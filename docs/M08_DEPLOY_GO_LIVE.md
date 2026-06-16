@@ -10,7 +10,7 @@ Runbook deploy/PWA, checklist go-live, dan appendix akun dummy untuk DB pengemba
 
 - `docs/04_DEPLOY_AND_PWA.md` - konten dipertahankan
 - `docs/GO_LIVE_CHECKLIST.md` - konten dipertahankan
-- `docs/_AKUN_DUMMY_DEV.md` - konten dipertahankan
+- `docs/archieve/2026-06-16_si_notes/_AKUN_DUMMY_DEV.md` - update SI-1 event-path diserap
 
 ## Catatan Pemakaian
 
@@ -357,52 +357,71 @@ Otomatis & **idempoten** (aman diulang): build → `prisma db push` → `bootstr
 **Catatan positioning (dari Google Business Profile, opsional):** profil muncul untuk pencarian "hotel"/"hotel terdekat" (3.168 tayang) → pertimbangkan kata kunci "kost"/"kost bulanan" diperkuat. Tarif harian Google (Rp377rb) jauh di atas pasar OYO — wajar karena ini kost bulanan, bukan hotel harian; pastikan deskripsi profil menegaskan "kost bulanan" agar ekspektasi tamu tepat.
 
 
-## Bagian 3 - `docs/_AKUN_DUMMY_DEV.md`
+## Bagian 3 - `docs/archieve/2026-06-16_si_notes/_AKUN_DUMMY_DEV.md`
 
-> DEV ONLY: akun di bagian ini hanya untuk seed database pengembangan. Jangan pakai password ini di produksi.
+> DEV ONLY: akun dan data di bagian ini hanya untuk database pengembangan port 5433. Jangan pakai password ini di produksi.
 
-### Akun Dummy DEV (login cepat)
+### Akun Dummy DEV (login cepat) - SI-1 event-path
 
-> ⚠️ **HANYA untuk DB pengembangan** (port **5433** `kost48_v3_pro`). Dibuat oleh
-> `backend/scripts/seed-dev-dummy.js` (wipe + isi atomik). **JANGAN dipakai di produksi** —
-> di produksi, ganti password OWNER dengan yang kuat.
+Data dummy **wajib dibuat lewat endpoint nyata (HTTP)**, bukan raw insert. Ini keputusan owner 2026-06-16: dummy harus melewati kejadian bisnis asli agar aturan service, invoice, deposit, meter, jurnal, dan audit trail ikut berjalan.
 
-Login di `http://localhost:5173/login`. Field "identifier" = email.
+Login di `http://localhost:5173/login` (field `identifier` = email).
+
+#### Cara isi ulang (wipe + reseed)
+
+```bash
+cd backend
+node scripts/seed-dev-reset.js
+# restart backend dev: npm run start:dev
+node scripts/seed-dev-via-api.js
+```
+
+Alternatif npm:
+
+```bash
+npm run seed:dev:reset
+npm run seed:dev:api
+```
+
+Seeder raw/bypass lama **usang** untuk data bisnis karena melewati aturan service. Jangan dipakai sebagai sumber data demo aktif.
 
 #### Back-office
+
 | Role | Email | Password |
 |------|-------|----------|
-| **OWNER** | `owner@kost48.com` | `Owner#2026` |
-| **ADMIN** | `admin@kost48.com` | `admin123` |
-| **STAFF** | `staff@kost48.com` | `staff123` |
+| OWNER | `owner@kost48.com` | `Owner#2026` |
+| ADMIN | `admin@kost48.com` | `admin123` |
+| STAFF | `staff@kost48.com` | `staff123` |
 
-#### Penghuni (TENANT) — semua password sama: `Tenant#2026`
-Pola email: `<nama-depan>.tenant@kost48.test`. 16 tenant pertama menempati kamar A–P:
+#### Penghuni (TENANT)
+
+Password semua tenant: `Tenant#2026`.
 
 | Kamar | Nama | Email |
 |-------|------|-------|
-| A | Maya Pratiwi | `maya.tenant@kost48.test` |
-| B | Dimas Saputra | `dimas.tenant@kost48.test` |
-| C | Cindy Wijaya | `cindy.tenant@kost48.test` |
-| D | Hendra Gunawan | `hendra.tenant@kost48.test` |
-| E | Gita Lestari | `gita.tenant@kost48.test` |
-| F | Indah Permata | `indah.tenant@kost48.test` |
-| G | Bayu Nugroho | `bayu.tenant@kost48.test` |
-| H | Karin Salsabila | `karin.tenant@kost48.test` |
-| I | Lani Kusuma | `lani.tenant@kost48.test` |
-| J | Rizky Ramadhan | `rizky.tenant@kost48.test` |
-| K | Putri Anggraini | `putri.tenant@kost48.test` |
-| L | Fajar Maulana | `fajar.tenant@kost48.test` |
-| M | Sari Melati | `sari.tenant@kost48.test` |
-| N | Andi Wirawan | `andi.tenant@kost48.test` |
-| O | Nadia Safitri | `nadia.tenant@kost48.test` |
-| P | Eko Prasetyo | `eko.tenant@kost48.test` |
+| K-A | Maya Pratiwi | `maya.tenant@kost48.test` |
+| K-B | Dimas Saputra | `dimas.tenant@kost48.test` |
+| K-C | Cindy Wijaya | `cindy.tenant@kost48.test` |
+| K-D | Hendra Gunawan | `hendra.tenant@kost48.test` |
+| K-E | Gita Lestari | `gita.tenant@kost48.test` |
+| K-F | Indah Permata | `indah.tenant@kost48.test` |
+| K-G | Bayu Nugroho | `bayu.tenant@kost48.test` |
+| K-H | Karin Salsabila | `karin.tenant@kost48.test` |
+| K-I | Lani Kusuma | `lani.tenant@kost48.test` |
+| K-J | Rizky Ramadhan | `rizky.tenant@kost48.test` |
+| K-K | Putri Anggraini | `putri.tenant@kost48.test` |
+| K-L | Fajar Maulana | `fajar.tenant@kost48.test` |
+| K-M | Sari Melati | `sari.tenant@kost48.test` |
+| K-N | Andi Wirawan | `andi.tenant@kost48.test` |
+| K-O | Nadia Safitri | `nadia.tenant@kost48.test` |
+| K-P | Eko Prasetyo | `eko.tenant@kost48.test` |
 
-Kamar Q–U (5 kamar) = **AVAILABLE** (kosong, untuk uji booking).
+Kamar `K-Q` sampai `K-T` tersedia untuk uji booking/check-in.
 
-#### Reset / isi ulang dummy
-```
-cd backend && node scripts/seed-dev-dummy.js
-```
-Setelah seed, login owner → **Pengaturan ▸ "Siapkan Bagan Akun (COA)"** untuk fondasi
-akuntansi (agar laporan keuangan terisi; tanpa ini KPI keuangan = Rp 0).
+#### Isi data terverifikasi
+
+- 20 kamar: 16 terisi, 4 kosong.
+- 16 penghuni dan 16 stay ACTIVE promoted.
+- 19 invoice: 16 sewa + 3 meter listrik; 12 PAID, 7 ISSUED.
+- 16 deposit HELD Rp500.000/kamar, terjurnal.
+- Trial balance seimbang dan tidak ada dobel-tagih.

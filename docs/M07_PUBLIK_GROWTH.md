@@ -17,6 +17,142 @@ Permukaan publik dan pertumbuhan: marketing, UI/UX, loyalitas, gamifikasi, refer
 - Jadikan file ini pintu masuk tematik; bila butuh detail mentah, cek file sumber di arsip yang disebut di atas.
 - Heading asli dinaikkan levelnya agar tidak bertabrakan dengan struktur M-file.
 
+## Konsep Baru - Public Marketing Modern (2026-06-16)
+
+Arahan owner: tema warna dan konten KOST48 tetap seperti sekarang, tetapi konsep web publik dibuat lebih modern,
+lebih berkesan, dan lebih "hidup" seperti referensi Marshiba. Referensi dipakai untuk rasa presentasi
+(immersive, playful, berani, CTA kuat), bukan untuk menyalin warna, aset, teks, atau karakter.
+
+### Prinsip arah visual
+
+- **Brand KOST48 tetap utama.** Warna, lokasi, harga, fasilitas, aturan booking, dan copy utama tidak diganti
+  tanpa keputusan owner. Yang berubah adalah komposisi, ritme section, gerak halus, kedalaman visual, dan
+  kekuatan CTA.
+- **Modern tetapi tetap kos nyata.** Jangan terlalu meme/cartoon; KOST48 harus terasa aman, bersih, praktis,
+  dan bisa dipercaya. Gaya playful dipakai secukupnya untuk membuat landing page mudah diingat.
+- **Hero immersive.** First viewport harus langsung menjual KOST48: lokasi Surabaya Barat/Pakuwon-PTC,
+  kamar siap huni, booking online, dan visual kamar/gedung/fasilitas. Gunakan foto nyata sebagai sinyal utama,
+  bukan ilustrasi abstrak.
+- **Navbar capsule/sticky.** Inspirasi Marshiba: navigasi rounded, kontras, sticky, dengan CTA booking yang
+  menonjol. Pada mobile, CTA tetap mudah dijangkau tanpa menutup konten penting.
+- **Section seperti story.** Alur publik bukan daftar fitur kaku, tetapi perjalanan: kenapa pilih KOST48,
+  lihat kamar, pahami fasilitas, percaya dari bukti, lalu booking.
+- **CTA berlapis.** CTA utama: "Lihat Kamar" / "Booking Sekarang". CTA sekunder: WhatsApp, Google Maps,
+  aturan kos, dan cek ketersediaan. CTA harus jelas, tidak memaksa, dan konsisten dengan first-paid-wins.
+
+### Data marketing yang wajib diangkat
+
+- **Lokasi:** Jl. Hikmah V No. 48, Surabaya Barat, dekat Pakuwon/PTC.
+- **Booking online:** katalog kamar, detail kamar, submit booking, dan status pembayaran via app.
+- **Kepercayaan:** social proof dari ulasan visible rating >=4, jumlah penghuni aktif, Google Maps, CCTV,
+  dan alur pembayaran yang transparan.
+- **Efisiensi listrik:** kamar punya kipas + AC, kuota listrik gratis 30 kWh, pascabayar tanpa repot token,
+  cocok untuk tenant yang ingin hemat.
+- **Kamar prima:** foto kamar nyata, fasilitas per kamar, status ketersediaan, dan info maintenance jujur.
+- **Layanan cepat:** kerusakan wajar seperti lampu, kran, shower, atau kebocoran ditangani gratis bila
+  tenant lapor lewat app.
+- **Retensi dan loyalitas:** poin tenant untuk renewal, bayar tepat waktu, review, referral, tiket tervalidasi,
+  dan quest onboarding. Narasi publik: tinggal di KOST48 bukan hanya sewa kamar, tetapi masuk sistem kos
+  yang rapi dan menghargai tenant baik.
+- **Diferensiasi kompetitor:** banyak kos belum punya web app, booking online, dashboard tenant, meter listrik
+  transparan, loyalty, dan laporan kerusakan digital.
+
+### Struktur landing page yang disarankan
+
+1. **Hero publik modern**
+   - Foto/visual kamar atau gedung sebagai visual utama.
+   - Headline singkat tentang kos Surabaya Barat yang praktis, transparan, dan bisa booking online.
+   - CTA utama ke katalog kamar; CTA sekunder ke WhatsApp/Maps.
+   - Micro-proof: rating, penghuni aktif, lokasi, atau "booking dan bayar bisa dipantau dari app".
+
+2. **Kamar tersedia**
+   - Card kamar dibuat lebih premium: foto besar, harga, fasilitas, status, badge hemat listrik, CTA detail.
+   - Filter tetap jelas: "Semua Kamar" tidak boleh membingungkan bila ada kamar maintenance.
+   - Loading memakai skeleton yang terasa polished.
+
+3. **Kenapa KOST48**
+   - 4 sampai 6 benefit berbasis data: booking online, 30 kWh gratis, CCTV, dekat Pakuwon/PTC, lapor kerusakan
+     via app, loyalty tenant.
+   - Bentuk visual boleh memakai card sedikit playful/offset seperti referensi, tetapi tetap rapi dan mudah
+     dibaca.
+
+4. **Cara booking**
+   - Timeline sederhana: pilih kamar, isi data, bayar DP/pelunasan, kamar terkunci setelah pembayaran valid.
+   - Harus jujur terhadap aturan first-paid-wins.
+
+5. **Bukti dan social proof**
+   - Rating agregat, ulasan visible, jumlah penghuni aktif, dan narasi singkat tenant.
+   - Jika data ulasan belum cukup, tampilkan empty state yang jujur, bukan klaim palsu.
+
+6. **Living system**
+   - Section yang menjual app sebagai nilai tambah: invoice jelas, riwayat sewa, laporan kerusakan, loyalty,
+     referral, dan dashboard tenant.
+   - Ini menjadi bagian "canggih" KOST48 tanpa mengubah bisnis kos menjadi gimmick.
+
+7. **FAQ dan aturan penting**
+   - FAQ ringkas tentang pembayaran, DP, listrik, maintenance, renewal, dan aturan umum.
+   - Hindari teks panjang di landing; detail bisa masuk halaman Panduan/Aturan.
+
+### Fitur frontend yang boleh dimaksimalkan
+
+Stack saat ini: React 18, Vite 5, React Query, Bootstrap/React-Bootstrap, Recharts, PWA, CSS custom.
+Gunakan kemampuan ini semaksimal mungkin sebelum menambah dependency baru.
+
+- **React Query:** prefetch detail kamar dari card yang di-hover/focus, cache katalog, dan optimistic feel pada
+  interaksi publik yang aman.
+- **Vite code-split:** landing, detail kamar, dashboard publik, dan chart tidak boleh membuat first-load berat.
+- **CSS modern:** sticky capsule nav, scroll reveal berbasis IntersectionObserver, `content-visibility` untuk
+  section bawah, image aspect-ratio stabil, responsive grid yang tidak layout shift, dan `prefers-reduced-motion`.
+- **PWA:** install prompt tetap halus; publik boleh diberi pesan "akses cepat dari HP" setelah user engage,
+  bukan popup agresif.
+- **Recharts:** hanya untuk visual yang benar-benar menjual data, misalnya okupansi/kepercayaan bila datanya
+  valid. Jangan visualkan angka yang belum siap.
+- **Media optimization:** foto kamar harus lazy-loaded, punya dimensi stabil, dan idealnya disiapkan dalam
+  ukuran web yang wajar agar LCP tetap bagus.
+- **Motion:** gunakan animasi CSS/native ringan. Library animasi baru hanya dipakai bila ada manfaat nyata dan
+  tidak merusak performance budget.
+
+### Batasan kualitas
+
+- Lighthouse SEO tetap target >=90; baseline terakhir home = 100.
+- LCP halaman publik target <2.5s di koneksi mobile layak.
+- Tidak boleh ada teks menumpuk, CTA menutup konten, atau card berubah ukuran saat hover.
+- Semua klaim marketing harus punya sumber dari data sistem, keputusan owner, atau konten manual owner.
+- Aksesibilitas tetap dijaga: kontras, fokus keyboard, alt text foto, dan reduced motion.
+- Mobile-first: landing harus terasa selesai di HP, bukan hanya bagus di desktop.
+
+### Backlog desain
+
+- **MG-UI-01:** Re-theme landing publik dengan konsep modern KOST48: hero immersive, capsule nav, CTA kuat,
+  section story, dan card kamar premium.
+- **MG-UI-02:** Buat komponen proof strip: rating, penghuni aktif, lokasi, dan status booking online.
+- **MG-UI-03:** Tambahkan section "Living System": invoice jelas, riwayat sewa, lapor kerusakan, loyalty,
+  referral.
+- **MG-UI-04:** Audit foto marketing: pilih foto hero, foto kamar unggulan, dan fallback bila foto belum siap.
+- **MG-UI-05:** Uji Playwright screenshot desktop/mobile dan Lighthouse setelah re-theme.
+
+### Prioritas productisasi analisa bisnis (owner setuju 2026-06-16)
+
+Analisa bisnis tidak dibuat sebagai halaman teori, tetapi diubah menjadi fitur yang membantu owner menjual,
+memilih kanal akuisisi, dan menjaga retensi. Urutan ini menjadi prioritas setelah konsep marketing modern
+disetujui.
+
+1. **P0 - MKT engine.** Buat konten analisa owner-editable: SWOT/PESTLE, value proposition,
+   pembanding kompetitor, proof source, dan kebijakan layanan. Simpan sebagai `BusinessNarrative`
+   atau `AppSetting` agar bisa dipakai ulang tanpa hardcode copy.
+2. **P1 - Narasi publik otomatis.** Turunkan MKT engine menjadi copy untuk landing page, katalog kamar,
+   onboarding tenant, FAQ ringkas, dan section "Living System". Klaim harus berasal dari data sistem,
+   keputusan owner, atau input owner.
+3. **P2 - Survey guest/prospek.** Tambahkan survey singkat untuk calon tenant: asal kanal, alasan memilih,
+   hambatan booking, budget, prioritas fasilitas, dan alasan batal. Hasilnya masuk ke analisa SWOT/PESTLE
+   dan dashboard growth.
+4. **P3 - CAC/CLV lite dashboard.** Lead source sudah ada; lanjutkan menjadi ringkasan owner per bulan:
+   bookingSource, jumlah booking, booking yang menjadi stay aktif, renewal rate, rata-rata lama tinggal,
+   referral/loyalty impact, dan estimasi CLV. Paid CAC hanya boleh tampil bila biaya iklan diinput.
+5. **P4 - Advanced finance/strategy nanti.** DCF, Altman, DuPont, sensitivity/stress analysis, market-share
+   formal, dan BCG kuantitatif ditunda sampai data produksi stabil. Untuk sekarang cukup dipakai sebagai
+   kerangka interpretasi, bukan modul aplikasi.
+
 
 ## Bagian 1 - `docs/17_PUBLIK_MARKETING_UIUX.md`
 

@@ -2,11 +2,12 @@
 
 Sistem manajemen kost 48 kamar. Backend NestJS+Prisma+PostgreSQL (`backend/`), frontend React+Vite (`frontend/`). Bahasa kerja: Indonesia.
 
-## Pintu masuk docs (struktur domain-dossier — JANGAN baca semua)
-1. `docs/00_BLUEPRINT.md` — **peta tunggal: model bisnis + indeks dossier + peta eksekusi (fase) + auto-ops engine + matrix teori**. BACA INI DULU. (Router file + anchor `file:baris` TERVERIFIKASI: `docs/_PETA_AI.md`.)
-2. Inti lintas-domain: `01_GROUND_STATE` (fakta) · `02_FLOW_MAP` (peta kode `file:baris`) · `03_KEPUTUSAN_OWNER` (**84 keputusan, SUMBER KEBENARAN** — baca sebelum ubah flow) · `04_DEPLOY_AND_PWA` · **`05_VERIFIKASI_KEUANGAN` (WAJIB dijalankan tiap task uang/akuntansi)**.
-3. **Dossier domain (10-19) — buka SESUAI area kerja, tiap dossier MANDIRI** (aturan+peta kode+temuan+task+desain+UAT): `10_PEMBAYARAN_INVOICE` · `11_BOOKING_RENEWAL` · `12_CHECKOUT_DEPOSIT_OVERSTAY` · `13_AKUNTANSI_LAPORAN` · `14_INVENTARIS` · `15_STAF_TIKET_KPI` · `16_NOTIFIKASI_PENGUMUMAN` · `17_PUBLIK_MARKETING_UIUX` · `18_AUTH_FONDASI_ONBOARDING` · `19_GAMIFIKASI_LOYALITAS`.
-4. `06_CONTRACTS` (aturan bisnis) · `07_PLAN` (rencana fase) · `08_CHECKLIST` (pekerjaan aktif) · `09_TRACEABILITY` (mapping audit) · `CHANGELOG.md` (V5.11.0+, prepend-only).
+## Pintu masuk docs (M-file — JANGAN baca semua)
+1. **`docs/M01_MASTER.md`** — blueprint + ground state + router AI (arsip `_PETA_AI` di `docs/archieve/`).
+2. **`docs/M02_KEPUTUSAN_OWNER.md`** — 84 keputusan owner (SUMBER KEBENARAN sebelum ubah flow).
+3. **`docs/M10_CHECKLIST_CHANGELOG.md`** — **CHECKLIST AKTIF + antrian eksekusi AI** (baca ANTRIAN, jangan ulang fase selesai).
+4. Domain: **M04** keuangan · **M05** siklus huni · **M06** operasional · **M07** publik/marketing · **M08** deploy · **M09** audit.
+5. Gate uang: **`docs/M04_KEUANGAN.md`** (verifikasi TB) — WAJIB tiap task finance.
 
 Detail forensik 97 temuan & rencana lama sudah DIBUBARKAN ke dossier; arsip di `docs/archieve/_DEPRECATED_*`. JANGAN baca `docs/archieve/*`, `*_STALE.md`, `node_modules`.
 
@@ -23,6 +24,6 @@ Detail forensik 97 temuan & rencana lama sudah DIBUBARKAN ke dossier; arsip di `
 - DB UAT: postgres port 5433 `kost48_v3_pro`; produksi 5432 `kost48_v3`. Jangan mutasi DB produksi.
 
 ## Aturan kerja hemat token
-- Cari kode via Grep berpola di `backend/src` / `frontend/src`; mulai dari anchor TERVERIFIKASI di `docs/_PETA_AI.md §2` / dossier 10-19 (baris di `02_FLOW_MAP` indikatif — grep nama metode bila ragu).
-- Selesai rilis: update ringkas `01_GROUND_STATE.md` + prepend `CHANGELOG.md`; pindahkan item selesai dari `08_CHECKLIST.md`.
+- Cari kode via Grep simbol di `backend/src` / `frontend/src`; spesifikasi task → `M10` ANTRIAN + M-file domain.
+- Selesai task: centang `M10` + prepend changelog di `M10` Bagian 2.
 - Tulisan commit & docs berbahasa Indonesia; ikuti gaya entri CHANGELOG yang ada.

@@ -15,7 +15,14 @@ Dokumen lifecycle penghuni dari booking/renewal sampai checkout, deposit, overst
 
 - Jadikan file ini pintu masuk tematik; bila butuh detail mentah, cek file sumber di arsip yang disebut di atas.
 - Heading asli dinaikkan levelnya agar tidak bertabrakan dengan struktur M-file.
+## Update 2026-06-16 - SI-2/SI-3 Riwayat Sewa
 
+Sesuai analisa PDF, siklus tenant harus terbaca sebagai alur end-to-end: masuk kos, periode berjalan, perpanjangan, invoice, meter, checkout, dan kamar siap jual lagi.
+
+- **SI-2 selesai:** UI renewal menjelaskan basis tanggal konkret: DP 30% harus dibayar <= hari-H/akhir kontrak lama; pelunasan <= 7 hari setelah DP. Guard backend sudah benar, perubahan utama adalah transparansi.
+- **SI-3 selesai:** `StayHistoryTimeline` menampilkan kronologi masuk kos, deposit, periode awal, periode perpanjangan, tagihan listrik/air, status lunas/belum, total, dan tautan ke invoice.
+- Periode sewa diturunkan dari invoice `RENT` berurut `periodStart`, sehingga riwayat huni dan invoice tetap terhubung.
+- Prinsip bisnis: tenant dan admin harus melihat kontrak sebagai narasi yang nyambung, bukan potongan invoice terpisah.
 
 ## Bagian 1 - `docs/11_BOOKING_RENEWAL.md`
 

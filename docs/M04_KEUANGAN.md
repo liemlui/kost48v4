@@ -16,7 +16,15 @@ Semua fondasi keuangan: harness verifikasi, pembayaran/invoice, accounting, lapo
 
 - Jadikan file ini pintu masuk tematik; bila butuh detail mentah, cek file sumber di arsip yang disebut di atas.
 - Heading asli dinaikkan levelnya agar tidak bertabrakan dengan struktur M-file.
+## Update 2026-06-16 - SI-4 Invoice Purpose
 
+Sesuai analisa PDF dan temuan owner 2026-06-16, invoice tidak boleh hanya terbaca sebagai nomor. UI harus menjawab "tagihan ini buat apa" sebelum tenant/admin membuka detail.
+
+- **SI-4 selesai:** `invoicePurposeLabel` dan `invoicePurposeMeta` menurunkan peruntukan dari `InvoiceLineType`.
+- Label utama: `Sewa`, `Listrik`, `Air`, `Listrik & Air`, `Sewa + Listrik`, `Uang Muka (DP)`, `WiFi`, dan `Denda`.
+- Badge "Tagihan <peruntukan>" tampil di daftar tenant, daftar backoffice, detail invoice backoffice, dan detail invoice tenant; nomor invoice turun menjadi subteks.
+- Tidak ada migrasi schema: peruntukan diturunkan dari baris invoice, bukan kolom baru.
+- Prinsip bisnis: kejelasan invoice mengurangi dispute, memperkuat trust, dan menyambungkan pembayaran ke riwayat sewa.
 
 ## Bagian 1 - `docs/05_VERIFIKASI_KEUANGAN.md`
 

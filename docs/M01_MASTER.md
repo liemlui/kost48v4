@@ -81,22 +81,57 @@ Mutex `running`; urutan: ①bookingExpiry ②contractEndReminders ③DP-forfeit 
 #### 6. INVARIAN SISTEM (tak boleh dilanggar)
 1. Uang masuk = otomatisasi BERHENTI. 2. Stay promoted tak pernah dibatalkan job; CANCELLED berjurnal wajib reversal blocking. 3. Kamar tak AVAILABLE tanpa tiket inspeksi ditutup (staf boleh tutup, guard keselamatan tetap). 4. Tiap rupiah = 1 jurnal POSTED + AuditLog; deposit=liability; no-partial. 5. Periode renewal menyambung tanpa gap/overlap; tenant lama prioritas s/d hari-H. 6. Data sensitif (KTP) minimal+terproteksi+dihapus saat keluar. 7. Reward/benefit selalu berjejak akuntansi.
 
-#### 7. MATRIX TEORI (63 teori diuji; 46 menghasilkan temuan, 17 ❌ ber-alasan)
-- **Keuangan/Akuntansi:** PSAK/forensic/variance/break-even ✅ (D13); IFRS/unearned ✅ F-15; DCF/Altman/DuPont/sensitivity/stress ❌ (blocked data produksi).
-- **Manajemen/Operasi:** Six Sigma/TOC/Kaizen/TQM/VSM/Balanced Scorecard ✅; Queue/Capacity/Revenue-mgmt/Inventory-turnover ✅ (D12/13/14); EOQ/Yield ❌ (skala kecil); OKR/7S/Agile ❌ (tim kecil).
-- **Psikologi:** Expectancy/Equity/Reinforcement(K-3 terjawab)/SDT/Goal-Setting/Nudge/Loss-Aversion/McClelland/Herzberg/Maslow ✅ (D15); Default-Effect/Hick ✅ (D17).
-- **UI/UX:** Nielsen 1-10 + Fitts/Gestalt/WCAG ✅ (D17).
-- **Bisnis/Tools:** VPC/JTBD/Social-Proof/CLV/CAC/Unit-Economics/VRIO/Subscription/Gamification/Growth/AIDA ✅ (D17/D19/D11); Porter/Blue-Ocean/BCG/Ansoff/7S/BMC/Platform ❌ (single-property / menunggu data).
-- **Visualisasi:** Tufte/Colorbrewer/Sparkline/Bullet/Treemap/Waterfall/Heatmap ✅ (D17); Sankey ❌ (ditolak, funnel linier).
-- **Hukum:** UU PDP (KTP/social-proof) ✅ (D17/D18); Perlindungan Konsumen (copy A17) ✅ (D16); Perdata (no-partial=kontrak, barang abandoned 30hr) ✅ (D10/D12); UU ITE ❌ (audit trail sudah memadai).
+#### 7. MATRIX TEORI (sinkron PDF `KOST48_Analisis_Bisnis_Total.pdf` + `buku.md`)
+> Catatan penting: teori bisnis dipakai dalam dua lapis. Lapis 1 = kerangka analisis owner/AI
+> untuk membaca bisnis. Lapis 2 = fitur sistem yang benar-benar perlu dibangun sekarang. Jadi
+> Porter, BMC, Ansoff, BCG, STEEPLE, STP, 7Ps, dan SERVQUAL **dipakai sebagai analisis** walau
+> tidak semuanya perlu menjadi modul aplikasi mandiri.
 
-#### 8. Risiko, dependensi & estimasi (lintas-domain)
+- **Keuangan/Akuntansi:** cashflow, break-even/BEP, budgeting, forecasting, PSAK/unearned revenue,
+  forensic accounting, variance, trial balance, deposit liability, dan rekonsiliasi dipakai aktif
+  (M04/M10). DCF/Altman/DuPont/sensitivity/stress tetap ditunda sampai ada data produksi stabil.
+- **Strategi Bisnis:** Porter/Five Forces, Business Model Canvas, Value Chain, STP, 7Ps, SWOT/TOWS,
+  Ansoff, BCG, CLV/CAC, unit economics, social proof, VRIO, growth, AIDA, gamification dipakai sebagai
+  kerangka analisis PDF dan prioritas growth (M07). Implementasi sistemnya bertahap: lead source,
+  loyalty/referral, public funnel, add-on service, dan AI scheduler.
+- **Manajemen/Operasi:** Six Sigma/TOC/Kaizen/TQM/VSM/Balanced Scorecard, Queue/Capacity,
+  Revenue Management, Inventory Turnover, SLA, KPI, dan SERVQUAL turun menjadi tiket, room readiness,
+  inventory, staff KPI, ranking kebersihan, dan kepuasan tenant (M05/M06). EOQ/Yield tetap tidak
+  prioritas karena skala kos kecil dan barang consumable sedikit.
+- **Psikologi & HR:** Expectancy, Equity, Reinforcement, SDT, Goal-Setting, Nudge, Loss-Aversion,
+  McClelland, Herzberg, Maslow, Default Effect, dan Hick dipakai untuk staf, review tenant,
+  gamifikasi, dan UX (M06/M07).
+- **UI/UX & Visualisasi:** Nielsen 1-10, Fitts, Gestalt, WCAG, Tufte, ColorBrewer, sparkline, bullet,
+  treemap, waterfall, heatmap dipakai; Sankey tetap ditolak karena funnel bisnis utama lebih linier.
+- **Hukum & Tata Kelola:** UU PDP, perlindungan konsumen, kontrak perdata, audit trail, OWNER-only
+  governance, dan source ledger dipakai sebagai guard operasional (M02/M06/M09).
+
+#### 8. GAP ANALISA BISNIS -> FITUR APP (disetujui 2026-06-16)
+
+Analisa bisnis dari PDF dan `buku.md` tidak semuanya harus menjadi modul mandiri. Yang wajib diprodukkan
+ke aplikasi adalah bagian yang langsung membantu owner menjual kamar, memahami kanal akuisisi, menjaga
+retensi, dan mengambil keputusan operasional.
+
+- **Prioritas 1 - MKT engine:** SWOT/PESTLE owner-editable, pembanding kompetitor, survey guest/prospek,
+  dan narasi otomatis untuk onboarding, web publik, katalog, dan FAQ ringkas.
+- **Prioritas 2 - MG-UI publik:** landing publik modern dengan hero immersive, capsule/sticky nav, CTA kuat,
+  proof strip, section "Living System", foto marketing yang rapi, dan verifikasi Lighthouse/Playwright.
+- **Prioritas 3 - CAC/CLV lite:** lead source sudah ada; lanjutkan menjadi dashboard owner untuk kanal
+  akuisisi, conversion proxy, renewal rate, rata-rata lama tinggal, referral/loyalty impact, dan estimasi CLV.
+  Paid CAC hanya dihitung bila biaya iklan/marketing sudah diinput; jangan membuat angka palsu.
+- **Prioritas 4 - Retensi & service add-on:** cross-sell saat renewal, WiFi/bantuan bersih, tip staf lengkap,
+  ranking kebersihan kamar, dan meter/listrik pascabayar sebagai value proposition publik.
+- **Ditunda sampai data produksi stabil:** DCF, Altman, DuPont, sensitivity/stress analysis, market-share
+  formal, dan BCG kuantitatif. Porter, BMC, Ansoff, STP, 7Ps, VRIO, AIDA, dan SERVQUAL tetap dipakai
+  sebagai kerangka berpikir, bukan modul aplikasi terpisah.
+
+#### 9. Risiko, dependensi & estimasi (lintas-domain)
 **Dependensi kunci:** Fase 1 (uang/laporan benar) → DEPLOY bersih → Fase 2+. `F1-1R` no-partial → prasyarat renewal (`F2-1`, pakai jalur payment sama). `F1-3..F1-6` fix laporan → prasyarat chart finansial (`F3-12`) & analitik. `F2-5` util bersama → `F2-6`. `F2-9`+round-robin → leaderboard (ditunda 1 staf). N-04 pruning → PWA push (`F4-2`).
 **Risiko tertinggi:** `F1-1R` (tolak pembayaran sah edge — uji DP/pelunasan/renewal/manual); `F1-3` (salah identifikasi line kas — cross-check manual 1 bulan); `F2-1` renewal (race vs booking publik); `F2-5` (refactor file panas); `F2-16` OWNER-only (audit `@Roles` menyeluruh); `F2-14` TZ WIB (KPI/jurnal dapat bergeser sehari). Kebijakan backup 6-bulanan berisiko terlalu jarang dan sebaiknya ditinjau owner.
 **Estimasi:** ~30-38 sesi AI eksekutor (Fase 1: 7-9 · Fase 2: 11-13 · Fase 3: 8-10 · Fase 4+desain: 4-6). Regression harness gratis tiap akhir kerja uang: `reconciliation-lite` + `deposit-reconciliation` + `trial-balance`.
 **Aturan eksekutor:** 1 task = `tsc --noEmit` 0 = 1 commit (Indonesia); STOP condition per task = lewati+catat+lanjut; JANGAN tambah npm deps / ubah schema-sql / push / sentuh file yang sedang M oleh AI lain (cek `git status` dulu). Schema additive (renewal/KTP/gamifikasi/refund) WAJIB owner-approve dulu.
 
-#### 9. Statistik
+#### 10. Statistik
 97 temuan forensik · keputusan owner terkonsolidasi di `03_KEPUTUSAN_OWNER` · 44+ task · 10 dossier domain + 4 desain fitur. Sistem inti uang, jurnal, dan Auto-Ops kuat secara arsitektur; pekerjaan tersisa adalah memperbaiki laporan, menutup aturan bisnis yang belum diterapkan, lalu deploy bersih.
 
 
