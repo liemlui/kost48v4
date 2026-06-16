@@ -9,6 +9,7 @@ import EmptyState from '../../components/common/EmptyState';
 import { createResource, getResource } from '../../api/resources';
 import { formatDateSafe } from '../resources/simpleCrudHelpers';
 import { getInvoiceOutstandingAmount, getInvoicePaidAmount, getInvoiceTotalAmount } from '../../utils/invoiceTotals';
+import { invoicePurposeMeta } from '../../utils/invoiceUtility';
 import InvoicePrintLayout from '../../components/reports/InvoicePrintLayout';
 import { useAuth } from '../../context/AuthContext';
 import { AssistantPanel, BlockedReasonCard, CompactMetrics, LifecycleTimeline, type AssistantItem, type MetricChip, type TimelineStep } from '../../components/command-center';
@@ -235,9 +236,13 @@ export default function InvoiceDetailPage() {
                   <div className="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-3">
                     <div>
                       <div className="page-eyebrow">Ringkasan tagihan</div>
-                      <h4 className="mb-1">{invoice.invoiceNumber || `INV-${invoice.id}`}</h4>
+                      {(() => { const m = invoicePurposeMeta(invoice); return (
+                        <h4 className="mb-1 d-inline-flex align-items-center gap-2">
+                          <Badge bg={m.bg} className="d-inline-flex align-items-center gap-1"><span aria-hidden>{m.icon}</span> Tagihan {m.label}</Badge>
+                        </h4>
+                      ); })()}
                       <div className="text-muted small">
-                        {tenantName || `Masa sewa #${invoice.stayId}`}
+                        {invoice.invoiceNumber || `INV-${invoice.id}`} · {tenantName || `Masa sewa #${invoice.stayId}`}
                         {roomInfo ? ` · ${roomInfo}` : ''}
                       </div>
                     </div>

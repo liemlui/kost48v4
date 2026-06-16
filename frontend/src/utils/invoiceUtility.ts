@@ -49,8 +49,60 @@ export function getInvoiceUtilitySummary(lines?: InvoiceUtilityLineLike[] | null
   };
 }
 
-export function invoiceKindLabel(lines?: InvoiceUtilityLineLike[] | null): string {
-  if (isRenewUtilityInvoice(lines)) return 'Tagihan Perpanjangan + Utilitas';
-  if (lines?.some((line) => String(line.lineType ?? '').toUpperCase() === 'RENT')) return 'Tagihan Sewa';
-  return 'Tagihan';
+// ── SI-4: Peruntukan invoice yang JELAS untuk orang awam ──
+// "Tagihan harus jelas, buat bayar sewa atau listrik dll, jangan cuma nomor" (owner 2026-06-16).
+// Diturunkan dari jenis baris (lineType); DP dideteksi dari nomor/catatan (tak ada lineType khusus).
+
+export type InvoiceLikeForPurpose = {
+  lines?: InvoiceUtilityLineLike[] | null;
+  invoiceNumber?: string | null;
+  notes?: string | null;
+};
+
+/** Noun peruntukan ringkas: "Sewa", "Listrik", "Air", "Listrik & Air", "Sewa + Listrik", "Uang Muka (DP)"… */
+export function invoicePurposeLabel(input?: InvoiceLikeForPurpose | InvoiceUtilityLineLike[] | null): string {
+  const inv: InvoiceLikeForPurpose = Array.isArray(input) ? { lines: input } : (input ?? {});
+  const lines = inv.lines ?? [];
+  const types = new Set(lines.map((l) => String(l.lineType ?? '').toUpperCase()).filter(Boolean));
+  const num = String(inv.invoiceNumber ?? '').toUpperCase();
+  const notes = String(inv.notes ?? '').toLowerCase();
+  const has = (t: string) => types.has(t);
+  const rent = has('RENT');
+  const elec = has('ELECTRICITY');
+  const water = has('WATER');
+  const wifi = has('WIFI');
+  const penalty = has('PENALTY');
+  const isDp = /\bDP\b|UANG MUKA|DOWN ?PAYMENT/.test(num) || /uang muka|down ?payment|\bdp\b/.test(notes);
+  const util = elec && water ? 'Listrik & Air' : elec ? 'Listrik' : water ? 'Air' : '';
+
+  if (isDp) return 'Uang Muka (DP)';
+  if (rent && util) return `Sewa + ${util}`;
+  if (rent && wifi) return 'Sewa + WiFi';
+  if (rent) return 'Sewa';
+  if (util) return util;
+  if (wifi) return 'WiFi';
+  if (penalty) return 'Denda';
+  if (num.startsWith('MTR')) return 'Listrik';
+  return 'Lainnya';
+}
+
+/** Badge: { label, icon (emoji), bg (varian react-bootstrap Badge) } untuk tampilan cepat. */
+export function invoicePurposeMeta(input?: InvoiceLikeForPurpose | InvoiceUtilityLineLike[] | null): {
+  label: string; icon: string; bg: string;
+} {
+  const label = invoicePurposeLabel(input);
+  if (label.startsWith('Sewa') && label.includes('+')) return { label, icon: '🏠⚡', bg: 'primary' };
+  if (label === 'Sewa') return { label, icon: '🏠', bg: 'primary' };
+  if (label === 'Listrik & Air') return { label, icon: '⚡', bg: 'warning' };
+  if (label === 'Listrik') return { label, icon: '⚡', bg: 'warning' };
+  if (label === 'Air') return { label, icon: '💧', bg: 'info' };
+  if (label === 'Uang Muka (DP)') return { label, icon: '💰', bg: 'secondary' };
+  if (label === 'WiFi') return { label, icon: '📶', bg: 'info' };
+  if (label === 'Denda') return { label, icon: '⚠️', bg: 'danger' };
+  return { label, icon: '🧾', bg: 'secondary' };
+}
+
+/** "Tagihan <peruntukan>" — untuk judul/detail. Tetap kompatibel dgn pemakai lama. */
+export function invoiceKindLabel(input?: InvoiceLikeForPurpose | InvoiceUtilityLineLike[] | null): string {
+  return `Tagihan ${invoicePurposeLabel(input)}`;
 }

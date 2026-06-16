@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
-import { Alert, Button, Card, Col, Row, Spinner, Table } from 'react-bootstrap';
+import { Alert, Badge, Button, Card, Col, Row, Spinner, Table } from 'react-bootstrap';
 import { Bar, BarChart, CartesianGrid, Cell, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import DonutGauge from '../../components/charts/DonutGauge';
 import { listResource } from '../../api/resources';
@@ -15,6 +15,7 @@ import type { Invoice } from '../../types';
 import { getOpenTenantInvoices, getPendingReviewInvoiceIds, isTenantInvoiceOverdue } from '../../utils/tenantRules';
 import { isPayableInvoiceStatus, tenantInvoiceStatusLabel } from '../../utils/tenantCopy';
 import { getInvoiceTotalAmount } from '../../utils/invoiceTotals';
+import { invoicePurposeMeta } from '../../utils/invoiceUtility';
 import { formatDateTimeWib, getDeadlineMeta } from '../../utils/dateTime';
 
 function fmtC(v: number) {
@@ -210,7 +211,7 @@ export default function MyInvoicesPage() {
           {!query.isLoading && !query.isError && !visibleItems.length ? <EmptyState icon="🧾" title="Belum ada tagihan di tab ini" description="Tagihan akan muncul sesuai statusnya saat dibuat atau diperbarui admin." /> : null}
           {!query.isLoading && !query.isError && sortedItems.length > 0 ? (
             <Table hover responsive className="responsive-data-table tenant-invoices-table">
-              <thead><tr><th>No. Tagihan</th><th>Masa Sewa</th><th>Jatuh Tempo</th><th>Total</th><th>Status</th><th>Aksi</th></tr></thead>
+              <thead><tr><th>Tagihan</th><th>Masa Sewa</th><th>Jatuh Tempo</th><th>Total</th><th>Status</th><th>Aksi</th></tr></thead>
               <tbody>
                 {pagedItems.map((item) => {
                   const overdue = isTenantInvoiceOverdue(item) && !pendingReviewByInvoiceId.has(item.id);
@@ -218,8 +219,11 @@ export default function MyInvoicesPage() {
                   const pendingReview = pendingReviewByInvoiceId.has(item.id);
                   return (
                     <tr key={item.id}>
-                      <td data-label="No. Tagihan" className="fw-semibold">
-                        <Button variant="link" className="p-0 text-decoration-none fw-semibold" onClick={() => navigate(`/portal/invoices/${item.id}`)}>{item.invoiceNumber || `TG-${item.id}`}</Button>
+                      <td data-label="Tagihan" className="fw-semibold">
+                        {(() => { const m = invoicePurposeMeta(item); return (
+                          <Badge bg={m.bg} className="mb-1 d-inline-flex align-items-center gap-1"><span aria-hidden>{m.icon}</span> Tagihan {m.label}</Badge>
+                        ); })()}
+                        <div><Button variant="link" className="p-0 text-decoration-none text-muted small" onClick={() => navigate(`/portal/invoices/${item.id}`)}>{item.invoiceNumber || `TG-${item.id}`}</Button></div>
                       </td>
                       <td data-label="Masa Sewa">{formatPeriod(item.periodStart, item.periodEnd)}</td>
                       <td data-label="Jatuh Tempo" className={overdue ? 'text-soft-danger fw-semibold' : ''}>

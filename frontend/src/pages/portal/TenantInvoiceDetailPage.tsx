@@ -76,7 +76,7 @@ export default function TenantInvoiceDetailPage() {
     : null;
   const utilitySummary = useMemo(() => getInvoiceUtilitySummary(invoice?.lines), [invoice?.lines]);
   const hasRenewUtilityLines = utilitySummary.hasUtilityLines;
-  const invoiceKind = invoiceKindLabel(invoice?.lines);
+  const invoiceKind = invoiceKindLabel(invoice ?? undefined);
 
   const handlePrint = () => {
     window.print();

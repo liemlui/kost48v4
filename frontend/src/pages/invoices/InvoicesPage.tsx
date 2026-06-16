@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Alert, Button, Card, Col, Form, Modal, Row, Spinner, Table } from 'react-bootstrap';
+import { Alert, Badge, Button, Card, Col, Form, Modal, Row, Spinner, Table } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import { Bar, BarChart, CartesianGrid, Cell, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import DonutGauge from '../../components/charts/DonutGauge';
@@ -16,6 +16,7 @@ import { createResource, listResource } from '../../api/resources';
 import { formatDateSafe, formatPeriod } from '../resources/simpleCrudHelpers';
 import { buildReferenceOptions } from '../resources/resourceRelations';
 import { cancelInvoice, issueInvoice } from '../../api/invoices';
+import { invoicePurposeMeta } from '../../utils/invoiceUtility';
 import { fetchAccountingReadiness } from '../../api/accounting';
 import { useAuth } from '../../context/AuthContext';
 import { getInvoiceTotalAmount } from '../../utils/invoiceTotals';
@@ -499,8 +500,10 @@ export default function InvoicesPage() {
                   return (
                     <tr key={item.id} className="clickable-row" onClick={() => navigate(`/invoices/${item.id}`)}>
                       <td data-label="Tagihan">
-                        <div className="fw-semibold">{item.invoiceNumber || `INV-${item.id}`}</div>
-                        <div className="small text-muted">Masa sewa #{item.stayId}</div>
+                        {(() => { const m = invoicePurposeMeta(item); return (
+                          <Badge bg={m.bg} className="mb-1 d-inline-flex align-items-center gap-1"><span aria-hidden>{m.icon}</span> {m.label}</Badge>
+                        ); })()}
+                        <div className="small text-muted">{item.invoiceNumber || `INV-${item.id}`}</div>
                       </td>
                       <td data-label="Tenant / Kamar">
                         <div className="fw-semibold">{tenantName}</div>

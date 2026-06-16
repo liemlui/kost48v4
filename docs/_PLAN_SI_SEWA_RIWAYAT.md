@@ -32,10 +32,13 @@ Seri tugas **SI** (Sewa & Integritas data). Compact, gaya MXX. Terkait dossier `
 - **SI-3 — UI riwayat sewa (timeline):** kartu kronologi di detail stay (admin) + portal tenant:
   *Masuk {checkInDate} → Periode 1 {a→b} → Perpanjang Periode 2 {b→c} …*, tiap periode tertaut
   invoice-nya (sewa/DP/pelunasan/meter). Jelas, tidak membingungkan.
-- **SI-4 — Label peruntukan invoice:** util derive label manusiawi dari `InvoiceLineType`
-  (RENT→"Sewa", ELECTRICITY→"Listrik", WATER→"Air", gabungan→"Sewa + Listrik", DP→"Uang Muka (DP)",
-  pelunasan→"Pelunasan", WIFI→"WiFi"). Tampil di semua daftar + detail invoice (tenant & backoffice),
-  mendampingi nomor invoice.
+- **SI-4 — Label peruntukan invoice — ✅ SELESAI 2026-06-16:** util `invoicePurposeLabel` +
+  `invoicePurposeMeta` (badge ikon+warna) di `utils/invoiceUtility.ts` menurunkan peruntukan
+  dari `InvoiceLineType` (RENT→"Sewa", ELECTRICITY→"Listrik", WATER→"Air", gabungan→"Listrik & Air"/
+  "Sewa + Listrik", DP via nomor/catatan→"Uang Muka (DP)", WIFI, PENALTY→"Denda"). Badge "Tagihan
+  <peruntukan>" tampil di **daftar tenant** (MyInvoicesPage), **daftar backoffice** (InvoicesPage),
+  **detail backoffice** (InvoiceDetailPage), dan **detail tenant** (TenantInvoiceDetailPage, via
+  `invoiceKindLabel`). Nomor invoice didemosikan jadi subteks. tsc 0; verified screenshot owner.
 
 ## Catatan teknis
 - Event-path check-in = `POST /api/stays` (dipakai CheckInWizard, lewat `StaysService` → aturan jalan).
