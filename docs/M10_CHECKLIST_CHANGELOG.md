@@ -50,6 +50,15 @@ Detail SI sudah diserap ke M04/M05/M08; source ringkas diarsipkan di `docs/archi
   (angka besar + eyebrow label + aksen warna kiri per status success/warning/danger/info), setara kartu
   metrik owner. Owner dashboard sudah punya kartu metrik besar. CSS `09-finance.css`. (Pemisahan hak
   owner/admin sendiri sudah ditegakkan backend via `@Roles`.)
+- **MKT-1 — Analisa Pasar AI (DeepSeek)** (owner): modul `market-analysis` (model `MarketAnalysis`,
+  klien DeepSeek `fetch` tanpa dep baru). Owner chat interaktif: AI **mewawancarai** owner lalu
+  menyusun **SWOT/PESTLE/Kompetitor** terstruktur (marker `===HASIL <KIND>===` + JSON) yang **bisa
+  disimpan** (+ transcript). Halaman `/market-analysis` (nav "Analisa Pasar (AI)"). Key via
+  **`DEEPSEEK_API_KEY`** di `backend/.env` (kosong → mode panduan/fallback, fitur tetap jalan).
+  Endpoint: `GET/POST /market-analysis(/chat|/status)`. Owner-only tulis; owner/admin baca.
+  **Fase 2 (belum):** riset **web LIVE** (kompetitor/harga terkini) butuh tool web-search terpisah
+  (API+biaya) — keputusan owner: bangun versi wawancara dulu. Verified: status/chat-fallback/list +
+  UI render; panggilan DeepSeek asli menunggu owner isi key. tsc BE+FE 0.
 - Sebelumnya (sesi sama): **Meter M-1/M-2/M-3** (konstanta owner-settable, siklus listrik+air auto-invoice,
   pencatatan mandiri tenant). Detail: `docs/_PROPOSAL_METER_LISTRIK_AIR.md`.
 

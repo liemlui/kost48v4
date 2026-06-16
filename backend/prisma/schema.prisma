@@ -501,9 +501,28 @@ model User {
   tenantsKtpVerified        Tenant[]                   @relation("TenantKtpVerifiedBy")
   roomTransfersCreated      RoomTransfer[]             @relation("RoomTransferCreatedBy")
   peerReportsModerated      PeerBehaviorReport[]       @relation("PeerReportModeratedBy")
+  marketAnalysesCreated     MarketAnalysis[]           @relation("MarketAnalysisCreatedBy")
 
   @@index([role])
   @@index([isActive])
+}
+
+// Marketing/strategi (owner): analisa pasar (SWOT/PESTLE/kompetitor) hasil chat AI DeepSeek
+// — disusun lewat wawancara AI ke owner + pengetahuan pasar; transcript & hasil terstruktur disimpan.
+// (Riset web LIVE = fase lanjutan; lihat docs.)
+model MarketAnalysis {
+  id             Int      @id @default(autoincrement())
+  kind           String   // SWOT | PESTLE | COMPETITOR | OTHER
+  title          String
+  summary        String?
+  resultJson     Json? // hasil terstruktur (mis. { strengths:[], weaknesses:[], ... })
+  transcriptJson Json? // [{ role, content }] riwayat chat
+  createdById    Int?
+  createdBy      User?    @relation("MarketAnalysisCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([kind, createdAt])
 }
 
 model Tenant {

@@ -20,6 +20,7 @@ const RoomsRouteEntry = lazy(() => import('./pages/rooms/RoomsRouteEntry'));
 const PublicRoomDetailPage = lazy(() => import('./pages/rooms/PublicRoomDetailPage'));
 const DashboardPage = lazy(() => import('./pages/dashboard/DashboardPage'));
 const OwnerDashboardPage = lazy(() => import('./pages/dashboard/OwnerDashboardPage'));
+const MarketAnalysisPage = lazy(() => import('./pages/marketing/MarketAnalysisPage'));
 const RenewRequestsAdminPage = lazy(() => import('./pages/renew-requests/RenewRequestsAdminPage'));
 const InvoiceDetailPage = lazy(() => import('./pages/invoices/InvoiceDetailPage'));
 const InvoicesPage = lazy(() => import('./pages/invoices/InvoicesPage'));
@@ -114,6 +115,14 @@ export default function App() {
             element={(
               <RequireRoles allowed={['OWNER']}>
                 <OwnerDashboardPage />
+              </RequireRoles>
+            )}
+          />
+          <Route
+            path="/market-analysis"
+            element={(
+              <RequireRoles allowed={['OWNER']}>
+                <MarketAnalysisPage />
               </RequireRoles>
             )}
           />

@@ -22,6 +22,7 @@ const ownerSections: NavigationSection[] = [
       { to: '/owner-dashboard', label: 'Kokpit Owner', icon: '📈', hint: 'KPI bisnis, sinyal risiko, dan tren 6 bulan.' },
       { to: '/stays', label: 'Masa Sewa & Penghuni', icon: '🏠', hint: 'Masa sewa aktif, booking, perpanjangan, keluar, dan data penghuni.', activePaths: ['/stays', '/tenants'] },
       { to: '/reports', label: 'Laporan Bisnis', icon: '📊', hint: 'Operasional, laba rugi, arus kas, neraca, dan rasio.' },
+      { to: '/market-analysis', label: 'Analisa Pasar (AI)', icon: '🧭', hint: 'Ditemani AI DeepSeek: wawancara lalu susun SWOT/PESTLE/kompetitor yang bisa disimpan.' },
     ],
   },
   {
