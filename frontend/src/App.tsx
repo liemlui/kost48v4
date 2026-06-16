@@ -1,10 +1,12 @@
 import { lazy, Suspense, type ReactNode } from 'react';
-import { Spinner } from 'react-bootstrap';
-import { Navigate, Route, Routes } from 'react-router-dom';
+import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
+import { PageLoadingSkeleton } from './components/common/SkeletonLoader';
 import AppLayout from './components/layout/AppLayout';
 import ProtectedRoute from './components/layout/ProtectedRoute';
 import PwaRouteBoundary from './components/pwa/PwaRouteBoundary';
 import { getDefaultRoute } from './config/navigation';
+import { resolveRouteTitle } from './config/routeTitles';
+import { useDocumentTitle } from './hooks/useDocumentTitle';
 import { useTenantPortalStage } from './hooks/useTenantPortalStage';
 import { useAuth } from './context/AuthContext';
 import ForgotPasswordPage from './pages/auth/ForgotPasswordPage';
@@ -81,16 +83,18 @@ function RootEntry() {
   return <Navigate to={getDefaultRoute(user.role, stage)} replace />;
 }
 
+// AUDIT-OWNER (A2): sinkronkan document.title dengan rute aktif (app-wide).
+function RouteTitleSync() {
+  const { pathname } = useLocation();
+  useDocumentTitle(resolveRouteTitle(pathname));
+  return null;
+}
+
 export default function App() {
   return (
     <PwaRouteBoundary>
-      <Suspense
-        fallback={(
-          <div className="min-vh-100 d-flex align-items-center justify-content-center">
-            <Spinner animation="border" />
-          </div>
-        )}
-      >
+      <RouteTitleSync />
+      <Suspense fallback={<PageLoadingSkeleton />}>
         <Routes>
         <Route path="/login" element={<LoginPage />} />
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />

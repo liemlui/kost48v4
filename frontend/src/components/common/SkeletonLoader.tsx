@@ -59,3 +59,16 @@ export function HeroSkeleton() {
     </div>
   );
 }
+
+// AUDIT-OWNER (A3): kerangka halaman netral untuk ganti full-page spinner
+// (Suspense fallback, auth-loading, dll). Menjaga tinggi/layout agar tak ada
+// lonjakan layout shift saat konten masuk. role=status untuk pembaca layar.
+export function PageLoadingSkeleton({ label = 'Memuat halaman…' }: { label?: string }) {
+  return (
+    <div className="page-loading-skeleton p-3" role="status" aria-label={label} aria-busy="true">
+      <HeroSkeleton />
+      <TableSkeleton rows={6} cols={4} />
+      <span className="visually-hidden">{label}</span>
+    </div>
+  );
+}

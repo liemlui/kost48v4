@@ -327,8 +327,8 @@ export default function AppLayout({ children }: { children?: ReactNode }) {
                 </div>
                 <NotificationBell />
                 {isAdmin ? (
-                  <Button variant="outline-primary" size="sm" className="admin-icon-action" onClick={() => navigate('/announcements')} title="Buka pengumuman">
-                    📣 <span>Pengumuman</span>
+                  <Button variant="outline-primary" size="sm" className="admin-icon-action" onClick={() => navigate('/announcements')} title="Buka pengumuman" aria-label="Buka pengumuman">
+                    <span aria-hidden="true">📣</span> <span>Pengumuman</span>
                   </Button>
                 ) : null}
                 {user?.role === 'TENANT' && <PaymentUrgencyChip />}

@@ -1,7 +1,8 @@
 import { useMemo, useState, type ReactNode } from 'react';
-import { Alert, Badge, Button, Card, Col, Container, Form, Row, Spinner } from 'react-bootstrap';
+import { Alert, Badge, Button, Card, Col, Container, Form, Row } from 'react-bootstrap';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
+import { StatCardSkeleton, TableSkeleton } from '../../components/common/SkeletonLoader';
 import {
   Bar,
   BarChart,
@@ -269,9 +270,13 @@ export default function OwnerDashboardPage() {
       </section>
 
       {dashboard.isLoading ? (
-        <Card className="owner-feedback-card mb-3">
-          <Card.Body className="text-center py-4"><Spinner animation="border" size="sm" /> <span className="ms-2">Memuat dashboard...</span></Card.Body>
-        </Card>
+        <div role="status" aria-label="Memuat dashboard" aria-busy="true">
+          <Row className="g-3 mb-3">
+            {Array.from({ length: 4 }).map((_, i) => <Col xl={3} md={6} key={i}><StatCardSkeleton /></Col>)}
+          </Row>
+          <Card className="owner-feedback-card mb-3"><Card.Body><TableSkeleton rows={5} cols={3} /></Card.Body></Card>
+          <span className="visually-hidden">Memuat dashboard…</span>
+        </div>
       ) : null}
 
       {dashboard.isError ? (

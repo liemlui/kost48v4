@@ -110,7 +110,7 @@ export default function NotificationBell() {
         )}
       </Dropdown.Toggle>
 
-      <Dropdown.Menu className="notification-dropdown-menu p-0" style={{ minWidth: 320, maxWidth: 380 }}>
+      <Dropdown.Menu className="notification-dropdown-menu p-0">
         <div className="d-flex align-items-center justify-content-between px-3 py-2 border-bottom">
           <span className="fw-semibold">Notifikasi</span>
           {unreadCount > 0 && (

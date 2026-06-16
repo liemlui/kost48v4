@@ -1,5 +1,5 @@
 import { lazy } from 'react';
-import { Spinner } from 'react-bootstrap';
+import { PageLoadingSkeleton } from '../../components/common/SkeletonLoader';
 import AppLayout from '../../components/layout/AppLayout';
 import { useAuth } from '../../context/AuthContext';
 import PublicGuestDashboardPage from '../public/PublicGuestDashboardPage';
@@ -11,12 +11,9 @@ const StaffRoomsPage = lazy(() => import('./StaffRoomsPage'));
 export default function RoomsRouteEntry() {
   const { user, loading } = useAuth();
 
+  // A7: hindari kedip full-page spinner saat auth resolve — pakai skeleton stabil.
   if (loading) {
-    return (
-      <div className="min-vh-100 d-flex align-items-center justify-content-center">
-        <Spinner animation="border" />
-      </div>
-    );
+    return <PageLoadingSkeleton label="Memuat kamar…" />;
   }
 
   if (user?.role === 'STAFF') {

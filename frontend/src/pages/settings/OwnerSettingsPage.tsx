@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Alert, Badge, Button, Card, Col, Form, Modal, Row, Spinner, Tab, Tabs } from 'react-bootstrap';
 import { useSearchParams } from 'react-router-dom';
 import client from '../../api/client';
+import SafeImage from '../../components/common/SafeImage';
 import { createFaq, deleteFaq, fetchAllFaqs, updateFaq, type FaqItem } from '../../api/faqs';
 import { fetchOperationalSettings, updateOperationalSettings, type OperationalSetting } from '../../api/settings';
 import { getApiErrorMessage } from '../../utils/getApiErrorMessage';
@@ -372,7 +373,7 @@ function RoomPhotoPanel() {
                     return (
                       <Col xs={6} md={4} key={`${url}-${i}`}>
                         <div className="settings-photo-thumb">
-                          <img src={displayUrl} alt={`Foto ${i + 1}`} loading="lazy" />
+                          <SafeImage src={displayUrl} alt={`Foto ${i + 1}`} resolveUrl={false} />
                           <button
                             type="button"
                             className="settings-photo-remove"

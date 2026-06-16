@@ -25,7 +25,7 @@ import {
   OccupancyDaily,
 } from '../../api/reports';
 import UnlockedFormalReports from './UnlockedFormalReports';
-import { fetchBalanceSheetDraft, fetchFormalRatiosReadiness, type BalanceSheetDraft, type FinanceReadiness } from '../../api/finance';
+import { StatCardSkeleton, TableSkeleton } from '../../components/common/SkeletonLoader';
 import { createBusinessNarrative } from '../../api/ai';
 import AiAssistButton from '../../components/ai/AiAssistButton';
 import DonutGauge from '../../components/charts/DonutGauge';
@@ -166,9 +166,6 @@ export default function ReportsPage() {
     queryFn: () => fetchOccupancyDaily(heatmapRange.from, heatmapRange.to),
     staleTime: 5 * 60_000,
   });
-  const financeReadiness = useQuery({ queryKey: ['finance', 'formal-readiness'], queryFn: () => fetchFormalRatiosReadiness(), staleTime: 120_000, retry: 1 });
-  const balanceSheetDraft = useQuery({ queryKey: ['finance', 'balance-sheet-draft', ym], queryFn: () => fetchBalanceSheetDraft(ym.year, ym.month), staleTime: 120_000, retry: 1 });
-
   const reportQueries = [monthlyIncome, overdueAging, depositLiability, expenseSummary, cashFlow, profitLoss, financialRatios, occupancy];
   const isLoading = reportQueries.some((q) => q.isLoading);
   const hasError = reportQueries.some((q) => q.isError);
@@ -230,9 +227,16 @@ export default function ReportsPage() {
       </Alert>
 
       {isLoading && (
-        <Card className="report-glass-card mb-3">
-          <Card.Body className="text-center py-4"><Spinner animation="border" size="sm" /> <span className="ms-2">Memuat data analytics...</span></Card.Body>
-        </Card>
+        <div role="status" aria-label="Memuat data laporan" aria-busy="true">
+          <section className="report-command-grid mb-3">
+            {Array.from({ length: 5 }).map((_, i) => <StatCardSkeleton key={i} />)}
+          </section>
+          <Row className="g-3 mb-3">
+            <Col xl={6}><Card className="report-panel"><Card.Body><TableSkeleton rows={5} cols={2} /></Card.Body></Card></Col>
+            <Col xl={6}><Card className="report-panel"><Card.Body><TableSkeleton rows={5} cols={2} /></Card.Body></Card></Col>
+          </Row>
+          <span className="visually-hidden">Memuat data laporan…</span>
+        </div>
       )}
 
       {hasError && (
@@ -726,61 +730,3 @@ function OverdueAgingTable({ data }: { data: OverdueAging }) { const b = data.bu
 function DepositLiabilityTable({ data }: { data: DepositLiability }) { return <Table responsive bordered size="sm" className="mb-0 mt-3 report-table"><tbody><tr><td>Total Dana Titipan Dinilai</td><td className="text-end">Rp {formatRupiah(data.totalDepositAmountRupiah)}</td></tr><tr><td>Sudah Dibayar</td><td className="text-end">Rp {formatRupiah(data.totalDepositPaidRupiah)}</td></tr><tr><td><strong>Sisa Dana Titipan Belum Dibayar</strong></td><td className="text-end"><strong>Rp {formatRupiah(data.totalDepositOutstandingRupiah)}</strong></td></tr><tr><td>Masa sewa aktif</td><td className="text-end">{data.activeStayCount}</td></tr><tr><td>Lunas / Partial / Belum</td><td className="text-end"><Badge bg="success">{data.fullyPaidCount}</Badge> <Badge bg="warning">{data.partiallyPaidCount}</Badge> <Badge bg="danger">{data.unpaidCount}</Badge></td></tr></tbody></Table>; }
 function ProfitLossTable({ data }: { data: ProfitLoss }) { return <Table responsive bordered size="sm" className="mb-0 report-table"><tbody><tr><td>Pendapatan Tagihan</td><td className="text-end">Rp {formatRupiah(data.invoiceRevenueRupiah)}</td></tr><tr><td>Pendapatan WiFi</td><td className="text-end">Rp {formatRupiah(data.wifiRevenueRupiah)}</td></tr><tr><td>Total Pendapatan</td><td className="text-end">Rp {formatRupiah(data.totalRevenueRupiah)}</td></tr><tr><td>Total Pengeluaran</td><td className="text-end">Rp {formatRupiah(data.totalExpenseRupiah)}</td></tr><tr><td><strong>Laba/Rugi Bersih</strong></td><td className={`text-end ${data.netProfitRupiah >= 0 ? 'text-success' : 'text-danger'}`}><strong>Rp {formatRupiah(data.netProfitRupiah)}</strong></td></tr><tr><td>Margin Laba Bersih</td><td className="text-end"><strong>{data.netProfitMarginPercent}%</strong></td></tr></tbody></Table>; }
 function OccupancyTable({ data }: { data: Occupancy }) { return <Table responsive bordered size="sm" className="mb-0 report-table"><tbody><tr><td>Total Kamar Operasional</td><td className="text-end"><strong>{data.totalOperableRooms}</strong></td></tr><tr><td>Kamar Terisi</td><td className="text-end"><strong>{data.occupiedRooms}</strong></td></tr><tr><td>Tingkat Okupansi</td><td className="text-end"><strong>{data.occupancyRatePercent}%</strong></td></tr><tr><td>Total Tagihan Bulan Ini</td><td className="text-end">Rp {formatRupiah(data.totalBilledRupiah)}</td></tr><tr><td>Pendapatan per Kamar Terisi</td><td className="text-end"><strong>Rp {formatRupiah(data.revenuePerOccupiedRoomRupiah)}</strong></td></tr><tr><td colSpan={2} className="text-muted small">{data.occupancyNote}<br />{data.revenueNote}</td></tr></tbody></Table>; }
-
-function LockedFormalRatios({ readiness: financeReadiness, balanceSheetDraft, isDataUnavailable }: { readiness?: FinanceReadiness; balanceSheetDraft?: BalanceSheetDraft; isDataUnavailable?: boolean }) {
-  const ratios = [
-    { name: 'Rasio Lancar', formula: 'Aset Lancar / Kewajiban Lancar', reason: 'Belum akurat karena kas/bank aktual dan current liabilities belum dimodelkan.' },
-    { name: 'Rasio Cepat', formula: '(Aset Lancar - Inventory) / Kewajiban Lancar', reason: 'Belum akurat karena kas/bank, inventory, dan current liabilities belum dimodelkan.' },
-    { name: 'ROCE', formula: 'EBIT / (Total Aset - Kewajiban Lancar)', reason: 'Belum akurat karena aset, depresiasi, dan capital employed belum dimodelkan.' },
-    { name: 'Debt-to-Equity', formula: 'Total Kewajiban / Total Ekuitas', reason: 'Belum akurat karena utang jangka panjang, ekuitas, dan akumulasi laba belum dimodelkan.' },
-  ];
-  const readiness = [
-    { label: 'Piutang tagihan', state: 'Ready', note: 'Tagihan aktif dapat menjadi kandidat piutang.' },
-    { label: 'Dana titipan', state: 'Ready', note: 'Dana titipan ditampilkan sebagai kewajiban, bukan pendapatan.' },
-    { label: 'Kas / rekening bank', state: 'Locked', note: 'Belum ada sumber saldo kas/bank formal.' },
-    { label: 'Ekuitas / modal kerja', state: 'Locked', note: 'Belum ada model ekuitas dan aset formal.' },
-  ];
-  const missingFinanceData = financeReadiness?.missing ?? [];
-  const knownAssets = balanceSheetDraft?.totals?.knownAssetsRupiah ?? null;
-  const knownLiabilities = balanceSheetDraft?.totals?.knownLiabilitiesRupiah ?? null;
-  return (
-    <Row className="g-3">
-      <Col xl={5}>
-        <Card className="report-panel h-100">
-          <Card.Header><span>Kesiapan Neraca</span><Badge bg="warning">Fondasi</Badge></Card.Header>
-          <Card.Body>
-            <p className="text-muted small">Rasio formal tetap dikunci sampai Aset = Kewajiban + Ekuitas bisa dibangun dari data yang dapat dipercaya.</p>
-            {isDataUnavailable ? <Alert variant="light" className="small">Data readiness keuangan belum bisa dimuat saat ini.</Alert> : null}
-            {balanceSheetDraft ? (
-              <div className="report-readiness-snapshot mb-3">
-                <div><span>Aset tercatat</span><strong>{knownAssets === null ? '-' : formatCompactRupiah(knownAssets)}</strong></div>
-                <div><span>Kewajiban tercatat</span><strong>{knownLiabilities === null ? '-' : formatCompactRupiah(knownLiabilities)}</strong></div>
-                <small>{balanceSheetDraft.note}</small>
-              </div>
-            ) : null}
-            <div className="readiness-mini-list">
-              {readiness.map((item) => (
-                <div key={item.label}>
-                  <span>{item.state === 'Ready' ? '✅' : '🔒'}</span>
-                  <strong>{item.label}</strong>
-                  <small>{item.note}</small>
-                </div>
-              ))}
-            </div>
-            {missingFinanceData.length ? (
-              <div className="mt-3 small text-muted">
-                <strong>Data yang belum lengkap:</strong> {missingFinanceData.join(', ')}
-              </div>
-            ) : null}
-          </Card.Body>
-        </Card>
-      </Col>
-      <Col xl={7}>
-        <Card className="report-panel h-100">
-          <Card.Header><span>Rasio Akuntansi Formal</span><Badge bg="secondary">Data Dikunci</Badge></Card.Header>
-          <Card.Body className="p-0"><Table responsive bordered size="sm" className="mb-0 report-table"><tbody>{ratios.map((r) => <tr key={r.name}><td style={{ width: 220 }}><strong>{r.name}</strong><br /><span className="text-muted small">{r.formula}</span></td><td><Badge bg="secondary" className="me-2">Belum Tersedia</Badge><span className="text-muted small">{r.reason}</span></td></tr>)}</tbody></Table></Card.Body>
-        </Card>
-      </Col>
-    </Row>
-  );
-}
