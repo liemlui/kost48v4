@@ -25,8 +25,20 @@ export type MarketAnalysis = {
   createdBy?: { id: number; fullName: string } | null;
 };
 
+export type MarketSnapshot = {
+  rooms: { total: number; occupied: number; available: number };
+  occupancyPercent: number;
+  activeStays: number;
+  survey: { count: number; avgOverall: number | null; recommendRate: number | null };
+};
+
 export async function getMarketAnalysisStatus(): Promise<{ configured: boolean }> {
   const res = await client.get<ApiEnvelope<{ configured: boolean }>>('/market-analysis/status');
+  return res.data.data;
+}
+
+export async function getMarketSnapshot(): Promise<MarketSnapshot> {
+  const res = await client.get<ApiEnvelope<MarketSnapshot>>('/market-analysis/snapshot');
   return res.data.data;
 }
 

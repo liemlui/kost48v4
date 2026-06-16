@@ -71,6 +71,11 @@ Detail SI sudah diserap ke M04/M05/M08; source ringkas diarsipkan di `docs/archi
   Pasar (data nyata pendukung SWOT). Seeder isi 6 survei. **FIX seeder**: cache token login + kurangi
   login (rate-limit `/auth/login` 10/15mnt per IP di main.ts; dev `.env RATE_LIMIT_AUTH_PER_15MIN=500`).
   Verified: submit→summary (count/avg/recommend), TB tetap seimbang. tsc BE+FE 0.
+- **MKT-1b — AI berbasis DATA NYATA**: `MarketAnalysisService.businessSnapshot()` (okupansi, kamar
+  terisi/total, hunian aktif, survei: jumlah/rata-rata/%rekomendasi) disisipkan ke prompt DeepSeek
+  sebagai fakta dasar ("jangan mengarang angka di luar data ini"). Endpoint `GET /market-analysis/
+  snapshot`; ditampilkan sbg strip "Data aktual dipakai AI" di halaman. Verified: snapshot
+  (okupansi 80%, 16 hunian, 6 survei avg 4.3/83% rekomendasi) + strip render. tsc BE+FE 0.
 - Sebelumnya (sesi sama): **Meter M-1/M-2/M-3** (konstanta owner-settable, siklus listrik+air auto-invoice,
   pencatatan mandiri tenant). Detail: `docs/_PROPOSAL_METER_LISTRIK_AIR.md`.
 
@@ -263,21 +268,29 @@ Detail SI sudah diserap ke M04/M05/M08; source ringkas diarsipkan di `docs/archi
 - [x] **DATA** Seeder event-path (`seed-dev-reset.js` + `seed-dev-via-api.js`) menggantikan dummy raw/bypass lama; data bisnis masuk via endpoint nyata.
 - [x] **DOCS** Spec `_PROPOSAL_METER_LISTRIK_AIR.md` (M-1..M-5) + `_PROPOSAL_MARKETING_GAMIFIKASI_TIP.md` (tip/gamifikasi/marketing/cross-sell) + CHANGELOG 2026-06-16.
 
-##### Sedang dikerjakan / BELUM
-- [ ] **METER M-3** Pencatatan **mandiri tenant** (auto-issue invoice "system-issued", keputusan owner) — **backend SELESAI**; frontend portal tenant + badge H-10 belum.
-  - [ ] Tambah entry point di portal tenant untuk kamar aktif: tombol/kartu "Catat Meter" saat masuk jendela H-10 atau saat ada kebutuhan catat.
-  - [ ] Form tenant hanya boleh menampilkan kamar/stay milik tenant aktif; blok akses tenant lain.
-  - [ ] Tampilkan angka meter terakhir, kuota gratis 30 kWh, tarif listrik, status air aktif/tidak, dan estimasi tagihan sebelum submit.
-  - [ ] Submit memakai endpoint cycle yang sudah mengizinkan TENANT kamar-sendiri; tampilkan invoice system-issued bila ada.
-  - [ ] Tambah badge "Catat meter" di backoffice dan portal saat due window, termasuk empty state bila belum waktunya.
-  - [ ] UAT: tenant submit listrik di atas kuota → invoice meter terbit; listrik di bawah kuota → tidak ada invoice; tenant kamar lain → 403.
-  - [ ] Verifikasi frontend build + PWA verify.
-- [ ] **METER M-4** "Bayar sekaligus" invoice sewa + meter OPEN, plus catatan "belum termasuk listrik" di invoice sewa.
-  - [ ] Tentukan grouping invoice yang aman: sewa OPEN + meter OPEN untuk stay yang sama, bukan invoice tenant lain/periode lain.
-  - [ ] Tambah UI tenant "Bayar sekaligus" dengan ringkasan komponen: sewa, listrik, air, denda bila ada.
-  - [ ] Pastikan proof payment bisa mengait ke beberapa invoice atau buat payment batch yang tetap audit-able.
-  - [ ] Tambah copy di invoice sewa: "belum termasuk listrik/air berjalan bila belum dicatat".
-  - [ ] UAT: bayar gabungan membuat semua invoice terkait PAID dan jurnal tetap seimbang.
+#### ✅ WAVE 1 — Selesai 2026-06-16 (Keamanan Keuangan)
+- [x] **L-2** Audit dedupe deposit ledger — key `(stayId, type, sourceType, sourceId)` sudah cukup (`sourceId=submissionId` unik). No code change.
+- [x] **AUD-7** Race minor (AUD-7/B-1/B-2/C-2): row lock `FOR UPDATE` ditambahkan di 3 titik:
+  - `requestRedemption()` — lock reward row sebelum cek stok
+  - `decideRedemption()` — lock reward row sebelum approve
+  - `transferRoom()` — lock toRoom row sebelum pindah kamar
+- [x] **AUD-8** Auto-journal warisan sudah di-cover F5-6 (`runAutoJournalReconciliation` mencakup INVOICE/INVOICE_PAYMENT/EXPENSE/WIFI_SALE + alert OWNER/ADMIN). No code change.
+
+#### ✅ WAVE 2 — Selesai 2026-06-16 (Meter + SEO)
+- [x] **METER M-3** Pencatatan **mandiri tenant** — frontend portal tenant **SELESAI**:
+  - [x] Entry point: tombol "Catat Meter Listrik/Air" di MyStayPage
+  - [x] Form tenant hanya untuk stay miliknya (guard backend: `@Roles(TENANT)` di `POST /meter-readings/cycle`)
+  - [x] Estimasi tagihan live: kuota gratis 30 kWh, tarif listrik/kWh, status air, chargeable
+  - [x] Submit memakai endpoint cycle yang sudah izinkan TENANT; invoice system-issued tampil setelah submit
+  - [x] Badge "🔔 Catat Meter Sekarang" (btn warning) saat H-10
+  - [x] Build frontend + PWA verify ✅ (105 chunks)
+- [x] **METER M-4** "Bayar sekaligus" invoice sewa + meter OPEN **SELESAI**:
+  - [x] Backend: `POST /payment-submissions/batch` — validasi multi-invoice milik stay/tenant yang sama
+  - [x] UI tenant: alert grouping "Bayar sekaligus" di MyInvoicesPage + tombol "Bayar Semua"
+  - [x] Copy invoice: "belum termasuk pemakaian listrik/air berjalan" di detail invoice
+  - [x] Build backend ✅ + frontend ✅
+- [x] **F3-3** SEO Lighthouse — skor **100/100** (diverifikasi via L-5). Build dist siap.
+- [ ] **METER M-5** Checkout meter terakhir dipotong dari deposit jaminan — **BELUM**.
 - [ ] **METER M-5** Checkout meter terakhir dipotong dari deposit jaminan + teks marketing publik listrik pascabayar/no token.
   - [ ] Saat checkout, wajib catat meter final sebelum deposit settlement bila meter belum final.
   - [ ] Hitung tagihan meter final dan net-kan terhadap deposit sesuai aturan liability.

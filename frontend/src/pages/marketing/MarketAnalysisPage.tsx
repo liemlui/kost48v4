@@ -9,6 +9,7 @@ import { getSurveySummary } from '../../api/surveys';
 import {
   deleteMarketAnalysis,
   getMarketAnalysisStatus,
+  getMarketSnapshot,
   listMarketAnalyses,
   marketAnalysisChat,
   saveMarketAnalysis,
@@ -66,6 +67,7 @@ export default function MarketAnalysisPage() {
   const statusQuery = useQuery({ queryKey: ['market-analysis-status'], queryFn: getMarketAnalysisStatus });
   const savedQuery = useQuery({ queryKey: ['market-analysis-list'], queryFn: listMarketAnalyses });
   const surveyQuery = useQuery({ queryKey: ['survey-summary'], queryFn: getSurveySummary });
+  const snapshotQuery = useQuery({ queryKey: ['market-snapshot'], queryFn: getMarketSnapshot });
   const configured = statusQuery.data?.configured ?? true;
 
   const chatMutation = useMutation({
@@ -119,6 +121,18 @@ export default function MarketAnalysisPage() {
         </Alert>
       ) : null}
       {error ? <Alert variant="danger" dismissible onClose={() => setError('')}>{error}</Alert> : null}
+
+      {/* Data aktual kos yang DIPAKAI AI sebagai fakta dasar (bukan karangan) */}
+      {snapshotQuery.data ? (
+        <Card className="border-0 mb-3" style={{ background: 'linear-gradient(135deg,#eef2ff,#f0fdf4)' }}>
+          <Card.Body className="py-2 px-3">
+            <span className="fw-semibold me-2">📊 Data aktual dipakai AI:</span>
+            <span className="me-3">Okupansi <strong>{snapshotQuery.data.occupancyPercent}%</strong> ({snapshotQuery.data.rooms.occupied}/{snapshotQuery.data.rooms.total} kamar)</span>
+            <span className="me-3">Hunian aktif <strong>{snapshotQuery.data.activeStays}</strong></span>
+            <span>Survei <strong>{snapshotQuery.data.survey.count}</strong>{snapshotQuery.data.survey.avgOverall != null ? <> · rata-rata <strong>{snapshotQuery.data.survey.avgOverall}/5</strong></> : null}{snapshotQuery.data.survey.recommendRate != null ? <> · {snapshotQuery.data.survey.recommendRate}% rekomendasi</> : null}</span>
+          </Card.Body>
+        </Card>
+      ) : null}
 
       {/* Ringkasan survei kepuasan penghuni — data nyata pendukung analisa */}
       {surveyQuery.data && surveyQuery.data.count > 0 ? (

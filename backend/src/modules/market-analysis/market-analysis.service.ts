@@ -53,27 +53,69 @@ export class MarketAnalysisService {
     ].join('\n');
   }
 
-  /** Multi-turn: frontend kirim seluruh riwayat (tanpa system); kita sisipkan system prompt. */
+  /**
+   * Snapshot data NYATA kos (okupansi, hunian aktif, survei kepuasan) → diberikan ke AI agar
+   * analisa berbasis fakta, bukan hanya jawaban verbal owner. Juga ditampilkan di UI.
+   */
+  async businessSnapshot() {
+    const [totalRooms, occupiedRooms, availableRooms, activeStays, surveyAgg, recRows] = await Promise.all([
+      this.prisma.room.count(),
+      this.prisma.room.count({ where: { status: 'OCCUPIED' as any } }),
+      this.prisma.room.count({ where: { status: 'AVAILABLE' as any } }),
+      this.prisma.stay.count({ where: { status: 'ACTIVE' as any } }),
+      this.prisma.satisfactionSurvey.aggregate({ _count: { _all: true }, _avg: { overallRating: true } }),
+      this.prisma.satisfactionSurvey.findMany({ select: { wouldRecommend: true } }),
+    ]);
+    const rec = recRows.map((r) => r.wouldRecommend).filter((v): v is boolean => v !== null);
+    return {
+      rooms: { total: totalRooms, occupied: occupiedRooms, available: availableRooms },
+      occupancyPercent: totalRooms ? Math.round((occupiedRooms / totalRooms) * 100) : 0,
+      activeStays,
+      survey: {
+        count: surveyAgg._count._all,
+        avgOverall: surveyAgg._avg.overallRating != null ? Math.round(surveyAgg._avg.overallRating * 10) / 10 : null,
+        recommendRate: rec.length ? Math.round((rec.filter(Boolean).length / rec.length) * 100) : null,
+      },
+    };
+  }
+
+  private snapshotPrompt(s: Awaited<ReturnType<MarketAnalysisService['businessSnapshot']>>) {
+    return [
+      'DATA AKTUAL KOST48 (per hari ini, dari sistem) — pakai sebagai fakta dasar analisamu:',
+      `- Kamar: ${s.rooms.total} total, ${s.rooms.occupied} terisi, ${s.rooms.available} kosong (okupansi ${s.occupancyPercent}%).`,
+      `- Hunian aktif: ${s.activeStays}.`,
+      s.survey.count > 0
+        ? `- Survei kepuasan: ${s.survey.count} responden, rata-rata ${s.survey.avgOverall}/5, ${s.survey.recommendRate ?? '-'}% merekomendasikan.`
+        : '- Survei kepuasan: belum ada responden.',
+      'Jangan mengarang angka di luar data ini; bila perlu data lain, tanyakan ke owner.',
+    ].join('\n');
+  }
+
+  /** Multi-turn: frontend kirim seluruh riwayat (tanpa system); kita sisipkan system prompt + data nyata. */
   async chat(dto: MarketAnalysisChatDto, actor: CurrentUserPayload) {
     this.rateLimit(actor.id);
     const kind = (dto.kind || 'SWOT').toUpperCase();
+    const snapshot = await this.businessSnapshot();
     if (!deepseekConfigured()) {
       return {
         configured: false,
         mode: 'RULE_FALLBACK',
         reply:
           'Fitur analisa AI DeepSeek belum aktif. Setel DEEPSEEK_API_KEY di backend/.env lalu restart backend. ' +
-          'Setelah itu, AI akan mewawancarai kamu dan menyusun analisa ' + kind + ' otomatis.',
+          `Saat aktif, AI memakai data nyata kos (okupansi ${snapshot.occupancyPercent}%, ` +
+          `${snapshot.survey.count} survei) + wawancara untuk menyusun analisa ${kind}.`,
         done: false,
+        snapshot,
       };
     }
     const messages: ChatMsg[] = [
       { role: 'system', content: this.systemPrompt(kind) },
+      { role: 'system', content: this.snapshotPrompt(snapshot) },
       ...dto.messages.map((m) => ({ role: m.role, content: m.content }) as ChatMsg),
     ];
     const raw = await deepseekChat(messages, { temperature: 0.5 });
     const parsed = this.extractResult(raw, kind);
-    return { configured: true, mode: 'DEEPSEEK', reply: raw, done: parsed.done, result: parsed.result };
+    return { configured: true, mode: 'DEEPSEEK', reply: raw, done: parsed.done, result: parsed.result, snapshot };
   }
 
   /** Deteksi blok HASIL + JSON terstruktur dari balasan AI. */

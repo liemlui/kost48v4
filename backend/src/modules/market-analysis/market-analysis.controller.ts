@@ -22,6 +22,13 @@ export class MarketAnalysisController {
     return { message: 'Status analisa AI', data: this.service.configured() };
   }
 
+  // Data nyata kos yang dipakai AI sebagai fakta dasar (okupansi, hunian, survei).
+  @Get('snapshot')
+  @Roles(UserRole.OWNER, UserRole.ADMIN)
+  async snapshot() {
+    return { message: 'Data aktual kos', data: await this.service.businessSnapshot() };
+  }
+
   // Chat interaktif (AI mewawancarai owner lalu menyusun SWOT/PESTLE). Owner-only (strategi).
   @Post('chat')
   @Roles(UserRole.OWNER)
