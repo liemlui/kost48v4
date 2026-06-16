@@ -18,6 +18,26 @@ Checklist eksekusi aktif plus changelog yang dipadatkan agar tetap terbaca sebag
 - Changelog sengaja dipadatkan: tanggal dan outcome dipertahankan, detail panjang tetap ada di source lama.
 
 
+## Sesi 2026-06-16 — SI (sewa/data/invoice) + G-1 (gamifikasi) — TERBARU
+
+Detail penuh: `docs/_PLAN_SI_SEWA_RIWAYAT.md`. Semua ter-commit & push ke `main`.
+
+- **SI-1** `90ced2f`/`bb49ff3` — Seeder dummy DEV via **event-path HTTP** (anti raw-insert; keputusan
+  owner: "dummy lewat jalur kejadian, jangan by pass DB"). `scripts/seed-dev-reset.js` (TRUNCATE+fondasi)
+  + `scripts/seed-dev-via-api.js` (rooms/tenants/check-in/invoice/bayar/meter via endpoint).
+  `seed-dev-dummy.js` lama diusangkan. Verified: 20 kamar/16 stay/19 invoice/TB seimbang.
+- **SI-4** `e8e80e3` — Label peruntukan invoice (badge "Tagihan Sewa/Listrik/Air/DP") di daftar+detail
+  tenant & backoffice; nomor invoice jadi subteks (`utils/invoiceUtility.ts`).
+- **SI-3** `eb820a9` — Timeline **Riwayat Sewa** (masuk→tiap periode→tagihannya, tertaut invoice) di
+  StayDetailPage + MyStayPage (`components/stays/StayHistoryTimeline.tsx`).
+- **SI-2** `c0dd13a` — Transparansi aturan perpanjangan: tampil tanggal+basis "DP ≤ hari-H (akhir
+  kontrak)", "lunas ≤ DP+7" di portal tenant + admin renew-requests. Guard backend sudah benar (audit).
+- **G-1** `c75370a` — Gamifikasi tenant: poin = "kebaikan" (bukan rupiah), kartu Total/Ditukar/Sisa,
+  **Papan Top-3 Kamar (anonim)** via `GET /me/loyalty/leaderboard`. Seeder lengkapi onboarding (event-path)
+  → poin ONBOARDING_QUEST terisi.
+- Sebelumnya (sesi sama): **Meter M-1/M-2/M-3** (konstanta owner-settable, siklus listrik+air auto-invoice,
+  pencatatan mandiri tenant). Detail: `docs/_PROPOSAL_METER_LISTRIK_AIR.md`.
+
 ## Bagian 1 - `docs/08_CHECKLIST.md`
 
 ### KOST48 V5 — Checklist Eksekusi (untuk AI eksekutor)
