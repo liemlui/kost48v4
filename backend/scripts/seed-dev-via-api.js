@@ -33,6 +33,16 @@ async function api(method, path, body, { token = TOKEN, optional = false } = {})
 }
 const idOf = (d) => d?.id ?? d?.stay?.id ?? d?.invoice?.id ?? d?.tenant?.id ?? null;
 const asList = (d) => (Array.isArray(d) ? d : (d?.items ?? d?.rows ?? d?.data ?? d?.results ?? []));
+
+// Cache token per identifier → hindari login berulang (rate-limit /auth/login = 10/15mnt per IP).
+const tokenCache = new Map();
+async function loginAs(identifier, password) {
+  if (tokenCache.has(identifier)) return tokenCache.get(identifier);
+  const r = await api('POST', '/auth/login', { identifier, password }, { token: '' });
+  const tok = r?.accessToken ?? null;
+  if (tok) tokenCache.set(identifier, tok);
+  return tok;
+}
 const ymd = (d) => d.toISOString().slice(0, 10);
 const addMonths = (d, n) => { const x = new Date(d); x.setMonth(x.getMonth() + n); return x; };
 const addDays = (d, n) => { const x = new Date(d); x.setDate(x.getDate() + n); return x; };
@@ -53,7 +63,7 @@ const EMPTY = ['Q', 'R', 'S', 'T'];
 const TENANT_PW = 'Tenant#2026';
 const RENT_BY_TIER = { lt: 1200000, mid: 1400000, top: 1600000 };
 
-const summary = { rooms: 0, tenants: 0, onboarded: 0, stays: 0, rentInvoices: 0, paidFull: 0, unpaid: 0, meterInvoices: 0, meterFree: 0, tickets: 0, tipAcks: 0, renewals: 0 };
+const summary = { rooms: 0, tenants: 0, onboarded: 0, stays: 0, rentInvoices: 0, paidFull: 0, unpaid: 0, meterInvoices: 0, meterFree: 0, tickets: 0, tipAcks: 0, surveys: 0, renewals: 0 };
 
 (async () => {
   console.log('=== SI-1 SEED via HTTP ===\nAPI:', API);
@@ -155,8 +165,7 @@ const summary = { rooms: 0, tenants: 0, onboarded: 0, stays: 0, rentInvoices: 0,
 
   // 4b) Tiket + tip (T-1): tenant lapor → assign → selesai → tenant tandai "sudah beri tip"
   //     (P2P, dihitung kali-nya saja). Sekaligus mengisi info tip staf (incl. ShopeePay).
-  const staffLogin = await api('POST', '/auth/login', { identifier: 'staff@kost48.com', password: 'staff123' }, { token: '' });
-  const staffTok = staffLogin?.accessToken;
+  const staffTok = await loginAs('staff@kost48.com', 'staff123');
   if (staffTok) {
     await api('PATCH', '/auth/me/tip-info', {
       tipGopay: '0812-3456-7890', tipShopeepay: '0899-1111-2222', tipDana: '0812-3456-7890',
@@ -170,8 +179,7 @@ const summary = { rooms: 0, tenants: 0, onboarded: 0, stays: 0, rentInvoices: 0,
       { ti: 6, title: 'Lampu kamar mati', cat: 'ELECTRICITY', tip: false },
     ];
     for (const t of ticketSeeds) {
-      const tEmail = `${NAMES[t.ti][2]}.tenant@kost48.test`;
-      const ttok = (await api('POST', '/auth/login', { identifier: tEmail, password: TENANT_PW }, { token: '' }))?.accessToken;
+      const ttok = await loginAs(`${NAMES[t.ti][2]}.tenant@kost48.test`, TENANT_PW);
       if (!ttok) continue;
       const tkId = idOf(await api('POST', '/tickets/portal', { title: t.title, description: `${t.title} (seed dummy)`, category: t.cat }, { token: ttok, optional: true }));
       if (!tkId) continue;
@@ -183,6 +191,27 @@ const summary = { rooms: 0, tenants: 0, onboarded: 0, stays: 0, rentInvoices: 0,
     }
     console.log(`✓ Tiket: ${summary.tickets ?? 0} dibuat (${summary.tipAcks ?? 0} ditandai tip) + info tip staf diisi`);
   }
+
+  // 4c) Survei kepuasan penghuni (beberapa responden, rating bervariasi)
+  // Pakai tenant yang SAMA dgn blok tiket (0,2,4,6) + 2 baru (1,3) → hemat login (token di-cache).
+  const surveySeeds = [
+    { ti: 0, overall: 5, rec: true, comment: 'Kos bersih, staf ramah, lokasi strategis.' },
+    { ti: 2, overall: 4, rec: true, comment: 'Nyaman; WiFi kadang lambat sore hari.' },
+    { ti: 4, overall: 5, rec: true, comment: 'Puas, respons keluhan cepat.' },
+    { ti: 6, overall: 3, rec: false, comment: 'Kamar mandi perlu perawatan lebih.' },
+    { ti: 1, overall: 4, rec: true },
+    { ti: 3, overall: 5, rec: true, comment: 'Recommended untuk pekerja.' },
+  ];
+  for (const sv of surveySeeds) {
+    const ttok = await loginAs(`${NAMES[sv.ti][2]}.tenant@kost48.test`, TENANT_PW);
+    if (!ttok) continue;
+    const r = await api('POST', '/surveys', {
+      overallRating: sv.overall, cleanliness: sv.overall, staffService: sv.overall >= 4 ? 5 : 3,
+      facility: 4, valueForMoney: sv.overall, wouldRecommend: sv.rec, comment: sv.comment,
+    }, { token: ttok, optional: true });
+    if (r) summary.surveys = (summary.surveys ?? 0) + 1;
+  }
+  console.log(`✓ ${summary.surveys ?? 0} survei kepuasan`);
 
   // 5) Perpanjangan (riwayat): /stays/:id/renew SENGAJA dinonaktifkan owner — wajib lewat
   //    alur Permintaan Perpanjangan (DP → invoice pelunasan → finalisasi). Itu multi-langkah;

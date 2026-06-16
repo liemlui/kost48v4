@@ -43,6 +43,7 @@ import { PushModule } from './modules/push/push.module';
 import { LoyaltyModule } from './modules/loyalty/loyalty.module';
 import { SettingsModule } from './modules/settings/settings.module';
 import { MarketAnalysisModule } from './modules/market-analysis/market-analysis.module';
+import { SurveysModule } from './modules/surveys/surveys.module';
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
@@ -86,6 +87,7 @@ import { MarketAnalysisModule } from './modules/market-analysis/market-analysis.
     LoyaltyModule,
     SettingsModule,
     MarketAnalysisModule,
+    SurveysModule,
   ],
   providers: [
     // Audit E-1: default-deny — semua endpoint butuh JWT kecuali ditandai @Public().

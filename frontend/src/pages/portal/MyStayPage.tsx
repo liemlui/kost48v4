@@ -16,6 +16,7 @@ import RenewRequestModal from '../../components/tenant/RenewRequestModal';
 import MeterCycleModal from '../../components/stays/MeterCycleModal';
 import StayHistoryTimeline from '../../components/stays/StayHistoryTimeline';
 import RenewalCrossSellCard from '../../components/tenant/RenewalCrossSellCard';
+import SatisfactionSurveyCard from '../../components/tenant/SatisfactionSurveyCard';
 import { useAuth } from '../../context/AuthContext';
 import { useTenantPortalStage } from '../../hooks/useTenantPortalStage';
 import type { PaginatedResponse } from '../../types';
@@ -586,8 +587,8 @@ function ActiveStayContent({ stay }: { stay: Stay }) {
           </Button>
         )}
         {/* M-3: tenant boleh catat meter sendiri (listrik pakai-dulu-bayar-kemudian). */}
-        <Button variant="outline-primary" size="sm" onClick={() => setShowMeter(true)}>
-          Catat Meter Listrik/Air
+        <Button variant={endDays !== null && endDays <= 10 && endDays >= 0 ? 'warning' : 'outline-primary'} size="sm" onClick={() => setShowMeter(true)}>
+          {endDays !== null && endDays <= 10 && endDays >= 0 ? '🔔 Catat Meter Sekarang' : 'Catat Meter Listrik/Air'}
         </Button>
       </div>
       {renewDisabledReason ? (
@@ -596,6 +597,9 @@ function ActiveStayContent({ stay }: { stay: Stay }) {
 
       {/* Cross-sell saat perpanjangan: tawarkan WiFi/cleaning (opsional) */}
       <RenewalCrossSellCard />
+
+      {/* Survei kepuasan penghuni */}
+      <SatisfactionSurveyCard />
 
       {/* SI-3: riwayat sewa (masuk → tiap periode → tagihannya) */}
       <StayHistoryTimeline stay={stay} invoices={invoices} invoiceHrefBase="/portal/invoices" />

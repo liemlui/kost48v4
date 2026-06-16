@@ -64,7 +64,13 @@ Detail SI sudah diserap ke M04/M05/M08; source ringkas diarsipkan di `docs/archi
   halaman Laporan (MyTicketsPage) + Panduan (MyManualPage). `RenewalCrossSellCard` di portal stay:
   tawar WiFi/Cleaning saat perpanjang → "Saya minat" buat tiket portal (kategori WIFI/CLEANING) agar
   admin tindak lanjut (reuse flow tiket, tanpa endpoint/skema baru). Verified render + tsc FE 0.
-  Survei tamu = belum (menyusul).
+- **MKT-3 — Survei kepuasan penghuni**: model `SatisfactionSurvey` + modul `surveys`
+  (POST tenant, GET summary/mine/list owner-admin). Tenant isi rating bintang (keseluruhan + aspek
+  kebersihan/staf/fasilitas/harga) + rekomendasi + komentar di portal stay (`SatisfactionSurveyCard`).
+  Owner lihat **ringkasan** (rata-rata per aspek, %rekomendasi, komentar terbaru) di halaman Analisa
+  Pasar (data nyata pendukung SWOT). Seeder isi 6 survei. **FIX seeder**: cache token login + kurangi
+  login (rate-limit `/auth/login` 10/15mnt per IP di main.ts; dev `.env RATE_LIMIT_AUTH_PER_15MIN=500`).
+  Verified: submit→summary (count/avg/recommend), TB tetap seimbang. tsc BE+FE 0.
 - Sebelumnya (sesi sama): **Meter M-1/M-2/M-3** (konstanta owner-settable, siklus listrik+air auto-invoice,
   pencatatan mandiri tenant). Detail: `docs/_PROPOSAL_METER_LISTRIK_AIR.md`.
 

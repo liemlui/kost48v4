@@ -525,6 +525,25 @@ model MarketAnalysis {
   @@index([kind, createdAt])
 }
 
+// Survei kepuasan penghuni (marketing/insight): rating keseluruhan + aspek + rekomendasi + komentar.
+// Scalar-only (tanpa relation) agar ringan; dipakai untuk ringkasan owner & konteks analisa SWOT.
+model SatisfactionSurvey {
+  id             Int      @id @default(autoincrement())
+  tenantId       Int?
+  stayId         Int?
+  overallRating  Int // 1..5
+  cleanliness    Int?
+  staffService   Int?
+  facility       Int?
+  valueForMoney  Int?
+  wouldRecommend Boolean?
+  comment        String?
+  createdById    Int?
+  createdAt      DateTime @default(now())
+
+  @@index([createdAt])
+}
+
 model Tenant {
   id             Int     @id @default(autoincrement())
   fullName       String

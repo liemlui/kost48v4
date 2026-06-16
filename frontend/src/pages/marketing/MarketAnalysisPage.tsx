@@ -5,6 +5,7 @@ import PageHeader from '../../components/common/PageHeader';
 import SegmentedTabs from '../../components/common/SegmentedTabs';
 import EmptyState from '../../components/common/EmptyState';
 import { getApiErrorMessage } from '../../utils/getApiErrorMessage';
+import { getSurveySummary } from '../../api/surveys';
 import {
   deleteMarketAnalysis,
   getMarketAnalysisStatus,
@@ -64,6 +65,7 @@ export default function MarketAnalysisPage() {
 
   const statusQuery = useQuery({ queryKey: ['market-analysis-status'], queryFn: getMarketAnalysisStatus });
   const savedQuery = useQuery({ queryKey: ['market-analysis-list'], queryFn: listMarketAnalyses });
+  const surveyQuery = useQuery({ queryKey: ['survey-summary'], queryFn: getSurveySummary });
   const configured = statusQuery.data?.configured ?? true;
 
   const chatMutation = useMutation({
@@ -117,6 +119,43 @@ export default function MarketAnalysisPage() {
         </Alert>
       ) : null}
       {error ? <Alert variant="danger" dismissible onClose={() => setError('')}>{error}</Alert> : null}
+
+      {/* Ringkasan survei kepuasan penghuni — data nyata pendukung analisa */}
+      {surveyQuery.data && surveyQuery.data.count > 0 ? (
+        <Card className="content-card border-0 mb-3">
+          <Card.Body>
+            <div className="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-2">
+              <strong>⭐ Survei Kepuasan Penghuni</strong>
+              <span className="text-muted small">{surveyQuery.data.count} responden</span>
+            </div>
+            <Row className="g-2 mb-2">
+              {[
+                { label: 'Keseluruhan', v: surveyQuery.data.avgOverall },
+                { label: 'Kebersihan', v: surveyQuery.data.avgCleanliness },
+                { label: 'Pelayanan staf', v: surveyQuery.data.avgStaffService },
+                { label: 'Fasilitas', v: surveyQuery.data.avgFacility },
+                { label: 'Harga sepadan', v: surveyQuery.data.avgValueForMoney },
+                { label: 'Rekomendasi', v: surveyQuery.data.recommendRate, suffix: '%' },
+              ].map((m) => (
+                <Col xs={6} md={4} lg={2} key={m.label}>
+                  <Card className="text-center h-100 border-0 shadow-sm"><Card.Body className="py-2">
+                    <div className="text-muted" style={{ fontSize: '0.68rem' }}>{m.label}</div>
+                    <div className="fs-5 fw-bold">{m.v != null ? `${m.v}${m.suffix ?? ''}` : '—'}</div>
+                  </Card.Body></Card>
+                </Col>
+              ))}
+            </Row>
+            {surveyQuery.data.recentComments.length ? (
+              <div className="small">
+                <div className="text-muted mb-1">Komentar terbaru:</div>
+                {surveyQuery.data.recentComments.slice(0, 4).map((c) => (
+                  <div key={c.id} className="border-start ps-2 mb-1"><span className="text-warning">{'★'.repeat(c.overallRating)}</span> <span className="text-muted">{c.comment}</span></div>
+                ))}
+              </div>
+            ) : null}
+          </Card.Body>
+        </Card>
+      ) : null}
 
       <Row className="g-4">
         <Col lg={7}>
