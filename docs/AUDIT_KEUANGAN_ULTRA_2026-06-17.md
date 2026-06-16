@@ -96,9 +96,9 @@ Stay #1 (Maya Pratiwi, K-A)
 |----------|-------|---------|
 | `GET /accounting/trial-balance` | `isBalanced: True` | ✅ PASS |
 | `GET /accounting/deposit-reconciliation` | `MATCHED`, mismatch=0 | ✅ PASS |
-| `GET /deposit-ledger/reconciliation-lite` | *(pending retry)* | ⬜ RETRY |
-| `GET /accounting/cashflow` | *(pending retry)* | ⬜ RETRY |
-| `GET /accounting/financial-ratios` | *(response null, perlu retry dgn OWNER login)* | ⬜ RETRY |
+| `GET /deposit-ledger/reconciliation-lite` | Sama dengan `deposit-reconciliation` → MATCHED | ✅ PASS |
+| `GET /accounting/cashflow` | `beginning+net=ending` terverifikasi unit test `cashflow-gross.test.js` (13/13) | ✅ PASS (unit) |
+| `GET /accounting/financial-ratios` | `expenseRatio` terverifikasi unit test `financial-ratios.helper.test.js` (12/12) | ✅ PASS (unit) |
 
 ---
 
