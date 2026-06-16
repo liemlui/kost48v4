@@ -15,6 +15,7 @@ import { RateLimitGuard } from '../../common/guards/rate-limit.guard';
 import { RateLimit } from '../../common/decorators/rate-limit.decorator';
 import { CurrentUserPayload } from '../../common/interfaces/current-user.interface';
 import { CreatePaymentSubmissionDto } from './dto/create-payment-submission.dto';
+import { BatchPaymentSubmissionDto } from './dto/batch-payment-submission.dto';
 import { RejectPaymentSubmissionDto } from './dto/reject-payment-submission.dto';
 import { ReviewQueueQueryDto } from './dto/review-queue-query.dto';
 import { PaymentSubmissionsService } from './payment-submissions.service';
@@ -238,6 +239,16 @@ export class PaymentSubmissionsController {
     return {
       message: 'Bukti pembayaran berhasil dikirim dan menunggu review',
       data: await this.paymentSubmissionsService.createSubmission(user, dto),
+    };
+  }
+
+  /** M-4: Bayar sekaligus beberapa invoice (sewa + meter OPEN) milik stay yang sama. */
+  @Post('batch')
+  @Roles(UserRole.TENANT)
+  async createBatch(@Body() dto: BatchPaymentSubmissionDto, @CurrentUser() user: CurrentUserPayload) {
+    return {
+      message: 'Bukti pembayaran batch berhasil dikirim dan menunggu review',
+      data: await this.paymentSubmissionsService.createBatchSubmission(user, dto),
     };
   }
 

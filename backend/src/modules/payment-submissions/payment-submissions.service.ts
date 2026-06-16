@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   ConflictException,
+  ForbiddenException,
   Injectable,
   Logger,
   NotFoundException,
@@ -30,6 +31,7 @@ import { calculatePeriodEnd } from '../stays/stays.helpers';
 import { UserRole } from '../../common/enums/app.enums';
 import { releaseRoomAfterBookingCancelTx } from '../../common/utils/room-booking.util';
 import { CreatePaymentSubmissionDto } from './dto/create-payment-submission.dto';
+import { BatchPaymentSubmissionDto } from './dto/batch-payment-submission.dto';
 import { ReviewQueueQueryDto } from './dto/review-queue-query.dto';
 import {
   SubmissionDetail,
@@ -232,6 +234,146 @@ export class PaymentSubmissionsService {
       this.handleSchemaError(error);
       throw error;
     }
+  }
+
+  /**
+   * M-4: Bayar sekaligus beberapa invoice (sewa + meter OPEN) milik stay yang sama.
+   * Membuat PaymentSubmission per invoice, semuanya dengan data pembayaran yang sama.
+   */
+  async createBatchSubmission(user: CurrentUserPayload, dto: BatchPaymentSubmissionDto) {
+    const tenantId = user.tenantId;
+    if (!tenantId) {
+      throw new ConflictException('Akun tenant belum terhubung ke data tenant');
+    }
+
+    const paidAt = parseDateOnly(dto.paidAt, 'Tanggal bayar tidak valid');
+    if (paidAt > endOfDay(new Date())) {
+      throw new BadRequestException('Tanggal bayar tidak boleh di masa depan');
+    }
+
+    if (dto.invoiceIds.length > 10) {
+      throw new BadRequestException('Maksimal 10 invoice dalam satu pembayaran batch');
+    }
+
+    const uniqueIds = [...new Set(dto.invoiceIds)];
+    if (uniqueIds.length !== dto.invoiceIds.length) {
+      throw new BadRequestException('Ada invoice duplikat dalam daftar pembayaran');
+    }
+
+    return this.prisma.$transaction(async (tx) => {
+      // Validasi semua invoice milik stay yang sama dan tenant yang sama
+      const invoices = await tx.invoice.findMany({
+        where: { id: { in: dto.invoiceIds } },
+        include: {
+          payments: { select: { amountRupiah: true } },
+          lines: { select: { lineAmountRupiah: true } },
+          stay: { select: { id: true, tenantId: true, status: true } },
+        },
+      });
+
+      if (invoices.length !== dto.invoiceIds.length) {
+        const found = new Set(invoices.map((inv) => inv.id));
+        const missing = dto.invoiceIds.filter((id) => !found.has(id));
+        throw new NotFoundException(`Invoice tidak ditemukan: ${missing.join(', ')}`);
+      }
+
+      // Validasi semua invoice milik stay yang benar
+      for (const inv of invoices) {
+        if (inv.stayId !== dto.stayId) {
+          throw new ConflictException(`Invoice ${inv.id} bukan milik stay ini`);
+        }
+        if (inv.stay.tenantId !== tenantId) {
+          throw new ForbiddenException(`Invoice ${inv.id} bukan milik tenant ini`);
+        }
+        if (inv.stay.status !== 'ACTIVE') {
+          throw new ConflictException(`Stay untuk invoice ${inv.id} tidak aktif`);
+        }
+        if (inv.status === 'DRAFT') {
+          throw new ConflictException(`Invoice ${inv.invoiceNumber} masih draft, belum bisa dibayar`);
+        }
+        if (['PAID', 'CANCELLED'].includes(inv.status)) {
+          throw new ConflictException(`Invoice ${inv.invoiceNumber} sudah ${inv.status}`);
+        }
+      }
+
+      const created: any[] = [];
+
+      for (const inv of invoices) {
+        const paid = inv.payments.reduce((sum, p) => sum + p.amountRupiah, 0);
+        const lineTotal = inv.lines.reduce((sum, l) => sum + Number(l.lineAmountRupiah ?? 0), 0);
+        const totalAmount = Number(inv.totalAmountRupiah ?? 0) > 0 ? Number(inv.totalAmountRupiah) : lineTotal;
+        const remaining = Math.max(totalAmount - paid, 0);
+
+        if (remaining <= 0) {
+          throw new ConflictException(`Invoice ${inv.invoiceNumber} sudah lunas`);
+        }
+
+        // Cek existing pending submission
+        const existing = await tx.paymentSubmission.findFirst({
+          where: { stayId: dto.stayId, invoiceId: inv.id, status: 'PENDING_REVIEW' as any },
+          select: { id: true },
+        });
+        if (existing) {
+          throw new ConflictException(`Invoice ${inv.invoiceNumber} sudah ada bukti bayar menunggu review`);
+        }
+
+        const submission = await tx.paymentSubmission.create({
+          data: {
+            stayId: dto.stayId,
+            invoiceId: inv.id,
+            tenantId,
+            submittedById: user.id,
+            amountRupiah: remaining,
+            paidAt,
+            paymentMethod: dto.paymentMethod as any,
+            targetType: 'INVOICE' as any,
+            targetId: inv.id,
+            senderName: dto.senderName ?? null,
+            senderBankName: dto.senderBankName ?? null,
+            referenceNumber: dto.referenceNumber ?? null,
+            notes: dto.notes ?? null,
+            fileKey: dto.fileKey ?? null,
+            fileUrl: dto.fileUrl ?? null,
+            originalFilename: dto.originalFilename ?? null,
+            mimeType: dto.mimeType ?? null,
+            fileSizeBytes: dto.fileSizeBytes ?? null,
+            status: 'PENDING_REVIEW' as any,
+          },
+        });
+
+        await tx.auditLog.create({
+          data: {
+            actorUserId: user.id,
+            action: 'CREATE_PAYMENT_SUBMISSION',
+            entityType: 'PaymentSubmission',
+            entityId: String(submission.id),
+            meta: {
+              stayId: dto.stayId,
+              invoiceId: inv.id,
+              tenantId,
+              amountRupiah: remaining,
+              paymentMethod: dto.paymentMethod,
+              batchSubmission: true,
+            } as any,
+          },
+        });
+
+        created.push(submission.id);
+      }
+
+      // Ambil detail semua submission yang baru dibuat
+      const results = await tx.paymentSubmission.findMany({
+        where: { id: { in: created } },
+        include: {
+          stay: { include: { room: true } },
+          invoice: true,
+          tenant: { select: { id: true, fullName: true, phone: true } },
+          submittedBy: { select: { id: true, fullName: true } },
+        },
+      });
+
+      return results;
+    });
   }
 
   async findMine(user: CurrentUserPayload, query: ReviewQueueQueryDto) {

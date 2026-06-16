@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Alert, Button, Form, Modal, Spinner } from 'react-bootstrap';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { recordMeterCycle, type MeterCycleResult } from '../../api/meterReadings';
@@ -14,11 +14,27 @@ export default function MeterCycleModal({ show, onHide, stay, onDone }: { show: 
   const qc = useQueryClient();
   const settings = useQuery({ queryKey: ['operational-settings'], queryFn: fetchOperationalSettings, enabled: show });
   const waterEnabled = Boolean(settings.data?.waterMeteringEnabled);
+  const freeKwh = settings.data?.freeElectricityKwhPerMonth ?? 30;
+  const elecTariff = Number(stay.room?.electricityTariffPerKwhRupiah ?? stay.electricityTariffPerKwhRupiah ?? 0);
+  const waterTariff = Number(stay.room?.waterTariffPerM3Rupiah ?? stay.waterTariffPerM3Rupiah ?? 0);
   const [readingAt, setReadingAt] = useState(new Date().toISOString().slice(0, 10));
   const [elec, setElec] = useState('');
   const [water, setWater] = useState('');
   const [note, setNote] = useState('');
   const [result, setResult] = useState<MeterCycleResult | null>(null);
+
+  // Estimasi tagihan (live preview)
+  const chargeableElec = useMemo(() => {
+    const kwh = parseFloat(elec) || 0;
+    if (kwh <= freeKwh) return 0;
+    return (kwh - freeKwh) * elecTariff;
+  }, [elec, freeKwh, elecTariff]);
+  const chargeableWater = useMemo(() => {
+    if (!waterEnabled) return 0;
+    const m3 = parseFloat(water) || 0;
+    return m3 * waterTariff;
+  }, [water, waterEnabled, waterTariff]);
+  const estimatedTotal = chargeableElec + chargeableWater;
 
   const mut = useMutation({
     mutationFn: () => recordMeterCycle({
@@ -82,6 +98,41 @@ export default function MeterCycleModal({ show, onHide, stay, onDone }: { show: 
               <Form.Control as="textarea" rows={2} value={note} onChange={(e) => setNote(e.currentTarget.value)} />
             </Form.Group>
             {mut.isError ? <Alert variant="danger" className="py-2">{getApiErrorMessage(mut.error, 'Gagal memproses meter')}</Alert> : null}
+            {/* Estimasi tagihan live (M-3) */}
+            {elec.trim() && !result ? (
+              <div className="mt-3 p-3 bg-light rounded small">
+                <div className="fw-semibold mb-1">Estimasi tagihan</div>
+                <div className="d-flex justify-content-between">
+                  <span>Listrik: {parseFloat(elec) || 0} kWh</span>
+                  <span>{elecTariff > 0 ? `Rp ${elecTariff.toLocaleString('id-ID')}/kWh` : 'gratis'}</span>
+                </div>
+                {parseFloat(elec) > freeKwh ? (
+                  <div className="d-flex justify-content-between text-danger">
+                    <span>{`Kena tagih (>${freeKwh} kWh gratis)`}</span>
+                    <span>Rp {chargeableElec.toLocaleString('id-ID')}</span>
+                  </div>
+                ) : (
+                  <div className="text-success">Dalam jatah gratis {freeKwh} kWh ✅</div>
+                )}
+                {waterEnabled && water.trim() ? (
+                  <div className="d-flex justify-content-between mt-1">
+                    <span>Air: {parseFloat(water) || 0} m³ × Rp {waterTariff.toLocaleString('id-ID')}</span>
+                    <span>Rp {chargeableWater.toLocaleString('id-ID')}</span>
+                  </div>
+                ) : null}
+                {estimatedTotal > 0 ? (
+                  <hr className="my-1" />
+                ) : null}
+                {estimatedTotal > 0 ? (
+                  <div className="d-flex justify-content-between fw-bold">
+                    <span>Estimasi total tagihan</span>
+                    <span>Rp {estimatedTotal.toLocaleString('id-ID')}</span>
+                  </div>
+                ) : (
+                  <div className="text-success mt-1">Tidak ada tagihan tambahan ✅</div>
+                )}
+              </div>
+            ) : null}
           </Form>
         )}
       </Modal.Body>

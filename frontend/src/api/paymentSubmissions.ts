@@ -1,6 +1,7 @@
 import apiClient from './client';
 import { createResource, listResource, postAction } from './resources';
 import type {
+  BatchPaymentSubmissionPayload,
   CreatePaymentSubmissionPayload,
   PaginatedResponse,
   PaymentSubmission,
@@ -54,6 +55,12 @@ export async function submitPaymentWithProof(payload: CreatePaymentSubmissionPay
     headers: { 'Content-Type': 'multipart/form-data' },
   });
   return data.data as PaymentSubmission;
+}
+
+/** M-4: Bayar sekaligus beberapa invoice (sewa + meter OPEN) milik stay yang sama. */
+export async function createBatchPaymentSubmission(payload: BatchPaymentSubmissionPayload) {
+  const { data } = await apiClient.post('/payment-submissions/batch', payload);
+  return data.data as PaymentSubmission[];
 }
 
 export async function uploadPaymentProof(file: File) {

@@ -46,7 +46,9 @@ export class RoomTransferService {
         throw new ConflictException('Kamar tujuan sama dengan kamar saat ini.');
       }
 
-      const toRoom = await tx.room.findUnique({ where: { id: dto.toRoomId } });
+      const [toRoom] = await tx.$queryRaw<Array<{ id: number; name: string; code: string | null; isActive: boolean; status: string; defaultDepositRupiah: number | null; electricityTariffPerKwhRupiah: number | null; waterTariffPerM3Rupiah: number | null }>>`
+        SELECT id, name, code, "isActive", status, "defaultDepositRupiah", "electricityTariffPerKwhRupiah", "waterTariffPerM3Rupiah" FROM "Room" WHERE id = ${dto.toRoomId} FOR UPDATE
+      `;
       if (!toRoom || !toRoom.isActive) throw new NotFoundException('Kamar tujuan tidak tersedia.');
       if ([RoomStatus.OCCUPIED, RoomStatus.MAINTENANCE, RoomStatus.INACTIVE].includes(toRoom.status as RoomStatus)) {
         throw new ConflictException(`Kamar tujuan berstatus ${toRoom.status}; tidak bisa dihuni.`);

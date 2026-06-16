@@ -593,8 +593,22 @@ export type CreatePaymentSubmissionPayload = {
   senderBankName?: string;
   referenceNumber?: string;
   notes?: string;
-  fileUrl?: string;
+};
+
+/**
+ * M-4: Bayar sekaligus beberapa invoice (sewa + meter OPEN) milik stay yang sama.
+ */
+export type BatchPaymentSubmissionPayload = {
+  stayId: number;
+  invoiceIds: number[];
+  paidAt: string;
+  paymentMethod: PaymentMethod;
+  senderName?: string;
+  senderBankName?: string;
+  referenceNumber?: string;
+  notes?: string;
   fileKey?: string;
+  fileUrl?: string;
   originalFilename?: string;
   mimeType?: string;
   fileSizeBytes?: number;

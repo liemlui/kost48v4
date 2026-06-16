@@ -64,7 +64,10 @@ export class RedemptionService {
   // ── Redemption ─────────────────────────────────────
   async requestRedemption(tenantId: number, rewardId: number) {
     return this.prisma.$transaction(async (tx) => {
-      const reward = await tx.loyaltyReward.findUnique({ where: { id: rewardId } });
+      const [reward] = await tx.$queryRaw<Array<{ id: number; name: string; pointCost: number; stockQty: number | null; type: string; isActive: boolean; description: string | null; fulfillmentTaskCategory: string | null; fulfillmentTaskTitle: string | null; valueRupiah: number | null }>>`
+        SELECT id, name, "pointCost", "stockQty", type, "isActive", description, "fulfillmentTaskCategory", "fulfillmentTaskTitle", "valueRupiah"
+        FROM "LoyaltyReward" WHERE id = ${rewardId} FOR UPDATE
+      `;
       if (!reward || !reward.isActive) throw new NotFoundException('Reward tidak tersedia');
       if (reward.stockQty != null && reward.stockQty <= 0) throw new ConflictException('Stok reward habis');
 
@@ -102,6 +105,14 @@ export class RedemptionService {
       const redemption = await tx.redemption.findUnique({ where: { id }, include: { reward: true } });
       if (!redemption) throw new NotFoundException('Penukaran tidak ditemukan');
       if (redemption.status !== 'PENDING') throw new ConflictException(`Penukaran sudah ${redemption.status}`);
+
+      // Lock reward row untuk cek stok real-time (AUD-7/B-1).
+      const [lockedReward] = await tx.$queryRaw<Array<{ id: number; stockQty: number | null }>>`
+        SELECT id, "stockQty" FROM "LoyaltyReward" WHERE id = ${redemption.rewardId} FOR UPDATE
+      `;
+      if (lockedReward.stockQty != null && lockedReward.stockQty <= 0) {
+        throw new ConflictException('Stok reward sudah habis, tidak bisa approve.');
+      }
 
       if (decision === 'REJECT') {
         await this.loyalty.award({

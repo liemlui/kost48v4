@@ -312,6 +312,12 @@ export default function TenantInvoiceDetailPage() {
                   </div>
                 </div>
 
+                {/* M-4: copy invoice sewa — belum termasuk listrik/air berjalan */}
+                {!hasRenewUtilityLines && invoice.lines?.some((l) => l.lineType === 'RENT') ? (
+                  <Alert variant="info" className="small py-2 mb-3">
+                    Tagihan sewa ini <strong>belum termasuk</strong> pemakaian listrik/air berjalan. Catat meter lewat portal untuk tagihan listrik/air terpisah.
+                  </Alert>
+                ) : null}
                 <Row className="g-3">
                   <Col md={3} sm={6}>
                     <div className="metric-tile">
@@ -402,6 +408,18 @@ export default function TenantInvoiceDetailPage() {
                   <Alert variant="info" className="small">
                     <div className="fw-semibold mb-1">Termasuk catatan meter perpanjangan.</div>
                     <div>Biaya listrik dan air dihitung dari selisih meter.</div>
+                    {(() => {
+                      const hasRentLine = invoice.lines?.some((l) => l.lineType === 'RENT');
+                      const hasMeterLine = invoice.lines?.some((l) => l.lineType === 'ELECTRICITY' || l.lineType === 'WATER');
+                      if (hasRentLine && !hasMeterLine) {
+                        return (
+                          <Alert variant="info" className="small py-2 mt-2 mb-2">
+                            Tagihan sewa <strong>belum termasuk</strong> pemakaian listrik/air berjalan. Catat meter lewat portal untuk tagihan listrik/air terpisah.
+                          </Alert>
+                        );
+                      }
+                      return null;
+                    })()}
                     <div className="d-flex flex-wrap gap-2 mt-3">
                       <span className="badge bg-primary-subtle text-primary-emphasis">Sewa: <CurrencyDisplay amount={utilitySummary.rentAmount} /></span>
                       <span className="badge bg-info-subtle text-info-emphasis">Listrik: {utilitySummary.electricityUsage.toFixed(3)} {utilitySummary.electricityUnit} · <CurrencyDisplay amount={utilitySummary.electricityAmount} /></span>

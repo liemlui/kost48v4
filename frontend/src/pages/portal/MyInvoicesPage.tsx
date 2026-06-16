@@ -1,16 +1,17 @@
 import { useEffect, useMemo, useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { Alert, Badge, Button, Card, Col, Row, Spinner, Table } from 'react-bootstrap';
 import { Bar, BarChart, CartesianGrid, Cell, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import DonutGauge from '../../components/charts/DonutGauge';
 import { listResource } from '../../api/resources';
+import { createBatchPaymentSubmission, listMyPaymentSubmissions } from '../../api/paymentSubmissions';
 import CurrencyDisplay from '../../components/common/CurrencyDisplay';
 import EmptyState from '../../components/common/EmptyState';
 import PaginationControls from '../../components/common/PaginationControls';
 import StatusBadge from '../../components/common/StatusBadge';
 import { useAuth } from '../../context/AuthContext';
-import { listMyPaymentSubmissions } from '../../api/paymentSubmissions';
+import { getApiErrorMessage } from '../../utils/getApiErrorMessage';
 import type { Invoice } from '../../types';
 import { getOpenTenantInvoices, getPendingReviewInvoiceIds, isTenantInvoiceOverdue } from '../../utils/tenantRules';
 import { isPayableInvoiceStatus, tenantInvoiceStatusLabel } from '../../utils/tenantCopy';
@@ -130,6 +131,21 @@ export default function MyInvoicesPage() {
     staleTime: 30_000,
   });
 
+  const qc = useQueryClient();
+  const batchMut = useMutation({
+    mutationFn: (payload: { stayId: number; invoiceIds: number[]; paidAt: string; paymentMethod: string }) =>
+      createBatchPaymentSubmission({
+        stayId: payload.stayId,
+        invoiceIds: payload.invoiceIds,
+        paidAt: payload.paidAt,
+        paymentMethod: payload.paymentMethod as any,
+      }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['portal-invoices'] });
+      qc.invalidateQueries({ queryKey: ['portal-payment-submissions'] });
+    },
+  });
+
   const allItems = query.data?.items ?? [];
   const pendingReviewByInvoiceId = useMemo(() => getPendingReviewInvoiceIds(submissionsQuery.data?.items ?? []), [submissionsQuery.data]);
   const sortedItems = useMemo(() => [...allItems].sort((a, b) => {
@@ -205,6 +221,68 @@ export default function MyInvoicesPage() {
               Ada {overdueCount} tagihan melewati jatuh tempo. Buka baris tagihan untuk bayar dan kirim bukti.
             </Alert>
           ) : null}
+
+          {/* M-4: Grouping invoice sewa + meter OPEN yang bisa dibayar sekaligus */}
+          {(() => {
+            const groupable = openInvoices.filter((inv) =>
+              isPayableInvoiceStatus(inv.status) && !pendingReviewByInvoiceId.has(inv.id)
+            );
+            const groupedByStay = new Map<number, Invoice[]>();
+            groupable.forEach((inv) => {
+              const stayId = inv.stayId;
+              if (!groupedByStay.has(stayId)) groupedByStay.set(stayId, []);
+              groupedByStay.get(stayId)!.push(inv);
+            });
+            // Filter hanya stay yang punya >=2 invoice OPEN (sewa + meter)
+            const batchCandidates: Invoice[][] = [];
+            groupedByStay.forEach((invs) => {
+              if (invs.length >= 2) batchCandidates.push(invs);
+            });
+            if (batchCandidates.length === 0) return null;
+            return batchCandidates.map((invs) => {
+              const total = invs.reduce((s, inv) => s + getInvoiceTotalAmount(inv), 0);
+              return (
+                <Alert key={`batch-${invs[0].stayId}`} variant="info" className="tenant-short-alert mb-3 d-flex flex-wrap align-items-center justify-content-between">
+                  <div className="small">
+                    <strong>Bayar sekaligus</strong> — {invs.length} tagihan untuk masa sewa ini dapat dibayar bersama: total <strong>Rp {total.toLocaleString('id-ID')}</strong>.
+                    Kirim 1 bukti bayar untuk semua.
+                  </div>
+                  <div className="d-flex gap-2">
+                    {invs.map((inv) => (
+                      <Button key={inv.id} size="sm" variant="outline-primary" onClick={() => navigate(`/portal/invoices/${inv.id}`)}>
+                        {inv.invoiceNumber || `#${inv.id}`}
+                      </Button>
+                    ))}
+                    <Button
+                      size="sm"
+                      variant="primary"
+                      disabled={batchMut.isPending}
+                      onClick={() => {
+                        batchMut.mutate({
+                          stayId: invs[0].stayId,
+                          invoiceIds: invs.map((i) => i.id),
+                          paidAt: new Date().toISOString().slice(0, 10),
+                          paymentMethod: 'TRANSFER',
+                        });
+                      }}
+                    >
+                      {batchMut.isPending ? 'Mengirim...' : 'Bayar Semua'}
+                    </Button>
+                  </div>
+                  {batchMut.isError && batchMut.variables?.stayId === invs[0].stayId ? (
+                    <div className="text-danger small mt-1 w-100">
+                      {getApiErrorMessage(batchMut.error, 'Gagal mengirim bukti bayar batch. Coba kirim satu per satu.')}
+                    </div>
+                  ) : null}
+                  {batchMut.isSuccess && batchMut.variables?.stayId === invs[0].stayId ? (
+                    <div className="text-success small mt-1 w-100">
+                      Bukti bayar batch terkirim! Admin akan memeriksa.
+                    </div>
+                  ) : null}
+                </Alert>
+              );
+            });
+          })()}
 
           {query.isLoading ? <div className="py-5 text-center"><Spinner animation="border" /></div> : null}
           {query.isError ? <Alert variant="danger">Gagal memuat tagihan kamu. Silakan coba lagi.</Alert> : null}
