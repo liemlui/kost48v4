@@ -14,6 +14,24 @@ Sumber cepat untuk keputusan owner dan aturan bisnis yang harus dihormati sebelu
 
 Semua keputusan owner terkait keuangan (no-partial, DP 30%, deposit=Room.defaultDepositRupiah, PSAK 72, DRAFT≠revenue, meter pascabayar, settlement guard) **terverifikasi TERIMPLEMENTASI** di kode. Audit 5 jalur: LULUS. Detail: `docs/M04_KEUANGAN.md` Update 2026-06-17.
 
+## Keputusan Operasional & Portal — 2026-06-17
+
+### Layanan Tambahan & Meter
+- **PUB-LAYANAN-TAMBAHAN**: Setiap layanan tambahan (WiFi, galon, TV, dll) di portal tenant tampilkan estimasi tarif. Admin yang kelola daftar layanan + tarif via Settings.
+- **PUB-LAYANAN-MINAT**: Tombol "Saya Minat" pada layanan → modal konfirmasi biaya → setelah disetujui tenant → masuk ke proses admin.
+- **PUB-METER-JADWAL**: Jadwal catat meter ditampilkan di halaman `/portal/stay` — kapan jendela buka/tutup, status bulan ini (sudah dicatat / belum).
+- **STF-METER-VIEW**: Staff bisa melihat kamar mana yang sudah/belum catat meter.
+- **CEGAH-DOUBLE-METER**: Guard sudah ada (M-2 dedupe per tanggal + utility). Cukup dipertahankan.
+
+### Staff & Role Scope
+- **STF-ROLE-SCOPE**: Staff hanya mengerjakan: reparasi, kebersihan, resepsionis (saat tamu datang). Staff tidak boleh memulai/approve pemesanan layanan berbayar.
+- **STF-WIFI-ORDER**: Tombol "Mulai" untuk WiFi order hanya untuk admin/owner. Staff lihat status saja. Atau gunakan tombol "Pesan" yang nanti di-approve admin → masuk invoice.
+- **STF-SARAN-LABEL**: Ganti label "Kirim via Laporan" menjadi "Kirim Saran" — fungsinya tetap lewat laporan (tiket), tapi judul dibedakan.
+- **STF-TIP-FLOW**: Tip staf: tenant klik "Saya sudah transfer" → notif ke staff → staff punya 2 hari untuk konfirmasi (sudah masuk atau belum). Tombol "Terima Kasih" (acknowledge) di portal staff.
+
+### Foto Profil
+- **PUB-FOTO-PROFIL-KTP**: Foto profil tenant pakai foto KTP yang di-upload pertama saat join. Compress otomatis saat upload. Owner/Admin bisa upload ulang. Sistem kompres gambar (via `compressImageFile` yang sudah ada).
+
 ## Keputusan UI/UX Publik — 2026-06-17 (lihat `docs/M07_PUBLIK_GROWTH.md`)
 
 ### Navigasi & Tombol

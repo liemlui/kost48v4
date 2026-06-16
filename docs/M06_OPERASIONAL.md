@@ -187,6 +187,44 @@ Format checklist yang digunakan petugas setelah kamar selesai dibersihkan dan si
 
 Data petugas: Tanggal, Nomor Kamar, Nama Petugas, Jam Selesai.
 
+## Staff Role Scope & Operasional — 2026-06-17
+
+### A. Scope Pekerjaan Staff
+Staff KOST48 hanya mengerjakan 3 area:
+1. **Reparasi** — perbaikan kerusakan kamar/fasilitas (tiket MAINTENANCE, KERUSAKAN, KUNCI)
+2. **Kebersihan** — housekeeping + room ready checklist (tiket KEBERSIHAN, CHECKOUT_INSPECTION)
+3. **Resepsionis** — menyambut tamu datang, antar kunci, info dasar
+
+Staff **TIDAK BOLEH** memulai/menyetujui pemesanan layanan berbayar (WiFi, galon, TV, deposit, dll). Semua layanan berbayar harus melalui admin/owner.
+
+### B. WiFi & Layanan Tambahan
+- **WiFi Order:** Staff hanya bisa melihat status pesanan WiFi. Tombol "Mulai" untuk memulai layanan hanya untuk ADMIN/OWNER. Alternatif: ganti tombol "Pesan" yang setelah di-approve admin → masuk invoice tenant.
+- **Layanan Tambahan Lain:** Galon, TV, dll — sama, admin yang memproses. Staff tidak punya akses approve.
+
+### C. Label Saran
+- **STF-SARAN-LABEL**: Ganti semua label "Kirim via Laporan" menjadi "Kirim Saran" di portal tenant. Fungsinya tetap membuat tiket (laporan), tapi judul dibedakan agar tenant tidak ragu memberi masukan non-darurat.
+
+### D. Tip Staf — Flow Lengkap
+1. Tenant selesai interaksi dengan staf (tiket CLOSED)
+2. Tenant melihat kartu tip di MyTicketsPage — berisi info e-wallet staf
+3. Tenant transfer manual ke e-wallet staf
+4. Tenant klik tombol "Saya sudah transfer" → notifikasi ke staff
+5. Staff punya **2 hari** untuk konfirmasi (via portal staff):
+   - **"Sudah masuk"** → notif balik ke tenant "Terima kasih" + poin tip untuk tenant
+   - **"Belum masuk"** → notif ke tenant "Silakan cek kembali"
+6. Setelah 2 hari tanpa konfirmasi staff → otomatis dianggap sudah masuk (default grace)
+7. Tombol "Terima Kasih" (acknowledge) di portal staff untuk memberi sinyal ke tenant
+
+### E. Meter View untuk Staff
+- Staff bisa melihat dashboard/daftar kamar yang **sudah** dan **belum** catat meter per siklus.
+- Tampilkan: kode kamar, tenant, status (SUDAH / BELUM), tanggal catat terakhir.
+- Gunakan data dari `MeterReading` — cukup query `MAX(readingAt)` per room.
+
+### F. Foto Profil Tenant dari KTP
+- Saat pertama upload KTP, foto tersebut otomatis dipakai sebagai foto profil tenant.
+- Sistem kompres gambar (reuse `compressImageFile` yang sudah ada di frontend).
+- Owner/Admin bisa upload ulang foto profil tenant via halaman edit tenant.
+
 ## Catatan Pemakaian
 
 - Jadikan file ini pintu masuk tematik; bila butuh detail mentah, cek file sumber di arsip yang disebut di atas.

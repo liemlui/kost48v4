@@ -443,6 +443,21 @@ Task di bawah = **satu-satunya `[ ]` yang perlu dikerjakan**. Centang + changelo
 - [ ] **PUB-KTP-OCR** — Install Tesseract.js + OCR offline ekstrak nama+NIK dari foto KTP.
 - [ ] **TEN-PROFILE-NOTIF** — Endpoint `GET /me/profile-completeness` + badge "Lengkapi Profil" di portal tenant.
 
+#### Fase G — Layanan Tambahan & Meter (portlet tenant)
+- [ ] **PUB-LAYANAN-TAMBAHAN** — Tampilkan estimasi tarif setiap layanan tambahan di portal tenant. Admin kelola daftar layanan + tarif via Settings.
+- [ ] **PUB-LAYANAN-MINAT** — Tombol "Saya Minat" → modal konfirmasi biaya → admin proses.
+- [ ] **PUB-METER-JADWAL** — Tampilkan jadwal catat meter di `/portal/stay` (jendela buka/tutup, status bulan ini).
+- [ ] **STF-METER-VIEW** — Dashboard staff: daftar kamar yang sudah/belum catat meter per siklus.
+
+#### Fase H — Staff & Role Scope
+- [ ] **STF-ROLE-SCOPE** — Staff: reparasi + kebersihan + resepsionis saja. Tidak bisa approve layanan berbayar.
+- [ ] **STF-WIFI-ORDER** — Tombol "Mulai" WiFi hanya admin. Staff lihat status. Atau "Pesan" → approve admin → invoice.
+- [ ] **STF-SARAN-LABEL** — Ganti label "Kirim via Laporan" → "Kirim Saran".
+- [ ] **STF-TIP-FLOW** — Tenant klik "Saya sudah transfer" → notif staff → staff konfirmasi 2 hari → poin tip.
+
+#### Fase I — Foto Profil
+- [ ] **PUB-FOTO-PROFIL-KTP** — Foto KTP pertama otomatis jadi profil tenant. Kompres otomatis. Admin bisa ganti.
+
 **Gate:** `npm run build` frontend harus PASS. Foto kamar tetap ratio 1:1, Lighthouse ≥90.
 
 ---
