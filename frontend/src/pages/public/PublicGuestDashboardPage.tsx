@@ -96,6 +96,11 @@ const TRUST_ITEMS = [
     title: 'Penghuni punya portal',
     desc: 'Masa sewa, tagihan, bukti bayar, dan laporan masalah bisa dicek lebih jelas setelah tinggal.',
   },
+  {
+    mark: '05',
+    title: 'Listrik transparan, bukan token',
+    desc: 'Listrik pascabayar: pakai dulu, bayar sesuai meter. Ada 30 kWh gratis tiap bulan, dan saat keluar tidak ada sisa saldo yang hangus — tagihan meter terakhir dipotong dari deposit.',
+  },
 ];
 
 const HOME_FAQ_ITEMS = [
@@ -121,8 +126,8 @@ const HOME_FAQ_ITEMS = [
   },
   {
     category: 'Aturan',
-    question: 'Bagaimana aturan listrik?',
-    answer: 'Aturan listrik mengikuti tipe sewa dan ketentuan kamar. Detail akan dijelaskan sebelum booking.',
+    question: 'Bagaimana aturan listrik & air?',
+    answer: 'Listrik PASCABAYAR — bukan token/prabayar. Pakai dulu, bayar kemudian sesuai pemakaian meter. Tersedia 30 kWh gratis tiap bulan; kelebihannya ditagih transparan lewat invoice meter terpisah (bisa dibayar sekaligus dengan sewa). Saat keluar, tidak ada sisa saldo listrik yang hangus: tagihan meter terakhir cukup dipotong dari deposit jaminan, sisanya dikembalikan.',
   },
   {
     category: 'Lokasi',

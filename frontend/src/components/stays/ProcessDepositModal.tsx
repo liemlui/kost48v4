@@ -2,8 +2,9 @@ import { useMemo, useState } from "react";
 import { getApiErrorMessage } from '../../utils/getApiErrorMessage';
 import { Alert, Button, Form, Modal, Spinner } from "react-bootstrap";
 import { useStay } from "../../hooks/useStay";
-import { Stay } from "../../types";
+import { Invoice, Stay } from "../../types";
 import { formatRupiah } from "../../utils/formatCurrency";
+import { getMeterDueRupiah, getOpenMeterInvoices } from "../../utils/checkoutReadiness";
 import {
   depositActionMeta,
   getDepositSettlementNumbers,
@@ -16,10 +17,12 @@ export default function ProcessDepositModal({
   show,
   onHide,
   stay,
+  invoices = [],
 }: {
   show: boolean;
   onHide: () => void;
   stay: Stay;
+  invoices?: Invoice[];
 }) {
   const { processDepositMutation } = useStay(stay.id);
   const depositPaidAmount = Number(stay.depositPaidAmountRupiah ?? 0);
@@ -27,6 +30,17 @@ export default function ProcessDepositModal({
     depositPaidAmount > 0
       ? depositPaidAmount
       : Number(stay.depositAmountRupiah ?? 0);
+
+  // METER M-5: bila ada tagihan meter PASCABAYAR yang masih OPEN, settlement
+  // bersifat OTOMATIS (deposit menutup tagihan meter; sisa refund; kekurangan →
+  // piutang). Keputusan refund/potong manual hanya berlaku tanpa tagihan meter.
+  const openMeterInvoices = useMemo(() => getOpenMeterInvoices(invoices), [invoices]);
+  const meterDue = useMemo(() => getMeterDueRupiah(invoices), [invoices]);
+  const isMeterSettlement = meterDue > 0;
+  const meterApplied = Math.min(meterDue, depositAmount);
+  const meterExcess = Math.max(0, depositAmount - meterApplied);
+  const meterShortfall = Math.max(0, meterDue - meterApplied);
+
   const [action, setAction] = useState<DepositAction>("FULL_REFUND");
   const [deduction, setDeduction] = useState("0");
   const [note, setNote] = useState("");
@@ -45,12 +59,14 @@ export default function ProcessDepositModal({
   );
   const selectedAction = depositActionMeta[action];
   const requiresNote = action === "PARTIAL_REFUND" || action === "FORFEIT";
-  const validationMessage = validateDepositSettlement({
-    depositAmount,
-    action,
-    deductionAmount: rawDeductionNumber,
-    note,
-  });
+  const validationMessage = isMeterSettlement
+    ? ""
+    : validateDepositSettlement({
+        depositAmount,
+        action,
+        deductionAmount: rawDeductionNumber,
+        note,
+      });
   const canSubmit =
     !validationMessage &&
     confirmedRoomCheck &&
@@ -80,6 +96,23 @@ export default function ProcessDepositModal({
 
   const handleSubmit = async () => {
     setError("");
+
+    // METER M-5: settlement otomatis — backend menghitung sendiri pemotongan
+    // deposit terhadap tagihan meter (action/nominal manual diabaikan server).
+    if (isMeterSettlement) {
+      try {
+        await processDepositMutation.mutateAsync({
+          action: "FULL_REFUND",
+          depositDeductionRupiah: 0,
+          depositRefundedRupiah: 0,
+          depositNote: note.trim() || undefined,
+        });
+        handleClose();
+      } catch (err: any) {
+        setError(getApiErrorMessage(err, "Gagal memproses deposit."));
+      }
+      return;
+    }
 
     const nextError = validateDepositSettlement({
       depositAmount,
@@ -118,34 +151,91 @@ export default function ProcessDepositModal({
           kewajiban.
         </Alert>
 
-        <Alert variant="light" className="border mb-3">
-          <div className="d-flex flex-wrap gap-3 justify-content-between">
-            <div>
-              <div className="text-muted small">Deposit awal</div>
-              <div className="fw-bold fs-5">
-                {formatRupiah(settlement.depositAmount)}
+        {isMeterSettlement ? (
+          <Alert variant="info" className="border mb-3">
+            <div className="fw-semibold mb-2">
+              Tagihan meter pascabayar dipotong dari deposit (M-5)
+            </div>
+            <div className="small text-muted mb-2">
+              Listrik/air tidak pakai token. Tagihan meter terakhir yang belum
+              dibayar otomatis dipotong dari deposit jaminan; sisa dikembalikan,
+              kekurangan menjadi piutang. Keputusan refund/potong manual
+              dinonaktifkan untuk menjaga buku tetap konsisten.
+            </div>
+            {openMeterInvoices.length ? (
+              <ul className="small mb-2 ps-3">
+                {openMeterInvoices.map((inv) => (
+                  <li key={inv.id}>
+                    {inv.invoiceNumber || `Tagihan #${inv.id}`} —{" "}
+                    {formatRupiah(
+                      Math.max(
+                        0,
+                        Number(inv.totalAmountRupiah ?? 0) -
+                          Number(inv.paidAmountRupiah ?? 0),
+                      ),
+                    )}
+                  </li>
+                ))}
+              </ul>
+            ) : null}
+            <div className="d-flex flex-wrap gap-3 justify-content-between">
+              <div>
+                <div className="text-muted small">Deposit jaminan</div>
+                <div className="fw-bold fs-5">{formatRupiah(depositAmount)}</div>
+              </div>
+              <div>
+                <div className="text-muted small">Tagihan meter</div>
+                <div className="fw-bold fs-5">{formatRupiah(meterDue)}</div>
+              </div>
+              <div>
+                <div className="text-muted small">Dipotong dari deposit</div>
+                <div className="fw-bold fs-5">{formatRupiah(meterApplied)}</div>
+              </div>
+              <div>
+                <div className="text-muted small">Dikembalikan</div>
+                <div className="fw-bold fs-5 text-success">
+                  {formatRupiah(meterExcess)}
+                </div>
               </div>
             </div>
-            <div>
-              <div className="text-muted small">Potongan</div>
-              <div className="fw-bold fs-5">
-                {formatRupiah(settlement.deductionAmount)}
+            {meterShortfall > 0 ? (
+              <Alert variant="warning" className="small mt-2 mb-0">
+                Deposit tidak cukup. Sisa{" "}
+                <strong>{formatRupiah(meterShortfall)}</strong> tetap menjadi
+                piutang (AR) tenant setelah deposit habis.
+              </Alert>
+            ) : null}
+          </Alert>
+        ) : (
+          <Alert variant="light" className="border mb-3">
+            <div className="d-flex flex-wrap gap-3 justify-content-between">
+              <div>
+                <div className="text-muted small">Deposit awal</div>
+                <div className="fw-bold fs-5">
+                  {formatRupiah(settlement.depositAmount)}
+                </div>
+              </div>
+              <div>
+                <div className="text-muted small">Potongan</div>
+                <div className="fw-bold fs-5">
+                  {formatRupiah(settlement.deductionAmount)}
+                </div>
+              </div>
+              <div>
+                <div className="text-muted small">Dikembalikan</div>
+                <div className="fw-bold fs-5">
+                  {formatRupiah(settlement.refundAmount)}
+                </div>
+              </div>
+              <div>
+                <div className="text-muted small">Total diproses</div>
+                <div className="fw-bold fs-5">
+                  {formatRupiah(settlement.processedAmount)}
+                </div>
               </div>
             </div>
-            <div>
-              <div className="text-muted small">Dikembalikan</div>
-              <div className="fw-bold fs-5">
-                {formatRupiah(settlement.refundAmount)}
-              </div>
-            </div>
-            <div>
-              <div className="text-muted small">Total diproses</div>
-              <div className="fw-bold fs-5">
-                {formatRupiah(settlement.processedAmount)}
-              </div>
-            </div>
-          </div>
-        </Alert>
+          </Alert>
+        )}
 
         {depositPaidAmount > 0 &&
         depositPaidAmount !== Number(stay.depositAmountRupiah ?? 0) ? (
@@ -155,43 +245,47 @@ export default function ProcessDepositModal({
           </Alert>
         ) : null}
 
-        <Form.Group className="mb-3">
-          <Form.Label>Keputusan Deposit</Form.Label>
-          <Form.Select
-            value={action}
-            onChange={(e) =>
-              handleActionChange(e.target.value as DepositAction)
-            }
-          >
-            <option value="FULL_REFUND">
-              {depositActionMeta.FULL_REFUND.label}
-            </option>
-            <option value="PARTIAL_REFUND">
-              {depositActionMeta.PARTIAL_REFUND.label}
-            </option>
-            <option value="FORFEIT">{depositActionMeta.FORFEIT.label}</option>
-          </Form.Select>
-          <Alert variant={selectedAction.tone} className="small mt-2 mb-0">
-            {selectedAction.helper}
-          </Alert>
-        </Form.Group>
+        {!isMeterSettlement ? (
+          <>
+            <Form.Group className="mb-3">
+              <Form.Label>Keputusan Deposit</Form.Label>
+              <Form.Select
+                value={action}
+                onChange={(e) =>
+                  handleActionChange(e.target.value as DepositAction)
+                }
+              >
+                <option value="FULL_REFUND">
+                  {depositActionMeta.FULL_REFUND.label}
+                </option>
+                <option value="PARTIAL_REFUND">
+                  {depositActionMeta.PARTIAL_REFUND.label}
+                </option>
+                <option value="FORFEIT">{depositActionMeta.FORFEIT.label}</option>
+              </Form.Select>
+              <Alert variant={selectedAction.tone} className="small mt-2 mb-0">
+                {selectedAction.helper}
+              </Alert>
+            </Form.Group>
 
-        <Form.Group className="mb-3">
-          <Form.Label>Nominal Potongan</Form.Label>
-          <Form.Control
-            type="text"
-            inputMode="numeric"
-            value={deduction}
-            onChange={(e) =>
-              setDeduction(e.target.value.replace(/[^0-9]/g, ""))
-            }
-            disabled={action !== "PARTIAL_REFUND"}
-            placeholder="Contoh: 150000"
-          />
-          <div className="text-muted small mt-1">
-            Potongan hanya untuk refund sebagian.
-          </div>
-        </Form.Group>
+            <Form.Group className="mb-3">
+              <Form.Label>Nominal Potongan</Form.Label>
+              <Form.Control
+                type="text"
+                inputMode="numeric"
+                value={deduction}
+                onChange={(e) =>
+                  setDeduction(e.target.value.replace(/[^0-9]/g, ""))
+                }
+                disabled={action !== "PARTIAL_REFUND"}
+                placeholder="Contoh: 150000"
+              />
+              <div className="text-muted small mt-1">
+                Potongan hanya untuk refund sebagian.
+              </div>
+            </Form.Group>
+          </>
+        ) : null}
 
         <Form.Group>
           <Form.Label>
@@ -256,6 +350,8 @@ export default function ProcessDepositModal({
               <Spinner size="sm" className="me-2" />
               Memproses...
             </>
+          ) : isMeterSettlement ? (
+            "Potong Deposit untuk Meter & Selesaikan"
           ) : (
             "Simpan Keputusan Deposit"
           )}

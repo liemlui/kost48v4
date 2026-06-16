@@ -461,7 +461,7 @@ export default function StayDetailPage() {
         meterCount={meterCount}
         latestMeterReadingAt={latestMeterReadingAt}
       />
-      <ProcessDepositModal show={showDepositModal} onHide={() => setShowDepositModal(false)} stay={stay} />
+      <ProcessDepositModal show={showDepositModal} onHide={() => setShowDepositModal(false)} stay={stay} invoices={invoices} />
       <CancelStayModal show={showCancelModal} onHide={() => setShowCancelModal(false)} stay={stay} invoices={invoices} />
       <RenewStayModal show={showRenewModal} onHide={() => setShowRenewModal(false)} stay={stay} onSuccess={() => {}} />
       <ApproveCheckoutModal

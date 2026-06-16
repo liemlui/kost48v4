@@ -17,14 +17,14 @@
 | Blok | Selesai | Terbuka | Catatan |
 |------|---------|---------|---------|
 | Fase 1–5 (F1–F5, audit) | ✅ ~semua | F1-12 go-live 🧑 | Kode inti siap publish |
-| UI/UX + Meter M-1–M-4 | ✅ | M-5 | Spec meter: `docs/M06_OPERASIONAL.md` Bagian 5 |
+| UI/UX + Meter M-1–M-5 | ✅ | — | M-5 checkout meter×deposit SELESAI 2026-06-17 (TB seimbang) |
 | Sesi 16 Jun (SI/G/T/U/MKT) | ✅ | MKT-4/5, MG-UI | MKT-1/2/3 sudah beda dari spec lama |
 | Polish (staf/owner/publik) | sebagian | STF-*, OWN-*, AUDIT-OWNER, CSS+SWEEP | Lihat antrian |
 
 ### Urutan kerja (jangan loncat kecuali blocked)
 
 1. **F1-12** 🧑 — menunggu server/domain owner (AI hanya pendamping runbook `docs/M08_DEPLOY_GO_LIVE.md`).
-2. **METER M-5** — satu-satunya gap fungsional meter + copy marketing (prioritas kode).
+2. ~~**METER M-5**~~ ✅ SELESAI 2026-06-17 (checkout meter final × deposit + copy marketing, TB seimbang).
 3. **AUDIT-OWNER** + **CSS+SWEEP** — stabilitas UI lintas role.
 4. **MG-UI-01..05** — re-theme publik (butuh aset foto owner).
 5. Sisanya (**STF-GUDANG-2**, **FASE B-2**, **MKT-4/5**, **TEN-GAMIF**, **TIP+**, **OWN-STRUKTUR**) boleh paralel bila tidak bentrok file.
@@ -280,24 +280,24 @@ Task di bawah = **satu-satunya `[ ]` yang perlu dikerjakan**. Centang + changelo
 
 ---
 
-### METER M-5 — Checkout: meter final × deposit + copy marketing
+### METER M-5 — Checkout: meter final × deposit + copy marketing — ✅ SELESAI 2026-06-17
 
-**Prioritas:** P0 kode · **Dossier:** `docs/M06_OPERASIONAL.md` Bagian 5 · **Finance gate:** ya.
+**Prioritas:** P0 kode · **Dossier:** `docs/M06_OPERASIONAL.md` Bagian 5 · **Finance gate:** LULUS.
 
 **Aturan:** tagihan meter terakhir belum PAID → dipotong deposit jaminan; sisa refund; kekurangan → AR (reuse pola F3-16 forced-checkout).
 
-**Anchor (grep):** `StaysService.complete` · `StaysService.processDeposit` · `postDepositSettlementTx` · `MeterReadingsService.recordCycle` · `StayDetailPage` · `checkoutReadiness.ts` · halaman publik + `11-public-pages.css`.
+**Anchor (grep):** `StaysService.complete` · `StaysService.processDeposit` · `settleDepositAgainstMeterTx` · `postForcedCheckoutDepositSettlementTx` · `isMeterInvoice`/`computeMeterDepositSettlement` (stays-service-helpers) · `MeterReadingsService.recordCycleAndInvoice` · `ProcessDepositModal` · `checkoutReadiness.ts` · `PublicGuestDashboardPage`.
 
 **Sub-task:**
 
-- [ ] **M5.1** Gate checkout: meter final wajib sebelum `complete`/`processDeposit` (409 + pesan jelas).
-- [ ] **M5.2** Issue tagihan meter final bila usage belum di-invoice (reuse logic `recordCycle`).
-- [ ] **M5.3** Net deposit vs tagihan meter OPEN saat settlement (TB balanced).
-- [ ] **M5.4** UI admin: breakdown meter + net deposit di wizard checkout.
-- [ ] **M5.5** Copy publik: pascabayar, 30 kWh gratis, no token, transparan invoice.
-- [ ] **M5.6 UAT:** deposit cukup / kurang / pemakaian nol — TB balanced, recon MATCHED.
+- [x] **M5.1** Gate checkout: `complete()` blokir bila kamar ber-riwayat meter listrik tapi belum ada catatan tertanggal ≥ hari checkout (409 jelas); tagihan meter OPEN dilewatkan (tidak memblokir, settle via deposit). Tagihan NON-meter tetap memblokir.
+- [x] **M5.2** Issue tagihan meter final reuse `recordCycleAndInvoice` (MeterCycleModal di MeterTab StayDetailPage) — angka sama = 0 pemakaian, tanpa invoice.
+- [x] **M5.3** `settleDepositAgainstMeterTx` di `processDeposit`: deposit menutup tagihan meter (DR 2000 / CR 1100 via jurnal forced-checkout), sisa refund kas, kekurangan TETAP AR. GUC carve-out `app.allow_deposit_with_open_invoices`. Helper math + unit test `meter-deposit.helper.test.js` (8/8).
+- [x] **M5.4** `ProcessDepositModal` mode meter: breakdown deposit/tagihan meter/dipotong/dikembalikan/shortfall; `checkoutReadiness.ts` (meter non-blocking, item meter-final & deposit-settlement disesuaikan).
+- [x] **M5.5** Copy publik: FAQ "aturan listrik & air" + trust item "Listrik transparan, bukan token" (`PublicGuestDashboardPage`).
+- [x] **M5.6 UAT runtime LULUS (DB 5433):** A cukup (meter 22.5k→applied 22.5k/refund 477.5k, PARTIALLY_REFUNDED, invoice PAID) · B kurang (meter 600k→applied 500k/shortfall 100k AR, FORFEITED, invoice PARTIAL) · C nol (gate lolos, full refund 500k). **TB seimbang tiap langkah**; akun 2000 turun tepat 1.5jt (3×500k); gate tolak checkout tanpa meter final (409).
 
-**Jangan sentuh:** `accounting-period-close` (DO-NOT-TOUCH).
+**Jangan sentuh:** `accounting-period-close` (DO-NOT-TOUCH). ✅ patuh.
 
 ---
 
@@ -415,6 +415,11 @@ Task di bawah = **satu-satunya `[ ]` yang perlu dikerjakan**. Centang + changelo
 ## Changelog Ringkas
 
 > Dipadatkan dari `docs/CHANGELOG.md`: header tanggal dipertahankan, tiap entry hanya menyimpan 1-2 poin outcome. Detail verbose tetap ada di source lama.
+
+### 2026-06-17 — feat(METER M-5): checkout meter final × deposit jaminan + copy marketing
+- **Backend:** `complete()` izinkan tagihan meter (listrik/air, semua baris ELECTRICITY/WATER) tetap OPEN saat checkout + gate WAJIB catat meter listrik final (catatan tertanggal ≥ hari checkout, 409 bila belum); tagihan NON-meter tetap memblokir. `processDeposit` → `settleDepositAgainstMeterTx`: deposit menutup tagihan meter (DR 2000 / CR 1100 via jurnal forced-checkout F3-16), sisa refund kas, kekurangan TETAP piutang AR; GUC carve-out `app.allow_deposit_with_open_invoices`. Helper `isMeterInvoice`/`invoiceRemainingRupiah`/`computeMeterDepositSettlement` + unit test 8/8.
+- **Frontend:** `ProcessDepositModal` mode meter (breakdown deposit/tagihan/dipotong/dikembalikan/shortfall, otomatis), `checkoutReadiness.ts` (tagihan meter non-blocking), copy publik pascabayar (FAQ + trust item "Listrik transparan, bukan token").
+- **Finance gate LULUS:** tsc 0 · unit test 8/8 · FE build (106 chunk, PWA ok) · **UAT runtime DB 5433**: deposit cukup/kurang/nol — TB seimbang tiap langkah, akun 2000 turun tepat 1.5jt, gate tolak checkout tanpa meter final.
 
 ### 2026-06-17 — feat(MKT-4): CAC/CLV lite dashboard — DeepSeek V4 Pro powered + offline fallback
 - **Backend:** `GET /market-analysis/cac-clv` — agregat booking per kanal, konversi, renewal rate, retensi, estimasi CLV, referral, loyalty. Query via Prisma `$queryRaw` dari tabel Stay/RenewRequest/TenantReferral/LoyaltyPoint/Redemption.

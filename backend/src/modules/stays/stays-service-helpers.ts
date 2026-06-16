@@ -41,6 +41,58 @@ export async function assertNoOpenInvoicesTx(
   }
 }
 
+// =========================================================================
+// METER M-5: checkout meter final × deposit jaminan
+// Listrik/air 100% PASCABAYAR. Tagihan meter periode terakhir yang belum
+// dibayar saat checkout BOLEH menahan kamar lepas, tapi diselesaikan dengan
+// memotong DEPOSIT JAMINAN (pola sama dengan forced-checkout F3-16):
+//   deposit menutup tagihan meter (DR 2000 / CR 1100), sisa di-refund kas,
+//   kekurangan TETAP jadi piutang AR. (Bukan jenis deposit baru.)
+// =========================================================================
+
+/**
+ * Sebuah tagihan = "tagihan meter" bila punya minimal 1 baris dan SELURUH
+ * barisnya bertipe utilitas (ELECTRICITY/WATER). Tagihan campuran (mis. sewa +
+ * listrik) BUKAN tagihan meter dan tetap memblokir checkout seperti biasa.
+ */
+export function isMeterInvoice(invoice: {
+  lines: Array<{ lineType: InvoiceLineType | string }>;
+}): boolean {
+  if (!invoice.lines || invoice.lines.length === 0) return false;
+  return invoice.lines.every(
+    (line) =>
+      line.lineType === InvoiceLineType.ELECTRICITY ||
+      line.lineType === InvoiceLineType.WATER,
+  );
+}
+
+/** Sisa tagihan = total − Σ pembayaran (tidak pernah negatif). */
+export function invoiceRemainingRupiah(invoice: {
+  totalAmountRupiah: number | null;
+  payments: Array<{ amountRupiah: number | Prisma.Decimal | null }>;
+}): number {
+  const paid = invoice.payments.reduce((sum, p) => sum + Number(p.amountRupiah ?? 0), 0);
+  return Math.max(0, roundRupiah(Number(invoice.totalAmountRupiah ?? 0) - paid));
+}
+
+/**
+ * M5.3: hitung pemotongan deposit terhadap tagihan meter OPEN saat settlement.
+ * - applied   = bagian deposit yang menutup tagihan meter (jadi pembayaran AR)
+ * - excess    = sisa deposit yang dikembalikan ke tenant (refund kas)
+ * - shortfall = tagihan meter yang tak tertutup deposit → TETAP piutang AR
+ */
+export function computeMeterDepositSettlement(params: {
+  meterDueRupiah: number;
+  depositHeldRupiah: number;
+}) {
+  const meterDue = Math.max(0, roundRupiah(params.meterDueRupiah));
+  const depositHeld = Math.max(0, roundRupiah(params.depositHeldRupiah));
+  const applied = Math.min(meterDue, depositHeld);
+  const excess = depositHeld - applied;
+  const shortfall = meterDue - applied;
+  return { meterDue, depositHeld, applied, excess, shortfall };
+}
+
 export function parseMeterDecimal(value: string, label: string) {
   try {
     const decimalValue = new Prisma.Decimal(value);

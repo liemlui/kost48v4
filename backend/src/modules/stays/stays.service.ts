@@ -56,6 +56,9 @@ import {
   parseMeterDecimal,
   createRenewUtilityCheckpointLineTx,
   resolveDepositSettlementAmount,
+  isMeterInvoice,
+  invoiceRemainingRupiah,
+  computeMeterDepositSettlement,
 } from "./stays-service-helpers";
 import { DepositLedgerService } from "../deposit-ledger/deposit-ledger.service";
 import {
@@ -577,7 +580,34 @@ export class StaysService {
     }
 
     const updated = await this.prisma.$transaction(async (tx) => {
-      const blockingInvoices = await tx.invoice.findMany({
+      // M5.1: meter listrik/air PASCABAYAR → catat meter final sebelum kamar
+      // lepas. Bila kamar punya riwayat meter listrik tapi belum ada catatan
+      // tertanggal >= hari checkout, blokir agar pemakaian akhir tidak luput
+      // ditagih (reuse MeterCycleModal: catat angka yang sama bila 0 pemakaian).
+      const meteredHistory = await tx.meterReading.findFirst({
+        where: { roomId: existing.roomId, utilityType: UtilityType.ELECTRICITY },
+        select: { id: true },
+      });
+      if (meteredHistory) {
+        const finalReading = await tx.meterReading.findFirst({
+          where: {
+            roomId: existing.roomId,
+            utilityType: UtilityType.ELECTRICITY,
+            readingAt: { gte: startOfJakartaBusinessDay(actualCheckOutDate) },
+          },
+          select: { id: true },
+        });
+        if (!finalReading) {
+          throw new ConflictException(
+            "Catat meter listrik final (tanggal ≥ tanggal checkout) dulu sebelum final checkout. Bila tidak ada pemakaian, catat angka meter terakhir yang sama (0 pemakaian, tanpa tagihan).",
+          );
+        }
+      }
+
+      // Tagihan meter (listrik/air) PASCABAYAR boleh tersisa OPEN: nanti dipotong
+      // dari deposit jaminan saat Proses Deposit (M5.3). Tagihan lain (sewa, dll)
+      // tetap WAJIB lunas/batal sebelum kamar lepas.
+      const openInvoices = await tx.invoice.findMany({
         where: {
           stayId: id,
           status: { notIn: [InvoiceStatus.PAID, InvoiceStatus.CANCELLED] },
@@ -586,9 +616,11 @@ export class StaysService {
           id: true,
           invoiceNumber: true,
           status: true,
+          lines: { select: { lineType: true } },
         },
         orderBy: { id: "asc" },
       });
+      const blockingInvoices = openInvoices.filter((inv) => !isMeterInvoice(inv));
 
       if (blockingInvoices.length > 0) {
         const invoiceRefs = blockingInvoices
@@ -1228,11 +1260,20 @@ export class StaysService {
           stayId: id,
           status: { notIn: [InvoiceStatus.PAID, InvoiceStatus.CANCELLED] },
         },
-        select: { id: true, invoiceNumber: true, status: true },
+        select: {
+          id: true,
+          invoiceNumber: true,
+          status: true,
+          totalAmountRupiah: true,
+          lines: { select: { lineType: true } },
+          payments: { select: { amountRupiah: true } },
+        },
         orderBy: { id: "asc" },
       });
-      if (openInvoices.length > 0) {
-        const invoiceRefs = openInvoices
+      const meterOpen = openInvoices.filter((inv) => isMeterInvoice(inv));
+      const nonMeterOpen = openInvoices.filter((inv) => !isMeterInvoice(inv));
+      if (nonMeterOpen.length > 0) {
+        const invoiceRefs = nonMeterOpen
           .map(
             (invoice) =>
               `${invoice.invoiceNumber || `Tagihan #${invoice.id}`} (${invoice.status})`,
@@ -1241,6 +1282,21 @@ export class StaysService {
         throw new ConflictException(
           `Deposit tidak dapat diproses karena masih ada tagihan aktif: ${invoiceRefs}`,
         );
+      }
+
+      // M5.3: tagihan meter PASCABAYAR yang masih OPEN → dipotong dari deposit
+      // jaminan (pola forced-checkout F3-16): deposit menutup tagihan meter
+      // (DR 2000 / CR 1100), sisa di-refund kas, kekurangan TETAP piutang AR.
+      // Mode ini OTOMATIS (mengabaikan input refund/forfeit manual) demi
+      // konsistensi buku — input manual hanya berlaku tanpa tagihan meter terbuka.
+      if (meterOpen.length > 0) {
+        return await this.settleDepositAgainstMeterTx(tx, {
+          stay,
+          settlementAmount,
+          meterOpen,
+          actorId: actor.id,
+          actorNote: dto.depositNote?.trim() || undefined,
+        });
       }
 
       const note = dto.depositNote?.trim() ?? "";
@@ -1347,6 +1403,181 @@ export class StaysService {
       newData: updated,
     });
     return updated;
+  }
+
+  /**
+   * M5.3: settlement deposit saat ada tagihan METER pascabayar OPEN. Deposit
+   * jaminan menutup tagihan meter (DR 2000 / CR 1100), sisa di-refund kas,
+   * kekurangan TETAP jadi piutang AR. Reuse jurnal forced-checkout (F3-16);
+   * input refund/forfeit manual diabaikan (netting otomatis demi buku konsisten).
+   * Dipanggil DI DALAM tx processDeposit; mengembalikan bentuk yang sama.
+   */
+  private async settleDepositAgainstMeterTx(
+    tx: Prisma.TransactionClient,
+    params: {
+      stay: {
+        id: number;
+        depositAmountRupiah: number | null;
+        actualCheckOutDate: Date | null;
+      };
+      settlementAmount: number;
+      meterOpen: Array<{
+        id: number;
+        invoiceNumber: string | null;
+        totalAmountRupiah: number | null;
+        payments: Array<{ amountRupiah: number | Prisma.Decimal | null }>;
+      }>;
+      actorId: number;
+      actorNote?: string;
+    },
+  ) {
+    const { stay, settlementAmount, meterOpen, actorId } = params;
+    const id = stay.id;
+
+    // Carve-out guard deposit HANYA untuk transaksi ini (auto-reset saat commit):
+    // izinkan deposit diproses meski tagihan meter masih open (akan ditutup deposit).
+    await (tx as any).$executeRawUnsafe(
+      `SET LOCAL "app.allow_deposit_with_open_invoices" = 'on'`,
+    );
+
+    // Constraint deposit memakai depositAmountRupiah; netting bersih hanya saat
+    // deposit dibayar penuh (settlementAmount = depositPaidAmount = depositAmount).
+    const depositAmount = Number(stay.depositAmountRupiah ?? 0);
+    if (settlementAmount !== depositAmount) {
+      throw new ConflictException(
+        "Deposit dibayar parsial — selesaikan tagihan meter & deposit lewat proses manual, bukan pemotongan otomatis.",
+      );
+    }
+
+    const meterDue = meterOpen.reduce(
+      (sum, inv) => sum + invoiceRemainingRupiah(inv),
+      0,
+    );
+    const { applied, excess, shortfall } = computeMeterDepositSettlement({
+      meterDueRupiah: meterDue,
+      depositHeldRupiah: settlementAmount,
+    });
+
+    const note =
+      params.actorNote ||
+      `Potong deposit untuk tagihan meter checkout (meter Rp${meterDue.toLocaleString("id-ID")})`;
+
+    // 1. Jurnal settlement deposit DULU (DR 2000 / CR 1100 applied / CR kas excess).
+    //    Bila penerimaan deposit tak pernah terjurnal (F-24), tolak agar konsisten.
+    const depositSettlement =
+      await this.accountingPosting.postForcedCheckoutDepositSettlementTx(
+        tx,
+        id,
+        applied,
+        excess,
+        actorId,
+      );
+    if (!depositSettlement?.posted) {
+      throw new ConflictException(
+        `Settlement deposit gagal/di-skip (${depositSettlement?.reason ?? "penerimaan deposit belum terjurnal"}). Perbaiki jurnal penerimaan deposit atau proses manual.`,
+      );
+    }
+
+    // 2. Terapkan deposit ke tagihan meter (oldest first) — pembayaran NON-KAS
+    //    (method OTHER); AR sudah di-clear lewat jurnal offset di atas.
+    const paymentDate = stay.actualCheckOutDate ?? new Date();
+    let left = applied;
+    for (const inv of meterOpen) {
+      if (left <= 0) break;
+      const remaining = invoiceRemainingRupiah(inv);
+      if (remaining <= 0) continue;
+      const cover = Math.min(remaining, left);
+      await tx.invoicePayment.create({
+        data: {
+          invoiceId: inv.id,
+          paymentDate,
+          amountRupiah: cover,
+          method: PaymentMethod.OTHER,
+          note: "Potongan deposit untuk tagihan meter (checkout M-5)",
+          capturedById: actorId,
+        },
+      });
+      await tx.invoice.update({
+        where: { id: inv.id },
+        data:
+          cover >= remaining
+            ? { status: InvoiceStatus.PAID, paidAt: new Date() }
+            : { status: InvoiceStatus.PARTIAL },
+      });
+      left -= cover;
+    }
+
+    // 3. Status deposit (patuh stay_deposit_status_consistency_chk vs depositAmount).
+    let depositPatch: Prisma.StayUpdateManyMutationInput;
+    if (applied === 0) {
+      depositPatch = {
+        depositStatus: DepositStatus.REFUNDED,
+        depositDeductionRupiah: 0,
+        depositRefundedRupiah: excess,
+        depositRefundedAt: new Date(),
+      };
+    } else if (excess === 0) {
+      depositPatch = {
+        depositStatus: DepositStatus.FORFEITED,
+        depositDeductionRupiah: applied, // == depositAmount (dijaga di atas)
+        depositRefundedRupiah: 0,
+        depositRefundedAt: null,
+      };
+    } else {
+      depositPatch = {
+        depositStatus: DepositStatus.PARTIALLY_REFUNDED,
+        depositDeductionRupiah: applied,
+        depositRefundedRupiah: excess,
+        depositRefundedAt: new Date(),
+      };
+    }
+
+    const updateResult = await tx.stay.updateMany({
+      where: {
+        id,
+        status: { in: [StayStatus.COMPLETED, StayStatus.CANCELLED] },
+        depositStatus: DepositStatus.HELD,
+      },
+      data: { ...depositPatch, depositNote: note },
+    });
+    if (updateResult.count !== 1) {
+      throw new ConflictException(
+        "Deposit sudah diproses atau status masa sewa berubah. Muat ulang halaman.",
+      );
+    }
+
+    const result = await tx.stay.findUnique({ where: { id } });
+    if (!result)
+      throw new NotFoundException("Stay tidak ditemukan setelah proses deposit");
+
+    const ledger = await this.depositLedger.recordDepositSettlementTx(tx, {
+      stayId: id,
+      actorUserId: actorId,
+      note,
+      metadata: {
+        action: "METER_SETTLEMENT",
+        settlementAmountRupiah: settlementAmount,
+        meterDueRupiah: meterDue,
+        appliedToMeterArRupiah: applied,
+        refundedRupiah: excess,
+        shortfallRemainingArRupiah: shortfall,
+      },
+    });
+
+    return {
+      ...result,
+      depositSettlement: {
+        accounting: depositSettlement,
+        ledger,
+        settlementAmountRupiah: settlementAmount,
+        meterSettlement: {
+          meterDueRupiah: meterDue,
+          appliedToMeterArRupiah: applied,
+          refundedRupiah: excess,
+          shortfallRemainingArRupiah: shortfall,
+        },
+      },
+    };
   }
 
   async renewStay(id: number, dto: RenewStayDto, actor: CurrentUserPayload) {

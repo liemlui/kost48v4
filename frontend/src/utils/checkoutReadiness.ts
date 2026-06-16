@@ -1,6 +1,7 @@
 import type { ReadinessItem } from '../components/command-center';
 import type { Invoice, Stay } from '../types';
 import { formatDateTimeWib } from './dateTime';
+import { formatRupiah } from './formatCurrency';
 
 export function isOpenInvoice(invoice: Pick<Invoice, 'status'>) {
   return invoice.status !== 'PAID' && invoice.status !== 'CANCELLED';
@@ -10,33 +11,63 @@ export function getOpenInvoices(invoices: Invoice[]) {
   return invoices.filter(isOpenInvoice);
 }
 
+// METER M-5: tagihan meter (listrik/air) PASCABAYAR. Sebuah tagihan = "tagihan
+// meter" bila SELURUH barisnya ELECTRICITY/WATER (fallback: nomor diawali MTR-).
+// Tagihan meter TIDAK memblokir checkout — dipotong dari deposit saat settlement.
+export function isMeterInvoice(invoice: Invoice) {
+  const lines = invoice.lines ?? [];
+  if (lines.length > 0) {
+    return lines.every((line) => line.lineType === 'ELECTRICITY' || line.lineType === 'WATER');
+  }
+  return Boolean(invoice.invoiceNumber && invoice.invoiceNumber.startsWith('MTR-'));
+}
+
+export function getOpenMeterInvoices(invoices: Invoice[]) {
+  return getOpenInvoices(invoices).filter(isMeterInvoice);
+}
+
+// Tagihan yang BENAR-BENAR memblokir final keluar = open & BUKAN tagihan meter.
+export function getBlockingOpenInvoices(invoices: Invoice[]) {
+  return getOpenInvoices(invoices).filter((invoice) => !isMeterInvoice(invoice));
+}
+
+export function invoiceRemainingRupiah(invoice: Invoice) {
+  const paid = Number(invoice.paidAmountRupiah ?? 0);
+  return Math.max(0, Number(invoice.totalAmountRupiah ?? 0) - paid);
+}
+
+export function getMeterDueRupiah(invoices: Invoice[]) {
+  return getOpenMeterInvoices(invoices).reduce((sum, invoice) => sum + invoiceRemainingRupiah(invoice), 0);
+}
+
 export function getDraftInvoices(invoices: Invoice[]) {
   return invoices.filter((invoice) => invoice.status === 'DRAFT');
 }
 
 export function getOverdueOpenInvoices(invoices: Invoice[]) {
   const now = Date.now();
-  return getOpenInvoices(invoices).filter((invoice) => invoice.dueDate && new Date(invoice.dueDate).getTime() < now);
+  // Tagihan meter pascabayar tidak dihitung "terlambat" pemblokir checkout.
+  return getBlockingOpenInvoices(invoices).filter((invoice) => invoice.dueDate && new Date(invoice.dueDate).getTime() < now);
 }
 
 export function getInvoiceBlockerCopy(invoices: Invoice[]) {
-  const openInvoices = getOpenInvoices(invoices);
-  const draftInvoices = getDraftInvoices(invoices);
+  const blockingInvoices = getBlockingOpenInvoices(invoices);
+  const draftInvoices = getDraftInvoices(invoices).filter((invoice) => !isMeterInvoice(invoice));
   const overdueInvoices = getOverdueOpenInvoices(invoices);
 
-  if (!openInvoices.length) {
-    return 'Semua tagihan untuk masa sewa ini sudah lunas atau dibatalkan.';
+  if (!blockingInvoices.length) {
+    return 'Semua tagihan non-meter untuk masa sewa ini sudah lunas atau dibatalkan.';
   }
 
-  const parts = [`${openInvoices.length} tagihan masih aktif`];
+  const parts = [`${blockingInvoices.length} tagihan masih aktif`];
   if (draftInvoices.length) parts.push(`${draftInvoices.length} masih draft`);
   if (overdueInvoices.length) parts.push(`${overdueInvoices.length} terlambat`);
   return `${parts.join(', ')}. Final keluar tetap terblokir sampai statusnya lunas atau dibatalkan.`;
 }
 
 export function getCheckoutReadinessSummary(invoices: Invoice[], hasApprovedCheckoutRequest?: boolean) {
-  const openInvoices = getOpenInvoices(invoices);
-  if (openInvoices.length) {
+  const blockingInvoices = getBlockingOpenInvoices(invoices);
+  if (blockingInvoices.length) {
     return {
       tone: 'danger' as const,
       title: 'Belum bisa final keluar',
@@ -74,20 +105,22 @@ export function buildCheckoutReadinessItems({
   meterCount?: number;
   latestMeterReadingAt?: string | null;
 }): ReadinessItem[] {
-  const openInvoices = getOpenInvoices(invoices);
-  const draftInvoices = getDraftInvoices(invoices);
+  const blockingInvoices = getBlockingOpenInvoices(invoices);
+  const draftInvoices = getDraftInvoices(invoices).filter((invoice) => !isMeterInvoice(invoice));
   const overdueInvoices = getOverdueOpenInvoices(invoices);
+  const meterDue = getMeterDueRupiah(invoices);
+  const hasOpenMeter = getOpenMeterInvoices(invoices).length > 0;
   const isFinished = stay.status === 'COMPLETED' || stay.status === 'CANCELLED';
   const depositHeld = stay.depositStatus === 'HELD';
 
   return [
     {
       id: 'invoice-clearance',
-      label: openInvoices.length ? 'Tagihan belum aman' : 'Tagihan sudah aman',
-      description: openInvoices.length
+      label: blockingInvoices.length ? 'Tagihan belum aman' : 'Tagihan sudah aman',
+      description: blockingInvoices.length
         ? getInvoiceBlockerCopy(invoices)
-        : 'Tidak ada tagihan aktif. Proses keluar final tidak terblokir oleh tagihan.',
-      state: openInvoices.length ? 'block' : 'pass',
+        : 'Tidak ada tagihan non-meter aktif. Proses keluar final tidak terblokir oleh tagihan (tagihan meter dipotong dari deposit).',
+      state: blockingInvoices.length ? 'block' : 'pass',
     },
     {
       id: 'draft-invoices',
@@ -117,11 +150,15 @@ export function buildCheckoutReadinessItems({
     },
     {
       id: 'meter-final',
-      label: meterCount > 0 ? 'Catatan meter tersedia' : 'Catatan meter perlu dicek',
-      description: latestMeterReadingAt
-        ? `Catatan meter terakhir: ${formatDateTimeWib(latestMeterReadingAt)}. Pastikan tidak ada pemakaian akhir yang belum ditagihkan.`
-        : 'Jika listrik/air ditagihkan berdasarkan meter, catat meter akhir sebelum melepas kamar.',
-      state: latestMeterReadingAt ? 'warn' : 'info',
+      label: hasOpenMeter
+        ? 'Tagihan meter akhir terbit (dipotong dari deposit)'
+        : meterCount > 0 ? 'Catat meter listrik final' : 'Catatan meter perlu dicek',
+      description: hasOpenMeter
+        ? `Listrik/air PASCABAYAR. Tagihan meter ${formatRupiah(meterDue)} akan dipotong dari deposit jaminan saat Proses Deposit; sisa deposit dikembalikan, kekurangan jadi piutang.`
+        : latestMeterReadingAt
+          ? `Catatan meter terakhir: ${formatDateTimeWib(latestMeterReadingAt)}. WAJIB catat meter listrik final (tanggal ≥ tanggal checkout) sebelum keluar final — bila tak ada pemakaian, catat angka yang sama (0 pemakaian).`
+          : 'Listrik/air ditagih berdasarkan meter (pascabayar). Catat meter listrik final sebelum melepas kamar.',
+      state: hasOpenMeter ? 'warn' : meterCount > 0 ? 'warn' : 'info',
     },
     {
       id: 'room-check',
@@ -134,7 +171,9 @@ export function buildCheckoutReadinessItems({
       label: isFinished ? (depositHeld ? 'Dana titipan masih perlu diproses' : 'Dana titipan sudah selesai') : 'Dana titipan diproses setelah keluar final',
       description: isFinished
         ? depositHeld
-          ? 'Masa sewa sudah selesai/dibatalkan tetapi dana titipan masih tersimpan. Proses pengembalian, potongan, atau hangus setelah cek kamar.'
+          ? hasOpenMeter
+            ? `Masih ada tagihan meter ${formatRupiah(meterDue)}. Saat Proses Deposit, deposit otomatis menutup tagihan meter dulu; sisanya dikembalikan, kekurangan jadi piutang.`
+            : 'Masa sewa sudah selesai/dibatalkan tetapi dana titipan masih tersimpan. Proses pengembalian, potongan, atau hangus setelah cek kamar.'
           : 'Status deposit tidak lagi menggantung.'
         : 'Dana titipan adalah kewajiban kos. Jangan dianggap omzet; proses terpisah setelah penghuni keluar dan kamar dicek.',
       state: isFinished ? (depositHeld ? 'warn' : 'pass') : 'info',
