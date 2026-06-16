@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import { Accordion, Alert, Card, Spinner } from 'react-bootstrap';
 import { useQuery } from '@tanstack/react-query';
 import { fetchPublicFaqs, type FaqItem } from '../../api/faqs';
+import FreeRepairPolicyCard from '../../components/tenant/FreeRepairPolicyCard';
 
 /**
  * F4-12 — "Panduan / Aturan Kos" untuk tenant: manual book ringkas dari FAQ,
@@ -25,6 +26,8 @@ export default function MyManualPage() {
     <div className="container py-4">
       <h3 className="mb-1">Panduan & Aturan Kos</h3>
       <p className="text-muted">Manual lengkap aturan, pembayaran, dan layanan KOST48. Klik tiap topik untuk membuka.</p>
+
+      <FreeRepairPolicyCard />
 
       {faqsQuery.isLoading && <div className="text-center py-5"><Spinner animation="border" /></div>}
 

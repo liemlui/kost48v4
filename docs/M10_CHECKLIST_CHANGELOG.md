@@ -59,6 +59,12 @@ Detail SI sudah diserap ke M04/M05/M08; source ringkas diarsipkan di `docs/archi
   **Fase 2 (belum):** riset **web LIVE** (kompetitor/harga terkini) butuh tool web-search terpisah
   (API+biaya) — keputusan owner: bangun versi wawancara dulu. Verified: status/chat-fallback/list +
   UI render; panggilan DeepSeek asli menunggu owner isi key. tsc BE+FE 0.
+- **MKT-2 — Kebijakan perbaikan GRATIS + cross-sell perpanjangan** (tenant, frontend):
+  `FreeRepairPolicyCard` (lampu/keran/shower/kebocoran/flush/stop-kontak gratis → dorong lapor) di
+  halaman Laporan (MyTicketsPage) + Panduan (MyManualPage). `RenewalCrossSellCard` di portal stay:
+  tawar WiFi/Cleaning saat perpanjang → "Saya minat" buat tiket portal (kategori WIFI/CLEANING) agar
+  admin tindak lanjut (reuse flow tiket, tanpa endpoint/skema baru). Verified render + tsc FE 0.
+  Survei tamu = belum (menyusul).
 - Sebelumnya (sesi sama): **Meter M-1/M-2/M-3** (konstanta owner-settable, siklus listrik+air auto-invoice,
   pencatatan mandiri tenant). Detail: `docs/_PROPOSAL_METER_LISTRIK_AIR.md`.
 

@@ -10,6 +10,7 @@ import PageHeader from '../../components/common/PageHeader';
 import StatusBadge from '../../components/common/StatusBadge';
 import TenantStaffReviewPrompt from '../../components/tenant/TenantStaffReviewPrompt';
 import { AssistantPanel, type AssistantItem } from '../../components/command-center';
+import FreeRepairPolicyCard from '../../components/tenant/FreeRepairPolicyCard';
 import { tenantCategoryLabel } from '../../utils/tenantCopy';
 import { toTenantFriendlyError } from '../../utils/tenantErrorCopy';
 import { compressImageFile } from '../../utils/compressImageFile';
@@ -159,6 +160,8 @@ export default function MyTicketsPage() {
         description="Lihat laporan bantuan yang pernah kamu ajukan. Sistem otomatis menghubungkan laporan dengan kamar aktif kamu."
         secondaryAction={<Button onClick={() => setShowCreate(true)}>Buat Laporan Baru</Button>}
       />
+
+      <FreeRepairPolicyCard />
 
       <AssistantPanel title="Asisten Laporan Kamu" subtitle="Ringkasan laporan yang masih perlu dipantau." items={assistantItems} maxItems={2} />
 
