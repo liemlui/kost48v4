@@ -33,6 +33,11 @@ export class LoyaltyController {
     return { message: 'Loyalitas', data: await this.loyalty.history(user.tenantId) };
   }
 
+  @Get('leaderboard')
+  async leaderboard() {
+    return { message: 'Papan poin anonim per kamar', data: await this.loyalty.leaderboardByRoom(3) };
+  }
+
   @Get('redemptions')
   async myRedemptions(@CurrentUser() user: CurrentUserPayload) {
     if (!user.tenantId) return { message: 'Penukaran', data: [] };

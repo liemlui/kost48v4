@@ -13,7 +13,15 @@ export interface LoyaltyHistoryItem {
 
 export interface LoyaltyMine {
   balance: number;
+  totalEarned?: number;
+  totalRedeemed?: number;
   items: LoyaltyHistoryItem[];
+}
+
+export interface LoyaltyLeaderboardEntry {
+  rank: number;
+  roomCode: string;
+  points: number;
 }
 
 export interface LoyaltyReward {
@@ -56,6 +64,11 @@ export async function getLoyaltyConfig(): Promise<LoyaltyConfig> {
 // ── Tenant ──────────────────────────────────────────
 export async function getMyLoyalty(): Promise<LoyaltyMine> {
   const res = await client.get<ApiEnvelope<LoyaltyMine>>('/me/loyalty');
+  return res.data.data;
+}
+
+export async function getLoyaltyLeaderboard(): Promise<LoyaltyLeaderboardEntry[]> {
+  const res = await client.get<ApiEnvelope<LoyaltyLeaderboardEntry[]>>('/me/loyalty/leaderboard');
   return res.data.data;
 }
 

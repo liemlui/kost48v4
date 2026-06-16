@@ -53,7 +53,7 @@ const EMPTY = ['Q', 'R', 'S', 'T'];
 const TENANT_PW = 'Tenant#2026';
 const RENT_BY_TIER = { lt: 1200000, mid: 1400000, top: 1600000 };
 
-const summary = { rooms: 0, tenants: 0, stays: 0, rentInvoices: 0, paidFull: 0, unpaid: 0, meterInvoices: 0, meterFree: 0, renewals: 0 };
+const summary = { rooms: 0, tenants: 0, onboarded: 0, stays: 0, rentInvoices: 0, paidFull: 0, unpaid: 0, meterInvoices: 0, meterFree: 0, renewals: 0 };
 
 (async () => {
   console.log('=== SI-1 SEED via HTTP ===\nAPI:', API);
@@ -99,6 +99,15 @@ const summary = { rooms: 0, tenants: 0, stays: 0, rentInvoices: 0, paidFull: 0, 
 
     // 3b) Akses portal (supaya bisa login)
     await api('POST', `/tenants/${tenantId}/portal-access`, { email, password: TENANT_PW, fullName }, { optional: true });
+
+    // 3b') Lengkapi profil onboarding (PATCH) → memicu poin ONBOARDING_QUEST (event-path, gamifikasi)
+    const bd = new Date(Date.UTC(1995 + (i % 8), i % 12, (i % 27) + 1));
+    const onb = await api('PATCH', `/tenants/${tenantId}`, {
+      fullName, phone, identityNumber: ktp, gender, originCity: 'Surabaya', occupation: i % 2 ? 'Karyawan' : 'Mahasiswa',
+      birthDate: bd.toISOString().slice(0, 10), companyOrCampus: i % 2 ? 'PT Maju Jaya' : 'Universitas Airlangga',
+      emergencyContactName: `Wali ${fullName.split(' ')[0]}`, emergencyContactPhone: '0813' + String(20000000 + i).padStart(8, '0'),
+    }, { optional: true });
+    if (onb) summary.onboarded = (summary.onboarded ?? 0) + 1;
 
     // 3c) Check-in (event huni; deposit tunai + meter awal) — stagger 2026-05-18..06-15
     const checkIn = new Date('2026-05-18'); checkIn.setDate(checkIn.getDate() + i * 2);

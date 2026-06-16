@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Alert, Badge, Button, Card, Col, Row, Spinner } from 'react-bootstrap';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { getMyLoyalty, getMyPeerReportsAboutMe, getMyRedemptions, getReferralCode, getRewards, markPeerReportImproved, requestRedemption } from '../../api/loyalty';
+import { getLoyaltyLeaderboard, getMyLoyalty, getMyPeerReportsAboutMe, getMyRedemptions, getReferralCode, getRewards, markPeerReportImproved, requestRedemption } from '../../api/loyalty';
 
 const STATUS_VARIANT: Record<string, string> = {
   PENDING: 'warning',
@@ -20,6 +20,7 @@ export default function MyLoyaltyPage() {
   const redemptionsQuery = useQuery({ queryKey: ['me-redemptions'], queryFn: getMyRedemptions });
   const referralQuery = useQuery({ queryKey: ['referral-code'], queryFn: getReferralCode });
   const aboutMeQuery = useQuery({ queryKey: ['peer-about-me'], queryFn: getMyPeerReportsAboutMe });
+  const leaderboardQuery = useQuery({ queryKey: ['loyalty-leaderboard'], queryFn: getLoyaltyLeaderboard });
 
   const improveMutation = useMutation({
     mutationFn: (id: number) => markPeerReportImproved(id),
@@ -29,6 +30,11 @@ export default function MyLoyaltyPage() {
   const balance = loyaltyQuery.data?.balance ?? 0;
   const referralCode = referralQuery.data?.code;
   const aboutMe = aboutMeQuery.data ?? [];
+  const items = loyaltyQuery.data?.items ?? [];
+  const totalEarned = loyaltyQuery.data?.totalEarned ?? items.filter((i) => i.delta > 0).reduce((s, i) => s + i.delta, 0);
+  const totalRedeemed = loyaltyQuery.data?.totalRedeemed ?? Math.abs(items.filter((i) => i.delta < 0).reduce((s, i) => s + i.delta, 0));
+  const leaderboard = leaderboardQuery.data ?? [];
+  const medal = (rank: number) => (rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : `#${rank}`);
 
   const redeemMutation = useMutation({
     mutationFn: (rewardId: number) => requestRedemption(rewardId),
@@ -45,10 +51,72 @@ export default function MyLoyaltyPage() {
 
   return (
     <div className="container py-4">
-      <div className="d-flex align-items-center gap-3 mb-4 flex-wrap">
-        <h3 className="mb-0">Poin & Reward</h3>
-        <Badge bg="primary" pill className="fs-6">{balance.toLocaleString('id-ID')} poin</Badge>
+      <div className="d-flex align-items-center gap-3 mb-3 flex-wrap">
+        <h3 className="mb-0">Poin Kebaikan & Reward</h3>
+        <Badge bg="primary" pill className="fs-6">{balance.toLocaleString('id-ID')} poin tersisa</Badge>
       </div>
+
+      {/* Narasi: poin = ukuran kebaikan, bukan sekadar demi reward */}
+      <Card className="mb-3 border-0" style={{ background: 'linear-gradient(135deg, #eef2ff 0%, #f0fdf4 100%)' }}>
+        <Card.Body className="py-3">
+          <div className="d-flex align-items-start gap-2">
+            <span style={{ fontSize: '1.5rem' }} aria-hidden>🌱</span>
+            <div>
+              <div className="fw-semibold">Poin = cerminan kebaikanmu sebagai penghuni</div>
+              <div className="text-muted small">
+                Bukan sekadar demi hadiah. Tiap kali kamu <strong>perpanjang kontrak</strong>, <strong>bayar tepat waktu</strong>,
+                <strong> lengkapi profil</strong>, atau <strong>memperbaiki masukan</strong> — poinmu bertambah. Makin tinggi poin,
+                makin besar kontribusimu untuk kos yang nyaman bersama. 🤝
+              </div>
+            </div>
+          </div>
+        </Card.Body>
+      </Card>
+
+      {/* Total kebaikan / ditukar / sisa */}
+      <Row className="g-3 mb-4">
+        <Col xs={4}>
+          <Card className="text-center h-100 border-0 shadow-sm"><Card.Body className="py-3">
+            <div className="text-muted small">Total kebaikan</div>
+            <div className="fs-4 fw-bold text-success">{totalEarned.toLocaleString('id-ID')}</div>
+            <div className="text-muted" style={{ fontSize: '0.75rem' }}>poin dikumpulkan</div>
+          </Card.Body></Card>
+        </Col>
+        <Col xs={4}>
+          <Card className="text-center h-100 border-0 shadow-sm"><Card.Body className="py-3">
+            <div className="text-muted small">Sudah ditukar</div>
+            <div className="fs-4 fw-bold text-secondary">{totalRedeemed.toLocaleString('id-ID')}</div>
+            <div className="text-muted" style={{ fontSize: '0.75rem' }}>poin untuk reward</div>
+          </Card.Body></Card>
+        </Col>
+        <Col xs={4}>
+          <Card className="text-center h-100 border-0 shadow-sm"><Card.Body className="py-3">
+            <div className="text-muted small">Sisa poin</div>
+            <div className="fs-4 fw-bold text-primary">{balance.toLocaleString('id-ID')}</div>
+            <div className="text-muted" style={{ fontSize: '0.75rem' }}>bisa ditukar</div>
+          </Card.Body></Card>
+        </Col>
+      </Row>
+
+      {/* Papan kebaikan top-3 (anonim per kamar) */}
+      {leaderboard.length > 0 && (
+        <Card className="mb-4">
+          <Card.Header className="d-flex align-items-center justify-content-between flex-wrap gap-1">
+            <strong>🏆 Papan Kebaikan — Top 3 Kamar</strong>
+            <small className="text-muted">anonim · hanya kode kamar</small>
+          </Card.Header>
+          <Card.Body className="p-0">
+            <ul className="list-group list-group-flush">
+              {leaderboard.map((row) => (
+                <li key={row.roomCode} className="list-group-item d-flex justify-content-between align-items-center">
+                  <span><span className="me-2" style={{ fontSize: '1.2rem' }} aria-hidden>{medal(row.rank)}</span><strong>Kamar {row.roomCode}</strong></span>
+                  <Badge bg="success" pill>{row.points.toLocaleString('id-ID')} poin</Badge>
+                </li>
+              ))}
+            </ul>
+          </Card.Body>
+        </Card>
+      )}
 
       {error && <Alert variant="danger" dismissible onClose={() => setError(null)}>{error}</Alert>}
 

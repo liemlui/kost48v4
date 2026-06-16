@@ -95,14 +95,21 @@ export class LoyaltyService {
   }
 
   async history(tenantId: number, limit = 50) {
-    const items = await this.prisma.loyaltyPoint.findMany({
-      where: { tenantId },
-      orderBy: { id: 'desc' },
-      take: Math.min(Math.max(1, limit), 200),
-      select: { id: true, delta: true, reason: true, note: true, createdAt: true },
-    });
+    const [items, earnedAgg, spentAgg, balance] = await Promise.all([
+      this.prisma.loyaltyPoint.findMany({
+        where: { tenantId },
+        orderBy: { id: 'desc' },
+        take: Math.min(Math.max(1, limit), 200),
+        select: { id: true, delta: true, reason: true, note: true, createdAt: true },
+      }),
+      this.prisma.loyaltyPoint.aggregate({ where: { tenantId, delta: { gt: 0 } }, _sum: { delta: true } }),
+      this.prisma.loyaltyPoint.aggregate({ where: { tenantId, delta: { lt: 0 } }, _sum: { delta: true } }),
+      this.balance(tenantId),
+    ]);
     return {
-      balance: await this.balance(tenantId),
+      balance,
+      totalEarned: earnedAgg._sum.delta ?? 0,
+      totalRedeemed: Math.abs(spentAgg._sum.delta ?? 0),
       items: items.map((p) => ({
         id: p.id,
         delta: p.delta,
@@ -111,5 +118,34 @@ export class LoyaltyService {
         createdAt: p.createdAt.toISOString(),
       })),
     };
+  }
+
+  /**
+   * F4-13: Papan poin ANONIM per KAMAR (top-N). Poin = ukuran kebaikan; tampil per kamar
+   * (kode kamar saja, tanpa nama penghuni) demi privasi. Hanya penghuni aktif yang muncul.
+   */
+  async leaderboardByRoom(limit = 3) {
+    const grouped = await this.prisma.loyaltyPoint.groupBy({ by: ['tenantId'], _sum: { delta: true } });
+    const pointsByTenant = new Map<number, number>();
+    for (const g of grouped) pointsByTenant.set(g.tenantId, g._sum.delta ?? 0);
+    const tenantIds = [...pointsByTenant.keys()];
+    if (!tenantIds.length) return [] as Array<{ rank: number; roomCode: string; points: number }>;
+
+    const stays = await this.prisma.stay.findMany({
+      where: { tenantId: { in: tenantIds }, status: 'ACTIVE' },
+      select: { tenantId: true, room: { select: { code: true } } },
+    });
+    const byRoom = new Map<string, number>();
+    for (const s of stays) {
+      const code = s.room?.code;
+      if (!code) continue;
+      byRoom.set(code, (byRoom.get(code) ?? 0) + (pointsByTenant.get(s.tenantId) ?? 0));
+    }
+    return [...byRoom.entries()]
+      .map(([roomCode, points]) => ({ roomCode, points }))
+      .filter((r) => r.points > 0)
+      .sort((a, b) => b.points - a.points)
+      .slice(0, Math.min(Math.max(1, limit), 10))
+      .map((r, i) => ({ rank: i + 1, roomCode: r.roomCode, points: r.points }));
   }
 }
