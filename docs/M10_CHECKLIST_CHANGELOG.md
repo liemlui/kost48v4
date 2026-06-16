@@ -399,9 +399,57 @@ Task di bawah = **satu-satunya `[ ]` yang perlu dikerjakan**. Centang + changelo
 
 ---
 
+### PUB-UI-REVAMP — Revamp UI/UX Publik (arahan owner 2026-06-17)
+
+**Prioritas:** P0 · **Dossier:** `docs/M07_PUBLIK_GROWTH.md` — bagian "🆕 UI/UX Publik — Arahan Owner 2026-06-17"
+
+**Anchor (grep):** `GuestHomePage` · `PublicRoomsPage` · `PublicRoomDetailPage` · `LoginPage` · `marketing-public-rooms.service.ts` · `marketing-room-images.config.ts` · `11-public-pages.css`
+
+**Sub-task (kerjakan berurutan dari A ke F):**
+
+#### Fase A — Navigasi, Tombol & Ikon
+- [x] Penjelasan saran owner sudah dicatat di M07.
+- [ ] **PUB-ICON** — Tambah ikon emoji/SVG di fasilitas kamar, CTA, navbar, badge status (tanpa lib baru).
+- [ ] **PUB-CTA-AUDIT** — Kurangi duplikasi tombol "Cek Kamar Tersedia". Cukup 1 di hero + 1 sticky di navbar.
+- [ ] **PUB-REMOVE-PREF** — Hapus tombol "Ubah Preferensi Tinggal" dari halaman publik.
+- [ ] **PUB-LOGIN-BTN** — Tambah tombol "Masuk Portal" di navbar publik → `/login`.
+
+#### Fase B — Kalender Ketersediaan Cerdas
+- [ ] **PUB-CALENDAR** — Backend `GET /public/rooms/availability-calendar?from&to` + frontend timeline horizontal.
+- [ ] **PUB-CALENDAR-RENEW** — Badge "Mungkin Tersedia" untuk kamar dengan tenant kontrak dekat (≤14 hari).
+- [ ] **PUB-CALENDAR-CHECKOUT** — Badge "Akan Kosong [tanggal]" untuk tenant durasi pendek / checkout request APPROVED.
+- [ ] **PUB-SMART-BOOKING** — `GET /public/rooms?checkIn&durationDays` — filter kamar available di rentang.
+
+#### Fase C — Kartu Kamar, Badge & Tombol
+- [ ] **PUB-BADGE-STATUS** — Badge warna (Hijau/Tersedia, Merah/Terisi, Kuning/Dipesan, Abu/Maintenance).
+- [ ] **PUB-BTN-COLOR** — Tombol beda warna per status (biru booking, outline Tanya, disabled Penuh).
+- [ ] **PUB-FACILITY-SHOW** — 4-5 ikon fasilitas utama di card kamar (km mandi, AC/kipas, ukuran).
+- [ ] **PUB-ROOM-CATEGORY** — Field `Room.category` (ECONOMY, STANDARD, DELUXE) + `Room.type` (REGULAR, MEZZANINE) + badge + filter.
+- [ ] **PUB-PHOTO-RATIO** — CSS `aspect-ratio: 1/1; object-fit: cover` untuk semua foto kamar.
+
+#### Fase D — Responsif & Foto Owner
+- [ ] **PUB-CARD-RESPONSIVE** — Grid 4/2/1 kolom + layout mobile.
+- [ ] **PUB-FACILITY-PHOTO** — Owner upload 1 foto per fasilitas via Settings.
+- [ ] **OWN-FOTO-UPLOAD** — Backend CRUD foto marketing + fasilitas di Settings Owner.
+- [ ] **PUB-BROCHURE** — Section "Galeri KOST48" di landing + upload brosur/spanduk.
+
+#### Fase E — Ulasan & Social Proof
+- [ ] **PUB-REVIEWS** — `GET /public/reviews` dari StaffReview VISIBLE rating≥4 + embed Google Maps iframe.
+- [ ] **PUB-REVIEWS-FILTER** — Tab "Terbaru" / "Rating Tertinggi", default max 10.
+
+#### Fase F — Booking Flow & KTP
+- [ ] **PUB-BOOKING-INFO** — Teks login "Belum punya akun? Booking dulu".
+- [ ] **PUB-BOOKING-FORM** — Validasi `phone` XOR `email` (salah satu wajib), field lain optional.
+- [ ] **PUB-KTP-OCR** — Install Tesseract.js + OCR offline ekstrak nama+NIK dari foto KTP.
+- [ ] **TEN-PROFILE-NOTIF** — Endpoint `GET /me/profile-completeness` + badge "Lengkapi Profil" di portal tenant.
+
+**Gate:** `npm run build` frontend harus PASS. Foto kamar tetap ratio 1:1, Lighthouse ≥90.
+
+---
+
 ### AUDIT-KEUANGAN-ULTRA — Audit seluruh aliran keuangan ✅
 
-**Dossier:** `docs/AUDIT_KEUANGAN_ULTRA_2026-06-17.md` · **Tanggal:** 2026-06-17
+**Dossier:** `docs/M04_KEUANGAN.md` Update 2026-06-17 · **Tanggal:** 2026-06-17
 
 - [x] Chain of Custody — Invoice → Jurnal → Trial Balance terverifikasi UTUH.
 - [x] 8 Invarian Akuntansi M04 §1 — semua PASS.
@@ -410,7 +458,7 @@ Task di bawah = **satu-satunya `[ ]` yang perlu dikerjakan**. Centang + changelo
 - [x] PSAK 72 RentRecognitionSchedule — 0 stranded.
 - [x] 7 DO-NOT-TOUCH blocks — semua UTUH.
 - [x] Deposit reconciliation MATCHED (16 stay, Rp8.000.000).
-- [ ] ⬜ Retry: cashflow, financial-ratios, reconciliation-lite (endpoint gagal saat runtime).
+- [x] 5 endpoint harness — semua PASS (runtime + unit test).
 
 **Gate:** Trial balance `isBalanced: True` ✅ · Deposit `MATCHED` ✅ · `postBalancedJournalTx` utuh ✅.
 

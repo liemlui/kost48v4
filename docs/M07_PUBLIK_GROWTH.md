@@ -125,15 +125,55 @@ Gunakan kemampuan ini semaksimal mungkin sebelum menambah dependency baru.
 - Aksesibilitas tetap dijaga: kontras, fokus keyboard, alt text foto, dan reduced motion.
 - Mobile-first: landing harus terasa selesai di HP, bukan hanya bagus di desktop.
 
-### Backlog desain
+### 🆕 UI/UX Publik — Arahan Owner 2026-06-17 (untuk implementasi)
 
-- **MG-UI-01:** Re-theme landing publik dengan konsep modern KOST48: hero immersive, capsule nav, CTA kuat,
-  section story, dan card kamar premium.
-- **MG-UI-02:** Buat komponen proof strip: rating, penghuni aktif, lokasi, dan status booking online.
-- **MG-UI-03:** Tambahkan section "Living System": invoice jelas, riwayat sewa, lapor kerusakan, loyalty,
-  referral.
-- **MG-UI-04:** Audit foto marketing: pilih foto hero, foto kamar unggulan, dan fallback bila foto belum siap.
-- **MG-UI-05:** Uji Playwright screenshot desktop/mobile dan Lighthouse setelah re-theme.
+Semua saran owner dari walkthrough `http://localhost:5173/` — sudah dipetakan ke task ID `PUB-*`.
+
+#### A. Navigasi, Tombol & Ikon
+- **PUB-ICON** — Tambah ikon SVG/emoji di: fasilitas kamar, CTA, section header, navbar, badge status. Tanpa library baru (pakai emoji + CSS).
+- **PUB-CTA-AUDIT** — Kurangi duplikasi tombol "Cek Kamar Tersedia". Cukup 1 di hero + 1 sticky di navbar. Sisanya ganti link teks ringan.
+- **PUB-REMOVE-PREF** — Hapus tombol "Ubah Preferensi Tinggal" dari halaman publik (tidak berguna).
+- **PUB-LOGIN-BTN** — Tambah tombol "Masuk Portal" di navbar publik, mengarah ke `/login`.
+
+#### B. Kalender Ketersediaan Cerdas
+- **PUB-CALENDAR** — Backend `GET /public/rooms/availability-calendar?from&to`: return grid per tanggal per kamar (KOSONG/BOOKING_DP/HUNI). Frontend: tampilan timeline horizontal 2 minggu/bulan.
+- **PUB-CALENDAR-RENEW** — Kamar dengan stay ACTIVE + `plannedCheckOutDate` ≤ 14 hari → badge "Mungkin Tersedia" + catatan tenant mungkin perpanjang.
+- **PUB-CALENDAR-CHECKOUT** — Tenant durasi pendek (DAILY/WEEKLY/BIWEEKLY) + stay dengan checkout request APPROVED → badge "Akan Kosong [tanggal]".
+- **PUB-SMART-BOOKING** — Kamar dengan booking ber-DP checkIn tgl 30 masih bisa dipesan harian/mingguan sebelum tgl 30. Backend: `GET /public/rooms?checkIn&durationDays` — filter room yang available di seluruh rentang.
+
+#### C. Kartu Kamar, Badge & Tombol
+- **PUB-BADGE-STATUS** — Badge warna: Hijau="Tersedia", Merah="Terisi", Kuning="Dipesan", Abu-abu="Maintenance".
+- **PUB-BTN-COLOR** — Tersedia→biru "Ajukan Booking", Maintenance→outline/wa "Tanya Ketersediaan", Terisi→disabled "Penuh".
+- **PUB-FACILITY-SHOW** — Tampilkan 4-5 ikon fasilitas utama di card kamar (kamar mandi dalam/luar, AC/kipas, ukuran). Backend: tambah `RoomFacility.isMainFacility`.
+- **PUB-ROOM-CATEGORY** — Field baru `Room.category` (ECONOMY, STANDARD, DELUXE) + `Room.type` (REGULAR, MEZZANINE). Badge kategori di card + filter drop-down. Untuk marketing, owner bisa petakan ulang kategori nanti via Settings.
+- **PUB-PHOTO-RATIO** — CSS `aspect-ratio: 1/1; object-fit: cover` untuk semua foto kamar.
+
+#### D. Responsif & Foto
+- **PUB-CARD-RESPONSIVE** — Grid: 4 kolom desktop, 2 tablet, 1 mobile. Card stack vertikal di mobile.
+- **PUB-FACILITY-PHOTO** — Owner upload 1 foto real per fasilitas via Settings. Tampil di halaman publik.
+- **OWN-FOTO-UPLOAD** — Backend: endpoint CRUD foto marketing + foto fasilitas di Settings Owner. Frontend komponen upload + preview.
+- **PUB-BROCHURE** — Section "Galeri KOST48" di landing — tampil foto brosur/spanduk yang di-upload owner.
+
+#### E. Ulasan & Social Proof
+- **PUB-REVIEWS** — `GET /public/reviews` ambil dari `StaffReview` VISIBLE rating≥4. Embed Google Maps reviews via iframe. Section "Apa Kata Penghuni".
+- **PUB-REVIEWS-FILTER** — Tab filter: "Terbaru" / "Rating Tertinggi". Default rating ≥4, max 10.
+
+#### F. Booking Flow & KTP
+- **PUB-BOOKING-INFO** — Di halaman login: teks "Belum punya akun? Booking kamar dulu — akun Anda dibuat otomatis."
+- **PUB-BOOKING-FORM** — Ubah validasi booking: `phone` XOR `email` wajib (minimal salah satu). Field lain optional, dilengkapi di portal tenant.
+- **PUB-KTP-OCR** — Tambah dependency Tesseract.js (~2MB gzip). Setelah upload foto KTP → OCR offline ekstrak nama + NIK → auto-isi form. Backend simpan hasil OCR.
+- **TEN-PROFILE-NOTIF** — Endpoint `GET /me/profile-completeness`. Di portal tenant, badge "Lengkapi Profil" + daftar field belum diisi (nama, telepon, email, KTP, kontak darurat, dll).
+
+### Backlog desain (diperbarui 2026-06-17)
+
+| ID | Deskripsi | Status |
+|----|-----------|--------|
+| **MG-UI-01** | Re-theme landing publik (hero immersive, capsule nav, CTA kuat, section story, card premium) | ⏳ Diperluas — lihat arahan owner §A-F |
+| **MG-UI-02** | Komponen proof strip (rating, penghuni aktif, lokasi) | ⏳ Menunggu PUB-REVIEWS |
+| **MG-UI-03** | Section "Living System" (invoice, riwayat, lapor, loyalty, referral) | ⏳ |
+| **MG-UI-04** | Audit + upload foto marketing via Settings owner | ⏳ Menunggu OWN-FOTO-UPLOAD |
+| **MG-UI-05** | Playwright screenshot desktop/mobile + Lighthouse ≥90 | ⏳ Setelah semua A-F selesai |
+| **PUB-UI-REVAMP** | **Task besar** — semua item A–F di atas | **P0** — daftar sub-task di M10 |
 
 ### Prioritas productisasi analisa bisnis (owner setuju 2026-06-16)
 
