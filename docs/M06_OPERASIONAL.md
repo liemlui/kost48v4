@@ -18,6 +18,175 @@ Operasional harian: inventaris, staf/tiket/KPI, notifikasi/pengumuman, auth/onbo
 
 **Audit 5 jalur 17 Jun 2026: LULUS.** Meter M-1..M-5 selesai (meter billing + checkout meter final × deposit, TB seimbang di UAT). Semua DO-NOT-TOUCH blocks UTUH.
 
+## Aturan & Panduan Tenant KOST48 — 2026-06-17
+
+Konten aturan ini akan diisi ke **menu Panduan & Aturan Kos** di portal tenant (MyManualPage) dan halaman publik FAQ. Berdasarkan keputusan owner D-19 (F4-12): FAQ di-seed dari aturan/flow, owner edit via admin FAQ.
+
+### A. Profil & Akomodasi KOST48
+
+Kost 48 Surabaya – Akomodasi Nyaman & Terjangkau di Lokasi Strategis. Mencari penginapan harian di Surabaya yang nyaman, terjangkau, dan strategis? Kost 48 Surabaya adalah pilihan tepat! Berlokasi di kawasan eksklusif Pakuwon Indah, kami menawarkan akomodasi yang cocok untuk pekerja mall, tim event, keluarga acara pernikahan, supir eksekutif, peserta lomba UNESA, tamu wisuda, wisatawan transit, hingga tenaga kerja yang hendak ke Jepang.
+
+**Lokasi:** Jl. Hikmah V No. 48, Lontar, Sambikerep, Surabaya.
+
+**Keunggulan:**
+- ✅ Dekat Pakuwon Mall & Pusat Perbelanjaan – Hanya 7-10 menit jalan kaki ke Pakuwon Mall (PTC & Supermall), Spazio, Lenmarc
+- ✅ Akses Mudah ke UNESA & Acara Akademik – Hanya 10 menit berkendara ke Universitas Negeri Surabaya
+- ✅ Dekat RS Lombok 22 Lontar & National Hospital – Cocok untuk keluarga pasien yang butuh akomodasi sementara
+- ✅ Lingkungan Eksklusif & Aman – Dikelilingi perumahan elite Pakuwon Indah, Graha Family, Citraland, Bukit Darmo Golf
+- ✅ Pilihan Kamar Beragam – Mulai dari Budget, Standard, Economy, hingga Deluxe dengan fasilitas AC/Fan & kamar mandi dalam/luar
+- ✅ Fasilitas Lengkap – Wi-Fi gratis, dapur bersama, lounge nyaman, parkir luas, dan pet-friendly
+- ✅ Dekat Pusat Transportasi – Transit ideal bagi wisatawan ke Malang atau Bali & akses mudah ke Bandara Juanda (27 km)
+
+**Cocok untuk:**
+- Pekerja Mall & Event Crew – Hemat & dekat lokasi kerja
+- Tamu Pernikahan – Akomodasi nyaman untuk keluarga pengantin
+- Supir Eksekutif – Tempat istirahat terbaik saat bos menginap di hotel mewah
+- Peserta Lomba & Wisuda UNESA – Nyaman & dekat kampus
+- Menunggu Renovasi Rumah – Tinggal sementara tanpa ribet
+- Wisatawan Transit – Istirahat sebelum ke Malang atau Bali
+- Backpacker Internasional – Ramah bule dengan harga bersahabat
+- Calon Tenaga Kerja ke Jepang – Menginap sambil mengurus izin & pelatihan
+
+### B. Aturan & Kebijakan — SEWA BULANAN
+
+**Check-in & Check-out:**
+- Check-in: 14:00 - 22:00 WIB
+- Check-out: Maksimal pukul 12:00 WIB
+
+**Kebijakan Deposit:**
+- Deposit kerusakan sebesar Rp 300.000 dibutuhkan saat kedatangan. Pembayaran dilakukan saat pelunasan dan akan dikembalikan sepenuhnya saat check-out, tergantung pada pemeriksaan akomodasi.
+
+**Kebijakan Merokok:**
+- Dilarang merokok di dalam kamar. Area merokok tersedia di luar ruangan.
+- Pelanggaran akan dikenakan denda Rp 200.000 untuk pembersihan ekstra.
+
+**Kebijakan Anak & Tamu:**
+- Anak di bawah 11 tahun menginap gratis jika berbagi tempat tidur dengan orang tua.
+- Anak 11 tahun ke atas dihitung sebagai tamu dewasa.
+- 1 Kamar Maksimal isi 2 Orang.
+
+**Makanan & Minuman:**
+- Dapur bersama tersedia bagi yang ingin memasak. Harap menjaga kebersihan setelah penggunaan.
+- Sarapan tidak termasuk dalam tarif kamar (khusus harian).
+
+**Wi-Fi & Fasilitas Umum:**
+- Wi-Fi tersedia dengan biaya tambahan Rp 50.000/bulan, Rp 20.000/minggu, atau Rp 5.000/hari per perangkat untuk menjaga kualitas koneksi.
+- Lounge bersama dapat digunakan oleh tamu untuk bersantai atau bekerja.
+
+**Parkir:**
+- Parkir gratis. Harap memastikan keamanan kendaraan secara pribadi.
+- Parkir terbatas, harap informasikan terlebih dahulu jika membawa kendaraan.
+
+**Hewan Peliharaan:**
+- Hewan peliharaan diizinkan dengan pemberitahuan sebelumnya.
+- Harap memastikan hewan peliharaan tidak mengganggu tamu lain.
+- Pemilik hewan peliharaan wajib memberikan uang jaminan Rp 100.000 yang akan dikembalikan jika tidak ada kerusakan.
+
+**Keamanan & Ketertiban:**
+- Dilarang membawa dan mengkonsumsi alkohol, narkoba, atau barang ilegal di dalam area penginapan.
+- Dilarang membuat kebisingan yang mengganggu tamu lain, terutama setelah pukul 22:00 WIB.
+- Pengunjung yang tidak terdaftar dilarang menginap tanpa izin dari pengelola.
+- Perilaku yang melanggar norma, seperti perbuatan asusila, sangat dilarang dan dapat dilaporkan ke pihak berwenang.
+
+### C. Aturan & Kebijakan — HARIAN / MINGGUAN / 2 MINGGUAN
+
+**Check-in & Check-out:**
+- Check-in: 14:00 - 22:00 WIB
+- Check-out: Maksimal pukul 12:00 WIB
+
+**Kebijakan Deposit:**
+- Deposit kerusakan Rp 100.000 atau jaminan KTP dibayarkan saat check-in.
+- Dikembalikan sepenuhnya saat check-out setelah pemeriksaan kamar.
+
+**Kebijakan Merokok:**
+- Dilarang merokok di dalam kamar. Area merokok di luar ruangan.
+- Pelanggaran denda Rp 200.000.
+
+**Anak & Tamu Tambahan:**
+- Anak <11 tahun gratis (berbagi tempat tidur).
+- Anak ≥11 tahun = tamu dewasa.
+- 1 kamar maksimal 2 orang.
+
+**Kebijakan Makanan & Minuman:**
+- Dapur bersama tersedia. Harap jaga kebersihan.
+- Sarapan tidak termasuk.
+
+**Wi-Fi:**
+- Wi-Fi gratis untuk tamu harian.
+
+**Parkir:**
+- Parkir gratis, terbatas. Informasikan sebelumnya jika bawa kendaraan.
+
+**Hewan Peliharaan:**
+- Diperbolehkan dengan pemberitahuan.
+- Deposit Rp 100.000, dikembalikan jika tidak ada kerusakan.
+
+**Keamanan & Ketertiban:**
+- Sama dengan aturan bulanan (poin 5–8 di atas).
+
+### D. SOP Housekeeping — KOST 48 SURABAYA
+
+**Jam Kerja Housekeeping:**
+- Senin – Sabtu: 08.00 – 16.00 WIB
+- Minggu & Tanggal Merah: sesuai kebutuhan/check-out
+
+**Peralatan Wajib Dibawa:**
+| Alat | Keterangan |
+|------|-----------|
+| Lap Microfiber | Untuk meja, kaca, dan permukaan keras |
+| Sabun Pembersih Serbaguna | Wajib pakai setiap kamar |
+| Sikat WC & Cairan Pembersih | Untuk kamar mandi |
+| Sapu + Pel | Lantai kamar dan lorong |
+| Sarung Tangan Karet | Wajib saat bersih kamar mandi |
+| Kantong Sampah | Ganti tiap hari |
+| Pengharum Ruangan | 1 semprot terakhir sebelum tutup kamar |
+
+**Checklist Pembersihan Kamar (urutan):**
+1. Buka gorden, nyalakan lampu dan kipas/AC
+2. Rapikan kasur dan lipat selimut/bantal
+3. Buang sampah & ganti kantong baru
+4. Lap meja, lemari, handle pintu, kaca
+5. Sapu & pel lantai
+6. Bersihkan toilet, wastafel, lantai kamar mandi
+7. Kunci pintu kamar, laporkan bila ada kerusakan/kotoran berat
+
+**Catatan Penting:**
+- Dilarang menyentuh barang pribadi penyewa
+- Bila menemukan: kunci, HP, uang → segera laporkan ke owner
+- Setiap selesai bersih kamar, centang checklist di app
+
+### E. Room Ready Checklist — KOST 48 SURABAYA
+
+Format checklist yang digunakan petugas setelah kamar selesai dibersihkan dan siap huni:
+
+**A. Kebersihan Kamar:**
+| Item | Cek (✔) | Catatan Jika Tidak Sesuai |
+|------|---------|--------------------------|
+| Kasur rapi & sprei bersih | | |
+| Bantal bersih | | |
+| Lantai disapu & dipel | | |
+| Meja & lemari bebas debu | | |
+| Jendela & kaca bersih | | |
+| Kamar mandi bersih & kering | | |
+| Wastafel & toilet bersih | | |
+| Sisa sampah dibuang | | |
+
+**B. Fasilitas dan Fungsi:**
+| Item | Cek (✔) | Catatan Jika Rusak / Tidak Aktif |
+|------|---------|----------------------------------|
+| AC menyala & dingin | | |
+| Lampu utama berfungsi | | |
+| Colokan listrik normal | | |
+| Wi-Fi aktif (tes koneksi HP) | | |
+| Kunci pintu berfungsi baik | | |
+
+**C. Foto Dokumentasi (opsional untuk laporan digital):**
+- Foto 1: Tampak kasur & meja
+- Foto 2: Kamar mandi
+- Foto 3: Kondisi umum ruangan
+
+Data petugas: Tanggal, Nomor Kamar, Nama Petugas, Jam Selesai.
+
 ## Catatan Pemakaian
 
 - Jadikan file ini pintu masuk tematik; bila butuh detail mentah, cek file sumber di arsip yang disebut di atas.
