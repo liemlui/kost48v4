@@ -14,6 +14,43 @@ Sumber cepat untuk keputusan owner dan aturan bisnis yang harus dihormati sebelu
 
 Semua keputusan owner terkait keuangan (no-partial, DP 30%, deposit=Room.defaultDepositRupiah, PSAK 72, DRAFT≠revenue, meter pascabayar, settlement guard) **terverifikasi TERIMPLEMENTASI** di kode. Audit 5 jalur: LULUS. Detail: `docs/M04_KEUANGAN.md` Update 2026-06-17.
 
+## Keputusan UI/UX Publik — 2026-06-17 (lihat `docs/M07_PUBLIK_GROWTH.md`)
+
+### Navigasi & Tombol
+- **PUB-LOGIN**: Tombol "Masuk Portal" harus ada di navbar publik → `/login`.
+- **PUB-CTA**: Kurangi duplikasi "Cek Kamar Tersedia". Cukup 1 di hero + 1 sticky di navbar. Sisanya link teks.
+- **PUB-REMOVE-PREF**: Hapus tombol "Ubah Preferensi Tinggal" dari halaman publik (tidak berguna).
+- **PUB-ICON**: Tambah ikon emoji/SVG di fasilitas kamar, CTA, navbar, badge status. Tanpa library baru.
+
+### Kalender Ketersediaan Cerdas
+- **PUB-CALENDAR**: Halaman publik perlu kalender/timeline yang menunjukkan kamar kosong 2 minggu/bulan ke depan.
+- **PUB-CALENDAR-RENEW**: Kamar dengan tenant kontrak dekat (≤14 hari) harus badge "Mungkin Tersedia" — tenant masih mungkin perpanjang.
+- **PUB-CALENDAR-CHECKOUT**: Kamar dengan tenant durasi pendek (DAILY/WEEKLY/BIWEEKLY) + checkout request APPROVED → badge "Akan Kosong [tanggal]".
+- **PUB-SMART-BOOKING**: Booking cerdas — kamar ada booking DP checkIn tgl 30 masih bisa dipesan harian/mingguan sebelum tgl 30.
+
+### Kartu Kamar, Badge & Status
+- **PUB-BADGE**: Badge warna per status: Hijau=Tersedia, Merah=Terisi, Kuning=Dipesan, Abu=Maintenance.
+- **PUB-BTN-COLOR**: Tombol beda warna: Tersedia→biru "Ajukan Booking", Maintenance→outline/wa "Tanya Ketersediaan", Terisi→disabled "Penuh".
+- **PUB-FACILITY-SHOW**: Tampilkan 4-5 ikon fasilitas utama di card kamar: kamar mandi dalam/luar, AC/kipas, ukuran besar/standar.
+- **PUB-ROOM-CATEGORY**: Kamar punya kategori (ECONOMY, STANDARD, DELUXE) + tipe (REGULAR, MEZZANINE). Owner bisa petakan ulang via Settings untuk marketing.
+- **PUB-PHOTO-RATIO**: Foto kamar dipaksa ratio 1:1 (CSS `aspect-ratio: 1/1; object-fit: cover`).
+
+### Responsif & Foto
+- **PUB-CARD-RESPONSIVE**: Grid kamar harus responsif: 4 kolom desktop, 2 tablet, 1 mobile.
+- **PUB-FACILITY-PHOTO**: 1 foto real per fasilitas, di-upload owner via Settings.
+- **OWN-FOTO-UPLOAD**: Owner bisa upload foto marketing (kamar, fasilitas, brosur, spanduk) via Settings.
+- **PUB-BROCHURE**: Section "Galeri KOST48" di landing — tampil foto brosur/spanduk.
+
+### Ulasan & Social Proof
+- **PUB-REVIEWS**: Section "Apa Kata Penghuni" — ambil dari StaffReview VISIBLE rating≥4 + embed Google Maps (iframe).
+- **PUB-REVIEWS-FILTER**: Filter "Terbaru" / "Rating Tertinggi". Default rating ≥4, max 10.
+
+### Booking Flow & KTP
+- **PUB-BOOKING-INFO**: Di halaman login: "Belum punya akun? Booking kamar dulu — akun Anda dibuat otomatis."
+- **PUB-BOOKING-FORM**: Validasi `phone` XOR `email` (salah satu wajib). Field lain optional, dilengkapi di portal tenant.
+- **PUB-KTP-OCR**: Tambah Tesseract.js untuk OCR offline — setelah upload foto KTP, ekstrak nama + NIK auto-isi form.
+- **TEN-PROFILE-NOTIF**: Endpoint `GET /me/profile-completeness`. Portal tenant tampilkan badge "Lengkapi Profil" + daftar field belum diisi.
+
 ## Catatan Pemakaian
 
 - Jadikan file ini pintu masuk tematik; bila butuh detail mentah, cek file sumber di arsip yang disebut di atas.
