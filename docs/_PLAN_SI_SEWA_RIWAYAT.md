@@ -26,9 +26,14 @@ Seri tugas **SI** (Sewa & Integritas data). Compact, gaya MXX. Terkait dossier `
   npm: `seed:dev:reset` + `seed:dev:api`. **Terverifikasi:** 20 kamar/16 stay/19 invoice (16 sewa+3 meter,
   **0 dobel-tagih**, 12 PAID/7 ISSUED), 16 deposit HELD, **neraca saldo SEIMBANG**. Kredensial:
   `docs/_AKUN_DUMMY_DEV.md`. CATATAN: perpanjangan TIDAK diseed (direct-renew dimatikan; lihat SI-2/SI-3).
-- **SI-2 — Audit + perjelas aturan perpanjangan:** pastikan tak bisa perpanjang **setelah** hari-H lewat
-  (EXPIRED_PRIORITY → kamar dibuka); tampilkan eksplisit di UI: basis = akhir kontrak lama, "DP ≤ {hari-H}",
-  "pelunasan ≤ {DP+7}", sisa hari. Tidak ada perubahan aturan—hanya transparansi + guard tepi.
+- **SI-2 — Audit + perjelas aturan perpanjangan — ✅ SELESAI 2026-06-16:**
+  AUDIT guard backend (renew-requests.service): DP ditolak bila `paidAt > downPaymentDueDate` (hari-H);
+  pelunasan/approve ditolak bila lewat `settlementDueDate` (DP+7); sweeper AWAITING_DP lewat hari-H →
+  EXPIRED_PRIORITY (kamar dibuka). **Sudah benar — tak ada perubahan aturan.** TRANSPARANSI UI:
+  portal tenant (MyStayPage) kini tampil tanggal konkret + basis — konfirmasi: "DP 30% ≤ {akhir
+  kontrak} (hari-H), pelunasan ≤ 7 hari setelah DP"; status AWAITING_DP: "DP ≤ {downPaymentDueDate}
+  (hari-H), lewat → prioritas hangus"; status pelunasan: "lunas ≤ {settlementDueDate} (H+7)". Admin
+  (RenewRequestsAdminPage) tampil "DP ≤ {tgl} (hari-H)" + "Lunas ≤ {tgl} (DP+7)". tsc 0.
 - **SI-3 — UI riwayat sewa (timeline) — ✅ SELESAI 2026-06-16:** komponen
   `components/stays/StayHistoryTimeline.tsx` (kronologi vertikal): *Masuk kos {checkInDate} +
   deposit → Periode 1 (awal) {a→b} → Perpanjangan Periode 2 {b→c} …* (periode diturunkan dari

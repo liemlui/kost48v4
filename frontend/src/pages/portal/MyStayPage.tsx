@@ -601,6 +601,10 @@ function ActiveStayContent({ stay }: { stay: Stay }) {
         <Alert variant="info" className="tenant-short-alert mb-3">
           <div className="fw-semibold mb-1">Konfirmasi perpanjangan</div>
           <div className="small mb-2">Pilih YA untuk menerbitkan invoice DP 30%, atau TIDAK jika kamu akan keluar sesuai jadwal.</div>
+          <div className="small text-muted mb-2">
+            Aturan: <strong>DP 30%</strong> dibayar paling lambat <strong>{formatDate(stay.plannedCheckOutDate)}</strong> (akhir kontrak / hari-H),
+            lalu <strong>pelunasan</strong> paling lambat <strong>7 hari setelah DP</strong> (H+7). Periode baru menyambung dari akhir kontrak.
+          </div>
           {decideRenewMutation.isError ? (
             <div className="text-danger small mb-2">
               {getApiErrorMessage(decideRenewMutation.error, 'Gagal menyimpan keputusan perpanjangan.')}
@@ -628,11 +632,25 @@ function ActiveStayContent({ stay }: { stay: Stay }) {
       ) : pendingRenewRequest ? (
         <Alert variant="info" className="tenant-short-alert mb-3">
           <StatusBadge status={pendingRenewRequest.status} domain="renew" className="me-2" />
-          {pendingRenewRequest.status === 'AWAITING_DP'
-            ? 'Bayar invoice DP penuh sebelum batas prioritas.'
-            : pendingRenewRequest.settlementInvoiceId
-              ? 'Invoice pelunasan sudah terbit. Selesaikan pembayaran penuh agar admin dapat memfinalkan.'
-              : 'DP sudah aman. Admin akan mencatat meter dan menerbitkan invoice pelunasan.'}
+          {pendingRenewRequest.status === 'AWAITING_DP' ? (
+            <>
+              Bayar <strong>DP perpanjangan</strong> penuh paling lambat{' '}
+              <strong>{formatDate(pendingRenewRequest.downPaymentDueDate ?? stay.plannedCheckOutDate)}</strong>{' '}
+              <em>(batas = akhir kontrak / hari-H)</em>. Lewat tanggal ini, prioritas kamarmu hangus dan kamar dibuka untuk umum.
+            </>
+          ) : pendingRenewRequest.settlementInvoiceId ? (
+            <>
+              Invoice <strong>pelunasan</strong> sudah terbit. Lunasi penuh paling lambat{' '}
+              <strong>{formatDate(pendingRenewRequest.settlementDueDate)}</strong>{' '}
+              <em>(= 7 hari sejak DP dibayar / H+7)</em>, agar admin dapat memfinalkan perpanjangan.
+            </>
+          ) : (
+            <>
+              DP sudah aman{pendingRenewRequest.downPaymentPaidAt ? ` (dibayar ${formatDate(pendingRenewRequest.downPaymentPaidAt)})` : ''}.
+              Admin akan mencatat meter & menerbitkan invoice pelunasan; batas lunas{' '}
+              <strong>{pendingRenewRequest.settlementDueDate ? formatDate(pendingRenewRequest.settlementDueDate) : '7 hari sejak DP (H+7)'}</strong>.
+            </>
+          )}
         </Alert>
       ) : null}
       {approvedCheckoutRequest ? <Alert variant="info" className="tenant-short-alert mb-3">Tanggal keluar disetujui. Admin akan finalkan setelah tagihan beres.</Alert> : null}

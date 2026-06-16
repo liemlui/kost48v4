@@ -385,6 +385,12 @@ export default function RenewRequestsAdminPage() {
                     <td data-label="Masa Sewa">
                       <div className="small text-muted">Akhir sekarang</div>
                       <div className="fw-semibold">{formatDate((rr as any).stay?.plannedCheckOutDate)}</div>
+                      {rr.downPaymentDueDate ? (
+                        <div className="small text-muted mt-1">DP ≤ <strong>{formatDate(rr.downPaymentDueDate)}</strong> <em>(hari-H)</em></div>
+                      ) : null}
+                      {rr.settlementDueDate ? (
+                        <div className="small text-muted">Lunas ≤ <strong>{formatDate(rr.settlementDueDate)}</strong> <em>(DP+7)</em></div>
+                      ) : null}
                     </td>
                     <td data-label="Status"><StatusBadge status={rr.status} /></td>
                     <td data-label="Risiko"><span className={`renew-risk-pill ${riskBadge.tone}`}>{riskBadge.label}</span></td>
