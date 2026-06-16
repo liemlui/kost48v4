@@ -41,6 +41,11 @@ Detail SI sudah diserap ke M04/M05/M08; source ringkas diarsipkan di `docs/archi
   bukan jumlah uang). **Bugfix**: `generateTicketNumberTx` pakai `$executeRaw` (bukan `$queryRaw`) untuk
   `pg_advisory_xact_lock` — Prisma 7 menolak kolom `void` → pembuatan tiket 500 (kini normal). Seeder +4
   tiket/3 tip-ack. Verified: tipCount=3, TB tetap seimbang.
+- **U-1** `ba1ba05` — Komponen Tab segmen SEMANTIK reusable (`components/common/SegmentedTabs.tsx`:
+  role=tablist/tab + keyboard + ikon) dipasang di filter staf (dashboard/tiket/gudang).
+- **FIX CORS dev** — `main.ts`: dev kini izinkan **semua origin localhost/127.0.0.1 port apa pun**
+  (Vite bisa geser 5173→5174→5175) meski `.env CORS_ORIGIN` hanya 5173 → login dari **5174** sempat
+  diblokir browser (curl jalan, browser gagal). Produksi tetap wajib CORS_ORIGIN eksplisit. Verified: fetch dari origin 5174 → 201.
 - Sebelumnya (sesi sama): **Meter M-1/M-2/M-3** (konstanta owner-settable, siklus listrik+air auto-invoice,
   pencatatan mandiri tenant). Detail: `docs/_PROPOSAL_METER_LISTRIK_AIR.md`.
 
@@ -89,6 +94,13 @@ Detail SI sudah diserap ke M04/M05/M08; source ringkas diarsipkan di `docs/archi
   - [x] **runbook schema+bootstrap REHEARSED** (2026-06-13, DB throwaway 5433): db push 41 tabel + bootstrap.sql+addendum BERSIH (2 uidx + 7 chk + 8 trigger + 231 index); DB di-drop, UAT utuh. ⚠️ **Temuan:** DB fresh tak punya user → tambah langkah #0 buat OWNER pertama (lihat `04_DEPLOY §2`).
   - [x] **DB produksi `kost48_v3` diprovisikan + di-seed** (2026-06-13, lokal-as-prod 5433 karena 5432/VPS tak ada): create+push+bootstrap+addendum → seed OWNER(liem.lui) + COA(37) + periode 2026-06 OPEN + CashAccount Cash(1000)+Bank(1010); opening NOL (mulai nol). Smoke LULUS (login OWNER, public/rooms 200, TB balanced, recon mismatch=0, cashflow depositLiability live). readiness=75 (opening/journal pending = normal zero-start).
   - [ ] **go-live nyata** = menunggu env produksi: jalankan backend di server prod (5432/VPS, NODE_ENV=production, domain+HTTPS) atau pg_dump→restore ke 5432; ganti password OWNER (admin123→real); set opening balance bila ada modal awal.
+    - [ ] Konfirmasi target deploy final: VPS/cPanel, domain, HTTPS, PostgreSQL prod 5432, dan env rahasia siap.
+    - [ ] Jalankan fresh provision sesuai M08: DB kosong → `prisma db push` → bootstrap/addendum → seed OWNER pertama → seed COA/periode/cash account.
+    - [ ] Set env produksi wajib: `NODE_ENV=production`, JWT secret kuat, CORS domain final, VAPID keys, `KTP_ACTIVATION_GATE_ENABLED=true`.
+    - [ ] Ganti password OWNER dummy/dev menjadi password real sebelum dipakai owner.
+    - [ ] Isi opening balance hanya jika ada modal/saldo awal nyata; kalau mulai nol, dokumentasikan keputusan zero-start.
+    - [ ] Smoke test prod: login OWNER, public rooms 200, create booking dummy kecil bila aman, trial balance balanced, readiness tidak ada blocker merah.
+    - [ ] Catat hasil go-live di changelog dan update status F1-12.
 
 #### FASE 2 — PASCA DEPLOY (flow & model)
 - [x] **F2-1** [BESAR][SCHEMA] Renewal DP penuh (GAP #2) — dossier **11 §5** · **schema approved S-1 (2026-06-13)**. **DIAUDIT ULANG DAN DIPERBAIKI 2026-06-14.** Renewal kini benar-benar dua fase: DP harus `PAID`; admin mencatat meter dan menerbitkan invoice pelunasan (`settlementInvoiceId`) tanpa mengubah periode stay; tenant membayar lewat proof flow; hanya invoice pelunasan `PAID` dalam H+7 yang boleh memfinalkan stay dan status `COMPLETED`. Endpoint direct-renew dinonaktifkan agar gate ini tidak dapat dilewati. Penolakan `AWAITING_DP` membatalkan invoice belum bayar beserta reversal jurnal; setelah `DP_SECURED` tidak boleh ditolak sembarang. Frontend tenant/admin menyediakan keputusan YA/TIDAK, konfirmasi DP, penerbitan pelunasan, tautan invoice, dan finalisasi. Prompt H-10, fallback portal, serta kebijakan FORFEITED manual tetap berlaku. Backend/frontend build lulus; regression renewal masuk total unit test 26/26 hijau.
@@ -114,6 +126,11 @@ Detail SI sudah diserap ke M04/M05/M08; source ringkas diarsipkan di `docs/archi
 - [x] **F3-1** Notif coverage 5 event + K-8 penerima (SELESAI 2026-06-14) — dossier **16**. **ticket-assign→assignee** (notif saat assignee berubah, skip self-assign); **K-6/K-8** BARANG_PINDAH closed → notif ke **staf assignee** (dulu keliru `actor.id`) di LUAR tx; **room-ready** CHECKOUT_INSPECTION close → kamar AVAILABLE → notif OWNER/ADMIN (dedupe `createOnce`). **wifi-order** = lewat WhatsApp (`WifiOrderPage`), tak ada event in-app. sweeper-cancel sudah di F2-17. Terisolasi di `tickets.service.ts`, tsc 0 utk file ini. (build penuh tertunda: WIP renewal agen lain di tree.)
 - [x] **F3-2** Inbox admin payment-submitted — **SELESAI 2026-06-14** · setelah submission commit, semua OWNER/ADMIN aktif menerima notifikasi dedupe berisi tenant, nominal, invoice, kamar, dan deep-link `/payment-submissions/review`; kegagalan notifikasi tidak membatalkan submission. **UAT rollback real DB:** 3 penerima aktif menghasilkan tepat 3 notifikasi meski helper dipanggil dua kali, residu 0.
 - [ ] **F3-3** SEO dasar — **IMPLEMENTASI SELESAI 2026-06-14; LIGHTHOUSE TERTUNDA** · OG/Twitter Card, JSON-LD `LodgingBusiness`, canonical, `robots.txt`, dan `sitemap.xml` tersedia. Build dan verifikasi statis lulus; target Lighthouse SEO ≥90 belum dapat diukur karena konektor browser lokal gagal dijalankan.
+  - [ ] Jalankan Lighthouse pada build/preview frontend final, minimal home dan katalog publik.
+  - [ ] Simpan skor SEO/Performance/Accessibility dan catat command/URL yang dipakai.
+  - [ ] Verifikasi title, meta description, canonical, robots, sitemap, OG/Twitter Card, dan JSON-LD masih valid setelah re-theme publik.
+  - [ ] Pastikan gambar publik utama punya alt text dan tidak merusak LCP.
+  - [ ] Jika skor SEO <90, fix dulu sebelum mencentang F3-3.
 - [x] **F3-4** Social proof home (D-09) — **SELESAI 2026-06-14** · endpoint publik hanya mengekspos ulasan visible rating≥4, agregat rating, inisial tenant, dan count penghuni aktif terpromosi. Guest page menampilkan statistik serta ulasan terbaru. **UAT real DB:** 11 penghuni aktif, 0 ulasan visible; build backend/frontend lulus.
 - [x] **F3-7** Occupancy heatmap (D-15: historis+berjalan+depan) — **SELESAI 2026-06-14** · endpoint owner `/api/reports/occupancy-daily?from&to` dan kalender CSS-grid 12 bulan historis + 3 bulan proyeksi tersedia. Checkout aktual bersifat eksklusif; planned checkout dipakai untuk proyeksi. **UAT real DB:** 14 hari, 19 kamar operasional, occupied≤operable; unit test boundary lulus.
 - [x] **F3-9** Hierarki laporan (SELESAI 2026-06-14) — dossier **13**. **F-11** badge tier `ReportSection` (≈ Estimasi default utk laporan operasional /reports; ✓ Formal utk jurnal) + banner hierarki yang mengarahkan ke tab "Laporan Formal". **F-12** filter unmapped tetap via gate `fetchFormalRatiosReadiness`/`LockedFormalRatios` yang sudah ada (formal terbuka hanya saat ter-map, konsisten readiness). `frontend npm run build` LULUS (95 chunk). (F-31 pembulatan = F4-10, terpisah.)
@@ -165,7 +182,17 @@ Detail SI sudah diserap ke M04/M05/M08; source ringkas diarsipkan di `docs/archi
 - [x] **AUD-prabayar (A-5/A-6/A-7/B-4) → F5-8 SELESAI** A-6 blokir saat menunggak · A-7 poin prabayar · A-5 tarif diskon SMESTERLY/YEARLY · B-4 sudah berlaku (no-change). UAT TB seimbang (D-21.4).
 - [x] **AUD-6 🟠 (A-1) → SELESAI** Readiness period-close kini punya gate **`rent-recognition-due`**: tutup periode DIBLOKIR bila ada baris `RentRecognitionSchedule` jatuh tempo (`periodStart ≤ akhir periode`) yang belum diakui → cegah recognition stranded. (`accounting-period-close.service.ts`; read-only, tsc 0, unit 47/47.)
 - [ ] **AUD-7 🟡 race minor** (risiko rendah, 1 admin): overspend poin (B-1), stok reward negatif (B-2), toRoom tak di-lock (C-2). Fix saat skala naik: row lock / serializable.
+  - [ ] Tambahkan row lock/transaction guard saat redemption memakai poin agar saldo tidak bisa overspend pada request paralel.
+  - [ ] Tambahkan lock/check stok reward sebelum approve/fulfill agar stok tidak negatif.
+  - [ ] Tambahkan lock kamar tujuan pada flow pindah kamar sebelum commit perubahan stay/room.
+  - [ ] Tambahkan unit/integration test concurrency minimal untuk overspend poin dan stok reward.
+  - [ ] Jalankan backend `tsc` + test terkait; catat residual risk jika tetap ditunda karena 1 admin.
 - [ ] **AUD-8 🟠 WARISAN (A-8, di luar Fase 4)** Auto-journal **best-effort** di flow lama (invoice issue/payment/cancel/expense/wifi/deposit-received) — bila posting gagal, operasi tetap jalan tanpa jurnal. Pertimbangkan blocking + reconciliation otomatis (R1/R2 audit lama `FLOW_AUDIT_LAPORAN.md`).
+  - [ ] Audit ulang semua flow lama yang masih bisa membuat transaksi uang tanpa jurnal blocking.
+  - [ ] Tentukan kebijakan per flow: blocking wajib, auto-reconciliation, atau tetap best-effort dengan alert owner.
+  - [ ] Pastikan `runAutoJournalReconciliation` mencakup gap yang dipilih dan idempotent.
+  - [ ] Tambahkan alert OWNER/ADMIN bila ada transaksi operasional tanpa jurnal setelah sweeper.
+  - [ ] UAT minimal: invoice issue/payment/cancel, expense, wifi, deposit-received → trial balance balanced.
 > **Semua abu-abu TERJAWAB (D-21 + D-22, 2026-06-15):** A-5/A-6/A-7/B-4 (AUD-prabayar), D-6 (AUD-2), L-1 (D-22.1), AUD-5+AC-vendor (D-22.2), AUD-4 FAQ (D-22.3), B-9 referral (D-22.4). → semua jadi **Fase 5 tindak-lanjut audit**; item schema (penanda vendor AC, jam-pakai AC) menunggu proposal+approval.
 
 ##### 🔍 AUDIT MENYELURUH SEMUA FASE (2026-06-15 — `docs/AUDIT_MENYELURUH_SEMUA_FASE.md`)
@@ -174,6 +201,10 @@ Detail SI sudah diserap ke M04/M05/M08; source ringkas diarsipkan di `docs/archi
 - [x] **L-1 🟠 (= AUD-8/A-8) → F5-6 SELESAI** Sweeper `runAutoJournalReconciliation` (backfill jurnal warisan yang bolong + alert OWNER/ADMIN, di runAll sebelum auto-close; endpoint manual). UAT: backfill 1 invoice, TB seimbang, idempoten (D-22.1).
 - [x] **B-9 🟡 → F5-5 SELESAI** Field `referredByCode` di pendaftaran tenant admin/portal → `linkReferralTx` (D-22.4).
 - [ ] **L-2 🟡 (= F-30)** Dedupe deposit-ledger belum pakai `invoicePaymentId` (kolom ada, kunci masih `paymentSubmissionId ?? stayId`). Dampak sangat rendah (deposit diterima 1×/stay).
+  - [ ] Telusuri semua jalur deposit ledger: booking DP, deposit received manual, invoice payment, checkout settlement.
+  - [ ] Ubah dedupe key agar memakai `invoicePaymentId` saat tersedia; fallback lama hanya untuk jalur historis/dev.
+  - [ ] Tambahkan test idempotency: pembayaran invoice sama tidak membuat ledger deposit ganda.
+  - [ ] Verifikasi deposit reconciliation tetap MATCHED dan trial balance balanced.
 - [x] **L-3 🟡 → SELESAI** Jurnal reward kini per tipe (`postRewardFulfillmentTx`): **RENT_DISCOUNT → DR 4000**, **METER_DISCOUNT → DR 4100** (kontra-pendapatan), SERVICE_ADDON/PHYSICAL → DR 6300 (beban); fallback aman ke 6300. UAT (`scripts/uat-l3...js`) LULUS: semua jurnal seimbang per tipe. Dossier 19 disinkron.
 - [x] **L-4 🟡 GO-LIVE → SELESAI (docs)** Gate aktivasi KTP default OFF (`KTP_ACTIVATION_GATE_ENABLED`). **WAJIB set `=true` di produksi** — sudah masuk runbook `04_DEPLOY` (checklist env + langkah cPanel #6).
 - [x] **L-5 🟡 → SELESAI (terukur)** SEO Lighthouse **100/100** (LH 12.8.2, headless Chrome atas build dist, halaman home) — 10 audit lulus (is-crawlable, document-title, meta-description, http-status, link-text, crawlable-anchors, robots-txt, image-alt, hreflang, canonical); structured-data = N/A (cek manual, JSON-LD ada). Target ≥90 TERLAMPAUI. _(UD-04/V-7 kosmetik tetap backlog UI.)_
@@ -208,23 +239,139 @@ Detail SI sudah diserap ke M04/M05/M08; source ringkas diarsipkan di `docs/archi
 - [x] **DOCS** Spec `_PROPOSAL_METER_LISTRIK_AIR.md` (M-1..M-5) + `_PROPOSAL_MARKETING_GAMIFIKASI_TIP.md` (tip/gamifikasi/marketing/cross-sell) + CHANGELOG 2026-06-16.
 
 ##### Sedang dikerjakan / BELUM
-- [ ] **METER M-3** Pencatatan **mandiri tenant** (auto-issue invoice "system-issued", keputusan owner) — **backend SELESAI** (cycle izinkan TENANT kamar-sendiri + `createWithLinesAndIssue` opsi `systemIssued`; GET `/settings/operational` dibuka semua role); **frontend portal tenant + badge "Catat meter" H-10 (backoffice+portal) = BELUM**.
-- [ ] **METER M-4** "Bayar sekaligus" (group invoice sewa + meter OPEN) + catatan "belum termasuk listrik" di invoice sewa.
-- [ ] **METER M-5** Checkout: tagihan meter terakhir dipotong dari deposit jaminan + teks marketing publik (listrik pascabayar, no sisa saldo).
-- [ ] **STF-GUDANG-2** Stok-min otomatis barang fasilitas (AC/kipas) = jumlah kamar pemakai + standar semua kamar punya kipas (marketing hemat listrik). [logika/data]
-- [ ] **STF-THEME** Percantik SEMUA route staf (satu pass: ikon, warna, komponen Tab yang sesuai) + screenshot review.
-- [ ] **TEN-GAMIF** Poin = ukuran kebaikan + total dikumpulkan/ditukar/sisa · rank Top 3 **kamar (anonim)** · ranking kebersihan depan kamar bulanan.
-- [ ] **TIP+** Tambah ShopeePay di tip staf (F4-14/F5-2 sudah ada e-wallet) + narasi tenant "uang kopi" + tombol terima kasih + tip→poin + tip-count di laporan kinerja.
-- [ ] **OWN-STRUKTUR** Pisah area "fitur admin" vs "khusus owner" di app owner + **kartu status besar** (pola kartu staf) di Admin & Owner.
-- [ ] **FASE B-2** Gabung 4 menu stok (inventaris/barang kamar/mutasi/gudang) jadi tab dalam satu halaman.
-- [ ] **MKT** Marketing high-level: SWOT/PESTLE owner-editable → narasi onboarding & web · pembanding kompetitor · survey guest · cross-sell perpanjangan (WiFi/bantuan bersih) · kebijakan perbaikan GRATIS (lampu/kran/shower/bocor).
-- [ ] **MG-UI-01** Re-theme landing publik modern (lihat M07): konsep KOST48 tetap, warna/konten existing tetap, tetapi presentasi dibuat lebih modern seperti referensi Marshiba: hero immersive, capsule/sticky nav, CTA kuat, section story, dan card kamar premium.
-- [ ] **MG-UI-02** Proof strip publik: tampilkan data marketing yang valid (lokasi Surabaya Barat/Pakuwon-PTC, rating/ulasan visible, penghuni aktif, booking online, Google Maps/CCTV, dan status ketersediaan) tanpa klaim palsu.
-- [ ] **MG-UI-03** Section "Living System": jual nilai web app KOST48 sebagai pembeda kos lain — invoice jelas, riwayat sewa, laporan kerusakan, loyalty, referral, dashboard tenant, listrik pascabayar/30 kWh gratis.
-- [ ] **MG-UI-04** Audit aset foto marketing: pilih foto hero, foto kamar unggulan, fallback foto rusak, ukuran web yang ringan, alt text, lazy-load, dan dimensi stabil agar LCP tidak turun.
-- [ ] **MG-UI-05** Verifikasi re-theme publik: screenshot Playwright desktop/mobile, cek overlap teks/CTA, Lighthouse SEO tetap >=90, LCP target <2.5s, reduced-motion, dan build+PWA verify lulus.
-- [ ] **AUDIT-OWNER** Sisa temuan audit owner: overflow Settings/Notif · spinner full-page antar-tab · fallback foto rusak · judul tab browser per-route · konsistensi "tersedia" owner vs publik · /rooms shared URL · "Laporan Formal" dangling.
-- [ ] **CSS+SWEEP** Konsolidasi CSS `.app-shell*` duplikat (6 file) + sweep responsif penuh semua role + sisir teks tanpa-spasi lain.
+- [ ] **METER M-3** Pencatatan **mandiri tenant** (auto-issue invoice "system-issued", keputusan owner) — **backend SELESAI**; frontend portal tenant + badge H-10 belum.
+  - [ ] Tambah entry point di portal tenant untuk kamar aktif: tombol/kartu "Catat Meter" saat masuk jendela H-10 atau saat ada kebutuhan catat.
+  - [ ] Form tenant hanya boleh menampilkan kamar/stay milik tenant aktif; blok akses tenant lain.
+  - [ ] Tampilkan angka meter terakhir, kuota gratis 30 kWh, tarif listrik, status air aktif/tidak, dan estimasi tagihan sebelum submit.
+  - [ ] Submit memakai endpoint cycle yang sudah mengizinkan TENANT kamar-sendiri; tampilkan invoice system-issued bila ada.
+  - [ ] Tambah badge "Catat meter" di backoffice dan portal saat due window, termasuk empty state bila belum waktunya.
+  - [ ] UAT: tenant submit listrik di atas kuota → invoice meter terbit; listrik di bawah kuota → tidak ada invoice; tenant kamar lain → 403.
+  - [ ] Verifikasi frontend build + PWA verify.
+- [ ] **METER M-4** "Bayar sekaligus" invoice sewa + meter OPEN, plus catatan "belum termasuk listrik" di invoice sewa.
+  - [ ] Tentukan grouping invoice yang aman: sewa OPEN + meter OPEN untuk stay yang sama, bukan invoice tenant lain/periode lain.
+  - [ ] Tambah UI tenant "Bayar sekaligus" dengan ringkasan komponen: sewa, listrik, air, denda bila ada.
+  - [ ] Pastikan proof payment bisa mengait ke beberapa invoice atau buat payment batch yang tetap audit-able.
+  - [ ] Tambah copy di invoice sewa: "belum termasuk listrik/air berjalan bila belum dicatat".
+  - [ ] UAT: bayar gabungan membuat semua invoice terkait PAID dan jurnal tetap seimbang.
+- [ ] **METER M-5** Checkout meter terakhir dipotong dari deposit jaminan + teks marketing publik listrik pascabayar/no token.
+  - [ ] Saat checkout, wajib catat meter final sebelum deposit settlement bila meter belum final.
+  - [ ] Hitung tagihan meter final dan net-kan terhadap deposit sesuai aturan liability.
+  - [ ] Jika deposit kurang, terbitkan invoice sisa; jika deposit lebih, proses refund/settlement normal.
+  - [ ] Tambahkan narasi publik: listrik pascabayar, 30 kWh gratis, tanpa sisa saldo token, transparan di invoice.
+  - [ ] UAT checkout: deposit cukup, deposit kurang, meter final nol, trial balance balanced.
+- [ ] **STF-GUDANG-2** Stok-min otomatis barang fasilitas (AC/kipas) + standar semua kamar punya kipas.
+  - [ ] Pastikan data fasilitas kamar punya penanda kipas dan AC yang konsisten.
+  - [ ] Set semua kamar punya kipas di data/seed/dev dummy sesuai keputusan owner.
+  - [ ] Hitung stok minimum item fasilitas = jumlah kamar pemakai fasilitas itu.
+  - [ ] Tandai status stok otomatis: Aman/Menipis/Habis/Masalah berdasarkan stok aktual vs minimum.
+  - [ ] Tampilkan alasan status di UI gudang agar staf paham kenapa item dianggap menipis.
+  - [ ] UAT: jumlah kamar berkipas berubah → min stok kipas berubah; item non-fasilitas tetap pakai min manual.
+- [ ] **STF-THEME** Percantik semua route staf dalam satu pass.
+  - [ ] Inventarisasi route staf: dashboard, tugas, laporan bulanan, barang kamar, gudang, profil/notifikasi.
+  - [ ] Standarkan header, tab, icon, status color, empty state, loading, dan spacing.
+  - [ ] Pastikan komponen tab tidak memakai tombol teks bila icon/segmented control lebih cocok.
+  - [ ] Rapikan mobile/tablet: tidak ada overflow, dropdown tidak tertutup, tombol aksi tidak saling menumpuk.
+  - [ ] Screenshot Playwright minimal desktop + mobile untuk route staf utama.
+- [ ] **TEN-GAMIF** Gamifikasi tenant lanjutan.
+  - [ ] Ubah copy saldo menjadi "poin kebaikan", bukan nilai uang.
+  - [ ] Tampilkan ringkasan total dikumpulkan, sudah ditukar, dan sisa.
+  - [ ] Top 3/Top 5 tampil kamar saja, anonim penuh; jangan tampil nama pribadi.
+  - [ ] Tambah sumber data ranking kebersihan depan kamar bulanan: audit staf/admin atau checklist kebersihan.
+  - [ ] Tampilkan ranking kebersihan sebagai permainan ringan, bukan mempermalukan tenant.
+  - [ ] UAT privacy: tenant tidak bisa melihat identitas tenant lain dari leaderboard.
+- [ ] **TIP+** Tip staf P2P versi penuh.
+  - [ ] Tambah field ShopeePay di tip info staf.
+  - [ ] Tambah narasi tenant "uang kopi" setelah tiket selesai; tekankan sukarela dan langsung ke staf.
+  - [ ] Tambah tombol "Terima kasih" agar staf bisa acknowledge tip.
+  - [ ] Jika tenant mencatat memberi tip, award poin kebaikan dengan idempotency.
+  - [ ] Tambah tip-count di laporan kinerja tanpa menjurnal nominal ke buku kos.
+  - [ ] UAT: tip tidak muncul di laporan keuangan, tetapi poin/ack/count bekerja.
+- [ ] **OWN-STRUKTUR** Pisah fitur admin vs fitur khusus owner + kartu status besar.
+  - [ ] Audit navigasi owner: tandai menu yang sifatnya operasional admin vs keputusan owner.
+  - [ ] Kelompokkan UI owner menjadi "Operasional" dan "Khusus Owner" tanpa menghapus akses admin-like milik owner.
+  - [ ] Tambah kartu status besar untuk keuangan, okupansi, tunggakan, tiket mendesak, meter due, dan readiness go-live.
+  - [ ] Pastikan ADMIN tidak mendapat fitur khusus OWNER.
+  - [ ] Screenshot owner desktop/mobile setelah regroup.
+- [ ] **FASE B-2** Gabung 4 menu stok menjadi satu halaman tab.
+  - [ ] Tentukan tab final: Inventaris, Barang Kamar, Mutasi, Gudang.
+  - [ ] Pindahkan entry point lama ke route baru atau redirect agar tidak ada menu ganda.
+  - [ ] Samakan filter area/kategori/status stok lintas tab.
+  - [ ] Pastikan aksi mutasi/penggantian barang tetap memakai flow lama yang aman.
+  - [ ] UAT: stok masuk, stok keluar, barang kamar rusak, pengganti gudang sejenis.
+- [ ] **MKT** Umbrella marketing high-level; selesai bila MKT-1..MKT-5 minimal P0-P3 selesai dan MG-UI masuk verifikasi.
+- [ ] **MKT-1** BusinessNarrative/AppSetting untuk analisa owner-editable.
+  - [ ] Tentukan model penyimpanan: `BusinessNarrative` baru atau reuse `AppSetting` terstruktur.
+  - [ ] Field minimal: SWOT, PESTLE, value proposition, competitor comparison, proof source, service policy, lastReviewedAt.
+  - [ ] Backend CRUD OWNER-only; ADMIN read-only bila perlu.
+  - [ ] UI Settings owner dengan editor ringkas, preview, dan status "butuh review".
+  - [ ] Seed default dari M07: lokasi, booking online, CCTV, Maps, 30 kWh gratis, listrik pascabayar, laporan kerusakan.
+  - [ ] UAT: owner edit → tersimpan → bisa dibaca public/onboarding endpoint.
+- [ ] **MKT-2** Narasi otomatis dari MKT engine.
+  - [ ] Buat helper yang mengubah BusinessNarrative menjadi copy pendek untuk landing, katalog, onboarding, FAQ, dan "Living System".
+  - [ ] Terapkan fallback bila owner belum mengisi narasi.
+  - [ ] Semua klaim harus punya sumber: data sistem, keputusan owner, atau input owner.
+  - [ ] Jangan generate klaim ulasan/rating bila data social proof kosong.
+  - [ ] UAT: kosong → fallback aman; terisi → copy publik berubah tanpa deploy.
+- [ ] **MKT-3** Survey guest/prospek.
+  - [ ] Tentukan lokasi survey: setelah lihat detail kamar, setelah batal booking, atau CTA ringan di katalog.
+  - [ ] Pertanyaan minimal: asal kanal, alasan memilih, hambatan booking, budget, fasilitas prioritas, alasan batal.
+  - [ ] Simpan anonim bila belum login; tautkan ke booking bila user melanjutkan booking.
+  - [ ] Dashboard ringkas hasil survey untuk owner.
+  - [ ] Pastikan tidak mengganggu conversion; survey bisa ditutup/skip.
+- [ ] **MKT-4** CAC/CLV lite dashboard owner.
+  - [ ] Query bookingSource per bulan: leads/booking, booking menjadi stay aktif, dan conversion proxy.
+  - [ ] Hitung renewal rate, rata-rata lama tinggal, referral impact, loyalty impact.
+  - [ ] Estimasi CLV konservatif berbasis revenue/stay historis; label "estimasi".
+  - [ ] Paid CAC hanya muncul bila owner input biaya iklan/marketing per kanal.
+  - [ ] Visualisasi sederhana dengan Recharts; jangan tambah library baru.
+- [ ] **MKT-5** Cross-sell renewal dan service add-on.
+  - [ ] Saat renewal, tawarkan WiFi, bantuan bersih kamar, dan service add-on lain tanpa memaksa.
+  - [ ] Jelaskan bantuan bersih kamar = opsional, dapat memberi tip langsung ke staf, bukan tagihan kos.
+  - [ ] Tampilkan kebijakan perbaikan gratis untuk kerusakan wajar.
+  - [ ] Masukkan meter/listrik pascabayar sebagai value proposition publik.
+  - [ ] UAT: renewal tetap bisa lanjut tanpa memilih add-on.
+- [ ] **MG-UI-01** Re-theme landing publik modern.
+  - [ ] Audit halaman publik saat ini: home/rooms/detail/guest dashboard dan CSS `11-public-pages.css`.
+  - [ ] Buat hero immersive dengan foto nyata KOST48, headline jelas, CTA "Lihat Kamar"/"Booking Sekarang", dan CTA sekunder WhatsApp/Maps.
+  - [ ] Navbar capsule/sticky dengan CTA menonjol, responsive, dan tidak menutup konten.
+  - [ ] Card kamar premium: foto besar, harga, status, fasilitas, badge hemat listrik, CTA detail.
+  - [ ] Scroll/section story ringan memakai CSS/IntersectionObserver; hormati `prefers-reduced-motion`.
+- [ ] **MG-UI-02** Proof strip publik berbasis data valid.
+  - [ ] Ambil data: lokasi, rating/ulasan visible, penghuni aktif, booking online, Maps/CCTV, status ketersediaan.
+  - [ ] Tampilkan proof strip dekat hero tanpa klaim palsu.
+  - [ ] Empty state jujur bila ulasan/rating belum ada.
+  - [ ] Pastikan proof strip mobile tidak memanjang berlebihan.
+- [ ] **MG-UI-03** Section "Living System".
+  - [ ] Buat section yang menjual invoice jelas, riwayat sewa, laporan kerusakan, loyalty, referral, dashboard tenant, dan listrik pascabayar.
+  - [ ] Gunakan copy dari MKT-2 bila tersedia; fallback statis dari M07 bila belum.
+  - [ ] CTA ke katalog/booking, bukan ke fitur internal yang butuh login.
+  - [ ] Jangan tampilkan data tenant pribadi.
+- [ ] **MG-UI-04** Audit aset foto marketing.
+  - [ ] Pilih foto hero, foto kamar unggulan, fallback foto rusak, dan thumbnail katalog.
+  - [ ] Pastikan ukuran web ringan, `loading=lazy` untuk non-hero, dimensi/aspect-ratio stabil, dan alt text deskriptif.
+  - [ ] Hapus/abaikan foto yang gelap, blur, terlalu crop, atau tidak menjual kamar.
+  - [ ] Verifikasi tidak ada CLS saat gambar load.
+- [ ] **MG-UI-05** Verifikasi re-theme publik.
+  - [ ] Build frontend + PWA verify lulus.
+  - [ ] Screenshot Playwright desktop/mobile untuk home, katalog, detail kamar.
+  - [ ] Cek overlap teks/CTA, hover/focus, keyboard navigation, reduced-motion.
+  - [ ] Lighthouse SEO tetap >=90; catat skor.
+  - [ ] LCP target <2.5s atau catat blocker konkret bila aset foto belum optimal.
+- [ ] **AUDIT-OWNER** Sisa temuan audit owner.
+  - [ ] Fix overflow Settings/Notif di desktop dan mobile.
+  - [ ] Hilangkan spinner full-page antar-tab; gunakan loading lokal/skeleton.
+  - [ ] Tambah fallback foto rusak untuk public/owner room image.
+  - [ ] Judul tab browser per-route.
+  - [ ] Konsistensi label "tersedia" owner vs publik.
+  - [ ] `/rooms` shared URL harus stabil dan tidak bergantung state internal.
+  - [ ] Hapus/perbaiki "Laporan Formal" dangling.
+  - [ ] Screenshot route owner utama setelah fix.
+- [ ] **CSS+SWEEP** Konsolidasi CSS dan sweep responsif.
+  - [ ] Inventaris `.app-shell*` duplikat di 6 file CSS.
+  - [ ] Pilih sumber kebenaran layout shell; pindahkan override yang sah, hapus konflik.
+  - [ ] Sweep responsive semua role: owner, admin, staff, tenant, publik.
+  - [ ] Sisir teks tanpa spasi/overflow di tombol, card, tab, modal, dan tabel.
+  - [ ] Build frontend dan screenshot spot-check setelah sweep.
 
 > Legenda marker: **🧬 / [SCHEMA]** = perlu perubahan schema additive (WAJIB approval owner dulu) · **🧑 / [OWNER]** = langkah manusia/owner · **[BESAR]** = task besar, desain lengkap sudah ada di dossier.
 

@@ -45,7 +45,17 @@ async function bootstrap() {
     }
     app.enableCors({ origin: corsOrigin.split(','), credentials: true });
   } else {
-    app.enableCors({ origin: process.env.CORS_ORIGIN?.split(',') ?? ['http://localhost:5173'], credentials: true });
+    // Dev: SELALU izinkan localhost/127.0.0.1 di port mana pun (Vite bisa bergeser 5173→5174→5175
+    // saat port dipakai) — meski CORS_ORIGIN di .env hanya menyebut satu port. Origin eksplisit
+    // non-localhost dari CORS_ORIGIN tetap diizinkan. Produksi tetap wajib CORS_ORIGIN eksplisit (atas).
+    const allowList = (process.env.CORS_ORIGIN?.split(',') ?? []).map((s) => s.trim()).filter(Boolean);
+    app.enableCors({
+      origin: (origin: string | undefined, cb: (err: Error | null, allow?: boolean) => void) => {
+        const ok = !origin || /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin) || allowList.includes(origin);
+        cb(null, ok);
+      },
+      credentials: true,
+    });
   }
 
   // ── Security headers (avoid Helmet dependency) ──────────────────────────────
