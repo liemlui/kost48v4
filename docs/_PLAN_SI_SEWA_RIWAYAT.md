@@ -29,9 +29,13 @@ Seri tugas **SI** (Sewa & Integritas data). Compact, gaya MXX. Terkait dossier `
 - **SI-2 — Audit + perjelas aturan perpanjangan:** pastikan tak bisa perpanjang **setelah** hari-H lewat
   (EXPIRED_PRIORITY → kamar dibuka); tampilkan eksplisit di UI: basis = akhir kontrak lama, "DP ≤ {hari-H}",
   "pelunasan ≤ {DP+7}", sisa hari. Tidak ada perubahan aturan—hanya transparansi + guard tepi.
-- **SI-3 — UI riwayat sewa (timeline):** kartu kronologi di detail stay (admin) + portal tenant:
-  *Masuk {checkInDate} → Periode 1 {a→b} → Perpanjang Periode 2 {b→c} …*, tiap periode tertaut
-  invoice-nya (sewa/DP/pelunasan/meter). Jelas, tidak membingungkan.
+- **SI-3 — UI riwayat sewa (timeline) — ✅ SELESAI 2026-06-16:** komponen
+  `components/stays/StayHistoryTimeline.tsx` (kronologi vertikal): *Masuk kos {checkInDate} +
+  deposit → Periode 1 (awal) {a→b} → Perpanjangan Periode 2 {b→c} …* (periode diturunkan dari
+  invoice RENT, urut periodStart) tiap periode ber-badge peruntukan + status (Lunas/Belum/Sebagian)
+  + total + **klik ke invoice**; node "Tagihan listrik/air" untuk utilitas; node "Kontrak berjalan
+  s/d {plannedCheckOut}". Dipasang di detail stay backoffice (StayDetailPage, href `/invoices/:id`)
+  + portal tenant (MyStayPage, href `/portal/invoices/:id`). tsc 0; verified screenshot owner+tenant.
 - **SI-4 — Label peruntukan invoice — ✅ SELESAI 2026-06-16:** util `invoicePurposeLabel` +
   `invoicePurposeMeta` (badge ikon+warna) di `utils/invoiceUtility.ts` menurunkan peruntukan
   dari `InvoiceLineType` (RENT→"Sewa", ELECTRICITY→"Listrik", WATER→"Air", gabungan→"Listrik & Air"/

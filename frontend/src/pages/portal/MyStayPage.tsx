@@ -14,6 +14,7 @@ import { listMyPaymentSubmissions } from '../../api/paymentSubmissions';
 import CheckoutRequestModal from '../../components/checkout-requests/CheckoutRequestModal';
 import RenewRequestModal from '../../components/tenant/RenewRequestModal';
 import MeterCycleModal from '../../components/stays/MeterCycleModal';
+import StayHistoryTimeline from '../../components/stays/StayHistoryTimeline';
 import { useAuth } from '../../context/AuthContext';
 import { useTenantPortalStage } from '../../hooks/useTenantPortalStage';
 import type { PaginatedResponse } from '../../types';
@@ -591,6 +592,9 @@ function ActiveStayContent({ stay }: { stay: Stay }) {
       {renewDisabledReason ? (
         <p className="text-muted small mb-3">{renewDisabledReason}</p>
       ) : null}
+
+      {/* SI-3: riwayat sewa (masuk → tiap periode → tagihannya) */}
+      <StayHistoryTimeline stay={stay} invoices={invoices} invoiceHrefBase="/portal/invoices" />
 
       {/* ── State alerts ── */}
       {pendingDecisionRequest ? (

@@ -13,6 +13,7 @@ import CompleteStayModal from '../../components/stays/CompleteStayModal';
 import ProcessDepositModal from '../../components/stays/ProcessDepositModal';
 import CancelStayModal from '../../components/stays/CancelStayModal';
 import RenewStayModal from '../../components/stays/RenewStayModal';
+import StayHistoryTimeline from '../../components/stays/StayHistoryTimeline';
 import ApproveCheckoutModal from '../../components/checkout-requests/ApproveCheckoutModal';
 import RejectCheckoutModal from '../../components/checkout-requests/RejectCheckoutModal';
 import { approveCheckoutRequest, listAdminCheckoutRequests, rejectCheckoutRequest } from '../../api/checkoutRequests';
@@ -259,6 +260,7 @@ export default function StayDetailPage() {
 
       <ReadinessChecklist title="Safety Belt Checkout" subtitle="Cek tagihan, meter, kamar, deposit." items={readinessItems} />
       <LifecycleTimeline title="Alur Masa Sewa" subtitle="Alur dari masuk sampai keluar selesai." steps={timelineSteps} />
+      <StayHistoryTimeline stay={stay} invoices={invoices} invoiceHrefBase="/invoices" />
 
       <Card className="detail-hero border-0 mb-4">
         <Card.Body>
