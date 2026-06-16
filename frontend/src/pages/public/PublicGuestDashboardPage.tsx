@@ -232,6 +232,9 @@ function GuestTopbar({ scrolled }: { scrolled: boolean }) {
       </Link>
       <nav className="gx-nav" aria-label="Navigasi">
         {NAV_LINKS.map((l) => <a key={l.href} href={l.href} className="gx-nav-link">{l.label}</a>)}
+        <Link to="/login" className="gx-nav-link gx-nav-login" style={{ marginLeft: 'auto', fontWeight: 600 }}>
+          Masuk Portal
+        </Link>
       </nav>
       <div className="gx-nav-cta">
         <a className="gx-btn-ghost" href={officialKost48Location.whatsappUrl} target="_blank" rel="noreferrer">WhatsApp</a>
