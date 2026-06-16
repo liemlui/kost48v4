@@ -1,4 +1,4 @@
-import { type ReactNode, useEffect, useMemo, useState } from 'react';
+import { type ReactNode, useEffect, useMemo, useState, lazy, Suspense } from 'react';
 import { useTenantPortalStage } from '../../hooks/useTenantPortalStage';
 import { Button, Offcanvas } from 'react-bootstrap';
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
@@ -9,10 +9,13 @@ import RoleWorkspaceTabs from '../workspace/RoleWorkspaceTabs';
 import GlobalSearch from './GlobalSearch';
 import PaymentUrgencyChip from '../payment-urgency/PaymentUrgencyChip';
 import Kost48LogoMark from '../common/Kost48LogoMark';
+import { LoadingDashboard } from '../../pages/dashboard/dashboardShared';
+const AdminDashboard = lazy(() => import('../../pages/dashboard/DashboardAdmin'));
 import {
   getDefaultRoute,
   getNavigationLinks,
   getNavigationSections,
+  adminSections,
   type NavigationLink,
   type NavigationSection,
 } from '../../config/navigation';
@@ -43,10 +46,10 @@ function getInitials(name?: string) {
     .join('');
 }
 
-function getWorkspaceTitle(role?: string) {
+function getWorkspaceTitle(role?: string, ownerViewMode?: 'owner' | 'admin') {
   switch (role) {
     case 'OWNER':
-      return 'Kokpit Owner';
+      return ownerViewMode === 'admin' ? 'Area Admin (Owner)' : 'Kokpit Owner';
     case 'ADMIN':
       return 'Command Center Admin';
     case 'STAFF':
@@ -58,10 +61,10 @@ function getWorkspaceTitle(role?: string) {
   }
 }
 
-function getWorkspaceSummary(role?: string) {
+function getWorkspaceSummary(role?: string, ownerViewMode?: 'owner' | 'admin') {
   switch (role) {
     case 'OWNER':
-      return 'Pantau kesehatan bisnis, kamar, dan laporan keuangan utama.';
+      return ownerViewMode === 'admin' ? 'Kelola keputusan harian, pembayaran, kamar, dan laporan operasional.' : 'Pantau kesehatan bisnis, kamar, dan laporan keuangan utama.';
     case 'ADMIN':
       return 'Kelola keputusan harian, pembayaran, kamar, dan laporan operasional.';
     case 'STAFF':
@@ -209,14 +212,43 @@ export default function AppLayout({ children }: { children?: ReactNode }) {
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { stage: tenantStage } = useTenantPortalStage();
-  const sections = useMemo(() => getNavigationSections(user?.role, tenantStage), [user?.role, tenantStage]);
-  const links = useMemo(() => getNavigationLinks(user?.role, tenantStage), [user?.role, tenantStage]);
-  const breadcrumbParts = useMemo(() => getBreadcrumbParts(location.pathname, links), [location.pathname, links]);
-  const defaultRoute = getDefaultRoute(user?.role, tenantStage);
+
   const isStaff = user?.role === 'STAFF';
   const isTenant = user?.role === 'TENANT';
   const isAdmin = user?.role === 'ADMIN';
   const isOwner = user?.role === 'OWNER';
+
+  // Owner view mode: 'owner' = Kokpit Owner, 'admin' = Area Admin (operasional)
+  const [ownerViewMode, setOwnerViewMode] = useState<'owner' | 'admin'>(() => {
+    try {
+      const saved = localStorage.getItem('kost48_owner_view_mode');
+      return saved === 'admin' ? 'admin' : 'owner';
+    } catch {
+      return 'owner';
+    }
+  });
+
+  // Persist ownerViewMode to localStorage
+  useEffect(() => {
+    if (isOwner) {
+      try {
+        localStorage.setItem('kost48_owner_view_mode', ownerViewMode);
+      } catch { /* ignore quota errors */ }
+    }
+  }, [ownerViewMode, isOwner]);
+
+  const sections = useMemo(() => {
+    if (isOwner && ownerViewMode === 'admin') return adminSections;
+    return getNavigationSections(user?.role, tenantStage);
+  }, [user?.role, tenantStage, isOwner, ownerViewMode]);
+
+  const links = useMemo(() => {
+    if (isOwner && ownerViewMode === 'admin') return adminSections.flatMap((s) => s.links);
+    return getNavigationLinks(user?.role, tenantStage);
+  }, [user?.role, tenantStage, isOwner, ownerViewMode]);
+
+  const breadcrumbParts = useMemo(() => getBreadcrumbParts(location.pathname, links), [location.pathname, links]);
+  const defaultRoute = getDefaultRoute(user?.role, tenantStage);
 
   useEffect(() => {
     if (sidebarOpen) {
@@ -321,6 +353,25 @@ export default function AppLayout({ children }: { children?: ReactNode }) {
                 </nav>
               </div>
 
+              {isOwner ? (
+                <div className="owner-view-toggle">
+                  <button
+                    type="button"
+                    className={`owner-view-toggle-btn ${ownerViewMode === 'owner' ? 'active' : ''}`}
+                    onClick={() => setOwnerViewMode('owner')}
+                  >
+                    <span aria-hidden="true">📈</span> Kokpit Owner
+                  </button>
+                  <button
+                    type="button"
+                    className={`owner-view-toggle-btn ${ownerViewMode === 'admin' ? 'active' : ''}`}
+                    onClick={() => setOwnerViewMode('admin')}
+                  >
+                    <span aria-hidden="true">🔧</span> Area Admin
+                  </button>
+                </div>
+              ) : null}
+
               <div className="topbar-actions-simple">
                 <div className="d-none d-lg-block">
                   <GlobalSearch role={user?.role} />
@@ -351,8 +402,8 @@ export default function AppLayout({ children }: { children?: ReactNode }) {
             </div>
           </section>
 
-          {isAdmin || isOwner ? <RoleWorkspaceTabs role={user?.role} /> : null}
-          {children ?? <Outlet />}
+          {isAdmin || isOwner ? <RoleWorkspaceTabs role={isOwner && ownerViewMode === 'admin' ? 'ADMIN' : user?.role} /> : null}
+          {isOwner && ownerViewMode === 'admin' ? <Suspense fallback={<LoadingDashboard />}><AdminDashboard /></Suspense> : (children ?? <Outlet />)}
         </main>
       </div>
     </div>

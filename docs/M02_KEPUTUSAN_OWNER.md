@@ -69,6 +69,25 @@ Semua keputusan owner terkait keuangan (no-partial, DP 30%, deposit=Room.default
 - **PUB-KTP-OCR**: Tambah Tesseract.js untuk OCR offline — setelah upload foto KTP, ekstrak nama + NIK auto-isi form.
 - **TEN-PROFILE-NOTIF**: Endpoint `GET /me/profile-completeness`. Portal tenant tampilkan badge "Lengkapi Profil" + daftar field belum diisi.
 
+## Keputusan UI/UX Dashboard — 2026-06-17
+
+### Toggle Owner/Admin View
+- **OWN-TOGGLE**: Owner bisa switch antara "Kokpit Owner" (bisnis) dan "Area Admin" (operasional) via toggle di navbar. Default = Kokpit Owner. Area Admin menampilkan Command Center operasional harian dengan sidebar 6 link.
+- **OWN-AUTOOPS-CLEAN**: Checklist UAT AutoOps dipindahkan dari UI ke docs. Panel AutoOps di dashboard hanya menampilkan metrik ringkas + tombol eksekusi + riwayat run kolapsibel.
+- **OWN-NAV-SPLIT**: Sidebar Kokpit Owner = 13 link bisnis (6 section). Sidebar Area Admin = 6 link operasional (1 section). Tidak campur.
+- **OWN-NAV-TOGGLE-PERSIST**: Mode toggle disimpan ke localStorage agar survive page refresh.
+
+### OWN-STRUKTUR-PHASE2 ❌ BELUM SELESAI
+Toggle Owner/Admin phase 1 sudah berfungsi secara state/dasar, tapi UI masih mentah dan belum dipisah secara utuh. Semua PR dicatat di `docs/M10_CHECKLIST_CHANGELOG.md` section **OWN-STRUKTUR-PHASE2**.
+
+**Gap utama:**
+- **P0:** CSS toggle tidak ada (dua tombol mentah), tidak ada transisi, mobile toggle tidak tersedia
+- **P1:** Sidebar context card, breadcrumb, offcanvas title tidak adaptif sesuai mode; tombol "Pengumuman" tidak muncul untuk Owner mode admin
+- **P2:** Route tidak terpisah (masih `/owner-dashboard` untuk semua mode), tidak ada guard route, RoleWorkspaceTabs tidak adaptif
+- **P3:** Backend tidak aware Owner mode
+
+**Target batch terpisah — 13 sub-task** di M10.
+
 ## Catatan Pemakaian
 
 - Jadikan file ini pintu masuk tematik; bila butuh detail mentah, cek file sumber di arsip yang disebut di atas.

@@ -61,7 +61,7 @@ const ownerSections: NavigationSection[] = [
   },
 ];
 
-const adminSections: NavigationSection[] = [
+export const adminSections: NavigationSection[] = [
   {
     title: 'Operasional Kos',
     links: [
