@@ -15,6 +15,20 @@ Dokumen lifecycle penghuni dari booking/renewal sampai checkout, deposit, overst
 
 - Jadikan file ini pintu masuk tematik; bila butuh detail mentah, cek file sumber di arsip yang disebut di atas.
 - Heading asli dinaikkan levelnya agar tidak bertabrakan dengan struktur M-file.
+## Update 2026-06-17 — AUDIT KEUANGAN ULTRA ✅
+
+**High-Risk Flows terverifikasi SEHAT (Audit 17 Jun 2026):**
+
+| Flow | Status | Jurnal yang dipicu |
+|------|--------|-------------------|
+| Booking Approval | ✅ SEHAT | INVOICE + INVOICE_PAYMENT + DEPOSIT receipt |
+| Checkout Final | ✅ SEHAT | DEPOSIT settlement (guard receipt check F1-8) |
+| Renewal (8-state machine) | ✅ SEHAT | INVOICE DP + INVOICE settlement terpisah |
+| Forced Checkout | ✅ SEHAT | Forced deposit→AR (DR 2000 / CR 1100), shortfall tetap AR |
+| Meter Billing (M-5) | ✅ SEHAT | INVOICE meter + deposit settlement via meter |
+
+**Invarian deposit:** 16 stay × Rp500.000 = Rp8.000.000, MATCHED, akun 2000 tak pernah debit.
+
 ## Update 2026-06-16 - SI-2/SI-3 Riwayat Sewa
 
 Sesuai analisa PDF, siklus tenant harus terbaca sebagai alur end-to-end: masuk kos, periode berjalan, perpanjangan, invoice, meter, checkout, dan kamar siap jual lagi.

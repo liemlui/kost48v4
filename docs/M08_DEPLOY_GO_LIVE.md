@@ -12,6 +12,10 @@ Runbook deploy/PWA, checklist go-live, dan appendix akun dummy untuk DB pengemba
 - `docs/GO_LIVE_CHECKLIST.md` - konten dipertahankan
 - `docs/archieve/2026-06-16_si_notes/_AKUN_DUMMY_DEV.md` - update SI-1 event-path diserap
 
+## Update 2026-06-17 — AUDIT KEUANGAN ULTRA ✅
+
+**READY FOR GO-LIVE.** Audit keuangan ultra teliti LULUS: Trial balance balanced, deposit MATCHED, 8 invarian PASS, 0 unmapped transactions. DO-NOT-TOUCH blocks UTUH. Dead code minor `postPaymentReversalTx`. Runbook `M08 §3` smoke + env checklist siap.
+
 ## Catatan Pemakaian
 
 - Jadikan file ini pintu masuk tematik; bila butuh detail mentah, cek file sumber di arsip yang disebut di atas.

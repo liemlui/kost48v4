@@ -5,6 +5,7 @@ Arsip ini menyimpan dokumen lama yang sudah digantikan oleh 10 M-file aktif di `
 ## Folder
 
 - `2026-06-16_root_docs_pre_M/` - 29 dokumen root lama sebelum pemampatan ke `M01` sampai `M10`.
+- `2026-06-16_si_notes/` - catatan SI dan akun dummy DEV yang sudah diserap ke M04/M05/M08/M10.
 - `legacy_v5100/` - dokumen lama V5100 yang sudah stale.
 - `legacy_v5110/` - dokumen legacy sekitar V5110 dan audit awal Juni 2026.
 - `deprecated_dossiers/` - dossier dan rencana deprecated.

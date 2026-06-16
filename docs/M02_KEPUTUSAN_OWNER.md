@@ -10,6 +10,10 @@ Sumber cepat untuk keputusan owner dan aturan bisnis yang harus dihormati sebelu
 
 - `docs/03_KEPUTUSAN_OWNER.md` - konten dipertahankan
 
+## Update 2026-06-17 — AUDIT KEUANGAN ULTRA ✅
+
+Semua keputusan owner terkait keuangan (no-partial, DP 30%, deposit=Room.defaultDepositRupiah, PSAK 72, DRAFT≠revenue, meter pascabayar, settlement guard) **terverifikasi TERIMPLEMENTASI** di kode. Audit 5 jalur: LULUS. Detail: `docs/M04_KEUANGAN.md` Update 2026-06-17.
+
 ## Catatan Pemakaian
 
 - Jadikan file ini pintu masuk tematik; bila butuh detail mentah, cek file sumber di arsip yang disebut di atas.

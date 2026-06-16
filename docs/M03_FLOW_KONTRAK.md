@@ -11,6 +11,10 @@ Peta alur kode krusial, lifecycle utama, kontrak domain, safety belt, dan aturan
 - `docs/02_FLOW_MAP.md` - konten dipertahankan
 - `docs/06_CONTRACTS.md` - konten dipertahankan
 
+## Update 2026-06-17 — AUDIT KEUANGAN ULTRA ✅
+
+**Chain of custody terverifikasi UTUH:** Invoice → JournalEntry → Trial Balance. Semua high-risk flow (booking, checkout, renewal, forced-checkout, meter) menghasilkan jurnal benar. TB balanced, deposit MATCHED, 0 unmapped transactions. Lihat `docs/M04_KEUANGAN.md` Update 2026-06-17.
+
 ## Catatan Pemakaian
 
 - Jadikan file ini pintu masuk tematik; bila butuh detail mentah, cek file sumber di arsip yang disebut di atas.

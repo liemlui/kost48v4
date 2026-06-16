@@ -14,6 +14,10 @@ Dokumen orientasi utama untuk memahami blueprint sistem, kondisi aktual, rencana
 - `docs/09_TRACEABILITY.md` - konten dipertahankan
 - `docs/_PETA_AI.md` - konten dipertahankan
 
+## Update 2026-06-17 — AUDIT KEUANGAN ULTRA ✅
+
+**Sistem KOST48 V5 LULUS audit keuangan ultra teliti.** Trial balance balanced, deposit MATCHED (16 stay × Rp500rb), 8 invarian akuntansi PASS, 7 DO-NOT-TOUCH blocks UTUH, 5 high-risk flows SEHAT. Detail: `docs/M04_KEUANGAN.md` Update 2026-06-17 dan `docs/M10_CHECKLIST_CHANGELOG.md`.
+
 ## Catatan Pemakaian
 
 - Jadikan file ini pintu masuk tematik; bila butuh detail mentah, cek file sumber di arsip yang disebut di atas.
@@ -232,7 +236,8 @@ backend/src/
 
 #### 3. Status audit & pengujian (per 2026-06-13)
 - **Audit V1 (V5.12):** 53 temuan (42 backend + 11 UI/UX), 24 FIX dieksekusi (sejarah, diarsipkan di `archieve/_DEPRECATED_03_AUDIT_REPORT.md`).
-- **Audit V3 (SELESAI):** 97 temuan, keputusan owner, dan 4 desain fitur telah dibubarkan ke dossier domain `10`-`19`. Detail forensik diarsip di `archieve/_DEPRECATED_AUDIT_*`.
+- **Audit V3 (SELESAI):** 97 temua
+n, keputusan owner, dan 4 desain fitur telah dibubarkan ke dossier domain `10`-`19`. Detail forensik diarsip di `archieve/_DEPRECATED_AUDIT_*`.
 - **COA dikoreksi:** V1 mengklaim 17/17, V3 mengkoreksi menjadi **38 akun**.
 - **UAT runtime PASS (DB UAT, 2026-06-12):** siklus DP→pelunasan (M-09 recalc DP, M-12 expiresAt mati, M-07 promoted) · siklus overstay penuh (pengingat H-3/H-day → tiket EVICT → forced checkout H+1 → kamar kotor-bisa-dipesan → settlement deposit berjurnal+ledger → gate room-ready) · renew penuh (invoice sewa+meter, periode menyambung) · rekonsiliasi deposit **mismatch=0** · trial balance **seimbang**; selisih P&L ledger vs operasional terjelaskan 100%.
 - **Fondasi terverifikasi runtime:** E-1 guard global default-deny (+@Public), E-3 jaminan check-in manual (ledger+jurnal), E-4 saldo kas dari jurnal, E-5 liability HELD, E-9 hardening — PASS di UAT.

@@ -14,6 +14,10 @@ Operasional harian: inventaris, staf/tiket/KPI, notifikasi/pengumuman, auth/onbo
 - `docs/18_AUTH_FONDASI_ONBOARDING.md` - konten dipertahankan
 - `docs/_PROPOSAL_METER_LISTRIK_AIR.md` - konten dipertahankan
 
+## Update 2026-06-17 — AUDIT KEUANGAN ULTRA ✅
+
+**Audit 5 jalur 17 Jun 2026: LULUS.** Meter M-1..M-5 selesai (meter billing + checkout meter final × deposit, TB seimbang di UAT). Semua DO-NOT-TOUCH blocks UTUH.
+
 ## Catatan Pemakaian
 
 - Jadikan file ini pintu masuk tematik; bila butuh detail mentah, cek file sumber di arsip yang disebut di atas.

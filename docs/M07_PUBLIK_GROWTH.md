@@ -12,6 +12,10 @@ Permukaan publik dan pertumbuhan: marketing, UI/UX, loyalitas, gamifikasi, refer
 - `docs/19_GAMIFIKASI_LOYALITAS.md` - konten dipertahankan
 - `docs/_PROPOSAL_MARKETING_GAMIFIKASI_TIP.md` - konten dipertahankan
 
+## Update 2026-06-17 — AUDIT KEUANGAN ULTRA ✅
+
+MKT-4 CAC/CLV Dashboard selesai (DeepSeek V4 Pro + offline fallback). Audit keuangan LULUS — akuntansi akurat mendukung insight marketing. Detail: `docs/M04_KEUANGAN.md`.
+
 ## Catatan Pemakaian
 
 - Jadikan file ini pintu masuk tematik; bila butuh detail mentah, cek file sumber di arsip yang disebut di atas.

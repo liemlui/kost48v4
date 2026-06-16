@@ -16,6 +16,24 @@ Semua fondasi keuangan: harness verifikasi, pembayaran/invoice, accounting, lapo
 
 - Jadikan file ini pintu masuk tematik; bila butuh detail mentah, cek file sumber di arsip yang disebut di atas.
 - Heading asli dinaikkan levelnya agar tidak bertabrakan dengan struktur M-file.
+## Update 2026-06-17 — AUDIT KEUANGAN ULTRA ✅
+
+**Hasil audit menyeluruh (17 Juni 2026):**
+
+| Invariant | Status |
+|-----------|--------|
+| Trial Balance `isBalanced: True` | ✅ LULUS |
+| Deposit Reconciliation MATCHED (16 stay, Rp8jt) | ✅ LULUS |
+| Cashflow `beginning+net=ending` (unit test 13/13) | ✅ LULUS |
+| Financial Ratios expenseRatio benar (unit test 12/12) | ✅ LULUS |
+| 8 Invarian M04 §1 | ✅ SEMUA PASS |
+| 7 DO-NOT-TOUCH blocks | ✅ SEMUA UTUH |
+| Dead code: `postPaymentReversalTx` (0 pemanggil) | 🟡 Minor |
+| Unmapped transactions | ✅ 0 |
+| PSAK 72 RentRecognitionSchedule | ✅ 0 stranded |
+
+**Detail:** Audit ultra teliti 5 jalur: Chain of Custody (Invoice→Jurnal→TB), Invarian Akuntansi, High-Risk Flows (Booking/Checkout/Renewal/Meter/Forced), Dead Code, PSAK 72.
+
 ## Update 2026-06-16 - SI-4 Invoice Purpose
 
 Sesuai analisa PDF dan temuan owner 2026-06-16, invoice tidak boleh hanya terbaca sebagai nomor. UI harus menjawab "tagihan ini buat apa" sebelum tenant/admin membuka detail.
