@@ -330,7 +330,7 @@ export default function PublicRoomsPage() {
       if (cooling && getPublicRoomCooling(room) !== cooling) return false;
       const bookable = isPublicRoomBookable(room);
       const status = String(room.status ?? "").toUpperCase();
-      if (avail === "bookable" && !bookable) return false;
+      if (avail === "bookable" && (!bookable || status === "MAINTENANCE")) return false;
       if (avail === "occupied" && (bookable || status !== "OCCUPIED")) return false;
       if (avail === "checking" && status !== "MAINTENANCE") return false;
       return true;
@@ -416,9 +416,9 @@ export default function PublicRoomsPage() {
                 <span className="rm-filter-label">Ketersediaan</span>
                 {/* UD-07: "Semua Kamar" lebih jujur — termasuk kamar terisi & yang sedang dicek (tidak semua bisa diajukan). */}
                 <FilterChip label="Semua Kamar" active={!avail} onClick={() => update({ avail: "" })} />
-                <FilterChip label="Bisa diajukan" active={avail === "bookable"} onClick={() => update({ avail: "bookable" })} />
-                <FilterChip label="Sedang dicek" active={avail === "checking"} onClick={() => update({ avail: "checking" })} />
-                <FilterChip label="Terisi" active={avail === "occupied"} onClick={() => update({ avail: "occupied" })} />
+                <FilterChip label="Kosong" active={avail === "bookable"} onClick={() => update({ avail: "bookable" })} />
+                <FilterChip label="Dibersihkan / Maintenance" active={avail === "checking"} onClick={() => update({ avail: "checking" })} />
+                <FilterChip label="Penuh / Terisi" active={avail === "occupied"} onClick={() => update({ avail: "occupied" })} />
                 {!avail && <span className="rm-filter-hint">Termasuk kamar terisi &amp; yang sedang dicek</span>}
               </div>
               <div className="rm-filter-divider" aria-hidden="true" />

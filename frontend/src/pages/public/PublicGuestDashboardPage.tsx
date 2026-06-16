@@ -1,82 +1,169 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Accordion, Container, Modal, Spinner } from 'react-bootstrap';
-import { Link, Navigate } from 'react-router-dom';
-import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from 'recharts';
+import { Link, Navigate, useLocation } from 'react-router-dom';
 import { listPublicRooms } from '../../api/bookings';
-import { fetchPublicFaqs } from '../../api/faqs';
 import { fetchPublicSocialProof } from '../../api/marketing';
-import HorizontalBarChart from '../../components/charts/HorizontalBarChart';
 import Kost48LogoMark from '../../components/common/Kost48LogoMark';
 import { useAuth } from '../../context/AuthContext';
 import { getDefaultRoute } from '../../config/navigation';
 import { useTenantPortalStage } from '../../hooks/useTenantPortalStage';
-import { officialKost48Faq, officialKost48Location } from '../../data/officialKost48Content';
-import { getKost48FrontPhotoUrl } from '../../data/kost48Assets';
+import { officialKost48Location } from '../../data/officialKost48Content';
+import {
+  getKost48FrontPhotoUrl,
+  getKost48RoomCover,
+  resolveKost48MarketingImageUrl,
+} from '../../data/kost48Assets';
+import type { PublicRoom } from '../../types';
 import {
   getBestPublicRoomRate,
+  getPublicRoomAvailabilityDisplay,
   getPublicRoomBathroom,
+  getPublicRoomBathroomLabel,
   getPublicRoomCooling,
+  getPublicRoomCoolingLabel,
+  getPublicRoomVisibleAmenities,
   isPublicRoomBookable,
 } from '../../utils/publicRoomDisplay';
 
 const NAV_LINKS = [
+  { href: '#pilihan-kamar', label: 'Kamar' },
   { href: '#fasilitas', label: 'Fasilitas' },
-  { href: '#cek-kamar', label: 'Cek Kamar' },
-  { href: '#pilihan-kamar', label: 'Pilihan Kamar' },
+  { href: '#lokasi', label: 'Lokasi' },
   { href: '#ulasan', label: 'Ulasan' },
   { href: '#faq', label: 'FAQ' },
-  { href: '#hubungi-kami', label: 'Hubungi Kami' },
 ];
 
-const FAQ_FILTERS = ['Semua', 'Lokasi', 'Tarif', 'Fasilitas', 'Aturan', 'Layanan'] as const;
-
 const GALLERY_ITEMS = [
-  { id: 'spanduk', src: '/room-images/spanduk-kost48-surabaya.webp', label: 'Spanduk Fasilitas Lengkap' },
-  { id: 'brosur-depan', src: '/room-images/brosur-depan.webp', label: 'Brosur — Halaman Depan' },
-  { id: 'brosur-belakang', src: '/room-images/brosur-belakang.webp', label: 'Brosur — Halaman Belakang' },
+  { id: 'spanduk', src: '/room-images/spanduk-kost48-surabaya.webp', label: 'Spanduk KOST48' },
+  { id: 'brosur-depan', src: '/room-images/brosur-depan.webp', label: 'Brosur - Halaman Depan' },
+  { id: 'brosur-belakang', src: '/room-images/brosur-belakang.webp', label: 'Brosur - Halaman Belakang' },
 ];
 
 const FACILITY_GROUPS = [
   {
     id: 'umum',
-    title: 'Fasilitas Umum',
+    title: 'Umum',
     items: [
-      { icon: '🚗', label: 'Parkir luas', desc: '6–8 mobil dan 5–20 motor' },
-      { icon: '🍳', label: 'Dapur bersama', desc: 'Kitchen set lengkap' },
-      { icon: '💧', label: 'Air PDAM + Tandon', desc: '2 tandon 650 liter' },
-      { icon: '🌿', label: 'Balkon santai', desc: 'Area relaksasi lantai 2' },
-      { icon: '👔', label: 'Area jemur', desc: 'Beberapa titik lokasi' },
-      { icon: '🌱', label: 'Taman & area hijau', desc: 'Sirkulasi udara asri' },
-      { icon: '🔧', label: 'Perawatan fasilitas', desc: 'Kran, lampu, kunci bisa dilaporkan' },
+      { mark: 'P', label: 'Parkir luas', desc: 'Ruang parkir untuk mobil dan motor.' },
+      { mark: 'D', label: 'Dapur bersama', desc: 'Area masak bersama untuk kebutuhan harian.' },
+      { mark: 'A', label: 'Air PDAM + tandon', desc: 'Pasokan air dibantu tandon cadangan.' },
+      { mark: 'B', label: 'Balkon santai', desc: 'Area terbuka untuk istirahat sejenak.' },
+      { mark: 'J', label: 'Area jemur', desc: 'Beberapa titik jemur di area kos.' },
+      { mark: 'T', label: 'Taman & area hijau', desc: 'Lingkungan lebih teduh dan nyaman.' },
     ],
   },
   {
     id: 'kamar',
-    title: 'Fasilitas Kamar',
+    title: 'Kamar',
     items: [
-      { icon: '🛏️', label: 'Kasur', desc: 'Single 120×200 atau double 180×200' },
-      { icon: '🗄️', label: 'Lemari baju', desc: '4 box standar per kamar' },
-      { icon: '❄️', label: 'Pendingin', desc: 'AC atau kipas angin' },
-      { icon: '🚿', label: 'Kamar mandi', desc: 'Dalam atau luar, shower + kloset duduk' },
+      { mark: 'K', label: 'Kasur', desc: 'Tipe kasur menyesuaikan kamar yang dipilih.' },
+      { mark: 'L', label: 'Lemari baju', desc: 'Penyimpanan dasar tersedia di kamar.' },
+      { mark: 'AC', label: 'AC / kipas', desc: 'Pilihan pendingin sesuai tipe kamar.' },
+      { mark: 'KM', label: 'Kamar mandi', desc: 'Pilihan kamar mandi dalam atau luar.' },
     ],
   },
   {
     id: 'tambahan',
-    title: 'Layanan Tambahan',
+    title: 'Tambahan',
     items: [
-      { icon: '📶', label: 'WiFi', desc: 'Rp 50.000/perangkat' },
-      { icon: '💧', label: 'Galon air minum', desc: 'Rp 15.000/galon' },
-      { icon: '📺', label: 'TV tambahan', desc: 'Rp 50.000/bulan' },
-      { icon: '🛠️', label: 'Perbaikan dasar', desc: 'Dilaporkan langsung ke pengelola' },
+      { mark: 'WF', label: 'WiFi', desc: 'Rp 50.000 per perangkat.' },
+      { mark: 'G', label: 'Galon air', desc: 'Rp 15.000 per galon.' },
+      { mark: 'TV', label: 'TV tambahan', desc: 'Rp 50.000 per bulan.' },
+      { mark: 'R', label: 'Perbaikan dasar', desc: 'Laporan fasilitas dibantu pengelola.' },
     ],
+  },
+];
+
+const TRUST_ITEMS = [
+  {
+    mark: '01',
+    title: 'Status kamar transparan',
+    desc: 'Calon penghuni bisa melihat kamar yang tersedia, terisi, atau sedang dicek tanpa menebak dari chat.',
+  },
+  {
+    mark: '02',
+    title: 'Booking tidak hilang di chat',
+    desc: 'Pengajuan booking dan pembayaran punya alur yang lebih rapi sehingga tindak lanjut lebih mudah dilacak.',
+  },
+  {
+    mark: '03',
+    title: 'Fasilitas terlihat sejak awal',
+    desc: 'Foto, fasilitas, tarif, dan status kamar bisa dibandingkan sebelum menghubungi admin.',
+  },
+  {
+    mark: '04',
+    title: 'Penghuni punya portal',
+    desc: 'Masa sewa, tagihan, bukti bayar, dan laporan masalah bisa dicek lebih jelas setelah tinggal.',
+  },
+];
+
+const HOME_FAQ_ITEMS = [
+  {
+    category: 'Aturan',
+    question: 'Apakah KOST48 menerima pria dan wanita?',
+    answer: 'Ya, KOST48 menerima penghuni pria dan wanita sesuai ketersediaan kamar dan aturan hunian.',
+  },
+  {
+    category: 'Tarif',
+    question: 'Berapa kisaran tarif kamar?',
+    answer: 'Tarif mengikuti tipe kamar dan fasilitas. Kisaran katalog saat ini sekitar Rp 1,2 jt - Rp 1,6 jt per bulan.',
+  },
+  {
+    category: 'Fasilitas',
+    question: 'Apakah tersedia WiFi?',
+    answer: 'Ya, tersedia layanan WiFi tambahan Rp 50.000 per perangkat.',
+  },
+  {
+    category: 'Kamar',
+    question: 'Apakah ada kamar kosong sekarang?',
+    answer: 'Ketersediaan bisa dicek melalui katalog kamar dan dapat berubah sesuai booking atau verifikasi admin.',
+  },
+  {
+    category: 'Aturan',
+    question: 'Bagaimana aturan listrik?',
+    answer: 'Aturan listrik mengikuti tipe sewa dan ketentuan kamar. Detail akan dijelaskan sebelum booking.',
+  },
+  {
+    category: 'Lokasi',
+    question: 'Di mana lokasi KOST48?',
+    answer: 'KOST48 berada di Jalan Hikmah V No. 48, Surabaya Barat, sekitar Pakuwon Mall / PTC.',
+  },
+];
+
+const EXTRA_FAQ_ITEMS = [
+  {
+    category: 'Aturan',
+    question: 'Satu kamar untuk berapa orang?',
+    answer: 'Standar satu kamar untuk 1-2 orang. Penghuni tambahan perlu konfirmasi terlebih dahulu kepada pengelola.',
+  },
+  {
+    category: 'Layanan',
+    question: 'Apakah ada layanan galon atau TV tambahan?',
+    answer: 'Ada. Galon air Rp 15.000 per galon dan TV tambahan Rp 50.000 per bulan, mengikuti ketersediaan.',
+  },
+  {
+    category: 'Aturan',
+    question: 'Apakah tamu boleh berkunjung?',
+    answer: 'Tamu wajib mengikuti aturan pengelola dan norma lingkungan. Kondisi khusus perlu dikonfirmasi ke admin.',
+  },
+  {
+    category: 'Booking',
+    question: 'Bagaimana cara booking kamar?',
+    answer: 'Pilih kamar dari katalog, ajukan booking, lalu admin akan mengecek data dan ketersediaan sebelum pembayaran diproses.',
   },
 ];
 
 const MAPS_EMBED_URL =
   'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d5304.776378640393!2d112.67025188642698!3d-7.28650073405867!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2dd7fc338c5ea093%3A0x68545aa7b3330f0a!2sKost%2048%20Dekat%20PTC%20%2F%20Supermall%20-%20Kost%20Surabaya%20Barat!5e0!3m2!1sid!2sid!4v1625312629036!5m2!1sid!2sid';
 
-/* ── Lightbox ─────────────────────────────────────────────────────── */
+const CATALOG_BATCH_SIZE = 8;
+
+function getTodayDateInput() {
+  const now = new Date();
+  const local = new Date(now.getTime() - now.getTimezoneOffset() * 60_000);
+  return local.toISOString().slice(0, 10);
+}
 
 function formatCompactRupiah(value: number) {
   if (!value) return 'Tanya admin';
@@ -92,6 +179,22 @@ function formatMonthlyRange(minimum: number, maximum: number) {
   return `${formatCompactRupiah(minimum)} - ${formatCompactRupiah(maximum)}`;
 }
 
+function buildWhatsAppUrl(message: string) {
+  return `${officialKost48Location.whatsappUrl}?text=${encodeURIComponent(message)}`;
+}
+
+function buildRoomWhatsAppUrl(room: PublicRoom) {
+  const roomName = room.code || room.name || `Kamar ${room.id}`;
+  return buildWhatsAppUrl(`Halo Admin KOST48, saya tertarik dengan ${roomName}. Boleh tanya ketersediaan dan estimasi siap huni?`);
+}
+
+function getRoomCover(room: PublicRoom) {
+  const apiImage = (room.images ?? [])
+    .map((url) => resolveKost48MarketingImageUrl(url))
+    .find(Boolean);
+  return apiImage || getKost48RoomCover(room.code, room.name) || '/room-images/kamar-a-1.webp';
+}
+
 function Lightbox({ src, onClose }: { src: string; onClose: () => void }) {
   useEffect(() => {
     const h = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
@@ -102,17 +205,16 @@ function Lightbox({ src, onClose }: { src: string; onClose: () => void }) {
   return (
     <Modal show onHide={onClose} size="xl" centered dialogClassName="gx-lightbox-dialog" contentClassName="gx-lightbox-content">
       <Modal.Body className="gx-lightbox-body p-0">
-        <button className="gx-lightbox-close" onClick={onClose} aria-label="Tutup">✕</button>
+        <button className="gx-lightbox-close" onClick={onClose} aria-label="Tutup">x</button>
         <img src={src} alt="Brosur KOST48" className="gx-lightbox-img" />
       </Modal.Body>
     </Modal>
   );
 }
 
-/* ── Topbar ──────────────────────────────────────────────────────── */
-
 function GuestTopbar({ scrolled }: { scrolled: boolean }) {
   const [iconBroken, setIconBroken] = useState(false);
+
   return (
     <header className={`gx-topbar${scrolled ? ' gx-topbar-solid' : ''}`}>
       <Link to="/" className="gx-brand" aria-label="KOST48 Beranda">
@@ -121,21 +223,68 @@ function GuestTopbar({ scrolled }: { scrolled: boolean }) {
         ) : (
           <Kost48LogoMark size="small" />
         )}
-        {/* Wordmark teks bersih 2-warna (ganti gambar logo gradasi multi-warna). */}
         <span className="gx-brand-name">KOST<span className="gx-brand-accent">48</span> Surabaya</span>
       </Link>
       <nav className="gx-nav" aria-label="Navigasi">
         {NAV_LINKS.map((l) => <a key={l.href} href={l.href} className="gx-nav-link">{l.label}</a>)}
       </nav>
       <div className="gx-nav-cta">
-        <Link className="gx-btn-ghost" to="/rooms">Cek Kamar</Link>
-        <a className="gx-btn-solid" href={officialKost48Location.whatsappUrl} target="_blank" rel="noreferrer">WhatsApp</a>
+        <a className="gx-btn-ghost" href={officialKost48Location.whatsappUrl} target="_blank" rel="noreferrer">WhatsApp</a>
+        <a className="gx-btn-solid" href="#pilihan-kamar">Cek Kamar</a>
       </div>
     </header>
   );
 }
 
-/* ── Footer ──────────────────────────────────────────────────────── */
+function RoomPreviewCard({ room }: { room: PublicRoom }) {
+  const availability = getPublicRoomAvailabilityDisplay(room);
+  const amenities = [
+    getPublicRoomCoolingLabel(room),
+    `KM ${getPublicRoomBathroomLabel(room)}`,
+    ...getPublicRoomVisibleAmenities(room, 3),
+  ].slice(0, 4);
+  const rate = getBestPublicRoomRate(room, 'MONTHLY');
+
+  return (
+    <article className="gx-room-card">
+      <div className="gx-room-image-wrap">
+        <img src={getRoomCover(room)} alt={`Foto ${room.name || room.code || 'kamar KOST48'}`} className="gx-room-image" loading="lazy" />
+        <span className={`gx-room-status ${availability.tone}`}>{availability.label}</span>
+      </div>
+      <div className="gx-room-body">
+        <div>
+          <h3>{room.name || room.code || `Kamar ${room.id}`}</h3>
+          <p>{availability.canBook ? 'Status kosong atau siap diajukan mengikuti tombol booking.' : 'Belum bisa dibooking langsung, tetapi tetap bisa ditanyakan.'}</p>
+        </div>
+        <strong className="gx-room-price">Mulai {formatCompactRupiah(rate)} / bulan</strong>
+        <div className="gx-room-amenities" aria-label="Fasilitas ringkas">
+          {amenities.map((item) => <span key={item}>{item}</span>)}
+        </div>
+        <div className="gx-room-actions">
+          <Link className="gx-room-action-secondary" to={`/rooms/${room.id}/detail`} state={{ room }}>Lihat Detail</Link>
+          {availability.canBook ? (
+            <Link className="gx-room-action-primary" to={`/booking/${room.id}`} state={{ room }}>Ajukan Booking</Link>
+          ) : (
+            <a className="gx-room-action-primary" href={buildRoomWhatsAppUrl(room)} target="_blank" rel="noreferrer">Tanya Ketersediaan</a>
+          )}
+        </div>
+      </div>
+    </article>
+  );
+}
+
+function RoomPreviewSkeleton() {
+  return (
+    <article className="gx-room-card gx-room-card-loading" aria-label="Memuat kamar">
+      <div className="gx-room-image-wrap" />
+      <div className="gx-room-body">
+        <span />
+        <span />
+        <span />
+      </div>
+    </article>
+  );
+}
 
 function GuestFooter() {
   return (
@@ -146,62 +295,76 @@ function GuestFooter() {
             <img src="/room-images/logo-kost48-sby.webp" alt="Logo KOST48" className="gx-footer-logo-img" />
             <div>
               <span className="gx-footer-brand-name">KOST<span className="gx-brand-accent">48</span> Surabaya</span>
-              <small>Jl. Hikmah V No. 48 · Surabaya Barat 60216</small>
+              <small>Jl. Hikmah V No. 48 - Surabaya Barat 60216</small>
             </div>
           </div>
-          <nav className="gx-footer-nav">
+          <nav className="gx-footer-nav" aria-label="Navigasi footer">
             {NAV_LINKS.map((l) => <a key={l.href} href={l.href}>{l.label}</a>)}
-            <Link to="/rooms">Katalog Kamar</Link>
+            <a href="#pilihan-kamar">Katalog Kamar</a>
             <Link to="/login">Masuk Portal</Link>
           </nav>
           <div className="gx-footer-links">
-            <a href={officialKost48Location.mapsUrl} target="_blank" rel="noreferrer">
-              <svg className="gx-footer-link-icon" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M12 21s7-6.5 7-12a7 7 0 1 0-14 0c0 5.5 7 12 7 12z" /><circle cx="12" cy="9" r="2.5" /></svg>
-              Google Maps
-            </a>
-            <a href={officialKost48Location.whatsappUrl} target="_blank" rel="noreferrer">
-              <svg className="gx-footer-link-icon" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M21 11.5a8.5 8.5 0 0 1-12.6 7.4L3 21l2.1-5.4A8.5 8.5 0 1 1 21 11.5z" /></svg>
-              WhatsApp
-            </a>
+            <a href={officialKost48Location.mapsUrl} target="_blank" rel="noreferrer">Google Maps</a>
+            <a href={officialKost48Location.whatsappUrl} target="_blank" rel="noreferrer">WhatsApp</a>
           </div>
         </div>
         <p className="gx-footer-copy">
-          © {new Date().getFullYear()} KOST48 Surabaya Barat &nbsp;·&nbsp; Kos nyaman dekat Pakuwon Mall / PTC
+          KOST48 Surabaya Barat - Kos nyaman dekat Pakuwon Mall / PTC.
         </p>
       </Container>
     </footer>
   );
 }
 
-/* ── Main ─────────────────────────────────────────────────────────── */
-
 export default function PublicGuestDashboardPage() {
   const { user } = useAuth();
   const { stage } = useTenantPortalStage();
+  const location = useLocation();
+  const initialCatalogParams = useMemo(() => new URLSearchParams(location.search), [location.search]);
   const [scrolled, setScrolled] = useState(false);
   const [lightboxSrc, setLightboxSrc] = useState<string | null>(null);
-  const [faqFilter, setFaqFilter] = useState<string>('Semua');
-  // Audit U-06: gambar brosur yang gagal dimuat jangan menyisakan kartu kosong.
+  const [activeFacilityTab, setActiveFacilityTab] = useState(FACILITY_GROUPS[0].id);
+  const [showAllFaq, setShowAllFaq] = useState(false);
+  const todayDate = useMemo(() => getTodayDateInput(), []);
+  const [checkInDate, setCheckInDate] = useState(todayDate);
+  const [duration, setDuration] = useState('monthly');
+  const [preference, setPreference] = useState('all');
+  const [catalogAvailability, setCatalogAvailability] = useState(() => {
+    const value = initialCatalogParams.get('avail');
+    return value === 'bookable' || value === 'checking' || value === 'occupied' ? value : 'all';
+  });
+  const [catalogPreference, setCatalogPreference] = useState(() => {
+    const cooling = initialCatalogParams.get('cooling');
+    const bathroom = initialCatalogParams.get('bathroom');
+    if (cooling === 'ac' || cooling === 'fan') return cooling;
+    if (bathroom === 'inside') return 'inside';
+    return 'all';
+  });
+  const [catalogSort, setCatalogSort] = useState(() => initialCatalogParams.get('sort') === 'price-desc' ? 'price-desc' : 'price-asc');
+  const [visibleRoomCount, setVisibleRoomCount] = useState(CATALOG_BATCH_SIZE);
   const [galleryBroken, setGalleryBroken] = useState<Record<string, boolean>>({});
   const visibleGalleryItems = GALLERY_ITEMS.filter((item) => !galleryBroken[item.id]);
   const closeLightbox = useCallback(() => setLightboxSrc(null), []);
 
   useEffect(() => {
     const h = () => setScrolled(window.scrollY > 60);
+    h();
     window.addEventListener('scroll', h, { passive: true });
     return () => window.removeEventListener('scroll', h);
   }, []);
+
+  useEffect(() => {
+    if (location.pathname !== '/rooms') return undefined;
+    const timer = window.setTimeout(() => {
+      document.getElementById('pilihan-kamar')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 180);
+    return () => window.clearTimeout(timer);
+  }, [location.pathname]);
 
   const roomsQuery = useQuery({
     queryKey: ['guest-dashboard-public-rooms'],
     queryFn: () => listPublicRooms({ limit: 100, pricingTerm: 'MONTHLY' }),
     staleTime: 60_000,
-  });
-
-  const faqQuery = useQuery({
-    queryKey: ['public-faqs'],
-    queryFn: fetchPublicFaqs,
-    staleTime: 5 * 60_000,
   });
 
   const socialProofQuery = useQuery({
@@ -210,43 +373,61 @@ export default function PublicGuestDashboardPage() {
     staleTime: 5 * 60_000,
   });
 
-  // API FAQ atau fallback ke static jika API belum di-seed
-  const faqData = (faqQuery.data && faqQuery.data.length > 0) ? faqQuery.data : officialKost48Faq;
-
   const rooms = roomsQuery.data?.items ?? [];
   const stats = useMemo(() => ({
-    bookable: rooms.filter((r) => isPublicRoomBookable(r)).length,
-    checking: rooms.filter((r) => String(r.status ?? '').toUpperCase() === 'MAINTENANCE').length,
+    bookable: rooms.filter((r) => isPublicRoomBookable(r) && String(r.status ?? '').toUpperCase() !== 'MAINTENANCE').length,
     occupied: rooms.filter((r) => String(r.status ?? '').toUpperCase() === 'OCCUPIED').length,
+    total: rooms.length,
   }), [rooms]);
 
-  const marketingData = useMemo(() => {
-    const monthlyRates = rooms
-      .map((room) => getBestPublicRoomRate(room, 'MONTHLY'))
-      .filter((rate) => rate > 0);
-
-    return {
-      totalRooms: rooms.length,
-      minMonthlyRate: monthlyRates.length ? Math.min(...monthlyRates) : 0,
-      maxMonthlyRate: monthlyRates.length ? Math.max(...monthlyRates) : 0,
-      statusMix: [
-        { label: 'Siap booking', value: stats.bookable, color: '#16a34a' },
-        { label: 'Sedang dicek', value: stats.checking, color: '#f59e0b' },
-        { label: 'Terisi', value: stats.occupied, color: '#64748b' },
-      ].filter((item) => item.value > 0),
-      facilityMix: [
-        { label: 'Kamar AC', value: rooms.filter((room) => getPublicRoomCooling(room) === 'ac').length, color: '#0ea5e9' },
-        { label: 'Kipas angin', value: rooms.filter((room) => getPublicRoomCooling(room) === 'fan').length, color: '#14b8a6' },
-        { label: 'KM dalam', value: rooms.filter((room) => getPublicRoomBathroom(room) === 'inside').length, color: '#8b5cf6' },
-        { label: 'KM luar', value: rooms.filter((room) => getPublicRoomBathroom(room) === 'outside').length, color: '#f59e0b' },
-      ],
-    };
-  }, [rooms, stats.bookable, stats.checking, stats.occupied]);
-
-  const filteredFaq = useMemo(
-    () => faqFilter === 'Semua' ? faqData : faqData.filter((q) => q.category === faqFilter),
-    [faqFilter, faqData],
+  const monthlyRates = useMemo(
+    () => rooms.map((room) => getBestPublicRoomRate(room, 'MONTHLY')).filter((rate) => rate > 0),
+    [rooms],
   );
+
+  const catalogRooms = useMemo(() => {
+    const filtered = rooms.filter((room) => {
+      const availability = getPublicRoomAvailabilityDisplay(room);
+      const status = String(room.status ?? '').toUpperCase();
+      if (catalogAvailability === 'bookable' && (!availability.canBook || status === 'MAINTENANCE')) return false;
+      if (catalogAvailability === 'checking' && status !== 'MAINTENANCE') return false;
+      if (catalogAvailability === 'occupied' && (availability.canBook || status !== 'OCCUPIED')) return false;
+      if (catalogPreference === 'ac' && getPublicRoomCooling(room) !== 'ac') return false;
+      if (catalogPreference === 'fan' && getPublicRoomCooling(room) !== 'fan') return false;
+      if (catalogPreference === 'inside' && getPublicRoomBathroom(room) !== 'inside') return false;
+      return true;
+    });
+
+    return filtered
+      .sort((a, b) => {
+        const aRate = getBestPublicRoomRate(a, 'MONTHLY');
+        const bRate = getBestPublicRoomRate(b, 'MONTHLY');
+        return catalogSort === 'price-desc' ? bRate - aRate : aRate - bRate;
+      });
+  }, [rooms, catalogAvailability, catalogPreference, catalogSort]);
+
+  const visibleCatalogRooms = useMemo(
+    () => catalogRooms.slice(0, visibleRoomCount),
+    [catalogRooms, visibleRoomCount],
+  );
+
+  const faqItems = showAllFaq ? [...HOME_FAQ_ITEMS, ...EXTRA_FAQ_ITEMS] : HOME_FAQ_ITEMS;
+  const activeFacility = FACILITY_GROUPS.find((group) => group.id === activeFacilityTab) ?? FACILITY_GROUPS[0];
+  const ratingAvailable = Boolean((socialProofQuery.data?.reviewCount ?? 0) > 0 && (socialProofQuery.data?.averageRating ?? 0) > 0);
+  const occupantCount = socialProofQuery.data?.occupantCount ?? stats.occupied;
+  const handleCheckInDateChange = (value: string) => {
+    setCheckInDate(!value || value < todayDate ? todayDate : value);
+  };
+  const handleCheckAvailability = () => {
+    setCatalogAvailability('bookable');
+    setCatalogPreference(preference);
+    setVisibleRoomCount(CATALOG_BATCH_SIZE);
+    document.getElementById('pilihan-kamar')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+
+  useEffect(() => {
+    setVisibleRoomCount(CATALOG_BATCH_SIZE);
+  }, [catalogAvailability, catalogPreference, catalogSort]);
 
   if (user) return <Navigate to={getDefaultRoute(user.role, stage)} replace />;
 
@@ -255,181 +436,284 @@ export default function PublicGuestDashboardPage() {
       <GuestTopbar scrolled={scrolled} />
       {lightboxSrc && <Lightbox src={lightboxSrc} onClose={closeLightbox} />}
 
-      {/* ══ HERO ══ */}
       <section className="gx-hero" id="top">
         <div className="gx-hero-bg" style={{ backgroundImage: `url(${getKost48FrontPhotoUrl()})` }} aria-hidden="true" />
         <div className="gx-hero-overlay" aria-hidden="true" />
         <div className="gx-hero-body">
-          <div className="gx-hero-eyebrow">📍 Jalan Hikmah V No. 48 &nbsp;·&nbsp; Surabaya Barat</div>
-          <h1 className="gx-hero-title">
-            KOST48<br />
-            <span>Surabaya</span>
-          </h1>
-          <p className="gx-hero-tagline">"Rumah kos sih, tapi terasa seperti rumah sendiri."</p>
-          <p className="gx-hero-sub">Dekat Pakuwon Mall / PTC &nbsp;·&nbsp; Pilihan kamar AC & kipas &nbsp;·&nbsp; Booking transparan</p>
+          <p className="gx-hero-eyebrow">Jalan Hikmah V No. 48 - Surabaya Barat</p>
+          <h1 className="gx-hero-title">KOST48 Surabaya</h1>
+          <p className="gx-hero-headline">Hunian fleksibel dekat Pakuwon Mall / PTC</p>
+          <p className="gx-hero-sub">
+            Kamar nyaman dengan pilihan AC atau kipas, fasilitas harian lengkap, dan proses booking yang lebih jelas dari awal.
+          </p>
           <div className="gx-hero-cta">
-            <Link className="gx-hero-btn-primary" to="/rooms">Cek Kamar Tersedia</Link>
-            <a className="gx-hero-btn-ghost" href={officialKost48Location.whatsappUrl} target="_blank" rel="noreferrer">💬 WhatsApp Admin</a>
-            <a className="gx-hero-btn-ghost" href={officialKost48Location.mapsUrl} target="_blank" rel="noreferrer">📍 Lihat di Maps</a>
+            <a className="gx-hero-btn-primary" href="#pilihan-kamar">Cek Kamar Tersedia</a>
+            <a className="gx-hero-btn-ghost" href={buildWhatsAppUrl('Halo Admin KOST48, saya ingin tanya ketersediaan kamar.')} target="_blank" rel="noreferrer">WhatsApp Admin</a>
+            <a className="gx-hero-btn-ghost" href={officialKost48Location.mapsUrl} target="_blank" rel="noreferrer">Lihat di Maps</a>
           </div>
+          <p className="gx-hero-tagline">"Rumah kos sih, tapi terasa seperti rumah sendiri."</p>
         </div>
-        <div className="gx-hero-scroll" aria-hidden="true"><span>↓</span><small>Jelajahi</small></div>
+        <div className="gx-hero-next" aria-hidden="true">Kamar tersedia, fasilitas, dan lokasi ada di bawah.</div>
       </section>
 
-      {/* ══ AVAILABILITY ══ */}
       <section className="gx-avail-section" id="cek-kamar">
         <Container fluid="xl">
-          <div className="gx-avail-wrap">
-            <div className="gx-avail-text">
-              <div className="gx-label">Cek Kamar</div>
-              <h2>Status kamar saat ini</h2>
-              <p>Ketersediaan diambil langsung dari sistem. Booking diajukan lewat katalog kamar.</p>
-              <Link className="gx-btn-outline" to="/rooms">Buka Katalog Kamar</Link>
+          <div className={`gx-booking-widget${scrolled ? ' gx-booking-widget-compact' : ''}`}>
+            <div className="gx-booking-copy">
+              <div className="gx-label">Cek ketersediaan kamar</div>
+              <h2>Mulai dari preferensi tinggalmu.</h2>
+              <p>
+                Pilih kebutuhan awal, lalu cek kamar yang bisa diajukan booking. Status kamar diambil dari sistem KOST48.
+              </p>
             </div>
-            <div className="gx-avail-stats">
-              <div className="gx-stat gx-stat-green gx-stat-hero">
-                <div className="gx-stat-num gx-stat-blink">{roomsQuery.isLoading ? <Spinner animation="border" size="sm" /> : stats.bookable}</div>
-                <div className="gx-stat-label">Kamar Kosong</div>
-                <div className="gx-stat-note">Siap diajukan booking sekarang</div>
-              </div>
-              <div className="gx-stat gx-stat-amber">
-                <div className="gx-stat-num">{roomsQuery.isLoading ? <Spinner animation="border" size="sm" /> : stats.checking}</div>
-                <div className="gx-stat-label">Sedang dicek</div>
-                <div className="gx-stat-note">Dalam inspeksi staff</div>
-              </div>
-              <div className="gx-stat gx-stat-gray">
-                <div className="gx-stat-num">{roomsQuery.isLoading ? <Spinner animation="border" size="sm" /> : stats.occupied}</div>
-                <div className="gx-stat-label">Terisi</div>
-                <div className="gx-stat-note">Referensi tipe & fasilitas</div>
-              </div>
+            <div className="gx-booking-form" aria-label="Form cek ketersediaan kamar">
+              <label>
+                <span>Mulai tinggal</span>
+                <input
+                  type="date"
+                  min={todayDate}
+                  value={checkInDate}
+                  onChange={(event) => handleCheckInDateChange(event.target.value)}
+                />
+              </label>
+              <label>
+                <span>Durasi tinggal</span>
+                <select value={duration} onChange={(event) => setDuration(event.target.value)}>
+                  <option value="monthly">Bulanan</option>
+                  <option value="weekly">Mingguan</option>
+                  <option value="daily">Harian</option>
+                </select>
+              </label>
+              <label>
+                <span>Preferensi kamar</span>
+                <select value={preference} onChange={(event) => setPreference(event.target.value)}>
+                  <option value="all">Semua tipe</option>
+                  <option value="ac">AC</option>
+                  <option value="fan">Kipas</option>
+                  <option value="inside">KM dalam</option>
+                </select>
+              </label>
+              <button type="button" className="gx-booking-submit" onClick={handleCheckAvailability}>
+                Cek Kamar Tersedia
+              </button>
+            </div>
+            <div className="gx-booking-status" aria-live="polite">
+              {roomsQuery.isLoading ? (
+                <><Spinner animation="border" size="sm" /> Memuat status kamar</>
+              ) : (
+                <>
+                  <strong>{stats.bookable} kamar tersedia hari ini</strong>
+                  <span>{stats.total} pilihan kamar</span>
+                  <span>Data dari sistem KOST48</span>
+                </>
+              )}
             </div>
           </div>
         </Container>
       </section>
 
-      {/* ══ MARKETING DATA ══ */}
       <section className="gx-market-section" id="pilihan-kamar">
         <Container fluid="xl">
           <div className="gx-market-head">
             <div className="gx-section-head">
-              <div className="gx-label">Data Pilihan Kamar</div>
-              <h2>Cari kamar dengan gambaran yang lebih jelas.</h2>
-              <p>Ringkasan katalog ini diperbarui dari sistem KOST48 agar kamu lebih mudah membandingkan pilihan sebelum menghubungi admin.</p>
+              <div className="gx-label">Katalog kamar</div>
+              <h2>Beranda dan cek kamar dalam satu halaman.</h2>
+              <p>Filter kamar berdasarkan ketersediaan, tipe pendingin, kamar mandi, dan tarif tanpa meninggalkan beranda.</p>
             </div>
-            <Link className="gx-btn-outline" to="/rooms">Bandingkan Kamar</Link>
+            <a className="gx-btn-outline" href="#cek-kamar">Ubah Preferensi Tinggal</a>
           </div>
 
-          <div className="gx-market-proof-grid">
-            <div className="gx-market-proof">
-              <span>Katalog kamar</span>
-              <strong>{roomsQuery.isLoading ? <Spinner animation="border" size="sm" /> : marketingData.totalRooms}</strong>
-              <small>Pilihan kamar dengan detail fasilitas</small>
+          <div className="gx-home-proof-grid">
+            <div className="gx-home-proof">
+              <span>Kamar tersedia</span>
+              <strong>{roomsQuery.isLoading ? <Spinner animation="border" size="sm" /> : stats.bookable}</strong>
             </div>
-            <div className="gx-market-proof">
-              <span>Tarif bulanan</span>
-              <strong>
-                {roomsQuery.isLoading
-                  ? <Spinner animation="border" size="sm" />
-                  : formatMonthlyRange(marketingData.minMonthlyRate, marketingData.maxMonthlyRate)}
-              </strong>
-              <small>Rentang tarif dari katalog saat ini</small>
+            <div className="gx-home-proof">
+              <span>Pilihan kamar</span>
+              <strong>{roomsQuery.isLoading ? <Spinner animation="border" size="sm" /> : stats.total}</strong>
             </div>
-            <div className="gx-market-proof">
-              <span>Dekat Pakuwon Mall / PTC</span>
+            <div className="gx-home-proof">
+              <span>Dari Pakuwon Mall / PTC</span>
               <strong>7 menit</strong>
-              <small>Estimasi berjalan kaki dari lokasi kos</small>
             </div>
           </div>
 
-          <div className="gx-market-chart-grid">
-            <article className="gx-market-chart-card">
-              <div className="gx-market-chart-head">
-                <div>
-                  <span>Status live</span>
-                  <h3>Ketersediaan kamar</h3>
-                </div>
-                <small>Dari katalog publik</small>
-              </div>
-              {roomsQuery.isLoading ? (
-                <div className="gx-market-chart-loading"><Spinner animation="border" size="sm" /> Memuat data kamar</div>
-              ) : marketingData.statusMix.length ? (
-                <div className="gx-market-donut-wrap">
-                  <div className="gx-market-donut">
-                    <ResponsiveContainer width="100%" height={220}>
-                      <PieChart>
-                        <Pie data={marketingData.statusMix} dataKey="value" nameKey="label" innerRadius={62} outerRadius={88} paddingAngle={3} stroke="none">
-                          {marketingData.statusMix.map((item) => <Cell key={item.label} fill={item.color} />)}
-                        </Pie>
-                        <Tooltip
-                          content={({ active, payload }) => {
-                            const item = payload?.[0]?.payload as { label: string; value: number } | undefined;
-                            if (!active || !item) return null;
-                            return <div className="recharts-tooltip"><strong>{item.label}</strong><span>{item.value} kamar</span></div>;
-                          }}
-                        />
-                      </PieChart>
-                    </ResponsiveContainer>
-                    <div className="gx-market-donut-center"><strong>{marketingData.totalRooms}</strong><span>kamar</span></div>
-                  </div>
-                  <div className="gx-market-legend">
-                    {marketingData.statusMix.map((item) => (
-                      <div key={item.label}>
-                        <i style={{ background: item.color }} />
-                        <span>{item.label}</span>
-                        <strong>{item.value}</strong>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              ) : (
-                <div className="gx-market-chart-loading">Data kamar belum tersedia.</div>
-              )}
-            </article>
+          <div className="gx-catalog-toolbar" aria-label="Filter katalog kamar">
+            <div className="gx-catalog-filter">
+              <span>Ketersediaan</span>
+              <button type="button" className={catalogAvailability === 'all' ? 'active' : ''} onClick={() => setCatalogAvailability('all')}>Semua</button>
+              <button type="button" className={catalogAvailability === 'bookable' ? 'active' : ''} onClick={() => setCatalogAvailability('bookable')}>Kosong</button>
+              <button type="button" className={catalogAvailability === 'checking' ? 'active' : ''} onClick={() => setCatalogAvailability('checking')}>Dibersihkan / Maintenance</button>
+              <button type="button" className={catalogAvailability === 'occupied' ? 'active' : ''} onClick={() => setCatalogAvailability('occupied')}>Penuh / Terisi</button>
+            </div>
+            <div className="gx-catalog-filter">
+              <span>Preferensi</span>
+              <button type="button" className={catalogPreference === 'all' ? 'active' : ''} onClick={() => setCatalogPreference('all')}>Semua tipe</button>
+              <button type="button" className={catalogPreference === 'ac' ? 'active' : ''} onClick={() => setCatalogPreference('ac')}>AC</button>
+              <button type="button" className={catalogPreference === 'fan' ? 'active' : ''} onClick={() => setCatalogPreference('fan')}>Kipas</button>
+              <button type="button" className={catalogPreference === 'inside' ? 'active' : ''} onClick={() => setCatalogPreference('inside')}>KM dalam</button>
+            </div>
+            <label className="gx-catalog-sort">
+              <span>Urutkan</span>
+              <select value={catalogSort} onChange={(event) => setCatalogSort(event.target.value)}>
+                <option value="price-asc">Tarif terendah</option>
+                <option value="price-desc">Tarif tertinggi</option>
+              </select>
+            </label>
+          </div>
 
-            <article className="gx-market-chart-card">
-              <div className="gx-market-chart-head">
-                <div>
-                  <span>Komposisi fasilitas</span>
-                  <h3>Temukan tipe yang cocok</h3>
-                </div>
-                <small>{marketingData.totalRooms} kamar tercatat</small>
-              </div>
-              {roomsQuery.isLoading ? (
-                <div className="gx-market-chart-loading"><Spinner animation="border" size="sm" /> Memuat data kamar</div>
-              ) : marketingData.totalRooms ? (
-                <HorizontalBarChart
-                  points={marketingData.facilityMix}
-                  ariaLabel="Komposisi pilihan kamar berdasarkan fasilitas"
-                  height={220}
-                  leftWidth={84}
-                  barSize={16}
-                  valueFormatter={(value) => `${value} kamar`}
-                />
-              ) : (
-                <div className="gx-market-chart-loading">Data fasilitas belum tersedia.</div>
-              )}
-            </article>
+          <div className="gx-catalog-results" aria-live="polite">
+            {roomsQuery.isLoading ? 'Memuat kamar dari sistem KOST48.' : `${catalogRooms.length} kamar sesuai filter.`}
+          </div>
+
+          {roomsQuery.isLoading ? (
+            <div className="gx-room-grid">
+              {[0, 1, 2, 3].map((item) => <RoomPreviewSkeleton key={item} />)}
+            </div>
+          ) : roomsQuery.isError ? (
+            <div className="gx-home-empty">Katalog kamar belum dapat dimuat. Silakan coba lagi atau hubungi admin via WhatsApp.</div>
+          ) : visibleCatalogRooms.length ? (
+            <div className="gx-room-grid">
+              {visibleCatalogRooms.map((room) => <RoomPreviewCard key={room.id} room={room} />)}
+            </div>
+          ) : (
+            <div className="gx-home-empty">Belum ada kamar yang cocok dengan filter ini. Coba ubah preferensi atau tanya admin via WhatsApp.</div>
+          )}
+
+          {!roomsQuery.isLoading && visibleCatalogRooms.length < catalogRooms.length && (
+            <div className="gx-room-more">
+              <button type="button" className="gx-btn-outline" onClick={() => setVisibleRoomCount((count) => count + CATALOG_BATCH_SIZE)}>
+                Tampilkan Lebih Banyak Kamar
+              </button>
+            </div>
+          )}
+
+          <div className="gx-room-range">
+            <span>Tarif bulanan saat ini</span>
+            <strong>{formatMonthlyRange(
+              monthlyRates.length ? Math.min(...monthlyRates) : 0,
+              monthlyRates.length ? Math.max(...monthlyRates) : 0,
+            )}</strong>
           </div>
         </Container>
       </section>
 
-      {/* ══ PHOTO DIVIDER ══ */}
+      <section className="gx-trust-section">
+        <Container fluid="xl">
+          <div className="gx-section-head gx-section-head-center">
+            <div className="gx-label">Proses jelas</div>
+            <h2>Kenapa booking di KOST48 lebih jelas?</h2>
+            <p>Yang biasanya tercecer di chat dibuat lebih terlihat: status kamar, pengajuan booking, pembayaran, dan portal penghuni.</p>
+          </div>
+          <div className="gx-trust-grid">
+            {TRUST_ITEMS.map((item) => (
+              <article className="gx-trust-card" key={item.title}>
+                <span className="gx-trust-mark">{item.mark}</span>
+                <h3>{item.title}</h3>
+                <p>{item.desc}</p>
+              </article>
+            ))}
+          </div>
+        </Container>
+      </section>
+
+      <section className="gx-content-section" id="fasilitas">
+        <Container fluid="xl">
+          <div className="gx-section-head">
+            <div className="gx-label">Fasilitas</div>
+            <h2>Fasilitas yang mendukung hidup sehari-hari.</h2>
+            <p>Pilih kategori untuk melihat fasilitas utama tanpa harus membaca daftar panjang sekaligus.</p>
+          </div>
+          <div className="gx-facility-tabs" role="tablist" aria-label="Kategori fasilitas">
+            {FACILITY_GROUPS.map((group) => (
+              <button
+                key={group.id}
+                type="button"
+                role="tab"
+                className={activeFacilityTab === group.id ? 'active' : ''}
+                aria-selected={activeFacilityTab === group.id}
+                onClick={() => setActiveFacilityTab(group.id)}
+              >
+                {group.title}
+              </button>
+            ))}
+          </div>
+          <div className="gx-facility-panel" role="tabpanel">
+            <div className="gx-facility-list gx-facility-list-active">
+              {activeFacility.items.map((item) => (
+                <div key={item.label} className="gx-facility-row">
+                  <span className="gx-facility-icon" aria-hidden="true">{item.mark}</span>
+                  <div>
+                    <strong>{item.label}</strong>
+                    <small>{item.desc}</small>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </Container>
+      </section>
+
+      <section className="gx-location-section" id="lokasi">
+        <Container fluid="xl">
+          <div className="gx-location-grid">
+            <div className="gx-location-copy">
+              <div className="gx-label">Lokasi</div>
+              <h2>Dekat Pakuwon Mall / PTC di Surabaya Barat.</h2>
+              <p>KOST48 berada di Jalan Hikmah V No. 48, Lontar, Sambikerep. Lokasinya mudah dikenali dan cocok untuk calon penghuni yang ingin akses harian lebih praktis.</p>
+              <div className="gx-location-facts">
+                <span>7 menit berjalan kaki</span>
+                <span>Surabaya Barat 60216</span>
+                <span>Area Pakuwon Mall / PTC</span>
+              </div>
+              <div className="gx-contact-actions">
+                <a className="gx-btn-primary" href={officialKost48Location.mapsUrl} target="_blank" rel="noreferrer">Buka Google Maps</a>
+                <a className="gx-btn-outline" href={officialKost48Location.whatsappUrl} target="_blank" rel="noreferrer">Chat WhatsApp</a>
+              </div>
+            </div>
+            <div className="gx-contact-map">
+              <iframe
+                title="Peta Lokasi KOST48 Surabaya"
+                src={MAPS_EMBED_URL}
+                width="100%"
+                height="380"
+                style={{ border: 0, display: 'block' }}
+                allowFullScreen
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+              />
+              <a href={officialKost48Location.mapsUrl} target="_blank" rel="noreferrer" className="gx-map-open">Buka di Google Maps</a>
+            </div>
+          </div>
+        </Container>
+      </section>
+
       <section className="gx-social-proof-section" id="ulasan">
         <Container fluid="xl">
           <div className="gx-social-proof-head">
             <div className="gx-section-head">
-              <div className="gx-label">Cerita Penghuni</div>
-              <h2>Pengalaman nyata, ditampilkan tanpa membuka identitas.</h2>
-              <p>Hanya ulasan terverifikasi dengan nilai minimal 4 yang ditampilkan dari sistem KOST48.</p>
+              <div className="gx-label">Cerita penghuni</div>
+              <h2>Ulasan ditampilkan hanya jika sudah terverifikasi.</h2>
+              <p>Pengalaman penghuni ditampilkan secara anonim dan hanya dari ulasan yang memenuhi kriteria.</p>
             </div>
-            <div className="gx-social-proof-summary" aria-label="Ringkasan social proof">
+            <div className="gx-social-proof-summary" aria-label="Ringkasan kepercayaan">
+              {ratingAvailable && (
+                <div>
+                  <strong>{socialProofQuery.data?.averageRating.toFixed(1)}</strong>
+                  <span>rating terverifikasi</span>
+                </div>
+              )}
               <div>
-                <strong>{socialProofQuery.isLoading ? '...' : socialProofQuery.data?.averageRating || '-'}</strong>
-                <span>rating rata-rata</span>
+                <strong>{socialProofQuery.isLoading ? '...' : occupantCount}</strong>
+                <span>penghuni aktif</span>
               </div>
               <div>
-                <strong>{socialProofQuery.isLoading ? '...' : socialProofQuery.data?.occupantCount ?? '-'}</strong>
-                <span>penghuni aktif</span>
+                <strong>Asli</strong>
+                <span>foto properti</span>
+              </div>
+              <div>
+                <strong>Live</strong>
+                <span>status kamar</span>
               </div>
             </div>
           </div>
@@ -454,76 +738,48 @@ export default function PublicGuestDashboardPage() {
               ))}
             </div>
           ) : (
-            <div className="gx-social-proof-state">Belum ada ulasan publik yang memenuhi kriteria.</div>
+            <div className="gx-social-proof-state gx-social-proof-empty">
+              <strong>Ulasan publik belum tersedia</strong>
+              <span>Kami hanya menampilkan ulasan yang sudah terverifikasi dan memenuhi kriteria.</span>
+            </div>
           )}
         </Container>
       </section>
 
-      <div className="gx-photo-divider" style={{ backgroundImage: `url(/room-images/kamar-a-1.webp)` }} aria-hidden="true" />
-
-      {/* ══ FASILITAS ══ */}
-      <section className="gx-content-section" id="fasilitas">
-        <Container fluid="xl">
-          <div className="gx-section-head">
-            <div className="gx-label">Fasilitas</div>
-            <h2>Fasilitas yang mendukung hidup sehari-hari.</h2>
-            <p>Dirancang agar penghuni bisa fokus bekerja atau kuliah tanpa repot urusan harian.</p>
-          </div>
-          <div className="gx-facility-wrap">
-            {FACILITY_GROUPS.map((group) => (
-              <div key={group.id} className="gx-facility-group">
-                <h3 className="gx-facility-group-title">{group.title}</h3>
-                <div className="gx-facility-list">
-                  {group.items.map((item) => (
-                    <div key={item.label} className="gx-facility-row">
-                      <span className="gx-facility-icon" aria-hidden="true">{item.icon}</span>
-                      <div>
-                        <strong>{item.label}</strong>
-                        <small>{item.desc}</small>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
-        </Container>
-      </section>
-
-      {/* ══ BROSUR & SPANDUK ══ */}
       {visibleGalleryItems.length > 0 ? (
         <section className="gx-gallery-section">
           <Container fluid="xl">
-            <div className="gx-section-head">
-              <div className="gx-label">Brosur & Spanduk</div>
-              <h2>Informasi lengkap KOST48.</h2>
-              <p>Klik gambar untuk melihat dalam ukuran penuh.</p>
-            </div>
-            <div className="gx-gallery-grid">
-              {visibleGalleryItems.map((item) => (
-                <button
-                  key={item.id}
-                  className="gx-gallery-item"
-                  onClick={() => setLightboxSrc(item.src)}
-                  aria-label={`Buka ${item.label} ukuran penuh`}
-                >
-                  <img
-                    src={item.src}
-                    alt={item.label}
-                    className="gx-gallery-img"
-                    loading="lazy"
-                    onError={() => setGalleryBroken((prev) => ({ ...prev, [item.id]: true }))}
-                  />
-                  <div className="gx-gallery-overlay"><span>🔍 Lihat ukuran penuh</span></div>
-                  <div className="gx-gallery-label">{item.label}</div>
-                </button>
-              ))}
+            <div className="gx-gallery-compact">
+              <div className="gx-section-head">
+                <div className="gx-label">Informasi lengkap</div>
+                <h2>Butuh brosur untuk dibagikan?</h2>
+                <p>Lihat brosur KOST48 dalam ukuran penuh untuk dibagikan ke keluarga atau teman.</p>
+              </div>
+              <div className="gx-gallery-grid">
+                {visibleGalleryItems.map((item) => (
+                  <button
+                    key={item.id}
+                    className="gx-gallery-item"
+                    onClick={() => setLightboxSrc(item.src)}
+                    aria-label={`Buka ${item.label} ukuran penuh`}
+                  >
+                    <img
+                      src={item.src}
+                      alt={item.label}
+                      className="gx-gallery-img"
+                      loading="lazy"
+                      onError={() => setGalleryBroken((prev) => ({ ...prev, [item.id]: true }))}
+                    />
+                    <div className="gx-gallery-overlay"><span>Lihat</span></div>
+                    <div className="gx-gallery-label">{item.label}</div>
+                  </button>
+                ))}
+              </div>
             </div>
           </Container>
         </section>
       ) : null}
 
-      {/* ══ FAQ dengan filter ══ */}
       <section className="gx-faq-section" id="faq">
         <Container fluid="xl">
           <div className="gx-section-head">
@@ -531,28 +787,8 @@ export default function PublicGuestDashboardPage() {
             <h2>Yang sering ditanyakan calon penghuni.</h2>
           </div>
 
-          {/* Filter chips */}
-          <div className="gx-faq-filters" role="group" aria-label="Filter pertanyaan">
-            {FAQ_FILTERS.map((cat) => (
-              <button
-                key={cat}
-                type="button"
-                className={`gx-faq-chip${faqFilter === cat ? ' active' : ''}`}
-                onClick={() => setFaqFilter(cat)}
-                aria-pressed={faqFilter === cat}
-              >
-                {cat}
-                {cat !== 'Semua' && (
-                  <span className="gx-faq-chip-count">
-                    {faqData.filter((q) => q.category === cat).length}
-                  </span>
-                )}
-              </button>
-            ))}
-          </div>
-
-          <Accordion key={faqFilter} className="gx-accordion" flush>
-            {filteredFaq.map((item, i) => (
+          <Accordion className="gx-accordion" flush alwaysOpen>
+            {faqItems.map((item, i) => (
               <Accordion.Item key={item.question} eventKey={String(i)} className="gx-acc-item">
                 <Accordion.Header className="gx-acc-header">
                   <span className="gx-acc-cat">{item.category}</span>
@@ -563,48 +799,41 @@ export default function PublicGuestDashboardPage() {
             ))}
           </Accordion>
 
-          {filteredFaq.length === 0 && (
-            <p className="text-muted text-center py-4">Belum ada pertanyaan dalam kategori ini.</p>
-          )}
+          <div className="gx-faq-more">
+            <button type="button" className="gx-btn-outline" onClick={() => setShowAllFaq((value) => !value)}>
+              {showAllFaq ? 'Tampilkan FAQ Utama' : 'Lihat Semua FAQ'}
+            </button>
+          </div>
         </Container>
       </section>
 
-      {/* ══ HUBUNGI KAMI ══ */}
       <section className="gx-contact-section" id="hubungi-kami">
         <Container fluid="xl">
-          <div className="gx-contact-grid">
-            <div className="gx-contact-info">
-              <div className="gx-label">Hubungi Kami</div>
-              <h2>Temukan kami atau hubungi via WhatsApp.</h2>
+          <div className="gx-final-cta">
+            <div>
+              <div className="gx-label">Hubungi kami</div>
+              <h2>Siap cek kamar di KOST48?</h2>
+              <p>Lihat kamar tersedia atau tanya admin untuk menyesuaikan kebutuhan tinggalmu.</p>
               <address className="gx-address">
                 <strong>KOST48 Surabaya Barat</strong>
                 <span>Jalan Hikmah V No. 48</span>
                 <span>Kec. Sambikerep, Kel. Lontar</span>
-                <span>Surabaya Barat · Kode Pos 60216</span>
+                <span>Surabaya Barat - Kode Pos 60216</span>
               </address>
-              <p className="gx-contact-near">Sekitar 7 menit berjalan kaki dari Pakuwon Mall / PTC.</p>
-              <div className="gx-contact-actions">
-                <a className="gx-btn-primary" href={officialKost48Location.mapsUrl} target="_blank" rel="noreferrer">📍 Buka Google Maps</a>
-                <a className="gx-btn-outline" href={officialKost48Location.whatsappUrl} target="_blank" rel="noreferrer">💬 Chat WhatsApp</a>
-                <Link className="gx-btn-outline" to="/login">Masuk Portal</Link>
-              </div>
             </div>
-            <div className="gx-contact-map">
-              <iframe
-                title="Peta Lokasi KOST48 Surabaya"
-                src={MAPS_EMBED_URL}
-                width="100%"
-                height="380"
-                style={{ border: 0, display: 'block' }}
-                allowFullScreen
-                loading="lazy"
-                referrerPolicy="no-referrer-when-downgrade"
-              />
-              <a href={officialKost48Location.mapsUrl} target="_blank" rel="noreferrer" className="gx-map-open">↗ Buka di Google Maps</a>
+            <div className="gx-final-actions">
+              <a className="gx-btn-primary" href="#pilihan-kamar">Cek Kamar Tersedia</a>
+              <a className="gx-btn-outline" href={officialKost48Location.whatsappUrl} target="_blank" rel="noreferrer">Chat WhatsApp</a>
+              <a className="gx-btn-outline" href={officialKost48Location.mapsUrl} target="_blank" rel="noreferrer">Buka Google Maps</a>
             </div>
           </div>
         </Container>
       </section>
+
+      <a className="gx-mobile-booking" href="#pilihan-kamar" aria-label="Cek kamar tersedia">
+        <strong>{roomsQuery.isLoading ? 'Cek kamar' : `${stats.bookable} kamar tersedia`}</strong>
+        <span>Cek</span>
+      </a>
 
       <GuestFooter />
     </div>

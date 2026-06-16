@@ -2,6 +2,7 @@ import { lazy } from 'react';
 import { Spinner } from 'react-bootstrap';
 import AppLayout from '../../components/layout/AppLayout';
 import { useAuth } from '../../context/AuthContext';
+import PublicGuestDashboardPage from '../public/PublicGuestDashboardPage';
 import PublicRoomsPage from './PublicRoomsPage';
 
 const ConfiguredResourcePage = lazy(() => import('../resources/ConfiguredResourcePage'));
@@ -42,5 +43,5 @@ export default function RoomsRouteEntry() {
     );
   }
 
-  return <PublicRoomsPage />;
+  return <PublicGuestDashboardPage />;
 }

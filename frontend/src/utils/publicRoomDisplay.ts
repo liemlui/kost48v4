@@ -135,12 +135,12 @@ export function getPublicRoomAvailabilityDisplay(room: PublicRoom): PublicRoomAv
   if (!isBookable) {
     const isMaintenance = status === "MAINTENANCE";
     return {
-      label: isMaintenance ? "Sedang dicek" : "Terisi",
+      label: isMaintenance ? "Dibersihkan / Maintenance" : "Penuh / Terisi",
       tone: isMaintenance ? "is-maintenance" : "is-occupied",
-      shortCopy: isMaintenance ? "Kamar kosong, tetapi sedang dicek sebelum siap ditempati." : "Kamar sedang terisi. Bisa tanya estimasi kosong.",
+      shortCopy: isMaintenance ? "Kamar sedang dibersihkan atau maintenance sebelum siap ditempati." : "Kamar sedang penuh atau terisi. Bisa tanya estimasi kosong.",
       detailCopy: isMaintenance
-        ? "Kamar ini sudah kosong, tetapi belum dibuka untuk booking karena tim masih mengecek kebersihan, kunci, inventaris, dan kondisi akhir. Anda tetap bisa tanya admin untuk estimasi siap ditempati."
-        : "Kamar ini sedang terisi. Anda tetap bisa melihat detail dan tanya ke admin kapan kamar ini bisa kosong lagi.",
+        ? "Kamar ini belum dibuka untuk booking karena tim masih mengecek kebersihan, kunci, inventaris, dan kondisi akhir. Anda tetap bisa tanya admin untuk estimasi siap ditempati."
+        : "Kamar ini sedang penuh atau terisi. Anda tetap bisa melihat detail dan tanya ke admin kapan kamar ini bisa kosong lagi.",
       canBook: false,
     };
   }
@@ -149,10 +149,10 @@ export function getPublicRoomAvailabilityDisplay(room: PublicRoom): PublicRoomAv
     // Kamar bekas checkout/overstay yang sudah dibuka untuk booking (canBook=true
     // dari backend) tetapi masih dibersihkan staf.
     return {
-      label: "Bisa dipesan · dibersihkan",
+      label: "Dibersihkan / Maintenance",
       tone: "is-limited",
-      shortCopy: "Kamar sedang dibersihkan staf. Booking & DP bisa diajukan sekarang.",
-      detailCopy: "Kamar baru dikosongkan dan sedang dibersihkan. Anda bisa booking dan bayar DP sekarang — kamar terkunci untuk Anda, check-in dilakukan setelah pembersihan selesai.",
+      shortCopy: "Kamar sedang dibersihkan atau maintenance. Booking bisa diajukan jika tombol booking tersedia.",
+      detailCopy: "Kamar baru dikosongkan dan sedang dibersihkan atau maintenance. Jika tombol booking tersedia, Anda bisa mengajukan booking sekarang dan check-in dilakukan setelah kamar siap.",
       canBook: true,
     };
   }
