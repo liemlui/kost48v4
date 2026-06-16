@@ -20,12 +20,12 @@ Checklist eksekusi aktif plus changelog yang dipadatkan agar tetap terbaca sebag
 
 ## Sesi 2026-06-16 — SI (sewa/data/invoice) + G-1 (gamifikasi) — TERBARU
 
-Detail penuh: `docs/_PLAN_SI_SEWA_RIWAYAT.md`. Semua ter-commit & push ke `main`.
+Detail SI sudah diserap ke M04/M05/M08; source ringkas diarsipkan di `docs/archieve/2026-06-16_si_notes/_PLAN_SI_SEWA_RIWAYAT.md`. Semua ter-commit & push ke `main`.
 
 - **SI-1** `90ced2f`/`bb49ff3` — Seeder dummy DEV via **event-path HTTP** (anti raw-insert; keputusan
   owner: "dummy lewat jalur kejadian, jangan by pass DB"). `scripts/seed-dev-reset.js` (TRUNCATE+fondasi)
   + `scripts/seed-dev-via-api.js` (rooms/tenants/check-in/invoice/bayar/meter via endpoint).
-  `seed-dev-dummy.js` lama diusangkan. Verified: 20 kamar/16 stay/19 invoice/TB seimbang.
+  Seeder raw/bypass lama diusangkan. Verified: 20 kamar/16 stay/19 invoice/TB seimbang.
 - **SI-4** `e8e80e3` — Label peruntukan invoice (badge "Tagihan Sewa/Listrik/Air/DP") di daftar+detail
   tenant & backoffice; nomor invoice jadi subteks (`utils/invoiceUtility.ts`).
 - **SI-3** `eb820a9` — Timeline **Riwayat Sewa** (masuk→tiap periode→tagihannya, tertaut invoice) di
@@ -35,6 +35,12 @@ Detail penuh: `docs/_PLAN_SI_SEWA_RIWAYAT.md`. Semua ter-commit & push ke `main`
 - **G-1** `c75370a` — Gamifikasi tenant: poin = "kebaikan" (bukan rupiah), kartu Total/Ditukar/Sisa,
   **Papan Top-3 Kamar (anonim)** via `GET /me/loyalty/leaderboard`. Seeder lengkapi onboarding (event-path)
   → poin ONBOARDING_QUEST terisi.
+- **T-1** — Tip staf: tambah **ShopeePay** (User.tipShopeepay) di profil staf + tampil ke penghuni;
+  penghuni **tandai "sudah beri tip"** pada tiket selesai → StaffPerformanceEvent `TIP_RECEIVED`
+  (scoreDelta 0, P2P, **tanpa nominal**); laporan staf tampil **"Tip diterima: N kali"** (hitungan,
+  bukan jumlah uang). **Bugfix**: `generateTicketNumberTx` pakai `$executeRaw` (bukan `$queryRaw`) untuk
+  `pg_advisory_xact_lock` — Prisma 7 menolak kolom `void` → pembuatan tiket 500 (kini normal). Seeder +4
+  tiket/3 tip-ack. Verified: tipCount=3, TB tetap seimbang.
 - Sebelumnya (sesi sama): **Meter M-1/M-2/M-3** (konstanta owner-settable, siklus listrik+air auto-invoice,
   pencatatan mandiri tenant). Detail: `docs/_PROPOSAL_METER_LISTRIK_AIR.md`.
 
@@ -173,7 +179,7 @@ Detail penuh: `docs/_PLAN_SI_SEWA_RIWAYAT.md`. Semua ter-commit & push ke `main`
 - [x] **L-5 🟡 → SELESAI (terukur)** SEO Lighthouse **100/100** (LH 12.8.2, headless Chrome atas build dist, halaman home) — 10 audit lulus (is-crawlable, document-title, meta-description, http-status, link-text, crawlable-anchors, robots-txt, image-alt, hreflang, canonical); structured-data = N/A (cek manual, JSON-LD ada). Target ≥90 TERLAMPAUI. _(UD-04/V-7 kosmetik tetap backlog UI.)_
 
 #### 🆕 SESI UI/UX + PENYATUAN MODUL + METER (2026-06-16) — review owner langsung
-**Konteks:** walkthrough UI/UX owner + verifikasi screenshot Playwright (`ui-shots/`, tak di-commit). Pakai DB dev 5433 (di-reseed via `backend/scripts/seed-dev-dummy.js`). Semua `tsc` 0, dipush ke `origin/main`.
+**Konteks:** walkthrough UI/UX owner + verifikasi screenshot Playwright (`ui-shots/`, tak di-commit). Pakai DB dev 5433 (di-reseed via event-path: `seed-dev-reset.js` + `seed-dev-via-api.js`). Semua `tsc` 0, dipush ke `origin/main`.
 
 ##### Sudah SELESAI & ter-commit/push
 - [x] **UI-RESP-1** Fix bug app-shell collapse `<1200px` (override `10-misc` menutup collapse `02-layout`) — global semua role.
@@ -198,7 +204,7 @@ Detail penuh: `docs/_PLAN_SI_SEWA_RIWAYAT.md`. Semua ter-commit & push ke `main`
 - [x] **OWN-4** Laporan owner: kartu **"Pergerakan Pengeluaran"** (per kategori) pendamping "Pergerakan Pendapatan".
 - [x] **METER M-1** Konstanta owner-settable di Settings (`OperationalSetting` + modul `settings` + tab "Tarif & Konstanta"): free 30 kWh, tarif Rp2500, toggle air, tarif air. [SCHEMA additive, owner OK]
 - [x] **METER M-2** `POST /meter-readings/cycle` (OWNER/ADMIN): catat listrik+air → jatah gratis+tarif → auto-issue invoice meter (reuse `createWithLinesAndIssue`) + `MeterCycleModal` di tab Meter. Verified API+UI.
-- [x] **DATA** `seed-dev-dummy.js` (wipe+isi atomik, guard anti-produksi) ganti dummy lama kacau.
+- [x] **DATA** Seeder event-path (`seed-dev-reset.js` + `seed-dev-via-api.js`) menggantikan dummy raw/bypass lama; data bisnis masuk via endpoint nyata.
 - [x] **DOCS** Spec `_PROPOSAL_METER_LISTRIK_AIR.md` (M-1..M-5) + `_PROPOSAL_MARKETING_GAMIFIKASI_TIP.md` (tip/gamifikasi/marketing/cross-sell) + CHANGELOG 2026-06-16.
 
 ##### Sedang dikerjakan / BELUM
@@ -212,6 +218,11 @@ Detail penuh: `docs/_PLAN_SI_SEWA_RIWAYAT.md`. Semua ter-commit & push ke `main`
 - [ ] **OWN-STRUKTUR** Pisah area "fitur admin" vs "khusus owner" di app owner + **kartu status besar** (pola kartu staf) di Admin & Owner.
 - [ ] **FASE B-2** Gabung 4 menu stok (inventaris/barang kamar/mutasi/gudang) jadi tab dalam satu halaman.
 - [ ] **MKT** Marketing high-level: SWOT/PESTLE owner-editable → narasi onboarding & web · pembanding kompetitor · survey guest · cross-sell perpanjangan (WiFi/bantuan bersih) · kebijakan perbaikan GRATIS (lampu/kran/shower/bocor).
+- [ ] **MG-UI-01** Re-theme landing publik modern (lihat M07): konsep KOST48 tetap, warna/konten existing tetap, tetapi presentasi dibuat lebih modern seperti referensi Marshiba: hero immersive, capsule/sticky nav, CTA kuat, section story, dan card kamar premium.
+- [ ] **MG-UI-02** Proof strip publik: tampilkan data marketing yang valid (lokasi Surabaya Barat/Pakuwon-PTC, rating/ulasan visible, penghuni aktif, booking online, Google Maps/CCTV, dan status ketersediaan) tanpa klaim palsu.
+- [ ] **MG-UI-03** Section "Living System": jual nilai web app KOST48 sebagai pembeda kos lain — invoice jelas, riwayat sewa, laporan kerusakan, loyalty, referral, dashboard tenant, listrik pascabayar/30 kWh gratis.
+- [ ] **MG-UI-04** Audit aset foto marketing: pilih foto hero, foto kamar unggulan, fallback foto rusak, ukuran web yang ringan, alt text, lazy-load, dan dimensi stabil agar LCP tidak turun.
+- [ ] **MG-UI-05** Verifikasi re-theme publik: screenshot Playwright desktop/mobile, cek overlap teks/CTA, Lighthouse SEO tetap >=90, LCP target <2.5s, reduced-motion, dan build+PWA verify lulus.
 - [ ] **AUDIT-OWNER** Sisa temuan audit owner: overflow Settings/Notif · spinner full-page antar-tab · fallback foto rusak · judul tab browser per-route · konsistensi "tersedia" owner vs publik · /rooms shared URL · "Laporan Formal" dangling.
 - [ ] **CSS+SWEEP** Konsolidasi CSS `.app-shell*` duplikat (6 file) + sweep responsif penuh semua role + sisir teks tanpa-spasi lain.
 

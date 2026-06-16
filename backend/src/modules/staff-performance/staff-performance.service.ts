@@ -281,6 +281,8 @@ export class StaffPerformanceService {
     const auditNeedsFix = audits.filter((item) => item.result === StaffAuditResult.NEEDS_FIX).length;
     const auditFailed = audits.filter((item) => item.result === StaffAuditResult.FAILED).length;
     const auditNotDone = audits.filter((item) => item.result === StaffAuditResult.NOT_DONE).length;
+    // T-1: tip diterima = HITUNGAN kali (bukan nominal). Dari StaffPerformanceEvent TIP_RECEIVED.
+    const tipCount = events.filter((e) => String(e.eventType) === 'TIP_RECEIVED').length;
     const reviewRatings = reviews.map((review) => review.rating);
     const averageRating = avg(reviewRatings);
     const lowReviewCount = reviews.filter((review) => review.rating <= 2).length;
@@ -327,6 +329,7 @@ export class StaffPerformanceService {
         auditNeedsFix,
         auditFailed: auditFailed + auditNotDone,
         proofCompletionRate,
+        tipCount,
       },
       tenantReviews: {
         count: reviews.length,

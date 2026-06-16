@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ConflictException,
   ForbiddenException,
   Injectable,
@@ -214,7 +215,7 @@ export class TicketsService {
           room: true,
           stay: true,
           assignedTo: {
-            select: { id: true, fullName: true, role: true, tipGopay: true, tipOvo: true, tipDana: true, tipBank: true },
+            select: { id: true, fullName: true, role: true, tipGopay: true, tipOvo: true, tipDana: true, tipShopeepay: true, tipBank: true },
           },
           linkedRoomItem: { include: { item: true, room: true } },
           linkedInventoryItem: true,
@@ -223,7 +224,54 @@ export class TicketsService {
       this.prisma.ticket.count({ where }),
     ]);
 
-    return { items, meta: buildMeta(page, limit, totalItems) };
+    // T-1: tandai tiket yang tip-nya sudah di-acknowledge penghuni (agar tombol tak dobel).
+    const ackIds = new Set<number>();
+    if (items.length) {
+      const acks = await this.prisma.staffPerformanceEvent.findMany({
+        where: { eventType: 'TIP_RECEIVED' as any, sourceType: 'TICKET' as any, sourceId: { in: items.map((t) => t.id) } },
+        select: { sourceId: true },
+      });
+      for (const a of acks) if (a.sourceId != null) ackIds.add(a.sourceId);
+    }
+    const enriched = items.map((t) => ({ ...t, tipAcknowledged: ackIds.has(t.id) }));
+
+    return { items: enriched, meta: buildMeta(page, limit, totalItems) };
+  }
+
+  /**
+   * T-1: penghuni menandai "sudah beri tip" untuk staf yang menangani tiket (P2P, di luar buku kos).
+   * Tercatat sebagai StaffPerformanceEvent TIP_RECEIVED (scoreDelta 0 — hanya HITUNGAN, bukan nominal,
+   * tidak memengaruhi skor KPI). Idempotent per tiket (sekali hitung).
+   */
+  async acknowledgeTip(ticketId: number, user: CurrentUserPayload) {
+    const ticket = await this.prisma.ticket.findUnique({
+      where: { id: ticketId },
+      select: { id: true, tenantId: true, assignedToId: true, status: true },
+    });
+    if (!ticket) throw new NotFoundException('Tiket tidak ditemukan');
+    if (user.role === 'TENANT' && ticket.tenantId !== user.tenantId) {
+      throw new ForbiddenException('Tidak berhak menandai tip untuk tiket ini');
+    }
+    if (!ticket.assignedToId) throw new BadRequestException('Tiket ini belum punya staf penanggung jawab.');
+    if (!['DONE', 'CLOSED'].includes(String(ticket.status).toUpperCase())) {
+      throw new BadRequestException('Tip hanya bisa ditandai setelah tiket selesai.');
+    }
+    const existing = await this.prisma.staffPerformanceEvent.findFirst({
+      where: { eventType: 'TIP_RECEIVED' as any, sourceType: 'TICKET' as any, sourceId: ticketId },
+      select: { id: true },
+    });
+    if (existing) return { acknowledged: true, alreadyRecorded: true };
+    await this.prisma.staffPerformanceEvent.create({
+      data: {
+        staffId: ticket.assignedToId,
+        sourceType: 'TICKET' as any,
+        sourceId: ticketId,
+        eventType: 'TIP_RECEIVED' as any,
+        scoreDelta: 0,
+        reason: 'Tip diberikan penghuni (P2P, tanpa nominal)',
+      },
+    });
+    return { acknowledged: true, alreadyRecorded: false };
   }
 
   async findOne(id: number, user: CurrentUserPayload) {

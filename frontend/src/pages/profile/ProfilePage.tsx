@@ -81,6 +81,7 @@ export default function ProfilePage() {
     tipGopay: user?.tipGopay ?? '',
     tipOvo: user?.tipOvo ?? '',
     tipDana: user?.tipDana ?? '',
+    tipShopeepay: user?.tipShopeepay ?? '',
     tipBank: user?.tipBank ?? '',
   });
   const [tipError, setTipError] = useState('');
@@ -300,6 +301,7 @@ export default function ProfilePage() {
                 { key: 'tipGopay', label: 'GoPay', placeholder: 'Nomor GoPay / tautan' },
                 { key: 'tipOvo', label: 'OVO', placeholder: 'Nomor OVO' },
                 { key: 'tipDana', label: 'DANA', placeholder: 'Nomor DANA' },
+                { key: 'tipShopeepay', label: 'ShopeePay', placeholder: 'Nomor ShopeePay' },
                 { key: 'tipBank', label: 'Bank (nama bank + no. rekening + a.n.)', placeholder: 'mis. BCA 1234567890 a.n. Budi' },
               ] as const).map((f) => (
                 <Col md={6} key={f.key}>

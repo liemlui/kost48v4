@@ -267,6 +267,7 @@ enum StaffPerformanceEventType {
   TENANT_REVIEW_LOW
   MISSING_PROOF
   MANUAL_ADJUSTMENT
+  TIP_RECEIVED
 }
 
 enum AnnouncementAudience {
@@ -459,6 +460,7 @@ model User {
   tipGopay          String?
   tipOvo            String?
   tipDana           String?
+  tipShopeepay      String?
   tipBank           String?
   createdAt         DateTime  @default(now())
   updatedAt         DateTime  @updatedAt

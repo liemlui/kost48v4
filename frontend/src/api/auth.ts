@@ -23,6 +23,7 @@ export type TipInfoPayload = {
   tipGopay?: string;
   tipOvo?: string;
   tipDana?: string;
+  tipShopeepay?: string;
   tipBank?: string;
 };
 

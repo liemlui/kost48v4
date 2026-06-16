@@ -21,6 +21,11 @@ export class UpdateMyTipInfoDto {
   tipDana?: string;
 
   @IsOptional()
+  @IsString({ message: 'ShopeePay harus berupa string' })
+  @MaxLength(120, { message: 'ShopeePay maksimal 120 karakter' })
+  tipShopeepay?: string;
+
+  @IsOptional()
   @IsString({ message: 'Bank harus berupa string' })
   @MaxLength(200, { message: 'Info bank maksimal 200 karakter' })
   tipBank?: string;

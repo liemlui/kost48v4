@@ -6,7 +6,10 @@ import { Prisma } from '../../generated/prisma';
  */
 export async function generateTicketNumberTx(db: any): Promise<string> {
   const year = new Date().getFullYear();
-  await db.$queryRaw(
+  // Pakai $executeRaw (bukan $queryRaw): pg_advisory_xact_lock mengembalikan `void`,
+  // dan deserializer Prisma 7 menolak kolom 'void' (→ "Failed to deserialize column of
+  // type 'void'") sehingga SELURUH pembuatan tiket 500. executeRaw tak men-deserialize hasil.
+  await db.$executeRaw(
     Prisma.sql`SELECT pg_advisory_xact_lock(hashtext(${`ticket-number-${year}`}))`,
   );
 

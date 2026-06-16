@@ -23,6 +23,7 @@ export type StaffPerformanceSummary = {
     auditNeedsFix: number;
     auditFailed: number;
     proofCompletionRate: number;
+    tipCount?: number;
   };
   tenantReviews: { count: number; averageRating: number | null; highReviewCount: number; lowReviewCount: number; items?: any[] };
   audits?: any[];

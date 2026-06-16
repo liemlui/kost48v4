@@ -48,6 +48,7 @@ export type AuthUser = {
   tipGopay?: string | null;
   tipOvo?: string | null;
   tipDana?: string | null;
+  tipShopeepay?: string | null;
   tipBank?: string | null;
 };
 

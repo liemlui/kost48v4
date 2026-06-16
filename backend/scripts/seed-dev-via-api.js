@@ -53,7 +53,7 @@ const EMPTY = ['Q', 'R', 'S', 'T'];
 const TENANT_PW = 'Tenant#2026';
 const RENT_BY_TIER = { lt: 1200000, mid: 1400000, top: 1600000 };
 
-const summary = { rooms: 0, tenants: 0, onboarded: 0, stays: 0, rentInvoices: 0, paidFull: 0, unpaid: 0, meterInvoices: 0, meterFree: 0, renewals: 0 };
+const summary = { rooms: 0, tenants: 0, onboarded: 0, stays: 0, rentInvoices: 0, paidFull: 0, unpaid: 0, meterInvoices: 0, meterFree: 0, tickets: 0, tipAcks: 0, renewals: 0 };
 
 (async () => {
   console.log('=== SI-1 SEED via HTTP ===\nAPI:', API);
@@ -152,6 +152,37 @@ const summary = { rooms: 0, tenants: 0, onboarded: 0, stays: 0, rentInvoices: 0,
     if (r) { if (r.invoice || r.invoiceId) summary.meterInvoices++; else summary.meterFree++; }
   }
   console.log(`✓ Meter: ${summary.meterInvoices} bertagihan, ${summary.meterFree} dalam jatah gratis`);
+
+  // 4b) Tiket + tip (T-1): tenant lapor → assign → selesai → tenant tandai "sudah beri tip"
+  //     (P2P, dihitung kali-nya saja). Sekaligus mengisi info tip staf (incl. ShopeePay).
+  const staffLogin = await api('POST', '/auth/login', { identifier: 'staff@kost48.com', password: 'staff123' }, { token: '' });
+  const staffTok = staffLogin?.accessToken;
+  if (staffTok) {
+    await api('PATCH', '/auth/me/tip-info', {
+      tipGopay: '0812-3456-7890', tipShopeepay: '0899-1111-2222', tipDana: '0812-3456-7890',
+      tipBank: 'BCA 1234567890 a.n. Staf KOST48',
+    }, { token: staffTok, optional: true });
+    const staffId = idOf(await api('GET', '/auth/me', null, { token: staffTok }));
+    const ticketSeeds = [
+      { ti: 0, title: 'AC kurang dingin', cat: 'AC', tip: true },
+      { ti: 2, title: 'Keran kamar mandi bocor', cat: 'PLUMBING', tip: true },
+      { ti: 4, title: 'WiFi sering putus', cat: 'WIFI', tip: true },
+      { ti: 6, title: 'Lampu kamar mati', cat: 'ELECTRICITY', tip: false },
+    ];
+    for (const t of ticketSeeds) {
+      const tEmail = `${NAMES[t.ti][2]}.tenant@kost48.test`;
+      const ttok = (await api('POST', '/auth/login', { identifier: tEmail, password: TENANT_PW }, { token: '' }))?.accessToken;
+      if (!ttok) continue;
+      const tkId = idOf(await api('POST', '/tickets/portal', { title: t.title, description: `${t.title} (seed dummy)`, category: t.cat }, { token: ttok, optional: true }));
+      if (!tkId) continue;
+      summary.tickets = (summary.tickets ?? 0) + 1;
+      await api('POST', `/tickets/${tkId}/assign`, { assignedToId: staffId }, { optional: true });
+      await api('POST', `/tickets/${tkId}/start`, {}, { token: staffTok, optional: true });
+      await api('POST', `/tickets/${tkId}/mark-done`, { resolutionNote: 'Sudah ditangani staf (seed).' }, { token: staffTok, optional: true });
+      if (t.tip) { await api('POST', `/tickets/${tkId}/tip-acknowledge`, {}, { token: ttok, optional: true }); summary.tipAcks = (summary.tipAcks ?? 0) + 1; }
+    }
+    console.log(`✓ Tiket: ${summary.tickets ?? 0} dibuat (${summary.tipAcks ?? 0} ditandai tip) + info tip staf diisi`);
+  }
 
   // 5) Perpanjangan (riwayat): /stays/:id/renew SENGAJA dinonaktifkan owner — wajib lewat
   //    alur Permintaan Perpanjangan (DP → invoice pelunasan → finalisasi). Itu multi-langkah;

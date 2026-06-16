@@ -57,6 +57,8 @@ export default function StaffKpiBreakdown({ performance }: Props) {
     { label: 'Catatan meter', value: kpi?.meterCount ?? 0 },
     { label: 'Stok/gudang', value: kpi?.stockReports ?? 0 },
     { label: 'Cek kamar', value: kpi?.roomChecks ?? 0 },
+    // T-1: apresiasi tip — HITUNGAN kali (bukan nominal). Tampil bila pernah dapat.
+    ...((kpi?.tipCount ?? 0) > 0 ? [{ label: '🙏 Tip diterima (kali)', value: kpi?.tipCount ?? 0 }] : []),
   ];
 
   return (

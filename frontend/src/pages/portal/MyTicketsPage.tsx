@@ -28,6 +28,7 @@ type PortalTicket = {
   updatedAt?: string;
   lastMessage?: string;
   category?: string | null;
+  tipAcknowledged?: boolean;
   assignedTo?: {
     id: number;
     fullName: string;
@@ -35,6 +36,7 @@ type PortalTicket = {
     tipGopay?: string | null;
     tipOvo?: string | null;
     tipDana?: string | null;
+    tipShopeepay?: string | null;
     tipBank?: string | null;
   } | null;
 };
@@ -44,6 +46,7 @@ function tipLines(staff: NonNullable<PortalTicket['assignedTo']>): { label: stri
   if (staff.tipGopay) out.push({ label: 'GoPay', value: staff.tipGopay });
   if (staff.tipOvo) out.push({ label: 'OVO', value: staff.tipOvo });
   if (staff.tipDana) out.push({ label: 'DANA', value: staff.tipDana });
+  if (staff.tipShopeepay) out.push({ label: 'ShopeePay', value: staff.tipShopeepay });
   if (staff.tipBank) out.push({ label: 'Bank', value: staff.tipBank });
   return out;
 }
@@ -104,6 +107,11 @@ export default function MyTicketsPage() {
     onError: (err: unknown) => {
       setError(toTenantFriendlyError(err, 'Gagal membuat laporan baru. Coba lagi atau hubungi admin.'));
     },
+  });
+
+  const tipAckMutation = useMutation({
+    mutationFn: (ticketId: number) => createResource(`/tickets/${ticketId}/tip-acknowledge`, {}),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['portal-tickets'] }),
   });
 
   const tickets = useMemo(() => query.data?.items ?? [], [query.data]);
@@ -189,6 +197,16 @@ export default function MyTicketsPage() {
                     {tipLines(ticket.assignedTo).map((t) => (
                       <span key={t.label} className="badge bg-success-subtle text-success border">{t.label}: {t.value}</span>
                     ))}
+                  </div>
+                  <div className="mt-2">
+                    {ticket.tipAcknowledged ? (
+                      <span className="text-success fw-semibold">✓ Tip sudah kamu tandai — terima kasih! 🙏</span>
+                    ) : (
+                      <Button size="sm" variant="outline-success" disabled={tipAckMutation.isPending} onClick={() => tipAckMutation.mutate(ticket.id)}>
+                        Saya sudah beri tip 🙏
+                      </Button>
+                    )}
+                    <div className="text-muted mt-1" style={{ fontSize: '0.72rem' }}>Hanya dihitung berapa kali (tanpa nominal), sebagai apresiasi di laporan staf.</div>
                   </div>
                 </Alert>
               ) : null}

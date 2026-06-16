@@ -66,6 +66,13 @@ export class TicketsController {
     return { message: 'Daftar tiket saya berhasil diambil', data: await this.ticketsService.findMine(user, query) };
   }
 
+  // T-1: penghuni menandai sudah memberi tip ke staf (P2P, dihitung — bukan nominal).
+  @Post(':id/tip-acknowledge')
+  @Roles(UserRole.TENANT)
+  async acknowledgeTip(@Param('id', ParseIntPipe) id: number, @CurrentUser() user: CurrentUserPayload) {
+    return { message: 'Terima kasih, tip dicatat', data: await this.ticketsService.acknowledgeTip(id, user) };
+  }
+
   @Post('upload-image')
   @Roles(UserRole.OWNER, UserRole.ADMIN, UserRole.STAFF, UserRole.TENANT)
   @UseGuards(RateLimitGuard)

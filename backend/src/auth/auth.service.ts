@@ -95,6 +95,7 @@ export class AuthService {
       tipGopay: user.tipGopay,
       tipOvo: user.tipOvo,
       tipDana: user.tipDana,
+      tipShopeepay: user.tipShopeepay,
       tipBank: user.tipBank,
     };
   }
@@ -117,6 +118,7 @@ export class AuthService {
     if (dto.tipGopay !== undefined) data.tipGopay = clean(dto.tipGopay) as string | null;
     if (dto.tipOvo !== undefined) data.tipOvo = clean(dto.tipOvo) as string | null;
     if (dto.tipDana !== undefined) data.tipDana = clean(dto.tipDana) as string | null;
+    if (dto.tipShopeepay !== undefined) data.tipShopeepay = clean(dto.tipShopeepay) as string | null;
     if (dto.tipBank !== undefined) data.tipBank = clean(dto.tipBank) as string | null;
 
     const updated = await this.prisma.user.update({ where: { id: userId }, data });
@@ -124,6 +126,7 @@ export class AuthService {
       tipGopay: updated.tipGopay,
       tipOvo: updated.tipOvo,
       tipDana: updated.tipDana,
+      tipShopeepay: updated.tipShopeepay,
       tipBank: updated.tipBank,
     };
   }
