@@ -424,8 +424,8 @@ changelog (Bagian 2) saat gate lulus. Item ✅ sudah dipindah ke daftar referens
 - [x] **TEN-PROFILE-NOTIF** — **SELESAI**: `GET /tenant/profile/completeness` (reuse `buildCompletionSummary`) + badge "📋 Lengkapi profil (X%)" di MyStayPage (list field kurang + tombol ke /portal/profile). UAT runtime: endpoint balikkan struktur benar (maya 100% → badge tersembunyi).
 
 #### Fase G — Layanan Tambahan & Meter (portlet tenant)
-- [ ] **PUB-LAYANAN-TAMBAHAN** — Tampilkan estimasi tarif setiap layanan tambahan di portal tenant. Admin kelola daftar layanan + tarif via Settings.
-- [ ] **PUB-LAYANAN-MINAT** — Tombol "Saya Minat" → modal konfirmasi biaya → admin proses.
+- [x] **PUB-LAYANAN-TAMBAHAN** 🧬 — **SELESAI**: model `AdditionalService` (migration `20260618000000_additional_services`) + modul backend CRUD (mutasi OWNER-only, list aktif semua role) + resource admin "Layanan Tambahan" (config + route + nav owner) + portlet tenant (estimasi tarif di MyStayPage). **UAT runtime LULUS** (owner create, admin 403, tenant lihat 2 layanan + tarif).
+- [ ] **PUB-LAYANAN-MINAT** — Tombol "Saya Minat" → modal konfirmasi biaya → admin proses. **DITUNDA:** butuh model `ServiceInterest` + flow (increment terpisah; sementara tenant pakai "Kirim Saran").
 - [ ] **PUB-METER-JADWAL** — Tampilkan jadwal catat meter di `/portal/stay` (jendela buka/tutup, status bulan ini).
 - [ ] **STF-METER-VIEW** — Dashboard staff: daftar kamar yang sudah/belum catat meter per siklus.
 
@@ -461,6 +461,12 @@ changelog (Bagian 2) saat gate lulus. Item ✅ sudah dipindah ke daftar referens
 ## Changelog Ringkas
 
 > Dipadatkan dari `docs/CHANGELOG.md`: header tanggal dipertahankan, tiap entry hanya menyimpan 1-2 poin outcome. Detail verbose tetap ada di source lama.
+
+### 2026-06-18 — feat(PUB-LAYANAN-TAMBAHAN 🧬): layanan tambahan + tarif (admin CRUD + portlet tenant)
+- Schema additive (owner-approved, migration `20260618000000_additional_services`): model `AdditionalService` (name/description/priceRupiah/unit/isActive/sortOrder).
+- BE: modul `additional-services` — CRUD mutasi **OWNER-only** (D-17), `GET /active` semua role.
+- FE: resource admin "Layanan Tambahan" (config-driven + route /additional-services + nav owner Pengaturan) + portlet tenant di MyStayPage (daftar layanan + estimasi tarif).
+- Gate: BE tsc 0 · FE build (106 chunk, PWA ok) · **UAT runtime LULUS** (owner create 201, admin 403, tenant lihat Galon/TV + tarif). PUB-LAYANAN-MINAT ditunda (butuh model ServiceInterest).
 
 ### 2026-06-18 — feat(PUB-CALENDAR-CHECKOUT): badge "Perkiraan kosong [tgl]" katalog publik
 - Keputusan owner: proyeksi kamar kosong hanya untuk (a) checkout-request APPROVED, atau (b) stay jangka pendek (harian/mingguan/2-mingguan, sering tak perpanjang). TIDAK menebak dari kontrak bulanan.

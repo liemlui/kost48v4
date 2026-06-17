@@ -1987,3 +1987,21 @@ model OperationalSetting {
   updatedAt                     DateTime @updatedAt
   updatedById                   Int?
 }
+
+// PUB-LAYANAN-TAMBAHAN (additive, owner-approved 2026-06-18): daftar layanan
+// tambahan (galon, TV, WiFi, dll) + tarif yang dikelola owner via Settings dan
+// ditampilkan di portal tenant.
+model AdditionalService {
+  id          Int      @id @default(autoincrement())
+  name        String
+  description String?
+  priceRupiah Int      @default(0)
+  unit        String?
+  isActive    Boolean  @default(true)
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([isActive])
+  @@index([sortOrder])
+}

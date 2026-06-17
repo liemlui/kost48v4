@@ -290,4 +290,27 @@ export const propertyConfigs = {
       },
     ],
   },
+
+  // PUB-LAYANAN-TAMBAHAN: layanan tambahan + tarif yang dikelola owner.
+  additionalServices: {
+    title: 'Layanan Tambahan',
+    path: '/additional-services',
+    allowDelete: true,
+    supportsIsActiveFilter: true,
+    columns: [
+      { key: 'sortOrder', label: 'Urutan' },
+      { key: 'name', label: 'Layanan' },
+      { key: 'priceRupiah', label: 'Tarif' },
+      { key: 'unit', label: 'Satuan' },
+      { key: 'isActive', label: 'Aktif' },
+    ],
+    fields: [
+      { name: 'name', label: 'Nama Layanan', type: 'text' as const, placeholder: 'Contoh: Galon Air, TV Tambahan', required: true },
+      { name: 'description', label: 'Deskripsi', type: 'textarea' as const, placeholder: 'Penjelasan singkat (opsional)' },
+      { name: 'priceRupiah', label: 'Tarif', type: 'currency' as const, placeholder: '15000 untuk Rp 15.000', required: true },
+      { name: 'unit', label: 'Satuan', type: 'text' as const, placeholder: 'Contoh: per galon, per bulan, per unit' },
+      { name: 'sortOrder', label: 'Urutan Tampil', type: 'number' as const, placeholder: '0' },
+      { name: 'isActive', label: 'Aktif (tampil ke penghuni)', type: 'checkbox' as const },
+    ],
+  },
 };

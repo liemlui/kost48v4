@@ -56,6 +56,7 @@ const ownerSections: NavigationSection[] = [
     title: 'Pengaturan',
     links: [
       { to: '/users', label: 'Akun User', icon: '👤', hint: 'Kelola akun owner, admin, staff, dan penghuni.' },
+      { to: '/additional-services', label: 'Layanan Tambahan', icon: '🛎️', hint: 'Kelola daftar layanan tambahan (galon, TV, WiFi, dll) + tarif yang tampil ke penghuni.' },
       { to: '/settings', label: 'Pengaturan', icon: '⚙️', hint: 'FAQ publik, foto kamar, konten halaman tamu, dan tarif dasar.' },
     ],
   },

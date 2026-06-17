@@ -12,6 +12,7 @@ import { decideRenewRequest, listMyRenewRequests } from '../../api/renewRequests
 import { listMyCheckoutRequests } from '../../api/checkoutRequests';
 import { listMyPaymentSubmissions } from '../../api/paymentSubmissions';
 import { getProfileCompleteness } from '../../api/tenants';
+import { listActiveAdditionalServices } from '../../api/additionalServices';
 import CheckoutRequestModal from '../../components/checkout-requests/CheckoutRequestModal';
 import RenewRequestModal from '../../components/tenant/RenewRequestModal';
 import MeterCycleModal from '../../components/stays/MeterCycleModal';
@@ -152,6 +153,13 @@ function ActiveStayContent({ stay }: { stay: Stay }) {
     queryKey: ['portal-renew-requests', stay.id],
     queryFn: () => listMyRenewRequests(),
     refetchOnWindowFocus: true,
+  });
+
+  // PUB-LAYANAN-TAMBAHAN: layanan tambahan + tarif (dikelola owner).
+  const servicesQuery = useQuery({
+    queryKey: ['additional-services-active'],
+    queryFn: listActiveAdditionalServices,
+    staleTime: 120_000,
   });
 
   const invoicesQuery = useQuery<PaginatedResponse<Invoice>>({
@@ -706,12 +714,29 @@ function ActiveStayContent({ stay }: { stay: Stay }) {
             <div>
               <div className="command-eyebrow">Bantu KOST48 jadi lebih nyaman</div>
               <h3>Layanan tambahan yang mungkin kamu butuhkan</h3>
-              <p>Minat dan saran dikirim lewat Laporan Saya dan dibaca pengelola.</p>
+              <p>Estimasi tarif di bawah. Minat? Kirim Saran ke pengelola untuk diproses.</p>
             </div>
             <Button variant="outline-primary" size="sm" onClick={() => navigate('/portal/tickets')}>
               Kirim Saran
             </Button>
           </div>
+          {/* PUB-LAYANAN-TAMBAHAN: layanan + tarif yang dikelola owner. */}
+          {servicesQuery.data && servicesQuery.data.length > 0 ? (
+            <div className="tenant-service-tariff-list mb-3">
+              {servicesQuery.data.map((svc) => (
+                <div key={svc.id} className="d-flex justify-content-between align-items-start gap-2 py-2 border-bottom">
+                  <div>
+                    <strong>{svc.name}</strong>
+                    {svc.description ? <div className="small text-muted">{svc.description}</div> : null}
+                  </div>
+                  <div className="text-end fw-semibold text-nowrap">
+                    <CurrencyDisplay amount={svc.priceRupiah} />
+                    {svc.unit ? <div className="small text-muted fw-normal">{svc.unit}</div> : null}
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : null}
           <div className="tenant-service-interest-grid">
             {TENANT_SERVICE_IDEAS.slice(0, 4).map((service) => (
               <div key={service.label} className="tenant-service-interest-chip">
