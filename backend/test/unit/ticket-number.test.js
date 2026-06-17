@@ -5,9 +5,10 @@ const { generateTicketNumberTx } = require('../../dist/common/utils/ticket-numbe
 test('ticket number generator locks the transaction and skips occupied sequence', async () => {
   let lockCalls = 0;
   const db = {
-    $queryRaw: async () => {
+    // Lock pakai $executeRaw (pg_advisory_xact_lock → void); mock harus sediakan ini.
+    $executeRaw: async () => {
       lockCalls += 1;
-      return [];
+      return 0;
     },
     ticket: {
       count: async () => 2,

@@ -462,6 +462,13 @@ changelog (Bagian 2) saat gate lulus. Item ✅ sudah dipindah ke daftar referens
 
 > Dipadatkan dari `docs/CHANGELOG.md`: header tanggal dipertahankan, tiap entry hanya menyimpan 1-2 poin outcome. Detail verbose tetap ada di source lama.
 
+### 2026-06-18 — fix(go-live hardening dari audit): test 55/55 + camera CSP (OCR) + HSTS
+- **Test 54/55 → 55/55:** mock `ticket-number.test.js` pakai `$executeRaw` (bukan `$queryRaw`) sesuai advisory-lock F2-5. Bukan bug produksi, tapi suite kini hijau penuh.
+- **DEEP-02:** `Permissions-Policy: camera=(self)` agar OCR KTP (PUB-KTP-OCR/Tesseract) tak terblok; mic & geo tetap diblok.
+- **DEEP-03:** header `Strict-Transport-Security` (HSTS) ditambah — **hanya di produksi** (HTTPS), tidak di dev.
+- **DEEP-01 = FALSE POSITIVE:** `PasswordResetToken.token` sudah `@unique` (sudah ada unique index PG); tidak perlu `@@index` tambahan.
+- Gate: BE build 0 · unit test **55/55** hijau. (DEEP-04/05 konsolidasi duplikat ditunda — refactor pasca go-live.)
+
 ### 2026-06-18 — feat(PUB-LAYANAN-TAMBAHAN 🧬): layanan tambahan + tarif (admin CRUD + portlet tenant)
 - Schema additive (owner-approved, migration `20260618000000_additional_services`): model `AdditionalService` (name/description/priceRupiah/unit/isActive/sortOrder).
 - BE: modul `additional-services` — CRUD mutasi **OWNER-only** (D-17), `GET /active` semua role.
