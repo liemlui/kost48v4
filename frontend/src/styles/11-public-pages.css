@@ -3782,18 +3782,23 @@
   animation: gx-status-pop .3s .16s cubic-bezier(.22, 1, .36, 1) both;
 }
 
-.gx-room-status.is-available,
-.gx-room-status.is-limited {
+/* PUB-BADGE-STATUS: warna badge sesuai mapping owner —
+   Hijau/Tersedia · Kuning/Dipesan(proses) · Merah/Terisi · Abu/Maintenance. */
+.gx-room-status.is-available {
   color: var(--gx-green);
 }
 
-.gx-room-status.is-maintenance {
+.gx-room-status.is-limited {
   color: var(--gx-amber);
+}
+
+.gx-room-status.is-maintenance {
+  color: #586575;
 }
 
 .gx-room-status.is-occupied,
 .gx-room-status.is-full {
-  color: #586575;
+  color: #c0392b;
 }
 
 .gx-room-body {

@@ -256,6 +256,19 @@ function roomStatusIcon(tone: string): string {
   return '🟢';
 }
 
+// PUB-FACILITY-SHOW: ikon fasilitas ringkas di kartu kamar (cocokkan kata kunci).
+function amenityIcon(label: string): string {
+  const l = label.toLowerCase();
+  if (l.includes('ac')) return '❄️';
+  if (l.includes('kipas')) return '🌀';
+  if (l.includes('km') || l.includes('mandi')) return '🚿';
+  if (l.includes('wifi') || l.includes('wi-fi')) return '📶';
+  if (l.includes('kasur') || l.includes('bed')) return '🛏️';
+  if (l.includes('lemari')) return '🚪';
+  if (l.includes('meja')) return '🪑';
+  return '✓';
+}
+
 function RoomPreviewCard({ room }: { room: PublicRoom }) {
   const availability = getPublicRoomAvailabilityDisplay(room);
   const amenities = [
@@ -278,14 +291,17 @@ function RoomPreviewCard({ room }: { room: PublicRoom }) {
         </div>
         <strong className="gx-room-price">Mulai {formatCompactRupiah(rate)} / bulan</strong>
         <div className="gx-room-amenities" aria-label="Fasilitas ringkas">
-          {amenities.map((item) => <span key={item}>{item}</span>)}
+          {amenities.map((item) => (
+            <span key={item}><span aria-hidden="true">{amenityIcon(item)}</span> {item}</span>
+          ))}
         </div>
         <div className="gx-room-actions">
           <Link className="gx-room-action-secondary" to={`/rooms/${room.id}/detail`} state={{ room }}>Lihat Detail</Link>
           {availability.canBook ? (
-            <Link className="gx-room-action-primary" to={`/booking/${room.id}`} state={{ room }}>Ajukan Booking</Link>
+            <Link className="gx-room-action-primary" to={`/booking/${room.id}`} state={{ room }}><span aria-hidden="true">📝</span> Ajukan Booking</Link>
           ) : (
-            <a className="gx-room-action-primary" href={buildRoomWhatsAppUrl(room)} target="_blank" rel="noreferrer">Tanya Ketersediaan</a>
+            // PUB-BTN-COLOR: kamar belum bisa dibooking → "Tanya" pakai gaya outline (bukan tombol utama).
+            <a className="gx-room-action-secondary" href={buildRoomWhatsAppUrl(room)} target="_blank" rel="noreferrer"><span aria-hidden="true">💬</span> Tanya Ketersediaan</a>
           )}
         </div>
       </div>
