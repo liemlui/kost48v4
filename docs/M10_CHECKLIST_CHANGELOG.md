@@ -394,11 +394,11 @@ changelog (Bagian 2) saat gate lulus. Item ✅ sudah dipindah ke daftar referens
 - [x] **PUB-CTA-AUDIT** — prominent "Cek Kamar Tersedia" tinggal 2 (hero + sticky navbar); CTA penutup di-relabel "Lihat Pilihan Kamar"; form submit tetap (fungsional).
 - [x] **PUB-REMOVE-PREF** — tombol "Ubah Preferensi Tinggal" dihapus dari halaman publik.
 
-#### Fase B — Kalender Ketersediaan Cerdas
-- [ ] **PUB-CALENDAR** — Backend `GET /public/rooms/availability-calendar?from&to` + frontend timeline horizontal.
-- [ ] **PUB-CALENDAR-RENEW** — Badge "Mungkin Tersedia" untuk kamar dengan tenant kontrak dekat (≤14 hari).
-- [ ] **PUB-CALENDAR-CHECKOUT** — Badge "Akan Kosong [tanggal]" untuk tenant durasi pendek / checkout request APPROVED.
-- [ ] **PUB-SMART-BOOKING** — `GET /public/rooms?checkIn&durationDays` — filter kamar available di rentang.
+#### Fase B — Kalender Ketersediaan Cerdas (keputusan owner 2026-06-18)
+- [x] **PUB-CALENDAR-CHECKOUT** — **SELESAI**: badge "🗓️ Perkiraan kosong [tgl]" di kartu kamar terisi bila (a) ada checkout-request **APPROVED**, atau (b) stay **jangka pendek** (DAILY/WEEKLY/BIWEEKLY). Backend `projectedAvailableDate`/`reason` di public rooms API (list+detail). **UAT runtime LULUS** (stay WEEKLY → projection muncul).
+- [~] **PUB-CALENDAR-RENEW** — **owner memutuskan TIDAK menebak** dari kontrak bulanan/panjang (hanya checkout-approved + short-term). Item ditutup sesuai keputusan.
+- [ ] **PUB-CALENDAR** (timeline horizontal penuh) — DITUNDA: badge proyeksi per-kamar sudah memenuhi kebutuhan inti owner; timeline penuh opsional bila nanti diminta.
+- [ ] **PUB-SMART-BOOKING** — `GET /public/rooms?checkIn&durationDays` filter rentang (belum; opsional).
 
 #### Fase C — Kartu Kamar, Badge & Tombol — ✅ SELESAI 2026-06-17
 - [x] **PUB-BADGE-STATUS** — warna badge: Hijau/Tersedia · Kuning/Dipesan(proses) · Merah/Terisi · Abu/Maintenance (selaras ikon).
@@ -461,6 +461,11 @@ changelog (Bagian 2) saat gate lulus. Item ✅ sudah dipindah ke daftar referens
 ## Changelog Ringkas
 
 > Dipadatkan dari `docs/CHANGELOG.md`: header tanggal dipertahankan, tiap entry hanya menyimpan 1-2 poin outcome. Detail verbose tetap ada di source lama.
+
+### 2026-06-18 — feat(PUB-CALENDAR-CHECKOUT): badge "Perkiraan kosong [tgl]" katalog publik
+- Keputusan owner: proyeksi kamar kosong hanya untuk (a) checkout-request APPROVED, atau (b) stay jangka pendek (harian/mingguan/2-mingguan, sering tak perpanjang). TIDAK menebak dari kontrak bulanan.
+- BE: `getProjectedAvailabilityByRoomId` + `projectedAvailableDate`/`projectedAvailableReason` di public rooms API (list+detail). FE: badge "🗓️ Perkiraan kosong [tgl]" di kartu kamar terisi + `PublicRoom` type.
+- Gate: BE tsc 0 · FE build (106 chunk, PWA ok) · UAT runtime (stay WEEKLY → projection 2026-06-27 muncul).
 
 ### 2026-06-17 — feat(TEN-PROFILE-NOTIF): badge "Lengkapi Profil" portal tenant
 - `GET /tenant/profile/completeness` (reuse `buildCompletionSummary`, 7 field onboarding) + badge "📋 Lengkapi profil (X%)" di MyStayPage (list field kurang + tombol /portal/profile).

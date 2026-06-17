@@ -412,6 +412,9 @@ export type PublicRoom = {
   status: string;
   category?: RoomCategory | null;
   roomType?: RoomType | null;
+  // PUB-CALENDAR-CHECKOUT: proyeksi kamar "Akan Kosong" (ISO date) bila relevan.
+  projectedAvailableDate?: string | null;
+  projectedAvailableReason?: 'checkout-approved' | 'short-term' | null;
   notes?: string | null;
   images?: string[];
   pricing: {

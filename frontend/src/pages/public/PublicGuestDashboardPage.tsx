@@ -278,6 +278,13 @@ function amenityIcon(label: string): string {
   return '✓';
 }
 
+// PUB-CALENDAR-CHECKOUT: format tanggal singkat (id-ID) untuk proyeksi kosong.
+function formatRoomShortDate(iso: string): string {
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return iso;
+  return d.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
+}
+
 function RoomPreviewCard({ room }: { room: PublicRoom }) {
   const availability = getPublicRoomAvailabilityDisplay(room);
   const amenities = [
@@ -308,6 +315,10 @@ function RoomPreviewCard({ room }: { room: PublicRoom }) {
         <div>
           <h3>{room.name || room.code || `Kamar ${room.id}`}</h3>
           <p>{availability.canBook ? 'Status kosong atau siap diajukan mengikuti tombol booking.' : 'Belum bisa dibooking langsung, tetapi tetap bisa ditanyakan.'}</p>
+          {/* PUB-CALENDAR-CHECKOUT: proyeksi kamar akan kosong (kamar terisi). */}
+          {!availability.canBook && room.projectedAvailableDate ? (
+            <p className="gx-room-soon">🗓️ Perkiraan kosong {formatRoomShortDate(room.projectedAvailableDate)}{room.projectedAvailableReason === 'short-term' ? ' (sewa jangka pendek)' : ''} — bisa pesan duluan.</p>
+          ) : null}
         </div>
         <strong className="gx-room-price">Mulai {formatCompactRupiah(rate)} / bulan</strong>
         <div className="gx-room-amenities" aria-label="Fasilitas ringkas">

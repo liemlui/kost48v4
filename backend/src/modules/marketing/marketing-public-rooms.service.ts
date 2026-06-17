@@ -117,11 +117,57 @@ export class MarketingPublicRoomsService {
     ]);
 
     const facilitiesByRoomId = await this.getPublicFacilitiesByRoomId(items.map((room) => room.id));
+    const projectedByRoomId = await this.getProjectedAvailabilityByRoomId(items.map((room) => room.id));
 
     return {
-      items: serializePrismaResult(items.map((room) => this.toPublicRoomDto(room, query.pricingTerm, facilitiesByRoomId.get(room.id) ?? []))),
+      items: serializePrismaResult(items.map((room) => this.toPublicRoomDto(room, query.pricingTerm, facilitiesByRoomId.get(room.id) ?? [], projectedByRoomId.get(room.id)))),
       meta: buildMeta(page, limit, totalItems),
     };
+  }
+
+  // PUB-CALENDAR-CHECKOUT/RENEW: proyeksi tanggal kamar "Akan Kosong" untuk kamar
+  // terisi yang (a) ada checkout-request APPROVED, atau (b) stay-nya jangka pendek
+  // (harian/mingguan/2-mingguan) yang sering tidak diperpanjang. Keputusan owner 2026-06-18.
+  private async getProjectedAvailabilityByRoomId(
+    roomIds: number[],
+  ): Promise<Map<number, { date: string; reason: 'checkout-approved' | 'short-term' }>> {
+    const map = new Map<number, { date: string; reason: 'checkout-approved' | 'short-term' }>();
+    if (!roomIds.length) return map;
+    const todayStr = new Date().toISOString().slice(0, 10);
+
+    const stays = await this.prisma.stay.findMany({
+      where: { roomId: { in: roomIds }, status: 'ACTIVE' as any },
+      select: { id: true, roomId: true, pricingTerm: true, plannedCheckOutDate: true },
+    });
+    const stayIds = stays.map((s) => s.id);
+    const approved = stayIds.length
+      ? await this.prisma.checkoutRequest.findMany({
+          where: { stayId: { in: stayIds }, status: 'APPROVED' as any },
+          select: { stayId: true, requestedCheckOutDate: true },
+          orderBy: { requestedCheckOutDate: 'asc' },
+        })
+      : [];
+    const approvedByStayId = new Map<number, Date>();
+    for (const c of approved) if (!approvedByStayId.has(c.stayId)) approvedByStayId.set(c.stayId, c.requestedCheckOutDate);
+
+    const SHORT_TERMS = ['DAILY', 'WEEKLY', 'BIWEEKLY'];
+    for (const stay of stays) {
+      const checkout = approvedByStayId.get(stay.id);
+      let date: Date | null = null;
+      let reason: 'checkout-approved' | 'short-term' | null = null;
+      if (checkout) {
+        date = checkout;
+        reason = 'checkout-approved';
+      } else if (SHORT_TERMS.includes(String(stay.pricingTerm)) && stay.plannedCheckOutDate) {
+        date = stay.plannedCheckOutDate;
+        reason = 'short-term';
+      }
+      if (date && reason) {
+        const dateStr = date.toISOString().slice(0, 10);
+        if (dateStr >= todayStr) map.set(stay.roomId, { date: dateStr, reason });
+      }
+    }
+    return map;
   }
 
   private toInitials(fullName: string): string {
@@ -159,9 +205,10 @@ export class MarketingPublicRoomsService {
     }
 
     const facilitiesByRoomId = await this.getPublicFacilitiesByRoomId([room.id]);
+    const projectedByRoomId = await this.getProjectedAvailabilityByRoomId([room.id]);
     const highlightedPricingTerm = this.getAvailablePricingTerms(room)[0] ?? PricingTerm.MONTHLY;
 
-    return serializePrismaResult(this.toPublicRoomDto(room, highlightedPricingTerm, facilitiesByRoomId.get(room.id) ?? []));
+    return serializePrismaResult(this.toPublicRoomDto(room, highlightedPricingTerm, facilitiesByRoomId.get(room.id) ?? [], projectedByRoomId.get(room.id)));
   }
 
   // ------------------------------------------------------------------
@@ -227,7 +274,12 @@ export class MarketingPublicRoomsService {
     return facilitiesByRoomId;
   }
 
-  private toPublicRoomDto(room: PublicRoomRecord, pricingTerm?: PricingTerm, facilities: unknown[] = []) {
+  private toPublicRoomDto(
+    room: PublicRoomRecord,
+    pricingTerm?: PricingTerm,
+    facilities: unknown[] = [],
+    projected?: { date: string; reason: 'checkout-approved' | 'short-term' },
+  ) {
     const highlightedPricingTerm = pricingTerm ?? PricingTerm.MONTHLY;
 
     return {
@@ -238,6 +290,9 @@ export class MarketingPublicRoomsService {
       status: room.status,
       category: room.category,
       roomType: room.roomType,
+      // PUB-CALENDAR-CHECKOUT: tanggal proyeksi kamar kosong (null bila tak relevan).
+      projectedAvailableDate: projected?.date ?? null,
+      projectedAvailableReason: projected?.reason ?? null,
       images: this.resolveRoomMarketingImages(room),
       notes: room.notes,
       pricing: {
