@@ -413,9 +413,9 @@ changelog (Bagian 2) saat gate lulus. Item ✅ sudah dipindah ke daftar referens
 - [ ] **OWN-FOTO-UPLOAD** — Backend CRUD foto marketing + fasilitas di Settings Owner.
 - [ ] **PUB-BROCHURE** — Section "Galeri KOST48" di landing + upload brosur/spanduk.
 
-#### Fase E — Ulasan & Social Proof
-- [ ] **PUB-REVIEWS** — `GET /public/reviews` dari StaffReview VISIBLE rating≥4 + embed Google Maps iframe.
-- [ ] **PUB-REVIEWS-FILTER** — Tab "Terbaru" / "Rating Tertinggi", default max 10.
+#### Fase E — Ulasan & Social Proof — ✅ SELESAI 2026-06-17
+- [x] **PUB-REVIEWS** — sudah ada via F3-4 (`getPublicSocialProof`: StaffReview VISIBLE rating≥4 + agregat) + **embed Google Maps iframe** sudah ada di section #lokasi (`MAPS_EMBED_URL`).
+- [x] **PUB-REVIEWS-FILTER** — tab "Terbaru" / "Rating Tertinggi" (client-side sort, default Terbaru), tampil maks 10; pool backend dinaikkan 6→12.
 
 #### Fase F — Booking Flow & KTP
 - [ ] **PUB-BOOKING-INFO** — Teks login "Belum punya akun? Booking dulu".
@@ -461,6 +461,10 @@ changelog (Bagian 2) saat gate lulus. Item ✅ sudah dipindah ke daftar referens
 ## Changelog Ringkas
 
 > Dipadatkan dari `docs/CHANGELOG.md`: header tanggal dipertahankan, tiap entry hanya menyimpan 1-2 poin outcome. Detail verbose tetap ada di source lama.
+
+### 2026-06-17 — feat(PUB-UI-REVAMP Fase E): filter ulasan Terbaru/Rating Tertinggi
+- **PUB-REVIEWS** sudah ada (F3-4 social-proof + Maps iframe di #lokasi). **PUB-REVIEWS-FILTER**: tab Terbaru/Rating Tertinggi (client-side sort, maks 10); pool review backend 6→12.
+- Gate: FE build (105 chunk, PWA ok) · BE tsc 0.
 
 ### 2026-06-17 — feat(PUB-ROOM-CATEGORY 🧬): kategori & tipe kamar (badge + filter)
 - **Schema additive** (owner-approved, migration `20260617000000_pub_room_category`): enum `RoomCategory` (ECONOMY/STANDARD/DELUXE) + `RoomType` (REGULAR/MEZZANINE), `Room.category`/`roomType` default STANDARD/REGULAR.

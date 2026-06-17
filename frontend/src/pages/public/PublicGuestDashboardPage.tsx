@@ -402,6 +402,8 @@ export default function PublicGuestDashboardPage() {
     const value = (initialCatalogParams.get('category') || '').toUpperCase();
     return ['ECONOMY', 'STANDARD', 'DELUXE'].includes(value) ? value : 'all';
   });
+  // PUB-REVIEWS-FILTER: urutkan ulasan (Terbaru / Rating Tertinggi), tampil maks 10.
+  const [reviewSort, setReviewSort] = useState<'recent' | 'rating'>('recent');
   const [visibleRoomCount, setVisibleRoomCount] = useState(CATALOG_BATCH_SIZE);
   const [galleryBroken, setGalleryBroken] = useState<Record<string, boolean>>({});
   const visibleGalleryItems = GALLERY_ITEMS.filter((item) => !galleryBroken[item.id]);
@@ -477,6 +479,16 @@ export default function PublicGuestDashboardPage() {
   const activeFacility = FACILITY_GROUPS.find((group) => group.id === activeFacilityTab) ?? FACILITY_GROUPS[0];
   const ratingAvailable = Boolean((socialProofQuery.data?.reviewCount ?? 0) > 0 && (socialProofQuery.data?.averageRating ?? 0) > 0);
   const occupantCount = socialProofQuery.data?.occupantCount ?? stats.occupied;
+  // PUB-REVIEWS-FILTER: urutkan + batasi 10 ulasan (client-side).
+  const displayedReviews = useMemo(() => {
+    const list = [...(socialProofQuery.data?.reviews ?? [])];
+    list.sort((a, b) =>
+      reviewSort === 'rating'
+        ? b.rating - a.rating
+        : new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+    );
+    return list.slice(0, 10);
+  }, [socialProofQuery.data?.reviews, reviewSort]);
   const handleCheckInDateChange = (value: string) => {
     setCheckInDate(!value || value < todayDate ? todayDate : value);
   };
@@ -790,9 +802,15 @@ export default function PublicGuestDashboardPage() {
             <div className="gx-social-proof-state"><Spinner animation="border" size="sm" /> Memuat ulasan penghuni</div>
           ) : socialProofQuery.isError ? (
             <div className="gx-social-proof-state">Ulasan belum dapat dimuat saat ini.</div>
-          ) : socialProofQuery.data?.reviews.length ? (
+          ) : displayedReviews.length ? (
+            <>
+              <div className="gx-catalog-filter gx-review-filter" role="tablist" aria-label="Urutkan ulasan">
+                <span>Urutkan</span>
+                <button type="button" role="tab" aria-selected={reviewSort === 'recent'} className={reviewSort === 'recent' ? 'active' : ''} onClick={() => setReviewSort('recent')}>Terbaru</button>
+                <button type="button" role="tab" aria-selected={reviewSort === 'rating'} className={reviewSort === 'rating' ? 'active' : ''} onClick={() => setReviewSort('rating')}>Rating Tertinggi</button>
+              </div>
             <div className="gx-review-grid">
-              {socialProofQuery.data.reviews.map((review, index) => (
+              {displayedReviews.map((review, index) => (
                 <article className="gx-review-card" key={`${review.initials}-${review.createdAt}-${index}`}>
                   <div className="gx-review-card-head">
                     <span className="gx-review-avatar">{review.initials}</span>
@@ -805,6 +823,7 @@ export default function PublicGuestDashboardPage() {
                 </article>
               ))}
             </div>
+            </>
           ) : (
             <div className="gx-social-proof-state gx-social-proof-empty">
               <strong>Ulasan publik belum tersedia</strong>

@@ -56,7 +56,7 @@ export class MarketingPublicRoomsService {
           tenant: { select: { fullName: true } },
         },
         orderBy: { createdAt: 'desc' },
-        take: 6,
+        take: 12, // PUB-REVIEWS-FILTER: pool utk sort Terbaru/Rating Tertinggi (FE tampil maks 10).
       }),
       this.prisma.staffReview.aggregate({
         where: {
