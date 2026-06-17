@@ -400,15 +400,15 @@ changelog (Bagian 2) saat gate lulus. Item ✅ sudah dipindah ke daftar referens
 - [ ] **PUB-CALENDAR-CHECKOUT** — Badge "Akan Kosong [tanggal]" untuk tenant durasi pendek / checkout request APPROVED.
 - [ ] **PUB-SMART-BOOKING** — `GET /public/rooms?checkIn&durationDays` — filter kamar available di rentang.
 
-#### Fase C — Kartu Kamar, Badge & Tombol
-- [ ] **PUB-BADGE-STATUS** — Badge warna (Hijau/Tersedia, Merah/Terisi, Kuning/Dipesan, Abu/Maintenance).
-- [ ] **PUB-BTN-COLOR** — Tombol beda warna per status (biru booking, outline Tanya, disabled Penuh).
-- [ ] **PUB-FACILITY-SHOW** — 4-5 ikon fasilitas utama di card kamar (km mandi, AC/kipas, ukuran).
-- [ ] **PUB-ROOM-CATEGORY** — Field `Room.category` (ECONOMY, STANDARD, DELUXE) + `Room.type` (REGULAR, MEZZANINE) + badge + filter.
-- [ ] **PUB-PHOTO-RATIO** — CSS `aspect-ratio: 1/1; object-fit: cover` untuk semua foto kamar.
+#### Fase C — Kartu Kamar, Badge & Tombol — sebagian ✅ (commit ca54397)
+- [x] **PUB-BADGE-STATUS** — warna badge: Hijau/Tersedia · Kuning/Dipesan(proses) · Merah/Terisi · Abu/Maintenance (selaras ikon).
+- [x] **PUB-BTN-COLOR** — kamar belum-bisa-booking → "Tanya" gaya outline; "Ajukan Booking" primary +📝. (Primary tetap HIJAU sesuai tema; owner sebut "biru" → bisa diubah bila mau.)
+- [x] **PUB-FACILITY-SHOW** — ikon fasilitas di chip kartu kamar (❄️🌀🚿📶…).
+- [ ] **PUB-ROOM-CATEGORY** 🧬 — Field `Room.category` (ECONOMY/STANDARD/DELUXE) + `Room.type` (REGULAR/MEZZANINE) + badge + filter. **Schema APPROVED owner 2026-06-17** — kerjakan di increment terpisah (migration additive + backend + filter FE).
+- [x] **PUB-PHOTO-RATIO** — **keputusan owner: pertahankan 4:3** (landscape, terbaik untuk foto ruang); rule 1:1 di M07 di-override. Tanpa perubahan kode.
 
 #### Fase D — Responsif & Foto Owner
-- [ ] **PUB-CARD-RESPONSIVE** — Grid 4/2/1 kolom + layout mobile.
+- [x] **PUB-CARD-RESPONSIVE** — grid `.gx-room-grid` sudah 4/2/1 kolom (verifikasi, tanpa perubahan).
 - [ ] **PUB-FACILITY-PHOTO** — Owner upload 1 foto per fasilitas via Settings.
 - [ ] **OWN-FOTO-UPLOAD** — Backend CRUD foto marketing + fasilitas di Settings Owner.
 - [ ] **PUB-BROCHURE** — Section "Galeri KOST48" di landing + upload brosur/spanduk.
@@ -420,7 +420,7 @@ changelog (Bagian 2) saat gate lulus. Item ✅ sudah dipindah ke daftar referens
 #### Fase F — Booking Flow & KTP
 - [ ] **PUB-BOOKING-INFO** — Teks login "Belum punya akun? Booking dulu".
 - [ ] **PUB-BOOKING-FORM** — Validasi `phone` XOR `email` (salah satu wajib), field lain optional.
-- [ ] **PUB-KTP-OCR** — Install Tesseract.js + OCR offline ekstrak nama+NIK dari foto KTP.
+- [ ] **PUB-KTP-OCR** — Install Tesseract.js + OCR offline ekstrak nama+NIK dari foto KTP. **npm APPROVED owner 2026-06-17** (`tesseract.js`) — kerjakan di increment terpisah.
 - [ ] **TEN-PROFILE-NOTIF** — Endpoint `GET /me/profile-completeness` + badge "Lengkapi Profil" di portal tenant.
 
 #### Fase G — Layanan Tambahan & Meter (portlet tenant)
@@ -461,6 +461,11 @@ changelog (Bagian 2) saat gate lulus. Item ✅ sudah dipindah ke daftar referens
 ## Changelog Ringkas
 
 > Dipadatkan dari `docs/CHANGELOG.md`: header tanggal dipertahankan, tiap entry hanya menyimpan 1-2 poin outcome. Detail verbose tetap ada di source lama.
+
+### 2026-06-17 — feat(PUB-UI-REVAMP Fase C frontend): badge/tombol status + ikon fasilitas (ca54397)
+- **PUB-BADGE-STATUS** warna badge per status (hijau/kuning/merah/abu, selaras ikon) · **PUB-BTN-COLOR** "Tanya" outline saat tak bisa booking, "Ajukan Booking" primary +📝 · **PUB-FACILITY-SHOW** ikon fasilitas di chip kartu.
+- **Keputusan owner:** foto kamar tetap **4:3** (PUB-PHOTO-RATIO); **PUB-CARD-RESPONSIVE** sudah 4/2/1 (tanpa ubah). Approved untuk increment lain: schema `Room.category` (PUB-ROOM-CATEGORY) + npm `tesseract.js` (PUB-KTP-OCR).
+- Gate: FE build hijau (105 chunk, PWA ok).
 
 ### 2026-06-17 — feat(PUB-UI-REVAMP Fase A): ikon publik + audit CTA (cf4c63c)
 - **PUB-REMOVE-PREF** hapus tombol "Ubah Preferensi Tinggal"; **PUB-CTA-AUDIT** prominent "Cek Kamar Tersedia" tinggal 2 (hero + sticky navbar), CTA penutup di-relabel.
