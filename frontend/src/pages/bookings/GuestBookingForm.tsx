@@ -83,7 +83,7 @@ export default function GuestBookingForm({
             </Col>
             <Col md={6}>
               <Form.Group>
-                <Form.Label>No. KTP/NIK <span className="text-danger">*</span></Form.Label>
+                <Form.Label>No. KTP/NIK <span className="text-muted small">(opsional)</span></Form.Label>
                 <Form.Control
                   value={form.identityNumber}
                   onChange={(e) => onChange('identityNumber', e.target.value)}
@@ -94,7 +94,7 @@ export default function GuestBookingForm({
                   maxLength={16}
                 />
                 <Form.Control.Feedback type="invalid">{errors.identityNumber}</Form.Control.Feedback>
-                <Form.Text muted>NIK 16 digit dari KTP, wajib untuk verifikasi tenant.</Form.Text>
+                <Form.Text muted>NIK 16 digit dari KTP. Opsional saat booking — bisa dilengkapi saat verifikasi/aktivasi.</Form.Text>
               </Form.Group>
             </Col>
             <Col md={6}>

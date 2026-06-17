@@ -697,7 +697,7 @@ function ActiveStayContent({ stay }: { stay: Stay }) {
               <p>Minat dan saran dikirim lewat Laporan Saya dan dibaca pengelola.</p>
             </div>
             <Button variant="outline-primary" size="sm" onClick={() => navigate('/portal/tickets')}>
-              Kirim via Laporan
+              Kirim Saran
             </Button>
           </div>
           <div className="tenant-service-interest-grid">

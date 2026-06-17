@@ -418,8 +418,8 @@ changelog (Bagian 2) saat gate lulus. Item ✅ sudah dipindah ke daftar referens
 - [x] **PUB-REVIEWS-FILTER** — tab "Terbaru" / "Rating Tertinggi" (client-side sort, default Terbaru), tampil maks 10; pool backend dinaikkan 6→12.
 
 #### Fase F — Booking Flow & KTP
-- [ ] **PUB-BOOKING-INFO** — Teks login "Belum punya akun? Booking dulu".
-- [ ] **PUB-BOOKING-FORM** — Validasi `phone` XOR `email` (salah satu wajib), field lain optional.
+- [x] **PUB-BOOKING-INFO** — teks "Belum punya akun? Booking kamar dulu" di LoginPage (akun portal dibuat otomatis).
+- [~] **PUB-BOOKING-FORM** — **KTP/NIK opsional** saat booking (validasi format hanya bila diisi; backend sudah `@IsOptional`). ⚠️ **phone XOR email DITUNDA:** auto-create akun portal (`public-bookings.service` user.create) butuh email → perlu desain "booking phone-only tanpa akun portal" (alur finance-adjacent, jangan YOLO).
 - [ ] **PUB-KTP-OCR** — Install Tesseract.js + OCR offline ekstrak nama+NIK dari foto KTP. **npm APPROVED owner 2026-06-17** (`tesseract.js`) — kerjakan di increment terpisah.
 - [ ] **TEN-PROFILE-NOTIF** — Endpoint `GET /me/profile-completeness` + badge "Lengkapi Profil" di portal tenant.
 
@@ -432,7 +432,7 @@ changelog (Bagian 2) saat gate lulus. Item ✅ sudah dipindah ke daftar referens
 #### Fase H — Staff & Role Scope
 - [ ] **STF-ROLE-SCOPE** — Staff: reparasi + kebersihan + resepsionis saja. Tidak bisa approve layanan berbayar.
 - [ ] **STF-WIFI-ORDER** — Tombol "Mulai" WiFi hanya admin. Staff lihat status. Atau "Pesan" → approve admin → invoice.
-- [ ] **STF-SARAN-LABEL** — Ganti label "Kirim via Laporan" → "Kirim Saran".
+- [x] **STF-SARAN-LABEL** — label "Kirim via Laporan" → "Kirim Saran" (MyStayPage).
 - [ ] **STF-TIP-FLOW** *(serap TIP+)* — Tenant klik "Saya sudah transfer/beri tip" di `MyTicketsPage` (copy "uang kopi" sukarela) → notif staff → staff konfirmasi 2 hari → award poin idempotent `TIP_MARKED:ticketId` (tanpa nominal). **UAT:** tip TIDAK masuk laporan keuangan. (Sudah T-1: ShopeePay, `TIP_RECEIVED`, `tipCount`.)
 
 #### Fase I — Foto Profil
@@ -461,6 +461,12 @@ changelog (Bagian 2) saat gate lulus. Item ✅ sudah dipindah ke daftar referens
 ## Changelog Ringkas
 
 > Dipadatkan dari `docs/CHANGELOG.md`: header tanggal dipertahankan, tiap entry hanya menyimpan 1-2 poin outcome. Detail verbose tetap ada di source lama.
+
+### 2026-06-17 — feat(PUB-UI-REVAMP batch cepat): booking-info, KTP opsional, label saran
+- **PUB-BOOKING-INFO**: teks "Belum punya akun? Booking kamar dulu" di LoginPage.
+- **PUB-BOOKING-FORM** (partial): KTP/NIK **opsional** saat booking (format dicek hanya bila diisi). phone-XOR-email ditunda (auto-akun portal butuh email).
+- **STF-SARAN-LABEL**: "Kirim via Laporan" → "Kirim Saran" (MyStayPage).
+- Gate: FE build (105 chunk, PWA ok).
 
 ### 2026-06-17 — feat(PUB-UI-REVAMP Fase E): filter ulasan Terbaru/Rating Tertinggi
 - **PUB-REVIEWS** sudah ada (F3-4 social-proof + Maps iframe di #lokasi). **PUB-REVIEWS-FILTER**: tab Terbaru/Rating Tertinggi (client-side sort, maks 10); pool review backend 6→12.

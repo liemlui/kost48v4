@@ -197,6 +197,11 @@ export default function LoginPage() {
             <Button type="submit" disabled={submitting} className="w-100 login-submit-btn">
               {submitting ? 'Memproses...' : 'Masuk'}
             </Button>
+
+            {/* PUB-BOOKING-INFO: tamu tak perlu daftar dulu — cukup booking kamar. */}
+            <p className="login-booking-hint text-center mt-3 mb-0 small">
+              Belum punya akun? <Link to="/rooms">Booking kamar dulu</Link> — akun portal dibuat otomatis setelah booking diverifikasi.
+            </p>
           </Form>
 
           {mode === 'TENANT' ? (
