@@ -420,7 +420,7 @@ changelog (Bagian 2) saat gate lulus. Item ✅ sudah dipindah ke daftar referens
 #### Fase F — Booking Flow & KTP
 - [x] **PUB-BOOKING-INFO** — teks "Belum punya akun? Booking kamar dulu" di LoginPage (akun portal dibuat otomatis).
 - [~] **PUB-BOOKING-FORM** — **KTP/NIK opsional** saat booking (validasi format hanya bila diisi; backend sudah `@IsOptional`). ⚠️ **phone XOR email DITUNDA:** auto-create akun portal (`public-bookings.service` user.create) butuh email → perlu desain "booking phone-only tanpa akun portal" (alur finance-adjacent, jangan YOLO).
-- [ ] **PUB-KTP-OCR** — Install Tesseract.js + OCR offline ekstrak nama+NIK dari foto KTP. **npm APPROVED owner 2026-06-17** (`tesseract.js`) — kerjakan di increment terpisah.
+- [x] **PUB-KTP-OCR** — **SELESAI**: `tesseract.js` (lazy-load, diproses di perangkat — privasi) di GuestBookingForm; tombol "📷 Pindai KTP" → ekstrak NIK (16 digit) + Nama via `parseKtpText` → isi otomatis (user wajib periksa). Bundle utama tak bertambah (chunk terpisah). npm approved owner 2026-06-17.
 - [ ] **TEN-PROFILE-NOTIF** — Endpoint `GET /me/profile-completeness` + badge "Lengkapi Profil" di portal tenant.
 
 #### Fase G — Layanan Tambahan & Meter (portlet tenant)
@@ -461,6 +461,10 @@ changelog (Bagian 2) saat gate lulus. Item ✅ sudah dipindah ke daftar referens
 ## Changelog Ringkas
 
 > Dipadatkan dari `docs/CHANGELOG.md`: header tanggal dipertahankan, tiap entry hanya menyimpan 1-2 poin outcome. Detail verbose tetap ada di source lama.
+
+### 2026-06-17 — feat(PUB-KTP-OCR): pindai KTP offline isi Nama+NIK otomatis
+- `tesseract.js` (owner-approved) **lazy-load** di GuestBookingForm — tombol "📷 Pindai KTP"; OCR diproses **di perangkat** (foto tak diunggah, privasi PDP). `parseKtpText` ekstrak NIK 16 digit + Nama → isi field (user wajib periksa/koreksi).
+- Bundle utama TIDAK bertambah (chunk dinamis terpisah, WASM/lang dari CDN saat dipakai). Gate: FE build (106 chunk, PWA ok).
 
 ### 2026-06-17 — feat(PUB-UI-REVAMP batch cepat): booking-info, KTP opsional, label saran
 - **PUB-BOOKING-INFO**: teks "Belum punya akun? Booking kamar dulu" di LoginPage.

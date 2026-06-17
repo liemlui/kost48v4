@@ -1,10 +1,11 @@
-import { FormEvent } from 'react';
+import { FormEvent, useState } from 'react';
 import { Alert, Button, Card, Col, Form, Row } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import CurrencyDisplay from '../../components/common/CurrencyDisplay';
 import StatusBadge, { getStatusLabel } from '../../components/common/StatusBadge';
 import type { PublicRoom } from '../../types';
 import { calculateRentByPricingTerm, isUtilitiesIncludedForPricingTerm, ALL_PRICING_TERMS } from '../../utils/pricing';
+import { parseKtpText } from '../../utils/ktpOcr';
 import type { GuestBookingFormState, FormErrors } from './guestBookingUtils';
 import { stayPurposeOptions, INITIAL_FORM } from './guestBookingUtils';
 
@@ -30,6 +31,34 @@ export default function GuestBookingForm({
   onSubmit,
 }: GuestBookingFormProps) {
   const availableTerms = room.availablePricingTerms?.length ? room.availablePricingTerms : ['MONTHLY'];
+
+  // PUB-KTP-OCR: pindai KTP di perangkat (offline). Tesseract.js di-lazy-load
+  // hanya saat user memilih foto, agar bundle utama tetap ramping.
+  const [ktpScanning, setKtpScanning] = useState(false);
+  const [ktpScanMsg, setKtpScanMsg] = useState<string | null>(null);
+
+  async function handleKtpScan(file?: File) {
+    if (!file) return;
+    setKtpScanning(true);
+    setKtpScanMsg('Memindai KTP di perangkat Anda (offline)…');
+    try {
+      const { recognize } = await import('tesseract.js');
+      const { data } = await recognize(file, 'ind');
+      const { nik, name } = parseKtpText(data.text || '');
+      if (nik) onChange('identityNumber', nik);
+      if (name && !form.fullName.trim()) onChange('fullName', name);
+      const filled = [nik ? 'NIK' : '', name ? 'Nama' : ''].filter(Boolean);
+      setKtpScanMsg(
+        filled.length
+          ? `Terisi otomatis (${filled.join(' & ')}). Mohon PERIKSA & koreksi bila ada yang salah.`
+          : 'Teks KTP tidak terbaca jelas. Silakan isi Nama & NIK manual.',
+      );
+    } catch {
+      setKtpScanMsg('Gagal memindai KTP. Silakan isi data manual saja.');
+    } finally {
+      setKtpScanning(false);
+    }
+  }
 
   return (
     <Card className="content-card border-0">
@@ -95,6 +124,22 @@ export default function GuestBookingForm({
                 />
                 <Form.Control.Feedback type="invalid">{errors.identityNumber}</Form.Control.Feedback>
                 <Form.Text muted>NIK 16 digit dari KTP. Opsional saat booking — bisa dilengkapi saat verifikasi/aktivasi.</Form.Text>
+                {/* PUB-KTP-OCR: pindai foto KTP → isi Nama & NIK otomatis (diproses di perangkat). */}
+                <div className="mt-2">
+                  <label className={`btn btn-outline-secondary btn-sm mb-0${ktpScanning ? ' disabled' : ''}`} style={{ cursor: ktpScanning ? 'wait' : 'pointer' }}>
+                    {ktpScanning ? 'Memindai…' : '📷 Pindai KTP (isi otomatis)'}
+                    <input
+                      type="file"
+                      accept="image/*"
+                      capture="environment"
+                      hidden
+                      disabled={ktpScanning}
+                      onChange={(e) => { const f = e.target.files?.[0]; e.currentTarget.value = ''; void handleKtpScan(f); }}
+                    />
+                  </label>
+                  <span className="text-muted small ms-2">Foto diproses di perangkat Anda, tidak diunggah.</span>
+                  {ktpScanMsg ? <div className="small mt-1">{ktpScanMsg}</div> : null}
+                </div>
               </Form.Group>
             </Col>
             <Col md={6}>
