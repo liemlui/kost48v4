@@ -3801,6 +3801,33 @@
   color: #c0392b;
 }
 
+/* PUB-ROOM-CATEGORY: badge kategori (kanan-atas foto), pendamping status (kiri-atas). */
+.gx-room-category-badge {
+  position: absolute;
+  top: .65rem;
+  right: .65rem;
+  display: inline-flex;
+  align-items: center;
+  gap: .3rem;
+  max-width: calc(100% - 1.3rem);
+  padding: .3rem .5rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, .92);
+  color: #243044;
+  font-size: .72rem;
+  font-weight: 800;
+  box-shadow: 0 4px 12px rgba(22, 32, 51, .14);
+}
+
+.gx-room-mezz {
+  padding: .08rem .34rem;
+  border-radius: 999px;
+  background: var(--gx-blue);
+  color: #fff;
+  font-size: .64rem;
+  font-weight: 800;
+}
+
 .gx-room-body {
   display: grid;
   gap: .72rem;

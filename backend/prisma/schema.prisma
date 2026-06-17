@@ -29,6 +29,19 @@ enum RoomStatus {
   INACTIVE
 }
 
+// PUB-ROOM-CATEGORY (additive, owner-approved 2026-06-17): kategori & tipe kamar
+// untuk katalog publik (badge + filter). Default STANDARD/REGULAR agar baris lama aman.
+enum RoomCategory {
+  ECONOMY
+  STANDARD
+  DELUXE
+}
+
+enum RoomType {
+  REGULAR
+  MEZZANINE
+}
+
 enum PricingTerm {
   DAILY
   WEEKLY
@@ -607,6 +620,10 @@ model Room {
   name   String?
   floor  String?
   status RoomStatus @default(AVAILABLE)
+
+  // PUB-ROOM-CATEGORY (additive): kategori & tipe untuk katalog publik.
+  category RoomCategory @default(STANDARD)
+  roomType RoomType     @default(REGULAR)
 
   dailyRateRupiah    Int?
   weeklyRateRupiah   Int?

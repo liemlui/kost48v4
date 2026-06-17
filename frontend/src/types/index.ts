@@ -401,12 +401,17 @@ export type Announcement = {
 };
 
 
+export type RoomCategory = 'ECONOMY' | 'STANDARD' | 'DELUXE' | string;
+export type RoomType = 'REGULAR' | 'MEZZANINE' | string;
+
 export type PublicRoom = {
   id: number;
   code: string;
   name?: string | null;
   floor?: string | null;
   status: string;
+  category?: RoomCategory | null;
+  roomType?: RoomType | null;
   notes?: string | null;
   images?: string[];
   pricing: {

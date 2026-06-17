@@ -400,11 +400,11 @@ changelog (Bagian 2) saat gate lulus. Item ✅ sudah dipindah ke daftar referens
 - [ ] **PUB-CALENDAR-CHECKOUT** — Badge "Akan Kosong [tanggal]" untuk tenant durasi pendek / checkout request APPROVED.
 - [ ] **PUB-SMART-BOOKING** — `GET /public/rooms?checkIn&durationDays` — filter kamar available di rentang.
 
-#### Fase C — Kartu Kamar, Badge & Tombol — sebagian ✅ (commit ca54397)
+#### Fase C — Kartu Kamar, Badge & Tombol — ✅ SELESAI 2026-06-17
 - [x] **PUB-BADGE-STATUS** — warna badge: Hijau/Tersedia · Kuning/Dipesan(proses) · Merah/Terisi · Abu/Maintenance (selaras ikon).
 - [x] **PUB-BTN-COLOR** — kamar belum-bisa-booking → "Tanya" gaya outline; "Ajukan Booking" primary +📝. (Primary tetap HIJAU sesuai tema; owner sebut "biru" → bisa diubah bila mau.)
 - [x] **PUB-FACILITY-SHOW** — ikon fasilitas di chip kartu kamar (❄️🌀🚿📶…).
-- [ ] **PUB-ROOM-CATEGORY** 🧬 — Field `Room.category` (ECONOMY/STANDARD/DELUXE) + `Room.type` (REGULAR/MEZZANINE) + badge + filter. **Schema APPROVED owner 2026-06-17** — kerjakan di increment terpisah (migration additive + backend + filter FE).
+- [x] **PUB-ROOM-CATEGORY** 🧬 — **SELESAI**: schema `RoomCategory`/`RoomType` + `Room.category`/`roomType` (migration additive `20260617000000_pub_room_category`, default STANDARD/REGULAR); DTO owner set kategori/tipe; public API expose; **badge kategori** (💎/🛋️/🏷️ + tag Mezzanine) + **filter kategori** di katalog; kolom + select di form admin kamar. **UAT runtime LULUS** (owner set DELUXE/MEZZANINE → tampil di public API). tsc 0 · FE build ok.
 - [x] **PUB-PHOTO-RATIO** — **keputusan owner: pertahankan 4:3** (landscape, terbaik untuk foto ruang); rule 1:1 di M07 di-override. Tanpa perubahan kode.
 
 #### Fase D — Responsif & Foto Owner
@@ -461,6 +461,12 @@ changelog (Bagian 2) saat gate lulus. Item ✅ sudah dipindah ke daftar referens
 ## Changelog Ringkas
 
 > Dipadatkan dari `docs/CHANGELOG.md`: header tanggal dipertahankan, tiap entry hanya menyimpan 1-2 poin outcome. Detail verbose tetap ada di source lama.
+
+### 2026-06-17 — feat(PUB-ROOM-CATEGORY 🧬): kategori & tipe kamar (badge + filter)
+- **Schema additive** (owner-approved, migration `20260617000000_pub_room_category`): enum `RoomCategory` (ECONOMY/STANDARD/DELUXE) + `RoomType` (REGULAR/MEZZANINE), `Room.category`/`roomType` default STANDARD/REGULAR.
+- **Backend:** DTO owner set kategori/tipe (`...dto` passthrough); public rooms API expose `category`/`roomType`.
+- **Frontend:** badge kategori di kartu katalog (💎 Deluxe / 🛋️ Standar / 🏷️ Ekonomi + tag Mezzanine) + filter kategori (client-side); kolom "Kategori" + select di form admin kamar.
+- **Gate:** backend tsc 0 · FE build (105 chunk, PWA ok) · **UAT runtime LULUS** (owner set K-A → DELUXE/MEZZANINE → tampil di `/public/rooms`).
 
 ### 2026-06-17 — feat(PUB-UI-REVAMP Fase C frontend): badge/tombol status + ikon fasilitas (ca54397)
 - **PUB-BADGE-STATUS** warna badge per status (hijau/kuning/merah/abu, selaras ikon) · **PUB-BTN-COLOR** "Tanya" outline saat tak bisa booking, "Ajukan Booking" primary +📝 · **PUB-FACILITY-SHOW** ikon fasilitas di chip kartu.

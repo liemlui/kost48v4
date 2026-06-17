@@ -6,6 +6,7 @@ export const propertyConfigs = {
     columns: [
       { key: 'code', label: 'Kamar' },
       { key: 'floor', label: 'Lantai' },
+      { key: 'category', label: 'Kategori' },
       { key: 'status', label: 'Status Kamar' },
       { key: 'monthlyRateRupiah', label: 'Tarif Bulanan' },
     ],
@@ -30,6 +31,25 @@ export const propertyConfigs = {
         type: 'text' as const,
         placeholder: 'Contoh: 1, 2, 3, Lantai Dasar',
         required: true,
+      },
+      {
+        name: 'category',
+        label: 'Kategori Kamar',
+        type: 'select' as const,
+        options: [
+          { value: 'STANDARD', label: 'Standar' },
+          { value: 'ECONOMY', label: 'Ekonomi' },
+          { value: 'DELUXE', label: 'Deluxe' },
+        ],
+      },
+      {
+        name: 'roomType',
+        label: 'Tipe Kamar',
+        type: 'select' as const,
+        options: [
+          { value: 'REGULAR', label: 'Reguler' },
+          { value: 'MEZZANINE', label: 'Mezzanine' },
+        ],
       },
       {
         name: 'monthlyRateRupiah',

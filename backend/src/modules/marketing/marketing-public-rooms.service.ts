@@ -19,6 +19,8 @@ const PUBLIC_ROOM_SELECT = {
   name: true,
   floor: true,
   status: true,
+  category: true,
+  roomType: true,
   images: true,
   notes: true,
   dailyRateRupiah: true,
@@ -234,6 +236,8 @@ export class MarketingPublicRoomsService {
       name: room.name,
       floor: room.floor,
       status: room.status,
+      category: room.category,
+      roomType: room.roomType,
       images: this.resolveRoomMarketingImages(room),
       notes: room.notes,
       pricing: {

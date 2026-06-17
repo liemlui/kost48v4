@@ -256,6 +256,15 @@ function roomStatusIcon(tone: string): string {
   return '🟢';
 }
 
+// PUB-ROOM-CATEGORY: label + ikon kategori kamar untuk badge katalog.
+function categoryBadge(cat?: string | null): { label: string; icon: string } | null {
+  const c = String(cat ?? '').toUpperCase();
+  if (c === 'DELUXE') return { label: 'Deluxe', icon: '💎' };
+  if (c === 'ECONOMY') return { label: 'Ekonomi', icon: '🏷️' };
+  if (c === 'STANDARD') return { label: 'Standar', icon: '🛋️' };
+  return null;
+}
+
 // PUB-FACILITY-SHOW: ikon fasilitas ringkas di kartu kamar (cocokkan kata kunci).
 function amenityIcon(label: string): string {
   const l = label.toLowerCase();
@@ -283,6 +292,17 @@ function RoomPreviewCard({ room }: { room: PublicRoom }) {
       <div className="gx-room-image-wrap">
         <img src={getRoomCover(room)} alt={`Foto ${room.name || room.code || 'kamar KOST48'}`} className="gx-room-image" loading="lazy" />
         <span className={`gx-room-status ${availability.tone}`}><span aria-hidden="true">{roomStatusIcon(availability.tone)}</span> {availability.label}</span>
+        {(() => {
+          const cat = categoryBadge(room.category);
+          const mezz = String(room.roomType ?? '').toUpperCase() === 'MEZZANINE';
+          if (!cat && !mezz) return null;
+          return (
+            <span className="gx-room-category-badge">
+              {cat ? <><span aria-hidden="true">{cat.icon}</span> {cat.label}</> : null}
+              {mezz ? <span className="gx-room-mezz">Mezzanine</span> : null}
+            </span>
+          );
+        })()}
       </div>
       <div className="gx-room-body">
         <div>
@@ -377,6 +397,11 @@ export default function PublicGuestDashboardPage() {
     return 'all';
   });
   const [catalogSort, setCatalogSort] = useState(() => initialCatalogParams.get('sort') === 'price-desc' ? 'price-desc' : 'price-asc');
+  // PUB-ROOM-CATEGORY: filter kategori kamar (client-side).
+  const [catalogCategory, setCatalogCategory] = useState(() => {
+    const value = (initialCatalogParams.get('category') || '').toUpperCase();
+    return ['ECONOMY', 'STANDARD', 'DELUXE'].includes(value) ? value : 'all';
+  });
   const [visibleRoomCount, setVisibleRoomCount] = useState(CATALOG_BATCH_SIZE);
   const [galleryBroken, setGalleryBroken] = useState<Record<string, boolean>>({});
   const visibleGalleryItems = GALLERY_ITEMS.filter((item) => !galleryBroken[item.id]);
@@ -431,6 +456,7 @@ export default function PublicGuestDashboardPage() {
       if (catalogPreference === 'ac' && getPublicRoomCooling(room) !== 'ac') return false;
       if (catalogPreference === 'fan' && getPublicRoomCooling(room) !== 'fan') return false;
       if (catalogPreference === 'inside' && getPublicRoomBathroom(room) !== 'inside') return false;
+      if (catalogCategory !== 'all' && String(room.category ?? 'STANDARD').toUpperCase() !== catalogCategory) return false;
       return true;
     });
 
@@ -440,7 +466,7 @@ export default function PublicGuestDashboardPage() {
         const bRate = getBestPublicRoomRate(b, 'MONTHLY');
         return catalogSort === 'price-desc' ? bRate - aRate : aRate - bRate;
       });
-  }, [rooms, catalogAvailability, catalogPreference, catalogSort]);
+  }, [rooms, catalogAvailability, catalogPreference, catalogSort, catalogCategory]);
 
   const visibleCatalogRooms = useMemo(
     () => catalogRooms.slice(0, visibleRoomCount),
@@ -587,6 +613,13 @@ export default function PublicGuestDashboardPage() {
               <button type="button" className={catalogPreference === 'ac' ? 'active' : ''} onClick={() => setCatalogPreference('ac')}>AC</button>
               <button type="button" className={catalogPreference === 'fan' ? 'active' : ''} onClick={() => setCatalogPreference('fan')}>Kipas</button>
               <button type="button" className={catalogPreference === 'inside' ? 'active' : ''} onClick={() => setCatalogPreference('inside')}>KM dalam</button>
+            </div>
+            <div className="gx-catalog-filter">
+              <span>Kategori</span>
+              <button type="button" className={catalogCategory === 'all' ? 'active' : ''} onClick={() => setCatalogCategory('all')}>Semua</button>
+              <button type="button" className={catalogCategory === 'ECONOMY' ? 'active' : ''} onClick={() => setCatalogCategory('ECONOMY')}>Ekonomi</button>
+              <button type="button" className={catalogCategory === 'STANDARD' ? 'active' : ''} onClick={() => setCatalogCategory('STANDARD')}>Standar</button>
+              <button type="button" className={catalogCategory === 'DELUXE' ? 'active' : ''} onClick={() => setCatalogCategory('DELUXE')}>Deluxe</button>
             </div>
             <label className="gx-catalog-sort">
               <span>Urutkan</span>

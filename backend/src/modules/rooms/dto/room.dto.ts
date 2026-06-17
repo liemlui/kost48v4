@@ -1,10 +1,13 @@
-import { IsArray, IsBoolean, IsInt, IsNumber, IsOptional, IsString, Max, Min } from 'class-validator';
-import { RoomStatus } from '../../../common/enums/app.enums';
+import { IsArray, IsBoolean, IsEnum, IsInt, IsNumber, IsOptional, IsString, Max, Min } from 'class-validator';
+import { RoomCategory, RoomStatus, RoomType } from '../../../common/enums/app.enums';
 
 export class CreateRoomDto {
   @IsString() code!: string;
   @IsOptional() @IsString() name?: string;
   @IsOptional() @IsString() floor?: string;
+  // PUB-ROOM-CATEGORY: kategori & tipe kamar (OWNER-only di service).
+  @IsOptional() @IsEnum(RoomCategory) category?: RoomCategory;
+  @IsOptional() @IsEnum(RoomType) roomType?: RoomType;
   @IsOptional() @IsInt() @Min(0) dailyRateRupiah?: number;
   @IsOptional() @IsInt() @Min(0) weeklyRateRupiah?: number;
   @IsOptional() @IsInt() @Min(0) biWeeklyRateRupiah?: number;
