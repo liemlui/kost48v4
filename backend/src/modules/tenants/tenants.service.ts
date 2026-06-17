@@ -588,6 +588,27 @@ export class TenantsService {
     };
   }
 
+  // TEN-PROFILE-NOTIF: ringkasan kelengkapan profil (ringan, untuk badge portal).
+  async getMyProfileCompleteness(actor: CurrentUserPayload) {
+    if (!actor.tenantId) {
+      throw new ConflictException('Akun tidak terhubung ke data penghuni. Hubungi admin.');
+    }
+    const tenant = await this.prisma.tenant.findUnique({
+      where: { id: actor.tenantId },
+      select: {
+        gender: true,
+        birthDate: true,
+        originCity: true,
+        occupation: true,
+        companyOrCampus: true,
+        emergencyContactName: true,
+        emergencyContactPhone: true,
+      },
+    });
+    if (!tenant) throw new NotFoundException('Data penghuni tidak ditemukan');
+    return this.buildCompletionSummary(tenant as unknown as Record<string, unknown>);
+  }
+
   async fillTenantProfileOnboarding(dto: TenantProfileOnboardingDto, actor: CurrentUserPayload) {
     if (!actor.tenantId) {
       throw new ConflictException('Akun tidak terhubung ke data penghuni. Hubungi admin.');

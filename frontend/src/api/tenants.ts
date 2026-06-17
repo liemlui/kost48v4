@@ -74,6 +74,20 @@ export async function getTenantProfile(): Promise<TenantProfileResponse> {
   return response.data.data;
 }
 
+// TEN-PROFILE-NOTIF: kelengkapan profil (ringan) untuk badge "Lengkapi Profil".
+export interface ProfileCompleteness {
+  requiredFields: string[];
+  completedFields: string[];
+  missingFields: string[];
+  completionPercent: number;
+  isComplete: boolean;
+}
+
+export async function getProfileCompleteness(): Promise<ProfileCompleteness> {
+  const response = await client.get<ApiEnvelope<ProfileCompleteness>>('/tenant/profile/completeness');
+  return response.data.data;
+}
+
 export interface TenantProfileOnboardingPayload {
   gender?: string;
   birthDate?: string;

@@ -11,6 +11,7 @@ import { getResource, listResource } from '../../api/resources';
 import { decideRenewRequest, listMyRenewRequests } from '../../api/renewRequests';
 import { listMyCheckoutRequests } from '../../api/checkoutRequests';
 import { listMyPaymentSubmissions } from '../../api/paymentSubmissions';
+import { getProfileCompleteness } from '../../api/tenants';
 import CheckoutRequestModal from '../../components/checkout-requests/CheckoutRequestModal';
 import RenewRequestModal from '../../components/tenant/RenewRequestModal';
 import MeterCycleModal from '../../components/stays/MeterCycleModal';
@@ -29,6 +30,17 @@ import { compactText } from '../../utils/readabilityRules';
 import { getInvoiceTotalAmount } from '../../utils/invoiceTotals';
 import { resolveAbsoluteFileUrl } from '../../utils/resolveAbsoluteFileUrl';
 import { getKost48RoomCover } from '../../data/kost48Assets';
+
+// TEN-PROFILE-NOTIF: label Indonesia untuk field profil yang belum lengkap.
+const PROFILE_FIELD_LABELS: Record<string, string> = {
+  gender: 'jenis kelamin',
+  birthDate: 'tanggal lahir',
+  originCity: 'kota asal',
+  occupation: 'pekerjaan',
+  companyOrCampus: 'perusahaan/kampus',
+  emergencyContactName: 'kontak darurat (nama)',
+  emergencyContactPhone: 'kontak darurat (telepon)',
+};
 
 // ── helpers ───────────────────────────────────────────────────────────────────
 
@@ -762,6 +774,14 @@ export default function MyStayPage() {
     staleTime: 30_000,
   });
 
+  // TEN-PROFILE-NOTIF: nudge "Lengkapi Profil" bila data onboarding belum lengkap.
+  const completenessQuery = useQuery({
+    queryKey: ['portal-profile-completeness', tenantId],
+    queryFn: getProfileCompleteness,
+    enabled: Boolean(tenantId),
+    staleTime: 60_000,
+  });
+
   const stay = query.data;
   const stayBelongsToUser = stay ? stay.tenantId === tenantId : false;
 
@@ -781,6 +801,19 @@ export default function MyStayPage() {
           title="Panduan Kos Saya"
           description="Kamar, tagihan, laporan, dan aksi penting."
         />
+      ) : null}
+
+      {completenessQuery.data && !completenessQuery.data.isComplete ? (
+        <Alert variant="warning" className="d-flex flex-wrap align-items-center justify-content-between gap-2">
+          <div>
+            <strong>📋 Lengkapi profil ({completenessQuery.data.completionPercent}%)</strong>
+            <div className="small mb-0">
+              {completenessQuery.data.missingFields.length} data belum diisi:{' '}
+              {completenessQuery.data.missingFields.map((f) => PROFILE_FIELD_LABELS[f] ?? f).join(', ')}.
+            </div>
+          </div>
+          <Button variant="warning" size="sm" onClick={() => navigate('/portal/profile')}>Lengkapi Sekarang</Button>
+        </Alert>
       ) : null}
 
       {stage !== 'occupied' ? (

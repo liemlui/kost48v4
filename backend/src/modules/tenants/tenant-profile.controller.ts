@@ -25,6 +25,16 @@ export class TenantProfileController {
     };
   }
 
+  // TEN-PROFILE-NOTIF: kelengkapan profil (ringan) untuk badge "Lengkapi Profil".
+  @Get('profile/completeness')
+  @Roles(UserRole.TENANT)
+  async getMyProfileCompleteness(@CurrentUser() actor: CurrentUserPayload) {
+    return {
+      message: 'Kelengkapan profil',
+      data: await this.tenantsService.getMyProfileCompleteness(actor),
+    };
+  }
+
   @Patch('profile/onboarding')
   @Roles(UserRole.TENANT)
   async onboardingFill(

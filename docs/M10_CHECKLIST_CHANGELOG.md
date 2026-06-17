@@ -421,7 +421,7 @@ changelog (Bagian 2) saat gate lulus. Item ✅ sudah dipindah ke daftar referens
 - [x] **PUB-BOOKING-INFO** — teks "Belum punya akun? Booking kamar dulu" di LoginPage (akun portal dibuat otomatis).
 - [~] **PUB-BOOKING-FORM** — **KTP/NIK opsional** saat booking (validasi format hanya bila diisi; backend sudah `@IsOptional`). ⚠️ **phone XOR email DITUNDA:** auto-create akun portal (`public-bookings.service` user.create) butuh email → perlu desain "booking phone-only tanpa akun portal" (alur finance-adjacent, jangan YOLO).
 - [x] **PUB-KTP-OCR** — **SELESAI**: `tesseract.js` (lazy-load, diproses di perangkat — privasi) di GuestBookingForm; tombol "📷 Pindai KTP" → ekstrak NIK (16 digit) + Nama via `parseKtpText` → isi otomatis (user wajib periksa). Bundle utama tak bertambah (chunk terpisah). npm approved owner 2026-06-17.
-- [ ] **TEN-PROFILE-NOTIF** — Endpoint `GET /me/profile-completeness` + badge "Lengkapi Profil" di portal tenant.
+- [x] **TEN-PROFILE-NOTIF** — **SELESAI**: `GET /tenant/profile/completeness` (reuse `buildCompletionSummary`) + badge "📋 Lengkapi profil (X%)" di MyStayPage (list field kurang + tombol ke /portal/profile). UAT runtime: endpoint balikkan struktur benar (maya 100% → badge tersembunyi).
 
 #### Fase G — Layanan Tambahan & Meter (portlet tenant)
 - [ ] **PUB-LAYANAN-TAMBAHAN** — Tampilkan estimasi tarif setiap layanan tambahan di portal tenant. Admin kelola daftar layanan + tarif via Settings.
@@ -461,6 +461,10 @@ changelog (Bagian 2) saat gate lulus. Item ✅ sudah dipindah ke daftar referens
 ## Changelog Ringkas
 
 > Dipadatkan dari `docs/CHANGELOG.md`: header tanggal dipertahankan, tiap entry hanya menyimpan 1-2 poin outcome. Detail verbose tetap ada di source lama.
+
+### 2026-06-17 — feat(TEN-PROFILE-NOTIF): badge "Lengkapi Profil" portal tenant
+- `GET /tenant/profile/completeness` (reuse `buildCompletionSummary`, 7 field onboarding) + badge "📋 Lengkapi profil (X%)" di MyStayPage (list field kurang + tombol /portal/profile).
+- Gate: BE tsc 0 · FE build (106 chunk, PWA ok) · UAT runtime endpoint OK.
 
 ### 2026-06-17 — feat(PUB-KTP-OCR): pindai KTP offline isi Nama+NIK otomatis
 - `tesseract.js` (owner-approved) **lazy-load** di GuestBookingForm — tombol "📷 Pindai KTP"; OCR diproses **di perangkat** (foto tak diunggah, privasi PDP). `parseKtpText` ekstrak NIK 16 digit + Nama → isi field (user wajib periksa/koreksi).
