@@ -208,6 +208,12 @@ function SidebarContent({
   );
 }
 
+function handleLogout(logoutFn: () => void) {
+  if (window.confirm('Yakin ingin keluar?')) {
+    logoutFn();
+  }
+}
+
 export default function AppLayout({ children }: { children?: ReactNode }) {
   const { user, logout } = useAuth();
   const location = useLocation();
@@ -322,7 +328,7 @@ export default function AppLayout({ children }: { children?: ReactNode }) {
                 </span>
                 <TenantAvatar tenantId={user?.tenantId} fullName={user?.fullName} enabled={user?.role === 'TENANT'} />
               </button>
-              <Button variant="outline-danger" size="sm" onClick={logout}>Logout</Button>
+              <Button variant="outline-danger" size="sm" onClick={() => handleLogout(logout)}>Logout</Button>
             </div>
           </section>
 
@@ -356,6 +362,8 @@ export default function AppLayout({ children }: { children?: ReactNode }) {
     );
   }
   return (
+    <>
+    <a href="#main-content" className="skip-to-content">Loncat ke konten utama</a>
     <div className="app-shell">
       <div className={`app-shell-grid ${sidebarCollapsed === 'collapsed' ? 'sidebar-collapsed' : ''}`}>
         <aside className={`app-sidebar d-none d-xl-flex ${sidebarCollapsed === 'collapsed' ? 'sidebar-collapsed' : ''}`}>
@@ -394,7 +402,7 @@ export default function AppLayout({ children }: { children?: ReactNode }) {
           </Offcanvas.Body>
         </Offcanvas>
 
-        <main className="app-main">
+        <main className="app-main" id="main-content">
           <section className="app-topbar">
             <div className="app-topbar-row app-topbar-row--simple">
               <div className="d-flex align-items-center gap-3">
@@ -453,7 +461,7 @@ export default function AppLayout({ children }: { children?: ReactNode }) {
                     </span>
                     <TenantAvatar tenantId={user?.tenantId} fullName={user?.fullName} enabled={user?.role === 'TENANT'} />
                   </button>
-                  <Button variant="outline-danger" size="sm" onClick={logout}>Logout</Button>
+                  <Button variant="outline-danger" size="sm" onClick={() => handleLogout(logout)}>Logout</Button>
                 </div>
               </div>
             </div>
@@ -467,5 +475,6 @@ export default function AppLayout({ children }: { children?: ReactNode }) {
         </main>
       </div>
     </div>
+    </>
   );
 }

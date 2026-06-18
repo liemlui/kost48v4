@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useToast } from '../../components/common/ToastProvider';
 import { Alert, Button, Card, Modal } from 'react-bootstrap';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { createResource, deleteResource, listResource, updateResource } from '../../api/resources';
@@ -50,6 +51,7 @@ type ResourceFilterId = string;
 
 export default function SimpleCrudPage({ config, hideAreaMenu = false }: { config: ResourceConfig; hideAreaMenu?: boolean }) {
   const queryClient = useQueryClient();
+  const toast = useToast();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const { user } = useAuth();
@@ -174,6 +176,7 @@ export default function SimpleCrudPage({ config, hideAreaMenu = false }: { confi
       setStockMovementConfirm(null);
       setFormState(buildInitialState(config));
       setError('');
+      toast.toast(editingItem ? 'Data berhasil diubah.' : 'Data berhasil ditambah.');
     },
     onError: (err: unknown) => {
       const message = err && typeof err === 'object' && 'response' in err
@@ -187,6 +190,7 @@ export default function SimpleCrudPage({ config, hideAreaMenu = false }: { confi
     mutationFn: (id: number) => deleteResource(`${config.path}/${id}`),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: [config.path, 'list'] });
+      toast.toast('Data berhasil dihapus.', 'warning');
     },
   });
 

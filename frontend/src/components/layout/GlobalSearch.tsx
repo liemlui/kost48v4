@@ -29,6 +29,8 @@ function getPlaceholder(role?: string) {
       return 'Cari tenant, kamar, invoice...';
     case 'STAFF':
       return 'Cari kamar...';
+    case 'TENANT':
+      return 'Cari invoice atau tiket...';
     default:
       return 'Cari data...';
   }
@@ -39,10 +41,11 @@ function canSearchTenants(role?: string) {
 }
 
 function canSearchInvoices(role?: string) {
-  return role === 'OWNER' || role === 'ADMIN';
+  return role === 'OWNER' || role === 'ADMIN' || role === 'TENANT';
 }
 
 function canSearchRooms(role?: string) {
+  if (role === 'TENANT') return false;
   return role === 'OWNER' || role === 'ADMIN' || role === 'STAFF';
 }
 
@@ -51,7 +54,7 @@ export default function GlobalSearch({ role }: { role?: string }) {
   const [keyword, setKeyword] = useState('');
   const [isFocused, setIsFocused] = useState(false);
   const debouncedKeyword = useDebouncedValue(keyword.trim(), 300);
-  const enabled = Boolean(debouncedKeyword) && role !== 'TENANT';
+  const enabled = Boolean(debouncedKeyword);
 
   const query = useQuery({
     queryKey: ['global-search', role, debouncedKeyword],
@@ -88,8 +91,9 @@ export default function GlobalSearch({ role }: { role?: string }) {
       }
 
       if (canSearchInvoices(role)) {
+        const invoicePath = role === 'TENANT' ? '/me/invoices' : '/invoices';
         tasks.push(
-          listResource<Invoice>('/invoices', { search: debouncedKeyword, limit: 5 })
+          listResource<Invoice>(invoicePath, { search: debouncedKeyword, limit: 5 })
             .then((invoices) => (invoices.items ?? []).map((item) => ({
               kind: 'invoice' as const,
               id: item.id,
@@ -107,10 +111,10 @@ export default function GlobalSearch({ role }: { role?: string }) {
     },
   });
 
-  const showResults = isFocused && keyword.trim().length > 0 && role !== 'TENANT';
+  const showResults = isFocused && keyword.trim().length > 0;
   const results = useMemo(() => query.data ?? [], [query.data]);
 
-  if (role === 'TENANT') return null;
+  // Tenant sekarang bisa search invoice + tiket mereka sendiri (UX-SEARCH-TENANT)
 
   return (
     <div className="global-search position-relative">

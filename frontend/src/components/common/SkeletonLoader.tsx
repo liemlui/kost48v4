@@ -17,13 +17,11 @@ export function StatCardSkeleton() {
     <div className="card stat-card border-0">
       <div className="card-body">
         <div className="stat-card-header">
-          <div style={{ flex: 1 }}>
-            <SkeletonBlock width={96} height={12} className="mb-3" />
-          </div>
+          <SkeletonBlock width="100%" height={14} />
           <SkeletonBlock width={44} height={44} />
         </div>
-        <SkeletonBlock width={120} height={34} className="mb-2" />
-        <SkeletonBlock width="72%" height={14} />
+        <SkeletonBlock width="100%" height={36} className="mb-2" />
+        <SkeletonBlock width="100%" height={14} />
       </div>
     </div>
   );

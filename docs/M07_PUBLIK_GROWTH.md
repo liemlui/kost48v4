@@ -151,8 +151,8 @@ Semua saran owner dari walkthrough `http://localhost:5173/` — sudah dipetakan 
 #### D. Responsif & Foto
 - **PUB-CARD-RESPONSIVE** — Grid: 4 kolom desktop, 2 tablet, 1 mobile. Card stack vertikal di mobile.
 - **PUB-FACILITY-PHOTO** — Owner upload 1 foto real per fasilitas via Settings. Tampil di halaman publik.
-- **OWN-FOTO-UPLOAD** — Backend: endpoint CRUD foto marketing + foto fasilitas di Settings Owner. Frontend komponen upload + preview.
-- **PUB-BROCHURE** — Section "Galeri KOST48" di landing — tampil foto brosur/spanduk yang di-upload owner.
+- **OWN-FOTO-UPLOAD** — SELESAI 2026-06-19: Owner Settings mengelola foto kamar, foto fasilitas, dan aset publik slot-based (hero, profil/galeri, spanduk, brosur depan/belakang) tanpa schema baru.
+- **PUB-BROCHURE** — SELESAI 2026-06-19: section "Galeri KOST48" memakai upload owner bila ada, dengan fallback aset statis.
 
 #### E. Ulasan & Social Proof
 - **PUB-REVIEWS** — `GET /public/reviews` ambil dari `StaffReview` VISIBLE rating≥4. Embed Google Maps reviews via iframe. Section "Apa Kata Penghuni".
@@ -171,7 +171,7 @@ Semua saran owner dari walkthrough `http://localhost:5173/` — sudah dipetakan 
 | **MG-UI-01** | Re-theme landing publik (hero immersive, capsule nav, CTA kuat, section story, card premium) | ⏳ Diperluas — lihat arahan owner §A-F |
 | **MG-UI-02** | Komponen proof strip (rating, penghuni aktif, lokasi) | ⏳ Menunggu PUB-REVIEWS |
 | **MG-UI-03** | Section "Living System" (invoice, riwayat, lapor, loyalty, referral) | ⏳ |
-| **MG-UI-04** | Audit + upload foto marketing via Settings owner | ⏳ Menunggu OWN-FOTO-UPLOAD |
+| **MG-UI-04** | Audit + upload foto marketing via Settings owner | ✅ Selesai Fase B (marketing-assets + Owner Settings) |
 | **MG-UI-05** | Playwright screenshot desktop/mobile + Lighthouse ≥90 | ⏳ Setelah semua A-F selesai |
 | **PUB-UI-REVAMP** | **Task besar** — semua item A–F di atas | **P0** — daftar sub-task di M10 |
 
@@ -395,3 +395,154 @@ Saat tenant **perpanjang**, tawarkan add-on (opsional, tidak memaksa):
 3. Gudang (D: kejelasan filter + min-stok fasilitas).
 4. Rank tenant + kebersihan kamar (C lanjutan) — perlu endpoint + sumber data.
 5. Marketing/SWOT/PESTLE engine (B) — paling besar.
+
+
+## Audit UI/UX Full — 2026-06-19
+
+**Cakupan:** 14 file CSS (~6000 baris), 100+ komponen React, 26 halaman, routing, auth, form UX, PWA, aksesibilitas.
+
+### Ringkasan Temuan
+
+| Severity | Jumlah | Area |
+|----------|--------|------|
+| 🔴 Critical | 1 | Routing (404) |
+| 🟠 High | 1 | Feedback system (toast global) |
+| 🟡 Medium | 5 | Aksesibilitas, kontras, keyboard, logout, focus trap |
+| 🔵 Low | 6 | Polish, edge case, search tenant, skeleton |
+| ✅ Positive | 6 | Code-splitting, PWA, responsive table, auth, inline error, breadcrumb |
+
+### 🔴 CRITICAL
+
+#### C-1: Tidak ada halaman 404 / wildcard route
+
+`App.tsx` tidak mendefinisikan `<Route path="*">`. Semua URL tidak dikenal merender layout kosong tanpa konten — sidebar + topbar dengan breadcrumb terakhir, tanpa pesan "Halaman tidak ditemukan" atau navigasi kembali.
+
+**File:** `frontend/src/App.tsx` (akhir `<Routes>` block — tidak ada wildcard route)
+
+**Rekomendasi:** Tambah `<Route path="*" element={<NotFoundPage />} />` dengan pesan ramah dan link ke dashboard/katalog.
+
+---
+
+### 🟠 HIGH
+
+#### H-1: Tidak ada sistem feedback global (toast) untuk aksi sukses
+
+Setelah create/update/delete, feedback sukses hanya berupa Alert inline di dalam modal atau hilang saat modal ditutup. `SimpleCrudPage` menutup modal setelah submit tanpa indikasi sukses apapun. Tidak ada pemanggilan `Toast` dari react-bootstrap di semua file TSX.
+
+**Evidence:** `search_content "toast|Toast|useToast"` di `frontend/src` — hanya style CSS toast (`.toast-container` di `02-layout.css:716`) tapi tidak ada komponen React yang menggunakannya.
+
+**Rekomendasi:** Buat `ToastProvider` + `useToast()` hook, tampilkan toast sukses/error di pojok kanan bawah setelah setiap mutasi. Bisa pakai react-bootstrap `Toast` atau buat custom ringan.
+
+---
+
+### 🟡 MEDIUM
+
+#### M-1: PasswordInput toggle — emoji tanpa alt, tidak keyboard-accessible
+
+`PasswordInput.tsx` menggunakan `🙈` / `👁` sebagai toggle show/hide password. Emoji dirender berbeda di tiap OS. Tombol toggle memiliki `tabIndex={-1}` (line 23) sehingga tidak bisa dijangkau keyboard.
+
+**File:** `frontend/src/components/common/PasswordInput.tsx:23-28`
+
+**Rekomendasi:** Ganti emoji dengan SVG icon (mata terbuka/tertutup), hapus `tabIndex={-1}`, tambahkan `aria-label` dinamis ("Tampilkan password" / "Sembunyikan password").
+
+#### M-2: Tidak ada skip-to-content link
+
+Tidak ada `<a href="#main-content" class="skip-link">` di awal halaman. User keyboard/screen reader harus menavigasi seluruh sidebar, topbar, dan tab sebelum mencapai konten utama.
+
+**Rekomendasi:** Tambah visually-hidden skip link di `AppLayout` yang muncul saat focus, menuju `<main>` content area.
+
+#### M-3: Color contrast `--text-muted` (#64748b) gagal WCAG AA untuk small text
+
+`--text-muted: #64748b` pada background putih memiliki contrast ratio ~4.55:1 — borderline pass untuk normal text (≥18px) tapi **gagal WCAG AA untuk small text** (<18px). Banyak `.small.text-muted` di aplikasi (label form, caption tabel, hint).
+
+**File:** `frontend/src/styles/01-base.css:23` (custom property), digunakan di 200+ tempat.
+
+**Rekomendasi:** Ubah `--text-muted` ke `#475569` (ratio 5.5:1, aman small text) atau `#334155` (ratio 7:1, AAA).
+
+#### M-4: Tidak ada konfirmasi sebelum logout
+
+Tombol "Logout" di `AppLayout` untuk Admin/Owner dan Staff langsung memanggil `logout()` tanpa modal konfirmasi. Di mobile, tombol ini kecil dan mudah tidak sengaja ter-tap.
+
+**File:** `frontend/src/components/layout/AppLayout.tsx` (logout button untuk Staff ~line 328, Owner/Admin ~line 389)
+
+**Rekomendasi:** Tambah `window.confirm()` atau modal kecil "Yakin ingin keluar?" sebelum logout.
+
+#### M-5: Focus trap tidak sempurna di modal dengan react-select
+
+`SearchableSelect` menggunakan `menuPortalTarget={document.body}` yang me-render dropdown di luar DOM tree modal. Focus tidak ter-trap di dalam modal saat dropdown react-select terbuka — user bisa Tab ke elemen di belakang modal.
+
+**File:** `frontend/src/components/common/SearchableSelect.tsx:58`
+
+**Rekomendasi:** Gunakan `menuPortalTarget` yang mengarah ke container modal, atau tambah event handler untuk membatasi Tab.
+
+---
+
+### 🔵 LOW
+
+#### L-1: Tenant tidak punya GlobalSearch
+
+`GlobalSearch` mengembalikan `null` saat `role === 'TENANT'`. Di portal tenant dengan banyak invoice dan tiket, tenant harus scroll panjang untuk mencari invoice lama.
+
+**File:** `frontend/src/components/layout/GlobalSearch.tsx:88`
+
+**Rekomendasi:** Buka search terbatas untuk tenant (hanya invoice dan tiket miliknya, bukan data global).
+
+#### L-2: Skeleton loader dimensi hardcoded
+
+`StatCardSkeleton` menggunakan width fixed (96px, 120px, 72%) yang menghasilkan layout shift saat konten riil muncul karena dimensi tidak cocok.
+
+**File:** `frontend/src/components/common/SkeletonLoader.tsx:29-40`
+
+**Rekomendasi:** Gunakan CSS grid yang sama dengan stat card asli agar skeleton dan konten riil memiliki dimensi identik.
+
+#### L-3: `overscroll-behavior-y: none` mencegah pull-to-refresh
+
+`01-base.css` line 68 menetapkan `overscroll-behavior-y: none` pada body. Mencegah pull-to-refresh di mobile browser — gesture alami pengguna mobile.
+
+**File:** `frontend/src/styles/01-base.css:68`
+
+**Rekomendasi:** Hapus atau batasi hanya pada elemen yang memang tidak boleh overscroll (mis. chart/map containers).
+
+#### L-4: Form login — error message tidak spesifik format
+
+LoginPage placeholder "Contoh: nama@email.com atau 0812..." — tapi error message generik. User tidak tahu apakah format input yang salah atau password yang salah.
+
+**File:** `frontend/src/pages/auth/LoginPage.tsx:57`
+
+**Rekomendasi:** Tambah validasi format ringan: jika input mengandung `@`, perlakukan sebagai email; jika diawali `0` dan numerik, perlakukan sebagai HP. Beri pesan error spesifik per format.
+
+#### L-5: SafeImage loading text Bahasa Indonesia campur Inggris
+
+`SafeImage` komentar internal bahasa Inggris; fallback text sudah Bahasa Indonesia.
+
+**File:** `frontend/src/components/common/SafeImage.tsx`
+
+#### L-6: Mobile offcanvas — pastikan SEMUA path navigasi menutup offcanvas
+
+`changeOwnerViewMode` + `onBrandClick` sudah menutup offcanvas. Tapi link di `SidebarContent` hanya menutup via `onNavigate` prop — perlu dipastikan semua path (termasuk redirect internal) menutup offcanvas dengan benar.
+
+---
+
+### ✅ POSITIVE — Hal yang sudah sangat baik
+
+1. **Code splitting dengan lazy loading** — semua halaman di-lazy load via `React.lazy()` + `Suspense` dengan fallback `PageLoadingSkeleton`. Bundle publik terpisah dari bundle workspace.
+2. **PWA layer lengkap** — Service worker dengan cache strategy + precache, offline detection, error boundary per-route, install prompt + update notification.
+3. **Responsive table otomatis** — `responsiveTables.ts` menambah `data-label` attribute via MutationObserver untuk tampilan stacked di mobile.
+4. **Auth handling robust** — 401 interceptor auto-redirect, ProtectedRoute dengan loading state, role-based routing + RequireRoles guard, owner mode toggle dengan route terpisah, session storage cache untuk user.
+5. **Inline error di form field** — LoginPage menampilkan error per-field (identifier, password) di bawah input terkait, bukan hanya Alert di atas form.
+6. **Breadcrumb dinamis dari URL** — `getBreadcrumbParts()` otomatis membangun breadcrumb dari pathname + navigation config, tidak perlu manual per halaman.
+
+### Prioritas Perbaikan
+
+| # | Action | Impact | Estimasi |
+|---|--------|--------|----------|
+| 1 | Tambah route 404 + NotFoundPage | User tidak bingung saat URL salah | 30 menit |
+| 2 | Buat ToastProvider global | Feedback aksi jelas & konsisten | 2 jam |
+| 3 | Ganti emoji PasswordInput → SVG icon | Aksesibilitas, konsistensi | 20 menit |
+| 4 | Tambah skip-to-content link | Aksesibilitas keyboard | 10 menit |
+| 5 | Gelapkan `--text-muted` ke `#475569` | WCAG AA compliance | 5 menit |
+| 6 | Tambah konfirmasi logout | Mencegah accidental logout | 15 menit |
+
+> **Instruksi eksekusi detail (SEARCH/REPLACE siap pakai) ada di `docs/M10_CHECKLIST_CHANGELOG.md` → Fase F.**
+> Setiap task di M10 sudah dilengkapi: path file, nomor baris, blok SEARCH/REPLACE eksak, dan perintah verifikasi.
+> AI model kecil (V4 Flash) bisa langsung menjalankan tanpa membaca kode sumber.

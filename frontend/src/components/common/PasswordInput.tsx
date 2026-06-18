@@ -4,6 +4,28 @@ import type { FormControlProps } from 'react-bootstrap';
 
 type PasswordInputProps = Omit<FormControlProps, 'type'>;
 
+/** SVG icon mata terbuka — digunakan saat password terlihat */
+function EyeOpenIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+      <circle cx="12" cy="12" r="3" />
+    </svg>
+  );
+}
+
+/** SVG icon mata tertutup — digunakan saat password disembunyikan */
+function EyeClosedIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94" />
+      <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19" />
+      <line x1="1" y1="1" x2="23" y2="23" />
+      <path d="M14.12 14.12a3 3 0 1 1-4.24-4.24" />
+    </svg>
+  );
+}
+
 export default function PasswordInput(props: PasswordInputProps) {
   const [show, setShow] = useState(false);
 
@@ -16,13 +38,13 @@ export default function PasswordInput(props: PasswordInputProps) {
       <Button
         variant="outline-secondary"
         onClick={() => setShow((v) => !v)}
-        tabIndex={-1}
         size="sm"
         className="px-2"
         style={{ borderTopLeftRadius: 0, borderBottomLeftRadius: 0, minWidth: 40 }}
+        aria-label={show ? 'Sembunyikan password' : 'Tampilkan password'}
         title={show ? 'Sembunyikan password' : 'Tampilkan password'}
       >
-        {show ? '🙈' : '👁'}
+        {show ? <EyeClosedIcon /> : <EyeOpenIcon />}
       </Button>
     </InputGroup>
   );

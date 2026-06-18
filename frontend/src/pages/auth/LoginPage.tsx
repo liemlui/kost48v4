@@ -56,7 +56,17 @@ export default function LoginPage() {
     event.preventDefault();
     const nextErrors: typeof fieldErrors = {};
 
-    if (!identifier.trim()) nextErrors.identifier = mode === 'TENANT' ? 'Masukkan email atau nomor HP yang terdaftar.' : 'Masukkan email admin/staff.';
+    if (!identifier.trim()) {
+      nextErrors.identifier = mode === 'TENANT' ? 'Masukkan email atau nomor HP yang terdaftar.' : 'Masukkan email admin/staff.';
+    } else if (mode === 'TENANT') {
+      // Deteksi format: jika mengandung @ → email; jika diawali 0 dan 10-13 digit → HP
+      const val = identifier.trim();
+      const isEmail = val.includes('@');
+      const isPhone = /^0\d{9,12}$/.test(val.replace(/[-\s]/g, ''));
+      if (!isEmail && !isPhone) {
+        nextErrors.identifier = 'Format tidak dikenal. Masukkan email (contoh: nama@email.com) atau nomor HP (contoh: 08123456789).';
+      }
+    }
     if (!password.trim()) nextErrors.password = 'Masukkan password.';
 
     if (Object.keys(nextErrors).length) {

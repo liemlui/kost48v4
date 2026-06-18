@@ -5,6 +5,7 @@ import { Link, Navigate, useLocation } from 'react-router-dom';
 import { listPublicRooms } from '../../api/bookings';
 import { fetchPublicSocialProof } from '../../api/marketing';
 import { listFacilityImages } from '../../api/facilityImages';
+import { listMarketingAssets } from '../../api/marketingAssets';
 import Kost48LogoMark from '../../components/common/Kost48LogoMark';
 import { useAuth } from '../../context/AuthContext';
 import { getDefaultRoute } from '../../config/navigation';
@@ -37,6 +38,7 @@ const NAV_LINKS = [
 ];
 
 const GALLERY_ITEMS = [
+  { id: 'profile', src: '/room-images/kost48-profile.webp', label: 'Profil KOST48' },
   { id: 'spanduk', src: '/room-images/spanduk-kost48-surabaya.webp', label: 'Spanduk KOST48' },
   { id: 'brosur-depan', src: '/room-images/brosur-depan.webp', label: 'Brosur - Halaman Depan' },
   { id: 'brosur-belakang', src: '/room-images/brosur-belakang.webp', label: 'Brosur - Halaman Belakang' },
@@ -136,6 +138,12 @@ const HOME_FAQ_ITEMS = [
     answer: 'KOST48 berada di Jalan Hikmah V No. 48, Surabaya Barat, sekitar Pakuwon Mall / PTC.',
   },
 ];
+
+function resolvePublicMarketingAssetUrl(url?: string | null) {
+  if (!url) return null;
+  if (url.startsWith('/uploads/room-images/')) return resolveAbsoluteFileUrl(url) ?? url;
+  return url;
+}
 
 const EXTRA_FAQ_ITEMS = [
   {
@@ -397,6 +405,11 @@ export default function PublicGuestDashboardPage() {
     queryFn: listFacilityImages,
     staleTime: 120_000,
   });
+  const marketingAssetsQuery = useQuery({
+    queryKey: ['marketing-assets'],
+    queryFn: listMarketingAssets,
+    staleTime: 120_000,
+  });
   const facilityImageMap = useMemo(() => {
     const map = new Map<string, string>();
     if (facilityImagesQuery.data) {
@@ -404,6 +417,13 @@ export default function PublicGuestDashboardPage() {
     }
     return map;
   }, [facilityImagesQuery.data]);
+  const marketingAssetMap = useMemo(() => {
+    const map = new Map<string, string>();
+    if (marketingAssetsQuery.data) {
+      for (const item of marketingAssetsQuery.data) map.set(item.slug, item.activeUrl);
+    }
+    return map;
+  }, [marketingAssetsQuery.data]);
 
   const [showAllFaq, setShowAllFaq] = useState(false);
   const todayDate = useMemo(() => getTodayDateInput(), []);
@@ -431,8 +451,20 @@ export default function PublicGuestDashboardPage() {
   const [reviewSort, setReviewSort] = useState<'recent' | 'rating'>('recent');
   const [visibleRoomCount, setVisibleRoomCount] = useState(CATALOG_BATCH_SIZE);
   const [galleryBroken, setGalleryBroken] = useState<Record<string, boolean>>({});
-  const visibleGalleryItems = GALLERY_ITEMS.filter((item) => !galleryBroken[item.id]);
+  const heroImageUrl = resolvePublicMarketingAssetUrl(marketingAssetMap.get('hero-front')) ?? getKost48FrontPhotoUrl();
+  const galleryItems = useMemo(
+    () => GALLERY_ITEMS.map((item) => ({
+      ...item,
+      src: resolvePublicMarketingAssetUrl(marketingAssetMap.get(item.id)) ?? item.src,
+    })),
+    [marketingAssetMap],
+  );
+  const visibleGalleryItems = galleryItems.filter((item) => !galleryBroken[item.id]);
   const closeLightbox = useCallback(() => setLightboxSrc(null), []);
+
+  useEffect(() => {
+    setGalleryBroken({});
+  }, [marketingAssetsQuery.data]);
 
   useEffect(() => {
     const h = () => setScrolled(window.scrollY > 60);
@@ -536,7 +568,7 @@ export default function PublicGuestDashboardPage() {
       {lightboxSrc && <Lightbox src={lightboxSrc} onClose={closeLightbox} />}
 
       <section className="gx-hero" id="top">
-        <div className="gx-hero-bg" style={{ backgroundImage: `url(${getKost48FrontPhotoUrl()})` }} aria-hidden="true" />
+        <div className="gx-hero-bg" style={{ backgroundImage: `url(${heroImageUrl})` }} aria-hidden="true" />
         <div className="gx-hero-overlay" aria-hidden="true" />
         <div className="gx-hero-body">
           <p className="gx-hero-eyebrow">Jalan Hikmah V No. 48 - Surabaya Barat</p>

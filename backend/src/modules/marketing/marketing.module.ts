@@ -3,9 +3,11 @@ import { MarketingPublicRoomsController } from './marketing-public-rooms.control
 import { MarketingPublicRoomsService } from './marketing-public-rooms.service';
 import { FacilityImagesController } from './facility-images.controller';
 import { FacilityImagesService } from './facility-images.service';
+import { MarketingAssetsController } from './marketing-assets.controller';
+import { MarketingAssetsService } from './marketing-assets.service';
 
 @Module({
-  controllers: [MarketingPublicRoomsController, FacilityImagesController],
-  providers: [MarketingPublicRoomsService, FacilityImagesService],
+  controllers: [MarketingPublicRoomsController, FacilityImagesController, MarketingAssetsController],
+  providers: [MarketingPublicRoomsService, FacilityImagesService, MarketingAssetsService],
 })
 export class MarketingModule {}

@@ -8,6 +8,8 @@ import { createFaq, deleteFaq, fetchAllFaqs, updateFaq, type FaqItem } from '../
 import { fetchOperationalSettings, updateOperationalSettings, type OperationalSetting } from '../../api/settings';
 import { getApiErrorMessage } from '../../utils/getApiErrorMessage';
 import { listFacilityImages, uploadFacilityImage, deleteFacilityImage } from '../../api/facilityImages';
+import { deleteMarketingAsset, listMarketingAssets, uploadMarketingAsset } from '../../api/marketingAssets';
+import { resolveAbsoluteFileUrl } from '../../utils/resolveAbsoluteFileUrl';
 
 /* ─── Facility Photos ──────────────────────────────────────────────── */
 
@@ -26,6 +28,12 @@ const FACILITY_SLUGS: { slug: string; label: string }[] = [
   { slug: 'galon-air', label: 'Galon air' },
   { slug: 'tv-tambahan', label: 'TV tambahan' },
 ];
+
+function resolvePublicPreviewUrl(url?: string | null) {
+  if (!url) return null;
+  if (url.startsWith('/uploads/room-images/')) return resolveAbsoluteFileUrl(url) ?? url;
+  return url;
+}
 
 function FacilityPhotoPanel() {
   const qc = useQueryClient();
@@ -137,6 +145,127 @@ function FacilityPhotoPanel() {
 }
 
 /* ─── Helpers ──────────────────────────────────────────────────────── */
+
+function MarketingAssetPanel() {
+  const qc = useQueryClient();
+  const [uploading, setUploading] = useState<string | null>(null);
+  const [error, setError] = useState('');
+
+  const { data: assets = [], isLoading, isError, refetch } = useQuery({
+    queryKey: ['marketing-assets'],
+    queryFn: listMarketingAssets,
+  });
+
+  const handleUpload = async (slug: string, file: File) => {
+    setUploading(slug);
+    setError('');
+    try {
+      await uploadMarketingAsset(slug, file);
+      qc.invalidateQueries({ queryKey: ['marketing-assets'] });
+    } catch (err) {
+      setError(getApiErrorMessage(err, 'Gagal upload aset marketing'));
+    } finally {
+      setUploading(null);
+    }
+  };
+
+  const handleDelete = async (slug: string, label: string) => {
+    if (!window.confirm(`Hapus upload "${label}" dan kembali ke aset bawaan?`)) return;
+    setError('');
+    try {
+      await deleteMarketingAsset(slug);
+      qc.invalidateQueries({ queryKey: ['marketing-assets'] });
+    } catch (err) {
+      setError(getApiErrorMessage(err, 'Gagal menghapus aset marketing'));
+    }
+  };
+
+  return (
+    <div>
+      <div className="mb-3">
+        <h3 className="h5 mb-0">Aset Publik & Brosur</h3>
+        <small className="text-muted">
+          Kelola foto hero, galeri, spanduk, dan brosur yang tampil di landing page. Jika upload dihapus,
+          halaman publik kembali memakai aset bawaan.
+        </small>
+      </div>
+
+      {error && <Alert variant="danger" className="py-2 small mb-3" dismissible onClose={() => setError('')}>{error}</Alert>}
+      {isError && !isLoading && (
+        <Alert variant="warning" className="d-flex align-items-start gap-3">
+          <div className="flex-fill">
+            <strong>Endpoint aset marketing belum bisa dibaca.</strong><br />
+            <span className="small">Pastikan backend sudah berjalan dengan kode terbaru.</span>
+          </div>
+          <Button size="sm" variant="outline-warning" onClick={() => refetch()}>Coba lagi</Button>
+        </Alert>
+      )}
+
+      {isLoading ? (
+        <div className="py-4 text-center"><Spinner animation="border" size="sm" /></div>
+      ) : (
+        <Row className="g-3">
+          {assets.map((asset) => {
+            const imageUrl = resolvePublicPreviewUrl(asset.activeUrl);
+            return (
+              <Col xs={6} md={4} lg={3} key={asset.slug}>
+                <div className="settings-facility-card">
+                  <div className="settings-facility-img-wrap">
+                    {imageUrl ? (
+                      <SafeImage
+                        src={imageUrl}
+                        alt={asset.label}
+                        className="settings-facility-img"
+                        resolveUrl={false}
+                      />
+                    ) : (
+                      <div className="settings-facility-img-placeholder">
+                        <span>Foto</span>
+                        <small>Belum ada aset</small>
+                      </div>
+                    )}
+                  </div>
+                  <div className="settings-facility-info">
+                    <strong>{asset.label}</strong>
+                    <Badge bg={asset.url ? 'primary' : 'secondary'} className="mt-1">
+                      {asset.url ? 'Upload owner' : 'Bawaan'}
+                    </Badge>
+                  </div>
+                  <div className="settings-facility-actions d-flex gap-1">
+                    <input
+                      type="file"
+                      accept="image/jpeg,image/png,image/webp"
+                      id={`marketing-asset-file-${asset.slug}`}
+                      style={{ display: 'none' }}
+                      onChange={(e) => {
+                        if (e.target.files?.[0]) handleUpload(asset.slug, e.target.files[0]);
+                        e.target.value = '';
+                      }}
+                    />
+                    <Button
+                      size="sm"
+                      variant={asset.url ? 'outline-primary' : 'primary'}
+                      onClick={() => document.getElementById(`marketing-asset-file-${asset.slug}`)?.click()}
+                      disabled={uploading === asset.slug}
+                      className="flex-fill"
+                    >
+                      {uploading === asset.slug ? <><Spinner animation="border" size="sm" /> Upload...</> : asset.url ? 'Ganti' : 'Upload'}
+                    </Button>
+                    {asset.url && (
+                      <Button size="sm" variant="outline-danger" onClick={() => handleDelete(asset.slug, asset.label)}>
+                        Hapus
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              </Col>
+            );
+          })}
+        </Row>
+      )}
+    </div>
+  );
+}
 
 const FAQ_CATEGORIES = ['Lokasi', 'Tarif', 'Fasilitas', 'Aturan', 'Layanan', 'Umum'];
 
@@ -614,7 +743,8 @@ function TariffSettingsPanel() {
 export default function OwnerSettingsPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const tabParam = searchParams.get('tab');
-  const activeTab = tabParam === 'photos' ? 'photos' : tabParam === 'facility-photos' ? 'facility-photos' : tabParam === 'tarif' ? 'tarif' : 'faq';
+  const validTabs = new Set(['faq', 'photos', 'facility-photos', 'marketing-assets', 'tarif']);
+  const activeTab = tabParam && validTabs.has(tabParam) ? tabParam : 'faq';
 
   return (
     <div className="settings-page">
@@ -625,8 +755,9 @@ export default function OwnerSettingsPage() {
       <Tabs
         activeKey={activeTab}
         onSelect={(key) => {
+          if (!key || !validTabs.has(key)) return;
           const next = new URLSearchParams(searchParams);
-          next.set('tab', key === 'photos' || key === 'tarif' ? key : 'faq');
+          next.set('tab', key);
           setSearchParams(next, { replace: true });
         }}
         className="command-tabs mb-4"
@@ -639,6 +770,9 @@ export default function OwnerSettingsPage() {
         </Tab>
         <Tab eventKey="facility-photos" title="Foto Fasilitas">
           <FacilityPhotoPanel />
+        </Tab>
+        <Tab eventKey="marketing-assets" title="Aset Publik">
+          <MarketingAssetPanel />
         </Tab>
         <Tab eventKey="tarif" title="Tarif & Konstanta">
           <TariffSettingsPanel />

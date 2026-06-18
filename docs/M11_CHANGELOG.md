@@ -4,7 +4,23 @@
 
 ## Changelog Ringkas
 
-> Dipadatkan dari `docs/CHANGELOG.md`: header tanggal dipertahankan, tiap entry hanya menyimpan 1-2 poin outcome. Detail verbose tetap ada di source lama.
+> Dipadatkan dari `docs/CHANGELOG.md`
+
+### 2026-06-19 — feat(Fase B publik/tenant): aset publik & brosur owner-managed
+- **Fase B 100%:** endpoint `marketing-assets` + tab Owner Settings "Aset Publik" mengelola hero, profil/galeri, spanduk, brosur depan/belakang; landing page memakai upload owner dengan fallback aset statis. Gate: BE `npx.cmd tsc --noEmit` PASS, FE `npm.cmd run build` PASS + PWA verify PASS.
+
+### 2026-06-19 — feat(Fase F UI/UX Sweep): 10 task selesai — 404, toast, a11y, kontras, logout, search tenant, skeleton, login format
+- **UX-404:** `NotFoundPage` + wildcard route di App.tsx untuk route tak dikenal.
+- **UX-TOAST:** `ToastProvider` global dengan `useToast` hook + toast di SimpleCrudPage (create/update/delete).
+- **UX-A11Y-PASSWORD:** Ganti emoji 👁/🙈 dengan SVG icon mata terbuka/tertutup, tambah `aria-label`.
+- **UX-A11Y-SKIPLINK:** Skip-to-content link di AppLayout + CSS (muncul saat Tab), `id="main-content"`.
+- **UX-COLOR:** `--text-muted` digelapkan `#64748b` → `#475569` di 01-base.css & 04-operations.css (WCAG AA).
+- **UX-LOGOUT:** Konfirmasi `window.confirm` sebelum logout (staff + admin/owner).
+- **UX-SEARCH-TENANT:** GlobalSearch dibuka untuk role TENANT (search invoice sendiri via `/me/invoices`), placeholder disesuaikan.
+- **UX-SKELETON:** `StatCardSkeleton` width hardcoded → `100%` mengikuti container (cegah layout shift).
+- **UX-OVERSCROLL:** Hapus `overscroll-behavior-y: none` — pull-to-refresh kembali di mobile.
+- **UX-LOGIN-FORMAT:** Validasi format login tenant (email vs HP dengan regex).
+- Gate: FE build PASS (0 error), PWA verify PASS.: header tanggal dipertahankan, tiap entry hanya menyimpan 1-2 poin outcome. Detail verbose tetap ada di source lama.
 
 ### 2026-06-19 — refactor(efisiensi AI/token): bersih repo + split docs + CODEMAP + decompose DashboardAdmin
 - **Repo:** untrack 32.8MB Prisma generated (`backend/src/generated/*`) dari git (sudah gitignore; regen via `prisma generate`); pindah `buku.md` (2.2MB) + `KOST48_Analisis_Bisnis_Total.pdf` (5.7MB) ke `reference/` (luar jalur baca AI) + read-guard di `CLAUDE.md`.

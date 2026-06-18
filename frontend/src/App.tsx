@@ -49,6 +49,7 @@ const LoyaltyAdminPage = lazy(() => import('./pages/loyalty/LoyaltyAdminPage'));
 const WifiOrderPage = lazy(() => import('./pages/portal/WifiOrderPage'));
 const ConfiguredResourcePage = lazy(() => import('./pages/resources/ConfiguredResourcePage'));
 const InventoryShellPage = lazy(() => import('./pages/resources/InventoryShellPage'));
+const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
 const BookingPage = lazy(() => import('./pages/bookings/BookingPage'));
 const RoomDetailPage = lazy(() => import('./pages/rooms/RoomDetailPage'));
 const CheckInWizard = lazy(() => import('./pages/stays/CheckInWizard'));
@@ -221,6 +222,7 @@ export default function App() {
           <Route path="/loyalty" element={<RequireRoles allowed={['OWNER', 'ADMIN']}><LoyaltyAdminPage /></RequireRoles>} />
           <Route path="/portal/wifi" element={<RequireRoles allowed={['TENANT']}><WifiOrderPage /></RequireRoles>} />
           </Route>
+          <Route path="*" element={<NotFoundPage />} />
         </Route>
         </Routes>
       </Suspense>

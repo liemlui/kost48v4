@@ -17,11 +17,11 @@
 | Blok | Selesai | Terbuka | Catatan |
 |------|---------|---------|---------|
 | Fase A — Pra-Go-Live | sebagian | F1-12 🧑 | Kode inti siap; publish nyata menunggu server/domain/env owner |
-| Fase B — Publik & Tenant | sebagian | foto, profil | Layanan tambahan, minat layanan, smart booking, kalender, dan meter jadwal sudah selesai fungsional |
+| Fase B — Publik & Tenant | **selesai** | — | Public/tenant B1-B5 selesai; aset publik/brosur kini bisa dikelola dari Owner Settings (2026-06-19) |
 | Fase C — Owner/Admin | **selesai** | — | Mode-aware UI, route split/guard, status cards, inventaris shell SEMUA selesai (2026-06-19) |
 | Fase D — Staff & Gudang | **selesai** | — | Meter status, theme, WiFi order, tip flow, gudang FK, role scope SEMUA selesai (2026-06-19) |
 | Fase E — Polish & Teknis | sebagian | TEN-GAMIF, refactor, test lanjutan | MKT-5 selesai fungsional; backlog teknis diserap ke M10 |
-| Fase F — UI/UX Sweep | **baru** | UX-404, UX-TOAST, UX-A11Y, UX-COLOR, UX-LOGOUT | Audit UI/UX 2026-06-19: 13 temuan, 6 prioritas perbaikan |
+| Fase F — UI/UX Sweep | **selesai** | — | UX-404 (NotFoundPage), UX-TOAST (ToastProvider), UX-A11Y (SVG password, skip-link), UX-COLOR (kontras AA), UX-LOGOUT (konfirmasi), UX-SEARCH-TENANT, UX-SKELETON, UX-OVERSCROLL, UX-LOGIN-FORMAT ✅ |
 
 ### Urutan kerja (jangan loncat kecuali blocked) — detail di [ANTRIAN](#antrian-eksekusi-aktif-untuk-ai--kerjakan-dari-sini)
 
@@ -325,7 +325,7 @@ Output akhir:
 | Fase | Nama Mudah | Status | Rujukan Utama | Catatan |
 |------|------------|--------|---------------|---------|
 | **Fase A** | Pra-Go-Live Produksi | 🧑 blocked owner | M08, M02 | Deploy nyata menunggu server/domain/env owner |
-| **Fase B** | Publik & Portal Tenant | sebagian | M07, M05, M06 | Banyak selesai; sisa foto dan profil |
+| **Fase B** | Publik & Portal Tenant | **selesai** | M07, M05, M06 | Public UI, smart booking, kalender, layanan, meter, profil, foto kamar/fasilitas, dan aset brosur selesai |
 | **Fase C** | Workspace Owner/Admin | **selesai** | M02, M06 | Mode-aware UI + route split/guard + status cards + inventaris shell selesai (2026-06-19) |
 | **Fase D** | Operasional Staff & Gudang | sebagian | M06, M04 | Staff/gudang/WiFi/tip/meter view |
 | **Fase E** | Polish, Gamifikasi & Teknis | sebagian | M06, M07, M09 | Ranking kebersihan + backlog teknis non-blocker |
@@ -362,7 +362,7 @@ Output akhir:
 #### B1 — Public UI dasar yang sudah selesai
 - [x] Navigasi publik, tombol "Masuk Portal", ikon, CTA audit, badge status, kategori kamar, filter ulasan, OCR KTP, KTP/NIK opsional, dan profile completeness badge sudah selesai.
 - [x] **PUB-CALENDAR-CHECKOUT:** badge "Perkiraan kosong [tgl]" sudah muncul dari checkout-approved atau stay jangka pendek.
-- [~] **PUB-CALENDAR-RENEW:** ditutup sesuai keputusan owner; sistem tidak menebak kontrak bulanan/panjang.
+- [x] **PUB-CALENDAR-RENEW:** ditutup sebagai keputusan produk owner; sistem tidak menebak kontrak bulanan/panjang.
 
 #### B2 — Ketersediaan & booking cerdas
 - [x] **PUB-CALENDAR:** backend `GET /public/rooms/availability-calendar?from&to` + frontend `AvailabilityTimeline` horizontal (per kamar × per tanggal: KOSONG/BOOKING_DP/HUNI/MAINTENANCE).
@@ -371,8 +371,8 @@ Output akhir:
 #### B3 — Foto, brosur, dan aset marketing
 - [x] **PUB-CARD-RESPONSIVE:** grid public rooms sudah 4/2/1 kolom.
 - [x] **PUB-FACILITY-PHOTO:** owner bisa upload 1 foto per fasilitas via Settings → Foto Fasilitas; foto real tampil di landing page publik (fallback emoji bila belum ada foto).
-- [~] **OWN-FOTO-UPLOAD:** upload foto kamar sudah ada di Owner Settings; sisa CRUD foto marketing, fasilitas, brosur/spanduk.
-- [~] **PUB-BROCHURE:** section "Galeri KOST48" + aset brosur/spanduk statis sudah ada; sisa upload/kelola dari Owner Settings.
+- [x] **OWN-FOTO-UPLOAD:** Owner Settings kini mengelola foto kamar, foto fasilitas, dan aset publik slot-based (hero, profil/galeri, spanduk, brosur depan/belakang) via endpoint `marketing-assets`.
+- [x] **PUB-BROCHURE:** section galeri/brosur publik memakai upload owner bila ada, dengan fallback aset statis bila slot belum di-upload.
 
 #### B4 — Layanan tambahan & minat layanan
 - [x] **PUB-LAYANAN-TAMBAHAN:** model `AdditionalService`, CRUD owner, route/nav admin, dan portlet tenant sudah selesai.
@@ -449,691 +449,263 @@ Output akhir:
 
 **Tujuan:** fitur non-blocker dirapikan setelah flow utama aman.
 
-**Rujukan:** `docs/M06_OPERASIONAL.md` · `docs/M07_PUBLIK_GROWTH.md` · `docs/M09_AUDIT.md` · `docs/AUDIT_POST_FIX.md`.
+**Rujukan:** `docs/M06_OPERASIONAL.md` · `docs/M07_PUBLIK_GROWTH.md` · `docs/M09_AUDIT.md`.
 
-#### E1 — Tenant gamification
-- [x] **TEN-GAMIF:** ranking kebersihan depan kamar bulanan — backend `GET /public/rooms/cleanliness-ranking?month&year` (skor persentase `DONE/expected` dari assignment aktif area CLEANING per room, query month/year tervalidasi) + frontend kartu ranking di MyLoyaltyPage.
-- [~] **TEN-GAMIF privacy:** leaderboard poin yang ada tidak expose tenantId/nama; tetap perlu UAT ulang untuk ranking kebersihan baru.
+**Urutan kerja:** E1b → E3a → E3b → E3c → E3d → E3e. **1 task = 1 commit.**
 
-#### E2 — Marketing renewal
-- [x] **MKT-5:** selesai fungsional. `RenewRequestModal` sudah memuat copy meter; `RenewalCrossSellCard` opsional dan tidak memblokir flow renewal.
-
-#### E3 — Backlog teknis non-blocker (jangan dikerjakan sebelum Fase A-D kecuali diminta)
-- [ ] Split file besar: `auto-ops.service.ts` → per-job + orchestrator; `stays.service.ts` → booking/checkout/renewal helper.
-- [ ] Tambah integration test flow kritis: booking → check-in → checkout → deposit refund.
-- [ ] Tambah E2E Playwright fungsional, bukan hanya screenshot visual.
-- [ ] Evaluasi refresh token JWT, nonce-based CSP, WA/email urgent alert, dan event bus/message queue sebagai jangka panjang.
+**Gate umum:** Backend `cd backend && npx tsc --noEmit` = 0. Frontend `cd frontend && npm run build` PASS. DB UAT: port **5433** `kost48_v3_pro`.
 
 ---
 
-### Fase F — UI/UX Sweep (Audit 2026-06-19)
+#### E1 — Tenant gamification
 
-**Tujuan:** perbaiki temuan audit UI/UX full — aksesibilitas, feedback, routing, kontras, polish.
+- [x] **TEN-GAMIF:** ranking kebersihan depan kamar bulanan — backend `GET /public/rooms/cleanliness-ranking?month&year` (skor persentase `DONE/expected` dari assignment aktif area CLEANING per room, query month/year tervalidasi) + frontend kartu ranking di MyLoyaltyPage.
+- [~] **TEN-GAMIF privacy:** leaderboard poin tidak expose tenantId/nama; perlu UAT ulang ranking kebersihan.
+
+##### E1b — Verifikasi Privacy (UAT manual, tanpa edit kode)
+
+**Anchor:** `backend/src/modules/marketing/marketing-public-rooms.service.ts:547-643` · `backend/src/modules/loyalty/loyalty.service.ts:125-151` · `frontend/src/pages/portal/MyLoyaltyPage.tsx`
+
+**Step 1 — Backend cleanliness ranking:** Jalankan backend, lalu:
+```bash
+curl -s "http://localhost:3000/api/public/rooms/cleanliness-ranking?month=6&year=2026" | python -c "import sys,json; d=json.load(sys.stdin); [print(k) for r in d.get('ranking',d.get('data',{}).get('ranking',[])) for k in r.keys()]" | sort -u
+```
+Assert: output HANYA berisi `code`, `doneCount`, `expectedCount`, `name`, `roomId`, `score`. **TIDAK boleh** ada `tenantId`, `tenantName`, `userId`, `fullName`, `email`, `nik`.
+
+**Step 2 — Backend loyalty leaderboard:**
+```bash
+curl -s -H "Authorization: Bearer $(node -e "const http=require('http'); http.get('http://localhost:3000/api/auth/login',{headers:{'Content-Type':'application/json'}},r=>{let d='';r.on('data',c=>d+=c);r.on('end',()=>{const j=JSON.parse(d);process.stdout.write(j.data?.token??'')})}).write(JSON.stringify({identifier:'tenant.g2@kost48.com',password:'tenant123'}))")|tail -1")" "http://localhost:3000/api/me/loyalty/leaderboard" | python -c "import sys,json; d=json.load(sys.stdin); items=d.get('data',d); [print(k) for r in (items if isinstance(items,list) else items.get('leaderboard',[])) for k in r.keys()]" | sort -u
+```
+Assert: output HANYA berisi `points`, `rank`, `roomCode`. **TIDAK boleh** ada identitas tenant.
+
+**Step 3 — Frontend smoke:** Buka `http://localhost:5173/portal/loyalty` (login tenant). Pastikan kartu kebersihan dan papan poin menampilkan **kode kamar** (A01, B03), bukan nama orang, dan ada badge "anonim".
+
+**Step 4 — Centang checklist:** Ubah marker `[~]` → `[x]`.
+
+**Gate:** keempat langkah PASS. Tidak perlu `tsc` atau build.
+
+---
+
+#### E2 — Marketing renewal
+
+- [x] **MKT-5:** selesai fungsional. `RenewRequestModal` sudah memuat copy meter; `RenewalCrossSellCard` opsional.
+
+---
+
+#### E3 — Backlog teknis non-blocker
+
+##### E3a — Split `auto-ops.service.ts` [ ]
+
+**Kondisi:** 1.819 baris monolitik, 26 method, 79.6 KiB. Belum dipecah.
+
+**Target:** Orchestrator + 5 sweep service. Controller **TIDAK** diubah.
+
+**Arsitektur target:**
+```
+auto-ops/
+├── auto-ops.service.ts          # Orchestrator (~200 baris): runAll, status, + proxy per sweep
+├── auto-ops.controller.ts       # TETAP — semua endpoint delegasi ke orchestrator
+├── auto-ops.module.ts           # Update: daftarkan 5 sweep service baru
+├── sweeps/
+│   ├── booking-sweep.service.ts     # runBookingExpiry(L287-315), runDownPaymentForfeit(L573-616),
+│   │                                #   expiredBookingWhere(L1704-1718), expireBookingTx(L1720-1818)
+│   ├── stay-sweep.service.ts        # runRoomReleaseAtNoon(L322-361), cancelEndedUnpaidStay(L372-537),
+│   │                                #   notifyTenantStayCancelled(L544-565), runOverstayForcedCheckout(L1306-1338),
+│   │                                #   forceCheckoutOverstay(L1340-1494), notifyAdminsForcedCheckoutBlocked(L1496-1538),
+│   │                                #   runOverstayEnforcement(L1548-1630), runPostCheckoutAutoCancel(L1637-1671),
+│   │                                #   runRoomHealer(L1673-1701)
+│   ├── renewal-sweep.service.ts     # runRenewalPriorityExpiry(L1075-1102), expireRenewalPriorityTx(L1104-1156),
+│   │                                #   notifyTenantRenewalExpired(L1158-1178), runRenewalSettlementForfeit(L1187-1268),
+│   │                                #   notifyAdminsRenewalForfeited(L1270-1295)
+│   ├── accounting-sweep.service.ts  # runRentRecognition(L766-777), runAutoJournalReconciliation(L824-843),
+│   │                                #   notifyAdminsJournalReconciliation(L846-878), runRecurringExpenseDrafts(L159-234),
+│   │                                #   runAutomaticDepreciation(L236-268), runAccountingAutoClose(L271-285)
+│   └── maintenance-sweep.service.ts # runAcCleaningSchedule(L704-760), runReferralRewards(L685-696),
+│                                    #   runPushDispatch(L783-794), runNotificationPruning(L802-815),
+│                                    #   runTicketSlaEscalation(L885-945), runContractEndReminders(L947-1029),
+│                                    #   notifyAdminsTenantNoPortalContract(L1032-1058), runBelongingsAbandonment(L628-679),
+│                                    #   wibToday(L1060-1064)
+└── auto-ops-period.helper.ts    # TETAP
+```
+
+**Pola sweep service (copy-paste template):**
+```typescript
+import { Injectable, Logger } from '@nestjs/common';
+// SALIN import yang relevan SAJA dari auto-ops.service.ts
+
+@Injectable()
+export class BookingSweepService {  // ganti nama per domain
+  private readonly logger = new Logger(BookingSweepService.name);
+
+  constructor(
+    // SALIN dependency yang dipakai method di file ini SAJA
+    private readonly prisma: PrismaService,
+    private readonly accountingPosting: AccountingPostingService,
+    // ...
+  ) {}
+
+  // COPY-PASTE method dari auto-ops.service.ts — JANGAN ubah isi method
+  async runBookingExpiry(...) { /* persis sama */ }
+}
+```
+
+**Langkah:**
+1. `mkdir backend/src/modules/auto-ops/sweeps`
+2. Buat 5 file sweep service — setiap file ambil method yang terdaftar di atas
+3. Update `auto-ops.service.ts`: hapus method yang sudah pindah + inject 5 sweep service; `runAll()` panggil via sweep service; tambah method proxy untuk setiap endpoint controller
+4. Update `auto-ops.module.ts`: tambah 5 sweep service di `providers`
+5. **JANGAN ubah `auto-ops.controller.ts`** — semua method publik orchestrator tetap jadi proxy
+
+**⚠️ PENTING:** Gunakan `get_symbols` + `read_file` untuk lihat dependensi tiap method (`this.xxx`) sebelum copy. Jangan pindahkan method yang memanggil `this.methodLain()` — method yang dipanggil juga harus ikut pindah.
+
+**Gate:** `cd backend && npx tsc --noEmit` = 0. Runtime: auto-ops cron tetap jalan (trigger via `/api/auto-ops/cron`).
+
+##### E3b — Split `stays.service.ts` (renewal) [ ]
+
+**Kondisi:** 2.020 baris, 73.5 KiB. Sudah ada `stays-service-helpers.ts` (203 baris).
+
+**Target:** Ekstrak 5 method renewal ke `stays-renewal.service.ts`.
+
+**Method yang dipindahkan:**
+| Method | Baris | Visibility |
+|--------|-------|------------|
+| `renewStay` | 1602-1609 | public |
+| `issueRenewalDownPaymentInvoiceTx` | 1615-1664 | public |
+| `prepareRenewalSettlementInTransaction` | 1666-1845 | public |
+| `finalizePreparedRenewalInTransaction` | 1847-1916 | public |
+| `cancelUnpaidRenewalInvoiceInTransaction` | 1918-1963 | public |
+
+**Konsumen yang harus diupdate:**
+
+1. **`renew-requests.service.ts`** — baris 158, 274, 313, 420 pakai `this.staysService.issueRenewal*/prepareRenewal*/finalize*/cancelUnpaid*`. Ganti ke `this.staysRenewalService.*`.
+   - SEARCH: `import { StaysService } from '../stays/stays.service';`
+   - UPDATE: inject `StaysRenewalService` (ganti atau tambah, tergantung apakah `StaysService` dipakai untuk method non-renewal juga — **grep dulu** `staysService\.` di file tersebut!)
+
+2. **`stays.controller.ts`** — baris 126: `this.staysService.renewStay(...)`. Tetap proxy via orchestrator.
+
+3. **`stays.module.ts`** — tambah `StaysRenewalService` di `providers` + `exports`.
+
+**Langkah:**
+1. Buat `backend/src/modules/stays/stays-renewal.service.ts` — copy 5 method renewal
+2. Hapus 5 method dari `stays.service.ts`
+3. Inject `StaysRenewalService` ke `StaysService`, method `renewStay()` jadi proxy
+4. Update `renew-requests.service.ts` — ganti pemanggilan ke `StaysRenewalService`
+5. Update `stays.module.ts`
+
+**Gate:** `cd backend && npx tsc --noEmit` = 0. Runtime UAT: renewal penuh (request → DP invoice → settlement → finalize).
+
+##### E3c — Integration test: booking → checkout → deposit [ ]
+
+**Prasyarat:** DB UAT (5433) running + seeded: `node scripts/seed-dev-reset.js && node scripts/seed-dev-via-api.js`
+
+**Buat direktori + file:** `backend/test/integration/stays-lifecycle.integration.test.ts`
+
+**Kerangka (copy-paste):**
+```typescript
+import { Test, TestingModule } from '@nestjs/testing';
+import { INestApplication } from '@nestjs/common';
+import { AppModule } from '../../src/app.module';
+import { PrismaService } from '../../src/prisma/prisma.service';
+
+describe('Stay Lifecycle Integration', () => {
+  let app: INestApplication;
+  let prisma: PrismaService;
+
+  beforeAll(async () => {
+    const module: TestingModule = await Test.createTestingModule({ imports: [AppModule] }).compile();
+    app = module.createNestApplication();
+    await app.init();
+    prisma = module.get(PrismaService);
+  });
+
+  afterAll(async () => { await app.close(); });
+
+  // TC1: Booking → DP lunas → check-in → checkout → deposit refund
+  it('full lifecycle: booking → check-in → checkout → deposit refund', async () => {
+    // 1. Ambil room AVAILABLE dari DB
+    // 2. Stay.create() → status ACTIVE, Room RESERVED
+    // 3. Buat PaymentSubmission → approve DP
+    // 4. Stay.complete() → Room OCCUPIED, promoted
+    // 5. Checkout request → deposit settlement → refund
+    // 6. Assert deposit ledger balance = 0
+  });
+
+  // TC2: Booking expiry 3 jam → DP hangus
+  // TC3: Renewal sukses tanpa gap periode
+  // TC4: Checkout dengan potong meter × deposit
+});
+```
+
+**Tambah script di `backend/package.json`:**
+```json
+"test:integration": "node --test \"test/integration/**/*.test.js\""
+```
+
+**Gate:** `cd backend && npm run build && npm run test:integration` — semua PASS.
+
+##### E3d — E2E Playwright fungsional [ ]
+
+**Prasyarat:** `ui-shots/` sudah ada Playwright 1.60.0 (screenshot capture). Backend + frontend harus running.
+
+**Langkah:**
+1. `cd frontend && npm install -D @playwright/test && npx playwright install chromium`
+2. Buat `frontend/playwright.config.ts`:
+   ```typescript
+   import { defineConfig } from '@playwright/test';
+   export default defineConfig({
+     testDir: './e2e',
+     timeout: 30000,
+     use: { baseURL: 'http://localhost:5173', headless: true },
+     webServer: { command: 'npm run dev', url: 'http://localhost:5173', reuseExistingServer: true },
+   });
+   ```
+3. Buat `frontend/e2e/public-pages.spec.ts` — test: landing, katalog, detail kamar, login
+4. Buat `frontend/e2e/booking-flow.spec.ts` — test: pilih kamar → form booking muncul
+5. Buat `frontend/e2e/tenant-portal.spec.ts` — test: login tenant → portal → loyalty page
+6. Tambah script: `"test:e2e": "npx playwright test"` di `frontend/package.json`
+
+**Gate:** `cd frontend && npx playwright test` — semua spec PASS.
+
+##### E3e — Evaluasi arsitektur jangka panjang [ ]
+
+**Output:** `docs/FASE_E_EVALUASI_ARSITEKTUR.md` (read-only, tidak ada perubahan kode).
+
+Evaluasi 4 item dengan format: kondisi saat ini → risiko → rekomendasi → prioritas → estimasi.
+
+| # | Item | Prioritas | Estimasi | Catatan |
+|---|------|-----------|----------|--------|
+| 1 | Refresh token JWT | MEDIUM | 1-2 sesi | Access 15m + refresh 7d + rotation. Perlu sebelum publish. |
+| 2 | Nonce-based CSP | LOW | 1 sesi | Header CSP strict + nonce. Bisa ditunda. |
+| 3 | WA/Email urgent alert | LOW | 2-3 sesi | PWA push dulu; WA opsional untuk notif urgent. |
+| 4 | Event bus / message queue | VERY LOW | N/A | Overengineering untuk 48 kamar. Sequential cukup. |
+
+**Gate:** Tidak ada — read-only.
+
+---
+
+### Fase F — UI/UX Sweep (Audit 2026-06-19) ✅ SELESAI
+
+**Tujuan:** perbaiki temuan audit UI/UX full — aksesibilitas, feedback, routing, kontras, polish. **Selesai 2026-06-19 — 10 task.**
 
 **Rujukan:** `docs/M07_PUBLIK_GROWTH.md` → Audit UI/UX Full 2026-06-19.
 
-**Anchor kode (grep):** `App.tsx` · `AppLayout.tsx` · `PasswordInput.tsx` · `SkeletonLoader.tsx` · `GlobalSearch.tsx` · `01-base.css`.
-
-**Gate:** `cd frontend && npm run build` harus PASS. Tidak ada npm install.
-
----
-
-#### F1 — Critical: Route 404 (UX-404)
-
-**Target:** `frontend/src/App.tsx` + `frontend/src/pages/NotFoundPage.tsx` (BARU)  
-**Estimasi:** 30 menit · **Risk:** low
-
-**Langkah 1 — Buat file halaman 404:**
-Buat file BARU `frontend/src/pages/NotFoundPage.tsx` dengan isi:
-
-```tsx
-import { Link } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
-import { getDefaultRoute } from '../config/navigation';
-
-export default function NotFoundPage() {
-  const { user } = useAuth();
-  const homeLink = user ? getDefaultRoute(user.role) : '/rooms';
-
-  return (
-    <div className="min-vh-100 d-flex align-items-center justify-content-center p-4">
-      <div className="text-center" style={{ maxWidth: 480 }}>
-        <div className="display-1 fw-bold text-muted mb-3">404</div>
-        <h1 className="h4 mb-2">Halaman tidak ditemukan</h1>
-        <p className="text-muted mb-4">
-          Alamat yang kamu tuju tidak ada atau sudah dipindahkan.
-          Gunakan menu navigasi atau tombol di bawah untuk kembali.
-        </p>
-        <Link to={homeLink} className="btn btn-primary">
-          {user ? 'Kembali ke Dashboard' : 'Lihat Katalog Kamar'}
-        </Link>
-      </div>
-    </div>
-  );
-}
-```
-
-**Langkah 2 — Tambah import di App.tsx:**
-Cari baris import di `frontend/src/App.tsx`. Tambahkan setelah import terakhir (sebelum `type Role`):
-
-```tsx
-const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
-```
-
-> **Cara temukan spot:** buka `App.tsx`, cari teks `type Role = 'OWNER'`. Tambah import di atasnya.
-
-**Langkah 3 — Tambah wildcard route di App.tsx:**
-Buka `frontend/src/App.tsx`, cari baris:
-
-```tsx
-          </Route>
-        </Route>
-        </Routes>
-```
-
-**SEARCH/REPLACE tepat:**
-```
-          </Route>
-        </Route>
-        </Routes>
-```
-
-**REPLACE dengan:**
-```
-          </Route>
-          <Route path="*" element={<NotFoundPage />} />
-        </Route>
-        </Routes>
-```
-
-**Verifikasi:** `cd frontend && npm run build` — harus PASS. Buka browser ke `/halaman-tidak-ada`, harus muncul halaman 404.
-
----
-
-#### F2 — High: Toast Feedback Global (UX-TOAST)
-
-**Target:** `frontend/src/components/common/ToastProvider.tsx` (BARU) + `frontend/src/main.tsx` + `frontend/src/pages/resources/SimpleCrudPage.tsx`  
-**Estimasi:** 2 jam · **Risk:** low (tidak menyentuh backend/schema)
-
-**Langkah 1 — Buat ToastProvider:**
-Buat file BARU `frontend/src/components/common/ToastProvider.tsx`:
-
-```tsx
-import { createContext, useCallback, useContext, useState, type ReactNode } from 'react';
-
-type Toast = { id: number; message: string; variant: 'success' | 'danger' | 'warning' | 'info' };
-
-const ToastCtx = createContext<{ toast: (message: string, variant?: Toast['variant']) => void } | null>(null);
-
-let nextId = 1;
-
-export function ToastProvider({ children }: { children: ReactNode }) {
-  const [toasts, setToasts] = useState<Toast[]>([]);
-
-  const addToast = useCallback((message: string, variant: Toast['variant'] = 'success') => {
-    const id = nextId++;
-    setToasts((prev) => [...prev, { id, message, variant }]);
-    setTimeout(() => setToasts((prev) => prev.filter((t) => t.id !== id)), 3500);
-  }, []);
-
-  return (
-    <ToastCtx.Provider value={{ toast: addToast }}>
-      {children}
-      <div className="toast-container position-fixed bottom-0 end-0 p-3" style={{ zIndex: 9999 }}>
-        {toasts.map((t) => (
-          <div key={t.id} className={`toast show align-items-center text-bg-${t.variant} border-0`} role="alert">
-            <div className="d-flex">
-              <div className="toast-body">{t.message}</div>
-              <button type="button" className="btn-close btn-close-white me-2 m-auto" onClick={() => setToasts((prev) => prev.filter((x) => x.id !== t.id))} aria-label="Tutup" />
-            </div>
-          </div>
-        ))}
-      </div>
-    </ToastCtx.Provider>
-  );
-}
-
-export function useToast() {
-  const ctx = useContext(ToastCtx);
-  if (!ctx) throw new Error('useToast must be used within ToastProvider');
-  return ctx;
-}
-```
-
-**Langkah 2 — Wrap di main.tsx:**
-Buka `frontend/src/main.tsx`. Tambah import:
-
-```tsx
-import { ToastProvider } from './components/common/ToastProvider';
-```
-
-Cari teks:
-
-```tsx
-        <AuthProvider>
-          <App />
-```
-
-**SEARCH/REPLACE tepat:**
-```
-        <AuthProvider>
-          <App />
-```
-
-**REPLACE dengan:**
-```
-        <AuthProvider>
-          <ToastProvider>
-            <App />
-          </ToastProvider>
-```
-
-**Langkah 3 — Panggil toast di SimpleCrudPage.tsx:**
-Buka `frontend/src/pages/resources/SimpleCrudPage.tsx`. Tambah import di atas:
-
-```tsx
-import { useToast } from '../../components/common/ToastProvider';
-```
-
-Cari `const queryClient = useQueryClient();` (sekitar line 60). Tambah di bawahnya:
-
-```tsx
-  const toast = useToast();
-```
-
-Lalu cari 3 lokasi mutation `onSuccess` — biasanya ada di `useMutation` untuk create, update, delete. Di tiap `onSuccess`, tambah `toast.toast('Data berhasil disimpan.')` atau pesan sesuai. Contoh:
-
-**SEARCH untuk create mutation onSuccess (cari teks `createResource`):**
-Cari blok `onSuccess: () => {` di dalam mutation create. Tambahkan `toast.toast('Data berhasil ditambah.');` di dalamnya.
-
-**SEARCH untuk update mutation onSuccess:**
-Cari blok `onSuccess: () => {` di dalam mutation update. Tambahkan `toast.toast('Data berhasil diubah.');`.
-
-**SEARCH untuk delete mutation onSuccess:**
-Cari blok `onSuccess: () => {` di dalam mutation delete. Tambahkan `toast.toast('Data berhasil dihapus.', 'warning');`.
-
-**Verifikasi:** `cd frontend && npm run build`. Buka aplikasi, tambah/edit/hapus data → toast muncul di kanan bawah.
-
----
-
-#### F3 — Medium: Aksesibilitas
-
-##### UX-A11Y-PASSWORD: Ganti emoji password toggle dengan SVG icon
-
-**Target:** `frontend/src/components/common/PasswordInput.tsx`  
-**Estimasi:** 20 menit · **Risk:** low
-
-**SEARCH (seluruh isi file — ganti total):**
-```
-import { useState } from 'react';
-import { Button, Form, InputGroup } from 'react-bootstrap';
-import type { FormControlProps } from 'react-bootstrap';
-
-type PasswordInputProps = Omit<FormControlProps, 'type'>;
-
-export default function PasswordInput(props: PasswordInputProps) {
-  const [show, setShow] = useState(false);
-
-  return (
-    <InputGroup>
-      <Form.Control
-        {...props}
-        type={show ? 'text' : 'password'}
-      />
-      <Button
-        variant="outline-secondary"
-        onClick={() => setShow((v) => !v)}
-        tabIndex={-1}
-        size="sm"
-        className="px-2"
-        style={{ borderTopLeftRadius: 0, borderBottomLeftRadius: 0, minWidth: 40 }}
-        title={show ? 'Sembunyikan password' : 'Tampilkan password'}
-      >
-        {show ? '🙈' : '👁'}
-      </Button>
-    </InputGroup>
-  );
-}
-```
-
-**REPLACE dengan:**
-```
-import { useState } from 'react';
-import { Button, Form, InputGroup } from 'react-bootstrap';
-import type { FormControlProps } from 'react-bootstrap';
-
-type PasswordInputProps = Omit<FormControlProps, 'type'>;
-
-/** SVG icon mata terbuka — digunakan saat password terlihat */
-function EyeOpenIcon() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-      <circle cx="12" cy="12" r="3" />
-    </svg>
-  );
-}
-
-/** SVG icon mata tertutup — digunakan saat password disembunyikan */
-function EyeClosedIcon() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94" />
-      <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19" />
-      <line x1="1" y1="1" x2="23" y2="23" />
-      <path d="M14.12 14.12a3 3 0 1 1-4.24-4.24" />
-    </svg>
-  );
-}
-
-export default function PasswordInput(props: PasswordInputProps) {
-  const [show, setShow] = useState(false);
-
-  return (
-    <InputGroup>
-      <Form.Control
-        {...props}
-        type={show ? 'text' : 'password'}
-      />
-      <Button
-        variant="outline-secondary"
-        onClick={() => setShow((v) => !v)}
-        size="sm"
-        className="px-2"
-        style={{ borderTopLeftRadius: 0, borderBottomLeftRadius: 0, minWidth: 40 }}
-        aria-label={show ? 'Sembunyikan password' : 'Tampilkan password'}
-        title={show ? 'Sembunyikan password' : 'Tampilkan password'}
-      >
-        {show ? <EyeClosedIcon /> : <EyeOpenIcon />}
-      </Button>
-    </InputGroup>
-  );
-}
-```
-
-**Yang berubah:** (1) `tabIndex={-1}` dihapus, (2) emoji diganti SVG icon, (3) tambah `aria-label`.
-
-**Verifikasi:** `cd frontend && npm run build`. Buka halaman login, test toggle password — icon harus berganti mata terbuka/tertutup, bisa di-tab keyboard.
-
----
-
-##### UX-A11Y-SKIPLINK: Tambah skip-to-content link
-
-**Target:** `frontend/src/components/layout/AppLayout.tsx`  
-**Estimasi:** 10 menit · **Risk:** low
-
-**Langkah 1 — Tambah CSS:**
-Buka `frontend/src/styles/01-base.css`, tambahkan di akhir file:
-
-```css
-/* Skip-to-content link — visually hidden, muncul saat Tab pertama */
-.skip-to-content {
-  position: absolute;
-  top: -100px;
-  left: 16px;
-  z-index: 9999;
-  padding: 10px 20px;
-  background: var(--primary);
-  color: #fff;
-  border-radius: 8px;
-  font-weight: 600;
-  text-decoration: none;
-  transition: top 0.2s ease;
-}
-.skip-to-content:focus {
-  top: 16px;
-}
-```
-
-**Langkah 2 — Tambah link di AppLayout.tsx:**
-Buka `frontend/src/components/layout/AppLayout.tsx`. Cari baris:
-
-```tsx
-    <div className="app-shell">
-```
-
-(Garis ~359, tepat setelah block `if (isTenant)` dan sebelum return utama admin/owner.)
-
-**SEARCH:**
-```
-    <div className="app-shell">
-```
-
-**REPLACE dengan:**
-```
-    <a href="#main-content" className="skip-to-content">Loncat ke konten utama</a>
-    <div className="app-shell">
-```
-
-**Langkah 3 — Tambah id di elemen main:**
-Cari baris:
-
-```tsx
-        <main className="app-main">
-```
-
-(Garis ~397.)
-
-**SEARCH:**
-```
-        <main className="app-main">
-```
-
-**REPLACE dengan:**
-```
-        <main className="app-main" id="main-content">
-```
-
-**Verifikasi:** `cd frontend && npm run build`. Buka halaman, tekan Tab — link "Loncat ke konten utama" muncul di kiri atas. Tekan Enter → fokus pindah ke konten utama.
-
----
-
-##### UX-COLOR: Gelapkan --text-muted untuk WCAG AA
-
-**Target:** `frontend/src/styles/01-base.css` line 13 + `frontend/src/styles/04-operations.css` line 18  
-**Estimasi:** 5 menit · **Risk:** low (hanya ubah warna, tidak rusak layout)
-
-**Langkah 1 — `01-base.css`:**
-Buka `frontend/src/styles/01-base.css`. Cari line yang tepat:
-
-```
-  --text-muted: #64748b;
-```
-
-(Garis 13.)
-
-**SEARCH:** `--text-muted: #64748b;`  
-**REPLACE:** `--text-muted: #475569;`
-
-> Hanya perubahan satu kata (64748b → 475569). Contrast ratio naik dari 4.55:1 ke 5.5:1 — lulus WCAG AA small text.
-
-**Langkah 2 — `04-operations.css`:**
-Buka `frontend/src/styles/04-operations.css`. Cari line yang tepat:
-
-```
-  --text-muted: #64748b;
-```
-
-(Garis 18.)
-
-**SEARCH:** `--text-muted: #64748b;`  
-**REPLACE:** `--text-muted: #475569;`
-
-**Verifikasi:** `cd frontend && npm run build`. Lihat halaman — teks muted sedikit lebih gelap, tetap terbaca.
-
----
-
-##### UX-LOGOUT: Tambah konfirmasi sebelum logout
-
-**Target:** `frontend/src/components/layout/AppLayout.tsx`  
-**Estimasi:** 15 menit · **Risk:** low
-
-**Langkah 1 — Buat helper di atas komponen AppLayout:**
-Buka `frontend/src/components/layout/AppLayout.tsx`. Cari baris:
-
-```tsx
-export default function AppLayout({ children }: { children?: ReactNode }) {
-```
-
-Tambahkan DI ATAS baris tersebut:
-
-```tsx
-function handleLogout(logoutFn: () => void) {
-  if (window.confirm('Yakin ingin keluar?')) {
-    logoutFn();
-  }
-}
-```
-
-**Langkah 2 — Ganti onClick di 2 tombol logout:**
-
-**Tombol 1 — Staff logout (line ~325):**
-**SEARCH:**
-```
-              <Button variant="outline-danger" size="sm" onClick={logout}>Logout</Button>
-            </div>
-          </section>
-
-          <StaffTopWorkspaceNav />
-```
-
-**REPLACE dengan:**
-```
-              <Button variant="outline-danger" size="sm" onClick={() => handleLogout(logout)}>Logout</Button>
-            </div>
-          </section>
-
-          <StaffTopWorkspaceNav />
-```
-
-**Tombol 2 — Admin/Owner logout (line ~456):**
-**SEARCH:**
-```
-                  <Button variant="outline-danger" size="sm" onClick={logout}>Logout</Button>
-```
-
-**REPLACE dengan:**
-```
-                  <Button variant="outline-danger" size="sm" onClick={() => handleLogout(logout)}>Logout</Button>
-```
-
-> **Catatan:** Tenant logout (line 348 — `onLogout={logout}` di `TenantWorkspaceTabs`) menggunakan handler internal tenant. JANGAN disentuh — tenant logout flow terpisah.
-
-**Verifikasi:** `cd frontend && npm run build`. Klik Logout → muncul dialog "Yakin ingin keluar?" → OK baru logout, Cancel tetap di halaman.
-
----
-
-#### F4 — Low: Polish
-
-##### UX-SEARCH-TENANT: Buka GlobalSearch untuk tenant
-
-**Target:** `frontend/src/components/layout/GlobalSearch.tsx`  
-**Estimasi:** 30 menit · **Risk:** low
-
-**Masalah:** `GlobalSearch` langsung `return null` bila `role === 'TENANT'`.
-
-**Langkah 1 — Tambah endpoint search tenant:**
-Buka `frontend/src/components/layout/GlobalSearch.tsx`. Cari function `canSearchTenants`, `canSearchInvoices`, `canSearchRooms`.  
-
-**SEARCH blok (sekitar line 47-60):**
-```
-function canSearchTenants(role?: string) {
-  return role === 'OWNER' || role === 'ADMIN';
-}
-
-function canSearchInvoices(role?: string) {
-  return role === 'OWNER' || role === 'ADMIN';
-}
-
-function canSearchRooms(role?: string) {
-  return role === 'OWNER' || role === 'ADMIN' || role === 'STAFF';
-}
-```
-
-**REPLACE dengan:**
-```
-function canSearchTenants(role?: string) {
-  return role === 'OWNER' || role === 'ADMIN';
-}
-
-function canSearchInvoices(role?: string) {
-  return role === 'OWNER' || role === 'ADMIN' || role === 'TENANT';
-}
-
-function canSearchRooms(role?: string) {
-  if (role === 'TENANT') return false;
-  return role === 'OWNER' || role === 'ADMIN' || role === 'STAFF';
-}
-```
-
-**Langkah 2 — Sesuaikan query tenant untuk tenant role:**
-Cari blok fungsi `queryFn` di dalam `useQuery` — sekitar line 68-100. Di bagian `canSearchInvoices`, ganti endpoint untuk tenant.
-
-**SEARCH (temukan bagian ini di dalam array tasks):**
-```
-      if (canSearchInvoices(role)) {
-        tasks.push(
-          listResource<Invoice>('/invoices', { search: debouncedKeyword, limit: 5 })
-```
-
-**REPLACE dengan:**
-```
-      if (canSearchInvoices(role)) {
-        const invoicePath = role === 'TENANT' ? '/me/invoices' : '/invoices';
-        tasks.push(
-          listResource<Invoice>(invoicePath, { search: debouncedKeyword, limit: 5 })
-```
-
-**Langkah 3 — Hapus early return untuk tenant:**
-Cari baris:
-
-```tsx
-  if (role === 'TENANT') return null;
-```
-
-(Line ~88.)
-
-**SEARCH:**
-```
-  if (role === 'TENANT') return null;
-```
-
-**REPLACE dengan:**
-```
-  // Tenant sekarang bisa search invoice + tiket mereka sendiri (UX-SEARCH-TENANT)
-```
-
-(Jangan return null — biarkan search tetap tampil.)
-
-**Langkah 4 — Update placeholder:**
-Cari function `getPlaceholder`. Di case `default`:
-
-**SEARCH:**
-```
-    default:
-      return 'Cari data...';
-```
-
-**REPLACE dengan:**
-```
-    case 'TENANT':
-      return 'Cari invoice atau tiket...';
-    default:
-      return 'Cari data...';
-```
-
-**Verifikasi:** `cd frontend && npm run build`. Login sebagai tenant, search bar muncul di portal. Cari invoice → hasil dari invoice tenant sendiri.
-
----
-
-##### UX-SKELETON: Sesuaikan StatCardSkeleton agar tidak layout shift
-
-**Target:** `frontend/src/components/common/SkeletonLoader.tsx`  
-**Estimasi:** 15 menit · **Risk:** low
-
-**Masalah:** `StatCardSkeleton` menggunakan width fixed (96px, 120px, 72%) yang tidak match card asli.
-
-**SEARCH (seluruh fungsi StatCardSkeleton):**
-```
-export function StatCardSkeleton() {
-  return (
-    <div className="card stat-card border-0">
-      <div className="card-body">
-        <div className="stat-card-header">
-          <div style={{ flex: 1 }}>
-            <SkeletonBlock width={96} height={12} className="mb-3" />
-          </div>
-          <SkeletonBlock width={44} height={44} />
-        </div>
-        <SkeletonBlock width={120} height={34} className="mb-2" />
-        <SkeletonBlock width="72%" height={14} />
-      </div>
-    </div>
-  );
-}
-```
-
-**REPLACE dengan:**
-```
-export function StatCardSkeleton() {
-  return (
-    <div className="card stat-card border-0">
-      <div className="card-body">
-        <div className="stat-card-header">
-          <SkeletonBlock width="100%" height={14} />
-          <SkeletonBlock width={44} height={44} />
-        </div>
-        <SkeletonBlock width="100%" height={36} className="mb-2" />
-        <SkeletonBlock width="100%" height={14} />
-      </div>
-    </div>
-  );
-}
-```
-
-> Perubahan: semua width jadi `100%` mengikuti container `.stat-card` yang sudah punya dimensi dari grid — tidak lagi hardcoded.
-
-**Verifikasi:** `cd frontend && npm run build`. Buka dashboard — skeleton card lebar sama dengan card asli, tidak ada layout shift.
-
----
-
-##### UX-OVERSCROLL: Kembalikan pull-to-refresh di mobile
-
-**Target:** `frontend/src/styles/01-base.css` line 59  
-**Estimasi:** 2 menit · **Risk:** low
-
-**SEARCH:**
-```
-  overscroll-behavior-y: none;
-```
-
-(Garis 59.)
-
-**REPLACE dengan:**
-```
-  /* UX-OVERSCROLL: pull-to-refresh dikembalikan untuk mobile */
-```
-
-> Hapus baris `overscroll-behavior-y: none;` — ganti dengan komentar.
-
-**Verifikasi:** `cd frontend && npm run build`. Buka di mobile browser — pull-to-refresh berfungsi kembali.
-
----
-
-##### UX-LOGIN-FORMAT: Validasi format input di LoginPage
-
-**Target:** `frontend/src/pages/auth/LoginPage.tsx`  
-**Estimasi:** 20 menit · **Risk:** low
-
-**Masalah:** Error message generik — user tidak tahu apakah format input atau password yang salah.
-
-**SEARCH (blok validasi di handleSubmit, sekitar line 56-59):**
-```
-    if (!identifier.trim()) nextErrors.identifier = mode === 'TENANT' ? 'Masukkan email atau nomor HP yang terdaftar.' : 'Masukkan email admin/staff.';
-    if (!password.trim()) nextErrors.password = 'Masukkan password.';
-```
-
-**REPLACE dengan:**
-```
-    if (!identifier.trim()) {
-      nextErrors.identifier = mode === 'TENANT' ? 'Masukkan email atau nomor HP yang terdaftar.' : 'Masukkan email admin/staff.';
-    } else if (mode === 'TENANT') {
-      // Deteksi format: jika mengandung @ → email; jika diawali 0 dan 10-13 digit → HP
-      const val = identifier.trim();
-      const isEmail = val.includes('@');
-      const isPhone = /^0\d{9,12}$/.test(val.replace(/[-\s]/g, ''));
-      if (!isEmail && !isPhone) {
-        nextErrors.identifier = 'Format tidak dikenal. Masukkan email (contoh: nama@email.com) atau nomor HP (contoh: 08123456789).';
-      }
-    }
-    if (!password.trim()) nextErrors.password = 'Masukkan password.';
-```
-
-**Verifikasi:** `cd frontend && npm run build`. Di login page tab Penghuni, ketik "abc" → error "Format tidak dikenal". Ketik "test@email.com" atau "08123456789" → tidak error format.
-
----
-
-**Gate akhir Fase F:** `cd frontend && npm run build` PASS. Semua 10 task `[x]` dicentang setelah diverifikasi.
+**Gate:** `cd frontend && npm run build` PASS.
+
+| ID | Task | File Kunci |
+|----|------|------------|
+| UX-404 | Route 404 NotFoundPage + wildcard route | `NotFoundPage.tsx`, `App.tsx` |
+| UX-TOAST | ToastProvider feedback global (success/danger/warning) | `ToastProvider.tsx`, `main.tsx`, `SimpleCrudPage.tsx` |
+| UX-A11Y-PASSWORD | SVG icon ganti emoji + aria-label + tabIndex dihapus | `PasswordInput.tsx` |
+| UX-A11Y-SKIPLINK | Skip-to-content link + CSS + id main-content | `AppLayout.tsx`, `01-base.css` |
+| UX-COLOR | Kontras WCAG AA — `--text-muted` #64748b→#475569 | `01-base.css`, `04-operations.css` |
+| UX-LOGOUT | Konfirmasi `window.confirm` sebelum logout | `AppLayout.tsx` (2 tombol logout) |
+| UX-SEARCH-TENANT | GlobalSearch buka untuk tenant (invoice + tiket sendiri) | `GlobalSearch.tsx` |
+| UX-SKELETON | StatCardSkeleton width 100% ikuti container | `SkeletonLoader.tsx` |
+| UX-OVERSCROLL | Hapus `overscroll-behavior-y: none` → pull-to-refresh mobile | `01-base.css` |
+| UX-LOGIN-FORMAT | Validasi format input (email vs HP) di LoginPage | `LoginPage.tsx` |
+
+> **Detail implementasi lengkap:** lihat changelog `docs/M11_CHANGELOG.md` atau commit history (2026-06-19).
+> **JANGAN kerjakan ulang** — semua task Fase F sudah `[x]`.
 
 ---
 

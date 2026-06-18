@@ -9,6 +9,7 @@ import App from './App';
 import { queryClient } from './lib/queryClient';
 import { installResponsiveTableLabels } from './utils/responsiveTables';
 import PwaStatus from './components/pwa/PwaStatus';
+import { ToastProvider } from './components/common/ToastProvider';
 
 installResponsiveTableLabels();
 
@@ -17,7 +18,9 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
     <QueryClientProvider client={queryClient}>
       <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
         <AuthProvider>
-          <App />
+          <ToastProvider>
+            <App />
+          </ToastProvider>
           <PwaStatus />
         </AuthProvider>
       </BrowserRouter>
