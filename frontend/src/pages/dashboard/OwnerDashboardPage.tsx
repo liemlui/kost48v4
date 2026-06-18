@@ -24,7 +24,9 @@ import AiAssistButton from '../../components/ai/AiAssistButton';
 
 const MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
-const VIEW_MODE_KEY = 'kost48_owner_view_mode';
+// Catatan: kepadatan ringkas/lengkap pakai key sendiri agar tidak bentrok dengan
+// `kost48_owner_view_mode` (toggle Kokpit/Area Admin di AppLayout + header X-Owner-View-Mode).
+const VIEW_MODE_KEY = 'kost48_owner_density';
 
 /** Hook: kelola mode tampilan ringkas/lengkap dengan persist localStorage + default mobile. */
 function useOwnerViewMode() {

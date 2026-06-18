@@ -450,7 +450,7 @@ export default function AppLayout({ children }: { children?: ReactNode }) {
             </div>
           </section>
 
-          {isAdmin || isOwner ? <RoleWorkspaceTabs role={isOwner && ownerViewMode === 'admin' ? 'ADMIN' : user?.role} adminDashboardPath={isOwner ? '/admin-dashboard' : '/dashboard'} /> : null}
+          {isAdmin || isOwner ? <RoleWorkspaceTabs role={user?.role} ownerViewMode={isOwner ? ownerViewMode : undefined} /> : null}
           {children ?? <Outlet />}
         </main>
       </div>

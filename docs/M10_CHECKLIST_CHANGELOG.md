@@ -411,7 +411,7 @@ Output akhir:
 #### C4 — Route split dan guard
 - [x] **OWN-ROUTE-SPLIT:** (SELESAI 2026-06-19) `/admin-dashboard` kini route nyata (OWNER) di `App.tsx` → `DashboardAdmin`; render inline hack di `AppLayout` dibuang. `ownerAdminSections` (sidebar) + `RoleWorkspaceTabs(adminDashboardPath)` + chip internal `DashboardAdmin` memakai base path dinamis (`/admin-dashboard` vs `/dashboard`).
 - [x] **OWN-ROUTE-GUARD:** (SELESAI 2026-06-19) `/owner-dashboard` & `/admin-dashboard` OWNER-only via `RequireRoles`; toggle owner kini navigasi antar route, dan `AppLayout` sinkronkan `ownerViewMode` dari pathname (buka `/admin-dashboard` → mode admin, `/owner-dashboard` → mode owner).
-- [~] **OWN-ROLE-TABS-MODE:** tabs sudah ikut mode via role override di `AppLayout`; sisa jadikan mode eksplisit, bukan hack role.
+- [x] **OWN-ROLE-TABS-MODE:** (SELESAI 2026-06-19) `RoleWorkspaceTabs` kini terima `role` asli + prop eksplisit `ownerViewMode`, dan memilih tab set + base path internal (OWNER+admin → `/admin-dashboard`). Hack `role={...?'ADMIN':...}` + `adminDashboardPath` di `AppLayout` dibuang; aria-label ikut `isAdminView`.
 - [ ] **OWN-BACKEND-MODE** *(opsional)*: header `X-Owner-View-Mode` belum dikirim untuk audit log/guard backend.
 
 #### C5 — Inventaris terpadu
@@ -429,11 +429,10 @@ Output akhir:
 
 **Anchor kode:** `DashboardStaff.tsx` · `StaffMotivationDashboard.tsx` · `StaffReportPrintView.tsx` · `inventory-items` · `room-items` · `tickets` · `WifiOrderPage`.
 
-- [ ] **STF-GUDANG-2:** mapping fasilitas→item gudang belum ada; `minQty` dinamis AC/kipas belum mengikuti jumlah kamar pemakai fasilitas.
-- [ ] **STF-GUDANG-2 UI/seeder:** alasan status Menipis + seeder semua kamar punya kipas belum selesai.
+- [x] **STF-GUDANG-2:** mapping fasilitas→item gudang via `matchInventoryToFacilities()` di `InventoryItemsService.decorateInventoryItem()`. `suggestedMinQtyRupiah` + `facilityCount` dihitung dari jumlah kamar dengan fasilitas terkait (query `RoomFacility.groupBy`). Seeder: semua 20 kamar dapat "Kipas Angin" via `POST /rooms/:id/facilities`.
 - [x] **STF-METER-VIEW:** dashboard daftar kamar sudah/belum catat meter per siklus — `StaffMeterStatusPanel` + integrasi ke `StaffMotivationDashboard`.
 - [x] **STF-ROLE-SCOPE:** audit penuh scope resepsionis/reparasi/kebersihan per route. **2 celah ditutup:** (1) STAFF dilarang override `agreedRentAmountRupiah`/tarif listrik+air saat create stay — ForbiddenException + pesan jelas; (2) `GET /tenants/:id` memfilter field KTP (ktp*, identityNumber, profilePhoto*) untuk STAFF — data PDP tidak bocor.
-- [~] **STF-WIFI-ORDER:** `wifi-sales` admin/owner-only; sisa flow "Pesan" → approve admin → invoice + staff read-only status.
+- [x] **STF-WIFI-ORDER:** flow lengkap tanpa schema: tenant lihat paket WiFi di `/portal/wifi` + tombol "Pesan Sekarang" → `ServiceInterest` → admin proses → `WifiSale` + invoice. Staff read-only via `GET /wifi-sales`. WhatsApp tetap sebagai fallback.
 - [x] **STF-TIP-FLOW:** T-1 tenant acknowledge + notif staff + endpoint `POST /tickets/:id/tip-confirm` (STAFF konfirmasi Sudah/Belum) + notif balik ke tenant + idempotency `TIP_CONFIRMED`. Sisa: UI konfirmasi di portal staff + auto-grace sweeper 2 hari.
 - [x] **STF-THEME:** standarkan header, tabs, empty/loading, mobile z-index di route staff — CSS `staff-panel-card`, `staff-meter-table`, z-index mobile.
 - [~] **STF-THEME screenshot:** `ui-shots/shoot-staff.mjs` desktop sudah ada; sisa tambah/rapikan mobile capture.
@@ -500,6 +499,10 @@ Output akhir:
 ## Changelog Ringkas
 
 > Dipadatkan dari `docs/CHANGELOG.md`: header tanggal dipertahankan, tiap entry hanya menyimpan 1-2 poin outcome. Detail verbose tetap ada di source lama.
+
+### 2026-06-19 — refactor(OWN-ROLE-TABS-MODE): mode eksplisit di RoleWorkspaceTabs, buang hack role
+- `RoleWorkspaceTabs` terima `role` asli + `ownerViewMode`; pilih tab set + base path internal (OWNER admin → `/admin-dashboard`, ADMIN → `/dashboard`). `AppLayout` tak lagi mengoper `role='ADMIN'` palsu / `adminDashboardPath`. aria-label ikut `isAdminView`.
+- Gate: FE build 109 chunk, PWA verify PASS.
 
 ### 2026-06-19 — feat(OWN-STATUS-CARDS): strip status kokpit owner + regroup sidebar
 - **Status Kokpit:** 4 kartu clickable di `OwnerDashboardPage` — okupansi (kpi), tunggakan (overdue+outstanding count+Rp), meter belum dicatat (best-effort `computeMeterDue`: stay aktif vs reading bulan terpilih), kesiapan go-live (`fetchAccountingReadiness` score/ready). Query readiness+meter best-effort (tak memblok dashboard, fallback "—").

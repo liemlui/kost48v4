@@ -23,19 +23,23 @@ const OWNER_TABS = [
   { id: 'settings', label: 'Pengaturan', to: '/settings', match: (path: string) => path.startsWith('/settings') || path.startsWith('/users') || path.startsWith('/announcements') },
 ];
 
-export default function RoleWorkspaceTabs({ role, adminDashboardPath = '/dashboard' }: { role?: string; adminDashboardPath?: string }) {
+// OWN-ROLE-TABS-MODE: mode eksplisit, bukan hack role. OWNER + ownerViewMode='admin'
+// memakai tab admin di route nyata `/admin-dashboard`; ADMIN memakai `/dashboard`.
+export default function RoleWorkspaceTabs({ role, ownerViewMode }: { role?: string; ownerViewMode?: 'owner' | 'admin' }) {
   const location = useLocation();
   const navigate = useNavigate();
-  const tabs = useMemo(
-    () => (role === 'ADMIN' ? buildAdminTabs(adminDashboardPath) : role === 'OWNER' ? OWNER_TABS : []),
-    [role, adminDashboardPath],
-  );
+  const isAdminView = role === 'ADMIN' || (role === 'OWNER' && ownerViewMode === 'admin');
+  const tabs = useMemo(() => {
+    if (role === 'OWNER') return ownerViewMode === 'admin' ? buildAdminTabs('/admin-dashboard') : OWNER_TABS;
+    if (role === 'ADMIN') return buildAdminTabs('/dashboard');
+    return [];
+  }, [role, ownerViewMode]);
   const searchParams = useMemo(() => new URLSearchParams(location.search), [location.search]);
 
   if (!tabs.length) return null;
 
   return (
-    <nav className="role-workspace-tabs" aria-label={`Navigasi workspace ${role === 'OWNER' ? 'owner' : 'admin'}`}>
+    <nav className="role-workspace-tabs" aria-label={`Navigasi workspace ${isAdminView ? 'admin' : 'owner'}`}>
       <span className="role-workspace-tabs-label">Menu area</span>
       {tabs.map((tab) => {
         const active = tab.match(location.pathname, searchParams);

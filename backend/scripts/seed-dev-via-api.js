@@ -91,6 +91,17 @@ const summary = { rooms: 0, tenants: 0, onboarded: 0, stays: 0, rentInvoices: 0,
   }
   console.log(`✓ ${summary.rooms} kamar`);
 
+  // 2b) STF-GUDANG-2: tambah fasilitas "Kipas Angin" di SETIAP kamar (seeder minQty dinamis)
+  let fanCount = 0;
+  for (const code of allCodes) {
+    const r = await api('POST', `/rooms/${roomId[code]}/facilities`, {
+      name: 'Kipas Angin', quantity: 1, category: 'pendingin', publicVisible: true,
+    }, { optional: true });
+    if (r) fanCount++;
+  }
+  summary.facilities = fanCount;
+  console.log(`✓ ${fanCount} fasilitas Kipas Angin`);
+
   // 3) Per penghuni: tenant → portal access → check-in → invoice sewa → pembayaran
   const stays = [];
   for (let i = 0; i < NAMES.length; i++) {

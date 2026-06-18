@@ -34,6 +34,12 @@ client.interceptors.request.use((config) => {
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
+
+  // OWN-BACKEND-MODE: kirim mode tampilan owner (owner/admin) untuk audit log/guard backend.
+  const ownerViewMode = localStorage.getItem('kost48_owner_view_mode');
+  if (ownerViewMode === 'owner' || ownerViewMode === 'admin') {
+    config.headers['X-Owner-View-Mode'] = ownerViewMode;
+  }
   return config;
 });
 

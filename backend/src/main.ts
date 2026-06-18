@@ -8,6 +8,7 @@ import { existsSync } from 'fs';
 import { AppModule } from './app.module';
 import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
 import { RequestIdInterceptor } from './common/interceptors/request-id.interceptor';
+import { OwnerViewModeInterceptor } from './common/interceptors/owner-view-mode.interceptor';
 import { ResponseEnvelopeInterceptor } from './common/interceptors/response-envelope.interceptor';
 import { PrismaService } from './prisma/prisma.service';
 import express, { NextFunction, Request, Response } from 'express';
@@ -35,7 +36,7 @@ async function bootstrap() {
   app.use(compression());
   app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true, forbidNonWhitelisted: true, disableErrorMessages: isProduction }));
   app.useGlobalFilters(new AllExceptionsFilter());
-  app.useGlobalInterceptors(new RequestIdInterceptor(), new ResponseEnvelopeInterceptor());
+  app.useGlobalInterceptors(new RequestIdInterceptor(), new OwnerViewModeInterceptor(), new ResponseEnvelopeInterceptor());
 
   // ── CORS ──────────────────────────────────────────────────────────────────
   if (isProduction) {

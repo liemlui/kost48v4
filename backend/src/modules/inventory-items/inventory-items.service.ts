@@ -76,7 +76,17 @@ export class InventoryItemsService {
     return Number.isInteger(numeric) ? String(numeric) : String(numeric).replace(/\.?0+$/, '');
   }
 
-  private decorateInventoryItem(item: any) {
+  // STF-GUDANG-2: mapping nama fasilitas → item gudang (pencocokan fuzzy).
+  private matchInventoryToFacilities(itemName: string, facilityCounts: Map<string, number>): number {
+    const lower = itemName.toLowerCase();
+    for (const [facilityName, count] of facilityCounts) {
+      const fl = facilityName.toLowerCase();
+      if (lower.includes(fl) || fl.includes(lower)) return count;
+    }
+    return 0;
+  }
+
+  private decorateInventoryItem(item: any, facilityCounts?: Map<string, number>) {
     const roomItems = Array.isArray(item.roomItems) ? item.roomItems : [];
     const warehouseQty = Number(item.qtyOnHand ?? 0);
     const roomSummaries = roomItems
@@ -90,11 +100,36 @@ export class InventoryItemsService {
       ...roomSummaries,
     ].filter(Boolean);
 
+    // STF-GUDANG-2: hitung suggestedMinQty dari jumlah kamar dengan fasilitas terkait.
+    let suggestedMinQtyRupiah: number | undefined;
+    let facilityCount: number | undefined;
+    if (facilityCounts && facilityCounts.size > 0) {
+      const count = this.matchInventoryToFacilities(String(item.name ?? ''), facilityCounts);
+      if (count > 0) {
+        facilityCount = count;
+        suggestedMinQtyRupiah = count;
+      }
+    }
+
     return {
       ...item,
       positionSummary: positionParts.length ? positionParts.join(' · ') : 'Tidak ada stok aktif',
       locationSummary: positionParts.length ? positionParts.join(' · ') : 'Tidak ada stok aktif',
+      ...(suggestedMinQtyRupiah != null ? { suggestedMinQtyRupiah, facilityCount } : {}),
     };
+  }
+
+  private async loadFacilityCounts(): Promise<Map<string, number>> {
+    const rows = await this.prisma.roomFacility.groupBy({
+      by: ['name'],
+      _count: { roomId: true },
+      where: { room: { isActive: true } },
+    });
+    const map = new Map<string, number>();
+    for (const row of rows) {
+      if (row.name) map.set(row.name, Number(row._count?.roomId ?? 0));
+    }
+    return map;
   }
 
   private async ensureOpeningStockSyncedTx(tx: any, itemId: number, expectedQty: number) {
@@ -121,7 +156,7 @@ export class InventoryItemsService {
         typeof query.isActive === 'string' ? { isActive: query.isActive === 'true' } : {},
       ],
     };
-    const [rawItems, totalItems] = await this.prisma.$transaction([
+    const [rawItems, totalItems, facilityCounts] = await Promise.all([
       this.prisma.inventoryItem.findMany({
         where,
         skip,
@@ -130,11 +165,12 @@ export class InventoryItemsService {
         include: { roomItems: { include: { room: true }, orderBy: { roomId: 'asc' } } },
       }),
       this.prisma.inventoryItem.count({ where }),
+      this.loadFacilityCounts(),
     ]);
     const filteredItems = query.lowStockOnly === 'true'
       ? rawItems.filter((item) => Number(item.qtyOnHand) <= Number(item.minQty))
       : rawItems;
-    const items = filteredItems.map((item) => this.decorateInventoryItem(item));
+    const items = filteredItems.map((item) => this.decorateInventoryItem(item, facilityCounts));
     return { items, meta: buildMeta(page, limit, totalItems) };
   }
 
