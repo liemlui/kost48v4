@@ -140,6 +140,25 @@ export class StaysService {
     });
     if (!tenant) throw new NotFoundException("Tenant tidak ditemukan");
 
+    // STF-ROLE-SCOPE: STAFF dilarang override harga/tarif — pakai default kamar.
+    if (actor.role === UserRole.STAFF) {
+      if (dto.agreedRentAmountRupiah != null) {
+        throw new ForbiddenException(
+          'Staf tidak boleh override harga sewa. Biaya akan dihitung dari tarif kamar.',
+        );
+      }
+      if (dto.electricityTariffPerKwhRupiah != null) {
+        throw new ForbiddenException(
+          'Staf tidak boleh override tarif listrik. Gunakan tarif default kamar.',
+        );
+      }
+      if (dto.waterTariffPerM3Rupiah != null) {
+        throw new ForbiddenException(
+          'Staf tidak boleh override tarif air. Gunakan tarif default kamar.',
+        );
+      }
+    }
+
     // F3-17: gate aktivasi kamar — bila KTP_ACTIVATION_GATE_ENABLED=true, tenant
     // wajib KTP terverifikasi sebelum check-in. Default OFF agar tak mengganggu
     // alur sampai onboarding KTP terpasang penuh; owner aktifkan saat siap.

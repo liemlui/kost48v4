@@ -15,6 +15,10 @@ import {
   YAxis,
 } from 'recharts';
 import { fetchOwnerDashboard, type OwnerDashboardTrendMonth } from '../../api/finance';
+import { fetchAccountingReadiness } from '../../api/accounting';
+import { listStays } from '../../api/stays';
+import { listResource } from '../../api/resources';
+import type { MeterReading } from '../../types';
 import { createBusinessNarrative } from '../../api/ai';
 import AiAssistButton from '../../components/ai/AiAssistButton';
 
@@ -45,6 +49,33 @@ function useOwnerViewMode() {
 function currentYearMonth() {
   const d = new Date();
   return { year: d.getFullYear(), month: d.getMonth() + 1 };
+}
+
+function isoDay(year: number, month: number, day: number) {
+  return `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+}
+
+type MeterDueSummary = { occupied: number; recorded: number; due: number };
+
+/**
+ * OWN-STATUS-CARDS: hitung kamar terisi yang BELUM dicatat meter pada bulan terpilih.
+ * Berbasis stay aktif (kamar terisi) vs reading bulan tsb (room unik). Best-effort:
+ * dipakai sebagai sinyal kokpit, daftar lengkap tetap di /meter-readings.
+ */
+async function computeMeterDue(ym: { year: number; month: number }): Promise<MeterDueSummary> {
+  const lastDay = new Date(ym.year, ym.month, 0).getDate();
+  const from = isoDay(ym.year, ym.month, 1);
+  const to = isoDay(ym.year, ym.month, lastDay);
+  const [stays, readings] = await Promise.all([
+    listStays({ status: 'ACTIVE', limit: 200 }),
+    listResource<MeterReading>('/meter-readings', { from, to, limit: 1000 }),
+  ]);
+  const occupiedRoomIds = new Set(
+    (stays.items ?? []).filter((stay) => stay.room && stay.room.id != null).map((stay) => stay.room!.id),
+  );
+  const recordedRoomIds = new Set((readings.items ?? []).map((reading) => reading.roomId));
+  const recorded = [...recordedRoomIds].filter((roomId) => occupiedRoomIds.has(roomId)).length;
+  return { occupied: occupiedRoomIds.size, recorded, due: Math.max(0, occupiedRoomIds.size - recorded) };
 }
 
 function monthLabel(ym: { year: number; month: number }) {
@@ -211,6 +242,26 @@ function OwnerKpiCard({
   );
 }
 
+type StatusCard = { key: string; label: string; value: string; helper: string; route: string; tone: string };
+
+/** OWN-STATUS-CARDS: kartu status kokpit owner — okupansi, tunggakan, meter due, go-live readiness. */
+function OwnerStatusStrip({ cards, onNavigate }: { cards: StatusCard[]; onNavigate: (route: string) => void }) {
+  return (
+    <section className="owner-cockpit-status mb-3" aria-label="Status kokpit owner">
+      <span className="owner-section-kicker">Status kokpit</span>
+      <div className="owner-action-strip mt-1">
+        {cards.map((card) => (
+          <button key={card.key} type="button" className={`owner-action-item owner-action-${card.tone}`} onClick={() => onNavigate(card.route)}>
+            <span>{card.label}</span>
+            <strong>{card.value}</strong>
+            <small>{card.helper}</small>
+          </button>
+        ))}
+      </div>
+    </section>
+  );
+}
+
 function OwnerActionStrip({
   signals,
   onNavigate,
@@ -257,10 +308,69 @@ export default function OwnerDashboardPage() {
     retry: 1,
   });
 
+  // OWN-STATUS-CARDS: sumber data tambahan untuk kartu status kokpit (best-effort, tak memblok dashboard utama).
+  const readinessQuery = useQuery({
+    queryKey: ['accounting-readiness'],
+    queryFn: fetchAccountingReadiness,
+    staleTime: 300_000,
+    retry: 1,
+  });
+  const meterDueQuery = useQuery({
+    queryKey: ['owner-meter-due', ym],
+    queryFn: () => computeMeterDue(ym),
+    staleTime: 120_000,
+    retry: 1,
+  });
+
   const data = dashboard.data;
   const trendData = data?.trendMonths ?? data?.trend6Months ?? [];
   const grade = data ? gradeBadge(data.grade) : null;
   const selectedPeriodLabel = monthLabel(ym);
+
+  const statusCards: StatusCard[] = useMemo(() => {
+    if (!data) return [];
+    const overdue = data.signals.find((signal) => signal.type === 'overdue');
+    const outstanding = data.signals.find((signal) => signal.type === 'outstanding');
+    const arrearsCount = (overdue?.count ?? 0) + (outstanding?.count ?? 0);
+    const arrearsRupiah = (overdue?.totalRupiah ?? 0) + (outstanding?.totalRupiah ?? 0);
+    const occupancy = data.kpi.occupancyRatePercent;
+    const meter = meterDueQuery.data;
+    const readiness = readinessQuery.data;
+    return [
+      {
+        key: 'occupancy',
+        label: 'Okupansi',
+        value: `${occupancy}%`,
+        helper: 'Kamar terisi periode ini',
+        route: '/reports',
+        tone: occupancy >= 70 ? 'good' : occupancy >= 40 ? 'watch' : 'risk',
+      },
+      {
+        key: 'arrears',
+        label: 'Tunggakan',
+        value: `${arrearsCount}`,
+        helper: arrearsCount ? `Rp ${formatRupiah(arrearsRupiah)} belum lunas` : 'Tidak ada tagihan tertunggak',
+        route: '/invoices',
+        tone: overdue?.count ? 'risk' : arrearsCount ? 'watch' : 'good',
+      },
+      {
+        key: 'meter-due',
+        label: 'Meter belum dicatat',
+        value: meterDueQuery.isLoading ? '…' : meterDueQuery.isError ? '—' : `${meter?.due ?? 0}`,
+        helper: meter ? `${meter.recorded}/${meter.occupied} kamar tercatat` : 'Catat siklus meter bulan ini',
+        route: '/meter-readings',
+        tone: (meter?.due ?? 0) > 0 ? 'watch' : 'good',
+      },
+      {
+        key: 'readiness',
+        label: 'Kesiapan Go-Live',
+        value: readinessQuery.isLoading ? '…' : readinessQuery.isError ? '—' : `${readiness?.score ?? 0}%`,
+        helper: readiness ? (readiness.ready ? 'Akuntansi siap' : `${readiness.missing.length} gate tersisa`) : 'Kesiapan akuntansi',
+        route: '/finance/accounting-setup',
+        tone: readiness?.ready ? 'good' : (readiness?.score ?? 0) >= 60 ? 'watch' : 'risk',
+      },
+    ];
+  }, [data, meterDueQuery.data, meterDueQuery.isLoading, meterDueQuery.isError, readinessQuery.data, readinessQuery.isLoading, readinessQuery.isError]);
 
   const handleChange = (field: 'year' | 'month', val: string) => {
     const num = parseInt(val, 10);
@@ -332,6 +442,8 @@ export default function OwnerDashboardPage() {
               </div>
             </section>
           ) : null}
+
+          {statusCards.length ? <OwnerStatusStrip cards={statusCards} onNavigate={navigate} /> : null}
 
           <OwnerActionStrip signals={data.signals} onNavigate={navigate} />
 

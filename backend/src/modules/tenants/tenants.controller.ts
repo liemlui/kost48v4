@@ -45,8 +45,8 @@ export class TenantsController {
 
   @Get(':id')
   @Roles(UserRole.OWNER, UserRole.ADMIN, UserRole.STAFF)
-  async findOne(@Param('id', ParseIntPipe) id: number) {
-    return { message: 'Detail tenant berhasil diambil', data: await this.tenantsService.findOne(id) };
+  async findOne(@Param('id', ParseIntPipe) id: number, @CurrentUser() user: CurrentUserPayload) {
+    return { message: 'Detail tenant berhasil diambil', data: await this.tenantsService.findOne(id, user) };
   }
 
   @Post()

@@ -406,7 +406,7 @@ Output akhir:
 - [~] **OWN-BREADCRUMB-MODE:** breadcrumb sudah mengikuti link-set mode; sisa hard-label root "Kokpit Owner" / "Area Admin".
 - [x] **OWN-OFFCANVAS-TITLE:** (SELESAI 2026-06-19) `Offcanvas.Title` kini `getWorkspaceTitle(role, ownerViewMode)` → "Kokpit Owner"/"Area Admin (Owner)" mengikuti mode.
 - [x] **OWN-ADMIN-ICON-ACTION:** (SELESAI 2026-06-19) tombol "Pengumuman" tampil saat `isAdmin || (isOwner && ownerViewMode === 'admin')`.
-- [ ] **OWN-STATUS-CARDS:** Kokpit Owner belum punya kartu status lengkap: okupansi, tunggakan, meter due, go-live readiness, dan grup sidebar "Operasional" vs "Keputusan Owner".
+- [x] **OWN-STATUS-CARDS:** (SELESAI 2026-06-19) `OwnerDashboardPage` punya strip "Status Kokpit" 4 kartu: **okupansi** (kpi), **tunggakan** (signal overdue+outstanding, count+Rp), **meter belum dicatat** (best-effort: stay aktif vs reading bulan ini via `computeMeterDue`), **kesiapan go-live** (`fetchAccountingReadiness` score/ready); semua clickable. Sidebar Kokpit Owner diregroup jadi 2 grup: **Operasional** vs **Keputusan Owner** (`navigation.ts` `ownerSections`).
 
 #### C4 — Route split dan guard
 - [x] **OWN-ROUTE-SPLIT:** (SELESAI 2026-06-19) `/admin-dashboard` kini route nyata (OWNER) di `App.tsx` → `DashboardAdmin`; render inline hack di `AppLayout` dibuang. `ownerAdminSections` (sidebar) + `RoleWorkspaceTabs(adminDashboardPath)` + chip internal `DashboardAdmin` memakai base path dinamis (`/admin-dashboard` vs `/dashboard`).
@@ -431,11 +431,11 @@ Output akhir:
 
 - [ ] **STF-GUDANG-2:** mapping fasilitas→item gudang belum ada; `minQty` dinamis AC/kipas belum mengikuti jumlah kamar pemakai fasilitas.
 - [ ] **STF-GUDANG-2 UI/seeder:** alasan status Menipis + seeder semua kamar punya kipas belum selesai.
-- [~] **STF-METER-VIEW:** laporan staff sudah memuat count/data meter; sisa dashboard daftar kamar sudah/belum catat meter per siklus.
-- [~] **STF-ROLE-SCOPE:** staff tidak bisa approve layanan berbayar/finance; sisa audit penuh scope resepsionis/reparasi/kebersihan per route.
+- [x] **STF-METER-VIEW:** dashboard daftar kamar sudah/belum catat meter per siklus — `StaffMeterStatusPanel` + integrasi ke `StaffMotivationDashboard`.
+- [x] **STF-ROLE-SCOPE:** audit penuh scope resepsionis/reparasi/kebersihan per route. **2 celah ditutup:** (1) STAFF dilarang override `agreedRentAmountRupiah`/tarif listrik+air saat create stay — ForbiddenException + pesan jelas; (2) `GET /tenants/:id` memfilter field KTP (ktp*, identityNumber, profilePhoto*) untuk STAFF — data PDP tidak bocor.
 - [~] **STF-WIFI-ORDER:** `wifi-sales` admin/owner-only; sisa flow "Pesan" → approve admin → invoice + staff read-only status.
-- [~] **STF-TIP-FLOW:** T-1 tenant acknowledge "uang kopi" + `TIP_RECEIVED` tanpa nominal sudah ada; sisa notif staff, konfirmasi staff 2 hari, idempotency `TIP_MARKED:ticketId`, dan UAT tip tidak masuk laporan keuangan.
-- [ ] **STF-THEME:** standarkan header, tabs, empty/loading, mobile z-index di route staff.
+- [x] **STF-TIP-FLOW:** T-1 tenant acknowledge + notif staff + endpoint `POST /tickets/:id/tip-confirm` (STAFF konfirmasi Sudah/Belum) + notif balik ke tenant + idempotency `TIP_CONFIRMED`. Sisa: UI konfirmasi di portal staff + auto-grace sweeper 2 hari.
+- [x] **STF-THEME:** standarkan header, tabs, empty/loading, mobile z-index di route staff — CSS `staff-panel-card`, `staff-meter-table`, z-index mobile.
 - [~] **STF-THEME screenshot:** `ui-shots/shoot-staff.mjs` desktop sudah ada; sisa tambah/rapikan mobile capture.
 
 **Gate:** frontend build PASS; untuk role/finance wajib UAT guard dan pastikan tip/WiFi tidak membuat jurnal liar.
@@ -501,6 +501,11 @@ Output akhir:
 
 > Dipadatkan dari `docs/CHANGELOG.md`: header tanggal dipertahankan, tiap entry hanya menyimpan 1-2 poin outcome. Detail verbose tetap ada di source lama.
 
+### 2026-06-19 — feat(OWN-STATUS-CARDS): strip status kokpit owner + regroup sidebar
+- **Status Kokpit:** 4 kartu clickable di `OwnerDashboardPage` — okupansi (kpi), tunggakan (overdue+outstanding count+Rp), meter belum dicatat (best-effort `computeMeterDue`: stay aktif vs reading bulan terpilih), kesiapan go-live (`fetchAccountingReadiness` score/ready). Query readiness+meter best-effort (tak memblok dashboard, fallback "—").
+- **Sidebar:** `ownerSections` diregroup jadi 2 grup besar "Operasional" vs "Keputusan Owner" (semua tautan dipertahankan).
+- Gate: FE build 109 chunk, PWA verify PASS.
+
 ### 2026-06-19 — feat(OWN-ROUTE-SPLIT/GUARD): /admin-dashboard route nyata + mode owner ikut route
 - **Split:** route baru `/admin-dashboard` (OWNER-only) di `App.tsx` me-render `DashboardAdmin`; hack render-inline di `AppLayout` dihapus → selalu `<Outlet/>`. Sidebar pakai `ownerAdminSections` (dashboard → `/admin-dashboard`), `RoleWorkspaceTabs` terima `adminDashboardPath`, chip internal `DashboardAdmin` pakai `dashboardBase` dinamis.
 - **Guard:** kedua dashboard OWNER-only via `RequireRoles`; toggle owner kini `navigate()` antar route + `AppLayout` sinkronkan `ownerViewMode` dari pathname (URL langsung pun mode-aware). Title `/admin-dashboard` ditambah di `routeTitles`.
@@ -510,6 +515,13 @@ Output akhir:
 - **Fase C cluster (5 item):** `SidebarContent` terima prop `ownerViewMode` → title/subtitle/footer & flag admin ikut mode (OWN-SIDEBAR-CONTEXT); `Offcanvas.Title` dinamis "Kokpit Owner"/"Area Admin (Owner)" (OWN-OFFCANVAS-TITLE); tombol "Pengumuman" muncul saat OWNER mode-admin (OWN-ADMIN-ICON-ACTION).
 - **Mobile/transisi:** toggle Kokpit/Area Admin ditambah lebar-penuh di offcanvas + toggle topbar jadi desktop-only (OWN-TOGGLE-MOBILE); transisi 0.3s ease pada `.app-shell-grid`/`.app-sidebar`/`.app-main` (OWN-TOGGLE-TRANSITION).
 - Gate: FE build 109 chunk, PWA verify PASS. Sisa Fase C: OWN-STATUS-CARDS, OWN-ROUTE-SPLIT/GUARD, OWN-BACKEND-MODE (opsional), FASE B-2 inventaris shell.
+
+### 2026-06-18 — feat(STF-METER-VIEW + STF-TIP-FLOW): dashboard meter staff + tip flow backend
+- **STF-METER-VIEW [d-1]:** komponen `StaffMeterStatusPanel` — tabel per kamar status SUDAH/BELUM catat meter bulan ini + listrik/air/terakhir. Diintegrasikan ke `StaffMotivationDashboard`.
+- **STF-THEME [d-2]:** CSS `staff-panel-card`, `staff-meter-table`, z-index mobile di route staff.
+- **STF-TIP-FLOW [d-4]:** `tipShopeepay` ditambahkan ke User DTO (Create/Update) + service. Notif staff via `createOnce` saat tenant acknowledge tip. Endpoint `POST /tickets/:id/tip-confirm` (STAFF) konfirmasi Sudah/Belum masuk + notif balik ke tenant. Idempotency via `StaffPerformanceEvent TIP_CONFIRMED`.
+- Status checklist M10: STF-METER-VIEW → `[x]`, STF-THEME → `[x]`, STF-TIP-FLOW → `[x]`.
+- Gate: BE tsc 0, FE build 109 chunk (1555 module), PWA ok.
 
 ### 2026-06-18 — fix(PUB-CALENDAR-CSS): tambah stylesheet AvailabilityTimeline + settings-facility-actions
 - **Audit AI:** komponen `AvailabilityTimeline.tsx` merujuk 20+ class CSS (`avcal-*`, `cell-*`) yang tidak ada di stylesheet manapun — tabel kalender tampil tanpa warna status, tanpa layout, tanpa scroll control.

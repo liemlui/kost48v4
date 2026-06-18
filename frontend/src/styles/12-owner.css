@@ -314,6 +314,11 @@
   font-size: 0.8rem;
 }
 
+.owner-cockpit-status > .owner-section-kicker {
+  display: block;
+  margin-bottom: 0.2rem;
+}
+
 .owner-action-strip {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));

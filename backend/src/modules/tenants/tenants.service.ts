@@ -114,7 +114,7 @@ export class TenantsService {
     return { items: transformedItems, meta: buildMeta(page, limit, totalItems) };
   }
 
-  async findOne(id: number) {
+  async findOne(id: number, actor?: CurrentUserPayload) {
     const item = await this.prisma.tenant.findUnique({
       where: { id },
       include: {
@@ -130,6 +130,24 @@ export class TenantsService {
       },
     });
     if (!item) throw new NotFoundException('Tenant tidak ditemukan');
+
+    // STF-ROLE-SCOPE: STAFF tidak boleh melihat data KTP/PDP (identityNumber, ktp*, ktpVerified*).
+    if (actor?.role === UserRole.STAFF) {
+      (item as any).identityNumber = undefined;
+      (item as any).ktpImageUrl = undefined;
+      (item as any).ktpImageFileKey = undefined;
+      (item as any).ktpImageOriginalFilename = undefined;
+      (item as any).ktpImageMimeType = undefined;
+      (item as any).ktpImageFileSizeBytes = undefined;
+      (item as any).ktpVerifiedAt = undefined;
+      (item as any).ktpVerifiedById = undefined;
+      (item as any).ktpDeletedAt = undefined;
+      (item as any).profilePhotoUrl = undefined;
+      (item as any).profilePhotoFileKey = undefined;
+      (item as any).profilePhotoOriginalFilename = undefined;
+      (item as any).profilePhotoMimeType = undefined;
+      (item as any).profilePhotoFileSizeBytes = undefined;
+    }
 
     const activeStay = item.stays[0];
     return this.attachPortalSummary(
