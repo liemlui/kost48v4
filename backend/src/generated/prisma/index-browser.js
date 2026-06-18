@@ -237,6 +237,7 @@ exports.Prisma.RoomFacilityScalarFieldEnum = {
   publicVisible: 'publicVisible',
   condition: 'condition',
   note: 'note',
+  inventoryItemId: 'inventoryItemId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };

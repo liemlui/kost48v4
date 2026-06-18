@@ -685,21 +685,25 @@ model Room {
 }
 
 model RoomFacility {
-  id        Int      @id @default(autoincrement())
-  roomId    Int
-  name      String
-  quantity  Int      @default(1)
-  category  String?
-  publicVisible  Boolean  @default(true)
-  condition String?
-  note      String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id              Int      @id @default(autoincrement())
+  roomId          Int
+  name            String
+  quantity        Int      @default(1)
+  category        String?
+  publicVisible   Boolean  @default(true)
+  condition       String?
+  note            String?
+  // STF-GUDANG-2: mapping eksak fasilitas → item gudang (minQty dinamis).
+  inventoryItemId Int?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 
-  room      Room     @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  room          Room           @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  inventoryItem InventoryItem? @relation(fields: [inventoryItemId], references: [id], onDelete: SetNull)
 
   @@index([roomId])
   @@index([roomId, publicVisible])
+  @@index([inventoryItemId])
 }
 
 model Stay {
@@ -1227,6 +1231,7 @@ model InventoryItem {
   fieldReportsAsItem StaffFieldReport[] @relation("StaffFieldReportInventoryItem")
   fieldReportsAsRequestedItem StaffFieldReport[] @relation("StaffFieldReportRequestedInventoryItem")
   fixedAssets FixedAsset[]
+  roomFacilities RoomFacility[]
 
   @@index([name])
   @@index([category])

@@ -76,17 +76,7 @@ export class InventoryItemsService {
     return Number.isInteger(numeric) ? String(numeric) : String(numeric).replace(/\.?0+$/, '');
   }
 
-  // STF-GUDANG-2: mapping nama fasilitas → item gudang (pencocokan fuzzy).
-  private matchInventoryToFacilities(itemName: string, facilityCounts: Map<string, number>): number {
-    const lower = itemName.toLowerCase();
-    for (const [facilityName, count] of facilityCounts) {
-      const fl = facilityName.toLowerCase();
-      if (lower.includes(fl) || fl.includes(lower)) return count;
-    }
-    return 0;
-  }
-
-  private decorateInventoryItem(item: any, facilityCounts?: Map<string, number>) {
+  private decorateInventoryItem(item: any, facilityCounts?: Map<number, number>) {
     const roomItems = Array.isArray(item.roomItems) ? item.roomItems : [];
     const warehouseQty = Number(item.qtyOnHand ?? 0);
     const roomSummaries = roomItems
@@ -100,12 +90,12 @@ export class InventoryItemsService {
       ...roomSummaries,
     ].filter(Boolean);
 
-    // STF-GUDANG-2: hitung suggestedMinQty dari jumlah kamar dengan fasilitas terkait.
+    // STF-GUDANG-2: hitung suggestedMinQty dari FK inventoryItemId di RoomFacility.
     let suggestedMinQtyRupiah: number | undefined;
     let facilityCount: number | undefined;
-    if (facilityCounts && facilityCounts.size > 0) {
-      const count = this.matchInventoryToFacilities(String(item.name ?? ''), facilityCounts);
-      if (count > 0) {
+    if (facilityCounts) {
+      const count = facilityCounts.get(Number(item.id));
+      if (count != null && count > 0) {
         facilityCount = count;
         suggestedMinQtyRupiah = count;
       }
@@ -119,15 +109,18 @@ export class InventoryItemsService {
     };
   }
 
-  private async loadFacilityCounts(): Promise<Map<string, number>> {
+  // STF-GUDANG-2: hitung jumlah kamar AKTIF per inventoryItemId via FK langsung.
+  private async loadFacilityCounts(): Promise<Map<number, number>> {
     const rows = await this.prisma.roomFacility.groupBy({
-      by: ['name'],
+      by: ['inventoryItemId'],
       _count: { roomId: true },
-      where: { room: { isActive: true } },
+      where: { inventoryItemId: { not: null }, room: { isActive: true } },
     });
-    const map = new Map<string, number>();
+    const map = new Map<number, number>();
     for (const row of rows) {
-      if (row.name) map.set(row.name, Number(row._count?.roomId ?? 0));
+      if (row.inventoryItemId != null) {
+        map.set(row.inventoryItemId, Number(row._count?.roomId ?? 0));
+      }
     }
     return map;
   }

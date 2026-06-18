@@ -1,3 +1,14 @@
+/* FASE B-2: shell Inventaris terpadu */
+.inventory-shell-head {
+  margin-bottom: 0.6rem;
+}
+.inventory-shell-head .owner-section-kicker {
+  display: block;
+}
+.inventory-shell .segmented-tabs {
+  margin-bottom: 0.25rem;
+}
+
 /* V5.8 Public booking smoke polish */
 .booking-summary-alert {
   border: 1px solid rgba(37, 99, 235, 0.14);

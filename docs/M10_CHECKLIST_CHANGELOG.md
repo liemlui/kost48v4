@@ -18,7 +18,7 @@
 |------|---------|---------|---------|
 | Fase A — Pra-Go-Live | sebagian | F1-12 🧑 | Kode inti siap; publish nyata menunggu server/domain/env owner |
 | Fase B — Publik & Tenant | sebagian | foto, profil | Layanan tambahan, minat layanan, smart booking, kalender, dan meter jadwal sudah selesai fungsional |
-| Fase C — Owner/Admin | sebagian | mode-aware UI, route split, inventaris shell | Layout dasar/sidebar/breadcrumb sudah selesai |
+| Fase C — Owner/Admin | **selesai** | — | Mode-aware UI, route split/guard, status cards, inventaris shell SEMUA selesai (2026-06-19) |
 | Fase D — Staff & Gudang | sebagian | gudang dinamis, staff meter, WiFi/tip, polish staff | Batas finance staff sudah sebagian aman |
 | Fase E — Polish & Teknis | sebagian | TEN-GAMIF, refactor, test lanjutan | MKT-5 selesai fungsional; backlog teknis diserap ke M10 |
 
@@ -322,7 +322,7 @@ Output akhir:
 |------|------------|--------|---------------|---------|
 | **Fase A** | Pra-Go-Live Produksi | 🧑 blocked owner | M08, M02 | Deploy nyata menunggu server/domain/env owner |
 | **Fase B** | Publik & Portal Tenant | sebagian | M07, M05, M06 | Banyak selesai; sisa foto dan profil |
-| **Fase C** | Workspace Owner/Admin | sebagian | M02, M06 | Layout dasar selesai; sisa mode-aware + route split |
+| **Fase C** | Workspace Owner/Admin | **selesai** | M02, M06 | Mode-aware UI + route split/guard + status cards + inventaris shell selesai (2026-06-19) |
 | **Fase D** | Operasional Staff & Gudang | sebagian | M06, M04 | Staff/gudang/WiFi/tip/meter view |
 | **Fase E** | Polish, Gamifikasi & Teknis | sebagian | M06, M07, M09 | Ranking kebersihan + backlog teknis non-blocker |
 
@@ -412,10 +412,10 @@ Output akhir:
 - [x] **OWN-ROUTE-SPLIT:** (SELESAI 2026-06-19) `/admin-dashboard` kini route nyata (OWNER) di `App.tsx` → `DashboardAdmin`; render inline hack di `AppLayout` dibuang. `ownerAdminSections` (sidebar) + `RoleWorkspaceTabs(adminDashboardPath)` + chip internal `DashboardAdmin` memakai base path dinamis (`/admin-dashboard` vs `/dashboard`).
 - [x] **OWN-ROUTE-GUARD:** (SELESAI 2026-06-19) `/owner-dashboard` & `/admin-dashboard` OWNER-only via `RequireRoles`; toggle owner kini navigasi antar route, dan `AppLayout` sinkronkan `ownerViewMode` dari pathname (buka `/admin-dashboard` → mode admin, `/owner-dashboard` → mode owner).
 - [x] **OWN-ROLE-TABS-MODE:** (SELESAI 2026-06-19) `RoleWorkspaceTabs` kini terima `role` asli + prop eksplisit `ownerViewMode`, dan memilih tab set + base path internal (OWNER+admin → `/admin-dashboard`). Hack `role={...?'ADMIN':...}` + `adminDashboardPath` di `AppLayout` dibuang; aria-label ikut `isAdminView`.
-- [ ] **OWN-BACKEND-MODE** *(opsional)*: header `X-Owner-View-Mode` belum dikirim untuk audit log/guard backend.
+- [x] **OWN-BACKEND-MODE** *(opsional)*: (SELESAI 2026-06-19) FE kirim header `X-Owner-View-Mode` (owner/admin) via interceptor `api/client.ts`; BE `OwnerViewModeInterceptor` global melampirkan `request.ownerViewMode` + audit log saat OWNER aksi tulis dalam mode admin. Bonus: fix bentrok key localStorage (`OwnerDashboardPage` density → `kost48_owner_density`).
 
 #### C5 — Inventaris terpadu
-- [ ] **FASE B-2:** belum ada shell `SegmentedTabs` untuk Inventaris | Barang Kamar | Mutasi | Gudang, dan route lama belum redirect ke shell.
+- [x] **FASE B-2:** (SELESAI 2026-06-19) shell `InventoryShellPage` (route `/inventory`, OWNER/ADMIN) dengan `SegmentedTabs` 3 tab path-based: **Gudang** (`/inventory/gudang`) · **Barang Kamar** (`/inventory/barang-kamar`) · **Mutasi** (`/inventory/mutasi`). Route lama `/inventory-items`/`/room-items`/`/inventory-movements` redirect ke shell (mutasi preservasi query untuk prefill). `SimpleCrudPage` dapat `hideAreaMenu` (cegah dobel nav); sidebar/dashboard chips/RoleWorkspaceTabs/ResourceTable diarahkan ke shell. **Keputusan owner: 3 tab** (Inventaris=shell, "Gudang" staf = view terpisah Fase D).
 
 **Gate:** frontend build PASS, UAT route guard OWNER/ADMIN, dan cek mobile 390/834/1440 bila menyentuh layout.
 
@@ -499,6 +499,17 @@ Output akhir:
 ## Changelog Ringkas
 
 > Dipadatkan dari `docs/CHANGELOG.md`: header tanggal dipertahankan, tiap entry hanya menyimpan 1-2 poin outcome. Detail verbose tetap ada di source lama.
+
+### 2026-06-19 — feat(FASE B-2): shell Inventaris terpadu /inventory + redirect route lama
+- `InventoryShellPage` (route `/inventory`, OWNER/ADMIN) + `SegmentedTabs` 3 tab path-based: Gudang/Barang Kamar/Mutasi (nested routes render `ConfiguredResourcePage` dengan `hideAreaMenu`).
+- Route lama `/inventory-items|/room-items|/inventory-movements` → `<Navigate>` ke tab shell; mutasi preservasi query (prefill ASSIGN/OUT/RETURN dari ResourceTable & SimpleCrudPage tetap jalan).
+- Tautan OWNER/ADMIN diarahkan ke shell: sidebar activePaths, DashboardAdmin chips, RoleWorkspaceTabs match, areaMenu SimpleCrudPage, routeTitles. Keputusan owner: 3 tab.
+- Gate: FE build 110 chunk, PWA verify PASS.
+
+### 2026-06-19 — feat(OWN-BACKEND-MODE): header X-Owner-View-Mode + audit interceptor
+- FE: `api/client.ts` interceptor kirim `X-Owner-View-Mode: owner|admin` saat key view-mode valid. Fix bentrok localStorage: density Kokpit Owner pindah ke key `kost48_owner_density` (sebelumnya tertimpa toggle owner/admin).
+- BE: `OwnerViewModeInterceptor` global (sesudah RequestId) melampirkan `request.ownerViewMode` untuk guard/audit + log saat OWNER POST/PATCH/PUT/DELETE dalam mode admin. Tanpa ubah perilaku endpoint.
+- Gate: backend `tsc --noEmit` 0 · FE build 109 chunk, PWA verify PASS.
 
 ### 2026-06-19 — refactor(OWN-ROLE-TABS-MODE): mode eksplisit di RoleWorkspaceTabs, buang hack role
 - `RoleWorkspaceTabs` terima `role` asli + `ownerViewMode`; pilih tab set + base path internal (OWNER admin → `/admin-dashboard`, ADMIN → `/dashboard`). `AppLayout` tak lagi mengoper `role='ADMIN'` palsu / `adminDashboardPath`. aria-label ikut `isAdminView`.

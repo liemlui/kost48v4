@@ -11,6 +11,9 @@ export class CreateRoomFacilityDto {
 
   @IsOptional() @IsString() condition?: string;
 
+  // STF-GUDANG-2: mapping eksak fasilitas → barang gudang.
+  @IsOptional() @IsInt() inventoryItemId?: number;
+
   @IsOptional() @IsString() note?: string;
 }
 
@@ -24,6 +27,9 @@ export class UpdateRoomFacilityDto {
   @IsOptional() @IsBoolean() publicVisible?: boolean;
 
   @IsOptional() @IsString() condition?: string;
+
+  // STF-GUDANG-2: mapping eksak fasilitas → barang gudang.
+  @IsOptional() @IsInt() inventoryItemId?: number;
 
   @IsOptional() @IsString() note?: string;
 }

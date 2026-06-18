@@ -862,9 +862,9 @@ export default function AdminDashboard() {
     { id: 'staff-performance', icon: '📈', label: 'Kinerja', helper: 'Detail kinerja dan ulasan staff', to: '/staff-performance', count: undefined, tone: 'info' },
   ] : activeArea === 'rooms' ? [
     { id: 'rooms-list', icon: '🏘️', label: 'Kamar', helper: 'Status kamar dan keterisian', to: `${dashboardBase}?area=rooms`, count: rooms.length, tone: 'info', active: true },
-    { id: 'rooms-room-items', icon: '🪑', label: 'Barang Kamar', helper: 'Inventaris per kamar', to: '/room-items', count: undefined, tone: 'info' },
-    { id: 'rooms-stock', icon: '📦', label: 'Stok Gudang', helper: 'Barang gudang dan stok minimum', to: '/inventory-items', count: inventoryItems.length, tone: 'info' },
-    { id: 'rooms-movements', icon: '🔄', label: 'Mutasi Stok', helper: 'Riwayat masuk/keluar/pasang barang', to: '/inventory-movements', count: undefined, tone: 'info' },
+    { id: 'rooms-room-items', icon: '🪑', label: 'Barang Kamar', helper: 'Inventaris per kamar', to: '/inventory/barang-kamar', count: undefined, tone: 'info' },
+    { id: 'rooms-stock', icon: '📦', label: 'Stok Gudang', helper: 'Barang gudang dan stok minimum', to: '/inventory/gudang', count: inventoryItems.length, tone: 'info' },
+    { id: 'rooms-movements', icon: '🔄', label: 'Mutasi Stok', helper: 'Riwayat masuk/keluar/pasang barang', to: '/inventory/mutasi', count: undefined, tone: 'info' },
     { id: 'rooms-low-stock', icon: '⚠️', label: 'Stok Menipis', helper: 'Barang butuh restock', to: `${dashboardBase}?area=rooms`, count: inventoryItems.filter(isLowStockItem).length, tone: inventoryItems.filter(isLowStockItem).length ? 'warning' : 'success' },
   ] : [];
 

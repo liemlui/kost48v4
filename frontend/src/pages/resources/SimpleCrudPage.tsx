@@ -48,7 +48,7 @@ type PortalTenantUser = {
 
 type ResourceFilterId = string;
 
-export default function SimpleCrudPage({ config }: { config: ResourceConfig }) {
+export default function SimpleCrudPage({ config, hideAreaMenu = false }: { config: ResourceConfig; hideAreaMenu?: boolean }) {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -320,7 +320,7 @@ export default function SimpleCrudPage({ config }: { config: ResourceConfig }) {
 
   const openCreate = () => {
     if (config.path === '/room-items') {
-      navigate('/inventory-movements?movementType=ASSIGN_TO_ROOM&qty=1');
+      navigate('/inventory/mutasi?movementType=ASSIGN_TO_ROOM&qty=1');
       return;
     }
     const createGuard = canCreateResourceItem(config, user?.role);
@@ -507,9 +507,9 @@ export default function SimpleCrudPage({ config }: { config: ResourceConfig }) {
     ];
     if (['/rooms', '/room-items', '/inventory-items', '/inventory-movements'].includes(config.path)) return [
       { id: 'rooms', icon: '🏘️', label: 'Kamar', helper: 'Status kamar dan okupansi.', to: '/rooms', active: config.path === '/rooms' },
-      { id: 'room-items', icon: '🪑', label: 'Barang Kamar', helper: 'Inventaris per kamar.', to: '/room-items', active: config.path === '/room-items' },
-      { id: 'stock', icon: '📦', label: 'Stok Gudang', helper: 'Barang gudang dan stok minimum.', to: '/inventory-items', active: config.path === '/inventory-items' },
-      { id: 'movement', icon: '🔄', label: 'Mutasi Stok', helper: 'Riwayat stok masuk/keluar/pasang.', to: '/inventory-movements', active: config.path === '/inventory-movements' },
+      { id: 'room-items', icon: '🪑', label: 'Barang Kamar', helper: 'Inventaris per kamar.', to: '/inventory/barang-kamar', active: config.path === '/room-items' },
+      { id: 'stock', icon: '📦', label: 'Stok Gudang', helper: 'Barang gudang dan stok minimum.', to: '/inventory/gudang', active: config.path === '/inventory-items' },
+      { id: 'movement', icon: '🔄', label: 'Mutasi Stok', helper: 'Riwayat stok masuk/keluar/pasang.', to: '/inventory/mutasi', active: config.path === '/inventory-movements' },
     ];
     return [];
   }, [config.path]);
@@ -544,7 +544,7 @@ export default function SimpleCrudPage({ config }: { config: ResourceConfig }) {
         </Alert>
       ) : null}
 
-      {areaMenuItems.length ? (
+      {areaMenuItems.length && !hideAreaMenu ? (
         <div className="admin-area-internal-menu finance-inline-menu" aria-label={`Sub-menu ${config.title}`}>
           <div className="admin-area-internal-menu-head">
             <span>{config.path === '/tenants' ? 'Menu Masa Sewa & Penghuni' : config.path === '/wifi-sales' || config.path === '/expenses' || config.path === '/invoice-payments' ? 'Menu Keuangan' : 'Menu Kamar & Stok'}</span>

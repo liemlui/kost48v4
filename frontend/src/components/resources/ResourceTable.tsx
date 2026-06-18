@@ -273,12 +273,12 @@ export default function ResourceTable({
       return (
         <>
           {qty > 0 ? (
-            <Button size="sm" variant="outline-primary" onClick={() => navigate(`/inventory-movements?movementType=ASSIGN_TO_ROOM&itemId=${item.id}&qty=1`)}>
+            <Button size="sm" variant="outline-primary" onClick={() => navigate(`/inventory/mutasi?movementType=ASSIGN_TO_ROOM&itemId=${item.id}&qty=1`)}>
               Pasang ke Kamar
             </Button>
           ) : null}
           {qty > 0 ? (
-            <Button size="sm" variant="outline-danger" onClick={() => navigate(`/inventory-movements?movementType=OUT&itemId=${item.id}&qty=1`)}>
+            <Button size="sm" variant="outline-danger" onClick={() => navigate(`/inventory/mutasi?movementType=OUT&itemId=${item.id}&qty=1`)}>
               Catat Keluar
             </Button>
           ) : null}
@@ -295,7 +295,7 @@ export default function ResourceTable({
             </Button>
           ) : null}
           {item.itemId && item.roomId ? (
-            <Button size="sm" variant="outline-primary" onClick={() => navigate(`/inventory-movements?movementType=RETURN_FROM_ROOM&itemId=${item.itemId}&roomId=${item.roomId}&qty=${item.qty ?? 1}`)}>
+            <Button size="sm" variant="outline-primary" onClick={() => navigate(`/inventory/mutasi?movementType=RETURN_FROM_ROOM&itemId=${item.itemId}&roomId=${item.roomId}&qty=${item.qty ?? 1}`)}>
               Kembalikan ke Gudang
             </Button>
           ) : null}

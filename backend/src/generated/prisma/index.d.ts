@@ -7529,6 +7529,7 @@ export namespace Prisma {
     fieldReportsAsItem: number
     fieldReportsAsRequestedItem: number
     fixedAssets: number
+    roomFacilities: number
   }
 
   export type InventoryItemCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -7538,6 +7539,7 @@ export namespace Prisma {
     fieldReportsAsItem?: boolean | InventoryItemCountOutputTypeCountFieldReportsAsItemArgs
     fieldReportsAsRequestedItem?: boolean | InventoryItemCountOutputTypeCountFieldReportsAsRequestedItemArgs
     fixedAssets?: boolean | InventoryItemCountOutputTypeCountFixedAssetsArgs
+    roomFacilities?: boolean | InventoryItemCountOutputTypeCountRoomFacilitiesArgs
   }
 
   // Custom InputTypes
@@ -7591,6 +7593,13 @@ export namespace Prisma {
    */
   export type InventoryItemCountOutputTypeCountFixedAssetsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: FixedAssetWhereInput
+  }
+
+  /**
+   * InventoryItemCountOutputType without action
+   */
+  export type InventoryItemCountOutputTypeCountRoomFacilitiesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: RoomFacilityWhereInput
   }
 
 
@@ -16298,12 +16307,14 @@ export namespace Prisma {
     id: number | null
     roomId: number | null
     quantity: number | null
+    inventoryItemId: number | null
   }
 
   export type RoomFacilitySumAggregateOutputType = {
     id: number | null
     roomId: number | null
     quantity: number | null
+    inventoryItemId: number | null
   }
 
   export type RoomFacilityMinAggregateOutputType = {
@@ -16315,6 +16326,7 @@ export namespace Prisma {
     publicVisible: boolean | null
     condition: string | null
     note: string | null
+    inventoryItemId: number | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -16328,6 +16340,7 @@ export namespace Prisma {
     publicVisible: boolean | null
     condition: string | null
     note: string | null
+    inventoryItemId: number | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -16341,6 +16354,7 @@ export namespace Prisma {
     publicVisible: number
     condition: number
     note: number
+    inventoryItemId: number
     createdAt: number
     updatedAt: number
     _all: number
@@ -16351,12 +16365,14 @@ export namespace Prisma {
     id?: true
     roomId?: true
     quantity?: true
+    inventoryItemId?: true
   }
 
   export type RoomFacilitySumAggregateInputType = {
     id?: true
     roomId?: true
     quantity?: true
+    inventoryItemId?: true
   }
 
   export type RoomFacilityMinAggregateInputType = {
@@ -16368,6 +16384,7 @@ export namespace Prisma {
     publicVisible?: true
     condition?: true
     note?: true
+    inventoryItemId?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -16381,6 +16398,7 @@ export namespace Prisma {
     publicVisible?: true
     condition?: true
     note?: true
+    inventoryItemId?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -16394,6 +16412,7 @@ export namespace Prisma {
     publicVisible?: true
     condition?: true
     note?: true
+    inventoryItemId?: true
     createdAt?: true
     updatedAt?: true
     _all?: true
@@ -16494,6 +16513,7 @@ export namespace Prisma {
     publicVisible: boolean
     condition: string | null
     note: string | null
+    inventoryItemId: number | null
     createdAt: Date
     updatedAt: Date
     _count: RoomFacilityCountAggregateOutputType | null
@@ -16526,9 +16546,11 @@ export namespace Prisma {
     publicVisible?: boolean
     condition?: boolean
     note?: boolean
+    inventoryItemId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     room?: boolean | RoomDefaultArgs<ExtArgs>
+    inventoryItem?: boolean | RoomFacility$inventoryItemArgs<ExtArgs>
   }, ExtArgs["result"]["roomFacility"]>
 
   export type RoomFacilitySelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -16540,9 +16562,11 @@ export namespace Prisma {
     publicVisible?: boolean
     condition?: boolean
     note?: boolean
+    inventoryItemId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     room?: boolean | RoomDefaultArgs<ExtArgs>
+    inventoryItem?: boolean | RoomFacility$inventoryItemArgs<ExtArgs>
   }, ExtArgs["result"]["roomFacility"]>
 
   export type RoomFacilitySelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -16554,9 +16578,11 @@ export namespace Prisma {
     publicVisible?: boolean
     condition?: boolean
     note?: boolean
+    inventoryItemId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     room?: boolean | RoomDefaultArgs<ExtArgs>
+    inventoryItem?: boolean | RoomFacility$inventoryItemArgs<ExtArgs>
   }, ExtArgs["result"]["roomFacility"]>
 
   export type RoomFacilitySelectScalar = {
@@ -16568,25 +16594,30 @@ export namespace Prisma {
     publicVisible?: boolean
     condition?: boolean
     note?: boolean
+    inventoryItemId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type RoomFacilityOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "roomId" | "name" | "quantity" | "category" | "publicVisible" | "condition" | "note" | "createdAt" | "updatedAt", ExtArgs["result"]["roomFacility"]>
+  export type RoomFacilityOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "roomId" | "name" | "quantity" | "category" | "publicVisible" | "condition" | "note" | "inventoryItemId" | "createdAt" | "updatedAt", ExtArgs["result"]["roomFacility"]>
   export type RoomFacilityInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     room?: boolean | RoomDefaultArgs<ExtArgs>
+    inventoryItem?: boolean | RoomFacility$inventoryItemArgs<ExtArgs>
   }
   export type RoomFacilityIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     room?: boolean | RoomDefaultArgs<ExtArgs>
+    inventoryItem?: boolean | RoomFacility$inventoryItemArgs<ExtArgs>
   }
   export type RoomFacilityIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     room?: boolean | RoomDefaultArgs<ExtArgs>
+    inventoryItem?: boolean | RoomFacility$inventoryItemArgs<ExtArgs>
   }
 
   export type $RoomFacilityPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "RoomFacility"
     objects: {
       room: Prisma.$RoomPayload<ExtArgs>
+      inventoryItem: Prisma.$InventoryItemPayload<ExtArgs> | null
     }
     scalars: $Extensions.GetPayloadResult<{
       id: number
@@ -16597,6 +16628,7 @@ export namespace Prisma {
       publicVisible: boolean
       condition: string | null
       note: string | null
+      inventoryItemId: number | null
       createdAt: Date
       updatedAt: Date
     }, ExtArgs["result"]["roomFacility"]>
@@ -16994,6 +17026,7 @@ export namespace Prisma {
   export interface Prisma__RoomFacilityClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     room<T extends RoomDefaultArgs<ExtArgs> = {}>(args?: Subset<T, RoomDefaultArgs<ExtArgs>>): Prisma__RoomClient<$Result.GetResult<Prisma.$RoomPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    inventoryItem<T extends RoomFacility$inventoryItemArgs<ExtArgs> = {}>(args?: Subset<T, RoomFacility$inventoryItemArgs<ExtArgs>>): Prisma__InventoryItemClient<$Result.GetResult<Prisma.$InventoryItemPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -17031,6 +17064,7 @@ export namespace Prisma {
     readonly publicVisible: FieldRef<"RoomFacility", 'Boolean'>
     readonly condition: FieldRef<"RoomFacility", 'String'>
     readonly note: FieldRef<"RoomFacility", 'String'>
+    readonly inventoryItemId: FieldRef<"RoomFacility", 'Int'>
     readonly createdAt: FieldRef<"RoomFacility", 'DateTime'>
     readonly updatedAt: FieldRef<"RoomFacility", 'DateTime'>
   }
@@ -17431,6 +17465,25 @@ export namespace Prisma {
      * Limit how many RoomFacilities to delete.
      */
     limit?: number
+  }
+
+  /**
+   * RoomFacility.inventoryItem
+   */
+  export type RoomFacility$inventoryItemArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the InventoryItem
+     */
+    select?: InventoryItemSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the InventoryItem
+     */
+    omit?: InventoryItemOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InventoryItemInclude<ExtArgs> | null
+    where?: InventoryItemWhereInput
   }
 
   /**
@@ -39092,6 +39145,7 @@ export namespace Prisma {
     fieldReportsAsItem?: boolean | InventoryItem$fieldReportsAsItemArgs<ExtArgs>
     fieldReportsAsRequestedItem?: boolean | InventoryItem$fieldReportsAsRequestedItemArgs<ExtArgs>
     fixedAssets?: boolean | InventoryItem$fixedAssetsArgs<ExtArgs>
+    roomFacilities?: boolean | InventoryItem$roomFacilitiesArgs<ExtArgs>
     _count?: boolean | InventoryItemCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["inventoryItem"]>
 
@@ -39151,6 +39205,7 @@ export namespace Prisma {
     fieldReportsAsItem?: boolean | InventoryItem$fieldReportsAsItemArgs<ExtArgs>
     fieldReportsAsRequestedItem?: boolean | InventoryItem$fieldReportsAsRequestedItemArgs<ExtArgs>
     fixedAssets?: boolean | InventoryItem$fixedAssetsArgs<ExtArgs>
+    roomFacilities?: boolean | InventoryItem$roomFacilitiesArgs<ExtArgs>
     _count?: boolean | InventoryItemCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type InventoryItemIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
@@ -39165,6 +39220,7 @@ export namespace Prisma {
       fieldReportsAsItem: Prisma.$StaffFieldReportPayload<ExtArgs>[]
       fieldReportsAsRequestedItem: Prisma.$StaffFieldReportPayload<ExtArgs>[]
       fixedAssets: Prisma.$FixedAssetPayload<ExtArgs>[]
+      roomFacilities: Prisma.$RoomFacilityPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: number
@@ -39580,6 +39636,7 @@ export namespace Prisma {
     fieldReportsAsItem<T extends InventoryItem$fieldReportsAsItemArgs<ExtArgs> = {}>(args?: Subset<T, InventoryItem$fieldReportsAsItemArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$StaffFieldReportPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     fieldReportsAsRequestedItem<T extends InventoryItem$fieldReportsAsRequestedItemArgs<ExtArgs> = {}>(args?: Subset<T, InventoryItem$fieldReportsAsRequestedItemArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$StaffFieldReportPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     fixedAssets<T extends InventoryItem$fixedAssetsArgs<ExtArgs> = {}>(args?: Subset<T, InventoryItem$fixedAssetsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$FixedAssetPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    roomFacilities<T extends InventoryItem$roomFacilitiesArgs<ExtArgs> = {}>(args?: Subset<T, InventoryItem$roomFacilitiesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$RoomFacilityPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -40156,6 +40213,30 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: FixedAssetScalarFieldEnum | FixedAssetScalarFieldEnum[]
+  }
+
+  /**
+   * InventoryItem.roomFacilities
+   */
+  export type InventoryItem$roomFacilitiesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RoomFacility
+     */
+    select?: RoomFacilitySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the RoomFacility
+     */
+    omit?: RoomFacilityOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RoomFacilityInclude<ExtArgs> | null
+    where?: RoomFacilityWhereInput
+    orderBy?: RoomFacilityOrderByWithRelationInput | RoomFacilityOrderByWithRelationInput[]
+    cursor?: RoomFacilityWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: RoomFacilityScalarFieldEnum | RoomFacilityScalarFieldEnum[]
   }
 
   /**
@@ -79228,6 +79309,7 @@ export namespace Prisma {
     publicVisible: 'publicVisible',
     condition: 'condition',
     note: 'note',
+    inventoryItemId: 'inventoryItemId',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
   };
@@ -82042,9 +82124,11 @@ export namespace Prisma {
     publicVisible?: BoolFilter<"RoomFacility"> | boolean
     condition?: StringNullableFilter<"RoomFacility"> | string | null
     note?: StringNullableFilter<"RoomFacility"> | string | null
+    inventoryItemId?: IntNullableFilter<"RoomFacility"> | number | null
     createdAt?: DateTimeFilter<"RoomFacility"> | Date | string
     updatedAt?: DateTimeFilter<"RoomFacility"> | Date | string
     room?: XOR<RoomScalarRelationFilter, RoomWhereInput>
+    inventoryItem?: XOR<InventoryItemNullableScalarRelationFilter, InventoryItemWhereInput> | null
   }
 
   export type RoomFacilityOrderByWithRelationInput = {
@@ -82056,9 +82140,11 @@ export namespace Prisma {
     publicVisible?: SortOrder
     condition?: SortOrderInput | SortOrder
     note?: SortOrderInput | SortOrder
+    inventoryItemId?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     room?: RoomOrderByWithRelationInput
+    inventoryItem?: InventoryItemOrderByWithRelationInput
   }
 
   export type RoomFacilityWhereUniqueInput = Prisma.AtLeast<{
@@ -82073,9 +82159,11 @@ export namespace Prisma {
     publicVisible?: BoolFilter<"RoomFacility"> | boolean
     condition?: StringNullableFilter<"RoomFacility"> | string | null
     note?: StringNullableFilter<"RoomFacility"> | string | null
+    inventoryItemId?: IntNullableFilter<"RoomFacility"> | number | null
     createdAt?: DateTimeFilter<"RoomFacility"> | Date | string
     updatedAt?: DateTimeFilter<"RoomFacility"> | Date | string
     room?: XOR<RoomScalarRelationFilter, RoomWhereInput>
+    inventoryItem?: XOR<InventoryItemNullableScalarRelationFilter, InventoryItemWhereInput> | null
   }, "id">
 
   export type RoomFacilityOrderByWithAggregationInput = {
@@ -82087,6 +82175,7 @@ export namespace Prisma {
     publicVisible?: SortOrder
     condition?: SortOrderInput | SortOrder
     note?: SortOrderInput | SortOrder
+    inventoryItemId?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     _count?: RoomFacilityCountOrderByAggregateInput
@@ -82108,6 +82197,7 @@ export namespace Prisma {
     publicVisible?: BoolWithAggregatesFilter<"RoomFacility"> | boolean
     condition?: StringNullableWithAggregatesFilter<"RoomFacility"> | string | null
     note?: StringNullableWithAggregatesFilter<"RoomFacility"> | string | null
+    inventoryItemId?: IntNullableWithAggregatesFilter<"RoomFacility"> | number | null
     createdAt?: DateTimeWithAggregatesFilter<"RoomFacility"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"RoomFacility"> | Date | string
   }
@@ -84099,6 +84189,7 @@ export namespace Prisma {
     fieldReportsAsItem?: StaffFieldReportListRelationFilter
     fieldReportsAsRequestedItem?: StaffFieldReportListRelationFilter
     fixedAssets?: FixedAssetListRelationFilter
+    roomFacilities?: RoomFacilityListRelationFilter
   }
 
   export type InventoryItemOrderByWithRelationInput = {
@@ -84121,6 +84212,7 @@ export namespace Prisma {
     fieldReportsAsItem?: StaffFieldReportOrderByRelationAggregateInput
     fieldReportsAsRequestedItem?: StaffFieldReportOrderByRelationAggregateInput
     fixedAssets?: FixedAssetOrderByRelationAggregateInput
+    roomFacilities?: RoomFacilityOrderByRelationAggregateInput
   }
 
   export type InventoryItemWhereUniqueInput = Prisma.AtLeast<{
@@ -84146,6 +84238,7 @@ export namespace Prisma {
     fieldReportsAsItem?: StaffFieldReportListRelationFilter
     fieldReportsAsRequestedItem?: StaffFieldReportListRelationFilter
     fixedAssets?: FixedAssetListRelationFilter
+    roomFacilities?: RoomFacilityListRelationFilter
   }, "id" | "sku">
 
   export type InventoryItemOrderByWithAggregationInput = {
@@ -88267,6 +88360,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     room: RoomCreateNestedOneWithoutFacilitiesInput
+    inventoryItem?: InventoryItemCreateNestedOneWithoutRoomFacilitiesInput
   }
 
   export type RoomFacilityUncheckedCreateInput = {
@@ -88278,6 +88372,7 @@ export namespace Prisma {
     publicVisible?: boolean
     condition?: string | null
     note?: string | null
+    inventoryItemId?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -88292,6 +88387,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     room?: RoomUpdateOneRequiredWithoutFacilitiesNestedInput
+    inventoryItem?: InventoryItemUpdateOneWithoutRoomFacilitiesNestedInput
   }
 
   export type RoomFacilityUncheckedUpdateInput = {
@@ -88303,6 +88399,7 @@ export namespace Prisma {
     publicVisible?: BoolFieldUpdateOperationsInput | boolean
     condition?: NullableStringFieldUpdateOperationsInput | string | null
     note?: NullableStringFieldUpdateOperationsInput | string | null
+    inventoryItemId?: NullableIntFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -88316,6 +88413,7 @@ export namespace Prisma {
     publicVisible?: boolean
     condition?: string | null
     note?: string | null
+    inventoryItemId?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -88340,6 +88438,7 @@ export namespace Prisma {
     publicVisible?: BoolFieldUpdateOperationsInput | boolean
     condition?: NullableStringFieldUpdateOperationsInput | string | null
     note?: NullableStringFieldUpdateOperationsInput | string | null
+    inventoryItemId?: NullableIntFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -90523,6 +90622,7 @@ export namespace Prisma {
     fieldReportsAsItem?: StaffFieldReportCreateNestedManyWithoutInventoryItemInput
     fieldReportsAsRequestedItem?: StaffFieldReportCreateNestedManyWithoutRequestedInventoryItemInput
     fixedAssets?: FixedAssetCreateNestedManyWithoutInventoryItemInput
+    roomFacilities?: RoomFacilityCreateNestedManyWithoutInventoryItemInput
   }
 
   export type InventoryItemUncheckedCreateInput = {
@@ -90545,6 +90645,7 @@ export namespace Prisma {
     fieldReportsAsItem?: StaffFieldReportUncheckedCreateNestedManyWithoutInventoryItemInput
     fieldReportsAsRequestedItem?: StaffFieldReportUncheckedCreateNestedManyWithoutRequestedInventoryItemInput
     fixedAssets?: FixedAssetUncheckedCreateNestedManyWithoutInventoryItemInput
+    roomFacilities?: RoomFacilityUncheckedCreateNestedManyWithoutInventoryItemInput
   }
 
   export type InventoryItemUpdateInput = {
@@ -90566,6 +90667,7 @@ export namespace Prisma {
     fieldReportsAsItem?: StaffFieldReportUpdateManyWithoutInventoryItemNestedInput
     fieldReportsAsRequestedItem?: StaffFieldReportUpdateManyWithoutRequestedInventoryItemNestedInput
     fixedAssets?: FixedAssetUpdateManyWithoutInventoryItemNestedInput
+    roomFacilities?: RoomFacilityUpdateManyWithoutInventoryItemNestedInput
   }
 
   export type InventoryItemUncheckedUpdateInput = {
@@ -90588,6 +90690,7 @@ export namespace Prisma {
     fieldReportsAsItem?: StaffFieldReportUncheckedUpdateManyWithoutInventoryItemNestedInput
     fieldReportsAsRequestedItem?: StaffFieldReportUncheckedUpdateManyWithoutRequestedInventoryItemNestedInput
     fixedAssets?: FixedAssetUncheckedUpdateManyWithoutInventoryItemNestedInput
+    roomFacilities?: RoomFacilityUncheckedUpdateManyWithoutInventoryItemNestedInput
   }
 
   export type InventoryItemCreateManyInput = {
@@ -95080,6 +95183,11 @@ export namespace Prisma {
     isNot?: RoomWhereInput
   }
 
+  export type InventoryItemNullableScalarRelationFilter = {
+    is?: InventoryItemWhereInput | null
+    isNot?: InventoryItemWhereInput | null
+  }
+
   export type RoomFacilityCountOrderByAggregateInput = {
     id?: SortOrder
     roomId?: SortOrder
@@ -95089,6 +95197,7 @@ export namespace Prisma {
     publicVisible?: SortOrder
     condition?: SortOrder
     note?: SortOrder
+    inventoryItemId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -95097,6 +95206,7 @@ export namespace Prisma {
     id?: SortOrder
     roomId?: SortOrder
     quantity?: SortOrder
+    inventoryItemId?: SortOrder
   }
 
   export type RoomFacilityMaxOrderByAggregateInput = {
@@ -95108,6 +95218,7 @@ export namespace Prisma {
     publicVisible?: SortOrder
     condition?: SortOrder
     note?: SortOrder
+    inventoryItemId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -95121,6 +95232,7 @@ export namespace Prisma {
     publicVisible?: SortOrder
     condition?: SortOrder
     note?: SortOrder
+    inventoryItemId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -95129,6 +95241,7 @@ export namespace Prisma {
     id?: SortOrder
     roomId?: SortOrder
     quantity?: SortOrder
+    inventoryItemId?: SortOrder
   }
 
   export type EnumStayStatusFilter<$PrismaModel = never> = {
@@ -96266,11 +96379,6 @@ export namespace Prisma {
   export type RoomItemNullableScalarRelationFilter = {
     is?: RoomItemWhereInput | null
     isNot?: RoomItemWhereInput | null
-  }
-
-  export type InventoryItemNullableScalarRelationFilter = {
-    is?: InventoryItemWhereInput | null
-    isNot?: InventoryItemWhereInput | null
   }
 
   export type TicketCountOrderByAggregateInput = {
@@ -102548,12 +102656,28 @@ export namespace Prisma {
     connect?: RoomWhereUniqueInput
   }
 
+  export type InventoryItemCreateNestedOneWithoutRoomFacilitiesInput = {
+    create?: XOR<InventoryItemCreateWithoutRoomFacilitiesInput, InventoryItemUncheckedCreateWithoutRoomFacilitiesInput>
+    connectOrCreate?: InventoryItemCreateOrConnectWithoutRoomFacilitiesInput
+    connect?: InventoryItemWhereUniqueInput
+  }
+
   export type RoomUpdateOneRequiredWithoutFacilitiesNestedInput = {
     create?: XOR<RoomCreateWithoutFacilitiesInput, RoomUncheckedCreateWithoutFacilitiesInput>
     connectOrCreate?: RoomCreateOrConnectWithoutFacilitiesInput
     upsert?: RoomUpsertWithoutFacilitiesInput
     connect?: RoomWhereUniqueInput
     update?: XOR<XOR<RoomUpdateToOneWithWhereWithoutFacilitiesInput, RoomUpdateWithoutFacilitiesInput>, RoomUncheckedUpdateWithoutFacilitiesInput>
+  }
+
+  export type InventoryItemUpdateOneWithoutRoomFacilitiesNestedInput = {
+    create?: XOR<InventoryItemCreateWithoutRoomFacilitiesInput, InventoryItemUncheckedCreateWithoutRoomFacilitiesInput>
+    connectOrCreate?: InventoryItemCreateOrConnectWithoutRoomFacilitiesInput
+    upsert?: InventoryItemUpsertWithoutRoomFacilitiesInput
+    disconnect?: InventoryItemWhereInput | boolean
+    delete?: InventoryItemWhereInput | boolean
+    connect?: InventoryItemWhereUniqueInput
+    update?: XOR<XOR<InventoryItemUpdateToOneWithWhereWithoutRoomFacilitiesInput, InventoryItemUpdateWithoutRoomFacilitiesInput>, InventoryItemUncheckedUpdateWithoutRoomFacilitiesInput>
   }
 
   export type TenantCreateNestedOneWithoutStaysInput = {
@@ -104056,6 +104180,13 @@ export namespace Prisma {
     connect?: FixedAssetWhereUniqueInput | FixedAssetWhereUniqueInput[]
   }
 
+  export type RoomFacilityCreateNestedManyWithoutInventoryItemInput = {
+    create?: XOR<RoomFacilityCreateWithoutInventoryItemInput, RoomFacilityUncheckedCreateWithoutInventoryItemInput> | RoomFacilityCreateWithoutInventoryItemInput[] | RoomFacilityUncheckedCreateWithoutInventoryItemInput[]
+    connectOrCreate?: RoomFacilityCreateOrConnectWithoutInventoryItemInput | RoomFacilityCreateOrConnectWithoutInventoryItemInput[]
+    createMany?: RoomFacilityCreateManyInventoryItemInputEnvelope
+    connect?: RoomFacilityWhereUniqueInput | RoomFacilityWhereUniqueInput[]
+  }
+
   export type RoomItemUncheckedCreateNestedManyWithoutItemInput = {
     create?: XOR<RoomItemCreateWithoutItemInput, RoomItemUncheckedCreateWithoutItemInput> | RoomItemCreateWithoutItemInput[] | RoomItemUncheckedCreateWithoutItemInput[]
     connectOrCreate?: RoomItemCreateOrConnectWithoutItemInput | RoomItemCreateOrConnectWithoutItemInput[]
@@ -104096,6 +104227,13 @@ export namespace Prisma {
     connectOrCreate?: FixedAssetCreateOrConnectWithoutInventoryItemInput | FixedAssetCreateOrConnectWithoutInventoryItemInput[]
     createMany?: FixedAssetCreateManyInventoryItemInputEnvelope
     connect?: FixedAssetWhereUniqueInput | FixedAssetWhereUniqueInput[]
+  }
+
+  export type RoomFacilityUncheckedCreateNestedManyWithoutInventoryItemInput = {
+    create?: XOR<RoomFacilityCreateWithoutInventoryItemInput, RoomFacilityUncheckedCreateWithoutInventoryItemInput> | RoomFacilityCreateWithoutInventoryItemInput[] | RoomFacilityUncheckedCreateWithoutInventoryItemInput[]
+    connectOrCreate?: RoomFacilityCreateOrConnectWithoutInventoryItemInput | RoomFacilityCreateOrConnectWithoutInventoryItemInput[]
+    createMany?: RoomFacilityCreateManyInventoryItemInputEnvelope
+    connect?: RoomFacilityWhereUniqueInput | RoomFacilityWhereUniqueInput[]
   }
 
   export type EnumInventoryItemStatusFieldUpdateOperationsInput = {
@@ -104191,6 +104329,20 @@ export namespace Prisma {
     deleteMany?: FixedAssetScalarWhereInput | FixedAssetScalarWhereInput[]
   }
 
+  export type RoomFacilityUpdateManyWithoutInventoryItemNestedInput = {
+    create?: XOR<RoomFacilityCreateWithoutInventoryItemInput, RoomFacilityUncheckedCreateWithoutInventoryItemInput> | RoomFacilityCreateWithoutInventoryItemInput[] | RoomFacilityUncheckedCreateWithoutInventoryItemInput[]
+    connectOrCreate?: RoomFacilityCreateOrConnectWithoutInventoryItemInput | RoomFacilityCreateOrConnectWithoutInventoryItemInput[]
+    upsert?: RoomFacilityUpsertWithWhereUniqueWithoutInventoryItemInput | RoomFacilityUpsertWithWhereUniqueWithoutInventoryItemInput[]
+    createMany?: RoomFacilityCreateManyInventoryItemInputEnvelope
+    set?: RoomFacilityWhereUniqueInput | RoomFacilityWhereUniqueInput[]
+    disconnect?: RoomFacilityWhereUniqueInput | RoomFacilityWhereUniqueInput[]
+    delete?: RoomFacilityWhereUniqueInput | RoomFacilityWhereUniqueInput[]
+    connect?: RoomFacilityWhereUniqueInput | RoomFacilityWhereUniqueInput[]
+    update?: RoomFacilityUpdateWithWhereUniqueWithoutInventoryItemInput | RoomFacilityUpdateWithWhereUniqueWithoutInventoryItemInput[]
+    updateMany?: RoomFacilityUpdateManyWithWhereWithoutInventoryItemInput | RoomFacilityUpdateManyWithWhereWithoutInventoryItemInput[]
+    deleteMany?: RoomFacilityScalarWhereInput | RoomFacilityScalarWhereInput[]
+  }
+
   export type RoomItemUncheckedUpdateManyWithoutItemNestedInput = {
     create?: XOR<RoomItemCreateWithoutItemInput, RoomItemUncheckedCreateWithoutItemInput> | RoomItemCreateWithoutItemInput[] | RoomItemUncheckedCreateWithoutItemInput[]
     connectOrCreate?: RoomItemCreateOrConnectWithoutItemInput | RoomItemCreateOrConnectWithoutItemInput[]
@@ -104273,6 +104425,20 @@ export namespace Prisma {
     update?: FixedAssetUpdateWithWhereUniqueWithoutInventoryItemInput | FixedAssetUpdateWithWhereUniqueWithoutInventoryItemInput[]
     updateMany?: FixedAssetUpdateManyWithWhereWithoutInventoryItemInput | FixedAssetUpdateManyWithWhereWithoutInventoryItemInput[]
     deleteMany?: FixedAssetScalarWhereInput | FixedAssetScalarWhereInput[]
+  }
+
+  export type RoomFacilityUncheckedUpdateManyWithoutInventoryItemNestedInput = {
+    create?: XOR<RoomFacilityCreateWithoutInventoryItemInput, RoomFacilityUncheckedCreateWithoutInventoryItemInput> | RoomFacilityCreateWithoutInventoryItemInput[] | RoomFacilityUncheckedCreateWithoutInventoryItemInput[]
+    connectOrCreate?: RoomFacilityCreateOrConnectWithoutInventoryItemInput | RoomFacilityCreateOrConnectWithoutInventoryItemInput[]
+    upsert?: RoomFacilityUpsertWithWhereUniqueWithoutInventoryItemInput | RoomFacilityUpsertWithWhereUniqueWithoutInventoryItemInput[]
+    createMany?: RoomFacilityCreateManyInventoryItemInputEnvelope
+    set?: RoomFacilityWhereUniqueInput | RoomFacilityWhereUniqueInput[]
+    disconnect?: RoomFacilityWhereUniqueInput | RoomFacilityWhereUniqueInput[]
+    delete?: RoomFacilityWhereUniqueInput | RoomFacilityWhereUniqueInput[]
+    connect?: RoomFacilityWhereUniqueInput | RoomFacilityWhereUniqueInput[]
+    update?: RoomFacilityUpdateWithWhereUniqueWithoutInventoryItemInput | RoomFacilityUpdateWithWhereUniqueWithoutInventoryItemInput[]
+    updateMany?: RoomFacilityUpdateManyWithWhereWithoutInventoryItemInput | RoomFacilityUpdateManyWithWhereWithoutInventoryItemInput[]
+    deleteMany?: RoomFacilityScalarWhereInput | RoomFacilityScalarWhereInput[]
   }
 
   export type RoomCreateNestedOneWithoutRoomItemsInput = {
@@ -113304,6 +113470,7 @@ export namespace Prisma {
     note?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    inventoryItem?: InventoryItemCreateNestedOneWithoutRoomFacilitiesInput
   }
 
   export type RoomFacilityUncheckedCreateWithoutRoomInput = {
@@ -113314,6 +113481,7 @@ export namespace Prisma {
     publicVisible?: boolean
     condition?: string | null
     note?: string | null
+    inventoryItemId?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -113684,6 +113852,7 @@ export namespace Prisma {
     publicVisible?: BoolFilter<"RoomFacility"> | boolean
     condition?: StringNullableFilter<"RoomFacility"> | string | null
     note?: StringNullableFilter<"RoomFacility"> | string | null
+    inventoryItemId?: IntNullableFilter<"RoomFacility"> | number | null
     createdAt?: DateTimeFilter<"RoomFacility"> | Date | string
     updatedAt?: DateTimeFilter<"RoomFacility"> | Date | string
   }
@@ -113806,6 +113975,54 @@ export namespace Prisma {
     create: XOR<RoomCreateWithoutFacilitiesInput, RoomUncheckedCreateWithoutFacilitiesInput>
   }
 
+  export type InventoryItemCreateWithoutRoomFacilitiesInput = {
+    sku?: string | null
+    name: string
+    category?: string | null
+    unit?: string
+    qtyOnHand?: Decimal | DecimalJsLike | number | string
+    minQty?: Decimal | DecimalJsLike | number | string
+    status?: $Enums.InventoryItemStatus
+    images?: InventoryItemCreateimagesInput | string[]
+    notes?: string | null
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    roomItems?: RoomItemCreateNestedManyWithoutItemInput
+    movements?: InventoryMovementCreateNestedManyWithoutItemInput
+    linkedTickets?: TicketCreateNestedManyWithoutLinkedInventoryItemInput
+    fieldReportsAsItem?: StaffFieldReportCreateNestedManyWithoutInventoryItemInput
+    fieldReportsAsRequestedItem?: StaffFieldReportCreateNestedManyWithoutRequestedInventoryItemInput
+    fixedAssets?: FixedAssetCreateNestedManyWithoutInventoryItemInput
+  }
+
+  export type InventoryItemUncheckedCreateWithoutRoomFacilitiesInput = {
+    id?: number
+    sku?: string | null
+    name: string
+    category?: string | null
+    unit?: string
+    qtyOnHand?: Decimal | DecimalJsLike | number | string
+    minQty?: Decimal | DecimalJsLike | number | string
+    status?: $Enums.InventoryItemStatus
+    images?: InventoryItemCreateimagesInput | string[]
+    notes?: string | null
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    roomItems?: RoomItemUncheckedCreateNestedManyWithoutItemInput
+    movements?: InventoryMovementUncheckedCreateNestedManyWithoutItemInput
+    linkedTickets?: TicketUncheckedCreateNestedManyWithoutLinkedInventoryItemInput
+    fieldReportsAsItem?: StaffFieldReportUncheckedCreateNestedManyWithoutInventoryItemInput
+    fieldReportsAsRequestedItem?: StaffFieldReportUncheckedCreateNestedManyWithoutRequestedInventoryItemInput
+    fixedAssets?: FixedAssetUncheckedCreateNestedManyWithoutInventoryItemInput
+  }
+
+  export type InventoryItemCreateOrConnectWithoutRoomFacilitiesInput = {
+    where: InventoryItemWhereUniqueInput
+    create: XOR<InventoryItemCreateWithoutRoomFacilitiesInput, InventoryItemUncheckedCreateWithoutRoomFacilitiesInput>
+  }
+
   export type RoomUpsertWithoutFacilitiesInput = {
     update: XOR<RoomUpdateWithoutFacilitiesInput, RoomUncheckedUpdateWithoutFacilitiesInput>
     create: XOR<RoomCreateWithoutFacilitiesInput, RoomUncheckedCreateWithoutFacilitiesInput>
@@ -113896,6 +114113,60 @@ export namespace Prisma {
     staffFieldReports?: StaffFieldReportUncheckedUpdateManyWithoutRoomNestedInput
     fixedAssets?: FixedAssetUncheckedUpdateManyWithoutRoomNestedInput
     depositLedgerEntries?: TenantDepositLedgerEntryUncheckedUpdateManyWithoutRoomNestedInput
+  }
+
+  export type InventoryItemUpsertWithoutRoomFacilitiesInput = {
+    update: XOR<InventoryItemUpdateWithoutRoomFacilitiesInput, InventoryItemUncheckedUpdateWithoutRoomFacilitiesInput>
+    create: XOR<InventoryItemCreateWithoutRoomFacilitiesInput, InventoryItemUncheckedCreateWithoutRoomFacilitiesInput>
+    where?: InventoryItemWhereInput
+  }
+
+  export type InventoryItemUpdateToOneWithWhereWithoutRoomFacilitiesInput = {
+    where?: InventoryItemWhereInput
+    data: XOR<InventoryItemUpdateWithoutRoomFacilitiesInput, InventoryItemUncheckedUpdateWithoutRoomFacilitiesInput>
+  }
+
+  export type InventoryItemUpdateWithoutRoomFacilitiesInput = {
+    sku?: NullableStringFieldUpdateOperationsInput | string | null
+    name?: StringFieldUpdateOperationsInput | string
+    category?: NullableStringFieldUpdateOperationsInput | string | null
+    unit?: StringFieldUpdateOperationsInput | string
+    qtyOnHand?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    minQty?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    status?: EnumInventoryItemStatusFieldUpdateOperationsInput | $Enums.InventoryItemStatus
+    images?: InventoryItemUpdateimagesInput | string[]
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    roomItems?: RoomItemUpdateManyWithoutItemNestedInput
+    movements?: InventoryMovementUpdateManyWithoutItemNestedInput
+    linkedTickets?: TicketUpdateManyWithoutLinkedInventoryItemNestedInput
+    fieldReportsAsItem?: StaffFieldReportUpdateManyWithoutInventoryItemNestedInput
+    fieldReportsAsRequestedItem?: StaffFieldReportUpdateManyWithoutRequestedInventoryItemNestedInput
+    fixedAssets?: FixedAssetUpdateManyWithoutInventoryItemNestedInput
+  }
+
+  export type InventoryItemUncheckedUpdateWithoutRoomFacilitiesInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    sku?: NullableStringFieldUpdateOperationsInput | string | null
+    name?: StringFieldUpdateOperationsInput | string
+    category?: NullableStringFieldUpdateOperationsInput | string | null
+    unit?: StringFieldUpdateOperationsInput | string
+    qtyOnHand?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    minQty?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    status?: EnumInventoryItemStatusFieldUpdateOperationsInput | $Enums.InventoryItemStatus
+    images?: InventoryItemUpdateimagesInput | string[]
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    roomItems?: RoomItemUncheckedUpdateManyWithoutItemNestedInput
+    movements?: InventoryMovementUncheckedUpdateManyWithoutItemNestedInput
+    linkedTickets?: TicketUncheckedUpdateManyWithoutLinkedInventoryItemNestedInput
+    fieldReportsAsItem?: StaffFieldReportUncheckedUpdateManyWithoutInventoryItemNestedInput
+    fieldReportsAsRequestedItem?: StaffFieldReportUncheckedUpdateManyWithoutRequestedInventoryItemNestedInput
+    fixedAssets?: FixedAssetUncheckedUpdateManyWithoutInventoryItemNestedInput
   }
 
   export type TenantCreateWithoutStaysInput = {
@@ -119691,6 +119962,7 @@ export namespace Prisma {
     fieldReportsAsItem?: StaffFieldReportCreateNestedManyWithoutInventoryItemInput
     fieldReportsAsRequestedItem?: StaffFieldReportCreateNestedManyWithoutRequestedInventoryItemInput
     fixedAssets?: FixedAssetCreateNestedManyWithoutInventoryItemInput
+    roomFacilities?: RoomFacilityCreateNestedManyWithoutInventoryItemInput
   }
 
   export type InventoryItemUncheckedCreateWithoutLinkedTicketsInput = {
@@ -119712,6 +119984,7 @@ export namespace Prisma {
     fieldReportsAsItem?: StaffFieldReportUncheckedCreateNestedManyWithoutInventoryItemInput
     fieldReportsAsRequestedItem?: StaffFieldReportUncheckedCreateNestedManyWithoutRequestedInventoryItemInput
     fixedAssets?: FixedAssetUncheckedCreateNestedManyWithoutInventoryItemInput
+    roomFacilities?: RoomFacilityUncheckedCreateNestedManyWithoutInventoryItemInput
   }
 
   export type InventoryItemCreateOrConnectWithoutLinkedTicketsInput = {
@@ -120291,6 +120564,7 @@ export namespace Prisma {
     fieldReportsAsItem?: StaffFieldReportUpdateManyWithoutInventoryItemNestedInput
     fieldReportsAsRequestedItem?: StaffFieldReportUpdateManyWithoutRequestedInventoryItemNestedInput
     fixedAssets?: FixedAssetUpdateManyWithoutInventoryItemNestedInput
+    roomFacilities?: RoomFacilityUpdateManyWithoutInventoryItemNestedInput
   }
 
   export type InventoryItemUncheckedUpdateWithoutLinkedTicketsInput = {
@@ -120312,6 +120586,7 @@ export namespace Prisma {
     fieldReportsAsItem?: StaffFieldReportUncheckedUpdateManyWithoutInventoryItemNestedInput
     fieldReportsAsRequestedItem?: StaffFieldReportUncheckedUpdateManyWithoutRequestedInventoryItemNestedInput
     fixedAssets?: FixedAssetUncheckedUpdateManyWithoutInventoryItemNestedInput
+    roomFacilities?: RoomFacilityUncheckedUpdateManyWithoutInventoryItemNestedInput
   }
 
   export type StaffFieldReportUpsertWithWhereUniqueWithoutTicketInput = {
@@ -123693,6 +123968,41 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  export type RoomFacilityCreateWithoutInventoryItemInput = {
+    name: string
+    quantity?: number
+    category?: string | null
+    publicVisible?: boolean
+    condition?: string | null
+    note?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    room: RoomCreateNestedOneWithoutFacilitiesInput
+  }
+
+  export type RoomFacilityUncheckedCreateWithoutInventoryItemInput = {
+    id?: number
+    roomId: number
+    name: string
+    quantity?: number
+    category?: string | null
+    publicVisible?: boolean
+    condition?: string | null
+    note?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type RoomFacilityCreateOrConnectWithoutInventoryItemInput = {
+    where: RoomFacilityWhereUniqueInput
+    create: XOR<RoomFacilityCreateWithoutInventoryItemInput, RoomFacilityUncheckedCreateWithoutInventoryItemInput>
+  }
+
+  export type RoomFacilityCreateManyInventoryItemInputEnvelope = {
+    data: RoomFacilityCreateManyInventoryItemInput | RoomFacilityCreateManyInventoryItemInput[]
+    skipDuplicates?: boolean
+  }
+
   export type RoomItemUpsertWithWhereUniqueWithoutItemInput = {
     where: RoomItemWhereUniqueInput
     update: XOR<RoomItemUpdateWithoutItemInput, RoomItemUncheckedUpdateWithoutItemInput>
@@ -123787,6 +124097,22 @@ export namespace Prisma {
   export type FixedAssetUpdateManyWithWhereWithoutInventoryItemInput = {
     where: FixedAssetScalarWhereInput
     data: XOR<FixedAssetUpdateManyMutationInput, FixedAssetUncheckedUpdateManyWithoutInventoryItemInput>
+  }
+
+  export type RoomFacilityUpsertWithWhereUniqueWithoutInventoryItemInput = {
+    where: RoomFacilityWhereUniqueInput
+    update: XOR<RoomFacilityUpdateWithoutInventoryItemInput, RoomFacilityUncheckedUpdateWithoutInventoryItemInput>
+    create: XOR<RoomFacilityCreateWithoutInventoryItemInput, RoomFacilityUncheckedCreateWithoutInventoryItemInput>
+  }
+
+  export type RoomFacilityUpdateWithWhereUniqueWithoutInventoryItemInput = {
+    where: RoomFacilityWhereUniqueInput
+    data: XOR<RoomFacilityUpdateWithoutInventoryItemInput, RoomFacilityUncheckedUpdateWithoutInventoryItemInput>
+  }
+
+  export type RoomFacilityUpdateManyWithWhereWithoutInventoryItemInput = {
+    where: RoomFacilityScalarWhereInput
+    data: XOR<RoomFacilityUpdateManyMutationInput, RoomFacilityUncheckedUpdateManyWithoutInventoryItemInput>
   }
 
   export type RoomCreateWithoutRoomItemsInput = {
@@ -123893,6 +124219,7 @@ export namespace Prisma {
     fieldReportsAsItem?: StaffFieldReportCreateNestedManyWithoutInventoryItemInput
     fieldReportsAsRequestedItem?: StaffFieldReportCreateNestedManyWithoutRequestedInventoryItemInput
     fixedAssets?: FixedAssetCreateNestedManyWithoutInventoryItemInput
+    roomFacilities?: RoomFacilityCreateNestedManyWithoutInventoryItemInput
   }
 
   export type InventoryItemUncheckedCreateWithoutRoomItemsInput = {
@@ -123914,6 +124241,7 @@ export namespace Prisma {
     fieldReportsAsItem?: StaffFieldReportUncheckedCreateNestedManyWithoutInventoryItemInput
     fieldReportsAsRequestedItem?: StaffFieldReportUncheckedCreateNestedManyWithoutRequestedInventoryItemInput
     fixedAssets?: FixedAssetUncheckedCreateNestedManyWithoutInventoryItemInput
+    roomFacilities?: RoomFacilityUncheckedCreateNestedManyWithoutInventoryItemInput
   }
 
   export type InventoryItemCreateOrConnectWithoutRoomItemsInput = {
@@ -124273,6 +124601,7 @@ export namespace Prisma {
     fieldReportsAsItem?: StaffFieldReportUpdateManyWithoutInventoryItemNestedInput
     fieldReportsAsRequestedItem?: StaffFieldReportUpdateManyWithoutRequestedInventoryItemNestedInput
     fixedAssets?: FixedAssetUpdateManyWithoutInventoryItemNestedInput
+    roomFacilities?: RoomFacilityUpdateManyWithoutInventoryItemNestedInput
   }
 
   export type InventoryItemUncheckedUpdateWithoutRoomItemsInput = {
@@ -124294,6 +124623,7 @@ export namespace Prisma {
     fieldReportsAsItem?: StaffFieldReportUncheckedUpdateManyWithoutInventoryItemNestedInput
     fieldReportsAsRequestedItem?: StaffFieldReportUncheckedUpdateManyWithoutRequestedInventoryItemNestedInput
     fixedAssets?: FixedAssetUncheckedUpdateManyWithoutInventoryItemNestedInput
+    roomFacilities?: RoomFacilityUncheckedUpdateManyWithoutInventoryItemNestedInput
   }
 
   export type TicketUpsertWithWhereUniqueWithoutLinkedRoomItemInput = {
@@ -124362,6 +124692,7 @@ export namespace Prisma {
     fieldReportsAsItem?: StaffFieldReportCreateNestedManyWithoutInventoryItemInput
     fieldReportsAsRequestedItem?: StaffFieldReportCreateNestedManyWithoutRequestedInventoryItemInput
     fixedAssets?: FixedAssetCreateNestedManyWithoutInventoryItemInput
+    roomFacilities?: RoomFacilityCreateNestedManyWithoutInventoryItemInput
   }
 
   export type InventoryItemUncheckedCreateWithoutMovementsInput = {
@@ -124383,6 +124714,7 @@ export namespace Prisma {
     fieldReportsAsItem?: StaffFieldReportUncheckedCreateNestedManyWithoutInventoryItemInput
     fieldReportsAsRequestedItem?: StaffFieldReportUncheckedCreateNestedManyWithoutRequestedInventoryItemInput
     fixedAssets?: FixedAssetUncheckedCreateNestedManyWithoutInventoryItemInput
+    roomFacilities?: RoomFacilityUncheckedCreateNestedManyWithoutInventoryItemInput
   }
 
   export type InventoryItemCreateOrConnectWithoutMovementsInput = {
@@ -124676,6 +125008,7 @@ export namespace Prisma {
     fieldReportsAsItem?: StaffFieldReportUpdateManyWithoutInventoryItemNestedInput
     fieldReportsAsRequestedItem?: StaffFieldReportUpdateManyWithoutRequestedInventoryItemNestedInput
     fixedAssets?: FixedAssetUpdateManyWithoutInventoryItemNestedInput
+    roomFacilities?: RoomFacilityUpdateManyWithoutInventoryItemNestedInput
   }
 
   export type InventoryItemUncheckedUpdateWithoutMovementsInput = {
@@ -124697,6 +125030,7 @@ export namespace Prisma {
     fieldReportsAsItem?: StaffFieldReportUncheckedUpdateManyWithoutInventoryItemNestedInput
     fieldReportsAsRequestedItem?: StaffFieldReportUncheckedUpdateManyWithoutRequestedInventoryItemNestedInput
     fixedAssets?: FixedAssetUncheckedUpdateManyWithoutInventoryItemNestedInput
+    roomFacilities?: RoomFacilityUncheckedUpdateManyWithoutInventoryItemNestedInput
   }
 
   export type RoomUpsertWithoutInventoryMovementsInput = {
@@ -125141,6 +125475,7 @@ export namespace Prisma {
     linkedTickets?: TicketCreateNestedManyWithoutLinkedInventoryItemInput
     fieldReportsAsRequestedItem?: StaffFieldReportCreateNestedManyWithoutRequestedInventoryItemInput
     fixedAssets?: FixedAssetCreateNestedManyWithoutInventoryItemInput
+    roomFacilities?: RoomFacilityCreateNestedManyWithoutInventoryItemInput
   }
 
   export type InventoryItemUncheckedCreateWithoutFieldReportsAsItemInput = {
@@ -125162,6 +125497,7 @@ export namespace Prisma {
     linkedTickets?: TicketUncheckedCreateNestedManyWithoutLinkedInventoryItemInput
     fieldReportsAsRequestedItem?: StaffFieldReportUncheckedCreateNestedManyWithoutRequestedInventoryItemInput
     fixedAssets?: FixedAssetUncheckedCreateNestedManyWithoutInventoryItemInput
+    roomFacilities?: RoomFacilityUncheckedCreateNestedManyWithoutInventoryItemInput
   }
 
   export type InventoryItemCreateOrConnectWithoutFieldReportsAsItemInput = {
@@ -125187,6 +125523,7 @@ export namespace Prisma {
     linkedTickets?: TicketCreateNestedManyWithoutLinkedInventoryItemInput
     fieldReportsAsItem?: StaffFieldReportCreateNestedManyWithoutInventoryItemInput
     fixedAssets?: FixedAssetCreateNestedManyWithoutInventoryItemInput
+    roomFacilities?: RoomFacilityCreateNestedManyWithoutInventoryItemInput
   }
 
   export type InventoryItemUncheckedCreateWithoutFieldReportsAsRequestedItemInput = {
@@ -125208,6 +125545,7 @@ export namespace Prisma {
     linkedTickets?: TicketUncheckedCreateNestedManyWithoutLinkedInventoryItemInput
     fieldReportsAsItem?: StaffFieldReportUncheckedCreateNestedManyWithoutInventoryItemInput
     fixedAssets?: FixedAssetUncheckedCreateNestedManyWithoutInventoryItemInput
+    roomFacilities?: RoomFacilityUncheckedCreateNestedManyWithoutInventoryItemInput
   }
 
   export type InventoryItemCreateOrConnectWithoutFieldReportsAsRequestedItemInput = {
@@ -125712,6 +126050,7 @@ export namespace Prisma {
     linkedTickets?: TicketUpdateManyWithoutLinkedInventoryItemNestedInput
     fieldReportsAsRequestedItem?: StaffFieldReportUpdateManyWithoutRequestedInventoryItemNestedInput
     fixedAssets?: FixedAssetUpdateManyWithoutInventoryItemNestedInput
+    roomFacilities?: RoomFacilityUpdateManyWithoutInventoryItemNestedInput
   }
 
   export type InventoryItemUncheckedUpdateWithoutFieldReportsAsItemInput = {
@@ -125733,6 +126072,7 @@ export namespace Prisma {
     linkedTickets?: TicketUncheckedUpdateManyWithoutLinkedInventoryItemNestedInput
     fieldReportsAsRequestedItem?: StaffFieldReportUncheckedUpdateManyWithoutRequestedInventoryItemNestedInput
     fixedAssets?: FixedAssetUncheckedUpdateManyWithoutInventoryItemNestedInput
+    roomFacilities?: RoomFacilityUncheckedUpdateManyWithoutInventoryItemNestedInput
   }
 
   export type InventoryItemUpsertWithoutFieldReportsAsRequestedItemInput = {
@@ -125764,6 +126104,7 @@ export namespace Prisma {
     linkedTickets?: TicketUpdateManyWithoutLinkedInventoryItemNestedInput
     fieldReportsAsItem?: StaffFieldReportUpdateManyWithoutInventoryItemNestedInput
     fixedAssets?: FixedAssetUpdateManyWithoutInventoryItemNestedInput
+    roomFacilities?: RoomFacilityUpdateManyWithoutInventoryItemNestedInput
   }
 
   export type InventoryItemUncheckedUpdateWithoutFieldReportsAsRequestedItemInput = {
@@ -125785,6 +126126,7 @@ export namespace Prisma {
     linkedTickets?: TicketUncheckedUpdateManyWithoutLinkedInventoryItemNestedInput
     fieldReportsAsItem?: StaffFieldReportUncheckedUpdateManyWithoutInventoryItemNestedInput
     fixedAssets?: FixedAssetUncheckedUpdateManyWithoutInventoryItemNestedInput
+    roomFacilities?: RoomFacilityUncheckedUpdateManyWithoutInventoryItemNestedInput
   }
 
   export type UserUpsertWithoutStaffFieldReportsCreatedInput = {
@@ -128348,6 +128690,7 @@ export namespace Prisma {
     linkedTickets?: TicketCreateNestedManyWithoutLinkedInventoryItemInput
     fieldReportsAsItem?: StaffFieldReportCreateNestedManyWithoutInventoryItemInput
     fieldReportsAsRequestedItem?: StaffFieldReportCreateNestedManyWithoutRequestedInventoryItemInput
+    roomFacilities?: RoomFacilityCreateNestedManyWithoutInventoryItemInput
   }
 
   export type InventoryItemUncheckedCreateWithoutFixedAssetsInput = {
@@ -128369,6 +128712,7 @@ export namespace Prisma {
     linkedTickets?: TicketUncheckedCreateNestedManyWithoutLinkedInventoryItemInput
     fieldReportsAsItem?: StaffFieldReportUncheckedCreateNestedManyWithoutInventoryItemInput
     fieldReportsAsRequestedItem?: StaffFieldReportUncheckedCreateNestedManyWithoutRequestedInventoryItemInput
+    roomFacilities?: RoomFacilityUncheckedCreateNestedManyWithoutInventoryItemInput
   }
 
   export type InventoryItemCreateOrConnectWithoutFixedAssetsInput = {
@@ -128802,6 +129146,7 @@ export namespace Prisma {
     linkedTickets?: TicketUpdateManyWithoutLinkedInventoryItemNestedInput
     fieldReportsAsItem?: StaffFieldReportUpdateManyWithoutInventoryItemNestedInput
     fieldReportsAsRequestedItem?: StaffFieldReportUpdateManyWithoutRequestedInventoryItemNestedInput
+    roomFacilities?: RoomFacilityUpdateManyWithoutInventoryItemNestedInput
   }
 
   export type InventoryItemUncheckedUpdateWithoutFixedAssetsInput = {
@@ -128823,6 +129168,7 @@ export namespace Prisma {
     linkedTickets?: TicketUncheckedUpdateManyWithoutLinkedInventoryItemNestedInput
     fieldReportsAsItem?: StaffFieldReportUncheckedUpdateManyWithoutInventoryItemNestedInput
     fieldReportsAsRequestedItem?: StaffFieldReportUncheckedUpdateManyWithoutRequestedInventoryItemNestedInput
+    roomFacilities?: RoomFacilityUncheckedUpdateManyWithoutInventoryItemNestedInput
   }
 
   export type RoomItemUpsertWithoutFixedAssetsInput = {
@@ -139683,6 +140029,7 @@ export namespace Prisma {
     publicVisible?: boolean
     condition?: string | null
     note?: string | null
+    inventoryItemId?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -140415,6 +140762,7 @@ export namespace Prisma {
     note?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    inventoryItem?: InventoryItemUpdateOneWithoutRoomFacilitiesNestedInput
   }
 
   export type RoomFacilityUncheckedUpdateWithoutRoomInput = {
@@ -140425,6 +140773,7 @@ export namespace Prisma {
     publicVisible?: BoolFieldUpdateOperationsInput | boolean
     condition?: NullableStringFieldUpdateOperationsInput | string | null
     note?: NullableStringFieldUpdateOperationsInput | string | null
+    inventoryItemId?: NullableIntFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -140437,6 +140786,7 @@ export namespace Prisma {
     publicVisible?: BoolFieldUpdateOperationsInput | boolean
     condition?: NullableStringFieldUpdateOperationsInput | string | null
     note?: NullableStringFieldUpdateOperationsInput | string | null
+    inventoryItemId?: NullableIntFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -141948,6 +142298,19 @@ export namespace Prisma {
     updatedAt?: Date | string
   }
 
+  export type RoomFacilityCreateManyInventoryItemInput = {
+    id?: number
+    roomId: number
+    name: string
+    quantity?: number
+    category?: string | null
+    publicVisible?: boolean
+    condition?: string | null
+    note?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
   export type RoomItemUpdateWithoutItemInput = {
     qty?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     status?: EnumRoomItemStatusFieldUpdateOperationsInput | $Enums.RoomItemStatus
@@ -142388,6 +142751,44 @@ export namespace Prisma {
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     disposedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     disposalNote?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type RoomFacilityUpdateWithoutInventoryItemInput = {
+    name?: StringFieldUpdateOperationsInput | string
+    quantity?: IntFieldUpdateOperationsInput | number
+    category?: NullableStringFieldUpdateOperationsInput | string | null
+    publicVisible?: BoolFieldUpdateOperationsInput | boolean
+    condition?: NullableStringFieldUpdateOperationsInput | string | null
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    room?: RoomUpdateOneRequiredWithoutFacilitiesNestedInput
+  }
+
+  export type RoomFacilityUncheckedUpdateWithoutInventoryItemInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    roomId?: IntFieldUpdateOperationsInput | number
+    name?: StringFieldUpdateOperationsInput | string
+    quantity?: IntFieldUpdateOperationsInput | number
+    category?: NullableStringFieldUpdateOperationsInput | string | null
+    publicVisible?: BoolFieldUpdateOperationsInput | boolean
+    condition?: NullableStringFieldUpdateOperationsInput | string | null
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type RoomFacilityUncheckedUpdateManyWithoutInventoryItemInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    roomId?: IntFieldUpdateOperationsInput | number
+    name?: StringFieldUpdateOperationsInput | string
+    quantity?: IntFieldUpdateOperationsInput | number
+    category?: NullableStringFieldUpdateOperationsInput | string | null
+    publicVisible?: BoolFieldUpdateOperationsInput | boolean
+    condition?: NullableStringFieldUpdateOperationsInput | string | null
+    note?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }

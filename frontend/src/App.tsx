@@ -48,6 +48,7 @@ const MyManualPage = lazy(() => import('./pages/portal/MyManualPage'));
 const LoyaltyAdminPage = lazy(() => import('./pages/loyalty/LoyaltyAdminPage'));
 const WifiOrderPage = lazy(() => import('./pages/portal/WifiOrderPage'));
 const ConfiguredResourcePage = lazy(() => import('./pages/resources/ConfiguredResourcePage'));
+const InventoryShellPage = lazy(() => import('./pages/resources/InventoryShellPage'));
 const BookingPage = lazy(() => import('./pages/bookings/BookingPage'));
 const RoomDetailPage = lazy(() => import('./pages/rooms/RoomDetailPage'));
 const CheckInWizard = lazy(() => import('./pages/stays/CheckInWizard'));
@@ -76,6 +77,12 @@ function TenantBookingRouteGuard({ children }: { children: ReactNode }) {
   if (isLoading) return null;
   if (stage !== 'browsing') return <TenantBookingGate mode="booking-route" />;
   return <>{children}</>;
+}
+
+// FASE B-2: redirect lama → tab Mutasi shell, pertahankan query (itemId/movementType/dll) untuk prefill.
+function InventoryMovementsRedirect() {
+  const { search } = useLocation();
+  return <Navigate to={`/inventory/mutasi${search}`} replace />;
 }
 
 function RootEntry() {
@@ -181,9 +188,17 @@ export default function App() {
           <Route path="/staff-performance" element={<RequireRoles allowed={['OWNER', 'ADMIN']}><AdminStaffPerformancePage /></RequireRoles>} />
           <Route path="/staff-report" element={<RequireRoles allowed={['STAFF']}><StaffMonthlyReportPage /></RequireRoles>} />
           <Route path="/staff-warehouse" element={<RequireRoles allowed={['STAFF']}><StaffWarehousePage /></RequireRoles>} />
-          <Route path="/inventory-items" element={<RequireRoles allowed={['OWNER', 'ADMIN']}><ConfiguredResourcePage resource="inventory-items" /></RequireRoles>} />
-          <Route path="/room-items" element={<RequireRoles allowed={['OWNER', 'ADMIN']}><ConfiguredResourcePage resource="room-items" /></RequireRoles>} />
-          <Route path="/inventory-movements" element={<RequireRoles allowed={['OWNER', 'ADMIN']}><ConfiguredResourcePage resource="inventory-movements" /></RequireRoles>} />
+          {/* FASE B-2: shell Inventaris terpadu (Gudang | Barang Kamar | Mutasi). */}
+          <Route path="/inventory" element={<RequireRoles allowed={['OWNER', 'ADMIN']}><InventoryShellPage /></RequireRoles>}>
+            <Route index element={<Navigate to="/inventory/gudang" replace />} />
+            <Route path="gudang" element={<ConfiguredResourcePage resource="inventory-items" hideAreaMenu />} />
+            <Route path="barang-kamar" element={<ConfiguredResourcePage resource="room-items" hideAreaMenu />} />
+            <Route path="mutasi" element={<ConfiguredResourcePage resource="inventory-movements" hideAreaMenu />} />
+          </Route>
+          {/* Redirect route lama → shell (preservasi query untuk deep-link prefill mutasi). */}
+          <Route path="/inventory-items" element={<Navigate to="/inventory/gudang" replace />} />
+          <Route path="/room-items" element={<Navigate to="/inventory/barang-kamar" replace />} />
+          <Route path="/inventory-movements" element={<InventoryMovementsRedirect />} />
           <Route path="/wifi-sales" element={<RequireRoles allowed={['OWNER', 'ADMIN']}><ConfiguredResourcePage resource="wifi-sales" /></RequireRoles>} />
           <Route path="/ancillary-revenue" element={<RequireRoles allowed={['OWNER', 'ADMIN']}><AncillaryRevenuePage /></RequireRoles>} />
           <Route path="/finance/accounting-setup" element={<RequireRoles allowed={['OWNER', 'ADMIN']}><AccountingSetupPage /></RequireRoles>} />

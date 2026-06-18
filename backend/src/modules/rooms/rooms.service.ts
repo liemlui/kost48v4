@@ -252,10 +252,12 @@ export class RoomsService {
     const quantity = dto.quantity ?? 1;
     if (quantity < 1) throw new ConflictException('Jumlah fasilitas minimal 1.');
 
+    const inventoryItemId = dto.inventoryItemId ?? undefined;
     const facility = await this.prisma.roomFacility.create({
       data: {
         roomId,
         name,
+        inventoryItemId,
         quantity,
         category: dto.category?.trim() || null,
         publicVisible: dto.publicVisible ?? true,
@@ -298,6 +300,7 @@ export class RoomsService {
     if (dto.category !== undefined) updateData.category = dto.category?.trim() || null;
     if (dto.publicVisible !== undefined) updateData.publicVisible = dto.publicVisible;
     if (dto.condition !== undefined) updateData.condition = dto.condition?.trim() || null;
+    if (dto.inventoryItemId !== undefined) (updateData as any).inventoryItemId = dto.inventoryItemId ?? null;
     if (dto.note !== undefined) updateData.note = dto.note?.trim() || null;
 
     const updated = await this.prisma.roomFacility.update({
