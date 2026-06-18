@@ -366,7 +366,7 @@ Output akhir:
 
 #### B3 — Foto, brosur, dan aset marketing
 - [x] **PUB-CARD-RESPONSIVE:** grid public rooms sudah 4/2/1 kolom.
-- [ ] **PUB-FACILITY-PHOTO:** owner belum bisa upload 1 foto per fasilitas; aset fasilitas publik masih statis.
+- [x] **PUB-FACILITY-PHOTO:** owner bisa upload 1 foto per fasilitas via Settings → Foto Fasilitas; foto real tampil di landing page publik (fallback emoji bila belum ada foto).
 - [~] **OWN-FOTO-UPLOAD:** upload foto kamar sudah ada di Owner Settings; sisa CRUD foto marketing, fasilitas, brosur/spanduk.
 - [~] **PUB-BROCHURE:** section "Galeri KOST48" + aset brosur/spanduk statis sudah ada; sisa upload/kelola dari Owner Settings.
 
@@ -512,6 +512,13 @@ Output akhir:
 - **BE:** `GET /meter-readings` kini mengizinkan TENANT membaca meter hanya untuk kamar aktifnya; query `roomId` lain ditolak.
 - **FE:** `/portal/stay` menampilkan jendela catat meter bulan ini, status sudah/belum, catatan terakhir, dan CTA catat meter.
 - Gate: BE `npx.cmd tsc --noEmit` PASS; FE `npx.cmd tsc -b` PASS; FE `npm.cmd run build` PASS (rerun escalated karena sandbox Vite access denied).
+
+### 2026-06-18 — feat(PUB-FACILITY-PHOTO): upload foto fasilitas publik + tampil di landing page
+- **PUB-FACILITY-PHOTO:** Backend `POST /facility-images/upload/:slug` (OWNER/ADMIN, file JPG/PNG/WebP, max 2MB) + `GET /facility-images` (publik) + `DELETE /facility-images/:slug`.
+- **Service:** `FacilityImagesService` — simpan file ke `uploads/room-images/facilities/{slug}.{ext}`, tanpa perubahan schema.
+- **Settings:** tab baru "Foto Fasilitas" di OwnerSettingsPage (`FacilityPhotoPanel`) — grid upload/ganti/hapus per slug.
+- **Landing page:** `PublicGuestDashboardPage` — fetch foto real dari API, tampilkan gambar bila ada, fallback emoji bila belum.
+- Gate: BE build 0 · FE build 109 chunk, PWA ok.
 
 ### 2026-06-18 — feat(PUB-CALENDAR): availability calendar timeline horizontal (backend + frontend)
 - **PUB-CALENDAR:** backend `GET /public/rooms/availability-calendar?from&to` — grid per kamar per tanggal (KOSONG/BOOKING_DP/HUNI/MAINTENANCE). Logic: stay ACTIVE + room status → status per hari.
