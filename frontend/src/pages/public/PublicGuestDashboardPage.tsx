@@ -26,6 +26,7 @@ import {
   getPublicRoomVisibleAmenities,
   isPublicRoomBookable,
 } from '../../utils/publicRoomDisplay';
+import { resolveAbsoluteFileUrl } from '../../utils/resolveAbsoluteFileUrl';
 
 const NAV_LINKS = [
   { href: '#pilihan-kamar', icon: '🛏️', label: 'Kamar' },
@@ -746,11 +747,12 @@ export default function PublicGuestDashboardPage() {
             <div className="gx-facility-list gx-facility-list-active">
               {activeFacility.items.map((item) => {
                 const imgUrl = facilityImageMap.get(item.slug);
+                const resolvedImgUrl = imgUrl ? resolveAbsoluteFileUrl(imgUrl) ?? imgUrl : null;
                 return (
-                  <div key={item.label} className={`gx-facility-row${imgUrl ? ' has-photo' : ''}`}>
-                    {imgUrl ? (
+                  <div key={item.label} className={`gx-facility-row${resolvedImgUrl ? ' has-photo' : ''}`}>
+                    {resolvedImgUrl ? (
                       <img
-                        src={imgUrl.startsWith('http') ? imgUrl : imgUrl}
+                        src={resolvedImgUrl}
                         alt={item.label}
                         className="gx-facility-photo"
                         loading="lazy"

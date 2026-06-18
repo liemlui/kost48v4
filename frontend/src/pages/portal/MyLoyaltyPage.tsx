@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Alert, Badge, Button, Card, Col, Row, Spinner } from 'react-bootstrap';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { getLoyaltyLeaderboard, getMyLoyalty, getMyPeerReportsAboutMe, getMyRedemptions, getReferralCode, getRewards, markPeerReportImproved, requestRedemption } from '../../api/loyalty';
+import { getCleanlinessRanking } from '../../api/marketing';
 
 const STATUS_VARIANT: Record<string, string> = {
   PENDING: 'warning',
@@ -34,6 +35,13 @@ export default function MyLoyaltyPage() {
   const totalEarned = loyaltyQuery.data?.totalEarned ?? items.filter((i) => i.delta > 0).reduce((s, i) => s + i.delta, 0);
   const totalRedeemed = loyaltyQuery.data?.totalRedeemed ?? Math.abs(items.filter((i) => i.delta < 0).reduce((s, i) => s + i.delta, 0));
   const leaderboard = leaderboardQuery.data ?? [];
+  const now = new Date();
+  const cleanRankQuery = useQuery({
+    queryKey: ['cleanliness-ranking', now.getMonth() + 1, now.getFullYear()],
+    queryFn: () => getCleanlinessRanking(now.getMonth() + 1, now.getFullYear()),
+    staleTime: 120_000,
+  });
+  const cleanRank = cleanRankQuery.data?.ranking ?? [];
   const medal = (rank: number) => (rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : `#${rank}`);
 
   const redeemMutation = useMutation({
@@ -97,6 +105,33 @@ export default function MyLoyaltyPage() {
           </Card.Body></Card>
         </Col>
       </Row>
+
+      {/* TEN-GAMIF: Ranking kebersihan depan kamar bulanan */}
+      {cleanRank.length > 0 && (
+        <Card className="mb-4">
+          <Card.Header className="d-flex align-items-center justify-content-between flex-wrap gap-1">
+            <strong>🧹 Ranking Kebersihan Bulan Ini</strong>
+            <small className="text-muted">berdasarkan rutinitas kebersihan staf · anonim</small>
+          </Card.Header>
+          <Card.Body className="p-0">
+            <ul className="list-group list-group-flush">
+              {cleanRank.map((row, i) => {
+                const icon = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `${i + 1}.`;
+                return (
+                  <li key={row.roomId} className="list-group-item d-flex justify-content-between align-items-center">
+                    <span>
+                      <span className="me-2" style={{ fontSize: '1.2rem' }} aria-hidden>{icon}</span>
+                      <strong>Kamar {row.code}</strong>
+                      <small className="text-muted ms-2">{row.doneCount ?? 0}/{row.expectedCount ?? 0} jadwal</small>
+                    </span>
+                    <Badge bg={i < 3 ? 'success' : 'secondary'} pill>{row.score}%</Badge>
+                  </li>
+                );
+              })}
+            </ul>
+          </Card.Body>
+        </Card>
+      )}
 
       {/* Papan kebaikan top-3 (anonim per kamar) */}
       {leaderboard.length > 0 && (

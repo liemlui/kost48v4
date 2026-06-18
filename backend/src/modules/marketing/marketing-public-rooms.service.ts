@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException, ServiceUnavailableException } from '@nestjs/common';
 import { Prisma } from '../../generated/prisma';
 import { PricingTerm, RoomStatus } from '../../common/enums/app.enums';
+import { StaffRoutineAreaType, StaffRoutineFrequency, StaffRoutineStatus } from '../../generated/prisma';
 import { buildMeta, buildPagination } from '../../common/utils/pagination';
 import { serializePrismaResult } from '../../common/utils/serialization';
 import { PrismaService } from '../../prisma/prisma.service';
@@ -540,6 +541,98 @@ export class MarketingPublicRoomsService {
       PricingTerm.SMESTERLY,
       PricingTerm.YEARLY,
     ];
+  }
+
+  /** TEN-GAMIF: ranking kebersihan depan kamar bulanan — berdasarkan StaffRoutineCompletion area CLEANING. */
+  async getCleanlinessRanking(month?: number, year?: number) {
+    const now = new Date();
+    const targetMonth = month ?? now.getMonth() + 1; // 1-based
+    const targetYear = year ?? now.getFullYear();
+
+    const monthStart = new Date(targetYear, targetMonth - 1, 1);
+    const monthEnd = new Date(targetYear, targetMonth, 0, 23, 59, 59, 999);
+
+    // Ambil semua template CLEANING.
+    const cleaningTemplates = await this.prisma.staffRoutineTemplate.findMany({
+      where: { areaType: StaffRoutineAreaType.CLEANING, isActive: true },
+      select: { id: true },
+    });
+    const templateIds = cleaningTemplates.map((t) => t.id);
+    if (templateIds.length === 0) return { month: targetMonth, year: targetYear, ranking: [] };
+
+    const countExpected = (template: { frequency: StaffRoutineFrequency; dayOfWeek: number | null; dayOfMonth: number | null }) => {
+      let expected = 0;
+      for (const date = new Date(monthStart); date <= monthEnd; date.setDate(date.getDate() + 1)) {
+        if (template.frequency === StaffRoutineFrequency.DAILY) expected += 1;
+        if (template.frequency === StaffRoutineFrequency.WEEKLY && (template.dayOfWeek == null || template.dayOfWeek === date.getDay())) expected += 1;
+        if (template.frequency === StaffRoutineFrequency.MONTHLY && (template.dayOfMonth == null || template.dayOfMonth === date.getDate())) expected += 1;
+      }
+      return expected;
+    };
+
+    // Assignment aktif adalah denominator ranking; kamar yang belum dikerjakan tetap muncul.
+    const assignments = await this.prisma.staffRoutineAssignment.findMany({
+      where: {
+        templateId: { in: templateIds },
+        roomId: { not: null },
+        isActive: true,
+      },
+      select: {
+        roomId: true,
+        template: { select: { frequency: true, dayOfWeek: true, dayOfMonth: true } },
+      },
+    });
+    const statsByRoomId = new Map<number, { expectedCount: number; doneCount: number }>();
+    for (const assignment of assignments) {
+      if (!assignment.roomId) continue;
+      const current = statsByRoomId.get(assignment.roomId) ?? { expectedCount: 0, doneCount: 0 };
+      current.expectedCount += countExpected(assignment.template);
+      statsByRoomId.set(assignment.roomId, current);
+    }
+
+    const completions = await this.prisma.staffRoutineCompletion.groupBy({
+      by: ['roomId'],
+      where: {
+        templateId: { in: templateIds },
+        roomId: { not: null },
+        dueDate: { gte: monthStart, lte: monthEnd },
+        status: StaffRoutineStatus.DONE,
+      },
+      _count: { id: true },
+    });
+    for (const completion of completions) {
+      if (!completion.roomId) continue;
+      const current = statsByRoomId.get(completion.roomId) ?? { expectedCount: 0, doneCount: 0 };
+      current.doneCount = completion._count.id;
+      statsByRoomId.set(completion.roomId, current);
+    }
+
+    const roomIds = [...statsByRoomId.keys()];
+    if (roomIds.length === 0) return { month: targetMonth, year: targetYear, ranking: [] };
+
+    const rooms = await this.prisma.room.findMany({
+      where: { id: { in: roomIds } },
+      select: { id: true, code: true, name: true, floor: true },
+    });
+    const roomMap = new Map(rooms.map((r) => [r.id, r]));
+
+    const ranked = roomIds
+      .map((roomId) => {
+        const stats = statsByRoomId.get(roomId) ?? { expectedCount: 0, doneCount: 0 };
+        const expectedCount = stats.expectedCount > 0 ? stats.expectedCount : stats.doneCount;
+        const score = expectedCount > 0 ? Math.round((stats.doneCount / expectedCount) * 100) : 0;
+        return {
+          roomId,
+          code: roomMap.get(roomId)?.code ?? `#${roomId}`,
+          name: roomMap.get(roomId)?.name ?? null,
+          score,
+          doneCount: stats.doneCount,
+          expectedCount,
+        };
+      })
+      .sort((a, b) => b.score - a.score || b.doneCount - a.doneCount || a.code.localeCompare(b.code));
+
+    return { month: targetMonth, year: targetYear, ranking: ranked };
   }
 
   private resolveRent(room: Pick<PublicRoomRecord, 'monthlyRateRupiah'>, pricingTerm: PricingTerm): number {

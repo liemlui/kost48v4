@@ -15,11 +15,16 @@ const FACILITY_SLUGS: { slug: string; label: string }[] = [
   { slug: 'parkir-luas', label: 'Parkir luas' },
   { slug: 'dapur-bersama', label: 'Dapur bersama' },
   { slug: 'air-pdam-tandon', label: 'Air PDAM + tandon' },
-  { slug: 'jemuran-luas', label: 'Jemuran luas' },
-  { slug: 'wifi', label: 'WiFi' },
-  { slug: 'cctv', label: 'CCTV 24 jam' },
+  { slug: 'balkon-santai', label: 'Balkon santai' },
+  { slug: 'area-jemur', label: 'Area jemur' },
   { slug: 'taman', label: 'Taman/halaman' },
-  { slug: 'ruang-tamu', label: 'Ruang tamu bersama' },
+  { slug: 'kasur', label: 'Kasur' },
+  { slug: 'lemari-baju', label: 'Lemari baju' },
+  { slug: 'ac-kipas', label: 'AC / kipas' },
+  { slug: 'kamar-mandi', label: 'Kamar mandi' },
+  { slug: 'wifi', label: 'WiFi' },
+  { slug: 'galon-air', label: 'Galon air' },
+  { slug: 'tv-tambahan', label: 'TV tambahan' },
 ];
 
 function FacilityPhotoPanel() {
@@ -81,9 +86,8 @@ function FacilityPhotoPanel() {
                   <div className="settings-facility-img-wrap">
                     {imageUrl ? (
                       <SafeImage
-                        src={imageUrl.startsWith('http') ? imageUrl : `${window.location.origin}${imageUrl}`}
+                        src={imageUrl}
                         alt={label}
-                        resolveUrl={false}
                         className="settings-facility-img"
                       />
                     ) : (
