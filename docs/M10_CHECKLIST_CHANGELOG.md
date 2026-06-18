@@ -435,7 +435,7 @@ Output akhir:
 - [x] **STF-WIFI-ORDER:** flow lengkap tanpa schema: tenant lihat paket WiFi di `/portal/wifi` + tombol "Pesan Sekarang" → `ServiceInterest` → admin proses → `WifiSale` + invoice. Staff read-only via `GET /wifi-sales`. WhatsApp tetap sebagai fallback.
 - [x] **STF-TIP-FLOW:** T-1 tenant acknowledge + notif staff + endpoint `POST /tickets/:id/tip-confirm` (STAFF konfirmasi Sudah/Belum) + notif balik ke tenant + idempotency `TIP_CONFIRMED`. Sisa: UI konfirmasi di portal staff + auto-grace sweeper 2 hari.
 - [x] **STF-THEME:** standarkan header, tabs, empty/loading, mobile z-index di route staff — CSS `staff-panel-card`, `staff-meter-table`, z-index mobile.
-- [~] **STF-THEME screenshot:** `ui-shots/shoot-staff.mjs` desktop sudah ada; sisa tambah/rapikan mobile capture.
+- [x] **STF-THEME screenshot:** `ui-shots/shoot-staff.mjs` desktop + mobile (390px) — 4 halaman staf: report, dashboard, warehouse, tickets.
 
 **Gate:** frontend build PASS; untuk role/finance wajib UAT guard dan pastikan tip/WiFi tidak membuat jurnal liar.
 

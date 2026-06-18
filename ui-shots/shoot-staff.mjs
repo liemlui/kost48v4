@@ -39,5 +39,27 @@ await page.goto(APP + '/staff-warehouse', { waitUntil: 'networkidle', timeout: 3
 await page.waitForTimeout(1300);
 await page.screenshot({ path: 'ui-shots/staff_warehouse.png', fullPage: true });
 
+// 5) MOBILE capture — semua halaman staf di viewport 390px
+const mobileCtx = await browser.newContext({ viewport: { width: 390, height: 844 } });
+await mobileCtx.addInitScript(([k, v]) => window.localStorage.setItem(k, v), [TOKEN_KEY, token]);
+const m = await mobileCtx.newPage();
+
+await m.goto(APP + '/staff-report', { waitUntil: 'networkidle', timeout: 30000 }).catch(() => {});
+await m.waitForTimeout(1000);
+await m.screenshot({ path: 'ui-shots/staff_report_mobile-390.png', fullPage: false });
+
+await m.goto(APP + '/dashboard', { waitUntil: 'networkidle', timeout: 30000 }).catch(() => {});
+await m.waitForTimeout(1000);
+await m.screenshot({ path: 'ui-shots/staff_dashboard_mobile-390.png', fullPage: false });
+
+await m.goto(APP + '/staff-warehouse', { waitUntil: 'networkidle', timeout: 30000 }).catch(() => {});
+await m.waitForTimeout(1000);
+await m.screenshot({ path: 'ui-shots/staff_warehouse_mobile-390.png', fullPage: false });
+
+await m.goto(APP + '/tickets', { waitUntil: 'networkidle', timeout: 30000 }).catch(() => {});
+await m.waitForTimeout(1000);
+await m.screenshot({ path: 'ui-shots/staff_tickets_mobile-390.png', fullPage: false });
+
+await mobileCtx.close();
 await browser.close();
-console.log('Selesai staf.');
+console.log('Selesai staf (desktop + mobile).');
