@@ -100,6 +100,11 @@ export class UsersService {
         role: dto.role,
         tenantId: dto.tenantId ?? null,
         isActive: dto.isActive ?? true,
+        tipGopay: dto.tipGopay ?? undefined,
+        tipOvo: dto.tipOvo ?? undefined,
+        tipDana: dto.tipDana ?? undefined,
+        tipShopeepay: dto.tipShopeepay ?? undefined,
+        tipBank: dto.tipBank ?? undefined,
       },
       select: { id: true, fullName: true, email: true, role: true, tenantId: true, isActive: true },
     });
@@ -160,9 +165,10 @@ export class UsersService {
         tipGopay: dto.tipGopay ?? undefined,
         tipOvo: dto.tipOvo ?? undefined,
         tipDana: dto.tipDana ?? undefined,
+        tipShopeepay: dto.tipShopeepay ?? undefined,
         tipBank: dto.tipBank ?? undefined,
       },
-      select: { id: true, fullName: true, email: true, role: true, tenantId: true, isActive: true, tipGopay: true, tipOvo: true, tipDana: true, tipBank: true },
+      select: { id: true, fullName: true, email: true, role: true, tenantId: true, isActive: true, tipGopay: true, tipOvo: true, tipDana: true, tipShopeepay: true, tipBank: true },
     });
 
     const { passwordHash: _pw, ...safeOldData } = existing;

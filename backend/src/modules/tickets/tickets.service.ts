@@ -238,6 +238,52 @@ export class TicketsService {
     return { items: enriched, meta: buildMeta(page, limit, totalItems) };
   }
 
+  // STF-TIP-FLOW: staff konfirmasi tip (Sudah/Belum masuk). Idempoten, hanya sekali konfirmasi per tiket.
+  async confirmTip(ticketId: number, staffId: number, received: boolean) {
+    const ticket = await this.prisma.ticket.findUnique({
+      where: { id: ticketId },
+      select: { id: true, tenantId: true, assignedToId: true, status: true },
+    });
+    if (!ticket) throw new NotFoundException('Tiket tidak ditemukan');
+    if (ticket.assignedToId !== staffId) {
+      throw new ForbiddenException('Anda bukan penanggung jawab tiket ini');
+    }
+    if (!ticket.tenantId) throw new BadRequestException('Tiket ini tidak memiliki tenant');
+
+    // Cegah konfirmasi dobel: cek apakah sudah ada event TIP_CONFIRMED
+    const existing = await this.prisma.staffPerformanceEvent.findFirst({
+      where: { eventType: 'TIP_CONFIRMED' as any, sourceType: 'TICKET' as any, sourceId: ticketId },
+      select: { id: true },
+    });
+    if (existing) throw new ConflictException('Konfirmasi tip untuk tiket ini sudah ada');
+
+    // Catat konfirmasi
+    await this.prisma.staffPerformanceEvent.create({
+      data: {
+        staffId,
+        sourceType: 'TICKET' as any,
+        sourceId: ticketId,
+        eventType: 'TIP_CONFIRMED' as any,
+        scoreDelta: 0,
+        reason: received ? 'Tip dikonfirmasi staf: sudah masuk' : 'Tip dikonfirmasi staf: belum masuk',
+      },
+    });
+
+    // Notif balik ke tenant
+    await this.notification.createOnce({
+      recipientUserId: ticket.tenantId,
+      title: received ? '✅ Tip dikonfirmasi staf' : '⚠️ Tip belum dikonfirmasi staf',
+      body: received
+        ? 'Staf mengkonfirmasi tip sudah diterima. Terima kasih!'
+        : 'Staf menyatakan tip belum masuk. Silakan cek kembali transfer Anda.',
+      linkTo: `/tickets/${ticketId}`,
+      entityType: 'Ticket',
+      entityId: String(ticketId),
+    });
+
+    return { confirmed: true, received };
+  }
+
   /**
    * T-1: penghuni menandai "sudah beri tip" untuk staf yang menangani tiket (P2P, di luar buku kos).
    * Tercatat sebagai StaffPerformanceEvent TIP_RECEIVED (scoreDelta 0 — hanya HITUNGAN, bukan nominal,
@@ -271,6 +317,17 @@ export class TicketsService {
         reason: 'Tip diberikan penghuni (P2P, tanpa nominal)',
       },
     });
+
+    // STF-TIP-FLOW: notif staff bahwa tenant mengakui tip (P2P, di luar buku kos).
+    await this.notification.createOnce({
+      recipientUserId: ticket.assignedToId,
+      title: '🙏 Tip dari penghuni',
+      body: 'Penghuni mengakui sudah memberi tip untuk tiket ini. Silakan cek e-wallet dan konfirmasi.',
+      linkTo: `/tickets/${ticketId}`,
+      entityType: 'Ticket',
+      entityId: String(ticketId),
+    });
+
     return { acknowledged: true, alreadyRecorded: false };
   }
 

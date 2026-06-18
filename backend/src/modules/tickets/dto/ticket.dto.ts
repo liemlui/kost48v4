@@ -200,3 +200,9 @@ export class CloseTicketDto {
   })
   finalAdminNote?: string;
 }
+
+// STF-TIP-FLOW: staff konfirmasi tip dari tenant.
+export class TipConfirmDto {
+  @IsBoolean()
+  received!: boolean;
+}

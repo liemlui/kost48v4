@@ -1009,6 +1009,27 @@
   outline-offset: -2px;
 }
 
+/* Toggle versi mobile (di dalam offcanvas): lebar penuh */
+.owner-view-toggle-mobile {
+  display: flex;
+  width: 100%;
+  margin-bottom: 0.85rem;
+}
+.owner-view-toggle-mobile .owner-view-toggle-btn {
+  flex: 1 1 0;
+  justify-content: center;
+  text-align: center;
+}
+
+/* OWN-TOGGLE-TRANSITION: transisi halus saat sidebar ciut/lebar */
+.app-shell-grid {
+  transition: grid-template-columns 0.3s ease;
+}
+.app-sidebar,
+.app-main {
+  transition: width 0.3s ease, margin 0.3s ease, padding 0.3s ease;
+}
+
 /* Compact mode: sembunyikan panel berat */
 .owner-view-compact .owner-trend-panel,
 .owner-view-compact .owner-ai-panel {

@@ -398,19 +398,19 @@ Output akhir:
 #### C2 — Toggle Owner/Admin mode
 - [~] **OWN-TOGGLE-CSS:** toggle sudah ada + style dasar; sisa detail checklist: radius 12px, active white+shadow, hover state, transition 0.2s.
 - [~] **OWN-TOGGLE-LAYOUT:** toggle sudah berada di topbar; sisa polish posisi antara breadcrumb/actions + divider.
-- [ ] **OWN-TOGGLE-MOBILE:** toggle belum tersedia di offcanvas mobile/dropdown navbar mobile.
-- [ ] **OWN-TOGGLE-TRANSITION:** belum ada transisi `.app-sidebar, .app-main { transition: all 0.3s ease; }`.
+- [x] **OWN-TOGGLE-MOBILE:** (SELESAI 2026-06-19) toggle Kokpit/Area Admin kini muncul lebar-penuh di offcanvas mobile (`owner-view-toggle-mobile`); toggle topbar dijadikan desktop-only (`d-none d-xl-inline-flex`) agar tak bertumpuk di layar kecil.
+- [x] **OWN-TOGGLE-TRANSITION:** (SELESAI 2026-06-19) `12-owner.css`: transisi `grid-template-columns` di `.app-shell-grid` + `width/margin/padding` di `.app-sidebar, .app-main` (0.3s ease) saat sidebar ciut/lebar.
 
 #### C3 — Sidebar, breadcrumb, dan aksi topbar adaptif
-- [ ] **OWN-SIDEBAR-CONTEXT:** `SidebarContent` belum menerima `ownerViewMode` prop penuh untuk title/subtitle/footer.
+- [x] **OWN-SIDEBAR-CONTEXT:** (SELESAI 2026-06-19) `SidebarContent` kini menerima prop `ownerViewMode`; context-card title/subtitle pakai `getWorkspaceTitle/Summary(role, mode)` dan footer/`isAdmin` memperlakukan OWNER mode-admin sebagai konteks admin.
 - [~] **OWN-BREADCRUMB-MODE:** breadcrumb sudah mengikuti link-set mode; sisa hard-label root "Kokpit Owner" / "Area Admin".
-- [ ] **OWN-OFFCANVAS-TITLE:** `Offcanvas.Title` masih statis, belum ikut mode owner/admin.
-- [ ] **OWN-ADMIN-ICON-ACTION:** tombol "Pengumuman" belum muncul saat OWNER berada di mode admin.
+- [x] **OWN-OFFCANVAS-TITLE:** (SELESAI 2026-06-19) `Offcanvas.Title` kini `getWorkspaceTitle(role, ownerViewMode)` → "Kokpit Owner"/"Area Admin (Owner)" mengikuti mode.
+- [x] **OWN-ADMIN-ICON-ACTION:** (SELESAI 2026-06-19) tombol "Pengumuman" tampil saat `isAdmin || (isOwner && ownerViewMode === 'admin')`.
 - [ ] **OWN-STATUS-CARDS:** Kokpit Owner belum punya kartu status lengkap: okupansi, tunggakan, meter due, go-live readiness, dan grup sidebar "Operasional" vs "Keputusan Owner".
 
 #### C4 — Route split dan guard
-- [ ] **OWN-ROUTE-SPLIT:** `/owner-dashboard` dan `/admin-dashboard` belum dipisah sebagai route nyata.
-- [ ] **OWN-ROUTE-GUARD:** guard `/owner-dashboard` vs `/admin-dashboard` belum mode-aware penuh.
+- [x] **OWN-ROUTE-SPLIT:** (SELESAI 2026-06-19) `/admin-dashboard` kini route nyata (OWNER) di `App.tsx` → `DashboardAdmin`; render inline hack di `AppLayout` dibuang. `ownerAdminSections` (sidebar) + `RoleWorkspaceTabs(adminDashboardPath)` + chip internal `DashboardAdmin` memakai base path dinamis (`/admin-dashboard` vs `/dashboard`).
+- [x] **OWN-ROUTE-GUARD:** (SELESAI 2026-06-19) `/owner-dashboard` & `/admin-dashboard` OWNER-only via `RequireRoles`; toggle owner kini navigasi antar route, dan `AppLayout` sinkronkan `ownerViewMode` dari pathname (buka `/admin-dashboard` → mode admin, `/owner-dashboard` → mode owner).
 - [~] **OWN-ROLE-TABS-MODE:** tabs sudah ikut mode via role override di `AppLayout`; sisa jadikan mode eksplisit, bukan hack role.
 - [ ] **OWN-BACKEND-MODE** *(opsional)*: header `X-Owner-View-Mode` belum dikirim untuk audit log/guard backend.
 
@@ -500,6 +500,16 @@ Output akhir:
 ## Changelog Ringkas
 
 > Dipadatkan dari `docs/CHANGELOG.md`: header tanggal dipertahankan, tiap entry hanya menyimpan 1-2 poin outcome. Detail verbose tetap ada di source lama.
+
+### 2026-06-19 — feat(OWN-ROUTE-SPLIT/GUARD): /admin-dashboard route nyata + mode owner ikut route
+- **Split:** route baru `/admin-dashboard` (OWNER-only) di `App.tsx` me-render `DashboardAdmin`; hack render-inline di `AppLayout` dihapus → selalu `<Outlet/>`. Sidebar pakai `ownerAdminSections` (dashboard → `/admin-dashboard`), `RoleWorkspaceTabs` terima `adminDashboardPath`, chip internal `DashboardAdmin` pakai `dashboardBase` dinamis.
+- **Guard:** kedua dashboard OWNER-only via `RequireRoles`; toggle owner kini `navigate()` antar route + `AppLayout` sinkronkan `ownerViewMode` dari pathname (URL langsung pun mode-aware). Title `/admin-dashboard` ditambah di `routeTitles`.
+- Gate: FE build 109 chunk, PWA verify PASS.
+
+### 2026-06-19 — ui(OWNER-VIEW mode-aware): sidebar/offcanvas/admin-action ikut mode + toggle mobile
+- **Fase C cluster (5 item):** `SidebarContent` terima prop `ownerViewMode` → title/subtitle/footer & flag admin ikut mode (OWN-SIDEBAR-CONTEXT); `Offcanvas.Title` dinamis "Kokpit Owner"/"Area Admin (Owner)" (OWN-OFFCANVAS-TITLE); tombol "Pengumuman" muncul saat OWNER mode-admin (OWN-ADMIN-ICON-ACTION).
+- **Mobile/transisi:** toggle Kokpit/Area Admin ditambah lebar-penuh di offcanvas + toggle topbar jadi desktop-only (OWN-TOGGLE-MOBILE); transisi 0.3s ease pada `.app-shell-grid`/`.app-sidebar`/`.app-main` (OWN-TOGGLE-TRANSITION).
+- Gate: FE build 109 chunk, PWA verify PASS. Sisa Fase C: OWN-STATUS-CARDS, OWN-ROUTE-SPLIT/GUARD, OWN-BACKEND-MODE (opsional), FASE B-2 inventaris shell.
 
 ### 2026-06-18 — fix(PUB-CALENDAR-CSS): tambah stylesheet AvailabilityTimeline + settings-facility-actions
 - **Audit AI:** komponen `AvailabilityTimeline.tsx` merujuk 20+ class CSS (`avcal-*`, `cell-*`) yang tidak ada di stylesheet manapun — tabel kalender tampil tanpa warna status, tanpa layout, tanpa scroll control.

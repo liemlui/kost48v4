@@ -1,0 +1,125 @@
+$ npm --prefix frontend run build
+[exit 0]
+
+> kost48surabaya-v3-frontend@1.0.0 build
+> tsc -b && vite build && node scripts/stamp-pwa-build.mjs && node scripts/verify-pwa.mjs
+
+[36mvite v5.4.21 [32mbuilding for production...[36m[39m
+transforming...
+[32m✓[39m 1555 modules transformed.
+rendering chunks...
+computing gzip size...
+[2mdist/[22m[32mindex.html                                       [39m[1m[2m  3.32 kB[22m[1m[22m[2m │ gzip:   1.08 kB[22m
+[2mdist/[22m[35massets/index-Cb3a14nl.css                        [39m[1m[2m700.35 kB[22m[1m[22m[2m │ gzip: 110.58 kB[22m
+[2mdist/[22m[36massets/settings-DxNuYmw6.js                      [39m[1m[2m  0.22 kB[22m[1m[22m[2m │ gzip:   0.15 kB[22m
+[2mdist/[22m[36massets/marketing-0INrhyXL.js                     [39m[1m[2m  0.26 kB[22m[1m[22m[2m │ gzip:   0.18 kB[22m
+[2mdist/[22m[36massets/meterReadings-B8V8O3zp.js                 [39m[1m[2m  0.27 kB[22m[1m[22m[2m │ gzip:   0.18 kB[22m
+[2mdist/[22m[36massets/surveys-BYIFLkj_.js                       [39m[1m[2m  0.27 kB[22m[1m[22m[2m │ gzip:   0.16 kB[22m
+[2mdist/[22m[36massets/Container-LlYmhnGR.js                     [39m[1m[2m  0.31 kB[22m[1m[22m[2m │ gzip:   0.25 kB[22m
+[2mdist/[22m[36massets/chartPalette-D3vjRcL8.js                  [39m[1m[2m  0.31 kB[22m[1m[22m[2m │ gzip:   0.23 kB[22m
+[2mdist/[22m[36massets/readabilityRules-DSjnw2d2.js              [39m[1m[2m  0.31 kB[22m[1m[22m[2m │ gzip:   0.26 kB[22m
+[2mdist/[22m[36massets/staffFieldReports-DjOchM6y.js             [39m[1m[2m  0.34 kB[22m[1m[22m[2m │ gzip:   0.20 kB[22m
+[2mdist/[22m[36massets/mediaUploads-DUQrxkqW.js                  [39m[1m[2m  0.34 kB[22m[1m[22m[2m │ gzip:   0.25 kB[22m
+[2mdist/[22m[36massets/getApiErrorMessage-DUxaJCiv.js            [39m[1m[2m  0.36 kB[22m[1m[22m[2m │ gzip:   0.24 kB[22m
+[2mdist/[22m[36massets/facilityImages-CfaH3A65.js                [39m[1m[2m  0.38 kB[22m[1m[22m[2m │ gzip:   0.25 kB[22m
+[2mdist/[22m[36massets/useClientPagination-BCBsgrnG.js           [39m[1m[2m  0.39 kB[22m[1m[22m[2m │ gzip:   0.28 kB[22m
+[2mdist/[22m[36massets/faqs-BW0WzVDp.js                          [39m[1m[2m  0.42 kB[22m[1m[22m[2m │ gzip:   0.23 kB[22m
+[2mdist/[22m[36massets/Row-ebagYrUR.js                           [39m[1m[2m  0.43 kB[22m[1m[22m[2m │ gzip:   0.33 kB[22m
+[2mdist/[22m[36massets/EmptyState-BDMEcbEF.js                    [39m[1m[2m  0.50 kB[22m[1m[22m[2m │ gzip:   0.29 kB[22m
+[2mdist/[22m[36massets/invoices-BI8QsFD_.js                      [39m[1m[2m  0.50 kB[22m[1m[22m[2m │ gzip:   0.23 kB[22m
+[2mdist/[22m[36massets/Table-oiWShT7v.js                         [39m[1m[2m  0.57 kB[22m[1m[22m[2m │ gzip:   0.36 kB[22m
+[2mdist/[22m[36massets/PaginationControls-BviK1HA8.js            [39m[1m[2m  0.57 kB[22m[1m[22m[2m │ gzip:   0.38 kB[22m
+[2mdist/[22m[36massets/AuthenticatedFileLink-CQ8ZQrEj.js         [39m[1m[2m  0.59 kB[22m[1m[22m[2m │ gzip:   0.39 kB[22m
+[2mdist/[22m[36massets/additionalServices-DUf-X623.js            [39m[1m[2m  0.59 kB[22m[1m[22m[2m │ gzip:   0.26 kB[22m
+[2mdist/[22m[36massets/checkoutRequests-CiYvbF1D.js              [39m[1m[2m  0.60 kB[22m[1m[22m[2m │ gzip:   0.30 kB[22m
+[2mdist/[22m[36massets/AssistantInsightLine-9sm2WUdL.js          [39m[1m[2m  0.63 kB[22m[1m[22m[2m │ gzip:   0.39 kB[22m
+[2mdist/[22m[36massets/PageHeader-CQrDnBOw.js                    [39m[1m[2m  0.70 kB[22m[1m[22m[2m │ gzip:   0.33 kB[22m
+[2mdist/[22m[36massets/renewRequests-ueMlv8fg.js                 [39m[1m[2m  0.75 kB[22m[1m[22m[2m │ gzip:   0.33 kB[22m
+[2mdist/[22m[36massets/EntityBadgeFilterBar-CazXlV6m.js          [39m[1m[2m  0.77 kB[22m[1m[22m[2m │ gzip:   0.42 kB[22m
+[2mdist/[22m[36massets/StatusStrip-B7G4KgF2.js                   [39m[1m[2m  0.89 kB[22m[1m[22m[2m │ gzip:   0.45 kB[22m
+[2mdist/[22m[36massets/compressImageFile-Bx-N8l_F.js             [39m[1m[2m  0.93 kB[22m[1m[22m[2m │ gzip:   0.55 kB[22m
+[2mdist/[22m[36massets/CameraOrGalleryInput-Bhqzzgb0.js          [39m[1m[2m  0.96 kB[22m[1m[22m[2m │ gzip:   0.48 kB[22m
+[2mdist/[22m[36massets/tenantPaymentProof-sKgOqPSn.js            [39m[1m[2m  1.00 kB[22m[1m[22m[2m │ gzip:   0.55 kB[22m
+[2mdist/[22m[36massets/DonutGauge-CvmykXyX.js                    [39m[1m[2m  1.06 kB[22m[1m[22m[2m │ gzip:   0.62 kB[22m
+[2mdist/[22m[36massets/AiAssistButton-CF3Kmcue.js                [39m[1m[2m  1.06 kB[22m[1m[22m[2m │ gzip:   0.60 kB[22m
+[2mdist/[22m[36massets/CompactMetrics-DTsoO4QC.js                [39m[1m[2m  1.10 kB[22m[1m[22m[2m │ gzip:   0.55 kB[22m
+[2mdist/[22m[36massets/Nav-Bdco7GtX.js                           [39m[1m[2m  1.13 kB[22m[1m[22m[2m │ gzip:   0.63 kB[22m
+[2mdist/[22m[36massets/WifiOrderPage-8uy1t0JP.js                 [39m[1m[2m  1.24 kB[22m[1m[22m[2m │ gzip:   0.61 kB[22m
+[2mdist/[22m[36massets/SegmentedTabs-DT4VDQzl.js                 [39m[1m[2m  1.31 kB[22m[1m[22m[2m │ gzip:   0.75 kB[22m
+[2mdist/[22m[36massets/MyManualPage-CoDX6ymd.js                  [39m[1m[2m  1.39 kB[22m[1m[22m[2m │ gzip:   0.79 kB[22m
+[2mdist/[22m[36massets/tenantRules-CniK_6Yy.js                   [39m[1m[2m  1.44 kB[22m[1m[22m[2m │ gzip:   0.68 kB[22m
+[2mdist/[22m[36massets/FreeRepairPolicyCard-ZtaKluWF.js          [39m[1m[2m  1.48 kB[22m[1m[22m[2m │ gzip:   0.78 kB[22m
+[2mdist/[22m[36massets/StaffPerformanceCategoryCard-BujhyNDb.js  [39m[1m[2m  1.50 kB[22m[1m[22m[2m │ gzip:   0.73 kB[22m
+[2mdist/[22m[36massets/loyalty-1mtmQ2AO.js                       [39m[1m[2m  1.52 kB[22m[1m[22m[2m │ gzip:   0.44 kB[22m
+[2mdist/[22m[36massets/Collapse-CWsM45j8.js                      [39m[1m[2m  1.60 kB[22m[1m[22m[2m │ gzip:   0.88 kB[22m
+[2mdist/[22m[36massets/stays-DidfOeTc.js                         [39m[1m[2m  1.61 kB[22m[1m[22m[2m │ gzip:   0.63 kB[22m
+[2mdist/[22m[36massets/LifecycleTimeline-BkghpWes.js             [39m[1m[2m  1.72 kB[22m[1m[22m[2m │ gzip:   0.73 kB[22m
+[2mdist/[22m[36massets/HorizontalBarChart-Dpib1fmc.js            [39m[1m[2m  1.80 kB[22m[1m[22m[2m │ gzip:   1.00 kB[22m
+[2mdist/[22m[36massets/invoiceUtility-D1EdJNMM.js                [39m[1m[2m  2.04 kB[22m[1m[22m[2m │ gzip:   0.90 kB[22m
+[2mdist/[22m[36massets/depositLedgerLabels-BbHuHF4-.js           [39m[1m[2m  2.25 kB[22m[1m[22m[2m │ gzip:   0.87 kB[22m
+[2mdist/[22m[36massets/Accordion-BccBK1uN.js                     [39m[1m[2m  2.54 kB[22m[1m[22m[2m │ gzip:   0.96 kB[22m
+[2mdist/[22m[36massets/TenantAnnouncementDetailPage-bNyGjK8w.js  [39m[1m[2m  2.75 kB[22m[1m[22m[2m │ gzip:   1.34 kB[22m
+[2mdist/[22m[36massets/staffRepairOptions-vFGVNN2J.js            [39m[1m[2m  2.97 kB[22m[1m[22m[2m │ gzip:   1.26 kB[22m
+[2mdist/[22m[36massets/ServiceInterestsPage-CAkL3xzq.js          [39m[1m[2m  2.97 kB[22m[1m[22m[2m │ gzip:   1.30 kB[22m
+[2mdist/[22m[36massets/MyAnnouncementsPage-DhEnEzH8.js           [39m[1m[2m  3.01 kB[22m[1m[22m[2m │ gzip:   1.39 kB[22m
+[2mdist/[22m[36massets/accounting-BCZXIxhz.js                    [39m[1m[2m  3.06 kB[22m[1m[22m[2m │ gzip:   0.77 kB[22m
+[2mdist/[22m[36massets/invoiceActionSafety-DQCPCuyX.js           [39m[1m[2m  3.10 kB[22m[1m[22m[2m │ gzip:   1.27 kB[22m
+[2mdist/[22m[36massets/AssistantPanel-BkZDGuZo.js                [39m[1m[2m  3.20 kB[22m[1m[22m[2m │ gzip:   1.31 kB[22m
+[2mdist/[22m[36massets/StaffRoomsPage-Ck74YURn.js                [39m[1m[2m  3.73 kB[22m[1m[22m[2m │ gzip:   1.65 kB[22m
+[2mdist/[22m[36massets/RejectCheckoutModal-Ct8IO8L2.js           [39m[1m[2m  3.84 kB[22m[1m[22m[2m │ gzip:   1.53 kB[22m
+[2mdist/[22m[36massets/LossRefundsPage-Cc9vGRpu.js               [39m[1m[2m  3.99 kB[22m[1m[22m[2m │ gzip:   1.72 kB[22m
+[2mdist/[22m[36massets/Tabs-DUvDLLoV.js                          [39m[1m[2m  4.42 kB[22m[1m[22m[2m │ gzip:   1.74 kB[22m
+[2mdist/[22m[36massets/publicRoomDisplay-BLUTIP84.js             [39m[1m[2m  4.72 kB[22m[1m[22m[2m │ gzip:   1.98 kB[22m
+[2mdist/[22m[36massets/StayHistoryTimeline-MFQURDdT.js           [39m[1m[2m  4.87 kB[22m[1m[22m[2m │ gzip:   1.89 kB[22m
+[2mdist/[22m[36massets/MeterCycleModal-BrouSoDQ.js               [39m[1m[2m  5.01 kB[22m[1m[22m[2m │ gzip:   1.96 kB[22m
+[2mdist/[22m[36massets/AncillaryRevenuePage-2wyK4MCI.js          [39m[1m[2m  5.64 kB[22m[1m[22m[2m │ gzip:   2.07 kB[22m
+[2mdist/[22m[36massets/NotificationsPage-EE38Cb39.js             [39m[1m[2m  6.32 kB[22m[1m[22m[2m │ gzip:   2.35 kB[22m
+[2mdist/[22m[36massets/StaffWarehousePage-9WMqamLn.js            [39m[1m[2m  7.55 kB[22m[1m[22m[2m │ gzip:   2.84 kB[22m
+[2mdist/[22m[36massets/BookingPage-uCqn9P00.js                   [39m[1m[2m  8.18 kB[22m[1m[22m[2m │ gzip:   3.21 kB[22m
+[2mdist/[22m[36massets/StaffRoutinesAdminPage-Djyz6VfJ.js        [39m[1m[2m  8.32 kB[22m[1m[22m[2m │ gzip:   2.56 kB[22m
+[2mdist/[22m[36massets/InvoicePrintLayout-C04LuQhA.js            [39m[1m[2m  9.43 kB[22m[1m[22m[2m │ gzip:   2.44 kB[22m
+[2mdist/[22m[36massets/ProfilePage-BrAqpeFg.js                   [39m[1m[2m  9.91 kB[22m[1m[22m[2m │ gzip:   3.45 kB[22m
+[2mdist/[22m[36massets/MyInvoicesPage-rV5h6Wqx.js                [39m[1m[2m 10.22 kB[22m[1m[22m[2m │ gzip:   4.02 kB[22m
+[2mdist/[22m[36massets/MyLoyaltyPage-Bpa5Pme_.js                 [39m[1m[2m 10.23 kB[22m[1m[22m[2m │ gzip:   3.00 kB[22m
+[2mdist/[22m[36massets/ReminderPreviewPage-BvYrzNiF.js           [39m[1m[2m 10.86 kB[22m[1m[22m[2m │ gzip:   3.41 kB[22m
+[2mdist/[22m[36massets/LoyaltyAdminPage-B0ZzHDHj.js              [39m[1m[2m 11.04 kB[22m[1m[22m[2m │ gzip:   3.18 kB[22m
+[2mdist/[22m[36massets/simpleCrudHelpers-CHE5L9s6.js             [39m[1m[2m 12.60 kB[22m[1m[22m[2m │ gzip:   4.16 kB[22m
+[2mdist/[22m[36massets/StaffInventoryStatusModal-CrVJz-2h.js     [39m[1m[2m 13.68 kB[22m[1m[22m[2m │ gzip:   4.70 kB[22m
+[2mdist/[22m[36massets/index-BeE05I-i.js                         [39m[1m[2m 14.93 kB[22m[1m[22m[2m │ gzip:   6.50 kB[22m
+[2mdist/[22m[36massets/MyTicketsPage-BH0ld8OA.js                 [39m[1m[2m 15.41 kB[22m[1m[22m[2m │ gzip:   5.64 kB[22m
+[2mdist/[22m[36massets/MeterTab-CzqhwULA.js                      [39m[1m[2m 15.93 kB[22m[1m[22m[2m │ gzip:   4.46 kB[22m
+[2mdist/[22m[36massets/MarketAnalysisPage-DM08MPbk.js            [39m[1m[2m 16.43 kB[22m[1m[22m[2m │ gzip:   5.16 kB[22m
+[2mdist/[22m[36massets/OwnerSettingsPage-BGOAeO0K.js             [39m[1m[2m 16.94 kB[22m[1m[22m[2m │ gzip:   5.32 kB[22m
+[2mdist/[22m[36massets/PieChart-CPWxL3Oc.js                      [39m[1m[2m 17.11 kB[22m[1m[22m[2m │ gzip:   5.51 kB[22m
+[2mdist/[22m[36massets/InvoiceDetailPage-G_QcVJEn.js             [39m[1m[2m 17.24 kB[22m[1m[22m[2m │ gzip:   5.32 kB[22m
+[2mdist/[22m[36massets/TenantInvoiceDetailPage-C7WAjF4c.js       [39m[1m[2m 17.28 kB[22m[1m[22m[2m │ gzip:   5.56 kB[22m
+[2mdist/[22m[36massets/AdminStaffPerformancePage-BSDIQg91.js     [39m[1m[2m 18.86 kB[22m[1m[22m[2m │ gzip:   5.76 kB[22m
+[2mdist/[22m[36massets/AssetRegisterPage-DFOt_89_.js             [39m[1m[2m 19.25 kB[22m[1m[22m[2m │ gzip:   5.13 kB[22m
+[2mdist/[22m[36massets/RoomDetailPage-rr3CDlQ6.js                [39m[1m[2m 19.77 kB[22m[1m[22m[2m │ gzip:   5.98 kB[22m
+[2mdist/[22m[36massets/GuestBookingPage-CNcweN3P.js              [39m[1m[2m 20.37 kB[22m[1m[22m[2m │ gzip:   6.48 kB[22m
+[2mdist/[22m[36massets/PublicRoomDetailPage-DY_xr9zy.js          [39m[1m[2m 20.41 kB[22m[1m[22m[2m │ gzip:   7.01 kB[22m
+[2mdist/[22m[36massets/MyBookingsPage-iWEx65NV.js                [39m[1m[2m 22.56 kB[22m[1m[22m[2m │ gzip:   7.26 kB[22m
+[2mdist/[22m[36massets/InvoicesPage-DGHkKHiA.js                  [39m[1m[2m 23.41 kB[22m[1m[22m[2m │ gzip:   7.60 kB[22m
+[2mdist/[22m[36massets/RoomsRouteEntry-BHXWooIG.js               [39m[1m[2m 25.38 kB[22m[1m[22m[2m │ gzip:   8.16 kB[22m
+[2mdist/[22m[36massets/RenewRequestsAdminPage-CkjbMqpB.js        [39m[1m[2m 26.28 kB[22m[1m[22m[2m │ gzip:   7.66 kB[22m
+[2mdist/[22m[36massets/StaffMonthlyReportPage-D8M3oD20.js        [39m[1m[2m 26.85 kB[22m[1m[22m[2m │ gzip:   7.85 kB[22m
+[2mdist/[22m[36massets/OwnerDashboardPage-BwO1NeeG.js            [39m[1m[2m 28.95 kB[22m[1m[22m[2m │ gzip:   9.40 kB[22m
+[2mdist/[22m[36massets/PublicGuestDashboardPage-LmRp3FNU.js      [39m[1m[2m 31.97 kB[22m[1m[22m[2m │ gzip:   9.55 kB[22m
+[2mdist/[22m[36massets/PaymentReviewPage-CNB1jPR0.js             [39m[1m[2m 33.41 kB[22m[1m[22m[2m │ gzip:  10.16 kB[22m
+[2mdist/[22m[36massets/StaysPage-9gIhLFnn.js                     [39m[1m[2m 35.48 kB[22m[1m[22m[2m │ gzip:   9.90 kB[22m
+[2mdist/[22m[36massets/MyStayPage-BADCr9iO.js                    [39m[1m[2m 35.91 kB[22m[1m[22m[2m │ gzip:  10.66 kB[22m
+[2mdist/[22m[36massets/TicketsPage-tDzqXEaE.js                   [39m[1m[2m 42.57 kB[22m[1m[22m[2m │ gzip:  11.41 kB[22m
+[2mdist/[22m[36massets/BarChart-DLfu_JgH.js                      [39m[1m[2m 47.54 kB[22m[1m[22m[2m │ gzip:  13.12 kB[22m
+[2mdist/[22m[36massets/DashboardPage-BSYXNoKr.js                 [39m[1m[2m 52.83 kB[22m[1m[22m[2m │ gzip:  15.58 kB[22m
+[2mdist/[22m[36massets/CheckInWizard-Dcngu_EZ.js                 [39m[1m[2m 56.37 kB[22m[1m[22m[2m │ gzip:  17.70 kB[22m
+[2mdist/[22m[36massets/ReportsPage-CYzfwm32.js                   [39m[1m[2m 60.53 kB[22m[1m[22m[2m │ gzip:  12.05 kB[22m
+[2mdist/[22m[36massets/ConfiguredResourcePage-B33xpM4H.js        [39m[1m[2m 63.84 kB[22m[1m[22m[2m │ gzip:  17.83 kB[22m
+[2mdist/[22m[36massets/DashboardAdmin-D1FI8Xo0.js                [39m[1m[2m 79.20 kB[22m[1m[22m[2m │ gzip:  22.11 kB[22m
+[2mdist/[22m[36massets/StayDetailPage-BduWe8v1.js                [39m[1m[2m 81.98 kB[22m[1m[22m[2m │ gzip:  21.30 kB[22m
+[2mdist/[22m[36massets/SearchableSelect-CaD4smAL.js              [39m[1m[2m 87.54 kB[22m[1m[22m[2m │ gzip:  31.39 kB[22m
+[2mdist/[22m[36massets/AccountingSetupPage-Dz-Azzvx.js           [39m[1m[2m 91.21 kB[22m[1m[22m[2m │ gzip:  21.36 kB[22m
+[2mdist/[22m[36massets/CategoricalChart-BMFAnbfi.js              [39m[1m[2m310.23 kB[22m[1m[22m[2m │ gzip:  96.24 kB[22m
+[2mdist/[22m[36massets/index-Ca69ond9.js                         [39m[1m[2m458.85 kB[22m[1m[22m[2m │ gzip: 148.83 kB[22m
+[32m✓ built in 29.92s[39m
+Stamped PWA build nbuwzuv7SHHy.
+PWA verification passed. build=nbuwzuv7SHHy chunks=109 initial-js-gzip=145 KiB initial-css-gzip=108 KiB

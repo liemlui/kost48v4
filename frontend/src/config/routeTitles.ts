@@ -16,6 +16,7 @@ const ROUTE_TITLES: Array<{ pattern: string; title: string }> = [
 
   { pattern: '/dashboard', title: 'Dashboard' },
   { pattern: '/owner-dashboard', title: 'Dashboard Owner' },
+  { pattern: '/admin-dashboard', title: 'Area Admin (Owner)' },
   { pattern: '/market-analysis', title: 'Analisa Pasar' },
   { pattern: '/profile', title: 'Profil' },
 

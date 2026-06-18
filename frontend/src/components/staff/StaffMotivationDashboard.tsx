@@ -5,6 +5,7 @@ import StaffUnifiedWorkQueue from './StaffUnifiedWorkQueue';
 import StaffRoutineChecklist from './StaffRoutineChecklist';
 import StaffActionLauncher from './StaffActionLauncher';
 import StaffOperationalTaskBoard from './StaffOperationalTaskBoard';
+import StaffMeterStatusPanel from './StaffMeterStatusPanel';
 import { makeStaffWorkStats, getStaffMotivation } from '../../utils/staffWorkStats';
 import type { ActionQueueItem } from '../command-center';
 import type { AuthUser, InventoryItem, Room, Ticket } from '../../types';
@@ -99,6 +100,8 @@ export default function StaffMotivationDashboard({ user, tickets, rooms = [], in
           </Card.Body>
         </Card>
       </div>
+
+      <StaffMeterStatusPanel rooms={rooms} />
     </div>
   );
 }

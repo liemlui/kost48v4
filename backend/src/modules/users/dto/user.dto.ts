@@ -26,6 +26,7 @@ export class CreateUserDto {
   @IsOptional() @IsString() tipGopay?: string;
   @IsOptional() @IsString() tipOvo?: string;
   @IsOptional() @IsString() tipDana?: string;
+  @IsOptional() @IsString() tipShopeepay?: string;
   @IsOptional() @IsString() tipBank?: string;
 }
 
@@ -59,5 +60,6 @@ export class UpdateUserDto {
   @IsOptional() @IsString() tipGopay?: string;
   @IsOptional() @IsString() tipOvo?: string;
   @IsOptional() @IsString() tipDana?: string;
+  @IsOptional() @IsString() tipShopeepay?: string;
   @IsOptional() @IsString() tipBank?: string;
 }

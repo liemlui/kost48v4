@@ -1,4 +1,4 @@
-import { type ReactNode, useEffect, useMemo, useState, lazy, Suspense } from 'react';
+import { type ReactNode, useEffect, useMemo, useState } from 'react';
 import { useTenantPortalStage } from '../../hooks/useTenantPortalStage';
 import { Button, Offcanvas } from 'react-bootstrap';
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
@@ -10,13 +10,11 @@ import GlobalSearch from './GlobalSearch';
 import PaymentUrgencyChip from '../payment-urgency/PaymentUrgencyChip';
 import Kost48LogoMark from '../common/Kost48LogoMark';
 import TenantAvatar from '../common/TenantAvatar';
-import { LoadingDashboard } from '../../pages/dashboard/dashboardShared';
-const AdminDashboard = lazy(() => import('../../pages/dashboard/DashboardAdmin'));
 import {
   getDefaultRoute,
   getNavigationLinks,
   getNavigationSections,
-  adminSections,
+  ownerAdminSections,
   type NavigationLink,
   type NavigationSection,
 } from '../../config/navigation';
@@ -129,12 +127,14 @@ function SidebarContent({
   sections,
   links,
   userRole,
+  ownerViewMode,
   onNavigate,
   onBrandClick,
 }: {
   sections: NavigationSection[];
   links: NavigationLink[];
   userRole?: string;
+  ownerViewMode?: 'owner' | 'admin';
   onNavigate?: () => void;
   onBrandClick?: () => void;
 }) {
@@ -144,7 +144,8 @@ function SidebarContent({
     return paths.some((path) => location.pathname === path || location.pathname.startsWith(`${path}/`));
   };
   const activeLink = links.find(isLinkActive);
-  const isAdmin = userRole === 'ADMIN';
+  // OWNER dalam mode admin diperlakukan sebagai konteks admin untuk title/subtitle/footer.
+  const isAdmin = userRole === 'ADMIN' || (userRole === 'OWNER' && ownerViewMode === 'admin');
   const [collapsedSections, setCollapsedSections] = useState<Record<string, boolean>>({});
   const toggleSection = (title: string) => setCollapsedSections((current) => ({ ...current, [title]: !current[title] }));
 
@@ -160,10 +161,10 @@ function SidebarContent({
 
       <div className={`sidebar-context-card ${isAdmin ? 'sidebar-context-card-admin' : ''}`}>
         <div className="sidebar-context-topline">
-          <span>{isAdmin ? 'Admin Command Center' : getWorkspaceTitle(userRole)}</span>
+          <span>{getWorkspaceTitle(userRole, ownerViewMode)}</span>
           <strong>{activeLink?.label || 'Dashboard'}</strong>
         </div>
-        <div className="app-caption mt-1">{activeLink?.hint || getWorkspaceSummary(userRole)}</div>
+        <div className="app-caption mt-1">{activeLink?.hint || getWorkspaceSummary(userRole, ownerViewMode)}</div>
       </div>
 
       <nav className="sidebar-nav-groups">
@@ -252,13 +253,28 @@ export default function AppLayout({ children }: { children?: ReactNode }) {
     }
   }, [ownerViewMode, isOwner]);
 
+  // OWN-ROUTE-GUARD: mode mengikuti route dashboard nyata. Membuka /admin-dashboard
+  // (mis. via URL langsung atau tab) menyalakan mode admin; /owner-dashboard kembali ke mode owner.
+  useEffect(() => {
+    if (!isOwner) return;
+    if (location.pathname === '/admin-dashboard' && ownerViewMode !== 'admin') setOwnerViewMode('admin');
+    else if (location.pathname === '/owner-dashboard' && ownerViewMode !== 'owner') setOwnerViewMode('owner');
+  }, [location.pathname, isOwner, ownerViewMode]);
+
+  // OWN-ROUTE-SPLIT: ganti mode = pindah ke route dashboard yang sesuai (bukan render inline).
+  const changeOwnerViewMode = (mode: 'owner' | 'admin') => {
+    setOwnerViewMode(mode);
+    setSidebarOpen(false);
+    navigate(mode === 'admin' ? '/admin-dashboard' : '/owner-dashboard');
+  };
+
   const sections = useMemo(() => {
-    if (isOwner && ownerViewMode === 'admin') return adminSections;
+    if (isOwner && ownerViewMode === 'admin') return ownerAdminSections;
     return getNavigationSections(user?.role, tenantStage);
   }, [user?.role, tenantStage, isOwner, ownerViewMode]);
 
   const links = useMemo(() => {
-    if (isOwner && ownerViewMode === 'admin') return adminSections.flatMap((s) => s.links);
+    if (isOwner && ownerViewMode === 'admin') return ownerAdminSections.flatMap((s) => s.links);
     return getNavigationLinks(user?.role, tenantStage);
   }, [user?.role, tenantStage, isOwner, ownerViewMode]);
 
@@ -338,16 +354,34 @@ export default function AppLayout({ children }: { children?: ReactNode }) {
           <button type="button" className={`sidebar-collapse-toggle ${sidebarCollapsed === 'collapsed' ? 'collapsed' : ''}`} onClick={toggleSidebarCollapsed} aria-label={sidebarCollapsed === 'collapsed' ? 'Perluas sidebar' : 'Ciutkan sidebar'} title={sidebarCollapsed === 'collapsed' ? 'Perluas' : 'Ciutkan'}>
             ◀
           </button>
-          <SidebarContent sections={sections} links={links} userRole={user?.role} onBrandClick={() => navigate(defaultRoute)} />
+          <SidebarContent sections={sections} links={links} userRole={user?.role} ownerViewMode={isOwner ? ownerViewMode : undefined} onBrandClick={() => navigate(defaultRoute)} />
         </aside>
 
         <Offcanvas show={sidebarOpen} onHide={() => setSidebarOpen(false)} placement="start" className="app-sidebar-offcanvas">
           <Offcanvas.Header closeButton closeLabel="Tutup navigasi">
-            <Offcanvas.Title>{getWorkspaceTitle(user?.role)}</Offcanvas.Title>
+            <Offcanvas.Title>{getWorkspaceTitle(user?.role, isOwner ? ownerViewMode : undefined)}</Offcanvas.Title>
           </Offcanvas.Header>
           <Offcanvas.Body>
             <div className="app-sidebar app-sidebar-mobile">
-              <SidebarContent sections={sections} links={links} userRole={user?.role} onBrandClick={() => { setSidebarOpen(false); navigate(defaultRoute); }} onNavigate={() => setSidebarOpen(false)} />
+              {isOwner ? (
+                <div className="owner-view-toggle owner-view-toggle-mobile" role="group" aria-label="Mode tampilan owner">
+                  <button
+                    type="button"
+                    className={`owner-view-toggle-btn ${ownerViewMode === 'owner' ? 'active' : ''}`}
+                    onClick={() => changeOwnerViewMode('owner')}
+                  >
+                    <span aria-hidden="true">📈</span> Kokpit Owner
+                  </button>
+                  <button
+                    type="button"
+                    className={`owner-view-toggle-btn ${ownerViewMode === 'admin' ? 'active' : ''}`}
+                    onClick={() => changeOwnerViewMode('admin')}
+                  >
+                    <span aria-hidden="true">🔧</span> Area Admin
+                  </button>
+                </div>
+              ) : null}
+              <SidebarContent sections={sections} links={links} userRole={user?.role} ownerViewMode={isOwner ? ownerViewMode : undefined} onBrandClick={() => { setSidebarOpen(false); navigate(defaultRoute); }} onNavigate={() => setSidebarOpen(false)} />
             </div>
           </Offcanvas.Body>
         </Offcanvas>
@@ -370,18 +404,18 @@ export default function AppLayout({ children }: { children?: ReactNode }) {
               </div>
 
               {isOwner ? (
-                <div className="owner-view-toggle">
+                <div className="owner-view-toggle d-none d-xl-inline-flex">
                   <button
                     type="button"
                     className={`owner-view-toggle-btn ${ownerViewMode === 'owner' ? 'active' : ''}`}
-                    onClick={() => setOwnerViewMode('owner')}
+                    onClick={() => changeOwnerViewMode('owner')}
                   >
                     <span aria-hidden="true">📈</span> Kokpit Owner
                   </button>
                   <button
                     type="button"
                     className={`owner-view-toggle-btn ${ownerViewMode === 'admin' ? 'active' : ''}`}
-                    onClick={() => setOwnerViewMode('admin')}
+                    onClick={() => changeOwnerViewMode('admin')}
                   >
                     <span aria-hidden="true">🔧</span> Area Admin
                   </button>
@@ -393,7 +427,7 @@ export default function AppLayout({ children }: { children?: ReactNode }) {
                   <GlobalSearch role={user?.role} />
                 </div>
                 <NotificationBell />
-                {isAdmin ? (
+                {isAdmin || (isOwner && ownerViewMode === 'admin') ? (
                   <Button variant="outline-primary" size="sm" className="admin-icon-action" onClick={() => navigate('/announcements')} title="Buka pengumuman" aria-label="Buka pengumuman">
                     <span aria-hidden="true">📣</span> <span>Pengumuman</span>
                   </Button>
@@ -416,8 +450,8 @@ export default function AppLayout({ children }: { children?: ReactNode }) {
             </div>
           </section>
 
-          {isAdmin || isOwner ? <RoleWorkspaceTabs role={isOwner && ownerViewMode === 'admin' ? 'ADMIN' : user?.role} /> : null}
-          {isOwner && ownerViewMode === 'admin' ? <Suspense fallback={<LoadingDashboard />}><AdminDashboard /></Suspense> : (children ?? <Outlet />)}
+          {isAdmin || isOwner ? <RoleWorkspaceTabs role={isOwner && ownerViewMode === 'admin' ? 'ADMIN' : user?.role} adminDashboardPath={isOwner ? '/admin-dashboard' : '/dashboard'} /> : null}
+          {children ?? <Outlet />}
         </main>
       </div>
     </div>

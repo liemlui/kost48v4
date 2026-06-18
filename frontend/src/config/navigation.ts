@@ -77,6 +77,14 @@ export const adminSections: NavigationSection[] = [
   },
 ];
 
+// OWN-ROUTE-SPLIT: OWNER dalam mode admin memakai route nyata `/admin-dashboard`
+// (bukan `/dashboard` milik ADMIN/STAFF). Sama persis dengan adminSections,
+// hanya tautan dashboard yang diarahkan ke route owner-admin.
+export const ownerAdminSections: NavigationSection[] = adminSections.map((section) => ({
+  ...section,
+  links: section.links.map((link) => (link.to === '/dashboard' ? { ...link, to: '/admin-dashboard' } : link)),
+}));
+
 const staffSections: NavigationSection[] = [
   {
     title: 'Pekerjaan Staff',

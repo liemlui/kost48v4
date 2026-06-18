@@ -41,6 +41,7 @@ import {
   CreatePortalTicketDto,
   MarkTicketVendorDto,
   ResolutionDto,
+  TipConfirmDto,
 } from './dto/ticket.dto';
 import { TicketsQueryDto } from './dto/tickets-query.dto';
 import { TicketsService } from './tickets.service';
@@ -71,6 +72,16 @@ export class TicketsController {
   @Roles(UserRole.TENANT)
   async acknowledgeTip(@Param('id', ParseIntPipe) id: number, @CurrentUser() user: CurrentUserPayload) {
     return { message: 'Terima kasih, tip dicatat', data: await this.ticketsService.acknowledgeTip(id, user) };
+  }
+
+  // STF-TIP-FLOW: staff konfirmasi apakah tip sudah masuk (P2P, di luar pembukuan).
+  @Post(':id/tip-confirm')
+  @Roles(UserRole.STAFF)
+  async confirmTip(@Param('id', ParseIntPipe) id: number, @Body() dto: TipConfirmDto, @CurrentUser() user: CurrentUserPayload) {
+    return {
+      message: dto.received ? 'Tip dikonfirmasi sudah diterima' : 'Tip ditandai belum masuk',
+      data: await this.ticketsService.confirmTip(id, Number(user.id), dto.received),
+    };
   }
 
   @Post('upload-image')

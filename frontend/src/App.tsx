@@ -22,6 +22,7 @@ const RoomsRouteEntry = lazy(() => import('./pages/rooms/RoomsRouteEntry'));
 const PublicRoomDetailPage = lazy(() => import('./pages/rooms/PublicRoomDetailPage'));
 const DashboardPage = lazy(() => import('./pages/dashboard/DashboardPage'));
 const OwnerDashboardPage = lazy(() => import('./pages/dashboard/OwnerDashboardPage'));
+const AdminDashboardPage = lazy(() => import('./pages/dashboard/DashboardAdmin'));
 const MarketAnalysisPage = lazy(() => import('./pages/marketing/MarketAnalysisPage'));
 const RenewRequestsAdminPage = lazy(() => import('./pages/renew-requests/RenewRequestsAdminPage'));
 const InvoiceDetailPage = lazy(() => import('./pages/invoices/InvoiceDetailPage'));
@@ -120,6 +121,15 @@ export default function App() {
             element={(
               <RequireRoles allowed={['OWNER']}>
                 <OwnerDashboardPage />
+              </RequireRoles>
+            )}
+          />
+          {/* OWN-ROUTE-SPLIT/GUARD: mode admin OWNER punya route nyata sendiri, terpisah dari /dashboard (ADMIN/STAFF). */}
+          <Route
+            path="/admin-dashboard"
+            element={(
+              <RequireRoles allowed={['OWNER']}>
+                <AdminDashboardPage />
               </RequireRoles>
             )}
           />

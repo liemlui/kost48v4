@@ -2981,3 +2981,40 @@
   grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
   gap: 0.62rem;
 }
+
+/* ── STF-METER-VIEW: panel meter di dashboard staff ───────────── */
+.staff-panel-card {
+  border-radius: 18px;
+  background: rgba(255,255,255,0.78);
+  box-shadow: 0 2px 10px rgba(15,23,42,0.04);
+}
+
+.staff-meter-table thead th {
+  font-size: 0.7rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #64748b;
+  padding: 0.5rem 0.6rem;
+}
+
+.staff-meter-table tbody td {
+  padding: 0.45rem 0.6rem;
+  vertical-align: middle;
+}
+
+.staff-meter-table .table-warning-subtle {
+  background: rgba(251,191,36,0.06);
+}
+
+/* ── STF-THEME: standarkan mobile z-index ── */
+@media (max-width: 767.98px) {
+  .staff-simple-mode .offcanvas,
+  .staff-simple-mode .modal {
+    z-index: 1055;
+  }
+
+  .staff-simple-mode .dropdown-menu {
+    z-index: 1060;
+  }
+}

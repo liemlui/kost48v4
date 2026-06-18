@@ -724,6 +724,8 @@ export default function AdminDashboard() {
   const navigate = useNavigate();
   const location = useLocation();
   const activeArea: AdminQueueArea = normalizeAdminArea(new URLSearchParams(location.search).get('area'));
+  // OWN-ROUTE-SPLIT: tetap di dashboard yang sama (OWNER `/admin-dashboard` atau ADMIN `/dashboard`) saat pindah area.
+  const dashboardBase = location.pathname === '/admin-dashboard' ? '/admin-dashboard' : '/dashboard';
   const needsTodayData = activeArea === 'today';
   const needsStaysData = needsTodayData || activeArea === 'stays';
   const needsFinanceData = needsTodayData || activeArea === 'finance' || activeArea === 'stays';
@@ -833,14 +835,14 @@ export default function AdminDashboard() {
   const activeAreaConfig = ADMIN_QUEUE_AREAS.find((area) => area.id === activeArea) ?? ADMIN_QUEUE_AREAS[0];
 
   const activeAreaMenuItems: AdminAreaMenuItem[] = activeArea === 'stays' ? [
-    { id: 'stays-all', icon: '🏠', label: 'Semua Proses', helper: 'Daftar utama proses sewa aktif', to: '/dashboard?area=stays', count: pendingApprovalCount + waitingInitialPaymentCount + stays.length + pendingRenewCount + pendingCheckoutRequestCount + approvedCheckoutRequestCount, tone: 'info', active: true },
+    { id: 'stays-all', icon: '🏠', label: 'Semua Proses', helper: 'Daftar utama proses sewa aktif', to: `${dashboardBase}?area=stays`, count: pendingApprovalCount + waitingInitialPaymentCount + stays.length + pendingRenewCount + pendingCheckoutRequestCount + approvedCheckoutRequestCount, tone: 'info', active: true },
     { id: 'stays-bookings', icon: '📝', label: 'Booking Baru', helper: 'Review booking dan bayar awal', to: '/stays?status=BOOKINGS', count: pendingApprovalCount + waitingInitialPaymentCount, tone: pendingApprovalCount ? 'warning' : 'info' },
     { id: 'stays-active', icon: '🛏️', label: 'Masa sewa aktif', helper: 'Masa sewa sedang berjalan', to: '/stays', count: stays.length, tone: 'success' },
     { id: 'stays-renew', icon: '🔁', label: 'Perpanjangan', helper: 'Pengajuan perpanjangan dan cek meter', to: '/renew-requests', count: pendingRenewCount, tone: pendingRenewCount ? 'warning' : 'info' },
     { id: 'stays-checkout', icon: '🚪', label: 'Keluar', helper: 'Review keluar dan finalkan keluar', to: '/stays?status=BOOKINGS', count: pendingCheckoutRequestCount + approvedCheckoutRequestCount, tone: pendingCheckoutRequestCount || approvedCheckoutRequestCount ? 'warning' : 'info' },
     { id: 'stays-tenant', icon: '👤', label: 'Tenant', helper: 'Data penghuni dan akses portal', to: '/tenants', count: undefined, tone: 'info' },
   ] : activeArea === 'finance' ? [
-    { id: 'finance-all', icon: '💳', label: 'Semua Keuangan', helper: 'Daftar utama keuangan di tab ini', to: '/dashboard?area=finance', count: invoices.length + pendingPaymentReviewCount, tone: 'info', active: true },
+    { id: 'finance-all', icon: '💳', label: 'Semua Keuangan', helper: 'Daftar utama keuangan di tab ini', to: `${dashboardBase}?area=finance`, count: invoices.length + pendingPaymentReviewCount, tone: 'info', active: true },
     { id: 'finance-invoices', icon: '🧾', label: 'Tagihan', helper: 'Semua tagihan tenant', to: '/invoices', count: invoices.length, tone: 'info' },
     { id: 'finance-review', icon: '✅', label: 'Review Pembayaran', helper: 'Bukti bayar menunggu dicek', to: '/payment-submissions/review', count: pendingPaymentReviewCount, tone: pendingPaymentReviewCount ? 'warning' : 'success' },
     { id: 'finance-overdue', icon: '⚠️', label: 'Terlambat', helper: 'Tagihan lewat jatuh tempo', to: '/invoices', count: overdueInvoices.length, tone: overdueInvoices.length ? 'danger' : 'success' },
@@ -848,22 +850,22 @@ export default function AdminDashboard() {
     { id: 'finance-expenses', icon: '💸', label: 'Expenses', helper: 'Catatan pengeluaran operasional', to: '/expenses', count: undefined, tone: 'info' },
     { id: 'finance-history', icon: '📚', label: 'Riwayat Pembayaran', helper: 'Pembayaran invoice yang sudah tercatat', to: '/invoice-payments', count: undefined, tone: 'info' },
   ] : activeArea === 'tickets' ? [
-    { id: 'tickets-all', icon: '🎫', label: 'Semua Tiket', helper: 'Daftar utama tiket di tab ini', to: '/dashboard?area=tickets', count: tickets.filter((ticket) => ticket.status !== 'CANCELLED').length, tone: 'info', active: true },
+    { id: 'tickets-all', icon: '🎫', label: 'Semua Tiket', helper: 'Daftar utama tiket di tab ini', to: `${dashboardBase}?area=tickets`, count: tickets.filter((ticket) => ticket.status !== 'CANCELLED').length, tone: 'info', active: true },
     { id: 'tickets-assign', icon: '👷', label: 'Perlu Assign', helper: 'Tiket baru belum punya petugas', to: '/tickets', count: tickets.filter((ticket) => ticket.status === 'OPEN' && !ticket.assignedToId).length, tone: 'warning' },
     { id: 'tickets-progress', icon: '🔧', label: 'Dikerjakan', helper: 'Sedang ditangani staff', to: '/tickets', count: tickets.filter((ticket) => ticket.status === 'IN_PROGRESS').length, tone: 'info' },
     { id: 'tickets-check', icon: '✅', label: 'Perlu Cek', helper: 'Staff selesai, admin cek akhir', to: '/tickets', count: tickets.filter((ticket) => ticket.status === 'DONE').length, tone: 'warning' },
     { id: 'tickets-final', icon: '📦', label: 'Selesai', helper: 'Tiket selesai', to: '/tickets', count: tickets.filter((ticket) => ticket.status === 'CLOSED').length, tone: 'success' },
   ] : activeArea === 'staff' ? [
-    { id: 'staff-score', icon: '👥', label: 'Staff & Skor', helper: 'Daftar skor staff di tab ini', to: '/dashboard?area=staff', count: staffPerformanceItems.length, tone: 'info', active: true },
+    { id: 'staff-score', icon: '👥', label: 'Staff & Skor', helper: 'Daftar skor staff di tab ini', to: `${dashboardBase}?area=staff`, count: staffPerformanceItems.length, tone: 'info', active: true },
     { id: 'staff-checklist', icon: '📋', label: 'Checklist', helper: 'Checklist harian/mingguan/bulanan staff', to: '/staff-routines', count: undefined, tone: 'success' },
     { id: 'staff-reports', icon: '📝', label: 'Laporan Lapangan', helper: 'Review laporan kondisi dari staff', to: '/tickets', count: tickets.filter((ticket) => Boolean(ticket.linkedRoomItemId || ticket.linkedInventoryItemId)).length, tone: 'warning' },
     { id: 'staff-performance', icon: '📈', label: 'Kinerja', helper: 'Detail kinerja dan ulasan staff', to: '/staff-performance', count: undefined, tone: 'info' },
   ] : activeArea === 'rooms' ? [
-    { id: 'rooms-list', icon: '🏘️', label: 'Kamar', helper: 'Status kamar dan keterisian', to: '/dashboard?area=rooms', count: rooms.length, tone: 'info', active: true },
+    { id: 'rooms-list', icon: '🏘️', label: 'Kamar', helper: 'Status kamar dan keterisian', to: `${dashboardBase}?area=rooms`, count: rooms.length, tone: 'info', active: true },
     { id: 'rooms-room-items', icon: '🪑', label: 'Barang Kamar', helper: 'Inventaris per kamar', to: '/room-items', count: undefined, tone: 'info' },
     { id: 'rooms-stock', icon: '📦', label: 'Stok Gudang', helper: 'Barang gudang dan stok minimum', to: '/inventory-items', count: inventoryItems.length, tone: 'info' },
     { id: 'rooms-movements', icon: '🔄', label: 'Mutasi Stok', helper: 'Riwayat masuk/keluar/pasang barang', to: '/inventory-movements', count: undefined, tone: 'info' },
-    { id: 'rooms-low-stock', icon: '⚠️', label: 'Stok Menipis', helper: 'Barang butuh restock', to: '/dashboard?area=rooms', count: inventoryItems.filter(isLowStockItem).length, tone: inventoryItems.filter(isLowStockItem).length ? 'warning' : 'success' },
+    { id: 'rooms-low-stock', icon: '⚠️', label: 'Stok Menipis', helper: 'Barang butuh restock', to: `${dashboardBase}?area=rooms`, count: inventoryItems.filter(isLowStockItem).length, tone: inventoryItems.filter(isLowStockItem).length ? 'warning' : 'success' },
   ] : [];
 
   const refreshDashboard = () => {
