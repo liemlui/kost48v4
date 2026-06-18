@@ -501,6 +501,11 @@ Output akhir:
 
 > Dipadatkan dari `docs/CHANGELOG.md`: header tanggal dipertahankan, tiap entry hanya menyimpan 1-2 poin outcome. Detail verbose tetap ada di source lama.
 
+### 2026-06-18 — fix(PUB-CALENDAR-CSS): tambah stylesheet AvailabilityTimeline + settings-facility-actions
+- **Audit AI:** komponen `AvailabilityTimeline.tsx` merujuk 20+ class CSS (`avcal-*`, `cell-*`) yang tidak ada di stylesheet manapun — tabel kalender tampil tanpa warna status, tanpa layout, tanpa scroll control.
+- **Fix:** tambah 168 baris CSS di `11-public-pages.css` (shell, header, legend 4 warna status, table scroll horizontal, sticky header+room, weekend highlight, floor row, scroll controls, collapse, loading, mobile compact). Tambah `.settings-facility-actions` di `12-owner.css` (6 baris, flex row tombol upload/hapus foto fasilitas).
+- Gate: FE build 109 chunk, PWA ok (CSS 108 KiB gzip).
+
 ### 2026-06-18 — feat(PUB-FOTO-PROFIL-KTP): avatar tenant dari foto KTP + kelola owner/admin
 - **Keputusan owner (M02):** foto profil tenant diturunkan dari foto KTP pertama; owner/admin bisa ganti ulang; gambar dikompres.
 - **Schema additive** (migration `20260618030000_tenant_profile_photo`): enum `ProfilePhotoSource {KTP_AUTO, MANUAL}` + field `profilePhoto*` di `Tenant`.

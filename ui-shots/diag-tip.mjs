@@ -1,0 +1,16 @@
+import { chromium } from 'playwright';
+const API = 'http://localhost:3000/api', APP = 'http://localhost:5173';
+const r = await fetch(`${API}/auth/login`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ identifier: 'maya.tenant@kost48.test', password: 'Tenant#2026' }) });
+const token = (await r.json())?.data?.accessToken;
+const b = await chromium.launch();
+const ctx = await b.newContext({ viewport: { width: 1000, height: 1100 } });
+await ctx.addInitScript((t) => window.localStorage.setItem('kost48_access_token', t), token);
+const p = await ctx.newPage(); const errs = [];
+p.on('pageerror', (e) => errs.push(String(e.message || e)));
+await p.goto(APP + '/portal/tickets', { waitUntil: 'networkidle', timeout: 30000 }).catch((e) => errs.push('GOTO ' + e.message));
+await p.waitForTimeout(1500);
+await p.screenshot({ path: 'ui-shots/tip_tenant_tickets.png', fullPage: true });
+const shopee = await p.locator('text=/ShopeePay/').count();
+const tipMark = await p.locator('text=/sudah kamu tandai|sudah beri tip/i').count();
+console.log('ShopeePay badge:', shopee, '| tip mark/btn:', tipMark, '| errors:', errs.length ? errs.slice(0, 2) : 'none');
+await b.close();
