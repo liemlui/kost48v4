@@ -19,7 +19,7 @@
 | Fase A — Pra-Go-Live | sebagian | F1-12 🧑 | Kode inti siap; publish nyata menunggu server/domain/env owner |
 | Fase B — Publik & Tenant | sebagian | foto, profil | Layanan tambahan, minat layanan, smart booking, kalender, dan meter jadwal sudah selesai fungsional |
 | Fase C — Owner/Admin | **selesai** | — | Mode-aware UI, route split/guard, status cards, inventaris shell SEMUA selesai (2026-06-19) |
-| Fase D — Staff & Gudang | sebagian | gudang dinamis, staff meter, WiFi/tip, polish staff | Batas finance staff sudah sebagian aman |
+| Fase D — Staff & Gudang | **selesai** | — | Meter status, theme, WiFi order, tip flow, gudang FK, role scope SEMUA selesai (2026-06-19) |
 | Fase E — Polish & Teknis | sebagian | TEN-GAMIF, refactor, test lanjutan | MKT-5 selesai fungsional; backlog teknis diserap ke M10 |
 
 ### Urutan kerja (jangan loncat kecuali blocked) — detail di [ANTRIAN](#antrian-eksekusi-aktif-untuk-ai--kerjakan-dari-sini)
@@ -429,7 +429,7 @@ Output akhir:
 
 **Anchor kode:** `DashboardStaff.tsx` · `StaffMotivationDashboard.tsx` · `StaffReportPrintView.tsx` · `inventory-items` · `room-items` · `tickets` · `WifiOrderPage`.
 
-- [x] **STF-GUDANG-2:** mapping fasilitas→item gudang via `matchInventoryToFacilities()` di `InventoryItemsService.decorateInventoryItem()`. `suggestedMinQtyRupiah` + `facilityCount` dihitung dari jumlah kamar dengan fasilitas terkait (query `RoomFacility.groupBy`). Seeder: semua 20 kamar dapat "Kipas Angin" via `POST /rooms/:id/facilities`.
+- [x] **STF-GUDANG-2:** (1) Schema additive: FK `inventoryItemId` di `RoomFacility` (migration `20260618210000`), mapping eksak fasilitas→item via FK langsung, bukan fuzzy-name. (2) `suggestedMinQtyRupiah` + `facilityCount` dari `loadFacilityCounts()` via `groupBy inventoryItemId`. (3) DTO `CreateRoomFacilityDto`/`UpdateRoomFacilityDto` + `inventoryItemId`. (4) Seeder: 20 kamar dapat "Kipas Angin" via `POST /rooms/:id/facilities`.
 - [x] **STF-METER-VIEW:** dashboard daftar kamar sudah/belum catat meter per siklus — `StaffMeterStatusPanel` + integrasi ke `StaffMotivationDashboard`.
 - [x] **STF-ROLE-SCOPE:** audit penuh scope resepsionis/reparasi/kebersihan per route. **2 celah ditutup:** (1) STAFF dilarang override `agreedRentAmountRupiah`/tarif listrik+air saat create stay — ForbiddenException + pesan jelas; (2) `GET /tenants/:id` memfilter field KTP (ktp*, identityNumber, profilePhoto*) untuk STAFF — data PDP tidak bocor.
 - [x] **STF-WIFI-ORDER:** flow lengkap tanpa schema: tenant lihat paket WiFi di `/portal/wifi` + tombol "Pesan Sekarang" → `ServiceInterest` → admin proses → `WifiSale` + invoice. Staff read-only via `GET /wifi-sales`. WhatsApp tetap sebagai fallback.
@@ -529,6 +529,12 @@ Output akhir:
 - **Fase C cluster (5 item):** `SidebarContent` terima prop `ownerViewMode` → title/subtitle/footer & flag admin ikut mode (OWN-SIDEBAR-CONTEXT); `Offcanvas.Title` dinamis "Kokpit Owner"/"Area Admin (Owner)" (OWN-OFFCANVAS-TITLE); tombol "Pengumuman" muncul saat OWNER mode-admin (OWN-ADMIN-ICON-ACTION).
 - **Mobile/transisi:** toggle Kokpit/Area Admin ditambah lebar-penuh di offcanvas + toggle topbar jadi desktop-only (OWN-TOGGLE-MOBILE); transisi 0.3s ease pada `.app-shell-grid`/`.app-sidebar`/`.app-main` (OWN-TOGGLE-TRANSITION).
 - Gate: FE build 109 chunk, PWA verify PASS. Sisa Fase C: OWN-STATUS-CARDS, OWN-ROUTE-SPLIT/GUARD, OWN-BACKEND-MODE (opsional), FASE B-2 inventaris shell.
+
+### 2026-06-19 — feat(schema-STF-GUDANG-2): FK inventoryItemId di RoomFacility + migration additive
+- **Schema additive** (migration `20260618210000_stf_gudang2_facility_inventory_link`): `RoomFacility.inventoryItemId` (FK→InventoryItem, SET NULL), index, back-relation.
+- **Service:** `loadFacilityCounts()` kini `groupBy inventoryItemId` (FK langsung), bukan fuzzy-name. `decorateInventoryItem()` terima `Map<number,number>`.
+- **DTO:** `CreateRoomFacilityDto` + `UpdateRoomFacilityDto` tambah `inventoryItemId`. Admin/owner bisa tautkan fasilitas ke item gudang dari form kamar.
+- Gate: BE tsc 0 · FE build 110 chunk · migration applied DB 5433 · seed 20 kipas.
 
 ### 2026-06-18 — feat(STF-METER-VIEW + STF-TIP-FLOW): dashboard meter staff + tip flow backend
 - **STF-METER-VIEW [d-1]:** komponen `StaffMeterStatusPanel` — tabel per kamar status SUDAH/BELUM catat meter bulan ini + listrik/air/terakhir. Diintegrasikan ke `StaffMotivationDashboard`.
