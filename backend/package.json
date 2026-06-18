@@ -17,6 +17,7 @@
     "build:local": "npm run build",
     "pretest:unit": "npm run build",
     "test:unit": "node --test \"test/**/*.test.js\"",
+    "test:integration": "node --test \"test/integration/**/*.test.js\"",
     "golive": "node scripts/golive.mjs",
     "golive:setup": "npm run build && node scripts/golive-setup.js",
     "seed:owner": "node scripts/seed-owner.js",

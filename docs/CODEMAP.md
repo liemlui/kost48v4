@@ -70,6 +70,14 @@
 | faqs | `faqs/faqs.service.ts` | FAQ (rule flow) |
 | announcements | `announcements/announcements.service.ts` | Pengumuman |
 
+### AI Owner/Admin — detail: `M12_AI_OWNER_ADMIN.md`
+| Modul/Service | Path | Tanggung jawab |
+|---|---|---|
+| market-analysis (existing) | `market-analysis/{deepseek.client,market-analysis}.service.ts` | Integrasi DeepSeek awal: SWOT/PESTLE/CAC-CLV, fallback offline |
+| owner-ai (target Fase G) | `owner-ai/{owner-ai,ai-context-builder}.service.ts` | Tombol manual Owner/Admin: brief, finance analyst, payment review draft, OCR text normalizer, ops/inventory suggestions |
+| audit-log | `audit-log/audit-log.service.ts` | Catat `meta.ai` saat manusia memakai draft AI untuk aksi final |
+| settings/env | `settings/settings.service.ts` + env | Status AI, budget guard, model, manual-only flag |
+
 ### Notifikasi & Sistem
 | Modul/Service | Path | Tanggung jawab |
 |---|---|---|
@@ -79,7 +87,7 @@
 | settings | `settings/settings.service.ts` | OperationalSetting (toggle meter air, dll) |
 
 ## Frontend grup halaman (`frontend/src/pages/`)
-`public` katalog+booking publik · `auth` login · `portal` area tenant (MyStay, invoice, loyalty, manual) · `dashboard` (DashboardAdmin owner/admin) · `stays` · `bookings` · `renew-requests` · `invoices` · `payments` · `finance` (AccountingSetup) · `reports` · `rooms` · `resources`+`admin` (CRUD generik via ConfiguredResourcePage/SimpleCrudPage) · `tickets` · `staff`+`staff-routines` · `services` · `marketing` · `loyalty` · `notifications`+`reminders` · `settings` · `profile`.
+`public` katalog+booking publik · `auth` login · `portal` area tenant (MyStay, invoice, loyalty, manual) · `dashboard` (DashboardAdmin owner/admin) · `stays` · `bookings` · `renew-requests` · `invoices` · `payments` · `finance` (AccountingSetup) · `reports` · `rooms` · `resources`+`admin` (CRUD generik via ConfiguredResourcePage/SimpleCrudPage) · `tickets` · `staff`+`staff-routines` · `services` · `marketing` · `loyalty` · `notifications`+`reminders` · `settings` · `profile` · `components/ai` (target Fase G reusable AI button/drawer).
 
 ## Index model (54) — grup → `schema.prisma`
 - **Identitas/akses:** User, Tenant, PasswordResetToken, AuditLog, PushSubscription, AppNotification, OperationalSetting

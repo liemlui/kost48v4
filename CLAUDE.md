@@ -7,7 +7,7 @@ Sistem manajemen kost 48 kamar. Backend NestJS+Prisma+PostgreSQL (`backend/`), f
 2. **`docs/M02_KEPUTUSAN_OWNER.md`** — 84 keputusan owner (SUMBER KEBENARAN sebelum ubah flow).
 3. **`docs/M10_CHECKLIST_CHANGELOG.md`** — **CHECKLIST AKTIF + antrian eksekusi AI** (baca ANTRIAN, jangan ulang fase selesai). Changelog historis → `docs/M11_CHANGELOG.md`.
 4. **`docs/CODEMAP.md`** — peta modul→path→tanggung jawab + index model + anchor flow. Pakai INI dulu untuk navigasi kode (hemat token), baru Grep simbol.
-5. Domain: **M04** keuangan · **M05** siklus huni · **M06** operasional · **M07** publik/marketing · **M08** deploy · **M09** audit.
+5. Domain: **M04** keuangan · **M05** siklus huni · **M06** operasional · **M07** publik/marketing · **M08** deploy · **M09** audit · **M12** AI Owner/Admin.
 6. Gate uang: **`docs/M04_KEUANGAN.md`** (verifikasi TB) — WAJIB tiap task finance.
 
 Detail forensik 97 temuan & rencana lama sudah DIBUBARKAN ke dossier; arsip di `docs/archieve/_DEPRECATED_*`. **JANGAN baca** (token bomb): `docs/archieve/*`, `*_STALE.md`, `node_modules`, `reference/*` (buku.md 2.2MB + PDF 5.7MB), `backend/src/generated/*` (Prisma generated, regen via `prisma generate`).
@@ -16,6 +16,7 @@ Detail forensik 97 temuan & rencana lama sudah DIBUBARKAN ke dossier; arsip di `
 - Tidak ada model `Booking` — satu `Stay` mewakili booking→huni→selesai (promoted = `initialMetersPromotedAt` terisi).
 - **DP** (`downPayment*`, 30% sewa, hangus) ≠ **deposit jaminan** (`deposit*`, refundable, dari `Room.defaultDepositRupiah`, SELALU tetap).
 - Tanpa denda keterlambatan. Notifikasi in-app (menuju PWA push). Role: OWNER/ADMIN/STAFF/TENANT.
+- AI/DeepSeek berbayar = **manual button only**, OWNER/ADMIN saja, AI membuat draft/rekomendasi; manusia tetap approve. Detail Fase G: `docs/M12_AI_OWNER_ADMIN.md`.
 - **Lokasi: Jl. Hikmah V No. 48, Surabaya Barat (Pakuwon/PTC)** — bukan Ngagel (koreksi D-01).
 - **Belum publish (DB = data testing); 1 staf; tenant = pengawas kualitas staf; bayar tunai+transfer.** (lihat `M02_KEPUTUSAN_OWNER`)
 

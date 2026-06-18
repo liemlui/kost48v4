@@ -16,6 +16,29 @@ Runbook deploy/PWA, checklist go-live, dan appendix akun dummy untuk DB pengemba
 
 **READY FOR GO-LIVE.** Audit keuangan ultra teliti LULUS: Trial balance balanced, deposit MATCHED, 8 invarian PASS, 0 unmapped transactions. DO-NOT-TOUCH blocks UTUH. Dead code minor `postPaymentReversalTx`. Runbook `M08 §3` smoke + env checklist siap.
 
+## Update 2026-06-19 - Env Fase G AI Owner/Admin
+
+Fitur AI berbayar bersifat opsional dan manual-only. Jika belum ingin memakai biaya API, kosongkan `DEEPSEEK_API_KEY` dan sistem harus tetap berjalan dengan fallback offline. Detail: `docs/M12_AI_OWNER_ADMIN.md`.
+
+Env produksi yang disarankan saat AI diaktifkan:
+
+```env
+DEEPSEEK_API_KEY=<rahasia>
+DEEPSEEK_BASE_URL=https://api.deepseek.com
+DEEPSEEK_MODEL=deepseek-v4-flash
+DEEPSEEK_FINANCE_MODEL=deepseek-v4-pro
+AI_FEATURES_ENABLED=true
+AI_MANUAL_ONLY=true
+AI_OWNER_ADMIN_ONLY=true
+AI_DAILY_REQUEST_LIMIT=50
+AI_MAX_INPUT_CHARS=12000
+AI_MAX_OUTPUT_TOKENS=1400
+AI_FINANCE_MAX_OUTPUT_TOKENS=2200
+AI_LOG_USAGE=true
+```
+
+Catatan deploy: jangan pernah expose API key ke frontend; semua panggilan DeepSeek wajib lewat backend.
+
 ## Catatan Pemakaian
 
 - Jadikan file ini pintu masuk tematik; bila butuh detail mentah, cek file sumber di arsip yang disebut di atas.
@@ -42,6 +65,7 @@ Runbook deploy/PWA, checklist go-live, dan appendix akun dummy untuk DB pengemba
 - [ ] Env produksi WAJIB: `DATABASE_URL`, `JWT_SECRET`, `CORS_ORIGIN` (domain frontend — backend tolak start tanpa ini), `NODE_ENV=production`, `FRONTEND_URL`, `BREVO_API_KEY` + `MAIL_FROM_*`. Auto-ops: **VPS/always-on** → `AUTO_OPS_ENABLED=true` (+`AUTO_OPS_INTERVAL_MINUTES`); **shared hosting/Passenger (mis. IDwebhost)** → `AUTO_OPS_ENABLED=false` + `AUTO_OPS_CRON_TOKEN` + cPanel Cron ke `GET /api/auto-ops/cron` (Bagian D).
 - [ ] **F4-2 PWA Web Push (opsional tapi disarankan):** set `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT` (`mailto:owner@...`). Generate sekali: `node -e "console.log(require('web-push').generateVAPIDKeys())"` (dependency `web-push` sudah terpasang). **Tanpa env ini push otomatis NONAKTIF** (notif in-app tetap jalan, tak error). Dispatch push ikut sweeper auto-ops (`runPushDispatch`) → di shared hosting pastikan cPanel Cron `GET /api/auto-ops/cron` aktif. Frontend butuh HTTPS (service worker) agar tenant bisa opt-in.
 - [ ] **F3-17 Gate aktivasi KTP (L-4, WAJIB di produksi):** set **`KTP_ACTIVATION_GATE_ENABLED=true`**. **Default OFF** (agar UAT lancar) → bila lupa di-set, kamar bisa diaktifkan TANPA KTP terverifikasi (lawan maksud E1/UU PDP & D-17). Konsekuensi ON: aktivasi kamar (`stays.create`/approve booking) menolak bila tenant belum ada foto KTP terverifikasi. Opsional terkait: ambang cuci AC kWh `AC_CLEAN_KWH_THRESHOLD` (default 200) & rekonsiliasi jurnal `JOURNAL_RECONCILIATION_ENABLED` (default on, F5-6).
+- [ ] **Fase G AI (opsional):** bila mengaktifkan DeepSeek, set `DEEPSEEK_API_KEY`, `DEEPSEEK_MODEL=deepseek-v4-flash`, `DEEPSEEK_FINANCE_MODEL=deepseek-v4-pro`, `AI_FEATURES_ENABLED=true`, `AI_MANUAL_ONLY=true`, limit harian, dan pastikan tombol AI hanya OWNER/ADMIN.
 - [ ] Canonical frontend: `https://app.kost48surabaya.com`. `CORS_ORIGIN` dan `FRONTEND_URL` pakai host ini.
 
 ##### 1. Build

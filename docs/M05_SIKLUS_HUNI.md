@@ -38,6 +38,15 @@ Sesuai analisa PDF, siklus tenant harus terbaca sebagai alur end-to-end: masuk k
 - Periode sewa diturunkan dari invoice `RENT` berurut `periodStart`, sehingga riwayat huni dan invoice tetap terhubung.
 - Prinsip bisnis: tenant dan admin harus melihat kontrak sebagai narasi yang nyambung, bukan potongan invoice terpisah.
 
+## Update 2026-06-19 - Fase G AI untuk Siklus Huni
+
+AI dalam siklus huni hanya membantu Owner/Admin membaca data dan membuat draft. Detail: `docs/M12_AI_OWNER_ADMIN.md`.
+
+- **Payment review assistant:** AI boleh memberi rekomendasi APPROVE/REJECT/ASK_MORE_INFO untuk `PaymentSubmission`, tetapi approval final tetap tombol Owner/Admin dan guard no-partial backend tetap menang.
+- **KTP OCR validator:** foto KTP tidak dikirim ke DeepSeek. OCR gambar tetap lokal; AI hanya boleh menerima teks OCR untuk menormalkan nama/NIK dan memberi warning. `verifyKtp` tetap Owner-only manual.
+- **Renewal/checkout:** AI boleh merangkum risiko renewal, tunggakan, meter, dan deposit. AI tidak boleh memfinalkan renewal, forced checkout, proses deposit, atau membuka kamar.
+- **PDP:** snapshot AI untuk tenant memakai ID/kode kamar/status/nominal; jangan kirim email, nomor KTP penuh, foto, atau alamat lengkap kecuali benar-benar dibutuhkan untuk validasi KTP dan tetap berbasis teks OCR.
+
 ## Bagian 1 - `docs/11_BOOKING_RENEWAL.md`
 
 ### DOSSIER 11 — BOOKING & RENEWAL

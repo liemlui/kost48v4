@@ -32,6 +32,15 @@ Semua keputusan owner terkait keuangan (no-partial, DP 30%, deposit=Room.default
 ### Foto Profil
 - **PUB-FOTO-PROFIL-KTP**: Foto profil tenant pakai foto KTP yang di-upload pertama saat join. Compress otomatis saat upload. Owner/Admin bisa upload ulang. Sistem kompres gambar (via `compressImageFile` yang sudah ada).
 
+### AI Owner/Admin - Fase G (2026-06-19)
+- **AI-MANUAL-ONLY**: Semua fitur AI/DeepSeek berbayar harus aktif hanya setelah Owner/Admin menekan tombol eksplisit. Tidak boleh auto-run saat page load, cron, interval, auto-ops, atau background prefetch.
+- **AI-OWNER-ADMIN-ONLY**: Tombol AI hanya untuk OWNER/ADMIN. Tenant dan Staff tidak mendapat akses AI API berbayar.
+- **AI-DRAFT-APPROVAL**: AI hanya membuat analisa, rekomendasi, draft note, atau prefilled form. Aksi final tetap manusia: Owner/Admin klik approve/simpan/tolak.
+- **AI-NO-DIRECT-MUTATION**: AI tidak boleh langsung approve pembayaran, verifikasi KTP, membuat expense, mutasi stok, menutup tiket, posting jurnal, atau mengubah status kamar.
+- **AI-HEMAT-TOKEN**: Kirim snapshot ringkas dan agregat, bukan seluruh data mentah. Default model hemat biaya; model berat hanya untuk analisa finance Owner-only.
+- **AI-PDP**: Untuk KTP/bukti identitas, jangan kirim gambar ke DeepSeek. OCR gambar tetap lokal; DeepSeek hanya boleh menerima teks OCR yang sudah disaring bila perlu validasi.
+- **AI-AUDIT**: Jika draft AI dipakai dalam aksi final, simpan jejak di `AuditLog.meta.ai`.
+
 ## Keputusan UI/UX Publik — 2026-06-17 (lihat `docs/M07_PUBLIK_GROWTH.md`)
 
 ### Navigasi & Tombol
@@ -110,7 +119,7 @@ Toggle Owner/Admin phase 1 sudah berfungsi secara state/dasar, tapi UI masih men
 
 ---
 
-#### D — KEPUTUSAN UTAMA (D-01 s/d D-20)
+#### D — KEPUTUSAN UTAMA (D-01 s/d D-23)
 
 | ID | Keputusan | Dampak |
 |----|-----------|--------|
@@ -134,6 +143,7 @@ Toggle Owner/Admin phase 1 sudah berfungsi secara state/dasar, tapi UI masih men
 | D-18 | **RENEWAL/PRABAYAR FLEKSIBEL KAPAN SAJA** (2026-06-14). Tenant boleh perpanjang / **bayar di muka 2-4 bulan ke depan dengan harga BULANAN**, KAPAN SAJA — **tak harus menunggu kontrak lama habis**. Ini menambah jalur "prabayar/perpanjang lebih awal" di samping renewal akhir-kontrak (R1-R5, prompt H-10). Prabayar >1 bulan = **pendapatan diterima di muka** (akui bertahap → F4-1 unearned revenue). Rent-lock D-16 tetap berlaku (harga tak naik selama renew berlanjut). | Backlog **F4-11**; terkait F4-1. |
 | D-19 | **FAQ DETAIL + "MANUAL BOOK" DI TENANT APP** (2026-06-14). Semua aturan/flow kos di-generate jadi **FAQ sangat detail** lalu disajikan sebagai **menu "Panduan/Aturan" di tenant app** — tenant bisa baca manual aturan kos secara mandiri. **Openness, TAPI jangan bikin tenant pusing** (ringkas, terstruktur, berkategori). Sumber konten: `03_KEPUTUSAN_OWNER` + dossier flow; input tambahan via **interview owner** atau **analisa percakapan WhatsApp** (pertanyaan & keluhan tenant yang sering). Fondasi `FaqsModule` sudah ada. | Backlog **F4-12**; dossier 17/16. |
 | D-20 | **PINDAH KAMAR RESMI** (2026-06-15). Stay SAMA (roomId diperbarui); deposit ikut apa adanya; harga dikunci (D-16) kecuali **override OWNER-only** (D-17); meter kamar baru di-snapshot; kamar lama→inspeksi, kamar baru→OCCUPIED. Detail di §D-20. | **F4-8 SELESAI**. |
+| D-23 | **AI Owner/Admin manual-only.** DeepSeek/API AI berbayar hanya dipakai setelah tombol manual Owner/Admin ditekan; AI membuat draft/rekomendasi dan manusia approve aksi final. Tidak ada AI otomatis dari cron/page-load; tidak ada akses Tenant/Staff; tidak ada mutasi uang/stok/kamar/KTP/jurnal tanpa approval manusia. | Fase G `docs/M12_AI_OWNER_ADMIN.md`; checklist M10. |
 
 ---
 

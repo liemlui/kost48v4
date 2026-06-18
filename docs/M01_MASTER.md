@@ -18,6 +18,10 @@ Dokumen orientasi utama untuk memahami blueprint sistem, kondisi aktual, rencana
 
 **Sistem KOST48 V5 LULUS audit keuangan ultra teliti.** Trial balance balanced, deposit MATCHED (16 stay × Rp500rb), 8 invarian akuntansi PASS, 7 DO-NOT-TOUCH blocks UTUH, 5 high-risk flows SEHAT. Detail: `docs/M04_KEUANGAN.md` Update 2026-06-17 dan `docs/M10_CHECKLIST_CHANGELOG.md`.
 
+## Update 2026-06-19 - Fase G AI Owner/Admin
+
+Fitur AI berbayar dipisah menjadi `docs/M12_AI_OWNER_ADMIN.md`. Keputusan owner: semua AI harus aktif hanya lewat tombol manual, role OWNER/ADMIN saja, AI membuat analisa/draft/rekomendasi, dan manusia tetap menekan approve untuk aksi final. AI tidak boleh berjalan dari cron/page-load atau mengubah uang/stok/kamar/KTP tanpa persetujuan manusia.
+
 ## Catatan Pemakaian
 
 - Jadikan file ini pintu masuk tematik; bila butuh detail mentah, cek file sumber di arsip yang disebut di atas.
@@ -53,6 +57,7 @@ Dokumen orientasi utama untuk memahami blueprint sistem, kondisi aktual, rencana
 | `17_PUBLIK_MARKETING_UIUX` | katalog/SEO/UI/chart (flow 2-publik) | 🟢 UX/🔴 SEO | SEO (F3-3), social proof (F3-4), perf publik (F2-11) |
 | `18_AUTH_FONDASI_ONBOARDING` | auth/role/KTP (flow 1) | 🟢 | OWNER-only (F2-16), KTP gate (F3-17) |
 | `19_GAMIFIKASI_LOYALITAS` | poin/reward tenant (BARU) | 📅 Fase 4 | F4-9 (desain lengkap di dossier) |
+| `M12_AI_OWNER_ADMIN` | AI berbayar Owner/Admin | 📋 Fase G | manual button only, draft AI, human approval, token/cost guard |
 **Hierarki sumber kebenaran:** `03_KEPUTUSAN_OWNER` (aturan bisnis mengikat) → `01_GROUND_STATE` dan `02_FLOW_MAP` (fakta kode saat ini) → dossier domain (temuan dan desain target) → `08_CHECKLIST` (urutan eksekusi). `04_DEPLOY_AND_PWA` adalah runbook operasi. **`05_VERIFIKASI_KEUANGAN` wajib untuk setiap task uang.** Detail forensik 97 temuan diarsipkan di `archieve/_DEPRECATED_AUDIT_*`.
 
 #### 4. PETA EKSEKUSI (urutan fase — task ada di dossier masing-masing)
@@ -75,6 +80,7 @@ FASE 3 (operasional & visibilitas):
   F3-18 expense-rutin[D13] → F3-19 SLA[D15] → F3-20 prompt-review[D15] →
   F3-21 depresiasi-auto[D13] → F3-1/2 notif-coverage[D16] → F3-9..13 polish
 FASE 4 (future): F4-1 unearned-rev[D13] · F4-9 GAMIFIKASI[D19] · F4-2 PWA-push[D16] · F4-7 pruning · F4-8 pindah-kamar
+FASE G (AI Owner/Admin): G0 safety foundation[M12] · G1 owner brief · G2 finance analyst · G3 payment review draft · G4 OCR expense draft · G5 KTP OCR validator · G6 ops/inventory assistant · G7 settings/budget · G8 FAQ generator · G9 optional AiDraft schema
 DITUNDA (1 staf): F2-10 round-robin · F3-5 leaderboard antar-staf [D15]
 ```
 **Prioritas mutlak (bila waktu terbatas):** F1-T · F1-1R · F1-2 · F1-3 · F1-7 · F1-8 · F1-9 · F2-3 (copy A17) · F2-5 (ghost-stock). Setelah itu kerjakan GAP #2 renewal.
@@ -109,6 +115,8 @@ Mutex `running`; urutan: ①bookingExpiry ②contractEndReminders ③DP-forfeit 
   treemap, waterfall, heatmap dipakai; Sankey tetap ditolak karena funnel bisnis utama lebih linier.
 - **Hukum & Tata Kelola:** UU PDP, perlindungan konsumen, kontrak perdata, audit trail, OWNER-only
   governance, dan source ledger dipakai sebagai guard operasional (M02/M06/M09).
+- **AI Owner/Admin:** DeepSeek dipakai sebagai copilot keputusan, bukan autopilot. Semua fitur AI manual-button,
+  hemat token, output JSON terstruktur, role OWNER/ADMIN, dan mutasi final tetap melalui approval manusia (M12).
 
 #### 8. GAP ANALISA BISNIS -> FITUR APP (disetujui 2026-06-16)
 
@@ -458,6 +466,7 @@ Tetap di `core-api`:
 | `17_PUBLIK_MARKETING_UIUX.md` | 6 | Katalog/SEO/UI/chart (F2-11, F3-3/4/7/11/12) | 🟢 |
 | `18_AUTH_FONDASI_ONBOARDING.md` | 5 | Auth/role/KTP (F2-16, F3-17) | 🟢 |
 | `19_GAMIFIKASI_LOYALITAS.md` | 3 | Poin/reward tenant (F4-9, desain) | 🟢 belum ada kode (fitur baru) |
+| `M12_AI_OWNER_ADMIN.md` | 12 | Fase G AI Owner/Admin: tombol manual, draft AI, approval manusia, hemat token | 🟡 fase baru |
 | `CHANGELOG.md` | 31 | Riwayat rilis (prepend-only) | 🟢 |
 | `_PETA_AI.md` | — | **File ini** — router + anchor terverifikasi | 🟢 |
 

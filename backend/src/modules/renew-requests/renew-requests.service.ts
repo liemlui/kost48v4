@@ -3,7 +3,7 @@ import { CurrentUserPayload } from '../../common/interfaces/current-user.interfa
 import { PrismaService } from '../../prisma/prisma.service';
 import { AuditLogService } from '../../audit-log/audit-log.service';
 import { AppNotificationService } from '../notifications/app-notification.service';
-import { StaysService } from '../stays/stays.service';
+import { StaysRenewalService } from '../stays/stays-renewal.service';
 import { RenewStayDto } from '../stays/dto/stay.dto';
 import { CreateRenewRequestDto } from './dto/create-renew-request.dto';
 import { ApproveRenewRequestDto } from './dto/approve-renew-request.dto';
@@ -20,7 +20,7 @@ export class RenewRequestsService {
 
   constructor(
     private readonly prisma: PrismaService,
-    private readonly staysService: StaysService,
+    private readonly staysRenewal: StaysRenewalService,
     private readonly audit: AuditLogService,
     private readonly appNotification: AppNotificationService,
     private readonly loyalty: LoyaltyService,
@@ -155,7 +155,7 @@ export class RenewRequestsService {
     const dpAmount = request.downPaymentAmountRupiah ?? 0;
     if (!(dpAmount > 0)) throw new ConflictException('Nominal DP perpanjangan belum tersedia');
     const { updated, dpInvoice } = await this.prisma.$transaction(async (tx) => {
-      const inv = await this.staysService.issueRenewalDownPaymentInvoiceTx(tx, request.stayId, dpAmount, actor);
+      const inv = await this.staysRenewal.issueRenewalDownPaymentInvoiceTx(tx, request.stayId, dpAmount, actor);
       const upd = await tx.renewRequest.update({
         where: { id },
         data: { status: RenewRequestStatus.AWAITING_DP, downPaymentInvoiceId: inv.id, requestNotes: dto.notes ?? request.requestNotes },
@@ -271,7 +271,7 @@ export class RenewRequestsService {
       };
 
       if (!request.settlementInvoiceId) {
-        const prepared = await this.staysService.prepareRenewalSettlementInTransaction(
+        const prepared = await this.staysRenewal.prepareRenewalSettlementInTransaction(
           tx,
           request.stayId,
           renewDto,
@@ -310,7 +310,7 @@ export class RenewRequestsService {
         throw new ConflictException('Pelunasan dibayar setelah batas H+7. Perpanjangan harus diproses sebagai FORFEITED.');
       }
 
-      const renewResult = await this.staysService.finalizePreparedRenewalInTransaction(
+      const renewResult = await this.staysRenewal.finalizePreparedRenewalInTransaction(
         tx,
         {
           stayId: request.stayId,
@@ -417,7 +417,7 @@ export class RenewRequestsService {
       }
 
       if (request.status === RenewRequestStatus.AWAITING_DP && request.downPaymentInvoiceId) {
-        await this.staysService.cancelUnpaidRenewalInvoiceInTransaction(
+        await this.staysRenewal.cancelUnpaidRenewalInvoiceInTransaction(
           tx,
           request.downPaymentInvoiceId,
           actor.id,

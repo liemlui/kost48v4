@@ -26,6 +26,19 @@ Konsolidasi audit fase, audit menyeluruh, dan laporan audit flow realita kode vs
 | Deposit 16 stay × Rp500rb | ✅ MATCHED |
 | Unmapped transactions | ✅ 0 |
 
+## Update 2026-06-19 - Audit Guard Fase G AI
+
+Fase G AI Owner/Admin (`docs/M12_AI_OWNER_ADMIN.md`) menambah risiko baru: biaya API, hallucination, PDP, dan over-automation. Audit wajib memakai guard berikut:
+
+- **Manual trigger:** tidak boleh ada request DeepSeek dari cron, auto-ops, page-load, `useEffect`, polling, atau prefetch otomatis.
+- **RBAC:** tombol dan endpoint AI berbayar hanya OWNER/ADMIN; finance deep analysis Owner-only.
+- **No direct mutation:** AI endpoint tidak boleh menulis domain state final. Mutasi final harus lewat endpoint existing setelah human approval.
+- **PDP:** jangan kirim foto KTP, foto bukti bayar, nomor KTP penuh, email, atau data personal yang tidak relevan ke DeepSeek.
+- **Deterministic guard wins:** no-partial, TB balanced, period close, deposit liability, room readiness, dan stok lock tetap milik service domain.
+- **Usage/cost:** response AI harus membawa model, promptHash, snapshotHash, dan usage bila tersedia.
+- **AuditLog:** setiap aksi final yang memakai rekomendasi AI mencatat `AuditLog.meta.ai`.
+- **Fallback:** tanpa API key atau API timeout, UI tetap aman dan tidak melakukan mutasi.
+
 ## Catatan Pemakaian
 
 - Jadikan file ini pintu masuk tematik; bila butuh detail mentah, cek file sumber di arsip yang disebut di atas.
@@ -231,6 +244,7 @@ F3-3 mengimplementasi OG/JSON-LD/canonical/robots/sitemap, TAPI target Lighthous
 | **17 Publik/Marketing/UIUX** | 🟢 | SEO impl ada, Lighthouse belum diukur (L-5). UX minor tertunda. |
 | **18 Auth/Fondasi/KTP** | 🟢 KUAT | default-deny guard, OWNER-only, KTP. Gate KTP default-OFF (L-4 go-live). |
 | **19 Gamifikasi** | 🟢 SELESAI | Lihat `AUDIT_FASE4_FINAL.md` (FASE B). L-3 jurnal reward vs spec. |
+| **M12 AI Owner/Admin** | 🟡 FASE BARU | Manual-only, OWNER/ADMIN, no direct mutation, audit usage/cost/PDP wajib. |
 
 #### TINDAK LANJUT (ke `08_CHECKLIST.md`)
 - **SINKRON-DOC:** rapikan tabel §3/§4 dossier 10/11/13/14/15/18 (tandai item SELESAI). _(pekerjaan docs, bukan kode)_

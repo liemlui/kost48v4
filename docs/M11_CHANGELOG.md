@@ -6,6 +6,18 @@
 
 > Dipadatkan dari `docs/CHANGELOG.md`
 
+### 2026-06-19 — docs(Fase G AI Owner/Admin): manual-only approval copilot
+- Tambah `docs/M12_AI_OWNER_ADMIN.md` dan sinkron `CLAUDE.md`, `M01`-`M11`, `CODEMAP`: DeepSeek/API AI berbayar hanya lewat tombol manual Owner/Admin, output berupa draft/rekomendasi, aksi final tetap approval manusia, dengan guard token, PDP, fallback, dan audit `meta.ai`.
+- Backlog Fase G G0-G9 disiapkan detail: safety foundation, owner brief, finance analyst, payment review, OCR expense/KTP, ops inventory, settings budget, FAQ/manual generator, dan optional `AiDraft` [SCHEMA] jika owner approve.
+
+### 2026-06-19 — feat(Fase E Polish & Teknis): 6 task selesai — privacy UAT, split auto-ops & stays, integration test, E2E, evaluasi
+- **E1b:** TEN-GAMIF privacy — verifikasi UAT ranking & leaderboard anonim; backend hanya expose kode kamar/poin/skor tanpa PII.
+- **E3a:** Split `auto-ops.service.ts` (1.819→235 baris) — 5 sweep service (booking, stay, renewal, accounting, maintenance) + orchestrator.
+- **E3b:** Split `stays.service.ts` — ekstrak 5 metode renewal ke `StaysRenewalService`; proxy via stays.service; renew-requests pakai StaysRenewalService langsung.
+- **E3c:** Integration test skeleton `test/integration/stays-lifecycle.integration.test.js` (TC1 booking→huni→checkout hidup, TC2-4 placeholder) + script `test:integration`.
+- **E3d:** E2E Playwright — `playwright.config.ts` + 3 spec (public-pages, booking-flow, tenant-portal) + script `test:e2e`.
+- **E3e:** `docs/FASE_E_EVALUASI_ARSITEKTUR.md` — 4 item: refresh token MEDIUM, CSP LOW, WA/Email LOW, event bus VERY LOW.
+
 ### 2026-06-19 — feat(Fase B publik/tenant): aset publik & brosur owner-managed
 - **Fase B 100%:** endpoint `marketing-assets` + tab Owner Settings "Aset Publik" mengelola hero, profil/galeri, spanduk, brosur depan/belakang; landing page memakai upload owner dengan fallback aset statis. Gate: BE `npx.cmd tsc --noEmit` PASS, FE `npm.cmd run build` PASS + PWA verify PASS.
 

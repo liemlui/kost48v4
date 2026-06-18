@@ -20,8 +20,9 @@
 | Fase B — Publik & Tenant | **selesai** | — | Public/tenant B1-B5 selesai; aset publik/brosur kini bisa dikelola dari Owner Settings (2026-06-19) |
 | Fase C — Owner/Admin | **selesai** | — | Mode-aware UI, route split/guard, status cards, inventaris shell SEMUA selesai (2026-06-19) |
 | Fase D — Staff & Gudang | **selesai** | — | Meter status, theme, WiFi order, tip flow, gudang FK, role scope SEMUA selesai (2026-06-19) |
-| Fase E — Polish & Teknis | sebagian | TEN-GAMIF, refactor, test lanjutan | MKT-5 selesai fungsional; backlog teknis diserap ke M10 |
+| Fase E — Polish & Teknis | **selesai** | — | TEN-GAMIF privacy, split auto-ops & stays, integration test, E2E Playwright, evaluasi arsitektur ✅ |
 | Fase F — UI/UX Sweep | **selesai** | — | UX-404 (NotFoundPage), UX-TOAST (ToastProvider), UX-A11Y (SVG password, skip-link), UX-COLOR (kontras AA), UX-LOGOUT (konfirmasi), UX-SEARCH-TENANT, UX-SKELETON, UX-OVERSCROLL, UX-LOGIN-FORMAT ✅ |
+| Fase G — AI Owner/Admin | baru | G0-G9 | DeepSeek/API AI berbayar: tombol manual Owner/Admin saja, hasil draft/rekomendasi, aksi final wajib approval manusia |
 
 ### Urutan kerja (jangan loncat kecuali blocked) — detail di [ANTRIAN](#antrian-eksekusi-aktif-untuk-ai--kerjakan-dari-sini)
 
@@ -29,8 +30,9 @@
 2. **Fase B — Publik & Portal Tenant**: bereskan sisa foto, smart booking, meter status, profil.
 3. **Fase C — Workspace Owner/Admin**: mode-aware UI, route split, inventaris shell.
 4. **Fase D — Operasional Staff & Gudang**: gudang dinamis, staff meter, WiFi/tip, polish staff.
-5. **Fase E — Polish & Teknis**: gamifikasi kebersihan + backlog teknis non-blocker.
+5. **Fase E — Polish & Teknis**: selesai; jangan ulang kecuali regresi.
 6. **Fase F — UI/UX Sweep**: perbaikan aksesibilitas, feedback toast, route 404, kontras, polish (13 temuan audit 2026-06-19).
+7. **Fase G — AI Owner/Admin Approval Copilot**: safety foundation → owner brief → finance analyst → payment/expense/KTP/ops assistant → budget observability.
 - ✅ Selesai referensi: METER M-5, AUDIT-OWNER, CSS+SWEEP, MKT-4, MKT-5, OWN-STRUKTUR-TOGGLE, AUDIT-KEUANGAN-ULTRA (lihat ANTRIAN → "Selesai Referensi").
 
 ### Legenda marker task
@@ -261,14 +263,14 @@ Detail SI: `docs/archieve/2026-06-16_si_notes/_PLAN_SI_SEWA_RIWAYAT.md` · Meter
 
 ## ANTRIAN EKSEKUSI AKTIF (untuk AI — kerjakan dari sini)
 
-> **Mulai dari Fase A lalu turun ke B, C, D, E.** Fase A boleh berhenti di langkah owner, lalu AI boleh lanjut ke Fase B/C selama tidak menyentuh deploy produksi. Status: `[x]` selesai, `[~]` sudah sebagian/tinggal polish, `[ ]` belum selesai.
+> **Mulai dari Fase A lalu turun ke B, C, D, E, F, G.** Fase A boleh berhenti di langkah owner, lalu AI boleh lanjut ke fase lain selama tidak menyentuh deploy produksi. Status: `[x]` selesai, `[~]` sudah sebagian/tinggal polish, `[ ]` belum selesai.
 
 ### Peta Rujukan Dokumen
 
 | Kebutuhan | Baca dulu | Dipakai untuk |
 |-----------|-----------|---------------|
 | Orientasi bisnis & batasan sistem | `docs/M01_MASTER.md` | Gambaran KOST48, asumsi 48 kamar, lokasi, role |
-| Keputusan owner & UX owner/admin | `docs/M02_KEPUTUSAN_OWNER.md` | Owner view, role guard, keputusan D-01..D-22 |
+| Keputusan owner & UX owner/admin | `docs/M02_KEPUTUSAN_OWNER.md` | Owner view, role guard, keputusan D-01..D-23 |
 | Flow kontrak & chain-of-custody | `docs/M03_FLOW_KONTRAK.md` | Alur booking, invoice, jurnal, stay, dan kontrak |
 | Keuangan, jurnal, invoice, deposit | `docs/M04_KEUANGAN.md` | Semua task uang wajib unit test + invarian TB |
 | Siklus huni, booking, tenant, renewal | `docs/M05_SIKLUS_HUNI.md` | Booking, stay, checkout, KTP, profil tenant |
@@ -278,17 +280,19 @@ Detail SI: `docs/archieve/2026-06-16_si_notes/_PLAN_SI_SEWA_RIWAYAT.md` · Meter
 | Audit historis & temuan forensik | `docs/M09_AUDIT.md` | Rujukan audit lama, risiko, dan keputusan pasca-audit |
 | Checklist aktif & ANTRIAN | `docs/M10_CHECKLIST_CHANGELOG.md` | Source of truth eksekusi berikutnya |
 | Changelog arsip | `docs/M11_CHANGELOG.md` | Riwayat ringkas; tulis entri baru di paling atas |
+| AI Owner/Admin berbayar | `docs/M12_AI_OWNER_ADMIN.md` | Fase G: tombol manual, DeepSeek, konteks hemat token, OCR draft, approval copilot |
 | Peta navigasi kode (AI) | `docs/CODEMAP.md` | Modul→path→tanggung jawab + index model + anchor flow |
 | Audit post-fix terbaru | `docs/AUDIT_POST_FIX.md` | Verifikasi DEEP-01..05 dan catatan hardening |
 
 ### Mode AI Lemah — Aturan Eksekusi
 
-1. Buka `docs/M10_CHECKLIST_CHANGELOG.md` dulu, pilih **satu** item `[ ]` atau `[~]` dari Fase A-E.
+1. Buka `docs/M10_CHECKLIST_CHANGELOG.md` dulu, pilih **satu** item `[ ]` atau `[~]` dari Fase A-G.
 2. Buka semua rujukan MD yang tertulis di fase itu sebelum edit kode. Jangan mengerjakan dari ingatan atau dari nama task saja.
 3. Cari anchor kode dengan `rg` sesuai petunjuk fase, lalu cocokkan perilaku kode dengan MD rujukan.
 4. Jika task menyentuh uang, baca `docs/M04_KEUANGAN.md` dan jalankan gate uang. `tsc 0` saja tidak cukup.
-5. Jika task menyentuh schema/migration, berhenti sampai ada approval owner untuk schema additive.
-6. Setelah selesai, update checklist M10 + 1 baris di `docs/M11_CHANGELOG.md`; jangan membuat checklist baru di file lain.
+5. Jika task Fase G menyentuh DeepSeek/API AI, baca `docs/M12_AI_OWNER_ADMIN.md` penuh. Semua fitur AI harus tombol manual Owner/Admin, tidak boleh auto-run.
+6. Jika task menyentuh schema/migration, berhenti sampai ada approval owner untuk schema additive.
+7. Setelah selesai, update checklist M10 + 1 baris di `docs/M11_CHANGELOG.md`; jangan membuat checklist baru di file lain.
 
 ### Prompt YOLO Siap Pakai
 
@@ -299,19 +303,20 @@ Kamu adalah AI eksekutor lemah untuk repo KOST48. Kerjakan YOLO tapi tetap aman.
 
 Aturan utama:
 1. Mulai dari docs/M10_CHECKLIST_CHANGELOG.md bagian "ANTRIAN EKSEKUSI AKTIF".
-2. Pilih 1 task pertama yang actionable dari Fase A-E dengan status [ ] atau [~].
+2. Pilih 1 task pertama yang actionable dari Fase A-G dengan status [ ] atau [~].
 3. Jika task owner-blocked, rahasia produksi, deploy nyata, atau schema/migration tanpa approval owner, jangan nebak. Lewati ke task AI-actionable berikutnya dan catat alasannya.
 4. Sebelum edit kode, buka semua MD rujukan yang tertulis di fase/task itu. Minimal baca M10 + M-file domain terkait. Untuk uang wajib baca docs/M04_KEUANGAN.md.
 5. Cari anchor kode pakai rg. Cocokkan kode aktual dengan checklist; jangan mengandalkan ingatan atau asumsi.
 6. Implementasikan perubahan sampai selesai, bukan sekadar rencana. Jaga scope kecil: 1 task = 1 perubahan fokus.
-7. Jangan tambah dependency npm, jangan git push, jangan ubah schema.prisma/sql tanpa approval owner, jangan sentuh flow finance di luar scope.
-8. Jalankan gate sesuai dampak:
+7. Untuk Fase G AI: baca docs/M12_AI_OWNER_ADMIN.md penuh; AI berbayar hanya boleh jalan setelah tombol manual Owner/Admin; Tenant/Staff tidak mendapat tombol AI; AI hanya membuat draft/rekomendasi dan manusia tetap approve.
+8. Jangan tambah dependency npm, jangan git push, jangan ubah schema.prisma/sql tanpa approval owner, jangan sentuh flow finance di luar scope.
+9. Jalankan gate sesuai dampak:
    - Backend: cd backend; npx tsc --noEmit
    - Frontend: cd frontend; npm run build
    - Task uang: cd backend; npm run test:unit atau node --test "test/**/*.test.js" sesuai package script
    - UI/layout: cek responsive/mobile bila memungkinkan
-9. Setelah lulus, update docs/M10_CHECKLIST_CHANGELOG.md (ubah status item) dan tambah 1 baris changelog di docs/M11_CHANGELOG.md.
-10. Jika gagal 2 kali di error yang sama, berhenti dan laporkan blocker dengan file/line/error konkret.
+10. Setelah lulus, update docs/M10_CHECKLIST_CHANGELOG.md (ubah status item) dan tambah 1 baris changelog di docs/M11_CHANGELOG.md.
+11. Jika gagal 2 kali di error yang sama, berhenti dan laporkan blocker dengan file/line/error konkret.
 
 Output akhir:
 - Sebut task yang dikerjakan.
@@ -327,8 +332,10 @@ Output akhir:
 | **Fase A** | Pra-Go-Live Produksi | 🧑 blocked owner | M08, M02 | Deploy nyata menunggu server/domain/env owner |
 | **Fase B** | Publik & Portal Tenant | **selesai** | M07, M05, M06 | Public UI, smart booking, kalender, layanan, meter, profil, foto kamar/fasilitas, dan aset brosur selesai |
 | **Fase C** | Workspace Owner/Admin | **selesai** | M02, M06 | Mode-aware UI + route split/guard + status cards + inventaris shell selesai (2026-06-19) |
-| **Fase D** | Operasional Staff & Gudang | sebagian | M06, M04 | Staff/gudang/WiFi/tip/meter view |
-| **Fase E** | Polish, Gamifikasi & Teknis | sebagian | M06, M07, M09 | Ranking kebersihan + backlog teknis non-blocker |
+| **Fase D** | Operasional Staff & Gudang | **selesai** | M06, M04 | Staff/gudang/WiFi/tip/meter view selesai untuk backlog aktif |
+| **Fase E** | Polish, Gamifikasi & Teknis | **selesai** | M06, M07, M09 | TEN-GAMIF privacy, split service, integration test, E2E, dan evaluasi arsitektur selesai |
+| **Fase F** | UI/UX Sweep | **selesai** | M07 | 404, toast, a11y, kontras, logout, tenant search, skeleton, overscroll, login format |
+| **Fase G** | AI Owner/Admin Approval Copilot | baru | M12, M02, M04-M09, CODEMAP | DeepSeek/API AI manual-only untuk Owner/Admin; draft/rekomendasi + approval manusia |
 
 ---
 
@@ -460,7 +467,7 @@ Output akhir:
 #### E1 — Tenant gamification
 
 - [x] **TEN-GAMIF:** ranking kebersihan depan kamar bulanan — backend `GET /public/rooms/cleanliness-ranking?month&year` (skor persentase `DONE/expected` dari assignment aktif area CLEANING per room, query month/year tervalidasi) + frontend kartu ranking di MyLoyaltyPage.
-- [~] **TEN-GAMIF privacy:** leaderboard poin tidak expose tenantId/nama; perlu UAT ulang ranking kebersihan.
+- [x] **TEN-GAMIF privacy:** leaderboard poin tidak expose tenantId/nama; UAT lulus.
 
 ##### E1b — Verifikasi Privacy (UAT manual, tanpa edit kode)
 
@@ -494,7 +501,7 @@ Assert: output HANYA berisi `points`, `rank`, `roomCode`. **TIDAK boleh** ada id
 
 #### E3 — Backlog teknis non-blocker
 
-##### E3a — Split `auto-ops.service.ts` [ ]
+##### E3a — Split `auto-ops.service.ts` [x]
 
 **Kondisi:** 1.819 baris monolitik, 26 method, 79.6 KiB. Belum dipecah.
 
@@ -560,7 +567,7 @@ export class BookingSweepService {  // ganti nama per domain
 
 **Gate:** `cd backend && npx tsc --noEmit` = 0. Runtime: auto-ops cron tetap jalan (trigger via `/api/auto-ops/cron`).
 
-##### E3b — Split `stays.service.ts` (renewal) [ ]
+##### E3b — Split `stays.service.ts` (renewal) [x]
 
 **Kondisi:** 2.020 baris, 73.5 KiB. Sudah ada `stays-service-helpers.ts` (203 baris).
 
@@ -594,7 +601,7 @@ export class BookingSweepService {  // ganti nama per domain
 
 **Gate:** `cd backend && npx tsc --noEmit` = 0. Runtime UAT: renewal penuh (request → DP invoice → settlement → finalize).
 
-##### E3c — Integration test: booking → checkout → deposit [ ]
+##### E3c — Integration test: booking → checkout → deposit [x]
 
 **Prasyarat:** DB UAT (5433) running + seeded: `node scripts/seed-dev-reset.js && node scripts/seed-dev-via-api.js`
 
@@ -643,7 +650,7 @@ describe('Stay Lifecycle Integration', () => {
 
 **Gate:** `cd backend && npm run build && npm run test:integration` — semua PASS.
 
-##### E3d — E2E Playwright fungsional [ ]
+##### E3d — E2E Playwright fungsional [x]
 
 **Prasyarat:** `ui-shots/` sudah ada Playwright 1.60.0 (screenshot capture). Backend + frontend harus running.
 
@@ -666,7 +673,7 @@ describe('Stay Lifecycle Integration', () => {
 
 **Gate:** `cd frontend && npx playwright test` — semua spec PASS.
 
-##### E3e — Evaluasi arsitektur jangka panjang [ ]
+##### E3e — Evaluasi arsitektur jangka panjang [x]
 
 **Output:** `docs/FASE_E_EVALUASI_ARSITEKTUR.md` (read-only, tidak ada perubahan kode).
 
@@ -709,11 +716,183 @@ Evaluasi 4 item dengan format: kondisi saat ini → risiko → rekomendasi → p
 
 ---
 
+### Fase G — AI Owner/Admin Approval Copilot (DeepSeek/API AI berbayar) 🆕
+
+**Tujuan:** AI membantu Owner/Admin membaca data, membuat analisa, dan menyiapkan draft keputusan. AI tidak menjadi autopilot. Semua fitur AI aktif hanya setelah tombol manual ditekan oleh Owner/Admin, lalu hasilnya ditampilkan untuk disetujui/diedit/ditolak manusia.
+
+**Rujukan wajib sebelum coding:** `docs/M12_AI_OWNER_ADMIN.md` (utama) · `docs/M02_KEPUTUSAN_OWNER.md` D-23 · `docs/M04_KEUANGAN.md` · `docs/M05_SIKLUS_HUNI.md` · `docs/M06_OPERASIONAL.md` · `docs/M07_PUBLIK_GROWTH.md` · `docs/M08_DEPLOY_GO_LIVE.md` · `docs/M09_AUDIT.md` · `docs/CODEMAP.md`.
+
+**Status:** baru. Kerjakan **G0 dulu** sebelum G1-G8. **G9 [SCHEMA] opsional** dan harus berhenti sampai owner approve.
+
+#### Kontrak Global Fase G
+
+1. **Manual button only:** tidak ada panggilan AI dari page load, React Query auto-fetch, cron, auto-ops, interval, hover, route enter, atau prefetch.
+2. **Owner/Admin only:** tombol AI berbayar hanya muncul untuk OWNER/ADMIN. Tenant dan Staff tidak boleh melihat tombol AI DeepSeek.
+3. **Draft/rekomendasi saja:** AI boleh mengisi draft form, memberi confidence, warning, dan payload usulan. Aksi final tetap tombol manusia.
+4. **Tidak ada direct mutation:** AI endpoint tidak boleh langsung membuat/mengubah `PaymentSubmission`, `Invoice`, `JournalEntry`, `Expense`, `InventoryMovement`, `Tenant`, `Room`, `Stay`, `Ticket`, atau status KTP. Endpoint AI hanya return JSON.
+5. **Guard deterministik menang:** no-partial payment, trial balance, deposit guard, period close, stock guard, room/stay state machine, dan PDP gate tetap ditentukan service existing.
+6. **Hemat token:** backend mengirim snapshot ringkas, bukan dump table. Pakai ID, kode kamar, status, nominal agregat, tanggal penting, dan top risk. Hindari email, nomor HP, NIK penuh, foto, alamat lengkap, dan catatan panjang kecuali task benar-benar butuh.
+7. **OCR aman:** gambar KTP/bukti/nota diproses lokal dulu bila memungkinkan. DeepSeek menerima teks OCR ringkas, bukan file gambar KTP. Untuk KTP, mask NIK di prompt kecuali validator butuh 16 digit untuk cek format.
+8. **Audit wajib:** saat manusia memakai rekomendasi AI untuk aksi final, tulis `AuditLog.meta.ai` minimal: `feature`, `model`, `promptHash`, `snapshotHash`, `confidence`, `recommendedAction`, `humanDecision`, `actorId`, `createdAt`.
+9. **Fallback offline:** jika `DEEPSEEK_API_KEY` kosong/error/rate-limit, UI menampilkan fallback rule-based atau pesan non-blocking. Data bisnis tidak berubah.
+10. **Model saat ini:** default baru gunakan `deepseek-v4-flash`; finance mendalam gunakan `deepseek-v4-pro`. Jangan membuat default baru ke `deepseek-chat`/`deepseek-reasoner`.
+
+#### Pola Implementasi Wajib
+
+- **Backend target:** buat modul baru `backend/src/modules/owner-ai/` untuk fitur G1-G8. Boleh reuse helper `backend/src/modules/market-analysis/deepseek.client.ts`, tetapi G0 harus mengubah helper itu menjadi aman untuk JSON, usage, model env, timeout, dan fallback.
+- **Frontend target:** pakai/upgrade `frontend/src/components/ai/AiAssistButton.tsx` atau buat komponen baru di `frontend/src/components/ai/` seperti `AiApprovalDrawer`, `AiDraftPanel`, `AiConfidenceBadge`, `AiCostHint`.
+- **API client target:** tambah `frontend/src/api/ownerAi.ts`. Jangan menaruh API key di frontend.
+- **Envelope response:** semua endpoint AI mengembalikan `{ mode, feature, model, generatedAt, snapshotHash, promptHash, confidence, warnings, result, usage?, fallback? }`.
+- **Approval pattern:** panel hasil AI punya tombol seperti `Gunakan Draft`, `Salin ke Form`, `Approve dengan Data Ini`, `Tolak`, atau `Minta Analisa Ulang`. Tombol approve harus memanggil endpoint domain existing, bukan endpoint AI.
+- **Cache/token:** cache boleh berdasarkan `feature + snapshotHash + actorId` TTL pendek. Jangan cache data yang berisi NIK penuh atau OCR KTP mentah.
+- **UI copy:** jangan klaim AI "pasti benar". Pakai copy singkat: "Bantuan AI", "Perlu review manusia", "Data tidak berubah sebelum disetujui".
+
+#### G0 — AI-SAFETY-FOUNDATION
+
+- [ ] **G0 / AI-SAFETY-FOUNDATION:** rapikan fondasi DeepSeek agar semua fitur berikutnya aman, hemat token, dan manual-only.
+  - **Rujukan:** `docs/M12_AI_OWNER_ADMIN.md` bagian G0, `docs/M08_DEPLOY_GO_LIVE.md` env Fase G, `docs/CODEMAP.md`.
+  - **Anchor backend:** `backend/src/modules/market-analysis/deepseek.client.ts`, `backend/src/modules/market-analysis/market-analysis.service.ts`, `backend/src/modules/ai/ai.service.ts`, `backend/src/modules/audit-log/`, `backend/src/app.module.ts`.
+  - **Anchor frontend:** `frontend/src/components/ai/AiAssistButton.tsx`, `frontend/src/api/ai.ts`, `frontend/src/pages/marketing/MarketAnalysisPage.tsx`.
+  - **Langkah detail:**
+    1. Ubah default model DeepSeek menjadi `process.env.DEEPSEEK_MODEL || 'deepseek-v4-flash'`.
+    2. Tambah opsi `model`, `responseFormatJson`, `maxTokens`, `timeoutMs`, `feature`, dan `actorId` pada helper chat.
+    3. Bila `responseFormatJson=true`, kirim `response_format: { type: 'json_object' }` dan validasi hasil JSON di service pemanggil.
+    4. Ambil `usage` dari response DeepSeek jika tersedia; jangan crash bila tidak ada.
+    5. Hitung `promptHash` dari messages yang sudah diminimalkan dan `snapshotHash` dari data bisnis sebelum prompt.
+    6. Tambah guard env: `AI_FEATURES_ENABLED`, `AI_MANUAL_ONLY`, `AI_OWNER_ADMIN_ONLY`, `AI_DAILY_REQUEST_LIMIT`, `AI_MAX_INPUT_CHARS`, `AI_MAX_OUTPUT_TOKENS`, `AI_FINANCE_MAX_OUTPUT_TOKENS`.
+    7. Tambah endpoint status aman `GET /owner-ai/status` untuk OWNER/ADMIN: configured true/false, enabled true/false, model, limit tersisa. Jangan bocorkan API key.
+    8. Pastikan integrasi lama `/market-analysis` tetap jalan atau fallback offline.
+  - **Gate:** `cd backend; npx tsc --noEmit`; `cd frontend; npm run build`; smoke manual `/market-analysis/status` dan `/owner-ai/status`.
+  - **Jangan:** jangan tambah dependency npm, jangan ubah schema, jangan panggil AI otomatis dari halaman.
+
+#### G1 — OWNER-BRIEF-AI
+
+- [ ] **G1 / OWNER-BRIEF-AI:** tombol "Ringkas Kondisi Bisnis dengan AI" di Kokpit Owner.
+  - **Tujuan:** Owner menekan tombol, AI membaca snapshot ringkas bisnis hari ini, lalu memberi prioritas 3-7 poin.
+  - **Rujukan:** `docs/M12_AI_OWNER_ADMIN.md` G1, `docs/M02_KEPUTUSAN_OWNER.md`, `docs/M04_KEUANGAN.md`, `docs/M06_OPERASIONAL.md`.
+  - **Anchor backend:** `OwnerDashboardPage` data source, `finance.service.ts`, `reports.service.ts`, `tickets.service.ts`, `payment-submissions.service.ts`, `settings.service.ts`.
+  - **Anchor frontend:** `frontend/src/pages/dashboard/OwnerDashboardPage.tsx`, `frontend/src/components/ai/`.
+  - **Snapshot minimal:** okupansi, kamar kosong/maintenance, invoice overdue agregat, pending payment count, ticket urgent/open, meter due, readiness score, top 5 risiko. Jangan kirim daftar tenant lengkap.
+  - **Output AI:** `executiveSummary`, `topRisks[]`, `recommendedActions[]`, `watchlist[]`, `missingData[]`, `confidence`.
+  - **UI:** hasil tampil di panel/drawer; tombol `Refresh Analisa AI` manual; tidak auto-refresh saat dashboard dibuka.
+  - **Gate:** backend tsc, frontend build, UAT role: OWNER bisa, ADMIN hanya jika diputuskan boleh di M12, STAFF/TENANT 403 dan tombol tidak muncul.
+
+#### G2 — FINANCE-AI-ANALYST
+
+- [ ] **G2 / FINANCE-AI-ANALYST:** analis keuangan mendalam untuk Owner.
+  - **Tujuan:** AI membantu membaca trial balance, P&L, cashflow, rasio, readiness, deposit reconciliation, dan aging piutang dari data terkini sistem.
+  - **Rujukan:** `docs/M12_AI_OWNER_ADMIN.md` G2, `docs/M04_KEUANGAN.md`, `docs/M09_AUDIT.md`.
+  - **Anchor backend:** `backend/src/modules/finance/`, `backend/src/modules/accounting/`, `backend/src/modules/reports/`, helper trial balance/cashflow/ratios.
+  - **Anchor frontend:** `frontend/src/pages/finance/AccountingSetupPage.tsx`, komponen accounting reports.
+  - **Snapshot minimal:** agregat per periode, bukan seluruh jurnal. Sertakan akun abnormal/top variance/top overdue/top expense category.
+  - **Output AI:** `healthScore`, `cashflowAnalysis`, `profitabilityAnalysis`, `riskFindings[]`, `anomalyChecks[]`, `nextActions[]`, `questionsForOwner[]`.
+  - **Approval:** AI tidak punya tombol posting jurnal. Jika ada saran koreksi, tampilkan sebagai checklist manual untuk Owner.
+  - **Gate uang:** `cd backend; npx tsc --noEmit`; `cd backend; node --test "test/**/*.test.js"`; frontend build bila ada UI.
+  - **Jangan:** jangan mengubah `JournalEntry`, `Invoice`, `InvoicePayment`, `Expense`, `AccountingPeriod`, `OpeningBalance`, atau `CashAccount`.
+
+#### G3 — PAYMENT-REVIEW-AI
+
+- [ ] **G3 / PAYMENT-REVIEW-AI:** asisten review bukti pembayaran untuk Admin/Owner.
+  - **Tujuan:** di modal review pembayaran, Admin menekan "Bantu Review AI"; AI memberi rekomendasi `APPROVE`, `REJECT`, atau `ASK_MORE_INFO`.
+  - **Rujukan:** `docs/M12_AI_OWNER_ADMIN.md` G3, `docs/M04_KEUANGAN.md`, `docs/M05_SIKLUS_HUNI.md`.
+  - **Anchor backend:** `backend/src/modules/payment-submissions/`, `backend/src/modules/ai/ai.service.ts` existing `analyzePaymentProof`, `invoice-payments.service.ts`.
+  - **Anchor frontend:** `frontend/src/pages/payments/PaymentReviewPage.tsx`, `frontend/src/components/payments/ReviewPaymentModal.tsx`, `frontend/src/api/ai.ts`.
+  - **Input minimal:** submissionId, invoiceId, expected amount, submitted amount, paidAt, sender/ref text, OCR text jika ada. Jangan kirim file bukti langsung ke DeepSeek untuk tahap ini.
+  - **Output AI:** `recommendedAction`, `confidence`, `matches[]`, `warnings[]`, `reason`, `suggestedAdminNote`.
+  - **Approval:** tombol approve/reject tetap endpoint existing `payment-submissions`. Saat manusia approve/reject setelah memakai AI, catat `AuditLog.meta.ai`.
+  - **Gate uang:** backend tsc + unit uang, frontend build. UAT: nominal kurang tetap tidak bisa approve meski AI menyarankan approve.
+
+#### G4 — EXPENSE-OCR-DRAFT
+
+- [ ] **G4 / EXPENSE-OCR-DRAFT:** OCR nota biaya menjadi draft expense.
+  - **Tujuan:** Admin/Owner upload/foto nota, OCR lokal membaca teks, AI menormalkan menjadi draft expense yang bisa diedit sebelum simpan.
+  - **Rujukan:** `docs/M12_AI_OWNER_ADMIN.md` G4, `docs/M04_KEUANGAN.md`, `docs/M06_OPERASIONAL.md`.
+  - **Anchor backend:** `backend/src/modules/expenses/expenses.service.ts`, `backend/src/modules/expenses/expenses.controller.ts`.
+  - **Anchor frontend:** halaman resource/expense, `frontend/src/pages/resources/`, `frontend/src/components/ai/`, lazy import `tesseract.js` seperti `GuestBookingForm`.
+  - **Flow wajib:** file → OCR di browser → user lihat teks OCR → tombol "Rapikan Draft AI" → AI return draft → user edit → user klik "Simpan Expense" endpoint existing.
+  - **Output AI:** `date`, `vendor`, `amountRupiah`, `categorySuggestion`, `description`, `taxOrFeeWarning`, `confidence`, `needsHumanCheck[]`.
+  - **Gate uang:** backend tsc, unit uang, frontend build. UAT: draft tidak membuat jurnal sampai expense disimpan lewat flow existing.
+  - **Jangan:** jangan posting expense/jurnal otomatis, jangan simpan OCR mentah panjang kecuali user eksplisit menyimpan catatan.
+
+#### G5 — KTP-OCR-VALIDATOR
+
+- [ ] **G5 / KTP-OCR-VALIDATOR:** validator teks OCR KTP untuk Admin/Owner.
+  - **Tujuan:** membantu cek format NIK/nama/tanggal lahir dari hasil OCR, bukan mengganti verifikasi manusia.
+  - **Rujukan:** `docs/M12_AI_OWNER_ADMIN.md` G5, `docs/M05_SIKLUS_HUNI.md`, `docs/M07_PUBLIK_GROWTH.md`.
+  - **Anchor frontend:** `frontend/src/pages/bookings/GuestBookingForm.tsx`, `frontend/src/utils/ktpOcr.ts`, `StayDetailPage`/tenant KTP card.
+  - **Anchor backend:** `backend/src/modules/tenants/tenants.service.ts`, endpoint upload/verifikasi KTP existing.
+  - **Flow wajib:** gambar KTP tetap di flow existing; OCR gambar lokal; AI hanya menerima teks OCR yang sudah diminimalkan; hasil AI tampil sebagai warning/checklist.
+  - **Output AI:** `normalizedName`, `nikFormatValid`, `birthDateGuess`, `fieldWarnings[]`, `manualReviewRequired`, `confidence`.
+  - **Approval:** status KTP/tenant tetap diverifikasi dengan tombol Owner/Admin existing.
+  - **PDP:** jangan kirim foto KTP ke DeepSeek. Jangan tampilkan NIK penuh di prompt log. Mask minimal `************1234` di audit.
+  - **Gate:** backend tsc bila ada endpoint, frontend build, UAT role + PDP.
+
+#### G6 — OPS-INVENTORY-AI
+
+- [ ] **G6 / OPS-INVENTORY-AI:** asisten operasional tiket dan stok.
+  - **Tujuan:** Admin/Owner menekan tombol pada tiket/gudang untuk mendapat ringkasan prioritas, saran barang pengganti, dan draft catatan follow-up.
+  - **Rujukan:** `docs/M12_AI_OWNER_ADMIN.md` G6, `docs/M06_OPERASIONAL.md`, `docs/CODEMAP.md`.
+  - **Anchor backend:** `backend/src/modules/tickets/`, `backend/src/modules/inventory-items/`, `backend/src/modules/inventory-movements/`, `backend/src/modules/rooms/`.
+  - **Anchor frontend:** `frontend/src/pages/tickets/TicketsPage.tsx`, `frontend/src/pages/resources/InventoryShellPage.tsx`, resource detail modal.
+  - **Snapshot minimal:** ticket id/type/priority/status/age, room code, related facility, stock summary by category, recent movements. Jangan kirim catatan tenant panjang kecuali relevan.
+  - **Output AI:** `priorityReason`, `suggestedNextStep`, `inventorySuggestions[]`, `draftAdminNote`, `riskWarnings[]`.
+  - **Approval:** AI tidak boleh membuat inventory movement, menutup tiket, mengubah status kamar, atau assign staff. Admin/Owner klik action existing.
+  - **Gate:** backend tsc, frontend build, UAT STAFF tidak melihat tombol AI.
+
+#### G7 — AI-SETTINGS-BUDGET-OBSERVABILITY
+
+- [ ] **G7 / AI-SETTINGS-BUDGET:** halaman setting dan observability biaya AI.
+  - **Tujuan:** Owner tahu AI aktif/tidak, model, limit harian, estimasi penggunaan, dan fitur mana yang paling sering dipakai.
+  - **Rujukan:** `docs/M12_AI_OWNER_ADMIN.md` G7, `docs/M08_DEPLOY_GO_LIVE.md`, `docs/M09_AUDIT.md`.
+  - **Anchor backend:** `settings.service.ts`, `audit-log`, `owner-ai/status`.
+  - **Anchor frontend:** `frontend/src/pages/settings/OwnerSettingsPage.tsx`.
+  - **UI minimal:** status API key configured, AI enabled flag, manual-only flag, daily request remaining, model default, model finance, last 20 AI audit logs.
+  - **Data source:** env + `OperationalSetting` bila sudah ada pola setting. Jika butuh schema baru untuk usage ledger, STOP dan jadikan bagian G9.
+  - **Gate:** backend tsc, frontend build, UAT API key tidak pernah tampil di response.
+
+#### G8 — AI-FAQ-MANUAL-GENERATOR
+
+- [ ] **G8 / AI-FAQ-MANUAL-GENERATOR:** generator draft FAQ/manual publik/tenant dari data sistem.
+  - **Tujuan:** Owner/Admin menekan tombol untuk membuat draft FAQ, copy layanan, atau ringkasan aturan berdasarkan setting dan data layanan existing.
+  - **Rujukan:** `docs/M12_AI_OWNER_ADMIN.md` G8, `docs/M07_PUBLIK_GROWTH.md`, `docs/M05_SIKLUS_HUNI.md`.
+  - **Anchor backend:** `settings`, `additional-services`, `public/marketing` modules.
+  - **Anchor frontend:** `OwnerSettingsPage`, halaman marketing/settings terkait.
+  - **Snapshot minimal:** daftar layanan aktif, aturan kost, jam operasional, kebijakan pembayaran/checkout ringkas. Jangan kirim data tenant.
+  - **Output AI:** `faqItems[]`, `publicCopyDraft`, `tenantManualDraft`, `warnings[]`.
+  - **Approval:** draft hanya disalin ke form. Publish/simpan tetap tombol Owner/Admin existing.
+  - **Gate:** backend tsc bila ada endpoint, frontend build.
+
+#### G9 — AI-DRAFT-QUEUE [SCHEMA] OPSIONAL
+
+- [ ] **G9 / AI-DRAFT-QUEUE** 🧬 **[SCHEMA][OWNER]:** hanya kerjakan jika owner menyetujui model `AiDraft`.
+  - **Tujuan:** menyimpan draft AI lintas fitur agar Owner/Admin bisa review, approve, reject, dan audit dari satu antrean.
+  - **Kapan dibutuhkan:** jika G1-G8 butuh persist draft lintas sesi, histori revisi, atau approval queue khusus.
+  - **Schema usulan:** `AiDraft(id, feature, actorId, status, sourceType, sourceId, snapshotHash, promptHash, model, confidence, inputSummaryJson, resultJson, humanDecision, decidedById, decidedAt, createdAt, updatedAt)`.
+  - **Status:** `DRAFT`, `APPLIED`, `REJECTED`, `EXPIRED`.
+  - **Aturan:** additive migration saja; tidak mengganti `AuditLog`; tidak menyimpan foto KTP atau bukti bayar mentah; retention 30-90 hari.
+  - **STOP:** sebelum edit `schema.prisma`/migration, lapor ke owner dan minta approval eksplisit.
+
+#### UAT Global Fase G
+
+Checklist ini wajib untuk setiap task G:
+
+- [ ] Tombol AI tidak muncul untuk STAFF/TENANT.
+- [ ] Tombol AI tidak memanggil API saat halaman baru dibuka.
+- [ ] Network tab: request AI hanya muncul setelah klik manual.
+- [ ] Jika `DEEPSEEK_API_KEY` kosong, halaman tetap bisa dipakai dan data tidak berubah.
+- [ ] Jika DeepSeek error/timeout, user mendapat pesan non-blocking.
+- [ ] AI response tidak langsung memutasi data; perubahan hanya lewat tombol approve/simpan existing.
+- [ ] Prompt/snapshot tidak berisi foto KTP, API key, password, JWT, atau dump tabel mentah.
+- [ ] Fitur uang tetap lulus unit test dan guard no-partial/deposit/TB.
+- [ ] Audit `meta.ai` terisi saat manusia memakai rekomendasi AI untuk aksi final.
+
+---
+
 ### Catatan Sinkron Audit 2026-06-18
 
 - Audit eksternal sementara sudah diserap ke M10 agar tidak menjadi rujukan ganda.
 - **MKT-5** ditutup sebagai `[x]` karena kode renewal meter-copy + cross-sell opsional sudah ada.
-- **PUB-UI-REVAMP Fase G** dipecah: layanan tambahan, minat layanan, dan meter jadwal `[x]`; staff meter view masih `[~]`.
+- **PUB-UI-REVAMP fase lama** dipecah: layanan tambahan, minat layanan, dan meter jadwal `[x]`; staff meter view sudah terserap Fase D.
 - **OWNER-VIEW-PHASE2 P0** hanya dihitung selesai untuk layout dasar; mode-aware context, mobile toggle, offcanvas title, dan route split tetap terbuka.
 - M10 memakai status terbaru: build + unit test 55/55 hijau setelah pretest/build.
 

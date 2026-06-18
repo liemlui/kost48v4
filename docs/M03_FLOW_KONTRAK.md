@@ -15,6 +15,15 @@ Peta alur kode krusial, lifecycle utama, kontrak domain, safety belt, dan aturan
 
 **Chain of custody terverifikasi UTUH:** Invoice → JournalEntry → Trial Balance. Semua high-risk flow (booking, checkout, renewal, forced-checkout, meter) menghasilkan jurnal benar. TB balanced, deposit MATCHED, 0 unmapped transactions. Lihat `docs/M04_KEUANGAN.md` Update 2026-06-17.
 
+## Update 2026-06-19 — Fase G AI sebagai Sidecar Approval
+
+AI/DeepSeek tidak menambah state machine baru untuk booking, invoice, stay, renewal, checkout, ticket, inventory, atau KTP. AI hanya menjadi sidecar manual Owner/Admin: membaca snapshot ringkas, membuat draft/rekomendasi, lalu manusia menekan tombol approve/simpan existing. Detail penuh: `docs/M12_AI_OWNER_ADMIN.md`.
+
+- **Tidak ada transisi otomatis:** AI tidak boleh memanggil promote stay, approve payment, reject payment, verify KTP, close ticket, create inventory movement, post journal, atau open room tanpa aksi manusia.
+- **Endpoint domain tetap sumber kebenaran:** semua mutasi tetap lewat controller/service existing yang sudah punya guard status, role, transaksi, dan audit.
+- **Audit flow:** jika manusia memakai rekomendasi AI, audit domain tetap dibuat dan `AuditLog.meta.ai` mencatat feature/model/hash/confidence/humanDecision.
+- **Fallback:** jika AI mati/limit/error, seluruh flow kontrak tetap berjalan manual seperti sebelum Fase G.
+
 ## Catatan Pemakaian
 
 - Jadikan file ini pintu masuk tematik; bila butuh detail mentah, cek file sumber di arsip yang disebut di atas.

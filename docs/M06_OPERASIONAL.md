@@ -18,6 +18,16 @@ Operasional harian: inventaris, staf/tiket/KPI, notifikasi/pengumuman, auth/onbo
 
 **Audit 5 jalur 17 Jun 2026: LULUS.** Meter M-1..M-5 selesai (meter billing + checkout meter final × deposit, TB seimbang di UAT). Semua DO-NOT-TOUCH blocks UTUH.
 
+## Update 2026-06-19 - Fase G AI Operasional
+
+AI operasional hanya untuk OWNER/ADMIN dan selalu manual lewat tombol. Detail implementasi ada di `docs/M12_AI_OWNER_ADMIN.md`.
+
+- **Ticket assistant:** AI boleh merangkum tiket, menyarankan prioritas, draft note, atau aksi lanjutan. Admin/Owner tetap klik assign/start/close/request-photo secara manual.
+- **Inventory assistant:** AI boleh menyusun rekomendasi reorder, stok rendah, atau estimasi pembelian. Mutasi stok, movement, expense, dan perubahan fasilitas tetap melalui endpoint existing dan approval manusia.
+- **Staff field report assistant:** AI boleh membantu admin membaca laporan staf dan menyarankan keputusan. Staff tidak mendapat tombol AI berbayar.
+- **Tidak ada auto-ops AI:** jangan menambahkan DeepSeek ke cron/sweeper/auto-ops. Auto-ops tetap deterministik dan murah.
+- **Audit:** bila saran AI dipakai untuk review laporan/tiket/stok, catat `AuditLog.meta.ai` pada aksi final.
+
 ## Aturan & Panduan Tenant KOST48 — 2026-06-17
 
 Konten aturan ini akan diisi ke **menu Panduan & Aturan Kos** di portal tenant (MyManualPage) dan halaman publik FAQ. Berdasarkan keputusan owner D-19 (F4-12): FAQ di-seed dari aturan/flow, owner edit via admin FAQ.

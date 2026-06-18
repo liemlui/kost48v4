@@ -44,6 +44,17 @@ Sesuai analisa PDF dan temuan owner 2026-06-16, invoice tidak boleh hanya terbac
 - Tidak ada migrasi schema: peruntukan diturunkan dari baris invoice, bukan kolom baru.
 - Prinsip bisnis: kejelasan invoice mengurangi dispute, memperkuat trust, dan menyambungkan pembayaran ke riwayat sewa.
 
+## Update 2026-06-19 - Fase G AI Finance Analyst
+
+AI finance hanya boleh menjadi analis dan pembuat draft keputusan Owner/Admin. Detail implementasi ada di `docs/M12_AI_OWNER_ADMIN.md`.
+
+- **Manual only:** tombol seperti "Analisa Finance dengan AI" tidak boleh terpanggil otomatis saat halaman finance dibuka.
+- **Owner-only untuk analisa mendalam:** AI membaca snapshot trial balance, P&L, cashflow, ratios, readiness, period close, dan deposit reconciliation; output berupa temuan, risiko, dan rekomendasi.
+- **Tidak boleh mutasi ledger:** AI tidak boleh membuat/mengubah `JournalEntry`, `Invoice`, `InvoicePayment`, `Expense`, `AccountingPeriod`, `CashAccount`, atau `OpeningBalance`.
+- **Guard tetap deterministik:** trial balance, no-partial, deposit liability, period OPEN/CLOSED, dan readiness tetap milik service accounting. Jika AI berbeda pendapat dengan guard backend, backend menang.
+- **Expense OCR draft:** nota biaya boleh di-OCR lokal lalu AI menormalkan teks menjadi draft expense. Admin/Owner tetap mengoreksi dan klik simpan; posting expense/jurnal mengikuti service existing.
+- **Audit trail:** jika rekomendasi AI dipakai untuk approve/reject pembayaran atau membuat expense, catat `AuditLog.meta.ai` berisi feature, model, promptHash, snapshotHash, confidence, dan humanDecision.
+
 ## Bagian 1 - `docs/05_VERIFIKASI_KEUANGAN.md`
 
 ### 05 — HARNESS VERIFIKASI KEUANGAN (jaring pengaman AI eksekutor)

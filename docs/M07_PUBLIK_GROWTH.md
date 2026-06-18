@@ -16,6 +16,15 @@ Permukaan publik dan pertumbuhan: marketing, UI/UX, loyalitas, gamifikasi, refer
 
 MKT-4 CAC/CLV Dashboard selesai (DeepSeek V4 Pro + offline fallback). Audit keuangan LULUS — akuntansi akurat mendukung insight marketing. Detail: `docs/M04_KEUANGAN.md`.
 
+## Update 2026-06-19 - Fase G AI Marketing & FAQ
+
+Analisa pasar AI yang sudah ada menjadi bagian Fase G `docs/M12_AI_OWNER_ADMIN.md`. Semua AI marketing tetap manual lewat tombol, OWNER/ADMIN only, hemat token, dan memiliki fallback offline. Default model baru disarankan `deepseek-v4-flash`; model berat hanya untuk analisa strategis/finance Owner-only.
+
+- **Market analysis:** SWOT/PESTLE/Competitor tetap owner-triggered; jangan auto-run saat halaman dibuka.
+- **CAC/CLV:** AI hanya memberi insight naratif dari snapshot agregat; jangan mengarang paid CAC jika biaya iklan belum diinput.
+- **FAQ generator:** AI boleh membuat draft FAQ/Manual dari rule summary, tetapi Owner memilih item lalu menyimpan. Jangan auto overwrite FAQ existing.
+- **Public copy:** AI boleh membuat draft copy marketing dari data sistem, tetapi Owner/Admin menyetujui sebelum dipakai di Settings/FAQ/landing.
+
 ## Catatan Pemakaian
 
 - Jadikan file ini pintu masuk tematik; bila butuh detail mentah, cek file sumber di arsip yang disebut di atas.
@@ -161,7 +170,7 @@ Semua saran owner dari walkthrough `http://localhost:5173/` — sudah dipetakan 
 #### F. Booking Flow & KTP
 - **PUB-BOOKING-INFO** — Di halaman login: teks "Belum punya akun? Booking kamar dulu — akun Anda dibuat otomatis."
 - **PUB-BOOKING-FORM** — Ubah validasi booking: `phone` XOR `email` wajib (minimal salah satu). Field lain optional, dilengkapi di portal tenant.
-- **PUB-KTP-OCR** — Tambah dependency Tesseract.js (~2MB gzip). Setelah upload foto KTP → OCR offline ekstrak nama + NIK → auto-isi form. Backend simpan hasil OCR.
+- **PUB-KTP-OCR** — Tesseract.js OCR offline: setelah upload foto KTP → ekstrak nama + NIK → auto-isi form. Fase G boleh menambah validator DeepSeek **berbasis teks OCR saja**; jangan kirim gambar KTP ke API AI. Backend hanya menyimpan data yang sudah disetujui flow KTP.
 - **TEN-PROFILE-NOTIF** — Endpoint `GET /me/profile-completeness`. Di portal tenant, badge "Lengkapi Profil" + daftar field belum diisi (nama, telepon, email, KTP, kontak darurat, dll).
 
 ### Backlog desain (diperbarui 2026-06-17)
