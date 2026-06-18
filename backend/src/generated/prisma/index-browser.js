@@ -133,9 +133,37 @@ exports.Prisma.UserScalarFieldEnum = {
   tipGopay: 'tipGopay',
   tipOvo: 'tipOvo',
   tipDana: 'tipDana',
+  tipShopeepay: 'tipShopeepay',
   tipBank: 'tipBank',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
+};
+
+exports.Prisma.MarketAnalysisScalarFieldEnum = {
+  id: 'id',
+  kind: 'kind',
+  title: 'title',
+  summary: 'summary',
+  resultJson: 'resultJson',
+  transcriptJson: 'transcriptJson',
+  createdById: 'createdById',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.SatisfactionSurveyScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  stayId: 'stayId',
+  overallRating: 'overallRating',
+  cleanliness: 'cleanliness',
+  staffService: 'staffService',
+  facility: 'facility',
+  valueForMoney: 'valueForMoney',
+  wouldRecommend: 'wouldRecommend',
+  comment: 'comment',
+  createdById: 'createdById',
+  createdAt: 'createdAt'
 };
 
 exports.Prisma.TenantScalarFieldEnum = {
@@ -172,6 +200,8 @@ exports.Prisma.RoomScalarFieldEnum = {
   name: 'name',
   floor: 'floor',
   status: 'status',
+  category: 'category',
+  roomType: 'roomType',
   dailyRateRupiah: 'dailyRateRupiah',
   weeklyRateRupiah: 'weeklyRateRupiah',
   biWeeklyRateRupiah: 'biWeeklyRateRupiah',
@@ -975,6 +1005,40 @@ exports.Prisma.FaqScalarFieldEnum = {
   updatedAt: 'updatedAt'
 };
 
+exports.Prisma.OperationalSettingScalarFieldEnum = {
+  id: 'id',
+  freeElectricityKwhPerMonth: 'freeElectricityKwhPerMonth',
+  electricityTariffPerKwhRupiah: 'electricityTariffPerKwhRupiah',
+  waterMeteringEnabled: 'waterMeteringEnabled',
+  waterTariffPerM3Rupiah: 'waterTariffPerM3Rupiah',
+  freeWaterM3PerMonth: 'freeWaterM3PerMonth',
+  updatedAt: 'updatedAt',
+  updatedById: 'updatedById'
+};
+
+exports.Prisma.AdditionalServiceScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  description: 'description',
+  priceRupiah: 'priceRupiah',
+  unit: 'unit',
+  isActive: 'isActive',
+  sortOrder: 'sortOrder',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.ServiceInterestScalarFieldEnum = {
+  id: 'id',
+  serviceId: 'serviceId',
+  tenantId: 'tenantId',
+  status: 'status',
+  note: 'note',
+  adminNote: 'adminNote',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -1019,6 +1083,17 @@ exports.RoomStatus = exports.$Enums.RoomStatus = {
   OCCUPIED: 'OCCUPIED',
   MAINTENANCE: 'MAINTENANCE',
   INACTIVE: 'INACTIVE'
+};
+
+exports.RoomCategory = exports.$Enums.RoomCategory = {
+  ECONOMY: 'ECONOMY',
+  STANDARD: 'STANDARD',
+  DELUXE: 'DELUXE'
+};
+
+exports.RoomType = exports.$Enums.RoomType = {
+  REGULAR: 'REGULAR',
+  MEZZANINE: 'MEZZANINE'
 };
 
 exports.StayStatus = exports.$Enums.StayStatus = {
@@ -1224,7 +1299,8 @@ exports.StaffPerformanceEventType = exports.$Enums.StaffPerformanceEventType = {
   TENANT_REVIEW_HIGH: 'TENANT_REVIEW_HIGH',
   TENANT_REVIEW_LOW: 'TENANT_REVIEW_LOW',
   MISSING_PROOF: 'MISSING_PROOF',
-  MANUAL_ADJUSTMENT: 'MANUAL_ADJUSTMENT'
+  MANUAL_ADJUSTMENT: 'MANUAL_ADJUSTMENT',
+  TIP_RECEIVED: 'TIP_RECEIVED'
 };
 
 exports.StaffReviewStatus = exports.$Enums.StaffReviewStatus = {
@@ -1479,8 +1555,17 @@ exports.ReferralStatus = exports.$Enums.ReferralStatus = {
   CANCELLED: 'CANCELLED'
 };
 
+exports.ServiceInterestStatus = exports.$Enums.ServiceInterestStatus = {
+  PENDING: 'PENDING',
+  CONTACTED: 'CONTACTED',
+  DONE: 'DONE',
+  CANCELLED: 'CANCELLED'
+};
+
 exports.Prisma.ModelName = {
   User: 'User',
+  MarketAnalysis: 'MarketAnalysis',
+  SatisfactionSurvey: 'SatisfactionSurvey',
   Tenant: 'Tenant',
   Room: 'Room',
   RoomFacility: 'RoomFacility',
@@ -1528,7 +1613,10 @@ exports.Prisma.ModelName = {
   Redemption: 'Redemption',
   PeerBehaviorReport: 'PeerBehaviorReport',
   TenantReferral: 'TenantReferral',
-  Faq: 'Faq'
+  Faq: 'Faq',
+  OperationalSetting: 'OperationalSetting',
+  AdditionalService: 'AdditionalService',
+  ServiceInterest: 'ServiceInterest'
 };
 
 /**

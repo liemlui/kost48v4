@@ -211,12 +211,26 @@ export default function AppLayout({ children }: { children?: ReactNode }) {
   const location = useLocation();
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState<'expanded' | 'collapsed'>(() => {
+    try {
+      const saved = localStorage.getItem('kost48_sidebar_collapsed');
+      return saved === 'collapsed' ? 'collapsed' : 'expanded';
+    } catch { return 'expanded'; }
+  });
   const { stage: tenantStage } = useTenantPortalStage();
 
   const isStaff = user?.role === 'STAFF';
   const isTenant = user?.role === 'TENANT';
   const isAdmin = user?.role === 'ADMIN';
   const isOwner = user?.role === 'OWNER';
+
+  const toggleSidebarCollapsed = () => {
+    setSidebarCollapsed((prev) => {
+      const next = prev === 'expanded' ? 'collapsed' : 'expanded';
+      localStorage.setItem('kost48_sidebar_collapsed', next);
+      return next;
+    });
+  };
 
   // Owner view mode: 'owner' = Kokpit Owner, 'admin' = Area Admin (operasional)
   const [ownerViewMode, setOwnerViewMode] = useState<'owner' | 'admin'>(() => {
@@ -320,8 +334,11 @@ export default function AppLayout({ children }: { children?: ReactNode }) {
   }
   return (
     <div className="app-shell">
-      <div className="app-shell-grid">
-        <aside className="app-sidebar d-none d-xl-flex">
+      <div className={`app-shell-grid ${sidebarCollapsed === 'collapsed' ? 'sidebar-collapsed' : ''}`}>
+        <aside className={`app-sidebar d-none d-xl-flex ${sidebarCollapsed === 'collapsed' ? 'sidebar-collapsed' : ''}`}>
+          <button type="button" className={`sidebar-collapse-toggle ${sidebarCollapsed === 'collapsed' ? 'collapsed' : ''}`} onClick={toggleSidebarCollapsed} aria-label={sidebarCollapsed === 'collapsed' ? 'Perluas sidebar' : 'Ciutkan sidebar'} title={sidebarCollapsed === 'collapsed' ? 'Perluas' : 'Ciutkan'}>
+            ◀
+          </button>
           <SidebarContent sections={sections} links={links} userRole={user?.role} onBrandClick={() => navigate(defaultRoute)} />
         </aside>
 

@@ -9,6 +9,7 @@ import EmptyState from "../../components/common/EmptyState";
 import { SkeletonBlock } from "../../components/common/SkeletonLoader";
 import TenantBookingGate from "../../components/tenant/TenantBookingGate";
 import RoomComparePanel from "../../components/rooms/RoomComparePanel";
+import AvailabilityTimeline from "../../components/public/AvailabilityTimeline";
 import Kost48LogoMark from "../../components/common/Kost48LogoMark";
 import type { PricingTerm, PublicRoom } from "../../types";
 import { useAuth } from "../../context/AuthContext";
@@ -547,6 +548,9 @@ export default function PublicRoomsPage() {
                 </Button>
               </nav>
             )}
+
+            {/* ── PUB-CALENDAR: Timeline ketersediaan ── */}
+            <AvailabilityTimeline />
 
             {/* ── Compare ── */}
             {comparedRooms.length > 0 && (

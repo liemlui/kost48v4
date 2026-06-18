@@ -289,116 +289,67 @@ export class AuthService {
 
   // ---- Private helpers ----
 
-  private async findUserForLogin(identifier: string, normalizedPhone: string | null) {
+  /** Helper bersama: cari user via email dulu, lalu via nomor HP (via Tenant).
+   *  @param includeExtraPhoneVariants — true untuk login (coba lebih banyak varian nomor),
+   *                                     false/default untuk forgot-password (varian minimal). */
+  private async findUserByEmailOrPhone(
+    identifier: string,
+    normalizedPhone: string | null,
+    options?: { includeExtraPhoneVariants?: boolean },
+  ) {
     const lowered = identifier.trim().toLowerCase();
 
+    // Email lookup (identik di kedua method)
     const userByEmail = await this.prisma.user.findFirst({
       where: {
-        email: {
-          equals: lowered,
-          mode: 'insensitive',
-        },
+        email: { equals: lowered, mode: 'insensitive' },
         isActive: true,
       },
-      include: {
-        tenant: true,
-      },
+      include: { tenant: true },
     });
+    if (userByEmail) return userByEmail;
 
-    if (userByEmail) {
-      return userByEmail;
-    }
+    if (!normalizedPhone) return null;
 
-    if (!normalizedPhone) {
-      return null;
-    }
+    // Phone lookup
+    const phoneConditions: Array<{ phone: string }> = [];
 
-    const denormalized = denormalizePhone(normalizedPhone);
-    const digitsOnly = identifier.replace(/\D/g, '');
-
-    const phoneConditions: Array<{ phone: string }> = [
-      { phone: normalizedPhone },
-      { phone: denormalized },
-    ];
-
-    if (!phoneConditions.some((c) => c.phone === identifier)) {
-      phoneConditions.push({ phone: identifier });
-    }
-    if (digitsOnly !== identifier && !phoneConditions.some((c) => c.phone === digitsOnly)) {
-      phoneConditions.push({ phone: digitsOnly });
+    if (options?.includeExtraPhoneVariants) {
+      // Login: coba lebih banyak varian (denormalized, raw identifier, digits-only)
+      const denormalized = denormalizePhone(normalizedPhone);
+      const digitsOnly = identifier.replace(/\D/g, '');
+      phoneConditions.push({ phone: normalizedPhone }, { phone: denormalized });
+      if (!phoneConditions.some((c) => c.phone === identifier)) {
+        phoneConditions.push({ phone: identifier });
+      }
+      if (digitsOnly !== identifier && !phoneConditions.some((c) => c.phone === digitsOnly)) {
+        phoneConditions.push({ phone: digitsOnly });
+      }
+    } else {
+      // Forgot-password: varian minimal
+      phoneConditions.push(
+        { phone: normalizedPhone },
+        { phone: denormalizePhone(normalizedPhone) },
+      );
     }
 
     const tenant = await this.prisma.tenant.findFirst({
-      where: {
-        OR: phoneConditions,
-        isActive: true,
-      },
+      where: { OR: phoneConditions, isActive: true },
     });
-
-    if (!tenant) {
-      return null;
-    }
+    if (!tenant) return null;
 
     return this.prisma.user.findFirst({
-      where: {
-        tenantId: tenant.id,
-        role: 'TENANT',
-        isActive: true,
-      },
-      include: {
-        tenant: true,
-      },
+      where: { tenantId: tenant.id, role: 'TENANT', isActive: true },
+      include: { tenant: true },
     });
   }
 
+  private async findUserForLogin(identifier: string, normalizedPhone: string | null) {
+    return this.findUserByEmailOrPhone(identifier, normalizedPhone, { includeExtraPhoneVariants: true });
+  }
+
   private async findUserForForgotPassword(identifier: string, normalizedPhone: string | null) {
-    const lowered = identifier.trim().toLowerCase();
-
-    const userByEmail = await this.prisma.user.findFirst({
-      where: {
-        email: {
-          equals: lowered,
-          mode: 'insensitive',
-        },
-        isActive: true,
-      },
-      include: {
-        tenant: true,
-      },
-    });
-
-    if (userByEmail) {
-      return userByEmail;
-    }
-
-    if (!normalizedPhone) {
-      return null;
-    }
-
-    const tenant = await this.prisma.tenant.findFirst({
-      where: {
-        OR: [
-          { phone: normalizedPhone },
-          { phone: denormalizePhone(normalizedPhone) },
-        ],
-        isActive: true,
-      },
-    });
-
-    if (!tenant) {
-      return null;
-    }
-
-    return this.prisma.user.findFirst({
-      where: {
-        tenantId: tenant.id,
-        role: 'TENANT',
-        isActive: true,
-      },
-      include: {
-        tenant: true,
-      },
-    });
+    return this.findUserByEmailOrPhone(identifier, normalizedPhone);
   }
 
   private async sendResetEmail(email: string, rawToken: string): Promise<void> {

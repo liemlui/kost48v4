@@ -19,6 +19,16 @@ export type PrismaPromise<T> = $Public.PrismaPromise<T>
  */
 export type User = $Result.DefaultSelection<Prisma.$UserPayload>
 /**
+ * Model MarketAnalysis
+ * 
+ */
+export type MarketAnalysis = $Result.DefaultSelection<Prisma.$MarketAnalysisPayload>
+/**
+ * Model SatisfactionSurvey
+ * 
+ */
+export type SatisfactionSurvey = $Result.DefaultSelection<Prisma.$SatisfactionSurveyPayload>
+/**
  * Model Tenant
  * 
  */
@@ -258,6 +268,21 @@ export type TenantReferral = $Result.DefaultSelection<Prisma.$TenantReferralPayl
  * 
  */
 export type Faq = $Result.DefaultSelection<Prisma.$FaqPayload>
+/**
+ * Model OperationalSetting
+ * 
+ */
+export type OperationalSetting = $Result.DefaultSelection<Prisma.$OperationalSettingPayload>
+/**
+ * Model AdditionalService
+ * 
+ */
+export type AdditionalService = $Result.DefaultSelection<Prisma.$AdditionalServicePayload>
+/**
+ * Model ServiceInterest
+ * 
+ */
+export type ServiceInterest = $Result.DefaultSelection<Prisma.$ServiceInterestPayload>
 
 /**
  * Enums
@@ -291,6 +316,23 @@ export const RoomStatus: {
 };
 
 export type RoomStatus = (typeof RoomStatus)[keyof typeof RoomStatus]
+
+
+export const RoomCategory: {
+  ECONOMY: 'ECONOMY',
+  STANDARD: 'STANDARD',
+  DELUXE: 'DELUXE'
+};
+
+export type RoomCategory = (typeof RoomCategory)[keyof typeof RoomCategory]
+
+
+export const RoomType: {
+  REGULAR: 'REGULAR',
+  MEZZANINE: 'MEZZANINE'
+};
+
+export type RoomType = (typeof RoomType)[keyof typeof RoomType]
 
 
 export const PricingTerm: {
@@ -612,7 +654,8 @@ export const StaffPerformanceEventType: {
   TENANT_REVIEW_HIGH: 'TENANT_REVIEW_HIGH',
   TENANT_REVIEW_LOW: 'TENANT_REVIEW_LOW',
   MISSING_PROOF: 'MISSING_PROOF',
-  MANUAL_ADJUSTMENT: 'MANUAL_ADJUSTMENT'
+  MANUAL_ADJUSTMENT: 'MANUAL_ADJUSTMENT',
+  TIP_RECEIVED: 'TIP_RECEIVED'
 };
 
 export type StaffPerformanceEventType = (typeof StaffPerformanceEventType)[keyof typeof StaffPerformanceEventType]
@@ -921,6 +964,16 @@ export const ReferralStatus: {
 
 export type ReferralStatus = (typeof ReferralStatus)[keyof typeof ReferralStatus]
 
+
+export const ServiceInterestStatus: {
+  PENDING: 'PENDING',
+  CONTACTED: 'CONTACTED',
+  DONE: 'DONE',
+  CANCELLED: 'CANCELLED'
+};
+
+export type ServiceInterestStatus = (typeof ServiceInterestStatus)[keyof typeof ServiceInterestStatus]
+
 }
 
 export type UserRole = $Enums.UserRole
@@ -934,6 +987,14 @@ export const Gender: typeof $Enums.Gender
 export type RoomStatus = $Enums.RoomStatus
 
 export const RoomStatus: typeof $Enums.RoomStatus
+
+export type RoomCategory = $Enums.RoomCategory
+
+export const RoomCategory: typeof $Enums.RoomCategory
+
+export type RoomType = $Enums.RoomType
+
+export const RoomType: typeof $Enums.RoomType
 
 export type PricingTerm = $Enums.PricingTerm
 
@@ -1163,6 +1224,10 @@ export type ReferralStatus = $Enums.ReferralStatus
 
 export const ReferralStatus: typeof $Enums.ReferralStatus
 
+export type ServiceInterestStatus = $Enums.ServiceInterestStatus
+
+export const ServiceInterestStatus: typeof $Enums.ServiceInterestStatus
+
 /**
  * ##  Prisma Client ʲˢ
  *
@@ -1293,6 +1358,26 @@ export class PrismaClient<
     * ```
     */
   get user(): Prisma.UserDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.marketAnalysis`: Exposes CRUD operations for the **MarketAnalysis** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more MarketAnalyses
+    * const marketAnalyses = await prisma.marketAnalysis.findMany()
+    * ```
+    */
+  get marketAnalysis(): Prisma.MarketAnalysisDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.satisfactionSurvey`: Exposes CRUD operations for the **SatisfactionSurvey** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more SatisfactionSurveys
+    * const satisfactionSurveys = await prisma.satisfactionSurvey.findMany()
+    * ```
+    */
+  get satisfactionSurvey(): Prisma.SatisfactionSurveyDelegate<ExtArgs, ClientOptions>;
 
   /**
    * `prisma.tenant`: Exposes CRUD operations for the **Tenant** model.
@@ -1773,6 +1858,36 @@ export class PrismaClient<
     * ```
     */
   get faq(): Prisma.FaqDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.operationalSetting`: Exposes CRUD operations for the **OperationalSetting** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more OperationalSettings
+    * const operationalSettings = await prisma.operationalSetting.findMany()
+    * ```
+    */
+  get operationalSetting(): Prisma.OperationalSettingDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.additionalService`: Exposes CRUD operations for the **AdditionalService** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more AdditionalServices
+    * const additionalServices = await prisma.additionalService.findMany()
+    * ```
+    */
+  get additionalService(): Prisma.AdditionalServiceDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.serviceInterest`: Exposes CRUD operations for the **ServiceInterest** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more ServiceInterests
+    * const serviceInterests = await prisma.serviceInterest.findMany()
+    * ```
+    */
+  get serviceInterest(): Prisma.ServiceInterestDelegate<ExtArgs, ClientOptions>;
 }
 
 export namespace Prisma {
@@ -2208,6 +2323,8 @@ export namespace Prisma {
 
   export const ModelName: {
     User: 'User',
+    MarketAnalysis: 'MarketAnalysis',
+    SatisfactionSurvey: 'SatisfactionSurvey',
     Tenant: 'Tenant',
     Room: 'Room',
     RoomFacility: 'RoomFacility',
@@ -2255,7 +2372,10 @@ export namespace Prisma {
     Redemption: 'Redemption',
     PeerBehaviorReport: 'PeerBehaviorReport',
     TenantReferral: 'TenantReferral',
-    Faq: 'Faq'
+    Faq: 'Faq',
+    OperationalSetting: 'OperationalSetting',
+    AdditionalService: 'AdditionalService',
+    ServiceInterest: 'ServiceInterest'
   };
 
   export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -2271,7 +2391,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "user" | "tenant" | "room" | "roomFacility" | "stay" | "tenantDepositLedgerEntry" | "meterReading" | "invoice" | "invoiceLine" | "invoicePayment" | "passwordResetToken" | "paymentSubmission" | "ticket" | "staffRoutineTemplate" | "staffRoutineAssignment" | "staffRoutineCompletion" | "staffWorkAudit" | "staffPerformanceEvent" | "staffReview" | "announcement" | "inventoryItem" | "roomItem" | "inventoryMovement" | "staffFieldReport" | "renewRequest" | "checkoutRequest" | "wifiSale" | "expense" | "fixedAsset" | "assetDepreciationRun" | "assetDepreciationLine" | "appNotification" | "pushSubscription" | "auditLog" | "chartOfAccount" | "cashAccount" | "accountingPeriod" | "openingBalanceBatch" | "openingBalanceLine" | "journalEntry" | "journalLine" | "rentRecognitionSchedule" | "roomTransfer" | "loyaltyPoint" | "loyaltyReward" | "redemption" | "peerBehaviorReport" | "tenantReferral" | "faq"
+      modelProps: "user" | "marketAnalysis" | "satisfactionSurvey" | "tenant" | "room" | "roomFacility" | "stay" | "tenantDepositLedgerEntry" | "meterReading" | "invoice" | "invoiceLine" | "invoicePayment" | "passwordResetToken" | "paymentSubmission" | "ticket" | "staffRoutineTemplate" | "staffRoutineAssignment" | "staffRoutineCompletion" | "staffWorkAudit" | "staffPerformanceEvent" | "staffReview" | "announcement" | "inventoryItem" | "roomItem" | "inventoryMovement" | "staffFieldReport" | "renewRequest" | "checkoutRequest" | "wifiSale" | "expense" | "fixedAsset" | "assetDepreciationRun" | "assetDepreciationLine" | "appNotification" | "pushSubscription" | "auditLog" | "chartOfAccount" | "cashAccount" | "accountingPeriod" | "openingBalanceBatch" | "openingBalanceLine" | "journalEntry" | "journalLine" | "rentRecognitionSchedule" | "roomTransfer" | "loyaltyPoint" | "loyaltyReward" | "redemption" | "peerBehaviorReport" | "tenantReferral" | "faq" | "operationalSetting" | "additionalService" | "serviceInterest"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -2346,6 +2466,154 @@ export namespace Prisma {
           count: {
             args: Prisma.UserCountArgs<ExtArgs>
             result: $Utils.Optional<UserCountAggregateOutputType> | number
+          }
+        }
+      }
+      MarketAnalysis: {
+        payload: Prisma.$MarketAnalysisPayload<ExtArgs>
+        fields: Prisma.MarketAnalysisFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.MarketAnalysisFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$MarketAnalysisPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.MarketAnalysisFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$MarketAnalysisPayload>
+          }
+          findFirst: {
+            args: Prisma.MarketAnalysisFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$MarketAnalysisPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.MarketAnalysisFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$MarketAnalysisPayload>
+          }
+          findMany: {
+            args: Prisma.MarketAnalysisFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$MarketAnalysisPayload>[]
+          }
+          create: {
+            args: Prisma.MarketAnalysisCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$MarketAnalysisPayload>
+          }
+          createMany: {
+            args: Prisma.MarketAnalysisCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.MarketAnalysisCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$MarketAnalysisPayload>[]
+          }
+          delete: {
+            args: Prisma.MarketAnalysisDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$MarketAnalysisPayload>
+          }
+          update: {
+            args: Prisma.MarketAnalysisUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$MarketAnalysisPayload>
+          }
+          deleteMany: {
+            args: Prisma.MarketAnalysisDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.MarketAnalysisUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.MarketAnalysisUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$MarketAnalysisPayload>[]
+          }
+          upsert: {
+            args: Prisma.MarketAnalysisUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$MarketAnalysisPayload>
+          }
+          aggregate: {
+            args: Prisma.MarketAnalysisAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateMarketAnalysis>
+          }
+          groupBy: {
+            args: Prisma.MarketAnalysisGroupByArgs<ExtArgs>
+            result: $Utils.Optional<MarketAnalysisGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.MarketAnalysisCountArgs<ExtArgs>
+            result: $Utils.Optional<MarketAnalysisCountAggregateOutputType> | number
+          }
+        }
+      }
+      SatisfactionSurvey: {
+        payload: Prisma.$SatisfactionSurveyPayload<ExtArgs>
+        fields: Prisma.SatisfactionSurveyFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.SatisfactionSurveyFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SatisfactionSurveyPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.SatisfactionSurveyFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SatisfactionSurveyPayload>
+          }
+          findFirst: {
+            args: Prisma.SatisfactionSurveyFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SatisfactionSurveyPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.SatisfactionSurveyFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SatisfactionSurveyPayload>
+          }
+          findMany: {
+            args: Prisma.SatisfactionSurveyFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SatisfactionSurveyPayload>[]
+          }
+          create: {
+            args: Prisma.SatisfactionSurveyCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SatisfactionSurveyPayload>
+          }
+          createMany: {
+            args: Prisma.SatisfactionSurveyCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.SatisfactionSurveyCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SatisfactionSurveyPayload>[]
+          }
+          delete: {
+            args: Prisma.SatisfactionSurveyDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SatisfactionSurveyPayload>
+          }
+          update: {
+            args: Prisma.SatisfactionSurveyUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SatisfactionSurveyPayload>
+          }
+          deleteMany: {
+            args: Prisma.SatisfactionSurveyDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.SatisfactionSurveyUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.SatisfactionSurveyUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SatisfactionSurveyPayload>[]
+          }
+          upsert: {
+            args: Prisma.SatisfactionSurveyUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SatisfactionSurveyPayload>
+          }
+          aggregate: {
+            args: Prisma.SatisfactionSurveyAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateSatisfactionSurvey>
+          }
+          groupBy: {
+            args: Prisma.SatisfactionSurveyGroupByArgs<ExtArgs>
+            result: $Utils.Optional<SatisfactionSurveyGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.SatisfactionSurveyCountArgs<ExtArgs>
+            result: $Utils.Optional<SatisfactionSurveyCountAggregateOutputType> | number
           }
         }
       }
@@ -5901,6 +6169,228 @@ export namespace Prisma {
           }
         }
       }
+      OperationalSetting: {
+        payload: Prisma.$OperationalSettingPayload<ExtArgs>
+        fields: Prisma.OperationalSettingFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.OperationalSettingFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OperationalSettingPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.OperationalSettingFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OperationalSettingPayload>
+          }
+          findFirst: {
+            args: Prisma.OperationalSettingFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OperationalSettingPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.OperationalSettingFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OperationalSettingPayload>
+          }
+          findMany: {
+            args: Prisma.OperationalSettingFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OperationalSettingPayload>[]
+          }
+          create: {
+            args: Prisma.OperationalSettingCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OperationalSettingPayload>
+          }
+          createMany: {
+            args: Prisma.OperationalSettingCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.OperationalSettingCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OperationalSettingPayload>[]
+          }
+          delete: {
+            args: Prisma.OperationalSettingDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OperationalSettingPayload>
+          }
+          update: {
+            args: Prisma.OperationalSettingUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OperationalSettingPayload>
+          }
+          deleteMany: {
+            args: Prisma.OperationalSettingDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.OperationalSettingUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.OperationalSettingUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OperationalSettingPayload>[]
+          }
+          upsert: {
+            args: Prisma.OperationalSettingUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OperationalSettingPayload>
+          }
+          aggregate: {
+            args: Prisma.OperationalSettingAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateOperationalSetting>
+          }
+          groupBy: {
+            args: Prisma.OperationalSettingGroupByArgs<ExtArgs>
+            result: $Utils.Optional<OperationalSettingGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.OperationalSettingCountArgs<ExtArgs>
+            result: $Utils.Optional<OperationalSettingCountAggregateOutputType> | number
+          }
+        }
+      }
+      AdditionalService: {
+        payload: Prisma.$AdditionalServicePayload<ExtArgs>
+        fields: Prisma.AdditionalServiceFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.AdditionalServiceFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AdditionalServicePayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.AdditionalServiceFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AdditionalServicePayload>
+          }
+          findFirst: {
+            args: Prisma.AdditionalServiceFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AdditionalServicePayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.AdditionalServiceFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AdditionalServicePayload>
+          }
+          findMany: {
+            args: Prisma.AdditionalServiceFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AdditionalServicePayload>[]
+          }
+          create: {
+            args: Prisma.AdditionalServiceCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AdditionalServicePayload>
+          }
+          createMany: {
+            args: Prisma.AdditionalServiceCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.AdditionalServiceCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AdditionalServicePayload>[]
+          }
+          delete: {
+            args: Prisma.AdditionalServiceDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AdditionalServicePayload>
+          }
+          update: {
+            args: Prisma.AdditionalServiceUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AdditionalServicePayload>
+          }
+          deleteMany: {
+            args: Prisma.AdditionalServiceDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.AdditionalServiceUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.AdditionalServiceUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AdditionalServicePayload>[]
+          }
+          upsert: {
+            args: Prisma.AdditionalServiceUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AdditionalServicePayload>
+          }
+          aggregate: {
+            args: Prisma.AdditionalServiceAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateAdditionalService>
+          }
+          groupBy: {
+            args: Prisma.AdditionalServiceGroupByArgs<ExtArgs>
+            result: $Utils.Optional<AdditionalServiceGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.AdditionalServiceCountArgs<ExtArgs>
+            result: $Utils.Optional<AdditionalServiceCountAggregateOutputType> | number
+          }
+        }
+      }
+      ServiceInterest: {
+        payload: Prisma.$ServiceInterestPayload<ExtArgs>
+        fields: Prisma.ServiceInterestFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.ServiceInterestFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ServiceInterestPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.ServiceInterestFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ServiceInterestPayload>
+          }
+          findFirst: {
+            args: Prisma.ServiceInterestFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ServiceInterestPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.ServiceInterestFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ServiceInterestPayload>
+          }
+          findMany: {
+            args: Prisma.ServiceInterestFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ServiceInterestPayload>[]
+          }
+          create: {
+            args: Prisma.ServiceInterestCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ServiceInterestPayload>
+          }
+          createMany: {
+            args: Prisma.ServiceInterestCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.ServiceInterestCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ServiceInterestPayload>[]
+          }
+          delete: {
+            args: Prisma.ServiceInterestDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ServiceInterestPayload>
+          }
+          update: {
+            args: Prisma.ServiceInterestUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ServiceInterestPayload>
+          }
+          deleteMany: {
+            args: Prisma.ServiceInterestDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.ServiceInterestUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.ServiceInterestUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ServiceInterestPayload>[]
+          }
+          upsert: {
+            args: Prisma.ServiceInterestUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ServiceInterestPayload>
+          }
+          aggregate: {
+            args: Prisma.ServiceInterestAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateServiceInterest>
+          }
+          groupBy: {
+            args: Prisma.ServiceInterestGroupByArgs<ExtArgs>
+            result: $Utils.Optional<ServiceInterestGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.ServiceInterestCountArgs<ExtArgs>
+            result: $Utils.Optional<ServiceInterestCountAggregateOutputType> | number
+          }
+        }
+      }
     }
   } & {
     other: {
@@ -6010,6 +6500,8 @@ export namespace Prisma {
   }
   export type GlobalOmitConfig = {
     user?: UserOmit
+    marketAnalysis?: MarketAnalysisOmit
+    satisfactionSurvey?: SatisfactionSurveyOmit
     tenant?: TenantOmit
     room?: RoomOmit
     roomFacility?: RoomFacilityOmit
@@ -6058,6 +6550,9 @@ export namespace Prisma {
     peerBehaviorReport?: PeerBehaviorReportOmit
     tenantReferral?: TenantReferralOmit
     faq?: FaqOmit
+    operationalSetting?: OperationalSettingOmit
+    additionalService?: AdditionalServiceOmit
+    serviceInterest?: ServiceInterestOmit
   }
 
   /* Types for Logging */
@@ -6173,6 +6668,7 @@ export namespace Prisma {
     tenantsKtpVerified: number
     roomTransfersCreated: number
     peerReportsModerated: number
+    marketAnalysesCreated: number
   }
 
   export type UserCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -6211,6 +6707,7 @@ export namespace Prisma {
     tenantsKtpVerified?: boolean | UserCountOutputTypeCountTenantsKtpVerifiedArgs
     roomTransfersCreated?: boolean | UserCountOutputTypeCountRoomTransfersCreatedArgs
     peerReportsModerated?: boolean | UserCountOutputTypeCountPeerReportsModeratedArgs
+    marketAnalysesCreated?: boolean | UserCountOutputTypeCountMarketAnalysesCreatedArgs
   }
 
   // Custom InputTypes
@@ -6469,6 +6966,13 @@ export namespace Prisma {
     where?: PeerBehaviorReportWhereInput
   }
 
+  /**
+   * UserCountOutputType without action
+   */
+  export type UserCountOutputTypeCountMarketAnalysesCreatedArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: MarketAnalysisWhereInput
+  }
+
 
   /**
    * Count Type TenantCountOutputType
@@ -6483,6 +6987,7 @@ export namespace Prisma {
     depositLedgerEntries: number
     loyaltyPoints: number
     redemptions: number
+    serviceInterests: number
     referralsMade: number
     peerReportsMade: number
     peerReportsReceived: number
@@ -6497,6 +7002,7 @@ export namespace Prisma {
     depositLedgerEntries?: boolean | TenantCountOutputTypeCountDepositLedgerEntriesArgs
     loyaltyPoints?: boolean | TenantCountOutputTypeCountLoyaltyPointsArgs
     redemptions?: boolean | TenantCountOutputTypeCountRedemptionsArgs
+    serviceInterests?: boolean | TenantCountOutputTypeCountServiceInterestsArgs
     referralsMade?: boolean | TenantCountOutputTypeCountReferralsMadeArgs
     peerReportsMade?: boolean | TenantCountOutputTypeCountPeerReportsMadeArgs
     peerReportsReceived?: boolean | TenantCountOutputTypeCountPeerReportsReceivedArgs
@@ -6567,6 +7073,13 @@ export namespace Prisma {
    */
   export type TenantCountOutputTypeCountRedemptionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: RedemptionWhereInput
+  }
+
+  /**
+   * TenantCountOutputType without action
+   */
+  export type TenantCountOutputTypeCountServiceInterestsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: ServiceInterestWhereInput
   }
 
   /**
@@ -7510,6 +8023,37 @@ export namespace Prisma {
 
 
   /**
+   * Count Type AdditionalServiceCountOutputType
+   */
+
+  export type AdditionalServiceCountOutputType = {
+    interests: number
+  }
+
+  export type AdditionalServiceCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    interests?: boolean | AdditionalServiceCountOutputTypeCountInterestsArgs
+  }
+
+  // Custom InputTypes
+  /**
+   * AdditionalServiceCountOutputType without action
+   */
+  export type AdditionalServiceCountOutputTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AdditionalServiceCountOutputType
+     */
+    select?: AdditionalServiceCountOutputTypeSelect<ExtArgs> | null
+  }
+
+  /**
+   * AdditionalServiceCountOutputType without action
+   */
+  export type AdditionalServiceCountOutputTypeCountInterestsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: ServiceInterestWhereInput
+  }
+
+
+  /**
    * Models
    */
 
@@ -7548,6 +8092,7 @@ export namespace Prisma {
     tipGopay: string | null
     tipOvo: string | null
     tipDana: string | null
+    tipShopeepay: string | null
     tipBank: string | null
     createdAt: Date | null
     updatedAt: Date | null
@@ -7566,6 +8111,7 @@ export namespace Prisma {
     tipGopay: string | null
     tipOvo: string | null
     tipDana: string | null
+    tipShopeepay: string | null
     tipBank: string | null
     createdAt: Date | null
     updatedAt: Date | null
@@ -7584,6 +8130,7 @@ export namespace Prisma {
     tipGopay: number
     tipOvo: number
     tipDana: number
+    tipShopeepay: number
     tipBank: number
     createdAt: number
     updatedAt: number
@@ -7614,6 +8161,7 @@ export namespace Prisma {
     tipGopay?: true
     tipOvo?: true
     tipDana?: true
+    tipShopeepay?: true
     tipBank?: true
     createdAt?: true
     updatedAt?: true
@@ -7632,6 +8180,7 @@ export namespace Prisma {
     tipGopay?: true
     tipOvo?: true
     tipDana?: true
+    tipShopeepay?: true
     tipBank?: true
     createdAt?: true
     updatedAt?: true
@@ -7650,6 +8199,7 @@ export namespace Prisma {
     tipGopay?: true
     tipOvo?: true
     tipDana?: true
+    tipShopeepay?: true
     tipBank?: true
     createdAt?: true
     updatedAt?: true
@@ -7755,6 +8305,7 @@ export namespace Prisma {
     tipGopay: string | null
     tipOvo: string | null
     tipDana: string | null
+    tipShopeepay: string | null
     tipBank: string | null
     createdAt: Date
     updatedAt: Date
@@ -7792,6 +8343,7 @@ export namespace Prisma {
     tipGopay?: boolean
     tipOvo?: boolean
     tipDana?: boolean
+    tipShopeepay?: boolean
     tipBank?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -7831,6 +8383,7 @@ export namespace Prisma {
     tenantsKtpVerified?: boolean | User$tenantsKtpVerifiedArgs<ExtArgs>
     roomTransfersCreated?: boolean | User$roomTransfersCreatedArgs<ExtArgs>
     peerReportsModerated?: boolean | User$peerReportsModeratedArgs<ExtArgs>
+    marketAnalysesCreated?: boolean | User$marketAnalysesCreatedArgs<ExtArgs>
     _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["user"]>
 
@@ -7847,6 +8400,7 @@ export namespace Prisma {
     tipGopay?: boolean
     tipOvo?: boolean
     tipDana?: boolean
+    tipShopeepay?: boolean
     tipBank?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -7866,6 +8420,7 @@ export namespace Prisma {
     tipGopay?: boolean
     tipOvo?: boolean
     tipDana?: boolean
+    tipShopeepay?: boolean
     tipBank?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -7885,12 +8440,13 @@ export namespace Prisma {
     tipGopay?: boolean
     tipOvo?: boolean
     tipDana?: boolean
+    tipShopeepay?: boolean
     tipBank?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type UserOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "fullName" | "email" | "passwordHash" | "role" | "tenantId" | "isActive" | "lastLoginAt" | "passwordChangedAt" | "tipGopay" | "tipOvo" | "tipDana" | "tipBank" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
+  export type UserOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "fullName" | "email" | "passwordHash" | "role" | "tenantId" | "isActive" | "lastLoginAt" | "passwordChangedAt" | "tipGopay" | "tipOvo" | "tipDana" | "tipShopeepay" | "tipBank" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
   export type UserInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     tenant?: boolean | User$tenantArgs<ExtArgs>
     announcementsCreated?: boolean | User$announcementsCreatedArgs<ExtArgs>
@@ -7928,6 +8484,7 @@ export namespace Prisma {
     tenantsKtpVerified?: boolean | User$tenantsKtpVerifiedArgs<ExtArgs>
     roomTransfersCreated?: boolean | User$roomTransfersCreatedArgs<ExtArgs>
     peerReportsModerated?: boolean | User$peerReportsModeratedArgs<ExtArgs>
+    marketAnalysesCreated?: boolean | User$marketAnalysesCreatedArgs<ExtArgs>
     _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type UserIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -7976,6 +8533,7 @@ export namespace Prisma {
       tenantsKtpVerified: Prisma.$TenantPayload<ExtArgs>[]
       roomTransfersCreated: Prisma.$RoomTransferPayload<ExtArgs>[]
       peerReportsModerated: Prisma.$PeerBehaviorReportPayload<ExtArgs>[]
+      marketAnalysesCreated: Prisma.$MarketAnalysisPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: number
@@ -7990,6 +8548,7 @@ export namespace Prisma {
       tipGopay: string | null
       tipOvo: string | null
       tipDana: string | null
+      tipShopeepay: string | null
       tipBank: string | null
       createdAt: Date
       updatedAt: Date
@@ -8423,6 +8982,7 @@ export namespace Prisma {
     tenantsKtpVerified<T extends User$tenantsKtpVerifiedArgs<ExtArgs> = {}>(args?: Subset<T, User$tenantsKtpVerifiedArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TenantPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     roomTransfersCreated<T extends User$roomTransfersCreatedArgs<ExtArgs> = {}>(args?: Subset<T, User$roomTransfersCreatedArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$RoomTransferPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     peerReportsModerated<T extends User$peerReportsModeratedArgs<ExtArgs> = {}>(args?: Subset<T, User$peerReportsModeratedArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PeerBehaviorReportPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    marketAnalysesCreated<T extends User$marketAnalysesCreatedArgs<ExtArgs> = {}>(args?: Subset<T, User$marketAnalysesCreatedArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$MarketAnalysisPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -8464,6 +9024,7 @@ export namespace Prisma {
     readonly tipGopay: FieldRef<"User", 'String'>
     readonly tipOvo: FieldRef<"User", 'String'>
     readonly tipDana: FieldRef<"User", 'String'>
+    readonly tipShopeepay: FieldRef<"User", 'String'>
     readonly tipBank: FieldRef<"User", 'String'>
     readonly createdAt: FieldRef<"User", 'DateTime'>
     readonly updatedAt: FieldRef<"User", 'DateTime'>
@@ -9727,6 +10288,30 @@ export namespace Prisma {
   }
 
   /**
+   * User.marketAnalysesCreated
+   */
+  export type User$marketAnalysesCreatedArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MarketAnalysis
+     */
+    select?: MarketAnalysisSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the MarketAnalysis
+     */
+    omit?: MarketAnalysisOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: MarketAnalysisInclude<ExtArgs> | null
+    where?: MarketAnalysisWhereInput
+    orderBy?: MarketAnalysisOrderByWithRelationInput | MarketAnalysisOrderByWithRelationInput[]
+    cursor?: MarketAnalysisWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: MarketAnalysisScalarFieldEnum | MarketAnalysisScalarFieldEnum[]
+  }
+
+  /**
    * User without action
    */
   export type UserDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -9742,6 +10327,2327 @@ export namespace Prisma {
      * Choose, which related nodes to fetch as well
      */
     include?: UserInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model MarketAnalysis
+   */
+
+  export type AggregateMarketAnalysis = {
+    _count: MarketAnalysisCountAggregateOutputType | null
+    _avg: MarketAnalysisAvgAggregateOutputType | null
+    _sum: MarketAnalysisSumAggregateOutputType | null
+    _min: MarketAnalysisMinAggregateOutputType | null
+    _max: MarketAnalysisMaxAggregateOutputType | null
+  }
+
+  export type MarketAnalysisAvgAggregateOutputType = {
+    id: number | null
+    createdById: number | null
+  }
+
+  export type MarketAnalysisSumAggregateOutputType = {
+    id: number | null
+    createdById: number | null
+  }
+
+  export type MarketAnalysisMinAggregateOutputType = {
+    id: number | null
+    kind: string | null
+    title: string | null
+    summary: string | null
+    createdById: number | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type MarketAnalysisMaxAggregateOutputType = {
+    id: number | null
+    kind: string | null
+    title: string | null
+    summary: string | null
+    createdById: number | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type MarketAnalysisCountAggregateOutputType = {
+    id: number
+    kind: number
+    title: number
+    summary: number
+    resultJson: number
+    transcriptJson: number
+    createdById: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type MarketAnalysisAvgAggregateInputType = {
+    id?: true
+    createdById?: true
+  }
+
+  export type MarketAnalysisSumAggregateInputType = {
+    id?: true
+    createdById?: true
+  }
+
+  export type MarketAnalysisMinAggregateInputType = {
+    id?: true
+    kind?: true
+    title?: true
+    summary?: true
+    createdById?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type MarketAnalysisMaxAggregateInputType = {
+    id?: true
+    kind?: true
+    title?: true
+    summary?: true
+    createdById?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type MarketAnalysisCountAggregateInputType = {
+    id?: true
+    kind?: true
+    title?: true
+    summary?: true
+    resultJson?: true
+    transcriptJson?: true
+    createdById?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type MarketAnalysisAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which MarketAnalysis to aggregate.
+     */
+    where?: MarketAnalysisWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of MarketAnalyses to fetch.
+     */
+    orderBy?: MarketAnalysisOrderByWithRelationInput | MarketAnalysisOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: MarketAnalysisWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` MarketAnalyses from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` MarketAnalyses.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned MarketAnalyses
+    **/
+    _count?: true | MarketAnalysisCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: MarketAnalysisAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: MarketAnalysisSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: MarketAnalysisMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: MarketAnalysisMaxAggregateInputType
+  }
+
+  export type GetMarketAnalysisAggregateType<T extends MarketAnalysisAggregateArgs> = {
+        [P in keyof T & keyof AggregateMarketAnalysis]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateMarketAnalysis[P]>
+      : GetScalarType<T[P], AggregateMarketAnalysis[P]>
+  }
+
+
+
+
+  export type MarketAnalysisGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: MarketAnalysisWhereInput
+    orderBy?: MarketAnalysisOrderByWithAggregationInput | MarketAnalysisOrderByWithAggregationInput[]
+    by: MarketAnalysisScalarFieldEnum[] | MarketAnalysisScalarFieldEnum
+    having?: MarketAnalysisScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: MarketAnalysisCountAggregateInputType | true
+    _avg?: MarketAnalysisAvgAggregateInputType
+    _sum?: MarketAnalysisSumAggregateInputType
+    _min?: MarketAnalysisMinAggregateInputType
+    _max?: MarketAnalysisMaxAggregateInputType
+  }
+
+  export type MarketAnalysisGroupByOutputType = {
+    id: number
+    kind: string
+    title: string
+    summary: string | null
+    resultJson: JsonValue | null
+    transcriptJson: JsonValue | null
+    createdById: number | null
+    createdAt: Date
+    updatedAt: Date
+    _count: MarketAnalysisCountAggregateOutputType | null
+    _avg: MarketAnalysisAvgAggregateOutputType | null
+    _sum: MarketAnalysisSumAggregateOutputType | null
+    _min: MarketAnalysisMinAggregateOutputType | null
+    _max: MarketAnalysisMaxAggregateOutputType | null
+  }
+
+  type GetMarketAnalysisGroupByPayload<T extends MarketAnalysisGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<MarketAnalysisGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof MarketAnalysisGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], MarketAnalysisGroupByOutputType[P]>
+            : GetScalarType<T[P], MarketAnalysisGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type MarketAnalysisSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    kind?: boolean
+    title?: boolean
+    summary?: boolean
+    resultJson?: boolean
+    transcriptJson?: boolean
+    createdById?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    createdBy?: boolean | MarketAnalysis$createdByArgs<ExtArgs>
+  }, ExtArgs["result"]["marketAnalysis"]>
+
+  export type MarketAnalysisSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    kind?: boolean
+    title?: boolean
+    summary?: boolean
+    resultJson?: boolean
+    transcriptJson?: boolean
+    createdById?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    createdBy?: boolean | MarketAnalysis$createdByArgs<ExtArgs>
+  }, ExtArgs["result"]["marketAnalysis"]>
+
+  export type MarketAnalysisSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    kind?: boolean
+    title?: boolean
+    summary?: boolean
+    resultJson?: boolean
+    transcriptJson?: boolean
+    createdById?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    createdBy?: boolean | MarketAnalysis$createdByArgs<ExtArgs>
+  }, ExtArgs["result"]["marketAnalysis"]>
+
+  export type MarketAnalysisSelectScalar = {
+    id?: boolean
+    kind?: boolean
+    title?: boolean
+    summary?: boolean
+    resultJson?: boolean
+    transcriptJson?: boolean
+    createdById?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type MarketAnalysisOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "kind" | "title" | "summary" | "resultJson" | "transcriptJson" | "createdById" | "createdAt" | "updatedAt", ExtArgs["result"]["marketAnalysis"]>
+  export type MarketAnalysisInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    createdBy?: boolean | MarketAnalysis$createdByArgs<ExtArgs>
+  }
+  export type MarketAnalysisIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    createdBy?: boolean | MarketAnalysis$createdByArgs<ExtArgs>
+  }
+  export type MarketAnalysisIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    createdBy?: boolean | MarketAnalysis$createdByArgs<ExtArgs>
+  }
+
+  export type $MarketAnalysisPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "MarketAnalysis"
+    objects: {
+      createdBy: Prisma.$UserPayload<ExtArgs> | null
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: number
+      kind: string
+      title: string
+      summary: string | null
+      resultJson: Prisma.JsonValue | null
+      transcriptJson: Prisma.JsonValue | null
+      createdById: number | null
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["marketAnalysis"]>
+    composites: {}
+  }
+
+  type MarketAnalysisGetPayload<S extends boolean | null | undefined | MarketAnalysisDefaultArgs> = $Result.GetResult<Prisma.$MarketAnalysisPayload, S>
+
+  type MarketAnalysisCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<MarketAnalysisFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: MarketAnalysisCountAggregateInputType | true
+    }
+
+  export interface MarketAnalysisDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['MarketAnalysis'], meta: { name: 'MarketAnalysis' } }
+    /**
+     * Find zero or one MarketAnalysis that matches the filter.
+     * @param {MarketAnalysisFindUniqueArgs} args - Arguments to find a MarketAnalysis
+     * @example
+     * // Get one MarketAnalysis
+     * const marketAnalysis = await prisma.marketAnalysis.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends MarketAnalysisFindUniqueArgs>(args: SelectSubset<T, MarketAnalysisFindUniqueArgs<ExtArgs>>): Prisma__MarketAnalysisClient<$Result.GetResult<Prisma.$MarketAnalysisPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one MarketAnalysis that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {MarketAnalysisFindUniqueOrThrowArgs} args - Arguments to find a MarketAnalysis
+     * @example
+     * // Get one MarketAnalysis
+     * const marketAnalysis = await prisma.marketAnalysis.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends MarketAnalysisFindUniqueOrThrowArgs>(args: SelectSubset<T, MarketAnalysisFindUniqueOrThrowArgs<ExtArgs>>): Prisma__MarketAnalysisClient<$Result.GetResult<Prisma.$MarketAnalysisPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first MarketAnalysis that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {MarketAnalysisFindFirstArgs} args - Arguments to find a MarketAnalysis
+     * @example
+     * // Get one MarketAnalysis
+     * const marketAnalysis = await prisma.marketAnalysis.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends MarketAnalysisFindFirstArgs>(args?: SelectSubset<T, MarketAnalysisFindFirstArgs<ExtArgs>>): Prisma__MarketAnalysisClient<$Result.GetResult<Prisma.$MarketAnalysisPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first MarketAnalysis that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {MarketAnalysisFindFirstOrThrowArgs} args - Arguments to find a MarketAnalysis
+     * @example
+     * // Get one MarketAnalysis
+     * const marketAnalysis = await prisma.marketAnalysis.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends MarketAnalysisFindFirstOrThrowArgs>(args?: SelectSubset<T, MarketAnalysisFindFirstOrThrowArgs<ExtArgs>>): Prisma__MarketAnalysisClient<$Result.GetResult<Prisma.$MarketAnalysisPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more MarketAnalyses that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {MarketAnalysisFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all MarketAnalyses
+     * const marketAnalyses = await prisma.marketAnalysis.findMany()
+     * 
+     * // Get first 10 MarketAnalyses
+     * const marketAnalyses = await prisma.marketAnalysis.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const marketAnalysisWithIdOnly = await prisma.marketAnalysis.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends MarketAnalysisFindManyArgs>(args?: SelectSubset<T, MarketAnalysisFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$MarketAnalysisPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a MarketAnalysis.
+     * @param {MarketAnalysisCreateArgs} args - Arguments to create a MarketAnalysis.
+     * @example
+     * // Create one MarketAnalysis
+     * const MarketAnalysis = await prisma.marketAnalysis.create({
+     *   data: {
+     *     // ... data to create a MarketAnalysis
+     *   }
+     * })
+     * 
+     */
+    create<T extends MarketAnalysisCreateArgs>(args: SelectSubset<T, MarketAnalysisCreateArgs<ExtArgs>>): Prisma__MarketAnalysisClient<$Result.GetResult<Prisma.$MarketAnalysisPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many MarketAnalyses.
+     * @param {MarketAnalysisCreateManyArgs} args - Arguments to create many MarketAnalyses.
+     * @example
+     * // Create many MarketAnalyses
+     * const marketAnalysis = await prisma.marketAnalysis.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends MarketAnalysisCreateManyArgs>(args?: SelectSubset<T, MarketAnalysisCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many MarketAnalyses and returns the data saved in the database.
+     * @param {MarketAnalysisCreateManyAndReturnArgs} args - Arguments to create many MarketAnalyses.
+     * @example
+     * // Create many MarketAnalyses
+     * const marketAnalysis = await prisma.marketAnalysis.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many MarketAnalyses and only return the `id`
+     * const marketAnalysisWithIdOnly = await prisma.marketAnalysis.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends MarketAnalysisCreateManyAndReturnArgs>(args?: SelectSubset<T, MarketAnalysisCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$MarketAnalysisPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a MarketAnalysis.
+     * @param {MarketAnalysisDeleteArgs} args - Arguments to delete one MarketAnalysis.
+     * @example
+     * // Delete one MarketAnalysis
+     * const MarketAnalysis = await prisma.marketAnalysis.delete({
+     *   where: {
+     *     // ... filter to delete one MarketAnalysis
+     *   }
+     * })
+     * 
+     */
+    delete<T extends MarketAnalysisDeleteArgs>(args: SelectSubset<T, MarketAnalysisDeleteArgs<ExtArgs>>): Prisma__MarketAnalysisClient<$Result.GetResult<Prisma.$MarketAnalysisPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one MarketAnalysis.
+     * @param {MarketAnalysisUpdateArgs} args - Arguments to update one MarketAnalysis.
+     * @example
+     * // Update one MarketAnalysis
+     * const marketAnalysis = await prisma.marketAnalysis.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends MarketAnalysisUpdateArgs>(args: SelectSubset<T, MarketAnalysisUpdateArgs<ExtArgs>>): Prisma__MarketAnalysisClient<$Result.GetResult<Prisma.$MarketAnalysisPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more MarketAnalyses.
+     * @param {MarketAnalysisDeleteManyArgs} args - Arguments to filter MarketAnalyses to delete.
+     * @example
+     * // Delete a few MarketAnalyses
+     * const { count } = await prisma.marketAnalysis.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends MarketAnalysisDeleteManyArgs>(args?: SelectSubset<T, MarketAnalysisDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more MarketAnalyses.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {MarketAnalysisUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many MarketAnalyses
+     * const marketAnalysis = await prisma.marketAnalysis.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends MarketAnalysisUpdateManyArgs>(args: SelectSubset<T, MarketAnalysisUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more MarketAnalyses and returns the data updated in the database.
+     * @param {MarketAnalysisUpdateManyAndReturnArgs} args - Arguments to update many MarketAnalyses.
+     * @example
+     * // Update many MarketAnalyses
+     * const marketAnalysis = await prisma.marketAnalysis.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more MarketAnalyses and only return the `id`
+     * const marketAnalysisWithIdOnly = await prisma.marketAnalysis.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends MarketAnalysisUpdateManyAndReturnArgs>(args: SelectSubset<T, MarketAnalysisUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$MarketAnalysisPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one MarketAnalysis.
+     * @param {MarketAnalysisUpsertArgs} args - Arguments to update or create a MarketAnalysis.
+     * @example
+     * // Update or create a MarketAnalysis
+     * const marketAnalysis = await prisma.marketAnalysis.upsert({
+     *   create: {
+     *     // ... data to create a MarketAnalysis
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the MarketAnalysis we want to update
+     *   }
+     * })
+     */
+    upsert<T extends MarketAnalysisUpsertArgs>(args: SelectSubset<T, MarketAnalysisUpsertArgs<ExtArgs>>): Prisma__MarketAnalysisClient<$Result.GetResult<Prisma.$MarketAnalysisPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of MarketAnalyses.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {MarketAnalysisCountArgs} args - Arguments to filter MarketAnalyses to count.
+     * @example
+     * // Count the number of MarketAnalyses
+     * const count = await prisma.marketAnalysis.count({
+     *   where: {
+     *     // ... the filter for the MarketAnalyses we want to count
+     *   }
+     * })
+    **/
+    count<T extends MarketAnalysisCountArgs>(
+      args?: Subset<T, MarketAnalysisCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], MarketAnalysisCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a MarketAnalysis.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {MarketAnalysisAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends MarketAnalysisAggregateArgs>(args: Subset<T, MarketAnalysisAggregateArgs>): Prisma.PrismaPromise<GetMarketAnalysisAggregateType<T>>
+
+    /**
+     * Group by MarketAnalysis.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {MarketAnalysisGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends MarketAnalysisGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: MarketAnalysisGroupByArgs['orderBy'] }
+        : { orderBy?: MarketAnalysisGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, MarketAnalysisGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetMarketAnalysisGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the MarketAnalysis model
+   */
+  readonly fields: MarketAnalysisFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for MarketAnalysis.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__MarketAnalysisClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    createdBy<T extends MarketAnalysis$createdByArgs<ExtArgs> = {}>(args?: Subset<T, MarketAnalysis$createdByArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the MarketAnalysis model
+   */
+  interface MarketAnalysisFieldRefs {
+    readonly id: FieldRef<"MarketAnalysis", 'Int'>
+    readonly kind: FieldRef<"MarketAnalysis", 'String'>
+    readonly title: FieldRef<"MarketAnalysis", 'String'>
+    readonly summary: FieldRef<"MarketAnalysis", 'String'>
+    readonly resultJson: FieldRef<"MarketAnalysis", 'Json'>
+    readonly transcriptJson: FieldRef<"MarketAnalysis", 'Json'>
+    readonly createdById: FieldRef<"MarketAnalysis", 'Int'>
+    readonly createdAt: FieldRef<"MarketAnalysis", 'DateTime'>
+    readonly updatedAt: FieldRef<"MarketAnalysis", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * MarketAnalysis findUnique
+   */
+  export type MarketAnalysisFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MarketAnalysis
+     */
+    select?: MarketAnalysisSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the MarketAnalysis
+     */
+    omit?: MarketAnalysisOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: MarketAnalysisInclude<ExtArgs> | null
+    /**
+     * Filter, which MarketAnalysis to fetch.
+     */
+    where: MarketAnalysisWhereUniqueInput
+  }
+
+  /**
+   * MarketAnalysis findUniqueOrThrow
+   */
+  export type MarketAnalysisFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MarketAnalysis
+     */
+    select?: MarketAnalysisSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the MarketAnalysis
+     */
+    omit?: MarketAnalysisOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: MarketAnalysisInclude<ExtArgs> | null
+    /**
+     * Filter, which MarketAnalysis to fetch.
+     */
+    where: MarketAnalysisWhereUniqueInput
+  }
+
+  /**
+   * MarketAnalysis findFirst
+   */
+  export type MarketAnalysisFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MarketAnalysis
+     */
+    select?: MarketAnalysisSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the MarketAnalysis
+     */
+    omit?: MarketAnalysisOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: MarketAnalysisInclude<ExtArgs> | null
+    /**
+     * Filter, which MarketAnalysis to fetch.
+     */
+    where?: MarketAnalysisWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of MarketAnalyses to fetch.
+     */
+    orderBy?: MarketAnalysisOrderByWithRelationInput | MarketAnalysisOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for MarketAnalyses.
+     */
+    cursor?: MarketAnalysisWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` MarketAnalyses from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` MarketAnalyses.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of MarketAnalyses.
+     */
+    distinct?: MarketAnalysisScalarFieldEnum | MarketAnalysisScalarFieldEnum[]
+  }
+
+  /**
+   * MarketAnalysis findFirstOrThrow
+   */
+  export type MarketAnalysisFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MarketAnalysis
+     */
+    select?: MarketAnalysisSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the MarketAnalysis
+     */
+    omit?: MarketAnalysisOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: MarketAnalysisInclude<ExtArgs> | null
+    /**
+     * Filter, which MarketAnalysis to fetch.
+     */
+    where?: MarketAnalysisWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of MarketAnalyses to fetch.
+     */
+    orderBy?: MarketAnalysisOrderByWithRelationInput | MarketAnalysisOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for MarketAnalyses.
+     */
+    cursor?: MarketAnalysisWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` MarketAnalyses from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` MarketAnalyses.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of MarketAnalyses.
+     */
+    distinct?: MarketAnalysisScalarFieldEnum | MarketAnalysisScalarFieldEnum[]
+  }
+
+  /**
+   * MarketAnalysis findMany
+   */
+  export type MarketAnalysisFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MarketAnalysis
+     */
+    select?: MarketAnalysisSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the MarketAnalysis
+     */
+    omit?: MarketAnalysisOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: MarketAnalysisInclude<ExtArgs> | null
+    /**
+     * Filter, which MarketAnalyses to fetch.
+     */
+    where?: MarketAnalysisWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of MarketAnalyses to fetch.
+     */
+    orderBy?: MarketAnalysisOrderByWithRelationInput | MarketAnalysisOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing MarketAnalyses.
+     */
+    cursor?: MarketAnalysisWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` MarketAnalyses from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` MarketAnalyses.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of MarketAnalyses.
+     */
+    distinct?: MarketAnalysisScalarFieldEnum | MarketAnalysisScalarFieldEnum[]
+  }
+
+  /**
+   * MarketAnalysis create
+   */
+  export type MarketAnalysisCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MarketAnalysis
+     */
+    select?: MarketAnalysisSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the MarketAnalysis
+     */
+    omit?: MarketAnalysisOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: MarketAnalysisInclude<ExtArgs> | null
+    /**
+     * The data needed to create a MarketAnalysis.
+     */
+    data: XOR<MarketAnalysisCreateInput, MarketAnalysisUncheckedCreateInput>
+  }
+
+  /**
+   * MarketAnalysis createMany
+   */
+  export type MarketAnalysisCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many MarketAnalyses.
+     */
+    data: MarketAnalysisCreateManyInput | MarketAnalysisCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * MarketAnalysis createManyAndReturn
+   */
+  export type MarketAnalysisCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MarketAnalysis
+     */
+    select?: MarketAnalysisSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the MarketAnalysis
+     */
+    omit?: MarketAnalysisOmit<ExtArgs> | null
+    /**
+     * The data used to create many MarketAnalyses.
+     */
+    data: MarketAnalysisCreateManyInput | MarketAnalysisCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: MarketAnalysisIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * MarketAnalysis update
+   */
+  export type MarketAnalysisUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MarketAnalysis
+     */
+    select?: MarketAnalysisSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the MarketAnalysis
+     */
+    omit?: MarketAnalysisOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: MarketAnalysisInclude<ExtArgs> | null
+    /**
+     * The data needed to update a MarketAnalysis.
+     */
+    data: XOR<MarketAnalysisUpdateInput, MarketAnalysisUncheckedUpdateInput>
+    /**
+     * Choose, which MarketAnalysis to update.
+     */
+    where: MarketAnalysisWhereUniqueInput
+  }
+
+  /**
+   * MarketAnalysis updateMany
+   */
+  export type MarketAnalysisUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update MarketAnalyses.
+     */
+    data: XOR<MarketAnalysisUpdateManyMutationInput, MarketAnalysisUncheckedUpdateManyInput>
+    /**
+     * Filter which MarketAnalyses to update
+     */
+    where?: MarketAnalysisWhereInput
+    /**
+     * Limit how many MarketAnalyses to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * MarketAnalysis updateManyAndReturn
+   */
+  export type MarketAnalysisUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MarketAnalysis
+     */
+    select?: MarketAnalysisSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the MarketAnalysis
+     */
+    omit?: MarketAnalysisOmit<ExtArgs> | null
+    /**
+     * The data used to update MarketAnalyses.
+     */
+    data: XOR<MarketAnalysisUpdateManyMutationInput, MarketAnalysisUncheckedUpdateManyInput>
+    /**
+     * Filter which MarketAnalyses to update
+     */
+    where?: MarketAnalysisWhereInput
+    /**
+     * Limit how many MarketAnalyses to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: MarketAnalysisIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * MarketAnalysis upsert
+   */
+  export type MarketAnalysisUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MarketAnalysis
+     */
+    select?: MarketAnalysisSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the MarketAnalysis
+     */
+    omit?: MarketAnalysisOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: MarketAnalysisInclude<ExtArgs> | null
+    /**
+     * The filter to search for the MarketAnalysis to update in case it exists.
+     */
+    where: MarketAnalysisWhereUniqueInput
+    /**
+     * In case the MarketAnalysis found by the `where` argument doesn't exist, create a new MarketAnalysis with this data.
+     */
+    create: XOR<MarketAnalysisCreateInput, MarketAnalysisUncheckedCreateInput>
+    /**
+     * In case the MarketAnalysis was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<MarketAnalysisUpdateInput, MarketAnalysisUncheckedUpdateInput>
+  }
+
+  /**
+   * MarketAnalysis delete
+   */
+  export type MarketAnalysisDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MarketAnalysis
+     */
+    select?: MarketAnalysisSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the MarketAnalysis
+     */
+    omit?: MarketAnalysisOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: MarketAnalysisInclude<ExtArgs> | null
+    /**
+     * Filter which MarketAnalysis to delete.
+     */
+    where: MarketAnalysisWhereUniqueInput
+  }
+
+  /**
+   * MarketAnalysis deleteMany
+   */
+  export type MarketAnalysisDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which MarketAnalyses to delete
+     */
+    where?: MarketAnalysisWhereInput
+    /**
+     * Limit how many MarketAnalyses to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * MarketAnalysis.createdBy
+   */
+  export type MarketAnalysis$createdByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the User
+     */
+    select?: UserSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the User
+     */
+    omit?: UserOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserInclude<ExtArgs> | null
+    where?: UserWhereInput
+  }
+
+  /**
+   * MarketAnalysis without action
+   */
+  export type MarketAnalysisDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MarketAnalysis
+     */
+    select?: MarketAnalysisSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the MarketAnalysis
+     */
+    omit?: MarketAnalysisOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: MarketAnalysisInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model SatisfactionSurvey
+   */
+
+  export type AggregateSatisfactionSurvey = {
+    _count: SatisfactionSurveyCountAggregateOutputType | null
+    _avg: SatisfactionSurveyAvgAggregateOutputType | null
+    _sum: SatisfactionSurveySumAggregateOutputType | null
+    _min: SatisfactionSurveyMinAggregateOutputType | null
+    _max: SatisfactionSurveyMaxAggregateOutputType | null
+  }
+
+  export type SatisfactionSurveyAvgAggregateOutputType = {
+    id: number | null
+    tenantId: number | null
+    stayId: number | null
+    overallRating: number | null
+    cleanliness: number | null
+    staffService: number | null
+    facility: number | null
+    valueForMoney: number | null
+    createdById: number | null
+  }
+
+  export type SatisfactionSurveySumAggregateOutputType = {
+    id: number | null
+    tenantId: number | null
+    stayId: number | null
+    overallRating: number | null
+    cleanliness: number | null
+    staffService: number | null
+    facility: number | null
+    valueForMoney: number | null
+    createdById: number | null
+  }
+
+  export type SatisfactionSurveyMinAggregateOutputType = {
+    id: number | null
+    tenantId: number | null
+    stayId: number | null
+    overallRating: number | null
+    cleanliness: number | null
+    staffService: number | null
+    facility: number | null
+    valueForMoney: number | null
+    wouldRecommend: boolean | null
+    comment: string | null
+    createdById: number | null
+    createdAt: Date | null
+  }
+
+  export type SatisfactionSurveyMaxAggregateOutputType = {
+    id: number | null
+    tenantId: number | null
+    stayId: number | null
+    overallRating: number | null
+    cleanliness: number | null
+    staffService: number | null
+    facility: number | null
+    valueForMoney: number | null
+    wouldRecommend: boolean | null
+    comment: string | null
+    createdById: number | null
+    createdAt: Date | null
+  }
+
+  export type SatisfactionSurveyCountAggregateOutputType = {
+    id: number
+    tenantId: number
+    stayId: number
+    overallRating: number
+    cleanliness: number
+    staffService: number
+    facility: number
+    valueForMoney: number
+    wouldRecommend: number
+    comment: number
+    createdById: number
+    createdAt: number
+    _all: number
+  }
+
+
+  export type SatisfactionSurveyAvgAggregateInputType = {
+    id?: true
+    tenantId?: true
+    stayId?: true
+    overallRating?: true
+    cleanliness?: true
+    staffService?: true
+    facility?: true
+    valueForMoney?: true
+    createdById?: true
+  }
+
+  export type SatisfactionSurveySumAggregateInputType = {
+    id?: true
+    tenantId?: true
+    stayId?: true
+    overallRating?: true
+    cleanliness?: true
+    staffService?: true
+    facility?: true
+    valueForMoney?: true
+    createdById?: true
+  }
+
+  export type SatisfactionSurveyMinAggregateInputType = {
+    id?: true
+    tenantId?: true
+    stayId?: true
+    overallRating?: true
+    cleanliness?: true
+    staffService?: true
+    facility?: true
+    valueForMoney?: true
+    wouldRecommend?: true
+    comment?: true
+    createdById?: true
+    createdAt?: true
+  }
+
+  export type SatisfactionSurveyMaxAggregateInputType = {
+    id?: true
+    tenantId?: true
+    stayId?: true
+    overallRating?: true
+    cleanliness?: true
+    staffService?: true
+    facility?: true
+    valueForMoney?: true
+    wouldRecommend?: true
+    comment?: true
+    createdById?: true
+    createdAt?: true
+  }
+
+  export type SatisfactionSurveyCountAggregateInputType = {
+    id?: true
+    tenantId?: true
+    stayId?: true
+    overallRating?: true
+    cleanliness?: true
+    staffService?: true
+    facility?: true
+    valueForMoney?: true
+    wouldRecommend?: true
+    comment?: true
+    createdById?: true
+    createdAt?: true
+    _all?: true
+  }
+
+  export type SatisfactionSurveyAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which SatisfactionSurvey to aggregate.
+     */
+    where?: SatisfactionSurveyWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of SatisfactionSurveys to fetch.
+     */
+    orderBy?: SatisfactionSurveyOrderByWithRelationInput | SatisfactionSurveyOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: SatisfactionSurveyWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` SatisfactionSurveys from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` SatisfactionSurveys.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned SatisfactionSurveys
+    **/
+    _count?: true | SatisfactionSurveyCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: SatisfactionSurveyAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: SatisfactionSurveySumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: SatisfactionSurveyMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: SatisfactionSurveyMaxAggregateInputType
+  }
+
+  export type GetSatisfactionSurveyAggregateType<T extends SatisfactionSurveyAggregateArgs> = {
+        [P in keyof T & keyof AggregateSatisfactionSurvey]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateSatisfactionSurvey[P]>
+      : GetScalarType<T[P], AggregateSatisfactionSurvey[P]>
+  }
+
+
+
+
+  export type SatisfactionSurveyGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: SatisfactionSurveyWhereInput
+    orderBy?: SatisfactionSurveyOrderByWithAggregationInput | SatisfactionSurveyOrderByWithAggregationInput[]
+    by: SatisfactionSurveyScalarFieldEnum[] | SatisfactionSurveyScalarFieldEnum
+    having?: SatisfactionSurveyScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: SatisfactionSurveyCountAggregateInputType | true
+    _avg?: SatisfactionSurveyAvgAggregateInputType
+    _sum?: SatisfactionSurveySumAggregateInputType
+    _min?: SatisfactionSurveyMinAggregateInputType
+    _max?: SatisfactionSurveyMaxAggregateInputType
+  }
+
+  export type SatisfactionSurveyGroupByOutputType = {
+    id: number
+    tenantId: number | null
+    stayId: number | null
+    overallRating: number
+    cleanliness: number | null
+    staffService: number | null
+    facility: number | null
+    valueForMoney: number | null
+    wouldRecommend: boolean | null
+    comment: string | null
+    createdById: number | null
+    createdAt: Date
+    _count: SatisfactionSurveyCountAggregateOutputType | null
+    _avg: SatisfactionSurveyAvgAggregateOutputType | null
+    _sum: SatisfactionSurveySumAggregateOutputType | null
+    _min: SatisfactionSurveyMinAggregateOutputType | null
+    _max: SatisfactionSurveyMaxAggregateOutputType | null
+  }
+
+  type GetSatisfactionSurveyGroupByPayload<T extends SatisfactionSurveyGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<SatisfactionSurveyGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof SatisfactionSurveyGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], SatisfactionSurveyGroupByOutputType[P]>
+            : GetScalarType<T[P], SatisfactionSurveyGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type SatisfactionSurveySelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    tenantId?: boolean
+    stayId?: boolean
+    overallRating?: boolean
+    cleanliness?: boolean
+    staffService?: boolean
+    facility?: boolean
+    valueForMoney?: boolean
+    wouldRecommend?: boolean
+    comment?: boolean
+    createdById?: boolean
+    createdAt?: boolean
+  }, ExtArgs["result"]["satisfactionSurvey"]>
+
+  export type SatisfactionSurveySelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    tenantId?: boolean
+    stayId?: boolean
+    overallRating?: boolean
+    cleanliness?: boolean
+    staffService?: boolean
+    facility?: boolean
+    valueForMoney?: boolean
+    wouldRecommend?: boolean
+    comment?: boolean
+    createdById?: boolean
+    createdAt?: boolean
+  }, ExtArgs["result"]["satisfactionSurvey"]>
+
+  export type SatisfactionSurveySelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    tenantId?: boolean
+    stayId?: boolean
+    overallRating?: boolean
+    cleanliness?: boolean
+    staffService?: boolean
+    facility?: boolean
+    valueForMoney?: boolean
+    wouldRecommend?: boolean
+    comment?: boolean
+    createdById?: boolean
+    createdAt?: boolean
+  }, ExtArgs["result"]["satisfactionSurvey"]>
+
+  export type SatisfactionSurveySelectScalar = {
+    id?: boolean
+    tenantId?: boolean
+    stayId?: boolean
+    overallRating?: boolean
+    cleanliness?: boolean
+    staffService?: boolean
+    facility?: boolean
+    valueForMoney?: boolean
+    wouldRecommend?: boolean
+    comment?: boolean
+    createdById?: boolean
+    createdAt?: boolean
+  }
+
+  export type SatisfactionSurveyOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "tenantId" | "stayId" | "overallRating" | "cleanliness" | "staffService" | "facility" | "valueForMoney" | "wouldRecommend" | "comment" | "createdById" | "createdAt", ExtArgs["result"]["satisfactionSurvey"]>
+
+  export type $SatisfactionSurveyPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "SatisfactionSurvey"
+    objects: {}
+    scalars: $Extensions.GetPayloadResult<{
+      id: number
+      tenantId: number | null
+      stayId: number | null
+      overallRating: number
+      cleanliness: number | null
+      staffService: number | null
+      facility: number | null
+      valueForMoney: number | null
+      wouldRecommend: boolean | null
+      comment: string | null
+      createdById: number | null
+      createdAt: Date
+    }, ExtArgs["result"]["satisfactionSurvey"]>
+    composites: {}
+  }
+
+  type SatisfactionSurveyGetPayload<S extends boolean | null | undefined | SatisfactionSurveyDefaultArgs> = $Result.GetResult<Prisma.$SatisfactionSurveyPayload, S>
+
+  type SatisfactionSurveyCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<SatisfactionSurveyFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: SatisfactionSurveyCountAggregateInputType | true
+    }
+
+  export interface SatisfactionSurveyDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['SatisfactionSurvey'], meta: { name: 'SatisfactionSurvey' } }
+    /**
+     * Find zero or one SatisfactionSurvey that matches the filter.
+     * @param {SatisfactionSurveyFindUniqueArgs} args - Arguments to find a SatisfactionSurvey
+     * @example
+     * // Get one SatisfactionSurvey
+     * const satisfactionSurvey = await prisma.satisfactionSurvey.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends SatisfactionSurveyFindUniqueArgs>(args: SelectSubset<T, SatisfactionSurveyFindUniqueArgs<ExtArgs>>): Prisma__SatisfactionSurveyClient<$Result.GetResult<Prisma.$SatisfactionSurveyPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one SatisfactionSurvey that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {SatisfactionSurveyFindUniqueOrThrowArgs} args - Arguments to find a SatisfactionSurvey
+     * @example
+     * // Get one SatisfactionSurvey
+     * const satisfactionSurvey = await prisma.satisfactionSurvey.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends SatisfactionSurveyFindUniqueOrThrowArgs>(args: SelectSubset<T, SatisfactionSurveyFindUniqueOrThrowArgs<ExtArgs>>): Prisma__SatisfactionSurveyClient<$Result.GetResult<Prisma.$SatisfactionSurveyPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first SatisfactionSurvey that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SatisfactionSurveyFindFirstArgs} args - Arguments to find a SatisfactionSurvey
+     * @example
+     * // Get one SatisfactionSurvey
+     * const satisfactionSurvey = await prisma.satisfactionSurvey.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends SatisfactionSurveyFindFirstArgs>(args?: SelectSubset<T, SatisfactionSurveyFindFirstArgs<ExtArgs>>): Prisma__SatisfactionSurveyClient<$Result.GetResult<Prisma.$SatisfactionSurveyPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first SatisfactionSurvey that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SatisfactionSurveyFindFirstOrThrowArgs} args - Arguments to find a SatisfactionSurvey
+     * @example
+     * // Get one SatisfactionSurvey
+     * const satisfactionSurvey = await prisma.satisfactionSurvey.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends SatisfactionSurveyFindFirstOrThrowArgs>(args?: SelectSubset<T, SatisfactionSurveyFindFirstOrThrowArgs<ExtArgs>>): Prisma__SatisfactionSurveyClient<$Result.GetResult<Prisma.$SatisfactionSurveyPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more SatisfactionSurveys that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SatisfactionSurveyFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all SatisfactionSurveys
+     * const satisfactionSurveys = await prisma.satisfactionSurvey.findMany()
+     * 
+     * // Get first 10 SatisfactionSurveys
+     * const satisfactionSurveys = await prisma.satisfactionSurvey.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const satisfactionSurveyWithIdOnly = await prisma.satisfactionSurvey.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends SatisfactionSurveyFindManyArgs>(args?: SelectSubset<T, SatisfactionSurveyFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SatisfactionSurveyPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a SatisfactionSurvey.
+     * @param {SatisfactionSurveyCreateArgs} args - Arguments to create a SatisfactionSurvey.
+     * @example
+     * // Create one SatisfactionSurvey
+     * const SatisfactionSurvey = await prisma.satisfactionSurvey.create({
+     *   data: {
+     *     // ... data to create a SatisfactionSurvey
+     *   }
+     * })
+     * 
+     */
+    create<T extends SatisfactionSurveyCreateArgs>(args: SelectSubset<T, SatisfactionSurveyCreateArgs<ExtArgs>>): Prisma__SatisfactionSurveyClient<$Result.GetResult<Prisma.$SatisfactionSurveyPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many SatisfactionSurveys.
+     * @param {SatisfactionSurveyCreateManyArgs} args - Arguments to create many SatisfactionSurveys.
+     * @example
+     * // Create many SatisfactionSurveys
+     * const satisfactionSurvey = await prisma.satisfactionSurvey.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends SatisfactionSurveyCreateManyArgs>(args?: SelectSubset<T, SatisfactionSurveyCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many SatisfactionSurveys and returns the data saved in the database.
+     * @param {SatisfactionSurveyCreateManyAndReturnArgs} args - Arguments to create many SatisfactionSurveys.
+     * @example
+     * // Create many SatisfactionSurveys
+     * const satisfactionSurvey = await prisma.satisfactionSurvey.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many SatisfactionSurveys and only return the `id`
+     * const satisfactionSurveyWithIdOnly = await prisma.satisfactionSurvey.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends SatisfactionSurveyCreateManyAndReturnArgs>(args?: SelectSubset<T, SatisfactionSurveyCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SatisfactionSurveyPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a SatisfactionSurvey.
+     * @param {SatisfactionSurveyDeleteArgs} args - Arguments to delete one SatisfactionSurvey.
+     * @example
+     * // Delete one SatisfactionSurvey
+     * const SatisfactionSurvey = await prisma.satisfactionSurvey.delete({
+     *   where: {
+     *     // ... filter to delete one SatisfactionSurvey
+     *   }
+     * })
+     * 
+     */
+    delete<T extends SatisfactionSurveyDeleteArgs>(args: SelectSubset<T, SatisfactionSurveyDeleteArgs<ExtArgs>>): Prisma__SatisfactionSurveyClient<$Result.GetResult<Prisma.$SatisfactionSurveyPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one SatisfactionSurvey.
+     * @param {SatisfactionSurveyUpdateArgs} args - Arguments to update one SatisfactionSurvey.
+     * @example
+     * // Update one SatisfactionSurvey
+     * const satisfactionSurvey = await prisma.satisfactionSurvey.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends SatisfactionSurveyUpdateArgs>(args: SelectSubset<T, SatisfactionSurveyUpdateArgs<ExtArgs>>): Prisma__SatisfactionSurveyClient<$Result.GetResult<Prisma.$SatisfactionSurveyPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more SatisfactionSurveys.
+     * @param {SatisfactionSurveyDeleteManyArgs} args - Arguments to filter SatisfactionSurveys to delete.
+     * @example
+     * // Delete a few SatisfactionSurveys
+     * const { count } = await prisma.satisfactionSurvey.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends SatisfactionSurveyDeleteManyArgs>(args?: SelectSubset<T, SatisfactionSurveyDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more SatisfactionSurveys.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SatisfactionSurveyUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many SatisfactionSurveys
+     * const satisfactionSurvey = await prisma.satisfactionSurvey.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends SatisfactionSurveyUpdateManyArgs>(args: SelectSubset<T, SatisfactionSurveyUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more SatisfactionSurveys and returns the data updated in the database.
+     * @param {SatisfactionSurveyUpdateManyAndReturnArgs} args - Arguments to update many SatisfactionSurveys.
+     * @example
+     * // Update many SatisfactionSurveys
+     * const satisfactionSurvey = await prisma.satisfactionSurvey.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more SatisfactionSurveys and only return the `id`
+     * const satisfactionSurveyWithIdOnly = await prisma.satisfactionSurvey.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends SatisfactionSurveyUpdateManyAndReturnArgs>(args: SelectSubset<T, SatisfactionSurveyUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SatisfactionSurveyPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one SatisfactionSurvey.
+     * @param {SatisfactionSurveyUpsertArgs} args - Arguments to update or create a SatisfactionSurvey.
+     * @example
+     * // Update or create a SatisfactionSurvey
+     * const satisfactionSurvey = await prisma.satisfactionSurvey.upsert({
+     *   create: {
+     *     // ... data to create a SatisfactionSurvey
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the SatisfactionSurvey we want to update
+     *   }
+     * })
+     */
+    upsert<T extends SatisfactionSurveyUpsertArgs>(args: SelectSubset<T, SatisfactionSurveyUpsertArgs<ExtArgs>>): Prisma__SatisfactionSurveyClient<$Result.GetResult<Prisma.$SatisfactionSurveyPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of SatisfactionSurveys.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SatisfactionSurveyCountArgs} args - Arguments to filter SatisfactionSurveys to count.
+     * @example
+     * // Count the number of SatisfactionSurveys
+     * const count = await prisma.satisfactionSurvey.count({
+     *   where: {
+     *     // ... the filter for the SatisfactionSurveys we want to count
+     *   }
+     * })
+    **/
+    count<T extends SatisfactionSurveyCountArgs>(
+      args?: Subset<T, SatisfactionSurveyCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], SatisfactionSurveyCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a SatisfactionSurvey.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SatisfactionSurveyAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends SatisfactionSurveyAggregateArgs>(args: Subset<T, SatisfactionSurveyAggregateArgs>): Prisma.PrismaPromise<GetSatisfactionSurveyAggregateType<T>>
+
+    /**
+     * Group by SatisfactionSurvey.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SatisfactionSurveyGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends SatisfactionSurveyGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: SatisfactionSurveyGroupByArgs['orderBy'] }
+        : { orderBy?: SatisfactionSurveyGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, SatisfactionSurveyGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetSatisfactionSurveyGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the SatisfactionSurvey model
+   */
+  readonly fields: SatisfactionSurveyFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for SatisfactionSurvey.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__SatisfactionSurveyClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the SatisfactionSurvey model
+   */
+  interface SatisfactionSurveyFieldRefs {
+    readonly id: FieldRef<"SatisfactionSurvey", 'Int'>
+    readonly tenantId: FieldRef<"SatisfactionSurvey", 'Int'>
+    readonly stayId: FieldRef<"SatisfactionSurvey", 'Int'>
+    readonly overallRating: FieldRef<"SatisfactionSurvey", 'Int'>
+    readonly cleanliness: FieldRef<"SatisfactionSurvey", 'Int'>
+    readonly staffService: FieldRef<"SatisfactionSurvey", 'Int'>
+    readonly facility: FieldRef<"SatisfactionSurvey", 'Int'>
+    readonly valueForMoney: FieldRef<"SatisfactionSurvey", 'Int'>
+    readonly wouldRecommend: FieldRef<"SatisfactionSurvey", 'Boolean'>
+    readonly comment: FieldRef<"SatisfactionSurvey", 'String'>
+    readonly createdById: FieldRef<"SatisfactionSurvey", 'Int'>
+    readonly createdAt: FieldRef<"SatisfactionSurvey", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * SatisfactionSurvey findUnique
+   */
+  export type SatisfactionSurveyFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SatisfactionSurvey
+     */
+    select?: SatisfactionSurveySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SatisfactionSurvey
+     */
+    omit?: SatisfactionSurveyOmit<ExtArgs> | null
+    /**
+     * Filter, which SatisfactionSurvey to fetch.
+     */
+    where: SatisfactionSurveyWhereUniqueInput
+  }
+
+  /**
+   * SatisfactionSurvey findUniqueOrThrow
+   */
+  export type SatisfactionSurveyFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SatisfactionSurvey
+     */
+    select?: SatisfactionSurveySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SatisfactionSurvey
+     */
+    omit?: SatisfactionSurveyOmit<ExtArgs> | null
+    /**
+     * Filter, which SatisfactionSurvey to fetch.
+     */
+    where: SatisfactionSurveyWhereUniqueInput
+  }
+
+  /**
+   * SatisfactionSurvey findFirst
+   */
+  export type SatisfactionSurveyFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SatisfactionSurvey
+     */
+    select?: SatisfactionSurveySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SatisfactionSurvey
+     */
+    omit?: SatisfactionSurveyOmit<ExtArgs> | null
+    /**
+     * Filter, which SatisfactionSurvey to fetch.
+     */
+    where?: SatisfactionSurveyWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of SatisfactionSurveys to fetch.
+     */
+    orderBy?: SatisfactionSurveyOrderByWithRelationInput | SatisfactionSurveyOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for SatisfactionSurveys.
+     */
+    cursor?: SatisfactionSurveyWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` SatisfactionSurveys from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` SatisfactionSurveys.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of SatisfactionSurveys.
+     */
+    distinct?: SatisfactionSurveyScalarFieldEnum | SatisfactionSurveyScalarFieldEnum[]
+  }
+
+  /**
+   * SatisfactionSurvey findFirstOrThrow
+   */
+  export type SatisfactionSurveyFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SatisfactionSurvey
+     */
+    select?: SatisfactionSurveySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SatisfactionSurvey
+     */
+    omit?: SatisfactionSurveyOmit<ExtArgs> | null
+    /**
+     * Filter, which SatisfactionSurvey to fetch.
+     */
+    where?: SatisfactionSurveyWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of SatisfactionSurveys to fetch.
+     */
+    orderBy?: SatisfactionSurveyOrderByWithRelationInput | SatisfactionSurveyOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for SatisfactionSurveys.
+     */
+    cursor?: SatisfactionSurveyWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` SatisfactionSurveys from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` SatisfactionSurveys.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of SatisfactionSurveys.
+     */
+    distinct?: SatisfactionSurveyScalarFieldEnum | SatisfactionSurveyScalarFieldEnum[]
+  }
+
+  /**
+   * SatisfactionSurvey findMany
+   */
+  export type SatisfactionSurveyFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SatisfactionSurvey
+     */
+    select?: SatisfactionSurveySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SatisfactionSurvey
+     */
+    omit?: SatisfactionSurveyOmit<ExtArgs> | null
+    /**
+     * Filter, which SatisfactionSurveys to fetch.
+     */
+    where?: SatisfactionSurveyWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of SatisfactionSurveys to fetch.
+     */
+    orderBy?: SatisfactionSurveyOrderByWithRelationInput | SatisfactionSurveyOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing SatisfactionSurveys.
+     */
+    cursor?: SatisfactionSurveyWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` SatisfactionSurveys from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` SatisfactionSurveys.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of SatisfactionSurveys.
+     */
+    distinct?: SatisfactionSurveyScalarFieldEnum | SatisfactionSurveyScalarFieldEnum[]
+  }
+
+  /**
+   * SatisfactionSurvey create
+   */
+  export type SatisfactionSurveyCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SatisfactionSurvey
+     */
+    select?: SatisfactionSurveySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SatisfactionSurvey
+     */
+    omit?: SatisfactionSurveyOmit<ExtArgs> | null
+    /**
+     * The data needed to create a SatisfactionSurvey.
+     */
+    data: XOR<SatisfactionSurveyCreateInput, SatisfactionSurveyUncheckedCreateInput>
+  }
+
+  /**
+   * SatisfactionSurvey createMany
+   */
+  export type SatisfactionSurveyCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many SatisfactionSurveys.
+     */
+    data: SatisfactionSurveyCreateManyInput | SatisfactionSurveyCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * SatisfactionSurvey createManyAndReturn
+   */
+  export type SatisfactionSurveyCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SatisfactionSurvey
+     */
+    select?: SatisfactionSurveySelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the SatisfactionSurvey
+     */
+    omit?: SatisfactionSurveyOmit<ExtArgs> | null
+    /**
+     * The data used to create many SatisfactionSurveys.
+     */
+    data: SatisfactionSurveyCreateManyInput | SatisfactionSurveyCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * SatisfactionSurvey update
+   */
+  export type SatisfactionSurveyUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SatisfactionSurvey
+     */
+    select?: SatisfactionSurveySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SatisfactionSurvey
+     */
+    omit?: SatisfactionSurveyOmit<ExtArgs> | null
+    /**
+     * The data needed to update a SatisfactionSurvey.
+     */
+    data: XOR<SatisfactionSurveyUpdateInput, SatisfactionSurveyUncheckedUpdateInput>
+    /**
+     * Choose, which SatisfactionSurvey to update.
+     */
+    where: SatisfactionSurveyWhereUniqueInput
+  }
+
+  /**
+   * SatisfactionSurvey updateMany
+   */
+  export type SatisfactionSurveyUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update SatisfactionSurveys.
+     */
+    data: XOR<SatisfactionSurveyUpdateManyMutationInput, SatisfactionSurveyUncheckedUpdateManyInput>
+    /**
+     * Filter which SatisfactionSurveys to update
+     */
+    where?: SatisfactionSurveyWhereInput
+    /**
+     * Limit how many SatisfactionSurveys to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * SatisfactionSurvey updateManyAndReturn
+   */
+  export type SatisfactionSurveyUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SatisfactionSurvey
+     */
+    select?: SatisfactionSurveySelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the SatisfactionSurvey
+     */
+    omit?: SatisfactionSurveyOmit<ExtArgs> | null
+    /**
+     * The data used to update SatisfactionSurveys.
+     */
+    data: XOR<SatisfactionSurveyUpdateManyMutationInput, SatisfactionSurveyUncheckedUpdateManyInput>
+    /**
+     * Filter which SatisfactionSurveys to update
+     */
+    where?: SatisfactionSurveyWhereInput
+    /**
+     * Limit how many SatisfactionSurveys to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * SatisfactionSurvey upsert
+   */
+  export type SatisfactionSurveyUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SatisfactionSurvey
+     */
+    select?: SatisfactionSurveySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SatisfactionSurvey
+     */
+    omit?: SatisfactionSurveyOmit<ExtArgs> | null
+    /**
+     * The filter to search for the SatisfactionSurvey to update in case it exists.
+     */
+    where: SatisfactionSurveyWhereUniqueInput
+    /**
+     * In case the SatisfactionSurvey found by the `where` argument doesn't exist, create a new SatisfactionSurvey with this data.
+     */
+    create: XOR<SatisfactionSurveyCreateInput, SatisfactionSurveyUncheckedCreateInput>
+    /**
+     * In case the SatisfactionSurvey was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<SatisfactionSurveyUpdateInput, SatisfactionSurveyUncheckedUpdateInput>
+  }
+
+  /**
+   * SatisfactionSurvey delete
+   */
+  export type SatisfactionSurveyDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SatisfactionSurvey
+     */
+    select?: SatisfactionSurveySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SatisfactionSurvey
+     */
+    omit?: SatisfactionSurveyOmit<ExtArgs> | null
+    /**
+     * Filter which SatisfactionSurvey to delete.
+     */
+    where: SatisfactionSurveyWhereUniqueInput
+  }
+
+  /**
+   * SatisfactionSurvey deleteMany
+   */
+  export type SatisfactionSurveyDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which SatisfactionSurveys to delete
+     */
+    where?: SatisfactionSurveyWhereInput
+    /**
+     * Limit how many SatisfactionSurveys to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * SatisfactionSurvey without action
+   */
+  export type SatisfactionSurveyDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SatisfactionSurvey
+     */
+    select?: SatisfactionSurveySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SatisfactionSurvey
+     */
+    omit?: SatisfactionSurveyOmit<ExtArgs> | null
   }
 
 
@@ -10121,6 +13027,7 @@ export namespace Prisma {
     depositLedgerEntries?: boolean | Tenant$depositLedgerEntriesArgs<ExtArgs>
     loyaltyPoints?: boolean | Tenant$loyaltyPointsArgs<ExtArgs>
     redemptions?: boolean | Tenant$redemptionsArgs<ExtArgs>
+    serviceInterests?: boolean | Tenant$serviceInterestsArgs<ExtArgs>
     referralsMade?: boolean | Tenant$referralsMadeArgs<ExtArgs>
     referredReferral?: boolean | Tenant$referredReferralArgs<ExtArgs>
     peerReportsMade?: boolean | Tenant$peerReportsMadeArgs<ExtArgs>
@@ -10226,6 +13133,7 @@ export namespace Prisma {
     depositLedgerEntries?: boolean | Tenant$depositLedgerEntriesArgs<ExtArgs>
     loyaltyPoints?: boolean | Tenant$loyaltyPointsArgs<ExtArgs>
     redemptions?: boolean | Tenant$redemptionsArgs<ExtArgs>
+    serviceInterests?: boolean | Tenant$serviceInterestsArgs<ExtArgs>
     referralsMade?: boolean | Tenant$referralsMadeArgs<ExtArgs>
     referredReferral?: boolean | Tenant$referredReferralArgs<ExtArgs>
     peerReportsMade?: boolean | Tenant$peerReportsMadeArgs<ExtArgs>
@@ -10252,6 +13160,7 @@ export namespace Prisma {
       depositLedgerEntries: Prisma.$TenantDepositLedgerEntryPayload<ExtArgs>[]
       loyaltyPoints: Prisma.$LoyaltyPointPayload<ExtArgs>[]
       redemptions: Prisma.$RedemptionPayload<ExtArgs>[]
+      serviceInterests: Prisma.$ServiceInterestPayload<ExtArgs>[]
       referralsMade: Prisma.$TenantReferralPayload<ExtArgs>[]
       referredReferral: Prisma.$TenantReferralPayload<ExtArgs> | null
       peerReportsMade: Prisma.$PeerBehaviorReportPayload<ExtArgs>[]
@@ -10687,6 +13596,7 @@ export namespace Prisma {
     depositLedgerEntries<T extends Tenant$depositLedgerEntriesArgs<ExtArgs> = {}>(args?: Subset<T, Tenant$depositLedgerEntriesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TenantDepositLedgerEntryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     loyaltyPoints<T extends Tenant$loyaltyPointsArgs<ExtArgs> = {}>(args?: Subset<T, Tenant$loyaltyPointsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$LoyaltyPointPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     redemptions<T extends Tenant$redemptionsArgs<ExtArgs> = {}>(args?: Subset<T, Tenant$redemptionsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$RedemptionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    serviceInterests<T extends Tenant$serviceInterestsArgs<ExtArgs> = {}>(args?: Subset<T, Tenant$serviceInterestsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ServiceInterestPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     referralsMade<T extends Tenant$referralsMadeArgs<ExtArgs> = {}>(args?: Subset<T, Tenant$referralsMadeArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TenantReferralPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     referredReferral<T extends Tenant$referredReferralArgs<ExtArgs> = {}>(args?: Subset<T, Tenant$referredReferralArgs<ExtArgs>>): Prisma__TenantReferralClient<$Result.GetResult<Prisma.$TenantReferralPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     peerReportsMade<T extends Tenant$peerReportsMadeArgs<ExtArgs> = {}>(args?: Subset<T, Tenant$peerReportsMadeArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PeerBehaviorReportPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -11376,6 +14286,30 @@ export namespace Prisma {
   }
 
   /**
+   * Tenant.serviceInterests
+   */
+  export type Tenant$serviceInterestsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ServiceInterest
+     */
+    select?: ServiceInterestSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ServiceInterest
+     */
+    omit?: ServiceInterestOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ServiceInterestInclude<ExtArgs> | null
+    where?: ServiceInterestWhereInput
+    orderBy?: ServiceInterestOrderByWithRelationInput | ServiceInterestOrderByWithRelationInput[]
+    cursor?: ServiceInterestWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: ServiceInterestScalarFieldEnum | ServiceInterestScalarFieldEnum[]
+  }
+
+  /**
    * Tenant.referralsMade
    */
   export type Tenant$referralsMadeArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -11531,6 +14465,8 @@ export namespace Prisma {
     name: string | null
     floor: string | null
     status: $Enums.RoomStatus | null
+    category: $Enums.RoomCategory | null
+    roomType: $Enums.RoomType | null
     dailyRateRupiah: number | null
     weeklyRateRupiah: number | null
     biWeeklyRateRupiah: number | null
@@ -11556,6 +14492,8 @@ export namespace Prisma {
     name: string | null
     floor: string | null
     status: $Enums.RoomStatus | null
+    category: $Enums.RoomCategory | null
+    roomType: $Enums.RoomType | null
     dailyRateRupiah: number | null
     weeklyRateRupiah: number | null
     biWeeklyRateRupiah: number | null
@@ -11581,6 +14519,8 @@ export namespace Prisma {
     name: number
     floor: number
     status: number
+    category: number
+    roomType: number
     dailyRateRupiah: number
     weeklyRateRupiah: number
     biWeeklyRateRupiah: number
@@ -11637,6 +14577,8 @@ export namespace Prisma {
     name?: true
     floor?: true
     status?: true
+    category?: true
+    roomType?: true
     dailyRateRupiah?: true
     weeklyRateRupiah?: true
     biWeeklyRateRupiah?: true
@@ -11662,6 +14604,8 @@ export namespace Prisma {
     name?: true
     floor?: true
     status?: true
+    category?: true
+    roomType?: true
     dailyRateRupiah?: true
     weeklyRateRupiah?: true
     biWeeklyRateRupiah?: true
@@ -11687,6 +14631,8 @@ export namespace Prisma {
     name?: true
     floor?: true
     status?: true
+    category?: true
+    roomType?: true
     dailyRateRupiah?: true
     weeklyRateRupiah?: true
     biWeeklyRateRupiah?: true
@@ -11800,6 +14746,8 @@ export namespace Prisma {
     name: string | null
     floor: string | null
     status: $Enums.RoomStatus
+    category: $Enums.RoomCategory
+    roomType: $Enums.RoomType
     dailyRateRupiah: number | null
     weeklyRateRupiah: number | null
     biWeeklyRateRupiah: number | null
@@ -11845,6 +14793,8 @@ export namespace Prisma {
     name?: boolean
     floor?: boolean
     status?: boolean
+    category?: boolean
+    roomType?: boolean
     dailyRateRupiah?: boolean
     weeklyRateRupiah?: boolean
     biWeeklyRateRupiah?: boolean
@@ -11886,6 +14836,8 @@ export namespace Prisma {
     name?: boolean
     floor?: boolean
     status?: boolean
+    category?: boolean
+    roomType?: boolean
     dailyRateRupiah?: boolean
     weeklyRateRupiah?: boolean
     biWeeklyRateRupiah?: boolean
@@ -11912,6 +14864,8 @@ export namespace Prisma {
     name?: boolean
     floor?: boolean
     status?: boolean
+    category?: boolean
+    roomType?: boolean
     dailyRateRupiah?: boolean
     weeklyRateRupiah?: boolean
     biWeeklyRateRupiah?: boolean
@@ -11938,6 +14892,8 @@ export namespace Prisma {
     name?: boolean
     floor?: boolean
     status?: boolean
+    category?: boolean
+    roomType?: boolean
     dailyRateRupiah?: boolean
     weeklyRateRupiah?: boolean
     biWeeklyRateRupiah?: boolean
@@ -11958,7 +14914,7 @@ export namespace Prisma {
     updatedAt?: boolean
   }
 
-  export type RoomOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "code" | "name" | "floor" | "status" | "dailyRateRupiah" | "weeklyRateRupiah" | "biWeeklyRateRupiah" | "monthlyRateRupiah" | "defaultDepositRupiah" | "electricityTariffPerKwhRupiah" | "waterTariffPerM3Rupiah" | "images" | "notes" | "isActive" | "allowBookingWhileCleaning" | "hasAc" | "acWattage" | "acLastCleanedAt" | "acCleanIntervalDays" | "acUsageHoursPerDay" | "createdAt" | "updatedAt", ExtArgs["result"]["room"]>
+  export type RoomOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "code" | "name" | "floor" | "status" | "category" | "roomType" | "dailyRateRupiah" | "weeklyRateRupiah" | "biWeeklyRateRupiah" | "monthlyRateRupiah" | "defaultDepositRupiah" | "electricityTariffPerKwhRupiah" | "waterTariffPerM3Rupiah" | "images" | "notes" | "isActive" | "allowBookingWhileCleaning" | "hasAc" | "acWattage" | "acLastCleanedAt" | "acCleanIntervalDays" | "acUsageHoursPerDay" | "createdAt" | "updatedAt", ExtArgs["result"]["room"]>
   export type RoomInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     stays?: boolean | Room$staysArgs<ExtArgs>
     meterReadings?: boolean | Room$meterReadingsArgs<ExtArgs>
@@ -12003,6 +14959,8 @@ export namespace Prisma {
       name: string | null
       floor: string | null
       status: $Enums.RoomStatus
+      category: $Enums.RoomCategory
+      roomType: $Enums.RoomType
       dailyRateRupiah: number | null
       weeklyRateRupiah: number | null
       biWeeklyRateRupiah: number | null
@@ -12463,6 +15421,8 @@ export namespace Prisma {
     readonly name: FieldRef<"Room", 'String'>
     readonly floor: FieldRef<"Room", 'String'>
     readonly status: FieldRef<"Room", 'RoomStatus'>
+    readonly category: FieldRef<"Room", 'RoomCategory'>
+    readonly roomType: FieldRef<"Room", 'RoomType'>
     readonly dailyRateRupiah: FieldRef<"Room", 'Int'>
     readonly weeklyRateRupiah: FieldRef<"Room", 'Int'>
     readonly biWeeklyRateRupiah: FieldRef<"Room", 'Int'>
@@ -72615,6 +75575,3420 @@ export namespace Prisma {
 
 
   /**
+   * Model OperationalSetting
+   */
+
+  export type AggregateOperationalSetting = {
+    _count: OperationalSettingCountAggregateOutputType | null
+    _avg: OperationalSettingAvgAggregateOutputType | null
+    _sum: OperationalSettingSumAggregateOutputType | null
+    _min: OperationalSettingMinAggregateOutputType | null
+    _max: OperationalSettingMaxAggregateOutputType | null
+  }
+
+  export type OperationalSettingAvgAggregateOutputType = {
+    id: number | null
+    freeElectricityKwhPerMonth: number | null
+    electricityTariffPerKwhRupiah: number | null
+    waterTariffPerM3Rupiah: number | null
+    freeWaterM3PerMonth: number | null
+    updatedById: number | null
+  }
+
+  export type OperationalSettingSumAggregateOutputType = {
+    id: number | null
+    freeElectricityKwhPerMonth: number | null
+    electricityTariffPerKwhRupiah: number | null
+    waterTariffPerM3Rupiah: number | null
+    freeWaterM3PerMonth: number | null
+    updatedById: number | null
+  }
+
+  export type OperationalSettingMinAggregateOutputType = {
+    id: number | null
+    freeElectricityKwhPerMonth: number | null
+    electricityTariffPerKwhRupiah: number | null
+    waterMeteringEnabled: boolean | null
+    waterTariffPerM3Rupiah: number | null
+    freeWaterM3PerMonth: number | null
+    updatedAt: Date | null
+    updatedById: number | null
+  }
+
+  export type OperationalSettingMaxAggregateOutputType = {
+    id: number | null
+    freeElectricityKwhPerMonth: number | null
+    electricityTariffPerKwhRupiah: number | null
+    waterMeteringEnabled: boolean | null
+    waterTariffPerM3Rupiah: number | null
+    freeWaterM3PerMonth: number | null
+    updatedAt: Date | null
+    updatedById: number | null
+  }
+
+  export type OperationalSettingCountAggregateOutputType = {
+    id: number
+    freeElectricityKwhPerMonth: number
+    electricityTariffPerKwhRupiah: number
+    waterMeteringEnabled: number
+    waterTariffPerM3Rupiah: number
+    freeWaterM3PerMonth: number
+    updatedAt: number
+    updatedById: number
+    _all: number
+  }
+
+
+  export type OperationalSettingAvgAggregateInputType = {
+    id?: true
+    freeElectricityKwhPerMonth?: true
+    electricityTariffPerKwhRupiah?: true
+    waterTariffPerM3Rupiah?: true
+    freeWaterM3PerMonth?: true
+    updatedById?: true
+  }
+
+  export type OperationalSettingSumAggregateInputType = {
+    id?: true
+    freeElectricityKwhPerMonth?: true
+    electricityTariffPerKwhRupiah?: true
+    waterTariffPerM3Rupiah?: true
+    freeWaterM3PerMonth?: true
+    updatedById?: true
+  }
+
+  export type OperationalSettingMinAggregateInputType = {
+    id?: true
+    freeElectricityKwhPerMonth?: true
+    electricityTariffPerKwhRupiah?: true
+    waterMeteringEnabled?: true
+    waterTariffPerM3Rupiah?: true
+    freeWaterM3PerMonth?: true
+    updatedAt?: true
+    updatedById?: true
+  }
+
+  export type OperationalSettingMaxAggregateInputType = {
+    id?: true
+    freeElectricityKwhPerMonth?: true
+    electricityTariffPerKwhRupiah?: true
+    waterMeteringEnabled?: true
+    waterTariffPerM3Rupiah?: true
+    freeWaterM3PerMonth?: true
+    updatedAt?: true
+    updatedById?: true
+  }
+
+  export type OperationalSettingCountAggregateInputType = {
+    id?: true
+    freeElectricityKwhPerMonth?: true
+    electricityTariffPerKwhRupiah?: true
+    waterMeteringEnabled?: true
+    waterTariffPerM3Rupiah?: true
+    freeWaterM3PerMonth?: true
+    updatedAt?: true
+    updatedById?: true
+    _all?: true
+  }
+
+  export type OperationalSettingAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which OperationalSetting to aggregate.
+     */
+    where?: OperationalSettingWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of OperationalSettings to fetch.
+     */
+    orderBy?: OperationalSettingOrderByWithRelationInput | OperationalSettingOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: OperationalSettingWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` OperationalSettings from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` OperationalSettings.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned OperationalSettings
+    **/
+    _count?: true | OperationalSettingCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: OperationalSettingAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: OperationalSettingSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: OperationalSettingMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: OperationalSettingMaxAggregateInputType
+  }
+
+  export type GetOperationalSettingAggregateType<T extends OperationalSettingAggregateArgs> = {
+        [P in keyof T & keyof AggregateOperationalSetting]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateOperationalSetting[P]>
+      : GetScalarType<T[P], AggregateOperationalSetting[P]>
+  }
+
+
+
+
+  export type OperationalSettingGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: OperationalSettingWhereInput
+    orderBy?: OperationalSettingOrderByWithAggregationInput | OperationalSettingOrderByWithAggregationInput[]
+    by: OperationalSettingScalarFieldEnum[] | OperationalSettingScalarFieldEnum
+    having?: OperationalSettingScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: OperationalSettingCountAggregateInputType | true
+    _avg?: OperationalSettingAvgAggregateInputType
+    _sum?: OperationalSettingSumAggregateInputType
+    _min?: OperationalSettingMinAggregateInputType
+    _max?: OperationalSettingMaxAggregateInputType
+  }
+
+  export type OperationalSettingGroupByOutputType = {
+    id: number
+    freeElectricityKwhPerMonth: number
+    electricityTariffPerKwhRupiah: number
+    waterMeteringEnabled: boolean
+    waterTariffPerM3Rupiah: number
+    freeWaterM3PerMonth: number
+    updatedAt: Date
+    updatedById: number | null
+    _count: OperationalSettingCountAggregateOutputType | null
+    _avg: OperationalSettingAvgAggregateOutputType | null
+    _sum: OperationalSettingSumAggregateOutputType | null
+    _min: OperationalSettingMinAggregateOutputType | null
+    _max: OperationalSettingMaxAggregateOutputType | null
+  }
+
+  type GetOperationalSettingGroupByPayload<T extends OperationalSettingGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<OperationalSettingGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof OperationalSettingGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], OperationalSettingGroupByOutputType[P]>
+            : GetScalarType<T[P], OperationalSettingGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type OperationalSettingSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    freeElectricityKwhPerMonth?: boolean
+    electricityTariffPerKwhRupiah?: boolean
+    waterMeteringEnabled?: boolean
+    waterTariffPerM3Rupiah?: boolean
+    freeWaterM3PerMonth?: boolean
+    updatedAt?: boolean
+    updatedById?: boolean
+  }, ExtArgs["result"]["operationalSetting"]>
+
+  export type OperationalSettingSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    freeElectricityKwhPerMonth?: boolean
+    electricityTariffPerKwhRupiah?: boolean
+    waterMeteringEnabled?: boolean
+    waterTariffPerM3Rupiah?: boolean
+    freeWaterM3PerMonth?: boolean
+    updatedAt?: boolean
+    updatedById?: boolean
+  }, ExtArgs["result"]["operationalSetting"]>
+
+  export type OperationalSettingSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    freeElectricityKwhPerMonth?: boolean
+    electricityTariffPerKwhRupiah?: boolean
+    waterMeteringEnabled?: boolean
+    waterTariffPerM3Rupiah?: boolean
+    freeWaterM3PerMonth?: boolean
+    updatedAt?: boolean
+    updatedById?: boolean
+  }, ExtArgs["result"]["operationalSetting"]>
+
+  export type OperationalSettingSelectScalar = {
+    id?: boolean
+    freeElectricityKwhPerMonth?: boolean
+    electricityTariffPerKwhRupiah?: boolean
+    waterMeteringEnabled?: boolean
+    waterTariffPerM3Rupiah?: boolean
+    freeWaterM3PerMonth?: boolean
+    updatedAt?: boolean
+    updatedById?: boolean
+  }
+
+  export type OperationalSettingOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "freeElectricityKwhPerMonth" | "electricityTariffPerKwhRupiah" | "waterMeteringEnabled" | "waterTariffPerM3Rupiah" | "freeWaterM3PerMonth" | "updatedAt" | "updatedById", ExtArgs["result"]["operationalSetting"]>
+
+  export type $OperationalSettingPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "OperationalSetting"
+    objects: {}
+    scalars: $Extensions.GetPayloadResult<{
+      id: number
+      freeElectricityKwhPerMonth: number
+      electricityTariffPerKwhRupiah: number
+      waterMeteringEnabled: boolean
+      waterTariffPerM3Rupiah: number
+      freeWaterM3PerMonth: number
+      updatedAt: Date
+      updatedById: number | null
+    }, ExtArgs["result"]["operationalSetting"]>
+    composites: {}
+  }
+
+  type OperationalSettingGetPayload<S extends boolean | null | undefined | OperationalSettingDefaultArgs> = $Result.GetResult<Prisma.$OperationalSettingPayload, S>
+
+  type OperationalSettingCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<OperationalSettingFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: OperationalSettingCountAggregateInputType | true
+    }
+
+  export interface OperationalSettingDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['OperationalSetting'], meta: { name: 'OperationalSetting' } }
+    /**
+     * Find zero or one OperationalSetting that matches the filter.
+     * @param {OperationalSettingFindUniqueArgs} args - Arguments to find a OperationalSetting
+     * @example
+     * // Get one OperationalSetting
+     * const operationalSetting = await prisma.operationalSetting.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends OperationalSettingFindUniqueArgs>(args: SelectSubset<T, OperationalSettingFindUniqueArgs<ExtArgs>>): Prisma__OperationalSettingClient<$Result.GetResult<Prisma.$OperationalSettingPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one OperationalSetting that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {OperationalSettingFindUniqueOrThrowArgs} args - Arguments to find a OperationalSetting
+     * @example
+     * // Get one OperationalSetting
+     * const operationalSetting = await prisma.operationalSetting.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends OperationalSettingFindUniqueOrThrowArgs>(args: SelectSubset<T, OperationalSettingFindUniqueOrThrowArgs<ExtArgs>>): Prisma__OperationalSettingClient<$Result.GetResult<Prisma.$OperationalSettingPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first OperationalSetting that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {OperationalSettingFindFirstArgs} args - Arguments to find a OperationalSetting
+     * @example
+     * // Get one OperationalSetting
+     * const operationalSetting = await prisma.operationalSetting.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends OperationalSettingFindFirstArgs>(args?: SelectSubset<T, OperationalSettingFindFirstArgs<ExtArgs>>): Prisma__OperationalSettingClient<$Result.GetResult<Prisma.$OperationalSettingPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first OperationalSetting that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {OperationalSettingFindFirstOrThrowArgs} args - Arguments to find a OperationalSetting
+     * @example
+     * // Get one OperationalSetting
+     * const operationalSetting = await prisma.operationalSetting.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends OperationalSettingFindFirstOrThrowArgs>(args?: SelectSubset<T, OperationalSettingFindFirstOrThrowArgs<ExtArgs>>): Prisma__OperationalSettingClient<$Result.GetResult<Prisma.$OperationalSettingPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more OperationalSettings that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {OperationalSettingFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all OperationalSettings
+     * const operationalSettings = await prisma.operationalSetting.findMany()
+     * 
+     * // Get first 10 OperationalSettings
+     * const operationalSettings = await prisma.operationalSetting.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const operationalSettingWithIdOnly = await prisma.operationalSetting.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends OperationalSettingFindManyArgs>(args?: SelectSubset<T, OperationalSettingFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$OperationalSettingPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a OperationalSetting.
+     * @param {OperationalSettingCreateArgs} args - Arguments to create a OperationalSetting.
+     * @example
+     * // Create one OperationalSetting
+     * const OperationalSetting = await prisma.operationalSetting.create({
+     *   data: {
+     *     // ... data to create a OperationalSetting
+     *   }
+     * })
+     * 
+     */
+    create<T extends OperationalSettingCreateArgs>(args: SelectSubset<T, OperationalSettingCreateArgs<ExtArgs>>): Prisma__OperationalSettingClient<$Result.GetResult<Prisma.$OperationalSettingPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many OperationalSettings.
+     * @param {OperationalSettingCreateManyArgs} args - Arguments to create many OperationalSettings.
+     * @example
+     * // Create many OperationalSettings
+     * const operationalSetting = await prisma.operationalSetting.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends OperationalSettingCreateManyArgs>(args?: SelectSubset<T, OperationalSettingCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many OperationalSettings and returns the data saved in the database.
+     * @param {OperationalSettingCreateManyAndReturnArgs} args - Arguments to create many OperationalSettings.
+     * @example
+     * // Create many OperationalSettings
+     * const operationalSetting = await prisma.operationalSetting.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many OperationalSettings and only return the `id`
+     * const operationalSettingWithIdOnly = await prisma.operationalSetting.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends OperationalSettingCreateManyAndReturnArgs>(args?: SelectSubset<T, OperationalSettingCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$OperationalSettingPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a OperationalSetting.
+     * @param {OperationalSettingDeleteArgs} args - Arguments to delete one OperationalSetting.
+     * @example
+     * // Delete one OperationalSetting
+     * const OperationalSetting = await prisma.operationalSetting.delete({
+     *   where: {
+     *     // ... filter to delete one OperationalSetting
+     *   }
+     * })
+     * 
+     */
+    delete<T extends OperationalSettingDeleteArgs>(args: SelectSubset<T, OperationalSettingDeleteArgs<ExtArgs>>): Prisma__OperationalSettingClient<$Result.GetResult<Prisma.$OperationalSettingPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one OperationalSetting.
+     * @param {OperationalSettingUpdateArgs} args - Arguments to update one OperationalSetting.
+     * @example
+     * // Update one OperationalSetting
+     * const operationalSetting = await prisma.operationalSetting.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends OperationalSettingUpdateArgs>(args: SelectSubset<T, OperationalSettingUpdateArgs<ExtArgs>>): Prisma__OperationalSettingClient<$Result.GetResult<Prisma.$OperationalSettingPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more OperationalSettings.
+     * @param {OperationalSettingDeleteManyArgs} args - Arguments to filter OperationalSettings to delete.
+     * @example
+     * // Delete a few OperationalSettings
+     * const { count } = await prisma.operationalSetting.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends OperationalSettingDeleteManyArgs>(args?: SelectSubset<T, OperationalSettingDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more OperationalSettings.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {OperationalSettingUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many OperationalSettings
+     * const operationalSetting = await prisma.operationalSetting.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends OperationalSettingUpdateManyArgs>(args: SelectSubset<T, OperationalSettingUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more OperationalSettings and returns the data updated in the database.
+     * @param {OperationalSettingUpdateManyAndReturnArgs} args - Arguments to update many OperationalSettings.
+     * @example
+     * // Update many OperationalSettings
+     * const operationalSetting = await prisma.operationalSetting.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more OperationalSettings and only return the `id`
+     * const operationalSettingWithIdOnly = await prisma.operationalSetting.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends OperationalSettingUpdateManyAndReturnArgs>(args: SelectSubset<T, OperationalSettingUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$OperationalSettingPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one OperationalSetting.
+     * @param {OperationalSettingUpsertArgs} args - Arguments to update or create a OperationalSetting.
+     * @example
+     * // Update or create a OperationalSetting
+     * const operationalSetting = await prisma.operationalSetting.upsert({
+     *   create: {
+     *     // ... data to create a OperationalSetting
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the OperationalSetting we want to update
+     *   }
+     * })
+     */
+    upsert<T extends OperationalSettingUpsertArgs>(args: SelectSubset<T, OperationalSettingUpsertArgs<ExtArgs>>): Prisma__OperationalSettingClient<$Result.GetResult<Prisma.$OperationalSettingPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of OperationalSettings.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {OperationalSettingCountArgs} args - Arguments to filter OperationalSettings to count.
+     * @example
+     * // Count the number of OperationalSettings
+     * const count = await prisma.operationalSetting.count({
+     *   where: {
+     *     // ... the filter for the OperationalSettings we want to count
+     *   }
+     * })
+    **/
+    count<T extends OperationalSettingCountArgs>(
+      args?: Subset<T, OperationalSettingCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], OperationalSettingCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a OperationalSetting.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {OperationalSettingAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends OperationalSettingAggregateArgs>(args: Subset<T, OperationalSettingAggregateArgs>): Prisma.PrismaPromise<GetOperationalSettingAggregateType<T>>
+
+    /**
+     * Group by OperationalSetting.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {OperationalSettingGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends OperationalSettingGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: OperationalSettingGroupByArgs['orderBy'] }
+        : { orderBy?: OperationalSettingGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, OperationalSettingGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetOperationalSettingGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the OperationalSetting model
+   */
+  readonly fields: OperationalSettingFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for OperationalSetting.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__OperationalSettingClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the OperationalSetting model
+   */
+  interface OperationalSettingFieldRefs {
+    readonly id: FieldRef<"OperationalSetting", 'Int'>
+    readonly freeElectricityKwhPerMonth: FieldRef<"OperationalSetting", 'Int'>
+    readonly electricityTariffPerKwhRupiah: FieldRef<"OperationalSetting", 'Int'>
+    readonly waterMeteringEnabled: FieldRef<"OperationalSetting", 'Boolean'>
+    readonly waterTariffPerM3Rupiah: FieldRef<"OperationalSetting", 'Int'>
+    readonly freeWaterM3PerMonth: FieldRef<"OperationalSetting", 'Int'>
+    readonly updatedAt: FieldRef<"OperationalSetting", 'DateTime'>
+    readonly updatedById: FieldRef<"OperationalSetting", 'Int'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * OperationalSetting findUnique
+   */
+  export type OperationalSettingFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OperationalSetting
+     */
+    select?: OperationalSettingSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OperationalSetting
+     */
+    omit?: OperationalSettingOmit<ExtArgs> | null
+    /**
+     * Filter, which OperationalSetting to fetch.
+     */
+    where: OperationalSettingWhereUniqueInput
+  }
+
+  /**
+   * OperationalSetting findUniqueOrThrow
+   */
+  export type OperationalSettingFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OperationalSetting
+     */
+    select?: OperationalSettingSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OperationalSetting
+     */
+    omit?: OperationalSettingOmit<ExtArgs> | null
+    /**
+     * Filter, which OperationalSetting to fetch.
+     */
+    where: OperationalSettingWhereUniqueInput
+  }
+
+  /**
+   * OperationalSetting findFirst
+   */
+  export type OperationalSettingFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OperationalSetting
+     */
+    select?: OperationalSettingSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OperationalSetting
+     */
+    omit?: OperationalSettingOmit<ExtArgs> | null
+    /**
+     * Filter, which OperationalSetting to fetch.
+     */
+    where?: OperationalSettingWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of OperationalSettings to fetch.
+     */
+    orderBy?: OperationalSettingOrderByWithRelationInput | OperationalSettingOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for OperationalSettings.
+     */
+    cursor?: OperationalSettingWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` OperationalSettings from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` OperationalSettings.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of OperationalSettings.
+     */
+    distinct?: OperationalSettingScalarFieldEnum | OperationalSettingScalarFieldEnum[]
+  }
+
+  /**
+   * OperationalSetting findFirstOrThrow
+   */
+  export type OperationalSettingFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OperationalSetting
+     */
+    select?: OperationalSettingSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OperationalSetting
+     */
+    omit?: OperationalSettingOmit<ExtArgs> | null
+    /**
+     * Filter, which OperationalSetting to fetch.
+     */
+    where?: OperationalSettingWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of OperationalSettings to fetch.
+     */
+    orderBy?: OperationalSettingOrderByWithRelationInput | OperationalSettingOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for OperationalSettings.
+     */
+    cursor?: OperationalSettingWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` OperationalSettings from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` OperationalSettings.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of OperationalSettings.
+     */
+    distinct?: OperationalSettingScalarFieldEnum | OperationalSettingScalarFieldEnum[]
+  }
+
+  /**
+   * OperationalSetting findMany
+   */
+  export type OperationalSettingFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OperationalSetting
+     */
+    select?: OperationalSettingSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OperationalSetting
+     */
+    omit?: OperationalSettingOmit<ExtArgs> | null
+    /**
+     * Filter, which OperationalSettings to fetch.
+     */
+    where?: OperationalSettingWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of OperationalSettings to fetch.
+     */
+    orderBy?: OperationalSettingOrderByWithRelationInput | OperationalSettingOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing OperationalSettings.
+     */
+    cursor?: OperationalSettingWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` OperationalSettings from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` OperationalSettings.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of OperationalSettings.
+     */
+    distinct?: OperationalSettingScalarFieldEnum | OperationalSettingScalarFieldEnum[]
+  }
+
+  /**
+   * OperationalSetting create
+   */
+  export type OperationalSettingCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OperationalSetting
+     */
+    select?: OperationalSettingSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OperationalSetting
+     */
+    omit?: OperationalSettingOmit<ExtArgs> | null
+    /**
+     * The data needed to create a OperationalSetting.
+     */
+    data: XOR<OperationalSettingCreateInput, OperationalSettingUncheckedCreateInput>
+  }
+
+  /**
+   * OperationalSetting createMany
+   */
+  export type OperationalSettingCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many OperationalSettings.
+     */
+    data: OperationalSettingCreateManyInput | OperationalSettingCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * OperationalSetting createManyAndReturn
+   */
+  export type OperationalSettingCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OperationalSetting
+     */
+    select?: OperationalSettingSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the OperationalSetting
+     */
+    omit?: OperationalSettingOmit<ExtArgs> | null
+    /**
+     * The data used to create many OperationalSettings.
+     */
+    data: OperationalSettingCreateManyInput | OperationalSettingCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * OperationalSetting update
+   */
+  export type OperationalSettingUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OperationalSetting
+     */
+    select?: OperationalSettingSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OperationalSetting
+     */
+    omit?: OperationalSettingOmit<ExtArgs> | null
+    /**
+     * The data needed to update a OperationalSetting.
+     */
+    data: XOR<OperationalSettingUpdateInput, OperationalSettingUncheckedUpdateInput>
+    /**
+     * Choose, which OperationalSetting to update.
+     */
+    where: OperationalSettingWhereUniqueInput
+  }
+
+  /**
+   * OperationalSetting updateMany
+   */
+  export type OperationalSettingUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update OperationalSettings.
+     */
+    data: XOR<OperationalSettingUpdateManyMutationInput, OperationalSettingUncheckedUpdateManyInput>
+    /**
+     * Filter which OperationalSettings to update
+     */
+    where?: OperationalSettingWhereInput
+    /**
+     * Limit how many OperationalSettings to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * OperationalSetting updateManyAndReturn
+   */
+  export type OperationalSettingUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OperationalSetting
+     */
+    select?: OperationalSettingSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the OperationalSetting
+     */
+    omit?: OperationalSettingOmit<ExtArgs> | null
+    /**
+     * The data used to update OperationalSettings.
+     */
+    data: XOR<OperationalSettingUpdateManyMutationInput, OperationalSettingUncheckedUpdateManyInput>
+    /**
+     * Filter which OperationalSettings to update
+     */
+    where?: OperationalSettingWhereInput
+    /**
+     * Limit how many OperationalSettings to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * OperationalSetting upsert
+   */
+  export type OperationalSettingUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OperationalSetting
+     */
+    select?: OperationalSettingSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OperationalSetting
+     */
+    omit?: OperationalSettingOmit<ExtArgs> | null
+    /**
+     * The filter to search for the OperationalSetting to update in case it exists.
+     */
+    where: OperationalSettingWhereUniqueInput
+    /**
+     * In case the OperationalSetting found by the `where` argument doesn't exist, create a new OperationalSetting with this data.
+     */
+    create: XOR<OperationalSettingCreateInput, OperationalSettingUncheckedCreateInput>
+    /**
+     * In case the OperationalSetting was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<OperationalSettingUpdateInput, OperationalSettingUncheckedUpdateInput>
+  }
+
+  /**
+   * OperationalSetting delete
+   */
+  export type OperationalSettingDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OperationalSetting
+     */
+    select?: OperationalSettingSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OperationalSetting
+     */
+    omit?: OperationalSettingOmit<ExtArgs> | null
+    /**
+     * Filter which OperationalSetting to delete.
+     */
+    where: OperationalSettingWhereUniqueInput
+  }
+
+  /**
+   * OperationalSetting deleteMany
+   */
+  export type OperationalSettingDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which OperationalSettings to delete
+     */
+    where?: OperationalSettingWhereInput
+    /**
+     * Limit how many OperationalSettings to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * OperationalSetting without action
+   */
+  export type OperationalSettingDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OperationalSetting
+     */
+    select?: OperationalSettingSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OperationalSetting
+     */
+    omit?: OperationalSettingOmit<ExtArgs> | null
+  }
+
+
+  /**
+   * Model AdditionalService
+   */
+
+  export type AggregateAdditionalService = {
+    _count: AdditionalServiceCountAggregateOutputType | null
+    _avg: AdditionalServiceAvgAggregateOutputType | null
+    _sum: AdditionalServiceSumAggregateOutputType | null
+    _min: AdditionalServiceMinAggregateOutputType | null
+    _max: AdditionalServiceMaxAggregateOutputType | null
+  }
+
+  export type AdditionalServiceAvgAggregateOutputType = {
+    id: number | null
+    priceRupiah: number | null
+    sortOrder: number | null
+  }
+
+  export type AdditionalServiceSumAggregateOutputType = {
+    id: number | null
+    priceRupiah: number | null
+    sortOrder: number | null
+  }
+
+  export type AdditionalServiceMinAggregateOutputType = {
+    id: number | null
+    name: string | null
+    description: string | null
+    priceRupiah: number | null
+    unit: string | null
+    isActive: boolean | null
+    sortOrder: number | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type AdditionalServiceMaxAggregateOutputType = {
+    id: number | null
+    name: string | null
+    description: string | null
+    priceRupiah: number | null
+    unit: string | null
+    isActive: boolean | null
+    sortOrder: number | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type AdditionalServiceCountAggregateOutputType = {
+    id: number
+    name: number
+    description: number
+    priceRupiah: number
+    unit: number
+    isActive: number
+    sortOrder: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type AdditionalServiceAvgAggregateInputType = {
+    id?: true
+    priceRupiah?: true
+    sortOrder?: true
+  }
+
+  export type AdditionalServiceSumAggregateInputType = {
+    id?: true
+    priceRupiah?: true
+    sortOrder?: true
+  }
+
+  export type AdditionalServiceMinAggregateInputType = {
+    id?: true
+    name?: true
+    description?: true
+    priceRupiah?: true
+    unit?: true
+    isActive?: true
+    sortOrder?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type AdditionalServiceMaxAggregateInputType = {
+    id?: true
+    name?: true
+    description?: true
+    priceRupiah?: true
+    unit?: true
+    isActive?: true
+    sortOrder?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type AdditionalServiceCountAggregateInputType = {
+    id?: true
+    name?: true
+    description?: true
+    priceRupiah?: true
+    unit?: true
+    isActive?: true
+    sortOrder?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type AdditionalServiceAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which AdditionalService to aggregate.
+     */
+    where?: AdditionalServiceWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of AdditionalServices to fetch.
+     */
+    orderBy?: AdditionalServiceOrderByWithRelationInput | AdditionalServiceOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: AdditionalServiceWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` AdditionalServices from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` AdditionalServices.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned AdditionalServices
+    **/
+    _count?: true | AdditionalServiceCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: AdditionalServiceAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: AdditionalServiceSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: AdditionalServiceMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: AdditionalServiceMaxAggregateInputType
+  }
+
+  export type GetAdditionalServiceAggregateType<T extends AdditionalServiceAggregateArgs> = {
+        [P in keyof T & keyof AggregateAdditionalService]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateAdditionalService[P]>
+      : GetScalarType<T[P], AggregateAdditionalService[P]>
+  }
+
+
+
+
+  export type AdditionalServiceGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: AdditionalServiceWhereInput
+    orderBy?: AdditionalServiceOrderByWithAggregationInput | AdditionalServiceOrderByWithAggregationInput[]
+    by: AdditionalServiceScalarFieldEnum[] | AdditionalServiceScalarFieldEnum
+    having?: AdditionalServiceScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: AdditionalServiceCountAggregateInputType | true
+    _avg?: AdditionalServiceAvgAggregateInputType
+    _sum?: AdditionalServiceSumAggregateInputType
+    _min?: AdditionalServiceMinAggregateInputType
+    _max?: AdditionalServiceMaxAggregateInputType
+  }
+
+  export type AdditionalServiceGroupByOutputType = {
+    id: number
+    name: string
+    description: string | null
+    priceRupiah: number
+    unit: string | null
+    isActive: boolean
+    sortOrder: number
+    createdAt: Date
+    updatedAt: Date
+    _count: AdditionalServiceCountAggregateOutputType | null
+    _avg: AdditionalServiceAvgAggregateOutputType | null
+    _sum: AdditionalServiceSumAggregateOutputType | null
+    _min: AdditionalServiceMinAggregateOutputType | null
+    _max: AdditionalServiceMaxAggregateOutputType | null
+  }
+
+  type GetAdditionalServiceGroupByPayload<T extends AdditionalServiceGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<AdditionalServiceGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof AdditionalServiceGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], AdditionalServiceGroupByOutputType[P]>
+            : GetScalarType<T[P], AdditionalServiceGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type AdditionalServiceSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    name?: boolean
+    description?: boolean
+    priceRupiah?: boolean
+    unit?: boolean
+    isActive?: boolean
+    sortOrder?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    interests?: boolean | AdditionalService$interestsArgs<ExtArgs>
+    _count?: boolean | AdditionalServiceCountOutputTypeDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["additionalService"]>
+
+  export type AdditionalServiceSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    name?: boolean
+    description?: boolean
+    priceRupiah?: boolean
+    unit?: boolean
+    isActive?: boolean
+    sortOrder?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["additionalService"]>
+
+  export type AdditionalServiceSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    name?: boolean
+    description?: boolean
+    priceRupiah?: boolean
+    unit?: boolean
+    isActive?: boolean
+    sortOrder?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["additionalService"]>
+
+  export type AdditionalServiceSelectScalar = {
+    id?: boolean
+    name?: boolean
+    description?: boolean
+    priceRupiah?: boolean
+    unit?: boolean
+    isActive?: boolean
+    sortOrder?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type AdditionalServiceOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "description" | "priceRupiah" | "unit" | "isActive" | "sortOrder" | "createdAt" | "updatedAt", ExtArgs["result"]["additionalService"]>
+  export type AdditionalServiceInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    interests?: boolean | AdditionalService$interestsArgs<ExtArgs>
+    _count?: boolean | AdditionalServiceCountOutputTypeDefaultArgs<ExtArgs>
+  }
+  export type AdditionalServiceIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
+  export type AdditionalServiceIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
+
+  export type $AdditionalServicePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "AdditionalService"
+    objects: {
+      interests: Prisma.$ServiceInterestPayload<ExtArgs>[]
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: number
+      name: string
+      description: string | null
+      priceRupiah: number
+      unit: string | null
+      isActive: boolean
+      sortOrder: number
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["additionalService"]>
+    composites: {}
+  }
+
+  type AdditionalServiceGetPayload<S extends boolean | null | undefined | AdditionalServiceDefaultArgs> = $Result.GetResult<Prisma.$AdditionalServicePayload, S>
+
+  type AdditionalServiceCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<AdditionalServiceFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: AdditionalServiceCountAggregateInputType | true
+    }
+
+  export interface AdditionalServiceDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['AdditionalService'], meta: { name: 'AdditionalService' } }
+    /**
+     * Find zero or one AdditionalService that matches the filter.
+     * @param {AdditionalServiceFindUniqueArgs} args - Arguments to find a AdditionalService
+     * @example
+     * // Get one AdditionalService
+     * const additionalService = await prisma.additionalService.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends AdditionalServiceFindUniqueArgs>(args: SelectSubset<T, AdditionalServiceFindUniqueArgs<ExtArgs>>): Prisma__AdditionalServiceClient<$Result.GetResult<Prisma.$AdditionalServicePayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one AdditionalService that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {AdditionalServiceFindUniqueOrThrowArgs} args - Arguments to find a AdditionalService
+     * @example
+     * // Get one AdditionalService
+     * const additionalService = await prisma.additionalService.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends AdditionalServiceFindUniqueOrThrowArgs>(args: SelectSubset<T, AdditionalServiceFindUniqueOrThrowArgs<ExtArgs>>): Prisma__AdditionalServiceClient<$Result.GetResult<Prisma.$AdditionalServicePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first AdditionalService that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AdditionalServiceFindFirstArgs} args - Arguments to find a AdditionalService
+     * @example
+     * // Get one AdditionalService
+     * const additionalService = await prisma.additionalService.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends AdditionalServiceFindFirstArgs>(args?: SelectSubset<T, AdditionalServiceFindFirstArgs<ExtArgs>>): Prisma__AdditionalServiceClient<$Result.GetResult<Prisma.$AdditionalServicePayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first AdditionalService that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AdditionalServiceFindFirstOrThrowArgs} args - Arguments to find a AdditionalService
+     * @example
+     * // Get one AdditionalService
+     * const additionalService = await prisma.additionalService.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends AdditionalServiceFindFirstOrThrowArgs>(args?: SelectSubset<T, AdditionalServiceFindFirstOrThrowArgs<ExtArgs>>): Prisma__AdditionalServiceClient<$Result.GetResult<Prisma.$AdditionalServicePayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more AdditionalServices that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AdditionalServiceFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all AdditionalServices
+     * const additionalServices = await prisma.additionalService.findMany()
+     * 
+     * // Get first 10 AdditionalServices
+     * const additionalServices = await prisma.additionalService.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const additionalServiceWithIdOnly = await prisma.additionalService.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends AdditionalServiceFindManyArgs>(args?: SelectSubset<T, AdditionalServiceFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AdditionalServicePayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a AdditionalService.
+     * @param {AdditionalServiceCreateArgs} args - Arguments to create a AdditionalService.
+     * @example
+     * // Create one AdditionalService
+     * const AdditionalService = await prisma.additionalService.create({
+     *   data: {
+     *     // ... data to create a AdditionalService
+     *   }
+     * })
+     * 
+     */
+    create<T extends AdditionalServiceCreateArgs>(args: SelectSubset<T, AdditionalServiceCreateArgs<ExtArgs>>): Prisma__AdditionalServiceClient<$Result.GetResult<Prisma.$AdditionalServicePayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many AdditionalServices.
+     * @param {AdditionalServiceCreateManyArgs} args - Arguments to create many AdditionalServices.
+     * @example
+     * // Create many AdditionalServices
+     * const additionalService = await prisma.additionalService.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends AdditionalServiceCreateManyArgs>(args?: SelectSubset<T, AdditionalServiceCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many AdditionalServices and returns the data saved in the database.
+     * @param {AdditionalServiceCreateManyAndReturnArgs} args - Arguments to create many AdditionalServices.
+     * @example
+     * // Create many AdditionalServices
+     * const additionalService = await prisma.additionalService.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many AdditionalServices and only return the `id`
+     * const additionalServiceWithIdOnly = await prisma.additionalService.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends AdditionalServiceCreateManyAndReturnArgs>(args?: SelectSubset<T, AdditionalServiceCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AdditionalServicePayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a AdditionalService.
+     * @param {AdditionalServiceDeleteArgs} args - Arguments to delete one AdditionalService.
+     * @example
+     * // Delete one AdditionalService
+     * const AdditionalService = await prisma.additionalService.delete({
+     *   where: {
+     *     // ... filter to delete one AdditionalService
+     *   }
+     * })
+     * 
+     */
+    delete<T extends AdditionalServiceDeleteArgs>(args: SelectSubset<T, AdditionalServiceDeleteArgs<ExtArgs>>): Prisma__AdditionalServiceClient<$Result.GetResult<Prisma.$AdditionalServicePayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one AdditionalService.
+     * @param {AdditionalServiceUpdateArgs} args - Arguments to update one AdditionalService.
+     * @example
+     * // Update one AdditionalService
+     * const additionalService = await prisma.additionalService.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends AdditionalServiceUpdateArgs>(args: SelectSubset<T, AdditionalServiceUpdateArgs<ExtArgs>>): Prisma__AdditionalServiceClient<$Result.GetResult<Prisma.$AdditionalServicePayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more AdditionalServices.
+     * @param {AdditionalServiceDeleteManyArgs} args - Arguments to filter AdditionalServices to delete.
+     * @example
+     * // Delete a few AdditionalServices
+     * const { count } = await prisma.additionalService.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends AdditionalServiceDeleteManyArgs>(args?: SelectSubset<T, AdditionalServiceDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more AdditionalServices.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AdditionalServiceUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many AdditionalServices
+     * const additionalService = await prisma.additionalService.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends AdditionalServiceUpdateManyArgs>(args: SelectSubset<T, AdditionalServiceUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more AdditionalServices and returns the data updated in the database.
+     * @param {AdditionalServiceUpdateManyAndReturnArgs} args - Arguments to update many AdditionalServices.
+     * @example
+     * // Update many AdditionalServices
+     * const additionalService = await prisma.additionalService.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more AdditionalServices and only return the `id`
+     * const additionalServiceWithIdOnly = await prisma.additionalService.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends AdditionalServiceUpdateManyAndReturnArgs>(args: SelectSubset<T, AdditionalServiceUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AdditionalServicePayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one AdditionalService.
+     * @param {AdditionalServiceUpsertArgs} args - Arguments to update or create a AdditionalService.
+     * @example
+     * // Update or create a AdditionalService
+     * const additionalService = await prisma.additionalService.upsert({
+     *   create: {
+     *     // ... data to create a AdditionalService
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the AdditionalService we want to update
+     *   }
+     * })
+     */
+    upsert<T extends AdditionalServiceUpsertArgs>(args: SelectSubset<T, AdditionalServiceUpsertArgs<ExtArgs>>): Prisma__AdditionalServiceClient<$Result.GetResult<Prisma.$AdditionalServicePayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of AdditionalServices.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AdditionalServiceCountArgs} args - Arguments to filter AdditionalServices to count.
+     * @example
+     * // Count the number of AdditionalServices
+     * const count = await prisma.additionalService.count({
+     *   where: {
+     *     // ... the filter for the AdditionalServices we want to count
+     *   }
+     * })
+    **/
+    count<T extends AdditionalServiceCountArgs>(
+      args?: Subset<T, AdditionalServiceCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], AdditionalServiceCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a AdditionalService.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AdditionalServiceAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends AdditionalServiceAggregateArgs>(args: Subset<T, AdditionalServiceAggregateArgs>): Prisma.PrismaPromise<GetAdditionalServiceAggregateType<T>>
+
+    /**
+     * Group by AdditionalService.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AdditionalServiceGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends AdditionalServiceGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: AdditionalServiceGroupByArgs['orderBy'] }
+        : { orderBy?: AdditionalServiceGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, AdditionalServiceGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetAdditionalServiceGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the AdditionalService model
+   */
+  readonly fields: AdditionalServiceFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for AdditionalService.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__AdditionalServiceClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    interests<T extends AdditionalService$interestsArgs<ExtArgs> = {}>(args?: Subset<T, AdditionalService$interestsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ServiceInterestPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the AdditionalService model
+   */
+  interface AdditionalServiceFieldRefs {
+    readonly id: FieldRef<"AdditionalService", 'Int'>
+    readonly name: FieldRef<"AdditionalService", 'String'>
+    readonly description: FieldRef<"AdditionalService", 'String'>
+    readonly priceRupiah: FieldRef<"AdditionalService", 'Int'>
+    readonly unit: FieldRef<"AdditionalService", 'String'>
+    readonly isActive: FieldRef<"AdditionalService", 'Boolean'>
+    readonly sortOrder: FieldRef<"AdditionalService", 'Int'>
+    readonly createdAt: FieldRef<"AdditionalService", 'DateTime'>
+    readonly updatedAt: FieldRef<"AdditionalService", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * AdditionalService findUnique
+   */
+  export type AdditionalServiceFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AdditionalService
+     */
+    select?: AdditionalServiceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AdditionalService
+     */
+    omit?: AdditionalServiceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AdditionalServiceInclude<ExtArgs> | null
+    /**
+     * Filter, which AdditionalService to fetch.
+     */
+    where: AdditionalServiceWhereUniqueInput
+  }
+
+  /**
+   * AdditionalService findUniqueOrThrow
+   */
+  export type AdditionalServiceFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AdditionalService
+     */
+    select?: AdditionalServiceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AdditionalService
+     */
+    omit?: AdditionalServiceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AdditionalServiceInclude<ExtArgs> | null
+    /**
+     * Filter, which AdditionalService to fetch.
+     */
+    where: AdditionalServiceWhereUniqueInput
+  }
+
+  /**
+   * AdditionalService findFirst
+   */
+  export type AdditionalServiceFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AdditionalService
+     */
+    select?: AdditionalServiceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AdditionalService
+     */
+    omit?: AdditionalServiceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AdditionalServiceInclude<ExtArgs> | null
+    /**
+     * Filter, which AdditionalService to fetch.
+     */
+    where?: AdditionalServiceWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of AdditionalServices to fetch.
+     */
+    orderBy?: AdditionalServiceOrderByWithRelationInput | AdditionalServiceOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for AdditionalServices.
+     */
+    cursor?: AdditionalServiceWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` AdditionalServices from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` AdditionalServices.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of AdditionalServices.
+     */
+    distinct?: AdditionalServiceScalarFieldEnum | AdditionalServiceScalarFieldEnum[]
+  }
+
+  /**
+   * AdditionalService findFirstOrThrow
+   */
+  export type AdditionalServiceFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AdditionalService
+     */
+    select?: AdditionalServiceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AdditionalService
+     */
+    omit?: AdditionalServiceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AdditionalServiceInclude<ExtArgs> | null
+    /**
+     * Filter, which AdditionalService to fetch.
+     */
+    where?: AdditionalServiceWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of AdditionalServices to fetch.
+     */
+    orderBy?: AdditionalServiceOrderByWithRelationInput | AdditionalServiceOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for AdditionalServices.
+     */
+    cursor?: AdditionalServiceWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` AdditionalServices from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` AdditionalServices.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of AdditionalServices.
+     */
+    distinct?: AdditionalServiceScalarFieldEnum | AdditionalServiceScalarFieldEnum[]
+  }
+
+  /**
+   * AdditionalService findMany
+   */
+  export type AdditionalServiceFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AdditionalService
+     */
+    select?: AdditionalServiceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AdditionalService
+     */
+    omit?: AdditionalServiceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AdditionalServiceInclude<ExtArgs> | null
+    /**
+     * Filter, which AdditionalServices to fetch.
+     */
+    where?: AdditionalServiceWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of AdditionalServices to fetch.
+     */
+    orderBy?: AdditionalServiceOrderByWithRelationInput | AdditionalServiceOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing AdditionalServices.
+     */
+    cursor?: AdditionalServiceWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` AdditionalServices from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` AdditionalServices.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of AdditionalServices.
+     */
+    distinct?: AdditionalServiceScalarFieldEnum | AdditionalServiceScalarFieldEnum[]
+  }
+
+  /**
+   * AdditionalService create
+   */
+  export type AdditionalServiceCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AdditionalService
+     */
+    select?: AdditionalServiceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AdditionalService
+     */
+    omit?: AdditionalServiceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AdditionalServiceInclude<ExtArgs> | null
+    /**
+     * The data needed to create a AdditionalService.
+     */
+    data: XOR<AdditionalServiceCreateInput, AdditionalServiceUncheckedCreateInput>
+  }
+
+  /**
+   * AdditionalService createMany
+   */
+  export type AdditionalServiceCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many AdditionalServices.
+     */
+    data: AdditionalServiceCreateManyInput | AdditionalServiceCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * AdditionalService createManyAndReturn
+   */
+  export type AdditionalServiceCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AdditionalService
+     */
+    select?: AdditionalServiceSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the AdditionalService
+     */
+    omit?: AdditionalServiceOmit<ExtArgs> | null
+    /**
+     * The data used to create many AdditionalServices.
+     */
+    data: AdditionalServiceCreateManyInput | AdditionalServiceCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * AdditionalService update
+   */
+  export type AdditionalServiceUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AdditionalService
+     */
+    select?: AdditionalServiceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AdditionalService
+     */
+    omit?: AdditionalServiceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AdditionalServiceInclude<ExtArgs> | null
+    /**
+     * The data needed to update a AdditionalService.
+     */
+    data: XOR<AdditionalServiceUpdateInput, AdditionalServiceUncheckedUpdateInput>
+    /**
+     * Choose, which AdditionalService to update.
+     */
+    where: AdditionalServiceWhereUniqueInput
+  }
+
+  /**
+   * AdditionalService updateMany
+   */
+  export type AdditionalServiceUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update AdditionalServices.
+     */
+    data: XOR<AdditionalServiceUpdateManyMutationInput, AdditionalServiceUncheckedUpdateManyInput>
+    /**
+     * Filter which AdditionalServices to update
+     */
+    where?: AdditionalServiceWhereInput
+    /**
+     * Limit how many AdditionalServices to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * AdditionalService updateManyAndReturn
+   */
+  export type AdditionalServiceUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AdditionalService
+     */
+    select?: AdditionalServiceSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the AdditionalService
+     */
+    omit?: AdditionalServiceOmit<ExtArgs> | null
+    /**
+     * The data used to update AdditionalServices.
+     */
+    data: XOR<AdditionalServiceUpdateManyMutationInput, AdditionalServiceUncheckedUpdateManyInput>
+    /**
+     * Filter which AdditionalServices to update
+     */
+    where?: AdditionalServiceWhereInput
+    /**
+     * Limit how many AdditionalServices to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * AdditionalService upsert
+   */
+  export type AdditionalServiceUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AdditionalService
+     */
+    select?: AdditionalServiceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AdditionalService
+     */
+    omit?: AdditionalServiceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AdditionalServiceInclude<ExtArgs> | null
+    /**
+     * The filter to search for the AdditionalService to update in case it exists.
+     */
+    where: AdditionalServiceWhereUniqueInput
+    /**
+     * In case the AdditionalService found by the `where` argument doesn't exist, create a new AdditionalService with this data.
+     */
+    create: XOR<AdditionalServiceCreateInput, AdditionalServiceUncheckedCreateInput>
+    /**
+     * In case the AdditionalService was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<AdditionalServiceUpdateInput, AdditionalServiceUncheckedUpdateInput>
+  }
+
+  /**
+   * AdditionalService delete
+   */
+  export type AdditionalServiceDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AdditionalService
+     */
+    select?: AdditionalServiceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AdditionalService
+     */
+    omit?: AdditionalServiceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AdditionalServiceInclude<ExtArgs> | null
+    /**
+     * Filter which AdditionalService to delete.
+     */
+    where: AdditionalServiceWhereUniqueInput
+  }
+
+  /**
+   * AdditionalService deleteMany
+   */
+  export type AdditionalServiceDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which AdditionalServices to delete
+     */
+    where?: AdditionalServiceWhereInput
+    /**
+     * Limit how many AdditionalServices to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * AdditionalService.interests
+   */
+  export type AdditionalService$interestsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ServiceInterest
+     */
+    select?: ServiceInterestSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ServiceInterest
+     */
+    omit?: ServiceInterestOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ServiceInterestInclude<ExtArgs> | null
+    where?: ServiceInterestWhereInput
+    orderBy?: ServiceInterestOrderByWithRelationInput | ServiceInterestOrderByWithRelationInput[]
+    cursor?: ServiceInterestWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: ServiceInterestScalarFieldEnum | ServiceInterestScalarFieldEnum[]
+  }
+
+  /**
+   * AdditionalService without action
+   */
+  export type AdditionalServiceDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AdditionalService
+     */
+    select?: AdditionalServiceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AdditionalService
+     */
+    omit?: AdditionalServiceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AdditionalServiceInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model ServiceInterest
+   */
+
+  export type AggregateServiceInterest = {
+    _count: ServiceInterestCountAggregateOutputType | null
+    _avg: ServiceInterestAvgAggregateOutputType | null
+    _sum: ServiceInterestSumAggregateOutputType | null
+    _min: ServiceInterestMinAggregateOutputType | null
+    _max: ServiceInterestMaxAggregateOutputType | null
+  }
+
+  export type ServiceInterestAvgAggregateOutputType = {
+    id: number | null
+    serviceId: number | null
+    tenantId: number | null
+  }
+
+  export type ServiceInterestSumAggregateOutputType = {
+    id: number | null
+    serviceId: number | null
+    tenantId: number | null
+  }
+
+  export type ServiceInterestMinAggregateOutputType = {
+    id: number | null
+    serviceId: number | null
+    tenantId: number | null
+    status: $Enums.ServiceInterestStatus | null
+    note: string | null
+    adminNote: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type ServiceInterestMaxAggregateOutputType = {
+    id: number | null
+    serviceId: number | null
+    tenantId: number | null
+    status: $Enums.ServiceInterestStatus | null
+    note: string | null
+    adminNote: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type ServiceInterestCountAggregateOutputType = {
+    id: number
+    serviceId: number
+    tenantId: number
+    status: number
+    note: number
+    adminNote: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type ServiceInterestAvgAggregateInputType = {
+    id?: true
+    serviceId?: true
+    tenantId?: true
+  }
+
+  export type ServiceInterestSumAggregateInputType = {
+    id?: true
+    serviceId?: true
+    tenantId?: true
+  }
+
+  export type ServiceInterestMinAggregateInputType = {
+    id?: true
+    serviceId?: true
+    tenantId?: true
+    status?: true
+    note?: true
+    adminNote?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type ServiceInterestMaxAggregateInputType = {
+    id?: true
+    serviceId?: true
+    tenantId?: true
+    status?: true
+    note?: true
+    adminNote?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type ServiceInterestCountAggregateInputType = {
+    id?: true
+    serviceId?: true
+    tenantId?: true
+    status?: true
+    note?: true
+    adminNote?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type ServiceInterestAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which ServiceInterest to aggregate.
+     */
+    where?: ServiceInterestWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ServiceInterests to fetch.
+     */
+    orderBy?: ServiceInterestOrderByWithRelationInput | ServiceInterestOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: ServiceInterestWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ServiceInterests from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ServiceInterests.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned ServiceInterests
+    **/
+    _count?: true | ServiceInterestCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: ServiceInterestAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: ServiceInterestSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: ServiceInterestMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: ServiceInterestMaxAggregateInputType
+  }
+
+  export type GetServiceInterestAggregateType<T extends ServiceInterestAggregateArgs> = {
+        [P in keyof T & keyof AggregateServiceInterest]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateServiceInterest[P]>
+      : GetScalarType<T[P], AggregateServiceInterest[P]>
+  }
+
+
+
+
+  export type ServiceInterestGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: ServiceInterestWhereInput
+    orderBy?: ServiceInterestOrderByWithAggregationInput | ServiceInterestOrderByWithAggregationInput[]
+    by: ServiceInterestScalarFieldEnum[] | ServiceInterestScalarFieldEnum
+    having?: ServiceInterestScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: ServiceInterestCountAggregateInputType | true
+    _avg?: ServiceInterestAvgAggregateInputType
+    _sum?: ServiceInterestSumAggregateInputType
+    _min?: ServiceInterestMinAggregateInputType
+    _max?: ServiceInterestMaxAggregateInputType
+  }
+
+  export type ServiceInterestGroupByOutputType = {
+    id: number
+    serviceId: number
+    tenantId: number
+    status: $Enums.ServiceInterestStatus
+    note: string | null
+    adminNote: string | null
+    createdAt: Date
+    updatedAt: Date
+    _count: ServiceInterestCountAggregateOutputType | null
+    _avg: ServiceInterestAvgAggregateOutputType | null
+    _sum: ServiceInterestSumAggregateOutputType | null
+    _min: ServiceInterestMinAggregateOutputType | null
+    _max: ServiceInterestMaxAggregateOutputType | null
+  }
+
+  type GetServiceInterestGroupByPayload<T extends ServiceInterestGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<ServiceInterestGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof ServiceInterestGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], ServiceInterestGroupByOutputType[P]>
+            : GetScalarType<T[P], ServiceInterestGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type ServiceInterestSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    serviceId?: boolean
+    tenantId?: boolean
+    status?: boolean
+    note?: boolean
+    adminNote?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    service?: boolean | AdditionalServiceDefaultArgs<ExtArgs>
+    tenant?: boolean | TenantDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["serviceInterest"]>
+
+  export type ServiceInterestSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    serviceId?: boolean
+    tenantId?: boolean
+    status?: boolean
+    note?: boolean
+    adminNote?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    service?: boolean | AdditionalServiceDefaultArgs<ExtArgs>
+    tenant?: boolean | TenantDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["serviceInterest"]>
+
+  export type ServiceInterestSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    serviceId?: boolean
+    tenantId?: boolean
+    status?: boolean
+    note?: boolean
+    adminNote?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    service?: boolean | AdditionalServiceDefaultArgs<ExtArgs>
+    tenant?: boolean | TenantDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["serviceInterest"]>
+
+  export type ServiceInterestSelectScalar = {
+    id?: boolean
+    serviceId?: boolean
+    tenantId?: boolean
+    status?: boolean
+    note?: boolean
+    adminNote?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type ServiceInterestOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "serviceId" | "tenantId" | "status" | "note" | "adminNote" | "createdAt" | "updatedAt", ExtArgs["result"]["serviceInterest"]>
+  export type ServiceInterestInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    service?: boolean | AdditionalServiceDefaultArgs<ExtArgs>
+    tenant?: boolean | TenantDefaultArgs<ExtArgs>
+  }
+  export type ServiceInterestIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    service?: boolean | AdditionalServiceDefaultArgs<ExtArgs>
+    tenant?: boolean | TenantDefaultArgs<ExtArgs>
+  }
+  export type ServiceInterestIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    service?: boolean | AdditionalServiceDefaultArgs<ExtArgs>
+    tenant?: boolean | TenantDefaultArgs<ExtArgs>
+  }
+
+  export type $ServiceInterestPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "ServiceInterest"
+    objects: {
+      service: Prisma.$AdditionalServicePayload<ExtArgs>
+      tenant: Prisma.$TenantPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: number
+      serviceId: number
+      tenantId: number
+      status: $Enums.ServiceInterestStatus
+      note: string | null
+      adminNote: string | null
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["serviceInterest"]>
+    composites: {}
+  }
+
+  type ServiceInterestGetPayload<S extends boolean | null | undefined | ServiceInterestDefaultArgs> = $Result.GetResult<Prisma.$ServiceInterestPayload, S>
+
+  type ServiceInterestCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<ServiceInterestFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: ServiceInterestCountAggregateInputType | true
+    }
+
+  export interface ServiceInterestDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['ServiceInterest'], meta: { name: 'ServiceInterest' } }
+    /**
+     * Find zero or one ServiceInterest that matches the filter.
+     * @param {ServiceInterestFindUniqueArgs} args - Arguments to find a ServiceInterest
+     * @example
+     * // Get one ServiceInterest
+     * const serviceInterest = await prisma.serviceInterest.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends ServiceInterestFindUniqueArgs>(args: SelectSubset<T, ServiceInterestFindUniqueArgs<ExtArgs>>): Prisma__ServiceInterestClient<$Result.GetResult<Prisma.$ServiceInterestPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one ServiceInterest that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {ServiceInterestFindUniqueOrThrowArgs} args - Arguments to find a ServiceInterest
+     * @example
+     * // Get one ServiceInterest
+     * const serviceInterest = await prisma.serviceInterest.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends ServiceInterestFindUniqueOrThrowArgs>(args: SelectSubset<T, ServiceInterestFindUniqueOrThrowArgs<ExtArgs>>): Prisma__ServiceInterestClient<$Result.GetResult<Prisma.$ServiceInterestPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first ServiceInterest that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ServiceInterestFindFirstArgs} args - Arguments to find a ServiceInterest
+     * @example
+     * // Get one ServiceInterest
+     * const serviceInterest = await prisma.serviceInterest.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends ServiceInterestFindFirstArgs>(args?: SelectSubset<T, ServiceInterestFindFirstArgs<ExtArgs>>): Prisma__ServiceInterestClient<$Result.GetResult<Prisma.$ServiceInterestPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first ServiceInterest that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ServiceInterestFindFirstOrThrowArgs} args - Arguments to find a ServiceInterest
+     * @example
+     * // Get one ServiceInterest
+     * const serviceInterest = await prisma.serviceInterest.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends ServiceInterestFindFirstOrThrowArgs>(args?: SelectSubset<T, ServiceInterestFindFirstOrThrowArgs<ExtArgs>>): Prisma__ServiceInterestClient<$Result.GetResult<Prisma.$ServiceInterestPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more ServiceInterests that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ServiceInterestFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all ServiceInterests
+     * const serviceInterests = await prisma.serviceInterest.findMany()
+     * 
+     * // Get first 10 ServiceInterests
+     * const serviceInterests = await prisma.serviceInterest.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const serviceInterestWithIdOnly = await prisma.serviceInterest.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends ServiceInterestFindManyArgs>(args?: SelectSubset<T, ServiceInterestFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ServiceInterestPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a ServiceInterest.
+     * @param {ServiceInterestCreateArgs} args - Arguments to create a ServiceInterest.
+     * @example
+     * // Create one ServiceInterest
+     * const ServiceInterest = await prisma.serviceInterest.create({
+     *   data: {
+     *     // ... data to create a ServiceInterest
+     *   }
+     * })
+     * 
+     */
+    create<T extends ServiceInterestCreateArgs>(args: SelectSubset<T, ServiceInterestCreateArgs<ExtArgs>>): Prisma__ServiceInterestClient<$Result.GetResult<Prisma.$ServiceInterestPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many ServiceInterests.
+     * @param {ServiceInterestCreateManyArgs} args - Arguments to create many ServiceInterests.
+     * @example
+     * // Create many ServiceInterests
+     * const serviceInterest = await prisma.serviceInterest.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends ServiceInterestCreateManyArgs>(args?: SelectSubset<T, ServiceInterestCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many ServiceInterests and returns the data saved in the database.
+     * @param {ServiceInterestCreateManyAndReturnArgs} args - Arguments to create many ServiceInterests.
+     * @example
+     * // Create many ServiceInterests
+     * const serviceInterest = await prisma.serviceInterest.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many ServiceInterests and only return the `id`
+     * const serviceInterestWithIdOnly = await prisma.serviceInterest.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends ServiceInterestCreateManyAndReturnArgs>(args?: SelectSubset<T, ServiceInterestCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ServiceInterestPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a ServiceInterest.
+     * @param {ServiceInterestDeleteArgs} args - Arguments to delete one ServiceInterest.
+     * @example
+     * // Delete one ServiceInterest
+     * const ServiceInterest = await prisma.serviceInterest.delete({
+     *   where: {
+     *     // ... filter to delete one ServiceInterest
+     *   }
+     * })
+     * 
+     */
+    delete<T extends ServiceInterestDeleteArgs>(args: SelectSubset<T, ServiceInterestDeleteArgs<ExtArgs>>): Prisma__ServiceInterestClient<$Result.GetResult<Prisma.$ServiceInterestPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one ServiceInterest.
+     * @param {ServiceInterestUpdateArgs} args - Arguments to update one ServiceInterest.
+     * @example
+     * // Update one ServiceInterest
+     * const serviceInterest = await prisma.serviceInterest.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends ServiceInterestUpdateArgs>(args: SelectSubset<T, ServiceInterestUpdateArgs<ExtArgs>>): Prisma__ServiceInterestClient<$Result.GetResult<Prisma.$ServiceInterestPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more ServiceInterests.
+     * @param {ServiceInterestDeleteManyArgs} args - Arguments to filter ServiceInterests to delete.
+     * @example
+     * // Delete a few ServiceInterests
+     * const { count } = await prisma.serviceInterest.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends ServiceInterestDeleteManyArgs>(args?: SelectSubset<T, ServiceInterestDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more ServiceInterests.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ServiceInterestUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many ServiceInterests
+     * const serviceInterest = await prisma.serviceInterest.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends ServiceInterestUpdateManyArgs>(args: SelectSubset<T, ServiceInterestUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more ServiceInterests and returns the data updated in the database.
+     * @param {ServiceInterestUpdateManyAndReturnArgs} args - Arguments to update many ServiceInterests.
+     * @example
+     * // Update many ServiceInterests
+     * const serviceInterest = await prisma.serviceInterest.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more ServiceInterests and only return the `id`
+     * const serviceInterestWithIdOnly = await prisma.serviceInterest.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends ServiceInterestUpdateManyAndReturnArgs>(args: SelectSubset<T, ServiceInterestUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ServiceInterestPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one ServiceInterest.
+     * @param {ServiceInterestUpsertArgs} args - Arguments to update or create a ServiceInterest.
+     * @example
+     * // Update or create a ServiceInterest
+     * const serviceInterest = await prisma.serviceInterest.upsert({
+     *   create: {
+     *     // ... data to create a ServiceInterest
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the ServiceInterest we want to update
+     *   }
+     * })
+     */
+    upsert<T extends ServiceInterestUpsertArgs>(args: SelectSubset<T, ServiceInterestUpsertArgs<ExtArgs>>): Prisma__ServiceInterestClient<$Result.GetResult<Prisma.$ServiceInterestPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of ServiceInterests.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ServiceInterestCountArgs} args - Arguments to filter ServiceInterests to count.
+     * @example
+     * // Count the number of ServiceInterests
+     * const count = await prisma.serviceInterest.count({
+     *   where: {
+     *     // ... the filter for the ServiceInterests we want to count
+     *   }
+     * })
+    **/
+    count<T extends ServiceInterestCountArgs>(
+      args?: Subset<T, ServiceInterestCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], ServiceInterestCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a ServiceInterest.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ServiceInterestAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends ServiceInterestAggregateArgs>(args: Subset<T, ServiceInterestAggregateArgs>): Prisma.PrismaPromise<GetServiceInterestAggregateType<T>>
+
+    /**
+     * Group by ServiceInterest.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ServiceInterestGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends ServiceInterestGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: ServiceInterestGroupByArgs['orderBy'] }
+        : { orderBy?: ServiceInterestGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, ServiceInterestGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetServiceInterestGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the ServiceInterest model
+   */
+  readonly fields: ServiceInterestFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for ServiceInterest.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__ServiceInterestClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    service<T extends AdditionalServiceDefaultArgs<ExtArgs> = {}>(args?: Subset<T, AdditionalServiceDefaultArgs<ExtArgs>>): Prisma__AdditionalServiceClient<$Result.GetResult<Prisma.$AdditionalServicePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    tenant<T extends TenantDefaultArgs<ExtArgs> = {}>(args?: Subset<T, TenantDefaultArgs<ExtArgs>>): Prisma__TenantClient<$Result.GetResult<Prisma.$TenantPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the ServiceInterest model
+   */
+  interface ServiceInterestFieldRefs {
+    readonly id: FieldRef<"ServiceInterest", 'Int'>
+    readonly serviceId: FieldRef<"ServiceInterest", 'Int'>
+    readonly tenantId: FieldRef<"ServiceInterest", 'Int'>
+    readonly status: FieldRef<"ServiceInterest", 'ServiceInterestStatus'>
+    readonly note: FieldRef<"ServiceInterest", 'String'>
+    readonly adminNote: FieldRef<"ServiceInterest", 'String'>
+    readonly createdAt: FieldRef<"ServiceInterest", 'DateTime'>
+    readonly updatedAt: FieldRef<"ServiceInterest", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * ServiceInterest findUnique
+   */
+  export type ServiceInterestFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ServiceInterest
+     */
+    select?: ServiceInterestSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ServiceInterest
+     */
+    omit?: ServiceInterestOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ServiceInterestInclude<ExtArgs> | null
+    /**
+     * Filter, which ServiceInterest to fetch.
+     */
+    where: ServiceInterestWhereUniqueInput
+  }
+
+  /**
+   * ServiceInterest findUniqueOrThrow
+   */
+  export type ServiceInterestFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ServiceInterest
+     */
+    select?: ServiceInterestSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ServiceInterest
+     */
+    omit?: ServiceInterestOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ServiceInterestInclude<ExtArgs> | null
+    /**
+     * Filter, which ServiceInterest to fetch.
+     */
+    where: ServiceInterestWhereUniqueInput
+  }
+
+  /**
+   * ServiceInterest findFirst
+   */
+  export type ServiceInterestFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ServiceInterest
+     */
+    select?: ServiceInterestSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ServiceInterest
+     */
+    omit?: ServiceInterestOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ServiceInterestInclude<ExtArgs> | null
+    /**
+     * Filter, which ServiceInterest to fetch.
+     */
+    where?: ServiceInterestWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ServiceInterests to fetch.
+     */
+    orderBy?: ServiceInterestOrderByWithRelationInput | ServiceInterestOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for ServiceInterests.
+     */
+    cursor?: ServiceInterestWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ServiceInterests from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ServiceInterests.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of ServiceInterests.
+     */
+    distinct?: ServiceInterestScalarFieldEnum | ServiceInterestScalarFieldEnum[]
+  }
+
+  /**
+   * ServiceInterest findFirstOrThrow
+   */
+  export type ServiceInterestFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ServiceInterest
+     */
+    select?: ServiceInterestSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ServiceInterest
+     */
+    omit?: ServiceInterestOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ServiceInterestInclude<ExtArgs> | null
+    /**
+     * Filter, which ServiceInterest to fetch.
+     */
+    where?: ServiceInterestWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ServiceInterests to fetch.
+     */
+    orderBy?: ServiceInterestOrderByWithRelationInput | ServiceInterestOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for ServiceInterests.
+     */
+    cursor?: ServiceInterestWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ServiceInterests from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ServiceInterests.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of ServiceInterests.
+     */
+    distinct?: ServiceInterestScalarFieldEnum | ServiceInterestScalarFieldEnum[]
+  }
+
+  /**
+   * ServiceInterest findMany
+   */
+  export type ServiceInterestFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ServiceInterest
+     */
+    select?: ServiceInterestSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ServiceInterest
+     */
+    omit?: ServiceInterestOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ServiceInterestInclude<ExtArgs> | null
+    /**
+     * Filter, which ServiceInterests to fetch.
+     */
+    where?: ServiceInterestWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ServiceInterests to fetch.
+     */
+    orderBy?: ServiceInterestOrderByWithRelationInput | ServiceInterestOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing ServiceInterests.
+     */
+    cursor?: ServiceInterestWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ServiceInterests from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ServiceInterests.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of ServiceInterests.
+     */
+    distinct?: ServiceInterestScalarFieldEnum | ServiceInterestScalarFieldEnum[]
+  }
+
+  /**
+   * ServiceInterest create
+   */
+  export type ServiceInterestCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ServiceInterest
+     */
+    select?: ServiceInterestSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ServiceInterest
+     */
+    omit?: ServiceInterestOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ServiceInterestInclude<ExtArgs> | null
+    /**
+     * The data needed to create a ServiceInterest.
+     */
+    data: XOR<ServiceInterestCreateInput, ServiceInterestUncheckedCreateInput>
+  }
+
+  /**
+   * ServiceInterest createMany
+   */
+  export type ServiceInterestCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many ServiceInterests.
+     */
+    data: ServiceInterestCreateManyInput | ServiceInterestCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * ServiceInterest createManyAndReturn
+   */
+  export type ServiceInterestCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ServiceInterest
+     */
+    select?: ServiceInterestSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the ServiceInterest
+     */
+    omit?: ServiceInterestOmit<ExtArgs> | null
+    /**
+     * The data used to create many ServiceInterests.
+     */
+    data: ServiceInterestCreateManyInput | ServiceInterestCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ServiceInterestIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * ServiceInterest update
+   */
+  export type ServiceInterestUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ServiceInterest
+     */
+    select?: ServiceInterestSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ServiceInterest
+     */
+    omit?: ServiceInterestOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ServiceInterestInclude<ExtArgs> | null
+    /**
+     * The data needed to update a ServiceInterest.
+     */
+    data: XOR<ServiceInterestUpdateInput, ServiceInterestUncheckedUpdateInput>
+    /**
+     * Choose, which ServiceInterest to update.
+     */
+    where: ServiceInterestWhereUniqueInput
+  }
+
+  /**
+   * ServiceInterest updateMany
+   */
+  export type ServiceInterestUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update ServiceInterests.
+     */
+    data: XOR<ServiceInterestUpdateManyMutationInput, ServiceInterestUncheckedUpdateManyInput>
+    /**
+     * Filter which ServiceInterests to update
+     */
+    where?: ServiceInterestWhereInput
+    /**
+     * Limit how many ServiceInterests to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * ServiceInterest updateManyAndReturn
+   */
+  export type ServiceInterestUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ServiceInterest
+     */
+    select?: ServiceInterestSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the ServiceInterest
+     */
+    omit?: ServiceInterestOmit<ExtArgs> | null
+    /**
+     * The data used to update ServiceInterests.
+     */
+    data: XOR<ServiceInterestUpdateManyMutationInput, ServiceInterestUncheckedUpdateManyInput>
+    /**
+     * Filter which ServiceInterests to update
+     */
+    where?: ServiceInterestWhereInput
+    /**
+     * Limit how many ServiceInterests to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ServiceInterestIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * ServiceInterest upsert
+   */
+  export type ServiceInterestUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ServiceInterest
+     */
+    select?: ServiceInterestSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ServiceInterest
+     */
+    omit?: ServiceInterestOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ServiceInterestInclude<ExtArgs> | null
+    /**
+     * The filter to search for the ServiceInterest to update in case it exists.
+     */
+    where: ServiceInterestWhereUniqueInput
+    /**
+     * In case the ServiceInterest found by the `where` argument doesn't exist, create a new ServiceInterest with this data.
+     */
+    create: XOR<ServiceInterestCreateInput, ServiceInterestUncheckedCreateInput>
+    /**
+     * In case the ServiceInterest was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<ServiceInterestUpdateInput, ServiceInterestUncheckedUpdateInput>
+  }
+
+  /**
+   * ServiceInterest delete
+   */
+  export type ServiceInterestDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ServiceInterest
+     */
+    select?: ServiceInterestSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ServiceInterest
+     */
+    omit?: ServiceInterestOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ServiceInterestInclude<ExtArgs> | null
+    /**
+     * Filter which ServiceInterest to delete.
+     */
+    where: ServiceInterestWhereUniqueInput
+  }
+
+  /**
+   * ServiceInterest deleteMany
+   */
+  export type ServiceInterestDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which ServiceInterests to delete
+     */
+    where?: ServiceInterestWhereInput
+    /**
+     * Limit how many ServiceInterests to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * ServiceInterest without action
+   */
+  export type ServiceInterestDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ServiceInterest
+     */
+    select?: ServiceInterestSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ServiceInterest
+     */
+    omit?: ServiceInterestOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ServiceInterestInclude<ExtArgs> | null
+  }
+
+
+  /**
    * Enums
    */
 
@@ -72641,12 +79015,46 @@ export namespace Prisma {
     tipGopay: 'tipGopay',
     tipOvo: 'tipOvo',
     tipDana: 'tipDana',
+    tipShopeepay: 'tipShopeepay',
     tipBank: 'tipBank',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
   };
 
   export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum]
+
+
+  export const MarketAnalysisScalarFieldEnum: {
+    id: 'id',
+    kind: 'kind',
+    title: 'title',
+    summary: 'summary',
+    resultJson: 'resultJson',
+    transcriptJson: 'transcriptJson',
+    createdById: 'createdById',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type MarketAnalysisScalarFieldEnum = (typeof MarketAnalysisScalarFieldEnum)[keyof typeof MarketAnalysisScalarFieldEnum]
+
+
+  export const SatisfactionSurveyScalarFieldEnum: {
+    id: 'id',
+    tenantId: 'tenantId',
+    stayId: 'stayId',
+    overallRating: 'overallRating',
+    cleanliness: 'cleanliness',
+    staffService: 'staffService',
+    facility: 'facility',
+    valueForMoney: 'valueForMoney',
+    wouldRecommend: 'wouldRecommend',
+    comment: 'comment',
+    createdById: 'createdById',
+    createdAt: 'createdAt'
+  };
+
+  export type SatisfactionSurveyScalarFieldEnum = (typeof SatisfactionSurveyScalarFieldEnum)[keyof typeof SatisfactionSurveyScalarFieldEnum]
 
 
   export const TenantScalarFieldEnum: {
@@ -72686,6 +79094,8 @@ export namespace Prisma {
     name: 'name',
     floor: 'floor',
     status: 'status',
+    category: 'category',
+    roomType: 'roomType',
     dailyRateRupiah: 'dailyRateRupiah',
     weeklyRateRupiah: 'weeklyRateRupiah',
     biWeeklyRateRupiah: 'biWeeklyRateRupiah',
@@ -73630,6 +80040,49 @@ export namespace Prisma {
   export type FaqScalarFieldEnum = (typeof FaqScalarFieldEnum)[keyof typeof FaqScalarFieldEnum]
 
 
+  export const OperationalSettingScalarFieldEnum: {
+    id: 'id',
+    freeElectricityKwhPerMonth: 'freeElectricityKwhPerMonth',
+    electricityTariffPerKwhRupiah: 'electricityTariffPerKwhRupiah',
+    waterMeteringEnabled: 'waterMeteringEnabled',
+    waterTariffPerM3Rupiah: 'waterTariffPerM3Rupiah',
+    freeWaterM3PerMonth: 'freeWaterM3PerMonth',
+    updatedAt: 'updatedAt',
+    updatedById: 'updatedById'
+  };
+
+  export type OperationalSettingScalarFieldEnum = (typeof OperationalSettingScalarFieldEnum)[keyof typeof OperationalSettingScalarFieldEnum]
+
+
+  export const AdditionalServiceScalarFieldEnum: {
+    id: 'id',
+    name: 'name',
+    description: 'description',
+    priceRupiah: 'priceRupiah',
+    unit: 'unit',
+    isActive: 'isActive',
+    sortOrder: 'sortOrder',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type AdditionalServiceScalarFieldEnum = (typeof AdditionalServiceScalarFieldEnum)[keyof typeof AdditionalServiceScalarFieldEnum]
+
+
+  export const ServiceInterestScalarFieldEnum: {
+    id: 'id',
+    serviceId: 'serviceId',
+    tenantId: 'tenantId',
+    status: 'status',
+    note: 'note',
+    adminNote: 'adminNote',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type ServiceInterestScalarFieldEnum = (typeof ServiceInterestScalarFieldEnum)[keyof typeof ServiceInterestScalarFieldEnum]
+
+
   export const SortOrder: {
     asc: 'asc',
     desc: 'desc'
@@ -73740,6 +80193,20 @@ export namespace Prisma {
 
 
   /**
+   * Reference to a field of type 'Json'
+   */
+  export type JsonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Json'>
+    
+
+
+  /**
+   * Reference to a field of type 'QueryMode'
+   */
+  export type EnumQueryModeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'QueryMode'>
+    
+
+
+  /**
    * Reference to a field of type 'Gender'
    */
   export type EnumGenderFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Gender'>
@@ -73764,6 +80231,34 @@ export namespace Prisma {
    * Reference to a field of type 'RoomStatus[]'
    */
   export type ListEnumRoomStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'RoomStatus[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'RoomCategory'
+   */
+  export type EnumRoomCategoryFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'RoomCategory'>
+    
+
+
+  /**
+   * Reference to a field of type 'RoomCategory[]'
+   */
+  export type ListEnumRoomCategoryFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'RoomCategory[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'RoomType'
+   */
+  export type EnumRoomTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'RoomType'>
+    
+
+
+  /**
+   * Reference to a field of type 'RoomType[]'
+   */
+  export type ListEnumRoomTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'RoomType[]'>
     
 
 
@@ -73932,20 +80427,6 @@ export namespace Prisma {
    * Reference to a field of type 'TenantDepositLedgerDirection[]'
    */
   export type ListEnumTenantDepositLedgerDirectionFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'TenantDepositLedgerDirection[]'>
-    
-
-
-  /**
-   * Reference to a field of type 'Json'
-   */
-  export type JsonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Json'>
-    
-
-
-  /**
-   * Reference to a field of type 'QueryMode'
-   */
-  export type EnumQueryModeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'QueryMode'>
     
 
 
@@ -74605,6 +81086,20 @@ export namespace Prisma {
    */
   export type ListEnumReferralStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ReferralStatus[]'>
     
+
+
+  /**
+   * Reference to a field of type 'ServiceInterestStatus'
+   */
+  export type EnumServiceInterestStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ServiceInterestStatus'>
+    
+
+
+  /**
+   * Reference to a field of type 'ServiceInterestStatus[]'
+   */
+  export type ListEnumServiceInterestStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ServiceInterestStatus[]'>
+    
   /**
    * Deep Input Types
    */
@@ -74626,6 +81121,7 @@ export namespace Prisma {
     tipGopay?: StringNullableFilter<"User"> | string | null
     tipOvo?: StringNullableFilter<"User"> | string | null
     tipDana?: StringNullableFilter<"User"> | string | null
+    tipShopeepay?: StringNullableFilter<"User"> | string | null
     tipBank?: StringNullableFilter<"User"> | string | null
     createdAt?: DateTimeFilter<"User"> | Date | string
     updatedAt?: DateTimeFilter<"User"> | Date | string
@@ -74665,6 +81161,7 @@ export namespace Prisma {
     tenantsKtpVerified?: TenantListRelationFilter
     roomTransfersCreated?: RoomTransferListRelationFilter
     peerReportsModerated?: PeerBehaviorReportListRelationFilter
+    marketAnalysesCreated?: MarketAnalysisListRelationFilter
   }
 
   export type UserOrderByWithRelationInput = {
@@ -74680,6 +81177,7 @@ export namespace Prisma {
     tipGopay?: SortOrderInput | SortOrder
     tipOvo?: SortOrderInput | SortOrder
     tipDana?: SortOrderInput | SortOrder
+    tipShopeepay?: SortOrderInput | SortOrder
     tipBank?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -74719,6 +81217,7 @@ export namespace Prisma {
     tenantsKtpVerified?: TenantOrderByRelationAggregateInput
     roomTransfersCreated?: RoomTransferOrderByRelationAggregateInput
     peerReportsModerated?: PeerBehaviorReportOrderByRelationAggregateInput
+    marketAnalysesCreated?: MarketAnalysisOrderByRelationAggregateInput
   }
 
   export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -74737,6 +81236,7 @@ export namespace Prisma {
     tipGopay?: StringNullableFilter<"User"> | string | null
     tipOvo?: StringNullableFilter<"User"> | string | null
     tipDana?: StringNullableFilter<"User"> | string | null
+    tipShopeepay?: StringNullableFilter<"User"> | string | null
     tipBank?: StringNullableFilter<"User"> | string | null
     createdAt?: DateTimeFilter<"User"> | Date | string
     updatedAt?: DateTimeFilter<"User"> | Date | string
@@ -74776,6 +81276,7 @@ export namespace Prisma {
     tenantsKtpVerified?: TenantListRelationFilter
     roomTransfersCreated?: RoomTransferListRelationFilter
     peerReportsModerated?: PeerBehaviorReportListRelationFilter
+    marketAnalysesCreated?: MarketAnalysisListRelationFilter
   }, "id" | "email" | "tenantId">
 
   export type UserOrderByWithAggregationInput = {
@@ -74791,6 +81292,7 @@ export namespace Prisma {
     tipGopay?: SortOrderInput | SortOrder
     tipOvo?: SortOrderInput | SortOrder
     tipDana?: SortOrderInput | SortOrder
+    tipShopeepay?: SortOrderInput | SortOrder
     tipBank?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -74817,9 +81319,176 @@ export namespace Prisma {
     tipGopay?: StringNullableWithAggregatesFilter<"User"> | string | null
     tipOvo?: StringNullableWithAggregatesFilter<"User"> | string | null
     tipDana?: StringNullableWithAggregatesFilter<"User"> | string | null
+    tipShopeepay?: StringNullableWithAggregatesFilter<"User"> | string | null
     tipBank?: StringNullableWithAggregatesFilter<"User"> | string | null
     createdAt?: DateTimeWithAggregatesFilter<"User"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"User"> | Date | string
+  }
+
+  export type MarketAnalysisWhereInput = {
+    AND?: MarketAnalysisWhereInput | MarketAnalysisWhereInput[]
+    OR?: MarketAnalysisWhereInput[]
+    NOT?: MarketAnalysisWhereInput | MarketAnalysisWhereInput[]
+    id?: IntFilter<"MarketAnalysis"> | number
+    kind?: StringFilter<"MarketAnalysis"> | string
+    title?: StringFilter<"MarketAnalysis"> | string
+    summary?: StringNullableFilter<"MarketAnalysis"> | string | null
+    resultJson?: JsonNullableFilter<"MarketAnalysis">
+    transcriptJson?: JsonNullableFilter<"MarketAnalysis">
+    createdById?: IntNullableFilter<"MarketAnalysis"> | number | null
+    createdAt?: DateTimeFilter<"MarketAnalysis"> | Date | string
+    updatedAt?: DateTimeFilter<"MarketAnalysis"> | Date | string
+    createdBy?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
+  }
+
+  export type MarketAnalysisOrderByWithRelationInput = {
+    id?: SortOrder
+    kind?: SortOrder
+    title?: SortOrder
+    summary?: SortOrderInput | SortOrder
+    resultJson?: SortOrderInput | SortOrder
+    transcriptJson?: SortOrderInput | SortOrder
+    createdById?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    createdBy?: UserOrderByWithRelationInput
+  }
+
+  export type MarketAnalysisWhereUniqueInput = Prisma.AtLeast<{
+    id?: number
+    AND?: MarketAnalysisWhereInput | MarketAnalysisWhereInput[]
+    OR?: MarketAnalysisWhereInput[]
+    NOT?: MarketAnalysisWhereInput | MarketAnalysisWhereInput[]
+    kind?: StringFilter<"MarketAnalysis"> | string
+    title?: StringFilter<"MarketAnalysis"> | string
+    summary?: StringNullableFilter<"MarketAnalysis"> | string | null
+    resultJson?: JsonNullableFilter<"MarketAnalysis">
+    transcriptJson?: JsonNullableFilter<"MarketAnalysis">
+    createdById?: IntNullableFilter<"MarketAnalysis"> | number | null
+    createdAt?: DateTimeFilter<"MarketAnalysis"> | Date | string
+    updatedAt?: DateTimeFilter<"MarketAnalysis"> | Date | string
+    createdBy?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
+  }, "id">
+
+  export type MarketAnalysisOrderByWithAggregationInput = {
+    id?: SortOrder
+    kind?: SortOrder
+    title?: SortOrder
+    summary?: SortOrderInput | SortOrder
+    resultJson?: SortOrderInput | SortOrder
+    transcriptJson?: SortOrderInput | SortOrder
+    createdById?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: MarketAnalysisCountOrderByAggregateInput
+    _avg?: MarketAnalysisAvgOrderByAggregateInput
+    _max?: MarketAnalysisMaxOrderByAggregateInput
+    _min?: MarketAnalysisMinOrderByAggregateInput
+    _sum?: MarketAnalysisSumOrderByAggregateInput
+  }
+
+  export type MarketAnalysisScalarWhereWithAggregatesInput = {
+    AND?: MarketAnalysisScalarWhereWithAggregatesInput | MarketAnalysisScalarWhereWithAggregatesInput[]
+    OR?: MarketAnalysisScalarWhereWithAggregatesInput[]
+    NOT?: MarketAnalysisScalarWhereWithAggregatesInput | MarketAnalysisScalarWhereWithAggregatesInput[]
+    id?: IntWithAggregatesFilter<"MarketAnalysis"> | number
+    kind?: StringWithAggregatesFilter<"MarketAnalysis"> | string
+    title?: StringWithAggregatesFilter<"MarketAnalysis"> | string
+    summary?: StringNullableWithAggregatesFilter<"MarketAnalysis"> | string | null
+    resultJson?: JsonNullableWithAggregatesFilter<"MarketAnalysis">
+    transcriptJson?: JsonNullableWithAggregatesFilter<"MarketAnalysis">
+    createdById?: IntNullableWithAggregatesFilter<"MarketAnalysis"> | number | null
+    createdAt?: DateTimeWithAggregatesFilter<"MarketAnalysis"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"MarketAnalysis"> | Date | string
+  }
+
+  export type SatisfactionSurveyWhereInput = {
+    AND?: SatisfactionSurveyWhereInput | SatisfactionSurveyWhereInput[]
+    OR?: SatisfactionSurveyWhereInput[]
+    NOT?: SatisfactionSurveyWhereInput | SatisfactionSurveyWhereInput[]
+    id?: IntFilter<"SatisfactionSurvey"> | number
+    tenantId?: IntNullableFilter<"SatisfactionSurvey"> | number | null
+    stayId?: IntNullableFilter<"SatisfactionSurvey"> | number | null
+    overallRating?: IntFilter<"SatisfactionSurvey"> | number
+    cleanliness?: IntNullableFilter<"SatisfactionSurvey"> | number | null
+    staffService?: IntNullableFilter<"SatisfactionSurvey"> | number | null
+    facility?: IntNullableFilter<"SatisfactionSurvey"> | number | null
+    valueForMoney?: IntNullableFilter<"SatisfactionSurvey"> | number | null
+    wouldRecommend?: BoolNullableFilter<"SatisfactionSurvey"> | boolean | null
+    comment?: StringNullableFilter<"SatisfactionSurvey"> | string | null
+    createdById?: IntNullableFilter<"SatisfactionSurvey"> | number | null
+    createdAt?: DateTimeFilter<"SatisfactionSurvey"> | Date | string
+  }
+
+  export type SatisfactionSurveyOrderByWithRelationInput = {
+    id?: SortOrder
+    tenantId?: SortOrderInput | SortOrder
+    stayId?: SortOrderInput | SortOrder
+    overallRating?: SortOrder
+    cleanliness?: SortOrderInput | SortOrder
+    staffService?: SortOrderInput | SortOrder
+    facility?: SortOrderInput | SortOrder
+    valueForMoney?: SortOrderInput | SortOrder
+    wouldRecommend?: SortOrderInput | SortOrder
+    comment?: SortOrderInput | SortOrder
+    createdById?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type SatisfactionSurveyWhereUniqueInput = Prisma.AtLeast<{
+    id?: number
+    AND?: SatisfactionSurveyWhereInput | SatisfactionSurveyWhereInput[]
+    OR?: SatisfactionSurveyWhereInput[]
+    NOT?: SatisfactionSurveyWhereInput | SatisfactionSurveyWhereInput[]
+    tenantId?: IntNullableFilter<"SatisfactionSurvey"> | number | null
+    stayId?: IntNullableFilter<"SatisfactionSurvey"> | number | null
+    overallRating?: IntFilter<"SatisfactionSurvey"> | number
+    cleanliness?: IntNullableFilter<"SatisfactionSurvey"> | number | null
+    staffService?: IntNullableFilter<"SatisfactionSurvey"> | number | null
+    facility?: IntNullableFilter<"SatisfactionSurvey"> | number | null
+    valueForMoney?: IntNullableFilter<"SatisfactionSurvey"> | number | null
+    wouldRecommend?: BoolNullableFilter<"SatisfactionSurvey"> | boolean | null
+    comment?: StringNullableFilter<"SatisfactionSurvey"> | string | null
+    createdById?: IntNullableFilter<"SatisfactionSurvey"> | number | null
+    createdAt?: DateTimeFilter<"SatisfactionSurvey"> | Date | string
+  }, "id">
+
+  export type SatisfactionSurveyOrderByWithAggregationInput = {
+    id?: SortOrder
+    tenantId?: SortOrderInput | SortOrder
+    stayId?: SortOrderInput | SortOrder
+    overallRating?: SortOrder
+    cleanliness?: SortOrderInput | SortOrder
+    staffService?: SortOrderInput | SortOrder
+    facility?: SortOrderInput | SortOrder
+    valueForMoney?: SortOrderInput | SortOrder
+    wouldRecommend?: SortOrderInput | SortOrder
+    comment?: SortOrderInput | SortOrder
+    createdById?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    _count?: SatisfactionSurveyCountOrderByAggregateInput
+    _avg?: SatisfactionSurveyAvgOrderByAggregateInput
+    _max?: SatisfactionSurveyMaxOrderByAggregateInput
+    _min?: SatisfactionSurveyMinOrderByAggregateInput
+    _sum?: SatisfactionSurveySumOrderByAggregateInput
+  }
+
+  export type SatisfactionSurveyScalarWhereWithAggregatesInput = {
+    AND?: SatisfactionSurveyScalarWhereWithAggregatesInput | SatisfactionSurveyScalarWhereWithAggregatesInput[]
+    OR?: SatisfactionSurveyScalarWhereWithAggregatesInput[]
+    NOT?: SatisfactionSurveyScalarWhereWithAggregatesInput | SatisfactionSurveyScalarWhereWithAggregatesInput[]
+    id?: IntWithAggregatesFilter<"SatisfactionSurvey"> | number
+    tenantId?: IntNullableWithAggregatesFilter<"SatisfactionSurvey"> | number | null
+    stayId?: IntNullableWithAggregatesFilter<"SatisfactionSurvey"> | number | null
+    overallRating?: IntWithAggregatesFilter<"SatisfactionSurvey"> | number
+    cleanliness?: IntNullableWithAggregatesFilter<"SatisfactionSurvey"> | number | null
+    staffService?: IntNullableWithAggregatesFilter<"SatisfactionSurvey"> | number | null
+    facility?: IntNullableWithAggregatesFilter<"SatisfactionSurvey"> | number | null
+    valueForMoney?: IntNullableWithAggregatesFilter<"SatisfactionSurvey"> | number | null
+    wouldRecommend?: BoolNullableWithAggregatesFilter<"SatisfactionSurvey"> | boolean | null
+    comment?: StringNullableWithAggregatesFilter<"SatisfactionSurvey"> | string | null
+    createdById?: IntNullableWithAggregatesFilter<"SatisfactionSurvey"> | number | null
+    createdAt?: DateTimeWithAggregatesFilter<"SatisfactionSurvey"> | Date | string
   }
 
   export type TenantWhereInput = {
@@ -74861,6 +81530,7 @@ export namespace Prisma {
     depositLedgerEntries?: TenantDepositLedgerEntryListRelationFilter
     loyaltyPoints?: LoyaltyPointListRelationFilter
     redemptions?: RedemptionListRelationFilter
+    serviceInterests?: ServiceInterestListRelationFilter
     referralsMade?: TenantReferralListRelationFilter
     referredReferral?: XOR<TenantReferralNullableScalarRelationFilter, TenantReferralWhereInput> | null
     peerReportsMade?: PeerBehaviorReportListRelationFilter
@@ -74903,6 +81573,7 @@ export namespace Prisma {
     depositLedgerEntries?: TenantDepositLedgerEntryOrderByRelationAggregateInput
     loyaltyPoints?: LoyaltyPointOrderByRelationAggregateInput
     redemptions?: RedemptionOrderByRelationAggregateInput
+    serviceInterests?: ServiceInterestOrderByRelationAggregateInput
     referralsMade?: TenantReferralOrderByRelationAggregateInput
     referredReferral?: TenantReferralOrderByWithRelationInput
     peerReportsMade?: PeerBehaviorReportOrderByRelationAggregateInput
@@ -74948,6 +81619,7 @@ export namespace Prisma {
     depositLedgerEntries?: TenantDepositLedgerEntryListRelationFilter
     loyaltyPoints?: LoyaltyPointListRelationFilter
     redemptions?: RedemptionListRelationFilter
+    serviceInterests?: ServiceInterestListRelationFilter
     referralsMade?: TenantReferralListRelationFilter
     referredReferral?: XOR<TenantReferralNullableScalarRelationFilter, TenantReferralWhereInput> | null
     peerReportsMade?: PeerBehaviorReportListRelationFilter
@@ -75027,6 +81699,8 @@ export namespace Prisma {
     name?: StringNullableFilter<"Room"> | string | null
     floor?: StringNullableFilter<"Room"> | string | null
     status?: EnumRoomStatusFilter<"Room"> | $Enums.RoomStatus
+    category?: EnumRoomCategoryFilter<"Room"> | $Enums.RoomCategory
+    roomType?: EnumRoomTypeFilter<"Room"> | $Enums.RoomType
     dailyRateRupiah?: IntNullableFilter<"Room"> | number | null
     weeklyRateRupiah?: IntNullableFilter<"Room"> | number | null
     biWeeklyRateRupiah?: IntNullableFilter<"Room"> | number | null
@@ -75067,6 +81741,8 @@ export namespace Prisma {
     name?: SortOrderInput | SortOrder
     floor?: SortOrderInput | SortOrder
     status?: SortOrder
+    category?: SortOrder
+    roomType?: SortOrder
     dailyRateRupiah?: SortOrderInput | SortOrder
     weeklyRateRupiah?: SortOrderInput | SortOrder
     biWeeklyRateRupiah?: SortOrderInput | SortOrder
@@ -75110,6 +81786,8 @@ export namespace Prisma {
     name?: StringNullableFilter<"Room"> | string | null
     floor?: StringNullableFilter<"Room"> | string | null
     status?: EnumRoomStatusFilter<"Room"> | $Enums.RoomStatus
+    category?: EnumRoomCategoryFilter<"Room"> | $Enums.RoomCategory
+    roomType?: EnumRoomTypeFilter<"Room"> | $Enums.RoomType
     dailyRateRupiah?: IntNullableFilter<"Room"> | number | null
     weeklyRateRupiah?: IntNullableFilter<"Room"> | number | null
     biWeeklyRateRupiah?: IntNullableFilter<"Room"> | number | null
@@ -75150,6 +81828,8 @@ export namespace Prisma {
     name?: SortOrderInput | SortOrder
     floor?: SortOrderInput | SortOrder
     status?: SortOrder
+    category?: SortOrder
+    roomType?: SortOrder
     dailyRateRupiah?: SortOrderInput | SortOrder
     weeklyRateRupiah?: SortOrderInput | SortOrder
     biWeeklyRateRupiah?: SortOrderInput | SortOrder
@@ -75184,6 +81864,8 @@ export namespace Prisma {
     name?: StringNullableWithAggregatesFilter<"Room"> | string | null
     floor?: StringNullableWithAggregatesFilter<"Room"> | string | null
     status?: EnumRoomStatusWithAggregatesFilter<"Room"> | $Enums.RoomStatus
+    category?: EnumRoomCategoryWithAggregatesFilter<"Room"> | $Enums.RoomCategory
+    roomType?: EnumRoomTypeWithAggregatesFilter<"Room"> | $Enums.RoomType
     dailyRateRupiah?: IntNullableWithAggregatesFilter<"Room"> | number | null
     weeklyRateRupiah?: IntNullableWithAggregatesFilter<"Room"> | number | null
     biWeeklyRateRupiah?: IntNullableWithAggregatesFilter<"Room"> | number | null
@@ -80216,6 +86898,227 @@ export namespace Prisma {
     updatedAt?: DateTimeWithAggregatesFilter<"Faq"> | Date | string
   }
 
+  export type OperationalSettingWhereInput = {
+    AND?: OperationalSettingWhereInput | OperationalSettingWhereInput[]
+    OR?: OperationalSettingWhereInput[]
+    NOT?: OperationalSettingWhereInput | OperationalSettingWhereInput[]
+    id?: IntFilter<"OperationalSetting"> | number
+    freeElectricityKwhPerMonth?: IntFilter<"OperationalSetting"> | number
+    electricityTariffPerKwhRupiah?: IntFilter<"OperationalSetting"> | number
+    waterMeteringEnabled?: BoolFilter<"OperationalSetting"> | boolean
+    waterTariffPerM3Rupiah?: IntFilter<"OperationalSetting"> | number
+    freeWaterM3PerMonth?: IntFilter<"OperationalSetting"> | number
+    updatedAt?: DateTimeFilter<"OperationalSetting"> | Date | string
+    updatedById?: IntNullableFilter<"OperationalSetting"> | number | null
+  }
+
+  export type OperationalSettingOrderByWithRelationInput = {
+    id?: SortOrder
+    freeElectricityKwhPerMonth?: SortOrder
+    electricityTariffPerKwhRupiah?: SortOrder
+    waterMeteringEnabled?: SortOrder
+    waterTariffPerM3Rupiah?: SortOrder
+    freeWaterM3PerMonth?: SortOrder
+    updatedAt?: SortOrder
+    updatedById?: SortOrderInput | SortOrder
+  }
+
+  export type OperationalSettingWhereUniqueInput = Prisma.AtLeast<{
+    id?: number
+    AND?: OperationalSettingWhereInput | OperationalSettingWhereInput[]
+    OR?: OperationalSettingWhereInput[]
+    NOT?: OperationalSettingWhereInput | OperationalSettingWhereInput[]
+    freeElectricityKwhPerMonth?: IntFilter<"OperationalSetting"> | number
+    electricityTariffPerKwhRupiah?: IntFilter<"OperationalSetting"> | number
+    waterMeteringEnabled?: BoolFilter<"OperationalSetting"> | boolean
+    waterTariffPerM3Rupiah?: IntFilter<"OperationalSetting"> | number
+    freeWaterM3PerMonth?: IntFilter<"OperationalSetting"> | number
+    updatedAt?: DateTimeFilter<"OperationalSetting"> | Date | string
+    updatedById?: IntNullableFilter<"OperationalSetting"> | number | null
+  }, "id">
+
+  export type OperationalSettingOrderByWithAggregationInput = {
+    id?: SortOrder
+    freeElectricityKwhPerMonth?: SortOrder
+    electricityTariffPerKwhRupiah?: SortOrder
+    waterMeteringEnabled?: SortOrder
+    waterTariffPerM3Rupiah?: SortOrder
+    freeWaterM3PerMonth?: SortOrder
+    updatedAt?: SortOrder
+    updatedById?: SortOrderInput | SortOrder
+    _count?: OperationalSettingCountOrderByAggregateInput
+    _avg?: OperationalSettingAvgOrderByAggregateInput
+    _max?: OperationalSettingMaxOrderByAggregateInput
+    _min?: OperationalSettingMinOrderByAggregateInput
+    _sum?: OperationalSettingSumOrderByAggregateInput
+  }
+
+  export type OperationalSettingScalarWhereWithAggregatesInput = {
+    AND?: OperationalSettingScalarWhereWithAggregatesInput | OperationalSettingScalarWhereWithAggregatesInput[]
+    OR?: OperationalSettingScalarWhereWithAggregatesInput[]
+    NOT?: OperationalSettingScalarWhereWithAggregatesInput | OperationalSettingScalarWhereWithAggregatesInput[]
+    id?: IntWithAggregatesFilter<"OperationalSetting"> | number
+    freeElectricityKwhPerMonth?: IntWithAggregatesFilter<"OperationalSetting"> | number
+    electricityTariffPerKwhRupiah?: IntWithAggregatesFilter<"OperationalSetting"> | number
+    waterMeteringEnabled?: BoolWithAggregatesFilter<"OperationalSetting"> | boolean
+    waterTariffPerM3Rupiah?: IntWithAggregatesFilter<"OperationalSetting"> | number
+    freeWaterM3PerMonth?: IntWithAggregatesFilter<"OperationalSetting"> | number
+    updatedAt?: DateTimeWithAggregatesFilter<"OperationalSetting"> | Date | string
+    updatedById?: IntNullableWithAggregatesFilter<"OperationalSetting"> | number | null
+  }
+
+  export type AdditionalServiceWhereInput = {
+    AND?: AdditionalServiceWhereInput | AdditionalServiceWhereInput[]
+    OR?: AdditionalServiceWhereInput[]
+    NOT?: AdditionalServiceWhereInput | AdditionalServiceWhereInput[]
+    id?: IntFilter<"AdditionalService"> | number
+    name?: StringFilter<"AdditionalService"> | string
+    description?: StringNullableFilter<"AdditionalService"> | string | null
+    priceRupiah?: IntFilter<"AdditionalService"> | number
+    unit?: StringNullableFilter<"AdditionalService"> | string | null
+    isActive?: BoolFilter<"AdditionalService"> | boolean
+    sortOrder?: IntFilter<"AdditionalService"> | number
+    createdAt?: DateTimeFilter<"AdditionalService"> | Date | string
+    updatedAt?: DateTimeFilter<"AdditionalService"> | Date | string
+    interests?: ServiceInterestListRelationFilter
+  }
+
+  export type AdditionalServiceOrderByWithRelationInput = {
+    id?: SortOrder
+    name?: SortOrder
+    description?: SortOrderInput | SortOrder
+    priceRupiah?: SortOrder
+    unit?: SortOrderInput | SortOrder
+    isActive?: SortOrder
+    sortOrder?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    interests?: ServiceInterestOrderByRelationAggregateInput
+  }
+
+  export type AdditionalServiceWhereUniqueInput = Prisma.AtLeast<{
+    id?: number
+    AND?: AdditionalServiceWhereInput | AdditionalServiceWhereInput[]
+    OR?: AdditionalServiceWhereInput[]
+    NOT?: AdditionalServiceWhereInput | AdditionalServiceWhereInput[]
+    name?: StringFilter<"AdditionalService"> | string
+    description?: StringNullableFilter<"AdditionalService"> | string | null
+    priceRupiah?: IntFilter<"AdditionalService"> | number
+    unit?: StringNullableFilter<"AdditionalService"> | string | null
+    isActive?: BoolFilter<"AdditionalService"> | boolean
+    sortOrder?: IntFilter<"AdditionalService"> | number
+    createdAt?: DateTimeFilter<"AdditionalService"> | Date | string
+    updatedAt?: DateTimeFilter<"AdditionalService"> | Date | string
+    interests?: ServiceInterestListRelationFilter
+  }, "id">
+
+  export type AdditionalServiceOrderByWithAggregationInput = {
+    id?: SortOrder
+    name?: SortOrder
+    description?: SortOrderInput | SortOrder
+    priceRupiah?: SortOrder
+    unit?: SortOrderInput | SortOrder
+    isActive?: SortOrder
+    sortOrder?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: AdditionalServiceCountOrderByAggregateInput
+    _avg?: AdditionalServiceAvgOrderByAggregateInput
+    _max?: AdditionalServiceMaxOrderByAggregateInput
+    _min?: AdditionalServiceMinOrderByAggregateInput
+    _sum?: AdditionalServiceSumOrderByAggregateInput
+  }
+
+  export type AdditionalServiceScalarWhereWithAggregatesInput = {
+    AND?: AdditionalServiceScalarWhereWithAggregatesInput | AdditionalServiceScalarWhereWithAggregatesInput[]
+    OR?: AdditionalServiceScalarWhereWithAggregatesInput[]
+    NOT?: AdditionalServiceScalarWhereWithAggregatesInput | AdditionalServiceScalarWhereWithAggregatesInput[]
+    id?: IntWithAggregatesFilter<"AdditionalService"> | number
+    name?: StringWithAggregatesFilter<"AdditionalService"> | string
+    description?: StringNullableWithAggregatesFilter<"AdditionalService"> | string | null
+    priceRupiah?: IntWithAggregatesFilter<"AdditionalService"> | number
+    unit?: StringNullableWithAggregatesFilter<"AdditionalService"> | string | null
+    isActive?: BoolWithAggregatesFilter<"AdditionalService"> | boolean
+    sortOrder?: IntWithAggregatesFilter<"AdditionalService"> | number
+    createdAt?: DateTimeWithAggregatesFilter<"AdditionalService"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"AdditionalService"> | Date | string
+  }
+
+  export type ServiceInterestWhereInput = {
+    AND?: ServiceInterestWhereInput | ServiceInterestWhereInput[]
+    OR?: ServiceInterestWhereInput[]
+    NOT?: ServiceInterestWhereInput | ServiceInterestWhereInput[]
+    id?: IntFilter<"ServiceInterest"> | number
+    serviceId?: IntFilter<"ServiceInterest"> | number
+    tenantId?: IntFilter<"ServiceInterest"> | number
+    status?: EnumServiceInterestStatusFilter<"ServiceInterest"> | $Enums.ServiceInterestStatus
+    note?: StringNullableFilter<"ServiceInterest"> | string | null
+    adminNote?: StringNullableFilter<"ServiceInterest"> | string | null
+    createdAt?: DateTimeFilter<"ServiceInterest"> | Date | string
+    updatedAt?: DateTimeFilter<"ServiceInterest"> | Date | string
+    service?: XOR<AdditionalServiceScalarRelationFilter, AdditionalServiceWhereInput>
+    tenant?: XOR<TenantScalarRelationFilter, TenantWhereInput>
+  }
+
+  export type ServiceInterestOrderByWithRelationInput = {
+    id?: SortOrder
+    serviceId?: SortOrder
+    tenantId?: SortOrder
+    status?: SortOrder
+    note?: SortOrderInput | SortOrder
+    adminNote?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    service?: AdditionalServiceOrderByWithRelationInput
+    tenant?: TenantOrderByWithRelationInput
+  }
+
+  export type ServiceInterestWhereUniqueInput = Prisma.AtLeast<{
+    id?: number
+    AND?: ServiceInterestWhereInput | ServiceInterestWhereInput[]
+    OR?: ServiceInterestWhereInput[]
+    NOT?: ServiceInterestWhereInput | ServiceInterestWhereInput[]
+    serviceId?: IntFilter<"ServiceInterest"> | number
+    tenantId?: IntFilter<"ServiceInterest"> | number
+    status?: EnumServiceInterestStatusFilter<"ServiceInterest"> | $Enums.ServiceInterestStatus
+    note?: StringNullableFilter<"ServiceInterest"> | string | null
+    adminNote?: StringNullableFilter<"ServiceInterest"> | string | null
+    createdAt?: DateTimeFilter<"ServiceInterest"> | Date | string
+    updatedAt?: DateTimeFilter<"ServiceInterest"> | Date | string
+    service?: XOR<AdditionalServiceScalarRelationFilter, AdditionalServiceWhereInput>
+    tenant?: XOR<TenantScalarRelationFilter, TenantWhereInput>
+  }, "id">
+
+  export type ServiceInterestOrderByWithAggregationInput = {
+    id?: SortOrder
+    serviceId?: SortOrder
+    tenantId?: SortOrder
+    status?: SortOrder
+    note?: SortOrderInput | SortOrder
+    adminNote?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: ServiceInterestCountOrderByAggregateInput
+    _avg?: ServiceInterestAvgOrderByAggregateInput
+    _max?: ServiceInterestMaxOrderByAggregateInput
+    _min?: ServiceInterestMinOrderByAggregateInput
+    _sum?: ServiceInterestSumOrderByAggregateInput
+  }
+
+  export type ServiceInterestScalarWhereWithAggregatesInput = {
+    AND?: ServiceInterestScalarWhereWithAggregatesInput | ServiceInterestScalarWhereWithAggregatesInput[]
+    OR?: ServiceInterestScalarWhereWithAggregatesInput[]
+    NOT?: ServiceInterestScalarWhereWithAggregatesInput | ServiceInterestScalarWhereWithAggregatesInput[]
+    id?: IntWithAggregatesFilter<"ServiceInterest"> | number
+    serviceId?: IntWithAggregatesFilter<"ServiceInterest"> | number
+    tenantId?: IntWithAggregatesFilter<"ServiceInterest"> | number
+    status?: EnumServiceInterestStatusWithAggregatesFilter<"ServiceInterest"> | $Enums.ServiceInterestStatus
+    note?: StringNullableWithAggregatesFilter<"ServiceInterest"> | string | null
+    adminNote?: StringNullableWithAggregatesFilter<"ServiceInterest"> | string | null
+    createdAt?: DateTimeWithAggregatesFilter<"ServiceInterest"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"ServiceInterest"> | Date | string
+  }
+
   export type UserCreateInput = {
     fullName: string
     email: string
@@ -80227,6 +87130,7 @@ export namespace Prisma {
     tipGopay?: string | null
     tipOvo?: string | null
     tipDana?: string | null
+    tipShopeepay?: string | null
     tipBank?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -80266,6 +87170,7 @@ export namespace Prisma {
     tenantsKtpVerified?: TenantCreateNestedManyWithoutKtpVerifiedByInput
     roomTransfersCreated?: RoomTransferCreateNestedManyWithoutCreatedByInput
     peerReportsModerated?: PeerBehaviorReportCreateNestedManyWithoutModeratedByInput
+    marketAnalysesCreated?: MarketAnalysisCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserUncheckedCreateInput = {
@@ -80281,6 +87186,7 @@ export namespace Prisma {
     tipGopay?: string | null
     tipOvo?: string | null
     tipDana?: string | null
+    tipShopeepay?: string | null
     tipBank?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -80319,6 +87225,7 @@ export namespace Prisma {
     tenantsKtpVerified?: TenantUncheckedCreateNestedManyWithoutKtpVerifiedByInput
     roomTransfersCreated?: RoomTransferUncheckedCreateNestedManyWithoutCreatedByInput
     peerReportsModerated?: PeerBehaviorReportUncheckedCreateNestedManyWithoutModeratedByInput
+    marketAnalysesCreated?: MarketAnalysisUncheckedCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserUpdateInput = {
@@ -80332,6 +87239,7 @@ export namespace Prisma {
     tipGopay?: NullableStringFieldUpdateOperationsInput | string | null
     tipOvo?: NullableStringFieldUpdateOperationsInput | string | null
     tipDana?: NullableStringFieldUpdateOperationsInput | string | null
+    tipShopeepay?: NullableStringFieldUpdateOperationsInput | string | null
     tipBank?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -80371,6 +87279,7 @@ export namespace Prisma {
     tenantsKtpVerified?: TenantUpdateManyWithoutKtpVerifiedByNestedInput
     roomTransfersCreated?: RoomTransferUpdateManyWithoutCreatedByNestedInput
     peerReportsModerated?: PeerBehaviorReportUpdateManyWithoutModeratedByNestedInput
+    marketAnalysesCreated?: MarketAnalysisUpdateManyWithoutCreatedByNestedInput
   }
 
   export type UserUncheckedUpdateInput = {
@@ -80386,6 +87295,7 @@ export namespace Prisma {
     tipGopay?: NullableStringFieldUpdateOperationsInput | string | null
     tipOvo?: NullableStringFieldUpdateOperationsInput | string | null
     tipDana?: NullableStringFieldUpdateOperationsInput | string | null
+    tipShopeepay?: NullableStringFieldUpdateOperationsInput | string | null
     tipBank?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -80424,6 +87334,7 @@ export namespace Prisma {
     tenantsKtpVerified?: TenantUncheckedUpdateManyWithoutKtpVerifiedByNestedInput
     roomTransfersCreated?: RoomTransferUncheckedUpdateManyWithoutCreatedByNestedInput
     peerReportsModerated?: PeerBehaviorReportUncheckedUpdateManyWithoutModeratedByNestedInput
+    marketAnalysesCreated?: MarketAnalysisUncheckedUpdateManyWithoutCreatedByNestedInput
   }
 
   export type UserCreateManyInput = {
@@ -80439,6 +87350,7 @@ export namespace Prisma {
     tipGopay?: string | null
     tipOvo?: string | null
     tipDana?: string | null
+    tipShopeepay?: string | null
     tipBank?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -80455,6 +87367,7 @@ export namespace Prisma {
     tipGopay?: NullableStringFieldUpdateOperationsInput | string | null
     tipOvo?: NullableStringFieldUpdateOperationsInput | string | null
     tipDana?: NullableStringFieldUpdateOperationsInput | string | null
+    tipShopeepay?: NullableStringFieldUpdateOperationsInput | string | null
     tipBank?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -80473,9 +87386,192 @@ export namespace Prisma {
     tipGopay?: NullableStringFieldUpdateOperationsInput | string | null
     tipOvo?: NullableStringFieldUpdateOperationsInput | string | null
     tipDana?: NullableStringFieldUpdateOperationsInput | string | null
+    tipShopeepay?: NullableStringFieldUpdateOperationsInput | string | null
     tipBank?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type MarketAnalysisCreateInput = {
+    kind: string
+    title: string
+    summary?: string | null
+    resultJson?: NullableJsonNullValueInput | InputJsonValue
+    transcriptJson?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    createdBy?: UserCreateNestedOneWithoutMarketAnalysesCreatedInput
+  }
+
+  export type MarketAnalysisUncheckedCreateInput = {
+    id?: number
+    kind: string
+    title: string
+    summary?: string | null
+    resultJson?: NullableJsonNullValueInput | InputJsonValue
+    transcriptJson?: NullableJsonNullValueInput | InputJsonValue
+    createdById?: number | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type MarketAnalysisUpdateInput = {
+    kind?: StringFieldUpdateOperationsInput | string
+    title?: StringFieldUpdateOperationsInput | string
+    summary?: NullableStringFieldUpdateOperationsInput | string | null
+    resultJson?: NullableJsonNullValueInput | InputJsonValue
+    transcriptJson?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    createdBy?: UserUpdateOneWithoutMarketAnalysesCreatedNestedInput
+  }
+
+  export type MarketAnalysisUncheckedUpdateInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    kind?: StringFieldUpdateOperationsInput | string
+    title?: StringFieldUpdateOperationsInput | string
+    summary?: NullableStringFieldUpdateOperationsInput | string | null
+    resultJson?: NullableJsonNullValueInput | InputJsonValue
+    transcriptJson?: NullableJsonNullValueInput | InputJsonValue
+    createdById?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type MarketAnalysisCreateManyInput = {
+    id?: number
+    kind: string
+    title: string
+    summary?: string | null
+    resultJson?: NullableJsonNullValueInput | InputJsonValue
+    transcriptJson?: NullableJsonNullValueInput | InputJsonValue
+    createdById?: number | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type MarketAnalysisUpdateManyMutationInput = {
+    kind?: StringFieldUpdateOperationsInput | string
+    title?: StringFieldUpdateOperationsInput | string
+    summary?: NullableStringFieldUpdateOperationsInput | string | null
+    resultJson?: NullableJsonNullValueInput | InputJsonValue
+    transcriptJson?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type MarketAnalysisUncheckedUpdateManyInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    kind?: StringFieldUpdateOperationsInput | string
+    title?: StringFieldUpdateOperationsInput | string
+    summary?: NullableStringFieldUpdateOperationsInput | string | null
+    resultJson?: NullableJsonNullValueInput | InputJsonValue
+    transcriptJson?: NullableJsonNullValueInput | InputJsonValue
+    createdById?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type SatisfactionSurveyCreateInput = {
+    tenantId?: number | null
+    stayId?: number | null
+    overallRating: number
+    cleanliness?: number | null
+    staffService?: number | null
+    facility?: number | null
+    valueForMoney?: number | null
+    wouldRecommend?: boolean | null
+    comment?: string | null
+    createdById?: number | null
+    createdAt?: Date | string
+  }
+
+  export type SatisfactionSurveyUncheckedCreateInput = {
+    id?: number
+    tenantId?: number | null
+    stayId?: number | null
+    overallRating: number
+    cleanliness?: number | null
+    staffService?: number | null
+    facility?: number | null
+    valueForMoney?: number | null
+    wouldRecommend?: boolean | null
+    comment?: string | null
+    createdById?: number | null
+    createdAt?: Date | string
+  }
+
+  export type SatisfactionSurveyUpdateInput = {
+    tenantId?: NullableIntFieldUpdateOperationsInput | number | null
+    stayId?: NullableIntFieldUpdateOperationsInput | number | null
+    overallRating?: IntFieldUpdateOperationsInput | number
+    cleanliness?: NullableIntFieldUpdateOperationsInput | number | null
+    staffService?: NullableIntFieldUpdateOperationsInput | number | null
+    facility?: NullableIntFieldUpdateOperationsInput | number | null
+    valueForMoney?: NullableIntFieldUpdateOperationsInput | number | null
+    wouldRecommend?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    comment?: NullableStringFieldUpdateOperationsInput | string | null
+    createdById?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type SatisfactionSurveyUncheckedUpdateInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    tenantId?: NullableIntFieldUpdateOperationsInput | number | null
+    stayId?: NullableIntFieldUpdateOperationsInput | number | null
+    overallRating?: IntFieldUpdateOperationsInput | number
+    cleanliness?: NullableIntFieldUpdateOperationsInput | number | null
+    staffService?: NullableIntFieldUpdateOperationsInput | number | null
+    facility?: NullableIntFieldUpdateOperationsInput | number | null
+    valueForMoney?: NullableIntFieldUpdateOperationsInput | number | null
+    wouldRecommend?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    comment?: NullableStringFieldUpdateOperationsInput | string | null
+    createdById?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type SatisfactionSurveyCreateManyInput = {
+    id?: number
+    tenantId?: number | null
+    stayId?: number | null
+    overallRating: number
+    cleanliness?: number | null
+    staffService?: number | null
+    facility?: number | null
+    valueForMoney?: number | null
+    wouldRecommend?: boolean | null
+    comment?: string | null
+    createdById?: number | null
+    createdAt?: Date | string
+  }
+
+  export type SatisfactionSurveyUpdateManyMutationInput = {
+    tenantId?: NullableIntFieldUpdateOperationsInput | number | null
+    stayId?: NullableIntFieldUpdateOperationsInput | number | null
+    overallRating?: IntFieldUpdateOperationsInput | number
+    cleanliness?: NullableIntFieldUpdateOperationsInput | number | null
+    staffService?: NullableIntFieldUpdateOperationsInput | number | null
+    facility?: NullableIntFieldUpdateOperationsInput | number | null
+    valueForMoney?: NullableIntFieldUpdateOperationsInput | number | null
+    wouldRecommend?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    comment?: NullableStringFieldUpdateOperationsInput | string | null
+    createdById?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type SatisfactionSurveyUncheckedUpdateManyInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    tenantId?: NullableIntFieldUpdateOperationsInput | number | null
+    stayId?: NullableIntFieldUpdateOperationsInput | number | null
+    overallRating?: IntFieldUpdateOperationsInput | number
+    cleanliness?: NullableIntFieldUpdateOperationsInput | number | null
+    staffService?: NullableIntFieldUpdateOperationsInput | number | null
+    facility?: NullableIntFieldUpdateOperationsInput | number | null
+    valueForMoney?: NullableIntFieldUpdateOperationsInput | number | null
+    wouldRecommend?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    comment?: NullableStringFieldUpdateOperationsInput | string | null
+    createdById?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type TenantCreateInput = {
@@ -80512,6 +87608,7 @@ export namespace Prisma {
     depositLedgerEntries?: TenantDepositLedgerEntryCreateNestedManyWithoutTenantInput
     loyaltyPoints?: LoyaltyPointCreateNestedManyWithoutTenantInput
     redemptions?: RedemptionCreateNestedManyWithoutTenantInput
+    serviceInterests?: ServiceInterestCreateNestedManyWithoutTenantInput
     referralsMade?: TenantReferralCreateNestedManyWithoutReferrerInput
     referredReferral?: TenantReferralCreateNestedOneWithoutReferredInput
     peerReportsMade?: PeerBehaviorReportCreateNestedManyWithoutReporterInput
@@ -80553,6 +87650,7 @@ export namespace Prisma {
     depositLedgerEntries?: TenantDepositLedgerEntryUncheckedCreateNestedManyWithoutTenantInput
     loyaltyPoints?: LoyaltyPointUncheckedCreateNestedManyWithoutTenantInput
     redemptions?: RedemptionUncheckedCreateNestedManyWithoutTenantInput
+    serviceInterests?: ServiceInterestUncheckedCreateNestedManyWithoutTenantInput
     referralsMade?: TenantReferralUncheckedCreateNestedManyWithoutReferrerInput
     referredReferral?: TenantReferralUncheckedCreateNestedOneWithoutReferredInput
     peerReportsMade?: PeerBehaviorReportUncheckedCreateNestedManyWithoutReporterInput
@@ -80593,6 +87691,7 @@ export namespace Prisma {
     depositLedgerEntries?: TenantDepositLedgerEntryUpdateManyWithoutTenantNestedInput
     loyaltyPoints?: LoyaltyPointUpdateManyWithoutTenantNestedInput
     redemptions?: RedemptionUpdateManyWithoutTenantNestedInput
+    serviceInterests?: ServiceInterestUpdateManyWithoutTenantNestedInput
     referralsMade?: TenantReferralUpdateManyWithoutReferrerNestedInput
     referredReferral?: TenantReferralUpdateOneWithoutReferredNestedInput
     peerReportsMade?: PeerBehaviorReportUpdateManyWithoutReporterNestedInput
@@ -80634,6 +87733,7 @@ export namespace Prisma {
     depositLedgerEntries?: TenantDepositLedgerEntryUncheckedUpdateManyWithoutTenantNestedInput
     loyaltyPoints?: LoyaltyPointUncheckedUpdateManyWithoutTenantNestedInput
     redemptions?: RedemptionUncheckedUpdateManyWithoutTenantNestedInput
+    serviceInterests?: ServiceInterestUncheckedUpdateManyWithoutTenantNestedInput
     referralsMade?: TenantReferralUncheckedUpdateManyWithoutReferrerNestedInput
     referredReferral?: TenantReferralUncheckedUpdateOneWithoutReferredNestedInput
     peerReportsMade?: PeerBehaviorReportUncheckedUpdateManyWithoutReporterNestedInput
@@ -80727,6 +87827,8 @@ export namespace Prisma {
     name?: string | null
     floor?: string | null
     status?: $Enums.RoomStatus
+    category?: $Enums.RoomCategory
+    roomType?: $Enums.RoomType
     dailyRateRupiah?: number | null
     weeklyRateRupiah?: number | null
     biWeeklyRateRupiah?: number | null
@@ -80767,6 +87869,8 @@ export namespace Prisma {
     name?: string | null
     floor?: string | null
     status?: $Enums.RoomStatus
+    category?: $Enums.RoomCategory
+    roomType?: $Enums.RoomType
     dailyRateRupiah?: number | null
     weeklyRateRupiah?: number | null
     biWeeklyRateRupiah?: number | null
@@ -80806,6 +87910,8 @@ export namespace Prisma {
     name?: NullableStringFieldUpdateOperationsInput | string | null
     floor?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumRoomStatusFieldUpdateOperationsInput | $Enums.RoomStatus
+    category?: EnumRoomCategoryFieldUpdateOperationsInput | $Enums.RoomCategory
+    roomType?: EnumRoomTypeFieldUpdateOperationsInput | $Enums.RoomType
     dailyRateRupiah?: NullableIntFieldUpdateOperationsInput | number | null
     weeklyRateRupiah?: NullableIntFieldUpdateOperationsInput | number | null
     biWeeklyRateRupiah?: NullableIntFieldUpdateOperationsInput | number | null
@@ -80846,6 +87952,8 @@ export namespace Prisma {
     name?: NullableStringFieldUpdateOperationsInput | string | null
     floor?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumRoomStatusFieldUpdateOperationsInput | $Enums.RoomStatus
+    category?: EnumRoomCategoryFieldUpdateOperationsInput | $Enums.RoomCategory
+    roomType?: EnumRoomTypeFieldUpdateOperationsInput | $Enums.RoomType
     dailyRateRupiah?: NullableIntFieldUpdateOperationsInput | number | null
     weeklyRateRupiah?: NullableIntFieldUpdateOperationsInput | number | null
     biWeeklyRateRupiah?: NullableIntFieldUpdateOperationsInput | number | null
@@ -80886,6 +87994,8 @@ export namespace Prisma {
     name?: string | null
     floor?: string | null
     status?: $Enums.RoomStatus
+    category?: $Enums.RoomCategory
+    roomType?: $Enums.RoomType
     dailyRateRupiah?: number | null
     weeklyRateRupiah?: number | null
     biWeeklyRateRupiah?: number | null
@@ -80911,6 +88021,8 @@ export namespace Prisma {
     name?: NullableStringFieldUpdateOperationsInput | string | null
     floor?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumRoomStatusFieldUpdateOperationsInput | $Enums.RoomStatus
+    category?: EnumRoomCategoryFieldUpdateOperationsInput | $Enums.RoomCategory
+    roomType?: EnumRoomTypeFieldUpdateOperationsInput | $Enums.RoomType
     dailyRateRupiah?: NullableIntFieldUpdateOperationsInput | number | null
     weeklyRateRupiah?: NullableIntFieldUpdateOperationsInput | number | null
     biWeeklyRateRupiah?: NullableIntFieldUpdateOperationsInput | number | null
@@ -80937,6 +88049,8 @@ export namespace Prisma {
     name?: NullableStringFieldUpdateOperationsInput | string | null
     floor?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumRoomStatusFieldUpdateOperationsInput | $Enums.RoomStatus
+    category?: EnumRoomCategoryFieldUpdateOperationsInput | $Enums.RoomCategory
+    roomType?: EnumRoomTypeFieldUpdateOperationsInput | $Enums.RoomType
     dailyRateRupiah?: NullableIntFieldUpdateOperationsInput | number | null
     weeklyRateRupiah?: NullableIntFieldUpdateOperationsInput | number | null
     biWeeklyRateRupiah?: NullableIntFieldUpdateOperationsInput | number | null
@@ -86375,6 +93489,240 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type OperationalSettingCreateInput = {
+    id?: number
+    freeElectricityKwhPerMonth?: number
+    electricityTariffPerKwhRupiah?: number
+    waterMeteringEnabled?: boolean
+    waterTariffPerM3Rupiah?: number
+    freeWaterM3PerMonth?: number
+    updatedAt?: Date | string
+    updatedById?: number | null
+  }
+
+  export type OperationalSettingUncheckedCreateInput = {
+    id?: number
+    freeElectricityKwhPerMonth?: number
+    electricityTariffPerKwhRupiah?: number
+    waterMeteringEnabled?: boolean
+    waterTariffPerM3Rupiah?: number
+    freeWaterM3PerMonth?: number
+    updatedAt?: Date | string
+    updatedById?: number | null
+  }
+
+  export type OperationalSettingUpdateInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    freeElectricityKwhPerMonth?: IntFieldUpdateOperationsInput | number
+    electricityTariffPerKwhRupiah?: IntFieldUpdateOperationsInput | number
+    waterMeteringEnabled?: BoolFieldUpdateOperationsInput | boolean
+    waterTariffPerM3Rupiah?: IntFieldUpdateOperationsInput | number
+    freeWaterM3PerMonth?: IntFieldUpdateOperationsInput | number
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedById?: NullableIntFieldUpdateOperationsInput | number | null
+  }
+
+  export type OperationalSettingUncheckedUpdateInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    freeElectricityKwhPerMonth?: IntFieldUpdateOperationsInput | number
+    electricityTariffPerKwhRupiah?: IntFieldUpdateOperationsInput | number
+    waterMeteringEnabled?: BoolFieldUpdateOperationsInput | boolean
+    waterTariffPerM3Rupiah?: IntFieldUpdateOperationsInput | number
+    freeWaterM3PerMonth?: IntFieldUpdateOperationsInput | number
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedById?: NullableIntFieldUpdateOperationsInput | number | null
+  }
+
+  export type OperationalSettingCreateManyInput = {
+    id?: number
+    freeElectricityKwhPerMonth?: number
+    electricityTariffPerKwhRupiah?: number
+    waterMeteringEnabled?: boolean
+    waterTariffPerM3Rupiah?: number
+    freeWaterM3PerMonth?: number
+    updatedAt?: Date | string
+    updatedById?: number | null
+  }
+
+  export type OperationalSettingUpdateManyMutationInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    freeElectricityKwhPerMonth?: IntFieldUpdateOperationsInput | number
+    electricityTariffPerKwhRupiah?: IntFieldUpdateOperationsInput | number
+    waterMeteringEnabled?: BoolFieldUpdateOperationsInput | boolean
+    waterTariffPerM3Rupiah?: IntFieldUpdateOperationsInput | number
+    freeWaterM3PerMonth?: IntFieldUpdateOperationsInput | number
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedById?: NullableIntFieldUpdateOperationsInput | number | null
+  }
+
+  export type OperationalSettingUncheckedUpdateManyInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    freeElectricityKwhPerMonth?: IntFieldUpdateOperationsInput | number
+    electricityTariffPerKwhRupiah?: IntFieldUpdateOperationsInput | number
+    waterMeteringEnabled?: BoolFieldUpdateOperationsInput | boolean
+    waterTariffPerM3Rupiah?: IntFieldUpdateOperationsInput | number
+    freeWaterM3PerMonth?: IntFieldUpdateOperationsInput | number
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedById?: NullableIntFieldUpdateOperationsInput | number | null
+  }
+
+  export type AdditionalServiceCreateInput = {
+    name: string
+    description?: string | null
+    priceRupiah?: number
+    unit?: string | null
+    isActive?: boolean
+    sortOrder?: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    interests?: ServiceInterestCreateNestedManyWithoutServiceInput
+  }
+
+  export type AdditionalServiceUncheckedCreateInput = {
+    id?: number
+    name: string
+    description?: string | null
+    priceRupiah?: number
+    unit?: string | null
+    isActive?: boolean
+    sortOrder?: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    interests?: ServiceInterestUncheckedCreateNestedManyWithoutServiceInput
+  }
+
+  export type AdditionalServiceUpdateInput = {
+    name?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    priceRupiah?: IntFieldUpdateOperationsInput | number
+    unit?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    sortOrder?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    interests?: ServiceInterestUpdateManyWithoutServiceNestedInput
+  }
+
+  export type AdditionalServiceUncheckedUpdateInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    name?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    priceRupiah?: IntFieldUpdateOperationsInput | number
+    unit?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    sortOrder?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    interests?: ServiceInterestUncheckedUpdateManyWithoutServiceNestedInput
+  }
+
+  export type AdditionalServiceCreateManyInput = {
+    id?: number
+    name: string
+    description?: string | null
+    priceRupiah?: number
+    unit?: string | null
+    isActive?: boolean
+    sortOrder?: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type AdditionalServiceUpdateManyMutationInput = {
+    name?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    priceRupiah?: IntFieldUpdateOperationsInput | number
+    unit?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    sortOrder?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type AdditionalServiceUncheckedUpdateManyInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    name?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    priceRupiah?: IntFieldUpdateOperationsInput | number
+    unit?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    sortOrder?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ServiceInterestCreateInput = {
+    status?: $Enums.ServiceInterestStatus
+    note?: string | null
+    adminNote?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    service: AdditionalServiceCreateNestedOneWithoutInterestsInput
+    tenant: TenantCreateNestedOneWithoutServiceInterestsInput
+  }
+
+  export type ServiceInterestUncheckedCreateInput = {
+    id?: number
+    serviceId: number
+    tenantId: number
+    status?: $Enums.ServiceInterestStatus
+    note?: string | null
+    adminNote?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type ServiceInterestUpdateInput = {
+    status?: EnumServiceInterestStatusFieldUpdateOperationsInput | $Enums.ServiceInterestStatus
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    adminNote?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    service?: AdditionalServiceUpdateOneRequiredWithoutInterestsNestedInput
+    tenant?: TenantUpdateOneRequiredWithoutServiceInterestsNestedInput
+  }
+
+  export type ServiceInterestUncheckedUpdateInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    serviceId?: IntFieldUpdateOperationsInput | number
+    tenantId?: IntFieldUpdateOperationsInput | number
+    status?: EnumServiceInterestStatusFieldUpdateOperationsInput | $Enums.ServiceInterestStatus
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    adminNote?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ServiceInterestCreateManyInput = {
+    id?: number
+    serviceId: number
+    tenantId: number
+    status?: $Enums.ServiceInterestStatus
+    note?: string | null
+    adminNote?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type ServiceInterestUpdateManyMutationInput = {
+    status?: EnumServiceInterestStatusFieldUpdateOperationsInput | $Enums.ServiceInterestStatus
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    adminNote?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ServiceInterestUncheckedUpdateManyInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    serviceId?: IntFieldUpdateOperationsInput | number
+    tenantId?: IntFieldUpdateOperationsInput | number
+    status?: EnumServiceInterestStatusFieldUpdateOperationsInput | $Enums.ServiceInterestStatus
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    adminNote?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type IntFilter<$PrismaModel = never> = {
     equals?: number | IntFieldRefInput<$PrismaModel>
     in?: number[] | ListIntFieldRefInput<$PrismaModel>
@@ -86640,6 +93988,12 @@ export namespace Prisma {
     none?: PeerBehaviorReportWhereInput
   }
 
+  export type MarketAnalysisListRelationFilter = {
+    every?: MarketAnalysisWhereInput
+    some?: MarketAnalysisWhereInput
+    none?: MarketAnalysisWhereInput
+  }
+
   export type SortOrderInput = {
     sort: SortOrder
     nulls?: NullsOrder
@@ -86761,6 +94115,10 @@ export namespace Prisma {
     _count?: SortOrder
   }
 
+  export type MarketAnalysisOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
   export type UserCountOrderByAggregateInput = {
     id?: SortOrder
     fullName?: SortOrder
@@ -86774,6 +94132,7 @@ export namespace Prisma {
     tipGopay?: SortOrder
     tipOvo?: SortOrder
     tipDana?: SortOrder
+    tipShopeepay?: SortOrder
     tipBank?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -86797,6 +94156,7 @@ export namespace Prisma {
     tipGopay?: SortOrder
     tipOvo?: SortOrder
     tipDana?: SortOrder
+    tipShopeepay?: SortOrder
     tipBank?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -86815,6 +94175,7 @@ export namespace Prisma {
     tipGopay?: SortOrder
     tipOvo?: SortOrder
     tipDana?: SortOrder
+    tipShopeepay?: SortOrder
     tipBank?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -86938,17 +94299,190 @@ export namespace Prisma {
     _min?: NestedDateTimeFilter<$PrismaModel>
     _max?: NestedDateTimeFilter<$PrismaModel>
   }
+  export type JsonNullableFilter<$PrismaModel = never> =
+    | PatchUndefined<
+        Either<Required<JsonNullableFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonNullableFilterBase<$PrismaModel>>, 'path'>>,
+        Required<JsonNullableFilterBase<$PrismaModel>>
+      >
+    | OptionalFlat<Omit<Required<JsonNullableFilterBase<$PrismaModel>>, 'path'>>
+
+  export type JsonNullableFilterBase<$PrismaModel = never> = {
+    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    path?: string[]
+    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
+    string_contains?: string | StringFieldRefInput<$PrismaModel>
+    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
+    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
+    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+  }
+
+  export type UserNullableScalarRelationFilter = {
+    is?: UserWhereInput | null
+    isNot?: UserWhereInput | null
+  }
+
+  export type MarketAnalysisCountOrderByAggregateInput = {
+    id?: SortOrder
+    kind?: SortOrder
+    title?: SortOrder
+    summary?: SortOrder
+    resultJson?: SortOrder
+    transcriptJson?: SortOrder
+    createdById?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type MarketAnalysisAvgOrderByAggregateInput = {
+    id?: SortOrder
+    createdById?: SortOrder
+  }
+
+  export type MarketAnalysisMaxOrderByAggregateInput = {
+    id?: SortOrder
+    kind?: SortOrder
+    title?: SortOrder
+    summary?: SortOrder
+    createdById?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type MarketAnalysisMinOrderByAggregateInput = {
+    id?: SortOrder
+    kind?: SortOrder
+    title?: SortOrder
+    summary?: SortOrder
+    createdById?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type MarketAnalysisSumOrderByAggregateInput = {
+    id?: SortOrder
+    createdById?: SortOrder
+  }
+  export type JsonNullableWithAggregatesFilter<$PrismaModel = never> =
+    | PatchUndefined<
+        Either<Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>, 'path'>>,
+        Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>
+      >
+    | OptionalFlat<Omit<Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>, 'path'>>
+
+  export type JsonNullableWithAggregatesFilterBase<$PrismaModel = never> = {
+    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    path?: string[]
+    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
+    string_contains?: string | StringFieldRefInput<$PrismaModel>
+    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
+    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
+    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedJsonNullableFilter<$PrismaModel>
+    _max?: NestedJsonNullableFilter<$PrismaModel>
+  }
+
+  export type BoolNullableFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel> | null
+    not?: NestedBoolNullableFilter<$PrismaModel> | boolean | null
+  }
+
+  export type SatisfactionSurveyCountOrderByAggregateInput = {
+    id?: SortOrder
+    tenantId?: SortOrder
+    stayId?: SortOrder
+    overallRating?: SortOrder
+    cleanliness?: SortOrder
+    staffService?: SortOrder
+    facility?: SortOrder
+    valueForMoney?: SortOrder
+    wouldRecommend?: SortOrder
+    comment?: SortOrder
+    createdById?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type SatisfactionSurveyAvgOrderByAggregateInput = {
+    id?: SortOrder
+    tenantId?: SortOrder
+    stayId?: SortOrder
+    overallRating?: SortOrder
+    cleanliness?: SortOrder
+    staffService?: SortOrder
+    facility?: SortOrder
+    valueForMoney?: SortOrder
+    createdById?: SortOrder
+  }
+
+  export type SatisfactionSurveyMaxOrderByAggregateInput = {
+    id?: SortOrder
+    tenantId?: SortOrder
+    stayId?: SortOrder
+    overallRating?: SortOrder
+    cleanliness?: SortOrder
+    staffService?: SortOrder
+    facility?: SortOrder
+    valueForMoney?: SortOrder
+    wouldRecommend?: SortOrder
+    comment?: SortOrder
+    createdById?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type SatisfactionSurveyMinOrderByAggregateInput = {
+    id?: SortOrder
+    tenantId?: SortOrder
+    stayId?: SortOrder
+    overallRating?: SortOrder
+    cleanliness?: SortOrder
+    staffService?: SortOrder
+    facility?: SortOrder
+    valueForMoney?: SortOrder
+    wouldRecommend?: SortOrder
+    comment?: SortOrder
+    createdById?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type SatisfactionSurveySumOrderByAggregateInput = {
+    id?: SortOrder
+    tenantId?: SortOrder
+    stayId?: SortOrder
+    overallRating?: SortOrder
+    cleanliness?: SortOrder
+    staffService?: SortOrder
+    facility?: SortOrder
+    valueForMoney?: SortOrder
+    createdById?: SortOrder
+  }
+
+  export type BoolNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel> | null
+    not?: NestedBoolNullableWithAggregatesFilter<$PrismaModel> | boolean | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedBoolNullableFilter<$PrismaModel>
+    _max?: NestedBoolNullableFilter<$PrismaModel>
+  }
 
   export type EnumGenderNullableFilter<$PrismaModel = never> = {
     equals?: $Enums.Gender | EnumGenderFieldRefInput<$PrismaModel> | null
     in?: $Enums.Gender[] | ListEnumGenderFieldRefInput<$PrismaModel> | null
     notIn?: $Enums.Gender[] | ListEnumGenderFieldRefInput<$PrismaModel> | null
     not?: NestedEnumGenderNullableFilter<$PrismaModel> | $Enums.Gender | null
-  }
-
-  export type UserNullableScalarRelationFilter = {
-    is?: UserWhereInput | null
-    isNot?: UserWhereInput | null
   }
 
   export type LoyaltyPointListRelationFilter = {
@@ -86961,6 +94495,12 @@ export namespace Prisma {
     every?: RedemptionWhereInput
     some?: RedemptionWhereInput
     none?: RedemptionWhereInput
+  }
+
+  export type ServiceInterestListRelationFilter = {
+    every?: ServiceInterestWhereInput
+    some?: ServiceInterestWhereInput
+    none?: ServiceInterestWhereInput
   }
 
   export type TenantReferralListRelationFilter = {
@@ -86979,6 +94519,10 @@ export namespace Prisma {
   }
 
   export type RedemptionOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type ServiceInterestOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
@@ -87099,6 +94643,20 @@ export namespace Prisma {
     not?: NestedEnumRoomStatusFilter<$PrismaModel> | $Enums.RoomStatus
   }
 
+  export type EnumRoomCategoryFilter<$PrismaModel = never> = {
+    equals?: $Enums.RoomCategory | EnumRoomCategoryFieldRefInput<$PrismaModel>
+    in?: $Enums.RoomCategory[] | ListEnumRoomCategoryFieldRefInput<$PrismaModel>
+    notIn?: $Enums.RoomCategory[] | ListEnumRoomCategoryFieldRefInput<$PrismaModel>
+    not?: NestedEnumRoomCategoryFilter<$PrismaModel> | $Enums.RoomCategory
+  }
+
+  export type EnumRoomTypeFilter<$PrismaModel = never> = {
+    equals?: $Enums.RoomType | EnumRoomTypeFieldRefInput<$PrismaModel>
+    in?: $Enums.RoomType[] | ListEnumRoomTypeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.RoomType[] | ListEnumRoomTypeFieldRefInput<$PrismaModel>
+    not?: NestedEnumRoomTypeFilter<$PrismaModel> | $Enums.RoomType
+  }
+
   export type StringNullableListFilter<$PrismaModel = never> = {
     equals?: string[] | ListStringFieldRefInput<$PrismaModel> | null
     has?: string | StringFieldRefInput<$PrismaModel> | null
@@ -87144,6 +94702,8 @@ export namespace Prisma {
     name?: SortOrder
     floor?: SortOrder
     status?: SortOrder
+    category?: SortOrder
+    roomType?: SortOrder
     dailyRateRupiah?: SortOrder
     weeklyRateRupiah?: SortOrder
     biWeeklyRateRupiah?: SortOrder
@@ -87184,6 +94744,8 @@ export namespace Prisma {
     name?: SortOrder
     floor?: SortOrder
     status?: SortOrder
+    category?: SortOrder
+    roomType?: SortOrder
     dailyRateRupiah?: SortOrder
     weeklyRateRupiah?: SortOrder
     biWeeklyRateRupiah?: SortOrder
@@ -87209,6 +94771,8 @@ export namespace Prisma {
     name?: SortOrder
     floor?: SortOrder
     status?: SortOrder
+    category?: SortOrder
+    roomType?: SortOrder
     dailyRateRupiah?: SortOrder
     weeklyRateRupiah?: SortOrder
     biWeeklyRateRupiah?: SortOrder
@@ -87250,6 +94814,26 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedEnumRoomStatusFilter<$PrismaModel>
     _max?: NestedEnumRoomStatusFilter<$PrismaModel>
+  }
+
+  export type EnumRoomCategoryWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.RoomCategory | EnumRoomCategoryFieldRefInput<$PrismaModel>
+    in?: $Enums.RoomCategory[] | ListEnumRoomCategoryFieldRefInput<$PrismaModel>
+    notIn?: $Enums.RoomCategory[] | ListEnumRoomCategoryFieldRefInput<$PrismaModel>
+    not?: NestedEnumRoomCategoryWithAggregatesFilter<$PrismaModel> | $Enums.RoomCategory
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumRoomCategoryFilter<$PrismaModel>
+    _max?: NestedEnumRoomCategoryFilter<$PrismaModel>
+  }
+
+  export type EnumRoomTypeWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.RoomType | EnumRoomTypeFieldRefInput<$PrismaModel>
+    in?: $Enums.RoomType[] | ListEnumRoomTypeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.RoomType[] | ListEnumRoomTypeFieldRefInput<$PrismaModel>
+    not?: NestedEnumRoomTypeWithAggregatesFilter<$PrismaModel> | $Enums.RoomType
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumRoomTypeFilter<$PrismaModel>
+    _max?: NestedEnumRoomTypeFilter<$PrismaModel>
   }
 
   export type FloatNullableWithAggregatesFilter<$PrismaModel = never> = {
@@ -87735,29 +95319,6 @@ export namespace Prisma {
     notIn?: $Enums.BookingDepositPaymentStatus[] | ListEnumBookingDepositPaymentStatusFieldRefInput<$PrismaModel> | null
     not?: NestedEnumBookingDepositPaymentStatusNullableFilter<$PrismaModel> | $Enums.BookingDepositPaymentStatus | null
   }
-  export type JsonNullableFilter<$PrismaModel = never> =
-    | PatchUndefined<
-        Either<Required<JsonNullableFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonNullableFilterBase<$PrismaModel>>, 'path'>>,
-        Required<JsonNullableFilterBase<$PrismaModel>>
-      >
-    | OptionalFlat<Omit<Required<JsonNullableFilterBase<$PrismaModel>>, 'path'>>
-
-  export type JsonNullableFilterBase<$PrismaModel = never> = {
-    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
-    path?: string[]
-    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
-    string_contains?: string | StringFieldRefInput<$PrismaModel>
-    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
-    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
-    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
-  }
 
   export type StayScalarRelationFilter = {
     is?: StayWhereInput
@@ -87895,32 +95456,6 @@ export namespace Prisma {
     _count?: NestedIntNullableFilter<$PrismaModel>
     _min?: NestedEnumBookingDepositPaymentStatusNullableFilter<$PrismaModel>
     _max?: NestedEnumBookingDepositPaymentStatusNullableFilter<$PrismaModel>
-  }
-  export type JsonNullableWithAggregatesFilter<$PrismaModel = never> =
-    | PatchUndefined<
-        Either<Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>, 'path'>>,
-        Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>
-      >
-    | OptionalFlat<Omit<Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>, 'path'>>
-
-  export type JsonNullableWithAggregatesFilterBase<$PrismaModel = never> = {
-    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
-    path?: string[]
-    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
-    string_contains?: string | StringFieldRefInput<$PrismaModel>
-    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
-    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
-    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
-    _count?: NestedIntNullableFilter<$PrismaModel>
-    _min?: NestedJsonNullableFilter<$PrismaModel>
-    _max?: NestedJsonNullableFilter<$PrismaModel>
   }
 
   export type EnumUtilityTypeFilter<$PrismaModel = never> = {
@@ -91821,6 +99356,172 @@ export namespace Prisma {
     sortOrder?: SortOrder
   }
 
+  export type OperationalSettingCountOrderByAggregateInput = {
+    id?: SortOrder
+    freeElectricityKwhPerMonth?: SortOrder
+    electricityTariffPerKwhRupiah?: SortOrder
+    waterMeteringEnabled?: SortOrder
+    waterTariffPerM3Rupiah?: SortOrder
+    freeWaterM3PerMonth?: SortOrder
+    updatedAt?: SortOrder
+    updatedById?: SortOrder
+  }
+
+  export type OperationalSettingAvgOrderByAggregateInput = {
+    id?: SortOrder
+    freeElectricityKwhPerMonth?: SortOrder
+    electricityTariffPerKwhRupiah?: SortOrder
+    waterTariffPerM3Rupiah?: SortOrder
+    freeWaterM3PerMonth?: SortOrder
+    updatedById?: SortOrder
+  }
+
+  export type OperationalSettingMaxOrderByAggregateInput = {
+    id?: SortOrder
+    freeElectricityKwhPerMonth?: SortOrder
+    electricityTariffPerKwhRupiah?: SortOrder
+    waterMeteringEnabled?: SortOrder
+    waterTariffPerM3Rupiah?: SortOrder
+    freeWaterM3PerMonth?: SortOrder
+    updatedAt?: SortOrder
+    updatedById?: SortOrder
+  }
+
+  export type OperationalSettingMinOrderByAggregateInput = {
+    id?: SortOrder
+    freeElectricityKwhPerMonth?: SortOrder
+    electricityTariffPerKwhRupiah?: SortOrder
+    waterMeteringEnabled?: SortOrder
+    waterTariffPerM3Rupiah?: SortOrder
+    freeWaterM3PerMonth?: SortOrder
+    updatedAt?: SortOrder
+    updatedById?: SortOrder
+  }
+
+  export type OperationalSettingSumOrderByAggregateInput = {
+    id?: SortOrder
+    freeElectricityKwhPerMonth?: SortOrder
+    electricityTariffPerKwhRupiah?: SortOrder
+    waterTariffPerM3Rupiah?: SortOrder
+    freeWaterM3PerMonth?: SortOrder
+    updatedById?: SortOrder
+  }
+
+  export type AdditionalServiceCountOrderByAggregateInput = {
+    id?: SortOrder
+    name?: SortOrder
+    description?: SortOrder
+    priceRupiah?: SortOrder
+    unit?: SortOrder
+    isActive?: SortOrder
+    sortOrder?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type AdditionalServiceAvgOrderByAggregateInput = {
+    id?: SortOrder
+    priceRupiah?: SortOrder
+    sortOrder?: SortOrder
+  }
+
+  export type AdditionalServiceMaxOrderByAggregateInput = {
+    id?: SortOrder
+    name?: SortOrder
+    description?: SortOrder
+    priceRupiah?: SortOrder
+    unit?: SortOrder
+    isActive?: SortOrder
+    sortOrder?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type AdditionalServiceMinOrderByAggregateInput = {
+    id?: SortOrder
+    name?: SortOrder
+    description?: SortOrder
+    priceRupiah?: SortOrder
+    unit?: SortOrder
+    isActive?: SortOrder
+    sortOrder?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type AdditionalServiceSumOrderByAggregateInput = {
+    id?: SortOrder
+    priceRupiah?: SortOrder
+    sortOrder?: SortOrder
+  }
+
+  export type EnumServiceInterestStatusFilter<$PrismaModel = never> = {
+    equals?: $Enums.ServiceInterestStatus | EnumServiceInterestStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.ServiceInterestStatus[] | ListEnumServiceInterestStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.ServiceInterestStatus[] | ListEnumServiceInterestStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumServiceInterestStatusFilter<$PrismaModel> | $Enums.ServiceInterestStatus
+  }
+
+  export type AdditionalServiceScalarRelationFilter = {
+    is?: AdditionalServiceWhereInput
+    isNot?: AdditionalServiceWhereInput
+  }
+
+  export type ServiceInterestCountOrderByAggregateInput = {
+    id?: SortOrder
+    serviceId?: SortOrder
+    tenantId?: SortOrder
+    status?: SortOrder
+    note?: SortOrder
+    adminNote?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type ServiceInterestAvgOrderByAggregateInput = {
+    id?: SortOrder
+    serviceId?: SortOrder
+    tenantId?: SortOrder
+  }
+
+  export type ServiceInterestMaxOrderByAggregateInput = {
+    id?: SortOrder
+    serviceId?: SortOrder
+    tenantId?: SortOrder
+    status?: SortOrder
+    note?: SortOrder
+    adminNote?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type ServiceInterestMinOrderByAggregateInput = {
+    id?: SortOrder
+    serviceId?: SortOrder
+    tenantId?: SortOrder
+    status?: SortOrder
+    note?: SortOrder
+    adminNote?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type ServiceInterestSumOrderByAggregateInput = {
+    id?: SortOrder
+    serviceId?: SortOrder
+    tenantId?: SortOrder
+  }
+
+  export type EnumServiceInterestStatusWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.ServiceInterestStatus | EnumServiceInterestStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.ServiceInterestStatus[] | ListEnumServiceInterestStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.ServiceInterestStatus[] | ListEnumServiceInterestStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumServiceInterestStatusWithAggregatesFilter<$PrismaModel> | $Enums.ServiceInterestStatus
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumServiceInterestStatusFilter<$PrismaModel>
+    _max?: NestedEnumServiceInterestStatusFilter<$PrismaModel>
+  }
+
   export type TenantCreateNestedOneWithoutUserInput = {
     create?: XOR<TenantCreateWithoutUserInput, TenantUncheckedCreateWithoutUserInput>
     connectOrCreate?: TenantCreateOrConnectWithoutUserInput
@@ -92072,6 +99773,13 @@ export namespace Prisma {
     connect?: PeerBehaviorReportWhereUniqueInput | PeerBehaviorReportWhereUniqueInput[]
   }
 
+  export type MarketAnalysisCreateNestedManyWithoutCreatedByInput = {
+    create?: XOR<MarketAnalysisCreateWithoutCreatedByInput, MarketAnalysisUncheckedCreateWithoutCreatedByInput> | MarketAnalysisCreateWithoutCreatedByInput[] | MarketAnalysisUncheckedCreateWithoutCreatedByInput[]
+    connectOrCreate?: MarketAnalysisCreateOrConnectWithoutCreatedByInput | MarketAnalysisCreateOrConnectWithoutCreatedByInput[]
+    createMany?: MarketAnalysisCreateManyCreatedByInputEnvelope
+    connect?: MarketAnalysisWhereUniqueInput | MarketAnalysisWhereUniqueInput[]
+  }
+
   export type AnnouncementUncheckedCreateNestedManyWithoutCreatedByInput = {
     create?: XOR<AnnouncementCreateWithoutCreatedByInput, AnnouncementUncheckedCreateWithoutCreatedByInput> | AnnouncementCreateWithoutCreatedByInput[] | AnnouncementUncheckedCreateWithoutCreatedByInput[]
     connectOrCreate?: AnnouncementCreateOrConnectWithoutCreatedByInput | AnnouncementCreateOrConnectWithoutCreatedByInput[]
@@ -92315,6 +100023,13 @@ export namespace Prisma {
     connectOrCreate?: PeerBehaviorReportCreateOrConnectWithoutModeratedByInput | PeerBehaviorReportCreateOrConnectWithoutModeratedByInput[]
     createMany?: PeerBehaviorReportCreateManyModeratedByInputEnvelope
     connect?: PeerBehaviorReportWhereUniqueInput | PeerBehaviorReportWhereUniqueInput[]
+  }
+
+  export type MarketAnalysisUncheckedCreateNestedManyWithoutCreatedByInput = {
+    create?: XOR<MarketAnalysisCreateWithoutCreatedByInput, MarketAnalysisUncheckedCreateWithoutCreatedByInput> | MarketAnalysisCreateWithoutCreatedByInput[] | MarketAnalysisUncheckedCreateWithoutCreatedByInput[]
+    connectOrCreate?: MarketAnalysisCreateOrConnectWithoutCreatedByInput | MarketAnalysisCreateOrConnectWithoutCreatedByInput[]
+    createMany?: MarketAnalysisCreateManyCreatedByInputEnvelope
+    connect?: MarketAnalysisWhereUniqueInput | MarketAnalysisWhereUniqueInput[]
   }
 
   export type StringFieldUpdateOperationsInput = {
@@ -92841,6 +100556,20 @@ export namespace Prisma {
     deleteMany?: PeerBehaviorReportScalarWhereInput | PeerBehaviorReportScalarWhereInput[]
   }
 
+  export type MarketAnalysisUpdateManyWithoutCreatedByNestedInput = {
+    create?: XOR<MarketAnalysisCreateWithoutCreatedByInput, MarketAnalysisUncheckedCreateWithoutCreatedByInput> | MarketAnalysisCreateWithoutCreatedByInput[] | MarketAnalysisUncheckedCreateWithoutCreatedByInput[]
+    connectOrCreate?: MarketAnalysisCreateOrConnectWithoutCreatedByInput | MarketAnalysisCreateOrConnectWithoutCreatedByInput[]
+    upsert?: MarketAnalysisUpsertWithWhereUniqueWithoutCreatedByInput | MarketAnalysisUpsertWithWhereUniqueWithoutCreatedByInput[]
+    createMany?: MarketAnalysisCreateManyCreatedByInputEnvelope
+    set?: MarketAnalysisWhereUniqueInput | MarketAnalysisWhereUniqueInput[]
+    disconnect?: MarketAnalysisWhereUniqueInput | MarketAnalysisWhereUniqueInput[]
+    delete?: MarketAnalysisWhereUniqueInput | MarketAnalysisWhereUniqueInput[]
+    connect?: MarketAnalysisWhereUniqueInput | MarketAnalysisWhereUniqueInput[]
+    update?: MarketAnalysisUpdateWithWhereUniqueWithoutCreatedByInput | MarketAnalysisUpdateWithWhereUniqueWithoutCreatedByInput[]
+    updateMany?: MarketAnalysisUpdateManyWithWhereWithoutCreatedByInput | MarketAnalysisUpdateManyWithWhereWithoutCreatedByInput[]
+    deleteMany?: MarketAnalysisScalarWhereInput | MarketAnalysisScalarWhereInput[]
+  }
+
   export type IntFieldUpdateOperationsInput = {
     set?: number
     increment?: number
@@ -93347,6 +101076,40 @@ export namespace Prisma {
     deleteMany?: PeerBehaviorReportScalarWhereInput | PeerBehaviorReportScalarWhereInput[]
   }
 
+  export type MarketAnalysisUncheckedUpdateManyWithoutCreatedByNestedInput = {
+    create?: XOR<MarketAnalysisCreateWithoutCreatedByInput, MarketAnalysisUncheckedCreateWithoutCreatedByInput> | MarketAnalysisCreateWithoutCreatedByInput[] | MarketAnalysisUncheckedCreateWithoutCreatedByInput[]
+    connectOrCreate?: MarketAnalysisCreateOrConnectWithoutCreatedByInput | MarketAnalysisCreateOrConnectWithoutCreatedByInput[]
+    upsert?: MarketAnalysisUpsertWithWhereUniqueWithoutCreatedByInput | MarketAnalysisUpsertWithWhereUniqueWithoutCreatedByInput[]
+    createMany?: MarketAnalysisCreateManyCreatedByInputEnvelope
+    set?: MarketAnalysisWhereUniqueInput | MarketAnalysisWhereUniqueInput[]
+    disconnect?: MarketAnalysisWhereUniqueInput | MarketAnalysisWhereUniqueInput[]
+    delete?: MarketAnalysisWhereUniqueInput | MarketAnalysisWhereUniqueInput[]
+    connect?: MarketAnalysisWhereUniqueInput | MarketAnalysisWhereUniqueInput[]
+    update?: MarketAnalysisUpdateWithWhereUniqueWithoutCreatedByInput | MarketAnalysisUpdateWithWhereUniqueWithoutCreatedByInput[]
+    updateMany?: MarketAnalysisUpdateManyWithWhereWithoutCreatedByInput | MarketAnalysisUpdateManyWithWhereWithoutCreatedByInput[]
+    deleteMany?: MarketAnalysisScalarWhereInput | MarketAnalysisScalarWhereInput[]
+  }
+
+  export type UserCreateNestedOneWithoutMarketAnalysesCreatedInput = {
+    create?: XOR<UserCreateWithoutMarketAnalysesCreatedInput, UserUncheckedCreateWithoutMarketAnalysesCreatedInput>
+    connectOrCreate?: UserCreateOrConnectWithoutMarketAnalysesCreatedInput
+    connect?: UserWhereUniqueInput
+  }
+
+  export type UserUpdateOneWithoutMarketAnalysesCreatedNestedInput = {
+    create?: XOR<UserCreateWithoutMarketAnalysesCreatedInput, UserUncheckedCreateWithoutMarketAnalysesCreatedInput>
+    connectOrCreate?: UserCreateOrConnectWithoutMarketAnalysesCreatedInput
+    upsert?: UserUpsertWithoutMarketAnalysesCreatedInput
+    disconnect?: UserWhereInput | boolean
+    delete?: UserWhereInput | boolean
+    connect?: UserWhereUniqueInput
+    update?: XOR<XOR<UserUpdateToOneWithWhereWithoutMarketAnalysesCreatedInput, UserUpdateWithoutMarketAnalysesCreatedInput>, UserUncheckedUpdateWithoutMarketAnalysesCreatedInput>
+  }
+
+  export type NullableBoolFieldUpdateOperationsInput = {
+    set?: boolean | null
+  }
+
   export type UserCreateNestedOneWithoutTenantInput = {
     create?: XOR<UserCreateWithoutTenantInput, UserUncheckedCreateWithoutTenantInput>
     connectOrCreate?: UserCreateOrConnectWithoutTenantInput
@@ -93413,6 +101176,13 @@ export namespace Prisma {
     connectOrCreate?: RedemptionCreateOrConnectWithoutTenantInput | RedemptionCreateOrConnectWithoutTenantInput[]
     createMany?: RedemptionCreateManyTenantInputEnvelope
     connect?: RedemptionWhereUniqueInput | RedemptionWhereUniqueInput[]
+  }
+
+  export type ServiceInterestCreateNestedManyWithoutTenantInput = {
+    create?: XOR<ServiceInterestCreateWithoutTenantInput, ServiceInterestUncheckedCreateWithoutTenantInput> | ServiceInterestCreateWithoutTenantInput[] | ServiceInterestUncheckedCreateWithoutTenantInput[]
+    connectOrCreate?: ServiceInterestCreateOrConnectWithoutTenantInput | ServiceInterestCreateOrConnectWithoutTenantInput[]
+    createMany?: ServiceInterestCreateManyTenantInputEnvelope
+    connect?: ServiceInterestWhereUniqueInput | ServiceInterestWhereUniqueInput[]
   }
 
   export type TenantReferralCreateNestedManyWithoutReferrerInput = {
@@ -93502,6 +101272,13 @@ export namespace Prisma {
     connectOrCreate?: RedemptionCreateOrConnectWithoutTenantInput | RedemptionCreateOrConnectWithoutTenantInput[]
     createMany?: RedemptionCreateManyTenantInputEnvelope
     connect?: RedemptionWhereUniqueInput | RedemptionWhereUniqueInput[]
+  }
+
+  export type ServiceInterestUncheckedCreateNestedManyWithoutTenantInput = {
+    create?: XOR<ServiceInterestCreateWithoutTenantInput, ServiceInterestUncheckedCreateWithoutTenantInput> | ServiceInterestCreateWithoutTenantInput[] | ServiceInterestUncheckedCreateWithoutTenantInput[]
+    connectOrCreate?: ServiceInterestCreateOrConnectWithoutTenantInput | ServiceInterestCreateOrConnectWithoutTenantInput[]
+    createMany?: ServiceInterestCreateManyTenantInputEnvelope
+    connect?: ServiceInterestWhereUniqueInput | ServiceInterestWhereUniqueInput[]
   }
 
   export type TenantReferralUncheckedCreateNestedManyWithoutReferrerInput = {
@@ -93665,6 +101442,20 @@ export namespace Prisma {
     update?: RedemptionUpdateWithWhereUniqueWithoutTenantInput | RedemptionUpdateWithWhereUniqueWithoutTenantInput[]
     updateMany?: RedemptionUpdateManyWithWhereWithoutTenantInput | RedemptionUpdateManyWithWhereWithoutTenantInput[]
     deleteMany?: RedemptionScalarWhereInput | RedemptionScalarWhereInput[]
+  }
+
+  export type ServiceInterestUpdateManyWithoutTenantNestedInput = {
+    create?: XOR<ServiceInterestCreateWithoutTenantInput, ServiceInterestUncheckedCreateWithoutTenantInput> | ServiceInterestCreateWithoutTenantInput[] | ServiceInterestUncheckedCreateWithoutTenantInput[]
+    connectOrCreate?: ServiceInterestCreateOrConnectWithoutTenantInput | ServiceInterestCreateOrConnectWithoutTenantInput[]
+    upsert?: ServiceInterestUpsertWithWhereUniqueWithoutTenantInput | ServiceInterestUpsertWithWhereUniqueWithoutTenantInput[]
+    createMany?: ServiceInterestCreateManyTenantInputEnvelope
+    set?: ServiceInterestWhereUniqueInput | ServiceInterestWhereUniqueInput[]
+    disconnect?: ServiceInterestWhereUniqueInput | ServiceInterestWhereUniqueInput[]
+    delete?: ServiceInterestWhereUniqueInput | ServiceInterestWhereUniqueInput[]
+    connect?: ServiceInterestWhereUniqueInput | ServiceInterestWhereUniqueInput[]
+    update?: ServiceInterestUpdateWithWhereUniqueWithoutTenantInput | ServiceInterestUpdateWithWhereUniqueWithoutTenantInput[]
+    updateMany?: ServiceInterestUpdateManyWithWhereWithoutTenantInput | ServiceInterestUpdateManyWithWhereWithoutTenantInput[]
+    deleteMany?: ServiceInterestScalarWhereInput | ServiceInterestScalarWhereInput[]
   }
 
   export type TenantReferralUpdateManyWithoutReferrerNestedInput = {
@@ -93839,6 +101630,20 @@ export namespace Prisma {
     update?: RedemptionUpdateWithWhereUniqueWithoutTenantInput | RedemptionUpdateWithWhereUniqueWithoutTenantInput[]
     updateMany?: RedemptionUpdateManyWithWhereWithoutTenantInput | RedemptionUpdateManyWithWhereWithoutTenantInput[]
     deleteMany?: RedemptionScalarWhereInput | RedemptionScalarWhereInput[]
+  }
+
+  export type ServiceInterestUncheckedUpdateManyWithoutTenantNestedInput = {
+    create?: XOR<ServiceInterestCreateWithoutTenantInput, ServiceInterestUncheckedCreateWithoutTenantInput> | ServiceInterestCreateWithoutTenantInput[] | ServiceInterestUncheckedCreateWithoutTenantInput[]
+    connectOrCreate?: ServiceInterestCreateOrConnectWithoutTenantInput | ServiceInterestCreateOrConnectWithoutTenantInput[]
+    upsert?: ServiceInterestUpsertWithWhereUniqueWithoutTenantInput | ServiceInterestUpsertWithWhereUniqueWithoutTenantInput[]
+    createMany?: ServiceInterestCreateManyTenantInputEnvelope
+    set?: ServiceInterestWhereUniqueInput | ServiceInterestWhereUniqueInput[]
+    disconnect?: ServiceInterestWhereUniqueInput | ServiceInterestWhereUniqueInput[]
+    delete?: ServiceInterestWhereUniqueInput | ServiceInterestWhereUniqueInput[]
+    connect?: ServiceInterestWhereUniqueInput | ServiceInterestWhereUniqueInput[]
+    update?: ServiceInterestUpdateWithWhereUniqueWithoutTenantInput | ServiceInterestUpdateWithWhereUniqueWithoutTenantInput[]
+    updateMany?: ServiceInterestUpdateManyWithWhereWithoutTenantInput | ServiceInterestUpdateManyWithWhereWithoutTenantInput[]
+    deleteMany?: ServiceInterestScalarWhereInput | ServiceInterestScalarWhereInput[]
   }
 
   export type TenantReferralUncheckedUpdateManyWithoutReferrerNestedInput = {
@@ -94095,6 +101900,14 @@ export namespace Prisma {
 
   export type EnumRoomStatusFieldUpdateOperationsInput = {
     set?: $Enums.RoomStatus
+  }
+
+  export type EnumRoomCategoryFieldUpdateOperationsInput = {
+    set?: $Enums.RoomCategory
+  }
+
+  export type EnumRoomTypeFieldUpdateOperationsInput = {
+    set?: $Enums.RoomType
   }
 
   export type RoomUpdateimagesInput = {
@@ -98191,6 +106004,80 @@ export namespace Prisma {
     update?: XOR<XOR<TenantUpdateToOneWithWhereWithoutReferredReferralInput, TenantUpdateWithoutReferredReferralInput>, TenantUncheckedUpdateWithoutReferredReferralInput>
   }
 
+  export type ServiceInterestCreateNestedManyWithoutServiceInput = {
+    create?: XOR<ServiceInterestCreateWithoutServiceInput, ServiceInterestUncheckedCreateWithoutServiceInput> | ServiceInterestCreateWithoutServiceInput[] | ServiceInterestUncheckedCreateWithoutServiceInput[]
+    connectOrCreate?: ServiceInterestCreateOrConnectWithoutServiceInput | ServiceInterestCreateOrConnectWithoutServiceInput[]
+    createMany?: ServiceInterestCreateManyServiceInputEnvelope
+    connect?: ServiceInterestWhereUniqueInput | ServiceInterestWhereUniqueInput[]
+  }
+
+  export type ServiceInterestUncheckedCreateNestedManyWithoutServiceInput = {
+    create?: XOR<ServiceInterestCreateWithoutServiceInput, ServiceInterestUncheckedCreateWithoutServiceInput> | ServiceInterestCreateWithoutServiceInput[] | ServiceInterestUncheckedCreateWithoutServiceInput[]
+    connectOrCreate?: ServiceInterestCreateOrConnectWithoutServiceInput | ServiceInterestCreateOrConnectWithoutServiceInput[]
+    createMany?: ServiceInterestCreateManyServiceInputEnvelope
+    connect?: ServiceInterestWhereUniqueInput | ServiceInterestWhereUniqueInput[]
+  }
+
+  export type ServiceInterestUpdateManyWithoutServiceNestedInput = {
+    create?: XOR<ServiceInterestCreateWithoutServiceInput, ServiceInterestUncheckedCreateWithoutServiceInput> | ServiceInterestCreateWithoutServiceInput[] | ServiceInterestUncheckedCreateWithoutServiceInput[]
+    connectOrCreate?: ServiceInterestCreateOrConnectWithoutServiceInput | ServiceInterestCreateOrConnectWithoutServiceInput[]
+    upsert?: ServiceInterestUpsertWithWhereUniqueWithoutServiceInput | ServiceInterestUpsertWithWhereUniqueWithoutServiceInput[]
+    createMany?: ServiceInterestCreateManyServiceInputEnvelope
+    set?: ServiceInterestWhereUniqueInput | ServiceInterestWhereUniqueInput[]
+    disconnect?: ServiceInterestWhereUniqueInput | ServiceInterestWhereUniqueInput[]
+    delete?: ServiceInterestWhereUniqueInput | ServiceInterestWhereUniqueInput[]
+    connect?: ServiceInterestWhereUniqueInput | ServiceInterestWhereUniqueInput[]
+    update?: ServiceInterestUpdateWithWhereUniqueWithoutServiceInput | ServiceInterestUpdateWithWhereUniqueWithoutServiceInput[]
+    updateMany?: ServiceInterestUpdateManyWithWhereWithoutServiceInput | ServiceInterestUpdateManyWithWhereWithoutServiceInput[]
+    deleteMany?: ServiceInterestScalarWhereInput | ServiceInterestScalarWhereInput[]
+  }
+
+  export type ServiceInterestUncheckedUpdateManyWithoutServiceNestedInput = {
+    create?: XOR<ServiceInterestCreateWithoutServiceInput, ServiceInterestUncheckedCreateWithoutServiceInput> | ServiceInterestCreateWithoutServiceInput[] | ServiceInterestUncheckedCreateWithoutServiceInput[]
+    connectOrCreate?: ServiceInterestCreateOrConnectWithoutServiceInput | ServiceInterestCreateOrConnectWithoutServiceInput[]
+    upsert?: ServiceInterestUpsertWithWhereUniqueWithoutServiceInput | ServiceInterestUpsertWithWhereUniqueWithoutServiceInput[]
+    createMany?: ServiceInterestCreateManyServiceInputEnvelope
+    set?: ServiceInterestWhereUniqueInput | ServiceInterestWhereUniqueInput[]
+    disconnect?: ServiceInterestWhereUniqueInput | ServiceInterestWhereUniqueInput[]
+    delete?: ServiceInterestWhereUniqueInput | ServiceInterestWhereUniqueInput[]
+    connect?: ServiceInterestWhereUniqueInput | ServiceInterestWhereUniqueInput[]
+    update?: ServiceInterestUpdateWithWhereUniqueWithoutServiceInput | ServiceInterestUpdateWithWhereUniqueWithoutServiceInput[]
+    updateMany?: ServiceInterestUpdateManyWithWhereWithoutServiceInput | ServiceInterestUpdateManyWithWhereWithoutServiceInput[]
+    deleteMany?: ServiceInterestScalarWhereInput | ServiceInterestScalarWhereInput[]
+  }
+
+  export type AdditionalServiceCreateNestedOneWithoutInterestsInput = {
+    create?: XOR<AdditionalServiceCreateWithoutInterestsInput, AdditionalServiceUncheckedCreateWithoutInterestsInput>
+    connectOrCreate?: AdditionalServiceCreateOrConnectWithoutInterestsInput
+    connect?: AdditionalServiceWhereUniqueInput
+  }
+
+  export type TenantCreateNestedOneWithoutServiceInterestsInput = {
+    create?: XOR<TenantCreateWithoutServiceInterestsInput, TenantUncheckedCreateWithoutServiceInterestsInput>
+    connectOrCreate?: TenantCreateOrConnectWithoutServiceInterestsInput
+    connect?: TenantWhereUniqueInput
+  }
+
+  export type EnumServiceInterestStatusFieldUpdateOperationsInput = {
+    set?: $Enums.ServiceInterestStatus
+  }
+
+  export type AdditionalServiceUpdateOneRequiredWithoutInterestsNestedInput = {
+    create?: XOR<AdditionalServiceCreateWithoutInterestsInput, AdditionalServiceUncheckedCreateWithoutInterestsInput>
+    connectOrCreate?: AdditionalServiceCreateOrConnectWithoutInterestsInput
+    upsert?: AdditionalServiceUpsertWithoutInterestsInput
+    connect?: AdditionalServiceWhereUniqueInput
+    update?: XOR<XOR<AdditionalServiceUpdateToOneWithWhereWithoutInterestsInput, AdditionalServiceUpdateWithoutInterestsInput>, AdditionalServiceUncheckedUpdateWithoutInterestsInput>
+  }
+
+  export type TenantUpdateOneRequiredWithoutServiceInterestsNestedInput = {
+    create?: XOR<TenantCreateWithoutServiceInterestsInput, TenantUncheckedCreateWithoutServiceInterestsInput>
+    connectOrCreate?: TenantCreateOrConnectWithoutServiceInterestsInput
+    upsert?: TenantUpsertWithoutServiceInterestsInput
+    connect?: TenantWhereUniqueInput
+    update?: XOR<XOR<TenantUpdateToOneWithWhereWithoutServiceInterestsInput, TenantUpdateWithoutServiceInterestsInput>, TenantUncheckedUpdateWithoutServiceInterestsInput>
+  }
+
   export type NestedIntFilter<$PrismaModel = never> = {
     equals?: number | IntFieldRefInput<$PrismaModel>
     in?: number[] | ListIntFieldRefInput<$PrismaModel>
@@ -98408,6 +106295,42 @@ export namespace Prisma {
     _min?: NestedDateTimeFilter<$PrismaModel>
     _max?: NestedDateTimeFilter<$PrismaModel>
   }
+  export type NestedJsonNullableFilter<$PrismaModel = never> =
+    | PatchUndefined<
+        Either<Required<NestedJsonNullableFilterBase<$PrismaModel>>, Exclude<keyof Required<NestedJsonNullableFilterBase<$PrismaModel>>, 'path'>>,
+        Required<NestedJsonNullableFilterBase<$PrismaModel>>
+      >
+    | OptionalFlat<Omit<Required<NestedJsonNullableFilterBase<$PrismaModel>>, 'path'>>
+
+  export type NestedJsonNullableFilterBase<$PrismaModel = never> = {
+    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    path?: string[]
+    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
+    string_contains?: string | StringFieldRefInput<$PrismaModel>
+    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
+    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
+    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+  }
+
+  export type NestedBoolNullableFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel> | null
+    not?: NestedBoolNullableFilter<$PrismaModel> | boolean | null
+  }
+
+  export type NestedBoolNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel> | null
+    not?: NestedBoolNullableWithAggregatesFilter<$PrismaModel> | boolean | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedBoolNullableFilter<$PrismaModel>
+    _max?: NestedBoolNullableFilter<$PrismaModel>
+  }
 
   export type NestedEnumGenderNullableFilter<$PrismaModel = never> = {
     equals?: $Enums.Gender | EnumGenderFieldRefInput<$PrismaModel> | null
@@ -98433,6 +106356,20 @@ export namespace Prisma {
     not?: NestedEnumRoomStatusFilter<$PrismaModel> | $Enums.RoomStatus
   }
 
+  export type NestedEnumRoomCategoryFilter<$PrismaModel = never> = {
+    equals?: $Enums.RoomCategory | EnumRoomCategoryFieldRefInput<$PrismaModel>
+    in?: $Enums.RoomCategory[] | ListEnumRoomCategoryFieldRefInput<$PrismaModel>
+    notIn?: $Enums.RoomCategory[] | ListEnumRoomCategoryFieldRefInput<$PrismaModel>
+    not?: NestedEnumRoomCategoryFilter<$PrismaModel> | $Enums.RoomCategory
+  }
+
+  export type NestedEnumRoomTypeFilter<$PrismaModel = never> = {
+    equals?: $Enums.RoomType | EnumRoomTypeFieldRefInput<$PrismaModel>
+    in?: $Enums.RoomType[] | ListEnumRoomTypeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.RoomType[] | ListEnumRoomTypeFieldRefInput<$PrismaModel>
+    not?: NestedEnumRoomTypeFilter<$PrismaModel> | $Enums.RoomType
+  }
+
   export type NestedEnumRoomStatusWithAggregatesFilter<$PrismaModel = never> = {
     equals?: $Enums.RoomStatus | EnumRoomStatusFieldRefInput<$PrismaModel>
     in?: $Enums.RoomStatus[] | ListEnumRoomStatusFieldRefInput<$PrismaModel>
@@ -98441,6 +106378,26 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedEnumRoomStatusFilter<$PrismaModel>
     _max?: NestedEnumRoomStatusFilter<$PrismaModel>
+  }
+
+  export type NestedEnumRoomCategoryWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.RoomCategory | EnumRoomCategoryFieldRefInput<$PrismaModel>
+    in?: $Enums.RoomCategory[] | ListEnumRoomCategoryFieldRefInput<$PrismaModel>
+    notIn?: $Enums.RoomCategory[] | ListEnumRoomCategoryFieldRefInput<$PrismaModel>
+    not?: NestedEnumRoomCategoryWithAggregatesFilter<$PrismaModel> | $Enums.RoomCategory
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumRoomCategoryFilter<$PrismaModel>
+    _max?: NestedEnumRoomCategoryFilter<$PrismaModel>
+  }
+
+  export type NestedEnumRoomTypeWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.RoomType | EnumRoomTypeFieldRefInput<$PrismaModel>
+    in?: $Enums.RoomType[] | ListEnumRoomTypeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.RoomType[] | ListEnumRoomTypeFieldRefInput<$PrismaModel>
+    not?: NestedEnumRoomTypeWithAggregatesFilter<$PrismaModel> | $Enums.RoomType
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumRoomTypeFilter<$PrismaModel>
+    _max?: NestedEnumRoomTypeFilter<$PrismaModel>
   }
 
   export type NestedFloatNullableWithAggregatesFilter<$PrismaModel = never> = {
@@ -98688,29 +106645,6 @@ export namespace Prisma {
     _count?: NestedIntNullableFilter<$PrismaModel>
     _min?: NestedEnumBookingDepositPaymentStatusNullableFilter<$PrismaModel>
     _max?: NestedEnumBookingDepositPaymentStatusNullableFilter<$PrismaModel>
-  }
-  export type NestedJsonNullableFilter<$PrismaModel = never> =
-    | PatchUndefined<
-        Either<Required<NestedJsonNullableFilterBase<$PrismaModel>>, Exclude<keyof Required<NestedJsonNullableFilterBase<$PrismaModel>>, 'path'>>,
-        Required<NestedJsonNullableFilterBase<$PrismaModel>>
-      >
-    | OptionalFlat<Omit<Required<NestedJsonNullableFilterBase<$PrismaModel>>, 'path'>>
-
-  export type NestedJsonNullableFilterBase<$PrismaModel = never> = {
-    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
-    path?: string[]
-    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
-    string_contains?: string | StringFieldRefInput<$PrismaModel>
-    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
-    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
-    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
   }
 
   export type NestedEnumUtilityTypeFilter<$PrismaModel = never> = {
@@ -99590,6 +107524,23 @@ export namespace Prisma {
     _max?: NestedEnumReferralStatusFilter<$PrismaModel>
   }
 
+  export type NestedEnumServiceInterestStatusFilter<$PrismaModel = never> = {
+    equals?: $Enums.ServiceInterestStatus | EnumServiceInterestStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.ServiceInterestStatus[] | ListEnumServiceInterestStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.ServiceInterestStatus[] | ListEnumServiceInterestStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumServiceInterestStatusFilter<$PrismaModel> | $Enums.ServiceInterestStatus
+  }
+
+  export type NestedEnumServiceInterestStatusWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.ServiceInterestStatus | EnumServiceInterestStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.ServiceInterestStatus[] | ListEnumServiceInterestStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.ServiceInterestStatus[] | ListEnumServiceInterestStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumServiceInterestStatusWithAggregatesFilter<$PrismaModel> | $Enums.ServiceInterestStatus
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumServiceInterestStatusFilter<$PrismaModel>
+    _max?: NestedEnumServiceInterestStatusFilter<$PrismaModel>
+  }
+
   export type TenantCreateWithoutUserInput = {
     fullName: string
     phone: string
@@ -99623,6 +107574,7 @@ export namespace Prisma {
     depositLedgerEntries?: TenantDepositLedgerEntryCreateNestedManyWithoutTenantInput
     loyaltyPoints?: LoyaltyPointCreateNestedManyWithoutTenantInput
     redemptions?: RedemptionCreateNestedManyWithoutTenantInput
+    serviceInterests?: ServiceInterestCreateNestedManyWithoutTenantInput
     referralsMade?: TenantReferralCreateNestedManyWithoutReferrerInput
     referredReferral?: TenantReferralCreateNestedOneWithoutReferredInput
     peerReportsMade?: PeerBehaviorReportCreateNestedManyWithoutReporterInput
@@ -99663,6 +107615,7 @@ export namespace Prisma {
     depositLedgerEntries?: TenantDepositLedgerEntryUncheckedCreateNestedManyWithoutTenantInput
     loyaltyPoints?: LoyaltyPointUncheckedCreateNestedManyWithoutTenantInput
     redemptions?: RedemptionUncheckedCreateNestedManyWithoutTenantInput
+    serviceInterests?: ServiceInterestUncheckedCreateNestedManyWithoutTenantInput
     referralsMade?: TenantReferralUncheckedCreateNestedManyWithoutReferrerInput
     referredReferral?: TenantReferralUncheckedCreateNestedOneWithoutReferredInput
     peerReportsMade?: PeerBehaviorReportUncheckedCreateNestedManyWithoutReporterInput
@@ -101390,6 +109343,7 @@ export namespace Prisma {
     depositLedgerEntries?: TenantDepositLedgerEntryCreateNestedManyWithoutTenantInput
     loyaltyPoints?: LoyaltyPointCreateNestedManyWithoutTenantInput
     redemptions?: RedemptionCreateNestedManyWithoutTenantInput
+    serviceInterests?: ServiceInterestCreateNestedManyWithoutTenantInput
     referralsMade?: TenantReferralCreateNestedManyWithoutReferrerInput
     referredReferral?: TenantReferralCreateNestedOneWithoutReferredInput
     peerReportsMade?: PeerBehaviorReportCreateNestedManyWithoutReporterInput
@@ -101430,6 +109384,7 @@ export namespace Prisma {
     depositLedgerEntries?: TenantDepositLedgerEntryUncheckedCreateNestedManyWithoutTenantInput
     loyaltyPoints?: LoyaltyPointUncheckedCreateNestedManyWithoutTenantInput
     redemptions?: RedemptionUncheckedCreateNestedManyWithoutTenantInput
+    serviceInterests?: ServiceInterestUncheckedCreateNestedManyWithoutTenantInput
     referralsMade?: TenantReferralUncheckedCreateNestedManyWithoutReferrerInput
     referredReferral?: TenantReferralUncheckedCreateNestedOneWithoutReferredInput
     peerReportsMade?: PeerBehaviorReportUncheckedCreateNestedManyWithoutReporterInput
@@ -101518,6 +109473,37 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  export type MarketAnalysisCreateWithoutCreatedByInput = {
+    kind: string
+    title: string
+    summary?: string | null
+    resultJson?: NullableJsonNullValueInput | InputJsonValue
+    transcriptJson?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type MarketAnalysisUncheckedCreateWithoutCreatedByInput = {
+    id?: number
+    kind: string
+    title: string
+    summary?: string | null
+    resultJson?: NullableJsonNullValueInput | InputJsonValue
+    transcriptJson?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type MarketAnalysisCreateOrConnectWithoutCreatedByInput = {
+    where: MarketAnalysisWhereUniqueInput
+    create: XOR<MarketAnalysisCreateWithoutCreatedByInput, MarketAnalysisUncheckedCreateWithoutCreatedByInput>
+  }
+
+  export type MarketAnalysisCreateManyCreatedByInputEnvelope = {
+    data: MarketAnalysisCreateManyCreatedByInput | MarketAnalysisCreateManyCreatedByInput[]
+    skipDuplicates?: boolean
+  }
+
   export type TenantUpsertWithoutUserInput = {
     update: XOR<TenantUpdateWithoutUserInput, TenantUncheckedUpdateWithoutUserInput>
     create: XOR<TenantCreateWithoutUserInput, TenantUncheckedCreateWithoutUserInput>
@@ -101562,6 +109548,7 @@ export namespace Prisma {
     depositLedgerEntries?: TenantDepositLedgerEntryUpdateManyWithoutTenantNestedInput
     loyaltyPoints?: LoyaltyPointUpdateManyWithoutTenantNestedInput
     redemptions?: RedemptionUpdateManyWithoutTenantNestedInput
+    serviceInterests?: ServiceInterestUpdateManyWithoutTenantNestedInput
     referralsMade?: TenantReferralUpdateManyWithoutReferrerNestedInput
     referredReferral?: TenantReferralUpdateOneWithoutReferredNestedInput
     peerReportsMade?: PeerBehaviorReportUpdateManyWithoutReporterNestedInput
@@ -101602,6 +109589,7 @@ export namespace Prisma {
     depositLedgerEntries?: TenantDepositLedgerEntryUncheckedUpdateManyWithoutTenantNestedInput
     loyaltyPoints?: LoyaltyPointUncheckedUpdateManyWithoutTenantNestedInput
     redemptions?: RedemptionUncheckedUpdateManyWithoutTenantNestedInput
+    serviceInterests?: ServiceInterestUncheckedUpdateManyWithoutTenantNestedInput
     referralsMade?: TenantReferralUncheckedUpdateManyWithoutReferrerNestedInput
     referredReferral?: TenantReferralUncheckedUpdateOneWithoutReferredNestedInput
     peerReportsMade?: PeerBehaviorReportUncheckedUpdateManyWithoutReporterNestedInput
@@ -102812,7 +110800,38 @@ export namespace Prisma {
     updatedAt?: DateTimeFilter<"PeerBehaviorReport"> | Date | string
   }
 
-  export type UserCreateWithoutTenantInput = {
+  export type MarketAnalysisUpsertWithWhereUniqueWithoutCreatedByInput = {
+    where: MarketAnalysisWhereUniqueInput
+    update: XOR<MarketAnalysisUpdateWithoutCreatedByInput, MarketAnalysisUncheckedUpdateWithoutCreatedByInput>
+    create: XOR<MarketAnalysisCreateWithoutCreatedByInput, MarketAnalysisUncheckedCreateWithoutCreatedByInput>
+  }
+
+  export type MarketAnalysisUpdateWithWhereUniqueWithoutCreatedByInput = {
+    where: MarketAnalysisWhereUniqueInput
+    data: XOR<MarketAnalysisUpdateWithoutCreatedByInput, MarketAnalysisUncheckedUpdateWithoutCreatedByInput>
+  }
+
+  export type MarketAnalysisUpdateManyWithWhereWithoutCreatedByInput = {
+    where: MarketAnalysisScalarWhereInput
+    data: XOR<MarketAnalysisUpdateManyMutationInput, MarketAnalysisUncheckedUpdateManyWithoutCreatedByInput>
+  }
+
+  export type MarketAnalysisScalarWhereInput = {
+    AND?: MarketAnalysisScalarWhereInput | MarketAnalysisScalarWhereInput[]
+    OR?: MarketAnalysisScalarWhereInput[]
+    NOT?: MarketAnalysisScalarWhereInput | MarketAnalysisScalarWhereInput[]
+    id?: IntFilter<"MarketAnalysis"> | number
+    kind?: StringFilter<"MarketAnalysis"> | string
+    title?: StringFilter<"MarketAnalysis"> | string
+    summary?: StringNullableFilter<"MarketAnalysis"> | string | null
+    resultJson?: JsonNullableFilter<"MarketAnalysis">
+    transcriptJson?: JsonNullableFilter<"MarketAnalysis">
+    createdById?: IntNullableFilter<"MarketAnalysis"> | number | null
+    createdAt?: DateTimeFilter<"MarketAnalysis"> | Date | string
+    updatedAt?: DateTimeFilter<"MarketAnalysis"> | Date | string
+  }
+
+  export type UserCreateWithoutMarketAnalysesCreatedInput = {
     fullName: string
     email: string
     passwordHash: string
@@ -102823,9 +110842,11 @@ export namespace Prisma {
     tipGopay?: string | null
     tipOvo?: string | null
     tipDana?: string | null
+    tipShopeepay?: string | null
     tipBank?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    tenant?: TenantCreateNestedOneWithoutUserInput
     announcementsCreated?: AnnouncementCreateNestedManyWithoutCreatedByInput
     staysCreated?: StayCreateNestedManyWithoutCreatedByInput
     staysInitialMetersRecorded?: StayCreateNestedManyWithoutInitialMetersRecordedByInput
@@ -102863,18 +110884,20 @@ export namespace Prisma {
     peerReportsModerated?: PeerBehaviorReportCreateNestedManyWithoutModeratedByInput
   }
 
-  export type UserUncheckedCreateWithoutTenantInput = {
+  export type UserUncheckedCreateWithoutMarketAnalysesCreatedInput = {
     id?: number
     fullName: string
     email: string
     passwordHash: string
     role: $Enums.UserRole
+    tenantId?: number | null
     isActive?: boolean
     lastLoginAt?: Date | string | null
     passwordChangedAt?: Date | string | null
     tipGopay?: string | null
     tipOvo?: string | null
     tipDana?: string | null
+    tipShopeepay?: string | null
     tipBank?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -102915,6 +110938,236 @@ export namespace Prisma {
     peerReportsModerated?: PeerBehaviorReportUncheckedCreateNestedManyWithoutModeratedByInput
   }
 
+  export type UserCreateOrConnectWithoutMarketAnalysesCreatedInput = {
+    where: UserWhereUniqueInput
+    create: XOR<UserCreateWithoutMarketAnalysesCreatedInput, UserUncheckedCreateWithoutMarketAnalysesCreatedInput>
+  }
+
+  export type UserUpsertWithoutMarketAnalysesCreatedInput = {
+    update: XOR<UserUpdateWithoutMarketAnalysesCreatedInput, UserUncheckedUpdateWithoutMarketAnalysesCreatedInput>
+    create: XOR<UserCreateWithoutMarketAnalysesCreatedInput, UserUncheckedCreateWithoutMarketAnalysesCreatedInput>
+    where?: UserWhereInput
+  }
+
+  export type UserUpdateToOneWithWhereWithoutMarketAnalysesCreatedInput = {
+    where?: UserWhereInput
+    data: XOR<UserUpdateWithoutMarketAnalysesCreatedInput, UserUncheckedUpdateWithoutMarketAnalysesCreatedInput>
+  }
+
+  export type UserUpdateWithoutMarketAnalysesCreatedInput = {
+    fullName?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    passwordHash?: StringFieldUpdateOperationsInput | string
+    role?: EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    passwordChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    tipGopay?: NullableStringFieldUpdateOperationsInput | string | null
+    tipOvo?: NullableStringFieldUpdateOperationsInput | string | null
+    tipDana?: NullableStringFieldUpdateOperationsInput | string | null
+    tipShopeepay?: NullableStringFieldUpdateOperationsInput | string | null
+    tipBank?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    tenant?: TenantUpdateOneWithoutUserNestedInput
+    announcementsCreated?: AnnouncementUpdateManyWithoutCreatedByNestedInput
+    staysCreated?: StayUpdateManyWithoutCreatedByNestedInput
+    staysInitialMetersRecorded?: StayUpdateManyWithoutInitialMetersRecordedByNestedInput
+    invoicesCreated?: InvoiceUpdateManyWithoutCreatedByNestedInput
+    paymentsCaptured?: InvoicePaymentUpdateManyWithoutCapturedByNestedInput
+    ticketsAssigned?: TicketUpdateManyWithoutAssignedToNestedInput
+    staffRoutineTemplatesCreated?: StaffRoutineTemplateUpdateManyWithoutCreatedByNestedInput
+    staffRoutineAssignments?: StaffRoutineAssignmentUpdateManyWithoutStaffUserNestedInput
+    staffRoutineCompletions?: StaffRoutineCompletionUpdateManyWithoutStaffUserNestedInput
+    staffPerformanceEvents?: StaffPerformanceEventUpdateManyWithoutStaffNestedInput
+    staffPerformanceAudits?: StaffWorkAuditUpdateManyWithoutStaffNestedInput
+    staffPerformanceAuditsMade?: StaffWorkAuditUpdateManyWithoutAuditedByNestedInput
+    staffReviewsReceived?: StaffReviewUpdateManyWithoutStaffNestedInput
+    staffReviewsModerated?: StaffReviewUpdateManyWithoutModeratedByNestedInput
+    meterReadingsRecorded?: MeterReadingUpdateManyWithoutRecordedByNestedInput
+    inventoryMovementsCreated?: InventoryMovementUpdateManyWithoutCreatedByNestedInput
+    wifiSalesCreated?: WifiSaleUpdateManyWithoutCreatedByNestedInput
+    expensesCreated?: ExpenseUpdateManyWithoutCreatedByNestedInput
+    renewRequestsReviewed?: RenewRequestUpdateManyWithoutReviewedByNestedInput
+    checkoutRequestsReviewed?: CheckoutRequestUpdateManyWithoutReviewedByNestedInput
+    auditLogs?: AuditLogUpdateManyWithoutActorUserNestedInput
+    paymentSubmissionsSubmitted?: PaymentSubmissionUpdateManyWithoutSubmittedByNestedInput
+    paymentSubmissionsReviewed?: PaymentSubmissionUpdateManyWithoutReviewedByNestedInput
+    passwordResetTokens?: PasswordResetTokenUpdateManyWithoutUserNestedInput
+    notifications?: AppNotificationUpdateManyWithoutRecipientUserNestedInput
+    pushSubscriptions?: PushSubscriptionUpdateManyWithoutUserNestedInput
+    staffFieldReportsCreated?: StaffFieldReportUpdateManyWithoutReportedByStaffNestedInput
+    staffFieldReportsReviewed?: StaffFieldReportUpdateManyWithoutAdminReviewedByNestedInput
+    fixedAssetsCreated?: FixedAssetUpdateManyWithoutCreatedByNestedInput
+    assetDepreciationRunsCreated?: AssetDepreciationRunUpdateManyWithoutCreatedByNestedInput
+    depositLedgerEntriesActed?: TenantDepositLedgerEntryUpdateManyWithoutActorUserNestedInput
+    staysFledMarked?: StayUpdateManyWithoutFledMarkedByNestedInput
+    tenantsKtpVerified?: TenantUpdateManyWithoutKtpVerifiedByNestedInput
+    roomTransfersCreated?: RoomTransferUpdateManyWithoutCreatedByNestedInput
+    peerReportsModerated?: PeerBehaviorReportUpdateManyWithoutModeratedByNestedInput
+  }
+
+  export type UserUncheckedUpdateWithoutMarketAnalysesCreatedInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    fullName?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    passwordHash?: StringFieldUpdateOperationsInput | string
+    role?: EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+    tenantId?: NullableIntFieldUpdateOperationsInput | number | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    passwordChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    tipGopay?: NullableStringFieldUpdateOperationsInput | string | null
+    tipOvo?: NullableStringFieldUpdateOperationsInput | string | null
+    tipDana?: NullableStringFieldUpdateOperationsInput | string | null
+    tipShopeepay?: NullableStringFieldUpdateOperationsInput | string | null
+    tipBank?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    announcementsCreated?: AnnouncementUncheckedUpdateManyWithoutCreatedByNestedInput
+    staysCreated?: StayUncheckedUpdateManyWithoutCreatedByNestedInput
+    staysInitialMetersRecorded?: StayUncheckedUpdateManyWithoutInitialMetersRecordedByNestedInput
+    invoicesCreated?: InvoiceUncheckedUpdateManyWithoutCreatedByNestedInput
+    paymentsCaptured?: InvoicePaymentUncheckedUpdateManyWithoutCapturedByNestedInput
+    ticketsAssigned?: TicketUncheckedUpdateManyWithoutAssignedToNestedInput
+    staffRoutineTemplatesCreated?: StaffRoutineTemplateUncheckedUpdateManyWithoutCreatedByNestedInput
+    staffRoutineAssignments?: StaffRoutineAssignmentUncheckedUpdateManyWithoutStaffUserNestedInput
+    staffRoutineCompletions?: StaffRoutineCompletionUncheckedUpdateManyWithoutStaffUserNestedInput
+    staffPerformanceEvents?: StaffPerformanceEventUncheckedUpdateManyWithoutStaffNestedInput
+    staffPerformanceAudits?: StaffWorkAuditUncheckedUpdateManyWithoutStaffNestedInput
+    staffPerformanceAuditsMade?: StaffWorkAuditUncheckedUpdateManyWithoutAuditedByNestedInput
+    staffReviewsReceived?: StaffReviewUncheckedUpdateManyWithoutStaffNestedInput
+    staffReviewsModerated?: StaffReviewUncheckedUpdateManyWithoutModeratedByNestedInput
+    meterReadingsRecorded?: MeterReadingUncheckedUpdateManyWithoutRecordedByNestedInput
+    inventoryMovementsCreated?: InventoryMovementUncheckedUpdateManyWithoutCreatedByNestedInput
+    wifiSalesCreated?: WifiSaleUncheckedUpdateManyWithoutCreatedByNestedInput
+    expensesCreated?: ExpenseUncheckedUpdateManyWithoutCreatedByNestedInput
+    renewRequestsReviewed?: RenewRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+    checkoutRequestsReviewed?: CheckoutRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+    auditLogs?: AuditLogUncheckedUpdateManyWithoutActorUserNestedInput
+    paymentSubmissionsSubmitted?: PaymentSubmissionUncheckedUpdateManyWithoutSubmittedByNestedInput
+    paymentSubmissionsReviewed?: PaymentSubmissionUncheckedUpdateManyWithoutReviewedByNestedInput
+    passwordResetTokens?: PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
+    notifications?: AppNotificationUncheckedUpdateManyWithoutRecipientUserNestedInput
+    pushSubscriptions?: PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+    staffFieldReportsCreated?: StaffFieldReportUncheckedUpdateManyWithoutReportedByStaffNestedInput
+    staffFieldReportsReviewed?: StaffFieldReportUncheckedUpdateManyWithoutAdminReviewedByNestedInput
+    fixedAssetsCreated?: FixedAssetUncheckedUpdateManyWithoutCreatedByNestedInput
+    assetDepreciationRunsCreated?: AssetDepreciationRunUncheckedUpdateManyWithoutCreatedByNestedInput
+    depositLedgerEntriesActed?: TenantDepositLedgerEntryUncheckedUpdateManyWithoutActorUserNestedInput
+    staysFledMarked?: StayUncheckedUpdateManyWithoutFledMarkedByNestedInput
+    tenantsKtpVerified?: TenantUncheckedUpdateManyWithoutKtpVerifiedByNestedInput
+    roomTransfersCreated?: RoomTransferUncheckedUpdateManyWithoutCreatedByNestedInput
+    peerReportsModerated?: PeerBehaviorReportUncheckedUpdateManyWithoutModeratedByNestedInput
+  }
+
+  export type UserCreateWithoutTenantInput = {
+    fullName: string
+    email: string
+    passwordHash: string
+    role: $Enums.UserRole
+    isActive?: boolean
+    lastLoginAt?: Date | string | null
+    passwordChangedAt?: Date | string | null
+    tipGopay?: string | null
+    tipOvo?: string | null
+    tipDana?: string | null
+    tipShopeepay?: string | null
+    tipBank?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    announcementsCreated?: AnnouncementCreateNestedManyWithoutCreatedByInput
+    staysCreated?: StayCreateNestedManyWithoutCreatedByInput
+    staysInitialMetersRecorded?: StayCreateNestedManyWithoutInitialMetersRecordedByInput
+    invoicesCreated?: InvoiceCreateNestedManyWithoutCreatedByInput
+    paymentsCaptured?: InvoicePaymentCreateNestedManyWithoutCapturedByInput
+    ticketsAssigned?: TicketCreateNestedManyWithoutAssignedToInput
+    staffRoutineTemplatesCreated?: StaffRoutineTemplateCreateNestedManyWithoutCreatedByInput
+    staffRoutineAssignments?: StaffRoutineAssignmentCreateNestedManyWithoutStaffUserInput
+    staffRoutineCompletions?: StaffRoutineCompletionCreateNestedManyWithoutStaffUserInput
+    staffPerformanceEvents?: StaffPerformanceEventCreateNestedManyWithoutStaffInput
+    staffPerformanceAudits?: StaffWorkAuditCreateNestedManyWithoutStaffInput
+    staffPerformanceAuditsMade?: StaffWorkAuditCreateNestedManyWithoutAuditedByInput
+    staffReviewsReceived?: StaffReviewCreateNestedManyWithoutStaffInput
+    staffReviewsModerated?: StaffReviewCreateNestedManyWithoutModeratedByInput
+    meterReadingsRecorded?: MeterReadingCreateNestedManyWithoutRecordedByInput
+    inventoryMovementsCreated?: InventoryMovementCreateNestedManyWithoutCreatedByInput
+    wifiSalesCreated?: WifiSaleCreateNestedManyWithoutCreatedByInput
+    expensesCreated?: ExpenseCreateNestedManyWithoutCreatedByInput
+    renewRequestsReviewed?: RenewRequestCreateNestedManyWithoutReviewedByInput
+    checkoutRequestsReviewed?: CheckoutRequestCreateNestedManyWithoutReviewedByInput
+    auditLogs?: AuditLogCreateNestedManyWithoutActorUserInput
+    paymentSubmissionsSubmitted?: PaymentSubmissionCreateNestedManyWithoutSubmittedByInput
+    paymentSubmissionsReviewed?: PaymentSubmissionCreateNestedManyWithoutReviewedByInput
+    passwordResetTokens?: PasswordResetTokenCreateNestedManyWithoutUserInput
+    notifications?: AppNotificationCreateNestedManyWithoutRecipientUserInput
+    pushSubscriptions?: PushSubscriptionCreateNestedManyWithoutUserInput
+    staffFieldReportsCreated?: StaffFieldReportCreateNestedManyWithoutReportedByStaffInput
+    staffFieldReportsReviewed?: StaffFieldReportCreateNestedManyWithoutAdminReviewedByInput
+    fixedAssetsCreated?: FixedAssetCreateNestedManyWithoutCreatedByInput
+    assetDepreciationRunsCreated?: AssetDepreciationRunCreateNestedManyWithoutCreatedByInput
+    depositLedgerEntriesActed?: TenantDepositLedgerEntryCreateNestedManyWithoutActorUserInput
+    staysFledMarked?: StayCreateNestedManyWithoutFledMarkedByInput
+    tenantsKtpVerified?: TenantCreateNestedManyWithoutKtpVerifiedByInput
+    roomTransfersCreated?: RoomTransferCreateNestedManyWithoutCreatedByInput
+    peerReportsModerated?: PeerBehaviorReportCreateNestedManyWithoutModeratedByInput
+    marketAnalysesCreated?: MarketAnalysisCreateNestedManyWithoutCreatedByInput
+  }
+
+  export type UserUncheckedCreateWithoutTenantInput = {
+    id?: number
+    fullName: string
+    email: string
+    passwordHash: string
+    role: $Enums.UserRole
+    isActive?: boolean
+    lastLoginAt?: Date | string | null
+    passwordChangedAt?: Date | string | null
+    tipGopay?: string | null
+    tipOvo?: string | null
+    tipDana?: string | null
+    tipShopeepay?: string | null
+    tipBank?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    announcementsCreated?: AnnouncementUncheckedCreateNestedManyWithoutCreatedByInput
+    staysCreated?: StayUncheckedCreateNestedManyWithoutCreatedByInput
+    staysInitialMetersRecorded?: StayUncheckedCreateNestedManyWithoutInitialMetersRecordedByInput
+    invoicesCreated?: InvoiceUncheckedCreateNestedManyWithoutCreatedByInput
+    paymentsCaptured?: InvoicePaymentUncheckedCreateNestedManyWithoutCapturedByInput
+    ticketsAssigned?: TicketUncheckedCreateNestedManyWithoutAssignedToInput
+    staffRoutineTemplatesCreated?: StaffRoutineTemplateUncheckedCreateNestedManyWithoutCreatedByInput
+    staffRoutineAssignments?: StaffRoutineAssignmentUncheckedCreateNestedManyWithoutStaffUserInput
+    staffRoutineCompletions?: StaffRoutineCompletionUncheckedCreateNestedManyWithoutStaffUserInput
+    staffPerformanceEvents?: StaffPerformanceEventUncheckedCreateNestedManyWithoutStaffInput
+    staffPerformanceAudits?: StaffWorkAuditUncheckedCreateNestedManyWithoutStaffInput
+    staffPerformanceAuditsMade?: StaffWorkAuditUncheckedCreateNestedManyWithoutAuditedByInput
+    staffReviewsReceived?: StaffReviewUncheckedCreateNestedManyWithoutStaffInput
+    staffReviewsModerated?: StaffReviewUncheckedCreateNestedManyWithoutModeratedByInput
+    meterReadingsRecorded?: MeterReadingUncheckedCreateNestedManyWithoutRecordedByInput
+    inventoryMovementsCreated?: InventoryMovementUncheckedCreateNestedManyWithoutCreatedByInput
+    wifiSalesCreated?: WifiSaleUncheckedCreateNestedManyWithoutCreatedByInput
+    expensesCreated?: ExpenseUncheckedCreateNestedManyWithoutCreatedByInput
+    renewRequestsReviewed?: RenewRequestUncheckedCreateNestedManyWithoutReviewedByInput
+    checkoutRequestsReviewed?: CheckoutRequestUncheckedCreateNestedManyWithoutReviewedByInput
+    auditLogs?: AuditLogUncheckedCreateNestedManyWithoutActorUserInput
+    paymentSubmissionsSubmitted?: PaymentSubmissionUncheckedCreateNestedManyWithoutSubmittedByInput
+    paymentSubmissionsReviewed?: PaymentSubmissionUncheckedCreateNestedManyWithoutReviewedByInput
+    passwordResetTokens?: PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
+    notifications?: AppNotificationUncheckedCreateNestedManyWithoutRecipientUserInput
+    pushSubscriptions?: PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
+    staffFieldReportsCreated?: StaffFieldReportUncheckedCreateNestedManyWithoutReportedByStaffInput
+    staffFieldReportsReviewed?: StaffFieldReportUncheckedCreateNestedManyWithoutAdminReviewedByInput
+    fixedAssetsCreated?: FixedAssetUncheckedCreateNestedManyWithoutCreatedByInput
+    assetDepreciationRunsCreated?: AssetDepreciationRunUncheckedCreateNestedManyWithoutCreatedByInput
+    depositLedgerEntriesActed?: TenantDepositLedgerEntryUncheckedCreateNestedManyWithoutActorUserInput
+    staysFledMarked?: StayUncheckedCreateNestedManyWithoutFledMarkedByInput
+    tenantsKtpVerified?: TenantUncheckedCreateNestedManyWithoutKtpVerifiedByInput
+    roomTransfersCreated?: RoomTransferUncheckedCreateNestedManyWithoutCreatedByInput
+    peerReportsModerated?: PeerBehaviorReportUncheckedCreateNestedManyWithoutModeratedByInput
+    marketAnalysesCreated?: MarketAnalysisUncheckedCreateNestedManyWithoutCreatedByInput
+  }
+
   export type UserCreateOrConnectWithoutTenantInput = {
     where: UserWhereUniqueInput
     create: XOR<UserCreateWithoutTenantInput, UserUncheckedCreateWithoutTenantInput>
@@ -102931,6 +111184,7 @@ export namespace Prisma {
     tipGopay?: string | null
     tipOvo?: string | null
     tipDana?: string | null
+    tipShopeepay?: string | null
     tipBank?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -102969,6 +111223,7 @@ export namespace Prisma {
     staysFledMarked?: StayCreateNestedManyWithoutFledMarkedByInput
     roomTransfersCreated?: RoomTransferCreateNestedManyWithoutCreatedByInput
     peerReportsModerated?: PeerBehaviorReportCreateNestedManyWithoutModeratedByInput
+    marketAnalysesCreated?: MarketAnalysisCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserUncheckedCreateWithoutTenantsKtpVerifiedInput = {
@@ -102984,6 +111239,7 @@ export namespace Prisma {
     tipGopay?: string | null
     tipOvo?: string | null
     tipDana?: string | null
+    tipShopeepay?: string | null
     tipBank?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -103021,6 +111277,7 @@ export namespace Prisma {
     staysFledMarked?: StayUncheckedCreateNestedManyWithoutFledMarkedByInput
     roomTransfersCreated?: RoomTransferUncheckedCreateNestedManyWithoutCreatedByInput
     peerReportsModerated?: PeerBehaviorReportUncheckedCreateNestedManyWithoutModeratedByInput
+    marketAnalysesCreated?: MarketAnalysisUncheckedCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserCreateOrConnectWithoutTenantsKtpVerifiedInput = {
@@ -103522,6 +111779,35 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  export type ServiceInterestCreateWithoutTenantInput = {
+    status?: $Enums.ServiceInterestStatus
+    note?: string | null
+    adminNote?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    service: AdditionalServiceCreateNestedOneWithoutInterestsInput
+  }
+
+  export type ServiceInterestUncheckedCreateWithoutTenantInput = {
+    id?: number
+    serviceId: number
+    status?: $Enums.ServiceInterestStatus
+    note?: string | null
+    adminNote?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type ServiceInterestCreateOrConnectWithoutTenantInput = {
+    where: ServiceInterestWhereUniqueInput
+    create: XOR<ServiceInterestCreateWithoutTenantInput, ServiceInterestUncheckedCreateWithoutTenantInput>
+  }
+
+  export type ServiceInterestCreateManyTenantInputEnvelope = {
+    data: ServiceInterestCreateManyTenantInput | ServiceInterestCreateManyTenantInput[]
+    skipDuplicates?: boolean
+  }
+
   export type TenantReferralCreateWithoutReferrerInput = {
     status?: $Enums.ReferralStatus
     rewardedAt?: Date | string | null
@@ -103671,6 +111957,7 @@ export namespace Prisma {
     tipGopay?: NullableStringFieldUpdateOperationsInput | string | null
     tipOvo?: NullableStringFieldUpdateOperationsInput | string | null
     tipDana?: NullableStringFieldUpdateOperationsInput | string | null
+    tipShopeepay?: NullableStringFieldUpdateOperationsInput | string | null
     tipBank?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -103709,6 +111996,7 @@ export namespace Prisma {
     tenantsKtpVerified?: TenantUpdateManyWithoutKtpVerifiedByNestedInput
     roomTransfersCreated?: RoomTransferUpdateManyWithoutCreatedByNestedInput
     peerReportsModerated?: PeerBehaviorReportUpdateManyWithoutModeratedByNestedInput
+    marketAnalysesCreated?: MarketAnalysisUpdateManyWithoutCreatedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutTenantInput = {
@@ -103723,6 +112011,7 @@ export namespace Prisma {
     tipGopay?: NullableStringFieldUpdateOperationsInput | string | null
     tipOvo?: NullableStringFieldUpdateOperationsInput | string | null
     tipDana?: NullableStringFieldUpdateOperationsInput | string | null
+    tipShopeepay?: NullableStringFieldUpdateOperationsInput | string | null
     tipBank?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -103761,6 +112050,7 @@ export namespace Prisma {
     tenantsKtpVerified?: TenantUncheckedUpdateManyWithoutKtpVerifiedByNestedInput
     roomTransfersCreated?: RoomTransferUncheckedUpdateManyWithoutCreatedByNestedInput
     peerReportsModerated?: PeerBehaviorReportUncheckedUpdateManyWithoutModeratedByNestedInput
+    marketAnalysesCreated?: MarketAnalysisUncheckedUpdateManyWithoutCreatedByNestedInput
   }
 
   export type UserUpsertWithoutTenantsKtpVerifiedInput = {
@@ -103785,6 +112075,7 @@ export namespace Prisma {
     tipGopay?: NullableStringFieldUpdateOperationsInput | string | null
     tipOvo?: NullableStringFieldUpdateOperationsInput | string | null
     tipDana?: NullableStringFieldUpdateOperationsInput | string | null
+    tipShopeepay?: NullableStringFieldUpdateOperationsInput | string | null
     tipBank?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -103823,6 +112114,7 @@ export namespace Prisma {
     staysFledMarked?: StayUpdateManyWithoutFledMarkedByNestedInput
     roomTransfersCreated?: RoomTransferUpdateManyWithoutCreatedByNestedInput
     peerReportsModerated?: PeerBehaviorReportUpdateManyWithoutModeratedByNestedInput
+    marketAnalysesCreated?: MarketAnalysisUpdateManyWithoutCreatedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutTenantsKtpVerifiedInput = {
@@ -103838,6 +112130,7 @@ export namespace Prisma {
     tipGopay?: NullableStringFieldUpdateOperationsInput | string | null
     tipOvo?: NullableStringFieldUpdateOperationsInput | string | null
     tipDana?: NullableStringFieldUpdateOperationsInput | string | null
+    tipShopeepay?: NullableStringFieldUpdateOperationsInput | string | null
     tipBank?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -103875,6 +112168,7 @@ export namespace Prisma {
     staysFledMarked?: StayUncheckedUpdateManyWithoutFledMarkedByNestedInput
     roomTransfersCreated?: RoomTransferUncheckedUpdateManyWithoutCreatedByNestedInput
     peerReportsModerated?: PeerBehaviorReportUncheckedUpdateManyWithoutModeratedByNestedInput
+    marketAnalysesCreated?: MarketAnalysisUncheckedUpdateManyWithoutCreatedByNestedInput
   }
 
   export type StayUpsertWithWhereUniqueWithoutTenantInput = {
@@ -104034,6 +112328,36 @@ export namespace Prisma {
     decidedById?: IntNullableFilter<"Redemption"> | number | null
     journalEntryId?: IntNullableFilter<"Redemption"> | number | null
     note?: StringNullableFilter<"Redemption"> | string | null
+  }
+
+  export type ServiceInterestUpsertWithWhereUniqueWithoutTenantInput = {
+    where: ServiceInterestWhereUniqueInput
+    update: XOR<ServiceInterestUpdateWithoutTenantInput, ServiceInterestUncheckedUpdateWithoutTenantInput>
+    create: XOR<ServiceInterestCreateWithoutTenantInput, ServiceInterestUncheckedCreateWithoutTenantInput>
+  }
+
+  export type ServiceInterestUpdateWithWhereUniqueWithoutTenantInput = {
+    where: ServiceInterestWhereUniqueInput
+    data: XOR<ServiceInterestUpdateWithoutTenantInput, ServiceInterestUncheckedUpdateWithoutTenantInput>
+  }
+
+  export type ServiceInterestUpdateManyWithWhereWithoutTenantInput = {
+    where: ServiceInterestScalarWhereInput
+    data: XOR<ServiceInterestUpdateManyMutationInput, ServiceInterestUncheckedUpdateManyWithoutTenantInput>
+  }
+
+  export type ServiceInterestScalarWhereInput = {
+    AND?: ServiceInterestScalarWhereInput | ServiceInterestScalarWhereInput[]
+    OR?: ServiceInterestScalarWhereInput[]
+    NOT?: ServiceInterestScalarWhereInput | ServiceInterestScalarWhereInput[]
+    id?: IntFilter<"ServiceInterest"> | number
+    serviceId?: IntFilter<"ServiceInterest"> | number
+    tenantId?: IntFilter<"ServiceInterest"> | number
+    status?: EnumServiceInterestStatusFilter<"ServiceInterest"> | $Enums.ServiceInterestStatus
+    note?: StringNullableFilter<"ServiceInterest"> | string | null
+    adminNote?: StringNullableFilter<"ServiceInterest"> | string | null
+    createdAt?: DateTimeFilter<"ServiceInterest"> | Date | string
+    updatedAt?: DateTimeFilter<"ServiceInterest"> | Date | string
   }
 
   export type TenantReferralUpsertWithWhereUniqueWithoutReferrerInput = {
@@ -105115,6 +113439,8 @@ export namespace Prisma {
     name?: string | null
     floor?: string | null
     status?: $Enums.RoomStatus
+    category?: $Enums.RoomCategory
+    roomType?: $Enums.RoomType
     dailyRateRupiah?: number | null
     weeklyRateRupiah?: number | null
     biWeeklyRateRupiah?: number | null
@@ -105154,6 +113480,8 @@ export namespace Prisma {
     name?: string | null
     floor?: string | null
     status?: $Enums.RoomStatus
+    category?: $Enums.RoomCategory
+    roomType?: $Enums.RoomType
     dailyRateRupiah?: number | null
     weeklyRateRupiah?: number | null
     biWeeklyRateRupiah?: number | null
@@ -105208,6 +113536,8 @@ export namespace Prisma {
     name?: NullableStringFieldUpdateOperationsInput | string | null
     floor?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumRoomStatusFieldUpdateOperationsInput | $Enums.RoomStatus
+    category?: EnumRoomCategoryFieldUpdateOperationsInput | $Enums.RoomCategory
+    roomType?: EnumRoomTypeFieldUpdateOperationsInput | $Enums.RoomType
     dailyRateRupiah?: NullableIntFieldUpdateOperationsInput | number | null
     weeklyRateRupiah?: NullableIntFieldUpdateOperationsInput | number | null
     biWeeklyRateRupiah?: NullableIntFieldUpdateOperationsInput | number | null
@@ -105247,6 +113577,8 @@ export namespace Prisma {
     name?: NullableStringFieldUpdateOperationsInput | string | null
     floor?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumRoomStatusFieldUpdateOperationsInput | $Enums.RoomStatus
+    category?: EnumRoomCategoryFieldUpdateOperationsInput | $Enums.RoomCategory
+    roomType?: EnumRoomTypeFieldUpdateOperationsInput | $Enums.RoomType
     dailyRateRupiah?: NullableIntFieldUpdateOperationsInput | number | null
     weeklyRateRupiah?: NullableIntFieldUpdateOperationsInput | number | null
     biWeeklyRateRupiah?: NullableIntFieldUpdateOperationsInput | number | null
@@ -105313,6 +113645,7 @@ export namespace Prisma {
     depositLedgerEntries?: TenantDepositLedgerEntryCreateNestedManyWithoutTenantInput
     loyaltyPoints?: LoyaltyPointCreateNestedManyWithoutTenantInput
     redemptions?: RedemptionCreateNestedManyWithoutTenantInput
+    serviceInterests?: ServiceInterestCreateNestedManyWithoutTenantInput
     referralsMade?: TenantReferralCreateNestedManyWithoutReferrerInput
     referredReferral?: TenantReferralCreateNestedOneWithoutReferredInput
     peerReportsMade?: PeerBehaviorReportCreateNestedManyWithoutReporterInput
@@ -105353,6 +113686,7 @@ export namespace Prisma {
     depositLedgerEntries?: TenantDepositLedgerEntryUncheckedCreateNestedManyWithoutTenantInput
     loyaltyPoints?: LoyaltyPointUncheckedCreateNestedManyWithoutTenantInput
     redemptions?: RedemptionUncheckedCreateNestedManyWithoutTenantInput
+    serviceInterests?: ServiceInterestUncheckedCreateNestedManyWithoutTenantInput
     referralsMade?: TenantReferralUncheckedCreateNestedManyWithoutReferrerInput
     referredReferral?: TenantReferralUncheckedCreateNestedOneWithoutReferredInput
     peerReportsMade?: PeerBehaviorReportUncheckedCreateNestedManyWithoutReporterInput
@@ -105369,6 +113703,8 @@ export namespace Prisma {
     name?: string | null
     floor?: string | null
     status?: $Enums.RoomStatus
+    category?: $Enums.RoomCategory
+    roomType?: $Enums.RoomType
     dailyRateRupiah?: number | null
     weeklyRateRupiah?: number | null
     biWeeklyRateRupiah?: number | null
@@ -105408,6 +113744,8 @@ export namespace Prisma {
     name?: string | null
     floor?: string | null
     status?: $Enums.RoomStatus
+    category?: $Enums.RoomCategory
+    roomType?: $Enums.RoomType
     dailyRateRupiah?: number | null
     weeklyRateRupiah?: number | null
     biWeeklyRateRupiah?: number | null
@@ -105457,6 +113795,7 @@ export namespace Prisma {
     tipGopay?: string | null
     tipOvo?: string | null
     tipDana?: string | null
+    tipShopeepay?: string | null
     tipBank?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -105495,6 +113834,7 @@ export namespace Prisma {
     tenantsKtpVerified?: TenantCreateNestedManyWithoutKtpVerifiedByInput
     roomTransfersCreated?: RoomTransferCreateNestedManyWithoutCreatedByInput
     peerReportsModerated?: PeerBehaviorReportCreateNestedManyWithoutModeratedByInput
+    marketAnalysesCreated?: MarketAnalysisCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserUncheckedCreateWithoutStaysCreatedInput = {
@@ -105510,6 +113850,7 @@ export namespace Prisma {
     tipGopay?: string | null
     tipOvo?: string | null
     tipDana?: string | null
+    tipShopeepay?: string | null
     tipBank?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -105547,6 +113888,7 @@ export namespace Prisma {
     tenantsKtpVerified?: TenantUncheckedCreateNestedManyWithoutKtpVerifiedByInput
     roomTransfersCreated?: RoomTransferUncheckedCreateNestedManyWithoutCreatedByInput
     peerReportsModerated?: PeerBehaviorReportUncheckedCreateNestedManyWithoutModeratedByInput
+    marketAnalysesCreated?: MarketAnalysisUncheckedCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserCreateOrConnectWithoutStaysCreatedInput = {
@@ -105565,6 +113907,7 @@ export namespace Prisma {
     tipGopay?: string | null
     tipOvo?: string | null
     tipDana?: string | null
+    tipShopeepay?: string | null
     tipBank?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -105603,6 +113946,7 @@ export namespace Prisma {
     tenantsKtpVerified?: TenantCreateNestedManyWithoutKtpVerifiedByInput
     roomTransfersCreated?: RoomTransferCreateNestedManyWithoutCreatedByInput
     peerReportsModerated?: PeerBehaviorReportCreateNestedManyWithoutModeratedByInput
+    marketAnalysesCreated?: MarketAnalysisCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserUncheckedCreateWithoutStaysInitialMetersRecordedInput = {
@@ -105618,6 +113962,7 @@ export namespace Prisma {
     tipGopay?: string | null
     tipOvo?: string | null
     tipDana?: string | null
+    tipShopeepay?: string | null
     tipBank?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -105655,6 +114000,7 @@ export namespace Prisma {
     tenantsKtpVerified?: TenantUncheckedCreateNestedManyWithoutKtpVerifiedByInput
     roomTransfersCreated?: RoomTransferUncheckedCreateNestedManyWithoutCreatedByInput
     peerReportsModerated?: PeerBehaviorReportUncheckedCreateNestedManyWithoutModeratedByInput
+    marketAnalysesCreated?: MarketAnalysisUncheckedCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserCreateOrConnectWithoutStaysInitialMetersRecordedInput = {
@@ -105673,6 +114019,7 @@ export namespace Prisma {
     tipGopay?: string | null
     tipOvo?: string | null
     tipDana?: string | null
+    tipShopeepay?: string | null
     tipBank?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -105711,6 +114058,7 @@ export namespace Prisma {
     tenantsKtpVerified?: TenantCreateNestedManyWithoutKtpVerifiedByInput
     roomTransfersCreated?: RoomTransferCreateNestedManyWithoutCreatedByInput
     peerReportsModerated?: PeerBehaviorReportCreateNestedManyWithoutModeratedByInput
+    marketAnalysesCreated?: MarketAnalysisCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserUncheckedCreateWithoutStaysFledMarkedInput = {
@@ -105726,6 +114074,7 @@ export namespace Prisma {
     tipGopay?: string | null
     tipOvo?: string | null
     tipDana?: string | null
+    tipShopeepay?: string | null
     tipBank?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -105763,6 +114112,7 @@ export namespace Prisma {
     tenantsKtpVerified?: TenantUncheckedCreateNestedManyWithoutKtpVerifiedByInput
     roomTransfersCreated?: RoomTransferUncheckedCreateNestedManyWithoutCreatedByInput
     peerReportsModerated?: PeerBehaviorReportUncheckedCreateNestedManyWithoutModeratedByInput
+    marketAnalysesCreated?: MarketAnalysisUncheckedCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserCreateOrConnectWithoutStaysFledMarkedInput = {
@@ -106269,6 +114619,7 @@ export namespace Prisma {
     depositLedgerEntries?: TenantDepositLedgerEntryUpdateManyWithoutTenantNestedInput
     loyaltyPoints?: LoyaltyPointUpdateManyWithoutTenantNestedInput
     redemptions?: RedemptionUpdateManyWithoutTenantNestedInput
+    serviceInterests?: ServiceInterestUpdateManyWithoutTenantNestedInput
     referralsMade?: TenantReferralUpdateManyWithoutReferrerNestedInput
     referredReferral?: TenantReferralUpdateOneWithoutReferredNestedInput
     peerReportsMade?: PeerBehaviorReportUpdateManyWithoutReporterNestedInput
@@ -106309,6 +114660,7 @@ export namespace Prisma {
     depositLedgerEntries?: TenantDepositLedgerEntryUncheckedUpdateManyWithoutTenantNestedInput
     loyaltyPoints?: LoyaltyPointUncheckedUpdateManyWithoutTenantNestedInput
     redemptions?: RedemptionUncheckedUpdateManyWithoutTenantNestedInput
+    serviceInterests?: ServiceInterestUncheckedUpdateManyWithoutTenantNestedInput
     referralsMade?: TenantReferralUncheckedUpdateManyWithoutReferrerNestedInput
     referredReferral?: TenantReferralUncheckedUpdateOneWithoutReferredNestedInput
     peerReportsMade?: PeerBehaviorReportUncheckedUpdateManyWithoutReporterNestedInput
@@ -106331,6 +114683,8 @@ export namespace Prisma {
     name?: NullableStringFieldUpdateOperationsInput | string | null
     floor?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumRoomStatusFieldUpdateOperationsInput | $Enums.RoomStatus
+    category?: EnumRoomCategoryFieldUpdateOperationsInput | $Enums.RoomCategory
+    roomType?: EnumRoomTypeFieldUpdateOperationsInput | $Enums.RoomType
     dailyRateRupiah?: NullableIntFieldUpdateOperationsInput | number | null
     weeklyRateRupiah?: NullableIntFieldUpdateOperationsInput | number | null
     biWeeklyRateRupiah?: NullableIntFieldUpdateOperationsInput | number | null
@@ -106370,6 +114724,8 @@ export namespace Prisma {
     name?: NullableStringFieldUpdateOperationsInput | string | null
     floor?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumRoomStatusFieldUpdateOperationsInput | $Enums.RoomStatus
+    category?: EnumRoomCategoryFieldUpdateOperationsInput | $Enums.RoomCategory
+    roomType?: EnumRoomTypeFieldUpdateOperationsInput | $Enums.RoomType
     dailyRateRupiah?: NullableIntFieldUpdateOperationsInput | number | null
     weeklyRateRupiah?: NullableIntFieldUpdateOperationsInput | number | null
     biWeeklyRateRupiah?: NullableIntFieldUpdateOperationsInput | number | null
@@ -106425,6 +114781,7 @@ export namespace Prisma {
     tipGopay?: NullableStringFieldUpdateOperationsInput | string | null
     tipOvo?: NullableStringFieldUpdateOperationsInput | string | null
     tipDana?: NullableStringFieldUpdateOperationsInput | string | null
+    tipShopeepay?: NullableStringFieldUpdateOperationsInput | string | null
     tipBank?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -106463,6 +114820,7 @@ export namespace Prisma {
     tenantsKtpVerified?: TenantUpdateManyWithoutKtpVerifiedByNestedInput
     roomTransfersCreated?: RoomTransferUpdateManyWithoutCreatedByNestedInput
     peerReportsModerated?: PeerBehaviorReportUpdateManyWithoutModeratedByNestedInput
+    marketAnalysesCreated?: MarketAnalysisUpdateManyWithoutCreatedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutStaysCreatedInput = {
@@ -106478,6 +114836,7 @@ export namespace Prisma {
     tipGopay?: NullableStringFieldUpdateOperationsInput | string | null
     tipOvo?: NullableStringFieldUpdateOperationsInput | string | null
     tipDana?: NullableStringFieldUpdateOperationsInput | string | null
+    tipShopeepay?: NullableStringFieldUpdateOperationsInput | string | null
     tipBank?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -106515,6 +114874,7 @@ export namespace Prisma {
     tenantsKtpVerified?: TenantUncheckedUpdateManyWithoutKtpVerifiedByNestedInput
     roomTransfersCreated?: RoomTransferUncheckedUpdateManyWithoutCreatedByNestedInput
     peerReportsModerated?: PeerBehaviorReportUncheckedUpdateManyWithoutModeratedByNestedInput
+    marketAnalysesCreated?: MarketAnalysisUncheckedUpdateManyWithoutCreatedByNestedInput
   }
 
   export type UserUpsertWithoutStaysInitialMetersRecordedInput = {
@@ -106539,6 +114899,7 @@ export namespace Prisma {
     tipGopay?: NullableStringFieldUpdateOperationsInput | string | null
     tipOvo?: NullableStringFieldUpdateOperationsInput | string | null
     tipDana?: NullableStringFieldUpdateOperationsInput | string | null
+    tipShopeepay?: NullableStringFieldUpdateOperationsInput | string | null
     tipBank?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -106577,6 +114938,7 @@ export namespace Prisma {
     tenantsKtpVerified?: TenantUpdateManyWithoutKtpVerifiedByNestedInput
     roomTransfersCreated?: RoomTransferUpdateManyWithoutCreatedByNestedInput
     peerReportsModerated?: PeerBehaviorReportUpdateManyWithoutModeratedByNestedInput
+    marketAnalysesCreated?: MarketAnalysisUpdateManyWithoutCreatedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutStaysInitialMetersRecordedInput = {
@@ -106592,6 +114954,7 @@ export namespace Prisma {
     tipGopay?: NullableStringFieldUpdateOperationsInput | string | null
     tipOvo?: NullableStringFieldUpdateOperationsInput | string | null
     tipDana?: NullableStringFieldUpdateOperationsInput | string | null
+    tipShopeepay?: NullableStringFieldUpdateOperationsInput | string | null
     tipBank?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -106629,6 +114992,7 @@ export namespace Prisma {
     tenantsKtpVerified?: TenantUncheckedUpdateManyWithoutKtpVerifiedByNestedInput
     roomTransfersCreated?: RoomTransferUncheckedUpdateManyWithoutCreatedByNestedInput
     peerReportsModerated?: PeerBehaviorReportUncheckedUpdateManyWithoutModeratedByNestedInput
+    marketAnalysesCreated?: MarketAnalysisUncheckedUpdateManyWithoutCreatedByNestedInput
   }
 
   export type UserUpsertWithoutStaysFledMarkedInput = {
@@ -106653,6 +115017,7 @@ export namespace Prisma {
     tipGopay?: NullableStringFieldUpdateOperationsInput | string | null
     tipOvo?: NullableStringFieldUpdateOperationsInput | string | null
     tipDana?: NullableStringFieldUpdateOperationsInput | string | null
+    tipShopeepay?: NullableStringFieldUpdateOperationsInput | string | null
     tipBank?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -106691,6 +115056,7 @@ export namespace Prisma {
     tenantsKtpVerified?: TenantUpdateManyWithoutKtpVerifiedByNestedInput
     roomTransfersCreated?: RoomTransferUpdateManyWithoutCreatedByNestedInput
     peerReportsModerated?: PeerBehaviorReportUpdateManyWithoutModeratedByNestedInput
+    marketAnalysesCreated?: MarketAnalysisUpdateManyWithoutCreatedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutStaysFledMarkedInput = {
@@ -106706,6 +115072,7 @@ export namespace Prisma {
     tipGopay?: NullableStringFieldUpdateOperationsInput | string | null
     tipOvo?: NullableStringFieldUpdateOperationsInput | string | null
     tipDana?: NullableStringFieldUpdateOperationsInput | string | null
+    tipShopeepay?: NullableStringFieldUpdateOperationsInput | string | null
     tipBank?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -106743,6 +115110,7 @@ export namespace Prisma {
     tenantsKtpVerified?: TenantUncheckedUpdateManyWithoutKtpVerifiedByNestedInput
     roomTransfersCreated?: RoomTransferUncheckedUpdateManyWithoutCreatedByNestedInput
     peerReportsModerated?: PeerBehaviorReportUncheckedUpdateManyWithoutModeratedByNestedInput
+    marketAnalysesCreated?: MarketAnalysisUncheckedUpdateManyWithoutCreatedByNestedInput
   }
 
   export type InvoiceUpsertWithWhereUniqueWithoutStayInput = {
@@ -107065,6 +115433,7 @@ export namespace Prisma {
     staffReviews?: StaffReviewCreateNestedManyWithoutTenantInput
     loyaltyPoints?: LoyaltyPointCreateNestedManyWithoutTenantInput
     redemptions?: RedemptionCreateNestedManyWithoutTenantInput
+    serviceInterests?: ServiceInterestCreateNestedManyWithoutTenantInput
     referralsMade?: TenantReferralCreateNestedManyWithoutReferrerInput
     referredReferral?: TenantReferralCreateNestedOneWithoutReferredInput
     peerReportsMade?: PeerBehaviorReportCreateNestedManyWithoutReporterInput
@@ -107105,6 +115474,7 @@ export namespace Prisma {
     staffReviews?: StaffReviewUncheckedCreateNestedManyWithoutTenantInput
     loyaltyPoints?: LoyaltyPointUncheckedCreateNestedManyWithoutTenantInput
     redemptions?: RedemptionUncheckedCreateNestedManyWithoutTenantInput
+    serviceInterests?: ServiceInterestUncheckedCreateNestedManyWithoutTenantInput
     referralsMade?: TenantReferralUncheckedCreateNestedManyWithoutReferrerInput
     referredReferral?: TenantReferralUncheckedCreateNestedOneWithoutReferredInput
     peerReportsMade?: PeerBehaviorReportUncheckedCreateNestedManyWithoutReporterInput
@@ -107121,6 +115491,8 @@ export namespace Prisma {
     name?: string | null
     floor?: string | null
     status?: $Enums.RoomStatus
+    category?: $Enums.RoomCategory
+    roomType?: $Enums.RoomType
     dailyRateRupiah?: number | null
     weeklyRateRupiah?: number | null
     biWeeklyRateRupiah?: number | null
@@ -107160,6 +115532,8 @@ export namespace Prisma {
     name?: string | null
     floor?: string | null
     status?: $Enums.RoomStatus
+    category?: $Enums.RoomCategory
+    roomType?: $Enums.RoomType
     dailyRateRupiah?: number | null
     weeklyRateRupiah?: number | null
     biWeeklyRateRupiah?: number | null
@@ -107209,6 +115583,7 @@ export namespace Prisma {
     tipGopay?: string | null
     tipOvo?: string | null
     tipDana?: string | null
+    tipShopeepay?: string | null
     tipBank?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -107247,6 +115622,7 @@ export namespace Prisma {
     tenantsKtpVerified?: TenantCreateNestedManyWithoutKtpVerifiedByInput
     roomTransfersCreated?: RoomTransferCreateNestedManyWithoutCreatedByInput
     peerReportsModerated?: PeerBehaviorReportCreateNestedManyWithoutModeratedByInput
+    marketAnalysesCreated?: MarketAnalysisCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserUncheckedCreateWithoutDepositLedgerEntriesActedInput = {
@@ -107262,6 +115638,7 @@ export namespace Prisma {
     tipGopay?: string | null
     tipOvo?: string | null
     tipDana?: string | null
+    tipShopeepay?: string | null
     tipBank?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -107299,6 +115676,7 @@ export namespace Prisma {
     tenantsKtpVerified?: TenantUncheckedCreateNestedManyWithoutKtpVerifiedByInput
     roomTransfersCreated?: RoomTransferUncheckedCreateNestedManyWithoutCreatedByInput
     peerReportsModerated?: PeerBehaviorReportUncheckedCreateNestedManyWithoutModeratedByInput
+    marketAnalysesCreated?: MarketAnalysisUncheckedCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserCreateOrConnectWithoutDepositLedgerEntriesActedInput = {
@@ -107484,6 +115862,7 @@ export namespace Prisma {
     staffReviews?: StaffReviewUpdateManyWithoutTenantNestedInput
     loyaltyPoints?: LoyaltyPointUpdateManyWithoutTenantNestedInput
     redemptions?: RedemptionUpdateManyWithoutTenantNestedInput
+    serviceInterests?: ServiceInterestUpdateManyWithoutTenantNestedInput
     referralsMade?: TenantReferralUpdateManyWithoutReferrerNestedInput
     referredReferral?: TenantReferralUpdateOneWithoutReferredNestedInput
     peerReportsMade?: PeerBehaviorReportUpdateManyWithoutReporterNestedInput
@@ -107524,6 +115903,7 @@ export namespace Prisma {
     staffReviews?: StaffReviewUncheckedUpdateManyWithoutTenantNestedInput
     loyaltyPoints?: LoyaltyPointUncheckedUpdateManyWithoutTenantNestedInput
     redemptions?: RedemptionUncheckedUpdateManyWithoutTenantNestedInput
+    serviceInterests?: ServiceInterestUncheckedUpdateManyWithoutTenantNestedInput
     referralsMade?: TenantReferralUncheckedUpdateManyWithoutReferrerNestedInput
     referredReferral?: TenantReferralUncheckedUpdateOneWithoutReferredNestedInput
     peerReportsMade?: PeerBehaviorReportUncheckedUpdateManyWithoutReporterNestedInput
@@ -107546,6 +115926,8 @@ export namespace Prisma {
     name?: NullableStringFieldUpdateOperationsInput | string | null
     floor?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumRoomStatusFieldUpdateOperationsInput | $Enums.RoomStatus
+    category?: EnumRoomCategoryFieldUpdateOperationsInput | $Enums.RoomCategory
+    roomType?: EnumRoomTypeFieldUpdateOperationsInput | $Enums.RoomType
     dailyRateRupiah?: NullableIntFieldUpdateOperationsInput | number | null
     weeklyRateRupiah?: NullableIntFieldUpdateOperationsInput | number | null
     biWeeklyRateRupiah?: NullableIntFieldUpdateOperationsInput | number | null
@@ -107585,6 +115967,8 @@ export namespace Prisma {
     name?: NullableStringFieldUpdateOperationsInput | string | null
     floor?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumRoomStatusFieldUpdateOperationsInput | $Enums.RoomStatus
+    category?: EnumRoomCategoryFieldUpdateOperationsInput | $Enums.RoomCategory
+    roomType?: EnumRoomTypeFieldUpdateOperationsInput | $Enums.RoomType
     dailyRateRupiah?: NullableIntFieldUpdateOperationsInput | number | null
     weeklyRateRupiah?: NullableIntFieldUpdateOperationsInput | number | null
     biWeeklyRateRupiah?: NullableIntFieldUpdateOperationsInput | number | null
@@ -107640,6 +116024,7 @@ export namespace Prisma {
     tipGopay?: NullableStringFieldUpdateOperationsInput | string | null
     tipOvo?: NullableStringFieldUpdateOperationsInput | string | null
     tipDana?: NullableStringFieldUpdateOperationsInput | string | null
+    tipShopeepay?: NullableStringFieldUpdateOperationsInput | string | null
     tipBank?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -107678,6 +116063,7 @@ export namespace Prisma {
     tenantsKtpVerified?: TenantUpdateManyWithoutKtpVerifiedByNestedInput
     roomTransfersCreated?: RoomTransferUpdateManyWithoutCreatedByNestedInput
     peerReportsModerated?: PeerBehaviorReportUpdateManyWithoutModeratedByNestedInput
+    marketAnalysesCreated?: MarketAnalysisUpdateManyWithoutCreatedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutDepositLedgerEntriesActedInput = {
@@ -107693,6 +116079,7 @@ export namespace Prisma {
     tipGopay?: NullableStringFieldUpdateOperationsInput | string | null
     tipOvo?: NullableStringFieldUpdateOperationsInput | string | null
     tipDana?: NullableStringFieldUpdateOperationsInput | string | null
+    tipShopeepay?: NullableStringFieldUpdateOperationsInput | string | null
     tipBank?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -107730,6 +116117,7 @@ export namespace Prisma {
     tenantsKtpVerified?: TenantUncheckedUpdateManyWithoutKtpVerifiedByNestedInput
     roomTransfersCreated?: RoomTransferUncheckedUpdateManyWithoutCreatedByNestedInput
     peerReportsModerated?: PeerBehaviorReportUncheckedUpdateManyWithoutModeratedByNestedInput
+    marketAnalysesCreated?: MarketAnalysisUncheckedUpdateManyWithoutCreatedByNestedInput
   }
 
   export type RoomCreateWithoutMeterReadingsInput = {
@@ -107737,6 +116125,8 @@ export namespace Prisma {
     name?: string | null
     floor?: string | null
     status?: $Enums.RoomStatus
+    category?: $Enums.RoomCategory
+    roomType?: $Enums.RoomType
     dailyRateRupiah?: number | null
     weeklyRateRupiah?: number | null
     biWeeklyRateRupiah?: number | null
@@ -107776,6 +116166,8 @@ export namespace Prisma {
     name?: string | null
     floor?: string | null
     status?: $Enums.RoomStatus
+    category?: $Enums.RoomCategory
+    roomType?: $Enums.RoomType
     dailyRateRupiah?: number | null
     weeklyRateRupiah?: number | null
     biWeeklyRateRupiah?: number | null
@@ -107825,6 +116217,7 @@ export namespace Prisma {
     tipGopay?: string | null
     tipOvo?: string | null
     tipDana?: string | null
+    tipShopeepay?: string | null
     tipBank?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -107863,6 +116256,7 @@ export namespace Prisma {
     tenantsKtpVerified?: TenantCreateNestedManyWithoutKtpVerifiedByInput
     roomTransfersCreated?: RoomTransferCreateNestedManyWithoutCreatedByInput
     peerReportsModerated?: PeerBehaviorReportCreateNestedManyWithoutModeratedByInput
+    marketAnalysesCreated?: MarketAnalysisCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserUncheckedCreateWithoutMeterReadingsRecordedInput = {
@@ -107878,6 +116272,7 @@ export namespace Prisma {
     tipGopay?: string | null
     tipOvo?: string | null
     tipDana?: string | null
+    tipShopeepay?: string | null
     tipBank?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -107915,6 +116310,7 @@ export namespace Prisma {
     tenantsKtpVerified?: TenantUncheckedCreateNestedManyWithoutKtpVerifiedByInput
     roomTransfersCreated?: RoomTransferUncheckedCreateNestedManyWithoutCreatedByInput
     peerReportsModerated?: PeerBehaviorReportUncheckedCreateNestedManyWithoutModeratedByInput
+    marketAnalysesCreated?: MarketAnalysisUncheckedCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserCreateOrConnectWithoutMeterReadingsRecordedInput = {
@@ -107938,6 +116334,8 @@ export namespace Prisma {
     name?: NullableStringFieldUpdateOperationsInput | string | null
     floor?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumRoomStatusFieldUpdateOperationsInput | $Enums.RoomStatus
+    category?: EnumRoomCategoryFieldUpdateOperationsInput | $Enums.RoomCategory
+    roomType?: EnumRoomTypeFieldUpdateOperationsInput | $Enums.RoomType
     dailyRateRupiah?: NullableIntFieldUpdateOperationsInput | number | null
     weeklyRateRupiah?: NullableIntFieldUpdateOperationsInput | number | null
     biWeeklyRateRupiah?: NullableIntFieldUpdateOperationsInput | number | null
@@ -107977,6 +116375,8 @@ export namespace Prisma {
     name?: NullableStringFieldUpdateOperationsInput | string | null
     floor?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumRoomStatusFieldUpdateOperationsInput | $Enums.RoomStatus
+    category?: EnumRoomCategoryFieldUpdateOperationsInput | $Enums.RoomCategory
+    roomType?: EnumRoomTypeFieldUpdateOperationsInput | $Enums.RoomType
     dailyRateRupiah?: NullableIntFieldUpdateOperationsInput | number | null
     weeklyRateRupiah?: NullableIntFieldUpdateOperationsInput | number | null
     biWeeklyRateRupiah?: NullableIntFieldUpdateOperationsInput | number | null
@@ -108032,6 +116432,7 @@ export namespace Prisma {
     tipGopay?: NullableStringFieldUpdateOperationsInput | string | null
     tipOvo?: NullableStringFieldUpdateOperationsInput | string | null
     tipDana?: NullableStringFieldUpdateOperationsInput | string | null
+    tipShopeepay?: NullableStringFieldUpdateOperationsInput | string | null
     tipBank?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -108070,6 +116471,7 @@ export namespace Prisma {
     tenantsKtpVerified?: TenantUpdateManyWithoutKtpVerifiedByNestedInput
     roomTransfersCreated?: RoomTransferUpdateManyWithoutCreatedByNestedInput
     peerReportsModerated?: PeerBehaviorReportUpdateManyWithoutModeratedByNestedInput
+    marketAnalysesCreated?: MarketAnalysisUpdateManyWithoutCreatedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutMeterReadingsRecordedInput = {
@@ -108085,6 +116487,7 @@ export namespace Prisma {
     tipGopay?: NullableStringFieldUpdateOperationsInput | string | null
     tipOvo?: NullableStringFieldUpdateOperationsInput | string | null
     tipDana?: NullableStringFieldUpdateOperationsInput | string | null
+    tipShopeepay?: NullableStringFieldUpdateOperationsInput | string | null
     tipBank?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -108122,6 +116525,7 @@ export namespace Prisma {
     tenantsKtpVerified?: TenantUncheckedUpdateManyWithoutKtpVerifiedByNestedInput
     roomTransfersCreated?: RoomTransferUncheckedUpdateManyWithoutCreatedByNestedInput
     peerReportsModerated?: PeerBehaviorReportUncheckedUpdateManyWithoutModeratedByNestedInput
+    marketAnalysesCreated?: MarketAnalysisUncheckedUpdateManyWithoutCreatedByNestedInput
   }
 
   export type StayCreateWithoutInvoicesInput = {
@@ -108263,6 +116667,7 @@ export namespace Prisma {
     tipGopay?: string | null
     tipOvo?: string | null
     tipDana?: string | null
+    tipShopeepay?: string | null
     tipBank?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -108301,6 +116706,7 @@ export namespace Prisma {
     tenantsKtpVerified?: TenantCreateNestedManyWithoutKtpVerifiedByInput
     roomTransfersCreated?: RoomTransferCreateNestedManyWithoutCreatedByInput
     peerReportsModerated?: PeerBehaviorReportCreateNestedManyWithoutModeratedByInput
+    marketAnalysesCreated?: MarketAnalysisCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserUncheckedCreateWithoutInvoicesCreatedInput = {
@@ -108316,6 +116722,7 @@ export namespace Prisma {
     tipGopay?: string | null
     tipOvo?: string | null
     tipDana?: string | null
+    tipShopeepay?: string | null
     tipBank?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -108353,6 +116760,7 @@ export namespace Prisma {
     tenantsKtpVerified?: TenantUncheckedCreateNestedManyWithoutKtpVerifiedByInput
     roomTransfersCreated?: RoomTransferUncheckedCreateNestedManyWithoutCreatedByInput
     peerReportsModerated?: PeerBehaviorReportUncheckedCreateNestedManyWithoutModeratedByInput
+    marketAnalysesCreated?: MarketAnalysisUncheckedCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserCreateOrConnectWithoutInvoicesCreatedInput = {
@@ -108649,6 +117057,7 @@ export namespace Prisma {
     tipGopay?: NullableStringFieldUpdateOperationsInput | string | null
     tipOvo?: NullableStringFieldUpdateOperationsInput | string | null
     tipDana?: NullableStringFieldUpdateOperationsInput | string | null
+    tipShopeepay?: NullableStringFieldUpdateOperationsInput | string | null
     tipBank?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -108687,6 +117096,7 @@ export namespace Prisma {
     tenantsKtpVerified?: TenantUpdateManyWithoutKtpVerifiedByNestedInput
     roomTransfersCreated?: RoomTransferUpdateManyWithoutCreatedByNestedInput
     peerReportsModerated?: PeerBehaviorReportUpdateManyWithoutModeratedByNestedInput
+    marketAnalysesCreated?: MarketAnalysisUpdateManyWithoutCreatedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutInvoicesCreatedInput = {
@@ -108702,6 +117112,7 @@ export namespace Prisma {
     tipGopay?: NullableStringFieldUpdateOperationsInput | string | null
     tipOvo?: NullableStringFieldUpdateOperationsInput | string | null
     tipDana?: NullableStringFieldUpdateOperationsInput | string | null
+    tipShopeepay?: NullableStringFieldUpdateOperationsInput | string | null
     tipBank?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -108739,6 +117150,7 @@ export namespace Prisma {
     tenantsKtpVerified?: TenantUncheckedUpdateManyWithoutKtpVerifiedByNestedInput
     roomTransfersCreated?: RoomTransferUncheckedUpdateManyWithoutCreatedByNestedInput
     peerReportsModerated?: PeerBehaviorReportUncheckedUpdateManyWithoutModeratedByNestedInput
+    marketAnalysesCreated?: MarketAnalysisUncheckedUpdateManyWithoutCreatedByNestedInput
   }
 
   export type InvoiceLineUpsertWithWhereUniqueWithoutInvoiceInput = {
@@ -108956,6 +117368,7 @@ export namespace Prisma {
     tipGopay?: string | null
     tipOvo?: string | null
     tipDana?: string | null
+    tipShopeepay?: string | null
     tipBank?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -108994,6 +117407,7 @@ export namespace Prisma {
     tenantsKtpVerified?: TenantCreateNestedManyWithoutKtpVerifiedByInput
     roomTransfersCreated?: RoomTransferCreateNestedManyWithoutCreatedByInput
     peerReportsModerated?: PeerBehaviorReportCreateNestedManyWithoutModeratedByInput
+    marketAnalysesCreated?: MarketAnalysisCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserUncheckedCreateWithoutPaymentsCapturedInput = {
@@ -109009,6 +117423,7 @@ export namespace Prisma {
     tipGopay?: string | null
     tipOvo?: string | null
     tipDana?: string | null
+    tipShopeepay?: string | null
     tipBank?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -109046,6 +117461,7 @@ export namespace Prisma {
     tenantsKtpVerified?: TenantUncheckedCreateNestedManyWithoutKtpVerifiedByInput
     roomTransfersCreated?: RoomTransferUncheckedCreateNestedManyWithoutCreatedByInput
     peerReportsModerated?: PeerBehaviorReportUncheckedCreateNestedManyWithoutModeratedByInput
+    marketAnalysesCreated?: MarketAnalysisUncheckedCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserCreateOrConnectWithoutPaymentsCapturedInput = {
@@ -109125,6 +117541,7 @@ export namespace Prisma {
     tipGopay?: NullableStringFieldUpdateOperationsInput | string | null
     tipOvo?: NullableStringFieldUpdateOperationsInput | string | null
     tipDana?: NullableStringFieldUpdateOperationsInput | string | null
+    tipShopeepay?: NullableStringFieldUpdateOperationsInput | string | null
     tipBank?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -109163,6 +117580,7 @@ export namespace Prisma {
     tenantsKtpVerified?: TenantUpdateManyWithoutKtpVerifiedByNestedInput
     roomTransfersCreated?: RoomTransferUpdateManyWithoutCreatedByNestedInput
     peerReportsModerated?: PeerBehaviorReportUpdateManyWithoutModeratedByNestedInput
+    marketAnalysesCreated?: MarketAnalysisUpdateManyWithoutCreatedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutPaymentsCapturedInput = {
@@ -109178,6 +117596,7 @@ export namespace Prisma {
     tipGopay?: NullableStringFieldUpdateOperationsInput | string | null
     tipOvo?: NullableStringFieldUpdateOperationsInput | string | null
     tipDana?: NullableStringFieldUpdateOperationsInput | string | null
+    tipShopeepay?: NullableStringFieldUpdateOperationsInput | string | null
     tipBank?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -109215,6 +117634,7 @@ export namespace Prisma {
     tenantsKtpVerified?: TenantUncheckedUpdateManyWithoutKtpVerifiedByNestedInput
     roomTransfersCreated?: RoomTransferUncheckedUpdateManyWithoutCreatedByNestedInput
     peerReportsModerated?: PeerBehaviorReportUncheckedUpdateManyWithoutModeratedByNestedInput
+    marketAnalysesCreated?: MarketAnalysisUncheckedUpdateManyWithoutCreatedByNestedInput
   }
 
   export type UserCreateWithoutPasswordResetTokensInput = {
@@ -109228,6 +117648,7 @@ export namespace Prisma {
     tipGopay?: string | null
     tipOvo?: string | null
     tipDana?: string | null
+    tipShopeepay?: string | null
     tipBank?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -109266,6 +117687,7 @@ export namespace Prisma {
     tenantsKtpVerified?: TenantCreateNestedManyWithoutKtpVerifiedByInput
     roomTransfersCreated?: RoomTransferCreateNestedManyWithoutCreatedByInput
     peerReportsModerated?: PeerBehaviorReportCreateNestedManyWithoutModeratedByInput
+    marketAnalysesCreated?: MarketAnalysisCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserUncheckedCreateWithoutPasswordResetTokensInput = {
@@ -109281,6 +117703,7 @@ export namespace Prisma {
     tipGopay?: string | null
     tipOvo?: string | null
     tipDana?: string | null
+    tipShopeepay?: string | null
     tipBank?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -109318,6 +117741,7 @@ export namespace Prisma {
     tenantsKtpVerified?: TenantUncheckedCreateNestedManyWithoutKtpVerifiedByInput
     roomTransfersCreated?: RoomTransferUncheckedCreateNestedManyWithoutCreatedByInput
     peerReportsModerated?: PeerBehaviorReportUncheckedCreateNestedManyWithoutModeratedByInput
+    marketAnalysesCreated?: MarketAnalysisUncheckedCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserCreateOrConnectWithoutPasswordResetTokensInput = {
@@ -109347,6 +117771,7 @@ export namespace Prisma {
     tipGopay?: NullableStringFieldUpdateOperationsInput | string | null
     tipOvo?: NullableStringFieldUpdateOperationsInput | string | null
     tipDana?: NullableStringFieldUpdateOperationsInput | string | null
+    tipShopeepay?: NullableStringFieldUpdateOperationsInput | string | null
     tipBank?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -109385,6 +117810,7 @@ export namespace Prisma {
     tenantsKtpVerified?: TenantUpdateManyWithoutKtpVerifiedByNestedInput
     roomTransfersCreated?: RoomTransferUpdateManyWithoutCreatedByNestedInput
     peerReportsModerated?: PeerBehaviorReportUpdateManyWithoutModeratedByNestedInput
+    marketAnalysesCreated?: MarketAnalysisUpdateManyWithoutCreatedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutPasswordResetTokensInput = {
@@ -109400,6 +117826,7 @@ export namespace Prisma {
     tipGopay?: NullableStringFieldUpdateOperationsInput | string | null
     tipOvo?: NullableStringFieldUpdateOperationsInput | string | null
     tipDana?: NullableStringFieldUpdateOperationsInput | string | null
+    tipShopeepay?: NullableStringFieldUpdateOperationsInput | string | null
     tipBank?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -109437,6 +117864,7 @@ export namespace Prisma {
     tenantsKtpVerified?: TenantUncheckedUpdateManyWithoutKtpVerifiedByNestedInput
     roomTransfersCreated?: RoomTransferUncheckedUpdateManyWithoutCreatedByNestedInput
     peerReportsModerated?: PeerBehaviorReportUncheckedUpdateManyWithoutModeratedByNestedInput
+    marketAnalysesCreated?: MarketAnalysisUncheckedUpdateManyWithoutCreatedByNestedInput
   }
 
   export type StayCreateWithoutPaymentSubmissionsInput = {
@@ -109644,6 +118072,7 @@ export namespace Prisma {
     depositLedgerEntries?: TenantDepositLedgerEntryCreateNestedManyWithoutTenantInput
     loyaltyPoints?: LoyaltyPointCreateNestedManyWithoutTenantInput
     redemptions?: RedemptionCreateNestedManyWithoutTenantInput
+    serviceInterests?: ServiceInterestCreateNestedManyWithoutTenantInput
     referralsMade?: TenantReferralCreateNestedManyWithoutReferrerInput
     referredReferral?: TenantReferralCreateNestedOneWithoutReferredInput
     peerReportsMade?: PeerBehaviorReportCreateNestedManyWithoutReporterInput
@@ -109684,6 +118113,7 @@ export namespace Prisma {
     depositLedgerEntries?: TenantDepositLedgerEntryUncheckedCreateNestedManyWithoutTenantInput
     loyaltyPoints?: LoyaltyPointUncheckedCreateNestedManyWithoutTenantInput
     redemptions?: RedemptionUncheckedCreateNestedManyWithoutTenantInput
+    serviceInterests?: ServiceInterestUncheckedCreateNestedManyWithoutTenantInput
     referralsMade?: TenantReferralUncheckedCreateNestedManyWithoutReferrerInput
     referredReferral?: TenantReferralUncheckedCreateNestedOneWithoutReferredInput
     peerReportsMade?: PeerBehaviorReportUncheckedCreateNestedManyWithoutReporterInput
@@ -109706,6 +118136,7 @@ export namespace Prisma {
     tipGopay?: string | null
     tipOvo?: string | null
     tipDana?: string | null
+    tipShopeepay?: string | null
     tipBank?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -109744,6 +118175,7 @@ export namespace Prisma {
     tenantsKtpVerified?: TenantCreateNestedManyWithoutKtpVerifiedByInput
     roomTransfersCreated?: RoomTransferCreateNestedManyWithoutCreatedByInput
     peerReportsModerated?: PeerBehaviorReportCreateNestedManyWithoutModeratedByInput
+    marketAnalysesCreated?: MarketAnalysisCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserUncheckedCreateWithoutPaymentSubmissionsSubmittedInput = {
@@ -109759,6 +118191,7 @@ export namespace Prisma {
     tipGopay?: string | null
     tipOvo?: string | null
     tipDana?: string | null
+    tipShopeepay?: string | null
     tipBank?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -109796,6 +118229,7 @@ export namespace Prisma {
     tenantsKtpVerified?: TenantUncheckedCreateNestedManyWithoutKtpVerifiedByInput
     roomTransfersCreated?: RoomTransferUncheckedCreateNestedManyWithoutCreatedByInput
     peerReportsModerated?: PeerBehaviorReportUncheckedCreateNestedManyWithoutModeratedByInput
+    marketAnalysesCreated?: MarketAnalysisUncheckedCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserCreateOrConnectWithoutPaymentSubmissionsSubmittedInput = {
@@ -109814,6 +118248,7 @@ export namespace Prisma {
     tipGopay?: string | null
     tipOvo?: string | null
     tipDana?: string | null
+    tipShopeepay?: string | null
     tipBank?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -109852,6 +118287,7 @@ export namespace Prisma {
     tenantsKtpVerified?: TenantCreateNestedManyWithoutKtpVerifiedByInput
     roomTransfersCreated?: RoomTransferCreateNestedManyWithoutCreatedByInput
     peerReportsModerated?: PeerBehaviorReportCreateNestedManyWithoutModeratedByInput
+    marketAnalysesCreated?: MarketAnalysisCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserUncheckedCreateWithoutPaymentSubmissionsReviewedInput = {
@@ -109867,6 +118303,7 @@ export namespace Prisma {
     tipGopay?: string | null
     tipOvo?: string | null
     tipDana?: string | null
+    tipShopeepay?: string | null
     tipBank?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -109904,6 +118341,7 @@ export namespace Prisma {
     tenantsKtpVerified?: TenantUncheckedCreateNestedManyWithoutKtpVerifiedByInput
     roomTransfersCreated?: RoomTransferUncheckedCreateNestedManyWithoutCreatedByInput
     peerReportsModerated?: PeerBehaviorReportUncheckedCreateNestedManyWithoutModeratedByInput
+    marketAnalysesCreated?: MarketAnalysisUncheckedCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserCreateOrConnectWithoutPaymentSubmissionsReviewedInput = {
@@ -110139,6 +118577,7 @@ export namespace Prisma {
     depositLedgerEntries?: TenantDepositLedgerEntryUpdateManyWithoutTenantNestedInput
     loyaltyPoints?: LoyaltyPointUpdateManyWithoutTenantNestedInput
     redemptions?: RedemptionUpdateManyWithoutTenantNestedInput
+    serviceInterests?: ServiceInterestUpdateManyWithoutTenantNestedInput
     referralsMade?: TenantReferralUpdateManyWithoutReferrerNestedInput
     referredReferral?: TenantReferralUpdateOneWithoutReferredNestedInput
     peerReportsMade?: PeerBehaviorReportUpdateManyWithoutReporterNestedInput
@@ -110179,6 +118618,7 @@ export namespace Prisma {
     depositLedgerEntries?: TenantDepositLedgerEntryUncheckedUpdateManyWithoutTenantNestedInput
     loyaltyPoints?: LoyaltyPointUncheckedUpdateManyWithoutTenantNestedInput
     redemptions?: RedemptionUncheckedUpdateManyWithoutTenantNestedInput
+    serviceInterests?: ServiceInterestUncheckedUpdateManyWithoutTenantNestedInput
     referralsMade?: TenantReferralUncheckedUpdateManyWithoutReferrerNestedInput
     referredReferral?: TenantReferralUncheckedUpdateOneWithoutReferredNestedInput
     peerReportsMade?: PeerBehaviorReportUncheckedUpdateManyWithoutReporterNestedInput
@@ -110207,6 +118647,7 @@ export namespace Prisma {
     tipGopay?: NullableStringFieldUpdateOperationsInput | string | null
     tipOvo?: NullableStringFieldUpdateOperationsInput | string | null
     tipDana?: NullableStringFieldUpdateOperationsInput | string | null
+    tipShopeepay?: NullableStringFieldUpdateOperationsInput | string | null
     tipBank?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -110245,6 +118686,7 @@ export namespace Prisma {
     tenantsKtpVerified?: TenantUpdateManyWithoutKtpVerifiedByNestedInput
     roomTransfersCreated?: RoomTransferUpdateManyWithoutCreatedByNestedInput
     peerReportsModerated?: PeerBehaviorReportUpdateManyWithoutModeratedByNestedInput
+    marketAnalysesCreated?: MarketAnalysisUpdateManyWithoutCreatedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutPaymentSubmissionsSubmittedInput = {
@@ -110260,6 +118702,7 @@ export namespace Prisma {
     tipGopay?: NullableStringFieldUpdateOperationsInput | string | null
     tipOvo?: NullableStringFieldUpdateOperationsInput | string | null
     tipDana?: NullableStringFieldUpdateOperationsInput | string | null
+    tipShopeepay?: NullableStringFieldUpdateOperationsInput | string | null
     tipBank?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -110297,6 +118740,7 @@ export namespace Prisma {
     tenantsKtpVerified?: TenantUncheckedUpdateManyWithoutKtpVerifiedByNestedInput
     roomTransfersCreated?: RoomTransferUncheckedUpdateManyWithoutCreatedByNestedInput
     peerReportsModerated?: PeerBehaviorReportUncheckedUpdateManyWithoutModeratedByNestedInput
+    marketAnalysesCreated?: MarketAnalysisUncheckedUpdateManyWithoutCreatedByNestedInput
   }
 
   export type UserUpsertWithoutPaymentSubmissionsReviewedInput = {
@@ -110321,6 +118765,7 @@ export namespace Prisma {
     tipGopay?: NullableStringFieldUpdateOperationsInput | string | null
     tipOvo?: NullableStringFieldUpdateOperationsInput | string | null
     tipDana?: NullableStringFieldUpdateOperationsInput | string | null
+    tipShopeepay?: NullableStringFieldUpdateOperationsInput | string | null
     tipBank?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -110359,6 +118804,7 @@ export namespace Prisma {
     tenantsKtpVerified?: TenantUpdateManyWithoutKtpVerifiedByNestedInput
     roomTransfersCreated?: RoomTransferUpdateManyWithoutCreatedByNestedInput
     peerReportsModerated?: PeerBehaviorReportUpdateManyWithoutModeratedByNestedInput
+    marketAnalysesCreated?: MarketAnalysisUpdateManyWithoutCreatedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutPaymentSubmissionsReviewedInput = {
@@ -110374,6 +118820,7 @@ export namespace Prisma {
     tipGopay?: NullableStringFieldUpdateOperationsInput | string | null
     tipOvo?: NullableStringFieldUpdateOperationsInput | string | null
     tipDana?: NullableStringFieldUpdateOperationsInput | string | null
+    tipShopeepay?: NullableStringFieldUpdateOperationsInput | string | null
     tipBank?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -110411,6 +118858,7 @@ export namespace Prisma {
     tenantsKtpVerified?: TenantUncheckedUpdateManyWithoutKtpVerifiedByNestedInput
     roomTransfersCreated?: RoomTransferUncheckedUpdateManyWithoutCreatedByNestedInput
     peerReportsModerated?: PeerBehaviorReportUncheckedUpdateManyWithoutModeratedByNestedInput
+    marketAnalysesCreated?: MarketAnalysisUncheckedUpdateManyWithoutCreatedByNestedInput
   }
 
   export type TenantCreateWithoutTicketsInput = {
@@ -110446,6 +118894,7 @@ export namespace Prisma {
     depositLedgerEntries?: TenantDepositLedgerEntryCreateNestedManyWithoutTenantInput
     loyaltyPoints?: LoyaltyPointCreateNestedManyWithoutTenantInput
     redemptions?: RedemptionCreateNestedManyWithoutTenantInput
+    serviceInterests?: ServiceInterestCreateNestedManyWithoutTenantInput
     referralsMade?: TenantReferralCreateNestedManyWithoutReferrerInput
     referredReferral?: TenantReferralCreateNestedOneWithoutReferredInput
     peerReportsMade?: PeerBehaviorReportCreateNestedManyWithoutReporterInput
@@ -110486,6 +118935,7 @@ export namespace Prisma {
     depositLedgerEntries?: TenantDepositLedgerEntryUncheckedCreateNestedManyWithoutTenantInput
     loyaltyPoints?: LoyaltyPointUncheckedCreateNestedManyWithoutTenantInput
     redemptions?: RedemptionUncheckedCreateNestedManyWithoutTenantInput
+    serviceInterests?: ServiceInterestUncheckedCreateNestedManyWithoutTenantInput
     referralsMade?: TenantReferralUncheckedCreateNestedManyWithoutReferrerInput
     referredReferral?: TenantReferralUncheckedCreateNestedOneWithoutReferredInput
     peerReportsMade?: PeerBehaviorReportUncheckedCreateNestedManyWithoutReporterInput
@@ -110502,6 +118952,8 @@ export namespace Prisma {
     name?: string | null
     floor?: string | null
     status?: $Enums.RoomStatus
+    category?: $Enums.RoomCategory
+    roomType?: $Enums.RoomType
     dailyRateRupiah?: number | null
     weeklyRateRupiah?: number | null
     biWeeklyRateRupiah?: number | null
@@ -110541,6 +118993,8 @@ export namespace Prisma {
     name?: string | null
     floor?: string | null
     status?: $Enums.RoomStatus
+    category?: $Enums.RoomCategory
+    roomType?: $Enums.RoomType
     dailyRateRupiah?: number | null
     weeklyRateRupiah?: number | null
     biWeeklyRateRupiah?: number | null
@@ -110718,6 +119172,7 @@ export namespace Prisma {
     tipGopay?: string | null
     tipOvo?: string | null
     tipDana?: string | null
+    tipShopeepay?: string | null
     tipBank?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -110756,6 +119211,7 @@ export namespace Prisma {
     tenantsKtpVerified?: TenantCreateNestedManyWithoutKtpVerifiedByInput
     roomTransfersCreated?: RoomTransferCreateNestedManyWithoutCreatedByInput
     peerReportsModerated?: PeerBehaviorReportCreateNestedManyWithoutModeratedByInput
+    marketAnalysesCreated?: MarketAnalysisCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserUncheckedCreateWithoutTicketsAssignedInput = {
@@ -110771,6 +119227,7 @@ export namespace Prisma {
     tipGopay?: string | null
     tipOvo?: string | null
     tipDana?: string | null
+    tipShopeepay?: string | null
     tipBank?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -110808,6 +119265,7 @@ export namespace Prisma {
     tenantsKtpVerified?: TenantUncheckedCreateNestedManyWithoutKtpVerifiedByInput
     roomTransfersCreated?: RoomTransferUncheckedCreateNestedManyWithoutCreatedByInput
     peerReportsModerated?: PeerBehaviorReportUncheckedCreateNestedManyWithoutModeratedByInput
+    marketAnalysesCreated?: MarketAnalysisUncheckedCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserCreateOrConnectWithoutTicketsAssignedInput = {
@@ -110994,6 +119452,7 @@ export namespace Prisma {
     depositLedgerEntries?: TenantDepositLedgerEntryUpdateManyWithoutTenantNestedInput
     loyaltyPoints?: LoyaltyPointUpdateManyWithoutTenantNestedInput
     redemptions?: RedemptionUpdateManyWithoutTenantNestedInput
+    serviceInterests?: ServiceInterestUpdateManyWithoutTenantNestedInput
     referralsMade?: TenantReferralUpdateManyWithoutReferrerNestedInput
     referredReferral?: TenantReferralUpdateOneWithoutReferredNestedInput
     peerReportsMade?: PeerBehaviorReportUpdateManyWithoutReporterNestedInput
@@ -111034,6 +119493,7 @@ export namespace Prisma {
     depositLedgerEntries?: TenantDepositLedgerEntryUncheckedUpdateManyWithoutTenantNestedInput
     loyaltyPoints?: LoyaltyPointUncheckedUpdateManyWithoutTenantNestedInput
     redemptions?: RedemptionUncheckedUpdateManyWithoutTenantNestedInput
+    serviceInterests?: ServiceInterestUncheckedUpdateManyWithoutTenantNestedInput
     referralsMade?: TenantReferralUncheckedUpdateManyWithoutReferrerNestedInput
     referredReferral?: TenantReferralUncheckedUpdateOneWithoutReferredNestedInput
     peerReportsMade?: PeerBehaviorReportUncheckedUpdateManyWithoutReporterNestedInput
@@ -111056,6 +119516,8 @@ export namespace Prisma {
     name?: NullableStringFieldUpdateOperationsInput | string | null
     floor?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumRoomStatusFieldUpdateOperationsInput | $Enums.RoomStatus
+    category?: EnumRoomCategoryFieldUpdateOperationsInput | $Enums.RoomCategory
+    roomType?: EnumRoomTypeFieldUpdateOperationsInput | $Enums.RoomType
     dailyRateRupiah?: NullableIntFieldUpdateOperationsInput | number | null
     weeklyRateRupiah?: NullableIntFieldUpdateOperationsInput | number | null
     biWeeklyRateRupiah?: NullableIntFieldUpdateOperationsInput | number | null
@@ -111095,6 +119557,8 @@ export namespace Prisma {
     name?: NullableStringFieldUpdateOperationsInput | string | null
     floor?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumRoomStatusFieldUpdateOperationsInput | $Enums.RoomStatus
+    category?: EnumRoomCategoryFieldUpdateOperationsInput | $Enums.RoomCategory
+    roomType?: EnumRoomTypeFieldUpdateOperationsInput | $Enums.RoomType
     dailyRateRupiah?: NullableIntFieldUpdateOperationsInput | number | null
     weeklyRateRupiah?: NullableIntFieldUpdateOperationsInput | number | null
     biWeeklyRateRupiah?: NullableIntFieldUpdateOperationsInput | number | null
@@ -111284,6 +119748,7 @@ export namespace Prisma {
     tipGopay?: NullableStringFieldUpdateOperationsInput | string | null
     tipOvo?: NullableStringFieldUpdateOperationsInput | string | null
     tipDana?: NullableStringFieldUpdateOperationsInput | string | null
+    tipShopeepay?: NullableStringFieldUpdateOperationsInput | string | null
     tipBank?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -111322,6 +119787,7 @@ export namespace Prisma {
     tenantsKtpVerified?: TenantUpdateManyWithoutKtpVerifiedByNestedInput
     roomTransfersCreated?: RoomTransferUpdateManyWithoutCreatedByNestedInput
     peerReportsModerated?: PeerBehaviorReportUpdateManyWithoutModeratedByNestedInput
+    marketAnalysesCreated?: MarketAnalysisUpdateManyWithoutCreatedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutTicketsAssignedInput = {
@@ -111337,6 +119803,7 @@ export namespace Prisma {
     tipGopay?: NullableStringFieldUpdateOperationsInput | string | null
     tipOvo?: NullableStringFieldUpdateOperationsInput | string | null
     tipDana?: NullableStringFieldUpdateOperationsInput | string | null
+    tipShopeepay?: NullableStringFieldUpdateOperationsInput | string | null
     tipBank?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -111374,6 +119841,7 @@ export namespace Prisma {
     tenantsKtpVerified?: TenantUncheckedUpdateManyWithoutKtpVerifiedByNestedInput
     roomTransfersCreated?: RoomTransferUncheckedUpdateManyWithoutCreatedByNestedInput
     peerReportsModerated?: PeerBehaviorReportUncheckedUpdateManyWithoutModeratedByNestedInput
+    marketAnalysesCreated?: MarketAnalysisUncheckedUpdateManyWithoutCreatedByNestedInput
   }
 
   export type RoomItemUpsertWithoutLinkedTicketsInput = {
@@ -111491,6 +119959,7 @@ export namespace Prisma {
     tipGopay?: string | null
     tipOvo?: string | null
     tipDana?: string | null
+    tipShopeepay?: string | null
     tipBank?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -111529,6 +119998,7 @@ export namespace Prisma {
     tenantsKtpVerified?: TenantCreateNestedManyWithoutKtpVerifiedByInput
     roomTransfersCreated?: RoomTransferCreateNestedManyWithoutCreatedByInput
     peerReportsModerated?: PeerBehaviorReportCreateNestedManyWithoutModeratedByInput
+    marketAnalysesCreated?: MarketAnalysisCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserUncheckedCreateWithoutStaffRoutineTemplatesCreatedInput = {
@@ -111544,6 +120014,7 @@ export namespace Prisma {
     tipGopay?: string | null
     tipOvo?: string | null
     tipDana?: string | null
+    tipShopeepay?: string | null
     tipBank?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -111581,6 +120052,7 @@ export namespace Prisma {
     tenantsKtpVerified?: TenantUncheckedCreateNestedManyWithoutKtpVerifiedByInput
     roomTransfersCreated?: RoomTransferUncheckedCreateNestedManyWithoutCreatedByInput
     peerReportsModerated?: PeerBehaviorReportUncheckedCreateNestedManyWithoutModeratedByInput
+    marketAnalysesCreated?: MarketAnalysisUncheckedCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserCreateOrConnectWithoutStaffRoutineTemplatesCreatedInput = {
@@ -111676,6 +120148,7 @@ export namespace Prisma {
     tipGopay?: NullableStringFieldUpdateOperationsInput | string | null
     tipOvo?: NullableStringFieldUpdateOperationsInput | string | null
     tipDana?: NullableStringFieldUpdateOperationsInput | string | null
+    tipShopeepay?: NullableStringFieldUpdateOperationsInput | string | null
     tipBank?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -111714,6 +120187,7 @@ export namespace Prisma {
     tenantsKtpVerified?: TenantUpdateManyWithoutKtpVerifiedByNestedInput
     roomTransfersCreated?: RoomTransferUpdateManyWithoutCreatedByNestedInput
     peerReportsModerated?: PeerBehaviorReportUpdateManyWithoutModeratedByNestedInput
+    marketAnalysesCreated?: MarketAnalysisUpdateManyWithoutCreatedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutStaffRoutineTemplatesCreatedInput = {
@@ -111729,6 +120203,7 @@ export namespace Prisma {
     tipGopay?: NullableStringFieldUpdateOperationsInput | string | null
     tipOvo?: NullableStringFieldUpdateOperationsInput | string | null
     tipDana?: NullableStringFieldUpdateOperationsInput | string | null
+    tipShopeepay?: NullableStringFieldUpdateOperationsInput | string | null
     tipBank?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -111766,6 +120241,7 @@ export namespace Prisma {
     tenantsKtpVerified?: TenantUncheckedUpdateManyWithoutKtpVerifiedByNestedInput
     roomTransfersCreated?: RoomTransferUncheckedUpdateManyWithoutCreatedByNestedInput
     peerReportsModerated?: PeerBehaviorReportUncheckedUpdateManyWithoutModeratedByNestedInput
+    marketAnalysesCreated?: MarketAnalysisUncheckedUpdateManyWithoutCreatedByNestedInput
   }
 
   export type StaffRoutineAssignmentUpsertWithWhereUniqueWithoutTemplateInput = {
@@ -111851,6 +120327,7 @@ export namespace Prisma {
     tipGopay?: string | null
     tipOvo?: string | null
     tipDana?: string | null
+    tipShopeepay?: string | null
     tipBank?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -111889,6 +120366,7 @@ export namespace Prisma {
     tenantsKtpVerified?: TenantCreateNestedManyWithoutKtpVerifiedByInput
     roomTransfersCreated?: RoomTransferCreateNestedManyWithoutCreatedByInput
     peerReportsModerated?: PeerBehaviorReportCreateNestedManyWithoutModeratedByInput
+    marketAnalysesCreated?: MarketAnalysisCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserUncheckedCreateWithoutStaffRoutineAssignmentsInput = {
@@ -111904,6 +120382,7 @@ export namespace Prisma {
     tipGopay?: string | null
     tipOvo?: string | null
     tipDana?: string | null
+    tipShopeepay?: string | null
     tipBank?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -111941,6 +120420,7 @@ export namespace Prisma {
     tenantsKtpVerified?: TenantUncheckedCreateNestedManyWithoutKtpVerifiedByInput
     roomTransfersCreated?: RoomTransferUncheckedCreateNestedManyWithoutCreatedByInput
     peerReportsModerated?: PeerBehaviorReportUncheckedCreateNestedManyWithoutModeratedByInput
+    marketAnalysesCreated?: MarketAnalysisUncheckedCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserCreateOrConnectWithoutStaffRoutineAssignmentsInput = {
@@ -111953,6 +120433,8 @@ export namespace Prisma {
     name?: string | null
     floor?: string | null
     status?: $Enums.RoomStatus
+    category?: $Enums.RoomCategory
+    roomType?: $Enums.RoomType
     dailyRateRupiah?: number | null
     weeklyRateRupiah?: number | null
     biWeeklyRateRupiah?: number | null
@@ -111992,6 +120474,8 @@ export namespace Prisma {
     name?: string | null
     floor?: string | null
     status?: $Enums.RoomStatus
+    category?: $Enums.RoomCategory
+    roomType?: $Enums.RoomType
     dailyRateRupiah?: number | null
     weeklyRateRupiah?: number | null
     biWeeklyRateRupiah?: number | null
@@ -112135,6 +120619,7 @@ export namespace Prisma {
     tipGopay?: NullableStringFieldUpdateOperationsInput | string | null
     tipOvo?: NullableStringFieldUpdateOperationsInput | string | null
     tipDana?: NullableStringFieldUpdateOperationsInput | string | null
+    tipShopeepay?: NullableStringFieldUpdateOperationsInput | string | null
     tipBank?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -112173,6 +120658,7 @@ export namespace Prisma {
     tenantsKtpVerified?: TenantUpdateManyWithoutKtpVerifiedByNestedInput
     roomTransfersCreated?: RoomTransferUpdateManyWithoutCreatedByNestedInput
     peerReportsModerated?: PeerBehaviorReportUpdateManyWithoutModeratedByNestedInput
+    marketAnalysesCreated?: MarketAnalysisUpdateManyWithoutCreatedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutStaffRoutineAssignmentsInput = {
@@ -112188,6 +120674,7 @@ export namespace Prisma {
     tipGopay?: NullableStringFieldUpdateOperationsInput | string | null
     tipOvo?: NullableStringFieldUpdateOperationsInput | string | null
     tipDana?: NullableStringFieldUpdateOperationsInput | string | null
+    tipShopeepay?: NullableStringFieldUpdateOperationsInput | string | null
     tipBank?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -112225,6 +120712,7 @@ export namespace Prisma {
     tenantsKtpVerified?: TenantUncheckedUpdateManyWithoutKtpVerifiedByNestedInput
     roomTransfersCreated?: RoomTransferUncheckedUpdateManyWithoutCreatedByNestedInput
     peerReportsModerated?: PeerBehaviorReportUncheckedUpdateManyWithoutModeratedByNestedInput
+    marketAnalysesCreated?: MarketAnalysisUncheckedUpdateManyWithoutCreatedByNestedInput
   }
 
   export type RoomUpsertWithoutStaffRoutineAssignmentsInput = {
@@ -112243,6 +120731,8 @@ export namespace Prisma {
     name?: NullableStringFieldUpdateOperationsInput | string | null
     floor?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumRoomStatusFieldUpdateOperationsInput | $Enums.RoomStatus
+    category?: EnumRoomCategoryFieldUpdateOperationsInput | $Enums.RoomCategory
+    roomType?: EnumRoomTypeFieldUpdateOperationsInput | $Enums.RoomType
     dailyRateRupiah?: NullableIntFieldUpdateOperationsInput | number | null
     weeklyRateRupiah?: NullableIntFieldUpdateOperationsInput | number | null
     biWeeklyRateRupiah?: NullableIntFieldUpdateOperationsInput | number | null
@@ -112282,6 +120772,8 @@ export namespace Prisma {
     name?: NullableStringFieldUpdateOperationsInput | string | null
     floor?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumRoomStatusFieldUpdateOperationsInput | $Enums.RoomStatus
+    category?: EnumRoomCategoryFieldUpdateOperationsInput | $Enums.RoomCategory
+    roomType?: EnumRoomTypeFieldUpdateOperationsInput | $Enums.RoomType
     dailyRateRupiah?: NullableIntFieldUpdateOperationsInput | number | null
     weeklyRateRupiah?: NullableIntFieldUpdateOperationsInput | number | null
     biWeeklyRateRupiah?: NullableIntFieldUpdateOperationsInput | number | null
@@ -112406,6 +120898,7 @@ export namespace Prisma {
     tipGopay?: string | null
     tipOvo?: string | null
     tipDana?: string | null
+    tipShopeepay?: string | null
     tipBank?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -112444,6 +120937,7 @@ export namespace Prisma {
     tenantsKtpVerified?: TenantCreateNestedManyWithoutKtpVerifiedByInput
     roomTransfersCreated?: RoomTransferCreateNestedManyWithoutCreatedByInput
     peerReportsModerated?: PeerBehaviorReportCreateNestedManyWithoutModeratedByInput
+    marketAnalysesCreated?: MarketAnalysisCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserUncheckedCreateWithoutStaffRoutineCompletionsInput = {
@@ -112459,6 +120953,7 @@ export namespace Prisma {
     tipGopay?: string | null
     tipOvo?: string | null
     tipDana?: string | null
+    tipShopeepay?: string | null
     tipBank?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -112496,6 +120991,7 @@ export namespace Prisma {
     tenantsKtpVerified?: TenantUncheckedCreateNestedManyWithoutKtpVerifiedByInput
     roomTransfersCreated?: RoomTransferUncheckedCreateNestedManyWithoutCreatedByInput
     peerReportsModerated?: PeerBehaviorReportUncheckedCreateNestedManyWithoutModeratedByInput
+    marketAnalysesCreated?: MarketAnalysisUncheckedCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserCreateOrConnectWithoutStaffRoutineCompletionsInput = {
@@ -112508,6 +121004,8 @@ export namespace Prisma {
     name?: string | null
     floor?: string | null
     status?: $Enums.RoomStatus
+    category?: $Enums.RoomCategory
+    roomType?: $Enums.RoomType
     dailyRateRupiah?: number | null
     weeklyRateRupiah?: number | null
     biWeeklyRateRupiah?: number | null
@@ -112547,6 +121045,8 @@ export namespace Prisma {
     name?: string | null
     floor?: string | null
     status?: $Enums.RoomStatus
+    category?: $Enums.RoomCategory
+    roomType?: $Enums.RoomType
     dailyRateRupiah?: number | null
     weeklyRateRupiah?: number | null
     biWeeklyRateRupiah?: number | null
@@ -112683,6 +121183,7 @@ export namespace Prisma {
     tipGopay?: NullableStringFieldUpdateOperationsInput | string | null
     tipOvo?: NullableStringFieldUpdateOperationsInput | string | null
     tipDana?: NullableStringFieldUpdateOperationsInput | string | null
+    tipShopeepay?: NullableStringFieldUpdateOperationsInput | string | null
     tipBank?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -112721,6 +121222,7 @@ export namespace Prisma {
     tenantsKtpVerified?: TenantUpdateManyWithoutKtpVerifiedByNestedInput
     roomTransfersCreated?: RoomTransferUpdateManyWithoutCreatedByNestedInput
     peerReportsModerated?: PeerBehaviorReportUpdateManyWithoutModeratedByNestedInput
+    marketAnalysesCreated?: MarketAnalysisUpdateManyWithoutCreatedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutStaffRoutineCompletionsInput = {
@@ -112736,6 +121238,7 @@ export namespace Prisma {
     tipGopay?: NullableStringFieldUpdateOperationsInput | string | null
     tipOvo?: NullableStringFieldUpdateOperationsInput | string | null
     tipDana?: NullableStringFieldUpdateOperationsInput | string | null
+    tipShopeepay?: NullableStringFieldUpdateOperationsInput | string | null
     tipBank?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -112773,6 +121276,7 @@ export namespace Prisma {
     tenantsKtpVerified?: TenantUncheckedUpdateManyWithoutKtpVerifiedByNestedInput
     roomTransfersCreated?: RoomTransferUncheckedUpdateManyWithoutCreatedByNestedInput
     peerReportsModerated?: PeerBehaviorReportUncheckedUpdateManyWithoutModeratedByNestedInput
+    marketAnalysesCreated?: MarketAnalysisUncheckedUpdateManyWithoutCreatedByNestedInput
   }
 
   export type RoomUpsertWithoutStaffRoutineCompletionsInput = {
@@ -112791,6 +121295,8 @@ export namespace Prisma {
     name?: NullableStringFieldUpdateOperationsInput | string | null
     floor?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumRoomStatusFieldUpdateOperationsInput | $Enums.RoomStatus
+    category?: EnumRoomCategoryFieldUpdateOperationsInput | $Enums.RoomCategory
+    roomType?: EnumRoomTypeFieldUpdateOperationsInput | $Enums.RoomType
     dailyRateRupiah?: NullableIntFieldUpdateOperationsInput | number | null
     weeklyRateRupiah?: NullableIntFieldUpdateOperationsInput | number | null
     biWeeklyRateRupiah?: NullableIntFieldUpdateOperationsInput | number | null
@@ -112830,6 +121336,8 @@ export namespace Prisma {
     name?: NullableStringFieldUpdateOperationsInput | string | null
     floor?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumRoomStatusFieldUpdateOperationsInput | $Enums.RoomStatus
+    category?: EnumRoomCategoryFieldUpdateOperationsInput | $Enums.RoomCategory
+    roomType?: EnumRoomTypeFieldUpdateOperationsInput | $Enums.RoomType
     dailyRateRupiah?: NullableIntFieldUpdateOperationsInput | number | null
     weeklyRateRupiah?: NullableIntFieldUpdateOperationsInput | number | null
     biWeeklyRateRupiah?: NullableIntFieldUpdateOperationsInput | number | null
@@ -112874,6 +121382,7 @@ export namespace Prisma {
     tipGopay?: string | null
     tipOvo?: string | null
     tipDana?: string | null
+    tipShopeepay?: string | null
     tipBank?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -112912,6 +121421,7 @@ export namespace Prisma {
     tenantsKtpVerified?: TenantCreateNestedManyWithoutKtpVerifiedByInput
     roomTransfersCreated?: RoomTransferCreateNestedManyWithoutCreatedByInput
     peerReportsModerated?: PeerBehaviorReportCreateNestedManyWithoutModeratedByInput
+    marketAnalysesCreated?: MarketAnalysisCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserUncheckedCreateWithoutStaffPerformanceAuditsInput = {
@@ -112927,6 +121437,7 @@ export namespace Prisma {
     tipGopay?: string | null
     tipOvo?: string | null
     tipDana?: string | null
+    tipShopeepay?: string | null
     tipBank?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -112964,6 +121475,7 @@ export namespace Prisma {
     tenantsKtpVerified?: TenantUncheckedCreateNestedManyWithoutKtpVerifiedByInput
     roomTransfersCreated?: RoomTransferUncheckedCreateNestedManyWithoutCreatedByInput
     peerReportsModerated?: PeerBehaviorReportUncheckedCreateNestedManyWithoutModeratedByInput
+    marketAnalysesCreated?: MarketAnalysisUncheckedCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserCreateOrConnectWithoutStaffPerformanceAuditsInput = {
@@ -112982,6 +121494,7 @@ export namespace Prisma {
     tipGopay?: string | null
     tipOvo?: string | null
     tipDana?: string | null
+    tipShopeepay?: string | null
     tipBank?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -113020,6 +121533,7 @@ export namespace Prisma {
     tenantsKtpVerified?: TenantCreateNestedManyWithoutKtpVerifiedByInput
     roomTransfersCreated?: RoomTransferCreateNestedManyWithoutCreatedByInput
     peerReportsModerated?: PeerBehaviorReportCreateNestedManyWithoutModeratedByInput
+    marketAnalysesCreated?: MarketAnalysisCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserUncheckedCreateWithoutStaffPerformanceAuditsMadeInput = {
@@ -113035,6 +121549,7 @@ export namespace Prisma {
     tipGopay?: string | null
     tipOvo?: string | null
     tipDana?: string | null
+    tipShopeepay?: string | null
     tipBank?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -113072,6 +121587,7 @@ export namespace Prisma {
     tenantsKtpVerified?: TenantUncheckedCreateNestedManyWithoutKtpVerifiedByInput
     roomTransfersCreated?: RoomTransferUncheckedCreateNestedManyWithoutCreatedByInput
     peerReportsModerated?: PeerBehaviorReportUncheckedCreateNestedManyWithoutModeratedByInput
+    marketAnalysesCreated?: MarketAnalysisUncheckedCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserCreateOrConnectWithoutStaffPerformanceAuditsMadeInput = {
@@ -113101,6 +121617,7 @@ export namespace Prisma {
     tipGopay?: NullableStringFieldUpdateOperationsInput | string | null
     tipOvo?: NullableStringFieldUpdateOperationsInput | string | null
     tipDana?: NullableStringFieldUpdateOperationsInput | string | null
+    tipShopeepay?: NullableStringFieldUpdateOperationsInput | string | null
     tipBank?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -113139,6 +121656,7 @@ export namespace Prisma {
     tenantsKtpVerified?: TenantUpdateManyWithoutKtpVerifiedByNestedInput
     roomTransfersCreated?: RoomTransferUpdateManyWithoutCreatedByNestedInput
     peerReportsModerated?: PeerBehaviorReportUpdateManyWithoutModeratedByNestedInput
+    marketAnalysesCreated?: MarketAnalysisUpdateManyWithoutCreatedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutStaffPerformanceAuditsInput = {
@@ -113154,6 +121672,7 @@ export namespace Prisma {
     tipGopay?: NullableStringFieldUpdateOperationsInput | string | null
     tipOvo?: NullableStringFieldUpdateOperationsInput | string | null
     tipDana?: NullableStringFieldUpdateOperationsInput | string | null
+    tipShopeepay?: NullableStringFieldUpdateOperationsInput | string | null
     tipBank?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -113191,6 +121710,7 @@ export namespace Prisma {
     tenantsKtpVerified?: TenantUncheckedUpdateManyWithoutKtpVerifiedByNestedInput
     roomTransfersCreated?: RoomTransferUncheckedUpdateManyWithoutCreatedByNestedInput
     peerReportsModerated?: PeerBehaviorReportUncheckedUpdateManyWithoutModeratedByNestedInput
+    marketAnalysesCreated?: MarketAnalysisUncheckedUpdateManyWithoutCreatedByNestedInput
   }
 
   export type UserUpsertWithoutStaffPerformanceAuditsMadeInput = {
@@ -113215,6 +121735,7 @@ export namespace Prisma {
     tipGopay?: NullableStringFieldUpdateOperationsInput | string | null
     tipOvo?: NullableStringFieldUpdateOperationsInput | string | null
     tipDana?: NullableStringFieldUpdateOperationsInput | string | null
+    tipShopeepay?: NullableStringFieldUpdateOperationsInput | string | null
     tipBank?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -113253,6 +121774,7 @@ export namespace Prisma {
     tenantsKtpVerified?: TenantUpdateManyWithoutKtpVerifiedByNestedInput
     roomTransfersCreated?: RoomTransferUpdateManyWithoutCreatedByNestedInput
     peerReportsModerated?: PeerBehaviorReportUpdateManyWithoutModeratedByNestedInput
+    marketAnalysesCreated?: MarketAnalysisUpdateManyWithoutCreatedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutStaffPerformanceAuditsMadeInput = {
@@ -113268,6 +121790,7 @@ export namespace Prisma {
     tipGopay?: NullableStringFieldUpdateOperationsInput | string | null
     tipOvo?: NullableStringFieldUpdateOperationsInput | string | null
     tipDana?: NullableStringFieldUpdateOperationsInput | string | null
+    tipShopeepay?: NullableStringFieldUpdateOperationsInput | string | null
     tipBank?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -113305,6 +121828,7 @@ export namespace Prisma {
     tenantsKtpVerified?: TenantUncheckedUpdateManyWithoutKtpVerifiedByNestedInput
     roomTransfersCreated?: RoomTransferUncheckedUpdateManyWithoutCreatedByNestedInput
     peerReportsModerated?: PeerBehaviorReportUncheckedUpdateManyWithoutModeratedByNestedInput
+    marketAnalysesCreated?: MarketAnalysisUncheckedUpdateManyWithoutCreatedByNestedInput
   }
 
   export type UserCreateWithoutStaffPerformanceEventsInput = {
@@ -113318,6 +121842,7 @@ export namespace Prisma {
     tipGopay?: string | null
     tipOvo?: string | null
     tipDana?: string | null
+    tipShopeepay?: string | null
     tipBank?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -113356,6 +121881,7 @@ export namespace Prisma {
     tenantsKtpVerified?: TenantCreateNestedManyWithoutKtpVerifiedByInput
     roomTransfersCreated?: RoomTransferCreateNestedManyWithoutCreatedByInput
     peerReportsModerated?: PeerBehaviorReportCreateNestedManyWithoutModeratedByInput
+    marketAnalysesCreated?: MarketAnalysisCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserUncheckedCreateWithoutStaffPerformanceEventsInput = {
@@ -113371,6 +121897,7 @@ export namespace Prisma {
     tipGopay?: string | null
     tipOvo?: string | null
     tipDana?: string | null
+    tipShopeepay?: string | null
     tipBank?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -113408,6 +121935,7 @@ export namespace Prisma {
     tenantsKtpVerified?: TenantUncheckedCreateNestedManyWithoutKtpVerifiedByInput
     roomTransfersCreated?: RoomTransferUncheckedCreateNestedManyWithoutCreatedByInput
     peerReportsModerated?: PeerBehaviorReportUncheckedCreateNestedManyWithoutModeratedByInput
+    marketAnalysesCreated?: MarketAnalysisUncheckedCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserCreateOrConnectWithoutStaffPerformanceEventsInput = {
@@ -113437,6 +121965,7 @@ export namespace Prisma {
     tipGopay?: NullableStringFieldUpdateOperationsInput | string | null
     tipOvo?: NullableStringFieldUpdateOperationsInput | string | null
     tipDana?: NullableStringFieldUpdateOperationsInput | string | null
+    tipShopeepay?: NullableStringFieldUpdateOperationsInput | string | null
     tipBank?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -113475,6 +122004,7 @@ export namespace Prisma {
     tenantsKtpVerified?: TenantUpdateManyWithoutKtpVerifiedByNestedInput
     roomTransfersCreated?: RoomTransferUpdateManyWithoutCreatedByNestedInput
     peerReportsModerated?: PeerBehaviorReportUpdateManyWithoutModeratedByNestedInput
+    marketAnalysesCreated?: MarketAnalysisUpdateManyWithoutCreatedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutStaffPerformanceEventsInput = {
@@ -113490,6 +122020,7 @@ export namespace Prisma {
     tipGopay?: NullableStringFieldUpdateOperationsInput | string | null
     tipOvo?: NullableStringFieldUpdateOperationsInput | string | null
     tipDana?: NullableStringFieldUpdateOperationsInput | string | null
+    tipShopeepay?: NullableStringFieldUpdateOperationsInput | string | null
     tipBank?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -113527,6 +122058,7 @@ export namespace Prisma {
     tenantsKtpVerified?: TenantUncheckedUpdateManyWithoutKtpVerifiedByNestedInput
     roomTransfersCreated?: RoomTransferUncheckedUpdateManyWithoutCreatedByNestedInput
     peerReportsModerated?: PeerBehaviorReportUncheckedUpdateManyWithoutModeratedByNestedInput
+    marketAnalysesCreated?: MarketAnalysisUncheckedUpdateManyWithoutCreatedByNestedInput
   }
 
   export type UserCreateWithoutStaffReviewsReceivedInput = {
@@ -113540,6 +122072,7 @@ export namespace Prisma {
     tipGopay?: string | null
     tipOvo?: string | null
     tipDana?: string | null
+    tipShopeepay?: string | null
     tipBank?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -113578,6 +122111,7 @@ export namespace Prisma {
     tenantsKtpVerified?: TenantCreateNestedManyWithoutKtpVerifiedByInput
     roomTransfersCreated?: RoomTransferCreateNestedManyWithoutCreatedByInput
     peerReportsModerated?: PeerBehaviorReportCreateNestedManyWithoutModeratedByInput
+    marketAnalysesCreated?: MarketAnalysisCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserUncheckedCreateWithoutStaffReviewsReceivedInput = {
@@ -113593,6 +122127,7 @@ export namespace Prisma {
     tipGopay?: string | null
     tipOvo?: string | null
     tipDana?: string | null
+    tipShopeepay?: string | null
     tipBank?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -113630,6 +122165,7 @@ export namespace Prisma {
     tenantsKtpVerified?: TenantUncheckedCreateNestedManyWithoutKtpVerifiedByInput
     roomTransfersCreated?: RoomTransferUncheckedCreateNestedManyWithoutCreatedByInput
     peerReportsModerated?: PeerBehaviorReportUncheckedCreateNestedManyWithoutModeratedByInput
+    marketAnalysesCreated?: MarketAnalysisUncheckedCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserCreateOrConnectWithoutStaffReviewsReceivedInput = {
@@ -113670,6 +122206,7 @@ export namespace Prisma {
     depositLedgerEntries?: TenantDepositLedgerEntryCreateNestedManyWithoutTenantInput
     loyaltyPoints?: LoyaltyPointCreateNestedManyWithoutTenantInput
     redemptions?: RedemptionCreateNestedManyWithoutTenantInput
+    serviceInterests?: ServiceInterestCreateNestedManyWithoutTenantInput
     referralsMade?: TenantReferralCreateNestedManyWithoutReferrerInput
     referredReferral?: TenantReferralCreateNestedOneWithoutReferredInput
     peerReportsMade?: PeerBehaviorReportCreateNestedManyWithoutReporterInput
@@ -113710,6 +122247,7 @@ export namespace Prisma {
     depositLedgerEntries?: TenantDepositLedgerEntryUncheckedCreateNestedManyWithoutTenantInput
     loyaltyPoints?: LoyaltyPointUncheckedCreateNestedManyWithoutTenantInput
     redemptions?: RedemptionUncheckedCreateNestedManyWithoutTenantInput
+    serviceInterests?: ServiceInterestUncheckedCreateNestedManyWithoutTenantInput
     referralsMade?: TenantReferralUncheckedCreateNestedManyWithoutReferrerInput
     referredReferral?: TenantReferralUncheckedCreateNestedOneWithoutReferredInput
     peerReportsMade?: PeerBehaviorReportUncheckedCreateNestedManyWithoutReporterInput
@@ -113732,6 +122270,7 @@ export namespace Prisma {
     tipGopay?: string | null
     tipOvo?: string | null
     tipDana?: string | null
+    tipShopeepay?: string | null
     tipBank?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -113770,6 +122309,7 @@ export namespace Prisma {
     tenantsKtpVerified?: TenantCreateNestedManyWithoutKtpVerifiedByInput
     roomTransfersCreated?: RoomTransferCreateNestedManyWithoutCreatedByInput
     peerReportsModerated?: PeerBehaviorReportCreateNestedManyWithoutModeratedByInput
+    marketAnalysesCreated?: MarketAnalysisCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserUncheckedCreateWithoutStaffReviewsModeratedInput = {
@@ -113785,6 +122325,7 @@ export namespace Prisma {
     tipGopay?: string | null
     tipOvo?: string | null
     tipDana?: string | null
+    tipShopeepay?: string | null
     tipBank?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -113822,6 +122363,7 @@ export namespace Prisma {
     tenantsKtpVerified?: TenantUncheckedCreateNestedManyWithoutKtpVerifiedByInput
     roomTransfersCreated?: RoomTransferUncheckedCreateNestedManyWithoutCreatedByInput
     peerReportsModerated?: PeerBehaviorReportUncheckedCreateNestedManyWithoutModeratedByInput
+    marketAnalysesCreated?: MarketAnalysisUncheckedCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserCreateOrConnectWithoutStaffReviewsModeratedInput = {
@@ -113851,6 +122393,7 @@ export namespace Prisma {
     tipGopay?: NullableStringFieldUpdateOperationsInput | string | null
     tipOvo?: NullableStringFieldUpdateOperationsInput | string | null
     tipDana?: NullableStringFieldUpdateOperationsInput | string | null
+    tipShopeepay?: NullableStringFieldUpdateOperationsInput | string | null
     tipBank?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -113889,6 +122432,7 @@ export namespace Prisma {
     tenantsKtpVerified?: TenantUpdateManyWithoutKtpVerifiedByNestedInput
     roomTransfersCreated?: RoomTransferUpdateManyWithoutCreatedByNestedInput
     peerReportsModerated?: PeerBehaviorReportUpdateManyWithoutModeratedByNestedInput
+    marketAnalysesCreated?: MarketAnalysisUpdateManyWithoutCreatedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutStaffReviewsReceivedInput = {
@@ -113904,6 +122448,7 @@ export namespace Prisma {
     tipGopay?: NullableStringFieldUpdateOperationsInput | string | null
     tipOvo?: NullableStringFieldUpdateOperationsInput | string | null
     tipDana?: NullableStringFieldUpdateOperationsInput | string | null
+    tipShopeepay?: NullableStringFieldUpdateOperationsInput | string | null
     tipBank?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -113941,6 +122486,7 @@ export namespace Prisma {
     tenantsKtpVerified?: TenantUncheckedUpdateManyWithoutKtpVerifiedByNestedInput
     roomTransfersCreated?: RoomTransferUncheckedUpdateManyWithoutCreatedByNestedInput
     peerReportsModerated?: PeerBehaviorReportUncheckedUpdateManyWithoutModeratedByNestedInput
+    marketAnalysesCreated?: MarketAnalysisUncheckedUpdateManyWithoutCreatedByNestedInput
   }
 
   export type TenantUpsertWithoutStaffReviewsInput = {
@@ -113987,6 +122533,7 @@ export namespace Prisma {
     depositLedgerEntries?: TenantDepositLedgerEntryUpdateManyWithoutTenantNestedInput
     loyaltyPoints?: LoyaltyPointUpdateManyWithoutTenantNestedInput
     redemptions?: RedemptionUpdateManyWithoutTenantNestedInput
+    serviceInterests?: ServiceInterestUpdateManyWithoutTenantNestedInput
     referralsMade?: TenantReferralUpdateManyWithoutReferrerNestedInput
     referredReferral?: TenantReferralUpdateOneWithoutReferredNestedInput
     peerReportsMade?: PeerBehaviorReportUpdateManyWithoutReporterNestedInput
@@ -114027,6 +122574,7 @@ export namespace Prisma {
     depositLedgerEntries?: TenantDepositLedgerEntryUncheckedUpdateManyWithoutTenantNestedInput
     loyaltyPoints?: LoyaltyPointUncheckedUpdateManyWithoutTenantNestedInput
     redemptions?: RedemptionUncheckedUpdateManyWithoutTenantNestedInput
+    serviceInterests?: ServiceInterestUncheckedUpdateManyWithoutTenantNestedInput
     referralsMade?: TenantReferralUncheckedUpdateManyWithoutReferrerNestedInput
     referredReferral?: TenantReferralUncheckedUpdateOneWithoutReferredNestedInput
     peerReportsMade?: PeerBehaviorReportUncheckedUpdateManyWithoutReporterNestedInput
@@ -114055,6 +122603,7 @@ export namespace Prisma {
     tipGopay?: NullableStringFieldUpdateOperationsInput | string | null
     tipOvo?: NullableStringFieldUpdateOperationsInput | string | null
     tipDana?: NullableStringFieldUpdateOperationsInput | string | null
+    tipShopeepay?: NullableStringFieldUpdateOperationsInput | string | null
     tipBank?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -114093,6 +122642,7 @@ export namespace Prisma {
     tenantsKtpVerified?: TenantUpdateManyWithoutKtpVerifiedByNestedInput
     roomTransfersCreated?: RoomTransferUpdateManyWithoutCreatedByNestedInput
     peerReportsModerated?: PeerBehaviorReportUpdateManyWithoutModeratedByNestedInput
+    marketAnalysesCreated?: MarketAnalysisUpdateManyWithoutCreatedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutStaffReviewsModeratedInput = {
@@ -114108,6 +122658,7 @@ export namespace Prisma {
     tipGopay?: NullableStringFieldUpdateOperationsInput | string | null
     tipOvo?: NullableStringFieldUpdateOperationsInput | string | null
     tipDana?: NullableStringFieldUpdateOperationsInput | string | null
+    tipShopeepay?: NullableStringFieldUpdateOperationsInput | string | null
     tipBank?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -114145,6 +122696,7 @@ export namespace Prisma {
     tenantsKtpVerified?: TenantUncheckedUpdateManyWithoutKtpVerifiedByNestedInput
     roomTransfersCreated?: RoomTransferUncheckedUpdateManyWithoutCreatedByNestedInput
     peerReportsModerated?: PeerBehaviorReportUncheckedUpdateManyWithoutModeratedByNestedInput
+    marketAnalysesCreated?: MarketAnalysisUncheckedUpdateManyWithoutCreatedByNestedInput
   }
 
   export type UserCreateWithoutAnnouncementsCreatedInput = {
@@ -114158,6 +122710,7 @@ export namespace Prisma {
     tipGopay?: string | null
     tipOvo?: string | null
     tipDana?: string | null
+    tipShopeepay?: string | null
     tipBank?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -114196,6 +122749,7 @@ export namespace Prisma {
     tenantsKtpVerified?: TenantCreateNestedManyWithoutKtpVerifiedByInput
     roomTransfersCreated?: RoomTransferCreateNestedManyWithoutCreatedByInput
     peerReportsModerated?: PeerBehaviorReportCreateNestedManyWithoutModeratedByInput
+    marketAnalysesCreated?: MarketAnalysisCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserUncheckedCreateWithoutAnnouncementsCreatedInput = {
@@ -114211,6 +122765,7 @@ export namespace Prisma {
     tipGopay?: string | null
     tipOvo?: string | null
     tipDana?: string | null
+    tipShopeepay?: string | null
     tipBank?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -114248,6 +122803,7 @@ export namespace Prisma {
     tenantsKtpVerified?: TenantUncheckedCreateNestedManyWithoutKtpVerifiedByInput
     roomTransfersCreated?: RoomTransferUncheckedCreateNestedManyWithoutCreatedByInput
     peerReportsModerated?: PeerBehaviorReportUncheckedCreateNestedManyWithoutModeratedByInput
+    marketAnalysesCreated?: MarketAnalysisUncheckedCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserCreateOrConnectWithoutAnnouncementsCreatedInput = {
@@ -114277,6 +122833,7 @@ export namespace Prisma {
     tipGopay?: NullableStringFieldUpdateOperationsInput | string | null
     tipOvo?: NullableStringFieldUpdateOperationsInput | string | null
     tipDana?: NullableStringFieldUpdateOperationsInput | string | null
+    tipShopeepay?: NullableStringFieldUpdateOperationsInput | string | null
     tipBank?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -114315,6 +122872,7 @@ export namespace Prisma {
     tenantsKtpVerified?: TenantUpdateManyWithoutKtpVerifiedByNestedInput
     roomTransfersCreated?: RoomTransferUpdateManyWithoutCreatedByNestedInput
     peerReportsModerated?: PeerBehaviorReportUpdateManyWithoutModeratedByNestedInput
+    marketAnalysesCreated?: MarketAnalysisUpdateManyWithoutCreatedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutAnnouncementsCreatedInput = {
@@ -114330,6 +122888,7 @@ export namespace Prisma {
     tipGopay?: NullableStringFieldUpdateOperationsInput | string | null
     tipOvo?: NullableStringFieldUpdateOperationsInput | string | null
     tipDana?: NullableStringFieldUpdateOperationsInput | string | null
+    tipShopeepay?: NullableStringFieldUpdateOperationsInput | string | null
     tipBank?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -114367,6 +122926,7 @@ export namespace Prisma {
     tenantsKtpVerified?: TenantUncheckedUpdateManyWithoutKtpVerifiedByNestedInput
     roomTransfersCreated?: RoomTransferUncheckedUpdateManyWithoutCreatedByNestedInput
     peerReportsModerated?: PeerBehaviorReportUncheckedUpdateManyWithoutModeratedByNestedInput
+    marketAnalysesCreated?: MarketAnalysisUncheckedUpdateManyWithoutCreatedByNestedInput
   }
 
   export type RoomItemCreateWithoutItemInput = {
@@ -114828,6 +123388,8 @@ export namespace Prisma {
     name?: string | null
     floor?: string | null
     status?: $Enums.RoomStatus
+    category?: $Enums.RoomCategory
+    roomType?: $Enums.RoomType
     dailyRateRupiah?: number | null
     weeklyRateRupiah?: number | null
     biWeeklyRateRupiah?: number | null
@@ -114867,6 +123429,8 @@ export namespace Prisma {
     name?: string | null
     floor?: string | null
     status?: $Enums.RoomStatus
+    category?: $Enums.RoomCategory
+    roomType?: $Enums.RoomType
     dailyRateRupiah?: number | null
     weeklyRateRupiah?: number | null
     biWeeklyRateRupiah?: number | null
@@ -115198,6 +123762,8 @@ export namespace Prisma {
     name?: NullableStringFieldUpdateOperationsInput | string | null
     floor?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumRoomStatusFieldUpdateOperationsInput | $Enums.RoomStatus
+    category?: EnumRoomCategoryFieldUpdateOperationsInput | $Enums.RoomCategory
+    roomType?: EnumRoomTypeFieldUpdateOperationsInput | $Enums.RoomType
     dailyRateRupiah?: NullableIntFieldUpdateOperationsInput | number | null
     weeklyRateRupiah?: NullableIntFieldUpdateOperationsInput | number | null
     biWeeklyRateRupiah?: NullableIntFieldUpdateOperationsInput | number | null
@@ -115237,6 +123803,8 @@ export namespace Prisma {
     name?: NullableStringFieldUpdateOperationsInput | string | null
     floor?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumRoomStatusFieldUpdateOperationsInput | $Enums.RoomStatus
+    category?: EnumRoomCategoryFieldUpdateOperationsInput | $Enums.RoomCategory
+    roomType?: EnumRoomTypeFieldUpdateOperationsInput | $Enums.RoomType
     dailyRateRupiah?: NullableIntFieldUpdateOperationsInput | number | null
     weeklyRateRupiah?: NullableIntFieldUpdateOperationsInput | number | null
     biWeeklyRateRupiah?: NullableIntFieldUpdateOperationsInput | number | null
@@ -115421,6 +123989,8 @@ export namespace Prisma {
     name?: string | null
     floor?: string | null
     status?: $Enums.RoomStatus
+    category?: $Enums.RoomCategory
+    roomType?: $Enums.RoomType
     dailyRateRupiah?: number | null
     weeklyRateRupiah?: number | null
     biWeeklyRateRupiah?: number | null
@@ -115460,6 +124030,8 @@ export namespace Prisma {
     name?: string | null
     floor?: string | null
     status?: $Enums.RoomStatus
+    category?: $Enums.RoomCategory
+    roomType?: $Enums.RoomType
     dailyRateRupiah?: number | null
     weeklyRateRupiah?: number | null
     biWeeklyRateRupiah?: number | null
@@ -115509,6 +124081,7 @@ export namespace Prisma {
     tipGopay?: string | null
     tipOvo?: string | null
     tipDana?: string | null
+    tipShopeepay?: string | null
     tipBank?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -115547,6 +124120,7 @@ export namespace Prisma {
     tenantsKtpVerified?: TenantCreateNestedManyWithoutKtpVerifiedByInput
     roomTransfersCreated?: RoomTransferCreateNestedManyWithoutCreatedByInput
     peerReportsModerated?: PeerBehaviorReportCreateNestedManyWithoutModeratedByInput
+    marketAnalysesCreated?: MarketAnalysisCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserUncheckedCreateWithoutInventoryMovementsCreatedInput = {
@@ -115562,6 +124136,7 @@ export namespace Prisma {
     tipGopay?: string | null
     tipOvo?: string | null
     tipDana?: string | null
+    tipShopeepay?: string | null
     tipBank?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -115599,6 +124174,7 @@ export namespace Prisma {
     tenantsKtpVerified?: TenantUncheckedCreateNestedManyWithoutKtpVerifiedByInput
     roomTransfersCreated?: RoomTransferUncheckedCreateNestedManyWithoutCreatedByInput
     peerReportsModerated?: PeerBehaviorReportUncheckedCreateNestedManyWithoutModeratedByInput
+    marketAnalysesCreated?: MarketAnalysisUncheckedCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserCreateOrConnectWithoutInventoryMovementsCreatedInput = {
@@ -115733,6 +124309,8 @@ export namespace Prisma {
     name?: NullableStringFieldUpdateOperationsInput | string | null
     floor?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumRoomStatusFieldUpdateOperationsInput | $Enums.RoomStatus
+    category?: EnumRoomCategoryFieldUpdateOperationsInput | $Enums.RoomCategory
+    roomType?: EnumRoomTypeFieldUpdateOperationsInput | $Enums.RoomType
     dailyRateRupiah?: NullableIntFieldUpdateOperationsInput | number | null
     weeklyRateRupiah?: NullableIntFieldUpdateOperationsInput | number | null
     biWeeklyRateRupiah?: NullableIntFieldUpdateOperationsInput | number | null
@@ -115772,6 +124350,8 @@ export namespace Prisma {
     name?: NullableStringFieldUpdateOperationsInput | string | null
     floor?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumRoomStatusFieldUpdateOperationsInput | $Enums.RoomStatus
+    category?: EnumRoomCategoryFieldUpdateOperationsInput | $Enums.RoomCategory
+    roomType?: EnumRoomTypeFieldUpdateOperationsInput | $Enums.RoomType
     dailyRateRupiah?: NullableIntFieldUpdateOperationsInput | number | null
     weeklyRateRupiah?: NullableIntFieldUpdateOperationsInput | number | null
     biWeeklyRateRupiah?: NullableIntFieldUpdateOperationsInput | number | null
@@ -115827,6 +124407,7 @@ export namespace Prisma {
     tipGopay?: NullableStringFieldUpdateOperationsInput | string | null
     tipOvo?: NullableStringFieldUpdateOperationsInput | string | null
     tipDana?: NullableStringFieldUpdateOperationsInput | string | null
+    tipShopeepay?: NullableStringFieldUpdateOperationsInput | string | null
     tipBank?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -115865,6 +124446,7 @@ export namespace Prisma {
     tenantsKtpVerified?: TenantUpdateManyWithoutKtpVerifiedByNestedInput
     roomTransfersCreated?: RoomTransferUpdateManyWithoutCreatedByNestedInput
     peerReportsModerated?: PeerBehaviorReportUpdateManyWithoutModeratedByNestedInput
+    marketAnalysesCreated?: MarketAnalysisUpdateManyWithoutCreatedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutInventoryMovementsCreatedInput = {
@@ -115880,6 +124462,7 @@ export namespace Prisma {
     tipGopay?: NullableStringFieldUpdateOperationsInput | string | null
     tipOvo?: NullableStringFieldUpdateOperationsInput | string | null
     tipDana?: NullableStringFieldUpdateOperationsInput | string | null
+    tipShopeepay?: NullableStringFieldUpdateOperationsInput | string | null
     tipBank?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -115917,6 +124500,7 @@ export namespace Prisma {
     tenantsKtpVerified?: TenantUncheckedUpdateManyWithoutKtpVerifiedByNestedInput
     roomTransfersCreated?: RoomTransferUncheckedUpdateManyWithoutCreatedByNestedInput
     peerReportsModerated?: PeerBehaviorReportUncheckedUpdateManyWithoutModeratedByNestedInput
+    marketAnalysesCreated?: MarketAnalysisUncheckedUpdateManyWithoutCreatedByNestedInput
   }
 
   export type StaffFieldReportUpsertWithWhereUniqueWithoutRelatedMovementInput = {
@@ -116022,6 +124606,8 @@ export namespace Prisma {
     name?: string | null
     floor?: string | null
     status?: $Enums.RoomStatus
+    category?: $Enums.RoomCategory
+    roomType?: $Enums.RoomType
     dailyRateRupiah?: number | null
     weeklyRateRupiah?: number | null
     biWeeklyRateRupiah?: number | null
@@ -116061,6 +124647,8 @@ export namespace Prisma {
     name?: string | null
     floor?: string | null
     status?: $Enums.RoomStatus
+    category?: $Enums.RoomCategory
+    roomType?: $Enums.RoomType
     dailyRateRupiah?: number | null
     weeklyRateRupiah?: number | null
     biWeeklyRateRupiah?: number | null
@@ -116232,6 +124820,7 @@ export namespace Prisma {
     tipGopay?: string | null
     tipOvo?: string | null
     tipDana?: string | null
+    tipShopeepay?: string | null
     tipBank?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -116270,6 +124859,7 @@ export namespace Prisma {
     tenantsKtpVerified?: TenantCreateNestedManyWithoutKtpVerifiedByInput
     roomTransfersCreated?: RoomTransferCreateNestedManyWithoutCreatedByInput
     peerReportsModerated?: PeerBehaviorReportCreateNestedManyWithoutModeratedByInput
+    marketAnalysesCreated?: MarketAnalysisCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserUncheckedCreateWithoutStaffFieldReportsCreatedInput = {
@@ -116285,6 +124875,7 @@ export namespace Prisma {
     tipGopay?: string | null
     tipOvo?: string | null
     tipDana?: string | null
+    tipShopeepay?: string | null
     tipBank?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -116322,6 +124913,7 @@ export namespace Prisma {
     tenantsKtpVerified?: TenantUncheckedCreateNestedManyWithoutKtpVerifiedByInput
     roomTransfersCreated?: RoomTransferUncheckedCreateNestedManyWithoutCreatedByInput
     peerReportsModerated?: PeerBehaviorReportUncheckedCreateNestedManyWithoutModeratedByInput
+    marketAnalysesCreated?: MarketAnalysisUncheckedCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserCreateOrConnectWithoutStaffFieldReportsCreatedInput = {
@@ -116340,6 +124932,7 @@ export namespace Prisma {
     tipGopay?: string | null
     tipOvo?: string | null
     tipDana?: string | null
+    tipShopeepay?: string | null
     tipBank?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -116378,6 +124971,7 @@ export namespace Prisma {
     tenantsKtpVerified?: TenantCreateNestedManyWithoutKtpVerifiedByInput
     roomTransfersCreated?: RoomTransferCreateNestedManyWithoutCreatedByInput
     peerReportsModerated?: PeerBehaviorReportCreateNestedManyWithoutModeratedByInput
+    marketAnalysesCreated?: MarketAnalysisCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserUncheckedCreateWithoutStaffFieldReportsReviewedInput = {
@@ -116393,6 +124987,7 @@ export namespace Prisma {
     tipGopay?: string | null
     tipOvo?: string | null
     tipDana?: string | null
+    tipShopeepay?: string | null
     tipBank?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -116430,6 +125025,7 @@ export namespace Prisma {
     tenantsKtpVerified?: TenantUncheckedCreateNestedManyWithoutKtpVerifiedByInput
     roomTransfersCreated?: RoomTransferUncheckedCreateNestedManyWithoutCreatedByInput
     peerReportsModerated?: PeerBehaviorReportUncheckedCreateNestedManyWithoutModeratedByInput
+    marketAnalysesCreated?: MarketAnalysisUncheckedCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserCreateOrConnectWithoutStaffFieldReportsReviewedInput = {
@@ -116569,6 +125165,8 @@ export namespace Prisma {
     name?: NullableStringFieldUpdateOperationsInput | string | null
     floor?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumRoomStatusFieldUpdateOperationsInput | $Enums.RoomStatus
+    category?: EnumRoomCategoryFieldUpdateOperationsInput | $Enums.RoomCategory
+    roomType?: EnumRoomTypeFieldUpdateOperationsInput | $Enums.RoomType
     dailyRateRupiah?: NullableIntFieldUpdateOperationsInput | number | null
     weeklyRateRupiah?: NullableIntFieldUpdateOperationsInput | number | null
     biWeeklyRateRupiah?: NullableIntFieldUpdateOperationsInput | number | null
@@ -116608,6 +125206,8 @@ export namespace Prisma {
     name?: NullableStringFieldUpdateOperationsInput | string | null
     floor?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumRoomStatusFieldUpdateOperationsInput | $Enums.RoomStatus
+    category?: EnumRoomCategoryFieldUpdateOperationsInput | $Enums.RoomCategory
+    roomType?: EnumRoomTypeFieldUpdateOperationsInput | $Enums.RoomType
     dailyRateRupiah?: NullableIntFieldUpdateOperationsInput | number | null
     weeklyRateRupiah?: NullableIntFieldUpdateOperationsInput | number | null
     biWeeklyRateRupiah?: NullableIntFieldUpdateOperationsInput | number | null
@@ -116803,6 +125403,7 @@ export namespace Prisma {
     tipGopay?: NullableStringFieldUpdateOperationsInput | string | null
     tipOvo?: NullableStringFieldUpdateOperationsInput | string | null
     tipDana?: NullableStringFieldUpdateOperationsInput | string | null
+    tipShopeepay?: NullableStringFieldUpdateOperationsInput | string | null
     tipBank?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -116841,6 +125442,7 @@ export namespace Prisma {
     tenantsKtpVerified?: TenantUpdateManyWithoutKtpVerifiedByNestedInput
     roomTransfersCreated?: RoomTransferUpdateManyWithoutCreatedByNestedInput
     peerReportsModerated?: PeerBehaviorReportUpdateManyWithoutModeratedByNestedInput
+    marketAnalysesCreated?: MarketAnalysisUpdateManyWithoutCreatedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutStaffFieldReportsCreatedInput = {
@@ -116856,6 +125458,7 @@ export namespace Prisma {
     tipGopay?: NullableStringFieldUpdateOperationsInput | string | null
     tipOvo?: NullableStringFieldUpdateOperationsInput | string | null
     tipDana?: NullableStringFieldUpdateOperationsInput | string | null
+    tipShopeepay?: NullableStringFieldUpdateOperationsInput | string | null
     tipBank?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -116893,6 +125496,7 @@ export namespace Prisma {
     tenantsKtpVerified?: TenantUncheckedUpdateManyWithoutKtpVerifiedByNestedInput
     roomTransfersCreated?: RoomTransferUncheckedUpdateManyWithoutCreatedByNestedInput
     peerReportsModerated?: PeerBehaviorReportUncheckedUpdateManyWithoutModeratedByNestedInput
+    marketAnalysesCreated?: MarketAnalysisUncheckedUpdateManyWithoutCreatedByNestedInput
   }
 
   export type UserUpsertWithoutStaffFieldReportsReviewedInput = {
@@ -116917,6 +125521,7 @@ export namespace Prisma {
     tipGopay?: NullableStringFieldUpdateOperationsInput | string | null
     tipOvo?: NullableStringFieldUpdateOperationsInput | string | null
     tipDana?: NullableStringFieldUpdateOperationsInput | string | null
+    tipShopeepay?: NullableStringFieldUpdateOperationsInput | string | null
     tipBank?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -116955,6 +125560,7 @@ export namespace Prisma {
     tenantsKtpVerified?: TenantUpdateManyWithoutKtpVerifiedByNestedInput
     roomTransfersCreated?: RoomTransferUpdateManyWithoutCreatedByNestedInput
     peerReportsModerated?: PeerBehaviorReportUpdateManyWithoutModeratedByNestedInput
+    marketAnalysesCreated?: MarketAnalysisUpdateManyWithoutCreatedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutStaffFieldReportsReviewedInput = {
@@ -116970,6 +125576,7 @@ export namespace Prisma {
     tipGopay?: NullableStringFieldUpdateOperationsInput | string | null
     tipOvo?: NullableStringFieldUpdateOperationsInput | string | null
     tipDana?: NullableStringFieldUpdateOperationsInput | string | null
+    tipShopeepay?: NullableStringFieldUpdateOperationsInput | string | null
     tipBank?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -117007,6 +125614,7 @@ export namespace Prisma {
     tenantsKtpVerified?: TenantUncheckedUpdateManyWithoutKtpVerifiedByNestedInput
     roomTransfersCreated?: RoomTransferUncheckedUpdateManyWithoutCreatedByNestedInput
     peerReportsModerated?: PeerBehaviorReportUncheckedUpdateManyWithoutModeratedByNestedInput
+    marketAnalysesCreated?: MarketAnalysisUncheckedUpdateManyWithoutCreatedByNestedInput
   }
 
   export type InventoryMovementUpsertWithoutFieldReportsInput = {
@@ -117204,6 +125812,7 @@ export namespace Prisma {
     depositLedgerEntries?: TenantDepositLedgerEntryCreateNestedManyWithoutTenantInput
     loyaltyPoints?: LoyaltyPointCreateNestedManyWithoutTenantInput
     redemptions?: RedemptionCreateNestedManyWithoutTenantInput
+    serviceInterests?: ServiceInterestCreateNestedManyWithoutTenantInput
     referralsMade?: TenantReferralCreateNestedManyWithoutReferrerInput
     referredReferral?: TenantReferralCreateNestedOneWithoutReferredInput
     peerReportsMade?: PeerBehaviorReportCreateNestedManyWithoutReporterInput
@@ -117244,6 +125853,7 @@ export namespace Prisma {
     depositLedgerEntries?: TenantDepositLedgerEntryUncheckedCreateNestedManyWithoutTenantInput
     loyaltyPoints?: LoyaltyPointUncheckedCreateNestedManyWithoutTenantInput
     redemptions?: RedemptionUncheckedCreateNestedManyWithoutTenantInput
+    serviceInterests?: ServiceInterestUncheckedCreateNestedManyWithoutTenantInput
     referralsMade?: TenantReferralUncheckedCreateNestedManyWithoutReferrerInput
     referredReferral?: TenantReferralUncheckedCreateNestedOneWithoutReferredInput
     peerReportsMade?: PeerBehaviorReportUncheckedCreateNestedManyWithoutReporterInput
@@ -117266,6 +125876,7 @@ export namespace Prisma {
     tipGopay?: string | null
     tipOvo?: string | null
     tipDana?: string | null
+    tipShopeepay?: string | null
     tipBank?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -117304,6 +125915,7 @@ export namespace Prisma {
     tenantsKtpVerified?: TenantCreateNestedManyWithoutKtpVerifiedByInput
     roomTransfersCreated?: RoomTransferCreateNestedManyWithoutCreatedByInput
     peerReportsModerated?: PeerBehaviorReportCreateNestedManyWithoutModeratedByInput
+    marketAnalysesCreated?: MarketAnalysisCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserUncheckedCreateWithoutRenewRequestsReviewedInput = {
@@ -117319,6 +125931,7 @@ export namespace Prisma {
     tipGopay?: string | null
     tipOvo?: string | null
     tipDana?: string | null
+    tipShopeepay?: string | null
     tipBank?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -117356,6 +125969,7 @@ export namespace Prisma {
     tenantsKtpVerified?: TenantUncheckedCreateNestedManyWithoutKtpVerifiedByInput
     roomTransfersCreated?: RoomTransferUncheckedCreateNestedManyWithoutCreatedByInput
     peerReportsModerated?: PeerBehaviorReportUncheckedCreateNestedManyWithoutModeratedByInput
+    marketAnalysesCreated?: MarketAnalysisUncheckedCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserCreateOrConnectWithoutRenewRequestsReviewedInput = {
@@ -117541,6 +126155,7 @@ export namespace Prisma {
     depositLedgerEntries?: TenantDepositLedgerEntryUpdateManyWithoutTenantNestedInput
     loyaltyPoints?: LoyaltyPointUpdateManyWithoutTenantNestedInput
     redemptions?: RedemptionUpdateManyWithoutTenantNestedInput
+    serviceInterests?: ServiceInterestUpdateManyWithoutTenantNestedInput
     referralsMade?: TenantReferralUpdateManyWithoutReferrerNestedInput
     referredReferral?: TenantReferralUpdateOneWithoutReferredNestedInput
     peerReportsMade?: PeerBehaviorReportUpdateManyWithoutReporterNestedInput
@@ -117581,6 +126196,7 @@ export namespace Prisma {
     depositLedgerEntries?: TenantDepositLedgerEntryUncheckedUpdateManyWithoutTenantNestedInput
     loyaltyPoints?: LoyaltyPointUncheckedUpdateManyWithoutTenantNestedInput
     redemptions?: RedemptionUncheckedUpdateManyWithoutTenantNestedInput
+    serviceInterests?: ServiceInterestUncheckedUpdateManyWithoutTenantNestedInput
     referralsMade?: TenantReferralUncheckedUpdateManyWithoutReferrerNestedInput
     referredReferral?: TenantReferralUncheckedUpdateOneWithoutReferredNestedInput
     peerReportsMade?: PeerBehaviorReportUncheckedUpdateManyWithoutReporterNestedInput
@@ -117609,6 +126225,7 @@ export namespace Prisma {
     tipGopay?: NullableStringFieldUpdateOperationsInput | string | null
     tipOvo?: NullableStringFieldUpdateOperationsInput | string | null
     tipDana?: NullableStringFieldUpdateOperationsInput | string | null
+    tipShopeepay?: NullableStringFieldUpdateOperationsInput | string | null
     tipBank?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -117647,6 +126264,7 @@ export namespace Prisma {
     tenantsKtpVerified?: TenantUpdateManyWithoutKtpVerifiedByNestedInput
     roomTransfersCreated?: RoomTransferUpdateManyWithoutCreatedByNestedInput
     peerReportsModerated?: PeerBehaviorReportUpdateManyWithoutModeratedByNestedInput
+    marketAnalysesCreated?: MarketAnalysisUpdateManyWithoutCreatedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutRenewRequestsReviewedInput = {
@@ -117662,6 +126280,7 @@ export namespace Prisma {
     tipGopay?: NullableStringFieldUpdateOperationsInput | string | null
     tipOvo?: NullableStringFieldUpdateOperationsInput | string | null
     tipDana?: NullableStringFieldUpdateOperationsInput | string | null
+    tipShopeepay?: NullableStringFieldUpdateOperationsInput | string | null
     tipBank?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -117699,6 +126318,7 @@ export namespace Prisma {
     tenantsKtpVerified?: TenantUncheckedUpdateManyWithoutKtpVerifiedByNestedInput
     roomTransfersCreated?: RoomTransferUncheckedUpdateManyWithoutCreatedByNestedInput
     peerReportsModerated?: PeerBehaviorReportUncheckedUpdateManyWithoutModeratedByNestedInput
+    marketAnalysesCreated?: MarketAnalysisUncheckedUpdateManyWithoutCreatedByNestedInput
   }
 
   export type StayCreateWithoutCheckoutRequestsInput = {
@@ -117840,6 +126460,7 @@ export namespace Prisma {
     tipGopay?: string | null
     tipOvo?: string | null
     tipDana?: string | null
+    tipShopeepay?: string | null
     tipBank?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -117878,6 +126499,7 @@ export namespace Prisma {
     tenantsKtpVerified?: TenantCreateNestedManyWithoutKtpVerifiedByInput
     roomTransfersCreated?: RoomTransferCreateNestedManyWithoutCreatedByInput
     peerReportsModerated?: PeerBehaviorReportCreateNestedManyWithoutModeratedByInput
+    marketAnalysesCreated?: MarketAnalysisCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserUncheckedCreateWithoutCheckoutRequestsReviewedInput = {
@@ -117893,6 +126515,7 @@ export namespace Prisma {
     tipGopay?: string | null
     tipOvo?: string | null
     tipDana?: string | null
+    tipShopeepay?: string | null
     tipBank?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -117930,6 +126553,7 @@ export namespace Prisma {
     tenantsKtpVerified?: TenantUncheckedCreateNestedManyWithoutKtpVerifiedByInput
     roomTransfersCreated?: RoomTransferUncheckedCreateNestedManyWithoutCreatedByInput
     peerReportsModerated?: PeerBehaviorReportUncheckedCreateNestedManyWithoutModeratedByInput
+    marketAnalysesCreated?: MarketAnalysisUncheckedCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserCreateOrConnectWithoutCheckoutRequestsReviewedInput = {
@@ -118093,6 +126717,7 @@ export namespace Prisma {
     tipGopay?: NullableStringFieldUpdateOperationsInput | string | null
     tipOvo?: NullableStringFieldUpdateOperationsInput | string | null
     tipDana?: NullableStringFieldUpdateOperationsInput | string | null
+    tipShopeepay?: NullableStringFieldUpdateOperationsInput | string | null
     tipBank?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -118131,6 +126756,7 @@ export namespace Prisma {
     tenantsKtpVerified?: TenantUpdateManyWithoutKtpVerifiedByNestedInput
     roomTransfersCreated?: RoomTransferUpdateManyWithoutCreatedByNestedInput
     peerReportsModerated?: PeerBehaviorReportUpdateManyWithoutModeratedByNestedInput
+    marketAnalysesCreated?: MarketAnalysisUpdateManyWithoutCreatedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutCheckoutRequestsReviewedInput = {
@@ -118146,6 +126772,7 @@ export namespace Prisma {
     tipGopay?: NullableStringFieldUpdateOperationsInput | string | null
     tipOvo?: NullableStringFieldUpdateOperationsInput | string | null
     tipDana?: NullableStringFieldUpdateOperationsInput | string | null
+    tipShopeepay?: NullableStringFieldUpdateOperationsInput | string | null
     tipBank?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -118183,6 +126810,7 @@ export namespace Prisma {
     tenantsKtpVerified?: TenantUncheckedUpdateManyWithoutKtpVerifiedByNestedInput
     roomTransfersCreated?: RoomTransferUncheckedUpdateManyWithoutCreatedByNestedInput
     peerReportsModerated?: PeerBehaviorReportUncheckedUpdateManyWithoutModeratedByNestedInput
+    marketAnalysesCreated?: MarketAnalysisUncheckedUpdateManyWithoutCreatedByNestedInput
   }
 
   export type UserCreateWithoutWifiSalesCreatedInput = {
@@ -118196,6 +126824,7 @@ export namespace Prisma {
     tipGopay?: string | null
     tipOvo?: string | null
     tipDana?: string | null
+    tipShopeepay?: string | null
     tipBank?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -118234,6 +126863,7 @@ export namespace Prisma {
     tenantsKtpVerified?: TenantCreateNestedManyWithoutKtpVerifiedByInput
     roomTransfersCreated?: RoomTransferCreateNestedManyWithoutCreatedByInput
     peerReportsModerated?: PeerBehaviorReportCreateNestedManyWithoutModeratedByInput
+    marketAnalysesCreated?: MarketAnalysisCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserUncheckedCreateWithoutWifiSalesCreatedInput = {
@@ -118249,6 +126879,7 @@ export namespace Prisma {
     tipGopay?: string | null
     tipOvo?: string | null
     tipDana?: string | null
+    tipShopeepay?: string | null
     tipBank?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -118286,6 +126917,7 @@ export namespace Prisma {
     tenantsKtpVerified?: TenantUncheckedCreateNestedManyWithoutKtpVerifiedByInput
     roomTransfersCreated?: RoomTransferUncheckedCreateNestedManyWithoutCreatedByInput
     peerReportsModerated?: PeerBehaviorReportUncheckedCreateNestedManyWithoutModeratedByInput
+    marketAnalysesCreated?: MarketAnalysisUncheckedCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserCreateOrConnectWithoutWifiSalesCreatedInput = {
@@ -118315,6 +126947,7 @@ export namespace Prisma {
     tipGopay?: NullableStringFieldUpdateOperationsInput | string | null
     tipOvo?: NullableStringFieldUpdateOperationsInput | string | null
     tipDana?: NullableStringFieldUpdateOperationsInput | string | null
+    tipShopeepay?: NullableStringFieldUpdateOperationsInput | string | null
     tipBank?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -118353,6 +126986,7 @@ export namespace Prisma {
     tenantsKtpVerified?: TenantUpdateManyWithoutKtpVerifiedByNestedInput
     roomTransfersCreated?: RoomTransferUpdateManyWithoutCreatedByNestedInput
     peerReportsModerated?: PeerBehaviorReportUpdateManyWithoutModeratedByNestedInput
+    marketAnalysesCreated?: MarketAnalysisUpdateManyWithoutCreatedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutWifiSalesCreatedInput = {
@@ -118368,6 +127002,7 @@ export namespace Prisma {
     tipGopay?: NullableStringFieldUpdateOperationsInput | string | null
     tipOvo?: NullableStringFieldUpdateOperationsInput | string | null
     tipDana?: NullableStringFieldUpdateOperationsInput | string | null
+    tipShopeepay?: NullableStringFieldUpdateOperationsInput | string | null
     tipBank?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -118405,6 +127040,7 @@ export namespace Prisma {
     tenantsKtpVerified?: TenantUncheckedUpdateManyWithoutKtpVerifiedByNestedInput
     roomTransfersCreated?: RoomTransferUncheckedUpdateManyWithoutCreatedByNestedInput
     peerReportsModerated?: PeerBehaviorReportUncheckedUpdateManyWithoutModeratedByNestedInput
+    marketAnalysesCreated?: MarketAnalysisUncheckedUpdateManyWithoutCreatedByNestedInput
   }
 
   export type RoomCreateWithoutExpensesInput = {
@@ -118412,6 +127048,8 @@ export namespace Prisma {
     name?: string | null
     floor?: string | null
     status?: $Enums.RoomStatus
+    category?: $Enums.RoomCategory
+    roomType?: $Enums.RoomType
     dailyRateRupiah?: number | null
     weeklyRateRupiah?: number | null
     biWeeklyRateRupiah?: number | null
@@ -118451,6 +127089,8 @@ export namespace Prisma {
     name?: string | null
     floor?: string | null
     status?: $Enums.RoomStatus
+    category?: $Enums.RoomCategory
+    roomType?: $Enums.RoomType
     dailyRateRupiah?: number | null
     weeklyRateRupiah?: number | null
     biWeeklyRateRupiah?: number | null
@@ -118628,6 +127268,7 @@ export namespace Prisma {
     tipGopay?: string | null
     tipOvo?: string | null
     tipDana?: string | null
+    tipShopeepay?: string | null
     tipBank?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -118666,6 +127307,7 @@ export namespace Prisma {
     tenantsKtpVerified?: TenantCreateNestedManyWithoutKtpVerifiedByInput
     roomTransfersCreated?: RoomTransferCreateNestedManyWithoutCreatedByInput
     peerReportsModerated?: PeerBehaviorReportCreateNestedManyWithoutModeratedByInput
+    marketAnalysesCreated?: MarketAnalysisCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserUncheckedCreateWithoutExpensesCreatedInput = {
@@ -118681,6 +127323,7 @@ export namespace Prisma {
     tipGopay?: string | null
     tipOvo?: string | null
     tipDana?: string | null
+    tipShopeepay?: string | null
     tipBank?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -118718,6 +127361,7 @@ export namespace Prisma {
     tenantsKtpVerified?: TenantUncheckedCreateNestedManyWithoutKtpVerifiedByInput
     roomTransfersCreated?: RoomTransferUncheckedCreateNestedManyWithoutCreatedByInput
     peerReportsModerated?: PeerBehaviorReportUncheckedCreateNestedManyWithoutModeratedByInput
+    marketAnalysesCreated?: MarketAnalysisUncheckedCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserCreateOrConnectWithoutExpensesCreatedInput = {
@@ -118826,6 +127470,8 @@ export namespace Prisma {
     name?: NullableStringFieldUpdateOperationsInput | string | null
     floor?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumRoomStatusFieldUpdateOperationsInput | $Enums.RoomStatus
+    category?: EnumRoomCategoryFieldUpdateOperationsInput | $Enums.RoomCategory
+    roomType?: EnumRoomTypeFieldUpdateOperationsInput | $Enums.RoomType
     dailyRateRupiah?: NullableIntFieldUpdateOperationsInput | number | null
     weeklyRateRupiah?: NullableIntFieldUpdateOperationsInput | number | null
     biWeeklyRateRupiah?: NullableIntFieldUpdateOperationsInput | number | null
@@ -118865,6 +127511,8 @@ export namespace Prisma {
     name?: NullableStringFieldUpdateOperationsInput | string | null
     floor?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumRoomStatusFieldUpdateOperationsInput | $Enums.RoomStatus
+    category?: EnumRoomCategoryFieldUpdateOperationsInput | $Enums.RoomCategory
+    roomType?: EnumRoomTypeFieldUpdateOperationsInput | $Enums.RoomType
     dailyRateRupiah?: NullableIntFieldUpdateOperationsInput | number | null
     weeklyRateRupiah?: NullableIntFieldUpdateOperationsInput | number | null
     biWeeklyRateRupiah?: NullableIntFieldUpdateOperationsInput | number | null
@@ -119054,6 +127702,7 @@ export namespace Prisma {
     tipGopay?: NullableStringFieldUpdateOperationsInput | string | null
     tipOvo?: NullableStringFieldUpdateOperationsInput | string | null
     tipDana?: NullableStringFieldUpdateOperationsInput | string | null
+    tipShopeepay?: NullableStringFieldUpdateOperationsInput | string | null
     tipBank?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -119092,6 +127741,7 @@ export namespace Prisma {
     tenantsKtpVerified?: TenantUpdateManyWithoutKtpVerifiedByNestedInput
     roomTransfersCreated?: RoomTransferUpdateManyWithoutCreatedByNestedInput
     peerReportsModerated?: PeerBehaviorReportUpdateManyWithoutModeratedByNestedInput
+    marketAnalysesCreated?: MarketAnalysisUpdateManyWithoutCreatedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutExpensesCreatedInput = {
@@ -119107,6 +127757,7 @@ export namespace Prisma {
     tipGopay?: NullableStringFieldUpdateOperationsInput | string | null
     tipOvo?: NullableStringFieldUpdateOperationsInput | string | null
     tipDana?: NullableStringFieldUpdateOperationsInput | string | null
+    tipShopeepay?: NullableStringFieldUpdateOperationsInput | string | null
     tipBank?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -119144,6 +127795,7 @@ export namespace Prisma {
     tenantsKtpVerified?: TenantUncheckedUpdateManyWithoutKtpVerifiedByNestedInput
     roomTransfersCreated?: RoomTransferUncheckedUpdateManyWithoutCreatedByNestedInput
     peerReportsModerated?: PeerBehaviorReportUncheckedUpdateManyWithoutModeratedByNestedInput
+    marketAnalysesCreated?: MarketAnalysisUncheckedUpdateManyWithoutCreatedByNestedInput
   }
 
   export type FixedAssetUpsertWithWhereUniqueWithoutExpenseInput = {
@@ -119167,6 +127819,8 @@ export namespace Prisma {
     name?: string | null
     floor?: string | null
     status?: $Enums.RoomStatus
+    category?: $Enums.RoomCategory
+    roomType?: $Enums.RoomType
     dailyRateRupiah?: number | null
     weeklyRateRupiah?: number | null
     biWeeklyRateRupiah?: number | null
@@ -119206,6 +127860,8 @@ export namespace Prisma {
     name?: string | null
     floor?: string | null
     status?: $Enums.RoomStatus
+    category?: $Enums.RoomCategory
+    roomType?: $Enums.RoomType
     dailyRateRupiah?: number | null
     weeklyRateRupiah?: number | null
     biWeeklyRateRupiah?: number | null
@@ -119371,6 +128027,7 @@ export namespace Prisma {
     tipGopay?: string | null
     tipOvo?: string | null
     tipDana?: string | null
+    tipShopeepay?: string | null
     tipBank?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -119409,6 +128066,7 @@ export namespace Prisma {
     tenantsKtpVerified?: TenantCreateNestedManyWithoutKtpVerifiedByInput
     roomTransfersCreated?: RoomTransferCreateNestedManyWithoutCreatedByInput
     peerReportsModerated?: PeerBehaviorReportCreateNestedManyWithoutModeratedByInput
+    marketAnalysesCreated?: MarketAnalysisCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserUncheckedCreateWithoutFixedAssetsCreatedInput = {
@@ -119424,6 +128082,7 @@ export namespace Prisma {
     tipGopay?: string | null
     tipOvo?: string | null
     tipDana?: string | null
+    tipShopeepay?: string | null
     tipBank?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -119461,6 +128120,7 @@ export namespace Prisma {
     tenantsKtpVerified?: TenantUncheckedCreateNestedManyWithoutKtpVerifiedByInput
     roomTransfersCreated?: RoomTransferUncheckedCreateNestedManyWithoutCreatedByInput
     peerReportsModerated?: PeerBehaviorReportUncheckedCreateNestedManyWithoutModeratedByInput
+    marketAnalysesCreated?: MarketAnalysisUncheckedCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserCreateOrConnectWithoutFixedAssetsCreatedInput = {
@@ -119607,6 +128267,8 @@ export namespace Prisma {
     name?: NullableStringFieldUpdateOperationsInput | string | null
     floor?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumRoomStatusFieldUpdateOperationsInput | $Enums.RoomStatus
+    category?: EnumRoomCategoryFieldUpdateOperationsInput | $Enums.RoomCategory
+    roomType?: EnumRoomTypeFieldUpdateOperationsInput | $Enums.RoomType
     dailyRateRupiah?: NullableIntFieldUpdateOperationsInput | number | null
     weeklyRateRupiah?: NullableIntFieldUpdateOperationsInput | number | null
     biWeeklyRateRupiah?: NullableIntFieldUpdateOperationsInput | number | null
@@ -119646,6 +128308,8 @@ export namespace Prisma {
     name?: NullableStringFieldUpdateOperationsInput | string | null
     floor?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumRoomStatusFieldUpdateOperationsInput | $Enums.RoomStatus
+    category?: EnumRoomCategoryFieldUpdateOperationsInput | $Enums.RoomCategory
+    roomType?: EnumRoomTypeFieldUpdateOperationsInput | $Enums.RoomType
     dailyRateRupiah?: NullableIntFieldUpdateOperationsInput | number | null
     weeklyRateRupiah?: NullableIntFieldUpdateOperationsInput | number | null
     biWeeklyRateRupiah?: NullableIntFieldUpdateOperationsInput | number | null
@@ -119835,6 +128499,7 @@ export namespace Prisma {
     tipGopay?: NullableStringFieldUpdateOperationsInput | string | null
     tipOvo?: NullableStringFieldUpdateOperationsInput | string | null
     tipDana?: NullableStringFieldUpdateOperationsInput | string | null
+    tipShopeepay?: NullableStringFieldUpdateOperationsInput | string | null
     tipBank?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -119873,6 +128538,7 @@ export namespace Prisma {
     tenantsKtpVerified?: TenantUpdateManyWithoutKtpVerifiedByNestedInput
     roomTransfersCreated?: RoomTransferUpdateManyWithoutCreatedByNestedInput
     peerReportsModerated?: PeerBehaviorReportUpdateManyWithoutModeratedByNestedInput
+    marketAnalysesCreated?: MarketAnalysisUpdateManyWithoutCreatedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutFixedAssetsCreatedInput = {
@@ -119888,6 +128554,7 @@ export namespace Prisma {
     tipGopay?: NullableStringFieldUpdateOperationsInput | string | null
     tipOvo?: NullableStringFieldUpdateOperationsInput | string | null
     tipDana?: NullableStringFieldUpdateOperationsInput | string | null
+    tipShopeepay?: NullableStringFieldUpdateOperationsInput | string | null
     tipBank?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -119925,6 +128592,7 @@ export namespace Prisma {
     tenantsKtpVerified?: TenantUncheckedUpdateManyWithoutKtpVerifiedByNestedInput
     roomTransfersCreated?: RoomTransferUncheckedUpdateManyWithoutCreatedByNestedInput
     peerReportsModerated?: PeerBehaviorReportUncheckedUpdateManyWithoutModeratedByNestedInput
+    marketAnalysesCreated?: MarketAnalysisUncheckedUpdateManyWithoutCreatedByNestedInput
   }
 
   export type ChartOfAccountUpsertWithoutFixedAssetAlignmentCreditsInput = {
@@ -120125,6 +128793,7 @@ export namespace Prisma {
     tipGopay?: string | null
     tipOvo?: string | null
     tipDana?: string | null
+    tipShopeepay?: string | null
     tipBank?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -120163,6 +128832,7 @@ export namespace Prisma {
     tenantsKtpVerified?: TenantCreateNestedManyWithoutKtpVerifiedByInput
     roomTransfersCreated?: RoomTransferCreateNestedManyWithoutCreatedByInput
     peerReportsModerated?: PeerBehaviorReportCreateNestedManyWithoutModeratedByInput
+    marketAnalysesCreated?: MarketAnalysisCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserUncheckedCreateWithoutAssetDepreciationRunsCreatedInput = {
@@ -120178,6 +128848,7 @@ export namespace Prisma {
     tipGopay?: string | null
     tipOvo?: string | null
     tipDana?: string | null
+    tipShopeepay?: string | null
     tipBank?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -120215,6 +128886,7 @@ export namespace Prisma {
     tenantsKtpVerified?: TenantUncheckedCreateNestedManyWithoutKtpVerifiedByInput
     roomTransfersCreated?: RoomTransferUncheckedCreateNestedManyWithoutCreatedByInput
     peerReportsModerated?: PeerBehaviorReportUncheckedCreateNestedManyWithoutModeratedByInput
+    marketAnalysesCreated?: MarketAnalysisUncheckedCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserCreateOrConnectWithoutAssetDepreciationRunsCreatedInput = {
@@ -120333,6 +129005,7 @@ export namespace Prisma {
     tipGopay?: NullableStringFieldUpdateOperationsInput | string | null
     tipOvo?: NullableStringFieldUpdateOperationsInput | string | null
     tipDana?: NullableStringFieldUpdateOperationsInput | string | null
+    tipShopeepay?: NullableStringFieldUpdateOperationsInput | string | null
     tipBank?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -120371,6 +129044,7 @@ export namespace Prisma {
     tenantsKtpVerified?: TenantUpdateManyWithoutKtpVerifiedByNestedInput
     roomTransfersCreated?: RoomTransferUpdateManyWithoutCreatedByNestedInput
     peerReportsModerated?: PeerBehaviorReportUpdateManyWithoutModeratedByNestedInput
+    marketAnalysesCreated?: MarketAnalysisUpdateManyWithoutCreatedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutAssetDepreciationRunsCreatedInput = {
@@ -120386,6 +129060,7 @@ export namespace Prisma {
     tipGopay?: NullableStringFieldUpdateOperationsInput | string | null
     tipOvo?: NullableStringFieldUpdateOperationsInput | string | null
     tipDana?: NullableStringFieldUpdateOperationsInput | string | null
+    tipShopeepay?: NullableStringFieldUpdateOperationsInput | string | null
     tipBank?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -120423,6 +129098,7 @@ export namespace Prisma {
     tenantsKtpVerified?: TenantUncheckedUpdateManyWithoutKtpVerifiedByNestedInput
     roomTransfersCreated?: RoomTransferUncheckedUpdateManyWithoutCreatedByNestedInput
     peerReportsModerated?: PeerBehaviorReportUncheckedUpdateManyWithoutModeratedByNestedInput
+    marketAnalysesCreated?: MarketAnalysisUncheckedUpdateManyWithoutCreatedByNestedInput
   }
 
   export type AssetDepreciationLineUpsertWithWhereUniqueWithoutRunInput = {
@@ -120700,6 +129376,7 @@ export namespace Prisma {
     tipGopay?: string | null
     tipOvo?: string | null
     tipDana?: string | null
+    tipShopeepay?: string | null
     tipBank?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -120738,6 +129415,7 @@ export namespace Prisma {
     tenantsKtpVerified?: TenantCreateNestedManyWithoutKtpVerifiedByInput
     roomTransfersCreated?: RoomTransferCreateNestedManyWithoutCreatedByInput
     peerReportsModerated?: PeerBehaviorReportCreateNestedManyWithoutModeratedByInput
+    marketAnalysesCreated?: MarketAnalysisCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserUncheckedCreateWithoutNotificationsInput = {
@@ -120753,6 +129431,7 @@ export namespace Prisma {
     tipGopay?: string | null
     tipOvo?: string | null
     tipDana?: string | null
+    tipShopeepay?: string | null
     tipBank?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -120790,6 +129469,7 @@ export namespace Prisma {
     tenantsKtpVerified?: TenantUncheckedCreateNestedManyWithoutKtpVerifiedByInput
     roomTransfersCreated?: RoomTransferUncheckedCreateNestedManyWithoutCreatedByInput
     peerReportsModerated?: PeerBehaviorReportUncheckedCreateNestedManyWithoutModeratedByInput
+    marketAnalysesCreated?: MarketAnalysisUncheckedCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserCreateOrConnectWithoutNotificationsInput = {
@@ -120819,6 +129499,7 @@ export namespace Prisma {
     tipGopay?: NullableStringFieldUpdateOperationsInput | string | null
     tipOvo?: NullableStringFieldUpdateOperationsInput | string | null
     tipDana?: NullableStringFieldUpdateOperationsInput | string | null
+    tipShopeepay?: NullableStringFieldUpdateOperationsInput | string | null
     tipBank?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -120857,6 +129538,7 @@ export namespace Prisma {
     tenantsKtpVerified?: TenantUpdateManyWithoutKtpVerifiedByNestedInput
     roomTransfersCreated?: RoomTransferUpdateManyWithoutCreatedByNestedInput
     peerReportsModerated?: PeerBehaviorReportUpdateManyWithoutModeratedByNestedInput
+    marketAnalysesCreated?: MarketAnalysisUpdateManyWithoutCreatedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutNotificationsInput = {
@@ -120872,6 +129554,7 @@ export namespace Prisma {
     tipGopay?: NullableStringFieldUpdateOperationsInput | string | null
     tipOvo?: NullableStringFieldUpdateOperationsInput | string | null
     tipDana?: NullableStringFieldUpdateOperationsInput | string | null
+    tipShopeepay?: NullableStringFieldUpdateOperationsInput | string | null
     tipBank?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -120909,6 +129592,7 @@ export namespace Prisma {
     tenantsKtpVerified?: TenantUncheckedUpdateManyWithoutKtpVerifiedByNestedInput
     roomTransfersCreated?: RoomTransferUncheckedUpdateManyWithoutCreatedByNestedInput
     peerReportsModerated?: PeerBehaviorReportUncheckedUpdateManyWithoutModeratedByNestedInput
+    marketAnalysesCreated?: MarketAnalysisUncheckedUpdateManyWithoutCreatedByNestedInput
   }
 
   export type UserCreateWithoutPushSubscriptionsInput = {
@@ -120922,6 +129606,7 @@ export namespace Prisma {
     tipGopay?: string | null
     tipOvo?: string | null
     tipDana?: string | null
+    tipShopeepay?: string | null
     tipBank?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -120960,6 +129645,7 @@ export namespace Prisma {
     tenantsKtpVerified?: TenantCreateNestedManyWithoutKtpVerifiedByInput
     roomTransfersCreated?: RoomTransferCreateNestedManyWithoutCreatedByInput
     peerReportsModerated?: PeerBehaviorReportCreateNestedManyWithoutModeratedByInput
+    marketAnalysesCreated?: MarketAnalysisCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserUncheckedCreateWithoutPushSubscriptionsInput = {
@@ -120975,6 +129661,7 @@ export namespace Prisma {
     tipGopay?: string | null
     tipOvo?: string | null
     tipDana?: string | null
+    tipShopeepay?: string | null
     tipBank?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -121012,6 +129699,7 @@ export namespace Prisma {
     tenantsKtpVerified?: TenantUncheckedCreateNestedManyWithoutKtpVerifiedByInput
     roomTransfersCreated?: RoomTransferUncheckedCreateNestedManyWithoutCreatedByInput
     peerReportsModerated?: PeerBehaviorReportUncheckedCreateNestedManyWithoutModeratedByInput
+    marketAnalysesCreated?: MarketAnalysisUncheckedCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserCreateOrConnectWithoutPushSubscriptionsInput = {
@@ -121041,6 +129729,7 @@ export namespace Prisma {
     tipGopay?: NullableStringFieldUpdateOperationsInput | string | null
     tipOvo?: NullableStringFieldUpdateOperationsInput | string | null
     tipDana?: NullableStringFieldUpdateOperationsInput | string | null
+    tipShopeepay?: NullableStringFieldUpdateOperationsInput | string | null
     tipBank?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -121079,6 +129768,7 @@ export namespace Prisma {
     tenantsKtpVerified?: TenantUpdateManyWithoutKtpVerifiedByNestedInput
     roomTransfersCreated?: RoomTransferUpdateManyWithoutCreatedByNestedInput
     peerReportsModerated?: PeerBehaviorReportUpdateManyWithoutModeratedByNestedInput
+    marketAnalysesCreated?: MarketAnalysisUpdateManyWithoutCreatedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutPushSubscriptionsInput = {
@@ -121094,6 +129784,7 @@ export namespace Prisma {
     tipGopay?: NullableStringFieldUpdateOperationsInput | string | null
     tipOvo?: NullableStringFieldUpdateOperationsInput | string | null
     tipDana?: NullableStringFieldUpdateOperationsInput | string | null
+    tipShopeepay?: NullableStringFieldUpdateOperationsInput | string | null
     tipBank?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -121131,6 +129822,7 @@ export namespace Prisma {
     tenantsKtpVerified?: TenantUncheckedUpdateManyWithoutKtpVerifiedByNestedInput
     roomTransfersCreated?: RoomTransferUncheckedUpdateManyWithoutCreatedByNestedInput
     peerReportsModerated?: PeerBehaviorReportUncheckedUpdateManyWithoutModeratedByNestedInput
+    marketAnalysesCreated?: MarketAnalysisUncheckedUpdateManyWithoutCreatedByNestedInput
   }
 
   export type UserCreateWithoutAuditLogsInput = {
@@ -121144,6 +129836,7 @@ export namespace Prisma {
     tipGopay?: string | null
     tipOvo?: string | null
     tipDana?: string | null
+    tipShopeepay?: string | null
     tipBank?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -121182,6 +129875,7 @@ export namespace Prisma {
     tenantsKtpVerified?: TenantCreateNestedManyWithoutKtpVerifiedByInput
     roomTransfersCreated?: RoomTransferCreateNestedManyWithoutCreatedByInput
     peerReportsModerated?: PeerBehaviorReportCreateNestedManyWithoutModeratedByInput
+    marketAnalysesCreated?: MarketAnalysisCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserUncheckedCreateWithoutAuditLogsInput = {
@@ -121197,6 +129891,7 @@ export namespace Prisma {
     tipGopay?: string | null
     tipOvo?: string | null
     tipDana?: string | null
+    tipShopeepay?: string | null
     tipBank?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -121234,6 +129929,7 @@ export namespace Prisma {
     tenantsKtpVerified?: TenantUncheckedCreateNestedManyWithoutKtpVerifiedByInput
     roomTransfersCreated?: RoomTransferUncheckedCreateNestedManyWithoutCreatedByInput
     peerReportsModerated?: PeerBehaviorReportUncheckedCreateNestedManyWithoutModeratedByInput
+    marketAnalysesCreated?: MarketAnalysisUncheckedCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserCreateOrConnectWithoutAuditLogsInput = {
@@ -121263,6 +129959,7 @@ export namespace Prisma {
     tipGopay?: NullableStringFieldUpdateOperationsInput | string | null
     tipOvo?: NullableStringFieldUpdateOperationsInput | string | null
     tipDana?: NullableStringFieldUpdateOperationsInput | string | null
+    tipShopeepay?: NullableStringFieldUpdateOperationsInput | string | null
     tipBank?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -121301,6 +129998,7 @@ export namespace Prisma {
     tenantsKtpVerified?: TenantUpdateManyWithoutKtpVerifiedByNestedInput
     roomTransfersCreated?: RoomTransferUpdateManyWithoutCreatedByNestedInput
     peerReportsModerated?: PeerBehaviorReportUpdateManyWithoutModeratedByNestedInput
+    marketAnalysesCreated?: MarketAnalysisUpdateManyWithoutCreatedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutAuditLogsInput = {
@@ -121316,6 +130014,7 @@ export namespace Prisma {
     tipGopay?: NullableStringFieldUpdateOperationsInput | string | null
     tipOvo?: NullableStringFieldUpdateOperationsInput | string | null
     tipDana?: NullableStringFieldUpdateOperationsInput | string | null
+    tipShopeepay?: NullableStringFieldUpdateOperationsInput | string | null
     tipBank?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -121353,6 +130052,7 @@ export namespace Prisma {
     tenantsKtpVerified?: TenantUncheckedUpdateManyWithoutKtpVerifiedByNestedInput
     roomTransfersCreated?: RoomTransferUncheckedUpdateManyWithoutCreatedByNestedInput
     peerReportsModerated?: PeerBehaviorReportUncheckedUpdateManyWithoutModeratedByNestedInput
+    marketAnalysesCreated?: MarketAnalysisUncheckedUpdateManyWithoutCreatedByNestedInput
   }
 
   export type ChartOfAccountCreateWithoutChildrenInput = {
@@ -123640,6 +132340,8 @@ export namespace Prisma {
     name?: string | null
     floor?: string | null
     status?: $Enums.RoomStatus
+    category?: $Enums.RoomCategory
+    roomType?: $Enums.RoomType
     dailyRateRupiah?: number | null
     weeklyRateRupiah?: number | null
     biWeeklyRateRupiah?: number | null
@@ -123679,6 +132381,8 @@ export namespace Prisma {
     name?: string | null
     floor?: string | null
     status?: $Enums.RoomStatus
+    category?: $Enums.RoomCategory
+    roomType?: $Enums.RoomType
     dailyRateRupiah?: number | null
     weeklyRateRupiah?: number | null
     biWeeklyRateRupiah?: number | null
@@ -123722,6 +132426,8 @@ export namespace Prisma {
     name?: string | null
     floor?: string | null
     status?: $Enums.RoomStatus
+    category?: $Enums.RoomCategory
+    roomType?: $Enums.RoomType
     dailyRateRupiah?: number | null
     weeklyRateRupiah?: number | null
     biWeeklyRateRupiah?: number | null
@@ -123761,6 +132467,8 @@ export namespace Prisma {
     name?: string | null
     floor?: string | null
     status?: $Enums.RoomStatus
+    category?: $Enums.RoomCategory
+    roomType?: $Enums.RoomType
     dailyRateRupiah?: number | null
     weeklyRateRupiah?: number | null
     biWeeklyRateRupiah?: number | null
@@ -123810,6 +132518,7 @@ export namespace Prisma {
     tipGopay?: string | null
     tipOvo?: string | null
     tipDana?: string | null
+    tipShopeepay?: string | null
     tipBank?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -123848,6 +132557,7 @@ export namespace Prisma {
     staysFledMarked?: StayCreateNestedManyWithoutFledMarkedByInput
     tenantsKtpVerified?: TenantCreateNestedManyWithoutKtpVerifiedByInput
     peerReportsModerated?: PeerBehaviorReportCreateNestedManyWithoutModeratedByInput
+    marketAnalysesCreated?: MarketAnalysisCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserUncheckedCreateWithoutRoomTransfersCreatedInput = {
@@ -123863,6 +132573,7 @@ export namespace Prisma {
     tipGopay?: string | null
     tipOvo?: string | null
     tipDana?: string | null
+    tipShopeepay?: string | null
     tipBank?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -123900,6 +132611,7 @@ export namespace Prisma {
     staysFledMarked?: StayUncheckedCreateNestedManyWithoutFledMarkedByInput
     tenantsKtpVerified?: TenantUncheckedCreateNestedManyWithoutKtpVerifiedByInput
     peerReportsModerated?: PeerBehaviorReportUncheckedCreateNestedManyWithoutModeratedByInput
+    marketAnalysesCreated?: MarketAnalysisUncheckedCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserCreateOrConnectWithoutRoomTransfersCreatedInput = {
@@ -124057,6 +132769,8 @@ export namespace Prisma {
     name?: NullableStringFieldUpdateOperationsInput | string | null
     floor?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumRoomStatusFieldUpdateOperationsInput | $Enums.RoomStatus
+    category?: EnumRoomCategoryFieldUpdateOperationsInput | $Enums.RoomCategory
+    roomType?: EnumRoomTypeFieldUpdateOperationsInput | $Enums.RoomType
     dailyRateRupiah?: NullableIntFieldUpdateOperationsInput | number | null
     weeklyRateRupiah?: NullableIntFieldUpdateOperationsInput | number | null
     biWeeklyRateRupiah?: NullableIntFieldUpdateOperationsInput | number | null
@@ -124096,6 +132810,8 @@ export namespace Prisma {
     name?: NullableStringFieldUpdateOperationsInput | string | null
     floor?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumRoomStatusFieldUpdateOperationsInput | $Enums.RoomStatus
+    category?: EnumRoomCategoryFieldUpdateOperationsInput | $Enums.RoomCategory
+    roomType?: EnumRoomTypeFieldUpdateOperationsInput | $Enums.RoomType
     dailyRateRupiah?: NullableIntFieldUpdateOperationsInput | number | null
     weeklyRateRupiah?: NullableIntFieldUpdateOperationsInput | number | null
     biWeeklyRateRupiah?: NullableIntFieldUpdateOperationsInput | number | null
@@ -124145,6 +132861,8 @@ export namespace Prisma {
     name?: NullableStringFieldUpdateOperationsInput | string | null
     floor?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumRoomStatusFieldUpdateOperationsInput | $Enums.RoomStatus
+    category?: EnumRoomCategoryFieldUpdateOperationsInput | $Enums.RoomCategory
+    roomType?: EnumRoomTypeFieldUpdateOperationsInput | $Enums.RoomType
     dailyRateRupiah?: NullableIntFieldUpdateOperationsInput | number | null
     weeklyRateRupiah?: NullableIntFieldUpdateOperationsInput | number | null
     biWeeklyRateRupiah?: NullableIntFieldUpdateOperationsInput | number | null
@@ -124184,6 +132902,8 @@ export namespace Prisma {
     name?: NullableStringFieldUpdateOperationsInput | string | null
     floor?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumRoomStatusFieldUpdateOperationsInput | $Enums.RoomStatus
+    category?: EnumRoomCategoryFieldUpdateOperationsInput | $Enums.RoomCategory
+    roomType?: EnumRoomTypeFieldUpdateOperationsInput | $Enums.RoomType
     dailyRateRupiah?: NullableIntFieldUpdateOperationsInput | number | null
     weeklyRateRupiah?: NullableIntFieldUpdateOperationsInput | number | null
     biWeeklyRateRupiah?: NullableIntFieldUpdateOperationsInput | number | null
@@ -124239,6 +132959,7 @@ export namespace Prisma {
     tipGopay?: NullableStringFieldUpdateOperationsInput | string | null
     tipOvo?: NullableStringFieldUpdateOperationsInput | string | null
     tipDana?: NullableStringFieldUpdateOperationsInput | string | null
+    tipShopeepay?: NullableStringFieldUpdateOperationsInput | string | null
     tipBank?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -124277,6 +132998,7 @@ export namespace Prisma {
     staysFledMarked?: StayUpdateManyWithoutFledMarkedByNestedInput
     tenantsKtpVerified?: TenantUpdateManyWithoutKtpVerifiedByNestedInput
     peerReportsModerated?: PeerBehaviorReportUpdateManyWithoutModeratedByNestedInput
+    marketAnalysesCreated?: MarketAnalysisUpdateManyWithoutCreatedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutRoomTransfersCreatedInput = {
@@ -124292,6 +133014,7 @@ export namespace Prisma {
     tipGopay?: NullableStringFieldUpdateOperationsInput | string | null
     tipOvo?: NullableStringFieldUpdateOperationsInput | string | null
     tipDana?: NullableStringFieldUpdateOperationsInput | string | null
+    tipShopeepay?: NullableStringFieldUpdateOperationsInput | string | null
     tipBank?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -124329,6 +133052,7 @@ export namespace Prisma {
     staysFledMarked?: StayUncheckedUpdateManyWithoutFledMarkedByNestedInput
     tenantsKtpVerified?: TenantUncheckedUpdateManyWithoutKtpVerifiedByNestedInput
     peerReportsModerated?: PeerBehaviorReportUncheckedUpdateManyWithoutModeratedByNestedInput
+    marketAnalysesCreated?: MarketAnalysisUncheckedUpdateManyWithoutCreatedByNestedInput
   }
 
   export type TenantCreateWithoutLoyaltyPointsInput = {
@@ -124364,6 +133088,7 @@ export namespace Prisma {
     staffReviews?: StaffReviewCreateNestedManyWithoutTenantInput
     depositLedgerEntries?: TenantDepositLedgerEntryCreateNestedManyWithoutTenantInput
     redemptions?: RedemptionCreateNestedManyWithoutTenantInput
+    serviceInterests?: ServiceInterestCreateNestedManyWithoutTenantInput
     referralsMade?: TenantReferralCreateNestedManyWithoutReferrerInput
     referredReferral?: TenantReferralCreateNestedOneWithoutReferredInput
     peerReportsMade?: PeerBehaviorReportCreateNestedManyWithoutReporterInput
@@ -124404,6 +133129,7 @@ export namespace Prisma {
     staffReviews?: StaffReviewUncheckedCreateNestedManyWithoutTenantInput
     depositLedgerEntries?: TenantDepositLedgerEntryUncheckedCreateNestedManyWithoutTenantInput
     redemptions?: RedemptionUncheckedCreateNestedManyWithoutTenantInput
+    serviceInterests?: ServiceInterestUncheckedCreateNestedManyWithoutTenantInput
     referralsMade?: TenantReferralUncheckedCreateNestedManyWithoutReferrerInput
     referredReferral?: TenantReferralUncheckedCreateNestedOneWithoutReferredInput
     peerReportsMade?: PeerBehaviorReportUncheckedCreateNestedManyWithoutReporterInput
@@ -124459,6 +133185,7 @@ export namespace Prisma {
     staffReviews?: StaffReviewUpdateManyWithoutTenantNestedInput
     depositLedgerEntries?: TenantDepositLedgerEntryUpdateManyWithoutTenantNestedInput
     redemptions?: RedemptionUpdateManyWithoutTenantNestedInput
+    serviceInterests?: ServiceInterestUpdateManyWithoutTenantNestedInput
     referralsMade?: TenantReferralUpdateManyWithoutReferrerNestedInput
     referredReferral?: TenantReferralUpdateOneWithoutReferredNestedInput
     peerReportsMade?: PeerBehaviorReportUpdateManyWithoutReporterNestedInput
@@ -124499,6 +133226,7 @@ export namespace Prisma {
     staffReviews?: StaffReviewUncheckedUpdateManyWithoutTenantNestedInput
     depositLedgerEntries?: TenantDepositLedgerEntryUncheckedUpdateManyWithoutTenantNestedInput
     redemptions?: RedemptionUncheckedUpdateManyWithoutTenantNestedInput
+    serviceInterests?: ServiceInterestUncheckedUpdateManyWithoutTenantNestedInput
     referralsMade?: TenantReferralUncheckedUpdateManyWithoutReferrerNestedInput
     referredReferral?: TenantReferralUncheckedUpdateOneWithoutReferredNestedInput
     peerReportsMade?: PeerBehaviorReportUncheckedUpdateManyWithoutReporterNestedInput
@@ -124587,6 +133315,7 @@ export namespace Prisma {
     staffReviews?: StaffReviewCreateNestedManyWithoutTenantInput
     depositLedgerEntries?: TenantDepositLedgerEntryCreateNestedManyWithoutTenantInput
     loyaltyPoints?: LoyaltyPointCreateNestedManyWithoutTenantInput
+    serviceInterests?: ServiceInterestCreateNestedManyWithoutTenantInput
     referralsMade?: TenantReferralCreateNestedManyWithoutReferrerInput
     referredReferral?: TenantReferralCreateNestedOneWithoutReferredInput
     peerReportsMade?: PeerBehaviorReportCreateNestedManyWithoutReporterInput
@@ -124627,6 +133356,7 @@ export namespace Prisma {
     staffReviews?: StaffReviewUncheckedCreateNestedManyWithoutTenantInput
     depositLedgerEntries?: TenantDepositLedgerEntryUncheckedCreateNestedManyWithoutTenantInput
     loyaltyPoints?: LoyaltyPointUncheckedCreateNestedManyWithoutTenantInput
+    serviceInterests?: ServiceInterestUncheckedCreateNestedManyWithoutTenantInput
     referralsMade?: TenantReferralUncheckedCreateNestedManyWithoutReferrerInput
     referredReferral?: TenantReferralUncheckedCreateNestedOneWithoutReferredInput
     peerReportsMade?: PeerBehaviorReportUncheckedCreateNestedManyWithoutReporterInput
@@ -124768,6 +133498,7 @@ export namespace Prisma {
     staffReviews?: StaffReviewUpdateManyWithoutTenantNestedInput
     depositLedgerEntries?: TenantDepositLedgerEntryUpdateManyWithoutTenantNestedInput
     loyaltyPoints?: LoyaltyPointUpdateManyWithoutTenantNestedInput
+    serviceInterests?: ServiceInterestUpdateManyWithoutTenantNestedInput
     referralsMade?: TenantReferralUpdateManyWithoutReferrerNestedInput
     referredReferral?: TenantReferralUpdateOneWithoutReferredNestedInput
     peerReportsMade?: PeerBehaviorReportUpdateManyWithoutReporterNestedInput
@@ -124808,6 +133539,7 @@ export namespace Prisma {
     staffReviews?: StaffReviewUncheckedUpdateManyWithoutTenantNestedInput
     depositLedgerEntries?: TenantDepositLedgerEntryUncheckedUpdateManyWithoutTenantNestedInput
     loyaltyPoints?: LoyaltyPointUncheckedUpdateManyWithoutTenantNestedInput
+    serviceInterests?: ServiceInterestUncheckedUpdateManyWithoutTenantNestedInput
     referralsMade?: TenantReferralUncheckedUpdateManyWithoutReferrerNestedInput
     referredReferral?: TenantReferralUncheckedUpdateOneWithoutReferredNestedInput
     peerReportsMade?: PeerBehaviorReportUncheckedUpdateManyWithoutReporterNestedInput
@@ -124946,6 +133678,7 @@ export namespace Prisma {
     depositLedgerEntries?: TenantDepositLedgerEntryCreateNestedManyWithoutTenantInput
     loyaltyPoints?: LoyaltyPointCreateNestedManyWithoutTenantInput
     redemptions?: RedemptionCreateNestedManyWithoutTenantInput
+    serviceInterests?: ServiceInterestCreateNestedManyWithoutTenantInput
     referralsMade?: TenantReferralCreateNestedManyWithoutReferrerInput
     referredReferral?: TenantReferralCreateNestedOneWithoutReferredInput
     peerReportsReceived?: PeerBehaviorReportCreateNestedManyWithoutReporteeInput
@@ -124986,6 +133719,7 @@ export namespace Prisma {
     depositLedgerEntries?: TenantDepositLedgerEntryUncheckedCreateNestedManyWithoutTenantInput
     loyaltyPoints?: LoyaltyPointUncheckedCreateNestedManyWithoutTenantInput
     redemptions?: RedemptionUncheckedCreateNestedManyWithoutTenantInput
+    serviceInterests?: ServiceInterestUncheckedCreateNestedManyWithoutTenantInput
     referralsMade?: TenantReferralUncheckedCreateNestedManyWithoutReferrerInput
     referredReferral?: TenantReferralUncheckedCreateNestedOneWithoutReferredInput
     peerReportsReceived?: PeerBehaviorReportUncheckedCreateNestedManyWithoutReporteeInput
@@ -125030,6 +133764,7 @@ export namespace Prisma {
     depositLedgerEntries?: TenantDepositLedgerEntryCreateNestedManyWithoutTenantInput
     loyaltyPoints?: LoyaltyPointCreateNestedManyWithoutTenantInput
     redemptions?: RedemptionCreateNestedManyWithoutTenantInput
+    serviceInterests?: ServiceInterestCreateNestedManyWithoutTenantInput
     referralsMade?: TenantReferralCreateNestedManyWithoutReferrerInput
     referredReferral?: TenantReferralCreateNestedOneWithoutReferredInput
     peerReportsMade?: PeerBehaviorReportCreateNestedManyWithoutReporterInput
@@ -125070,6 +133805,7 @@ export namespace Prisma {
     depositLedgerEntries?: TenantDepositLedgerEntryUncheckedCreateNestedManyWithoutTenantInput
     loyaltyPoints?: LoyaltyPointUncheckedCreateNestedManyWithoutTenantInput
     redemptions?: RedemptionUncheckedCreateNestedManyWithoutTenantInput
+    serviceInterests?: ServiceInterestUncheckedCreateNestedManyWithoutTenantInput
     referralsMade?: TenantReferralUncheckedCreateNestedManyWithoutReferrerInput
     referredReferral?: TenantReferralUncheckedCreateNestedOneWithoutReferredInput
     peerReportsMade?: PeerBehaviorReportUncheckedCreateNestedManyWithoutReporterInput
@@ -125091,6 +133827,7 @@ export namespace Prisma {
     tipGopay?: string | null
     tipOvo?: string | null
     tipDana?: string | null
+    tipShopeepay?: string | null
     tipBank?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -125129,6 +133866,7 @@ export namespace Prisma {
     staysFledMarked?: StayCreateNestedManyWithoutFledMarkedByInput
     tenantsKtpVerified?: TenantCreateNestedManyWithoutKtpVerifiedByInput
     roomTransfersCreated?: RoomTransferCreateNestedManyWithoutCreatedByInput
+    marketAnalysesCreated?: MarketAnalysisCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserUncheckedCreateWithoutPeerReportsModeratedInput = {
@@ -125144,6 +133882,7 @@ export namespace Prisma {
     tipGopay?: string | null
     tipOvo?: string | null
     tipDana?: string | null
+    tipShopeepay?: string | null
     tipBank?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -125181,6 +133920,7 @@ export namespace Prisma {
     staysFledMarked?: StayUncheckedCreateNestedManyWithoutFledMarkedByInput
     tenantsKtpVerified?: TenantUncheckedCreateNestedManyWithoutKtpVerifiedByInput
     roomTransfersCreated?: RoomTransferUncheckedCreateNestedManyWithoutCreatedByInput
+    marketAnalysesCreated?: MarketAnalysisUncheckedCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserCreateOrConnectWithoutPeerReportsModeratedInput = {
@@ -125233,6 +133973,7 @@ export namespace Prisma {
     depositLedgerEntries?: TenantDepositLedgerEntryUpdateManyWithoutTenantNestedInput
     loyaltyPoints?: LoyaltyPointUpdateManyWithoutTenantNestedInput
     redemptions?: RedemptionUpdateManyWithoutTenantNestedInput
+    serviceInterests?: ServiceInterestUpdateManyWithoutTenantNestedInput
     referralsMade?: TenantReferralUpdateManyWithoutReferrerNestedInput
     referredReferral?: TenantReferralUpdateOneWithoutReferredNestedInput
     peerReportsReceived?: PeerBehaviorReportUpdateManyWithoutReporteeNestedInput
@@ -125273,6 +134014,7 @@ export namespace Prisma {
     depositLedgerEntries?: TenantDepositLedgerEntryUncheckedUpdateManyWithoutTenantNestedInput
     loyaltyPoints?: LoyaltyPointUncheckedUpdateManyWithoutTenantNestedInput
     redemptions?: RedemptionUncheckedUpdateManyWithoutTenantNestedInput
+    serviceInterests?: ServiceInterestUncheckedUpdateManyWithoutTenantNestedInput
     referralsMade?: TenantReferralUncheckedUpdateManyWithoutReferrerNestedInput
     referredReferral?: TenantReferralUncheckedUpdateOneWithoutReferredNestedInput
     peerReportsReceived?: PeerBehaviorReportUncheckedUpdateManyWithoutReporteeNestedInput
@@ -125323,6 +134065,7 @@ export namespace Prisma {
     depositLedgerEntries?: TenantDepositLedgerEntryUpdateManyWithoutTenantNestedInput
     loyaltyPoints?: LoyaltyPointUpdateManyWithoutTenantNestedInput
     redemptions?: RedemptionUpdateManyWithoutTenantNestedInput
+    serviceInterests?: ServiceInterestUpdateManyWithoutTenantNestedInput
     referralsMade?: TenantReferralUpdateManyWithoutReferrerNestedInput
     referredReferral?: TenantReferralUpdateOneWithoutReferredNestedInput
     peerReportsMade?: PeerBehaviorReportUpdateManyWithoutReporterNestedInput
@@ -125363,6 +134106,7 @@ export namespace Prisma {
     depositLedgerEntries?: TenantDepositLedgerEntryUncheckedUpdateManyWithoutTenantNestedInput
     loyaltyPoints?: LoyaltyPointUncheckedUpdateManyWithoutTenantNestedInput
     redemptions?: RedemptionUncheckedUpdateManyWithoutTenantNestedInput
+    serviceInterests?: ServiceInterestUncheckedUpdateManyWithoutTenantNestedInput
     referralsMade?: TenantReferralUncheckedUpdateManyWithoutReferrerNestedInput
     referredReferral?: TenantReferralUncheckedUpdateOneWithoutReferredNestedInput
     peerReportsMade?: PeerBehaviorReportUncheckedUpdateManyWithoutReporterNestedInput
@@ -125390,6 +134134,7 @@ export namespace Prisma {
     tipGopay?: NullableStringFieldUpdateOperationsInput | string | null
     tipOvo?: NullableStringFieldUpdateOperationsInput | string | null
     tipDana?: NullableStringFieldUpdateOperationsInput | string | null
+    tipShopeepay?: NullableStringFieldUpdateOperationsInput | string | null
     tipBank?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -125428,6 +134173,7 @@ export namespace Prisma {
     staysFledMarked?: StayUpdateManyWithoutFledMarkedByNestedInput
     tenantsKtpVerified?: TenantUpdateManyWithoutKtpVerifiedByNestedInput
     roomTransfersCreated?: RoomTransferUpdateManyWithoutCreatedByNestedInput
+    marketAnalysesCreated?: MarketAnalysisUpdateManyWithoutCreatedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutPeerReportsModeratedInput = {
@@ -125443,6 +134189,7 @@ export namespace Prisma {
     tipGopay?: NullableStringFieldUpdateOperationsInput | string | null
     tipOvo?: NullableStringFieldUpdateOperationsInput | string | null
     tipDana?: NullableStringFieldUpdateOperationsInput | string | null
+    tipShopeepay?: NullableStringFieldUpdateOperationsInput | string | null
     tipBank?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -125480,6 +134227,7 @@ export namespace Prisma {
     staysFledMarked?: StayUncheckedUpdateManyWithoutFledMarkedByNestedInput
     tenantsKtpVerified?: TenantUncheckedUpdateManyWithoutKtpVerifiedByNestedInput
     roomTransfersCreated?: RoomTransferUncheckedUpdateManyWithoutCreatedByNestedInput
+    marketAnalysesCreated?: MarketAnalysisUncheckedUpdateManyWithoutCreatedByNestedInput
   }
 
   export type TenantCreateWithoutReferralsMadeInput = {
@@ -125516,6 +134264,7 @@ export namespace Prisma {
     depositLedgerEntries?: TenantDepositLedgerEntryCreateNestedManyWithoutTenantInput
     loyaltyPoints?: LoyaltyPointCreateNestedManyWithoutTenantInput
     redemptions?: RedemptionCreateNestedManyWithoutTenantInput
+    serviceInterests?: ServiceInterestCreateNestedManyWithoutTenantInput
     referredReferral?: TenantReferralCreateNestedOneWithoutReferredInput
     peerReportsMade?: PeerBehaviorReportCreateNestedManyWithoutReporterInput
     peerReportsReceived?: PeerBehaviorReportCreateNestedManyWithoutReporteeInput
@@ -125556,6 +134305,7 @@ export namespace Prisma {
     depositLedgerEntries?: TenantDepositLedgerEntryUncheckedCreateNestedManyWithoutTenantInput
     loyaltyPoints?: LoyaltyPointUncheckedCreateNestedManyWithoutTenantInput
     redemptions?: RedemptionUncheckedCreateNestedManyWithoutTenantInput
+    serviceInterests?: ServiceInterestUncheckedCreateNestedManyWithoutTenantInput
     referredReferral?: TenantReferralUncheckedCreateNestedOneWithoutReferredInput
     peerReportsMade?: PeerBehaviorReportUncheckedCreateNestedManyWithoutReporterInput
     peerReportsReceived?: PeerBehaviorReportUncheckedCreateNestedManyWithoutReporteeInput
@@ -125600,6 +134350,7 @@ export namespace Prisma {
     depositLedgerEntries?: TenantDepositLedgerEntryCreateNestedManyWithoutTenantInput
     loyaltyPoints?: LoyaltyPointCreateNestedManyWithoutTenantInput
     redemptions?: RedemptionCreateNestedManyWithoutTenantInput
+    serviceInterests?: ServiceInterestCreateNestedManyWithoutTenantInput
     referralsMade?: TenantReferralCreateNestedManyWithoutReferrerInput
     peerReportsMade?: PeerBehaviorReportCreateNestedManyWithoutReporterInput
     peerReportsReceived?: PeerBehaviorReportCreateNestedManyWithoutReporteeInput
@@ -125640,6 +134391,7 @@ export namespace Prisma {
     depositLedgerEntries?: TenantDepositLedgerEntryUncheckedCreateNestedManyWithoutTenantInput
     loyaltyPoints?: LoyaltyPointUncheckedCreateNestedManyWithoutTenantInput
     redemptions?: RedemptionUncheckedCreateNestedManyWithoutTenantInput
+    serviceInterests?: ServiceInterestUncheckedCreateNestedManyWithoutTenantInput
     referralsMade?: TenantReferralUncheckedCreateNestedManyWithoutReferrerInput
     peerReportsMade?: PeerBehaviorReportUncheckedCreateNestedManyWithoutReporterInput
     peerReportsReceived?: PeerBehaviorReportUncheckedCreateNestedManyWithoutReporteeInput
@@ -125695,6 +134447,7 @@ export namespace Prisma {
     depositLedgerEntries?: TenantDepositLedgerEntryUpdateManyWithoutTenantNestedInput
     loyaltyPoints?: LoyaltyPointUpdateManyWithoutTenantNestedInput
     redemptions?: RedemptionUpdateManyWithoutTenantNestedInput
+    serviceInterests?: ServiceInterestUpdateManyWithoutTenantNestedInput
     referredReferral?: TenantReferralUpdateOneWithoutReferredNestedInput
     peerReportsMade?: PeerBehaviorReportUpdateManyWithoutReporterNestedInput
     peerReportsReceived?: PeerBehaviorReportUpdateManyWithoutReporteeNestedInput
@@ -125735,6 +134488,7 @@ export namespace Prisma {
     depositLedgerEntries?: TenantDepositLedgerEntryUncheckedUpdateManyWithoutTenantNestedInput
     loyaltyPoints?: LoyaltyPointUncheckedUpdateManyWithoutTenantNestedInput
     redemptions?: RedemptionUncheckedUpdateManyWithoutTenantNestedInput
+    serviceInterests?: ServiceInterestUncheckedUpdateManyWithoutTenantNestedInput
     referredReferral?: TenantReferralUncheckedUpdateOneWithoutReferredNestedInput
     peerReportsMade?: PeerBehaviorReportUncheckedUpdateManyWithoutReporterNestedInput
     peerReportsReceived?: PeerBehaviorReportUncheckedUpdateManyWithoutReporteeNestedInput
@@ -125785,6 +134539,7 @@ export namespace Prisma {
     depositLedgerEntries?: TenantDepositLedgerEntryUpdateManyWithoutTenantNestedInput
     loyaltyPoints?: LoyaltyPointUpdateManyWithoutTenantNestedInput
     redemptions?: RedemptionUpdateManyWithoutTenantNestedInput
+    serviceInterests?: ServiceInterestUpdateManyWithoutTenantNestedInput
     referralsMade?: TenantReferralUpdateManyWithoutReferrerNestedInput
     peerReportsMade?: PeerBehaviorReportUpdateManyWithoutReporterNestedInput
     peerReportsReceived?: PeerBehaviorReportUpdateManyWithoutReporteeNestedInput
@@ -125825,7 +134580,293 @@ export namespace Prisma {
     depositLedgerEntries?: TenantDepositLedgerEntryUncheckedUpdateManyWithoutTenantNestedInput
     loyaltyPoints?: LoyaltyPointUncheckedUpdateManyWithoutTenantNestedInput
     redemptions?: RedemptionUncheckedUpdateManyWithoutTenantNestedInput
+    serviceInterests?: ServiceInterestUncheckedUpdateManyWithoutTenantNestedInput
     referralsMade?: TenantReferralUncheckedUpdateManyWithoutReferrerNestedInput
+    peerReportsMade?: PeerBehaviorReportUncheckedUpdateManyWithoutReporterNestedInput
+    peerReportsReceived?: PeerBehaviorReportUncheckedUpdateManyWithoutReporteeNestedInput
+  }
+
+  export type ServiceInterestCreateWithoutServiceInput = {
+    status?: $Enums.ServiceInterestStatus
+    note?: string | null
+    adminNote?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    tenant: TenantCreateNestedOneWithoutServiceInterestsInput
+  }
+
+  export type ServiceInterestUncheckedCreateWithoutServiceInput = {
+    id?: number
+    tenantId: number
+    status?: $Enums.ServiceInterestStatus
+    note?: string | null
+    adminNote?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type ServiceInterestCreateOrConnectWithoutServiceInput = {
+    where: ServiceInterestWhereUniqueInput
+    create: XOR<ServiceInterestCreateWithoutServiceInput, ServiceInterestUncheckedCreateWithoutServiceInput>
+  }
+
+  export type ServiceInterestCreateManyServiceInputEnvelope = {
+    data: ServiceInterestCreateManyServiceInput | ServiceInterestCreateManyServiceInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type ServiceInterestUpsertWithWhereUniqueWithoutServiceInput = {
+    where: ServiceInterestWhereUniqueInput
+    update: XOR<ServiceInterestUpdateWithoutServiceInput, ServiceInterestUncheckedUpdateWithoutServiceInput>
+    create: XOR<ServiceInterestCreateWithoutServiceInput, ServiceInterestUncheckedCreateWithoutServiceInput>
+  }
+
+  export type ServiceInterestUpdateWithWhereUniqueWithoutServiceInput = {
+    where: ServiceInterestWhereUniqueInput
+    data: XOR<ServiceInterestUpdateWithoutServiceInput, ServiceInterestUncheckedUpdateWithoutServiceInput>
+  }
+
+  export type ServiceInterestUpdateManyWithWhereWithoutServiceInput = {
+    where: ServiceInterestScalarWhereInput
+    data: XOR<ServiceInterestUpdateManyMutationInput, ServiceInterestUncheckedUpdateManyWithoutServiceInput>
+  }
+
+  export type AdditionalServiceCreateWithoutInterestsInput = {
+    name: string
+    description?: string | null
+    priceRupiah?: number
+    unit?: string | null
+    isActive?: boolean
+    sortOrder?: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type AdditionalServiceUncheckedCreateWithoutInterestsInput = {
+    id?: number
+    name: string
+    description?: string | null
+    priceRupiah?: number
+    unit?: string | null
+    isActive?: boolean
+    sortOrder?: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type AdditionalServiceCreateOrConnectWithoutInterestsInput = {
+    where: AdditionalServiceWhereUniqueInput
+    create: XOR<AdditionalServiceCreateWithoutInterestsInput, AdditionalServiceUncheckedCreateWithoutInterestsInput>
+  }
+
+  export type TenantCreateWithoutServiceInterestsInput = {
+    fullName: string
+    phone: string
+    email?: string | null
+    identityNumber?: string | null
+    ktpImageUrl?: string | null
+    ktpImageFileKey?: string | null
+    ktpImageOriginalFilename?: string | null
+    ktpImageMimeType?: string | null
+    ktpImageFileSizeBytes?: number | null
+    ktpVerifiedAt?: Date | string | null
+    ktpDeletedAt?: Date | string | null
+    gender?: $Enums.Gender | null
+    birthDate?: Date | string | null
+    originCity?: string | null
+    occupation?: string | null
+    companyOrCampus?: string | null
+    emergencyContactName?: string | null
+    emergencyContactPhone?: string | null
+    notes?: string | null
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    referralCode?: string | null
+    user?: UserCreateNestedOneWithoutTenantInput
+    ktpVerifiedBy?: UserCreateNestedOneWithoutTenantsKtpVerifiedInput
+    stays?: StayCreateNestedManyWithoutTenantInput
+    tickets?: TicketCreateNestedManyWithoutTenantInput
+    paymentSubmissions?: PaymentSubmissionCreateNestedManyWithoutTenantInput
+    renewRequests?: RenewRequestCreateNestedManyWithoutTenantInput
+    staffReviews?: StaffReviewCreateNestedManyWithoutTenantInput
+    depositLedgerEntries?: TenantDepositLedgerEntryCreateNestedManyWithoutTenantInput
+    loyaltyPoints?: LoyaltyPointCreateNestedManyWithoutTenantInput
+    redemptions?: RedemptionCreateNestedManyWithoutTenantInput
+    referralsMade?: TenantReferralCreateNestedManyWithoutReferrerInput
+    referredReferral?: TenantReferralCreateNestedOneWithoutReferredInput
+    peerReportsMade?: PeerBehaviorReportCreateNestedManyWithoutReporterInput
+    peerReportsReceived?: PeerBehaviorReportCreateNestedManyWithoutReporteeInput
+  }
+
+  export type TenantUncheckedCreateWithoutServiceInterestsInput = {
+    id?: number
+    fullName: string
+    phone: string
+    email?: string | null
+    identityNumber?: string | null
+    ktpImageUrl?: string | null
+    ktpImageFileKey?: string | null
+    ktpImageOriginalFilename?: string | null
+    ktpImageMimeType?: string | null
+    ktpImageFileSizeBytes?: number | null
+    ktpVerifiedAt?: Date | string | null
+    ktpVerifiedById?: number | null
+    ktpDeletedAt?: Date | string | null
+    gender?: $Enums.Gender | null
+    birthDate?: Date | string | null
+    originCity?: string | null
+    occupation?: string | null
+    companyOrCampus?: string | null
+    emergencyContactName?: string | null
+    emergencyContactPhone?: string | null
+    notes?: string | null
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    referralCode?: string | null
+    user?: UserUncheckedCreateNestedOneWithoutTenantInput
+    stays?: StayUncheckedCreateNestedManyWithoutTenantInput
+    tickets?: TicketUncheckedCreateNestedManyWithoutTenantInput
+    paymentSubmissions?: PaymentSubmissionUncheckedCreateNestedManyWithoutTenantInput
+    renewRequests?: RenewRequestUncheckedCreateNestedManyWithoutTenantInput
+    staffReviews?: StaffReviewUncheckedCreateNestedManyWithoutTenantInput
+    depositLedgerEntries?: TenantDepositLedgerEntryUncheckedCreateNestedManyWithoutTenantInput
+    loyaltyPoints?: LoyaltyPointUncheckedCreateNestedManyWithoutTenantInput
+    redemptions?: RedemptionUncheckedCreateNestedManyWithoutTenantInput
+    referralsMade?: TenantReferralUncheckedCreateNestedManyWithoutReferrerInput
+    referredReferral?: TenantReferralUncheckedCreateNestedOneWithoutReferredInput
+    peerReportsMade?: PeerBehaviorReportUncheckedCreateNestedManyWithoutReporterInput
+    peerReportsReceived?: PeerBehaviorReportUncheckedCreateNestedManyWithoutReporteeInput
+  }
+
+  export type TenantCreateOrConnectWithoutServiceInterestsInput = {
+    where: TenantWhereUniqueInput
+    create: XOR<TenantCreateWithoutServiceInterestsInput, TenantUncheckedCreateWithoutServiceInterestsInput>
+  }
+
+  export type AdditionalServiceUpsertWithoutInterestsInput = {
+    update: XOR<AdditionalServiceUpdateWithoutInterestsInput, AdditionalServiceUncheckedUpdateWithoutInterestsInput>
+    create: XOR<AdditionalServiceCreateWithoutInterestsInput, AdditionalServiceUncheckedCreateWithoutInterestsInput>
+    where?: AdditionalServiceWhereInput
+  }
+
+  export type AdditionalServiceUpdateToOneWithWhereWithoutInterestsInput = {
+    where?: AdditionalServiceWhereInput
+    data: XOR<AdditionalServiceUpdateWithoutInterestsInput, AdditionalServiceUncheckedUpdateWithoutInterestsInput>
+  }
+
+  export type AdditionalServiceUpdateWithoutInterestsInput = {
+    name?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    priceRupiah?: IntFieldUpdateOperationsInput | number
+    unit?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    sortOrder?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type AdditionalServiceUncheckedUpdateWithoutInterestsInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    name?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    priceRupiah?: IntFieldUpdateOperationsInput | number
+    unit?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    sortOrder?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type TenantUpsertWithoutServiceInterestsInput = {
+    update: XOR<TenantUpdateWithoutServiceInterestsInput, TenantUncheckedUpdateWithoutServiceInterestsInput>
+    create: XOR<TenantCreateWithoutServiceInterestsInput, TenantUncheckedCreateWithoutServiceInterestsInput>
+    where?: TenantWhereInput
+  }
+
+  export type TenantUpdateToOneWithWhereWithoutServiceInterestsInput = {
+    where?: TenantWhereInput
+    data: XOR<TenantUpdateWithoutServiceInterestsInput, TenantUncheckedUpdateWithoutServiceInterestsInput>
+  }
+
+  export type TenantUpdateWithoutServiceInterestsInput = {
+    fullName?: StringFieldUpdateOperationsInput | string
+    phone?: StringFieldUpdateOperationsInput | string
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    identityNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageFileKey?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageOriginalFilename?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageMimeType?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageFileSizeBytes?: NullableIntFieldUpdateOperationsInput | number | null
+    ktpVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    ktpDeletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    gender?: NullableEnumGenderFieldUpdateOperationsInput | $Enums.Gender | null
+    birthDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    originCity?: NullableStringFieldUpdateOperationsInput | string | null
+    occupation?: NullableStringFieldUpdateOperationsInput | string | null
+    companyOrCampus?: NullableStringFieldUpdateOperationsInput | string | null
+    emergencyContactName?: NullableStringFieldUpdateOperationsInput | string | null
+    emergencyContactPhone?: NullableStringFieldUpdateOperationsInput | string | null
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    referralCode?: NullableStringFieldUpdateOperationsInput | string | null
+    user?: UserUpdateOneWithoutTenantNestedInput
+    ktpVerifiedBy?: UserUpdateOneWithoutTenantsKtpVerifiedNestedInput
+    stays?: StayUpdateManyWithoutTenantNestedInput
+    tickets?: TicketUpdateManyWithoutTenantNestedInput
+    paymentSubmissions?: PaymentSubmissionUpdateManyWithoutTenantNestedInput
+    renewRequests?: RenewRequestUpdateManyWithoutTenantNestedInput
+    staffReviews?: StaffReviewUpdateManyWithoutTenantNestedInput
+    depositLedgerEntries?: TenantDepositLedgerEntryUpdateManyWithoutTenantNestedInput
+    loyaltyPoints?: LoyaltyPointUpdateManyWithoutTenantNestedInput
+    redemptions?: RedemptionUpdateManyWithoutTenantNestedInput
+    referralsMade?: TenantReferralUpdateManyWithoutReferrerNestedInput
+    referredReferral?: TenantReferralUpdateOneWithoutReferredNestedInput
+    peerReportsMade?: PeerBehaviorReportUpdateManyWithoutReporterNestedInput
+    peerReportsReceived?: PeerBehaviorReportUpdateManyWithoutReporteeNestedInput
+  }
+
+  export type TenantUncheckedUpdateWithoutServiceInterestsInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    fullName?: StringFieldUpdateOperationsInput | string
+    phone?: StringFieldUpdateOperationsInput | string
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    identityNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageFileKey?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageOriginalFilename?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageMimeType?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageFileSizeBytes?: NullableIntFieldUpdateOperationsInput | number | null
+    ktpVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    ktpVerifiedById?: NullableIntFieldUpdateOperationsInput | number | null
+    ktpDeletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    gender?: NullableEnumGenderFieldUpdateOperationsInput | $Enums.Gender | null
+    birthDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    originCity?: NullableStringFieldUpdateOperationsInput | string | null
+    occupation?: NullableStringFieldUpdateOperationsInput | string | null
+    companyOrCampus?: NullableStringFieldUpdateOperationsInput | string | null
+    emergencyContactName?: NullableStringFieldUpdateOperationsInput | string | null
+    emergencyContactPhone?: NullableStringFieldUpdateOperationsInput | string | null
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    referralCode?: NullableStringFieldUpdateOperationsInput | string | null
+    user?: UserUncheckedUpdateOneWithoutTenantNestedInput
+    stays?: StayUncheckedUpdateManyWithoutTenantNestedInput
+    tickets?: TicketUncheckedUpdateManyWithoutTenantNestedInput
+    paymentSubmissions?: PaymentSubmissionUncheckedUpdateManyWithoutTenantNestedInput
+    renewRequests?: RenewRequestUncheckedUpdateManyWithoutTenantNestedInput
+    staffReviews?: StaffReviewUncheckedUpdateManyWithoutTenantNestedInput
+    depositLedgerEntries?: TenantDepositLedgerEntryUncheckedUpdateManyWithoutTenantNestedInput
+    loyaltyPoints?: LoyaltyPointUncheckedUpdateManyWithoutTenantNestedInput
+    redemptions?: RedemptionUncheckedUpdateManyWithoutTenantNestedInput
+    referralsMade?: TenantReferralUncheckedUpdateManyWithoutReferrerNestedInput
+    referredReferral?: TenantReferralUncheckedUpdateOneWithoutReferredNestedInput
     peerReportsMade?: PeerBehaviorReportUncheckedUpdateManyWithoutReporterNestedInput
     peerReportsReceived?: PeerBehaviorReportUncheckedUpdateManyWithoutReporteeNestedInput
   }
@@ -126539,6 +135580,17 @@ export namespace Prisma {
     acknowledgedAt?: Date | string | null
     improvedAt?: Date | string | null
     confirmedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type MarketAnalysisCreateManyCreatedByInput = {
+    id?: number
+    kind: string
+    title: string
+    summary?: string | null
+    resultJson?: NullableJsonNullValueInput | InputJsonValue
+    transcriptJson?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -128598,6 +137650,7 @@ export namespace Prisma {
     depositLedgerEntries?: TenantDepositLedgerEntryUpdateManyWithoutTenantNestedInput
     loyaltyPoints?: LoyaltyPointUpdateManyWithoutTenantNestedInput
     redemptions?: RedemptionUpdateManyWithoutTenantNestedInput
+    serviceInterests?: ServiceInterestUpdateManyWithoutTenantNestedInput
     referralsMade?: TenantReferralUpdateManyWithoutReferrerNestedInput
     referredReferral?: TenantReferralUpdateOneWithoutReferredNestedInput
     peerReportsMade?: PeerBehaviorReportUpdateManyWithoutReporterNestedInput
@@ -128638,6 +137691,7 @@ export namespace Prisma {
     depositLedgerEntries?: TenantDepositLedgerEntryUncheckedUpdateManyWithoutTenantNestedInput
     loyaltyPoints?: LoyaltyPointUncheckedUpdateManyWithoutTenantNestedInput
     redemptions?: RedemptionUncheckedUpdateManyWithoutTenantNestedInput
+    serviceInterests?: ServiceInterestUncheckedUpdateManyWithoutTenantNestedInput
     referralsMade?: TenantReferralUncheckedUpdateManyWithoutReferrerNestedInput
     referredReferral?: TenantReferralUncheckedUpdateOneWithoutReferredNestedInput
     peerReportsMade?: PeerBehaviorReportUncheckedUpdateManyWithoutReporterNestedInput
@@ -128746,6 +137800,38 @@ export namespace Prisma {
     acknowledgedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     improvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     confirmedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type MarketAnalysisUpdateWithoutCreatedByInput = {
+    kind?: StringFieldUpdateOperationsInput | string
+    title?: StringFieldUpdateOperationsInput | string
+    summary?: NullableStringFieldUpdateOperationsInput | string | null
+    resultJson?: NullableJsonNullValueInput | InputJsonValue
+    transcriptJson?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type MarketAnalysisUncheckedUpdateWithoutCreatedByInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    kind?: StringFieldUpdateOperationsInput | string
+    title?: StringFieldUpdateOperationsInput | string
+    summary?: NullableStringFieldUpdateOperationsInput | string | null
+    resultJson?: NullableJsonNullValueInput | InputJsonValue
+    transcriptJson?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type MarketAnalysisUncheckedUpdateManyWithoutCreatedByInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    kind?: StringFieldUpdateOperationsInput | string
+    title?: StringFieldUpdateOperationsInput | string
+    summary?: NullableStringFieldUpdateOperationsInput | string | null
+    resultJson?: NullableJsonNullValueInput | InputJsonValue
+    transcriptJson?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -128949,6 +138035,16 @@ export namespace Prisma {
     decidedById?: number | null
     journalEntryId?: number | null
     note?: string | null
+  }
+
+  export type ServiceInterestCreateManyTenantInput = {
+    id?: number
+    serviceId: number
+    status?: $Enums.ServiceInterestStatus
+    note?: string | null
+    adminNote?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
   }
 
   export type TenantReferralCreateManyReferrerInput = {
@@ -129602,6 +138698,35 @@ export namespace Prisma {
     decidedById?: NullableIntFieldUpdateOperationsInput | number | null
     journalEntryId?: NullableIntFieldUpdateOperationsInput | number | null
     note?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type ServiceInterestUpdateWithoutTenantInput = {
+    status?: EnumServiceInterestStatusFieldUpdateOperationsInput | $Enums.ServiceInterestStatus
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    adminNote?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    service?: AdditionalServiceUpdateOneRequiredWithoutInterestsNestedInput
+  }
+
+  export type ServiceInterestUncheckedUpdateWithoutTenantInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    serviceId?: IntFieldUpdateOperationsInput | number
+    status?: EnumServiceInterestStatusFieldUpdateOperationsInput | $Enums.ServiceInterestStatus
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    adminNote?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ServiceInterestUncheckedUpdateManyWithoutTenantInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    serviceId?: IntFieldUpdateOperationsInput | number
+    status?: EnumServiceInterestStatusFieldUpdateOperationsInput | $Enums.ServiceInterestStatus
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    adminNote?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type TenantReferralUpdateWithoutReferrerInput = {
@@ -134357,6 +143482,45 @@ export namespace Prisma {
     decidedById?: NullableIntFieldUpdateOperationsInput | number | null
     journalEntryId?: NullableIntFieldUpdateOperationsInput | number | null
     note?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type ServiceInterestCreateManyServiceInput = {
+    id?: number
+    tenantId: number
+    status?: $Enums.ServiceInterestStatus
+    note?: string | null
+    adminNote?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type ServiceInterestUpdateWithoutServiceInput = {
+    status?: EnumServiceInterestStatusFieldUpdateOperationsInput | $Enums.ServiceInterestStatus
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    adminNote?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    tenant?: TenantUpdateOneRequiredWithoutServiceInterestsNestedInput
+  }
+
+  export type ServiceInterestUncheckedUpdateWithoutServiceInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    tenantId?: IntFieldUpdateOperationsInput | number
+    status?: EnumServiceInterestStatusFieldUpdateOperationsInput | $Enums.ServiceInterestStatus
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    adminNote?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ServiceInterestUncheckedUpdateManyWithoutServiceInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    tenantId?: IntFieldUpdateOperationsInput | number
+    status?: EnumServiceInterestStatusFieldUpdateOperationsInput | $Enums.ServiceInterestStatus
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    adminNote?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
 

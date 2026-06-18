@@ -20,6 +20,28 @@ import AiAssistButton from '../../components/ai/AiAssistButton';
 
 const MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
+const VIEW_MODE_KEY = 'kost48_owner_view_mode';
+
+/** Hook: kelola mode tampilan ringkas/lengkap dengan persist localStorage + default mobile. */
+function useOwnerViewMode() {
+  const [mode, setModeState] = useState<'compact' | 'full'>(() => {
+    // Prioritaskan localStorage
+    const saved = localStorage.getItem(VIEW_MODE_KEY);
+    if (saved === 'compact' || saved === 'full') return saved;
+    // Default: compact untuk viewport ≤834px
+    return window.innerWidth <= 834 ? 'compact' : 'full';
+  });
+
+  const setMode = (next: 'compact' | 'full') => {
+    localStorage.setItem(VIEW_MODE_KEY, next);
+    setModeState(next);
+  };
+
+  const toggle = () => setMode(mode === 'compact' ? 'full' : 'compact');
+
+  return { mode, setMode, toggle };
+}
+
 function currentYearMonth() {
   const d = new Date();
   return { year: d.getFullYear(), month: d.getMonth() + 1 };
@@ -222,6 +244,7 @@ function OwnerActionStrip({
 
 export default function OwnerDashboardPage() {
   const navigate = useNavigate();
+  const { mode: viewMode, toggle: toggleViewMode } = useOwnerViewMode();
   const [ym, setYm] = useState<{ year: number; month: number }>(currentYearMonth());
   const [trendMonths, setTrendMonths] = useState<number>(6);
   const [chartMode, setChartMode] = useState<TrendChartMode>('line');
@@ -245,7 +268,7 @@ export default function OwnerDashboardPage() {
   };
 
   return (
-    <Container fluid className="owner-dashboard px-2 py-3">
+    <Container fluid className={`owner-dashboard owner-view-${viewMode} px-2 py-3`}>
       <section className="owner-workspace-head mb-3">
         <div>
           <span className="owner-section-kicker">Kokpit bisnis</span>
@@ -266,6 +289,14 @@ export default function OwnerDashboardPage() {
             </Form.Select>
           </div>
           <Button size="sm" className="owner-report-button" onClick={() => navigate('/reports')}>Buka laporan</Button>
+          <div className="owner-view-toggle" role="radiogroup" aria-label="Tampilan dashboard">
+            <button type="button" role="radio" aria-checked={viewMode === 'compact'} className={viewMode === 'compact' ? 'active' : ''} onClick={() => toggleViewMode()}>
+              📋 Ringkas
+            </button>
+            <button type="button" role="radio" aria-checked={viewMode === 'full'} className={viewMode === 'full' ? 'active' : ''} onClick={() => toggleViewMode()}>
+              📊 Lengkap
+            </button>
+          </div>
         </div>
       </section>
 
@@ -351,7 +382,7 @@ export default function OwnerDashboardPage() {
             </Col>
 
             <Col lg={5}>
-              <section className="owner-panel h-100">
+              <section className="owner-panel owner-ai-panel h-100">
                 <div className="owner-panel-heading">
                   <div>
                     <span className="owner-section-kicker">Ringkasan otomatis</span>

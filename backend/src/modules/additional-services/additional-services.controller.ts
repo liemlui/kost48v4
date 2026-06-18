@@ -1,14 +1,19 @@
 import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Query, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { UserRole } from '../../common/enums/app.enums';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
+import { CurrentUserPayload } from '../../common/interfaces/current-user.interface';
 import { AdditionalServicesService } from './additional-services.service';
 import {
   AdditionalServicesQueryDto,
   CreateAdditionalServiceDto,
+  CreateServiceInterestDto,
+  ServiceInterestsQueryDto,
   UpdateAdditionalServiceDto,
+  UpdateServiceInterestDto,
 } from './dto/additional-service.dto';
 
 // PUB-LAYANAN-TAMBAHAN: kelola layanan tambahan (OWNER-only mutasi, selaras D-17);
@@ -30,6 +35,39 @@ export class AdditionalServicesController {
   @Roles(UserRole.OWNER, UserRole.ADMIN, UserRole.STAFF, UserRole.TENANT)
   async listActive() {
     return { message: 'Layanan tambahan aktif', data: await this.service.listActive() };
+  }
+
+  // ── PUB-LAYANAN-MINAT (rute static SEBELUM :id agar tak tertangkap ParseIntPipe) ──
+  @Get('interests')
+  @Roles(UserRole.OWNER, UserRole.ADMIN)
+  async listInterests(@Query() query: ServiceInterestsQueryDto) {
+    return { message: 'Daftar minat layanan', data: await this.service.listInterests(query) };
+  }
+
+  @Get('my-interests')
+  @Roles(UserRole.TENANT)
+  async listMyInterests(@CurrentUser() actor: CurrentUserPayload) {
+    if (!actor.tenantId) return { message: 'Minat saya', data: { items: [] } };
+    return { message: 'Minat saya', data: await this.service.listMyInterests(actor.tenantId) };
+  }
+
+  @Patch('interests/:id')
+  @Roles(UserRole.OWNER, UserRole.ADMIN)
+  async updateInterest(@Param('id', ParseIntPipe) id: number, @Body() dto: UpdateServiceInterestDto) {
+    return { message: 'Minat layanan diperbarui', data: await this.service.updateInterest(id, dto) };
+  }
+
+  @Post(':id/interest')
+  @Roles(UserRole.TENANT)
+  async createInterest(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: CreateServiceInterestDto,
+    @CurrentUser() actor: CurrentUserPayload,
+  ) {
+    if (!actor.tenantId) {
+      return { message: 'Akun tidak terhubung ke penghuni', data: null };
+    }
+    return { message: 'Minat dikirim ke pengelola', data: await this.service.createInterest(actor.tenantId, id, dto) };
   }
 
   @Get(':id')

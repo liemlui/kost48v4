@@ -170,6 +170,137 @@ export class MarketingPublicRoomsService {
     return map;
   }
 
+  /** PUB-CALENDAR: grid ketersediaan per kamar per tanggal untuk rentang [from, to]. */
+  async getAvailabilityCalendar(query: { from?: string; to?: string }) {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const fromDate = query.from ? new Date(query.from + 'T00:00:00') : new Date(today);
+    const rawTo = query.to ? new Date(query.to + 'T00:00:00') : new Date(fromDate);
+    if (!query.to) rawTo.setDate(rawTo.getDate() + 13); // default 2 minggu
+
+    // Clamp maks 62 hari biar tidak overload.
+    const MAX_SPAN_DAYS = 62;
+    let toDate = rawTo;
+    const spanDays = Math.round((toDate.getTime() - fromDate.getTime()) / 86_400_000);
+    if (spanDays > MAX_SPAN_DAYS) {
+      toDate = new Date(fromDate);
+      toDate.setDate(toDate.getDate() + MAX_SPAN_DAYS);
+    }
+    if (spanDays < 0) {
+      toDate = new Date(fromDate);
+    }
+
+    const fromStr = fromDate.toISOString().slice(0, 10);
+    const toStr = toDate.toISOString().slice(0, 10);
+
+    // Bangun array tanggal.
+    const dates: string[] = [];
+    const cursor = new Date(fromDate);
+    while (cursor <= toDate) {
+      dates.push(cursor.toISOString().slice(0, 10));
+      cursor.setDate(cursor.getDate() + 1);
+    }
+
+    // Ambil semua kamar aktif.
+    const rooms = await this.prisma.room.findMany({
+      where: { isActive: true },
+      select: { id: true, code: true, name: true, floor: true, status: true },
+      orderBy: [{ floor: 'asc' }, { code: 'asc' }],
+    });
+
+    // Ambil stay ACTIVE yang overlap dengan rentang.
+    const stays = await this.prisma.stay.findMany({
+      where: {
+        status: 'ACTIVE',
+        checkInDate: { lt: toDate }, // stay dimulai sebelum akhir rentang
+        OR: [
+          { plannedCheckOutDate: null },
+          { plannedCheckOutDate: { gt: fromDate } }, // stay berakhir setelah awal rentang
+        ],
+      },
+      select: {
+        id: true,
+        roomId: true,
+        status: true,
+        checkInDate: true,
+        plannedCheckOutDate: true,
+        initialMetersPromotedAt: true,
+        downPaymentPaidRupiah: true,
+        room: {
+          select: { status: true },
+        },
+      },
+    });
+
+    // Group stays by roomId.
+    const staysByRoomId = new Map<number, typeof stays>();
+    for (const stay of stays) {
+      const list = staysByRoomId.get(stay.roomId);
+      if (list) list.push(stay);
+      else staysByRoomId.set(stay.roomId, [stay]);
+    }
+
+    // Untuk tiap kamar + tanggal, tentukan status.
+    const roomDays: Array<{
+      id: number;
+      code: string;
+      name: string | null;
+      floor: string | null;
+      status: string;
+      days: Record<string, string>;
+    }> = [];
+
+    for (const room of rooms) {
+      const roomStays = staysByRoomId.get(room.id) ?? [];
+      const days: Record<string, string> = {};
+
+      for (const dateStr of dates) {
+        const dateObj = new Date(dateStr + 'T00:00:00');
+        const nextDate = new Date(dateObj);
+        nextDate.setDate(nextDate.getDate() + 1);
+
+        // Cari stay yang mencakup tanggal ini.
+        const coveringStay = roomStays.find((stay) => {
+          const stayStart = new Date(stay.checkInDate);
+          const stayEnd = stay.plannedCheckOutDate
+            ? new Date(stay.plannedCheckOutDate)
+            : null;
+          // stay mencakup date jika stayStart <= date < stayEnd (atau stayEnd null)
+          return stayStart <= dateObj && (!stayEnd || stayEnd > dateObj);
+        });
+
+        if (coveringStay) {
+          // Ada stay aktif — bedakan HUNI vs BOOKING_DP
+          const isOccupied =
+            coveringStay.initialMetersPromotedAt !== null ||
+            coveringStay.room.status === 'OCCUPIED';
+          days[dateStr] = isOccupied ? 'HUNI' : 'BOOKING_DP';
+        } else if (room.status === 'MAINTENANCE') {
+          days[dateStr] = 'MAINTENANCE';
+        } else {
+          days[dateStr] = 'KOSONG';
+        }
+      }
+
+      roomDays.push({
+        id: room.id,
+        code: room.code,
+        name: room.name,
+        floor: room.floor,
+        status: room.status,
+        days,
+      });
+    }
+
+    return {
+      from: fromStr,
+      to: toStr,
+      dates,
+      rooms: roomDays,
+    };
+  }
+
   private toInitials(fullName: string): string {
     const parts = fullName.trim().split(/\s+/).filter(Boolean);
     if (!parts.length) return 'P';
@@ -216,31 +347,50 @@ export class MarketingPublicRoomsService {
   // ------------------------------------------------------------------
 
   private buildPublicRoomWhere(query: PublicRoomsQueryDto): Prisma.RoomWhereInput {
-    return {
-      AND: [
-        { isActive: true },
-        {
-          status: {
-            in: [
-              RoomStatus.AVAILABLE as any,
-              RoomStatus.RESERVED as any,
-              RoomStatus.OCCUPIED as any,
-              RoomStatus.MAINTENANCE as any,
+    const conditions: Prisma.RoomWhereInput[] = [
+      { isActive: true },
+      {
+        status: {
+          in: [
+            RoomStatus.AVAILABLE as any,
+            RoomStatus.RESERVED as any,
+            RoomStatus.OCCUPIED as any,
+            RoomStatus.MAINTENANCE as any,
+          ],
+        },
+      },
+      query.search
+        ? {
+            OR: [
+              { code: { contains: query.search, mode: 'insensitive' } },
+              { name: { contains: query.search, mode: 'insensitive' } },
+            ],
+          }
+        : {},
+      query.floor ? { floor: query.floor } : {},
+      this.buildPricingAvailabilityWhere(query.pricingTerm),
+    ];
+
+    // PUB-SMART-BOOKING: filter kamar yang available di seluruh rentang [checkIn, checkIn+durationDays).
+    if (query.checkIn && query.durationDays) {
+      const checkInDate = new Date(query.checkIn);
+      const endDate = new Date(checkInDate.getTime() + query.durationDays * 86_400_000);
+
+      conditions.push({
+        stays: {
+          none: {
+            status: 'ACTIVE',
+            checkInDate: { lt: endDate },
+            OR: [
+              { plannedCheckOutDate: null },
+              { plannedCheckOutDate: { gt: checkInDate } },
             ],
           },
         },
-        query.search
-          ? {
-              OR: [
-                { code: { contains: query.search, mode: 'insensitive' } },
-                { name: { contains: query.search, mode: 'insensitive' } },
-              ],
-            }
-          : {},
-        query.floor ? { floor: query.floor } : {},
-        this.buildPricingAvailabilityWhere(query.pricingTerm),
-      ],
-    };
+      });
+    }
+
+    return { AND: conditions };
   }
 
   private async getPublicFacilitiesByRoomId(roomIds: number[]) {

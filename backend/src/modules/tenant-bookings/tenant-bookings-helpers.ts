@@ -63,39 +63,8 @@ export interface BookingRow {
   invoiceRemainingAmountRupiah?: number | null;
 }
 
-export interface ApprovalBookingSnapshot {
-  stayId: number;
-  tenantId: number;
-  roomId: number;
-  stayStatus: string;
-  pricingTerm: string;
-  agreedRentAmountRupiah: number;
-  checkInDate: Date;
-  plannedCheckOutDate: Date | null;
-  expiresAt: Date | null;
-  bookingSource: string | null;
-  roomCode: string;
-  roomStatus: string;
-  roomIsActive: boolean;
-  tenantIsActive: boolean;
-}
-
-export async function lockApprovalBookingTx(tx: Prisma.TransactionClient, stayId: number) {
-  const rows = await tx.$queryRaw<ApprovalBookingSnapshot[]>(Prisma.sql`
-    SELECT
-      s.id AS "stayId", s."tenantId", s."roomId", s.status AS "stayStatus",
-      s."pricingTerm", s."agreedRentAmountRupiah", s."checkInDate",
-      s."plannedCheckOutDate", s."expiresAt", s."bookingSource",
-      r.code AS "roomCode", r.status AS "roomStatus", r."isActive" AS "roomIsActive",
-      t."isActive" AS "tenantIsActive"
-    FROM "Stay" s
-    INNER JOIN "Room" r ON r.id = s."roomId"
-    INNER JOIN "Tenant" t ON t.id = s."tenantId"
-    WHERE s.id = ${stayId}
-    FOR UPDATE OF s, r
-  `);
-  return rows[0] ?? null;
-}
+// lockApprovalBookingTx dan ApprovalBookingSnapshot dipindah ke tenant-bookings.queries.ts
+// (source of truth). Import dari sana.
 
 export function mapBookingRow(row: BookingRow) {
   return {

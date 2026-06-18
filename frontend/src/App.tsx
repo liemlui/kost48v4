@@ -58,6 +58,7 @@ const StaffMonthlyReportPage = lazy(() => import('./pages/staff/StaffMonthlyRepo
 const StaffWarehousePage = lazy(() => import('./pages/staff/StaffWarehousePage'));
 const AdminStaffPerformancePage = lazy(() => import('./pages/admin/AdminStaffPerformancePage'));
 const OwnerSettingsPage = lazy(() => import('./pages/settings/OwnerSettingsPage'));
+const ServiceInterestsPage = lazy(() => import('./pages/services/ServiceInterestsPage'));
 
 type Role = 'OWNER' | 'ADMIN' | 'STAFF' | 'TENANT';
 
@@ -164,6 +165,7 @@ export default function App() {
           <Route path="/announcements" element={<RequireRoles allowed={['OWNER', 'ADMIN']}><ConfiguredResourcePage resource="announcements" /></RequireRoles>} />
           <Route path="/meter-readings" element={<RequireRoles allowed={['OWNER', 'ADMIN']}><ConfiguredResourcePage resource="meter-readings" /></RequireRoles>} />
           <Route path="/additional-services" element={<RequireRoles allowed={['OWNER', 'ADMIN']}><ConfiguredResourcePage resource="additionalServices" /></RequireRoles>} />
+          <Route path="/service-interests" element={<RequireRoles allowed={['OWNER', 'ADMIN']}><ServiceInterestsPage /></RequireRoles>} />
           <Route path="/tickets" element={<RequireRoles allowed={['OWNER', 'ADMIN', 'STAFF']}><TicketsPage /></RequireRoles>} />
           <Route path="/staff-routines" element={<RequireRoles allowed={['OWNER', 'ADMIN']}><StaffRoutinesAdminPage /></RequireRoles>} />
           <Route path="/staff-performance" element={<RequireRoles allowed={['OWNER', 'ADMIN']}><AdminStaffPerformancePage /></RequireRoles>} />

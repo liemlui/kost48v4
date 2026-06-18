@@ -1,33 +1,35 @@
 # KOST48 V5 — Checklist Eksekusi Aktif + Changelog Ringkas
 
-> **Pintu masuk AI eksekutor.** Versi: **2026-06-16**. Arsip dokumen root lama: `docs/archieve/2026-06-16_root_docs_pre_M/`.
+> **Pintu masuk AI eksekutor.** Versi: **2026-06-18**. Arsip dokumen root lama: `docs/archieve/2026-06-16_root_docs_pre_M/`.
 
 ## Cara pakai (AI eksekutor — baca sebelum coding)
 
-1. **Orientasi:** `docs/M01_MASTER.md` (model bisnis) → **task terbuka:** bagian [ANTRIAN EKSEKUSI AKTIF](#antrian-eksekusi-aktif-untuk-ai--kerjakan-dari-sini) di bawah.
-2. **Spesifikasi domain:** buka M-file yang ditunjuk task (M04 keuangan · M05 siklus huni · M06 operasional · M07 publik/marketing · M08 deploy).
+1. **Orientasi:** mulai dari bagian [ANTRIAN EKSEKUSI AKTIF](#antrian-eksekusi-aktif-untuk-ai--kerjakan-dari-sini) di file ini.
+2. **Spesifikasi domain:** buka M-file yang ditunjuk fase/task (`M01`-`M09`) dan audit MD pendukung bila disebut di tabel rujukan.
 3. **Anchor kode:** grep **nama simbol/fungsi** di `backend/src` / `frontend/src` — **JANGAN** edit baris dokumen secara buta.
 4. **1 task = 1 commit** (Bahasa Indonesia: `fix:`/`feat:`/`ui:`/`ops:`). Lalu centang `[x]` di sini + 1 baris di Bagian 2 Changelog.
 5. **Gate build:** `cd backend; npx tsc --noEmit` · `cd frontend; npm run build`. Task **uang** WAJIB juga `cd backend; node --test "test/**/*.test.js"` + gate di `docs/M04_KEUANGAN.md`.
 6. **DB dev:** postgres **5433** `kost48_v3_pro` · reseed: `node scripts/seed-dev-reset.js` lalu `node scripts/seed-dev-via-api.js`.
 7. **Larangan:** no npm dep baru · no `schema.prisma` tanpa approval owner (🧬) · no `git push` · no sentuh file milik AI lain (`git status` dulu).
 
-### Status ringkas (2026-06-16)
+### Status ringkas (2026-06-18)
 
 | Blok | Selesai | Terbuka | Catatan |
 |------|---------|---------|---------|
-| Fase 1–5 (F1–F5, audit) | ✅ ~semua | F1-12 go-live 🧑 | Kode inti siap publish |
-| UI/UX + Meter M-1–M-5 | ✅ | — | M-5 checkout meter×deposit SELESAI 2026-06-17 (TB seimbang) |
-| Sesi 16 Jun (SI/G/T/U/MKT) | ✅ | MKT-5 | MKT-4 ✅; MG-UI → diserap PUB-UI-REVAMP |
-| Polish (staf/owner/publik) | sebagian | PUB-UI-REVAMP, OWNER-VIEW-PHASE2, STF-* | AUDIT-OWNER + CSS+SWEEP SELESAI 2026-06-17 |
+| Fase A — Pra-Go-Live | sebagian | F1-12 🧑 | Kode inti siap; publish nyata menunggu server/domain/env owner |
+| Fase B — Publik & Tenant | sebagian | foto, profil | Layanan tambahan, minat layanan, smart booking, kalender, dan meter jadwal sudah selesai fungsional |
+| Fase C — Owner/Admin | sebagian | mode-aware UI, route split, inventaris shell | Layout dasar/sidebar/breadcrumb sudah selesai |
+| Fase D — Staff & Gudang | sebagian | gudang dinamis, staff meter, WiFi/tip, polish staff | Batas finance staff sudah sebagian aman |
+| Fase E — Polish & Teknis | sebagian | TEN-GAMIF, refactor, test lanjutan | MKT-5 selesai fungsional; backlog teknis diserap ke M10 |
 
 ### Urutan kerja (jangan loncat kecuali blocked) — detail di [ANTRIAN](#antrian-eksekusi-aktif-untuk-ai--kerjakan-dari-sini)
 
-1. **F1-12** 🧑 — menunggu server/domain owner (AI hanya pendamping runbook `docs/M08_DEPLOY_GO_LIVE.md`).
-2. **PUB-UI-REVAMP** (P0, serap MG-UI) — fokus owner 2026-06-17; Fase A→I berurutan.
-3. **OWNER-VIEW-PHASE2** (P0) — polish toggle Owner/Admin + pemisahan route.
-4. Sisanya P1/P2 (**STF-GUDANG-2**, **FASE B-2**, **MKT-5**, **STF-THEME**, **TEN-GAMIF**) boleh paralel bila tak bentrok file.
-- ✅ Selesai 2026-06-17: METER M-5, AUDIT-OWNER, CSS+SWEEP, MKT-4, OWN-STRUKTUR-TOGGLE, AUDIT-KEUANGAN-ULTRA (lihat ANTRIAN → "Selesai").
+1. **Fase A — Pra-Go-Live**: owner-blocked, ikuti `docs/M08_DEPLOY_GO_LIVE.md`.
+2. **Fase B — Publik & Portal Tenant**: bereskan sisa foto, smart booking, meter status, profil.
+3. **Fase C — Workspace Owner/Admin**: mode-aware UI, route split, inventaris shell.
+4. **Fase D — Operasional Staff & Gudang**: gudang dinamis, staff meter, WiFi/tip, polish staff.
+5. **Fase E — Polish & Teknis**: gamifikasi kebersihan + backlog teknis non-blocker.
+- ✅ Selesai referensi: METER M-5, AUDIT-OWNER, CSS+SWEEP, MKT-4, MKT-5, OWN-STRUKTUR-TOGGLE, AUDIT-KEUANGAN-ULTRA (lihat ANTRIAN → "Selesai Referensi").
 
 ### Legenda marker task
 
@@ -257,201 +259,238 @@ Detail SI: `docs/archieve/2026-06-16_si_notes/_PLAN_SI_SEWA_RIWAYAT.md` · Meter
 
 ## ANTRIAN EKSEKUSI AKTIF (untuk AI — kerjakan dari sini)
 
-**Cara pakai (YOLO):** ikuti **Urutan kerja** di bawah (bukan urutan fisik section — tiap section
-ditandai `[P0]`/`[P1]`/`[P2]`). Setiap item `[ ]` = masih perlu dikerjakan. Centang `[x]` + prepend
-changelog (Bagian 2) saat gate lulus. Item ✅ sudah dipindah ke daftar referensi di bawah — **JANGAN ulang**.
+> **Mulai dari Fase A lalu turun ke B, C, D, E.** Fase A boleh berhenti di langkah owner, lalu AI boleh lanjut ke Fase B/C selama tidak menyentuh deploy produksi. Status: `[x]` selesai, `[~]` sudah sebagian/tinggal polish, `[ ]` belum selesai.
 
-**Urutan kerja (prioritas):**
-1. **F1-12** 🧑 — owner-blocked (AI hanya pendamping runbook).
-2. **PUB-UI-REVAMP** `[P0]` — fokus owner 2026-06-17; kerjakan Fase A→I berurutan (serap MG-UI).
-3. **OWNER-VIEW-PHASE2** `[P0]` — polish toggle Owner/Admin + pemisahan route.
-4. **FASE B-2** `[P1]` · **STF-GUDANG-2** `[P1]` · **MKT-5** `[P1]` — boleh paralel bila tak bentrok file.
-5. **STF-THEME** `[P2]` · **TEN-GAMIF** `[P2]` — polish, kerjakan terakhir.
+### Peta Rujukan Dokumen
 
----
+| Kebutuhan | Baca dulu | Dipakai untuk |
+|-----------|-----------|---------------|
+| Orientasi bisnis & batasan sistem | `docs/M01_MASTER.md` | Gambaran KOST48, asumsi 48 kamar, lokasi, role |
+| Keputusan owner & UX owner/admin | `docs/M02_KEPUTUSAN_OWNER.md` | Owner view, role guard, keputusan D-01..D-22 |
+| Flow kontrak & chain-of-custody | `docs/M03_FLOW_KONTRAK.md` | Alur booking, invoice, jurnal, stay, dan kontrak |
+| Keuangan, jurnal, invoice, deposit | `docs/M04_KEUANGAN.md` | Semua task uang wajib unit test + invarian TB |
+| Siklus huni, booking, tenant, renewal | `docs/M05_SIKLUS_HUNI.md` | Booking, stay, checkout, KTP, profil tenant |
+| Operasional, staff, gudang, meter | `docs/M06_OPERASIONAL.md` | Staff route, inventory, meter, tiket, gudang |
+| Publik, marketing, SEO, layanan | `docs/M07_PUBLIK_GROWTH.md` | Public UI, katalog, layanan tambahan, foto marketing |
+| Deploy & go-live produksi | `docs/M08_DEPLOY_GO_LIVE.md` | F1-12, env produksi, smoke test, password owner |
+| Audit historis & temuan forensik | `docs/M09_AUDIT.md` | Rujukan audit lama, risiko, dan keputusan pasca-audit |
+| Checklist aktif & changelog | `docs/M10_CHECKLIST_CHANGELOG.md` | Source of truth eksekusi berikutnya |
+| Audit post-fix terbaru | `docs/AUDIT_POST_FIX.md` | Verifikasi DEEP-01..05 dan catatan hardening |
 
-### ✅ Selesai 2026-06-17 (referensi — JANGAN kerjakan ulang; detail di Changelog Bagian 2)
+### Mode AI Lemah — Aturan Eksekusi
 
-- **METER M-5** — checkout meter final × deposit jaminan (TB seimbang, UAT DB 5433 cukup/kurang/nol).
-- **MKT-4** — CAC/CLV lite dashboard (DeepSeek V4 Pro + fallback offline).
-- **AUDIT-OWNER** — `document.title` per-rute, skeleton ganti spinner penuh, fallback foto, notif overflow, a11y, hapus dead-code "Laporan Formal". **A7 RESOLVED:** guest `/rooms` = halaman home+katalog gabungan (`PublicGuestDashboardPage`) — DISENGAJA, bukan bug.
-- **CSS+SWEEP** — `.app-shell*` dipusatkan ke `02-layout.css`; sweep Playwright 30 cek (5 role × 390/834/1440) 0 overflow.
-- **OWN-STRUKTUR-TOGGLE** (Phase 1) — toggle Owner/Admin view + AutoOps cleanup. Lanjutan polish → **OWNER-VIEW-PHASE2** di bawah.
-- **AUDIT-KEUANGAN-ULTRA** — audit 5 aliran keuangan LULUS (8 invarian, TB balanced, deposit MATCHED Rp8jt, 7 DO-NOT-TOUCH utuh).
-- **PUB-LOGIN-BTN** — tombol "Masuk Portal" di navbar publik (commit 26b0b6b).
+1. Buka `docs/M10_CHECKLIST_CHANGELOG.md` dulu, pilih **satu** item `[ ]` atau `[~]` dari Fase A-E.
+2. Buka semua rujukan MD yang tertulis di fase itu sebelum edit kode. Jangan mengerjakan dari ingatan atau dari nama task saja.
+3. Cari anchor kode dengan `rg` sesuai petunjuk fase, lalu cocokkan perilaku kode dengan MD rujukan.
+4. Jika task menyentuh uang, baca `docs/M04_KEUANGAN.md` dan jalankan gate uang. `tsc 0` saja tidak cukup.
+5. Jika task menyentuh schema/migration, berhenti sampai ada approval owner untuk schema additive.
+6. Setelah selesai, update checklist M10 + changelog ringkas; jangan membuat checklist baru di file lain.
 
----
+### Prompt YOLO Siap Pakai
 
-### 🧑 F1-12 — Go-live produksi (BLOCKER PUBLISH)
+Salin prompt ini ke AI eksekutor baru bila ingin dia jalan otonom dari checklist:
 
-**Dossier:** `docs/M08_DEPLOY_GO_LIVE.md` Bagian 1 · **Marker:** 🧑 · **Schema:** tidak perlu.
+```text
+Kamu adalah AI eksekutor lemah untuk repo KOST48. Kerjakan YOLO tapi tetap aman.
 
-**Sudah lulus:** rehearsal 5433 · provision lokal-as-prod + smoke TB/recon.
+Aturan utama:
+1. Mulai dari docs/M10_CHECKLIST_CHANGELOG.md bagian "ANTRIAN EKSEKUSI AKTIF".
+2. Pilih 1 task pertama yang actionable dari Fase A-E dengan status [ ] atau [~].
+3. Jika task owner-blocked, rahasia produksi, deploy nyata, atau schema/migration tanpa approval owner, jangan nebak. Lewati ke task AI-actionable berikutnya dan catat alasannya.
+4. Sebelum edit kode, buka semua MD rujukan yang tertulis di fase/task itu. Minimal baca M10 + M-file domain terkait. Untuk uang wajib baca docs/M04_KEUANGAN.md.
+5. Cari anchor kode pakai rg. Cocokkan kode aktual dengan checklist; jangan mengandalkan ingatan atau asumsi.
+6. Implementasikan perubahan sampai selesai, bukan sekadar rencana. Jaga scope kecil: 1 task = 1 perubahan fokus.
+7. Jangan tambah dependency npm, jangan git push, jangan ubah schema.prisma/sql tanpa approval owner, jangan sentuh flow finance di luar scope.
+8. Jalankan gate sesuai dampak:
+   - Backend: cd backend; npx tsc --noEmit
+   - Frontend: cd frontend; npm run build
+   - Task uang: cd backend; npm run test:unit atau node --test "test/**/*.test.js" sesuai package script
+   - UI/layout: cek responsive/mobile bila memungkinkan
+9. Setelah lulus, update docs/M10_CHECKLIST_CHANGELOG.md: ubah status item, tulis catatan singkat, dan tambah changelog ringkas.
+10. Jika gagal 2 kali di error yang sama, berhenti dan laporkan blocker dengan file/line/error konkret.
 
-**Sub-task go-live nyata:**
+Output akhir:
+- Sebut task yang dikerjakan.
+- Sebut file yang diubah.
+- Sebut gate yang dijalankan dan hasilnya.
+- Sebut sisa risiko atau item berikutnya.
+```
 
-- [ ] Owner konfirmasi VPS/cPanel, domain, HTTPS, PostgreSQL prod 5432, env rahasia.
-- [ ] Fresh provision: DB kosong → migrate/push → bootstrap + addendum → OWNER pertama → COA/periode/cash account.
-- [ ] Env: `NODE_ENV=production`, JWT, CORS, VAPID, `KTP_ACTIVATION_GATE_ENABLED=true`, auto-ops sesuai host.
-- [ ] Ganti password OWNER dev → produksi.
-- [ ] Opening balance (atau dokumentasi zero-start).
-- [ ] Smoke prod + catat di Changelog + centang F1-12 induk di Fase 1.
+### Ringkasan Fase Aktif
 
-**Gate:** M08 §3 smoke · **Jangan:** backfill data UAT.
-
----
-
-### `[P1]` STF-GUDANG-2 — Stok-min otomatis AC/kipas
-
-**Prioritas:** P1 · **Dossier:** M06 · **Anchor:** `inventory-items` service · `isLowStockItem` · `SimpleCrudPage` `/inventory-items` · `room-items`.
-
-- [ ] Mapping fasilitas→item gudang; `minQty` dinamis = jumlah kamar pemakai fasilitas.
-- [ ] UI: alasan status Menipis; seeder: semua kamar punya kipas.
-- [ ] **UAT:** ubah jumlah kamar ber-AC → min stok berubah.
-
----
-
-### `[P2]` STF-THEME — Polish route staf (1 pass)
-
-**Prioritas:** P2 · **Anchor:** `DashboardStaff.tsx` · `StaffMotivationDashboard.tsx` · routes `/staff-*`.
-
-- [ ] Standarkan header, tabs, empty/loading, mobile z-index.
-- [ ] Screenshot: `ui-shots/shoot-staff.mjs` desktop + mobile.
-
----
-
-### `[P2]` TEN-GAMIF — Sisa setelah G-1
-
-**Sudah (G-1):** poin kebaikan, Total/Ditukar/Sisa, Top-3 kamar di `MyLoyaltyPage`.
-
-- [ ] Ranking kebersihan depan kamar bulanan (anonim, kamar saja) dari `staff-field-reports` atau checklist.
-- [ ] **UAT privacy:** API tidak expose tenantId/nama.
+| Fase | Nama Mudah | Status | Rujukan Utama | Catatan |
+|------|------------|--------|---------------|---------|
+| **Fase A** | Pra-Go-Live Produksi | 🧑 blocked owner | M08, M02 | Deploy nyata menunggu server/domain/env owner |
+| **Fase B** | Publik & Portal Tenant | sebagian | M07, M05, M06 | Banyak selesai; sisa foto dan profil |
+| **Fase C** | Workspace Owner/Admin | sebagian | M02, M06 | Layout dasar selesai; sisa mode-aware + route split |
+| **Fase D** | Operasional Staff & Gudang | sebagian | M06, M04 | Staff/gudang/WiFi/tip/meter view |
+| **Fase E** | Polish, Gamifikasi & Teknis | sebagian | M06, M07, M09 | Ranking kebersihan + backlog teknis non-blocker |
 
 ---
 
-### `[P0]` OWNER-VIEW-PHASE2 — Polish toggle Owner/Admin + pemisahan route
+### Fase A — Pra-Go-Live Produksi
 
-**Prioritas:** P0 · **Dossier:** `docs/M02_KEPUTUSAN_OWNER.md` §Keputusan UI/UX Dashboard
-**Lanjutan dari** OWN-STRUKTUR-TOGGLE Phase 1 (✅, lihat referensi). **Menyerap** OWN-STRUKTUR lama (grup sidebar + kartu status owner + guard route OWNER-only).
+**Tujuan:** aplikasi siap dipublish bersih, tanpa membawa data UAT/testing.
 
-**Anchor (grep):** `AppLayout.tsx` (toggle) · `01-base.css` · `02-layout.css` · `navigation.ts` · `DashboardAdmin/OwnerDashboardPage` · `RoleWorkspaceTabs.tsx`
+**Rujukan:** `docs/M08_DEPLOY_GO_LIVE.md` · `backend/.env.production.example` · `backend/scripts/change-owner-password.ts` · `docs/M02_KEPUTUSAN_OWNER.md`.
 
-**Sub-task (kerjakan berurutan):**
+- [ ] **A1 / F1-12 — Go-live nyata** 🧑: owner konfirmasi VPS/cPanel, domain, HTTPS, PostgreSQL prod 5432, dan env rahasia.
+- [ ] **A2 — Fresh provision produksi:** DB kosong → migrate/push → bootstrap + addendum → OWNER pertama → COA/periode/cash account.
+- [ ] **A3 — Env produksi:** `NODE_ENV=production`, JWT kuat, CORS domain final, VAPID, `KTP_ACTIVATION_GATE_ENABLED=true`, auto-ops sesuai host.
+- [ ] **A4 — Password OWNER:** ganti password dev/dummy ke password real sebelum dipakai owner.
+- [ ] **A5 — Opening balance:** isi saldo/modal awal bila ada; jika mulai nol, dokumentasikan zero-start.
+- [ ] **A6 — Smoke prod:** login OWNER, public rooms 200, trial balance balanced, recon mismatch 0, readiness tanpa blocker merah.
+- [x] **A7 — Guard test stale:** `backend/package.json` sudah punya `pretest:unit = npm run build`, jadi test unit pakai `dist` segar.
+- [x] **A8 — Hardening hasil audit:** DEEP-01..05 sudah tercatat selesai; HSTS dan `Permissions-Policy: camera=(self)` sudah masuk changelog.
 
-#### P0 — Toggle UI Polish
-- [ ] **OWN-TOGGLE-CSS** — CSS proper untuk toggle: container `inline-flex`, button `border-radius: 12px`, active state white+shadow, hover state, transition 0.2s
-- [ ] **OWN-TOGGLE-LAYOUT** — Pindahkan toggle dari tengah `topbar-row` ke posisi yang proporsional (antara breadcrumb dan actions, dengan divider)
-- [ ] **OWN-TOGGLE-MOBILE** — Toggle tersedia di offcanvas mobile atau sebagai dropdown di navbar mobile
-- [ ] **OWN-TOGGLE-TRANSITION** — Tambah transisi CSS untuk sidebar & konten saat switch mode (`.app-sidebar, .app-main { transition: all 0.3s ease; }`)
-
-#### P1 — Sidebar, Breadcrumb & Topbar Adaptif
-- [ ] **OWN-SIDEBAR-CONTEXT** — `SidebarContent` terima `ownerViewMode` prop: context card title berubah ("Kokpit Owner" / "Area Admin"), brand subtitle berubah, footer label berubah
-- [ ] **OWN-BREADCRUMB-MODE** — Breadcrumb pertama menampilkan "Kokpit Owner" atau "Area Admin" sesuai mode (bukan `/owner-dashboard`)
-- [ ] **OWN-OFFCANVAS-TITLE** — `Offcanvas.Title` ikut berubah sesuai mode (sekarang statis)
-- [ ] **OWN-ADMIN-ICON-ACTION** — Tombol "📣 Pengumuman" muncul saat Owner mode admin (sekarang hanya untuk ADMIN)
-- [ ] **OWN-STATUS-CARDS** *(eks OWN-STRUKTUR)* — Kartu status besar di Kokpit Owner: okupansi, tunggakan, meter due, go-live readiness. Grup sidebar "Operasional" vs "Keputusan Owner".
-
-#### P2 — Route Separation & Guard
-- [ ] **OWN-ROUTE-SPLIT** — Pisah route: `/owner-dashboard` → Kokpit Owner, `/admin-dashboard` → Area Admin. Navigasi link sidebar mengarah ke route tepat per mode
-- [ ] **OWN-ROUTE-GUARD** — Guard route: `/admin-dashboard` hanya OWNER mode admin atau ADMIN; `/owner-dashboard` hanya OWNER mode kokpit; ADMIN tidak bisa akses `/owner-dashboard`
-- [ ] **OWN-ROLE-TABS-MODE** — `RoleWorkspaceTabs` menampilkan tabs sesuai mode (owner bisnis vs admin operasional), bukan berdasarkan role
-
-#### P3 — Pemisahan Fitur Backend-Aware (Opsional)
-- [ ] **OWN-BACKEND-MODE** — Kirim header `X-Owner-View-Mode` dari frontend untuk audit log atau guard spesifik backend
-
-**Jangan sentuh:** backend logika bisnis · schema · database · STAFF/TENANT layout · AutoOpsControlPanel (sudah bersih).
+**Gate:** M08 §3 smoke PASS. **Jangan:** backfill data UAT ke produksi.
 
 ---
 
-### `[P1]` FASE B-2 — Tab Inventaris | Barang Kamar | Mutasi | Gudang
+### Fase B — Publik & Portal Tenant
 
-**Anchor:** `RoleWorkspaceTabs.tsx` · `SimpleCrudPage.tsx` · routes inventaris.
+**Tujuan:** calon penghuni bisa paham kamar/biaya, booking, lihat layanan, dan tenant bisa memakai portal tanpa bingung.
 
-- [ ] Shell `SegmentedTabs` + redirect route lama; UAT mutasi & pengganti gudang sejenis.
+**Rujukan:** `docs/M07_PUBLIK_GROWTH.md` · `docs/M05_SIKLUS_HUNI.md` · `docs/M06_OPERASIONAL.md`.
 
----
+**Anchor kode:** `PublicGuestDashboardPage` · `GuestBookingForm` · `MyStayPage` · `marketing-public-rooms.service.ts` · `additional-services`.
 
-### `[P1]` MKT-5 — Perluas cross-sell renewal
+#### B1 — Public UI dasar yang sudah selesai
+- [x] Navigasi publik, tombol "Masuk Portal", ikon, CTA audit, badge status, kategori kamar, filter ulasan, OCR KTP, KTP/NIK opsional, dan profile completeness badge sudah selesai.
+- [x] **PUB-CALENDAR-CHECKOUT:** badge "Perkiraan kosong [tgl]" sudah muncul dari checkout-approved atau stay jangka pendek.
+- [~] **PUB-CALENDAR-RENEW:** ditutup sesuai keputusan owner; sistem tidak menebak kontrak bulanan/panjang.
 
-**Sudah (MKT-2):** `RenewalCrossSellCard`. Sisa: value prop meter di renewal + skip add-on tidak block flow.
+#### B2 — Ketersediaan & booking cerdas
+- [x] **PUB-CALENDAR:** backend `GET /public/rooms/availability-calendar?from&to` + frontend `AvailabilityTimeline` horizontal (per kamar × per tanggal: KOSONG/BOOKING_DP/HUNI/MAINTENANCE).
+- [x] **PUB-SMART-BOOKING:** API `GET /public/rooms?checkIn&durationDays` sudah memfilter kamar yang available di seluruh rentang (backend: `marketing-public-rooms.service.ts`).
 
----
+#### B3 — Foto, brosur, dan aset marketing
+- [x] **PUB-CARD-RESPONSIVE:** grid public rooms sudah 4/2/1 kolom.
+- [ ] **PUB-FACILITY-PHOTO:** owner belum bisa upload 1 foto per fasilitas; aset fasilitas publik masih statis.
+- [~] **OWN-FOTO-UPLOAD:** upload foto kamar sudah ada di Owner Settings; sisa CRUD foto marketing, fasilitas, brosur/spanduk.
+- [~] **PUB-BROCHURE:** section "Galeri KOST48" + aset brosur/spanduk statis sudah ada; sisa upload/kelola dari Owner Settings.
 
-### `[P0]` PUB-UI-REVAMP — Revamp UI/UX Publik (arahan owner 2026-06-17) — serap MG-UI
+#### B4 — Layanan tambahan & minat layanan
+- [x] **PUB-LAYANAN-TAMBAHAN:** model `AdditionalService`, CRUD owner, route/nav admin, dan portlet tenant sudah selesai.
+- [x] **PUB-LAYANAN-MINAT:** model `ServiceInterest`, API interest, tombol tenant "Saya Minat", dan halaman admin/owner proses minat sudah selesai fungsional. Sisa polish: ganti `window.confirm` ke modal custom bila diminta.
 
-**Prioritas:** P0 · **Dossier:** `docs/M07_PUBLIK_GROWTH.md` — bagian "🆕 UI/UX Publik — Arahan Owner 2026-06-17"
+#### B5 — Meter & profil tenant
+- [x] **PUB-METER-JADWAL:** tenant sudah bisa melihat jendela catat meter bulan ini + status sudah/belum di `/portal/stay`; tenant hanya bisa membaca meter kamar aktifnya.
+- [ ] **PUB-FOTO-PROFIL-KTP:** KTP upload sudah ada, tetapi foto KTP pertama belum otomatis menjadi avatar/profil tenant; admin belum punya flow ganti foto profil.
 
-**Anchor (grep):** `GuestHomePage` · `PublicRoomsPage` · `PublicRoomDetailPage` · `LoginPage` · `marketing-public-rooms.service.ts` · `marketing-room-images.config.ts` · `11-public-pages.css`
-
-> **Menyerap MG-UI-01..05 lama** (re-theme publik: home, social proof, Living System, foto marketing, Lighthouse ≥90) — semua itu kini bagian revamp ini. Catatan: guest `/rooms` = `PublicGuestDashboardPage` (home+katalog gabungan, disengaja — lihat AUDIT-OWNER A7).
-
-**Sub-task (kerjakan berurutan dari A ke I):**
-
-#### Fase A — Navigasi, Tombol & Ikon — ✅ SELESAI 2026-06-17 (commit cf4c63c)
-- [x] Penjelasan saran owner sudah dicatat di M07.
-- [x] **PUB-LOGIN-BTN** — tombol "Masuk Portal" di navbar publik → `/login` (commit 26b0b6b).
-- [x] **PUB-ICON** — emoji + aria-hidden (tanpa lib): nav links, CTA (hero/navbar/penutup/sticky), mark fasilitas, badge status per tone (🟢🟡🔴🧹).
-- [x] **PUB-CTA-AUDIT** — prominent "Cek Kamar Tersedia" tinggal 2 (hero + sticky navbar); CTA penutup di-relabel "Lihat Pilihan Kamar"; form submit tetap (fungsional).
-- [x] **PUB-REMOVE-PREF** — tombol "Ubah Preferensi Tinggal" dihapus dari halaman publik.
-
-#### Fase B — Kalender Ketersediaan Cerdas (keputusan owner 2026-06-18)
-- [x] **PUB-CALENDAR-CHECKOUT** — **SELESAI**: badge "🗓️ Perkiraan kosong [tgl]" di kartu kamar terisi bila (a) ada checkout-request **APPROVED**, atau (b) stay **jangka pendek** (DAILY/WEEKLY/BIWEEKLY). Backend `projectedAvailableDate`/`reason` di public rooms API (list+detail). **UAT runtime LULUS** (stay WEEKLY → projection muncul).
-- [~] **PUB-CALENDAR-RENEW** — **owner memutuskan TIDAK menebak** dari kontrak bulanan/panjang (hanya checkout-approved + short-term). Item ditutup sesuai keputusan.
-- [ ] **PUB-CALENDAR** (timeline horizontal penuh) — DITUNDA: badge proyeksi per-kamar sudah memenuhi kebutuhan inti owner; timeline penuh opsional bila nanti diminta.
-- [ ] **PUB-SMART-BOOKING** — `GET /public/rooms?checkIn&durationDays` filter rentang (belum; opsional).
-
-#### Fase C — Kartu Kamar, Badge & Tombol — ✅ SELESAI 2026-06-17
-- [x] **PUB-BADGE-STATUS** — warna badge: Hijau/Tersedia · Kuning/Dipesan(proses) · Merah/Terisi · Abu/Maintenance (selaras ikon).
-- [x] **PUB-BTN-COLOR** — kamar belum-bisa-booking → "Tanya" gaya outline; "Ajukan Booking" primary +📝. (Primary tetap HIJAU sesuai tema; owner sebut "biru" → bisa diubah bila mau.)
-- [x] **PUB-FACILITY-SHOW** — ikon fasilitas di chip kartu kamar (❄️🌀🚿📶…).
-- [x] **PUB-ROOM-CATEGORY** 🧬 — **SELESAI**: schema `RoomCategory`/`RoomType` + `Room.category`/`roomType` (migration additive `20260617000000_pub_room_category`, default STANDARD/REGULAR); DTO owner set kategori/tipe; public API expose; **badge kategori** (💎/🛋️/🏷️ + tag Mezzanine) + **filter kategori** di katalog; kolom + select di form admin kamar. **UAT runtime LULUS** (owner set DELUXE/MEZZANINE → tampil di public API). tsc 0 · FE build ok.
-- [x] **PUB-PHOTO-RATIO** — **keputusan owner: pertahankan 4:3** (landscape, terbaik untuk foto ruang); rule 1:1 di M07 di-override. Tanpa perubahan kode.
-
-#### Fase D — Responsif & Foto Owner
-- [x] **PUB-CARD-RESPONSIVE** — grid `.gx-room-grid` sudah 4/2/1 kolom (verifikasi, tanpa perubahan).
-- [ ] **PUB-FACILITY-PHOTO** — Owner upload 1 foto per fasilitas via Settings.
-- [ ] **OWN-FOTO-UPLOAD** — Backend CRUD foto marketing + fasilitas di Settings Owner.
-- [ ] **PUB-BROCHURE** — Section "Galeri KOST48" di landing + upload brosur/spanduk.
-
-#### Fase E — Ulasan & Social Proof — ✅ SELESAI 2026-06-17
-- [x] **PUB-REVIEWS** — sudah ada via F3-4 (`getPublicSocialProof`: StaffReview VISIBLE rating≥4 + agregat) + **embed Google Maps iframe** sudah ada di section #lokasi (`MAPS_EMBED_URL`).
-- [x] **PUB-REVIEWS-FILTER** — tab "Terbaru" / "Rating Tertinggi" (client-side sort, default Terbaru), tampil maks 10; pool backend dinaikkan 6→12.
-
-#### Fase F — Booking Flow & KTP
-- [x] **PUB-BOOKING-INFO** — teks "Belum punya akun? Booking kamar dulu" di LoginPage (akun portal dibuat otomatis).
-- [~] **PUB-BOOKING-FORM** — **KTP/NIK opsional** saat booking (validasi format hanya bila diisi; backend sudah `@IsOptional`). ⚠️ **phone XOR email DITUNDA:** auto-create akun portal (`public-bookings.service` user.create) butuh email → perlu desain "booking phone-only tanpa akun portal" (alur finance-adjacent, jangan YOLO).
-- [x] **PUB-KTP-OCR** — **SELESAI**: `tesseract.js` (lazy-load, diproses di perangkat — privasi) di GuestBookingForm; tombol "📷 Pindai KTP" → ekstrak NIK (16 digit) + Nama via `parseKtpText` → isi otomatis (user wajib periksa). Bundle utama tak bertambah (chunk terpisah). npm approved owner 2026-06-17.
-- [x] **TEN-PROFILE-NOTIF** — **SELESAI**: `GET /tenant/profile/completeness` (reuse `buildCompletionSummary`) + badge "📋 Lengkapi profil (X%)" di MyStayPage (list field kurang + tombol ke /portal/profile). UAT runtime: endpoint balikkan struktur benar (maya 100% → badge tersembunyi).
-
-#### Fase G — Layanan Tambahan & Meter (portlet tenant)
-- [x] **PUB-LAYANAN-TAMBAHAN** 🧬 — **SELESAI**: model `AdditionalService` (migration `20260618000000_additional_services`) + modul backend CRUD (mutasi OWNER-only, list aktif semua role) + resource admin "Layanan Tambahan" (config + route + nav owner) + portlet tenant (estimasi tarif di MyStayPage). **UAT runtime LULUS** (owner create, admin 403, tenant lihat 2 layanan + tarif).
-- [ ] **PUB-LAYANAN-MINAT** — Tombol "Saya Minat" → modal konfirmasi biaya → admin proses. **DITUNDA:** butuh model `ServiceInterest` + flow (increment terpisah; sementara tenant pakai "Kirim Saran").
-- [ ] **PUB-METER-JADWAL** — Tampilkan jadwal catat meter di `/portal/stay` (jendela buka/tutup, status bulan ini).
-- [ ] **STF-METER-VIEW** — Dashboard staff: daftar kamar yang sudah/belum catat meter per siklus.
-
-#### Fase H — Staff & Role Scope
-- [ ] **STF-ROLE-SCOPE** — Staff: reparasi + kebersihan + resepsionis saja. Tidak bisa approve layanan berbayar.
-- [ ] **STF-WIFI-ORDER** — Tombol "Mulai" WiFi hanya admin. Staff lihat status. Atau "Pesan" → approve admin → invoice.
-- [x] **STF-SARAN-LABEL** — label "Kirim via Laporan" → "Kirim Saran" (MyStayPage).
-- [ ] **STF-TIP-FLOW** *(serap TIP+)* — Tenant klik "Saya sudah transfer/beri tip" di `MyTicketsPage` (copy "uang kopi" sukarela) → notif staff → staff konfirmasi 2 hari → award poin idempotent `TIP_MARKED:ticketId` (tanpa nominal). **UAT:** tip TIDAK masuk laporan keuangan. (Sudah T-1: ShopeePay, `TIP_RECEIVED`, `tipCount`.)
-
-#### Fase I — Foto Profil
-- [ ] **PUB-FOTO-PROFIL-KTP** — Foto KTP pertama otomatis jadi profil tenant. Kompres otomatis. Admin bisa ganti.
-
-**Gate:** `npm run build` frontend harus PASS. Foto kamar tetap ratio 1:1, Lighthouse ≥90.
+**Gate:** frontend `npm run build` PASS; jika menyentuh backend/schema, backend `npx tsc --noEmit` dan migration additive owner-approved.
 
 ---
 
-### Backlog rendah / jangan duplikasi (item digabung/digantikan — JANGAN buat section baru)
+### Fase C — Workspace Owner/Admin
+
+**Tujuan:** owner punya kokpit bisnis yang jelas, dan saat pindah ke mode admin tidak terasa campur-aduk dengan dashboard owner.
+
+**Rujukan:** `docs/M02_KEPUTUSAN_OWNER.md` §Keputusan UI/UX Dashboard · `docs/M06_OPERASIONAL.md`.
+
+**Anchor kode:** `AppLayout.tsx` · `navigation.ts` · `RoleWorkspaceTabs.tsx` · `OwnerDashboardPage` · `DashboardAdmin` · `02-layout.css` · `12-owner.css`.
+
+#### C1 — Layout dasar yang sudah masuk
+- [x] **Sidebar collapsible:** ikon-only desktop + persist localStorage sudah ada.
+- [x] **Breadcrumb + hamburger:** topbar breadcrumb dan hamburger mobile sudah ada.
+- [x] **Owner dashboard compact/full:** toggle Ringkas/Lengkap di `OwnerDashboardPage` sudah ada.
+
+#### C2 — Toggle Owner/Admin mode
+- [~] **OWN-TOGGLE-CSS:** toggle sudah ada + style dasar; sisa detail checklist: radius 12px, active white+shadow, hover state, transition 0.2s.
+- [~] **OWN-TOGGLE-LAYOUT:** toggle sudah berada di topbar; sisa polish posisi antara breadcrumb/actions + divider.
+- [ ] **OWN-TOGGLE-MOBILE:** toggle belum tersedia di offcanvas mobile/dropdown navbar mobile.
+- [ ] **OWN-TOGGLE-TRANSITION:** belum ada transisi `.app-sidebar, .app-main { transition: all 0.3s ease; }`.
+
+#### C3 — Sidebar, breadcrumb, dan aksi topbar adaptif
+- [ ] **OWN-SIDEBAR-CONTEXT:** `SidebarContent` belum menerima `ownerViewMode` prop penuh untuk title/subtitle/footer.
+- [~] **OWN-BREADCRUMB-MODE:** breadcrumb sudah mengikuti link-set mode; sisa hard-label root "Kokpit Owner" / "Area Admin".
+- [ ] **OWN-OFFCANVAS-TITLE:** `Offcanvas.Title` masih statis, belum ikut mode owner/admin.
+- [ ] **OWN-ADMIN-ICON-ACTION:** tombol "Pengumuman" belum muncul saat OWNER berada di mode admin.
+- [ ] **OWN-STATUS-CARDS:** Kokpit Owner belum punya kartu status lengkap: okupansi, tunggakan, meter due, go-live readiness, dan grup sidebar "Operasional" vs "Keputusan Owner".
+
+#### C4 — Route split dan guard
+- [ ] **OWN-ROUTE-SPLIT:** `/owner-dashboard` dan `/admin-dashboard` belum dipisah sebagai route nyata.
+- [ ] **OWN-ROUTE-GUARD:** guard `/owner-dashboard` vs `/admin-dashboard` belum mode-aware penuh.
+- [~] **OWN-ROLE-TABS-MODE:** tabs sudah ikut mode via role override di `AppLayout`; sisa jadikan mode eksplisit, bukan hack role.
+- [ ] **OWN-BACKEND-MODE** *(opsional)*: header `X-Owner-View-Mode` belum dikirim untuk audit log/guard backend.
+
+#### C5 — Inventaris terpadu
+- [ ] **FASE B-2:** belum ada shell `SegmentedTabs` untuk Inventaris | Barang Kamar | Mutasi | Gudang, dan route lama belum redirect ke shell.
+
+**Gate:** frontend build PASS, UAT route guard OWNER/ADMIN, dan cek mobile 390/834/1440 bila menyentuh layout.
+
+---
+
+### Fase D — Operasional Staff & Gudang
+
+**Tujuan:** pekerjaan staff, gudang, meter, WiFi, dan tip sukarela jelas batas role-nya, tanpa bocor ke finance.
+
+**Rujukan:** `docs/M06_OPERASIONAL.md` · `docs/M04_KEUANGAN.md` untuk batas finance.
+
+**Anchor kode:** `DashboardStaff.tsx` · `StaffMotivationDashboard.tsx` · `StaffReportPrintView.tsx` · `inventory-items` · `room-items` · `tickets` · `WifiOrderPage`.
+
+- [ ] **STF-GUDANG-2:** mapping fasilitas→item gudang belum ada; `minQty` dinamis AC/kipas belum mengikuti jumlah kamar pemakai fasilitas.
+- [ ] **STF-GUDANG-2 UI/seeder:** alasan status Menipis + seeder semua kamar punya kipas belum selesai.
+- [~] **STF-METER-VIEW:** laporan staff sudah memuat count/data meter; sisa dashboard daftar kamar sudah/belum catat meter per siklus.
+- [~] **STF-ROLE-SCOPE:** staff tidak bisa approve layanan berbayar/finance; sisa audit penuh scope resepsionis/reparasi/kebersihan per route.
+- [~] **STF-WIFI-ORDER:** `wifi-sales` admin/owner-only; sisa flow "Pesan" → approve admin → invoice + staff read-only status.
+- [~] **STF-TIP-FLOW:** T-1 tenant acknowledge "uang kopi" + `TIP_RECEIVED` tanpa nominal sudah ada; sisa notif staff, konfirmasi staff 2 hari, idempotency `TIP_MARKED:ticketId`, dan UAT tip tidak masuk laporan keuangan.
+- [ ] **STF-THEME:** standarkan header, tabs, empty/loading, mobile z-index di route staff.
+- [~] **STF-THEME screenshot:** `ui-shots/shoot-staff.mjs` desktop sudah ada; sisa tambah/rapikan mobile capture.
+
+**Gate:** frontend build PASS; untuk role/finance wajib UAT guard dan pastikan tip/WiFi tidak membuat jurnal liar.
+
+---
+
+### Fase E — Polish, Gamifikasi & Teknis
+
+**Tujuan:** fitur non-blocker dirapikan setelah flow utama aman.
+
+**Rujukan:** `docs/M06_OPERASIONAL.md` · `docs/M07_PUBLIK_GROWTH.md` · `docs/M09_AUDIT.md` · `docs/AUDIT_POST_FIX.md`.
+
+#### E1 — Tenant gamification
+- [ ] **TEN-GAMIF:** ranking kebersihan depan kamar bulanan belum ada; Top-3 kamar yang ada sekarang berbasis poin kebaikan, bukan kebersihan bulanan.
+- [~] **TEN-GAMIF privacy:** leaderboard poin yang ada tidak expose tenantId/nama; tetap perlu UAT ulang untuk ranking kebersihan baru.
+
+#### E2 — Marketing renewal
+- [x] **MKT-5:** selesai fungsional. `RenewRequestModal` sudah memuat copy meter; `RenewalCrossSellCard` opsional dan tidak memblokir flow renewal.
+
+#### E3 — Backlog teknis non-blocker (jangan dikerjakan sebelum Fase A-D kecuali diminta)
+- [ ] Split file besar: `auto-ops.service.ts` → per-job + orchestrator; `stays.service.ts` → booking/checkout/renewal helper.
+- [ ] Tambah integration test flow kritis: booking → check-in → checkout → deposit refund.
+- [ ] Tambah E2E Playwright fungsional, bukan hanya screenshot visual.
+- [ ] Evaluasi refresh token JWT, nonce-based CSP, WA/email urgent alert, dan event bus/message queue sebagai jangka panjang.
+
+---
+
+### Catatan Sinkron Audit 2026-06-18
+
+- Audit eksternal sementara sudah diserap ke M10 agar tidak menjadi rujukan ganda.
+- **MKT-5** ditutup sebagai `[x]` karena kode renewal meter-copy + cross-sell opsional sudah ada.
+- **PUB-UI-REVAMP Fase G** dipecah: layanan tambahan, minat layanan, dan meter jadwal `[x]`; staff meter view masih `[~]`.
+- **OWNER-VIEW-PHASE2 P0** hanya dihitung selesai untuk layout dasar; mode-aware context, mobile toggle, offcanvas title, dan route split tetap terbuka.
+- M10 memakai status terbaru: build + unit test 55/55 hijau setelah pretest/build.
+
+### Selesai Referensi — Jangan Kerjakan Ulang
+
+- **METER M-5:** checkout meter final × deposit jaminan, TB seimbang, UAT cukup/kurang/nol.
+- **MKT-4:** CAC/CLV lite dashboard, DeepSeek V4 Pro + fallback offline.
+- **AUDIT-OWNER:** title per-rute, skeleton, fallback foto, notif overflow, a11y, hapus dead-code, guest `/rooms` disengaja home+katalog gabungan.
+- **CSS+SWEEP:** `.app-shell*` dipusatkan ke `02-layout.css`; sweep 5 role × 3 viewport = 0 overflow.
+- **OWN-STRUKTUR-TOGGLE Phase 1:** toggle Owner/Admin view + AutoOps cleanup.
+- **AUDIT-KEUANGAN-ULTRA:** 8 invarian, TB balanced, deposit MATCHED Rp8jt, 7 DO-NOT-TOUCH utuh.
+- **PUB-LOGIN-BTN:** tombol "Masuk Portal" di navbar publik.
+
+### Backlog Rendah / Jangan Duplikasi
 
 | ID | Status / Catatan |
 |----|------------------|
-| **MG-UI-01..05** | ➡️ Diserap **PUB-UI-REVAMP** (re-theme publik). Jangan buat section terpisah. |
-| **OWN-STRUKTUR** (lama) | ➡️ Diserap **OWNER-VIEW-PHASE2** (grup sidebar + kartu status owner + route guard). |
-| **TIP+** | ➡️ Diserap **STF-TIP-FLOW** (PUB-UI-REVAMP Fase H). |
-| MKT-1/2/3 spec lama | ✅ Digantikan DeepSeek + surveys — jangan buat `BusinessNarrative` duplikat |
-| MKT-1 web LIVE | 🧑 butuh API search berbayar |
-| V-7 chart | Keputusan UX owner (F3-12) |
+| **MG-UI-01..05** | Diserap **Fase B — Publik & Portal Tenant**. Jangan buat section terpisah. |
+| **OWN-STRUKTUR** lama | Diserap **Fase C — Workspace Owner/Admin**. |
+| **TIP+** | Diserap **Fase D — Operasional Staff & Gudang** sebagai `STF-TIP-FLOW`. |
+| MKT-1/2/3 spec lama | Selesai/digantikan DeepSeek + surveys; jangan buat `BusinessNarrative` duplikat. |
+| MKT-1 web LIVE | Owner/API-search berbayar; bukan blocker go-live. |
+| V-7 chart | Ditutup sebagai keputusan UX owner di F3-12. |
 
 <!-- KOST48_DOCS_SYNC_20260616_CHECKLIST_AI_ANTARIAN -->
 
@@ -462,18 +501,70 @@ changelog (Bagian 2) saat gate lulus. Item ✅ sudah dipindah ke daftar referens
 
 > Dipadatkan dari `docs/CHANGELOG.md`: header tanggal dipertahankan, tiap entry hanya menyimpan 1-2 poin outcome. Detail verbose tetap ada di source lama.
 
+### 2026-06-18 — feat(PUB-LAYANAN-MINAT): tenant ajukan minat layanan + proses admin/owner
+- **Schema additive** (migration `20260618010000_service_interest`): model `ServiceInterest` (serviceId/tenantId/status `ServiceInterestStatus` PENDING·CONTACTED·DONE·CANCELLED/note/adminNote) + relasi cascade ke `AdditionalService`+`Tenant`.
+- **BE:** `POST /additional-services/:id/interest` (TENANT, dedupe PENDING agar tak dobel) + `GET /my-interests` (TENANT) + `GET /interests` & `PATCH /interests/:id` (OWNER/ADMIN). Tiap minat baru bikin notif `createOnce` ke semua admin/owner (linkTo `/service-interests`).
+- **FE tenant:** tombol "🙋 Saya Minat" per layanan di portlet MyStayPage (konfirmasi tarif, badge "Sudah diminati" bila PENDING).
+- **FE admin/owner:** halaman `/service-interests` (tab PENDING/CONTACTED/DONE/Semua + aksi Tandai Dihubungi/Selesai/Batalkan) + nav owner Pengaturan.
+- Gate: BE build 0 · FE build 108 chunk, PWA ok · **UAT runtime LULUS** (tenant create 201, dedupe→id sama, admin list+proses CONTACTED 200, tenant→route admin 403, notif owner+admin terbuat).
+
+### 2026-06-18 -- feat(PUB-METER-JADWAL): status meter bulan ini di portal tenant
+- **BE:** `GET /meter-readings` kini mengizinkan TENANT membaca meter hanya untuk kamar aktifnya; query `roomId` lain ditolak.
+- **FE:** `/portal/stay` menampilkan jendela catat meter bulan ini, status sudah/belum, catatan terakhir, dan CTA catat meter.
+- Gate: BE `npx.cmd tsc --noEmit` PASS; FE `npx.cmd tsc -b` PASS; FE `npm.cmd run build` PASS (rerun escalated karena sandbox Vite access denied).
+
+### 2026-06-18 — feat(PUB-CALENDAR): availability calendar timeline horizontal (backend + frontend)
+- **PUB-CALENDAR:** backend `GET /public/rooms/availability-calendar?from&to` — grid per kamar per tanggal (KOSONG/BOOKING_DP/HUNI/MAINTENANCE). Logic: stay ACTIVE + room status → status per hari.
+- **Frontend:** `AvailabilityTimeline.tsx` — tabel horizontal scrollable, group per lantai, legend warna, collapse/expand, loading/empty state.
+- **Integrasi:** ditampilkan di `PublicRoomsPage` setelah grid kamar + pagination.
+- DTO: `AvailabilityCalendarQueryDto` (from, to opsional, default 2 minggu, clamp 62 hari).
+- Gate: BE build 0 · FE build 108 chunk, PWA ok.
+
+### 2026-06-18 — feat(PUB-SMART-BOOKING): filter ketersediaan kamar publik by checkIn+durationDays
+- **PUB-SMART-BOOKING:** API `GET /public/rooms?checkIn=YYYY-MM-DD&durationDays=N` — filter kamar yang available di seluruh rentang (tanpa overlapping active stay).
+- **DTO:** tambah field `checkIn`+`durationDays` di kedua `PublicRoomsQueryDto` (marketing + tenant-bookings).
+- **Service:** `MarketingPublicRoomsService.buildPublicRoomWhere()` — tambah kondisi `stays: { none: { status: ACTIVE, checkInDate: { lt: endDate }, OR: [plannedCheckOutDate: null, plannedCheckOutDate: { gt: checkInDate }] } }`.
+- Gate: BE build 0 (tsc PASS).
+
+### 2026-06-18 — docs(checklist audit): sinkron status M10 vs kode
+- **PUB-LAYANAN-MINAT:** dicatat selesai fungsional berdasarkan kode `ServiceInterest` + API + tenant button + halaman admin/owner proses minat. Sisa polish: native `window.confirm` → modal custom bila diminta.
+- **MKT-5:** ditutup fungsional; renewal sudah punya copy meter dan cross-sell add-on opsional yang tidak memblokir flow.
+- **Parsial ditandai `[~]`:** owner toggle phase-2, foto/brosur, meter schedule/staff view, staff role/wifi, tip flow, dan beberapa item audit visual.
+
 ### 2026-06-18 — fix(go-live hardening dari audit): test 55/55 + camera CSP (OCR) + HSTS
 - **Test 54/55 → 55/55:** mock `ticket-number.test.js` pakai `$executeRaw` (bukan `$queryRaw`) sesuai advisory-lock F2-5. Bukan bug produksi, tapi suite kini hijau penuh.
 - **DEEP-02:** `Permissions-Policy: camera=(self)` agar OCR KTP (PUB-KTP-OCR/Tesseract) tak terblok; mic & geo tetap diblok.
 - **DEEP-03:** header `Strict-Transport-Security` (HSTS) ditambah — **hanya di produksi** (HTTPS), tidak di dev.
-- **DEEP-01 = FALSE POSITIVE:** `PasswordResetToken.token` sudah `@unique` (sudah ada unique index PG); tidak perlu `@@index` tambahan.
-- Gate: BE build 0 · unit test **55/55** hijau. (DEEP-04/05 konsolidasi duplikat ditunda — refactor pasca go-live.)
+- **DEEP-01:** `@@index([token])` ditambahkan di schema + migration `20260618020000`. Redundan (@unique sudah bikin unique index PG) tapi tidak merusak — index eksplisit tidak mengurangi performa.
+- Gate: BE build 0 · unit test **55/55** hijau.
+
+### 2026-06-18 — fix(audit post-fix DEEP-04/05): konsolidasi duplikat + refactor auth helper
+- **DEEP-04:** konsolidasi `lockApprovalBookingTx` — source of truth di `tenant-bookings.queries.ts`, hapus dari `tenant-bookings-helpers.ts`. tsc 0, 55/55 test PASS.
+- **DEEP-05:** refactor `findUserForLogin` + `findUserForForgotPassword` → satu helper `findUserByEmailOrPhone(identifier, normalizedPhone, { includeExtraPhoneVariants? })`. Perilaku kedua method TETAP — login coba varian HP lebih banyak, forgot-password varian minimal. tsc 0, 55/55 test PASS.
+- **NEW:** `backend/.env.production.example` — 55+ env vars lengkap (Wajib, VAPID, KTP gate, Brevo, DeepSeek, auto-ops, akuntansi, loyalty points, rate limit, deadline).
+- **NEW:** `backend/scripts/change-owner-password.ts` — overwrite password OWNER via Prisma+bcrypt. Idempoten, pass dari env `OWNER_NEW_PASSWORD` atau prompt. JWT lama invalid otomatis (guard pwdAt).
+
+### 2026-06-18 — ui(owner-dashboard): toggle tampilan Ringkas/Lengkap + persist localStorage
+- **OwnerDashboardPage:** tombol toggle "📋 Ringkas" / "📊 Lengkap" di toolbar, sebelah "Buka laporan".
+- **useOwnerViewMode hook:** baca localStorage `kost48_owner_view_mode`; default mobile ≤834px = compact; override manual tersimpan.
+- **Compact mode sembunyikan:** panel tren chart + panel AI analysis via CSS class `owner-view-compact`.
+- **FE:** `12-owner.css` — style toggle button (pill-style, active dark bg) + compact hide rules.
+- Gate: FE build 108 chunk, PWA ok (gzip: 146 KiB JS, 107 KiB CSS).
+
+### 2026-06-18 — ui(layout): sidebar collapsible (ikon-only) + breadcrumb + hamburger toggle
+- **AppLayout.tsx:** state `sidebarCollapsed` + localStorage persist; class `sidebar-collapsed` di aside + grid.
+- **SidebarContent:** saat collapsed — hanya ikon link yang tampil, teks/brand/context-card disembunyikan via CSS.
+- **Toggle button:** lingkaran kecil di tepi kanan sidebar (◀ / ▶) + ikon hamburger ☰ di topbar (mobile).
+- **CSS:** `02-layout.css` — `.app-shell-grid.sidebar-collapsed` (grid 60px + transisi 0.25s), `.sidebar-collapse-toggle` (toggle button bulat).
+- **CSS:** `10-misc.css` — `.sidebar-collapsed` hide rules (sembunyikan brand-title, label, arrow, context-card, section-toggle, footer).
+- **Breadcrumb:** sudah ada (`getBreadcrumbParts` + `app-topbar-breadcrumb`) — memakai React Router `pathname`.
+- Gate: FE build 108 chunk, PWA ok (CSS +1 KiB gzip).
 
 ### 2026-06-18 — feat(PUB-LAYANAN-TAMBAHAN 🧬): layanan tambahan + tarif (admin CRUD + portlet tenant)
 - Schema additive (owner-approved, migration `20260618000000_additional_services`): model `AdditionalService` (name/description/priceRupiah/unit/isActive/sortOrder).
 - BE: modul `additional-services` — CRUD mutasi **OWNER-only** (D-17), `GET /active` semua role.
 - FE: resource admin "Layanan Tambahan" (config-driven + route /additional-services + nav owner Pengaturan) + portlet tenant di MyStayPage (daftar layanan + estimasi tarif).
-- Gate: BE tsc 0 · FE build (106 chunk, PWA ok) · **UAT runtime LULUS** (owner create 201, admin 403, tenant lihat Galon/TV + tarif). PUB-LAYANAN-MINAT ditunda (butuh model ServiceInterest).
+- Gate: BE tsc 0 · FE build (106 chunk, PWA ok) · **UAT runtime LULUS** (owner create 201, admin 403, tenant lihat Galon/TV + tarif). Catatan lama "PUB-LAYANAN-MINAT ditunda" sudah superseded oleh audit checklist 2026-06-18.
 
 ### 2026-06-18 — feat(PUB-CALENDAR-CHECKOUT): badge "Perkiraan kosong [tgl]" katalog publik
 - Keputusan owner: proyeksi kamar kosong hanya untuk (a) checkout-request APPROVED, atau (b) stay jangka pendek (harian/mingguan/2-mingguan, sering tak perpanjang). TIDAK menebak dari kontrak bulanan.

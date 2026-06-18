@@ -29,8 +29,6 @@ import { AccountingPostingService } from '../accounting/accounting-posting.servi
 import {
   type RoomPricingSnapshot,
   type BookingRow,
-  type ApprovalBookingSnapshot,
-  lockApprovalBookingTx,
   mapBookingRow,
   findBookingByIdTx,
   resolveRentFromSnapshot,
@@ -41,6 +39,7 @@ import {
   calculateBookingExpiry,
   resolveTenantPortalUser,
 } from './tenant-bookings-helpers';
+import { lockApprovalBookingTx } from './tenant-bookings.queries';
 
 @Injectable()
 export class TenantBookingsService {

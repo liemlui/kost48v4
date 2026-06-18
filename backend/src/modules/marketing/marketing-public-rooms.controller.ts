@@ -1,6 +1,7 @@
 import { Controller, Get, Param, ParseIntPipe, Query } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { Public } from '../../common/decorators/public.decorator';
+import { AvailabilityCalendarQueryDto } from './dto/availability-calendar-query.dto';
 import { PublicRoomsQueryDto } from './dto/public-rooms-query.dto';
 import { MarketingPublicRoomsService } from './marketing-public-rooms.service';
 
@@ -23,6 +24,14 @@ export class MarketingPublicRoomsController {
     return {
       message: 'Social proof publik berhasil diambil',
       data: await this.publicRoomsService.getPublicSocialProof(),
+    };
+  }
+
+  @Get('availability-calendar')
+  async availabilityCalendar(@Query() query: AvailabilityCalendarQueryDto) {
+    return {
+      message: 'Kalender ketersediaan berhasil diambil',
+      data: await this.publicRoomsService.getAvailabilityCalendar(query),
     };
   }
 

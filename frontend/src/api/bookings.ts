@@ -1,3 +1,4 @@
+import client from './client';
 import { createResource, getResource, listResource, postAction, updateResource } from './resources';
 import type {
   ApproveBookingPayload,
@@ -12,6 +13,26 @@ import type {
 
 export async function listPublicRooms(params?: Record<string, unknown>) {
   return listResource<PublicRoom>('/public/rooms', params) as Promise<PaginatedResponse<PublicRoom>>;
+}
+
+export async function getAvailabilityCalendar(params?: { from?: string; to?: string }) {
+  const response = await client.get<{
+    message: string;
+    data: {
+      from: string;
+      to: string;
+      dates: string[];
+      rooms: Array<{
+        id: number;
+        code: string;
+        name: string | null;
+        floor: string | null;
+        status: string;
+        days: Record<string, string>;
+      }>;
+    };
+  }>('/public/rooms/availability-calendar', { params });
+  return response.data.data;
 }
 
 function readAlias<T>(source: unknown, ...keys: string[]): T | undefined {

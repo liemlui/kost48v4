@@ -4566,3 +4566,34 @@ div.tenant-stay-fact-chip {
     min-height: 260px;
   }
 }
+
+/* ── Collapsed sidebar: hanya ikon ───────────────────────── */
+.sidebar-collapsed .brand-block > div,
+.sidebar-collapsed .brand-subtitle,
+.sidebar-collapsed .sidebar-context-card,
+.sidebar-collapsed .sidebar-section-toggle,
+.sidebar-collapsed .sidebar-link-label span:last-child,
+.sidebar-collapsed .sidebar-link-arrow,
+.sidebar-collapsed .sidebar-footer-compact > div,
+.sidebar-collapsed .sidebar-footer-compact strong {
+  display: none;
+}
+.sidebar-collapsed .brand-block {
+  padding: 0.75rem 0;
+  justify-content: center;
+}
+.sidebar-collapsed .sidebar-nav-groups {
+  padding: 0.5rem 0;
+}
+.sidebar-collapsed .sidebar-link {
+  justify-content: center;
+  padding: 0.5rem 0;
+  margin: 0.15rem 0.5rem;
+}
+.sidebar-collapsed .sidebar-link-label {
+  justify-content: center;
+}
+.sidebar-collapsed .sidebar-footer-compact {
+  padding: 0.75rem 0;
+  text-align: center;
+}

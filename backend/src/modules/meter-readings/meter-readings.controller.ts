@@ -19,9 +19,9 @@ export class MeterReadingsController {
   constructor(private readonly meterreadingsService: MeterReadingsService) {}
 
   @Get()
-  @Roles(UserRole.OWNER, UserRole.ADMIN, UserRole.STAFF)
-  async findAll(@Query() query: MeterReadingsQueryDto) {
-    return { message: 'Daftar meter reading berhasil diambil', data: await this.meterreadingsService.findAll(query) };
+  @Roles(UserRole.OWNER, UserRole.ADMIN, UserRole.STAFF, UserRole.TENANT)
+  async findAll(@Query() query: MeterReadingsQueryDto, @CurrentUser() user: CurrentUserPayload) {
+    return { message: 'Daftar meter reading berhasil diambil', data: await this.meterreadingsService.findAll(query, user) };
   }
 
   @Get(':id')

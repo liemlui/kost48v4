@@ -1,8 +1,8 @@
 import { createResource, listResource } from './resources';
 import { MeterReading, PaginatedResponse } from '../types';
 
-export async function getMeterReadingsByRoom(roomId: number | string) {
-  const response = await listResource<MeterReading>('/meter-readings', { roomId });
+export async function getMeterReadingsByRoom(roomId: number | string, params?: { from?: string; to?: string; utilityType?: string; limit?: number }) {
+  const response = await listResource<MeterReading>('/meter-readings', { roomId, ...params });
   return response.items ?? [];
 }
 

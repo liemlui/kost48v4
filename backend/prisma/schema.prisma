@@ -597,6 +597,7 @@ model Tenant {
   depositLedgerEntries TenantDepositLedgerEntry[]
   loyaltyPoints      LoyaltyPoint[]
   redemptions        Redemption[]
+  serviceInterests   ServiceInterest[]
   // F4-13/S-4: referral + quest perbaikan sikap.
   referralCode        String?              @unique
   referralsMade       TenantReferral[]     @relation("ReferralReferrer")
@@ -929,6 +930,7 @@ model PasswordResetToken {
 
   @@index([userId])
   @@index([expiresAt])
+  @@index([token])
 }
 
 model PaymentSubmission {
@@ -2002,6 +2004,35 @@ model AdditionalService {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
+  interests ServiceInterest[]
+
   @@index([isActive])
   @@index([sortOrder])
+}
+
+// PUB-LAYANAN-MINAT (additive, owner-approved 2026-06-18): tenant menyatakan minat
+// atas layanan tambahan → admin proses (hubungi/selesai).
+enum ServiceInterestStatus {
+  PENDING
+  CONTACTED
+  DONE
+  CANCELLED
+}
+
+model ServiceInterest {
+  id        Int                   @id @default(autoincrement())
+  serviceId Int
+  tenantId  Int
+  status    ServiceInterestStatus @default(PENDING)
+  note      String?
+  adminNote String?
+  createdAt DateTime              @default(now())
+  updatedAt DateTime              @updatedAt
+
+  service AdditionalService @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  tenant  Tenant            @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([serviceId])
+  @@index([tenantId])
+  @@index([status])
 }

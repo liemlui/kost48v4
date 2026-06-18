@@ -926,3 +926,45 @@
     margin-bottom: 0.45rem;
   }
 }
+
+/* ── Owner View Mode Toggle ──────────────────────────────────────────── */
+.owner-view-toggle {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid rgba(148, 163, 184, 0.28);
+  border-radius: 8px;
+  background: #fff;
+  overflow: hidden;
+  font-size: 0.78rem;
+  line-height: 1;
+}
+.owner-view-toggle button {
+  border: none;
+  background: transparent;
+  padding: 0.38rem 0.62rem;
+  color: #64748b;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  font-size: inherit;
+  line-height: inherit;
+  white-space: nowrap;
+}
+.owner-view-toggle button:hover {
+  background: #f1f5f9;
+  color: #1e293b;
+}
+.owner-view-toggle button.active {
+  background: #1e293b;
+  color: #fff;
+  font-weight: 600;
+}
+.owner-view-toggle button:focus-visible {
+  outline: 2px solid #3b82f6;
+  outline-offset: -2px;
+}
+
+/* Compact mode: sembunyikan panel berat */
+.owner-view-compact .owner-trend-panel,
+.owner-view-compact .owner-ai-panel {
+  display: none !important;
+}

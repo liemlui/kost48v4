@@ -12,7 +12,8 @@ import { decideRenewRequest, listMyRenewRequests } from '../../api/renewRequests
 import { listMyCheckoutRequests } from '../../api/checkoutRequests';
 import { listMyPaymentSubmissions } from '../../api/paymentSubmissions';
 import { getProfileCompleteness } from '../../api/tenants';
-import { listActiveAdditionalServices } from '../../api/additionalServices';
+import { listActiveAdditionalServices, createServiceInterest, listMyServiceInterests } from '../../api/additionalServices';
+import { getMeterReadingsByRoom } from '../../api/meterReadings';
 import CheckoutRequestModal from '../../components/checkout-requests/CheckoutRequestModal';
 import RenewRequestModal from '../../components/tenant/RenewRequestModal';
 import MeterCycleModal from '../../components/stays/MeterCycleModal';
@@ -22,7 +23,7 @@ import SatisfactionSurveyCard from '../../components/tenant/SatisfactionSurveyCa
 import { useAuth } from '../../context/AuthContext';
 import { useTenantPortalStage } from '../../hooks/useTenantPortalStage';
 import type { PaginatedResponse } from '../../types';
-import type { CheckoutRequest, Invoice, RenewRequest, RoomItem, Stay, Ticket } from '../../types';
+import type { CheckoutRequest, Invoice, MeterReading, RenewRequest, RoomItem, Stay, Ticket } from '../../types';
 import { getApiErrorMessage } from '../../utils/getApiErrorMessage';
 import { getDaysUntilTenantDate, getOpenTenantInvoices, getPendingReviewInvoiceIds, getPrimaryTenantInvoice, isTenantInvoiceOverdue } from '../../utils/tenantRules';
 import { isPayableInvoiceStatus, TENANT_PAYMENT_REVIEW_MESSAGE, tenantPricingTermLabel } from '../../utils/tenantCopy';
@@ -47,6 +48,29 @@ const PROFILE_FIELD_LABELS: Record<string, string> = {
 
 function formatDate(value?: string | null) {
   return formatDateTimeWib(value);
+}
+
+function toDateKey(date: Date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+function getCurrentMeterWindow() {
+  const today = new Date();
+  const start = new Date(today.getFullYear(), today.getMonth(), 1);
+  const end = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+  return {
+    startKey: toDateKey(start),
+    endKey: toDateKey(end),
+  };
+}
+
+function getLatestUtilityReading(readings: MeterReading[], utilityType: 'ELECTRICITY' | 'WATER') {
+  return readings
+    .filter((reading) => String(reading.utilityType).toUpperCase() === utilityType)
+    .sort((a, b) => new Date(b.readingAt).getTime() - new Date(a.readingAt).getTime())[0] ?? null;
 }
 
 function formatEndHelper(value?: string | null) {
@@ -162,6 +186,20 @@ function ActiveStayContent({ stay }: { stay: Stay }) {
     staleTime: 120_000,
   });
 
+  // PUB-LAYANAN-MINAT: minat tenant atas layanan.
+  const myInterestsQuery = useQuery({
+    queryKey: ['my-service-interests'],
+    queryFn: listMyServiceInterests,
+    staleTime: 60_000,
+  });
+  const interestMutation = useMutation({
+    mutationFn: (serviceId: number) => createServiceInterest(serviceId),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['my-service-interests'] }),
+  });
+  const pendingServiceIds = new Set(
+    (myInterestsQuery.data ?? []).filter((i) => i.status === 'PENDING').map((i) => i.serviceId),
+  );
+
   const invoicesQuery = useQuery<PaginatedResponse<Invoice>>({
     queryKey: ['portal-invoices', stay.id],
     queryFn: () => listResource<Invoice>('/invoices/my'),
@@ -209,6 +247,19 @@ function ActiveStayContent({ stay }: { stay: Stay }) {
     retry: false,
   });
 
+  const meterWindow = useMemo(() => getCurrentMeterWindow(), []);
+  const meterReadingsQuery = useQuery<MeterReading[]>({
+    queryKey: ['portal-meter-readings', stay.roomId, meterWindow.startKey, meterWindow.endKey],
+    queryFn: () => getMeterReadingsByRoom(stay.roomId, {
+      from: meterWindow.startKey,
+      to: meterWindow.endKey,
+      limit: 50,
+    }),
+    enabled: Boolean(stay.roomId),
+    staleTime: 60_000,
+    retry: false,
+  });
+
   // ── derived data ────────────────────────────────────────────────────────────
 
   const invoices = invoicesQuery.data?.items ?? [];
@@ -233,6 +284,15 @@ function ActiveStayContent({ stay }: { stay: Stay }) {
   const roomCoverImage = useMemo(() => getRoomCoverImage(stay), [stay]);
   const roomSummary = useMemo(() => getRoomFacilitySummary(stay), [stay]);
   const priceFacts = useMemo(() => getRoomPriceFacts(stay), [stay]);
+  const monthMeterReadings = meterReadingsQuery.data ?? [];
+  const electricityReadingThisMonth = useMemo(
+    () => getLatestUtilityReading(monthMeterReadings, 'ELECTRICITY'),
+    [monthMeterReadings],
+  );
+  const waterReadingThisMonth = useMemo(
+    () => getLatestUtilityReading(monthMeterReadings, 'WATER'),
+    [monthMeterReadings],
+  );
 
   const activeTickets = useMemo(() => tickets.filter((t) => !['CLOSED', 'CANCELLED'].includes((t.status ?? '').toUpperCase())), [tickets]);
   const activeRenewStatuses = ['PENDING', 'PENDING_DECISION', 'AWAITING_DP', 'DP_SECURED'];
@@ -249,6 +309,14 @@ function ActiveStayContent({ stay }: { stay: Stay }) {
   const endMeta = getDeadlineMeta(stay.plannedCheckOutDate, 'Akhir masa sewa');
   const endHelper = formatEndHelper(stay.plannedCheckOutDate);
   const nearEnd = endDays !== null && endDays >= 0 && endDays <= 10;
+  const meterRecordedThisMonth = Boolean(electricityReadingThisMonth);
+  const meterScheduleVariant = meterReadingsQuery.isError
+    ? 'secondary'
+    : meterRecordedThisMonth
+      ? 'success'
+      : nearEnd
+        ? 'warning'
+        : 'info';
   const hasOpenInvoice = openInvoices.length > 0;
   const hasPayableOpenInvoice = payableOpenInvoices.length > 0;
   const hasZeroAmountOpenInvoice = zeroAmountOpenInvoices.length > 0;
@@ -463,6 +531,40 @@ function ActiveStayContent({ stay }: { stay: Stay }) {
               <small>{Number(stay.depositPaidAmountRupiah ?? 0) > 0 ? 'Titipan' : 'Belum disetor'}</small>
             </div>
           </div>
+
+          <Alert variant={meterScheduleVariant} className="tenant-short-alert mt-3 mb-0">
+            <div className="d-flex flex-wrap align-items-center justify-content-between gap-2">
+              <div>
+                <div className="fw-semibold">
+                  {meterReadingsQuery.isLoading
+                    ? 'Memeriksa status meter bulan ini'
+                    : meterReadingsQuery.isError
+                      ? 'Status meter belum bisa dimuat'
+                      : meterRecordedThisMonth
+                        ? 'Meter bulan ini sudah dicatat'
+                        : 'Meter bulan ini belum dicatat'}
+                </div>
+                <div className="small">
+                  Jendela catat: <strong>{formatDate(meterWindow.startKey)}</strong> sampai{' '}
+                  <strong>{formatDate(meterWindow.endKey)}</strong>.
+                  {nearEnd && !meterRecordedThisMonth ? ' Prioritas H-10 aktif, sebaiknya catat sekarang.' : null}
+                </div>
+                {electricityReadingThisMonth ? (
+                  <div className="small text-muted">
+                    Terakhir listrik: {String(electricityReadingThisMonth.readingValue)} kWh pada {formatDate(electricityReadingThisMonth.readingAt)}
+                    {waterReadingThisMonth ? ` · air ${String(waterReadingThisMonth.readingValue)} m³` : ''}
+                  </div>
+                ) : null}
+              </div>
+              <Button
+                variant={meterRecordedThisMonth ? 'outline-success' : nearEnd ? 'warning' : 'outline-primary'}
+                size="sm"
+                onClick={() => setShowMeter(true)}
+              >
+                {meterRecordedThisMonth ? 'Catat Ulang Meter' : 'Catat Meter'}
+              </Button>
+            </div>
+          </Alert>
 
           {/* ── Detail kamar — accordion (UI/UX selaras menu "Panduan & Aturan") ── */}
           <Accordion flush className="tenant-dossier-accordion">
@@ -723,18 +825,39 @@ function ActiveStayContent({ stay }: { stay: Stay }) {
           {/* PUB-LAYANAN-TAMBAHAN: layanan + tarif yang dikelola owner. */}
           {servicesQuery.data && servicesQuery.data.length > 0 ? (
             <div className="tenant-service-tariff-list mb-3">
-              {servicesQuery.data.map((svc) => (
-                <div key={svc.id} className="d-flex justify-content-between align-items-start gap-2 py-2 border-bottom">
-                  <div>
-                    <strong>{svc.name}</strong>
-                    {svc.description ? <div className="small text-muted">{svc.description}</div> : null}
+              {servicesQuery.data.map((svc) => {
+                const alreadyMinat = pendingServiceIds.has(svc.id);
+                return (
+                  <div key={svc.id} className="d-flex justify-content-between align-items-center gap-2 py-2 border-bottom">
+                    <div>
+                      <strong>{svc.name}</strong>
+                      {svc.description ? <div className="small text-muted">{svc.description}</div> : null}
+                    </div>
+                    <div className="d-flex align-items-center gap-2 text-nowrap">
+                      <div className="text-end fw-semibold">
+                        <CurrencyDisplay amount={svc.priceRupiah} />
+                        {svc.unit ? <div className="small text-muted fw-normal">{svc.unit}</div> : null}
+                      </div>
+                      {alreadyMinat ? (
+                        <span className="badge bg-success-subtle text-success border border-success-subtle">Sudah diminati</span>
+                      ) : (
+                        <Button
+                          variant="outline-success"
+                          size="sm"
+                          disabled={interestMutation.isPending}
+                          onClick={() => {
+                            if (window.confirm(`Tertarik dengan "${svc.name}" (Rp ${svc.priceRupiah.toLocaleString('id-ID')}${svc.unit ? ` ${svc.unit}` : ''})? Pengelola akan menghubungi Anda.`)) {
+                              interestMutation.mutate(svc.id);
+                            }
+                          }}
+                        >
+                          Saya Minat
+                        </Button>
+                      )}
+                    </div>
                   </div>
-                  <div className="text-end fw-semibold text-nowrap">
-                    <CurrencyDisplay amount={svc.priceRupiah} />
-                    {svc.unit ? <div className="small text-muted fw-normal">{svc.unit}</div> : null}
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           ) : null}
           <div className="tenant-service-interest-grid">
@@ -773,6 +896,7 @@ function ActiveStayContent({ stay }: { stay: Stay }) {
       }} stay={stay} />
       <MeterCycleModal show={showMeter} onHide={() => setShowMeter(false)} stay={stay} onDone={() => {
         queryClient.invalidateQueries({ queryKey: ['portal-invoices'] });
+        queryClient.invalidateQueries({ queryKey: ['portal-meter-readings', stay.roomId] });
         queryClient.invalidateQueries({ queryKey: ['portal-stay'] });
       }} />
     </>

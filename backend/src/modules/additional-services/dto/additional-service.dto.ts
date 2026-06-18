@@ -17,3 +17,19 @@ export class AdditionalServicesQueryDto {
   @IsOptional() @Type(() => Number) @IsInt() limit?: number;
   @IsOptional() @IsString() isActive?: string;
 }
+
+// PUB-LAYANAN-MINAT: tenant menyatakan minat + admin proses.
+export class CreateServiceInterestDto {
+  @IsOptional() @IsString() @MaxLength(280) note?: string;
+}
+
+export class UpdateServiceInterestDto {
+  @IsString() status!: string; // PENDING | CONTACTED | DONE | CANCELLED
+  @IsOptional() @IsString() @MaxLength(280) adminNote?: string;
+}
+
+export class ServiceInterestsQueryDto {
+  @IsOptional() @Type(() => Number) @IsInt() page?: number;
+  @IsOptional() @Type(() => Number) @IsInt() limit?: number;
+  @IsOptional() @IsString() status?: string;
+}

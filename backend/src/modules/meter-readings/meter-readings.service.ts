@@ -7,7 +7,7 @@ import { MeterReadingsQueryDto } from './dto/meter-readings-query.dto';
 import { RecordMeterCycleDto } from './dto/record-meter-cycle.dto';
 import { AuditLogService } from '../../audit-log/audit-log.service';
 import { CurrentUserPayload } from '../../common/interfaces/current-user.interface';
-import { UserRole, UtilityType } from '../../common/enums/app.enums';
+import { StayStatus, UserRole, UtilityType } from '../../common/enums/app.enums';
 import { endOfDay, parseJakartaDateOnly } from '../../common/utils/date.util';
 import { InvoicesService } from '../invoices/invoices.service';
 import { SettingsService } from '../settings/settings.service';
@@ -91,11 +91,30 @@ export class MeterReadingsService {
     }
   }
 
-  async findAll(query: MeterReadingsQueryDto) {
+  async findAll(query: MeterReadingsQueryDto, actor?: CurrentUserPayload) {
     const { page, limit, skip, take } = buildPagination(query.page, query.limit);
+    let tenantRoomId: number | undefined;
+
+    if (actor?.role === UserRole.TENANT) {
+      if (!actor.tenantId) {
+        throw new ForbiddenException('Akun tenant belum terhubung ke data tenant');
+      }
+      const activeStay = await this.prisma.stay.findFirst({
+        where: { tenantId: actor.tenantId, status: StayStatus.ACTIVE },
+        select: { roomId: true },
+      });
+      if (!activeStay) {
+        throw new NotFoundException('Stay aktif tidak ditemukan');
+      }
+      tenantRoomId = activeStay.roomId;
+      if (query.roomId && Number(query.roomId) !== tenantRoomId) {
+        throw new ForbiddenException('Tenant hanya dapat melihat meter kamar aktifnya');
+      }
+    }
+
     const where: Prisma.MeterReadingWhereInput = {
       AND: [
-        query.roomId ? { roomId: Number(query.roomId) } : undefined,
+        tenantRoomId ? { roomId: tenantRoomId } : query.roomId ? { roomId: Number(query.roomId) } : undefined,
         query.utilityType ? { utilityType: query.utilityType } : undefined,
         query.from || query.to
           ? {
