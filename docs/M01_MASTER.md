@@ -85,7 +85,7 @@ Mutex `running`; urutan: ①bookingExpiry ②contractEndReminders ③DP-forfeit 
 #### 6. INVARIAN SISTEM (tak boleh dilanggar)
 1. Uang masuk = otomatisasi BERHENTI. 2. Stay promoted tak pernah dibatalkan job; CANCELLED berjurnal wajib reversal blocking. 3. Kamar tak AVAILABLE tanpa tiket inspeksi ditutup (staf boleh tutup, guard keselamatan tetap). 4. Tiap rupiah = 1 jurnal POSTED + AuditLog; deposit=liability; no-partial. 5. Periode renewal menyambung tanpa gap/overlap; tenant lama prioritas s/d hari-H. 6. Data sensitif (KTP) minimal+terproteksi+dihapus saat keluar. 7. Reward/benefit selalu berjejak akuntansi.
 
-#### 7. MATRIX TEORI (sinkron PDF `KOST48_Analisis_Bisnis_Total.pdf` + `buku.md`)
+#### 7. MATRIX TEORI (sinkron PDF `reference/KOST48_Analisis_Bisnis_Total.pdf` + `reference/buku.md` — file referensi BESAR, JANGAN baca penuh)
 > Catatan penting: teori bisnis dipakai dalam dua lapis. Lapis 1 = kerangka analisis owner/AI
 > untuk membaca bisnis. Lapis 2 = fitur sistem yang benar-benar perlu dibangun sekarang. Jadi
 > Porter, BMC, Ansoff, BCG, STEEPLE, STP, 7Ps, dan SERVQUAL **dipakai sebagai analisis** walau
@@ -112,7 +112,7 @@ Mutex `running`; urutan: ①bookingExpiry ②contractEndReminders ③DP-forfeit 
 
 #### 8. GAP ANALISA BISNIS -> FITUR APP (disetujui 2026-06-16)
 
-Analisa bisnis dari PDF dan `buku.md` tidak semuanya harus menjadi modul mandiri. Yang wajib diprodukkan
+Analisa bisnis dari PDF dan `reference/buku.md` tidak semuanya harus menjadi modul mandiri. Yang wajib diprodukkan
 ke aplikasi adalah bagian yang langsung membantu owner menjual kamar, memahami kanal akuisisi, menjaga
 retensi, dan mengambil keputusan operasional.
 

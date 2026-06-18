@@ -1,4 +1,4 @@
-# KOST48 V5 — Checklist Eksekusi Aktif + Changelog Ringkas
+# KOST48 V5 — Checklist Eksekusi Aktif (changelog → M11)
 
 > **Pintu masuk AI eksekutor.** Versi: **2026-06-18**. Arsip dokumen root lama: `docs/archieve/2026-06-16_root_docs_pre_M/`.
 
@@ -7,12 +7,12 @@
 1. **Orientasi:** mulai dari bagian [ANTRIAN EKSEKUSI AKTIF](#antrian-eksekusi-aktif-untuk-ai--kerjakan-dari-sini) di file ini.
 2. **Spesifikasi domain:** buka M-file yang ditunjuk fase/task (`M01`-`M09`) dan audit MD pendukung bila disebut di tabel rujukan.
 3. **Anchor kode:** grep **nama simbol/fungsi** di `backend/src` / `frontend/src` — **JANGAN** edit baris dokumen secara buta.
-4. **1 task = 1 commit** (Bahasa Indonesia: `fix:`/`feat:`/`ui:`/`ops:`). Lalu centang `[x]` di sini + 1 baris di Bagian 2 Changelog.
+4. **1 task = 1 commit** (Bahasa Indonesia: `fix:`/`feat:`/`ui:`/`ops:`). Lalu centang `[x]` di sini + 1 baris di `docs/M11_CHANGELOG.md` (paling atas).
 5. **Gate build:** `cd backend; npx tsc --noEmit` · `cd frontend; npm run build`. Task **uang** WAJIB juga `cd backend; node --test "test/**/*.test.js"` + gate di `docs/M04_KEUANGAN.md`.
 6. **DB dev:** postgres **5433** `kost48_v3_pro` · reseed: `node scripts/seed-dev-reset.js` lalu `node scripts/seed-dev-via-api.js`.
 7. **Larangan:** no npm dep baru · no `schema.prisma` tanpa approval owner (🧬) · no `git push` · no sentuh file milik AI lain (`git status` dulu).
 
-### Status ringkas (2026-06-18)
+### Status ringkas (2026-06-19)
 
 | Blok | Selesai | Terbuka | Catatan |
 |------|---------|---------|---------|
@@ -21,6 +21,7 @@
 | Fase C — Owner/Admin | **selesai** | — | Mode-aware UI, route split/guard, status cards, inventaris shell SEMUA selesai (2026-06-19) |
 | Fase D — Staff & Gudang | **selesai** | — | Meter status, theme, WiFi order, tip flow, gudang FK, role scope SEMUA selesai (2026-06-19) |
 | Fase E — Polish & Teknis | sebagian | TEN-GAMIF, refactor, test lanjutan | MKT-5 selesai fungsional; backlog teknis diserap ke M10 |
+| Fase F — UI/UX Sweep | **baru** | UX-404, UX-TOAST, UX-A11Y, UX-COLOR, UX-LOGOUT | Audit UI/UX 2026-06-19: 13 temuan, 6 prioritas perbaikan |
 
 ### Urutan kerja (jangan loncat kecuali blocked) — detail di [ANTRIAN](#antrian-eksekusi-aktif-untuk-ai--kerjakan-dari-sini)
 
@@ -29,6 +30,7 @@
 3. **Fase C — Workspace Owner/Admin**: mode-aware UI, route split, inventaris shell.
 4. **Fase D — Operasional Staff & Gudang**: gudang dinamis, staff meter, WiFi/tip, polish staff.
 5. **Fase E — Polish & Teknis**: gamifikasi kebersihan + backlog teknis non-blocker.
+6. **Fase F — UI/UX Sweep**: perbaikan aksesibilitas, feedback toast, route 404, kontras, polish (13 temuan audit 2026-06-19).
 - ✅ Selesai referensi: METER M-5, AUDIT-OWNER, CSS+SWEEP, MKT-4, MKT-5, OWN-STRUKTUR-TOGGLE, AUDIT-KEUANGAN-ULTRA (lihat ANTRIAN → "Selesai Referensi").
 
 ### Legenda marker task
@@ -73,7 +75,7 @@ Detail SI: `docs/archieve/2026-06-16_si_notes/_PLAN_SI_SEWA_RIWAYAT.md` · Meter
 2. **ANCHOR = PETUNJUK AWAL, bukan kebenaran.** Konfirmasi via **grep nama fungsi/simbol** di kode, baru edit.
 3. Kerjakan **1 task = 1 commit**. Backend: `cd backend; npx tsc --noEmit` = 0. Frontend: `cd frontend; npm run build`.
 3b. **Task KEUANGAN** WAJIB gate `docs/M04_KEUANGAN.md`: `node --test "test/**/*.test.js"` hijau + invarian TB. `tsc 0` saja tidak cukup.
-4. Commit Bahasa Indonesia. Centang `[x]` + 1 baris Changelog Bagian 2.
+4. Commit Bahasa Indonesia. Centang `[x]` + 1 baris di `docs/M11_CHANGELOG.md`.
 5. **Jalan otonom** untuk task tanpa 🧬/🧑. **STOP & lapor** bila: simbol tidak ketemu / error 2× / butuh `npm install` / schema belum approve / langkah owner / konflik `git status`.
 
 #### 🚫 LARANGAN MUTLAK
@@ -274,7 +276,9 @@ Detail SI: `docs/archieve/2026-06-16_si_notes/_PLAN_SI_SEWA_RIWAYAT.md` · Meter
 | Publik, marketing, SEO, layanan | `docs/M07_PUBLIK_GROWTH.md` | Public UI, katalog, layanan tambahan, foto marketing |
 | Deploy & go-live produksi | `docs/M08_DEPLOY_GO_LIVE.md` | F1-12, env produksi, smoke test, password owner |
 | Audit historis & temuan forensik | `docs/M09_AUDIT.md` | Rujukan audit lama, risiko, dan keputusan pasca-audit |
-| Checklist aktif & changelog | `docs/M10_CHECKLIST_CHANGELOG.md` | Source of truth eksekusi berikutnya |
+| Checklist aktif & ANTRIAN | `docs/M10_CHECKLIST_CHANGELOG.md` | Source of truth eksekusi berikutnya |
+| Changelog arsip | `docs/M11_CHANGELOG.md` | Riwayat ringkas; tulis entri baru di paling atas |
+| Peta navigasi kode (AI) | `docs/CODEMAP.md` | Modul→path→tanggung jawab + index model + anchor flow |
 | Audit post-fix terbaru | `docs/AUDIT_POST_FIX.md` | Verifikasi DEEP-01..05 dan catatan hardening |
 
 ### Mode AI Lemah — Aturan Eksekusi
@@ -284,7 +288,7 @@ Detail SI: `docs/archieve/2026-06-16_si_notes/_PLAN_SI_SEWA_RIWAYAT.md` · Meter
 3. Cari anchor kode dengan `rg` sesuai petunjuk fase, lalu cocokkan perilaku kode dengan MD rujukan.
 4. Jika task menyentuh uang, baca `docs/M04_KEUANGAN.md` dan jalankan gate uang. `tsc 0` saja tidak cukup.
 5. Jika task menyentuh schema/migration, berhenti sampai ada approval owner untuk schema additive.
-6. Setelah selesai, update checklist M10 + changelog ringkas; jangan membuat checklist baru di file lain.
+6. Setelah selesai, update checklist M10 + 1 baris di `docs/M11_CHANGELOG.md`; jangan membuat checklist baru di file lain.
 
 ### Prompt YOLO Siap Pakai
 
@@ -306,7 +310,7 @@ Aturan utama:
    - Frontend: cd frontend; npm run build
    - Task uang: cd backend; npm run test:unit atau node --test "test/**/*.test.js" sesuai package script
    - UI/layout: cek responsive/mobile bila memungkinkan
-9. Setelah lulus, update docs/M10_CHECKLIST_CHANGELOG.md: ubah status item, tulis catatan singkat, dan tambah changelog ringkas.
+9. Setelah lulus, update docs/M10_CHECKLIST_CHANGELOG.md (ubah status item) dan tambah 1 baris changelog di docs/M11_CHANGELOG.md.
 10. Jika gagal 2 kali di error yang sama, berhenti dan laporkan blocker dengan file/line/error konkret.
 
 Output akhir:
@@ -462,6 +466,677 @@ Output akhir:
 
 ---
 
+### Fase F — UI/UX Sweep (Audit 2026-06-19)
+
+**Tujuan:** perbaiki temuan audit UI/UX full — aksesibilitas, feedback, routing, kontras, polish.
+
+**Rujukan:** `docs/M07_PUBLIK_GROWTH.md` → Audit UI/UX Full 2026-06-19.
+
+**Anchor kode (grep):** `App.tsx` · `AppLayout.tsx` · `PasswordInput.tsx` · `SkeletonLoader.tsx` · `GlobalSearch.tsx` · `01-base.css`.
+
+**Gate:** `cd frontend && npm run build` harus PASS. Tidak ada npm install.
+
+---
+
+#### F1 — Critical: Route 404 (UX-404)
+
+**Target:** `frontend/src/App.tsx` + `frontend/src/pages/NotFoundPage.tsx` (BARU)  
+**Estimasi:** 30 menit · **Risk:** low
+
+**Langkah 1 — Buat file halaman 404:**
+Buat file BARU `frontend/src/pages/NotFoundPage.tsx` dengan isi:
+
+```tsx
+import { Link } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
+import { getDefaultRoute } from '../config/navigation';
+
+export default function NotFoundPage() {
+  const { user } = useAuth();
+  const homeLink = user ? getDefaultRoute(user.role) : '/rooms';
+
+  return (
+    <div className="min-vh-100 d-flex align-items-center justify-content-center p-4">
+      <div className="text-center" style={{ maxWidth: 480 }}>
+        <div className="display-1 fw-bold text-muted mb-3">404</div>
+        <h1 className="h4 mb-2">Halaman tidak ditemukan</h1>
+        <p className="text-muted mb-4">
+          Alamat yang kamu tuju tidak ada atau sudah dipindahkan.
+          Gunakan menu navigasi atau tombol di bawah untuk kembali.
+        </p>
+        <Link to={homeLink} className="btn btn-primary">
+          {user ? 'Kembali ke Dashboard' : 'Lihat Katalog Kamar'}
+        </Link>
+      </div>
+    </div>
+  );
+}
+```
+
+**Langkah 2 — Tambah import di App.tsx:**
+Cari baris import di `frontend/src/App.tsx`. Tambahkan setelah import terakhir (sebelum `type Role`):
+
+```tsx
+const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
+```
+
+> **Cara temukan spot:** buka `App.tsx`, cari teks `type Role = 'OWNER'`. Tambah import di atasnya.
+
+**Langkah 3 — Tambah wildcard route di App.tsx:**
+Buka `frontend/src/App.tsx`, cari baris:
+
+```tsx
+          </Route>
+        </Route>
+        </Routes>
+```
+
+**SEARCH/REPLACE tepat:**
+```
+          </Route>
+        </Route>
+        </Routes>
+```
+
+**REPLACE dengan:**
+```
+          </Route>
+          <Route path="*" element={<NotFoundPage />} />
+        </Route>
+        </Routes>
+```
+
+**Verifikasi:** `cd frontend && npm run build` — harus PASS. Buka browser ke `/halaman-tidak-ada`, harus muncul halaman 404.
+
+---
+
+#### F2 — High: Toast Feedback Global (UX-TOAST)
+
+**Target:** `frontend/src/components/common/ToastProvider.tsx` (BARU) + `frontend/src/main.tsx` + `frontend/src/pages/resources/SimpleCrudPage.tsx`  
+**Estimasi:** 2 jam · **Risk:** low (tidak menyentuh backend/schema)
+
+**Langkah 1 — Buat ToastProvider:**
+Buat file BARU `frontend/src/components/common/ToastProvider.tsx`:
+
+```tsx
+import { createContext, useCallback, useContext, useState, type ReactNode } from 'react';
+
+type Toast = { id: number; message: string; variant: 'success' | 'danger' | 'warning' | 'info' };
+
+const ToastCtx = createContext<{ toast: (message: string, variant?: Toast['variant']) => void } | null>(null);
+
+let nextId = 1;
+
+export function ToastProvider({ children }: { children: ReactNode }) {
+  const [toasts, setToasts] = useState<Toast[]>([]);
+
+  const addToast = useCallback((message: string, variant: Toast['variant'] = 'success') => {
+    const id = nextId++;
+    setToasts((prev) => [...prev, { id, message, variant }]);
+    setTimeout(() => setToasts((prev) => prev.filter((t) => t.id !== id)), 3500);
+  }, []);
+
+  return (
+    <ToastCtx.Provider value={{ toast: addToast }}>
+      {children}
+      <div className="toast-container position-fixed bottom-0 end-0 p-3" style={{ zIndex: 9999 }}>
+        {toasts.map((t) => (
+          <div key={t.id} className={`toast show align-items-center text-bg-${t.variant} border-0`} role="alert">
+            <div className="d-flex">
+              <div className="toast-body">{t.message}</div>
+              <button type="button" className="btn-close btn-close-white me-2 m-auto" onClick={() => setToasts((prev) => prev.filter((x) => x.id !== t.id))} aria-label="Tutup" />
+            </div>
+          </div>
+        ))}
+      </div>
+    </ToastCtx.Provider>
+  );
+}
+
+export function useToast() {
+  const ctx = useContext(ToastCtx);
+  if (!ctx) throw new Error('useToast must be used within ToastProvider');
+  return ctx;
+}
+```
+
+**Langkah 2 — Wrap di main.tsx:**
+Buka `frontend/src/main.tsx`. Tambah import:
+
+```tsx
+import { ToastProvider } from './components/common/ToastProvider';
+```
+
+Cari teks:
+
+```tsx
+        <AuthProvider>
+          <App />
+```
+
+**SEARCH/REPLACE tepat:**
+```
+        <AuthProvider>
+          <App />
+```
+
+**REPLACE dengan:**
+```
+        <AuthProvider>
+          <ToastProvider>
+            <App />
+          </ToastProvider>
+```
+
+**Langkah 3 — Panggil toast di SimpleCrudPage.tsx:**
+Buka `frontend/src/pages/resources/SimpleCrudPage.tsx`. Tambah import di atas:
+
+```tsx
+import { useToast } from '../../components/common/ToastProvider';
+```
+
+Cari `const queryClient = useQueryClient();` (sekitar line 60). Tambah di bawahnya:
+
+```tsx
+  const toast = useToast();
+```
+
+Lalu cari 3 lokasi mutation `onSuccess` — biasanya ada di `useMutation` untuk create, update, delete. Di tiap `onSuccess`, tambah `toast.toast('Data berhasil disimpan.')` atau pesan sesuai. Contoh:
+
+**SEARCH untuk create mutation onSuccess (cari teks `createResource`):**
+Cari blok `onSuccess: () => {` di dalam mutation create. Tambahkan `toast.toast('Data berhasil ditambah.');` di dalamnya.
+
+**SEARCH untuk update mutation onSuccess:**
+Cari blok `onSuccess: () => {` di dalam mutation update. Tambahkan `toast.toast('Data berhasil diubah.');`.
+
+**SEARCH untuk delete mutation onSuccess:**
+Cari blok `onSuccess: () => {` di dalam mutation delete. Tambahkan `toast.toast('Data berhasil dihapus.', 'warning');`.
+
+**Verifikasi:** `cd frontend && npm run build`. Buka aplikasi, tambah/edit/hapus data → toast muncul di kanan bawah.
+
+---
+
+#### F3 — Medium: Aksesibilitas
+
+##### UX-A11Y-PASSWORD: Ganti emoji password toggle dengan SVG icon
+
+**Target:** `frontend/src/components/common/PasswordInput.tsx`  
+**Estimasi:** 20 menit · **Risk:** low
+
+**SEARCH (seluruh isi file — ganti total):**
+```
+import { useState } from 'react';
+import { Button, Form, InputGroup } from 'react-bootstrap';
+import type { FormControlProps } from 'react-bootstrap';
+
+type PasswordInputProps = Omit<FormControlProps, 'type'>;
+
+export default function PasswordInput(props: PasswordInputProps) {
+  const [show, setShow] = useState(false);
+
+  return (
+    <InputGroup>
+      <Form.Control
+        {...props}
+        type={show ? 'text' : 'password'}
+      />
+      <Button
+        variant="outline-secondary"
+        onClick={() => setShow((v) => !v)}
+        tabIndex={-1}
+        size="sm"
+        className="px-2"
+        style={{ borderTopLeftRadius: 0, borderBottomLeftRadius: 0, minWidth: 40 }}
+        title={show ? 'Sembunyikan password' : 'Tampilkan password'}
+      >
+        {show ? '🙈' : '👁'}
+      </Button>
+    </InputGroup>
+  );
+}
+```
+
+**REPLACE dengan:**
+```
+import { useState } from 'react';
+import { Button, Form, InputGroup } from 'react-bootstrap';
+import type { FormControlProps } from 'react-bootstrap';
+
+type PasswordInputProps = Omit<FormControlProps, 'type'>;
+
+/** SVG icon mata terbuka — digunakan saat password terlihat */
+function EyeOpenIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+      <circle cx="12" cy="12" r="3" />
+    </svg>
+  );
+}
+
+/** SVG icon mata tertutup — digunakan saat password disembunyikan */
+function EyeClosedIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94" />
+      <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19" />
+      <line x1="1" y1="1" x2="23" y2="23" />
+      <path d="M14.12 14.12a3 3 0 1 1-4.24-4.24" />
+    </svg>
+  );
+}
+
+export default function PasswordInput(props: PasswordInputProps) {
+  const [show, setShow] = useState(false);
+
+  return (
+    <InputGroup>
+      <Form.Control
+        {...props}
+        type={show ? 'text' : 'password'}
+      />
+      <Button
+        variant="outline-secondary"
+        onClick={() => setShow((v) => !v)}
+        size="sm"
+        className="px-2"
+        style={{ borderTopLeftRadius: 0, borderBottomLeftRadius: 0, minWidth: 40 }}
+        aria-label={show ? 'Sembunyikan password' : 'Tampilkan password'}
+        title={show ? 'Sembunyikan password' : 'Tampilkan password'}
+      >
+        {show ? <EyeClosedIcon /> : <EyeOpenIcon />}
+      </Button>
+    </InputGroup>
+  );
+}
+```
+
+**Yang berubah:** (1) `tabIndex={-1}` dihapus, (2) emoji diganti SVG icon, (3) tambah `aria-label`.
+
+**Verifikasi:** `cd frontend && npm run build`. Buka halaman login, test toggle password — icon harus berganti mata terbuka/tertutup, bisa di-tab keyboard.
+
+---
+
+##### UX-A11Y-SKIPLINK: Tambah skip-to-content link
+
+**Target:** `frontend/src/components/layout/AppLayout.tsx`  
+**Estimasi:** 10 menit · **Risk:** low
+
+**Langkah 1 — Tambah CSS:**
+Buka `frontend/src/styles/01-base.css`, tambahkan di akhir file:
+
+```css
+/* Skip-to-content link — visually hidden, muncul saat Tab pertama */
+.skip-to-content {
+  position: absolute;
+  top: -100px;
+  left: 16px;
+  z-index: 9999;
+  padding: 10px 20px;
+  background: var(--primary);
+  color: #fff;
+  border-radius: 8px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: top 0.2s ease;
+}
+.skip-to-content:focus {
+  top: 16px;
+}
+```
+
+**Langkah 2 — Tambah link di AppLayout.tsx:**
+Buka `frontend/src/components/layout/AppLayout.tsx`. Cari baris:
+
+```tsx
+    <div className="app-shell">
+```
+
+(Garis ~359, tepat setelah block `if (isTenant)` dan sebelum return utama admin/owner.)
+
+**SEARCH:**
+```
+    <div className="app-shell">
+```
+
+**REPLACE dengan:**
+```
+    <a href="#main-content" className="skip-to-content">Loncat ke konten utama</a>
+    <div className="app-shell">
+```
+
+**Langkah 3 — Tambah id di elemen main:**
+Cari baris:
+
+```tsx
+        <main className="app-main">
+```
+
+(Garis ~397.)
+
+**SEARCH:**
+```
+        <main className="app-main">
+```
+
+**REPLACE dengan:**
+```
+        <main className="app-main" id="main-content">
+```
+
+**Verifikasi:** `cd frontend && npm run build`. Buka halaman, tekan Tab — link "Loncat ke konten utama" muncul di kiri atas. Tekan Enter → fokus pindah ke konten utama.
+
+---
+
+##### UX-COLOR: Gelapkan --text-muted untuk WCAG AA
+
+**Target:** `frontend/src/styles/01-base.css` line 13 + `frontend/src/styles/04-operations.css` line 18  
+**Estimasi:** 5 menit · **Risk:** low (hanya ubah warna, tidak rusak layout)
+
+**Langkah 1 — `01-base.css`:**
+Buka `frontend/src/styles/01-base.css`. Cari line yang tepat:
+
+```
+  --text-muted: #64748b;
+```
+
+(Garis 13.)
+
+**SEARCH:** `--text-muted: #64748b;`  
+**REPLACE:** `--text-muted: #475569;`
+
+> Hanya perubahan satu kata (64748b → 475569). Contrast ratio naik dari 4.55:1 ke 5.5:1 — lulus WCAG AA small text.
+
+**Langkah 2 — `04-operations.css`:**
+Buka `frontend/src/styles/04-operations.css`. Cari line yang tepat:
+
+```
+  --text-muted: #64748b;
+```
+
+(Garis 18.)
+
+**SEARCH:** `--text-muted: #64748b;`  
+**REPLACE:** `--text-muted: #475569;`
+
+**Verifikasi:** `cd frontend && npm run build`. Lihat halaman — teks muted sedikit lebih gelap, tetap terbaca.
+
+---
+
+##### UX-LOGOUT: Tambah konfirmasi sebelum logout
+
+**Target:** `frontend/src/components/layout/AppLayout.tsx`  
+**Estimasi:** 15 menit · **Risk:** low
+
+**Langkah 1 — Buat helper di atas komponen AppLayout:**
+Buka `frontend/src/components/layout/AppLayout.tsx`. Cari baris:
+
+```tsx
+export default function AppLayout({ children }: { children?: ReactNode }) {
+```
+
+Tambahkan DI ATAS baris tersebut:
+
+```tsx
+function handleLogout(logoutFn: () => void) {
+  if (window.confirm('Yakin ingin keluar?')) {
+    logoutFn();
+  }
+}
+```
+
+**Langkah 2 — Ganti onClick di 2 tombol logout:**
+
+**Tombol 1 — Staff logout (line ~325):**
+**SEARCH:**
+```
+              <Button variant="outline-danger" size="sm" onClick={logout}>Logout</Button>
+            </div>
+          </section>
+
+          <StaffTopWorkspaceNav />
+```
+
+**REPLACE dengan:**
+```
+              <Button variant="outline-danger" size="sm" onClick={() => handleLogout(logout)}>Logout</Button>
+            </div>
+          </section>
+
+          <StaffTopWorkspaceNav />
+```
+
+**Tombol 2 — Admin/Owner logout (line ~456):**
+**SEARCH:**
+```
+                  <Button variant="outline-danger" size="sm" onClick={logout}>Logout</Button>
+```
+
+**REPLACE dengan:**
+```
+                  <Button variant="outline-danger" size="sm" onClick={() => handleLogout(logout)}>Logout</Button>
+```
+
+> **Catatan:** Tenant logout (line 348 — `onLogout={logout}` di `TenantWorkspaceTabs`) menggunakan handler internal tenant. JANGAN disentuh — tenant logout flow terpisah.
+
+**Verifikasi:** `cd frontend && npm run build`. Klik Logout → muncul dialog "Yakin ingin keluar?" → OK baru logout, Cancel tetap di halaman.
+
+---
+
+#### F4 — Low: Polish
+
+##### UX-SEARCH-TENANT: Buka GlobalSearch untuk tenant
+
+**Target:** `frontend/src/components/layout/GlobalSearch.tsx`  
+**Estimasi:** 30 menit · **Risk:** low
+
+**Masalah:** `GlobalSearch` langsung `return null` bila `role === 'TENANT'`.
+
+**Langkah 1 — Tambah endpoint search tenant:**
+Buka `frontend/src/components/layout/GlobalSearch.tsx`. Cari function `canSearchTenants`, `canSearchInvoices`, `canSearchRooms`.  
+
+**SEARCH blok (sekitar line 47-60):**
+```
+function canSearchTenants(role?: string) {
+  return role === 'OWNER' || role === 'ADMIN';
+}
+
+function canSearchInvoices(role?: string) {
+  return role === 'OWNER' || role === 'ADMIN';
+}
+
+function canSearchRooms(role?: string) {
+  return role === 'OWNER' || role === 'ADMIN' || role === 'STAFF';
+}
+```
+
+**REPLACE dengan:**
+```
+function canSearchTenants(role?: string) {
+  return role === 'OWNER' || role === 'ADMIN';
+}
+
+function canSearchInvoices(role?: string) {
+  return role === 'OWNER' || role === 'ADMIN' || role === 'TENANT';
+}
+
+function canSearchRooms(role?: string) {
+  if (role === 'TENANT') return false;
+  return role === 'OWNER' || role === 'ADMIN' || role === 'STAFF';
+}
+```
+
+**Langkah 2 — Sesuaikan query tenant untuk tenant role:**
+Cari blok fungsi `queryFn` di dalam `useQuery` — sekitar line 68-100. Di bagian `canSearchInvoices`, ganti endpoint untuk tenant.
+
+**SEARCH (temukan bagian ini di dalam array tasks):**
+```
+      if (canSearchInvoices(role)) {
+        tasks.push(
+          listResource<Invoice>('/invoices', { search: debouncedKeyword, limit: 5 })
+```
+
+**REPLACE dengan:**
+```
+      if (canSearchInvoices(role)) {
+        const invoicePath = role === 'TENANT' ? '/me/invoices' : '/invoices';
+        tasks.push(
+          listResource<Invoice>(invoicePath, { search: debouncedKeyword, limit: 5 })
+```
+
+**Langkah 3 — Hapus early return untuk tenant:**
+Cari baris:
+
+```tsx
+  if (role === 'TENANT') return null;
+```
+
+(Line ~88.)
+
+**SEARCH:**
+```
+  if (role === 'TENANT') return null;
+```
+
+**REPLACE dengan:**
+```
+  // Tenant sekarang bisa search invoice + tiket mereka sendiri (UX-SEARCH-TENANT)
+```
+
+(Jangan return null — biarkan search tetap tampil.)
+
+**Langkah 4 — Update placeholder:**
+Cari function `getPlaceholder`. Di case `default`:
+
+**SEARCH:**
+```
+    default:
+      return 'Cari data...';
+```
+
+**REPLACE dengan:**
+```
+    case 'TENANT':
+      return 'Cari invoice atau tiket...';
+    default:
+      return 'Cari data...';
+```
+
+**Verifikasi:** `cd frontend && npm run build`. Login sebagai tenant, search bar muncul di portal. Cari invoice → hasil dari invoice tenant sendiri.
+
+---
+
+##### UX-SKELETON: Sesuaikan StatCardSkeleton agar tidak layout shift
+
+**Target:** `frontend/src/components/common/SkeletonLoader.tsx`  
+**Estimasi:** 15 menit · **Risk:** low
+
+**Masalah:** `StatCardSkeleton` menggunakan width fixed (96px, 120px, 72%) yang tidak match card asli.
+
+**SEARCH (seluruh fungsi StatCardSkeleton):**
+```
+export function StatCardSkeleton() {
+  return (
+    <div className="card stat-card border-0">
+      <div className="card-body">
+        <div className="stat-card-header">
+          <div style={{ flex: 1 }}>
+            <SkeletonBlock width={96} height={12} className="mb-3" />
+          </div>
+          <SkeletonBlock width={44} height={44} />
+        </div>
+        <SkeletonBlock width={120} height={34} className="mb-2" />
+        <SkeletonBlock width="72%" height={14} />
+      </div>
+    </div>
+  );
+}
+```
+
+**REPLACE dengan:**
+```
+export function StatCardSkeleton() {
+  return (
+    <div className="card stat-card border-0">
+      <div className="card-body">
+        <div className="stat-card-header">
+          <SkeletonBlock width="100%" height={14} />
+          <SkeletonBlock width={44} height={44} />
+        </div>
+        <SkeletonBlock width="100%" height={36} className="mb-2" />
+        <SkeletonBlock width="100%" height={14} />
+      </div>
+    </div>
+  );
+}
+```
+
+> Perubahan: semua width jadi `100%` mengikuti container `.stat-card` yang sudah punya dimensi dari grid — tidak lagi hardcoded.
+
+**Verifikasi:** `cd frontend && npm run build`. Buka dashboard — skeleton card lebar sama dengan card asli, tidak ada layout shift.
+
+---
+
+##### UX-OVERSCROLL: Kembalikan pull-to-refresh di mobile
+
+**Target:** `frontend/src/styles/01-base.css` line 59  
+**Estimasi:** 2 menit · **Risk:** low
+
+**SEARCH:**
+```
+  overscroll-behavior-y: none;
+```
+
+(Garis 59.)
+
+**REPLACE dengan:**
+```
+  /* UX-OVERSCROLL: pull-to-refresh dikembalikan untuk mobile */
+```
+
+> Hapus baris `overscroll-behavior-y: none;` — ganti dengan komentar.
+
+**Verifikasi:** `cd frontend && npm run build`. Buka di mobile browser — pull-to-refresh berfungsi kembali.
+
+---
+
+##### UX-LOGIN-FORMAT: Validasi format input di LoginPage
+
+**Target:** `frontend/src/pages/auth/LoginPage.tsx`  
+**Estimasi:** 20 menit · **Risk:** low
+
+**Masalah:** Error message generik — user tidak tahu apakah format input atau password yang salah.
+
+**SEARCH (blok validasi di handleSubmit, sekitar line 56-59):**
+```
+    if (!identifier.trim()) nextErrors.identifier = mode === 'TENANT' ? 'Masukkan email atau nomor HP yang terdaftar.' : 'Masukkan email admin/staff.';
+    if (!password.trim()) nextErrors.password = 'Masukkan password.';
+```
+
+**REPLACE dengan:**
+```
+    if (!identifier.trim()) {
+      nextErrors.identifier = mode === 'TENANT' ? 'Masukkan email atau nomor HP yang terdaftar.' : 'Masukkan email admin/staff.';
+    } else if (mode === 'TENANT') {
+      // Deteksi format: jika mengandung @ → email; jika diawali 0 dan 10-13 digit → HP
+      const val = identifier.trim();
+      const isEmail = val.includes('@');
+      const isPhone = /^0\d{9,12}$/.test(val.replace(/[-\s]/g, ''));
+      if (!isEmail && !isPhone) {
+        nextErrors.identifier = 'Format tidak dikenal. Masukkan email (contoh: nama@email.com) atau nomor HP (contoh: 08123456789).';
+      }
+    }
+    if (!password.trim()) nextErrors.password = 'Masukkan password.';
+```
+
+**Verifikasi:** `cd frontend && npm run build`. Di login page tab Penghuni, ketik "abc" → error "Format tidak dikenal". Ketik "test@email.com" atau "08123456789" → tidak error format.
+
+---
+
+**Gate akhir Fase F:** `cd frontend && npm run build` PASS. Semua 10 task `[x]` dicentang setelah diverifikasi.
+
+---
+
 ### Catatan Sinkron Audit 2026-06-18
 
 - Audit eksternal sementara sudah diserap ke M10 agar tidak menjadi rujukan ganda.
@@ -493,573 +1168,8 @@ Output akhir:
 
 <!-- KOST48_DOCS_SYNC_20260616_CHECKLIST_AI_ANTARIAN -->
 
+---
 
-## Bagian 2 - `docs/CHANGELOG.md`
+## Changelog
 
-## Changelog Ringkas
-
-> Dipadatkan dari `docs/CHANGELOG.md`: header tanggal dipertahankan, tiap entry hanya menyimpan 1-2 poin outcome. Detail verbose tetap ada di source lama.
-
-### 2026-06-19 — ui(Fase C polish): toggle segmented + divider topbar + breadcrumb root mode + bersih repo
-- **OWN-TOGGLE-CSS:** `.owner-view-toggle` jadi segmented control (radius 12px, active putih+shadow, transisi 0.2s). **OWN-TOGGLE-LAYOUT:** `.owner-view-toggle-wrap` center + `.topbar-divider` kiri-kanan. **OWN-BREADCRUMB-MODE:** root hard-label "Kokpit Owner"/"Area Admin" sesuai mode.
-- **Bersih repo:** hapus 14 file sampah `.reasonix/truncated-results/*` dari git + tambah `.reasonix/` ke `.gitignore`. Fase C kini benar-benar 100% (tanpa `[~]`).
-- Gate: FE build 110 chunk, PWA verify PASS.
-
-### 2026-06-19 — feat(FASE B-2): shell Inventaris terpadu /inventory + redirect route lama
-- `InventoryShellPage` (route `/inventory`, OWNER/ADMIN) + `SegmentedTabs` 3 tab path-based: Gudang/Barang Kamar/Mutasi (nested routes render `ConfiguredResourcePage` dengan `hideAreaMenu`).
-- Route lama `/inventory-items|/room-items|/inventory-movements` → `<Navigate>` ke tab shell; mutasi preservasi query (prefill ASSIGN/OUT/RETURN dari ResourceTable & SimpleCrudPage tetap jalan).
-- Tautan OWNER/ADMIN diarahkan ke shell: sidebar activePaths, DashboardAdmin chips, RoleWorkspaceTabs match, areaMenu SimpleCrudPage, routeTitles. Keputusan owner: 3 tab.
-- Gate: FE build 110 chunk, PWA verify PASS.
-
-### 2026-06-19 — feat(OWN-BACKEND-MODE): header X-Owner-View-Mode + audit interceptor
-- FE: `api/client.ts` interceptor kirim `X-Owner-View-Mode: owner|admin` saat key view-mode valid. Fix bentrok localStorage: density Kokpit Owner pindah ke key `kost48_owner_density` (sebelumnya tertimpa toggle owner/admin).
-- BE: `OwnerViewModeInterceptor` global (sesudah RequestId) melampirkan `request.ownerViewMode` untuk guard/audit + log saat OWNER POST/PATCH/PUT/DELETE dalam mode admin. Tanpa ubah perilaku endpoint.
-- Gate: backend `tsc --noEmit` 0 · FE build 109 chunk, PWA verify PASS.
-
-### 2026-06-19 — refactor(OWN-ROLE-TABS-MODE): mode eksplisit di RoleWorkspaceTabs, buang hack role
-- `RoleWorkspaceTabs` terima `role` asli + `ownerViewMode`; pilih tab set + base path internal (OWNER admin → `/admin-dashboard`, ADMIN → `/dashboard`). `AppLayout` tak lagi mengoper `role='ADMIN'` palsu / `adminDashboardPath`. aria-label ikut `isAdminView`.
-- Gate: FE build 109 chunk, PWA verify PASS.
-
-### 2026-06-19 — feat(OWN-STATUS-CARDS): strip status kokpit owner + regroup sidebar
-- **Status Kokpit:** 4 kartu clickable di `OwnerDashboardPage` — okupansi (kpi), tunggakan (overdue+outstanding count+Rp), meter belum dicatat (best-effort `computeMeterDue`: stay aktif vs reading bulan terpilih), kesiapan go-live (`fetchAccountingReadiness` score/ready). Query readiness+meter best-effort (tak memblok dashboard, fallback "—").
-- **Sidebar:** `ownerSections` diregroup jadi 2 grup besar "Operasional" vs "Keputusan Owner" (semua tautan dipertahankan).
-- Gate: FE build 109 chunk, PWA verify PASS.
-
-### 2026-06-19 — feat(OWN-ROUTE-SPLIT/GUARD): /admin-dashboard route nyata + mode owner ikut route
-- **Split:** route baru `/admin-dashboard` (OWNER-only) di `App.tsx` me-render `DashboardAdmin`; hack render-inline di `AppLayout` dihapus → selalu `<Outlet/>`. Sidebar pakai `ownerAdminSections` (dashboard → `/admin-dashboard`), `RoleWorkspaceTabs` terima `adminDashboardPath`, chip internal `DashboardAdmin` pakai `dashboardBase` dinamis.
-- **Guard:** kedua dashboard OWNER-only via `RequireRoles`; toggle owner kini `navigate()` antar route + `AppLayout` sinkronkan `ownerViewMode` dari pathname (URL langsung pun mode-aware). Title `/admin-dashboard` ditambah di `routeTitles`.
-- Gate: FE build 109 chunk, PWA verify PASS.
-
-### 2026-06-19 — ui(OWNER-VIEW mode-aware): sidebar/offcanvas/admin-action ikut mode + toggle mobile
-- **Fase C cluster (5 item):** `SidebarContent` terima prop `ownerViewMode` → title/subtitle/footer & flag admin ikut mode (OWN-SIDEBAR-CONTEXT); `Offcanvas.Title` dinamis "Kokpit Owner"/"Area Admin (Owner)" (OWN-OFFCANVAS-TITLE); tombol "Pengumuman" muncul saat OWNER mode-admin (OWN-ADMIN-ICON-ACTION).
-- **Mobile/transisi:** toggle Kokpit/Area Admin ditambah lebar-penuh di offcanvas + toggle topbar jadi desktop-only (OWN-TOGGLE-MOBILE); transisi 0.3s ease pada `.app-shell-grid`/`.app-sidebar`/`.app-main` (OWN-TOGGLE-TRANSITION).
-- Gate: FE build 109 chunk, PWA verify PASS. Sisa Fase C: OWN-STATUS-CARDS, OWN-ROUTE-SPLIT/GUARD, OWN-BACKEND-MODE (opsional), FASE B-2 inventaris shell.
-
-### 2026-06-19 — feat(schema-STF-GUDANG-2): FK inventoryItemId di RoomFacility + migration additive
-- **Schema additive** (migration `20260618210000_stf_gudang2_facility_inventory_link`): `RoomFacility.inventoryItemId` (FK→InventoryItem, SET NULL), index, back-relation.
-- **Service:** `loadFacilityCounts()` kini `groupBy inventoryItemId` (FK langsung), bukan fuzzy-name. `decorateInventoryItem()` terima `Map<number,number>`.
-- **DTO:** `CreateRoomFacilityDto` + `UpdateRoomFacilityDto` tambah `inventoryItemId`. Admin/owner bisa tautkan fasilitas ke item gudang dari form kamar.
-- Gate: BE tsc 0 · FE build 110 chunk · migration applied DB 5433 · seed 20 kipas.
-
-### 2026-06-18 — feat(STF-METER-VIEW + STF-TIP-FLOW): dashboard meter staff + tip flow backend
-- **STF-METER-VIEW [d-1]:** komponen `StaffMeterStatusPanel` — tabel per kamar status SUDAH/BELUM catat meter bulan ini + listrik/air/terakhir. Diintegrasikan ke `StaffMotivationDashboard`.
-- **STF-THEME [d-2]:** CSS `staff-panel-card`, `staff-meter-table`, z-index mobile di route staff.
-- **STF-TIP-FLOW [d-4]:** `tipShopeepay` ditambahkan ke User DTO (Create/Update) + service. Notif staff via `createOnce` saat tenant acknowledge tip. Endpoint `POST /tickets/:id/tip-confirm` (STAFF) konfirmasi Sudah/Belum masuk + notif balik ke tenant. Idempotency via `StaffPerformanceEvent TIP_CONFIRMED`.
-- Status checklist M10: STF-METER-VIEW → `[x]`, STF-THEME → `[x]`, STF-TIP-FLOW → `[x]`.
-- Gate: BE tsc 0, FE build 109 chunk (1555 module), PWA ok.
-
-### 2026-06-18 — fix(PUB-CALENDAR-CSS): tambah stylesheet AvailabilityTimeline + settings-facility-actions
-- **Audit AI:** komponen `AvailabilityTimeline.tsx` merujuk 20+ class CSS (`avcal-*`, `cell-*`) yang tidak ada di stylesheet manapun — tabel kalender tampil tanpa warna status, tanpa layout, tanpa scroll control.
-- **Fix:** tambah 168 baris CSS di `11-public-pages.css` (shell, header, legend 4 warna status, table scroll horizontal, sticky header+room, weekend highlight, floor row, scroll controls, collapse, loading, mobile compact). Tambah `.settings-facility-actions` di `12-owner.css` (6 baris, flex row tombol upload/hapus foto fasilitas).
-- Gate: FE build 109 chunk, PWA ok (CSS 108 KiB gzip).
-
-### 2026-06-18 — feat(PUB-FOTO-PROFIL-KTP): avatar tenant dari foto KTP + kelola owner/admin
-- **Keputusan owner (M02):** foto profil tenant diturunkan dari foto KTP pertama; owner/admin bisa ganti ulang; gambar dikompres.
-- **Schema additive** (migration `20260618030000_tenant_profile_photo`): enum `ProfilePhotoSource {KTP_AUTO, MANUAL}` + field `profilePhoto*` di `Tenant`.
-- **BE:** unggah KTP pertama otomatis menyalin file → `uploads/profile-photos/` dan set avatar `KTP_AUTO`; `POST/DELETE /tenants/:id/profile-photo` (OWNER/ADMIN ganti/hapus → `MANUAL`); `GET /tenants/:id/profile-photo/image` terproteksi (OWNER/ADMIN atau tenant **pemilik** saja). Avatar `KTP_AUTO` ikut terhapus saat KTP dihapus (UU PDP); avatar `MANUAL` tetap.
-- **FE:** komponen `TenantAvatar` (foto + fallback inisial via `useAuthenticatedMediaUrl`) di topbar owner/tenant + workspace tenant; kartu `TenantProfilePhotoCard` (ganti/hapus, kompres 512px) di `StayDetailPage`; `profilePhotoUrl` ditambahkan ke `/tenant/profile`.
-- Gate: BE build 0 · FE build 109 chunk, PWA ok · **UAT runtime LULUS 10/10** (auto-avatar 201, serve owner/tenant 200, tenant lihat avatar tenant lain 403, profile url terisi, re-upload MANUAL 201, hapus KTP→avatar MANUAL tetap / avatar KTP_AUTO terhapus).
-
-### 2026-06-18 — fix(audit AI): facility photo URL/slug + ranking cleanliness + avatar KTP
-- **PUB-FACILITY-PHOTO:** slug upload Settings disamakan dengan slug landing page; URL `/uploads/...` kini di-resolve ke backend/API origin; thumbnail fasilitas diberi dimensi stabil.
-- **TEN-GAMIF:** ranking kebersihan memakai assignment aktif sebagai denominator (`doneCount/expectedCount`, `score%`), termasuk kamar yang belum dikerjakan, dan query `month/year` divalidasi.
-- **PUB-FOTO-PROFIL-KTP:** auto-avatar dari KTP tidak gagal diam-diam lagi; response memberi warning bila turunan avatar gagal dan sukses mengembalikan tenant dengan avatar terbaru.
-- Gate: BE `npx.cmd tsc --noEmit` PASS; FE `npx.cmd tsc -b --pretty false` PASS; FE `npm.cmd run build` PASS (rerun escalated karena sandbox Vite access denied).
-
-### 2026-06-18 — feat(PUB-LAYANAN-MINAT): tenant ajukan minat layanan + proses admin/owner
-- **Schema additive** (migration `20260618010000_service_interest`): model `ServiceInterest` (serviceId/tenantId/status `ServiceInterestStatus` PENDING·CONTACTED·DONE·CANCELLED/note/adminNote) + relasi cascade ke `AdditionalService`+`Tenant`.
-- **BE:** `POST /additional-services/:id/interest` (TENANT, dedupe PENDING agar tak dobel) + `GET /my-interests` (TENANT) + `GET /interests` & `PATCH /interests/:id` (OWNER/ADMIN). Tiap minat baru bikin notif `createOnce` ke semua admin/owner (linkTo `/service-interests`).
-- **FE tenant:** tombol "🙋 Saya Minat" per layanan di portlet MyStayPage (konfirmasi tarif, badge "Sudah diminati" bila PENDING).
-- **FE admin/owner:** halaman `/service-interests` (tab PENDING/CONTACTED/DONE/Semua + aksi Tandai Dihubungi/Selesai/Batalkan) + nav owner Pengaturan.
-- Gate: BE build 0 · FE build 108 chunk, PWA ok · **UAT runtime LULUS** (tenant create 201, dedupe→id sama, admin list+proses CONTACTED 200, tenant→route admin 403, notif owner+admin terbuat).
-
-### 2026-06-18 -- feat(PUB-METER-JADWAL): status meter bulan ini di portal tenant
-- **BE:** `GET /meter-readings` kini mengizinkan TENANT membaca meter hanya untuk kamar aktifnya; query `roomId` lain ditolak.
-- **FE:** `/portal/stay` menampilkan jendela catat meter bulan ini, status sudah/belum, catatan terakhir, dan CTA catat meter.
-- Gate: BE `npx.cmd tsc --noEmit` PASS; FE `npx.cmd tsc -b` PASS; FE `npm.cmd run build` PASS (rerun escalated karena sandbox Vite access denied).
-
-### 2026-06-18 — feat(TEN-GAMIF): ranking kebersihan depan kamar bulanan (backend + frontend)
-- **TEN-GAMIF:** backend `GET /public/rooms/cleanliness-ranking?month&year` — hitung skor per kamar dari `StaffRoutineCompletion` dengan template area `CLEANING` per bulan.
-- **Frontend:** kartu "🧹 Ranking Kebersihan Bulan Ini" di `MyLoyaltyPage` — medali 🥇🥈🥉, anonim per kode kamar.
-- Gate: BE build 0 · FE build 109 chunk, PWA ok.
-
-### 2026-06-18 — feat(PUB-FACILITY-PHOTO): upload foto fasilitas publik + tampil di landing page
-- **PUB-FACILITY-PHOTO:** Backend `POST /facility-images/upload/:slug` (OWNER/ADMIN, file JPG/PNG/WebP, max 2MB) + `GET /facility-images` (publik) + `DELETE /facility-images/:slug`.
-- **Service:** `FacilityImagesService` — simpan file ke `uploads/room-images/facilities/{slug}.{ext}`, tanpa perubahan schema.
-- **Settings:** tab baru "Foto Fasilitas" di OwnerSettingsPage (`FacilityPhotoPanel`) — grid upload/ganti/hapus per slug.
-- **Landing page:** `PublicGuestDashboardPage` — fetch foto real dari API, tampilkan gambar bila ada, fallback emoji bila belum.
-- Gate: BE build 0 · FE build 109 chunk, PWA ok.
-
-### 2026-06-18 — feat(PUB-CALENDAR): availability calendar timeline horizontal (backend + frontend)
-- **PUB-CALENDAR:** backend `GET /public/rooms/availability-calendar?from&to` — grid per kamar per tanggal (KOSONG/BOOKING_DP/HUNI/MAINTENANCE). Logic: stay ACTIVE + room status → status per hari.
-- **Frontend:** `AvailabilityTimeline.tsx` — tabel horizontal scrollable, group per lantai, legend warna, collapse/expand, loading/empty state.
-- **Integrasi:** ditampilkan di `PublicRoomsPage` setelah grid kamar + pagination.
-- DTO: `AvailabilityCalendarQueryDto` (from, to opsional, default 2 minggu, clamp 62 hari).
-- Gate: BE build 0 · FE build 108 chunk, PWA ok.
-
-### 2026-06-18 — feat(PUB-SMART-BOOKING): filter ketersediaan kamar publik by checkIn+durationDays
-- **PUB-SMART-BOOKING:** API `GET /public/rooms?checkIn=YYYY-MM-DD&durationDays=N` — filter kamar yang available di seluruh rentang (tanpa overlapping active stay).
-- **DTO:** tambah field `checkIn`+`durationDays` di kedua `PublicRoomsQueryDto` (marketing + tenant-bookings).
-- **Service:** `MarketingPublicRoomsService.buildPublicRoomWhere()` — tambah kondisi `stays: { none: { status: ACTIVE, checkInDate: { lt: endDate }, OR: [plannedCheckOutDate: null, plannedCheckOutDate: { gt: checkInDate }] } }`.
-- Gate: BE build 0 (tsc PASS).
-
-### 2026-06-18 — docs(checklist audit): sinkron status M10 vs kode
-- **PUB-LAYANAN-MINAT:** dicatat selesai fungsional berdasarkan kode `ServiceInterest` + API + tenant button + halaman admin/owner proses minat. Sisa polish: native `window.confirm` → modal custom bila diminta.
-- **MKT-5:** ditutup fungsional; renewal sudah punya copy meter dan cross-sell add-on opsional yang tidak memblokir flow.
-- **Parsial ditandai `[~]`:** owner toggle phase-2, foto/brosur, meter schedule/staff view, staff role/wifi, tip flow, dan beberapa item audit visual.
-
-### 2026-06-18 — fix(go-live hardening dari audit): test 55/55 + camera CSP (OCR) + HSTS
-- **Test 54/55 → 55/55:** mock `ticket-number.test.js` pakai `$executeRaw` (bukan `$queryRaw`) sesuai advisory-lock F2-5. Bukan bug produksi, tapi suite kini hijau penuh.
-- **DEEP-02:** `Permissions-Policy: camera=(self)` agar OCR KTP (PUB-KTP-OCR/Tesseract) tak terblok; mic & geo tetap diblok.
-- **DEEP-03:** header `Strict-Transport-Security` (HSTS) ditambah — **hanya di produksi** (HTTPS), tidak di dev.
-- **DEEP-01:** `@@index([token])` ditambahkan di schema + migration `20260618020000`. Redundan (@unique sudah bikin unique index PG) tapi tidak merusak — index eksplisit tidak mengurangi performa.
-- Gate: BE build 0 · unit test **55/55** hijau.
-
-### 2026-06-18 — fix(audit post-fix DEEP-04/05): konsolidasi duplikat + refactor auth helper
-- **DEEP-04:** konsolidasi `lockApprovalBookingTx` — source of truth di `tenant-bookings.queries.ts`, hapus dari `tenant-bookings-helpers.ts`. tsc 0, 55/55 test PASS.
-- **DEEP-05:** refactor `findUserForLogin` + `findUserForForgotPassword` → satu helper `findUserByEmailOrPhone(identifier, normalizedPhone, { includeExtraPhoneVariants? })`. Perilaku kedua method TETAP — login coba varian HP lebih banyak, forgot-password varian minimal. tsc 0, 55/55 test PASS.
-- **NEW:** `backend/.env.production.example` — 55+ env vars lengkap (Wajib, VAPID, KTP gate, Brevo, DeepSeek, auto-ops, akuntansi, loyalty points, rate limit, deadline).
-- **NEW:** `backend/scripts/change-owner-password.ts` — overwrite password OWNER via Prisma+bcrypt. Idempoten, pass dari env `OWNER_NEW_PASSWORD` atau prompt. JWT lama invalid otomatis (guard pwdAt).
-
-### 2026-06-18 — ui(owner-dashboard): toggle tampilan Ringkas/Lengkap + persist localStorage
-- **OwnerDashboardPage:** tombol toggle "📋 Ringkas" / "📊 Lengkap" di toolbar, sebelah "Buka laporan".
-- **useOwnerViewMode hook:** baca localStorage `kost48_owner_view_mode`; default mobile ≤834px = compact; override manual tersimpan.
-- **Compact mode sembunyikan:** panel tren chart + panel AI analysis via CSS class `owner-view-compact`.
-- **FE:** `12-owner.css` — style toggle button (pill-style, active dark bg) + compact hide rules.
-- Gate: FE build 108 chunk, PWA ok (gzip: 146 KiB JS, 107 KiB CSS).
-
-### 2026-06-18 — ui(layout): sidebar collapsible (ikon-only) + breadcrumb + hamburger toggle
-- **AppLayout.tsx:** state `sidebarCollapsed` + localStorage persist; class `sidebar-collapsed` di aside + grid.
-- **SidebarContent:** saat collapsed — hanya ikon link yang tampil, teks/brand/context-card disembunyikan via CSS.
-- **Toggle button:** lingkaran kecil di tepi kanan sidebar (◀ / ▶) + ikon hamburger ☰ di topbar (mobile).
-- **CSS:** `02-layout.css` — `.app-shell-grid.sidebar-collapsed` (grid 60px + transisi 0.25s), `.sidebar-collapse-toggle` (toggle button bulat).
-- **CSS:** `10-misc.css` — `.sidebar-collapsed` hide rules (sembunyikan brand-title, label, arrow, context-card, section-toggle, footer).
-- **Breadcrumb:** sudah ada (`getBreadcrumbParts` + `app-topbar-breadcrumb`) — memakai React Router `pathname`.
-- Gate: FE build 108 chunk, PWA ok (CSS +1 KiB gzip).
-
-### 2026-06-18 — feat(PUB-LAYANAN-TAMBAHAN 🧬): layanan tambahan + tarif (admin CRUD + portlet tenant)
-- Schema additive (owner-approved, migration `20260618000000_additional_services`): model `AdditionalService` (name/description/priceRupiah/unit/isActive/sortOrder).
-- BE: modul `additional-services` — CRUD mutasi **OWNER-only** (D-17), `GET /active` semua role.
-- FE: resource admin "Layanan Tambahan" (config-driven + route /additional-services + nav owner Pengaturan) + portlet tenant di MyStayPage (daftar layanan + estimasi tarif).
-- Gate: BE tsc 0 · FE build (106 chunk, PWA ok) · **UAT runtime LULUS** (owner create 201, admin 403, tenant lihat Galon/TV + tarif). Catatan lama "PUB-LAYANAN-MINAT ditunda" sudah superseded oleh audit checklist 2026-06-18.
-
-### 2026-06-18 — feat(PUB-CALENDAR-CHECKOUT): badge "Perkiraan kosong [tgl]" katalog publik
-- Keputusan owner: proyeksi kamar kosong hanya untuk (a) checkout-request APPROVED, atau (b) stay jangka pendek (harian/mingguan/2-mingguan, sering tak perpanjang). TIDAK menebak dari kontrak bulanan.
-- BE: `getProjectedAvailabilityByRoomId` + `projectedAvailableDate`/`projectedAvailableReason` di public rooms API (list+detail). FE: badge "🗓️ Perkiraan kosong [tgl]" di kartu kamar terisi + `PublicRoom` type.
-- Gate: BE tsc 0 · FE build (106 chunk, PWA ok) · UAT runtime (stay WEEKLY → projection 2026-06-27 muncul).
-
-### 2026-06-17 — feat(TEN-PROFILE-NOTIF): badge "Lengkapi Profil" portal tenant
-- `GET /tenant/profile/completeness` (reuse `buildCompletionSummary`, 7 field onboarding) + badge "📋 Lengkapi profil (X%)" di MyStayPage (list field kurang + tombol /portal/profile).
-- Gate: BE tsc 0 · FE build (106 chunk, PWA ok) · UAT runtime endpoint OK.
-
-### 2026-06-17 — feat(PUB-KTP-OCR): pindai KTP offline isi Nama+NIK otomatis
-- `tesseract.js` (owner-approved) **lazy-load** di GuestBookingForm — tombol "📷 Pindai KTP"; OCR diproses **di perangkat** (foto tak diunggah, privasi PDP). `parseKtpText` ekstrak NIK 16 digit + Nama → isi field (user wajib periksa/koreksi).
-- Bundle utama TIDAK bertambah (chunk dinamis terpisah, WASM/lang dari CDN saat dipakai). Gate: FE build (106 chunk, PWA ok).
-
-### 2026-06-17 — feat(PUB-UI-REVAMP batch cepat): booking-info, KTP opsional, label saran
-- **PUB-BOOKING-INFO**: teks "Belum punya akun? Booking kamar dulu" di LoginPage.
-- **PUB-BOOKING-FORM** (partial): KTP/NIK **opsional** saat booking (format dicek hanya bila diisi). phone-XOR-email ditunda (auto-akun portal butuh email).
-- **STF-SARAN-LABEL**: "Kirim via Laporan" → "Kirim Saran" (MyStayPage).
-- Gate: FE build (105 chunk, PWA ok).
-
-### 2026-06-17 — feat(PUB-UI-REVAMP Fase E): filter ulasan Terbaru/Rating Tertinggi
-- **PUB-REVIEWS** sudah ada (F3-4 social-proof + Maps iframe di #lokasi). **PUB-REVIEWS-FILTER**: tab Terbaru/Rating Tertinggi (client-side sort, maks 10); pool review backend 6→12.
-- Gate: FE build (105 chunk, PWA ok) · BE tsc 0.
-
-### 2026-06-17 — feat(PUB-ROOM-CATEGORY 🧬): kategori & tipe kamar (badge + filter)
-- **Schema additive** (owner-approved, migration `20260617000000_pub_room_category`): enum `RoomCategory` (ECONOMY/STANDARD/DELUXE) + `RoomType` (REGULAR/MEZZANINE), `Room.category`/`roomType` default STANDARD/REGULAR.
-- **Backend:** DTO owner set kategori/tipe (`...dto` passthrough); public rooms API expose `category`/`roomType`.
-- **Frontend:** badge kategori di kartu katalog (💎 Deluxe / 🛋️ Standar / 🏷️ Ekonomi + tag Mezzanine) + filter kategori (client-side); kolom "Kategori" + select di form admin kamar.
-- **Gate:** backend tsc 0 · FE build (105 chunk, PWA ok) · **UAT runtime LULUS** (owner set K-A → DELUXE/MEZZANINE → tampil di `/public/rooms`).
-
-### 2026-06-17 — feat(PUB-UI-REVAMP Fase C frontend): badge/tombol status + ikon fasilitas (ca54397)
-- **PUB-BADGE-STATUS** warna badge per status (hijau/kuning/merah/abu, selaras ikon) · **PUB-BTN-COLOR** "Tanya" outline saat tak bisa booking, "Ajukan Booking" primary +📝 · **PUB-FACILITY-SHOW** ikon fasilitas di chip kartu.
-- **Keputusan owner:** foto kamar tetap **4:3** (PUB-PHOTO-RATIO); **PUB-CARD-RESPONSIVE** sudah 4/2/1 (tanpa ubah). Approved untuk increment lain: schema `Room.category` (PUB-ROOM-CATEGORY) + npm `tesseract.js` (PUB-KTP-OCR).
-- Gate: FE build hijau (105 chunk, PWA ok).
-
-### 2026-06-17 — feat(PUB-UI-REVAMP Fase A): ikon publik + audit CTA (cf4c63c)
-- **PUB-REMOVE-PREF** hapus tombol "Ubah Preferensi Tinggal"; **PUB-CTA-AUDIT** prominent "Cek Kamar Tersedia" tinggal 2 (hero + sticky navbar), CTA penutup di-relabel.
-- **PUB-ICON** (emoji + aria-hidden, tanpa lib): nav links, CTA, mark fasilitas (🅿️🍳❄️🚿📶…), badge status per tone (🟢🟡🔴🧹).
-- Gate: FE build (105 chunk, PWA ok) · sweep Playwright 30 cek 0 overflow (publik 390/834/1440).
-
-### 2026-06-17 — feat(AUDIT-OWNER + CSS+SWEEP): polish UI stabilitas lintas role (app-wide)
-- **AUDIT-OWNER** (`ff415f5`): `document.title` per-rute (`useDocumentTitle` + `routeTitles` + `RouteTitleSync`); skeleton ganti full-page spinner (`PageLoadingSkeleton` di App Suspense/Rooms/Reports/OwnerDashboard); foto OwnerSettings lewat `SafeImage`; dropdown notif width responsif (anti-overflow ≤390px); hapus dead-code "Laporan Formal" di ReportsPage (2 API mubazir); a11y emoji dekoratif `aria-hidden`.
-- **CSS+SWEEP**: `02-layout.css` jadi sumber tunggal `.app-shell`/`.app-shell-grid` (buang rule mati/duplikat di 01-base/09-finance/10-misc, behavior-preserving; print override tetap di 03-components).
-- **Gate:** FE build hijau (105 chunk, PWA ok) · **sweep Playwright 30 cek (5 role × 390/834/1440) = 0 overflow** + judul tab terverifikasi live. ⚠️ Guest `/rooms`→beranda menunggu konfirmasi owner.
-
-### 2026-06-17 — feat(METER M-5): checkout meter final × deposit jaminan + copy marketing
-- **Backend:** `complete()` izinkan tagihan meter (listrik/air, semua baris ELECTRICITY/WATER) tetap OPEN saat checkout + gate WAJIB catat meter listrik final (catatan tertanggal ≥ hari checkout, 409 bila belum); tagihan NON-meter tetap memblokir. `processDeposit` → `settleDepositAgainstMeterTx`: deposit menutup tagihan meter (DR 2000 / CR 1100 via jurnal forced-checkout F3-16), sisa refund kas, kekurangan TETAP piutang AR; GUC carve-out `app.allow_deposit_with_open_invoices`. Helper `isMeterInvoice`/`invoiceRemainingRupiah`/`computeMeterDepositSettlement` + unit test 8/8.
-- **Frontend:** `ProcessDepositModal` mode meter (breakdown deposit/tagihan/dipotong/dikembalikan/shortfall, otomatis), `checkoutReadiness.ts` (tagihan meter non-blocking), copy publik pascabayar (FAQ + trust item "Listrik transparan, bukan token").
-- **Finance gate LULUS:** tsc 0 · unit test 8/8 · FE build (106 chunk, PWA ok) · **UAT runtime DB 5433**: deposit cukup/kurang/nol — TB seimbang tiap langkah, akun 2000 turun tepat 1.5jt, gate tolak checkout tanpa meter final.
-
-### 2026-06-17 — feat(MKT-4): CAC/CLV lite dashboard — DeepSeek V4 Pro powered + offline fallback
-- **Backend:** `GET /market-analysis/cac-clv` — agregat booking per kanal, konversi, renewal rate, retensi, estimasi CLV, referral, loyalty. Query via Prisma `$queryRaw` dari tabel Stay/RenewRequest/TenantReferral/LoyaltyPoint/Redemption.
-- **Backend:** `POST /market-analysis/cac-clv/analyze` — kirim snapshot ke DeepSeek V4 Pro, ekstrak JSON insight CAC/CLV. Fallback offline bila AI gagal/tidak terkonfigurasi.
-- **Frontend:** `CacClvDashboard.tsx` — metrik card (Total Booking, Konversi, Renewal, CLV), HorizontalBarChart per kanal, tabel detail kanal, kartu Retensi/Referral/Loyalitas, dan AI Insight section.
-- **Frontend:** `MarketAnalysisPage.tsx` — tab toggle baru: "Analisa SWOT/PESTLE" ↔ "CAC/CLV Dashboard". CAC/CLV query lazy hanya saat tab aktif.
-- **API types:** `CacClvSnapshot`, `CacClvChannel`, `CacClvAnalyzeResult` + fungsi `getCacClvSnapshot()`, `analyzeCacClv()`.
-- **Gate:** backend tsc 0 ✅, frontend build 106 chunks ✅, PWA verify ✅.
-- Lihat `docs/M10_CHECKLIST_CHANGELOG.md` → MKT-4 ✅.
-
-### 2026-06-16 — docs: rapikan checklist AI eksekutor (M10 antrian + sinkron selesai)
-- `M10_CHECKLIST_CHANGELOG.md`: pintu masuk AI (M-file, urutan kerja, gate); centang F3-3/AUD-7/AUD-8/L-2; sesi 16 Jun terstruktur; **ANTRIAN EKSEKUSI** dengan anchor grep, sub-task, UAT per task terbuka.
-- `M06_OPERASIONAL.md`: status M-3/M-4 selesai, M-5 → antrian M10.
-
-### 2026-06-16 — Walkthrough UI/UX (owner+staf+tenant+publik) + penyatuan modul (Fase A/B-1) + Meter M-1
-- Sesi UI/UX menyeluruh berbasis review owner + verifikasi screenshot Playwright (`ui-shots/`, tidak di-commit).
-- **Responsif & publik:** fix bug app-shell (konten mepet kiri <1200px, override `10-misc` menutup collapse `02-layout`) — global semua role; login (subtitle d...
-
-### 2026-06-15 — Pasca-Fase 5: hardening + sinkron docs (L-4, SINKRON-DOC, AUD-6, L-3)
-- Lanjutan tindak-lanjut audit setelah Fase 5 inti:
-- **L-4 (go-live):** runbook `04_DEPLOY` mewajibkan `KTP_ACTIVATION_GATE_ENABLED=true` di produksi (default OFF; tanpa ini kamar bisa aktif tanpa KTP terverifi...
-
-### 2026-06-15 — FASE 5 (tindak-lanjut audit menyeluruh): S-5 + F5-1..F5-8 — SELESAI
-- **S-5 schema additive** (owner-approve, migration `20260615140000_s5_ac_usage_vendor`): `Room.acUsageHoursPerDay`, `Ticket.handledByVendor`/`vendorNote`.
-- **F5-1 (AUD-4) FAQ operasional:** seed FAQ dari aturan/flow (Pembayaran/Booking/Perpanjangan/Checkout&Deposit/KTP/Keluhan&Poin); `seed()` idempoten per-perta...
-
-### 2026-06-15 — feat(F2-10 + F3-5): round-robin tiket + leaderboard staf (disiapkan, dorman saat 1 staf)
-- **Ide owner:** siapkan round-robin & leaderboard meski staf masih 1; aktif otomatis saat staf ≥ 2. **Tanpa schema baru.**
-- **F2-10 round-robin** (K-4): `TicketsService.pickStaffAssigneeTx` dipakai di `createTicketRecord` saat tiket belum ber-assignee — staf=0 → tanpa assignee; st...
-
-### 2026-06-15 — feat(F4-13c + F4-13 referral): quest perbaikan sikap anonim + referral teman (S-4)
-- **Schema additive S-4** (owner-approve, migration `20260615130000_f4_s4_peer_referral`): `PeerBehaviorReport` + enum `PeerReportStatus`; `TenantReferral` + e...
-- **F4-13c quest perbaikan sikap (ANONIM):** A lapor B → admin moderasi (`ACKNOWLEDGE` → notif B **tanpa identitas A** / `DISMISS`) → B `markImproved` → konfir...
-
-### 2026-06-15 — feat(F4-11 deep): prabayar/perpanjangan multi-bulan + unearned (PSAK 72) — SELESAI
-- **`PrepayExtensionService.prepayExtension`** (`POST /stays/:id/prepay-extension`, OWNER/ADMIN): tenant membayar **N bulan ke depan dengan harga BULANAN** (te...
-- **Akuntansi PSAK 72:** jurnal issuance (DR 1100 / CR 4000) + payment (DR kas / CR 1100) + **deferral seluruh prabayar (DR 4000 / CR 2200 Unearned)**; lalu sw...
-
-### 2026-06-15 — feat(backlog S-3): F4-11/12/13a/13b/14/15 — implementasi backlog ide owner
-- **Schema additive S-3** (owner-approve, migration `20260615120000_f4_backlog_s3`): Room (hasAc/acWattage/acLastCleanedAt/acCleanIntervalDays), LoyaltyReward...
-- **F4-12 FAQ/manual** (tanpa schema): `MyManualPage` (`/portal/manual`) menampilkan FAQ publik per kategori (Accordion ringkas) — manual book aturan kos untuk...
-
-### 2026-06-15 — feat(F4-9): Gamifikasi & Loyalitas tenant — SELESAI (schema S-2, dossier 19)
-- **Schema additive (S-2):** `LoyaltyPoint` (ledger append-only, unique sourceType+sourceId) + `LoyaltyReward` (katalog) + `Redemption` (penukaran, wajib appro...
-- **Poin (default dossier 19, env-override):** `LoyaltyService.award/earn/earnSafe` (idempotent per sourceType+sourceId), `balance`, `history`. **4 trigger ear...
-
-### 2026-06-15 — feat(F4-8): Pindah kamar resmi (E4) — SELESAI, schema S-2 + 5 keputusan desain owner
-- **Keputusan desain owner (D-20, 2026-06-15):** Stay **SAMA** (roomId diperbarui, tak putus kontrak); **deposit ikut apa adanya**; **harga dikunci** (rent-loy...
-- **Schema additive (S-2):** `RoomTransfer` (stayId, fromRoomId, toRoomId, transferDate, reason, rentBefore/AfterRupiah, note, createdById) + back-rel Stay/Roo...
-
-### 2026-06-15 — feat(F4-1): Unearned Revenue PSAK 72 (F-15) — SELESAI, schema S-2 approved
-- **Kebijakan (keputusan owner):** sewa yang mencakup **>1 bulan** diakui pendapatan **bertahap** (straight-line per bulan), bukan sekaligus saat check-in. **I...
-- **Schema additive (S-2):** `RentRecognitionSchedule` (stayId, periodIndex, periodStart/End, scheduledAmountRupiah, recognizedAt, journalEntryId; unique stayI...
-
-### 2026-06-15 — feat(F4-2): PWA Web Push (4 kelompok event J-d) — SELESAI, schema S-2 approved
-- **Schema additive (owner-approve S-2):** `PushSubscription` (endpoint unik/device) + enum `PushDeliveryStatus` + `AppNotification.pushStatus/pushAttempts/pus...
-- **Backend `PushModule`:** `GET /push/vapid-public-key`, `POST /push/subscribe` (upsert by endpoint), `POST /push/unsubscribe` (deactivate). `PushService` bac...
-
-### 2026-06-14 — fix(F4-10): standarisasi pembulatan Rupiah (F-31) — helper terpusat
-- **Masalah (F-31):** pembulatan Rupiah tersebar (`Math.round` mentah di util/DP/depresiasi/revenue-per-kamar + helper `rupiah` duplikat di modul akuntansi) →...
-- **Helper terpusat baru** `backend/src/common/business/money.helper.ts`: `roundRupiah(v)` (bilangan bulat terdekat; tie tepat 0,5 dibulatkan MENJAUHI nol agar...
-
-### 2026-06-14 — ops(F4-7): pruning notifikasi >90 hari (N-04) — retensi AppNotification
-- **Masalah (N-04):** `AppNotification` tak punya retensi → tumbuh tanpa batas, terutama untuk broadcast ALL ke banyak penerima.
-- **Solusi:** `AppNotificationService.pruneOlderThan(retentionDays=90, batchLimit=5000)` menghapus notifikasi `createdAt < now − retensi`, dibatasi per-batch (...
-
-### 2026-06-14 — chore(migration): migration resmi F3 additive + dukungan shadow DB
-- **Migration baru** `prisma/migrations/20260614210000_f3_admin_safety/migration.sql` — additive untuk F3-14/15/17/19: enum `BelongingsStatus`; `Tenant.ktp*` (...
-- **Divalidasi vs DB UAT live:** seluruh 18 kolom + enum + 3 index + 2 FK ADA dengan nama/tipe/default PERSIS sesuai migration → file akurat & lengkap.
-
-### 2026-06-14 — feat(F3-14/F3-16): forced-checkout admin (kabur/overstay) + deposit→AR (SELESAI, UAT LULUS)
-- **Gabung F3-14+F3-16 (keputusan owner):** satu endpoint `POST /stays/:id/forced-checkout` (OWNER) beralasan `OVERSTAY_NUNGGAK`/`TENANT_KABUR`.
-- **Akuntansi (disetujui owner):** deposit menutup tunggakan → jurnal **DR 2000 / CR 1100** (`postForcedCheckoutDepositSettlementTx`, BEDA dari settlement dama...
-
-### 2026-06-14 — ui(F3-9): hierarki laporan — badge Formal/Estimasi
-- **Badge tier (F-11):** `ReportSection` kini menandai setiap kartu laporan operasional dengan badge **≈ Estimasi** (default) — angka dihitung mentah dari data...
-- **Banner hierarki:** ReportsPage menambah catatan tetap yang menjelaskan tab operasional = Estimasi, dan mengarahkan ke tab **"Laporan Formal"** (sudah ada:...
-
-### 2026-06-14 — feat(F3-17): upload + verifikasi KTP (terproteksi, gate aktivasi, hapus PDP)
-- **Schema (approved):** `Tenant.ktpImage*` (url/fileKey/originalFilename/mimeType/fileSizeBytes) + `ktpVerifiedAt/ktpVerifiedById` + `ktpDeletedAt`.
-- **Upload:** `POST /tenants/:id/ktp/upload` (OWNER/ADMIN, multer + validasi MIME signature, simpan di `uploads/ktp-images` terpisah dari foto kamar/tiket). Up...
-
-### 2026-06-14 — feat(F3-15): lacak barang ditinggal 30 hari → ABANDONED
-- **Schema (approved):** `Stay.belongingsStatus` (enum `BelongingsStatus PENDING/CLAIMED/ABANDONED`, default PENDING), `belongingsDeadline`, `belongingsResolve...
-- **Set deadline:** checkout final (`stays.complete`) dan forced-checkout overstay (`auto-ops.forceCheckoutOverstay`) men-set `belongingsDeadline = checkout +...
-
-### 2026-06-14 — feat(F3-19): SLA tiket — dueAt per kategori, resolved-time adil, eskalasi
-- **Schema (approved):** `Ticket.assignedAt/dueAt/escalationLevel/escalatedAt` + index `dueAt`.
-- **SLA per kategori (`ticket-sla.ts`):** `dueAt = assignedAt + window` — **24 jam** EMERGENCY/SECURITY/KUNCI · **3 hari** KERUSAKAN/MAINTENANCE/KEBERSIHAN/CHE...
-
-### 2026-06-14 — ops(F3-13): hardening checkout/notif (B-06/B-07/B-11/B-12/B-14/N-02) SELESAI
-- **B-07 (D-03):** forced-checkout overstay tak lagi diblokir tagihan **DRAFT** (belum terbit, tanpa jurnal). `forceCheckoutOverstay` mengecualikan DRAFT dari...
-- **B-12:** `stays.update` menolak `plannedCheckOutDate` di masa lalu (WIB) — mencegah admin tak sengaja menjadikan stay target overstay/forced-checkout instan...
-
-### 2026-06-14 — refactor(F3-11): lead source + katalog foto marketing ke config
-- **M-08 lead source:** sudah lengkap di kode — check-in wizard admin punya dropdown `bookingSource` 10 kanal (Google Maps/Walk-in/Referral/Instagram/TikTok/Wh...
-- **M-04 foto config:** ~76 nama berkas foto marketing dipindah dari `marketing-public-rooms.service.ts` ke `marketing/marketing-room-images.config.ts` (`ROOM_...
-
-### 2026-06-14 — ops(F3-10): higiene jurnal — idempoten anti-race P2002 di posting
-- **Race P2002 (utama):** `accounting-posting.service` membungkus 7 entrypoint posting ber-transaksi-sendiri (invoice issued/payment, expense, wifi-sale, depos...
-- **entryNumber suffix VOID:** _tidak berlaku pada kode saat ini_ — tidak ada jalur `journalEntry` → status `VOID` (reversal selalu membuat entry `ADJUSTMENT`...
-
-### 2026-06-14 — audit-fix(Fase 1/2): checklist dibuktikan ulang terhadap kode
-- **Renewal:** menutup celah kritis approval sebelum lunas. DP PAID kini hanya mengamankan prioritas; admin menerbitkan invoice pelunasan setelah catat meter;...
-- **Cashflow:** classifier menyimpan gross inflow/outflow terpisah per sumber sehingga transaksi dua arah tidak saling menutup.
-
-### 2026-06-14 — ui(F3-12): paket chart — palet Okabe-Ito, count risiko n<5, kontras donut, filter publik
-- **V-5:** palet Okabe-Ito colorblind-safe terpusat (`frontend/src/components/charts/chartPalette.ts`) dipakai `SmartChartPanel`, `HorizontalBarChart`, `DonutG...
-- **V-2:** donut "Level Risiko" di review pembayaran berubah jadi tampilan hitungan saat sampel kecil (n<5) — 1 bukti high-risk tak lagi terbaca sebagai lingka...
-
-### 2026-06-14 — feat(F3-1): coverage notifikasi operasional (assign, room-ready, K-6/K-8)
-- **Ticket-assign → assignee:** `tickets.service.assign()` mengirim notif ke penerima tugas (best-effort, di luar audit) hanya saat assignee benar-benar beruba...
-- **K-6/K-8 BARANG_PINDAH:** notif tiket pindah barang yang ditutup kini menuju **staf assignee** (sebelumnya keliru ke `actor.id` = admin penutup) dan dipinda...
-
-### 2026-06-14 — ops(F1-11): verifikasi booking expiry 3 jam flat
-- Kedua helper booking (`expireBookingTx` di `auto-ops.service.ts` dan `cancelCompetingUnpaidBookingsTx` di `payment-submissions.service.ts`) memakai konstanta...
-- **Verifikasi:** `grep` konfirmasi kedua helper pakai konstanta sama; tidak ada kode baru.
-
-### 2026-06-14 — F3-2/F3-20: inbox pembayaran dan prompt review
-- Payment submission yang berhasil commit kini mengirim inbox dedupe ke seluruh OWNER/ADMIN aktif, lengkap dengan tenant, nominal, invoice, kamar, dan deep-lin...
-- Tiket tenant ber-assignee STAFF kini mengirim ajakan review saat masuk DONE/CLOSED; pemanggilan ulang pada close aman karena dedupe.
-
-### 2026-06-14 — Fase 3 independen: visibilitas dan otomasi operasional
-- Menambahkan SEO dasar guest page: metadata, OpenGraph/Twitter Card, canonical, JSON-LD, `robots.txt`, dan `sitemap.xml`. Implementasi lulus build; skor Light...
-- Menambahkan social proof publik dengan pembatasan privasi, agregat rating, ulasan visible terbaru, dan count penghuni aktif.
-
-### 2026-06-14 — feat(F2-18): gate verifikasi owner utk review tenant ≤2 (F2-18 SELESAI)
-- Owner: `GET /tenant/staff-reviews/pending-verification` + `POST /:id/verify {decision: APPROVE→VISIBLE | DISMISS→HIDDEN}` (OWNER-only, set `moderatedById`)....
-- **UAT runtime:** rating-2 → PENDING_VERIFICATION; owner list memuatnya; ADMIN verify → 403; owner APPROVE → VISIBLE; re-verify → 409. `tsc` 0. → **F2-18 SELE...
-
-### 2026-06-14 — test(F2-6): UAT cancel stay promoted → MAINTENANCE + tiket inspeksi (F2-6 SELESAI)
-- Ringkas: lihat source changelog lama bila perlu detail historis.
-
-### 2026-06-14 — ui(F2-11): paginasi 12 + skeleton katalog publik → F2-11 SELESAI
-- Ringkas: lihat source changelog lama bila perlu detail historis.
-
-### 2026-06-14 — refactor(F2-5): satukan generateTicketNumber (4 salinan → 1 util) → F2-5 SELESAI
-- Ringkas: lihat source changelog lama bila perlu detail historis.
-
-### 2026-06-14 — fix(F2-14): staff-routines startOfLocalDate → WIB (F2-14 SELESAI)
-- Ringkas: lihat source changelog lama bila perlu detail historis.
-
-### 2026-06-14 — docs(F2-1): sinkron dossier 11 dgn keputusan owner hibrida → F2-1 SELESAI
-- Ringkas: lihat source changelog lama bila perlu detail historis.
-
-### 2026-06-14 — feat(F2-2/#3): prompt renewal H-10 + fallback admin tenant tanpa portal
-- **UAT runtime:** stay di H-10 → notif tenant "berakhir 10 hari lagi"; tenant non-portal → notif 3 admin "Tenant tanpa portal"; data uji dipulihkan. `tsc` 0....
-
-### 2026-06-14 — feat(F2-1 R3): gate deadline renewal di command service
-- Tindak lanjut audit (deadline hanya digate sweeper): `renew-requests.service` kini menegakkan deadline di tingkat command (deterministik):
-- **`confirmDownPayment`** → 409 bila WIB-today > `downPaymentDueDate` (hari-H lewat → prioritas hangus).
-
-### 2026-06-14 — fix(F2-5): tutup ghost-stock RETURN_FROM_ROOM (lock + 409 di dua jalur)
-- **`assertRoomItemQtyAvailableTx`** (lock `SELECT … FOR UPDATE` + `ConflictException` bila stok kamar < diminta) diekstrak ke `common/utils/room-booking.util....
-- Dipakai **DI DALAM transaksi** oleh `inventory-movements.create` (sebelumnya private, kini util) **dan** `staff-field-reports.adminReview` (sebelumnya TIDAK...
-
-### 2026-06-14 — Audit ulang checklist terhadap kode aktual
-- Mengembalikan `F2-1`, `F2-2`, `F2-5`, `F2-6`, `F2-18`, `F2-11`, dan `F2-14` ke `[ ]` karena lingkup task belum lengkap atau verifikasinya belum selesai.
-- Temuan kritis: jalur `staff-field-reports.adminReview` masih dapat RETURN melebihi qty kamar tanpa lock/409; `syncRoomItemTx` hanya menghapus RoomItem saat q...
-
-### 2026-06-14 — fix(F2-18): STAFF close dibatasi ke CHECKOUT_INSPECTION (invarian dossier 15)
-- **UAT runtime:** STAFF close #1 (non-inspeksi) → 403; STAFF close #13 (CHECKOUT_INSPECTION) → 409 (guard kategori lolos, status OPEN≠DONE); OWNER close #1 →...
-
-### 2026-06-14 — F2-3b: catat refund kalah-cepat di sistem (full-stack, UAT LULUS)
-- Refund untuk tenant yang KALAH first-paid-wins padahal sudah transfer kini tercatat & terlacak (lanjutan F2-3 yang memberi tahu loser "dana akan direfund").
-- **Schema (owner-approved):** enum `RefundStatus { NONE, PENDING, COMPLETED }` + 7 field `Stay.lossRefund*` (status/amount/proofUrl/proofFileKey/note/processe...
-
-### 2026-06-14 — F2-11 (V-1): code-split halaman publik (bundle utama lebih ramping)
-- **Sisa F2-11 (UI polish):** W-02 skeleton detail + CSS ring, W-03 pagination 12 katalog, UD-05 sticky CTA — perlu iterasi visual.
-
-### 2026-06-14 — F2-18: tenant-pengawas — STAFF boleh tutup tiket (guard keselamatan tetap), enum PENDING_VERIFICATION
-- **`tickets POST :id/close` kini izinkan STAFF** (sebelumnya OWNER/ADMIN). Mendukung model tenant-pengawas: staf menutup tiket pekerjaannya sendiri termasuk `...
-- **`StaffReviewStatus` += `PENDING_VERIFICATION`** (enum app + schema, db push UAT & prod-lokal) sebagai prasarana model "tenant sebagai pengawas kualitas" (r...
-
-### 2026-06-14 — F2-5: konsolidasi util terduplikasi ke common/utils (X-03, sebagian)
-- `backend/src/common/utils/room-booking.util.ts` (baru) menyatukan helper yang sebelumnya disalin lintas service:
-- **`releaseRoomAfterBookingCancelTx`** — 2 salinan IDENTIK (auto-ops + payment-submissions) → satu sumber. Behavior tetap.
-
-### 2026-06-14 — F2-3: copy notif A17 dua-varian (kalah first-paid: sudah/belum transfer)
-- **Sudah transfer** → "Booking dibatalkan: dana Anda akan direfund" (admin akan menghubungi untuk proses refund).
-- **Belum transfer** → "Booking dibatalkan: kamar diamankan tenant lain" (tak ada dana terpotong, pilih kamar lain).
-
-### 2026-06-14 — F2-14: timezone WIB untuk bucketing tanggal (F-25/E-6, sebagian)
-- **`accounting-posting-helpers.dateOnly` → WIB (UTC+7):** entryDate jurnal kini dibucket per tanggal kalender WIB (dulu komponen UTC) → transaksi dini hari WI...
-- **`staff-performance.monthRange` → batas WIB-instant:** bebas timezone server (di server UTC/cPanel perhitungan local lama meleset ±7 jam di tepi bulan). No-...
-
-### 2026-06-14 — F2-12: sinyal tiket hidup lagi + aging pakai sisa tagihan (F-21/F-27, UAT LULUS)
-- `finance.service.ts`:
-- **F-21 (sinyal tiket):** `highSignalTickets` dulu memakai kategori `['URGENT','HIGH','EMERGENCY']` — `URGENT`/`HIGH` BUKAN `TicketCategory` valid → query sel...
-
-### 2026-06-14 — F2-9: KPI tiket berhenti dobel-hitung lintas bulan (K-6)
-- Ringkas: lihat source changelog lama bila perlu detail historis.
-
-### 2026-06-14 — F2-17: notif tenant saat booking/stay dibatalkan sweeper (E3, UAT LULUS)
-- `cancelEndedUnpaidStay` (noon-release/H+1 auto-cancel/DP-forfeit) di-refactor: hasil tx ditangkap ke `cancelled`, lalu bila `true` panggil `notifyTenantStayC...
-- `runBookingExpiry`: setelah `expireBookingTx` sukses, kirim notif "booking kedaluwarsa".
-
-### 2026-06-14 — F2-16: perketat OWNER-only 4 area (D-17), ADMIN→403 (UAT LULUS)
-- Audit `@Roles` + perketat 4 area sensitif jadi OWNER-only (ADMIN ditolak 403); operasi baca (GET) tetap untuk ADMIN/STAFF sesuai sebelumnya:
-- **(a) Periode akuntansi** — sudah OWNER (create/update/`reopen`/`period-close/post`/`auto-run`/opening-balance post/void/draft); tak ada perubahan.
-
-### 2026-06-14 — F2-1 inc.4: notif siklus renewal end-to-end (F2-1 & F2-2 SELESAI, UAT LULUS)
-- `renew-requests.service` kini menerbitkan notifikasi in-app di tiap transisi (pola `app-notification.service`, mirror checkout-requests; best-effort di luar...
-- **create** → OWNER/ADMIN ("🔁 Permintaan perpanjangan baru" + nominal DP).
-
-### 2026-06-14 — Auto-ops cron eksternal (cPanel/Passenger idle-sleep) — endpoint token-protected
-- **`GET /api/auto-ops/cron`** baru (`@Public`, tanpa JWT): validasi token rahasia `process.env.AUTO_OPS_CRON_TOKEN` via header `X-Cron-Token` ATAU query `?tok...
-- **Deploy shared hosting:** set `AUTO_OPS_ENABLED=false` (matikan timer) + `AUTO_OPS_CRON_TOKEN=<rahasia>`, pasang cPanel **Cron** tiap 5–10 mnt: `curl -fsS -...
-
-### 2026-06-13 — F2-1 inc.3: sweeper auto-ops renewal HIBRIDA (EXPIRED_PRIORITY + FORFEITED, UAT LULUS)
-- Sweeper baru di `auto-ops.service.ts` (wired ke `runAll`, jalan tiap 5 menit) — **kebijakan HIBRIDA** (keputusan owner 2026-06-13):
-- **`runRenewalPriorityExpiry` (OTOMATIS):** `AWAITING_DP` yang lewat hari-H (`downPaymentDueDate`) tanpa DP lunas → `EXPIRED_PRIORITY`. Membatalkan invoice DP...
-
-### 2026-06-13 — F2-1 inc.2b: invoice DP TERPISAH + rent-line pelunasan dikurangi (UAT runtime LULUS)
-- **`stays.service.ts`** `issueRenewalDownPaymentInvoiceTx(tx,…)` baru: terbitkan invoice DP 30% (DRAFT→ISSUED + Auto Journal Lite). `renewStayInTransaction` k...
-- **`renew-requests.service.ts`**: `decideByTenant` **YA** → transaksi terbitkan invoice DP + set `downPaymentInvoiceId` + `AWAITING_DP`; `confirmDownPayment`...
-
-### 2026-06-13 — F2-1 inc.2a UAT runtime LULUS (rent-loyalty terbukti)
-- Diuji end-to-end vs DB UAT (backend kode-baru :3002, stay 5 / tenant.gita, rent 850rb):
-- CREATE → `PENDING_DECISION`, DP=**255.000** (30%), downPaymentDueDate=**2026-06-30** (hari-H).
-
-### 2026-06-13 — F2-1 inc.2a: State Machine Renewal DP (CORE, admin-verified)
-- **`renew-requests.service.ts`** dibangun ulang ke state machine GAP #2:
-- `createRequest` → `PENDING_DECISION` + set `downPaymentAmountRupiah` (30% × sewa SAAT INI — rent-loyalty D-16) + `downPaymentDueDate` = `plannedCheckOutDate`...
-
-### 2026-06-13 — Paket deploy RAMPING + script cPanel (`make-deploy`, `cpanel:setup`)
-- **`npm run make-deploy`** (root, `scripts/make-deploy.mjs`): build frontend combined → folder **`deploy/`** = backend SOURCE (tanpa `node_modules`/`dist`/`sr...
-- **Backend script cPanel** (`backend/package.json`): **`cpanel:setup`** = `npm ci && npm run build && npm prune --omit=dev` (build prisma engine Linux + tsc,...
-
-### 2026-06-13 — COMBINED single-server: 1 proses serve frontend + API (`npm run golive:1`)
-- Owner pilih arsitektur "1 server". Diimplementasi **dependency-free**:
-- **`backend/src/main.ts`**: serve `frontend/dist` (copy → `backend/client`, env `FRONTEND_DIST_PATH`, default `<backend>/client`) via `useStaticAssets` + **fa...
-
-### 2026-06-13 — Target publish cPanel DIKONFIRMASI + rencana (04_DEPLOY §D)
-- Owner konfirmasi host cPanel **mampu**: Node.js App (versi dukung) · PostgreSQL · SSH · build-on-server · AutoSSL. Resource upgrade bila kurang. Belum pasti:...
-- **Arsitektur diputuskan: combined single-server** (backend serve `frontend/dist` + API, 1 proses/port/domain, tanpa CORS) — dependency-free (`useStaticAssets...
-
-### 2026-06-13 — Go-live SATU PERINTAH: `npm run golive` (root) + port tetap dijamin
-- **Root `package.json` + `scripts/golive-all.mjs`** (zero-dependency): `npm run golive` dari `final_bundle/` → (1) **pastikan port 3000+5173 bebas** (deteksi...
-- Frontend `golive` ditambah `--strictPort` (gagal jelas, tak geser port).
-
-### 2026-06-13 — Go-live LAN: npm script `golive` + `build:lan` (self-host WiFi kos)
-- Owner pilih go-live di localhost/LAN (kos 1 lokasi). Ditambah tooling konvenien **zero-dependency**:
-- **`backend/scripts/golive.mjs`** + script `npm run golive`: set `NODE_ENV=production`, `DATABASE_URL`→`kost48_v3` (derive dari `.env`), `CORS_ORIGIN` auto da...
-
-### 2026-06-13 — F1-12: DB Produksi `kost48_v3` Diprovisikan + Di-seed (lokal-as-prod 5433)
-- **DB bersih:** `CREATE DATABASE kost48_v3` → `prisma db push` (41 tabel) → `bootstrap.sql` + `bootstrap_v4_addendum.sql` (bersih).
-- **Seed fondasi (owner-driven):** OWNER `liem.lui@gmail.com` (bcryptjs, role OWNER) · COA **37 akun** (DEFAULT_COA) · AccountingPeriod 2026-06 **OPEN** · Cash...
-
-### 2026-06-13 — F1-12 rehearsal: Runbook Fresh-Deploy Schema+Bootstrap LULUS
-- Rehearsal di DB throwaway `kost48_v3_deploy_rehearsal` (5433): `prisma db push` → **41 tabel** (=41 model) · `sql/bootstrap.sql` + `bootstrap_v4_addendum.sql...
-- **Temuan F1-12:** DB fresh TIDAK punya user (bootstrap.sql tak buat User, tak ada seed script) → endpoint seed butuh auth admin. `04_DEPLOY §2` ditambah PRAS...
-
-### 2026-06-13 — F2-1 inc.1: Schema Renewal DP (owner-approved S-1)
-- **Owner approval S-1** (`03_KEPUTUSAN_OWNER §S`): seluruh perubahan schema ADDITIVE disetujui (F2-1, F2-3b, F2-18, F3-14/15/17, F4-9).
-- **`schema.prisma`** (additive): `RenewRequestStatus` +7 status (`PENDING_DECISION`, `AWAITING_DP`, `DP_SECURED`, `COMPLETED`, `REJECTED_BY_TENANT`, `EXPIRED_...
-
-### 2026-06-13 — F2-6: Auto-tiket Inspeksi saat Cancel Stay Promoted (B-08)
-- **`stays.service.ts` `cancel()`**: ketika stay yang dibatalkan `wasPromoted` (sudah dihuni) dan kamar → MAINTENANCE, kini otomatis membuat tiket `CHECKOUT_IN...
-- Menutup B-08: sebelumnya cancel stay promoted menaruh kamar di MAINTENANCE TANPA tiket → kamar nyangkut selamanya (gate room-ready hanya buka lewat penutupan...
-
-### 2026-06-13 — GATE RUNTIME FASE 1: LULUS (backend dev + DB UAT 5433)
-- Verifikasi `05 §4-5` dijalankan terhadap data UAT (`kost48_v3_pro`), backend `npm run start:dev`:
-- **trial-balance**: `isBalanced=true` (debit=kredit=119.694.250). Invarian #6 ✓
-
-### 2026-06-13 — F2-8: Nonaktifkan Endpoint Draft Jurnal Manual (F-22/F-23/D-05)
-- **`accounting.controller.ts`**: route `POST /accounting/journal-entries/draft` (`createJournalDraft`) kini melempar `ForbiddenException` (403) — pembuatan ju...
-- Opening Balance draft (jalur terpisah & terkontrol via OpeningBalanceWizard) TETAP berfungsi.
-
-### 2026-06-13 — F1-10: Kunci Deposit = Room.defaultDepositRupiah (C3/D-05)
-- **`stays.service.ts` create**: `deposit = dto.depositAmountRupiah ?? room.defaultDepositRupiah` → `room.defaultDepositRupiah ?? 0` (abaikan override dto).
-- **`tenant-bookings.service.ts` approveBooking**: hapus override `depositAmountRupiah: dto.depositAmountRupiah` dari update stay — deposit tetap di snapshot r...
-
-### 2026-06-13 — F1-9: Deposit Bukan Operating Cashflow (F-10)
-- **`cashflow-classifier.ts`**: sourceType `DEPOSIT` (dana titipan) tidak lagi masuk operating (fallback) → kategori baru `depositLiabilityIn/Out` (perubahan l...
-- **`accounting-reports.service.ts` `cashflow()`**: tambah section `depositLiability` (totalIn/Out/net + catatan "bukan kas operasional yang bisa dipakai"); `n...
-
-### 2026-06-13 — F1-8: Guard Settlement Deposit (F-24)
-- **`accounting-posting.service.ts` `postDepositSettlementTx`**: TAMBAH pra-cek — sebelum men-debit liability 2000, pastikan ada jurnal PENERIMAAN deposit POST...
-- Menutup F-24: tanpa cek, settlement bisa men-debit 2000 tanpa kredit sebelumnya → akun liability 2000 bersaldo DEBIT (uang titipan "hilang" dari buku). Recei...
-
-### 2026-06-13 — F1-7: Invoice DRAFT Bukan Revenue (F-09)
-- **`reports.service.ts` (4 agregat revenue/billed)** + **`finance.service.ts` (5 agregat revenue ber-periodStart)**: filter `status: { not: CANCELLED }` → `st...
-- **Sengaja TIDAK diubah** (LARANGAN): groupBy `countByStatus` di reports (masih perlu DRAFT untuk `unpaidCount`), dan openInvoice/AR (`notIn [PAID, CANCELLED]...
-
-### 2026-06-13 — F1-6: Occupancy Rasio (F-04) dihitung inline
-- **`financialRatios()`**: `occupancyRate` tak lagi membaca `bs.statement?.occupancyRate` (yang tidak ada → selalu 0). Dihitung INLINE: `operableRooms = kamar...
-- Helper `occupancyRatePercent` (di `financial-ratios.helper.ts`) + test (5/10→50; operable 0→0; 48/48→100). Total `test:unit` **13/13 hijau**.
-
-### 2026-06-13 — F1-5: Deposit sebagai Kewajiban Lancar (F-03) — verifikasi & tutup (docs-only)
-- Inti F1-5 (deposit masuk kewajiban lancar → currentRatio turun wajar saat deposit HELD) sudah terpenuhi di **F1-4**: `currentLiabilities` memakai `CURRENT_LI...
-- `balanceSheet()` ditelaah baris-demi-baris: identitas **A = L + E** benar — keenam tipe akun (ASSET/LIABILITY/EQUITY/REVENUE/COGS/EXPENSE) ter-map, contra-as...
-
-### 2026-06-13 — F1-4: Rasio Keuangan Benar (F-02 presedensi + F-18 kas/AR)
-- **`financial-ratios.helper.ts` (baru, pure)** + `backend/test/unit/financial-ratios.helper.test.js` (12/12 hijau total).
-- **`accounting-reports.service.ts` `financialRatios()`**:
-
-### 2026-06-13 — F1-3: Perbaikan Cashflow (F-01/05/19/20) + classifier teruji
-- **Tulis `13_AKUNTANSI_LAPORAN §6`** — spec before→after 4 sub-langkah (sebelumnya checklist menunjuk §6 yang belum ada).
-- **`cashflow-classifier.ts` (baru, pure)** + `backend/test/unit/cashflow-classifier.test.js` (10/10 hijau total): klasifikasi arus kas terverifikasi zero-depe...
-
-### 2026-06-13 — F1-2: Guard Hapus/Ubah Pembayaran Kamar OCCUPIED (D-17 / GAP #3 / B-04)
-- **`invoice-payments.service.ts`** — tambah helper `assertStayNotOccupiedForPaymentMutationTx`, dipanggil di `update` + `remove` (dalam tx, sesudah `FOR UPDAT...
-- Menutup lubang: pembayaran TANPA jurnal (best-effort skip) sebelumnya masih bisa dihapus saat kamar sudah ditempati → occupancy vs uang inkonsisten. Booking...
-
-### 2026-06-13 — F1-1R: No-Partial Menyeluruh (D-02 / GAP #1 / B-01)
-- **`payment-submissions.service.ts` `approveSubmission`** — tambah gate re-validasi dua nominal sah (sebelumnya hanya blokir overpay → bisa approve PARTIAL li...
-- **`approveSubmission` invoice-only** (renewal/utilitas/manual) — wajib `amount === invoiceRemaining` (lunas penuh), bukan sekadar `≤`.
-
-### 2026-06-13 — F1-T: Sabuk Pengaman Unit Test Finance (baseline terkunci)
-- **F1-T SELESAI** — pasang harness unit test zero-dependency (Node built-in `node --test`, tanpa npm install):
-- `backend/test/unit/pricing.test.js` — `calculateRentByPricingTerm` (multiplier 13/45/75/100/550/1000% + pembulatan naik 5.000), `roundUpToNearest`, `isUtilit...
-
-### 2026-06-13 — Audit Traceability Root Docs + Router `_PETA_AI` + Penomoran 06-09 (docs-only)
-- **Buat `_PETA_AI.md`** — router 22 file root: §1 tabel "baca saat" + status akurasi, §2 anchor `file:baris` TERVERIFIKASI vs kode (`3c7ffe2`), §3 status defe...
-- **Audit mendalam 22 file root → perbaiki 4 defek traceability:**
-
-### 2026-06-13 — Normalisasi Logic dan Referensi Root Docs
-- Rename fisik dossier `06`-`15` menjadi `10`-`19` agar sesuai heading, blueprint, checklist, dan tab kerja.
-- Tetapkan hierarki sumber kebenaran: keputusan owner untuk aturan bisnis, kode untuk perilaku aktual, checklist untuk ID/urutan task.
-
-### 2026-06-13 — Audit Forensik V3 + 84 Keputusan Owner + Restruktur Docs Domain-Dossier (READ-ONLY, belum sentuh kode aplikasi)
-- Subbagian: Audit forensik V3 (Fable 5, baca kode penuh per-baris)
-- **97 temuan** di atas 53 temuan V1: finance F-17..F-34 (cashflow salah-akun F-01 + kembarannya F-18 yang LOLOS fix V1, rasio, BS-MoM 0%, settlement deposit b...
-
-### 2026-06-12 — Simplifikasi & Update Docs — FLOW_MAP V2 + 6 Flow Baru + Arsip
-- Subbagian: Update besar `docs/02_FLOW_MAP.md` (V2)
-- **Koreksi 5 bagian basi:**
-
-### 2026-06-12 (larut) — Eskalasi Tuntas + 5 Skenario Residual PASS + Runbook Deploy → SIAP PRODUKSI
-- Subbagian: Eskalasi diimplementasikan & diverifikasi runtime
-- **E-1 Guard global (default-deny):** `APP_GUARD` JwtAuthGuard+RolesGuard + decorator `@Public()` (login/forgot/reset, public/bookings, public/rooms, faqs/pub...
-
-### 2026-06-12 (malam) — UAT Siklus Overstay V5.12.1 PASS PENUH + Rekonsiliasi Bersih
-- Subbagian: UAT overstay end-to-end (stay tes #15, kamar G2-003 — manipulasi tanggal via SQL UAT, eksekusi via `POST /auto-ops/run`)
-- H-3: notifikasi "⏰ Kontrak berakhir 3 hari lagi" terkirim ✓
-
-### 2026-06-12 (sore) — E-2 Backfill (DB UAT) + UAT M-07/M-09 PASS Penuh
-- Subbagian: E-2 — Backfill `initialMetersPromotedAt` (data fix, DB UAT 5433)
-- 11 stay penghuni nyata (kamar OCCUPIED, jaminan terbayar) diisi `initialMetersPromotedAt = checkInDate` via SQL bertransaksi; 1 booking fase RESERVED dikecua...
-
-### 2026-06-12 — Eksekusi FIX-01..26 oleh AI eksekutor (VERIFIED) + Audit UI/UX Visual
-- Subbagian: Eksekusi audit mega (kode)
-- AI eksekutor menerapkan **24/24 FIX** dari `04_FIX_INSTRUCTIONS.md` (commit e4a8c31..f9d10ac, 1 commit per FIX; M-26/M-27 digabung 1 commit — deviasi minor d...
-
-### 2026-06-12 — Audit Mega Full-Sweep (docs only, tanpa perubahan kode aplikasi)
-- Subbagian: Type
-- Subbagian: Deliverables
-
-### 2026-06-11 — Docs Compaction + Keputusan Owner D1–D4 (tanpa perubahan logika, 1 copy fix)
-- Subbagian: Type
-- Subbagian: Keputusan owner (detail di `02_FOCUS_PLAN.md` §3)
-
-### 2026-06-11 — V5.12.2 Frontend DP/Jaminan + Rate Limiting + Audit Pass C/E/P3
-- Subbagian: Type
-- Subbagian: Frontend (fitur V5.12.x kini terlihat pengguna)
-
-### 2026-06-11 — V5.12.1 Overstay Lifecycle (Keputusan Owner)
-- Subbagian: Type
-- Subbagian: Siklus overstay lengkap (auto-ops, urutan sequential)
-
-### 2026-06-11 — V5.12.0 DP (Uang Muka) vs Deposit (Jaminan) + Overstay Enforcement Baru
-- Subbagian: Type
-- Subbagian: Schema (additive)
-
-### 2026-06-11 — V5.11.1 Audit Pass A/B — Fix Paket 1
-- Subbagian: Type
-- Subbagian: Fixed
-
-### 2026-06-11 — V5.11.0 Audit Hardening & Business Logic Fixes
-- Subbagian: Type
-- Subbagian: Commits (5)
+Riwayat changelog dipindah ke **`docs/M11_CHANGELOG.md`** (2026-06-19, hemat token). **Tulis entri changelog baru di M11 (paling atas).**
