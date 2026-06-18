@@ -2,6 +2,16 @@ import { Injectable, ConflictException, NotFoundException } from '@nestjs/common
 import { existsSync, mkdirSync, unlinkSync, readdirSync, writeFileSync } from 'fs';
 import { join, extname } from 'path';
 
+// Type untuk file upload — nestjs/platform-express menyediakan ini via multer.
+interface UploadFile {
+  fieldname: string;
+  originalname: string;
+  encoding: string;
+  mimetype: string;
+  buffer: Buffer;
+  size: number;
+}
+
 const FACILITY_UPLOAD_DIR = 'uploads/room-images/facilities';
 const ALLOWED_MIMES = ['image/jpeg', 'image/png', 'image/webp'];
 
@@ -17,7 +27,7 @@ export class FacilityImagesService {
    * Upload foto fasilitas. Slug adalah URL-safe identifier fasilitas (contoh: "parkir-luas").
    * File disimpan sebagai {slug}.webp — konversi ke webp via extension rename (server simpan apa adanya).
    */
-  async upload(slug: string, file: Express.Multer.File): Promise<{ url: string }> {
+  async upload(slug: string, file: UploadFile): Promise<{ url: string }> {
     if (!slug || !/^[a-z0-9-]+$/.test(slug)) {
       throw new ConflictException('Slug hanya boleh huruf kecil, angka, dan tanda hubung.');
     }

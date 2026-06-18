@@ -44,7 +44,8 @@ export class FacilityImagesController {
         fileIsRequired: true,
       }),
     )
-    file: Express.Multer.File,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    file: any,
   ) {
     const result = await this.service.upload(slug, file);
     return { message: 'Foto fasilitas berhasil diunggah', data: result };
