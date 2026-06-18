@@ -278,7 +278,15 @@ export default function AppLayout({ children }: { children?: ReactNode }) {
     return getNavigationLinks(user?.role, tenantStage);
   }, [user?.role, tenantStage, isOwner, ownerViewMode]);
 
-  const breadcrumbParts = useMemo(() => getBreadcrumbParts(location.pathname, links), [location.pathname, links]);
+  const breadcrumbParts = useMemo(() => {
+    const parts = getBreadcrumbParts(location.pathname, links);
+    // OWN-BREADCRUMB-MODE: root hard-label sesuai mode owner aktif.
+    if (isOwner) {
+      const root = ownerViewMode === 'admin' ? 'Area Admin' : 'Kokpit Owner';
+      if (parts[0] !== root) return [root, ...parts];
+    }
+    return parts;
+  }, [location.pathname, links, isOwner, ownerViewMode]);
   const defaultRoute = getDefaultRoute(user?.role, tenantStage);
 
   useEffect(() => {
@@ -404,21 +412,25 @@ export default function AppLayout({ children }: { children?: ReactNode }) {
               </div>
 
               {isOwner ? (
-                <div className="owner-view-toggle d-none d-xl-inline-flex">
-                  <button
-                    type="button"
-                    className={`owner-view-toggle-btn ${ownerViewMode === 'owner' ? 'active' : ''}`}
-                    onClick={() => changeOwnerViewMode('owner')}
-                  >
-                    <span aria-hidden="true">📈</span> Kokpit Owner
-                  </button>
-                  <button
-                    type="button"
-                    className={`owner-view-toggle-btn ${ownerViewMode === 'admin' ? 'active' : ''}`}
-                    onClick={() => changeOwnerViewMode('admin')}
-                  >
-                    <span aria-hidden="true">🔧</span> Area Admin
-                  </button>
+                <div className="owner-view-toggle-wrap d-none d-xl-flex">
+                  <span className="topbar-divider" aria-hidden="true" />
+                  <div className="owner-view-toggle">
+                    <button
+                      type="button"
+                      className={`owner-view-toggle-btn ${ownerViewMode === 'owner' ? 'active' : ''}`}
+                      onClick={() => changeOwnerViewMode('owner')}
+                    >
+                      <span aria-hidden="true">📈</span> Kokpit Owner
+                    </button>
+                    <button
+                      type="button"
+                      className={`owner-view-toggle-btn ${ownerViewMode === 'admin' ? 'active' : ''}`}
+                      onClick={() => changeOwnerViewMode('admin')}
+                    >
+                      <span aria-hidden="true">🔧</span> Area Admin
+                    </button>
+                  </div>
+                  <span className="topbar-divider" aria-hidden="true" />
                 </div>
               ) : null}
 

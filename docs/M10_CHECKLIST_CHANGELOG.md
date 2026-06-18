@@ -396,14 +396,14 @@ Output akhir:
 - [x] **Owner dashboard compact/full:** toggle Ringkas/Lengkap di `OwnerDashboardPage` sudah ada.
 
 #### C2 — Toggle Owner/Admin mode
-- [~] **OWN-TOGGLE-CSS:** toggle sudah ada + style dasar; sisa detail checklist: radius 12px, active white+shadow, hover state, transition 0.2s.
-- [~] **OWN-TOGGLE-LAYOUT:** toggle sudah berada di topbar; sisa polish posisi antara breadcrumb/actions + divider.
+- [x] **OWN-TOGGLE-CSS:** (SELESAI 2026-06-19) `.owner-view-toggle` jadi segmented control: radius 12px, track abu (`#f1f5f9`) + padding, active **putih + shadow** (`0 1px 3px`), hover state, transisi **0.2s ease**. Konsisten utk toggle topbar, mobile, & Ringkas/Lengkap.
+- [x] **OWN-TOGGLE-LAYOUT:** (SELESAI 2026-06-19) toggle dibungkus `.owner-view-toggle-wrap` (center `margin:0 auto`) dengan `.topbar-divider` di kiri-kanan sebagai pemisah breadcrumb/aksi.
 - [x] **OWN-TOGGLE-MOBILE:** (SELESAI 2026-06-19) toggle Kokpit/Area Admin kini muncul lebar-penuh di offcanvas mobile (`owner-view-toggle-mobile`); toggle topbar dijadikan desktop-only (`d-none d-xl-inline-flex`) agar tak bertumpuk di layar kecil.
 - [x] **OWN-TOGGLE-TRANSITION:** (SELESAI 2026-06-19) `12-owner.css`: transisi `grid-template-columns` di `.app-shell-grid` + `width/margin/padding` di `.app-sidebar, .app-main` (0.3s ease) saat sidebar ciut/lebar.
 
 #### C3 — Sidebar, breadcrumb, dan aksi topbar adaptif
 - [x] **OWN-SIDEBAR-CONTEXT:** (SELESAI 2026-06-19) `SidebarContent` kini menerima prop `ownerViewMode`; context-card title/subtitle pakai `getWorkspaceTitle/Summary(role, mode)` dan footer/`isAdmin` memperlakukan OWNER mode-admin sebagai konteks admin.
-- [~] **OWN-BREADCRUMB-MODE:** breadcrumb sudah mengikuti link-set mode; sisa hard-label root "Kokpit Owner" / "Area Admin".
+- [x] **OWN-BREADCRUMB-MODE:** (SELESAI 2026-06-19) breadcrumb owner kini diprepend root hard-label "Kokpit Owner"/"Area Admin" sesuai `ownerViewMode` (tak dobel bila segmen pertama sudah sama).
 - [x] **OWN-OFFCANVAS-TITLE:** (SELESAI 2026-06-19) `Offcanvas.Title` kini `getWorkspaceTitle(role, ownerViewMode)` → "Kokpit Owner"/"Area Admin (Owner)" mengikuti mode.
 - [x] **OWN-ADMIN-ICON-ACTION:** (SELESAI 2026-06-19) tombol "Pengumuman" tampil saat `isAdmin || (isOwner && ownerViewMode === 'admin')`.
 - [x] **OWN-STATUS-CARDS:** (SELESAI 2026-06-19) `OwnerDashboardPage` punya strip "Status Kokpit" 4 kartu: **okupansi** (kpi), **tunggakan** (signal overdue+outstanding, count+Rp), **meter belum dicatat** (best-effort: stay aktif vs reading bulan ini via `computeMeterDue`), **kesiapan go-live** (`fetchAccountingReadiness` score/ready); semua clickable. Sidebar Kokpit Owner diregroup jadi 2 grup: **Operasional** vs **Keputusan Owner** (`navigation.ts` `ownerSections`).
@@ -499,6 +499,11 @@ Output akhir:
 ## Changelog Ringkas
 
 > Dipadatkan dari `docs/CHANGELOG.md`: header tanggal dipertahankan, tiap entry hanya menyimpan 1-2 poin outcome. Detail verbose tetap ada di source lama.
+
+### 2026-06-19 — ui(Fase C polish): toggle segmented + divider topbar + breadcrumb root mode + bersih repo
+- **OWN-TOGGLE-CSS:** `.owner-view-toggle` jadi segmented control (radius 12px, active putih+shadow, transisi 0.2s). **OWN-TOGGLE-LAYOUT:** `.owner-view-toggle-wrap` center + `.topbar-divider` kiri-kanan. **OWN-BREADCRUMB-MODE:** root hard-label "Kokpit Owner"/"Area Admin" sesuai mode.
+- **Bersih repo:** hapus 14 file sampah `.reasonix/truncated-results/*` dari git + tambah `.reasonix/` ke `.gitignore`. Fase C kini benar-benar 100% (tanpa `[~]`).
+- Gate: FE build 110 chunk, PWA verify PASS.
 
 ### 2026-06-19 — feat(FASE B-2): shell Inventaris terpadu /inventory + redirect route lama
 - `InventoryShellPage` (route `/inventory`, OWNER/ADMIN) + `SegmentedTabs` 3 tab path-based: Gudang/Barang Kamar/Mutasi (nested routes render `ConfiguredResourcePage` dengan `hideAreaMenu`).

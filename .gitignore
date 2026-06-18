@@ -29,6 +29,9 @@ tmp/
 temp/
 .cache/
 .parcel-cache/
+.reasonix/
+# Skrip migrasi pembantu sementara (jangan di-commit)
+/_*.js
 
 # IDE / OS
 .vscode/

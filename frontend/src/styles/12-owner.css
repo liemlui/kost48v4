@@ -978,40 +978,55 @@
   }
 }
 
-/* ── Owner View Mode Toggle ──────────────────────────────────────────── */
+/* ── Owner View Mode Toggle (segmented control) ──────────────────────── */
 .owner-view-toggle {
   display: inline-flex;
   align-items: center;
+  gap: 2px;
   border: 1px solid rgba(148, 163, 184, 0.28);
-  border-radius: 8px;
-  background: #fff;
-  overflow: hidden;
+  border-radius: 12px;
+  background: #f1f5f9;
+  padding: 3px;
   font-size: 0.78rem;
   line-height: 1;
 }
 .owner-view-toggle button {
   border: none;
   background: transparent;
-  padding: 0.38rem 0.62rem;
+  padding: 0.36rem 0.66rem;
+  border-radius: 9px;
   color: #64748b;
   cursor: pointer;
-  transition: background 0.15s, color 0.15s;
+  transition: background 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
   font-size: inherit;
   line-height: inherit;
   white-space: nowrap;
 }
 .owner-view-toggle button:hover {
-  background: #f1f5f9;
+  background: rgba(255, 255, 255, 0.6);
   color: #1e293b;
 }
 .owner-view-toggle button.active {
-  background: #1e293b;
-  color: #fff;
+  background: #ffffff;
+  color: #1e293b;
   font-weight: 600;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.18);
 }
 .owner-view-toggle button:focus-visible {
   outline: 2px solid #3b82f6;
-  outline-offset: -2px;
+  outline-offset: 1px;
+}
+
+/* OWN-TOGGLE-LAYOUT: posisi toggle di tengah topbar + divider pemisah breadcrumb/aksi */
+.owner-view-toggle-wrap {
+  align-items: center;
+  gap: 0.65rem;
+  margin: 0 auto;
+}
+.topbar-divider {
+  width: 1px;
+  height: 22px;
+  background: rgba(148, 163, 184, 0.4);
 }
 
 /* Toggle versi mobile (di dalam offcanvas): lebar penuh */
