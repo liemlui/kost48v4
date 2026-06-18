@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException, BadRequestException, ForbiddenException, ConflictException } from '@nestjs/common';
 import * as bcrypt from 'bcryptjs';
-import { Prisma } from '../../generated/prisma';
+import { Prisma, ProfilePhotoSource } from '../../generated/prisma';
 import { PrismaService } from '../../prisma/prisma.service';
 import { buildMeta, buildPagination } from '../../common/utils/pagination';
 import { CreatePortalAccessDto } from './dto/create-portal-access.dto';
@@ -157,7 +157,7 @@ export class TenantsService {
     file: { fileKey: string; fileUrl: string; originalFilename?: string; mimeType: string; fileSizeBytes?: number },
     actor: CurrentUserPayload,
   ) {
-    const tenant = await this.prisma.tenant.findUnique({ where: { id }, select: { id: true, ktpImageFileKey: true } });
+    const tenant = await this.prisma.tenant.findUnique({ where: { id }, select: { id: true, ktpImageFileKey: true, profilePhotoFileKey: true } });
     if (!tenant) throw new NotFoundException('Tenant tidak ditemukan');
     const updated = await this.prisma.tenant.update({
       where: { id },
@@ -174,7 +174,8 @@ export class TenantsService {
     });
     await this.audit.log({ actorUserId: actor.id, action: 'KTP_UPLOAD', entityType: 'Tenant', entityId: String(id) });
     // fileKey lama (jika ada) dikembalikan agar controller bisa hapus file fisiknya.
-    return { tenant: updated, previousFileKey: tenant.ktpImageFileKey };
+    // PUB-FOTO-PROFIL-KTP: hadProfilePhoto menentukan apakah controller perlu auto-derive avatar.
+    return { tenant: updated, previousFileKey: tenant.ktpImageFileKey, hadProfilePhoto: Boolean(tenant.profilePhotoFileKey) };
   }
 
   /** OWNER memverifikasi KTP (gate aktivasi kamar bila diaktifkan). */
@@ -200,9 +201,16 @@ export class TenantsService {
 
   /** Hapus data KTP (UU PDP) — kembalikan fileKey agar controller hapus file fisik. */
   async clearKtp(id: number, actor: CurrentUserPayload, reason: string) {
-    const tenant = await this.prisma.tenant.findUnique({ where: { id }, select: { id: true, ktpImageFileKey: true } });
+    const tenant = await this.prisma.tenant.findUnique({
+      where: { id },
+      select: { id: true, ktpImageFileKey: true, profilePhotoFileKey: true, profilePhotoSource: true },
+    });
     if (!tenant) throw new NotFoundException('Tenant tidak ditemukan');
     const previousFileKey = tenant.ktpImageFileKey;
+    // PUB-FOTO-PROFIL-KTP (UU PDP): avatar yang DITURUNKAN dari KTP (KTP_AUTO) ikut dihapus
+    // saat KTP dihapus — tak menyisakan turunan data identitas. Avatar MANUAL tetap (foto terpisah).
+    const clearAutoPhoto = tenant.profilePhotoSource === ProfilePhotoSource.KTP_AUTO;
+    const previousProfilePhotoFileKey = clearAutoPhoto ? tenant.profilePhotoFileKey : null;
     await this.prisma.tenant.update({
       where: { id },
       data: {
@@ -214,9 +222,72 @@ export class TenantsService {
         ktpVerifiedAt: null,
         ktpVerifiedById: null,
         ktpDeletedAt: new Date(),
+        ...(clearAutoPhoto
+          ? {
+              profilePhotoUrl: null,
+              profilePhotoFileKey: null,
+              profilePhotoMimeType: null,
+              profilePhotoFileSizeBytes: null,
+              profilePhotoSource: null,
+              profilePhotoUpdatedAt: null,
+            }
+          : {}),
       },
     });
     await this.audit.log({ actorUserId: actor.id, action: 'KTP_DELETE', entityType: 'Tenant', entityId: String(id), meta: { reason } });
+    return { previousFileKey, previousProfilePhotoFileKey };
+  }
+
+  // ── PUB-FOTO-PROFIL-KTP: foto profil/avatar tenant ──────────────────────────
+
+  /** Set foto profil (KTP_AUTO saat diturunkan dari KTP, MANUAL saat owner/admin unggah ulang). */
+  async setProfilePhoto(
+    id: number,
+    file: { fileKey: string; fileUrl: string; mimeType: string; fileSizeBytes?: number },
+    source: ProfilePhotoSource,
+    actor: CurrentUserPayload,
+  ) {
+    const tenant = await this.prisma.tenant.findUnique({ where: { id }, select: { id: true, profilePhotoFileKey: true } });
+    if (!tenant) throw new NotFoundException('Tenant tidak ditemukan');
+    const updated = await this.prisma.tenant.update({
+      where: { id },
+      data: {
+        profilePhotoUrl: file.fileUrl,
+        profilePhotoFileKey: file.fileKey,
+        profilePhotoMimeType: file.mimeType,
+        profilePhotoFileSizeBytes: file.fileSizeBytes ?? null,
+        profilePhotoSource: source,
+        profilePhotoUpdatedAt: new Date(),
+      },
+    });
+    await this.audit.log({ actorUserId: actor.id, action: 'PROFILE_PHOTO_SET', entityType: 'Tenant', entityId: String(id), meta: { source } });
+    return { tenant: updated, previousFileKey: tenant.profilePhotoFileKey };
+  }
+
+  /** fileKey untuk penyajian terproteksi avatar. */
+  async getProfilePhotoKey(id: number): Promise<string> {
+    const tenant = await this.prisma.tenant.findUnique({ where: { id }, select: { profilePhotoFileKey: true } });
+    if (!tenant?.profilePhotoFileKey) throw new NotFoundException('Foto profil tidak ditemukan');
+    return tenant.profilePhotoFileKey;
+  }
+
+  /** Hapus foto profil — kembalikan fileKey agar controller hapus file fisik. */
+  async clearProfilePhoto(id: number, actor: CurrentUserPayload) {
+    const tenant = await this.prisma.tenant.findUnique({ where: { id }, select: { id: true, profilePhotoFileKey: true } });
+    if (!tenant) throw new NotFoundException('Tenant tidak ditemukan');
+    const previousFileKey = tenant.profilePhotoFileKey;
+    await this.prisma.tenant.update({
+      where: { id },
+      data: {
+        profilePhotoUrl: null,
+        profilePhotoFileKey: null,
+        profilePhotoMimeType: null,
+        profilePhotoFileSizeBytes: null,
+        profilePhotoSource: null,
+        profilePhotoUpdatedAt: null,
+      },
+    });
+    await this.audit.log({ actorUserId: actor.id, action: 'PROFILE_PHOTO_DELETE', entityType: 'Tenant', entityId: String(id) });
     return { previousFileKey };
   }
 
@@ -576,6 +647,8 @@ export class TenantsService {
         isActive: true,
         createdAt: true,
         updatedAt: true,
+        // PUB-FOTO-PROFIL-KTP: url avatar terproteksi (disajikan via endpoint authed).
+        profilePhotoUrl: true,
         // notes deliberately excluded — admin-internal field
       },
     });

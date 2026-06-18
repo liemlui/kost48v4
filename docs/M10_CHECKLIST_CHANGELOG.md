@@ -376,7 +376,7 @@ Output akhir:
 
 #### B5 — Meter & profil tenant
 - [x] **PUB-METER-JADWAL:** tenant sudah bisa melihat jendela catat meter bulan ini + status sudah/belum di `/portal/stay`; tenant hanya bisa membaca meter kamar aktifnya.
-- [ ] **PUB-FOTO-PROFIL-KTP:** KTP upload sudah ada, tetapi foto KTP pertama belum otomatis menjadi avatar/profil tenant; admin belum punya flow ganti foto profil.
+- [x] **PUB-FOTO-PROFIL-KTP:** foto KTP pertama otomatis menjadi avatar tenant; owner/admin bisa ganti/hapus foto profil; avatar disajikan via endpoint authed. Schema additive `20260618030000_tenant_profile_photo` dipakai untuk metadata profil.
 
 **Gate:** frontend `npm run build` PASS; jika menyentuh backend/schema, backend `npx tsc --noEmit` dan migration additive owner-approved.
 
@@ -449,7 +449,7 @@ Output akhir:
 **Rujukan:** `docs/M06_OPERASIONAL.md` · `docs/M07_PUBLIK_GROWTH.md` · `docs/M09_AUDIT.md` · `docs/AUDIT_POST_FIX.md`.
 
 #### E1 — Tenant gamification
-- [ ] **TEN-GAMIF:** ranking kebersihan depan kamar bulanan belum ada; Top-3 kamar yang ada sekarang berbasis poin kebaikan, bukan kebersihan bulanan.
+- [x] **TEN-GAMIF:** ranking kebersihan depan kamar bulanan — backend `GET /public/rooms/cleanliness-ranking?month&year` (skor persentase `DONE/expected` dari assignment aktif area CLEANING per room, query month/year tervalidasi) + frontend kartu ranking di MyLoyaltyPage.
 - [~] **TEN-GAMIF privacy:** leaderboard poin yang ada tidak expose tenantId/nama; tetap perlu UAT ulang untuk ranking kebersihan baru.
 
 #### E2 — Marketing renewal
@@ -501,6 +501,19 @@ Output akhir:
 
 > Dipadatkan dari `docs/CHANGELOG.md`: header tanggal dipertahankan, tiap entry hanya menyimpan 1-2 poin outcome. Detail verbose tetap ada di source lama.
 
+### 2026-06-18 — feat(PUB-FOTO-PROFIL-KTP): avatar tenant dari foto KTP + kelola owner/admin
+- **Keputusan owner (M02):** foto profil tenant diturunkan dari foto KTP pertama; owner/admin bisa ganti ulang; gambar dikompres.
+- **Schema additive** (migration `20260618030000_tenant_profile_photo`): enum `ProfilePhotoSource {KTP_AUTO, MANUAL}` + field `profilePhoto*` di `Tenant`.
+- **BE:** unggah KTP pertama otomatis menyalin file → `uploads/profile-photos/` dan set avatar `KTP_AUTO`; `POST/DELETE /tenants/:id/profile-photo` (OWNER/ADMIN ganti/hapus → `MANUAL`); `GET /tenants/:id/profile-photo/image` terproteksi (OWNER/ADMIN atau tenant **pemilik** saja). Avatar `KTP_AUTO` ikut terhapus saat KTP dihapus (UU PDP); avatar `MANUAL` tetap.
+- **FE:** komponen `TenantAvatar` (foto + fallback inisial via `useAuthenticatedMediaUrl`) di topbar owner/tenant + workspace tenant; kartu `TenantProfilePhotoCard` (ganti/hapus, kompres 512px) di `StayDetailPage`; `profilePhotoUrl` ditambahkan ke `/tenant/profile`.
+- Gate: BE build 0 · FE build 109 chunk, PWA ok · **UAT runtime LULUS 10/10** (auto-avatar 201, serve owner/tenant 200, tenant lihat avatar tenant lain 403, profile url terisi, re-upload MANUAL 201, hapus KTP→avatar MANUAL tetap / avatar KTP_AUTO terhapus).
+
+### 2026-06-18 — fix(audit AI): facility photo URL/slug + ranking cleanliness + avatar KTP
+- **PUB-FACILITY-PHOTO:** slug upload Settings disamakan dengan slug landing page; URL `/uploads/...` kini di-resolve ke backend/API origin; thumbnail fasilitas diberi dimensi stabil.
+- **TEN-GAMIF:** ranking kebersihan memakai assignment aktif sebagai denominator (`doneCount/expectedCount`, `score%`), termasuk kamar yang belum dikerjakan, dan query `month/year` divalidasi.
+- **PUB-FOTO-PROFIL-KTP:** auto-avatar dari KTP tidak gagal diam-diam lagi; response memberi warning bila turunan avatar gagal dan sukses mengembalikan tenant dengan avatar terbaru.
+- Gate: BE `npx.cmd tsc --noEmit` PASS; FE `npx.cmd tsc -b --pretty false` PASS; FE `npm.cmd run build` PASS (rerun escalated karena sandbox Vite access denied).
+
 ### 2026-06-18 — feat(PUB-LAYANAN-MINAT): tenant ajukan minat layanan + proses admin/owner
 - **Schema additive** (migration `20260618010000_service_interest`): model `ServiceInterest` (serviceId/tenantId/status `ServiceInterestStatus` PENDING·CONTACTED·DONE·CANCELLED/note/adminNote) + relasi cascade ke `AdditionalService`+`Tenant`.
 - **BE:** `POST /additional-services/:id/interest` (TENANT, dedupe PENDING agar tak dobel) + `GET /my-interests` (TENANT) + `GET /interests` & `PATCH /interests/:id` (OWNER/ADMIN). Tiap minat baru bikin notif `createOnce` ke semua admin/owner (linkTo `/service-interests`).
@@ -512,6 +525,11 @@ Output akhir:
 - **BE:** `GET /meter-readings` kini mengizinkan TENANT membaca meter hanya untuk kamar aktifnya; query `roomId` lain ditolak.
 - **FE:** `/portal/stay` menampilkan jendela catat meter bulan ini, status sudah/belum, catatan terakhir, dan CTA catat meter.
 - Gate: BE `npx.cmd tsc --noEmit` PASS; FE `npx.cmd tsc -b` PASS; FE `npm.cmd run build` PASS (rerun escalated karena sandbox Vite access denied).
+
+### 2026-06-18 — feat(TEN-GAMIF): ranking kebersihan depan kamar bulanan (backend + frontend)
+- **TEN-GAMIF:** backend `GET /public/rooms/cleanliness-ranking?month&year` — hitung skor per kamar dari `StaffRoutineCompletion` dengan template area `CLEANING` per bulan.
+- **Frontend:** kartu "🧹 Ranking Kebersihan Bulan Ini" di `MyLoyaltyPage` — medali 🥇🥈🥉, anonim per kode kamar.
+- Gate: BE build 0 · FE build 109 chunk, PWA ok.
 
 ### 2026-06-18 — feat(PUB-FACILITY-PHOTO): upload foto fasilitas publik + tampil di landing page
 - **PUB-FACILITY-PHOTO:** Backend `POST /facility-images/upload/:slug` (OWNER/ADMIN, file JPG/PNG/WebP, max 2MB) + `GET /facility-images` (publik) + `DELETE /facility-images/:slug`.

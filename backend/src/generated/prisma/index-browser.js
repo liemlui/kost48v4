@@ -180,6 +180,12 @@ exports.Prisma.TenantScalarFieldEnum = {
   ktpVerifiedAt: 'ktpVerifiedAt',
   ktpVerifiedById: 'ktpVerifiedById',
   ktpDeletedAt: 'ktpDeletedAt',
+  profilePhotoUrl: 'profilePhotoUrl',
+  profilePhotoFileKey: 'profilePhotoFileKey',
+  profilePhotoMimeType: 'profilePhotoMimeType',
+  profilePhotoFileSizeBytes: 'profilePhotoFileSizeBytes',
+  profilePhotoSource: 'profilePhotoSource',
+  profilePhotoUpdatedAt: 'profilePhotoUpdatedAt',
   gender: 'gender',
   birthDate: 'birthDate',
   originCity: 'originCity',
@@ -1069,6 +1075,11 @@ exports.UserRole = exports.$Enums.UserRole = {
   ADMIN: 'ADMIN',
   STAFF: 'STAFF',
   TENANT: 'TENANT'
+};
+
+exports.ProfilePhotoSource = exports.$Enums.ProfilePhotoSource = {
+  KTP_AUTO: 'KTP_AUTO',
+  MANUAL: 'MANUAL'
 };
 
 exports.Gender = exports.$Enums.Gender = {

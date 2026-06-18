@@ -96,6 +96,8 @@ export type TenantSelfProfile = {
   emergencyContactName?: string | null;
   emergencyContactPhone?: string | null;
   isActive?: boolean;
+  // PUB-FOTO-PROFIL-KTP: url avatar terproteksi (disajikan via endpoint authed).
+  profilePhotoUrl?: string | null;
 };
 
 export type TenantProfileResponse = {

@@ -9,6 +9,7 @@ import RoleWorkspaceTabs from '../workspace/RoleWorkspaceTabs';
 import GlobalSearch from './GlobalSearch';
 import PaymentUrgencyChip from '../payment-urgency/PaymentUrgencyChip';
 import Kost48LogoMark from '../common/Kost48LogoMark';
+import TenantAvatar from '../common/TenantAvatar';
 import { LoadingDashboard } from '../../pages/dashboard/dashboardShared';
 const AdminDashboard = lazy(() => import('../../pages/dashboard/DashboardAdmin'));
 import {
@@ -295,9 +296,7 @@ export default function AppLayout({ children }: { children?: ReactNode }) {
                   <strong>{user?.fullName}</strong>
                   <em>{getRoleLabel(user?.role)}</em>
                 </span>
-                <span className="user-avatar" role="img" aria-label={`Avatar ${user?.fullName ?? 'User'}`}>
-                  {getInitials(user?.fullName)}
-                </span>
+                <TenantAvatar tenantId={user?.tenantId} fullName={user?.fullName} enabled={user?.role === 'TENANT'} />
               </button>
               <Button variant="outline-danger" size="sm" onClick={logout}>Logout</Button>
             </div>
@@ -406,9 +405,7 @@ export default function AppLayout({ children }: { children?: ReactNode }) {
                       <strong>{user?.fullName}</strong>
                       <em>{getRoleLabel(user?.role)}</em>
                     </span>
-                    <span className="user-avatar" role="img" aria-label={`Avatar ${user?.fullName ?? 'User'}`}>
-                      {getInitials(user?.fullName)}
-                    </span>
+                    <TenantAvatar tenantId={user?.tenantId} fullName={user?.fullName} enabled={user?.role === 'TENANT'} />
                   </button>
                   <Button variant="outline-danger" size="sm" onClick={logout}>Logout</Button>
                 </div>

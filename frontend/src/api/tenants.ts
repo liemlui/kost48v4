@@ -24,6 +24,24 @@ export interface CreatePortalAccessResponse {
   lastLoginAt: string | null;
 }
 
+// PUB-FOTO-PROFIL-KTP: url avatar terproteksi (butuh Authorization → pakai useAuthenticatedMediaUrl).
+export function tenantProfilePhotoUrl(tenantId: number): string {
+  return `/api/tenants/${tenantId}/profile-photo/image`;
+}
+
+// PUB-FOTO-PROFIL-KTP: owner/admin ganti foto profil tenant (file sudah dikompres di klien).
+export async function uploadTenantProfilePhoto(tenantId: number, file: File): Promise<void> {
+  const form = new FormData();
+  form.append('file', file);
+  await client.post(`/tenants/${tenantId}/profile-photo/upload`, form, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  });
+}
+
+export async function deleteTenantProfilePhoto(tenantId: number): Promise<void> {
+  await client.delete(`/tenants/${tenantId}/profile-photo`);
+}
+
 export async function togglePortalAccess(tenantId: number, isActive: boolean): Promise<TogglePortalAccessResponse> {
   const response = await client.patch<ApiEnvelope<TogglePortalAccessResponse>>(
     `/tenants/${tenantId}/portal-access/status`,

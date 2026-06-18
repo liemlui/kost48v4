@@ -16,7 +16,9 @@ export function isProtectedMediaUrl(value?: string | null) {
   return pathname.startsWith('/api/payment-submissions/proofs/')
     || pathname.startsWith('/api/tickets/images/')
     || pathname.startsWith('/api/announcements/images/')
-    || pathname.startsWith('/uploads/ticket-images/');
+    || pathname.startsWith('/uploads/ticket-images/')
+    // PUB-FOTO-PROFIL-KTP: avatar tenant disajikan terproteksi (butuh Authorization).
+    || /^\/api\/tenants\/\d+\/profile-photo\/image$/.test(pathname);
 }
 
 function toApiClientPath(value: string) {

@@ -6,6 +6,7 @@ import PageHeader from '../../components/common/PageHeader';
 import StatusBadge from '../../components/common/StatusBadge';
 import { HeroSkeleton } from '../../components/common/SkeletonLoader';
 import { AssistantPanel, BlockedReasonCard, ReadinessChecklist, LifecycleTimeline, type AssistantItem, type ReadinessItem, type TimelineStep } from '../../components/command-center';
+import TenantProfilePhotoCard from '../../components/tenant/TenantProfilePhotoCard';
 import InfoTab from '../../components/stays/InfoTab';
 import MeterTab from '../../components/stays/MeterTab';
 import FinanceTab from '../../components/stays/FinanceTab';
@@ -246,6 +247,10 @@ export default function StayDetailPage() {
         title={stay.tenant?.fullName ?? `Masa Sewa #${stay.id}`}
         description={`Kamar ${stay.room?.code ?? stay.roomId} · Status ${stay.status} · Deposit ${stay.depositStatus ?? 'HELD'}`}
       />
+
+      {stay.tenant?.id ? (
+        <TenantProfilePhotoCard tenantId={stay.tenant.id} fullName={stay.tenant.fullName} />
+      ) : null}
 
       <AssistantPanel title="Asisten Checkout & Masa Sewa" subtitle="Blocker utama masa sewa ini." items={assistantItems} emptyTitle="Tidak ada blocker besar" emptyMessage="Tidak ada blocker utama." />
 

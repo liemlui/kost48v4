@@ -572,6 +572,16 @@ model Tenant {
   ktpVerifiedById          Int?
   ktpDeletedAt             DateTime?
 
+  // PUB-FOTO-PROFIL-KTP: foto profil/avatar tenant. Default diturunkan dari foto KTP
+  // pertama (source KTP_AUTO); owner/admin bisa ganti (source MANUAL). KTP_AUTO ikut
+  // terhapus saat KTP dihapus (UU PDP); MANUAL tetap karena foto terpisah dari KTP.
+  profilePhotoUrl           String?
+  profilePhotoFileKey       String?
+  profilePhotoMimeType      String?
+  profilePhotoFileSizeBytes Int?
+  profilePhotoSource        ProfilePhotoSource?
+  profilePhotoUpdatedAt     DateTime?
+
   gender          Gender?
   birthDate       DateTime?
   originCity      String?
@@ -2011,6 +2021,12 @@ enum ServiceInterestStatus {
   CONTACTED
   DONE
   CANCELLED
+}
+
+// PUB-FOTO-PROFIL-KTP: asal foto profil tenant.
+enum ProfilePhotoSource {
+  KTP_AUTO // diturunkan otomatis dari foto KTP pertama
+  MANUAL // diunggah ulang owner/admin
 }
 
 model ServiceInterest {

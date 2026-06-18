@@ -974,6 +974,14 @@ export const ServiceInterestStatus: {
 
 export type ServiceInterestStatus = (typeof ServiceInterestStatus)[keyof typeof ServiceInterestStatus]
 
+
+export const ProfilePhotoSource: {
+  KTP_AUTO: 'KTP_AUTO',
+  MANUAL: 'MANUAL'
+};
+
+export type ProfilePhotoSource = (typeof ProfilePhotoSource)[keyof typeof ProfilePhotoSource]
+
 }
 
 export type UserRole = $Enums.UserRole
@@ -1227,6 +1235,10 @@ export const ReferralStatus: typeof $Enums.ReferralStatus
 export type ServiceInterestStatus = $Enums.ServiceInterestStatus
 
 export const ServiceInterestStatus: typeof $Enums.ServiceInterestStatus
+
+export type ProfilePhotoSource = $Enums.ProfilePhotoSource
+
+export const ProfilePhotoSource: typeof $Enums.ProfilePhotoSource
 
 /**
  * ##  Prisma Client ʲˢ
@@ -12667,12 +12679,14 @@ export namespace Prisma {
     id: number | null
     ktpImageFileSizeBytes: number | null
     ktpVerifiedById: number | null
+    profilePhotoFileSizeBytes: number | null
   }
 
   export type TenantSumAggregateOutputType = {
     id: number | null
     ktpImageFileSizeBytes: number | null
     ktpVerifiedById: number | null
+    profilePhotoFileSizeBytes: number | null
   }
 
   export type TenantMinAggregateOutputType = {
@@ -12689,6 +12703,12 @@ export namespace Prisma {
     ktpVerifiedAt: Date | null
     ktpVerifiedById: number | null
     ktpDeletedAt: Date | null
+    profilePhotoUrl: string | null
+    profilePhotoFileKey: string | null
+    profilePhotoMimeType: string | null
+    profilePhotoFileSizeBytes: number | null
+    profilePhotoSource: $Enums.ProfilePhotoSource | null
+    profilePhotoUpdatedAt: Date | null
     gender: $Enums.Gender | null
     birthDate: Date | null
     originCity: string | null
@@ -12717,6 +12737,12 @@ export namespace Prisma {
     ktpVerifiedAt: Date | null
     ktpVerifiedById: number | null
     ktpDeletedAt: Date | null
+    profilePhotoUrl: string | null
+    profilePhotoFileKey: string | null
+    profilePhotoMimeType: string | null
+    profilePhotoFileSizeBytes: number | null
+    profilePhotoSource: $Enums.ProfilePhotoSource | null
+    profilePhotoUpdatedAt: Date | null
     gender: $Enums.Gender | null
     birthDate: Date | null
     originCity: string | null
@@ -12745,6 +12771,12 @@ export namespace Prisma {
     ktpVerifiedAt: number
     ktpVerifiedById: number
     ktpDeletedAt: number
+    profilePhotoUrl: number
+    profilePhotoFileKey: number
+    profilePhotoMimeType: number
+    profilePhotoFileSizeBytes: number
+    profilePhotoSource: number
+    profilePhotoUpdatedAt: number
     gender: number
     birthDate: number
     originCity: number
@@ -12765,12 +12797,14 @@ export namespace Prisma {
     id?: true
     ktpImageFileSizeBytes?: true
     ktpVerifiedById?: true
+    profilePhotoFileSizeBytes?: true
   }
 
   export type TenantSumAggregateInputType = {
     id?: true
     ktpImageFileSizeBytes?: true
     ktpVerifiedById?: true
+    profilePhotoFileSizeBytes?: true
   }
 
   export type TenantMinAggregateInputType = {
@@ -12787,6 +12821,12 @@ export namespace Prisma {
     ktpVerifiedAt?: true
     ktpVerifiedById?: true
     ktpDeletedAt?: true
+    profilePhotoUrl?: true
+    profilePhotoFileKey?: true
+    profilePhotoMimeType?: true
+    profilePhotoFileSizeBytes?: true
+    profilePhotoSource?: true
+    profilePhotoUpdatedAt?: true
     gender?: true
     birthDate?: true
     originCity?: true
@@ -12815,6 +12855,12 @@ export namespace Prisma {
     ktpVerifiedAt?: true
     ktpVerifiedById?: true
     ktpDeletedAt?: true
+    profilePhotoUrl?: true
+    profilePhotoFileKey?: true
+    profilePhotoMimeType?: true
+    profilePhotoFileSizeBytes?: true
+    profilePhotoSource?: true
+    profilePhotoUpdatedAt?: true
     gender?: true
     birthDate?: true
     originCity?: true
@@ -12843,6 +12889,12 @@ export namespace Prisma {
     ktpVerifiedAt?: true
     ktpVerifiedById?: true
     ktpDeletedAt?: true
+    profilePhotoUrl?: true
+    profilePhotoFileKey?: true
+    profilePhotoMimeType?: true
+    profilePhotoFileSizeBytes?: true
+    profilePhotoSource?: true
+    profilePhotoUpdatedAt?: true
     gender?: true
     birthDate?: true
     originCity?: true
@@ -12958,6 +13010,12 @@ export namespace Prisma {
     ktpVerifiedAt: Date | null
     ktpVerifiedById: number | null
     ktpDeletedAt: Date | null
+    profilePhotoUrl: string | null
+    profilePhotoFileKey: string | null
+    profilePhotoMimeType: string | null
+    profilePhotoFileSizeBytes: number | null
+    profilePhotoSource: $Enums.ProfilePhotoSource | null
+    profilePhotoUpdatedAt: Date | null
     gender: $Enums.Gender | null
     birthDate: Date | null
     originCity: string | null
@@ -13005,6 +13063,12 @@ export namespace Prisma {
     ktpVerifiedAt?: boolean
     ktpVerifiedById?: boolean
     ktpDeletedAt?: boolean
+    profilePhotoUrl?: boolean
+    profilePhotoFileKey?: boolean
+    profilePhotoMimeType?: boolean
+    profilePhotoFileSizeBytes?: boolean
+    profilePhotoSource?: boolean
+    profilePhotoUpdatedAt?: boolean
     gender?: boolean
     birthDate?: boolean
     originCity?: boolean
@@ -13049,6 +13113,12 @@ export namespace Prisma {
     ktpVerifiedAt?: boolean
     ktpVerifiedById?: boolean
     ktpDeletedAt?: boolean
+    profilePhotoUrl?: boolean
+    profilePhotoFileKey?: boolean
+    profilePhotoMimeType?: boolean
+    profilePhotoFileSizeBytes?: boolean
+    profilePhotoSource?: boolean
+    profilePhotoUpdatedAt?: boolean
     gender?: boolean
     birthDate?: boolean
     originCity?: boolean
@@ -13078,6 +13148,12 @@ export namespace Prisma {
     ktpVerifiedAt?: boolean
     ktpVerifiedById?: boolean
     ktpDeletedAt?: boolean
+    profilePhotoUrl?: boolean
+    profilePhotoFileKey?: boolean
+    profilePhotoMimeType?: boolean
+    profilePhotoFileSizeBytes?: boolean
+    profilePhotoSource?: boolean
+    profilePhotoUpdatedAt?: boolean
     gender?: boolean
     birthDate?: boolean
     originCity?: boolean
@@ -13107,6 +13183,12 @@ export namespace Prisma {
     ktpVerifiedAt?: boolean
     ktpVerifiedById?: boolean
     ktpDeletedAt?: boolean
+    profilePhotoUrl?: boolean
+    profilePhotoFileKey?: boolean
+    profilePhotoMimeType?: boolean
+    profilePhotoFileSizeBytes?: boolean
+    profilePhotoSource?: boolean
+    profilePhotoUpdatedAt?: boolean
     gender?: boolean
     birthDate?: boolean
     originCity?: boolean
@@ -13121,7 +13203,7 @@ export namespace Prisma {
     referralCode?: boolean
   }
 
-  export type TenantOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "fullName" | "phone" | "email" | "identityNumber" | "ktpImageUrl" | "ktpImageFileKey" | "ktpImageOriginalFilename" | "ktpImageMimeType" | "ktpImageFileSizeBytes" | "ktpVerifiedAt" | "ktpVerifiedById" | "ktpDeletedAt" | "gender" | "birthDate" | "originCity" | "occupation" | "companyOrCampus" | "emergencyContactName" | "emergencyContactPhone" | "notes" | "isActive" | "createdAt" | "updatedAt" | "referralCode", ExtArgs["result"]["tenant"]>
+  export type TenantOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "fullName" | "phone" | "email" | "identityNumber" | "ktpImageUrl" | "ktpImageFileKey" | "ktpImageOriginalFilename" | "ktpImageMimeType" | "ktpImageFileSizeBytes" | "ktpVerifiedAt" | "ktpVerifiedById" | "ktpDeletedAt" | "profilePhotoUrl" | "profilePhotoFileKey" | "profilePhotoMimeType" | "profilePhotoFileSizeBytes" | "profilePhotoSource" | "profilePhotoUpdatedAt" | "gender" | "birthDate" | "originCity" | "occupation" | "companyOrCampus" | "emergencyContactName" | "emergencyContactPhone" | "notes" | "isActive" | "createdAt" | "updatedAt" | "referralCode", ExtArgs["result"]["tenant"]>
   export type TenantInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     user?: boolean | Tenant$userArgs<ExtArgs>
     ktpVerifiedBy?: boolean | Tenant$ktpVerifiedByArgs<ExtArgs>
@@ -13180,6 +13262,12 @@ export namespace Prisma {
       ktpVerifiedAt: Date | null
       ktpVerifiedById: number | null
       ktpDeletedAt: Date | null
+      profilePhotoUrl: string | null
+      profilePhotoFileKey: string | null
+      profilePhotoMimeType: string | null
+      profilePhotoFileSizeBytes: number | null
+      profilePhotoSource: $Enums.ProfilePhotoSource | null
+      profilePhotoUpdatedAt: Date | null
       gender: $Enums.Gender | null
       birthDate: Date | null
       originCity: string | null
@@ -13643,6 +13731,12 @@ export namespace Prisma {
     readonly ktpVerifiedAt: FieldRef<"Tenant", 'DateTime'>
     readonly ktpVerifiedById: FieldRef<"Tenant", 'Int'>
     readonly ktpDeletedAt: FieldRef<"Tenant", 'DateTime'>
+    readonly profilePhotoUrl: FieldRef<"Tenant", 'String'>
+    readonly profilePhotoFileKey: FieldRef<"Tenant", 'String'>
+    readonly profilePhotoMimeType: FieldRef<"Tenant", 'String'>
+    readonly profilePhotoFileSizeBytes: FieldRef<"Tenant", 'Int'>
+    readonly profilePhotoSource: FieldRef<"Tenant", 'ProfilePhotoSource'>
+    readonly profilePhotoUpdatedAt: FieldRef<"Tenant", 'DateTime'>
     readonly gender: FieldRef<"Tenant", 'Gender'>
     readonly birthDate: FieldRef<"Tenant", 'DateTime'>
     readonly originCity: FieldRef<"Tenant", 'String'>
@@ -79071,6 +79165,12 @@ export namespace Prisma {
     ktpVerifiedAt: 'ktpVerifiedAt',
     ktpVerifiedById: 'ktpVerifiedById',
     ktpDeletedAt: 'ktpDeletedAt',
+    profilePhotoUrl: 'profilePhotoUrl',
+    profilePhotoFileKey: 'profilePhotoFileKey',
+    profilePhotoMimeType: 'profilePhotoMimeType',
+    profilePhotoFileSizeBytes: 'profilePhotoFileSizeBytes',
+    profilePhotoSource: 'profilePhotoSource',
+    profilePhotoUpdatedAt: 'profilePhotoUpdatedAt',
     gender: 'gender',
     birthDate: 'birthDate',
     originCity: 'originCity',
@@ -80203,6 +80303,20 @@ export namespace Prisma {
    * Reference to a field of type 'QueryMode'
    */
   export type EnumQueryModeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'QueryMode'>
+    
+
+
+  /**
+   * Reference to a field of type 'ProfilePhotoSource'
+   */
+  export type EnumProfilePhotoSourceFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ProfilePhotoSource'>
+    
+
+
+  /**
+   * Reference to a field of type 'ProfilePhotoSource[]'
+   */
+  export type ListEnumProfilePhotoSourceFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ProfilePhotoSource[]'>
     
 
 
@@ -81508,6 +81622,12 @@ export namespace Prisma {
     ktpVerifiedAt?: DateTimeNullableFilter<"Tenant"> | Date | string | null
     ktpVerifiedById?: IntNullableFilter<"Tenant"> | number | null
     ktpDeletedAt?: DateTimeNullableFilter<"Tenant"> | Date | string | null
+    profilePhotoUrl?: StringNullableFilter<"Tenant"> | string | null
+    profilePhotoFileKey?: StringNullableFilter<"Tenant"> | string | null
+    profilePhotoMimeType?: StringNullableFilter<"Tenant"> | string | null
+    profilePhotoFileSizeBytes?: IntNullableFilter<"Tenant"> | number | null
+    profilePhotoSource?: EnumProfilePhotoSourceNullableFilter<"Tenant"> | $Enums.ProfilePhotoSource | null
+    profilePhotoUpdatedAt?: DateTimeNullableFilter<"Tenant"> | Date | string | null
     gender?: EnumGenderNullableFilter<"Tenant"> | $Enums.Gender | null
     birthDate?: DateTimeNullableFilter<"Tenant"> | Date | string | null
     originCity?: StringNullableFilter<"Tenant"> | string | null
@@ -81551,6 +81671,12 @@ export namespace Prisma {
     ktpVerifiedAt?: SortOrderInput | SortOrder
     ktpVerifiedById?: SortOrderInput | SortOrder
     ktpDeletedAt?: SortOrderInput | SortOrder
+    profilePhotoUrl?: SortOrderInput | SortOrder
+    profilePhotoFileKey?: SortOrderInput | SortOrder
+    profilePhotoMimeType?: SortOrderInput | SortOrder
+    profilePhotoFileSizeBytes?: SortOrderInput | SortOrder
+    profilePhotoSource?: SortOrderInput | SortOrder
+    profilePhotoUpdatedAt?: SortOrderInput | SortOrder
     gender?: SortOrderInput | SortOrder
     birthDate?: SortOrderInput | SortOrder
     originCity?: SortOrderInput | SortOrder
@@ -81598,6 +81724,12 @@ export namespace Prisma {
     ktpVerifiedAt?: DateTimeNullableFilter<"Tenant"> | Date | string | null
     ktpVerifiedById?: IntNullableFilter<"Tenant"> | number | null
     ktpDeletedAt?: DateTimeNullableFilter<"Tenant"> | Date | string | null
+    profilePhotoUrl?: StringNullableFilter<"Tenant"> | string | null
+    profilePhotoFileKey?: StringNullableFilter<"Tenant"> | string | null
+    profilePhotoMimeType?: StringNullableFilter<"Tenant"> | string | null
+    profilePhotoFileSizeBytes?: IntNullableFilter<"Tenant"> | number | null
+    profilePhotoSource?: EnumProfilePhotoSourceNullableFilter<"Tenant"> | $Enums.ProfilePhotoSource | null
+    profilePhotoUpdatedAt?: DateTimeNullableFilter<"Tenant"> | Date | string | null
     gender?: EnumGenderNullableFilter<"Tenant"> | $Enums.Gender | null
     birthDate?: DateTimeNullableFilter<"Tenant"> | Date | string | null
     originCity?: StringNullableFilter<"Tenant"> | string | null
@@ -81640,6 +81772,12 @@ export namespace Prisma {
     ktpVerifiedAt?: SortOrderInput | SortOrder
     ktpVerifiedById?: SortOrderInput | SortOrder
     ktpDeletedAt?: SortOrderInput | SortOrder
+    profilePhotoUrl?: SortOrderInput | SortOrder
+    profilePhotoFileKey?: SortOrderInput | SortOrder
+    profilePhotoMimeType?: SortOrderInput | SortOrder
+    profilePhotoFileSizeBytes?: SortOrderInput | SortOrder
+    profilePhotoSource?: SortOrderInput | SortOrder
+    profilePhotoUpdatedAt?: SortOrderInput | SortOrder
     gender?: SortOrderInput | SortOrder
     birthDate?: SortOrderInput | SortOrder
     originCity?: SortOrderInput | SortOrder
@@ -81676,6 +81814,12 @@ export namespace Prisma {
     ktpVerifiedAt?: DateTimeNullableWithAggregatesFilter<"Tenant"> | Date | string | null
     ktpVerifiedById?: IntNullableWithAggregatesFilter<"Tenant"> | number | null
     ktpDeletedAt?: DateTimeNullableWithAggregatesFilter<"Tenant"> | Date | string | null
+    profilePhotoUrl?: StringNullableWithAggregatesFilter<"Tenant"> | string | null
+    profilePhotoFileKey?: StringNullableWithAggregatesFilter<"Tenant"> | string | null
+    profilePhotoMimeType?: StringNullableWithAggregatesFilter<"Tenant"> | string | null
+    profilePhotoFileSizeBytes?: IntNullableWithAggregatesFilter<"Tenant"> | number | null
+    profilePhotoSource?: EnumProfilePhotoSourceNullableWithAggregatesFilter<"Tenant"> | $Enums.ProfilePhotoSource | null
+    profilePhotoUpdatedAt?: DateTimeNullableWithAggregatesFilter<"Tenant"> | Date | string | null
     gender?: EnumGenderNullableWithAggregatesFilter<"Tenant"> | $Enums.Gender | null
     birthDate?: DateTimeNullableWithAggregatesFilter<"Tenant"> | Date | string | null
     originCity?: StringNullableWithAggregatesFilter<"Tenant"> | string | null
@@ -87586,6 +87730,12 @@ export namespace Prisma {
     ktpImageFileSizeBytes?: number | null
     ktpVerifiedAt?: Date | string | null
     ktpDeletedAt?: Date | string | null
+    profilePhotoUrl?: string | null
+    profilePhotoFileKey?: string | null
+    profilePhotoMimeType?: string | null
+    profilePhotoFileSizeBytes?: number | null
+    profilePhotoSource?: $Enums.ProfilePhotoSource | null
+    profilePhotoUpdatedAt?: Date | string | null
     gender?: $Enums.Gender | null
     birthDate?: Date | string | null
     originCity?: string | null
@@ -87629,6 +87779,12 @@ export namespace Prisma {
     ktpVerifiedAt?: Date | string | null
     ktpVerifiedById?: number | null
     ktpDeletedAt?: Date | string | null
+    profilePhotoUrl?: string | null
+    profilePhotoFileKey?: string | null
+    profilePhotoMimeType?: string | null
+    profilePhotoFileSizeBytes?: number | null
+    profilePhotoSource?: $Enums.ProfilePhotoSource | null
+    profilePhotoUpdatedAt?: Date | string | null
     gender?: $Enums.Gender | null
     birthDate?: Date | string | null
     originCity?: string | null
@@ -87669,6 +87825,12 @@ export namespace Prisma {
     ktpImageFileSizeBytes?: NullableIntFieldUpdateOperationsInput | number | null
     ktpVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     ktpDeletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    profilePhotoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    profilePhotoFileKey?: NullableStringFieldUpdateOperationsInput | string | null
+    profilePhotoMimeType?: NullableStringFieldUpdateOperationsInput | string | null
+    profilePhotoFileSizeBytes?: NullableIntFieldUpdateOperationsInput | number | null
+    profilePhotoSource?: NullableEnumProfilePhotoSourceFieldUpdateOperationsInput | $Enums.ProfilePhotoSource | null
+    profilePhotoUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     gender?: NullableEnumGenderFieldUpdateOperationsInput | $Enums.Gender | null
     birthDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     originCity?: NullableStringFieldUpdateOperationsInput | string | null
@@ -87712,6 +87874,12 @@ export namespace Prisma {
     ktpVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     ktpVerifiedById?: NullableIntFieldUpdateOperationsInput | number | null
     ktpDeletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    profilePhotoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    profilePhotoFileKey?: NullableStringFieldUpdateOperationsInput | string | null
+    profilePhotoMimeType?: NullableStringFieldUpdateOperationsInput | string | null
+    profilePhotoFileSizeBytes?: NullableIntFieldUpdateOperationsInput | number | null
+    profilePhotoSource?: NullableEnumProfilePhotoSourceFieldUpdateOperationsInput | $Enums.ProfilePhotoSource | null
+    profilePhotoUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     gender?: NullableEnumGenderFieldUpdateOperationsInput | $Enums.Gender | null
     birthDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     originCity?: NullableStringFieldUpdateOperationsInput | string | null
@@ -87754,6 +87922,12 @@ export namespace Prisma {
     ktpVerifiedAt?: Date | string | null
     ktpVerifiedById?: number | null
     ktpDeletedAt?: Date | string | null
+    profilePhotoUrl?: string | null
+    profilePhotoFileKey?: string | null
+    profilePhotoMimeType?: string | null
+    profilePhotoFileSizeBytes?: number | null
+    profilePhotoSource?: $Enums.ProfilePhotoSource | null
+    profilePhotoUpdatedAt?: Date | string | null
     gender?: $Enums.Gender | null
     birthDate?: Date | string | null
     originCity?: string | null
@@ -87780,6 +87954,12 @@ export namespace Prisma {
     ktpImageFileSizeBytes?: NullableIntFieldUpdateOperationsInput | number | null
     ktpVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     ktpDeletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    profilePhotoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    profilePhotoFileKey?: NullableStringFieldUpdateOperationsInput | string | null
+    profilePhotoMimeType?: NullableStringFieldUpdateOperationsInput | string | null
+    profilePhotoFileSizeBytes?: NullableIntFieldUpdateOperationsInput | number | null
+    profilePhotoSource?: NullableEnumProfilePhotoSourceFieldUpdateOperationsInput | $Enums.ProfilePhotoSource | null
+    profilePhotoUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     gender?: NullableEnumGenderFieldUpdateOperationsInput | $Enums.Gender | null
     birthDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     originCity?: NullableStringFieldUpdateOperationsInput | string | null
@@ -87808,6 +87988,12 @@ export namespace Prisma {
     ktpVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     ktpVerifiedById?: NullableIntFieldUpdateOperationsInput | number | null
     ktpDeletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    profilePhotoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    profilePhotoFileKey?: NullableStringFieldUpdateOperationsInput | string | null
+    profilePhotoMimeType?: NullableStringFieldUpdateOperationsInput | string | null
+    profilePhotoFileSizeBytes?: NullableIntFieldUpdateOperationsInput | number | null
+    profilePhotoSource?: NullableEnumProfilePhotoSourceFieldUpdateOperationsInput | $Enums.ProfilePhotoSource | null
+    profilePhotoUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     gender?: NullableEnumGenderFieldUpdateOperationsInput | $Enums.Gender | null
     birthDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     originCity?: NullableStringFieldUpdateOperationsInput | string | null
@@ -94478,6 +94664,13 @@ export namespace Prisma {
     _max?: NestedBoolNullableFilter<$PrismaModel>
   }
 
+  export type EnumProfilePhotoSourceNullableFilter<$PrismaModel = never> = {
+    equals?: $Enums.ProfilePhotoSource | EnumProfilePhotoSourceFieldRefInput<$PrismaModel> | null
+    in?: $Enums.ProfilePhotoSource[] | ListEnumProfilePhotoSourceFieldRefInput<$PrismaModel> | null
+    notIn?: $Enums.ProfilePhotoSource[] | ListEnumProfilePhotoSourceFieldRefInput<$PrismaModel> | null
+    not?: NestedEnumProfilePhotoSourceNullableFilter<$PrismaModel> | $Enums.ProfilePhotoSource | null
+  }
+
   export type EnumGenderNullableFilter<$PrismaModel = never> = {
     equals?: $Enums.Gender | EnumGenderFieldRefInput<$PrismaModel> | null
     in?: $Enums.Gender[] | ListEnumGenderFieldRefInput<$PrismaModel> | null
@@ -94544,6 +94737,12 @@ export namespace Prisma {
     ktpVerifiedAt?: SortOrder
     ktpVerifiedById?: SortOrder
     ktpDeletedAt?: SortOrder
+    profilePhotoUrl?: SortOrder
+    profilePhotoFileKey?: SortOrder
+    profilePhotoMimeType?: SortOrder
+    profilePhotoFileSizeBytes?: SortOrder
+    profilePhotoSource?: SortOrder
+    profilePhotoUpdatedAt?: SortOrder
     gender?: SortOrder
     birthDate?: SortOrder
     originCity?: SortOrder
@@ -94562,6 +94761,7 @@ export namespace Prisma {
     id?: SortOrder
     ktpImageFileSizeBytes?: SortOrder
     ktpVerifiedById?: SortOrder
+    profilePhotoFileSizeBytes?: SortOrder
   }
 
   export type TenantMaxOrderByAggregateInput = {
@@ -94578,6 +94778,12 @@ export namespace Prisma {
     ktpVerifiedAt?: SortOrder
     ktpVerifiedById?: SortOrder
     ktpDeletedAt?: SortOrder
+    profilePhotoUrl?: SortOrder
+    profilePhotoFileKey?: SortOrder
+    profilePhotoMimeType?: SortOrder
+    profilePhotoFileSizeBytes?: SortOrder
+    profilePhotoSource?: SortOrder
+    profilePhotoUpdatedAt?: SortOrder
     gender?: SortOrder
     birthDate?: SortOrder
     originCity?: SortOrder
@@ -94606,6 +94812,12 @@ export namespace Prisma {
     ktpVerifiedAt?: SortOrder
     ktpVerifiedById?: SortOrder
     ktpDeletedAt?: SortOrder
+    profilePhotoUrl?: SortOrder
+    profilePhotoFileKey?: SortOrder
+    profilePhotoMimeType?: SortOrder
+    profilePhotoFileSizeBytes?: SortOrder
+    profilePhotoSource?: SortOrder
+    profilePhotoUpdatedAt?: SortOrder
     gender?: SortOrder
     birthDate?: SortOrder
     originCity?: SortOrder
@@ -94624,6 +94836,17 @@ export namespace Prisma {
     id?: SortOrder
     ktpImageFileSizeBytes?: SortOrder
     ktpVerifiedById?: SortOrder
+    profilePhotoFileSizeBytes?: SortOrder
+  }
+
+  export type EnumProfilePhotoSourceNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.ProfilePhotoSource | EnumProfilePhotoSourceFieldRefInput<$PrismaModel> | null
+    in?: $Enums.ProfilePhotoSource[] | ListEnumProfilePhotoSourceFieldRefInput<$PrismaModel> | null
+    notIn?: $Enums.ProfilePhotoSource[] | ListEnumProfilePhotoSourceFieldRefInput<$PrismaModel> | null
+    not?: NestedEnumProfilePhotoSourceNullableWithAggregatesFilter<$PrismaModel> | $Enums.ProfilePhotoSource | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedEnumProfilePhotoSourceNullableFilter<$PrismaModel>
+    _max?: NestedEnumProfilePhotoSourceNullableFilter<$PrismaModel>
   }
 
   export type EnumGenderNullableWithAggregatesFilter<$PrismaModel = never> = {
@@ -101308,6 +101531,10 @@ export namespace Prisma {
     connect?: PeerBehaviorReportWhereUniqueInput | PeerBehaviorReportWhereUniqueInput[]
   }
 
+  export type NullableEnumProfilePhotoSourceFieldUpdateOperationsInput = {
+    set?: $Enums.ProfilePhotoSource | null
+  }
+
   export type NullableEnumGenderFieldUpdateOperationsInput = {
     set?: $Enums.Gender | null
   }
@@ -106332,11 +106559,28 @@ export namespace Prisma {
     _max?: NestedBoolNullableFilter<$PrismaModel>
   }
 
+  export type NestedEnumProfilePhotoSourceNullableFilter<$PrismaModel = never> = {
+    equals?: $Enums.ProfilePhotoSource | EnumProfilePhotoSourceFieldRefInput<$PrismaModel> | null
+    in?: $Enums.ProfilePhotoSource[] | ListEnumProfilePhotoSourceFieldRefInput<$PrismaModel> | null
+    notIn?: $Enums.ProfilePhotoSource[] | ListEnumProfilePhotoSourceFieldRefInput<$PrismaModel> | null
+    not?: NestedEnumProfilePhotoSourceNullableFilter<$PrismaModel> | $Enums.ProfilePhotoSource | null
+  }
+
   export type NestedEnumGenderNullableFilter<$PrismaModel = never> = {
     equals?: $Enums.Gender | EnumGenderFieldRefInput<$PrismaModel> | null
     in?: $Enums.Gender[] | ListEnumGenderFieldRefInput<$PrismaModel> | null
     notIn?: $Enums.Gender[] | ListEnumGenderFieldRefInput<$PrismaModel> | null
     not?: NestedEnumGenderNullableFilter<$PrismaModel> | $Enums.Gender | null
+  }
+
+  export type NestedEnumProfilePhotoSourceNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.ProfilePhotoSource | EnumProfilePhotoSourceFieldRefInput<$PrismaModel> | null
+    in?: $Enums.ProfilePhotoSource[] | ListEnumProfilePhotoSourceFieldRefInput<$PrismaModel> | null
+    notIn?: $Enums.ProfilePhotoSource[] | ListEnumProfilePhotoSourceFieldRefInput<$PrismaModel> | null
+    not?: NestedEnumProfilePhotoSourceNullableWithAggregatesFilter<$PrismaModel> | $Enums.ProfilePhotoSource | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedEnumProfilePhotoSourceNullableFilter<$PrismaModel>
+    _max?: NestedEnumProfilePhotoSourceNullableFilter<$PrismaModel>
   }
 
   export type NestedEnumGenderNullableWithAggregatesFilter<$PrismaModel = never> = {
@@ -107553,6 +107797,12 @@ export namespace Prisma {
     ktpImageFileSizeBytes?: number | null
     ktpVerifiedAt?: Date | string | null
     ktpDeletedAt?: Date | string | null
+    profilePhotoUrl?: string | null
+    profilePhotoFileKey?: string | null
+    profilePhotoMimeType?: string | null
+    profilePhotoFileSizeBytes?: number | null
+    profilePhotoSource?: $Enums.ProfilePhotoSource | null
+    profilePhotoUpdatedAt?: Date | string | null
     gender?: $Enums.Gender | null
     birthDate?: Date | string | null
     originCity?: string | null
@@ -107595,6 +107845,12 @@ export namespace Prisma {
     ktpVerifiedAt?: Date | string | null
     ktpVerifiedById?: number | null
     ktpDeletedAt?: Date | string | null
+    profilePhotoUrl?: string | null
+    profilePhotoFileKey?: string | null
+    profilePhotoMimeType?: string | null
+    profilePhotoFileSizeBytes?: number | null
+    profilePhotoSource?: $Enums.ProfilePhotoSource | null
+    profilePhotoUpdatedAt?: Date | string | null
     gender?: $Enums.Gender | null
     birthDate?: Date | string | null
     originCity?: string | null
@@ -109322,6 +109578,12 @@ export namespace Prisma {
     ktpImageFileSizeBytes?: number | null
     ktpVerifiedAt?: Date | string | null
     ktpDeletedAt?: Date | string | null
+    profilePhotoUrl?: string | null
+    profilePhotoFileKey?: string | null
+    profilePhotoMimeType?: string | null
+    profilePhotoFileSizeBytes?: number | null
+    profilePhotoSource?: $Enums.ProfilePhotoSource | null
+    profilePhotoUpdatedAt?: Date | string | null
     gender?: $Enums.Gender | null
     birthDate?: Date | string | null
     originCity?: string | null
@@ -109363,6 +109625,12 @@ export namespace Prisma {
     ktpImageFileSizeBytes?: number | null
     ktpVerifiedAt?: Date | string | null
     ktpDeletedAt?: Date | string | null
+    profilePhotoUrl?: string | null
+    profilePhotoFileKey?: string | null
+    profilePhotoMimeType?: string | null
+    profilePhotoFileSizeBytes?: number | null
+    profilePhotoSource?: $Enums.ProfilePhotoSource | null
+    profilePhotoUpdatedAt?: Date | string | null
     gender?: $Enums.Gender | null
     birthDate?: Date | string | null
     originCity?: string | null
@@ -109527,6 +109795,12 @@ export namespace Prisma {
     ktpImageFileSizeBytes?: NullableIntFieldUpdateOperationsInput | number | null
     ktpVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     ktpDeletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    profilePhotoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    profilePhotoFileKey?: NullableStringFieldUpdateOperationsInput | string | null
+    profilePhotoMimeType?: NullableStringFieldUpdateOperationsInput | string | null
+    profilePhotoFileSizeBytes?: NullableIntFieldUpdateOperationsInput | number | null
+    profilePhotoSource?: NullableEnumProfilePhotoSourceFieldUpdateOperationsInput | $Enums.ProfilePhotoSource | null
+    profilePhotoUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     gender?: NullableEnumGenderFieldUpdateOperationsInput | $Enums.Gender | null
     birthDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     originCity?: NullableStringFieldUpdateOperationsInput | string | null
@@ -109569,6 +109843,12 @@ export namespace Prisma {
     ktpVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     ktpVerifiedById?: NullableIntFieldUpdateOperationsInput | number | null
     ktpDeletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    profilePhotoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    profilePhotoFileKey?: NullableStringFieldUpdateOperationsInput | string | null
+    profilePhotoMimeType?: NullableStringFieldUpdateOperationsInput | string | null
+    profilePhotoFileSizeBytes?: NullableIntFieldUpdateOperationsInput | number | null
+    profilePhotoSource?: NullableEnumProfilePhotoSourceFieldUpdateOperationsInput | $Enums.ProfilePhotoSource | null
+    profilePhotoUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     gender?: NullableEnumGenderFieldUpdateOperationsInput | $Enums.Gender | null
     birthDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     originCity?: NullableStringFieldUpdateOperationsInput | string | null
@@ -110719,6 +110999,12 @@ export namespace Prisma {
     ktpVerifiedAt?: DateTimeNullableFilter<"Tenant"> | Date | string | null
     ktpVerifiedById?: IntNullableFilter<"Tenant"> | number | null
     ktpDeletedAt?: DateTimeNullableFilter<"Tenant"> | Date | string | null
+    profilePhotoUrl?: StringNullableFilter<"Tenant"> | string | null
+    profilePhotoFileKey?: StringNullableFilter<"Tenant"> | string | null
+    profilePhotoMimeType?: StringNullableFilter<"Tenant"> | string | null
+    profilePhotoFileSizeBytes?: IntNullableFilter<"Tenant"> | number | null
+    profilePhotoSource?: EnumProfilePhotoSourceNullableFilter<"Tenant"> | $Enums.ProfilePhotoSource | null
+    profilePhotoUpdatedAt?: DateTimeNullableFilter<"Tenant"> | Date | string | null
     gender?: EnumGenderNullableFilter<"Tenant"> | $Enums.Gender | null
     birthDate?: DateTimeNullableFilter<"Tenant"> | Date | string | null
     originCity?: StringNullableFilter<"Tenant"> | string | null
@@ -113624,6 +113910,12 @@ export namespace Prisma {
     ktpImageFileSizeBytes?: number | null
     ktpVerifiedAt?: Date | string | null
     ktpDeletedAt?: Date | string | null
+    profilePhotoUrl?: string | null
+    profilePhotoFileKey?: string | null
+    profilePhotoMimeType?: string | null
+    profilePhotoFileSizeBytes?: number | null
+    profilePhotoSource?: $Enums.ProfilePhotoSource | null
+    profilePhotoUpdatedAt?: Date | string | null
     gender?: $Enums.Gender | null
     birthDate?: Date | string | null
     originCity?: string | null
@@ -113666,6 +113958,12 @@ export namespace Prisma {
     ktpVerifiedAt?: Date | string | null
     ktpVerifiedById?: number | null
     ktpDeletedAt?: Date | string | null
+    profilePhotoUrl?: string | null
+    profilePhotoFileKey?: string | null
+    profilePhotoMimeType?: string | null
+    profilePhotoFileSizeBytes?: number | null
+    profilePhotoSource?: $Enums.ProfilePhotoSource | null
+    profilePhotoUpdatedAt?: Date | string | null
     gender?: $Enums.Gender | null
     birthDate?: Date | string | null
     originCity?: string | null
@@ -114598,6 +114896,12 @@ export namespace Prisma {
     ktpImageFileSizeBytes?: NullableIntFieldUpdateOperationsInput | number | null
     ktpVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     ktpDeletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    profilePhotoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    profilePhotoFileKey?: NullableStringFieldUpdateOperationsInput | string | null
+    profilePhotoMimeType?: NullableStringFieldUpdateOperationsInput | string | null
+    profilePhotoFileSizeBytes?: NullableIntFieldUpdateOperationsInput | number | null
+    profilePhotoSource?: NullableEnumProfilePhotoSourceFieldUpdateOperationsInput | $Enums.ProfilePhotoSource | null
+    profilePhotoUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     gender?: NullableEnumGenderFieldUpdateOperationsInput | $Enums.Gender | null
     birthDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     originCity?: NullableStringFieldUpdateOperationsInput | string | null
@@ -114640,6 +114944,12 @@ export namespace Prisma {
     ktpVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     ktpVerifiedById?: NullableIntFieldUpdateOperationsInput | number | null
     ktpDeletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    profilePhotoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    profilePhotoFileKey?: NullableStringFieldUpdateOperationsInput | string | null
+    profilePhotoMimeType?: NullableStringFieldUpdateOperationsInput | string | null
+    profilePhotoFileSizeBytes?: NullableIntFieldUpdateOperationsInput | number | null
+    profilePhotoSource?: NullableEnumProfilePhotoSourceFieldUpdateOperationsInput | $Enums.ProfilePhotoSource | null
+    profilePhotoUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     gender?: NullableEnumGenderFieldUpdateOperationsInput | $Enums.Gender | null
     birthDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     originCity?: NullableStringFieldUpdateOperationsInput | string | null
@@ -115412,6 +115722,12 @@ export namespace Prisma {
     ktpImageFileSizeBytes?: number | null
     ktpVerifiedAt?: Date | string | null
     ktpDeletedAt?: Date | string | null
+    profilePhotoUrl?: string | null
+    profilePhotoFileKey?: string | null
+    profilePhotoMimeType?: string | null
+    profilePhotoFileSizeBytes?: number | null
+    profilePhotoSource?: $Enums.ProfilePhotoSource | null
+    profilePhotoUpdatedAt?: Date | string | null
     gender?: $Enums.Gender | null
     birthDate?: Date | string | null
     originCity?: string | null
@@ -115454,6 +115770,12 @@ export namespace Prisma {
     ktpVerifiedAt?: Date | string | null
     ktpVerifiedById?: number | null
     ktpDeletedAt?: Date | string | null
+    profilePhotoUrl?: string | null
+    profilePhotoFileKey?: string | null
+    profilePhotoMimeType?: string | null
+    profilePhotoFileSizeBytes?: number | null
+    profilePhotoSource?: $Enums.ProfilePhotoSource | null
+    profilePhotoUpdatedAt?: Date | string | null
     gender?: $Enums.Gender | null
     birthDate?: Date | string | null
     originCity?: string | null
@@ -115841,6 +116163,12 @@ export namespace Prisma {
     ktpImageFileSizeBytes?: NullableIntFieldUpdateOperationsInput | number | null
     ktpVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     ktpDeletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    profilePhotoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    profilePhotoFileKey?: NullableStringFieldUpdateOperationsInput | string | null
+    profilePhotoMimeType?: NullableStringFieldUpdateOperationsInput | string | null
+    profilePhotoFileSizeBytes?: NullableIntFieldUpdateOperationsInput | number | null
+    profilePhotoSource?: NullableEnumProfilePhotoSourceFieldUpdateOperationsInput | $Enums.ProfilePhotoSource | null
+    profilePhotoUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     gender?: NullableEnumGenderFieldUpdateOperationsInput | $Enums.Gender | null
     birthDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     originCity?: NullableStringFieldUpdateOperationsInput | string | null
@@ -115883,6 +116211,12 @@ export namespace Prisma {
     ktpVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     ktpVerifiedById?: NullableIntFieldUpdateOperationsInput | number | null
     ktpDeletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    profilePhotoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    profilePhotoFileKey?: NullableStringFieldUpdateOperationsInput | string | null
+    profilePhotoMimeType?: NullableStringFieldUpdateOperationsInput | string | null
+    profilePhotoFileSizeBytes?: NullableIntFieldUpdateOperationsInput | number | null
+    profilePhotoSource?: NullableEnumProfilePhotoSourceFieldUpdateOperationsInput | $Enums.ProfilePhotoSource | null
+    profilePhotoUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     gender?: NullableEnumGenderFieldUpdateOperationsInput | $Enums.Gender | null
     birthDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     originCity?: NullableStringFieldUpdateOperationsInput | string | null
@@ -118051,6 +118385,12 @@ export namespace Prisma {
     ktpImageFileSizeBytes?: number | null
     ktpVerifiedAt?: Date | string | null
     ktpDeletedAt?: Date | string | null
+    profilePhotoUrl?: string | null
+    profilePhotoFileKey?: string | null
+    profilePhotoMimeType?: string | null
+    profilePhotoFileSizeBytes?: number | null
+    profilePhotoSource?: $Enums.ProfilePhotoSource | null
+    profilePhotoUpdatedAt?: Date | string | null
     gender?: $Enums.Gender | null
     birthDate?: Date | string | null
     originCity?: string | null
@@ -118093,6 +118433,12 @@ export namespace Prisma {
     ktpVerifiedAt?: Date | string | null
     ktpVerifiedById?: number | null
     ktpDeletedAt?: Date | string | null
+    profilePhotoUrl?: string | null
+    profilePhotoFileKey?: string | null
+    profilePhotoMimeType?: string | null
+    profilePhotoFileSizeBytes?: number | null
+    profilePhotoSource?: $Enums.ProfilePhotoSource | null
+    profilePhotoUpdatedAt?: Date | string | null
     gender?: $Enums.Gender | null
     birthDate?: Date | string | null
     originCity?: string | null
@@ -118556,6 +118902,12 @@ export namespace Prisma {
     ktpImageFileSizeBytes?: NullableIntFieldUpdateOperationsInput | number | null
     ktpVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     ktpDeletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    profilePhotoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    profilePhotoFileKey?: NullableStringFieldUpdateOperationsInput | string | null
+    profilePhotoMimeType?: NullableStringFieldUpdateOperationsInput | string | null
+    profilePhotoFileSizeBytes?: NullableIntFieldUpdateOperationsInput | number | null
+    profilePhotoSource?: NullableEnumProfilePhotoSourceFieldUpdateOperationsInput | $Enums.ProfilePhotoSource | null
+    profilePhotoUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     gender?: NullableEnumGenderFieldUpdateOperationsInput | $Enums.Gender | null
     birthDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     originCity?: NullableStringFieldUpdateOperationsInput | string | null
@@ -118598,6 +118950,12 @@ export namespace Prisma {
     ktpVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     ktpVerifiedById?: NullableIntFieldUpdateOperationsInput | number | null
     ktpDeletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    profilePhotoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    profilePhotoFileKey?: NullableStringFieldUpdateOperationsInput | string | null
+    profilePhotoMimeType?: NullableStringFieldUpdateOperationsInput | string | null
+    profilePhotoFileSizeBytes?: NullableIntFieldUpdateOperationsInput | number | null
+    profilePhotoSource?: NullableEnumProfilePhotoSourceFieldUpdateOperationsInput | $Enums.ProfilePhotoSource | null
+    profilePhotoUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     gender?: NullableEnumGenderFieldUpdateOperationsInput | $Enums.Gender | null
     birthDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     originCity?: NullableStringFieldUpdateOperationsInput | string | null
@@ -118873,6 +119231,12 @@ export namespace Prisma {
     ktpImageFileSizeBytes?: number | null
     ktpVerifiedAt?: Date | string | null
     ktpDeletedAt?: Date | string | null
+    profilePhotoUrl?: string | null
+    profilePhotoFileKey?: string | null
+    profilePhotoMimeType?: string | null
+    profilePhotoFileSizeBytes?: number | null
+    profilePhotoSource?: $Enums.ProfilePhotoSource | null
+    profilePhotoUpdatedAt?: Date | string | null
     gender?: $Enums.Gender | null
     birthDate?: Date | string | null
     originCity?: string | null
@@ -118915,6 +119279,12 @@ export namespace Prisma {
     ktpVerifiedAt?: Date | string | null
     ktpVerifiedById?: number | null
     ktpDeletedAt?: Date | string | null
+    profilePhotoUrl?: string | null
+    profilePhotoFileKey?: string | null
+    profilePhotoMimeType?: string | null
+    profilePhotoFileSizeBytes?: number | null
+    profilePhotoSource?: $Enums.ProfilePhotoSource | null
+    profilePhotoUpdatedAt?: Date | string | null
     gender?: $Enums.Gender | null
     birthDate?: Date | string | null
     originCity?: string | null
@@ -119431,6 +119801,12 @@ export namespace Prisma {
     ktpImageFileSizeBytes?: NullableIntFieldUpdateOperationsInput | number | null
     ktpVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     ktpDeletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    profilePhotoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    profilePhotoFileKey?: NullableStringFieldUpdateOperationsInput | string | null
+    profilePhotoMimeType?: NullableStringFieldUpdateOperationsInput | string | null
+    profilePhotoFileSizeBytes?: NullableIntFieldUpdateOperationsInput | number | null
+    profilePhotoSource?: NullableEnumProfilePhotoSourceFieldUpdateOperationsInput | $Enums.ProfilePhotoSource | null
+    profilePhotoUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     gender?: NullableEnumGenderFieldUpdateOperationsInput | $Enums.Gender | null
     birthDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     originCity?: NullableStringFieldUpdateOperationsInput | string | null
@@ -119473,6 +119849,12 @@ export namespace Prisma {
     ktpVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     ktpVerifiedById?: NullableIntFieldUpdateOperationsInput | number | null
     ktpDeletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    profilePhotoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    profilePhotoFileKey?: NullableStringFieldUpdateOperationsInput | string | null
+    profilePhotoMimeType?: NullableStringFieldUpdateOperationsInput | string | null
+    profilePhotoFileSizeBytes?: NullableIntFieldUpdateOperationsInput | number | null
+    profilePhotoSource?: NullableEnumProfilePhotoSourceFieldUpdateOperationsInput | $Enums.ProfilePhotoSource | null
+    profilePhotoUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     gender?: NullableEnumGenderFieldUpdateOperationsInput | $Enums.Gender | null
     birthDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     originCity?: NullableStringFieldUpdateOperationsInput | string | null
@@ -122185,6 +122567,12 @@ export namespace Prisma {
     ktpImageFileSizeBytes?: number | null
     ktpVerifiedAt?: Date | string | null
     ktpDeletedAt?: Date | string | null
+    profilePhotoUrl?: string | null
+    profilePhotoFileKey?: string | null
+    profilePhotoMimeType?: string | null
+    profilePhotoFileSizeBytes?: number | null
+    profilePhotoSource?: $Enums.ProfilePhotoSource | null
+    profilePhotoUpdatedAt?: Date | string | null
     gender?: $Enums.Gender | null
     birthDate?: Date | string | null
     originCity?: string | null
@@ -122227,6 +122615,12 @@ export namespace Prisma {
     ktpVerifiedAt?: Date | string | null
     ktpVerifiedById?: number | null
     ktpDeletedAt?: Date | string | null
+    profilePhotoUrl?: string | null
+    profilePhotoFileKey?: string | null
+    profilePhotoMimeType?: string | null
+    profilePhotoFileSizeBytes?: number | null
+    profilePhotoSource?: $Enums.ProfilePhotoSource | null
+    profilePhotoUpdatedAt?: Date | string | null
     gender?: $Enums.Gender | null
     birthDate?: Date | string | null
     originCity?: string | null
@@ -122512,6 +122906,12 @@ export namespace Prisma {
     ktpImageFileSizeBytes?: NullableIntFieldUpdateOperationsInput | number | null
     ktpVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     ktpDeletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    profilePhotoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    profilePhotoFileKey?: NullableStringFieldUpdateOperationsInput | string | null
+    profilePhotoMimeType?: NullableStringFieldUpdateOperationsInput | string | null
+    profilePhotoFileSizeBytes?: NullableIntFieldUpdateOperationsInput | number | null
+    profilePhotoSource?: NullableEnumProfilePhotoSourceFieldUpdateOperationsInput | $Enums.ProfilePhotoSource | null
+    profilePhotoUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     gender?: NullableEnumGenderFieldUpdateOperationsInput | $Enums.Gender | null
     birthDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     originCity?: NullableStringFieldUpdateOperationsInput | string | null
@@ -122554,6 +122954,12 @@ export namespace Prisma {
     ktpVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     ktpVerifiedById?: NullableIntFieldUpdateOperationsInput | number | null
     ktpDeletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    profilePhotoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    profilePhotoFileKey?: NullableStringFieldUpdateOperationsInput | string | null
+    profilePhotoMimeType?: NullableStringFieldUpdateOperationsInput | string | null
+    profilePhotoFileSizeBytes?: NullableIntFieldUpdateOperationsInput | number | null
+    profilePhotoSource?: NullableEnumProfilePhotoSourceFieldUpdateOperationsInput | $Enums.ProfilePhotoSource | null
+    profilePhotoUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     gender?: NullableEnumGenderFieldUpdateOperationsInput | $Enums.Gender | null
     birthDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     originCity?: NullableStringFieldUpdateOperationsInput | string | null
@@ -125791,6 +126197,12 @@ export namespace Prisma {
     ktpImageFileSizeBytes?: number | null
     ktpVerifiedAt?: Date | string | null
     ktpDeletedAt?: Date | string | null
+    profilePhotoUrl?: string | null
+    profilePhotoFileKey?: string | null
+    profilePhotoMimeType?: string | null
+    profilePhotoFileSizeBytes?: number | null
+    profilePhotoSource?: $Enums.ProfilePhotoSource | null
+    profilePhotoUpdatedAt?: Date | string | null
     gender?: $Enums.Gender | null
     birthDate?: Date | string | null
     originCity?: string | null
@@ -125833,6 +126245,12 @@ export namespace Prisma {
     ktpVerifiedAt?: Date | string | null
     ktpVerifiedById?: number | null
     ktpDeletedAt?: Date | string | null
+    profilePhotoUrl?: string | null
+    profilePhotoFileKey?: string | null
+    profilePhotoMimeType?: string | null
+    profilePhotoFileSizeBytes?: number | null
+    profilePhotoSource?: $Enums.ProfilePhotoSource | null
+    profilePhotoUpdatedAt?: Date | string | null
     gender?: $Enums.Gender | null
     birthDate?: Date | string | null
     originCity?: string | null
@@ -126134,6 +126552,12 @@ export namespace Prisma {
     ktpImageFileSizeBytes?: NullableIntFieldUpdateOperationsInput | number | null
     ktpVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     ktpDeletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    profilePhotoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    profilePhotoFileKey?: NullableStringFieldUpdateOperationsInput | string | null
+    profilePhotoMimeType?: NullableStringFieldUpdateOperationsInput | string | null
+    profilePhotoFileSizeBytes?: NullableIntFieldUpdateOperationsInput | number | null
+    profilePhotoSource?: NullableEnumProfilePhotoSourceFieldUpdateOperationsInput | $Enums.ProfilePhotoSource | null
+    profilePhotoUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     gender?: NullableEnumGenderFieldUpdateOperationsInput | $Enums.Gender | null
     birthDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     originCity?: NullableStringFieldUpdateOperationsInput | string | null
@@ -126176,6 +126600,12 @@ export namespace Prisma {
     ktpVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     ktpVerifiedById?: NullableIntFieldUpdateOperationsInput | number | null
     ktpDeletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    profilePhotoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    profilePhotoFileKey?: NullableStringFieldUpdateOperationsInput | string | null
+    profilePhotoMimeType?: NullableStringFieldUpdateOperationsInput | string | null
+    profilePhotoFileSizeBytes?: NullableIntFieldUpdateOperationsInput | number | null
+    profilePhotoSource?: NullableEnumProfilePhotoSourceFieldUpdateOperationsInput | $Enums.ProfilePhotoSource | null
+    profilePhotoUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     gender?: NullableEnumGenderFieldUpdateOperationsInput | $Enums.Gender | null
     birthDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     originCity?: NullableStringFieldUpdateOperationsInput | string | null
@@ -133067,6 +133497,12 @@ export namespace Prisma {
     ktpImageFileSizeBytes?: number | null
     ktpVerifiedAt?: Date | string | null
     ktpDeletedAt?: Date | string | null
+    profilePhotoUrl?: string | null
+    profilePhotoFileKey?: string | null
+    profilePhotoMimeType?: string | null
+    profilePhotoFileSizeBytes?: number | null
+    profilePhotoSource?: $Enums.ProfilePhotoSource | null
+    profilePhotoUpdatedAt?: Date | string | null
     gender?: $Enums.Gender | null
     birthDate?: Date | string | null
     originCity?: string | null
@@ -133109,6 +133545,12 @@ export namespace Prisma {
     ktpVerifiedAt?: Date | string | null
     ktpVerifiedById?: number | null
     ktpDeletedAt?: Date | string | null
+    profilePhotoUrl?: string | null
+    profilePhotoFileKey?: string | null
+    profilePhotoMimeType?: string | null
+    profilePhotoFileSizeBytes?: number | null
+    profilePhotoSource?: $Enums.ProfilePhotoSource | null
+    profilePhotoUpdatedAt?: Date | string | null
     gender?: $Enums.Gender | null
     birthDate?: Date | string | null
     originCity?: string | null
@@ -133164,6 +133606,12 @@ export namespace Prisma {
     ktpImageFileSizeBytes?: NullableIntFieldUpdateOperationsInput | number | null
     ktpVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     ktpDeletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    profilePhotoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    profilePhotoFileKey?: NullableStringFieldUpdateOperationsInput | string | null
+    profilePhotoMimeType?: NullableStringFieldUpdateOperationsInput | string | null
+    profilePhotoFileSizeBytes?: NullableIntFieldUpdateOperationsInput | number | null
+    profilePhotoSource?: NullableEnumProfilePhotoSourceFieldUpdateOperationsInput | $Enums.ProfilePhotoSource | null
+    profilePhotoUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     gender?: NullableEnumGenderFieldUpdateOperationsInput | $Enums.Gender | null
     birthDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     originCity?: NullableStringFieldUpdateOperationsInput | string | null
@@ -133206,6 +133654,12 @@ export namespace Prisma {
     ktpVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     ktpVerifiedById?: NullableIntFieldUpdateOperationsInput | number | null
     ktpDeletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    profilePhotoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    profilePhotoFileKey?: NullableStringFieldUpdateOperationsInput | string | null
+    profilePhotoMimeType?: NullableStringFieldUpdateOperationsInput | string | null
+    profilePhotoFileSizeBytes?: NullableIntFieldUpdateOperationsInput | number | null
+    profilePhotoSource?: NullableEnumProfilePhotoSourceFieldUpdateOperationsInput | $Enums.ProfilePhotoSource | null
+    profilePhotoUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     gender?: NullableEnumGenderFieldUpdateOperationsInput | $Enums.Gender | null
     birthDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     originCity?: NullableStringFieldUpdateOperationsInput | string | null
@@ -133294,6 +133748,12 @@ export namespace Prisma {
     ktpImageFileSizeBytes?: number | null
     ktpVerifiedAt?: Date | string | null
     ktpDeletedAt?: Date | string | null
+    profilePhotoUrl?: string | null
+    profilePhotoFileKey?: string | null
+    profilePhotoMimeType?: string | null
+    profilePhotoFileSizeBytes?: number | null
+    profilePhotoSource?: $Enums.ProfilePhotoSource | null
+    profilePhotoUpdatedAt?: Date | string | null
     gender?: $Enums.Gender | null
     birthDate?: Date | string | null
     originCity?: string | null
@@ -133336,6 +133796,12 @@ export namespace Prisma {
     ktpVerifiedAt?: Date | string | null
     ktpVerifiedById?: number | null
     ktpDeletedAt?: Date | string | null
+    profilePhotoUrl?: string | null
+    profilePhotoFileKey?: string | null
+    profilePhotoMimeType?: string | null
+    profilePhotoFileSizeBytes?: number | null
+    profilePhotoSource?: $Enums.ProfilePhotoSource | null
+    profilePhotoUpdatedAt?: Date | string | null
     gender?: $Enums.Gender | null
     birthDate?: Date | string | null
     originCity?: string | null
@@ -133477,6 +133943,12 @@ export namespace Prisma {
     ktpImageFileSizeBytes?: NullableIntFieldUpdateOperationsInput | number | null
     ktpVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     ktpDeletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    profilePhotoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    profilePhotoFileKey?: NullableStringFieldUpdateOperationsInput | string | null
+    profilePhotoMimeType?: NullableStringFieldUpdateOperationsInput | string | null
+    profilePhotoFileSizeBytes?: NullableIntFieldUpdateOperationsInput | number | null
+    profilePhotoSource?: NullableEnumProfilePhotoSourceFieldUpdateOperationsInput | $Enums.ProfilePhotoSource | null
+    profilePhotoUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     gender?: NullableEnumGenderFieldUpdateOperationsInput | $Enums.Gender | null
     birthDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     originCity?: NullableStringFieldUpdateOperationsInput | string | null
@@ -133519,6 +133991,12 @@ export namespace Prisma {
     ktpVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     ktpVerifiedById?: NullableIntFieldUpdateOperationsInput | number | null
     ktpDeletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    profilePhotoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    profilePhotoFileKey?: NullableStringFieldUpdateOperationsInput | string | null
+    profilePhotoMimeType?: NullableStringFieldUpdateOperationsInput | string | null
+    profilePhotoFileSizeBytes?: NullableIntFieldUpdateOperationsInput | number | null
+    profilePhotoSource?: NullableEnumProfilePhotoSourceFieldUpdateOperationsInput | $Enums.ProfilePhotoSource | null
+    profilePhotoUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     gender?: NullableEnumGenderFieldUpdateOperationsInput | $Enums.Gender | null
     birthDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     originCity?: NullableStringFieldUpdateOperationsInput | string | null
@@ -133656,6 +134134,12 @@ export namespace Prisma {
     ktpImageFileSizeBytes?: number | null
     ktpVerifiedAt?: Date | string | null
     ktpDeletedAt?: Date | string | null
+    profilePhotoUrl?: string | null
+    profilePhotoFileKey?: string | null
+    profilePhotoMimeType?: string | null
+    profilePhotoFileSizeBytes?: number | null
+    profilePhotoSource?: $Enums.ProfilePhotoSource | null
+    profilePhotoUpdatedAt?: Date | string | null
     gender?: $Enums.Gender | null
     birthDate?: Date | string | null
     originCity?: string | null
@@ -133698,6 +134182,12 @@ export namespace Prisma {
     ktpVerifiedAt?: Date | string | null
     ktpVerifiedById?: number | null
     ktpDeletedAt?: Date | string | null
+    profilePhotoUrl?: string | null
+    profilePhotoFileKey?: string | null
+    profilePhotoMimeType?: string | null
+    profilePhotoFileSizeBytes?: number | null
+    profilePhotoSource?: $Enums.ProfilePhotoSource | null
+    profilePhotoUpdatedAt?: Date | string | null
     gender?: $Enums.Gender | null
     birthDate?: Date | string | null
     originCity?: string | null
@@ -133742,6 +134232,12 @@ export namespace Prisma {
     ktpImageFileSizeBytes?: number | null
     ktpVerifiedAt?: Date | string | null
     ktpDeletedAt?: Date | string | null
+    profilePhotoUrl?: string | null
+    profilePhotoFileKey?: string | null
+    profilePhotoMimeType?: string | null
+    profilePhotoFileSizeBytes?: number | null
+    profilePhotoSource?: $Enums.ProfilePhotoSource | null
+    profilePhotoUpdatedAt?: Date | string | null
     gender?: $Enums.Gender | null
     birthDate?: Date | string | null
     originCity?: string | null
@@ -133784,6 +134280,12 @@ export namespace Prisma {
     ktpVerifiedAt?: Date | string | null
     ktpVerifiedById?: number | null
     ktpDeletedAt?: Date | string | null
+    profilePhotoUrl?: string | null
+    profilePhotoFileKey?: string | null
+    profilePhotoMimeType?: string | null
+    profilePhotoFileSizeBytes?: number | null
+    profilePhotoSource?: $Enums.ProfilePhotoSource | null
+    profilePhotoUpdatedAt?: Date | string | null
     gender?: $Enums.Gender | null
     birthDate?: Date | string | null
     originCity?: string | null
@@ -133951,6 +134453,12 @@ export namespace Prisma {
     ktpImageFileSizeBytes?: NullableIntFieldUpdateOperationsInput | number | null
     ktpVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     ktpDeletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    profilePhotoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    profilePhotoFileKey?: NullableStringFieldUpdateOperationsInput | string | null
+    profilePhotoMimeType?: NullableStringFieldUpdateOperationsInput | string | null
+    profilePhotoFileSizeBytes?: NullableIntFieldUpdateOperationsInput | number | null
+    profilePhotoSource?: NullableEnumProfilePhotoSourceFieldUpdateOperationsInput | $Enums.ProfilePhotoSource | null
+    profilePhotoUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     gender?: NullableEnumGenderFieldUpdateOperationsInput | $Enums.Gender | null
     birthDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     originCity?: NullableStringFieldUpdateOperationsInput | string | null
@@ -133993,6 +134501,12 @@ export namespace Prisma {
     ktpVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     ktpVerifiedById?: NullableIntFieldUpdateOperationsInput | number | null
     ktpDeletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    profilePhotoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    profilePhotoFileKey?: NullableStringFieldUpdateOperationsInput | string | null
+    profilePhotoMimeType?: NullableStringFieldUpdateOperationsInput | string | null
+    profilePhotoFileSizeBytes?: NullableIntFieldUpdateOperationsInput | number | null
+    profilePhotoSource?: NullableEnumProfilePhotoSourceFieldUpdateOperationsInput | $Enums.ProfilePhotoSource | null
+    profilePhotoUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     gender?: NullableEnumGenderFieldUpdateOperationsInput | $Enums.Gender | null
     birthDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     originCity?: NullableStringFieldUpdateOperationsInput | string | null
@@ -134043,6 +134557,12 @@ export namespace Prisma {
     ktpImageFileSizeBytes?: NullableIntFieldUpdateOperationsInput | number | null
     ktpVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     ktpDeletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    profilePhotoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    profilePhotoFileKey?: NullableStringFieldUpdateOperationsInput | string | null
+    profilePhotoMimeType?: NullableStringFieldUpdateOperationsInput | string | null
+    profilePhotoFileSizeBytes?: NullableIntFieldUpdateOperationsInput | number | null
+    profilePhotoSource?: NullableEnumProfilePhotoSourceFieldUpdateOperationsInput | $Enums.ProfilePhotoSource | null
+    profilePhotoUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     gender?: NullableEnumGenderFieldUpdateOperationsInput | $Enums.Gender | null
     birthDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     originCity?: NullableStringFieldUpdateOperationsInput | string | null
@@ -134085,6 +134605,12 @@ export namespace Prisma {
     ktpVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     ktpVerifiedById?: NullableIntFieldUpdateOperationsInput | number | null
     ktpDeletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    profilePhotoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    profilePhotoFileKey?: NullableStringFieldUpdateOperationsInput | string | null
+    profilePhotoMimeType?: NullableStringFieldUpdateOperationsInput | string | null
+    profilePhotoFileSizeBytes?: NullableIntFieldUpdateOperationsInput | number | null
+    profilePhotoSource?: NullableEnumProfilePhotoSourceFieldUpdateOperationsInput | $Enums.ProfilePhotoSource | null
+    profilePhotoUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     gender?: NullableEnumGenderFieldUpdateOperationsInput | $Enums.Gender | null
     birthDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     originCity?: NullableStringFieldUpdateOperationsInput | string | null
@@ -134242,6 +134768,12 @@ export namespace Prisma {
     ktpImageFileSizeBytes?: number | null
     ktpVerifiedAt?: Date | string | null
     ktpDeletedAt?: Date | string | null
+    profilePhotoUrl?: string | null
+    profilePhotoFileKey?: string | null
+    profilePhotoMimeType?: string | null
+    profilePhotoFileSizeBytes?: number | null
+    profilePhotoSource?: $Enums.ProfilePhotoSource | null
+    profilePhotoUpdatedAt?: Date | string | null
     gender?: $Enums.Gender | null
     birthDate?: Date | string | null
     originCity?: string | null
@@ -134284,6 +134816,12 @@ export namespace Prisma {
     ktpVerifiedAt?: Date | string | null
     ktpVerifiedById?: number | null
     ktpDeletedAt?: Date | string | null
+    profilePhotoUrl?: string | null
+    profilePhotoFileKey?: string | null
+    profilePhotoMimeType?: string | null
+    profilePhotoFileSizeBytes?: number | null
+    profilePhotoSource?: $Enums.ProfilePhotoSource | null
+    profilePhotoUpdatedAt?: Date | string | null
     gender?: $Enums.Gender | null
     birthDate?: Date | string | null
     originCity?: string | null
@@ -134328,6 +134866,12 @@ export namespace Prisma {
     ktpImageFileSizeBytes?: number | null
     ktpVerifiedAt?: Date | string | null
     ktpDeletedAt?: Date | string | null
+    profilePhotoUrl?: string | null
+    profilePhotoFileKey?: string | null
+    profilePhotoMimeType?: string | null
+    profilePhotoFileSizeBytes?: number | null
+    profilePhotoSource?: $Enums.ProfilePhotoSource | null
+    profilePhotoUpdatedAt?: Date | string | null
     gender?: $Enums.Gender | null
     birthDate?: Date | string | null
     originCity?: string | null
@@ -134370,6 +134914,12 @@ export namespace Prisma {
     ktpVerifiedAt?: Date | string | null
     ktpVerifiedById?: number | null
     ktpDeletedAt?: Date | string | null
+    profilePhotoUrl?: string | null
+    profilePhotoFileKey?: string | null
+    profilePhotoMimeType?: string | null
+    profilePhotoFileSizeBytes?: number | null
+    profilePhotoSource?: $Enums.ProfilePhotoSource | null
+    profilePhotoUpdatedAt?: Date | string | null
     gender?: $Enums.Gender | null
     birthDate?: Date | string | null
     originCity?: string | null
@@ -134425,6 +134975,12 @@ export namespace Prisma {
     ktpImageFileSizeBytes?: NullableIntFieldUpdateOperationsInput | number | null
     ktpVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     ktpDeletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    profilePhotoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    profilePhotoFileKey?: NullableStringFieldUpdateOperationsInput | string | null
+    profilePhotoMimeType?: NullableStringFieldUpdateOperationsInput | string | null
+    profilePhotoFileSizeBytes?: NullableIntFieldUpdateOperationsInput | number | null
+    profilePhotoSource?: NullableEnumProfilePhotoSourceFieldUpdateOperationsInput | $Enums.ProfilePhotoSource | null
+    profilePhotoUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     gender?: NullableEnumGenderFieldUpdateOperationsInput | $Enums.Gender | null
     birthDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     originCity?: NullableStringFieldUpdateOperationsInput | string | null
@@ -134467,6 +135023,12 @@ export namespace Prisma {
     ktpVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     ktpVerifiedById?: NullableIntFieldUpdateOperationsInput | number | null
     ktpDeletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    profilePhotoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    profilePhotoFileKey?: NullableStringFieldUpdateOperationsInput | string | null
+    profilePhotoMimeType?: NullableStringFieldUpdateOperationsInput | string | null
+    profilePhotoFileSizeBytes?: NullableIntFieldUpdateOperationsInput | number | null
+    profilePhotoSource?: NullableEnumProfilePhotoSourceFieldUpdateOperationsInput | $Enums.ProfilePhotoSource | null
+    profilePhotoUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     gender?: NullableEnumGenderFieldUpdateOperationsInput | $Enums.Gender | null
     birthDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     originCity?: NullableStringFieldUpdateOperationsInput | string | null
@@ -134517,6 +135079,12 @@ export namespace Prisma {
     ktpImageFileSizeBytes?: NullableIntFieldUpdateOperationsInput | number | null
     ktpVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     ktpDeletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    profilePhotoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    profilePhotoFileKey?: NullableStringFieldUpdateOperationsInput | string | null
+    profilePhotoMimeType?: NullableStringFieldUpdateOperationsInput | string | null
+    profilePhotoFileSizeBytes?: NullableIntFieldUpdateOperationsInput | number | null
+    profilePhotoSource?: NullableEnumProfilePhotoSourceFieldUpdateOperationsInput | $Enums.ProfilePhotoSource | null
+    profilePhotoUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     gender?: NullableEnumGenderFieldUpdateOperationsInput | $Enums.Gender | null
     birthDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     originCity?: NullableStringFieldUpdateOperationsInput | string | null
@@ -134559,6 +135127,12 @@ export namespace Prisma {
     ktpVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     ktpVerifiedById?: NullableIntFieldUpdateOperationsInput | number | null
     ktpDeletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    profilePhotoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    profilePhotoFileKey?: NullableStringFieldUpdateOperationsInput | string | null
+    profilePhotoMimeType?: NullableStringFieldUpdateOperationsInput | string | null
+    profilePhotoFileSizeBytes?: NullableIntFieldUpdateOperationsInput | number | null
+    profilePhotoSource?: NullableEnumProfilePhotoSourceFieldUpdateOperationsInput | $Enums.ProfilePhotoSource | null
+    profilePhotoUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     gender?: NullableEnumGenderFieldUpdateOperationsInput | $Enums.Gender | null
     birthDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     originCity?: NullableStringFieldUpdateOperationsInput | string | null
@@ -134671,6 +135245,12 @@ export namespace Prisma {
     ktpImageFileSizeBytes?: number | null
     ktpVerifiedAt?: Date | string | null
     ktpDeletedAt?: Date | string | null
+    profilePhotoUrl?: string | null
+    profilePhotoFileKey?: string | null
+    profilePhotoMimeType?: string | null
+    profilePhotoFileSizeBytes?: number | null
+    profilePhotoSource?: $Enums.ProfilePhotoSource | null
+    profilePhotoUpdatedAt?: Date | string | null
     gender?: $Enums.Gender | null
     birthDate?: Date | string | null
     originCity?: string | null
@@ -134713,6 +135293,12 @@ export namespace Prisma {
     ktpVerifiedAt?: Date | string | null
     ktpVerifiedById?: number | null
     ktpDeletedAt?: Date | string | null
+    profilePhotoUrl?: string | null
+    profilePhotoFileKey?: string | null
+    profilePhotoMimeType?: string | null
+    profilePhotoFileSizeBytes?: number | null
+    profilePhotoSource?: $Enums.ProfilePhotoSource | null
+    profilePhotoUpdatedAt?: Date | string | null
     gender?: $Enums.Gender | null
     birthDate?: Date | string | null
     originCity?: string | null
@@ -134802,6 +135388,12 @@ export namespace Prisma {
     ktpImageFileSizeBytes?: NullableIntFieldUpdateOperationsInput | number | null
     ktpVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     ktpDeletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    profilePhotoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    profilePhotoFileKey?: NullableStringFieldUpdateOperationsInput | string | null
+    profilePhotoMimeType?: NullableStringFieldUpdateOperationsInput | string | null
+    profilePhotoFileSizeBytes?: NullableIntFieldUpdateOperationsInput | number | null
+    profilePhotoSource?: NullableEnumProfilePhotoSourceFieldUpdateOperationsInput | $Enums.ProfilePhotoSource | null
+    profilePhotoUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     gender?: NullableEnumGenderFieldUpdateOperationsInput | $Enums.Gender | null
     birthDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     originCity?: NullableStringFieldUpdateOperationsInput | string | null
@@ -134844,6 +135436,12 @@ export namespace Prisma {
     ktpVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     ktpVerifiedById?: NullableIntFieldUpdateOperationsInput | number | null
     ktpDeletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    profilePhotoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    profilePhotoFileKey?: NullableStringFieldUpdateOperationsInput | string | null
+    profilePhotoMimeType?: NullableStringFieldUpdateOperationsInput | string | null
+    profilePhotoFileSizeBytes?: NullableIntFieldUpdateOperationsInput | number | null
+    profilePhotoSource?: NullableEnumProfilePhotoSourceFieldUpdateOperationsInput | $Enums.ProfilePhotoSource | null
+    profilePhotoUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     gender?: NullableEnumGenderFieldUpdateOperationsInput | $Enums.Gender | null
     birthDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     originCity?: NullableStringFieldUpdateOperationsInput | string | null
@@ -135543,6 +136141,12 @@ export namespace Prisma {
     ktpImageFileSizeBytes?: number | null
     ktpVerifiedAt?: Date | string | null
     ktpDeletedAt?: Date | string | null
+    profilePhotoUrl?: string | null
+    profilePhotoFileKey?: string | null
+    profilePhotoMimeType?: string | null
+    profilePhotoFileSizeBytes?: number | null
+    profilePhotoSource?: $Enums.ProfilePhotoSource | null
+    profilePhotoUpdatedAt?: Date | string | null
     gender?: $Enums.Gender | null
     birthDate?: Date | string | null
     originCity?: string | null
@@ -137629,6 +138233,12 @@ export namespace Prisma {
     ktpImageFileSizeBytes?: NullableIntFieldUpdateOperationsInput | number | null
     ktpVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     ktpDeletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    profilePhotoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    profilePhotoFileKey?: NullableStringFieldUpdateOperationsInput | string | null
+    profilePhotoMimeType?: NullableStringFieldUpdateOperationsInput | string | null
+    profilePhotoFileSizeBytes?: NullableIntFieldUpdateOperationsInput | number | null
+    profilePhotoSource?: NullableEnumProfilePhotoSourceFieldUpdateOperationsInput | $Enums.ProfilePhotoSource | null
+    profilePhotoUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     gender?: NullableEnumGenderFieldUpdateOperationsInput | $Enums.Gender | null
     birthDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     originCity?: NullableStringFieldUpdateOperationsInput | string | null
@@ -137670,6 +138280,12 @@ export namespace Prisma {
     ktpImageFileSizeBytes?: NullableIntFieldUpdateOperationsInput | number | null
     ktpVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     ktpDeletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    profilePhotoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    profilePhotoFileKey?: NullableStringFieldUpdateOperationsInput | string | null
+    profilePhotoMimeType?: NullableStringFieldUpdateOperationsInput | string | null
+    profilePhotoFileSizeBytes?: NullableIntFieldUpdateOperationsInput | number | null
+    profilePhotoSource?: NullableEnumProfilePhotoSourceFieldUpdateOperationsInput | $Enums.ProfilePhotoSource | null
+    profilePhotoUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     gender?: NullableEnumGenderFieldUpdateOperationsInput | $Enums.Gender | null
     birthDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     originCity?: NullableStringFieldUpdateOperationsInput | string | null
@@ -137711,6 +138327,12 @@ export namespace Prisma {
     ktpImageFileSizeBytes?: NullableIntFieldUpdateOperationsInput | number | null
     ktpVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     ktpDeletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    profilePhotoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    profilePhotoFileKey?: NullableStringFieldUpdateOperationsInput | string | null
+    profilePhotoMimeType?: NullableStringFieldUpdateOperationsInput | string | null
+    profilePhotoFileSizeBytes?: NullableIntFieldUpdateOperationsInput | number | null
+    profilePhotoSource?: NullableEnumProfilePhotoSourceFieldUpdateOperationsInput | $Enums.ProfilePhotoSource | null
+    profilePhotoUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     gender?: NullableEnumGenderFieldUpdateOperationsInput | $Enums.Gender | null
     birthDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     originCity?: NullableStringFieldUpdateOperationsInput | string | null

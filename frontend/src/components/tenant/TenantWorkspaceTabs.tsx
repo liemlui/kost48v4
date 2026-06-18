@@ -4,6 +4,8 @@ import { useQuery } from '@tanstack/react-query';
 import NotificationBell from '../notifications/NotificationBell';
 import PaymentUrgencyChip from '../payment-urgency/PaymentUrgencyChip';
 import Kost48LogoMark from '../common/Kost48LogoMark';
+import TenantAvatar from '../common/TenantAvatar';
+import { useAuth } from '../../context/AuthContext';
 import { getNavigationLinks, type TenantPortalStage } from '../../config/navigation';
 import { getResource } from '../../api/resources';
 import type { Announcement } from '../../types';
@@ -75,6 +77,7 @@ export default function TenantWorkspaceTabs({
   onLogout: () => void;
 }) {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const links = getNavigationLinks('TENANT', stage);
 
   return (
@@ -96,9 +99,8 @@ export default function TenantWorkspaceTabs({
               <strong>{fullName}</strong>
               <em>Penghuni</em>
             </span>
-            <span className="user-avatar" role="img" aria-label={`Avatar ${fullName ?? 'User'}`}>
-              {initials}
-            </span>
+            <TenantAvatar tenantId={user?.tenantId} fullName={fullName} />
+            {initials ? <span className="visually-hidden">{initials}</span> : null}
           </button>
           <Button variant="outline-danger" size="sm" className="tenant-logout-button" onClick={onLogout}>Keluar</Button>
         </div>
