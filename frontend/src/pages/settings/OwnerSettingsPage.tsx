@@ -7,6 +7,130 @@ import SafeImage from '../../components/common/SafeImage';
 import { createFaq, deleteFaq, fetchAllFaqs, updateFaq, type FaqItem } from '../../api/faqs';
 import { fetchOperationalSettings, updateOperationalSettings, type OperationalSetting } from '../../api/settings';
 import { getApiErrorMessage } from '../../utils/getApiErrorMessage';
+import { listFacilityImages, uploadFacilityImage, deleteFacilityImage } from '../../api/facilityImages';
+
+/* ─── Facility Photos ──────────────────────────────────────────────── */
+
+const FACILITY_SLUGS: { slug: string; label: string }[] = [
+  { slug: 'parkir-luas', label: 'Parkir luas' },
+  { slug: 'dapur-bersama', label: 'Dapur bersama' },
+  { slug: 'air-pdam-tandon', label: 'Air PDAM + tandon' },
+  { slug: 'jemuran-luas', label: 'Jemuran luas' },
+  { slug: 'wifi', label: 'WiFi' },
+  { slug: 'cctv', label: 'CCTV 24 jam' },
+  { slug: 'taman', label: 'Taman/halaman' },
+  { slug: 'ruang-tamu', label: 'Ruang tamu bersama' },
+];
+
+function FacilityPhotoPanel() {
+  const qc = useQueryClient();
+  const [uploading, setUploading] = useState<string | null>(null);
+  const [error, setError] = useState('');
+
+  const { data: uploaded = [], isLoading, refetch } = useQuery({
+    queryKey: ['facility-images'],
+    queryFn: listFacilityImages,
+  });
+
+  const uploadedMap = new Map(uploaded.map((u) => [u.slug, u.url]));
+
+  const handleUpload = async (slug: string, file: File) => {
+    setUploading(slug);
+    setError('');
+    try {
+      await uploadFacilityImage(slug, file);
+      qc.invalidateQueries({ queryKey: ['facility-images'] });
+    } catch (err) {
+      setError(`Gagal upload ${slug}: ${err instanceof Error ? err.message : 'Unknown error'}`);
+    } finally {
+      setUploading(null);
+    }
+  };
+
+  const handleDelete = async (slug: string) => {
+    if (!window.confirm(`Hapus foto untuk "${FACILITY_SLUGS.find((f) => f.slug === slug)?.label}"?`)) return;
+    try {
+      await deleteFacilityImage(slug);
+      qc.invalidateQueries({ queryKey: ['facility-images'] });
+    } catch (err) {
+      setError(`Gagal hapus: ${err instanceof Error ? err.message : 'Unknown error'}`);
+    }
+  };
+
+  return (
+    <div>
+      <div className="mb-3">
+        <h3 className="h5 mb-0">Foto Fasilitas</h3>
+        <small className="text-muted">
+          Upload 1 foto real per fasilitas KOST48. Foto akan tampil di halaman publik (beranda).
+          Format: JPG/PNG/WebP, maks. 2MB.
+        </small>
+      </div>
+
+      {error && <Alert variant="danger" className="py-2 small mb-3" dismissible onClose={() => setError('')}>{error}</Alert>}
+
+      {isLoading ? (
+        <div className="py-4 text-center"><Spinner animation="border" size="sm" /></div>
+      ) : (
+        <Row className="g-3">
+          {FACILITY_SLUGS.map(({ slug, label }) => {
+            const imageUrl = uploadedMap.get(slug);
+            return (
+              <Col xs={6} md={4} lg={3} key={slug}>
+                <div className="settings-facility-card">
+                  <div className="settings-facility-img-wrap">
+                    {imageUrl ? (
+                      <SafeImage
+                        src={imageUrl.startsWith('http') ? imageUrl : `${window.location.origin}${imageUrl}`}
+                        alt={label}
+                        resolveUrl={false}
+                        className="settings-facility-img"
+                      />
+                    ) : (
+                      <div className="settings-facility-img-placeholder">
+                        <span>📷</span>
+                        <small>Belum ada foto</small>
+                      </div>
+                    )}
+                  </div>
+                  <div className="settings-facility-info">
+                    <strong>{label}</strong>
+                  </div>
+                  <div className="settings-facility-actions d-flex gap-1">
+                    <input
+                      type="file"
+                      accept="image/jpeg,image/png,image/webp"
+                      id={`facility-file-${slug}`}
+                      style={{ display: 'none' }}
+                      onChange={(e) => {
+                        if (e.target.files?.[0]) handleUpload(slug, e.target.files[0]);
+                        e.target.value = '';
+                      }}
+                    />
+                    <Button
+                      size="sm"
+                      variant={imageUrl ? 'outline-primary' : 'primary'}
+                      onClick={() => document.getElementById(`facility-file-${slug}`)?.click()}
+                      disabled={uploading === slug}
+                      className="flex-fill"
+                    >
+                      {uploading === slug ? <><Spinner animation="border" size="sm" /> Upload...</> : imageUrl ? 'Ganti' : 'Upload'}
+                    </Button>
+                    {imageUrl && (
+                      <Button size="sm" variant="outline-danger" onClick={() => handleDelete(slug)}>
+                        ✕
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              </Col>
+            );
+          })}
+        </Row>
+      )}
+    </div>
+  );
+}
 
 /* ─── Helpers ──────────────────────────────────────────────────────── */
 
@@ -486,7 +610,7 @@ function TariffSettingsPanel() {
 export default function OwnerSettingsPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const tabParam = searchParams.get('tab');
-  const activeTab = tabParam === 'photos' ? 'photos' : tabParam === 'tarif' ? 'tarif' : 'faq';
+  const activeTab = tabParam === 'photos' ? 'photos' : tabParam === 'facility-photos' ? 'facility-photos' : tabParam === 'tarif' ? 'tarif' : 'faq';
 
   return (
     <div className="settings-page">
@@ -508,6 +632,9 @@ export default function OwnerSettingsPage() {
         </Tab>
         <Tab eventKey="photos" title="Foto Kamar">
           <RoomPhotoPanel />
+        </Tab>
+        <Tab eventKey="facility-photos" title="Foto Fasilitas">
+          <FacilityPhotoPanel />
         </Tab>
         <Tab eventKey="tarif" title="Tarif & Konstanta">
           <TariffSettingsPanel />

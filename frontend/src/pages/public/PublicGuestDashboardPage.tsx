@@ -4,6 +4,7 @@ import { Accordion, Container, Modal, Spinner } from 'react-bootstrap';
 import { Link, Navigate, useLocation } from 'react-router-dom';
 import { listPublicRooms } from '../../api/bookings';
 import { fetchPublicSocialProof } from '../../api/marketing';
+import { listFacilityImages } from '../../api/facilityImages';
 import Kost48LogoMark from '../../components/common/Kost48LogoMark';
 import { useAuth } from '../../context/AuthContext';
 import { getDefaultRoute } from '../../config/navigation';
@@ -45,32 +46,31 @@ const FACILITY_GROUPS = [
     id: 'umum',
     title: 'Umum',
     items: [
-      { mark: '🅿️', label: 'Parkir luas', desc: 'Ruang parkir untuk mobil dan motor.' },
-      { mark: '🍳', label: 'Dapur bersama', desc: 'Area masak bersama untuk kebutuhan harian.' },
-      { mark: '💧', label: 'Air PDAM + tandon', desc: 'Pasokan air dibantu tandon cadangan.' },
-      { mark: '🌅', label: 'Balkon santai', desc: 'Area terbuka untuk istirahat sejenak.' },
-      { mark: '🧺', label: 'Area jemur', desc: 'Beberapa titik jemur di area kos.' },
-      { mark: '🌳', label: 'Taman & area hijau', desc: 'Lingkungan lebih teduh dan nyaman.' },
+      { slug: 'parkir-luas', mark: '🅿️', label: 'Parkir luas', desc: 'Ruang parkir untuk mobil dan motor.' },
+      { slug: 'dapur-bersama', mark: '🍳', label: 'Dapur bersama', desc: 'Area masak bersama untuk kebutuhan harian.' },
+      { slug: 'air-pdam-tandon', mark: '💧', label: 'Air PDAM + tandon', desc: 'Pasokan air dibantu tandon cadangan.' },
+      { slug: 'balkon-santai', mark: '🌅', label: 'Balkon santai', desc: 'Area terbuka untuk istirahat sejenak.' },
+      { slug: 'area-jemur', mark: '🧺', label: 'Area jemur', desc: 'Beberapa titik jemur di area kos.' },
+      { slug: 'taman', mark: '🌳', label: 'Taman & area hijau', desc: 'Lingkungan lebih teduh dan nyaman.' },
     ],
   },
   {
     id: 'kamar',
     title: 'Kamar',
     items: [
-      { mark: '🛏️', label: 'Kasur', desc: 'Tipe kasur menyesuaikan kamar yang dipilih.' },
-      { mark: '🚪', label: 'Lemari baju', desc: 'Penyimpanan dasar tersedia di kamar.' },
-      { mark: '❄️', label: 'AC / kipas', desc: 'Pilihan pendingin sesuai tipe kamar.' },
-      { mark: '🚿', label: 'Kamar mandi', desc: 'Pilihan kamar mandi dalam atau luar.' },
+      { slug: 'kasur', mark: '🛏️', label: 'Kasur', desc: 'Tipe kasur menyesuaikan kamar yang dipilih.' },
+      { slug: 'lemari-baju', mark: '🚪', label: 'Lemari baju', desc: 'Penyimpanan dasar tersedia di kamar.' },
+      { slug: 'ac-kipas', mark: '❄️', label: 'AC / kipas', desc: 'Pilihan pendingin sesuai tipe kamar.' },
+      { slug: 'kamar-mandi', mark: '🚿', label: 'Kamar mandi', desc: 'Pilihan kamar mandi dalam atau luar.' },
     ],
   },
   {
     id: 'tambahan',
     title: 'Tambahan',
     items: [
-      { mark: '📶', label: 'WiFi', desc: 'Rp 50.000 per perangkat.' },
-      { mark: '🚰', label: 'Galon air', desc: 'Rp 15.000 per galon.' },
-      { mark: '📺', label: 'TV tambahan', desc: 'Rp 50.000 per bulan.' },
-      { mark: '🔧', label: 'Perbaikan dasar', desc: 'Laporan fasilitas dibantu pengelola.' },
+      { slug: 'wifi', mark: '📶', label: 'WiFi', desc: 'Rp 50.000 per perangkat.' },
+      { slug: 'galon-air', mark: '🚰', label: 'Galon air', desc: 'Rp 15.000 per galon.' },
+      { slug: 'tv-tambahan', mark: '📺', label: 'TV tambahan', desc: 'Rp 50.000 per bulan.' },
     ],
   },
 ];
@@ -391,6 +391,19 @@ export default function PublicGuestDashboardPage() {
   const [scrolled, setScrolled] = useState(false);
   const [lightboxSrc, setLightboxSrc] = useState<string | null>(null);
   const [activeFacilityTab, setActiveFacilityTab] = useState(FACILITY_GROUPS[0].id);
+  const facilityImagesQuery = useQuery({
+    queryKey: ['facility-images'],
+    queryFn: listFacilityImages,
+    staleTime: 120_000,
+  });
+  const facilityImageMap = useMemo(() => {
+    const map = new Map<string, string>();
+    if (facilityImagesQuery.data) {
+      for (const item of facilityImagesQuery.data) map.set(item.slug, item.url);
+    }
+    return map;
+  }, [facilityImagesQuery.data]);
+
   const [showAllFaq, setShowAllFaq] = useState(false);
   const todayDate = useMemo(() => getTodayDateInput(), []);
   const [checkInDate, setCheckInDate] = useState(todayDate);
@@ -731,15 +744,27 @@ export default function PublicGuestDashboardPage() {
           </div>
           <div className="gx-facility-panel" role="tabpanel">
             <div className="gx-facility-list gx-facility-list-active">
-              {activeFacility.items.map((item) => (
-                <div key={item.label} className="gx-facility-row">
-                  <span className="gx-facility-icon" aria-hidden="true">{item.mark}</span>
-                  <div>
-                    <strong>{item.label}</strong>
-                    <small>{item.desc}</small>
+              {activeFacility.items.map((item) => {
+                const imgUrl = facilityImageMap.get(item.slug);
+                return (
+                  <div key={item.label} className={`gx-facility-row${imgUrl ? ' has-photo' : ''}`}>
+                    {imgUrl ? (
+                      <img
+                        src={imgUrl.startsWith('http') ? imgUrl : imgUrl}
+                        alt={item.label}
+                        className="gx-facility-photo"
+                        loading="lazy"
+                      />
+                    ) : (
+                      <span className="gx-facility-icon" aria-hidden="true">{item.mark}</span>
+                    )}
+                    <div>
+                      <strong>{item.label}</strong>
+                      <small>{item.desc}</small>
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         </Container>
