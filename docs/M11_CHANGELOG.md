@@ -34,6 +34,10 @@
 - **UX-LOGIN-FORMAT:** Validasi format login tenant (email vs HP dengan regex).
 - Gate: FE build PASS (0 error), PWA verify PASS.: header tanggal dipertahankan, tiap entry hanya menyimpan 1-2 poin outcome. Detail verbose tetap ada di source lama.
 
+### 2026-06-19 — refactor(efisiensi AI/token): decompose ReportsPage
+- `ReportsPage.tsx` 732→289 baris; helpers + 21 komponen presentational (read-only laporan) diekstrak ke `frontend/src/pages/reports/reportShared.tsx` (pola mengikuti `dashboardShared.tsx`).
+- Gate: FE `tsc` 0 + build PASS (PWA verified), chunk ReportsPage identik (0 perubahan perilaku). Catatan: TicketsPage/StaysPage/AccountingSetupPage = monolit stateful, ditunda (refactor per-task lebih aman).
+
 ### 2026-06-19 — refactor(efisiensi AI/token): bersih repo + split docs + CODEMAP + decompose DashboardAdmin
 - **Repo:** untrack 32.8MB Prisma generated (`backend/src/generated/*`) dari git (sudah gitignore; regen via `prisma generate`); pindah `buku.md` (2.2MB) + `KOST48_Analisis_Bisnis_Total.pdf` (5.7MB) ke `reference/` (luar jalur baca AI) + read-guard di `CLAUDE.md`.
 - **Docs:** split M10 → `docs/M11_CHANGELOG.md` (M10 126KB→90KB, changelog historis pindah ke sini); tambah `docs/CODEMAP.md` (peta modul→path→tanggung jawab + index 54 model + anchor flow) sebagai pintu navigasi kode hemat token.
