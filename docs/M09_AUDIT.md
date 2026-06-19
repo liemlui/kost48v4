@@ -26,6 +26,23 @@ Konsolidasi audit fase, audit menyeluruh, dan laporan audit flow realita kode vs
 | Deposit 16 stay × Rp500rb | ✅ MATCHED |
 | Unmapped transactions | ✅ 0 |
 
+## Update 2026-06-20 — Fase K: Pasca-Audit Total 12 Jalur ✅
+
+**Audit 12 jalur paralel selesai 20 Jun 2026. 97 temuan (24 critical, 42 medium, 31 low). Semua critical difix. Detail: `docs/M16_PASCA_AUDIT_PLAN.md`.**
+
+| Area | Temuan | Status |
+|------|--------|--------|
+| Keamanan Auth (RolesGuard, DTO, STAFF leak) | 5 critical | ✅ Semua difix |
+| Data Integrity (resolveRent, helpers, schema) | 4 critical | ✅ Semua difix |
+| Business Logic (deposit, arus kas, threshold) | 3 critical | ✅ Semua difix |
+| Auto-Ops (race condition, circuit breaker) | 2 critical | ✅ Semua difix |
+| CSS Chaos (7 :root blocks) | 1 critical | ✅ 00-tokens.css |
+| DeepSeek Settings (no UI) | 1 critical | ✅ UI editable |
+| Code Quality (as any, silent errors) | 8 medium | ✅ Sebagian difix |
+| UI/UX (error handling, duplikasi) | 6 medium | ✅ Sebagian difix |
+| Prisma Schema (missing index/enum/relation) | 10 medium | ✅ Sebagian difix |
+| Backlog (31 low) | — | 📋 Tercatat di M16 |
+
 ## Update 2026-06-19 - Audit Guard Fase G AI
 
 Fase G AI Owner/Admin (`docs/M12_AI_OWNER_ADMIN.md`) menambah risiko baru: biaya API, hallucination, PDP, dan over-automation. Audit wajib memakai guard berikut:

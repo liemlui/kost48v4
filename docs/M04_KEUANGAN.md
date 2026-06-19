@@ -16,6 +16,10 @@ Semua fondasi keuangan: harness verifikasi, pembayaran/invoice, accounting, lapo
 
 - Jadikan file ini pintu masuk tematik; bila butuh detail mentah, cek file sumber di arsip yang disebut di atas.
 - Heading asli dinaikkan levelnya agar tidak bertabrakan dengan struktur M-file.
+## Update 2026-06-20 — Fase K: Unifikasi Arus Kas ✅
+
+**Dua "Arus Kas" yang berbeda (operasional approximation vs ledger-backed direct method) sudah diunifikasi (R2).** `GET /reports/cash-flow` dihapus — semua laporan arus kas kini pakai `GET /accounting/cashflow` (direct method, termasuk deposit + investasi + pendanaan). Frontend `ReportsPage` tab Operasional kini mengambil dari `fetchCashflowStatement()`. Deposit handling normal checkout juga diselaraskan dengan forced checkout (auto-cover semua invoice, tidak hanya meter).
+
 ## Update 2026-06-17 — AUDIT KEUANGAN ULTRA ✅
 
 **Hasil audit menyeluruh (17 Juni 2026):**

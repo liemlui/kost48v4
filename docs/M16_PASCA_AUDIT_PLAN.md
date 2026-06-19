@@ -1,19 +1,28 @@
 # M16 — Pasca-Audit Total KOST48 V5: Rencana Eksekusi
 
-> **Dibuat:** 2026-06-20 · **Sumber:** Audit 12 jalur paralel · **97 temuan**
-> **AI lain paralel:** Fase J (J0-J4 di `docs/M15_FASE_J_HARDENING_AI.md`)
+> **Dibuat:** 2026-06-20 · **Selesai:** 2026-06-20 · **Commit:** `ac4cc2f`
+> **Sumber:** Audit 12 jalur paralel · **97 temuan** · **13/13 task SELESAI**
 > **5 Keputusan Owner sudah diambil** (threshold configurable, unifikasi arus kas, auto-adjust stok, full UI DeepSeek, CSS audit)
 
 ---
 
 ## Status Eksekusi
 
-| Task | Status | Commit |
-|------|--------|--------|
-| P1 — RolesGuard di 3 controller | ✅ SELESAI | _(pending commit)_ |
-| P2 — DTO validation bypass multipart | ✅ SELESAI | _(pending commit)_ |
-| P3 — Hapus STAFF dari 11 endpoint sensitif | ✅ SELESAI | _(pending commit)_ |
-| P4–R5 (13 task) | ⏳ PLAN | Lihat di bawah |
+| Batch | Task | Status |
+|-------|------|:------:|
+| P1 | RolesGuard di 3 controller | ✅ |
+| P2 | DTO validation bypass multipart | ✅ |
+| P3 | Hapus STAFF dari 11 endpoint | ✅ |
+| P5 | Circuit breaker DeepSeek | ✅ |
+| P6 | Auto-ops DB advisory lock | ✅ |
+| Q1 | Unifikasi resolveRent | ✅ |
+| Q2 | Merge tenant-bookings helpers | ✅ |
+| Q3+Q4 | Schema unique NIK + index + Cascade | ✅ |
+| Q5 | Deposit normal = forced checkout | ✅ |
+| R1 | CSS variables audit | ✅ |
+| R2 | Unifikasi arus kas | ✅ |
+| R3 | DeepSeek UI Settings | ✅ |
+| R4+R5 | Error handling + dead code | ✅ |
 
 ---
 

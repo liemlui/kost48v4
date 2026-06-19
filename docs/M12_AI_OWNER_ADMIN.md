@@ -8,21 +8,16 @@ Fase G menjadikan AI sebagai pembantu keputusan Owner/Admin, bukan autopilot. AI
 
 ## Status Saat Ini
 
-- Integrasi DeepSeek sudah ada di `backend/src/modules/market-analysis/`.
-- Client API ada di `backend/src/modules/market-analysis/deepseek.client.ts`.
-- Halaman frontend ada di `frontend/src/pages/marketing/MarketAnalysisPage.tsx`.
-- API yang sudah tersedia:
-  - `GET /market-analysis/status`
-  - `GET /market-analysis/snapshot`
-  - `POST /market-analysis/chat`
-  - `GET /market-analysis/cac-clv`
-  - `POST /market-analysis/cac-clv/analyze`
-- OCR KTP gratis/offline sudah ada di frontend:
-  - `frontend/src/utils/ktpOcr.ts`
-  - `frontend/src/pages/bookings/GuestBookingForm.tsx`
-- Audit trail sudah punya `AuditLog.meta`, bisa dipakai untuk mencatat `aiSuggestion` saat manusia menyetujui hasil AI.
-- **Fase G (G0-G9) SELESAI** 19-20 Jun 2026 di modul `backend/src/modules/owner-ai/` (15 file) + `frontend/src/components/ai/*`.
-- **Fase J — Hardening (BARU, pra-go-live):** modul owner-ai selesai TANPA test. Jaring pengaman uang+PDP, pelurusan guard no-partial (temuan divergensi DP booking), hardening FE, dan audit PDP. Spesifikasi lengkap & langkah eksekutor lemah: **`docs/M15_FASE_J_HARDENING_AI.md`** (J0-J4). Antrian di `docs/M10_CHECKLIST_CHANGELOG.md` → Fase J.
+- **Fase G (G0-G9) SELESAI** 19-20 Jun 2026 — modul `backend/src/modules/owner-ai/` (15 file) + `frontend/src/components/ai/*`.
+- **Fase J — Hardening SELESAI** 20 Jun 2026 — J0-J4: helper/test PDP+uang, guard no-partial DP, hardening FE AI, audit PDP dibukukan di M09. Detail: `docs/M15_FASE_J_HARDENING_AI.md`.
+- **Fase K — Pasca-Audit SELESAI** 20 Jun 2026 — 13 task termasuk:
+  - **Circuit breaker DeepSeek** (`deepseek.client.ts`): 5 kegagalan berturut-turut → circuit open 30 detik, auto-recover.
+  - **Fallback MarketAnalysis.chat**: API gagal → return `RULE_FALLBACK` dengan pesan, bukan 500 error.
+  - **Konfigurasi AI owner-configurable** (R3): model, base URL, daily limit, toggle enable/manual-only/log — semua bisa diatur dari **Owner Settings → tab "AI & Biaya"**. Disimpan di `OperationalSetting` (DB), fallback ke `.env`. API key TETAP di `.env` (keamanan). Detail: `docs/M16_PASCA_AUDIT_PLAN.md`.
+- Integrasi DeepSeek: client di `backend/src/modules/market-analysis/deepseek.client.ts`.
+- Halaman frontend: `frontend/src/pages/marketing/MarketAnalysisPage.tsx`, settings di `frontend/src/pages/settings/OwnerSettingsPage.tsx`.
+- OCR KTP gratis/offline: `frontend/src/utils/ktpOcr.ts`, `frontend/src/pages/bookings/GuestBookingForm.tsx`.
+- Audit trail: `AuditLog.meta.ai` untuk jejak keputusan yang memakai AI.
 
 ## Keputusan Owner Fase G
 

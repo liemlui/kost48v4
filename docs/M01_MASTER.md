@@ -32,7 +32,11 @@ De-duplikasi navigasi pasca Fase H: hapus sub-menu chip duplikat sidebar, unifik
 
 ## Update 2026-06-20 - Fase J Hardening AI Pra-Go-Live
 
-Jaring pengaman modul AI Fase G (yang selesai tanpa test). Spesifikasi lengkap: `docs/M15_FASE_J_HARDENING_AI.md`. Lima task: J0 (ekstrak guard murni `owner-ai.helpers.ts`), J1 (unit test PDP mask-NIK + uang no-partial), J2 (luruskan guard no-partial AI agar sadar DP booking — temuan divergensi vs `approveSubmission`), J3 (hardening FE AI non-blocking + gating), J4 (audit PDP/keamanan 12 endpoint AI → M09). Tanpa schema. **BARU.**
+Jaring pengaman modul AI Fase G (yang selesai tanpa test). Spesifikasi lengkap: `docs/M15_FASE_J_HARDENING_AI.md`. Lima task: J0-J4. Tanpa schema. **SELESAI 2026-06-20.**
+
+## Update 2026-06-20 - Fase K Pasca-Audit Total
+
+Audit 12 jalur paralel — 97 temuan (24 critical, 42 medium, 31 low). 5 keputusan owner diambil. 13 task eksekusi: keamanan (RolesGuard, DTO validation, STAFF removal, circuit breaker, auto-ops lock), data integrity (resolveRent unifikasi, merge helpers, schema unique NIK+index+Cascade, deposit handling), CSS (00-tokens.css), arus kas (unifikasi ke ledger-backed), AI settings (DeepSeek UI configurable). Plan & detail: `docs/M16_PASCA_AUDIT_PLAN.md`. Commit: `ac4cc2f`. **SELESAI 2026-06-20.**
 
 ## Catatan Pemakaian
 
@@ -69,7 +73,9 @@ Jaring pengaman modul AI Fase G (yang selesai tanpa test). Spesifikasi lengkap: 
 | `17_PUBLIK_MARKETING_UIUX` | katalog/SEO/UI/chart (flow 2-publik) | 🟢 UX/🔴 SEO | SEO (F3-3), social proof (F3-4), perf publik (F2-11) |
 | `18_AUTH_FONDASI_ONBOARDING` | auth/role/KTP (flow 1) | 🟢 | OWNER-only (F2-16), KTP gate (F3-17) |
 | `19_GAMIFIKASI_LOYALITAS` | poin/reward tenant (BARU) | 📅 Fase 4 | F4-9 (desain lengkap di dossier) |
-| `M12_AI_OWNER_ADMIN` | AI berbayar Owner/Admin | 📋 Fase G | manual button only, draft AI, human approval, token/cost guard |
+| `M12_AI_OWNER_ADMIN` | AI berbayar Owner/Admin | 🟢 Fase G | SELESAI — manual button, circuit breaker, UI configurable settings |
+| `M15_FASE_J_HARDENING_AI` | Hardening AI Pra-Go-Live | 🟢 Fase J | SELESAI — helper/test PDP+uang, guard no-partial DP, audit PDP |
+| `M16_PASCA_AUDIT_PLAN` | Pasca-Audit Total + Eksekusi | 🟢 Fase K | SELESAI — 13 task keamanan+integrity+CSS+AI settings |
 **Hierarki sumber kebenaran:** `03_KEPUTUSAN_OWNER` (aturan bisnis mengikat) → `01_GROUND_STATE` dan `02_FLOW_MAP` (fakta kode saat ini) → dossier domain (temuan dan desain target) → `08_CHECKLIST` (urutan eksekusi). `04_DEPLOY_AND_PWA` adalah runbook operasi. **`05_VERIFIKASI_KEUANGAN` wajib untuk setiap task uang.** Detail forensik 97 temuan diarsipkan di `archieve/_DEPRECATED_AUDIT_*`.
 
 #### 4. PETA EKSEKUSI (urutan fase — task ada di dossier masing-masing)
