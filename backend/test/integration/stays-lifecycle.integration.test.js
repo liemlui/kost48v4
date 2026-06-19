@@ -6,7 +6,7 @@ const { AppModule } = require('../../dist/app.module.js');
 /**
  * Integration test: siklus hidup Stay (booking → huni → checkout).
  * Prasyarat: DB UAT (port 5433) running + sudah di-seed.
- * Jalankan: npm run build && node --test "test/integration/**/*.test.js"
+ * Jalankan: npm run build, lalu `npm run test:integration` (butuh dist + DB seeded).
  */
 
 test('full lifecycle: booking → check-in → checkout → deposit refund', async (t) => {
