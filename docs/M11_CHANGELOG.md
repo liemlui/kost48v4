@@ -34,6 +34,10 @@
 - **UX-LOGIN-FORMAT:** Validasi format login tenant (email vs HP dengan regex).
 - Gate: FE build PASS (0 error), PWA verify PASS.: header tanggal dipertahankan, tiap entry hanya menyimpan 1-2 poin outcome. Detail verbose tetap ada di source lama.
 
+### 2026-06-19 — refactor(efisiensi AI/token): decompose PublicGuestDashboardPage
+- `PublicGuestDashboardPage.tsx` 998→639 baris; helpers/konstanta + 5 komponen presentational (Lightbox/GuestTopbar/RoomPreviewCard/RoomPreviewSkeleton/GuestFooter) diekstrak ke `frontend/src/pages/public/publicGuestShared.tsx`.
+- Gate: FE `tsc` 0 + build PASS (PWA verified), chunk ≈identik (0 perubahan perilaku).
+
 ### 2026-06-19 — refactor(efisiensi AI/token): decompose ReportsPage
 - `ReportsPage.tsx` 732→289 baris; helpers + 21 komponen presentational (read-only laporan) diekstrak ke `frontend/src/pages/reports/reportShared.tsx` (pola mengikuti `dashboardShared.tsx`).
 - Gate: FE `tsc` 0 + build PASS (PWA verified), chunk ReportsPage identik (0 perubahan perilaku). Catatan: TicketsPage/StaysPage/AccountingSetupPage = monolit stateful, ditunda (refactor per-task lebih aman).
