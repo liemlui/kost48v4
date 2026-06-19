@@ -144,6 +144,18 @@ export default function KtpOcrValidateCard({ tenantId, tenantName }: Props) {
             usage={result.usage}
             model={result.model}
             confidence={result.confidence}
+            saveDraft={{
+              feature: 'ktp-ocr',
+              targetType: 'Tenant',
+              targetId: String(tenantId),
+              mode: result.mode,
+              model: result.model,
+              snapshotHash: result.snapshotHash,
+              promptHash: result.promptHash,
+              confidence: result.confidence,
+              resultJson: result.result as unknown as Record<string, unknown>,
+              usageJson: result.usage as unknown as Record<string, unknown> | undefined,
+            }}
           >
             <ul className="mb-2 ps-3">
               <li>

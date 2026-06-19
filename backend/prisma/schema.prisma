@@ -1610,6 +1610,41 @@ model AuditLog {
   @@index([createdAt])
 }
 
+// G9 (S-6): antrean draft AI lintas sesi. Additive; tidak mengganti AuditLog.
+// resultJson HANYA berisi output AI (tanpa NIK penuh/foto KTP/bukti bayar mentah).
+enum AiDraftStatus {
+  DRAFT
+  APPLIED
+  REJECTED
+  EXPIRED
+}
+
+model AiDraft {
+  id           Int           @id @default(autoincrement())
+  feature      String
+  targetType   String?
+  targetId     String?
+  status       AiDraftStatus @default(DRAFT)
+  mode         String
+  model        String?
+  snapshotHash String?
+  promptHash   String?
+  confidence   Float?
+  resultJson   Json
+  usageJson    Json?
+  createdById  Int?
+  reviewedById Int?
+  reviewedAt   DateTime?
+  reviewNote   String?
+  expiresAt    DateTime?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  @@index([feature, status])
+  @@index([targetType, targetId])
+  @@index([createdAt])
+}
+
 model ChartOfAccount {
   id              Int                     @id @default(autoincrement())
   code            String                  @unique

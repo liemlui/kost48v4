@@ -934,7 +934,7 @@ Evaluasi 4 item dengan format: kondisi saat ini → risiko → rekomendasi → p
 
 #### G9 — AI-DRAFT-QUEUE [SCHEMA] OPSIONAL
 
-- [ ] **G9 / AI-DRAFT-QUEUE** 🧬 **[SCHEMA][OWNER]:** hanya kerjakan jika owner menyetujui model `AiDraft`.
+- [x] **G9 / AI-DRAFT-QUEUE** 🧬 **[SCHEMA][OWNER]:** **SELESAI 2026-06-19** (schema S-6 owner-approved). Model `AiDraft`+enum `AiDraftStatus` (migration `20260619140000_ai_draft_queue`, additive). Modul terpisah `ai-draft.service.ts`+`ai-draft.controller.ts` (hindari file owner-ai kontensi): `POST/GET /owner-ai/drafts`, `GET :id`, `POST :id/review` (APPLIED/REJECTED), `POST run/expire` (retention `AI_DRAFT_RETENTION_DAYS`=60). FE: `api/aiDrafts.ts` + tombol "Simpan sebagai draft" di `AiResultPanel` (dipakai KtpOcrValidateCard) + tab "Antrean Draft AI" di OwnerSettings (review queue). PDP: resultJson sudah bersih dari sumbernya (NIK ter-mask). Gate: backend tsc 0, frontend tsc 0, build lulus.
   - **Tujuan:** menyimpan draft AI lintas fitur agar Owner/Admin bisa review, approve, reject, dan audit dari satu antrean.
   - **Kapan dibutuhkan:** jika G1-G8 butuh persist draft lintas sesi, histori revisi, atau approval queue khusus.
   - **Schema usulan:** `AiDraft(id, feature, actorId, status, sourceType, sourceId, snapshotHash, promptHash, model, confidence, inputSummaryJson, resultJson, humanDecision, decidedById, decidedAt, createdAt, updatedAt)`.

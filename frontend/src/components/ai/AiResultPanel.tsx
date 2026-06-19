@@ -1,6 +1,8 @@
 import type { ReactNode } from 'react';
-import { Alert, Card } from 'react-bootstrap';
+import { Alert, Button, Card, Spinner } from 'react-bootstrap';
+import { useMutation } from '@tanstack/react-query';
 import AiCostBadge from './AiCostBadge';
+import { saveAiDraft, type SaveAiDraftPayload } from '../../api/aiDrafts';
 
 type Props = {
   title?: string;
@@ -11,6 +13,8 @@ type Props = {
   usage?: { total_tokens?: number };
   model?: string;
   confidence?: number;
+  /** G9: bila diisi, tampilkan tombol "Simpan sebagai draft" → antrean AiDraft. */
+  saveDraft?: SaveAiDraftPayload;
   children: ReactNode;
 };
 
@@ -24,8 +28,11 @@ export default function AiResultPanel({
   usage,
   model,
   confidence,
+  saveDraft,
   children,
 }: Props) {
+  const saveMutation = useMutation({ mutationFn: () => saveAiDraft(saveDraft as SaveAiDraftPayload) });
+
   return (
     <Card className="ai-result-panel mt-3">
       <Card.Header className="d-flex justify-content-between align-items-center py-2">
@@ -53,6 +60,20 @@ export default function AiResultPanel({
         ) : null}
         {children}
         <AiCostBadge usage={usage} model={model} />
+        {saveDraft ? (
+          <div className="mt-2 d-flex align-items-center gap-2">
+            <Button
+              size="sm"
+              variant="outline-secondary"
+              disabled={saveMutation.isPending || saveMutation.isSuccess}
+              onClick={() => saveMutation.mutate()}
+            >
+              {saveMutation.isPending ? <><Spinner animation="border" size="sm" className="me-2" />Menyimpan…</>
+                : saveMutation.isSuccess ? '✅ Tersimpan di antrean' : 'Simpan sebagai draft'}
+            </Button>
+            {saveMutation.isError ? <span className="small text-danger">Gagal menyimpan draft.</span> : null}
+          </div>
+        ) : null}
       </Card.Body>
     </Card>
   );

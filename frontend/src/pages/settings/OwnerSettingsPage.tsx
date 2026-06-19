@@ -11,6 +11,7 @@ import { listFacilityImages, uploadFacilityImage, deleteFacilityImage } from '..
 import { deleteMarketingAsset, listMarketingAssets, uploadMarketingAsset } from '../../api/marketingAssets';
 import { resolveAbsoluteFileUrl } from '../../utils/resolveAbsoluteFileUrl';
 import { getOwnerAiStatus, getOwnerAiUsage, testOwnerAiConnection } from '../../api/ai';
+import { listAiDrafts, reviewAiDraft, expireAiDrafts, type AiDraft, type AiDraftStatus } from '../../api/aiDrafts';
 
 /* ─── Facility Photos ──────────────────────────────────────────────── */
 
@@ -861,10 +862,95 @@ function AiSettingsPanel() {
   );
 }
 
+/* ─── Antrean Draft AI (G9) ────────────────────────────────────────── */
+
+const DRAFT_STATUS_BADGE: Record<AiDraftStatus, string> = {
+  DRAFT: 'warning', APPLIED: 'success', REJECTED: 'secondary', EXPIRED: 'light',
+};
+const DRAFT_STATUS_LABEL: Record<AiDraftStatus, string> = {
+  DRAFT: 'Menunggu', APPLIED: 'Dipakai', REJECTED: 'Ditolak', EXPIRED: 'Kedaluwarsa',
+};
+const DRAFT_FILTERS: { key: AiDraftStatus | 'ALL'; label: string }[] = [
+  { key: 'DRAFT', label: 'Menunggu' },
+  { key: 'APPLIED', label: 'Dipakai' },
+  { key: 'REJECTED', label: 'Ditolak' },
+  { key: 'EXPIRED', label: 'Kedaluwarsa' },
+  { key: 'ALL', label: 'Semua' },
+];
+
+function AiDraftQueuePanel() {
+  const qc = useQueryClient();
+  const [filter, setFilter] = useState<AiDraftStatus | 'ALL'>('DRAFT');
+  const { data: drafts = [], isLoading } = useQuery({
+    queryKey: ['ai-drafts', filter],
+    queryFn: () => listAiDrafts(filter === 'ALL' ? undefined : { status: filter }),
+  });
+  const reviewMutation = useMutation({
+    mutationFn: ({ id, decision }: { id: number; decision: 'APPLIED' | 'REJECTED' }) => reviewAiDraft(id, decision),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['ai-drafts'] }),
+  });
+  const expireMutation = useMutation({
+    mutationFn: expireAiDrafts,
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['ai-drafts'] }),
+  });
+
+  return (
+    <div>
+      <div className="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+        <div>
+          <h3 className="h5 mb-0">Antrean Draft AI</h3>
+          <small className="text-muted">Hasil AI yang disimpan untuk ditinjau. Aksi final tetap lewat menu masing-masing — di sini hanya menandai Dipakai/Ditolak.</small>
+        </div>
+        <Button size="sm" variant="outline-secondary" onClick={() => expireMutation.mutate()} disabled={expireMutation.isPending}>
+          {expireMutation.isPending ? 'Memproses…' : 'Bersihkan kedaluwarsa'}
+        </Button>
+      </div>
+
+      <div className="mb-3 d-flex gap-1 flex-wrap">
+        {DRAFT_FILTERS.map((f) => (
+          <Button key={f.key} size="sm" variant={filter === f.key ? 'primary' : 'outline-primary'} onClick={() => setFilter(f.key)}>{f.label}</Button>
+        ))}
+      </div>
+
+      {isLoading ? (
+        <div className="py-4 text-center"><Spinner animation="border" /></div>
+      ) : drafts.length === 0 ? (
+        <Alert variant="light" className="border text-center py-4">Belum ada draft pada status ini.</Alert>
+      ) : (
+        <div className="d-grid gap-2">
+          {drafts.map((d: AiDraft) => (
+            <div key={d.id} className="border rounded p-2">
+              <div className="d-flex justify-content-between align-items-start flex-wrap gap-2">
+                <div className="min-w-0">
+                  <span className="fw-semibold">{d.feature}</span>
+                  {d.targetType ? <span className="text-muted small ms-2">{d.targetType}{d.targetId ? ` #${d.targetId}` : ''}</span> : null}
+                  <div className="small text-muted">
+                    {new Date(d.createdAt).toLocaleString('id-ID')} · {d.mode}{d.model ? ` · ${d.model}` : ''}
+                    {d.confidence != null ? ` · keyakinan ${Math.round(d.confidence * 100)}%` : ''}
+                  </div>
+                </div>
+                <Badge bg={DRAFT_STATUS_BADGE[d.status]} text={d.status === 'EXPIRED' ? 'dark' : undefined}>{DRAFT_STATUS_LABEL[d.status]}</Badge>
+              </div>
+              <pre className="small bg-light border rounded p-2 mt-2 mb-2" style={{ maxHeight: 160, overflow: 'auto' }}>{JSON.stringify(d.resultJson, null, 2)}</pre>
+              {d.reviewNote ? <div className="small text-muted mb-1">Catatan: {d.reviewNote}</div> : null}
+              {d.status === 'DRAFT' ? (
+                <div className="d-flex gap-1">
+                  <Button size="sm" variant="outline-success" disabled={reviewMutation.isPending} onClick={() => reviewMutation.mutate({ id: d.id, decision: 'APPLIED' })}>Tandai Dipakai</Button>
+                  <Button size="sm" variant="outline-danger" disabled={reviewMutation.isPending} onClick={() => reviewMutation.mutate({ id: d.id, decision: 'REJECTED' })}>Tolak</Button>
+                </div>
+              ) : null}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function OwnerSettingsPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const tabParam = searchParams.get('tab');
-  const validTabs = new Set(['faq', 'photos', 'facility-photos', 'marketing-assets', 'tarif', 'ai']);
+  const validTabs = new Set(['faq', 'photos', 'facility-photos', 'marketing-assets', 'tarif', 'ai', 'ai-drafts']);
   const activeTab = tabParam && validTabs.has(tabParam) ? tabParam : 'faq';
 
   return (
@@ -900,6 +986,9 @@ export default function OwnerSettingsPage() {
         </Tab>
         <Tab eventKey="ai" title="AI & Biaya">
           <AiSettingsPanel />
+        </Tab>
+        <Tab eventKey="ai-drafts" title="Antrean Draft AI">
+          <AiDraftQueuePanel />
         </Tab>
       </Tabs>
     </div>

@@ -3,6 +3,10 @@
 > Arsip changelog ringkas, dipisah dari M10 pada 2026-06-19 untuk hemat token AI (M10 = checklist aktif saja). **Entri changelog BARU ditulis DI SINI (paling atas)**, bukan di M10. Format: 1 header tanggal + 1-2 poin outcome per entri.
 
 ## Changelog Ringkas
+### 2026-06-19 — G9: AI Draft Queue (schema S-6)
+
+- **G9 🧬** Model `AiDraft`+`AiDraftStatus` (migration additive `20260619140000_ai_draft_queue`). Modul terpisah `AiDraftService`/`AiDraftController`: `POST/GET /owner-ai/drafts`, `GET :id`, `POST :id/review` (APPLIED/REJECTED), `POST run/expire` (retention 60 hari). FE `api/aiDrafts.ts` + tombol "Simpan sebagai draft" di `AiResultPanel` (wired di KTP validator) + tab "Antrean Draft AI" di OwnerSettings. resultJson bersih (PDP).
+
 ### 2026-06-19 — G7: AI Settings, Budget & Observability
 
 - **G7** GET /owner-ai/usage (usage per-fitur in-memory + 20 jejak AuditLog.meta.ai via jsonb_exists) + POST /owner-ai/test-connection (OWNER, latency+model, tanpa bocor API key). Tab "AI & Biaya" di OwnerSettingsPage: status/enabled/manual-only/model/limit, tes koneksi, usage per fitur, jejak keputusan AI.
