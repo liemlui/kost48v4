@@ -176,6 +176,87 @@ export type KtpOcrValidateResult = {
   warnings: string[];
   result: {
     extracted: {
+
+// G6: Operations & inventory AI drafts. Semua hasil hanya saran manual.
+
+export type TicketActionDraftResult = {
+  mode: 'DEEPSEEK' | 'RULE_FALLBACK';
+  model?: string;
+  usage?: { total_tokens?: number };
+  snapshotHash?: string;
+  promptHash?: string;
+  fallback?: boolean;
+  warnings: string[];
+  result: {
+    summary: string;
+    recommendedAction: 'ASSIGN_STAFF' | 'CREATE_EXPENSE_DRAFT' | 'REQUEST_PHOTO' | 'CLOSE' | 'KEEP_OPEN';
+    priority: 'LOW' | 'MEDIUM' | 'HIGH';
+    suggestedNote: string;
+    riskFlags: string[];
+  };
+  missingData: string[];
+};
+
+export async function draftTicketAction(ticketId: number) {
+  const response = await client.post<ApiEnvelope<TicketActionDraftResult>>(`/owner-ai/tickets/${ticketId}/action-draft`);
+  return response.data.data;
+}
+
+export type InventoryReorderDraftResult = {
+  mode: 'DEEPSEEK' | 'RULE_FALLBACK';
+  model?: string;
+  usage?: { total_tokens?: number };
+  snapshotHash?: string;
+  promptHash?: string;
+  fallback?: boolean;
+  warnings: string[];
+  result: {
+    lowStockItems: Array<{
+      inventoryItemId: number;
+      name: string;
+      currentQty: number;
+      suggestedMinQty: number;
+      reason: string;
+    }>;
+    purchaseSuggestions: Array<{
+      name: string;
+      qty: number;
+      estimatedBudgetRupiah: number;
+      priority: 'LOW' | 'MEDIUM' | 'HIGH';
+    }>;
+    warnings: string[];
+  };
+  missingData: string[];
+};
+
+export async function draftInventoryReorder() {
+  const response = await client.post<ApiEnvelope<InventoryReorderDraftResult>>('/owner-ai/inventory/reorder-draft');
+  return response.data.data;
+}
+
+export type FieldReportReviewDraftResult = {
+  mode: 'DEEPSEEK' | 'RULE_FALLBACK';
+  model?: string;
+  usage?: { total_tokens?: number };
+  snapshotHash?: string;
+  promptHash?: string;
+  fallback?: boolean;
+  warnings: string[];
+  result: {
+    summary: string;
+    recommendedDecision: 'APPROVE' | 'REJECT' | 'NEEDS_MORE_INFO';
+    priority: 'LOW' | 'MEDIUM' | 'HIGH';
+    suggestedAdminNote: string;
+    suggestedMovement: { needed: boolean; movementType: 'ASSIGN_TO_ROOM' | 'OUT' | null; reason: string };
+    riskFlags: string[];
+  };
+  missingData: string[];
+};
+
+export async function reviewFieldReportWithAi(reportId: number) {
+  const response = await client.post<ApiEnvelope<FieldReportReviewDraftResult>>(`/owner-ai/staff-field-reports/${reportId}/review-draft`);
+  return response.data.data;
+}
       nik?: string | null;
       name?: string | null;
       birthPlace?: string | null;

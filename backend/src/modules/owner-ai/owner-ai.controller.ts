@@ -79,6 +79,33 @@ export class OwnerAiController {
     return this.ownerAiService.reviewFieldReport(id, user.id);
   }
 
+  /** G6: draft saran aksi tiket. Tidak assign/close/create expense otomatis. */
+  @Post('tickets/:id/action-draft')
+  @Roles(UserRole.OWNER, UserRole.ADMIN)
+  async draftTicketAction(
+    @Param('id', ParseIntPipe) id: number,
+    @CurrentUser() user: CurrentUserPayload,
+  ) {
+    return this.ownerAiService.draftTicketAction(id, user.id);
+  }
+
+  /** G6: draft reorder stok. Tidak membuat pembelian atau mutasi otomatis. */
+  @Post('inventory/reorder-draft')
+  @Roles(UserRole.OWNER, UserRole.ADMIN)
+  async draftInventoryReorder(@CurrentUser() user: CurrentUserPayload) {
+    return this.ownerAiService.draftReorder(user.id);
+  }
+
+  /** G6: draft review laporan lapangan. Keputusan final tetap endpoint admin-review. */
+  @Post('staff-field-reports/:id/review-draft')
+  @Roles(UserRole.OWNER, UserRole.ADMIN)
+  async reviewFieldReport(
+    @Param('id', ParseIntPipe) id: number,
+    @CurrentUser() user: CurrentUserPayload,
+  ) {
+    return this.ownerAiService.reviewFieldReport(id, user.id);
+  }
+
   /** G3: review pembayaran dengan AI. No-partial dicek deterministic SEBELUM AI. */
   @Post("payment-submissions/:id/review-draft")
   @Roles(UserRole.OWNER, UserRole.ADMIN)
