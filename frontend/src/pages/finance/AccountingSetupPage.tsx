@@ -5,6 +5,9 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import PageHeader from '../../components/common/PageHeader';
 import { StatusStrip } from '../../components/workspace';
+import { analyzeFinance, type FinanceResult } from '../../api/ai';
+import AiAssistButton from '../../components/ai/AiAssistButton';
+import AiResultPanel from '../../components/ai/AiResultPanel';
 import AccountingReadinessCard from '../../components/accounting/AccountingReadinessCard';
 import CashAccountSetupPanel from '../../components/accounting/CashAccountSetupPanel';
 import OpeningBalanceWizard from '../../components/accounting/OpeningBalanceWizard';
@@ -342,6 +345,63 @@ export default function AccountingSetupPage() {
         description="Cockpit owner untuk membaca Trial Balance, Neraca, Laba Rugi, aset, kualitas data, dan status tutup periode tanpa jargon fase teknis."
         secondaryAction={<Button variant="outline-primary" onClick={() => seedMutation.mutate()} disabled={seedMutation.isPending} title="Bagan Akun (Chart of Accounts): daftar akun standar untuk mencatat keuangan kos">Siapkan Bagan Akun (COA)</Button>}
       />
+
+      {/* G2: Finance AI Analyst — OWNER only */}
+      {user?.role === 'OWNER' ? (
+        <Row className="mb-3">
+          <Col xs={12}>
+            <section className="owner-panel owner-ai-panel">
+              <div className="owner-panel-heading">
+                <h2>Analisa Keuangan AI</h2>
+              </div>
+              <div className="owner-panel-body p-3">
+                <AiAssistButton<FinanceResult>
+                  label="Analisa Keuangan dengan AI"
+                  loadingLabel="Menganalisa dengan DeepSeek Pro..."
+                  variant="outline-primary"
+                  run={analyzeFinance}
+                  renderResult={(result) => (
+                    <AiResultPanel
+                      title={`Skor Kesehatan: ${result.result?.healthScore ?? '?'}/100`}
+                      mode={result.mode}
+                      fallback={result.fallback}
+                      warnings={result.warnings}
+                      missingData={result.missingData}
+                      usage={result.usage}
+                      model={result.model}
+                    >
+                      <p className="fw-medium">{result.result?.executiveSummary}</p>
+                      {result.result?.findings?.length > 0 ? (
+                        <div className="mb-2">
+                          <div className="small fw-semibold text-muted mb-1">Temuan</div>
+                          {result.result.findings.map((f, i) => (
+                            <Alert key={i} variant={f.severity === 'CRITICAL' ? 'danger' : f.severity === 'HIGH' ? 'warning' : 'info'} className="py-1 px-2 mb-1 small">
+                              <strong>{f.area}</strong>: {f.finding} — <em>{f.recommendedAction}</em>
+                            </Alert>
+                          ))}
+                        </div>
+                      ) : null}
+                      {result.result?.ownerQuestions?.length > 0 ? (
+                        <div className="small text-muted">
+                          <div className="fw-semibold">Pertanyaan untuk Owner:</div>
+                          <ul className="mb-0 ps-3">
+                            {result.result.ownerQuestions.map((q, i) => <li key={i}>{q}</li>)}
+                          </ul>
+                        </div>
+                      ) : null}
+                      {result.result?.doNotTouch?.length > 0 ? (
+                        <div className="small text-danger mt-1">
+                          ⛔ Jangan diubah: {result.result.doNotTouch.join(', ')}
+                        </div>
+                      ) : null}
+                    </AiResultPanel>
+                  )}
+                />
+              </div>
+            </section>
+          </Col>
+        </Row>
+      ) : null}
 
       <div className="admin-area-internal-menu finance-inline-menu" aria-label="Sub-menu Finance">
         <div className="admin-area-internal-menu-head">

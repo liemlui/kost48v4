@@ -802,7 +802,7 @@ Evaluasi 4 item dengan format: kondisi saat ini → risiko → rekomendasi → p
 
 #### G2 — FINANCE-AI-ANALYST
 
-- [ ] **G2 / FINANCE-AI-ANALYST:** analis keuangan mendalam untuk Owner.
+- [x] **G2 / FINANCE-AI-ANALYST:** analis keuangan mendalam untuk Owner.
   - **Tujuan:** AI membantu membaca trial balance, P&L, cashflow, rasio, readiness, deposit reconciliation, dan aging piutang dari data terkini sistem.
   - **Rujukan:** `docs/M12_AI_OWNER_ADMIN.md` G2, `docs/M04_KEUANGAN.md`, `docs/M09_AUDIT.md`.
   - **Anchor backend:** `backend/src/modules/finance/`, `backend/src/modules/accounting/`, `backend/src/modules/reports/`, helper trial balance/cashflow/ratios.
@@ -842,7 +842,7 @@ Evaluasi 4 item dengan format: kondisi saat ini → risiko → rekomendasi → p
 
 #### G4 — EXPENSE-OCR-DRAFT
 
-- [ ] **G4 / EXPENSE-OCR-DRAFT:** OCR nota biaya menjadi draft expense.
+- [x] **G4 / EXPENSE-OCR-DRAFT:** OCR nota biaya menjadi draft expense.
   - **Tujuan:** Admin/Owner upload/foto nota, OCR lokal membaca teks, AI menormalkan menjadi draft expense yang bisa diedit sebelum simpan.
   - **Rujukan:** `docs/M12_AI_OWNER_ADMIN.md` G4, `docs/M04_KEUANGAN.md`, `docs/M06_OPERASIONAL.md`.
   - **Anchor backend:** `backend/src/modules/expenses/expenses.service.ts`, `backend/src/modules/expenses/expenses.controller.ts`.
@@ -861,7 +861,7 @@ Evaluasi 4 item dengan format: kondisi saat ini → risiko → rekomendasi → p
 
 #### G5 — KTP-OCR-VALIDATOR
 
-- [ ] **G5 / KTP-OCR-VALIDATOR:** validator teks OCR KTP untuk Admin/Owner.
+- [x] **G5 / KTP-OCR-VALIDATOR:** validator teks OCR KTP untuk Admin/Owner. **SELESAI 2026-06-19** — `POST /owner-ai/tenants/:id/ktp-ocr-validate` (OWNER/ADMIN); PDP: hanya TEKS (gambar/base64 ditolak), NIK ter-mask di prompt & hasil; cek deterministik backend-menang + demografi dari NIK (tgl lahir/gender) tanpa AI; DeepSeek json + fallback rule-based; `KtpOcrValidateCard` (OCR lokal, gating role+configured) di StepTenantSelect; verifikasi final tetap tombol existing. Gate: backend tsc 0, frontend tsc 0.
   - **Tujuan:** membantu cek format NIK/nama/tanggal lahir dari hasil OCR, bukan mengganti verifikasi manusia.
   - **Rujukan:** `docs/M12_AI_OWNER_ADMIN.md` G5, `docs/M05_SIKLUS_HUNI.md`, `docs/M07_PUBLIK_GROWTH.md`.
   - **Anchor frontend:** `frontend/src/pages/bookings/GuestBookingForm.tsx`, `frontend/src/utils/ktpOcr.ts`, `StayDetailPage`/tenant KTP card.

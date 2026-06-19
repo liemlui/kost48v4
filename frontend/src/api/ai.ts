@@ -83,6 +83,35 @@ export async function generateBrief() {
   return response.data.data;
 }
 
+export type FinanceResult = {
+  mode: string;
+  model: string;
+  fallback: boolean;
+  warnings: string[];
+  missingData: string[];
+  result: {
+    executiveSummary: string;
+    healthScore: number;
+    findings: Array<{
+      severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+      area: string;
+      finding: string;
+      evidence: string;
+      recommendedAction: string;
+      route?: string;
+    }>;
+    ownerQuestions: string[];
+    doNotTouch: string[];
+  };
+  usage?: { total_tokens?: number };
+  snapshotHash?: string;
+};
+
+export async function analyzeFinance() {
+  const response = await client.post<ApiEnvelope<FinanceResult>>('/owner-ai/finance/analyze');
+  return response.data.data;
+}
+
 export type ExpenseReceiptDraft = {
   expenseDate: string | null;
   vendorName: string | null;

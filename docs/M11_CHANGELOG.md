@@ -3,6 +3,19 @@
 > Arsip changelog ringkas, dipisah dari M10 pada 2026-06-19 untuk hemat token AI (M10 = checklist aktif saja). **Entri changelog BARU ditulis DI SINI (paling atas)**, bukan di M10. Format: 1 header tanggal + 1-2 poin outcome per entri.
 
 ## Changelog Ringkas
+### 2026-06-19 — G2: Finance AI Analyst
+
+- **G2** POST /owner-ai/finance/analyze: buildFinanceSnapshot() raw SQL dari JournalLine, analyzeFinance() dengan deepseek-v4-pro, fallback rule-based. Tombol "Analisa Keuangan AI" di AccountingSetupPage (OWNER only).
+
+### 2026-06-19 - G4: Expense Receipt OCR Draft
+
+- **G4** POST `/owner-ai/expenses/receipt-draft`: teks OCR nota divalidasi, dirapikan DeepSeek/fallback menjadi draft expense, dinormalisasi ke enum existing, dan tidak membuat jurnal.
+- Frontend `/expenses`: tambah OCR lokal `tesseract.js`, preview teks OCR, tombol "Rapikan Draft AI", prefill form expense existing, plus `AuditLog.meta.ai` kecil saat draft dipakai untuk simpan.
+
+### 2026-06-19 — G5: KTP OCR Validator
+
+- **G5** POST /owner-ai/tenants/:id/ktp-ocr-validate (OWNER/ADMIN): validasi TEKS OCR KTP vs data tenant. PDP — hanya teks (bukan gambar/base64, ditolak), NIK tenant & hasil ter-mask `************1234`. Cek deterministik backend-menang (NIK 16 digit + cocok tenant) + demografi dari struktur NIK (tgl lahir/gender) tanpa AI; DeepSeek json:true menormalkan + nama match; fallback rule-based. Komponen `KtpOcrValidateCard` (OCR lokal tesseract, gating role+configured) di StepTenantSelect check-in. Verifikasi final tetap tombol existing — AI tidak auto-verify.
+
 ### 2026-06-19 — G1: Owner Executive Brief
 
 - **G1** POST /owner-ai/brief: service buildBriefSnapshot() query Prisma (rooms, overdue, pending, tickets, meter), generateBrief() dengan deepseekChat json:true, fallback rule-based. Tombol "Buat Brief AI" di OwnerDashboardPage dengan AiResultPanel.

@@ -561,11 +561,11 @@ export class OwnerAiService {
     const now = new Date();
     const [jeResult] = await this.prisma.$queryRaw<Array<{ totalDebit: number; totalCredit: number }>>`
       SELECT
-        COALESCE(SUM(jl.debitRupiah), 0) AS totalDebit,
-        COALESCE(SUM(jl.creditRupiah), 0) AS totalCredit
-      FROM JournalLine jl
-      JOIN JournalEntry je ON je.id = jl.journalEntryId
-      WHERE je.status = 'POSTED'
+        COALESCE(SUM(jl."debitRupiah"), 0) AS "totalDebit",
+        COALESCE(SUM(jl."creditRupiah"), 0) AS "totalCredit"
+      FROM "JournalLine" jl
+      JOIN "JournalEntry" je ON je.id = jl."journalEntryId"
+      WHERE je.status = 'POSTED'::text
     `;
     const [totalRooms, occupied] = await Promise.all([
       this.prisma.room.count(),
