@@ -880,7 +880,7 @@ Evaluasi 4 item dengan format: kondisi saat ini → risiko → rekomendasi → p
 
 #### G6 — OPS-INVENTORY-AI
 
-- [ ] **G6 / OPS-INVENTORY-AI:** asisten operasional tiket dan stok.
+- [x] **G6 / OPS-INVENTORY-AI:** **SELESAI 2026-06-19** — asisten operasional tiket dan stok.
   - **Tujuan:** Admin/Owner menekan tombol pada tiket/gudang untuk mendapat ringkasan prioritas, saran barang pengganti, dan draft catatan follow-up.
   - **Rujukan:** `docs/M12_AI_OWNER_ADMIN.md` G6, `docs/M06_OPERASIONAL.md`, `docs/CODEMAP.md`.
   - **Anchor backend:** `backend/src/modules/tickets/`, `backend/src/modules/inventory-items/`, `backend/src/modules/inventory-movements/`, `backend/src/modules/rooms/`.
