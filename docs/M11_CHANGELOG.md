@@ -3,6 +3,10 @@
 > Arsip changelog ringkas, dipisah dari M10 pada 2026-06-19 untuk hemat token AI (M10 = checklist aktif saja). **Entri changelog BARU ditulis DI SINI (paling atas)**, bukan di M10. Format: 1 header tanggal + 1-2 poin outcome per entri.
 
 ## Changelog Ringkas
+### 2026-06-20 — css(Fase H H6): hapus CSS dead di 08-admin.css
+- **css(H6):** 7 edit bedah di `08-admin.css` — hapus `.admin-area-tabs` (layout 6 & 7 kolom lama), `.admin-area-link-grid` (grid pintasan lama), `.admin-primary-tabs` (sticky tabs 6 kolom lama), dan semua referensinya di `@media` block. Selector live (`.admin-sla-mini-note`, `.admin-workspace-topbar`, `.admin-today-status-strip`, dll.) dipertahankan. `12-owner.css` tidak ada selector mati.
+- **Gate:** `npm run build` PASS (19 s, 115 chunks, PWA verify OK). Backend tidak disentuh.
+
 ### 2026-06-20 — ui(Fase H H4+H5): unifikasi AI panel + compact Owner Dashboard
 - **ui(H4):** `AiAssistButton` (`generateBrief`) ditambah di `DashboardAdmin.tsx` area overview — conditional bila API key `configured` (`aiStatusQuery`). `AssistantPanel` sinyal (`ownerAssistantItems` dari `data.signals`) ditambah di `OwnerDashboardPage.tsx` di bawah KPI cards.
 - **ui(H5):** tren chart `.owner-trend-panel` dibungkus `{viewMode === 'full' ? ... : null}` (disembunyikan di mode Ringkas). 3 quick-action buttons "Buka Laporan / Buka Area Admin / Analisa Pasar" ditambah setelah row sinyal.

@@ -1080,7 +1080,7 @@ Evaluasi 4 item dengan format: kondisi saat ini → risiko → rekomendasi → p
 
 **JANGAN:** hapus chart, hapus mode full, atau ubah backend.
 
-#### H6 — Polish: Hapus CSS Dead + Selaraskan Responsive [~]  ← responsive SELESAI (@media 480px .role-workspace-tabs di 12-owner.css). Hapus CSS dead DI-DEFER (prinsip "bila ragu jangan hapus"; tidak ada selector pasti mati setelah H1–H5).
+#### H6 — Polish: Hapus CSS Dead + Selaraskan Responsive [x] SELESAI 2026-06-20
 
 **Target:** `frontend/src/styles/12-owner.css` + `frontend/src/styles/08-admin.css`.
 
