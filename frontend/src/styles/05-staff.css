@@ -2329,7 +2329,6 @@
   color: #334155;
 }
 
-
 .staff-admin-report-card {
   display: flex;
   flex-direction: column;
@@ -2349,33 +2348,7 @@
   border-radius: 999px;
 }
 
-
 /* V5.17-A Staff Workspace UX Polish + Progressive Report Flow */
-:root {
-  --k48-staff-bg: #f5f4f0;
-  --k48-staff-bg-2: #ebe7dd;
-  --k48-staff-surface: #ffffff;
-  --k48-staff-surface-soft: #faf9f6;
-  --k48-staff-text: #17211d;
-  --k48-staff-text-soft: #4f625b;
-  --k48-staff-text-muted: #738078;
-  --k48-staff-primary: #0f6e56;
-  --k48-staff-primary-strong: #094c3b;
-  --k48-staff-primary-soft: #dff3ec;
-  --k48-staff-danger: #d85a30;
-  --k48-staff-danger-strong: #a23a1c;
-  --k48-staff-danger-soft: #fff0ea;
-  --k48-staff-warning: #ba7517;
-  --k48-staff-warning-soft: #fff4dd;
-  --k48-staff-success: #3b6d11;
-  --k48-staff-success-soft: #edf8e6;
-  --k48-staff-info: #21607a;
-  --k48-staff-info-soft: #e6f6fb;
-  --k48-staff-border: #d9e1dc;
-  --k48-staff-border-strong: #b8c7bf;
-  --k48-staff-shadow-card: 0 1px 3px rgba(0, 0, 0, 0.08);
-  --k48-staff-shadow-float: 0 18px 44px rgba(23, 33, 29, 0.16);
-}
 
 .staff-workspace-shell,
 .staff-simple-mode,

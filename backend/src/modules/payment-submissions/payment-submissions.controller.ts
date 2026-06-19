@@ -20,6 +20,8 @@ import { RejectPaymentSubmissionDto } from './dto/reject-payment-submission.dto'
 import { ReviewQueueQueryDto } from './dto/review-queue-query.dto';
 import { PaymentSubmissionsService } from './payment-submissions.service';
 import { detectImageMime, deleteFileSafe } from '../../common/utils/file-signature.util';
+import { validate } from 'class-validator';
+import { plainToInstance } from 'class-transformer';
 
 @ApiTags('payment-submissions')
 @ApiBearerAuth()
@@ -122,6 +124,19 @@ export class PaymentSubmissionsController {
     } as CreatePaymentSubmissionDto;
   }
 
+  /** Manual class-validator check for multipart DTO (bypasses global ValidationPipe). */
+  private async validateDto(dto: CreatePaymentSubmissionDto): Promise<string[]> {
+    const instance = plainToInstance(CreatePaymentSubmissionDto, dto);
+    const errors = await validate(instance, { whitelist: true, forbidNonWhitelisted: false });
+    const messages: string[] = [];
+    for (const err of errors) {
+      for (const constraint of Object.values(err.constraints ?? {})) {
+        messages.push(constraint);
+      }
+    }
+    return messages;
+  }
+
 
   @Post('submit-with-proof')
   @Roles(UserRole.TENANT)
@@ -176,9 +191,17 @@ export class PaymentSubmissionsController {
     file.originalname = file.originalname || 'proof';
     file.mimetype = detectedMime;
 
+    // ── Manual DTO validation (multipart bypasses class-validator pipe) ────
+    const dto = this.mapMultipartBodyToDto(body, file);
+    const errors = await this.validateDto(dto);
+    if (errors.length > 0) {
+      deleteFileSafe(securePath);
+      throw new BadRequestException(`Data pembayaran tidak valid: ${errors.join('; ')}`);
+    }
+
     return {
       message: 'Pembayaran dan bukti berhasil dikirim dalam satu langkah. Admin akan memeriksa bukti pembayaran.',
-      data: await this.paymentSubmissionsService.createSubmission(user, this.mapMultipartBodyToDto(body, file)),
+      data: await this.paymentSubmissionsService.createSubmission(user, dto),
     };
   }
 

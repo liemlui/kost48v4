@@ -61,7 +61,7 @@ export class StaysController {
   }
 
   @Post()
-  @Roles(UserRole.OWNER, UserRole.ADMIN, UserRole.STAFF)
+  @Roles(UserRole.OWNER, UserRole.ADMIN)
   async create(@Body() dto: CreateStayDto, @CurrentUser() user: CurrentUserPayload) {
     return { message: 'Stay berhasil dibuat', data: await this.staysService.create(dto, user) };
   }

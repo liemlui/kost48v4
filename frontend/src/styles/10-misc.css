@@ -467,7 +467,6 @@
   }
 }
 
-
 /* V5.8.4 Owner UI simplification */
 .owner-policy-card {
   margin-bottom: 1rem;
@@ -968,17 +967,6 @@
 }
 
 /* V5.9.1 Compact UI Density Pass — more content per screen without losing readability */
-:root {
-  --density-page-x: 16px;
-  --density-page-y: 14px;
-  --density-section-gap: 14px;
-  --density-card-pad: 14px;
-  --density-card-pad-sm: 12px;
-  --density-radius-lg: 18px;
-  --density-radius-md: 14px;
-  --density-body: 14px;
-  --density-small: 12px;
-}
 
 body {
   font-size: var(--density-body);
@@ -2598,7 +2586,6 @@ div.tenant-stay-fact-chip {
   }
 }
 
-
 /* V5.9.5-A — Public room real assets + simple availability polish */
 .rooms-public-logo {
   display: block;
@@ -3597,7 +3584,6 @@ div.tenant-stay-fact-chip {
   }
 }
 
-
 /* ─────────────────────────────────────────────
    V5.9.8-C tenant density + image fallback
    ───────────────────────────────────────────── */
@@ -3733,7 +3719,6 @@ div.tenant-stay-fact-chip {
   }
 }
 
-
 /* Tenant menu typography: menu/submenu lebih tegas tanpa membuat card membesar */
 .tenant-workspace-brand strong,
 .staff-workspace-brand strong,
@@ -3759,7 +3744,6 @@ div.tenant-stay-fact-chip {
 .sidebar-section-toggle span {
   font-weight: 800;
 }
-
 
 .login-experience-v518d .login-mark.kost48-logo-mark {
   background: linear-gradient(135deg, #ffffff, #eff6ff);

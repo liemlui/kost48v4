@@ -158,14 +158,7 @@ export default function App() {
               </RequireRoles>
             )}
           />
-          <Route
-            path="/portal/profile"
-            element={(
-              <RequireRoles allowed={['TENANT']}>
-                <ProfilePage />
-              </RequireRoles>
-            )}
-          />
+          {/* R4: /portal/profile dihapus — redundant, /profile sudah mencakup TENANT */}
 
           <Route path="/renew-requests" element={<RequireRoles allowed={['OWNER', 'ADMIN']}><RenewRequestsAdminPage /></RequireRoles>} />
           <Route path="/loss-refunds" element={<RequireRoles allowed={['OWNER']}><LossRefundsPage /></RequireRoles>} />

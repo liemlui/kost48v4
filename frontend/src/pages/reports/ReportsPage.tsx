@@ -9,7 +9,6 @@ import {
   fetchOverdueAging,
   fetchDepositLiability,
   fetchExpenseSummary,
-  fetchCashFlow,
   fetchProfitLoss,
   fetchFinancialRatios,
   fetchOccupancy,
@@ -18,12 +17,12 @@ import {
   OverdueAging,
   DepositLiability,
   ExpenseSummary,
-  CashFlow,
   ProfitLoss,
   FinancialRatios,
   Occupancy,
   OccupancyDaily,
 } from '../../api/reports';
+import { fetchCashflowStatement, type CashflowStatement } from '../../api/accounting';
 import UnlockedFormalReports from './UnlockedFormalReports';
 import { StatCardSkeleton, TableSkeleton } from '../../components/common/SkeletonLoader';
 import { createBusinessNarrative } from '../../api/ai';
@@ -57,7 +56,22 @@ export default function ReportsPage() {
   const overdueAging = useQuery({ queryKey: ['reports', 'overdue-aging'], queryFn: () => fetchOverdueAging() });
   const depositLiability = useQuery({ queryKey: ['reports', 'deposit-liability'], queryFn: () => fetchDepositLiability() });
   const expenseSummary = useQuery({ queryKey: ['reports', 'expense-summary', ym], queryFn: () => fetchExpenseSummary(ym.year, ym.month) });
-  const cashFlow = useQuery({ queryKey: ['reports', 'cash-flow', ym], queryFn: () => fetchCashFlow(ym.year, ym.month) });
+  const cashFlowRaw = useQuery({ queryKey: ['accounting', 'cashflow', ym], queryFn: () => fetchCashflowStatement({ year: ym.year, month: ym.month }) });
+  // Adapter: konversi CashflowStatement ke shape CashFlow kompatibel (R2)
+  const cashFlow = useMemo(() => {
+    if (!cashFlowRaw.data) return cashFlowRaw;
+    const d = cashFlowRaw.data;
+    return {
+      ...cashFlowRaw,
+      data: {
+        year: d.period.year,
+        month: d.period.month,
+        cashIn: { invoicePaymentsRupiah: d.operating.totalInRupiah, wifiSalesRupiah: 0, totalRupiah: d.operating.totalInRupiah },
+        cashOut: { expensesRupiah: d.operating.totalOutRupiah, totalRupiah: d.operating.totalOutRupiah },
+        netCashFlowRupiah: d.totals.netCashflowRupiah,
+      },
+    };
+  }, [cashFlowRaw.data]);
   const profitLoss = useQuery({ queryKey: ['reports', 'profit-loss', ym], queryFn: () => fetchProfitLoss(ym.year, ym.month) });
   const financialRatios = useQuery({ queryKey: ['reports', 'financial-ratios', ym], queryFn: () => fetchFinancialRatios(ym.year, ym.month) });
   const occupancy = useQuery({ queryKey: ['reports', 'occupancy', ym], queryFn: () => fetchOccupancy(ym.year, ym.month) });

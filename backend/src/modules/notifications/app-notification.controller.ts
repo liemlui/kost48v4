@@ -2,13 +2,14 @@ import { Controller, Get, Param, ParseIntPipe, Patch, Query, UseGuards } from '@
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
+import { RolesGuard } from '../../common/guards/roles.guard';
 import { CurrentUserPayload } from '../../common/interfaces/current-user.interface';
 import { AppNotificationService } from './app-notification.service';
 import { NotificationQueryDto } from './dto/notification.dto';
 
 @ApiTags('Me - Notifications')
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('me/notifications')
 export class AppNotificationController {
   constructor(private readonly appNotificationService: AppNotificationService) {}

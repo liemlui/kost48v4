@@ -1,9 +1,11 @@
 import { BadRequestException } from '@nestjs/common';
 import { Prisma } from '../../generated/prisma';
-import { PricingTerm, RoomStatus } from '../../common/enums/app.enums';
+import { PricingTerm, RoomStatus, UserRole } from '../../common/enums/app.enums';
+import { PrismaService } from '../../prisma/prisma.service';
 import { BookingRow, RoomPayload } from './tenant-bookings.types';
 import { AUTO_OPS_DEADLINES, hoursFromNow, hoursAfter } from '../../common/business/auto-ops.constants';
 import { calculateRentByPricingTerm } from './pricing.helper';
+import { startOfDay as startOfDayUtil } from '../../common/utils/date.util';
 
 export function mapBookingRow(row: BookingRow) {
   return {
@@ -74,16 +76,9 @@ export function getAvailablePricingTerms(room: RoomPayload) {
 }
 
 export function resolveRent(room: RoomPayload, pricingTerm: PricingTerm): number {
-  if (pricingTerm === PricingTerm.DAILY) return Number((room as any).dailyRateRupiah ?? 0);
-  if (pricingTerm === PricingTerm.WEEKLY) return Number((room as any).weeklyRateRupiah ?? 0);
-  if (pricingTerm === PricingTerm.BIWEEKLY) return Number((room as any).biWeeklyRateRupiah ?? 0);
-
   const monthlyRate = Number((room as any).monthlyRateRupiah ?? 0);
-  if (pricingTerm === PricingTerm.SMESTERLY || pricingTerm === PricingTerm.YEARLY) {
-    return calculateRentByPricingTerm(monthlyRate, pricingTerm);
-  }
-
-  return monthlyRate;
+  if (!monthlyRate || monthlyRate <= 0) return 0;
+  return calculateRentByPricingTerm(monthlyRate, pricingTerm);
 }
 
 export function mapPricingTermToUnit(pricingTerm: string): string {
@@ -181,4 +176,139 @@ export function isBookingSchemaDriftError(error: unknown) {
     || message.includes('column') && message.includes('does not exist')
     || message.includes('type') && message.includes('does not exist')
   );
+}
+
+// ── Migrated from tenant-bookings-helpers.ts (Q2 merge) ──────────────────
+
+export interface RoomPricingSnapshot {
+  allowBookingWhileCleaning?: boolean | null;
+  id: number;
+  code: string;
+  name: string | null;
+  floor: string | null;
+  status: string;
+  isActive: boolean;
+  dailyRateRupiah: number | null;
+  weeklyRateRupiah: number | null;
+  biWeeklyRateRupiah: number | null;
+  monthlyRateRupiah: number;
+  defaultDepositRupiah: number;
+  electricityTariffPerKwhRupiah: number;
+  waterTariffPerM3Rupiah: number;
+  notes: string | null;
+}
+
+export interface BookingRowFull {
+  id: number;
+  tenantId: number;
+  roomId: number;
+  status: string;
+  pricingTerm: string;
+  agreedRentAmountRupiah: number;
+  checkInDate: Date;
+  plannedCheckOutDate: Date | null;
+  expiresAt: Date | null;
+  depositAmountRupiah: number;
+  depositPaidAmountRupiah?: number | null;
+  depositPaymentStatus?: string | null;
+  downPaymentAmountRupiah?: number | null;
+  downPaymentPaidRupiah?: number | null;
+  electricityTariffPerKwhRupiah: number;
+  waterTariffPerM3Rupiah: number;
+  bookingSource: string | null;
+  stayPurpose: string | null;
+  notes: string | null;
+  cancelReason?: string | null;
+  createdById: number | null;
+  createdAt: Date;
+  updatedAt: Date;
+  tenantFullName: string;
+  tenantPhone: string;
+  tenantEmail: string | null;
+  roomCode: string;
+  roomName: string | null;
+  roomFloor: string | null;
+  roomStatus: string;
+  invoiceCount?: number;
+  latestInvoiceId?: number | null;
+  latestInvoiceNumber?: string | null;
+  latestInvoiceStatus?: string | null;
+  invoiceTotalAmountRupiah?: number | null;
+  invoicePaidAmountRupiah?: number | null;
+  invoiceRemainingAmountRupiah?: number | null;
+}
+
+export function mapBookingRowFull(row: BookingRowFull) {
+  return {
+    id: row.id,
+    tenantId: row.tenantId,
+    roomId: row.roomId,
+    status: row.status,
+    pricingTerm: row.pricingTerm,
+    agreedRentAmountRupiah: row.agreedRentAmountRupiah,
+    checkInDate: row.checkInDate,
+    plannedCheckOutDate: row.plannedCheckOutDate,
+    expiresAt: row.expiresAt,
+    depositAmountRupiah: row.depositAmountRupiah,
+    depositPaidAmountRupiah: row.depositPaidAmountRupiah ?? 0,
+    depositPaymentStatus: row.depositPaymentStatus ?? 'UNPAID',
+    downPaymentAmountRupiah: row.downPaymentAmountRupiah ?? 0,
+    downPaymentPaidRupiah: row.downPaymentPaidRupiah ?? 0,
+    electricityTariffPerKwhRupiah: row.electricityTariffPerKwhRupiah,
+    waterTariffPerM3Rupiah: row.waterTariffPerM3Rupiah,
+    bookingSource: row.bookingSource,
+    stayPurpose: row.stayPurpose,
+    notes: row.notes,
+    cancelReason: row.cancelReason ?? null,
+    createdById: row.createdById,
+    createdAt: row.createdAt,
+    updatedAt: row.updatedAt,
+    tenant: { id: row.tenantId, fullName: row.tenantFullName, phone: row.tenantPhone, email: row.tenantEmail },
+    room: { id: row.roomId, code: row.roomCode, name: row.roomName, floor: row.roomFloor, status: row.roomStatus },
+    invoiceCount: Number(row.invoiceCount ?? 0),
+    latestInvoiceId: row.latestInvoiceId ?? null,
+    latestInvoiceNumber: row.latestInvoiceNumber ?? null,
+    latestInvoiceStatus: row.latestInvoiceStatus ?? null,
+    invoiceTotalAmountRupiah: row.invoiceTotalAmountRupiah ?? null,
+    invoicePaidAmountRupiah: row.invoicePaidAmountRupiah ?? null,
+    invoiceRemainingAmountRupiah: row.invoiceRemainingAmountRupiah ?? null,
+  };
+}
+
+export async function findBookingByIdTx(tx: Prisma.TransactionClient, bookingId: number, tenantId: number) {
+  const rows = await tx.$queryRaw<BookingRowFull[]>(Prisma.sql`
+    SELECT
+      s.id, s."tenantId", s."roomId", s.status, s."pricingTerm",
+      s."agreedRentAmountRupiah", s."checkInDate", s."plannedCheckOutDate",
+      s."expiresAt", s."depositAmountRupiah",
+      COALESCE(s."depositPaidAmountRupiah", 0) AS "depositPaidAmountRupiah",
+      COALESCE(CAST(s."depositPaymentStatus" AS text), 'UNPAID') AS "depositPaymentStatus",
+      COALESCE(s."downPaymentAmountRupiah", 0) AS "downPaymentAmountRupiah",
+      COALESCE(s."downPaymentPaidRupiah", 0) AS "downPaymentPaidRupiah",
+      s."electricityTariffPerKwhRupiah", s."waterTariffPerM3Rupiah",
+      s."bookingSource", s."stayPurpose", s.notes, s."cancelReason",
+      s."createdById", s."createdAt", s."updatedAt",
+      t."fullName" AS "tenantFullName",
+      t.phone AS "tenantPhone",
+      t.email AS "tenantEmail",
+      r.code AS "roomCode",
+      r.name AS "roomName",
+      r.floor AS "roomFloor",
+      r.status AS "roomStatus"
+    FROM "Stay" s
+    INNER JOIN "Tenant" t ON t.id = s."tenantId"
+    INNER JOIN "Room" r ON r.id = s."roomId"
+    WHERE s.id = ${bookingId} AND s."tenantId" = ${tenantId}
+    LIMIT 1
+  `);
+  if (rows.length === 0) return null;
+  return mapBookingRowFull(rows[0]);
+}
+
+export async function resolveTenantPortalUser(prisma: PrismaService, tenantId: number): Promise<number | null> {
+  const user = await prisma.user.findFirst({
+    where: { role: UserRole.TENANT, tenantId, isActive: true },
+    select: { id: true },
+  });
+  return user?.id ?? null;
 }

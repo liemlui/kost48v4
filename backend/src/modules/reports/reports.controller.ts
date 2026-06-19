@@ -54,13 +54,7 @@ export class ReportsController {
     };
   }
 
-  @Get('cash-flow')
-  async cashFlow(@Query() query: CashFlowQueryDto) {
-    return {
-      message: 'Ringkasan arus kas berhasil diambil',
-      data: await this.reportsService.cashFlow(query.year, query.month),
-    };
-  }
+  // R2: GET /cash-flow dihapus — digantikan oleh GET /accounting/cashflow (direct method).
 
   @Get('profit-loss')
   async profitLoss(@Query() query: OccupancyQueryDto) {

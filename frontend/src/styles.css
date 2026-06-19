@@ -5,6 +5,7 @@
  * Load order matters: base → layout → components → features → pages → charts.
  */
 
+@import './styles/00-tokens.css';
 @import './styles/01-base.css';
 @import './styles/02-layout.css';
 @import './styles/03-components.css';

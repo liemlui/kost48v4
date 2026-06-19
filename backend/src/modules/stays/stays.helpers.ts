@@ -1,6 +1,5 @@
 import { Prisma } from '../../generated/prisma';
 import { AUTO_OPS_DEADLINES, hoursAfter } from '../../common/business/auto-ops.constants';
-import { calculateRentByPricingTerm } from '../tenant-bookings/pricing.helper';
 import { roundRupiah } from '../../common/business/money.helper';
 
 export function normalizeStayForResponse<T extends Record<string, any>>(stay: T): T & { cancelReason: string | null } {
@@ -56,19 +55,6 @@ export function addDays(value: Date, days: number) {
 
 export function maxDate(a: Date, b: Date) {
   return a.getTime() >= b.getTime() ? a : b;
-}
-
-export function resolveRent(room: any, pricingTerm: string) {
-  if (pricingTerm === 'DAILY') return room.dailyRateRupiah ?? 0;
-  if (pricingTerm === 'WEEKLY') return room.weeklyRateRupiah ?? 0;
-  if (pricingTerm === 'BIWEEKLY') return room.biWeeklyRateRupiah ?? 0;
-
-  const monthlyRate = Number(room.monthlyRateRupiah ?? 0);
-  if (pricingTerm === 'SMESTERLY' || pricingTerm === 'YEARLY') {
-    return calculateRentByPricingTerm(monthlyRate, pricingTerm as any);
-  }
-
-  return monthlyRate;
 }
 
 export function mapPricingTermToUnit(pricingTerm: string): string {

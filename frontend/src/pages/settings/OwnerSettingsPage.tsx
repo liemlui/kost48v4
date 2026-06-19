@@ -758,21 +758,39 @@ const AI_FEATURE_LABELS: Record<string, string> = {
 const aiFeatureLabel = (k: string) => AI_FEATURE_LABELS[k] ?? k;
 
 function AiSettingsPanel() {
+  const qc = useQueryClient();
   const statusQuery = useQuery({ queryKey: ['owner-ai', 'status'], queryFn: getOwnerAiStatus });
   const usageQuery = useQuery({ queryKey: ['owner-ai', 'usage'], queryFn: getOwnerAiUsage });
+  const settingsQuery = useQuery({ queryKey: ['settings', 'operational'], queryFn: fetchOperationalSettings });
+  const updateMutation = useMutation({
+    mutationFn: updateOperationalSettings,
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ['owner-ai', 'status'] }); qc.invalidateQueries({ queryKey: ['settings', 'operational'] }); },
+  });
   const testMutation = useMutation({ mutationFn: testOwnerAiConnection });
 
   const s = statusQuery.data;
   const u = usageQuery.data;
+  const db = settingsQuery.data;
   const yesNo = (v?: boolean) => (v ? <Badge bg="success">Ya</Badge> : <Badge bg="secondary">Tidak</Badge>);
+
+  const [form, setForm] = useState<Record<string, any>>({});
+  useEffect(() => { if (db) setForm({ ...db }); }, [db]);
+  const setF = (k: string, v: any) => setForm((p: any) => ({ ...p, [k]: v }));
+
+  const save = () => updateMutation.mutate(form as any);
 
   return (
     <div>
-      <div className="mb-3">
-        <h3 className="h5 mb-0">AI &amp; Biaya</h3>
-        <small className="text-muted">
-          Status DeepSeek, batas harian, penggunaan, dan jejak keputusan yang memakai AI. Semua AI manual &amp; perlu persetujuan manusia.
-        </small>
+      <div className="mb-3 d-flex justify-content-between align-items-start">
+        <div>
+          <h3 className="h5 mb-0">AI &amp; Biaya</h3>
+          <small className="text-muted">
+            Status DeepSeek, batas harian, penggunaan, dan jejak keputusan. API key tetap diatur via <code>.env</code>. Model &amp; limit bisa diubah di sini.
+          </small>
+        </div>
+        <Button size="sm" variant="primary" onClick={save} disabled={updateMutation.isPending || !db}>
+          {updateMutation.isPending ? <><Spinner size="sm" className="me-1" />Menyimpan…</> : 'Simpan Konfigurasi'}
+        </Button>
       </div>
 
       {statusQuery.isLoading ? (
@@ -780,14 +798,26 @@ function AiSettingsPanel() {
       ) : s ? (
         <Card className="content-card border-0 mb-3">
           <Card.Body>
-            <Row className="g-3">
-              <Col md={4}><div className="small text-muted">API Key</div>{s.configured ? <Badge bg="success">Terkonfigurasi</Badge> : <Badge bg="warning" text="dark">Belum diset</Badge>}</Col>
-              <Col md={4}><div className="small text-muted">Fitur AI aktif</div>{yesNo(s.enabled)}</Col>
-              <Col md={4}><div className="small text-muted">Manual-only</div>{yesNo(s.manualOnly)}</Col>
-              <Col md={4}><div className="small text-muted">Hanya OWNER/ADMIN</div>{yesNo(s.ownerAdminOnly)}</Col>
-              <Col md={4}><div className="small text-muted">Model default</div><code>{s.defaultModel}</code></Col>
-              <Col md={4}><div className="small text-muted">Model finance</div><code>{s.financeModel}</code></Col>
-              <Col md={4}><div className="small text-muted">Limit harian</div>{s.dailyLimit}</Col>
+            <Row className="g-3 mb-3">
+              <Col md={4}><div className="small text-muted">API Key</div>{s.configured ? <Badge bg="success">Terkonfigurasi</Badge> : <Badge bg="warning" text="dark">Belum diset (isi .env)</Badge>}</Col>
+              <Col md={4}><div className="small text-muted">Fitur AI aktif</div><Form.Check type="switch" checked={form.aiFeaturesEnabled ?? false} onChange={e => setF('aiFeaturesEnabled', e.target.checked)} label={form.aiFeaturesEnabled ? 'Aktif' : 'Mati'} /></Col>
+              <Col md={4}><div className="small text-muted">Manual-only</div><Form.Check type="switch" checked={form.aiManualOnly ?? true} onChange={e => setF('aiManualOnly', e.target.checked)} /></Col>
+              <Col md={4}><div className="small text-muted">Hanya OWNER/ADMIN</div><Form.Check type="switch" checked={form.aiOwnerAdminOnly ?? true} onChange={e => setF('aiOwnerAdminOnly', e.target.checked)} /></Col>
+              <Col md={4}><div className="small text-muted">Log penggunaan</div><Form.Check type="switch" checked={form.aiLogUsage ?? true} onChange={e => setF('aiLogUsage', e.target.checked)} /></Col>
+              <Col md={4}><div className="small text-muted">Model default</div>
+                <Form.Select size="sm" value={form.deepseekModel || 'deepseek-v4-flash'} onChange={e => setF('deepseekModel', e.target.value)}>
+                  <option value="deepseek-v4-flash">deepseek-v4-flash (hemat)</option>
+                  <option value="deepseek-v4-pro">deepseek-v4-pro (analisa berat)</option>
+                </Form.Select>
+              </Col>
+              <Col md={4}><div className="small text-muted">Model finance</div>
+                <Form.Select size="sm" value={form.deepseekFinanceModel || 'deepseek-v4-pro'} onChange={e => setF('deepseekFinanceModel', e.target.value)}>
+                  <option value="deepseek-v4-flash">deepseek-v4-flash</option>
+                  <option value="deepseek-v4-pro">deepseek-v4-pro</option>
+                </Form.Select>
+              </Col>
+              <Col md={4}><div className="small text-muted">Base URL</div><Form.Control size="sm" value={form.deepseekBaseUrl || 'https://api.deepseek.com'} onChange={e => setF('deepseekBaseUrl', e.target.value)} /></Col>
+              <Col md={4}><div className="small text-muted">Limit harian</div><Form.Control size="sm" type="number" min={1} max={1000} value={form.aiDailyRequestLimit ?? 50} onChange={e => setF('aiDailyRequestLimit', Number(e.target.value))} /></Col>
               <Col md={4}><div className="small text-muted">Sisa hari ini</div>{u?.remainingDaily ?? s.dailyRemaining}</Col>
               <Col md={4}><div className="small text-muted">Terpakai hari ini</div>{u?.todayTotal ?? 0}</Col>
             </Row>
@@ -801,7 +831,7 @@ function AiSettingsPanel() {
                   {testMutation.data.ok ? `✅ ${testMutation.data.message} (${testMutation.data.latencyMs} ms, ${testMutation.data.model})` : `⚠️ ${testMutation.data.message}`}
                 </span>
               ) : null}
-              {!s.configured ? <span className="small text-muted">Set <code>DEEPSEEK_API_KEY</code> di backend/.env untuk mengaktifkan.</span> : null}
+              {!s.configured ? <span className="small text-muted">Set <code>DEEPSEEK_API_KEY</code> di backend/.env lalu restart backend untuk mengaktifkan.</span> : null}
             </div>
           </Card.Body>
         </Card>

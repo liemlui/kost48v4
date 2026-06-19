@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { Prisma } from '../../generated/prisma';
 import { CurrentUserPayload } from '../../common/interfaces/current-user.interface';
 import { PrismaService } from '../../prisma/prisma.service';
@@ -9,6 +9,7 @@ const RESULT_MARKER = '===HASIL';
 
 @Injectable()
 export class MarketAnalysisService {
+  private readonly logger = new Logger(MarketAnalysisService.name);
   private readonly buckets = new Map<string, { count: number; resetAt: number }>();
 
   constructor(private readonly prisma: PrismaService) {}
@@ -379,9 +380,21 @@ export class MarketAnalysisService {
       { role: 'system', content: this.snapshotPrompt(snapshot) },
       ...dto.messages.map((m) => ({ role: m.role, content: m.content }) as ChatMsg),
     ];
-    const raw = await deepseekChat(messages, { temperature: 0.5 });
-    const parsed = this.extractResult(raw.content, kind);
-    return { configured: true, mode: 'DEEPSEEK', reply: raw.content, done: parsed.done, result: parsed.result, snapshot };
+    try {
+      const raw = await deepseekChat(messages, { temperature: 0.5 });
+      const parsed = this.extractResult(raw.content, kind);
+      return { configured: true, mode: 'DEEPSEEK', reply: raw.content, done: parsed.done, result: parsed.result, snapshot };
+    } catch (err: any) {
+      this.logger.warn(`DeepSeek chat gagal — fallback: ${err?.message}`);
+      return {
+        configured: true,
+        mode: 'RULE_FALLBACK',
+        reply: `Maaf, DeepSeek API sedang tidak tersedia (${err?.message?.slice(0, 100) || 'timeout/jaringan'}). Data snapshot tetap bisa diakses di bawah. Coba lagi dalam beberapa saat.`,
+        done: false,
+        snapshot,
+        error: err?.message?.slice(0, 200),
+      };
+    }
   }
 
   /** Deteksi blok HASIL + JSON terstruktur dari balasan AI. */

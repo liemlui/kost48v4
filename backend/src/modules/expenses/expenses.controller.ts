@@ -18,13 +18,13 @@ export class ExpensesController {
   constructor(private readonly expensesService: ExpensesService) {}
 
   @Get()
-  @Roles(UserRole.OWNER, UserRole.ADMIN, UserRole.STAFF)
+  @Roles(UserRole.OWNER, UserRole.ADMIN)
   async findAll(@Query() query: ExpensesQueryDto) {
     return { message: 'Daftar expense berhasil diambil', data: await this.expensesService.findAll(query) };
   }
 
   @Get(':id')
-  @Roles(UserRole.OWNER, UserRole.ADMIN, UserRole.STAFF)
+  @Roles(UserRole.OWNER, UserRole.ADMIN)
   async findOne(@Param('id', ParseIntPipe) id: number) {
     return { message: 'Detail expense berhasil diambil', data: await this.expensesService.findOne(id) };
   }

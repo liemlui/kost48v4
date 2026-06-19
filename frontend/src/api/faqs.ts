@@ -25,7 +25,7 @@ export type CreateFaqPayload = {
 export type UpdateFaqPayload = Partial<CreateFaqPayload>;
 
 // Public endpoint — no auth, uses absolute URL to backend
-const BACKEND_BASE = (import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api');
+const BACKEND_BASE = (import.meta.env.VITE_API_BASE_URL || '/api');
 export async function fetchPublicFaqs(): Promise<FaqItem[]> {
   const res = await axios.get<{ data: FaqItem[] }>(`${BACKEND_BASE}/faqs/public`);
   return res.data.data ?? [];

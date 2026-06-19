@@ -2,6 +2,9 @@ import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
+import { RolesGuard } from '../../common/guards/roles.guard';
+import { Roles } from '../../common/decorators/roles.decorator';
+import { UserRole } from '../../common/enums/app.enums';
 import { CurrentUserPayload } from '../../common/interfaces/current-user.interface';
 import { LoyaltyService } from './loyalty.service';
 import { RedemptionService } from './redemption.service';
@@ -10,7 +13,7 @@ import { RequestRedemptionDto } from './dto/loyalty.dto';
 
 @ApiTags('Me - Loyalty')
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('me/loyalty')
 export class LoyaltyController {
   constructor(

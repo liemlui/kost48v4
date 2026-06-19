@@ -8,6 +8,20 @@ export type OperationalSetting = {
   waterMeteringEnabled: boolean;
   waterTariffPerM3Rupiah: number;
   freeWaterM3PerMonth: number;
+  // R3: AI/DeepSeek fields
+  deepseekModel?: string;
+  deepseekFinanceModel?: string;
+  deepseekBaseUrl?: string;
+  aiFeaturesEnabled?: boolean;
+  aiManualOnly?: boolean;
+  aiOwnerAdminOnly?: boolean;
+  aiDailyRequestLimit?: number;
+  aiMaxInputChars?: number;
+  aiMaxOutputTokens?: number;
+  aiFinanceMaxOutputTokens?: number;
+  aiLogUsage?: boolean;
+  aiDraftRetentionDays?: number;
+  capitalizationThresholdByCategory?: string | null;
   updatedAt: string;
   updatedById?: number | null;
 };

@@ -18,13 +18,13 @@ export class InvoicePaymentsController {
   constructor(private readonly invoicePaymentsService: InvoicePaymentsService) {}
 
   @Get()
-  @Roles(UserRole.OWNER, UserRole.ADMIN, UserRole.STAFF)
+  @Roles(UserRole.OWNER, UserRole.ADMIN)
   async findAll(@Query() query: InvoicePaymentsQueryDto) {
     return { message: 'Daftar pembayaran berhasil diambil', data: await this.invoicePaymentsService.findAll(query) };
   }
 
   @Get(':id')
-  @Roles(UserRole.OWNER, UserRole.ADMIN, UserRole.STAFF)
+  @Roles(UserRole.OWNER, UserRole.ADMIN)
   async findOne(@Param('id', ParseIntPipe) id: number) {
     return { message: 'Detail pembayaran berhasil diambil', data: await this.invoicePaymentsService.findOne(id) };
   }

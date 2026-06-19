@@ -44,11 +44,11 @@ import {
   normalizeStayForResponse,
   startOfDay,
   maxDate,
-  resolveRent,
   mapPricingTermToUnit,
   calculatePeriodEnd,
   calculateDueDate,
 } from "./stays.helpers";
+import { calculateRentByPricingTerm } from "../tenant-bookings/pricing.helper";
 import { AccountingPostingService } from "../accounting/accounting-posting.service";
 import {
   assertCoreLifecycleActor,
@@ -209,7 +209,7 @@ export class StaysService {
     }
 
     const agreed =
-      dto.agreedRentAmountRupiah ?? resolveRent(room, dto.pricingTerm);
+      dto.agreedRentAmountRupiah ?? calculateRentByPricingTerm(Number(room.monthlyRateRupiah ?? 0), dto.pricingTerm);
     // F1-10 (C3/D-05): deposit jaminan SELALU = Room.defaultDepositRupiah; admin tak boleh override via dto.
     const deposit = room.defaultDepositRupiah ?? 0;
     const electricity =
@@ -1288,30 +1288,14 @@ export class StaysService {
         },
         orderBy: { id: "asc" },
       });
-      const meterOpen = openInvoices.filter((inv) => isMeterInvoice(inv));
-      const nonMeterOpen = openInvoices.filter((inv) => !isMeterInvoice(inv));
-      if (nonMeterOpen.length > 0) {
-        const invoiceRefs = nonMeterOpen
-          .map(
-            (invoice) =>
-              `${invoice.invoiceNumber || `Tagihan #${invoice.id}`} (${invoice.status})`,
-          )
-          .join(", ");
-        throw new ConflictException(
-          `Deposit tidak dapat diproses karena masih ada tagihan aktif: ${invoiceRefs}`,
-        );
-      }
-
-      // M5.3: tagihan meter PASCABAYAR yang masih OPEN → dipotong dari deposit
-      // jaminan (pola forced-checkout F3-16): deposit menutup tagihan meter
-      // (DR 2000 / CR 1100), sisa di-refund kas, kekurangan TETAP piutang AR.
-      // Mode ini OTOMATIS (mengabaikan input refund/forfeit manual) demi
-      // konsistensi buku — input manual hanya berlaku tanpa tagihan meter terbuka.
-      if (meterOpen.length > 0) {
+      // Q5: selaraskan dengan forced checkout — deposit auto-cover SEMUA invoice
+      // terbuka (meter + non-meter), oldest-first. Tidak lagi memblokir non-meter.
+      const allOpen = openInvoices; // sudah termasuk meter + non-meter
+      if (allOpen.length > 0) {
         return await this.settleDepositAgainstMeterTx(tx, {
           stay,
           settlementAmount,
-          meterOpen,
+          meterOpen: allOpen,
           actorId: actor.id,
           actorNote: dto.depositNote?.trim() || undefined,
         });

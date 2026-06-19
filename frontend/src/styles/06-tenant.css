@@ -1,58 +1,5 @@
 /* V5.17-B Clean Blue App System + On-Flow Staff/Admin Repair UX
    Tujuan: readable, tidak tebal berlebihan, kontras aman, blue app-wide, dan flow staff/admin tetap sederhana. */
-:root {
-  --k48-bg: #f6f9fd;
-  --k48-surface: #ffffff;
-  --k48-surface-soft: #f9fbff;
-  --k48-primary: #2563eb;
-  --k48-primary-strong: #1d4ed8;
-  --k48-primary-soft: #e8f1ff;
-  --k48-text: #172033;
-  --k48-text-soft: #43546a;
-  --k48-text-muted: #66758a;
-  --k48-border: #d9e4f2;
-  --k48-border-soft: #eaf1fb;
-  --k48-success: #15803d;
-  --k48-success-soft: #e8f7ee;
-  --k48-warning: #b45309;
-  --k48-warning-soft: #fff4dc;
-  --k48-danger: #dc2626;
-  --k48-danger-soft: #feecec;
-  --k48-info: #0369a1;
-  --k48-info-soft: #e7f5ff;
-  --k48-radius-card: 18px;
-  --k48-radius-control: 12px;
-  --k48-shadow-card: 0 10px 28px rgba(15, 23, 42, 0.06);
-  --k48-shadow-hover: 0 18px 45px rgba(37, 99, 235, 0.13);
-  --font-display: 'Plus Jakarta Sans', Inter, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  --font-body: 'Inter', 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  --font-data: 'JetBrains Mono', 'SFMono-Regular', Consolas, monospace;
-
-  /* map old staff tokens to clean blue to prevent theme drift */
-  --k48-staff-bg: var(--k48-bg);
-  --k48-staff-bg-2: #edf4ff;
-  --k48-staff-surface: var(--k48-surface);
-  --k48-staff-surface-soft: var(--k48-surface-soft);
-  --k48-staff-text: var(--k48-text);
-  --k48-staff-text-soft: var(--k48-text-soft);
-  --k48-staff-text-muted: var(--k48-text-muted);
-  --k48-staff-primary: var(--k48-primary);
-  --k48-staff-primary-strong: var(--k48-primary-strong);
-  --k48-staff-primary-soft: var(--k48-primary-soft);
-  --k48-staff-danger: var(--k48-danger);
-  --k48-staff-danger-strong: #991b1b;
-  --k48-staff-danger-soft: var(--k48-danger-soft);
-  --k48-staff-warning: var(--k48-warning);
-  --k48-staff-warning-soft: var(--k48-warning-soft);
-  --k48-staff-success: var(--k48-success);
-  --k48-staff-success-soft: var(--k48-success-soft);
-  --k48-staff-info: var(--k48-info);
-  --k48-staff-info-soft: var(--k48-info-soft);
-  --k48-staff-border: var(--k48-border);
-  --k48-staff-border-strong: #b8c9e1;
-  --k48-staff-shadow-card: var(--k48-shadow-card);
-  --k48-staff-shadow-float: 0 18px 48px rgba(15, 23, 42, 0.16);
-}
 
 body {
   font-family: var(--font-body) !important;
@@ -2078,7 +2025,6 @@ p, small, span, label, .form-text, .text-muted,
     padding: .66rem .4rem;
   }
 }
-
 
 /* V5.18-D1 — Login left-panel readability hotfix */
 .login-experience-v518d .login-aside {

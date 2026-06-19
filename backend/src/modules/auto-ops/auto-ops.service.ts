@@ -29,7 +29,6 @@ type AutoOpsRunResult = {
 export class AutoOpsService implements OnModuleInit, OnModuleDestroy {
   private readonly logger = new Logger(AutoOpsService.name);
   private timer: ReturnType<typeof setInterval> | null = null;
-  private running = false;
 
   constructor(
     private readonly prisma: PrismaService,
@@ -96,11 +95,15 @@ export class AutoOpsService implements OnModuleInit, OnModuleDestroy {
   }
 
   async runAll(options: { actorUserId?: number | null; source?: string } = {}): Promise<AutoOpsRunResult> {
-    if (this.running) {
-      return { expiredBookings: 0, heldForPaymentReview: 0, releasedRooms: 0, expiredStayIds: [], releasedRoomIds: [], accountingAutoClose: { skipped: true, skippedReason: 'AUTO_OPS_ALREADY_RUNNING' } };
+    // P6: DB advisory lock mencegah race antar multi-process (ganti in-memory flag).
+    const lockAcquired = await this.prisma.$queryRawUnsafe<Array<{ pg_try_advisory_lock: boolean }>>(
+      `SELECT pg_try_advisory_lock(1) AS "pg_try_advisory_lock"`,
+    ).then(rows => rows[0]?.pg_try_advisory_lock ?? false);
+    if (!lockAcquired) {
+      return { expiredBookings: 0, heldForPaymentReview: 0, releasedRooms: 0, expiredStayIds: [], releasedRoomIds: [], accountingAutoClose: { skipped: true, skippedReason: 'AUTO_OPS_LOCK_HELD_BY_ANOTHER_PROCESS' } };
     }
-    this.running = true;
     try {
+      // Release di finally agar lock tidak bocor
       // Sequential (audit A4): job-job ini menyentuh tabel Stay/Room yang sama;
       // paralel menimbulkan race double-cancel dengan hasil DP/jaminan berbeda.
       const bookingResult = await this.bookingSweep.runBookingExpiry(options);
@@ -143,7 +146,8 @@ export class AutoOpsService implements OnModuleInit, OnModuleDestroy {
         journalReconciliation,
       };
     } finally {
-      this.running = false;
+      // P6: selalu release advisory lock (tidak bocor walau exception)
+      await this.prisma.$executeRawUnsafe(`SELECT pg_advisory_unlock(1)`);
     }
   }
 

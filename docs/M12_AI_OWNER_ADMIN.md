@@ -21,6 +21,8 @@ Fase G menjadikan AI sebagai pembantu keputusan Owner/Admin, bukan autopilot. AI
   - `frontend/src/utils/ktpOcr.ts`
   - `frontend/src/pages/bookings/GuestBookingForm.tsx`
 - Audit trail sudah punya `AuditLog.meta`, bisa dipakai untuk mencatat `aiSuggestion` saat manusia menyetujui hasil AI.
+- **Fase G (G0-G9) SELESAI** 19-20 Jun 2026 di modul `backend/src/modules/owner-ai/` (15 file) + `frontend/src/components/ai/*`.
+- **Fase J — Hardening (BARU, pra-go-live):** modul owner-ai selesai TANPA test. Jaring pengaman uang+PDP, pelurusan guard no-partial (temuan divergensi DP booking), hardening FE, dan audit PDP. Spesifikasi lengkap & langkah eksekutor lemah: **`docs/M15_FASE_J_HARDENING_AI.md`** (J0-J4). Antrian di `docs/M10_CHECKLIST_CHANGELOG.md` → Fase J.
 
 ## Keputusan Owner Fase G
 

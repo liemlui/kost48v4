@@ -28,17 +28,17 @@ import { AppNotificationService } from '../notifications/app-notification.servic
 import { AccountingPostingService } from '../accounting/accounting-posting.service';
 import {
   type RoomPricingSnapshot,
-  type BookingRow,
-  mapBookingRow,
+  type BookingRowFull,
+  mapBookingRowFull,
   findBookingByIdTx,
-  resolveRentFromSnapshot,
+  resolveRent,
   mapPricingTermToUnit,
   addCalendarMonthsClamped,
-  calculatePeriodEndFromBooking,
-  calculateDueDateFromBooking,
+  calculatePeriodEnd,
+  calculateDueDate,
   calculateBookingExpiry,
   resolveTenantPortalUser,
-} from './tenant-bookings-helpers';
+} from './tenant-bookings.helpers';
 import { lockApprovalBookingTx } from './tenant-bookings.queries';
 
 @Injectable()
@@ -147,7 +147,7 @@ export class TenantBookingsService {
           throw new ConflictException('Kamar sedang ditempati. Pemesanan baru belum dibuka sampai kamar siap huni.');
         }
 
-        const agreedRentAmountRupiah = resolveRentFromSnapshot(room, dto.pricingTerm);
+        const agreedRentAmountRupiah = resolveRent(room as any, dto.pricingTerm);
         if (!agreedRentAmountRupiah || agreedRentAmountRupiah <= 0) {
           throw new ConflictException('Tarif kamar untuk term ini belum tersedia');
         }
@@ -346,12 +346,12 @@ export class TenantBookingsService {
           },
         });
 
-        const periodEnd = calculatePeriodEndFromBooking(
+        const periodEnd = calculatePeriodEnd(
           new Date(booking.checkInDate),
           booking.pricingTerm,
           booking.plannedCheckOutDate ? new Date(booking.plannedCheckOutDate) : undefined,
         );
-        const dueDate = calculateDueDateFromBooking(periodEnd);
+        const dueDate = calculateDueDate(periodEnd);
         const invoiceNumber = `INV-${stayId}-A-${Date.now()}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
 
         const invoice = await tx.invoice.create({
@@ -877,7 +877,7 @@ if (error instanceof Prisma.PrismaClientKnownRequestError) {
       : Prisma.empty;
 
     try {
-      const items = await this.prisma.$queryRaw<BookingRow[]>(Prisma.sql`
+      const items = await this.prisma.$queryRaw<BookingRowFull[]>(Prisma.sql`
         SELECT
           s.id, s."tenantId", s."roomId", s.status, s."pricingTerm",
           s."agreedRentAmountRupiah", s."checkInDate", s."plannedCheckOutDate",
@@ -943,7 +943,7 @@ if (error instanceof Prisma.PrismaClientKnownRequestError) {
 
       const totalItems = Number(countRows[0]?.total ?? 0);
       return {
-        items: serializePrismaResult(items.map((item) => mapBookingRow(item))),
+        items: serializePrismaResult(items.map((item) => mapBookingRowFull(item))),
         meta: buildMeta(page, limit, totalItems),
       };
     } catch (error) {

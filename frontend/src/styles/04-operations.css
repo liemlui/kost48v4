@@ -4,28 +4,6 @@
    Theme: terang, modern, compact, operasional; no Syne / no dark sidebar.
    ================================================================ */
 
-:root {
-  --font-display: 'Plus Jakarta Sans', 'Inter', sans-serif;
-  --font-body: 'Inter', 'DM Sans', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-
-  --app-bg: #eef5ff;
-  --surface: rgba(255, 255, 255, 0.94);
-  --surface-strong: #ffffff;
-  --surface-main: #ffffff;
-  --surface-soft: #f8fbff;
-  --text-main: #0f172a;
-  --text-muted: #475569;
-  --primary: #2563eb;
-  --primary-strong: #1d4ed8;
-  --primary-deep: #1e3a8a;
-  --primary-soft: rgba(37, 99, 235, 0.10);
-  --border-soft: rgba(30, 64, 175, 0.10);
-  --border-strong: rgba(37, 99, 235, 0.22);
-  --shadow-soft: 0 18px 44px rgba(30, 64, 175, 0.08);
-  --shadow-subtle: 0 10px 24px rgba(30, 64, 175, 0.06);
-}
-
 html {
   background-color: var(--app-bg);
 }
@@ -1060,20 +1038,6 @@ body {
 }
 
 /* V5.13-G — global light high-tech operations redesign */
-:root {
-  --ops-blue-900: #0f2f76;
-  --ops-blue-800: #1e40af;
-  --ops-blue-700: #1d4ed8;
-  --ops-blue-600: #2563eb;
-  --ops-blue-500: #3b82f6;
-  --ops-cyan-500: #06b6d4;
-  --ops-sky-50: #eff6ff;
-  --ops-sky-100: #dbeafe;
-  --ops-ink: #0f172a;
-  --ops-muted: #64748b;
-  --ops-border: rgba(37, 99, 235, 0.14);
-  --ops-glow: 0 18px 48px rgba(37, 99, 235, 0.12);
-}
 
 body {
   background:

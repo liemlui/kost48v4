@@ -45,14 +45,14 @@ export class OwnerAiService {
   private async getAiConfigInternal() {
     const db = await this.prisma.operationalSetting.findUnique({ where: { id: 1 } });
     return {
-      featuresEnabled: (db as any)?.aiFeaturesEnabled ?? (process.env.AI_FEATURES_ENABLED === 'true'),
-      defaultModel: (db as any)?.deepseekModel || process.env.DEEPSEEK_MODEL || 'deepseek-v4-flash',
-      financeModel: (db as any)?.deepseekFinanceModel || process.env.DEEPSEEK_FINANCE_MODEL || 'deepseek-v4-pro',
-      baseUrl: (db as any)?.deepseekBaseUrl || process.env.DEEPSEEK_BASE_URL || 'https://api.deepseek.com',
-      dailyLimit: (db as any)?.aiDailyRequestLimit ?? Number(process.env.AI_DAILY_REQUEST_LIMIT || 50),
-      maxInputChars: (db as any)?.aiMaxInputChars ?? Number(process.env.AI_MAX_INPUT_CHARS || 12000),
-      maxOutputTokens: (db as any)?.aiMaxOutputTokens ?? Number(process.env.AI_MAX_OUTPUT_TOKENS || 1400),
-      financeMaxOutputTokens: (db as any)?.aiFinanceMaxOutputTokens ?? Number(process.env.AI_FINANCE_MAX_OUTPUT_TOKENS || 2200),
+      featuresEnabled: db?.aiFeaturesEnabled ?? (process.env.AI_FEATURES_ENABLED === 'true'),
+      defaultModel: db?.deepseekModel || process.env.DEEPSEEK_MODEL || 'deepseek-v4-flash',
+      financeModel: db?.deepseekFinanceModel || process.env.DEEPSEEK_FINANCE_MODEL || 'deepseek-v4-pro',
+      baseUrl: db?.deepseekBaseUrl || process.env.DEEPSEEK_BASE_URL || 'https://api.deepseek.com',
+      dailyLimit: db?.aiDailyRequestLimit ?? Number(process.env.AI_DAILY_REQUEST_LIMIT || 50),
+      maxInputChars: db?.aiMaxInputChars ?? Number(process.env.AI_MAX_INPUT_CHARS || 12000),
+      maxOutputTokens: db?.aiMaxOutputTokens ?? Number(process.env.AI_MAX_OUTPUT_TOKENS || 1400),
+      financeMaxOutputTokens: db?.aiFinanceMaxOutputTokens ?? Number(process.env.AI_FINANCE_MAX_OUTPUT_TOKENS || 2200),
     };
   }
   private async getAiConfig() {
@@ -75,19 +75,19 @@ export class OwnerAiService {
     const db = await this.prisma.operationalSetting.findUnique({ where: { id: 1 } });
     return {
       configured,
-      enabled: (db as any)?.aiFeaturesEnabled ?? (process.env.AI_FEATURES_ENABLED === 'true'),
-      defaultModel: (db as any)?.deepseekModel || process.env.DEEPSEEK_MODEL || 'deepseek-v4-flash',
-      financeModel: (db as any)?.deepseekFinanceModel || process.env.DEEPSEEK_FINANCE_MODEL || 'deepseek-v4-pro',
-      baseUrl: (db as any)?.deepseekBaseUrl || process.env.DEEPSEEK_BASE_URL || 'https://api.deepseek.com',
-      manualOnly: (db as any)?.aiManualOnly ?? (process.env.AI_MANUAL_ONLY !== 'false'),
-      ownerAdminOnly: (db as any)?.aiOwnerAdminOnly ?? (process.env.AI_OWNER_ADMIN_ONLY !== 'false'),
-      dailyLimit: (db as any)?.aiDailyRequestLimit ?? Number(process.env.AI_DAILY_REQUEST_LIMIT || 50),
+      enabled: db?.aiFeaturesEnabled ?? (process.env.AI_FEATURES_ENABLED === 'true'),
+      defaultModel: db?.deepseekModel || process.env.DEEPSEEK_MODEL || 'deepseek-v4-flash',
+      financeModel: db?.deepseekFinanceModel || process.env.DEEPSEEK_FINANCE_MODEL || 'deepseek-v4-pro',
+      baseUrl: db?.deepseekBaseUrl || process.env.DEEPSEEK_BASE_URL || 'https://api.deepseek.com',
+      manualOnly: db?.aiManualOnly ?? (process.env.AI_MANUAL_ONLY !== 'false'),
+      ownerAdminOnly: db?.aiOwnerAdminOnly ?? (process.env.AI_OWNER_ADMIN_ONLY !== 'false'),
+      dailyLimit: db?.aiDailyRequestLimit ?? Number(process.env.AI_DAILY_REQUEST_LIMIT || 50),
       dailyRemaining: this.getDailyRemaining(),
-      logUsage: (db as any)?.aiLogUsage ?? (process.env.AI_LOG_USAGE !== 'false'),
-      maxInputChars: (db as any)?.aiMaxInputChars ?? Number(process.env.AI_MAX_INPUT_CHARS || 12000),
-      maxOutputTokens: (db as any)?.aiMaxOutputTokens ?? Number(process.env.AI_MAX_OUTPUT_TOKENS || 1400),
-      financeMaxOutputTokens: (db as any)?.aiFinanceMaxOutputTokens ?? Number(process.env.AI_FINANCE_MAX_OUTPUT_TOKENS || 2200),
-      draftRetentionDays: (db as any)?.aiDraftRetentionDays ?? Number(process.env.AI_DRAFT_RETENTION_DAYS || 60),
+      logUsage: db?.aiLogUsage ?? (process.env.AI_LOG_USAGE !== 'false'),
+      maxInputChars: db?.aiMaxInputChars ?? Number(process.env.AI_MAX_INPUT_CHARS || 12000),
+      maxOutputTokens: db?.aiMaxOutputTokens ?? Number(process.env.AI_MAX_OUTPUT_TOKENS || 1400),
+      financeMaxOutputTokens: db?.aiFinanceMaxOutputTokens ?? Number(process.env.AI_FINANCE_MAX_OUTPUT_TOKENS || 2200),
+      draftRetentionDays: db?.aiDraftRetentionDays ?? Number(process.env.AI_DRAFT_RETENTION_DAYS || 60),
     };
   }
 

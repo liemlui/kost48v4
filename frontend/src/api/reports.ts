@@ -54,20 +54,7 @@ export interface ExpenseSummary {
   categories: ExpenseCategorySummary[];
 }
 
-export interface CashFlow {
-  year: number;
-  month: number;
-  cashIn: {
-    invoicePaymentsRupiah: number;
-    wifiSalesRupiah: number;
-    totalRupiah: number;
-  };
-  cashOut: {
-    expensesRupiah: number;
-    totalRupiah: number;
-  };
-  netCashFlowRupiah: number;
-}
+// R2: CashFlow interface dihapus — digantikan oleh CashflowStatement dari accounting-types.ts
 
 export async function fetchMonthlyIncome(year: number, month: number): Promise<MonthlyIncome> {
   const params = new URLSearchParams({ year: String(year), month: String(month) });
@@ -92,11 +79,7 @@ export async function fetchExpenseSummary(year: number, month: number): Promise<
   return res.data.data;
 }
 
-export async function fetchCashFlow(year: number, month: number): Promise<CashFlow> {
-  const params = new URLSearchParams({ year: String(year), month: String(month) });
-  const res = await apiClient.get(`/reports/cash-flow?${params}`);
-  return res.data.data;
-}
+// R2: fetchCashFlow dihapus — gunakan fetchCashflowStatement() dari api/accounting.ts
 
 // --- M10-B: New report types ---
 

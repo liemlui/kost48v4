@@ -38,25 +38,25 @@ export class TenantsController {
   private readonly profilePhotoUploadDir = join(process.cwd(), 'uploads', 'profile-photos');
 
   @Get()
-  @Roles(UserRole.OWNER, UserRole.ADMIN, UserRole.STAFF)
+  @Roles(UserRole.OWNER, UserRole.ADMIN)
   async findAll(@Query() query: TenantsQueryDto) {
     return { message: 'Daftar tenant berhasil diambil', data: await this.tenantsService.findAll(query) };
   }
 
   @Get(':id')
-  @Roles(UserRole.OWNER, UserRole.ADMIN, UserRole.STAFF)
+  @Roles(UserRole.OWNER, UserRole.ADMIN)
   async findOne(@Param('id', ParseIntPipe) id: number, @CurrentUser() user: CurrentUserPayload) {
     return { message: 'Detail tenant berhasil diambil', data: await this.tenantsService.findOne(id, user) };
   }
 
   @Post()
-  @Roles(UserRole.OWNER, UserRole.ADMIN, UserRole.STAFF)
+  @Roles(UserRole.OWNER, UserRole.ADMIN)
   async create(@Body() dto: CreateTenantDto, @CurrentUser() user: CurrentUserPayload) {
     return { message: 'Tenant berhasil dibuat', data: await this.tenantsService.create(dto, user) };
   }
 
   @Patch(':id')
-  @Roles(UserRole.OWNER, UserRole.ADMIN, UserRole.STAFF)
+  @Roles(UserRole.OWNER, UserRole.ADMIN)
   async update(@Param('id', ParseIntPipe) id: number, @Body() dto: UpdateTenantDto, @CurrentUser() user: CurrentUserPayload) {
     return { message: 'Tenant berhasil diperbarui', data: await this.tenantsService.update(id, dto, user) };
   }

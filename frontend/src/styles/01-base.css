@@ -1,44 +1,6 @@
 
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Cormorant+Garant:ital,wght@0,400;0,600;0,700;1,400;1,600&display=swap');
 
-:root {
-  --app-bg: #f0f6ff;
-  --surface: rgba(255, 255, 255, 0.92);
-  --surface-strong: #ffffff;
-  --surface-main: #ffffff;
-  --surface-soft: #f7fbff;
-  --border-soft: rgba(15, 23, 42, 0.08);
-  --border-strong: rgba(14, 165, 233, 0.18);
-  --text-main: #0f172a;
-  --text-muted: #475569;
-  --primary: #0ea5e9;
-  --primary-strong: #0284c7;
-  --primary-soft: rgba(14, 165, 233, 0.10);
-  --color-success: #15803d;
-  --color-success-bg: rgba(34, 197, 94, 0.12);
-  --color-warning: #b45309;
-  --color-warning-bg: rgba(245, 158, 11, 0.16);
-  --color-danger: #b91c1c;
-  --color-danger-bg: rgba(239, 68, 68, 0.12);
-  --color-info: #1d4ed8;
-  --color-info-bg: rgba(59, 130, 246, 0.12);
-  --color-muted-bg: rgba(148, 163, 184, 0.12);
-  --success-soft: var(--color-success-bg);
-  --warning-soft: var(--color-warning-bg);
-  --danger-soft: var(--color-danger-bg);
-  --info-soft: var(--color-info-bg);
-  --shadow-soft: 0 18px 45px rgba(15, 23, 42, 0.08);
-  --shadow-subtle: 0 10px 24px rgba(15, 23, 42, 0.06);
-  --radius-xl: 24px;
-  --radius-lg: 18px;
-  --radius-md: 14px;
-  --transition-fast: 0.15s ease;
-  --transition-base: 0.2s ease;
-  --font-display: 'DM Sans', 'Plus Jakarta Sans', sans-serif;
-  --font-body: 'DM Sans', 'Inter', sans-serif;
-  --font-data: 'DM Mono', 'JetBrains Mono', monospace;
-}
-
 * {
   box-sizing: border-box;
 }
@@ -117,8 +79,6 @@ a {
   letter-spacing: 0.02em;
   box-shadow: 0 16px 34px rgba(14, 165, 233, 0.22);
 }
-
-
 
 .kost48-logo-mark {
   overflow: hidden;

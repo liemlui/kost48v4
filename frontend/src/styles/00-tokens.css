@@ -1,0 +1,103 @@
+/* ================================================================
+   00-tokens.css — Sumber tunggal CSS custom properties
+   Hasil merger 7 :root blocks dari 6 file (R1 — CSS variables audit).
+   Urutan prioritas: nilai dari 06-tenant.css menang (import terakhir).
+   JANGAN tambah :root di file CSS lain — semua variable disini.
+   ================================================================ */
+
+:root {
+  /* ── Warna aplikasi (menang: 04-operations + 06-tenant) ────────── */
+  --app-bg: #eef5ff;
+  --surface: rgba(255, 255, 255, 0.94);
+  --surface-strong: #ffffff;
+  --surface-main: #ffffff;
+  --surface-soft: #f8fbff;
+  --text-main: #0f172a;
+  --text-muted: #475569;
+  --primary: #2563eb;
+  --primary-strong: #1d4ed8;
+  --primary-deep: #1e3a8a;
+  --primary-soft: rgba(37, 99, 235, 0.10);
+  --border-soft: rgba(30, 64, 175, 0.10);
+  --border-strong: rgba(37, 99, 235, 0.22);
+  --shadow-soft: 0 18px 44px rgba(30, 64, 175, 0.08);
+  --shadow-subtle: 0 10px 24px rgba(30, 64, 175, 0.06);
+
+  /* ── Warna semantik (menang: 01-base) ───────────────────────────── */
+  --color-success: #15803d;
+  --color-success-bg: rgba(34, 197, 94, 0.12);
+  --color-warning: #b45309;
+  --color-warning-bg: rgba(245, 158, 11, 0.16);
+  --color-danger: #b91c1c;
+  --color-danger-bg: rgba(239, 68, 68, 0.12);
+  --color-info: #1d4ed8;
+  --color-info-bg: rgba(59, 130, 246, 0.12);
+  --color-muted-bg: rgba(148, 163, 184, 0.12);
+  --success-soft: var(--color-success-bg);
+  --warning-soft: var(--color-warning-bg);
+  --danger-soft: var(--color-danger-bg);
+  --info-soft: var(--color-info-bg);
+
+  /* ── Tipografi (menang: 06-tenant + 04-operations) ──────────────── */
+  --font-display: 'Plus Jakarta Sans', 'Inter', sans-serif;
+  --font-body: 'Inter', 'DM Sans', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  --font-data: 'DM Mono', 'JetBrains Mono', monospace;
+
+  /* ── Radius & shadows ───────────────────────────────────────────── */
+  --radius-xl: 24px;
+  --radius-lg: 18px;
+  --radius-md: 14px;
+  --transition-fast: 0.15s ease;
+  --transition-base: 0.2s ease;
+
+  /* ── K48-brand colors (06-tenant) ───────────────────────────────── */
+  --k48-bg: #f6f9fd;
+  --k48-surface: #ffffff;
+  --k48-surface-soft: #f9fbff;
+  --k48-primary: #2563eb;
+  --k48-primary-strong: #1d4ed8;
+  --k48-primary-soft: #e8f1ff;
+  --k48-text: #172033;
+  --k48-text-soft: #43546a;
+  --k48-text-muted: #66758a;
+  --k48-border: #d9e4f2;
+  --k48-border-soft: #eaf1fb;
+  --k48-success: #15803d;
+  --k48-success-soft: #e8f7ee;
+  --k48-warning: #b45309;
+  --k48-warning-soft: #fff4dc;
+  --k48-danger: #dc2626;
+  --k48-danger-soft: #feecec;
+
+  /* ── Staff theme (05-staff) ─────────────────────────────────────── */
+  --k48-staff-bg: #f5f4f0;
+  --k48-staff-bg-2: #ebe7dd;
+  --k48-staff-surface: #ffffff;
+  --k48-staff-surface-soft: #faf9f6;
+  --k48-staff-text: #17211d;
+  --k48-staff-text-soft: #4f625b;
+  --k48-staff-text-muted: #738078;
+  --k48-staff-primary: #0f6e56;
+  --k48-staff-primary-strong: #094c3b;
+  --k48-staff-primary-soft: #dff3ec;
+  --k48-staff-danger: #d85a30;
+
+  /* ── Operations blue palette (04-operations V5.13-G) ────────────── */
+  --ops-blue-900: #0f2f76;
+  --ops-blue-800: #1e40af;
+  --ops-blue-700: #1d4ed8;
+  --ops-blue-600: #2563eb;
+  --ops-blue-500: #3b82f6;
+  --ops-cyan-500: #06b6d4;
+  --ops-sky-50: #eff6ff;
+
+  /* ── Density (10-misc) ──────────────────────────────────────────── */
+  --density-page-x: 16px;
+  --density-page-y: 14px;
+  --density-section-gap: 14px;
+  --density-card-pad: 14px;
+  --density-card-pad-sm: 12px;
+  --density-radius-lg: 18px;
+  --density-radius-md: 14px;
+}

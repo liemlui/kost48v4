@@ -515,6 +515,7 @@ model User {
   roomTransfersCreated      RoomTransfer[]             @relation("RoomTransferCreatedBy")
   peerReportsModerated      PeerBehaviorReport[]       @relation("PeerReportModeratedBy")
   marketAnalysesCreated     MarketAnalysis[]           @relation("MarketAnalysisCreatedBy")
+  satisfactionSurveysCreated SatisfactionSurvey[]
 
   @@index([role])
   @@index([isActive])
@@ -542,8 +543,8 @@ model MarketAnalysis {
 // Scalar-only (tanpa relation) agar ringan; dipakai untuk ringkasan owner & konteks analisa SWOT.
 model SatisfactionSurvey {
   id             Int      @id @default(autoincrement())
-  tenantId       Int?
-  stayId         Int?
+  tenantId       Int?     
+  stayId         Int?     
   overallRating  Int // 1..5
   cleanliness    Int?
   staffService   Int?
@@ -554,6 +555,10 @@ model SatisfactionSurvey {
   createdById    Int?
   createdAt      DateTime @default(now())
 
+  tenant    Tenant? @relation(fields: [tenantId], references: [id], onDelete: SetNull)
+  stay      Stay?   @relation(fields: [stayId], references: [id], onDelete: SetNull)
+  createdBy User?   @relation(fields: [createdById], references: [id], onDelete: SetNull)
+
   @@index([createdAt])
 }
 
@@ -562,7 +567,7 @@ model Tenant {
   fullName       String
   phone          String
   email          String?
-  identityNumber String?
+  identityNumber String?  @unique
 
   // F3-17: foto KTP terproteksi + jejak verifikasi + hapus saat keluar (UU PDP).
   ktpImageUrl              String?
@@ -615,6 +620,7 @@ model Tenant {
   referredReferral    TenantReferral?      @relation("ReferralReferred")
   peerReportsMade     PeerBehaviorReport[] @relation("PeerReportReporter")
   peerReportsReceived PeerBehaviorReport[] @relation("PeerReportReportee")
+  satisfactionSurveys SatisfactionSurvey[]
 
   @@index([fullName])
   @@index([phone])
@@ -683,6 +689,7 @@ model Room {
 
   @@index([status])
   @@index([isActive])
+  @@index([floor, category])
 }
 
 model RoomFacility {
@@ -794,6 +801,7 @@ model Stay {
   depositLedgerEntries TenantDepositLedgerEntry[]
   rentRecognitionSchedules RentRecognitionSchedule[]
   roomTransfers      RoomTransfer[]
+  satisfactionSurveys SatisfactionSurvey[]
 
   @@index([tenantId])
   @@index([roomId])
@@ -805,6 +813,7 @@ model Stay {
   @@index([bookingSource])
   @@index([stayPurpose])
   @@index([belongingsStatus, belongingsDeadline])
+  @@index([createdById])
 }
 
 model TenantDepositLedgerEntry {
@@ -1046,6 +1055,8 @@ model Ticket {
   @@index([linkedInventoryItemId])
   @@index([dueAt])
   @@index([status, dueAt])
+  @@index([assignedToId])
+  @@index([category])
 }
 
 model StaffRoutineTemplate {
@@ -1132,7 +1143,7 @@ model StaffWorkAudit {
   createdAt   DateTime            @default(now())
   updatedAt   DateTime            @updatedAt
 
-  staff     User @relation("StaffWorkAuditStaff", fields: [staffId], references: [id], onDelete: Cascade)
+  staff     User @relation("StaffWorkAuditStaff", fields: [staffId], references: [id], onDelete: SetNull)
   auditedBy User @relation("StaffWorkAuditAuditor", fields: [auditedById], references: [id], onDelete: Restrict)
 
   @@index([staffId, createdAt])
@@ -1151,7 +1162,7 @@ model StaffPerformanceEvent {
   reason     String?
   createdAt  DateTime                  @default(now())
 
-  staff User @relation("StaffPerformanceEventStaff", fields: [staffId], references: [id], onDelete: Cascade)
+  staff User @relation("StaffPerformanceEventStaff", fields: [staffId], references: [id], onDelete: SetNull)
 
   @@index([staffId, createdAt])
   @@index([sourceType, sourceId])
@@ -1172,7 +1183,7 @@ model StaffReview {
   createdAt     DateTime          @default(now())
   updatedAt     DateTime          @updatedAt
 
-  staff       User    @relation("StaffReviewStaff", fields: [staffId], references: [id], onDelete: Cascade)
+  staff       User    @relation("StaffReviewStaff", fields: [staffId], references: [id], onDelete: SetNull)
   tenant      Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   moderatedBy User?   @relation("StaffReviewModeratedBy", fields: [moderatedById], references: [id], onDelete: SetNull)
 
@@ -1932,6 +1943,9 @@ model LoyaltyReward {
   updatedAt   DateTime          @updatedAt
 
   redemptions Redemption[]
+
+  @@index([isActive, type])
+  @@index([pointCost])
 }
 
 // Penukaran reward (wajib approve; reward terjurnal saat FULFILLED).
@@ -2037,6 +2051,21 @@ model OperationalSetting {
   waterMeteringEnabled          Boolean  @default(false)
   waterTariffPerM3Rupiah        Int      @default(0)
   freeWaterM3PerMonth           Int      @default(0)
+  // ── R3: AI/DeepSeek owner-configurable settings ──────────────────────────
+  deepseekModel                String   @default("deepseek-v4-flash")
+  deepseekFinanceModel         String   @default("deepseek-v4-pro")
+  deepseekBaseUrl              String   @default("https://api.deepseek.com")
+  aiFeaturesEnabled            Boolean  @default(false)
+  aiManualOnly                 Boolean  @default(true)
+  aiOwnerAdminOnly             Boolean  @default(true)
+  aiDailyRequestLimit          Int      @default(50)
+  aiMaxInputChars              Int      @default(12000)
+  aiMaxOutputTokens            Int      @default(1400)
+  aiFinanceMaxOutputTokens     Int      @default(2200)
+  aiLogUsage                   Boolean  @default(true)
+  aiDraftRetentionDays         Int      @default(60)
+  capitalizationThresholdByCategory String? // JSON: {"SALARY":500000,...}
+  // ──────────────────────────────────────────────────────────────────────────
   updatedAt                     DateTime @updatedAt
   updatedById                   Int?
 }

@@ -249,54 +249,7 @@ export class ReportsService {
    * cashOut = expenses
    * net = cashIn - cashOut
    */
-  async cashFlow(year: number, month: number) {
-    const start = new Date(Date.UTC(year, month - 1, 1));
-    const end = new Date(Date.UTC(year, month, 1));
-
-    const [paymentAgg, wifiAgg, expenseAgg] = await Promise.all([
-      this.prisma.invoicePayment.aggregate({
-        _sum: { amountRupiah: true },
-        where: {
-          paymentDate: { gte: start, lt: end },
-        },
-      }),
-      this.prisma.wifiSale.aggregate({
-        _sum: { soldPriceRupiah: true },
-        where: {
-          saleDate: { gte: start, lt: end },
-        },
-      }),
-      this.prisma.expense.aggregate({
-        _sum: { amountRupiah: true },
-        where: {
-          status: 'CONFIRMED' as any,
-          expenseDate: { gte: start, lt: end },
-        },
-      }),
-    ]);
-
-    const invoicePayments = Number(paymentAgg._sum.amountRupiah ?? 0);
-    const wifiSales = Number(wifiAgg._sum.soldPriceRupiah ?? 0);
-    const expenses = Number(expenseAgg._sum.amountRupiah ?? 0);
-    const totalCashIn = invoicePayments + wifiSales;
-    const totalCashOut = expenses;
-
-    return {
-      year,
-      month,
-      cashIn: {
-        invoicePaymentsRupiah: invoicePayments,
-        wifiSalesRupiah: wifiSales,
-        totalRupiah: totalCashIn,
-      },
-      cashOut: {
-        expensesRupiah: totalCashOut,
-        totalRupiah: totalCashOut,
-      },
-      netCashFlowRupiah: totalCashIn - totalCashOut,
-      metadata: this.operationalApproximationMetadata('cash-flow'),
-    };
-  }
+  // R2: cashFlow() dihapus — digantikan oleh GET /accounting/cashflow (ledger-backed direct method).
 
   /**
    * Profit & Loss Summary (Akrual)

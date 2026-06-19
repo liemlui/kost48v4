@@ -21,7 +21,6 @@ import {
 import {
   startOfDay,
   maxDate,
-  resolveRent,
   mapPricingTermToUnit,
   calculatePeriodEnd,
   calculateDueDate,
