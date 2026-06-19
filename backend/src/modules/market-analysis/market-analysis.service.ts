@@ -124,8 +124,8 @@ export class MarketAnalysisService {
     ];
     try {
       const raw = await deepseekChat(messages, { temperature: 0.4 });
-      const parsed = this.extractCacClvResult(raw);
-      return { configured: true, mode: 'DEEPSEEK', reply: raw, result: parsed, snapshot, fallback: false };
+      const parsed = this.extractCacClvResult(raw.content);
+      return { configured: true, mode: 'DEEPSEEK', reply: raw.content, result: parsed, snapshot, fallback: false };
     } catch {
       return this.cacClvFallback(snapshot);
     }
@@ -319,8 +319,8 @@ export class MarketAnalysisService {
       ...dto.messages.map((m) => ({ role: m.role, content: m.content }) as ChatMsg),
     ];
     const raw = await deepseekChat(messages, { temperature: 0.5 });
-    const parsed = this.extractResult(raw, kind);
-    return { configured: true, mode: 'DEEPSEEK', reply: raw, done: parsed.done, result: parsed.result, snapshot };
+    const parsed = this.extractResult(raw.content, kind);
+    return { configured: true, mode: 'DEEPSEEK', reply: raw.content, done: parsed.done, result: parsed.result, snapshot };
   }
 
   /** Deteksi blok HASIL + JSON terstruktur dari balasan AI. */

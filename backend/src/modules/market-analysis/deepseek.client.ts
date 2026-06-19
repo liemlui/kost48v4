@@ -1,9 +1,31 @@
 // Klien DeepSeek (OpenAI-compatible) — TANPA dependensi npm baru (pakai global fetch Node 18+).
 // Key dibaca dari env: DEEPSEEK_API_KEY (fallback AI_PROVIDER_KEY). Base/model bisa di-override.
-// Riset web LIVE = fase lanjutan (perlu tool web-search terpisah); untuk kini model memakai
-// pengetahuannya sendiri + jawaban owner.
+// Fase G: upgrade ke model v4-flash, return usage, JSON mode, thinking toggle, hash helper.
 
 export type ChatMsg = { role: 'system' | 'user' | 'assistant'; content: string };
+
+export type DeepseekUsage = {
+  prompt_tokens?: number;
+  completion_tokens?: number;
+  total_tokens?: number;
+  prompt_cache_hit_tokens?: number;
+  prompt_cache_miss_tokens?: number;
+};
+
+export type DeepseekChatResult = {
+  content: string;
+  model: string;
+  usage?: DeepseekUsage;
+};
+
+export type DeepseekChatOpts = {
+  temperature?: number;
+  maxTokens?: number;
+  timeoutMs?: number;
+  model?: string;
+  json?: boolean;
+  thinking?: 'disabled' | 'enabled';
+};
 
 export function deepseekApiKey(): string | undefined {
   return process.env.DEEPSEEK_API_KEY || process.env.AI_PROVIDER_KEY || undefined;
@@ -15,12 +37,28 @@ export function deepseekConfigured(): boolean {
 
 export async function deepseekChat(
   messages: ChatMsg[],
-  opts: { temperature?: number; maxTokens?: number; timeoutMs?: number } = {},
-): Promise<string> {
+  opts: DeepseekChatOpts = {},
+): Promise<DeepseekChatResult> {
   const key = deepseekApiKey();
   if (!key) throw new Error('DEEPSEEK_API_KEY belum dikonfigurasi di .env backend.');
   const baseURL = (process.env.DEEPSEEK_BASE_URL || 'https://api.deepseek.com').replace(/\/+$/, '');
-  const model = process.env.DEEPSEEK_MODEL || 'deepseek-chat';
+  const model = opts.model || process.env.DEEPSEEK_MODEL || 'deepseek-v4-flash';
+
+  const body: Record<string, unknown> = {
+    model,
+    messages,
+    temperature: opts.temperature ?? 0.5,
+    max_tokens: opts.maxTokens ?? 1400,
+    stream: false,
+  };
+
+  if (opts.json) {
+    body.response_format = { type: 'json_object' };
+  }
+
+  if (opts.thinking) {
+    body.thinking = { type: opts.thinking };
+  }
 
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), opts.timeoutMs ?? 60_000);
@@ -28,23 +66,29 @@ export async function deepseekChat(
     const res = await fetch(`${baseURL}/chat/completions`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${key}` },
-      body: JSON.stringify({
-        model,
-        messages,
-        temperature: opts.temperature ?? 0.5,
-        max_tokens: opts.maxTokens ?? 1400,
-        stream: false,
-      }),
+      body: JSON.stringify(body),
       signal: controller.signal,
     });
     if (!res.ok) {
-      const body = await res.text().catch(() => '');
-      throw new Error(`DeepSeek API ${res.status}: ${body.slice(0, 300)}`);
+      const text = await res.text().catch(() => '');
+      throw new Error(`DeepSeek API ${res.status}: ${text.slice(0, 300)}`);
     }
     const json: any = await res.json();
     const content = json?.choices?.[0]?.message?.content;
     if (typeof content !== 'string') throw new Error('Respon DeepSeek tidak terbaca.');
-    return content;
+    return {
+      content,
+      model: json.model || model,
+      usage: json.usage
+        ? {
+            prompt_tokens: json.usage.prompt_tokens,
+            completion_tokens: json.usage.completion_tokens,
+            total_tokens: json.usage.total_tokens,
+            prompt_cache_hit_tokens: json.usage.prompt_cache_hit_tokens,
+            prompt_cache_miss_tokens: json.usage.prompt_cache_miss_tokens,
+          }
+        : undefined,
+    };
   } finally {
     clearTimeout(timer);
   }

@@ -43,6 +43,7 @@ import { PushModule } from './modules/push/push.module';
 import { LoyaltyModule } from './modules/loyalty/loyalty.module';
 import { SettingsModule } from './modules/settings/settings.module';
 import { MarketAnalysisModule } from './modules/market-analysis/market-analysis.module';
+import { OwnerAiModule } from './modules/owner-ai/owner-ai.module';
 import { SurveysModule } from './modules/surveys/surveys.module';
 import { AdditionalServicesModule } from './modules/additional-services/additional-services.module';
 @Module({
@@ -88,6 +89,7 @@ import { AdditionalServicesModule } from './modules/additional-services/addition
     LoyaltyModule,
     SettingsModule,
     MarketAnalysisModule,
+    OwnerAiModule,
     SurveysModule,
     AdditionalServicesModule,
   ],

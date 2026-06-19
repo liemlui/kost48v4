@@ -41,3 +41,109 @@ export async function createBusinessNarrative(payload: {
   const response = await client.post<ApiEnvelope<AiResult<{ title: string; summary: string; recommendations: string[] }>>>('/ai/business-narrative', payload);
   return response.data.data;
 }
+
+// ── Fase G: Owner AI ──────────────────────────────────────────────────────────
+
+export type OwnerAiStatus = {
+  configured: boolean;
+  enabled: boolean;
+  defaultModel: string;
+  financeModel: string;
+  manualOnly: boolean;
+  ownerAdminOnly: boolean;
+  dailyLimit: number;
+  dailyRemaining: number;
+  logUsage: boolean;
+};
+
+export async function getOwnerAiStatus() {
+  const response = await client.get<ApiEnvelope<OwnerAiStatus>>('/owner-ai/status');
+  return response.data.data;
+}
+
+export type BriefResult = {
+  mode: string;
+  model: string;
+  fallback: boolean;
+  warnings: string[];
+  missingData: string[];
+  result: {
+    summary: string;
+    priorityActions: Array<{ title: string; reason: string; route?: string; severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL' }>;
+    risks: Array<{ title: string; impact: string; mitigation: string }>;
+    numbersToWatch: Array<{ label: string; value: string; why: string }>;
+  };
+  usage?: { total_tokens?: number };
+  snapshotHash?: string;
+  promptHash?: string;
+};
+
+export async function generateBrief() {
+  const response = await client.post<ApiEnvelope<BriefResult>>('/owner-ai/brief');
+  return response.data.data;
+}
+
+export type ExpenseReceiptDraft = {
+  expenseDate: string | null;
+  vendorName: string | null;
+  amountRupiah: number;
+  category: string;
+  type: string;
+  description: string;
+  note: string;
+  confidence: number;
+  needsReview: string[];
+};
+
+export type ExpenseReceiptDraftResult = {
+  mode: string;
+  model: string;
+  fallback: boolean;
+  warnings: string[];
+  result: ExpenseReceiptDraft;
+  usage?: { total_tokens?: number };
+  snapshotHash?: string;
+  promptHash?: string;
+};
+
+export async function draftExpenseReceiptFromOcr(ocrText: string) {
+  const response = await client.post<ApiEnvelope<ExpenseReceiptDraftResult>>('/owner-ai/expenses/receipt-draft', { ocrText });
+  return response.data.data;
+}
+
+// ── G5: KTP OCR Validator ──────────────────────────────────────────────────────
+
+export type KtpOcrValidateResult = {
+  mode: 'DEEPSEEK' | 'RULE_FALLBACK';
+  model?: string;
+  usage?: { total_tokens?: number };
+  snapshotHash?: string;
+  promptHash?: string;
+  fallback?: boolean;
+  confidence?: number;
+  warnings: string[];
+  result: {
+    extracted: {
+      nik?: string | null;
+      name?: string | null;
+      birthPlace?: string | null;
+      birthDate?: string | null;
+      gender?: 'MALE' | 'FEMALE' | null;
+      address?: string | null;
+    };
+    nikFormatValid: boolean;
+    demographicsFromNik: { birthDate: string | null; gender: 'MALE' | 'FEMALE' | null };
+    match: { nameMatchesTenant: boolean | null; nikMatchesTenant: boolean; warnings: string[] };
+    recommendation: 'VERIFY' | 'REVIEW_MANUALLY' | 'REJECT';
+  };
+  missingData: string[];
+};
+
+/** Kirim TEKS OCR KTP (BUKAN gambar) untuk divalidasi vs data tenant. */
+export async function validateKtpOcr(tenantId: number, ocrText: string) {
+  const response = await client.post<ApiEnvelope<KtpOcrValidateResult>>(
+    `/owner-ai/tenants/${tenantId}/ktp-ocr-validate`,
+    { ocrText },
+  );
+  return response.data.data;
+}

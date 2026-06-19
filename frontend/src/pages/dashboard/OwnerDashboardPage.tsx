@@ -19,8 +19,9 @@ import { fetchAccountingReadiness } from '../../api/accounting';
 import { listStays } from '../../api/stays';
 import { listResource } from '../../api/resources';
 import type { MeterReading } from '../../types';
-import { createBusinessNarrative } from '../../api/ai';
+import { createBusinessNarrative, generateBrief, type BriefResult } from '../../api/ai';
 import AiAssistButton from '../../components/ai/AiAssistButton';
+import AiResultPanel from '../../components/ai/AiResultPanel';
 
 const MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
@@ -530,6 +531,71 @@ export default function OwnerDashboardPage() {
                           </ul>
                         ) : null}
                       </Alert>
+                    )}
+                  />
+                </div>
+              </section>
+            </Col>
+          </Row>
+
+          {/* G1: Owner Executive Brief AI */}
+          <Row className="mb-3">
+            <Col xs={12}>
+              <section className="owner-panel owner-ai-panel">
+                <div className="owner-panel-heading">
+                  <h2>Ringkasan Bisnis AI</h2>
+                </div>
+                <div className="owner-panel-body p-3">
+                  <AiAssistButton<BriefResult>
+                    label="Buat Brief AI"
+                    loadingLabel="Menganalisa dengan DeepSeek..."
+                    variant="primary"
+                    run={generateBrief}
+                    renderResult={(result) => (
+                      <AiResultPanel
+                        title="Ringkasan Bisnis"
+                        mode={result.mode}
+                        fallback={result.fallback}
+                        warnings={result.warnings}
+                        missingData={result.missingData}
+                        usage={result.usage}
+                        model={result.model}
+                      >
+                        <p className="fw-medium mb-2">{result.result?.summary}</p>
+
+                        {result.result?.priorityActions?.length > 0 ? (
+                          <div className="mb-2">
+                            <div className="small fw-semibold text-muted mb-1">Aksi Prioritas</div>
+                            {result.result.priorityActions.map((a, i) => (
+                              <div key={i} className="d-flex align-items-center gap-2 mb-1 small">
+                                <span className={`badge bg-${a.severity === 'CRITICAL' ? 'danger' : a.severity === 'HIGH' ? 'warning' : a.severity === 'MEDIUM' ? 'info' : 'secondary'}`}>
+                                  {a.severity}
+                                </span>
+                                <span>{a.title}</span>
+                                <span className="text-muted">— {a.reason}</span>
+                              </div>
+                            ))}
+                          </div>
+                        ) : null}
+
+                        {result.result?.risks?.length > 0 ? (
+                          <div className="mb-2">
+                            <div className="small fw-semibold text-muted mb-1">Risiko</div>
+                            {result.result.risks.map((r, i) => (
+                              <div key={i} className="small mb-1">⚠️ <strong>{r.title}</strong> — {r.impact}. <em>Mitigasi: {r.mitigation}</em></div>
+                            ))}
+                          </div>
+                        ) : null}
+
+                        {result.result?.numbersToWatch?.length > 0 ? (
+                          <div className="mb-2">
+                            <div className="small fw-semibold text-muted mb-1">Angka Penting</div>
+                            {result.result.numbersToWatch.map((n, i) => (
+                              <div key={i} className="small mb-1">📊 <strong>{n.label}:</strong> {n.value} — {n.why}</div>
+                            ))}
+                          </div>
+                        ) : null}
+                      </AiResultPanel>
                     )}
                   />
                 </div>

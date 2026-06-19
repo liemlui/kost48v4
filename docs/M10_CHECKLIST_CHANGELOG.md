@@ -722,7 +722,22 @@ Evaluasi 4 item dengan format: kondisi saat ini → risiko → rekomendasi → p
 
 **Rujukan wajib sebelum coding:** `docs/M12_AI_OWNER_ADMIN.md` (utama) · `docs/M02_KEPUTUSAN_OWNER.md` D-23 · `docs/M04_KEUANGAN.md` · `docs/M05_SIKLUS_HUNI.md` · `docs/M06_OPERASIONAL.md` · `docs/M07_PUBLIK_GROWTH.md` · `docs/M08_DEPLOY_GO_LIVE.md` · `docs/M09_AUDIT.md` · `docs/CODEMAP.md`.
 
-**Status:** baru. Kerjakan **G0 dulu** sebelum G1-G8. **G9 [SCHEMA] opsional** dan harus berhenti sampai owner approve.
+**Status:** baru. Kerjakan **G0 dulu** sebelum G1-G8 — G0 adalah PONDASI (deepseek.client upgrade + modul owner-ai + komponen UI). **G9 [SCHEMA] opsional** dan harus berhenti sampai owner approve.
+
+**Panduan file exist vs new (untuk AI lemah):**
+
+| Target | Status | Jangan |
+|--------|--------|--------|
+| `backend/src/modules/market-analysis/deepseek.client.ts` | ✏️ EDIT (upgrade) | Jangan hapus market-analysis |
+| `backend/src/modules/owner-ai/` | ✨ BUAT BARU (folder kosong) | — |
+| `backend/src/modules/ai/` | 🔒 READ-ONLY (rule-based, NO DeepSeek) | JANGAN tambah DeepSeek call ke sini |
+| `frontend/src/components/ai/AiAssistButton.tsx` | ✏️ EDIT (upgrade) | Jangan hapus, keep backward compat |
+| `frontend/src/api/ai.ts` | ✏️ EDIT (tambah endpoint) | — |
+| `frontend/src/api/ownerAi.ts` | ✨ BUAT BARU | — |
+| `backend/.env.production.example` | ✏️ EDIT (tambah env Fase G) | — |
+| `backend/src/app.module.ts` | ✏️ EDIT (import OwnerAiModule) | Jangan hapus import lain |
+| `backend/prisma/schema.prisma` | 🧬 JANGAN SENTUH (kecuali G9 + approval) | — |
+| Semua file `*test*` / `*.spec.ts` | 🔒 JANGAN UBAH | Tambah test baru boleh |
 
 #### Kontrak Global Fase G
 
@@ -749,9 +764,9 @@ Evaluasi 4 item dengan format: kondisi saat ini → risiko → rekomendasi → p
 
 #### G0 — AI-SAFETY-FOUNDATION
 
-- [ ] **G0 / AI-SAFETY-FOUNDATION:** rapikan fondasi DeepSeek agar semua fitur berikutnya aman, hemat token, dan manual-only.
+- [x] **G0 / AI-SAFETY-FOUNDATION:** rapikan fondasi DeepSeek agar semua fitur berikutnya aman, hemat token, dan manual-only.
   - **Rujukan:** `docs/M12_AI_OWNER_ADMIN.md` bagian G0, `docs/M08_DEPLOY_GO_LIVE.md` env Fase G, `docs/CODEMAP.md`.
-  - **Anchor backend:** `backend/src/modules/market-analysis/deepseek.client.ts`, `backend/src/modules/market-analysis/market-analysis.service.ts`, `backend/src/modules/ai/ai.service.ts`, `backend/src/modules/audit-log/`, `backend/src/app.module.ts`.
+  - **Anchor backend:** `backend/src/modules/market-analysis/deepseek.client.ts` ✏️ [EDIT] · `backend/src/modules/market-analysis/market-analysis.service.ts` 🔒 [READ-ONLY, backward compat check] · `backend/src/modules/ai/ai.service.ts` 🔒 [READ-ONLY, referensi rate-limit pattern saja, JANGAN diedit] · `backend/src/modules/audit-log/` 🔒 [READ-ONLY, referensi AuditLog.meta] · `backend/src/app.module.ts` ✏️ [EDIT].
   - **Anchor frontend:** `frontend/src/components/ai/AiAssistButton.tsx`, `frontend/src/api/ai.ts`, `frontend/src/pages/marketing/MarketAnalysisPage.tsx`.
   - **Langkah detail:**
     1. Ubah default model DeepSeek menjadi `process.env.DEEPSEEK_MODEL || 'deepseek-v4-flash'`.
@@ -767,7 +782,7 @@ Evaluasi 4 item dengan format: kondisi saat ini → risiko → rekomendasi → p
 
 #### G1 — OWNER-BRIEF-AI
 
-- [ ] **G1 / OWNER-BRIEF-AI:** tombol "Ringkas Kondisi Bisnis dengan AI" di Kokpit Owner.
+- [x] **G1 / OWNER-BRIEF-AI:** tombol "Ringkas Kondisi Bisnis dengan AI" di Kokpit Owner.
   - **Tujuan:** Owner menekan tombol, AI membaca snapshot ringkas bisnis hari ini, lalu memberi prioritas 3-7 poin.
   - **Rujukan:** `docs/M12_AI_OWNER_ADMIN.md` G1, `docs/M02_KEPUTUSAN_OWNER.md`, `docs/M04_KEUANGAN.md`, `docs/M06_OPERASIONAL.md`.
   - **Anchor backend:** `OwnerDashboardPage` data source, `finance.service.ts`, `reports.service.ts`, `tickets.service.ts`, `payment-submissions.service.ts`, `settings.service.ts`.
@@ -775,6 +790,14 @@ Evaluasi 4 item dengan format: kondisi saat ini → risiko → rekomendasi → p
   - **Snapshot minimal:** okupansi, kamar kosong/maintenance, invoice overdue agregat, pending payment count, ticket urgent/open, meter due, readiness score, top 5 risiko. Jangan kirim daftar tenant lengkap.
   - **Output AI:** `executiveSummary`, `topRisks[]`, `recommendedActions[]`, `watchlist[]`, `missingData[]`, `confidence`.
   - **UI:** hasil tampil di panel/drawer; tombol `Refresh Analisa AI` manual; tidak auto-refresh saat dashboard dibuka.
+  - **Langkah detail:**
+    1. Buat `backend/src/modules/owner-ai/prompts/brief.prompt.ts` ✨ [NEW]: export `buildBriefPrompt(snapshot)` → return `ChatMsg[]` (system prompt tetap + JSON schema + data snapshot).
+    2. Di `OwnerAiService`: tambah method `buildBriefSnapshot()` → query Prisma: room count by status, invoice overdue (sum + count), pending payments, open tickets, meter missing, readiness score.
+    3. Di `OwnerAiService`: tambah method `generateBrief(actorId)` → rate-limit check → build snapshot → `stableHash(snapshot)` → panggil `deepseekChat(messages, { json: true })` → parse JSON → return `AiResult<BriefOutput>`.
+    4. Fallback: bila API gagal/disabled, return ringkasan rule-based dari snapshot mentah (tanpa AI).
+    5. Di `OwnerAiController`: tambah `POST /owner-ai/brief` → guard `@Roles(OWNER)` → panggil service.
+    6. Di `frontend/src/pages/dashboard/OwnerDashboardPage.tsx`: import `AiAssistButton` + `AiResultPanel` → tambah tombol "Buat Brief AI" di bawah status cards → onClick POST → render panel hasil.
+    7. Tombol disabled bila `configured=false` (cek dari `GET /owner-ai/status`).
   - **Gate:** backend tsc, frontend build, UAT role: OWNER bisa, ADMIN hanya jika diputuskan boleh di M12, STAFF/TENANT 403 dan tombol tidak muncul.
 
 #### G2 — FINANCE-AI-ANALYST
@@ -789,18 +812,33 @@ Evaluasi 4 item dengan format: kondisi saat ini → risiko → rekomendasi → p
   - **Approval:** AI tidak punya tombol posting jurnal. Jika ada saran koreksi, tampilkan sebagai checklist manual untuk Owner.
   - **Gate uang:** `cd backend; npx tsc --noEmit`; `cd backend; node --test "test/**/*.test.js"`; frontend build bila ada UI.
   - **Jangan:** jangan mengubah `JournalEntry`, `Invoice`, `InvoicePayment`, `Expense`, `AccountingPeriod`, `OpeningBalance`, atau `CashAccount`.
+  - **Langkah detail:**
+    1. Buat `backend/src/modules/owner-ai/prompts/finance.prompt.ts` ✨ [NEW]: system prompt tetap + JSON schema + business rules (no-partial, TB invariant, deposit liability).
+    2. Di `OwnerAiService`: tambah method `buildFinanceSnapshot()` → panggil service TB, P&L, cashflow, ratios, readiness, deposit reconciliation (JANGAN reimplementasi — panggil fungsi service existing).
+    3. Di `OwnerAiService`: tambah method `analyzeFinance(actorId)` → rate-limit → snapshot → hash → `deepseekChat(..., { json: true, model: env.DEEPSEEK_FINANCE_MODEL })` → parse → return.
+    4. Fallback: jika API gagal, return `{ mode: "RULE_FALLBACK", warnings: ["AI tidak tersedia, silakan review manual"] }` — JANGAN buat analisa palsu.
+    5. Di `OwnerAiController`: tambah `POST /owner-ai/finance/analyze` → guard `@Roles(OWNER)`.
+    6. Di halaman accounting (cari `frontend/src/pages/finance/`): tambah tombol "Analisa Keuangan AI" → hasil tampil di drawer dengan `AiResultPanel`.
+    7. Gate UANG: `cd backend && node --test "test/**/*.test.js"` HARUS HIJAU — pastikan tidak ada side effect ke ledger.
 
 #### G3 — PAYMENT-REVIEW-AI
 
 - [ ] **G3 / PAYMENT-REVIEW-AI:** asisten review bukti pembayaran untuk Admin/Owner.
   - **Tujuan:** di modal review pembayaran, Admin menekan "Bantu Review AI"; AI memberi rekomendasi `APPROVE`, `REJECT`, atau `ASK_MORE_INFO`.
   - **Rujukan:** `docs/M12_AI_OWNER_ADMIN.md` G3, `docs/M04_KEUANGAN.md`, `docs/M05_SIKLUS_HUNI.md`.
-  - **Anchor backend:** `backend/src/modules/payment-submissions/`, `backend/src/modules/ai/ai.service.ts` existing `analyzePaymentProof`, `invoice-payments.service.ts`.
+  - **Anchor backend:** `backend/src/modules/payment-submissions/` 🔒 [READ-ONLY, baca data saja] · `backend/src/modules/ai/ai.service.ts` 🔒 [READ-ONLY, `analyzePaymentProof` rule-based existing — JANGAN diedit, buat versi DeepSeek BARU di `owner-ai/`] · `invoice-payments.service.ts` 🔒 [READ-ONLY, baca data saja].
   - **Anchor frontend:** `frontend/src/pages/payments/PaymentReviewPage.tsx`, `frontend/src/components/payments/ReviewPaymentModal.tsx`, `frontend/src/api/ai.ts`.
   - **Input minimal:** submissionId, invoiceId, expected amount, submitted amount, paidAt, sender/ref text, OCR text jika ada. Jangan kirim file bukti langsung ke DeepSeek untuk tahap ini.
   - **Output AI:** `recommendedAction`, `confidence`, `matches[]`, `warnings[]`, `reason`, `suggestedAdminNote`.
   - **Approval:** tombol approve/reject tetap endpoint existing `payment-submissions`. Saat manusia approve/reject setelah memakai AI, catat `AuditLog.meta.ai`.
   - **Gate uang:** backend tsc + unit uang, frontend build. UAT: nominal kurang tetap tidak bisa approve meski AI menyarankan approve.
+  - **Langkah detail:**
+    1. Buat `backend/src/modules/owner-ai/prompts/payment-review.prompt.ts` ✨ [NEW]: system prompt + JSON schema + deterministic rules (no-partial, allowed amounts).
+    2. Di `OwnerAiService`: tambah method `reviewPaymentSubmission(submissionId, actorId)` → ambil data submission + invoice + stay dari service existing → validasi no-partial dulu SEBELUM panggil AI → jika nominal tidak sah, langsung return `{ recommendation: "REJECT", reason: "Nominal tidak sesuai aturan no-partial" }` TANPA panggil AI.
+    3. Jika nominal valid, panggil `deepseekChat` dengan snapshot → parse JSON → return rekomendasi.
+    4. Di `OwnerAiController`: tambah `POST /owner-ai/payment-submissions/:id/review-draft` → guard OWNER/ADMIN.
+    5. Di `frontend/src/pages/payments/PaymentReviewPage.tsx`: tambah tombol "Bantu Review AI" di modal review (cari modal yang dipakai untuk approve/reject) → tampil `AiResultPanel` dengan rekomendasi.
+    6. Saat admin klik "Setujui" setelah pakai AI: endpoint approve existing jalan + catat `AuditLog.meta.ai` dengan field minimal dari M12 Audit Trail.
 
 #### G4 — EXPENSE-OCR-DRAFT
 
@@ -813,6 +851,13 @@ Evaluasi 4 item dengan format: kondisi saat ini → risiko → rekomendasi → p
   - **Output AI:** `date`, `vendor`, `amountRupiah`, `categorySuggestion`, `description`, `taxOrFeeWarning`, `confidence`, `needsHumanCheck[]`.
   - **Gate uang:** backend tsc, unit uang, frontend build. UAT: draft tidak membuat jurnal sampai expense disimpan lewat flow existing.
   - **Jangan:** jangan posting expense/jurnal otomatis, jangan simpan OCR mentah panjang kecuali user eksplisit menyimpan catatan.
+  - **Langkah detail:**
+    1. Buat `backend/src/modules/owner-ai/prompts/expense-ocr.prompt.ts` ✨ [NEW]: system prompt untuk normalisasi teks OCR → field expense (date, vendor, amount, category, description).
+    2. Di `OwnerAiService`: tambah method `draftExpenseFromOcr(ocrText, actorId)` → validasi input ≤ `AI_MAX_INPUT_CHARS` → panggil `deepseekChat` → parse JSON → return draft expense.
+    3. Di `OwnerAiController`: tambah `POST /owner-ai/expenses/receipt-draft` → guard OWNER/ADMIN.
+    4. Buat `frontend/src/components/expenses/ExpenseReceiptUpload.tsx` ✨ [NEW]: lazy import `tesseract.js` (pola dari `GuestBookingForm.tsx`) → OCR di browser → tampilkan teks OCR → tombol "Rapikan Draft AI" → panggil endpoint → tampilkan form prefill.
+    5. User edit form → klik "Simpan Expense" → panggil endpoint `POST /expenses` EXISTING (jangan buat endpoint baru untuk simpan).
+    6. JANGAN auto-create expense/jurnal dari AI.
 
 #### G5 — KTP-OCR-VALIDATOR
 
@@ -826,6 +871,12 @@ Evaluasi 4 item dengan format: kondisi saat ini → risiko → rekomendasi → p
   - **Approval:** status KTP/tenant tetap diverifikasi dengan tombol Owner/Admin existing.
   - **PDP:** jangan kirim foto KTP ke DeepSeek. Jangan tampilkan NIK penuh di prompt log. Mask minimal `************1234` di audit.
   - **Gate:** backend tsc bila ada endpoint, frontend build, UAT role + PDP.
+  - **Langkah detail:**
+    1. Buat `backend/src/modules/owner-ai/prompts/ktp-ocr.prompt.ts` ✨ [NEW]: system prompt untuk ekstrak NIK/nama/tglLahir dari teks OCR — JANGAN minta gambar.
+    2. Di `OwnerAiService`: tambah method `validateKtpOcr(ocrText, tenantId, actorId)` → validasi input tidak mengandung base64/image → mask NIK jadi `************1234` di prompt → panggil `deepseekChat` → return normalisasi + match warnings.
+    3. Di `OwnerAiController`: tambah `POST /owner-ai/tenants/:id/ktp-ocr-validate` → guard OWNER/ADMIN.
+    4. Di frontend (cari halaman verifikasi tenant / `StayDetailPage` / `GuestBookingForm`): tambah tombol "Bantu Validasi KTP" — kirim teks OCR (BUKAN gambar) → hasil tampil sebagai checklist warning.
+    5. Verifikasi final tetap tombol Owner/Admin existing — AI TIDAK auto-verify.
 
 #### G6 — OPS-INVENTORY-AI
 
@@ -838,6 +889,13 @@ Evaluasi 4 item dengan format: kondisi saat ini → risiko → rekomendasi → p
   - **Output AI:** `priorityReason`, `suggestedNextStep`, `inventorySuggestions[]`, `draftAdminNote`, `riskWarnings[]`.
   - **Approval:** AI tidak boleh membuat inventory movement, menutup tiket, mengubah status kamar, atau assign staff. Admin/Owner klik action existing.
   - **Gate:** backend tsc, frontend build, UAT STAFF tidak melihat tombol AI.
+  - **Langkah detail:**
+    1. Buat `backend/src/modules/owner-ai/prompts/ops-inventory.prompt.ts` ✨ [NEW]: system prompt untuk 3 domain (tiket / inventory / field-report) — masing-masing dengan JSON schema output.
+    2. Di `OwnerAiService`: tambah 3 method: `draftTicketAction(ticketId, actorId)`, `draftReorder(actorId)`, `reviewFieldReport(reportId, actorId)` → masing-masing query data dari service existing (tickets, inventory-items, inventory-movements, rooms).
+    3. Di `OwnerAiController`: tambah 3 endpoint: `POST /owner-ai/tickets/:id/action-draft`, `POST /owner-ai/inventory/reorder-draft`, `POST /owner-ai/staff-field-reports/:id/review-draft` → guard OWNER/ADMIN.
+    4. Di `frontend/src/pages/tickets/TicketsPage.tsx`: tambah tombol "Saran AI" di ticket detail → tampil rekomendasi, tapi action tetap manual.
+    5. Di `frontend/src/pages/resources/InventoryShellPage.tsx`: tambah tombol "Cek Stok AI" → tampil saran pembelian, tapi movement/purchase tetap manual.
+    6. AI TIDAK membuat inventory movement, menutup tiket, mengubah status kamar, atau assign staff.
 
 #### G7 — AI-SETTINGS-BUDGET-OBSERVABILITY
 
@@ -849,6 +907,12 @@ Evaluasi 4 item dengan format: kondisi saat ini → risiko → rekomendasi → p
   - **UI minimal:** status API key configured, AI enabled flag, manual-only flag, daily request remaining, model default, model finance, last 20 AI audit logs.
   - **Data source:** env + `OperationalSetting` bila sudah ada pola setting. Jika butuh schema baru untuk usage ledger, STOP dan jadikan bagian G9.
   - **Gate:** backend tsc, frontend build, UAT API key tidak pernah tampil di response.
+  - **Langkah detail:**
+    1. Di `OwnerAiService`: tambah method `getUsageStats()` → hitung dari in-memory counter (G0 sudah setup rate-limit per actor) → return `{ todayTotal, byFeature: { feature: count }, remainingDaily }`.
+    2. Di `OwnerAiController`: tambah `GET /owner-ai/usage` → guard OWNER only.
+    3. Di `OwnerAiController`: tambah `POST /owner-ai/test-connection` → panggil `deepseekChat` dengan prompt "OK" (1 token) → return latency + model — guard OWNER only.
+    4. Di `frontend/src/pages/settings/OwnerSettingsPage.tsx`: tambah tab "AI & Biaya" → tampilkan: status API key, AI enabled, model default, model finance, daily limit, remaining, usage by feature, last 20 AI audit logs dari `AuditLog.meta.ai`.
+    5. Pastikan response TIDAK PERNAH mengandung `DEEPSEEK_API_KEY` atau secret apapun.
 
 #### G8 — AI-FAQ-MANUAL-GENERATOR
 
@@ -861,6 +925,12 @@ Evaluasi 4 item dengan format: kondisi saat ini → risiko → rekomendasi → p
   - **Output AI:** `faqItems[]`, `publicCopyDraft`, `tenantManualDraft`, `warnings[]`.
   - **Approval:** draft hanya disalin ke form. Publish/simpan tetap tombol Owner/Admin existing.
   - **Gate:** backend tsc bila ada endpoint, frontend build.
+  - **Langkah detail:**
+    1. Buat `backend/src/modules/owner-ai/prompts/faq.prompt.ts` ✨ [NEW]: system prompt berisi ATURAN BISNIS yang dikurasi manual (dari M02/M04/M05/M06 — hardcode di file prompt, JANGAN baca file MD runtime).
+    2. Di `OwnerAiService`: tambah method `generateFaqDraft(actorId)` → ambil data layanan aktif dari service additional-services → gabung dengan aturan bisnis hardcoded → panggil `deepseekChat` → return `faqItems[]`, `publicCopyDraft`, `tenantManualDraft`.
+    3. Di `OwnerAiController`: tambah `POST /owner-ai/faqs/generate-draft` → guard OWNER only.
+    4. Di frontend halaman FAQ/settings: tambah tombol "Generate Draft FAQ" → hasil tampil sebagai checklist → Owner pilih item → klik "Simpan FAQ terpilih" → panggil endpoint FAQ/settings EXISTING.
+    5. JANGAN auto-overwrite FAQ existing.
 
 #### G9 — AI-DRAFT-QUEUE [SCHEMA] OPSIONAL
 

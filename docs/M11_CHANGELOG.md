@@ -3,6 +3,17 @@
 > Arsip changelog ringkas, dipisah dari M10 pada 2026-06-19 untuk hemat token AI (M10 = checklist aktif saja). **Entri changelog BARU ditulis DI SINI (paling atas)**, bukan di M10. Format: 1 header tanggal + 1-2 poin outcome per entri.
 
 ## Changelog Ringkas
+### 2026-06-19 — G1: Owner Executive Brief
+
+- **G1** POST /owner-ai/brief: service buildBriefSnapshot() query Prisma (rooms, overdue, pending, tickets, meter), generateBrief() dengan deepseekChat json:true, fallback rule-based. Tombol "Buat Brief AI" di OwnerDashboardPage dengan AiResultPanel.
+
+### 2026-06-19 — G0: AI Safety Foundation
+
+- **G0** deepseek.client.ts: upgrade model default ke deepseek-v4-flash, return type DeepseekChatResult (content+model+usage), opsi json:true+thinking, backward compat dengan market-analysis.
+- Modul baru owner-ai/: controller status GET /owner-ai/status, service rate-limit+env guard, hash util stableHash.
+- Frontend: 4 komponen AI (AiCostBadge, AiResultPanel, AiApprovalDrawer, AiSourceSnapshot), API getOwnerAiStatus().
+- Env: tambah 9 var Fase G (AI_FEATURES_ENABLED, AI_MANUAL_ONLY, dll) di .env.production.example.
+
 
 > Dipadatkan dari `docs/CHANGELOG.md`
 
