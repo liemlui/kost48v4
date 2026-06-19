@@ -63,3 +63,8 @@ Thumbs.db
 *.sqlite
 *.sqlite3
 
+# Playwright UAT artifacts
+frontend/test-results/
+frontend/playwright-report/
+frontend/e2e/uat-shots/
+
