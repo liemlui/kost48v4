@@ -34,6 +34,10 @@
 - **UX-LOGIN-FORMAT:** Validasi format login tenant (email vs HP dengan regex).
 - Gate: FE build PASS (0 error), PWA verify PASS.: header tanggal dipertahankan, tiap entry hanya menyimpan 1-2 poin outcome. Detail verbose tetap ada di source lama.
 
+### 2026-06-19 — refactor(efisiensi AI/token): ekstrak helper MyStayPage
+- `MyStayPage.tsx` 1028→902 baris; 15 helper murni (format/fasilitas/inventaris/harga kamar) → `frontend/src/pages/portal/myStayShared.tsx`. Komponen `ActiveStayContent` (stateful) tetap di file utama.
+- Gate: FE `tsc` 0 + build PASS, chunk MyStayPage identik 35.91kB (0 perubahan perilaku). Sisa: monolit stateful (Tickets/Stays/AccountingSetup + backend jalur-uang) di-defer ke refactor per-task.
+
 ### 2026-06-19 — refactor(efisiensi AI/token): decompose PublicGuestDashboardPage
 - `PublicGuestDashboardPage.tsx` 998→639 baris; helpers/konstanta + 5 komponen presentational (Lightbox/GuestTopbar/RoomPreviewCard/RoomPreviewSkeleton/GuestFooter) diekstrak ke `frontend/src/pages/public/publicGuestShared.tsx`.
 - Gate: FE `tsc` 0 + build PASS (PWA verified), chunk ≈identik (0 perubahan perilaku).
