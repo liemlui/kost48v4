@@ -9,6 +9,7 @@ import { EntityBadgeFilterBar, StatusStrip } from '../../components/workspace';
 import ResourceFormModal from '../../components/resources/ResourceFormModal';
 import ResourceTable from '../../components/resources/ResourceTable';
 import ResourceDetailModal from '../../components/resources/ResourceDetailModal';
+import ExpenseReceiptUpload from '../../components/expenses/ExpenseReceiptUpload';
 import {
   canCreateResourceItem,
   canDeleteResourceItem,
@@ -219,6 +220,14 @@ export default function SimpleCrudPage({ config, hideAreaMenu = false }: { confi
     });
   };
 
+  const applyExpenseReceiptDraft = (patch: Record<string, unknown>) => {
+    setEditingItem(null);
+    setFormState({ ...buildInitialState(config), ...patch });
+    setError('');
+    refetchRequiredReferences();
+    setShowModal(true);
+  };
+
   useEffect(() => {
     if (config.path !== '/inventory-movements' || !movementContext) return;
     const params = new URLSearchParams(movementContext);
@@ -404,6 +413,9 @@ export default function SimpleCrudPage({ config, hideAreaMenu = false }: { confi
     }
 
     const payload = normalizeFormDataForSubmit(formState, config.fields);
+    if (config.path === '/expenses' && !editingItem && formState.aiDraftMeta) {
+      payload.aiDraftMeta = formState.aiDraftMeta;
+    }
 
     if (editingItem && !payload.password) {
       delete payload.password;
@@ -542,6 +554,12 @@ export default function SimpleCrudPage({ config, hideAreaMenu = false }: { confi
       />
 
       {error ? <Alert variant="danger">{error}</Alert> : null}
+      {config.path === '/expenses' && (user?.role === 'OWNER' || user?.role === 'ADMIN') ? (
+        <ExpenseReceiptUpload
+          onApplyDraft={applyExpenseReceiptDraft}
+          disabled={saveMutation.isPending}
+        />
+      ) : null}
       {config.path === '/room-items' && user?.role !== 'STAFF' ? (
         <Alert variant="info" className="mb-3">
           Barang kamar dibuat otomatis dari <strong>Mutasi Stok</strong>. Gunakan halaman ini untuk cek posisi dan kondisi.

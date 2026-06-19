@@ -49,16 +49,24 @@ export class ExpensesService {
   }
 
   async create(dto: CreateExpenseDto, actor: CurrentUserPayload) {
-    await this.validateRelations(dto.roomId, dto.stayId);
+    const { aiDraftMeta, ...expenseDto } = dto;
+    await this.validateRelations(expenseDto.roomId, expenseDto.stayId);
     const created = await this.prisma.expense.create({
       data: {
-        ...dto,
+        ...expenseDto,
         status: ExpenseStatus.CONFIRMED as any,
-        expenseDate: new Date(dto.expenseDate),
+        expenseDate: new Date(expenseDto.expenseDate),
         createdById: actor.id,
       },
     });
-    await this.audit.log({ actorUserId: actor.id, action: 'CREATE', entityType: 'Expense', entityId: String(created.id), newData: created });
+    await this.audit.log({
+      actorUserId: actor.id,
+      action: 'CREATE',
+      entityType: 'Expense',
+      entityId: String(created.id),
+      newData: created,
+      meta: this.buildAiDraftAuditMeta(aiDraftMeta),
+    });
     await this.accountingPosting.postExpense(created.id, actor.id).catch(() => undefined);
     return created;
   }
@@ -137,5 +145,25 @@ export class ExpensesService {
       if (!stay) throw new NotFoundException('Stay tidak ditemukan');
       if (roomId && stay.roomId !== Number(roomId)) throw new ConflictException('Relasi room/stay tidak konsisten');
     }
+  }
+
+  private buildAiDraftAuditMeta(aiDraftMeta?: Record<string, unknown>) {
+    if (!aiDraftMeta || typeof aiDraftMeta !== 'object') return undefined;
+    const confidence = Number(aiDraftMeta.confidence);
+    const ai = {
+      feature: 'EXPENSE_OCR_DRAFT',
+      mode: typeof aiDraftMeta.mode === 'string' ? aiDraftMeta.mode : undefined,
+      model: typeof aiDraftMeta.model === 'string' ? aiDraftMeta.model : undefined,
+      promptHash: typeof aiDraftMeta.promptHash === 'string' ? aiDraftMeta.promptHash : undefined,
+      snapshotHash: typeof aiDraftMeta.snapshotHash === 'string' ? aiDraftMeta.snapshotHash : undefined,
+      confidence: Number.isFinite(confidence) ? confidence : undefined,
+      humanDecision: 'CREATE_EXPENSE',
+    } as Record<string, unknown>;
+    Object.keys(ai).forEach((key) => {
+      if (ai[key] === undefined) delete ai[key];
+    });
+    return {
+      ai,
+    };
   }
 }

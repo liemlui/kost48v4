@@ -1,4 +1,4 @@
-import { IsDateString, IsEnum, IsInt, IsOptional, IsString, Min } from 'class-validator';
+import { IsDateString, IsEnum, IsInt, IsObject, IsOptional, IsString, Min } from 'class-validator';
 import { ExpenseCategory, ExpenseStatus, ExpenseType } from '../../../common/enums/app.enums';
 
 export class CreateExpenseDto {
@@ -11,6 +11,7 @@ export class CreateExpenseDto {
   @IsOptional() roomId?: number;
   @IsOptional() stayId?: number;
   @IsOptional() @IsString() note?: string;
+  @IsOptional() @IsObject() aiDraftMeta?: Record<string, unknown>;
 }
 export class UpdateExpenseDto {
   @IsOptional() @IsDateString() expenseDate?: string;
