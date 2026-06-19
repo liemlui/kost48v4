@@ -3,6 +3,10 @@
 > Arsip changelog ringkas, dipisah dari M10 pada 2026-06-19 untuk hemat token AI (M10 = checklist aktif saja). **Entri changelog BARU ditulis DI SINI (paling atas)**, bukan di M10. Format: 1 header tanggal + 1-2 poin outcome per entri.
 
 ## Changelog Ringkas
+### 2026-06-19 — G7: AI Settings, Budget & Observability
+
+- **G7** GET /owner-ai/usage (usage per-fitur in-memory + 20 jejak AuditLog.meta.ai via jsonb_exists) + POST /owner-ai/test-connection (OWNER, latency+model, tanpa bocor API key). Tab "AI & Biaya" di OwnerSettingsPage: status/enabled/manual-only/model/limit, tes koneksi, usage per fitur, jejak keputusan AI.
+
 #### 2026-06-19 — G3: Payment Review Assistant
 
 - **G3** POST /owner-ai/payment-submissions/:id/review-draft: reviewPaymentSubmission() — no-partial deterministic guard BEFORE AI call, snapshot submission+invoice+stay, deepseekChat json:true. Tombol "Bantu Review AI (DeepSeek)" di ReviewPaymentModal.

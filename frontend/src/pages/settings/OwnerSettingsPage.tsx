@@ -10,6 +10,7 @@ import { getApiErrorMessage } from '../../utils/getApiErrorMessage';
 import { listFacilityImages, uploadFacilityImage, deleteFacilityImage } from '../../api/facilityImages';
 import { deleteMarketingAsset, listMarketingAssets, uploadMarketingAsset } from '../../api/marketingAssets';
 import { resolveAbsoluteFileUrl } from '../../utils/resolveAbsoluteFileUrl';
+import { getOwnerAiStatus, getOwnerAiUsage, testOwnerAiConnection } from '../../api/ai';
 
 /* ─── Facility Photos ──────────────────────────────────────────────── */
 
@@ -740,10 +741,130 @@ function TariffSettingsPanel() {
   );
 }
 
+/* ─── AI & Biaya (G7) ──────────────────────────────────────────────── */
+
+const AI_FEATURE_LABELS: Record<string, string> = {
+  brief: 'Brief Owner',
+  finance: 'Analisa Keuangan',
+  'expense-ocr-draft': 'Draft Nota (OCR)',
+  'ktp-ocr': 'Validasi KTP',
+  'payment-review': 'Review Pembayaran',
+  'ticket-action-draft': 'Saran Tiket',
+  'inventory-reorder-draft': 'Saran Stok',
+  'field-report-review-draft': 'Review Lapangan',
+  'test-connection': 'Tes Koneksi',
+};
+const aiFeatureLabel = (k: string) => AI_FEATURE_LABELS[k] ?? k;
+
+function AiSettingsPanel() {
+  const statusQuery = useQuery({ queryKey: ['owner-ai', 'status'], queryFn: getOwnerAiStatus });
+  const usageQuery = useQuery({ queryKey: ['owner-ai', 'usage'], queryFn: getOwnerAiUsage });
+  const testMutation = useMutation({ mutationFn: testOwnerAiConnection });
+
+  const s = statusQuery.data;
+  const u = usageQuery.data;
+  const yesNo = (v?: boolean) => (v ? <Badge bg="success">Ya</Badge> : <Badge bg="secondary">Tidak</Badge>);
+
+  return (
+    <div>
+      <div className="mb-3">
+        <h3 className="h5 mb-0">AI &amp; Biaya</h3>
+        <small className="text-muted">
+          Status DeepSeek, batas harian, penggunaan, dan jejak keputusan yang memakai AI. Semua AI manual &amp; perlu persetujuan manusia.
+        </small>
+      </div>
+
+      {statusQuery.isLoading ? (
+        <div className="py-3 text-muted"><Spinner animation="border" size="sm" className="me-2" />Memuat status AI…</div>
+      ) : s ? (
+        <Card className="content-card border-0 mb-3">
+          <Card.Body>
+            <Row className="g-3">
+              <Col md={4}><div className="small text-muted">API Key</div>{s.configured ? <Badge bg="success">Terkonfigurasi</Badge> : <Badge bg="warning" text="dark">Belum diset</Badge>}</Col>
+              <Col md={4}><div className="small text-muted">Fitur AI aktif</div>{yesNo(s.enabled)}</Col>
+              <Col md={4}><div className="small text-muted">Manual-only</div>{yesNo(s.manualOnly)}</Col>
+              <Col md={4}><div className="small text-muted">Hanya OWNER/ADMIN</div>{yesNo(s.ownerAdminOnly)}</Col>
+              <Col md={4}><div className="small text-muted">Model default</div><code>{s.defaultModel}</code></Col>
+              <Col md={4}><div className="small text-muted">Model finance</div><code>{s.financeModel}</code></Col>
+              <Col md={4}><div className="small text-muted">Limit harian</div>{s.dailyLimit}</Col>
+              <Col md={4}><div className="small text-muted">Sisa hari ini</div>{u?.remainingDaily ?? s.dailyRemaining}</Col>
+              <Col md={4}><div className="small text-muted">Terpakai hari ini</div>{u?.todayTotal ?? 0}</Col>
+            </Row>
+            <hr />
+            <div className="d-flex align-items-center gap-2 flex-wrap">
+              <Button size="sm" onClick={() => testMutation.mutate()} disabled={testMutation.isPending || !s.configured}>
+                {testMutation.isPending ? <><Spinner animation="border" size="sm" className="me-2" />Menguji…</> : 'Tes Koneksi DeepSeek'}
+              </Button>
+              {testMutation.data ? (
+                <span className={`small ${testMutation.data.ok ? 'text-success' : 'text-danger'}`}>
+                  {testMutation.data.ok ? `✅ ${testMutation.data.message} (${testMutation.data.latencyMs} ms, ${testMutation.data.model})` : `⚠️ ${testMutation.data.message}`}
+                </span>
+              ) : null}
+              {!s.configured ? <span className="small text-muted">Set <code>DEEPSEEK_API_KEY</code> di backend/.env untuk mengaktifkan.</span> : null}
+            </div>
+          </Card.Body>
+        </Card>
+      ) : (
+        <Alert variant="warning">Gagal memuat status AI.</Alert>
+      )}
+
+      <Row className="g-3">
+        <Col md={5}>
+          <Card className="content-card border-0 h-100">
+            <Card.Body>
+              <div className="fw-semibold mb-2">Penggunaan hari ini (per fitur)</div>
+              {u && Object.keys(u.byFeature).length ? (
+                <ul className="list-unstyled mb-0 small">
+                  {Object.entries(u.byFeature).sort((a, b) => b[1] - a[1]).map(([k, v]) => (
+                    <li key={k} className="d-flex justify-content-between border-bottom py-1">
+                      <span>{aiFeatureLabel(k)}</span><span className="fw-semibold">{v}</span>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <div className="text-muted small">Belum ada penggunaan AI hari ini.</div>
+              )}
+            </Card.Body>
+          </Card>
+        </Col>
+        <Col md={7}>
+          <Card className="content-card border-0 h-100">
+            <Card.Body>
+              <div className="fw-semibold mb-2">Jejak keputusan memakai AI (20 terakhir)</div>
+              {usageQuery.isLoading ? (
+                <div className="text-muted small"><Spinner animation="border" size="sm" className="me-2" />Memuat…</div>
+              ) : u && u.recentAudit.length ? (
+                <div className="d-grid gap-2">
+                  {u.recentAudit.map((a) => (
+                    <div key={a.id} className="border rounded p-2 small">
+                      <div className="d-flex justify-content-between">
+                        <span className="fw-semibold">{a.ai?.feature ? aiFeatureLabel(a.ai.feature) : a.action}</span>
+                        <span className="text-muted">{new Date(a.createdAt).toLocaleString('id-ID')}</span>
+                      </div>
+                      <div className="text-muted">
+                        {a.action} · {a.entityType}{a.entityId ? ` #${a.entityId}` : ''}{a.actorName ? ` · oleh ${a.actorName}` : ''}
+                        {a.ai?.humanDecision ? ` · ${a.ai.humanDecision}` : ''}
+                        {a.ai?.model ? ` · ${a.ai.model}` : ''}
+                        {a.ai?.confidence != null ? ` · keyakinan ${Math.round(a.ai.confidence * 100)}%` : ''}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-muted small">Belum ada keputusan yang memakai AI. (Tercatat saat manusia menyetujui hasil AI.)</div>
+              )}
+            </Card.Body>
+          </Card>
+        </Col>
+      </Row>
+    </div>
+  );
+}
+
 export default function OwnerSettingsPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const tabParam = searchParams.get('tab');
-  const validTabs = new Set(['faq', 'photos', 'facility-photos', 'marketing-assets', 'tarif']);
+  const validTabs = new Set(['faq', 'photos', 'facility-photos', 'marketing-assets', 'tarif', 'ai']);
   const activeTab = tabParam && validTabs.has(tabParam) ? tabParam : 'faq';
 
   return (
@@ -776,6 +897,9 @@ export default function OwnerSettingsPage() {
         </Tab>
         <Tab eventKey="tarif" title="Tarif & Konstanta">
           <TariffSettingsPanel />
+        </Tab>
+        <Tab eventKey="ai" title="AI & Biaya">
+          <AiSettingsPanel />
         </Tab>
       </Tabs>
     </div>

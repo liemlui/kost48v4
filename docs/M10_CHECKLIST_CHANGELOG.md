@@ -899,7 +899,7 @@ Evaluasi 4 item dengan format: kondisi saat ini → risiko → rekomendasi → p
 
 #### G7 — AI-SETTINGS-BUDGET-OBSERVABILITY
 
-- [ ] **G7 / AI-SETTINGS-BUDGET:** halaman setting dan observability biaya AI.
+- [x] **G7 / AI-SETTINGS-BUDGET:** halaman setting dan observability biaya AI. **SELESAI 2026-06-19** — `getUsageStats()` (per-feature in-memory) + `recentAiAudit()` (AuditLog.meta.ai via jsonb_exists) + `getUsageOverview()`; `GET /owner-ai/usage` & `POST /owner-ai/test-connection` (OWNER only, latency+model, tanpa bocor API key). Tab "AI & Biaya" di OwnerSettingsPage: status (configured/enabled/manual-only/model/limit), tes koneksi, usage per fitur, 20 jejak audit AI terakhir. Gate: backend tsc 0, frontend tsc 0, build lulus.
   - **Tujuan:** Owner tahu AI aktif/tidak, model, limit harian, estimasi penggunaan, dan fitur mana yang paling sering dipakai.
   - **Rujukan:** `docs/M12_AI_OWNER_ADMIN.md` G7, `docs/M08_DEPLOY_GO_LIVE.md`, `docs/M09_AUDIT.md`.
   - **Anchor backend:** `settings.service.ts`, `audit-log`, `owner-ai/status`.
