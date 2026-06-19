@@ -8,6 +8,9 @@ import { AssistantPanel, ActionQueueTable, type ActionQueueItem, type AssistantI
 import { AssistantInsightLine, EntityBadgeFilterBar } from '../../components/workspace';
 import AutoOpsControlPanel from '../../components/auto-ops/AutoOpsControlPanel';
 import SmartChartPanel, { type SmartChartPoint } from '../../components/charts/SmartChartPanel';
+import { generateBrief, getOwnerAiStatus, type BriefResult } from '../../api/ai';
+import AiAssistButton from '../../components/ai/AiAssistButton';
+import AiResultPanel from '../../components/ai/AiResultPanel';
 import { listResource, postAction } from '../../api/resources';
 import { listAdminRenewRequests } from '../../api/renewRequests';
 import { listAdminCheckoutRequests } from '../../api/checkoutRequests';
@@ -356,6 +359,8 @@ export default function AdminDashboard() {
   const paymentReviewQuery = useQuery({ queryKey: ['dashboard-admin', 'payment-review', activeArea], queryFn: () => listPaymentReviewQueue({ limit: isOverview ? 25 : 15 }), enabled: needsFinanceData, ...ACTION_QUERY_OPTIONS });
   const staffPerformanceQuery = useQuery({ queryKey: ['dashboard-admin', 'staff-performance', activeArea], queryFn: () => fetchAdminStaffPerformance(), enabled: needsStaffPerformanceData, ...MEDIUM_FRESH_QUERY_OPTIONS });
   const autoOpsQuery = useQuery({ queryKey: ['dashboard-admin', 'auto-ops-status', activeArea], queryFn: fetchAutoOpsStatus, enabled: needsAutoOpsData, ...ACTION_QUERY_OPTIONS });
+  // H4: status AI untuk conditional render AiAssistButton di area overview
+  const aiStatusQuery = useQuery({ queryKey: ['owner-ai-status'], queryFn: getOwnerAiStatus, staleTime: 300_000, retry: 1 });
 
   const rooms = roomsQuery.data?.items ?? [];
   const inventoryItems = inventoryItemsQuery.data?.items ?? [];
@@ -499,6 +504,37 @@ export default function AdminDashboard() {
       />
       {supportQueriesLoading ? <Alert variant="info" className="admin-support-loading-note">Data pendukung sedang dimuat. Dashboard utama tetap bisa dipakai.</Alert> : null}
       {activeArea === 'overview' ? <AdminOperationsCommandQueue lanes={adminWorkLanes} assistantItems={adminAssistantItems} metrics={adminHealthMetrics} topQueueItem={topQueueItem} queueItems={queueItems} onNavigate={navigate} /> : null}
+      {/* H4: Brief AI untuk admin — hanya muncul jika API key dikonfigurasi & area overview */}
+      {activeArea === 'overview' && aiStatusQuery.data?.configured ? (
+        <section className="owner-panel mt-3 mb-3">
+          <div className="owner-panel-heading p-3">
+            <div><span className="owner-section-kicker">Bantuan AI</span><h2 className="mb-0">Brief Admin</h2></div>
+          </div>
+          <div className="owner-panel-body p-3">
+            <AiAssistButton<BriefResult>
+              label="Buat Brief AI"
+              loadingLabel="Menganalisa dengan AI..."
+              variant="outline-primary"
+              run={generateBrief}
+              renderResult={(result) => (
+                <AiResultPanel title="Brief Admin" mode={result.mode} fallback={result.fallback} warnings={result.warnings} missingData={result.missingData} usage={result.usage} model={result.model}>
+                  <p className="fw-medium mb-2">{result.result?.summary}</p>
+                  {result.result?.priorityActions?.length > 0 ? (
+                    <ul className="mb-0 ps-3">
+                      {result.result.priorityActions.map((a, i) => (
+                        <li key={i} className="small">
+                          <span className={`badge bg-${a.severity === 'CRITICAL' ? 'danger' : a.severity === 'HIGH' ? 'warning' : a.severity === 'MEDIUM' ? 'info' : 'secondary'} me-1`}>{a.severity}</span>
+                          {a.title} — {a.reason}
+                        </li>
+                      ))}
+                    </ul>
+                  ) : null}
+                </AiResultPanel>
+              )}
+            />
+          </div>
+        </section>
+      ) : null}
       {activeArea !== 'overview' ? <AdminAreaInternalMenu title={`Menu ${activeAreaConfig.label}`} items={activeAreaMenuItems} onNavigate={navigate} /> : null}
       {activeArea === 'overview' ? <AdminTodayStatusStrip rooms={rooms} inventoryItems={inventoryItems} invoices={invoices} tickets={tickets} pendingPaymentReviewCount={pendingPaymentReviewCount} pendingApprovalCount={pendingApprovalCount} pendingRenewCount={pendingRenewCount} checkoutCount={pendingCheckoutRequestCount + approvedCheckoutRequestCount} /> : null}
       {activeArea === 'stays-finance' ? <AdminProcessLine /> : null}

@@ -3,6 +3,11 @@
 > Arsip changelog ringkas, dipisah dari M10 pada 2026-06-19 untuk hemat token AI (M10 = checklist aktif saja). **Entri changelog BARU ditulis DI SINI (paling atas)**, bukan di M10. Format: 1 header tanggal + 1-2 poin outcome per entri.
 
 ## Changelog Ringkas
+### 2026-06-20 — ui(Fase H H4+H5): unifikasi AI panel + compact Owner Dashboard
+- **ui(H4):** `AiAssistButton` (`generateBrief`) ditambah di `DashboardAdmin.tsx` area overview — conditional bila API key `configured` (`aiStatusQuery`). `AssistantPanel` sinyal (`ownerAssistantItems` dari `data.signals`) ditambah di `OwnerDashboardPage.tsx` di bawah KPI cards.
+- **ui(H5):** tren chart `.owner-trend-panel` dibungkus `{viewMode === 'full' ? ... : null}` (disembunyikan di mode Ringkas). 3 quick-action buttons "Buka Laporan / Buka Area Admin / Analisa Pasar" ditambah setelah row sinyal.
+- **Gate:** `frontend npm run build` PASS (39 s, 115 chunks, PWA verify OK). Backend tidak disentuh.
+
 ### 2026-06-20 — ui(Fase H): compact Owner↔Admin (H1–H5 per M13) SELESAI
 - **ui(H1):** sidebar Kokpit Owner 18→7 item, 1 grup "Keputusan Owner" (`navigation.ts`). Tanpa hilang fitur: `/loss-refunds` (Refund Kalah-Cepat, OWNER-only) + `/finance/assets` digabung ke `activePaths` "Akuntansi & Aset"; `/users`+`/tenants`+`/additional-services`+`/service-interests` digabung ke "Akun & Layanan". Pengumuman pindah ke tombol 📣 topbar (kondisi `isAdmin||isOwner`, `AppLayout.tsx`).
 - **ui(H2):** dashboard admin 6→3 area — Ringkasan·Penghuni&Uang·Operasional (`DashboardAdmin.tsx`: type/areas/normalize/match/needs*/queries/menu/charts/JSX; `RoleWorkspaceTabs.tsx`: buildAdminTabs + OWNER_TABS jadi 3, match mencakup semua route). H3 (merge Minat→Layanan) & H4 (hapus dup finance) selesai otomatis via H1. H5 polish: `@media 480px .role-workspace-tabs` (`12-owner.css`).

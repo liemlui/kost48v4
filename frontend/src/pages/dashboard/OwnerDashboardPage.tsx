@@ -22,6 +22,7 @@ import type { MeterReading } from '../../types';
 import { createBusinessNarrative, generateBrief, type BriefResult } from '../../api/ai';
 import AiAssistButton from '../../components/ai/AiAssistButton';
 import AiResultPanel from '../../components/ai/AiResultPanel';
+import { AssistantPanel, sortAssistantItems, type AssistantItem } from '../../components/command-center';
 
 const MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
@@ -375,6 +376,19 @@ export default function OwnerDashboardPage() {
     ];
   }, [data, meterDueQuery.data, meterDueQuery.isLoading, meterDueQuery.isError, readinessQuery.data, readinessQuery.isLoading, readinessQuery.isError]);
 
+  // H4: item urgent dari signals untuk AssistantPanel di bawah KPI cards.
+  const ownerAssistantItems: AssistantItem[] = useMemo(() => {
+    if (!data) return [];
+    const items: AssistantItem[] = [];
+    const overdue = data.signals.find((s) => s.type === 'overdue');
+    const pending = data.signals.find((s) => s.type === 'pending_payment');
+    const outstanding = data.signals.find((s) => s.type === 'outstanding');
+    if (overdue?.count) items.push({ id: 'owner-overdue', severity: 'HIGH', title: 'Tagihan overdue', message: `${overdue.count} tagihan melewati jatuh tempo (Rp ${formatRupiah(overdue.totalRupiah ?? 0)}).`, count: overdue.count, actionLabel: 'Lihat Tagihan', actionTo: '/invoices', dedupKey: 'owner-overdue' });
+    if (pending?.count) items.push({ id: 'owner-pending', severity: 'MEDIUM', title: 'Pembayaran pending review', message: `${pending.count} bukti bayar tenant perlu diputuskan admin.`, count: pending.count, actionLabel: 'Review Pembayaran', actionTo: '/payment-submissions/review', dedupKey: 'owner-pending' });
+    if (outstanding?.count) items.push({ id: 'owner-outstanding', severity: 'INFO', title: 'Tagihan outstanding', message: `${outstanding.count} tagihan masih terbuka dan perlu dipantau.`, count: outstanding.count, actionLabel: 'Pantau Tagihan', actionTo: '/invoices', dedupKey: 'owner-outstanding' });
+    return sortAssistantItems(items);
+  }, [data]);
+
   const handleChange = (field: 'year' | 'month', val: string) => {
     const num = parseInt(val, 10);
     if (!isNaN(num)) setYm((prev) => ({ ...prev, [field]: num }));
@@ -465,6 +479,19 @@ export default function OwnerDashboardPage() {
             </Col>
           </Row>
 
+          {/* H4: AssistantPanel sinyal urgent — hanya tampil bila ada item */}
+          {ownerAssistantItems.length > 0 ? (
+            <AssistantPanel
+              title="Sinyal Operasional"
+              subtitle="Aksi prioritas dari data keuangan dan operasional bisnis."
+              items={ownerAssistantItems}
+              emptyTitle="Tidak ada sinyal urgent"
+              emptyMessage="Semua flow keuangan dan operasional aman."
+              maxItems={4}
+              collapsible={false}
+            />
+          ) : null}
+
           <Row className="g-3 mb-3">
             <Col lg={7}>
               <section className="owner-panel h-100">
@@ -538,6 +565,13 @@ export default function OwnerDashboardPage() {
             </Col>
           </Row>
 
+          {/* H5: Quick-action buttons — tampil di semua mode (compact & full) */}
+          <div className="d-flex gap-2 flex-wrap mb-3">
+            <Button size="sm" variant="outline-primary" onClick={() => navigate('/reports')}>📊 Buka Laporan</Button>
+            <Button size="sm" variant="outline-secondary" onClick={() => navigate('/admin-dashboard')}>🛠️ Buka Area Admin</Button>
+            <Button size="sm" variant="outline-info" onClick={() => navigate('/market-analysis')}>🧭 Analisa Pasar</Button>
+          </div>
+
           {/* G1: Owner Executive Brief AI */}
           <Row className="mb-3">
             <Col xs={12}>
@@ -603,6 +637,8 @@ export default function OwnerDashboardPage() {
             </Col>
           </Row>
 
+          {/* H5: tren chart hanya tampil di mode Lengkap — compact mode menyembunyikan ini */}
+          {viewMode === 'full' ? (
           <section className="owner-panel owner-trend-panel mb-3">
             <div className="owner-panel-heading owner-trend-heading">
               <div>
@@ -640,6 +676,7 @@ export default function OwnerDashboardPage() {
               </div>
             </div>
           </section>
+          ) : null}
         </>
       ) : null}
     </Container>

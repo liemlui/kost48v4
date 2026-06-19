@@ -1042,7 +1042,7 @@ Evaluasi 4 item dengan format: kondisi saat ini → risiko → rekomendasi → p
 
 **JANGAN:** hapus route `/service-interests`, hapus `ServiceInterestsPage`, atau ubah backend.
 
-#### H4 — Unifikasi AI Panel (Owner + Admin) [ ]  ← DI-DEFER (di luar scope M13; Keputusan #5 M13: AI panel admin TIDAK diubah — biaya AI, owner belum minta). Catatan: "H4" versi M13 = "hapus duplikat finance" yang otomatis selesai via H1.
+#### H4 — Unifikasi AI Panel (Owner + Admin) [x]  ← SELESAI 2026-06-20 (AiAssistButton di DashboardAdmin overview + AssistantPanel sinyal di OwnerDashboard bawah KPI; keduanya conditional — tidak memaksa AI selalu tampil)
 
 **Target:** `frontend/src/pages/dashboard/OwnerDashboardPage.tsx` + `frontend/src/pages/dashboard/DashboardAdmin.tsx`.
 
@@ -1060,7 +1060,7 @@ Evaluasi 4 item dengan format: kondisi saat ini → risiko → rekomendasi → p
 
 **JANGAN:** hapus `AssistantPanel`, ganti endpoint AI, atau ubah backend.
 
-#### H5 — Owner Dashboard: Kurangi Full-Page, Jadi Landing Strategis [ ]  ← DI-DEFER (di luar scope M13; OwnerDashboard tetap penuh). Catatan: "H5" versi M13 = "polish breadcrumb & responsive tab" yang SUDAH SELESAI (CSS @media 480px di 12-owner.css).
+#### H5 — Owner Dashboard: Kurangi Full-Page, Jadi Landing Strategis [x]  ← SELESAI 2026-06-20 (tren chart `.owner-trend-panel` disembunyikan di mode Ringkas; 3 quick-action buttons "Buka Laporan / Buka Area Admin / Analisa Pasar" ditambah setelah sinyal; OwnerDashboardPage.tsx)
 
 **Target:** `frontend/src/pages/dashboard/OwnerDashboardPage.tsx`.
 
