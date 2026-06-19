@@ -3,15 +3,6 @@
 > Arsip changelog ringkas, dipisah dari M10 pada 2026-06-19 untuk hemat token AI (M10 = checklist aktif saja). **Entri changelog BARU ditulis DI SINI (paling atas)**, bukan di M10. Format: 1 header tanggal + 1-2 poin outcome per entri.
 
 ## Changelog Ringkas
-#### 2026-06-19 — G3: Payment Review Assistant
-
-- **G3** POST /owner-ai/payment-submissions/:id/review-draft: reviewPaymentSubmission() — no-partial deterministic guard BEFORE AI call, snapshot submission+invoice+stay, deepseekChat json:true. Tombol "Bantu Review AI (DeepSeek)" di ReviewPaymentModal.
-
-## 2026-06-19 - G6: Ops & Inventory AI Draft
-
-- **G6** POST `/owner-ai/tickets/:id/action-draft`, `/owner-ai/inventory/reorder-draft`, dan `/owner-ai/staff-field-reports/:id/review-draft`: snapshot operasional read-only, prompt ops-inventory, normalisasi schema, dan fallback rule-based. Tidak assign staf, tidak close tiket, tidak membuat movement/purchase/expense.
-- Frontend: tombol "Saran AI" di detail tiket Owner/Admin dan "Cek Stok AI" di shell inventaris; hasil tampil di `AiResultPanel`, aksi final tetap lewat tombol existing.
-
 ### 2026-06-19 — Demografi Customer (teranonim, marketing)
 
 - **Demografi** GET /market-analysis/demographics (OWNER/ADMIN): `demographicsSnapshot()` agregat TERANONIM dari Tenant (rentang usia dari birthDate, gender, top 10 provinsi/kota asal, top 10 pekerjaan) + coverage — tanpa NIK/nama/alamat (UU PDP, keputusan owner). Tab "Demografi Customer" di MarketAnalysisPage (`DemographicsPanel.tsx`).

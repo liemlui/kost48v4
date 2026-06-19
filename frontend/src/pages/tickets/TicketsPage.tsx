@@ -20,11 +20,9 @@ import StatusBadge from "../../components/common/StatusBadge";
 import CameraOrGalleryInput from "../../components/common/CameraOrGalleryInput";
 import SafeImage from "../../components/common/SafeImage";
 import AdminStaffFieldReportQueue from "../../components/staff/AdminStaffFieldReportQueue";
-import AiResultPanel from "../../components/ai/AiResultPanel";
 import { inventoryItemFinalStatusOptions, roomItemFinalStatusOptions } from "../../constants/staffRepairOptions";
 import { listResource, postAction } from "../../api/resources";
 import { uploadTicketImage } from "../../api/mediaUploads";
-import { draftTicketAction, type TicketActionDraftResult } from "../../api/ai";
 import { useAuth } from "../../context/AuthContext";
 import {
   type TicketItem,
@@ -166,8 +164,6 @@ export default function TicketsPage() {
   const [page, setPage] = useState(1);
   const [doneTicket, setDoneTicket] = useState<TicketItem | null>(null);
   const [detailTicket, setDetailTicket] = useState<TicketItem | null>(null);
-  const [ticketAiResult, setTicketAiResult] = useState<TicketActionDraftResult | null>(null);
-  const [ticketAiError, setTicketAiError] = useState("");
   const [resolutionNote, setResolutionNote] = useState("Sudah dikerjakan");
   const [resolutionImageMeta, setResolutionImageMeta] = useState<any>(null);
   const [resolutionPreview, setResolutionPreview] = useState<string | null>(
@@ -220,18 +216,6 @@ export default function TicketsPage() {
       await queryClient.invalidateQueries({ queryKey: ['tickets'] });
       setShowCreateTicket(false);
       setCreateForm({ category: 'KEBERSIHAN', title: '', description: '', assignedToId: '', fromLocation: '', toLocation: '', itemName: '', itemQty: '' });
-    },
-  });
-
-  const ticketAiMutation = useMutation({
-    mutationFn: (ticketId: number) => draftTicketAction(ticketId),
-    onSuccess: (result) => {
-      setTicketAiResult(result);
-      setTicketAiError("");
-    },
-    onError: (err: any) => {
-      setTicketAiResult(null);
-      setTicketAiError(err?.response?.data?.message || err?.message || "Gagal meminta saran AI.");
     },
   });
 
@@ -341,12 +325,6 @@ export default function TicketsPage() {
       setCloseSubmitAttempted(false);
     }
   }, [closeTicket?.id]);
-
-  useEffect(() => {
-    setTicketAiResult(null);
-    setTicketAiError("");
-    ticketAiMutation.reset();
-  }, [detailTicket?.id]);
 
   const isClosingCheckoutInspection =
     String(closeTicket?.category ?? "").toUpperCase() === "CHECKOUT_INSPECTION";
@@ -964,54 +942,6 @@ export default function TicketsPage() {
               <p className="text-muted mb-0">
                 {detailTicket.description || "Tidak ada deskripsi tambahan."}
               </p>
-              {canAssign ? (
-                <div className="mt-3">
-                  <Button
-                    size="sm"
-                    variant="outline-primary"
-                    disabled={ticketAiMutation.isPending}
-                    onClick={() => ticketAiMutation.mutate(detailTicket.id)}
-                  >
-                    {ticketAiMutation.isPending ? "Meminta saran..." : "Saran AI"}
-                  </Button>
-                  {ticketAiError ? (
-                    <Alert variant="danger" className="py-2 px-3 mt-2 mb-0 small">
-                      {ticketAiError}
-                    </Alert>
-                  ) : null}
-                  {ticketAiResult ? (
-                    <AiResultPanel
-                      title="Saran AI Operasional"
-                      mode={ticketAiResult.mode}
-                      fallback={ticketAiResult.fallback}
-                      warnings={ticketAiResult.warnings}
-                      missingData={ticketAiResult.missingData}
-                      usage={ticketAiResult.usage}
-                      model={ticketAiResult.model}
-                    >
-                      <div className="mb-2">
-                        <strong>Ringkasan:</strong> {ticketAiResult.result.summary}
-                      </div>
-                      <div className="mb-2">
-                        <strong>Aksi:</strong> {ticketAiResult.result.recommendedAction}
-                        <span className="ms-2 badge bg-light text-dark border">
-                          {ticketAiResult.result.priority}
-                        </span>
-                      </div>
-                      <div className="mb-2">
-                        <strong>Catatan:</strong> {ticketAiResult.result.suggestedNote}
-                      </div>
-                      {ticketAiResult.result.riskFlags.length ? (
-                        <ul className="mb-0 ps-3">
-                          {ticketAiResult.result.riskFlags.map((flag) => (
-                            <li key={flag}>{flag}</li>
-                          ))}
-                        </ul>
-                      ) : null}
-                    </AiResultPanel>
-                  ) : null}
-                </div>
-              ) : null}
             </>
           ) : null}
         </Modal.Body>

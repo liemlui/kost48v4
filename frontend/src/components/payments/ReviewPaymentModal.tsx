@@ -7,7 +7,7 @@ import SafeImage from '../common/SafeImage';
 import type { PaymentSubmission } from '../../types';
 import { resolveAbsoluteFileUrl } from '../../utils/resolveAbsoluteFileUrl';
 import AiAssistButton from '../ai/AiAssistButton';
-import { analyzePaymentProof, type PaymentProofAiResult, reviewPaymentSubmission, type PaymentReviewResult } from '../../api/ai';
+import { analyzePaymentProof, type PaymentProofAiResult } from '../../api/ai';
 import { addHoursToDate, formatDateTimeWib, getDeadlineMeta } from '../../utils/dateTime';
 import {
   getPaymentReviewSafety,

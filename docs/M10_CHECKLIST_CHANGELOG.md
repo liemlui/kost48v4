@@ -823,7 +823,7 @@ Evaluasi 4 item dengan format: kondisi saat ini → risiko → rekomendasi → p
 
 #### G3 — PAYMENT-REVIEW-AI
 
-- [x] **G3 / PAYMENT-REVIEW-AI:** asisten review bukti pembayaran untuk Admin/Owner.
+- [ ] **G3 / PAYMENT-REVIEW-AI:** asisten review bukti pembayaran untuk Admin/Owner.
   - **Tujuan:** di modal review pembayaran, Admin menekan "Bantu Review AI"; AI memberi rekomendasi `APPROVE`, `REJECT`, atau `ASK_MORE_INFO`.
   - **Rujukan:** `docs/M12_AI_OWNER_ADMIN.md` G3, `docs/M04_KEUANGAN.md`, `docs/M05_SIKLUS_HUNI.md`.
   - **Anchor backend:** `backend/src/modules/payment-submissions/` 🔒 [READ-ONLY, baca data saja] · `backend/src/modules/ai/ai.service.ts` 🔒 [READ-ONLY, `analyzePaymentProof` rule-based existing — JANGAN diedit, buat versi DeepSeek BARU di `owner-ai/`] · `invoice-payments.service.ts` 🔒 [READ-ONLY, baca data saja].
@@ -886,7 +886,7 @@ Evaluasi 4 item dengan format: kondisi saat ini → risiko → rekomendasi → p
   - **Anchor backend:** `backend/src/modules/tickets/`, `backend/src/modules/inventory-items/`, `backend/src/modules/inventory-movements/`, `backend/src/modules/rooms/`.
   - **Anchor frontend:** `frontend/src/pages/tickets/TicketsPage.tsx`, `frontend/src/pages/resources/InventoryShellPage.tsx`, resource detail modal.
   - **Snapshot minimal:** ticket id/type/priority/status/age, room code, related facility, stock summary by category, recent movements. Jangan kirim catatan tenant panjang kecuali relevan.
-  - **Output AI:** tiket `{ summary, recommendedAction, priority, suggestedNote, riskFlags[] }`; stok `{ lowStockItems[], purchaseSuggestions[], warnings[] }`; laporan staf `{ summary, recommendedDecision, priority, suggestedAdminNote, suggestedMovement, riskFlags[] }`.
+  - **Output AI:** `priorityReason`, `suggestedNextStep`, `inventorySuggestions[]`, `draftAdminNote`, `riskWarnings[]`.
   - **Approval:** AI tidak boleh membuat inventory movement, menutup tiket, mengubah status kamar, atau assign staff. Admin/Owner klik action existing.
   - **Gate:** backend tsc, frontend build, UAT STAFF tidak melihat tombol AI.
   - **Langkah detail:**
