@@ -130,6 +130,24 @@ export async function reviewPaymentSubmission(submissionId: number) {
   return response.data.data;
 }
 
+
+export type FaqDraftResult = {
+  mode: string;
+  fallback: boolean;
+  warnings: string[];
+  result: {
+    items: Array<{ category: string; question: string; answer: string; sortOrder: number }>;
+    publicCopyDraft: string;
+    tenantManualDraft: string;
+  };
+  usage?: { total_tokens?: number };
+};
+
+export async function generateFaqDraft() {
+  const response = await client.post<ApiEnvelope<FaqDraftResult>>('/owner-ai/faqs/generate-draft');
+  return response.data.data;
+}
+
 export async function analyzeFinance() {
   const response = await client.post<ApiEnvelope<FinanceResult>>('/owner-ai/finance/analyze');
   return response.data.data;

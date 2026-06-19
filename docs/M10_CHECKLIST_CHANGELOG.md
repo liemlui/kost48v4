@@ -916,7 +916,7 @@ Evaluasi 4 item dengan format: kondisi saat ini → risiko → rekomendasi → p
 
 #### G8 — AI-FAQ-MANUAL-GENERATOR
 
-- [ ] **G8 / AI-FAQ-MANUAL-GENERATOR:** generator draft FAQ/manual publik/tenant dari data sistem.
+- [x] **G8 / AI-FAQ-MANUAL-GENERATOR:** generator draft FAQ/manual publik/tenant dari data sistem.
   - **Tujuan:** Owner/Admin menekan tombol untuk membuat draft FAQ, copy layanan, atau ringkasan aturan berdasarkan setting dan data layanan existing.
   - **Rujukan:** `docs/M12_AI_OWNER_ADMIN.md` G8, `docs/M07_PUBLIK_GROWTH.md`, `docs/M05_SIKLUS_HUNI.md`.
   - **Anchor backend:** `settings`, `additional-services`, `public/marketing` modules.

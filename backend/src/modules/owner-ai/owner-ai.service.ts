@@ -6,6 +6,7 @@ import { stableHash } from './ai-snapshot-hash.util';
 import { buildBriefPrompt } from './prompts/brief.prompt';
 import { buildFinancePrompt } from './prompts/finance.prompt';
 import { buildPaymentReviewPrompt } from './prompts/payment-review.prompt';
+import { buildFaqPrompt } from './prompts/faq.prompt';
 import { buildExpenseOcrPrompt } from './prompts/expense-ocr.prompt';
 import { buildKtpOcrPrompt } from './prompts/ktp-ocr.prompt';
 import {
@@ -1205,6 +1206,46 @@ export class OwnerAiService {
       },
       missingData: [], snapshotHash,
     };
+  }
+
+  // ---- G8: FAQ Generator ----------------------------------------------------
+
+  async generateFaqDraft(actorId: number) {
+    this.checkRateLimit(actorId, 'faq-generate');
+    const layanan = await this.prisma.additionalService.findMany({
+      where: { isActive: true },
+      select: { name: true, description: true },
+    });
+    const messages = buildFaqPrompt(layanan.map(l => ({ name: l.name, description: l.description || undefined })));
+
+    const promptHash = stableHash(messages.map(m => m.content).join('|'));
+
+    if (!deepseekConfigured() || process.env.AI_FEATURES_ENABLED !== 'true') {
+      return {
+        mode: 'RULE_FALLBACK', fallback: true, promptHash,
+        warnings: ['AI tidak dikonfigurasi'],
+        result: { items: [], publicCopyDraft: '', tenantManualDraft: 'Aturan KOST48: DP 30%, deposit jaminan, no-partial.', warnings: [] },
+        missingData: [],
+      };
+    }
+
+    try {
+      const result = await deepseekChat(messages, { json: true, temperature: 0.3 });
+      const parsed = JSON.parse(result.content);
+      return {
+        mode: 'DEEPSEEK', model: result.model, usage: result.usage,
+        promptHash, snapshotHash: '',
+        fallback: false, warnings: parsed.warnings || [],
+        result: parsed, missingData: [],
+      };
+    } catch (err: any) {
+      return {
+        mode: 'RULE_FALLBACK', fallback: true, promptHash,
+        warnings: ['AI gagal: ' + err.message],
+        result: { items: [], publicCopyDraft: '', tenantManualDraft: '', warnings: [] },
+        missingData: [],
+      };
+    }
   }
 
 }
