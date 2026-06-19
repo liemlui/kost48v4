@@ -39,6 +39,21 @@ Fase G AI Owner/Admin (`docs/M12_AI_OWNER_ADMIN.md`) menambah risiko baru: biaya
 - **AuditLog:** setiap aksi final yang memakai rekomendasi AI mencatat `AuditLog.meta.ai`.
 - **Fallback:** tanpa API key atau API timeout, UI tetap aman dan tidak melakukan mutasi.
 
+## Update 2026-06-20 - Audit Keamanan/PDP Fase J Owner AI
+
+**Scope:** 12 endpoint `owner-ai.controller.ts`, helper guard Fase J, dan gating frontend tombol AI. Hasil: **LULUS** untuk pra-go-live dengan guard deterministik tetap menang.
+
+| Area | Hasil |
+|------|-------|
+| Role guard | PASS. `status` OWNER/ADMIN; `brief`, `finance/analyze`, `usage`, `test-connection`, `faqs/generate-draft` OWNER-only; draft expense/KTP/ticket/inventory/field-report/payment OWNER/ADMIN. |
+| Secret/API key | PASS. `getStatus()` hanya expose configured/model/limit; `testConnection()` tidak mengembalikan API key; Authorization hanya dipakai di DeepSeek client. |
+| PDP KTP/foto | PASS setelah hardening Fase J. OCR KTP menolak gambar/base64; NIK tenant dan NIK OCR di snapshot, prompt, dan response dimask via helper. |
+| Snapshot ramping | PASS. Brief/finance/ops/payment memakai agregat dan snapshot terpilih; tidak mengirim foto bukti bayar, foto KTP, password, JWT, atau dump tabel mentah. |
+| No direct mutation | PASS. `owner-ai.service.ts` hanya read/query + DeepSeek call; endpoint review/draft tidak menulis domain final. `AiDraftService` hanya menulis queue `AiDraft`, bukan state final domain. |
+| Uang no-partial | PASS. Guard AI payment kini sadar FULL/DP/SETTLEMENT; DP booking sah tidak di-REJECT, nominal salah tetap kena warning deterministic. |
+| Frontend AI | PASS. Tombol AI digate `configured===true` + role sesuai endpoint; error AI tampil non-blocking dengan tombol coba lagi; result panel menampilkan mode/model/fallback/warnings. |
+| Audit `meta.ai` | PASS untuk jalur final yang memakai draft AI saat ini: create expense dari OCR membawa `meta.ai` ke AuditLog, dan `recentAiAudit()` membaca `jsonb_exists(meta,'ai')`. Endpoint lain tetap draft-only sampai human menjalankan action domain existing. |
+
 ## Catatan Pemakaian
 
 - Jadikan file ini pintu masuk tematik; bila butuh detail mentah, cek file sumber di arsip yang disebut di atas.

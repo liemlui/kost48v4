@@ -16,6 +16,12 @@ export default function AiAssistButton<T>({ label, loadingLabel = 'Menganalisa..
   const [result, setResult] = useState<T | null>(null);
   const [error, setError] = useState<string | null>(null);
 
+  const getErrorMessage = (err: any) => {
+    const message = err?.response?.data?.message ?? err?.message;
+    if (Array.isArray(message)) return message.join(', ');
+    return message ? String(message) : 'Analisa gagal. Data tetap aman dan tidak berubah.';
+  };
+
   const handleClick = async () => {
     setBusy(true);
     setError(null);
@@ -23,7 +29,7 @@ export default function AiAssistButton<T>({ label, loadingLabel = 'Menganalisa..
       const next = await run();
       setResult(next);
     } catch (err: any) {
-      setError(err?.response?.data?.message ?? 'Analisa gagal. Data tetap aman dan tidak berubah.');
+      setError(getErrorMessage(err));
     } finally {
       setBusy(false);
     }
@@ -34,7 +40,16 @@ export default function AiAssistButton<T>({ label, loadingLabel = 'Menganalisa..
       <Button type="button" variant={variant as any} size={size} disabled={disabled || busy} onClick={handleClick}>
         {busy ? <><Spinner animation="border" size="sm" className="me-2" />{loadingLabel}</> : label}
       </Button>
-      {error ? <Alert variant="warning" className="mt-2 mb-0 small">{error}</Alert> : null}
+      {error ? (
+        <Alert variant="warning" className="mt-2 mb-0 small" role="status">
+          <div className="d-flex flex-wrap align-items-center justify-content-between gap-2">
+            <span>{error}</span>
+            <Button type="button" variant="outline-warning" size="sm" disabled={busy || disabled} onClick={handleClick}>
+              Coba lagi
+            </Button>
+          </div>
+        </Alert>
+      ) : null}
       {result ? <div className="ai-assist-result mt-2">{renderResult(result)}</div> : null}
     </div>
   );

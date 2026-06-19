@@ -36,6 +36,7 @@ import {
   LoadingDashboard,
 } from './dashboardShared';
 import { AdminStaffFrontlineList, AdminStaysUnifiedList, AdminFinanceWorkspace, AdminTicketsWorkspace, AdminRoomsStockWorkspace } from './AdminWorkspaces';
+import { useAuth } from '../../context/AuthContext';
 
 // FASE-H: area kerja admin dipadatkan dari 6 → 3 (Ringkasan · Penghuni & Uang · Operasional).
 type AdminQueueArea = 'overview' | 'stays-finance' | 'ops';
@@ -294,6 +295,7 @@ function AdminOverviewCharts({ activeArea, rooms, invoices, tickets, pendingPaym
 export default function AdminDashboard() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { user } = useAuth();
   const activeArea: AdminQueueArea = normalizeAdminArea(new URLSearchParams(location.search).get('area'));
   // OWN-ROUTE-SPLIT: tetap di dashboard yang sama (OWNER `/admin-dashboard` atau ADMIN `/dashboard`) saat pindah area.
   const dashboardBase = location.pathname === '/admin-dashboard' ? '/admin-dashboard' : '/dashboard';
@@ -320,6 +322,7 @@ export default function AdminDashboard() {
   const autoOpsQuery = useQuery({ queryKey: ['dashboard-admin', 'auto-ops-status', activeArea], queryFn: fetchAutoOpsStatus, enabled: needsAutoOpsData, ...ACTION_QUERY_OPTIONS });
   // H4: status AI untuk conditional render AiAssistButton di area overview
   const aiStatusQuery = useQuery({ queryKey: ['owner-ai-status'], queryFn: getOwnerAiStatus, staleTime: 300_000, retry: 1 });
+  const canUseAdminBriefAi = user?.role === 'OWNER' && aiStatusQuery.data?.configured === true;
 
   const rooms = roomsQuery.data?.items ?? [];
   const inventoryItems = inventoryItemsQuery.data?.items ?? [];
@@ -439,7 +442,7 @@ export default function AdminDashboard() {
       {supportQueriesLoading ? <Alert variant="info" className="admin-support-loading-note">Data pendukung sedang dimuat. Dashboard utama tetap bisa dipakai.</Alert> : null}
       {activeArea === 'overview' ? <AdminOperationsCommandQueue lanes={adminWorkLanes} assistantItems={adminAssistantItems} metrics={adminHealthMetrics} topQueueItem={topQueueItem} queueItems={queueItems} onNavigate={navigate} /> : null}
       {/* H4: Brief AI untuk admin — hanya muncul jika API key dikonfigurasi & area overview */}
-      {activeArea === 'overview' && aiStatusQuery.data?.configured ? (
+      {activeArea === 'overview' && canUseAdminBriefAi ? (
         <section className="owner-panel mt-3 mb-3">
           <div className="owner-panel-heading p-3">
             <div><span className="owner-section-kicker">Bantuan AI</span><h2 className="mb-0">Brief Admin</h2></div>

@@ -24,7 +24,7 @@ import AiResultPanel from "../../components/ai/AiResultPanel";
 import { inventoryItemFinalStatusOptions, roomItemFinalStatusOptions } from "../../constants/staffRepairOptions";
 import { listResource, postAction } from "../../api/resources";
 import { uploadTicketImage } from "../../api/mediaUploads";
-import { draftTicketAction, type TicketActionDraftResult } from "../../api/ai";
+import { draftTicketAction, getOwnerAiStatus, type TicketActionDraftResult } from "../../api/ai";
 import { useAuth } from "../../context/AuthContext";
 import {
   type TicketItem,
@@ -265,6 +265,14 @@ export default function TicketsPage() {
   const totalPages = Math.max(1, Math.ceil(filteredItems.length / PAGE_SIZE));
 
   const canAssign = user?.role === "OWNER" || user?.role === "ADMIN";
+  const ownerAiStatusQuery = useQuery({
+    queryKey: ["owner-ai", "status", "tickets"],
+    queryFn: getOwnerAiStatus,
+    enabled: canAssign,
+    staleTime: 300_000,
+    retry: 1,
+  });
+  const canUseTicketAi = canAssign && ownerAiStatusQuery.data?.configured === true;
   const canProgress =
     user?.role === "OWNER" || user?.role === "ADMIN" || user?.role === "STAFF";
 
@@ -964,7 +972,7 @@ export default function TicketsPage() {
               <p className="text-muted mb-0">
                 {detailTicket.description || "Tidak ada deskripsi tambahan."}
               </p>
-              {canAssign ? (
+              {canUseTicketAi ? (
                 <div className="mt-3">
                   <Button
                     size="sm"

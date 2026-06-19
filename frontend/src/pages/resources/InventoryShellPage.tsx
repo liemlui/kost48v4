@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import { Alert, Button } from 'react-bootstrap';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import SegmentedTabs, { type SegmentedTabItem } from '../../components/common/SegmentedTabs';
 import AiResultPanel from '../../components/ai/AiResultPanel';
-import { draftInventoryReorder, type InventoryReorderDraftResult } from '../../api/ai';
+import { draftInventoryReorder, getOwnerAiStatus, type InventoryReorderDraftResult } from '../../api/ai';
 import { useAuth } from '../../context/AuthContext';
 
 // FASE B-2: shell Inventaris terpadu. Tab berbasis PATH (`/inventory/<key>`) supaya
@@ -25,7 +25,15 @@ export default function InventoryShellPage() {
   const [aiError, setAiError] = useState('');
   const active: TabKey = TABS.find((tab) => location.pathname.startsWith(`/inventory/${tab.key}`))?.key ?? 'gudang';
   const items: SegmentedTabItem<TabKey>[] = TABS.map((tab) => ({ key: tab.key, label: tab.label, icon: tab.icon }));
-  const canUseAi = user?.role === 'OWNER' || user?.role === 'ADMIN';
+  const canUseAiRole = user?.role === 'OWNER' || user?.role === 'ADMIN';
+  const ownerAiStatusQuery = useQuery({
+    queryKey: ['owner-ai', 'status', 'inventory'],
+    queryFn: getOwnerAiStatus,
+    enabled: canUseAiRole,
+    staleTime: 300_000,
+    retry: 1,
+  });
+  const canUseAi = canUseAiRole && ownerAiStatusQuery.data?.configured === true;
   const reorderAi = useMutation({
     mutationFn: draftInventoryReorder,
     onSuccess: (result) => {

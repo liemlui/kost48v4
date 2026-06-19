@@ -19,7 +19,7 @@ import { fetchAccountingReadiness } from '../../api/accounting';
 import { listStays } from '../../api/stays';
 import { listResource } from '../../api/resources';
 import type { MeterReading } from '../../types';
-import { createBusinessNarrative, generateBrief, type BriefResult } from '../../api/ai';
+import { createBusinessNarrative, generateBrief, getOwnerAiStatus, type BriefResult } from '../../api/ai';
 import AiAssistButton from '../../components/ai/AiAssistButton';
 import AiResultPanel from '../../components/ai/AiResultPanel';
 import { AssistantPanel, sortAssistantItems, type AssistantItem } from '../../components/command-center';
@@ -325,11 +325,18 @@ export default function OwnerDashboardPage() {
     staleTime: 120_000,
     retry: 1,
   });
+  const ownerAiStatusQuery = useQuery({
+    queryKey: ['owner-ai', 'status', 'owner-dashboard'],
+    queryFn: getOwnerAiStatus,
+    staleTime: 300_000,
+    retry: 1,
+  });
 
   const data = dashboard.data;
   const trendData = data?.trendMonths ?? data?.trend6Months ?? [];
   const grade = data ? gradeBadge(data.grade) : null;
   const selectedPeriodLabel = monthLabel(ym);
+  const canUseOwnerAi = ownerAiStatusQuery.data?.configured === true;
 
   const statusCards: StatusCard[] = useMemo(() => {
     if (!data) return [];
@@ -536,30 +543,34 @@ export default function OwnerDashboardPage() {
                     <span>Skor bisnis<strong>{data.score}</strong></span>
                     <span>Periode<strong>{selectedPeriodLabel}</strong></span>
                   </div>
-                  <AiAssistButton
-                    label="Buat analisis"
-                    loadingLabel="Menganalisis..."
-                    run={() => createBusinessNarrative({
-                      period: selectedPeriodLabel,
-                      metrics: {
-                        score: data.score,
-                        overdueRupiah: data.signals.find((signal) => signal.type === 'overdue')?.totalRupiah ?? 0,
-                        pendingPaymentCount: data.signals.find((signal) => signal.type === 'pending_payment')?.count ?? 0,
-                        occupancyRatePercent: data.kpi.occupancyRatePercent,
-                      },
-                    })}
-                    renderResult={(result) => (
-                      <Alert variant="light" className="owner-ai-result mb-0 small">
-                        <div className="fw-semibold">{result.title}</div>
-                        <div>{result.summary}</div>
-                        {result.recommendations?.length > 0 ? (
-                          <ul className="mb-0 mt-2 ps-3">
-                            {result.recommendations.map((item, idx) => <li key={idx}>{item}</li>)}
-                          </ul>
-                        ) : null}
-                      </Alert>
-                    )}
-                  />
+                  {canUseOwnerAi ? (
+                    <AiAssistButton
+                      label="Buat analisis"
+                      loadingLabel="Menganalisis..."
+                      run={() => createBusinessNarrative({
+                        period: selectedPeriodLabel,
+                        metrics: {
+                          score: data.score,
+                          overdueRupiah: data.signals.find((signal) => signal.type === 'overdue')?.totalRupiah ?? 0,
+                          pendingPaymentCount: data.signals.find((signal) => signal.type === 'pending_payment')?.count ?? 0,
+                          occupancyRatePercent: data.kpi.occupancyRatePercent,
+                        },
+                      })}
+                      renderResult={(result) => (
+                        <Alert variant="light" className="owner-ai-result mb-0 small">
+                          <div className="fw-semibold">{result.title}</div>
+                          <div>{result.summary}</div>
+                          {result.recommendations?.length > 0 ? (
+                            <ul className="mb-0 mt-2 ps-3">
+                              {result.recommendations.map((item, idx) => <li key={idx}>{item}</li>)}
+                            </ul>
+                          ) : null}
+                        </Alert>
+                      )}
+                    />
+                  ) : (
+                    <Alert variant="secondary" className="mb-0 small">AI belum dikonfigurasi.</Alert>
+                  )}
                 </div>
               </section>
             </Col>
@@ -580,22 +591,23 @@ export default function OwnerDashboardPage() {
                   <h2>Ringkasan Bisnis AI</h2>
                 </div>
                 <div className="owner-panel-body p-3">
-                  <AiAssistButton<BriefResult>
-                    label="Buat Brief AI"
-                    loadingLabel="Menganalisa dengan DeepSeek..."
-                    variant="primary"
-                    run={generateBrief}
-                    renderResult={(result) => (
-                      <AiResultPanel
-                        title="Ringkasan Bisnis"
-                        mode={result.mode}
-                        fallback={result.fallback}
-                        warnings={result.warnings}
-                        missingData={result.missingData}
-                        usage={result.usage}
-                        model={result.model}
-                      >
-                        <p className="fw-medium mb-2">{result.result?.summary}</p>
+                  {canUseOwnerAi ? (
+                    <AiAssistButton<BriefResult>
+                      label="Buat Brief AI"
+                      loadingLabel="Menganalisa dengan DeepSeek..."
+                      variant="primary"
+                      run={generateBrief}
+                      renderResult={(result) => (
+                        <AiResultPanel
+                          title="Ringkasan Bisnis"
+                          mode={result.mode}
+                          fallback={result.fallback}
+                          warnings={result.warnings}
+                          missingData={result.missingData}
+                          usage={result.usage}
+                          model={result.model}
+                        >
+                          <p className="fw-medium mb-2">{result.result?.summary}</p>
 
                         {result.result?.priorityActions?.length > 0 ? (
                           <div className="mb-2">
@@ -629,9 +641,12 @@ export default function OwnerDashboardPage() {
                             ))}
                           </div>
                         ) : null}
-                      </AiResultPanel>
-                    )}
-                  />
+                        </AiResultPanel>
+                      )}
+                    />
+                  ) : (
+                    <Alert variant="secondary" className="mb-0 small">AI belum dikonfigurasi.</Alert>
+                  )}
                 </div>
               </section>
             </Col>

@@ -16,7 +16,7 @@
     "build": "npm run clean && npm run prisma:generate && npx tsc -p tsconfig.build.json && node -e \"const fs=require('fs');const p=require('path');const src='src/generated';const dst='dist/generated';if(fs.existsSync(src)){fs.cpSync(src,dst,{recursive:true})}\"",
     "build:local": "npm run build",
     "pretest:unit": "npm run build",
-    "test:unit": "node --test \"test/**/*.test.js\"",
+    "test:unit": "node --test \"test/unit/**/*.test.js\"",
     "test:integration": "node --test \"test/integration/**/*.test.js\"",
     "golive": "node scripts/golive.mjs",
     "golive:setup": "npm run build && node scripts/golive-setup.js",

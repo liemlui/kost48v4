@@ -48,6 +48,16 @@ export default function AiResultPanel({
         </div>
       </Card.Header>
       <Card.Body className="small">
+        {mode || model ? (
+          <div className="text-muted mb-2">
+            Mode: <strong>{mode ?? '-'}</strong>{model ? <> · Model: <strong>{model}</strong></> : null}
+          </div>
+        ) : null}
+        {fallback ? (
+          <Alert variant="secondary" className="py-1 px-2 mb-2 small">
+            Hasil ini memakai rule fallback. Data tetap bisa dipakai sebagai bantuan, tetapi keputusan final tetap manual.
+          </Alert>
+        ) : null}
         {warnings?.length ? (
           <Alert variant="warning" className="py-1 px-2 mb-2 small">
             {warnings.map((w, i) => <div key={i}>⚠️ {w}</div>)}

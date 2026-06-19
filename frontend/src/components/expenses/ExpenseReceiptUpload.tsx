@@ -1,7 +1,9 @@
 import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { Alert, Badge, Button, Col, Form, Row, Spinner } from 'react-bootstrap';
-import { draftExpenseReceiptFromOcr, type ExpenseReceiptDraftResult } from '../../api/ai';
+import { draftExpenseReceiptFromOcr, getOwnerAiStatus, type ExpenseReceiptDraftResult } from '../../api/ai';
 import AiResultPanel from '../ai/AiResultPanel';
+import { useAuth } from '../../context/AuthContext';
 
 type ExpenseDraftPatch = Record<string, unknown>;
 
@@ -39,12 +41,24 @@ function buildExpensePatch(result: ExpenseReceiptDraftResult): ExpenseDraftPatch
 }
 
 export default function ExpenseReceiptUpload({ onApplyDraft, disabled }: Props) {
+  const { user } = useAuth();
+  const isOwnerAdmin = user?.role === 'OWNER' || user?.role === 'ADMIN';
+  const ownerAiStatusQuery = useQuery({
+    queryKey: ['owner-ai', 'status', 'expense-ocr'],
+    queryFn: getOwnerAiStatus,
+    enabled: isOwnerAdmin,
+    staleTime: 300_000,
+    retry: 1,
+  });
   const [ocrText, setOcrText] = useState('');
   const [fileName, setFileName] = useState('');
   const [scanning, setScanning] = useState(false);
   const [drafting, setDrafting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<ExpenseReceiptDraftResult | null>(null);
+  const canUseAi = isOwnerAdmin && ownerAiStatusQuery.data?.configured === true;
+
+  if (!canUseAi) return null;
 
   const handleFile = async (file?: File) => {
     if (!file) return;

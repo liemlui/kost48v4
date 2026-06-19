@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import PageHeader from '../../components/common/PageHeader';
 import { StatusStrip } from '../../components/workspace';
-import { analyzeFinance, type FinanceResult } from '../../api/ai';
+import { analyzeFinance, getOwnerAiStatus, type FinanceResult } from '../../api/ai';
 import AiAssistButton from '../../components/ai/AiAssistButton';
 import AiResultPanel from '../../components/ai/AiResultPanel';
 import AccountingReadinessCard from '../../components/accounting/AccountingReadinessCard';
@@ -118,6 +118,13 @@ export default function AccountingSetupPage() {
   const depositLedgerSummaryQuery = useQuery({ queryKey: ['deposit-ledger', 'summary'], queryFn: () => fetchDepositLedgerSummary({ limit: 25 }), staleTime: 30_000, retry: false });
   const depositLedgerReconciliationQuery = useQuery({ queryKey: ['deposit-ledger', 'reconciliation-lite'], queryFn: () => fetchDepositLedgerReconciliationLite({ limit: 200 }), staleTime: 30_000, retry: false });
   const reversalWatchQuery = useQuery({ queryKey: ['accounting-reversal-watch'], queryFn: fetchReversalWatch, staleTime: 30_000 });
+  const ownerAiStatusQuery = useQuery({
+    queryKey: ['owner-ai', 'status', 'finance'],
+    queryFn: getOwnerAiStatus,
+    enabled: user?.role === 'OWNER',
+    staleTime: 300_000,
+    retry: 1,
+  });
 
   const accounts = accountsQuery.data ?? [];
   const cashAccounts = cashAccountsQuery.data ?? [];
@@ -134,6 +141,7 @@ export default function AccountingSetupPage() {
   const postedOpeningBalance = useMemo(() => openingBalances.find((batch) => batch.status === 'POSTED'), [openingBalances]);
   const draftOpeningBalance = useMemo(() => openingBalances.find((batch) => batch.status === 'DRAFT'), [openingBalances]);
   const canManageOpeningBalance = user?.role === 'OWNER';
+  const canUseFinanceAi = user?.role === 'OWNER' && ownerAiStatusQuery.data?.configured === true;
 
 
   function focusAccountingSection(sectionId: string) {
@@ -347,7 +355,7 @@ export default function AccountingSetupPage() {
       />
 
       {/* G2: Finance AI Analyst — OWNER only */}
-      {user?.role === 'OWNER' ? (
+      {canUseFinanceAi ? (
         <Row className="mb-3">
           <Col xs={12}>
             <section className="owner-panel owner-ai-panel">

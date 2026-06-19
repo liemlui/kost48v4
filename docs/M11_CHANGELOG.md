@@ -3,6 +3,17 @@
 > Arsip changelog ringkas, dipisah dari M10 pada 2026-06-19 untuk hemat token AI (M10 = checklist aktif saja). **Entri changelog BARU ditulis DI SINI (paling atas)**, bukan di M10. Format: 1 header tanggal + 1-2 poin outcome per entri.
 
 ## Changelog Ringkas
+### 2026-06-20 — audit(Fase K): audit total 12 jalur + fix keamanan P1-P3
+- **audit(12-jalur):** 97 temuan (24 critical, 42 medium, 31 low). Plan: `docs/M16_PASCA_AUDIT_PLAN.md`. 5 keputusan owner diambil.
+- **backend(P1):** tambah `RolesGuard` di loyalty, notifications, push controller.
+- **backend(P2):** fix DTO validation bypass multipart `submitWithProof` — validasi class-validator manual.
+- **backend(P3):** hapus `STAFF` dari 11 endpoint sensitif (tenants, users, invoices, expenses, invoice-payments, stays POST). OWNER/ADMIN only.
+- **docs(M16):** `docs/M16_PASCA_AUDIT_PLAN.md` BARU — 13 task P4-R5 + 31 backlog.
+
+### 2026-06-20 — fix(Fase J): hardening owner-ai PDP, no-partial, dan gating frontend
+- **backend(J0-J2):** tambah `owner-ai.helpers.ts`, safety test `owner-ai-safety.test.js`, guard AI payment sadar FULL/DP/SETTLEMENT, dan masking NIK di teks prompt KTP OCR sebelum DeepSeek. `test:unit` juga dipersempit ke `test/unit/**/*.test.js` agar tidak menjalankan integration test yang butuh DB UAT.
+- **frontend(J3)+audit(J4):** `AiAssistButton` error non-blocking + retry, `AiResultPanel` tampilkan mode/model/fallback/warnings, tombol AI digate role+configured, dan audit 12 endpoint owner-ai dibukukan di M09. Gate: backend `npx.cmd tsc --noEmit`, `npm.cmd run build`, `npm.cmd run test:unit` PASS; frontend `npm.cmd run build` PASS.
+
 ### 2026-06-20 — docs(Fase J): dossier hardening AI pra-go-live (jaring pengaman owner-ai)
 - **docs(M15):** `docs/M15_FASE_J_HARDENING_AI.md` BARU — 5 task J0-J4 (detail untuk AI eksekutor lemah): J0 ekstrak guard murni → `owner-ai.helpers.ts`, J1 unit test PDP mask-NIK + uang no-partial (`owner-ai-safety.test.js`), J2 luruskan guard no-partial AI sadar DP booking, J3 hardening FE AI non-blocking + gating, J4 audit PDP 12 endpoint → M09.
 - **temuan audit kode 2026-06-20:** modul `owner-ai/` (Fase G, 15 file) selesai TANPA test; fungsi pengaman murni terkubur `private`; DIVERGENSI guard no-partial — AI `reviewPaymentSubmission` (±l.1150) salah me-REJECT DP booking sah vs domain `approveSubmission` (±l.567-587) yang sadar DP. Aman uang (over-reject) tapi rekomendasi salah.

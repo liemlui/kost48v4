@@ -1,6 +1,6 @@
 import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
-import { ExpenseCategory, ExpenseType } from '../../common/enums/app.enums';
+import { ExpenseCategory, ExpenseType, RoomStatus } from '../../common/enums/app.enums';
 import { deepseekConfigured, deepseekChat } from '../market-analysis/deepseek.client';
 import { stableHash } from './ai-snapshot-hash.util';
 import { buildBriefPrompt } from './prompts/brief.prompt';
@@ -14,51 +14,86 @@ import {
   buildInventoryReorderPrompt,
   buildTicketActionPrompt,
 } from './prompts/ops-inventory.prompt';
-
-type ExpenseOcrDraft = {
-  expenseDate: string | null;
-  vendorName: string | null;
-  amountRupiah: number;
-  category: ExpenseCategory;
-  type: ExpenseType;
-  description: string;
-  note: string;
-  confidence: number;
-  needsReview: string[];
-};
-
-const EXPENSE_CATEGORY_VALUES = new Set<string>(Object.values(ExpenseCategory));
-const EXPENSE_TYPE_VALUES = new Set<string>(Object.values(ExpenseType));
-const TICKET_ACTION_VALUES = new Set(['ASSIGN_STAFF', 'CREATE_EXPENSE_DRAFT', 'REQUEST_PHOTO', 'CLOSE', 'KEEP_OPEN']);
-const PRIORITY_VALUES = new Set(['LOW', 'MEDIUM', 'HIGH']);
-const FIELD_DECISION_VALUES = new Set(['APPROVE', 'REJECT', 'NEEDS_MORE_INFO']);
+import {
+  ageDays,
+  cleanShortText,
+  decidePaymentReviewGuard,
+  extractLikelyAmount,
+  extractLikelyDate,
+  extractLikelyVendor,
+  extractNikFromOcr,
+  inventoryItemSnapshot,
+  maskNik,
+  maskNikInText,
+  normalizeExpenseOcrDraft,
+  normalizeFieldReportDraft,
+  normalizeInventoryDraft,
+  normalizeName,
+  normalizeTicketActionDraft,
+  parseNikDemographics,
+} from './owner-ai.helpers';
 
 @Injectable()
 export class OwnerAiService {
   private readonly buckets = new Map<string, { count: number; resetAt: number }>();
+  private aiConfigCache: { data: Awaited<ReturnType<typeof this.getAiConfigInternal>>; ts: number } | null = null;
+  private aiConfigSync: Awaited<ReturnType<typeof this.getAiConfigInternal>> | null = null;
 
   constructor(private readonly prisma: PrismaService) {}
 
-  /** Status AI: configured, enabled, model, limit. Tanpa bocorkan API key. */
-  getStatus() {
+  /** Baca konfigurasi AI dari DB (cache 5 menit). Fallback env. */
+  private async getAiConfigInternal() {
+    const db = await this.prisma.operationalSetting.findUnique({ where: { id: 1 } });
+    return {
+      featuresEnabled: (db as any)?.aiFeaturesEnabled ?? (process.env.AI_FEATURES_ENABLED === 'true'),
+      defaultModel: (db as any)?.deepseekModel || process.env.DEEPSEEK_MODEL || 'deepseek-v4-flash',
+      financeModel: (db as any)?.deepseekFinanceModel || process.env.DEEPSEEK_FINANCE_MODEL || 'deepseek-v4-pro',
+      baseUrl: (db as any)?.deepseekBaseUrl || process.env.DEEPSEEK_BASE_URL || 'https://api.deepseek.com',
+      dailyLimit: (db as any)?.aiDailyRequestLimit ?? Number(process.env.AI_DAILY_REQUEST_LIMIT || 50),
+      maxInputChars: (db as any)?.aiMaxInputChars ?? Number(process.env.AI_MAX_INPUT_CHARS || 12000),
+      maxOutputTokens: (db as any)?.aiMaxOutputTokens ?? Number(process.env.AI_MAX_OUTPUT_TOKENS || 1400),
+      financeMaxOutputTokens: (db as any)?.aiFinanceMaxOutputTokens ?? Number(process.env.AI_FINANCE_MAX_OUTPUT_TOKENS || 2200),
+    };
+  }
+  private async getAiConfig() {
+    const now = Date.now();
+    if (!this.aiConfigCache || (now - this.aiConfigCache.ts) > 300_000) {
+      this.aiConfigCache = { data: await this.getAiConfigInternal(), ts: now };
+      this.aiConfigSync = this.aiConfigCache.data;
+    }
+    return this.aiConfigCache.data;
+  }
+
+  /** Sync fallback (gunakan setelah getAiConfig() dipanggil minimal sekali). */
+  private getAiConfigSync(): NonNullable<typeof this.aiConfigSync> {
+    return this.aiConfigSync ?? { featuresEnabled: false, defaultModel: 'deepseek-v4-flash', financeModel: 'deepseek-v4-pro', baseUrl: 'https://api.deepseek.com', dailyLimit: 50, maxInputChars: 12000, maxOutputTokens: 1400, financeMaxOutputTokens: 2200 };
+  }
+
+  /** Status AI: configured, enabled, model, limit. Baca dari DB (R3), fallback env. Tanpa bocorkan API key. */
+  async getStatus() {
     const configured = deepseekConfigured();
-    const enabled = process.env.AI_FEATURES_ENABLED === 'true';
+    const db = await this.prisma.operationalSetting.findUnique({ where: { id: 1 } });
     return {
       configured,
-      enabled,
-      defaultModel: process.env.DEEPSEEK_MODEL || 'deepseek-v4-flash',
-      financeModel: process.env.DEEPSEEK_FINANCE_MODEL || 'deepseek-v4-pro',
-      manualOnly: process.env.AI_MANUAL_ONLY !== 'false', // default true
-      ownerAdminOnly: process.env.AI_OWNER_ADMIN_ONLY !== 'false', // default true
-      dailyLimit: Number(process.env.AI_DAILY_REQUEST_LIMIT || 50),
+      enabled: (db as any)?.aiFeaturesEnabled ?? (process.env.AI_FEATURES_ENABLED === 'true'),
+      defaultModel: (db as any)?.deepseekModel || process.env.DEEPSEEK_MODEL || 'deepseek-v4-flash',
+      financeModel: (db as any)?.deepseekFinanceModel || process.env.DEEPSEEK_FINANCE_MODEL || 'deepseek-v4-pro',
+      baseUrl: (db as any)?.deepseekBaseUrl || process.env.DEEPSEEK_BASE_URL || 'https://api.deepseek.com',
+      manualOnly: (db as any)?.aiManualOnly ?? (process.env.AI_MANUAL_ONLY !== 'false'),
+      ownerAdminOnly: (db as any)?.aiOwnerAdminOnly ?? (process.env.AI_OWNER_ADMIN_ONLY !== 'false'),
+      dailyLimit: (db as any)?.aiDailyRequestLimit ?? Number(process.env.AI_DAILY_REQUEST_LIMIT || 50),
       dailyRemaining: this.getDailyRemaining(),
-      logUsage: process.env.AI_LOG_USAGE !== 'false', // default true
+      logUsage: (db as any)?.aiLogUsage ?? (process.env.AI_LOG_USAGE !== 'false'),
+      maxInputChars: (db as any)?.aiMaxInputChars ?? Number(process.env.AI_MAX_INPUT_CHARS || 12000),
+      maxOutputTokens: (db as any)?.aiMaxOutputTokens ?? Number(process.env.AI_MAX_OUTPUT_TOKENS || 1400),
+      financeMaxOutputTokens: (db as any)?.aiFinanceMaxOutputTokens ?? Number(process.env.AI_FINANCE_MAX_OUTPUT_TOKENS || 2200),
+      draftRetentionDays: (db as any)?.aiDraftRetentionDays ?? Number(process.env.AI_DRAFT_RETENTION_DAYS || 60),
     };
   }
 
   /** Rate-limit check: throws 429 jika melebihi daily limit. */
   checkRateLimit(actorId: number, feature: string): void {
-    if (process.env.AI_FEATURES_ENABLED !== 'true') return; // no limit if disabled
+    if (!this.getAiConfigSync().featuresEnabled) return; // no limit if disabled
     const key = `${actorId}:${feature}`;
     const now = Date.now();
     const dayStart = new Date().setHours(0, 0, 0, 0);
@@ -94,14 +129,14 @@ export class OwnerAiService {
     return Number(process.env.AI_MAX_INPUT_CHARS || 12000);
   }
 
-  /** Max output tokens (default) dari env. */
+  /** Max output tokens (default) — DB config dengan fallback env. */
   getMaxOutputTokens(): number {
-    return Number(process.env.AI_MAX_OUTPUT_TOKENS || 1400);
+    return this.getAiConfigSync().maxOutputTokens;
   }
 
-  /** Max output tokens (finance) dari env. */
+  /** Max output tokens (finance) — DB config dengan fallback env. */
   getFinanceMaxOutputTokens(): number {
-    return Number(process.env.AI_FINANCE_MAX_OUTPUT_TOKENS || 2200);
+    return this.getAiConfigSync().financeMaxOutputTokens;
   }
 
   // ── G7: Settings, Budget & Observability ──────────────────────────────────
@@ -120,7 +155,7 @@ export class OwnerAiService {
       todayTotal += b.count;
     }
     return {
-      enabled: process.env.AI_FEATURES_ENABLED === 'true',
+      enabled: this.getAiConfigSync().featuresEnabled,
       dailyLimit,
       todayTotal,
       remainingDaily: Math.max(0, dailyLimit - todayTotal),
@@ -244,7 +279,8 @@ export class OwnerAiService {
     const snapshot = await this.buildBriefSnapshot();
     const snapshotHash = stableHash(snapshot);
 
-    if (!deepseekConfigured() || process.env.AI_FEATURES_ENABLED !== 'true') {
+    const aicfg = await this.getAiConfig();
+    if (!deepseekConfigured() || !aicfg.featuresEnabled) {
       return this.briefFallback(snapshot, snapshotHash);
     }
 
@@ -326,7 +362,8 @@ export class OwnerAiService {
     };
     const snapshotHash = stableHash(snapshot);
 
-    if (!deepseekConfigured() || process.env.AI_FEATURES_ENABLED !== 'true') {
+    const aicfg = await this.getAiConfig();
+    if (!deepseekConfigured() || !aicfg.featuresEnabled) {
       return this.expenseOcrFallback(text, snapshotHash);
     }
 
@@ -347,7 +384,7 @@ export class OwnerAiService {
         promptHash,
         fallback: false,
         warnings: [],
-        result: this.normalizeExpenseOcrDraft(parsed),
+        result: normalizeExpenseOcrDraft(parsed),
       };
     } catch (err: any) {
       return this.expenseOcrFallback(text, snapshotHash, err?.message);
@@ -358,9 +395,9 @@ export class OwnerAiService {
     const warnings = ['AI tidak tersedia; draft dibuat konservatif dari OCR lokal dan wajib dicek manual.'];
     if (errorMsg) warnings.unshift('AI gagal: ' + String(errorMsg).slice(0, 180));
 
-    const amountRupiah = this.extractLikelyAmount(text);
-    const expenseDate = this.extractLikelyDate(text);
-    const vendorName = this.extractLikelyVendor(text);
+    const amountRupiah = extractLikelyAmount(text);
+    const expenseDate = extractLikelyDate(text);
+    const vendorName = extractLikelyVendor(text);
     const needsReview = [
       'Periksa ulang tanggal, vendor, kategori, dan nominal sebelum simpan.',
       ...(amountRupiah <= 0 ? ['Nominal tidak terbaca jelas dari nota.'] : []),
@@ -375,7 +412,7 @@ export class OwnerAiService {
       promptHash: '',
       fallback: true,
       warnings,
-      result: this.normalizeExpenseOcrDraft({
+      result: normalizeExpenseOcrDraft({
         expenseDate,
         vendorName,
         amountRupiah,
@@ -389,139 +426,7 @@ export class OwnerAiService {
     };
   }
 
-  private normalizeExpenseOcrDraft(input: any): ExpenseOcrDraft {
-    const needsReview: string[] = Array.isArray(input?.needsReview)
-      ? input.needsReview.map((item: unknown) => String(item)).filter(Boolean).slice(0, 8)
-      : [];
-
-    const categoryRaw = String(input?.category ?? input?.categorySuggestion ?? ExpenseCategory.OTHER).toUpperCase();
-    const category = EXPENSE_CATEGORY_VALUES.has(categoryRaw)
-      ? categoryRaw as ExpenseCategory
-      : ExpenseCategory.OTHER;
-    if (category === ExpenseCategory.OTHER && categoryRaw !== ExpenseCategory.OTHER) {
-      needsReview.push('Kategori dari AI tidak valid/kurang yakin; diset ke OTHER.');
-    }
-
-    const typeRaw = String(input?.type ?? ExpenseType.VARIABLE).toUpperCase();
-    const type = EXPENSE_TYPE_VALUES.has(typeRaw)
-      ? typeRaw as ExpenseType
-      : ExpenseType.VARIABLE;
-    if (type === ExpenseType.VARIABLE && typeRaw !== ExpenseType.VARIABLE) {
-      needsReview.push('Tipe dari AI tidak valid; diset ke VARIABLE.');
-    }
-
-    const amount = Number(input?.amountRupiah ?? input?.amount ?? 0);
-    const amountRupiah = Number.isFinite(amount) ? Math.max(0, Math.round(amount)) : 0;
-    if (amountRupiah <= 0 && !needsReview.some((item) => item.includes('Nominal'))) {
-      needsReview.push('Nominal belum terbaca jelas.');
-    }
-    if (amountRupiah > 500000 && !needsReview.some((item) => item.includes('Rp500.000'))) {
-      needsReview.push('Nominal di atas Rp500.000; cek apakah perlu dicatat sebagai aset/kapitalisasi.');
-    }
-
-    const expenseDate = this.isDateOnly(input?.expenseDate ?? input?.date)
-      ? String(input?.expenseDate ?? input?.date)
-      : null;
-    if (!expenseDate) needsReview.push('Tanggal nota perlu dicek manual.');
-
-    const vendorName = this.cleanShortText(input?.vendorName ?? input?.vendor, 120) || null;
-    const description = this.cleanShortText(input?.description, 180)
-      || (vendorName ? `Pembelian dari ${vendorName}` : 'Pengeluaran operasional dari nota');
-    const note = this.cleanShortText(input?.note ?? input?.taxOrFeeWarning, 500);
-    const confidenceRaw = Number(input?.confidence ?? 0);
-    const confidence = Number.isFinite(confidenceRaw)
-      ? Math.max(0, Math.min(1, confidenceRaw))
-      : 0;
-
-    return {
-      expenseDate,
-      vendorName,
-      amountRupiah,
-      category,
-      type,
-      description,
-      note,
-      confidence,
-      needsReview: Array.from(new Set(needsReview)).slice(0, 8),
-    };
-  }
-
-  private cleanShortText(value: unknown, maxLength: number): string {
-    return String(value ?? '').replace(/\s+/g, ' ').trim().slice(0, maxLength);
-  }
-
-  private isDateOnly(value: unknown): boolean {
-    return typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value);
-  }
-
-  private extractLikelyVendor(text: string): string | null {
-    const line = text
-      .split(/\r?\n/)
-      .map((item) => item.trim())
-      .find((item) => item.length >= 3 && !/^\d/.test(item) && !/total|tunai|cash|debit|kembali/i.test(item));
-    return line ? this.cleanShortText(line, 80) : null;
-  }
-
-  private extractLikelyDate(text: string): string | null {
-    const iso = text.match(/\b(20\d{2})[-/](0?[1-9]|1[0-2])[-/](0?[1-9]|[12]\d|3[01])\b/);
-    if (iso) {
-      return `${iso[1]}-${iso[2].padStart(2, '0')}-${iso[3].padStart(2, '0')}`;
-    }
-
-    const local = text.match(/\b(0?[1-9]|[12]\d|3[01])[-/](0?[1-9]|1[0-2])[-/](20\d{2}|\d{2})\b/);
-    if (!local) return null;
-    const year = local[3].length === 2 ? `20${local[3]}` : local[3];
-    return `${year}-${local[2].padStart(2, '0')}-${local[1].padStart(2, '0')}`;
-  }
-
-  private extractLikelyAmount(text: string): number {
-    const matches = text.match(/(?:rp|idr)?\s*([0-9]{1,3}(?:[.\s][0-9]{3})+|[0-9]{4,})(?:,\d{2})?/gi) ?? [];
-    const amounts = matches
-      .map((match) => Number(match.replace(/(?:rp|idr)/gi, '').replace(/[,]\d{2}$/g, '').replace(/[^\d]/g, '')))
-      .filter((value) => Number.isFinite(value) && value > 0);
-    return amounts.length ? Math.max(...amounts) : 0;
-  }
-
   // ── G5: KTP OCR Validator ──────────────────────────────────────────────────
-
-  /** Mask NIK → `************1234` (PDP: jangan tampilkan NIK penuh di log/prompt). */
-  private maskNik(nik?: string | null): string | null {
-    const digits = (nik || '').replace(/\D/g, '');
-    if (digits.length < 4) return null;
-    return '*'.repeat(Math.max(0, digits.length - 4)) + digits.slice(-4);
-  }
-
-  /** Ambil 16-digit NIK pertama dari teks OCR (heuristik deterministik). */
-  private extractNikFromOcr(ocrText: string): string | null {
-    const spaced = (ocrText || '').replace(/[^0-9]/g, ' ');
-    const m = spaced.match(/\d{16}/);
-    return m ? m[0] : null;
-  }
-
-  /**
-   * Demografi deterministik dari struktur NIK (PPKKDD DDMMYY SSSS).
-   * Digit 7-12 = tanggal lahir DDMMYY (DD+40 untuk perempuan). Tanpa AI.
-   */
-  private parseNikDemographics(nik?: string | null): { birthDate: string | null; gender: 'MALE' | 'FEMALE' | null } {
-    const d = (nik || '').replace(/\D/g, '');
-    if (d.length !== 16) return { birthDate: null, gender: null };
-    let day = Number(d.slice(6, 8));
-    const month = Number(d.slice(8, 10));
-    const yy = Number(d.slice(10, 12));
-    const gender: 'MALE' | 'FEMALE' = day > 40 ? 'FEMALE' : 'MALE';
-    if (day > 40) day -= 40;
-    if (day < 1 || day > 31 || month < 1 || month > 12) return { birthDate: null, gender };
-    // Heuristik abad: <= tahun-sekarang (2 digit) → 20xx, selain itu 19xx.
-    const nowYy = new Date().getFullYear() % 100;
-    const year = yy <= nowYy ? 2000 + yy : 1900 + yy;
-    const birthDate = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-    return { birthDate, gender };
-  }
-
-  /** Normalisasi nama untuk perbandingan (uppercase, buang non-huruf). */
-  private normalizeName(name?: string | null): string {
-    return (name || '').toUpperCase().replace(/[^A-Z\s]/g, '').replace(/\s+/g, ' ').trim();
-  }
 
   /**
    * Validasi teks OCR KTP vs data tenant. PDP: hanya TEKS OCR (bukan gambar);
@@ -548,35 +453,36 @@ export class OwnerAiService {
     if (!tenant) throw new NotFoundException('Tenant tidak ditemukan.');
 
     // ── Cek deterministik (backend yang menang, bukan AI) ──
-    const ocrNik = this.extractNikFromOcr(text);
+    const ocrNik = extractNikFromOcr(text);
     const nikFormatValid = !!ocrNik && ocrNik.length === 16;
     const tenantNikDigits = (tenant.identityNumber || '').replace(/\D/g, '');
     const nikMatchesTenant = nikFormatValid && tenantNikDigits.length === 16 && ocrNik === tenantNikDigits;
-    const demographics = this.parseNikDemographics(ocrNik);
-    const tenantMaskedNik = this.maskNik(tenant.identityNumber);
+    const demographics = parseNikDemographics(ocrNik);
+    const tenantMaskedNik = maskNik(tenant.identityNumber);
 
     // Hash dari objek yang sudah diminimalkan — TANPA NIK penuh / OCR mentah (PDP).
     const snapshotHash = stableHash({
       tenantId: tenant.id,
-      tenantName: this.normalizeName(tenant.fullName),
+      tenantName: normalizeName(tenant.fullName),
       tenantNikMasked: tenantMaskedNik,
       ocrLen: text.length,
-      ocrNikMasked: this.maskNik(ocrNik),
+      ocrNikMasked: maskNik(ocrNik),
     });
 
     const deterministic = {
       nikFormatValid,
       nikMatchesTenant,
-      ocrNikMasked: this.maskNik(ocrNik),
+      ocrNikMasked: maskNik(ocrNik),
       demographicsFromNik: demographics,
     };
 
-    if (!deepseekConfigured() || process.env.AI_FEATURES_ENABLED !== 'true') {
+    const aicfg = await this.getAiConfig();
+    if (!deepseekConfigured() || !aicfg.featuresEnabled) {
       return this.ktpFallback(tenant, deterministic, snapshotHash);
     }
 
     const messages = buildKtpOcrPrompt({
-      ocrText: text,
+      ocrText: maskNikInText(text),
       tenant: { fullName: tenant.fullName, nikMasked: tenantMaskedNik },
     });
 
@@ -588,7 +494,7 @@ export class OwnerAiService {
       });
       const parsed = JSON.parse(ai.content);
       // Mask NIK apa pun yang dikembalikan AI sebelum keluar dari backend (PDP).
-      if (parsed?.extracted) parsed.extracted.nik = this.maskNik(parsed.extracted.nik);
+      if (parsed?.extracted) parsed.extracted.nik = maskNik(parsed.extracted.nik);
       // Backend menang untuk cek deterministik.
       const match = {
         nameMatchesTenant: parsed?.match?.nameMatchesTenant ?? null,
@@ -688,7 +594,8 @@ export class OwnerAiService {
 
     const snapshot = this.buildTicketOpsSnapshot(ticket);
     const snapshotHash = stableHash(snapshot);
-    if (!deepseekConfigured() || process.env.AI_FEATURES_ENABLED !== 'true') {
+    const aicfg = await this.getAiConfig();
+    if (!deepseekConfigured() || !aicfg.featuresEnabled) {
       return this.ticketActionFallback(snapshot, snapshotHash, 'AI tidak dikonfigurasi');
     }
 
@@ -704,7 +611,7 @@ export class OwnerAiService {
         promptHash: stableHash(messages.map((m) => m.content).join('|')),
         fallback: false,
         warnings: [],
-        result: this.normalizeTicketActionDraft(parsed),
+        result: normalizeTicketActionDraft(parsed),
         missingData: [],
       };
     } catch (err: any) {
@@ -766,12 +673,13 @@ export class OwnerAiService {
         category: ticket.category,
         status: ticket.status,
         linkedInventoryItemId: ticket.linkedInventoryItemId,
-        ageDays: this.ageDays(ticket.createdAt),
+        ageDays: ageDays(ticket.createdAt),
       })),
     };
     const snapshotHash = stableHash(snapshot);
 
-    if (!deepseekConfigured() || process.env.AI_FEATURES_ENABLED !== 'true') {
+    const aicfg = await this.getAiConfig();
+    if (!deepseekConfigured() || !aicfg.featuresEnabled) {
       return this.inventoryReorderFallback(snapshot, snapshotHash, 'AI tidak dikonfigurasi');
     }
 
@@ -787,7 +695,7 @@ export class OwnerAiService {
         promptHash: stableHash(messages.map((m) => m.content).join('|')),
         fallback: false,
         warnings: [],
-        result: this.normalizeInventoryDraft(parsed, lowStockItems),
+        result: normalizeInventoryDraft(parsed, lowStockItems),
         missingData: [],
       };
     } catch (err: any) {
@@ -814,10 +722,10 @@ export class OwnerAiService {
         id: report.id,
         status: report.status,
         reportedCondition: report.reportedCondition,
-        conditionNotes: this.cleanShortText(report.conditionNotes, 600),
+        conditionNotes: cleanShortText(report.conditionNotes, 600),
         requestsReplacement: report.requestsReplacement,
         requestedQty: report.requestedQty == null ? null : Number(report.requestedQty),
-        ageDays: this.ageDays(report.createdAt),
+        ageDays: ageDays(report.createdAt),
       },
       ticket: report.ticket,
       room: report.room,
@@ -825,15 +733,16 @@ export class OwnerAiService {
         id: report.roomItem.id,
         qty: Number(report.roomItem.qty),
         status: report.roomItem.status,
-        note: this.cleanShortText(report.roomItem.note, 300),
-        item: this.inventoryItemSnapshot(report.roomItem.item),
+        note: cleanShortText(report.roomItem.note, 300),
+        item: inventoryItemSnapshot(report.roomItem.item),
       } : null,
-      inventoryItem: this.inventoryItemSnapshot(report.inventoryItem),
-      requestedInventoryItem: this.inventoryItemSnapshot(report.requestedInventoryItem),
+      inventoryItem: inventoryItemSnapshot(report.inventoryItem),
+      requestedInventoryItem: inventoryItemSnapshot(report.requestedInventoryItem),
     };
     const snapshotHash = stableHash(snapshot);
 
-    if (!deepseekConfigured() || process.env.AI_FEATURES_ENABLED !== 'true') {
+    const aicfg = await this.getAiConfig();
+    if (!deepseekConfigured() || !aicfg.featuresEnabled) {
       return this.fieldReportFallback(snapshot, snapshotHash, 'AI tidak dikonfigurasi');
     }
 
@@ -849,7 +758,7 @@ export class OwnerAiService {
         promptHash: stableHash(messages.map((m) => m.content).join('|')),
         fallback: false,
         warnings: [],
-        result: this.normalizeFieldReportDraft(parsed),
+        result: normalizeFieldReportDraft(parsed),
         missingData: [],
       };
     } catch (err: any) {
@@ -865,7 +774,7 @@ export class OwnerAiService {
         id: ticket.id,
         ticketNumber: ticket.ticketNumber,
         title: ticket.title,
-        description: this.cleanShortText(ticket.description, 800),
+        description: cleanShortText(ticket.description, 800),
         category: ticket.category,
         status: ticket.status,
         hasIssueImage: Boolean(ticket.issueImageUrl || ticket.issueImageFileKey),
@@ -873,40 +782,28 @@ export class OwnerAiService {
         assigned: Boolean(ticket.assignedToId),
         handledByVendor: Boolean(ticket.handledByVendor),
         dueAt: ticket.dueAt?.toISOString?.() ?? null,
-        ageDays: this.ageDays(ticket.createdAt),
+        ageDays: ageDays(ticket.createdAt),
       },
       room: ticket.room,
       linkedRoomItem: ticket.linkedRoomItem ? {
         id: ticket.linkedRoomItem.id,
         qty: Number(ticket.linkedRoomItem.qty),
         status: ticket.linkedRoomItem.status,
-        note: this.cleanShortText(ticket.linkedRoomItem.note, 300),
+        note: cleanShortText(ticket.linkedRoomItem.note, 300),
         roomCode: ticket.linkedRoomItem.room?.code ?? null,
-        item: this.inventoryItemSnapshot(ticket.linkedRoomItem.item),
+        item: inventoryItemSnapshot(ticket.linkedRoomItem.item),
       } : null,
-      linkedInventoryItem: this.inventoryItemSnapshot(ticket.linkedInventoryItem),
+      linkedInventoryItem: inventoryItemSnapshot(ticket.linkedInventoryItem),
       staffFieldReports: (ticket.staffFieldReports || []).map((report: any) => ({
         id: report.id,
         reportedCondition: report.reportedCondition,
-        conditionNotes: this.cleanShortText(report.conditionNotes, 300),
+        conditionNotes: cleanShortText(report.conditionNotes, 300),
         requestsReplacement: report.requestsReplacement,
         requestedQty: report.requestedQty == null ? null : Number(report.requestedQty),
-        requestedInventoryItem: this.inventoryItemSnapshot(report.requestedInventoryItem),
+        requestedInventoryItem: inventoryItemSnapshot(report.requestedInventoryItem),
         status: report.status,
-        ageDays: this.ageDays(report.createdAt),
+        ageDays: ageDays(report.createdAt),
       })),
-    };
-  }
-
-  private inventoryItemSnapshot(item: any) {
-    if (!item) return null;
-    return {
-      id: item.id,
-      name: item.name,
-      category: item.category,
-      qtyOnHand: item.qtyOnHand == null ? null : Number(item.qtyOnHand),
-      minQty: item.minQty == null ? null : Number(item.minQty),
-      status: item.status,
     };
   }
 
@@ -930,7 +827,7 @@ export class OwnerAiService {
       promptHash: '',
       fallback: true,
       warnings,
-      result: this.normalizeTicketActionDraft({
+      result: normalizeTicketActionDraft({
         summary: `${ticket.ticketNumber || 'Tiket'}: ${ticket.title || 'perlu ditinjau'}.`,
         recommendedAction,
         priority: ticket.category === 'EMERGENCY' || ticket.ageDays > 3 ? 'HIGH' : 'MEDIUM',
@@ -953,7 +850,7 @@ export class OwnerAiService {
       promptHash: '',
       fallback: true,
       warnings,
-      result: this.normalizeInventoryDraft({
+      result: normalizeInventoryDraft({
         lowStockItems: lowStockItems.map((item: any) => ({
           inventoryItemId: item.id,
           name: item.name,
@@ -985,7 +882,7 @@ export class OwnerAiService {
       promptHash: '',
       fallback: true,
       warnings,
-      result: this.normalizeFieldReportDraft({
+      result: normalizeFieldReportDraft({
         summary: `Laporan ${report.reportedCondition || 'lapangan'} perlu dicek admin.`,
         recommendedDecision: report.requestsReplacement ? 'APPROVE' : 'NEEDS_MORE_INFO',
         priority: ['MISSING', 'OUT_OF_STOCK'].includes(report.reportedCondition) ? 'HIGH' : 'MEDIUM',
@@ -1001,73 +898,6 @@ export class OwnerAiService {
       }),
       missingData: [],
     };
-  }
-
-  private normalizeTicketActionDraft(input: any) {
-    const recommendedActionRaw = String(input?.recommendedAction ?? 'KEEP_OPEN').toUpperCase();
-    const priorityRaw = String(input?.priority ?? 'MEDIUM').toUpperCase();
-    return {
-      summary: this.cleanShortText(input?.summary, 280) || 'Tiket perlu ditinjau manual.',
-      recommendedAction: TICKET_ACTION_VALUES.has(recommendedActionRaw) ? recommendedActionRaw : 'KEEP_OPEN',
-      priority: PRIORITY_VALUES.has(priorityRaw) ? priorityRaw : 'MEDIUM',
-      suggestedNote: this.cleanShortText(input?.suggestedNote, 700) || 'Cek data tiket lalu pilih aksi manual.',
-      riskFlags: this.toStringArray(input?.riskFlags).slice(0, 8),
-    };
-  }
-
-  private normalizeInventoryDraft(input: any, fallbackLowStock: any[]) {
-    const lowStockItems = Array.isArray(input?.lowStockItems) ? input.lowStockItems : fallbackLowStock;
-    const purchaseSuggestions = Array.isArray(input?.purchaseSuggestions) ? input.purchaseSuggestions : [];
-    return {
-      lowStockItems: lowStockItems.slice(0, 20).map((item: any) => ({
-        inventoryItemId: Number(item?.inventoryItemId ?? item?.id ?? 0) || 0,
-        name: this.cleanShortText(item?.name, 120) || 'Item stok',
-        currentQty: Number.isFinite(Number(item?.currentQty ?? item?.qtyOnHand)) ? Number(item?.currentQty ?? item?.qtyOnHand) : 0,
-        suggestedMinQty: Number.isFinite(Number(item?.suggestedMinQty ?? item?.minQty)) ? Number(item?.suggestedMinQty ?? item?.minQty) : 0,
-        reason: this.cleanShortText(item?.reason, 240) || 'Perlu dicek ulang oleh admin.',
-      })),
-      purchaseSuggestions: purchaseSuggestions.slice(0, 12).map((item: any) => {
-        const priorityRaw = String(item?.priority ?? 'MEDIUM').toUpperCase();
-        return {
-          name: this.cleanShortText(item?.name, 120) || 'Item pembelian',
-          qty: Number.isFinite(Number(item?.qty)) ? Math.max(0, Number(item.qty)) : 0,
-          estimatedBudgetRupiah: Number.isFinite(Number(item?.estimatedBudgetRupiah)) ? Math.max(0, Math.round(Number(item.estimatedBudgetRupiah))) : 0,
-          priority: PRIORITY_VALUES.has(priorityRaw) ? priorityRaw : 'MEDIUM',
-        };
-      }),
-      warnings: this.toStringArray(input?.warnings).slice(0, 8),
-    };
-  }
-
-  private normalizeFieldReportDraft(input: any) {
-    const decisionRaw = String(input?.recommendedDecision ?? 'NEEDS_MORE_INFO').toUpperCase();
-    const priorityRaw = String(input?.priority ?? 'MEDIUM').toUpperCase();
-    const suggestedMovement = input?.suggestedMovement || {};
-    const movementRaw = suggestedMovement?.movementType == null ? null : String(suggestedMovement.movementType).toUpperCase();
-    return {
-      summary: this.cleanShortText(input?.summary, 280) || 'Laporan lapangan perlu direview admin.',
-      recommendedDecision: FIELD_DECISION_VALUES.has(decisionRaw) ? decisionRaw : 'NEEDS_MORE_INFO',
-      priority: PRIORITY_VALUES.has(priorityRaw) ? priorityRaw : 'MEDIUM',
-      suggestedAdminNote: this.cleanShortText(input?.suggestedAdminNote, 700) || 'Cek laporan dan pilih keputusan manual.',
-      suggestedMovement: {
-        needed: Boolean(suggestedMovement?.needed),
-        movementType: ['ASSIGN_TO_ROOM', 'OUT'].includes(String(movementRaw)) ? movementRaw : null,
-        reason: this.cleanShortText(suggestedMovement?.reason, 240),
-      },
-      riskFlags: this.toStringArray(input?.riskFlags).slice(0, 8),
-    };
-  }
-
-  private toStringArray(value: unknown): string[] {
-    if (!Array.isArray(value)) return [];
-    return value.map((item) => this.cleanShortText(item, 240)).filter(Boolean);
-  }
-
-  private ageDays(value: Date | string | null | undefined): number {
-    if (!value) return 0;
-    const date = value instanceof Date ? value : new Date(value);
-    if (Number.isNaN(date.getTime())) return 0;
-    return Math.max(0, Math.floor((Date.now() - date.getTime()) / 86_400_000));
   }
 
   async buildFinanceSnapshot() {
@@ -1100,12 +930,12 @@ export class OwnerAiService {
     this.checkRateLimit(actorId, 'finance');
     const snapshot = await this.buildFinanceSnapshot();
     const snapshotHash = stableHash(snapshot);
-    if (!deepseekConfigured() || process.env.AI_FEATURES_ENABLED !== 'true') {
-      return this.financeFallback(snapshot, snapshotHash, 'AI tidak dikonfigurasi');
-    }
+    if (!deepseekConfigured()) return this.financeFallback(snapshot, snapshotHash, 'AI tidak dikonfigurasi');
+    const config = await this.getAiConfig();
+    if (!config.featuresEnabled) return this.financeFallback(snapshot, snapshotHash, 'AI dimatikan di Settings');
     const messages = buildFinancePrompt(snapshot as any);
     try {
-      const result = await deepseekChat(messages, { json: true, temperature: 0.3, model: process.env.DEEPSEEK_FINANCE_MODEL || 'deepseek-v4-pro', maxTokens: this.getFinanceMaxOutputTokens() });
+      const result = await deepseekChat(messages, { json: true, temperature: 0.3, model: config.financeModel, maxTokens: config.financeMaxOutputTokens });
       const parsed = JSON.parse(result.content);
       return { mode: 'DEEPSEEK', model: result.model, usage: result.usage, snapshotHash, promptHash: stableHash(messages.map(m=>m.content).join('|')), fallback: false, warnings: [], result: parsed, missingData: parsed.missingData || [] };
     } catch (err: any) {
@@ -1138,16 +968,53 @@ export class OwnerAiService {
     const submission = await this.prisma.paymentSubmission.findUnique({
       where: { id: submissionId },
       include: {
-        invoice: { select: { id: true, status: true, totalAmountRupiah: true, dueDate: true } },
-        stay: { select: { status: true, agreedRentAmountRupiah: true, initialMetersPromotedAt: true } },
+        invoice: {
+          select: {
+            id: true,
+            status: true,
+            totalAmountRupiah: true,
+            dueDate: true,
+            lines: { select: { lineAmountRupiah: true } },
+            payments: { select: { amountRupiah: true } },
+          },
+        },
+        stay: {
+          select: {
+            status: true,
+            agreedRentAmountRupiah: true,
+            initialMetersPromotedAt: true,
+            depositAmountRupiah: true,
+            depositPaidAmountRupiah: true,
+            downPaymentAmountRupiah: true,
+            downPaymentPaidRupiah: true,
+            room: { select: { status: true } },
+          },
+        },
       },
     });
     if (!submission) throw new Error('Submission tidak ditemukan');
 
     // Deterministic no-partial check SEBELUM AI
-    const invoiceTotal = Number(submission.invoice?.totalAmountRupiah || 0);
+    const invoiceLineTotal = submission.invoice?.lines?.reduce((sum, line) => sum + Number(line.lineAmountRupiah ?? 0), 0) ?? 0;
+    const invoiceTotal = Number(submission.invoice?.totalAmountRupiah ?? 0) > 0
+      ? Number(submission.invoice?.totalAmountRupiah)
+      : invoiceLineTotal;
+    const invoicePaidAmount = submission.invoice?.payments?.reduce((sum, payment) => sum + Number(payment.amountRupiah ?? 0), 0) ?? 0;
+    const invoiceRemaining = Math.max(invoiceTotal - invoicePaidAmount, 0);
     const submitted = submission.amountRupiah;
-    if (invoiceTotal > 0 && submitted !== invoiceTotal) {
+    const isBookingPath = submission.stay?.room?.status === RoomStatus.RESERVED;
+    const depositRemaining = isBookingPath
+      ? Math.max((submission.stay?.depositAmountRupiah ?? 0) - (submission.stay?.depositPaidAmountRupiah ?? 0), 0)
+      : 0;
+    const downPaymentRemaining = isBookingPath
+      ? Math.max((submission.stay?.downPaymentAmountRupiah ?? 0) - (submission.stay?.downPaymentPaidRupiah ?? 0), 0)
+      : 0;
+    const settlementAmount = isBookingPath ? invoiceRemaining + depositRemaining : 0;
+    const paymentGuard = decidePaymentReviewGuard(isBookingPath
+      ? { invoiceTotal: 0, submitted, downPaymentRemaining, settlementAmount }
+      : { invoiceTotal: invoiceRemaining, submitted });
+
+    if (paymentGuard.violated) {
       return {
         mode: 'RULE_FALLBACK', fallback: true,
         warnings: ['Deterministic guard: nominal tidak sesuai aturan no-partial'],
@@ -1168,16 +1035,22 @@ export class OwnerAiService {
       invoice: submission.invoice ? {
         id: submission.invoice.id, status: submission.invoice.status,
         totalAmountRupiah: submission.invoice.totalAmountRupiah, dueDate: submission.invoice.dueDate,
+        remainingRupiah: invoiceRemaining,
       } : null,
       stay: submission.stay ? {
         status: submission.stay.status,
         rent: submission.stay.agreedRentAmountRupiah,
         promoted: submission.stay.initialMetersPromotedAt !== null,
+        bookingPath: isBookingPath,
+        downPaymentRemaining,
+        settlementAmount,
+        paymentRule: paymentGuard.matchedRule,
       } : null,
     };
     const snapshotHash = stableHash(snapshot);
 
-    if (!deepseekConfigured() || process.env.AI_FEATURES_ENABLED !== 'true') {
+    const aicfg = await this.getAiConfig();
+    if (!deepseekConfigured() || !aicfg.featuresEnabled) {
       return this.paymentFallback(snapshotHash, 'AI tidak dikonfigurasi');
     }
 
@@ -1220,7 +1093,8 @@ export class OwnerAiService {
 
     const promptHash = stableHash(messages.map(m => m.content).join('|'));
 
-    if (!deepseekConfigured() || process.env.AI_FEATURES_ENABLED !== 'true') {
+    const aicfg = await this.getAiConfig();
+    if (!deepseekConfigured() || !aicfg.featuresEnabled) {
       return {
         mode: 'RULE_FALLBACK', fallback: true, promptHash,
         warnings: ['AI tidak dikonfigurasi'],

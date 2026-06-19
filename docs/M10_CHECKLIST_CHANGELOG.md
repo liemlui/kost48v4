@@ -25,7 +25,7 @@
 | Fase G — AI Owner/Admin | **selesai** | — | DeepSeek/API AI berbayar: G0-G9 selesai, tombol manual, draft queue, KTP OCR, budgeting ✅ |
 | Fase H — UI/UX Compact | **selesai** | — | Sidebar owner 18→7, dashboard 6→3 tab, merge minat+layanan, polish CSS ✅ |
 | Fase I — Navigasi & Onboarding | **selesai** | — | I1-I6 selesai: hapus AdminAreaInternalMenu, unifikasi staff nav via navigation.ts, ekspos /meter-readings, GettingStartedGuide tenant, breadcrumb klik ✅ |
-| Fase J — Hardening AI Pra-Go-Live | **baru** | J0-J4 | Jaring pengaman owner-ai (test PDP/uang), luruskan guard no-partial DP, hardening FE AI, audit PDP → `docs/M15_FASE_J_HARDENING_AI.md` |
+| Fase J — Hardening AI Pra-Go-Live | **selesai** | — | J0-J4 selesai: helper/test PDP+uang, guard no-partial DP, hardening FE AI, audit PDP dibukukan di M09 |
 
 ### Urutan kerja (jangan loncat kecuali blocked) — detail di [ANTRIAN](#antrian-eksekusi-aktif-untuk-ai--kerjakan-dari-sini)
 
@@ -36,6 +36,7 @@
 5. **Fase E — Polish & Teknis**: selesai; jangan ulang kecuali regresi.
 6. **Fase F — UI/UX Sweep**: perbaikan aksesibilitas, feedback toast, route 404, kontras, polish (13 temuan audit 2026-06-19).
 7. **Fase G — AI Owner/Admin Approval Copilot**: safety foundation → owner brief → finance analyst → payment/expense/KTP/ops assistant → budget observability.
+8. **Fase K — Pasca-Audit Total**: ikuti `docs/M16_PASCA_AUDIT_PLAN.md` — 13 task P4–R5 + 31 backlog.
 - ✅ Selesai referensi: METER M-5, AUDIT-OWNER, CSS+SWEEP, MKT-4, MKT-5, OWN-STRUKTUR-TOGGLE, AUDIT-KEUANGAN-ULTRA (lihat ANTRIAN → "Selesai Referensi").
 
 ### Legenda marker task
@@ -1229,7 +1230,7 @@ Checklist wajib sebelum centang `[x]`:
 
 **Anchor kode:** `owner-ai.service.ts` · `owner-ai.helpers.ts` (baru) · `payment-submissions.service.ts` (acuan no-partial) · `frontend/src/components/ai/*` · `backend/test/unit/financial-ratios.helper.test.js` (pola test). **Test require `dist/` → WAJIB `npm run build` dulu.**
 
-#### J0 — Ekstrak guard murni owner-ai → `owner-ai.helpers.ts` (refactor tanpa ubah perilaku) [ ]
+#### J0 — Ekstrak guard murni owner-ai → `owner-ai.helpers.ts` (refactor tanpa ubah perilaku) [x]
 
 **Target:** buat `backend/src/modules/owner-ai/owner-ai.helpers.ts`; edit `owner-ai.service.ts`.
 
@@ -1237,7 +1238,7 @@ Checklist wajib sebelum centang `[x]`:
 
 **Gate:** `cd backend; npx tsc --noEmit` = 0 → `npm run build` → `npm run test:unit` (regresi hijau). Diff service hanya pindah + import.
 
-#### J1 — Unit test jaring pengaman `owner-ai-safety.test.js` [ ]
+#### J1 — Unit test jaring pengaman `owner-ai-safety.test.js` [x]
 
 **Target:** buat `backend/test/unit/owner-ai-safety.test.js`.
 
@@ -1245,7 +1246,7 @@ Checklist wajib sebelum centang `[x]`:
 
 **Gate:** `cd backend; npm run build && npm run test:unit` semua hijau (+≥18 assert baru).
 
-#### J2 — Luruskan guard no-partial AI agar selaras domain (DP booking) [ ]
+#### J2 — Luruskan guard no-partial AI agar selaras domain (DP booking) [x]
 
 **Target:** `owner-ai.helpers.ts` + `owner-ai.service.ts` `reviewPaymentSubmission`. Acuan: `payment-submissions.service.ts` `approveSubmission` (±567–587).
 
@@ -1253,7 +1254,7 @@ Checklist wajib sebelum centang `[x]`:
 
 **Gate (UANG):** `npx tsc --noEmit` = 0 → `npm run build` → `npm run test:unit` hijau + gate `docs/M04_KEUANGAN.md`. UAT: DP booking 30% tidak disarankan REJECT; nominal salah tetap REJECT.
 
-#### J3 — Hardening frontend AI (non-blocking error + role/configured gating) [ ]
+#### J3 — Hardening frontend AI (non-blocking error + role/configured gating) [x]
 
 **Target:** `frontend/src/components/ai/AiAssistButton.tsx` · `AiResultPanel.tsx` · `AiApprovalDrawer.tsx`.
 
@@ -1261,7 +1262,7 @@ Checklist wajib sebelum centang `[x]`:
 
 **Gate:** `cd frontend; npm run build` PASS. UAT: error → pesan non-blocking; STAFF/TENANT tak lihat tombol AI.
 
-#### J4 — Audit keamanan & PDP menyeluruh modul AI (bukukan ke M09) [ ]
+#### J4 — Audit keamanan & PDP menyeluruh modul AI (bukukan ke M09) [x]
 
 **Target:** verifikasi 12 endpoint `owner-ai.controller.ts`; tulis hasil ke `docs/M09_AUDIT.md`.
 
@@ -1271,12 +1272,12 @@ Checklist wajib sebelum centang `[x]`:
 
 #### UAT Global Fase J
 
-- [ ] `cd backend; npm run build && npm run test:unit` SEMUA hijau (termasuk `owner-ai-safety.test.js`).
-- [ ] `owner-ai.service.ts` bersih dari fungsi murni (sudah di helper); `npx tsc --noEmit` = 0.
-- [ ] Guard no-partial AI: DP booking sah tidak di-REJECT; nominal salah tetap REJECT.
-- [ ] `cd frontend; npm run build` PASS; tombol AI non-blocking + tak muncul untuk STAFF/TENANT.
-- [ ] Audit PDP/keamanan AI dibukukan di `docs/M09_AUDIT.md`.
-- [ ] Tidak ada perubahan `schema.prisma` / `sql/`.
+- [x] `cd backend; npm run build && npm run test:unit` SEMUA hijau (termasuk `owner-ai-safety.test.js`).
+- [x] `owner-ai.service.ts` bersih dari fungsi murni (sudah di helper); `npx tsc --noEmit` = 0.
+- [x] Guard no-partial AI: DP booking sah tidak di-REJECT; nominal salah tetap REJECT.
+- [x] `cd frontend; npm run build` PASS; tombol AI non-blocking + tak muncul untuk STAFF/TENANT.
+- [x] Audit PDP/keamanan AI dibukukan di `docs/M09_AUDIT.md`.
+- [x] Tidak ada perubahan `schema.prisma` / `sql/`.
 
 ---
 
