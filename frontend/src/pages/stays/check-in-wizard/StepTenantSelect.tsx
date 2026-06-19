@@ -3,6 +3,7 @@ import { Alert, Button, Card, Col, Form, Row, Spinner } from 'react-bootstrap';
 import { Controller } from 'react-hook-form';
 import type { UseFormReturn } from 'react-hook-form';
 import SearchableSelect, { SelectOption } from '../../../components/common/SearchableSelect';
+import KtpOcrValidateCard from '../../../components/ai/KtpOcrValidateCard';
 import type { WizardFormValues } from './types';
 
 interface StepTenantSelectProps {
@@ -211,6 +212,10 @@ export default function StepTenantSelect({
               <Button size="sm" variant="outline-secondary" onClick={() => setShowInlineTenant(false)}>Tutup</Button>
             </div>
           </Card>
+        ) : null}
+
+        {selectedTenant?.value ? (
+          <KtpOcrValidateCard tenantId={selectedTenant.value} tenantName={selectedTenant.label} />
         ) : null}
       </Card.Body>
     </Card>
