@@ -8,6 +8,7 @@ import TenantAvatar from '../common/TenantAvatar';
 import { useAuth } from '../../context/AuthContext';
 import { getNavigationLinks, type TenantPortalStage } from '../../config/navigation';
 import { getResource } from '../../api/resources';
+import GettingStartedGuide from './GettingStartedGuide';
 import type { Announcement } from '../../types';
 
 function getStageTitle(stage: TenantPortalStage) {
@@ -107,6 +108,8 @@ export default function TenantWorkspaceTabs({
       </section>
 
       <TenantAnnouncementStrip stage={stage} />
+
+      <GettingStartedGuide stage={stage} />
 
       <section className="tenant-workspace-guide-strip">
         <div>

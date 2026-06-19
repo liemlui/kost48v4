@@ -24,7 +24,15 @@ Fitur AI berbayar dipisah menjadi `docs/M12_AI_OWNER_ADMIN.md`. Keputusan owner:
 
 ## Update 2026-06-22 - Fase H UI/UX Compact Owner↔Admin
 
-Penyederhanaan UI Owner & Admin tanpa menghilangkan fitur — **reduksi duplikasi, compact dashboard, merge entri mirip.** Spesifikasi lengkap: `docs/M13_FASE_H_UIUX_COMPACT.md`. Enam task: H1 (sidebar owner 19→7), H2 (dashboard 6→3 tab), H3 (merge Minat+Layanan), H4 (unifikasi AI panel), H5 (owner dashboard landing page), H6 (CSS polish). Semua task frontend-only — tidak sentuh backend/schema/API.
+Penyederhanaan UI Owner & Admin tanpa menghilangkan fitur — **reduksi duplikasi, compact dashboard, merge entri mirip.** Spesifikasi lengkap: `docs/M13_FASE_H_UIUX_COMPACT.md`. Enam task: H1 (sidebar owner 18→7), H2 (dashboard 6→3 tab), H3 (merge Minat+Layanan), H4 (unifikasi AI panel), H5 (owner dashboard landing page), H6 (CSS polish). Semua task frontend-only — tidak sentuh backend/schema/API. **SELESAI 2026-06-20.**
+
+## Update 2026-06-20 - Fase I Navigasi & Onboarding
+
+De-duplikasi navigasi pasca Fase H: hapus sub-menu chip duplikat sidebar, unifikasi StaffTopWorkspaceNav, ekspos rute tersembunyi, breadcrumb interaktif, dan onboarding tenant baru. Spesifikasi lengkap: `docs/M14_FASE_I_NAVIGASI_ONBOARDING.md`. Enam task: I1-I6. Semua frontend-only. **BARU.**
+
+## Update 2026-06-20 - Fase J Hardening AI Pra-Go-Live
+
+Jaring pengaman modul AI Fase G (yang selesai tanpa test). Spesifikasi lengkap: `docs/M15_FASE_J_HARDENING_AI.md`. Lima task: J0 (ekstrak guard murni `owner-ai.helpers.ts`), J1 (unit test PDP mask-NIK + uang no-partial), J2 (luruskan guard no-partial AI agar sadar DP booking — temuan divergensi vs `approveSubmission`), J3 (hardening FE AI non-blocking + gating), J4 (audit PDP/keamanan 12 endpoint AI → M09). Tanpa schema. **BARU.**
 
 ## Catatan Pemakaian
 

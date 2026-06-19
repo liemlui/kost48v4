@@ -6,6 +6,7 @@ import { fetchMyStaffPerformance } from '../../api/staffPerformance';
 import { listResource } from '../../api/resources';
 import type { InventoryItem, RoomItem } from '../../types';
 import { getInventoryHealth, isInventoryPhysicalIssue } from '../../utils/inventoryHealth';
+import { getNavigationLinks } from '../../config/navigation';
 
 type StaffTicketLite = {
   id: number;
@@ -61,18 +62,26 @@ export default function StaffTopWorkspaceNav() {
 
     return {
       today: routineRemaining + actionTickets,
+      tickets: actionTickets,
       rooms: roomProblems,
       warehouse: warehouseProblems,
       report: reportIssues,
     };
   }, [routineQuery.data, ticketsQuery.data, roomItemsQuery.data, inventoryQuery.data, performanceQuery.data]);
 
-  const links = [
-    { to: '/dashboard', label: 'Hari Ini', count: counts.today, key: 'today', hint: 'Semua pekerjaan hari ini' },
-    { to: '/rooms', label: 'Kamar', count: counts.rooms, key: 'rooms', hint: 'Barang kamar, meter, dan kondisi kamar' },
-    { to: '/staff-warehouse', label: 'Gudang', count: counts.warehouse, key: 'warehouse', hint: 'Stok dan alat umum' },
-    { to: '/staff-report', label: 'Laporan', count: counts.report, key: 'report', hint: 'Bukti kerja bulanan' },
-  ];
+  const navLinks = useMemo(() => getNavigationLinks('STAFF'), []);
+  const links = useMemo(() => navLinks.map((link, idx) => {
+    const keys = ['today', 'tickets', 'rooms', 'warehouse', 'report'] as const;
+    const key = keys[idx] ?? 'today';
+    const countMap: Record<string, number> = {
+      today: counts.today,
+      tickets: counts.tickets,
+      rooms: counts.rooms,
+      warehouse: counts.warehouse,
+      report: counts.report,
+    };
+    return { to: link.to, label: link.label, count: countMap[key] ?? 0, key, hint: link.hint ?? link.label };
+  }), [navLinks, counts]);
 
   return (
     <div className="staff-workspace-nav-wrap simple-only">

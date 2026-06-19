@@ -3,6 +3,26 @@
 > Arsip changelog ringkas, dipisah dari M10 pada 2026-06-19 untuk hemat token AI (M10 = checklist aktif saja). **Entri changelog BARU ditulis DI SINI (paling atas)**, bukan di M10. Format: 1 header tanggal + 1-2 poin outcome per entri.
 
 ## Changelog Ringkas
+### 2026-06-20 — docs(Fase J): dossier hardening AI pra-go-live (jaring pengaman owner-ai)
+- **docs(M15):** `docs/M15_FASE_J_HARDENING_AI.md` BARU — 5 task J0-J4 (detail untuk AI eksekutor lemah): J0 ekstrak guard murni → `owner-ai.helpers.ts`, J1 unit test PDP mask-NIK + uang no-partial (`owner-ai-safety.test.js`), J2 luruskan guard no-partial AI sadar DP booking, J3 hardening FE AI non-blocking + gating, J4 audit PDP 12 endpoint → M09.
+- **temuan audit kode 2026-06-20:** modul `owner-ai/` (Fase G, 15 file) selesai TANPA test; fungsi pengaman murni terkubur `private`; DIVERGENSI guard no-partial — AI `reviewPaymentSubmission` (±l.1150) salah me-REJECT DP booking sah vs domain `approveSubmission` (±l.567-587) yang sadar DP. Aman uang (over-reject) tapi rekomendasi salah.
+- **docs(M10/M01/M12):** Fase J ditambah ke ANTRIAN + status table (dedup baris Fase I ganda) + router M01 + status M12. Backend/FE tidak disentuh (fase dokumentasi).
+
+### 2026-06-20 — ui(Fase I): I1–I6 de-duplikasi navigasi + onboarding tenant
+- **ui(I1):** hapus `AdminAreaInternalMenu` + `AdminAreaMenuItem` type + `activeAreaMenuItems` dari `DashboardAdmin.tsx` (484 baris, dari 551). Sub-menu chip 20+ item yang 100% duplikat sidebar dihapus. Teks header diupdate: "Gunakan sidebar kiri untuk membuka halaman detail."
+- **ui(I2):** unifikasi `StaffTopWorkspaceNav` — import `getNavigationLinks('STAFF')` dari `navigation.ts`, ganti hardcode 4 tab dengan source tunggal. Tambah tab "Tugas" (`/tickets`) + key `tickets` di counts.
+- **ui(I3):** tambah `/meter-readings` ke `activePaths` sidebar "Kamar & Stok" di `navigation.ts`.
+- **feat(I4):** komponen baru `GettingStartedGuide.tsx` — 3 langkah orientasi tenant (browsing: pilih kamar→booking→bayar; booking: pantau→bayar→kunci). Render di `TenantWorkspaceTabs`.
+- **ui(I5):** breadcrumb segmen pertama jadi `<NavLink to={defaultRoute}>` di `AppLayout.tsx`.
+- **ui(I6):** verifikasi guide strip tenant adaptif (no-op, sudah benar).
+- **Gate:** `npm run build` PASS (43s, 115 chunks, PWA verified). Backend tidak disentuh.
+- **docs:** M14 dossier SEARCH/REPLACE siap copas; M10 centang I1-I6 [x]; M11 changelog ini.
+
+### 2026-06-20 — docs(Fase I): dossier navigasi & onboarding + audit UI/UX total
+- **docs(M14):** `docs/M14_FASE_I_NAVIGASI_ONBOARDING.md` — 6 task I1-I6: hapus AdminAreaInternalMenu (duplikasi sidebar), unifikasi StaffTopWorkspaceNav dengan staffSections, ekspos rute tersembunyi (/expenses, /meter-readings), GettingStartedGuide tenant, breadcrumb interaktif, guide strip adaptif.
+- **docs(M10):** Fase I ditambah ke ANTRIAN + ringkasan + peta rujukan. Fase G dan H ditandai **selesai**.
+- **audit:** audit UI/UX total selesai — tidak ditemukan auto-trigger AI, semua panggilan AI di balik button. 3 lapis navigasi paralel teridentifikasi (sidebar → menu area → sub-menu chip).
+
 ### 2026-06-20 — css(Fase H H6): hapus CSS dead di 08-admin.css
 - **css(H6):** 7 edit bedah di `08-admin.css` — hapus `.admin-area-tabs` (layout 6 & 7 kolom lama), `.admin-area-link-grid` (grid pintasan lama), `.admin-primary-tabs` (sticky tabs 6 kolom lama), dan semua referensinya di `@media` block. Selector live (`.admin-sla-mini-note`, `.admin-workspace-topbar`, `.admin-today-status-strip`, dll.) dipertahankan. `12-owner.css` tidak ada selector mati.
 - **Gate:** `npm run build` PASS (19 s, 115 chunks, PWA verify OK). Backend tidak disentuh.

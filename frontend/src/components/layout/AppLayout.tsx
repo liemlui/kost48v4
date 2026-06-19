@@ -413,7 +413,7 @@ export default function AppLayout({ children }: { children?: ReactNode }) {
                   {breadcrumbParts.map((part, index) => (
                     <span key={`${part}-${index}`}>
                       {index > 0 ? <span className="app-breadcrumb-separator"> / </span> : null}
-                      <span>{part}</span>
+                      {index === 0 ? <NavLink to={defaultRoute} className="app-breadcrumb-link">{part}</NavLink> : <span>{part}</span>}
                     </span>
                   ))}
                 </nav>

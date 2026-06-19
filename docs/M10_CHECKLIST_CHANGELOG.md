@@ -12,7 +12,7 @@
 6. **DB dev:** postgres **5433** `kost48_v3_pro` · reseed: `node scripts/seed-dev-reset.js` lalu `node scripts/seed-dev-via-api.js`.
 7. **Larangan:** no npm dep baru · no `schema.prisma` tanpa approval owner (🧬) · no `git push` · no sentuh file milik AI lain (`git status` dulu).
 
-### Status ringkas (2026-06-19)
+### Status ringkas (2026-06-20)
 
 | Blok | Selesai | Terbuka | Catatan |
 |------|---------|---------|---------|
@@ -22,7 +22,10 @@
 | Fase D — Staff & Gudang | **selesai** | — | Meter status, theme, WiFi order, tip flow, gudang FK, role scope SEMUA selesai (2026-06-19) |
 | Fase E — Polish & Teknis | **selesai** | — | TEN-GAMIF privacy, split auto-ops & stays, integration test, E2E Playwright, evaluasi arsitektur ✅ |
 | Fase F — UI/UX Sweep | **selesai** | — | UX-404 (NotFoundPage), UX-TOAST (ToastProvider), UX-A11Y (SVG password, skip-link), UX-COLOR (kontras AA), UX-LOGOUT (konfirmasi), UX-SEARCH-TENANT, UX-SKELETON, UX-OVERSCROLL, UX-LOGIN-FORMAT ✅ |
-| Fase G — AI Owner/Admin | baru | G0-G9 | DeepSeek/API AI berbayar: tombol manual Owner/Admin saja, hasil draft/rekomendasi, aksi final wajib approval manusia |
+| Fase G — AI Owner/Admin | **selesai** | — | DeepSeek/API AI berbayar: G0-G9 selesai, tombol manual, draft queue, KTP OCR, budgeting ✅ |
+| Fase H — UI/UX Compact | **selesai** | — | Sidebar owner 18→7, dashboard 6→3 tab, merge minat+layanan, polish CSS ✅ |
+| Fase I — Navigasi & Onboarding | **baru** | I1-I6 | Hapus duplikasi menu, unifikasi staff nav, ekspos rute, breadcrumb klik, onboarding tenant |
+| Fase J — Hardening AI Pra-Go-Live | **baru** | J0-J4 | Jaring pengaman owner-ai (test PDP/uang), luruskan guard no-partial DP, hardening FE AI, audit PDP → `docs/M15_FASE_J_HARDENING_AI.md` |
 
 ### Urutan kerja (jangan loncat kecuali blocked) — detail di [ANTRIAN](#antrian-eksekusi-aktif-untuk-ai--kerjakan-dari-sini)
 
@@ -281,6 +284,8 @@ Detail SI: `docs/archieve/2026-06-16_si_notes/_PLAN_SI_SEWA_RIWAYAT.md` · Meter
 | Checklist aktif & ANTRIAN | `docs/M10_CHECKLIST_CHANGELOG.md` | Source of truth eksekusi berikutnya |
 | Changelog arsip | `docs/M11_CHANGELOG.md` | Riwayat ringkas; tulis entri baru di paling atas |
 | AI Owner/Admin berbayar | `docs/M12_AI_OWNER_ADMIN.md` | Fase G: tombol manual, DeepSeek, konteks hemat token, OCR draft, approval copilot |
+| UI/UX Compact Owner↔Admin | `docs/M13_FASE_H_UIUX_COMPACT.md` | Fase H: reduksi sidebar 18→7, dashboard 6→3 tab, merge layanan |
+| Navigasi & Onboarding | `docs/M14_FASE_I_NAVIGASI_ONBOARDING.md` | Fase I: de-duplikasi menu, rute tersembunyi, breadcrumb, onboarding |
 | Peta navigasi kode (AI) | `docs/CODEMAP.md` | Modul→path→tanggung jawab + index model + anchor flow |
 | Audit post-fix terbaru | `docs/AUDIT_POST_FIX.md` | Verifikasi DEEP-01..05 dan catatan hardening |
 
@@ -335,8 +340,9 @@ Output akhir:
 | **Fase D** | Operasional Staff & Gudang | **selesai** | M06, M04 | Staff/gudang/WiFi/tip/meter view selesai untuk backlog aktif |
 | **Fase E** | Polish, Gamifikasi & Teknis | **selesai** | M06, M07, M09 | TEN-GAMIF privacy, split service, integration test, E2E, dan evaluasi arsitektur selesai |
 | **Fase F** | UI/UX Sweep | **selesai** | M07 | 404, toast, a11y, kontras, logout, tenant search, skeleton, overscroll, login format |
-| **Fase G** | AI Owner/Admin Approval Copilot | baru | M12, M02, M04-M09, CODEMAP | DeepSeek/API AI manual-only untuk Owner/Admin; draft/rekomendasi + approval manusia |
-| **Fase H** | UI/UX Compact Owner↔Admin | baru | M13, M02, M07, CODEMAP | Reduksi sidebar owner 19→7, compact dashboard 6→3 tab, merge minat+layanan, unifikasi AI panel |
+| **Fase G** | AI Owner/Admin Approval Copilot | **selesai** | M12, M02, M04-M09, CODEMAP | DeepSeek/API AI manual-only; G0-G9 selesai, draft queue, KTP OCR, budgeting ✅ |
+| **Fase H** | UI/UX Compact Owner↔Admin | **selesai** | M13, M02, M07, CODEMAP | Reduksi sidebar 18→7, dashboard 6→3 tab, merge layanan, polish CSS ✅ |
+| **Fase I** | Navigasi & Onboarding | baru | M14, M02, M07, CODEMAP | Hapus duplikasi menu, unifikasi staff nav, ekspos rute, breadcrumb klik, onboarding tenant |
 
 ---
 
@@ -1110,6 +1116,167 @@ Checklist wajib sebelum centang `[x]`:
 - [ ] Owner dashboard mode full: chart tren tetap ada.
 - [ ] Mobile (390px): sidebar offcanvas toggle Kokpit/Area Admin berfungsi, tidak overflow.
 - [ ] `npm run build` PASS.
+
+---
+
+### Fase I — Navigasi & Onboarding
+
+**Tujuan:** menghilangkan duplikasi navigasi tersisa pasca Fase H, mengekspos rute tersembunyi, dan menambah orientasi untuk user baru.
+
+> **Rencana otoritatif = `docs/M14_FASE_I_NAVIGASI_ONBOARDING.md` (I1–I6).** Semua perubahan frontend-only — tidak menyentuh backend, schema, atau API.
+
+**Rujukan:** `docs/M14_FASE_I_NAVIGASI_ONBOARDING.md` (spesifikasi LENGKAP) · `docs/M02_KEPUTUSAN_OWNER.md` · `docs/M07_PUBLIK_GROWTH.md` · `docs/CODEMAP.md`.
+
+**Anchor kode:** `DashboardAdmin.tsx` · `StaffTopWorkspaceNav.tsx` · `navigation.ts` · `AppLayout.tsx` · `TenantWorkspaceTabs.tsx`.
+
+#### I1 — Hapus AdminAreaInternalMenu dari DashboardAdmin [x]
+
+**Target:** `frontend/src/pages/dashboard/DashboardAdmin.tsx`.
+
+**Langkah:**
+1. Hapus type `AdminAreaMenuItem` (dead code).
+2. Hapus fungsi `AdminAreaInternalMenu` (dead code).
+3. Hapus computed `activeAreaMenuItems` (~30 baris chip duplikat).
+4. Hapus render call `<AdminAreaInternalMenu ... />` di JSX.
+5. Update teks `AdminCommandHeader`: ganti "buka area lain dari chip atau sidebar" → "Gunakan sidebar kiri untuk membuka halaman detail."
+
+**Gate:** `cd frontend; npm run build` PASS. UAT: dashboard admin TIDAK menampilkan sub-menu chip; navigasi via sidebar berfungsi normal.
+
+#### I2 — Unifikasi StaffTopWorkspaceNav dengan staffSections [x]
+
+**Target:** `frontend/src/components/staff/StaffTopWorkspaceNav.tsx` + `frontend/src/config/navigation.ts`.
+
+**Langkah:**
+1. Import `staffSections` dari `navigation.ts` di `StaffTopWorkspaceNav.tsx`.
+2. Ganti array `links` hardcode dengan `staffSections[0].links` (single source of truth).
+3. Update `counts` logic agar mencakup semua link (termasuk "Tugas" `/tickets`).
+4. Pastikan `staffSections` di `navigation.ts` sudah mencakup `/tickets` (sudah ada).
+
+**Gate:** `cd frontend; npm run build` PASS. UAT: StaffTopWorkspaceNav menampilkan 5 tab dari navigation.ts; count badge berfungsi.
+
+#### I3 — Ekspos Rute Tersembunyi di Sidebar Admin [x]
+
+**Target:** `frontend/src/config/navigation.ts`.
+
+**Langkah:**
+1. Cek `adminSections` → section "Keuangan": pastikan `activePaths` sudah mencakup `/expenses`, `/invoice-payments` (✅ sudah ada).
+2. Cek `adminSections` → section "Kamar & Stok": tambah `/meter-readings` ke `activePaths`.
+3. Verifikasi semua rute admin punya cakupan `activePaths` di minimal 1 section sidebar.
+
+**Gate:** `cd frontend; npm run build` PASS. UAT: buka `/expenses` → sidebar "Keuangan" active; buka `/meter-readings` → sidebar "Kamar & Stok" active.
+
+#### I4 — GettingStartedGuide untuk Tenant Baru [x]
+
+**Target:** `frontend/src/components/tenant/GettingStartedGuide.tsx` [NEW] + `frontend/src/components/tenant/TenantWorkspaceTabs.tsx`.
+
+**Langkah:**
+1. Buat komponen `GettingStartedGuide` — terima prop `stage: TenantPortalStage`.
+2. Stage "browsing": tampilkan 3 langkah (pilih kamar → ajukan booking → bayar).
+3. Stage "booking": tampilkan 3 langkah (pantau status → bayar tagihan → dapat kunci).
+4. Stage "occupied": tidak menampilkan apa-apa.
+5. Render di `TenantWorkspaceTabs`, di antara guide strip dan tab navigasi.
+
+**Gate:** `cd frontend; npm run build` PASS. UAT: tenant browsing/booking melihat langkah orientasi; tenant occupied tidak.
+
+#### I5 — Breadcrumb Interaktif (Segmen Pertama Klik) [x]
+
+**Target:** `frontend/src/components/layout/AppLayout.tsx`.
+
+**Langkah:**
+1. Di render breadcrumb, ubah segmen index 0 dari `<span>` menjadi `<NavLink to={defaultRoute}>`.
+2. Segmen lainnya tetap `<span>` (tidak ada route mapping untuk "Detail" ID numerik).
+3. Style tetap sama (jangan ubah CSS).
+
+**Gate:** `cd frontend; npm run build` PASS. UAT: klik segmen pertama breadcrumb → navigasi ke dashboard.
+
+#### I6 — Verifikasi Guide Strip Adaptif Tenant [x]
+
+**Target:** `frontend/src/components/tenant/TenantWorkspaceTabs.tsx` (verifikasi only, tidak ada perubahan kode).
+
+**Langkah:**
+1. Verifikasi `getStageTitle()` dan `getStageSummary()` mengembalikan teks berbeda per stage.
+2. Pastikan teks deskriptif dan membantu orientasi.
+3. Jika teks sudah benar → centang [x] tanpa perubahan kode.
+
+**Gate:** UAT manual: login tenant di 3 stage berbeda → guide strip menampilkan teks yang sesuai.
+
+---
+
+#### UAT Global Fase I
+
+Checklist wajib sebelum centang `[x]`:
+
+- [ ] **UAT-I1:** Login ADMIN → dashboard TIDAK menampilkan sub-menu chip.
+- [ ] **UAT-I2:** Login STAFF → StaffTopWorkspaceNav 5 tab, sumber dari navigation.ts.
+- [ ] **UAT-I3:** `/expenses`, `/meter-readings` → sidebar item active.
+- [ ] **UAT-I4:** TENANT browsing/booking → GettingStartedGuide muncul.
+- [ ] **UAT-I5:** Breadcrumb segmen pertama bisa diklik → ke dashboard.
+- [ ] **UAT-I6:** Guide strip tenant adaptif per stage.
+- [ ] **UAT-REGRESSION:** Semua halaman existing tidak 404; toggle Owner↔Admin tidak rusak.
+- [ ] `cd frontend && npm run build` PASS.
+
+---
+
+### Fase J — Hardening Pasca-Fase-G (Jaring Pengaman AI Pra-Go-Live) 🆕
+
+**Tujuan:** mengunci jaminan PDP (mask NIK) + uang (no-partial) dengan test, meluruskan divergensi guard, dan membukukan audit keamanan AI — sebelum go-live (F1-12). BUKAN menambah fitur AI.
+
+> **Rencana otoritatif = `docs/M15_FASE_J_HARDENING_AI.md` (J0–J4).** Baca PENUH sebelum coding (ditulis detail untuk AI eksekutor lemah: anchor ter-grep, langkah bernomor, gate, larangan).
+
+**Latar belakang temuan (audit 2026-06-20):** modul `backend/src/modules/owner-ai/` (Fase G, 15 file) selesai 19–20 Jun tapi **NOL test**, padahal paling dekat ke uang + PDP. Fungsi pengaman murni terkubur sebagai `private`. Ditemukan **divergensi guard no-partial**: guard AI `reviewPaymentSubmission` (±l.1150) salah me-REJECT DP booking yang sah karena hanya cek `submitted !== invoiceTotal`, sedangkan guard domain `approveSubmission` (±l.567–587) sadar DP.
+
+**Rujukan:** `docs/M15_FASE_J_HARDENING_AI.md` · `docs/M12_AI_OWNER_ADMIN.md` · `docs/M04_KEUANGAN.md` (gate uang) · `docs/M09_AUDIT.md` · `docs/CODEMAP.md`.
+
+**Anchor kode:** `owner-ai.service.ts` · `owner-ai.helpers.ts` (baru) · `payment-submissions.service.ts` (acuan no-partial) · `frontend/src/components/ai/*` · `backend/test/unit/financial-ratios.helper.test.js` (pola test). **Test require `dist/` → WAJIB `npm run build` dulu.**
+
+#### J0 — Ekstrak guard murni owner-ai → `owner-ai.helpers.ts` (refactor tanpa ubah perilaku) [ ]
+
+**Target:** buat `backend/src/modules/owner-ai/owner-ai.helpers.ts`; edit `owner-ai.service.ts`.
+
+**Langkah:** pindahkan fungsi MURNI (tanpa Prisma/env/DeepSeek) + konstanta set ke helper & `export`; service import + delegasi; tambah `decidePaymentReviewGuard()` (kunci perilaku saat ini). Daftar fungsi & yang JANGAN dipindah → M15 J0 langkah 3–6.
+
+**Gate:** `cd backend; npx tsc --noEmit` = 0 → `npm run build` → `npm run test:unit` (regresi hijau). Diff service hanya pindah + import.
+
+#### J1 — Unit test jaring pengaman `owner-ai-safety.test.js` [ ]
+
+**Target:** buat `backend/test/unit/owner-ai-safety.test.js`.
+
+**Langkah:** test `maskNik` (PDP), `parseNikDemographics`, `extractNikFromOcr`, `decidePaymentReviewGuard` (uang), `normalizeExpenseOcrDraft` (clamp+enum), `cleanShortText`/`isDateOnly`/`ageDays`, normalize* default aman. Detail assert → M15 J1.
+
+**Gate:** `cd backend; npm run build && npm run test:unit` semua hijau (+≥18 assert baru).
+
+#### J2 — Luruskan guard no-partial AI agar selaras domain (DP booking) [ ]
+
+**Target:** `owner-ai.helpers.ts` + `owner-ai.service.ts` `reviewPaymentSubmission`. Acuan: `payment-submissions.service.ts` `approveSubmission` (±567–587).
+
+**Langkah:** `decidePaymentReviewGuard` jadi sadar-DP (FULL/DP/SETTLEMENT); hitung downPaymentRemaining/settlementAmount rumus SAMA dengan domain; tambah field `select` bila perlu (TANPA ubah tabel); test DP-persis/pelunasan tidak violated. Detail → M15 J2.
+
+**Gate (UANG):** `npx tsc --noEmit` = 0 → `npm run build` → `npm run test:unit` hijau + gate `docs/M04_KEUANGAN.md`. UAT: DP booking 30% tidak disarankan REJECT; nominal salah tetap REJECT.
+
+#### J3 — Hardening frontend AI (non-blocking error + role/configured gating) [ ]
+
+**Target:** `frontend/src/components/ai/AiAssistButton.tsx` · `AiResultPanel.tsx` · `AiApprovalDrawer.tsx`.
+
+**Langkah:** error AI non-blocking + tombol coba lagi; gating tombol = `configured===true` && role∈{OWNER,ADMIN}; tampilkan `mode/fallback/warnings`; verifikasi tombol approve panggil endpoint DOMAIN bukan AI. Detail → M15 J3.
+
+**Gate:** `cd frontend; npm run build` PASS. UAT: error → pesan non-blocking; STAFF/TENANT tak lihat tombol AI.
+
+#### J4 — Audit keamanan & PDP menyeluruh modul AI (bukukan ke M09) [ ]
+
+**Target:** verifikasi 12 endpoint `owner-ai.controller.ts`; tulis hasil ke `docs/M09_AUDIT.md`.
+
+**Langkah:** cek role guard, no secret bocor, PDP NIK/foto (tolak base64 + mask), snapshot ramping, no direct mutation (read-only), audit `meta.ai`. Checklist per endpoint → M15 J4.
+
+**Gate:** audit dibukukan di M09; temuan (bila ada) → fix + commit terpisah.
+
+#### UAT Global Fase J
+
+- [ ] `cd backend; npm run build && npm run test:unit` SEMUA hijau (termasuk `owner-ai-safety.test.js`).
+- [ ] `owner-ai.service.ts` bersih dari fungsi murni (sudah di helper); `npx tsc --noEmit` = 0.
+- [ ] Guard no-partial AI: DP booking sah tidak di-REJECT; nominal salah tetap REJECT.
+- [ ] `cd frontend; npm run build` PASS; tombol AI non-blocking + tak muncul untuk STAFF/TENANT.
+- [ ] Audit PDP/keamanan AI dibukukan di `docs/M09_AUDIT.md`.
+- [ ] Tidak ada perubahan `schema.prisma` / `sql/`.
 
 ---
 
