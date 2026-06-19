@@ -61,6 +61,7 @@ export type Tenant = {
   gender?: string | null;
   birthDate?: string | null;
   originCity?: string | null;
+  originProvince?: string | null;
   occupation?: string | null;
   companyOrCampus?: string | null;
   emergencyContactName?: string | null;
@@ -91,6 +92,7 @@ export type TenantSelfProfile = {
   gender?: string | null;
   birthDate?: string | null;
   originCity?: string | null;
+  originProvince?: string | null;
   occupation?: string | null;
   companyOrCampus?: string | null;
   emergencyContactName?: string | null;

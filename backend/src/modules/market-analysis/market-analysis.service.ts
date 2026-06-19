@@ -79,6 +79,67 @@ export class MarketAnalysisService {
     };
   }
 
+  /**
+   * Demografi customer TERANONIM untuk bahan marketing (keputusan owner 2026-06-19).
+   * UU PDP: hanya agregat (rentang usia, gender, kota asal, pekerjaan) — TIDAK ada NIK,
+   * alamat lengkap, nama, atau identitas individu. Deterministik, tanpa AI.
+   */
+  async demographicsSnapshot() {
+    const tenants = await this.prisma.tenant.findMany({
+      select: { gender: true, birthDate: true, originCity: true, originProvince: true, occupation: true },
+    });
+    const total = tenants.length;
+
+    // Rentang usia dari birthDate (dihitung saat query, tak menyimpan usia mentah).
+    const ageBuckets = ['<20', '20–24', '25–29', '30–34', '35–44', '45+'] as const;
+    const ageCount: Record<string, number> = { ...Object.fromEntries(ageBuckets.map((b) => [b, 0])), 'Tidak diketahui': 0 };
+    const now = Date.now();
+    const ageOf = (d: Date) => Math.floor((now - d.getTime()) / (365.25 * 24 * 3600 * 1000));
+    const bucketOf = (age: number) =>
+      age < 20 ? '<20' : age < 25 ? '20–24' : age < 30 ? '25–29' : age < 35 ? '30–34' : age < 45 ? '35–44' : '45+';
+
+    const genderCount: Record<string, number> = { MALE: 0, FEMALE: 0, OTHER: 0, 'Tidak diketahui': 0 };
+    const cityCount = new Map<string, number>();
+    const provinceCount = new Map<string, number>();
+    const occCount = new Map<string, number>();
+    const coverage = { gender: 0, birthDate: 0, originCity: 0, originProvince: 0, occupation: 0 };
+
+    for (const t of tenants) {
+      if (t.birthDate) {
+        coverage.birthDate += 1;
+        const age = ageOf(t.birthDate);
+        ageCount[age >= 0 && age < 120 ? bucketOf(age) : 'Tidak diketahui'] += 1;
+      } else {
+        ageCount['Tidak diketahui'] += 1;
+      }
+
+      if (t.gender) { coverage.gender += 1; genderCount[t.gender] = (genderCount[t.gender] ?? 0) + 1; }
+      else genderCount['Tidak diketahui'] += 1;
+
+      const city = (t.originCity || '').trim();
+      if (city) { coverage.originCity += 1; cityCount.set(city, (cityCount.get(city) ?? 0) + 1); }
+
+      const province = (t.originProvince || '').trim();
+      if (province) { coverage.originProvince += 1; provinceCount.set(province, (provinceCount.get(province) ?? 0) + 1); }
+
+      const occ = (t.occupation || '').trim();
+      if (occ) { coverage.occupation += 1; occCount.set(occ, (occCount.get(occ) ?? 0) + 1); }
+    }
+
+    const topN = (m: Map<string, number>, n: number) =>
+      [...m.entries()].sort((a, b) => b[1] - a[1]).slice(0, n).map(([label, count]) => ({ label, count }));
+
+    return {
+      totalTenants: total,
+      coverage,
+      ageRanges: [...ageBuckets, 'Tidak diketahui'].map((label) => ({ label, count: ageCount[label] })),
+      genders: ['MALE', 'FEMALE', 'OTHER', 'Tidak diketahui'].map((label) => ({ label, count: genderCount[label] })),
+      topOriginProvinces: topN(provinceCount, 10),
+      topOriginCities: topN(cityCount, 10),
+      topOccupations: topN(occCount, 10),
+    };
+  }
+
   // ─── CAC/CLV Lite ─────────────────────────────────────────────────────────────
   // Agregat akuisisi & retensi dari data sistem. Offline-first: tanpa AI pun tetap
   // menampilkan chart + metrik. AI digunakan untuk insight naratif.

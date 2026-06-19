@@ -127,6 +127,12 @@ export const peopleConfigs = {
         placeholder: 'Kota asal tenant',
       },
       {
+        name: 'originProvince',
+        label: 'Provinsi Asal',
+        type: 'text' as const,
+        placeholder: 'Provinsi asal tenant (untuk demografi)',
+      },
+      {
         name: 'occupation',
         label: 'Pekerjaan',
         type: 'text' as const,

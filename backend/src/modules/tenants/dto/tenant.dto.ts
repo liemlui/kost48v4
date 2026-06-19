@@ -30,6 +30,10 @@ export class CreateTenantDto {
 
   @IsOptional()
   @IsString()
+  originProvince?: string;
+
+  @IsOptional()
+  @IsString()
   occupation?: string;
 
   @IsOptional()

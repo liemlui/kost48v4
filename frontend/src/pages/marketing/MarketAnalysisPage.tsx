@@ -5,11 +5,13 @@ import PageHeader from '../../components/common/PageHeader';
 import SegmentedTabs from '../../components/common/SegmentedTabs';
 import EmptyState from '../../components/common/EmptyState';
 import CacClvDashboard from './CacClvDashboard';
+import DemographicsPanel from './DemographicsPanel';
 import { getApiErrorMessage } from '../../utils/getApiErrorMessage';
 import { getSurveySummary } from '../../api/surveys';
 import {
   deleteMarketAnalysis,
   getCacClvSnapshot,
+  getCustomerDemographics,
   getMarketAnalysisStatus,
   getMarketSnapshot,
   listMarketAnalyses,
@@ -59,7 +61,7 @@ function ResultView({ result }: { result: Record<string, unknown> }) {
 export default function MarketAnalysisPage() {
   const queryClient = useQueryClient();
   // view: 'chat' = SWOT/PESTLE/Kompetitor + saved; 'cacclv' = CAC/CLV dashboard
-  const [view, setView] = useState<'chat' | 'cacclv'>('chat');
+  const [view, setView] = useState<'chat' | 'cacclv' | 'demografi'>('chat');
   const [kind, setKind] = useState<AnalysisKind>('SWOT');
   const [messages, setMessages] = useState<ChatTurn[]>([]);
   const [input, setInput] = useState('');
@@ -73,6 +75,7 @@ export default function MarketAnalysisPage() {
   const surveyQuery = useQuery({ queryKey: ['survey-summary'], queryFn: getSurveySummary });
   const snapshotQuery = useQuery({ queryKey: ['market-snapshot'], queryFn: getMarketSnapshot });
   const cacClvQuery = useQuery({ queryKey: ['cac-clv'], queryFn: () => getCacClvSnapshot(), enabled: view === 'cacclv' });
+  const demographicsQuery = useQuery({ queryKey: ['customer-demographics'], queryFn: getCustomerDemographics, enabled: view === 'demografi' });
   const configured = statusQuery.data?.configured ?? true;
 
   const chatMutation = useMutation({
@@ -132,15 +135,18 @@ export default function MarketAnalysisPage() {
         ariaLabel="Mode analisa"
         size="md"
         value={view}
-        onChange={(v) => { setView(v as 'chat' | 'cacclv'); setError(''); }}
+        onChange={(v) => { setView(v as 'chat' | 'cacclv' | 'demografi'); setError(''); }}
         items={[
           { key: 'chat', label: 'Analisa SWOT/PESTLE', icon: '🧠' },
           { key: 'cacclv', label: 'CAC/CLV Dashboard', icon: '📊' },
+          { key: 'demografi', label: 'Demografi Customer', icon: '👥' },
         ]}
       />
 
       {view === 'cacclv' ? (
         <CacClvDashboard snapshotQuery={cacClvQuery} />
+      ) : view === 'demografi' ? (
+        <DemographicsPanel query={demographicsQuery} />
       ) : (
         <Row className="g-4 mt-0">
           <Col lg={7}>

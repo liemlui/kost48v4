@@ -120,3 +120,22 @@ export async function analyzeCacClv(): Promise<CacClvAnalyzeResult> {
   const res = await client.post<ApiEnvelope<CacClvAnalyzeResult>>('/market-analysis/cac-clv/analyze');
   return res.data.data;
 }
+
+// ─── Demografi customer (agregat teranonim) ─────────────────────────────
+
+export type DemographicsBucket = { label: string; count: number };
+
+export type CustomerDemographics = {
+  totalTenants: number;
+  coverage: { gender: number; birthDate: number; originCity: number; originProvince: number; occupation: number };
+  ageRanges: DemographicsBucket[];
+  genders: DemographicsBucket[];
+  topOriginProvinces: DemographicsBucket[];
+  topOriginCities: DemographicsBucket[];
+  topOccupations: DemographicsBucket[];
+};
+
+export async function getCustomerDemographics(): Promise<CustomerDemographics> {
+  const res = await client.get<ApiEnvelope<CustomerDemographics>>('/market-analysis/demographics');
+  return res.data.data;
+}

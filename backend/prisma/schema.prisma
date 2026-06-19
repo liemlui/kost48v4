@@ -587,6 +587,7 @@ model Tenant {
   gender          Gender?
   birthDate       DateTime?
   originCity      String?
+  originProvince  String?
   occupation      String?
   companyOrCampus String?
 

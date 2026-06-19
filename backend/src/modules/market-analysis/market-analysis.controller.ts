@@ -29,6 +29,13 @@ export class MarketAnalysisController {
     return { message: 'Data aktual kos', data: await this.service.businessSnapshot() };
   }
 
+  // Demografi customer teranonim (umur/gender/kota/pekerjaan agregat) — tanpa AI, tanpa PDP mentah.
+  @Get('demographics')
+  @Roles(UserRole.OWNER, UserRole.ADMIN)
+  async demographics() {
+    return { message: 'Demografi customer (agregat)', data: await this.service.demographicsSnapshot() };
+  }
+
   // CAC/CLV Lite — data agregat akuisisi & retensi (tanpa AI, offline-first)
   @Get('cac-clv')
   @Roles(UserRole.OWNER)

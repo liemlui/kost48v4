@@ -3,6 +3,11 @@
 > Arsip changelog ringkas, dipisah dari M10 pada 2026-06-19 untuk hemat token AI (M10 = checklist aktif saja). **Entri changelog BARU ditulis DI SINI (paling atas)**, bukan di M10. Format: 1 header tanggal + 1-2 poin outcome per entri.
 
 ## Changelog Ringkas
+### 2026-06-19 — Demografi Customer (teranonim, marketing)
+
+- **Demografi** GET /market-analysis/demographics (OWNER/ADMIN): `demographicsSnapshot()` agregat TERANONIM dari Tenant (rentang usia dari birthDate, gender, top 10 provinsi/kota asal, top 10 pekerjaan) + coverage — tanpa NIK/nama/alamat (UU PDP, keputusan owner). Tab "Demografi Customer" di MarketAnalysisPage (`DemographicsPanel.tsx`).
+- **🧬 Schema (owner-approved):** `Tenant.originProvince String?` (migration `20260619120000_tenant_origin_province`, additive nullable) + field di form tenant (people.ts) & DTO; demografi breakdown per provinsi.
+
 ### 2026-06-19 — G2: Finance AI Analyst
 
 - **G2** POST /owner-ai/finance/analyze: buildFinanceSnapshot() raw SQL dari JournalLine, analyzeFinance() dengan deepseek-v4-pro, fallback rule-based. Tombol "Analisa Keuangan AI" di AccountingSetupPage (OWNER only).
