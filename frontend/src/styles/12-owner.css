@@ -978,6 +978,14 @@
   }
 }
 
+/* FASE-H: 3 tab area (Ringkasan · Penghuni & Uang · Operasional) muat di layar kecil */
+@media (max-width: 480px) {
+  .role-workspace-tabs button {
+    font-size: 0.72rem;
+    padding: 0.35rem 0.55rem;
+  }
+}
+
 /* ── Owner View Mode Toggle (segmented control) ──────────────────────── */
 .owner-view-toggle {
   display: inline-flex;

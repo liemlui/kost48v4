@@ -3,6 +3,16 @@
 > Arsip changelog ringkas, dipisah dari M10 pada 2026-06-19 untuk hemat token AI (M10 = checklist aktif saja). **Entri changelog BARU ditulis DI SINI (paling atas)**, bukan di M10. Format: 1 header tanggal + 1-2 poin outcome per entri.
 
 ## Changelog Ringkas
+### 2026-06-20 — ui(Fase H): compact Owner↔Admin (H1–H5 per M13) SELESAI
+- **ui(H1):** sidebar Kokpit Owner 18→7 item, 1 grup "Keputusan Owner" (`navigation.ts`). Tanpa hilang fitur: `/loss-refunds` (Refund Kalah-Cepat, OWNER-only) + `/finance/assets` digabung ke `activePaths` "Akuntansi & Aset"; `/users`+`/tenants`+`/additional-services`+`/service-interests` digabung ke "Akun & Layanan". Pengumuman pindah ke tombol 📣 topbar (kondisi `isAdmin||isOwner`, `AppLayout.tsx`).
+- **ui(H2):** dashboard admin 6→3 area — Ringkasan·Penghuni&Uang·Operasional (`DashboardAdmin.tsx`: type/areas/normalize/match/needs*/queries/menu/charts/JSX; `RoleWorkspaceTabs.tsx`: buildAdminTabs + OWNER_TABS jadi 3, match mencakup semua route). H3 (merge Minat→Layanan) & H4 (hapus dup finance) selesai otomatis via H1. H5 polish: `@media 480px .role-workspace-tabs` (`12-owner.css`).
+- **Gate:** `frontend npm run build` PASS · `backend npx tsc --noEmit` PASS (0 perubahan backend/schema/API). DI-DEFER (di luar scope M13, owner belum minta): unifikasi AI panel admin & owner-dashboard compact mode.
+
+### 2026-06-22 — docs(Fase H UI/UX Compact): spesifikasi + checklist antrian
+- **docs(M13):** `docs/M13_FASE_H_UIUX_COMPACT.md` — 6 task H1-H6: compact owner sidebar (19→7), dashboard admin (6→3 tab), merge Minat+Layanan, unifikasi AI panel, owner dashboard landing page, CSS polish. Semua frontend-only, tidak sentuh backend/schema.
+- **docs(M10):** Fase H ditambah ke ANTRIAN dengan 6 task + UAT checklist.
+- **docs(M01, CODEMAP):** referensi M13 ditambah.
+
 ### 2026-06-19 — G9: AI Draft Queue (schema S-6)
 
 - **G9 🧬** Model `AiDraft`+`AiDraftStatus` (migration additive `20260619140000_ai_draft_queue`). Modul terpisah `AiDraftService`/`AiDraftController`: `POST/GET /owner-ai/drafts`, `GET :id`, `POST :id/review` (APPLIED/REJECTED), `POST run/expire` (retention 60 hari). FE `api/aiDrafts.ts` + tombol "Simpan sebagai draft" di `AiResultPanel` (wired di KTP validator) + tab "Antrean Draft AI" di OwnerSettings. resultJson bersih (PDP).

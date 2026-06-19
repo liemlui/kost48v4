@@ -78,6 +78,17 @@
 | audit-log | `audit-log/audit-log.service.ts` | Catat `meta.ai` saat manusia memakai draft AI untuk aksi final |
 | settings/env | `settings/settings.service.ts` + env | Status AI, budget guard, model, manual-only flag |
 
+### UI/UX Compact (Fase H) — detail: `M13_FASE_H_UIUX_COMPACT.md`
+| Area | Path | Tanggung jawab |
+|---|---|---|
+| navigation config | `frontend/src/config/navigation.ts` | Sidebar sections OWNER/ADMIN/STAFF/TENANT |
+| AppLayout + toggle | `frontend/src/components/layout/AppLayout.tsx` | Owner view mode toggle + sidebar adaptif |
+| DashboardAdmin | `frontend/src/pages/dashboard/DashboardAdmin.tsx` | Command center 6-area (target compact 3) |
+| AdminWorkspaces | `frontend/src/pages/dashboard/AdminWorkspaces.tsx` | Tabel workspace per area (stays/finance/tickets/rooms) |
+| OwnerDashboard | `frontend/src/pages/dashboard/OwnerDashboardPage.tsx` | Kokpit owner KPI+chart+AI |
+| RoleWorkspaceTabs | `frontend/src/components/workspace/RoleWorkspaceTabs.tsx` | Tab navigasi per-role (owner 7 / admin 6) |
+| CSS owner + admin | `frontend/src/styles/12-owner.css` + `08-admin.css` | Styling dashboard & sidebar |
+
 ### Notifikasi & Sistem
 | Modul/Service | Path | Tanggung jawab |
 |---|---|---|

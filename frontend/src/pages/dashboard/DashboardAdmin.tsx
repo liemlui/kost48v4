@@ -34,15 +34,13 @@ import {
 } from './dashboardShared';
 import { AdminStaffFrontlineList, AdminStaysUnifiedList, AdminFinanceWorkspace, AdminTicketsWorkspace, AdminRoomsStockWorkspace } from './AdminWorkspaces';
 
-type AdminQueueArea = 'today' | 'stays' | 'finance' | 'tickets' | 'staff' | 'rooms';
+// FASE-H: area kerja admin dipadatkan dari 6 → 3 (Ringkasan · Penghuni & Uang · Operasional).
+type AdminQueueArea = 'overview' | 'stays-finance' | 'ops';
 
 const ADMIN_QUEUE_AREAS: Array<{ id: AdminQueueArea; label: string; helper: string }> = [
-  { id: 'today', label: 'Hari Ini', helper: 'Orientasi cepat: kondisi hari ini dan pekerjaan yang butuh keputusan.' },
-  { id: 'stays', label: 'Masa Sewa', helper: 'Pemesanan, penghuni aktif, perpanjangan, dan proses keluar.' },
-  { id: 'finance', label: 'Keuangan', helper: 'Tagihan, bukti pembayaran, tunggakan, pembayaran manual, dan pengeluaran.' },
-  { id: 'tickets', label: 'Tiket', helper: 'Tiket tenant, kamar rusak, follow-up, dan target penanganan.' },
-  { id: 'staff', label: 'Staff', helper: 'Checklist, ketersediaan staff, laporan lapangan, dan kinerja.' },
-  { id: 'rooms', label: 'Kamar & Stok', helper: 'Status kamar, barang kamar, stok gudang, dan mutasi inventaris.' },
+  { id: 'overview', label: 'Ringkasan', helper: 'Orientasi cepat: kondisi hari ini dan pekerjaan yang butuh keputusan.' },
+  { id: 'stays-finance', label: 'Penghuni & Uang', helper: 'Booking, penghuni aktif, perpanjangan, keluar, tagihan, dan pembayaran.' },
+  { id: 'ops', label: 'Operasional', helper: 'Tiket, staff, rutinitas, kamar, stok, dan inventaris.' },
 ];
 
 type AdminAreaMenuItem = {
@@ -57,18 +55,16 @@ type AdminAreaMenuItem = {
 };
 
 function normalizeAdminArea(value: string | null | undefined): AdminQueueArea {
-  if (value === 'today' || value === 'announcements') return 'today';
-  return ADMIN_QUEUE_AREAS.some((area) => area.id === value) ? value as AdminQueueArea : 'today';
+  if (value === 'stays-finance' || value === 'stays' || value === 'finance') return 'stays-finance';
+  if (value === 'ops' || value === 'tickets' || value === 'staff' || value === 'rooms') return 'ops';
+  return 'overview';
 }
 
 function itemMatchesAdminArea(item: ActionQueueItem, area: AdminQueueArea): boolean {
-  if (area === 'today') return true;
+  if (area === 'overview') return true;
   const haystack = `${item.ruleId ?? ''} ${item.entityType ?? ''} ${item.type ?? ''} ${item.subject ?? ''}`.toLowerCase();
-  if (area === 'stays') return /stay|booking|renew|checkout|tenant|sewa|pemesanan|perpanjangan/.test(haystack);
-  if (area === 'finance') return /payment|invoice|tagihan|bayar|bukti|overdue|submission/.test(haystack);
-  if (area === 'tickets') return /ticket|tiket|repair|perbaikan/.test(haystack);
-  if (area === 'staff') return /staff|routine|checklist|laporan|kinerja/.test(haystack);
-  if (area === 'rooms') return /room|kamar|inventory|inventaris|maintenance|stok|barang/.test(haystack);
+  if (area === 'stays-finance') return /stay|booking|renew|checkout|tenant|sewa|pemesanan|perpanjangan|payment|invoice|tagihan|bayar|bukti|overdue|submission/.test(haystack);
+  if (area === 'ops') return /ticket|tiket|repair|perbaikan|staff|routine|checklist|laporan|kinerja|room|kamar|inventory|inventaris|maintenance|stok|barang/.test(haystack);
   return true;
 }
 
@@ -135,9 +131,9 @@ function AdminCommandHeader({ totalQueue, urgentCount, activeAreaLabel }: {
   activeAreaLabel: string;
   topQueueItem?: ActionQueueItem;
 }) {
-  const isToday = activeAreaLabel === 'Hari Ini';
+  const isOverview = activeAreaLabel === 'Ringkasan';
   const headline = totalQueue
-    ? `${totalQueue} pekerjaan ${isToday ? 'hari ini' : `di area ${activeAreaLabel}`}`
+    ? `${totalQueue} pekerjaan ${isOverview ? 'hari ini' : `di area ${activeAreaLabel}`}`
     : `${activeAreaLabel} aman`;
   const status = urgentCount ? `${urgentCount} urgent/terlambat` : 'Tidak ada deadline merah';
   return (
@@ -303,28 +299,33 @@ function AdminOverviewCharts({ activeArea, rooms, invoices, tickets, pendingPaym
     { label: 'Cek meter perpanjangan', value: pendingRenewCount, detail: 'Butuh cek meter', to: '/renew-requests' },
     { label: 'Keluar', value: checkoutCount, detail: 'Review dan finalkan keluar', to: '/stays?status=BOOKINGS' },
   ];
-  if (activeArea === 'today') return null;
+  if (activeArea === 'overview') return null;
   const panels: Array<{ id: string; area: AdminQueueArea[]; node: ReactNode }> = [
-    { id: 'stays-overview', area: ['stays'], node: <SmartChartPanel title="Masa Sewa & Penghuni" subtitle="Booking, bayar awal, perpanjangan, dan keluar dalam satu alur." points={stayPoints} defaultMode="bar" ctaLabel="Buka masa sewa" ctaTo="/stays" totalLabel="Alur" /> },
-    { id: 'finance', area: ['finance'], node: <SmartChartPanel title="Keuangan" subtitle="Tagihan, bukti pembayaran, draft, dan overdue." points={makeAdminFinancePoints(invoices, pendingPaymentReviewCount)} defaultMode="bar" ctaLabel="Semua tagihan" ctaTo="/invoices" totalLabel="Keuangan" /> },
-    { id: 'tickets', area: ['tickets'], node: <SmartChartPanel title="Tiket Operasional" subtitle="Tiket baru, pekerjaan aktif, dan konfirmasi final admin." points={makeAdminTicketPoints(tickets)} defaultMode="bar" ctaLabel="Buka tiket" ctaTo="/tickets" totalLabel="Tiket" /> },
-    { id: 'rooms', area: ['rooms'], node: <SmartChartPanel title="Kamar & Inventaris" subtitle="Admin melihat kesiapan kamar dan barang." points={makeRoomPoints(rooms)} defaultMode="bar" ctaLabel="Status kamar" ctaTo="/rooms" totalLabel="Kamar" /> },
-    { id: 'staff', area: ['staff'], node: <SmartChartPanel title="Pekerjaan Staff" subtitle="Ketersediaan kerja dari tiket aktif." points={makeAdminStaffPoints(tickets)} defaultMode="bar" ctaLabel="Kinerja staff" ctaTo="/staff-performance" totalLabel="Kerja Staff" /> },
+    { id: 'stays-finance-overview', area: ['stays-finance'], node: (
+      <Row className="g-3">
+        <Col lg={6}><SmartChartPanel title="Penghuni & Masa Sewa" subtitle="Booking, bayar awal, perpanjangan, dan keluar dalam satu alur." points={stayPoints} defaultMode="bar" ctaLabel="Buka masa sewa" ctaTo="/stays" totalLabel="Alur" /></Col>
+        <Col lg={6}><SmartChartPanel title="Keuangan" subtitle="Tagihan, bukti pembayaran, draft, dan overdue." points={makeAdminFinancePoints(invoices, pendingPaymentReviewCount)} defaultMode="bar" ctaLabel="Semua tagihan" ctaTo="/invoices" totalLabel="Keuangan" /></Col>
+      </Row>
+    ) },
+    { id: 'ops-overview', area: ['ops'], node: (
+      <Row className="g-3">
+        <Col lg={4}><SmartChartPanel title="Tiket" subtitle="Baru, dikerjakan, dan menunggu cek admin." points={makeAdminTicketPoints(tickets)} defaultMode="bar" ctaLabel="Buka tiket" ctaTo="/tickets" totalLabel="Tiket" /></Col>
+        <Col lg={4}><SmartChartPanel title="Staff" subtitle="Ketersediaan kerja dari tiket aktif." points={makeAdminStaffPoints(tickets)} defaultMode="bar" ctaLabel="Kinerja staff" ctaTo="/staff-performance" totalLabel="Staff" /></Col>
+        <Col lg={4}><SmartChartPanel title="Kamar" subtitle="Status okupansi dan kesiapan kamar." points={makeRoomPoints(rooms)} defaultMode="bar" ctaLabel="Status kamar" ctaTo="/rooms" totalLabel="Kamar" /></Col>
+      </Row>
+    ) },
   ];
   const visible = panels.filter((panel) => panel.area.includes(activeArea));
   const hasUsefulData = (() => {
-    if (activeArea === 'stays') return pendingApprovalCount + waitingInitialPaymentCount + pendingRenewCount + checkoutCount > 0;
-    if (activeArea === 'finance') return invoices.some(isOpenInvoice) || pendingPaymentReviewCount > 0;
-    if (activeArea === 'tickets') return tickets.some((ticket) => ['OPEN', 'IN_PROGRESS', 'DONE'].includes(ticket.status));
-    if (activeArea === 'staff') return tickets.some((ticket) => ['OPEN', 'IN_PROGRESS', 'DONE'].includes(ticket.status));
-    if (activeArea === 'rooms') return rooms.some((room) => ['OCCUPIED', 'RESERVED', 'MAINTENANCE', 'INACTIVE'].includes(room.status));
+    if (activeArea === 'stays-finance') return pendingApprovalCount + waitingInitialPaymentCount + pendingRenewCount + checkoutCount > 0 || invoices.some(isOpenInvoice) || pendingPaymentReviewCount > 0;
+    if (activeArea === 'ops') return tickets.some((ticket) => ['OPEN', 'IN_PROGRESS', 'DONE'].includes(ticket.status)) || rooms.some((room) => ['OCCUPIED', 'RESERVED', 'MAINTENANCE', 'INACTIVE'].includes(room.status));
     return false;
   })();
   if (!visible.length || !hasUsefulData) return null;
   return (
-    <Row className="g-3 admin-overview-charts">
-      {visible.map((panel) => <Col lg={12} xl={6} key={panel.id}>{panel.node}</Col>)}
-    </Row>
+    <div className="admin-overview-charts">
+      {visible.map((panel) => <div key={panel.id}>{panel.node}</div>)}
+    </div>
   );
 }
 
@@ -334,24 +335,25 @@ export default function AdminDashboard() {
   const activeArea: AdminQueueArea = normalizeAdminArea(new URLSearchParams(location.search).get('area'));
   // OWN-ROUTE-SPLIT: tetap di dashboard yang sama (OWNER `/admin-dashboard` atau ADMIN `/dashboard`) saat pindah area.
   const dashboardBase = location.pathname === '/admin-dashboard' ? '/admin-dashboard' : '/dashboard';
-  const needsTodayData = activeArea === 'today';
-  const needsStaysData = needsTodayData || activeArea === 'stays';
-  const needsFinanceData = needsTodayData || activeArea === 'finance' || activeArea === 'stays';
-  const needsTicketData = needsTodayData || activeArea === 'tickets' || activeArea === 'staff';
-  const needsRoomData = needsTodayData || activeArea === 'rooms';
-  const needsInventoryData = needsTodayData || activeArea === 'rooms';
-  const needsAutoOpsData = needsTodayData || activeArea === 'stays' || activeArea === 'finance';
-  const needsStaffPerformanceData = activeArea === 'staff';
+  // FASE-H: 3 area. Overview memuat semua (status strip + antrean butuh seluruh data).
+  const isOverview = activeArea === 'overview';
+  const needsStaysData = isOverview || activeArea === 'stays-finance';
+  const needsFinanceData = isOverview || activeArea === 'stays-finance';
+  const needsTicketData = isOverview || activeArea === 'ops';
+  const needsRoomData = isOverview || activeArea === 'ops';
+  const needsInventoryData = isOverview || activeArea === 'ops';
+  const needsAutoOpsData = isOverview;
+  const needsStaffPerformanceData = activeArea === 'ops';
 
-  const roomsQuery = useQuery({ queryKey: ['dashboard-admin', 'rooms', activeArea], queryFn: () => listResource<Room>('/rooms', { limit: needsTodayData ? 500 : 120 }), enabled: needsRoomData, ...MEDIUM_FRESH_QUERY_OPTIONS });
-  const inventoryItemsQuery = useQuery({ queryKey: ['dashboard-admin', 'inventory-items', activeArea], queryFn: () => listResource<any>('/inventory-items', { limit: needsTodayData ? 150 : 80 }), enabled: needsInventoryData, ...MEDIUM_FRESH_QUERY_OPTIONS });
-  const staysQuery = useQuery({ queryKey: ['dashboard-admin', 'stays-active', activeArea], queryFn: () => listResource<Stay>('/stays', { status: 'ACTIVE', limit: needsTodayData ? 300 : 160 }), enabled: needsStaysData, ...MEDIUM_FRESH_QUERY_OPTIONS });
-  const invoicesQuery = useQuery({ queryKey: ['dashboard-admin', 'invoices', activeArea], queryFn: () => listResource<Invoice>('/invoices', { limit: needsTodayData ? 500 : 180 }), enabled: needsFinanceData, ...MEDIUM_FRESH_QUERY_OPTIONS });
-  const ticketsQuery = useQuery({ queryKey: ['dashboard-admin', 'tickets', activeArea], queryFn: () => listResource<Ticket>('/tickets', { limit: needsTodayData ? 150 : 100 }), enabled: needsTicketData, ...MEDIUM_FRESH_QUERY_OPTIONS });
+  const roomsQuery = useQuery({ queryKey: ['dashboard-admin', 'rooms', activeArea], queryFn: () => listResource<Room>('/rooms', { limit: isOverview ? 500 : 120 }), enabled: needsRoomData, ...MEDIUM_FRESH_QUERY_OPTIONS });
+  const inventoryItemsQuery = useQuery({ queryKey: ['dashboard-admin', 'inventory-items', activeArea], queryFn: () => listResource<any>('/inventory-items', { limit: isOverview ? 150 : 80 }), enabled: needsInventoryData, ...MEDIUM_FRESH_QUERY_OPTIONS });
+  const staysQuery = useQuery({ queryKey: ['dashboard-admin', 'stays-active', activeArea], queryFn: () => listResource<Stay>('/stays', { status: 'ACTIVE', limit: isOverview ? 300 : 160 }), enabled: needsStaysData, ...MEDIUM_FRESH_QUERY_OPTIONS });
+  const invoicesQuery = useQuery({ queryKey: ['dashboard-admin', 'invoices', activeArea], queryFn: () => listResource<Invoice>('/invoices', { limit: isOverview ? 500 : 180 }), enabled: needsFinanceData, ...MEDIUM_FRESH_QUERY_OPTIONS });
+  const ticketsQuery = useQuery({ queryKey: ['dashboard-admin', 'tickets', activeArea], queryFn: () => listResource<Ticket>('/tickets', { limit: isOverview ? 150 : 100 }), enabled: needsTicketData, ...MEDIUM_FRESH_QUERY_OPTIONS });
   const renewRequestsQuery = useQuery({ queryKey: ['dashboard-admin', 'renew-requests', activeArea], queryFn: () => listAdminRenewRequests(), enabled: needsStaysData, ...MEDIUM_FRESH_QUERY_OPTIONS });
   const checkoutRequestsPendingQuery = useQuery({ queryKey: ['dashboard-admin', 'checkout-requests-pending', activeArea], queryFn: () => listAdminCheckoutRequests({ status: 'PENDING' }), enabled: needsStaysData, ...ACTION_QUERY_OPTIONS });
   const checkoutRequestsApprovedQuery = useQuery({ queryKey: ['dashboard-admin', 'checkout-requests-approved', activeArea], queryFn: () => listAdminCheckoutRequests({ status: 'APPROVED' }), enabled: needsStaysData, ...ACTION_QUERY_OPTIONS });
-  const paymentReviewQuery = useQuery({ queryKey: ['dashboard-admin', 'payment-review', activeArea], queryFn: () => listPaymentReviewQueue({ limit: needsTodayData ? 25 : 15 }), enabled: needsFinanceData, ...ACTION_QUERY_OPTIONS });
+  const paymentReviewQuery = useQuery({ queryKey: ['dashboard-admin', 'payment-review', activeArea], queryFn: () => listPaymentReviewQueue({ limit: isOverview ? 25 : 15 }), enabled: needsFinanceData, ...ACTION_QUERY_OPTIONS });
   const staffPerformanceQuery = useQuery({ queryKey: ['dashboard-admin', 'staff-performance', activeArea], queryFn: () => fetchAdminStaffPerformance(), enabled: needsStaffPerformanceData, ...MEDIUM_FRESH_QUERY_OPTIONS });
   const autoOpsQuery = useQuery({ queryKey: ['dashboard-admin', 'auto-ops-status', activeArea], queryFn: fetchAutoOpsStatus, enabled: needsAutoOpsData, ...ACTION_QUERY_OPTIONS });
 
@@ -403,7 +405,7 @@ export default function AdminDashboard() {
     { id: 'payment-review', step: '2', title: 'Verifikasi pembayaran', value: pendingPaymentReviewCount, helper: pendingPaymentReviewCount ? 'Bukti pending tidak boleh auto-cancel; admin harus putuskan.' : 'Tidak ada bukti bayar pending review.', sla: `${ADMIN_SLA_HOURS.paymentReviewUrgent}/${ADMIN_SLA_HOURS.paymentReviewMax} jam`, nextDeadline: earliestDeadlineLabel(paymentMaxDeadlines), action: 'Verifikasi Pembayaran', to: '/payment-submissions/review', tone: expiredPaymentReviewCount ? 'danger' : pendingPaymentReviewCount ? 'warning' : 'success' },
     { id: 'renew-checkpoint', step: '3', title: 'Review Perpanjangan', value: pendingRenewCount, helper: pendingRenewCount ? 'Catat meter sebelum approve dan tagihan perpanjangan.' : 'Tidak ada perpanjangan menunggu approval.', sla: `${ADMIN_SLA_HOURS.renewReview} jam`, nextDeadline: earliestDeadlineLabel(renewReviewDeadlines), action: 'Review Perpanjangan', to: '/renew-requests', tone: expiredRenewCount ? 'danger' : pendingRenewCount ? 'warning' : 'success' },
     { id: 'checkout-flow', step: '4', title: 'Keluar', value: checkoutWorkCount, helper: checkoutWorkCount ? 'Review pengajuan keluar dan finalkan hanya jika tagihan beres.' : 'Tidak ada pengajuan keluar yang menunggu admin.', sla: `${ADMIN_SLA_HOURS.checkoutReview}/${ADMIN_SLA_HOURS.checkoutFinal} jam`, nextDeadline: earliestDeadlineLabel([...checkoutReviewDeadlines, ...checkoutFinalDeadlines]), action: 'Cek Checkout', to: '/stays?status=BOOKINGS', tone: expiredCheckoutCount ? 'danger' : checkoutWorkCount ? 'warning' : 'success' },
-    { id: 'finance-ticket-blockers', step: '5', title: 'Blocker operasional', value: overdueInvoiceCount + ticketWaitingAdminCount + unassignedTicketCount + lowStockCount, helper: 'Tagihan overdue, tiket menunggu admin, dan stok menipis masuk blocker harian.', sla: 'harian', nextDeadline: earliestDeadlineLabel(overdueInvoices.map((invoice) => invoice.dueDate)), action: overdueInvoiceCount ? 'Lihat Tagihan' : ticketWaitingAdminCount || unassignedTicketCount ? 'Lihat Tiket' : 'Cek Stok', to: overdueInvoiceCount ? '/invoices' : ticketWaitingAdminCount || unassignedTicketCount ? '/tickets' : '/dashboard?area=rooms', tone: overdueInvoiceCount ? 'danger' : ticketWaitingAdminCount || unassignedTicketCount || lowStockCount ? 'warning' : 'success' },
+    { id: 'finance-ticket-blockers', step: '5', title: 'Blocker operasional', value: overdueInvoiceCount + ticketWaitingAdminCount + unassignedTicketCount + lowStockCount, helper: 'Tagihan overdue, tiket menunggu admin, dan stok menipis masuk blocker harian.', sla: 'harian', nextDeadline: earliestDeadlineLabel(overdueInvoices.map((invoice) => invoice.dueDate)), action: overdueInvoiceCount ? 'Lihat Tagihan' : ticketWaitingAdminCount || unassignedTicketCount ? 'Lihat Tiket' : 'Cek Stok', to: overdueInvoiceCount ? '/invoices' : ticketWaitingAdminCount || unassignedTicketCount ? '/tickets' : '/inventory/gudang', tone: overdueInvoiceCount ? 'danger' : ticketWaitingAdminCount || unassignedTicketCount || lowStockCount ? 'warning' : 'success' },
   ];
 
   const adminAssistantItems: AssistantItem[] = dedupeCommandItems([
@@ -442,38 +444,29 @@ export default function AdminDashboard() {
   const urgentQueueCount = filteredQueueItems.filter((item) => item.priority === 'BLOCKER' || item.priority === 'HIGH' || item.timeStatusTone === 'danger').length;
   const activeAreaConfig = ADMIN_QUEUE_AREAS.find((area) => area.id === activeArea) ?? ADMIN_QUEUE_AREAS[0];
 
-  const activeAreaMenuItems: AdminAreaMenuItem[] = activeArea === 'stays' ? [
-    { id: 'stays-all', icon: '🏠', label: 'Semua Proses', helper: 'Daftar utama proses sewa aktif', to: `${dashboardBase}?area=stays`, count: pendingApprovalCount + waitingInitialPaymentCount + stays.length + pendingRenewCount + pendingCheckoutRequestCount + approvedCheckoutRequestCount, tone: 'info', active: true },
+  // FASE-H: sub-menu digabung mengikuti 3 area. 'stays-finance' = menu sewa + keuangan; 'ops' = tiket + staff + kamar/stok.
+  const activeAreaMenuItems: AdminAreaMenuItem[] = activeArea === 'stays-finance' ? [
+    { id: 'sf-all', icon: '💼', label: 'Semua', helper: 'Daftar utama penghuni & uang di tab ini', to: `${dashboardBase}?area=stays-finance`, count: pendingApprovalCount + waitingInitialPaymentCount + stays.length + pendingRenewCount + pendingCheckoutRequestCount + approvedCheckoutRequestCount + invoices.length, tone: 'info', active: true },
     { id: 'stays-bookings', icon: '📝', label: 'Booking Baru', helper: 'Review booking dan bayar awal', to: '/stays?status=BOOKINGS', count: pendingApprovalCount + waitingInitialPaymentCount, tone: pendingApprovalCount ? 'warning' : 'info' },
     { id: 'stays-active', icon: '🛏️', label: 'Masa sewa aktif', helper: 'Masa sewa sedang berjalan', to: '/stays', count: stays.length, tone: 'success' },
     { id: 'stays-renew', icon: '🔁', label: 'Perpanjangan', helper: 'Pengajuan perpanjangan dan cek meter', to: '/renew-requests', count: pendingRenewCount, tone: pendingRenewCount ? 'warning' : 'info' },
     { id: 'stays-checkout', icon: '🚪', label: 'Keluar', helper: 'Review keluar dan finalkan keluar', to: '/stays?status=BOOKINGS', count: pendingCheckoutRequestCount + approvedCheckoutRequestCount, tone: pendingCheckoutRequestCount || approvedCheckoutRequestCount ? 'warning' : 'info' },
     { id: 'stays-tenant', icon: '👤', label: 'Tenant', helper: 'Data penghuni dan akses portal', to: '/tenants', count: undefined, tone: 'info' },
-  ] : activeArea === 'finance' ? [
-    { id: 'finance-all', icon: '💳', label: 'Semua Keuangan', helper: 'Daftar utama keuangan di tab ini', to: `${dashboardBase}?area=finance`, count: invoices.length + pendingPaymentReviewCount, tone: 'info', active: true },
     { id: 'finance-invoices', icon: '🧾', label: 'Tagihan', helper: 'Semua tagihan tenant', to: '/invoices', count: invoices.length, tone: 'info' },
     { id: 'finance-review', icon: '✅', label: 'Review Pembayaran', helper: 'Bukti bayar menunggu dicek', to: '/payment-submissions/review', count: pendingPaymentReviewCount, tone: pendingPaymentReviewCount ? 'warning' : 'success' },
     { id: 'finance-overdue', icon: '⚠️', label: 'Terlambat', helper: 'Tagihan lewat jatuh tempo', to: '/invoices', count: overdueInvoices.length, tone: overdueInvoices.length ? 'danger' : 'success' },
-    { id: 'finance-draft', icon: '📝', label: 'Belum Terbit', helper: 'Tagihan belum diterbitkan', to: '/invoices', count: invoices.filter((invoice) => invoice.status === 'DRAFT').length, tone: 'info' },
     { id: 'finance-expenses', icon: '💸', label: 'Expenses', helper: 'Catatan pengeluaran operasional', to: '/expenses', count: undefined, tone: 'info' },
     { id: 'finance-history', icon: '📚', label: 'Riwayat Pembayaran', helper: 'Pembayaran invoice yang sudah tercatat', to: '/invoice-payments', count: undefined, tone: 'info' },
-  ] : activeArea === 'tickets' ? [
-    { id: 'tickets-all', icon: '🎫', label: 'Semua Tiket', helper: 'Daftar utama tiket di tab ini', to: `${dashboardBase}?area=tickets`, count: tickets.filter((ticket) => ticket.status !== 'CANCELLED').length, tone: 'info', active: true },
+  ] : activeArea === 'ops' ? [
+    { id: 'ops-all', icon: '🛠️', label: 'Semua', helper: 'Daftar utama operasional di tab ini', to: `${dashboardBase}?area=ops`, count: tickets.filter((ticket) => ticket.status !== 'CANCELLED').length + rooms.length, tone: 'info', active: true },
     { id: 'tickets-assign', icon: '👷', label: 'Perlu Assign', helper: 'Tiket baru belum punya petugas', to: '/tickets', count: tickets.filter((ticket) => ticket.status === 'OPEN' && !ticket.assignedToId).length, tone: 'warning' },
     { id: 'tickets-progress', icon: '🔧', label: 'Dikerjakan', helper: 'Sedang ditangani staff', to: '/tickets', count: tickets.filter((ticket) => ticket.status === 'IN_PROGRESS').length, tone: 'info' },
     { id: 'tickets-check', icon: '✅', label: 'Perlu Cek', helper: 'Staff selesai, admin cek akhir', to: '/tickets', count: tickets.filter((ticket) => ticket.status === 'DONE').length, tone: 'warning' },
-    { id: 'tickets-final', icon: '📦', label: 'Selesai', helper: 'Tiket selesai', to: '/tickets', count: tickets.filter((ticket) => ticket.status === 'CLOSED').length, tone: 'success' },
-  ] : activeArea === 'staff' ? [
-    { id: 'staff-score', icon: '👥', label: 'Staff & Skor', helper: 'Daftar skor staff di tab ini', to: `${dashboardBase}?area=staff`, count: staffPerformanceItems.length, tone: 'info', active: true },
     { id: 'staff-checklist', icon: '📋', label: 'Checklist', helper: 'Checklist harian/mingguan/bulanan staff', to: '/staff-routines', count: undefined, tone: 'success' },
-    { id: 'staff-reports', icon: '📝', label: 'Laporan Lapangan', helper: 'Review laporan kondisi dari staff', to: '/tickets', count: tickets.filter((ticket) => Boolean(ticket.linkedRoomItemId || ticket.linkedInventoryItemId)).length, tone: 'warning' },
-    { id: 'staff-performance', icon: '📈', label: 'Kinerja', helper: 'Detail kinerja dan ulasan staff', to: '/staff-performance', count: undefined, tone: 'info' },
-  ] : activeArea === 'rooms' ? [
-    { id: 'rooms-list', icon: '🏘️', label: 'Kamar', helper: 'Status kamar dan keterisian', to: `${dashboardBase}?area=rooms`, count: rooms.length, tone: 'info', active: true },
-    { id: 'rooms-room-items', icon: '🪑', label: 'Barang Kamar', helper: 'Inventaris per kamar', to: '/inventory/barang-kamar', count: undefined, tone: 'info' },
+    { id: 'staff-performance', icon: '📈', label: 'Kinerja Staff', helper: 'Detail kinerja dan ulasan staff', to: '/staff-performance', count: undefined, tone: 'info' },
+    { id: 'rooms-list', icon: '🏘️', label: 'Kamar', helper: 'Status kamar dan keterisian', to: '/rooms', count: rooms.length, tone: 'info' },
     { id: 'rooms-stock', icon: '📦', label: 'Stok Gudang', helper: 'Barang gudang dan stok minimum', to: '/inventory/gudang', count: inventoryItems.length, tone: 'info' },
-    { id: 'rooms-movements', icon: '🔄', label: 'Mutasi Stok', helper: 'Riwayat masuk/keluar/pasang barang', to: '/inventory/mutasi', count: undefined, tone: 'info' },
-    { id: 'rooms-low-stock', icon: '⚠️', label: 'Stok Menipis', helper: 'Barang butuh restock', to: `${dashboardBase}?area=rooms`, count: inventoryItems.filter(isLowStockItem).length, tone: inventoryItems.filter(isLowStockItem).length ? 'warning' : 'success' },
+    { id: 'rooms-low-stock', icon: '⚠️', label: 'Stok Menipis', helper: 'Barang butuh restock', to: '/inventory/gudang', count: inventoryItems.filter(isLowStockItem).length, tone: inventoryItems.filter(isLowStockItem).length ? 'warning' : 'success' },
   ] : [];
 
   const refreshDashboard = () => {
@@ -502,20 +495,20 @@ export default function AdminDashboard() {
       <AssistantInsightLine
         title="Asisten Operasional"
         tone={supportQueriesError ? 'warning' : urgentQueueCount ? 'warning' : topQueueItem ? 'info' : 'success'}
-        message={supportQueriesError ? 'Data utama sudah tampil, tetapi sebagian data pendukung gagal dimuat.' : topQueueItem ? `${topQueueItem.type}: ${topQueueItem.issue}` : activeArea === 'today' ? 'Tidak ada blocker besar. Gunakan sidebar untuk membuka detail per area.' : `${activeAreaConfig.label} sedang aman.`}
+        message={supportQueriesError ? 'Data utama sudah tampil, tetapi sebagian data pendukung gagal dimuat.' : topQueueItem ? `${topQueueItem.type}: ${topQueueItem.issue}` : activeArea === 'overview' ? 'Tidak ada blocker besar. Gunakan tab area untuk membuka detail.' : `${activeAreaConfig.label} sedang aman.`}
       />
       {supportQueriesLoading ? <Alert variant="info" className="admin-support-loading-note">Data pendukung sedang dimuat. Dashboard utama tetap bisa dipakai.</Alert> : null}
-      {activeArea === 'today' ? <AdminOperationsCommandQueue lanes={adminWorkLanes} assistantItems={adminAssistantItems} metrics={adminHealthMetrics} topQueueItem={topQueueItem} queueItems={queueItems} onNavigate={navigate} /> : null}
-      {activeArea !== 'today' ? <AdminAreaInternalMenu title={`Menu ${activeAreaConfig.label}`} items={activeAreaMenuItems} onNavigate={navigate} /> : null}
-      {activeArea === 'today' ? <AdminTodayStatusStrip rooms={rooms} inventoryItems={inventoryItems} invoices={invoices} tickets={tickets} pendingPaymentReviewCount={pendingPaymentReviewCount} pendingApprovalCount={pendingApprovalCount} pendingRenewCount={pendingRenewCount} checkoutCount={pendingCheckoutRequestCount + approvedCheckoutRequestCount} /> : null}
-      {activeArea === 'stays' ? <AdminProcessLine /> : null}
-      {activeArea === 'stays' ? <AdminStaysUnifiedList activeStays={stays} bookingReview={pendingApprovalBookings} waitingPayment={waitingInitialPaymentBookings} renewRequests={renewRequests} checkoutPending={checkoutPendingRequests} checkoutApproved={checkoutApprovedRequests} onNavigate={navigate} /> : null}
-      {activeArea === 'staff' ? <AdminStaffFrontlineList items={staffPerformanceItems} isLoading={staffPerformanceQuery.isLoading} /> : null}
-      {activeArea === 'tickets' ? <AdminTicketsWorkspace tickets={tickets} onNavigate={navigate} /> : null}
-      {activeArea === 'rooms' ? <AdminRoomsStockWorkspace rooms={rooms} inventoryItems={inventoryItems} onNavigate={navigate} /> : null}
-      {activeArea === 'finance' ? <AdminFinanceWorkspace invoices={invoices} paymentReviewItems={paymentReviewItems} onNavigate={navigate} /> : null}
-      {activeArea === 'today' ? <ActionQueueTable title="Admin Operations Antrean Aksi" subtitle="Antrean keputusan lintas booking, pembayaran, renew, checkout, tagihan, tiket, dan stok." items={filteredQueueItems} emptyTitle="Tidak ada item mendesak hari ini" emptyDescription="Semua area operasional sedang aman." maxItems={12} collapsible={false} /> : null}
-      {(activeArea === 'today' || activeArea === 'stays' || activeArea === 'finance') ? <div className="mt-3"><AutoOpsControlPanel status={autoOpsQuery.data} role="ADMIN" onCompleted={refreshDashboard} /><AdminSlaMiniNote status={autoOpsQuery.data} /></div> : null}
+      {activeArea === 'overview' ? <AdminOperationsCommandQueue lanes={adminWorkLanes} assistantItems={adminAssistantItems} metrics={adminHealthMetrics} topQueueItem={topQueueItem} queueItems={queueItems} onNavigate={navigate} /> : null}
+      {activeArea !== 'overview' ? <AdminAreaInternalMenu title={`Menu ${activeAreaConfig.label}`} items={activeAreaMenuItems} onNavigate={navigate} /> : null}
+      {activeArea === 'overview' ? <AdminTodayStatusStrip rooms={rooms} inventoryItems={inventoryItems} invoices={invoices} tickets={tickets} pendingPaymentReviewCount={pendingPaymentReviewCount} pendingApprovalCount={pendingApprovalCount} pendingRenewCount={pendingRenewCount} checkoutCount={pendingCheckoutRequestCount + approvedCheckoutRequestCount} /> : null}
+      {activeArea === 'stays-finance' ? <AdminProcessLine /> : null}
+      {activeArea === 'stays-finance' ? <AdminStaysUnifiedList activeStays={stays} bookingReview={pendingApprovalBookings} waitingPayment={waitingInitialPaymentBookings} renewRequests={renewRequests} checkoutPending={checkoutPendingRequests} checkoutApproved={checkoutApprovedRequests} onNavigate={navigate} /> : null}
+      {activeArea === 'stays-finance' ? <AdminFinanceWorkspace invoices={invoices} paymentReviewItems={paymentReviewItems} onNavigate={navigate} /> : null}
+      {activeArea === 'ops' ? <AdminTicketsWorkspace tickets={tickets} onNavigate={navigate} /> : null}
+      {activeArea === 'ops' ? <AdminStaffFrontlineList items={staffPerformanceItems} isLoading={staffPerformanceQuery.isLoading} /> : null}
+      {activeArea === 'ops' ? <AdminRoomsStockWorkspace rooms={rooms} inventoryItems={inventoryItems} onNavigate={navigate} /> : null}
+      {activeArea === 'overview' ? <ActionQueueTable title="Admin Operations Antrean Aksi" subtitle="Antrean keputusan lintas booking, pembayaran, renew, checkout, tagihan, tiket, dan stok." items={filteredQueueItems} emptyTitle="Tidak ada item mendesak hari ini" emptyDescription="Semua area operasional sedang aman." maxItems={12} collapsible={false} /> : null}
+      {activeArea === 'overview' ? <div className="mt-3"><AutoOpsControlPanel status={autoOpsQuery.data} role="ADMIN" onCompleted={refreshDashboard} /><AdminSlaMiniNote status={autoOpsQuery.data} /></div> : null}
       <AdminOverviewCharts activeArea={activeArea} rooms={rooms} invoices={invoices} tickets={tickets} pendingPaymentReviewCount={pendingPaymentReviewCount} pendingApprovalCount={pendingApprovalCount} waitingInitialPaymentCount={waitingInitialPaymentCount} pendingRenewCount={pendingRenewCount} checkoutCount={pendingCheckoutRequestCount + approvedCheckoutRequestCount} />
     </div>
   );

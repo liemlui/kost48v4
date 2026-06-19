@@ -2,25 +2,21 @@ import { useMemo } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 // OWN-ROUTE-SPLIT: base dashboard bisa `/dashboard` (ADMIN/STAFF) atau `/admin-dashboard` (OWNER mode admin).
+// FASE-H: dipadatkan dari 6 → 3 area (Ringkasan · Penghuni & Uang · Operasional).
 function buildAdminTabs(base: string) {
   return [
-    { id: 'today', label: 'Hari Ini', to: base, match: (path: string, search: URLSearchParams) => path === base && !search.get('area') },
-    { id: 'stays', label: 'Masa Sewa', to: `${base}?area=stays`, match: (path: string, search: URLSearchParams) => path.startsWith('/stays') || path.startsWith('/tenants') || path.startsWith('/renew-requests') || (path === base && search.get('area') === 'stays') },
-    { id: 'finance', label: 'Keuangan', to: `${base}?area=finance`, match: (path: string, search: URLSearchParams) => ['/invoices', '/payment-submissions', '/invoice-payments', '/expenses'].some((prefix) => path.startsWith(prefix)) || (path === base && search.get('area') === 'finance') },
-    { id: 'tickets', label: 'Tiket', to: `${base}?area=tickets`, match: (path: string, search: URLSearchParams) => path.startsWith('/tickets') || (path === base && search.get('area') === 'tickets') },
-    { id: 'staff', label: 'Staff', to: `${base}?area=staff`, match: (path: string, search: URLSearchParams) => path.startsWith('/staff') || path.startsWith('/staff-routines') || (path === base && search.get('area') === 'staff') },
-    { id: 'rooms', label: 'Kamar & Stok', to: `${base}?area=rooms`, match: (path: string, search: URLSearchParams) => ['/rooms', '/inventory', '/room-items', '/inventory-items', '/inventory-movements', '/meter-readings'].some((prefix) => path.startsWith(prefix)) || (path === base && search.get('area') === 'rooms') },
+    { id: 'overview', label: 'Ringkasan', to: base, match: (path: string, search: URLSearchParams) => path === base && !search.get('area') },
+    { id: 'stays-finance', label: 'Penghuni & Uang', to: `${base}?area=stays-finance`, match: (path: string, search: URLSearchParams) => ['/stays', '/tenants', '/renew-requests', '/invoices', '/payment-submissions', '/invoice-payments', '/expenses'].some((prefix) => path.startsWith(prefix)) || (path === base && search.get('area') === 'stays-finance') },
+    { id: 'ops', label: 'Operasional', to: `${base}?area=ops`, match: (path: string, search: URLSearchParams) => ['/tickets', '/staff', '/staff-routines', '/rooms', '/inventory', '/room-items', '/inventory-items', '/inventory-movements', '/meter-readings'].some((prefix) => path.startsWith(prefix)) || (path === base && search.get('area') === 'ops') },
   ];
 }
 
+// FASE-H: tab Kokpit Owner dipadatkan jadi 3, dengan match yang mencakup SEMUA route owner agar
+// tidak ada halaman yang tak menyorot tab (loss-refunds, market-analysis, loyalty, layanan, dst).
 const OWNER_TABS = [
   { id: 'overview', label: 'Ringkasan', to: '/owner-dashboard', match: (path: string) => path === '/owner-dashboard' },
-  { id: 'stays', label: 'Masa Sewa', to: '/stays', match: (path: string) => path.startsWith('/stays') || path.startsWith('/tenants') || path.startsWith('/renew-requests') },
-  { id: 'finance', label: 'Keuangan', to: '/invoices', match: (path: string) => ['/invoices', '/payment-submissions', '/invoice-payments', '/expenses', '/wifi-sales', '/ancillary-revenue', '/finance/accounting-setup', '/loss-refunds'].some((prefix) => path.startsWith(prefix)) },
-  { id: 'reports', label: 'Laporan', to: '/reports', match: (path: string) => path.startsWith('/reports') },
-  { id: 'staff', label: 'Staff', to: '/staff-performance', match: (path: string) => path.startsWith('/staff') || path.startsWith('/tickets') },
-  { id: 'rooms', label: 'Barang & Aset', to: '/rooms', match: (path: string) => ['/rooms', '/inventory', '/room-items', '/inventory-items', '/inventory-movements', '/meter-readings', '/finance/assets'].some((prefix) => path.startsWith(prefix)) },
-  { id: 'settings', label: 'Pengaturan', to: '/settings', match: (path: string) => path.startsWith('/settings') || path.startsWith('/users') || path.startsWith('/announcements') },
+  { id: 'stays-finance', label: 'Penghuni & Uang', to: '/stays', match: (path: string) => ['/stays', '/tenants', '/renew-requests', '/invoices', '/payment-submissions', '/invoice-payments', '/expenses', '/wifi-sales', '/ancillary-revenue'].some((prefix) => path.startsWith(prefix)) },
+  { id: 'ops', label: 'Laporan & Aset', to: '/reports', match: (path: string) => ['/reports', '/finance', '/loss-refunds', '/market-analysis', '/loyalty', '/staff', '/tickets', '/rooms', '/inventory', '/room-items', '/inventory-items', '/inventory-movements', '/meter-readings', '/users', '/settings', '/announcements', '/service-interests', '/additional-services'].some((prefix) => path.startsWith(prefix)) },
 ];
 
 // OWN-ROLE-TABS-MODE: mode eksplisit, bukan hack role. OWNER + ownerViewMode='admin'

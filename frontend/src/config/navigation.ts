@@ -15,35 +15,23 @@ export type NavigationSection = {
 
 export type TenantPortalStage = 'browsing' | 'booking' | 'occupied';
 
-// OWN-STATUS-CARDS: sidebar Kokpit Owner dipisah 2 grup besar — "Operasional" (pantau & jalankan
-// harian) vs "Keputusan Owner" (strategis, keuangan formal, governance, konfigurasi).
+// OWN-STATUS-CARDS / FASE-H: Kokpit Owner dipadatkan jadi 1 grup strategis "Keputusan Owner" (7 item).
+// Item operasional harian yang duplikat dengan sidebar Admin DIHAPUS — owner mengaksesnya via toggle
+// 🔧 Area Admin. Beberapa route digabung lewat `activePaths` agar tetap reachable tanpa nambah item:
+// - "Akuntansi & Aset" mencakup /finance/accounting-setup + /finance/assets + /loss-refunds (Refund Kalah-Cepat, OWNER-only).
+// - "Akun & Layanan" mencakup /users + /tenants + /additional-services + /service-interests.
+// Pengumuman (/announcements) diakses via tombol 📣 di topbar (sebelah lonceng), bukan sidebar.
 const ownerSections: NavigationSection[] = [
-  {
-    title: 'Operasional',
-    links: [
-      { to: '/owner-dashboard', label: 'Kokpit Owner', icon: '📈', hint: 'KPI bisnis, status kokpit, sinyal risiko, dan tren.' },
-      { to: '/stays', label: 'Masa Sewa & Penghuni', icon: '🏠', hint: 'Masa sewa aktif, booking, perpanjangan, keluar, dan data penghuni.', activePaths: ['/stays', '/tenants'] },
-      { to: '/invoices', label: 'Tagihan & Piutang', icon: '🧾', hint: 'Tagihan, pembayaran, dan keterlambatan. Tiap pembayaran otomatis tercatat ke jurnal akuntansi.', activePaths: ['/invoices', '/payment-submissions/review', '/invoice-payments'] },
-      { to: '/expenses', label: 'Pengeluaran', icon: '💳', hint: 'Catat dan kategorikan biaya operasional (masuk ke laba rugi).' },
-      { to: '/ancillary-revenue', label: 'Pendapatan Tambahan', icon: '➕', hint: 'Pendapatan non-sewa: laundry, cleaning, WiFi, dan layanan lain.', activePaths: ['/ancillary-revenue', '/wifi-sales'] },
-      { to: '/rooms', label: 'Kamar & Inventaris', icon: '🚪', hint: 'Kamar, tarif, fasilitas, barang kamar, dan stok. Barang bernilai bisa dijadikan aset yang disusutkan.', activePaths: ['/rooms', '/inventory', '/room-items', '/inventory-items', '/inventory-movements'] },
-      { to: '/staff-performance', label: 'Kinerja Staff', icon: '📋', hint: 'KPI staff, audit, review, tiket, dan rutinitas kerja.', activePaths: ['/staff-performance', '/staff-routines', '/tickets'] },
-      { to: '/announcements', label: 'Pengumuman', icon: '📢', hint: 'Buat dan kelola pengumuman untuk penghuni.' },
-      { to: '/service-interests', label: 'Minat Layanan', icon: '🙋', hint: 'Penghuni yang menyatakan minat atas layanan tambahan — hubungi & tandai selesai.' },
-    ],
-  },
   {
     title: 'Keputusan Owner',
     links: [
-      { to: '/reports', label: 'Laporan Bisnis', icon: '📊', hint: 'Operasional, laba rugi, arus kas, neraca, dan rasio.' },
-      { to: '/market-analysis', label: 'Analisa Pasar (AI)', icon: '🧭', hint: 'Ditemani AI DeepSeek: wawancara lalu susun SWOT/PESTLE/kompetitor yang bisa disimpan.' },
-      { to: '/finance/accounting-setup', label: 'Akuntansi (Bagan Akun & Jurnal)', icon: '📘', hint: 'Bagan Akun (COA), periode, saldo awal, dan jurnal — fondasi semua laporan keuangan.' },
-      { to: '/finance/assets', label: 'Aset & Depresiasi', icon: '🏗️', hint: 'Aset tetap & penyusutan. Bisa ditautkan ke barang inventaris/kamar agar tidak dobel input.' },
-      { to: '/loss-refunds', label: 'Refund Kalah-Cepat', icon: '↩️', hint: 'Kembalikan dana tenant yang kalah first-paid-wins padahal sudah transfer.' },
+      { to: '/owner-dashboard', label: 'Kokpit Owner', icon: '📈', hint: 'KPI bisnis, status kokpit, sinyal risiko, dan tren.' },
+      { to: '/reports', label: 'Laporan Bisnis', icon: '📊', hint: 'Operasional, laba rugi, arus kas, neraca, dan rasio keuangan.' },
+      { to: '/market-analysis', label: 'Analisa Pasar (AI)', icon: '🧭', hint: 'Ditemani AI DeepSeek: SWOT, PESTLE, dan analisa kompetitor.' },
+      { to: '/finance/accounting-setup', label: 'Akuntansi & Aset', icon: '📘', hint: 'Bagan Akun, periode, saldo awal, jurnal, aset & depresiasi, dan refund kalah-cepat.', activePaths: ['/finance/accounting-setup', '/finance/assets', '/loss-refunds'] },
       { to: '/loyalty', label: 'Loyalitas & Reward', icon: '🎁', hint: 'Katalog reward, kelola poin, dan setujui penukaran tenant.' },
-      { to: '/users', label: 'Akun User', icon: '👤', hint: 'Kelola akun owner, admin, staff, dan penghuni.' },
-      { to: '/additional-services', label: 'Layanan Tambahan', icon: '🛎️', hint: 'Kelola daftar layanan tambahan (galon, TV, WiFi, dll) + tarif yang tampil ke penghuni.', activePaths: ['/additional-services', '/service-interests'] },
-      { to: '/settings', label: 'Pengaturan', icon: '⚙️', hint: 'FAQ publik, foto kamar, konten halaman tamu, dan tarif dasar.' },
+      { to: '/users', label: 'Akun & Layanan', icon: '👤', hint: 'Kelola akun owner/admin/staff/penghuni, layanan tambahan, dan minat tenant.', activePaths: ['/users', '/tenants', '/additional-services', '/service-interests'] },
+      { to: '/settings', label: 'Pengaturan', icon: '⚙️', hint: 'FAQ publik, foto kamar, konten halaman tamu, tarif dasar, dan konfigurasi AI.' },
     ],
   },
 ];

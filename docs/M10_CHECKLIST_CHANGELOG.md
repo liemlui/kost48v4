@@ -336,6 +336,7 @@ Output akhir:
 | **Fase E** | Polish, Gamifikasi & Teknis | **selesai** | M06, M07, M09 | TEN-GAMIF privacy, split service, integration test, E2E, dan evaluasi arsitektur selesai |
 | **Fase F** | UI/UX Sweep | **selesai** | M07 | 404, toast, a11y, kontras, logout, tenant search, skeleton, overscroll, login format |
 | **Fase G** | AI Owner/Admin Approval Copilot | baru | M12, M02, M04-M09, CODEMAP | DeepSeek/API AI manual-only untuk Owner/Admin; draft/rekomendasi + approval manusia |
+| **Fase H** | UI/UX Compact Owner↔Admin | baru | M13, M02, M07, CODEMAP | Reduksi sidebar owner 19→7, compact dashboard 6→3 tab, merge minat+layanan, unifikasi AI panel |
 
 ---
 
@@ -941,6 +942,176 @@ Evaluasi 4 item dengan format: kondisi saat ini → risiko → rekomendasi → p
   - **Status:** `DRAFT`, `APPLIED`, `REJECTED`, `EXPIRED`.
   - **Aturan:** additive migration saja; tidak mengganti `AuditLog`; tidak menyimpan foto KTP atau bukti bayar mentah; retention 30-90 hari.
   - **STOP:** sebelum edit `schema.prisma`/migration, lapor ke owner dan minta approval eksplisit.
+
+---
+
+### Fase H — UI/UX Compact Owner ↔ Admin
+
+**Tujuan:** menyederhanakan UI Owner & Admin dengan menghilangkan redundansi dan duplikasi, BUKAN menghilangkan fitur. Semua fitur tetap bisa diakses; hanya tampilan yang lebih compact.
+
+> **⚠️ REVISI FINAL 2026-06-20 — rencana otoritatif = `docs/M13_FASE_H_UIUX_COMPACT.md` (H1–H5).** Outline H1–H6 di bawah ini adalah draf lama; ikuti M13 bila berbeda. Yang **DIKERJAKAN & SELESAI** (build+tsc PASS): H1 sidebar owner 18→7 item (1 grup "Keputusan Owner"; loss-refunds & assets digabung via `activePaths` Akuntansi&Aset; users+layanan+minat via `activePaths` Akun&Layanan), H2 dashboard admin 6→3 area (Ringkasan·Penghuni&Uang·Operasional di `DashboardAdmin.tsx`+`RoleWorkspaceTabs.tsx`), H3 merge Minat→Layanan (via activePaths), H4 hapus duplikat finance (auto via H1), H5 polish responsive tab (`12-owner.css`). Pengumuman dipindah ke tombol 📣 topbar utk owner-Kokpit (`AppLayout.tsx`).
+> **DI-DEFER (di luar scope M13, owner belum minta):** "Unifikasi AI Panel admin" & "Owner Dashboard compact mode" & "hapus CSS dead" (lihat H4/H5/H6 draf lama). Keputusan #5 M13: AI panel TIDAK diubah (biaya AI).
+
+**Rujukan:** `docs/M13_FASE_H_UIUX_COMPACT.md` (spesifikasi LENGKAP — baca penuh sebelum kerjakan) · `docs/M02_KEPUTUSAN_OWNER.md` · `docs/M07_PUBLIK_GROWTH.md` · `docs/CODEMAP.md`.
+
+**Anchor kode:** `navigation.ts` · `AppLayout.tsx` · `DashboardAdmin.tsx` · `AdminWorkspaces.tsx` · `RoleWorkspaceTabs.tsx` · `OwnerDashboardPage.tsx` · `12-owner.css`.
+
+#### H1 — Compact Owner Sidebar (18 → 7 item) [x]  ← SELESAI 2026-06-20 (1 grup "Keputusan Owner"; per M13)
+
+**Target:** `frontend/src/config/navigation.ts` — fungsi `ownerSections`.
+
+**Langkah:**
+1. Buka `frontend/src/config/navigation.ts`.
+2. Cari `const ownerSections: NavigationSection[] = [` (sekitar baris 38).
+3. Hapus SELURUH item dari grup `Operasional` KECUALI `Kokpit Owner`.
+4. Pindahkan item yang masih relevan ke grup `Keputusan Owner` bila perlu, tapi JANGAN tambah item baru.
+5. Hasil akhir: grup `Operasional` hanya berisi 1 item (`Kokpit Owner`). Grup `Keputusan Owner` = 6-7 item strategis.
+
+**Item yang DIHAPUS dari sidebar owner (tetap bisa diakses via toggle 🔧 Area Admin):**
+- Masa Sewa & Penghuni `/stays`
+- Tagihan & Piutang `/invoices`
+- Pengeluaran `/expenses`
+- Pendapatan Tambahan `/ancillary-revenue`
+- Kamar & Inventaris `/rooms`
+- Kinerja Staff `/staff-performance`
+- Pengumuman `/announcements`
+- Minat Layanan `/service-interests`
+
+**Item yang TETAP:**
+- Kokpit Owner `/owner-dashboard`
+- Laporan Bisnis `/reports`
+- Analisa Pasar (AI) `/market-analysis`
+- Akuntansi `/finance/accounting-setup`
+- Aset & Depresiasi `/finance/assets`
+- Loyalitas & Reward `/loyalty`
+- Pengaturan `/settings`
+- (opsional) Akun User `/users`
+
+**Gate:** `cd frontend; npm run build` PASS. Cek: login sebagai OWNER → sidebar hanya tampil 1 grup pendek (2 grup total: "Operasional" dengan 1 item + "Keputusan Owner" dengan ~7 item). Toggle 🔧 Area Admin → sidebar tetap 6 item.
+
+**JANGAN:** hapus route, hapus halaman, atau ubah `ownerAdminSections` (sidebar mode admin).
+
+#### H2 — Compact Dashboard Tab (6 → 3 area) [x]  ← SELESAI 2026-06-20 (id area: overview/stays-finance/ops per M13; bukan 'today/stays/operations' draf lama)
+
+**Target:** `frontend/src/pages/dashboard/DashboardAdmin.tsx` + `frontend/src/components/workspace/RoleWorkspaceTabs.tsx`.
+
+**Langkah:**
+1. Buka `frontend/src/pages/dashboard/DashboardAdmin.tsx`.
+2. Cari `const ADMIN_QUEUE_AREAS = [` (sekitar baris 52).
+3. Ganti array 6 area dengan 3 area:
+   ```ts
+   const ADMIN_QUEUE_AREAS = [
+     { id: 'today', label: 'Ringkasan', helper: 'Orientasi cepat: kondisi hari ini dan pekerjaan yang butuh keputusan.' },
+     { id: 'stays', label: 'Penghuni & Uang', helper: 'Booking, pembayaran, tagihan, perpanjangan, dan keluar.' },
+     { id: 'operations', label: 'Operasional', helper: 'Tiket, staff, kamar, dan stok.' },
+   ];
+   ```
+4. Update fungsi `normalizeAdminArea` — ganti validasi area lama dengan 3 area baru.
+5. Update fungsi `itemMatchesAdminArea` — `'operations'` cocokkan dengan pattern tiket/staff/rooms.
+6. Update seluruh query `needs*Data` — gabungkan: `stays` + `finance` → 1 set query, `tickets` + `staff` + `rooms` → 1 set query.
+7. Update `AdminOverviewCharts` — panel untuk area `stays` gabung stays+finance charts dalam 1 area.
+8. Buka `frontend/src/components/workspace/RoleWorkspaceTabs.tsx`.
+9. Update `buildAdminTabs` — ganti 6 tab jadi 3:
+   ```ts
+   { id: 'today', label: 'Ringkasan', to: base },
+   { id: 'stays', label: 'Penghuni & Uang', to: `${base}?area=stays` },
+   { id: 'operations', label: 'Operasional', to: `${base}?area=operations` },
+   ```
+10. Update `match` function tiap tab — `stays` match `/stays|/tenants|/renew-requests|/invoices|/payment-submissions|/expenses`, `operations` match `/tickets|/staff|/rooms|/inventory`.
+
+**Gate:** `cd frontend; npm run build` PASS. UAT: login ADMIN → tab hanya 3 (Ringkasan | Penghuni & Uang | Operasional). Klik tab → data termuat sesuai area. Owner mode admin → sama.
+
+**JANGAN:** hapus query, hapus komponen workspace (AdminStaysUnifiedList, AdminFinanceWorkspace, dll), atau ubah backend.
+
+#### H3 — Merge "Minat Layanan" + "Layanan Tambahan" → 1 sidebar entry [x]  ← SELESAI 2026-06-20 (via activePaths "Akun & Layanan"; breadcrumb ServiceInterestsPage opsional, di-skip per M13)
+
+**Target:** `frontend/src/config/navigation.ts`.
+
+**Langkah:**
+1. Buka `frontend/src/config/navigation.ts`.
+2. Cari entry `Minat Layanan` (`/service-interests`) di `ownerSections`.
+3. Hapus entry tersebut (sudah dihapus di H1 otomatis — pastikan benar-benar hilang dari sidebar owner).
+4. Cari entry `Layanan Tambahan` (`/additional-services`) — pastikan hint-nya menyebut "kelola layanan & minat tenant".
+5. Update `activePaths` untuk `/additional-services` agar menyertakan `/service-interests`:
+   ```ts
+   activePaths: ['/additional-services', '/service-interests']
+   ```
+6. Di `frontend/src/pages/services/ServiceInterestsPage.tsx`: tambah link/breadcrumb yang mengarah ke `/additional-services` sebagai parent context.
+
+**Gate:** `npm run build` PASS. UAT: sidebar owner hanya 1 entry untuk layanan. Klik → bisa akses daftar layanan. Minat tenant tetap bisa diakses (via tab di halaman yang sama atau link terpisah).
+
+**JANGAN:** hapus route `/service-interests`, hapus `ServiceInterestsPage`, atau ubah backend.
+
+#### H4 — Unifikasi AI Panel (Owner + Admin) [ ]  ← DI-DEFER (di luar scope M13; Keputusan #5 M13: AI panel admin TIDAK diubah — biaya AI, owner belum minta). Catatan: "H4" versi M13 = "hapus duplikat finance" yang otomatis selesai via H1.
+
+**Target:** `frontend/src/pages/dashboard/OwnerDashboardPage.tsx` + `frontend/src/pages/dashboard/DashboardAdmin.tsx`.
+
+**Latar:** Owner dashboard punya `AiAssistButton` + DeepSeek; Admin dashboard punya `AssistantPanel` rules-based. Dua sistem berbeda untuk kebutuhan yang mirip: memberi ringkasan cerdas ke pengambil keputusan.
+
+**Langkah:**
+1. Di `DashboardAdmin.tsx`, cari `AssistantPanel` (sekitar baris 410-430).
+2. TAMBAHKAN (jangan ganti) `AiAssistButton` di sebelah atau di bawah `AssistantPanel` untuk area `today`, dengan fitur brief ala G1 tapi untuk admin (pakai `generateBrief` atau endpoint baru `POST /owner-ai/brief` yang sudah ada).
+3. Bungkus dalam conditional: hanya tampil jika `AI_FEATURES_ENABLED` (cek dari `GET /owner-ai/status`).
+4. Hasil AI tampil di `AiResultPanel` (seperti di OwnerDashboard).
+5. Di `OwnerDashboardPage.tsx`, TAMBAHKAN `AssistantPanel` di bawah KPI cards untuk menampilkan aksi urgent (seperti di admin dashboard).
+6. Gunakan data yang sudah ada (signals, statusCards) — tidak perlu query baru.
+
+**Gate:** `npm run build` PASS. UAT: Owner dashboard → ada aksi urgent + AI brief. Admin dashboard → AssistantPanel tetap + tombol AI muncul untuk ADMIN/OWNER (opsional, tergantung env).
+
+**JANGAN:** hapus `AssistantPanel`, ganti endpoint AI, atau ubah backend.
+
+#### H5 — Owner Dashboard: Kurangi Full-Page, Jadi Landing Strategis [ ]  ← DI-DEFER (di luar scope M13; OwnerDashboard tetap penuh). Catatan: "H5" versi M13 = "polish breadcrumb & responsive tab" yang SUDAH SELESAI (CSS @media 480px di 12-owner.css).
+
+**Target:** `frontend/src/pages/dashboard/OwnerDashboardPage.tsx`.
+
+**Latar:** Saat ini OwnerDashboard adalah halaman penuh dengan KPI + chart tren + AI. Tapi laporan detail ada di `/reports`, dan operasional ada di `/admin-dashboard`. Dashboard owner sebaiknya jadi halaman ringkas — KPI + sinyal + quick actions.
+
+**Langkah:**
+1. Buka `OwnerDashboardPage.tsx`.
+2. Cari section tren chart (`owner-trend-panel`, sekitar baris 440-490).
+3. Bungkus dalam conditional: hanya tampil di mode `full`, SEMBUNYIKAN di mode `compact`.
+4. Di bawah sinyal "Butuh perhatian", tambah 2-3 quick-action button:
+   - "Buka Laporan" → `/reports`
+   - "Buka Area Admin" → `/admin-dashboard`
+   - "Analisa Pasar" → `/market-analysis`
+5. Pastikan mode compact menampilkan: KPI 4 kartu, status kokpit strip, sinyal urgent, AI brief (opsional), dan quick-action buttons.
+
+**Gate:** `npm run build` PASS. UAT: mode compact → tidak ada chart tren. Mode full → chart tetap ada. Kedua mode tetap punya quick-action yang mengarah ke laporan/area admin.
+
+**JANGAN:** hapus chart, hapus mode full, atau ubah backend.
+
+#### H6 — Polish: Hapus CSS Dead + Selaraskan Responsive [~]  ← responsive SELESAI (@media 480px .role-workspace-tabs di 12-owner.css). Hapus CSS dead DI-DEFER (prinsip "bila ragu jangan hapus"; tidak ada selector pasti mati setelah H1–H5).
+
+**Target:** `frontend/src/styles/12-owner.css` + `frontend/src/styles/08-admin.css`.
+
+**Langkah:**
+1. Buka `12-owner.css`.
+2. Cari selector yang sudah tidak dipakai setelah H1-H5 (misal: `.owner-lane-*` yang mengacu ke sidebar item yang dihapus — hati-hati, jangan hapus yang masih dipakai komponen).
+3. Hapus selector yang SUDAH PASTI tidak dipakai. Bila ragu, LEBIH BAIK TIDAK MENGHAPUS.
+4. Buka `08-admin.css`.
+5. Pastikan responsive breakpoint (≤768px, ≤834px, ≥1440px) untuk area dashboard baru (H2) tidak pecah.
+6. Cek mobile: sidebar offcanvas toggle tetap berfungsi, area chip horizontal tidak overflow.
+
+**Gate:** `npm run build` PASS. UAT: buka dashboard admin di 390px (mobile) — tidak ada overflow horizontal, semua konten bisa dibaca.
+
+**JANGAN:** hapus CSS secara agresif. Jika selector muncul di search_content, jangan hapus.
+
+---
+
+#### UAT Global Fase H
+
+Checklist wajib sebelum centang `[x]`:
+
+- [ ] Login OWNER → sidebar Kokpit hanya 1 grup pendek (1+7 item).
+- [ ] Toggle 🔧 Area Admin → sidebar 6 item, dashboard admin 3 tab.
+- [ ] Login ADMIN → sidebar 6 item, dashboard admin 3 tab.
+- [ ] Semua route `/stays`, `/invoices`, `/tickets`, `/rooms`, `/staff-performance`, `/announcements`, `/service-interests` tetap bisa dibuka (via sidebar admin atau URL langsung).
+- [ ] Owner dashboard mode compact: tidak ada chart tren, ada quick-action buttons.
+- [ ] Owner dashboard mode full: chart tren tetap ada.
+- [ ] Mobile (390px): sidebar offcanvas toggle Kokpit/Area Admin berfungsi, tidak overflow.
+- [ ] `npm run build` PASS.
+
+---
 
 #### UAT Global Fase G
 

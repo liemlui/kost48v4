@@ -447,7 +447,7 @@ export default function AppLayout({ children }: { children?: ReactNode }) {
                   <GlobalSearch role={user?.role} />
                 </div>
                 <NotificationBell />
-                {isAdmin || (isOwner && ownerViewMode === 'admin') ? (
+                {isAdmin || isOwner ? (
                   <Button variant="outline-primary" size="sm" className="admin-icon-action" onClick={() => navigate('/announcements')} title="Buka pengumuman" aria-label="Buka pengumuman">
                     <span aria-hidden="true">📣</span> <span>Pengumuman</span>
                   </Button>

@@ -22,6 +22,10 @@ Dokumen orientasi utama untuk memahami blueprint sistem, kondisi aktual, rencana
 
 Fitur AI berbayar dipisah menjadi `docs/M12_AI_OWNER_ADMIN.md`. Keputusan owner: semua AI harus aktif hanya lewat tombol manual, role OWNER/ADMIN saja, AI membuat analisa/draft/rekomendasi, dan manusia tetap menekan approve untuk aksi final. AI tidak boleh berjalan dari cron/page-load atau mengubah uang/stok/kamar/KTP tanpa persetujuan manusia.
 
+## Update 2026-06-22 - Fase H UI/UX Compact Owner↔Admin
+
+Penyederhanaan UI Owner & Admin tanpa menghilangkan fitur — **reduksi duplikasi, compact dashboard, merge entri mirip.** Spesifikasi lengkap: `docs/M13_FASE_H_UIUX_COMPACT.md`. Enam task: H1 (sidebar owner 19→7), H2 (dashboard 6→3 tab), H3 (merge Minat+Layanan), H4 (unifikasi AI panel), H5 (owner dashboard landing page), H6 (CSS polish). Semua task frontend-only — tidak sentuh backend/schema/API.
+
 ## Catatan Pemakaian
 
 - Jadikan file ini pintu masuk tematik; bila butuh detail mentah, cek file sumber di arsip yang disebut di atas.
