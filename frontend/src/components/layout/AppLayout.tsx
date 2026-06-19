@@ -2,6 +2,7 @@ import { type ReactNode, useEffect, useMemo, useState } from 'react';
 import { useTenantPortalStage } from '../../hooks/useTenantPortalStage';
 import { Button, Offcanvas } from 'react-bootstrap';
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { APP_VERSION, APP_PHASE } from '../../config/version';
 import NotificationBell from '../notifications/NotificationBell';
 import StaffTopWorkspaceNav from '../staff/StaffTopWorkspaceNav';
 import TenantWorkspaceTabs from '../tenant/TenantWorkspaceTabs';
@@ -473,6 +474,11 @@ export default function AppLayout({ children }: { children?: ReactNode }) {
           {isAdmin || isOwner ? <RoleWorkspaceTabs role={user?.role} ownerViewMode={isOwner ? ownerViewMode : undefined} /> : null}
           {children ?? <Outlet />}
         </main>
+
+        <footer className="app-footer">
+          <span>KOST48 v{APP_VERSION}</span>
+          <span className="app-footer-phase">{APP_PHASE}</span>
+        </footer>
       </div>
     </div>
     </>

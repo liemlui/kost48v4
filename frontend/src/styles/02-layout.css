@@ -1025,3 +1025,19 @@ body.offcanvas-open {
 .notification-bell-toggle::after {
   display: none !important;
 }
+
+/* ── App Footer (version info) ──────────────────────────────────── */
+.app-footer {
+  padding: 6px 20px;
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  text-align: center;
+  border-top: 1px solid var(--border-soft);
+  background: var(--surface-soft);
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+}
+.app-footer-phase {
+  opacity: 0.65;
+}
