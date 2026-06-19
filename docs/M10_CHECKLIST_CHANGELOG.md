@@ -24,7 +24,7 @@
 | Fase F — UI/UX Sweep | **selesai** | — | UX-404 (NotFoundPage), UX-TOAST (ToastProvider), UX-A11Y (SVG password, skip-link), UX-COLOR (kontras AA), UX-LOGOUT (konfirmasi), UX-SEARCH-TENANT, UX-SKELETON, UX-OVERSCROLL, UX-LOGIN-FORMAT ✅ |
 | Fase G — AI Owner/Admin | **selesai** | — | DeepSeek/API AI berbayar: G0-G9 selesai, tombol manual, draft queue, KTP OCR, budgeting ✅ |
 | Fase H — UI/UX Compact | **selesai** | — | Sidebar owner 18→7, dashboard 6→3 tab, merge minat+layanan, polish CSS ✅ |
-| Fase I — Navigasi & Onboarding | **baru** | I1-I6 | Hapus duplikasi menu, unifikasi staff nav, ekspos rute, breadcrumb klik, onboarding tenant |
+| Fase I — Navigasi & Onboarding | **selesai** | — | I1-I6 selesai: hapus AdminAreaInternalMenu, unifikasi staff nav via navigation.ts, ekspos /meter-readings, GettingStartedGuide tenant, breadcrumb klik ✅ |
 | Fase J — Hardening AI Pra-Go-Live | **baru** | J0-J4 | Jaring pengaman owner-ai (test PDP/uang), luruskan guard no-partial DP, hardening FE AI, audit PDP → `docs/M15_FASE_J_HARDENING_AI.md` |
 
 ### Urutan kerja (jangan loncat kecuali blocked) — detail di [ANTRIAN](#antrian-eksekusi-aktif-untuk-ai--kerjakan-dari-sini)
@@ -342,7 +342,7 @@ Output akhir:
 | **Fase F** | UI/UX Sweep | **selesai** | M07 | 404, toast, a11y, kontras, logout, tenant search, skeleton, overscroll, login format |
 | **Fase G** | AI Owner/Admin Approval Copilot | **selesai** | M12, M02, M04-M09, CODEMAP | DeepSeek/API AI manual-only; G0-G9 selesai, draft queue, KTP OCR, budgeting ✅ |
 | **Fase H** | UI/UX Compact Owner↔Admin | **selesai** | M13, M02, M07, CODEMAP | Reduksi sidebar 18→7, dashboard 6→3 tab, merge layanan, polish CSS ✅ |
-| **Fase I** | Navigasi & Onboarding | baru | M14, M02, M07, CODEMAP | Hapus duplikasi menu, unifikasi staff nav, ekspos rute, breadcrumb klik, onboarding tenant |
+| **Fase I** | Navigasi & Onboarding | **selesai** | M14, M02, M07, CODEMAP | I1-I6 selesai: hapus duplikasi menu, unifikasi staff nav, ekspos /meter-readings, breadcrumb klik, onboarding tenant ✅ |
 
 ---
 
@@ -1213,7 +1213,7 @@ Checklist wajib sebelum centang `[x]`:
 - [ ] **UAT-I5:** Breadcrumb segmen pertama bisa diklik → ke dashboard.
 - [ ] **UAT-I6:** Guide strip tenant adaptif per stage.
 - [ ] **UAT-REGRESSION:** Semua halaman existing tidak 404; toggle Owner↔Admin tidak rusak.
-- [ ] `cd frontend && npm run build` PASS.
+- [x] `cd frontend && npm run build` PASS (2026-06-20: built 27.7s, PWA verify ok, 115 chunks).
 
 ---
 
