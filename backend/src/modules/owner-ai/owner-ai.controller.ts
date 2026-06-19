@@ -102,4 +102,11 @@ export class OwnerAiController {
   async testConnection(@CurrentUser() user: CurrentUserPayload) {
     return this.ownerAiService.testConnection(user.id);
   }
+
+  /** G8: generate draft FAQ dari aturan bisnis + layanan aktif. OWNER only. */
+  @Post("faqs/generate-draft")
+  @Roles(UserRole.OWNER)
+  async generateFaqDraft(@CurrentUser() user: CurrentUserPayload) {
+    return this.ownerAiService.generateFaqDraft(user.id);
+  }
 }
