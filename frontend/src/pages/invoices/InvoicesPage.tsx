@@ -181,7 +181,12 @@ export default function InvoicesPage() {
   const [cancelReason, setCancelReason] = useState('');
 
   const invoicesQuery = useQuery({ queryKey: ['invoices', page], queryFn: () => listResource<any>('/invoices', { page, limit: PAGE_SIZE }) });
-  const staysQuery = useQuery({ queryKey: ['stays', 'invoice-form'], queryFn: () => listResource<any>('/stays', { limit: 500 }) });
+  const staysQuery = useQuery({
+    queryKey: ['stays', 'invoice-form'],
+    queryFn: () => listResource<any>('/stays', { limit: 500 }),
+    enabled: showCreate && canManageFinance,
+    staleTime: 30_000,
+  });
   const accountingReadinessQuery = useQuery({ queryKey: ['accounting-readiness', 'invoice-posting'], queryFn: fetchAccountingReadiness, enabled: canManageFinance, staleTime: 30_000 });
 
   const refreshInvoiceRelated = async () => {
