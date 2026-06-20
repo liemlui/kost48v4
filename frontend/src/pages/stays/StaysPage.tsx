@@ -192,12 +192,14 @@ export default function StaysPage() {
     queryKey: ['admin-checkout-requests', 'PENDING'],
     queryFn: () => listAdminCheckoutRequests({ status: 'PENDING' }),
     enabled: isBookingsMode,
+    staleTime: 30_000,
   });
 
   const approvedCheckoutRequestsQuery = useQuery({
     queryKey: ['admin-checkout-requests', 'APPROVED'],
     queryFn: () => listAdminCheckoutRequests({ status: 'APPROVED' }),
     enabled: isBookingsMode,
+    staleTime: 30_000,
   });
 
   const pendingCheckoutRequests = useMemo(() => {
