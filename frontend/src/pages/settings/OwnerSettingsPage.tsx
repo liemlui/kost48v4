@@ -56,7 +56,8 @@ function FacilityPhotoPanel() {
       await uploadFacilityImage(slug, file);
       qc.invalidateQueries({ queryKey: ['facility-images'] });
     } catch (err) {
-      setError(`Gagal upload ${slug}: ${err instanceof Error ? err.message : 'Unknown error'}`);
+      const label = FACILITY_SLUGS.find((f) => f.slug === slug)?.label ?? slug;
+      setError(`Gagal upload foto "${label}": ${err instanceof Error ? err.message : 'Terjadi kesalahan.'}`);
     } finally {
       setUploading(null);
     }
@@ -430,6 +431,7 @@ function FaqManagementPanel() {
           <Form.Group className="mb-3">
             <Form.Label>Pertanyaan</Form.Label>
             <Form.Control
+              autoFocus
               value={form.question}
               onChange={(e) => setForm((p) => ({ ...p, question: e.target.value }))}
               placeholder="Contoh: Berapa kisaran tarif kamar?"

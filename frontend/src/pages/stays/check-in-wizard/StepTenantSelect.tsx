@@ -13,6 +13,7 @@ interface StepTenantSelectProps {
   loadTenantOptions: (inputValue: string) => Promise<SelectOption<number>[]>;
   defaultTenantOptions: SelectOption<number>[];
   isLoading: boolean;
+  isError?: boolean;
   onCreateInlineTenant: (tenant: { fullName: string; phone: string; email: string; gender: string; identityNumber: string }) => void;
   isCreatingTenant: boolean;
   wizardError: string;
@@ -27,6 +28,7 @@ export default function StepTenantSelect({
   loadTenantOptions,
   defaultTenantOptions,
   isLoading,
+  isError,
   onCreateInlineTenant,
   isCreatingTenant,
   wizardError,
@@ -91,7 +93,11 @@ export default function StepTenantSelect({
         ) : null}
         <Form.Group className="mb-3">
           <Form.Label>Penghuni</Form.Label>
-          {isLoading ? (
+          {isError ? (
+            <Alert variant="warning" className="py-2 mb-0">
+              Gagal memuat daftar penghuni. Periksa koneksi lalu muat ulang halaman, atau gunakan tombol "Tambah Penghuni Baru" di atas.
+            </Alert>
+          ) : isLoading ? (
             <div className="d-flex align-items-center gap-2">
               <Spinner size="sm" />
               <span className="text-muted">Memuat data penghuni...</span>

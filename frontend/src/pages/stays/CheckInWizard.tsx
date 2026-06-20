@@ -40,7 +40,7 @@ export default function CheckInWizard({ show: _show = true, onHide }: CheckInWiz
   const form = useForm<WizardFormValues>({ defaultValues });
 
   // ---- Queries ----
-  const { data: tenantsResp, isLoading: isLoadingTenants } = useQuery({
+  const { data: tenantsResp, isLoading: isLoadingTenants, isError: isTenantsError } = useQuery({
     queryKey: ['tenants', 'select'],
     queryFn: () => listResource<Tenant>('tenants', { limit: 200 }),
     enabled: show,
@@ -465,6 +465,7 @@ export default function CheckInWizard({ show: _show = true, onHide }: CheckInWiz
               loadTenantOptions={loadTenantOptions}
               defaultTenantOptions={defaultTenantOptions}
               isLoading={isLoadingTenants}
+              isError={isTenantsError}
               onCreateInlineTenant={handleCreateInlineTenant}
               isCreatingTenant={createInlineTenantMutation.isPending}
               wizardError={wizardError}

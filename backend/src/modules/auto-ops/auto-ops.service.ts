@@ -1,4 +1,5 @@
 import { Injectable, Logger, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
+import { Client } from 'pg';
 import { RoomStatus, StayStatus } from '../../common/enums/app.enums';
 import { AUTO_OPS_DEADLINES } from '../../common/business/auto-ops.constants';
 import { PrismaService } from '../../prisma/prisma.service';
@@ -29,6 +30,7 @@ type AutoOpsRunResult = {
 export class AutoOpsService implements OnModuleInit, OnModuleDestroy {
   private readonly logger = new Logger(AutoOpsService.name);
   private timer: ReturnType<typeof setInterval> | null = null;
+  private running = false;
 
   constructor(
     private readonly prisma: PrismaService,
@@ -94,61 +96,102 @@ export class AutoOpsService implements OnModuleInit, OnModuleDestroy {
     };
   }
 
-  async runAll(options: { actorUserId?: number | null; source?: string } = {}): Promise<AutoOpsRunResult> {
-    // P6: DB advisory lock mencegah race antar multi-process (ganti in-memory flag).
-    const lockAcquired = await this.prisma.$queryRawUnsafe<Array<{ pg_try_advisory_lock: boolean }>>(
-      `SELECT pg_try_advisory_lock(1) AS "pg_try_advisory_lock"`,
-    ).then(rows => rows[0]?.pg_try_advisory_lock ?? false);
-    if (!lockAcquired) {
-      return { expiredBookings: 0, heldForPaymentReview: 0, releasedRooms: 0, expiredStayIds: [], releasedRoomIds: [], accountingAutoClose: { skipped: true, skippedReason: 'AUTO_OPS_LOCK_HELD_BY_ANOTHER_PROCESS' } };
+  private skipped(skippedReason: string): AutoOpsRunResult {
+    return {
+      expiredBookings: 0,
+      heldForPaymentReview: 0,
+      releasedRooms: 0,
+      expiredStayIds: [],
+      releasedRoomIds: [],
+      accountingAutoClose: { skipped: true, skippedReason },
+    };
+  }
+
+  private async withAdvisoryLock<T>(fn: () => Promise<T>): Promise<T | null> {
+    const connectionString = process.env.DATABASE_URL;
+    if (!connectionString) {
+      throw new Error('DATABASE_URL wajib diisi untuk AutoOps advisory lock.');
     }
+
+    const client = new Client({ connectionString });
+    await client.connect();
+    let locked = false;
     try {
-      // Release di finally agar lock tidak bocor
-      // Sequential (audit A4): job-job ini menyentuh tabel Stay/Room yang sama;
-      // paralel menimbulkan race double-cancel dengan hasil DP/jaminan berbeda.
-      const bookingResult = await this.bookingSweep.runBookingExpiry(options);
-      await this.maintenanceSweep.runContractEndReminders(options);
-      await this.maintenanceSweep.runTicketSlaEscalation(options);
-      await this.maintenanceSweep.runBelongingsAbandonment(options);
-      // F2-1 inc.3: sweeper renewal (hibrida) — expiry prioritas OTOMATIS, forfeit DITANDAI.
-      await this.renewalSweep.runRenewalPriorityExpiry(options);
-      await this.renewalSweep.runRenewalSettlementForfeit(options);
-      const dpForfeitResult = await this.bookingSweep.runDownPaymentForfeit(options);
-      void dpForfeitResult;
-      await this.staySweep.runOverstayForcedCheckout(options);
-      const autoCancelResult = await this.staySweep.runPostCheckoutAutoCancel(options);
-      const noonResult = await this.staySweep.runRoomReleaseAtNoon(options);
-      const roomResult = await this.staySweep.runRoomHealer(options);
-      const overstayResult = await this.staySweep.runOverstayEnforcement(options);
-      const recurringExpenseDrafts = await this.accountingSweep.runRecurringExpenseDrafts(options);
-      const automaticDepreciation = await this.accountingSweep.runAutomaticDepreciation(options);
-      const rentRecognition = await this.accountingSweep.runRentRecognition(options);
-      const acCleaning = await this.maintenanceSweep.runAcCleaningSchedule(options);
-      await this.maintenanceSweep.runReferralRewards(options);
-      // F5-6 (L-1): backfill jurnal warisan yang bolong SEBELUM auto-close (agar readiness bersih).
-      const journalReconciliation = await this.accountingSweep.runAutoJournalReconciliation(options);
-      const accountingAutoClose = await this.accountingSweep.runAccountingAutoClose(options);
-      const notificationPruning = await this.accountingSweep.runNotificationPruning(options);
-      const pushDispatch = await this.maintenanceSweep.runPushDispatch(options);
-      return {
-        expiredBookings: bookingResult.expiredStayIds.length,
-        heldForPaymentReview: bookingResult.heldForPaymentReview,
-        releasedRooms: roomResult.releasedRoomIds.length + noonResult.releasedRoomIds.length,
-        expiredStayIds: bookingResult.expiredStayIds,
-        releasedRoomIds: [...roomResult.releasedRoomIds, ...noonResult.releasedRoomIds],
-        recurringExpenseDrafts,
-        automaticDepreciation,
-        rentRecognition,
-        accountingAutoClose,
-        notificationPruning,
-        pushDispatch,
-        acCleaning,
-        journalReconciliation,
-      };
+      const result = await client.query<{ locked: boolean }>(
+        'SELECT pg_try_advisory_lock($1) AS locked',
+        [1],
+      );
+      locked = result.rows[0]?.locked === true;
+      if (!locked) return null;
+      return await fn();
     } finally {
-      // P6: selalu release advisory lock (tidak bocor walau exception)
-      await this.prisma.$executeRawUnsafe(`SELECT pg_advisory_unlock(1)`);
+      if (locked) {
+        await client.query('SELECT pg_advisory_unlock($1)', [1]).catch((error) => {
+          this.logger.warn(`AutoOps advisory unlock gagal: ${error?.message ?? error}`);
+        });
+      }
+      await client.end().catch(() => undefined);
     }
+  }
+
+  async runAll(options: { actorUserId?: number | null; source?: string } = {}): Promise<AutoOpsRunResult> {
+    if (this.running) {
+      return this.skipped('AUTO_OPS_ALREADY_RUNNING');
+    }
+
+    this.running = true;
+    try {
+      const result = await this.withAdvisoryLock(() => this.runAllUnlocked(options));
+      return result ?? this.skipped('AUTO_OPS_LOCK_HELD_BY_ANOTHER_PROCESS');
+    } finally {
+      this.running = false;
+    }
+  }
+
+  private async runAllUnlocked(options: { actorUserId?: number | null; source?: string } = {}): Promise<AutoOpsRunResult> {
+    // Sequential (audit A4): job-job ini menyentuh tabel Stay/Room yang sama;
+    // paralel menimbulkan race double-cancel dengan hasil DP/jaminan berbeda.
+    const bookingResult = await this.bookingSweep.runBookingExpiry(options);
+    await this.maintenanceSweep.runContractEndReminders(options);
+    await this.maintenanceSweep.runTicketSlaEscalation(options);
+    await this.maintenanceSweep.runBelongingsAbandonment(options);
+      // F2-1 inc.3: sweeper renewal (hibrida) — expiry prioritas OTOMATIS, forfeit DITANDAI.
+    await this.renewalSweep.runRenewalPriorityExpiry(options);
+    await this.renewalSweep.runRenewalSettlementForfeit(options);
+    const dpForfeitResult = await this.bookingSweep.runDownPaymentForfeit(options);
+    void dpForfeitResult;
+    await this.staySweep.runOverstayForcedCheckout(options);
+    const autoCancelResult = await this.staySweep.runPostCheckoutAutoCancel(options);
+    void autoCancelResult;
+    const noonResult = await this.staySweep.runRoomReleaseAtNoon(options);
+    const roomResult = await this.staySweep.runRoomHealer(options);
+    const overstayResult = await this.staySweep.runOverstayEnforcement(options);
+    void overstayResult;
+    const recurringExpenseDrafts = await this.accountingSweep.runRecurringExpenseDrafts(options);
+    const automaticDepreciation = await this.accountingSweep.runAutomaticDepreciation(options);
+    const rentRecognition = await this.accountingSweep.runRentRecognition(options);
+    const acCleaning = await this.maintenanceSweep.runAcCleaningSchedule(options);
+    await this.maintenanceSweep.runReferralRewards(options);
+      // F5-6 (L-1): backfill jurnal warisan yang bolong SEBELUM auto-close (agar readiness bersih).
+    const journalReconciliation = await this.accountingSweep.runAutoJournalReconciliation(options);
+    const accountingAutoClose = await this.accountingSweep.runAccountingAutoClose(options);
+    const notificationPruning = await this.accountingSweep.runNotificationPruning(options);
+    const pushDispatch = await this.maintenanceSweep.runPushDispatch(options);
+    return {
+      expiredBookings: bookingResult.expiredStayIds.length,
+      heldForPaymentReview: bookingResult.heldForPaymentReview,
+      releasedRooms: roomResult.releasedRoomIds.length + noonResult.releasedRoomIds.length,
+      expiredStayIds: bookingResult.expiredStayIds,
+      releasedRoomIds: [...roomResult.releasedRoomIds, ...noonResult.releasedRoomIds],
+      recurringExpenseDrafts,
+      automaticDepreciation,
+      rentRecognition,
+      accountingAutoClose,
+      notificationPruning,
+      pushDispatch,
+      acCleaning,
+      journalReconciliation,
+    };
   }
 
   // ── Proxy methods for controller ──────────────────────────────────────────

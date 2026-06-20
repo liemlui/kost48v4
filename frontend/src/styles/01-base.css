@@ -385,3 +385,22 @@ a {
 .skip-to-content:focus {
   top: 16px;
 }
+
+/* L-17 a11y: outline keyboard-focus konsisten untuk elemen interaktif */
+a:focus-visible,
+button:focus-visible,
+[role="button"]:focus-visible,
+.btn:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2px solid #2563eb;
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+/* Kartu kamar staf yang keyboard-focusable (tabIndex=0) */
+.staff-room-card:focus-visible {
+  outline: 3px solid #2563eb;
+  outline-offset: 2px;
+}

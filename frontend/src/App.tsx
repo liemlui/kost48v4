@@ -67,15 +67,19 @@ type Role = 'OWNER' | 'ADMIN' | 'STAFF' | 'TENANT';
 
 function RequireRoles({ allowed, children }: { allowed: Role[]; children: ReactNode }) {
   const { user } = useAuth();
-  const { stage } = useTenantPortalStage();
+  const { stage, isLoading: isStageLoading } = useTenantPortalStage();
   if (!user) return null;
+  // Tunggu stage selesai dimuat sebelum redirect (hindari redirect prematur ke /rooms saat loading)
+  // L-01: skeleton saat TENANT stage loading, hindari layar putih kosong.
+  if (isStageLoading && user.role === 'TENANT') return <PageLoadingSkeleton />;
   return allowed.includes(user.role as Role) ? <>{children}</> : <Navigate to={getDefaultRoute(user.role, stage)} replace />;
 }
 
 
 function TenantBookingRouteGuard({ children }: { children: ReactNode }) {
   const { stage, isLoading } = useTenantPortalStage();
-  if (isLoading) return null;
+  // L-01: skeleton saat menentukan stage, hindari flash layar putih sebelum gate/booking.
+  if (isLoading) return <PageLoadingSkeleton />;
   if (stage !== 'browsing') return <TenantBookingGate mode="booking-route" />;
   return <>{children}</>;
 }

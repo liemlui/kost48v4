@@ -1973,6 +1973,53 @@
   outline: 3px solid rgba(37, 99, 235, .25);
   outline-offset: -3px;
 }
+
+.accounting-setup-checklist-list {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.accounting-setup-checklist-item {
+  border: 1px solid rgba(148, 163, 184, .22);
+  border-radius: 12px;
+  padding: .85rem;
+  background: #f8fafc;
+}
+
+.accounting-setup-checklist-item.is-done {
+  border-color: rgba(22, 163, 74, .26);
+  background: #f0fdf4;
+}
+
+.accounting-setup-checklist-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: #e2e8f0;
+  color: #475569;
+  font-size: .75rem;
+  font-weight: 900;
+}
+
+.accounting-setup-checklist-item.is-done .accounting-setup-checklist-mark {
+  background: #16a34a;
+  color: #fff;
+}
+
+@media (max-width: 1199.98px) {
+  .accounting-setup-checklist-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 575.98px) {
+  .accounting-setup-checklist-list {
+    grid-template-columns: 1fr;
+  }
+}
 @media (max-width: 520px) {
   .role-workspace-tabs-label {
     width: 100%;

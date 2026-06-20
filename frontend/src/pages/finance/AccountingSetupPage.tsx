@@ -14,6 +14,7 @@ import OpeningBalanceWizard from '../../components/accounting/OpeningBalanceWiza
 import TrialBalancePreview from '../../components/accounting/TrialBalancePreview';
 import BalanceSheetGuardPanel from '../../components/accounting/BalanceSheetGuardPanel';
 import AccountingCommandCenterLite from '../../components/accounting/AccountingCommandCenterLite';
+import AccountingSetupChecklist, { type AccountingSetupChecklistStep } from '../../components/accounting/AccountingSetupChecklist';
 import ProfitLossLitePanel from '../../components/accounting/ProfitLossLitePanel';
 import AssetReadinessPanel from '../../components/accounting/AssetReadinessPanel';
 import PeriodClosePanel from '../../components/accounting/PeriodClosePanel';
@@ -142,6 +143,51 @@ export default function AccountingSetupPage() {
   const draftOpeningBalance = useMemo(() => openingBalances.find((batch) => batch.status === 'DRAFT'), [openingBalances]);
   const canManageOpeningBalance = user?.role === 'OWNER';
   const canUseFinanceAi = user?.role === 'OWNER' && ownerAiStatusQuery.data?.configured === true;
+  const activePostingPeriodReady = Boolean(
+    readinessQuery.data?.postingPeriod?.ready
+      || periods.some((period) => period.isCurrentPostingPeriod || period.isPostingOpen || period.status === 'OPEN'),
+  );
+  const setupChecklistSteps = useMemo<AccountingSetupChecklistStep[]>(() => {
+    const postingPeriod = readinessQuery.data?.postingPeriod;
+    const readinessScore = readinessQuery.data?.score ?? 0;
+    return [
+      {
+        id: 'coa',
+        label: 'COA terisi',
+        done: accounts.length >= 30,
+        helper: `${accounts.length} akun aktif. Gunakan tombol Siapkan Bagan Akun (COA) bila masih kosong.`,
+      },
+      {
+        id: 'period',
+        label: 'Periode aktif',
+        done: activePostingPeriodReady,
+        helper: postingPeriod?.key
+          ? `${postingPeriod.key} - ${postingPeriod.ready ? 'siap untuk posting' : postingPeriod.status ?? 'belum siap'}.`
+          : `${periods.length} periode tersedia. Buat periode aktif bila belum ada.`,
+        targetSectionId: 'opening-balance',
+      },
+      {
+        id: 'opening-balance',
+        label: 'Opening Balance',
+        done: Boolean(postedOpeningBalance),
+        helper: postedOpeningBalance
+          ? `Sudah diposting pada ${postedOpeningBalance.cutoverDate}.`
+          : draftOpeningBalance
+            ? 'Draft sudah ada. Review lalu posting sebagai saldo awal.'
+            : 'Buat draft saldo awal sebagai titik mulai neraca.',
+        targetSectionId: 'opening-balance',
+      },
+      {
+        id: 'ready',
+        label: 'Siap catat transaksi',
+        done: Boolean(readinessQuery.data?.ready && autoJournalEnabled),
+        helper: autoJournalEnabled
+          ? `Readiness ${readinessScore}%. Sistem siap bila semua gate ledger hijau.`
+          : `Readiness ${readinessScore}%. Auto journal belum aktif untuk transaksi operasional.`,
+        targetSectionId: autoJournalEnabled ? 'trial-balance' : 'operational-posting',
+      },
+    ];
+  }, [accounts.length, activePostingPeriodReady, autoJournalEnabled, draftOpeningBalance, periods.length, postedOpeningBalance, readinessQuery.data]);
 
 
   function focusAccountingSection(sectionId: string) {
@@ -453,6 +499,11 @@ export default function AccountingSetupPage() {
         ]}
       />
 
+      <AccountingSetupChecklist
+        steps={setupChecklistSteps}
+        onFocusSection={focusAccountingSection}
+      />
+
       <AccountingCommandCenterLite
         readiness={readinessQuery.data}
         trial={trialBalanceQuery.data}
@@ -573,7 +624,7 @@ export default function AccountingSetupPage() {
         note={recentJournalsQuery.data?.note}
       />
 
-      <Card className="content-card border-0 mb-3">
+      <Card id="operational-posting" className="content-card border-0 mb-3">
         <Card.Body className="d-flex flex-column flex-lg-row gap-3 justify-content-between align-items-lg-center">
           <div>
             <div className="section-kicker mb-2">Posting Operasional</div>
@@ -655,7 +706,7 @@ export default function AccountingSetupPage() {
             isSubmitting={createCashMutation.isPending}
           />
         </Col>
-        <Col xl={7}>
+        <Col xl={7} id="opening-balance">
           <OpeningBalanceWizard
             accounts={accounts}
             periods={periods}

@@ -4,8 +4,9 @@ import PageHeader from '../../components/common/PageHeader';
 import CurrencyDisplay from '../../components/common/CurrencyDisplay';
 import { listActiveAdditionalServices, createServiceInterest, listMyServiceInterests, type AdditionalService } from '../../api/additionalServices';
 
-const WHATSAPP_NUMBER = '6285648887628';
-const WHATSAPP_URL = `https://wa.me/${WHATSAPP_NUMBER}`;
+const KOST_WHATSAPP_NUMBER = '6285648887628';
+const WHATSAPP_URL = `https://wa.me/${KOST_WHATSAPP_NUMBER}`;
+const KOST_WHATSAPP_DISPLAY = `0${KOST_WHATSAPP_NUMBER.slice(2)}`.replace(/(\d{4})(\d{4})(\d+)/, '$1-$2-$3');
 
 export default function WifiOrderPage() {
   const qc = useQueryClient();
@@ -93,7 +94,7 @@ export default function WifiOrderPage() {
                 <span><strong>3</strong> Ikuti instruksi bayar</span>
               </div>
               <div className="alert alert-info small mb-2">
-                <strong>Kontak WhatsApp:</strong> 0856-4888-7628
+                <strong>Kontak WhatsApp:</strong> {KOST_WHATSAPP_DISPLAY}
               </div>
               <Button as="a" href={WHATSAPP_URL} target="_blank" rel="noreferrer" variant="outline-primary" size="sm">
                 Hubungi via WhatsApp

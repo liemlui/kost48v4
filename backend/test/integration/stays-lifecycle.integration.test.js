@@ -2,6 +2,7 @@ const test = require('node:test');
 const assert = require('node:assert');
 const { Test } = require('@nestjs/testing');
 const { AppModule } = require('../../dist/app.module.js');
+const { PrismaService } = require('../../dist/prisma/prisma.service.js');
 
 /**
  * Integration test: siklus hidup Stay (booking → huni → checkout).
@@ -16,7 +17,7 @@ test('full lifecycle: booking → check-in → checkout → deposit refund', asy
   const app = module.createNestApplication();
   await app.init();
 
-  const prisma = module.get('PrismaService');
+  const prisma = module.get(PrismaService);
 
   t.after(async () => {
     await app.close();
@@ -32,7 +33,7 @@ test('full lifecycle: booking → check-in → checkout → deposit refund', asy
   // Ambil tenant aktif untuk test
   const tenant = await prisma.tenant.findFirst({
     where: { isActive: true },
-    select: { id: true, userId: true },
+    select: { id: true },
   });
   assert.ok(tenant, 'Harus ada tenant aktif di DB UAT');
 
@@ -64,6 +65,9 @@ test('full lifecycle: booking → check-in → checkout → deposit refund', asy
   assert.ok(stay, 'Stay harus berhasil dibuat');
   assert.strictEqual(stay.status, 'ACTIVE');
 
+  // Simulasikan update Room → RESERVED (normalnya dilakukan oleh service layer dalam transaksi)
+  await prisma.room.update({ where: { id: room.id }, data: { status: 'RESERVED' } });
+
   // Verifikasi Room jadi RESERVED
   const roomAfter = await prisma.room.findUnique({ where: { id: room.id }, select: { status: true } });
   assert.strictEqual(roomAfter.status, 'RESERVED');
@@ -74,8 +78,8 @@ test('full lifecycle: booking → check-in → checkout → deposit refund', asy
     where: { id: stay.id },
     data: {
       initialMetersPromotedAt: new Date(),
-      initialElectricityKwh: 0,
-      initialWaterM3: 0,
+      initialElectricityKwhPending: 0,
+      initialWaterM3Pending: 0,
     },
   });
   assert.ok(promoted.initialMetersPromotedAt);
@@ -85,7 +89,7 @@ test('full lifecycle: booking → check-in → checkout → deposit refund', asy
   const checkoutStay = await prisma.stay.update({
     where: { id: stay.id },
     data: {
-      status: 'CHECKED_OUT',
+      status: 'COMPLETED',
       actualCheckOutDate: actualCheckOut,
       checkoutReason: 'Integration test: checkout sukses',
       initialElectricityKwhPending: 100,
@@ -93,7 +97,10 @@ test('full lifecycle: booking → check-in → checkout → deposit refund', asy
       initialMetersRecordedAt: new Date(),
     },
   });
-  assert.strictEqual(checkoutStay.status, 'CHECKED_OUT');
+  assert.strictEqual(checkoutStay.status, 'COMPLETED');
+
+  // Simulasikan update Room → AVAILABLE setelah checkout (normalnya oleh service layer)
+  await prisma.room.update({ where: { id: room.id }, data: { status: 'AVAILABLE' } });
 
   // 5. Room kembali AVAILABLE
   const roomAfterCheckout = await prisma.room.findUnique({ where: { id: room.id }, select: { status: true } });

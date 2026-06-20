@@ -11,7 +11,6 @@ import {
   fetchOverdueAging,
   fetchDepositLiability,
   fetchExpenseSummary,
-  fetchCashFlow,
   fetchProfitLoss,
   fetchFinancialRatios,
   fetchOccupancy,
@@ -20,7 +19,6 @@ import {
   OverdueAging,
   DepositLiability,
   ExpenseSummary,
-  CashFlow,
   ProfitLoss,
   FinancialRatios,
   Occupancy,
@@ -37,6 +35,20 @@ export type HealthLevel = 'Baik' | 'Perlu Dipantau' | 'Buruk';
 export type CashFlowStatus = 'Positif' | 'Netral' | 'Negatif';
 export type OverallStatus = 'Sehat' | 'Perlu Dipantau' | 'Bermasalah';
 export type ReportTab = 'command' | 'finance' | 'aging' | 'operations' | 'formal';
+export interface CashFlow {
+  year: number;
+  month: number;
+  cashIn: {
+    invoicePaymentsRupiah: number;
+    wifiSalesRupiah: number;
+    totalRupiah: number;
+  };
+  cashOut: {
+    expensesRupiah: number;
+    totalRupiah: number;
+  };
+  netCashFlowRupiah: number;
+}
 export const reportTabs: ReportTab[] = ['command', 'finance', 'aging', 'operations', 'formal'];
 export function normalizeReportTab(value: string | null): ReportTab {
   return reportTabs.includes(value as ReportTab) ? (value as ReportTab) : 'command';

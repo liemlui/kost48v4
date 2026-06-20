@@ -103,6 +103,24 @@ export default function StaffRoutinesAdminPage() {
     },
   });
 
+  const reactivateMutation = useMutation({
+    mutationFn: (item: StaffRoutineTemplate) => updateStaffRoutineTemplate(item.id, { ...toPayload({ ...initialForm,
+      id: item.id,
+      title: item.title,
+      description: item.description ?? '',
+      frequency: item.frequency,
+      areaType: item.areaType ?? 'GENERAL',
+      dayOfWeek: item.dayOfWeek != null ? String(item.dayOfWeek) : '',
+      dayOfMonth: item.dayOfMonth != null ? String(item.dayOfMonth) : '',
+      requiresPhoto: Boolean(item.requiresPhoto),
+      requiresNote: Boolean(item.requiresNote),
+      sortOrder: String(item.sortOrder ?? 0),
+    }), isActive: true }),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['staff-routines-admin'] });
+    },
+  });
+
   const activeCount = useMemo(() => templates.filter((item) => item.isActive !== false).length, [templates]);
 
   const edit = (item: StaffRoutineTemplate) => {
@@ -215,7 +233,7 @@ export default function StaffRoutinesAdminPage() {
                   <Form.Control type="number" value={form.sortOrder} onChange={(event) => setForm((prev) => ({ ...prev, sortOrder: event.currentTarget.value }))} />
                 </Form.Group>
               </Col>
-              <Col md={3} className="d-flex align-items-end gap-3 flex-wrap">
+              <Col xs={12} md={6} lg={3} className="d-flex align-items-end gap-3 flex-wrap">
                 <Form.Check checked={form.requiresPhoto} onChange={(event) => setForm((prev) => ({ ...prev, requiresPhoto: event.currentTarget.checked }))} label="Butuh foto" />
                 <Form.Check checked={form.requiresNote} onChange={(event) => setForm((prev) => ({ ...prev, requiresNote: event.currentTarget.checked }))} label="Butuh catatan" />
                 <Form.Check checked={form.isActive} onChange={(event) => setForm((prev) => ({ ...prev, isActive: event.currentTarget.checked }))} label="Aktif" />
@@ -245,7 +263,7 @@ export default function StaffRoutinesAdminPage() {
                     <td>{areaLabel(item.areaType || 'GENERAL')}</td>
                     <td>{item.requiresPhoto ? 'Foto' : '-'}{item.requiresNote ? ' + catatan' : ''}</td>
                     <td>{item.isActive === false ? 'Nonaktif' : 'Aktif'}</td>
-                    <td className="text-end"><Button size="sm" variant="outline-primary" onClick={() => edit(item)}>Edit</Button>{item.isActive !== false ? <Button size="sm" variant="outline-danger" className="ms-2" onClick={() => deactivateMutation.mutate(item.id)}>Nonaktifkan</Button> : null}</td>
+                    <td className="text-end"><Button size="sm" variant="outline-primary" onClick={() => edit(item)}>Edit</Button>{item.isActive !== false ? <Button size="sm" variant="outline-danger" className="ms-2" disabled={deactivateMutation.isPending} onClick={() => deactivateMutation.mutate(item.id)}>{deactivateMutation.isPending ? 'Memproses...' : 'Nonaktifkan'}</Button> : <Button size="sm" variant="outline-success" className="ms-2" disabled={reactivateMutation.isPending} onClick={() => reactivateMutation.mutate(item)}>{reactivateMutation.isPending ? 'Memproses...' : 'Aktifkan'}</Button>}</td>
                   </tr>
                 ))}
               </tbody>

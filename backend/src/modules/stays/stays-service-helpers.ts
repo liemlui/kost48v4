@@ -93,6 +93,23 @@ export function computeMeterDepositSettlement(params: {
   return { meterDue, depositHeld, applied, excess, shortfall };
 }
 
+export function computeInvoiceDepositSettlement(params: {
+  invoiceDueRupiah: number;
+  depositHeldRupiah: number;
+}) {
+  const result = computeMeterDepositSettlement({
+    meterDueRupiah: params.invoiceDueRupiah,
+    depositHeldRupiah: params.depositHeldRupiah,
+  });
+  return {
+    invoiceDue: result.meterDue,
+    depositHeld: result.depositHeld,
+    applied: result.applied,
+    excess: result.excess,
+    shortfall: result.shortfall,
+  };
+}
+
 export function parseMeterDecimal(value: string, label: string) {
   try {
     const decimalValue = new Prisma.Decimal(value);

@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useState } from 'react';
+import { lazy, Suspense, useMemo, useState } from 'react';
 import { Alert, Badge, Button, Card, Col, Container, Form, Row, Spinner, Table } from 'react-bootstrap';
 import { useSearchParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
@@ -22,8 +22,7 @@ import {
   Occupancy,
   OccupancyDaily,
 } from '../../api/reports';
-import { fetchCashflowStatement, type CashflowStatement } from '../../api/accounting';
-import UnlockedFormalReports from './UnlockedFormalReports';
+import { fetchCashflowStatement } from '../../api/accounting';
 import { StatCardSkeleton, TableSkeleton } from '../../components/common/SkeletonLoader';
 import { createBusinessNarrative } from '../../api/ai';
 import AiAssistButton from '../../components/ai/AiAssistButton';
@@ -38,6 +37,9 @@ import {
   InlinePercentBar, OwnerHealthMatrix, InsightStack, ExpenseSummaryVisual, DepositLiabilityVisual, OperationsBars, ExportAllCsvButton,
   MonthlyIncomeTable, CashFlowTable, OverdueAgingTable, DepositLiabilityTable, ProfitLossTable, OccupancyTable,
 } from './reportShared';
+
+const UnlockedFormalReports = lazy(() => import('./UnlockedFormalReports'));
+
 export default function ReportsPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [ym, setYm] = useState<{ year: number; month: number }>(currentYearMonth());
@@ -294,10 +296,13 @@ export default function ReportsPage() {
             </Row>
           )}
 
-          {activeTab === 'formal' && <UnlockedFormalReports />}
+          {activeTab === 'formal' && (
+            <Suspense fallback={<Card className="report-panel"><Card.Body><TableSkeleton rows={8} /></Card.Body></Card>}>
+              <UnlockedFormalReports />
+            </Suspense>
+          )}
         </>
       )}
     </Container>
   );
 }
-

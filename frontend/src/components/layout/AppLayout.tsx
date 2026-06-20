@@ -226,7 +226,7 @@ export default function AppLayout({ children }: { children?: ReactNode }) {
       return saved === 'collapsed' ? 'collapsed' : 'expanded';
     } catch { return 'expanded'; }
   });
-  const { stage: tenantStage } = useTenantPortalStage();
+  const { stage: tenantStage, isLoading: tenantStageLoading } = useTenantPortalStage();
 
   const isStaff = user?.role === 'STAFF';
   const isTenant = user?.role === 'TENANT';
@@ -350,6 +350,7 @@ export default function AppLayout({ children }: { children?: ReactNode }) {
         <main className="tenant-workspace-main">
           <TenantWorkspaceTabs
             stage={tenantStage}
+            stageLoading={tenantStageLoading}
             fullName={user?.fullName}
             initials={getInitials(user?.fullName)}
             onLogout={logout}
@@ -384,6 +385,7 @@ export default function AppLayout({ children }: { children?: ReactNode }) {
                 <div className="owner-view-toggle owner-view-toggle-mobile" role="group" aria-label="Mode tampilan owner">
                   <button
                     type="button"
+                    aria-pressed={ownerViewMode === 'owner'}
                     className={`owner-view-toggle-btn ${ownerViewMode === 'owner' ? 'active' : ''}`}
                     onClick={() => changeOwnerViewMode('owner')}
                   >
@@ -391,6 +393,7 @@ export default function AppLayout({ children }: { children?: ReactNode }) {
                   </button>
                   <button
                     type="button"
+                    aria-pressed={ownerViewMode === 'admin'}
                     className={`owner-view-toggle-btn ${ownerViewMode === 'admin' ? 'active' : ''}`}
                     onClick={() => changeOwnerViewMode('admin')}
                   >
@@ -426,6 +429,7 @@ export default function AppLayout({ children }: { children?: ReactNode }) {
                   <div className="owner-view-toggle">
                     <button
                       type="button"
+                      aria-pressed={ownerViewMode === 'owner'}
                       className={`owner-view-toggle-btn ${ownerViewMode === 'owner' ? 'active' : ''}`}
                       onClick={() => changeOwnerViewMode('owner')}
                     >
@@ -433,6 +437,7 @@ export default function AppLayout({ children }: { children?: ReactNode }) {
                     </button>
                     <button
                       type="button"
+                      aria-pressed={ownerViewMode === 'admin'}
                       className={`owner-view-toggle-btn ${ownerViewMode === 'admin' ? 'active' : ''}`}
                       onClick={() => changeOwnerViewMode('admin')}
                     >

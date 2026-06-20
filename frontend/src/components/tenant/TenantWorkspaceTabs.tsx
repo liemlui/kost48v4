@@ -58,7 +58,20 @@ function TenantAnnouncementStrip({ stage }: { stage: TenantPortalStage }) {
         <div>
           <div className="tenant-announcement-label">Pengumuman</div>
           <strong>{selected.title}</strong>
-          {selected.content ? <p>{selected.content}</p> : null}
+          {selected.content ? (
+            <p
+              className="tenant-announcement-content"
+              style={{
+                display: '-webkit-box',
+                WebkitLineClamp: 2,
+                WebkitBoxOrient: 'vertical',
+                overflow: 'hidden',
+                marginBottom: 0,
+              }}
+            >
+              {selected.content}
+            </p>
+          ) : null}
         </div>
       </div>
       <Button variant="outline-primary" size="sm" onClick={() => navigate(`/portal/announcements/${selected.id}`)}>Lihat</Button>
@@ -68,11 +81,13 @@ function TenantAnnouncementStrip({ stage }: { stage: TenantPortalStage }) {
 
 export default function TenantWorkspaceTabs({
   stage,
+  stageLoading = false,
   fullName,
   initials,
   onLogout,
 }: {
   stage: TenantPortalStage;
+  stageLoading?: boolean;
   fullName?: string;
   initials: string;
   onLogout: () => void;
@@ -88,7 +103,7 @@ export default function TenantWorkspaceTabs({
           <Kost48LogoMark size="small" />
           <span>
             <strong>KOST48 Portal Penghuni</strong>
-            <em>{getStageTitle(stage)}</em>
+            <em>{stageLoading ? 'Portal Penghuni' : getStageTitle(stage)}</em>
           </span>
         </button>
 
@@ -107,26 +122,40 @@ export default function TenantWorkspaceTabs({
         </div>
       </section>
 
-      <TenantAnnouncementStrip stage={stage} />
+      {stageLoading ? (
+        // Hindari kedip stage: selama status portal masih dimuat, jangan render chrome
+        // khas browsing (onboarding "pilih kamar") yang salah untuk penghuni occupied/booking.
+        <section className="tenant-workspace-guide-strip" aria-busy="true">
+          <div>
+            <div className="page-eyebrow">Panduan penghuni</div>
+            <h2>Memuat portal…</h2>
+            <p>Menyiapkan ruang kerja penghuni Anda.</p>
+          </div>
+        </section>
+      ) : (
+        <>
+          <TenantAnnouncementStrip stage={stage} />
 
-      <GettingStartedGuide stage={stage} />
+          <GettingStartedGuide stage={stage} />
 
-      <section className="tenant-workspace-guide-strip">
-        <div>
-          <div className="page-eyebrow">Panduan penghuni</div>
-          <h2>{getStageTitle(stage)}</h2>
-          <p>{getStageSummary(stage)}</p>
-        </div>
-      </section>
+          <section className="tenant-workspace-guide-strip">
+            <div>
+              <div className="page-eyebrow">Panduan penghuni</div>
+              <h2>{getStageTitle(stage)}</h2>
+              <p>{getStageSummary(stage)}</p>
+            </div>
+          </section>
 
-      <nav className="tenant-workspace-tabs" aria-label="Navigasi tenant">
-        {links.map((link) => (
-          <NavLink key={link.to} to={link.to} className={({ isActive }) => `tenant-workspace-tab ${isActive ? 'active' : ''}`} title={link.hint ?? link.label}>
-            <span aria-hidden="true">{link.icon}</span>
-            <strong>{link.label}</strong>
-          </NavLink>
-        ))}
-      </nav>
+          <nav className="tenant-workspace-tabs" aria-label="Navigasi tenant">
+            {links.map((link) => (
+              <NavLink key={link.to} to={link.to} className={({ isActive }) => `tenant-workspace-tab ${isActive ? 'active' : ''}`} title={link.hint ?? link.label}>
+                <span aria-hidden="true">{link.icon}</span>
+                <strong>{link.label}</strong>
+              </NavLink>
+            ))}
+          </nav>
+        </>
+      )}
     </>
   );
 }

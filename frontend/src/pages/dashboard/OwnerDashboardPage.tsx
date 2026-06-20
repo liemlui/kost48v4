@@ -248,6 +248,9 @@ function OwnerKpiCard({
 
 type StatusCard = { key: string; label: string; value: string; helper: string; route: string; tone: string };
 
+// L-09: penanda baku saat sumber data kartu gagal dimuat (lebih jelas dari "—").
+const CARD_ERROR_VALUE = 'Gagal';
+
 /** OWN-STATUS-CARDS: kartu status kokpit owner — okupansi, tunggakan, meter due, go-live readiness. */
 function OwnerStatusStrip({ cards, onNavigate }: { cards: StatusCard[]; onNavigate: (route: string) => void }) {
   return (
@@ -367,18 +370,18 @@ export default function OwnerDashboardPage() {
       {
         key: 'meter-due',
         label: 'Meter belum dicatat',
-        value: meterDueQuery.isLoading ? '…' : meterDueQuery.isError ? '—' : `${meter?.due ?? 0}`,
-        helper: meter ? `${meter.recorded}/${meter.occupied} kamar tercatat` : 'Catat siklus meter bulan ini',
+        value: meterDueQuery.isLoading ? '…' : meterDueQuery.isError ? CARD_ERROR_VALUE : `${meter?.due ?? 0}`,
+        helper: meterDueQuery.isError ? 'Gagal memuat — coba muat ulang' : meter ? `${meter.recorded}/${meter.occupied} kamar tercatat` : 'Catat siklus meter bulan ini',
         route: '/meter-readings',
-        tone: (meter?.due ?? 0) > 0 ? 'watch' : 'good',
+        tone: meterDueQuery.isError ? 'risk' : (meter?.due ?? 0) > 0 ? 'watch' : 'good',
       },
       {
         key: 'readiness',
         label: 'Kesiapan Go-Live',
-        value: readinessQuery.isLoading ? '…' : readinessQuery.isError ? '—' : `${readiness?.score ?? 0}%`,
-        helper: readiness ? (readiness.ready ? 'Akuntansi siap' : `${readiness.missing.length} gate tersisa`) : 'Kesiapan akuntansi',
+        value: readinessQuery.isLoading ? '…' : readinessQuery.isError ? CARD_ERROR_VALUE : `${readiness?.score ?? 0}%`,
+        helper: readinessQuery.isError ? 'Gagal memuat — coba muat ulang' : readiness ? (readiness.ready ? 'Akuntansi siap' : `${readiness.missing.length} gate tersisa`) : 'Kesiapan akuntansi',
         route: '/finance/accounting-setup',
-        tone: readiness?.ready ? 'good' : (readiness?.score ?? 0) >= 60 ? 'watch' : 'risk',
+        tone: readinessQuery.isError ? 'risk' : readiness?.ready ? 'good' : (readiness?.score ?? 0) >= 60 ? 'watch' : 'risk',
       },
     ];
   }, [data, meterDueQuery.data, meterDueQuery.isLoading, meterDueQuery.isError, readinessQuery.data, readinessQuery.isLoading, readinessQuery.isError]);

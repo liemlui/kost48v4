@@ -1133,6 +1133,7 @@
   background: rgba(255, 255, 255, .95);
   box-shadow: 0 8px 22px rgba(15, 23, 42, .04);
   margin-bottom: 1rem;
+  transition: max-height .22s ease, opacity .18s ease, padding .18s ease, margin .18s ease;
 }
 
 /* Filter mengikuti scroll di layar lebar (menempel di bawah topbar yang juga sticky).
@@ -1518,6 +1519,7 @@
 }
 
 .rm-compare-bar strong { display: block; font-size: .92rem; font-weight: 800; }
+.rm-compare-bar strong.rm-compare-limit { color: #fecaca; }
 .rm-compare-bar span { font-size: .78rem; color: rgba(255, 255, 255, .7); }
 
 .rm-compare-bar-actions {
@@ -1534,6 +1536,57 @@
   .rm-topbar-nav { width: 100%; overflow-x: auto; justify-content: flex-start; }
   .rm-filter-bar { padding: .65rem .8rem; }
   .rm-filter-divider { display: none; }
+}
+
+.rm-filter-toggle {
+  width: 100%;
+  border: 1px solid rgba(14, 165, 233, .18);
+  background: #fff;
+  border-radius: 14px;
+  padding: .68rem .85rem;
+  font-weight: 800;
+  color: #0f3f68;
+  margin-bottom: .7rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .5rem;
+  box-shadow: 0 8px 18px rgba(15, 23, 42, .04);
+}
+
+.rm-filter-toggle-dot {
+  width: .55rem;
+  height: .55rem;
+  border-radius: 50%;
+  background: #0ea5e9;
+  flex: 0 0 auto;
+}
+
+.rm-pagination-ellipsis {
+  color: #94a3b8;
+  font-weight: 800;
+  padding: 0 .2rem;
+}
+
+@media (max-width: 991.98px) {
+  .rm-filter-bar {
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
+    padding-top: 0;
+    padding-bottom: 0;
+    margin-bottom: .75rem;
+    pointer-events: none;
+  }
+
+  .rm-filter-bar.is-open {
+    max-height: 720px;
+    opacity: 1;
+    padding-top: .65rem;
+    padding-bottom: .65rem;
+    margin-bottom: 1rem;
+    pointer-events: auto;
+  }
 }
 
 @media (max-width: 640px) {

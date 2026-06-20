@@ -3,6 +3,26 @@
 > Arsip changelog ringkas, dipisah dari M10 pada 2026-06-19 untuk hemat token AI (M10 = checklist aktif saja). **Entri changelog BARU ditulis DI SINI (paling atas)**, bukan di M10. Format: 1 header tanggal + 1-2 poin outcome per entri.
 
 ## Changelog Ringkas
+### 2026-06-20 — feat(Fase L): eksekusi L-01..L-20 UI/UX fixes
+- **L-01:** `App.tsx` — `return null` → `<PageLoadingSkeleton />` di `RequireRoles` + `TenantBookingRouteGuard`.
+- **L-02/L-18:** `CashflowPage.tsx` — tambah EmptyState operasi kas kosong + import. `FinancialRatiosPage.tsx` — import `useNavigate`+`Button`, tambah CTA setup akuntansi bila belum formal.
+- **L-03:** `StaffRoutinesAdminPage.tsx` — `Col md={3}` → `Col xs={12} md={6} lg={3}` (checkbox). `ReminderPreviewPage.tsx` — `maxWidth:250` → `minWidth:200,maxWidth:320` (4 lokasi, replace_all).
+- **L-04:** `CheckInWizard.tsx` — tambah `isTenantsError` dari query. `StepTenantSelect.tsx` — prop `isError?`, Alert fallback saat query gagal.
+- **L-06:** `GuestBookingSuccess.tsx` — state `copied`+`copyError`, `handleCopyPassword`, tombol "📋 Salin"/"✅ Disalin".
+- **L-07:** `ResetPasswordPage.tsx` — timeout redirect 1200ms → 2000ms + teks pesan diperbarui.
+- **L-09:** `OwnerDashboardPage.tsx` — konstanta `CARD_ERROR_VALUE='Gagal'`, kartu meter-due+readiness pakai `CARD_ERROR_VALUE` + helper jelas + tone `risk` saat error.
+- **L-12:** `LoyaltyAdminPage.tsx` — tambah `REWARD_TYPE_LABEL` map, dropdown + kolom tabel pakai label Indonesia. Save button dinamis "Tambah Reward"/"Simpan Perubahan".
+- **L-13:** `TicketsStaffMode.tsx` — "Mulai Kerjakan" → "Memproses..." saat `isPending`. `StaffRoutinesAdminPage.tsx` — tambah `reactivateMutation` + tombol "Aktifkan"/"Nonaktifkan" dengan loading state.
+- **L-14:** `StayDetailPage.tsx` — tukar urutan Alert: warning keuangan (hasUnpaid/overdue) naik ke atas "Aturan perpanjangan" (info statis).
+- **L-15:** `TenantWorkspaceTabs.tsx` — announcement strip truncate 2 baris `-webkit-line-clamp`. `MyManualPage.tsx` — Accordion `defaultActiveKey` buka FAQ pertama tiap kategori.
+- **L-17:** `01-base.css` — CSS `:focus-visible` global + `.staff-room-card:focus-visible`. `AppLayout.tsx` — `aria-pressed` pada 4 tombol owner-view-toggle (mobile+desktop).
+- **L-19:** `AssetRegisterPage.tsx` — `ALIGNMENT_STATUS_TOOLTIP` + `title` pada badge alignment. `LoyaltyAdminPage.tsx` — save button teks kontekstual.
+- **L-20:** `ProfilePage.tsx` — `Form.Text` "Kosongkan jika tidak dipakai" di tip e-wallet. `OwnerSettingsPage.tsx` — error upload pakai label fasilitas (bukan slug). FAQ modal `autoFocus` ke field Pertanyaan.
+
+### 2026-06-20 — audit(Fase L): audit UI/UX menyeluruh 75+ halaman
+- **audit(L):** 75+ halaman diaudit via 5 agen paralel. 20 task (L-01..L-20) dikategorikan: loading state, mobile responsiveness, error display, aksesibilitas, wording, dan isu per halaman.
+- **docs(M17):** `docs/M17_FASE_L_UIUX_AUDIT.md` BARU — laporan lengkap per halaman + matriks prioritas. Checklist Fase L ditambah di M10.
+
 ### 2026-06-20 — audit(Fase K): audit total 12 jalur + fix keamanan P1-P3
 - **audit(12-jalur):** 97 temuan (24 critical, 42 medium, 31 low). Plan: `docs/M16_PASCA_AUDIT_PLAN.md`. 5 keputusan owner diambil.
 - **backend(P1):** tambah `RolesGuard` di loyalty, notifications, push controller.

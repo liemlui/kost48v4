@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Alert, Badge, Card, Col, Container, Form, Row, Spinner, Table } from 'react-bootstrap';
 import { useQuery } from '@tanstack/react-query';
 import { fetchCashflowStatement, type CashflowStatement } from '../../api/accounting';
+import EmptyState from '../../components/common/EmptyState';
 
 function currentYearMonth() { const d = new Date(); return { year: d.getFullYear(), month: d.getMonth() + 1 }; }
 function formatRupiah(v: number) { return new Intl.NumberFormat('id-ID').format(v || 0); }
@@ -43,11 +44,16 @@ export default function CashflowPage() {
         </Row>
         <Row className="g-3">
           <Col lg={4}><Card><Card.Header style={{fontWeight:600,fontSize:14,background:'#f8fafc'}}>💰 Arus Kas Operasi</Card.Header><Card.Body>
+            {data.operating.cashIn.length === 0 && data.operating.cashOut.length === 0 ? (
+              <EmptyState icon="💰" title="Belum ada arus kas operasi" description="Belum ada transaksi kas masuk/keluar operasional pada periode ini." />
+            ) : (
             <Table size="sm" className="mb-0"><tbody>
               {data.operating.cashIn.map((item,i)=><tr key={i}><td className="text-success">+ {item.sourceType}</td><td className="text-end">{formatCompact(item.amountRupiah)}</td></tr>)}
               {data.operating.cashOut.map((item,i)=><tr key={i}><td className="text-danger">− {item.sourceType}</td><td className="text-end">{formatCompact(item.amountRupiah)}</td></tr>)}
               <tr className="border-top"><td><strong>Kas Bersih Operasi</strong></td><td className="text-end"><strong style={{color:data.operating.netRupiah>=0?'#22c55e':'#ef4444'}}>{formatCompact(data.operating.netRupiah)}</strong></td></tr>
-            </tbody></Table></Card.Body></Card></Col>
+            </tbody></Table>
+            )}
+          </Card.Body></Card></Col>
           <Col lg={4}><Card><Card.Header style={{fontWeight:600,fontSize:14,background:'#f8fafc'}}>🏗️ Arus Kas Investasi</Card.Header><Card.Body>
             <Table size="sm" className="mb-0"><tbody>
               <tr><td className="text-danger">− Investasi Aset</td><td className="text-end">{formatCompact(data.investing.totalOutRupiah)}</td></tr>

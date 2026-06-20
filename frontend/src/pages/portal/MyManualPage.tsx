@@ -40,7 +40,7 @@ export default function MyManualPage() {
       {grouped.map(([category, items]) => (
         <Card key={category} className="mb-3">
           <Card.Header><strong>{category}</strong></Card.Header>
-          <Accordion flush alwaysOpen={false}>
+          <Accordion flush alwaysOpen={false} defaultActiveKey={items[0] ? String(items[0].id) : undefined}>
             {items.map((faq) => (
               <Accordion.Item eventKey={String(faq.id)} key={faq.id}>
                 <Accordion.Header>{faq.question}</Accordion.Header>

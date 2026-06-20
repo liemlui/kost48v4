@@ -87,7 +87,7 @@ export default function StaffTicketsMode({
                     {item.description ? <small>{item.description}</small> : null}
                   </div>
                   <div className="staff-work-action">
-                    {item.status === 'OPEN' ? <Button size="sm" className="staff-action-button" disabled={simpleAction.isPending} onClick={() => simpleAction.mutate({ path: `/tickets/${item.id}/start` })}>Mulai Kerjakan</Button> : null}
+                    {item.status === 'OPEN' ? <Button size="sm" className="staff-action-button" disabled={simpleAction.isPending} onClick={() => simpleAction.mutate({ path: `/tickets/${item.id}/start` })}>{simpleAction.isPending ? 'Memproses...' : 'Mulai Kerjakan'}</Button> : null}
                     {item.status === 'IN_PROGRESS' ? <Button size="sm" variant="success" className="staff-action-button" disabled={simpleAction.isPending} onClick={() => setDoneTicket(item)}>Kirim Bukti</Button> : null}
                     {item.status === 'DONE' ? <span className="staff-done-note">Menunggu admin cek</span> : null}
                   </div>

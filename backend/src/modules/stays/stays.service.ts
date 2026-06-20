@@ -55,7 +55,7 @@ import {
   resolveDepositSettlementAmount,
   isMeterInvoice,
   invoiceRemainingRupiah,
-  computeMeterDepositSettlement,
+  computeInvoiceDepositSettlement,
 } from "./stays-service-helpers";
 import { DepositLedgerService } from "../deposit-ledger/deposit-ledger.service";
 import { StaysRenewalService } from "./stays-renewal.service";
@@ -1292,10 +1292,10 @@ export class StaysService {
       // terbuka (meter + non-meter), oldest-first. Tidak lagi memblokir non-meter.
       const allOpen = openInvoices; // sudah termasuk meter + non-meter
       if (allOpen.length > 0) {
-        return await this.settleDepositAgainstMeterTx(tx, {
+        return await this.settleDepositAgainstOpenInvoicesTx(tx, {
           stay,
           settlementAmount,
-          meterOpen: allOpen,
+          openInvoices: allOpen,
           actorId: actor.id,
           actorNote: dto.depositNote?.trim() || undefined,
         });
@@ -1408,13 +1408,13 @@ export class StaysService {
   }
 
   /**
-   * M5.3: settlement deposit saat ada tagihan METER pascabayar OPEN. Deposit
-   * jaminan menutup tagihan meter (DR 2000 / CR 1100), sisa di-refund kas,
+   * Q5: settlement deposit saat ada invoice OPEN. Deposit jaminan menutup
+   * invoice terbuka (DR 2000 / CR 1100), sisa di-refund kas,
    * kekurangan TETAP jadi piutang AR. Reuse jurnal forced-checkout (F3-16);
    * input refund/forfeit manual diabaikan (netting otomatis demi buku konsisten).
    * Dipanggil DI DALAM tx processDeposit; mengembalikan bentuk yang sama.
    */
-  private async settleDepositAgainstMeterTx(
+  private async settleDepositAgainstOpenInvoicesTx(
     tx: Prisma.TransactionClient,
     params: {
       stay: {
@@ -1423,7 +1423,7 @@ export class StaysService {
         actualCheckOutDate: Date | null;
       };
       settlementAmount: number;
-      meterOpen: Array<{
+      openInvoices: Array<{
         id: number;
         invoiceNumber: string | null;
         totalAmountRupiah: number | null;
@@ -1433,11 +1433,11 @@ export class StaysService {
       actorNote?: string;
     },
   ) {
-    const { stay, settlementAmount, meterOpen, actorId } = params;
+    const { stay, settlementAmount, openInvoices, actorId } = params;
     const id = stay.id;
 
     // Carve-out guard deposit HANYA untuk transaksi ini (auto-reset saat commit):
-    // izinkan deposit diproses meski tagihan meter masih open (akan ditutup deposit).
+    // izinkan deposit diproses meski invoice masih open (akan ditutup deposit).
     await (tx as any).$executeRawUnsafe(
       `SET LOCAL "app.allow_deposit_with_open_invoices" = 'on'`,
     );
@@ -1447,22 +1447,22 @@ export class StaysService {
     const depositAmount = Number(stay.depositAmountRupiah ?? 0);
     if (settlementAmount !== depositAmount) {
       throw new ConflictException(
-        "Deposit dibayar parsial — selesaikan tagihan meter & deposit lewat proses manual, bukan pemotongan otomatis.",
+        "Deposit dibayar parsial - selesaikan invoice terbuka & deposit lewat proses manual, bukan pemotongan otomatis.",
       );
     }
 
-    const meterDue = meterOpen.reduce(
+    const invoiceDue = openInvoices.reduce(
       (sum, inv) => sum + invoiceRemainingRupiah(inv),
       0,
     );
-    const { applied, excess, shortfall } = computeMeterDepositSettlement({
-      meterDueRupiah: meterDue,
+    const { applied, excess, shortfall } = computeInvoiceDepositSettlement({
+      invoiceDueRupiah: invoiceDue,
       depositHeldRupiah: settlementAmount,
     });
 
     const note =
       params.actorNote ||
-      `Potong deposit untuk tagihan meter checkout (meter Rp${meterDue.toLocaleString("id-ID")})`;
+      `Potong deposit untuk invoice terbuka checkout (total invoice Rp${invoiceDue.toLocaleString("id-ID")})`;
 
     // 1. Jurnal settlement deposit DULU (DR 2000 / CR 1100 applied / CR kas excess).
     //    Bila penerimaan deposit tak pernah terjurnal (F-24), tolak agar konsisten.
@@ -1480,11 +1480,11 @@ export class StaysService {
       );
     }
 
-    // 2. Terapkan deposit ke tagihan meter (oldest first) — pembayaran NON-KAS
+    // 2. Terapkan deposit ke invoice terbuka (oldest first) - pembayaran NON-KAS
     //    (method OTHER); AR sudah di-clear lewat jurnal offset di atas.
     const paymentDate = stay.actualCheckOutDate ?? new Date();
     let left = applied;
-    for (const inv of meterOpen) {
+    for (const inv of openInvoices) {
       if (left <= 0) break;
       const remaining = invoiceRemainingRupiah(inv);
       if (remaining <= 0) continue;
@@ -1495,7 +1495,7 @@ export class StaysService {
           paymentDate,
           amountRupiah: cover,
           method: PaymentMethod.OTHER,
-          note: "Potongan deposit untuk tagihan meter (checkout M-5)",
+          note: "Potongan deposit untuk invoice terbuka saat checkout",
           capturedById: actorId,
         },
       });
@@ -1557,10 +1557,10 @@ export class StaysService {
       actorUserId: actorId,
       note,
       metadata: {
-        action: "METER_SETTLEMENT",
+        action: "OPEN_INVOICE_SETTLEMENT",
         settlementAmountRupiah: settlementAmount,
-        meterDueRupiah: meterDue,
-        appliedToMeterArRupiah: applied,
+        invoiceDueRupiah: invoiceDue,
+        appliedToInvoiceArRupiah: applied,
         refundedRupiah: excess,
         shortfallRemainingArRupiah: shortfall,
       },
@@ -1572,9 +1572,9 @@ export class StaysService {
         accounting: depositSettlement,
         ledger,
         settlementAmountRupiah: settlementAmount,
-        meterSettlement: {
-          meterDueRupiah: meterDue,
-          appliedToMeterArRupiah: applied,
+        openInvoiceSettlement: {
+          invoiceDueRupiah: invoiceDue,
+          appliedToInvoiceArRupiah: applied,
           refundedRupiah: excess,
           shortfallRemainingArRupiah: shortfall,
         },

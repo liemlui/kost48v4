@@ -90,6 +90,7 @@ export default function MyTicketsPage() {
   const [error, setError] = useState('');
   const [uploadingImage, setUploadingImage] = useState(false);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [lightbox, setLightbox] = useState<{ src: string; alt: string } | null>(null);
 
   const query = useQuery({
     queryKey: ['portal-tickets'],
@@ -221,6 +222,7 @@ export default function MyTicketsPage() {
                     style={{ width: 120, height: 80, objectFit: 'cover', borderRadius: 8 }}
                     fallbackTitle="Foto laporan tidak bisa dimuat"
                     fallbackDescription="Detail laporan tetap tersedia di teks."
+                    onClick={() => setLightbox({ src: ticket.issueImageUrl!, alt: 'Bukti laporan' })}
                   />
                 </div>
               ) : null}
@@ -232,6 +234,7 @@ export default function MyTicketsPage() {
                     style={{ width: 120, height: 80, objectFit: 'cover', borderRadius: 8 }}
                     fallbackTitle="Foto penyelesaian tidak bisa dimuat"
                     fallbackDescription="Status laporan tetap bisa dibaca."
+                    onClick={() => setLightbox({ src: ticket.resolutionImageUrl!, alt: 'Bukti selesai' })}
                   />
                 </div>
               ) : null}
@@ -296,6 +299,23 @@ export default function MyTicketsPage() {
             {createMutation.isPending ? 'Menyimpan...' : 'Kirim Laporan'}
           </Button>
         </Modal.Footer>
+      </Modal>
+
+      <Modal show={Boolean(lightbox)} onHide={() => setLightbox(null)} centered size="lg">
+        <Modal.Header closeButton>
+          <Modal.Title className="h6 mb-0">{lightbox?.alt ?? 'Foto tiket'}</Modal.Title>
+        </Modal.Header>
+        <Modal.Body className="text-center p-0 bg-dark">
+          {lightbox ? (
+            <SafeImage
+              src={lightbox.src}
+              alt={lightbox.alt}
+              style={{ maxWidth: '100%', maxHeight: '80vh', objectFit: 'contain' }}
+              fallbackTitle="Foto tidak bisa dimuat"
+              fallbackDescription="Coba lagi nanti."
+            />
+          ) : null}
+        </Modal.Body>
       </Modal>
     </div>
   );

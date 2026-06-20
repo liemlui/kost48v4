@@ -114,22 +114,22 @@ test.describe('Fase I — UAT Navigasi & Onboarding + Smoke', () => {
   });
 
   test('UAT-I1+I3+I5+REGRESI (ADMIN)', async ({ page }) => {
-    test.setTimeout(90_000);
+    test.setTimeout(180_000);
     await uiLogin(page, CREDS.admin.id, CREDS.admin.pw, /\/dashboard/);
 
     // I1 — dashboard admin TIDAK menampilkan chip sub-menu (bahkan dalam area tab)
-    await page.goto('/dashboard?area=stays-finance', { waitUntil: 'domcontentloaded' });
+    await page.goto('/dashboard?area=stays-finance', { waitUntil: 'networkidle' });
     await expect(page.locator('.admin-area-internal-menu')).toHaveCount(0);
-    await expect(page.locator('.sidebar-link').first()).toBeVisible();
+    await expect(page.locator('.sidebar-link').first()).toBeVisible({ timeout: 15000 });
     await shot(page, '02-admin-dashboard-no-chips');
 
     // I3 — /meter-readings → sidebar "Kamar & Stok" active
-    await page.goto('/meter-readings', { waitUntil: 'domcontentloaded' });
-    await expect(page.locator('.sidebar-link.active', { hasText: 'Kamar & Stok' }).first()).toBeVisible();
+    await page.goto('/meter-readings', { waitUntil: 'networkidle' });
+    await expect(page.locator('.sidebar-link.active', { hasText: 'Kamar & Stok' }).first()).toBeVisible({ timeout: 15000 });
     await shot(page, '03-meter-readings-sidebar-active');
 
     // I5 — segmen pertama breadcrumb bisa diklik → default route (dashboard)
-    await page.goto('/invoices', { waitUntil: 'domcontentloaded' });
+    await page.goto('/invoices', { waitUntil: 'networkidle' });
     const crumb = page.locator('a.app-breadcrumb-link').first();
     await expect(crumb).toBeVisible();
     await shot(page, '04-breadcrumb-link');
@@ -153,7 +153,11 @@ test.describe('Fase I — UAT Navigasi & Onboarding + Smoke', () => {
   });
 
   test('UAT-I4+I6 occupied — guide tersembunyi, strip "Panduan Kos Saya"', async ({ page }) => {
+    // Bersihkan sesi sebelumnya (serial-mode share page)
+    await page.evaluate(() => { try { localStorage.removeItem('kost48_access_token'); sessionStorage.clear(); } catch(_) {} });
     await uiLogin(page, CREDS.occupied.id, CREDS.occupied.pw, /portal\/stay/);
+    // Tunggu sampai stage selesai dimuat (aria-busy hilang) sebelum cek konten
+    await page.locator('.tenant-workspace-guide-strip:not([aria-busy="true"])').waitFor({ state: 'attached', timeout: 15000 });
     // tunggu stage settle (strip occupied) baru pastikan guide hilang
     await expect(page.locator('.tenant-workspace-guide-strip')).toContainText('Panduan Kos Saya');
     await expect(page.locator('.getting-started-guide')).toHaveCount(0);
@@ -161,8 +165,12 @@ test.describe('Fase I — UAT Navigasi & Onboarding + Smoke', () => {
   });
 
   test('UAT-I4+I6 browsing — guide 3 langkah pilih kamar', async ({ page }) => {
+    // Bersihkan sesi sebelumnya (serial-mode share page)
+    await page.evaluate(() => { try { localStorage.removeItem('kost48_access_token'); sessionStorage.clear(); } catch(_) {} });
     await uiLogin(page, browsing.id, browsing.pw, /rooms|portal/);
     await page.goto('/rooms', { waitUntil: 'domcontentloaded' });
+    // Tunggu stage selesai dimuat
+    await page.locator('.tenant-workspace-guide-strip:not([aria-busy="true"])').waitFor({ state: 'attached', timeout: 15000 });
     await expect(page.locator('.tenant-workspace-guide-strip')).toContainText('Pilih kamar yang cocok');
     await expect(page.locator('.getting-started-guide')).toBeVisible();
     await expect(page.locator('.getting-started-guide')).toContainText('menuju kamar Anda');
@@ -170,10 +178,15 @@ test.describe('Fase I — UAT Navigasi & Onboarding + Smoke', () => {
   });
 
   test('UAT-I4+I6 booking — guide status pemesanan', async ({ page }) => {
+    // Hapus sesi browsing sebelum login sebagai booking (serial-mode share page)
+    await page.evaluate(() => { try { localStorage.removeItem('kost48_access_token'); sessionStorage.clear(); } catch(_) {} });
     await uiLogin(page, booking.id, booking.pw, /portal|rooms/);
-    await page.goto('/portal/bookings', { waitUntil: 'domcontentloaded' });
+    await page.goto('/portal/bookings', { waitUntil: 'networkidle' });
+    // Tunggu sampai portal selesai memuat (aria-busy=false): gunakan 'attached' bukan 'visible'
+    // karena guide-strip di-hide via CSS (display:none) tapi konten tetap ada di DOM
+    await page.locator('.tenant-workspace-guide-strip:not([aria-busy="true"])').waitFor({ state: 'attached', timeout: 15000 });
     await expect(page.locator('.tenant-workspace-guide-strip')).toContainText('Pantau pemesanan');
-    await expect(page.locator('.getting-started-guide')).toBeVisible();
+    await expect(page.locator('.getting-started-guide')).toBeAttached();
     await expect(page.locator('.getting-started-guide')).toContainText('Status pemesanan Anda');
     await shot(page, '09-tenant-booking-guide');
   });

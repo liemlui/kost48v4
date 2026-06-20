@@ -34,8 +34,8 @@ export default function ResetPasswordPage() {
     setSubmitting(true);
     try {
       await resetPassword({ token, newPassword });
-      setSuccess('Password berhasil diperbarui. Anda akan diarahkan ke login.');
-      window.setTimeout(() => navigate('/login', { replace: true }), 1200);
+      setSuccess('Password berhasil diperbarui. Anda akan diarahkan ke login dalam beberapa detik.');
+      window.setTimeout(() => navigate('/login', { replace: true }), 2000);
     } catch (err: any) {
       const message = err?.response?.data?.message;
       setError(Array.isArray(message) ? message.join(', ') : (message || 'Gagal mereset password.'));

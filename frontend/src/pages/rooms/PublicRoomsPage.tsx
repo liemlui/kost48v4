@@ -34,6 +34,21 @@ type SortFilter = "price-asc" | "price-desc";
 
 const pricingTerm: PricingTerm = "MONTHLY";
 const ROOMS_PER_PAGE = 12; // F2-11 (W-03): paginasi katalog publik
+type PaginationItem = number | "gap";
+
+function getPaginationItems(totalPages: number, currentPage: number): PaginationItem[] {
+  if (totalPages <= 7) return Array.from({ length: totalPages }, (_, i) => i + 1);
+
+  const pages: PaginationItem[] = [];
+  for (let p = 1; p <= totalPages; p += 1) {
+    if (p === 1 || p === totalPages || Math.abs(p - currentPage) <= 1) {
+      pages.push(p);
+    } else if (pages[pages.length - 1] !== "gap") {
+      pages.push("gap");
+    }
+  }
+  return pages;
+}
 
 function buildWhatsAppUrl(room: PublicRoom) {
   const number = String(import.meta.env.VITE_PUBLIC_ADMIN_WHATSAPP ?? "").replace(/\D/g, "");
@@ -58,16 +73,21 @@ function RoomCardImage({ room }: { room: PublicRoom }) {
   const [activeIndex, setActiveIndex] = useState(0);
   const [failed, setFailed] = useState<Set<string>>(() => new Set());
   const [hovered, setHovered] = useState(false);
+  const isTouchDevice = typeof window !== "undefined"
+    && typeof window.matchMedia === "function"
+    && window.matchMedia("(hover: none)").matches;
   const resolved = candidates.filter((url) => !failed.has(url));
   const active = resolved.length ? resolved[activeIndex % resolved.length] : null;
 
   useEffect(() => { setActiveIndex(0); setFailed(new Set()); }, [room.id, candidates.join("|")]);
   useEffect(() => { if (activeIndex >= resolved.length) setActiveIndex(0); }, [activeIndex, resolved.length]);
   useEffect(() => {
-    if (!hovered || resolved.length <= 1) return undefined;
-    const t = window.setInterval(() => setActiveIndex((i) => (i + 1) % resolved.length), 1200);
+    if (resolved.length <= 1) return undefined;
+    if (!hovered && !isTouchDevice) return undefined;
+    const intervalMs = hovered ? 1200 : 3500;
+    const t = window.setInterval(() => setActiveIndex((i) => (i + 1) % resolved.length), intervalMs);
     return () => clearInterval(t);
-  }, [hovered, resolved.length]);
+  }, [hovered, isTouchDevice, resolved.length]);
 
   const markFailed = (url: string) => setFailed((prev) => {
     if (prev.has(url)) return prev;
@@ -379,6 +399,8 @@ export default function PublicRoomsPage() {
   };
 
   const hasActiveFilter = !!(bathroom || cooling || avail || sort !== "price-asc");
+  const [filtersOpen, setFiltersOpen] = useState(false);
+  const paginationItems = useMemo(() => getPaginationItems(totalPages, safePage), [safePage, totalPages]);
 
   return (
     <div className={isTenant ? "tenant-room-discovery-page" : "rm-page"}>
@@ -412,7 +434,17 @@ export default function PublicRoomsPage() {
             )}
 
             {/* ── Filter bar ── */}
-            <div className="rm-filter-bar">
+            <button
+              type="button"
+              className="rm-filter-toggle d-lg-none"
+              aria-controls="room-filter-panel"
+              aria-expanded={filtersOpen}
+              onClick={() => setFiltersOpen((open) => !open)}
+            >
+              <span>{filtersOpen ? "Tutup filter" : "Filter & urutkan"}</span>
+              {hasActiveFilter ? <span className="rm-filter-toggle-dot" aria-hidden="true" /> : null}
+            </button>
+            <div id="room-filter-panel" className={`rm-filter-bar${filtersOpen ? " is-open" : ""}`}>
               <div className="rm-filter-group">
                 <span className="rm-filter-label">Ketersediaan</span>
                 {/* UD-07: "Semua Kamar" lebih jujur — termasuk kamar terisi & yang sedang dicek (tidak semua bisa diajukan). */}
@@ -532,16 +564,20 @@ export default function PublicRoomsPage() {
                 <Button size="sm" variant="outline-secondary" disabled={safePage <= 1} onClick={() => setPage(safePage - 1)}>
                   ‹ Sebelumnya
                 </Button>
-                {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
-                  <Button
-                    key={p}
-                    size="sm"
-                    variant={p === safePage ? "primary" : "outline-secondary"}
-                    aria-current={p === safePage ? "page" : undefined}
-                    onClick={() => setPage(p)}
-                  >
-                    {p}
-                  </Button>
+                {paginationItems.map((item, idx) => (
+                  item === "gap" ? (
+                    <span key={`gap-${idx}`} className="rm-pagination-ellipsis" aria-hidden="true">&hellip;</span>
+                  ) : (
+                    <Button
+                      key={item}
+                      size="sm"
+                      variant={item === safePage ? "primary" : "outline-secondary"}
+                      aria-current={item === safePage ? "page" : undefined}
+                      onClick={() => setPage(item)}
+                    >
+                      {item}
+                    </Button>
+                  )
                 ))}
                 <Button size="sm" variant="outline-secondary" disabled={safePage >= totalPages} onClick={() => setPage(safePage + 1)}>
                   Berikutnya ›
@@ -560,8 +596,10 @@ export default function PublicRoomsPage() {
                 </div>
                 <div className="rm-compare-bar" role="status" aria-live="polite">
                   <div>
-                    <strong>{comparedRooms.length} kamar dipilih</strong>
-                    <span>Lihat perbandingan estimasi awal</span>
+                    <strong className={comparedRooms.length >= 3 ? "rm-compare-limit" : undefined}>
+                      {comparedRooms.length}/3 kamar dipilih
+                    </strong>
+                    <span>{comparedRooms.length >= 3 ? "Maksimal tercapai, lihat perbandingan" : "Lihat perbandingan estimasi awal"}</span>
                   </div>
                   <div className="rm-compare-bar-actions">
                     <Button size="sm" onClick={() => comparePanelRef.current?.scrollIntoView({ behavior: "smooth" })}>

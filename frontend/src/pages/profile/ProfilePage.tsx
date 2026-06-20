@@ -317,6 +317,7 @@ export default function ProfilePage() {
                       placeholder={f.placeholder}
                       maxLength={f.key === 'tipBank' ? 200 : 120}
                     />
+                    <Form.Text muted>Kosongkan jika tidak dipakai.</Form.Text>
                   </Form.Group>
                 </Col>
               ))}

@@ -11,7 +11,22 @@ interface GuestBookingSuccessProps {
 
 export default function GuestBookingSuccess({ result }: GuestBookingSuccessProps) {
   const [showPassword, setShowPassword] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const [copyError, setCopyError] = useState(false);
   const tempPwd = result.portalAccess.temporaryPassword;
+
+  const handleCopyPassword = async () => {
+    if (!tempPwd) return;
+    try {
+      await navigator.clipboard.writeText(tempPwd);
+      setCopyError(false);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 3000);
+    } catch {
+      setCopied(false);
+      setCopyError(true);
+    }
+  };
 
   return (
     <div className="public-page-shell">
@@ -54,7 +69,7 @@ export default function GuestBookingSuccess({ result }: GuestBookingSuccessProps
             {tempPwd ? (
               <Alert variant="warning" className="small">
                 <strong>Password portal sementara Anda:</strong>
-                <div className="d-flex align-items-center gap-2 mt-2">
+                <div className="d-flex align-items-center gap-2 mt-2 flex-wrap">
                   <code className="fs-5 bg-white px-2 py-1 rounded">{showPassword ? tempPwd : '\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022'}</code>
                   <Button
                     variant="outline-secondary"
@@ -63,7 +78,19 @@ export default function GuestBookingSuccess({ result }: GuestBookingSuccessProps
                   >
                     {showPassword ? 'Sembunyikan' : 'Tampilkan'}
                   </Button>
+                  <Button
+                    variant={copied ? 'success' : 'outline-primary'}
+                    size="sm"
+                    onClick={handleCopyPassword}
+                  >
+                    {copied ? '\u2705 Disalin' : '\ud83d\udccb Salin'}
+                  </Button>
                 </div>
+                {copyError ? (
+                  <div className="text-danger small mt-2">
+                    Browser tidak mengizinkan salin otomatis. Silakan salin password secara manual dari kolom di atas.
+                  </div>
+                ) : null}
                 <div className="mt-2">
                   <strong>Simpan password ini.</strong> Password sementara hanya ditampilkan di halaman ini dan tidak akan dikirim melalui email atau SMS.
                 </div>

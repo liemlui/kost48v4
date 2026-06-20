@@ -27,6 +27,7 @@
 | Fase I — Navigasi & Onboarding | **selesai** | — | I1-I6 selesai: hapus AdminAreaInternalMenu, unifikasi staff nav via navigation.ts, ekspos /meter-readings, GettingStartedGuide tenant, breadcrumb klik ✅ |
 | Fase J — Hardening AI Pra-Go-Live | **selesai** | — | J0-J4 selesai: helper/test PDP+uang, guard no-partial DP, hardening FE AI, audit PDP dibukukan di M09 |
 | **Fase K — Pasca-Audit Total** | **selesai** | — | Audit 12 jalur (97 temuan). 13 task: keamanan, data integrity, CSS, arus kas, AI settings. Commit `ac4cc2f` |
+| **Fase L — UI/UX Audit Menyeluruh** | terbuka | L-01..L-20 | Audit 75+ halaman (2026-06-20): loading state, mobile, error handling, aksesibilitas, wording. Detail → `docs/M17_FASE_L_UIUX_AUDIT.md` |
 
 ### Urutan kerja (jangan loncat kecuali blocked) — detail di [ANTRIAN](#antrian-eksekusi-aktif-untuk-ai--kerjakan-dari-sini)
 
@@ -329,7 +330,84 @@ Output akhir:
 - Sebut task yang dikerjakan.
 - Sebut file yang diubah.
 - Sebut gate yang dijalankan dan hasilnya.
+- Sebut task yang dikerjakan.
+- Sebut file yang diubah.
+- Sebut gate yang dijalankan dan hasilnya.
 - Sebut sisa risiko atau item berikutnya.
+```
+
+### Prompt Fase L — UI/UX Executor
+
+Salin prompt ini ke AI eksekutor baru untuk mengerjakan Fase L secara otonom:
+
+```text
+Kamu adalah AI eksekutor untuk repo KOST48 — tugasmu mengerjakan Fase L (UI/UX) satu task per sesi.
+Working directory: frontend/src (React + Bootstrap + React-Bootstrap). Tidak ada perubahan backend atau schema.
+
+=== CARA KERJA ===
+
+LANGKAH 1 — Pilih task
+Buka docs/M10_CHECKLIST_CHANGELOG.md → cari section "Fase L". Pilih task pertama dengan status [ ] dari atas ke bawah. L-05 sudah SKIP — lewati. Task bertanda ✅ SKIP juga lewati.
+
+LANGKAH 2 — Buka spec detail
+Setiap task punya baris "Spec detail: docs/fase-l-specs/[file].md § L-XX". Buka file tersebut dan baca section task yang dipilih. Spec berisi:
+  - Daftar file yang diubah
+  - Blok SEBELUM (kode persis dari file sumber)
+  - Blok SESUDAH (kode baru yang harus ditulis)
+  - Grep anchor untuk menemukan lokasi
+  - Gate verifikasi
+
+LANGKAH 3 — Verifikasi SEBELUM sebelum edit
+Gunakan Grep dengan string dari blok SEBELUM atau "Grep untuk menemukan" di spec.
+WAJIB: pastikan string SEBELUM ditemukan persis di file sebelum melakukan edit.
+Jika tidak ditemukan → STOP task ini, catat "SEBELUM tidak cocok — mungkin sudah diubah atau path salah" dan lanjut ke task berikutnya.
+
+LANGKAH 4 — Terapkan perubahan
+Gunakan tool Edit dengan old_string = teks SEBELUM (copy persis dari spec), new_string = teks SESUDAH.
+Jika spec menyebutkan replace_all=true, gunakan parameter itu.
+Jangan tambahkan perubahan di luar yang tertulis di spec.
+
+LANGKAH 5 — Gate build
+Jalankan: cd frontend && npm run build
+Jika gagal:
+  - Baca error dengan teliti — biasanya TypeScript type error atau import missing.
+  - Coba perbaiki error build (maksimal 2 percobaan).
+  - Jika masih gagal setelah 2 percobaan → ROLLBACK perubahan (kembalikan file ke SEBELUM), catat blocker, lanjut ke task berikutnya.
+
+LANGKAH 6 — Update docs
+Setelah build hijau:
+(a) docs/M10_CHECKLIST_CHANGELOG.md: ubah `- [ ] **L-XX**` menjadi `- [x] **L-XX**` untuk task yang selesai.
+(b) docs/M11_CHANGELOG.md: prepend 1 baris entry di paling atas (setelah header), format:
+    ### 2026-06-XX — ui(L-XX): [deskripsi singkat 1 kalimat]
+    - [file yang diubah]: [apa yang berubah]
+
+=== ATURAN MUTLAK ===
+
+JANGAN:
+- Tambah npm dependency baru (tidak ada npm install)
+- Ubah file di backend/ atau prisma/
+- Ubah schema.prisma atau file SQL
+- Sentuh logika keuangan (invoice, payment, journal, stay lifecycle)
+- git push atau git commit (kecuali diminta eksplisit)
+- Mengerjakan lebih dari 1 task per sesi tanpa instruksi lanjut
+
+BOLEH:
+- Edit file .tsx, .ts, .css di frontend/src/
+- Tambah import yang sudah ada di node_modules (Bootstrap, React-Bootstrap, React Router sudah installed)
+- Tambah state (useState), ref, atau helper function kecil di dalam file yang sedang diedit
+- Tambah CSS class baru di file .css yang sudah ada di frontend/src/styles/
+
+=== STOP & LAPORKAN jika ===
+- File spec tidak ada atau section tidak ditemukan → laporkan path yang dicoba
+- SEBELUM tidak cocok di semua file yang disebutkan → laporkan task ID + grep string yang gagal
+- Build error tidak bisa diselesaikan dalam 2 percobaan → laporkan error lengkap + file yang menyebabkan
+- Task melibatkan modal/komponen baru yang butuh state lifting ke parent yang kompleks → minta konfirmasi scope dulu
+
+=== OUTPUT AKHIR PER TASK ===
+- Task ID yang dikerjakan (mis. L-03)
+- File yang diubah (path lengkap)
+- Hasil gate: build ✅ atau ❌ (dengan error)
+- Judul task berikutnya yang bisa dikerjakan
 ```
 
 ### Ringkasan Fase Aktif
@@ -345,6 +423,7 @@ Output akhir:
 | **Fase G** | AI Owner/Admin Approval Copilot | **selesai** | M12, M02, M04-M09, CODEMAP | DeepSeek/API AI manual-only; G0-G9 selesai, draft queue, KTP OCR, budgeting ✅ |
 | **Fase H** | UI/UX Compact Owner↔Admin | **selesai** | M13, M02, M07, CODEMAP | Reduksi sidebar 18→7, dashboard 6→3 tab, merge layanan, polish CSS ✅ |
 | **Fase I** | Navigasi & Onboarding | **selesai** | M14, M02, M07, CODEMAP | I1-I6 selesai: hapus duplikasi menu, unifikasi staff nav, ekspos /meter-readings, breadcrumb klik, onboarding tenant ✅ |
+| **Fase L** | UI/UX Audit Menyeluruh | 🔴 aktif | M17, CODEMAP | 20 task audit 75+ halaman: loading, mobile, error, aksesibilitas, wording — detail `docs/M17_FASE_L_UIUX_AUDIT.md` |
 
 ---
 
@@ -1295,6 +1374,222 @@ Checklist ini wajib untuk setiap task G:
 - [ ] Prompt/snapshot tidak berisi foto KTP, API key, password, JWT, atau dump tabel mentah.
 - [ ] Fitur uang tetap lulus unit test dan guard no-partial/deposit/TB.
 - [ ] Audit `meta.ai` terisi saat manusia memakai rekomendasi AI untuk aksi final.
+
+---
+
+### Fase L — UI/UX Audit Menyeluruh
+
+**Tujuan:** Perbaiki isu UI/UX di semua 75+ halaman hasil audit menyeluruh 2026-06-20.
+
+**Rujukan utama:** `docs/M17_FASE_L_UIUX_AUDIT.md` (ringkasan) · `docs/CODEMAP.md`
+
+**Spec eksekusi detail (before/after kode nyata):** `docs/fase-l-specs/`
+- `L01_L03_loading_error_mobile.md` — L-01, L-02, L-03
+- `L04_L07_wizard_balance_guest_auth.md` — L-04, L-05(SKIP), L-06, L-07
+- `L08_L11_public_dashboard_tenant_reports.md` — L-08, L-09, L-10, L-11
+- `L12_L15_enum_staff_stays_tenant.md` — L-12, L-13, L-14, L-15
+- `L16_L20_accounting_a11y_empty_asset_minor.md` — L-16, L-17, L-18, L-19, L-20
+
+**Gate umum:** `cd frontend; npm run build` ✅ setelah tiap task. Tidak ada perubahan backend/schema.
+
+> **Cara eksekutor memakai spec:** Buka file spec yang relevan → temukan section task → ikuti blok SEBELUM/SESUDAH → verifikasi teks SEBELUM cocok dengan file (grep anchor sudah disediakan) → terapkan → jalankan gate.
+
+#### Koreksi Pasca-Verifikasi Kode (5 agen Opus, 2026-06-20)
+
+Beberapa isu dari audit awal ternyata **sudah benar di kode** — jangan dikerjakan ulang:
+- `TicketsPage` CSS category grid sudah responsif 3→2 kolom via `13-charts.css` — skip L-03 partial
+- `PublicRoomDetailPage` tarif table sudah `<Table responsive>` — skip L-03 partial
+- `CheckInWizard` sudah punya `WizardSteps` progress bar di `checkInWizardUtils.tsx` — skip L-04 partial
+- `StepDetailsAndMeters` validasi meter sudah ada via react-hook-form `register+validate` — skip L-04 partial
+- `DashboardAdmin` `coreQueriesError`/`supportQueriesError` severity sudah tepat — skip L-02 partial
+- `OwnerDashboardPage` `'…'` (loading) vs `'—'` (data kosong) sudah dibedakan — skip L-09 partial
+- `OwnerDashboardPage` quick-action sudah `flex-wrap` di baris 580 — skip L-09 partial
+- `LoginPage` kedua field sudah auto-clear error — skip L-07 partial
+- `WifiOrderPage` step indicator dan badge "Sudah dipesan" sudah oke — skip L-10 partial
+- `ReportsPage` period selector sudah di posisi yang tepat — skip L-11 partial
+- `LoyaltyAdminPage` save button sudah dinamis; `ServiceInterestsPage` sudah Indonesia — skip L-12 partial
+- `AdminWorkspaces` `closeTicketMutation` sudah tutup modal + invalidate query — skip L-13 partial
+- `StayDetailPage` format currency metric tiles sudah konsisten — skip L-14 partial
+- `TenantWorkspaceTabs` loading state dan `MyManualPage` FAQ sudah oke — skip L-15 partial
+- `AppLayout` GlobalSearch sudah punya `aria-label` (baris 128) — skip L-17 partial
+- `AdminContinuityStrip` adalah tombol navigasi (bukan toggle), bukan kandidat `aria-pressed` — skip L-17 partial
+- `InvoicesPage` sudah pakai `EmptyState` — skip L-18 partial
+- `MarketAnalysisPage` bubble sudah ada label "Kamu"/"Analis AI" (baris 179) — skip L-19 partial
+
+---
+
+#### L-01 🔴 — App.tsx: Blank Page saat Loading
+
+**Scope nyata (dari kode):** hanya 2 baris di `App.tsx`. File lain sudah punya loading state yang bagus.
+
+- [x] **L-01** Di `frontend/src/App.tsx`: ganti 2x `return null` (saat loading) dengan `<PageLoadingSkeleton />` — komponen sudah di-import di baris 3. Titik yang perlu diubah: (1) di dalam `RequireRoles` saat `isLoading`, (2) di dalam `TenantBookingRouteGuard` saat `isLoading`.
+  - **Spec detail:** `docs/fase-l-specs/L01_L03_loading_error_mobile.md` § L-01
+  - **Anchor grep:** `if (isLoading) return null` — 2 kemunculan di `App.tsx`
+  - **Gate:** `cd frontend; npm run build` ✅
+
+#### L-02 🔴 — Empty Feedback di CashflowPage + CTA di FinancialRatiosPage
+
+**Scope nyata (dari kode):** OwnerDashboard dan DashboardAdmin sudah benar. 2 file yang perlu fix:
+
+- [x] **L-02** (a) `CashflowPage.tsx`: tambah kondisi `{items.length === 0 && <p className="text-muted small">Belum ada arus kas operasi periode ini.</p>}` di dalam map `cashIn` dan `cashOut` saat hasilnya kosong. (b) `FinancialRatiosPage.tsx`: pada badge readiness "Belum"/"Kosong", tambah tombol navigasi ke `/finance/accounting-setup` (perlu import `Button` dari react-bootstrap dan `useNavigate` dari react-router-dom).
+  - **Spec detail:** `docs/fase-l-specs/L01_L03_loading_error_mobile.md` § L-02
+  - **Anchor grep:** `cashIn.map` · `cashOut.map` · `"Belum"` (FinancialRatiosPage)
+  - **Gate:** `cd frontend; npm run build` ✅
+
+#### L-03 🔴 — Mobile Grid: 2 File yang Belum Responsive
+
+**Scope nyata (dari kode):** hanya 2 file. TicketsPage sudah responsive via CSS, PublicRoomDetailPage sudah `<Table responsive>`.
+
+- [x] **L-03** (a) `StaffRoutinesAdminPage.tsx` baris 218: ubah `<Col md={3}>` menjadi `<Col xs={12} md={6} lg={3}>` untuk wrapper 3 checkbox (Butuh Foto / Butuh Catatan / Aktif). (b) `ReminderPreviewPage.tsx`: ganti `maxWidth: 250` menjadi `minWidth: 200, maxWidth: 320` di 4 lokasi message preview (baris 253, 271, 289, 307 — gunakan `replace_all`).
+  - **Spec detail:** `docs/fase-l-specs/L01_L03_loading_error_mobile.md` § L-03
+  - **Anchor grep:** `Col md={3}` (StaffRoutinesAdminPage) · `maxWidth: 250` (ReminderPreviewPage)
+  - **Gate:** `cd frontend; npm run build` ✅ · test manual 375px
+
+#### L-04 🔴 — CheckInWizard: Error Handling Query Tenant Gagal
+
+**Scope nyata (dari kode):** WizardSteps progress bar sudah ada di `checkInWizardUtils.tsx`. Validasi meter sudah ada. Satu gap nyata: `StepTenantSelect` tidak menangani `tenantsQuery.isError`.
+
+- [x] **L-04** `StepTenantSelect.tsx`: tambah blok kondisi untuk `tenantsQuery.isError` — tampilkan `<Alert variant="danger">Gagal memuat daftar penghuni. <Button variant="link" onClick={() => tenantsQuery.refetch()}>Muat ulang</Button></Alert>` di atas SearchableSelect, dan set `isDisabled={tenantsQuery.isError}` pada komponen select.
+  - **Spec detail:** `docs/fase-l-specs/L04_L07_wizard_balance_guest_auth.md` § L-04
+  - **Anchor grep:** `tenantsQuery` · `SearchableSelect` (StepTenantSelect.tsx)
+  - **Gate:** `cd frontend; npm run build` ✅
+
+#### L-05 ✅ SKIP — BalanceSheetPage Warna % Kewajiban: BUKAN BUG
+
+**Verifikasi kode (2026-06-20):** Warna % kewajiban di `BalanceSheetPage.tsx` baris 34 sengaja dibalik (`>=0 ? merah : hijau`) — konsisten dengan perlakuan "Beban" di `ProfitLossPage.tsx`. Ini benar by design: kewajiban naik = merah. **Jangan diubah.** Tutup tanpa action.
+
+#### L-06 🟡 — GuestBookingSuccess: Tombol Copy Password
+
+**Scope nyata (dari kode):** hanya tambah copy button. Alert "Jangan transfer" beda layar/konteks — bukan duplikasi, tidak dihapus.
+
+- [x] **L-06** `GuestBookingSuccess.tsx`: di sekitar `<code>{result.portalAccess.temporaryPassword}</code>`, tambah tombol copy dengan state `copied`. Pola: `<Button size="sm" variant="outline-secondary" onClick={() => { navigator.clipboard.writeText(pwd); setCopied(true); setTimeout(() => setCopied(false), 2000); }}>{copied ? '✓ Tersalin' : '📋 Salin'}</Button>`. Tambah `useState` untuk `copied`.
+  - **Spec detail:** `docs/fase-l-specs/L04_L07_wizard_balance_guest_auth.md` § L-06
+  - **Anchor grep:** `temporaryPassword` · `portalAccess` (GuestBookingSuccess.tsx)
+  - **Gate:** `cd frontend; npm run build` ✅
+
+#### L-07 🟡 — ResetPasswordPage: Timeout 1200ms → 2000ms
+
+**Scope nyata (dari kode):** hanya 1 baris. LoginPage auto-clear sudah benar. ForgotPassword helper text posisi sudah oke.
+
+- [x] **L-07** `ResetPasswordPage.tsx`: ubah `setTimeout(..., 1200)` menjadi `setTimeout(..., 2000)`. Satu baris.
+  - **Spec detail:** `docs/fase-l-specs/L04_L07_wizard_balance_guest_auth.md` § L-07
+  - **Anchor grep:** `setTimeout` (ResetPasswordPage.tsx)
+  - **Gate:** `cd frontend; npm run build` ✅
+
+#### L-08 🟡 — PublicRoomsPage: 5 Perubahan Nyata
+
+**Scope nyata (dari kode):** 5 perubahan. `PaginationControls.tsx` tidak dipakai oleh PublicRoomsPage — pagination dikelola inline.
+
+- [ ] **L-08** `PublicRoomsPage.tsx`: (1) carousel auto-rotate: tambah guard `if (isTouchDevice) return` agar tidak rotate otomatis di mobile. (2) counter compare: ubah `{compareList.length} kamar dipilih` → `{compareList.length}/3 kamar dipilih` dengan warna merah saat sudah 3. (3) filter toggle mobile: tambah button "Filter" yang toggle `showFilter` state + class `d-md-none` pada button, `d-none d-md-block` pada filter bar (atau conditionally render). (4) CSS filter: tambah animasi collapse/expand. (5) pagination ellipsis: ganti `Array.from({length: totalPages})` dengan fungsi yang render `1 … X X+1 … N` saat totalPages > 7.
+  - **Spec detail:** `docs/fase-l-specs/L08_L11_public_dashboard_tenant_reports.md` § L-08
+  - **Anchor grep:** `hovered` (carousel) · `compareList.length` · `rm-filter-bar` · `Array.from.*totalPages`
+  - **Gate:** `cd frontend; npm run build` ✅ · test compare counter · test filter mobile 375px
+
+#### L-09 🟡 — OwnerDashboard: 2 Kartu Error + Link AI
+
+**Scope nyata (dari kode):** hanya 2 kartu (meter-due baris 370, readiness baris 378) dan 2 lokasi AI panel. Quick-action sudah `flex-wrap`.
+
+- [x] **L-09** `OwnerDashboardPage.tsx`: (1) Baris ~370: ganti `meterDueQuery.isError ? '—'` menjadi `meterDueQuery.isError ? <span className="text-danger small">Gagal</span>`. (2) Baris ~378: sama untuk `readinessQuery.isError`. (3) Di 2 lokasi alert "AI belum dikonfigurasi": tambah `{' '}<a href="/settings">Atur AI →</a>` di dalam Alert — verifikasi path `/settings` benar di `App.tsx` sebelum commit.
+  - **Spec detail:** `docs/fase-l-specs/L08_L11_public_dashboard_tenant_reports.md` § L-09
+  - **Anchor grep:** `meterDueQuery.isError ? '—'` · `readinessQuery.isError ? '—'` · `"AI belum dikonfigurasi"`
+  - **Gate:** `cd frontend; npm run build` ✅
+
+#### L-10 🟡 — MyTicketsPage: Image Lightbox + WifiOrderPage: WhatsApp Hardcode
+
+**Scope nyata (dari kode):** step indicator dan badge "Sudah dipesan" sudah oke. 2 gap nyata.
+
+- [ ] **L-10** (a) `MyTicketsPage.tsx`: tambah `onClick` ke `SafeImage` untuk foto issue dan resolution — buka modal Bootstrap dengan `<img>` full-size. Tambah `useState` untuk `lightboxSrc` dan `Modal` dari react-bootstrap. (b) `WifiOrderPage.tsx`: ada nomor WhatsApp hardcoded di 2 tempat (const baris 7 + teks baris 96) — konsolidasi ke satu const `KOST_WHATSAPP_NUMBER` di baris 7 dan gunakan const di baris 96, pastikan keduanya merujuk variabel yang sama.
+  - **Spec detail:** `docs/fase-l-specs/L08_L11_public_dashboard_tenant_reports.md` § L-10
+  - **Anchor grep:** `SafeImage` (MyTicketsPage) · nomor WA hardcoded (WifiOrderPage baris 7 dan 96)
+  - **Gate:** `cd frontend; npm run build` ✅
+
+#### L-11 🟡 — UnlockedFormalReports: Lazy + Suspense + Skeleton
+
+**Scope nyata (dari kode):** period selector sudah di posisi tepat. Gap nyata: `UnlockedFormalReports` tidak punya skeleton saat pertama dimuat.
+
+- [ ] **L-11** `ReportsPage.tsx` atau parent yang render `UnlockedFormalReports`: bungkus dengan `React.lazy` + `<Suspense fallback={<TableSkeleton rows={8} />}>`. Verifikasi `UnlockedFormalReports` diekspor sebagai default export sebelum membuat lazy import.
+  - **Spec detail:** `docs/fase-l-specs/L08_L11_public_dashboard_tenant_reports.md` § L-11
+  - **Anchor grep:** `UnlockedFormalReports` (import + render di ReportsPage)
+  - **Gate:** `cd frontend; npm run build` ✅
+
+#### L-12 🟡 — LoyaltyAdminPage: REWARD_TYPES Label Indonesia
+
+**Scope nyata (dari kode):** save button sudah dinamis. `ServiceInterestsPage` sudah pakai label Indonesia. Gap nyata: `REWARD_TYPES` di `LoyaltyAdminPage` masih enum mentah.
+
+- [x] **L-12** `LoyaltyAdminPage.tsx` baris 19-20: ubah konstanta `REWARD_TYPES` dari `{ value: 'RENT_DISCOUNT', label: 'RENT_DISCOUNT' }` dst menjadi `{ value: 'RENT_DISCOUNT', label: 'Diskon Sewa' }`, `{ value: 'SERVICE_ADDON', label: 'Add-on Layanan' }`, `{ value: 'METER_DISCOUNT', label: 'Diskon Meter' }`, `{ value: 'PHYSICAL', label: 'Hadiah Fisik' }`. (Sesuaikan label dengan nilai enum yang ada di kode — verifikasi via grep `RewardType` di backend schema atau frontend types.)
+  - **Spec detail:** `docs/fase-l-specs/L12_L15_enum_staff_stays_tenant.md` § L-12
+  - **Anchor grep:** `REWARD_TYPES` (LoyaltyAdminPage.tsx baris 19-20)
+  - **Gate:** `cd frontend; npm run build` ✅
+
+#### L-13 🟡 — TicketsStaffMode: Loading Button + StaffRoutines: Re-aktifkan Template
+
+**Scope nyata (dari kode):** `closeTicketMutation` AdminWorkspaces sudah sempurna (tutup modal + invalidate). 2 gap nyata.
+
+- [x] **L-13** (a) `TicketsStaffMode.tsx` baris 90-91: pada button action (Mulai Kerjakan / Selesai dll), tambah `disabled={simpleAction.isPending}` dan ubah children ke `{simpleAction.isPending ? <><Spinner size="sm" /> Memproses…</> : 'Mulai Kerjakan'}`. (b) `StaffRoutinesAdminPage.tsx` baris 99-104: tambah kondisi di render template list — bila `template.isActive === false`, tampilkan tombol "Aktifkan" (bukan hanya "Nonaktifkan") yang memanggil mutation set `isActive: true`.
+  - **Spec detail:** `docs/fase-l-specs/L12_L15_enum_staff_stays_tenant.md` § L-13
+  - **Anchor grep:** `simpleAction.isPending` · `template.isActive` (StaffRoutinesAdminPage)
+  - **Gate:** `cd frontend; npm run build` ✅
+
+#### L-14 🟡 — StayDetailPage: Urutan Alert Priority
+
+**Scope nyata (dari kode):** format currency metric tiles sudah konsisten. Gap nyata: Alert info statis "Aturan perpanjangan" muncul sebelum warning keuangan yang lebih urgent.
+
+- [x] **L-14** `StayDetailPage.tsx` baris 330-345: pindahkan Alert info statis (aturan perpanjangan / kebijakan umum) ke posisi terakhir dari blok Alert — setelah Alert warning keuangan (overdue/tagihan aktif) dan Alert checkout. Urutan yang benar: (1) danger/warning keuangan → (2) info checkout → (3) info statis/aturan.
+  - **Spec detail:** `docs/fase-l-specs/L12_L15_enum_staff_stays_tenant.md` § L-14
+  - **Anchor grep:** Alert blocks baris 330-345 (StayDetailPage.tsx)
+  - **Gate:** `cd frontend; npm run build` ✅
+
+#### L-15 🟡 — TenantWorkspaceTabs: Announcement Truncate
+
+**Scope nyata (dari kode):** loading state dan `MyManualPage` FAQ sudah oke. Gap nyata: announcement strip tidak ada truncation CSS.
+
+- [x] **L-15** `TenantWorkspaceTabs.tsx` baris 61: pada elemen yang render konten announcement strip, tambah style `{{ overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}` atau className dengan CSS serupa, agar konten panjang tidak mendorong tombol "Lihat" ke luar area.
+  - **Spec detail:** `docs/fase-l-specs/L12_L15_enum_staff_stays_tenant.md` § L-15
+  - **Anchor grep:** announcement content render (TenantWorkspaceTabs.tsx baris ~61)
+  - **Gate:** `cd frontend; npm run build` ✅
+
+#### L-16 🟢 — AccountingSetupPage: Checklist Bertahap di Atas Halaman
+
+**Pendekatan nyata (dari kode):** halaman monolit jalur-uang — tidak di-refactor besar. Tambah komponen checklist read-only di atas saja.
+
+- [ ] **L-16** `AccountingSetupPage.tsx`: tambah komponen `<AccountingSetupChecklist />` baru (file baru atau inline) di atas halaman — sebelum section pertama. Komponen ini membaca state dari query-query yang sudah ada (period, COA, readiness) dan menampilkan checklist: ① COA terisi (hijau/merah) → ② Periode aktif (hijau/merah) → ③ Opening Balance (hijau/merah) → ④ Siap catat transaksi. Sumber state: gunakan data dari queries yang sudah di-fetch oleh halaman (jangan tambah query baru).
+  - **Spec detail:** `docs/fase-l-specs/L16_L20_accounting_a11y_empty_asset_minor.md` § L-16
+  - **Anchor grep:** `AccountingSetupPage` — baca awal file untuk menemukan query names yang ada
+  - **Gate:** `cd frontend; npm run build` ✅
+
+#### L-17 🟢 — Aksesibilitas: Focus Outline StaffRoomsPage + aria-pressed Owner Toggle
+
+**Scope nyata (dari kode):** GlobalSearch sudah ada `aria-label` (baris 128). AdminContinuityStrip adalah navigasi (bukan toggle). 2 gap nyata.
+
+- [x] **L-17** (a) `StaffRoomsPage.tsx`: pada card dengan `tabIndex={0}`, tambah CSS class atau inline style `:focus-visible { outline: 2px solid #0056b3; border-radius: 4px; }`. Cari file CSS yang relevan (`frontend/src/styles/`) dan tambah rule `.staff-room-card:focus-visible { outline: 2px solid #0056b3; }`. (b) `OwnerDashboardPage.tsx` atau `AppLayout.tsx`: pada tombol toggle Owner/Admin view (bukan AdminContinuityStrip), tambah `aria-pressed={isOwnerView}` dan `aria-label="Beralih ke tampilan Owner/Admin"`.
+  - **Spec detail:** `docs/fase-l-specs/L16_L20_accounting_a11y_empty_asset_minor.md` § L-17
+  - **Anchor grep:** `tabIndex={0}` (StaffRoomsPage) · owner/admin view toggle button
+  - **Gate:** `cd frontend; npm run build` ✅
+
+#### L-18 🟢 — Empty State: CashflowPage Saja
+
+**Scope nyata (dari kode):** `InvoicesPage` sudah pakai `EmptyState`. `MarketAnalysisPage` sudah ada labels. Gap nyata: hanya `CashflowPage`.
+
+- [x] **L-18** `CashflowPage.tsx`: di section render `cashIn` dan `cashOut`, tambah kondisi untuk list kosong: `{cashIn.length === 0 && <p className="text-muted text-center py-2 small">Belum ada arus kas masuk periode ini.</p>}` dan serupa untuk `cashOut`. Import `EmptyState` bila pattern ini sudah ada di file lain atau tulis inline.
+  - **Spec detail:** `docs/fase-l-specs/L16_L20_accounting_a11y_empty_asset_minor.md` § L-18
+  - **Anchor grep:** `cashIn.map` · `cashOut.map` (CashflowPage.tsx)
+  - **Gate:** `cd frontend; npm run build` ✅
+
+#### L-19 🟢 — AssetRegisterPage: Form Modal + Badge Tooltip
+
+**Scope nyata (dari kode):** `MarketAnalysisPage` sudah ada label bubble. 2 gap nyata.
+
+- [x] **L-19** (a) `AssetRegisterPage.tsx`: pindahkan form "Tambah Aset" (yang saat ini inline panjang) ke dalam `<Modal>` Bootstrap — trigger dengan tombol "Tambah Aset Baru" yang membuka modal. Ini mengurangi panjang halaman di mobile signifikan. (b) Pada setiap badge status (`NEEDS_REVIEW`, `ALIGNED`, dll): tambah `title="..."` dengan deskripsi singkat apa artinya (mis. `title="Perlu ditinjau: nilai buku dan kondisi fisik belum dicocokkan"`).
+  - **Spec detail:** `docs/fase-l-specs/L16_L20_accounting_a11y_empty_asset_minor.md` § L-19
+  - **Anchor grep:** form tambah aset (AssetRegisterPage.tsx) · badge status NEEDS_REVIEW · ALIGNED
+  - **Gate:** `cd frontend; npm run build` ✅ · **⚠️ Hati-hati:** ini halaman relatif panjang — jaga agar tidak merusak logika form validation yang sudah ada
+
+#### L-20 🟢 — Minor Fixes (ProfilePage, OwnerSettingsPage, FAQ)
+
+- [x] **L-20** (a) `ProfilePage.tsx`: tambah `Form.Text` di bawah setiap field tip e-wallet dengan format yang diharapkan (GoPay/OVO/ShopeePay: "Nomor HP aktif", DANA: "Nomor HP atau email DANA", Bank: "Nama Bank - Nomor Rekening"). (b) `ProfilePage.tsx`: normalisasi pesan error API untuk password change — tangkap string "Password current tidak cocok" dari API dan ubah tampil ke "Password saat ini salah". (c) `OwnerSettingsPage.tsx` baris 59: pesan error upload foto menggunakan slug fasilitas mentah — ubah ke nama ramah dengan `facilityLabels[slug] ?? slug`. (d) `OwnerSettingsPage.tsx` FAQ modal baris 432: tambah `autoFocus` pada `Form.Control` untuk field "Pertanyaan".
+  - **Spec detail:** `docs/fase-l-specs/L16_L20_accounting_a11y_empty_asset_minor.md` § L-20
+  - **Anchor grep:** tip field (ProfilePage) · `"Password current"` · slug error (OwnerSettingsPage baris 59) · FAQ `Form.Control` Question
+  - **Gate:** `cd frontend; npm run build` ✅
 
 ---
 

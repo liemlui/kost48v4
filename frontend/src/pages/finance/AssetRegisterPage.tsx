@@ -72,6 +72,15 @@ const alignmentStatusLabels: Record<string, string> = {
   VOIDED: 'Voided',
 };
 
+const ALIGNMENT_STATUS_TOOLTIP: Record<string, string> = {
+  NOT_REQUIRED: 'Tidak perlu alignment — nilai aset tidak perlu disamakan dengan ledger.',
+  NEEDS_REVIEW: 'Perlu ditinjau owner sebelum membuat adjustment journal.',
+  PREVIEWED: 'Sudah dibuat preview journal, belum diposting.',
+  ALIGNED: 'Register aset sudah sama dengan ledger Fixed Assets.',
+  DISCLOSURE_ONLY: 'Hanya dicatat sebagai disclosure, tidak membentuk journal.',
+  VOIDED: 'Alignment dibatalkan.',
+};
+
 function alignmentBadge(status?: string) {
   if (status === 'ALIGNED') return 'success';
   if (status === 'DISCLOSURE_ONLY') return 'secondary';
@@ -97,6 +106,7 @@ const initialForm = {
 export default function AssetRegisterPage() {
   const queryClient = useQueryClient();
   const [form, setForm] = useState(initialForm);
+  const [showCreateAsset, setShowCreateAsset] = useState(false);
   const now = useMemo(() => new Date(), []);
   const [runPeriod, setRunPeriod] = useState({ year: now.getFullYear(), month: now.getMonth() + 1 });
   const [alignmentAsset, setAlignmentAsset] = useState<FixedAsset | null>(null);
@@ -120,6 +130,7 @@ export default function AssetRegisterPage() {
     mutationFn: createFixedAsset,
     onSuccess: () => {
       setForm(initialForm);
+      setShowCreateAsset(false);
       queryClient.invalidateQueries({ queryKey: ['assets'] });
     },
   });
@@ -171,6 +182,16 @@ export default function AssetRegisterPage() {
     createMutation.mutate(payload);
   }
 
+  function openCreateAssetModal() {
+    createMutation.reset();
+    setShowCreateAsset(true);
+  }
+
+  function closeCreateAssetModal() {
+    if (createMutation.isPending) return;
+    setShowCreateAsset(false);
+  }
+
   function openAlignmentModal(asset: FixedAsset) {
     setAlignmentAsset(asset);
     setAlignmentForm({
@@ -207,7 +228,12 @@ export default function AssetRegisterPage() {
   <PageHeader
     title="Asset Register"
     description="List fixed assets, depreciation, and ledger alignment — ensure assets are recorded correctly in the Balance Sheet."
-    secondaryAction={<Badge bg="primary">Fixed Asset</Badge>}
+    secondaryAction={(
+      <div className="d-flex flex-wrap gap-2 align-items-center">
+        <Badge bg="primary">Fixed Asset</Badge>
+        <Button type="button" onClick={openCreateAssetModal}>Tambah Aset Baru</Button>
+      </div>
+    )}
   />
 
       <Row className="g-3 mb-3">
@@ -234,12 +260,15 @@ export default function AssetRegisterPage() {
       ) : null}
 
       <Row className="g-3 mb-3">
-        <Col xl={7}>
+        <Col xs={12}>
           <Card className="content-card border-0 h-100">
             <Card.Body>
               <div className="d-flex justify-content-between align-items-start mb-3 gap-2">
                 <div><div className="small text-uppercase text-muted fw-semibold mb-1">Register</div><h3 className="h5 mb-1">Daftar aset</h3><p className="text-muted mb-0">Gunakan alignment hanya setelah owner yakin treatment ledger-nya benar.</p></div>
-                <Badge bg={assets.length ? 'success' : 'secondary'}>{assets.length} aset</Badge>
+                <div className="d-flex flex-wrap gap-2 align-items-center justify-content-end">
+                  <Badge bg={assets.length ? 'success' : 'secondary'}>{assets.length} aset</Badge>
+                  <Button type="button" size="sm" onClick={openCreateAssetModal}>Tambah Aset Baru</Button>
+                </div>
               </div>
               {assetsQuery.isLoading ? <div className="text-muted"><Spinner animation="border" size="sm" className="me-2" /> Memuat aset...</div> : assets.length ? (
                 <div className="table-responsive">
@@ -258,7 +287,7 @@ export default function AssetRegisterPage() {
                         <td>{formatRupiah(asset.acquisitionCostRupiah)}</td>
                         <td>{formatRupiah(asset.accumulatedDepreciationRupiah)}</td>
                         <td>{formatRupiah(asset.bookValueRupiah)}</td>
-                        <td><Badge bg={alignmentBadge(status)} text={alignmentBadge(status) === 'warning' || alignmentBadge(status) === 'light' ? 'dark' : undefined}>{alignmentStatusLabels[status] ?? status}</Badge></td>
+                        <td><Badge bg={alignmentBadge(status)} text={alignmentBadge(status) === 'warning' || alignmentBadge(status) === 'light' ? 'dark' : undefined} title={ALIGNMENT_STATUS_TOOLTIP[status] ?? 'Status alignment aset terhadap ledger Fixed Assets.'}>{alignmentStatusLabels[status] ?? status}</Badge></td>
                         <td><Button size="sm" variant="outline-primary" disabled={status === 'ALIGNED'} onClick={() => openAlignmentModal(asset)}>{status === 'ALIGNED' ? 'Aligned' : 'Review'}</Button></td>
                       </tr>;
                     })}</tbody>
@@ -269,6 +298,7 @@ export default function AssetRegisterPage() {
           </Card>
         </Col>
 
+        {false ? (
         <Col xl={5}>
           <Card className="content-card border-0 h-100">
             <Card.Body>
@@ -297,6 +327,7 @@ export default function AssetRegisterPage() {
             </Card.Body>
           </Card>
         </Col>
+        ) : null}
       </Row>
 
       <Card className="content-card border-0 mb-3">
@@ -313,6 +344,124 @@ export default function AssetRegisterPage() {
           </>}
         </Card.Body>
       </Card>
+
+      <Modal show={showCreateAsset} onHide={closeCreateAssetModal} size="lg" centered>
+        <Form onSubmit={submitAsset}>
+          <Modal.Header closeButton>
+            <Modal.Title>Tambah Aset Baru</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            <div className="small text-uppercase text-muted fw-semibold mb-1">Asset onboarding aman</div>
+            <p className="text-muted small mb-3">
+              Isi data aset tetap tanpa membuka halaman panjang. Validasi field wajib tetap aktif sebelum submit.
+            </p>
+            <div className="d-grid gap-3">
+              <Form.Group>
+                <Form.Label>Nama aset</Form.Label>
+                <Form.Control
+                  value={form.name}
+                  onChange={(e) => setForm((prev) => ({ ...prev, name: e.target.value }))}
+                  placeholder="Contoh: AC kamar 201"
+                  required
+                />
+              </Form.Group>
+              <Row className="g-2">
+                <Col sm={6}>
+                  <Form.Group>
+                    <Form.Label>Kategori</Form.Label>
+                    <Form.Select value={form.category} onChange={(e) => setForm((prev) => ({ ...prev, category: e.target.value as FixedAssetCategory }))}>
+                      {categoryOptions.map((option) => <option key={option} value={option}>{categoryLabels[option]}</option>)}
+                    </Form.Select>
+                  </Form.Group>
+                </Col>
+                <Col sm={6}>
+                  <Form.Group>
+                    <Form.Label>Basis kapitalisasi</Form.Label>
+                    <Form.Select value={form.capitalizationSource} onChange={(e) => setForm((prev) => ({ ...prev, capitalizationSource: e.target.value as FixedAssetCapitalizationSource }))}>
+                      {capitalizationOptions.map((option) => <option key={option} value={option}>{capitalizationLabels[option]}</option>)}
+                    </Form.Select>
+                  </Form.Group>
+                </Col>
+              </Row>
+              <Row className="g-2">
+                <Col sm={6}>
+                  <Form.Group>
+                    <Form.Label>Tanggal perolehan</Form.Label>
+                    <Form.Control type="date" value={form.acquisitionDate} onChange={(e) => setForm((prev) => ({ ...prev, acquisitionDate: e.target.value }))} required />
+                  </Form.Group>
+                </Col>
+                <Col sm={6}>
+                  <Form.Group>
+                    <Form.Label>Mulai depresiasi</Form.Label>
+                    <Form.Control type="date" value={form.depreciationStartDate} onChange={(e) => setForm((prev) => ({ ...prev, depreciationStartDate: e.target.value }))} />
+                  </Form.Group>
+                </Col>
+              </Row>
+              <Row className="g-2">
+                <Col sm={6}>
+                  <Form.Group>
+                    <Form.Label>Cost</Form.Label>
+                    <Form.Control type="number" min={1} value={form.acquisitionCostRupiah} onChange={(e) => setForm((prev) => ({ ...prev, acquisitionCostRupiah: e.target.value }))} required />
+                  </Form.Group>
+                </Col>
+                <Col sm={6}>
+                  <Form.Group>
+                    <Form.Label>Residu</Form.Label>
+                    <Form.Control type="number" min={0} value={form.salvageValueRupiah} onChange={(e) => setForm((prev) => ({ ...prev, salvageValueRupiah: e.target.value }))} />
+                  </Form.Group>
+                </Col>
+              </Row>
+              <Row className="g-2">
+                <Col sm={6}>
+                  <Form.Group>
+                    <Form.Label>Umur manfaat bulan</Form.Label>
+                    <Form.Control type="number" min={1} value={form.usefulLifeMonths} onChange={(e) => setForm((prev) => ({ ...prev, usefulLifeMonths: e.target.value }))} required />
+                  </Form.Group>
+                </Col>
+                <Col sm={6}>
+                  <Form.Group>
+                    <Form.Label>Akumulasi awal</Form.Label>
+                    <Form.Control type="number" min={0} value={form.accumulatedDepreciationRupiah} onChange={(e) => setForm((prev) => ({ ...prev, accumulatedDepreciationRupiah: e.target.value }))} />
+                  </Form.Group>
+                </Col>
+              </Row>
+              <Form.Check
+                type="switch"
+                label="Aktifkan depresiasi bulanan untuk aset ini"
+                checked={form.depreciationEnabled}
+                onChange={(e) => setForm((prev) => ({ ...prev, depreciationEnabled: e.target.checked }))}
+              />
+              <Form.Group>
+                <Form.Label>Tautkan ke barang inventaris <span className="text-muted">(opsional)</span></Form.Label>
+                <Form.Select value={form.inventoryItemId} onChange={(e) => setForm((prev) => ({ ...prev, inventoryItemId: e.target.value }))}>
+                  <option value="">Tidak ditautkan</option>
+                  {(inventoryOptionsQuery.data?.items ?? []).map((opt) => (
+                    <option key={opt.id} value={opt.id}>{opt.name}{opt.category ? ` (${opt.category})` : ''}</option>
+                  ))}
+                </Form.Select>
+                <Form.Text muted>Aset ini akan terhubung ke barang inventaris yang sama, bukan dua data terpisah.</Form.Text>
+              </Form.Group>
+              <Form.Group>
+                <Form.Label>Catatan</Form.Label>
+                <Form.Control
+                  as="textarea"
+                  rows={2}
+                  value={form.notes}
+                  onChange={(e) => setForm((prev) => ({ ...prev, notes: e.target.value }))}
+                  placeholder="Contoh: aset sudah termasuk opening balance 2026-05"
+                />
+              </Form.Group>
+              {createMutation.isError ? <Alert variant="danger" className="mb-0">{getApiErrorMessage(createMutation.error, 'Gagal membuat aset')}</Alert> : null}
+            </div>
+          </Modal.Body>
+          <Modal.Footer>
+            <Button type="button" variant="outline-secondary" onClick={closeCreateAssetModal} disabled={createMutation.isPending}>Batal</Button>
+            <Button type="submit" disabled={createMutation.isPending}>
+              {createMutation.isPending ? 'Menyimpan...' : 'Simpan Aset'}
+            </Button>
+          </Modal.Footer>
+        </Form>
+      </Modal>
 
       <Modal show={Boolean(alignmentAsset)} onHide={() => setAlignmentAsset(null)} size="lg" centered>
         <Modal.Header closeButton><Modal.Title>Review Alignment Ledger</Modal.Title></Modal.Header>

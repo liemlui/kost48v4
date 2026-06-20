@@ -17,6 +17,13 @@ import {
 import { useAuth } from '../../context/AuthContext';
 
 const REWARD_TYPES = ['RENT_DISCOUNT', 'SERVICE_ADDON', 'METER_DISCOUNT', 'BADGE', 'PHYSICAL'];
+const REWARD_TYPE_LABEL: Record<string, string> = {
+  RENT_DISCOUNT: 'Diskon Sewa',
+  SERVICE_ADDON: 'Layanan Tambahan',
+  METER_DISCOUNT: 'Diskon Meter (Listrik/Air)',
+  BADGE: 'Lencana',
+  PHYSICAL: 'Barang Fisik',
+};
 const STATUS_VARIANT: Record<string, string> = { PENDING: 'warning', APPROVED: 'info', FULFILLED: 'success', REJECTED: 'danger', CANCELLED: 'secondary' };
 
 const emptyForm: RewardInput = { name: '', description: '', pointCost: 100, type: 'PHYSICAL', valueRupiah: 0, stockQty: undefined, isActive: true };
@@ -159,7 +166,7 @@ export default function LoyaltyAdminPage() {
               {rewardsQuery.data?.map((r) => (
                 <tr key={r.id}>
                   <td>{r.name}{r.description && <div className="text-muted small">{r.description}</div>}</td>
-                  <td><small>{r.type}</small></td>
+                  <td><small>{REWARD_TYPE_LABEL[r.type] ?? r.type}</small></td>
                   <td>{r.pointCost}</td>
                   <td>{r.valueRupiah ? `Rp${r.valueRupiah.toLocaleString('id-ID')}` : '-'}</td>
                   <td>{r.stockQty ?? '∞'}</td>
@@ -177,7 +184,7 @@ export default function LoyaltyAdminPage() {
         <Modal.Body>
           <Form.Group className="mb-3"><Form.Label>Nama</Form.Label><Form.Control value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} /></Form.Group>
           <Form.Group className="mb-3"><Form.Label>Deskripsi</Form.Label><Form.Control as="textarea" rows={2} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} /></Form.Group>
-          <Form.Group className="mb-3"><Form.Label>Tipe</Form.Label><Form.Select value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value })}>{REWARD_TYPES.map((t) => <option key={t} value={t}>{t}</option>)}</Form.Select></Form.Group>
+          <Form.Group className="mb-3"><Form.Label>Tipe</Form.Label><Form.Select value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value })}>{REWARD_TYPES.map((t) => <option key={t} value={t}>{REWARD_TYPE_LABEL[t] ?? t}</option>)}</Form.Select></Form.Group>
           <Form.Group className="mb-3"><Form.Label>Biaya Poin</Form.Label><Form.Control type="number" min={1} value={form.pointCost} onChange={(e) => setForm({ ...form, pointCost: Number(e.target.value) })} /></Form.Group>
           <Form.Group className="mb-3">
             <Form.Label>Nilai (Rp, untuk jurnal reward)</Form.Label>
@@ -198,7 +205,7 @@ export default function LoyaltyAdminPage() {
         </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={() => setShowForm(false)}>Batal</Button>
-          <Button variant="primary" disabled={saveMutation.isPending || !form.name.trim()} onClick={() => saveMutation.mutate({ id: editId, input: form })}>{saveMutation.isPending ? 'Menyimpan...' : 'Simpan'}</Button>
+          <Button variant="primary" disabled={saveMutation.isPending || !form.name.trim()} onClick={() => saveMutation.mutate({ id: editId, input: form })}>{saveMutation.isPending ? 'Menyimpan...' : editId ? 'Simpan Perubahan' : 'Tambah Reward'}</Button>
         </Modal.Footer>
       </Modal>
     </div>

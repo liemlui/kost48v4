@@ -10,6 +10,7 @@ type SafeImageProps = {
   fallbackTitle?: string;
   fallbackDescription?: string;
   resolveUrl?: boolean;
+  onClick?: () => void;
 };
 
 export default function SafeImage({
@@ -21,6 +22,7 @@ export default function SafeImage({
   fallbackTitle = 'Foto belum tersedia',
   fallbackDescription = 'Gambar tidak bisa dimuat. Informasi tetap bisa dibaca dari detail di halaman ini.',
   resolveUrl = true,
+  onClick,
 }: SafeImageProps) {
   const [failed, setFailed] = useState(false);
   const media = useAuthenticatedMediaUrl(resolveUrl ? src : null);
@@ -50,8 +52,17 @@ export default function SafeImage({
       src={resolvedSrc}
       alt={alt}
       className={className}
-      style={style}
+      style={onClick ? { ...(style ?? {}), cursor: 'zoom-in' } : style}
       loading="lazy"
+      role={onClick ? 'button' : undefined}
+      tabIndex={onClick ? 0 : undefined}
+      onClick={onClick}
+      onKeyDown={onClick ? (event) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          onClick();
+        }
+      } : undefined}
       onError={() => setFailed(true)}
     />
   );

@@ -327,10 +327,6 @@ export default function StayDetailPage() {
             </div>
           </div>
 
-          <Alert variant="info" className="mb-3">
-            <strong>Aturan perpanjangan:</strong> perpanjangan wajib catat meter.
-          </Alert>
-
           {hasUnpaid ? (
             <Alert variant="warning" className="mb-3">
               <strong>Ada tagihan yang belum dibayar.</strong>
@@ -339,10 +335,14 @@ export default function StayDetailPage() {
           ) : null}
 
           {overdue ? (
-            <Alert variant="warning" className="mb-0">
+            <Alert variant="warning" className="mb-3">
               Tagihan overdue. Cek Keuangan.
             </Alert>
           ) : null}
+
+          <Alert variant="info" className="mb-3">
+            <strong>Aturan perpanjangan:</strong> perpanjangan wajib catat meter.
+          </Alert>
 
           {pendingCheckoutRequest ? (
             <Alert variant="warning" className="mt-3 mb-0 d-flex justify-content-between align-items-center">
