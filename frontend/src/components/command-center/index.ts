@@ -13,3 +13,6 @@ export type { TimelineStep } from './LifecycleTimeline';
 
 export { default as PeriodVisualizer } from './PeriodVisualizer';
 export type { PeriodPoint } from './PeriodVisualizer';
+
+export { default as ActionKanbanBoard } from './ActionKanbanBoard';
+export { default as ActionCalendar } from './ActionCalendar';

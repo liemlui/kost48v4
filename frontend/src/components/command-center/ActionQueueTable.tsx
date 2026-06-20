@@ -14,6 +14,7 @@ export type ActionQueueItem = {
   age?: string;
   receivedAtLabel?: string;
   deadlineLabel?: string;
+  deadlineIso?: string;
   timeStatusLabel?: string;
   timeStatusTone?: 'danger' | 'warning' | 'info' | 'success';
   recommendedAction: string;

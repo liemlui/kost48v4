@@ -4,6 +4,15 @@
 
 ## Changelog Ringkas
 
+### 2026-06-20 — Fase P: Pola UI Modern (P-01..P-06)
+- **P-01** `DashboardAdmin.tsx`: tambah `<SegmentedTabs>` 3-mode (list/board/kalender), state `viewMode` + persist `localStorage('admin-queue-view')`; ekspor `ActionKanbanBoard` + `ActionCalendar` dari `command-center/index.ts`.
+- **P-02** `ActionCalendar.tsx`: lazy-load FullCalendar 6.x (`Promise.all` bundle 3 modul); events dari `items.filter(i => i.deadlineIso)` → warna per prioritas; `eventClick` → `navigate(actionTo)`; tambah `deadlineIso?: string` ke `ActionQueueItem` + `makeQueueTime` kirim `raw.toISOString()`.
+- **P-03** `ActionKanbanBoard.tsx`: `@dnd-kit/core` — `DndContext`, `useDroppable`, `useDraggable`; `PointerSensor(distance:5)` + `KeyboardSensor`; `colMap` state, `onDragEnd` update kolom; visual `isOver` highlight biru.
+- **P-04** Buat `TanStackTable<T>` generic wrapper (`@tanstack/react-table@8.21.3`): sort + column-visibility toggle; accessible clickable rows (`tabIndex/role/aria-label/onKeyDown`); pilot di `InvoicesPage.tsx` (7 kolom, replace bootstrap Table).
+- **P-05** Buat `MobileBottomNav.tsx` — fixed-bottom `<nav>` hanya tampil `@media (max-width:768px)`; NavLink stage-aware via `getNavigationLinks('TENANT', stage).slice(0,5)`; `safe-area-inset-bottom` aware; `tenant-workspace-content` tambah `padding-bottom: calc(68px + env(safe-area-inset-bottom))` pada mobile; integrasikan ke `AppLayout` blok TENANT.
+- **P-06** Install `cmdk@^1.1.1`; buat `CommandPalette.tsx` (`Command.Input/List/Group/Item/Empty`); grup Navigasi (role-aware dari `navigation.ts`) + Aksi Cepat (5 shortcut); lazy-load di `AppLayout` via `React.lazy + Suspense`; shortcut `Ctrl+K`/`Cmd+K` via `useEffect` keydown; CSS overlay+dialog di `10-misc.css`.
+- **Gate:** `npx tsc --noEmit` ✅ semua P-task.
+
 ### 2026-06-20 — Fase O: Design System & Token (O-01..O-08)
 - **O-01** `00-tokens.css`: tambah skala primitif gray/blue/green/red/amber/purple/orange (50–900) + alias semantik (`--color-primary`, `--text-primary`, `--bg-surface`, dll.); @deprecated `--k48-primary`, `--ops-blue-600`.
 - **O-02** Buat `config/chartPalette.ts`: `CHART_COLORS` + helper `cc(key)` baca CSS var runtime; ganti semua hex hardcode di `OwnerDashboardPage.tsx` (BarChart + LineChart) pakai `cc(...)`.

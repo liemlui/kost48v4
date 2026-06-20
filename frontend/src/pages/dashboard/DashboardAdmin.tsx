@@ -4,7 +4,8 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import EmptyState from '../../components/common/EmptyState';
 import PaginationControls from '../../components/common/PaginationControls';
 import StatusBadge from '../../components/common/StatusBadge';
-import { AssistantPanel, ActionQueueTable, AdminHealthBar, type ActionQueueItem, type AssistantItem } from '../../components/command-center';
+import { AssistantPanel, ActionQueueTable, AdminHealthBar, ActionKanbanBoard, ActionCalendar, type ActionQueueItem, type AssistantItem } from '../../components/command-center';
+import SegmentedTabs from '../../components/common/SegmentedTabs';
 import { AssistantInsightLine, EntityBadgeFilterBar } from '../../components/workspace';
 import AutoOpsControlPanel from '../../components/auto-ops/AutoOpsControlPanel';
 import SmartChartPanel, { type SmartChartPoint } from '../../components/charts/SmartChartPanel';
@@ -199,6 +200,14 @@ export default function AdminDashboard() {
   const { user } = useAuth();
   const activeArea: AdminQueueArea = normalizeAdminArea(new URLSearchParams(location.search).get('area'));
   const [dense, setDense] = useState<boolean>(() => localStorage.getItem('admin-density') === 'compact');
+  const [viewMode, setViewMode] = useState<'list' | 'board' | 'calendar'>(() => {
+    const stored = localStorage.getItem('admin-queue-view');
+    return (stored === 'board' || stored === 'calendar') ? stored : 'list';
+  });
+  const handleViewMode = (v: 'list' | 'board' | 'calendar') => {
+    setViewMode(v);
+    localStorage.setItem('admin-queue-view', v);
+  };
   const handleToggleDense = () => {
     setDense((prev) => {
       const next = !prev;
@@ -326,8 +335,35 @@ export default function AdminDashboard() {
           lowStockCount={lowStockCount}
         />
       ) : null}
-      {/* N-02: ActionQueueTable sebagai hero — dipindah ke atas */}
-      {activeArea === 'overview' ? <ActionQueueTable title="Admin Operations Antrean Aksi" subtitle="Antrean keputusan lintas booking, pembayaran, renew, checkout, tagihan, tiket, dan stok." items={filteredQueueItems} emptyTitle="Tidak ada item mendesak hari ini" emptyDescription="Semua area operasional sedang aman." maxItems={12} collapsible={false} /> : null}
+      {/* P-01: 3 tampilan antrean — Daftar / Papan / Kalender */}
+      {activeArea === 'overview' ? (
+        <>
+          <SegmentedTabs<'list' | 'board' | 'calendar'>
+            items={[
+              { key: 'list',     label: 'Daftar',   icon: '☰',  count: filteredQueueItems.length || undefined },
+              { key: 'board',    label: 'Papan',    icon: '📌' },
+              { key: 'calendar', label: 'Kalender', icon: '📅' },
+            ]}
+            value={viewMode}
+            onChange={handleViewMode}
+            ariaLabel="Mode tampilan antrean aksi"
+            size="sm"
+          />
+          {viewMode === 'list' && (
+            <ActionQueueTable
+              title="Admin Operations Antrean Aksi"
+              subtitle="Antrean keputusan lintas booking, pembayaran, renew, checkout, tagihan, tiket, dan stok."
+              items={filteredQueueItems}
+              emptyTitle="Tidak ada item mendesak hari ini"
+              emptyDescription="Semua area operasional sedang aman."
+              maxItems={12}
+              collapsible={false}
+            />
+          )}
+          {viewMode === 'board' && <ActionKanbanBoard items={filteredQueueItems} />}
+          {viewMode === 'calendar' && <ActionCalendar items={filteredQueueItems} />}
+        </>
+      ) : null}
       {/* N-02: AssistantPanel full-width di bawah antrean */}
       {activeArea === 'overview' ? <AssistantPanel title="Daily Assistant Admin" subtitle="Ringkasan pekerjaan yang paling berdampak ke kamar, uang masuk, dan tenant." items={adminAssistantItems} emptyTitle="Operasional hari ini aman" emptyMessage="Tidak ada bukti bayar pending, checkout macet, perpanjangan pending, tagihan overdue, atau tiket penting dari data yang dimuat." maxItems={4} collapsible={false} /> : null}
       {activeArea === 'overview' && !dense && canUseAdminBriefAi ? (

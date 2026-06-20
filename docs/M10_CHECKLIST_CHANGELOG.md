@@ -39,7 +39,7 @@
 | **Fase M — Quick Wins A11y & Polish** | ✅ selesai | M-01..M-06: navigate, ConfirmProvider, reduced-motion, font fix, ClickableRow a11y, toast a11y |
 | **Fase N — Ramping Dashboard & Navigasi** | ✅ selesai | N-01..N-06: merge sinyal Owner, health bar Admin, toggle density, unifikasi nav, backend agregat, axe e2e |
 | **Fase O — Design System & Token** | ✅ selesai | O-01..O-08: palet terpadu, chartColors, spacing scale, CSS Modules, pisah misc.css, lucide-react, date-fns, touch target ≥44px |
-| **Fase P — Pola UI Modern** | ⬜ antri | P-01..P-06: 3-tampilan toggle, kalender, kanban, TanStack Table, bottom tab bar Tenant, cmd palette |
+| **Fase P — Pola UI Modern** | ✅ selesai | P-01..P-06: 3-tampilan toggle, FullCalendar, @dnd-kit kanban, TanStack Table, bottom tab bar Tenant, cmdk palette |
 
 ---
 
@@ -590,7 +590,7 @@
 **Rujukan:** Audit §7–§8, rekomendasi teknologi mutakhir.
 **Strategi:** Tiap task tambah 1 dependensi baru (lazy-load di rute). Kerjakan **bertahap** — P-01 dulu (toggle tampilan), lalu P-02..P-04 bisa independen.
 
-- [ ] **P-01 — Model "1 data, 3 tampilan" (List / Board / Kalender) untuk Admin**
+- [x] **P-01 — Model "1 data, 3 tampilan" (List / Board / Kalender) untuk Admin**
   **Target:** `frontend/src/pages/dashboard/DashboardAdmin.tsx` + komponen BARU.
   **Aksi:**
   1. Tambah state `const [viewMode, setViewMode] = useState<'list' | 'board' | 'calendar'>('list')`.
@@ -602,7 +602,7 @@
   **Anchor grep:** `SegmentedTabs` · `ActionQueueTable`
   **Gate:** `cd frontend; npm run build` ✅ · toggle tampilan tidak reload halaman.
 
-- [ ] **P-02 — Kalender operasional dengan FullCalendar**
+- [x] **P-02 — Kalender operasional dengan FullCalendar**
   **Target:** `frontend/src/components/command-center/ActionCalendar.tsx` — ganti placeholder P-01.
   **Aksi:**
   1. Install: `cd frontend; npm install @fullcalendar/react @fullcalendar/daygrid @fullcalendar/interaction`.
@@ -617,7 +617,7 @@
   **Anchor grep:** `FullCalendar`
   **Gate:** `cd frontend; npm run build` ✅ · kalender render bulan Juni 2026 tanpa error.
 
-- [ ] **P-03 — Papan kanban dengan `@dnd-kit` (drag-drop aksesibel)**
+- [x] **P-03 — Papan kanban dengan `@dnd-kit` (drag-drop aksesibel)**
   **Target:** `frontend/src/components/command-center/ActionKanbanBoard.tsx` — ganti placeholder P-01.
   **Aksi:**
   1. Install: `cd frontend; npm install @dnd-kit/core @dnd-kit/sortable @dnd-kit/utilities`.
@@ -632,7 +632,7 @@
   **Anchor grep:** `DndContext` · `useDroppable`
   **Gate:** `cd frontend; npm run build` ✅ · drag-drop antar kolom berfungsi, keyboard aksesibel.
 
-- [ ] **P-04 — TanStack Table ganti tabel buatan tangan**
+- [x] **P-04 — TanStack Table ganti tabel buatan tangan**
   **Target:** Pilih 1 halaman sebagai pilot, lalu perluas.
   **Aksi:**
   1. Install: `cd frontend; npm install @tanstack/react-table`.
@@ -647,7 +647,7 @@
   **Anchor grep:** `InvoicesPage` · `TicketsPage` · `PaginationControls`
   **Gate:** `cd frontend; npm run build` ✅ · sort/filter/paginasi berfungsi.
 
-- [ ] **P-05 — Bottom tab bar untuk portal Tenant di mobile**
+- [x] **P-05 — Bottom tab bar untuk portal Tenant di mobile**
   **Target:** `frontend/src/components/layout/AppLayout.tsx` (atau `TenantWorkspaceTabs.tsx`).
   **Aksi:**
   1. **Deteksi viewport:** pakai CSS media query `@media (max-width: 768px)` atau hook `useMediaQuery`.
@@ -661,7 +661,7 @@
   **Anchor grep:** `TenantWorkspaceTabs` · `max-width: 768`
   **Gate:** `cd frontend; npm run build` ✅ · test di Chrome DevTools 375px — bottom nav muncul, tombol berfungsi.
 
-- [ ] **P-06 — Command palette ⌘K dengan `cmdk`**
+- [x] **P-06 — Command palette ⌘K dengan `cmdk`**
   **Target:** `frontend/src/components/layout/AppLayout.tsx` — tambah overlay global.
   **Aksi:**
   1. Install: `cd frontend; npm install cmdk`.

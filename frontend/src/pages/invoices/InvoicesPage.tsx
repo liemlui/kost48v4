@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Alert, Badge, Button, Card, Col, Form, Modal, Row, Spinner, Table } from 'react-bootstrap';
+import { Alert, Badge, Button, Card, Col, Form, Modal, Row, Spinner } from 'react-bootstrap';
+import type { ColumnDef } from '@tanstack/react-table';
 import { useNavigate } from 'react-router-dom';
 import { Bar, BarChart, CartesianGrid, Cell, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import DonutGauge from '../../components/charts/DonutGauge';
@@ -8,8 +9,8 @@ import PageHeader from '../../components/common/PageHeader';
 import StatusBadge from '../../components/common/StatusBadge';
 import CurrencyDisplay from '../../components/common/CurrencyDisplay';
 import EmptyState from '../../components/common/EmptyState';
-import ClickableRow from '../../components/common/ClickableRow';
 import PaginationControls from '../../components/common/PaginationControls';
+import TanStackTable from '../../components/common/TanStackTable';
 import SearchableSelect from '../../components/common/SearchableSelect';
 import { type ActionQueueItem, type AssistantItem, type MetricChip } from '../../components/command-center';
 import { EntityBadgeFilterBar, StatusStrip } from '../../components/workspace';
@@ -392,6 +393,57 @@ export default function InvoicesPage() {
     { id: 'history', icon: '📚', label: 'Riwayat Bayar', helper: 'Pembayaran invoice yang sudah tercatat.', to: '/invoice-payments', count: undefined, active: false },
   ];
 
+  // P-04: TanStack Table columns — cell renderers bisa closure atas state modal karena definisi di sini
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const invoiceColumns = useMemo<ColumnDef<any, unknown>[]>(() => [
+    {
+      accessorKey: 'invoiceNumber',
+      header: 'Tagihan',
+      cell: ({ row }) => { const item = row.original; const m = invoicePurposeMeta(item); return (<><Badge bg={m.bg} className="mb-1 d-inline-flex align-items-center gap-1"><span aria-hidden>{m.icon}</span> {m.label}</Badge><div className="small text-muted">{item.invoiceNumber || `INV-${item.id}`}</div></>); },
+    },
+    {
+      id: 'tenant',
+      header: 'Tenant / Kamar',
+      enableSorting: false,
+      cell: ({ row }) => { const item = row.original; const tenantName = item.stay?.tenant?.fullName || `Masa sewa #${item.stayId}`; const roomLabel = item.stay?.room ? `${item.stay.room.code}${item.stay.room.name ? ` · ${item.stay.room.name}` : ''}` : '-'; return (<><div className="fw-semibold">{tenantName}</div><div className="small text-muted">{roomLabel}</div></>); },
+    },
+    {
+      id: 'statusCol',
+      header: 'Status',
+      enableSorting: false,
+      cell: ({ row }) => { const item = row.original; const dueSoonBadge = getDueSoonBadge(item); const overdue = isOverdue(item); return (<><StatusBadge status={item.status} />{overdue ? <div className="small text-danger mt-1">Melewati jatuh tempo</div> : null}{!overdue && dueSoonBadge ? <StatusBadge status={dueSoonBadge.status} customLabel={dueSoonBadge.label} className="mt-1" /> : null}</>); },
+    },
+    {
+      id: 'periode',
+      header: 'Periode',
+      enableSorting: false,
+      cell: ({ row }) => formatPeriod(row.original.periodStart, row.original.periodEnd),
+    },
+    {
+      accessorKey: 'dueDate',
+      header: 'Jatuh Tempo',
+      cell: ({ row }) => formatDateSafe(row.original.dueDate),
+    },
+    {
+      id: 'total',
+      header: 'Total',
+      enableSorting: false,
+      cell: ({ row }) => <CurrencyDisplay amount={getInvoiceTotalAmount(row.original as any)} />,
+    },
+    {
+      id: 'aksi',
+      header: 'Aksi',
+      enableSorting: false,
+      cell: ({ row }) => { const item = row.original; return (
+        <div className="d-flex flex-wrap gap-2 align-items-center" onClick={(e) => e.stopPropagation()}>
+          {canManageFinance && item.status === 'DRAFT' ? <Button size="sm" variant="outline-success" onClick={() => { setIssueTarget(item); setIssueChecks({}); setError(''); }} disabled={issueMutation.isPending}>Terbitkan</Button> : null}
+          {canManageFinance && ['DRAFT', 'ISSUED'].includes(item.status) ? <Button size="sm" variant="outline-danger" onClick={() => { setCancelTarget(item); setCancelReason(''); setError(''); }} disabled={cancelMutation.isPending}>Batalkan</Button> : null}
+          <span className="row-arrow-cell">›</span>
+        </div>
+      ); },
+    },
+  ], [canManageFinance, issueMutation.isPending, cancelMutation.isPending]);
+
   const issueSafety = issueTarget ? buildIssueInvoiceSafety(issueTarget, issueChecks) : null;
   const cancelSafety = cancelTarget ? buildCancelInvoiceSafety(cancelTarget, cancelReason) : null;
 
@@ -480,60 +532,14 @@ export default function InvoicesPage() {
           ) : null}
 
           {filteredItems.length > 0 ? (
-            <Table hover responsive className="responsive-data-table">
-              <thead>
-                <tr>
-                  <th>Tagihan</th>
-                  <th>Tenant / Kamar</th>
-                  <th>Status</th>
-                  <th>Periode</th>
-                  <th>Jatuh Tempo</th>
-                  <th>Total</th>
-                  <th style={{ width: 220 }}>Aksi</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredItems.map((item: any) => {
-                  const dueSoonBadge = getDueSoonBadge(item);
-                  const overdue = isOverdue(item);
-                  const tenantName = item.stay?.tenant?.fullName || `Masa sewa #${item.stayId}`;
-                  const roomLabel = item.stay?.room ? `${item.stay.room.code}${item.stay.room.name ? ` · ${item.stay.room.name}` : ''}` : '-';
-                  return (
-                    <ClickableRow key={item.id} onClick={() => navigate(`/invoices/${item.id}`)} label={`Buka invoice ${item.invoiceNumber || `INV-${item.id}`} untuk ${tenantName}`}>
-                      <td data-label="Tagihan">
-                        {(() => { const m = invoicePurposeMeta(item); return (
-                          <Badge bg={m.bg} className="mb-1 d-inline-flex align-items-center gap-1"><span aria-hidden>{m.icon}</span> {m.label}</Badge>
-                        ); })()}
-                        <div className="small text-muted">{item.invoiceNumber || `INV-${item.id}`}</div>
-                      </td>
-                      <td data-label="Tenant / Kamar">
-                        <div className="fw-semibold">{tenantName}</div>
-                        <div className="small text-muted">{roomLabel}</div>
-                      </td>
-                      <td data-label="Status">
-                        <StatusBadge status={item.status} />
-                        {overdue ? <div className="small text-danger mt-1">Melewati jatuh tempo</div> : null}
-                        {!overdue && dueSoonBadge ? <StatusBadge status={dueSoonBadge.status} customLabel={dueSoonBadge.label} className="mt-1" /> : null}
-                      </td>
-                      <td data-label="Periode">{formatPeriod(item.periodStart, item.periodEnd)}</td>
-                      <td data-label="Jatuh Tempo">{formatDateSafe(item.dueDate)}</td>
-                      <td data-label="Total"><CurrencyDisplay amount={getInvoiceTotalAmount(item as any)} /></td>
-                      <td data-label="Aksi" onClick={(event) => event.stopPropagation()}>
-                        <div className="d-flex flex-wrap gap-2 align-items-center">
-                          {canManageFinance && item.status === 'DRAFT' ? (
-                            <Button size="sm" variant="outline-success" onClick={() => { setIssueTarget(item); setIssueChecks({}); setError(''); }} disabled={issueMutation.isPending}>Terbitkan</Button>
-                          ) : null}
-                          {canManageFinance && ['DRAFT', 'ISSUED'].includes(item.status) ? (
-                            <Button size="sm" variant="outline-danger" onClick={() => { setCancelTarget(item); setCancelReason(''); setError(''); }} disabled={cancelMutation.isPending}>Batalkan</Button>
-                          ) : null}
-                          <span className="row-arrow-cell">›</span>
-                        </div>
-                      </td>
-                    </ClickableRow>
-                  );
-                })}
-              </tbody>
-            </Table>
+            <TanStackTable
+              columns={invoiceColumns}
+              data={filteredItems}
+              onRowClick={(item: any) => navigate(`/invoices/${item.id}`)}
+              rowLabel={(item: any) => `Buka invoice ${item.invoiceNumber || `INV-${item.id}`} untuk ${item.stay?.tenant?.fullName || `Masa sewa #${item.stayId}`}`}
+              showColumnToggle
+              isLoading={invoicesQuery.isLoading}
+            />
           ) : null}
 
           <div className="mt-3">

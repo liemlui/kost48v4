@@ -217,11 +217,13 @@ export function makeLastUpdatedLabel() {
 
 export function makeQueueTime(deadline?: string | Date | null) {
   const meta = getDeadlineMeta(deadline, 'Deadline');
+  const raw = parseDateTimeSafe(deadline);
   return {
     deadlineLabel: meta.hasDate ? meta.absoluteLabel : undefined,
+    deadlineIso: raw ? raw.toISOString() : undefined,
     timeStatusLabel: meta.hasDate ? meta.relativeLabel : undefined,
     timeStatusTone: meta.hasDate ? (meta.isExpired ? 'danger' as const : 'info' as const) : undefined,
-  } satisfies Pick<ActionQueueItem, 'deadlineLabel' | 'timeStatusLabel' | 'timeStatusTone'>;
+  } satisfies Pick<ActionQueueItem, 'deadlineLabel' | 'deadlineIso' | 'timeStatusLabel' | 'timeStatusTone'>;
 }
 
 export function earliestDeadlineLabel(dates: Array<string | Date | null | undefined>): string | undefined {

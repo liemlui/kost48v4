@@ -1,4 +1,4 @@
-import { type ReactNode, useEffect, useMemo, useState } from 'react';
+import { type ReactNode, lazy, Suspense, useEffect, useMemo, useState } from 'react';
 import { useTenantPortalStage } from '../../hooks/useTenantPortalStage';
 import { Button, Offcanvas } from 'react-bootstrap';
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
@@ -6,6 +6,8 @@ import { APP_VERSION, APP_PHASE } from '../../config/version';
 import NotificationBell from '../notifications/NotificationBell';
 import StaffTopWorkspaceNav from '../staff/StaffTopWorkspaceNav';
 import TenantWorkspaceTabs from '../tenant/TenantWorkspaceTabs';
+import MobileBottomNav from './MobileBottomNav';
+const CommandPalette = lazy(() => import('../common/CommandPalette'));
 import RoleWorkspaceTabs from '../workspace/RoleWorkspaceTabs';
 import GlobalSearch from './GlobalSearch';
 import PaymentUrgencyChip from '../payment-urgency/PaymentUrgencyChip';
@@ -220,6 +222,7 @@ export default function AppLayout({ children }: { children?: ReactNode }) {
     if (!ok) return;
     logout();
   };
+  const [isCommandOpen, setIsCommandOpen] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState<'expanded' | 'collapsed'>(() => {
     try {
@@ -260,6 +263,17 @@ export default function AppLayout({ children }: { children?: ReactNode }) {
       } catch { /* ignore quota errors */ }
     }
   }, [ownerViewMode, isOwner]);
+
+  useEffect(() => {
+    function handleCmdK(e: KeyboardEvent) {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+        e.preventDefault();
+        setIsCommandOpen((v) => !v);
+      }
+    }
+    document.addEventListener('keydown', handleCmdK);
+    return () => document.removeEventListener('keydown', handleCmdK);
+  }, []);
 
   // OWN-ROUTE-GUARD: mode mengikuti route dashboard nyata. Membuka /admin-dashboard
   // (mis. via URL langsung atau tab) menyalakan mode admin; /owner-dashboard kembali ke mode owner.
@@ -361,6 +375,7 @@ export default function AppLayout({ children }: { children?: ReactNode }) {
             {children ?? <Outlet />}
           </section>
         </main>
+        <MobileBottomNav stage={tenantStage} />
       </div>
     );
   }
@@ -509,6 +524,9 @@ export default function AppLayout({ children }: { children?: ReactNode }) {
         </footer>
       </div>
     </div>
+    <Suspense fallback={null}>
+      {isCommandOpen && <CommandPalette onClose={() => setIsCommandOpen(false)} />}
+    </Suspense>
     </>
   );
 }
