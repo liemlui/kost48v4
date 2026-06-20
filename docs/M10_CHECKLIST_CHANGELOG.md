@@ -41,6 +41,7 @@
 | **Fase O — Design System & Token** | ✅ selesai | O-01..O-08: palet terpadu, chartColors, spacing scale, CSS Modules, pisah misc.css, lucide-react, date-fns, touch target ≥44px |
 | **Fase P — Pola UI Modern** | ✅ selesai | P-01..P-06: 3-tampilan toggle, FullCalendar, @dnd-kit kanban, TanStack Table, bottom tab bar Tenant, cmdk palette |
 | **Fase Q — Performa & Stabilitas** | ✅ selesai | Q-01..Q-07: fix endpoint 404 backend, anti-pattern fetch loop, heavy query, error boundary, lazy-load, empty state |
+| **Fase S — Multi-Portal Vercel + Mobile-First** | 🔴 antrian | S-01..S-06: env portal gate, CORS Vercel, 3 Vercel project, mobile tenant, mobile staff, PWA offline-aware |
 
 ---
 
@@ -972,6 +973,154 @@ Tanpa `staleTime`, keduanya refetch setiap kali StaysPage di-mount ulang (naviga
 ---
 
 - [x] **Q-07** PushToggle: graceful fallback saat VAPID belum dikonfigurasi — info ringan, bukan error merah.
+
+---
+
+### Fase S — Multi-Portal Vercel + Mobile-First Tenant & Staff
+
+**Tujuan:** Pisah frontend menjadi 3 portal Vercel terpisah (tenant/staff/admin) dengan mobile-first UX; Owner tetap akses via cPanel (full desktop view). PWA offline-aware dengan status sinkronisasi.
+
+**Arsitektur target:**
+```
+tenant.kost48.com  → Vercel project "kost48-tenant"  (SPA, VITE_APP_PORTAL=tenant)
+staff.kost48.com   → Vercel project "kost48-staff"   (SPA, VITE_APP_PORTAL=staff)
+admin.kost48.com   → Vercel project "kost48-admin"   (SPA, VITE_APP_PORTAL=admin)
+owner: cPanel saja (akses komputer, full access, sudah ada)
+Backend API: tetap di cPanel → /api/*
+Database: tetap di cPanel/VPS
+```
+
+**Strategi kode:** Satu codebase (`frontend/`), 3 build dengan env var berbeda. Login page menampilkan portal sesuai peran; setelah login role-check redirect ke error bila role tidak cocok.
+
+**Batas Vercel Free Tier (lebih dari cukup untuk KOST48 48 kamar):**
+- Bandwidth: 100 GB/bulan · Build: 6.000 menit/bulan · Projects: tidak terbatas · SSL: gratis
+
+#### S-01 🟡 — Env var VITE_APP_PORTAL + role gate di login
+
+**Target:** `frontend/src/main.tsx` atau `frontend/src/App.tsx` + `LoginPage.tsx`
+
+**Aksi:**
+1. Tambah env var `VITE_APP_PORTAL` (`tenant` | `staff` | `admin` | `` / kosong = all).
+2. Di `LoginPage.tsx`: baca `import.meta.env.VITE_APP_PORTAL` → tampilkan judul dan logo sesuai portal ("Portal Penghuni", "Portal Staf", "Panel Admin").
+3. Setelah login sukses: cek `user.role` vs portal yang diijinkan.
+   - Jika portal=`tenant` dan role bukan TENANT → `logout()` + tampilkan alert "Akses ditolak. Gunakan portal yang sesuai."
+   - Sama untuk `staff` (STAFF) dan `admin` (OWNER/ADMIN).
+4. Jika `VITE_APP_PORTAL` kosong → semua role diijinkan (behavior saat ini, untuk cPanel/dev).
+
+**Gate:** `VITE_APP_PORTAL=tenant npm run build` ✅ · Login sebagai TENANT → berhasil; login sebagai STAFF → alert tolak.
+
+---
+
+- [ ] **S-01** Env var `VITE_APP_PORTAL` + role gate di login (≤1 jam)
+
+---
+
+#### S-02 🟡 — Update CORS backend untuk domain Vercel
+
+**Target:** `backend/.env` / `backend/src/app.module.ts` atau `main.ts`
+
+**Aksi:**
+1. Di `backend/.env.production`: tambahkan `CORS_ORIGIN=https://tenant.kost48.com,https://staff.kost48.com,https://admin.kost48.com,https://kost48.com`.
+2. Verifikasi `main.ts` sudah baca `CORS_ORIGIN` dari env (split by koma).
+3. Tambahkan wildcard `*.vercel.app` untuk preview URL Vercel (opsional, hanya dev).
+
+**Gate:** `npx tsc --noEmit` ✅ · Test CORS dari browser dengan Origin Vercel.
+
+---
+
+- [ ] **S-02** Update CORS backend untuk domain Vercel (≤30 menit)
+
+---
+
+#### S-03 🧑 — Setup 3 Vercel project + custom domain
+
+**[OWNER]** Langkah manual di dashboard Vercel & domain registrar:
+
+1. Buat akun Vercel (gratis) → Import repo GitHub `liemlui/kost48v4`.
+2. Buat 3 project: `kost48-tenant`, `kost48-staff`, `kost48-admin`.
+3. Tiap project: Root Directory = `frontend/`, Build Command = `npm run build`, Output = `dist/`.
+4. Env Vars per project:
+   ```
+   VITE_APP_PORTAL = tenant / staff / admin
+   VITE_API_BASE_URL = https://api.kost48.com  ← sesuai domain backend
+   ```
+5. Custom domain: arahkan DNS `tenant/staff/admin.kost48.com` ke Vercel (CNAME).
+6. SSL otomatis (Vercel Let's Encrypt).
+
+**Gate:** Buka `https://tenant.kost48.com` → landing halaman login "Portal Penghuni".
+
+---
+
+- [ ] **S-03** 🧑 [OWNER] Setup Vercel + DNS + env vars (manual)
+
+---
+
+#### S-04 🟡 — Mobile-first layout Tenant portal
+
+**Target:** `frontend/src/pages/portal/` + `frontend/src/styles/06-tenant.css`
+
+**Aksi:**
+1. `MyStayPage.tsx`: ganti tabel → card stack full-width di mobile (`<Card>` Bootstrap).
+2. `MyInvoicesPage.tsx`: list tagihan → card per tagihan (nominal besar, status badge, tombol bayar full-width).
+3. `MyTicketsPage.tsx`: card tiket dengan foto thumbnail inline (sudah ada lightbox dari R-1).
+4. Form input: `font-size: 16px` min (cegah zoom iOS), padding ≥ 12px, label di atas bukan samping.
+5. `06-tenant.css`: tambah breakpoint `@media (max-width: 576px)` untuk card utama full-width, gap 12px.
+
+**Gate:** `npm run build` ✅ · Test di Chrome DevTools 375px (iPhone SE) → tidak ada overflow horizontal.
+
+---
+
+- [ ] **S-04** Mobile-first layout Tenant portal (≤2 jam)
+
+---
+
+#### S-05 🟡 — Mobile-first layout Staff portal
+
+**Target:** `frontend/src/pages/tickets/TicketsStaffMode.tsx` + `frontend/src/styles/05-staff.css`
+
+**Aksi:**
+1. `TicketsStaffMode.tsx`: kartu tiket jadi swipeable (pakai `@dnd-kit` atau CSS `overflow-x: scroll` dengan snap).
+2. Form laporan staf: tombol CTA full-width, foto upload tap-friendly.
+3. `DashboardStaff.tsx`: metrik 2-kolom di mobile, chart responsif.
+4. BottomTabBar (sudah ada Fase P): pastikan aktif untuk STAFF juga (saat ini hanya TENANT).
+5. `05-staff.css`: min touch target 48px untuk semua tombol aksi staf.
+
+**Gate:** `npm run build` ✅ · Test di 375px → BottomTabBar staf muncul, kartu tiket terbaca.
+
+---
+
+- [ ] **S-05** Mobile-first layout Staff portal (≤2 jam)
+
+---
+
+#### S-06 🟡 — PWA offline-aware: cache read + status banner
+
+**Target:** `frontend/public/sw.js` atau `vite-plugin-pwa` config + komponen baru `OfflineStatusBanner.tsx`
+
+**Aksi:**
+1. Verifikasi `vite-plugin-pwa` sudah ada di `package.json`; jika tidak, install dulu (🧑 owner approve npm dep baru).
+2. Konfigurasi Workbox cache strategy:
+   - `GET /api/tenants/me`, `/api/stays/my`, `/api/invoices*`, `/api/tickets/my` → **StaleWhileRevalidate** (baca offline, update background).
+   - `POST/PATCH/*` → network-only + queue di IndexedDB bila offline.
+3. Buat `frontend/src/components/common/OfflineStatusBanner.tsx`:
+   ```tsx
+   // Tampil bila navigator.onLine === false
+   // "📡 Offline · Data per [waktu] · X aksi tertunda"
+   // Warna kuning/amber, tidak memblokir konten
+   ```
+4. Pasang `<OfflineStatusBanner />` di `AppLayout.tsx` (di atas `<main>`).
+5. Tombol aksi keuangan (bayar, booking): tambah guard `if (!navigator.onLine) → toast "Butuh koneksi internet"`.
+
+**Gate:** `npm run build` ✅ · Chrome DevTools → Network: Offline → halaman tenant tetap terbaca, banner kuning muncul.
+
+---
+
+- [ ] **S-06** PWA offline-aware: cache + `OfflineStatusBanner` (≤3 jam)
+
+---
+
+**Urutan eksekusi:** S-01 → S-02 → S-03 🧑 (paralel dengan S-04/S-05) → S-06  
+**Estimasi total kode:** ~6-8 jam. S-03 tergantung owner (DNS propagation 1-24 jam).
 
 ---
 

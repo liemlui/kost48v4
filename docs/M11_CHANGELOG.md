@@ -4,6 +4,10 @@
 
 ## Changelog Ringkas
 
+### 2026-06-21 — Fase S dirancang: Multi-Portal Vercel + Mobile-First + PWA Offline
+- **Arsitektur:** 3 Vercel project terpisah (tenant/staff/admin) dari satu codebase; Owner tetap di cPanel desktop.
+- **S-01..S-06** ditambahkan ke M10: env gate login, CORS Vercel, setup manual Vercel+DNS, mobile tenant, mobile staff, PWA offline-aware (Workbox + OfflineStatusBanner).
+
 ### 2026-06-21 — Audit Mendalam: 11 Bug Kritis Diperbaiki (backend + frontend)
 - **Fix #1** `tenant-bookings.service.ts`: KTP gate ditambah di jalur booking — `ConflictException` bila `KTP_ACTIVATION_GATE_ENABLED=true` dan `ktpVerifiedAt == null`.
 - **Fix #2** `meter-readings.service.ts` + `invoices.service.ts`: meter billing dibungkus `$transaction` atomik; `createWithLinesAndIssueTx(tx,...)` diekstrak sebagai metode publik agar dapat menerima `tx` eksternal.
