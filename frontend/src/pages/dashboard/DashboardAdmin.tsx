@@ -220,7 +220,7 @@ export default function AdminDashboard() {
   const isOverview = activeArea === 'overview';
 
   // N-05: 9+ query individual → 1 aggregate (staleTime 60 s). AutoOps & staffPerformance tetap terpisah.
-  const aggregateQuery = useQuery({ queryKey: ['admin-dashboard-aggregate'], queryFn: fetchAdminDashboardAggregate, staleTime: 60_000 });
+  const aggregateQuery = useQuery({ queryKey: ['admin-dashboard-aggregate'], queryFn: fetchAdminDashboardAggregate, staleTime: 60_000, retry: 1, retryDelay: 1000 });
   const staffPerformanceQuery = useQuery({ queryKey: ['dashboard-admin', 'staff-performance'], queryFn: () => fetchAdminStaffPerformance(), enabled: activeArea === 'ops', ...ACTION_QUERY_OPTIONS });
   const autoOpsQuery = useQuery({ queryKey: ['dashboard-admin', 'auto-ops-status'], queryFn: fetchAutoOpsStatus, enabled: isOverview, ...ACTION_QUERY_OPTIONS });
   // H4: status AI untuk conditional render AiAssistButton di area overview
