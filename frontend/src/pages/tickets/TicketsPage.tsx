@@ -152,7 +152,7 @@ export default function TicketsPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [assignMap, setAssignMap] = useState<Record<number, string>>({});
-  const [activeTab, setActiveTab] = useState<StatusTab>("ALL");
+  const [activeTab, setActiveTab] = useState<StatusTab>("OPEN");
   const [showCreateTicket, setShowCreateTicket] = useState(false);
   const [createForm, setCreateForm] = useState({
     category: 'KEBERSIHAN',
@@ -182,8 +182,9 @@ export default function TicketsPage() {
   const [adminCheckedEvidence, setAdminCheckedEvidence] = useState(false);
   const [adminCheckedFinalImpact, setAdminCheckedFinalImpact] = useState(false);
   const [closeSubmitAttempted, setCloseSubmitAttempted] = useState(false);
+  const [lightboxUrl, setLightboxUrl] = useState<string | null>(null);
 
-  const PAGE_SIZE = 10;
+  const PAGE_SIZE = 5;
   const ticketsQuery = useQuery({
     queryKey: ["tickets"],
     queryFn: () => listResource<TicketItem>("/tickets", { limit: 200 }),
@@ -750,32 +751,38 @@ export default function TicketsPage() {
                       >
                         {item.description || "Tidak ada deskripsi tambahan."}
                       </div>
-                      {item.issueImageUrl ? (
-                        <div className="mt-1">
-                          <SafeImage
-                            src={item.issueImageUrl}
-                            alt="Foto masalah"
-                            style={{
-                              width: 84,
-                              height: 56,
-                              objectFit: "cover",
-                              borderRadius: 6,
-                            }}
-                          />
-                        </div>
-                      ) : null}
-                      {item.resolutionImageUrl ? (
-                        <div className="mt-1">
-                          <SafeImage
-                            src={item.resolutionImageUrl}
-                            alt="Foto selesai"
-                            style={{
-                              width: 84,
-                              height: 56,
-                              objectFit: "cover",
-                              borderRadius: 6,
-                            }}
-                          />
+                      {item.issueImageUrl || item.resolutionImageUrl ? (
+                        <div className="d-flex gap-1 mt-1 flex-wrap">
+                          {item.issueImageUrl ? (
+                            <button
+                              type="button"
+                              className="btn p-0 border-0"
+                              title="Klik untuk perbesar foto masalah"
+                              onClick={(e) => { e.stopPropagation(); setLightboxUrl(item.issueImageUrl!); }}
+                            >
+                              <SafeImage
+                                src={item.issueImageUrl}
+                                alt="Foto masalah"
+                                style={{ width: 72, height: 48, objectFit: "cover", borderRadius: 6, display: 'block' }}
+                              />
+                              <div className="text-muted" style={{ fontSize: '0.65rem', textAlign: 'center' }}>Masalah</div>
+                            </button>
+                          ) : null}
+                          {item.resolutionImageUrl ? (
+                            <button
+                              type="button"
+                              className="btn p-0 border-0"
+                              title="Klik untuk perbesar foto bukti selesai"
+                              onClick={(e) => { e.stopPropagation(); setLightboxUrl(item.resolutionImageUrl!); }}
+                            >
+                              <SafeImage
+                                src={item.resolutionImageUrl}
+                                alt="Foto selesai"
+                                style={{ width: 72, height: 48, objectFit: "cover", borderRadius: 6, display: 'block' }}
+                              />
+                              <div className="text-muted" style={{ fontSize: '0.65rem', textAlign: 'center' }}>Bukti</div>
+                            </button>
+                          ) : null}
                         </div>
                       ) : null}
                     </td>
@@ -1332,6 +1339,22 @@ export default function TicketsPage() {
             {createTicketMutation.isPending ? 'Membuat...' : `Buat Tiket ${createForm.category === 'BARANG_PINDAH' ? 'Pindah Barang' : 'Pekerjaan'}`}
           </Button>
         </Modal.Footer>
+      </Modal>
+
+      {/* ── Lightbox foto tiket ── */}
+      <Modal show={Boolean(lightboxUrl)} onHide={() => setLightboxUrl(null)} centered size="lg">
+        <Modal.Header closeButton>
+          <Modal.Title className="fs-6">Foto Bukti Tiket</Modal.Title>
+        </Modal.Header>
+        <Modal.Body className="p-2 text-center" style={{ background: '#0f172a' }}>
+          {lightboxUrl ? (
+            <SafeImage
+              src={lightboxUrl}
+              alt="Foto bukti tiket"
+              style={{ maxWidth: '100%', maxHeight: '70vh', objectFit: 'contain', borderRadius: 8 }}
+            />
+          ) : null}
+        </Modal.Body>
       </Modal>
     </div>
   );

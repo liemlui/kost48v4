@@ -164,7 +164,7 @@ export default function AdminStaffPerformancePage() {
   const [month, setMonth] = useState(currentMonth());
   const [selected, setSelected] = useState<StaffPerformanceSummary | null>(null);
   const [page, setPage] = useState(1);
-  const PAGE_SIZE = 10;
+  const PAGE_SIZE = 5;
   const query = useQuery({ queryKey: ['admin-staff-performance', month], queryFn: () => fetchAdminStaffPerformance(month), staleTime: 60_000 });
   const suggestionsQuery = useQuery({ queryKey: ['admin-staff-audit-suggestions', month], queryFn: () => fetchAdminStaffAuditSuggestions(month), staleTime: 60_000 });
   const leaderboardQuery = useQuery({ queryKey: ['admin-staff-leaderboard', month], queryFn: () => fetchStaffLeaderboard(month), staleTime: 60_000 });

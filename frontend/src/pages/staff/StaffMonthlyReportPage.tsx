@@ -29,7 +29,7 @@ export default function StaffMonthlyReportPage() {
   const [month, setMonth] = useState(currentMonth());
   const [reviewPage, setReviewPage] = useState(1);
   const [auditPage, setAuditPage] = useState(1);
-  const PAGE_SIZE = 10;
+  const PAGE_SIZE = 5;
   const query = useQuery({
     queryKey: ['staff-performance-me-evidence', month],
     queryFn: () => fetchMyStaffPerformanceEvidence(month),

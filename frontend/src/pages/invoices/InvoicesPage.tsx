@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Alert, Badge, Button, Card, Col, Form, Modal, Row, Spinner } from 'react-bootstrap';
 import type { ColumnDef } from '@tanstack/react-table';
@@ -168,19 +168,45 @@ export default function InvoicesPage() {
   const [formState, setFormState] = useState(initialForm);
   const [error, setError] = useState('');
   const [accountingNotice, setAccountingNotice] = useState('');
-  // Audit U-05: default "Semua" agar landing tidak empty-state saat tidak ada tagihan aktif.
-  const [activeTab, setActiveTab] = useState<StatusTab>('ALL');
+  const [activeTab, setActiveTab] = useState<StatusTab>('BILLING');
   const [keyword, setKeyword] = useState('');
   const [page, setPage] = useState(1);
-  const PAGE_SIZE = 10;
-  const [dateFrom, setDateFrom] = useState('');
+  const PAGE_SIZE = 5;
+  const defaultDateFrom = new Date(new Date().setMonth(new Date().getMonth() - 2)).toISOString().slice(0, 10);
+  const [dateFrom, setDateFrom] = useState(defaultDateFrom);
   const [dateTo, setDateTo] = useState('');
+
+  // Reset halaman ke 1 saat filter berubah agar paginasi tidak menunjuk halaman yang salah.
+  const prevFilterRef = useRef({ activeTab, dateFrom, dateTo });
+  useEffect(() => {
+    const prev = prevFilterRef.current;
+    if (prev.activeTab !== activeTab || prev.dateFrom !== dateFrom || prev.dateTo !== dateTo) {
+      setPage(1);
+      prevFilterRef.current = { activeTab, dateFrom, dateTo };
+    }
+  }, [activeTab, dateFrom, dateTo]);
   const [issueTarget, setIssueTarget] = useState<any | null>(null);
   const [issueChecks, setIssueChecks] = useState<Record<string, boolean>>({});
   const [cancelTarget, setCancelTarget] = useState<any | null>(null);
   const [cancelReason, setCancelReason] = useState('');
 
-  const invoicesQuery = useQuery({ queryKey: ['invoices', page], queryFn: () => listResource<any>('/invoices', { page, limit: PAGE_SIZE }) });
+  // Kirim filter ke server: status (untuk tab single-status), dueDateFrom/To.
+  // BILLING dan OVERDUE tidak punya single-status di backend → filter klien setelah fetch.
+  // KOST48 max 48 kamar → dalam kondisi terfilter, data per halaman < 100 item.
+  const serverStatus = activeTab === 'DRAFT' ? 'DRAFT'
+    : activeTab === 'PAID' ? 'PAID'
+    : activeTab === 'CANCELLED' ? 'CANCELLED'
+    : undefined;
+  const invoicesQuery = useQuery({
+    queryKey: ['invoices', page, serverStatus, dateFrom, dateTo],
+    queryFn: () => listResource<any>('/invoices', {
+      page,
+      limit: PAGE_SIZE,
+      ...(serverStatus ? { status: serverStatus } : {}),
+      ...(dateFrom ? { dueDateFrom: dateFrom } : {}),
+      ...(dateTo ? { dueDateTo: dateTo } : {}),
+    }),
+  });
   const staysQuery = useQuery({
     queryKey: ['stays', 'invoice-form'],
     queryFn: () => listResource<any>('/stays', { limit: 500 }),

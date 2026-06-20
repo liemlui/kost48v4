@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useAuth } from '../../context/AuthContext';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Alert, Button, Card, Col, Form, Row, Spinner, Table } from 'react-bootstrap';
 import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts';
@@ -142,11 +143,12 @@ function StayAnalyticsPanel({ items, operationalActive, reservedBookings, checko
 }
 
 export default function StaysPage() {
+  const { user } = useAuth();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [searchParams, setSearchParams] = useSearchParams();
   const statusFromUrl = searchParams.get('status') || undefined;
-  const initialFilter: StayViewFilter = statusFromUrl === 'ACTIVE' || statusFromUrl === 'BOOKINGS' ? statusFromUrl : 'ALL';
+  const initialFilter: StayViewFilter = statusFromUrl === 'BOOKINGS' ? 'BOOKINGS' : statusFromUrl === 'ALL' ? 'ALL' : 'ACTIVE';
   const [statusFilter, setStatusFilter] = useState<StayViewFilter>(initialFilter);
   const [keyword, setKeyword] = useState('');
   const [page, setPage] = useState(1);
@@ -154,7 +156,7 @@ export default function StaysPage() {
   const [rejectBookingTarget, setRejectBookingTarget] = useState<Stay | null>(null);
   const [approveTarget, setApproveTarget] = useState<CheckoutRequest | null>(null);
   const [rejectTarget, setRejectTarget] = useState<CheckoutRequest | null>(null);
-  const PAGE_SIZE = 10;
+  const PAGE_SIZE = 5;
 
   const isBookingsMode = statusFilter === 'BOOKINGS';
   const apiStatusFilter = statusFilter === 'ALL' || statusFilter === 'BOOKINGS' ? undefined : statusFilter;
@@ -639,7 +641,7 @@ export default function StaysPage() {
                       <tr key={item.id}>
                         <td data-label="Penghuni">
                           <div className="fw-semibold">{item.tenant?.fullName ?? `Penghuni #${item.tenantId}`}</div>
-                          {item.tenant?.identityNumber ? (
+                          {item.tenant?.identityNumber && user?.role !== 'STAFF' ? (
                             <div className="small text-muted font-monospace">NIK: {item.tenant.identityNumber}</div>
                           ) : null}
                           <div className="small text-muted">{item.bookingSource ? `Sumber: ${getStatusLabel(item.bookingSource)}` : item.stayPurpose ? getStatusLabel(item.stayPurpose) : 'Tanpa keterangan tambahan'}</div>

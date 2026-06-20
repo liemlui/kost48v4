@@ -23,7 +23,7 @@ export default function StaffTicketsMode({
   setDoneTicket: (ticket: TicketItem | null) => void;
 }) {
   const [page, setPage] = useState(1);
-  const PAGE_SIZE = 10;
+  const PAGE_SIZE = 5;
 
   const activeWork = useMemo(
     () => items.filter((item) => item.status !== 'CLOSED').sort((a, b) => staffSortScore(a) - staffSortScore(b) || new Date(b.updatedAt || b.createdAt || 0).getTime() - new Date(a.updatedAt || a.createdAt || 0).getTime()),

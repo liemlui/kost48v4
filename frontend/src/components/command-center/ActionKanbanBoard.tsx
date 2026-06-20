@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { DndContext, DragEndEvent, PointerSensor, KeyboardSensor, useSensor, useSensors, closestCenter } from '@dnd-kit/core';
 import { useDroppable, useDraggable } from '@dnd-kit/core';
 import { sortableKeyboardCoordinates } from '@dnd-kit/sortable';
@@ -86,7 +86,7 @@ function KanbanColumn({ col, items }: { col: typeof COLUMNS[0]; items: ActionQue
       <div className={`fw-bold mb-2 small ${col.headCls}`} style={{ letterSpacing: '0.03em' }}>
         {col.label}
         {items.length > 0 ? (
-          <span className="badge bg-secondary ms-2" style={{ fontSize: '0.7em', fontWeight: 700 }}>{items.length}</span>
+          <span className="badge bg-secondary ms-2" style={{ fontSize: '0.75em', fontWeight: 700 }}>{items.length}</span>
         ) : null}
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
@@ -107,6 +107,28 @@ export default function ActionKanbanBoard({ items, onColumnChange }: Props) {
     for (const item of items) m.set(String(item.id), itemDefaultCol(item));
     return m;
   });
+
+  useEffect(() => {
+    setColMap((prev) => {
+      const next = new Map(prev);
+      let changed = false;
+      for (const item of items) {
+        const key = String(item.id);
+        if (!next.has(key)) {
+          next.set(key, itemDefaultCol(item));
+          changed = true;
+        }
+      }
+      const currentIds = new Set(items.map((i) => String(i.id)));
+      for (const key of next.keys()) {
+        if (!currentIds.has(key)) {
+          next.delete(key);
+          changed = true;
+        }
+      }
+      return changed ? next : prev;
+    });
+  }, [items]);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),

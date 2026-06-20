@@ -1440,7 +1440,7 @@
 .staff-report-print-page {
   background: #ffffff;
   color: #0f172a;
-  font-family: 'DM Sans', ui-sans-serif, system-ui, -apple-system, sans-serif;
+  font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif;
 }
 .staff-print-header {
   display: flex;

@@ -111,7 +111,7 @@ export default function MyInvoicesPage() {
   const tenantId = user?.tenantId;
   const [activeTab, setActiveTab] = useState<'UNPAID' | 'REVIEW' | 'PAID' | 'ALL'>('UNPAID');
   const [page, setPage] = useState(1);
-  const PAGE_SIZE = 10;
+  const PAGE_SIZE = 5;
 
   const query = useQuery({
     queryKey: ['portal-invoices', { userId, tenantId }],
