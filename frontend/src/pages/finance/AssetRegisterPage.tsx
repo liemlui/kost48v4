@@ -298,36 +298,6 @@ export default function AssetRegisterPage() {
           </Card>
         </Col>
 
-        {false ? (
-        <Col xl={5}>
-          <Card className="content-card border-0 h-100">
-            <Card.Body>
-              <div className="small text-uppercase text-muted fw-semibold mb-1">Tambah Aset</div><h3 className="h5 mb-3">Asset onboarding aman</h3>
-              <Form onSubmit={submitAsset} className="d-grid gap-3">
-                <Form.Group><Form.Label>Nama aset</Form.Label><Form.Control value={form.name} onChange={(e) => setForm((prev) => ({ ...prev, name: e.target.value }))} placeholder="Contoh: AC kamar 201" required /></Form.Group>
-                <Row className="g-2"><Col sm={6}><Form.Group><Form.Label>Kategori</Form.Label><Form.Select value={form.category} onChange={(e) => setForm((prev) => ({ ...prev, category: e.target.value as FixedAssetCategory }))}>{categoryOptions.map((option) => <option key={option} value={option}>{categoryLabels[option]}</option>)}</Form.Select></Form.Group></Col><Col sm={6}><Form.Group><Form.Label>Basis kapitalisasi</Form.Label><Form.Select value={form.capitalizationSource} onChange={(e) => setForm((prev) => ({ ...prev, capitalizationSource: e.target.value as FixedAssetCapitalizationSource }))}>{capitalizationOptions.map((option) => <option key={option} value={option}>{capitalizationLabels[option]}</option>)}</Form.Select></Form.Group></Col></Row>
-                <Row className="g-2"><Col sm={6}><Form.Group><Form.Label>Tanggal perolehan</Form.Label><Form.Control type="date" value={form.acquisitionDate} onChange={(e) => setForm((prev) => ({ ...prev, acquisitionDate: e.target.value }))} required /></Form.Group></Col><Col sm={6}><Form.Group><Form.Label>Mulai depresiasi</Form.Label><Form.Control type="date" value={form.depreciationStartDate} onChange={(e) => setForm((prev) => ({ ...prev, depreciationStartDate: e.target.value }))} /></Form.Group></Col></Row>
-                <Row className="g-2"><Col sm={6}><Form.Group><Form.Label>Cost</Form.Label><Form.Control type="number" min={1} value={form.acquisitionCostRupiah} onChange={(e) => setForm((prev) => ({ ...prev, acquisitionCostRupiah: e.target.value }))} required /></Form.Group></Col><Col sm={6}><Form.Group><Form.Label>Residu</Form.Label><Form.Control type="number" min={0} value={form.salvageValueRupiah} onChange={(e) => setForm((prev) => ({ ...prev, salvageValueRupiah: e.target.value }))} /></Form.Group></Col></Row>
-                <Row className="g-2"><Col sm={6}><Form.Group><Form.Label>Umur manfaat bulan</Form.Label><Form.Control type="number" min={1} value={form.usefulLifeMonths} onChange={(e) => setForm((prev) => ({ ...prev, usefulLifeMonths: e.target.value }))} required /></Form.Group></Col><Col sm={6}><Form.Group><Form.Label>Akumulasi awal</Form.Label><Form.Control type="number" min={0} value={form.accumulatedDepreciationRupiah} onChange={(e) => setForm((prev) => ({ ...prev, accumulatedDepreciationRupiah: e.target.value }))} /></Form.Group></Col></Row>
-                <Form.Check type="switch" label="Aktifkan depresiasi bulanan untuk aset ini" checked={form.depreciationEnabled} onChange={(e) => setForm((prev) => ({ ...prev, depreciationEnabled: e.target.checked }))} />
-                <Form.Group>
-                  <Form.Label>Tautkan ke barang inventaris <span className="text-muted">(opsional — agar tidak dobel input)</span></Form.Label>
-                  <Form.Select value={form.inventoryItemId} onChange={(e) => setForm((prev) => ({ ...prev, inventoryItemId: e.target.value }))}>
-                    <option value="">— Tidak ditautkan —</option>
-                    {(inventoryOptionsQuery.data?.items ?? []).map((opt) => (
-                      <option key={opt.id} value={opt.id}>{opt.name}{opt.category ? ` (${opt.category})` : ''}</option>
-                    ))}
-                  </Form.Select>
-                  <Form.Text muted>Aset ini akan terhubung ke barang inventaris yang sama — satu kesatuan, bukan dua data terpisah.</Form.Text>
-                </Form.Group>
-                <Form.Group><Form.Label>Catatan</Form.Label><Form.Control as="textarea" rows={2} value={form.notes} onChange={(e) => setForm((prev) => ({ ...prev, notes: e.target.value }))} placeholder="Contoh: aset sudah termasuk opening balance 2026-05" /></Form.Group>
-                {createMutation.isError ? <Alert variant="danger" className="mb-0">{getApiErrorMessage(createMutation.error, 'Gagal membuat aset')}</Alert> : null}
-                <Button type="submit" disabled={createMutation.isPending}>{createMutation.isPending ? 'Menyimpan...' : 'Simpan Aset'}</Button>
-              </Form>
-            </Card.Body>
-          </Card>
-        </Col>
-        ) : null}
       </Row>
 
       <Card className="content-card border-0 mb-3">

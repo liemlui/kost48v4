@@ -3,6 +3,10 @@
 > Arsip changelog ringkas, dipisah dari M10 pada 2026-06-19 untuk hemat token AI (M10 = checklist aktif saja). **Entri changelog BARU ditulis DI SINI (paling atas)**, bukan di M10. Format: 1 header tanggal + 1-2 poin outcome per entri.
 
 ## Changelog Ringkas
+### 2026-06-20 — ui(Fase L): L-08, L-10, L-11, L-16, L-19
+- **frontend(L):** PublicRooms mendapat filter mobile collapse, compare counter x/3, carousel touch, dan pagination ellipsis; tiket tenant punya SafeImage lightbox; Reports lazy-load `UnlockedFormalReports` via Suspense skeleton.
+- **finance(L):** Accounting setup punya checklist read-only dari query existing; Asset Register memindahkan form tambah aset ke modal dengan validasi tetap aktif. Gate: `npm.cmd run build` PASS + PWA verified.
+
 ### 2026-06-20 — feat(Fase L): eksekusi L-01..L-20 UI/UX fixes
 - **L-01:** `App.tsx` — `return null` → `<PageLoadingSkeleton />` di `RequireRoles` + `TenantBookingRouteGuard`.
 - **L-02/L-18:** `CashflowPage.tsx` — tambah EmptyState operasi kas kosong + import. `FinancialRatiosPage.tsx` — import `useNavigate`+`Button`, tambah CTA setup akuntansi bila belum formal.
