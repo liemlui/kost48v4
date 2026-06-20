@@ -3,9 +3,60 @@
    Hasil merger 7 :root blocks dari 6 file (R1 — CSS variables audit).
    Urutan prioritas: nilai dari 06-tenant.css menang (import terakhir).
    JANGAN tambah :root di file CSS lain — semua variable disini.
+   O-01/O-03: ditambah skala primitif, alias semantik, spacing, radius.
    ================================================================ */
 
 :root {
+  /* ── Skala warna primitif (O-01) ────────────────────────────────── */
+  --gray-50: #f8fafc;  --gray-100: #f1f5f9;  --gray-200: #e2e8f0;
+  --gray-300: #cbd5e1; --gray-400: #94a3b8;  --gray-500: #64748b;
+  --gray-600: #475569; --gray-700: #334155;  --gray-800: #1e293b; --gray-900: #0f172a;
+
+  --blue-50: #eff6ff;  --blue-100: #dbeafe;  --blue-200: #bfdbfe;
+  --blue-300: #93c5fd; --blue-400: #60a5fa;  --blue-500: #3b82f6;
+  --blue-600: #2563eb; --blue-700: #1d4ed8;  --blue-800: #1e40af; --blue-900: #1e3a8a;
+
+  --green-50: #f0fdf4; --green-100: #dcfce7; --green-200: #bbf7d0;
+  --green-500: #22c55e; --green-600: #16a34a; --green-700: #15803d;
+
+  --red-50: #fef2f2;  --red-100: #fee2e2;  --red-200: #fecaca;
+  --red-500: #ef4444; --red-600: #dc2626;   --red-700: #b91c1c;
+
+  --amber-50: #fffbeb; --amber-100: #fef3c7; --amber-200: #fde68a;
+  --amber-500: #f59e0b; --amber-600: #d97706; --amber-700: #b45309;
+
+  --purple-50: #faf5ff; --purple-500: #a855f7;
+  --purple-600: #9333ea; --purple-700: #7c3aed;
+
+  --orange-400: #fb923c; --orange-500: #f97316; --orange-600: #ea580c;
+
+  /* ── Alias semantik (O-01 — menunjuk ke skala primitif) ─────────── */
+  --color-primary: var(--blue-600);
+  --color-primary-hover: var(--blue-700);
+  --text-primary: var(--gray-900);
+  --text-secondary: var(--gray-600);
+  --bg-surface: var(--gray-50);
+  --border-default: var(--gray-200);
+
+  /* ── Skala spacing (O-03) ───────────────────────────────────────── */
+  --space-1: 0.25rem;  /* 4px */
+  --space-2: 0.5rem;   /* 8px */
+  --space-3: 0.75rem;  /* 12px */
+  --space-4: 1rem;     /* 16px */
+  --space-5: 1.25rem;  /* 20px */
+  --space-6: 1.5rem;   /* 24px */
+  --space-8: 2rem;     /* 32px */
+  --space-10: 2.5rem;  /* 40px */
+  --space-12: 3rem;    /* 48px */
+
+  /* Radius kecil (O-03) — --radius-md/lg/xl sudah ada di bawah (nilai card) */
+  --radius-sm: 0.25rem;   /* 4px — inline badge, chip kecil */
+  --radius-base: 0.375rem; /* 6px — input, button default */
+  --radius-full: 9999px;  /* pill */
+
+  /* Touch target (O-08) */
+  --tap-min: 44px;
+
   /* ── Warna aplikasi (menang: 04-operations + 06-tenant) ────────── */
   --app-bg: #eef5ff;
   --surface: rgba(255, 255, 255, 0.94);
@@ -55,8 +106,8 @@
   --k48-bg: #f6f9fd;
   --k48-surface: #ffffff;
   --k48-surface-soft: #f9fbff;
-  --k48-primary: #2563eb;
-  --k48-primary-strong: #1d4ed8;
+  --k48-primary: #2563eb; /* @deprecated O-01 — pakai --color-primary */
+  --k48-primary-strong: #1d4ed8; /* @deprecated O-01 — pakai --color-primary-hover */
   --k48-primary-soft: #e8f1ff;
   --k48-text: #172033;
   --k48-text-soft: #43546a;
@@ -87,7 +138,7 @@
   --ops-blue-900: #0f2f76;
   --ops-blue-800: #1e40af;
   --ops-blue-700: #1d4ed8;
-  --ops-blue-600: #2563eb;
+  --ops-blue-600: #2563eb; /* @deprecated O-01 — pakai --color-primary */
   --ops-blue-500: #3b82f6;
   --ops-cyan-500: #06b6d4;
   --ops-sky-50: #eff6ff;

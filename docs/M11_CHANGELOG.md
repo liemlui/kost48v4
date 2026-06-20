@@ -4,6 +4,17 @@
 
 ## Changelog Ringkas
 
+### 2026-06-20 — Fase O: Design System & Token (O-01..O-08)
+- **O-01** `00-tokens.css`: tambah skala primitif gray/blue/green/red/amber/purple/orange (50–900) + alias semantik (`--color-primary`, `--text-primary`, `--bg-surface`, dll.); @deprecated `--k48-primary`, `--ops-blue-600`.
+- **O-02** Buat `config/chartPalette.ts`: `CHART_COLORS` + helper `cc(key)` baca CSS var runtime; ganti semua hex hardcode di `OwnerDashboardPage.tsx` (BarChart + LineChart) pakai `cc(...)`.
+- **O-03** `00-tokens.css`: tambah `--space-1..12` (spacing scale) + `--radius-sm/base/full` + `--tap-min: 44px`; tambah `--red-200`, `--amber-200`, `--green-200` ke skala primitif.
+- **O-04** CSS Modules pilot `AdminHealthBar.module.css` (scoped `.bar/.chip/.toggle/.detailGrid/.detailItem` + tone variants); pindah 46 baris dari `09-finance.css` → `AdminHealthBar.module.css`; `AdminHealthBar.tsx` pakai `import styles from ...`.
+- **O-05** Pisah `10-misc.css`: ekstrak V5.8.3+V5.8.4 → `15-settings.css`, V5.8.9 → `14-reports.css`; tambah 2 @import ke `styles.css`.
+- **O-06** Install `lucide-react@1.21.0`; ganti emoji ikon UI di `AdminHealthBar.tsx` (⚠→AlertTriangle, 📋→ClipboardList, 📌→Pin, 🛏→BedDouble, 🎫→Ticket, 📦→Package, ✅→CheckCircle).
+- **O-07** Install `date-fns`; refactor `utils/dateTime.ts`: `addHoursToDate` → `addHours`, `parseDateTimeSafe` → `isValid`, duration → `intervalToDuration`; tambah `daysFromToday` (`differenceInCalendarDays`).
+- **O-08** Touch target ≥44px: `.staff-filter-chip` `min-height: 30px → var(--tap-min)`; `.row-arrow-cell` + `.clickable-row` tambah `min-height: var(--tap-min)`; `.topbar-profile-trigger`/`.staff-user-profile-trigger` tambah `min-height/min-width: var(--tap-min)`.
+- **Gate:** `npx tsc --noEmit` ✅ (frontend + backend).
+
 ### 2026-06-20 — Fase N: Ramping Dashboard & Navigasi (N-01..N-06)
 - **N-01** `OwnerDashboardPage.tsx`: merge `extraSignals` (meter due + readiness) ke dalam panel "Butuh perhatian" — badge count & empty-state kini gabungkan kedua sumber sinyal.
 - **N-02** Buat `AdminHealthBar.tsx` (chip ringkas + Bootstrap Collapse); hapus `AdminContinuityStrip`, `AdminTodayStatusStrip`, `AdminOperationsCommandQueue`, dead CSS `admin-ops-guardrails`; `ActionQueueTable` dipindah ke hero.

@@ -1170,10 +1170,12 @@ button.status-strip-item:hover {
 }
 .row-arrow-cell {
   width: 34px;
+  min-height: var(--tap-min);
   text-align: center;
   color: var(--text-muted, #64748b);
   font-size: 1.15rem;
 }
+.table tbody tr.clickable-row { min-height: var(--tap-min); }
 .entity-detail-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));

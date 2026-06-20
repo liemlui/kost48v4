@@ -38,7 +38,7 @@
 | **Fase L — UI/UX Audit** | ✅ selesai | L-01..L-20 semua selesai (loading, mobile, error, a11y, wording, accounting checklist, dll.) |
 | **Fase M — Quick Wins A11y & Polish** | ✅ selesai | M-01..M-06: navigate, ConfirmProvider, reduced-motion, font fix, ClickableRow a11y, toast a11y |
 | **Fase N — Ramping Dashboard & Navigasi** | ✅ selesai | N-01..N-06: merge sinyal Owner, health bar Admin, toggle density, unifikasi nav, backend agregat, axe e2e |
-| **Fase O — Design System & Token** | ⬜ antri | O-01..O-08: palet terpadu, chartColors, spacing scale, CSS Modules, pisah misc.css, lucide-react, date-fns, touch target ≥44px |
+| **Fase O — Design System & Token** | ✅ selesai | O-01..O-08: palet terpadu, chartColors, spacing scale, CSS Modules, pisah misc.css, lucide-react, date-fns, touch target ≥44px |
 | **Fase P — Pola UI Modern** | ⬜ antri | P-01..P-06: 3-tampilan toggle, kalender, kanban, TanStack Table, bottom tab bar Tenant, cmd palette |
 
 ---
@@ -417,7 +417,7 @@
 **Rujukan:** Audit §4 (V1–V6).
 **Strategi:** O-01..O-03 fondasi token → O-04..O-05 bersihkan CSS → O-06 lucide-react → O-07 date-fns → O-08 touch target ≥44px.
 
-- [ ] **O-01 — Satukan palet warna: 1 skala 50–900 + alias semantik**
+- [x] **O-01 — Satukan palet warna: 1 skala 50–900 + alias semantik**
   **Target:** `frontend/src/styles/00-tokens.css`.
   **Aksi:**
   1. **Baca dulu:** `00-tokens.css` — catat SEMUA token warna yang ada (`--primary`, `--k48-primary`, `--ops-blue-600`, `--color-success`, `--color-danger`, dll).
@@ -454,7 +454,7 @@
   **Anchor grep:** `--k48-primary` · `--ops-blue-600` · `--primary`
   **Gate:** `cd frontend; npm run build` ✅ · warna tidak berubah secara visual (bandingkan screenshot sebelum/sesudah).
 
-- [ ] **O-02 — Util `chartColors` dari token + ganti hardcode di chart**
+- [x] **O-02 — Util `chartColors` dari token + ganti hardcode di chart**
   **Target:** Buat file BARU `frontend/src/config/chartPalette.ts`. Ganti `OwnerDashboardPage.tsx` + file chart lain.
   **Aksi:**
   1. Buat `frontend/src/config/chartPalette.ts`:
@@ -487,7 +487,7 @@
   **Anchor grep:** `#2563eb` · `#f97316` · `#16a34a` (di TSX)
   **Gate:** `cd frontend; npm run build` ✅ · chart tetap berwarna sama.
 
-- [ ] **O-03 — Tambah skala spacing (`--space-1..8`) + skala radius**
+- [x] **O-03 — Tambah skala spacing (`--space-1..8`) + skala radius**
   **Target:** `frontend/src/styles/00-tokens.css`.
   **Aksi:**
   1. Tambah di `:root`:
@@ -513,7 +513,7 @@
   **Anchor grep:** `--density-`
   **Gate:** `cd frontend; npm run build` ✅.
 
-- [ ] **O-04 — Mulai CSS Modules untuk kurangi `!important`**
+- [x] **O-04 — Mulai CSS Modules untuk kurangi `!important`**
   **Target:** Pilih 1 file CSS paling bermasalah sebagai pilot.
   **Aksi:**
   1. **Pilih pilot:** `10-misc.css` (104 KB, 130 `!important`) — file paling besar & kacau.
@@ -524,7 +524,7 @@
   **Anchor grep:** `10-misc.css` · `!important`
   **Gate:** `cd frontend; npm run build` ✅ · komponen pilot tidak rusak.
 
-- [ ] **O-05 — Pisah `10-misc.css` + bersihkan dead CSS**
+- [x] **O-05 — Pisah `10-misc.css` + bersihkan dead CSS**
   **Target:** `frontend/src/styles/10-misc.css`.
   **Aksi:**
   1. **Split file berdasarkan domain:** `10-misc.css` (104 KB) → pecah jadi:
@@ -537,7 +537,7 @@
   **Anchor grep:** `10-misc.css`
   **Gate:** `cd frontend; npm run build` ✅ · tidak ada style hilang.
 
-- [ ] **O-06 — Ganti emoji UI → `lucide-react` (ikon SVG konsisten)**
+- [x] **O-06 — Ganti emoji UI → `lucide-react` (ikon SVG konsisten)**
   **Target:** Semua file TSX yang pakai emoji sebagai ikon UI.
   **Aksi:**
   1. Install: `cd frontend; npm install lucide-react`.
@@ -563,7 +563,7 @@
   **Anchor grep:** `⚠️` · `✅` · `aria-hidden` (emoji)
   **Gate:** `cd frontend; npm run build` ✅ · ikon tampil tajam di semua OS.
 
-- [ ] **O-07 — Adopsi library tanggal (date-fns) ganti hitung tanggal manual** (audit §8)
+- [x] **O-07 — Adopsi library tanggal (date-fns) ganti hitung tanggal manual** (audit §8)
   **Target:** `frontend/src/utils/dateTime.ts` + konsumen.
   **Aksi:**
   1. Install: `cd frontend; npm install date-fns` (tree-shakable; locale `id`).
@@ -573,7 +573,7 @@
   **Anchor grep:** `addHoursToDate` · `getDeadlineMeta` · `formatDateTimeWib`
   **Gate:** `cd frontend; npm run build` ✅ · label deadline/relatif tetap sama persis.
 
-- [ ] **O-08 — Audit touch target ≥44px (mobile)** (audit §5 R5)
+- [x] **O-08 — Audit touch target ≥44px (mobile)** (audit §5 R5)
   **Target:** CSS — chip, badge kecil, panah baris, tombol ikon.
   **Aksi:**
   1. Tetapkan token `--tap-min: 44px`. Elemen interaktif kecil diberi `min-height/min-width: var(--tap-min)` ATAU padding cukup (pakai hit-area `::before` transparan bila visual harus tetap kecil).

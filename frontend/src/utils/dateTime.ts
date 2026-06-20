@@ -1,10 +1,12 @@
+import { addHours, isValid, intervalToDuration, differenceInCalendarDays } from 'date-fns';
+
 const DEFAULT_TIME_ZONE = 'Asia/Jakarta';
 const DEFAULT_TIME_ZONE_LABEL = 'WIB';
 
 export function parseDateTimeSafe(value?: string | Date | null): Date | null {
   if (!value) return null;
   const date = value instanceof Date ? new Date(value.getTime()) : new Date(value);
-  return Number.isNaN(date.getTime()) ? null : date;
+  return isValid(date) ? date : null;
 }
 
 export function formatDateTimeWib(value?: string | Date | null): string {
@@ -43,30 +45,22 @@ function plural(value: number, singular: string): string {
 }
 
 export function formatDurationDetailed(ms: number): string {
-  const totalMinutes = Math.max(0, Math.floor(Math.abs(ms) / 60_000));
-  const days = Math.floor(totalMinutes / (60 * 24));
-  const hours = Math.floor((totalMinutes % (60 * 24)) / 60);
-  const minutes = totalMinutes % 60;
-
+  const absMs = Math.max(0, Math.abs(ms));
+  const { days = 0, hours = 0, minutes = 0 } = intervalToDuration({ start: 0, end: absMs });
   const parts: string[] = [];
   if (days > 0) parts.push(plural(days, 'hari'));
   if (hours > 0) parts.push(plural(hours, 'jam'));
   if (minutes > 0 || parts.length === 0) parts.push(plural(minutes, 'menit'));
-
   return parts.slice(0, 3).join(' ');
 }
 
 export function formatDurationCompact(ms: number): string {
-  const totalMinutes = Math.max(0, Math.floor(Math.abs(ms) / 60_000));
-  const days = Math.floor(totalMinutes / (60 * 24));
-  const hours = Math.floor((totalMinutes % (60 * 24)) / 60);
-  const minutes = totalMinutes % 60;
-
+  const absMs = Math.max(0, Math.abs(ms));
+  const { days = 0, hours = 0, minutes = 0 } = intervalToDuration({ start: 0, end: absMs });
   const parts: string[] = [];
   if (days > 0) parts.push(`${days}h`);
   if (hours > 0) parts.push(`${hours}j`);
   if (minutes > 0 || parts.length === 0) parts.push(`${minutes}m`);
-
   return parts.slice(0, 3).join(' ');
 }
 
@@ -134,5 +128,11 @@ export function getCreatedToDeadlineLabel(createdAt?: string | Date | null, dead
 export function addHoursToDate(value: string | Date | null | undefined, hours: number): Date | null {
   const date = parseDateTimeSafe(value);
   if (!date) return null;
-  return new Date(date.getTime() + hours * 60 * 60 * 1000);
+  return addHours(date, hours);
+}
+
+export function daysFromToday(value?: string | Date | null): number | null {
+  const date = parseDateTimeSafe(value);
+  if (!date) return null;
+  return differenceInCalendarDays(date, new Date());
 }

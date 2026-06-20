@@ -1,0 +1,115 @@
+/* O-05: dipindah dari 10-misc.css — admin & owner simplification */
+
+/* V5.8.3 admin simplification */
+.admin-sensitive-note,
+.admin-simple-note {
+  border-radius: 18px;
+  border: 1px solid rgba(37, 99, 235, 0.18);
+  background: linear-gradient(135deg, rgba(239, 246, 255, 0.95), rgba(255, 255, 255, 0.96));
+  color: #24415f;
+  padding: 0.85rem 1rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.55rem;
+  line-height: 1.45;
+}
+
+.admin-sensitive-note strong,
+.admin-simple-note strong {
+  color: #0f2a4a;
+  white-space: nowrap;
+}
+
+.admin-operations-command-card .assistant-panel,
+.admin-operations-command-card .compact-metrics,
+.payment-command-page .compact-metrics,
+.payment-review-command-modal .ai-proof-card {
+  display: none !important;
+}
+
+.admin-ops-command-hero p,
+.admin-command-head p,
+.finance-inline-menu small,
+.panel-subtitle {
+  max-width: 860px;
+}
+
+.admin-area-internal-menu-scroll .admin-area-internal-chip small {
+  font-size: 0.72rem;
+  line-height: 1.3;
+}
+
+.payment-command-page .admin-simple-note,
+.renew-command-page .admin-simple-note {
+  margin-top: -0.25rem;
+}
+
+@media (max-width: 768px) {
+  .admin-sensitive-note,
+  .admin-simple-note {
+    display: block;
+  }
+
+  .admin-sensitive-note strong,
+  .admin-simple-note strong {
+    display: block;
+    margin-bottom: 0.25rem;
+    white-space: normal;
+  }
+}
+
+/* V5.8.4 Owner UI simplification */
+.owner-policy-card {
+  margin-bottom: 1rem;
+  background: linear-gradient(135deg, #f8fbff, #eef6ff);
+}
+.owner-policy-card.danger {
+  background: linear-gradient(135deg, #fff7f7, #fff1f2);
+}
+.owner-policy-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+.owner-policy-row h3 {
+  font-size: 1.05rem;
+  font-weight: 750;
+}
+.owner-policy-pills {
+  display: flex;
+  gap: .5rem;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+.owner-policy-pills span, .owner-policy-alert {
+  border-radius: 999px;
+  background: rgba(37, 99, 235, .08);
+  color: #1d4ed8;
+  font-size: .78rem;
+  font-weight: 650;
+  padding: .35rem .65rem;
+}
+.owner-policy-alert {
+  display: inline-flex;
+  background: rgba(220, 38, 38, .1);
+  color: #b91c1c;
+}
+.owner-financial-health-cockpit .metric-grid {
+  margin-top: .75rem;
+}
+.owner-financial-health-headline {
+  border-radius: 16px;
+}
+.owner-production-gate-card {
+  background: #f8fafc;
+}
+@media (max-width: 768px) {
+  .owner-policy-row {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+  .owner-policy-pills {
+    justify-content: flex-start;
+  }
+}

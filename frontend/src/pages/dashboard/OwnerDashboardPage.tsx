@@ -16,6 +16,7 @@ import {
 } from 'recharts';
 import type { OwnerDashboardTrendMonth } from '../../api/finance';
 import { fetchOwnerDashboardAggregate } from '../../api/ownerDashboard';
+import { cc } from '../../config/chartPalette';
 import { generateBrief, getOwnerAiStatus, type BriefResult } from '../../api/ai';
 import AiAssistButton from '../../components/ai/AiAssistButton';
 import AiResultPanel from '../../components/ai/AiResultPanel';
@@ -154,13 +155,13 @@ function TrendChart({
     return (
       <ResponsiveContainer width="100%" height={300}>
         <BarChart data={chartData} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
-          <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+          <CartesianGrid strokeDasharray="3 3" stroke={cc('grid')} />
           <XAxis dataKey="name" tick={{ fontSize: 11 }} />
           <YAxis width={76} tick={{ fontSize: 11 }} tickFormatter={(value: number) => formatCompactRupiah(value)} />
           <RechartsTooltip content={<CustomTooltip />} />
-          <Bar dataKey="revenue" fill="#2563eb" radius={[3, 3, 0, 0]} name="Pendapatan" />
-          <Bar dataKey="expense" fill="#f97316" radius={[3, 3, 0, 0]} name="Pengeluaran" />
-          <Bar dataKey="netProfit" fill="#16a34a" radius={[3, 3, 0, 0]} name="Laba Bersih" />
+          <Bar dataKey="revenue" fill={cc('revenue')} radius={[3, 3, 0, 0]} name="Pendapatan" />
+          <Bar dataKey="expense" fill={cc('expense')} radius={[3, 3, 0, 0]} name="Pengeluaran" />
+          <Bar dataKey="netProfit" fill={cc('profit')} radius={[3, 3, 0, 0]} name="Laba Bersih" />
         </BarChart>
       </ResponsiveContainer>
     );
@@ -169,15 +170,15 @@ function TrendChart({
   return (
     <ResponsiveContainer width="100%" height={300}>
       <LineChart data={chartData} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
-        <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+        <CartesianGrid strokeDasharray="3 3" stroke={cc('grid')} />
         <XAxis dataKey="name" tick={{ fontSize: 11 }} />
         <YAxis width={76} tick={{ fontSize: 11 }} tickFormatter={(value: number) => formatCompactRupiah(value)} />
         <RechartsTooltip content={<CustomTooltip />} />
-        <Line type="monotone" dataKey="revenue" stroke="#2563eb" strokeWidth={2} dot={{ r: 3 }} name="Pendapatan" />
-        <Line type="monotone" dataKey="expense" stroke="#f97316" strokeWidth={2} dot={{ r: 3 }} name="Pengeluaran" />
-        <Line type="monotone" dataKey="netProfit" stroke="#16a34a" strokeWidth={2} dot={{ r: 3 }} name="Laba Bersih" />
+        <Line type="monotone" dataKey="revenue" stroke={cc('revenue')} strokeWidth={2} dot={{ r: 3 }} name="Pendapatan" />
+        <Line type="monotone" dataKey="expense" stroke={cc('expense')} strokeWidth={2} dot={{ r: 3 }} name="Pengeluaran" />
+        <Line type="monotone" dataKey="netProfit" stroke={cc('profit')} strokeWidth={2} dot={{ r: 3 }} name="Laba Bersih" />
         {showBestFit ? (
-          <Line type="monotone" dataKey="bestFit" stroke="#7c3aed" strokeWidth={2} strokeDasharray="6 3" dot={false} name="Tren Pendapatan" />
+          <Line type="monotone" dataKey="bestFit" stroke={cc('trend')} strokeWidth={2} strokeDasharray="6 3" dot={false} name="Tren Pendapatan" />
         ) : null}
       </LineChart>
     </ResponsiveContainer>

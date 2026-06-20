@@ -1,0 +1,51 @@
+/* O-04: CSS Modules pilot — AdminHealthBar scoped styles */
+
+.bar {
+  background: #ffffff;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  border-radius: 12px;
+  padding: 0.6rem 0.9rem;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: 0.2rem 0.55rem;
+  border-radius: 20px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  border: 1px solid transparent;
+}
+
+.chip.danger  { background: var(--red-50);   color: var(--red-700);   border-color: var(--red-200); }
+.chip.warning { background: var(--amber-50); color: var(--amber-700); border-color: var(--amber-200); }
+.chip.info    { background: var(--blue-50);  color: var(--blue-700);  border-color: var(--blue-200); }
+.chip.success { background: var(--green-50); color: var(--green-700); border-color: var(--green-200); }
+
+.toggle { font-size: 0.78rem; text-decoration: none; }
+.toggle:hover { text-decoration: underline; }
+
+.detailGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: var(--space-2);
+}
+
+.detailItem {
+  padding: var(--space-2) 0.65rem;
+  border-radius: 10px;
+  border: 1px solid transparent;
+}
+
+.detailItem strong { display: block; font-size: 0.75rem; margin-bottom: 0.15rem; }
+.detailItem span   { font-size: 0.76rem; color: var(--gray-600); }
+
+.detailItem.danger  { background: var(--red-50);   border-color: var(--red-200); }
+.detailItem.warning { background: var(--amber-50); border-color: var(--amber-200); }
+.detailItem.info    { background: var(--blue-50);  border-color: var(--blue-200); }
+.detailItem.success { background: var(--green-50); border-color: var(--green-200); }
+
+@media (max-width: 768px) {
+  .detailGrid { grid-template-columns: 1fr 1fr; }
+}

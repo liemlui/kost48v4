@@ -40,7 +40,7 @@
   display: inline-flex;
   align-items: center;
   gap: 0.38rem;
-  min-height: 30px;
+  min-height: var(--tap-min);
 }
 .staff-filter-chip strong {
   min-width: 1.25rem;

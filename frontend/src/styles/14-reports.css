@@ -1,0 +1,272 @@
+/* O-05: dipindah dari 10-misc.css — finance report center + tenant journey intelligence */
+
+/* V5.8.9 — finance report center + tenant journey intelligence */
+.finance-report-center {
+  display: grid;
+  gap: 14px;
+}
+
+.finance-command-strip .card-body {
+  display: grid;
+  grid-template-columns: minmax(260px, 0.9fr) minmax(360px, 1.2fr);
+  gap: 18px;
+  align-items: stretch;
+}
+
+.finance-command-copy h2 {
+  margin: 6px 0 8px;
+  color: #0f172a;
+  font-weight: 900;
+  letter-spacing: -0.045em;
+}
+
+.finance-command-copy p {
+  margin: 0;
+  max-width: 680px;
+  color: #64748b;
+}
+
+.finance-command-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.finance-subtabbar {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 8px;
+  border-radius: 24px;
+  border: 1px solid rgba(37, 99, 235, 0.12);
+  background: rgba(255, 255, 255, 0.82);
+  box-shadow: 0 14px 36px rgba(37, 99, 235, 0.08);
+}
+
+.finance-subtabbar button {
+  min-width: max-content;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 0;
+  border-radius: 999px;
+  padding: 10px 14px;
+  background: transparent;
+  color: #475569;
+  font-weight: 900;
+}
+
+.finance-subtabbar button:hover {
+  color: #1d4ed8;
+  background: rgba(37, 99, 235, 0.07);
+}
+
+.finance-subtabbar button.active {
+  color: #fff;
+  background: linear-gradient(135deg, #2563eb, #0ea5e9);
+  box-shadow: 0 14px 28px rgba(37, 99, 235, 0.22);
+}
+
+.finance-subtabbar em {
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.24);
+  font-style: normal;
+  font-size: 0.72rem;
+}
+
+.finance-bridge-chart,
+.balance-sheet-bars {
+  display: grid;
+  gap: 12px;
+}
+
+.finance-bridge-row,
+.balance-sheet-row {
+  display: grid;
+  grid-template-columns: minmax(170px, 0.8fr) minmax(160px, 1.2fr);
+  gap: 12px;
+  align-items: center;
+  padding: 12px;
+  border-radius: 18px;
+  border: 1px solid rgba(37, 99, 235, 0.10);
+  background: rgba(255, 255, 255, 0.78);
+  box-shadow: 0 10px 24px rgba(37, 99, 235, 0.06);
+}
+
+.finance-bridge-row strong,
+.balance-sheet-row strong {
+  display: block;
+  color: #0f172a;
+}
+
+.finance-bridge-row span,
+.balance-sheet-row span {
+  color: #64748b;
+  font-size: 0.82rem;
+}
+
+.finance-bridge-row.negative .finance-bridge-track {
+  background: rgba(249, 115, 22, 0.12);
+}
+
+.finance-bridge-track {
+  height: 14px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(37, 99, 235, 0.09);
+}
+
+.finance-bridge-track i {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+}
+
+.finance-donut-meter {
+  display: grid;
+  place-items: center;
+  gap: 10px;
+}
+
+.finance-donut {
+  width: 180px;
+  height: 180px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  background: conic-gradient(#2563eb var(--p), rgba(37, 99, 235, 0.10) 0);
+  box-shadow: 0 20px 45px rgba(37, 99, 235, 0.15);
+}
+
+.finance-donut > div {
+  width: 122px;
+  height: 122px;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  border-radius: inherit;
+  background: #fff;
+  border: 1px solid rgba(37, 99, 235, 0.12);
+}
+
+.finance-donut strong {
+  color: #0f172a;
+  font-size: 2rem;
+  line-height: 1;
+}
+
+.finance-donut span,
+.finance-donut-meter p {
+  color: #64748b;
+  font-size: 0.82rem;
+  text-align: center;
+}
+
+.balance-sheet-snapshot .alert {
+  border-radius: 18px;
+  border: 1px solid rgba(245, 158, 11, 0.18);
+}
+
+.tenant-journey-card {
+  border-radius: 26px !important;
+  background:
+    linear-gradient(135deg, rgba(255,255,255,0.98), rgba(239,246,255,0.92)),
+    radial-gradient(circle at top right, rgba(37,99,235,0.14), transparent 36%) !important;
+  box-shadow: 0 22px 60px rgba(37, 99, 235, 0.12) !important;
+  border: 1px solid rgba(37, 99, 235, 0.12) !important;
+}
+
+.tenant-journey-layout {
+  display: grid;
+  grid-template-columns: minmax(220px, 1fr) auto;
+  gap: 18px;
+  align-items: center;
+}
+
+.tenant-journey-layout h3 {
+  margin: 4px 0 6px;
+  color: #0f172a;
+  font-weight: 900;
+  letter-spacing: -0.035em;
+}
+
+.tenant-journey-layout p {
+  margin: 0;
+  color: #64748b;
+}
+
+.tenant-payment-ring {
+  width: 138px;
+  height: 138px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  background: conic-gradient(#0ea5e9 var(--p), rgba(14, 165, 233, 0.12) 0);
+  box-shadow: 0 18px 40px rgba(14, 165, 233, 0.18);
+}
+
+.tenant-payment-ring > div {
+  width: 96px;
+  height: 96px;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  border-radius: inherit;
+  background: #fff;
+  border: 1px solid rgba(14, 165, 233, 0.16);
+}
+
+.tenant-payment-ring strong {
+  color: #0f172a;
+  font-size: 1.7rem;
+  line-height: 1;
+}
+
+.tenant-payment-ring span {
+  color: #64748b;
+  text-align: center;
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+
+.tenant-journey-stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.tenant-journey-stats > div {
+  display: grid;
+  gap: 2px;
+  padding: 12px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.78);
+  border: 1px solid rgba(37, 99, 235, 0.10);
+}
+
+.tenant-journey-stats span {
+  color: #64748b;
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.tenant-journey-stats strong {
+  color: #0f172a;
+  font-size: 1.35rem;
+  line-height: 1;
+}
+
+@media (max-width: 992px) {
+  .finance-command-strip .card-body,
+  .finance-command-metrics,
+  .tenant-journey-layout,
+  .tenant-journey-stats {
+    grid-template-columns: 1fr;
+  }
+  .tenant-payment-ring {
+    justify-self: start;
+  }
+}
