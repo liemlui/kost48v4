@@ -69,7 +69,7 @@ const ROUTE_TITLES: Array<{ pattern: string; title: string }> = [
   { pattern: '/portal/tickets', title: 'Tiket Saya' },
   { pattern: '/portal/loyalty', title: 'Poin & Reward' },
   { pattern: '/portal/manual', title: 'Panduan' },
-  { pattern: '/portal/profile', title: 'Profil' },
+  { pattern: '/profile', title: 'Profil' },
   { pattern: '/portal/wifi', title: 'Pesan WiFi' },
 ];
 

@@ -110,7 +110,7 @@ export default function TenantWorkspaceTabs({
         <div className="tenant-workspace-userbar">
           <PaymentUrgencyChip />
           <NotificationBell />
-          <button type="button" className="staff-user-profile-trigger" onClick={() => navigate('/portal/profile')} title="Buka profil">
+          <button type="button" className="staff-user-profile-trigger" onClick={() => navigate('/profile')} title="Buka profil">
             <span className="text-end">
               <strong>{fullName}</strong>
               <em>Penghuni</em>

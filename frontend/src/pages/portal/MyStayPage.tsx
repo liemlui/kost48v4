@@ -837,7 +837,7 @@ export default function MyStayPage() {
               {completenessQuery.data.missingFields.map((f) => PROFILE_FIELD_LABELS[f] ?? f).join(', ')}.
             </div>
           </div>
-          <Button variant="warning" size="sm" onClick={() => navigate('/portal/profile')}>Lengkapi Sekarang</Button>
+          <Button variant="warning" size="sm" onClick={() => navigate('/profile')}>Lengkapi Sekarang</Button>
         </Alert>
       ) : null}
 
