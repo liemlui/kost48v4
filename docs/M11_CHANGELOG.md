@@ -4,6 +4,19 @@
 
 ## Changelog Ringkas
 
+### 2026-06-21 — Audit Mendalam: 11 Bug Kritis Diperbaiki (backend + frontend)
+- **Fix #1** `tenant-bookings.service.ts`: KTP gate ditambah di jalur booking — `ConflictException` bila `KTP_ACTIVATION_GATE_ENABLED=true` dan `ktpVerifiedAt == null`.
+- **Fix #2** `meter-readings.service.ts` + `invoices.service.ts`: meter billing dibungkus `$transaction` atomik; `createWithLinesAndIssueTx(tx,...)` diekstrak sebagai metode publik agar dapat menerima `tx` eksternal.
+- **Fix #3** `payment-submissions.service.ts`: pindahkan cek `existingPending` ke dalam `$transaction` + tambah `SELECT ... FOR UPDATE` pada invoice untuk cegah race condition TOCTOU.
+- **Fix #4** `stays.service.ts` cancel(): DP hangus (`downPaymentForfeitedAt`) otomatis di-set dan `postDownPaymentForfeitTx` dipanggil saat booking dibatalkan sebelum promoted.
+- **Fix #5** `payment-submissions.service.ts` approve(): `journalPending` dideklarasikan di luar `$transaction` sehingga dapat di-set di dalam closure catch dan dikembalikan ke caller.
+- **Fix #6** `wifi-sales.service.ts` + `expenses.service.ts`: tambah `Logger`; ganti `.catch(() => undefined)` → `.catch((err) => logger.warn(...))` agar kegagalan jurnal tercatat.
+- **Fix #7** `InvoicesPage.tsx`: filter server-side (`status`, `dueDateFrom`, `dueDateTo`) dikirim ke backend; `queryKey` sertakan filter; `useEffect` reset halaman saat filter berubah.
+- **Fix #8** `StaysPage.tsx`: NIK tenant disembunyikan untuk role STAFF (UU PDP) — hanya OWNER/ADMIN yang melihat `NIK: ...`.
+- **Fix #9** `stays/dto/stay.dto.ts`: `agreedRentAmountRupiah` `@Min(0)` → `@Min(1)` mencegah sewa Rp 0.
+- **Fix #10** `ActionKanbanBoard.tsx`: `useEffect` sync `colMap` saat `items` prop berubah — item baru dari React Query refresh masuk kolom default; item stale dihapus; posisi drag manual dipertahankan.
+- **Fix #11** `tickets.service.ts` + `tickets.controller.ts`: vendor tickets dapat `markDone` langsung dari `OPEN` (skip `IN_PROGRESS`); TENANT dapat menutup tiket miliknya yang sudah `DONE` via `POST :id/close`; controller tambah `UserRole.TENANT` ke `@Roles`.
+
 ### 2026-06-20 — Fase Q: Performa & Stabilitas UI/UX (Q-01..Q-07 selesai)
 - **Q-01** backend rebuild dist → `dist/modules/admin/` ter-generate; `/api/admin/dashboard/aggregate` responsif (sebelumnya 404).
 - **Q-02** `DashboardAdmin.tsx` aggregateQuery: `retry: 1, retryDelay: 1000` — error alert tampil ≤ 3 detik.

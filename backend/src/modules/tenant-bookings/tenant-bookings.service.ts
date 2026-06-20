@@ -3,6 +3,7 @@ import {
   ConflictException,
   ForbiddenException,
   Injectable,
+  Logger,
   NotFoundException,
   ServiceUnavailableException,
 } from '@nestjs/common';
@@ -43,6 +44,7 @@ import { lockApprovalBookingTx } from './tenant-bookings.queries';
 
 @Injectable()
 export class TenantBookingsService {
+  private readonly logger = new Logger(TenantBookingsService.name);
   constructor(
     private readonly prisma: PrismaService,
     private readonly appNotification: AppNotificationService,
@@ -91,6 +93,17 @@ export class TenantBookingsService {
     const tenant = await this.prisma.tenant.findUnique({ where: { id: tenantId } });
     if (!tenant || !tenant.isActive) {
       throw new NotFoundException('Tenant tidak ditemukan atau sudah nonaktif');
+    }
+
+    // F3-17: gate KTP — sama dengan jalur admin (stays.service.ts). Cek di sini
+    // agar tenant tanpa KTP terverifikasi tidak bisa komit DP sebelum KTP siap.
+    if (
+      String(process.env.KTP_ACTIVATION_GATE_ENABLED ?? 'false').toLowerCase() === 'true' &&
+      tenant.ktpVerifiedAt == null
+    ) {
+      throw new ConflictException(
+        'KTP tenant belum diverifikasi. Unggah & verifikasi KTP sebelum melakukan booking (gate onboarding).',
+      );
     }
 
     try {
@@ -391,7 +404,9 @@ export class TenantBookingsService {
             issuedAt: new Date(),
           },
         });
-        await this.accountingPosting.postInvoiceIssuedTx(tx, issuedInvoice.id, actor.id).catch(() => undefined);
+        await this.accountingPosting.postInvoiceIssuedTx(tx, issuedInvoice.id, actor.id).catch((err) =>
+          this.logger.warn(`Jurnal invoice booking #${issuedInvoice.id} gagal (Auto Journal Lite): ${err instanceof Error ? err.message : String(err)}`)
+        );
 
         await tx.stay.update({
           where: { id: updatedStay.id },

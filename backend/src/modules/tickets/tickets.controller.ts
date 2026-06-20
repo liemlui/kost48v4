@@ -207,11 +207,10 @@ export class TicketsController {
     return { message: 'Tiket berhasil ditandai selesai', data: await this.ticketsService.markDone(id, dto, user) };
   }
 
-  // F2-18 (tenant-pengawas): STAFF boleh menutup tiket (termasuk CHECKOUT_INSPECTION →
-  // tandai kamar siap). Guard keselamatan tetap di service close(): kamar HANYA jadi
-  // AVAILABLE bila status akhir barang GOOD & tak ada stay aktif (else room-ready diblokir).
+  // F2-18: STAFF boleh tutup CHECKOUT_INSPECTION; TENANT boleh tutup tiket mereka yang DONE.
+  // Guard keselamatan tetap di service close().
   @Post(':id/close')
-  @Roles(UserRole.OWNER, UserRole.ADMIN, UserRole.STAFF)
+  @Roles(UserRole.OWNER, UserRole.ADMIN, UserRole.STAFF, UserRole.TENANT)
   async close(@Param('id', ParseIntPipe) id: number, @Body() dto: CloseTicketDto, @CurrentUser() user: CurrentUserPayload) {
     return { message: 'Status tiket berhasil diperbarui', data: await this.ticketsService.close(id, dto, user) };
   }

@@ -1085,10 +1085,16 @@ export class StaysService {
     const isReservedBooking = room?.status === RoomStatus.RESERVED;
 
     const updated = await this.prisma.$transaction(async (tx) => {
+      // DP hangus jika booking belum promoted (belum check-in) dan DP sudah dibayar.
+      // Untuk stay yang sudah promoted, DP sudah diserap ke invoice pertama.
+      const dpPaid = Number((existing as any).downPaymentPaidRupiah ?? 0);
+      const shouldForfeitDp = dpPaid > 0 && !(existing as any).downPaymentForfeitedAt && !existing.initialMetersPromotedAt;
+
       const updateData: Prisma.StayUpdateInput = {
         status: StayStatus.CANCELLED,
         checkoutReason: dto.cancelReason,
         notes: dto.notes ?? existing.notes,
+        ...(shouldForfeitDp ? { downPaymentForfeitedAt: new Date() } : {}),
       };
 
       if (isReservedBooking) {
@@ -1148,6 +1154,22 @@ export class StaysService {
         if (reversalResult?.skipped) {
           throw new ConflictException(
             `Pembatalan stay gagal karena reversal accounting invoice #${invoice.id} tidak berhasil: ${reversalResult.reason ?? 'alasan tidak diketahui'}`,
+          );
+        }
+      }
+
+      // Hanguskan DP secara akuntansi (jurnal DR Kas / CR Pendapatan-DP-hangus)
+      // jika booking belum check-in dan DP sudah terbayar — selaras dengan sweeper.
+      if (shouldForfeitDp) {
+        const forfeitResult = await this.accountingPosting.postDownPaymentForfeitTx(
+          tx,
+          id,
+          dpPaid,
+          actor.id,
+        );
+        if (forfeitResult?.skipped && !(forfeitResult as any)?.journalEntry && !(forfeitResult as any)?.benign) {
+          throw new ConflictException(
+            `Pembatalan gagal: jurnal hangus DP tidak berhasil (${(forfeitResult as any)?.reason ?? 'alasan tidak diketahui'}).`,
           );
         }
       }

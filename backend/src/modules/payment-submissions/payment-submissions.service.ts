@@ -166,22 +166,27 @@ export class PaymentSubmissionsService {
         }
       }
 
-      const existingPending = await this.prisma.paymentSubmission.findFirst({
-        where: {
-          stayId: dto.stayId,
-          invoiceId: dto.invoiceId,
-          status: PaymentSubmissionStatus.PENDING_REVIEW,
-        },
-        select: { id: true },
-      });
-
-      if (existingPending) {
-        throw new ConflictException(
-          'Masih ada bukti pembayaran lain yang sedang menunggu review untuk invoice ini',
-        );
-      }
-
       const created = await this.prisma.$transaction(async (tx) => {
+        // Kunci baris invoice agar concurrent submission untuk invoice yang sama
+        // di-serialize — mencegah race condition TOCTOU pada cek existingPending.
+        if (dto.invoiceId) {
+          await tx.$queryRaw`SELECT id FROM "Invoice" WHERE id = ${dto.invoiceId} FOR UPDATE`;
+        }
+
+        const existingPending = await tx.paymentSubmission.findFirst({
+          where: {
+            stayId: dto.stayId,
+            invoiceId: dto.invoiceId,
+            status: PaymentSubmissionStatus.PENDING_REVIEW,
+          },
+          select: { id: true },
+        });
+        if (existingPending) {
+          throw new ConflictException(
+            'Masih ada bukti pembayaran lain yang sedang menunggu review untuk invoice ini',
+          );
+        }
+
         const submission = await tx.paymentSubmission.create({
           data: {
             stayId: dto.stayId,
@@ -501,6 +506,7 @@ export class PaymentSubmissionsService {
   async approveSubmission(user: CurrentUserPayload, submissionId: number) {
     let losingTenants: Array<{ stayId: number; tenantId: number }> = [];
     let paidInvoiceId: number | null = null; // F4-9: dipakai untuk poin ON_TIME_PAYMENT pasca-commit
+    let journalPending = false; // set true jika Auto Journal Lite gagal — dikembalikan ke caller
     try {
       const approved = await this.prisma.$transaction(async (tx) => {
         const submission = await this.lockSubmissionTx(tx, submissionId);
@@ -672,7 +678,9 @@ export class PaymentSubmissionsService {
             await this.accountingPosting.postInvoicePaymentTx(tx, invoicePaymentId, user.id);
           }
         } catch (err) {
-          // Auto Journal Lite must not block payment approval. Readiness/backfill can repair skipped journal later.
+          // Auto Journal Lite tidak memblokir approval. Jurnal bisa diperbaiki via backfill.
+          // journalPending=true dikembalikan ke caller agar admin tahu perlu repair.
+          journalPending = true;
           this.logger.warn(
             `Auto Journal Lite gagal saat approval pembayaran (submission #${submissionId}, invoice #${submission.invoiceId}): ${err instanceof Error ? err.message : String(err)}`,
           );
@@ -924,7 +932,7 @@ export class PaymentSubmissionsService {
         return this.findSubmissionByIdTx(tx, submissionId);
       });
 
-      const result = serializePrismaResult(approved);
+      const result = { ...serializePrismaResult(approved), journalPending };
       this.notifyPaymentApproved(approved.tenantId, submissionId).catch(() => {});
       if (losingTenants.length > 0) {
         this.notifyLosingTenants(losingTenants).catch(() => {});

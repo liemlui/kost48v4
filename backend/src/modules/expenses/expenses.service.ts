@@ -1,4 +1,4 @@
-import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { ConflictException, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { buildMeta, buildPagination } from '../../common/utils/pagination';
 import { CreateExpenseDto, UpdateExpenseDto } from './dto/expense.dto';
@@ -10,6 +10,7 @@ import { ExpenseStatus } from '../../common/enums/app.enums';
 
 @Injectable()
 export class ExpensesService {
+  private readonly logger = new Logger(ExpensesService.name);
   constructor(
     private readonly prisma: PrismaService,
     private readonly audit: AuditLogService,
@@ -67,7 +68,9 @@ export class ExpensesService {
       newData: created,
       meta: this.buildAiDraftAuditMeta(aiDraftMeta),
     });
-    await this.accountingPosting.postExpense(created.id, actor.id).catch(() => undefined);
+    await this.accountingPosting.postExpense(created.id, actor.id).catch((err) =>
+      this.logger.warn(`Jurnal expense #${created.id} gagal (Auto Journal Lite): ${err instanceof Error ? err.message : String(err)}`)
+    );
     return created;
   }
 

@@ -37,7 +37,7 @@ export class CreateStayDto {
   pricingTerm!: PricingTerm;
 
   @IsInt()
-  @Min(0)
+  @Min(1)
   agreedRentAmountRupiah!: number;
 
   @IsDateString()

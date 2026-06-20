@@ -286,67 +286,79 @@ export class InvoicesService {
     this.assertValidInvoicePeriod(dto.periodStart, dto.periodEnd);
     if (!dto.lines?.length) throw new ConflictException('Tagihan wajib memiliki minimal satu rincian tagihan');
 
-    const readiness = await this.accountingReadiness.getReadiness();
-
     const result = await (this.prisma as any).$transaction(async (tx: Prisma.TransactionClient) => {
-      const stay = await tx.stay.findUnique({ where: { id: dto.stayId } });
-      if (!stay) throw new NotFoundException('Masa sewa tidak ditemukan');
-
-      const existingNumber = await tx.invoice.findUnique({ where: { invoiceNumber: dto.invoiceNumber } });
-      if (existingNumber) throw new ConflictException('Nomor tagihan sudah digunakan');
-
-      const created = await tx.invoice.create({
-        data: {
-          stayId: dto.stayId,
-          invoiceNumber: dto.invoiceNumber,
-          status: InvoiceStatus.DRAFT,
-          periodStart: new Date(dto.periodStart),
-          periodEnd: new Date(dto.periodEnd),
-          dueDate: dto.dueDate ? new Date(dto.dueDate) : undefined,
-          notes: dto.notes,
-          createdById: actor.id,
-        },
-      });
-
-      let totalAmountRupiah = 0;
-      for (let index = 0; index < dto.lines.length; index += 1) {
-        const lineData = this.buildLineData(created.id, dto.lines[index], index);
-        const lineSign = String(dto.lines[index].lineType) === 'DISCOUNT' ? -1 : 1;
-        totalAmountRupiah += lineSign * Number(lineData.lineAmountRupiah ?? 0);
-        await tx.invoiceLine.create({ data: lineData });
-      }
-
-      if (totalAmountRupiah <= 0) {
-        throw new ConflictException('Tagihan tidak valid: total harus lebih dari 0');
-      }
-
-      const issued = await tx.invoice.update({
-        where: { id: created.id },
-        data: {
-          totalAmountRupiah,
-          status: InvoiceStatus.ISSUED,
-          issuedAt: new Date(),
-        },
-        include: { lines: { orderBy: { sortOrder: 'asc' } }, payments: true, stay: { include: { tenant: true, room: true } } },
-      });
-
-      const accounting = this.shouldAttemptInvoiceAccountingPosting(readiness)
-        ? this.resolveInvoiceAccountingMetadata(
-            await this.accountingPosting.postInvoiceIssuedTx(tx, issued.id, actor.id),
-            readiness,
-          )
-        : this.buildSkippedAccountingMetadata(
-            readiness,
-            readiness.schemaStatus?.message ?? 'Accounting foundation schema belum siap di database.',
-          );
-
-      return { invoice: issued, accounting };
+      return this.createWithLinesAndIssueTx(tx, dto, actor, opts);
     });
 
     const normalized = this.normalizeInvoiceTotals(result.invoice);
     const response = this.attachAccountingMetadata(normalized as Record<string, unknown>, result.accounting);
     await this.audit.log({ actorUserId: actor.id, action: 'CREATE_AND_ISSUE', entityType: 'Invoice', entityId: String(result.invoice.id), newData: response });
     return response;
+  }
+
+  // Versi tx-aware: dipakai oleh createWithLinesAndIssue DAN oleh service lain
+  // (mis. meter-readings) yang butuh atomisitas dengan operasi DB lainnya dalam
+  // satu transaksi yang sama. Tidak memanggil audit — caller yang bertanggung jawab.
+  async createWithLinesAndIssueTx(
+    tx: Prisma.TransactionClient,
+    dto: CreateInvoiceWithLinesAndIssueDto,
+    actor: CurrentUserPayload,
+    opts?: { systemIssued?: boolean },
+  ) {
+    const readiness = await this.accountingReadiness.getReadiness();
+
+    const stay = await tx.stay.findUnique({ where: { id: dto.stayId } });
+    if (!stay) throw new NotFoundException('Masa sewa tidak ditemukan');
+
+    const existingNumber = await tx.invoice.findUnique({ where: { invoiceNumber: dto.invoiceNumber } });
+    if (existingNumber) throw new ConflictException('Nomor tagihan sudah digunakan');
+
+    const created = await tx.invoice.create({
+      data: {
+        stayId: dto.stayId,
+        invoiceNumber: dto.invoiceNumber,
+        status: InvoiceStatus.DRAFT,
+        periodStart: new Date(dto.periodStart),
+        periodEnd: new Date(dto.periodEnd),
+        dueDate: dto.dueDate ? new Date(dto.dueDate) : undefined,
+        notes: dto.notes,
+        createdById: actor.id,
+      },
+    });
+
+    let totalAmountRupiah = 0;
+    for (let index = 0; index < dto.lines.length; index += 1) {
+      const lineData = this.buildLineData(created.id, dto.lines[index], index);
+      const lineSign = String(dto.lines[index].lineType) === 'DISCOUNT' ? -1 : 1;
+      totalAmountRupiah += lineSign * Number(lineData.lineAmountRupiah ?? 0);
+      await tx.invoiceLine.create({ data: lineData });
+    }
+
+    if (totalAmountRupiah <= 0) {
+      throw new ConflictException('Tagihan tidak valid: total harus lebih dari 0');
+    }
+
+    const issued = await tx.invoice.update({
+      where: { id: created.id },
+      data: {
+        totalAmountRupiah,
+        status: InvoiceStatus.ISSUED,
+        issuedAt: new Date(),
+      },
+      include: { lines: { orderBy: { sortOrder: 'asc' } }, payments: true, stay: { include: { tenant: true, room: true } } },
+    });
+
+    const accounting = this.shouldAttemptInvoiceAccountingPosting(readiness)
+      ? this.resolveInvoiceAccountingMetadata(
+          await this.accountingPosting.postInvoiceIssuedTx(tx, issued.id, actor.id),
+          readiness,
+        )
+      : this.buildSkippedAccountingMetadata(
+          readiness,
+          readiness.schemaStatus?.message ?? 'Accounting foundation schema belum siap di database.',
+        );
+
+    return { invoice: issued, accounting };
   }
 
   async update(id: number, dto: UpdateInvoiceDto, actor: CurrentUserPayload) {

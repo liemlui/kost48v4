@@ -657,12 +657,20 @@ export class TicketsService {
   async markDone(id: number, dto: ResolutionDto, actor: CurrentUserPayload) {
     const ticket = await this.prisma.ticket.findUnique({ where: { id } });
     if (!ticket) throw new NotFoundException("Tiket tidak ditemukan");
-    if (ticket.status !== "IN_PROGRESS")
-      throw new ConflictException("Transisi status tidak valid");
-    // Audit M-26: guard yang sama dengan start() — staf bukan assignee tidak
-    // boleh menyelesaikan tiket staf lain.
-    if (actor.role === "STAFF" && ticket.assignedToId !== actor.id) {
-      throw new ConflictException("Tiket ini bukan tugas akun ini");
+    const isVendor = (ticket as any).handledByVendor === true;
+    if (isVendor) {
+      // Vendor tickets: admin dapat langsung menandai selesai dari OPEN tanpa melewati IN_PROGRESS.
+      if (!["OPEN", "IN_PROGRESS"].includes(String(ticket.status))) {
+        throw new ConflictException("Transisi status tidak valid");
+      }
+    } else {
+      if (ticket.status !== "IN_PROGRESS")
+        throw new ConflictException("Transisi status tidak valid");
+      // Audit M-26: guard yang sama dengan start() — staf bukan assignee tidak
+      // boleh menyelesaikan tiket staf lain.
+      if (actor.role === "STAFF" && ticket.assignedToId !== actor.id) {
+        throw new ConflictException("Tiket ini bukan tugas akun ini");
+      }
     }
 
     const updated = await this.prisma.ticket.update({
@@ -703,6 +711,34 @@ export class TicketsService {
       },
     });
     if (!ticket) throw new NotFoundException("Tiket tidak ditemukan");
+
+    // Tenant dapat menutup tiket miliknya sendiri yang sudah DONE (konfirmasi penyelesaian).
+    if (actor.role === UserRole.TENANT) {
+      if (ticket.tenantId !== actor.tenantId) {
+        throw new ForbiddenException("Tidak berhak menutup tiket ini");
+      }
+      if (dto.action !== "CLOSE") {
+        throw new ForbiddenException("Tenant hanya dapat menutup tiket, tidak membatalkan");
+      }
+      if (ticket.status !== "DONE") {
+        throw new ConflictException("Tiket harus berstatus DONE sebelum dapat ditutup oleh penghuni");
+      }
+      const closed = await this.prisma.ticket.update({
+        where: { id },
+        data: { status: "CLOSED", closedAt: new Date() },
+      });
+      await this.audit.log({
+        actorUserId: actor.id,
+        action: "CLOSE",
+        entityType: "Ticket",
+        entityId: String(closed.id),
+        oldData: ticket,
+        newData: closed,
+        meta: { closedByTenant: true },
+      });
+      await this.notifyTenantReviewPrompt(closed.id);
+      return closed;
+    }
 
     // F2-18 (invarian dossier 15): STAFF HANYA boleh menutup tiket CHECKOUT_INSPECTION.
     // Kategori lain (admin/keuangan/dll) tetap ditutup OWNER/ADMIN.

@@ -244,32 +244,46 @@ export class MeterReadingsService {
       }
     }
 
-    const createdElec = await this.prisma.meterReading.create({ data: { room: { connect: { id: roomId } }, utilityType: UtilityType.ELECTRICITY, readingAt, readingValue: elecValue, note: dto.note, recordedBy: { connect: { id: actor.id } } } });
-    let createdWater: typeof createdElec | null = null;
-    if (waterEnabled && waterValue) {
-      createdWater = await this.prisma.meterReading.create({ data: { room: { connect: { id: roomId } }, utilityType: UtilityType.WATER, readingAt, readingValue: waterValue, note: dto.note, recordedBy: { connect: { id: actor.id } } } });
-    }
-    await this.audit.log({ actorUserId: actor.id, action: 'CREATE', entityType: 'MeterReading', entityId: String(createdElec.id), newData: { electricity: createdElec, water: createdWater } });
-
     const summary = { elecUsage, elecChargeable, waterUsage, waterChargeable };
-    if (!lines.length) {
-      return { readings: { electricity: createdElec, water: createdWater }, invoice: null, summary, message: prevElec ? 'Pemakaian dalam jatah gratis — tidak ada tagihan meter.' : 'Catatan meter pertama tersimpan (belum ada selisih untuk ditagih).' };
-    }
 
+    // Bungkus pembuatan meter + invoice dalam satu $transaction agar atomis:
+    // jika invoice gagal (periode CLOSED, nomor duplikat, dll.) angka meter
+    // tidak tersimpan — mencegah selisih meter yang salah di bulan berikutnya.
     const ym = `${readingAt.getUTCFullYear()}${String(readingAt.getUTCMonth() + 1).padStart(2, '0')}`;
     const periodStart = (prevElec?.readingAt ?? prevWater?.readingAt ?? readingAt);
     const due = new Date(readingAt); due.setUTCDate(due.getUTCDate() + 7);
-    const invoice = await this.invoices.createWithLinesAndIssue({
-      stayId: stay.id,
-      invoiceNumber: `MTR-${ym}-${roomId}-${createdElec.id}`,
-      periodStart: periodStart.toISOString().slice(0, 10),
-      periodEnd: readingAt.toISOString().slice(0, 10),
-      dueDate: due.toISOString().slice(0, 10),
-      notes: `Tagihan meter (listrik${waterEnabled ? ' & air' : ''}) Kamar ${room.code}. Dibuat otomatis dari catatan meter${isTenant ? ' (mandiri penghuni)' : ''}.`,
-      lines: lines as any,
-    }, actor, { systemIssued: true });
 
-    return { readings: { electricity: createdElec, water: createdWater }, invoice, summary };
+    const txResult = await (this.prisma as any).$transaction(async (tx: any) => {
+      const createdElecTx = await tx.meterReading.create({ data: { room: { connect: { id: roomId } }, utilityType: UtilityType.ELECTRICITY, readingAt, readingValue: elecValue, note: dto.note, recordedBy: { connect: { id: actor.id } } } });
+      let createdWaterTx: typeof createdElecTx | null = null;
+      if (waterEnabled && waterValue) {
+        createdWaterTx = await tx.meterReading.create({ data: { room: { connect: { id: roomId } }, utilityType: UtilityType.WATER, readingAt, readingValue: waterValue, note: dto.note, recordedBy: { connect: { id: actor.id } } } });
+      }
+
+      let invoiceTx: any = null;
+      if (lines.length) {
+        const invoiceResult = await this.invoices.createWithLinesAndIssueTx(tx, {
+          stayId: stay.id,
+          invoiceNumber: `MTR-${ym}-${roomId}-${createdElecTx.id}`,
+          periodStart: periodStart.toISOString().slice(0, 10),
+          periodEnd: readingAt.toISOString().slice(0, 10),
+          dueDate: due.toISOString().slice(0, 10),
+          notes: `Tagihan meter (listrik${waterEnabled ? ' & air' : ''}) Kamar ${room.code}. Dibuat otomatis dari catatan meter${isTenant ? ' (mandiri penghuni)' : ''}.`,
+          lines: lines as any,
+        }, actor, { systemIssued: true });
+        invoiceTx = invoiceResult.invoice;
+      }
+
+      return { electricity: createdElecTx, water: createdWaterTx, invoice: invoiceTx };
+    });
+
+    await this.audit.log({ actorUserId: actor.id, action: 'CREATE', entityType: 'MeterReading', entityId: String(txResult.electricity.id), newData: { electricity: txResult.electricity, water: txResult.water } });
+
+    if (!lines.length) {
+      return { readings: { electricity: txResult.electricity, water: txResult.water }, invoice: null, summary, message: prevElec ? 'Pemakaian dalam jatah gratis — tidak ada tagihan meter.' : 'Catatan meter pertama tersimpan (belum ada selisih untuk ditagih).' };
+    }
+
+    return { readings: { electricity: txResult.electricity, water: txResult.water }, invoice: txResult.invoice, summary };
   }
 
   async update(id: number, dto: UpdateMeterReadingDto, actor: CurrentUserPayload) {
