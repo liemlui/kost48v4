@@ -4,6 +4,19 @@
 
 ## Changelog Ringkas
 
+### 2026-06-20 — Fase Q: Performa & Stabilitas UI/UX (Q-01..Q-07 selesai)
+- **Q-01** backend rebuild dist → `dist/modules/admin/` ter-generate; `/api/admin/dashboard/aggregate` responsif (sebelumnya 404).
+- **Q-02** `DashboardAdmin.tsx` aggregateQuery: `retry: 1, retryDelay: 1000` — error alert tampil ≤ 3 detik.
+- **Q-03** `stayPredicates.ts` `listAllActiveStaysForBookings`: hapus `do...while` 50-halaman → single `listStays({ limit: 200 })` (KOST48 maks 48 kamar).
+- **Q-04** `InvoicesPage.tsx` staysQuery: `enabled: showCreate && canManageFinance` — 500-stays tidak di-fetch saat mount, hanya saat modal dibuka.
+- **Q-05** `StaysPage.tsx` checkout queries: `staleTime: 30_000` — tidak refetch setiap mount ulang.
+- **Q-06** Inventory empty state informatif: `ResourceConfig.emptyMessage?` ditambah; 3 pesan CTA ditambahkan ke `inventory.ts`; `ResourceTable.tsx` render `config.emptyMessage`.
+- **Q-07** `PushToggle.tsx`: prefetch VAPID key via `useEffect`; bila `!enabled` → Alert info biru (bukan error merah).
+
+### 2026-06-20 — Fase Q: Investigasi & Spesifikasi Performa UI/UX
+- **Investigasi Playwright** — screenshot 21 halaman (publik, login, admin, owner, mobile, tiket, inventory, notifikasi) via headless Chromium; temukan 7 bug/bottleneck: (1) `dist/modules/admin/` missing → 404 aggregate, (2) sequential do-while fetch loop di stayPredicates, (3) 500-stays mount-query di InvoicesPage, (4) retry default 7s+ sebelum error alert, (5) double checkout query tanpa staleTime, (6) inventory empty state kosong, (7) PushToggle tanpa graceful fallback.
+- **Fase Q dirancang** — Q-01..Q-07 ditambahkan ke M10 dengan spesifikasi lengkap (file path, baris, kode sebelum/sesudah, anchor grep, gate); siap dieksekusi AI.
+
 ### 2026-06-20 — Fase P: Pola UI Modern (P-01..P-06)
 - **P-01** `DashboardAdmin.tsx`: tambah `<SegmentedTabs>` 3-mode (list/board/kalender), state `viewMode` + persist `localStorage('admin-queue-view')`; ekspor `ActionKanbanBoard` + `ActionCalendar` dari `command-center/index.ts`.
 - **P-02** `ActionCalendar.tsx`: lazy-load FullCalendar 6.x (`Promise.all` bundle 3 modul); events dari `items.filter(i => i.deadlineIso)` → warna per prioritas; `eventClick` → `navigate(actionTo)`; tambah `deadlineIso?: string` ke `ActionQueueItem` + `makeQueueTime` kirim `raw.toISOString()`.

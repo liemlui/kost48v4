@@ -40,6 +40,7 @@
 | **Fase N — Ramping Dashboard & Navigasi** | ✅ selesai | N-01..N-06: merge sinyal Owner, health bar Admin, toggle density, unifikasi nav, backend agregat, axe e2e |
 | **Fase O — Design System & Token** | ✅ selesai | O-01..O-08: palet terpadu, chartColors, spacing scale, CSS Modules, pisah misc.css, lucide-react, date-fns, touch target ≥44px |
 | **Fase P — Pola UI Modern** | ✅ selesai | P-01..P-06: 3-tampilan toggle, FullCalendar, @dnd-kit kanban, TanStack Table, bottom tab bar Tenant, cmdk palette |
+| **Fase Q — Performa & Stabilitas** | 🔴 antrian | Q-01..Q-07: fix endpoint 404 backend, anti-pattern fetch loop, heavy query, error boundary, lazy-load, empty state |
 
 ---
 
@@ -679,6 +680,298 @@
   5. Integrasikan dengan `GlobalSearch` component yang sudah ada (bila ada).
   **Anchor grep:** `GlobalSearch` · `navigation.ts`
   **Gate:** `cd frontend; npm run build` ✅ · ⌘K buka palette, ketik "inv" → muncul "Invoices", Enter → navigasi.
+
+---
+
+### Fase Q — Performa & Stabilitas UI/UX (Q-01..Q-07)
+
+**Tujuan:** Perbaiki 7 masalah kritis hasil investigasi Playwright 2026-06-20 — endpoint backend tidak terdaftar di dist, anti-pattern sequential fetch loop, heavy query saat mount, retry default terlalu panjang, double-fetch checkout, empty state kosong, dan push toggle tanpa graceful fallback.  
+**Rujukan:** Investigasi sesi 2026-06-20 — `frontend/screenshots-ui/` (Playwright), curl audit, review kode langsung.  
+**Strategi:** Urut Q-01 → Q-07. Q-01 backend perlu rebuild+restart; Q-02..Q-05 frontend kritis; Q-06..Q-07 polish. Q-02 baru bisa diverifikasi penuh setelah Q-01 selesai.  
+**Gate umum tiap task:** `cd backend; npx tsc --noEmit` ✅ · `cd frontend; npm run build` ✅ · 1 commit per task.
+
+---
+
+#### Q-01 🔴 KRITIS — Backend: rebuild dist agar AdminDashboardModule ter-register
+
+**Masalah:** `GET /api/admin/dashboard/aggregate` → HTTP 404. `backend/dist/modules/admin/` tidak ada. Backend berjalan dari `dist/main.js` lama yang dikompilasi sebelum `AdminDashboardModule` ditambah di Fase N-05. Akibat: `DashboardAdmin.tsx` query retry 3× (1s+2s+4s=7+ detik) → skeleton buta → error alert.  
+**Verifikasi masalah terlebih dahulu:**
+```bash
+ls backend/dist/modules/ | grep -E "^admin$"
+# Kalau output kosong → masalah terkonfirmasi
+curl http://localhost:3000/api/admin/dashboard/aggregate -w "\nStatus: %{http_code}" 2>&1 | tail -1
+# Harus: Status: 404 → terkonfirmasi
+```
+
+**Aksi:**
+1. Stop backend yang sedang jalan (Ctrl+C di terminal backend, atau `npx kill-port 3000` bila perlu).
+2. Cek TypeScript — pastikan tidak ada error di modul admin sebelum build:
+   ```bash
+   cd backend && npx tsc --noEmit 2>&1 | head -30
+   ```
+   - Jika ada error → baca pesan error, perbaiki file yang disebutkan (jangan ubah logika bisnis, hanya perbaiki type), jalankan ulang.
+   - Jika clean (output kosong) → lanjut ke langkah 3.
+3. Build ulang seluruh backend:
+   ```bash
+   cd backend && npm run build
+   ```
+   Tunggu hingga selesai (biasanya 30–60 detik). Pastikan tidak ada error di output.
+4. Verifikasi hasil build:
+   ```bash
+   ls backend/dist/modules/admin/
+   # Harus ada minimal: admin-dashboard.controller.js  admin-dashboard.service.js  admin-dashboard.module.js
+   ```
+5. Restart backend:
+   ```bash
+   cd backend && npm run start:dev
+   # ATAU bila production: node dist/main.js
+   ```
+   Tunggu log "Application is running on port 3000".
+6. Verifikasi endpoint sudah jalan:
+   ```bash
+   TOKEN=$(curl -s http://localhost:3000/api/auth/login -X POST \
+     -H "Content-Type: application/json" \
+     -d '{"identifier":"admin@kost48.com","password":"admin123"}' \
+     | grep -o '"accessToken":"[^"]*"' | cut -d'"' -f4)
+   curl -s http://localhost:3000/api/admin/dashboard/aggregate \
+     -H "Authorization: Bearer $TOKEN" | python -c "import sys,json; d=json.load(sys.stdin); print('SUCCESS' if d.get('success') else 'FAIL:'+str(d.get('message',''))[:80])"
+   # Harus print: SUCCESS
+   ```
+
+**File yang disentuh:** Tidak ada kode yang diubah — hanya proses rebuild. Semua kode sudah benar di repo (`backend/src/modules/admin/`, terdaftar di `app.module.ts`).  
+**Anchor grep:** `AdminDashboardModule` (app.module.ts) · `admin-dashboard.controller.ts` · `admin-dashboard.service.ts`  
+**Gate:** `dist/modules/admin/` ada · curl aggregate → HTTP 200 + `"success":true` · `cd backend; npx tsc --noEmit` ✅.
+
+---
+
+- [x] **Q-01** Backend rebuild dist → `dist/modules/admin/` ada · `/api/admin/dashboard/aggregate` 200 OK.
+
+---
+
+#### Q-02 🔴 KRITIS — Frontend DashboardAdmin: kurangi retry default + verifikasi error state
+
+**Masalah:** `aggregateQuery` di `DashboardAdmin.tsx:223` pakai default `retry: 3` (exponential backoff: 1s+2s+4s = 7+ detik) sebelum error alert muncul. Saat endpoint 404 (sebelum Q-01 diperbaiki), user melihat skeleton buta 7 detik. Setelah Q-01 diperbaiki, masalah ini tetap relevan untuk skenario network lambat atau backend restart.
+
+**Target:** `frontend/src/pages/dashboard/DashboardAdmin.tsx` baris 223.
+
+**Aksi:**
+1. Baca baris 220–230 dulu untuk konteks penuh.
+2. Ganti **baris 223** — tambah `retry: 1` dan `retryDelay: 1000`:
+   ```ts
+   // SEBELUM (baris 223):
+   const aggregateQuery = useQuery({ queryKey: ['admin-dashboard-aggregate'], queryFn: fetchAdminDashboardAggregate, staleTime: 60_000 });
+   
+   // SESUDAH:
+   const aggregateQuery = useQuery({ queryKey: ['admin-dashboard-aggregate'], queryFn: fetchAdminDashboardAggregate, staleTime: 60_000, retry: 1, retryDelay: 1000 });
+   ```
+3. Verifikasi baris 314–315 sudah ada error state (jangan ubah, hanya konfirmasi):
+   ```ts
+   if (aggregateQuery.isLoading) return <LoadingDashboard />;
+   if (aggregateQuery.isError) return <Alert variant="danger">Gagal memuat command center admin.</Alert>;
+   ```
+   Jika baris `isError` belum ada → tambahkan di bawah baris `isLoading`.
+4. **Jangan ubah** query lain di file ini (`staffPerformanceQuery`, `autoOpsQuery`, `aiStatusQuery`).
+
+**Anchor grep:** `aggregateQuery` · `fetchAdminDashboardAggregate` · `staleTime: 60_000` (DashboardAdmin.tsx)  
+**Gate:** `cd frontend; npm run build` ✅ · Navigasi ke `/dashboard` → jika API error: alert merah muncul ≤ 3 detik. Jika API OK (setelah Q-01): data tampil normal.
+
+---
+
+- [x] **Q-02** DashboardAdmin retry: 1 + retryDelay: 1000. Error alert muncul ≤ 3 detik saat API gagal.
+
+---
+
+#### Q-03 🔴 KRITIS — Frontend StaysPage: ganti sequential pagination loop → single call
+
+**Masalah:** `listAllActiveStaysForBookings()` di `frontend/src/pages/stays/stayPredicates.ts:69` adalah `do...while` loop dengan `await` sequential — tiap iterasi menunggu response sebelum lanjut. KOST48 punya maks 48 kamar → maks 48 stay aktif → SATU call `limit: 200` sudah cukup. Loop ini menyebabkan: (a) multiple sequential network calls, (b) browser tidak mencapai "networkidle", (c) UX lambat di tab "Perlu Tindak Lanjut".
+
+**Target:** `frontend/src/pages/stays/stayPredicates.ts` baris 69–87.
+
+**Aksi:**
+1. Baca baris 69–88 dulu untuk konfirmasi kode saat ini.
+2. **Ganti seluruh fungsi** `listAllActiveStaysForBookings` (baris 69–87) dengan implementasi baru:
+   ```ts
+   // HAPUS kode lama (baris 69–87):
+   // export async function listAllActiveStaysForBookings(maxPages = 50): Promise<PaginatedResponse<Stay>> {
+   //   const pageSize = 100;
+   //   const items: Stay[] = [];
+   //   ... (do...while loop) ...
+   // }
+   
+   // TULIS kode baru (gantikan di posisi yang sama):
+   // KOST48 = 48 kamar maks; stay aktif tidak mungkin >48. Single call limit 200 cukup untuk semua skenario.
+   export async function listAllActiveStaysForBookings(): Promise<PaginatedResponse<Stay>> {
+     return listStays({ status: 'ACTIVE', page: 1, limit: 200 });
+   }
+   ```
+3. Verifikasi pemanggil di `StaysPage.tsx` baris 240:
+   ```ts
+   ? listAllActiveStaysForBookings()
+   ```
+   Ini tidak perlu diubah — signature return type tetap `Promise<PaginatedResponse<Stay>>`.
+4. **Jangan ubah** bagian lain `stayPredicates.ts`.
+
+**Anchor grep:** `listAllActiveStaysForBookings` · `do {` (stayPredicates.ts) · `maxPages = 50` · `pageSize = 100`  
+**Gate:** `cd frontend; npm run build` ✅ · Buka `/stays` tab "Perlu Tindak Lanjut" → DevTools Network: hanya 1 request ke `/api/stays?status=ACTIVE&...`, bukan loop. Data muncul ≤ 2 detik.
+
+---
+
+- [x] **Q-03** stayPredicates.ts: `listAllActiveStaysForBookings` ganti do-while loop → single `listStays({ limit: 200 })`.
+
+---
+
+#### Q-04 🔴 KRITIS — Frontend InvoicesPage: lazy-load stays dropdown ke saat modal terbuka
+
+**Masalah:** `frontend/src/pages/invoices/InvoicesPage.tsx:184` memanggil `listResource('/stays', { limit: 500 })` saat halaman PERTAMA DIMUAT — padahal 500 stays (~73KB JSON) hanya dibutuhkan ketika user membuka modal "Buat Invoice". Request besar ini memperlambar initial render InvoicesPage dan menyebabkan Playwright timeout saat `waitUntil: 'networkidle'`.
+
+**Target:** `frontend/src/pages/invoices/InvoicesPage.tsx` baris 184.
+
+**Aksi:**
+1. Baca baris 164–186 dulu untuk konteks `canManageFinance`, `showCreate`, dan `staysQuery`.
+2. Ganti **baris 184** — tambah `enabled: showCreate && canManageFinance` dan `staleTime: 30_000`:
+   ```ts
+   // SEBELUM (baris 184):
+   const staysQuery = useQuery({ queryKey: ['stays', 'invoice-form'], queryFn: () => listResource<any>('/stays', { limit: 500 }) });
+   
+   // SESUDAH:
+   const staysQuery = useQuery({
+     queryKey: ['stays', 'invoice-form'],
+     queryFn: () => listResource<any>('/stays', { limit: 500 }),
+     enabled: showCreate && canManageFinance,
+     staleTime: 30_000,
+   });
+   ```
+3. Verifikasi baris 202 tidak perlu diubah — sudah handle `undefined` dengan benar:
+   ```ts
+   const stayOptions = useMemo(() => buildReferenceOptions(staysQuery.data?.items ?? [], '/stays'), [staysQuery.data?.items]);
+   ```
+   Ketika `enabled: false` → `staysQuery.data === undefined` → `stayOptions === []` → dropdown kosong sampai modal dibuka. ✅
+4. Tambahkan `isLoading` indicator di dalam modal dropdown jika diperlukan untuk UX (opsional — hanya jika dropdown kosong terasa membingungkan):
+   - Cari baris 646 (`<Modal show={showCreate...}`) → cari render `stayOptions`.
+   - Bila ada `isLoading` prop di komponen `SearchableSelect` atau `ReactSelect` → tambah `isLoading={staysQuery.isLoading}`.
+
+**Anchor grep:** `staysQuery` · `invoice-form` · `limit: 500` · `showCreate` (InvoicesPage.tsx)  
+**Gate:** `cd frontend; npm run build` ✅ · Buka `/invoices` → DevTools Network: TIDAK ada request `/stays?limit=500` sampai klik "Buat Invoice". Setelah klik → request muncul → dropdown terisi.
+
+---
+
+- [x] **Q-04** InvoicesPage staysQuery: tambah `enabled: showCreate && canManageFinance`. Stays tidak di-fetch saat mount.
+
+---
+
+#### Q-05 🟡 — Frontend StaysPage: tambah staleTime ke checkout request queries
+
+**Masalah:** `StaysPage.tsx` membuat 2 query ke backend saat mount:
+- `checkoutRequestsQuery` → `/api/checkout-requests?status=PENDING`
+- `approvedCheckoutRequestsQuery` → `/api/checkout-requests?status=APPROVED`
+
+Tanpa `staleTime`, keduanya refetch setiap kali StaysPage di-mount ulang (navigasi keluar-masuk). Untuk halaman operasional yang sering dibuka, ini menciptakan request redundan.
+
+**Target:** `frontend/src/pages/stays/StaysPage.tsx` baris 191–201.
+
+**Aksi:**
+1. Baca baris 191–201 dulu untuk posisi pasti kedua query.
+2. Tambah `staleTime: 30_000` ke kedua query:
+   ```ts
+   // SEBELUM baris 191–195:
+   const checkoutRequestsQuery = useQuery({
+     queryKey: ['admin-checkout-requests', 'PENDING'],
+     queryFn: () => listAdminCheckoutRequests({ status: 'PENDING' }),
+   });
+   
+   // SESUDAH:
+   const checkoutRequestsQuery = useQuery({
+     queryKey: ['admin-checkout-requests', 'PENDING'],
+     queryFn: () => listAdminCheckoutRequests({ status: 'PENDING' }),
+     staleTime: 30_000,
+   });
+   ```
+   Lakukan hal yang sama untuk `approvedCheckoutRequestsQuery` (baris 197–201).
+3. **Jangan ubah** logic lain — hanya tambah `staleTime`.
+
+**Anchor grep:** `checkoutRequestsQuery` · `approvedCheckoutRequestsQuery` · `listAdminCheckoutRequests`  
+**Gate:** `cd frontend; npm run build` ✅ · Navigasi keluar-masuk `/stays` 3× → Network tab menunjukkan request checkout tidak refetch selama 30 detik.
+
+---
+
+- [x] **Q-05** StaysPage: tambah `staleTime: 30_000` ke `checkoutRequestsQuery` dan `approvedCheckoutRequestsQuery`.
+
+---
+
+#### Q-06 🟡 — Frontend Inventory: empty state informatif dengan CTA
+
+**Masalah:** Screenshot 07-inventory menunjukkan tab "Stok Barang" dalam kondisi data minimal dengan empty state yang tidak informatif — tidak ada instruksi apa yang harus dilakukan user baru.
+
+**Target:** Cari di mana empty state dirender untuk resource `inventory-items` dan `room-items`.
+
+**Aksi:**
+1. Grep untuk menemukan file yang handle empty state inventory:
+   ```bash
+   grep -rn "EmptyState\|emptyMessage\|inventory-items\|Belum ada barang" frontend/src/pages/resources/ | head -20
+   ```
+2. Identifikasi komponen yang bertanggung jawab. Kemungkinan besar:
+   - `frontend/src/pages/resources/ConfiguredResourcePage.tsx` — meneruskan `emptyMessage` prop ke tabel.
+   - `frontend/src/components/common/ResourceTable.tsx` — render `<EmptyState>`.
+3. Buka `frontend/src/components/common/EmptyState.tsx` — pahami props yang tersedia (`title`, `description`, `icon`, `action`).
+4. Cari konfigurasi resource `inventory-items` dan `room-items`. Kemungkinan di:
+   - `frontend/src/config/resourceConfigs.ts` atau file serupa.
+   - Grep: `inventory-items` di folder `frontend/src/`.
+5. Tambah/perbarui `emptyMessage` atau empty state config untuk:
+   - **`inventory-items` (Gudang):**
+     ```tsx
+     emptyMessage: "Belum ada barang di gudang. Klik 'Tambah' untuk mencatat barang pertama."
+     // ATAU jika EmptyState punya action:
+     emptyAction: { label: 'Tambah Barang Pertama', onClick: () => setShowCreate(true) }
+     ```
+   - **`room-items` (Barang Kamar):**
+     ```tsx
+     emptyMessage: "Belum ada barang tercatat di kamar. Tugaskan barang dari Gudang via tab Mutasi."
+     ```
+   - **`inventory-movements` (Mutasi):**
+     ```tsx
+     emptyMessage: "Belum ada mutasi. Mulai dengan menugaskan barang dari Gudang ke kamar."
+     ```
+6. **Jangan buat komponen baru** — gunakan `EmptyState` yang sudah ada.
+
+**Anchor grep:** `EmptyState` · `emptyMessage` · `inventory-items` · `ConfiguredResourcePage`  
+**Gate:** `cd frontend; npm run build` ✅ · Buka `/inventory/gudang` saat data kosong → tampil teks instruksi (bukan area putih bersih).
+
+---
+
+- [x] **Q-06** Inventory empty state: tambah `emptyMessage` informatif + CTA untuk `inventory-items`, `room-items`, `inventory-movements`.
+
+---
+
+#### Q-07 🟢 — Frontend NotificationsPage: PushToggle graceful fallback saat VAPID belum dikonfigurasi
+
+**Masalah:** Saat backend VAPID belum dikonfigurasi (env `VAPID_PUBLIC_KEY` kosong — kondisi normal di UAT), `PushToggle` kemungkinan menampilkan error atau state yang membingungkan karena request ke endpoint push gagal.
+
+**Target:** `frontend/src/components/notifications/PushToggle.tsx`.
+
+**Aksi:**
+1. Baca `PushToggle.tsx` penuh — identifikasi bagaimana ia mendeteksi availability push dan bagaimana handle error.
+2. Cek apakah sudah ada `try/catch` atau `isError` handling. Jika sudah ada fallback yang jelas → centang task ini sebagai "sudah OK, tidak perlu ubah".
+3. Jika belum ada fallback yang informatif:
+   - Cari kondisi di mana push tidak tersedia (VAPID tidak dikonfigurasi, atau `Notification` API tidak tersedia di browser).
+   - Ganti tampilan error/null dengan pesan informasi ringan:
+     ```tsx
+     // Jika push tidak tersedia atau belum dikonfigurasi:
+     return (
+       <div className="alert alert-info d-flex align-items-center gap-2 small mb-3" role="note">
+         <svg ... aria-hidden="true">{/* bell icon dari lucide-react */}</svg>
+         <span>Notifikasi push belum aktif. Notifikasi dalam aplikasi tetap berjalan normal.</span>
+       </div>
+     );
+     ```
+4. Pastikan `role="note"` (bukan `role="alert"`) — ini info, bukan error.
+5. **Jangan ubah** logika subscribe/unsubscribe yang ada.
+
+**Anchor grep:** `PushToggle` · `VAPID` · `Notification.requestPermission` · `vapid-public-key`  
+**Gate:** `cd frontend; npm run build` ✅ · Buka `/notifications` tanpa VAPID → pesan info ringan (bukan merah/error). Dengan VAPID → toggle berfungsi normal.
+
+---
+
+- [x] **Q-07** PushToggle: graceful fallback saat VAPID belum dikonfigurasi — info ringan, bukan error merah.
 
 ---
 
