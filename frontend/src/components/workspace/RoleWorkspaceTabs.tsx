@@ -3,20 +3,20 @@ import { useLocation, useNavigate } from 'react-router-dom';
 
 // OWN-ROUTE-SPLIT: base dashboard bisa `/dashboard` (ADMIN/STAFF) atau `/admin-dashboard` (OWNER mode admin).
 // FASE-H: dipadatkan dari 6 → 3 area (Ringkasan · Penghuni & Uang · Operasional).
+// N-04: hapus tab Ringkasan (sidebar sudah punya item Dashboard → base) agar tidak ada rute ganda.
 function buildAdminTabs(base: string) {
   return [
-    { id: 'overview', label: 'Ringkasan', to: base, match: (path: string, search: URLSearchParams) => path === base && !search.get('area') },
     { id: 'stays-finance', label: 'Penghuni & Uang', to: `${base}?area=stays-finance`, match: (path: string, search: URLSearchParams) => ['/stays', '/tenants', '/renew-requests', '/invoices', '/payment-submissions', '/invoice-payments', '/expenses'].some((prefix) => path.startsWith(prefix)) || (path === base && search.get('area') === 'stays-finance') },
     { id: 'ops', label: 'Operasional', to: `${base}?area=ops`, match: (path: string, search: URLSearchParams) => ['/tickets', '/staff', '/staff-routines', '/rooms', '/inventory', '/room-items', '/inventory-items', '/inventory-movements', '/meter-readings'].some((prefix) => path.startsWith(prefix)) || (path === base && search.get('area') === 'ops') },
   ];
 }
 
-// FASE-H: tab Kokpit Owner dipadatkan jadi 3, dengan match yang mencakup SEMUA route owner agar
-// tidak ada halaman yang tak menyorot tab (loss-refunds, market-analysis, loyalty, layanan, dst).
+// N-04: hapus tab yang duplikat dengan sidebar owner:
+// - 'Ringkasan' → /owner-dashboard (sudah ada di sidebar sebagai 'Kokpit Owner')
+// - 'Laporan & Aset' → /reports (sudah ada di sidebar sebagai 'Laporan Bisnis')
+// Sisa: hanya 'Penghuni & Uang' → /stays (tidak ada di sidebar owner).
 const OWNER_TABS = [
-  { id: 'overview', label: 'Ringkasan', to: '/owner-dashboard', match: (path: string) => path === '/owner-dashboard' },
   { id: 'stays-finance', label: 'Penghuni & Uang', to: '/stays', match: (path: string) => ['/stays', '/tenants', '/renew-requests', '/invoices', '/payment-submissions', '/invoice-payments', '/expenses', '/wifi-sales', '/ancillary-revenue'].some((prefix) => path.startsWith(prefix)) },
-  { id: 'ops', label: 'Laporan & Aset', to: '/reports', match: (path: string) => ['/reports', '/finance', '/loss-refunds', '/market-analysis', '/loyalty', '/staff', '/tickets', '/rooms', '/inventory', '/room-items', '/inventory-items', '/inventory-movements', '/meter-readings', '/users', '/settings', '/announcements', '/service-interests', '/additional-services'].some((prefix) => path.startsWith(prefix)) },
 ];
 
 // OWN-ROLE-TABS-MODE: mode eksplisit, bukan hack role. OWNER + ownerViewMode='admin'

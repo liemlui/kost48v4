@@ -4,6 +4,15 @@
 
 ## Changelog Ringkas
 
+### 2026-06-20 — Fase N: Ramping Dashboard & Navigasi (N-01..N-06)
+- **N-01** `OwnerDashboardPage.tsx`: merge `extraSignals` (meter due + readiness) ke dalam panel "Butuh perhatian" — badge count & empty-state kini gabungkan kedua sumber sinyal.
+- **N-02** Buat `AdminHealthBar.tsx` (chip ringkas + Bootstrap Collapse); hapus `AdminContinuityStrip`, `AdminTodayStatusStrip`, `AdminOperationsCommandQueue`, dead CSS `admin-ops-guardrails`; `ActionQueueTable` dipindah ke hero.
+- **N-03** Toggle density Ringkas/Lengkap di Admin (`⊟/⊞`): `dense` state + `localStorage` persist (`admin-density`); `AdminWorkspaces` terima prop `dense`, `useClientPagination` page size 10→3.
+- **N-04** `RoleWorkspaceTabs`: hapus tab duplikat (Ringkasan Admin + 2 tab Owner yg sudah di sidebar); Admin tersisa 2 tab, Owner tersisa 1 tab.
+- **N-05** Backend: buat `AdminDashboardModule` (`GET /admin/dashboard/aggregate`) + `OwnerDashboardModule` (`GET /owner/dashboard/aggregate`), export `FinanceService`; Frontend: 9+ query Admin → 1, 3 query Owner → 1; hapus `computeMeterDue` klien.
+- **N-06** Install `@axe-core/playwright`; buat `e2e/a11y/axe-audit.spec.ts` (public + katalog, target ≤5 critical/serious); tambah `"test:a11y"` script ke `package.json`.
+- **Gate:** `npx tsc --noEmit` ✅ · `npm run build` ✅ semua N-task.
+
 ### 2026-06-20 — Fase M: Quick Wins A11y & Polish (M-01..M-06)
 - **M-01** `AdminWorkspaces.tsx`: ganti `window.location.assign` → `useNavigate()` di `AdminStaffFrontlineList`.
 - **M-02** Buat `ConfirmProvider` + `useConfirm()` (context + promise); daftarkan di `main.tsx`; ganti 9 `window.confirm` di 6 file (`AppLayout`, `FacilityManager`, `TenantProfilePhotoCard`, `MyStayPage`, `WifiOrderPage`, `OwnerSettingsPage`).

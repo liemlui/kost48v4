@@ -46,6 +46,8 @@ import { MarketAnalysisModule } from './modules/market-analysis/market-analysis.
 import { OwnerAiModule } from './modules/owner-ai/owner-ai.module';
 import { SurveysModule } from './modules/surveys/surveys.module';
 import { AdditionalServicesModule } from './modules/additional-services/additional-services.module';
+import { AdminDashboardModule } from './modules/admin/admin-dashboard.module';
+import { OwnerDashboardModule } from './modules/owner/owner-dashboard.module';
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
@@ -92,6 +94,8 @@ import { AdditionalServicesModule } from './modules/additional-services/addition
     OwnerAiModule,
     SurveysModule,
     AdditionalServicesModule,
+    AdminDashboardModule,
+    OwnerDashboardModule,
   ],
   providers: [
     // Audit E-1: default-deny — semua endpoint butuh JWT kecuali ditandai @Public().

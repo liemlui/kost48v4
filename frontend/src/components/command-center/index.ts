@@ -1,3 +1,4 @@
+export { default as AdminHealthBar } from './AdminHealthBar';
 export { default as AssistantPanel, sortAssistantItems } from './AssistantPanel';
 export type { AssistantItem, AssistantSeverity } from './AssistantPanel';
 export { default as ActionQueueTable } from './ActionQueueTable';

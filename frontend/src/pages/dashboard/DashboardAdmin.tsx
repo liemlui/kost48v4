@@ -1,32 +1,28 @@
 import { useState, type ReactNode } from 'react';
-import { Alert, Button, Card, Col, Modal, Row, Table } from 'react-bootstrap';
+import { Alert, Col, Row } from 'react-bootstrap';
 import { useNavigate, useLocation } from 'react-router-dom';
 import EmptyState from '../../components/common/EmptyState';
 import PaginationControls from '../../components/common/PaginationControls';
 import StatusBadge from '../../components/common/StatusBadge';
-import { AssistantPanel, ActionQueueTable, type ActionQueueItem, type AssistantItem } from '../../components/command-center';
+import { AssistantPanel, ActionQueueTable, AdminHealthBar, type ActionQueueItem, type AssistantItem } from '../../components/command-center';
 import { AssistantInsightLine, EntityBadgeFilterBar } from '../../components/workspace';
 import AutoOpsControlPanel from '../../components/auto-ops/AutoOpsControlPanel';
 import SmartChartPanel, { type SmartChartPoint } from '../../components/charts/SmartChartPanel';
 import { generateBrief, getOwnerAiStatus, type BriefResult } from '../../api/ai';
 import AiAssistButton from '../../components/ai/AiAssistButton';
 import AiResultPanel from '../../components/ai/AiResultPanel';
-import { listResource, postAction } from '../../api/resources';
-import { listAdminRenewRequests } from '../../api/renewRequests';
-import { listAdminCheckoutRequests } from '../../api/checkoutRequests';
-import { listPaymentReviewQueue } from '../../api/paymentSubmissions';
+import { fetchAdminDashboardAggregate } from '../../api/adminDashboard';
 import { fetchAutoOpsStatus } from '../../api/autoOps';
 import { fetchAdminStaffPerformance } from '../../api/staffPerformance';
 import { useOperationalStressIndex } from '../../hooks/useOperationalStressIndex';
 import { useClientPagination } from '../../hooks/useClientPagination';
 import { dedupeCommandItems } from '../../utils/commandCenterDedup';
 import { addHoursToDate, formatDateTimeWib, getDeadlineMeta } from '../../utils/dateTime';
-import { getInvoiceTotalAmount } from '../../utils/invoiceTotals';
 import type { CheckoutRequest, InventoryItem, Invoice, PaymentSubmission, RenewRequest, Room, Stay, Ticket } from '../../types';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import {
   type AutoOpsStatusLike, type AdminWorkLane,
-  ACTION_QUERY_OPTIONS, MEDIUM_FRESH_QUERY_OPTIONS, ADMIN_SLA_HOURS,
+  ACTION_QUERY_OPTIONS, ADMIN_SLA_HOURS,
   formatDateSafe, formatNumber,
   daysFromToday, isOpenInvoice, isTerlambat, isDueSoon,
   isReservedBookingPendingApproval, isReservedBookingWaitingPayment, isExpiredAdminBooking,
@@ -100,29 +96,14 @@ function makeAdminStaffPoints(tickets: Ticket[]): SmartChartPoint[] {
   ];
 }
 
-function AdminContinuityStrip({ lanes, onNavigate }: { lanes: AdminWorkLane[]; onNavigate: (to: string) => void }) {
-  return (
-    <div className="admin-lane-strip" aria-label="Ringkasan jalur kerja admin">
-      {lanes.map((lane) => {
-        const hasWork = lane.value > 0;
-        return (
-          <button type="button" key={lane.id} className={`admin-lane-chip ${lane.tone} ${hasWork ? 'has-work' : 'is-calm'}`.trim()} onClick={() => onNavigate(lane.to)}>
-            <span className="admin-lane-step">{lane.step}</span>
-            <strong>{lane.title}</strong>
-            <span className="admin-lane-value">{hasWork ? `${lane.value} perlu aksi` : 'Aman'}</span>
-            {lane.nextDeadline ? <span className="admin-lane-deadline">{lane.nextDeadline}</span> : <span className="admin-lane-sla">{lane.sla}</span>}
-          </button>
-        );
-      })}
-    </div>
-  );
-}
 
-function AdminCommandHeader({ totalQueue, urgentCount, activeAreaLabel }: {
+function AdminCommandHeader({ totalQueue, urgentCount, activeAreaLabel, dense, onToggleDense }: {
   totalQueue: number;
   urgentCount: number;
   activeAreaLabel: string;
   topQueueItem?: ActionQueueItem;
+  dense?: boolean;
+  onToggleDense?: () => void;
 }) {
   const isOverview = activeAreaLabel === 'Ringkasan';
   const headline = totalQueue
@@ -138,6 +119,11 @@ function AdminCommandHeader({ totalQueue, urgentCount, activeAreaLabel }: {
         <div className="admin-command-status-line">
           <span>{status}</span>
           <span>Terakhir update: {makeLastUpdatedLabel()}</span>
+          {onToggleDense ? (
+            <button type="button" className="btn btn-outline-secondary btn-sm admin-density-toggle" onClick={onToggleDense} aria-pressed={dense}>
+              {dense ? '⊞ Lengkap' : '⊟ Ringkas'}
+            </button>
+          ) : null}
         </div>
       </div>
     </div>
@@ -168,74 +154,16 @@ function AdminSlaMiniNote({ status }: { status?: AutoOpsStatusLike | null }) {
   );
 }
 
-function AdminTodayStatusStrip({ rooms, inventoryItems, invoices, tickets, pendingPaymentReviewCount, pendingApprovalCount, pendingRenewCount, checkoutCount }: { rooms: Room[]; inventoryItems: any[]; invoices: Invoice[]; tickets: Ticket[]; pendingPaymentReviewCount: number; pendingApprovalCount: number; pendingRenewCount: number; checkoutCount: number }) {
-  const occupied = rooms.filter((room) => room.status === 'OCCUPIED').length;
-  const available = rooms.filter((room) => room.status === 'AVAILABLE').length;
-  const activeTickets = tickets.filter((ticket) => ['OPEN', 'IN_PROGRESS', 'DONE'].includes(ticket.status)).length;
-  const waitingAdminTickets = tickets.filter((ticket) => ticket.status === 'DONE').length;
-  const lowStock = inventoryItems.filter(isLowStockItem).length;
-  const openInvoices = invoices.filter(isOpenInvoice).length;
-  const overdueInvoices = invoices.filter(isTerlambat).length;
-  const occupancyPercent = makePercent(occupied, rooms.length);
-  const financeRisk = overdueInvoices + pendingPaymentReviewCount;
-  const stayWork = pendingApprovalCount + pendingRenewCount + checkoutCount;
-  const strips = [
-    { label: 'Hunian', value: `${occupied}/${rooms.length || 0}`, helper: `${available} kamar kosong`, detail: `${occupancyPercent}% terisi`, percent: occupancyPercent, tone: occupancyPercent >= 80 ? 'success' : 'info' },
-    { label: 'Masa sewa', value: String(stayWork), helper: stayWork ? 'butuh keputusan' : 'alur aman', detail: `${pendingApprovalCount} booking · ${pendingRenewCount} perpanjangan · ${checkoutCount} keluar`, tone: stayWork ? 'warning' : 'success' },
-    { label: 'Keuangan', value: String(openInvoices), helper: financeRisk ? `${financeRisk} risiko bayar` : 'tidak ada risiko urgent', detail: `${overdueInvoices} overdue · ${pendingPaymentReviewCount} bukti review`, tone: financeRisk ? 'danger' : 'success' },
-    { label: 'Staff & Tiket', value: String(activeTickets), helper: activeTickets ? 'tiket aktif/perlu cek' : 'staff & tiket aman', detail: `${waitingAdminTickets} menunggu cek admin`, tone: waitingAdminTickets ? 'warning' : activeTickets ? 'info' : 'success' },
-    { label: 'Kamar & Stok', value: String(lowStock), helper: lowStock ? 'stok menipis' : 'stok aman', detail: `${inventoryItems.length} item dipantau`, tone: lowStock ? 'warning' : 'success' },
-  ];
-  return (
-    <div className="admin-today-status-strip" aria-label="Kondisi operasional hari ini">
-      {strips.map((strip) => (
-        <div className={`admin-today-status-item ${strip.tone}`} key={strip.label}>
-          <div className="status-strip-top"><span>{strip.label}</span><strong>{strip.value}</strong></div>
-          {strip.percent !== undefined ? <div className="status-strip-bar" aria-hidden="true"><i style={{ width: `${strip.percent}%` }} /></div> : null}
-          <small>{strip.helper}</small>
-        </div>
-      ))}
-    </div>
-  );
-}
 
-type AdminOperationsCommandQueueProps = { lanes: AdminWorkLane[]; assistantItems: AssistantItem[]; topQueueItem?: ActionQueueItem; queueItems: ActionQueueItem[]; onNavigate: (to: string) => void };
 
-function AdminOperationsCommandQueue({ lanes, assistantItems, topQueueItem, queueItems, onNavigate }: AdminOperationsCommandQueueProps) {
-  const blockerCount = queueItems.filter((item) => item.priority === 'BLOCKER' || item.timeStatusTone === 'danger').length;
-  const decisionCount = lanes.reduce((sum, lane) => sum + lane.value, 0);
-  const primaryAction = topQueueItem?.actionTo ?? lanes.find((lane) => lane.value > 0)?.to ?? '/dashboard';
-  const primaryLabel = topQueueItem?.recommendedAction ?? lanes.find((lane) => lane.value > 0)?.action ?? 'Cek dashboard';
-  return (
-    <Card className="content-card border-0 admin-operations-command-card mb-3">
-      <Card.Body>
-        <div className="admin-ops-command-hero">
-          <div>
-            <div className="admin-section-label">Antrean Operasional Admin</div>
-            <h2>Kerjakan yang mengunci flow dulu.</h2>
-            <p>Dashboard ini menggabungkan pemesanan, pembayaran, perpanjangan, keluar, tagihan, tiket, dan stok menjadi antrean aksi harian.</p>
-          </div>
-          <div className="admin-ops-command-summary">
-            <span>{decisionCount} pekerjaan aktif</span>
-            <strong>{blockerCount ? `${blockerCount} blocker` : 'Tidak ada blocker merah'}</strong>
-            <Button variant={blockerCount ? 'primary' : 'outline-primary'} size="sm" onClick={() => onNavigate(primaryAction)}>{primaryLabel}</Button>
-          </div>
-        </div>
-        <AdminContinuityStrip lanes={lanes} onNavigate={onNavigate} />
-        <AssistantPanel title="Daily Assistant Admin" subtitle="Ringkasan pekerjaan yang paling berdampak ke kamar, uang masuk, dan tenant." items={assistantItems} emptyTitle="Operasional hari ini aman" emptyMessage="Tidak ada bukti bayar pending, checkout macet, perpanjangan pending, tagihan overdue, atau tiket penting dari data yang dimuat." maxItems={4} collapsible={false} />
-      </Card.Body>
-    </Card>
-  );
-}
-
-function AdminOverviewCharts({ activeArea, rooms, invoices, tickets, pendingPaymentReviewCount, pendingApprovalCount, waitingInitialPaymentCount, pendingRenewCount, checkoutCount }: { activeArea: AdminQueueArea; rooms: Room[]; invoices: Invoice[]; tickets: Ticket[]; pendingPaymentReviewCount: number; pendingApprovalCount: number; waitingInitialPaymentCount: number; pendingRenewCount: number; checkoutCount: number }) {
+function AdminOverviewCharts({ activeArea, rooms, invoices, tickets, pendingPaymentReviewCount, pendingApprovalCount, waitingInitialPaymentCount, pendingRenewCount, checkoutCount, dense }: { activeArea: AdminQueueArea; rooms: Room[]; invoices: Invoice[]; tickets: Ticket[]; pendingPaymentReviewCount: number; pendingApprovalCount: number; waitingInitialPaymentCount: number; pendingRenewCount: number; checkoutCount: number; dense?: boolean }) {
   const stayPoints: SmartChartPoint[] = [
     { label: 'Review booking', value: pendingApprovalCount, detail: 'Menunggu keputusan admin', to: '/stays?status=BOOKINGS' },
     { label: 'Menunggu bayar', value: waitingInitialPaymentCount, detail: 'Tenant punya deadline bayar', to: '/stays?status=BOOKINGS' },
     { label: 'Cek meter perpanjangan', value: pendingRenewCount, detail: 'Butuh cek meter', to: '/renew-requests' },
     { label: 'Keluar', value: checkoutCount, detail: 'Review dan finalkan keluar', to: '/stays?status=BOOKINGS' },
   ];
-  if (activeArea === 'overview') return null;
+  if (activeArea === 'overview' || dense) return null;
   const panels: Array<{ id: string; area: AdminQueueArea[]; node: ReactNode }> = [
     { id: 'stays-finance-overview', area: ['stays-finance'], node: (
       <Row className="g-3">
@@ -270,49 +198,40 @@ export default function AdminDashboard() {
   const location = useLocation();
   const { user } = useAuth();
   const activeArea: AdminQueueArea = normalizeAdminArea(new URLSearchParams(location.search).get('area'));
+  const [dense, setDense] = useState<boolean>(() => localStorage.getItem('admin-density') === 'compact');
+  const handleToggleDense = () => {
+    setDense((prev) => {
+      const next = !prev;
+      localStorage.setItem('admin-density', next ? 'compact' : 'full');
+      return next;
+    });
+  };
   // OWN-ROUTE-SPLIT: tetap di dashboard yang sama (OWNER `/admin-dashboard` atau ADMIN `/dashboard`) saat pindah area.
   const dashboardBase = location.pathname === '/admin-dashboard' ? '/admin-dashboard' : '/dashboard';
-  // FASE-H: 3 area. Overview memuat semua (status strip + antrean butuh seluruh data).
   const isOverview = activeArea === 'overview';
-  const needsStaysData = isOverview || activeArea === 'stays-finance';
-  const needsFinanceData = isOverview || activeArea === 'stays-finance';
-  const needsTicketData = isOverview || activeArea === 'ops';
-  const needsRoomData = isOverview || activeArea === 'ops';
-  const needsInventoryData = isOverview || activeArea === 'ops';
-  const needsAutoOpsData = isOverview;
-  const needsStaffPerformanceData = activeArea === 'ops';
 
-  const roomsQuery = useQuery({ queryKey: ['dashboard-admin', 'rooms', activeArea], queryFn: () => listResource<Room>('/rooms', { limit: isOverview ? 500 : 120 }), enabled: needsRoomData, ...MEDIUM_FRESH_QUERY_OPTIONS });
-  const inventoryItemsQuery = useQuery({ queryKey: ['dashboard-admin', 'inventory-items', activeArea], queryFn: () => listResource<any>('/inventory-items', { limit: isOverview ? 150 : 80 }), enabled: needsInventoryData, ...MEDIUM_FRESH_QUERY_OPTIONS });
-  const staysQuery = useQuery({ queryKey: ['dashboard-admin', 'stays-active', activeArea], queryFn: () => listResource<Stay>('/stays', { status: 'ACTIVE', limit: isOverview ? 300 : 160 }), enabled: needsStaysData, ...MEDIUM_FRESH_QUERY_OPTIONS });
-  const invoicesQuery = useQuery({ queryKey: ['dashboard-admin', 'invoices', activeArea], queryFn: () => listResource<Invoice>('/invoices', { limit: isOverview ? 500 : 180 }), enabled: needsFinanceData, ...MEDIUM_FRESH_QUERY_OPTIONS });
-  const ticketsQuery = useQuery({ queryKey: ['dashboard-admin', 'tickets', activeArea], queryFn: () => listResource<Ticket>('/tickets', { limit: isOverview ? 150 : 100 }), enabled: needsTicketData, ...MEDIUM_FRESH_QUERY_OPTIONS });
-  const renewRequestsQuery = useQuery({ queryKey: ['dashboard-admin', 'renew-requests', activeArea], queryFn: () => listAdminRenewRequests(), enabled: needsStaysData, ...MEDIUM_FRESH_QUERY_OPTIONS });
-  const checkoutRequestsPendingQuery = useQuery({ queryKey: ['dashboard-admin', 'checkout-requests-pending', activeArea], queryFn: () => listAdminCheckoutRequests({ status: 'PENDING' }), enabled: needsStaysData, ...ACTION_QUERY_OPTIONS });
-  const checkoutRequestsApprovedQuery = useQuery({ queryKey: ['dashboard-admin', 'checkout-requests-approved', activeArea], queryFn: () => listAdminCheckoutRequests({ status: 'APPROVED' }), enabled: needsStaysData, ...ACTION_QUERY_OPTIONS });
-  const paymentReviewQuery = useQuery({ queryKey: ['dashboard-admin', 'payment-review', activeArea], queryFn: () => listPaymentReviewQueue({ limit: isOverview ? 25 : 15 }), enabled: needsFinanceData, ...ACTION_QUERY_OPTIONS });
-  const staffPerformanceQuery = useQuery({ queryKey: ['dashboard-admin', 'staff-performance', activeArea], queryFn: () => fetchAdminStaffPerformance(), enabled: needsStaffPerformanceData, ...MEDIUM_FRESH_QUERY_OPTIONS });
-  const autoOpsQuery = useQuery({ queryKey: ['dashboard-admin', 'auto-ops-status', activeArea], queryFn: fetchAutoOpsStatus, enabled: needsAutoOpsData, ...ACTION_QUERY_OPTIONS });
+  // N-05: 9+ query individual → 1 aggregate (staleTime 60 s). AutoOps & staffPerformance tetap terpisah.
+  const aggregateQuery = useQuery({ queryKey: ['admin-dashboard-aggregate'], queryFn: fetchAdminDashboardAggregate, staleTime: 60_000 });
+  const staffPerformanceQuery = useQuery({ queryKey: ['dashboard-admin', 'staff-performance'], queryFn: () => fetchAdminStaffPerformance(), enabled: activeArea === 'ops', ...ACTION_QUERY_OPTIONS });
+  const autoOpsQuery = useQuery({ queryKey: ['dashboard-admin', 'auto-ops-status'], queryFn: fetchAutoOpsStatus, enabled: isOverview, ...ACTION_QUERY_OPTIONS });
   // H4: status AI untuk conditional render AiAssistButton di area overview
   const aiStatusQuery = useQuery({ queryKey: ['owner-ai-status'], queryFn: getOwnerAiStatus, staleTime: 300_000, retry: 1 });
   const canUseAdminBriefAi = user?.role === 'OWNER' && aiStatusQuery.data?.configured === true;
 
-  const rooms = roomsQuery.data?.items ?? [];
-  const inventoryItems = inventoryItemsQuery.data?.items ?? [];
-  const stays = staysQuery.data?.items ?? [];
-  const invoices = invoicesQuery.data?.items ?? [];
-  const tickets = ticketsQuery.data?.items ?? [];
-  const renewRequests = renewRequestsQuery.data?.items?.filter((rr: RenewRequest) =>
-    ['PENDING', 'PENDING_DECISION', 'AWAITING_DP', 'DP_SECURED'].includes(rr.status),
-  ) ?? [];
-  const checkoutPendingRequests = checkoutRequestsPendingQuery.data?.items ?? [];
-  const checkoutApprovedRequests = checkoutRequestsApprovedQuery.data?.items ?? [];
-  const paymentReviewItems = (paymentReviewQuery.data?.items ?? []).filter((submission: PaymentSubmission) => submission.status === 'PENDING_REVIEW');
+  const rooms = aggregateQuery.data?.rooms.items ?? [];
+  const inventoryItems = aggregateQuery.data?.inventoryItems.items ?? [];
+  const stays = aggregateQuery.data?.stays.items ?? [];
+  const invoices = aggregateQuery.data?.invoices.items ?? [];
+  const tickets = aggregateQuery.data?.tickets.items ?? [];
+  const renewRequests = aggregateQuery.data?.renewRequests.items ?? [];
+  const checkoutPendingRequests = aggregateQuery.data?.checkoutPending.items ?? [];
+  const checkoutApprovedRequests = aggregateQuery.data?.checkoutApproved.items ?? [];
+  const paymentReviewItems = aggregateQuery.data?.paymentReview.items ?? [];
   const staffPerformanceItems = staffPerformanceQuery.data?.items ?? [];
   const pendingRenewCount = renewRequests.length;
   const pendingCheckoutRequestCount = checkoutPendingRequests.length;
   const approvedCheckoutRequestCount = checkoutApprovedRequests.length;
-  const pendingPaymentReviewCount = makePaymentCount(paymentReviewItems, paymentReviewQuery.data?.meta?.totalItems);
+  const pendingPaymentReviewCount = makePaymentCount(paymentReviewItems, aggregateQuery.data?.paymentReview.meta?.totalItems);
   const overdueInvoices = invoices.filter(isTerlambat);
   const dueSoonInvoices = invoices.filter(isDueSoon);
   const pendingApprovalBookings = stays.filter((stay) => isReservedBookingPendingApproval(stay) && !isExpiredAdminBooking(stay));
@@ -377,37 +296,41 @@ export default function AdminDashboard() {
   const activeAreaConfig = ADMIN_QUEUE_AREAS.find((area) => area.id === activeArea) ?? ADMIN_QUEUE_AREAS[0];
 
   const refreshDashboard = () => {
-    const refetches: Array<Promise<unknown>> = [];
-    if (needsRoomData) refetches.push(roomsQuery.refetch());
-    if (needsInventoryData) refetches.push(inventoryItemsQuery.refetch());
-    if (needsStaysData) refetches.push(staysQuery.refetch(), renewRequestsQuery.refetch(), checkoutRequestsPendingQuery.refetch(), checkoutRequestsApprovedQuery.refetch());
-    if (needsFinanceData) refetches.push(invoicesQuery.refetch(), paymentReviewQuery.refetch());
-    if (needsTicketData) refetches.push(ticketsQuery.refetch());
-    if (needsAutoOpsData) refetches.push(autoOpsQuery.refetch());
-    if (needsStaffPerformanceData) refetches.push(staffPerformanceQuery.refetch());
-    void Promise.all(refetches);
+    void Promise.all([aggregateQuery.refetch(), autoOpsQuery.refetch()]);
   };
 
-  const coreQueriesLoading = (needsRoomData && roomsQuery.isLoading) || (needsStaysData && staysQuery.isLoading) || (needsFinanceData && invoicesQuery.isLoading) || (needsTicketData && ticketsQuery.isLoading);
-  const supportQueriesLoading = (needsInventoryData && inventoryItemsQuery.isLoading) || (needsStaysData && (renewRequestsQuery.isLoading || checkoutRequestsPendingQuery.isLoading || checkoutRequestsApprovedQuery.isLoading)) || (needsFinanceData && paymentReviewQuery.isLoading) || (needsAutoOpsData && autoOpsQuery.isLoading) || (needsStaffPerformanceData && staffPerformanceQuery.isLoading);
-  const coreQueriesError = (needsRoomData && roomsQuery.isError) || (needsStaysData && staysQuery.isError) || (needsFinanceData && invoicesQuery.isError) || (needsTicketData && ticketsQuery.isError);
-  const supportQueriesError = (needsInventoryData && inventoryItemsQuery.isError) || (needsStaysData && (renewRequestsQuery.isError || checkoutRequestsPendingQuery.isError || checkoutRequestsApprovedQuery.isError)) || (needsFinanceData && paymentReviewQuery.isError) || (needsAutoOpsData && autoOpsQuery.isError) || (needsStaffPerformanceData && staffPerformanceQuery.isError);
+  const supportQueriesLoading = staffPerformanceQuery.isLoading || autoOpsQuery.isLoading;
+  const supportQueriesError = staffPerformanceQuery.isError || autoOpsQuery.isError;
 
-  if (coreQueriesLoading) return <LoadingDashboard />;
-  if (coreQueriesError) return <Alert variant="danger">Gagal memuat command center admin.</Alert>;
+  if (aggregateQuery.isLoading) return <LoadingDashboard />;
+  if (aggregateQuery.isError) return <Alert variant="danger">Gagal memuat command center admin.</Alert>;
 
   return (
     <div className="admin-dashboard-queue-first admin-dashboard-simplified">
-      <AdminCommandHeader totalQueue={filteredQueueItems.length} urgentCount={urgentQueueCount} activeAreaLabel={activeAreaConfig.label} topQueueItem={topQueueItem} />
+      <AdminCommandHeader totalQueue={filteredQueueItems.length} urgentCount={urgentQueueCount} activeAreaLabel={activeAreaConfig.label} topQueueItem={topQueueItem} dense={dense} onToggleDense={handleToggleDense} />
       <AssistantInsightLine
         title="Asisten Operasional"
         tone={supportQueriesError ? 'warning' : urgentQueueCount ? 'warning' : topQueueItem ? 'info' : 'success'}
         message={supportQueriesError ? 'Data utama sudah tampil, tetapi sebagian data pendukung gagal dimuat.' : topQueueItem ? `${topQueueItem.type}: ${topQueueItem.issue}` : activeArea === 'overview' ? 'Tidak ada blocker besar. Gunakan tab area untuk membuka detail.' : `${activeAreaConfig.label} sedang aman.`}
       />
       {supportQueriesLoading ? <Alert variant="info" className="admin-support-loading-note">Data pendukung sedang dimuat. Dashboard utama tetap bisa dipakai.</Alert> : null}
-      {activeArea === 'overview' ? <AdminOperationsCommandQueue lanes={adminWorkLanes} assistantItems={adminAssistantItems} topQueueItem={topQueueItem} queueItems={queueItems} onNavigate={navigate} /> : null}
-      {/* H4: Brief AI untuk admin — hanya muncul jika API key dikonfigurasi & area overview */}
-      {activeArea === 'overview' && canUseAdminBriefAi ? (
+      {/* N-02: AdminHealthBar ringkas — gantikan AdminTodayStatusStrip + AdminContinuityStrip */}
+      {activeArea === 'overview' ? (
+        <AdminHealthBar
+          occupiedCount={rooms.filter((room) => room.status === 'OCCUPIED').length}
+          totalRooms={rooms.length}
+          overdueInvoiceCount={overdueInvoiceCount}
+          pendingPaymentReviewCount={pendingPaymentReviewCount}
+          activeTicketCount={activeTicketCount}
+          stayWorkCount={pendingApprovalCount + pendingRenewCount + checkoutWorkCount}
+          lowStockCount={lowStockCount}
+        />
+      ) : null}
+      {/* N-02: ActionQueueTable sebagai hero — dipindah ke atas */}
+      {activeArea === 'overview' ? <ActionQueueTable title="Admin Operations Antrean Aksi" subtitle="Antrean keputusan lintas booking, pembayaran, renew, checkout, tagihan, tiket, dan stok." items={filteredQueueItems} emptyTitle="Tidak ada item mendesak hari ini" emptyDescription="Semua area operasional sedang aman." maxItems={12} collapsible={false} /> : null}
+      {/* N-02: AssistantPanel full-width di bawah antrean */}
+      {activeArea === 'overview' ? <AssistantPanel title="Daily Assistant Admin" subtitle="Ringkasan pekerjaan yang paling berdampak ke kamar, uang masuk, dan tenant." items={adminAssistantItems} emptyTitle="Operasional hari ini aman" emptyMessage="Tidak ada bukti bayar pending, checkout macet, perpanjangan pending, tagihan overdue, atau tiket penting dari data yang dimuat." maxItems={4} collapsible={false} /> : null}
+      {activeArea === 'overview' && !dense && canUseAdminBriefAi ? (
         <section className="owner-panel mt-3 mb-3">
           <div className="owner-panel-heading p-3">
             <div><span className="owner-section-kicker">Bantuan AI</span><h2 className="mb-0">Brief Admin</h2></div>
@@ -437,16 +360,14 @@ export default function AdminDashboard() {
           </div>
         </section>
       ) : null}
-      {activeArea === 'overview' ? <AdminTodayStatusStrip rooms={rooms} inventoryItems={inventoryItems} invoices={invoices} tickets={tickets} pendingPaymentReviewCount={pendingPaymentReviewCount} pendingApprovalCount={pendingApprovalCount} pendingRenewCount={pendingRenewCount} checkoutCount={pendingCheckoutRequestCount + approvedCheckoutRequestCount} /> : null}
+      {activeArea === 'overview' && !dense ? <div className="mt-3"><AutoOpsControlPanel status={autoOpsQuery.data} role="ADMIN" onCompleted={refreshDashboard} /><AdminSlaMiniNote status={autoOpsQuery.data} /></div> : null}
       {activeArea === 'stays-finance' ? <AdminProcessLine /> : null}
-      {activeArea === 'stays-finance' ? <AdminStaysUnifiedList activeStays={stays} bookingReview={pendingApprovalBookings} waitingPayment={waitingInitialPaymentBookings} renewRequests={renewRequests} checkoutPending={checkoutPendingRequests} checkoutApproved={checkoutApprovedRequests} onNavigate={navigate} /> : null}
-      {activeArea === 'stays-finance' ? <AdminFinanceWorkspace invoices={invoices} paymentReviewItems={paymentReviewItems} onNavigate={navigate} /> : null}
-      {activeArea === 'ops' ? <AdminTicketsWorkspace tickets={tickets} onNavigate={navigate} /> : null}
-      {activeArea === 'ops' ? <AdminStaffFrontlineList items={staffPerformanceItems} isLoading={staffPerformanceQuery.isLoading} /> : null}
-      {activeArea === 'ops' ? <AdminRoomsStockWorkspace rooms={rooms} inventoryItems={inventoryItems} onNavigate={navigate} /> : null}
-      {activeArea === 'overview' ? <ActionQueueTable title="Admin Operations Antrean Aksi" subtitle="Antrean keputusan lintas booking, pembayaran, renew, checkout, tagihan, tiket, dan stok." items={filteredQueueItems} emptyTitle="Tidak ada item mendesak hari ini" emptyDescription="Semua area operasional sedang aman." maxItems={12} collapsible={false} /> : null}
-      {activeArea === 'overview' ? <div className="mt-3"><AutoOpsControlPanel status={autoOpsQuery.data} role="ADMIN" onCompleted={refreshDashboard} /><AdminSlaMiniNote status={autoOpsQuery.data} /></div> : null}
-      <AdminOverviewCharts activeArea={activeArea} rooms={rooms} invoices={invoices} tickets={tickets} pendingPaymentReviewCount={pendingPaymentReviewCount} pendingApprovalCount={pendingApprovalCount} waitingInitialPaymentCount={waitingInitialPaymentCount} pendingRenewCount={pendingRenewCount} checkoutCount={pendingCheckoutRequestCount + approvedCheckoutRequestCount} />
+      {activeArea === 'stays-finance' ? <AdminStaysUnifiedList activeStays={stays} bookingReview={pendingApprovalBookings} waitingPayment={waitingInitialPaymentBookings} renewRequests={renewRequests} checkoutPending={checkoutPendingRequests} checkoutApproved={checkoutApprovedRequests} onNavigate={navigate} dense={dense} /> : null}
+      {activeArea === 'stays-finance' ? <AdminFinanceWorkspace invoices={invoices} paymentReviewItems={paymentReviewItems} onNavigate={navigate} dense={dense} /> : null}
+      {activeArea === 'ops' ? <AdminTicketsWorkspace tickets={tickets} onNavigate={navigate} dense={dense} /> : null}
+      {activeArea === 'ops' ? <AdminStaffFrontlineList items={staffPerformanceItems} isLoading={staffPerformanceQuery.isLoading} dense={dense} /> : null}
+      {activeArea === 'ops' ? <AdminRoomsStockWorkspace rooms={rooms} inventoryItems={inventoryItems} onNavigate={navigate} dense={dense} /> : null}
+      <AdminOverviewCharts activeArea={activeArea} rooms={rooms} invoices={invoices} tickets={tickets} pendingPaymentReviewCount={pendingPaymentReviewCount} pendingApprovalCount={pendingApprovalCount} waitingInitialPaymentCount={waitingInitialPaymentCount} pendingRenewCount={pendingRenewCount} checkoutCount={pendingCheckoutRequestCount + approvedCheckoutRequestCount} dense={dense} />
     </div>
   );
 }

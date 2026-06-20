@@ -37,7 +37,7 @@
 | Fase K — Pasca-Audit Total | ✅ selesai | 13 task: keamanan, data integrity, CSS, arus kas, AI settings. Commit `ac4cc2f` |
 | **Fase L — UI/UX Audit** | ✅ selesai | L-01..L-20 semua selesai (loading, mobile, error, a11y, wording, accounting checklist, dll.) |
 | **Fase M — Quick Wins A11y & Polish** | ✅ selesai | M-01..M-06: navigate, ConfirmProvider, reduced-motion, font fix, ClickableRow a11y, toast a11y |
-| **Fase N — Ramping Dashboard & Navigasi** | ⬜ antri | N-01..N-06: merge sinyal Owner, health bar Admin, toggle density, unifikasi nav, backend agregat, axe e2e |
+| **Fase N — Ramping Dashboard & Navigasi** | ✅ selesai | N-01..N-06: merge sinyal Owner, health bar Admin, toggle density, unifikasi nav, backend agregat, axe e2e |
 | **Fase O — Design System & Token** | ⬜ antri | O-01..O-08: palet terpadu, chartColors, spacing scale, CSS Modules, pisah misc.css, lucide-react, date-fns, touch target ≥44px |
 | **Fase P — Pola UI Modern** | ⬜ antri | P-01..P-06: 3-tampilan toggle, kalender, kanban, TanStack Table, bottom tab bar Tenant, cmd palette |
 
@@ -327,7 +327,7 @@
 **Rujukan:** Audit §5–§7, blueprint penyederhanaan Admin & Owner.
 **Strategi:** Kerjakan **berurutan** (N-01→N-02→...→N-06) karena tiap task bisa ubah file yang sama.
 
-- [ ] **N-01 — Ramping Owner Dashboard: hapus sinyal ganda, satukan panel AI**
+- [x] **N-01 — Ramping Owner Dashboard: hapus sinyal ganda, satukan panel AI**
   **Target:** `frontend/src/pages/dashboard/OwnerDashboardPage.tsx`.
   **Aksi:**
   1. **Hapus `OwnerActionStrip`** (komponen sinyal "butuh perhatian" yang tampil di atas dashboard) — data yang sama sudah muncul di `AssistantPanel` dan panel "Butuh perhatian" bawah. Cari render `<OwnerActionStrip` → hapus.
@@ -339,7 +339,7 @@
   **Anchor grep:** `OwnerActionStrip` · `AiResultPanel` · `generateBrief`
   **Gate:** `cd frontend; npm run build` ✅ · Owner dashboard tidak boleh ada data yang sama tampil 2×.
 
-- [ ] **N-02 — Ramping Admin Dashboard: hero tunggal = antrean kerja, health bar ringkas**
+- [x] **N-02 — Ramping Admin Dashboard: hero tunggal = antrean kerja, health bar ringkas**
   **Target:** `frontend/src/pages/dashboard/DashboardAdmin.tsx`.
   **Aksi:**
   1. **Hero = `ActionQueueTable`** sebagai sumber kebenaran tunggal. Pindahkan ke posisi paling atas (setelah header).
@@ -352,7 +352,7 @@
   **Anchor grep:** `AdminHealthChips` · `AdminContinuityStrip` · `admin-ops-guardrails` · `action-queue-table`
   **Gate:** `cd frontend; npm run build` ✅ · Admin dashboard ≤ 3 section vertikal.
 
-- [ ] **N-03 — Tambah toggle density "Ringkas/Lengkap" untuk Admin**
+- [x] **N-03 — Tambah toggle density "Ringkas/Lengkap" untuk Admin**
   **Target:** `frontend/src/pages/dashboard/DashboardAdmin.tsx` + `AdminWorkspaces.tsx`.
   **Aksi:**
   1. Di `DashboardAdmin.tsx`, tambah `const [dense, setDense] = useState(false)` + `<Button variant="outline-secondary" size="sm" onClick={() => setDense(!dense)}>📏 {dense ? 'Ringkas' : 'Lengkap'}</Button>` di header.
@@ -362,7 +362,7 @@
   **Anchor grep:** `DashboardAdmin` · `dense` · `compact`
   **Gate:** `cd frontend; npm run build` ✅ · toggle tidak reload halaman, preferensi tersimpan.
 
-- [ ] **N-04 — Hapus duplikasi navigasi: sidebar + tabs tetap, tapi tanpa rute ganda**
+- [x] **N-04 — Hapus duplikasi navigasi: sidebar + tabs tetap, tapi tanpa rute ganda**
   **Target:** `frontend/src/config/navigation.ts` + `frontend/src/components/layout/RoleWorkspaceTabs.tsx`.
   **Strategi (pilihan owner):** Pertahankan sidebar DAN RoleWorkspaceTabs — keduanya tetap ada. Tapi **tidak boleh ada rute yang bisa dijangkau dari kedua jalur.**
   **Aksi:**
@@ -374,7 +374,7 @@
   **Anchor grep:** `navigation.ts` · `RoleWorkspaceTabs` · `to:` · `path:`
   **Gate:** `cd frontend; npm run build` ✅ · inspeksi manual: tidak ada rute yang muncul di sidebar DAN tab sekaligus.
 
-- [ ] **N-05 — Pindahkan agregasi dashboard ke backend**
+- [x] **N-05 — Pindahkan agregasi dashboard ke backend**
   **Target:** Backend: buat endpoint agregat BARU. Frontend: ganti komputasi klien dengan query.
   **Aksi:**
   1. **Backend — endpoint baru** `GET /api/admin/dashboard/aggregate`:
@@ -396,7 +396,7 @@
   **Anchor grep:** `useQuery` (DashboardAdmin) · `computeMeterDue`
   **Gate:** `cd backend; npx tsc --noEmit` ✅ · `cd frontend; npm run build` ✅ · unit test backend PASS.
 
-- [ ] **N-06 — Tambah `@axe-core/playwright` ke e2e**
+- [x] **N-06 — Tambah `@axe-core/playwright` ke e2e**
   **Target:** `frontend/e2e/` — tambah ke setup Playwright yang sudah ada.
   **Aksi:**
   1. Install: `cd frontend; npm install --save-dev @axe-core/playwright`.

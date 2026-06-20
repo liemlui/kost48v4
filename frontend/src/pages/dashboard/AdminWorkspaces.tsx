@@ -40,7 +40,7 @@ function getTicketAssigneeLabel(ticket: Ticket) {
   return ticket.assignedTo?.fullName || (ticket.assignedToId ? `Staff #${ticket.assignedToId}` : 'Belum ditugaskan');
 }
 
-export function AdminStaffFrontlineList({ items, isLoading }: { items: any[]; isLoading?: boolean }) {
+export function AdminStaffFrontlineList({ items, isLoading, dense }: { items: any[]; isLoading?: boolean; dense?: boolean }) {
   const navigate = useNavigate();
   const [filter, setFilter] = useState<'ALL' | 'ACTIVE' | 'GOOD' | 'HELP' | 'EVALUATE'>('ALL');
   const staffRows = [...items].sort((a, b) => Number(b?.score?.final ?? 0) - Number(a?.score?.final ?? 0));
@@ -62,7 +62,7 @@ export function AdminStaffFrontlineList({ items, isLoading }: { items: any[]; is
     if (id === 'EVALUATE') return staffRows.filter((item) => getScore(item) > 0 && getScore(item) < 60).length;
     return 0;
   };
-  const staffPagination = useClientPagination(filteredRows, [filter, filteredRows.length], 10);
+  const staffPagination = useClientPagination(filteredRows, [filter, filteredRows.length, dense], dense ? 3 : 10);
   return (
     <Card className="content-card border-0 mb-3 admin-staff-frontline-card true-workspace-card">
       <Card.Body>
@@ -122,7 +122,7 @@ export function AdminStaffFrontlineList({ items, isLoading }: { items: any[]; is
 type AdminStayFlowFilter = 'ALL' | 'BOOKING' | 'ACTIVE' | 'RENEW' | 'CHECKOUT' | 'FOLLOWUP';
 type AdminStayFlowRow = { id: string; group: Exclude<AdminStayFlowFilter, 'ALL' | 'FOLLOWUP'>; tenant: string; room: string; statusLabel: string; tone: 'success' | 'info' | 'warning' | 'danger'; deadline?: string; helper: string; to: string; actionLabel: string };
 
-export function AdminStaysUnifiedList({ activeStays, bookingReview, waitingPayment, renewRequests, checkoutPending, checkoutApproved, onNavigate }: { activeStays: Stay[]; bookingReview: Stay[]; waitingPayment: Stay[]; renewRequests: RenewRequest[]; checkoutPending: CheckoutRequest[]; checkoutApproved: CheckoutRequest[]; onNavigate: (to: string) => void }) {
+export function AdminStaysUnifiedList({ activeStays, bookingReview, waitingPayment, renewRequests, checkoutPending, checkoutApproved, onNavigate, dense }: { activeStays: Stay[]; bookingReview: Stay[]; waitingPayment: Stay[]; renewRequests: RenewRequest[]; checkoutPending: CheckoutRequest[]; checkoutApproved: CheckoutRequest[]; onNavigate: (to: string) => void; dense?: boolean }) {
   const [filter, setFilter] = useState<AdminStayFlowFilter>('ALL');
 
   const bookingRows: AdminStayFlowRow[] = [...bookingReview, ...waitingPayment]
@@ -162,7 +162,7 @@ export function AdminStaysUnifiedList({ activeStays, bookingReview, waitingPayme
     if (filter === 'FOLLOWUP') return row.tone === 'danger' || row.tone === 'warning';
     return row.group === filter;
   });
-  const rowPagination = useClientPagination(filteredRows, [filter, filteredRows.length], 10);
+  const rowPagination = useClientPagination(filteredRows, [filter, filteredRows.length, dense], dense ? 3 : 10);
   const countBy = (value: AdminStayFlowFilter) => value === 'ALL' ? rows.length : value === 'FOLLOWUP' ? rows.filter((row) => row.tone === 'danger' || row.tone === 'warning').length : rows.filter((row) => row.group === value).length;
 
   return (
@@ -206,7 +206,7 @@ export function AdminStaysUnifiedList({ activeStays, bookingReview, waitingPayme
 type AdminFinanceDashboardFilter = 'ALL' | 'PAYMENT_REVIEW' | 'OPEN' | 'OVERDUE' | 'DRAFT' | 'PAID';
 type AdminFinanceRow = { id: string; group: Exclude<AdminFinanceDashboardFilter, 'ALL'>; subject: string; flow: string; statusLabel: string; tone: 'success' | 'info' | 'warning' | 'danger'; amount: number; deadline?: string; helper: string; to: string };
 
-export function AdminFinanceWorkspace({ invoices, paymentReviewItems, onNavigate }: { invoices: Invoice[]; paymentReviewItems: PaymentSubmission[]; onNavigate: (to: string) => void }) {
+export function AdminFinanceWorkspace({ invoices, paymentReviewItems, onNavigate, dense }: { invoices: Invoice[]; paymentReviewItems: PaymentSubmission[]; onNavigate: (to: string) => void; dense?: boolean }) {
   const [filter, setFilter] = useState<AdminFinanceDashboardFilter>('ALL');
 
   const paymentRows: AdminFinanceRow[] = paymentReviewItems.filter((s) => s.status === 'PENDING_REVIEW').map((submission) => {
@@ -229,7 +229,7 @@ export function AdminFinanceWorkspace({ invoices, paymentReviewItems, onNavigate
 
   const allRows = [...paymentRows, ...invoiceRows];
   const rows = allRows.filter((row) => filter === 'ALL' ? true : row.group === filter).sort((a, b) => { const rank: Record<string, number> = { PAYMENT_REVIEW: 0, OVERDUE: 1, DRAFT: 2, OPEN: 3, PAID: 4 }; return (rank[a.group] ?? 9) - (rank[b.group] ?? 9) || b.amount - a.amount; });
-  const financePagination = useClientPagination(rows, [filter, rows.length], 10);
+  const financePagination = useClientPagination(rows, [filter, rows.length, dense], dense ? 3 : 10);
   const countBy = (value: AdminFinanceDashboardFilter) => value === 'ALL' ? allRows.length : allRows.filter((row) => row.group === value).length;
 
   return (
@@ -273,7 +273,7 @@ export function AdminFinanceWorkspace({ invoices, paymentReviewItems, onNavigate
 
 type AdminTicketDashboardFilter = 'ALL' | 'OPEN' | 'IN_PROGRESS' | 'DONE' | 'CLOSED';
 
-export function AdminTicketsWorkspace({ tickets, onNavigate }: { tickets: Ticket[]; onNavigate: (to: string) => void }) {
+export function AdminTicketsWorkspace({ tickets, onNavigate, dense }: { tickets: Ticket[]; onNavigate: (to: string) => void; dense?: boolean }) {
   const queryClient = useQueryClient();
   const [filter, setFilter] = useState<AdminTicketDashboardFilter>('ALL');
   const [detailTicket, setDetailTicket] = useState<Ticket | null>(null);
@@ -294,7 +294,7 @@ export function AdminTicketsWorkspace({ tickets, onNavigate }: { tickets: Ticket
   const activeTickets = tickets.filter((ticket) => ticket.status !== 'CANCELLED');
   const countBy = (value: AdminTicketDashboardFilter) => value === 'ALL' ? activeTickets.length : activeTickets.filter((ticket) => ticket.status === value).length;
   const rows = activeTickets.filter((ticket) => filter === 'ALL' ? true : ticket.status === filter).sort((a, b) => { const rank: Record<string, number> = { OPEN: 0, IN_PROGRESS: 1, DONE: 2, CLOSED: 3 }; return (rank[a.status] ?? 9) - (rank[b.status] ?? 9) || new Date(b.updatedAt ?? b.createdAt ?? 0).getTime() - new Date(a.updatedAt ?? a.createdAt ?? 0).getTime(); });
-  const ticketPagination = useClientPagination(rows, [filter, rows.length], 10);
+  const ticketPagination = useClientPagination(rows, [filter, rows.length, dense], dense ? 3 : 10);
 
   return (
     <Card className="content-card border-0 mb-3 true-workspace-card">
@@ -371,7 +371,7 @@ export function AdminTicketsWorkspace({ tickets, onNavigate }: { tickets: Ticket
 
 type AdminRoomsDashboardFilter = 'ALL' | 'AVAILABLE' | 'OCCUPIED' | 'RESERVED' | 'MAINTENANCE' | 'STOCK_LOW';
 
-export function AdminRoomsStockWorkspace({ rooms, inventoryItems, onNavigate }: { rooms: Room[]; inventoryItems: any[]; onNavigate: (to: string) => void }) {
+export function AdminRoomsStockWorkspace({ rooms, inventoryItems, onNavigate, dense }: { rooms: Room[]; inventoryItems: any[]; onNavigate: (to: string) => void; dense?: boolean }) {
   const [filter, setFilter] = useState<AdminRoomsDashboardFilter>('ALL');
   const lowStockItems = inventoryItems.filter(isLowStockItem);
   const activeRooms = rooms.filter((room) => room.status !== 'INACTIVE');
@@ -387,8 +387,8 @@ export function AdminRoomsStockWorkspace({ rooms, inventoryItems, onNavigate }: 
     if (filter === 'STOCK_LOW') return false;
     return room.status === filter;
   });
-  const roomPagination = useClientPagination(roomRows, [filter, roomRows.length], 10);
-  const stockPagination = useClientPagination(lowStockItems, [filter, lowStockItems.length], 10);
+  const roomPagination = useClientPagination(roomRows, [filter, roomRows.length, dense], dense ? 3 : 10);
+  const stockPagination = useClientPagination(lowStockItems, [filter, lowStockItems.length, dense], dense ? 3 : 10);
 
   return (
     <Card className="content-card border-0 mb-3 true-workspace-card">

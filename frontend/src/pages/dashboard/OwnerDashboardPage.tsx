@@ -14,11 +14,8 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
-import { fetchOwnerDashboard, type OwnerDashboardTrendMonth } from '../../api/finance';
-import { fetchAccountingReadiness } from '../../api/accounting';
-import { listStays } from '../../api/stays';
-import { listResource } from '../../api/resources';
-import type { MeterReading } from '../../types';
+import type { OwnerDashboardTrendMonth } from '../../api/finance';
+import { fetchOwnerDashboardAggregate } from '../../api/ownerDashboard';
 import { generateBrief, getOwnerAiStatus, type BriefResult } from '../../api/ai';
 import AiAssistButton from '../../components/ai/AiAssistButton';
 import AiResultPanel from '../../components/ai/AiResultPanel';
@@ -48,28 +45,6 @@ function useOwnerViewMode() {
 function currentYearMonth() {
   const d = new Date();
   return { year: d.getFullYear(), month: d.getMonth() + 1 };
-}
-
-function isoDay(year: number, month: number, day: number) {
-  return `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-}
-
-type MeterDueSummary = { occupied: number; recorded: number; due: number };
-
-async function computeMeterDue(ym: { year: number; month: number }): Promise<MeterDueSummary> {
-  const lastDay = new Date(ym.year, ym.month, 0).getDate();
-  const from = isoDay(ym.year, ym.month, 1);
-  const to = isoDay(ym.year, ym.month, lastDay);
-  const [stays, readings] = await Promise.all([
-    listStays({ status: 'ACTIVE', limit: 200 }),
-    listResource<MeterReading>('/meter-readings', { from, to, limit: 1000 }),
-  ]);
-  const occupiedRoomIds = new Set(
-    (stays.items ?? []).filter((stay) => stay.room && stay.room.id != null).map((stay) => stay.room!.id),
-  );
-  const recordedRoomIds = new Set((readings.items ?? []).map((reading) => reading.roomId));
-  const recorded = [...recordedRoomIds].filter((roomId) => occupiedRoomIds.has(roomId)).length;
-  return { occupied: occupiedRoomIds.size, recorded, due: Math.max(0, occupiedRoomIds.size - recorded) };
 }
 
 function monthLabel(ym: { year: number; month: number }) {
@@ -236,27 +211,8 @@ function OwnerKpiCard({
   );
 }
 
-type StatusCard = { key: string; label: string; value: string; helper: string; route: string; tone: string };
-
 // Penanda baku saat sumber data kartu gagal dimuat.
 const CARD_ERROR_VALUE = 'Gagal';
-
-function OwnerStatusStrip({ cards, onNavigate }: { cards: StatusCard[]; onNavigate: (route: string) => void }) {
-  return (
-    <section className="owner-cockpit-status mb-3" aria-label="Status kokpit owner">
-      <span className="owner-section-kicker">Status kokpit</span>
-      <div className="owner-action-strip mt-1">
-        {cards.map((card) => (
-          <button key={card.key} type="button" className={`owner-action-item owner-action-${card.tone}`} onClick={() => onNavigate(card.route)}>
-            <span>{card.label}</span>
-            <strong>{card.value}</strong>
-            <small>{card.helper}</small>
-          </button>
-        ))}
-      </div>
-    </section>
-  );
-}
 
 export default function OwnerDashboardPage() {
   const navigate = useNavigate();
@@ -266,23 +222,11 @@ export default function OwnerDashboardPage() {
   const [chartMode, setChartMode] = useState<TrendChartMode>('line');
   const [showBestFit, setShowBestFit] = useState<boolean>(true);
 
-  const dashboard = useQuery({
-    queryKey: ['owner-dashboard', ym, trendMonths],
-    queryFn: () => fetchOwnerDashboard(ym.year, ym.month, trendMonths),
+  // N-05: 3 query individual (dashboard, readiness, meterDue) → 1 aggregate
+  const aggregateQuery = useQuery({
+    queryKey: ['owner-dashboard-aggregate', ym, trendMonths],
+    queryFn: () => fetchOwnerDashboardAggregate(ym.year, ym.month, trendMonths),
     staleTime: 60_000,
-    retry: 1,
-  });
-
-  const readinessQuery = useQuery({
-    queryKey: ['accounting-readiness'],
-    queryFn: fetchAccountingReadiness,
-    staleTime: 300_000,
-    retry: 1,
-  });
-  const meterDueQuery = useQuery({
-    queryKey: ['owner-meter-due', ym],
-    queryFn: () => computeMeterDue(ym),
-    staleTime: 120_000,
     retry: 1,
   });
   const ownerAiStatusQuery = useQuery({
@@ -292,56 +236,24 @@ export default function OwnerDashboardPage() {
     retry: 1,
   });
 
-  const data = dashboard.data;
+  const data = aggregateQuery.data?.dashboard;
   const trendData = data?.trendMonths ?? data?.trend6Months ?? [];
   const grade = data ? gradeBadge(data.grade) : null;
   const selectedPeriodLabel = monthLabel(ym);
   const canUseOwnerAi = ownerAiStatusQuery.data?.configured === true;
 
-  const statusCards: StatusCard[] = useMemo(() => {
-    if (!data) return [];
-    const overdue = data.signals.find((signal) => signal.type === 'overdue');
-    const outstanding = data.signals.find((signal) => signal.type === 'outstanding');
-    const arrearsCount = (overdue?.count ?? 0) + (outstanding?.count ?? 0);
-    const arrearsRupiah = (overdue?.totalRupiah ?? 0) + (outstanding?.totalRupiah ?? 0);
-    const occupancy = data.kpi.occupancyRatePercent;
-    const meter = meterDueQuery.data;
-    const readiness = readinessQuery.data;
-    return [
-      {
-        key: 'occupancy',
-        label: 'Okupansi',
-        value: `${occupancy}%`,
-        helper: 'Kamar terisi periode ini',
-        route: '/reports',
-        tone: occupancy >= 70 ? 'good' : occupancy >= 40 ? 'watch' : 'risk',
-      },
-      {
-        key: 'arrears',
-        label: 'Tunggakan',
-        value: `${arrearsCount}`,
-        helper: arrearsCount ? `Rp ${formatRupiah(arrearsRupiah)} belum lunas` : 'Tidak ada tagihan tertunggak',
-        route: '/invoices',
-        tone: overdue?.count ? 'risk' : arrearsCount ? 'watch' : 'good',
-      },
-      {
-        key: 'meter-due',
-        label: 'Meter belum dicatat',
-        value: meterDueQuery.isLoading ? '…' : meterDueQuery.isError ? CARD_ERROR_VALUE : `${meter?.due ?? 0}`,
-        helper: meterDueQuery.isError ? 'Gagal memuat — coba muat ulang' : meter ? `${meter.recorded}/${meter.occupied} kamar tercatat` : 'Catat siklus meter bulan ini',
-        route: '/meter-readings',
-        tone: meterDueQuery.isError ? 'risk' : (meter?.due ?? 0) > 0 ? 'watch' : 'good',
-      },
-      {
-        key: 'readiness',
-        label: 'Kesiapan Akuntansi',
-        value: readinessQuery.isLoading ? '…' : readinessQuery.isError ? CARD_ERROR_VALUE : `${readiness?.score ?? 0}%`,
-        helper: readinessQuery.isError ? 'Gagal memuat — coba muat ulang' : readiness ? (readiness.ready ? 'Akuntansi siap' : `${readiness.missing.length} gate tersisa`) : 'Kesiapan akuntansi',
-        route: '/finance/accounting-setup',
-        tone: readinessQuery.isError ? 'risk' : readiness?.ready ? 'good' : (readiness?.score ?? 0) >= 60 ? 'watch' : 'risk',
-      },
-    ];
-  }, [data, meterDueQuery.data, meterDueQuery.isLoading, meterDueQuery.isError, readinessQuery.data, readinessQuery.isLoading, readinessQuery.isError]);
+  const extraSignals = useMemo(() => {
+    const items: { key: string; label: string; helper: string; route: string; type: string }[] = [];
+    const meter = aggregateQuery.data?.meterDue;
+    const readiness = aggregateQuery.data?.readiness;
+    if (!aggregateQuery.isLoading && !aggregateQuery.isError && (meter?.due ?? 0) > 0) {
+      items.push({ key: 'meter-due', label: 'Meter belum dicatat', helper: `${meter!.recorded}/${meter!.occupied} kamar tercatat bulan ini`, route: '/meter-readings', type: 'outstanding' });
+    }
+    if (!aggregateQuery.isLoading && !aggregateQuery.isError && readiness && !readiness.ready) {
+      items.push({ key: 'readiness', label: 'Akuntansi belum siap', helper: `${readiness.missing.length} gate tersisa — skor ${readiness.score ?? 0}%`, route: '/finance/accounting-setup', type: 'outstanding' });
+    }
+    return items;
+  }, [aggregateQuery.data, aggregateQuery.isLoading, aggregateQuery.isError]);
 
   const handleChange = (field: 'year' | 'month', val: string) => {
     const num = parseInt(val, 10);
@@ -381,7 +293,7 @@ export default function OwnerDashboardPage() {
         </div>
       </section>
 
-      {dashboard.isLoading ? (
+      {aggregateQuery.isLoading ? (
         <div role="status" aria-label="Memuat dashboard" aria-busy="true">
           <Row className="g-3 mb-3">
             {Array.from({ length: 4 }).map((_, i) => <Col xl={3} md={6} key={i}><StatCardSkeleton /></Col>)}
@@ -391,10 +303,10 @@ export default function OwnerDashboardPage() {
         </div>
       ) : null}
 
-      {dashboard.isError ? (
+      {aggregateQuery.isError ? (
         <Alert variant="warning" className="mb-3">
           Dashboard gagal dimuat. Pastikan backend API berjalan dan data transaksi tersedia.
-          {dashboard.error ? <div className="small mt-1">{(dashboard.error as any)?.message ?? ''}</div> : null}
+          {aggregateQuery.error ? <div className="small mt-1">{(aggregateQuery.error as any)?.message ?? ''}</div> : null}
         </Alert>
       ) : null}
 
@@ -419,8 +331,6 @@ export default function OwnerDashboardPage() {
             </section>
           ) : null}
 
-          {statusCards.length ? <OwnerStatusStrip cards={statusCards} onNavigate={navigate} /> : null}
-
           <Row className="g-3 mb-3">
             <Col xs={12} sm={6} xl={3}>
               <OwnerKpiCard label="Pendapatan" value={formatCompactRupiah(data.kpi.totalRevenueRupiah)} change={changeLabel(data.kpi.totalRevenueChangePercent)} tone="revenue" />
@@ -444,10 +354,12 @@ export default function OwnerDashboardPage() {
                     <span className="owner-section-kicker">Prioritas</span>
                     <h2>Butuh perhatian</h2>
                   </div>
-                  <Badge bg={data.signals.length === 0 ? 'success' : 'warning'}>{data.signals.length === 0 ? 'Aman' : `${data.signals.length} sinyal`}</Badge>
+                  <Badge bg={data.signals.length === 0 && extraSignals.length === 0 ? 'success' : 'warning'}>
+                    {data.signals.length === 0 && extraSignals.length === 0 ? 'Aman' : `${data.signals.length + extraSignals.length} sinyal`}
+                  </Badge>
                 </div>
                 <div className="owner-panel-body">
-                  {data.signals.length === 0 ? (
+                  {data.signals.length === 0 && extraSignals.length === 0 ? (
                     <p className="owner-empty-state mb-0">Tidak ada tindak lanjut mendesak pada periode ini.</p>
                   ) : (
                     <div className="owner-signal-list">
@@ -457,6 +369,16 @@ export default function OwnerDashboardPage() {
                           <span className="owner-signal-content">
                             <strong>{signal.type === 'overdue' ? 'Tagihan overdue' : signal.type === 'pending_payment' ? 'Pembayaran pending' : 'Tagihan outstanding'}</strong>
                             <small>{signal.count} item{signal.totalRupiah ? ` - Rp ${formatRupiah(signal.totalRupiah)}` : ''}</small>
+                          </span>
+                          <span className="owner-signal-arrow" aria-hidden="true">&rsaquo;</span>
+                        </button>
+                      ))}
+                      {extraSignals.map((signal) => (
+                        <button key={signal.key} type="button" className="owner-signal-item" onClick={() => navigate(signal.route)}>
+                          <span className={`owner-signal-dot owner-signal-${signal.type}`} aria-hidden="true" />
+                          <span className="owner-signal-content">
+                            <strong>{signal.label}</strong>
+                            <small>{signal.helper}</small>
                           </span>
                           <span className="owner-signal-arrow" aria-hidden="true">&rsaquo;</span>
                         </button>

@@ -11,7 +11,8 @@
     "preview": "vite preview",
     "build:lan": "node scripts/golive-build.mjs",
     "golive": "vite preview --host 0.0.0.0 --port 5173 --strictPort",
-    "test:e2e": "npx playwright test"
+    "test:e2e": "npx playwright test",
+    "test:a11y": "npx playwright test e2e/a11y/"
   },
   "dependencies": {
     "@tanstack/react-query": "^5.59.0",
@@ -27,6 +28,7 @@
     "tesseract.js": "^7.0.0"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.11.3",
     "@playwright/test": "^1.61.0",
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",
