@@ -2,6 +2,7 @@ export const inventoryConfigs = {
   'inventory-items': {
     title: 'Stok Barang',
     path: '/inventory-items',
+    emptyMessage: "Belum ada barang di gudang. Klik 'Tambah' untuk mencatat barang pertama.",
     columns: [
       { key: 'id', label: 'ID' },
       { key: 'sku', label: 'SKU' },
@@ -79,6 +80,7 @@ export const inventoryConfigs = {
     title: 'Barang di Kamar',
     path: '/room-items',
     createLabel: 'Lewat Mutasi Stok',
+    emptyMessage: 'Belum ada barang tercatat di kamar. Tugaskan barang dari Gudang via tab Mutasi.',
     columns: [
       { key: 'roomId', label: 'Kamar' },
       { key: 'itemId', label: 'Barang' },
@@ -132,6 +134,7 @@ export const inventoryConfigs = {
     title: 'Mutasi Stok Resmi',
     path: '/inventory-movements',
     createLabel: 'Catat Mutasi',
+    emptyMessage: 'Belum ada mutasi. Mulai dengan menugaskan barang dari Gudang ke kamar.',
     columns: [
       { key: 'itemId', label: 'Barang' },
       { key: 'movementType', label: 'Jenis' },

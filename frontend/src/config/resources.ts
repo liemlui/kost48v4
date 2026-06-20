@@ -27,6 +27,7 @@ export type ResourceConfig = {
   allowDelete?: boolean;
   createLabel?: string;
   supportsIsActiveFilter?: boolean;
+  emptyMessage?: string;
 };
 
 export type ManageGuardResult = {

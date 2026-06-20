@@ -120,7 +120,7 @@ export default function ResourceTable({
             {hasActiveStay ? (
               <div className="small">
                 <span className="text-muted">{roomCode ? `Kamar: ${roomCode}` : 'Sedang menempati'}</span>
-                <span className="ms-2 badge bg-warning text-dark" style={{ fontSize: '0.7em' }}>Aktif</span>
+                <span className="ms-2 badge bg-warning text-dark" style={{ fontSize: '0.75em' }}>Aktif</span>
               </div>
             ) : (
               <div className="small text-muted">Tidak sedang menempati</div>
@@ -324,7 +324,7 @@ export default function ResourceTable({
     <>
       {isLoading ? <div className="py-5 text-center"><Spinner /></div> : null}
       {isError ? <Alert variant="danger">Gagal mengambil data.</Alert> : null}
-      {!isLoading && !items.length ? <Alert variant="secondary">Belum ada data.</Alert> : null}
+      {!isLoading && !items.length ? <Alert variant="secondary">{config.emptyMessage ?? 'Belum ada data.'}</Alert> : null}
       {!isLoading && items.length > 0 && !filteredItems.length ? <Alert variant="warning">Tidak ada data untuk filter ini.</Alert> : null}
       {!!filteredItems.length ? (
         <Table hover responsive className="compact-data-table responsive-data-table">
@@ -346,7 +346,6 @@ export default function ResourceTable({
                   className={onRowOpen ? 'clickable-row' : undefined}
                   onClick={() => onRowOpen?.(item)}
                   tabIndex={onRowOpen ? 0 : undefined}
-                  role={onRowOpen ? 'button' : undefined}
                   onKeyDown={onRowOpen ? (event) => {
                     if (event.key === 'Enter' || event.key === ' ') {
                       event.preventDefault();
