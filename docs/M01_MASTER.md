@@ -113,4 +113,4 @@ npm run dev               # dev server
 node scripts/seed-dev-reset.js && node scripts/seed-dev-via-api.js
 ```
 
-**Akun dev:** `liem.lui@gmail.com / admin123` (OWNER) · `admin@kost48.com / admin123` (ADMIN) · `staff@kost48.com / staff123` · `tenant.g2@kost48.com / tenant123`.
+**Akun dev:** `owner@kost48.com / Owner#2026` (OWNER) · `admin@kost48.com / admin123` (ADMIN) · `staff@kost48.com / staff123` · `maya.tenant@kost48.test / Tenant#2026` (contoh tenant; ada 16: maya, dimas, cindy, hendra, gita, indah, bayu, karin, lani, rizky, putri, fajar, sari, andi, nadia, eko — semua `@kost48.test / Tenant#2026`).
