@@ -66,22 +66,7 @@ export function getBookingApprovalMeta(stay: Stay) {
   };
 }
 
-export async function listAllActiveStaysForBookings(maxPages = 50): Promise<PaginatedResponse<Stay>> {
-  const pageSize = 100;
-  const items: Stay[] = [];
-  let page = 1;
-  let totalPages = 1;
-  let totalItems = 0;
-  do {
-    const response = await listStays({ status: 'ACTIVE', page, limit: pageSize });
-    items.push(...(response.items ?? []));
-    totalPages = response.meta?.totalPages ?? 1;
-    totalItems = response.meta?.totalItems ?? items.length;
-    if (!(response.items ?? []).length) break;
-    page += 1;
-  } while (page <= totalPages && page <= maxPages);
-  return {
-    items,
-    meta: { page: 1, limit: items.length || pageSize, totalItems, totalPages: 1 },
-  };
+// KOST48 = 48 kamar maks; stay aktif tidak mungkin >48. Single call limit 200 cukup untuk semua skenario.
+export async function listAllActiveStaysForBookings(): Promise<PaginatedResponse<Stay>> {
+  return listStays({ status: 'ACTIVE', page: 1, limit: 200 });
 }
