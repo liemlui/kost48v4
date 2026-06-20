@@ -4,6 +4,7 @@ import { useState, type ReactNode } from 'react';
 import { Alert, Button, Card, Col, Modal, Row, Table } from 'react-bootstrap';
 import { useNavigate, useLocation } from 'react-router-dom';
 import EmptyState from '../../components/common/EmptyState';
+import ClickableRow from '../../components/common/ClickableRow';
 import PaginationControls from '../../components/common/PaginationControls';
 import StatusBadge from '../../components/common/StatusBadge';
 import { AssistantPanel, ActionQueueTable, type ActionQueueItem, type AssistantItem, type MetricChip } from '../../components/command-center';
@@ -40,6 +41,7 @@ function getTicketAssigneeLabel(ticket: Ticket) {
 }
 
 export function AdminStaffFrontlineList({ items, isLoading }: { items: any[]; isLoading?: boolean }) {
+  const navigate = useNavigate();
   const [filter, setFilter] = useState<'ALL' | 'ACTIVE' | 'GOOD' | 'HELP' | 'EVALUATE'>('ALL');
   const staffRows = [...items].sort((a, b) => Number(b?.score?.final ?? 0) - Number(a?.score?.final ?? 0));
   const isNeedHelp = (item: any) => Number(item?.monthlyKpi?.needHelpCount ?? item?.monthlyKpi?.needHelp ?? 0) > 0;
@@ -94,14 +96,14 @@ export function AdminStaffFrontlineList({ items, isLoading }: { items: any[]; is
                 const tone = score >= 80 ? 'success' : score >= 60 ? 'warning' : 'danger';
                 const name = item?.staff?.fullName ?? 'Staff';
                 return (
-                  <tr key={item?.staff?.id ?? name} className="clickable-row" onClick={() => window.location.assign('/staff-performance')}>
+                  <ClickableRow key={item?.staff?.id ?? name} onClick={() => navigate('/staff-performance')} label={`Lihat kinerja ${name}`}>
                     <td><strong>{name}</strong><div className="small text-muted">{item?.staff?.email ?? 'Klik untuk detail kinerja'}</div></td>
                     <td><StatusBadge status={tone.toUpperCase()} customLabel={String(score)} /></td>
                     <td>{category}</td>
                     <td>{item?.monthlyKpi?.ticketsDone ?? 0}</td>
                     <td>{item?.monthlyKpi?.routineDone ?? 0}</td>
                     <td>{isNeedHelp(item) ? <StatusBadge status="WARNING" customLabel="Perlu bantuan" /> : <span className="text-muted small">Aman</span>}</td>
-                  </tr>
+                  </ClickableRow>
                 );
               })}
             </tbody>
@@ -183,14 +185,14 @@ export function AdminStaysUnifiedList({ activeStays, bookingReview, waitingPayme
             <thead><tr><th>Tenant</th><th>Kamar</th><th>Status</th><th>Deadline</th><th>Catatan</th><th>Detail</th></tr></thead>
             <tbody>
               {rowPagination.pagedItems.map((row) => (
-                <tr key={row.id} className="clickable-row" onClick={() => onNavigate(row.to)}>
+                <ClickableRow key={row.id} onClick={() => onNavigate(row.to)} label={`${row.actionLabel}: ${row.tenant}`}>
                   <td><strong>{row.tenant}</strong></td>
                   <td>{row.room}</td>
                   <td><StatusBadge status={row.tone.toUpperCase()} customLabel={row.statusLabel} /></td>
                   <td>{row.deadline ?? <span className="text-muted">-</span>}</td>
                   <td className="small text-muted">{row.helper}</td>
                   <td><span className="row-arrow-cell" aria-label={`Buka ${row.actionLabel}`}>›</span></td>
-                </tr>
+                </ClickableRow>
               ))}
             </tbody>
           </Table>
@@ -250,7 +252,7 @@ export function AdminFinanceWorkspace({ invoices, paymentReviewItems, onNavigate
             <thead><tr><th>Penghuni / Masa Sewa</th><th>Alur</th><th>Status</th><th>Nominal</th><th>Batas Waktu</th><th>Catatan</th><th>Detail</th></tr></thead>
             <tbody>
               {financePagination.pagedItems.map((row) => (
-                <tr key={row.id} className="clickable-row" onClick={() => onNavigate(row.to)}>
+                <ClickableRow key={row.id} onClick={() => onNavigate(row.to)} label={`${row.flow}: ${row.subject}`}>
                   <td><strong>{row.subject}</strong></td>
                   <td>{row.flow}</td>
                   <td><StatusBadge status={row.tone.toUpperCase()} customLabel={row.statusLabel} /></td>
@@ -258,7 +260,7 @@ export function AdminFinanceWorkspace({ invoices, paymentReviewItems, onNavigate
                   <td>{row.deadline ?? <span className="text-muted">-</span>}</td>
                   <td className="small text-muted">{row.helper}</td>
                   <td><span className="row-arrow-cell">›</span></td>
-                </tr>
+                </ClickableRow>
               ))}
             </tbody>
           </Table>
@@ -313,7 +315,7 @@ export function AdminTicketsWorkspace({ tickets, onNavigate }: { tickets: Ticket
             <thead><tr><th>Tiket</th><th>Status</th><th>Lokasi / orang</th><th>Petugas</th><th>Diperbarui</th><th>Aksi</th></tr></thead>
             <tbody>
               {ticketPagination.pagedItems.map((ticket) => (
-                <tr key={ticket.id} className="clickable-row" onClick={() => setDetailTicket(ticket)}>
+                <ClickableRow key={ticket.id} onClick={() => setDetailTicket(ticket)} label={`Buka tiket ${ticket.ticketNumber ?? `TIK-${ticket.id}`}`}>
                   <td><strong>{ticket.ticketNumber ?? `TIK-${ticket.id}`}</strong><div className="small text-muted">{ticket.title ?? 'Tiket operasional'}</div></td>
                   <td><StatusBadge status={ticket.status} /></td>
                   <td>{ticket.tenant?.fullName || ticket.room?.code || ticket.room?.name || (ticket.roomId ? `Kamar #${ticket.roomId}` : 'Belum ada lokasi')}</td>
@@ -322,7 +324,7 @@ export function AdminTicketsWorkspace({ tickets, onNavigate }: { tickets: Ticket
                   <td onClick={(event) => event.stopPropagation()}>
                     {ticket.status === 'DONE' ? <Button size="sm" variant="success" onClick={() => setCloseTarget(ticket)} disabled={closeTicketMutation.isPending}>Tutup</Button> : <span className="row-arrow-cell">›</span>}
                   </td>
-                </tr>
+                </ClickableRow>
               ))}
             </tbody>
           </Table>
@@ -408,7 +410,7 @@ export function AdminRoomsStockWorkspace({ rooms, inventoryItems, onNavigate }: 
             <>
               <Table responsive hover className="compact-data-table mb-0">
                 <thead><tr><th>Barang</th><th>Kategori</th><th>Stok</th><th>Min</th><th>Status</th></tr></thead>
-                <tbody>{stockPagination.pagedItems.map((item) => <tr key={item.id} className="clickable-row" onClick={() => onNavigate('/inventory-items')}><td><strong>{item.name ?? `Barang #${item.id}`}</strong><div className="small text-muted">{item.sku ?? '-'}</div></td><td>{item.category ?? '-'}</td><td>{String(item.qtyOnHand ?? 0)}</td><td>{String(item.minQty ?? 0)}</td><td><StatusBadge status="WARNING" customLabel="Stok menipis" /></td></tr>)}</tbody>
+                <tbody>{stockPagination.pagedItems.map((item) => <ClickableRow key={item.id} onClick={() => onNavigate('/inventory-items')} label={`Lihat barang ${item.name ?? `Barang #${item.id}`}`}><td><strong>{item.name ?? `Barang #${item.id}`}</strong><div className="small text-muted">{item.sku ?? '-'}</div></td><td>{item.category ?? '-'}</td><td>{String(item.qtyOnHand ?? 0)}</td><td>{String(item.minQty ?? 0)}</td><td><StatusBadge status="WARNING" customLabel="Stok menipis" /></td></ClickableRow>)}</tbody>
               </Table>
               {stockPagination.hasPagination ? <div className="table-pagination-shell mt-3"><PaginationControls currentPage={stockPagination.page} totalPages={stockPagination.totalPages} totalItems={stockPagination.totalItems} pageSize={stockPagination.pageSize} onPageChange={stockPagination.setPage} /></div> : null}
             </>
@@ -418,7 +420,7 @@ export function AdminRoomsStockWorkspace({ rooms, inventoryItems, onNavigate }: 
             <>
               <Table responsive hover className="compact-data-table mb-0">
                 <thead><tr><th>Kamar</th><th>Status</th><th>Penghuni / pemesan</th><th>Tarif bulanan</th><th>Detail</th></tr></thead>
-                <tbody>{roomPagination.pagedItems.map((room) => { const tenantName = room.currentStay?.tenant?.fullName; return <tr key={room.id} className="clickable-row" onClick={() => onNavigate(`/rooms/${room.id}`)}><td><strong>{room.code}</strong><div className="small text-muted">{room.name ?? room.floor ?? '-'}</div></td><td><StatusBadge status={room.status} /></td><td>{tenantName ?? (room.status === 'AVAILABLE' ? 'Kosong' : 'Belum ada nama')}</td><td>Rp {formatNumber(Number(room.monthlyRateRupiah ?? 0))}</td><td><span className="row-arrow-cell">›</span></td></tr>; })}</tbody>
+                <tbody>{roomPagination.pagedItems.map((room) => { const tenantName = room.currentStay?.tenant?.fullName; return <ClickableRow key={room.id} onClick={() => onNavigate(`/rooms/${room.id}`)} label={`Buka detail kamar ${room.code}`}><td><strong>{room.code}</strong><div className="small text-muted">{room.name ?? room.floor ?? '-'}</div></td><td><StatusBadge status={room.status} /></td><td>{tenantName ?? (room.status === 'AVAILABLE' ? 'Kosong' : 'Belum ada nama')}</td><td>Rp {formatNumber(Number(room.monthlyRateRupiah ?? 0))}</td><td><span className="row-arrow-cell">›</span></td></ClickableRow>; })}</tbody>
               </Table>
               {roomPagination.hasPagination ? <div className="table-pagination-shell mt-3"><PaginationControls currentPage={roomPagination.page} totalPages={roomPagination.totalPages} totalItems={roomPagination.totalItems} pageSize={roomPagination.pageSize} onPageChange={roomPagination.setPage} /></div> : null}
             </>

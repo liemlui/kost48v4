@@ -3,6 +3,7 @@ import { Button, Card, Table } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from 'recharts';
 import HorizontalBarChart from './HorizontalBarChart';
+import ClickableRow from '../common/ClickableRow';
 import { CHART_PALETTE } from './chartPalette';
 
 export type SmartChartMode = 'summary' | 'donut' | 'bar' | 'table';
@@ -117,7 +118,13 @@ export default function SmartChartPanel({ title, subtitle, points, defaultMode =
         {safeMode === 'table' && (
           <Table responsive size="sm" className="mt-3 mb-0 smart-chart-table">
             <thead><tr><th>Kategori</th><th className="text-end">Nilai</th><th>Catatan</th></tr></thead>
-            <tbody>{points.map((point) => <tr key={point.label} className={point.to ? 'clickable-row' : undefined} onClick={() => point.to ? navigate(point.to) : undefined}><td>{point.label}</td><td className="text-end fw-semibold">{formatNumber(point.value)}</td><td className="text-muted small">{point.detail ?? '-'}</td></tr>)}</tbody>
+            <tbody>{points.map((point) => point.to ? (
+              <ClickableRow key={point.label} onClick={() => navigate(point.to!)} label={`Buka detail ${point.label}`}>
+                <td>{point.label}</td><td className="text-end fw-semibold">{formatNumber(point.value)}</td><td className="text-muted small">{point.detail ?? '-'}</td>
+              </ClickableRow>
+            ) : (
+              <tr key={point.label}><td>{point.label}</td><td className="text-end fw-semibold">{formatNumber(point.value)}</td><td className="text-muted small">{point.detail ?? '-'}</td></tr>
+            ))}</tbody>
           </Table>
         )}
       </Card.Body>

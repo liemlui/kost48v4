@@ -15,6 +15,7 @@ import { useNavigate } from "react-router-dom";
 import PageHeader from "../../components/common/PageHeader";
 import PaginationControls from "../../components/common/PaginationControls";
 import EmptyState from "../../components/common/EmptyState";
+import ClickableRow from "../../components/common/ClickableRow";
 import { TableSkeleton } from "../../components/common/SkeletonLoader";
 import StatusBadge from "../../components/common/StatusBadge";
 import CameraOrGalleryInput from "../../components/common/CameraOrGalleryInput";
@@ -726,10 +727,10 @@ export default function TicketsPage() {
               </thead>
               <tbody>
                 {visibleItems.map((item) => (
-                  <tr
+                  <ClickableRow
                     key={item.id}
-                    className="clickable-row"
                     onClick={() => setDetailTicket(item)}
+                    label={`Buka detail tiket ${item.ticketNumber ?? `TIK-${item.id}`}: ${item.title || 'Tanpa judul'}`}
                   >
                     <td>
                       <div className="fw-semibold">
@@ -902,7 +903,7 @@ export default function TicketsPage() {
                         <span className="row-arrow-cell">›</span>
                       </div>
                     </td>
-                  </tr>
+                  </ClickableRow>
                 ))}
               </tbody>
             </Table>

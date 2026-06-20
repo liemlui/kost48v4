@@ -1,4 +1,5 @@
 import { Button, Card, Spinner, Badge } from 'react-bootstrap';
+import { useConfirm } from '../../components/common/ConfirmProvider';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import PageHeader from '../../components/common/PageHeader';
 import CurrencyDisplay from '../../components/common/CurrencyDisplay';
@@ -9,6 +10,7 @@ const WHATSAPP_URL = `https://wa.me/${KOST_WHATSAPP_NUMBER}`;
 const KOST_WHATSAPP_DISPLAY = `0${KOST_WHATSAPP_NUMBER.slice(2)}`.replace(/(\d{4})(\d{4})(\d+)/, '$1-$2-$3');
 
 export default function WifiOrderPage() {
+  const confirm = useConfirm();
   const qc = useQueryClient();
 
   const servicesQuery = useQuery({
@@ -64,10 +66,10 @@ export default function WifiOrderPage() {
                           variant="primary"
                           size="sm"
                           disabled={isPending}
-                          onClick={() => {
-                            if (window.confirm(`Pesan "${svc.name}" (Rp ${svc.priceRupiah.toLocaleString('id-ID')})? Pengelola akan menghubungi untuk konfirmasi.`)) {
-                              interestMutation.mutate(svc.id);
-                            }
+                          onClick={async () => {
+                            const ok = await confirm({ title: 'Pesan Layanan', message: `Pesan "${svc.name}" (Rp ${svc.priceRupiah.toLocaleString('id-ID')})? Pengelola akan menghubungi untuk konfirmasi.`, confirmLabel: 'Pesan', variant: 'primary' });
+                            if (!ok) return;
+                            interestMutation.mutate(svc.id);
                           }}
                         >
                           {isPending ? 'Mengirim...' : 'Pesan Sekarang'}

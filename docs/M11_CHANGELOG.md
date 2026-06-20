@@ -3,6 +3,24 @@
 > Arsip changelog ringkas, dipisah dari M10 pada 2026-06-19 untuk hemat token AI (M10 = checklist aktif saja). **Entri changelog BARU ditulis DI SINI (paling atas)**, bukan di M10. Format: 1 header tanggal + 1-2 poin outcome per entri.
 
 ## Changelog Ringkas
+
+### 2026-06-20 — Fase M: Quick Wins A11y & Polish (M-01..M-06)
+- **M-01** `AdminWorkspaces.tsx`: ganti `window.location.assign` → `useNavigate()` di `AdminStaffFrontlineList`.
+- **M-02** Buat `ConfirmProvider` + `useConfirm()` (context + promise); daftarkan di `main.tsx`; ganti 9 `window.confirm` di 6 file (`AppLayout`, `FacilityManager`, `TenantProfilePhotoCard`, `MyStayPage`, `WifiOrderPage`, `OwnerSettingsPage`).
+- **M-03** `01-base.css`: tambah blok `@media (prefers-reduced-motion: reduce)` global di akhir file.
+- **M-04** `01-base.css` + `11-public-pages.css` (9 occurrences): typo `Cormorant Garant` → `Cormorant Garamond`; `00-tokens.css`: hapus `DM Mono` (tidak di-@import) → fallback `JetBrains Mono`.
+- **M-05** Buat `ClickableRow.tsx` (tabIndex + onKeyDown + aria-label); pasang di `AdminWorkspaces`, `InvoicesPage`, `AncillaryRevenuePage`, `TicketsPage`, `SmartChartPanel`.
+- **M-06** `ToastProvider.tsx`: refactor ke `ToastItem` per-toast dengan timer per-item; durasi 3500 → 6000ms; pause hover/focus; ARIA `role="status"` + `aria-live="polite"` untuk success/info, `role="alert"` + `aria-live="assertive"` untuk danger/warning.
+- **Gate build:** `npm run build` ✅ 0 error (fix scope `useConfirm` di `ActiveStayContent` bukan `MyStayPage`).
+
+### 2026-06-20 — Audit UI/UX: Owner & Admin Dashboard
+- **OwnerDashboardPage**: hapus `OwnerActionStrip` + `AssistantPanel` sinyal (duplikat); gabung 2 panel AI menjadi 1 (`generateBrief`); hapus 3 tombol quick-action redundan; tambah tooltip kriteria grade badge; label "Kesiapan Go-Live" → "Kesiapan Akuntansi"; skor bisnis kini tampil hint `(0–100)`.
+- **DashboardAdmin**: hapus `AdminHealthChips` (6 chip duplikat lane) + `admin-ops-guardrails` (4 blok teks statis); `AssistantPanel` kini full-width; hapus baris `detail` di `AdminTodayStatusStrip`; label "Finance" → "Keuangan".
+- **AppLayout**: toggle `Kokpit Owner / Area Admin` kini muncul di mobile topbar (di bawah search bar), tidak hanya di sidebar Offcanvas.
+### 2026-06-22 — docs: audit & bersihkan M-file (dedup, stale, sinkronisasi)
+- **docs(audit):** Audit 14 M-file + CODEMAP terhadap kode nyata. 14 isu ditemukan (4 critical, 5 stale, 3 duplikasi, 2 minor). Semua difix: M17 status L-08/10/11/16 ditandai ✅, M01 model count 41→55 + modul 33+→38, CODEMAP 39→38 modul + 54→55 model, M02 OWN-STRUKTUR-PHASE2 ditandai selesai, M03 §7 auto-ops diupdate ke 5 sweep service, M01 §4 tabel auto-ops diganti sweep.
+- **docs(arsip):** M17 + fase-l-specs/ dipindahkan ke `archieve/2026-06-20_fase_selesai/` karena Fase L selesai semua. Root docs lebih ramping.
+
 ### 2026-06-20 — ui(Fase L): L-08, L-10, L-11, L-16, L-19
 - **frontend(L):** PublicRooms mendapat filter mobile collapse, compare counter x/3, carousel touch, dan pagination ellipsis; tiket tenant punya SafeImage lightbox; Reports lazy-load `UnlockedFormalReports` via Suspense skeleton.
 - **finance(L):** Accounting setup punya checklist read-only dari query existing; Asset Register memindahkan form tambah aset ke modal dengan validasi tetap aktif. Gate: `npm.cmd run build` PASS + PWA verified.

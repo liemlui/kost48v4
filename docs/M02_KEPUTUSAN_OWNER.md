@@ -86,16 +86,9 @@ Semua keputusan owner terkait keuangan (no-partial, DP 30%, deposit=Room.default
 - **OWN-NAV-SPLIT**: Sidebar Kokpit Owner = 13 link bisnis (6 section). Sidebar Area Admin = 6 link operasional (1 section). Tidak campur.
 - **OWN-NAV-TOGGLE-PERSIST**: Mode toggle disimpan ke localStorage agar survive page refresh.
 
-### OWN-STRUKTUR-PHASE2 ❌ BELUM SELESAI
-Toggle Owner/Admin phase 1 sudah berfungsi secara state/dasar, tapi UI masih mentah dan belum dipisah secara utuh. Semua PR dicatat di `docs/M10_CHECKLIST_CHANGELOG.md` section **OWN-STRUKTUR-PHASE2**.
+### OWN-STRUKTUR-PHASE2 ✅ SELESAI (Fase C + H + I)
 
-**Gap utama:**
-- **P0:** CSS toggle tidak ada (dua tombol mentah), tidak ada transisi, mobile toggle tidak tersedia
-- **P1:** Sidebar context card, breadcrumb, offcanvas title tidak adaptif sesuai mode; tombol "Pengumuman" tidak muncul untuk Owner mode admin
-- **P2:** Route tidak terpisah (masih `/owner-dashboard` untuk semua mode), tidak ada guard route, RoleWorkspaceTabs tidak adaptif
-- **P3:** Backend tidak aware Owner mode
-
-**Target batch terpisah — 13 sub-task** di M10.
+Toggle Owner/Admin phase 1 berfungsi penuh. UI telah diperbaiki melalui Fase C (toggle segmented control, route split, sidebar context-aware, breadcrumb), Fase H (sidebar compact 18→7, dashboard 6→3 tab), dan Fase I (de-duplikasi navigasi, breadcrumb interaktif). Detail: `docs/M10_CHECKLIST_CHANGELOG.md` Fase C, H, I.
 
 ## Catatan Pemakaian
 

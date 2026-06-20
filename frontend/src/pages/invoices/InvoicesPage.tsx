@@ -8,6 +8,7 @@ import PageHeader from '../../components/common/PageHeader';
 import StatusBadge from '../../components/common/StatusBadge';
 import CurrencyDisplay from '../../components/common/CurrencyDisplay';
 import EmptyState from '../../components/common/EmptyState';
+import ClickableRow from '../../components/common/ClickableRow';
 import PaginationControls from '../../components/common/PaginationControls';
 import SearchableSelect from '../../components/common/SearchableSelect';
 import { type ActionQueueItem, type AssistantItem, type MetricChip } from '../../components/command-center';
@@ -498,7 +499,7 @@ export default function InvoicesPage() {
                   const tenantName = item.stay?.tenant?.fullName || `Masa sewa #${item.stayId}`;
                   const roomLabel = item.stay?.room ? `${item.stay.room.code}${item.stay.room.name ? ` · ${item.stay.room.name}` : ''}` : '-';
                   return (
-                    <tr key={item.id} className="clickable-row" onClick={() => navigate(`/invoices/${item.id}`)}>
+                    <ClickableRow key={item.id} onClick={() => navigate(`/invoices/${item.id}`)} label={`Buka invoice ${item.invoiceNumber || `INV-${item.id}`} untuk ${tenantName}`}>
                       <td data-label="Tagihan">
                         {(() => { const m = invoicePurposeMeta(item); return (
                           <Badge bg={m.bg} className="mb-1 d-inline-flex align-items-center gap-1"><span aria-hidden>{m.icon}</span> {m.label}</Badge>
@@ -528,7 +529,7 @@ export default function InvoicesPage() {
                           <span className="row-arrow-cell">›</span>
                         </div>
                       </td>
-                    </tr>
+                    </ClickableRow>
                   );
                 })}
               </tbody>

@@ -1,6 +1,7 @@
 import { Card, Col, Row, Table } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import PageHeader from '../../components/common/PageHeader';
+import ClickableRow from '../../components/common/ClickableRow';
 import { StatusStrip } from '../../components/workspace';
 
 const revenueStreams = [
@@ -92,12 +93,12 @@ export default function AncillaryRevenuePage() {
                 </thead>
                 <tbody>
                   {activeStreams.map((stream) => (
-                    <tr key={stream.id} className="clickable-row" onClick={() => navigate(stream.route)}>
+                    <ClickableRow key={stream.id} onClick={() => navigate(stream.route)} label={`Buka detail ${stream.name}`}>
                       <td><strong>{stream.icon} {stream.name}</strong></td>
                       <td>{stream.buyer}</td>
                       <td><span className="status-soft-pill success">{stream.status}</span></td>
                       <td>{stream.note}</td>
-                    </tr>
+                    </ClickableRow>
                   ))}
                 </tbody>
               </Table>

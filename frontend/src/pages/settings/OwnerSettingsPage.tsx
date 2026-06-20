@@ -4,6 +4,7 @@ import { Alert, Badge, Button, Card, Col, Form, Modal, Row, Spinner, Tab, Tabs }
 import { useSearchParams } from 'react-router-dom';
 import client from '../../api/client';
 import SafeImage from '../../components/common/SafeImage';
+import { useConfirm } from '../../components/common/ConfirmProvider';
 import { createFaq, deleteFaq, fetchAllFaqs, updateFaq, type FaqItem } from '../../api/faqs';
 import { fetchOperationalSettings, updateOperationalSettings, type OperationalSetting } from '../../api/settings';
 import { getApiErrorMessage } from '../../utils/getApiErrorMessage';
@@ -38,6 +39,7 @@ function resolvePublicPreviewUrl(url?: string | null) {
 }
 
 function FacilityPhotoPanel() {
+  const confirm = useConfirm();
   const qc = useQueryClient();
   const [uploading, setUploading] = useState<string | null>(null);
   const [error, setError] = useState('');
@@ -64,7 +66,8 @@ function FacilityPhotoPanel() {
   };
 
   const handleDelete = async (slug: string) => {
-    if (!window.confirm(`Hapus foto untuk "${FACILITY_SLUGS.find((f) => f.slug === slug)?.label}"?`)) return;
+    const ok = await confirm({ title: 'Hapus Foto Fasilitas', message: `Hapus foto untuk "${FACILITY_SLUGS.find((f) => f.slug === slug)?.label}"?`, confirmLabel: 'Hapus', variant: 'danger' });
+    if (!ok) return;
     try {
       await deleteFacilityImage(slug);
       qc.invalidateQueries({ queryKey: ['facility-images'] });
@@ -150,6 +153,7 @@ function FacilityPhotoPanel() {
 /* ─── Helpers ──────────────────────────────────────────────────────── */
 
 function MarketingAssetPanel() {
+  const confirm = useConfirm();
   const qc = useQueryClient();
   const [uploading, setUploading] = useState<string | null>(null);
   const [error, setError] = useState('');
@@ -173,7 +177,8 @@ function MarketingAssetPanel() {
   };
 
   const handleDelete = async (slug: string, label: string) => {
-    if (!window.confirm(`Hapus upload "${label}" dan kembali ke aset bawaan?`)) return;
+    const ok = await confirm({ title: 'Hapus Aset Marketing', message: `Hapus upload "${label}" dan kembali ke aset bawaan?`, confirmLabel: 'Hapus', variant: 'danger' });
+    if (!ok) return;
     setError('');
     try {
       await deleteMarketingAsset(slug);
@@ -282,6 +287,7 @@ type SavePayload = FaqForm & { editId: number | null };
 /* ─── FAQ Management ───────────────────────────────────────────────── */
 
 function FaqManagementPanel() {
+  const confirm = useConfirm();
   const qc = useQueryClient();
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
@@ -403,7 +409,7 @@ function FaqManagementPanel() {
                 <Button
                   size="sm"
                   variant="outline-danger"
-                  onClick={() => { if (window.confirm('Hapus FAQ ini?')) deleteMutation.mutate(faq.id); }}
+                  onClick={async () => { const ok = await confirm({ title: 'Hapus FAQ', message: 'Hapus FAQ ini?', confirmLabel: 'Hapus', variant: 'danger' }); if (!ok) return; deleteMutation.mutate(faq.id); }}
                   disabled={deleteMutation.isPending}
                 >
                   Hapus
@@ -495,6 +501,7 @@ function FaqManagementPanel() {
 type RoomBasic = { id: number; code: string; name: string; images: string[] };
 
 function RoomPhotoPanel() {
+  const confirm = useConfirm();
   const qc = useQueryClient();
   const [selectedRoom, setSelectedRoom] = useState<RoomBasic | null>(null);
   const [uploading, setUploading] = useState(false);
@@ -540,7 +547,8 @@ function RoomPhotoPanel() {
 
   const handleRemoveImage = async (url: string) => {
     if (!selectedRoom) return;
-    if (!window.confirm('Hapus foto ini dari kamar?')) return;
+    const ok = await confirm({ title: 'Hapus Foto Kamar', message: 'Hapus foto ini dari kamar?', confirmLabel: 'Hapus', variant: 'danger' });
+    if (!ok) return;
     const updatedImages = selectedRoom.images.filter((u) => u !== url);
     try {
       await client.patch(`/rooms/${selectedRoom.id}`, { images: updatedImages });

@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Accordion, Alert, Button, Card, Spinner } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import PageHeader from '../../components/common/PageHeader';
+import { useConfirm } from '../../components/common/ConfirmProvider';
 import StatusBadge from '../../components/common/StatusBadge';
 import CurrencyDisplay from '../../components/common/CurrencyDisplay';
 import EmptyState from '../../components/common/EmptyState';
@@ -41,6 +42,7 @@ import {
 // ── ActiveStayContent ─────────────────────────────────────────────────────────
 
 function ActiveStayContent({ stay }: { stay: Stay }) {
+  const confirm = useConfirm();
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const [showCheckoutModal, setShowCheckoutModal] = useState(false);
@@ -719,10 +721,10 @@ function ActiveStayContent({ stay }: { stay: Stay }) {
                           variant="outline-success"
                           size="sm"
                           disabled={interestMutation.isPending}
-                          onClick={() => {
-                            if (window.confirm(`Tertarik dengan "${svc.name}" (Rp ${svc.priceRupiah.toLocaleString('id-ID')}${svc.unit ? ` ${svc.unit}` : ''})? Pengelola akan menghubungi Anda.`)) {
-                              interestMutation.mutate(svc.id);
-                            }
+                          onClick={async () => {
+                            const ok = await confirm({ title: 'Minat Layanan', message: `Tertarik dengan "${svc.name}" (Rp ${svc.priceRupiah.toLocaleString('id-ID')}${svc.unit ? ` ${svc.unit}` : ''})? Pengelola akan menghubungi Anda.`, confirmLabel: 'Ya, Saya Minat', variant: 'primary' });
+                            if (!ok) return;
+                            interestMutation.mutate(svc.id);
                           }}
                         >
                           Saya Minat

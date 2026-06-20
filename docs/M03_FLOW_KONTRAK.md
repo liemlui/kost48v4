@@ -245,22 +245,33 @@ Tiket CHECKOUT_INSPECTION di-close → cek tidak ada stay ACTIVE lain :622 → s
 
 #### 7. Flow Auto-Ops (jam biologis sistem)
 
-**File:** `modules/auto-ops/auto-ops.service.ts` — 9 job sequential (V5.12.1), mutex `running`, `runAll`:88:
+**File:** `modules/auto-ops/auto-ops.service.ts` — 5 sweep service sejak Fase E, mutex advisory lock `pg_try_advisory_lock(1)`, `runAll()` sequential:
 
-| # | Job | Lokasi | Aksi |
-|---|---|---|---|
-| 1 | **Booking expiry** | runBookingExpiry:136 → expireBookingTx | Booking lewat `expiresAt` tanpa submission PENDING/APPROVED → invoice CANCELLED (reversal blocking), submission EXPIRED, stay CANCELLED, room AVAILABLE. FOR UPDATE re-check. |
-| 2 | **Contract end reminders** | runContractEndReminders | Notifikasi H-7/H-3/H-1/H-day ke tenant (target berikutnya menambah H-10). |
-| 3 | **DownPayment forfeit** | runDownPaymentForfeit | Stay belum promoted, lewat checkIn +1 hari tanpa pelunasan → CANCELLED, DP hangus, jaminan tidak tersentuh. |
-| 4 | **Overstay forced checkout** | runOverstayForcedCheckout | H+1 pk 12:00: stay → COMPLETED, kamar → MAINTENANCE + `allowBookingWhileCleaning=true`. Skip jika ada tagihan belum lunas. |
-| 5 | **Post-checkout auto-cancel** | runPostCheckoutAutoCancel | Stay belum promoted dan lewat planned checkout → cancel melalui jalur bersama yang menjaga uang masuk. |
-| 6 | **Noon release** | runRoomReleaseAtNoon | ≥ pk 12:00 WIB: kandidat booking berakhir diproses melalui jalur cancel bersama. |
-| 7 | **Room healer** | runRoomHealer | Room RESERVED yatim dipulihkan dengan tetap menghormati tiket inspeksi terbuka. |
-| 8 | **Overstay enforcement** | runOverstayEnforcement | Kamar OCCUPIED lewat kontrak → tiket `EVICT_OVERSTAY` untuk staf. |
-| 9 | **Accounting auto-close** | runAccountingAutoClose | Tutup buku bulan lalu otomatis jika readiness aman. |
+| Sweep | Operasi | Aksi |
+|---|---|---|
+| **BookingSweep** | `runBookingExpiry` | Booking lewat `expiresAt` tanpa submission PENDING/APPROVED → invoice CANCELLED, stay CANCELLED, room AVAILABLE. |
+| | `runDownPaymentForfeit` | Stay belum promoted, lewat checkIn +1 hari tanpa pelunasan → CANCELLED, DP hangus. |
+| **StaySweep** | `runOverstayForcedCheckout` | H+1 pk 12:00: stay → COMPLETED, kamar → MAINTENANCE + `allowBookingWhileCleaning=true`. |
+| | `runPostCheckoutAutoCancel` | Stay belum promoted lewat planned checkout → cancel. |
+| | `runRoomReleaseAtNoon` | ≥ pk 12:00 WIB: kandidat booking berakhir diproses. |
+| | `runRoomHealer` | Room RESERVED yatim dipulihkan. |
+| | `runOverstayEnforcement` | Kamar OCCUPIED lewat kontrak → tiket `EVICT_OVERSTAY`. |
+| **RenewalSweep** | `runRenewalPriorityExpiry` | AWAITING_DP lewat hari-H → EXPIRED_PRIORITY. |
+| | `runRenewalSettlementForfeit` | DP_SECURED gagal lunas H+7 → FORFEITED. |
+| **AccountingSweep** | `runRentRecognition` | PSAK 72: unearned→earned bulanan. |
+| | `runAutoJournalReconciliation` | Backfill jurnal warisan yang bolong. |
+| | `runRecurringExpenseDrafts` | Draft biaya rutin bulanan. |
+| | `runAutomaticDepreciation` | Depresiasi aset tetap bulan sebelumnya. |
+| | `runAccountingAutoClose` | Tutup buku bulan lalu jika readiness aman. |
+| | `runNotificationPruning` | Hapus notif >90 hari. |
+| **MaintenanceSweep** | `runContractEndReminders` | Notifikasi H-10/H-7/H-3/H-1/H-day. |
+| | `runTicketSlaEscalation` | Eskalasi SLA tiket (L0→admin, L1→owner). |
+| | `runBelongingsAbandonment` | Barang ditinggal 30 hari → ABANDONED. |
+| | `runAcCleaningSchedule` | Tiket cuci AC saat lewat interval. |
+| | `runReferralRewards` | Beri poin referral saat teman aktif. |
+| | `runPushDispatch` | Kirim push PWA queued. |
 
-**Invarian:** job idempotent & aman dijalankan berulang; tidak pernah membatalkan stay yang sudah promoted/dibayar.
-**Status verifikasi:** noon release sudah mengecek submission PENDING/APPROVED dan jalur cancel bersama melewati stay yang memiliki invoice PAID/PARTIAL. Klaim lama bahwa job #3 dapat membatalkan uang masuk sudah basi.
+**Invarian:** job idempotent & aman dijalankan berulang; tidak pernah membatalkan stay yang sudah promoted/dibayar. Semua lewat `FOR UPDATE` re-cek. Uang masuk (submission PENDING/APPROVED, invoice PAID/PARTIAL) = STOP otomatisasi.
 
 ---
 

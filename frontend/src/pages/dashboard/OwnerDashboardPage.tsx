@@ -19,24 +19,19 @@ import { fetchAccountingReadiness } from '../../api/accounting';
 import { listStays } from '../../api/stays';
 import { listResource } from '../../api/resources';
 import type { MeterReading } from '../../types';
-import { createBusinessNarrative, generateBrief, getOwnerAiStatus, type BriefResult } from '../../api/ai';
+import { generateBrief, getOwnerAiStatus, type BriefResult } from '../../api/ai';
 import AiAssistButton from '../../components/ai/AiAssistButton';
 import AiResultPanel from '../../components/ai/AiResultPanel';
-import { AssistantPanel, sortAssistantItems, type AssistantItem } from '../../components/command-center';
 
 const MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
-// Catatan: kepadatan ringkas/lengkap pakai key sendiri agar tidak bentrok dengan
-// `kost48_owner_view_mode` (toggle Kokpit/Area Admin di AppLayout + header X-Owner-View-Mode).
+// Catatan: key ini terpisah dari `kost48_owner_view_mode` (toggle Kokpit/Area Admin di AppLayout).
 const VIEW_MODE_KEY = 'kost48_owner_density';
 
-/** Hook: kelola mode tampilan ringkas/lengkap dengan persist localStorage + default mobile. */
 function useOwnerViewMode() {
   const [mode, setModeState] = useState<'compact' | 'full'>(() => {
-    // Prioritaskan localStorage
     const saved = localStorage.getItem(VIEW_MODE_KEY);
     if (saved === 'compact' || saved === 'full') return saved;
-    // Default: compact untuk viewport ≤834px
     return window.innerWidth <= 834 ? 'compact' : 'full';
   });
 
@@ -61,11 +56,6 @@ function isoDay(year: number, month: number, day: number) {
 
 type MeterDueSummary = { occupied: number; recorded: number; due: number };
 
-/**
- * OWN-STATUS-CARDS: hitung kamar terisi yang BELUM dicatat meter pada bulan terpilih.
- * Berbasis stay aktif (kamar terisi) vs reading bulan tsb (room unik). Best-effort:
- * dipakai sebagai sinyal kokpit, daftar lengkap tetap di /meter-readings.
- */
 async function computeMeterDue(ym: { year: number; month: number }): Promise<MeterDueSummary> {
   const lastDay = new Date(ym.year, ym.month, 0).getDate();
   const from = isoDay(ym.year, ym.month, 1);
@@ -170,7 +160,7 @@ function TrendChart({
     );
   };
 
-  // Audit U-10: bidang chart kosong tanpa pesan terlihat seperti halaman rusak.
+  // Chart kosong tanpa pesan terlihat seperti halaman rusak.
   const hasAnyValue = chartData.some(
     (d) => (d.revenue || 0) !== 0 || (d.expense || 0) !== 0 || (d.netProfit || 0) !== 0,
   );
@@ -248,10 +238,9 @@ function OwnerKpiCard({
 
 type StatusCard = { key: string; label: string; value: string; helper: string; route: string; tone: string };
 
-// L-09: penanda baku saat sumber data kartu gagal dimuat (lebih jelas dari "—").
+// Penanda baku saat sumber data kartu gagal dimuat.
 const CARD_ERROR_VALUE = 'Gagal';
 
-/** OWN-STATUS-CARDS: kartu status kokpit owner — okupansi, tunggakan, meter due, go-live readiness. */
 function OwnerStatusStrip({ cards, onNavigate }: { cards: StatusCard[]; onNavigate: (route: string) => void }) {
   return (
     <section className="owner-cockpit-status mb-3" aria-label="Status kokpit owner">
@@ -265,37 +254,6 @@ function OwnerStatusStrip({ cards, onNavigate }: { cards: StatusCard[]; onNaviga
           </button>
         ))}
       </div>
-    </section>
-  );
-}
-
-function OwnerActionStrip({
-  signals,
-  onNavigate,
-}: {
-  signals: { type: string; count: number; route: string }[];
-  onNavigate: (route: string) => void;
-}) {
-  const signalByType = (type: string) => signals.find((signal) => signal.type === type);
-  const overdue = signalByType('overdue');
-  const pendingPayment = signalByType('pending_payment');
-  const outstanding = signalByType('outstanding');
-  const actions = [
-    { label: 'Review pembayaran', value: pendingPayment?.count ?? 0, helper: 'Bukti bayar menunggu keputusan', route: pendingPayment?.route ?? '/payment-submissions/review', tone: pendingPayment?.count ? 'watch' : 'good' },
-    { label: 'Tagihan overdue', value: overdue?.count ?? 0, helper: 'Piutang perlu ditindaklanjuti', route: overdue?.route ?? '/invoices', tone: overdue?.count ? 'risk' : 'good' },
-    { label: 'Tagihan outstanding', value: outstanding?.count ?? 0, helper: 'Pantau tagihan yang masih terbuka', route: outstanding?.route ?? '/invoices', tone: outstanding?.count ? 'watch' : 'good' },
-    { label: 'Masa sewa', value: 'Buka', helper: 'Booking, perpanjangan, dan keluar', route: '/stays', tone: 'info' },
-  ];
-
-  return (
-    <section className="owner-action-strip mb-3" aria-label="Aksi cepat owner">
-      {actions.map((action) => (
-        <button key={action.label} type="button" className={`owner-action-item owner-action-${action.tone}`} onClick={() => onNavigate(action.route)}>
-          <span>{action.label}</span>
-          <strong>{action.value}</strong>
-          <small>{action.helper}</small>
-        </button>
-      ))}
     </section>
   );
 }
@@ -315,7 +273,6 @@ export default function OwnerDashboardPage() {
     retry: 1,
   });
 
-  // OWN-STATUS-CARDS: sumber data tambahan untuk kartu status kokpit (best-effort, tak memblok dashboard utama).
   const readinessQuery = useQuery({
     queryKey: ['accounting-readiness'],
     queryFn: fetchAccountingReadiness,
@@ -377,7 +334,7 @@ export default function OwnerDashboardPage() {
       },
       {
         key: 'readiness',
-        label: 'Kesiapan Go-Live',
+        label: 'Kesiapan Akuntansi',
         value: readinessQuery.isLoading ? '…' : readinessQuery.isError ? CARD_ERROR_VALUE : `${readiness?.score ?? 0}%`,
         helper: readinessQuery.isError ? 'Gagal memuat — coba muat ulang' : readiness ? (readiness.ready ? 'Akuntansi siap' : `${readiness.missing.length} gate tersisa`) : 'Kesiapan akuntansi',
         route: '/finance/accounting-setup',
@@ -385,19 +342,6 @@ export default function OwnerDashboardPage() {
       },
     ];
   }, [data, meterDueQuery.data, meterDueQuery.isLoading, meterDueQuery.isError, readinessQuery.data, readinessQuery.isLoading, readinessQuery.isError]);
-
-  // H4: item urgent dari signals untuk AssistantPanel di bawah KPI cards.
-  const ownerAssistantItems: AssistantItem[] = useMemo(() => {
-    if (!data) return [];
-    const items: AssistantItem[] = [];
-    const overdue = data.signals.find((s) => s.type === 'overdue');
-    const pending = data.signals.find((s) => s.type === 'pending_payment');
-    const outstanding = data.signals.find((s) => s.type === 'outstanding');
-    if (overdue?.count) items.push({ id: 'owner-overdue', severity: 'HIGH', title: 'Tagihan overdue', message: `${overdue.count} tagihan melewati jatuh tempo (Rp ${formatRupiah(overdue.totalRupiah ?? 0)}).`, count: overdue.count, actionLabel: 'Lihat Tagihan', actionTo: '/invoices', dedupKey: 'owner-overdue' });
-    if (pending?.count) items.push({ id: 'owner-pending', severity: 'MEDIUM', title: 'Pembayaran pending review', message: `${pending.count} bukti bayar tenant perlu diputuskan admin.`, count: pending.count, actionLabel: 'Review Pembayaran', actionTo: '/payment-submissions/review', dedupKey: 'owner-pending' });
-    if (outstanding?.count) items.push({ id: 'owner-outstanding', severity: 'INFO', title: 'Tagihan outstanding', message: `${outstanding.count} tagihan masih terbuka dan perlu dipantau.`, count: outstanding.count, actionLabel: 'Pantau Tagihan', actionTo: '/invoices', dedupKey: 'owner-outstanding' });
-    return sortAssistantItems(items);
-  }, [data]);
 
   const handleChange = (field: 'year' | 'month', val: string) => {
     const num = parseInt(val, 10);
@@ -458,7 +402,12 @@ export default function OwnerDashboardPage() {
         <>
           {grade ? (
             <section className={`owner-status-strip owner-status-${grade.tone} mb-3`}>
-              <span className="owner-grade-badge">{grade.label}</span>
+              <span
+                className="owner-grade-badge"
+                title="Sehat ≥ 70 · Perhatian 40–69 · Risiko 20–39 · Kritis < 20"
+              >
+                {grade.label}
+              </span>
               <div className="owner-status-copy">
                 <span>Kondisi bulan ini</span>
                 <strong>{data.headline}</strong>
@@ -471,8 +420,6 @@ export default function OwnerDashboardPage() {
           ) : null}
 
           {statusCards.length ? <OwnerStatusStrip cards={statusCards} onNavigate={navigate} /> : null}
-
-          <OwnerActionStrip signals={data.signals} onNavigate={navigate} />
 
           <Row className="g-3 mb-3">
             <Col xs={12} sm={6} xl={3}>
@@ -488,19 +435,6 @@ export default function OwnerDashboardPage() {
               <OwnerKpiCard label="Kas Bersih" value={formatCompactRupiah(data.kpi.netCashFlowRupiah)} change={changeLabel(data.kpi.netCashFlowChangePercent)} tone="cash" />
             </Col>
           </Row>
-
-          {/* H4: AssistantPanel sinyal urgent — hanya tampil bila ada item */}
-          {ownerAssistantItems.length > 0 ? (
-            <AssistantPanel
-              title="Sinyal Operasional"
-              subtitle="Aksi prioritas dari data keuangan dan operasional bisnis."
-              items={ownerAssistantItems}
-              emptyTitle="Tidak ada sinyal urgent"
-              emptyMessage="Semua flow keuangan dan operasional aman."
-              maxItems={4}
-              collapsible={false}
-            />
-          ) : null}
 
           <Row className="g-3 mb-3">
             <Col lg={7}>
@@ -537,66 +471,18 @@ export default function OwnerDashboardPage() {
               <section className="owner-panel owner-ai-panel h-100">
                 <div className="owner-panel-heading">
                   <div>
-                    <span className="owner-section-kicker">Ringkasan otomatis</span>
-                    <h2>Analisis AI</h2>
+                    <span className="owner-section-kicker">Analisis AI</span>
+                    <h2>Ringkasan Bisnis</h2>
                   </div>
                 </div>
                 <div className="owner-panel-body owner-ai-body">
                   <div className="owner-ai-context">
-                    <span>Skor bisnis<strong>{data.score}</strong></span>
+                    <span>Skor bisnis <small className="text-muted">(0–100)</small><strong>{data.score}</strong></span>
                     <span>Periode<strong>{selectedPeriodLabel}</strong></span>
                   </div>
                   {canUseOwnerAi ? (
-                    <AiAssistButton
-                      label="Buat analisis"
-                      loadingLabel="Menganalisis..."
-                      run={() => createBusinessNarrative({
-                        period: selectedPeriodLabel,
-                        metrics: {
-                          score: data.score,
-                          overdueRupiah: data.signals.find((signal) => signal.type === 'overdue')?.totalRupiah ?? 0,
-                          pendingPaymentCount: data.signals.find((signal) => signal.type === 'pending_payment')?.count ?? 0,
-                          occupancyRatePercent: data.kpi.occupancyRatePercent,
-                        },
-                      })}
-                      renderResult={(result) => (
-                        <Alert variant="light" className="owner-ai-result mb-0 small">
-                          <div className="fw-semibold">{result.title}</div>
-                          <div>{result.summary}</div>
-                          {result.recommendations?.length > 0 ? (
-                            <ul className="mb-0 mt-2 ps-3">
-                              {result.recommendations.map((item, idx) => <li key={idx}>{item}</li>)}
-                            </ul>
-                          ) : null}
-                        </Alert>
-                      )}
-                    />
-                  ) : (
-                    <Alert variant="secondary" className="mb-0 small">AI belum dikonfigurasi.</Alert>
-                  )}
-                </div>
-              </section>
-            </Col>
-          </Row>
-
-          {/* H5: Quick-action buttons — tampil di semua mode (compact & full) */}
-          <div className="d-flex gap-2 flex-wrap mb-3">
-            <Button size="sm" variant="outline-primary" onClick={() => navigate('/reports')}>📊 Buka Laporan</Button>
-            <Button size="sm" variant="outline-secondary" onClick={() => navigate('/admin-dashboard')}>🛠️ Buka Area Admin</Button>
-            <Button size="sm" variant="outline-info" onClick={() => navigate('/market-analysis')}>🧭 Analisa Pasar</Button>
-          </div>
-
-          {/* G1: Owner Executive Brief AI */}
-          <Row className="mb-3">
-            <Col xs={12}>
-              <section className="owner-panel owner-ai-panel">
-                <div className="owner-panel-heading">
-                  <h2>Ringkasan Bisnis AI</h2>
-                </div>
-                <div className="owner-panel-body p-3">
-                  {canUseOwnerAi ? (
                     <AiAssistButton<BriefResult>
-                      label="Buat Brief AI"
+                      label="Buat Ringkasan AI"
                       loadingLabel="Menganalisa dengan DeepSeek..."
                       variant="primary"
                       run={generateBrief}
@@ -612,50 +498,50 @@ export default function OwnerDashboardPage() {
                         >
                           <p className="fw-medium mb-2">{result.result?.summary}</p>
 
-                        {result.result?.priorityActions?.length > 0 ? (
-                          <div className="mb-2">
-                            <div className="small fw-semibold text-muted mb-1">Aksi Prioritas</div>
-                            {result.result.priorityActions.map((a, i) => (
-                              <div key={i} className="d-flex align-items-center gap-2 mb-1 small">
-                                <span className={`badge bg-${a.severity === 'CRITICAL' ? 'danger' : a.severity === 'HIGH' ? 'warning' : a.severity === 'MEDIUM' ? 'info' : 'secondary'}`}>
-                                  {a.severity}
-                                </span>
-                                <span>{a.title}</span>
-                                <span className="text-muted">— {a.reason}</span>
-                              </div>
-                            ))}
-                          </div>
-                        ) : null}
+                          {result.result?.priorityActions?.length > 0 ? (
+                            <div className="mb-2">
+                              <div className="small fw-semibold text-muted mb-1">Aksi Prioritas</div>
+                              {result.result.priorityActions.map((a, i) => (
+                                <div key={i} className="d-flex align-items-center gap-2 mb-1 small">
+                                  <span className={`badge bg-${a.severity === 'CRITICAL' ? 'danger' : a.severity === 'HIGH' ? 'warning' : a.severity === 'MEDIUM' ? 'info' : 'secondary'}`}>
+                                    {a.severity}
+                                  </span>
+                                  <span>{a.title}</span>
+                                  <span className="text-muted">— {a.reason}</span>
+                                </div>
+                              ))}
+                            </div>
+                          ) : null}
 
-                        {result.result?.risks?.length > 0 ? (
-                          <div className="mb-2">
-                            <div className="small fw-semibold text-muted mb-1">Risiko</div>
-                            {result.result.risks.map((r, i) => (
-                              <div key={i} className="small mb-1">⚠️ <strong>{r.title}</strong> — {r.impact}. <em>Mitigasi: {r.mitigation}</em></div>
-                            ))}
-                          </div>
-                        ) : null}
+                          {result.result?.risks?.length > 0 ? (
+                            <div className="mb-2">
+                              <div className="small fw-semibold text-muted mb-1">Risiko</div>
+                              {result.result.risks.map((r, i) => (
+                                <div key={i} className="small mb-1">⚠️ <strong>{r.title}</strong> — {r.impact}. <em>Mitigasi: {r.mitigation}</em></div>
+                              ))}
+                            </div>
+                          ) : null}
 
-                        {result.result?.numbersToWatch?.length > 0 ? (
-                          <div className="mb-2">
-                            <div className="small fw-semibold text-muted mb-1">Angka Penting</div>
-                            {result.result.numbersToWatch.map((n, i) => (
-                              <div key={i} className="small mb-1">📊 <strong>{n.label}:</strong> {n.value} — {n.why}</div>
-                            ))}
-                          </div>
-                        ) : null}
+                          {result.result?.numbersToWatch?.length > 0 ? (
+                            <div className="mb-2">
+                              <div className="small fw-semibold text-muted mb-1">Angka Penting</div>
+                              {result.result.numbersToWatch.map((n, i) => (
+                                <div key={i} className="small mb-1">📊 <strong>{n.label}:</strong> {n.value} — {n.why}</div>
+                              ))}
+                            </div>
+                          ) : null}
                         </AiResultPanel>
                       )}
                     />
                   ) : (
-                    <Alert variant="secondary" className="mb-0 small">AI belum dikonfigurasi.</Alert>
+                    <Alert variant="secondary" className="mb-0 small">AI belum dikonfigurasi. Aktifkan di <strong>Pengaturan → Konfigurasi AI</strong>.</Alert>
                   )}
                 </div>
               </section>
             </Col>
           </Row>
 
-          {/* H5: tren chart hanya tampil di mode Lengkap — compact mode menyembunyikan ini */}
+          {/* Tren chart hanya tampil di mode Lengkap */}
           {viewMode === 'full' ? (
           <section className="owner-panel owner-trend-panel mb-3">
             <div className="owner-panel-heading owner-trend-heading">

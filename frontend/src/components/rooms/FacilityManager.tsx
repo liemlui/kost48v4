@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Alert, Button, Col, Collapse, Form, Row, Spinner, Table } from 'react-bootstrap';
 import { createResource, deleteResource, getResource, updateResource } from '../../api/resources';
 import EmptyState from '../common/EmptyState';
+import { useConfirm } from '../common/ConfirmProvider';
 import type { RoomFacility } from '../../types';
 
 interface FacilityManagerProps {
@@ -76,6 +77,7 @@ function getErrorMessage(error: unknown, fallback: string): string {
 }
 
 export default function FacilityManager({ roomId, allowedToManage = true }: FacilityManagerProps) {
+  const confirm = useConfirm();
   const queryClient = useQueryClient();
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
@@ -367,10 +369,10 @@ export default function FacilityManager({ roomId, allowedToManage = true }: Faci
                       <Button
                         variant="outline-danger"
                         size="sm"
-                        onClick={() => {
-                          if (window.confirm(`Hapus fasilitas "${facility.name}"?`)) {
-                            deleteMutation.mutate(facility.id);
-                          }
+                        onClick={async () => {
+                          const ok = await confirm({ title: 'Hapus Fasilitas', message: `Hapus fasilitas "${facility.name}"?`, confirmLabel: 'Hapus', variant: 'danger' });
+                          if (!ok) return;
+                          deleteMutation.mutate(facility.id);
                         }}
                         disabled={isMutating}
                       >

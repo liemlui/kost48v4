@@ -20,6 +20,7 @@ import {
   type NavigationSection,
 } from '../../config/navigation';
 import { useAuth } from '../../context/AuthContext';
+import { useConfirm } from '../common/ConfirmProvider';
 
 function getRoleLabel(role?: string) {
   switch (role) {
@@ -209,16 +210,16 @@ function SidebarContent({
   );
 }
 
-function handleLogout(logoutFn: () => void) {
-  if (window.confirm('Yakin ingin keluar?')) {
-    logoutFn();
-  }
-}
-
 export default function AppLayout({ children }: { children?: ReactNode }) {
   const { user, logout } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
+  const confirm = useConfirm();
+  const handleLogoutClick = async () => {
+    const ok = await confirm({ title: 'Keluar', message: 'Yakin ingin keluar?', confirmLabel: 'Keluar', variant: 'danger' });
+    if (!ok) return;
+    logout();
+  };
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState<'expanded' | 'collapsed'>(() => {
     try {
@@ -329,7 +330,7 @@ export default function AppLayout({ children }: { children?: ReactNode }) {
                 </span>
                 <TenantAvatar tenantId={user?.tenantId} fullName={user?.fullName} enabled={user?.role === 'TENANT'} />
               </button>
-              <Button variant="outline-danger" size="sm" onClick={() => handleLogout(logout)}>Logout</Button>
+              <Button variant="outline-danger" size="sm" onClick={handleLogoutClick}>Logout</Button>
             </div>
           </section>
 
@@ -467,13 +468,35 @@ export default function AppLayout({ children }: { children?: ReactNode }) {
                     </span>
                     <TenantAvatar tenantId={user?.tenantId} fullName={user?.fullName} enabled={user?.role === 'TENANT'} />
                   </button>
-                  <Button variant="outline-danger" size="sm" onClick={() => handleLogout(logout)}>Logout</Button>
+                  <Button variant="outline-danger" size="sm" onClick={handleLogoutClick}>Logout</Button>
                 </div>
               </div>
             </div>
             <div className="d-lg-none mt-2">
               <GlobalSearch role={user?.role} />
             </div>
+            {isOwner ? (
+              <div className="d-xl-none mt-1">
+                <div className="owner-view-toggle owner-view-toggle-topbar-mobile" role="group" aria-label="Mode tampilan owner">
+                  <button
+                    type="button"
+                    aria-pressed={ownerViewMode === 'owner'}
+                    className={`owner-view-toggle-btn ${ownerViewMode === 'owner' ? 'active' : ''}`}
+                    onClick={() => changeOwnerViewMode('owner')}
+                  >
+                    <span aria-hidden="true">📈</span> Kokpit Owner
+                  </button>
+                  <button
+                    type="button"
+                    aria-pressed={ownerViewMode === 'admin'}
+                    className={`owner-view-toggle-btn ${ownerViewMode === 'admin' ? 'active' : ''}`}
+                    onClick={() => changeOwnerViewMode('admin')}
+                  >
+                    <span aria-hidden="true">🔧</span> Area Admin
+                  </button>
+                </div>
+              </div>
+            ) : null}
           </section>
 
           {isAdmin || isOwner ? <RoleWorkspaceTabs role={user?.role} ownerViewMode={isOwner ? ownerViewMode : undefined} /> : null}

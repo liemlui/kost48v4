@@ -4,7 +4,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import EmptyState from '../../components/common/EmptyState';
 import PaginationControls from '../../components/common/PaginationControls';
 import StatusBadge from '../../components/common/StatusBadge';
-import { AssistantPanel, ActionQueueTable, type ActionQueueItem, type AssistantItem, type MetricChip } from '../../components/command-center';
+import { AssistantPanel, ActionQueueTable, type ActionQueueItem, type AssistantItem } from '../../components/command-center';
 import { AssistantInsightLine, EntityBadgeFilterBar } from '../../components/workspace';
 import AutoOpsControlPanel from '../../components/auto-ops/AutoOpsControlPanel';
 import SmartChartPanel, { type SmartChartPoint } from '../../components/charts/SmartChartPanel';
@@ -155,19 +155,6 @@ function AdminProcessLine() {
   );
 }
 
-function AdminHealthChips({ metrics }: { metrics: MetricChip[] }) {
-  return (
-    <div className="admin-health-chip-row" aria-label="Ringkasan kesehatan admin">
-      {metrics.map((metric) => (
-        <button type="button" key={metric.id} className={`admin-health-chip ${metric.status?.toLowerCase() ?? 'info'}`} onClick={() => metric.to ? window.location.assign(metric.to) : metric.onClick?.()}>
-          <span>{metric.icon ?? '•'} {metric.label}</span>
-          <strong>{metric.value}</strong>
-          <em>{metric.helper ?? metric.statusLabel ?? 'Aman'}</em>
-        </button>
-      ))}
-    </div>
-  );
-}
 
 function AdminSlaMiniNote({ status }: { status?: AutoOpsStatusLike | null }) {
   const reviewHours = Number(status?.deadlines?.BOOKING_REVIEW_DEADLINE_HOURS ?? ADMIN_SLA_HOURS.bookingReview);
@@ -195,7 +182,7 @@ function AdminTodayStatusStrip({ rooms, inventoryItems, invoices, tickets, pendi
   const strips = [
     { label: 'Hunian', value: `${occupied}/${rooms.length || 0}`, helper: `${available} kamar kosong`, detail: `${occupancyPercent}% terisi`, percent: occupancyPercent, tone: occupancyPercent >= 80 ? 'success' : 'info' },
     { label: 'Masa sewa', value: String(stayWork), helper: stayWork ? 'butuh keputusan' : 'alur aman', detail: `${pendingApprovalCount} booking · ${pendingRenewCount} perpanjangan · ${checkoutCount} keluar`, tone: stayWork ? 'warning' : 'success' },
-    { label: 'Finance', value: String(openInvoices), helper: financeRisk ? `${financeRisk} risiko bayar` : 'tidak ada risiko urgent', detail: `${overdueInvoices} overdue · ${pendingPaymentReviewCount} bukti review`, tone: financeRisk ? 'danger' : 'success' },
+    { label: 'Keuangan', value: String(openInvoices), helper: financeRisk ? `${financeRisk} risiko bayar` : 'tidak ada risiko urgent', detail: `${overdueInvoices} overdue · ${pendingPaymentReviewCount} bukti review`, tone: financeRisk ? 'danger' : 'success' },
     { label: 'Staff & Tiket', value: String(activeTickets), helper: activeTickets ? 'tiket aktif/perlu cek' : 'staff & tiket aman', detail: `${waitingAdminTickets} menunggu cek admin`, tone: waitingAdminTickets ? 'warning' : activeTickets ? 'info' : 'success' },
     { label: 'Kamar & Stok', value: String(lowStock), helper: lowStock ? 'stok menipis' : 'stok aman', detail: `${inventoryItems.length} item dipantau`, tone: lowStock ? 'warning' : 'success' },
   ];
@@ -206,16 +193,15 @@ function AdminTodayStatusStrip({ rooms, inventoryItems, invoices, tickets, pendi
           <div className="status-strip-top"><span>{strip.label}</span><strong>{strip.value}</strong></div>
           {strip.percent !== undefined ? <div className="status-strip-bar" aria-hidden="true"><i style={{ width: `${strip.percent}%` }} /></div> : null}
           <small>{strip.helper}</small>
-          <em>{strip.detail}</em>
         </div>
       ))}
     </div>
   );
 }
 
-type AdminOperationsCommandQueueProps = { lanes: AdminWorkLane[]; assistantItems: AssistantItem[]; metrics: MetricChip[]; topQueueItem?: ActionQueueItem; queueItems: ActionQueueItem[]; onNavigate: (to: string) => void };
+type AdminOperationsCommandQueueProps = { lanes: AdminWorkLane[]; assistantItems: AssistantItem[]; topQueueItem?: ActionQueueItem; queueItems: ActionQueueItem[]; onNavigate: (to: string) => void };
 
-function AdminOperationsCommandQueue({ lanes, assistantItems, metrics, topQueueItem, queueItems, onNavigate }: AdminOperationsCommandQueueProps) {
+function AdminOperationsCommandQueue({ lanes, assistantItems, topQueueItem, queueItems, onNavigate }: AdminOperationsCommandQueueProps) {
   const blockerCount = queueItems.filter((item) => item.priority === 'BLOCKER' || item.timeStatusTone === 'danger').length;
   const decisionCount = lanes.reduce((sum, lane) => sum + lane.value, 0);
   const primaryAction = topQueueItem?.actionTo ?? lanes.find((lane) => lane.value > 0)?.to ?? '/dashboard';
@@ -236,20 +222,7 @@ function AdminOperationsCommandQueue({ lanes, assistantItems, metrics, topQueueI
           </div>
         </div>
         <AdminContinuityStrip lanes={lanes} onNavigate={onNavigate} />
-        <div className="admin-ops-command-grid">
-          <div>
-            <AssistantPanel title="Daily Assistant Admin" subtitle="Ringkasan pekerjaan yang paling berdampak ke kamar, uang masuk, dan tenant." items={assistantItems} emptyTitle="Operasional hari ini aman" emptyMessage="Tidak ada bukti bayar pending, checkout macet, perpanjangan pending, tagihan overdue, atau tiket penting dari data yang dimuat." maxItems={4} collapsible={false} />
-          </div>
-          <div>
-            <AdminHealthChips metrics={metrics} />
-            <div className="admin-ops-guardrails mt-3">
-              <div><strong>Payment</strong><span>Admin hanya verifikasi/reject bukti; AutoOps tidak approve pembayaran.</span></div>
-              <div><strong>Perpanjangan</strong><span>Wajib melewati cek meter dan tagihan perpanjangan.</span></div>
-              <div><strong>Keluar</strong><span>Final keluar tetap manual dan harus bebas tagihan aktif.</span></div>
-              <div><strong>Deposit</strong><span>Refund/deduction/forfeit tetap keputusan admin/owner, bukan otomatis.</span></div>
-            </div>
-          </div>
-        </div>
+        <AssistantPanel title="Daily Assistant Admin" subtitle="Ringkasan pekerjaan yang paling berdampak ke kamar, uang masuk, dan tenant." items={assistantItems} emptyTitle="Operasional hari ini aman" emptyMessage="Tidak ada bukti bayar pending, checkout macet, perpanjangan pending, tagihan overdue, atau tiket penting dari data yang dimuat." maxItems={4} collapsible={false} />
       </Card.Body>
     </Card>
   );
@@ -386,14 +359,6 @@ export default function AdminDashboard() {
     waitingInitialPaymentCount > 0 ? { id: 'admin-assistant-waiting-payment', severity: expiredTenantPaymentCount ? 'WARNING' as const : 'INFO' as const, title: 'Booking menunggu bayar tenant', message: `${waitingInitialPaymentCount} booking punya tagihan awal. Pantau agar kamar tidak tertahan.`, count: waitingInitialPaymentCount, actionLabel: 'Pantau Booking', actionTo: '/stays?status=BOOKINGS', dedupKey: 'admin-waiting-payment' } : null,
   ].filter(Boolean) as AssistantItem[]);
 
-  const adminHealthMetrics: MetricChip[] = [
-    { id: 'admin-metric-payment', label: 'Bukti pending', value: pendingPaymentReviewCount, helper: expiredPaymentReviewCount ? `${expiredPaymentReviewCount} lewat SLA` : 'Perlu verifikasi manual', status: expiredPaymentReviewCount ? 'DANGER' : pendingPaymentReviewCount ? 'WARNING' : 'SUCCESS', icon: '✅', to: '/payment-submissions/review' },
-    { id: 'admin-metric-booking', label: 'Review booking', value: pendingApprovalCount, helper: expiredBookingReviewCount ? `${expiredBookingReviewCount} lewat deadline` : 'Sebelum invoice awal', status: expiredBookingReviewCount ? 'DANGER' : pendingApprovalCount ? 'WARNING' : 'SUCCESS', icon: '📝', to: '/stays?status=BOOKINGS' },
-    { id: 'admin-metric-renew', label: 'Perpanjangan pending', value: pendingRenewCount, helper: 'Butuh cek meter', status: pendingRenewCount ? 'WARNING' : 'SUCCESS', icon: '🔁', to: '/renew-requests' },
-    { id: 'admin-metric-checkout', label: 'Pekerjaan keluar', value: checkoutWorkCount, helper: `${pendingCheckoutRequestCount} review · ${approvedCheckoutRequestCount} final`, status: checkoutWorkCount ? 'WARNING' : 'SUCCESS', icon: '🚪', to: '/stays?status=BOOKINGS' },
-    { id: 'admin-metric-invoice', label: 'Tagihan open', value: openInvoiceCount, helper: overdueInvoiceCount ? `${overdueInvoiceCount} overdue` : 'Belum lunas/dibatalkan', status: overdueInvoiceCount ? 'DANGER' : openInvoiceCount ? 'WARNING' : 'SUCCESS', icon: '🧾', to: '/invoices' },
-    { id: 'admin-metric-ticket', label: 'Tiket aktif', value: activeTicketCount, helper: `${unassignedTicketCount} belum assign · ${ticketWaitingAdminCount} perlu cek`, status: ticketWaitingAdminCount || unassignedTicketCount ? 'WARNING' : activeTicketCount ? 'INFO' : 'SUCCESS', icon: '🎫', to: '/tickets' },
-  ];
 
   const queueItems: ActionQueueItem[] = dedupeCommandItems([
     ...pendingApprovalBookings.slice(0, 4).map((stay) => { const createdAt = getStayCreatedAt(stay); const deadline = getStayDeadline(stay, ADMIN_SLA_HOURS.bookingReview); const meta = getDeadlineMeta(deadline, 'Batas review booking'); return { id: `booking-approval-${stay.id}`, ruleId: 'booking-review-sla', entityType: 'stay', entityId: stay.id, priority: meta.isExpired ? 'HIGH' as const : 'MEDIUM' as const, type: '1. Review booking', subject: stay.tenant?.fullName || stay.room?.code || `Booking #${stay.id}`, issue: meta.isExpired ? 'Melewati batas review. AutoOps dapat reset pemesanan.' : 'Putuskan booking sebelum deadline.', receivedAtLabel: createdAt ? makeClock(createdAt) : undefined, ...makeQueueTime(deadline), recommendedAction: 'Review Booking', actionTo: '/stays?status=BOOKINGS' }; }),
@@ -440,7 +405,7 @@ export default function AdminDashboard() {
         message={supportQueriesError ? 'Data utama sudah tampil, tetapi sebagian data pendukung gagal dimuat.' : topQueueItem ? `${topQueueItem.type}: ${topQueueItem.issue}` : activeArea === 'overview' ? 'Tidak ada blocker besar. Gunakan tab area untuk membuka detail.' : `${activeAreaConfig.label} sedang aman.`}
       />
       {supportQueriesLoading ? <Alert variant="info" className="admin-support-loading-note">Data pendukung sedang dimuat. Dashboard utama tetap bisa dipakai.</Alert> : null}
-      {activeArea === 'overview' ? <AdminOperationsCommandQueue lanes={adminWorkLanes} assistantItems={adminAssistantItems} metrics={adminHealthMetrics} topQueueItem={topQueueItem} queueItems={queueItems} onNavigate={navigate} /> : null}
+      {activeArea === 'overview' ? <AdminOperationsCommandQueue lanes={adminWorkLanes} assistantItems={adminAssistantItems} topQueueItem={topQueueItem} queueItems={queueItems} onNavigate={navigate} /> : null}
       {/* H4: Brief AI untuk admin — hanya muncul jika API key dikonfigurasi & area overview */}
       {activeArea === 'overview' && canUseAdminBriefAi ? (
         <section className="owner-panel mt-3 mb-3">

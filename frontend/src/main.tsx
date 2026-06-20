@@ -10,6 +10,7 @@ import { queryClient } from './lib/queryClient';
 import { installResponsiveTableLabels } from './utils/responsiveTables';
 import PwaStatus from './components/pwa/PwaStatus';
 import { ToastProvider } from './components/common/ToastProvider';
+import { ConfirmProvider } from './components/common/ConfirmProvider';
 
 installResponsiveTableLabels();
 
@@ -19,7 +20,9 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
       <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
         <AuthProvider>
           <ToastProvider>
-            <App />
+            <ConfirmProvider>
+              <App />
+            </ConfirmProvider>
           </ToastProvider>
           <PwaStatus />
         </AuthProvider>

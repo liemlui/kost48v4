@@ -1,4 +1,5 @@
 import { useRef, useState } from 'react';
+import { useConfirm } from '../common/ConfirmProvider';
 import { Button, Card, Spinner } from 'react-bootstrap';
 import TenantAvatar from '../common/TenantAvatar';
 import { compressImageFile } from '../../utils/compressImageFile';
@@ -14,6 +15,7 @@ interface Props {
 }
 
 export default function TenantProfilePhotoCard({ tenantId, fullName }: Props) {
+  const confirm = useConfirm();
   const inputRef = useRef<HTMLInputElement>(null);
   const [version, setVersion] = useState(0);
   const [busy, setBusy] = useState(false);
@@ -37,7 +39,8 @@ export default function TenantProfilePhotoCard({ tenantId, fullName }: Props) {
   }
 
   async function handleDelete() {
-    if (!window.confirm('Hapus foto profil penghuni ini?')) return;
+    const ok = await confirm({ title: 'Hapus Foto Profil', message: 'Hapus foto profil penghuni ini?', confirmLabel: 'Hapus', variant: 'danger' });
+    if (!ok) return;
     setBusy(true);
     setError(null);
     try {
