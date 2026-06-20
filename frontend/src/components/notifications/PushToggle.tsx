@@ -1,5 +1,7 @@
+import { useEffect, useState } from 'react';
 import { Alert, Button, Spinner } from 'react-bootstrap';
 import { usePushNotifications } from '../../hooks/usePushNotifications';
+import { getVapidPublicKey } from '../../api/push';
 
 /**
  * F4-2 — kartu aktifkan/matikan notifikasi push (PWA) untuk device ini.
@@ -7,8 +9,25 @@ import { usePushNotifications } from '../../hooks/usePushNotifications';
  */
 export default function PushToggle() {
   const { supported, state, busy, error, enable, disable } = usePushNotifications();
+  const [vapidEnabled, setVapidEnabled] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    if (!supported) return;
+    getVapidPublicKey()
+      .then(({ enabled }) => setVapidEnabled(enabled))
+      .catch(() => setVapidEnabled(false));
+  }, [supported]);
 
   if (!supported) return null;
+
+  if (vapidEnabled === false) {
+    return (
+      <Alert variant="info" className="d-flex align-items-center gap-2 small mb-4" role="note">
+        <span role="img" aria-hidden="true" style={{ fontSize: '1.1rem' }}>🔔</span>
+        <span>Notifikasi push belum aktif. Notifikasi dalam aplikasi tetap berjalan normal.</span>
+      </Alert>
+    );
+  }
 
   return (
     <Alert variant="light" className="border d-flex align-items-center justify-content-between flex-wrap gap-2 mb-4">
