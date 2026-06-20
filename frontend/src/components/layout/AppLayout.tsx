@@ -476,7 +476,7 @@ export default function AppLayout({ children }: { children?: ReactNode }) {
                 ) : null}
                 {user?.role === 'TENANT' && <PaymentUrgencyChip />}
                 <div className="topbar-user">
-                  <button type="button" className="topbar-profile-trigger" onClick={() => navigate(user?.role === 'TENANT' ? '/portal/profile' : '/profile')} title="Buka profil">
+                  <button type="button" className="topbar-profile-trigger" onClick={() => navigate('/profile')} title="Buka profil">
                     <span className="text-end">
                       <strong>{user?.fullName}</strong>
                       <em>{getRoleLabel(user?.role)}</em>
