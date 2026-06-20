@@ -71,6 +71,8 @@ export function useAuthenticatedMediaUrl(value?: string | null) {
       responseType: 'blob',
       signal: controller.signal,
     }).then((response) => {
+      // 204 No Content = sumber daya belum ada (misal: foto profil belum diunggah).
+      if (response.status === 204 || !response.data?.size) { setFailed(true); return; }
       createdUrl = URL.createObjectURL(response.data);
       setObjectUrl(createdUrl);
       setLoadedFor(resolved);

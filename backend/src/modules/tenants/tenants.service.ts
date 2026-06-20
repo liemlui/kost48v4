@@ -282,11 +282,10 @@ export class TenantsService {
     return { tenant: updated, previousFileKey: tenant.profilePhotoFileKey };
   }
 
-  /** fileKey untuk penyajian terproteksi avatar. */
-  async getProfilePhotoKey(id: number): Promise<string> {
+  /** fileKey untuk penyajian terproteksi avatar. Null bila belum ada foto. */
+  async getProfilePhotoKey(id: number): Promise<string | null> {
     const tenant = await this.prisma.tenant.findUnique({ where: { id }, select: { profilePhotoFileKey: true } });
-    if (!tenant?.profilePhotoFileKey) throw new NotFoundException('Foto profil tidak ditemukan');
-    return tenant.profilePhotoFileKey;
+    return tenant?.profilePhotoFileKey ?? null;
   }
 
   /** Hapus foto profil — kembalikan fileKey agar controller hapus file fisik. */
