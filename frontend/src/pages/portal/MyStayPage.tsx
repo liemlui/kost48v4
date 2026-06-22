@@ -58,7 +58,7 @@ function ActiveStayContent({ stay }: { stay: Stay }) {
     } catch { /* ignore */ }
     return ['info', 'fasilitas']; // default buka dua panel teratas
   });
-  const handleAccordionChange = useCallback((keys: string | string[] | null) => {
+  const handleAccordionChange = useCallback((keys: string | string[] | null | undefined) => {
     const next = Array.isArray(keys) ? keys : keys ? [keys] : [];
     setOpenAccordionKeys(next);
     try { sessionStorage.setItem(SESSION_KEY, JSON.stringify(next)); } catch { /* ignore */ }
