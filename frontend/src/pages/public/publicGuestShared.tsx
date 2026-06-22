@@ -247,13 +247,15 @@ export function GuestTopbar({ scrolled }: { scrolled: boolean }) {
             <span aria-hidden="true" className="gx-nav-ico">{l.icon}</span> {l.label}
           </a>
         ))}
+        <Link to="/panduan" className="gx-nav-link">
+          <span aria-hidden="true" className="gx-nav-ico">📖</span> Panduan
+        </Link>
         <Link to="/login" className="gx-nav-link gx-nav-login" style={{ marginLeft: 'auto', fontWeight: 600 }}>
           <span aria-hidden="true" className="gx-nav-ico">🔑</span> Masuk Portal
         </Link>
       </nav>
       <div className="gx-nav-cta">
-        <a className="gx-btn-ghost" href={officialKost48Location.whatsappUrl} target="_blank" rel="noreferrer"><span aria-hidden="true">💬</span> WhatsApp</a>
-        <a className="gx-btn-solid" href="#kamar"><span aria-hidden="true">🔍</span> Cek Kamar</a>
+        <Link to="/rooms" className="gx-btn-solid"><span aria-hidden="true">🔍</span> Cek Kamar</Link>
       </div>
     </header>
   );
@@ -311,7 +313,7 @@ export function RoomPreviewCard({ room }: { room: PublicRoom }) {
   return (
     <article className={`gx-room-card${isOccupied ? ' gx-room-card-occupied' : ''}${isAvailable ? ' gx-room-card-available' : ''}`}>
       <div className="gx-room-image-wrap">
-        <img src={getRoomCover(room)} alt={`Foto ${room.name || room.code || 'kamar KOST48'}`} className="gx-room-image" loading="lazy" />
+        <img src={getRoomCover(room)} alt={`${room.name || room.code || 'Kamar KOST48'} — ${getPublicRoomCoolingLabel(room)}, KM ${getPublicRoomBathroomLabel(room)}`} className="gx-room-image" loading="lazy" />
         <span className={`gx-room-status ${availability.tone}`}><span aria-hidden="true">{roomStatusIcon(availability.tone)}</span> {availability.label}</span>
         {/* R-06: chip TERISI besar di atas foto untuk kamar occupied */}
         {isOccupied && (
@@ -389,6 +391,7 @@ export function MobileShortcutNav({ visible }: { visible: boolean }) {
       <a href="#lokasi" className="gx-shortcut-link">Lokasi</a>
       <a href="#ulasan" className="gx-shortcut-link">Ulasan</a>
       <a href="#faq" className="gx-shortcut-link">FAQ</a>
+      <Link to="/panduan" className="gx-shortcut-link">Panduan</Link>
     </nav>
   );
 }
@@ -408,6 +411,8 @@ export function GuestFooter() {
           <nav className="gx-footer-nav" aria-label="Navigasi footer">
             {NAV_LINKS.map((l) => <a key={l.href} href={l.href}>{l.label}</a>)}
             <a href="#kamar">Katalog Kamar</a>
+            <Link to="/panduan">Panduan</Link>
+            <Link to="/reviews">Ulasan</Link>
             <Link to="/login">Masuk Portal</Link>
           </nav>
           <div className="gx-footer-links">

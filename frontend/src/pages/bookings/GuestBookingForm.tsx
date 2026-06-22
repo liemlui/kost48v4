@@ -83,7 +83,7 @@ export default function GuestBookingForm({
             </Col>
             <Col md={6}>
               <Form.Group>
-                <Form.Label>Telepon <span className="text-danger">*</span></Form.Label>
+                <Form.Label>Telepon <span className="text-muted small">(minimal isi salah satu)</span></Form.Label>
                 <Form.Control
                   value={form.phone}
                   onChange={(e) => onChange('phone', e.target.value)}
@@ -97,7 +97,7 @@ export default function GuestBookingForm({
             </Col>
             <Col md={6}>
               <Form.Group>
-                <Form.Label>Email <span className="text-danger">*</span></Form.Label>
+                <Form.Label>Email <span className="text-muted small">(minimal isi salah satu)</span></Form.Label>
                 <Form.Control
                   value={form.email}
                   onChange={(e) => onChange('email', e.target.value)}

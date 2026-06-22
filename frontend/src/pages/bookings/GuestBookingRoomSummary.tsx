@@ -68,7 +68,7 @@ function GuestRoomPhoto({ room }: { room: PublicRoom }) {
         />
       ) : (
         <>
-          <span>K48</span>
+          <span>🛏️</span>
           <strong>Foto kamar menyusul</strong>
         </>
       )}

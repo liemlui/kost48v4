@@ -50,10 +50,14 @@ export type FormErrors = Partial<Record<keyof GuestBookingFormState | 'server', 
 export function validate(form: GuestBookingFormState): FormErrors {
   const errors: FormErrors = {};
   if (!form.fullName.trim()) errors.fullName = 'Nama lengkap wajib diisi.';
-  if (!form.phone.trim()) errors.phone = 'Nomor telepon wajib diisi.';
-  if (!form.email.trim()) {
-    errors.email = 'Email wajib diisi.';
-  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
+  // PUB-BOOKING-FORM: phone XOR email — minimal salah satu wajib diisi.
+  const hasPhone = form.phone.trim().length > 0;
+  const hasEmail = form.email.trim().length > 0;
+  if (!hasPhone && !hasEmail) {
+    errors.phone = 'Minimal isi nomor telepon atau email.';
+    errors.email = 'Minimal isi nomor telepon atau email.';
+  }
+  if (hasEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
     errors.email = 'Format email tidak valid.';
   }
   if (!form.checkInDate) errors.checkInDate = 'Tanggal check-in wajib diisi.';

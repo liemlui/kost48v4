@@ -15,13 +15,15 @@ export class CreatePublicBookingDto {
   @MaxLength(120)
   fullName!: string;
 
+  @IsOptional()
   @IsString()
   @MaxLength(30)
-  phone!: string;
+  phone?: string;
 
+  @IsOptional()
   @IsEmail()
   @MaxLength(254)
-  email!: string;
+  email?: string;
 
   @IsOptional()
   @IsString()

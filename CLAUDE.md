@@ -3,7 +3,7 @@
 Sistem manajemen kost 48 kamar. Backend NestJS+Prisma+PostgreSQL (`backend/`), frontend React+Vite (`frontend/`). Bahasa kerja: Indonesia.
 
 ## Pintu masuk docs (M-file — JANGAN baca semua)
-1. **`docs/M01_MASTER.md`** — blueprint + ground state + router AI (arsip `_PETA_AI` di `docs/archieve/`).
+1. **`docs/M01_MASTER.md`** — blueprint + ground state + router AI (arsip `_PETA_AI` di `docs/archieve/`).Apa bisa 
 2. **`docs/M02_KEPUTUSAN_OWNER.md`** — 84 keputusan owner (SUMBER KEBENARAN sebelum ubah flow).
 3. **`docs/M10_CHECKLIST_CHANGELOG.md`** — **CHECKLIST AKTIF + antrian eksekusi AI** (baca ANTRIAN, jangan ulang fase selesai). Changelog historis → `docs/M11_CHANGELOG.md`.
 4. **`docs/CODEMAP.md`** — peta modul→path→tanggung jawab + index model + anchor flow. Pakai INI dulu untuk navigasi kode (hemat token), baru Grep simbol.
@@ -29,3 +29,13 @@ Detail forensik 97 temuan & rencana lama sudah DIBUBARKAN ke dossier; arsip di `
 - Navigasi kode: `docs/CODEMAP.md` dulu → lalu Grep simbol di `backend/src` / `frontend/src`. Spesifikasi task → `M10` ANTRIAN + M-file domain.
 - Selesai task: centang `M10` + prepend 1 baris changelog di `docs/M11_CHANGELOG.md`.
 - Tulisan commit & docs berbahasa Indonesia; ikuti gaya entri CHANGELOG yang ada.
+
+## Aturan efisiensi sesi (cache & /new)
+- **Prefix system prompt + CLAUDE.md + tool definitions di-cache DeepSeek.** Turn 2+ dalam sesi yang sama = cache HIT (hemat ~80% prefix). Tiap `/new` = cache MISS (prefix ~8K token diproses ulang).
+- **Sesi optimal: 5-15 turn.** Di atas ~20 turn, akumulasi konteks percakapan mulai boros dan memperlambat respons.
+- **AI WAJIB rekomendasikan `/new`** bila: (a) topik berubah total (mis. keuangan→UI), (b) sudah >20 turn, (c) user mulai koreksi berulang tanda konteks jenuh. Format rekomendasi: "💡 Sesi sudah 18 turn dan topik berubah dari X ke Y. Pertimbangkan `/new` untuk reset cache + konteks bersih."
+- **Jangan `/new` untuk tugas sepele** (1-3 turn, edit kecil) — cache MISS lebih mahal daripada melanjutkan.
+- **Pola ideal:** satu sesi = satu "episode" (1-3 task terkait). Pagi: `/new`→orientasi+eksekusi, siang: `/new`→lanjut, sore: `/new`→review+tutup.
+
+## Peta scope pengembangan
+- **`docs/PETA_SCOPE.md`** — pemetaan tugas berdasarkan ROLE (OWNER/ADMIN/STAFF/TENANT/PUBLIC) dan FLOW BISNIS (booking→huni→bayar→checkout→akuntansi). Pakai ini untuk langsung lompat ke file yang tepat saat mengerjakan fitur untuk role atau flow tertentu.

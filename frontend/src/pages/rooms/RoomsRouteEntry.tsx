@@ -2,7 +2,6 @@ import { lazy } from 'react';
 import { PageLoadingSkeleton } from '../../components/common/SkeletonLoader';
 import AppLayout from '../../components/layout/AppLayout';
 import { useAuth } from '../../context/AuthContext';
-import PublicGuestDashboardPage from '../public/PublicGuestDashboardPage';
 import PublicRoomsPage from './PublicRoomsPage';
 
 const ConfiguredResourcePage = lazy(() => import('../resources/ConfiguredResourcePage'));
@@ -40,5 +39,6 @@ export default function RoomsRouteEntry() {
     );
   }
 
-  return <PublicGuestDashboardPage />;
+  // Guest (tanpa login) → PublicRoomsPage dengan katalog dedicated, filter, kalender, compare
+  return <PublicRoomsPage />;
 }

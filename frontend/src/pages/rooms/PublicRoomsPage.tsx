@@ -104,7 +104,7 @@ function RoomCardImage({ room }: { room: PublicRoom }) {
         <img
           key={active}
           src={active}
-          alt={`Foto kamar ${room.code}`}
+          alt={`Kamar ${room.code} — ${getPublicRoomCoolingLabel(room)}, kamar mandi ${getPublicRoomBathroomLabel(room)}`}
           className="rm-card-img"
           loading="lazy"
           decoding="async"
@@ -112,8 +112,8 @@ function RoomCardImage({ room }: { room: PublicRoom }) {
         />
       ) : (
         <div className="rm-card-img-placeholder">
-          <span>K48</span>
-          <small>Foto menyusul</small>
+          <span>🛏️</span>
+          <small>Foto segera hadir</small>
         </div>
       )}
       {resolved.length > 1 && (
@@ -293,6 +293,14 @@ function RoomsTopbar() {
           <svg className="rm-nav-icon" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M3 9.5 12 3l9 6.5" /><path d="M5 10v10h14V10" /></svg>
           Beranda
         </button>
+        <button type="button" onClick={() => navigate("/panduan")}>
+          <svg className="rm-nav-icon" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" /><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" /></svg>
+          Panduan
+        </button>
+        <button type="button" onClick={() => navigate("/reviews")}>
+          <svg className="rm-nav-icon" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" /></svg>
+          Ulasan
+        </button>
         <a href={officialKost48Location.mapsUrl} target="_blank" rel="noreferrer">
           <svg className="rm-nav-icon" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M12 21s7-6.5 7-12a7 7 0 1 0-14 0c0 5.5 7 12 7 12z" /><circle cx="12" cy="9" r="2.5" /></svg>
           Maps
@@ -332,6 +340,34 @@ export default function PublicRoomsPage() {
   const { user } = useAuth();
   const { stage, isLoading: isTenantStageLoading } = useTenantPortalStage();
   const isTenant = user?.role === "TENANT";
+  const restoresSearch = useRef(false);
+
+  // UX-02: simpan/pulihkan filter katalog & scroll saat navigasi kembali dari detail.
+  const CACHE_KEY = 'kost48-catalog-state';
+  useEffect(() => {
+    if (!restoresSearch.current) {
+      const cached = sessionStorage.getItem(CACHE_KEY);
+      if (cached) {
+        try {
+          const saved = JSON.parse(cached);
+          if (saved.search) setSearchParams(new URLSearchParams(saved.search), { replace: true });
+          if (saved.scrollY && saved.scrollY > 0) {
+            window.setTimeout(() => window.scrollTo({ top: saved.scrollY }), 60);
+          }
+        } catch { /* abaikan cache rusak */ }
+      }
+      restoresSearch.current = true;
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      sessionStorage.setItem(CACHE_KEY, JSON.stringify({ search: searchParams.toString(), scrollY: window.scrollY }));
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [searchParams]);
 
   const bathroom = (searchParams.get("bathroom") ?? "") as BathroomFilter;
   const cooling = (searchParams.get("cooling") ?? "") as CoolingFilter;

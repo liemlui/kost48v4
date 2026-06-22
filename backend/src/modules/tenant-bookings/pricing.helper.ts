@@ -7,19 +7,19 @@ export const PRICING_ROUND_TO = 5000;
  * Pricing multipliers derived from monthly rent.
  *
  * DAILY = 13% × monthly rent, utilities included.
- * WEEKLY = 45% × monthly rent, utilities included.
+ * WEEKLY = 50% × monthly rent, utilities included.
  * BIWEEKLY = 75% × monthly rent, utilities included.
  * MONTHLY = 100% × monthly rent, utilities metered.
- * SMESTERLY = 5.5 × monthly rent, utilities metered.
- * YEARLY = 10 × monthly rent, utilities metered.
+ * SMESTERLY = 5.7 × monthly rent, utilities metered.
+ * YEARLY = 11 × monthly rent, utilities metered.
  */
 export const PRICING_MULTIPLIERS: Record<PricingTerm, number> = {
   DAILY: 0.13,
-  WEEKLY: 0.45,
+  WEEKLY: 0.5,
   BIWEEKLY: 0.75,
   MONTHLY: 1.0,
-  SMESTERLY: 5.5,
-  YEARLY: 10.0,
+  SMESTERLY: 5.7,
+  YEARLY: 11.0,
 };
 
 /** Round up to the nearest multiple of `nearest`. */

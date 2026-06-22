@@ -12,11 +12,9 @@
 import { test, expect, request as pwRequest, type Page } from '@playwright/test';
 import * as fs from 'fs';
 import * as path from 'path';
-import { fileURLToPath } from 'url';
 
-const HERE = path.dirname(fileURLToPath(import.meta.url));
 const API = process.env.UAT_API_BASE || 'http://localhost:3000/api/';
-const SHOTS = path.join(HERE, 'uat-shots');
+const SHOTS = path.join(process.cwd(), 'uat-shots');
 fs.mkdirSync(SHOTS, { recursive: true });
 
 const CREDS = {

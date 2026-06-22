@@ -13,6 +13,8 @@ const ROUTE_TITLES: Array<{ pattern: string; title: string }> = [
   { pattern: '/rooms/:id', title: 'Detail Kamar' },
   { pattern: '/rooms', title: 'Kamar' },
   { pattern: '/booking/:roomId', title: 'Booking Kamar' },
+  { pattern: '/panduan', title: 'Panduan & FAQ' },
+  { pattern: '/reviews', title: 'Ulasan Penghuni' },
 
   { pattern: '/dashboard', title: 'Dashboard' },
   { pattern: '/owner-dashboard', title: 'Dashboard Owner' },

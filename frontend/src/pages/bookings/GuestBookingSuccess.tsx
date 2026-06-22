@@ -68,6 +68,7 @@ export default function GuestBookingSuccess({ result }: GuestBookingSuccessProps
 
             {tempPwd ? (
               <Alert variant="warning" className="small">
+                <div className="text-danger fw-bold mb-2">⚠️ Password ini HANYA ditampilkan SEKALI. Salin dan simpan sekarang juga.</div>
                 <strong>Password portal sementara Anda:</strong>
                 <div className="d-flex align-items-center gap-2 mt-2 flex-wrap">
                   <code className="fs-5 bg-white px-2 py-1 rounded">{showPassword ? tempPwd : '\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022'}</code>

@@ -127,8 +127,13 @@ export class PublicBookingsService {
       );
     }
 
-    const normalizedPhone = normalizePhone(dto.phone);
-    const normalizedEmail = dto.email.trim().toLowerCase();
+    // PUB-BOOKING-FORM: phone XOR email — minimal salah satu wajib.
+    if (!dto.phone?.trim() && !dto.email?.trim()) {
+      throw new BadRequestException('Minimal isi nomor telepon atau email.');
+    }
+
+    const normalizedPhone = normalizePhone(dto.phone ?? '');
+    const normalizedEmail = (dto.email?.trim() ?? '').toLowerCase();
     const trimmedFullName = dto.fullName.trim();
 
     if (dto.website && dto.website.trim().length > 0) {

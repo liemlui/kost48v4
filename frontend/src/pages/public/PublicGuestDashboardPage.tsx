@@ -39,6 +39,7 @@ export default function PublicGuestDashboardPage() {
   const location = useLocation();
   const initialCatalogParams = useMemo(() => new URLSearchParams(location.search), [location.search]);
   const [scrolled, setScrolled] = useState(false);
+  const [scrollProgress, setScrollProgress] = useState(0);
   const [lightboxSrc, setLightboxSrc] = useState<string | null>(null);
   const [activeFacilityTab, setActiveFacilityTab] = useState(FACILITY_GROUPS[0].id);
   const facilityImagesQuery = useQuery({
@@ -112,6 +113,17 @@ export default function PublicGuestDashboardPage() {
     h();
     window.addEventListener('scroll', h, { passive: true });
     return () => window.removeEventListener('scroll', h);
+  }, []);
+
+  // UX-06: scroll progress bar (0-100%) di landing panjang.
+  useEffect(() => {
+    const update = () => {
+      const h = document.documentElement.scrollHeight - window.innerHeight;
+      setScrollProgress(h > 0 ? Math.min(100, Math.round((window.scrollY / h) * 100)) : 0);
+    };
+    update();
+    window.addEventListener('scroll', update, { passive: true });
+    return () => window.removeEventListener('scroll', update);
   }, []);
 
   useEffect(() => {
@@ -206,6 +218,16 @@ export default function PublicGuestDashboardPage() {
   return (
     <div className="gx-page">
       <GuestTopbar scrolled={scrolled} />
+      {/* UX-06: scroll progress bar — thin line di bawah topbar */}
+      <div
+        className="gx-scroll-progress"
+        role="progressbar"
+        aria-valuenow={scrollProgress}
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-label="Kemajuan membaca halaman"
+        style={{ width: `${scrollProgress}%` }}
+      />
       {/* R-07: sticky shortcut nav mobile, muncul setelah scroll melewati hero */}
       <MobileShortcutNav visible={scrolled} />
       {lightboxSrc && <Lightbox src={lightboxSrc} onClose={closeLightbox} />}
@@ -230,7 +252,6 @@ export default function PublicGuestDashboardPage() {
           <div className="gx-hero-cta">
             <a className="gx-hero-btn-primary" href="#kamar"><span aria-hidden="true">🛏️</span> Lihat Kamar Tersedia →</a>
             <a className="gx-hero-btn-ghost" href={buildWhatsAppUrl('Halo Admin KOST48, saya ingin tanya ketersediaan kamar.')} target="_blank" rel="noreferrer"><span aria-hidden="true">💬</span> WhatsApp Admin</a>
-            <a className="gx-hero-btn-ghost" href={officialKost48Location.mapsUrl} target="_blank" rel="noreferrer"><span aria-hidden="true">📍</span> Lihat di Maps</a>
           </div>
           <p className="gx-hero-tagline">"Rumah kos sih, tapi terasa seperti rumah sendiri."</p>
         </div>
@@ -239,55 +260,30 @@ export default function PublicGuestDashboardPage() {
 
       <section className="gx-avail-section" id="cek-kamar">
         <Container fluid="xl">
-          <div className={`gx-booking-widget${scrolled ? ' gx-booking-widget-compact' : ''}`}>
-            <div className="gx-booking-copy">
-              <div className="gx-label">Cek ketersediaan kamar</div>
-              <h2>Mulai dari preferensi tinggalmu.</h2>
+          <div className="gx-avail-wrap">
+            <div className="gx-avail-text">
+              <div className="gx-label">Cek kamar langsung di katalog</div>
+              <h2>Pilih & bandingkan kamar dengan mudah.</h2>
               <p>
-                Pilih kebutuhan awal, lalu cek kamar yang bisa diajukan booking. Status kamar diambil dari sistem KOST48.
+                Lihat semua kamar, filter sesuai kebutuhan (AC/kipas, KM dalam/luar, harga), 
+                bandingkan 3 kamar sekaligus, dan cek kalender ketersediaan — tanpa login.
               </p>
-            </div>
-            <div className="gx-booking-form" aria-label="Form cek ketersediaan kamar">
-              <label>
-                <span>Mulai tinggal</span>
-                <input
-                  type="date"
-                  min={todayDate}
-                  value={checkInDate}
-                  onChange={(event) => handleCheckInDateChange(event.target.value)}
-                />
-              </label>
-              <label>
-                <span>Durasi tinggal</span>
-                <select value={duration} onChange={(event) => setDuration(event.target.value)}>
-                  <option value="monthly">Bulanan</option>
-                  <option value="weekly">Mingguan</option>
-                  <option value="daily">Harian</option>
-                </select>
-              </label>
-              <label>
-                <span>Preferensi kamar</span>
-                <select value={preference} onChange={(event) => setPreference(event.target.value)}>
-                  <option value="all">Semua tipe</option>
-                  <option value="ac">AC</option>
-                  <option value="fan">Kipas</option>
-                  <option value="inside">KM dalam</option>
-                </select>
-              </label>
-              <button type="button" className="gx-booking-submit" onClick={handleCheckAvailability}>
-                Cek Kamar Tersedia
-              </button>
-            </div>
-            <div className="gx-booking-status" aria-live="polite">
-              {roomsQuery.isLoading ? (
-                <><Spinner animation="border" size="sm" /> Memuat status kamar</>
-              ) : (
-                <>
-                  <strong>{stats.bookable} kamar tersedia hari ini</strong>
-                  <span>{stats.total} pilihan kamar</span>
-                  <span>Data dari sistem KOST48</span>
-                </>
-              )}
+              <div className="gx-avail-stats">
+                <div className="gx-stat gx-stat-green">
+                  <span className="gx-stat-num">{roomsQuery.isLoading ? '...' : stats.bookable}</span>
+                  <span className="gx-stat-label">Kamar tersedia</span>
+                </div>
+                <div className="gx-stat gx-stat-amber">
+                  <span className="gx-stat-num">{roomsQuery.isLoading ? '...' : stats.occupied}</span>
+                  <span className="gx-stat-label">Terisi</span>
+                </div>
+                <div className="gx-stat gx-stat-gray">
+                  <span className="gx-stat-num">{roomsQuery.isLoading ? '...' : stats.total}</span>
+                  <span className="gx-stat-label">Total kamar</span>
+                </div>
+              </div>
+              <a className="gx-btn-primary" href="/rooms"><span aria-hidden="true">🔍</span> Lihat Katalog Kamar</a>
+              <span className="text-muted small mt-2 d-block">💡 Cukup DP 30% untuk amankan kamar — sisanya saat check-in.</span>
             </div>
           </div>
         </Container>
@@ -298,90 +294,38 @@ export default function PublicGuestDashboardPage() {
           <div className="gx-market-head">
             <div className="gx-section-head">
               <div className="gx-label">Katalog kamar</div>
-              <h2>Beranda dan cek kamar dalam satu halaman.</h2>
-              <p>Filter kamar berdasarkan ketersediaan, tipe pendingin, kamar mandi, dan tarif tanpa meninggalkan beranda.</p>
+              <h2>Lihat & bandingkan semua kamar di katalog.</h2>
+              <p>Filter lengkap, kalender ketersediaan, dan perbandingan kamar — semua di halaman katalog khusus.</p>
             </div>
+            <Link to="/rooms" className="gx-btn-outline">Lihat Katalog Lengkap →</Link>
           </div>
 
-          <div className="gx-home-proof-grid">
-            <div className="gx-home-proof">
-              <span>Kamar tersedia</span>
-              <strong>{roomsQuery.isLoading ? <Spinner animation="border" size="sm" /> : stats.bookable}</strong>
-            </div>
-            <div className="gx-home-proof">
-              <span>Pilihan kamar</span>
-              <strong>{roomsQuery.isLoading ? <Spinner animation="border" size="sm" /> : stats.total}</strong>
-            </div>
-            <div className="gx-home-proof">
-              <span>Dari Pakuwon Mall / PTC</span>
-              <strong>7 menit</strong>
-            </div>
-          </div>
-
-          <div className="gx-catalog-toolbar" aria-label="Filter katalog kamar">
-            <div className="gx-catalog-filter">
-              <span>Ketersediaan</span>
-              <button type="button" className={catalogAvailability === 'all' ? 'active' : ''} onClick={() => setCatalogAvailability('all')}>Semua</button>
-              <button type="button" className={catalogAvailability === 'bookable' ? 'active' : ''} onClick={() => setCatalogAvailability('bookable')}>Kosong</button>
-              <button type="button" className={catalogAvailability === 'checking' ? 'active' : ''} onClick={() => setCatalogAvailability('checking')}>Dibersihkan / Maintenance</button>
-              <button type="button" className={catalogAvailability === 'occupied' ? 'active' : ''} onClick={() => setCatalogAvailability('occupied')}>Penuh / Terisi</button>
-            </div>
-            <div className="gx-catalog-filter">
-              <span>Preferensi</span>
-              <button type="button" className={catalogPreference === 'all' ? 'active' : ''} onClick={() => setCatalogPreference('all')}>Semua tipe</button>
-              <button type="button" className={catalogPreference === 'ac' ? 'active' : ''} onClick={() => setCatalogPreference('ac')}>AC</button>
-              <button type="button" className={catalogPreference === 'fan' ? 'active' : ''} onClick={() => setCatalogPreference('fan')}>Kipas</button>
-              <button type="button" className={catalogPreference === 'inside' ? 'active' : ''} onClick={() => setCatalogPreference('inside')}>KM dalam</button>
-            </div>
-            <div className="gx-catalog-filter">
-              <span>Kategori</span>
-              <button type="button" className={catalogCategory === 'all' ? 'active' : ''} onClick={() => setCatalogCategory('all')}>Semua</button>
-              <button type="button" className={catalogCategory === 'ECONOMY' ? 'active' : ''} onClick={() => setCatalogCategory('ECONOMY')}>Ekonomi</button>
-              <button type="button" className={catalogCategory === 'STANDARD' ? 'active' : ''} onClick={() => setCatalogCategory('STANDARD')}>Standar</button>
-              <button type="button" className={catalogCategory === 'DELUXE' ? 'active' : ''} onClick={() => setCatalogCategory('DELUXE')}>Deluxe</button>
-            </div>
-            <label className="gx-catalog-sort">
-              <span>Urutkan</span>
-              <select value={catalogSort} onChange={(event) => setCatalogSort(event.target.value)}>
-                <option value="price-asc">Tarif terendah</option>
-                <option value="price-desc">Tarif tertinggi</option>
-              </select>
-            </label>
-          </div>
-
-          <div className="gx-catalog-results" aria-live="polite">
-            {roomsQuery.isLoading ? 'Memuat kamar dari sistem KOST48.' : `${catalogRooms.length} kamar sesuai filter.`}
-          </div>
-
+          {/* Preview card 4 kamar — teaser, bukan full catalog */}
           {roomsQuery.isLoading ? (
             <div className="gx-room-grid">
               {[0, 1, 2, 3].map((item) => <RoomPreviewSkeleton key={item} />)}
             </div>
           ) : roomsQuery.isError ? (
-            <div className="gx-home-empty">Katalog kamar belum dapat dimuat. Silakan coba lagi atau hubungi admin via WhatsApp.</div>
-          ) : visibleCatalogRooms.length ? (
-            <div className="gx-room-grid">
-              {visibleCatalogRooms.map((room) => <RoomPreviewCard key={room.id} room={room} />)}
-            </div>
+            <div className="gx-home-empty">Katalog kamar belum dapat dimuat. <Link to="/rooms">Coba buka katalog langsung →</Link></div>
+          ) : rooms.length > 0 ? (
+            <>
+              <div className="gx-room-grid">
+                {rooms.slice(0, 4).map((room) => <RoomPreviewCard key={room.id} room={room} />)}
+              </div>
+              <div className="gx-room-range">
+                <span>Tarif bulanan mulai</span>
+                <strong>{formatMonthlyRange(
+                  monthlyRates.length ? Math.min(...monthlyRates) : 0,
+                  monthlyRates.length ? Math.max(...monthlyRates) : 0,
+                )}</strong>
+              </div>
+              <div className="gx-room-more">
+                <Link to="/rooms" className="gx-btn-outline">Lihat Semua Kamar ({stats.total}) →</Link>
+              </div>
+            </>
           ) : (
-            <div className="gx-home-empty">Belum ada kamar yang cocok dengan filter ini. Coba ubah preferensi atau tanya admin via WhatsApp.</div>
+            <div className="gx-home-empty">Belum ada kamar yang tersedia saat ini. <Link to="/rooms">Cek ketersediaan langsung</Link></div>
           )}
-
-          {!roomsQuery.isLoading && visibleCatalogRooms.length < catalogRooms.length && (
-            <div className="gx-room-more">
-              <button type="button" className="gx-btn-outline" onClick={() => setVisibleRoomCount((count) => count + CATALOG_BATCH_SIZE)}>
-                Tampilkan Lebih Banyak Kamar
-              </button>
-            </div>
-          )}
-
-          <div className="gx-room-range">
-            <span>Tarif bulanan saat ini</span>
-            <strong>{formatMonthlyRange(
-              monthlyRates.length ? Math.min(...monthlyRates) : 0,
-              monthlyRates.length ? Math.max(...monthlyRates) : 0,
-            )}</strong>
-          </div>
         </Container>
       </section>
 
@@ -497,6 +441,7 @@ export default function PublicGuestDashboardPage() {
                 <div className="gx-label">Cerita penghuni</div>
                 <h2>Ulasan dari penghuni terverifikasi.</h2>
                 <p>Pengalaman penghuni ditampilkan secara anonim dan hanya dari ulasan yang memenuhi kriteria.</p>
+                <Link to="/reviews" className="btn btn-outline-primary btn-sm" style={{ borderRadius: 999, flexShrink: 0 }}>Lihat semua ulasan →</Link>
               </div>
               <div className="gx-social-proof-summary" aria-label="Ringkasan kepercayaan">
                 {ratingAvailable && (
@@ -544,9 +489,9 @@ export default function PublicGuestDashboardPage() {
         <section className="gx-keunggulan-section" id="ulasan">
           <Container fluid="xl">
             <div className="gx-section-head gx-section-head-center">
-              <div className="gx-label">Keunggulan KOST48</div>
-              <h2>Kenapa memilih KOST48?</h2>
-              <p>Hunian yang transparan, nyaman, dan dekat semua kebutuhan harian di Surabaya Barat.</p>
+              <div className="gx-label">Belum Ada Ulasan</div>
+              <h2>Jadilah penghuni pertama yang memberikan ulasan.</h2>
+              <p>Belum ada ulasan dari penghuni terverifikasi. Saat kamu sudah tinggal, kamu bisa memberikan penilaian lewat portal penghuni — membantu calon penghuni lain lebih percaya.</p>
             </div>
             <div className="gx-keunggulan-grid">
               <div className="gx-keunggulan-card">
@@ -650,18 +595,28 @@ export default function PublicGuestDashboardPage() {
               </address>
             </div>
             <div className="gx-final-actions">
-              <a className="gx-btn-primary" href="#kamar"><span aria-hidden="true">🔍</span> Lihat Pilihan Kamar</a>
+              <Link to="/rooms" className="gx-btn-primary"><span aria-hidden="true">🔍</span> Lihat Pilihan Kamar</Link>
               <a className="gx-btn-outline" href={officialKost48Location.whatsappUrl} target="_blank" rel="noreferrer"><span aria-hidden="true">💬</span> Chat WhatsApp</a>
-              <a className="gx-btn-outline" href={officialKost48Location.mapsUrl} target="_blank" rel="noreferrer"><span aria-hidden="true">📍</span> Buka Google Maps</a>
             </div>
           </div>
         </Container>
       </section>
 
-      <a className="gx-mobile-booking" href="#kamar" aria-label="Cek kamar tersedia">
+      <Link to="/rooms" className="gx-mobile-booking" aria-label="Cek kamar tersedia">
         <strong>{roomsQuery.isLoading ? 'Cek kamar' : `${stats.bookable} kamar tersedia`}</strong>
         <span><span aria-hidden="true">🔍</span> Cek</span>
-      </a>
+      </Link>
+
+      {scrolled && (
+        <button
+          type="button"
+          className="gx-scroll-top"
+          onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+          aria-label="Kembali ke atas"
+        >
+          ↑
+        </button>
+      )}
 
       <GuestFooter />
     </div>

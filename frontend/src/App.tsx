@@ -21,6 +21,8 @@ const PublicGuestDashboardPage = lazy(() => import('./pages/public/PublicGuestDa
 const GuestBookingPage = lazy(() => import('./pages/bookings/GuestBookingPage'));
 const RoomsRouteEntry = lazy(() => import('./pages/rooms/RoomsRouteEntry'));
 const PublicRoomDetailPage = lazy(() => import('./pages/rooms/PublicRoomDetailPage'));
+const FaqPublicPage = lazy(() => import('./pages/public/FaqPublicPage'));
+const ReviewsPublicPage = lazy(() => import('./pages/public/ReviewsPublicPage'));
 const DashboardPage = lazy(() => import('./pages/dashboard/DashboardPage'));
 const OwnerDashboardPage = lazy(() => import('./pages/dashboard/OwnerDashboardPage'));
 const AdminDashboardPage = lazy(() => import('./pages/dashboard/DashboardAdmin'));
@@ -196,6 +198,8 @@ export default function App() {
         <Route path="/rooms" element={<RoomsRouteEntry />} />
         <Route path="/rooms/:roomId/detail" element={<PublicRoomDetailPage />} />
         <Route path="/booking/:roomId" element={<GuestBookingPage />} />
+        <Route path="/panduan" element={<FaqPublicPage />} />
+        <Route path="/reviews" element={<ReviewsPublicPage />} />
         <Route path="/" element={<RootEntry />} />
         <Route element={<ProtectedRoute />}>
           <Route element={<AppLayout />}>

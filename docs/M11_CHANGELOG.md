@@ -4,6 +4,28 @@
 
 ## Changelog Ringkas
 
+### 2026-06-22 — Audit A1 — Perbaikan halaman publik (10+3 task)
+- **P1-CRIT** Validasi booking: phone XOR email (frontend+backend) — sesuai spesifikasi PUB-BOOKING-FORM M07
+- **P2-CRIT** Hapus 959 baris dead CSS `gh-*` dari `11-public-pages.css` (tidak ada komponen pakai)
+- **P3-CRIT** Publik sekarang buka `/rooms` → katalog dedicated (kalender, compare, filter, pagination 12)
+- **P4-HIGH** Halaman FAQ/Panduan baru di `/panduan` (database-driven, kategori, search by category)
+- **P5-HIGH** Kurangi CTA hero: 3→2 tombol, hapus duplikasi WhatsApp di topbar
+- **P6-HIGH** Empty state ulasan jujur "Belum ada ulasan" (bukan marketing copy)
+- **P7-MED** Warning password sementara "HANYA ditampilkan SEKALI"
+- **P8-MED** "7 menit" → "±7 menit jalan kaki" di semua tempat
+- **P9-MED** Alt text foto kamar deskriptif (tipe pendingin, KM)
+- **P10-MED** Halaman ulasan dedicated `/reviews` + filter sort
+- **+3 easy wins:** filter "Semua"→"Semua Kamar" + hint; info DP 30% di landing; placeholder foto 🛏️ bukan K48
+- **+4 rapihan:** link Ulasan di RoomsTopbar + GuestFooter; scroll-to-top button di landing; link /reviews di MobileShortcutNav
+- **+3 hardening:** preserve scroll+filter katalog via sessionStorage (UX-02); token CSS publik di `00-tokens.css` + migrasi class kunci; UAT P-09..P-12 (panduan/reviews/rooms-public/booking-form)
+- **+3 audit final:** tambah route title `/panduan` + `/reviews`; hapus unused import `PublicGuestDashboardPage` di RoomsRouteEntry; fix overlap scroll-top vs mobile booking bar; fix fallback `--gx-ink` di mobile booking
+- **+2 UI/UX deep:** scroll progress bar di landing (UX-06); migrasi token CSS ke `.room-market-card`, `.rm-topbar`, `.rm-card` (UI-02 lite)
+- **✅ EKSEKUSI:** script `scripts/analyze-css-dups.mjs --fix` membersihkan 196 duplikasi CSS (1.096 baris, 24 KB) dari `11-public-pages.css`. Backup di `11-public-pages.bak.css`. Semua class kunci (`.gx-page`, `.gx-topbar`, `.gx-hero`) hanya 1 definisi. Build `frontend tsc` LULUS.
+- **🎯 Playwright fix:** ganti `import.meta.url` → `process.cwd()` di 8 file `.spec.ts` (inkompatibel dgn PW 1.61). Fix CSS comment `/* gx-* /rm-* /room-* */` di `00-tokens.css` yang ngebug parser postcss.
+- **🔙 ROLLBACK:** `scripts/analyze-css-dups.mjs --fix` di-rollback (backup restore). Script hanya cek nama class, bukan isi properti — beda definisi punya property beda. Deduplikasi CSS harus manual + visual test.
+- **♻️ Landing simplification:** ganti booking widget date/duration form → info + CTA "/rooms"; hapus filter toolbar duplikat (4 chip baris) → preview 4 kamar + "Lihat Katalog Lengkap"; ubah final CTA dari anchor `#kamar` → link `/rooms`; mobile booking link ke `/rooms`; topbar "Cek Kamar" link ke `/rooms`.
+- Build `npm --prefix frontend exec tsc --noEmit` ✅ | backend `tsc --noEmit` ✅
+
 ### 2026-06-22 — Fase R selesai: R-01..R-30 UX audit implementation (29 task, R-12 deferred)
 - R-01..R-07: public pages — hero, ulasan conditional, sticky CTA detail kamar, DP eksplisit, mobile grid 1-kolom, badge kamar available/occupied, anchor nav shortcut
 - R-08..R-11: admin — placeholder text "sst", invoice overdue row highlight (`table-danger`/`table-warning`), tooltip "Bermasalah", COA confirm + warning banner
