@@ -1,4 +1,4 @@
-import { type ReactNode, useMemo, useState } from 'react';
+import { type ReactNode, useMemo, useState, useCallback } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Accordion, Alert, Button, Card, Spinner } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
@@ -48,6 +48,21 @@ function ActiveStayContent({ stay }: { stay: Stay }) {
   const [showCheckoutModal, setShowCheckoutModal] = useState(false);
   const [showRenewModal, setShowRenewModal] = useState(false);
   const [showMeter, setShowMeter] = useState(false);
+
+  // R-16: "Info kamar" dan "Fasilitas" terbuka by default; preferensi disimpan di sessionStorage.
+  const SESSION_KEY = 'kost48_accordion_open';
+  const [openAccordionKeys, setOpenAccordionKeys] = useState<string[]>(() => {
+    try {
+      const saved = sessionStorage.getItem(SESSION_KEY);
+      if (saved) return JSON.parse(saved) as string[];
+    } catch { /* ignore */ }
+    return ['info', 'fasilitas']; // default buka dua panel teratas
+  });
+  const handleAccordionChange = useCallback((keys: string | string[] | null) => {
+    const next = Array.isArray(keys) ? keys : keys ? [keys] : [];
+    setOpenAccordionKeys(next);
+    try { sessionStorage.setItem(SESSION_KEY, JSON.stringify(next)); } catch { /* ignore */ }
+  }, []);
 
   const renewRequestsQuery = useQuery<PaginatedResponse<RenewRequest>>({
     queryKey: ['portal-renew-requests', stay.id],
@@ -443,7 +458,8 @@ function ActiveStayContent({ stay }: { stay: Stay }) {
           </Alert>
 
           {/* ── Detail kamar — accordion (UI/UX selaras menu "Panduan & Aturan") ── */}
-          <Accordion flush className="tenant-dossier-accordion">
+          {/* R-16: "Info kamar" & "Fasilitas" buka by default; preferensi disimpan sessionStorage */}
+          <Accordion flush alwaysOpen activeKey={openAccordionKeys} onSelect={handleAccordionChange} className="tenant-dossier-accordion">
             <Accordion.Item eventKey="info">
               <Accordion.Header>Info kamar</Accordion.Header>
               <Accordion.Body>
