@@ -41,7 +41,7 @@
 | **Fase O — Design System & Token** | ✅ selesai | O-01..O-08: palet terpadu, chartColors, spacing scale, CSS Modules, pisah misc.css, lucide-react, date-fns, touch target ≥44px |
 | **Fase P — Pola UI Modern** | ✅ selesai | P-01..P-06: 3-tampilan toggle, FullCalendar, @dnd-kit kanban, TanStack Table, bottom tab bar Tenant, cmdk palette |
 | **Fase Q — Performa & Stabilitas** | ✅ selesai | Q-01..Q-07: fix endpoint 404 backend, anti-pattern fetch loop, heavy query, error boundary, lazy-load, empty state |
-| **Fase R — UI/UX Public + Admin/Owner + Tenant + Staff + Owner-Only** | 🔴 antrian | R-01..R-07: public · R-08..R-12: admin/owner · R-13..R-18: tenant (404, NIK, mobile nav) · R-19..R-24: staff (meter mobile, guard toast, gudang) · R-25..R-30: owner-only (role display, notif grouping, meter filter, bahasa aset, guard toast, chip OWNER) |
+| **Fase R — UI/UX Public + Admin/Owner + Tenant + Staff + Owner-Only** | ✅ selesai | R-01..R-30 selesai (R-12 deferred/investigasi backend); build lulus 2026-06-22. |
 | **Fase S — Multi-Portal Vercel + Mobile-First** | 🔴 antrian | S-01..S-06: env portal gate, CORS Vercel, 3 Vercel project, mobile tenant, mobile staff, PWA offline-aware |
 
 ---
@@ -986,7 +986,7 @@ Tanpa `staleTime`, keduanya refetch setiap kali StaysPage di-mount ulang (naviga
 
 ---
 
-- [ ] **R-01 — Hero section: foto besar + tagline + harga visible above-the-fold (P01)**  
+- [x] **R-01 — Hero section: foto besar + tagline + harga visible above-the-fold (P01)**  
   **Masalah:** Dalam 5 detik, calon penghuni tidak melihat foto suasana kost yang menarik, tidak ada harga, dan tidak ada satu CTA besar di hero. Filter kamar langsung muncul tanpa "wow moment."  
   **Target:** Komponen hero di halaman landing publik (grep `PublicGuestDashboardPage` atau `LandingPage`).  
   **Aksi:**
@@ -999,7 +999,7 @@ Tanpa `staleTime`, keduanya refetch setiap kali StaysPage di-mount ulang (naviga
 
 ---
 
-- [ ] **R-02 — Sembunyikan section ulasan jika kosong (P08)**  
+- [x] **R-02 — Sembunyikan section ulasan jika kosong (P08)**  
   **Masalah:** Section ulasan tampil dengan teks *"Ulasan ditampilkan hanya jika sudah terverifikasi"* tanpa satu pun ulasan — menjadi sinyal merah kepercayaan untuk calon penghuni baru.  
   **Target:** Komponen section ulasan di halaman publik (grep `terverifikasi` atau `ReviewSection` di `frontend/src/pages/public/`).  
   **Aksi:**
@@ -1011,7 +1011,7 @@ Tanpa `staleTime`, keduanya refetch setiap kali StaysPage di-mount ulang (naviga
 
 ---
 
-- [ ] **R-03 — Detail kamar: sticky CTA booking prominent above-the-fold (P03)**  
+- [x] **R-03 — Detail kamar: sticky CTA booking prominent above-the-fold (P03)**  
   **Masalah:** Tombol booking di halaman detail kamar tidak terlihat di viewport pertama — pengguna harus scroll jauh untuk menemukan aksi utama. Halaman paling penting untuk konversi tetapi CTA tersembunyi.  
   **Target:** Halaman detail kamar publik (grep `RoomDetailPublic` atau `PublicRoomDetail` di `frontend/src/pages/public/`).  
   **Aksi:**
@@ -1023,7 +1023,7 @@ Tanpa `staleTime`, keduanya refetch setiap kali StaysPage di-mount ulang (naviga
 
 ---
 
-- [ ] **R-04 — Detail kamar: hapus teks overlay foto + tampilkan nominal DP eksplisit (P03)**  
+- [x] **R-04 — Detail kamar: hapus teks overlay foto + tampilkan nominal DP eksplisit (P03)**  
   **Masalah:** (a) Foto kamar memiliki teks overlay besar *"Kamar K"* yang terkesan placeholder/tidak profesional. (b) Nominal DP 30% tidak disebutkan eksplisit di bagian atas — calon penghuni bingung berapa yang harus disiapkan hari pertama.  
   **Target:** Komponen foto kamar + section harga di halaman detail kamar publik.  
   **Aksi:**
@@ -1037,7 +1037,7 @@ Tanpa `staleTime`, keduanya refetch setiap kali StaysPage di-mount ulang (naviga
 
 ---
 
-- [ ] **R-05 — Mobile katalog: grid 2 kolom → 1 kolom full-width di ≤480px (P05, P05b)**  
+- [x] **R-05 — Mobile katalog: grid 2 kolom → 1 kolom full-width di ≤480px (P05, P05b)**  
   **Masalah:** Di 375px, kartu kamar 2 kolom membuat foto hanya ~155px lebar — terlalu kecil untuk menilai kondisi kamar. Mayoritas calon penghuni mengakses via HP.  
   **Target:** CSS grid katalog kamar publik — `frontend/src/styles/11-public-pages.css` + komponen `PublicRoomsPage`.  
   **Aksi:**
@@ -1060,7 +1060,7 @@ Tanpa `staleTime`, keduanya refetch setiap kali StaysPage di-mount ulang (naviga
 
 ---
 
-- [ ] **R-06 — Katalog: visual differentiation kamar available vs terisi lebih kuat (P02)**  
+- [x] **R-06 — Katalog: visual differentiation kamar available vs terisi lebih kuat (P02)**  
   **Masalah:** Kamar tersedia dan kamar terisi hampir identik secara visual di grid — hanya badge kecil yang membedakan. Calon penghuni tidak langsung tahu mana yang bisa dipesan.  
   **Target:** Komponen kartu kamar di katalog publik (grep `AVAILABLE` · `OCCUPIED` di `PublicRoomsPage.tsx`).  
   **Aksi:**
@@ -1072,7 +1072,7 @@ Tanpa `staleTime`, keduanya refetch setiap kali StaysPage di-mount ulang (naviga
 
 ---
 
-- [ ] **R-07 — Mobile: sticky anchor nav untuk halaman publik panjang (P05)**  
+- [x] **R-07 — Mobile: sticky anchor nav untuk halaman publik panjang (P05)**  
   **Masalah:** Halaman landing/rooms di mobile ~15.000px tinggi tanpa shortcut navigasi ke section penting (filter kamar, fasilitas, lokasi, FAQ). Pengguna HP harus scroll sangat jauh.  
   **Target:** Halaman publik landing (`/`) dan katalog (`/rooms`) — `PublicGuestDashboardPage` / `PublicRoomsPage`.  
   **Aksi:**
@@ -1100,7 +1100,7 @@ Tanpa `staleTime`, keduanya refetch setiap kali StaysPage di-mount ulang (naviga
 
 ---
 
-- [ ] **R-08 — Perbaiki teks placeholder "sst" di Payment Review command center (A06)**  
+- [x] **R-08 — Perbaiki teks placeholder "sst" di Payment Review command center (A06)**  
   **Masalah:** Teks *"Antrian Review Pembayaran - Tunggu sst yang lain..."* tampil ke pengguna di halaman review pembayaran. "sst" adalah singkatan/placeholder yang tidak profesional dan membingungkan.  
   **Target:** Komponen command center payment review — grep `sst` atau `Tunggu sst` di `frontend/src/pages/invoices/` atau `frontend/src/pages/payments/`.  
   **Aksi:**
@@ -1112,7 +1112,7 @@ Tanpa `staleTime`, keduanya refetch setiap kali StaysPage di-mount ulang (naviga
 
 ---
 
-- [ ] **R-09 — Highlight baris invoice overdue/mendekati jatuh tempo (A05)**  
+- [x] **R-09 — Highlight baris invoice overdue/mendekati jatuh tempo (A05)**  
   **Masalah:** Di tabel daftar tagihan, semua baris terlihat identik secara visual — tidak ada perbedaan warna/badge antara tagihan yang sudah melewati jatuh tempo dengan yang masih normal. Admin tidak bisa scan cepat mana yang mendesak.  
   **Target:** `frontend/src/pages/invoices/InvoicesPage.tsx` — baris render tabel tagihan.  
   **Aksi:**
@@ -1127,7 +1127,7 @@ Tanpa `staleTime`, keduanya refetch setiap kali StaysPage di-mount ulang (naviga
 
 ---
 
-- [ ] **R-10 — Laporan A11: tooltip "Bermasalah" + sinkron Ringkasan Pengeluaran (A11, A16)**  
+- [x] **R-10 — Laporan A11: tooltip "Bermasalah" + sinkron Ringkasan Pengeluaran (A11, A16)**  
   **Masalah:** (a) Badge besar "Bermasalah" muncul di halaman laporan tanpa penjelasan kondisi apa yang menyebabkannya — pengguna baru akan panik. (b) Ringkasan Pengeluaran di A11 menampilkan *"Belum ada pengeluaran bulan ini"* padahal A16 menunjukkan 5 pengeluaran Juni 2026 PAID — inkonsistensi yang merusak kepercayaan pada laporan.  
   **Target:** `frontend/src/pages/reports/` atau komponen laporan keuangan (grep `Bermasalah` + `Ringkasan Pengeluaran`).  
   **Aksi:**
@@ -1138,7 +1138,7 @@ Tanpa `staleTime`, keduanya refetch setiap kali StaysPage di-mount ulang (naviga
 
 ---
 
-- [ ] **R-11 — Accounting Setup: konfirmasi sebelum simpan perubahan COA (A20)**  
+- [x] **R-11 — Accounting Setup: konfirmasi sebelum simpan perubahan COA (A20)**  
   **Masalah:** Halaman Accounting Setup (COA) sangat padat dan bisa diubah kapan saja tanpa confirmation dialog. Perubahan COA mid-period dapat merusak integritas semua laporan keuangan historical. Tidak ada visible guard di screenshot A20.  
   **Target:** `frontend/src/pages/accounting/AccountingSetupPage.tsx` — tombol simpan/update COA.  
   **Aksi:**
@@ -1185,7 +1185,7 @@ Tanpa `staleTime`, keduanya refetch setiap kali StaysPage di-mount ulang (naviga
 
 ---
 
-- [ ] **R-13 🔴 KRITIS — Tenant: Fix routing 404 halaman Checkout & Perpanjangan Kontrak (T08, T09)**  
+- [x] **R-13 🔴 KRITIS — Tenant: Fix routing 404 halaman Checkout & Perpanjangan Kontrak (T08, T09)**  
   **Masalah:** Halaman `/portal/checkout` dan `/portal/renewal` (atau rute setaranya) menampilkan halaman 404 — dua fitur paling penting bagi penghuni tidak bisa diakses sama sekali. Ini blocker mutlak sebelum publish.  
   **Target:** React Router config untuk portal tenant (grep `checkout` · `renewal` di `frontend/src/App.tsx` atau `frontend/src/routes/`).  
   **Aksi:**
@@ -1200,7 +1200,7 @@ Tanpa `staleTime`, keduanya refetch setiap kali StaysPage di-mount ulang (naviga
 
 ---
 
-- [ ] **R-14 🔴 KRITIS — Tenant: Mask NIK di halaman profil (T10) — UU PDP**  
+- [x] **R-14 🔴 KRITIS — Tenant: Mask NIK di halaman profil (T10) — UU PDP**  
   **Masalah:** NIK `0871220000000` tampil penuh di halaman "Data Penghuni Tambahan" — pelanggaran UU PDP No. 27/2022 (NIK termasuk data pribadi sensitif). Penghuni mungkin mengakses portal dari perangkat bersama.  
   **Target:** Komponen profil tenant (grep `nik` · `NIK` · `ktp` di `frontend/src/pages/profile/` atau `frontend/src/pages/tenant/`).  
   **Aksi:**
@@ -1216,7 +1216,7 @@ Tanpa `staleTime`, keduanya refetch setiap kali StaysPage di-mount ulang (naviga
 
 ---
 
-- [ ] **R-15 🟡 — Tenant: Perbaiki mobile nav — label terpotong di bottom tab bar (T13)**  
+- [x] **R-15 🟡 — Tenant: Perbaiki mobile nav — label terpotong di bottom tab bar (T13)**  
   **Masalah:** Di mobile (375px), label tab "Panduan Ko...", "Poin & Rewa...", "Panduan &..." terpotong tidak terbaca. Ada 6 tab di top nav yang tidak muat di mobile.  
   **Target:** `frontend/src/components/layout/MobileBottomNav.tsx` (dibuat di P-05) atau `TenantWorkspaceTabs.tsx`.  
   **Aksi:**
@@ -1229,7 +1229,7 @@ Tanpa `staleTime`, keduanya refetch setiap kali StaysPage di-mount ulang (naviga
 
 ---
 
-- [ ] **R-16 🟡 — Tenant: Buka accordion info kamar by default di portal utama (T02)**  
+- [x] **R-16 🟡 — Tenant: Buka accordion info kamar by default di portal utama (T02)**  
   **Masalah:** Di portal utama (`MyStayPage`), accordion "Info kamar", "Fasilitas", "Inventaris kamar", "Tarif & dana titipan" semua collapsed by default — penghuni baru harus klik 4× untuk melihat info dasar kamarnya. Kesan pertama buruk.  
   **Target:** `frontend/src/pages/tenant/MyStayPage.tsx` (atau nama setara) — section accordion info kamar.  
   **Aksi:**
@@ -1242,7 +1242,7 @@ Tanpa `staleTime`, keduanya refetch setiap kali StaysPage di-mount ulang (naviga
 
 ---
 
-- [ ] **R-17 🟢 — Tenant: Empty states Panduan & Aturan + Loyalty Reward lebih informatif (T07, T09-manual)**  
+- [x] **R-17 🟢 — Tenant: Empty states Panduan & Aturan + Loyalty Reward lebih informatif (T07, T09-manual)**  
   **Masalah:** (a) Halaman "Panduan & Aturan Kos" menampilkan *"Panduan belum tersedia. Hubungi admin bila ada pertanyaan."* — tidak informatif, tidak ada nomor WA atau cara menghubungi. (b) Halaman "Poin & Reward" menampilkan katalog reward kosong (*"Belum ada reward tersedia"*) — penghuni punya 300 poin tapi tidak bisa menukar apapun; sistem poin terasa percuma.  
   **Target:** (a) Komponen halaman panduan/manual tenant · (b) Komponen katalog reward di loyalty page.  
   **Aksi:**
@@ -1253,7 +1253,7 @@ Tanpa `staleTime`, keduanya refetch setiap kali StaysPage di-mount ulang (naviga
 
 ---
 
-- [ ] **R-18 🟢 — Tenant: Bar chart "Tagihan per Status" tidak render di mobile (T13b)**  
+- [x] **R-18 🟢 — Tenant: Bar chart "Tagihan per Status" tidak render di mobile (T13b)**  
   **Masalah:** Di mobile, section "Tagihan per Status" di halaman Tagihan Saya menampilkan bar kosong tanpa angka atau warna — komponen chart tidak responsive atau gagal render di viewport sempit.  
   **Target:** Komponen chart status tagihan di `frontend/src/pages/tenant/` (grep `Tagihan per Status` · bar chart di halaman invoices tenant).  
   **Aksi:**
@@ -1274,7 +1274,7 @@ Tanpa `staleTime`, keduanya refetch setiap kali StaysPage di-mount ulang (naviga
 
 ---
 
-- [ ] **R-19 🔴 KRITIS — Staff: Tabel meter 48 kamar tidak bisa dipakai di mobile (S10)**  
+- [x] **R-19 🔴 KRITIS — Staff: Tabel meter 48 kamar tidak bisa dipakai di mobile (S10)**  
   **Masalah:** "Status Meter Bulan Ini" — tabel 6 kolom (Kamar/Penghuni/Status/Listrik/Air/Tindakan) × 48 baris dirender di layar 375px tanpa horizontal scroll. Kolom berdesak-desakan, tombol "Tindakan" tidak bisa disentuh dengan jari. Staf yang menggunakan HP tidak bisa mencatat meter sama sekali dari halaman ini.  
   **Target:** Komponen tabel meter di dashboard staf (grep `Status Meter` · `meter` · `StaffDashboard` atau `DashboardStaff.tsx` di `frontend/src/pages/`).  
   **Aksi:**
@@ -1287,7 +1287,7 @@ Tanpa `staleTime`, keduanya refetch setiap kali StaysPage di-mount ulang (naviga
 
 ---
 
-- [ ] **R-20 🔴 KRITIS — Staff: Guard redirect tambah toast feedback (S08, S09)**  
+- [x] **R-20 🔴 KRITIS — Staff: Guard redirect tambah toast feedback (S08, S09)**  
   **Masalah:** Saat staf mencoba akses halaman yang dilarang (invoices/reports/stays/portal tenant), terjadi silent redirect kembali ke dashboard tanpa pesan apapun. Staf tidak tahu kenapa URL berubah tiba-tiba — bisa dikira bug atau koneksi bermasalah.  
   **Target:** Guard/middleware frontend yang menangani redirect role STAFF (grep `STAFF` · `RoleGuard` · `ProtectedRoute` · `useAuth` di `frontend/src/`).  
   **Aksi:**
@@ -1304,7 +1304,7 @@ Tanpa `staleTime`, keduanya refetch setiap kali StaysPage di-mount ulang (naviga
 
 ---
 
-- [ ] **R-21 🟡 — Staff: Dashboard mobile terlalu panjang — pindahkan tabel meter ke tab Gudang (S10)**  
+- [x] **R-21 🟡 — Staff: Dashboard mobile terlalu panjang — pindahkan tabel meter ke tab Gudang (S10)**  
   **Masalah:** Dashboard staf di mobile ~11.000px tinggi karena section berurut: welcome → progress → stats → prioritas → task list → skor → checklist → tabel meter 48 kamar. Staf harus scroll sangat jauh padahal tugas utama (tombol "Mulai Kerjakan") ada di tengah halaman.  
   **Target:** `DashboardStaff.tsx` (atau `StaffDashboardPage.tsx`) — posisi render tabel meter.  
   **Aksi:**
@@ -1317,7 +1317,7 @@ Tanpa `staleTime`, keduanya refetch setiap kali StaysPage di-mount ulang (naviga
 
 ---
 
-- [ ] **R-22 🟡 — Staff: Gudang empty state dengan CTA hubungi admin (S04)**  
+- [x] **R-22 🟡 — Staff: Gudang empty state dengan CTA hubungi admin (S04)**  
   **Masalah:** Tab Gudang menampilkan *"Belum ada data barang umum atau gudang. Data barang akan muncul setelah master barang tersedia."* tanpa aksi apapun. Staf yang baru pertama membuka halaman ini tidak tahu harus berbuat apa, dan tidak ada cara menghubungi admin dari halaman ini.  
   **Target:** Komponen empty state di halaman gudang staf (grep `Belum ada data barang` · `GudangPage` · `WarehousePage` di `frontend/src/pages/`).  
   **Aksi:**
@@ -1332,7 +1332,7 @@ Tanpa `staleTime`, keduanya refetch setiap kali StaysPage di-mount ulang (naviga
 
 ---
 
-- [ ] **R-23 🟡 — Staff: Prompt upload foto saat menyelesaikan tugas (S02, S03)**  
+- [x] **R-23 🟡 — Staff: Prompt upload foto saat menyelesaikan tugas (S02, S03)**  
   **Masalah:** Laporan staf (S03) menunjukkan "0% Bukti foto lengkap" sebagai KPI negatif — artinya tidak ada satu pun foto yang dilampirkan ke penyelesaian tugas. Dari S02, tidak ada petunjuk visible cara upload foto saat mengerjakan tiket. Kemungkinan besar tombol/form foto tersembunyi di langkah yang tidak ditemukan staf.  
   **Target:** Komponen detail/penyelesaian tugas staf (grep `foto` · `upload` · `SelesaikanTugas` · `TaskDetail` di halaman tugas staf).  
   **Aksi:**
@@ -1346,7 +1346,7 @@ Tanpa `staleTime`, keduanya refetch setiap kali StaysPage di-mount ulang (naviga
 
 ---
 
-- [ ] **R-24 🟢 — Staff: Tasks "Menunggu info" perlu CTA atau penjelasan (S01)**  
+- [x] **R-24 🟢 — Staff: Tasks "Menunggu info" perlu CTA atau penjelasan (S01)**  
   **Masalah:** Di dashboard, beberapa task tampil dengan label *"Tugas menunggu info"* (AC kurang dingin, Kamar kamar mandiri bocor, Lampu kandang, WiFi sangkuriang) tanpa tombol aksi apapun. Staf tidak tahu apakah harus menunggu, menghubungi admin, atau mengabaikan.  
   **Target:** Komponen task list di dashboard staf (grep `menunggu info` · `WAITING` · `task-list` di `DashboardStaff.tsx`).  
   **Aksi:**
@@ -1366,7 +1366,7 @@ Tanpa `staleTime`, keduanya refetch setiap kali StaysPage di-mount ulang (naviga
 
 ---
 
-- [ ] **R-25 🔴 KRITIS — Owner: Fix display role "10tamu" di tabel Users & Akses (O02)**  
+- [x] **R-25 🔴 KRITIS — Owner: Fix display role "10tamu" di tabel Users & Akses (O02)**  
   **Masalah:** Kolom "Role" di halaman manajemen user menampilkan *"10tamu"* untuk semua user yang terlihat — kemungkinan truncation atau format render yang salah. Owner tidak bisa membaca role dengan benar sehingga manajemen akses (assign/revoke OWNER/ADMIN/STAFF/TENANT) menjadi berbahaya.  
   **Target:** Komponen tabel users di halaman user management owner (grep `Users & Akses` · `role` · `UserManagement` · `UsersPage` di `frontend/src/pages/`).  
   **Aksi:**
@@ -1386,7 +1386,7 @@ Tanpa `staleTime`, keduanya refetch setiap kali StaysPage di-mount ulang (naviga
 
 ---
 
-- [ ] **R-26 🟡 — Owner: Notifikasi date grouping + filter noise test data (O12)**  
+- [x] **R-26 🟡 — Owner: Notifikasi date grouping + filter noise test data (O12)**  
   **Masalah:** Halaman notifikasi owner dipenuhi notifikasi duplikat dari seeder (*"INT TEST: Pengumuman tes — harap abaikan"*) bercampur dengan notifikasi real tanpa pemisah tanggal. Owner sulit menemukan notifikasi yang benar-benar perlu ditindak.  
   **Target:** Komponen halaman notifikasi owner (grep `NotificationsPage` · `NotificationList` · `owner/notifications` di `frontend/src/pages/`).  
   **Aksi:**
@@ -1399,7 +1399,7 @@ Tanpa `staleTime`, keduanya refetch setiap kali StaysPage di-mount ulang (naviga
 
 ---
 
-- [ ] **R-27 🟡 — Owner: Filter periode default "bulan ini" di Meter Readings (O03)**  
+- [x] **R-27 🟡 — Owner: Filter periode default "bulan ini" di Meter Readings (O03)**  
   **Masalah:** Halaman Riwayat Meter menampilkan 38 data dari berbagai bulan bercampur tanpa filter aktif. Owner tidak langsung tahu kamar mana yang belum tercatat meter untuk bulan berjalan — harus manual filter dulu setiap kali membuka halaman.  
   **Target:** Komponen halaman meter readings owner (grep `Riwayat Meter` · `MeterReadingsPage` · `meter-readings` di `frontend/src/pages/`).  
   **Aksi:**
@@ -1412,7 +1412,7 @@ Tanpa `staleTime`, keduanya refetch setiap kali StaysPage di-mount ulang (naviga
 
 ---
 
-- [ ] **R-28 🟡 — Owner: Seragamkan bahasa + ganti tombol "Poster" di Asset Register (O08)**  
+- [x] **R-28 🟡 — Owner: Seragamkan bahasa + ganti tombol "Poster" di Asset Register (O08)**  
   **Masalah:** Halaman Asset Register adalah satu-satunya halaman dengan campuran bahasa Inggris-Indonesia yang kuat: heading *"Asset Register"*, label KPI *"LEDGER NET FIXED ASSET"* dan *"ADJUSTMENT GAP"* di samping *"Nilai Aset"* dan *"Nilai Buku"*. Selain itu tombol *"Poster"* di section depresiasi tidak jelas fungsinya.  
   **Target:** Komponen halaman aset (`AssetRegisterPage` atau `FinanceAssetsPage`) di `frontend/src/pages/`.  
   **Aksi:**
@@ -1427,7 +1427,7 @@ Tanpa `staleTime`, keduanya refetch setiap kali StaysPage di-mount ulang (naviga
 
 ---
 
-- [ ] **R-29 🟡 — Owner: Guard redirect tambah toast — extend dari R-20 (O13)**  
+- [x] **R-29 🟡 — Owner: Guard redirect tambah toast — extend dari R-20 (O13)**  
   **Masalah:** Sama dengan issue staff (R-20) — owner yang mencoba akses portal tenant dikembalikan ke Owner Dashboard tanpa pesan apapun. Implementasi R-20 harus di-extend agar cover role OWNER juga.  
   **Target:** Sama dengan R-20 — guard/middleware frontend (grep `ProtectedRoute` · `RoleGuard` di `frontend/src/`).  
   **Aksi:**
@@ -1442,7 +1442,7 @@ Tanpa `staleTime`, keduanya refetch setiap kali StaysPage di-mount ulang (naviga
 
 ---
 
-- [ ] **R-30 🟢 — Owner: Tambah chip "OWNER ONLY" di halaman eksklusif owner (O01, O08, dll)**  
+- [x] **R-30 🟢 — Owner: Tambah chip "OWNER ONLY" di halaman eksklusif owner (O01, O08, dll)**  
   **Masalah:** Halaman-halaman eksklusif owner (loss refunds, aset, user management, dll) secara visual terlihat sama dengan halaman admin biasa. Owner baru yang baru diberi akses tidak tahu halaman mana yang tidak bisa dilihat admin/staf — tidak ada penanda eksplisit di body konten halaman.  
   **Target:** Komponen layout atau wrapper halaman owner-only.  
   **Aksi:**

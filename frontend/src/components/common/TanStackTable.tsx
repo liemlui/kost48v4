@@ -16,6 +16,8 @@ type Props<T> = {
   data: T[];
   onRowClick?: (row: T) => void;
   rowLabel?: (row: T) => string;
+  /** Opsional: kembalikan className tambahan per baris — mis. 'table-danger' untuk baris overdue. */
+  getRowClassName?: (row: T) => string | undefined;
   isLoading?: boolean;
   emptyMessage?: string;
   showColumnToggle?: boolean;
@@ -23,7 +25,7 @@ type Props<T> = {
 };
 
 export default function TanStackTable<T>({
-  columns, data, onRowClick, rowLabel, isLoading, emptyMessage = 'Tidak ada data.', showColumnToggle = false, className = '',
+  columns, data, onRowClick, rowLabel, getRowClassName, isLoading, emptyMessage = 'Tidak ada data.', showColumnToggle = false, className = '',
 }: Props<T>) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
@@ -107,6 +109,7 @@ export default function TanStackTable<T>({
           ) : (
             table.getRowModel().rows.map((row) => {
               const clickable = Boolean(onRowClick);
+              const extraClass = getRowClassName ? (getRowClassName(row.original) ?? '') : '';
               function handleRowKey(e: React.KeyboardEvent<HTMLTableRowElement>) {
                 if (clickable && (e.key === 'Enter' || e.key === ' ')) {
                   e.preventDefault();
@@ -122,7 +125,7 @@ export default function TanStackTable<T>({
                 role={clickable ? 'button' : undefined}
                 aria-label={clickable && rowLabel ? rowLabel(row.original) : undefined}
                 style={clickable ? { cursor: 'pointer' } : undefined}
-                className={clickable ? 'clickable-row' : undefined}
+                className={[clickable ? 'clickable-row' : '', extraClass].filter(Boolean).join(' ') || undefined}
               >
                 {row.getVisibleCells().map((cell) => (
                   <td key={cell.id} data-label={typeof cell.column.columnDef.header === 'string' ? cell.column.columnDef.header : undefined}>

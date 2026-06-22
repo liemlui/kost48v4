@@ -4,6 +4,14 @@
 
 ## Changelog Ringkas
 
+### 2026-06-22 — Fase R selesai: R-01..R-30 UX audit implementation (29 task, R-12 deferred)
+- R-01..R-07: public pages — hero, ulasan conditional, sticky CTA detail kamar, DP eksplisit, mobile grid 1-kolom, badge kamar available/occupied, anchor nav shortcut
+- R-08..R-11: admin — placeholder text "sst", invoice overdue row highlight (`table-danger`/`table-warning`), tooltip "Bermasalah", COA confirm + warning banner
+- R-13..R-18: tenant portal — routing /portal/checkout & /portal/renewal, NIK mask PDP, mobile nav 4 tab, accordion default open, empty state informatif, chart responsif
+- R-19..R-24: staff — meter mobile scroll/card, guard toast, tab meter pindah, gudang empty state + WA CTA, foto upload prompt, WAITING task tooltip
+- R-25..R-30: owner — role badge kolom tabel, notif grouping + filter tab + test data filter, meter filter bulan ini, bahasa aset seragam Indonesia, guard toast cross-role, chip "Hanya Owner"
+- Build `cd frontend && npm run build` lulus ✅ (3711 modul, 44.16s)
+
 ### 2026-06-22 — UI/UX audit halaman publik (8T) = 8/8 lulus; total e2e 66/66
 - **`public-ux-audit.spec.ts`** P-01..P-08: landing page (`/`), daftar kamar publik (`/rooms`), detail kamar publik, form booking tamu, mobile 375px, guard unauth (`/dashboard` → `/login`), link lupa password aktif, rooms bebas error 500.
 - Total e2e Playwright kumulatif: **66/66 lulus** (tenant 14 + admin 20 + staff 10 + owner-extra 14 + public 8).

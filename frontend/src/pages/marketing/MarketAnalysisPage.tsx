@@ -121,6 +121,10 @@ export default function MarketAnalysisPage() {
   return (
     <div className="container py-4">
       <PageHeader eyebrow="Marketing & Strategi" title="Analisa Pasar & CAC/CLV" description="Ditemani analis AI DeepSeek: wawancara SWOT/PESTLE/Kompetitor, atau dashboard CAC/CLV berbasis data nyata." />
+      {/* R-30: chip penanda halaman eksklusif owner */}
+      <div className="mb-3">
+        <span className="badge bg-danger-subtle text-danger-emphasis small" title="Halaman ini tidak dapat dilihat oleh Admin, Staf, atau Penghuni.">Hanya Owner</span>
+      </div>
 
       {!configured ? (
         <Alert variant="warning">

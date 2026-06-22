@@ -99,6 +99,10 @@ export default function ReportsPage() {
 
   return (
     <Container fluid className="reports-command-page px-2 py-3">
+      {/* R-30: chip penanda halaman eksklusif owner */}
+      <div className="mb-2">
+        <span className="badge bg-danger-subtle text-danger-emphasis small" title="Halaman ini tidak dapat dilihat oleh Admin, Staf, atau Penghuni.">Hanya Owner</span>
+      </div>
       <section className="report-hero mb-3">
         <div>
           <div className="report-eyebrow">Laporan bisnis</div>
@@ -225,7 +229,7 @@ export default function ReportsPage() {
             <Row className="g-3">
               <Col xl={7}>
                 <Card className="report-panel h-100">
-                  <Card.Header><span>Matriks Kesehatan Keuangan</span><Badge bg={overall?.color ?? 'secondary'}>{overall?.label}</Badge></Card.Header>
+                  <Card.Header><span>Matriks Kesehatan Keuangan</span><Badge bg={overall?.color ?? 'secondary'} title={overall?.label === 'Bermasalah' ? 'Status bermasalah: terdapat tunggakan signifikan, arus kas negatif, atau rasio keuangan di bawah ambang batas.' : overall?.label === 'Perlu Dipantau' ? 'Ada satu atau lebih indikator keuangan yang perlu diawasi — belum kritis tapi butuh perhatian.' : undefined}>{overall?.label}</Badge></Card.Header>
                   <Card.Body className="p-0"><OwnerHealthMatrix financialRatios={financialRatios.data!} profitLoss={profitLoss.data!} occupancy={occupancy.data!} cashFlow={cashFlow.data!} /></Card.Body>
                 </Card>
               </Col>

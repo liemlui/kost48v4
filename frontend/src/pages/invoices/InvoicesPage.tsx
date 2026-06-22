@@ -570,6 +570,11 @@ export default function InvoicesPage() {
               rowLabel={(item: any) => `Buka invoice ${item.invoiceNumber || `INV-${item.id}`} untuk ${item.stay?.tenant?.fullName || `Masa sewa #${item.stayId}`}`}
               showColumnToggle
               isLoading={invoicesQuery.isLoading}
+              getRowClassName={(item: any) => {
+                if (isOverdue(item)) return 'table-danger';
+                if (getDueSoonBadge(item)) return 'table-warning';
+                return undefined;
+              }}
             />
           ) : null}
 

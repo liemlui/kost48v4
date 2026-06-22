@@ -1,4 +1,5 @@
-import { useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
+import { useConfirm } from '../../components/common/ConfirmProvider';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Alert, Badge, Button, Card, Col, Row, Spinner } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
@@ -84,6 +85,7 @@ export default function AccountingSetupPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { user } = useAuth();
+  const confirm = useConfirm();
   const [actionMessage, setActionMessage] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
   const [periodCloseNotes, setPeriodCloseNotes] = useState('');
@@ -231,6 +233,18 @@ export default function AccountingSetupPage() {
     },
     onError: (error: unknown) => { setActionMessage(null); setActionError(getApiErrorMessage(error, 'Gagal menyiapkan Bagan Akun (COA).')); },
   });
+
+  const handleSeedCoa = useCallback(async () => {
+    const ok = await confirm({
+      title: 'Siapkan Bagan Akun (COA)?',
+      message: 'Tindakan ini akan menyemai akun standar ke dalam sistem. Perubahan COA memengaruhi semua laporan keuangan. Pastikan tidak ada periode aktif yang sedang diproses sebelum melanjutkan.',
+      confirmLabel: 'Ya, Siapkan COA',
+      cancelLabel: 'Batal',
+      variant: 'warning',
+    });
+    if (!ok) return;
+    seedMutation.mutate();
+  }, [confirm, seedMutation]);
 
   const createCashMutation = useMutation({
     mutationFn: (payload: CreateCashAccountPayload) => createCashAccount(payload),
@@ -397,8 +411,19 @@ export default function AccountingSetupPage() {
         eyebrow="Finance · Laporan Keuangan"
         title="Laporan Keuangan & Kesehatan Ledger"
         description="Cockpit owner untuk membaca Trial Balance, Neraca, Laba Rugi, aset, kualitas data, dan status tutup periode tanpa jargon fase teknis."
-        secondaryAction={<Button variant="outline-primary" onClick={() => seedMutation.mutate()} disabled={seedMutation.isPending} title="Bagan Akun (Chart of Accounts): daftar akun standar untuk mencatat keuangan kos">Siapkan Bagan Akun (COA)</Button>}
+        secondaryAction={<Button variant="outline-primary" onClick={handleSeedCoa} disabled={seedMutation.isPending} title="Bagan Akun (Chart of Accounts): daftar akun standar untuk mencatat keuangan kos">Siapkan Bagan Akun (COA)</Button>}
       />
+
+      {/* R-11: Banner peringatan COA — tampil saat ada akun aktif (COA sudah terisi) */}
+      {accounts.length > 0 && (
+        <Alert variant="warning" className="mb-3 d-flex align-items-start gap-2 small">
+          <span aria-hidden="true">⚠</span>
+          <span>
+            <strong>Ubah COA hanya jika benar-benar diperlukan.</strong>{' '}
+            Perubahan berlaku untuk semua laporan keuangan historis dan periode berjalan.
+          </span>
+        </Alert>
+      )}
 
       {/* G2: Finance AI Analyst — OWNER only */}
       {canUseFinanceAi ? (

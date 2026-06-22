@@ -55,6 +55,10 @@ export default function LossRefundsPage() {
         title="Refund Kalah-Cepat"
         description="Tenant yang kalah first-paid-wins padahal sudah transfer — kembalikan dananya lalu tandai selesai."
       />
+      {/* R-30: chip penanda halaman eksklusif owner */}
+      <div className="mb-3">
+        <span className="badge bg-danger-subtle text-danger-emphasis small" title="Halaman ini tidak dapat dilihat oleh Admin, Staf, atau Penghuni.">Hanya Owner</span>
+      </div>
 
       <Card>
         <Card.Body>
