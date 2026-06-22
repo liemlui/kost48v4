@@ -43,6 +43,14 @@ function getApiErrorMessage(err: unknown, fallback = 'Terjadi kesalahan.'): stri
   return fallback;
 }
 
+// ── R-14: masking NIK sesuai UU PDP No. 27/2022 ──────────────────────────────
+
+/** Tampilkan hanya 4 digit awal dan 4 digit akhir; tengah diganti 'x'. */
+function maskNik(nik: string): string {
+  if (nik.length >= 8) return `${nik.slice(0, 4)}xxxxxxxx${nik.slice(-4)}`;
+  return '****';
+}
+
 // ── field definitions ─────────────────────────────────────────────────────────
 
 type OnboardingFieldDef =
@@ -75,6 +83,8 @@ export default function ProfilePage() {
   const queryClient = useQueryClient();
   const isTenant = user?.role === 'TENANT';
   const isStaff = user?.role === 'STAFF';
+  // R-14: toggle tampil NIK penuh (UU PDP — default tersembunyi)
+  const [showNik, setShowNik] = useState(false);
 
   // F5-2 (AUD-2): info tip P2P staf (self-service).
   const [tipForm, setTipForm] = useState({
@@ -438,6 +448,29 @@ export default function ProfilePage() {
                     </div>
                   );
                 })}
+              </div>
+            ) : null}
+
+            {/* R-14: NIK / Nomor KTP — tampil ter-masking, UU PDP No. 27/2022 */}
+            {profile && tenantData?.identityNumber ? (
+              <div className="tp-field tp-field--locked mt-3">
+                <label className="tp-field-label">Nomor KTP / NIK</label>
+                <div className="tp-field-value d-flex align-items-center gap-2 font-monospace">
+                  {showNik ? tenantData.identityNumber : maskNik(tenantData.identityNumber)}
+                  <Button
+                    variant="link"
+                    size="sm"
+                    className="p-0 text-muted"
+                    onClick={() => setShowNik((v) => !v)}
+                    aria-label={showNik ? 'Sembunyikan NIK' : 'Tampilkan NIK'}
+                    title={showNik ? 'Sembunyikan NIK' : 'Tampilkan NIK penuh'}
+                  >
+                    {showNik ? '🙈 Sembunyikan' : '👁 Tampilkan'}
+                  </Button>
+                </div>
+                <small className="tp-field-lock-hint">
+                  NIK disembunyikan secara default sesuai UU PDP No. 27/2022.
+                </small>
               </div>
             ) : null}
 

@@ -193,8 +193,22 @@ export default function MyLoyaltyPage() {
             <Card.Header><strong>Katalog Reward</strong></Card.Header>
             <Card.Body>
               {rewardsQuery.isLoading && <div className="text-center py-3"><Spinner animation="border" size="sm" /></div>}
+              {/* R-17: empty state lebih informatif — motivasi kumpul poin */}
               {rewardsQuery.data && rewardsQuery.data.length === 0 && (
-                <p className="text-muted mb-0">Belum ada reward tersedia.</p>
+                <div className="text-center py-4">
+                  <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>🎁</div>
+                  <div className="fw-semibold mb-1">Reward segera hadir!</div>
+                  <p className="text-muted small mb-2">Kumpulkan poin kamu sekarang agar siap ditukar saat katalog tersedia.</p>
+                  <div className="text-start border rounded p-3 bg-light">
+                    <div className="fw-semibold small mb-1">Cara mendapat poin:</div>
+                    <ul className="small text-muted mb-0 ps-3">
+                      <li>Bayar tagihan tepat waktu</li>
+                      <li>Perpanjang kontrak masa sewa</li>
+                      <li>Lengkapi data profil penghuni</li>
+                      <li>Perbaiki masukan pengelola</li>
+                    </ul>
+                  </div>
+                </div>
               )}
               <div className="d-flex flex-column gap-3">
                 {rewardsQuery.data?.map((reward) => {

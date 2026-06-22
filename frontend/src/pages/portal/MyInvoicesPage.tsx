@@ -81,17 +81,30 @@ function TenantInvoiceSnapshot({ allItems, paidCount, unpaidCount, overdueCount 
           <Card.Body>
             <div className="panel-title mb-1">Tagihan per Status</div>
             <div className="panel-subtitle mb-2">Jumlah tagihan berdasarkan kondisi bayar</div>
-            <ResponsiveContainer width="100%" height={130}>
-              <BarChart layout="vertical" data={statusBars} margin={{ top: 4, right: 48, bottom: 4, left: 4 }}>
-                <CartesianGrid horizontal={false} stroke="rgba(148,163,184,0.18)" strokeDasharray="3 3" />
-                <XAxis type="number" hide />
-                <YAxis type="category" dataKey="label" width={90} tick={{ fill: '#64748b', fontSize: 11, fontWeight: 600 }} axisLine={false} tickLine={false} />
-                <Tooltip formatter={(v: unknown) => [`${Number(v ?? 0)} tagihan`, '']} />
-                <Bar dataKey="value" radius={[0, 6, 6, 0]} background={{ fill: 'rgba(148,163,184,0.10)' }}>
-                  {statusBars.map((d) => <Cell key={d.label} fill={d.color} />)}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
+            {/* R-18: fallback teks di mobile (chart recharts sering kosong di xs karena zero-width container) */}
+            <div className="d-sm-none mb-2">
+              <div className="d-flex flex-wrap gap-2">
+                {statusBars.map((d) => (
+                  <span key={d.label} className="badge fs-6 px-3 py-2" style={{ background: d.color, color: '#fff' }}>
+                    {d.label}: <strong>{d.value}</strong>
+                  </span>
+                ))}
+              </div>
+            </div>
+            {/* Chart: tampilkan di sm ke atas agar ResponsiveContainer punya lebar cukup */}
+            <div className="d-none d-sm-block">
+              <ResponsiveContainer width="100%" height={130}>
+                <BarChart layout="vertical" data={statusBars} margin={{ top: 4, right: 48, bottom: 4, left: 4 }}>
+                  <CartesianGrid horizontal={false} stroke="rgba(148,163,184,0.18)" strokeDasharray="3 3" />
+                  <XAxis type="number" hide />
+                  <YAxis type="category" dataKey="label" width={90} tick={{ fill: '#64748b', fontSize: 11, fontWeight: 600 }} axisLine={false} tickLine={false} />
+                  <Tooltip formatter={(v: unknown) => [`${Number(v ?? 0)} tagihan`, '']} />
+                  <Bar dataKey="value" radius={[0, 6, 6, 0]} background={{ fill: 'rgba(148,163,184,0.10)' }}>
+                    {statusBars.map((d) => <Cell key={d.label} fill={d.color} />)}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
           </Card.Body>
         </Card>
       </Col>

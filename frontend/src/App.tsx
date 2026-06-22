@@ -48,6 +48,9 @@ const MyLoyaltyPage = lazy(() => import('./pages/portal/MyLoyaltyPage'));
 const MyManualPage = lazy(() => import('./pages/portal/MyManualPage'));
 const LoyaltyAdminPage = lazy(() => import('./pages/loyalty/LoyaltyAdminPage'));
 const WifiOrderPage = lazy(() => import('./pages/portal/WifiOrderPage'));
+// R-13: stub halaman /portal/checkout dan /portal/renewal (fitur ada di MyStayPage via modal)
+const CheckoutPortalPage = lazy(() => import('./pages/portal/CheckoutPortalPage'));
+const RenewalPortalPage = lazy(() => import('./pages/portal/RenewalPortalPage'));
 const ConfiguredResourcePage = lazy(() => import('./pages/resources/ConfiguredResourcePage'));
 const InventoryShellPage = lazy(() => import('./pages/resources/InventoryShellPage'));
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
@@ -292,6 +295,9 @@ export default function App() {
           <Route path="/portal/tickets" element={<RequireRoles allowed={['TENANT']}><MyTicketsPage /></RequireRoles>} />
           <Route path="/portal/loyalty" element={<RequireRoles allowed={['TENANT']}><MyLoyaltyPage /></RequireRoles>} />
           <Route path="/portal/manual" element={<RequireRoles allowed={['TENANT']}><MyManualPage /></RequireRoles>} />
+          {/* R-13: route /portal/checkout & /portal/renewal — stub informatif, redirect ke /portal/stay */}
+          <Route path="/portal/checkout" element={<RequireRoles allowed={['TENANT']}><CheckoutPortalPage /></RequireRoles>} />
+          <Route path="/portal/renewal" element={<RequireRoles allowed={['TENANT']}><RenewalPortalPage /></RequireRoles>} />
           <Route path="/loyalty" element={<RequireRoles allowed={['OWNER', 'ADMIN']}><LoyaltyAdminPage /></RequireRoles>} />
           <Route path="/portal/wifi" element={<RequireRoles allowed={['TENANT']}><WifiOrderPage /></RequireRoles>} />
           </Route>
