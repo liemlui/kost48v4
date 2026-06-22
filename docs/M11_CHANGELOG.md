@@ -4,6 +4,35 @@
 
 ## Changelog Ringkas
 
+### 2026-06-22 — UI/UX audit halaman publik (8T) = 8/8 lulus; total e2e 66/66
+- **`public-ux-audit.spec.ts`** P-01..P-08: landing page (`/`), daftar kamar publik (`/rooms`), detail kamar publik, form booking tamu, mobile 375px, guard unauth (`/dashboard` → `/login`), link lupa password aktif, rooms bebas error 500.
+- Total e2e Playwright kumulatif: **66/66 lulus** (tenant 14 + admin 20 + staff 10 + owner-extra 14 + public 8).
+
+### 2026-06-22 — UI/UX audit staff (10T) + owner-extra (14T) = 24/24 lulus
+- **`staff-ux-audit.spec.ts`** S-01..S-10: dashboard staff, tiket mode-staff, staff-report, staff-warehouse, profil, notifikasi, room-detail, mobile, guard (staf tidak bisa akses `/invoices`/`/reports`/`/portal/*`).
+- **`owner-extra-ux-audit.spec.ts`** O-01..O-14: loss-refunds, users, meter-readings, additional-services, service-interests, wifi-sales, ancillary-revenue, aset tetap, reminders, room-detail, check-in wizard, notifikasi, invoice-payments, guard portal-tenant.
+- Total e2e Playwright kumulatif: **58/58 lulus** (tenant 14 + admin 20 + staff 10 + owner-extra 14).
+
+### 2026-06-21 — UI/UX audit lengkap: tenant (14T) + admin/owner (20T) = 34/34 lulus
+- **Playwright e2e**: `tenant-ux-audit.spec.ts` (T-01..T-14) + `admin-ux-audit.spec.ts` (A-01..A-20) → **34/34 LULUS** (2 worker, headless).
+- **Integration test cleanup**: `cleanupTestData` diperbaiki — urutan hapus sesuai RESTRICT FK (LoyaltyPoint→InvoicePayment→Invoice cascade→TenantDepositLedgerEntry→Stay cascade). Script `cleanup-test-artifacts.js` ditambahkan.
+- **Bug fix loyalty leaderboard**: test artifacts (kamar TEST-*, LoyaltyPoint, Invoice, DepositLedger) tidak lagi bocor ke produk setelah cleanup diperbaiki. A-13 memverifikasi leaderboard bersih dari kode TEST-*.
+- **Guard terverifikasi**: tenant tidak bisa akses `/stays`, `/invoices`, `/reports`; admin tidak bisa akses `/portal/*`.
+
+### 2026-06-21 — Fix test suite: cleanup mandiri + 175/175 lulus
+- **Fix kritis `stays-lifecycle.integration.test.js`**: refactor setiap test buat kamar uji mandiri (`createTestRoom`) + `cleanupTestData` (hapus stay/invoice/schedule/room di `finally`). Root cause: TC3 set room OCCUPIED tanpa cleanup → semua kamar DB UAT stuck OCCUPIED (karena seed hanya 20 kamar & semua terisi).
+- **`repair-room-status.js`** ditambahkan (`test/`) untuk sinkron status kamar bila DB kotor pasca test crash.
+- Total: **175/175 test lulus** — 159 unit + 16 integration (0 gagal).
+
+### 2026-06-21 — Audit flow + test suite komprehensif (tiket, renewal, checkout, pengumuman)
+- **4 unit test baru** (97 kasus): `tickets-state-machine`, `checkout-request-guards`, `renewal-guard-extended`, `announcements-logic` — cakupan state machine, role guard, deadline enforcement, tip flow, cross-block, window tayang.
+- **2 integration test baru** (12 kasus via DB UAT): `tickets.integration` (siklus OPEN→DONE→CLOSED, vendor, staf, pengumuman) + `renewal.integration` (decide YA/TIDAK, invoice DP, reject cancel, guard H+1).
+- Total unit test naik: **159 test, 0 gagal** (`npm run test:unit` lulus bersih).
+
+### 2026-06-21 — Fase S diperinci: plan detail backend-first + iterasi UI/UX via Vercel
+- **S-00 (prasyarat)** ditambahkan: backend wajib live di cPanel sebelum Vercel bisa digunakan; dokumentasi dua mode kerja (lokal vs produksi).
+- **S-01..S-06** diperluas dengan kode snippet konkret, gate test per task, dan urutan eksekusi yang jelas: kerjakan UI/UX lokal dulu (S-01/04/05) → deploy backend → setup Vercel → setiap git push auto-deploy 30 detik.
+
 ### 2026-06-21 — Fase S dirancang: Multi-Portal Vercel + Mobile-First + PWA Offline
 - **Arsitektur:** 3 Vercel project terpisah (tenant/staff/admin) dari satu codebase; Owner tetap di cPanel desktop.
 - **S-01..S-06** ditambahkan ke M10: env gate login, CORS Vercel, setup manual Vercel+DNS, mobile tenant, mobile staff, PWA offline-aware (Workbox + OfflineStatusBanner).

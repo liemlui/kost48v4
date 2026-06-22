@@ -1,7 +1,9 @@
 import { defineConfig } from '@playwright/test';
+const PORT = process.env.VITE_PORT || '5176';
+const BASE = `http://localhost:${PORT}`;
 export default defineConfig({
   testDir: './e2e',
   timeout: 30000,
-  use: { baseURL: 'http://localhost:5173', headless: true },
-  webServer: { command: 'npm run dev', url: 'http://localhost:5173', reuseExistingServer: true },
+  use: { baseURL: BASE, headless: true },
+  webServer: { command: 'npm run dev', url: BASE, reuseExistingServer: true },
 });

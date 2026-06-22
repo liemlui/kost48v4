@@ -4,6 +4,7 @@ import { Alert, Card, Spinner } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import { listResource } from '../../api/resources';
 import StatusBadge from '../../components/common/StatusBadge';
+import StaffMeterStatusPanel from '../../components/staff/StaffMeterStatusPanel';
 import type { Room, RoomItem } from '../../types';
 
 const PROBLEM_STATUSES = new Set(['DAMAGED', 'MISSING', 'NEEDS_REPAIR', 'PENDING_CHECK', 'MAINTENANCE']);
@@ -68,6 +69,9 @@ export default function StaffRoomsPage() {
       {(roomsQuery.isLoading || roomItemsQuery.isLoading) ? <div className="py-5 text-center"><Spinner /> Memuat kamar...</div> : null}
       {roomsQuery.isError ? <Alert variant="danger">Gagal memuat daftar kamar.</Alert> : null}
       {!roomsQuery.isLoading && !roomsQuery.isError && !sortedRooms.length ? <Alert variant="secondary">Belum ada kamar aktif.</Alert> : null}
+
+      {/* R-21: Tabel meter dipindah ke sini dari dashboard Hari Ini agar mobile lebih ramping */}
+      <StaffMeterStatusPanel rooms={rooms} />
 
       <div className="staff-room-grid">
         {sortedRooms.map((room) => {

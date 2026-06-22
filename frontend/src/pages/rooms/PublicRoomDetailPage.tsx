@@ -258,6 +258,33 @@ export default function PublicRoomDetailPage() {
           </div>
         </div>
 
+        {/* R-03: CTA booking prominent above-the-fold, tepat di bawah judul kamar */}
+        {room && availability && (
+          <div className="room-detail-above-fold-cta mb-4">
+            {selectedRow && (
+              <div className="room-detail-above-fold-price">
+                <span>Tarif {selectedRow.label}</span>
+                <strong><CurrencyDisplay amount={selectedRow.rent} showZero={false} /></strong>
+                <span className="text-muted small">{selectedRow.utilitiesIncluded ? 'Listrik & air termasuk' : 'Listrik & air meteran'}</span>
+              </div>
+            )}
+            <div className="d-flex gap-2 flex-wrap align-items-center">
+              {availability.canBook ? (
+                <button type="button" className="btn btn-primary btn-lg room-detail-cta-main" onClick={handleBook}>
+                  Booking Kamar Ini
+                </button>
+              ) : (
+                <a className="btn btn-warning btn-lg room-detail-cta-main" href={buildWhatsAppUrl(room)} target="_blank" rel="noreferrer">
+                  💬 Tanya Ketersediaan via WhatsApp
+                </a>
+              )}
+              {availability.canBook && (
+                <a className="btn btn-outline-secondary" href={buildWhatsAppUrl(room)} target="_blank" rel="noreferrer">💬 Tanya via WhatsApp</a>
+              )}
+            </div>
+          </div>
+        )}
+
         {query.isLoading ? <div className="py-5 text-center"><Spinner animation="border" /></div> : null}
         {query.isError ? <Alert variant="danger">Gagal memuat detail kamar publik.</Alert> : null}
         {!query.isLoading && !query.isError && !room ? <EmptyState icon="🛏️" title="Kamar tidak ditemukan" description="Data kamar publik tidak tersedia atau sudah tidak aktif." /> : null}
@@ -297,6 +324,35 @@ export default function PublicRoomDetailPage() {
                       <Alert variant="light" className="room-detail-clean-note mt-3 mb-0">
                         {getBusinessHighlight(room)}
                       </Alert>
+
+                      {/* R-04: DP dan deposit eksplisit */}
+                      {(() => {
+                        const monthlyRent = getTermRent(room, 'MONTHLY');
+                        const dpAmount = monthlyRent > 0 ? Math.round(monthlyRent * 0.3) : 0;
+                        const depositAmount = Number(room.defaultDepositRupiah ?? 0);
+                        return (
+                          <div className="room-detail-dp-deposit-info mt-3">
+                            {dpAmount > 0 && (
+                              <div className="room-detail-dp-row">
+                                <span aria-hidden="true">📋</span>
+                                <div>
+                                  <strong>DP awal: Rp {dpAmount.toLocaleString('id-ID')}</strong>
+                                  <span>Dibayar saat booking dikonfirmasi. Hangus jika dibatalkan.</span>
+                                </div>
+                              </div>
+                            )}
+                            {depositAmount > 0 && (
+                              <div className="room-detail-deposit-row">
+                                <span aria-hidden="true">🛡️</span>
+                                <div>
+                                  <em>Deposit jaminan: Rp {depositAmount.toLocaleString('id-ID')}</em>
+                                  <span>Dikembalikan penuh saat checkout (refundable).</span>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })()}
                     </Card.Body>
                   </Card>
 
@@ -423,15 +479,16 @@ export default function PublicRoomDetailPage() {
               </Col>
             </Row>
 
-            <div className="room-detail-mobile-sticky">
+            {/* R-03: Mobile sticky CTA — tampil hanya di mobile, full-width */}
+            <div className="room-detail-mobile-sticky d-md-none">
               <div>
                 <span>{selectedRow?.label ?? 'Tarif'}</span>
                 <strong><CurrencyDisplay amount={selectedRow?.rent ?? 0} showZero={false} /></strong>
               </div>
               {availability?.canBook ? (
-                <Button onClick={handleBook}>Ajukan Booking</Button>
+                <Button onClick={handleBook}>Booking Kamar Ini</Button>
               ) : (
-                <a className="btn btn-outline-secondary" href={buildWhatsAppUrl(room)} target="_blank" rel="noreferrer">Tanya Ketersediaan</a>
+                <a className="btn btn-warning" href={buildWhatsAppUrl(room)} target="_blank" rel="noreferrer">💬 Tanya via WhatsApp</a>
               )}
             </div>
           </>

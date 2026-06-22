@@ -1,14 +1,16 @@
-import { Card } from 'react-bootstrap';
+import { useMemo } from 'react';
+import { Button, Card } from 'react-bootstrap';
 import { useQuery } from '@tanstack/react-query';
+import { useNavigate } from 'react-router-dom';
 import StaffPerformanceCategoryCard from './StaffPerformanceCategoryCard';
 import StaffUnifiedWorkQueue from './StaffUnifiedWorkQueue';
 import StaffRoutineChecklist from './StaffRoutineChecklist';
 import StaffActionLauncher from './StaffActionLauncher';
 import StaffOperationalTaskBoard from './StaffOperationalTaskBoard';
-import StaffMeterStatusPanel from './StaffMeterStatusPanel';
+import { listResource } from '../../api/resources';
 import { makeStaffWorkStats, getStaffMotivation } from '../../utils/staffWorkStats';
 import type { ActionQueueItem } from '../command-center';
-import type { AuthUser, InventoryItem, Room, Ticket } from '../../types';
+import type { AuthUser, InventoryItem, MeterReading, Room, Ticket } from '../../types';
 import type { StaffRoutineKpiResponse, StaffRoutineTodayResponse } from '../../api/staffRoutines';
 import { fetchMyStaffPerformance } from '../../api/staffPerformance';
 
@@ -25,6 +27,14 @@ type Props = {
   onRoutineUpdated?: () => void | Promise<void>;
 };
 
+function getMonthRange() {
+  const now = new Date();
+  const from = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-01`;
+  const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+  const to = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(lastDay).padStart(2, '0')}`;
+  return { from, to };
+}
+
 function safeUserCreatedAt(user: AuthUser | null): string | null {
   const raw = (user as any)?.createdAt;
   return typeof raw === 'string' ? raw : null;
@@ -32,6 +42,52 @@ function safeUserCreatedAt(user: AuthUser | null): string | null {
 
 function staffFirstName(user: AuthUser | null) {
   return user?.fullName?.trim()?.split(/\s+/)[0] || 'Staf';
+}
+
+/** Widget ringkas pengganti tabel meter di tab Hari Ini (R-21). */
+function MeterSummaryWidget({ rooms }: { rooms: Room[] }) {
+  const navigate = useNavigate();
+  const { from, to } = useMemo(() => getMonthRange(), []);
+  const meterQuery = useQuery({
+    queryKey: ['staff-meter-summary', from, to],
+    queryFn: () => listResource<MeterReading>('/meter-readings', { from, to, limit: 200 }),
+    staleTime: 120_000,
+  });
+
+  const pending = useMemo(() => {
+    const readings = meterQuery.data?.items ?? [];
+    const recordedRoomIds = new Set(readings.map((r) => r.roomId));
+    const total = rooms.length;
+    const rec = rooms.filter((r) => recordedRoomIds.has(r.id)).length;
+    return Math.max(0, total - rec);
+  }, [meterQuery.data, rooms]);
+
+  if (meterQuery.isLoading) return null;
+
+  return (
+    <div className="staff-meter-summary-widget">
+      <div className="staff-meter-summary-info">
+        <span className="staff-hero-pill compact">Meter</span>
+        {pending > 0 ? (
+          <span className="staff-meter-summary-text">
+            <strong>{pending} kamar</strong> belum dicatat meter bulan ini
+          </span>
+        ) : (
+          <span className="staff-meter-summary-text text-success">
+            Semua kamar sudah dicatat meter bulan ini ✓
+          </span>
+        )}
+      </div>
+      <Button
+        variant="outline-secondary"
+        size="sm"
+        onClick={() => navigate('/rooms')}
+        className="staff-meter-summary-btn"
+      >
+        Lihat Kamar
+      </Button>
+    </div>
+  );
 }
 
 export default function StaffMotivationDashboard({ user, tickets, rooms = [], inventoryItems = [], queueItems, onRefresh, routineToday, routineKpi, routinesLoading, onRoutineUpdated }: Props) {
@@ -101,7 +157,8 @@ export default function StaffMotivationDashboard({ user, tickets, rooms = [], in
         </Card>
       </div>
 
-      <StaffMeterStatusPanel rooms={rooms} />
+      {/* R-21: Widget ringkas pengganti tabel meter. Tabel lengkap ada di tab Kamar & Stok. */}
+      <MeterSummaryWidget rooms={rooms} />
     </div>
   );
 }

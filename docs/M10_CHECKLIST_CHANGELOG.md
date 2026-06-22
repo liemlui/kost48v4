@@ -41,6 +41,7 @@
 | **Fase O — Design System & Token** | ✅ selesai | O-01..O-08: palet terpadu, chartColors, spacing scale, CSS Modules, pisah misc.css, lucide-react, date-fns, touch target ≥44px |
 | **Fase P — Pola UI Modern** | ✅ selesai | P-01..P-06: 3-tampilan toggle, FullCalendar, @dnd-kit kanban, TanStack Table, bottom tab bar Tenant, cmdk palette |
 | **Fase Q — Performa & Stabilitas** | ✅ selesai | Q-01..Q-07: fix endpoint 404 backend, anti-pattern fetch loop, heavy query, error boundary, lazy-load, empty state |
+| **Fase R — UI/UX Public + Admin/Owner + Tenant + Staff + Owner-Only** | 🔴 antrian | R-01..R-07: public · R-08..R-12: admin/owner · R-13..R-18: tenant (404, NIK, mobile nav) · R-19..R-24: staff (meter mobile, guard toast, gudang) · R-25..R-30: owner-only (role display, notif grouping, meter filter, bahasa aset, guard toast, chip OWNER) |
 | **Fase S — Multi-Portal Vercel + Mobile-First** | 🔴 antrian | S-01..S-06: env portal gate, CORS Vercel, 3 Vercel project, mobile tenant, mobile staff, PWA offline-aware |
 
 ---
@@ -976,97 +977,708 @@ Tanpa `staleTime`, keduanya refetch setiap kali StaysPage di-mount ulang (naviga
 
 ---
 
+### Fase R — UI/UX Public Pages (Audit Screenshot SCOPE 5)
+
+**Tujuan:** Perbaiki 7 masalah UX halaman publik (landing, katalog kamar, detail kamar, mobile) hasil audit screenshot SCOPE 5 tanggal 2026-06-22.  
+**Rujukan:** `docs/AI_SCREENSHOT_REVIEW_PROMPTS.md` §SCOPE-5 · screenshot `frontend/screenshots-ui/public-audit/` (P01–P08).  
+**Strategi:** R-01..R-04 prioritas konversi dulu (dampak langsung booking) → R-05..R-07 polish mobile. Semua task independen — bisa paralel. Tidak ada perubahan backend/schema.  
+**Gate umum tiap task:** `cd frontend; npm run build` ✅ · 1 commit per task.
+
+---
+
+- [ ] **R-01 — Hero section: foto besar + tagline + harga visible above-the-fold (P01)**  
+  **Masalah:** Dalam 5 detik, calon penghuni tidak melihat foto suasana kost yang menarik, tidak ada harga, dan tidak ada satu CTA besar di hero. Filter kamar langsung muncul tanpa "wow moment."  
+  **Target:** Komponen hero di halaman landing publik (grep `PublicGuestDashboardPage` atau `LandingPage`).  
+  **Aksi:**
+  1. Tambah 1 `<img>` atau `<div>` hero full-width (tinggi ≥420px desktop, ≥220px mobile) dengan foto fasilitas/kamar yang sudah ada di sistem.
+  2. Overlay teks di atas foto: tagline singkat (mis. *"Kost bersih & aman dekat Pakuwon Mall"*) + badge harga mulai dari (mis. *"Mulai Rp 500.000/bln"*) — data dari kamar termurah di API.
+  3. CTA tombol besar di bawah tagline: *"Lihat Kamar Tersedia →"* — `href="#kamar"` scroll ke grid kamar (anchor R-07).
+  4. Filter kamar tetap ada — pindahkan ke BAWAH hero, bukan di atas.  
+  **Anchor grep:** `PublicGuestDashboardPage` · `hero` · `landing` · `PublicRoomsPage`  
+  **Gate:** `npm run build` ✅ · Chrome 375px: foto hero terlihat, tagline terbaca, tombol CTA klik → scroll ke grid kamar.
+
+---
+
+- [ ] **R-02 — Sembunyikan section ulasan jika kosong (P08)**  
+  **Masalah:** Section ulasan tampil dengan teks *"Ulasan ditampilkan hanya jika sudah terverifikasi"* tanpa satu pun ulasan — menjadi sinyal merah kepercayaan untuk calon penghuni baru.  
+  **Target:** Komponen section ulasan di halaman publik (grep `terverifikasi` atau `ReviewSection` di `frontend/src/pages/public/`).  
+  **Aksi:**
+  1. Baca query/data yang mengisi section ulasan — cari variabel array ulasan.
+  2. Tambah conditional render: `{reviews?.length > 0 ? <ReviewSection /> : null}` — sembunyikan section sepenuhnya jika data kosong.
+  3. (Opsional) Ganti section ulasan kosong dengan blok "Keunggulan KOST48" (3–4 poin manfaat: lokasi, keamanan, transparansi harga, WiFi gratis) selama belum ada ulasan nyata.  
+  **Anchor grep:** `terverifikasi` · `ulasan` · `ReviewSection` · `reviews` (file halaman publik)  
+  **Gate:** `npm run build` ✅ · Dengan data ulasan kosong (DB UAT) → section ulasan tidak tampil sama sekali, tidak ada teks placeholder yang terlihat.
+
+---
+
+- [ ] **R-03 — Detail kamar: sticky CTA booking prominent above-the-fold (P03)**  
+  **Masalah:** Tombol booking di halaman detail kamar tidak terlihat di viewport pertama — pengguna harus scroll jauh untuk menemukan aksi utama. Halaman paling penting untuk konversi tetapi CTA tersembunyi.  
+  **Target:** Halaman detail kamar publik (grep `RoomDetailPublic` atau `PublicRoomDetail` di `frontend/src/pages/public/`).  
+  **Aksi:**
+  1. Tambah tombol *"Booking Kamar Ini"* di bagian INFO UTAMA atas (tepat di bawah nama kamar + harga) — sebelum tabel spesifikasi.
+  2. Mobile sticky: tambah `<div className="d-md-none sticky-booking-cta">` di bawah layout — `position: sticky; bottom: 0; padding: 12px; background: white; border-top: 1px solid var(--border-default);` — berisi tombol booking full-width.
+  3. Untuk kamar PENUH: ganti kedua tombol tersebut dengan *"Tanya Ketersediaan via WhatsApp"* (reuse logika dari state "kamar penuh" yang sudah ada di P04).  
+  **Anchor grep:** `RoomDetailPublic` · `GuestBookingForm` · `Tanya Ketersediaan` · `sticky`  
+  **Gate:** `npm run build` ✅ · Buka `/rooms/:id/detail` kamar available → tombol booking terlihat tanpa scroll · mobile 375px → sticky CTA muncul di bawah layar.
+
+---
+
+- [ ] **R-04 — Detail kamar: hapus teks overlay foto + tampilkan nominal DP eksplisit (P03)**  
+  **Masalah:** (a) Foto kamar memiliki teks overlay besar *"Kamar K"* yang terkesan placeholder/tidak profesional. (b) Nominal DP 30% tidak disebutkan eksplisit di bagian atas — calon penghuni bingung berapa yang harus disiapkan hari pertama.  
+  **Target:** Komponen foto kamar + section harga di halaman detail kamar publik.  
+  **Aksi:**
+  1. (a) Cari sumber teks overlay *"Kamar K"* — kemungkinan nama kamar dirender sebagai `<div>` di atas `<img>`. Hapus overlay dari foto atau pindahkan sebagai caption di BAWAH foto.
+  2. (b) Di section info harga atas (sebelum tabel tarif lengkap), tambah 1 baris ringkas:  
+     *"DP awal: Rp [monthlyRent × 0,3] — dibayar saat booking dikonfirmasi, hangus jika batal"*  
+     Hitung dinamis dari `monthlyRent * 0.3` (pembulatan ke atas ribuan).
+  3. Di bawahnya, tambah 1 baris deposit jaminan: *"Deposit jaminan: Rp [defaultDepositRupiah] — dikembalikan penuh saat checkout"* — bedakan visual dari DP (mis. warna berbeda atau italic).  
+  **Anchor grep:** overlay foto kamar · `monthlyRent` · `downPayment` · `defaultDeposit` (halaman detail publik)  
+  **Gate:** `npm run build` ✅ · Foto kamar tampil bersih tanpa teks overlay · nominal DP dan deposit tertera jelas sebelum tabel tarif.
+
+---
+
+- [ ] **R-05 — Mobile katalog: grid 2 kolom → 1 kolom full-width di ≤480px (P05, P05b)**  
+  **Masalah:** Di 375px, kartu kamar 2 kolom membuat foto hanya ~155px lebar — terlalu kecil untuk menilai kondisi kamar. Mayoritas calon penghuni mengakses via HP.  
+  **Target:** CSS grid katalog kamar publik — `frontend/src/styles/11-public-pages.css` + komponen `PublicRoomsPage`.  
+  **Aksi:**
+  1. Grep selector grid kartu: `rooms-grid` / `room-cards-grid` / `grid-template-columns` di `11-public-pages.css`.
+  2. Tambah/override media query:
+     ```css
+     @media (max-width: 480px) {
+       .rooms-grid, .room-cards-grid {
+         grid-template-columns: 1fr !important;
+       }
+       .room-card .card-img-top, .room-card img {
+         height: 200px;
+         object-fit: cover;
+       }
+     }
+     ```
+  3. Verifikasi foto tidak terpotong aneh di 1 kolom dan kartu masih terbaca.  
+  **Anchor grep:** `rooms-grid` · `room-cards-grid` · `grid-template-columns` di `11-public-pages.css` dan `PublicRoomsPage.tsx`  
+  **Gate:** `npm run build` ✅ · Chrome DevTools 375px → kartu kamar 1 kolom penuh, foto ≥200px tinggi, tidak ada scroll horizontal.
+
+---
+
+- [ ] **R-06 — Katalog: visual differentiation kamar available vs terisi lebih kuat (P02)**  
+  **Masalah:** Kamar tersedia dan kamar terisi hampir identik secara visual di grid — hanya badge kecil yang membedakan. Calon penghuni tidak langsung tahu mana yang bisa dipesan.  
+  **Target:** Komponen kartu kamar di katalog publik (grep `AVAILABLE` · `OCCUPIED` di `PublicRoomsPage.tsx`).  
+  **Aksi:**
+  1. Kamar **TERISI**: tambah `opacity: 0.55` pada kartu + overlay chip *"Terisi"* besar di pojok kiri atas foto (merah, font-weight bold) + tombol booking di-disable/replace dengan *"Lihat Info"*.
+  2. Kamar **TERSEDIA**: pertahankan visual normal, opsional tambah `border: 2px solid var(--color-success)` atau badge hijau kecil *"Tersedia"* di pojok foto.
+  3. Kamar terisi tetap bisa diklik → redirect ke state "kamar penuh" (halaman P04 yang sudah ada).  
+  **Anchor grep:** `AVAILABLE` · `OCCUPIED` · badge status di `PublicRoomsPage.tsx` / komponen kartu kamar  
+  **Gate:** `npm run build` ✅ · Grid kamar: sekilas pandang langsung jelas mana yang tersedia vs terisi. Kamar terisi masih bisa diklik.
+
+---
+
+- [ ] **R-07 — Mobile: sticky anchor nav untuk halaman publik panjang (P05)**  
+  **Masalah:** Halaman landing/rooms di mobile ~15.000px tinggi tanpa shortcut navigasi ke section penting (filter kamar, fasilitas, lokasi, FAQ). Pengguna HP harus scroll sangat jauh.  
+  **Target:** Halaman publik landing (`/`) dan katalog (`/rooms`) — `PublicGuestDashboardPage` / `PublicRoomsPage`.  
+  **Aksi:**
+  1. Tambah komponen sticky shortcut nav — hanya tampil di mobile (`d-md-none`):
+     ```tsx
+     <nav className="section-shortcuts d-md-none sticky-top bg-white border-bottom py-2 px-3 d-flex gap-3 overflow-x-auto">
+       <a href="#kamar" className="text-decoration-none small fw-semibold">Kamar</a>
+       <a href="#fasilitas" className="text-decoration-none small fw-semibold">Fasilitas</a>
+       <a href="#lokasi" className="text-decoration-none small fw-semibold">Lokasi</a>
+       <a href="#faq" className="text-decoration-none small fw-semibold">FAQ</a>
+     </nav>
+     ```
+  2. Tambah `id` anchor ke masing-masing section yang sudah ada: `id="kamar"`, `id="fasilitas"`, `id="lokasi"`, `id="faq"`.
+  3. CSS: scroll horizontal jika tidak muat di 1 baris, `z-index: 100`, warna konsisten dengan `--bg-surface`.
+  4. Anchor `#kamar` juga menjadi target dari tombol CTA hero (R-01).  
+  **Anchor grep:** section headers di `PublicGuestDashboardPage` · `11-public-pages.css`  
+  **Gate:** `npm run build` ✅ · Mobile 375px → nav shortcuts sticky di atas saat scroll; klik "Fasilitas" → smooth scroll ke section fasilitas.
+
+---
+
+#### Sub-blok R-B: Admin & Owner App (Audit Screenshot SCOPE 2 — 2026-06-22)
+
+**Rujukan:** screenshot `frontend/screenshots-ui/admin-audit/` (A01–A20).  
+**Strategi:** R-08 kritis teks frontend → R-09..R-10 UX tabel & laporan → R-11 safety COA → R-12 investigasi skeleton. Semua independen kecuali R-12 (butuh backend jalan).
+
+---
+
+- [ ] **R-08 — Perbaiki teks placeholder "sst" di Payment Review command center (A06)**  
+  **Masalah:** Teks *"Antrian Review Pembayaran - Tunggu sst yang lain..."* tampil ke pengguna di halaman review pembayaran. "sst" adalah singkatan/placeholder yang tidak profesional dan membingungkan.  
+  **Target:** Komponen command center payment review — grep `sst` atau `Tunggu sst` di `frontend/src/pages/invoices/` atau `frontend/src/pages/payments/`.  
+  **Aksi:**
+  1. Grep `sst` di seluruh `frontend/src/` — temukan string tersebut.
+  2. Ganti dengan teks yang jelas, mis.: *"Belum ada pembayaran yang menunggu review saat ini."* atau *"Semua pembayaran sudah diproses."*
+  3. Pastikan tidak ada placeholder lain di halaman yang sama (cek teks dengan huruf kecil tidak wajar: "dll", "etc", "xxx", "todo", "test").  
+  **Anchor grep:** `sst` · `Tunggu sst` · `command-center` (file payment/invoice)  
+  **Gate:** `npm run build` ✅ · Buka `/invoices` tab Review Pembayaran → tidak ada teks "sst" atau placeholder visible.
+
+---
+
+- [ ] **R-09 — Highlight baris invoice overdue/mendekati jatuh tempo (A05)**  
+  **Masalah:** Di tabel daftar tagihan, semua baris terlihat identik secara visual — tidak ada perbedaan warna/badge antara tagihan yang sudah melewati jatuh tempo dengan yang masih normal. Admin tidak bisa scan cepat mana yang mendesak.  
+  **Target:** `frontend/src/pages/invoices/InvoicesPage.tsx` — baris render tabel tagihan.  
+  **Aksi:**
+  1. Di setiap baris tabel, hitung selisih `dueDate` vs `today` (pakai `date-fns` yang sudah ada dari O-07).
+  2. Kondisi highlight:
+     - **Overdue** (jatuh tempo sudah lewat): `className="table-danger"` atau `border-left: 3px solid var(--color-danger)` + badge merah kecil "Lewat X hari"
+     - **Mendekati** (≤3 hari): `className="table-warning"` atau badge amber "Jatuh tempo X hari lagi"
+     - **Normal**: tidak ada perubahan visual
+  3. **JANGAN** ubah logika bisnis atau status invoice — hanya perubahan visual CSS/className.  
+  **Anchor grep:** `dueDate` · `jatuh` · baris render tabel di `InvoicesPage.tsx`  
+  **Gate:** `npm run build` ✅ · Baris invoice overdue tampil merah/amber; baris normal tidak berubah · tidak ada regresi filter/sort.
+
+---
+
+- [ ] **R-10 — Laporan A11: tooltip "Bermasalah" + sinkron Ringkasan Pengeluaran (A11, A16)**  
+  **Masalah:** (a) Badge besar "Bermasalah" muncul di halaman laporan tanpa penjelasan kondisi apa yang menyebabkannya — pengguna baru akan panik. (b) Ringkasan Pengeluaran di A11 menampilkan *"Belum ada pengeluaran bulan ini"* padahal A16 menunjukkan 5 pengeluaran Juni 2026 PAID — inkonsistensi yang merusak kepercayaan pada laporan.  
+  **Target:** `frontend/src/pages/reports/` atau komponen laporan keuangan (grep `Bermasalah` + `Ringkasan Pengeluaran`).  
+  **Aksi:**
+  1. (a) Cari kondisi yang men-trigger label "Bermasalah". Tambah `title` atau `<Tooltip>` Bootstrap yang menjelaskan kriteria: mis. *"Status bermasalah: terdapat tunggakan ≥ X% atau arus kas negatif."*
+  2. (b) Telusuri query yang mengisi "Ringkasan Pengeluaran" di halaman laporan vs query di halaman pengeluaran (A16). Bandingkan endpoint/filter yang dipakai — kemungkinan perbedaan filter bulan, status, atau kategori. Selaraskan agar keduanya membaca data yang sama.  
+  **Anchor grep:** `Bermasalah` · `Ringkasan Pengeluaran` · `pengeluaran bulan ini` (halaman laporan)  
+  **Gate:** `npm run build` ✅ · Tooltip "Bermasalah" muncul saat hover badge · Ringkasan Pengeluaran di laporan menampilkan jumlah yang konsisten dengan halaman pengeluaran.
+
+---
+
+- [ ] **R-11 — Accounting Setup: konfirmasi sebelum simpan perubahan COA (A20)**  
+  **Masalah:** Halaman Accounting Setup (COA) sangat padat dan bisa diubah kapan saja tanpa confirmation dialog. Perubahan COA mid-period dapat merusak integritas semua laporan keuangan historical. Tidak ada visible guard di screenshot A20.  
+  **Target:** `frontend/src/pages/accounting/AccountingSetupPage.tsx` — tombol simpan/update COA.  
+  **Aksi:**
+  1. Grep semua tombol Save/Simpan/Update di `AccountingSetupPage.tsx`.
+  2. Ganti handler `onClick` tombol simpan COA dengan `useConfirm()` (sudah ada dari M-02):
+     ```tsx
+     const ok = await confirm({
+       title: 'Ubah Chart of Accounts?',
+       message: 'Perubahan COA memengaruhi semua laporan keuangan. Pastikan tidak ada periode aktif yang sedang berjalan sebelum mengubah.',
+       confirmLabel: 'Ya, Simpan Perubahan',
+       cancelLabel: 'Batal',
+       variant: 'warning',
+     });
+     if (!ok) return;
+     // lanjut save
+     ```
+  3. Tambah banner info kuning di atas halaman AccountingSetup: *"⚠ Ubah COA hanya jika benar-benar diperlukan. Perubahan berlaku untuk semua laporan."*  
+  **Anchor grep:** `AccountingSetupPage` · tombol simpan/save · `useConfirm`  
+  **Gate:** `npm run build` ✅ · Klik simpan COA → modal konfirmasi muncul; Batal → tidak ada perubahan; Ya → simpan normal.
+
+---
+
+- [ ] **R-12 — Investigasi admin dashboard skeleton tidak hilang (A03)**  
+  **Masalah:** Screenshot A03 hanya menampilkan skeleton loading (blue shimmer placeholders) — data dashboard admin tidak pernah muncul menggantikan skeleton. Ini mengindikasikan query aggregate admin gagal atau timeout, sehingga skeleton tidak pernah di-replace dengan konten.  
+  **Target:** `frontend/src/pages/dashboard/DashboardAdmin.tsx` · endpoint `GET /api/admin/dashboard/aggregate`.  
+  **Aksi:**
+  1. Buka `/admin-dashboard` di browser — perhatikan apakah skeleton menghilang dalam ≤3 detik atau tetap tampil.
+  2. Buka DevTools → Network → cari request `/api/admin/dashboard/aggregate`:
+     - **404**: endpoint belum terdaftar → ulangi Q-01 (rebuild backend dist).
+     - **200 tapi skeleton tetap**: cek `aggregateQuery.isLoading` tidak pernah jadi `false` — mungkin response shape tidak cocok dengan yang diharapkan frontend.
+     - **Error lain**: baca pesan error, perbaiki sesuai root cause.
+  3. Jika data berhasil dimuat tapi ada section yang tetap kosong/placeholder: pastikan semua field di response aggregate sudah di-destructure dengan benar di `DashboardAdmin.tsx`.
+  4. Jika skeleton sudah hilang dan data tampil normal → centang task ini sebagai DONE (A03 hanya timing screenshot).  
+  **Anchor grep:** `aggregateQuery` · `isLoading` · `DashboardAdmin` · `AdminDashboardModule`  
+  **Gate:** Buka `/admin-dashboard` → dalam ≤3 detik skeleton hilang, data KPI dan action table tampil berisi. DevTools: `/api/admin/dashboard/aggregate` → HTTP 200.
+
+---
+
+#### Sub-blok R-C: Tenant Portal App (Audit Screenshot SCOPE 1 — 2026-06-22)
+
+**Rujukan:** screenshot `frontend/screenshots-ui/tenant-audit/` (T01–T14c) · laporan audit sesi 2026-06-22.  
+**Urutan:** R-13 + R-14 wajib selesai dulu (blocker) → R-15..R-18 bisa paralel.  
+**Gate umum tiap task:** `cd frontend; npm run build` ✅ · 1 commit per task. Tidak ada perubahan backend/schema.
+
+---
+
+- [ ] **R-13 🔴 KRITIS — Tenant: Fix routing 404 halaman Checkout & Perpanjangan Kontrak (T08, T09)**  
+  **Masalah:** Halaman `/portal/checkout` dan `/portal/renewal` (atau rute setaranya) menampilkan halaman 404 — dua fitur paling penting bagi penghuni tidak bisa diakses sama sekali. Ini blocker mutlak sebelum publish.  
+  **Target:** React Router config untuk portal tenant (grep `checkout` · `renewal` di `frontend/src/App.tsx` atau `frontend/src/routes/`).  
+  **Aksi:**
+  1. Grep rute yang terdaftar: cari `checkout` dan `renewal` di router config — apakah ada `<Route path="...checkout...">` dan `<Route path="...renewal...">`.
+  2. Grep komponen: `CheckoutPage` · `CheckoutRequestPage` · `RenewalPage` · `MyRenewalPage` — temukan apakah komponen ada di `frontend/src/pages/`.
+  3. Dua kemungkinan root cause:
+     - **Komponen ada tapi rute tidak terdaftar** → tambahkan `<Route path="/portal/checkout" element={<CheckoutPage />} />` di router.
+     - **Komponen tidak ada** → buat stub minimal yang mengarahkan ke formulir checkout via `StayPage` (pakai tombol "Ajukan Checkout" yang sudah ada di portal stay, bukan halaman terpisah).
+  4. Setelah fix, navigasi ke rute tersebut dari portal utama harus berhasil (bukan 404).  
+  **Anchor grep:** `checkout` · `renewal` di `App.tsx` / `routes/` · `CheckoutPage` · `RenewalPage`  
+  **Gate:** `npm run build` ✅ · Buka `/portal/checkout` → bukan 404 · Buka `/portal/renewal` → bukan 404.
+
+---
+
+- [ ] **R-14 🔴 KRITIS — Tenant: Mask NIK di halaman profil (T10) — UU PDP**  
+  **Masalah:** NIK `0871220000000` tampil penuh di halaman "Data Penghuni Tambahan" — pelanggaran UU PDP No. 27/2022 (NIK termasuk data pribadi sensitif). Penghuni mungkin mengakses portal dari perangkat bersama.  
+  **Target:** Komponen profil tenant (grep `nik` · `NIK` · `ktp` di `frontend/src/pages/profile/` atau `frontend/src/pages/tenant/`).  
+  **Aksi:**
+  1. Cari render NIK — kemungkinan baris `{tenant.nik}` atau `{profile.nik}` di komponen profil.
+  2. Ganti dengan fungsi mask: tampilkan hanya 4 digit awal + `xxxxxxxx` + 4 digit akhir (NIK 16 digit):
+     ```tsx
+     const maskNik = (nik: string) => nik.length >= 8 ? `${nik.slice(0, 4)}xxxxxxxx${nik.slice(-4)}` : '****';
+     ```
+  3. Tambahkan tombol "👁 Tampilkan" kecil di sebelahnya — `useState(false)` untuk toggle reveal (opsional, hanya jika desain memang perlu penghuni melihat NIK penuh sendiri).
+  4. **Jangan hapus NIK dari data** — hanya ubah tampilan (masking di FE saja).  
+  **Anchor grep:** `.nik` · `NIK` · `identityNumber` di komponen profil tenant  
+  **Gate:** `npm run build` ✅ · Halaman profil: NIK tampil sebagai `0871xxxxxxxx0000` (atau format serupa) · tidak ada NIK mentah di DOM.
+
+---
+
+- [ ] **R-15 🟡 — Tenant: Perbaiki mobile nav — label terpotong di bottom tab bar (T13)**  
+  **Masalah:** Di mobile (375px), label tab "Panduan Ko...", "Poin & Rewa...", "Panduan &..." terpotong tidak terbaca. Ada 6 tab di top nav yang tidak muat di mobile.  
+  **Target:** `frontend/src/components/layout/MobileBottomNav.tsx` (dibuat di P-05) atau `TenantWorkspaceTabs.tsx`.  
+  **Aksi:**
+  1. Kurangi tab mobile menjadi 4 yang paling sering dipakai: **Beranda** (Panduan Kos) · **Tagihan** · **Laporan** · **Profil**.
+  2. Tab "Poin & Reward", "Panduan & Aturan", "Pesan WiFi" → pindahkan ke menu "Lainnya ···" (overlay bottom sheet atau halaman `/portal/more`).
+  3. Gunakan ikon lucide-react tanpa label teks (label hanya di mode desktop), atau label singkat ≤7 karakter: "Beranda", "Tagihan", "Laporan", "Profil".
+  4. **Jangan ubah** navigasi desktop — perubahan ini hanya di breakpoint `≤768px`.  
+  **Anchor grep:** `MobileBottomNav` · `TenantWorkspaceTabs` · `max-width: 768`  
+  **Gate:** `npm run build` ✅ · Chrome DevTools 375px: 4 tab tampil tanpa terpotong · semua halaman masih bisa dijangkau.
+
+---
+
+- [ ] **R-16 🟡 — Tenant: Buka accordion info kamar by default di portal utama (T02)**  
+  **Masalah:** Di portal utama (`MyStayPage`), accordion "Info kamar", "Fasilitas", "Inventaris kamar", "Tarif & dana titipan" semua collapsed by default — penghuni baru harus klik 4× untuk melihat info dasar kamarnya. Kesan pertama buruk.  
+  **Target:** `frontend/src/pages/tenant/MyStayPage.tsx` (atau nama setara) — section accordion info kamar.  
+  **Aksi:**
+  1. Grep `Accordion` atau `collapse` + `Info kamar` / `Fasilitas` di `MyStayPage.tsx` — temukan `defaultActiveKey` atau kondisi expand.
+  2. Set "Info kamar" dan "Fasilitas" terbuka by default (`defaultActiveKey={['info-kamar', 'fasilitas']}` atau `defaultExpanded={true}`).
+  3. "Inventaris kamar" dan "Tarif & dana titipan" boleh tetap collapsed (konten lebih teknis).
+  4. Simpan preferensi expand/collapse ke `sessionStorage` agar jika penghuni sengaja menutupnya, tidak terbuka lagi setiap refresh.  
+  **Anchor grep:** `Accordion` · `Info kamar` · `Fasilitas` di `MyStayPage.tsx`  
+  **Gate:** `npm run build` ✅ · Buka portal utama → "Info kamar" dan "Fasilitas" langsung terbuka tanpa klik · klik tutup → tetap tertutup setelah refresh.
+
+---
+
+- [ ] **R-17 🟢 — Tenant: Empty states Panduan & Aturan + Loyalty Reward lebih informatif (T07, T09-manual)**  
+  **Masalah:** (a) Halaman "Panduan & Aturan Kos" menampilkan *"Panduan belum tersedia. Hubungi admin bila ada pertanyaan."* — tidak informatif, tidak ada nomor WA atau cara menghubungi. (b) Halaman "Poin & Reward" menampilkan katalog reward kosong (*"Belum ada reward tersedia"*) — penghuni punya 300 poin tapi tidak bisa menukar apapun; sistem poin terasa percuma.  
+  **Target:** (a) Komponen halaman panduan/manual tenant · (b) Komponen katalog reward di loyalty page.  
+  **Aksi:**
+  1. **(a) Panduan:** Ganti teks placeholder dengan isi minimal: tampilkan 3–5 aturan dasar kost (jam tamu, kebersihan, larangan) yang sudah ada di `M02_KEPUTUSAN_OWNER.md`. Tambahkan link WA admin di bawah (reuse `KOST_WHATSAPP_NUMBER` dari `WifiOrderPage.tsx` — L-10).
+  2. **(b) Reward katalog kosong:** Ganti empty state *"Belum ada reward tersedia"* dengan teks *"Reward segera hadir — kumpulkan poin kamu sekarang!"* + ilustrasi kecil + penjelasan 1 kalimat cara mendapat poin (bayar tepat waktu, perpanjang kontrak). Jangan hapus seksi poin/leaderboard yang sudah berjalan.  
+  **Anchor grep:** `Panduan belum tersedia` · `Belum ada reward` · komponen loyalitas + panduan tenant  
+  **Gate:** `npm run build` ✅ · Buka Panduan & Aturan → ada konten minimal, ada link/cara hubungi admin · Buka Poin & Reward → katalog kosong punya pesan motivasi, bukan kekosongan polos.
+
+---
+
+- [ ] **R-18 🟢 — Tenant: Bar chart "Tagihan per Status" tidak render di mobile (T13b)**  
+  **Masalah:** Di mobile, section "Tagihan per Status" di halaman Tagihan Saya menampilkan bar kosong tanpa angka atau warna — komponen chart tidak responsive atau gagal render di viewport sempit.  
+  **Target:** Komponen chart status tagihan di `frontend/src/pages/tenant/` (grep `Tagihan per Status` · bar chart di halaman invoices tenant).  
+  **Aksi:**
+  1. Identifikasi library chart yang dipakai (kemungkinan `recharts` atau `chart.js`).
+  2. Cek apakah container chart punya lebar fixed (px) — ganti ke `width="100%"` + `responsive={true}` (untuk recharts: bungkus dalam `<ResponsiveContainer width="100%" height={200}>`).
+  3. Jika chart terlalu kompleks untuk mobile: tambah kondisi `{isMobile ? <TextFallback /> : <BarChart />}` — tampilkan ringkasan teks (mis. "Lunas: 1 · Belum Bayar: 1") sebagai fallback di mobile ≤768px.
+  4. **Jangan ubah** logika data/query — hanya perbaikan render responsif.  
+  **Anchor grep:** `Tagihan per Status` · `BarChart` · `ResponsiveContainer` di komponen invoice tenant  
+  **Gate:** `npm run build` ✅ · Chrome DevTools 375px: chart status tagihan tampil dengan bar berwarna atau fallback teks yang terbaca.
+
+---
+
+#### Sub-blok R-D: Staff App (Audit Screenshot SCOPE 4 — 2026-06-22)
+
+**Rujukan:** screenshot `frontend/screenshots-ui/staff-audit/` (S01–S10b) · laporan audit sesi 2026-06-22.  
+**Urutan:** R-19 kritis (mobile meter table) → R-20 (guard toast) → R-21..R-23 bisa paralel → R-24 polish terakhir.  
+**Gate umum tiap task:** `cd frontend; npm run build` ✅ · 1 commit per task. Tidak ada perubahan backend/schema.
+
+---
+
+- [ ] **R-19 🔴 KRITIS — Staff: Tabel meter 48 kamar tidak bisa dipakai di mobile (S10)**  
+  **Masalah:** "Status Meter Bulan Ini" — tabel 6 kolom (Kamar/Penghuni/Status/Listrik/Air/Tindakan) × 48 baris dirender di layar 375px tanpa horizontal scroll. Kolom berdesak-desakan, tombol "Tindakan" tidak bisa disentuh dengan jari. Staf yang menggunakan HP tidak bisa mencatat meter sama sekali dari halaman ini.  
+  **Target:** Komponen tabel meter di dashboard staf (grep `Status Meter` · `meter` · `StaffDashboard` atau `DashboardStaff.tsx` di `frontend/src/pages/`).  
+  **Aksi:**
+  1. Bungkus tabel meter dalam `<div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>` — minimal ini sudah menyelesaikan problem di mobile.
+  2. Tambah `position: sticky; left: 0; background: var(--bg-surface);` pada kolom pertama (nama kamar) agar tetap terlihat saat scroll horizontal.
+  3. Opsional (lebih baik): di mobile ≤768px, ganti tabel dengan tampilan card list per kamar — tiap card: nama kamar + badge status + tombol "Catat Meter". Tabel tetap di desktop.
+  4. **Jangan ubah** logika data meter — hanya perubahan layout/CSS.  
+  **Anchor grep:** `Status Meter` · `meter-table` · `DashboardStaff` · tabel kamar di staff dashboard  
+  **Gate:** `npm run build` ✅ · Chrome DevTools 375px: tabel meter bisa discroll horizontal ATAU tampil sebagai card list · kolom kamar tidak hilang dari viewport.
+
+---
+
+- [ ] **R-20 🔴 KRITIS — Staff: Guard redirect tambah toast feedback (S08, S09)**  
+  **Masalah:** Saat staf mencoba akses halaman yang dilarang (invoices/reports/stays/portal tenant), terjadi silent redirect kembali ke dashboard tanpa pesan apapun. Staf tidak tahu kenapa URL berubah tiba-tiba — bisa dikira bug atau koneksi bermasalah.  
+  **Target:** Guard/middleware frontend yang menangani redirect role STAFF (grep `STAFF` · `RoleGuard` · `ProtectedRoute` · `useAuth` di `frontend/src/`).  
+  **Aksi:**
+  1. Temukan di mana redirect untuk role STAFF terjadi — kemungkinan di `ProtectedRoute.tsx`, `AppRouter.tsx`, atau hook `useAuth`.
+  2. Sebelum atau sesaat setelah redirect, tambahkan satu toast informatif (reuse `useToast` yang sudah ada dari M-06):
+     ```tsx
+     toast('Halaman ini hanya dapat diakses oleh Admin atau Owner.', 'warning');
+     navigate('/staff-dashboard'); // atau rute staff yang sesuai
+     ```
+  3. Durasi toast: 5000ms (cukup terbaca, tidak mengganggu).
+  4. **Jangan tambah** halaman "403 Forbidden" baru — toast sudah cukup untuk kasus ini.  
+  **Anchor grep:** `ProtectedRoute` · `RoleGuard` · `navigate` + `STAFF` · `useToast`  
+  **Gate:** `npm run build` ✅ · Login sebagai STAFF → akses `/invoices` → toast "Halaman ini hanya dapat diakses..." muncul + redirect ke dashboard staf.
+
+---
+
+- [ ] **R-21 🟡 — Staff: Dashboard mobile terlalu panjang — pindahkan tabel meter ke tab Gudang (S10)**  
+  **Masalah:** Dashboard staf di mobile ~11.000px tinggi karena section berurut: welcome → progress → stats → prioritas → task list → skor → checklist → tabel meter 48 kamar. Staf harus scroll sangat jauh padahal tugas utama (tombol "Mulai Kerjakan") ada di tengah halaman.  
+  **Target:** `DashboardStaff.tsx` (atau `StaffDashboardPage.tsx`) — posisi render tabel meter.  
+  **Aksi:**
+  1. Pindahkan section "Status Meter Bulan Ini" (tabel 48 kamar) **keluar dari tab "Hari Ini"** → pindahkan ke tab **"Kamar & Stok"** atau buat sub-tab baru di sana.
+  2. Di tab "Hari Ini", gantikan tabel meter dengan widget ringkas: `{jumlahKamarBelumCatat} kamar belum dicatat meter bulan ini → [Lihat Kamar]` — satu baris chip saja.
+  3. Verifikasi tab "Hari Ini" setelah dipotong masih memuat: greeting → progress → prioritas → task list → skor — ini sudah cukup untuk kebutuhan harian staf.
+  4. **Jangan hapus** tabel meter — hanya dipindah, masih harus bisa diakses.  
+  **Anchor grep:** `Status Meter` · `DashboardStaff` · tab "Hari Ini" vs tab "Kamar & Stok"  
+  **Gate:** `npm run build` ✅ · Mobile 375px: tab "Hari Ini" tidak melebihi 3000px tinggi · tabel meter masih tersedia di tab lain.
+
+---
+
+- [ ] **R-22 🟡 — Staff: Gudang empty state dengan CTA hubungi admin (S04)**  
+  **Masalah:** Tab Gudang menampilkan *"Belum ada data barang umum atau gudang. Data barang akan muncul setelah master barang tersedia."* tanpa aksi apapun. Staf yang baru pertama membuka halaman ini tidak tahu harus berbuat apa, dan tidak ada cara menghubungi admin dari halaman ini.  
+  **Target:** Komponen empty state di halaman gudang staf (grep `Belum ada data barang` · `GudangPage` · `WarehousePage` di `frontend/src/pages/`).  
+  **Aksi:**
+  1. Ganti teks placeholder dengan empty state yang actionable:
+     - Judul: *"Belum ada barang yang terdaftar"*
+     - Deskripsi: *"Admin perlu menambahkan daftar barang terlebih dahulu. Hubungi admin untuk memulai pengisian stok gudang."*
+     - Tombol: *"Hubungi Admin via WhatsApp"* → reuse `KOST_WHATSAPP_NUMBER` dari `WifiOrderPage.tsx`.
+  2. Pertahankan counter "0 habis | 0 menipis | 0 masalah fisik" — sembunyikan saat data kosong (tampilkan hanya setelah ada barang).
+  3. **Jangan ubah** logika data/query — hanya perubahan teks dan tombol CTA.  
+  **Anchor grep:** `Belum ada data barang` · `GudangPage` · `WarehousePage` · `KOST_WHATSAPP_NUMBER`  
+  **Gate:** `npm run build` ✅ · Buka tab Gudang dengan data kosong → pesan actionable + tombol WA muncul.
+
+---
+
+- [ ] **R-23 🟡 — Staff: Prompt upload foto saat menyelesaikan tugas (S02, S03)**  
+  **Masalah:** Laporan staf (S03) menunjukkan "0% Bukti foto lengkap" sebagai KPI negatif — artinya tidak ada satu pun foto yang dilampirkan ke penyelesaian tugas. Dari S02, tidak ada petunjuk visible cara upload foto saat mengerjakan tiket. Kemungkinan besar tombol/form foto tersembunyi di langkah yang tidak ditemukan staf.  
+  **Target:** Komponen detail/penyelesaian tugas staf (grep `foto` · `upload` · `SelesaikanTugas` · `TaskDetail` di halaman tugas staf).  
+  **Aksi:**
+  1. Cari form penyelesaian tugas — temukan apakah sudah ada field upload foto dan di mana posisinya.
+  2. Jika ada tapi tersembunyi: pindahkan field foto ke ATAS form penyelesaian (sebelum field catatan teks) dengan label tegas: *"📷 Foto bukti kerja (wajib untuk skor lengkap)"*.
+  3. Jika belum ada: tambahkan `<input type="file" accept="image/*" capture="environment">` — `capture="environment"` langsung membuka kamera belakang HP.
+  4. Tampilkan preview thumbnail foto setelah dipilih sebelum submit.
+  5. Tambahkan hint text di bawah field: *"Foto tanpa bukti menurunkan skor laporan bulan ini."*  
+  **Anchor grep:** `foto` · `upload` · `capture` · form selesaikan tugas staf  
+  **Gate:** `npm run build` ✅ · Mobile 375px: buka detail tugas → field foto kamera muncul di atas form · pilih foto → preview thumbnail tampil.
+
+---
+
+- [ ] **R-24 🟢 — Staff: Tasks "Menunggu info" perlu CTA atau penjelasan (S01)**  
+  **Masalah:** Di dashboard, beberapa task tampil dengan label *"Tugas menunggu info"* (AC kurang dingin, Kamar kamar mandiri bocor, Lampu kandang, WiFi sangkuriang) tanpa tombol aksi apapun. Staf tidak tahu apakah harus menunggu, menghubungi admin, atau mengabaikan.  
+  **Target:** Komponen task list di dashboard staf (grep `menunggu info` · `WAITING` · `task-list` di `DashboardStaff.tsx`).  
+  **Aksi:**
+  1. Untuk task dengan status "Menunggu info" / `WAITING`: tampilkan tooltip atau teks kecil di bawah label — *"Admin sedang meninjau. Tunggu konfirmasi sebelum dikerjakan."*
+  2. Opsional: tambahkan tombol "Tanya Admin" kecil (secondary/ghost) yang membuka WA dengan pesan pre-filled: *"Halo, saya mau tanya status tugas [nama tugas] di kamar [X]."*
+  3. Pastikan task "Menunggu info" **tidak** muncul di filter "Kerjakan dulu" — hanya di filter "Semua" atau "Tunggu dicek".  
+  **Anchor grep:** `menunggu info` · `WAITING` · status task di staff dashboard  
+  **Gate:** `npm run build` ✅ · Task "Menunggu info" punya tooltip/keterangan · tidak muncul di tab "Kerjakan dulu".
+
+---
+
+#### Sub-blok R-E: Owner-Only Pages (Audit Screenshot SCOPE 3 — 2026-06-22)
+
+**Rujukan:** screenshot `frontend/screenshots-ui/owner-extra-audit/` (O01–O14) · laporan audit sesi 2026-06-22.  
+**Urutan:** R-25 kritis (role display) → R-26 (notif grouping) → R-27..R-29 bisa paralel → R-30 polish terakhir.  
+**Gate umum tiap task:** `cd frontend; npm run build` ✅ · 1 commit per task. Tidak ada perubahan backend/schema.
+
+---
+
+- [ ] **R-25 🔴 KRITIS — Owner: Fix display role "10tamu" di tabel Users & Akses (O02)**  
+  **Masalah:** Kolom "Role" di halaman manajemen user menampilkan *"10tamu"* untuk semua user yang terlihat — kemungkinan truncation atau format render yang salah. Owner tidak bisa membaca role dengan benar sehingga manajemen akses (assign/revoke OWNER/ADMIN/STAFF/TENANT) menjadi berbahaya.  
+  **Target:** Komponen tabel users di halaman user management owner (grep `Users & Akses` · `role` · `UserManagement` · `UsersPage` di `frontend/src/pages/`).  
+  **Aksi:**
+  1. Grep render kolom Role di tabel — temukan bagaimana nilai role diformat (kemungkinan `user.role` langsung atau via mapping).
+  2. Pastikan mapping role ke label bahasa Indonesia sudah benar:
+     ```tsx
+     const ROLE_LABELS: Record<string, string> = {
+       OWNER: 'Owner', ADMIN: 'Admin', STAFF: 'Staf', TENANT: 'Penghuni'
+     };
+     // render: {ROLE_LABELS[user.role] ?? user.role}
+     ```
+  3. Tambahkan badge berwarna per role untuk scan visual cepat:
+     - OWNER → badge merah gelap · ADMIN → badge biru · STAFF → badge hijau · TENANT → badge abu
+  4. Verifikasi tidak ada data yang masih menampilkan "10tamu" atau format lain yang tidak terbaca.  
+  **Anchor grep:** `10tamu` · `user.role` · kolom role di tabel users owner  
+  **Gate:** `npm run build` ✅ · Buka halaman Users & Akses → kolom Role menampilkan "Penghuni" / "Staf" / "Admin" / "Owner" dengan badge berwarna · tidak ada "10tamu".
+
+---
+
+- [ ] **R-26 🟡 — Owner: Notifikasi date grouping + filter noise test data (O12)**  
+  **Masalah:** Halaman notifikasi owner dipenuhi notifikasi duplikat dari seeder (*"INT TEST: Pengumuman tes — harap abaikan"*) bercampur dengan notifikasi real tanpa pemisah tanggal. Owner sulit menemukan notifikasi yang benar-benar perlu ditindak.  
+  **Target:** Komponen halaman notifikasi owner (grep `NotificationsPage` · `NotificationList` · `owner/notifications` di `frontend/src/pages/`).  
+  **Aksi:**
+  1. Tambah **date grouping** — kelompokkan notifikasi per hari dengan header separator: *"Hari ini — 21 Jun 2026"*, *"Kemarin"*, *"Minggu lalu"*. Gunakan `date-fns` `isToday` / `isYesterday` / `format` (sudah ada dari O-07).
+  2. Tambah **filter tab** sederhana: "Semua | Keuangan | Operasional | Sistem" — filter berdasarkan `notificationType` yang sudah ada di data.
+  3. Notifikasi dengan kata *"INT TEST"* atau *"harap abaikan"* di judul: sembunyikan otomatis di environment production (`NODE_ENV === 'production'`). Di dev tetap tampil.
+  4. Tambah **pagination** atau "Muat lebih banyak" jika item > 20 — jangan render semua sekaligus.  
+  **Anchor grep:** `NotificationsPage` · `notification` · `isToday` · `notificationType`  
+  **Gate:** `npm run build` ✅ · Notifikasi dikelompokkan per hari · filter tab berfungsi · notif "INT TEST" tidak tampil di build production.
+
+---
+
+- [ ] **R-27 🟡 — Owner: Filter periode default "bulan ini" di Meter Readings (O03)**  
+  **Masalah:** Halaman Riwayat Meter menampilkan 38 data dari berbagai bulan bercampur tanpa filter aktif. Owner tidak langsung tahu kamar mana yang belum tercatat meter untuk bulan berjalan — harus manual filter dulu setiap kali membuka halaman.  
+  **Target:** Komponen halaman meter readings owner (grep `Riwayat Meter` · `MeterReadingsPage` · `meter-readings` di `frontend/src/pages/`).  
+  **Aksi:**
+  1. Set default filter ke bulan & tahun saat ini saat halaman pertama dibuka — gunakan `date-fns` `startOfMonth` / `endOfMonth` sebagai nilai awal query parameter.
+  2. Tambah selector bulan/tahun yang terlihat di atas tabel (bukan hanya tersembunyi di filter) — mis. `<MonthPicker value={selectedMonth} onChange={setSelectedMonth} />` atau dropdown sederhana.
+  3. Tambah kolom/indikator visual: kamar yang **belum** ada bacaan meter bulan ini ditandai dengan badge "Belum dicatat" berwarna kuning.
+  4. Klarifikasi dua tombol "Catat": tombol "Catat" per baris = input bacaan baru untuk baris itu; tombol "Catat Meter Manual" di atas = input untuk kamar mana saja. Tambahkan `title` tooltip yang berbeda.  
+  **Anchor grep:** `MeterReadingsPage` · `meter-readings` · filter periode · `startOfMonth`  
+  **Gate:** `npm run build` ✅ · Buka halaman Meter Readings → default filter = bulan ini · kamar tanpa bacaan punya badge "Belum dicatat".
+
+---
+
+- [ ] **R-28 🟡 — Owner: Seragamkan bahasa + ganti tombol "Poster" di Asset Register (O08)**  
+  **Masalah:** Halaman Asset Register adalah satu-satunya halaman dengan campuran bahasa Inggris-Indonesia yang kuat: heading *"Asset Register"*, label KPI *"LEDGER NET FIXED ASSET"* dan *"ADJUSTMENT GAP"* di samping *"Nilai Aset"* dan *"Nilai Buku"*. Selain itu tombol *"Poster"* di section depresiasi tidak jelas fungsinya.  
+  **Target:** Komponen halaman aset (`AssetRegisterPage` atau `FinanceAssetsPage`) di `frontend/src/pages/`.  
+  **Aksi:**
+  1. Ganti heading *"Asset Register"* → *"Daftar Aset Tetap"*.
+  2. Ganti label KPI:
+     - *"LEDGER NET FIXED ASSET"* → *"Nilai Buku (Ledger)"*
+     - *"ADJUSTMENT GAP"* → *"Selisih Ledger vs Register"*
+  3. Ganti tombol *"Poster"* → *"Cetak / Ekspor"* (atau hapus jika belum fungsional, tambahkan `disabled` dengan tooltip *"Segera hadir"*).
+  4. Pastikan empty state text konsisten bahasa Indonesia.  
+  **Anchor grep:** `Asset Register` · `LEDGER NET FIXED ASSET` · `ADJUSTMENT GAP` · `Poster` di halaman aset owner  
+  **Gate:** `npm run build` ✅ · Halaman aset 100% bahasa Indonesia · tidak ada label bahasa Inggris yang tersisa di heading/KPI.
+
+---
+
+- [ ] **R-29 🟡 — Owner: Guard redirect tambah toast — extend dari R-20 (O13)**  
+  **Masalah:** Sama dengan issue staff (R-20) — owner yang mencoba akses portal tenant dikembalikan ke Owner Dashboard tanpa pesan apapun. Implementasi R-20 harus di-extend agar cover role OWNER juga.  
+  **Target:** Sama dengan R-20 — guard/middleware frontend (grep `ProtectedRoute` · `RoleGuard` di `frontend/src/`).  
+  **Aksi:**
+  1. Jika R-20 sudah dikerjakan: pastikan toast yang ditambahkan di R-20 juga triggered saat OWNER mencoba akses rute portal tenant (bukan hanya STAFF).
+  2. Sesuaikan pesan toast per konteks:
+     - STAFF coba akses area keuangan → *"Halaman ini hanya dapat diakses oleh Admin atau Owner."*
+     - OWNER/ADMIN coba akses portal tenant → *"Area portal penghuni hanya dapat diakses dengan akun Penghuni."*
+  3. Satu implementasi guard redirect yang menangani semua skenario cross-role.  
+  **Anchor grep:** `ProtectedRoute` · `RoleGuard` · rute portal tenant · `useToast`  
+  **Dependensi:** Lebih mudah dikerjakan setelah R-20 selesai.  
+  **Gate:** `npm run build` ✅ · Login sebagai OWNER → akses `/portal/stay` → toast muncul "Area portal penghuni..." + redirect ke owner dashboard.
+
+---
+
+- [ ] **R-30 🟢 — Owner: Tambah chip "OWNER ONLY" di halaman eksklusif owner (O01, O08, dll)**  
+  **Masalah:** Halaman-halaman eksklusif owner (loss refunds, aset, user management, dll) secara visual terlihat sama dengan halaman admin biasa. Owner baru yang baru diberi akses tidak tahu halaman mana yang tidak bisa dilihat admin/staf — tidak ada penanda eksplisit di body konten halaman.  
+  **Target:** Komponen layout atau wrapper halaman owner-only.  
+  **Aksi:**
+  1. Tentukan daftar rute yang benar-benar owner-only (cek `navigation.ts` + `ProtectedRoute` — rute dengan `roles: ['OWNER']`).
+  2. Untuk setiap halaman owner-only, tambahkan chip kecil di bawah heading halaman:
+     ```tsx
+     <span className="badge bg-danger-subtle text-danger-emphasis ms-2 small">
+       Hanya Owner
+     </span>
+     ```
+  3. Opsional: tambahkan tooltip pada chip *"Halaman ini tidak dapat dilihat oleh Admin, Staf, atau Penghuni."*
+  4. **Jangan tambahkan** chip ini ke halaman yang bisa diakses admin juga — hanya yang pure owner-only.  
+  **Anchor grep:** `roles: \['OWNER'\]` di router/navigation · halaman loss refunds, aset, user management  
+  **Gate:** `npm run build` ✅ · Buka halaman loss refunds → ada chip "Hanya Owner" kecil di bawah heading · halaman admin biasa tidak punya chip ini.
+
+---
+
 ### Fase S — Multi-Portal Vercel + Mobile-First Tenant & Staff
 
-**Tujuan:** Pisah frontend menjadi 3 portal Vercel terpisah (tenant/staff/admin) dengan mobile-first UX; Owner tetap akses via cPanel (full desktop view). PWA offline-aware dengan status sinkronisasi.
+**Tujuan:** Pisah frontend menjadi 3 portal Vercel terpisah (tenant/staff/admin) dengan mobile-first UX; Owner tetap akses via cPanel (desktop view). Fokus iterasi UI/UX cepat via Vercel auto-deploy.
 
-**Arsitektur target:**
+---
+
+#### ⚠️ PRASYARAT WAJIB: Backend harus online dulu
+
+> Vercel hanya hosting **frontend (SPA)**. Frontend butuh backend API yang bisa diakses publik.
+> Tanpa backend live → Vercel frontend hanya tampil halaman login, tidak bisa login/data.
+
+**Dua mode kerja:**
+
+| Mode | Setup | Cocok untuk |
+|------|-------|-------------|
+| **A — Lokal dulu** | `npm run start:dev` + `npm run dev` | UI/UX development, tidak perlu Vercel |
+| **B — Vercel production** | Backend di cPanel live + Vercel frontend | Iterasi UI/UX + bisa diakses HP/klien |
+
+**Rekomendasi urutan:**
 ```
-tenant.kost48.com  → Vercel project "kost48-tenant"  (SPA, VITE_APP_PORTAL=tenant)
-staff.kost48.com   → Vercel project "kost48-staff"   (SPA, VITE_APP_PORTAL=staff)
-admin.kost48.com   → Vercel project "kost48-admin"   (SPA, VITE_APP_PORTAL=admin)
-owner: cPanel saja (akses komputer, full access, sudah ada)
-Backend API: tetap di cPanel → /api/*
-Database: tetap di cPanel/VPS
+1. Kerjakan UI/UX lokal dulu (Mode A) → tidak perlu deploy apapun
+2. Saat siap publish → deploy backend ke cPanel (S-00) → lalu setup Vercel (S-03)
+3. Setelah itu: setiap push GitHub → Vercel auto-deploy dalam 30 detik ✨
 ```
 
-**Strategi kode:** Satu codebase (`frontend/`), 3 build dengan env var berbeda. Login page menampilkan portal sesuai peran; setelah login role-check redirect ke error bila role tidak cocok.
+---
 
-**Batas Vercel Free Tier (lebih dari cukup untuk KOST48 48 kamar):**
-- Bandwidth: 100 GB/bulan · Build: 6.000 menit/bulan · Projects: tidak terbatas · SSL: gratis
+#### Arsitektur target (setelah Fase S selesai):
+
+```
+GitHub push
+     │
+     ├──▶ Vercel auto-build (30 detik)
+     │         ├─ tenant.kost48.com  (VITE_APP_PORTAL=tenant)
+     │         ├─ staff.kost48.com   (VITE_APP_PORTAL=staff)
+     │         └─ admin.kost48.com   (VITE_APP_PORTAL=admin)
+     │                   │ HTTPS API calls
+     └──▶ cPanel         ▼
+              ├─ NestJS API  https://api.kost48.com
+              ├─ PostgreSQL  (tidak berubah)
+              └─ File uploads uploads/ (tidak berubah)
+
+Owner: akses langsung https://kost48.com (cPanel, full desktop)
+```
+
+**Satu codebase, 3 Vercel project, env var berbeda.** Tidak ada duplikasi kode.
+
+**Batas Vercel Free (lebih dari cukup KOST48 48 kamar):**
+`100 GB bandwidth/bln · 6.000 build-menit/bln · unlimited projects · SSL gratis`
+
+---
+
+#### S-00 🧑 — [PRASYARAT] Deploy backend ke cPanel production
+
+> **BLOKIR untuk S-03 dan seterusnya.** S-01, S-02, S-04, S-05 bisa dikerjakan tanpa ini.
+
+**[OWNER]** Ikuti `docs/M08_DEPLOY_GO_LIVE.md` lengkap. Checklist ringkas:
+
+1. SSH/cPanel → buat aplikasi Node.js, titik ke `backend/`.
+2. `npm install --production` di server.
+3. Salin `.env.production` ke server, isi semua secret (JWT, DB, VAPID, dll).
+4. `npx prisma migrate deploy` → DB skema terbaru.
+5. `node scripts/bootstrap.sql` → seed data awal (COA, periode, owner account).
+6. Pastikan `https://api.kost48.com/api/health` → `{"status":"ok"}`.
+7. Catat URL API yang sudah live — dipakai di S-03 sebagai `VITE_API_BASE_URL`.
+
+**Gate:** `curl https://api.kost48.com/api/health` → `200 OK`.
+
+---
+
+- [ ] **S-00** 🧑 [OWNER] Deploy backend ke cPanel (ikuti M08)
+
+---
 
 #### S-01 🟡 — Env var VITE_APP_PORTAL + role gate di login
 
-**Target:** `frontend/src/main.tsx` atau `frontend/src/App.tsx` + `LoginPage.tsx`
+> **Bisa dikerjakan sekarang, tanpa backend live.**
+
+**Target:** `frontend/src/pages/auth/LoginPage.tsx` + `frontend/src/context/AuthContext.tsx`
 
 **Aksi:**
-1. Tambah env var `VITE_APP_PORTAL` (`tenant` | `staff` | `admin` | `` / kosong = all).
-2. Di `LoginPage.tsx`: baca `import.meta.env.VITE_APP_PORTAL` → tampilkan judul dan logo sesuai portal ("Portal Penghuni", "Portal Staf", "Panel Admin").
-3. Setelah login sukses: cek `user.role` vs portal yang diijinkan.
-   - Jika portal=`tenant` dan role bukan TENANT → `logout()` + tampilkan alert "Akses ditolak. Gunakan portal yang sesuai."
-   - Sama untuk `staff` (STAFF) dan `admin` (OWNER/ADMIN).
-4. Jika `VITE_APP_PORTAL` kosong → semua role diijinkan (behavior saat ini, untuk cPanel/dev).
+1. Tambah env var `VITE_APP_PORTAL` (nilai: `tenant` | `staff` | `admin` | kosong = semua).
+2. Buat helper `frontend/src/utils/portalGuard.ts`:
+   ```ts
+   export const PORTAL = (import.meta.env.VITE_APP_PORTAL ?? '') as string;
+   export const PORTAL_ALLOWED_ROLES: Record<string, string[]> = {
+     tenant: ['TENANT'],
+     staff:  ['STAFF'],
+     admin:  ['OWNER', 'ADMIN'],
+     '':     ['OWNER', 'ADMIN', 'STAFF', 'TENANT'],
+   };
+   export function isRoleAllowedOnPortal(role: string): boolean {
+     return (PORTAL_ALLOWED_ROLES[PORTAL] ?? ['OWNER','ADMIN','STAFF','TENANT']).includes(role);
+   }
+   export const PORTAL_TITLE: Record<string, string> = {
+     tenant: 'Portal Penghuni',
+     staff:  'Portal Staf',
+     admin:  'Panel Admin',
+     '':     'KOST48',
+   };
+   ```
+3. `LoginPage.tsx`:
+   - Ganti judul dengan `PORTAL_TITLE[PORTAL]`.
+   - Setelah login sukses, cek `isRoleAllowedOnPortal(user.role)`:
+     - `false` → `logout()` + tampilkan alert merah "Akses ditolak. Login menggunakan portal yang sesuai."
+4. `AuthContext.tsx`: setelah token refresh/restore, cek portal gate sama — logout paksa bila role tidak cocok.
+5. `frontend/.env.example`: tambahkan `VITE_APP_PORTAL=` (kosong = default all).
 
-**Gate:** `VITE_APP_PORTAL=tenant npm run build` ✅ · Login sebagai TENANT → berhasil; login sebagai STAFF → alert tolak.
+**Gate:** `VITE_APP_PORTAL=tenant npm run build` ✅ · `npm run dev` dengan VITE_APP_PORTAL=staff → login TENANT → alert tolak; login STAFF → masuk normal.
 
 ---
 
-- [ ] **S-01** Env var `VITE_APP_PORTAL` + role gate di login (≤1 jam)
+- [ ] **S-01** Env var + portal guard helper + login gate (≤1 jam)
 
 ---
 
-#### S-02 🟡 — Update CORS backend untuk domain Vercel
+#### S-02 🟡 — Update CORS backend izinkan domain Vercel
 
-**Target:** `backend/.env` / `backend/src/app.module.ts` atau `main.ts`
+> **Bisa dikerjakan sekarang tanpa backend live** (edit env file saja, berlaku saat deploy).
+
+**Target:** `backend/src/main.ts` + `backend/.env.production.example`
 
 **Aksi:**
-1. Di `backend/.env.production`: tambahkan `CORS_ORIGIN=https://tenant.kost48.com,https://staff.kost48.com,https://admin.kost48.com,https://kost48.com`.
-2. Verifikasi `main.ts` sudah baca `CORS_ORIGIN` dari env (split by koma).
-3. Tambahkan wildcard `*.vercel.app` untuk preview URL Vercel (opsional, hanya dev).
-
-**Gate:** `npx tsc --noEmit` ✅ · Test CORS dari browser dengan Origin Vercel.
-
----
-
-- [ ] **S-02** Update CORS backend untuk domain Vercel (≤30 menit)
-
----
-
-#### S-03 🧑 — Setup 3 Vercel project + custom domain
-
-**[OWNER]** Langkah manual di dashboard Vercel & domain registrar:
-
-1. Buat akun Vercel (gratis) → Import repo GitHub `liemlui/kost48v4`.
-2. Buat 3 project: `kost48-tenant`, `kost48-staff`, `kost48-admin`.
-3. Tiap project: Root Directory = `frontend/`, Build Command = `npm run build`, Output = `dist/`.
-4. Env Vars per project:
+1. Cek `backend/src/main.ts` → cari konfigurasi CORS. Pastikan sudah baca dari env:
+   ```ts
+   const allowedOrigins = (process.env.CORS_ORIGIN ?? 'http://localhost:5173')
+     .split(',').map(o => o.trim());
+   app.enableCors({ origin: allowedOrigins, credentials: true });
    ```
-   VITE_APP_PORTAL = tenant / staff / admin
-   VITE_API_BASE_URL = https://api.kost48.com  ← sesuai domain backend
+2. `backend/.env.production.example`: tambahkan baris:
    ```
-5. Custom domain: arahkan DNS `tenant/staff/admin.kost48.com` ke Vercel (CNAME).
-6. SSL otomatis (Vercel Let's Encrypt).
+   CORS_ORIGIN=https://kost48.com,https://tenant.kost48.com,https://staff.kost48.com,https://admin.kost48.com,https://*.vercel.app
+   ```
+3. Server production: update `.env` dan restart NestJS setelah S-00 selesai.
 
-**Gate:** Buka `https://tenant.kost48.com` → landing halaman login "Portal Penghuni".
+**Gate:** `npx tsc --noEmit` ✅ · Setelah backend live: `curl -H "Origin: https://tenant.kost48.com" https://api.kost48.com/api/health` → header `Access-Control-Allow-Origin` ada.
 
 ---
 
-- [ ] **S-03** 🧑 [OWNER] Setup Vercel + DNS + env vars (manual)
+- [ ] **S-02** CORS backend tambah domain Vercel (≤30 menit)
+
+---
+
+#### S-03 🧑 — [OWNER] Setup 3 Vercel project + custom domain
+
+> **Butuh S-00 selesai dulu** (perlu URL backend yang live untuk `VITE_API_BASE_URL`).
+
+**Langkah manual di vercel.com + dashboard domain registrar:**
+
+**3A — Buat akun & import repo:**
+1. Daftar gratis di [vercel.com](https://vercel.com) → "Add New Project" → Import GitHub `liemlui/kost48v4`.
+2. **Penting:** Pilih repo, bukan fork. Vercel otomatis detect Vite.
+
+**3B — Buat project `kost48-tenant`:**
+1. Project Name: `kost48-tenant`
+2. Root Directory: `frontend` ← **wajib diset, bukan root repo**
+3. Build Command: `npm run build` (auto-detect)
+4. Output Directory: `dist` (auto-detect)
+5. Environment Variables:
+   ```
+   VITE_APP_PORTAL   = tenant
+   VITE_API_BASE_URL = https://api.kost48.com
+   ```
+6. Deploy → tunggu build selesai → dapat URL `kost48-tenant.vercel.app`.
+
+**3C — Ulangi untuk `kost48-staff` dan `kost48-admin`:**
+- `VITE_APP_PORTAL = staff` / `admin`
+- `VITE_API_BASE_URL = https://api.kost48.com` (sama)
+
+**3D — Custom domain (opsional, bisa menyusul):**
+1. Di setiap Vercel project → Settings → Domains → Add `tenant.kost48.com`.
+2. Di domain registrar (Niagahoster/Cloudflare/dll) → tambah CNAME:
+   ```
+   tenant → cname.vercel-dns.com
+   staff  → cname.vercel-dns.com
+   admin  → cname.vercel-dns.com
+   ```
+3. DNS propagasi 1–24 jam. SSL otomatis dari Vercel.
+
+**Gate:** `https://kost48-tenant.vercel.app` → halaman login "Portal Penghuni" tampil (meski login belum bisa bila backend belum live).
+
+---
+
+- [ ] **S-03** 🧑 [OWNER] Setup Vercel + 3 project + env vars + domain (manual)
 
 ---
 
 #### S-04 🟡 — Mobile-first layout Tenant portal
 
-**Target:** `frontend/src/pages/portal/` + `frontend/src/styles/06-tenant.css`
+> **Bisa dikerjakan lokal tanpa backend live.** Hasil langsung tampil di Vercel setelah push.
+
+**Target:** `frontend/src/pages/portal/` · `frontend/src/styles/06-tenant.css`
+
+**Prinsip mobile-first:** Desain untuk 375px dahulu, baru tablet/desktop.
 
 **Aksi:**
-1. `MyStayPage.tsx`: ganti tabel → card stack full-width di mobile (`<Card>` Bootstrap).
-2. `MyInvoicesPage.tsx`: list tagihan → card per tagihan (nominal besar, status badge, tombol bayar full-width).
-3. `MyTicketsPage.tsx`: card tiket dengan foto thumbnail inline (sudah ada lightbox dari R-1).
-4. Form input: `font-size: 16px` min (cegah zoom iOS), padding ≥ 12px, label di atas bukan samping.
-5. `06-tenant.css`: tambah breakpoint `@media (max-width: 576px)` untuk card utama full-width, gap 12px.
+1. **`MyStayPage.tsx`** — hero card info hunian:
+   - Hapus tabel, ganti dengan `<Card>` tunggal full-width: nama kamar (besar), status badge, tanggal masuk-keluar.
+   - Tombol aksi (perpanjang, checkout) → `<Button className="w-100 mb-2">`.
+2. **`MyInvoicesPage.tsx`** — list tagihan kartu:
+   - Tiap tagihan = `<Card>`: nominal (font besar `fs-4`), status badge warna, due date, tombol "Bayar" full-width.
+   - Ganti tabel dengan `<div className="d-flex flex-column gap-2">`.
+3. **`MyTicketsPage.tsx`** — tiket feed style:
+   - Card per tiket: judul, status, foto thumbnail (klik → lightbox dari R-1), tombol "Beri Rating".
+4. **Form input global** (cegah zoom iOS):
+   ```css
+   /* 06-tenant.css */
+   @media (max-width: 576px) {
+     .portal-form input, .portal-form select, .portal-form textarea {
+       font-size: 16px !important;
+       padding: 10px 12px;
+     }
+     .portal-card { border-radius: 16px; box-shadow: 0 2px 12px rgba(0,0,0,.08); }
+     .portal-cta  { width: 100%; margin-bottom: 8px; min-height: 48px; }
+   }
+   ```
+5. **BottomTabBar** (sudah ada Fase P): pastikan muncul untuk TENANT di semua halaman portal.
 
-**Gate:** `npm run build` ✅ · Test di Chrome DevTools 375px (iPhone SE) → tidak ada overflow horizontal.
+**Gate:** `npm run build` ✅ · Chrome DevTools 375px → tidak ada scroll horizontal, semua tombol ≥48px, teks terbaca tanpa zoom.
 
 ---
 
@@ -1074,53 +1686,98 @@ Database: tetap di cPanel/VPS
 
 ---
 
-#### S-05 🟡 — Mobile-first layout Staff portal
+#### S-05 🟡 — Mobile-first layout Staff portal + BottomTabBar STAFF
 
-**Target:** `frontend/src/pages/tickets/TicketsStaffMode.tsx` + `frontend/src/styles/05-staff.css`
+> **Bisa dikerjakan lokal.** Staff paling sering pakai HP saat kerja lapangan.
 
-**Aksi:**
-1. `TicketsStaffMode.tsx`: kartu tiket jadi swipeable (pakai `@dnd-kit` atau CSS `overflow-x: scroll` dengan snap).
-2. Form laporan staf: tombol CTA full-width, foto upload tap-friendly.
-3. `DashboardStaff.tsx`: metrik 2-kolom di mobile, chart responsif.
-4. BottomTabBar (sudah ada Fase P): pastikan aktif untuk STAFF juga (saat ini hanya TENANT).
-5. `05-staff.css`: min touch target 48px untuk semua tombol aksi staf.
-
-**Gate:** `npm run build` ✅ · Test di 375px → BottomTabBar staf muncul, kartu tiket terbaca.
-
----
-
-- [ ] **S-05** Mobile-first layout Staff portal (≤2 jam)
-
----
-
-#### S-06 🟡 — PWA offline-aware: cache read + status banner
-
-**Target:** `frontend/public/sw.js` atau `vite-plugin-pwa` config + komponen baru `OfflineStatusBanner.tsx`
+**Target:** `TicketsStaffMode.tsx` · `DashboardStaff.tsx` · `05-staff.css` · `AppLayout.tsx`
 
 **Aksi:**
-1. Verifikasi `vite-plugin-pwa` sudah ada di `package.json`; jika tidak, install dulu (🧑 owner approve npm dep baru).
-2. Konfigurasi Workbox cache strategy:
-   - `GET /api/tenants/me`, `/api/stays/my`, `/api/invoices*`, `/api/tickets/my` → **StaleWhileRevalidate** (baca offline, update background).
-   - `POST/PATCH/*` → network-only + queue di IndexedDB bila offline.
-3. Buat `frontend/src/components/common/OfflineStatusBanner.tsx`:
-   ```tsx
-   // Tampil bila navigator.onLine === false
-   // "📡 Offline · Data per [waktu] · X aksi tertunda"
-   // Warna kuning/amber, tidak memblokir konten
+1. **`TicketsStaffMode.tsx`** — kartu tiket swipe-friendly:
+   - Stack vertikal kartu (bukan tabel) dengan gap 12px.
+   - Tiap kartu: prioritas badge (merah/kuning), judul tiket, nomor kamar, tombol "Mulai" / "Selesai" full-width.
+   - Swipe kiri = detail tiket (via `onClick` ke route detail, bukan swipe gesture dulu — simpan kompleksitas).
+2. **`DashboardStaff.tsx`** — metrik 2 kolom:
+   - Grid 2×2 (`d-grid gap-2` style 2 kolom) untuk statistik KPI, bukan tabel.
+   - Chart collapsible di mobile (accordion, toggle "Lihat Grafik").
+3. **BottomTabBar untuk STAFF** — tambah ke `AppLayout.tsx`:
+   - Tab: 🏠 Dashboard · 🎫 Tiket · 📋 Rutin · 👤 Profil
+   - Hanya tampil bila `user.role === 'STAFF'` DAN `window.innerWidth < 768`.
+4. **`05-staff.css`** — touch targets staf:
+   ```css
+   @media (max-width: 768px) {
+     .staff-action-btn { min-height: 48px; width: 100%; margin-bottom: 8px; }
+     .staff-card       { border-radius: 14px; padding: 16px; }
+     .staff-metric-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+   }
    ```
-4. Pasang `<OfflineStatusBanner />` di `AppLayout.tsx` (di atas `<main>`).
-5. Tombol aksi keuangan (bayar, booking): tambah guard `if (!navigator.onLine) → toast "Butuh koneksi internet"`.
 
-**Gate:** `npm run build` ✅ · Chrome DevTools → Network: Offline → halaman tenant tetap terbaca, banner kuning muncul.
+**Gate:** `npm run build` ✅ · 375px → BottomTabBar staf 4 tab muncul, kartu tiket stack rapi, tombol ≥48px.
 
 ---
 
-- [ ] **S-06** PWA offline-aware: cache + `OfflineStatusBanner` (≤3 jam)
+- [ ] **S-05** Mobile-first Staff portal + BottomTabBar STAFF (≤2 jam)
 
 ---
 
-**Urutan eksekusi:** S-01 → S-02 → S-03 🧑 (paralel dengan S-04/S-05) → S-06  
-**Estimasi total kode:** ~6-8 jam. S-03 tergantung owner (DNS propagation 1-24 jam).
+#### S-06 🟡 — PWA offline-aware: cache read + OfflineStatusBanner
+
+> **Kerjakan setelah S-04/S-05** (butuh layout stabil dulu).
+
+**Target:** `frontend/vite.config.ts` (vite-plugin-pwa) · `AppLayout.tsx` · komponen baru
+
+**Aksi:**
+1. **Cek `vite-plugin-pwa`** di `frontend/package.json`. Jika belum ada → 🧑 owner approve dulu (npm dep baru).
+2. **Workbox cache strategy** di `vite.config.ts`:
+   ```ts
+   workbox: {
+     runtimeCaching: [
+       { urlPattern: /\/api\/(tenants\/me|stays\/my|invoices|tickets\/my|rooms)/,
+         handler: 'StaleWhileRevalidate',        // baca offline, update background
+         options: { cacheName: 'api-cache', expiration: { maxAgeSeconds: 3600 } } },
+       { urlPattern: /\.(js|css|woff2|png|jpg|webp)$/,
+         handler: 'CacheFirst',
+         options: { cacheName: 'assets-cache', expiration: { maxEntries: 100 } } },
+     ]
+   }
+   ```
+3. **`OfflineStatusBanner.tsx`** (komponen baru):
+   ```tsx
+   // Tampil hanya saat navigator.onLine === false
+   // "📡 Offline  ·  Data per [waktu sinkron terakhir]"
+   // Warna: amber, di atas konten (bukan blocking)
+   // Auto-hilang 3 detik setelah kembali online
+   ```
+4. Pasang `<OfflineStatusBanner />` di `AppLayout.tsx` tepat di bawah `<TopBar>`.
+5. **Guard transaksi uang** — di `MyInvoicesPage`, tombol "Bayar":
+   ```tsx
+   onClick={() => { if (!navigator.onLine) { toast.error('Butuh koneksi internet untuk bayar.'); return; } ... }}
+   ```
+6. Sama untuk tombol Booking, Submit Laporan Staf.
+
+**Gate:** `npm run build` ✅ · Chrome DevTools → Network: Offline → halaman tenant terbaca (cached), banner amber muncul. Tombol bayar → toast error.
+
+---
+
+- [ ] **S-06** PWA offline cache + OfflineStatusBanner + guard transaksi (≤3 jam)
+
+---
+
+#### Urutan Eksekusi Fase S
+
+```
+SEKARANG (tanpa backend live):
+  S-01 → S-02 → S-04 → S-05   ← kerjakan UI/UX dulu, iterasi lokal
+
+SAAT SIAP PUBLISH (owner siapkan cPanel):
+  S-00 [OWNER] → S-02 (apply ke server) → S-03 [OWNER] → S-06
+
+SETELAH S-03 SELESAI:
+  Setiap git push → Vercel auto-deploy 30 detik → iterasi UI/UX super cepat ✨
+```
+
+**Estimasi kode (AI):** S-01 ~1j · S-02 ~30m · S-04 ~2j · S-05 ~2j · S-06 ~3j = **~9 jam total**  
+**Estimasi owner:** S-00 ~2-4j (cPanel deploy) · S-03 ~30m (Vercel setup) · DNS propagasi 1-24j
 
 ---
 

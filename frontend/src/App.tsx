@@ -1,5 +1,5 @@
-import { lazy, Suspense, type ReactNode } from 'react';
-import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
+import { lazy, Suspense, useEffect, type ReactNode } from 'react';
+import { Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import { PageLoadingSkeleton } from './components/common/SkeletonLoader';
 import AppLayout from './components/layout/AppLayout';
 import ProtectedRoute from './components/layout/ProtectedRoute';
@@ -9,6 +9,7 @@ import { resolveRouteTitle } from './config/routeTitles';
 import { useDocumentTitle } from './hooks/useDocumentTitle';
 import { useTenantPortalStage } from './hooks/useTenantPortalStage';
 import { useAuth } from './context/AuthContext';
+import { useToast } from './components/common/ToastProvider';
 import ForgotPasswordPage from './pages/auth/ForgotPasswordPage';
 import LoginPage from './pages/auth/LoginPage';
 import ResetPasswordPage from './pages/auth/ResetPasswordPage';
@@ -65,14 +66,89 @@ const ServiceInterestsPage = lazy(() => import('./pages/services/ServiceInterest
 
 type Role = 'OWNER' | 'ADMIN' | 'STAFF' | 'TENANT';
 
+/**
+ * Pesan toast yang akan ditampilkan saat role tertentu mencoba akses route terlarang.
+ * Modular — mudah di-extend untuk role OWNER (R-29).
+ */
+function getDeniedMessage(role: string, targetPath: string): string {
+  // STAFF coba akses area keuangan
+  if (role === 'STAFF' && (
+    targetPath.startsWith('/invoices') ||
+    targetPath.startsWith('/finance') ||
+    targetPath.startsWith('/invoice-payments') ||
+    targetPath.startsWith('/payment-submissions') ||
+    targetPath.startsWith('/expenses') ||
+    targetPath.startsWith('/ancillary-revenue') ||
+    targetPath.startsWith('/wifi-sales') ||
+    targetPath.startsWith('/loss-refunds') ||
+    targetPath.startsWith('/reports')
+  )) {
+    return 'Halaman keuangan ini hanya dapat diakses oleh Admin atau Owner.';
+  }
+  // STAFF coba akses area admin/manajemen
+  if (role === 'STAFF' && (
+    targetPath.startsWith('/stays') ||
+    targetPath.startsWith('/tenants') ||
+    targetPath.startsWith('/users') ||
+    targetPath.startsWith('/settings') ||
+    targetPath.startsWith('/reminders') ||
+    targetPath.startsWith('/inventory') ||
+    targetPath.startsWith('/staff-routines') ||
+    targetPath.startsWith('/staff-performance') ||
+    targetPath.startsWith('/renew-requests') ||
+    targetPath.startsWith('/announcements') ||
+    targetPath.startsWith('/meter-readings') ||
+    targetPath.startsWith('/additional-services') ||
+    targetPath.startsWith('/service-interests') ||
+    targetPath.startsWith('/loyalty') ||
+    targetPath.startsWith('/market-analysis') ||
+    targetPath.startsWith('/owner-dashboard') ||
+    targetPath.startsWith('/admin-dashboard')
+  )) {
+    return 'Halaman ini hanya dapat diakses oleh Admin atau Owner.';
+  }
+  // STAFF coba akses portal tenant
+  if (role === 'STAFF' && targetPath.startsWith('/portal')) {
+    return 'Portal ini hanya untuk penghuni aktif. Silakan gunakan dashboard staf.';
+  }
+  // TENANT coba akses area operasional
+  if (role === 'TENANT' && (
+    targetPath.startsWith('/dashboard') ||
+    targetPath.startsWith('/stays') ||
+    targetPath.startsWith('/invoices') ||
+    targetPath.startsWith('/tickets') ||
+    targetPath.startsWith('/rooms/') ||
+    targetPath.startsWith('/finance') ||
+    targetPath.startsWith('/staff')
+  )) {
+    return 'Halaman ini hanya dapat diakses oleh staf atau admin.';
+  }
+  // Fallback generic
+  return 'Anda tidak memiliki akses ke halaman ini.';
+}
+
 function RequireRoles({ allowed, children }: { allowed: Role[]; children: ReactNode }) {
   const { user } = useAuth();
   const { stage, isLoading: isStageLoading } = useTenantPortalStage();
+  const { toast } = useToast();
+  const navigate = useNavigate();
+  const { pathname } = useLocation();
+  const isDenied = !!user && !allowed.includes(user.role as Role);
+
+  // Tampilkan toast lalu redirect — satu kali saat isDenied terdeteksi (R-20).
+  useEffect(() => {
+    if (!isDenied || !user || isStageLoading) return;
+    const message = getDeniedMessage(user.role, pathname);
+    toast(message, 'warning', 5000);
+    navigate(getDefaultRoute(user.role, stage), { replace: true });
+  }, [isDenied, user, stage, isStageLoading, pathname, toast, navigate]);
+
   if (!user) return null;
   // Tunggu stage selesai dimuat sebelum redirect (hindari redirect prematur ke /rooms saat loading)
   // L-01: skeleton saat TENANT stage loading, hindari layar putih kosong.
   if (isStageLoading && user.role === 'TENANT') return <PageLoadingSkeleton />;
-  return allowed.includes(user.role as Role) ? <>{children}</> : <Navigate to={getDefaultRoute(user.role, stage)} replace />;
+  if (isDenied) return null; // useEffect akan navigate
+  return <>{children}</>;
 }
 
 

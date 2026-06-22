@@ -104,11 +104,14 @@ export default function StaffGeneralInventorySection({ embedded = false }: { emb
             <h6 className="mb-1">Stok dihitung otomatis, staff cukup lapor masalah lapangan</h6>
             <div className="text-muted small">Habis/menipis dihitung dari jumlah dan minimal stok. Staff tidak perlu memilih status stok manual.</div>
           </div>
-          <div className="staff-stock-summary-strip" aria-label="Ringkasan stok otomatis">
-            <span className={stockSummary.out ? 'tone-danger' : ''}>{stockSummary.out} habis</span>
-            <span className={stockSummary.low ? 'tone-warning' : ''}>{stockSummary.low} menipis</span>
-            <span>{stockSummary.physical} masalah fisik</span>
-          </div>
+          {/* R-22: Sembunyikan counter saat data kosong */}
+          {!!items.length && (
+            <div className="staff-stock-summary-strip" aria-label="Ringkasan stok otomatis">
+              <span className={stockSummary.out ? 'tone-danger' : ''}>{stockSummary.out} habis</span>
+              <span className={stockSummary.low ? 'tone-warning' : ''}>{stockSummary.low} menipis</span>
+              <span>{stockSummary.physical} masalah fisik</span>
+            </div>
+          )}
         </div>
         {!!items.length ? (
           <div className="staff-inventory-filters">
@@ -145,7 +148,21 @@ export default function StaffGeneralInventorySection({ embedded = false }: { emb
         ) : null}
         {query.isLoading ? <div className="py-4 text-center"><Spinner size="sm" /> Memuat barang gudang...</div> : null}
         {query.isError ? <Alert variant="danger">Gagal memuat barang umum/gudang.</Alert> : null}
-        {!query.isLoading && !query.isError && !items.length ? <Alert variant="secondary" className="mb-0">Belum ada data barang umum atau gudang. Data barang akan muncul setelah master barang tersedia.</Alert> : null}
+        {!query.isLoading && !query.isError && !items.length ? (
+          <div className="staff-gudang-empty-state">
+            <div className="staff-gudang-empty-icon" aria-hidden="true">🧰</div>
+            <strong className="staff-gudang-empty-title">Belum ada barang yang terdaftar</strong>
+            <p className="staff-gudang-empty-desc">Admin perlu menambahkan daftar barang terlebih dahulu. Hubungi admin untuk mendaftarkan barang gudang dan stok area umum.</p>
+            <a
+              href={`https://wa.me/6285648887628?text=${encodeURIComponent('Halo Admin, tolong tambahkan daftar barang gudang di aplikasi Kost48 ya.')}`}
+              target="_blank"
+              rel="noreferrer"
+              className="btn btn-outline-success btn-sm staff-gudang-wa-btn"
+            >
+              💬 Hubungi Admin via WhatsApp
+            </a>
+          </div>
+        ) : null}
         {!!filteredItems.length ? (
           <Table responsive hover className="staff-compact-table mb-0">
             <thead>

@@ -409,7 +409,21 @@ export default function StaffUnifiedWorkQueue({ routines, tickets, isLoading, on
               <div className="staff-work-action">
                 {item.status === 'TODO' ? <Button size="sm" className="staff-action-button" disabled={disabled} onClick={() => openModal('START', item)}>Mulai</Button> : null}
                 {item.status === 'IN_PROGRESS' ? <Button size="sm" variant="success" className="staff-action-button" disabled={actionMutation.isPending} onClick={() => openModal('COMPLETE', item)}>Tandai selesai</Button> : null}
-                {item.status === 'WAITING_CHECK' ? <span className="staff-done-note">Tinggal menunggu cek</span> : null}
+                {/* R-24: WAITING_CHECK — tambah penjelasan + CTA Tanya Admin */}
+                {item.status === 'WAITING_CHECK' ? (
+                  <div className="staff-waiting-check-block">
+                    <span className="staff-done-note">Menunggu cek admin</span>
+                    <small className="staff-waiting-check-hint">Admin sedang meninjau. Tunggu konfirmasi sebelum dikerjakan ulang.</small>
+                    <a
+                      href={`https://wa.me/6285648887628?text=${encodeURIComponent(`Halo Admin, saya mau tanya status tugas: ${item.title}.`)}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="btn btn-outline-secondary btn-sm staff-waiting-ask-btn"
+                    >
+                      Tanya Admin
+                    </a>
+                  </div>
+                ) : null}
                 {item.status === 'NEED_HELP' ? <span className="staff-done-note danger">Kendala terkirim</span> : null}
               </div>
             </article>
@@ -444,15 +458,33 @@ export default function StaffUnifiedWorkQueue({ routines, tickets, isLoading, on
           {modal?.action === 'START' ? <p className="mb-0">Setelah dimulai, selesaikan pekerjaan ini dulu sebelum mulai pekerjaan lain.</p> : null}
           {modal?.action !== 'START' ? (
             <>
+              {/* R-23: Foto di ATAS form (sebelum catatan) dengan label tegas — pacu upload bukti */}
+              {modal?.action === 'COMPLETE' ? (
+                <Form.Group className="mb-3 staff-photo-proof-group">
+                  <Form.Label className="staff-photo-proof-label fw-semibold">
+                    📷 Foto bukti kerja (wajib untuk skor lengkap)
+                  </Form.Label>
+                  <CameraOrGalleryInput onChange={handlePhoto} />
+                  {photoPreview ? (
+                    <SafeImage className="staff-proof-preview" src={photoPreview} alt="Foto bukti" />
+                  ) : (
+                    <div className="staff-photo-proof-hint text-muted small mt-1">
+                      Foto tanpa bukti menurunkan skor laporan bulan ini.
+                    </div>
+                  )}
+                </Form.Group>
+              ) : null}
               <Form.Group className="mb-3">
                 <Form.Label>{modal?.action === 'NEED_HELP' ? 'Apa kendalanya?' : 'Catatan hasil kerja'}</Form.Label>
                 <Form.Control as="textarea" rows={3} value={note} onChange={(event) => setNote(event.currentTarget.value)} placeholder={modal?.action === 'NEED_HELP' ? 'Contoh: butuh alat, barang rusak berat, atau tidak bisa masuk kamar' : 'Contoh: sudah bersih / sudah diganti / sudah dicek'} />
               </Form.Group>
-              <Form.Group>
-                <Form.Label>Foto bukti</Form.Label>
-                <CameraOrGalleryInput onChange={handlePhoto} />
-                {photoPreview ? <SafeImage className="staff-proof-preview" src={photoPreview} alt="Foto bukti" /> : null}
-              </Form.Group>
+              {modal?.action === 'NEED_HELP' ? (
+                <Form.Group>
+                  <Form.Label>Foto bukti (opsional)</Form.Label>
+                  <CameraOrGalleryInput onChange={handlePhoto} />
+                  {photoPreview ? <SafeImage className="staff-proof-preview" src={photoPreview} alt="Foto bukti" /> : null}
+                </Form.Group>
+              ) : null}
             </>
           ) : null}
         </Modal.Body>

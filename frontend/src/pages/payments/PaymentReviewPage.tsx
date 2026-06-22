@@ -313,7 +313,7 @@ export default function PaymentReviewPage() {
       />
 
       <CommandFlowStrip />
-      <AssistantPanel title="Asisten Review Pembayaran" subtitle="Prioritaskan bukti yang menahan flow." items={assistantItems} emptyTitle="Antrean pembayaran aman" emptyMessage="Filter ini aman." />
+      <AssistantPanel title="Asisten Review Pembayaran" subtitle="Prioritaskan bukti yang menahan flow." items={assistantItems} emptyTitle="Belum ada pembayaran yang menunggu review saat ini" emptyMessage="Semua pembayaran sudah diproses atau belum ada bukti masuk. Refresh jika baru saja ada kiriman baru." />
       <CompactMetrics metrics={metrics} />
 
       {items.length > 0 && (

@@ -1201,6 +1201,104 @@
   text-align: right;
 }
 
+/* R-04: DP dan deposit eksplisit di halaman detail kamar */
+.room-detail-dp-deposit-info {
+  display: flex;
+  flex-direction: column;
+  gap: .6rem;
+}
+
+.room-detail-dp-row,
+.room-detail-deposit-row {
+  display: flex;
+  align-items: flex-start;
+  gap: .65rem;
+  padding: .7rem .9rem;
+  border-radius: 8px;
+  font-size: .88rem;
+}
+
+.room-detail-dp-row {
+  background: #fefce8;
+  border: 1px solid rgba(202, 138, 4, .22);
+}
+
+.room-detail-deposit-row {
+  background: #f0fdf4;
+  border: 1px solid rgba(22, 163, 74, .22);
+}
+
+.room-detail-dp-row > span:first-child,
+.room-detail-deposit-row > span:first-child {
+  font-size: 1.15rem;
+  line-height: 1;
+  flex-shrink: 0;
+  margin-top: .1rem;
+}
+
+.room-detail-dp-row div,
+.room-detail-deposit-row div {
+  display: flex;
+  flex-direction: column;
+  gap: .2rem;
+}
+
+.room-detail-dp-row strong {
+  font-size: .9rem;
+  font-weight: 800;
+  color: #78350f;
+}
+
+.room-detail-deposit-row em {
+  font-style: normal;
+  font-size: .9rem;
+  font-weight: 800;
+  color: #14532d;
+}
+
+.room-detail-dp-row span:last-child,
+.room-detail-deposit-row span:last-child {
+  font-size: .78rem;
+  color: #64748b;
+  font-weight: 500;
+}
+
+/* R-03: CTA above-the-fold di halaman detail kamar */
+.room-detail-above-fold-cta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  background: #f0f9ff;
+  border: 1px solid rgba(9, 108, 134, .18);
+  border-radius: 10px;
+}
+
+.room-detail-above-fold-price {
+  display: flex;
+  flex-direction: column;
+  gap: .15rem;
+  flex: 1 1 180px;
+}
+
+.room-detail-above-fold-price span:first-child {
+  font-size: .76rem;
+  color: #64748b;
+  font-weight: 700;
+}
+
+.room-detail-above-fold-price strong {
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.room-detail-cta-main {
+  min-width: 180px;
+  font-weight: 800;
+}
+
 .room-detail-mobile-sticky {
   display: none;
 }

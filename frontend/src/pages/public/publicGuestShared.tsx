@@ -32,7 +32,7 @@ import {
 import { resolveAbsoluteFileUrl } from '../../utils/resolveAbsoluteFileUrl';
 
 export const NAV_LINKS = [
-  { href: '#pilihan-kamar', icon: '🛏️', label: 'Kamar' },
+  { href: '#kamar', icon: '🛏️', label: 'Kamar' },
   { href: '#fasilitas', icon: '✨', label: 'Fasilitas' },
   { href: '#lokasi', icon: '📍', label: 'Lokasi' },
   { href: '#ulasan', icon: '⭐', label: 'Ulasan' },
@@ -253,7 +253,7 @@ export function GuestTopbar({ scrolled }: { scrolled: boolean }) {
       </nav>
       <div className="gx-nav-cta">
         <a className="gx-btn-ghost" href={officialKost48Location.whatsappUrl} target="_blank" rel="noreferrer"><span aria-hidden="true">💬</span> WhatsApp</a>
-        <a className="gx-btn-solid" href="#pilihan-kamar"><span aria-hidden="true">🔍</span> Cek Kamar</a>
+        <a className="gx-btn-solid" href="#kamar"><span aria-hidden="true">🔍</span> Cek Kamar</a>
       </div>
     </header>
   );
@@ -304,12 +304,23 @@ export function RoomPreviewCard({ room }: { room: PublicRoom }) {
     ...getPublicRoomVisibleAmenities(room, 3),
   ].slice(0, 4);
   const rate = getBestPublicRoomRate(room, 'MONTHLY');
+  // R-06: deteksi kamar terisi untuk visual berbeda
+  const isOccupied = availability.tone === 'is-occupied' || availability.tone === 'is-full';
+  const isAvailable = availability.canBook && availability.tone !== 'is-maintenance';
 
   return (
-    <article className="gx-room-card">
+    <article className={`gx-room-card${isOccupied ? ' gx-room-card-occupied' : ''}${isAvailable ? ' gx-room-card-available' : ''}`}>
       <div className="gx-room-image-wrap">
         <img src={getRoomCover(room)} alt={`Foto ${room.name || room.code || 'kamar KOST48'}`} className="gx-room-image" loading="lazy" />
         <span className={`gx-room-status ${availability.tone}`}><span aria-hidden="true">{roomStatusIcon(availability.tone)}</span> {availability.label}</span>
+        {/* R-06: chip TERISI besar di atas foto untuk kamar occupied */}
+        {isOccupied && (
+          <span className="gx-room-occupied-chip" aria-label="Kamar sedang terisi">Terisi</span>
+        )}
+        {/* R-06: badge TERSEDIA hijau kecil untuk kamar available */}
+        {isAvailable && (
+          <span className="gx-room-available-badge" aria-label="Kamar tersedia">Tersedia</span>
+        )}
         {(() => {
           const cat = categoryBadge(room.category);
           const mezz = String(room.roomType ?? '').toUpperCase() === 'MEZZANINE';
@@ -338,11 +349,12 @@ export function RoomPreviewCard({ room }: { room: PublicRoom }) {
           ))}
         </div>
         <div className="gx-room-actions">
-          <Link className="gx-room-action-secondary" to={`/rooms/${room.id}/detail`} state={{ room }}>Lihat Detail</Link>
+          <Link className="gx-room-action-secondary" to={`/rooms/${room.id}/detail`} state={{ room }}>Lihat Info</Link>
           {availability.canBook ? (
             <Link className="gx-room-action-primary" to={`/booking/${room.id}`} state={{ room }}><span aria-hidden="true">📝</span> Ajukan Booking</Link>
           ) : (
             // PUB-BTN-COLOR: kamar belum bisa dibooking → "Tanya" pakai gaya outline (bukan tombol utama).
+            // R-06: kamar terisi bisa diklik ke detail (state penuh), tombol WA tetap tersedia.
             <a className="gx-room-action-secondary" href={buildRoomWhatsAppUrl(room)} target="_blank" rel="noreferrer"><span aria-hidden="true">💬</span> Tanya Ketersediaan</a>
           )}
         </div>
@@ -364,6 +376,23 @@ export function RoomPreviewSkeleton() {
   );
 }
 
+// R-07: Sticky shortcut nav — hanya tampil di mobile, muncul setelah scroll melewati hero
+export function MobileShortcutNav({ visible }: { visible: boolean }) {
+  if (!visible) return null;
+  return (
+    <nav
+      className="gx-section-shortcuts"
+      aria-label="Pintasan navigasi halaman"
+    >
+      <a href="#kamar" className="gx-shortcut-link">Kamar</a>
+      <a href="#fasilitas" className="gx-shortcut-link">Fasilitas</a>
+      <a href="#lokasi" className="gx-shortcut-link">Lokasi</a>
+      <a href="#ulasan" className="gx-shortcut-link">Ulasan</a>
+      <a href="#faq" className="gx-shortcut-link">FAQ</a>
+    </nav>
+  );
+}
+
 export function GuestFooter() {
   return (
     <footer className="gx-footer">
@@ -378,7 +407,7 @@ export function GuestFooter() {
           </div>
           <nav className="gx-footer-nav" aria-label="Navigasi footer">
             {NAV_LINKS.map((l) => <a key={l.href} href={l.href}>{l.label}</a>)}
-            <a href="#pilihan-kamar">Katalog Kamar</a>
+            <a href="#kamar">Katalog Kamar</a>
             <Link to="/login">Masuk Portal</Link>
           </nav>
           <div className="gx-footer-links">

@@ -31,7 +31,7 @@ import { resolveAbsoluteFileUrl } from '../../utils/resolveAbsoluteFileUrl';
 import {
   NAV_LINKS, GALLERY_ITEMS, FACILITY_GROUPS, TRUST_ITEMS, HOME_FAQ_ITEMS, EXTRA_FAQ_ITEMS, MAPS_EMBED_URL, CATALOG_BATCH_SIZE,
   resolvePublicMarketingAssetUrl, getTodayDateInput, formatCompactRupiah, formatMonthlyRange, buildWhatsAppUrl, buildRoomWhatsAppUrl, getRoomCover,
-  Lightbox, GuestTopbar, RoomPreviewCard, RoomPreviewSkeleton, GuestFooter,
+  Lightbox, GuestTopbar, RoomPreviewCard, RoomPreviewSkeleton, GuestFooter, MobileShortcutNav,
 } from './publicGuestShared';
 export default function PublicGuestDashboardPage() {
   const { user } = useAuth();
@@ -117,7 +117,7 @@ export default function PublicGuestDashboardPage() {
   useEffect(() => {
     if (location.pathname !== '/rooms') return undefined;
     const timer = window.setTimeout(() => {
-      document.getElementById('pilihan-kamar')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      document.getElementById('kamar')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }, 180);
     return () => window.clearTimeout(timer);
   }, [location.pathname]);
@@ -194,7 +194,7 @@ export default function PublicGuestDashboardPage() {
     setCatalogAvailability('bookable');
     setCatalogPreference(preference);
     setVisibleRoomCount(CATALOG_BATCH_SIZE);
-    document.getElementById('pilihan-kamar')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    document.getElementById('kamar')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
   useEffect(() => {
@@ -206,6 +206,8 @@ export default function PublicGuestDashboardPage() {
   return (
     <div className="gx-page">
       <GuestTopbar scrolled={scrolled} />
+      {/* R-07: sticky shortcut nav mobile, muncul setelah scroll melewati hero */}
+      <MobileShortcutNav visible={scrolled} />
       {lightboxSrc && <Lightbox src={lightboxSrc} onClose={closeLightbox} />}
 
       <section className="gx-hero" id="top">
@@ -214,12 +216,19 @@ export default function PublicGuestDashboardPage() {
         <div className="gx-hero-body">
           <p className="gx-hero-eyebrow">Jalan Hikmah V No. 48 - Surabaya Barat</p>
           <h1 className="gx-hero-title">KOST48 Surabaya</h1>
-          <p className="gx-hero-headline">Hunian fleksibel dekat Pakuwon Mall / PTC</p>
+          <p className="gx-hero-headline">Kost bersih &amp; aman dekat Pakuwon Mall</p>
           <p className="gx-hero-sub">
             Kamar nyaman dengan pilihan AC atau kipas, fasilitas harian lengkap, dan proses booking yang lebih jelas dari awal.
           </p>
+          {monthlyRates.length > 0 && (
+            <div className="gx-hero-price-badge">
+              <span aria-hidden="true">🏷️</span>
+              <strong>Mulai {formatCompactRupiah(Math.min(...monthlyRates))}/bln</strong>
+              <span className="gx-hero-price-badge-sub">{stats.bookable} kamar tersedia</span>
+            </div>
+          )}
           <div className="gx-hero-cta">
-            <a className="gx-hero-btn-primary" href="#pilihan-kamar"><span aria-hidden="true">🔍</span> Cek Kamar Tersedia</a>
+            <a className="gx-hero-btn-primary" href="#kamar"><span aria-hidden="true">🛏️</span> Lihat Kamar Tersedia →</a>
             <a className="gx-hero-btn-ghost" href={buildWhatsAppUrl('Halo Admin KOST48, saya ingin tanya ketersediaan kamar.')} target="_blank" rel="noreferrer"><span aria-hidden="true">💬</span> WhatsApp Admin</a>
             <a className="gx-hero-btn-ghost" href={officialKost48Location.mapsUrl} target="_blank" rel="noreferrer"><span aria-hidden="true">📍</span> Lihat di Maps</a>
           </div>
@@ -284,7 +293,7 @@ export default function PublicGuestDashboardPage() {
         </Container>
       </section>
 
-      <section className="gx-market-section" id="pilihan-kamar">
+      <section className="gx-market-section" id="kamar">
         <Container fluid="xl">
           <div className="gx-market-head">
             <div className="gx-section-head">
@@ -479,47 +488,42 @@ export default function PublicGuestDashboardPage() {
         </Container>
       </section>
 
-      <section className="gx-social-proof-section" id="ulasan">
-        <Container fluid="xl">
-          <div className="gx-social-proof-head">
-            <div className="gx-section-head">
-              <div className="gx-label">Cerita penghuni</div>
-              <h2>Ulasan ditampilkan hanya jika sudah terverifikasi.</h2>
-              <p>Pengalaman penghuni ditampilkan secara anonim dan hanya dari ulasan yang memenuhi kriteria.</p>
-            </div>
-            <div className="gx-social-proof-summary" aria-label="Ringkasan kepercayaan">
-              {ratingAvailable && (
+      {/* R-02: section ulasan hanya tampil jika ada data ulasan nyata; jika kosong tampilkan blok Keunggulan */}
+      {!socialProofQuery.isLoading && !socialProofQuery.isError && displayedReviews.length > 0 ? (
+        <section className="gx-social-proof-section" id="ulasan">
+          <Container fluid="xl">
+            <div className="gx-social-proof-head">
+              <div className="gx-section-head">
+                <div className="gx-label">Cerita penghuni</div>
+                <h2>Ulasan dari penghuni terverifikasi.</h2>
+                <p>Pengalaman penghuni ditampilkan secara anonim dan hanya dari ulasan yang memenuhi kriteria.</p>
+              </div>
+              <div className="gx-social-proof-summary" aria-label="Ringkasan kepercayaan">
+                {ratingAvailable && (
+                  <div>
+                    <strong>{socialProofQuery.data?.averageRating.toFixed(1)}</strong>
+                    <span>rating terverifikasi</span>
+                  </div>
+                )}
                 <div>
-                  <strong>{socialProofQuery.data?.averageRating.toFixed(1)}</strong>
-                  <span>rating terverifikasi</span>
+                  <strong>{occupantCount}</strong>
+                  <span>penghuni aktif</span>
                 </div>
-              )}
-              <div>
-                <strong>{socialProofQuery.isLoading ? '...' : occupantCount}</strong>
-                <span>penghuni aktif</span>
-              </div>
-              <div>
-                <strong>Asli</strong>
-                <span>foto properti</span>
-              </div>
-              <div>
-                <strong>Live</strong>
-                <span>status kamar</span>
+                <div>
+                  <strong>Asli</strong>
+                  <span>foto properti</span>
+                </div>
+                <div>
+                  <strong>Live</strong>
+                  <span>status kamar</span>
+                </div>
               </div>
             </div>
-          </div>
-
-          {socialProofQuery.isLoading ? (
-            <div className="gx-social-proof-state"><Spinner animation="border" size="sm" /> Memuat ulasan penghuni</div>
-          ) : socialProofQuery.isError ? (
-            <div className="gx-social-proof-state">Ulasan belum dapat dimuat saat ini.</div>
-          ) : displayedReviews.length ? (
-            <>
-              <div className="gx-catalog-filter gx-review-filter" role="tablist" aria-label="Urutkan ulasan">
-                <span>Urutkan</span>
-                <button type="button" role="tab" aria-selected={reviewSort === 'recent'} className={reviewSort === 'recent' ? 'active' : ''} onClick={() => setReviewSort('recent')}>Terbaru</button>
-                <button type="button" role="tab" aria-selected={reviewSort === 'rating'} className={reviewSort === 'rating' ? 'active' : ''} onClick={() => setReviewSort('rating')}>Rating Tertinggi</button>
-              </div>
+            <div className="gx-catalog-filter gx-review-filter" role="tablist" aria-label="Urutkan ulasan">
+              <span>Urutkan</span>
+              <button type="button" role="tab" aria-selected={reviewSort === 'recent'} className={reviewSort === 'recent' ? 'active' : ''} onClick={() => setReviewSort('recent')}>Terbaru</button>
+              <button type="button" role="tab" aria-selected={reviewSort === 'rating'} className={reviewSort === 'rating' ? 'active' : ''} onClick={() => setReviewSort('rating')}>Rating Tertinggi</button>
+            </div>
             <div className="gx-review-grid">
               {displayedReviews.map((review, index) => (
                 <article className="gx-review-card" key={`${review.initials}-${review.createdAt}-${index}`}>
@@ -534,15 +538,41 @@ export default function PublicGuestDashboardPage() {
                 </article>
               ))}
             </div>
-            </>
-          ) : (
-            <div className="gx-social-proof-state gx-social-proof-empty">
-              <strong>Ulasan publik belum tersedia</strong>
-              <span>Kami hanya menampilkan ulasan yang sudah terverifikasi dan memenuhi kriteria.</span>
+          </Container>
+        </section>
+      ) : !socialProofQuery.isLoading ? (
+        <section className="gx-keunggulan-section" id="ulasan">
+          <Container fluid="xl">
+            <div className="gx-section-head gx-section-head-center">
+              <div className="gx-label">Keunggulan KOST48</div>
+              <h2>Kenapa memilih KOST48?</h2>
+              <p>Hunian yang transparan, nyaman, dan dekat semua kebutuhan harian di Surabaya Barat.</p>
             </div>
-          )}
-        </Container>
-      </section>
+            <div className="gx-keunggulan-grid">
+              <div className="gx-keunggulan-card">
+                <span className="gx-keunggulan-icon" aria-hidden="true">📍</span>
+                <h3>Lokasi Pakuwon / PTC</h3>
+                <p>7 menit jalan kaki dari Pakuwon Mall dan PTC. Akses mudah ke tol, minimarket, dan pusat kuliner.</p>
+              </div>
+              <div className="gx-keunggulan-card">
+                <span className="gx-keunggulan-icon" aria-hidden="true">🔒</span>
+                <h3>Keamanan terjaga</h3>
+                <p>Lingkungan aman dengan akses terkontrol, parkir luas, dan pengelolaan yang responsif.</p>
+              </div>
+              <div className="gx-keunggulan-card">
+                <span className="gx-keunggulan-icon" aria-hidden="true">💰</span>
+                <h3>Harga transparan</h3>
+                <p>Tarif tertera jelas di katalog. Tidak ada biaya tersembunyi — deposit dan DP dijelaskan sejak awal.</p>
+              </div>
+              <div className="gx-keunggulan-card">
+                <span className="gx-keunggulan-icon" aria-hidden="true">📶</span>
+                <h3>WiFi tersedia</h3>
+                <p>Layanan WiFi tambahan tersedia Rp 50.000/perangkat. Cocok untuk WFH atau streaming harian.</p>
+              </div>
+            </div>
+          </Container>
+        </section>
+      ) : null}
 
       {visibleGalleryItems.length > 0 ? (
         <section className="gx-gallery-section">
@@ -620,7 +650,7 @@ export default function PublicGuestDashboardPage() {
               </address>
             </div>
             <div className="gx-final-actions">
-              <a className="gx-btn-primary" href="#pilihan-kamar"><span aria-hidden="true">🔍</span> Lihat Pilihan Kamar</a>
+              <a className="gx-btn-primary" href="#kamar"><span aria-hidden="true">🔍</span> Lihat Pilihan Kamar</a>
               <a className="gx-btn-outline" href={officialKost48Location.whatsappUrl} target="_blank" rel="noreferrer"><span aria-hidden="true">💬</span> Chat WhatsApp</a>
               <a className="gx-btn-outline" href={officialKost48Location.mapsUrl} target="_blank" rel="noreferrer"><span aria-hidden="true">📍</span> Buka Google Maps</a>
             </div>
@@ -628,7 +658,7 @@ export default function PublicGuestDashboardPage() {
         </Container>
       </section>
 
-      <a className="gx-mobile-booking" href="#pilihan-kamar" aria-label="Cek kamar tersedia">
+      <a className="gx-mobile-booking" href="#kamar" aria-label="Cek kamar tersedia">
         <strong>{roomsQuery.isLoading ? 'Cek kamar' : `${stats.bookable} kamar tersedia`}</strong>
         <span><span aria-hidden="true">🔍</span> Cek</span>
       </a>

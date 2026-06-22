@@ -107,7 +107,7 @@ export default function StaffMeterStatusPanel({ rooms }: Props) {
   const pending = total - done;
 
   return (
-    <Card className="staff-panel-card border-0 mt-3">
+    <Card className="staff-panel-card border-0 mt-3" id="staff-meter-status-panel">
       <Card.Body>
         <div className="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-2">
           <div>
@@ -127,38 +127,76 @@ export default function StaffMeterStatusPanel({ rooms }: Props) {
         ) : rows.length === 0 ? (
           <div className="text-muted small py-2">Belum ada data meter bulan ini.</div>
         ) : (
-          <div className="table-responsive">
-            <table className="table table-sm table-borderless align-middle mb-0 staff-meter-table">
-              <thead>
-                <tr className="small text-muted">
-                  <th>Kamar</th>
-                  <th>Penghuni</th>
-                  <th className="text-center">Status</th>
-                  <th>Listrik</th>
-                  <th>Air</th>
-                  <th>Terakhir</th>
-                </tr>
-              </thead>
-              <tbody>
-                {rows.map((row) => (
-                  <tr key={row.roomId} className={row.recorded ? '' : 'table-warning-subtle'}>
-                    <td className="fw-semibold">{row.roomCode}</td>
-                    <td className="text-muted small">{row.tenantName || '—'}</td>
-                    <td className="text-center">
-                      {row.recorded ? (
-                        <span className="badge bg-success-subtle text-success border border-success-subtle">SUDAH</span>
-                      ) : (
-                        <span className="badge bg-warning-subtle text-warning border border-warning-subtle">BELUM</span>
-                      )}
-                    </td>
-                    <td className="small">{row.lastElectricity || '—'}</td>
-                    <td className="small">{row.lastWater || '—'}</td>
-                    <td className="small text-muted">{formatShortDate(row.lastReadingAt)}</td>
+          <>
+            {/* Desktop: tabel scroll horizontal dengan sticky kolom kamar */}
+            <div
+              className="staff-meter-table-desktop"
+              style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}
+            >
+              <table className="table table-sm table-borderless align-middle mb-0 staff-meter-table">
+                <thead>
+                  <tr className="small text-muted">
+                    <th style={{ position: 'sticky', left: 0, background: 'var(--bs-body-bg, #fff)', zIndex: 1, whiteSpace: 'nowrap' }}>Kamar</th>
+                    <th>Penghuni</th>
+                    <th className="text-center">Status</th>
+                    <th>Listrik</th>
+                    <th>Air</th>
+                    <th>Terakhir</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody>
+                  {rows.map((row) => (
+                    <tr key={row.roomId} className={row.recorded ? '' : 'table-warning-subtle'}>
+                      <td
+                        className="fw-semibold"
+                        style={{ position: 'sticky', left: 0, background: row.recorded ? 'var(--bs-body-bg, #fff)' : 'var(--bs-warning-bg-subtle, #fff8e1)', zIndex: 1, whiteSpace: 'nowrap' }}
+                      >
+                        {row.roomCode}
+                      </td>
+                      <td className="text-muted small" style={{ whiteSpace: 'nowrap' }}>{row.tenantName || '—'}</td>
+                      <td className="text-center">
+                        {row.recorded ? (
+                          <span className="badge bg-success-subtle text-success border border-success-subtle">SUDAH</span>
+                        ) : (
+                          <span className="badge bg-warning-subtle text-warning border border-warning-subtle">BELUM</span>
+                        )}
+                      </td>
+                      <td className="small" style={{ whiteSpace: 'nowrap' }}>{row.lastElectricity || '—'}</td>
+                      <td className="small" style={{ whiteSpace: 'nowrap' }}>{row.lastWater || '—'}</td>
+                      <td className="small text-muted" style={{ whiteSpace: 'nowrap' }}>{formatShortDate(row.lastReadingAt)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Mobile: card list per kamar — lebih ramah jari */}
+            <div className="staff-meter-card-list">
+              {rows.map((row) => (
+                <div
+                  key={row.roomId}
+                  className={`staff-meter-card-item${row.recorded ? '' : ' staff-meter-card-pending'}`}
+                >
+                  <div className="staff-meter-card-header">
+                    <span className="staff-meter-card-room fw-semibold">{row.roomCode}</span>
+                    {row.recorded ? (
+                      <span className="badge bg-success-subtle text-success border border-success-subtle">SUDAH</span>
+                    ) : (
+                      <span className="badge bg-warning-subtle text-warning border border-warning-subtle">BELUM</span>
+                    )}
+                  </div>
+                  {row.tenantName ? (
+                    <div className="staff-meter-card-tenant text-muted small">{row.tenantName}</div>
+                  ) : null}
+                  <div className="staff-meter-card-readings small">
+                    <span>⚡ {row.lastElectricity || '—'}</span>
+                    <span>💧 {row.lastWater || '—'}</span>
+                    <span className="text-muted">{formatShortDate(row.lastReadingAt)}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </>
         )}
       </Card.Body>
     </Card>

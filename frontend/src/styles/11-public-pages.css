@@ -3458,6 +3458,33 @@
   animation-delay: .76s;
 }
 
+/* R-01: badge harga mulai dari, muncul di hero above-the-fold */
+.gx-hero-price-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+  padding: .5rem 1rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, .18);
+  border: 1px solid rgba(255, 255, 255, .38);
+  backdrop-filter: blur(8px);
+  color: #ffffff;
+  font-size: .88rem;
+  animation: gx-fade-up .58s .48s cubic-bezier(.22, 1, .36, 1) both;
+}
+
+.gx-hero-price-badge strong {
+  font-weight: 800;
+  font-size: .96rem;
+}
+
+.gx-hero-price-badge-sub {
+  font-size: .76rem;
+  opacity: .82;
+  border-left: 1px solid rgba(255, 255, 255, .38);
+  padding-left: .5rem;
+}
+
 .gx-hero-next {
   position: absolute;
   left: 50%;
@@ -3474,6 +3501,50 @@
 
 .gx-hero-scroll {
   display: none;
+}
+
+/* R-07: sticky mobile shortcut nav — hanya di mobile, scroll horizontal */
+.gx-section-shortcuts {
+  display: none;
+}
+
+@media (max-width: 767px) {
+  .gx-section-shortcuts {
+    display: flex;
+    position: sticky;
+    top: 66px;
+    z-index: 100;
+    background: #ffffff;
+    border-bottom: 1px solid rgba(22, 32, 51, .1);
+    padding: .45rem 1rem;
+    gap: .75rem;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+
+  .gx-section-shortcuts::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+.gx-shortcut-link {
+  white-space: nowrap;
+  text-decoration: none;
+  font-size: .8rem;
+  font-weight: 700;
+  color: #334155;
+  padding: .3rem .6rem;
+  border-radius: 999px;
+  border: 1px solid rgba(22, 32, 51, .12);
+  background: #f8fafc;
+  transition: background .15s, color .15s;
+  flex-shrink: 0;
+}
+
+.gx-shortcut-link:hover {
+  background: #e0f2fe;
+  color: #0369a1;
 }
 
 .gx-label {
@@ -3852,6 +3923,51 @@
 .gx-room-status.is-occupied,
 .gx-room-status.is-full {
   color: #c0392b;
+}
+
+/* R-06: kamar available — border hijau menonjol */
+.gx-room-card-available {
+  border-color: var(--gx-green, #23835b) !important;
+  border-width: 2px !important;
+}
+
+/* R-06: kamar occupied — redup + chip "Terisi" besar merah di pojok kiri atas foto */
+.gx-room-card-occupied {
+  opacity: .58;
+}
+
+.gx-room-card-occupied:hover {
+  opacity: .75;
+}
+
+.gx-room-occupied-chip {
+  position: absolute;
+  top: 0;
+  left: 0;
+  padding: .4rem .7rem;
+  background: #c0392b;
+  color: #ffffff;
+  font-size: .78rem;
+  font-weight: 900;
+  letter-spacing: .02em;
+  border-radius: 0 0 8px 0;
+  text-transform: uppercase;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.gx-room-available-badge {
+  position: absolute;
+  bottom: .65rem;
+  left: .65rem;
+  padding: .28rem .54rem;
+  border-radius: 999px;
+  background: var(--gx-green, #23835b);
+  color: #ffffff;
+  font-size: .7rem;
+  font-weight: 850;
+  z-index: 2;
+  pointer-events: none;
 }
 
 /* PUB-ROOM-CATEGORY: badge kategori (kanan-atas foto), pendamping status (kiri-atas). */
@@ -4240,6 +4356,61 @@
   color: var(--gx-muted);
 }
 
+/* R-02: Keunggulan KOST48 — pengganti section ulasan saat kosong */
+.gx-keunggulan-section {
+  padding: 4.5rem 0;
+  background: #f0f9ff;
+}
+
+.gx-keunggulan-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1.25rem;
+  margin-top: 2.5rem;
+}
+
+.gx-keunggulan-card {
+  padding: 1.5rem 1.25rem;
+  background: #ffffff;
+  border-radius: 12px;
+  border: 1px solid rgba(9, 108, 134, .12);
+  box-shadow: 0 6px 18px rgba(22, 32, 51, .06);
+  display: flex;
+  flex-direction: column;
+  gap: .6rem;
+}
+
+.gx-keunggulan-icon {
+  font-size: 1.75rem;
+  line-height: 1;
+}
+
+.gx-keunggulan-card h3 {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--gx-ink, #0f172a);
+}
+
+.gx-keunggulan-card p {
+  margin: 0;
+  font-size: .88rem;
+  color: var(--gx-muted, #475569);
+  line-height: 1.6;
+}
+
+@media (max-width: 768px) {
+  .gx-keunggulan-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .gx-keunggulan-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 .gx-gallery-section {
   background: #f6f8f5;
 }
@@ -4624,6 +4795,29 @@
     color: #ffffff;
     font-size: .82rem;
     font-weight: 900;
+  }
+}
+
+/* R-05: mobile katalog 1 kolom full-width di ≤480px; foto taller 200px */
+@media (max-width: 480px) {
+  .gx-room-grid,
+  .gx-room-cards-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .gx-room-card {
+    grid-template-columns: 1fr !important;
+  }
+
+  .gx-room-card .gx-room-image-wrap {
+    height: 200px;
+    min-height: 200px;
+    aspect-ratio: auto;
+  }
+
+  .gx-room-card .gx-room-image {
+    height: 200px;
+    object-fit: cover;
   }
 }
 
