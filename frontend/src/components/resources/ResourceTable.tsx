@@ -95,6 +95,25 @@ export default function ResourceTable({
       return <CurrencyDisplay amount={typeof value === 'number' ? value : Number(value ?? 0)} />;
     }
 
+    if (config.path === '/users' && column.key === 'role') {
+      const roleVal = String(value ?? '');
+      const ROLE_LABELS: Record<string, string> = {
+        OWNER: 'Owner',
+        ADMIN: 'Admin',
+        STAFF: 'Staf',
+        TENANT: 'Penghuni',
+      };
+      const ROLE_BADGE: Record<string, string> = {
+        OWNER: 'danger',
+        ADMIN: 'primary',
+        STAFF: 'success',
+        TENANT: 'secondary',
+      };
+      const label = ROLE_LABELS[roleVal] ?? roleVal;
+      const bg = ROLE_BADGE[roleVal] ?? 'light';
+      return <span className={`badge bg-${bg}`}>{label}</span>;
+    }
+
     if (config.path === '/users' && column.key === 'tenantId') {
       if (item.role !== 'TENANT') return <span className="text-muted">Tidak terkait</span>;
       const tenantName = (item.tenant as { fullName?: string } | undefined)?.fullName;

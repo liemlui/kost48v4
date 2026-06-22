@@ -44,7 +44,7 @@ const categoryLabels: Record<string, string> = {
   ROOM_EQUIPMENT: 'Barang Kamar',
   FURNITURE: 'Furniture',
   ELECTRONIC: 'Elektronik',
-  UTILITY_EQUIPMENT: 'Utility Equipment',
+  UTILITY_EQUIPMENT: 'Peralatan Utilitas',
   VEHICLE: 'Kendaraan',
   SOFTWARE: 'Software',
   OTHER: 'Lainnya',
@@ -57,19 +57,19 @@ const capitalizationLabels: Record<string, string> = {
 };
 
 const alignmentLabels: Record<string, string> = {
-  RECLASSIFY_FROM_CASH: 'Reclassify dari kas/bank',
+  RECLASSIFY_FROM_CASH: 'Reklasifikasi dari kas/bank',
   OWNER_CAPITAL_CONTRIBUTION: 'Kontribusi modal owner',
-  DISCLOSURE_ONLY: 'Disclosure only',
+  DISCLOSURE_ONLY: 'Hanya catatan (tanpa jurnal)',
   MANUAL_REVIEW: 'Review manual',
 };
 
 const alignmentStatusLabels: Record<string, string> = {
   NOT_REQUIRED: 'Tidak perlu',
-  NEEDS_REVIEW: 'Perlu review',
+  NEEDS_REVIEW: 'Perlu ditinjau',
   PREVIEWED: 'Sudah preview',
-  ALIGNED: 'Aligned',
-  DISCLOSURE_ONLY: 'Disclosure only',
-  VOIDED: 'Voided',
+  ALIGNED: 'Selaras',
+  DISCLOSURE_ONLY: 'Hanya catatan',
+  VOIDED: 'Dibatalkan',
 };
 
 const ALIGNMENT_STATUS_TOOLTIP: Record<string, string> = {
@@ -226,8 +226,8 @@ export default function AssetRegisterPage() {
   return (
     <div>
   <PageHeader
-    title="Asset Register"
-    description="List fixed assets, depreciation, and ledger alignment — ensure assets are recorded correctly in the Balance Sheet."
+    title="Daftar Aset Tetap"
+    description="Daftar aset tetap, depresiasi, dan penyesuaian ledger — pastikan aset tercatat dengan benar di Neraca."
     secondaryAction={(
       <div className="d-flex flex-wrap gap-2 align-items-center">
         <Badge bg="primary">Fixed Asset</Badge>
@@ -244,10 +244,10 @@ export default function AssetRegisterPage() {
           <Card className="content-card border-0 h-100"><Card.Body><div className="small text-uppercase text-muted fw-semibold mb-1">Nilai Buku</div><h3 className="h4 mb-1">{formatRupiah(readiness?.totals.netBookValueRupiah)}</h3><small className="text-muted">Cost dikurangi akumulasi depresiasi</small></Card.Body></Card>
         </Col>
         <Col md={3}>
-          <Card className="content-card border-0 h-100"><Card.Body><div className="small text-uppercase text-muted fw-semibold mb-1">Ledger Net Fixed Asset</div><h3 className="h4 mb-1">{formatRupiah(alignment?.ledger.netFixedAssetsRupiah)}</h3><small className="text-muted">Dari JournalEntry ledger</small></Card.Body></Card>
+          <Card className="content-card border-0 h-100"><Card.Body><div className="small text-uppercase text-muted fw-semibold mb-1">Nilai Buku (Ledger)</div><h3 className="h4 mb-1">{formatRupiah(alignment?.ledger.netFixedAssetsRupiah)}</h3><small className="text-muted">Dari JournalEntry ledger</small></Card.Body></Card>
         </Col>
         <Col md={3}>
-          <Card className="content-card border-0 h-100"><Card.Body><div className="small text-uppercase text-muted fw-semibold mb-1">Alignment Gap</div><h3 className="h4 mb-1">{formatRupiah(alignment?.gapRupiah)}</h3><small className="text-muted">Register vs ledger</small></Card.Body></Card>
+          <Card className="content-card border-0 h-100"><Card.Body><div className="small text-uppercase text-muted fw-semibold mb-1">Selisih Ledger vs Register</div><h3 className="h4 mb-1">{formatRupiah(alignment?.gapRupiah)}</h3><small className="text-muted">Register vs ledger</small></Card.Body></Card>
         </Col>
       </Row>
 
@@ -303,8 +303,8 @@ export default function AssetRegisterPage() {
       <Card className="content-card border-0 mb-3">
         <Card.Body>
           <div className="d-flex flex-column flex-lg-row gap-3 justify-content-between align-items-lg-start mb-3">
-            <div><div className="small text-uppercase text-muted fw-semibold mb-1">Monthly Depreciation</div><h3 className="h5 mb-1">Preview & post depresiasi</h3><p className="text-muted mb-0">Posting beban penyusutan bulanan ke jurnal akuntansi berdasarkan aset yang aktif dan eligible.</p></div>
-            <div className="d-flex gap-2 align-items-end"><Form.Group><Form.Label className="small mb-1">Tahun</Form.Label><Form.Control type="number" value={runPeriod.year} onChange={(e) => setRunPeriod((prev) => ({ ...prev, year: Number(e.target.value) }))} style={{ width: 110 }} /></Form.Group><Form.Group><Form.Label className="small mb-1">Bulan</Form.Label><Form.Control type="number" min={1} max={12} value={runPeriod.month} onChange={(e) => setRunPeriod((prev) => ({ ...prev, month: Number(e.target.value) }))} style={{ width: 90 }} /></Form.Group><Button variant="outline-primary" disabled={!canRunDepreciation || runMutation.isPending} onClick={() => runMutation.mutate({ ...runPeriod, notes: 'Monthly depreciation run' })}>{runMutation.isPending ? 'Posting...' : 'Post Run'}</Button></div>
+            <div><div className="small text-uppercase text-muted fw-semibold mb-1">Depresiasi Bulanan</div><h3 className="h5 mb-1">Preview &amp; posting depresiasi</h3><p className="text-muted mb-0">Posting beban penyusutan bulanan ke jurnal akuntansi berdasarkan aset yang aktif dan eligible.</p></div>
+            <div className="d-flex gap-2 align-items-end"><Form.Group><Form.Label className="small mb-1">Tahun</Form.Label><Form.Control type="number" value={runPeriod.year} onChange={(e) => setRunPeriod((prev) => ({ ...prev, year: Number(e.target.value) }))} style={{ width: 110 }} /></Form.Group><Form.Group><Form.Label className="small mb-1">Bulan</Form.Label><Form.Control type="number" min={1} max={12} value={runPeriod.month} onChange={(e) => setRunPeriod((prev) => ({ ...prev, month: Number(e.target.value) }))} style={{ width: 90 }} /></Form.Group><Button variant="outline-primary" disabled={!canRunDepreciation || runMutation.isPending} onClick={() => runMutation.mutate({ ...runPeriod, notes: 'Monthly depreciation run' })}>{runMutation.isPending ? 'Memposting...' : 'Posting Depresiasi'}</Button></div>
           </div>
           {previewQuery.isLoading ? <div className="text-muted"><Spinner animation="border" size="sm" className="me-2" /> Menghitung preview...</div> : <>
             <div className="d-flex flex-wrap gap-2 mb-3"><Badge bg={preview?.alreadyPosted ? 'secondary' : 'primary'}>{preview?.alreadyPosted ? 'Sudah diposting' : 'Belum diposting'}</Badge><Badge bg="light" text="dark" className="border">Eligible: {preview?.eligibleAssetCount ?? 0}</Badge><Badge bg="light" text="dark" className="border">Total: {formatRupiah(preview?.totalDepreciationRupiah)}</Badge></div>
@@ -321,9 +321,9 @@ export default function AssetRegisterPage() {
             <Modal.Title>Tambah Aset Baru</Modal.Title>
           </Modal.Header>
           <Modal.Body>
-            <div className="small text-uppercase text-muted fw-semibold mb-1">Asset onboarding aman</div>
+            <div className="small text-uppercase text-muted fw-semibold mb-1">Pendaftaran aset baru</div>
             <p className="text-muted small mb-3">
-              Isi data aset tetap tanpa membuka halaman panjang. Validasi field wajib tetap aktif sebelum submit.
+              Isi data aset tetap. Validasi field wajib tetap aktif sebelum simpan.
             </p>
             <div className="d-grid gap-3">
               <Form.Group>
@@ -443,10 +443,10 @@ export default function AssetRegisterPage() {
             <Form.Group className="mb-3"><Form.Label>Catatan</Form.Label><Form.Control as="textarea" rows={2} value={alignmentForm.notes} onChange={(e) => setAlignmentForm((prev) => ({ ...prev, notes: e.target.value }))} /></Form.Group>
             {alignmentPreviewMutation.isError ? <Alert variant="danger">{getApiErrorMessage(alignmentPreviewMutation.error, 'Preview gagal')}</Alert> : null}
             {alignmentPostMutation.isError ? <Alert variant="danger">{getApiErrorMessage(alignmentPostMutation.error, 'Post alignment gagal')}</Alert> : null}
-            {alignmentPreviewMutation.data ? <Card className="border-0 bg-light"><Card.Body><div className="small text-uppercase text-muted fw-semibold mb-2">Preview Journal</div>{alignmentPreviewMutation.data.journalPreview ? <><div>Debit {alignmentPreviewMutation.data.journalPreview.debit.accountCode} {alignmentPreviewMutation.data.journalPreview.debit.accountName}: <strong>{formatRupiah(alignmentPreviewMutation.data.journalPreview.debit.amountRupiah)}</strong></div><div>Credit {alignmentPreviewMutation.data.journalPreview.credit.accountCode} {alignmentPreviewMutation.data.journalPreview.credit.accountName}: <strong>{formatRupiah(alignmentPreviewMutation.data.journalPreview.credit.amountRupiah)}</strong></div><Badge bg="success" className="mt-2">Balanced</Badge></> : <div className="text-muted">Metode ini tidak membuat journal.</div>}</Card.Body></Card> : null}
+            {alignmentPreviewMutation.data ? <Card className="border-0 bg-light"><Card.Body><div className="small text-uppercase text-muted fw-semibold mb-2">Preview Journal</div>{alignmentPreviewMutation.data.journalPreview ? <><div>Debit {alignmentPreviewMutation.data.journalPreview.debit.accountCode} {alignmentPreviewMutation.data.journalPreview.debit.accountName}: <strong>{formatRupiah(alignmentPreviewMutation.data.journalPreview.debit.amountRupiah)}</strong></div><div>Credit {alignmentPreviewMutation.data.journalPreview.credit.accountCode} {alignmentPreviewMutation.data.journalPreview.credit.accountName}: <strong>{formatRupiah(alignmentPreviewMutation.data.journalPreview.credit.amountRupiah)}</strong></div><Badge bg="success" className="mt-2">Seimbang</Badge></> : <div className="text-muted">Metode ini tidak membuat journal.</div>}</Card.Body></Card> : null}
           </> : null}
         </Modal.Body>
-        <Modal.Footer><Button variant="outline-secondary" onClick={() => setAlignmentAsset(null)}>Tutup</Button><Button variant="outline-primary" onClick={previewAlignment} disabled={alignmentPreviewMutation.isPending}>{alignmentPreviewMutation.isPending ? 'Preview...' : 'Preview'}</Button><Button variant="primary" onClick={postAlignment} disabled={alignmentPostMutation.isPending}>{alignmentPostMutation.isPending ? 'Posting...' : 'Post Alignment'}</Button></Modal.Footer>
+        <Modal.Footer><Button variant="outline-secondary" onClick={() => setAlignmentAsset(null)}>Tutup</Button><Button variant="outline-primary" onClick={previewAlignment} disabled={alignmentPreviewMutation.isPending}>{alignmentPreviewMutation.isPending ? 'Memuat preview...' : 'Preview Jurnal'}</Button><Button variant="primary" onClick={postAlignment} disabled={alignmentPostMutation.isPending}>{alignmentPostMutation.isPending ? 'Memposting...' : 'Posting Penyesuaian'}</Button></Modal.Footer>
       </Modal>
     </div>
   );

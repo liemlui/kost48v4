@@ -66,14 +66,19 @@ const StaffWarehousePage = lazy(() => import('./pages/staff/StaffWarehousePage')
 const AdminStaffPerformancePage = lazy(() => import('./pages/admin/AdminStaffPerformancePage'));
 const OwnerSettingsPage = lazy(() => import('./pages/settings/OwnerSettingsPage'));
 const ServiceInterestsPage = lazy(() => import('./pages/services/ServiceInterestsPage'));
+const MeterReadingsPage = lazy(() => import('./pages/rooms/MeterReadingsPage'));
 
 type Role = 'OWNER' | 'ADMIN' | 'STAFF' | 'TENANT';
 
 /**
  * Pesan toast yang akan ditampilkan saat role tertentu mencoba akses route terlarang.
- * Modular — mudah di-extend untuk role OWNER (R-29).
+ * R-20 (STAFF) + R-29 (OWNER/ADMIN) — semua skenario cross-role.
  */
 function getDeniedMessage(role: string, targetPath: string): string {
+  // OWNER/ADMIN/STAFF coba akses portal tenant (R-29)
+  if ((role === 'OWNER' || role === 'ADMIN' || role === 'STAFF') && targetPath.startsWith('/portal')) {
+    return 'Area portal penghuni hanya dapat diakses dengan akun Penghuni.';
+  }
   // STAFF coba akses area keuangan
   if (role === 'STAFF' && (
     targetPath.startsWith('/invoices') ||
@@ -110,10 +115,6 @@ function getDeniedMessage(role: string, targetPath: string): string {
   )) {
     return 'Halaman ini hanya dapat diakses oleh Admin atau Owner.';
   }
-  // STAFF coba akses portal tenant
-  if (role === 'STAFF' && targetPath.startsWith('/portal')) {
-    return 'Portal ini hanya untuk penghuni aktif. Silakan gunakan dashboard staf.';
-  }
   // TENANT coba akses area operasional
   if (role === 'TENANT' && (
     targetPath.startsWith('/dashboard') ||
@@ -138,7 +139,7 @@ function RequireRoles({ allowed, children }: { allowed: Role[]; children: ReactN
   const { pathname } = useLocation();
   const isDenied = !!user && !allowed.includes(user.role as Role);
 
-  // Tampilkan toast lalu redirect — satu kali saat isDenied terdeteksi (R-20).
+  // Tampilkan toast lalu redirect — satu kali saat isDenied terdeteksi (R-20 + R-29).
   useEffect(() => {
     if (!isDenied || !user || isStageLoading) return;
     const message = getDeniedMessage(user.role, pathname);
@@ -257,7 +258,7 @@ export default function App() {
           <Route path="/payment-submissions/review" element={<RequireRoles allowed={['OWNER', 'ADMIN']}><PaymentReviewPage /></RequireRoles>} />
           <Route path="/invoices/:id" element={<RequireRoles allowed={['OWNER', 'ADMIN']}><InvoiceDetailPage /></RequireRoles>} />
           <Route path="/announcements" element={<RequireRoles allowed={['OWNER', 'ADMIN']}><ConfiguredResourcePage resource="announcements" /></RequireRoles>} />
-          <Route path="/meter-readings" element={<RequireRoles allowed={['OWNER', 'ADMIN']}><ConfiguredResourcePage resource="meter-readings" /></RequireRoles>} />
+          <Route path="/meter-readings" element={<RequireRoles allowed={['OWNER', 'ADMIN']}><MeterReadingsPage /></RequireRoles>} />
           <Route path="/additional-services" element={<RequireRoles allowed={['OWNER', 'ADMIN']}><ConfiguredResourcePage resource="additionalServices" /></RequireRoles>} />
           <Route path="/service-interests" element={<RequireRoles allowed={['OWNER', 'ADMIN']}><ServiceInterestsPage /></RequireRoles>} />
           <Route path="/tickets" element={<RequireRoles allowed={['OWNER', 'ADMIN', 'STAFF']}><TicketsPage /></RequireRoles>} />
