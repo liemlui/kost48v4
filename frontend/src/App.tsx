@@ -1,5 +1,6 @@
-import { lazy, Suspense, type ReactNode } from 'react';
+import { lazy, Suspense, useEffect, type ReactNode } from 'react';
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
+import { useToast } from './components/common/ToastProvider';
 import { PageLoadingSkeleton } from './components/common/SkeletonLoader';
 import AppLayout from './components/layout/AppLayout';
 import ProtectedRoute from './components/layout/ProtectedRoute';
@@ -62,17 +63,54 @@ const StaffWarehousePage = lazy(() => import('./pages/staff/StaffWarehousePage')
 const AdminStaffPerformancePage = lazy(() => import('./pages/admin/AdminStaffPerformancePage'));
 const OwnerSettingsPage = lazy(() => import('./pages/settings/OwnerSettingsPage'));
 const ServiceInterestsPage = lazy(() => import('./pages/services/ServiceInterestsPage'));
+const MeterReadingsPage = lazy(() => import('./pages/rooms/MeterReadingsPage'));
 
 type Role = 'OWNER' | 'ADMIN' | 'STAFF' | 'TENANT';
+
+// R-29: Toast sebelum redirect cross-role
+function getCrossRoleToastMessage(userRole: string, allowedRoles: Role[], targetPath: string): string | null {
+  const isPortalPath = targetPath.startsWith('/portal/');
+  const isFinancePath = ['/reports', '/finance/', '/loss-refunds', '/market-analysis'].some((p) => targetPath.startsWith(p));
+  const isOwnerOnlyPath = ['/owner-dashboard', '/reports', '/market-analysis', '/loss-refunds'].some((p) => targetPath.startsWith(p));
+
+  if (isPortalPath && (userRole === 'OWNER' || userRole === 'ADMIN' || userRole === 'STAFF')) {
+    return 'Area portal penghuni hanya dapat diakses dengan akun Penghuni.';
+  }
+  if (isFinancePath && userRole === 'STAFF') {
+    return 'Area keuangan hanya dapat diakses oleh Owner atau Admin.';
+  }
+  if (isOwnerOnlyPath && userRole === 'ADMIN') {
+    return 'Halaman ini hanya dapat diakses oleh Owner.';
+  }
+  if (allowedRoles.includes('TENANT' as Role) && !allowedRoles.includes(userRole as Role)) {
+    return 'Halaman ini tidak tersedia untuk peran Anda.';
+  }
+  return null;
+}
+
+function ToastRedirect({ to, message }: { to: string; message: string | null }) {
+  const { toast } = useToast();
+  const location = useLocation();
+  useEffect(() => {
+    if (message) toast(message, 'warning');
+  // Hanya satu kali saat komponen mount — eslint disable
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.pathname]);
+  return <Navigate to={to} replace />;
+}
 
 function RequireRoles({ allowed, children }: { allowed: Role[]; children: ReactNode }) {
   const { user } = useAuth();
   const { stage, isLoading: isStageLoading } = useTenantPortalStage();
+  const location = useLocation();
   if (!user) return null;
   // Tunggu stage selesai dimuat sebelum redirect (hindari redirect prematur ke /rooms saat loading)
   // L-01: skeleton saat TENANT stage loading, hindari layar putih kosong.
   if (isStageLoading && user.role === 'TENANT') return <PageLoadingSkeleton />;
-  return allowed.includes(user.role as Role) ? <>{children}</> : <Navigate to={getDefaultRoute(user.role, stage)} replace />;
+  if (allowed.includes(user.role as Role)) return <>{children}</>;
+  const redirectTo = getDefaultRoute(user.role, stage);
+  const toastMsg = getCrossRoleToastMessage(user.role, allowed, location.pathname);
+  return <ToastRedirect to={redirectTo} message={toastMsg} />;
 }
 
 
@@ -178,7 +216,7 @@ export default function App() {
           <Route path="/payment-submissions/review" element={<RequireRoles allowed={['OWNER', 'ADMIN']}><PaymentReviewPage /></RequireRoles>} />
           <Route path="/invoices/:id" element={<RequireRoles allowed={['OWNER', 'ADMIN']}><InvoiceDetailPage /></RequireRoles>} />
           <Route path="/announcements" element={<RequireRoles allowed={['OWNER', 'ADMIN']}><ConfiguredResourcePage resource="announcements" /></RequireRoles>} />
-          <Route path="/meter-readings" element={<RequireRoles allowed={['OWNER', 'ADMIN']}><ConfiguredResourcePage resource="meter-readings" /></RequireRoles>} />
+          <Route path="/meter-readings" element={<RequireRoles allowed={['OWNER', 'ADMIN']}><MeterReadingsPage /></RequireRoles>} />
           <Route path="/additional-services" element={<RequireRoles allowed={['OWNER', 'ADMIN']}><ConfiguredResourcePage resource="additionalServices" /></RequireRoles>} />
           <Route path="/service-interests" element={<RequireRoles allowed={['OWNER', 'ADMIN']}><ServiceInterestsPage /></RequireRoles>} />
           <Route path="/tickets" element={<RequireRoles allowed={['OWNER', 'ADMIN', 'STAFF']}><TicketsPage /></RequireRoles>} />
