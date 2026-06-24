@@ -1,13 +1,11 @@
-import { useMemo, type CSSProperties } from 'react';
+import { useMemo } from 'react';
 import { Badge, Card } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import CurrencyDisplay from '../common/CurrencyDisplay';
 import { invoicePurposeMeta } from '../../utils/invoiceUtility';
 
-// SI-3: Riwayat sewa yang JELAS — kapan masuk kos, tiap periode sewa & perpanjangan,
-// dan tautannya ke invoice. Menjawab: "tampilan kapan masuk + riwayat perpanjang kurang
-// konek dengan invoice" (owner 2026-06-16). Satu Stay = booking→huni→selesai; periode
-// diturunkan dari invoice sewa (periodStart/End), invoice listrik/air ditandai terpisah.
+// SI-3: Riwayat sewa yang jelas: kapan masuk kos, tiap periode
+// sewa/perpanjangan, dan tautannya ke invoice.
 
 type InvoiceLite = {
   id: number;
@@ -30,10 +28,20 @@ type StayLite = {
   depositStatus?: string | null;
 };
 
+export type StayJourneyStepTone = 'done' | 'active' | 'waiting' | 'idle' | 'blocked';
+
+export type StayJourneyStep = {
+  key: string;
+  title: string;
+  status: string;
+  tone: StayJourneyStepTone;
+  helper?: string;
+};
+
 function fmt(d?: string | null): string {
-  if (!d) return '—';
+  if (!d) return '-';
   const dt = new Date(d);
-  return Number.isNaN(dt.getTime()) ? '—' : dt.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
+  return Number.isNaN(dt.getTime()) ? '-' : dt.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
 }
 
 function invStatusBadge(status: string): { label: string; bg: string } {
@@ -47,6 +55,17 @@ function invStatusBadge(status: string): { label: string; bg: string } {
   }
 }
 
+function depositLabel(paid: number, target: number, status?: string | null): string {
+  const paidLabel = target <= 0
+    ? 'Tidak ada target'
+    : paid >= target
+      ? 'Lunas'
+      : paid > 0
+        ? 'Sebagian'
+        : 'Belum disetor';
+  return status ? `${paidLabel} - ${status}` : paidLabel;
+}
+
 const isRentInvoice = (inv: InvoiceLite) =>
   (inv.lines ?? []).some((l) => String(l.lineType ?? '').toUpperCase() === 'RENT');
 
@@ -55,108 +74,154 @@ export default function StayHistoryTimeline({
   invoices,
   invoiceHrefBase = '/invoices',
   clickable = true,
+  journeySteps,
 }: {
   stay: StayLite;
   invoices: InvoiceLite[];
   invoiceHrefBase?: string;
   clickable?: boolean;
+  journeySteps?: StayJourneyStep[];
 }) {
   const navigate = useNavigate();
-  const { rentPeriods, utilityInvoices } = useMemo(() => {
+  const { rentPeriods, utilityInvoices, actionableInvoices } = useMemo(() => {
     const rent = invoices.filter(isRentInvoice).slice().sort(
       (a, b) => new Date(a.periodStart ?? 0).getTime() - new Date(b.periodStart ?? 0).getTime(),
     );
     const util = invoices.filter((i) => !isRentInvoice(i) && String(i.status).toUpperCase() !== 'CANCELLED').slice().sort(
       (a, b) => new Date(a.periodStart ?? 0).getTime() - new Date(b.periodStart ?? 0).getTime(),
     );
-    return { rentPeriods: rent, utilityInvoices: util };
+    const open = invoices.filter((i) => !['PAID', 'CANCELLED'].includes(String(i.status).toUpperCase()));
+    return { rentPeriods: rent, utilityInvoices: util, actionableInvoices: open };
   }, [invoices]);
 
   const depositAmt = Number(stay.depositAmountRupiah ?? 0);
   const depositPaid = Number(stay.depositPaidAmountRupiah ?? 0);
-  const go = (id: number) => clickable && navigate(`${invoiceHrefBase}/${id}`);
+  const depositPct = depositAmt > 0 ? Math.min(100, Math.round((depositPaid / depositAmt) * 100)) : 0;
+  const isActive = String(stay.status ?? '').toUpperCase() === 'ACTIVE';
+  const periodCount = Math.max(1, rentPeriods.length);
+  const openCount = actionableInvoices.length;
 
-  const dot = (color: string) => (
-    <span style={{ width: 12, height: 12, borderRadius: '50%', background: color, flex: '0 0 auto', marginTop: 4, boxShadow: '0 0 0 3px rgba(0,0,0,0.04)' }} aria-hidden />
-  );
-  const rowStyle: CSSProperties = { display: 'flex', gap: 12, alignItems: 'flex-start', paddingBottom: 16, position: 'relative' };
-  const lineStyle: CSSProperties = { position: 'absolute', left: 5, top: 14, bottom: -2, width: 2, background: 'var(--bs-border-color, #e5e7eb)' };
+  const defaultSteps: StayJourneyStep[] = [
+    { key: 'checkin', title: 'Masuk kamar', status: stay.checkInDate ? 'Selesai' : 'Menunggu', tone: stay.checkInDate ? 'done' : 'idle' },
+    { key: 'lease', title: 'Masa sewa', status: isActive ? 'Aktif' : 'Selesai', tone: isActive ? 'active' : 'done' },
+    { key: 'billing', title: 'Tagihan', status: openCount ? `${openCount} aktif` : 'Beres', tone: openCount ? 'waiting' : 'done' },
+    { key: 'next', title: 'Perpanjang / keluar', status: isActive ? 'Bisa diajukan' : 'Riwayat selesai', tone: isActive ? 'idle' : 'done' },
+  ];
+  const steps = journeySteps ?? defaultSteps;
+
+  const go = (id: number) => {
+    if (clickable) navigate(`${invoiceHrefBase}/${id}`);
+  };
 
   return (
-    <Card className="content-card border-0 mb-4">
+    <Card className="content-card stay-history-card border-0 mb-4">
       <Card.Body>
-        <div className="d-flex align-items-center justify-content-between mb-1">
-          <h5 className="mb-0">📜 Riwayat Sewa</h5>
-          <span className="text-muted small">Masuk → tiap periode → tagihannya</span>
+        <div className="stay-history-head">
+          <div>
+            <div className="stay-history-kicker">Riwayat Sewa</div>
+            <h5>Masuk, periode, tagihan, dan keputusan akhir</h5>
+            <p>
+              Satu kronologi utuh: mulai kos, masa sewa/perpanjangan, invoice terkait,
+              sampai deposit diproses saat keluar final.
+            </p>
+          </div>
+          <div className="stay-history-summary" aria-label="Ringkasan riwayat sewa">
+            <span><strong>{periodCount}</strong><small>Periode</small></span>
+            <span><strong>{openCount}</strong><small>Tagihan aktif</small></span>
+          </div>
         </div>
-        <p className="text-muted small mb-3">Kronologi jelas: kapan mulai kos, tiap periode sewa/perpanjangan, dan tautan ke tagihannya.</p>
 
-        <div>
-          {/* Masuk kos */}
-          <div style={rowStyle}>
-            <span style={lineStyle} />
-            {dot('#2563eb')}
-            <div className="flex-grow-1">
-              <div className="fw-semibold">Masuk kos · {fmt(stay.checkInDate)}</div>
-              <div className="small text-muted">
-                Deposit jaminan <CurrencyDisplay amount={depositAmt} />
-                {depositAmt > 0 ? ` (${depositPaid >= depositAmt ? 'lunas' : depositPaid > 0 ? 'sebagian' : 'belum'} · ${stay.depositStatus ?? 'HELD'})` : ''}
+        <div className="stay-history-step-grid" aria-label="Alur masa sewa">
+          {steps.map((step, index) => (
+            <div key={step.key} className={`stay-history-step is-${step.tone}`}>
+              <span className="stay-history-step-index">{index + 1}</span>
+              <strong>{step.title}</strong>
+              <span>{step.status}</span>
+              {step.helper ? <small>{step.helper}</small> : null}
+            </div>
+          ))}
+        </div>
+
+        <div className="stay-history-flow">
+          <div className="stay-history-event is-start">
+            <span className="stay-history-dot" aria-hidden />
+            <div className="stay-history-event-body">
+              <div className="stay-history-event-top">
+                <strong>Masuk kos</strong>
+                <span>{fmt(stay.checkInDate)}</span>
               </div>
+              <p>
+                Deposit jaminan <CurrencyDisplay amount={depositAmt} /> ({depositLabel(depositPaid, depositAmt, stay.depositStatus)}).
+              </p>
             </div>
           </div>
 
-          {/* Tiap periode sewa (dari invoice RENT) */}
           {rentPeriods.length === 0 ? (
-            <div style={rowStyle}><span style={lineStyle} />{dot('#9ca3af')}
-              <div className="small text-muted">Belum ada tagihan sewa tercatat.</div>
+            <div className="stay-history-event is-muted">
+              <span className="stay-history-dot" aria-hidden />
+              <div className="stay-history-event-body">
+                <div className="stay-history-event-top">
+                  <strong>Tagihan sewa</strong>
+                  <span>Belum tercatat</span>
+                </div>
+                <p>Belum ada tagihan sewa tercatat untuk periode ini.</p>
+              </div>
             </div>
           ) : rentPeriods.map((inv, idx) => {
             const m = invoicePurposeMeta(inv);
             const st = invStatusBadge(inv.status);
             return (
-              <div key={inv.id} style={rowStyle}>
-                <span style={lineStyle} />
-                {dot(idx === 0 ? '#16a34a' : '#7c3aed')}
-                <div className="flex-grow-1">
-                  <div className="fw-semibold">
-                    {idx === 0 ? 'Periode 1 (awal)' : `Perpanjangan · Periode ${idx + 1}`}
-                    {' '}· {fmt(inv.periodStart)} → {fmt(inv.periodEnd)}
+              <div key={inv.id} className="stay-history-event is-rent">
+                <span className="stay-history-dot" aria-hidden />
+                <div className="stay-history-event-body">
+                  <div className="stay-history-event-top">
+                    <strong>{idx === 0 ? 'Periode awal' : `Perpanjangan periode ${idx + 1}`}</strong>
+                    <span>{fmt(inv.periodStart)} - {fmt(inv.periodEnd)}</span>
                   </div>
-                  <div
-                    className={`d-flex flex-wrap align-items-center gap-2 mt-1${clickable ? ' cursor-pointer' : ''}`}
-                    role={clickable ? 'button' : undefined}
+                  <button
+                    type="button"
+                    className="stay-history-invoice-pill"
                     onClick={() => go(inv.id)}
-                    style={clickable ? { cursor: 'pointer' } : undefined}
+                    disabled={!clickable}
                   >
-                    <Badge bg={m.bg} className="d-inline-flex align-items-center gap-1"><span aria-hidden>{m.icon}</span> Tagihan {m.label}</Badge>
+                    <Badge bg={m.bg} className="d-inline-flex align-items-center gap-1">
+                      <span aria-hidden>{m.icon}</span> Tagihan {m.label}
+                    </Badge>
                     <Badge bg={st.bg}>{st.label}</Badge>
-                    <span className="small text-muted"><CurrencyDisplay amount={Number(inv.totalAmountRupiah ?? 0)} /></span>
-                    <span className="small text-decoration-underline text-muted">{inv.invoiceNumber || `INV-${inv.id}`}</span>
-                  </div>
+                    <span><CurrencyDisplay amount={Number(inv.totalAmountRupiah ?? 0)} /></span>
+                    <u>{inv.invoiceNumber || `INV-${inv.id}`}</u>
+                  </button>
                 </div>
               </div>
             );
           })}
 
-          {/* Tagihan listrik/air (utilitas) */}
           {utilityInvoices.length > 0 ? (
-            <div style={rowStyle}>
-              <span style={lineStyle} />
-              {dot('#f59e0b')}
-              <div className="flex-grow-1">
-                <div className="fw-semibold">Tagihan listrik/air</div>
-                <div className="d-flex flex-wrap gap-2 mt-1">
+            <div className="stay-history-event is-utility">
+              <span className="stay-history-dot" aria-hidden />
+              <div className="stay-history-event-body">
+                <div className="stay-history-event-top">
+                  <strong>Tagihan listrik/air</strong>
+                  <span>{utilityInvoices.length} invoice</span>
+                </div>
+                <div className="stay-history-utility-list">
                   {utilityInvoices.map((inv) => {
                     const m = invoicePurposeMeta(inv);
                     const st = invStatusBadge(inv.status);
                     return (
-                      <span key={inv.id} role={clickable ? 'button' : undefined} onClick={() => go(inv.id)}
-                        style={clickable ? { cursor: 'pointer' } : undefined}
-                        className="d-inline-flex align-items-center gap-1 border rounded px-2 py-1 small">
-                        <Badge bg={m.bg} className="d-inline-flex align-items-center gap-1"><span aria-hidden>{m.icon}</span>{m.label}</Badge>
-                        <span className="text-muted">{fmt(inv.periodEnd || inv.periodStart)}</span>
+                      <button
+                        key={inv.id}
+                        type="button"
+                        className="stay-history-utility-pill"
+                        onClick={() => go(inv.id)}
+                        disabled={!clickable}
+                      >
+                        <Badge bg={m.bg} className="d-inline-flex align-items-center gap-1">
+                          <span aria-hidden>{m.icon}</span>{m.label}
+                        </Badge>
+                        <span>{fmt(inv.periodEnd || inv.periodStart)}</span>
                         <Badge bg={st.bg}>{st.label}</Badge>
-                      </span>
+                      </button>
                     );
                   })}
                 </div>
@@ -164,20 +229,34 @@ export default function StayHistoryTimeline({
             </div>
           ) : null}
 
-          {/* Kontrak berjalan */}
-          <div style={{ ...rowStyle, paddingBottom: 0 }}>
-            {dot(stay.status === 'ACTIVE' ? '#2563eb' : '#9ca3af')}
-            <div className="flex-grow-1">
-              <div className="fw-semibold">
-                {stay.status === 'ACTIVE' ? 'Kontrak berjalan' : 'Masa sewa selesai'} · s/d {fmt(stay.plannedCheckOutDate)}
+          <div className={`stay-history-event ${isActive ? 'is-current' : 'is-muted'}`}>
+            <span className="stay-history-dot" aria-hidden />
+            <div className="stay-history-event-body">
+              <div className="stay-history-event-top">
+                <strong>{isActive ? 'Kontrak berjalan' : 'Masa sewa selesai'}</strong>
+                <span>s/d {fmt(stay.plannedCheckOutDate)}</span>
               </div>
-              <div className="small text-muted">
-                {stay.status === 'ACTIVE'
-                  ? 'Perpanjangan akan menambah periode baru di atas dari tanggal ini.'
-                  : 'Riwayat lengkap di atas.'}
-              </div>
+              <p>
+                {isActive
+                  ? 'Perpanjangan akan menambah periode baru dari akhir kontrak ini.'
+                  : 'Riwayat periode dan tagihan tersimpan di atas.'}
+              </p>
             </div>
           </div>
+        </div>
+
+        <div className="stay-history-deposit-panel">
+          <div>
+            <span>Dana titipan deposit</span>
+            <strong><CurrencyDisplay amount={depositPaid} showZero /> / <CurrencyDisplay amount={depositAmt} /></strong>
+            <small>Diproses saat keluar final setelah semua tagihan selesai.</small>
+          </div>
+          <div className="stay-history-deposit-meter" aria-label={`Deposit ${depositPct}%`}>
+            <div style={{ width: `${depositPct}%` }} />
+          </div>
+          <Badge bg={depositPaid >= depositAmt && depositAmt > 0 ? 'success' : 'secondary'}>
+            {depositLabel(depositPaid, depositAmt, stay.depositStatus)}
+          </Badge>
         </div>
       </Card.Body>
     </Card>
