@@ -20,7 +20,6 @@ import CheckoutRequestModal from '../../components/checkout-requests/CheckoutReq
 import RenewRequestModal from '../../components/tenant/RenewRequestModal';
 import MeterCycleModal from '../../components/stays/MeterCycleModal';
 import StayHistoryTimeline from '../../components/stays/StayHistoryTimeline';
-import RenewalCrossSellCard from '../../components/tenant/RenewalCrossSellCard';
 import SatisfactionSurveyCard from '../../components/tenant/SatisfactionSurveyCard';
 import { useAuth } from '../../context/AuthContext';
 import { useTenantPortalStage } from '../../hooks/useTenantPortalStage';
@@ -29,11 +28,36 @@ import type { CheckoutRequest, Invoice, MeterReading, RenewRequest, RoomItem, St
 import { getApiErrorMessage } from '../../utils/getApiErrorMessage';
 import { getDaysUntilTenantDate, getOpenTenantInvoices, getPendingReviewInvoiceIds, getPrimaryTenantInvoice, isTenantInvoiceOverdue } from '../../utils/tenantRules';
 import { isPayableInvoiceStatus, TENANT_PAYMENT_REVIEW_MESSAGE, tenantPricingTermLabel } from '../../utils/tenantCopy';
-import { formatDateTimeWib, getDeadlineMeta } from '../../utils/dateTime';
+import { formatDateOnly, formatDateTimeWib, getDeadlineMeta } from '../../utils/dateTime';
 import { compactText } from '../../utils/readabilityRules';
 import { getInvoiceTotalAmount } from '../../utils/invoiceTotals';
 import { resolveAbsoluteFileUrl } from '../../utils/resolveAbsoluteFileUrl';
 import { getKost48RoomCover } from '../../data/kost48Assets';
+import { expectedTenantFacilities, type FacilityKind } from '../../utils/roomFacilitySpec';
+
+// ── label helpers ─────────────────────────────────────────────────────────────
+
+export function roomCategoryLabel(category?: string | null): string {
+  switch ((category ?? '').toUpperCase()) {
+    case 'ECONOMY': return 'Ekonomi';
+    case 'STANDARD': return 'Standar';
+    case 'DELUXE': return 'Deluxe';
+    default: return category ?? '';
+  }
+}
+
+export function facilityIcon(key: string, name?: string): string {
+  const k = (key ?? '').toLowerCase();
+  const n = (name ?? '').toLowerCase();
+  if (k === 'ac' || n.startsWith('ac ') || n === 'ac') return '❄️';
+  if (k === 'kipas' || n.includes('kipas') || n.includes('fan')) return '🌀';
+  if (k === 'kasur' || n.includes('kasur')) return '🛏️';
+  if (k === 'lemari' || n.includes('lemari') || n.includes('almari')) return '🪞';
+  if (k === 'kamar-mandi' || n.includes('kamar mandi')) return '🚿';
+  if (k === 'mezzanine' || n.includes('mezzanine') || n.includes('loteng')) return '🏠';
+  if (k === 'ukuran' || n.includes('ukuran') || n.includes('m²')) return '📐';
+  return '✨';
+}
 
 // TEN-PROFILE-NOTIF: label Indonesia untuk field profil yang belum lengkap.
 export const PROFILE_FIELD_LABELS: Record<string, string> = {
@@ -49,7 +73,7 @@ export const PROFILE_FIELD_LABELS: Record<string, string> = {
 // ── helpers ───────────────────────────────────────────────────────────────────
 
 export function formatDate(value?: string | null) {
-  return formatDateTimeWib(value);
+  return formatDateOnly(value);
 }
 
 export function toDateKey(date: Date) {
@@ -137,21 +161,37 @@ export function inventoryStatusClass(status?: string | null): string {
 export function getRoomFacilitySummary(stay: Stay) {
   const room = stay.room;
   const floorLabel = formatRoomFloorLabel(room?.floor);
-  const roomBits = [room?.name, floorLabel, tenantPricingTermLabel(stay.pricingTerm)]
+  const roomBits = [floorLabel, tenantPricingTermLabel(stay.pricingTerm)]
     .filter(Boolean) as string[];
   return {
     roomInfo: roomBits.length ? roomBits.join(' · ') : 'Detail kamar aktif',
   };
 }
 
-export function getRoomFacilities(stay: Stay) {
-  return (stay.room?.facilities ?? [])
-    .filter((f: any) => f.publicVisible !== false)
-    .map((f: any) => ({
-      id: `facility-${f.id}`,
-      name: (f.name ?? '') as string,
-    }))
-    .filter((f) => f.name.trim() !== '');
+export function getRoomFacilities(stay: Stay): { id: string; name: string; kind?: FacilityKind }[] {
+  const room = stay.room;
+  const result: { id: string; name: string; kind?: FacilityKind }[] = [];
+  const seen = new Set<string>();
+  const pushUnique = (name: string, id: string, kind?: FacilityKind) => {
+    const clean = (name ?? '').trim();
+    const key = clean.toLowerCase();
+    if (!clean || seen.has(key)) return;
+    seen.add(key);
+    result.push({ id, name: clean, kind });
+  };
+
+  // 1. Chip dari kriteria kamar (pendingin + struktural) — selalu tampil meski tak ada baris manual.
+  if (room) {
+    for (const f of expectedTenantFacilities(room)) {
+      pushUnique(f.label, `spec-${f.key}`, f.kind);
+    }
+  }
+  // 2. Fasilitas manual publik (mis. meja, kursi) yang belum tercakup.
+  for (const f of (room?.facilities ?? [])) {
+    if ((f as any).publicVisible === false) continue;
+    pushUnique((f.name ?? '') as string, `facility-${f.id}`);
+  }
+  return result;
 }
 
 export function getInventoryItems(roomItems: RoomItem[], stayRoomId: number | string | undefined) {

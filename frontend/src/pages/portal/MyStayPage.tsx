@@ -3,7 +3,6 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Accordion, Alert, Button, Card, Spinner } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import PageHeader from '../../components/common/PageHeader';
-import { useConfirm } from '../../components/common/ConfirmProvider';
 import StatusBadge from '../../components/common/StatusBadge';
 import CurrencyDisplay from '../../components/common/CurrencyDisplay';
 import EmptyState from '../../components/common/EmptyState';
@@ -13,14 +12,17 @@ import { decideRenewRequest, listMyRenewRequests } from '../../api/renewRequests
 import { listMyCheckoutRequests } from '../../api/checkoutRequests';
 import { listMyPaymentSubmissions } from '../../api/paymentSubmissions';
 import { getProfileCompleteness } from '../../api/tenants';
-import { listActiveAdditionalServices, createServiceInterest, listMyServiceInterests } from '../../api/additionalServices';
 import { getMeterReadingsByRoom } from '../../api/meterReadings';
+import { fetchPublicConfig } from '../../api/settings';
 import CheckoutRequestModal from '../../components/checkout-requests/CheckoutRequestModal';
 import RenewRequestModal from '../../components/tenant/RenewRequestModal';
 import MeterCycleModal from '../../components/stays/MeterCycleModal';
-import StayHistoryTimeline from '../../components/stays/StayHistoryTimeline';
-import RenewalCrossSellCard from '../../components/tenant/RenewalCrossSellCard';
+import StayHistoryTimeline, { type StayJourneyStep } from '../../components/stays/StayHistoryTimeline';
 import SatisfactionSurveyCard from '../../components/tenant/SatisfactionSurveyCard';
+import LeaseProgressHero from '../../components/portal/stay/LeaseProgressHero';
+import UtilityInsightCard from '../../components/portal/stay/UtilityInsightCard';
+import StayQuickActions from '../../components/portal/stay/StayQuickActions';
+import StayAnnouncementBanner from '../../components/portal/stay/StayAnnouncementBanner';
 import { useAuth } from '../../context/AuthContext';
 import { useTenantPortalStage } from '../../hooks/useTenantPortalStage';
 import type { PaginatedResponse } from '../../types';
@@ -28,21 +30,17 @@ import type { CheckoutRequest, Invoice, MeterReading, RenewRequest, RoomItem, St
 import { getApiErrorMessage } from '../../utils/getApiErrorMessage';
 import { getDaysUntilTenantDate, getOpenTenantInvoices, getPendingReviewInvoiceIds, getPrimaryTenantInvoice, isTenantInvoiceOverdue } from '../../utils/tenantRules';
 import { isPayableInvoiceStatus, TENANT_PAYMENT_REVIEW_MESSAGE, tenantPricingTermLabel } from '../../utils/tenantCopy';
-import { formatDateTimeWib, getDeadlineMeta } from '../../utils/dateTime';
-import { compactText } from '../../utils/readabilityRules';
 import { getInvoiceTotalAmount } from '../../utils/invoiceTotals';
-import { resolveAbsoluteFileUrl } from '../../utils/resolveAbsoluteFileUrl';
-import { getKost48RoomCover } from '../../data/kost48Assets';
 import {
-  PROFILE_FIELD_LABELS, formatDate, toDateKey, getMeterWindow, getLatestUtilityReading, formatEndHelper, formatRoomFloorLabel,
+  PROFILE_FIELD_LABELS, formatDate, toDateKey, getMeterWindow, getLatestUtilityReading, formatRoomFloorLabel,
   friendlyItemStatus, inventoryStatusClass, getRoomFacilitySummary, getRoomFacilities, getInventoryItems, getRoomCoverImage, getRoomPriceFacts,
-  TENANT_SERVICE_IDEAS,
 } from './myStayShared';
+import { acCapacityLabel, roomBathroomLabel, roomSizeLabel, roomMaxOccupants } from '../../utils/roomFacilitySpec';
+import { formatAcHoursEstimate } from '../../utils/acUsageEstimate';
 
 // ── ActiveStayContent ─────────────────────────────────────────────────────────
 
 function ActiveStayContent({ stay }: { stay: Stay }) {
-  const confirm = useConfirm();
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const [showCheckoutModal, setShowCheckoutModal] = useState(false);
@@ -70,26 +68,13 @@ function ActiveStayContent({ stay }: { stay: Stay }) {
     refetchOnWindowFocus: true,
   });
 
-  // PUB-LAYANAN-TAMBAHAN: layanan tambahan + tarif (dikelola owner).
-  const servicesQuery = useQuery({
-    queryKey: ['additional-services-active'],
-    queryFn: listActiveAdditionalServices,
-    staleTime: 120_000,
+  // Kuota listrik gratis (untuk estimasi jam AC/hari). Settable owner.
+  const publicConfigQuery = useQuery({
+    queryKey: ['public-config'],
+    queryFn: fetchPublicConfig,
+    staleTime: 300_000,
   });
-
-  // PUB-LAYANAN-MINAT: minat tenant atas layanan.
-  const myInterestsQuery = useQuery({
-    queryKey: ['my-service-interests'],
-    queryFn: listMyServiceInterests,
-    staleTime: 60_000,
-  });
-  const interestMutation = useMutation({
-    mutationFn: (serviceId: number) => createServiceInterest(serviceId),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['my-service-interests'] }),
-  });
-  const pendingServiceIds = new Set(
-    (myInterestsQuery.data ?? []).filter((i) => i.status === 'PENDING').map((i) => i.serviceId),
-  );
+  const freeKwh = publicConfigQuery.data?.freeElectricityKwhPerMonth ?? 30;
 
   const invoicesQuery = useQuery<PaginatedResponse<Invoice>>({
     queryKey: ['portal-invoices', stay.id],
@@ -197,8 +182,6 @@ function ActiveStayContent({ stay }: { stay: Stay }) {
   const rejectedCheckoutRequest = checkoutRequests.find((cr) => cr.stayId === stay.id && cr.status === 'REJECTED');
 
   const endDays = getDaysUntilTenantDate(stay.plannedCheckOutDate);
-  const endMeta = getDeadlineMeta(stay.plannedCheckOutDate, 'Akhir masa sewa');
-  const endHelper = formatEndHelper(stay.plannedCheckOutDate);
   const nearEnd = endDays !== null && endDays >= 0 && endDays <= 10;
   const meterRecordedThisMonth = Boolean(electricityReadingThisMonth);
   const meterScheduleVariant = meterReadingsQuery.isError
@@ -322,7 +305,6 @@ function ActiveStayContent({ stay }: { stay: Stay }) {
       ? 'Ada tagihan tanpa nominal pembayaran. Hubungi admin agar statusnya dicek sebelum ajukan perpanjangan atau keluar.'
       : null;
 
-  const showCheckoutSecondary = canRequestCheckout;
   // Tombol perpanjangan SELALU tampil di halaman; nonaktif (dengan alasan) bila belum bisa diajukan.
   const renewDisabledReason = canRequestRenew
     ? undefined
@@ -341,57 +323,54 @@ function ActiveStayContent({ stay }: { stay: Stay }) {
       ? 'tone-info'
       : 'tone-success';
 
+  const stayJourneySteps: StayJourneyStep[] = [
+    {
+      key: 'checkin',
+      title: 'Masuk kamar',
+      status: 'Selesai',
+      tone: 'done',
+      helper: formatDate(stay.checkInDate),
+    },
+    {
+      key: 'lease',
+      title: 'Masa sewa',
+      status: 'Aktif',
+      tone: nearEnd ? 'waiting' : 'active',
+      helper: `s/d ${formatDate(stay.plannedCheckOutDate) || 'belum ditentukan'}`,
+    },
+    {
+      key: 'billing',
+      title: 'Tagihan',
+      status: hasPayableOpenInvoice ? 'Perlu dibayar' : hasZeroAmountOpenInvoice ? 'Dicek admin' : 'Beres',
+      tone: hasPayableOpenInvoice ? 'waiting' : hasZeroAmountOpenInvoice ? 'idle' : 'done',
+      helper: hasOpenInvoice ? `${openInvoices.length} invoice aktif` : 'Tidak ada tagihan aktif',
+    },
+    {
+      key: 'next',
+      title: 'Perpanjang / keluar',
+      status: pendingRenewRequest ? 'Perpanjangan diproses' : pendingCheckoutRequest ? 'Keluar diproses' : hasOpenInvoice ? 'Tunggu tagihan beres' : 'Bisa diajukan',
+      tone: pendingRenewRequest || pendingCheckoutRequest || hasOpenInvoice ? 'waiting' : 'idle',
+      helper: 'Aksi berikutnya mengikuti status tagihan',
+    },
+  ];
+
   // ── render ───────────────────────────────────────────────────────────────────
 
   return (
     <>
-      {/* ── Compact dossier card ── */}
-      <Card className="tenant-stay-main-card border-0 mb-3">
+      {/* Topbar PaymentUrgencyChip is the main assistant. Body stays compact. */}
+      {nearEnd && !hasOpenInvoice ? (
+        <Alert variant="warning" className="tenant-short-alert mb-3">
+          Masa sewa hampir selesai. Ajukan perpanjangan atau keluar sebelum akhir masa sewa.
+        </Alert>
+      ) : null}
+
+      {/* ── Hero: progres masa sewa + fact chips ── */}
+      <Card className="tenant-stay-hero border-0 mb-3">
         <Card.Body>
-
-          {/* Topbar PaymentUrgencyChip is the main assistant. Body stays compact. */}
-          {nearEnd && !hasOpenInvoice ? (
-            <Alert variant="warning" className="tenant-short-alert mb-3">
-              Masa sewa hampir selesai. Ajukan perpanjangan atau keluar sebelum akhir masa sewa.
-            </Alert>
-          ) : null}
-
-          {/* ── Compact room header: thumbnail + key info ── */}
-          <div className="tenant-room-dossier-header">
-            <div className="tenant-room-dossier-thumb-wrap">
-              <SafeImage
-                src={roomCoverImage}
-                alt={`Foto kamar ${stay.room?.code ?? stay.roomId}`}
-                className="tenant-room-dossier-thumb"
-                placeholderClassName="tenant-room-dossier-thumb-empty"
-                fallbackTitle="Foto kamar belum tersedia"
-                fallbackDescription="Detail kamar tetap dapat dicek di bawah."
-                resolveUrl={false}
-              />
-            </div>
-            <div className="tenant-room-dossier-info">
-              <div className="command-eyebrow">Kamar Saya</div>
-              <div className="tenant-room-dossier-title-row">
-                <h3 className="tenant-room-dossier-name">Kamar {stay.room?.code ?? stay.roomId}</h3>
-                {/* Audit U-03: fase booking (kamar RESERVED) jangan tampil "Masa Sewa Aktif" —
-                    kamar belum terkunci sebelum pembayaran disetujui (first-paid-wins). */}
-                {stay.room?.status === 'RESERVED' ? (
-                  <span className="badge text-bg-warning">Menunggu Pembayaran — kamar belum terkunci</span>
-                ) : (
-                  <StatusBadge status={stay.status} tone="tenant" domain="stay" />
-                )}
-              </div>
-              <div className="tenant-room-dossier-room-meta">{roomSummary.roomInfo}</div>
-              <div className={`tenant-room-dossier-end-date${nearEnd ? ' near-end' : ''}`}>
-                <span>Akhir sewa:</span>
-                {' '}<strong>{stay.plannedCheckOutDate ? formatDate(stay.plannedCheckOutDate) : 'Belum ditentukan'}</strong>
-                {endHelper !== 'Belum diisi' && <em> · {endHelper}</em>}
-              </div>
-            </div>
-          </div>
-
+          <LeaseProgressHero stay={stay} />
           {/* ── Mini fact chips: tagihan, laporan, deposit ── */}
-          <div className="tenant-stay-facts-strip">
+          <div className="tenant-stay-facts-strip mt-3">
             <button
               type="button"
               className={`tenant-stay-fact-chip ${billTone}`}
@@ -414,12 +393,72 @@ function ActiveStayContent({ stay }: { stay: Stay }) {
             </button>
             <div className="tenant-stay-fact-chip tone-info" role="status" aria-label="Dana titipan">
               <span className="fact-label">Dana titipan</span>
-              {/* Audit U-03: tampilkan yang BENAR-BENAR disetor vs target, bukan target saja. */}
               <strong>
                 <CurrencyDisplay amount={stay.depositPaidAmountRupiah ?? 0} showZero />
                 <span className="text-muted"> / <CurrencyDisplay amount={stay.depositAmountRupiah} /></span>
               </strong>
               <small>{Number(stay.depositPaidAmountRupiah ?? 0) > 0 ? 'Titipan' : 'Belum disetor'}</small>
+            </div>
+          </div>
+        </Card.Body>
+      </Card>
+
+      {/* ── Quick actions hub ── */}
+      <StayQuickActions
+        canRecordMeter={meterWindow.windowOpen}
+        onCatatMeter={() => setShowMeter(true)}
+        canRenew={canRequestRenew}
+        renewDisabledReason={renewDisabledReason}
+        onRenew={() => setShowRenewModal(true)}
+        canCheckout={canRequestCheckout}
+        onCheckout={() => setShowCheckoutModal(true)}
+      />
+
+      {/* ── Pengumuman terbaru ── */}
+      <StayAnnouncementBanner />
+
+      {/* ── Dashboard grid 2 kolom ── */}
+      <div className="tenant-stay-dashboard-grid">
+        <div className="tenant-stay-col-left">
+          {/* ── Konsumsi listrik & air + estimasi ── */}
+          <UtilityInsightCard
+            stay={stay}
+            readings={monthMeterReadings}
+            isLoading={meterReadingsQuery.isLoading}
+            isError={meterReadingsQuery.isError}
+            canRecord={meterWindow.windowOpen}
+            onCatatMeter={() => setShowMeter(true)}
+          />
+
+          {/* ── Compact dossier card ── */}
+          <Card className="tenant-stay-main-card border-0">
+            <Card.Body>
+
+          {/* ── Compact room header: thumbnail + key info ── */}
+          <div className="tenant-room-dossier-header">
+            <div className="tenant-room-dossier-thumb-wrap">
+              <SafeImage
+                src={roomCoverImage}
+                alt={`Foto kamar ${stay.room?.code ?? stay.roomId}`}
+                className="tenant-room-dossier-thumb"
+                placeholderClassName="tenant-room-dossier-thumb-empty"
+                fallbackTitle="Foto kamar belum tersedia"
+                fallbackDescription="Detail kamar tetap dapat dicek di bawah."
+                resolveUrl={false}
+              />
+            </div>
+            <div className="tenant-room-dossier-info">
+              <div className="tenant-room-dossier-title-row">
+                <h3 className="tenant-room-dossier-name">Kamar {stay.room?.code ?? stay.roomId}</h3>
+                {/* Audit U-03: fase booking (kamar RESERVED) jangan tampil "Masa Sewa Aktif" —
+                    kamar belum terkunci sebelum pembayaran disetujui (first-paid-wins). */}
+                {stay.room?.status === 'RESERVED' ? (
+                  <span className="badge text-bg-warning">Menunggu Pembayaran — kamar belum terkunci</span>
+                ) : (
+                  <StatusBadge status={stay.status} tone="tenant" domain="stay" />
+                )}
+              </div>
+              <div className="tenant-room-dossier-room-meta">{roomSummary.roomInfo}</div>
             </div>
           </div>
 
@@ -428,22 +467,22 @@ function ActiveStayContent({ stay }: { stay: Stay }) {
               <div>
                 <div className="fw-semibold">
                   {meterReadingsQuery.isLoading
-                    ? 'Memeriksa status meter bulan ini'
+                    ? 'Mengecek meter...'
                     : meterReadingsQuery.isError
-                      ? 'Status meter belum bisa dimuat'
+                      ? 'Status meter tidak tersedia'
                       : meterRecordedThisMonth
-                        ? 'Meter bulan ini sudah dicatat'
+                        ? 'Meter bulan ini sudah dicatat ✓'
                         : 'Meter bulan ini belum dicatat'}
                 </div>
                 <div className="small">
                   {meterWindow.windowOpen
-                    ? <>Jendela catat aktif: <strong>{formatDate(meterWindow.windowStartKey)}</strong> s.d.{' '}<strong>{formatDate(meterWindow.windowEndKey)}</strong>.</>
-                    : <>Jendela catat akan buka pada <strong>{formatDate(meterWindow.windowStartKey)}</strong> (H-10 sebelum akhir kontrak).</>
+                    ? <>Jendela aktif: <strong>{formatDate(meterWindow.windowStartKey)}</strong> – <strong>{formatDate(meterWindow.windowEndKey)}</strong>.</>
+                    : <>Buka pada <strong>{formatDate(meterWindow.windowStartKey)}</strong> · H-10 sebelum akhir sewa.</>
                   }
                 </div>
                 {electricityReadingThisMonth ? (
                   <div className="small text-muted">
-                    Terakhir listrik: {String(electricityReadingThisMonth.readingValue)} kWh pada {formatDate(electricityReadingThisMonth.readingAt)}
+                    Listrik: <strong>{String(electricityReadingThisMonth.readingValue)} kWh</strong> · {formatDate(electricityReadingThisMonth.readingAt)}
                     {waterReadingThisMonth ? ` · air ${String(waterReadingThisMonth.readingValue)} m³` : ''}
                   </div>
                 ) : null}
@@ -453,29 +492,39 @@ function ActiveStayContent({ stay }: { stay: Stay }) {
                 size="sm"
                 disabled={!meterWindow.windowOpen}
                 onClick={() => setShowMeter(true)}
-                title={!meterWindow.windowOpen ? `Pencatatan meter dibuka H-10 sebelum akhir kontrak (${formatDate(meterWindow.windowStartKey)})` : undefined}
+                title={!meterWindow.windowOpen ? `Dibuka H-10 sebelum akhir sewa (${formatDate(meterWindow.windowStartKey)})` : undefined}
               >
-                {meterRecordedThisMonth ? 'Catat Ulang Meter' : 'Catat Meter'}
+                {meterRecordedThisMonth ? 'Catat Ulang' : 'Catat Meter'}
               </Button>
             </div>
           </Alert>
 
-          {/* ── Detail kamar — accordion (UI/UX selaras menu "Panduan & Aturan") ── */}
-          {/* R-16: "Info kamar" & "Fasilitas" buka by default; preferensi disimpan sessionStorage */}
+          {/* ── Detail kamar — accordion (R-16: "Info kamar" & "Fasilitas" buka by default; preferensi sessionStorage) */}
           <Accordion flush alwaysOpen activeKey={openAccordionKeys} onSelect={handleAccordionChange} className="tenant-dossier-accordion">
             <Accordion.Item eventKey="info">
-              <Accordion.Header>Info kamar</Accordion.Header>
+              <Accordion.Header><span className="me-2">🏠</span> Info kamar</Accordion.Header>
               <Accordion.Body>
                 <div className="tenant-dossier-tarif">
-                  {stay.room?.name ? (
-                    <div className="tenant-dossier-tarif-row">
-                      <span>Nama kamar</span><strong>{stay.room.name}</strong>
-                    </div>
-                  ) : null}
                   {stay.room?.floor ? (
                     <div className="tenant-dossier-tarif-row">
                       <span>Lantai</span><strong>{formatRoomFloorLabel(stay.room.floor)}</strong>
                     </div>
+                  ) : null}
+                  {stay.room ? (
+                    <>
+                      <div className="tenant-dossier-tarif-row">
+                        <span>Kamar mandi</span><strong>{roomBathroomLabel(stay.room)}</strong>
+                      </div>
+                      <div className="tenant-dossier-tarif-row">
+                        <span>Ukuran kamar</span>
+                        <strong>{roomSizeLabel(stay.room)} · maks {roomMaxOccupants(stay.room)} orang</strong>
+                      </div>
+                      {stay.room.hasAc ? (
+                        <div className="tenant-dossier-tarif-row">
+                          <span>Pendingin</span><strong>AC {acCapacityLabel(stay.room)}</strong>
+                        </div>
+                      ) : null}
+                    </>
                   ) : null}
                   <div className="tenant-dossier-tarif-row">
                     <span>Jenis masa sewa</span><strong>{tenantPricingTermLabel(stay.pricingTerm)}</strong>
@@ -484,18 +533,36 @@ function ActiveStayContent({ stay }: { stay: Stay }) {
                     <span>Akhir masa sewa</span>
                     <strong>{formatDate(stay.plannedCheckOutDate) || 'Belum ditentukan'}</strong>
                   </div>
+                  {stay.room?.hasAc ? (
+                    <div className="tenant-dossier-tarif-row">
+                      <span>Cuci AC terakhir</span>
+                      <strong>
+                        {stay.room.acLastCleanedAt ? formatDate(stay.room.acLastCleanedAt) : 'Belum tercatat'}
+                        {stay.room.acLastCleanedAt && stay.room.acCleanIntervalDays ? (
+                          <em className="text-muted">
+                            {' '}· berikutnya ~{formatDate(new Date(new Date(stay.room.acLastCleanedAt).getTime() + stay.room.acCleanIntervalDays * 86400000).toISOString())}
+                          </em>
+                        ) : null}
+                      </strong>
+                    </div>
+                  ) : null}
                   {stay.notes ? (
                     <div className="tenant-dossier-tarif-row">
                       <span>Catatan</span><strong>{stay.notes}</strong>
                     </div>
                   ) : null}
                 </div>
+                {stay.room?.hasAc ? (
+                  <p className="text-muted small mb-0 mt-2" style={{ fontSize: '0.75rem' }}>
+                    💡 Kuota gratis {formatAcHoursEstimate(freeKwh)}. Perkiraan; kuota mencakup seluruh listrik kamar.
+                  </p>
+                ) : null}
               </Accordion.Body>
             </Accordion.Item>
 
             <Accordion.Item eventKey="fasilitas">
               <Accordion.Header>
-                Fasilitas
+                <span className="me-2">✨</span> Fasilitas
                 {roomFacilities.length > 0 && (
                   <span className="tenant-dossier-count ms-2">{roomFacilities.length}</span>
                 )}
@@ -504,7 +571,12 @@ function ActiveStayContent({ stay }: { stay: Stay }) {
                 {roomFacilities.length > 0 ? (
                   <div className="tenant-dossier-facilities">
                     {roomFacilities.map((f) => (
-                      <span key={f.id} className="tenant-dossier-facility-chip">{f.name}</span>
+                      <span
+                        key={f.id}
+                        className={`tenant-dossier-facility-chip${f.kind === 'STRUCTURAL' ? ' is-structural' : ''}`}
+                      >
+                        {f.name}
+                      </span>
                     ))}
                   </div>
                 ) : (
@@ -517,7 +589,7 @@ function ActiveStayContent({ stay }: { stay: Stay }) {
 
             <Accordion.Item eventKey="inventaris">
               <Accordion.Header>
-                Inventaris kamar
+                <span className="me-2">📦</span> Inventaris kamar
                 {inventoryItems.length > 0 && (
                   <span className="tenant-dossier-count ms-2">{inventoryItems.length} jenis</span>
                 )}
@@ -548,13 +620,13 @@ function ActiveStayContent({ stay }: { stay: Stay }) {
                   </>
                 ) : (
                   <p className="text-muted small mb-0">
-                    Data inventaris belum diisi. Kamu tetap bisa melaporkan barang rusak atau hilang lewat{' '}
+                    Belum ada data. Laporkan barang rusak/hilang lewat{' '}
                     <button
                       type="button"
                       className="tenant-installed-items-report"
                       onClick={() => navigate('/portal/tickets')}
                     >
-                      Laporan Saya
+                      Lapor Masalah
                     </button>.
                   </p>
                 )}
@@ -562,86 +634,70 @@ function ActiveStayContent({ stay }: { stay: Stay }) {
             </Accordion.Item>
 
             <Accordion.Item eventKey="tarif">
-              <Accordion.Header>Tarif & dana titipan</Accordion.Header>
+              <Accordion.Header><span className="me-2">💰</span> Tarif & dana titipan</Accordion.Header>
               <Accordion.Body>
-                <div className="tenant-dossier-tarif">
-                  {priceFacts.map((fact) => (
-                    <div key={fact.label} className="tenant-dossier-tarif-row">
+                <div className="tenant-dossier-tarif-tiles">
+                  {priceFacts.map((fact, i) => (
+                    <div key={fact.label} className={`tenant-dossier-tarif-tile${i === 0 ? ' tile-primary' : ''}`}>
                       <span>{fact.label}</span>
                       <strong>{fact.value}</strong>
                     </div>
                   ))}
                 </div>
-                <p className="text-muted small mb-0 mt-2">
-                  Dana titipan diproses saat keluar final, setelah semua tagihan selesai.
-                </p>
+                {/* Progres dana titipan: disetor vs target */}
+                {(() => {
+                  const target = Number(stay.depositAmountRupiah ?? 0);
+                  const paid = Number(stay.depositPaidAmountRupiah ?? 0);
+                  const pct = target > 0 ? Math.min(100, Math.round((paid / target) * 100)) : 0;
+                  return (
+                    <div className="tenant-deposit-progress">
+                      <div className="d-flex justify-content-between small mb-1">
+                        <span className="text-muted">Dana titipan disetor</span>
+                        <strong><CurrencyDisplay amount={paid} showZero /> / <CurrencyDisplay amount={target} /></strong>
+                      </div>
+                      <div className="tenant-deposit-bar"><div className="tenant-deposit-bar-fill" style={{ width: `${pct}%` }} /></div>
+                      <p className="text-muted small mb-0 mt-1" style={{ fontSize: '0.75rem' }}>
+                        Diproses saat keluar final setelah semua tagihan selesai.
+                      </p>
+                    </div>
+                  );
+                })()}
               </Accordion.Body>
             </Accordion.Item>
           </Accordion>
 
           {blockedText ? <Alert variant="warning" className="tenant-short-alert mt-3 mb-0">{blockedText}</Alert> : null}
         </Card.Body>
-      </Card>
+          </Card>
 
-      {/* Panduan resmi KOST48 dipindah sepenuhnya ke menu "Panduan & Aturan"
-         (MyManualPage) agar tidak duplikat di halaman ini. */}
+          {/* M-3 H-10: banner pengingat catat meter saat mendekati akhir kontrak/perpanjangan */}
+          {nearEnd && !meterRecordedThisMonth && (
+            <Alert variant="warning" className="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-0">
+              <div>
+                <strong>⚡ Waktunya catat meter!</strong>
+                <div className="small mt-1">
+                  Kontrak berakhir dalam <strong>{endDays === 0 ? 'hari ini' : `${endDays} hari`}</strong>.
+                  Catat angka meter listrik (dan air jika aktif) sekarang agar tagihan akhir periode dapat dihitung tepat.
+                </div>
+              </div>
+              <Button variant="warning" size="sm" onClick={() => setShowMeter(true)}>
+                Catat Meter Sekarang
+              </Button>
+            </Alert>
+          )}
+        </div>{/* tenant-stay-col-left */}
 
-      {/* ── Secondary actions ── */}
-      <div className="tenant-stay-secondary-actions mb-3">
-        {/* Tombol perpanjangan SELALU tampil (permintaan owner). Nonaktif + alasan bila belum bisa. */}
-        <Button
-          variant="primary"
-          size="sm"
-          disabled={!canRequestRenew}
-          title={renewDisabledReason}
-          onClick={() => setShowRenewModal(true)}
-        >
-          Ajukan Perpanjangan Masa Sewa
-        </Button>
-        {showCheckoutSecondary && (
-          <Button variant="outline-secondary" size="sm" onClick={() => setShowCheckoutModal(true)}>
-            Ajukan Keluar
-          </Button>
-        )}
-        {/* M-3: tenant boleh catat meter — hanya aktif saat window H-10 terbuka. */}
-        <Button
-          variant={nearEnd && meterWindow.windowOpen ? 'warning' : 'outline-primary'}
-          size="sm"
-          disabled={!meterWindow.windowOpen}
-          title={!meterWindow.windowOpen ? `Pencatatan dibuka H-10 sebelum akhir kontrak (${formatDate(meterWindow.windowStartKey)})` : undefined}
-          onClick={() => setShowMeter(true)}
-        >
-          {nearEnd && meterWindow.windowOpen ? '🔔 Catat Meter Sekarang' : 'Catat Meter Listrik/Air'}
-        </Button>
-      </div>
-      {renewDisabledReason ? (
-        <p className="text-muted small mb-3">{renewDisabledReason}</p>
-      ) : null}
-
-      {/* M-3 H-10: banner pengingat catat meter saat mendekati akhir kontrak/perpanjangan */}
-      {nearEnd && !meterRecordedThisMonth && (
-        <Alert variant="warning" className="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
-          <div>
-            <strong>⚡ Waktunya catat meter!</strong>
-            <div className="small mt-1">
-              Kontrak berakhir dalam <strong>{endDays === 0 ? 'hari ini' : `${endDays} hari`}</strong>.
-              Catat angka meter listrik (dan air jika aktif) sekarang agar tagihan akhir periode dapat dihitung tepat.
-            </div>
-          </div>
-          <Button variant="warning" size="sm" onClick={() => setShowMeter(true)}>
-            Catat Meter Sekarang
-          </Button>
-        </Alert>
-      )}
-
-      {/* Cross-sell saat perpanjangan: tawarkan WiFi/cleaning (opsional) */}
-      <RenewalCrossSellCard />
-
+        <div className="tenant-stay-col-right">
       {/* Survei kepuasan penghuni */}
       <SatisfactionSurveyCard />
 
       {/* SI-3: riwayat sewa (masuk → tiap periode → tagihannya) */}
-      <StayHistoryTimeline stay={stay} invoices={invoices} invoiceHrefBase="/portal/invoices" />
+      <StayHistoryTimeline
+        stay={stay}
+        invoices={invoices}
+        invoiceHrefBase="/portal/invoices"
+        journeySteps={stayJourneySteps}
+      />
 
       {/* ── State alerts ── */}
       {pendingDecisionRequest ? (
@@ -704,103 +760,8 @@ function ActiveStayContent({ stay }: { stay: Stay }) {
       {rejectedRequest ? <Alert variant="warning" className="tenant-short-alert mb-3">Pengajuan perpanjangan ditolak.</Alert> : null}
       {rejectedCheckoutRequest ? <Alert variant="warning" className="tenant-short-alert mb-3">Pengajuan keluar ditolak.</Alert> : null}
 
-      {/* ── Alur masa sewa — collapsible ── */}
-      <details className="tenant-stay-journey mb-3">
-        <summary><span>Alur masa sewa</span></summary>
-        <div className="tenant-stay-journey-body">
-          <div className="tenant-simple-steps">
-            <div className="done"><strong>Masuk kamar</strong><span>Selesai</span></div>
-            <div className="done"><strong>Masa sewa</strong><span>Aktif</span></div>
-            <div className={hasPayableOpenInvoice ? 'waiting' : 'done'}>
-              <strong>Tagihan</strong>
-              <span>{hasPayableOpenInvoice ? 'Perlu dibayar' : hasZeroAmountOpenInvoice ? 'Dicek admin' : 'Beres'}</span>
-            </div>
-            <div className={pendingRenewRequest || pendingCheckoutRequest ? 'waiting' : 'idle'}>
-              <strong>Perpanjang / keluar</strong>
-              <span>{pendingRenewRequest ? 'Perpanjangan diproses' : pendingCheckoutRequest ? 'Keluar diproses' : hasOpenInvoice ? 'Tunggu tagihan beres' : 'Bisa diajukan'}</span>
-            </div>
-          </div>
-          <p className="small text-muted mb-0 mt-3">
-            Deposit adalah dana titipan dan diproses saat keluar final, setelah semua tagihan selesai.
-          </p>
-        </div>
-      </details>
-
-      {/* ── Layanan tambahan ── */}
-      <Card className="tenant-engagement-card border-0 mb-4">
-        <Card.Body>
-          <div className="tenant-engagement-head">
-            <div>
-              <div className="command-eyebrow">Bantu KOST48 jadi lebih nyaman</div>
-              <h3>Layanan tambahan yang mungkin kamu butuhkan</h3>
-              <p>Estimasi tarif di bawah. Minat? Kirim Saran ke pengelola untuk diproses.</p>
-            </div>
-            <Button variant="outline-primary" size="sm" onClick={() => navigate('/portal/tickets')}>
-              Kirim Saran
-            </Button>
-          </div>
-          {/* PUB-LAYANAN-TAMBAHAN: layanan + tarif yang dikelola owner. */}
-          {servicesQuery.data && servicesQuery.data.length > 0 ? (
-            <div className="tenant-service-tariff-list mb-3">
-              {servicesQuery.data.map((svc) => {
-                const alreadyMinat = pendingServiceIds.has(svc.id);
-                return (
-                  <div key={svc.id} className="d-flex justify-content-between align-items-center gap-2 py-2 border-bottom">
-                    <div>
-                      <strong>{svc.name}</strong>
-                      {svc.description ? <div className="small text-muted">{svc.description}</div> : null}
-                    </div>
-                    <div className="d-flex align-items-center gap-2 text-nowrap">
-                      <div className="text-end fw-semibold">
-                        <CurrencyDisplay amount={svc.priceRupiah} />
-                        {svc.unit ? <div className="small text-muted fw-normal">{svc.unit}</div> : null}
-                      </div>
-                      {alreadyMinat ? (
-                        <span className="badge bg-success-subtle text-success border border-success-subtle">Sudah diminati</span>
-                      ) : (
-                        <Button
-                          variant="outline-success"
-                          size="sm"
-                          disabled={interestMutation.isPending}
-                          onClick={async () => {
-                            const ok = await confirm({ title: 'Minat Layanan', message: `Tertarik dengan "${svc.name}" (Rp ${svc.priceRupiah.toLocaleString('id-ID')}${svc.unit ? ` ${svc.unit}` : ''})? Pengelola akan menghubungi Anda.`, confirmLabel: 'Ya, Saya Minat', variant: 'primary' });
-                            if (!ok) return;
-                            interestMutation.mutate(svc.id);
-                          }}
-                        >
-                          Saya Minat
-                        </Button>
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          ) : null}
-          <div className="tenant-service-interest-grid">
-            {TENANT_SERVICE_IDEAS.slice(0, 4).map((service) => (
-              <div key={service.label} className="tenant-service-interest-chip">
-                <strong>{service.label}</strong>
-                <span>{service.helper}</span>
-              </div>
-            ))}
-          </div>
-          <details className="tenant-service-extra-details">
-            <summary>Lihat ide layanan lain</summary>
-            <div className="tenant-service-interest-grid mt-2">
-              {TENANT_SERVICE_IDEAS.slice(4).map((service) => (
-                <div key={service.label} className="tenant-service-interest-chip">
-                  <strong>{service.label}</strong>
-                  <span>{service.helper}</span>
-                </div>
-              ))}
-            </div>
-          </details>
-          <div className="tenant-engagement-note">
-            Saran dibaca pengelola. Belum tersimpan otomatis sebagai survey; kirim lewat Laporan Saya.
-          </div>
-        </Card.Body>
-      </Card>
+        </div>{/* tenant-stay-col-right */}
+      </div>{/* tenant-stay-dashboard-grid */}
 
       <RenewRequestModal show={showRenewModal} onHide={() => setShowRenewModal(false)} onSuccess={() => {
         queryClient.invalidateQueries({ queryKey: ['portal-renew-requests', stay.id] });
