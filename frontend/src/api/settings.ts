@@ -13,6 +13,8 @@ export type OperationalSetting = {
   galonRupiah: number;
   petDepositRupiah: number;
   extraOccupantFeePercent: number;
+  // Fitur tenant toggle
+  tenantLoyaltyEnabled: boolean;
   // R3: AI/DeepSeek fields
   deepseekModel?: string;
   deepseekFinanceModel?: string;
@@ -48,6 +50,7 @@ export type PublicConfig = {
   galonRupiah: number;
   petDepositRupiah: number;
   extraOccupantFeePercent: number;
+  tenantLoyaltyEnabled: boolean;
 };
 
 export async function fetchPublicConfig() {

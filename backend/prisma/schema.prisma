@@ -23,6 +23,7 @@ enum Gender {
 
 enum RoomStatus {
   AVAILABLE
+  BOOKING
   RESERVED
   OCCUPIED
   MAINTENANCE
@@ -2111,6 +2112,8 @@ model OperationalSetting {
   aiLogUsage                   Boolean  @default(true)
   aiDraftRetentionDays         Int      @default(60)
   capitalizationThresholdByCategory String? // JSON: {"SALARY":500000,...}
+  // ── Fitur tenant toggle ──────────────────────────────────────────────────
+  tenantLoyaltyEnabled          Boolean  @default(false)  // Loyalty/reward tenant (poin, leaderboard, katalog reward)
   // ──────────────────────────────────────────────────────────────────────────
   updatedAt                     DateTime @updatedAt
   updatedById                   Int?

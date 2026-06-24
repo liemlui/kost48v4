@@ -44,7 +44,9 @@ export const adminSections: NavigationSection[] = [
       { to: '/stays', label: 'Masa Sewa & Penghuni', icon: '🏠', hint: 'Booking, masa sewa aktif, perpanjangan, keluar, dan daftar penghuni.', activePaths: ['/stays', '/tenants', '/renew-requests'] },
       { to: '/invoices', label: 'Keuangan', icon: '🧾', hint: 'Tagihan, review pembayaran, voucher WiFi, pendapatan tambahan, dan pengeluaran.', activePaths: ['/invoices', '/invoice-payments', '/payment-submissions/review', '/wifi-sales', '/ancillary-revenue', '/expenses', '/finance/accounting-setup', '/finance/assets'] },
       { to: '/tickets', label: 'Staff & Tiket', icon: '👷', hint: 'Tiket operasional, staff, checklist, laporan lapangan, dan kinerja.', activePaths: ['/tickets', '/staff-routines', '/staff-performance'] },
+      { to: '/surveys', label: 'Survei Penghuni', icon: '⭐', hint: 'Lihat semua survei kepuasan, rating, komentar, dan ringkasan.' },
       { to: '/rooms', label: 'Kamar & Stok', icon: '🏘️', hint: 'Status kamar, barang kamar, stok gudang, mutasi stok, dan catatan meter.', activePaths: ['/rooms', '/inventory', '/room-items', '/inventory-items', '/inventory-movements', '/meter-readings'] },
+      { to: '/ac-maintenance', label: 'Perawatan AC', icon: '❄️', hint: 'Pantau pemakaian AC dan jadwalkan cuci AC secara konsisten.' },
       { to: '/loyalty', label: 'Loyalitas & Reward', icon: '🎁', hint: 'Setujui penukaran reward tenant dan lihat katalog.' },
     ],
   },
@@ -71,7 +73,9 @@ const staffSections: NavigationSection[] = [
   },
 ];
 
-function getTenantSections(stage: TenantPortalStage = 'occupied'): NavigationSection[] {
+export type TenantFeatures = { loyaltyEnabled?: boolean };
+
+function getTenantSections(stage: TenantPortalStage = 'occupied', features?: TenantFeatures): NavigationSection[] {
   if (stage === 'browsing') {
     return [{
       title: 'Portal Penghuni',
@@ -95,16 +99,17 @@ function getTenantSections(stage: TenantPortalStage = 'occupied'): NavigationSec
     title: 'Portal Penghuni',
     links: [
       { to: '/portal/stay', label: 'Panduan Kos Saya', icon: '🏠', hint: 'Kamar, masa sewa, tagihan, dan aksi berikutnya.' },
-      { to: '/portal/invoices', label: 'Tagihan Saya', icon: '🧾', hint: 'Tagihan, status, dan tindak lanjut pembayaran.' },
-      { to: '/portal/tickets', label: 'Laporan Saya', icon: '🎫', hint: 'Buat laporan bantuan dan pantau progresnya.' },
-      // { to: '/portal/loyalty', label: 'Poin & Reward', icon: '🎁', hint: 'Kumpulkan poin loyalitas dan tukar dengan reward.' }, // PENDING
-      { to: '/portal/manual', label: 'Panduan & Aturan', icon: '📖', hint: 'Manual lengkap aturan, pembayaran, dan layanan kos.' },
+      { to: '/portal/invoices', label: 'Bayar Tagihan', icon: '💳', hint: 'Tagihan, status, dan tindak lanjut pembayaran.' },
+      { to: '/portal/tickets', label: 'Lapor Masalah', icon: '🛠️', hint: 'Laporkan kerusakan atau kebutuhan bantuan dan pantau progresnya.' },
+      { to: '/portal/announcements', label: 'Pengumuman', icon: '📢', hint: 'Info terbaru dari pengelola KOST48.' },
+      { to: '/portal/manual', label: 'Panduan', icon: '📖', hint: 'Aturan, pembayaran, dan layanan kos.' },
       { to: '/portal/wifi', label: 'Pesan WiFi', icon: '📶', hint: 'Lihat prosedur pembelian paket WiFi melalui WhatsApp.' },
+      ...(features?.loyaltyEnabled ? [{ to: '/portal/loyalty', label: 'Poin & Reward', icon: '🎁', hint: 'Poin kebaikan, leaderboard, katalog reward, dan referral.' }] : []),
     ],
   }];
 }
 
-export function getNavigationSections(role?: Role, tenantStage: TenantPortalStage = 'occupied'): NavigationSection[] {
+export function getNavigationSections(role?: Role, tenantStage: TenantPortalStage = 'occupied', features?: TenantFeatures): NavigationSection[] {
   switch (role) {
     case 'OWNER':
       return ownerSections;
@@ -113,14 +118,14 @@ export function getNavigationSections(role?: Role, tenantStage: TenantPortalStag
     case 'STAFF':
       return staffSections;
     case 'TENANT':
-      return getTenantSections(tenantStage);
+      return getTenantSections(tenantStage, features);
     default:
       return adminSections;
   }
 }
 
-export function getNavigationLinks(role?: Role, tenantStage: TenantPortalStage = 'occupied'): NavigationLink[] {
-  return getNavigationSections(role, tenantStage).flatMap((section) => section.links);
+export function getNavigationLinks(role?: Role, tenantStage: TenantPortalStage = 'occupied', features?: TenantFeatures): NavigationLink[] {
+  return getNavigationSections(role, tenantStage, features).flatMap((section) => section.links);
 }
 
 export function getDefaultRoute(role?: Role, tenantStage: TenantPortalStage = 'occupied'): string {

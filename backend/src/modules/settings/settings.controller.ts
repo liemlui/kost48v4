@@ -29,6 +29,7 @@ export class SettingsController {
         galonRupiah: s.galonRupiah,
         petDepositRupiah: s.petDepositRupiah,
         extraOccupantFeePercent: s.extraOccupantFeePercent,
+        tenantLoyaltyEnabled: s.tenantLoyaltyEnabled,
       },
     };
   }

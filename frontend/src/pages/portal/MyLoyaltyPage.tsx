@@ -1,8 +1,10 @@
 import { useState } from 'react';
 import { Alert, Badge, Button, Card, Col, Row, Spinner } from 'react-bootstrap';
+import { Navigate } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { getLoyaltyLeaderboard, getMyLoyalty, getMyPeerReportsAboutMe, getMyRedemptions, getReferralCode, getRewards, markPeerReportImproved, requestRedemption } from '../../api/loyalty';
 import { getCleanlinessRanking } from '../../api/marketing';
+import { fetchPublicConfig } from '../../api/settings';
 
 const STATUS_VARIANT: Record<string, string> = {
   PENDING: 'warning',
@@ -15,6 +17,16 @@ const STATUS_VARIANT: Record<string, string> = {
 export default function MyLoyaltyPage() {
   const queryClient = useQueryClient();
   const [error, setError] = useState<string | null>(null);
+
+  // Guard: redirect jika fitur loyalty dinonaktifkan owner
+  const configQuery = useQuery({
+    queryKey: ['public-config'],
+    queryFn: fetchPublicConfig,
+    staleTime: 60_000,
+  });
+  if (!configQuery.isLoading && configQuery.data && !configQuery.data.tenantLoyaltyEnabled) {
+    return <Navigate to="/portal/stay" replace />;
+  }
 
   const loyaltyQuery = useQuery({ queryKey: ['me-loyalty'], queryFn: getMyLoyalty });
   const rewardsQuery = useQuery({ queryKey: ['loyalty-rewards'], queryFn: () => getRewards(false) });

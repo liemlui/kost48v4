@@ -691,6 +691,7 @@ function TariffSettingsPanel() {
       galonRupiah: Number(form?.galonRupiah ?? 20000),
       petDepositRupiah: Number(form?.petDepositRupiah ?? 100000),
       extraOccupantFeePercent: Number(form?.extraOccupantFeePercent ?? 20),
+      tenantLoyaltyEnabled: Boolean(form?.tenantLoyaltyEnabled),
     }),
     onSuccess: (updated) => { setForm(updated); setSavedMsg('Konstanta tersimpan.'); qc.invalidateQueries({ queryKey: ['operational-settings'] }); },
   });
@@ -775,6 +776,17 @@ function TariffSettingsPanel() {
               <Form.Control type="number" min={0} max={100} value={form.extraOccupantFeePercent ?? 20} onChange={(e) => set('extraOccupantFeePercent', Number(e.target.value))} />
               <Form.Text muted>% dari sewa per penghuni ekstra (di atas batas gratis per roomSize).</Form.Text>
             </Form.Group>
+          </Col>
+          <Col xs={12}><hr className="my-1" /><p className="text-muted small mb-0">Fitur tenant</p></Col>
+          <Col md={12}>
+            <Form.Check
+              type="switch"
+              id="tenant-loyalty-toggle"
+              label="Tampilkan fitur Loyalitas & Reward untuk penghuni (poin, leaderboard, katalog reward, referral)"
+              checked={form.tenantLoyaltyEnabled ?? false}
+              onChange={(e) => set('tenantLoyaltyEnabled', e.target.checked)}
+            />
+            <Form.Text muted>Nonaktifkan saat katalog reward belum siap. Penghuni tidak akan melihat menu Loyalitas di portal.</Form.Text>
           </Col>
         </Row>
         <Button className="mt-3" onClick={() => { setSavedMsg(''); save.mutate(); }} disabled={save.isPending}>

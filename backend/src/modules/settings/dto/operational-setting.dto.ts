@@ -13,6 +13,8 @@ export class UpdateOperationalSettingDto {
   @IsOptional() @IsInt() @Min(0) @Max(1000000) galonRupiah?: number;
   @IsOptional() @IsInt() @Min(0) @Max(1000000) petDepositRupiah?: number;
   @IsOptional() @IsInt() @Min(0) @Max(100) extraOccupantFeePercent?: number;
+  // Fitur tenant toggle
+  @IsOptional() @IsBoolean() tenantLoyaltyEnabled?: boolean;
   // AI / DeepSeek (R3)
   @IsOptional() @IsString() @MaxLength(100) deepseekModel?: string;
   @IsOptional() @IsString() @MaxLength(100) deepseekFinanceModel?: string;

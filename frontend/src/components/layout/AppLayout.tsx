@@ -1,4 +1,5 @@
 import { type ReactNode, lazy, Suspense, useEffect, useMemo, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { useTenantPortalStage } from '../../hooks/useTenantPortalStage';
 import { Button, Offcanvas } from 'react-bootstrap';
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
@@ -23,6 +24,7 @@ import {
 } from '../../config/navigation';
 import { useAuth } from '../../context/AuthContext';
 import { useConfirm } from '../common/ConfirmProvider';
+import { fetchPublicConfig } from '../../api/settings';
 
 function getRoleLabel(role?: string) {
   switch (role) {
@@ -290,15 +292,26 @@ export default function AppLayout({ children }: { children?: ReactNode }) {
     navigate(mode === 'admin' ? '/admin-dashboard' : '/owner-dashboard');
   };
 
+  // Fetch public config for tenant feature toggles (loyalty, dll)
+  const publicConfigQuery = useQuery({
+    queryKey: ['public-config'],
+    queryFn: fetchPublicConfig,
+    enabled: isTenant,
+    staleTime: 60_000,
+  });
+  const tenantFeatures = useMemo(() => ({
+    loyaltyEnabled: publicConfigQuery.data?.tenantLoyaltyEnabled ?? false,
+  }), [publicConfigQuery.data]);
+
   const sections = useMemo(() => {
     if (isOwner && ownerViewMode === 'admin') return ownerAdminSections;
-    return getNavigationSections(user?.role, tenantStage);
-  }, [user?.role, tenantStage, isOwner, ownerViewMode]);
+    return getNavigationSections(user?.role, tenantStage, tenantFeatures);
+  }, [user?.role, tenantStage, isOwner, ownerViewMode, tenantFeatures]);
 
   const links = useMemo(() => {
     if (isOwner && ownerViewMode === 'admin') return ownerAdminSections.flatMap((s) => s.links);
-    return getNavigationLinks(user?.role, tenantStage);
-  }, [user?.role, tenantStage, isOwner, ownerViewMode]);
+    return getNavigationLinks(user?.role, tenantStage, tenantFeatures);
+  }, [user?.role, tenantStage, isOwner, ownerViewMode, tenantFeatures]);
 
   const breadcrumbParts = useMemo(() => {
     const parts = getBreadcrumbParts(location.pathname, links);

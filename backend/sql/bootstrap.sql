@@ -731,4 +731,7 @@ CHECK (
 -- A5 follow-up: kamar kotor pasca forced-checkout boleh dipesan
 ALTER TABLE "Room" ADD COLUMN IF NOT EXISTS "allowBookingWhileCleaning" BOOLEAN NOT NULL DEFAULT FALSE;
 
+-- Toggle fitur Loyalitas & Reward untuk tenant (Owner ON/OFF dari Settings)
+ALTER TABLE "OperationalSetting" ADD COLUMN IF NOT EXISTS "tenantLoyaltyEnabled" BOOLEAN NOT NULL DEFAULT FALSE;
+
 COMMIT;
