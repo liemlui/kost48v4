@@ -4,6 +4,42 @@
 
 ## Changelog Ringkas
 
+### 2026-06-24 (lanjut-10) — Badge Pengumuman + Indikator Update Laporan + Timeline Tiket
+- **`StayAnnouncementBanner`**: kini menampilkan badge `"N aktif"` + navigasi ke daftar pengumuman (`/portal/announcements`) bila >1 pengumuman aktif.
+- **Fact chip "Laporan" di `MyStayPage`**: dot merah muncul bila ada tiket dengan `updatedAt` > terakhir kali tenant lihat halaman stay (via `sessionStorage`). Label `"Ada update"` menggantikan `"Aktif"`.
+- **`MyTicketsPage`**: tiket kini ditampilkan sebagai **timeline vertikal** — node: Dibuat → Ditugaskan (ke staff) → Dieskalasi (jika ada) → Selesai dikerjakan → Ditutup. Setiap node menampilkan timestamp asli dari DB; node yang belum terjadi tampil redup ("Menunggu").
+- CSS: `.asb-badge`, `.fact-dot`, `.ticket-timeline*` di `10-misc.css`. Build LULUS (tsc backend + vite frontend).
+
+### 2026-06-24 (lanjut-9) — Denda kerusakan di form Final Checkout
+- **`CompleteStayDto`** sekarang menerima `damageChargeRupiah` (opsional) + `damageNote` (opsional) — admin bisa mencatat biaya kerusakan langsung di form final checkout.
+- **`complete()`** (`stays.service.ts`) otomatis membuat invoice `PENALTY` setelah stay COMPLETED bila ada denda. Invoice dibuat SETELAH blocking-check sehingga tidak memblokir checkout.
+- Invoice PENALTY otomatis disettle terhadap deposit jaminan saat `processDeposit()` (Q5: deposit auto-cover semua invoice terbuka, termasuk non-meter).
+- Frontend `CompleteStayModal`: input nominal denda (Rp) + catatan kerusakan (opsional, wajib diisi bila ada nominal).
+- Build LULUS (tsc backend + vite frontend).
+
+### 2026-06-24 (lanjut-8) — Survei Kepuasan: Gate 30 Hari + Re-submit + Halaman Owner
+- **Timing gate 30 hari**: tenant hanya bisa isi survei setelah minimal 30 hari menginap (cek `checkInDate` stay aktif). Sebelumnya bisa isi hari pertama — rating tidak valid.
+- **Re-submit 6 bulan**: tenant bisa isi ulang survei setiap 6 bulan (bukan sekali seumur tenant). Jika belum 6 bulan sejak survei terakhir, tampil info cooldown + tanggal eligible berikutnya.
+- **Halaman owner `/admin/surveys`**: halaman baru (`AdminSurveysPage`) untuk OWNER/ADMIN — tabel semua survei, ringkasan agregat (rata-rata per aspek, rekomendasi rate), filter rating, sort, komentar terbaru. Sebelumnya endpoint `GET /surveys` sudah ada tapi tidak ada UI.
+- **Ringkasan dashboard admin**: banner kecil di overview dashboard admin yang menampilkan jumlah respons, rata-rata rating, dan % rekomendasi — dengan link "Lihat semua →" ke `/surveys`.
+- **Nav sidebar**: item "⭐ Survei Penghuni" di sidebar admin, route title "Survei Penghuni".
+- Backend: `mineExists()` return shape baru (`eligible`, `reason`, `eligibleAt`, `nextEligibleAt`). Frontend: `SatisfactionSurveyCard` handle 4 state (belum eligible/cooldown/re-submit/fresh). Build LULUS.
+
+### 2026-06-24 (lanjut-7) — Konsistensi Fasilitas↔Inventaris + Monitoring AC
+- **Spec kanonik** (`backend/.../rooms/room-facility-spec.ts` + mirror `frontend/.../utils/roomFacilitySpec.ts`): turunkan "expected facility" dari kriteria kamar (category/roomType/roomSize/hasAc), tandai STRUCTURAL (KM/mezzanine/ukuran) vs INVENTORY_BACKED (AC/kipas/kasur/lemari). `computeFacilityGap` jadi sumber tunggal gap.
+- **Cek admin**: `GET /rooms/:id` sertakan `facilityCheck` (AC disorot via `acGap`); panel `FacilityGapPanel` + badge ⚠️ di tab Fasilitas (`RoomDetailPage`); `FacilityManager` kini bisa menautkan fasilitas → barang gudang (`inventoryItemId`).
+- **Katalog publik**: kamar dengan gap fasilitas↔inventaris (mis. AC kurang) otomatis disembunyikan dari `/public/rooms` (list + detail) via `MarketingPublicRoomsService`.
+- **Tenant**: accordion Fasilitas selalu terisi dari kriteria (AC/kipas, KM dalam/luar, mezzanine, ukuran); Info kamar tampilkan kapasitas AC ½ PK, jenis KM, ukuran+maks penghuni, jadwal cuci AC, dan estimasi "30 kWh ≈ ~X jam AC/hari" (`utils/acUsageEstimate.ts`).
+- **Monitoring AC**: halaman admin `/ac-maintenance` (`GET /rooms/ac-maintenance` + `PATCH /rooms/:id/ac-clean`) — status hibrid (interval+kWh), tombol Catat Cuci AC (set `acLastCleanedAt`, tutup tiket `AC_CLEANING`).
+- **Backfill**: `scripts/seed-facilities-inventory.js` (`npm run seed:facilities`, idempoten, UAT 5433) — isi item gudang + RoomItem (ASSIGN_TO_ROOM) + fasilitas tertaut + standar AC ½ PK (380W) untuk 13 kamar.
+- **Tanpa migrasi** (semua kolom sudah ada). tsc backend + build frontend LULUS.
+
+### 2026-06-24 (lanjut-6) — /portal/stay jadi dashboard penghuni modern
+- **Restrukturisasi dashboard** (`MyStayPage.tsx`): tata letak grid 2 kolom (1 kolom di mobile), tanpa ubah flow/modal/aturan.
+- **4 modul baru** (`components/portal/stay/`): `LeaseProgressHero` (ring progres masa sewa via DonutGauge — % terlewati, sisa hari, lama tinggal), `UtilityInsightCard` (pemakaian + estimasi biaya listrik/air sesuai logika MeterCycleModal: free 30 kWh, toggle air; + mini-tren HorizontalBarChart), `StayQuickActions` (grid ikon: bayar/catat meter/perpanjang/keluar/lapor/pengumuman/panduan/WA admin), `StayAnnouncementBanner` (pengumuman aktif terbaru).
+- **Progres deposit**: bar disetor vs target di accordion Tarif.
+- **Refactor**: komputasi meter diekstrak ke `utils/meterUsage.ts` (dipakai bersama `MeterTab`); helper `getLeaseProgress`/`formatTenure` di `utils/dateTime.ts`.
+
 ### 2026-06-24 (lanjut-5) — ProfilePage: KTP OCR + Marketing fields + UX perbaikan portal
 - **Profil Tenant lengkap**: KTP scan OCR (tesseract.js, client-side, tidak upload ke server) auto-isi gender/tgl-lahir/kota; tenant audit & koreksi hasil OCR sebelum terapkan ke form.
 - **Marketing analytics fields**: `maritalStatus`, `vehicleOwnership`, `smokingHabit`, `howDidYouHear` ditambah ke schema Prisma + enum backend + DTO + service; bebas diedit (tidak dikunci); section terpisah di ProfilePage.

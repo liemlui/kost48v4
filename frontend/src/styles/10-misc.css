@@ -1,4 +1,4 @@
-﻿/* FASE B-2: shell Inventaris terpadu */
+/* FASE B-2: shell Inventaris terpadu */
 .inventory-shell-head {
   margin-bottom: 0.6rem;
 }
@@ -1834,6 +1834,17 @@ div.tenant-stay-fact-chip {
   color: #64748b;
   line-height: 1;
 }
+.tenant-stay-fact-chip .fact-label .fact-dot {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #ef4444;
+  margin-left: 4px;
+  vertical-align: middle;
+  position: relative;
+  top: -1px;
+}
 
 .tenant-stay-fact-chip strong {
   display: block;
@@ -1958,6 +1969,13 @@ div.tenant-stay-fact-chip {
   padding: 0.22rem 0.58rem;
   font-size: 0.78rem;
   color: #334155;
+}
+
+/* Chip struktural (kamar mandi, mezzanine, ukuran) — beda warna agar mudah dibedakan dari barang. */
+.tenant-dossier-facility-chip.is-structural {
+  background: #eff6ff;
+  border-color: #bfdbfe;
+  color: #1e40af;
 }
 
 /* Inventory list */
@@ -4374,7 +4392,40 @@ div.tenant-stay-fact-chip {
   text-align: center;
 }
 
-/* /portal/stay unified stay history */
+/* ── /portal/stay dashboard (power-up) ───────────────────────────── */
+.tenant-stay-hero { background:#fff; border-radius:20px; box-shadow:0 4px 18px rgba(14,30,60,0.06); }
+.tenant-lease-hero { display:flex; align-items:center; gap:1.1rem; flex-wrap:wrap; }
+.tenant-lease-hero-center { display:flex; flex-direction:column; align-items:center; line-height:1.1; }
+.tenant-lease-hero-center strong { font-size:1.5rem; color:#102033; }
+.tenant-lease-hero-center small { font-size:.72rem; color:#64748b; }
+.tenant-lease-hero-stats { flex:1; min-width:200px; }
+.tenant-lease-hero-pct { font-size:1.05rem; font-weight:750; color:#1e3a5f; margin:.1rem 0 .55rem; }
+.tenant-lease-hero-list { list-style:none; margin:0; padding:0; display:grid; gap:.35rem; }
+.tenant-lease-hero-list li { display:flex; justify-content:space-between; gap:.75rem; font-size:.82rem; }
+.tenant-lease-hero-list li span { color:#64748b; }
+.tenant-lease-hero-list li strong { color:#102033; text-align:right; }
+
+.tenant-quick-actions-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:.6rem; margin-bottom:1rem; }
+.tenant-quick-action { position:relative; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:.32rem; padding:.85rem .5rem; border-radius:16px; border:1px solid rgba(148,163,184,.22); background:#fff; box-shadow:0 2px 8px rgba(14,30,60,.04); cursor:pointer; text-decoration:none; color:#1e293b; transition:transform .12s ease, box-shadow .12s ease; }
+.tenant-quick-action:hover:not(:disabled) { transform:translateY(-2px); box-shadow:0 6px 16px rgba(14,30,60,.1); }
+.tenant-quick-action:disabled { opacity:.5; cursor:not-allowed; }
+.tenant-quick-action .qa-icon { font-size:1.35rem; line-height:1; }
+.tenant-quick-action .qa-label { font-size:.74rem; font-weight:700; text-align:center; color:#334155; }
+.tenant-quick-action .qa-badge { position:absolute; top:.4rem; right:.5rem; min-width:18px; height:18px; padding:0 5px; border-radius:9px; background:#ef4444; color:#fff; font-size:.66rem; font-weight:800; display:flex; align-items:center; justify-content:center; }
+.tenant-quick-action.tone-warning { background:#fff9eb; border-color:#fde3a7; }
+.tenant-quick-action.tone-info { background:#eff6ff; border-color:#bfdbfe; }
+
+.tenant-stay-announcement-banner { display:flex; align-items:center; gap:.7rem; width:100%; text-align:left; border:1px solid #bfdbfe; background:#eff6ff; border-radius:14px; padding:.7rem .9rem; margin-bottom:1rem; cursor:pointer; }
+.tenant-stay-announcement-banner .asb-icon { font-size:1.2rem; }
+.tenant-stay-announcement-banner .asb-body { display:flex; flex-direction:column; gap:.1rem; flex:1; min-width:0; }
+.tenant-stay-announcement-banner .asb-body strong { font-size:.86rem; color:#1e3a5f; }
+.tenant-stay-announcement-banner .asb-body small { font-size:.76rem; color:#475569; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.tenant-stay-announcement-banner .asb-badge { font-size:.72rem; font-weight:700; color:#1d4ed8; background:#dbeafe; border-radius:20px; padding:.15rem .55rem; white-space:nowrap; }
+.tenant-stay-announcement-banner .asb-cta { font-size:.78rem; font-weight:750; color:#1d4ed8; white-space:nowrap; }
+
+.tenant-stay-dashboard-grid { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:1rem; align-items:start; }
+.tenant-stay-col-left, .tenant-stay-col-right { display:flex; flex-direction:column; gap:1rem; min-width:0; }
+
 .stay-history-card {
   overflow: hidden;
 }
@@ -4687,8 +4738,97 @@ div.tenant-stay-fact-chip {
   transition: width 0.2s ease;
 }
 
+.tenant-utility-insight { background:#fff; border-radius:18px; box-shadow:0 4px 18px rgba(14,30,60,.06); }
+.tenant-utility-insight-title { font-size:1rem; font-weight:750; color:#1e3a5f; margin:.1rem 0 .7rem; }
+.tenant-utility-tiles { display:grid; grid-template-columns:1fr 1fr; gap:.6rem; }
+.tenant-utility-tile { border:1px solid rgba(148,163,184,.22); border-radius:14px; padding:.7rem; background:#f8fbff; }
+.tenant-utility-tile .ut-label { display:block; font-size:.72rem; color:#64748b; font-weight:700; }
+.tenant-utility-tile .ut-usage { display:block; font-size:1.15rem; color:#102033; margin:.15rem 0; }
+.tenant-utility-tile .ut-cost { display:block; font-size:.82rem; color:#1e3a5f; font-weight:600; }
+.tenant-utility-tile .ut-note { display:block; font-size:.68rem; color:#64748b; margin-top:.2rem; }
+.tenant-utility-trend { margin-top:.9rem; }
+.tenant-utility-trend .ut-trend-head { font-size:.76rem; font-weight:700; color:#52627a; margin-bottom:.3rem; }
+.tenant-utility-total { margin-top:.8rem; font-size:.84rem; color:#334155; }
+.tenant-utility-empty { padding:.4rem 0; }
+
+.tenant-deposit-bar { height:8px; border-radius:6px; background:rgba(148,163,184,.2); overflow:hidden; }
+.tenant-deposit-bar-fill { height:100%; background:#0072B2; border-radius:6px; transition:width .3s ease; }
+
+/* Tarif tiles — 2×2 grid di accordion Tarif & dana titipan */
+.tenant-dossier-tarif-tiles {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.45rem;
+  margin-bottom: 0.85rem;
+}
+
+.tenant-dossier-tarif-tile {
+  background: #f8fbff;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  border-radius: 12px;
+  padding: 0.55rem 0.65rem;
+}
+
+.tenant-dossier-tarif-tile.tile-primary {
+  background: linear-gradient(135deg, #eff6ff, #f0f7ff);
+  border-color: #bfdbfe;
+}
+
+.tenant-dossier-tarif-tile > span {
+  display: block;
+  font-size: 0.66rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 700;
+  color: #64748b;
+  margin-bottom: 0.2rem;
+}
+
+.tenant-dossier-tarif-tile > strong {
+  display: block;
+  font-size: 0.9rem;
+  font-weight: 800;
+  color: #102033;
+}
+
+.tenant-dossier-tarif-tile.tile-primary > strong {
+  color: #1d4ed8;
+}
+
+.tenant-deposit-progress {
+  background: #f8fafc;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  border-radius: 12px;
+  padding: 0.6rem 0.65rem;
+}
+
+/* Accordion icon spacing — emoji di header */
+.tenant-dossier-accordion .accordion-button {
+  font-weight: 700;
+  font-size: 0.86rem;
+  color: #1e3a5f;
+}
+
+.tenant-dossier-accordion .accordion-button:not(.collapsed) {
+  color: #1d4ed8;
+  background: rgba(239, 246, 255, 0.6);
+}
+
+@media (max-width: 575px) {
+  .tenant-dossier-tarif-tiles { gap: 0.35rem; }
+  .tenant-dossier-tarif-tile { padding: 0.45rem 0.5rem; border-radius: 10px; }
+  .tenant-dossier-tarif-tile > span { font-size: 0.62rem; }
+  .tenant-dossier-tarif-tile > strong { font-size: 0.82rem; }
+  .tenant-deposit-progress { padding: 0.45rem 0.5rem; border-radius: 10px; }
+}
 
 @media (max-width: 820px) {
+  .tenant-stay-dashboard-grid { grid-template-columns:1fr; }
+  .tenant-quick-actions-grid { grid-template-columns:repeat(4,1fr); gap:.45rem; }
+  .tenant-quick-action { padding:.65rem .35rem; }
+  .tenant-quick-action .qa-label { font-size:.66rem; }
+  .tenant-utility-tiles { grid-template-columns:1fr; }
+  .tenant-lease-hero { justify-content:center; }
   .stay-history-head { display: grid; }
   .stay-history-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); width: 100%; }
   .stay-history-step-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -4704,4 +4844,71 @@ div.tenant-stay-fact-chip {
   .stay-history-event-body { padding: 0.58rem 0.62rem; border-radius: 13px; }
   .stay-history-invoice-pill,
   .stay-history-utility-pill { border-radius: 13px; }
+}
+
+/* ── Ticket timeline (MyTicketsPage) ─────────────────────────────────────── */
+
+.ticket-timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding: 0.2rem 0;
+}
+
+.ticket-timeline-node {
+  display: flex;
+  gap: 0.6rem;
+  min-height: 2rem;
+}
+
+.ticket-timeline-rail {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 22px;
+}
+
+.ticket-timeline-dot {
+  font-size: 0.85rem;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.ticket-timeline-line {
+  width: 2px;
+  flex: 1;
+  min-height: 12px;
+  background: #d1d5db;
+  margin: 2px 0;
+}
+
+.ticket-timeline-node.is-done .ticket-timeline-line {
+  background: #86efac;
+}
+
+.ticket-timeline-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.04rem;
+  padding-bottom: 0.6rem;
+}
+
+.ticket-timeline-label {
+  font-size: 0.8rem;
+  font-weight: 650;
+  color: #1e293b;
+}
+
+.ticket-timeline-node.is-pending .ticket-timeline-label {
+  color: #94a3b8;
+}
+
+.ticket-timeline-ts {
+  font-size: 0.7rem;
+  color: #64748b;
+}
+
+.ticket-timeline-ts.muted {
+  color: #94a3b8;
+  font-style: italic;
 }

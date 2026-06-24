@@ -1,4 +1,4 @@
-import { type ReactNode, useMemo, useState, useCallback } from 'react';
+import { type ReactNode, useEffect, useMemo, useState, useCallback } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Accordion, Alert, Button, Card, Spinner } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
@@ -171,6 +171,25 @@ function ActiveStayContent({ stay }: { stay: Stay }) {
   );
 
   const activeTickets = useMemo(() => tickets.filter((t) => !['CLOSED', 'CANCELLED'].includes((t.status ?? '').toUpperCase())), [tickets]);
+
+  // Indikator "update baru": dot merah jika ada tiket yang berubah sejak terakhir tenant lihat halaman ini
+  const LAST_STAY_VIEW_KEY = 'kost48_last_stay_view';
+  const hasNewTicketUpdates = useMemo(() => {
+    try {
+      const lastView = sessionStorage.getItem(LAST_STAY_VIEW_KEY);
+      if (!lastView) return activeTickets.length > 0; // pertama kali lihat = semua dianggap baru
+      const lastViewMs = Number(lastView);
+      if (Number.isNaN(lastViewMs)) return false;
+      return activeTickets.some((t) => {
+        const updated = new Date(t.updatedAt ?? t.createdAt ?? 0).getTime();
+        return updated > lastViewMs;
+      });
+    } catch { return false; }
+  }, [activeTickets]);
+  useEffect(() => {
+    try { sessionStorage.setItem(LAST_STAY_VIEW_KEY, String(Date.now())); } catch { /* ignore */ }
+  }, []);
+
   const activeRenewStatuses = ['PENDING', 'PENDING_DECISION', 'AWAITING_DP', 'DP_SECURED'];
   const pendingRenewRequest = renewRequests.find((rr) => rr.stayId === stay.id && activeRenewStatuses.includes(rr.status));
   const pendingDecisionRequest = pendingRenewRequest?.status === 'PENDING_DECISION' ? pendingRenewRequest : null;
@@ -383,13 +402,16 @@ function ActiveStayContent({ stay }: { stay: Stay }) {
             </button>
             <button
               type="button"
-              className={`tenant-stay-fact-chip${activeTickets.length ? ' tone-info' : ''}`}
+              className={`tenant-stay-fact-chip${hasNewTicketUpdates ? ' tone-warning' : activeTickets.length ? ' tone-info' : ''}`}
               onClick={() => navigate('/portal/tickets')}
               aria-label="Lihat laporan aktif"
             >
-              <span className="fact-label">Laporan</span>
+              <span className="fact-label">
+                Laporan
+                {hasNewTicketUpdates ? <span className="fact-dot" aria-label="Ada pembaruan baru" /> : null}
+              </span>
               <strong>{activeTickets.length}</strong>
-              <small>{activeTickets.length ? 'Aktif' : 'Tidak ada'}</small>
+              <small>{hasNewTicketUpdates ? 'Ada update' : activeTickets.length ? 'Aktif' : 'Tidak ada'}</small>
             </button>
             <div className="tenant-stay-fact-chip tone-info" role="status" aria-label="Dana titipan">
               <span className="fact-label">Dana titipan</span>

@@ -27,6 +27,10 @@ type PortalTicket = {
   priority?: string;
   createdAt?: string;
   updatedAt?: string;
+  assignedAt?: string | null;
+  resolvedAt?: string | null;
+  closedAt?: string | null;
+  escalatedAt?: string | null;
   lastMessage?: string;
   category?: string | null;
   tipAcknowledged?: boolean;
@@ -60,6 +64,72 @@ function formatDate(value?: string) {
     day: '2-digit',
     month: 'short',
     year: 'numeric',
+  });
+}
+
+function formatDateTime(value?: string | null) {
+  if (!value) return null;
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return null;
+  return date.toLocaleDateString('id-ID', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+}
+
+type TimelineNode = {
+  key: string;
+  icon: string;
+  label: string;
+  ts: string | null;
+  done: boolean;
+};
+
+function buildTimeline(ticket: PortalTicket): TimelineNode[] {
+  return [
+    {
+      key: 'created',
+      icon: '🕐',
+      label: 'Dibuat',
+      ts: formatDateTime(ticket.createdAt),
+      done: true,
+    },
+    {
+      key: 'assigned',
+      icon: '👤',
+      label: ticket.assignedTo ? `Ditugaskan ke ${ticket.assignedTo.fullName}` : 'Ditugaskan ke staff',
+      ts: formatDateTime(ticket.assignedAt),
+      done: Boolean(ticket.assignedAt),
+    },
+    {
+      key: 'escalated',
+      icon: '🚨',
+      label: 'Dieskalasi',
+      ts: formatDateTime(ticket.escalatedAt),
+      done: Boolean(ticket.escalatedAt),
+    },
+    {
+      key: 'resolved',
+      icon: '✅',
+      label: 'Selesai dikerjakan',
+      ts: formatDateTime(ticket.resolvedAt),
+      done: Boolean(ticket.resolvedAt),
+    },
+    {
+      key: 'closed',
+      icon: '🔒',
+      label: 'Ditutup',
+      ts: formatDateTime(ticket.closedAt),
+      done: Boolean(ticket.closedAt),
+    },
+  ].filter((n) => {
+    // Sembunyikan node eskalasi jika tidak pernah terjadi
+    if (n.key === 'escalated' && !ticket.escalatedAt) return false;
+    // Node yang sudah done atau yang merupakan langkah wajar selalu tampil
+    return true;
   });
 }
 
@@ -157,7 +227,7 @@ export default function MyTicketsPage() {
   return (
     <div>
       <PageHeader
-        title="Laporan Saya"
+        title="Lapor Masalah"
         description="Lihat laporan bantuan yang pernah kamu ajukan. Sistem otomatis menghubungkan laporan dengan kamar aktif kamu."
         secondaryAction={<Button onClick={() => setShowCreate(true)}>Buat Laporan Baru</Button>}
       />
@@ -180,13 +250,15 @@ export default function MyTicketsPage() {
       ) : null}
 
       <div className="d-grid gap-3">
-        {tickets.map((ticket) => (
+        {tickets.map((ticket) => {
+          const timeline = buildTimeline(ticket);
+          return (
           <Card className="content-card border-0" key={ticket.id}>
             <Card.Body>
-              <div className="d-flex align-items-start justify-content-between gap-3 flex-wrap mb-2">
+              {/* Header: judul + badge status + kategori */}
+              <div className="d-flex align-items-start justify-content-between gap-3 flex-wrap mb-3">
                 <div>
                   <div className="fw-semibold">{ticket.title || ticket.subject || ticket.ticketNumber || `Tiket #${ticket.id}`}</div>
-                  <div className="small text-muted">Dibuat {formatDate(ticket.createdAt)} · Update {formatDate(ticket.updatedAt)}</div>
                 </div>
                 <div className="d-flex gap-2 flex-wrap">
                   <StatusBadge status={ticket.status} tone="tenant" domain="ticket" />
@@ -194,8 +266,53 @@ export default function MyTicketsPage() {
                   {ticket.priority ? <StatusBadge status="SECONDARY" customLabel={ticket.priority} /> : null}
                 </div>
               </div>
+
+              {/* Timeline kronologi */}
+              <div className="ticket-timeline">
+                {timeline.map((node, i) => (
+                  <div key={node.key} className={`ticket-timeline-node${node.done ? ' is-done' : ' is-pending'}`}>
+                    <div className="ticket-timeline-rail">
+                      <span className="ticket-timeline-dot" aria-hidden="true">{node.done ? node.icon : '○'}</span>
+                      {i < timeline.length - 1 ? <span className="ticket-timeline-line" /> : null}
+                    </div>
+                    <div className="ticket-timeline-body">
+                      <span className="ticket-timeline-label">{node.label}</span>
+                      {node.ts ? <span className="ticket-timeline-ts">{node.ts}</span> : <span className="ticket-timeline-ts muted">Menunggu</span>}
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Foto laporan / penyelesaian */}
+              <div className="d-flex gap-2 flex-wrap mt-3">
+                {ticket.issueImageUrl ? (
+                  <SafeImage
+                    src={ticket.issueImageUrl}
+                    alt="Bukti laporan"
+                    style={{ width: 100, height: 68, objectFit: 'cover', borderRadius: 8, cursor: 'pointer' }}
+                    fallbackTitle="Foto laporan tidak bisa dimuat"
+                    fallbackDescription="Detail laporan tetap tersedia di teks."
+                    onClick={() => setLightbox({ src: ticket.issueImageUrl!, alt: 'Bukti laporan' })}
+                  />
+                ) : null}
+                {ticket.resolutionImageUrl ? (
+                  <SafeImage
+                    src={ticket.resolutionImageUrl}
+                    alt="Bukti selesai"
+                    style={{ width: 100, height: 68, objectFit: 'cover', borderRadius: 8, cursor: 'pointer' }}
+                    fallbackTitle="Foto penyelesaian tidak bisa dimuat"
+                    fallbackDescription="Status laporan tetap bisa dibaca."
+                    onClick={() => setLightbox({ src: ticket.resolutionImageUrl!, alt: 'Bukti selesai' })}
+                  />
+                ) : null}
+              </div>
+
+              {/* Pesan terakhir */}
+              <div className="app-caption mt-2">{ticket.lastMessage || ticket.description || 'Belum ada pembaruan tambahan.'}</div>
+
+              {/* Tip section — hanya untuk tiket DONE/CLOSED */}
               {['DONE', 'CLOSED'].includes((ticket.status ?? '').toUpperCase()) && ticket.assignedTo && tipLines(ticket.assignedTo).length > 0 ? (
-                <Alert variant="light" className="border py-2 px-3 mb-2 small">
+                <Alert variant="light" className="border py-2 px-3 mt-3 mb-0 small">
                   <span role="img" aria-hidden="true">🙏</span> Puas dengan kerja <strong>{ticket.assignedTo.fullName}</strong>? Beri tip langsung (opsional, di luar pembayaran kos):
                   <div className="d-flex flex-wrap gap-2 mt-1">
                     {tipLines(ticket.assignedTo).map((t) => (
@@ -214,34 +331,9 @@ export default function MyTicketsPage() {
                   </div>
                 </Alert>
               ) : null}
-              {ticket.issueImageUrl ? (
-                <div className="mb-2">
-                  <SafeImage
-                    src={ticket.issueImageUrl}
-                    alt="Bukti laporan"
-                    style={{ width: 120, height: 80, objectFit: 'cover', borderRadius: 8 }}
-                    fallbackTitle="Foto laporan tidak bisa dimuat"
-                    fallbackDescription="Detail laporan tetap tersedia di teks."
-                    onClick={() => setLightbox({ src: ticket.issueImageUrl!, alt: 'Bukti laporan' })}
-                  />
-                </div>
-              ) : null}
-              {ticket.resolutionImageUrl ? (
-                <div className="mb-2">
-                  <SafeImage
-                    src={ticket.resolutionImageUrl}
-                    alt="Bukti selesai"
-                    style={{ width: 120, height: 80, objectFit: 'cover', borderRadius: 8 }}
-                    fallbackTitle="Foto penyelesaian tidak bisa dimuat"
-                    fallbackDescription="Status laporan tetap bisa dibaca."
-                    onClick={() => setLightbox({ src: ticket.resolutionImageUrl!, alt: 'Bukti selesai' })}
-                  />
-                </div>
-              ) : null}
-              <div className="app-caption">{ticket.lastMessage || ticket.description || 'Belum ada pembaruan tambahan.'}</div>
             </Card.Body>
           </Card>
-        ))}
+        )})}
       </div>
 
       <Modal show={showCreate} onHide={() => setShowCreate(false)}>
