@@ -662,6 +662,10 @@ export class TenantsService {
         companyOrCampus: true,
         emergencyContactName: true,
         emergencyContactPhone: true,
+        maritalStatus: true,
+        vehicleOwnership: true,
+        smokingHabit: true,
+        howDidYouHear: true,
         isActive: true,
         createdAt: true,
         updatedAt: true,
@@ -765,6 +769,13 @@ export class TenantsService {
       }
     }
 
+    // Marketing analytics fields — bebas diedit kapan saja (tidak dikunci seperti ONBOARDING_FIELDS)
+    const MARKETING_FIELDS = ['maritalStatus', 'vehicleOwnership', 'smokingHabit', 'howDidYouHear'] as const;
+    for (const field of MARKETING_FIELDS) {
+      const val = (dto as Record<string, unknown>)[field];
+      if (val !== undefined) updateData[field] = val;
+    }
+
     const updated = await this.prisma.tenant.update({
       where: { id: actor.tenantId },
       data: updateData as Prisma.TenantUpdateInput,
@@ -782,6 +793,10 @@ export class TenantsService {
         companyOrCampus: true,
         emergencyContactName: true,
         emergencyContactPhone: true,
+        maritalStatus: true,
+        vehicleOwnership: true,
+        smokingHabit: true,
+        howDidYouHear: true,
         isActive: true,
         createdAt: true,
         updatedAt: true,

@@ -2,12 +2,17 @@ import { IsBoolean, IsInt, IsOptional, IsString, Max, Min, MaxLength } from 'cla
 
 /** M-1: konstanta operasional owner-settable (meter listrik/air + AI DeepSeek). Semua opsional (partial update). */
 export class UpdateOperationalSettingDto {
-  // Meter
+  // Meter listrik & air
   @IsOptional() @IsInt() @Min(0) @Max(10000) freeElectricityKwhPerMonth?: number;
   @IsOptional() @IsInt() @Min(0) @Max(1000000) electricityTariffPerKwhRupiah?: number;
   @IsOptional() @IsBoolean() waterMeteringEnabled?: boolean;
   @IsOptional() @IsInt() @Min(0) @Max(1000000) waterTariffPerM3Rupiah?: number;
   @IsOptional() @IsInt() @Min(0) @Max(10000) freeWaterM3PerMonth?: number;
+  // Layanan tambahan owner-settable
+  @IsOptional() @IsInt() @Min(0) @Max(1000000) wifiRupiah?: number;
+  @IsOptional() @IsInt() @Min(0) @Max(1000000) galonRupiah?: number;
+  @IsOptional() @IsInt() @Min(0) @Max(1000000) petDepositRupiah?: number;
+  @IsOptional() @IsInt() @Min(0) @Max(100) extraOccupantFeePercent?: number;
   // AI / DeepSeek (R3)
   @IsOptional() @IsString() @MaxLength(100) deepseekModel?: string;
   @IsOptional() @IsString() @MaxLength(100) deepseekFinanceModel?: string;

@@ -2,13 +2,13 @@ const test = require('node:test');
 const assert = require('node:assert');
 const P = require('../../dist/modules/tenant-bookings/pricing.helper.js');
 
-test('calculateRentByPricingTerm — tarif bulanan 1.700.000', () => {
+test('calculateRentByPricingTerm — tarif bulanan 1.700.000 (owner decision: WEEKLY=0.5, SMESTERLY=5.7, YEARLY=11)', () => {
   assert.strictEqual(P.calculateRentByPricingTerm(1700000, 'DAILY'), 225000);    // 221.000 → bulat naik 5.000
-  assert.strictEqual(P.calculateRentByPricingTerm(1700000, 'WEEKLY'), 765000);
-  assert.strictEqual(P.calculateRentByPricingTerm(1700000, 'BIWEEKLY'), 1275000);
+  assert.strictEqual(P.calculateRentByPricingTerm(1700000, 'WEEKLY'), 850000);   // 0.5 × 1.700.000 = 850.000
+  assert.strictEqual(P.calculateRentByPricingTerm(1700000, 'BIWEEKLY'), 1275000); // 0.75 × 1.700.000 = 1.275.000 → 1.275.000
   assert.strictEqual(P.calculateRentByPricingTerm(1700000, 'MONTHLY'), 1700000);
-  assert.strictEqual(P.calculateRentByPricingTerm(1700000, 'SMESTERLY'), 9350000);
-  assert.strictEqual(P.calculateRentByPricingTerm(1700000, 'YEARLY'), 17000000);
+  assert.strictEqual(P.calculateRentByPricingTerm(1700000, 'SMESTERLY'), 9690000); // 5.7 × 1.700.000 = 9.690.000 → 9.690.000
+  assert.strictEqual(P.calculateRentByPricingTerm(1700000, 'YEARLY'), 18700000);   // 11.0 × 1.700.000 = 18.700.000 → 18.700.000
 });
 test('pembulatan naik ke 5.000', () => {
   assert.strictEqual(P.calculateRentByPricingTerm(1333000, 'DAILY'), 175000);    // 173.290 → 175.000

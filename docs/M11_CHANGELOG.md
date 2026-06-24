@@ -4,6 +4,86 @@
 
 ## Changelog Ringkas
 
+### 2026-06-24 (lanjut-5) — ProfilePage: KTP OCR + Marketing fields + UX perbaikan portal
+- **Profil Tenant lengkap**: KTP scan OCR (tesseract.js, client-side, tidak upload ke server) auto-isi gender/tgl-lahir/kota; tenant audit & koreksi hasil OCR sebelum terapkan ke form.
+- **Marketing analytics fields**: `maritalStatus`, `vehicleOwnership`, `smokingHabit`, `howDidYouHear` ditambah ke schema Prisma + enum backend + DTO + service; bebas diedit (tidak dikunci); section terpisah di ProfilePage.
+- **NIK masking**: NIK tampil `XXXX****XXXX` default sesuai UU PDP; ada tombol toggle tampil/sembunyikan per sesi.
+- **Poin Reward hidden**: navigasi `/portal/loyalty` dimatikan sementara (PENDING).
+- **Notifikasi z-index**: `notification-dropdown-menu` dinaikkan ke `z-index: 1050` agar tidak tertutup card "Lengkapi Profil".
+- **Banner meter H-10**: banner kuning muncul otomatis H-10 sebelum akhir kontrak jika meter belum dicatat bulan ini, dengan CTA langsung buka modal catat meter.
+
+### 2026-06-24 — Owner konfirmasi pricing + unit test pricing sinkron
+- **Owner konfirmasi**: multiplier dipertahankan — `WEEKLY=0.5, SMESTERLY=5.7, YEARLY=11.0` (A-5/D-21.4).
+- **Test fix**: `pricing.test.js` diperbarui mencerminkan nilai aktual — WEEKLY 850.000, SMESTERLY 9.690.000, YEARLY 18.700.000 (sebelumnya pakai nilai lama 0.45/5.5/10).
+
+### 2026-06-24 (lanjut-3) — ExternalReview + Wizard Booking + Filter Default Kosong
+- **ExternalReview**: Model baru additive di schema + migrasi + `prisma generate`; service `getPublicSocialProof` gabung StaffReview + ExternalReview (weighted avg, pool 20); seed 14 ulasan Google nyata di `seed-real.ts`.
+- **Wizard 4-step booking**: `GuestBookingForm.tsx` direfactor ke wizard (Data Diri→Booking→Preferensi→Ringkasan); NIK wajib 16 digit; "Berapa lama?" chip menggantikan date picker checkout; step Preferensi bisa dilewati; estimasi duplikat dihapus; pilihan DP/Lunas di step 4.
+- **Pricing fix**: `WEEKLY=0.5, SMESTERLY=5.7, YEARLY=11.0` sinkron backend.
+- **Filter default**: `/rooms` default `avail=bookable` (tampil kamar kosong saja).
+
+### 2026-06-24 (lanjut-2) — Dark Mode Fix + Panduan Navbar + WiFi Tiered + Google Review
+- **CSS root fix**: Hapus `@media (prefers-color-scheme: dark)` dari `00-tokens.css` — variabel `--pub-surface` tidak lagi jadi `#1e293b` saat OS dark mode; teks kartu kini selalu terbaca (hardcoded dark text vs white card bg).
+- **Navbar**: Tombol "Panduan & FAQ" dikembalikan ke `rm-topbar-nav` di `PublicRoomsPage.tsx`.
+- **FaqPublicPage**: Tambah topbar navigasi; tampilkan `HOME_FAQ_ITEMS + EXTRA_FAQ_ITEMS` sebagai fallback statis saat DB kosong (bukan hanya saat error); kontras accordion diperkuat via inline style explicit.
+- **WiFi tiered**: Update FAQ backend + `publicGuestShared.tsx` + `officialKost48Content.ts` — Bulanan Rp 50k · 2 Mingguan Rp 30k · Mingguan Rp 20k · Harian Rp 5k (per perangkat).
+- **Google Review**: Link `https://g.page/r/CQoPM7OnWlRoEAE/review` disimpan di `officialKost48Location.googleReviewUrl`; tombol "Tulis Ulasan di Google" muncul di `ReviewsPublicPage`.
+- **Galon fix**: Harga galon dikoreksi Rp 15.000 → Rp 20.000 di `officialKost48Content.ts`.
+
+### 2026-06-24 (lanjut) — hasPet Booking Flow + Owner Settings Konstanta UI
+- **Backend DTO + service**: `hasPet` optional bool ditambah ke `CreatePublicBookingDto`; kolom `"hasPet"` masuk INSERT Stay di `public-bookings.service.ts`.
+- **Frontend booking form**: Checkbox hewan peliharaan di `GuestBookingForm` + info deposit Rp 100.000 (refundable) saat dicentang; summary `GuestBookingRoomSummary` tampilkan baris hewan; `GuestBookingPage` kirim `hasPet` ke API.
+- **Owner Settings UI**: `TariffSettingsPanel` diperluas — 4 form field baru: WiFi/galon, deposit hewan, % ekstra penghuni. Save mutation menyertakan keempatnya.
+
+### 2026-06-24 — Data Default Nyata + Konstanta Baru + Kontras CSS
+- **Backend FAQ**: Ganti 18 FAQ generik ke konten asli website kost48surabaya.com (galon Rp 20.000, ekstra penghuni 20%, deposit hewan Rp 100.000, aturan pasutri/nikah siri/hewan, sistem listrik detail). `faqs.service.ts` DEFAULT_FAQS.
+- **Backend schema + migration**: Tambah 4 konstanta owner-settable ke `OperationalSetting` — `wifiRupiah(50k)`, `galonRupiah(20k)`, `petDepositRupiah(100k)`, `extraOccupantFeePercent(20)`. Tambah `hasPet Boolean` ke `Stay`. Migration `20260624000000_add_operational_constants_and_pet`. `settings.controller.ts` expose ke `public-config`. Frontend `settings.ts` type diperbarui.
+- **Seed real**: `seed-dev-via-api.js` rewrite — 13 kamar nyata (A-M+F1-F2) kategori/tipe/ukuran/tarif/deposit sesuai website. Tenant bervariasi: Dimas(B) RenewPending, Cindy(C) pet, Indah(H) 2 orang, Bayu(I) menunggak, Lani(K) H-10 checkout, Sari(F2) DP saja.
+- **CSS kontras**: Fix 6 area — `#94a3b8` → `#475569/#64748b` di filter-label/hint/breadcrumb/placeholder; active chip `#0ea5e9`→`#0369a1`; gx-room-status is-limited amber→`#7c3f00`; gx-room-price coral→`#a04020`; rm-card-cat-badge menjadi light per-kategori (DELUXE=ungu, ECONOMY=amber, STANDARD=biru) dengan cls diterapkan dari component.
+- **Docs**: `docs/DEFAULT_DATA.md` baru — dokumentasi semua nilai awal DB (13 kamar, konstanta, FAQ 18 item, fasilitas umum, dummy tenant).
+
+### 2026-06-24 — Redesign Katalog Publik + Extra Occupant Fee
+- **Backend/Frontend**: Fitur biaya penghuni ekstra — STANDARD maks 4 (2 free + 2 ekstra @+20%), LARGE maks 6 (4 free + 2 ekstra @+20%). Hard cap + "tidak direkomendasikan" (D-24). Schema `Stay.occupantCount`, `pricing.helper.ts`, DTO, service, frontend `pricing.ts` + `GuestBookingForm`.
+- **Frontend katalog**: Tombol "Panduan" hapus dari topbar → chip "📖 Panduan & FAQ KOST48" dekat header. Filter vertikal (Ketersediaan→Pendingin→KM→Harga stack). `ROOMS_PER_PAGE` 12→3 + paginasi. Status chip warna berkedip (green pulse=Kosong, orange pulse=Maintenance, red=Penuh) — fix class mismatch `rm-badge-is-*`. Card: 4 spec selalu tampil (KM/Pendingin/Ukuran/Mezzanine) + tabel harga lengkap 6 term.
+
+### 2026-06-Sekarang — Wizard Redesign + Animasi Marketing
+- **Frontend**: Extract RoomCard ke komponen bersama (`src/components/rooms/RoomCard.tsx`). Wizard result screen langsung tampilkan grid RoomCard dengan tombol booking via WA. Animasi fade/stagger/count-up/pulse + copy marketing. Hapus duplikasi tombol navigasi yang membingungkan.
+
+### 2026-06-23 — RichAvailabilityCalendar: Room Status Board canggih
+- **Backend**: `getAvailabilityCalendar()` diperkaya — tenant name, contract end date, renew request indicator, DP booking info, category rate
+- **Frontend**: `AvailabilityTimeline.tsx` → `RichAvailabilityCalendar.tsx` — card layout per kamar, status badge (🟢/🔴/🟡/⚙️), progress bar kontrak, filter pills, indikator perpanjangan 🔄, countdown urgent
+- **CSS**: `avcal-*` → `rcal-*` — design system baru, mobile responsive, stats bar
+
+### 2026-06-23 — Fitur biaya penghuni ekstra + aturan batas D-24
+- **Backend**: `Stay.occupantCount Int @default(1)` + migration SQL; `ROOM_MAX_FREE_OCCUPANTS` + `ROOM_MAX_OCCUPANTS` + `calculateOccupantSurcharge` di `pricing.helper.ts`; hard-cap validation di service; surcharge +20%/orang ekstra
+- **Frontend**: dropdown 1–hardCap (STANDARD maks 4, LARGE maks 6); opsi ekstra bertanda "⚠️ tidak direkomendasikan"; warning merah jika > maxFree; `selectedRate` include surcharge real-time
+- **Aturan D-24** dicatat di `docs/M02_KEPUTUSAN_OWNER.md` — extra bed memenuhi lantai kamar; hard cap ditolak sistem
+
+### 2026-06-23 — Katalog publik & dashboard: wizard intercept, 3-kolom, category badge, kalender, login btn
+- **GuestTopbar**: "Masuk Portal" dipindah ke `gx-nav-cta` (selalu visible di mobile ≤1100px, tidak hilang bersama nav)
+- **Wizard intercept**: `GuestPreferenceWizard` mengambil alih halaman penuh saat user pertama masuk `/rooms`; katalog baru tampil setelah selesai/skip
+- **Kartu kamar**: 3 per baris (`lg={4} md={4} sm={6}`), category badge overlay di foto (🌬️/🚿/❄️), roomSize chip (📐 Besar), slide btn ‹/› muncul saat hover, auto-slide hanya saat hover
+- **Legend kategori**: section di bawah grid menjelaskan Ekonomi/Standar/Deluxe/Mezzanine/Besar/Standar
+- **AvailabilityTimeline**: header dirancang ulang (ikon+title+range), legend dot berwarna, baris alternating, icon sel lebih jelas (✓/DP/●/⚙)
+- CSS baru: `.rm-slide-btn`, `.rm-card-cat-badge`, `.rm-spec-size`, `.gpw-intercept-shell`, `.rm-category-legend`, `.avcal-header-left`, `.avcal-legend-dot`, dll
+
+### 2026-06-23 — roomSize propagasi penuh: type, detail, tabel admin, detail publik, wizard check-in
+- **`Room` type** di `frontend/src/types/index.ts` ditambah `category?`, `roomType?`, `roomSize?` — TS bersih
+- **RoomDetailPage** (admin/owner/staf): metric tile "Ukuran kamar" + baris info "Kategori" & "Ukuran kamar" di tab Informasi
+- **ResourceTable** `/rooms`: kolom `category` & `roomSize` tampil label Indonesia (Ekonomi/Standar/Deluxe, Standar/Besar)
+- **PublicRoomDetailPage**: `getBathroomType`/`getCoolingType`/`getRoomSize` pakai enum `category`/`roomSize` (bukan text-regex) — konsisten dengan `publicRoomDisplay.ts`
+- **StepRoomSelect** (wizard check-in): prop type diperluas + baris kategori·ukuran tampil di kartu kamar; `CheckInWizard.tsx` meneruskan field baru
+
+### 2026-06-23 — Fitur publik: animasi hunian, wizard preferensi kamar, data real
+- **Tingkat hunian animasi:** progress bar publik tampilkan `X%` dengan count-up cubic-ease 0→aktual; badge "⚡ Sisa N kamar!" saat bookable ≤5
+- **Free kWh dinamis:** FAQ & trust-item baca nilai dari `GET /settings/public-config` (endpoint baru `@Public()`); owner setting `freeElectricityKwhPerMonth` langsung terpantul tanpa redeploy
+- **Copy heading lebih manusia:** 2 heading dashboard publik diperbarui agar terasa natural dan tidak marketing-copy
+- **`RoomSize` enum + `GuestPreferenceSurvey` model:** schema Prisma diperluas; `prisma db push` + `prisma generate` UAT 5433 ✅
+- **Seed data real 13 kamar** (`seed-real.ts`): A,B,C,D,F1,F2,G,H,I,J,K,L,M — harga formula (Base 800k+KM 500k+AC 300k+Mezz 150k+Besar 200k); A+F1 AVAILABLE, sisanya OCCUPIED dummy tenant+stay
+- **`GuestPreferenceWizard` (4 langkah):** KM→Pendingin→Ukuran→Tipe, estimasi tarif, cocokkan kamar exact/near, simpan survey ke DB via `POST /public/bookings/survey` (`@Public()`)
+- **Integrasi wizard di `/rooms`:** muncul di atas katalog (hanya publik), hilang setelah done/skip; onDone: set URL params bathroom/cooling + scroll ke `#rm-catalog`; gpw-* CSS 180+ baris navy-dark theme
+- **TS frontend + backend:** keduanya 0 error ✅
+
 ### 2026-06-22 — Audit A1 — Perbaikan halaman publik (10+3 task)
 - **P1-CRIT** Validasi booking: phone XOR email (frontend+backend) — sesuai spesifikasi PUB-BOOKING-FORM M07
 - **P2-CRIT** Hapus 959 baris dead CSS `gh-*` dari `11-public-pages.css` (tidak ada komponen pakai)

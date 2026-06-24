@@ -2,6 +2,8 @@ import apiClient from './client';
 
 export interface PublicSocialProofReview {
   initials: string;
+  displayName?: string | null;
+  source?: string | null;
   rating: number;
   comment: string | null;
   createdAt: string;

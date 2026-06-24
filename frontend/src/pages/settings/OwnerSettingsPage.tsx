@@ -687,6 +687,10 @@ function TariffSettingsPanel() {
       waterMeteringEnabled: Boolean(form?.waterMeteringEnabled),
       waterTariffPerM3Rupiah: Number(form?.waterTariffPerM3Rupiah ?? 0),
       freeWaterM3PerMonth: Number(form?.freeWaterM3PerMonth ?? 0),
+      wifiRupiah: Number(form?.wifiRupiah ?? 50000),
+      galonRupiah: Number(form?.galonRupiah ?? 20000),
+      petDepositRupiah: Number(form?.petDepositRupiah ?? 100000),
+      extraOccupantFeePercent: Number(form?.extraOccupantFeePercent ?? 20),
     }),
     onSuccess: (updated) => { setForm(updated); setSavedMsg('Konstanta tersimpan.'); qc.invalidateQueries({ queryKey: ['operational-settings'] }); },
   });
@@ -743,6 +747,35 @@ function TariffSettingsPanel() {
               </Col>
             </>
           ) : null}
+          <Col xs={12}><hr className="my-1" /><p className="text-muted small mb-0">Biaya layanan tambahan & aturan penghuni</p></Col>
+          <Col md={6}>
+            <Form.Group>
+              <Form.Label>WiFi per gadget / bulan (Rp)</Form.Label>
+              <Form.Control type="number" min={0} value={form.wifiRupiah ?? 50000} onChange={(e) => set('wifiRupiah', Number(e.target.value))} />
+              <Form.Text muted>Biaya berlangganan WiFi per perangkat per bulan.</Form.Text>
+            </Form.Group>
+          </Col>
+          <Col md={6}>
+            <Form.Group>
+              <Form.Label>Galon air (Voila) / galon (Rp)</Form.Label>
+              <Form.Control type="number" min={0} value={form.galonRupiah ?? 20000} onChange={(e) => set('galonRupiah', Number(e.target.value))} />
+              <Form.Text muted>Harga jual galon air Voila dari pengelola.</Form.Text>
+            </Form.Group>
+          </Col>
+          <Col md={6}>
+            <Form.Group>
+              <Form.Label>Deposit hewan peliharaan (Rp)</Form.Label>
+              <Form.Control type="number" min={0} value={form.petDepositRupiah ?? 100000} onChange={(e) => set('petDepositRupiah', Number(e.target.value))} />
+              <Form.Text muted>Deposit refundable untuk tenant yang membawa hewan peliharaan.</Form.Text>
+            </Form.Group>
+          </Col>
+          <Col md={6}>
+            <Form.Group>
+              <Form.Label>Biaya penghuni ekstra (%)</Form.Label>
+              <Form.Control type="number" min={0} max={100} value={form.extraOccupantFeePercent ?? 20} onChange={(e) => set('extraOccupantFeePercent', Number(e.target.value))} />
+              <Form.Text muted>% dari sewa per penghuni ekstra (di atas batas gratis per roomSize).</Form.Text>
+            </Form.Group>
+          </Col>
         </Row>
         <Button className="mt-3" onClick={() => { setSavedMsg(''); save.mutate(); }} disabled={save.isPending}>
           {save.isPending ? 'Menyimpan...' : 'Simpan Konstanta'}

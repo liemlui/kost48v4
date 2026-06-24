@@ -2,6 +2,7 @@ import axios from 'axios';
 
 const client = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL || '/api',
+  timeout: 15000,
   headers: {
     'Cache-Control': 'no-cache',
     Pragma: 'no-cache',
@@ -53,6 +54,14 @@ client.interceptors.response.use(
 
     if (status === 401 && hasToken && !isLoginRequest) {
       clearAuthAndRedirect();
+    }
+
+    // Timeout atau server tidak merespons → pesan yang bisa dibaca
+    if (error?.code === 'ECONNABORTED' || error?.code === 'ERR_NETWORK') {
+      error.response = error.response ?? {};
+      error.response.data = {
+        message: 'Server tidak merespons. Pastikan backend sudah berjalan dan coba lagi.',
+      };
     }
 
     return Promise.reject(error);

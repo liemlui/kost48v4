@@ -1,6 +1,7 @@
 // Helpers/konstanta + 5 komponen presentational diekstrak dari PublicGuestDashboardPage.tsx (refactor 2026-06-19: AI-read).
 // Halaman publik (read-only, tanpa state global). Pola mengikuti reportShared/dashboardShared.
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { APP_VERSION } from '../../config/version';
 import { useQuery } from '@tanstack/react-query';
 import { Accordion, Container, Modal, Spinner } from 'react-bootstrap';
 import { Link, Navigate, useLocation } from 'react-router-dom';
@@ -73,9 +74,9 @@ export const FACILITY_GROUPS = [
     id: 'tambahan',
     title: 'Tambahan',
     items: [
-      { slug: 'wifi', mark: '📶', label: 'WiFi', desc: 'Rp 50.000 per perangkat.' },
-      { slug: 'galon-air', mark: '🚰', label: 'Galon air', desc: 'Rp 15.000 per galon.' },
-      { slug: 'tv-tambahan', mark: '📺', label: 'TV tambahan', desc: 'Rp 50.000 per bulan.' },
+      { slug: 'wifi', mark: '📶', label: 'WiFi', desc: 'Bulanan Rp 50.000 · 2 Mingguan Rp 30.000 · Mingguan Rp 20.000 · Harian Rp 5.000 (per perangkat). Menjaga kualitas koneksi.' },
+      { slug: 'galon-air', mark: '🚰', label: 'Galon air (Voila)', desc: 'Rp 20.000/galon. Beli langsung ke pengelola.' },
+      { slug: 'deposit-hewan', mark: '🐾', label: 'Deposit hewan peliharaan', desc: 'Rp 100.000 (refundable, bila tidak ada kerusakan).' },
     ],
   },
 ];
@@ -104,40 +105,50 @@ export const TRUST_ITEMS = [
   {
     mark: '05',
     title: 'Listrik transparan, bukan token',
-    desc: 'Listrik pascabayar: pakai dulu, bayar sesuai meter. Ada 30 kWh gratis tiap bulan, dan saat keluar tidak ada sisa saldo yang hangus — tagihan meter terakhir dipotong dari deposit.',
+    desc: 'Listrik pascabayar: pakai dulu, bayar sesuai meter. Ada jatah listrik gratis tiap bulan, dan saat keluar tidak ada sisa saldo yang hangus — tagihan meter terakhir dipotong dari deposit.',
   },
 ];
 
 export const HOME_FAQ_ITEMS = [
   {
-    category: 'Aturan',
-    question: 'Apakah KOST48 menerima pria dan wanita?',
-    answer: 'Ya, KOST48 menerima penghuni pria dan wanita sesuai ketersediaan kamar dan aturan hunian.',
-  },
-  {
     category: 'Tarif',
-    question: 'Berapa kisaran tarif kamar?',
-    answer: 'Tarif mengikuti tipe kamar dan fasilitas. Kisaran katalog saat ini sekitar Rp 1,2 jt - Rp 1,6 jt per bulan.',
+    question: 'Berapa tarif kamarnya?',
+    answer: 'Tarif kamar berkisar Rp 850.000 – Rp 1.800.000 per bulan, tergantung ukuran kamar, kamar mandi dalam/luar, pendingin AC/kipas, dan perabotan. Lihat detail di halaman Cek Kamar.',
   },
   {
     category: 'Fasilitas',
-    question: 'Apakah tersedia WiFi?',
-    answer: 'Ya, tersedia layanan WiFi tambahan Rp 50.000 per perangkat.',
-  },
-  {
-    category: 'Kamar',
-    question: 'Apakah ada kamar kosong sekarang?',
-    answer: 'Ketersediaan bisa dicek melalui katalog kamar dan dapat berubah sesuai booking atau verifikasi admin.',
-  },
-  {
-    category: 'Aturan',
-    question: 'Bagaimana aturan listrik & air?',
-    answer: 'Listrik PASCABAYAR — bukan token/prabayar. Pakai dulu, bayar kemudian sesuai pemakaian meter. Tersedia 30 kWh gratis tiap bulan; kelebihannya ditagih transparan lewat invoice meter terpisah (bisa dibayar sekaligus dengan sewa). Saat keluar, tidak ada sisa saldo listrik yang hangus: tagihan meter terakhir cukup dipotong dari deposit jaminan, sisanya dikembalikan.',
+    question: 'Fasilitasnya apa saja?',
+    answer: 'Fasilitas umum: parkir luas, dapur bersama, air PDAM + tandon 650L, balkon santai, area jemur, taman. Fasilitas kamar: kasur busa tebal, lemari, gantungan baju, AC atau kipas, kamar mandi dalam/luar sesuai tipe.',
   },
   {
     category: 'Lokasi',
     question: 'Di mana lokasi KOST48?',
-    answer: 'KOST48 berada di Jalan Hikmah V No. 48, Surabaya Barat, sekitar Pakuwon Mall / PTC.',
+    answer: 'KOST48 berada di Jalan Hikmah V No. 48, Surabaya Barat. Sekitar 7 menit berjalan kaki dari Pakuwon Mall / PTC.',
+  },
+  {
+    category: 'Aturan',
+    question: 'Satu kamar untuk berapa orang?',
+    answer: 'Maksimal 2 orang per kamar. Penghuni tambahan dikenakan biaya air & kebersihan sebesar 20% dari tarif kamar per kepala per bulan, dan wajib dikonfirmasi ke pengelola.',
+  },
+  {
+    category: 'Fasilitas',
+    question: 'Apakah tersedia WiFi?',
+    answer: 'Ya, tersedia WiFi tambahan dengan tarif per perangkat: Bulanan Rp 50.000 · 2 Mingguan Rp 30.000 · Mingguan Rp 20.000 · Harian Rp 5.000. Tarif per-perangkat menjaga kualitas koneksi tetap stabil untuk semua penghuni.',
+  },
+  {
+    category: 'Tarif',
+    question: 'Bagaimana sistem listrik?',
+    answer: 'Listrik pascabayar (bukan token) — pakai dulu, bayar sesuai meter. Jatah gratis 30 kWh/bulan; kelebihan Rp 2.500/kWh. Saat keluar tidak ada token yang hangus — tagihan meter terakhir dipotong dari deposit.',
+  },
+  {
+    category: 'Aturan',
+    question: 'Apakah kos bebas keluar masuk?',
+    answer: 'Jam keluar masuk dibebaskan — tidak ada jam malam. Namun penghuni wajib menjaga ketertiban, norma, dan keamanan lingkungan kos.',
+  },
+  {
+    category: 'Aturan',
+    question: 'Apakah boleh membawa hewan peliharaan?',
+    answer: 'Boleh, asalkan tidak merusak fasilitas. Wajib membayar deposit jaminan Rp 100.000 (dikembalikan jika tidak ada kerusakan) dan dikonfirmasi ke pengelola saat booking.',
   },
 ];
 
@@ -150,23 +161,23 @@ export function resolvePublicMarketingAssetUrl(url?: string | null) {
 export const EXTRA_FAQ_ITEMS = [
   {
     category: 'Aturan',
-    question: 'Satu kamar untuk berapa orang?',
-    answer: 'Standar satu kamar untuk 1-2 orang. Penghuni tambahan perlu konfirmasi terlebih dahulu kepada pengelola.',
-  },
-  {
-    category: 'Layanan',
-    question: 'Apakah ada layanan galon atau TV tambahan?',
-    answer: 'Ada. Galon air Rp 15.000 per galon dan TV tambahan Rp 50.000 per bulan, mengikuti ketersediaan.',
+    question: 'Apakah boleh untuk pasutri (pasangan suami istri)?',
+    answer: 'Diperbolehkan. Wajib membawa surat nikah, bukti foto pernikahan, atau kartu keluarga.',
   },
   {
     category: 'Aturan',
-    question: 'Apakah tamu boleh berkunjung?',
-    answer: 'Tamu wajib mengikuti aturan pengelola dan norma lingkungan. Kondisi khusus perlu dikonfirmasi ke admin.',
+    question: 'Apakah boleh membawa pasangan?',
+    answer: 'Boleh menginap dengan pacar asalkan orang tua pihak wanita datang mengantar dan berbicara langsung dengan ibu kos. Membawa selingkuhan tidak diperbolehkan dan dapat dilaporkan ke pihak berwenang.',
+  },
+  {
+    category: 'Layanan',
+    question: 'Apakah ada layanan galon air?',
+    answer: 'Ada. Galon air merek Voila tersedia seharga Rp 20.000 per galon, dibeli langsung ke pengelola.',
   },
   {
     category: 'Booking',
     question: 'Bagaimana cara booking kamar?',
-    answer: 'Pilih kamar dari katalog, ajukan booking, lalu admin akan mengecek data dan ketersediaan sebelum pembayaran diproses.',
+    answer: 'Pilih kamar dari katalog, ajukan booking, bayar DP 30% sebagai tanda jadi, lalu admin memverifikasi dan mengunci kamar untuk Anda. Lengkapi pelunasan sesuai jadwal.',
   },
 ];
 
@@ -250,11 +261,9 @@ export function GuestTopbar({ scrolled }: { scrolled: boolean }) {
         <Link to="/panduan" className="gx-nav-link">
           <span aria-hidden="true" className="gx-nav-ico">📖</span> Panduan
         </Link>
-        <Link to="/login" className="gx-nav-link gx-nav-login" style={{ marginLeft: 'auto', fontWeight: 600 }}>
-          <span aria-hidden="true" className="gx-nav-ico">🔑</span> Masuk Portal
-        </Link>
       </nav>
       <div className="gx-nav-cta">
+        <Link to="/login" className="gx-btn-ghost"><span aria-hidden="true">🔑</span> Masuk Portal</Link>
         <Link to="/rooms" className="gx-btn-solid"><span aria-hidden="true">🔍</span> Cek Kamar</Link>
       </div>
     </header>
@@ -421,7 +430,8 @@ export function GuestFooter() {
           </div>
         </div>
         <p className="gx-footer-copy">
-          KOST48 Surabaya Barat - Kos nyaman dekat Pakuwon Mall / PTC.
+          KOST48 Surabaya Barat — Kos nyaman dekat Pakuwon Mall / PTC.{' '}
+          <span className="gx-footer-version">v{APP_VERSION}</span>
         </p>
       </Container>
     </footer>

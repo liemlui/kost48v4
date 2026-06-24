@@ -4,6 +4,47 @@ import { Container, Spinner } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import { fetchPublicSocialProof } from '../../api/marketing';
 import EmptyState from '../../components/common/EmptyState';
+import { officialKost48Location } from '../../data/officialKost48Content';
+
+const PER_PAGE = 6;
+
+function ReviewPagination({ page, totalPages, onChange }: { page: number; totalPages: number; onChange: (p: number) => void }) {
+  if (totalPages <= 1) return null;
+  return (
+    <div className="d-flex justify-content-center align-items-center gap-2 mt-4" role="navigation" aria-label="Halaman ulasan">
+      <button
+        type="button"
+        className="btn btn-sm btn-outline-secondary"
+        onClick={() => onChange(page - 1)}
+        disabled={page === 1}
+        aria-label="Halaman sebelumnya"
+      >
+        ‹
+      </button>
+      {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
+        <button
+          key={p}
+          type="button"
+          className={`btn btn-sm ${p === page ? 'btn-primary' : 'btn-outline-secondary'}`}
+          onClick={() => onChange(p)}
+          aria-current={p === page ? 'page' : undefined}
+          style={{ minWidth: 36, borderRadius: 8 }}
+        >
+          {p}
+        </button>
+      ))}
+      <button
+        type="button"
+        className="btn btn-sm btn-outline-secondary"
+        onClick={() => onChange(page + 1)}
+        disabled={page === totalPages}
+        aria-label="Halaman berikutnya"
+      >
+        ›
+      </button>
+    </div>
+  );
+}
 
 export default function ReviewsPublicPage() {
   const query = useQuery({
@@ -13,6 +54,7 @@ export default function ReviewsPublicPage() {
   });
 
   const [sortBy, setSortBy] = useState<'recent' | 'rating'>('recent');
+  const [page, setPage] = useState(1);
 
   const sortedReviews = useMemo(() => {
     const data = query.data;
@@ -26,6 +68,14 @@ export default function ReviewsPublicPage() {
     return list;
   }, [query.data, sortBy]);
 
+  const totalPages = Math.ceil(sortedReviews.length / PER_PAGE);
+  const pagedReviews = sortedReviews.slice((page - 1) * PER_PAGE, page * PER_PAGE);
+
+  const handleSortChange = (next: 'recent' | 'rating') => {
+    setSortBy(next);
+    setPage(1);
+  };
+
   const data = query.data;
 
   return (
@@ -35,10 +85,19 @@ export default function ReviewsPublicPage() {
           <div className="page-eyebrow">✦ Ulasan Penghuni</div>
           <h1 className="mb-2">Apa Kata Penghuni KOST48</h1>
           <p className="text-muted" style={{ maxWidth: 600 }}>
-            Ulasan dari penghuni yang pernah atau sedang tinggal — ditampilkan secara anonim.
+            Ulasan dari penghuni dan tamu yang pernah tinggal di KOST48.
           </p>
           <div className="d-flex gap-2 flex-wrap mt-3">
             <Link to="/rooms" className="btn btn-primary btn-sm">🔍 Lihat Kamar</Link>
+            <a
+              href={officialKost48Location.googleReviewUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="btn btn-outline-warning btn-sm"
+              style={{ color: '#92400e', borderColor: '#d97706' }}
+            >
+              ⭐ Tulis Ulasan di Google
+            </a>
             <Link to="/" className="btn btn-outline-secondary btn-sm">🏠 Beranda</Link>
           </div>
         </div>
@@ -74,14 +133,14 @@ export default function ReviewsPublicPage() {
 
             {/* Sort filter */}
             {sortedReviews.length > 1 && (
-              <div className="d-flex gap-2 mb-4" role="tablist" aria-label="Urutkan ulasan">
-                <span className="text-muted small align-self-center">Urutkan:</span>
+              <div className="d-flex gap-2 mb-4 align-items-center flex-wrap" role="tablist" aria-label="Urutkan ulasan">
+                <span className="text-muted small">Urutkan:</span>
                 <button
                   type="button"
                   role="tab"
                   aria-selected={sortBy === 'recent'}
                   className={`btn btn-sm ${sortBy === 'recent' ? 'btn-primary' : 'btn-outline-secondary'}`}
-                  onClick={() => setSortBy('recent')}
+                  onClick={() => handleSortChange('recent')}
                   style={{ borderRadius: 999 }}
                 >
                   Terbaru
@@ -91,11 +150,14 @@ export default function ReviewsPublicPage() {
                   role="tab"
                   aria-selected={sortBy === 'rating'}
                   className={`btn btn-sm ${sortBy === 'rating' ? 'btn-primary' : 'btn-outline-secondary'}`}
-                  onClick={() => setSortBy('rating')}
+                  onClick={() => handleSortChange('rating')}
                   style={{ borderRadius: 999 }}
                 >
                   Rating Tertinggi
                 </button>
+                <span className="text-muted small ms-auto">
+                  {sortedReviews.length} ulasan · halaman {page} dari {totalPages}
+                </span>
               </div>
             )}
 
@@ -109,24 +171,38 @@ export default function ReviewsPublicPage() {
             )}
 
             {/* Review cards */}
-            {sortedReviews.length > 0 && (
-              <div className="gx-review-grid">
-                {sortedReviews.map((review, index) => (
-                  <article className="gx-review-card" key={`${review.initials}-${review.createdAt}-${index}`}>
-                    <div className="gx-review-card-head">
-                      <span className="gx-review-avatar">{review.initials}</span>
-                      <div>
-                        <strong>Penghuni {review.initials}</strong>
-                        <span className="text-muted small">
-                          {new Date(review.createdAt).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}
-                        </span>
-                      </div>
-                      <span className="ms-auto fw-bold">{review.rating.toFixed(1)} / 5</span>
-                    </div>
-                    <p>{review.comment || 'Memberikan penilaian positif untuk layanan KOST48.'}</p>
-                  </article>
-                ))}
-              </div>
+            {pagedReviews.length > 0 && (
+              <>
+                <div className="gx-review-grid">
+                  {pagedReviews.map((review, index) => {
+                    const isGoogle = review.source === 'google';
+                    const displayName = review.displayName || ('Penghuni ' + review.initials);
+                    return (
+                      <article className="gx-review-card" key={`${review.initials}-${review.createdAt}-${index}`}>
+                        <div className="gx-review-card-head">
+                          <span className="gx-review-avatar">{review.initials}</span>
+                          <div>
+                            <div className="d-flex align-items-center gap-2 flex-wrap">
+                              <strong>{displayName}</strong>
+                              {isGoogle && (
+                                <span style={{ fontSize: 11, background: '#fef9c3', color: '#92400e', border: '1px solid #fde68a', borderRadius: 6, padding: '1px 7px', fontWeight: 600, whiteSpace: 'nowrap' }}>
+                                  ⭐ Google Review
+                                </span>
+                              )}
+                            </div>
+                            <span className="text-muted small">
+                              {new Date(review.createdAt).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}
+                            </span>
+                          </div>
+                          <span className="ms-auto fw-bold">{review.rating.toFixed(1)} / 5</span>
+                        </div>
+                        <p>{review.comment || '⭐ Memberikan penilaian positif untuk KOST48.'}</p>
+                      </article>
+                    );
+                  })}
+                </div>
+                <ReviewPagination page={page} totalPages={totalPages} onChange={(p) => { setPage(p); window.scrollTo({ top: 0, behavior: 'smooth' }); }} />
+              </>
             )}
           </>
         )}

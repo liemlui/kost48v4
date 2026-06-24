@@ -98,6 +98,11 @@ export type TenantSelfProfile = {
   emergencyContactName?: string | null;
   emergencyContactPhone?: string | null;
   isActive?: boolean;
+  // Marketing analytics — bebas diedit kapan saja
+  maritalStatus?: string | null;
+  vehicleOwnership?: string | null;
+  smokingHabit?: string | null;
+  howDidYouHear?: string | null;
   // PUB-FOTO-PROFIL-KTP: url avatar terproteksi (disajikan via endpoint authed).
   profilePhotoUrl?: string | null;
 };
@@ -138,6 +143,9 @@ export type Room = {
   isActive?: boolean;
   activeStayId?: number | null;
   currentStay?: Stay | null;
+  category?: 'ECONOMY' | 'STANDARD' | 'DELUXE' | string | null;
+  roomType?: 'REGULAR' | 'MEZZANINE' | string | null;
+  roomSize?: 'STANDARD' | 'LARGE' | string | null;
   facilities?: RoomFacility[];
   isAvailable?: boolean;
   canBook?: boolean;
@@ -180,6 +188,7 @@ export type Stay = {
   initialElectricityKwh?: number | string | null;
   initialWaterM3?: number | string | null;
   roomStatusAfterSync?: string;
+  occupantCount?: number;
   openInvoiceCount?: number;
   invoices?: Invoice[];
   invoiceCount?: number;
@@ -407,6 +416,7 @@ export type Announcement = {
 
 export type RoomCategory = 'ECONOMY' | 'STANDARD' | 'DELUXE' | string;
 export type RoomType = 'REGULAR' | 'MEZZANINE' | string;
+export type RoomSize = 'STANDARD' | 'LARGE' | string;
 
 export type PublicRoom = {
   id: number;
@@ -416,6 +426,7 @@ export type PublicRoom = {
   status: string;
   category?: RoomCategory | null;
   roomType?: RoomType | null;
+  roomSize?: RoomSize | null;
   // PUB-CALENDAR-CHECKOUT: proyeksi kamar "Akan Kosong" (ISO date) bila relevan.
   projectedAvailableDate?: string | null;
   projectedAvailableReason?: 'checkout-approved' | 'short-term' | null;
@@ -525,6 +536,8 @@ export type CreatePublicBookingPayload = {
   stayPurpose?: StayPurposeOption;
   notes?: string;
   website?: string;
+  occupantCount?: number;
+  hasPet?: boolean;
 };
 
 export type PublicBookingResult = {

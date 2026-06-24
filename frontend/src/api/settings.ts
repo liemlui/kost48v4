@@ -8,6 +8,11 @@ export type OperationalSetting = {
   waterMeteringEnabled: boolean;
   waterTariffPerM3Rupiah: number;
   freeWaterM3PerMonth: number;
+  // Layanan tambahan owner-settable
+  wifiRupiah: number;
+  galonRupiah: number;
+  petDepositRupiah: number;
+  extraOccupantFeePercent: number;
   // R3: AI/DeepSeek fields
   deepseekModel?: string;
   deepseekFinanceModel?: string;
@@ -32,6 +37,21 @@ export type UpdateOperationalSettingPayload = Partial<
 
 export async function fetchOperationalSettings() {
   const res = await client.get<ApiEnvelope<OperationalSetting>>('/settings/operational');
+  return res.data.data;
+}
+
+export type PublicConfig = {
+  freeElectricityKwhPerMonth: number;
+  electricityTariffPerKwhRupiah: number;
+  waterMeteringEnabled: boolean;
+  wifiRupiah: number;
+  galonRupiah: number;
+  petDepositRupiah: number;
+  extraOccupantFeePercent: number;
+};
+
+export async function fetchPublicConfig() {
+  const res = await client.get<{ data: PublicConfig }>('/settings/public-config');
   return res.data.data;
 }
 

@@ -7,6 +7,9 @@
    ================================================================ */
 
 :root {
+  /* App ini light-only — matikan OS dark mode agar variabel warna tidak di-override */
+  color-scheme: light only;
+
   /* ── Skala warna primitif (O-01) ────────────────────────────────── */
   --gray-50: #f8fafc;  --gray-100: #f1f5f9;  --gray-200: #e2e8f0;
   --gray-300: #cbd5e1; --gray-400: #94a3b8;  --gray-500: #64748b;
@@ -182,3 +185,5 @@
   --density-radius-lg: 18px;
   --density-radius-md: 14px;
 }
+
+/* Dark mode dinonaktifkan — app ini light-only; color-scheme: light only sudah dideklarasikan di :root */

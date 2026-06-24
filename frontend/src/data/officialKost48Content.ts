@@ -17,6 +17,7 @@ export const officialKost48Location = {
   nearby: 'Dekat Pakuwon Mall / PTC, sekitar 7 menit berjalan kaki.',
   mapsUrl: 'https://maps.app.goo.gl/j2cZQzjZP87t6hja9',
   whatsappUrl: 'https://wa.me/6285648887628',
+  googleReviewUrl: 'https://g.page/r/CQoPM7OnWlRoEAE/review',
 };
 
 export const officialKost48Highlights: Kost48OfficialHighlight[] = [
@@ -89,12 +90,12 @@ export const officialKost48Faq: Kost48OfficialFaq[] = [
   {
     category: 'Fasilitas',
     question: 'Apakah tersedia WiFi?',
-    answer: 'WiFi tersedia sebagai layanan tambahan dengan biaya Rp 50.000 per perangkat per bulan. Sistem ini menjaga kualitas koneksi agar tetap stabil bagi semua penghuni.',
+    answer: 'WiFi tersedia sebagai layanan tambahan (per perangkat): Bulanan Rp 50.000 · 2 Mingguan Rp 30.000 · Mingguan Rp 20.000 · Harian Rp 5.000. Biaya per-perangkat menjaga kualitas koneksi tetap stabil bagi semua penghuni.',
   },
   {
     category: 'Fasilitas',
     question: 'Apakah ada dispenser atau air minum?',
-    answer: 'Tidak ada dispenser bersama, namun penghuni dapat membeli galon air merek Voila seharga Rp 15.000 per galon melalui pengelola kapan saja dibutuhkan.',
+    answer: 'Tidak ada dispenser bersama, namun penghuni dapat membeli galon air merek Voila seharga Rp 20.000 per galon melalui pengelola kapan saja dibutuhkan.',
   },
   {
     category: 'Aturan',
@@ -154,7 +155,7 @@ export const officialKost48Faq: Kost48OfficialFaq[] = [
   {
     category: 'Tarif',
     question: 'Berapa biaya layanan tambahan seperti WiFi, TV, dan galon?',
-    answer: 'WiFi: Rp 50.000/perangkat/bulan · TV: Rp 50.000/bulan · Galon air: Rp 15.000/galon. Semua layanan ini bersifat opsional dan bisa dikonfirmasi saat check-in atau kapan saja kepada admin.',
+    answer: 'WiFi (per perangkat): Bulanan Rp 50.000 · 2 Mingguan Rp 30.000 · Mingguan Rp 20.000 · Harian Rp 5.000. Galon air Voila: Rp 20.000/galon. Semua layanan ini bersifat opsional dan bisa dikonfirmasi saat check-in atau kapan saja kepada admin.',
   },
 ];
 

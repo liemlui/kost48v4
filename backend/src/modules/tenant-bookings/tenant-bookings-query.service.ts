@@ -73,6 +73,9 @@ export class TenantBookingsQueryService {
       highlightedPricingTerm: query.pricingTerm ?? PricingTerm.MONTHLY,
       highlightedRateRupiah: resolveRent(room, query.pricingTerm ?? PricingTerm.MONTHLY),
       availablePricingTerms: getAvailablePricingTerms(room),
+      roomType: room.roomType,
+      roomSize: room.roomSize,
+      roomCategory: room.category,
       isAvailable: room.status === RoomStatus.AVAILABLE || room.status === RoomStatus.RESERVED,
       availabilityNote: room.status === RoomStatus.RESERVED ? 'Sudah ada peminat, tetapi belum terkunci sebelum pembayaran valid disetujui.' : null,
     }));

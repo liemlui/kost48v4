@@ -3390,6 +3390,11 @@ div.tenant-stay-fact-chip {
   margin: 1.55rem 0 1.35rem;
 }
 
+.kost48-decor-gallery.auth:has(.kost48-decor-card:only-child) {
+  grid-template-columns: 1fr;
+  grid-template-rows: auto;
+}
+
 .kost48-decor-card {
   min-width: 0;
   margin: 0;

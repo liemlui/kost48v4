@@ -1015,6 +1015,8 @@ body.offcanvas-open {
   width: min(380px, calc(100vw - 1.5rem));
   max-height: 420px;
   overflow-y: auto;
+  opacity: 0.8;
+  backdrop-filter: blur(6px);
 }
 
 .notification-title {

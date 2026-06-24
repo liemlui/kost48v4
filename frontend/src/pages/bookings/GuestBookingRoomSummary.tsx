@@ -21,6 +21,7 @@ interface GuestBookingRoomSummaryProps {
   form: GuestBookingFormState;
   selectedRate: string | null;
   initialTotal: number;
+  petDepositRupiah?: number;
 }
 
 function GuestRoomPhoto({ room }: { room: PublicRoom }) {
@@ -76,7 +77,7 @@ function GuestRoomPhoto({ room }: { room: PublicRoom }) {
   );
 }
 
-export default function GuestBookingRoomSummary({ room, form, selectedRate, initialTotal }: GuestBookingRoomSummaryProps) {
+export default function GuestBookingRoomSummary({ room, form, selectedRate, initialTotal, petDepositRupiah = 100000 }: GuestBookingRoomSummaryProps) {
   const utilityCopy = getPublicRoomUtilityCopy(room, form.pricingTerm);
   const availability = getPublicRoomAvailabilityDisplay(room);
   const initialCost = getPublicRoomInitialCostEstimate(room, form.pricingTerm);
@@ -111,12 +112,13 @@ export default function GuestBookingRoomSummary({ room, form, selectedRate, init
           <div className="booking-room-estimate-lines">
             <span>Sewa pertama <strong><CurrencyDisplay amount={selectedRate || initialCost.rent} showZero={false} /></strong></span>
             <span>Deposit jaminan <strong><CurrencyDisplay amount={room.defaultDepositRupiah} showZero={false} /></strong></span>
-          </div>
-          {/* Audit U-09: kebijakan DP 30% (A18) — kamar bisa diamankan tanpa dana penuh. */}
-          <div className="small text-success mt-2">
-            Amankan kamar cukup dengan DP 30%:{' '}
-            <strong><CurrencyDisplay amount={Math.round(Number(selectedRate || initialCost.rent) * 0.3)} showZero={false} /></strong>
-            {' '}— pelunasan sisa sewa + jaminan saat check-in.
+            {form.hasPet && (
+              <span className="text-info">
+                Deposit hewan{' '}
+                <strong>{new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(petDepositRupiah)}</strong>
+                {' '}<small>(refundable)</small>
+              </span>
+            )}
           </div>
         </div>
 

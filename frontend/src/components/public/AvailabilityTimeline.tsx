@@ -73,52 +73,59 @@ export default function AvailabilityTimeline() {
   if (query.isLoading) {
     return (
       <div className="avcal-shell">
-        <div className="avcal-loading"><Spinner animation="border" size="sm" /> Memuat kalender...</div>
+        <div className="avcal-loading"><Spinner animation="border" size="sm" className="me-2" /> Memuat kalender ketersediaan…</div>
       </div>
     );
   }
 
   if (query.isError || !data || data.rooms.length === 0) {
-    return null; // Kalender tidak muncul bila error/kosong
+    return null;
   }
 
   const dateCount = data.dates.length;
 
   return (
     <div className="avcal-shell">
+      {/* ── Header ── */}
       <div className="avcal-header">
-        <h3 className="avcal-title">
-          📅 Kalender Ketersediaan
-          <span className="avcal-range">{data.from} — {data.to}</span>
-        </h3>
+        <div className="avcal-header-left">
+          <span className="avcal-icon" aria-hidden="true">📅</span>
+          <div>
+            <h3 className="avcal-title">Kalender Ketersediaan</h3>
+            <span className="avcal-range">{data.from} — {data.to} · {dateCount} hari</span>
+          </div>
+        </div>
         <button
           type="button"
           className="avcal-collapse-btn"
           onClick={() => setCollapsed((c) => !c)}
           aria-expanded={!collapsed}
+          aria-label={collapsed ? 'Tampilkan kalender' : 'Sembunyikan kalender'}
         >
-          {collapsed ? 'Tampilkan' : 'Sembunyikan'}
+          {collapsed ? '▼ Tampilkan' : '▲ Sembunyikan'}
         </button>
       </div>
 
       {!collapsed && (
         <>
-          {/* Legend */}
+          {/* ── Legend ── */}
           <div className="avcal-legend">
-            <span className="avcal-legend-item"><span className="avcal-cell cell-kosong" /> Kosong</span>
-            <span className="avcal-legend-item"><span className="avcal-cell cell-booking-dp" /> Dipesan (DP)</span>
-            <span className="avcal-legend-item"><span className="avcal-cell cell-huni" /> Terisi</span>
-            <span className="avcal-legend-item"><span className="avcal-cell cell-maintenance" /> Maintenance</span>
+            {(['KOSONG', 'BOOKING_DP', 'HUNI', 'MAINTENANCE'] as CellStatus[]).map((s) => (
+              <span key={s} className="avcal-legend-item">
+                <span className={`avcal-legend-dot cell-${s.toLowerCase().replace('_', '-')}`} aria-hidden="true" />
+                {s === 'KOSONG' ? 'Kosong' : s === 'BOOKING_DP' ? 'Dipesan (DP)' : s === 'HUNI' ? 'Terisi' : 'Maintenance'}
+              </span>
+            ))}
           </div>
 
-          {/* Scroll controls */}
+          {/* ── Scroll controls ── */}
           <div className="avcal-scroll-controls">
             <button type="button" className="avcal-scroll-btn" onClick={scrollLeft} aria-label="Gulir kiri">‹</button>
-            <span className="avcal-scroll-hint">{dateCount} hari • geser untuk lihat lebih banyak</span>
+            <span className="avcal-scroll-hint">Geser kiri/kanan untuk lihat lebih banyak tanggal</span>
             <button type="button" className="avcal-scroll-btn" onClick={scrollRight} aria-label="Gulir kanan">›</button>
           </div>
 
-          {/* Timeline table */}
+          {/* ── Timeline table ── */}
           <div className="avcal-table-wrap" ref={scrollRef}>
             <table className="avcal-table">
               <thead>
@@ -128,6 +135,7 @@ export default function AvailabilityTimeline() {
                     <th
                       key={d}
                       className={`avcal-th-date${isWeekend(d) ? ' avcal-weekend' : ''}`}
+                      title={d}
                     >
                       {formatHeaderDate(d).split('\n').map((line, i) => (
                         <span key={i} className="avcal-date-line">{line}</span>
@@ -145,7 +153,7 @@ export default function AvailabilityTimeline() {
                       </td>
                     </tr>
                     {rooms.map((room) => (
-                      <tr key={room.id}>
+                      <tr key={room.id} className="avcal-room-row">
                         <td className="avcal-td-room">
                           <span className="avcal-room-code">{room.code}</span>
                           {room.name && <span className="avcal-room-name">{room.name}</span>}
@@ -153,14 +161,15 @@ export default function AvailabilityTimeline() {
                         {data.dates.map((d) => {
                           const raw = room.days[d] || 'KOSONG';
                           const status = raw as CellStatus;
+                          const cls = status.toLowerCase().replace('_', '-');
                           return (
                             <td
                               key={d}
-                              className={`avcal-cell cell-${status.toLowerCase()}`}
-                              title={`${room.code} — ${d}: ${STATUS_LABELS[status]}`}
+                              className={`avcal-cell cell-${cls}${isWeekend(d) ? ' avcal-weekend-cell' : ''}`}
+                              title={`${room.code} · ${d}: ${STATUS_LABELS[status]}`}
                             >
-                              <span className="avcal-cell-text">
-                                {status === 'KOSONG' ? '✓' : status === 'BOOKING_DP' ? '◷' : status === 'HUNI' ? '●' : '▲'}
+                              <span className="avcal-cell-icon" aria-hidden="true">
+                                {status === 'KOSONG' ? '✓' : status === 'BOOKING_DP' ? 'DP' : status === 'HUNI' ? '' : '⚙'}
                               </span>
                             </td>
                           );

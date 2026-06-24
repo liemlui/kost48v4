@@ -1,9 +1,10 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Accordion, Container, Modal, Spinner } from 'react-bootstrap';
 import { Link, Navigate, useLocation } from 'react-router-dom';
 import { listPublicRooms } from '../../api/bookings';
 import { fetchPublicSocialProof } from '../../api/marketing';
+import { fetchPublicConfig } from '../../api/settings';
 import { listFacilityImages } from '../../api/facilityImages';
 import { listMarketingAssets } from '../../api/marketingAssets';
 import Kost48LogoMark from '../../components/common/Kost48LogoMark';
@@ -33,10 +34,13 @@ import {
   resolvePublicMarketingAssetUrl, getTodayDateInput, formatCompactRupiah, formatMonthlyRange, buildWhatsAppUrl, buildRoomWhatsAppUrl, getRoomCover,
   Lightbox, GuestTopbar, RoomPreviewCard, RoomPreviewSkeleton, GuestFooter, MobileShortcutNav,
 } from './publicGuestShared';
+const HERO_SUB_TEXT = 'Kamar nyaman dengan pilihan AC atau kipas, fasilitas harian lengkap, dan proses booking yang lebih jelas dari awal.';
+
 export default function PublicGuestDashboardPage() {
   const { user } = useAuth();
   const { stage } = useTenantPortalStage();
   const location = useLocation();
+
   const initialCatalogParams = useMemo(() => new URLSearchParams(location.search), [location.search]);
   const [scrolled, setScrolled] = useState(false);
   const [scrollProgress, setScrollProgress] = useState(0);
@@ -67,6 +71,8 @@ export default function PublicGuestDashboardPage() {
     return map;
   }, [marketingAssetsQuery.data]);
 
+  const [heroTyped, setHeroTyped] = useState('');
+  const [heroTypingDone, setHeroTypingDone] = useState(false);
   const [showAllFaq, setShowAllFaq] = useState(false);
   const todayDate = useMemo(() => getTodayDateInput(), []);
   const [checkInDate, setCheckInDate] = useState(todayDate);
@@ -89,10 +95,16 @@ export default function PublicGuestDashboardPage() {
     const value = (initialCatalogParams.get('category') || '').toUpperCase();
     return ['ECONOMY', 'STANDARD', 'DELUXE'].includes(value) ? value : 'all';
   });
-  // PUB-REVIEWS-FILTER: urutkan ulasan (Terbaru / Rating Tertinggi), tampil maks 10.
+  // PUB-REVIEWS-FILTER: urutkan + paginasi ulasan (6 per halaman).
   const [reviewSort, setReviewSort] = useState<'recent' | 'rating'>('recent');
+  const [reviewPage, setReviewPage] = useState(1);
+  const REVIEW_PER_PAGE = 6;
   const [visibleRoomCount, setVisibleRoomCount] = useState(CATALOG_BATCH_SIZE);
   const [galleryBroken, setGalleryBroken] = useState<Record<string, boolean>>({});
+  const availSectionRef = useRef<HTMLElement>(null);
+  const [statsVisible, setStatsVisible] = useState(false);
+  const [displayStats, setDisplayStats] = useState({ bookable: 0, occupied: 0, total: 0, percent: 0 });
+  const countUpStarted = useRef(false);
   const heroImageUrl = resolvePublicMarketingAssetUrl(marketingAssetMap.get('hero-front')) ?? getKost48FrontPhotoUrl();
   const galleryItems = useMemo(
     () => GALLERY_ITEMS.map((item) => ({
@@ -115,6 +127,19 @@ export default function PublicGuestDashboardPage() {
     return () => window.removeEventListener('scroll', h);
   }, []);
 
+  useEffect(() => {
+    let i = 0;
+    let id: ReturnType<typeof setInterval>;
+    const delay = setTimeout(() => {
+      id = setInterval(() => {
+        i += 1;
+        setHeroTyped(HERO_SUB_TEXT.slice(0, i));
+        if (i >= HERO_SUB_TEXT.length) { clearInterval(id); setHeroTypingDone(true); }
+      }, 22);
+    }, 760);
+    return () => { clearTimeout(delay); clearInterval(id); };
+  }, []);
+
   // UX-06: scroll progress bar (0-100%) di landing panjang.
   useEffect(() => {
     const update = () => {
@@ -134,6 +159,34 @@ export default function PublicGuestDashboardPage() {
     return () => window.clearTimeout(timer);
   }, [location.pathname]);
 
+  useEffect(() => {
+    const obs = new IntersectionObserver(
+      (entries) => entries.forEach((e) => {
+        if (e.isIntersecting) { e.target.classList.add('gx-visible'); obs.unobserve(e.target); }
+      }),
+      { threshold: 0.05, rootMargin: '0px 0px -10px 0px' },
+    );
+    const t = setTimeout(() => {
+      document.querySelectorAll('.gx-reveal, .gx-reveal-l, .gx-reveal-r').forEach((el) => {
+        const rect = (el as Element).getBoundingClientRect();
+        if (rect.top < window.innerHeight && rect.bottom > 0) {
+          (el as Element).classList.add('gx-visible');
+        } else {
+          obs.observe(el);
+        }
+      });
+    }, 60);
+    return () => { clearTimeout(t); obs.disconnect(); };
+  }, []);
+
+  useEffect(() => {
+    const el = availSectionRef.current;
+    if (!el) return undefined;
+    const obs = new IntersectionObserver(([entry]) => { if (entry.isIntersecting) setStatsVisible(true); }, { threshold: 0.15 });
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, []);
+
   const roomsQuery = useQuery({
     queryKey: ['guest-dashboard-public-rooms'],
     queryFn: () => listPublicRooms({ limit: 100, pricingTerm: 'MONTHLY' }),
@@ -146,12 +199,35 @@ export default function PublicGuestDashboardPage() {
     staleTime: 5 * 60_000,
   });
 
+  const publicConfigQuery = useQuery({
+    queryKey: ['public-config'],
+    queryFn: fetchPublicConfig,
+    staleTime: 30 * 60_000,
+  });
+  const freeKwh = publicConfigQuery.data?.freeElectricityKwhPerMonth ?? 30;
+
   const rooms = roomsQuery.data?.items ?? [];
   const stats = useMemo(() => ({
     bookable: rooms.filter((r) => isPublicRoomBookable(r) && String(r.status ?? '').toUpperCase() !== 'MAINTENANCE').length,
     occupied: rooms.filter((r) => String(r.status ?? '').toUpperCase() === 'OCCUPIED').length,
     total: rooms.length,
   }), [rooms]);
+
+  useEffect(() => {
+    if (!statsVisible || roomsQuery.isLoading || countUpStarted.current) return undefined;
+    countUpStarted.current = true;
+    const { bookable, occupied, total } = stats;
+    const actualPercent = total > 0 ? Math.round((occupied / total) * 100) : 0;
+    const steps = 28;
+    let s = 0;
+    const id = setInterval(() => {
+      s += 1;
+      const p = 1 - Math.pow(1 - s / steps, 3);
+      setDisplayStats({ bookable: Math.round(bookable * p), occupied: Math.round(occupied * p), total: Math.round(total * p), percent: Math.round(actualPercent * p) });
+      if (s >= steps) { clearInterval(id); setDisplayStats({ bookable, occupied, total, percent: actualPercent }); }
+    }, Math.round(820 / steps));
+    return () => clearInterval(id);
+  }, [statsVisible, stats, roomsQuery.isLoading]);
 
   const monthlyRates = useMemo(
     () => rooms.map((room) => getBestPublicRoomRate(room, 'MONTHLY')).filter((rate) => rate > 0),
@@ -185,20 +261,32 @@ export default function PublicGuestDashboardPage() {
     [catalogRooms, visibleRoomCount],
   );
 
-  const faqItems = showAllFaq ? [...HOME_FAQ_ITEMS, ...EXTRA_FAQ_ITEMS] : HOME_FAQ_ITEMS;
+  const faqItems = useMemo(() => {
+    const base = showAllFaq ? [...HOME_FAQ_ITEMS, ...EXTRA_FAQ_ITEMS] : HOME_FAQ_ITEMS;
+    return base.map((item) =>
+      item.question === 'Bagaimana aturan listrik & air?'
+        ? { ...item, answer: item.answer.replace('jatah listrik gratis', `${freeKwh} kWh gratis`) }
+        : item,
+    );
+  }, [showAllFaq, freeKwh]);
   const activeFacility = FACILITY_GROUPS.find((group) => group.id === activeFacilityTab) ?? FACILITY_GROUPS[0];
   const ratingAvailable = Boolean((socialProofQuery.data?.reviewCount ?? 0) > 0 && (socialProofQuery.data?.averageRating ?? 0) > 0);
   const occupantCount = socialProofQuery.data?.occupantCount ?? stats.occupied;
-  // PUB-REVIEWS-FILTER: urutkan + batasi 10 ulasan (client-side).
-  const displayedReviews = useMemo(() => {
+  // PUB-REVIEWS-FILTER: urutkan + paginasi 6 per halaman (client-side).
+  const allSortedReviews = useMemo(() => {
     const list = [...(socialProofQuery.data?.reviews ?? [])];
     list.sort((a, b) =>
       reviewSort === 'rating'
         ? b.rating - a.rating
         : new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
     );
-    return list.slice(0, 10);
+    return list;
   }, [socialProofQuery.data?.reviews, reviewSort]);
+  const reviewTotalPages = Math.ceil(allSortedReviews.length / REVIEW_PER_PAGE);
+  const displayedReviews = useMemo(
+    () => allSortedReviews.slice((reviewPage - 1) * REVIEW_PER_PAGE, reviewPage * REVIEW_PER_PAGE),
+    [allSortedReviews, reviewPage, REVIEW_PER_PAGE],
+  );
   const handleCheckInDateChange = (value: string) => {
     setCheckInDate(!value || value < todayDate ? todayDate : value);
   };
@@ -239,8 +327,12 @@ export default function PublicGuestDashboardPage() {
           <p className="gx-hero-eyebrow">Jalan Hikmah V No. 48 - Surabaya Barat</p>
           <h1 className="gx-hero-title">KOST48 Surabaya</h1>
           <p className="gx-hero-headline">Kost bersih &amp; aman dekat Pakuwon Mall</p>
-          <p className="gx-hero-sub">
-            Kamar nyaman dengan pilihan AC atau kipas, fasilitas harian lengkap, dan proses booking yang lebih jelas dari awal.
+          <p
+            className="gx-hero-sub"
+            aria-label={HERO_SUB_TEXT}
+          >
+            {heroTyped || ' '}
+            <span className={`gx-typewriter-cursor${heroTypingDone ? ' done' : ''}`} aria-hidden="true" />
           </p>
           {monthlyRates.length > 0 && (
             <div className="gx-hero-price-badge">
@@ -258,32 +350,83 @@ export default function PublicGuestDashboardPage() {
         <div className="gx-hero-next" aria-hidden="true">Kamar tersedia, fasilitas, dan lokasi ada di bawah.</div>
       </section>
 
-      <section className="gx-avail-section" id="cek-kamar">
+      <section className="gx-avail-section" id="cek-kamar" ref={availSectionRef}>
         <Container fluid="xl">
           <div className="gx-avail-wrap">
             <div className="gx-avail-text">
-              <div className="gx-label">Cek kamar langsung di katalog</div>
-              <h2>Pilih & bandingkan kamar dengan mudah.</h2>
+              <div className="gx-label">Ketersediaan kamar — diperbarui langsung</div>
+              <h2>Kamar tersedia, transparan tanpa chat dulu.</h2>
               <p>
-                Lihat semua kamar, filter sesuai kebutuhan (AC/kipas, KM dalam/luar, harga), 
-                bandingkan 3 kamar sekaligus, dan cek kalender ketersediaan — tanpa login.
+                Lihat status setiap kamar secara real-time — filter AC/kipas, KM dalam/luar, harga,
+                dan bandingkan hingga 3 kamar sekaligus. Tidak perlu login, tidak perlu nunggu balas WA.
               </p>
+              <div className="gx-avail-live-badge" aria-live="polite">
+                <span className="gx-avail-live-dot" aria-hidden="true" />
+                {roomsQuery.isLoading ? 'Memuat ketersediaan…' : `${stats.bookable} kamar tersedia sekarang`}
+              </div>
               <div className="gx-avail-stats">
                 <div className="gx-stat gx-stat-green">
-                  <span className="gx-stat-num">{roomsQuery.isLoading ? '...' : stats.bookable}</span>
+                  <span className="gx-stat-num">{roomsQuery.isLoading ? '...' : displayStats.bookable}</span>
                   <span className="gx-stat-label">Kamar tersedia</span>
                 </div>
                 <div className="gx-stat gx-stat-amber">
-                  <span className="gx-stat-num">{roomsQuery.isLoading ? '...' : stats.occupied}</span>
+                  <span className="gx-stat-num">{roomsQuery.isLoading ? '...' : displayStats.occupied}</span>
                   <span className="gx-stat-label">Terisi</span>
                 </div>
                 <div className="gx-stat gx-stat-gray">
-                  <span className="gx-stat-num">{roomsQuery.isLoading ? '...' : stats.total}</span>
+                  <span className="gx-stat-num">{roomsQuery.isLoading ? '...' : displayStats.total}</span>
                   <span className="gx-stat-label">Total kamar</span>
                 </div>
               </div>
+              {!roomsQuery.isLoading && stats.total > 0 && (
+                <div className="gx-avail-progress-wrap">
+                  <div className="gx-avail-progress-meta">
+                    <span>Tingkat hunian saat ini</span>
+                    <strong className={`gx-percent-badge${stats.bookable <= 5 ? ' is-scarce' : ''}`}>
+                      <span className="gx-percent-num">{displayStats.percent}%</span>
+                      {stats.bookable <= 5 && <span className="gx-percent-note">⚡ Sisa {stats.bookable} kamar!</span>}
+                    </strong>
+                  </div>
+                  <div
+                    className="gx-avail-progress"
+                    role="progressbar"
+                    aria-valuenow={stats.occupied}
+                    aria-valuemin={0}
+                    aria-valuemax={stats.total}
+                    aria-label={`${stats.occupied} dari ${stats.total} kamar terisi`}
+                  >
+                    <div
+                      className={`gx-avail-progress-bar${stats.bookable <= 5 ? ' is-scarce' : ''}`}
+                      style={{ width: statsVisible ? `${Math.round((stats.occupied / stats.total) * 100)}%` : '0%' }}
+                    />
+                  </div>
+                </div>
+              )}
               <a className="gx-btn-primary" href="/rooms"><span aria-hidden="true">🔍</span> Lihat Katalog Kamar</a>
               <span className="text-muted small mt-2 d-block">💡 Cukup DP 30% untuk amankan kamar — sisanya saat check-in.</span>
+            </div>
+            <div className="gx-avail-steps">
+              <div className="gx-avail-step">
+                <span className="gx-avail-step-num">1</span>
+                <div>
+                  <strong>Pilih kamar</strong>
+                  <small>Filter AC/kipas, KM dalam/luar, harga, dan bandingkan 3 kamar sekaligus.</small>
+                </div>
+              </div>
+              <div className="gx-avail-step">
+                <span className="gx-avail-step-num">2</span>
+                <div>
+                  <strong>Isi data & DP 30%</strong>
+                  <small>Formulir singkat: nama, nomor KTP, tanggal check-in. DP hangus hanya jika batal.</small>
+                </div>
+              </div>
+              <div className="gx-avail-step">
+                <span className="gx-avail-step-num">3</span>
+                <div>
+                  <strong>Kamar diamankan</strong>
+                  <small>Admin review lalu konfirmasi via portal. Sisa pembayaran dibawa saat check-in.</small>
+                </div>
+              </div>
             </div>
           </div>
         </Container>
@@ -292,10 +435,10 @@ export default function PublicGuestDashboardPage() {
       <section className="gx-market-section" id="kamar">
         <Container fluid="xl">
           <div className="gx-market-head">
-            <div className="gx-section-head">
-              <div className="gx-label">Katalog kamar</div>
-              <h2>Lihat & bandingkan semua kamar di katalog.</h2>
-              <p>Filter lengkap, kalender ketersediaan, dan perbandingan kamar — semua di halaman katalog khusus.</p>
+            <div className="gx-section-head gx-reveal">
+              <div className="gx-label">Pilih kamarmu</div>
+              <h2>Pilih kamar yang benar-benar sesuai, bukan sekadar yang ada.</h2>
+              <p>Filter AC/kipas, kamar mandi dalam/luar, dan harga. Bandingkan 3 kamar sekaligus — baru booking yang benar-benar cocok.</p>
             </div>
             <Link to="/rooms" className="gx-btn-outline">Lihat Katalog Lengkap →</Link>
           </div>
@@ -310,7 +453,7 @@ export default function PublicGuestDashboardPage() {
           ) : rooms.length > 0 ? (
             <>
               <div className="gx-room-grid">
-                {rooms.slice(0, 4).map((room) => <RoomPreviewCard key={room.id} room={room} />)}
+                {rooms.filter((r) => isPublicRoomBookable(r)).slice(0, 4).map((room) => <RoomPreviewCard key={room.id} room={room} />)}
               </div>
               <div className="gx-room-range">
                 <span>Tarif bulanan mulai</span>
@@ -331,14 +474,14 @@ export default function PublicGuestDashboardPage() {
 
       <section className="gx-trust-section">
         <Container fluid="xl">
-          <div className="gx-section-head gx-section-head-center">
-            <div className="gx-label">Proses jelas</div>
-            <h2>Kenapa booking di KOST48 lebih jelas?</h2>
-            <p>Yang biasanya tercecer di chat dibuat lebih terlihat: status kamar, pengajuan booking, pembayaran, dan portal penghuni.</p>
+          <div className="gx-section-head gx-section-head-center gx-reveal">
+            <div className="gx-label">Beda dari kost lain</div>
+            <h2>Semua info kamar bisa langsung dicek — tidak perlu chat tanya-tanya dulu.</h2>
+            <p>Status kamar, jadwal booking, pembayaran, dan komunikasi — semua di satu portal. Kamu tahu posisinya di mana sejak hari pertama.</p>
           </div>
-          <div className="gx-trust-grid">
+          <div className="gx-trust-grid gx-stagger">
             {TRUST_ITEMS.map((item) => (
-              <article className="gx-trust-card" key={item.title}>
+              <article className="gx-trust-card gx-reveal" key={item.title}>
                 <span className="gx-trust-mark">{item.mark}</span>
                 <h3>{item.title}</h3>
                 <p>{item.desc}</p>
@@ -401,7 +544,7 @@ export default function PublicGuestDashboardPage() {
       <section className="gx-location-section" id="lokasi">
         <Container fluid="xl">
           <div className="gx-location-grid">
-            <div className="gx-location-copy">
+            <div className="gx-location-copy gx-reveal-l">
               <div className="gx-label">Lokasi</div>
               <h2>Dekat Pakuwon Mall / PTC di Surabaya Barat.</h2>
               <p>KOST48 berada di Jalan Hikmah V No. 48, Lontar, Sambikerep. Lokasinya mudah dikenali dan cocok untuk calon penghuni yang ingin akses harian lebih praktis.</p>
@@ -415,7 +558,7 @@ export default function PublicGuestDashboardPage() {
                 <a className="gx-btn-outline" href={officialKost48Location.whatsappUrl} target="_blank" rel="noreferrer">Chat WhatsApp</a>
               </div>
             </div>
-            <div className="gx-contact-map">
+            <div className="gx-contact-map gx-reveal-r">
               <iframe
                 title="Peta Lokasi KOST48 Surabaya"
                 src={MAPS_EMBED_URL}
@@ -439,8 +582,8 @@ export default function PublicGuestDashboardPage() {
             <div className="gx-social-proof-head">
               <div className="gx-section-head">
                 <div className="gx-label">Cerita penghuni</div>
-                <h2>Ulasan dari penghuni terverifikasi.</h2>
-                <p>Pengalaman penghuni ditampilkan secara anonim dan hanya dari ulasan yang memenuhi kriteria.</p>
+                <h2>Ulasan dari penghuni dan tamu KOST48.</h2>
+                <p>Ulasan dari penghuni nyata dan tamu Google Maps — ditampilkan apa adanya.</p>
                 <Link to="/reviews" className="btn btn-outline-primary btn-sm" style={{ borderRadius: 999, flexShrink: 0 }}>Lihat semua ulasan →</Link>
               </div>
               <div className="gx-social-proof-summary" aria-label="Ringkasan kepercayaan">
@@ -466,22 +609,48 @@ export default function PublicGuestDashboardPage() {
             </div>
             <div className="gx-catalog-filter gx-review-filter" role="tablist" aria-label="Urutkan ulasan">
               <span>Urutkan</span>
-              <button type="button" role="tab" aria-selected={reviewSort === 'recent'} className={reviewSort === 'recent' ? 'active' : ''} onClick={() => setReviewSort('recent')}>Terbaru</button>
-              <button type="button" role="tab" aria-selected={reviewSort === 'rating'} className={reviewSort === 'rating' ? 'active' : ''} onClick={() => setReviewSort('rating')}>Rating Tertinggi</button>
+              <button type="button" role="tab" aria-selected={reviewSort === 'recent'} className={reviewSort === 'recent' ? 'active' : ''} onClick={() => { setReviewSort('recent'); setReviewPage(1); }}>Terbaru</button>
+              <button type="button" role="tab" aria-selected={reviewSort === 'rating'} className={reviewSort === 'rating' ? 'active' : ''} onClick={() => { setReviewSort('rating'); setReviewPage(1); }}>Rating Tertinggi</button>
             </div>
             <div className="gx-review-grid">
-              {displayedReviews.map((review, index) => (
-                <article className="gx-review-card" key={`${review.initials}-${review.createdAt}-${index}`}>
-                  <div className="gx-review-card-head">
-                    <span className="gx-review-avatar">{review.initials}</span>
-                    <div>
-                      <strong>Penghuni {review.initials}</strong>
-                      <span>{review.rating.toFixed(1)} / 5</span>
+              {displayedReviews.map((review, index) => {
+                const isGoogle = review.source === 'google';
+                const displayName = review.displayName || ('Penghuni ' + review.initials);
+                return (
+                  <article className="gx-review-card" key={`${review.initials}-${review.createdAt}-${index}`}>
+                    <div className="gx-review-card-head">
+                      <span className="gx-review-avatar">{review.initials}</span>
+                      <div>
+                        <div className="d-flex align-items-center gap-2 flex-wrap">
+                          <strong>{displayName}</strong>
+                          {isGoogle && (
+                            <span style={{ fontSize: 11, background: '#fef9c3', color: '#92400e', border: '1px solid #fde68a', borderRadius: 6, padding: '1px 7px', fontWeight: 600, whiteSpace: 'nowrap' }}>
+                              ⭐ Google Review
+                            </span>
+                          )}
+                        </div>
+                        <span>{review.rating.toFixed(1)} / 5</span>
+                      </div>
                     </div>
-                  </div>
-                  <p>{review.comment || 'Memberikan penilaian positif untuk layanan KOST48.'}</p>
-                </article>
-              ))}
+                    <p>{review.comment || '⭐ Memberikan penilaian positif untuk KOST48.'}</p>
+                  </article>
+                );
+              })}
+            </div>
+            {reviewTotalPages > 1 && (
+              <div className="d-flex justify-content-center align-items-center gap-2 mt-4" role="navigation" aria-label="Halaman ulasan">
+                <button type="button" className="gx-btn-outline" style={{ padding: '6px 14px', fontSize: 13 }} onClick={() => setReviewPage((p) => Math.max(1, p - 1))} disabled={reviewPage === 1}>‹</button>
+                {Array.from({ length: reviewTotalPages }, (_, i) => i + 1).map((p) => (
+                  <button key={p} type="button" onClick={() => setReviewPage(p)} aria-current={p === reviewPage ? 'page' : undefined}
+                    style={{ padding: '6px 14px', fontSize: 13, minWidth: 36, borderRadius: 8, border: '1px solid', borderColor: p === reviewPage ? '#0ea5e9' : '#e2e8f0', background: p === reviewPage ? '#0ea5e9' : 'transparent', color: p === reviewPage ? '#fff' : 'inherit', cursor: 'pointer' }}>
+                    {p}
+                  </button>
+                ))}
+                <button type="button" className="gx-btn-outline" style={{ padding: '6px 14px', fontSize: 13 }} onClick={() => setReviewPage((p) => Math.min(reviewTotalPages, p + 1))} disabled={reviewPage === reviewTotalPages}>›</button>
+              </div>
+            )}
+            <div className="text-center mt-3">
+              <Link to="/reviews" style={{ fontSize: 13, color: 'inherit', opacity: 0.6 }}>Lihat semua ulasan →</Link>
             </div>
           </Container>
         </section>
@@ -582,7 +751,7 @@ export default function PublicGuestDashboardPage() {
 
       <section className="gx-contact-section" id="hubungi-kami">
         <Container fluid="xl">
-          <div className="gx-final-cta">
+          <div className="gx-final-cta gx-reveal">
             <div>
               <div className="gx-label">Hubungi kami</div>
               <h2>Siap cek kamar di KOST48?</h2>

@@ -7,6 +7,7 @@ export const propertyConfigs = {
       { key: 'code', label: 'Kamar' },
       { key: 'floor', label: 'Lantai' },
       { key: 'category', label: 'Kategori' },
+      { key: 'roomSize', label: 'Ukuran' },
       { key: 'status', label: 'Status Kamar' },
       { key: 'monthlyRateRupiah', label: 'Tarif Bulanan' },
     ],
@@ -49,6 +50,15 @@ export const propertyConfigs = {
         options: [
           { value: 'REGULAR', label: 'Reguler' },
           { value: 'MEZZANINE', label: 'Mezzanine' },
+        ],
+      },
+      {
+        name: 'roomSize',
+        label: 'Ukuran Kamar',
+        type: 'select' as const,
+        options: [
+          { value: 'STANDARD', label: 'Standar 2,5×3m (~7,5m², maks 2 org)' },
+          { value: 'LARGE', label: 'Besar 3×3,5m (~10,5m², maks 4 org, +Rp 200rb/bln)' },
         ],
       },
       {

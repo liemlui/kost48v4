@@ -20,10 +20,12 @@ export default function Kost48DecorGallery({ variant = 'compact', maxItems = 3 }
             fallbackDescription="Informasi resmi tetap bisa dibaca dari teks di halaman ini."
             resolveUrl={false}
           />
-          <figcaption>
-            <strong>{item.title}</strong>
-            {variant !== 'auth' ? <span>{item.description}</span> : null}
-          </figcaption>
+          {variant !== 'auth' ? (
+            <figcaption>
+              <strong>{item.title}</strong>
+              <span>{item.description}</span>
+            </figcaption>
+          ) : null}
         </figure>
       ))}
     </div>

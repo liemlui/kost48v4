@@ -22,6 +22,7 @@ const PUBLIC_ROOM_SELECT = {
   status: true,
   category: true,
   roomType: true,
+  roomSize: true,
   images: true,
   notes: true,
   dailyRateRupiah: true,
@@ -44,7 +45,7 @@ export class MarketingPublicRoomsService {
   constructor(private readonly prisma: PrismaService) {}
 
   async getPublicSocialProof() {
-    const [reviews, reviewAggregate, activeStays] = await this.prisma.$transaction([
+    const [staffReviews, staffAggregate, activeStays, externalReviews, externalAggregate] = await this.prisma.$transaction([
       this.prisma.staffReview.findMany({
         where: {
           status: 'VISIBLE' as any,
@@ -57,40 +58,69 @@ export class MarketingPublicRoomsService {
           tenant: { select: { fullName: true } },
         },
         orderBy: { createdAt: 'desc' },
-        take: 12, // PUB-REVIEWS-FILTER: pool utk sort Terbaru/Rating Tertinggi (FE tampil maks 10).
+        take: 12,
       }),
       this.prisma.staffReview.aggregate({
-        where: {
-          status: 'VISIBLE' as any,
-          rating: { gte: 4 },
-        },
+        where: { status: 'VISIBLE' as any, rating: { gte: 4 } },
         _avg: { rating: true },
         _count: { id: true },
       }),
       this.prisma.stay.findMany({
-        where: {
-          status: 'ACTIVE' as any,
-          initialMetersPromotedAt: { not: null },
-        },
+        where: { status: 'ACTIVE' as any, initialMetersPromotedAt: { not: null } },
         select: { tenantId: true },
+      }),
+      this.prisma.externalReview.findMany({
+        where: { isVisible: true, rating: { gte: 4 } },
+        select: { rating: true, comment: true, authorName: true, source: true, reviewedAt: true },
+        orderBy: { reviewedAt: 'desc' },
+        take: 20,
+      }),
+      this.prisma.externalReview.aggregate({
+        where: { isVisible: true, rating: { gte: 4 } },
+        _avg: { rating: true },
+        _count: { id: true },
       }),
     ]);
 
     const occupantCount = new Set(activeStays.map((stay) => stay.tenantId)).size;
-    const averageRating = reviewAggregate._avg.rating
-      ? Math.round(reviewAggregate._avg.rating * 10) / 10
+
+    // Gabung StaffReview + ExternalReview untuk rata-rata dan pool ulasan.
+    const totalCount = staffAggregate._count.id + externalAggregate._count.id;
+    const weightedAvg = totalCount > 0
+      ? ((staffAggregate._avg.rating ?? 0) * staffAggregate._count.id +
+         (externalAggregate._avg.rating ?? 0) * externalAggregate._count.id) / totalCount
       : 0;
+    const averageRating = weightedAvg > 0 ? Math.round(weightedAvg * 10) / 10 : 0;
+
+    const staffMapped = staffReviews.map((r) => ({
+      initials: this.toInitials(r.tenant.fullName),
+      displayName: null as string | null,
+      source: null as string | null,
+      rating: r.rating,
+      comment: r.comment?.trim().slice(0, 280) || null,
+      createdAt: r.createdAt,
+    }));
+
+    const externalMapped = externalReviews.map((r) => ({
+      initials: this.toInitials(r.authorName),
+      displayName: r.authorName,
+      source: r.source,
+      rating: r.rating,
+      comment: r.comment?.trim().slice(0, 280) || null,
+      createdAt: r.reviewedAt,
+    }));
+
+    // Campurkan: tampilkan Google reviews terbaru di depan, lalu StaffReview.
+    // Pool 20 batas agar FE bisa sort Terbaru/Rating.
+    const allReviews = [...externalMapped, ...staffMapped]
+      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
+      .slice(0, 20);
 
     return {
       occupantCount,
       averageRating,
-      reviewCount: reviewAggregate._count.id,
-      reviews: reviews.map((review) => ({
-        initials: this.toInitials(review.tenant.fullName),
-        rating: review.rating,
-        comment: review.comment?.trim().slice(0, 280) || null,
-        createdAt: review.createdAt,
-      })),
+      reviewCount: totalCount,
+      reviews: allReviews,
     };
   }
 
@@ -171,6 +201,11 @@ export class MarketingPublicRoomsService {
     return map;
   }
 
+  /** localYMD: format Date lokal → "YYYY-MM-DD" (sama seperti frontend) */
+  private localYMD(d: Date): string {
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  }
+
   /** PUB-CALENDAR: grid ketersediaan per kamar per tanggal untuk rentang [from, to]. */
   async getAvailabilityCalendar(query: { from?: string; to?: string }) {
     const today = new Date();
@@ -192,33 +227,41 @@ export class MarketingPublicRoomsService {
       toDate = new Date(fromDate);
     }
 
-    const fromStr = fromDate.toISOString().slice(0, 10);
-    const toStr = toDate.toISOString().slice(0, 10);
+    const fromStr = this.localYMD(fromDate);
+    const toStr = this.localYMD(toDate);
 
-    // Bangun array tanggal.
+    // Bangun array tanggal — pakai localYMD agar key konsisten dgn frontend.
     const dates: string[] = [];
     const cursor = new Date(fromDate);
     while (cursor <= toDate) {
-      dates.push(cursor.toISOString().slice(0, 10));
+      dates.push(this.localYMD(cursor));
       cursor.setDate(cursor.getDate() + 1);
     }
 
-    // Ambil semua kamar aktif.
+    // Ambil semua kamar aktif — dengan info pricing + kategori.
     const rooms = await this.prisma.room.findMany({
       where: { isActive: true },
-      select: { id: true, code: true, name: true, floor: true, status: true },
+      select: {
+        id: true,
+        code: true,
+        name: true,
+        floor: true,
+        status: true,
+        category: true,
+        roomType: true,
+        hasAc: true,
+        monthlyRateRupiah: true,
+      },
       orderBy: [{ floor: 'asc' }, { code: 'asc' }],
     });
 
-    // Ambil stay ACTIVE yang overlap dengan rentang.
+    // Ambil stay ACTIVE — termasuk yg kontraknya sudah lewat (masih ACTIVE / overstay).
     const stays = await this.prisma.stay.findMany({
       where: {
         status: 'ACTIVE',
-        checkInDate: { lt: toDate }, // stay dimulai sebelum akhir rentang
-        OR: [
-          { plannedCheckOutDate: null },
-          { plannedCheckOutDate: { gt: fromDate } }, // stay berakhir setelah awal rentang
-        ],
+        checkInDate: { lt: toDate },
+        // TIDAK filter plannedCheckOutDate — stay yg lewat kontrak tetap perlu
+        // untuk nunjukkin status HUNI (overstay) atau PERPANJANG (jika ada renew).
       },
       select: {
         id: true,
@@ -228,11 +271,36 @@ export class MarketingPublicRoomsService {
         plannedCheckOutDate: true,
         initialMetersPromotedAt: true,
         downPaymentPaidRupiah: true,
+        downPaymentPaidAt: true,
+        downPaymentAmountRupiah: true,
         room: {
           select: { status: true },
         },
+        tenant: {
+          select: { fullName: true },
+        },
       },
     });
+
+    // Ambil renew request PENDING / APPROVED untuk stay aktif.
+    const activeStayIds = stays.map((s) => s.id);
+    const renewRequests = activeStayIds.length > 0
+      ? await this.prisma.renewRequest.findMany({
+          where: {
+            stayId: { in: activeStayIds },
+            status: { in: ['PENDING', 'APPROVED'] },
+          },
+          select: {
+            stayId: true,
+            status: true,
+            requestedCheckOutDate: true,
+          },
+        })
+      : [];
+    const renewByStayId = new Map<number, typeof renewRequests[0]>();
+    for (const rr of renewRequests) {
+      renewByStayId.set(rr.stayId, rr);
+    }
 
     // Group stays by roomId.
     const staysByRoomId = new Map<number, typeof stays>();
@@ -242,13 +310,30 @@ export class MarketingPublicRoomsService {
       else staysByRoomId.set(stay.roomId, [stay]);
     }
 
-    // Untuk tiap kamar + tanggal, tentukan status.
+    // Helper: hitung sisa hari dari hari ini sampai target date.
+    const todayNorm = new Date(today);
+    const diffDays = (d: Date): number =>
+      Math.max(0, Math.round((d.getTime() - todayNorm.getTime()) / 86_400_000));
+
+    // Untuk tiap kamar + tanggal, tentukan status + data kaya.
     const roomDays: Array<{
       id: number;
       code: string;
       name: string | null;
       floor: string | null;
       status: string;
+      category: string;
+      roomType: string;
+      hasAc: boolean;
+      monthlyRateRupiah: number;
+      currentTenantName: string | null;
+      checkInDate: string | null;
+      plannedCheckOutDate: string | null;
+      remainingDays: number;
+      hasPendingRenew: boolean;
+      renewStatus: string | null;
+      dpTenantName: string | null;
+      dpCheckInDate: string | null;
       days: Record<string, string>;
     }> = [];
 
@@ -256,31 +341,118 @@ export class MarketingPublicRoomsService {
       const roomStays = staysByRoomId.get(room.id) ?? [];
       const days: Record<string, string> = {};
 
+      // Cari stay yang mencakup hari INI untuk summary
+      const todayObj = new Date(today);
+      const todayStay = roomStays.find((stay) => {
+        const start = new Date(stay.checkInDate);
+        const end = stay.plannedCheckOutDate
+          ? new Date(stay.plannedCheckOutDate)
+          : null;
+        return start <= todayObj && (!end || end > todayObj);
+      });
+
+      let currentTenantName: string | null = null;
+      let checkInDate: string | null = null;
+      let plannedCheckOutDate: string | null = null;
+      let remainingDays = 0;
+      let hasPendingRenew = false;
+      let renewStatus: string | null = null;
+      let dpTenantName: string | null = null;
+      let dpCheckInDate: string | null = null;
+
+      if (todayStay) {
+        const isOccupied =
+          todayStay.initialMetersPromotedAt !== null ||
+          todayStay.room.status === 'OCCUPIED';
+
+        if (isOccupied) {
+          currentTenantName = todayStay.tenant?.fullName ?? null;
+          checkInDate = todayStay.checkInDate
+            ? this.localYMD(todayStay.checkInDate)
+            : null;
+          plannedCheckOutDate = todayStay.plannedCheckOutDate
+            ? this.localYMD(todayStay.plannedCheckOutDate)
+            : null;
+          if (plannedCheckOutDate) {
+            remainingDays = diffDays(new Date(plannedCheckOutDate + 'T00:00:00'));
+          }
+          // Cek renew request
+          const rr = todayStay.id ? renewByStayId.get(todayStay.id) : undefined;
+          if (rr) {
+            hasPendingRenew = true;
+            renewStatus = rr.status;
+          }
+        } else {
+          // DP booking — downPaymentPaidRupiah > 0 && belum occupied
+          dpTenantName = todayStay.tenant?.fullName ?? null;
+          dpCheckInDate = todayStay.checkInDate
+            ? this.localYMD(todayStay.checkInDate)
+            : null;
+        }
+      } else if (roomStays.length > 0) {
+        // Kontrak sudah lewat, tapi stay masih ACTIVE — ambil stay terbaru
+        const sortedStays = [...roomStays].sort((a, b) => {
+          const aEnd = a.plannedCheckOutDate?.getTime() ?? 0;
+          const bEnd = b.plannedCheckOutDate?.getTime() ?? 0;
+          return bEnd - aEnd;
+        });
+        const latestStay = sortedStays[0];
+        currentTenantName = latestStay.tenant?.fullName ?? null;
+        checkInDate = latestStay.checkInDate
+          ? this.localYMD(latestStay.checkInDate)
+          : null;
+        plannedCheckOutDate = latestStay.plannedCheckOutDate
+          ? this.localYMD(latestStay.plannedCheckOutDate)
+          : null;
+        remainingDays = 0; // kontrak sudah lewat
+        const rr = latestStay.id ? renewByStayId.get(latestStay.id) : undefined;
+        if (rr) {
+          hasPendingRenew = true;
+          renewStatus = rr.status;
+        }
+      }
+
+      // Bangun per-day status — dengan PERPANJANG setelah kontrak habis
       for (const dateStr of dates) {
         const dateObj = new Date(dateStr + 'T00:00:00');
-        const nextDate = new Date(dateObj);
-        nextDate.setDate(nextDate.getDate() + 1);
 
-        // Cari stay yang mencakup tanggal ini.
         const coveringStay = roomStays.find((stay) => {
           const stayStart = new Date(stay.checkInDate);
           const stayEnd = stay.plannedCheckOutDate
             ? new Date(stay.plannedCheckOutDate)
             : null;
-          // stay mencakup date jika stayStart <= date < stayEnd (atau stayEnd null)
           return stayStart <= dateObj && (!stayEnd || stayEnd > dateObj);
         });
 
         if (coveringStay) {
-          // Ada stay aktif — bedakan HUNI vs BOOKING_DP
           const isOccupied =
             coveringStay.initialMetersPromotedAt !== null ||
             coveringStay.room.status === 'OCCUPIED';
           days[dateStr] = isOccupied ? 'HUNI' : 'BOOKING_DP';
-        } else if (room.status === 'MAINTENANCE') {
-          days[dateStr] = 'MAINTENANCE';
         } else {
-          days[dateStr] = 'KOSONG';
+          // Tidak tercakup stay — cek apakah ada stay aktif yg kontraknya sudah lewat
+          // (tenant belum check-out, stay masih ACTIVE, kamar tetap terisi)
+          const pastContract = roomStays.some((stay) => {
+            if (!stay.plannedCheckOutDate) return false;
+            const stayEnd = new Date(stay.plannedCheckOutDate);
+            return dateObj >= stayEnd;
+          });
+
+          if (pastContract) {
+            // Setelah kontrak habis: masih terisi (HUNI), atau PERPANJANG jika ada renewal
+            const inRenewPeriod = roomStays.some((stay) => {
+              if (!stay.plannedCheckOutDate) return false;
+              const rr = stay.id ? renewByStayId.get(stay.id) : undefined;
+              if (!rr) return false;
+              const stayEnd = new Date(stay.plannedCheckOutDate);
+              return dateObj >= stayEnd;
+            });
+            days[dateStr] = inRenewPeriod ? 'PERPANJANG' : 'HUNI';
+          } else if (room.status === 'MAINTENANCE') {
+            days[dateStr] = 'MAINTENANCE';
+          } else {
+            days[dateStr] = 'KOSONG';
+          }
         }
       }
 
@@ -290,6 +462,18 @@ export class MarketingPublicRoomsService {
         name: room.name,
         floor: room.floor,
         status: room.status,
+        category: room.category ?? 'STANDARD',
+        roomType: room.roomType ?? 'REGULAR',
+        hasAc: room.hasAc ?? false,
+        monthlyRateRupiah: room.monthlyRateRupiah ?? 0,
+        currentTenantName,
+        checkInDate,
+        plannedCheckOutDate,
+        remainingDays,
+        hasPendingRenew,
+        renewStatus,
+        dpTenantName,
+        dpCheckInDate,
         days,
       });
     }
@@ -441,6 +625,7 @@ export class MarketingPublicRoomsService {
       status: room.status,
       category: room.category,
       roomType: room.roomType,
+      roomSize: room.roomSize,
       // PUB-CALENDAR-CHECKOUT: tanggal proyeksi kamar kosong (null bila tak relevan).
       projectedAvailableDate: projected?.date ?? null,
       projectedAvailableReason: projected?.reason ?? null,

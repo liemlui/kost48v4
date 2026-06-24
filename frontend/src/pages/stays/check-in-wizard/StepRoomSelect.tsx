@@ -5,7 +5,7 @@ import type { WizardFormValues } from './types';
 
 interface StepRoomSelectProps {
   form: UseFormReturn<WizardFormValues>;
-  rooms: Array<{ id: number; name: string; price?: number; deposit?: number; status: string }>;
+  rooms: Array<{ id: number; name: string; price?: number; deposit?: number; status: string; category?: string | null; roomType?: string | null; roomSize?: string | null }>;
   isLoadingRooms: boolean;
   selectedRoomName: string;
   onClearError: () => void;
@@ -55,6 +55,13 @@ export default function StepRoomSelect({
                           <h6 className="mb-0">{room.name}</h6>
                           <Badge bg={isOccupied ? 'danger' : 'success'}>{isOccupied ? 'Terisi' : 'Tersedia'}</Badge>
                         </div>
+                        {room.category || room.roomSize ? (
+                          <div className="text-muted small">
+                            {room.category === 'ECONOMY' ? 'Ekonomi' : room.category === 'DELUXE' ? 'Deluxe' : room.category === 'STANDARD' ? 'Standar' : null}
+                            {room.category && room.roomSize ? ' · ' : null}
+                            {room.roomSize === 'LARGE' ? 'Besar' : room.roomSize === 'STANDARD' ? 'Standar' : null}
+                          </div>
+                        ) : null}
                         {room.price ? (
                           <div className="text-muted small">
                             Harga Sewa: Rp {Number(room.price).toLocaleString('id-ID')} / bulan

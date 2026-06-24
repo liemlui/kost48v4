@@ -188,6 +188,16 @@ export default function ResourceTable({
         );
       }
 
+      if (column.key === 'category') {
+        const labels: Record<string, string> = { ECONOMY: 'Ekonomi', STANDARD: 'Standar', DELUXE: 'Deluxe' };
+        return labels[String(value ?? '')] ?? formatValue(value);
+      }
+
+      if (column.key === 'roomSize') {
+        const labels: Record<string, string> = { STANDARD: 'Standar', LARGE: 'Besar' };
+        return labels[String(value ?? '')] ?? formatValue(value);
+      }
+
       if (column.key === 'status') {
         const status = String(value || 'AVAILABLE');
         const isActive = item.isActive === true;

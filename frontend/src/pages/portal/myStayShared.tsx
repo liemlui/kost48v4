@@ -59,14 +59,43 @@ export function toDateKey(date: Date) {
   return `${year}-${month}-${day}`;
 }
 
-export function getCurrentMeterWindow() {
+// H-10 sebelum akhir kontrak: jendela catat meter dimulai 10 hari sebelum plannedCheckOutDate.
+// Kueri meter mencakup 30 hari ke belakang agar tetap menangkap catatan yang sudah ada.
+export function getMeterWindow(plannedCheckOutDate?: string | null) {
   const today = new Date();
+  if (plannedCheckOutDate) {
+    const endDate = new Date(plannedCheckOutDate);
+    // startKey = H-10 (10 hari sebelum akhir kontrak); minimum = 30 hari lalu agar catatan lama tetap terbaca
+    const h10 = new Date(endDate);
+    h10.setDate(h10.getDate() - 10);
+    const cutoff = new Date(today);
+    cutoff.setDate(cutoff.getDate() - 30);
+    const start = h10 < cutoff ? cutoff : h10;
+    // jendela aktif = hari ini ≥ h10 (sudah masuk window); belum masuk = start = endDate (empty range)
+    const windowOpen = today >= h10;
+    return {
+      startKey: toDateKey(start),
+      endKey: toDateKey(endDate),
+      windowOpen,
+      windowStartKey: toDateKey(h10),
+      windowEndKey: toDateKey(endDate),
+    };
+  }
+  // fallback: bulan berjalan
   const start = new Date(today.getFullYear(), today.getMonth(), 1);
   const end = new Date(today.getFullYear(), today.getMonth() + 1, 0);
   return {
     startKey: toDateKey(start),
     endKey: toDateKey(end),
+    windowOpen: true,
+    windowStartKey: toDateKey(start),
+    windowEndKey: toDateKey(end),
   };
+}
+
+/** @deprecated pakai getMeterWindow(plannedCheckOutDate) */
+export function getCurrentMeterWindow() {
+  return getMeterWindow(null);
 }
 
 export function getLatestUtilityReading(readings: MeterReading[], utilityType: 'ELECTRICITY' | 'WATER') {

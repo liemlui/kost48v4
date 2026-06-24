@@ -36,20 +36,29 @@ function allRoomText(room: PublicRoom) {
 }
 
 function getBathroomType(room: PublicRoom) {
+  const cat = String(room.category ?? '').toUpperCase();
+  if (cat === 'ECONOMY') return 'Luar';
+  if (cat === 'STANDARD' || cat === 'DELUXE') return 'Dalam';
   const text = allRoomText(room);
   if (/km\s*dalam|kamar mandi dalam|mandi dalam|private bathroom|bathroom dalam|toilet dalam/.test(text)) return 'Dalam';
   return 'Luar';
 }
 
 function getCoolingType(room: PublicRoom) {
+  const cat = String(room.category ?? '').toUpperCase();
+  if (cat === 'DELUXE') return 'AC';
+  if (cat === 'ECONOMY' || cat === 'STANDARD') return 'Kipas angin';
   const text = allRoomText(room);
   if (/\bac\b|air conditioner|pendingin ruangan/.test(text)) return 'AC';
   return 'Kipas angin';
 }
 
 function getRoomSize(room: PublicRoom) {
+  const size = String(room.roomSize ?? '').toUpperCase();
+  if (size === 'LARGE') return 'Besar';
+  if (size === 'STANDARD') return 'Standar';
   const text = allRoomText(room);
-  if (/besar|large|deluxe|luas|vip|premium|superior/.test(text)) return 'Besar';
+  if (/besar|large|luas|vip|premium|superior/.test(text)) return 'Besar';
   return 'Standar';
 }
 

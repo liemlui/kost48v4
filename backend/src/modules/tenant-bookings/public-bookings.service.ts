@@ -15,10 +15,11 @@ import { AUTO_OPS_DEADLINES, hoursFromNow } from '../../common/business/auto-ops
 import { serializePrismaResult } from '../../common/utils/serialization';
 import { normalizePhone } from '../../common/utils/phone.util';
 import { PrismaService } from '../../prisma/prisma.service';
-import { calculateRentByPricingTerm } from './pricing.helper';
+import { calculateRentByPricingTerm, calculateOccupantSurcharge, ROOM_MAX_FREE_OCCUPANTS, ROOM_MAX_OCCUPANTS } from './pricing.helper';
 import { startOfDay, endOfDay, addDays, parseDateOnly } from '../../common/utils/date.util';
 import { isBookingSchemaReady, isBookingSchemaDriftError } from './booking-schema.helper';
 import { CreatePublicBookingDto } from './dto/create-public-booking.dto';
+import { CreatePublicSurveyDto } from './dto/create-public-survey.dto';
 
 interface RoomPricingSnapshot {
   id: number;
@@ -33,6 +34,7 @@ interface RoomPricingSnapshot {
   monthlyRateRupiah: number;
   defaultDepositRupiah: number;
   allowBookingWhileCleaning?: boolean | null;
+  roomSize: string | null;
   electricityTariffPerKwhRupiah: number;
   waterTariffPerM3Rupiah: number;
   notes: string | null;
@@ -186,6 +188,7 @@ export class PublicBookingsService {
             "monthlyRateRupiah",
             "defaultDepositRupiah",
             "allowBookingWhileCleaning",
+            "roomSize",
             "electricityTariffPerKwhRupiah",
             "waterTariffPerM3Rupiah",
             notes
@@ -299,10 +302,20 @@ export class PublicBookingsService {
           });
         }
 
-        const agreedRentAmountRupiah = this.resolveRent(room, dto.pricingTerm);
-        if (!agreedRentAmountRupiah || agreedRentAmountRupiah <= 0) {
+        const baseRent = this.resolveRent(room, dto.pricingTerm);
+        if (!baseRent || baseRent <= 0) {
           throw new ConflictException('Tarif kamar untuk term ini belum tersedia');
         }
+        const occupantCount = Math.max(1, Number(dto.occupantCount ?? 1));
+        const roomSizeKey = String(room.roomSize ?? '').toUpperCase();
+        const hardCap = ROOM_MAX_OCCUPANTS[roomSizeKey] ?? (ROOM_MAX_FREE_OCCUPANTS[roomSizeKey] ?? 2) + 2;
+        if (occupantCount > hardCap) {
+          throw new BadRequestException(
+            `Jumlah penghuni melebihi batas maksimal untuk kamar ${roomSizeKey === 'LARGE' ? 'besar' : 'standar'} (maks ${hardCap} orang).`,
+          );
+        }
+        const occupantSurcharge = calculateOccupantSurcharge(baseRent, room.roomSize, occupantCount);
+        const agreedRentAmountRupiah = baseRent + occupantSurcharge;
 
         const expiresAt = hoursFromNow(AUTO_OPS_DEADLINES.BOOKING_REVIEW_DEADLINE_HOURS, now);
         const stayPurposeSql = dto.stayPurpose
@@ -323,6 +336,8 @@ export class PublicBookingsService {
             status,
             "pricingTerm",
             "agreedRentAmountRupiah",
+            "occupantCount",
+            "hasPet",
             "checkInDate",
             "plannedCheckOutDate",
             "expiresAt",
@@ -342,6 +357,8 @@ export class PublicBookingsService {
             CAST(${StayStatus.ACTIVE} AS "StayStatus"),
             CAST(${dto.pricingTerm} AS "PricingTerm"),
             ${agreedRentAmountRupiah},
+            ${occupantCount},
+            ${Boolean(dto.hasPet)},
             ${checkInDate},
             ${plannedCheckOutDate},
             ${expiresAt},
@@ -434,6 +451,28 @@ export class PublicBookingsService {
 
       throw error;
     }
+  }
+
+  // ---------------------------------------------------------------------------
+  // PUBLIC: saveGuestSurvey
+  // ---------------------------------------------------------------------------
+
+  async saveGuestSurvey(dto: CreatePublicSurveyDto, userAgent: string, referrer: string) {
+    const survey = await this.prisma.guestPreferenceSurvey.create({
+      data: {
+        bathroom:             dto.bathroom  ?? null,
+        cooling:              dto.cooling   ?? null,
+        roomSize:             dto.roomSize  ?? null,
+        roomType:             dto.roomType  ?? null,
+        priorities:           dto.priorities ?? null,
+        estimatedPriceRupiah: dto.estimatedPriceRupiah ?? null,
+        skipped:              dto.skipped ?? false,
+        sessionId:            dto.sessionId ?? null,
+        userAgent:            userAgent || null,
+        referrer:             referrer || null,
+      },
+    });
+    return { id: survey.id };
   }
 
   // ---------------------------------------------------------------------------

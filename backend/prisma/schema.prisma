@@ -42,6 +42,12 @@ enum RoomType {
   MEZZANINE
 }
 
+// PUB-ROOM-SIZE: ukuran kamar untuk simulator tarif & filter katalog.
+enum RoomSize {
+  STANDARD // 2,5m x 3m (~7,5m2), maks 2 orang; kelebihan per kepala +20% dari harga
+  LARGE    // 3m x 3,5m (~10,5m2), maks 4 orang; cocok bawa banyak barang; +Rp 200.000/bln
+}
+
 enum PricingTerm {
   DAILY
   WEEKLY
@@ -309,6 +315,27 @@ enum StayPurpose {
   MEDICAL
   PROJECT
   OTHER
+}
+
+// Marketing analytics — profil tenant opsional untuk segmentasi pasar
+enum MaritalStatus {
+  SINGLE
+  MARRIED
+  DIVORCED
+  WIDOWED
+}
+
+enum VehicleOwnership {
+  NONE
+  MOTORCYCLE
+  CAR
+  BOTH
+}
+
+enum SmokingHabit {
+  NEVER
+  OCCASIONAL
+  REGULAR
 }
 
 enum ExpenseType {
@@ -598,8 +625,15 @@ model Tenant {
 
   emergencyContactName  String?
   emergencyContactPhone String?
-  notes                 String?
-  isActive              Boolean  @default(true)
+
+  // Marketing analytics — opsional, self-reported, bebas diedit kapan saja
+  maritalStatus    MaritalStatus?
+  vehicleOwnership VehicleOwnership?
+  smokingHabit     SmokingHabit?
+  howDidYouHear    LeadSource?
+
+  notes     String?
+  isActive  Boolean  @default(true)
   createdAt             DateTime @default(now())
   updatedAt             DateTime @updatedAt
 
@@ -630,6 +664,9 @@ model Tenant {
   @@index([occupation])
   @@index([companyOrCampus])
   @@index([isActive])
+  @@index([maritalStatus])
+  @@index([vehicleOwnership])
+  @@index([howDidYouHear])
 }
 
 model Room {
@@ -639,9 +676,10 @@ model Room {
   floor  String?
   status RoomStatus @default(AVAILABLE)
 
-  // PUB-ROOM-CATEGORY (additive): kategori & tipe untuk katalog publik.
+  // PUB-ROOM-CATEGORY (additive): kategori & tipe & ukuran untuk katalog publik.
   category RoomCategory @default(STANDARD)
   roomType RoomType     @default(REGULAR)
+  roomSize RoomSize     @default(STANDARD)
 
   dailyRateRupiah    Int?
   weeklyRateRupiah   Int?
@@ -690,6 +728,7 @@ model Room {
   @@index([status])
   @@index([isActive])
   @@index([floor, category])
+  @@index([category, roomType, roomSize])
 }
 
 model RoomFacility {
@@ -722,6 +761,8 @@ model Stay {
 
   pricingTerm            PricingTerm
   agreedRentAmountRupiah Int
+  occupantCount          Int         @default(1) // jumlah penghuni; melebihi batas gratis per roomSize → +20%/orang
+  hasPet                 Boolean     @default(false) // ada hewan peliharaan → petDepositRupiah dibebankan
 
   checkInDate         DateTime  @db.Date
   plannedCheckOutDate DateTime? @db.Date
@@ -2051,6 +2092,11 @@ model OperationalSetting {
   waterMeteringEnabled          Boolean  @default(false)
   waterTariffPerM3Rupiah        Int      @default(0)
   freeWaterM3PerMonth           Int      @default(0)
+  // ── Konstanta layanan tambahan (owner-settable, dipakai booking/invoicing) ─
+  wifiRupiah                    Int      @default(50000)   // WiFi per perangkat per bulan
+  galonRupiah                   Int      @default(20000)   // Galon air Voila per galon
+  petDepositRupiah              Int      @default(100000)  // Deposit jaminan hewan peliharaan (refundable)
+  extraOccupantFeePercent       Int      @default(20)      // Biaya penghuni tambahan (% tarif/kepala/bulan)
   // ── R3: AI/DeepSeek owner-configurable settings ──────────────────────────
   deepseekModel                String   @default("deepseek-v4-flash")
   deepseekFinanceModel         String   @default("deepseek-v4-pro")
@@ -2121,4 +2167,45 @@ model ServiceInterest {
   @@index([serviceId])
   @@index([tenantId])
   @@index([status])
+}
+
+// PUB-SURVEY: wizard preferensi calon penghuni — data marketing 1-5 tahun.
+// Dicatat tanpa auth; dipakai analisa demografi & tren preferensi (generasi, harga, fasilitas).
+model GuestPreferenceSurvey {
+  id           String   @id @default(cuid())
+  // Preferensi kamar
+  bathroom     String?  // "inside" | "outside" | "any"
+  cooling      String?  // "ac" | "fan" | "any"
+  roomSize     String?  // "standard" | "large" | "any"
+  roomType     String?  // "regular" | "mezzanine" | "any"
+  // Prioritas (JSON array): ["cleanliness","security","price","location","facilities"]
+  priorities   String?
+  // Estimasi harga hasil simulator yang ditampilkan (Rupiah)
+  estimatedPriceRupiah Int?
+  // Apakah wizard di-skip
+  skipped      Boolean  @default(false)
+  // Metadata sesi (anonim)
+  sessionId    String?
+  userAgent    String?
+  referrer     String?
+  createdAt    DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([bathroom, cooling, roomSize, roomType])
+}
+
+// Ulasan eksternal (Google Maps, dll) — tidak membutuhkan akun Tenant.
+// Dipakai bersama StaffReview untuk social proof di halaman publik.
+model ExternalReview {
+  id          Int      @id @default(autoincrement())
+  source      String   @default("google") // "google" | "facebook" | "manual"
+  authorName  String
+  rating      Int      // 1..5
+  comment     String?
+  isVisible   Boolean  @default(true)
+  reviewedAt  DateTime @default(now())
+  createdAt   DateTime @default(now())
+
+  @@index([isVisible, rating])
+  @@index([reviewedAt])
 }

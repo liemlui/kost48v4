@@ -1,6 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
 import { Alert, Button } from 'react-bootstrap';
 import { useAuth } from '../../context/AuthContext';
+import { useToast } from '../common/ToastProvider';
+
+const PWA_UPDATED_KEY = 'kost48_pwa_just_updated';
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -18,6 +21,7 @@ function shortBuildId(buildId: string | undefined) {
 
 export default function PwaStatus() {
   const { user } = useAuth();
+  const { toast } = useToast();
   const [isOffline, setIsOffline] = useState(() => !navigator.onLine);
   const [registration, setRegistration] = useState<ServiceWorkerRegistration | null>(null);
   const [updateAvailable, setUpdateAvailable] = useState(false);
@@ -28,6 +32,15 @@ export default function PwaStatus() {
   );
   const reloadingRef = useRef(false);
   const registrationRef = useRef<ServiceWorkerRegistration | null>(null);
+
+  // Tampilkan toast "App diperbaharui" setelah SW reload selesai.
+  useEffect(() => {
+    const flag = sessionStorage.getItem(PWA_UPDATED_KEY);
+    if (flag === '1') {
+      sessionStorage.removeItem(PWA_UPDATED_KEY);
+      toast('✓ App diperbaharui ke versi terbaru.', 'success');
+    }
+  }, [toast]);
 
   useEffect(() => {
     const handleOnline = () => setIsOffline(false);
@@ -132,11 +145,13 @@ export default function PwaStatus() {
   }, []);
 
   const applyUpdate = () => {
+    sessionStorage.setItem(PWA_UPDATED_KEY, '1');
     const waiting = registration?.waiting;
     if (waiting) {
       waiting.postMessage({ type: 'SKIP_WAITING' });
     } else {
       void registration?.update();
+      window.location.reload();
     }
   };
 

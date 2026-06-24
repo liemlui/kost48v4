@@ -114,6 +114,11 @@ export interface TenantProfileOnboardingPayload {
   companyOrCampus?: string;
   emergencyContactName?: string;
   emergencyContactPhone?: string;
+  // Marketing analytics — bebas diedit kapan saja
+  maritalStatus?: string;
+  vehicleOwnership?: string;
+  smokingHabit?: string;
+  howDidYouHear?: string;
 }
 
 export async function fillTenantProfileOnboarding(

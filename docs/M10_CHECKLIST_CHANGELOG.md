@@ -43,6 +43,7 @@
 | **Fase Q — Performa & Stabilitas** | ✅ selesai | Q-01..Q-07: fix endpoint 404 backend, anti-pattern fetch loop, heavy query, error boundary, lazy-load, empty state |
 | **Fase R — UI/UX Public + Admin/Owner + Tenant + Staff + Owner-Only** | ✅ selesai | R-01..R-30 selesai (R-12 deferred/investigasi backend); build lulus 2026-06-22. |
 | **Fase S — Multi-Portal Vercel + Mobile-First** | 🔴 antrian | S-01..S-06: env portal gate, CORS Vercel, 3 Vercel project, mobile tenant, mobile staff, PWA offline-aware |
+| **Fase T — Wizard + Animasi Marketing** | ✅ selesai | T-01: Redesign wizard result screen — RoomCard langsung, animasi, marketing copy, extract RoomCard |
 
 ---
 
@@ -1778,6 +1779,28 @@ SETELAH S-03 SELESAI:
 
 **Estimasi kode (AI):** S-01 ~1j · S-02 ~30m · S-04 ~2j · S-05 ~2j · S-06 ~3j = **~9 jam total**  
 **Estimasi owner:** S-00 ~2-4j (cPanel deploy) · S-03 ~30m (Vercel setup) · DNS propagasi 1-24j
+
+---
+
+### Fase T — Wizard Redesign + Animasi Marketing
+
+**Tujuan:** Perbaiki wizard result screen — ganti chip + dua tombol redundant dengan RoomCard langsung, tambah animasi, copy marketing. Extract RoomCard ke komponen bersama.
+
+**Rujukan:** `frontend/src/components/public/GuestPreferenceWizard.tsx` · `frontend/src/components/rooms/RoomCard.tsx` · `frontend/src/styles/11-public-pages.css`
+
+#### T-01 ✅ Redesign Wizard + Extract RoomCard
+
+**Perubahan:**
+- Extract `RoomCard` + `RoomCardImage` + `buildWhatsAppUrl` + `getCategoryBadgeInfo` dari `PublicRoomsPage.tsx` ke `frontend/src/components/rooms/RoomCard.tsx`
+- Wizard result screen sekarang menampilkan **grid RoomCard** (bukan chip kecil) untuk kamar yang cocok + tersedia
+- Hapus dua tombol "Tampilkan kamar di katalog" dan "Lihat semua kamar" — ganti dengan "Lihat Semua Kamar Sesuai Preferensi →", "Ubah Preferensi", "Lanjut tanpa filter"
+- Animasi: fadeInUp, stagger opsi, count-up estimasi, pulse CTA, direction slide transisi antar step
+- Marketing copy: pertanyaan lebih personal, urgency line "🔥 X kamar tersedia", social proof di opsi
+- RoomCard di wizard punya `bookViaWA={true}` — booking langsung ke WA admin tanya ketersediaan
+- Dark-theme RoomCard variant untuk latar wizard gelap
+- Skeleton shimmer saat loading kamar
+
+**Gate:** `npx tsc --noEmit` ✅
 
 ---
 

@@ -1,7 +1,8 @@
 import { IsDateString, IsEnum, IsOptional, IsString } from 'class-validator';
-import { Gender } from '../../../common/enums/app.enums';
+import { Gender, LeadSource, MaritalStatus, SmokingHabit, VehicleOwnership } from '../../../common/enums/app.enums';
 
 export class TenantProfileOnboardingDto {
+  // ── Field profil wajib (dikunci setelah diisi) ───────────────────────────────
   @IsOptional()
   @IsEnum(Gender, { message: 'Jenis kelamin tidak valid' })
   gender?: Gender;
@@ -29,4 +30,21 @@ export class TenantProfileOnboardingDto {
   @IsOptional()
   @IsString()
   emergencyContactPhone?: string;
+
+  // ── Field marketing analytics (opsional, bebas diedit kapan saja) ────────────
+  @IsOptional()
+  @IsEnum(MaritalStatus, { message: 'Status pernikahan tidak valid' })
+  maritalStatus?: MaritalStatus;
+
+  @IsOptional()
+  @IsEnum(VehicleOwnership, { message: 'Kepemilikan kendaraan tidak valid' })
+  vehicleOwnership?: VehicleOwnership;
+
+  @IsOptional()
+  @IsEnum(SmokingHabit, { message: 'Kebiasaan merokok tidak valid' })
+  smokingHabit?: SmokingHabit;
+
+  @IsOptional()
+  @IsEnum(LeadSource, { message: 'Sumber informasi tidak valid' })
+  howDidYouHear?: LeadSource;
 }

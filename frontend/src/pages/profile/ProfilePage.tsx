@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Alert, Button, Card, Col, Form, Row } from 'react-bootstrap';
+import { Alert, Button, Card, Col, Form, Row, Spinner } from 'react-bootstrap';
 import PasswordInput from '../../components/common/PasswordInput';
 import { changePassword, updateMyTipInfo } from '../../api/auth';
 import { getTenantProfile, fillTenantProfileOnboarding } from '../../api/tenants';
@@ -31,6 +31,26 @@ function formatFieldDisplay(key: string, value: unknown): string {
       return d.toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' });
     }
   }
+  if (key === 'maritalStatus') {
+    const map: Record<string, string> = { SINGLE: 'Belum Menikah', MARRIED: 'Menikah', DIVORCED: 'Cerai', WIDOWED: 'Janda/Duda' };
+    return map[value as string] ?? String(value);
+  }
+  if (key === 'vehicleOwnership') {
+    const map: Record<string, string> = { NONE: 'Tidak Ada', MOTORCYCLE: 'Motor', CAR: 'Mobil', BOTH: 'Motor & Mobil' };
+    return map[value as string] ?? String(value);
+  }
+  if (key === 'smokingHabit') {
+    const map: Record<string, string> = { NEVER: 'Tidak Merokok', OCCASIONAL: 'Kadang-kadang', REGULAR: 'Perokok Aktif' };
+    return map[value as string] ?? String(value);
+  }
+  if (key === 'howDidYouHear') {
+    const map: Record<string, string> = {
+      GOOGLE_MAPS: 'Google Maps', WALK_IN: 'Langsung Datang', REFERRAL: 'Dari Teman/Keluarga',
+      INSTAGRAM: 'Instagram', TIKTOK: 'TikTok', WHATSAPP: 'WhatsApp', FACEBOOK: 'Facebook',
+      WEBSITE: 'Website', OTA: 'Platform Online (OTA)', OTHER: 'Lainnya',
+    };
+    return map[value as string] ?? String(value);
+  }
   return String(value);
 }
 
@@ -45,17 +65,221 @@ function getApiErrorMessage(err: unknown, fallback = 'Terjadi kesalahan.'): stri
 
 // ── R-14: masking NIK sesuai UU PDP No. 27/2022 ──────────────────────────────
 
-/** Tampilkan hanya 4 digit awal dan 4 digit akhir; tengah diganti 'x'. */
 function maskNik(nik: string): string {
   if (nik.length >= 8) return `${nik.slice(0, 4)}xxxxxxxx${nik.slice(-4)}`;
   return '****';
 }
 
+// ── KTP OCR parser (Indonesian KTP format) ───────────────────────────────────
+
+interface OcrResult {
+  nik?: string;
+  gender?: string;
+  birthDate?: string;
+  originCity?: string;
+}
+
+function parseKtpText(text: string): OcrResult {
+  const lines = text.split('\n').map((l) => l.trim()).filter(Boolean);
+  const joined = lines.join('\n');
+  const result: OcrResult = {};
+
+  // NIK: 16 consecutive digits
+  const nikMatch = joined.match(/\b(\d{16})\b/);
+  if (nikMatch) result.nik = nikMatch[1];
+
+  // Jenis Kelamin
+  if (/LAKI[\s-]*LAKI/i.test(joined)) result.gender = 'MALE';
+  else if (/PEREMPUAN/i.test(joined)) result.gender = 'FEMALE';
+
+  // Tempat/Tgl Lahir — format: KOTA, DD-MM-YYYY or DD/MM/YYYY
+  const tglMatch = joined.match(/(?:TEMPAT[^:]*:|TGL LAHIR[^:]*:|LAHIR[^:]*:)?\s*([A-Z\s]+),\s*(\d{2})[-/](\d{2})[-/](\d{4})/i);
+  if (tglMatch) {
+    const [, city, dd, mm, yyyy] = tglMatch;
+    result.originCity = city.trim().replace(/\s+/g, ' ');
+    result.birthDate = `${yyyy}-${mm}-${dd}`;
+  } else {
+    // Fallback: just date without city
+    const dateMatch = joined.match(/(\d{2})[-/](\d{2})[-/](\d{4})/);
+    if (dateMatch) {
+      const [, dd, mm, yyyy] = dateMatch;
+      result.birthDate = `${yyyy}-${mm}-${dd}`;
+    }
+  }
+
+  return result;
+}
+
+// ── KTP OCR section component ─────────────────────────────────────────────────
+
+type OcrState = 'idle' | 'selected' | 'processing' | 'done' | 'error';
+
+interface KtpOcrSectionProps {
+  onApply: (data: { gender?: string; birthDate?: string; originCity?: string }) => void;
+}
+
+function KtpOcrSection({ onApply }: KtpOcrSectionProps) {
+  const [ocrState, setOcrState] = useState<OcrState>('idle');
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [extracted, setExtracted] = useState<OcrResult | null>(null);
+  const [editedExtracted, setEditedExtracted] = useState<OcrResult>({});
+  const [ocrError, setOcrError] = useState('');
+  const fileRef = useRef<HTMLInputElement>(null);
+  const imgRef = useRef<HTMLImageElement>(null);
+
+  const handleFileSelect = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith('image/')) {
+      setOcrError('Pilih file gambar (JPG, PNG, atau WebP).');
+      return;
+    }
+    setOcrError('');
+    setExtracted(null);
+    setOcrState('selected');
+    const url = URL.createObjectURL(file);
+    setPreviewUrl((old) => { if (old) URL.revokeObjectURL(old); return url; });
+  }, []);
+
+  const handleOcr = useCallback(async () => {
+    if (!fileRef.current?.files?.[0]) return;
+    setOcrState('processing');
+    setOcrError('');
+    try {
+      const { createWorker } = await import('tesseract.js');
+      const worker = await createWorker('ind+eng', 1, {
+        logger: () => {},
+      });
+      const { data: { text } } = await worker.recognize(fileRef.current.files[0]);
+      await worker.terminate();
+      const parsed = parseKtpText(text);
+      setExtracted(parsed);
+      setEditedExtracted(parsed);
+      setOcrState('done');
+    } catch {
+      setOcrState('error');
+      setOcrError('OCR gagal diproses. Coba gambar yang lebih jelas atau isi manual.');
+    }
+  }, []);
+
+  const handleApply = useCallback(() => {
+    const { nik: _nik, ...profileFields } = editedExtracted;
+    onApply(profileFields);
+  }, [editedExtracted, onApply]);
+
+  const hasAnyExtracted = extracted && Object.values(extracted).some(Boolean);
+
+  return (
+    <Card className="content-card border-0 mt-4">
+      <Card.Body>
+        <h5 className="mb-1">Scan KTP — Isi Otomatis</h5>
+        <p className="text-muted small mb-3">
+          Foto KTP akan diproses langsung di perangkat kamu (tidak dikirim ke server).
+          Hasil OCR mungkin tidak 100% akurat — periksa dan koreksi sebelum diterapkan.
+        </p>
+
+        {ocrError ? <Alert variant="warning" className="mb-3">{ocrError}</Alert> : null}
+
+        <div className="d-flex flex-wrap gap-2 align-items-center mb-3">
+          <Button variant="outline-secondary" size="sm" onClick={() => fileRef.current?.click()}>
+            Pilih Foto KTP
+          </Button>
+          {ocrState === 'selected' && (
+            <Button variant="primary" size="sm" onClick={handleOcr}>
+              Proses OCR
+            </Button>
+          )}
+          {ocrState === 'processing' && (
+            <span className="text-muted small d-flex align-items-center gap-2">
+              <Spinner size="sm" animation="border" /> Membaca teks KTP...
+            </span>
+          )}
+          <input
+            ref={fileRef}
+            type="file"
+            accept="image/*"
+            style={{ display: 'none' }}
+            onChange={handleFileSelect}
+          />
+        </div>
+
+        {previewUrl && (
+          <img
+            ref={imgRef}
+            src={previewUrl}
+            alt="Preview KTP"
+            style={{ maxWidth: '100%', maxHeight: 200, borderRadius: 8, border: '1px solid #dee2e6', marginBottom: 12 }}
+          />
+        )}
+
+        {ocrState === 'done' && hasAnyExtracted && (
+          <div>
+            <p className="small fw-semibold mb-2">Hasil OCR — periksa dan koreksi jika perlu:</p>
+            <div className="d-flex flex-column gap-2 mb-3" style={{ maxWidth: 360 }}>
+              {extracted?.nik && (
+                <div className="d-flex align-items-center gap-2">
+                  <span className="text-muted small" style={{ minWidth: 120 }}>NIK (info)</span>
+                  <code className="small">{extracted.nik}</code>
+                </div>
+              )}
+              <div className="d-flex align-items-center gap-2">
+                <span className="text-muted small" style={{ minWidth: 120 }}>Jenis Kelamin</span>
+                <Form.Select
+                  size="sm"
+                  style={{ flex: 1 }}
+                  value={editedExtracted.gender ?? ''}
+                  onChange={(e) => setEditedExtracted((p) => ({ ...p, gender: e.target.value || undefined }))}
+                >
+                  <option value="">Pilih...</option>
+                  <option value="MALE">Laki-laki</option>
+                  <option value="FEMALE">Perempuan</option>
+                </Form.Select>
+              </div>
+              <div className="d-flex align-items-center gap-2">
+                <span className="text-muted small" style={{ minWidth: 120 }}>Tgl Lahir</span>
+                <Form.Control
+                  size="sm"
+                  type="date"
+                  style={{ flex: 1 }}
+                  value={editedExtracted.birthDate ?? ''}
+                  onChange={(e) => setEditedExtracted((p) => ({ ...p, birthDate: e.target.value || undefined }))}
+                />
+              </div>
+              <div className="d-flex align-items-center gap-2">
+                <span className="text-muted small" style={{ minWidth: 120 }}>Kota Lahir</span>
+                <Form.Control
+                  size="sm"
+                  type="text"
+                  style={{ flex: 1 }}
+                  value={editedExtracted.originCity ?? ''}
+                  onChange={(e) => setEditedExtracted((p) => ({ ...p, originCity: e.target.value || undefined }))}
+                />
+              </div>
+            </div>
+            <Button variant="success" size="sm" onClick={handleApply}>
+              Terapkan ke Formulir
+            </Button>
+            <span className="text-muted small ms-2">
+              Hanya mengisi field yang masih kosong di formulir profil.
+            </span>
+          </div>
+        )}
+
+        {ocrState === 'done' && !hasAnyExtracted && (
+          <Alert variant="warning" className="mb-0">
+            Teks KTP tidak berhasil dibaca. Coba gambar yang lebih terang/tajam, atau isi formulir manual.
+          </Alert>
+        )}
+      </Card.Body>
+    </Card>
+  );
+}
+
 // ── field definitions ─────────────────────────────────────────────────────────
 
 type OnboardingFieldDef =
-  | { key: string; label: string; type: 'text' | 'date' | 'tel' }
-  | { key: string; label: string; type: 'select'; options: { value: string; label: string }[] };
+  | { key: string; label: string; type: 'text' | 'date' | 'tel'; marketing?: false }
+  | { key: string; label: string; type: 'select'; options: { value: string; label: string }[]; marketing?: boolean };
 
 const ONBOARDING_FIELD_DEFS: OnboardingFieldDef[] = [
   {
@@ -76,6 +300,61 @@ const ONBOARDING_FIELD_DEFS: OnboardingFieldDef[] = [
   { key: 'emergencyContactPhone', label: 'Telepon kontak darurat', type: 'tel' },
 ];
 
+const MARKETING_FIELD_DEFS: OnboardingFieldDef[] = [
+  {
+    key: 'maritalStatus',
+    label: 'Status pernikahan',
+    type: 'select',
+    marketing: true,
+    options: [
+      { value: 'SINGLE', label: 'Belum Menikah' },
+      { value: 'MARRIED', label: 'Menikah' },
+      { value: 'DIVORCED', label: 'Cerai' },
+      { value: 'WIDOWED', label: 'Janda/Duda' },
+    ],
+  },
+  {
+    key: 'vehicleOwnership',
+    label: 'Kendaraan yang dimiliki',
+    type: 'select',
+    marketing: true,
+    options: [
+      { value: 'NONE', label: 'Tidak ada' },
+      { value: 'MOTORCYCLE', label: 'Motor' },
+      { value: 'CAR', label: 'Mobil' },
+      { value: 'BOTH', label: 'Motor & Mobil' },
+    ],
+  },
+  {
+    key: 'smokingHabit',
+    label: 'Kebiasaan merokok',
+    type: 'select',
+    marketing: true,
+    options: [
+      { value: 'NEVER', label: 'Tidak merokok' },
+      { value: 'OCCASIONAL', label: 'Kadang-kadang (sosial)' },
+      { value: 'REGULAR', label: 'Perokok aktif' },
+    ],
+  },
+  {
+    key: 'howDidYouHear',
+    label: 'Tahu KOST48 dari mana?',
+    type: 'select',
+    marketing: true,
+    options: [
+      { value: 'REFERRAL', label: 'Dari teman/keluarga' },
+      { value: 'GOOGLE_MAPS', label: 'Google Maps' },
+      { value: 'INSTAGRAM', label: 'Instagram' },
+      { value: 'TIKTOK', label: 'TikTok' },
+      { value: 'WALK_IN', label: 'Langsung datang' },
+      { value: 'WHATSAPP', label: 'WhatsApp' },
+      { value: 'FACEBOOK', label: 'Facebook' },
+      { value: 'WEBSITE', label: 'Website' },
+      { value: 'OTHER', label: 'Lainnya' },
+    ],
+  },
+];
+
 // ── component ─────────────────────────────────────────────────────────────────
 
 export default function ProfilePage() {
@@ -83,10 +362,8 @@ export default function ProfilePage() {
   const queryClient = useQueryClient();
   const isTenant = user?.role === 'TENANT';
   const isStaff = user?.role === 'STAFF';
-  // R-14: toggle tampil NIK penuh (UU PDP — default tersembunyi)
   const [showNik, setShowNik] = useState(false);
 
-  // F5-2 (AUD-2): info tip P2P staf (self-service).
   const [tipForm, setTipForm] = useState({
     tipGopay: user?.tipGopay ?? '',
     tipOvo: user?.tipOvo ?? '',
@@ -108,19 +385,22 @@ export default function ProfilePage() {
     },
   });
 
-  // Password change state
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [pwError, setPwError] = useState('');
   const [pwSuccess, setPwSuccess] = useState('');
 
-  // Onboarding form state (tenant only)
+  // Onboarding form state
   const [formData, setFormData] = useState<Record<string, string>>({});
   const [saveError, setSaveError] = useState('');
   const [saveSuccess, setSaveSuccess] = useState(false);
 
-  // Fetch tenant profile
+  // Marketing form state (always editable, separate save)
+  const [marketingData, setMarketingData] = useState<Record<string, string>>({});
+  const [marketingSaveError, setMarketingSaveError] = useState('');
+  const [marketingSaveSuccess, setMarketingSaveSuccess] = useState(false);
+
   const profileQuery = useQuery({
     queryKey: ['tenant-self-profile'],
     queryFn: getTenantProfile,
@@ -133,7 +413,6 @@ export default function ProfilePage() {
   const completion = profile?.completion;
   const tenantData = profile?.tenant;
 
-  // Password change mutation
   const pwMutation = useMutation({
     mutationFn: () => changePassword({ currentPassword: currentPassword || undefined, newPassword }),
     onSuccess: () => {
@@ -149,10 +428,8 @@ export default function ProfilePage() {
     },
   });
 
-  // Onboarding save mutation
   const saveMutation = useMutation({
     mutationFn: () => {
-      // Only send non-empty values from formData (exclude locked fields)
       const missingFields = completion?.missingFields ?? [];
       const payload: TenantProfileOnboardingPayload = {};
       for (const field of ONBOARDING_FIELD_DEFS) {
@@ -176,6 +453,28 @@ export default function ProfilePage() {
     },
   });
 
+  const marketingMutation = useMutation({
+    mutationFn: () => {
+      const payload: TenantProfileOnboardingPayload = {};
+      for (const field of MARKETING_FIELD_DEFS) {
+        const val = marketingData[field.key];
+        if (val && val.trim() !== '') {
+          (payload as Record<string, string>)[field.key] = val.trim();
+        }
+      }
+      return fillTenantProfileOnboarding(payload);
+    },
+    onSuccess: () => {
+      setMarketingSaveSuccess(true);
+      setMarketingSaveError('');
+      queryClient.invalidateQueries({ queryKey: ['tenant-self-profile'] });
+    },
+    onError: (err: unknown) => {
+      setMarketingSaveError(getApiErrorMessage(err, 'Gagal menyimpan. Coba lagi.'));
+      setMarketingSaveSuccess(false);
+    },
+  });
+
   const handlePwSubmit = () => {
     setPwError('');
     setPwSuccess('');
@@ -196,11 +495,27 @@ export default function ProfilePage() {
     if (saveError) setSaveError('');
   };
 
+  // Apply OCR result: only fill fields that are still empty in the form
+  const handleOcrApply = (data: { gender?: string; birthDate?: string; originCity?: string }) => {
+    setFormData((prev) => {
+      const next = { ...prev };
+      const missingFields = completion?.missingFields ?? [];
+      if (data.gender && missingFields.includes('gender') && !prev.gender) next.gender = data.gender;
+      if (data.birthDate && missingFields.includes('birthDate') && !prev.birthDate) next.birthDate = data.birthDate;
+      if (data.originCity && missingFields.includes('originCity') && !prev.originCity) next.originCity = data.originCity;
+      return next;
+    });
+  };
+
   const hasAnyInput = ONBOARDING_FIELD_DEFS.some(
     (f) =>
       (completion?.missingFields ?? []).includes(f.key) &&
       formData[f.key] &&
       formData[f.key].trim() !== '',
+  );
+
+  const hasAnyMarketingInput = MARKETING_FIELD_DEFS.some(
+    (f) => marketingData[f.key] && marketingData[f.key].trim() !== '',
   );
 
   return (
@@ -294,7 +609,7 @@ export default function ProfilePage() {
         </Col>
       </Row>
 
-      {/* ── Staff: Info Tip (E-wallet) self-service (F5-2 / AUD-2) ── */}
+      {/* ── Staff: Info Tip ── */}
       {isStaff && (
         <Card className="content-card border-0 mt-4">
           <Card.Body>
@@ -341,14 +656,18 @@ export default function ProfilePage() {
         </Card>
       )}
 
+      {/* ── Tenant: KTP OCR ── */}
+      {isTenant && (
+        <KtpOcrSection onApply={handleOcrApply} />
+      )}
+
       {/* ── Tenant onboarding: Data Penghuni Tambahan ── */}
       {isTenant && (
         <Card className="tenant-profile-onboarding-card border-0 mt-4">
           <Card.Body>
-            {/* Header */}
             <div className="tp-onboarding-header">
               <div>
-                <h5 className="mb-0">Data Penghuni Tambahan</h5>
+                <h5 className="mb-0">Data Penghuni</h5>
                 <p className="text-muted small mb-0 mt-1">
                   Isi sekali dengan benar. Setelah disimpan, perubahan perlu bantuan pengelola.
                 </p>
@@ -364,18 +683,14 @@ export default function ProfilePage() {
               ) : null}
             </div>
 
-            {/* Loading */}
             {profileQuery.isLoading && (
               <p className="text-muted small mt-3">Memuat data penghuni...</p>
             )}
-
             {profileQuery.isError && (
               <Alert variant="warning" className="mt-3">
                 Gagal memuat data penghuni. Coba muat ulang halaman.
               </Alert>
             )}
-
-            {/* Save feedback */}
             {saveSuccess && (
               <Alert variant="success" className="mt-3" dismissible onClose={() => setSaveSuccess(false)}>
                 Data berhasil disimpan. Field yang sudah diisi dikunci untuk keamanan.
@@ -386,8 +701,6 @@ export default function ProfilePage() {
                 {saveError}
               </Alert>
             )}
-
-            {/* All locked */}
             {completion?.isLocked && !profileQuery.isLoading && (
               <div className="tp-all-locked-notice mt-3">
                 <span>✓</span>
@@ -395,7 +708,6 @@ export default function ProfilePage() {
               </div>
             )}
 
-            {/* Field list */}
             {profile && !profileQuery.isLoading ? (
               <div className="tp-fields-grid mt-3">
                 {ONBOARDING_FIELD_DEFS.map((fieldDef) => {
@@ -451,7 +763,7 @@ export default function ProfilePage() {
               </div>
             ) : null}
 
-            {/* R-14: NIK / Nomor KTP — tampil ter-masking, UU PDP No. 27/2022 */}
+            {/* R-14: NIK / Nomor KTP */}
             {profile && tenantData?.identityNumber ? (
               <div className="tp-field tp-field--locked mt-3">
                 <label className="tp-field-label">Nomor KTP / NIK</label>
@@ -463,7 +775,6 @@ export default function ProfilePage() {
                     className="p-0 text-muted"
                     onClick={() => setShowNik((v) => !v)}
                     aria-label={showNik ? 'Sembunyikan NIK' : 'Tampilkan NIK'}
-                    title={showNik ? 'Sembunyikan NIK' : 'Tampilkan NIK penuh'}
                   >
                     {showNik ? '🙈 Sembunyikan' : '👁 Tampilkan'}
                   </Button>
@@ -474,7 +785,6 @@ export default function ProfilePage() {
               </div>
             ) : null}
 
-            {/* Save button */}
             {profile && !completion?.isLocked ? (
               <div className="tp-save-row mt-3">
                 <Button
@@ -490,6 +800,78 @@ export default function ProfilePage() {
                 </small>
               </div>
             ) : null}
+          </Card.Body>
+        </Card>
+      )}
+
+      {/* ── Tenant: Info Tambahan untuk Analisa Marketing ── */}
+      {isTenant && (
+        <Card className="content-card border-0 mt-4">
+          <Card.Body>
+            <h5 className="mb-1">Info Tambahan (Opsional)</h5>
+            <p className="text-muted small mb-3">
+              Membantu pengelola memahami kebutuhan penghuni dan meningkatkan layanan.
+              Data ini bersifat rahasia dan hanya dilihat oleh pengelola. Bisa diperbarui kapan saja.
+            </p>
+
+            {marketingSaveSuccess && (
+              <Alert variant="success" className="mb-3" dismissible onClose={() => setMarketingSaveSuccess(false)}>
+                Info tambahan berhasil disimpan.
+              </Alert>
+            )}
+            {marketingSaveError && (
+              <Alert variant="danger" className="mb-3" dismissible onClose={() => setMarketingSaveError('')}>
+                {marketingSaveError}
+              </Alert>
+            )}
+
+            {profileQuery.isLoading ? (
+              <p className="text-muted small">Memuat...</p>
+            ) : (
+              <div className="tp-fields-grid">
+                {MARKETING_FIELD_DEFS.map((fieldDef) => {
+                  const currentVal = (tenantData as Record<string, unknown> | undefined)?.[fieldDef.key];
+                  const displayVal = formatFieldDisplay(fieldDef.key, currentVal);
+                  return (
+                    <div key={fieldDef.key} className="tp-field tp-field--editable">
+                      <label className="tp-field-label" htmlFor={`mkt-${fieldDef.key}`}>
+                        {fieldDef.label}
+                        {displayVal !== '-' && (
+                          <span className="text-muted fw-normal ms-1 small">({displayVal})</span>
+                        )}
+                      </label>
+                      {fieldDef.type === 'select' && (
+                        <Form.Select
+                          id={`mkt-${fieldDef.key}`}
+                          size="sm"
+                          value={marketingData[fieldDef.key] ?? ''}
+                          onChange={(e) => {
+                            setMarketingData((p) => ({ ...p, [fieldDef.key]: e.target.value }));
+                            if (marketingSaveSuccess) setMarketingSaveSuccess(false);
+                          }}
+                        >
+                          <option value="">Pilih... {displayVal !== '-' ? `(saat ini: ${displayVal})` : ''}</option>
+                          {fieldDef.options.map((opt) => (
+                            <option key={opt.value} value={opt.value}>{opt.label}</option>
+                          ))}
+                        </Form.Select>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+
+            <div className="tp-save-row mt-3">
+              <Button
+                variant="outline-primary"
+                size="sm"
+                onClick={() => marketingMutation.mutate()}
+                disabled={marketingMutation.isPending || !hasAnyMarketingInput}
+              >
+                {marketingMutation.isPending ? 'Menyimpan...' : 'Simpan Info Tambahan'}
+              </Button>
+            </div>
           </Card.Body>
         </Card>
       )}

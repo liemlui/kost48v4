@@ -1,8 +1,10 @@
-// Versi aplikasi — increment setiap fase baru selesai.
-// Format: v5.{fase}.{patch}
-// Fase: A=1 Pra-Go-Live · B=2 Publik · C=3 Owner/Admin · D=4 Staff/Gudang
-//        E=5 Polish · F=6 UI/UX Sweep · G=7 AI · H=8 Compact · I=9 Navigasi
-//        J=10 Hardening AI · K=11 Pasca-Audit
-export const APP_VERSION = '5.11.0';
-export const APP_PHASE = 'K — Pasca-Audit Total';
-export const APP_BUILD_DATE = '2026-06-20';
+// Versi rilis publik — naikkan setiap kali ada update signifikan yang di-deploy.
+// Format: MAJOR.MINOR.PATCH
+//   MAJOR: perubahan besar / redesign total (jarang)
+//   MINOR: fitur baru yang terasa oleh pengguna (+0.1.0)
+//   PATCH: perbaikan bug / tweak tampilan minor (+0.0.1)
+// Catatan: versi ini HANYA dinaikkan manual oleh AI saat owner minta bump versi.
+// Dokumentasi lengkap: lihat CLAUDE.md bagian "Konvensi Versi".
+export const APP_VERSION = '1.0.0';
+export const APP_PHASE = 'Rilis Publik Perdana';
+export const APP_BUILD_DATE = '2026-06-24';

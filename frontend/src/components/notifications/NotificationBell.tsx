@@ -1,5 +1,6 @@
-import { useCallback, useRef } from 'react';
-import { Badge, Dropdown, Spinner } from 'react-bootstrap';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import ReactDOM from 'react-dom';
+import { Badge, Spinner } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import { useNotifications } from '../../hooks/useNotifications';
 import type { AppNotificationItem } from '../../api/notifications';
@@ -33,9 +34,9 @@ interface NotificationItemRowProps {
 
 function NotificationItemRow({ item, onClick }: NotificationItemRowProps) {
   return (
-    <Dropdown.Item
-      as="button"
-      className={`notification-dropdown-item ${item.isRead ? '' : 'unread'}`}
+    <button
+      type="button"
+      className={`notification-dropdown-item w-100 text-start border-0 bg-transparent px-3 py-2 ${item.isRead ? '' : 'unread'}`}
       onClick={() => onClick(item)}
     >
       <div className="d-flex align-items-start gap-2">
@@ -55,19 +56,66 @@ function NotificationItemRow({ item, onClick }: NotificationItemRowProps) {
           </div>
         </div>
       </div>
-    </Dropdown.Item>
+    </button>
   );
 }
+
+interface MenuPos { top: number; right: number }
 
 export default function NotificationBell() {
   const navigate = useNavigate();
   const { query, markReadMutation, markAllReadMutation } = useNotifications();
   const { data, isLoading, isError } = query;
-  const toggleRef = useRef<HTMLButtonElement>(null);
+  const bellRef = useRef<HTMLButtonElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
+  const [open, setOpen] = useState(false);
+  const [menuPos, setMenuPos] = useState<MenuPos>({ top: 60, right: 16 });
 
   const unreadCount = data?.unreadCount ?? 0;
   const notifications = data?.items ?? [];
   const latestFive = notifications.slice(0, 5);
+
+  const recalcPos = useCallback(() => {
+    if (!bellRef.current) return;
+    const rect = bellRef.current.getBoundingClientRect();
+    setMenuPos({
+      top: rect.bottom + 8,
+      right: Math.max(8, window.innerWidth - rect.right),
+    });
+  }, []);
+
+  const handleToggle = useCallback(() => {
+    if (!open) recalcPos();
+    setOpen((v) => !v);
+  }, [open, recalcPos]);
+
+  // Tutup saat klik di luar
+  useEffect(() => {
+    if (!open) return;
+    const handler = (e: MouseEvent) => {
+      if (
+        bellRef.current && bellRef.current.contains(e.target as Node)
+      ) return;
+      if (
+        menuRef.current && menuRef.current.contains(e.target as Node)
+      ) return;
+      setOpen(false);
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [open]);
+
+  // Tutup saat scroll / resize (posisi bisa berubah)
+  useEffect(() => {
+    if (!open) return;
+    const handler = () => { recalcPos(); };
+    window.addEventListener('resize', handler, { passive: true });
+    window.addEventListener('scroll', handler, { passive: true, capture: true });
+    return () => {
+      window.removeEventListener('resize', handler);
+      window.removeEventListener('scroll', handler, { capture: true });
+    };
+  }, [open, recalcPos]);
 
   const handleMarkAllRead = useCallback(() => {
     markAllReadMutation.mutate();
@@ -75,28 +123,86 @@ export default function NotificationBell() {
 
   const handleItemClick = useCallback(
     (item: AppNotificationItem) => {
-      if (!item.isRead) {
-        markReadMutation.mutate(item.id);
-      }
+      if (!item.isRead) markReadMutation.mutate(item.id);
       if (item.linkTo) {
-        try {
-          navigate(item.linkTo);
-        } catch {
-          // safe: invalid linkTo falls through
-        }
+        try { navigate(item.linkTo); } catch { /* invalid linkTo */ }
       }
+      setOpen(false);
     },
     [markReadMutation, navigate],
   );
 
+  const menu = open
+    ? ReactDOM.createPortal(
+        <div
+          ref={menuRef}
+          className="notification-dropdown-menu p-0 dropdown-menu show"
+          style={{
+            position: 'fixed',
+            top: menuPos.top,
+            right: menuPos.right,
+            zIndex: 9999,
+          }}
+          role="menu"
+          aria-label="Notifikasi"
+        >
+          <div className="d-flex align-items-center justify-content-between px-3 py-2 border-bottom">
+            <span className="fw-semibold">Notifikasi</span>
+            {unreadCount > 0 && (
+              <button
+                type="button"
+                className="btn btn-link btn-sm text-decoration-none p-0"
+                onClick={handleMarkAllRead}
+                disabled={markAllReadMutation.isPending}
+              >
+                {markAllReadMutation.isPending ? 'Menandai...' : 'Tandai semua dibaca'}
+              </button>
+            )}
+          </div>
+
+          {isLoading && (
+            <div className="d-flex justify-content-center py-4">
+              <Spinner animation="border" size="sm" />
+            </div>
+          )}
+
+          {isError && !isLoading && (
+            <div className="px-3 py-3 text-center text-muted small">Gagal memuat notifikasi</div>
+          )}
+
+          {!isLoading && !isError && latestFive.length === 0 && (
+            <div className="px-3 py-4 text-center text-muted">Belum ada notifikasi</div>
+          )}
+
+          {!isLoading && !isError && latestFive.map((item) => (
+            <NotificationItemRow key={item.id} item={item} onClick={handleItemClick} />
+          ))}
+
+          <div className="border-top">
+            <button
+              type="button"
+              className="w-100 text-center text-decoration-none fw-semibold small py-2 border-0 bg-transparent"
+              onClick={() => { navigate('/notifications'); setOpen(false); }}
+            >
+              Lihat semua notifikasi →
+            </button>
+          </div>
+        </div>,
+        document.body,
+      )
+    : null;
+
   return (
-    <Dropdown align="end" onToggle={(isOpen) => { if (!isOpen) toggleRef.current?.blur(); }}>
-      <Dropdown.Toggle
-        ref={toggleRef}
-        variant="link"
+    <>
+      <button
+        ref={bellRef}
+        type="button"
         id="notification-bell-toggle"
-        className="notification-bell-toggle position-relative p-0 border-0"
+        className="notification-bell-toggle position-relative p-0 border-0 bg-transparent"
         aria-label={`Notifikasi${unreadCount > 0 ? `, ${unreadCount} belum dibaca` : ''}`}
+        aria-expanded={open}
+        aria-haspopup="true"
+        onClick={handleToggle}
       >
         <span role="img" aria-hidden="true" style={{ fontSize: '1.35rem', lineHeight: 1 }}>🔔</span>
         {unreadCount > 0 && (
@@ -108,53 +214,8 @@ export default function NotificationBell() {
             {unreadCount > 99 ? '99+' : unreadCount}
           </Badge>
         )}
-      </Dropdown.Toggle>
-
-      <Dropdown.Menu className="notification-dropdown-menu p-0">
-        <div className="d-flex align-items-center justify-content-between px-3 py-2 border-bottom">
-          <span className="fw-semibold">Notifikasi</span>
-          {unreadCount > 0 && (
-            <button
-              type="button"
-              className="btn btn-link btn-sm text-decoration-none p-0"
-              onClick={handleMarkAllRead}
-              disabled={markAllReadMutation.isPending}
-            >
-              {markAllReadMutation.isPending ? 'Menandai...' : 'Tandai semua dibaca'}
-            </button>
-          )}
-        </div>
-
-        {isLoading && (
-          <div className="d-flex justify-content-center py-4">
-            <Spinner animation="border" size="sm" />
-          </div>
-        )}
-
-        {isError && !isLoading && (
-          <div className="px-3 py-3 text-center text-muted small">Gagal memuat notifikasi</div>
-        )}
-
-        {!isLoading && !isError && latestFive.length === 0 && (
-          <div className="px-3 py-4 text-center text-muted">Belum ada notifikasi</div>
-        )}
-
-        {!isLoading &&
-          !isError &&
-          latestFive.map((item) => (
-            <NotificationItemRow key={item.id} item={item} onClick={handleItemClick} />
-          ))}
-
-        <div className="border-top">
-          <Dropdown.Item
-            as="button"
-            className="text-center text-decoration-none fw-semibold small py-2"
-            onClick={() => navigate('/notifications')}
-          >
-            Lihat semua notifikasi →
-          </Dropdown.Item>
-        </div>
-      </Dropdown.Menu>
-    </Dropdown>
+      </button>
+      {menu}
+    </>
   );
 }

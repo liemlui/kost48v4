@@ -114,6 +114,22 @@ export async function createPublicBooking(payload: CreatePublicBookingPayload) {
   return createResource<PublicBookingResult>('/public/bookings', payload as unknown as Record<string, unknown>);
 }
 
+export interface GuestSurveyPayload {
+  bathroom?: string;
+  cooling?: string;
+  roomSize?: string;
+  roomType?: string;
+  priorities?: string;
+  estimatedPriceRupiah?: number;
+  skipped?: boolean;
+  sessionId?: string;
+}
+
+export async function saveGuestSurvey(payload: GuestSurveyPayload) {
+  const res = await client.post<{ data: { id: string } }>('/public/bookings/survey', payload);
+  return res.data.data;
+}
+
 export interface CancelTenantBookingPayload {
   cancelReason?: string;
 }

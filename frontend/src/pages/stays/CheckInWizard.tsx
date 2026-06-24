@@ -88,6 +88,9 @@ export default function CheckInWizard({ show: _show = true, onHide }: CheckInWiz
       price: room.monthlyRateRupiah ?? undefined,
       deposit: room.defaultDepositRupiah ?? undefined,
       status: room.status,
+      category: room.category ?? null,
+      roomType: room.roomType ?? null,
+      roomSize: room.roomSize ?? null,
     }));
   }, [_rooms]);
 

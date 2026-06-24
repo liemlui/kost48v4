@@ -23,8 +23,8 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
             <ConfirmProvider>
               <App />
             </ConfirmProvider>
+            <PwaStatus />
           </ToastProvider>
-          <PwaStatus />
         </AuthProvider>
       </BrowserRouter>
     </QueryClientProvider>

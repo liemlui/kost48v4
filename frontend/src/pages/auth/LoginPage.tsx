@@ -106,15 +106,15 @@ export default function LoginPage() {
       <div className="login-wrap">
         <section className="login-aside" aria-label="Tentang KOST48 Surabaya">
           <div className="login-chip"><span /> {officialKost48Location.address}</div>
-          <h1 className="login-title">Kos Surabaya Barat dekat Pakuwon Mall / PTC.</h1>
+          <h1 className="login-title">Kos nyaman &amp; terurus — satu portal untuk semuanya.</h1>
           <p className="login-copy">
             Pilih kamar, pantau pemesanan, cek tagihan, dan laporkan kebutuhan kos dari satu portal KOST48.
           </p>
 
-          <Kost48DecorGallery variant="auth" maxItems={3} />
+          <Kost48DecorGallery variant="auth" maxItems={1} />
 
           <div className="login-feature-list">
-            {officialKost48Highlights.slice(0, 3).map((item) => (
+            {officialKost48Highlights.slice(1, 4).map((item) => (
               <div key={item.title} className="login-feature-item">
                 <div className="login-feature-icon">{item.icon}</div>
                 <div>
@@ -208,10 +208,7 @@ export default function LoginPage() {
               {submitting ? 'Memproses...' : 'Masuk'}
             </Button>
 
-            {/* PUB-BOOKING-INFO: tamu tak perlu daftar dulu — cukup booking kamar. */}
-            <p className="login-booking-hint text-center mt-3 mb-0 small">
-              Belum punya akun? <Link to="/rooms">Booking kamar dulu</Link> — akun portal dibuat otomatis setelah booking diverifikasi.
-            </p>
+
           </Form>
 
           {mode === 'TENANT' ? (

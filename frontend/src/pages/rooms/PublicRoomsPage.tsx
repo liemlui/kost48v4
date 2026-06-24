@@ -1,20 +1,19 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import type React from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Alert, Button, Col, Container, Row, Spinner } from "react-bootstrap";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { listPublicRooms } from "../../api/bookings";
-import CurrencyDisplay from "../../components/common/CurrencyDisplay";
+import GuestPreferenceWizard from "../../components/public/GuestPreferenceWizard";
 import EmptyState from "../../components/common/EmptyState";
 import { SkeletonBlock } from "../../components/common/SkeletonLoader";
 import TenantBookingGate from "../../components/tenant/TenantBookingGate";
 import RoomComparePanel from "../../components/rooms/RoomComparePanel";
-import AvailabilityTimeline from "../../components/public/AvailabilityTimeline";
+import AvailabilityTimeline from "../../components/public/RichAvailabilityCalendar";
 import Kost48LogoMark from "../../components/common/Kost48LogoMark";
+import RoomCard from "../../components/rooms/RoomCard";
 import type { PricingTerm, PublicRoom } from "../../types";
 import { useAuth } from "../../context/AuthContext";
 import { useTenantPortalStage } from "../../hooks/useTenantPortalStage";
-import { getKost48RoomGallery, resolveKost48MarketingImageUrl } from "../../data/kost48Assets";
 import { officialKost48Location } from "../../data/officialKost48Content";
 import {
   getBestPublicRoomRate,
@@ -33,7 +32,7 @@ type AvailFilter = "" | "bookable" | "occupied" | "checking";
 type SortFilter = "price-asc" | "price-desc";
 
 const pricingTerm: PricingTerm = "MONTHLY";
-const ROOMS_PER_PAGE = 12; // F2-11 (W-03): paginasi katalog publik
+const ROOMS_PER_PAGE = 3; // F2-11 (W-03): paginasi katalog publik
 type PaginationItem = number | "gap";
 
 function getPaginationItems(totalPages: number, currentPage: number): PaginationItem[] {
@@ -50,201 +49,7 @@ function getPaginationItems(totalPages: number, currentPage: number): Pagination
   return pages;
 }
 
-function buildWhatsAppUrl(room: PublicRoom) {
-  const number = String(import.meta.env.VITE_PUBLIC_ADMIN_WHATSAPP ?? "").replace(/\D/g, "");
-  const roomCode = room.code || `Kamar #${room.id}`;
-  const isChecking = String(room.status ?? "").toUpperCase() === "MAINTENANCE";
-  const message = isChecking
-    ? `Halo Admin KOST48, saya tertarik dengan kamar ${roomCode}. Saya lihat kamar sedang dicek. Boleh tanya estimasi kapan siap ditempati?`
-    : `Halo Admin KOST48, saya tertarik dengan kamar ${roomCode}. Boleh tanya ketersediaan atau estimasi kapan kosong?`;
-  return number
-    ? `https://wa.me/${number}?text=${encodeURIComponent(message)}`
-    : `https://wa.me/?text=${encodeURIComponent(message)}`;
-}
 
-// ── Room image carousel ────────────────────────────────────────────────────
-function RoomCardImage({ room }: { room: PublicRoom }) {
-  const localGallery = useMemo(() => getKost48RoomGallery(room.code, room.name, 5), [room.code, room.name]);
-  const apiGallery = useMemo(
-    () => (room.images ?? []).map((url) => resolveKost48MarketingImageUrl(url)).filter(Boolean) as string[],
-    [room.images],
-  );
-  const candidates = useMemo(() => Array.from(new Set([...localGallery, ...apiGallery])), [localGallery, apiGallery]);
-  const [activeIndex, setActiveIndex] = useState(0);
-  const [failed, setFailed] = useState<Set<string>>(() => new Set());
-  const [hovered, setHovered] = useState(false);
-  const isTouchDevice = typeof window !== "undefined"
-    && typeof window.matchMedia === "function"
-    && window.matchMedia("(hover: none)").matches;
-  const resolved = candidates.filter((url) => !failed.has(url));
-  const active = resolved.length ? resolved[activeIndex % resolved.length] : null;
-
-  useEffect(() => { setActiveIndex(0); setFailed(new Set()); }, [room.id, candidates.join("|")]);
-  useEffect(() => { if (activeIndex >= resolved.length) setActiveIndex(0); }, [activeIndex, resolved.length]);
-  useEffect(() => {
-    if (resolved.length <= 1) return undefined;
-    if (!hovered && !isTouchDevice) return undefined;
-    const intervalMs = hovered ? 1200 : 3500;
-    const t = window.setInterval(() => setActiveIndex((i) => (i + 1) % resolved.length), intervalMs);
-    return () => clearInterval(t);
-  }, [hovered, isTouchDevice, resolved.length]);
-
-  const markFailed = (url: string) => setFailed((prev) => {
-    if (prev.has(url)) return prev;
-    return new Set([...prev, url]);
-  });
-
-  return (
-    <div
-      className={`rm-card-img-wrap${active ? "" : " rm-card-img-empty"}`}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-    >
-      {active ? (
-        <img
-          key={active}
-          src={active}
-          alt={`Kamar ${room.code} — ${getPublicRoomCoolingLabel(room)}, kamar mandi ${getPublicRoomBathroomLabel(room)}`}
-          className="rm-card-img"
-          loading="lazy"
-          decoding="async"
-          onError={() => markFailed(active)}
-        />
-      ) : (
-        <div className="rm-card-img-placeholder">
-          <span>🛏️</span>
-          <small>Foto segera hadir</small>
-        </div>
-      )}
-      {resolved.length > 1 && (
-        <div className="rm-card-img-dots" aria-hidden="true">
-          {resolved.slice(0, 5).map((_, i) => (
-            <span key={i} className={i === activeIndex % resolved.length ? "active" : ""} />
-          ))}
-        </div>
-      )}
-    </div>
-  );
-}
-
-// ── Room card ──────────────────────────────────────────────────────────────
-function RoomCard({
-  room,
-  isTenant,
-  isCompared,
-  compareDisabled,
-  onToggleCompare,
-}: {
-  room: PublicRoom;
-  isTenant: boolean;
-  isCompared: boolean;
-  compareDisabled: boolean;
-  onToggleCompare: () => void;
-}) {
-  const navigate = useNavigate();
-  const avail = getPublicRoomAvailabilityDisplay(room);
-  const mainRate = getBestPublicRoomRate(room, pricingTerm);
-  const amenities = getPublicRoomVisibleAmenities(room).slice(0, 3);
-
-  const goDetail = () => navigate(`/rooms/${room.id}/detail`, { state: { room } });
-  const goBook = () => navigate(isTenant ? `/portal/booking/${room.id}` : `/booking/${room.id}`, { state: { room } });
-
-  const handleCardClick = (e: React.MouseEvent<HTMLElement>) => {
-    if ((e.target as HTMLElement).closest("button,a")) return;
-    goDetail();
-  };
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLElement>) => {
-    if (e.key !== "Enter" && e.key !== " ") return;
-    if ((e.target as HTMLElement).closest("button,a")) return;
-    e.preventDefault();
-    goDetail();
-  };
-
-  return (
-    <article
-      className="rm-card"
-      role="link"
-      tabIndex={0}
-      onClick={handleCardClick}
-      onKeyDown={handleKeyDown}
-      aria-label={`Lihat detail ${room.name || room.code || `kamar ${room.id}`}`}
-    >
-      {/* Image */}
-      <div className="rm-card-img-shell">
-        <RoomCardImage room={room} />
-        <span className={`rm-card-badge rm-badge-${avail.tone}`}>{avail.label}</span>
-        <button
-          type="button"
-          className={`rm-card-compare-btn${isCompared ? " active" : ""}`}
-          onClick={(e) => { e.stopPropagation(); onToggleCompare(); }}
-          disabled={compareDisabled}
-          aria-pressed={isCompared}
-          aria-label={compareDisabled ? "Maksimal 3 kamar untuk dibandingkan" : isCompared ? "Hapus kamar dari perbandingan" : "Tambah kamar ke perbandingan"}
-          title={compareDisabled ? "Maks. 3 kamar" : isCompared ? "Hapus dari perbandingan" : "Bandingkan kamar ini"}
-        >
-          {isCompared ? "✓" : "+"}
-        </button>
-      </div>
-
-      {/* Body */}
-      <div className="rm-card-body">
-        <div className="rm-card-title-row">
-          <div>
-            <div className="rm-card-code">{room.code || `Kamar ${room.id}`}</div>
-            <div className="rm-card-name">{room.name || "Kamar KOST48 Surabaya"}</div>
-          </div>
-        </div>
-
-        <div className="rm-card-specs">
-          <span>
-            {getPublicRoomBathroom(room) === "inside" ? "🚿" : "🪣"} {getPublicRoomBathroomLabel(room)}
-          </span>
-          <span>
-            {getPublicRoomCooling(room) === "ac" ? "❄️" : "🌬️"} {getPublicRoomCoolingLabel(room)}
-          </span>
-        </div>
-
-        {amenities.length > 0 && (
-          <div className="rm-card-amenities">
-            {amenities.map((a) => <span key={a}>{a}</span>)}
-          </div>
-        )}
-
-        <div className="rm-card-price-row">
-          <strong>
-            <CurrencyDisplay amount={mainRate} />
-          </strong>
-          <span>/bulan</span>
-          {mainRate === 0 && <span className="rm-card-price-ask">Tanya admin</span>}
-        </div>
-
-        <div className="rm-card-actions">
-          {avail.canBook && (
-            <Button size="sm" className="rm-btn-book" onClick={(e) => { e.stopPropagation(); goBook(); }}>
-              Ajukan Booking
-            </Button>
-          )}
-          <a
-            className="btn btn-sm btn-outline-secondary rm-btn-wa"
-            href={buildWhatsAppUrl(room)}
-            target="_blank"
-            rel="noreferrer"
-            onClick={(e) => e.stopPropagation()}
-          >
-            💬 {avail.canBook ? "Tanya via WhatsApp" : "Tanya Ketersediaan"}
-          </a>
-          <button
-            type="button"
-            className="rm-btn-detail"
-            onClick={(e) => { e.stopPropagation(); goDetail(); }}
-          >
-            Lihat detail →
-          </button>
-        </div>
-      </div>
-    </article>
-  );
-}
 
 // ── Chip filter ────────────────────────────────────────────────────────────
 function FilterChip({
@@ -294,8 +99,8 @@ function RoomsTopbar() {
           Beranda
         </button>
         <button type="button" onClick={() => navigate("/panduan")}>
-          <svg className="rm-nav-icon" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" /><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" /></svg>
-          Panduan
+          <svg className="rm-nav-icon" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M12 20h9" /><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z" /></svg>
+          Panduan & FAQ
         </button>
         <button type="button" onClick={() => navigate("/reviews")}>
           <svg className="rm-nav-icon" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" /></svg>
@@ -337,6 +142,7 @@ export default function PublicRoomsPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [comparedRoomIds, setComparedRoomIds] = useState<number[]>([]);
   const comparePanelRef = useRef<HTMLDivElement | null>(null);
+  const [wizardDone, setWizardDone] = useState(false);
   const { user } = useAuth();
   const { stage, isLoading: isTenantStageLoading } = useTenantPortalStage();
   const isTenant = user?.role === "TENANT";
@@ -371,7 +177,7 @@ export default function PublicRoomsPage() {
 
   const bathroom = (searchParams.get("bathroom") ?? "") as BathroomFilter;
   const cooling = (searchParams.get("cooling") ?? "") as CoolingFilter;
-  const avail = (searchParams.get("avail") ?? "") as AvailFilter;
+  const avail = (searchParams.get("avail") ?? "bookable") as AvailFilter;
   const sort = (searchParams.get("sort") ?? "price-asc") as SortFilter;
 
   const query = useQuery({
@@ -434,7 +240,7 @@ export default function PublicRoomsPage() {
     setSearchParams(p, { replace: true });
   };
 
-  const hasActiveFilter = !!(bathroom || cooling || avail || sort !== "price-asc");
+  const hasActiveFilter = !!(bathroom || cooling || avail !== "bookable" || sort !== "price-asc");
   const [filtersOpen, setFiltersOpen] = useState(false);
   const paginationItems = useMemo(() => getPaginationItems(totalPages, safePage), [safePage, totalPages]);
 
@@ -448,9 +254,30 @@ export default function PublicRoomsPage() {
 
         {!lockedForTenant && (
           <>
+            {/* ── Wizard intercept: ambil alih halaman sebelum katalog ── */}
+            {!isTenant && !wizardDone ? (
+              <div className="gpw-intercept-shell">
+                <GuestPreferenceWizard
+                  rooms={roomsFromApi}
+                  roomsLoading={query.isLoading}
+                  onDone={(filters) => {
+                    const p = new URLSearchParams(searchParams);
+                    if (filters.bathroom === 'inside')    p.set('bathroom', 'inside');
+                    else if (filters.bathroom === 'outside') p.set('bathroom', 'outside');
+                    if (filters.cooling === 'ac')         p.set('cooling', 'ac');
+                    else if (filters.cooling === 'fan')   p.set('cooling', 'fan');
+                    setSearchParams(p, { replace: true });
+                    setWizardDone(true);
+                  }}
+                  onSkip={() => setWizardDone(true)}
+                />
+              </div>
+            ) : (
+            <>
+
             {/* ── Header ── */}
             {!isTenant && (
-              <div className="rm-page-header">
+              <div className="rm-page-header" id="rm-catalog">
                 <div className="rm-breadcrumb">
                   <button type="button" onClick={() => navigate("/")}>Beranda</button>
                   <span aria-hidden="true">›</span>
@@ -540,8 +367,8 @@ export default function PublicRoomsPage() {
             {/* ── Skeleton saat memuat (F2-11 W-02) ── */}
             {query.isLoading && (
               <Row className="g-3 rm-grid" aria-hidden="true">
-                {Array.from({ length: 6 }).map((_, i) => (
-                  <Col xl={4} md={6} key={i}>
+                {Array.from({ length: 3 }).map((_, i) => (
+                  <Col lg={4} md={4} sm={6} key={i}>
                     <div className="rm-card">
                       <SkeletonBlock height={180} />
                       <div className="rm-card-body">
@@ -581,7 +408,7 @@ export default function PublicRoomsPage() {
               {pageRooms.map((room) => {
                 const isCompared = comparedRoomIds.includes(room.id);
                 return (
-                  <Col xl={4} md={6} key={room.id}>
+                  <Col lg={4} md={4} sm={6} key={room.id}>
                     <RoomCard
                       room={room}
                       isTenant={isTenant}
@@ -621,8 +448,25 @@ export default function PublicRoomsPage() {
               </nav>
             )}
 
-            {/* ── PUB-CALENDAR: Timeline ketersediaan ── */}
+            {/* ── PANDUAN KATEGORI KAMAR ── */}
+            <div className="rm-guide-shell">
+              <div className="rm-guide-header">
+                <span className="rm-guide-icon">🏠</span>
+                <h3 className="rm-guide-title">Panduan Kategori Kamar</h3>
+              </div>
+              <div className="rm-guide-cards">
+                <div className="rm-guide-card"><span className="rm-guide-card-icon">🌬️</span><div><strong>Ekonomi</strong><small>Kipas angin · Kamar mandi luar bersama · Tarif paling terjangkau</small></div></div>
+                <div className="rm-guide-card"><span className="rm-guide-card-icon">🚿</span><div><strong>Standar</strong><small>Kipas angin · Kamar mandi dalam (private) · Harga menengah</small></div></div>
+                <div className="rm-guide-card"><span className="rm-guide-card-icon">❄️</span><div><strong>Deluxe</strong><small>AC · Kamar mandi dalam (private) · Fasilitas terlengkap</small></div></div>
+                <div className="rm-guide-card"><span className="rm-guide-card-icon">🏗️</span><div><strong>Mezzanine</strong><small>Kamar bertingkat dua (loft) · Ruang penyimpanan atas · Unik dan lebih lega</small></div></div>
+                <div className="rm-guide-card"><span className="rm-guide-card-icon">📐</span><div><strong>Besar</strong><small>Luas ~10 m² ke atas · Ruang gerak lebih lega · +Rp 200.000/bulan</small></div></div>
+                <div className="rm-guide-card"><span className="rm-guide-card-icon">📏</span><div><strong>Standar</strong><small>Luas ~7–9 m² · Efisien dan fungsional · Tarif dasar</small></div></div>
+              </div>
+            </div>
+
+            {/* ── KALENDER KETERSEDIAAN ── */}
             <AvailabilityTimeline />
+            {/* RichAvailabilityCalendar menggantikan AvailabilityTimeline lama */}
 
             {/* ── Compare ── */}
             {comparedRooms.length > 0 && (
@@ -648,6 +492,10 @@ export default function PublicRoomsPage() {
                 </div>
               </>
             )}
+
+
+          </>
+          )}
           </>
         )}
       </Container>

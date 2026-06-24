@@ -219,6 +219,12 @@ export default function RoomDetailPage() {
                   <div className="metric-tile-label">Status</div>
                   <div className="metric-tile-value">{room.status}</div>
                 </div>
+                <div className="metric-tile">
+                  <div className="metric-tile-label">Ukuran kamar</div>
+                  <div className="metric-tile-value">
+                    {room.roomSize === 'LARGE' ? 'Besar 3×3,5m (~10,5m²)' : room.roomSize === 'STANDARD' ? 'Standar 2,5×3m (~7,5m²)' : formatValue(room.roomSize)}
+                  </div>
+                </div>
               </div>
             </Card.Body>
           </Card>
@@ -251,6 +257,10 @@ export default function RoomDetailPage() {
                       </>
                     ) : (
                       <>
+                        <div className="text-muted small">Kategori</div>
+                        <div className="fw-semibold mb-3">{room.category === 'ECONOMY' ? 'Ekonomi' : room.category === 'DELUXE' ? 'Deluxe' : room.category === 'STANDARD' ? 'Standar' : formatValue(room.category)}</div>
+                        <div className="text-muted small">Ukuran kamar</div>
+                        <div className="fw-semibold mb-3">{room.roomSize === 'LARGE' ? 'Besar 3×3,5m (~10,5m²)' : room.roomSize === 'STANDARD' ? 'Standar 2,5×3m (~7,5m²)' : formatValue(room.roomSize)}</div>
                         <div className="text-muted small">Tarif listrik / kWh</div>
                         <div className="fw-semibold mb-3"><CurrencyDisplay amount={room.electricityTariffPerKwhRupiah} /></div>
                         <div className="text-muted small">Tarif air / m³</div>

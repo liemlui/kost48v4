@@ -43,3 +43,40 @@ export function calculateRentByPricingTerm(
 export function isUtilitiesIncludedForPricingTerm(pricingTerm: PricingTerm): boolean {
   return [PricingTerm.DAILY, PricingTerm.WEEKLY, PricingTerm.BIWEEKLY].includes(pricingTerm);
 }
+
+/**
+ * Max free occupants per room size (tidak kena surcharge).
+ * Melebihi batas ini → +20% sewa per kepala ekstra.
+ */
+export const ROOM_MAX_FREE_OCCUPANTS: Record<string, number> = {
+  STANDARD: 2,
+  LARGE: 4,
+};
+
+/**
+ * Hard cap penghuni per ukuran kamar (batas booking sistem).
+ * Maks tambahan = 2 orang ekstra — lebih dari itu kamar tidak lagi layak huni
+ * (extra bed mengisi hampir seluruh lantai). Keputusan owner D-24.
+ */
+export const ROOM_MAX_OCCUPANTS: Record<string, number> = {
+  STANDARD: 4, // 2 free + maks 2 ekstra (tidak direkomendasikan di atas 2)
+  LARGE: 6,    // 4 free + maks 2 ekstra (tidak direkomendasikan di atas 4)
+};
+
+/**
+ * Calculate extra-occupant surcharge.
+ * @param baseRent - rent for the chosen pricing term (no surcharge)
+ * @param roomSize - 'STANDARD' | 'LARGE' | null
+ * @param occupantCount - total number of occupants
+ */
+export function calculateOccupantSurcharge(
+  baseRent: number,
+  roomSize: string | null | undefined,
+  occupantCount: number,
+): number {
+  const key = String(roomSize ?? '').toUpperCase();
+  const maxFree = ROOM_MAX_FREE_OCCUPANTS[key] ?? 2;
+  const extra = Math.max(0, occupantCount - maxFree);
+  if (extra === 0) return 0;
+  return roundUpToNearest(baseRent * 0.20 * extra);
+}

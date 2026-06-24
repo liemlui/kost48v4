@@ -34,7 +34,7 @@ import { getInvoiceTotalAmount } from '../../utils/invoiceTotals';
 import { resolveAbsoluteFileUrl } from '../../utils/resolveAbsoluteFileUrl';
 import { getKost48RoomCover } from '../../data/kost48Assets';
 import {
-  PROFILE_FIELD_LABELS, formatDate, toDateKey, getCurrentMeterWindow, getLatestUtilityReading, formatEndHelper, formatRoomFloorLabel,
+  PROFILE_FIELD_LABELS, formatDate, toDateKey, getMeterWindow, getLatestUtilityReading, formatEndHelper, formatRoomFloorLabel,
   friendlyItemStatus, inventoryStatusClass, getRoomFacilitySummary, getRoomFacilities, getInventoryItems, getRoomCoverImage, getRoomPriceFacts,
   TENANT_SERVICE_IDEAS,
 } from './myStayShared';
@@ -138,7 +138,7 @@ function ActiveStayContent({ stay }: { stay: Stay }) {
     retry: false,
   });
 
-  const meterWindow = useMemo(() => getCurrentMeterWindow(), []);
+  const meterWindow = useMemo(() => getMeterWindow(stay.plannedCheckOutDate), [stay.plannedCheckOutDate]);
   const meterReadingsQuery = useQuery<MeterReading[]>({
     queryKey: ['portal-meter-readings', stay.roomId, meterWindow.startKey, meterWindow.endKey],
     queryFn: () => getMeterReadingsByRoom(stay.roomId, {
@@ -436,9 +436,10 @@ function ActiveStayContent({ stay }: { stay: Stay }) {
                         : 'Meter bulan ini belum dicatat'}
                 </div>
                 <div className="small">
-                  Jendela catat: <strong>{formatDate(meterWindow.startKey)}</strong> sampai{' '}
-                  <strong>{formatDate(meterWindow.endKey)}</strong>.
-                  {nearEnd && !meterRecordedThisMonth ? ' Prioritas H-10 aktif, sebaiknya catat sekarang.' : null}
+                  {meterWindow.windowOpen
+                    ? <>Jendela catat aktif: <strong>{formatDate(meterWindow.windowStartKey)}</strong> s.d.{' '}<strong>{formatDate(meterWindow.windowEndKey)}</strong>.</>
+                    : <>Jendela catat akan buka pada <strong>{formatDate(meterWindow.windowStartKey)}</strong> (H-10 sebelum akhir kontrak).</>
+                  }
                 </div>
                 {electricityReadingThisMonth ? (
                   <div className="small text-muted">
@@ -450,7 +451,9 @@ function ActiveStayContent({ stay }: { stay: Stay }) {
               <Button
                 variant={meterRecordedThisMonth ? 'outline-success' : nearEnd ? 'warning' : 'outline-primary'}
                 size="sm"
+                disabled={!meterWindow.windowOpen}
                 onClick={() => setShowMeter(true)}
+                title={!meterWindow.windowOpen ? `Pencatatan meter dibuka H-10 sebelum akhir kontrak (${formatDate(meterWindow.windowStartKey)})` : undefined}
               >
                 {meterRecordedThisMonth ? 'Catat Ulang Meter' : 'Catat Meter'}
               </Button>
@@ -600,14 +603,36 @@ function ActiveStayContent({ stay }: { stay: Stay }) {
             Ajukan Keluar
           </Button>
         )}
-        {/* M-3: tenant boleh catat meter sendiri (listrik pakai-dulu-bayar-kemudian). */}
-        <Button variant={endDays !== null && endDays <= 10 && endDays >= 0 ? 'warning' : 'outline-primary'} size="sm" onClick={() => setShowMeter(true)}>
-          {endDays !== null && endDays <= 10 && endDays >= 0 ? '🔔 Catat Meter Sekarang' : 'Catat Meter Listrik/Air'}
+        {/* M-3: tenant boleh catat meter — hanya aktif saat window H-10 terbuka. */}
+        <Button
+          variant={nearEnd && meterWindow.windowOpen ? 'warning' : 'outline-primary'}
+          size="sm"
+          disabled={!meterWindow.windowOpen}
+          title={!meterWindow.windowOpen ? `Pencatatan dibuka H-10 sebelum akhir kontrak (${formatDate(meterWindow.windowStartKey)})` : undefined}
+          onClick={() => setShowMeter(true)}
+        >
+          {nearEnd && meterWindow.windowOpen ? '🔔 Catat Meter Sekarang' : 'Catat Meter Listrik/Air'}
         </Button>
       </div>
       {renewDisabledReason ? (
         <p className="text-muted small mb-3">{renewDisabledReason}</p>
       ) : null}
+
+      {/* M-3 H-10: banner pengingat catat meter saat mendekati akhir kontrak/perpanjangan */}
+      {nearEnd && !meterRecordedThisMonth && (
+        <Alert variant="warning" className="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+          <div>
+            <strong>⚡ Waktunya catat meter!</strong>
+            <div className="small mt-1">
+              Kontrak berakhir dalam <strong>{endDays === 0 ? 'hari ini' : `${endDays} hari`}</strong>.
+              Catat angka meter listrik (dan air jika aktif) sekarang agar tagihan akhir periode dapat dihitung tepat.
+            </div>
+          </div>
+          <Button variant="warning" size="sm" onClick={() => setShowMeter(true)}>
+            Catat Meter Sekarang
+          </Button>
+        </Alert>
+      )}
 
       {/* Cross-sell saat perpanjangan: tawarkan WiFi/cleaning (opsional) */}
       <RenewalCrossSellCard />

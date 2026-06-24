@@ -37,5 +37,16 @@ Detail forensik 97 temuan & rencana lama sudah DIBUBARKAN ke dossier; arsip di `
 - **Jangan `/new` untuk tugas sepele** (1-3 turn, edit kecil) — cache MISS lebih mahal daripada melanjutkan.
 - **Pola ideal:** satu sesi = satu "episode" (1-3 task terkait). Pagi: `/new`→orientasi+eksekusi, siang: `/new`→lanjut, sore: `/new`→review+tutup.
 
+## Konvensi Versi (WAJIB diikuti AI)
+- File tunggal: `frontend/src/config/version.ts` — konstanta `APP_VERSION`, `APP_PHASE`, `APP_BUILD_DATE`.
+- Juga update `frontend/public/version.json` dengan nilai yang sama (dipakai PWA update check).
+- Format: `MAJOR.MINOR.PATCH` — contoh `1.0.0` → `1.1.0` (fitur baru) → `1.1.1` (bugfix).
+- **PATCH** (+0.0.1): perbaikan bug, tweak tampilan, teks, performa minor.
+- **MINOR** (+0.1.0): fitur baru yang dirasakan pengguna (modul baru, flow baru, halaman baru).
+- **MAJOR** (+1.0.0): perubahan besar / redesign / breaking change (jarang).
+- AI **HANYA** naikkan versi saat owner **eksplisit minta** ("bump versi", "naikkan versi", "update versi").
+- Setelah bump: update `APP_BUILD_DATE` ke tanggal hari ini (format `YYYY-MM-DD`), update `APP_PHASE` bila relevan.
+- PWA: setiap build ulang (`npm run build`) otomatis dapat `BUILD_ID` baru via `stamp-pwa-build.mjs` — tidak perlu aksi manual; versi di footer terpisah dari build ID internal.
+
 ## Peta scope pengembangan
 - **`docs/PETA_SCOPE.md`** — pemetaan tugas berdasarkan ROLE (OWNER/ADMIN/STAFF/TENANT/PUBLIC) dan FLOW BISNIS (booking→huni→bayar→checkout→akuntansi). Pakai ini untuk langsung lompat ke file yang tepat saat mengerjakan fitur untuk role atau flow tertentu.

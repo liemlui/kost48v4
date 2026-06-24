@@ -21,12 +21,20 @@ export function getPublicRoomSearchText(room: PublicRoom) {
 }
 
 export function getPublicRoomBathroom(room: PublicRoom): PublicRoomBathroom {
+  // Prefer category enum (authoritative, matches wizard logic). Fallback ke text.
+  const cat = String(room.category ?? "").toUpperCase();
+  if (cat === "ECONOMY") return "outside";
+  if (cat === "STANDARD" || cat === "DELUXE") return "inside";
   const text = getPublicRoomSearchText(room);
   if (/km\s*dalam|kamar mandi dalam|mandi dalam|private bathroom|bathroom dalam|toilet dalam|wc dalam/.test(text)) return "inside";
   return "outside";
 }
 
 export function getPublicRoomCooling(room: PublicRoom): PublicRoomCooling {
+  // Prefer category enum (authoritative, matches wizard logic). Fallback ke text.
+  const cat = String(room.category ?? "").toUpperCase();
+  if (cat === "DELUXE") return "ac";
+  if (cat === "ECONOMY" || cat === "STANDARD") return "fan";
   const text = getPublicRoomSearchText(room);
   if (/\bac\b|air conditioner|pendingin ruangan|aircon/.test(text)) return "ac";
   return "fan";

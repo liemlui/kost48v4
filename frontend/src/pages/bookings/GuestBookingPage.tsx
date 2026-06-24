@@ -3,11 +3,12 @@ import { useMutation, useQuery } from '@tanstack/react-query';
 import { Alert, Row, Col, Spinner } from 'react-bootstrap';
 import { useNavigate, useParams } from 'react-router-dom';
 import { createPublicBooking, getPublicRoomDetail } from '../../api/bookings';
+import { fetchPublicConfig } from '../../api/settings';
 import EmptyState from '../../components/common/EmptyState';
 import type { CreatePublicBookingPayload, PricingTerm, PublicBookingResult } from '../../types';
-import { calculateRentByPricingTerm } from '../../utils/pricing';
+import { calculateRentByPricingTerm, calculateOccupantSurcharge } from '../../utils/pricing';
 import type { GuestBookingFormState } from './guestBookingUtils';
-import { INITIAL_FORM, validate } from './guestBookingUtils';
+import { INITIAL_FORM, validate, computeCheckOutDate } from './guestBookingUtils';
 import GuestBookingForm from './GuestBookingForm';
 import GuestBookingRoomSummary from './GuestBookingRoomSummary';
 import GuestBookingSuccess from './GuestBookingSuccess';
@@ -36,7 +37,14 @@ export default function GuestBookingPage() {
     enabled: Number.isFinite(id),
   });
 
+  const configQuery = useQuery({
+    queryKey: ['public-config'],
+    queryFn: fetchPublicConfig,
+    staleTime: 10 * 60_000,
+  });
+
   const room = roomQuery.data;
+  const petDepositRupiah = configQuery.data?.petDepositRupiah ?? 100000;
 
   const mutation = useMutation({
     mutationFn: (payload: CreatePublicBookingPayload) => createPublicBooking(payload),
@@ -55,14 +63,17 @@ export default function GuestBookingPage() {
 
   const selectedRate = useMemo(() => {
     if (!room || !room.pricing?.monthlyRateRupiah) return null;
-    return calculateRentByPricingTerm(room.pricing.monthlyRateRupiah, form.pricingTerm);
-  }, [room, form.pricingTerm]);
+    const base = calculateRentByPricingTerm(room.pricing.monthlyRateRupiah, form.pricingTerm);
+    const surcharge = calculateOccupantSurcharge(base, room.roomSize, form.occupantCount);
+    return base + surcharge;
+  }, [room, form.pricingTerm, form.occupantCount]);
 
   const initialTotal = useMemo(() => {
     const rent = Number(selectedRate ?? 0);
     const deposit = Number(room?.defaultDepositRupiah ?? 0);
-    return rent + deposit;
-  }, [room, selectedRate]);
+    const pet = form.hasPet ? petDepositRupiah : 0;
+    return rent + deposit + pet;
+  }, [room, selectedRate, form.hasPet, petDepositRupiah]);
 
   const handleSubmit = (event: FormEvent) => {
     event.preventDefault();
@@ -74,6 +85,8 @@ export default function GuestBookingPage() {
       return;
     }
     setErrors({});
+
+    const checkOutDate = computeCheckOutDate(form.checkInDate, form.pricingTerm, form.leaseDurationCount);
 
     const payload: CreatePublicBookingPayload = {
       roomId: room.id,
@@ -87,9 +100,11 @@ export default function GuestBookingPage() {
     if (form.identityNumber.trim()) payload.identityNumber = form.identityNumber.trim();
     if (form.emergencyContactName.trim()) payload.emergencyContactName = form.emergencyContactName.trim();
     if (form.emergencyContactPhone.trim()) payload.emergencyContactPhone = form.emergencyContactPhone.trim();
-    if (form.plannedCheckOutDate) payload.plannedCheckOutDate = form.plannedCheckOutDate;
+    if (checkOutDate) payload.plannedCheckOutDate = checkOutDate;
     if (form.stayPurpose) payload.stayPurpose = form.stayPurpose as CreatePublicBookingPayload['stayPurpose'];
     if (form.notes.trim()) payload.notes = form.notes.trim();
+    if (form.occupantCount > 1) payload.occupantCount = form.occupantCount;
+    if (form.hasPet) payload.hasPet = true;
 
     mutation.mutate(payload);
   };
@@ -142,7 +157,9 @@ export default function GuestBookingPage() {
               </div>
 
               <Alert variant="info" className="small">
-                {isChecking ? 'Kamar sudah kosong, tetapi perlu dicek dulu sebelum ditawarkan kembali. Admin bisa bantu beri estimasi siap ditempati.' : 'Anda masih bisa tanya estimasi kapan kamar ini kosong via WhatsApp. Admin akan bantu cek pilihan yang paling cocok.'}
+                {isChecking
+                  ? 'Kamar sudah kosong, tetapi perlu dicek dulu sebelum ditawarkan kembali. Admin bisa bantu beri estimasi siap ditempati.'
+                  : 'Anda masih bisa tanya estimasi kapan kamar ini kosong via WhatsApp. Admin akan bantu cek pilihan yang paling cocok.'}
               </Alert>
 
               <div className="d-grid gap-2">
@@ -168,11 +185,15 @@ export default function GuestBookingPage() {
           <div className="text-muted">Lengkapi data diri dan pilih tanggal check-in. Admin akan memeriksa dan menyetujui booking Anda.</div>
         </div>
 
-        {errors.server ? <Alert variant="danger">{errors.server}</Alert> : null}
-
         <Row className="g-4">
           <Col lg={5}>
-      <GuestBookingRoomSummary room={room} form={form} selectedRate={selectedRate != null ? String(selectedRate) : null} initialTotal={initialTotal} />
+            <GuestBookingRoomSummary
+              room={room}
+              form={form}
+              selectedRate={selectedRate != null ? String(selectedRate) : null}
+              initialTotal={initialTotal}
+              petDepositRupiah={petDepositRupiah}
+            />
           </Col>
           <Col lg={7}>
             <GuestBookingForm
@@ -182,6 +203,7 @@ export default function GuestBookingPage() {
               selectedRate={selectedRate != null ? String(selectedRate) : null}
               initialTotal={initialTotal}
               isSubmitting={mutation.isPending}
+              petDepositRupiah={petDepositRupiah}
               onChange={update}
               onSubmit={handleSubmit}
             />

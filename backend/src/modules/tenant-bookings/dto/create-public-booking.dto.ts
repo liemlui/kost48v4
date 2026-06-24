@@ -1,4 +1,4 @@
-import { IsDateString, IsEmail, IsEnum, IsInt, IsOptional, IsString, MaxLength } from 'class-validator';
+import { IsBoolean, IsDateString, IsEmail, IsEnum, IsInt, IsOptional, IsString, Max, MaxLength, Min } from 'class-validator';
 import { PricingTerm, StayPurpose } from '../../../common/enums/app.enums';
 
 export class CreatePublicBookingDto {
@@ -63,4 +63,17 @@ export class CreatePublicBookingDto {
   @IsString()
   @MaxLength(40)
   referralCode?: string;
+
+  // Jumlah penghuni; melebihi batas gratis per roomSize → +20% sewa per orang.
+  // Hard cap divalidasi di service berdasarkan roomSize (maks 4 STANDARD / 6 LARGE).
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  @Max(6)
+  occupantCount?: number;
+
+  // Hewan peliharaan → petDepositRupiah dibebankan terpisah (refundable, dari OperationalSetting).
+  @IsOptional()
+  @IsBoolean()
+  hasPet?: boolean;
 }

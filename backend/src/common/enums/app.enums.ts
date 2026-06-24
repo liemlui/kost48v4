@@ -1,9 +1,10 @@
 export enum UserRole { OWNER = 'OWNER', ADMIN = 'ADMIN', STAFF = 'STAFF', TENANT = 'TENANT' }
 export enum Gender { MALE = 'MALE', FEMALE = 'FEMALE', OTHER = 'OTHER' }
 export enum RoomStatus { AVAILABLE = 'AVAILABLE', RESERVED = 'RESERVED', OCCUPIED = 'OCCUPIED', MAINTENANCE = 'MAINTENANCE', INACTIVE = 'INACTIVE' }
-// PUB-ROOM-CATEGORY (additive): kategori & tipe kamar untuk katalog publik.
+// PUB-ROOM-CATEGORY (additive): kategori, tipe, dan ukuran kamar untuk katalog publik.
 export enum RoomCategory { ECONOMY = 'ECONOMY', STANDARD = 'STANDARD', DELUXE = 'DELUXE' }
 export enum RoomType { REGULAR = 'REGULAR', MEZZANINE = 'MEZZANINE' }
+export enum RoomSize { STANDARD = 'STANDARD', LARGE = 'LARGE' }
 export enum PricingTerm { DAILY = 'DAILY', WEEKLY = 'WEEKLY', BIWEEKLY = 'BIWEEKLY', MONTHLY = 'MONTHLY', SMESTERLY = 'SMESTERLY', YEARLY = 'YEARLY' }
 export enum StayStatus { ACTIVE = 'ACTIVE', COMPLETED = 'COMPLETED', CANCELLED = 'CANCELLED' }
 export enum DepositStatus { HELD = 'HELD', PARTIALLY_REFUNDED = 'PARTIALLY_REFUNDED', REFUNDED = 'REFUNDED', FORFEITED = 'FORFEITED' }
@@ -29,6 +30,11 @@ export enum StayPurpose { WORK = 'WORK', STUDY = 'STUDY', TRANSIT = 'TRANSIT', F
 export enum ExpenseType { FIXED = 'FIXED', VARIABLE = 'VARIABLE' }
 export enum ExpenseStatus { DRAFT = 'DRAFT', CONFIRMED = 'CONFIRMED', CANCELLED = 'CANCELLED' }
 export enum ExpenseCategory { RENT_BUILDING = 'RENT_BUILDING', SALARY = 'SALARY', ELECTRICITY = 'ELECTRICITY', WATER = 'WATER', INTERNET = 'INTERNET', MAINTENANCE = 'MAINTENANCE', CLEANING = 'CLEANING', SUPPLIES = 'SUPPLIES', TAX = 'TAX', MARKETING = 'MARKETING', OTHER = 'OTHER' }
+
+// Marketing analytics — data profil tenant (opsional, untuk segmentasi pasar)
+export enum MaritalStatus { SINGLE = 'SINGLE', MARRIED = 'MARRIED', DIVORCED = 'DIVORCED', WIDOWED = 'WIDOWED' }
+export enum VehicleOwnership { NONE = 'NONE', MOTORCYCLE = 'MOTORCYCLE', CAR = 'CAR', BOTH = 'BOTH' }
+export enum SmokingHabit { NEVER = 'NEVER', OCCASIONAL = 'OCCASIONAL', REGULAR = 'REGULAR' }
 
 export enum PaymentSubmissionStatus { PENDING_REVIEW = 'PENDING_REVIEW', APPROVED = 'APPROVED', REJECTED = 'REJECTED', EXPIRED = 'EXPIRED' }
 
