@@ -3,78 +3,11 @@ import { Alert, Badge, Button, Card, Spinner, Table } from 'react-bootstrap';
 import AddMeterReadingModal from './AddMeterReadingModal';
 import MeterCycleModal from './MeterCycleModal';
 import { useAuth } from '../../context/AuthContext';
-import { MeterReading, MeterRow, Stay } from '../../types';
-
-function numeric(value: number | string | null | undefined) {
-  const parsed = Number(value ?? 0);
-  return Number.isNaN(parsed) ? 0 : parsed;
-}
+import { MeterReading, Stay } from '../../types';
+import { numeric, buildMeterRows, categorizeReadings } from '../../utils/meterUsage';
 
 function rupiah(value: number) {
   return `Rp ${Math.round(value).toLocaleString('id-ID')}`;
-}
-
-function buildRows(readings: MeterReading[]): MeterRow[] {
-  const sorted = [...readings].sort((a, b) => new Date(a.readingAt).getTime() - new Date(b.readingAt).getTime());
-  const grouped = new Map<string, MeterRow>();
-
-  sorted.forEach((reading) => {
-    const dateKey = String(reading.readingAt).slice(0, 10);
-    const row = grouped.get(dateKey) ?? { dateKey, readingAt: reading.readingAt };
-    if (reading.utilityType === 'ELECTRICITY') row.electricityKwh = numeric(reading.readingValue);
-    if (reading.utilityType === 'WATER') row.waterM3 = numeric(reading.readingValue);
-    grouped.set(dateKey, row);
-  });
-
-  const rows = Array.from(grouped.values()).sort((a, b) => new Date(a.readingAt).getTime() - new Date(b.readingAt).getTime());
-  let prevElectricity: number | null = null;
-  let prevWater: number | null = null;
-
-  return rows.map((row, index) => {
-    const next = { ...row };
-    if (typeof next.electricityKwh === 'number') {
-      next.usageElectricityKwh = index === 0 || prevElectricity === null ? 0 : next.electricityKwh - prevElectricity;
-      prevElectricity = next.electricityKwh;
-    }
-    if (typeof next.waterM3 === 'number') {
-      next.usageWaterM3 = index === 0 || prevWater === null ? 0 : next.waterM3 - prevWater;
-      prevWater = next.waterM3;
-    }
-    return next;
-  });
-}
-
-/**
- * Memisahkan meter readings menjadi dua kategori:
- * 1. Sejak penghuni masuk (readingAt >= checkInDate)
- * 2. Catatan kamar sebelumnya (readingAt < checkInDate)
- */
-function categorizeReadings(readings: MeterReading[], checkInDate?: string) {
-  if (!checkInDate) {
-    return { sinceCheckIn: readings, beforeCheckIn: [] as MeterReading[] };
-  }
-
-  const checkIn = new Date(checkInDate);
-  if (Number.isNaN(checkIn.getTime())) {
-    return { sinceCheckIn: readings, beforeCheckIn: [] as MeterReading[] };
-  }
-  checkIn.setHours(0, 0, 0, 0);
-
-  const sinceCheckIn: MeterReading[] = [];
-  const beforeCheckIn: MeterReading[] = [];
-
-  readings.forEach((reading) => {
-    const readingDate = new Date(reading.readingAt);
-    readingDate.setHours(0, 0, 0, 0);
-
-    if (readingDate >= checkIn) {
-      sinceCheckIn.push(reading);
-    } else {
-      beforeCheckIn.push(reading);
-    }
-  });
-
-  return { sinceCheckIn, beforeCheckIn };
 }
 
 export default function MeterTab({
@@ -102,8 +35,8 @@ export default function MeterTab({
   );
   
   // Buat rows untuk masing-masing kategori
-  const sinceCheckInRows = useMemo(() => buildRows(sinceCheckIn), [sinceCheckIn]);
-  const beforeCheckInRows = useMemo(() => buildRows(beforeCheckIn), [beforeCheckIn]);
+  const sinceCheckInRows = useMemo(() => buildMeterRows(sinceCheckIn), [sinceCheckIn]);
+  const beforeCheckInRows = useMemo(() => buildMeterRows(beforeCheckIn), [beforeCheckIn]);
 
   const initialMeter = useMemo(() => {
     if (!sinceCheckInRows.length) return { electricity: 0, water: 0, date: '-' };

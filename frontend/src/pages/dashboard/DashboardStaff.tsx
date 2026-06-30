@@ -6,8 +6,21 @@ import { listResource } from '../../api/resources';
 import { fetchStaffRoutineToday, fetchMyStaffRoutineKpi } from '../../api/staffRoutines';
 import { useOperationalStressIndex } from '../../hooks/useOperationalStressIndex';
 import { dedupeCommandItems } from '../../utils/commandCenterDedup';
+import { HeroSkeleton, StatCardSkeleton, TableSkeleton } from '../../components/common/SkeletonLoader';
 import type { InventoryItem, Room, Ticket } from '../../types';
-import { ACTION_QUERY_OPTIONS, MEDIUM_FRESH_QUERY_OPTIONS, LoadingDashboard } from './dashboardShared';
+import { ACTION_QUERY_OPTIONS, MEDIUM_FRESH_QUERY_OPTIONS } from './dashboardShared';
+
+function StaffDashboardSkeleton() {
+  return (
+    <div className="staff-simple-mode" role="status" aria-label="Memuat beranda kerja" aria-busy="true">
+      <HeroSkeleton />
+      <div className="staff-kpi-strip mb-3">
+        {Array.from({ length: 5 }).map((_, i) => <StatCardSkeleton key={i} />)}
+      </div>
+      <TableSkeleton rows={5} cols={3} />
+    </div>
+  );
+}
 
 export default function StaffDashboard() {
   const { user } = useAuth();
@@ -27,7 +40,7 @@ export default function StaffDashboard() {
     void Promise.all([ticketsQuery.refetch(), roomsQuery.refetch(), inventoryItemsQuery.refetch(), routineTodayQuery.refetch(), routineKpiQuery.refetch()]);
   };
 
-  if (ticketsQuery.isLoading || roomsQuery.isLoading) return <LoadingDashboard />;
+  if (ticketsQuery.isLoading || roomsQuery.isLoading) return <StaffDashboardSkeleton />;
   if (ticketsQuery.isError || roomsQuery.isError) return <Alert variant="danger">Gagal memuat beranda kerja. Muat ulang halaman.</Alert>;
 
   return (

@@ -24,6 +24,27 @@ AI/DeepSeek tidak menambah state machine baru untuk booking, invoice, stay, rene
 - **Audit flow:** jika manusia memakai rekomendasi AI, audit domain tetap dibuat dan `AuditLog.meta.ai` mencatat feature/model/hash/confidence/humanDecision.
 - **Fallback:** jika AI mati/limit/error, seluruh flow kontrak tetap berjalan manual seperti sebelum Fase G.
 
+## Update 2026-06-30 - Override Booking Flow Fase V
+
+**Kontrak terbaru mengalahkan narasi historis di bagian lama dokumen ini.** Bagian `0.2 Representasi "Booking"` di bawah masih menyimpan model lama untuk konteks arsip, tetapi eksekusi baru wajib mengikuti Fase V di `docs/M10_CHECKLIST_CHANGELOG.md`.
+
+State final status kamar:
+
+```txt
+Booking dibuat, belum bayar        -> Room AVAILABLE
+DP 30% approved                    -> Room RESERVED
+Full payment approved              -> Room RESERVED
+Check-in/serah kunci setelah lunas  -> Room OCCUPIED
+```
+
+Aturan baru:
+
+- `RoomStatus.BOOKING` tidak boleh ditulis lagi oleh runtime; jika masih ada di DB, perlakukan sebagai legacy-only.
+- `RESERVED` berarti kamar terkunci oleh pembayaran approved, tetapi belum tentu lunas.
+- Lunas dibaca dari invoice/payment asli, bukan dari status kamar dan bukan dari `downPaymentPaidRupiah`.
+- Payment approval tidak boleh set `OCCUPIED` dan tidak boleh promote meter.
+- Check-in/serah kunci wajib invoice sewa awal lunas; saat itulah `initialMetersPromotedAt` dan meter awal dipromosikan.
+
 ## Catatan Pemakaian
 
 - Jadikan file ini pintu masuk tematik; bila butuh detail mentah, cek file sumber di arsip yang disebut di atas.
@@ -35,9 +56,9 @@ AI/DeepSeek tidak menambah state machine baru untuk booking, invoice, stay, rene
 ### KOST48 V5 — Flow Map (Peta Alur Kode Krusial)
 **Versi:** 2026-06-13 — sinkronisasi keputusan owner, status kode, dossier `10`-`19`, dan urutan Auto-Ops aktual.
 **Tujuan:** Peta NARASI alur lintas-domain (apa memanggil apa, transisi status, side-effect, invarian).
-> ⚠️ **ANCHOR BARIS:** angka `file:baris` di dokumen ini = posisi METODE (anchor utama disinkronkan ke kode `3c7ffe2`) + sebagian sub-baris langkah yang **INDIKATIF** (bisa bergeser saat file disunting). **Sumber baris terverifikasi:** `_PETA_AI.md §2` + dossier `10`-`19`. Bila ragu, **grep nama metode**, jangan andalkan sub-baris.
+> ⚠️ **ANCHOR BARIS:** angka `file:baris` di dokumen ini = posisi METODE pada snapshot audit **2026-06-13** — **INDIKATIF** (pasti bergeser sejak commit tersebut). **Sumber historis:** `docs/archieve/2026-06-16_root_docs_pre_M/_PETA_AI.md §2` + dossier `10`-`19`. Bila ragu, **grep nama metode di `backend/src/`**, jangan andalkan baris; pakai `docs/CODEMAP.md` untuk navigasi modul terkini.
 
-<!-- KOST48_DOCS_SYNC_20260613_FLOW_MAP_V3 -->
+<!-- KOST48_DOCS_SYNC_20260630_FLOW_MAP_REVIEWED -->
 
 #### Cara pakai saat audit
 - Kolom **Rantai kode** = urutan eksekusi nyata, klik/lompat per `file:baris`.

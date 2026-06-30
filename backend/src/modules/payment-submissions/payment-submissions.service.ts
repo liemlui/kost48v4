@@ -76,7 +76,7 @@ export class PaymentSubmissionsService {
         throw new ConflictException('Booking tidak lagi aktif');
       }
 
-      const isBookingPath = eligibility.roomStatus === RoomStatus.RESERVED;
+      const isBookingPath = [RoomStatus.BOOKING, RoomStatus.RESERVED].includes(eligibility.roomStatus as RoomStatus);
 
       if (isBookingPath) {
         // ── Booking combined payment (RESERVED) ──────────────────────────
@@ -527,7 +527,7 @@ export class PaymentSubmissionsService {
           throw new ConflictException('Hunian tidak lagi aktif');
         }
 
-        const isBookingPath = submission.roomStatus === RoomStatus.RESERVED;
+        const isBookingPath = [RoomStatus.BOOKING, RoomStatus.RESERVED].includes(submission.roomStatus as RoomStatus);
 
         if (isBookingPath) {
           if (!submission.roomIsActive) {
@@ -785,9 +785,13 @@ export class PaymentSubmissionsService {
               );
             }
 
+            // V-02: Payment approved (DP atau Lunas) selalu set room RESERVED.
+            // Tidak ada lagi room status BOOKING — unpaid booking = AVAILABLE.
+            // Check-in akan mengubah ke OCCUPIED.
+
             await tx.room.update({
               where: { id: submission.roomId },
-              data: { status: RoomStatus.OCCUPIED, allowBookingWhileCleaning: false },
+              data: { status: RoomStatus.RESERVED, allowBookingWhileCleaning: false },
             });
 
             const activationStay = await tx.stay.findUnique({
@@ -1244,7 +1248,11 @@ if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P20
         throw new ConflictException('Booking tidak aktif atau sudah diproses.');
       }
 
-      if (booking.room.status !== RoomStatus.RESERVED) {
+      if (
+        ![RoomStatus.AVAILABLE, RoomStatus.BOOKING, RoomStatus.RESERVED, RoomStatus.MAINTENANCE].includes(
+          booking.room.status as RoomStatus,
+        )
+      ) {
         throw new ConflictException(
           'Booking sudah menjadi hunian aktif. Gunakan checkout untuk mengakhiri stay.',
         );
@@ -1268,7 +1276,7 @@ if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P20
         if (
           !current ||
           current.status !== StayStatus.ACTIVE ||
-          current.roomStatus !== RoomStatus.RESERVED ||
+          ![RoomStatus.AVAILABLE, RoomStatus.BOOKING, RoomStatus.RESERVED, RoomStatus.MAINTENANCE].includes(current.roomStatus as RoomStatus) ||
           current.promotedAt
         ) {
           throw new ConflictException(
@@ -1365,7 +1373,7 @@ if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P20
       const heldForPaymentReview = await this.prisma.stay.count({
         where: {
           status: StayStatus.ACTIVE,
-          room: { status: RoomStatus.RESERVED },
+          room: { status: { notIn: [RoomStatus.OCCUPIED, RoomStatus.INACTIVE] } },
           initialMetersPromotedAt: null,
           expiresAt: { not: null, lt: new Date() },
           paymentSubmissions: { some: { status: PaymentSubmissionStatus.PENDING_REVIEW } },
@@ -1375,7 +1383,7 @@ if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P20
       const expiredBookings = await this.prisma.stay.findMany({
         where: {
           status: StayStatus.ACTIVE,
-          room: { status: RoomStatus.RESERVED },
+          room: { status: { notIn: [RoomStatus.OCCUPIED, RoomStatus.INACTIVE] } },
           initialMetersPromotedAt: null,
           expiresAt: { not: null, lt: new Date() },
           paymentSubmissions: {
@@ -1402,7 +1410,7 @@ if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P20
           if (
             !current ||
             current.status !== StayStatus.ACTIVE ||
-            current.roomStatus !== RoomStatus.RESERVED ||
+            current.roomStatus === RoomStatus.OCCUPIED ||
             current.promotedAt
           ) {
             return false;
@@ -1508,7 +1516,7 @@ if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P20
       where: {
         id: stayId,
         status: StayStatus.ACTIVE as any,
-        room: { status: RoomStatus.RESERVED as any },
+        room: { status: { notIn: [RoomStatus.OCCUPIED, RoomStatus.INACTIVE] } },
         initialMetersPromotedAt: null,
         expiresAt: { not: null, lt: new Date() },
         paymentSubmissions: {

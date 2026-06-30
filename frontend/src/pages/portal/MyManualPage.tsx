@@ -43,7 +43,7 @@ function DefaultRulesCard() {
           <Accordion.Header>Pembayaran Sewa</Accordion.Header>
           <Accordion.Body>
             Tagihan sewa diterbitkan oleh admin sesuai jadwal. Bayar tunai atau transfer ke
-            rekening pengelola, lalu unggah bukti transfer di menu <strong>Tagihan Saya</strong>.
+            rekening pengelola, lalu unggah bukti transfer di menu <strong>Bayar Tagihan</strong>.
             Konfirmasi pembayaran oleh admin dilakukan maks. 1×24 jam kerja.
           </Accordion.Body>
         </Accordion.Item>

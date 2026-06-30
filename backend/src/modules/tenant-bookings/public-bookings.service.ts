@@ -207,7 +207,7 @@ export class PublicBookingsService {
         const bookableWhileCleaning =
           room.status === RoomStatus.MAINTENANCE && Boolean(room.allowBookingWhileCleaning);
         if (
-          ![RoomStatus.AVAILABLE, RoomStatus.RESERVED].includes(room.status as RoomStatus) &&
+          ![RoomStatus.AVAILABLE, RoomStatus.BOOKING, RoomStatus.RESERVED].includes(room.status as RoomStatus) &&
           !bookableWhileCleaning
         ) {
           throw new ConflictException('Kamar belum bisa dipesan karena sudah aktif ditempati atau sedang tidak tersedia.');
@@ -238,7 +238,7 @@ export class PublicBookingsService {
               some: {
                 status: StayStatus.ACTIVE as any,
                 room: {
-                  status: { in: [RoomStatus.RESERVED as any, RoomStatus.OCCUPIED as any] },
+                  status: { in: [RoomStatus.BOOKING as any, RoomStatus.RESERVED as any, RoomStatus.OCCUPIED as any] },
                 },
               },
             },
@@ -317,17 +317,25 @@ export class PublicBookingsService {
         const occupantSurcharge = calculateOccupantSurcharge(baseRent, room.roomSize, occupantCount);
         const agreedRentAmountRupiah = baseRent + occupantSurcharge;
 
+        // Deposit jaminan dasar dari kamar + tambahan hewan bila ada.
+        const hasPet = Boolean(dto.hasPet);
+        const opSetting = await tx.operationalSetting.findUnique({ where: { id: 1 } });
+        const petDepositRupiah = hasPet ? (opSetting?.petDepositRupiah ?? 100000) : 0;
+        const depositAmountRupiah = (room.defaultDepositRupiah ?? 0) + petDepositRupiah;
+
+        // DP = 30% sewa (default), atau 100% bila tenant pilih LUNAS.
+        const isFullPayment = dto.paymentChoice === 'FULL';
+        const downPaymentAmountRupiah = isFullPayment
+          ? agreedRentAmountRupiah
+          : roundRupiah((agreedRentAmountRupiah * 30) / 100);
+
         const expiresAt = hoursFromNow(AUTO_OPS_DEADLINES.BOOKING_REVIEW_DEADLINE_HOURS, now);
         const stayPurposeSql = dto.stayPurpose
           ? Prisma.sql`CAST(${dto.stayPurpose} AS "StayPurpose")`
           : Prisma.sql`NULL`;
 
-        await tx.$executeRaw(Prisma.sql`
-          UPDATE "Room"
-          SET "status" = CAST(${RoomStatus.RESERVED} AS "RoomStatus"),
-              "updatedAt" = NOW()
-          WHERE id = ${dto.roomId}
-        `);
+        // Room status left as-is — baru berubah saat DP/LUNAS dibayar (BOOKING/RESERVED).
+        // Tidak ada UPDATE Room di sini.
 
         const insertedRows = await tx.$queryRaw<Array<{ id: number }>>(Prisma.sql`
           INSERT INTO "Stay" (
@@ -358,12 +366,12 @@ export class PublicBookingsService {
             CAST(${dto.pricingTerm} AS "PricingTerm"),
             ${agreedRentAmountRupiah},
             ${occupantCount},
-            ${Boolean(dto.hasPet)},
+            ${hasPet},
             ${checkInDate},
             ${plannedCheckOutDate},
             ${expiresAt},
-            ${room.defaultDepositRupiah ?? 0},
-            ${roundRupiah((agreedRentAmountRupiah * 30) / 100)},
+            ${depositAmountRupiah},
+            ${downPaymentAmountRupiah},
             ${room.electricityTariffPerKwhRupiah ?? 0},
             ${room.waterTariffPerM3Rupiah ?? 0},
             CAST(${LeadSource.WEBSITE} AS "LeadSource"),
@@ -397,6 +405,7 @@ export class PublicBookingsService {
               source: 'PUBLIC_BOOKING',
               roomId: dto.roomId,
               pricingTerm: dto.pricingTerm,
+              paymentChoice: dto.paymentChoice ?? 'DP',
               expiresAt,
               isNewTenant,
               isNewUser,
@@ -413,6 +422,17 @@ export class PublicBookingsService {
             expiresAt: booking.expiresAt,
             checkInDate: booking.checkInDate,
             pricingTerm: booking.pricingTerm,
+          },
+          payment: {
+            paymentChoice: dto.paymentChoice ?? 'DP',
+            agreedRentAmountRupiah,
+            downPaymentAmountRupiah,
+            depositAmountRupiah,
+            depositBreakdown: {
+              roomDepositRupiah: room.defaultDepositRupiah ?? 0,
+              petDepositRupiah,
+            },
+            hasPet,
           },
           portalAccess: {
             email: normalizedEmail,

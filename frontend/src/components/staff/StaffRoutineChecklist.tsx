@@ -1,32 +1,17 @@
-import { ChangeEvent, type CSSProperties, useMemo, useState } from 'react';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { Alert, Button, Form, Modal, Spinner } from 'react-bootstrap';
+import { type CSSProperties, useMemo, useState } from 'react';
 import {
-  completeStaffRoutine,
-  sendStaffRoutineNeedHelp,
-  startStaffRoutine,
   type StaffRoutineFrequency,
   type StaffRoutineItem,
   type StaffRoutineStatus,
   type StaffRoutineTodayResponse,
 } from '../../api/staffRoutines';
-import { uploadTicketImage, type UploadedImageMeta } from '../../api/mediaUploads';
-import CameraOrGalleryInput from '../common/CameraOrGalleryInput';
-import SafeImage from '../common/SafeImage';
-import { compressImageFile as compressBrowserImage } from '../../utils/compressImageFile';
 
 type Props = {
   today?: StaffRoutineTodayResponse | null;
   isLoading?: boolean;
-  onUpdated?: () => void | Promise<void>;
+  /** Callback saat user klik "Buka di daftar kerja" — scroll ke WorkQueue. */
+  onJumpToWorkQueue?: () => void;
 };
-
-type RoutineAction = 'START' | 'DONE' | 'NEED_HELP';
-
-type ModalState = {
-  item: StaffRoutineItem;
-  action: RoutineAction;
-} | null;
 
 type FrequencySummary = {
   frequency: StaffRoutineFrequency;
@@ -107,7 +92,7 @@ function pickAssistantMessage(summaries: FrequencySummary[]) {
 
   if (active) return { tone: 'blue', title: 'Selesaikan pekerjaan aktif dulu', body: `${active.title} sedang berjalan. Setelah selesai, baru mulai checklist berikutnya.` };
   if (needHelp.length) return { tone: 'red', title: 'Ada checklist yang butuh bantuan', body: `${needHelp.length} kendala sudah tercatat. Lanjutkan pekerjaan lain yang aman sambil menunggu arahan admin.` };
-  if (todo.length) return { tone: 'amber', title: 'Checklist belum selesai', body: `Masih ada ${todo.length} tugas rutin. Mulai dari pekerjaan yang paling cepat diselesaikan.` };
+  if (todo.length) return { tone: 'amber', title: 'Checklist belum selesai', body: `Masih ada ${todo.length} tugas rutin. Buka daftar kerja untuk memulai.` };
   if (monthly?.total && monthly.percent < 100) return { tone: 'blue', title: 'Audit bulanan masih berjalan', body: 'Selesaikan bertahap setelah rutinitas harian aman.' };
   if (weekly?.total && weekly.percent < 100) return { tone: 'blue', title: 'Checklist mingguan belum penuh', body: 'Gunakan waktu kosong untuk menyelesaikan pengecekan mingguan.' };
   return { tone: 'green', title: 'Checklist aman', body: 'Checklist yang tampil sudah selesai. Pertahankan ritme kerja rapi hari ini.' };
@@ -123,18 +108,6 @@ function evidenceLabel(item: StaffRoutineItem) {
   if (item.requiresPhoto) required.push('foto');
   if (item.requiresNote) required.push('catatan');
   return required.length ? `Wajib ${required.join(' + ')}` : 'Bukti opsional';
-}
-
-function nextActionLabel(item: StaffRoutineItem) {
-  if (item.status === 'DONE') return 'Lihat hasil';
-  if (item.status === 'IN_PROGRESS') return 'Tandai selesai';
-  if (item.status === 'NEED_HELP') return 'Kendala terkirim';
-  if (item.status === 'MISSED') return 'Kerjakan susulan';
-  return 'Mulai pekerjaan';
-}
-
-async function compressImageFile(file: File): Promise<File> {
-  return compressBrowserImage(file, { maxSide: 1400, quality: 0.78 });
 }
 
 function FrequencyCard({ summary, active, onClick }: { summary: FrequencySummary; active: boolean; onClick: () => void }) {
@@ -155,13 +128,7 @@ function FrequencyCard({ summary, active, onClick }: { summary: FrequencySummary
   );
 }
 
-export default function StaffRoutineChecklist({ today, isLoading, onUpdated }: Props) {
-  const queryClient = useQueryClient();
-  const [modalState, setModalState] = useState<ModalState>(null);
-  const [note, setNote] = useState('');
-  const [photo, setPhoto] = useState<UploadedImageMeta | null>(null);
-  const [photoPreview, setPhotoPreview] = useState('');
-  const [error, setError] = useState('');
+export default function StaffRoutineChecklist({ today, isLoading, onJumpToWorkQueue }: Props) {
   const [activeFrequency, setActiveFrequency] = useState<StaffRoutineFrequency>('DAILY');
 
   const items = today?.items ?? [];
@@ -179,75 +146,13 @@ export default function StaffRoutineChecklist({ today, isLoading, onUpdated }: P
   const activeItem = items.find((item) => item.status === 'IN_PROGRESS');
   const needHelpCount = today?.summary.needHelp ?? items.filter((item) => item.status === 'NEED_HELP').length;
 
-  const resetModal = () => {
-    setModalState(null);
-    setNote('');
-    setPhoto(null);
-    setPhotoPreview('');
-    setError('');
-  };
-
-  const openModal = (item: StaffRoutineItem, action: RoutineAction) => {
-    setModalState({ item, action });
-    setNote(action === 'DONE' ? 'Sudah dikerjakan' : '');
-    setPhoto(null);
-    setPhotoPreview('');
-    setError('');
-  };
-
-  const saveMutation = useMutation({
-    mutationFn: async () => {
-      if (!modalState) return null;
-      const item = modalState.item;
-      if (modalState.action === 'DONE' && item.requiresPhoto && !photo?.fileUrl) throw new Error('Foto bukti wajib diisi.');
-      if (modalState.action === 'DONE' && item.requiresNote && !note.trim()) throw new Error('Catatan singkat wajib diisi.');
-      const payload = {
-        assignmentId: item.assignmentId ?? undefined,
-        roomId: item.roomId ?? undefined,
-        dueDate: item.dueDate,
-        note: note.trim() || undefined,
-        photoUrl: photo?.fileUrl,
-      };
-      if (modalState.action === 'START') return startStaffRoutine(item.templateId, payload);
-      if (modalState.action === 'DONE') return completeStaffRoutine(item.templateId, payload);
-      return sendStaffRoutineNeedHelp(item.templateId, payload);
-    },
-    onSuccess: async () => {
-      await onUpdated?.();
-      await Promise.all([
-        queryClient.invalidateQueries({ queryKey: ['dashboard-staff', 'routines-today'] }),
-        queryClient.invalidateQueries({ queryKey: ['staff-workspace-nav', 'routines'] }),
-        queryClient.invalidateQueries({ queryKey: ['staff-performance-me-dashboard'] }),
-        queryClient.invalidateQueries({ queryKey: ['staff-performance-me-evidence'] }),
-      ]);
-      resetModal();
-    },
-    onError: (err: any) => setError(err?.response?.data?.message || err?.message || 'Checklist belum tersimpan. Coba lagi.'),
-  });
-
-  const handlePhoto = async (event: ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-    setError('');
-    try {
-      const compressed = await compressImageFile(file);
-      const uploaded = await uploadTicketImage(compressed);
-      setPhoto(uploaded);
-      setPhotoPreview(uploaded.fileUrl);
-    } catch (err: any) {
-      setError(err?.response?.data?.message || 'Foto belum berhasil diunggah. Coba foto lain.');
-    } finally {
-      event.target.value = '';
-    }
-  };
-
   return (
     <section className="routine-board-card">
       <div className="routine-board-header">
         <div>
           <span className="routine-board-eyebrow">Checklist Operasional</span>
           <h2>Harian, mingguan, dan bulanan</h2>
-          <p>{isLoading ? 'Memuat checklist...' : `${completed} dari ${total} tugas selesai. Checklist ini adalah work board utama staff.`}</p>
+          <p>{isLoading ? 'Memuat checklist...' : `${completed} dari ${total} tugas selesai. Pantau progres di sini, kerjakan lewat Daftar Kerja di atas.`}</p>
         </div>
         <div className="routine-board-total">
           <strong>{totalPercent}%</strong>
@@ -288,9 +193,7 @@ export default function StaffRoutineChecklist({ today, isLoading, onUpdated }: P
           <div className="routine-board-list">
             {activeSummary.items.map((item) => {
               const done = item.status === 'DONE';
-              const active = item.status === 'IN_PROGRESS';
               const needHelp = item.status === 'NEED_HELP';
-              const canStart = item.status === 'TODO' || item.status === 'MISSED' || item.status === 'SKIPPED';
               return (
                 <article key={item.occurrenceKey} className={`routine-task-card tone-${statusTone(item.status)}`}>
                   <div className="routine-task-status-line">
@@ -308,12 +211,11 @@ export default function StaffRoutineChecklist({ today, isLoading, onUpdated }: P
                     </div>
                   </div>
                   <div className="routine-task-footer">
-                    <span>{done && item.completedAt ? `Selesai ${new Date(item.completedAt).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}` : nextActionLabel(item)}</span>
-                    <div>
-                      {canStart ? <Button size="sm" className="staff-action-button" onClick={() => openModal(item, 'START')} disabled={saveMutation.isPending}>Mulai</Button> : null}
-                      {active ? <Button size="sm" variant="success" onClick={() => openModal(item, 'DONE')} disabled={saveMutation.isPending}>Tandai selesai</Button> : null}
-                      {active && !needHelp ? <Button size="sm" variant="outline-danger" className="routine-help-button" onClick={() => openModal(item, 'NEED_HELP')} disabled={saveMutation.isPending}>Butuh bantuan</Button> : null}
-                    </div>
+                    <span>
+                      {done && item.completedAt
+                        ? `Selesai ${new Date(item.completedAt).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}`
+                        : `Status: ${statusLabel(item.status)} — kerjakan lewat Daftar Kerja`}
+                    </span>
                   </div>
                   {needHelp ? <div className="routine-task-note">Kendala sudah dikirim. Lanjutkan pekerjaan lain yang aman sambil menunggu arahan.</div> : null}
                   {done && item.note ? <div className="routine-task-note success">Catatan: {item.note}</div> : null}
@@ -324,40 +226,13 @@ export default function StaffRoutineChecklist({ today, isLoading, onUpdated }: P
         </div>
       ) : null}
 
-      <Modal show={Boolean(modalState)} onHide={resetModal} centered className="routine-action-modal">
-        <Modal.Header closeButton>
-          <Modal.Title>{modalState?.action === 'START' ? 'Mulai checklist' : modalState?.action === 'DONE' ? 'Tandai checklist selesai' : 'Kirim kendala'}</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          {error ? <Alert variant="danger" className="py-2">{error}</Alert> : null}
-          {modalState?.item ? (
-            <div className="routine-modal-target">
-              <strong>{modalState.item.title}</strong>
-              <span>{locationLabel(modalState.item)} · {evidenceLabel(modalState.item)}</span>
-            </div>
-          ) : null}
-          {modalState?.action === 'START' ? <p className="routine-modal-guidance">Mulai satu pekerjaan dulu. Setelah aktif, selesaikan sebelum mengambil pekerjaan berikutnya.</p> : null}
-          {modalState?.action !== 'START' ? (
-            <>
-              <Form.Group className="mb-3">
-                <Form.Label>{modalState?.action === 'NEED_HELP' ? 'Apa kendalanya?' : `Catatan hasil kerja${modalState?.item.requiresNote ? ' wajib' : ''}`}</Form.Label>
-                <Form.Control as="textarea" rows={3} value={note} onChange={(event) => setNote(event.currentTarget.value)} placeholder={modalState?.action === 'NEED_HELP' ? 'Contoh: butuh alat, tidak bisa masuk kamar, atau perlu arahan admin' : 'Contoh: sudah dibersihkan / sudah dicek / sudah diganti'} />
-              </Form.Group>
-              <Form.Group>
-                <Form.Label>Foto bukti{modalState?.item.requiresPhoto && modalState.action === 'DONE' ? ' wajib' : ''}</Form.Label>
-                <CameraOrGalleryInput onChange={handlePhoto} />
-                {photoPreview ? <SafeImage className="staff-proof-preview" src={photoPreview} alt="Foto bukti" /> : null}
-              </Form.Group>
-            </>
-          ) : null}
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant="light" onClick={resetModal}>Batal</Button>
-          <Button onClick={() => saveMutation.mutate()} disabled={saveMutation.isPending} variant={modalState?.action === 'NEED_HELP' ? 'danger' : modalState?.action === 'DONE' ? 'success' : 'primary'}>
-            {saveMutation.isPending ? <><Spinner size="sm" className="me-2" />Menyimpan...</> : modalState?.action === 'START' ? 'Mulai sekarang' : modalState?.action === 'DONE' ? 'Simpan selesai' : 'Kirim kendala'}
-          </Button>
-        </Modal.Footer>
-      </Modal>
+      {onJumpToWorkQueue ? (
+        <div className="routine-board-cta">
+          <button type="button" className="btn btn-outline-primary btn-sm" onClick={onJumpToWorkQueue}>
+            Buka Daftar Kerja untuk memulai
+          </button>
+        </div>
+      ) : null}
     </section>
   );
 }

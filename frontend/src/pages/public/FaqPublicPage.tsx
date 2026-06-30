@@ -76,7 +76,7 @@ export default function FaqPublicPage() {
       <FaqTopbar />
       <div className="container py-4 py-lg-5" style={{ maxWidth: 820 }}>
         <div className="mb-4">
-          <div className="page-eyebrow">✦ Panduan & Aturan</div>
+          <div className="page-eyebrow">✦ Panduan</div>
           <h1 className="mb-2" style={{ color: '#0f172a' }}>Panduan & FAQ KOST48</h1>
           <p style={{ color: '#475569', maxWidth: 600 }}>
             Semua aturan, tata cara, dan informasi penting tentang KOST48 dalam satu halaman — mulai dari tarif,

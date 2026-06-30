@@ -1,4 +1,4 @@
-import { IsBoolean, IsDateString, IsEmail, IsEnum, IsInt, IsOptional, IsString, Max, MaxLength, Min } from 'class-validator';
+import { IsBoolean, IsDateString, IsEmail, IsEnum, IsIn, IsInt, IsOptional, IsString, Max, MaxLength, Min } from 'class-validator';
 import { PricingTerm, StayPurpose } from '../../../common/enums/app.enums';
 
 export class CreatePublicBookingDto {
@@ -76,4 +76,10 @@ export class CreatePublicBookingDto {
   @IsOptional()
   @IsBoolean()
   hasPet?: boolean;
+
+  // Pilihan pembayaran awal: DP 30% atau LUNAS 100% sewa + semua deposit.
+  // Default backend = DP bila tidak diisi.
+  @IsOptional()
+  @IsIn(['DP', 'FULL'])
+  paymentChoice?: 'DP' | 'FULL';
 }

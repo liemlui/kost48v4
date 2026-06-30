@@ -42,8 +42,10 @@
 | **Fase P — Pola UI Modern** | ✅ selesai | P-01..P-06: 3-tampilan toggle, FullCalendar, @dnd-kit kanban, TanStack Table, bottom tab bar Tenant, cmdk palette |
 | **Fase Q — Performa & Stabilitas** | ✅ selesai | Q-01..Q-07: fix endpoint 404 backend, anti-pattern fetch loop, heavy query, error boundary, lazy-load, empty state |
 | **Fase R — UI/UX Public + Admin/Owner + Tenant + Staff + Owner-Only** | ✅ selesai | R-01..R-30 selesai (R-12 deferred/investigasi backend); build lulus 2026-06-22. |
-| **Fase S — Multi-Portal Vercel + Mobile-First** | 🔴 antrian | S-01..S-06: env portal gate, CORS Vercel, 3 Vercel project, mobile tenant, mobile staff, PWA offline-aware |
 | **Fase T — Wizard + Animasi Marketing** | ✅ selesai | T-01: Redesign wizard result screen — RoomCard langsung, animasi, marketing copy, extract RoomCard |
+| **Fase U — Konsistensi Fasilitas↔Inventaris + Monitoring AC** | ✅ selesai | U-01..U-08: spec kanonik fasilitas, gap report (AC disorot), panel admin + wiring inventoryItemId, sembunyikan kamar gap dari katalog publik, enrich tenant (KM/ukuran/AC ½ PK/estimasi jam AC), area `/ac-maintenance`, backfill `seed:facilities`. Tanpa migrasi; build lulus 2026-06-24. |
+| **Fase V — Audit 2026-06-30 + Booking Flow Baru** | 🔴 aktif | V-00..V-16: room state `AVAILABLE -> RESERVED -> OCCUPIED`, booking/payment/check-in, public/marketing UI, role/API exposure, upload/proof, cron, meter, ticket image, dan sinkronisasi dokumen flow. |
+| **Fase W — Audit Maksimal Status Proyek** | 🔴 aktif | W-00..W-13: security baseline, role exposure matrix, lifecycle renew/checkout/deposit, AutoOps idempotency, media registry, finance guard, staff boundary, frontend state, observability, dan source-of-truth docs. |
 
 ---
 
@@ -72,7 +74,701 @@
 
 ## ANTRIAN EKSEKUSI AKTIF
 
-> Fase A blocked owner. Fase B–L selesai (lihat M11 untuk detail historis).
+> Fase A blocked owner. Fase B–U selesai (lihat M11 untuk detail historis). Fase V dan W adalah antrian audit/hardening aktif 2026-06-30.
+
+---
+
+### Fase V — Audit 2026-06-30 + Booking Flow Baru 🔴 AKTIF
+
+**Tujuan:** menutup temuan audit terbaru dan merapikan flow booking awal agar status kamar tidak ambigu antara booking unpaid, DP, lunas, dan check-in.
+
+**Keputusan domain final room status:**
+- `AVAILABLE`: kamar masih bisa dipasarkan/dibooking.
+- `RESERVED`: kamar sudah dikunci oleh pembayaran approved, baik DP maupun lunas.
+- `OCCUPIED`: tenant sudah check-in/serah kunci.
+- `MAINTENANCE`: kamar perlu inspeksi/perbaikan.
+- `INACTIVE`: kamar tidak dipasarkan.
+
+**Flow final:**
+```txt
+Booking dibuat, belum bayar        -> Room AVAILABLE
+DP 30% approved                    -> Room RESERVED
+Full payment approved              -> Room RESERVED
+Check-in/serah kunci setelah lunas  -> Room OCCUPIED
+```
+
+**Larangan penting untuk AI eksekutor:**
+- Jangan menulis `RoomStatus.BOOKING` lagi.
+- Jika enum DB `BOOKING` masih ada, perlakukan sebagai legacy-only sampai cleanup selesai.
+- Jangan pakai `downPaymentPaidRupiah >= agreedRentAmountRupiah` sebagai definisi lunas.
+- Full payment approved bukan check-in otomatis.
+- `initialMetersPromotedAt` dan promosi meter awal hanya boleh terjadi saat check-in/serah kunci.
+- Jangan percaya `fileKey`, `fileUrl`, MIME, status pembayaran, atau status kamar dari client.
+
+**Anchor temuan audit lanjutan 2026-06-30:**
+- `payment-submissions.service.ts` saat ini menebak booking path dari `room.status` (`BOOKING/RESERVED`). Dalam flow baru unpaid booking tetap `AVAILABLE`, jadi helper ini harus berbasis state stay/invoice (`initialMetersPromotedAt = null`, `expiresAt`, invoice awal, payment state), bukan status kamar.
+- `stays.service.ts` punya komentar awal yang mengizinkan check-in room `RESERVED`, tetapi re-check transaction masih hanya menerima `RoomStatus.AVAILABLE`. Ini harus diselesaikan dengan flow check-in booking pemenang yang lunas.
+- `marketing-public-rooms.service.ts` dan `frontend/src/utils/publicRoomDisplay.ts` masih menganggap `BOOKING`/`RESERVED` bookable. Dalam flow final, `RESERVED` terkunci dan booking baru harus ditolak/dibatalkan.
+- `statusLabels.ts` masih memberi label `RESERVED = Dipesan (Lunas)`. Dalam flow final `RESERVED` bisa DP atau lunas; label lunas harus dibaca dari invoice/payment.
+- Dokumen `M03`/`M05` masih menyimpan narasi lama "Booking = Room RESERVED"; lihat task V-08 untuk sinkronisasi agar AI eksekutor tidak mengikuti kontrak historis.
+
+#### V-00 — Preflight Enum/Data `BOOKING`
+
+**Target:** `backend/prisma/schema.prisma`, `backend/src/common/enums/app.enums.ts`, seluruh backend yang memakai `RoomStatus.BOOKING`.
+
+- [ ] Cari semua pemakaian `RoomStatus.BOOKING` dan raw string room status `'BOOKING'`.
+- [ ] Cek data room yang masih berstatus `BOOKING`.
+- [ ] Jika ada data `BOOKING`, mapping dulu:
+  - [ ] stay terkait punya payment approved -> room `RESERVED`;
+  - [ ] belum punya payment approved -> room `AVAILABLE` atau `MAINTENANCE` sesuai kondisi kamar.
+- [ ] Jika DB target tidak punya enum `BOOKING`, hapus dari Prisma schema dan app enum.
+- [ ] Jika DB target masih punya enum `BOOKING`, boleh biarkan sementara sebagai legacy DB value, tapi runtime tidak boleh menulisnya.
+- [ ] Update helper readiness agar `hasBookingRoomStatus` tidak lagi menjadi syarat schema siap.
+
+**Gate:** ada keputusan eksplisit "hapus enum sekarang" vs "legacy-only dulu"; tidak ada data aktif yang butuh `BOOKING` sebagai ownership kamar.
+
+#### V-01 — Booking Created Tidak Mengunci Room
+
+**Target:** `tenant-bookings.service.ts`, `public-bookings.service.ts`, `tenant-bookings-query.service.ts`, `marketing-public-rooms.service.ts`, `payment-submissions.service.ts`.
+
+- [ ] Public booking create tidak mengubah room status.
+- [ ] Admin/portal booking create tidak mengubah room status.
+- [ ] Room `AVAILABLE` boleh punya lebih dari satu unpaid booking.
+- [ ] Definisi booking path jangan bergantung pada `Room.status`; gunakan data stay/invoice: `Stay.status=ACTIVE`, `initialMetersPromotedAt=null`, invoice awal, `expiresAt`, dan payment state.
+- [ ] Availability publik hanya bookable untuk `AVAILABLE` atau `MAINTENANCE` dengan `allowBookingWhileCleaning=true`.
+- [ ] Room `RESERVED` tidak boleh dianggap available untuk booking baru.
+- [ ] Hapus label/query yang menganggap `BOOKING` masih available.
+- [ ] `marketing-public-rooms.service.ts` bagian `isAvailable/canBook/statusLabel` tidak boleh memasukkan `RoomStatus.RESERVED`.
+- [ ] Calendar publik boleh menandai tanggal sudah ada booking unpaid, tetapi copy-nya harus jelas "belum terkunci sampai pembayaran approved"; jangan menyebut `BOOKING_DP` bila belum ada DP approved.
+
+**Gate:** unpaid booking tetap `AVAILABLE`; dua unpaid booking untuk kamar sama bisa dibuat; calon tenant tidak bisa booking kamar `RESERVED`; tenant booking masih bisa kirim DP walau room saat ini `AVAILABLE`.
+
+#### V-02 — Payment Approved Mengunci Room sebagai RESERVED
+
+**Target:** `backend/src/modules/payment-submissions/payment-submissions.service.ts`.
+
+- [ ] Di approval payment booking, lock row room dalam transaction.
+- [ ] Ganti `const isBookingPath = [RoomStatus.BOOKING, RoomStatus.RESERVED].includes(roomStatus)` menjadi helper domain, misalnya `isUnpromotedInitialStayPayment(submission/stay)`.
+- [ ] `createSubmission()` tenant harus menerima nominal DP atau pelunasan untuk stay booking meskipun room masih `AVAILABLE`.
+- [ ] `approveSubmission()` harus memakai helper domain yang sama; jangan salah masuk jalur invoice-only.
+- [ ] Sebelum approve, re-check room:
+  - [ ] `OCCUPIED` -> tolak;
+  - [ ] `RESERVED` oleh stay yang sama -> lanjut;
+  - [ ] `RESERVED` oleh stay lain -> tolak dan beri notes refund/kalah;
+  - [ ] `AVAILABLE` -> lanjut;
+  - [ ] `MAINTENANCE` -> lanjut hanya jika aturan booking while cleaning mengizinkan.
+- [ ] DP approved selalu set room `RESERVED`.
+- [ ] Full payment approved selalu set room `RESERVED`.
+- [ ] Hapus logika `isFullPayment ? RESERVED : BOOKING`.
+- [ ] Batalkan booking pesaing unpaid setelah room dikunci.
+- [ ] Payment submission pesaing `PENDING_REVIEW` untuk room yang sudah dimenangkan harus ditolak/ditandai kalah dengan alasan refund bila dana sudah masuk.
+- [ ] Jika pesaing sudah transfer tapi kalah, status/notes refund harus jelas.
+- [ ] Jangan set `initialMetersPromotedAt` di payment approval.
+- [ ] Jangan promote pending meter ke `MeterReading` di payment approval.
+
+**Gate:** DP dan lunas sama-sama `RESERVED`; payment approval tidak pernah langsung `OCCUPIED`; pesaing ditolak bila room sudah `RESERVED` oleh stay lain.
+
+#### V-03 — Check-in Wajib Lunas
+
+**Target:** `backend/src/modules/stays/stays.service.ts`, `frontend/src/pages/stays/CheckInWizard.tsx`, `frontend/src/pages/stays/check-in-wizard/StepRoomSelect.tsx`.
+
+- [ ] Pisahkan flow check-in manual walk-in dan flow aktivasi booking berbayar bila perlu endpoint/service berbeda.
+- [ ] Check-in dari booking hanya boleh untuk room `RESERVED` milik stay yang sama.
+- [ ] Pastikan stay yang check-in adalah stay pemenang untuk room tersebut.
+- [ ] Perbaiki kontradiksi: pre-check mengizinkan `RESERVED`, tetapi lock transaction saat ini menolak selain `AVAILABLE`.
+- [ ] Tambahkan helper, misalnya `assertInitialRentFullyPaid(stayId)`.
+- [ ] Helper cek invoice sewa awal:
+  - [ ] invoice tidak `CANCELLED`;
+  - [ ] total pembayaran >= total invoice, atau invoice status `PAID`.
+- [ ] Jangan gunakan `downPaymentPaidRupiah` sebagai bukti lunas.
+- [ ] Jika baru DP/partial, tolak check-in dengan pesan jelas.
+- [ ] UI `CheckInWizard`/`StepRoomSelect` jangan menampilkan room `RESERVED` sebagai pilihan bebas; tampilkan hanya booking pemenang yang siap check-in atau room `AVAILABLE` walk-in.
+- [ ] Saat check-in valid: set room `OCCUPIED`, set `initialMetersPromotedAt`, promote pending meter, clear pending fields.
+
+**Gate:** DP/partial tidak bisa check-in; invoice lunas bisa check-in; room menjadi `OCCUPIED` hanya lewat check-in/serah kunci.
+
+#### V-04 — AutoOps dan Dashboard Ikut Flow Baru
+
+**Target:** `auto-ops/sweeps/*`, `payment-submissions.service.ts`, `finance.service.ts`, public/tenant/admin UI terkait.
+
+- [ ] Expiry booking unpaid tidak perlu release room karena room masih `AVAILABLE`.
+- [ ] Reserved DP overdue harus bisa release room sesuai deadline bisnis.
+- [ ] Tentukan aturan reserved full payment tapi belum check-in lewat batas: tetap reserved, reminder, atau manual cancel/refund.
+- [ ] Hapus query AutoOps yang mencari room status `BOOKING`.
+- [ ] Update `runRoomHealer()` agar tidak bergantung `BOOKING`; orphan `RESERVED` hanya dilepas bila tidak ada stay aktif berbayar/pending yang sah.
+- [ ] `runExpiryCheck()`/booking sweep harus melihat stay unpaid, bukan status room.
+- [ ] Orphan reserved sweep hanya release room kalau tidak ada stay aktif berbayar valid.
+- [ ] Dashboard jangan tampilkan "Room BOOKING".
+- [ ] Dashboard label berbasis data pembayaran:
+  - [ ] `Reserved - DP`;
+  - [ ] `Reserved - Lunas`;
+  - [ ] `Occupied`.
+
+**Gate:** AutoOps tidak bergantung `RoomStatus.BOOKING`; owner/admin tetap bisa melihat reserved yang belum lunas.
+
+#### V-05 — Fix Booking Publik Phone/Email
+
+**Target:** `create-public-booking.dto.ts`, `public-bookings.service.ts`, `phone.util.ts`, Prisma `User`/`Tenant`.
+
+- [ ] Public booking wajib nomor HP valid; email optional.
+- [ ] Setelah `normalizePhone(dto.phone)`, jika `null`, return `BadRequestException`.
+- [ ] Jangan insert `Tenant.phone = null`.
+- [ ] Jangan insert `User.email = ''`.
+- [ ] Untuk phone-only booking, buat email placeholder internal unik, misalnya `tenant-{tenantId}@phone.local.kost48`.
+- [ ] Jangan tampilkan placeholder sebagai email kontak asli di `portalAccess.email`.
+- [ ] Lookup tenant jangan memasukkan `{ phone: null }` atau object kosong di `OR`.
+
+**Test wajib:** phone-only sukses; dua phone-only berbeda tidak tabrakan unique email; email-only ditolak jelas; nomor invalid ditolak.
+
+#### V-06 — Payment Proof Ownership + Batch Payment
+
+**Target:** payment-submissions backend, DTO, Prisma schema, `MyInvoicesPage.tsx`, `paymentSubmissions.ts`, modal submit pembayaran.
+
+- [ ] Buat metadata server-side proof upload sementara, misalnya `PaymentProofUpload`.
+- [ ] Jika tidak ingin migrasi dulu, alternatif minimal: single/batch submission wajib lewat endpoint multipart `submit-with-proof`; hapus jalur JSON yang menerima `fileKey/fileUrl` dari client.
+- [ ] Saat `upload-proof`, simpan `fileKey`, `uploadedById`, `tenantId`, filename asli, MIME, size, `createdAt`, `consumedAt`.
+- [ ] Saat single/batch submission, validasi proof wajib:
+  - [ ] metadata ada;
+  - [ ] proof milik tenant/user yang sama;
+  - [ ] proof belum dipakai;
+  - [ ] file fisik ada.
+- [ ] Backend generate `fileUrl` dari `fileKey`; jangan percaya `fileUrl` client.
+- [ ] Tentukan aturan batch: satu proof boleh dipakai untuk beberapa invoice dalam batch yang sama atau tidak.
+- [ ] Ubah "Bayar Semua" agar membuka modal upload bukti, bukan langsung submit.
+- [ ] `PaymentReviewPage` tetap boleh menampilkan "Tanpa file", tetapi approve backend wajib menolak bukti tanpa ownership proof.
+
+**Test wajib:** tanpa proof ditolak; fileKey palsu ditolak; Tenant A tidak bisa pakai proof Tenant B; batch wajib proof; combined `submit-with-proof` tetap sukses.
+
+#### V-07 — Hardening Upload, Cron, Meter, Ticket Image
+
+**Upload marketing/fasilitas:**
+- [ ] Pakai magic-byte `detectImageMime`; jangan percaya `file.mimetype`.
+- [ ] Jangan pakai `extname(file.originalname)` untuk nama final.
+- [ ] Extension final hanya dari hasil deteksi: `.jpg`, `.png`, `.webp`.
+- [ ] Test MIME spoof HTML sebagai `image/png` ditolak.
+
+**Cron token:**
+- [ ] Hapus dukungan query `?token=`.
+- [ ] Terima hanya header `X-Cron-Token`.
+- [ ] Jika bisa, ubah cron endpoint ke `POST`; jika harus `GET`, tetap header-only.
+- [ ] Test query token valid tetap ditolak.
+
+**Tenant meter cycle:**
+- [ ] Tolak `readingAt` masa depan.
+- [ ] Tolak `readingAt` sebelum check-in.
+- [ ] Tolak reading mundur.
+- [ ] Tentukan apakah tenant submit langsung issue invoice atau pending review/flag anomali.
+
+**Ticket image access:**
+- [ ] `canAccessImage()` jangan return `true` untuk file tanpa metadata/ownership record.
+- [ ] Owner/admin boleh akses file bermetadata; staff/tenant hanya sesuai ownership.
+
+**Announcement/tenant/private image parity:**
+- [ ] Audit ulang `announcements.controller.ts`, `tickets.controller.ts`, `tenants.controller.ts`, dan `rooms.controller.ts`; endpoint yang sudah pakai `detectImageMime` harus punya ownership/role guard yang sepadan.
+- [ ] Public room images boleh statik hanya untuk asset marketing yang sudah divalidasi magic-byte.
+- [ ] Static `/uploads/room-images` harus tetap aman dari HTML/SVG/script upload; test file spoof disajikan dengan `nosniff` dan MIME benar atau ditolak sejak upload.
+
+#### V-08 — Sinkronisasi Dokumen Kontrak Domain
+
+**Target:** `docs/M03_FLOW_KONTRAK.md`, `docs/M04_KEUANGAN.md`, `docs/M05_SIKLUS_HUNI.md`, `docs/M09_AUDIT.md`, `docs/M11_CHANGELOG.md`.
+
+- [ ] Tambahkan override 2026-06-30 bahwa kontrak final room status adalah `AVAILABLE -> RESERVED -> OCCUPIED`.
+- [ ] Tandai narasi lama "Booking = Room RESERVED" sebagai historis/legacy sampai code Fase V selesai.
+- [ ] Tegaskan `RESERVED` bukan sinonim lunas; DP dan lunas sama-sama reserved, beda di status invoice/payment.
+- [ ] Tegaskan check-in/serah kunci wajib invoice sewa awal lunas.
+- [ ] Tegaskan payment approval tidak boleh promote meter/occupancy.
+- [ ] Pastikan AI eksekutor diarahkan ke M10 Fase V, bukan bagian arsip lama.
+
+**Gate:** M03/M04/M05 tidak lagi memberi instruksi yang bertentangan dengan Fase V.
+
+#### V-09 — Public & Marketing Availability Components
+
+**Target:** `marketing-public-rooms.service.ts`, `publicRoomDisplay.ts`, `PublicRoomsPage.tsx`, `PublicGuestDashboardPage.tsx`, `PublicRoomDetailPage.tsx`, `publicGuestShared.tsx`.
+
+- [ ] Backend public rooms `isAvailable/canBook` hanya true untuk `AVAILABLE` atau cleaning-bookable.
+- [ ] Frontend helper `isPublicRoomBookable()` tidak lagi fallback true untuk `BOOKING/RESERVED`.
+- [ ] Copy publik untuk `AVAILABLE`: "bisa diajukan, aman setelah payment approved".
+- [ ] Copy publik untuk `RESERVED`: "sudah terkunci, pilih kamar lain / tanya estimasi".
+- [ ] Kartu/detail publik menyembunyikan tombol booking bila backend `canBook=false`.
+- [ ] Calendar/copy tidak menjanjikan first-paid-wins terhadap room yang sudah `RESERVED`.
+- [ ] Build visual tetap mobile-safe; text panjang tidak overflow.
+
+**Gate:** user publik tidak bisa memulai booking room `RESERVED` dari list, detail, dashboard tamu, atau deep link booking.
+
+#### V-10 — Frontend Tenant Portal Booking/Payment
+
+**Target:** `useTenantPortalStage.ts`, `TenantBookingGate.tsx`, `MyBookingsPage.tsx`, `BookingCard.tsx`, `BookingStatusHelper.tsx`, `SubmitPaymentModal.tsx`, `TenantInvoiceDetailPage.tsx`, `MyInvoicesPage.tsx`, `usePaymentUrgency.ts`.
+
+- [ ] Stage tenant tetap `booking` untuk stay unpromoted walau room masih `AVAILABLE`.
+- [ ] Stage `occupied` hanya jika room `OCCUPIED` dan stay milik user.
+- [ ] Booking card membedakan "belum bayar", "DP approved/RESERVED", "lunas menunggu check-in", dan "sudah huni".
+- [ ] Submit payment modal menghitung DP/pelunasan dari invoice/payment asli, bukan label room.
+- [ ] `MyInvoicesPage` batch payment wajib proof file dan tidak mengirim JSON tanpa file.
+- [ ] `TenantInvoiceDetailPage` tetap melarang overpay dan bukti tanpa file.
+- [ ] Urgency/reminder harus menampilkan deadline 3 jam unpaid, deadline pelunasan DP, dan pending review tanpa menyuruh upload ulang.
+
+**Gate:** tenant melihat status yang benar untuk unpaid `AVAILABLE`, DP `RESERVED`, lunas `RESERVED`, dan occupied.
+
+#### V-11 — Frontend Admin/Owner/Staff Workspace
+
+**Target:** `App.tsx`, `navigation.ts`, `ProtectedRoute.tsx`, `StaysPage.tsx`, `StayDetailPage.tsx`, `CheckInWizard.tsx`, `StepRoomSelect.tsx`, `PaymentReviewPage.tsx`, `ReviewPaymentModal.tsx`, `DashboardPage`, `OwnerDashboardPage`, `DashboardAdmin`, `StaffRoomsPage`, `RoomDetailPage`.
+
+- [ ] Route guard UI sinkron dengan role backend; jangan ada halaman staff yang menampilkan finance summary sensitif bila API harus admin/owner.
+- [ ] `StaysPage` filter "Perlu Tindak Lanjut" memakai predicate unpromoted stay + payment state, bukan room `BOOKING`.
+- [ ] `StayDetailPage` menampilkan CTA check-in hanya bila lunas.
+- [ ] `CheckInWizard` tidak bisa memilih `RESERVED` orang lain dan tidak menganggap `BOOKED` sebagai enum nyata.
+- [ ] `PaymentReviewPage` dampak approve menyebut "set RESERVED" untuk DP/lunas, bukan "aktif huni".
+- [ ] Staff room card boleh melihat status operasional, tetapi tidak membocorkan detail finance tenant.
+- [ ] Owner dashboard membedakan reserved-DP vs reserved-lunas dari payment data.
+
+**Gate:** UI admin/owner/staff tidak memberi aksi yang backend akan tolak karena status lama.
+
+#### V-12 — Backend Role/Data Exposure Audit
+
+**Target:** controllers/services `analytics`, `wifi-sales`, `reports`, `finance`, `accounting`, `assets`, `inventory-*`, `rooms`, `stays`, `tickets`, `announcements`.
+
+- [ ] Review `analytics/finance/summary`: saat ini STAFF diizinkan melihat total billed/paid/expense; putuskan apakah STAFF boleh atau harus OWNER/ADMIN.
+- [ ] Review `wifi-sales` GET untuk STAFF; pastikan hanya operasional yang diperlukan, bukan margin/profit sensitif.
+- [ ] Review `inventory-items`/`inventory-movements` STAFF read scope; jangan bocorkan nilai aset/biaya jika tidak perlu.
+- [ ] Review `stays` endpoint STAFF read apakah menampilkan tagihan/deposit/payment.
+- [ ] Review `announcements` upload image STAFF allowed; pastikan hanya upload helper, bukan create/publish pengumuman.
+- [ ] Pastikan semua public endpoint memang sengaja public: auth login/forgot/reset, public rooms, public booking/survey, FAQ public, public config, marketing assets/facility images, cron header-only.
+- [ ] Tambah test e2e role untuk endpoint yang berubah.
+
+**Gate:** matrix role backend sama dengan navigasi frontend dan keputusan owner.
+
+#### V-13 — Backend Finance/Accounting Guard Audit
+
+**Target:** `accounting.controller.ts`, `accounting-posting.service.ts`, `accounting-period-close.service.ts`, `assets.controller.ts`, `invoice-payments.service.ts`, `invoices.service.ts`, `loss-refund`, `deposit-ledger`.
+
+- [ ] Pastikan manual journal draft tetap disabled walau route class OWNER/ADMIN.
+- [ ] Putuskan apakah create/update COA, cash account, asset create/update boleh ADMIN atau OWNER-only.
+- [ ] Period close/reopen/post tetap OWNER-only.
+- [ ] Backfill auto-journal dan deposit dry-run tetap OWNER-only.
+- [ ] Loss refund proof jangan berupa free-text URL tanpa upload/ownership proof.
+- [ ] Invoice payment manual harus tetap no-partial sesuai M04 atau jelas jalurnya bila pembayaran manual owner.
+- [ ] Jalankan unit finance setelah perubahan payment/check-in.
+
+**Gate:** tidak ada mutasi ledger/asset/refund sensitif yang lolos role terlalu lebar atau tanpa audit trail.
+
+#### V-14 — Shared Component & Media Safety
+
+**Target:** `SafeImage`, `AuthenticatedFileLink`, `useAuthenticatedMediaUrl`, `resolveAbsoluteFileUrl`, `ResourceFormModal`, `ConfiguredResourcePage`, API media upload helpers.
+
+- [ ] `resolveAbsoluteFileUrl` tidak membuka external URL tidak perlu untuk media protected.
+- [ ] `AuthenticatedFileLink` hanya dipakai untuk endpoint protected, bukan `/uploads` bebas.
+- [ ] `SafeImage` fallback tidak menyembunyikan error security; log/label cukup jelas untuk admin.
+- [ ] `ResourceFormModal` announcement/room image upload memakai helper yang mengembalikan server-generated `fileKey/fileUrl`.
+- [ ] File preview `URL.createObjectURL` direvoke saat modal ditutup untuk mengurangi leak memori.
+- [ ] Tidak ada `dangerouslySetInnerHTML`, `innerHTML`, `eval`, atau `new Function` di frontend.
+
+**Gate:** media protected tetap protected dari list, modal, preview, zoom, dan download.
+
+#### V-15 — Regression Matrix Manual/UAT
+
+- [ ] Public guest: lihat katalog, buka detail room AVAILABLE, booking room, upload bukti DP, pending review.
+- [ ] Public guest: room RESERVED tidak bisa dibooking dari list/detail/deep link.
+- [ ] Tenant portal: unpaid booking tetap stage booking walau room AVAILABLE.
+- [ ] Tenant portal: DP approved tampil reserved-DP dan belum boleh check-in.
+- [ ] Tenant portal: full payment approved tampil reserved-lunas dan menunggu admin check-in.
+- [ ] Admin payment review: approve DP -> room RESERVED, pesaing cancel/refund.
+- [ ] Admin payment review: approve full -> room RESERVED, tidak OCCUPIED.
+- [ ] Admin check-in: DP-only ditolak; full paid sukses -> room OCCUPIED + meter promoted.
+- [ ] AutoOps: expired unpaid cancel stay tanpa mengubah room yang sudah AVAILABLE.
+- [ ] AutoOps: reserved DP lewat deadline diproses sesuai kebijakan.
+- [ ] Upload: proof palsu/fileKey tenant lain/MIME spoof ditolak.
+- [ ] Role: STAFF tidak bisa akses finance/report sensitif yang diputuskan admin/owner-only.
+
+#### V-16 — Verifikasi Final Fase V
+
+- [ ] Backend: `npm.cmd run build`.
+- [ ] Backend: `npm.cmd run test:unit`.
+- [ ] Backend: `npm.cmd run test:integration`.
+- [ ] Frontend: `npm.cmd run build`.
+- [ ] Search final:
+  ```powershell
+  rg -n "RoomStatus\\.BOOKING|status:\\s*RoomStatus\\.BOOKING|BOOKING" backend/src backend/prisma frontend/src
+  ```
+- [ ] Pastikan tidak ada kode yang menulis `RoomStatus.BOOKING`.
+- [ ] Pastikan tidak ada availability logic yang menganggap `RESERVED` masih available.
+- [ ] Pastikan sisa kata "booking" hanya bermakna bisnis booking, route, copy UI, atau enum non-room yang valid.
+
+---
+
+### Fase W — Audit Maksimal Status Proyek 🔴 AKTIF
+
+**Tujuan:** memperkuat status proyek sebelum eksekusi coding lanjutan. Fase W bukan pengganti Fase V; Fase V fokus booking/payment/check-in, sedangkan Fase W adalah hardening lintas sistem agar deploy tidak hanya "fitur jalan", tetapi role, security, uang, media, operasional, dan dokumentasi juga terkunci.
+
+**Aturan untuk AI eksekutor:**
+- Kerjakan W setelah atau paralel dengan V hanya bila tidak menyentuh file yang sama.
+- Jangan menambah dependency baru kecuali owner menyetujui.
+- Jangan mengubah `schema.prisma` kecuali item bertanda `[SCHEMA]` dan owner menyetujui.
+- Tiap task W wajib menulis hasil audit singkat di `docs/M11_CHANGELOG.md`.
+- Semua perubahan security/finance/role harus punya test atau minimal manual UAT yang jelas.
+
+#### W-00 — Project Status Gate & Decision Register
+
+**Target:** `docs/M10_CHECKLIST_CHANGELOG.md`, `docs/M09_AUDIT.md`, `docs/M02_KEPUTUSAN_OWNER.md`, `docs/CODEMAP.md`.
+
+- [ ] Buat tabel keputusan yang masih perlu owner/admin:
+  - [ ] STAFF boleh lihat `analytics/finance/summary` atau tidak.
+  - [ ] STAFF boleh lihat `wifi-sales` atau tidak.
+  - [ ] ADMIN boleh menjalankan AutoOps finance-heavy (`depreciation`, `recurring expense`, `period close/backfill`) atau OWNER-only.
+  - [ ] `RoomStatus.BOOKING` dihapus dari schema sekarang atau legacy-only dulu.
+  - [ ] JWT tetap `localStorage` sementara atau roadmap httpOnly cookie.
+  - [ ] Upload registry perlu migration atau bisa dimulai tanpa schema baru.
+- [ ] Untuk setiap keputusan, tulis pilihan final, tanggal, dan dampak implementasi.
+- [ ] Jangan mulai task kode yang bergantung keputusan owner sebelum statusnya jelas.
+
+**Gate:** semua keputusan blocker punya status `Diputuskan`, `Legacy sementara`, atau `Butuh owner`.
+
+#### W-01 — Production Security Baseline
+
+**Target:** `backend/src/main.ts`, `backend/src/common/middleware/rate-limit.middleware.ts`, `backend/src/common/guards/rate-limit.guard.ts`, `backend/src/auth/*`, `frontend/src/api/client.ts`.
+
+- [ ] Pindahkan middleware security headers sebelum static assets, atau tambahkan `setHeaders` ke static `/uploads/room-images`.
+- [ ] Pastikan `/uploads/room-images` selalu mengirim `X-Content-Type-Options: nosniff`.
+- [ ] Pastikan static image public hanya melayani extension gambar yang valid dan tidak menjalankan file lain.
+- [ ] Review CSP `img-src`: harus cukup untuk gambar public/protected yang sah, tapi tidak membuka wildcard tidak perlu.
+- [ ] Production CORS wajib berasal dari env allowlist, bukan `*`.
+- [ ] `JWT_SECRET` production tidak boleh fallback ke secret dev.
+- [ ] Rate limiter in-memory `fail-open` saat `MAX_TRACKED_KEYS` penuh harus diputuskan:
+  - [ ] jika tetap fail-open, catat risiko DoS brute-force;
+  - [ ] jika fail-closed untuk auth/payment/upload, implement khusus route sensitif.
+- [ ] Tambah test/manual UAT:
+  - [ ] request static room image punya security headers;
+  - [ ] upload MIME spoof ditolak;
+  - [ ] 401/403 tidak bocor stack trace;
+  - [ ] auth reset password tidak membocorkan email valid/tidak.
+
+**Gate:** security header konsisten untuk API dan static; auth/upload route sensitif punya rate limit yang tidak melemah diam-diam.
+
+#### W-02 — Auth, Session, dan PDP
+
+**Target:** `backend/src/auth/auth.service.ts`, `backend/src/auth/jwt.strategy.ts`, `frontend/src/context/AuthContext.tsx`, `frontend/src/api/client.ts`, modul tenant/profile/KTP/payment proof.
+
+- [ ] Pertahankan validasi aktif user dan `passwordChangedAt > pwdAt` di JWT strategy.
+- [ ] Tambahkan test reset password:
+  - [ ] token expired ditolak;
+  - [ ] token reused ditolak;
+  - [ ] password sama ditolak;
+  - [ ] user inactive ditolak.
+- [ ] Audit semua data PDP yang tampil ke frontend:
+  - [ ] NIK masked default;
+  - [ ] foto KTP/profil tidak public;
+  - [ ] payment proof tidak bisa dibaca tenant lain;
+  - [ ] placeholder email phone-only tidak tampil sebagai email kontak asli.
+- [ ] Dokumentasikan risiko JWT di `localStorage`:
+  - [ ] mitigasi jangka pendek: no raw HTML/eval, CSP, protected media, logout clear token;
+  - [ ] roadmap jangka menengah: httpOnly secure same-site cookie atau refresh-token rotation.
+- [ ] Pastikan `sessionStorage` user cache dibersihkan saat 401/logout.
+
+**Gate:** tidak ada data PDP sensitif yang public; auth reset/session punya UAT regresi.
+
+#### W-03 — Role/API Exposure Matrix
+
+**Target:** seluruh `backend/src/modules/**/*.controller.ts`, `frontend/src/App.tsx`, `frontend/src/config/navigation.ts`, `frontend/src/components/layout/*`.
+
+- [ ] Buat matriks endpoint penting: route, method, allowed roles, data sensitif, keputusan final.
+- [ ] Audit endpoint yang mengizinkan STAFF:
+  - [ ] `analytics/marketing/summary`;
+  - [ ] `analytics/finance/summary`;
+  - [ ] `analytics/operations/summary`;
+  - [ ] `wifi-sales` GET/list/detail;
+  - [ ] `rooms`, `room-items`, `inventory-items`, `inventory-movements` read;
+  - [ ] `settings` operational read;
+  - [ ] `stays` read/meter endpoints;
+  - [ ] `tickets`, `staff-field-reports`, `staff-routines`.
+- [ ] Jika data berisi nominal revenue/profit/expense, default rekomendasi: OWNER/ADMIN, kecuali owner menyetujui STAFF.
+- [ ] Samakan frontend route guard dengan backend guard.
+- [ ] Hapus nav/tab/CTA yang mengarah ke route yang role-nya tidak boleh.
+- [ ] Tambah regression:
+  - [ ] STAFF tidak bisa akses finance sensitif jika diputuskan admin/owner-only;
+  - [ ] TENANT tidak bisa list data tenant/stay orang lain;
+  - [ ] ADMIN tidak bisa endpoint OWNER-only.
+
+**Gate:** role matrix final tidak punya route frontend yang lebih longgar daripada backend.
+
+#### W-04 — Lifecycle Renew, Checkout, Deposit Cross-Blocks
+
+**Target:** `renew-requests.service.ts`, `checkout-requests.service.ts`, `stays-renewal.service.ts`, `deposit-ledger.service.ts`, `auto-ops/sweeps/renewal-sweep.service.ts`.
+
+- [ ] Fix checkout cross-block: saat create checkout request, jangan hanya blok `RenewRequestStatus.PENDING`.
+- [ ] Active renewal statuses yang harus memblokir checkout:
+  - [ ] `PENDING`;
+  - [ ] `PENDING_DECISION`;
+  - [ ] `AWAITING_DP`;
+  - [ ] `DP_SECURED`.
+- [ ] Pastikan renew create sudah memblokir checkout `PENDING`; jika checkout punya status baru nanti, sync helper-nya.
+- [ ] Ekstrak helper domain:
+  - [ ] `isActiveRenewRequestStatus(status)`;
+  - [ ] `isActiveCheckoutRequestStatus(status)`.
+- [ ] Renewal DP flow:
+  - [ ] DP invoice harus `PAID` sebelum `DP_SECURED`;
+  - [ ] payment `paidAt` setelah `downPaymentDueDate` ditolak;
+  - [ ] settlement invoice harus `PAID` sebelum `COMPLETED`;
+  - [ ] settlement setelah H+7 ditolak/forfeit.
+- [ ] Deposit ledger:
+  - [ ] jalankan reconciliation lite sebelum go-live;
+  - [ ] `mismatchCount` harus 0 atau ada daftar backfill manual owner;
+  - [ ] backfill tetap dry-run sampai owner approve.
+- [ ] Tambah UAT:
+  - [ ] renewal aktif lalu checkout ditolak;
+  - [ ] checkout pending lalu renew ditolak;
+  - [ ] DP renew telat ditolak;
+  - [ ] settlement telat tidak finalize.
+
+**Gate:** tidak ada dua lifecycle request aktif yang saling bertentangan pada stay yang sama.
+
+#### W-05 — AutoOps Job Ownership & Idempotency
+
+**Target:** `auto-ops.controller.ts`, `auto-ops.service.ts`, `backend/src/modules/auto-ops/sweeps/*`, accounting/expense/asset services yang dipanggil AutoOps.
+
+- [ ] Hapus dukungan cron token via query `?token=...`; token hanya boleh lewat header `X-Cron-Token`.
+- [ ] Pastikan token tidak pernah masuk log.
+- [ ] Review semua manual AutoOps endpoint:
+  - [ ] room healer;
+  - [ ] booking expiry;
+  - [ ] renewal sweep;
+  - [ ] depreciation;
+  - [ ] recurring expense drafts;
+  - [ ] period close/backfill;
+  - [ ] notification pruning.
+- [ ] Tentukan endpoint finance-heavy OWNER-only atau tetap OWNER/ADMIN.
+- [ ] Tambahkan idempotency/concurrency guard:
+  - [ ] job yang sama tidak boleh berjalan paralel di satu instance;
+  - [ ] multi-instance production butuh DB lock/advisory lock atau catatan risiko.
+- [ ] AutoOps tidak boleh membuat jurnal/expense duplikat saat retry.
+- [ ] AutoOps booking/room healer harus mengikuti Fase V: tidak ada dependensi ke `RoomStatus.BOOKING`.
+
+**Gate:** cron aman dari token leak; job retry tidak menggandakan efek uang/room.
+
+#### W-06 — Upload & Media Registry Lintas Modul
+
+**Target:** payment proof, refund proof, ticket images, staff field reports, staff routines, announcements, room images, marketing assets, facility images, KTP/profile images.
+
+- [ ] Inventaris semua endpoint upload:
+  - [ ] path API;
+  - [ ] public/protected;
+  - [ ] max size;
+  - [ ] magic-byte validation;
+  - [ ] owner user/entity;
+  - [ ] kapan file boleh diattach ke entity final.
+- [ ] Jangan percaya `fileKey`, `fileUrl`, `mimeType`, `size`, atau `originalFilename` dari client.
+- [ ] Untuk protected upload, file harus punya status `PENDING_ATTACH` milik uploader.
+- [ ] Saat attach ke payment/ticket/staff report/routine, server harus verifikasi file milik user atau role sah.
+- [ ] Setelah attach, file pindah status ke `ATTACHED` dan entity id tercatat.
+- [ ] Staff field report dan routine tidak boleh menerima arbitrary external `photoUrl` sebagai bukti final tanpa validasi.
+- [ ] Marketing/facility upload harus parity dengan ticket image: magic-byte, extension dari signature, random filename, delete temp saat invalid.
+- [ ] Public static room images wajib no-sniff dan hanya image valid.
+- [ ] Buat cleanup orphan upload yang aman:
+  - [ ] hanya hapus file pending lama;
+  - [ ] jangan hapus file yang sudah attached walau entity belum terbaca karena race.
+
+**Gate:** file tenant/staff lain tidak bisa dipakai sebagai proof; MIME spoof ditolak di semua upload utama.
+
+#### W-07 — Finance & Accounting Operational Controls
+
+**Target:** `accounting.controller.ts`, `finance.controller.ts`, `expenses.controller.ts`, `invoice-payments`, `invoices`, `wifi-sales`, `assets`, `deposit-ledger`, `reports`.
+
+- [ ] Audit semua mutasi uang/akuntansi:
+  - [ ] invoice create/issue/cancel;
+  - [ ] invoice payment create/update/delete;
+  - [ ] expense create/update/delete/confirm;
+  - [ ] wifi sale create/update/delete;
+  - [ ] asset depreciation;
+  - [ ] COA/cash account setup;
+  - [ ] period close/reopen;
+  - [ ] deposit settlement/backfill.
+- [ ] Default rekomendasi:
+  - [ ] OWNER-only untuk COA/cash account/period close/reopen/depreciation/backfill;
+  - [ ] OWNER/ADMIN untuk operasional invoice/payment/expense harian bila owner setuju.
+- [ ] Pastikan data yang sudah terjurnal tidak diedit langsung; gunakan reversal/correction.
+- [ ] Reconciliation readiness:
+  - [ ] trial balance balanced;
+  - [ ] deposit ledger `ready=true`;
+  - [ ] no stranded journal queue;
+  - [ ] no invoice paid tanpa payment row;
+  - [ ] no payment approved tanpa journal bila flow wajib blocking.
+- [ ] Review warisan best-effort auto journal lama:
+  - [ ] tentukan tetap best-effort + reconciliation;
+  - [ ] atau upgrade blocking untuk source uang tertentu.
+
+**Gate:** laporan keuangan tidak bergantung pada mutasi silent-fail yang tidak terdeteksi.
+
+#### W-08 — Inventory, Staff, Ticket Boundary
+
+**Target:** `tickets.service.ts`, `staff-field-reports.service.ts`, `staff-routines.service.ts`, `inventory-items.service.ts`, `inventory-movements.service.ts`, `room-items`.
+
+- [ ] Pertahankan batas: inventory movement resmi hanya OWNER/ADMIN.
+- [ ] STAFF update inventory/item status harus tetap "laporan lapangan", bukan mutasi stok final.
+- [ ] Staff routine:
+  - [ ] putuskan apakah staff boleh start/complete routine untuk `roomId` bebas tanpa assignment;
+  - [ ] jika tidak, wajib restrict ke assignment aktif atau template area yang memang global;
+  - [ ] rapikan formatting `let assignment ... if` di `complete()` agar tidak membingungkan maintenance.
+- [ ] Ticket:
+  - [ ] STAFF hanya bisa start/mark-done tiket assigned atau tiket yang ia ambil sesuai aturan;
+  - [ ] STAFF hanya boleh close `CHECKOUT_INSPECTION`;
+  - [ ] TENANT hanya bisa close tiket miliknya yang sudah `DONE`.
+- [ ] Ticket image:
+  - [ ] upload magic-byte sudah ada, tapi binding upload->ticket harus masuk W-06 registry;
+  - [ ] image access tetap via relasi ticket/tenant/staff/admin.
+- [ ] Staff field report:
+  - [ ] `photoUrl/fileKey` harus divalidasi terhadap registry upload;
+  - [ ] laporan ke barang/kamar harus membuat ticket/report idempotent;
+  - [ ] tidak boleh mengubah status final barang tanpa admin review.
+
+**Gate:** staff bisa bekerja cepat, tetapi tidak bisa mengubah stok/uang/status final tanpa jalur review yang jelas.
+
+#### W-09 — Frontend State, Route, Copy, dan XSS Surface
+
+**Target:** `frontend/src/App.tsx`, `AuthContext.tsx`, `api/client.ts`, `utils/statusLabels.ts`, `utils/publicRoomDisplay.ts`, semua halaman public/tenant/admin/staff yang terkait V/W.
+
+- [ ] Code-search raw HTML harus tetap kosong:
+  ```powershell
+  rg -n "dangerouslySetInnerHTML|innerHTML|outerHTML|eval\(|new Function" frontend/src
+  ```
+- [ ] Dokumentasikan risiko token di `localStorage`; jangan tambah raw HTML sebelum strategi token berubah.
+- [ ] Pastikan semua route protected sesuai role:
+  - [ ] Owner-only;
+  - [ ] Owner/Admin;
+  - [ ] Staff;
+  - [ ] Tenant.
+- [ ] `statusLabels.ts`:
+  - [ ] `RESERVED` tidak boleh berarti "Lunas";
+  - [ ] label DP/lunas berasal dari invoice/payment;
+  - [ ] legacy `BOOKING` hanya ditampilkan jika data lama masih ada.
+- [ ] External link audit:
+  - [ ] jika ada `target="_blank"`, wajib `rel="noopener noreferrer"`;
+  - [ ] no `window.open` tanpa noopener.
+- [ ] File preview:
+  - [ ] revoke object URL saat modal/preview ditutup;
+  - [ ] jangan simpan file blob di state global.
+- [ ] Copy public/tenant tidak boleh menjanjikan kamar terkunci sebelum payment approved.
+
+**Gate:** FE tidak membuka XSS surface baru dan copy status tidak menyesatkan pembayaran/booking.
+
+#### W-10 — Public & Marketing Surface Hardening
+
+**Target:** `public-bookings`, `public-rooms`, `settings/public-config`, marketing assets, `PublicRoomsPage`, `PublicRoomDetailPage`, `GuestBookingForm`, `RichAvailabilityCalendar`.
+
+- [ ] Public config tidak boleh expose secret, token, internal email placeholder, atau operational data sensitif.
+- [ ] Harga/fasilitas public boleh tampil, tapi data tenant aktif tidak boleh bocor.
+- [ ] Public room detail untuk `RESERVED/OCCUPIED`:
+  - [ ] tidak punya CTA booking aktif;
+  - [ ] deep link tetap menampilkan status benar;
+  - [ ] form submit backend tetap menolak.
+- [ ] Availability calendar harus membedakan:
+  - [ ] available;
+  - [ ] unpaid booking interest;
+  - [ ] reserved DP;
+  - [ ] reserved paid;
+  - [ ] occupied;
+  - [ ] maintenance.
+- [ ] Marketing/facility image upload ikut W-06.
+- [ ] Public booking phone/email fix ikut V-05.
+
+**Gate:** public surface tidak bisa membuat booking/payment yang melanggar state backend.
+
+#### W-11 — Observability, Logs, Release Readiness
+
+**Target:** `backend/scripts`, root `scripts`, health endpoints, deployment docs, seed scripts, CI/manual commands.
+
+- [ ] Buat checklist release dry-run:
+  - [ ] `cd backend; npm.cmd run build`;
+  - [ ] `cd backend; npm.cmd run test:unit`;
+  - [ ] `cd backend; npm.cmd run test:integration`;
+  - [ ] `cd frontend; npm.cmd run build`;
+  - [ ] `cd frontend; npm.cmd run test:e2e` bila browser environment siap;
+  - [ ] `cd frontend; npm.cmd run test:a11y` bila browser environment siap.
+- [ ] Seed/reset dev harus jelas untuk UAT booking/payment/check-in.
+- [ ] DB release:
+  - [ ] backup sebelum migration/db push;
+  - [ ] daftar enum/data cleanup;
+  - [ ] rollback plan;
+  - [ ] smoke test setelah deploy.
+- [ ] Logs:
+  - [ ] tidak log JWT/password/token cron;
+  - [ ] NIK/payment proof filename tidak muncul di log publik;
+  - [ ] error production tidak mengirim stack trace ke client.
+- [ ] Health/readiness:
+  - [ ] DB reachable;
+  - [ ] Prisma schema ready;
+  - [ ] upload dir writable;
+  - [ ] accounting readiness;
+  - [ ] AI key optional status aman.
+
+**Gate:** ada satu daftar perintah release yang bisa diikuti tanpa menebak.
+
+#### W-12 — Documentation Hygiene & Source of Truth
+
+**Target:** semua `docs/M*.md`, `docs/CODEMAP.md`, README/deploy docs bila ada.
+
+- [ ] M10 tetap menjadi checklist aktif satu-satunya.
+- [ ] M11 hanya changelog ringkas, bukan task aktif.
+- [ ] M09 hanya audit/finding, bukan instruksi eksekusi utama.
+- [ ] M03/M04/M05 harus punya override terbaru untuk booking/payment/check-in.
+- [ ] CODEMAP harus menunjuk modul aktual untuk:
+  - [ ] payment submissions;
+  - [ ] tenant/public bookings;
+  - [ ] stays/check-in/renew/checkout;
+  - [ ] auto-ops;
+  - [ ] upload/media;
+  - [ ] accounting/finance;
+  - [ ] staff/tickets/inventory.
+- [ ] Hapus atau arsipkan file MD liar di root yang menduplikasi M10.
+- [ ] Tambahkan "jangan ikuti narasi lama" bila dokumen historis masih menyebut flow lama.
+
+**Gate:** AI eksekutor baru cukup baca M10 + M-file terkait dan tidak tersesat ke checklist lama.
+
+#### W-13 — Manual UAT Matrix per Role
+
+**Target:** public browser, tenant portal, staff portal, admin workspace, owner workspace.
+
+- [ ] Public guest:
+  - [ ] katalog room available;
+  - [ ] detail room reserved tidak bisa booking;
+  - [ ] booking phone-only;
+  - [ ] booking invalid phone ditolak;
+  - [ ] upload proof DP.
+- [ ] Tenant:
+  - [ ] login portal;
+  - [ ] lihat booking unpaid;
+  - [ ] bayar DP;
+  - [ ] DP approved tampil reserved-DP;
+  - [ ] full payment tampil siap check-in;
+  - [ ] tenant lain tidak bisa lihat invoice/proof.
+- [ ] Staff:
+  - [ ] lihat task/ticket assigned;
+  - [ ] start satu pekerjaan saja;
+  - [ ] upload foto valid;
+  - [ ] MIME spoof ditolak;
+  - [ ] tidak bisa akses finance sensitif bila sudah diputuskan.
+- [ ] Admin:
+  - [ ] review payment DP/lunas;
+  - [ ] check-in hanya jika lunas;
+  - [ ] renewal/checkout cross-block;
+  - [ ] ticket close guard;
+  - [ ] inventory report review.
+- [ ] Owner:
+  - [ ] accounting readiness;
+  - [ ] period close/backfill guard;
+  - [ ] AI status/usage aman;
+  - [ ] role matrix final.
+
+**Gate:** UAT ditulis sebagai hasil nyata di changelog, bukan sekadar "build lulus".
+
+---
+
+### Enhancement — Survei Kepuasan Penghuni ✅ SELESAI (2026-06-24)
+
+**Cakupan:** timing gate 30 hari, re-submit 6 bulan, halaman owner `/admin/surveys`, ringkasan di dashboard admin.
+
+- [x] **SV-01** Backend: `mineExists()` gate 30 hari stay aktif + re-submit 6 bulan. File: `backend/src/modules/surveys/surveys.service.ts`.
+- [x] **SV-02** Frontend: `SatisfactionSurveyCard` handle 4 state (belum eligible / cooldown / re-submit / fresh). File: `frontend/src/components/tenant/SatisfactionSurveyCard.tsx`.
+- [x] **SV-03** Frontend: halaman baru `AdminSurveysPage` — daftar survei, ringkasan agregat, filter rating, komentar. Route `/admin/surveys` (OWNER/ADMIN).
+- [x] **SV-04** Frontend: nav item "Survei Penghuni" di sidebar admin + route title + ringkasan di dashboard admin overview.
+- [x] **SV-05** Gate build: backend `tsc --noEmit` lulus, frontend `vite build` lulus.
 
 ---
 
@@ -1458,328 +2154,6 @@ Tanpa `staleTime`, keduanya refetch setiap kali StaysPage di-mount ulang (naviga
   4. **Jangan tambahkan** chip ini ke halaman yang bisa diakses admin juga — hanya yang pure owner-only.  
   **Anchor grep:** `roles: \['OWNER'\]` di router/navigation · halaman loss refunds, aset, user management  
   **Gate:** `npm run build` ✅ · Buka halaman loss refunds → ada chip "Hanya Owner" kecil di bawah heading · halaman admin biasa tidak punya chip ini.
-
----
-
-### Fase S — Multi-Portal Vercel + Mobile-First Tenant & Staff
-
-**Tujuan:** Pisah frontend menjadi 3 portal Vercel terpisah (tenant/staff/admin) dengan mobile-first UX; Owner tetap akses via cPanel (desktop view). Fokus iterasi UI/UX cepat via Vercel auto-deploy.
-
----
-
-#### ⚠️ PRASYARAT WAJIB: Backend harus online dulu
-
-> Vercel hanya hosting **frontend (SPA)**. Frontend butuh backend API yang bisa diakses publik.
-> Tanpa backend live → Vercel frontend hanya tampil halaman login, tidak bisa login/data.
-
-**Dua mode kerja:**
-
-| Mode | Setup | Cocok untuk |
-|------|-------|-------------|
-| **A — Lokal dulu** | `npm run start:dev` + `npm run dev` | UI/UX development, tidak perlu Vercel |
-| **B — Vercel production** | Backend di cPanel live + Vercel frontend | Iterasi UI/UX + bisa diakses HP/klien |
-
-**Rekomendasi urutan:**
-```
-1. Kerjakan UI/UX lokal dulu (Mode A) → tidak perlu deploy apapun
-2. Saat siap publish → deploy backend ke cPanel (S-00) → lalu setup Vercel (S-03)
-3. Setelah itu: setiap push GitHub → Vercel auto-deploy dalam 30 detik ✨
-```
-
----
-
-#### Arsitektur target (setelah Fase S selesai):
-
-```
-GitHub push
-     │
-     ├──▶ Vercel auto-build (30 detik)
-     │         ├─ tenant.kost48.com  (VITE_APP_PORTAL=tenant)
-     │         ├─ staff.kost48.com   (VITE_APP_PORTAL=staff)
-     │         └─ admin.kost48.com   (VITE_APP_PORTAL=admin)
-     │                   │ HTTPS API calls
-     └──▶ cPanel         ▼
-              ├─ NestJS API  https://api.kost48.com
-              ├─ PostgreSQL  (tidak berubah)
-              └─ File uploads uploads/ (tidak berubah)
-
-Owner: akses langsung https://kost48.com (cPanel, full desktop)
-```
-
-**Satu codebase, 3 Vercel project, env var berbeda.** Tidak ada duplikasi kode.
-
-**Batas Vercel Free (lebih dari cukup KOST48 48 kamar):**
-`100 GB bandwidth/bln · 6.000 build-menit/bln · unlimited projects · SSL gratis`
-
----
-
-#### S-00 🧑 — [PRASYARAT] Deploy backend ke cPanel production
-
-> **BLOKIR untuk S-03 dan seterusnya.** S-01, S-02, S-04, S-05 bisa dikerjakan tanpa ini.
-
-**[OWNER]** Ikuti `docs/M08_DEPLOY_GO_LIVE.md` lengkap. Checklist ringkas:
-
-1. SSH/cPanel → buat aplikasi Node.js, titik ke `backend/`.
-2. `npm install --production` di server.
-3. Salin `.env.production` ke server, isi semua secret (JWT, DB, VAPID, dll).
-4. `npx prisma migrate deploy` → DB skema terbaru.
-5. `node scripts/bootstrap.sql` → seed data awal (COA, periode, owner account).
-6. Pastikan `https://api.kost48.com/api/health` → `{"status":"ok"}`.
-7. Catat URL API yang sudah live — dipakai di S-03 sebagai `VITE_API_BASE_URL`.
-
-**Gate:** `curl https://api.kost48.com/api/health` → `200 OK`.
-
----
-
-- [ ] **S-00** 🧑 [OWNER] Deploy backend ke cPanel (ikuti M08)
-
----
-
-#### S-01 🟡 — Env var VITE_APP_PORTAL + role gate di login
-
-> **Bisa dikerjakan sekarang, tanpa backend live.**
-
-**Target:** `frontend/src/pages/auth/LoginPage.tsx` + `frontend/src/context/AuthContext.tsx`
-
-**Aksi:**
-1. Tambah env var `VITE_APP_PORTAL` (nilai: `tenant` | `staff` | `admin` | kosong = semua).
-2. Buat helper `frontend/src/utils/portalGuard.ts`:
-   ```ts
-   export const PORTAL = (import.meta.env.VITE_APP_PORTAL ?? '') as string;
-   export const PORTAL_ALLOWED_ROLES: Record<string, string[]> = {
-     tenant: ['TENANT'],
-     staff:  ['STAFF'],
-     admin:  ['OWNER', 'ADMIN'],
-     '':     ['OWNER', 'ADMIN', 'STAFF', 'TENANT'],
-   };
-   export function isRoleAllowedOnPortal(role: string): boolean {
-     return (PORTAL_ALLOWED_ROLES[PORTAL] ?? ['OWNER','ADMIN','STAFF','TENANT']).includes(role);
-   }
-   export const PORTAL_TITLE: Record<string, string> = {
-     tenant: 'Portal Penghuni',
-     staff:  'Portal Staf',
-     admin:  'Panel Admin',
-     '':     'KOST48',
-   };
-   ```
-3. `LoginPage.tsx`:
-   - Ganti judul dengan `PORTAL_TITLE[PORTAL]`.
-   - Setelah login sukses, cek `isRoleAllowedOnPortal(user.role)`:
-     - `false` → `logout()` + tampilkan alert merah "Akses ditolak. Login menggunakan portal yang sesuai."
-4. `AuthContext.tsx`: setelah token refresh/restore, cek portal gate sama — logout paksa bila role tidak cocok.
-5. `frontend/.env.example`: tambahkan `VITE_APP_PORTAL=` (kosong = default all).
-
-**Gate:** `VITE_APP_PORTAL=tenant npm run build` ✅ · `npm run dev` dengan VITE_APP_PORTAL=staff → login TENANT → alert tolak; login STAFF → masuk normal.
-
----
-
-- [ ] **S-01** Env var + portal guard helper + login gate (≤1 jam)
-
----
-
-#### S-02 🟡 — Update CORS backend izinkan domain Vercel
-
-> **Bisa dikerjakan sekarang tanpa backend live** (edit env file saja, berlaku saat deploy).
-
-**Target:** `backend/src/main.ts` + `backend/.env.production.example`
-
-**Aksi:**
-1. Cek `backend/src/main.ts` → cari konfigurasi CORS. Pastikan sudah baca dari env:
-   ```ts
-   const allowedOrigins = (process.env.CORS_ORIGIN ?? 'http://localhost:5173')
-     .split(',').map(o => o.trim());
-   app.enableCors({ origin: allowedOrigins, credentials: true });
-   ```
-2. `backend/.env.production.example`: tambahkan baris:
-   ```
-   CORS_ORIGIN=https://kost48.com,https://tenant.kost48.com,https://staff.kost48.com,https://admin.kost48.com,https://*.vercel.app
-   ```
-3. Server production: update `.env` dan restart NestJS setelah S-00 selesai.
-
-**Gate:** `npx tsc --noEmit` ✅ · Setelah backend live: `curl -H "Origin: https://tenant.kost48.com" https://api.kost48.com/api/health` → header `Access-Control-Allow-Origin` ada.
-
----
-
-- [ ] **S-02** CORS backend tambah domain Vercel (≤30 menit)
-
----
-
-#### S-03 🧑 — [OWNER] Setup 3 Vercel project + custom domain
-
-> **Butuh S-00 selesai dulu** (perlu URL backend yang live untuk `VITE_API_BASE_URL`).
-
-**Langkah manual di vercel.com + dashboard domain registrar:**
-
-**3A — Buat akun & import repo:**
-1. Daftar gratis di [vercel.com](https://vercel.com) → "Add New Project" → Import GitHub `liemlui/kost48v4`.
-2. **Penting:** Pilih repo, bukan fork. Vercel otomatis detect Vite.
-
-**3B — Buat project `kost48-tenant`:**
-1. Project Name: `kost48-tenant`
-2. Root Directory: `frontend` ← **wajib diset, bukan root repo**
-3. Build Command: `npm run build` (auto-detect)
-4. Output Directory: `dist` (auto-detect)
-5. Environment Variables:
-   ```
-   VITE_APP_PORTAL   = tenant
-   VITE_API_BASE_URL = https://api.kost48.com
-   ```
-6. Deploy → tunggu build selesai → dapat URL `kost48-tenant.vercel.app`.
-
-**3C — Ulangi untuk `kost48-staff` dan `kost48-admin`:**
-- `VITE_APP_PORTAL = staff` / `admin`
-- `VITE_API_BASE_URL = https://api.kost48.com` (sama)
-
-**3D — Custom domain (opsional, bisa menyusul):**
-1. Di setiap Vercel project → Settings → Domains → Add `tenant.kost48.com`.
-2. Di domain registrar (Niagahoster/Cloudflare/dll) → tambah CNAME:
-   ```
-   tenant → cname.vercel-dns.com
-   staff  → cname.vercel-dns.com
-   admin  → cname.vercel-dns.com
-   ```
-3. DNS propagasi 1–24 jam. SSL otomatis dari Vercel.
-
-**Gate:** `https://kost48-tenant.vercel.app` → halaman login "Portal Penghuni" tampil (meski login belum bisa bila backend belum live).
-
----
-
-- [ ] **S-03** 🧑 [OWNER] Setup Vercel + 3 project + env vars + domain (manual)
-
----
-
-#### S-04 🟡 — Mobile-first layout Tenant portal
-
-> **Bisa dikerjakan lokal tanpa backend live.** Hasil langsung tampil di Vercel setelah push.
-
-**Target:** `frontend/src/pages/portal/` · `frontend/src/styles/06-tenant.css`
-
-**Prinsip mobile-first:** Desain untuk 375px dahulu, baru tablet/desktop.
-
-**Aksi:**
-1. **`MyStayPage.tsx`** — hero card info hunian:
-   - Hapus tabel, ganti dengan `<Card>` tunggal full-width: nama kamar (besar), status badge, tanggal masuk-keluar.
-   - Tombol aksi (perpanjang, checkout) → `<Button className="w-100 mb-2">`.
-2. **`MyInvoicesPage.tsx`** — list tagihan kartu:
-   - Tiap tagihan = `<Card>`: nominal (font besar `fs-4`), status badge warna, due date, tombol "Bayar" full-width.
-   - Ganti tabel dengan `<div className="d-flex flex-column gap-2">`.
-3. **`MyTicketsPage.tsx`** — tiket feed style:
-   - Card per tiket: judul, status, foto thumbnail (klik → lightbox dari R-1), tombol "Beri Rating".
-4. **Form input global** (cegah zoom iOS):
-   ```css
-   /* 06-tenant.css */
-   @media (max-width: 576px) {
-     .portal-form input, .portal-form select, .portal-form textarea {
-       font-size: 16px !important;
-       padding: 10px 12px;
-     }
-     .portal-card { border-radius: 16px; box-shadow: 0 2px 12px rgba(0,0,0,.08); }
-     .portal-cta  { width: 100%; margin-bottom: 8px; min-height: 48px; }
-   }
-   ```
-5. **BottomTabBar** (sudah ada Fase P): pastikan muncul untuk TENANT di semua halaman portal.
-
-**Gate:** `npm run build` ✅ · Chrome DevTools 375px → tidak ada scroll horizontal, semua tombol ≥48px, teks terbaca tanpa zoom.
-
----
-
-- [ ] **S-04** Mobile-first layout Tenant portal (≤2 jam)
-
----
-
-#### S-05 🟡 — Mobile-first layout Staff portal + BottomTabBar STAFF
-
-> **Bisa dikerjakan lokal.** Staff paling sering pakai HP saat kerja lapangan.
-
-**Target:** `TicketsStaffMode.tsx` · `DashboardStaff.tsx` · `05-staff.css` · `AppLayout.tsx`
-
-**Aksi:**
-1. **`TicketsStaffMode.tsx`** — kartu tiket swipe-friendly:
-   - Stack vertikal kartu (bukan tabel) dengan gap 12px.
-   - Tiap kartu: prioritas badge (merah/kuning), judul tiket, nomor kamar, tombol "Mulai" / "Selesai" full-width.
-   - Swipe kiri = detail tiket (via `onClick` ke route detail, bukan swipe gesture dulu — simpan kompleksitas).
-2. **`DashboardStaff.tsx`** — metrik 2 kolom:
-   - Grid 2×2 (`d-grid gap-2` style 2 kolom) untuk statistik KPI, bukan tabel.
-   - Chart collapsible di mobile (accordion, toggle "Lihat Grafik").
-3. **BottomTabBar untuk STAFF** — tambah ke `AppLayout.tsx`:
-   - Tab: 🏠 Dashboard · 🎫 Tiket · 📋 Rutin · 👤 Profil
-   - Hanya tampil bila `user.role === 'STAFF'` DAN `window.innerWidth < 768`.
-4. **`05-staff.css`** — touch targets staf:
-   ```css
-   @media (max-width: 768px) {
-     .staff-action-btn { min-height: 48px; width: 100%; margin-bottom: 8px; }
-     .staff-card       { border-radius: 14px; padding: 16px; }
-     .staff-metric-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-   }
-   ```
-
-**Gate:** `npm run build` ✅ · 375px → BottomTabBar staf 4 tab muncul, kartu tiket stack rapi, tombol ≥48px.
-
----
-
-- [ ] **S-05** Mobile-first Staff portal + BottomTabBar STAFF (≤2 jam)
-
----
-
-#### S-06 🟡 — PWA offline-aware: cache read + OfflineStatusBanner
-
-> **Kerjakan setelah S-04/S-05** (butuh layout stabil dulu).
-
-**Target:** `frontend/vite.config.ts` (vite-plugin-pwa) · `AppLayout.tsx` · komponen baru
-
-**Aksi:**
-1. **Cek `vite-plugin-pwa`** di `frontend/package.json`. Jika belum ada → 🧑 owner approve dulu (npm dep baru).
-2. **Workbox cache strategy** di `vite.config.ts`:
-   ```ts
-   workbox: {
-     runtimeCaching: [
-       { urlPattern: /\/api\/(tenants\/me|stays\/my|invoices|tickets\/my|rooms)/,
-         handler: 'StaleWhileRevalidate',        // baca offline, update background
-         options: { cacheName: 'api-cache', expiration: { maxAgeSeconds: 3600 } } },
-       { urlPattern: /\.(js|css|woff2|png|jpg|webp)$/,
-         handler: 'CacheFirst',
-         options: { cacheName: 'assets-cache', expiration: { maxEntries: 100 } } },
-     ]
-   }
-   ```
-3. **`OfflineStatusBanner.tsx`** (komponen baru):
-   ```tsx
-   // Tampil hanya saat navigator.onLine === false
-   // "📡 Offline  ·  Data per [waktu sinkron terakhir]"
-   // Warna: amber, di atas konten (bukan blocking)
-   // Auto-hilang 3 detik setelah kembali online
-   ```
-4. Pasang `<OfflineStatusBanner />` di `AppLayout.tsx` tepat di bawah `<TopBar>`.
-5. **Guard transaksi uang** — di `MyInvoicesPage`, tombol "Bayar":
-   ```tsx
-   onClick={() => { if (!navigator.onLine) { toast.error('Butuh koneksi internet untuk bayar.'); return; } ... }}
-   ```
-6. Sama untuk tombol Booking, Submit Laporan Staf.
-
-**Gate:** `npm run build` ✅ · Chrome DevTools → Network: Offline → halaman tenant terbaca (cached), banner amber muncul. Tombol bayar → toast error.
-
----
-
-- [ ] **S-06** PWA offline cache + OfflineStatusBanner + guard transaksi (≤3 jam)
-
----
-
-#### Urutan Eksekusi Fase S
-
-```
-SEKARANG (tanpa backend live):
-  S-01 → S-02 → S-04 → S-05   ← kerjakan UI/UX dulu, iterasi lokal
-
-SAAT SIAP PUBLISH (owner siapkan cPanel):
-  S-00 [OWNER] → S-02 (apply ke server) → S-03 [OWNER] → S-06
-
-SETELAH S-03 SELESAI:
-  Setiap git push → Vercel auto-deploy 30 detik → iterasi UI/UX super cepat ✨
-```
-
-**Estimasi kode (AI):** S-01 ~1j · S-02 ~30m · S-04 ~2j · S-05 ~2j · S-06 ~3j = **~9 jam total**  
-**Estimasi owner:** S-00 ~2-4j (cPanel deploy) · S-03 ~30m (Vercel setup) · DNS propagasi 1-24j
-
 ---
 
 ### Fase T — Wizard Redesign + Animasi Marketing

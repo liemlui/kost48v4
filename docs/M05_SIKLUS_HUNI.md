@@ -47,6 +47,17 @@ AI dalam siklus huni hanya membantu Owner/Admin membaca data dan membuat draft. 
 - **Renewal/checkout:** AI boleh merangkum risiko renewal, tunggakan, meter, dan deposit. AI tidak boleh memfinalkan renewal, forced checkout, proses deposit, atau membuka kamar.
 - **PDP:** snapshot AI untuk tenant memakai ID/kode kamar/status/nominal; jangan kirim email, nomor KTP penuh, foto, atau alamat lengkap kecuali benar-benar dibutuhkan untuk validasi KTP dan tetap berbasis teks OCR.
 
+## Update 2026-06-30 - Override Booking Awal Fase V
+
+Bagian historis `DOSSIER 11` di bawah masih menyebut multi-booking `RESERVED` dan `RoomStatus.BOOKING`. Untuk eksekusi baru, gunakan aturan Fase V:
+
+- Booking dibuat tetapi belum dibayar: room tetap `AVAILABLE`; calon tenant lain masih boleh mengajukan booking kamar yang sama.
+- Pembayaran DP 30% approved atau pelunasan approved: room menjadi `RESERVED` dan terkunci untuk stay pemenang.
+- `RESERVED` tidak berarti lunas. Reserved-DP dan reserved-lunas harus dibedakan dari invoice/payment.
+- Check-in/serah kunci hanya boleh setelah sewa awal lunas; baru saat itu room menjadi `OCCUPIED` dan meter awal dipromosikan.
+- Booking pesaing yang belum bayar dibatalkan saat pemenang payment approved; pesaing yang sudah transfer perlu jalur refund kalah-cepat.
+- Checklist detail eksekusi ada di `docs/M10_CHECKLIST_CHANGELOG.md` V-00..V-16.
+
 ## Bagian 1 - `docs/11_BOOKING_RENEWAL.md`
 
 ### DOSSIER 11 — BOOKING & RENEWAL
@@ -61,7 +72,7 @@ AI dalam siklus huni hanya membantu Owner/Admin membaca data dan membuat draft. 
 - **DP 30%** × sewa periode (sesuai pricingTerm), non-refundable, hangus bila gagal lunas H+1. Deposit jaminan = `Room.defaultDepositRupiah`, **SELALU tetap** (D-05; admin tak boleh override).
 - **Booking expiry 3 JAM FLAT** semua jalur (D-04) — sudah diterapkan melalui `AUTO_OPS_DEADLINES.BOOKING_REVIEW_DEADLINE_HOURS`.
 - **First-paid-wins**: multi-booking RESERVED tak dibatasi (D4); pembayaran pertama disetujui (DP pun) mengunci kamar + batalkan pesaing.
-- Harga per term (owner-confirmed C1): Harian 13% · Mingguan 45% · 2-Mingguan 75% · Bulanan 100% · Semester 5,5× · Tahunan 10× dari tarif bulanan. Utilitas term pendek all-in; bulanan+ meter (C2).
+- Harga per term (owner-confirmed 2026-06-24): Harian 13% · Mingguan 50% · 2-Mingguan 75% · Bulanan 100% · Semester 5,7× · Tahunan 11× dari tarif bulanan. Utilitas term pendek all-in; bulanan+ meter (C2).
 - **KTP wajib** sebelum aktivasi (E1 — detail di dossier 18).
 ##### Renewal (GAP #2 — TARGET, lihat desain lengkap di §5)
 - Tenant lama yang menyatakan perpanjang punya **prioritas eksklusif sampai hari-H TANPA wajib DP dulu** (L2). Di hari-H belum bayar DP → kamar dibuka publik untuk orang lain (first-paid, mulai tanggal checkout L1). Tenant pilih TIDAK → kamar langsung dibuka.
@@ -128,6 +139,7 @@ Gamifikasi (poin perpanjangan → reward) memperkuat retensi renewal — lihat d
 - **Checkout request ≤ `plannedCheckOutDate`** (tak boleh extend; perpanjang via renewal dossier 11).
 - **Final checkout** blokir bila ada tagihan non-PAID/CANCELLED → kamar MAINTENANCE + tiket CHECKOUT_INSPECTION (dedupe). Gate room-ready: MAINTENANCE→AVAILABLE saat tiket inspeksi ditutup (**staf kini boleh tutup** → kamar siap, guard keselamatan tetap; lihat dossier 15).
 - **Deposit jaminan refundable** via settlement (FULL_REFUND/PARTIAL/FORFEIT), jurnal + ledger BLOCKING. Partial wajib habis dibagi (deduction+refund = settlement), catatan ≥8 char untuk potongan/hangus.
+- **Denda kerusakan (2026-06-24):** admin bisa mencatat biaya kerusakan (`damageChargeRupiah` + `damageNote`) langsung di form Final Checkout. Sistem otomatis membuat invoice `PENALTY` setelah stay COMPLETED, dan deposit otomatis menutup invoice ini saat `processDeposit()` (Q5: auto-cover semua invoice terbuka).
 - **Keluar lebih awal (K-e):** sewa yang sudah dibayar HANGUS (no refund pro-rata); deposit dikembalikan normal.
 - **Overstay (Auto-Ops):** reminder H-10..H-day → H-day pk 12:00 kamar publik + tiket EVICT → H+1 pk 12:00 forced checkout → kamar MAINTENANCE + `allowBookingWhileCleaning`. Tagihan belum lunas → TIDAK auto-checkout, admin dapat alert.
 - **Tenant kabur (B2):** admin tandai manual bila **nunggak X hari + tak bisa dihubungi** (X konfig, mis. 7) → checkout dini + potong deposit.

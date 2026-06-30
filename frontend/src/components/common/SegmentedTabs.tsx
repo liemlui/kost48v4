@@ -1,4 +1,4 @@
-import { KeyboardEvent, useRef } from 'react';
+import { KeyboardEvent, useRef, type ReactNode } from 'react';
 
 // Komponen Tab segmen SEMANTIK reusable (keputusan owner: "menu yang tombolnya pilihan itu
 // kan tab, kasih component yang sesuai"). Memakai kelas visual yang sudah ada
@@ -8,7 +8,7 @@ import { KeyboardEvent, useRef } from 'react';
 export type SegmentedTabItem<K extends string = string> = {
   key: K;
   label: string;
-  icon?: string; // emoji/teks pendek
+  icon?: ReactNode; // emoji/teks pendek atau komponen ikon (mis. lucide)
   count?: number; // badge angka opsional
   disabled?: boolean; // mis. filter kosong
 };

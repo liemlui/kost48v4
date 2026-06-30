@@ -27,12 +27,40 @@ export async function submitSurvey(payload: SubmitSurveyPayload): Promise<{ id: 
   return res.data.data;
 }
 
-export async function getMySurveyStatus(): Promise<{ submitted: boolean; last?: { id: number; overallRating: number; createdAt: string } }> {
-  const res = await client.get<ApiEnvelope<{ submitted: boolean; last?: { id: number; overallRating: number; createdAt: string } }>>('/surveys/mine');
+export type SurveyMineStatus = {
+  submitted: boolean;
+  eligible: boolean;
+  reason?: 'min_stay_30_days' | 'cooldown_6_months';
+  eligibleAt?: string;       // ISO — kapan form mulai tersedia (gate 30 hari)
+  nextEligibleAt?: string;   // ISO — kapan bisa isi ulang (gate 6 bulan)
+  last?: { id: number; overallRating: number; createdAt: string };
+};
+
+export async function getMySurveyStatus(): Promise<SurveyMineStatus> {
+  const res = await client.get<ApiEnvelope<SurveyMineStatus>>('/surveys/mine');
   return res.data.data;
 }
 
 export async function getSurveySummary(): Promise<SurveySummary> {
   const res = await client.get<ApiEnvelope<SurveySummary>>('/surveys/summary');
+  return res.data.data;
+}
+
+export type SurveyItem = {
+  id: number;
+  tenantId: number | null;
+  overallRating: number;
+  cleanliness: number | null;
+  staffService: number | null;
+  facility: number | null;
+  valueForMoney: number | null;
+  wouldRecommend: boolean | null;
+  comment: string | null;
+  createdById: number;
+  createdAt: string;
+};
+
+export async function getAllSurveys(): Promise<SurveyItem[]> {
+  const res = await client.get<ApiEnvelope<SurveyItem[]>>('/surveys');
   return res.data.data;
 }

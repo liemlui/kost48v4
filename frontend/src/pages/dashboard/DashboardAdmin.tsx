@@ -15,6 +15,7 @@ import AiResultPanel from '../../components/ai/AiResultPanel';
 import { fetchAdminDashboardAggregate } from '../../api/adminDashboard';
 import { fetchAutoOpsStatus } from '../../api/autoOps';
 import { fetchAdminStaffPerformance } from '../../api/staffPerformance';
+import { getSurveySummary } from '../../api/surveys';
 import { useOperationalStressIndex } from '../../hooks/useOperationalStressIndex';
 import { useClientPagination } from '../../hooks/useClientPagination';
 import { dedupeCommandItems } from '../../utils/commandCenterDedup';
@@ -225,6 +226,7 @@ export default function AdminDashboard() {
   const autoOpsQuery = useQuery({ queryKey: ['dashboard-admin', 'auto-ops-status'], queryFn: fetchAutoOpsStatus, enabled: isOverview, ...ACTION_QUERY_OPTIONS });
   // H4: status AI untuk conditional render AiAssistButton di area overview
   const aiStatusQuery = useQuery({ queryKey: ['owner-ai-status'], queryFn: getOwnerAiStatus, staleTime: 300_000, retry: 1 });
+  const surveySummaryQuery = useQuery({ queryKey: ['survey-summary'], queryFn: getSurveySummary, staleTime: 300_000, retry: 1 });
   const canUseAdminBriefAi = user?.role === 'OWNER' && aiStatusQuery.data?.configured === true;
 
   const rooms = aggregateQuery.data?.rooms.items ?? [];
@@ -334,6 +336,23 @@ export default function AdminDashboard() {
           stayWorkCount={pendingApprovalCount + pendingRenewCount + checkoutWorkCount}
           lowStockCount={lowStockCount}
         />
+      ) : null}
+      {/* Survei kepuasan ringkas — tampil di overview */}
+      {activeArea === 'overview' && surveySummaryQuery.data && surveySummaryQuery.data.count > 0 ? (
+        <div className="d-flex align-items-center gap-3 mb-2 p-2 rounded-3" style={{ background: 'linear-gradient(135deg,#fefce8,#fffbeb)', border: '1px solid #fcd34d' }}>
+          <span className="fw-semibold small">⭐ Survei Penghuni</span>
+          <span className="text-muted small">|</span>
+          <span className="small">{surveySummaryQuery.data.count} respons</span>
+          <span className="text-muted small">|</span>
+          <span className="small">Rata-rata <strong>{surveySummaryQuery.data.avgOverall ?? '—'}</strong> ★</span>
+          {surveySummaryQuery.data.recommendRate !== null ? (
+            <>
+              <span className="text-muted small">|</span>
+              <span className="small">👍 {surveySummaryQuery.data.recommendRate}% rekomendasi</span>
+            </>
+          ) : null}
+          <a href="/surveys" className="small ms-auto" style={{ whiteSpace: 'nowrap' }}>Lihat semua →</a>
+        </div>
       ) : null}
       {/* P-01: 3 tampilan antrean — Daftar / Papan / Kalender */}
       {activeArea === 'overview' ? (

@@ -50,6 +50,8 @@ export default function CompleteStayModal({
     toDateInput(approvedCheckOutDate),
   );
   const [checkoutReason, setCheckoutReason] = useState("");
+  const [damageChargeRupiah, setDamageChargeRupiah] = useState("");
+  const [damageNote, setDamageNote] = useState("");
   const [error, setError] = useState("");
   const [confirmedFinalCheck, setConfirmedFinalCheck] = useState(false);
 
@@ -93,6 +95,8 @@ export default function CompleteStayModal({
   useEffect(() => {
     if (show) {
       setActualCheckOutDate(toDateInput(approvedCheckOutDate));
+      setDamageChargeRupiah("");
+      setDamageNote("");
       setConfirmedFinalCheck(false);
     }
   }, [approvedCheckOutDate, show]);
@@ -100,6 +104,8 @@ export default function CompleteStayModal({
   const handleClose = () => {
     setActualCheckOutDate(toDateInput(approvedCheckOutDate));
     setCheckoutReason("");
+    setDamageChargeRupiah("");
+    setDamageNote("");
     setError("");
     setConfirmedFinalCheck(false);
     onHide();
@@ -127,10 +133,24 @@ export default function CompleteStayModal({
       return;
     }
 
+    const damageAmount = damageChargeRupiah.trim() ? Number(damageChargeRupiah) : 0;
+    if (damageAmount > 0 && !damageNote.trim()) {
+      setError("Isi catatan kerusakan bila ada biaya denda.");
+      return;
+    }
+    if (damageAmount < 0) {
+      setError("Nominal denda tidak boleh negatif.");
+      return;
+    }
+
     try {
       await completeMutation.mutateAsync({
         actualCheckOutDate,
         checkoutReason: checkoutReason.trim(),
+        ...(damageAmount > 0 && {
+          damageChargeRupiah: damageAmount,
+          damageNote: damageNote.trim(),
+        }),
       });
       onSuccess?.();
       handleClose();
@@ -212,6 +232,41 @@ export default function CompleteStayModal({
           <div className="text-muted small mt-1">
             Wajib diisi untuk audit operasional dan histori masa sewa.
           </div>
+        </Form.Group>
+
+        <hr className="my-3" />
+        <h6 className="text-muted small fw-semibold text-uppercase">Denda / Biaya Kerusakan (Opsional)</h6>
+        <div className="text-muted small mb-2">
+          Biaya ini akan jadi invoice PENALTY dan otomatis dipotong dari deposit
+          jaminan saat proses deposit.
+        </div>
+
+        <Form.Group className="mb-2">
+          <Form.Label className="small">Nominal Denda (Rp)</Form.Label>
+          <Form.Control
+            type="number"
+            min="0"
+            step="1000"
+            placeholder="Contoh: 50000"
+            value={damageChargeRupiah}
+            onChange={(e) => setDamageChargeRupiah(e.target.value)}
+          />
+        </Form.Group>
+
+        <Form.Group className="mb-3">
+          <Form.Label className="small">
+            Catatan Kerusakan
+            {damageChargeRupiah.trim() && Number(damageChargeRupiah) > 0 && (
+              <span className="text-danger ms-1">*</span>
+            )}
+          </Form.Label>
+          <Form.Control
+            as="textarea"
+            rows={2}
+            placeholder="Contoh: Remote AC hilang, gorden robek"
+            value={damageNote}
+            onChange={(e) => setDamageNote(e.target.value)}
+          />
         </Form.Group>
 
         <div className="border rounded-3 p-3 mt-3 bg-light">

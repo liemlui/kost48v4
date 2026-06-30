@@ -4,6 +4,40 @@
 
 ## Changelog Ringkas
 
+### 2026-06-30 — V-00: Preflight RoomStatus.BOOKING (legacy-only, runtime tidak menulis)
+- **V-00**: `booking-schema.helper.ts` — `hasBookingRoomStatus` tidak lagi syarat `isBookingSchemaReady()` (V5 flow: unpaid booking = AVAILABLE).
+- **V-00**: `payment-submissions.service.ts` — hapus writer `RoomStatus.BOOKING`; payment approved (DP/lunas) selalu set `RoomStatus.RESERVED`.
+- **V-00**: Strategy legacy-only — enum `BOOKING` tetap di schema, runtime tidak boleh menulis.
+
+### 2026-07-01 — Sinkronisasi Docs MD vs Kode (Audit Total)
+- **Audit total 16 file MD vs kode riil** (schema, enum, modul, pricing helper): M01, M04, M05, M03, CODEMAP diperbarui — sync pricing multipliers (WEEKLY 0.5, SMESTERLY 5.7, YEARLY 11.0), model count (55→57), enum count (65→69), module count (38→42), stale anchor commit reference, arsip path references.
+- **M01_MASTER.md**: pricing terms +57 model/69 enum/42 modul + tambah `GuestPreferenceSurvey` & `ExternalReview`.
+- **M04_KEUANGAN.md**: embedded `pricing.test.js` diperbarui ke nilai aktual (WEEKLY 850rb, SMESTERLY 9.69jt, YEARLY 18.7jt).
+- **M05_SIKLUS_HUNI.md**: pricing terms sync (50% / 5,7× / 11×).
+- **M03_FLOW_KONTRAK.md**: anchor warning diperbarui tunjuk arsip `_PETA_AI.md` + hilangkan commit `3c7ffe2`.
+- **CODEMAP.md**: 42 modul · 57 model · 69 enum; link `M13_FASE_H` ke arsip; tambah model baru di index.
+
+### 2026-06-30 — Audit menyeluruh + Fase V booking/payment hardening
+- **Dokumentasi audit diperbarui**: `docs/M09_AUDIT.md` kini mencatat temuan audit terbaru 2026-06-30 (booking publik phone/email, proof ownership, room state `BOOKING`, upload spoof, cron token, meter guard, ticket image access, JWT localStorage) beserta hasil verifikasi build/test.
+- **Checklist aktif dipindah ke M10**: `docs/M10_CHECKLIST_CHANGELOG.md` menambah **Fase V — Audit 2026-06-30 + Booking Flow Baru** dengan keputusan room state final `AVAILABLE -> RESERVED -> OCCUPIED` dan task V-00..V-16 untuk dieksekusi bertahap. File checklist root yang salah tempat dihapus.
+- **Pendalaman flow/komponen ditambahkan**: Fase V diperluas menjadi V-00..V-16, mencakup payment booking path berbasis stay, check-in wajib lunas, public/tenant/admin/staff UI, role/data exposure, finance guard, media safety, dan regression matrix. `M03`, `M04`, `M05`, dan `M09` diberi update/override agar tidak mengikuti kontrak booking lama.
+
+### 2026-06-25 — Redesign total Dashboard Staff (`/dashboard`) — KPI strip + bento
+- **Hero ringkas + kontekstual** (`StaffMotivationDashboard`): tanggal + sapaan waktu (pagi/siang/sore/malam) + sekilas "{N} tugas · {M} perlu perhatian" + aksi cepat; paragraf motivasi/terima kasih panjang dipangkas jadi 1 baris halus.
+- **KPI strip** 5 `StatCard` (reuse `common/StatCard`): Tugas hari ini · Selesai · Perlu bantuan · Meter belum dicatat · Kinerja bulan ini — semua clickable (scroll daftar kerja / ke `/rooms` / `/staff-report`).
+- **Layout bento** (`05-staff.css`): Papan kerja + Prioritas terdekat (top-3, sebelumnya 8 `focusItems` dihitung tapi cuma 1 ditampilkan) sejajar; Kinerja + Checklist sejajar; responsif tumpuk di <992px.
+- **Papan kerja**: progress "selesai hari ini" kini **donut ring** (`DonutGauge`) menggganti teks polos.
+- **Single source of truth**: ekstrak `computeStaffBoard()` ke `utils/staffBoardStats.ts`, dipakai bersama KPI strip + papan kerja (angka tak pernah beda).
+- **Modern touch**: ikon **lucide** menggantikan emoji di tab `StaffUnifiedWorkQueue` + `EmptyState` saat filter kosong; **skeleton per-seksi** (`HeroSkeleton`+`StatCardSkeleton`+`TableSkeleton`) menggantikan spinner full-page.
+- **Hapus dead code lama**: file `utils/staffWorkStats.ts` (yatim) dihapus; kelas CSS usang dibersihkan (`staff-day-hero-*`, `staff-hero-copy`, `staff-thank-card`, `staff-nearest-inline`, `staff-operational-progress`, `staff-meter-summary-widget/info/text/btn`) di 05/06/09/10-*.css — tanpa duplikasi.
+- `SegmentedTabs.icon` diperlebar `string` → `ReactNode` (kompatibel mundur). Build LULUS (vite frontend).
+
+### 2026-06-24 (lanjut-11) — Ikon + konsistensi navbar Staff Portal
+- **`StaffTopWorkspaceNav`**: tambah render ikon emoji (`link.icon`) di tiap tab, selaras dengan `TenantWorkspaceTabs` (sebelumnya ikon didefinisikan di `navigation.ts` tapi tidak dirender).
+- **CSS** (`05-staff.css`): tambah rule `.staff-workspace-tab > span[aria-hidden]` untuk sizing ikon (`1.05rem`).
+- **`AppLayout` staff branch**: label tombol logout `"Logout"` → `"Keluar"` (konsisten dengan tenant portal berbahasa Indonesia).
+- Build LULUS (tsc backend + vite frontend).
+
 ### 2026-06-24 (lanjut-10) — Badge Pengumuman + Indikator Update Laporan + Timeline Tiket
 - **`StayAnnouncementBanner`**: kini menampilkan badge `"N aktif"` + navigasi ke daftar pengumuman (`/portal/announcements`) bila >1 pengumuman aktif.
 - **Fact chip "Laporan" di `MyStayPage`**: dot merah muncul bila ada tiket dengan `updatedAt` > terakhir kali tenant lihat halaman stay (via `sessionStorage`). Label `"Ada update"` menggantikan `"Aktif"`.

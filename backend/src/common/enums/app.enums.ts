@@ -1,6 +1,6 @@
 export enum UserRole { OWNER = 'OWNER', ADMIN = 'ADMIN', STAFF = 'STAFF', TENANT = 'TENANT' }
 export enum Gender { MALE = 'MALE', FEMALE = 'FEMALE', OTHER = 'OTHER' }
-export enum RoomStatus { AVAILABLE = 'AVAILABLE', RESERVED = 'RESERVED', OCCUPIED = 'OCCUPIED', MAINTENANCE = 'MAINTENANCE', INACTIVE = 'INACTIVE' }
+export enum RoomStatus { AVAILABLE = 'AVAILABLE', BOOKING = 'BOOKING', RESERVED = 'RESERVED', OCCUPIED = 'OCCUPIED', MAINTENANCE = 'MAINTENANCE', INACTIVE = 'INACTIVE' }
 // PUB-ROOM-CATEGORY (additive): kategori, tipe, dan ukuran kamar untuk katalog publik.
 export enum RoomCategory { ECONOMY = 'ECONOMY', STANDARD = 'STANDARD', DELUXE = 'DELUXE' }
 export enum RoomType { REGULAR = 'REGULAR', MEZZANINE = 'MEZZANINE' }

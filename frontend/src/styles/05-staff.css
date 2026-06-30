@@ -301,19 +301,6 @@
   background: #0ea5e9;
   box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.14);
 }
-.staff-hero-copy h1 {
-  font-size: clamp(1.35rem, 2.4vw, 2rem);
-  font-weight: 950;
-  letter-spacing: -0.045em;
-  margin: 0 0 0.3rem;
-  color: #0f172a;
-}
-.staff-hero-copy p {
-  margin: 0;
-  color: #475569;
-  font-size: 0.93rem;
-  max-width: 660px;
-}
 .staff-tenure-row {
   display: flex;
   flex-wrap: wrap;
@@ -692,40 +679,6 @@
 }
 
 /* V5.16-H Staff Role Finalization */
-.staff-thank-card {
-  display: flex;
-  align-items: flex-start;
-  gap: 0.55rem;
-  margin-top: 0.75rem;
-  padding: 0.62rem 0.72rem;
-  border-radius: 16px;
-  background: rgba(255, 255, 255, 0.72);
-  border: 1px solid rgba(147, 197, 253, 0.26);
-  max-width: 680px;
-}
-.staff-thank-card > span {
-  width: 30px;
-  height: 30px;
-  border-radius: 12px;
-  display: grid;
-  place-items: center;
-  background: #eff6ff;
-  flex: 0 0 30px;
-}
-.staff-thank-card strong,
-.staff-thank-card small {
-  display: block;
-}
-.staff-thank-card strong {
-  color: #0f172a;
-  font-size: 0.86rem;
-  margin-bottom: 0.08rem;
-}
-.staff-thank-card small {
-  color: #475569;
-  font-size: 0.79rem;
-  line-height: 1.35;
-}
 .staff-routine-summary-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -1233,15 +1186,6 @@
 }
 .staff-motivation-hero.compact .card-body {
   padding: 1rem 1.1rem;
-}
-.staff-thank-card.compact {
-  align-items: center;
-  padding: 0.65rem 0.75rem;
-  margin-top: 0.55rem;
-}
-.staff-thank-card.compact small {
-  color: #475569;
-  font-weight: 700;
 }
 .staff-performance-category-card.compact.mini {
   margin: 0;
@@ -2419,6 +2363,11 @@
   font-weight: 850;
 }
 
+.staff-workspace-tab > span[aria-hidden] {
+  font-size: 1.05rem;
+  line-height: 1;
+}
+
 .staff-workspace-tab:hover {
   color: var(--k48-staff-primary-strong);
   background: var(--k48-staff-surface);
@@ -2471,8 +2420,7 @@
 
 .staff-simple-hero h1,
 .staff-room-detail-hero h1,
-.staff-work-summary-card h2,
-.staff-hero-copy h1 {
+.staff-work-summary-card h2 {
   color: var(--k48-staff-text);
   font-weight: 900;
   letter-spacing: -0.035em;
@@ -2480,8 +2428,7 @@
 
 .staff-simple-hero p,
 .staff-room-detail-hero p,
-.staff-work-summary-card p,
-.staff-hero-copy p {
+.staff-work-summary-card p {
   color: var(--k48-staff-text-soft);
   font-weight: 600;
 }
@@ -2980,36 +2927,11 @@
   background: rgba(251,191,36,0.06);
 }
 
-/* ── R-21: Widget ringkas meter di tab Hari Ini ── */
-.staff-meter-summary-widget {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem;
-  padding: 0.85rem 1rem;
-  background: var(--k48-staff-surface, #f8fafc);
-  border: 1px solid var(--k48-staff-border, #e5e7eb);
-  border-radius: 12px;
-  margin-top: 0.75rem;
-  flex-wrap: wrap;
-}
-.staff-meter-summary-info {
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
-  flex: 1;
-  min-width: 0;
-}
 .staff-hero-pill.compact {
   font-size: 0.68rem;
   padding: 0.18rem 0.55rem;
   white-space: nowrap;
 }
-.staff-meter-summary-text {
-  font-size: 0.875rem;
-  color: var(--bs-body-color);
-}
-.staff-meter-summary-btn { white-space: nowrap; }
 
 /* ── R-19: Mobile meter card list — tampil di ≤768px, tabel tampil di >768px ── */
 .staff-meter-table-desktop { display: block; }
@@ -3109,4 +3031,79 @@
   .staff-simple-mode .dropdown-menu {
     z-index: 1060;
   }
+}
+
+/* ── Redesign Dashboard staff — hero ringkas + KPI strip + bento ── */
+.staff-hero-ringkas .card-body { padding: 1rem 1.25rem; }
+.staff-hero-ringkas-layout {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 1rem; flex-wrap: wrap;
+}
+.staff-hero-ringkas-copy { min-width: 0; }
+.staff-hero-ringkas-copy h1 {
+  font-size: clamp(1.25rem, 2.4vw, 1.5rem); font-weight: 850;
+  margin: 0.15rem 0 0.2rem; color: #0f172a; letter-spacing: -0.02em;
+}
+.staff-hero-glance { margin: 0; font-weight: 800; color: #0369a1; font-size: 0.95rem; }
+.staff-hero-thanks {
+  display: block; margin-top: 0.35rem; color: #64748b;
+  font-size: 0.78rem; line-height: 1.45; max-width: 52ch;
+}
+.staff-hero-ringkas-actions { flex-shrink: 0; }
+
+/* KPI strip — kartu metrik ringkas (reuse .stat-card) */
+.staff-kpi-strip {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(168px, 1fr));
+  gap: 0.7rem;
+}
+
+/* Bento row generik (papan kerja + prioritas, kinerja + checklist) */
+.staff-bento-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) minmax(238px, 0.85fr);
+  gap: 0.85rem;
+  align-items: stretch;
+}
+.staff-bento-row > * { min-width: 0; }
+
+/* Donut progress di papan kerja */
+.staff-operational-board .staff-operational-head { align-items: center; }
+.staff-board-progress-ring { flex-shrink: 0; }
+.staff-board-progress-ring .recharts-donut-center {
+  font-weight: 850; color: #0f172a; text-align: center; line-height: 1;
+}
+.staff-board-progress-ring .recharts-donut-center strong { font-size: 1.05rem; display: block; }
+.staff-board-progress-ring .recharts-donut-center small { font-size: 0.6rem; color: #64748b; font-weight: 700; }
+
+/* Kartu prioritas terdekat (sisi kanan bento papan kerja) */
+.staff-priority-card {
+  border-radius: 22px;
+  background: linear-gradient(135deg, #ffffff, #f7fbff);
+  border: 1px solid rgba(147, 197, 253, 0.34) !important;
+  box-shadow: 0 14px 30px rgba(15, 23, 42, 0.05);
+}
+.staff-priority-card .card-body { display: flex; flex-direction: column; height: 100%; padding: 1rem 1.1rem; }
+.staff-priority-head h3 { font-size: 1rem; font-weight: 850; margin: 0.3rem 0 0.55rem; color: #0f172a; }
+.staff-priority-list { list-style: none; margin: 0 0 0.5rem; padding: 0; display: grid; gap: 0.4rem; }
+.staff-priority-item {
+  display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 0.55rem;
+  border: 1px solid #eef2f7; border-radius: 12px; padding: 0.5rem 0.6rem; background: #fff;
+}
+.staff-priority-dot { width: 9px; height: 9px; border-radius: 999px; flex-shrink: 0; }
+.staff-priority-body { min-width: 0; display: flex; flex-direction: column; }
+.staff-priority-body strong { font-size: 0.88rem; color: #0f172a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.staff-priority-body span { font-size: 0.74rem; color: #64748b; }
+.staff-priority-go { padding: 0 0.15rem; color: #2563eb; display: inline-flex; align-items: center; }
+.staff-priority-empty { font-size: 0.84rem; color: #64748b; margin: 0; }
+.staff-priority-cta { margin-top: auto; align-self: flex-start; }
+
+/* Responsif: tumpuk bento di layar sempit */
+@media (max-width: 991.98px) {
+  .staff-bento-row { grid-template-columns: 1fr; }
+}
+@media (max-width: 575.98px) {
+  .staff-kpi-strip { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .staff-hero-ringkas-actions { width: 100%; }
+  .staff-hero-ringkas-actions .btn { width: 100%; }
 }

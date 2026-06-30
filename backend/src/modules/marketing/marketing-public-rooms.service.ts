@@ -8,6 +8,7 @@ import { PrismaService } from '../../prisma/prisma.service';
 import { isBookingSchemaReady } from '../tenant-bookings/booking-schema.helper';
 import { calculateRentByPricingTerm } from '../tenant-bookings/pricing.helper';
 import { PublicRoomsQueryDto } from './dto/public-rooms-query.dto';
+import { computeFacilityGap, type FacilityGapInput } from '../rooms/room-facility-spec';
 import {
   GENERIC_ROOM_MARKETING_IMAGES,
   ROOM_IMAGE_BASE_PATH,
@@ -40,7 +41,7 @@ type PublicRoomRecord = Prisma.RoomGetPayload<{ select: typeof PUBLIC_ROOM_SELEC
 
 @Injectable()
 export class MarketingPublicRoomsService {
-  private bookingSchemaStatusCache: { hasReservedRoomStatus: boolean; hasStayExpiresAt: boolean } | null = null;
+  private bookingSchemaStatusCache: { hasReservedRoomStatus: boolean; hasBookingRoomStatus: boolean; hasStayExpiresAt: boolean } | null = null;
 
   constructor(private readonly prisma: PrismaService) {}
 
@@ -135,6 +136,12 @@ export class MarketingPublicRoomsService {
     }
 
     const where = this.buildPublicRoomWhere(query);
+
+    // Sembunyikan kamar dengan gap fasilitas↔inventaris (mis. AC kurang) dari katalog publik.
+    const gapRoomIds = await this.getRoomIdsWithFacilityGap();
+    if (gapRoomIds.length) {
+      (where.AND as Prisma.RoomWhereInput[]).push({ id: { notIn: gapRoomIds } });
+    }
 
     const [items, totalItems] = await this.prisma.$transaction([
       this.prisma.room.findMany({
@@ -507,6 +514,7 @@ export class MarketingPublicRoomsService {
         status: {
           in: [
             RoomStatus.AVAILABLE as any,
+            RoomStatus.BOOKING as any,
             RoomStatus.RESERVED as any,
             RoomStatus.OCCUPIED as any,
             RoomStatus.MAINTENANCE as any,
@@ -517,6 +525,11 @@ export class MarketingPublicRoomsService {
     });
 
     if (!room) {
+      throw new NotFoundException('Kamar tidak ditemukan atau tidak tersedia untuk dilihat');
+    }
+
+    // Kamar dengan gap fasilitas↔inventaris (mis. AC kurang) tidak dibuka ke publik.
+    if ((await this.getRoomIdsWithFacilityGap([room.id])).includes(room.id)) {
       throw new NotFoundException('Kamar tidak ditemukan atau tidak tersedia untuk dilihat');
     }
 
@@ -531,6 +544,25 @@ export class MarketingPublicRoomsService {
   // PRIVATE HELPERS
   // ------------------------------------------------------------------
 
+  /** roomId yang punya gap fasilitas↔inventaris belum terpenuhi (disembunyikan dari katalog). */
+  private async getRoomIdsWithFacilityGap(roomIds?: number[]): Promise<number[]> {
+    const rooms = await this.prisma.room.findMany({
+      where: roomIds && roomIds.length ? { id: { in: roomIds } } : { isActive: true },
+      select: {
+        id: true,
+        category: true,
+        roomType: true,
+        roomSize: true,
+        hasAc: true,
+        roomItems: { select: { id: true, status: true, item: { select: { name: true } } } },
+        facilities: { select: { inventoryItemId: true } },
+      },
+    });
+    return rooms
+      .filter((room) => computeFacilityGap(room as unknown as FacilityGapInput).hasGap)
+      .map((room) => room.id);
+  }
+
   private buildPublicRoomWhere(query: PublicRoomsQueryDto): Prisma.RoomWhereInput {
     const conditions: Prisma.RoomWhereInput[] = [
       { isActive: true },
@@ -538,6 +570,7 @@ export class MarketingPublicRoomsService {
         status: {
           in: [
             RoomStatus.AVAILABLE as any,
+            RoomStatus.BOOKING as any,
             RoomStatus.RESERVED as any,
             RoomStatus.OCCUPIED as any,
             RoomStatus.MAINTENANCE as any,
@@ -645,17 +678,21 @@ export class MarketingPublicRoomsService {
       availablePricingTerms: this.getAvailablePricingTerms(room),
       isAvailable:
         room.status === RoomStatus.AVAILABLE ||
+        room.status === RoomStatus.BOOKING ||
         room.status === RoomStatus.RESERVED ||
         (room.status === RoomStatus.MAINTENANCE && Boolean(room.allowBookingWhileCleaning)),
       canBook:
         room.status === RoomStatus.AVAILABLE ||
+        room.status === RoomStatus.BOOKING ||
         room.status === RoomStatus.RESERVED ||
         (room.status === RoomStatus.MAINTENANCE && Boolean(room.allowBookingWhileCleaning)),
       availabilityNote:
-        room.status === RoomStatus.RESERVED
-          ? 'Sudah ada peminat, tetapi belum terkunci sebelum pembayaran valid disetujui.'
-          : room.status === RoomStatus.MAINTENANCE && Boolean(room.allowBookingWhileCleaning)
-            ? 'Bisa dipesan sekarang — kamar sedang dibersihkan staf dan siap dihuni setelah pembersihan selesai.'
+        room.status === RoomStatus.BOOKING
+          ? 'Sedang di-booking (DP dibayar) — masih bisa dipesan, first-paid-wins.'
+          : room.status === RoomStatus.RESERVED
+            ? 'Sudah lunas dibayar & dikunci untuk tenant.'
+            : room.status === RoomStatus.MAINTENANCE && Boolean(room.allowBookingWhileCleaning)
+              ? 'Bisa dipesan sekarang — kamar sedang dibersihkan staf dan siap dihuni setelah pembersihan selesai.'
             : room.status === RoomStatus.MAINTENANCE
               ? 'Kamar kosong, tetapi sedang dicek sebelum dibuka untuk booking.'
               : null,

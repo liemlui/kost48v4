@@ -139,7 +139,7 @@ export class TenantBookingsService {
         const bookableWhileCleaning =
           room.status === RoomStatus.MAINTENANCE && Boolean(room.allowBookingWhileCleaning);
         if (
-          ![RoomStatus.AVAILABLE, RoomStatus.RESERVED].includes(room.status as RoomStatus) &&
+          ![RoomStatus.AVAILABLE, RoomStatus.BOOKING, RoomStatus.RESERVED].includes(room.status as RoomStatus) &&
           !bookableWhileCleaning
         ) {
           throw new ConflictException('Kamar belum bisa dipesan karena sudah aktif ditempati atau sedang tidak tersedia');
@@ -176,11 +176,7 @@ export class TenantBookingsService {
           ? Prisma.sql`CAST(${dto.stayPurpose} AS "StayPurpose")`
           : Prisma.sql`NULL`;
 
-        await tx.$executeRaw(Prisma.sql`
-          UPDATE "Room"
-          SET "status" = CAST(${RoomStatus.RESERVED} AS "RoomStatus"), "updatedAt" = NOW()
-          WHERE id = ${dto.roomId}
-        `);
+        // Room status left as-is — baru berubah saat DP/LUNAS dibayar (BOOKING/RESERVED).
 
         const insertedRows = await tx.$queryRaw<Array<{ id: number }>>(Prisma.sql`
           INSERT INTO "Stay" (
@@ -279,8 +275,14 @@ export class TenantBookingsService {
         if (booking.stayStatus !== StayStatus.ACTIVE) {
           throw new ConflictException('Booking tidak lagi aktif dan tidak dapat disetujui');
         }
-        if (booking.roomStatus !== RoomStatus.RESERVED) {
-          throw new ConflictException('Booking bukan booking reserved yang menunggu approval');
+        // Room masih di status AVAILABLE/BOOKING/reservasi lain — approval invoice
+        // tidak bergantung pada status kamar, cukup booking aktif & belum expired.
+        if (
+          ![RoomStatus.AVAILABLE, RoomStatus.BOOKING, RoomStatus.RESERVED, RoomStatus.MAINTENANCE].includes(
+            booking.roomStatus as RoomStatus,
+          )
+        ) {
+          throw new ConflictException('Kamar tidak dalam status yang bisa diproses untuk approval booking');
         }
         if (!booking.roomIsActive) {
           throw new ConflictException('Kamar tidak aktif untuk approval booking');
@@ -563,8 +565,10 @@ if (error instanceof Prisma.PrismaClientKnownRequestError) {
           throw new ConflictException('Booking tidak lagi aktif dan tidak dapat ditolak lewat flow ini');
         }
 
-        if (row.roomStatus !== RoomStatus.RESERVED) {
-          throw new ConflictException('Booking sudah masuk flow hunian/pembayaran. Gunakan flow lifecycle yang sesuai.');
+        // Tolak hanya bila kamar sudah OCCUPIED (penghuni aktif) — status lain
+        // (AVAILABLE/BOOKING/RESERVED/MAINTENANCE) masih bisa ditolak.
+        if (row.roomStatus === RoomStatus.OCCUPIED) {
+          throw new ConflictException('Booking sudah menjadi hunian aktif. Gunakan flow checkout yang sesuai.');
         }
 
         if (row.bookingSource !== LeadSource.WEBSITE) {
@@ -587,12 +591,12 @@ if (error instanceof Prisma.PrismaClientKnownRequestError) {
           throw new ConflictException('Booking sudah memiliki bukti pembayaran. Review pembayaran harus diselesaikan dari flow pembayaran.');
         }
 
-        const otherActiveReservedBooking = await tx.stay.findFirst({
+        // Cek apakah masih ada booking aktif lain di kamar yang sama.
+        const otherActiveBooking = await tx.stay.findFirst({
           where: {
             roomId: row.roomId,
             status: StayStatus.ACTIVE as any,
             NOT: { id: stayId },
-            room: { status: RoomStatus.RESERVED as any },
           },
           select: { id: true },
         });
@@ -606,8 +610,10 @@ if (error instanceof Prisma.PrismaClientKnownRequestError) {
           },
           select: { id: true },
         });
-        const nextRoomStatus = otherActiveReservedBooking
-          ? RoomStatus.RESERVED
+        // Jika masih ada booking lain, biarkan status kamar apa adanya.
+        // Jika tidak, fallback ke MAINTENANCE atau AVAILABLE.
+        const nextRoomStatus = otherActiveBooking
+          ? row.roomStatus
           : openCleaningTicket
             ? RoomStatus.MAINTENANCE
             : RoomStatus.AVAILABLE;
@@ -748,7 +754,8 @@ if (error instanceof Prisma.PrismaClientKnownRequestError) {
           );
         }
 
-        if (row.roomStatus !== RoomStatus.RESERVED) {
+        // Tolak pembatalan mandiri hanya bila kamar sudah OCCUPIED (penghuni aktif).
+        if (row.roomStatus === RoomStatus.OCCUPIED) {
           throw new ConflictException(
             'Booking sudah menjadi hunian aktif. Gunakan proses checkout.',
           );
@@ -784,12 +791,11 @@ if (error instanceof Prisma.PrismaClientKnownRequestError) {
           dto.cancelReason?.trim() ||
           'Dibatalkan oleh tenant sebelum review admin';
 
-        const otherActiveReservedBooking = await tx.stay.findFirst({
+        const otherActiveBooking = await tx.stay.findFirst({
           where: {
             roomId: row.roomId,
             status: StayStatus.ACTIVE as any,
             NOT: { id: stayId },
-            room: { status: RoomStatus.RESERVED as any },
           },
           select: { id: true },
         });
@@ -803,8 +809,10 @@ if (error instanceof Prisma.PrismaClientKnownRequestError) {
           },
           select: { id: true },
         });
-        const nextRoomStatus = otherActiveReservedBooking
-          ? RoomStatus.RESERVED
+        // Jika masih ada booking lain, biarkan status kamar apa adanya.
+        // Jika tidak, fallback ke MAINTENANCE atau AVAILABLE.
+        const nextRoomStatus = otherActiveBooking
+          ? row.roomStatus
           : openCleaningTicket
             ? RoomStatus.MAINTENANCE
             : RoomStatus.AVAILABLE;
@@ -936,7 +944,7 @@ if (error instanceof Prisma.PrismaClientKnownRequestError) {
         INNER JOIN "Room" r ON r.id = s."roomId"
         WHERE s."tenantId" = ${tenantId}
           AND (
-            (s.status = CAST(${StayStatus.ACTIVE} AS "StayStatus") AND r.status = CAST(${RoomStatus.RESERVED} AS "RoomStatus"))
+            s.status = CAST(${StayStatus.ACTIVE} AS "StayStatus")
             OR (s.status = CAST(${StayStatus.CANCELLED} AS "StayStatus") AND s."bookingSource" = CAST(${LeadSource.WEBSITE} AS "LeadSource"))
           )
         ${searchFilter}
@@ -947,10 +955,9 @@ if (error instanceof Prisma.PrismaClientKnownRequestError) {
       const countRows = await this.prisma.$queryRaw<Array<{ total: bigint | number }>>(Prisma.sql`
         SELECT COUNT(*)::bigint AS total
         FROM "Stay" s
-        INNER JOIN "Room" r ON r.id = s."roomId"
         WHERE s."tenantId" = ${tenantId}
           AND (
-            (s.status = CAST(${StayStatus.ACTIVE} AS "StayStatus") AND r.status = CAST(${RoomStatus.RESERVED} AS "RoomStatus"))
+            s.status = CAST(${StayStatus.ACTIVE} AS "StayStatus")
             OR (s.status = CAST(${StayStatus.CANCELLED} AS "StayStatus") AND s."bookingSource" = CAST(${LeadSource.WEBSITE} AS "LeadSource"))
           )
         ${searchFilter}

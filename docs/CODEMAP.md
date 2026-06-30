@@ -1,13 +1,13 @@
 # CODEMAP — Peta Navigasi Kode KOST48 V5 (untuk AI)
 
 > **Tujuan:** lompat langsung ke file yang benar tanpa scan buta. **Ini peta NAVIGASI, bukan sumber kebenaran perilaku** — detail aturan/flow ada di M-file domain (kolom "Detail"). Verifikasi simbol via Grep sebelum edit; path bisa bergeser.
-> Stack: backend NestJS+Prisma+PostgreSQL (`backend/`), frontend React+Vite (`frontend/`). 38 modul · 55 model · 24 grup halaman.
+> Stack: backend NestJS+Prisma+PostgreSQL (`backend/`), frontend React+Vite (`frontend/`). 42 modul · 57 model · 24 grup halaman.
 
 ## Konvensi (sekali paham, berlaku semua modul)
 - **Backend modul:** `backend/src/modules/<nama>/` berisi `<nama>.controller.ts` (route `/<nama>`), `<nama>.service.ts` (logika), `<nama>.module.ts` (wiring), `dto/`. Modul besar dipecah multi-service (lihat tabel).
 - **Infra backend:** `backend/src/prisma/` (PrismaService), `backend/src/auth/` (JWT+guard role), `backend/src/audit-log/` (AuditLog writer), `backend/src/common/` (`guards/ decorators/ filters/ interceptors/ enums/ utils/ business/`), `backend/src/main.ts` (bootstrap, CORS, prefix `/api`).
 - **Frontend halaman:** `frontend/src/pages/<grup>/<Halaman>Page.tsx`; komponen reusable `frontend/src/components/`; util `frontend/src/utils/`.
-- **Schema:** `backend/prisma/schema.prisma` (55 model, 65 enum). Generated client `backend/src/generated/prisma/` = **JANGAN baca** (32MB, regen `prisma generate`).
+- **Schema:** `backend/prisma/schema.prisma` (57 model, 69 enum). Generated client `backend/src/generated/prisma/` = **JANGAN baca** (32MB, regen `prisma generate`).
 
 ## Backend modul → path → tanggung jawab
 
@@ -78,7 +78,7 @@
 | audit-log | `audit-log/audit-log.service.ts` | Catat `meta.ai` saat manusia memakai draft AI untuk aksi final |
 | settings/env | `settings/settings.service.ts` + env | Status AI, budget guard, model, manual-only flag |
 
-### UI/UX Compact (Fase H) — detail: `M13_FASE_H_UIUX_COMPACT.md`
+### UI/UX Compact (Fase H) — detail: `docs/archieve/2026-06-20_fase_selesai/M13_FASE_H_UIUX_COMPACT.md` (🗄️ arsip)
 | Area | Path | Tanggung jawab |
 |---|---|---|
 | navigation config | `frontend/src/config/navigation.ts` | Sidebar sections OWNER/ADMIN/STAFF/TENANT |
@@ -100,13 +100,13 @@
 ## Frontend grup halaman (`frontend/src/pages/`)
 `public` katalog+booking publik · `auth` login · `portal` area tenant (MyStay, invoice, loyalty, manual) · `dashboard` (DashboardAdmin owner/admin) · `stays` · `bookings` · `renew-requests` · `invoices` · `payments` · `finance` (AccountingSetup) · `reports` · `rooms` · `resources`+`admin` (CRUD generik via ConfiguredResourcePage/SimpleCrudPage) · `tickets` · `staff`+`staff-routines` · `services` · `marketing` · `loyalty` · `notifications`+`reminders` · `settings` · `profile` · `components/ai` (target Fase G reusable AI button/drawer).
 
-## Index model (55) — grup → `schema.prisma`
+## Index model (57) — grup → `schema.prisma`
 - **Identitas/akses:** User, Tenant, PasswordResetToken, AuditLog, PushSubscription, AppNotification, OperationalSetting
 - **Huni:** Room, RoomFacility, Stay, RoomTransfer, RenewRequest, CheckoutRequest, MeterReading
 - **Uang:** Invoice, InvoiceLine, InvoicePayment, PaymentSubmission, TenantDepositLedgerEntry, Expense, WifiSale
 - **Akuntansi:** ChartOfAccount, CashAccount, AccountingPeriod, OpeningBalanceBatch, OpeningBalanceLine, JournalEntry, JournalLine, RentRecognitionSchedule, FixedAsset, AssetDepreciationRun, AssetDepreciationLine
 - **Operasional/staf:** Ticket, StaffRoutineTemplate/Assignment/Completion, StaffWorkAudit, StaffPerformanceEvent, StaffReview, StaffFieldReport, InventoryItem, RoomItem, InventoryMovement, Announcement
-- **Growth/AI:** LoyaltyPoint, LoyaltyReward, Redemption, PeerBehaviorReport, TenantReferral, Faq, AdditionalService, ServiceInterest, SatisfactionSurvey, TenantStaffReview, MarketAnalysis, AiDraft
+- **Growth/AI:** LoyaltyPoint, LoyaltyReward, Redemption, PeerBehaviorReport, TenantReferral, Faq, AdditionalService, ServiceInterest, SatisfactionSurvey, TenantStaffReview, MarketAnalysis, AiDraft, GuestPreferenceSurvey, ExternalReview
 
 ## Flow & audit anchor
 Tabel flow + method-anchor: `M03_FLOW_KONTRAK.md` (kontrak/uang) & `M09_AUDIT.md` (job otomatis, mis. `runAccountingAutoClose`, `rent-recognition`). Keputusan owner (84): `M02_KEPUTUSAN_OWNER.md`.

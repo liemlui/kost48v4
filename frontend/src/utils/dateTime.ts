@@ -26,6 +26,17 @@ export function formatDateTimeWib(value?: string | Date | null): string {
   return `${formatted.replace('.', ':')} ${DEFAULT_TIME_ZONE_LABEL}`;
 }
 
+export function formatDateOnly(value?: string | Date | null): string {
+  const date = parseDateTimeSafe(value);
+  if (!date) return '-';
+  return new Intl.DateTimeFormat('id-ID', {
+    timeZone: DEFAULT_TIME_ZONE,
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  }).format(date);
+}
+
 export function formatClockWib(value?: string | Date | null): string {
   const date = parseDateTimeSafe(value);
   if (!date) return '-';
@@ -135,4 +146,37 @@ export function daysFromToday(value?: string | Date | null): number | null {
   const date = parseDateTimeSafe(value);
   if (!date) return null;
   return differenceInCalendarDays(date, new Date());
+}
+
+export type LeaseProgress = {
+  hasRange: boolean;
+  percentElapsed: number; // 0..100
+  daysElapsed: number;
+  daysRemaining: number;  // negatif bila lewat jadwal
+  totalDays: number;
+};
+
+export function getLeaseProgress(checkInDate?: string | Date | null, endDate?: string | Date | null): LeaseProgress {
+  const start = parseDateTimeSafe(checkInDate);
+  const end = parseDateTimeSafe(endDate);
+  if (!start || !end) {
+    return { hasRange: false, percentElapsed: 0, daysElapsed: 0, daysRemaining: 0, totalDays: 0 };
+  }
+  const now = new Date();
+  const totalDays = Math.max(1, differenceInCalendarDays(end, start));
+  const daysElapsed = Math.min(totalDays, Math.max(0, differenceInCalendarDays(now, start)));
+  const daysRemaining = differenceInCalendarDays(end, now);
+  const percentElapsed = Math.min(100, Math.max(0, Math.round((daysElapsed / totalDays) * 100)));
+  return { hasRange: true, percentElapsed, daysElapsed, daysRemaining, totalDays };
+}
+
+export function formatTenure(checkInDate?: string | Date | null): string {
+  const start = parseDateTimeSafe(checkInDate);
+  if (!start) return '-';
+  const { years = 0, months = 0, days = 0 } = intervalToDuration({ start, end: new Date() });
+  const parts: string[] = [];
+  if (years > 0) parts.push(`${years} tahun`);
+  if (months > 0) parts.push(`${months} bulan`);
+  if (parts.length === 0) parts.push(`${days} hari`);
+  return parts.join(' ');
 }

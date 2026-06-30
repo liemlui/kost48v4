@@ -37,7 +37,7 @@ export async function findBookingByIdTx(tx: Prisma.TransactionClient, bookingId:
 }
 
 export async function isBookingSchemaReady(prisma: PrismaService, cache: BookingSchemaStatus | null) {
-  if (cache) return cache.hasReservedRoomStatus && cache.hasStayExpiresAt;
+  if (cache) return cache.hasReservedRoomStatus && cache.hasBookingRoomStatus && cache.hasStayExpiresAt;
   const rows = await prisma.$queryRaw<BookingSchemaStatus[]>(Prisma.sql`
     SELECT
       EXISTS (
@@ -45,10 +45,14 @@ export async function isBookingSchemaReady(prisma: PrismaService, cache: Booking
         WHERE t.typname = 'RoomStatus' AND e.enumlabel = ${RoomStatus.RESERVED}
       ) AS "hasReservedRoomStatus",
       EXISTS (
+        SELECT 1 FROM pg_type t INNER JOIN pg_enum e ON e.enumtypid = t.oid
+        WHERE t.typname = 'RoomStatus' AND e.enumlabel = ${RoomStatus.BOOKING}
+      ) AS "hasBookingRoomStatus",
+      EXISTS (
         SELECT 1 FROM information_schema.columns
         WHERE table_schema = 'public' AND table_name = 'Stay' AND column_name = 'expiresAt'
       ) AS "hasStayExpiresAt"
   `);
-  const status = rows[0] ?? { hasReservedRoomStatus: false, hasStayExpiresAt: false };
-  return Boolean(status.hasReservedRoomStatus) && Boolean(status.hasStayExpiresAt);
+  const status = rows[0] ?? { hasReservedRoomStatus: false, hasBookingRoomStatus: false, hasStayExpiresAt: false };
+  return Boolean(status.hasReservedRoomStatus) && Boolean(status.hasBookingRoomStatus) && Boolean(status.hasStayExpiresAt);
 }

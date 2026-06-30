@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Alert, Button, Card } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
+import CurrencyDisplay from '../../components/common/CurrencyDisplay';
 import StatusBadge, { getStatusLabel } from '../../components/common/StatusBadge';
 import type { PublicBookingResult } from '../../types';
 import { formatDate } from './guestBookingUtils';
@@ -27,6 +28,9 @@ export default function GuestBookingSuccess({ result }: GuestBookingSuccessProps
       setCopyError(true);
     }
   };
+
+  const fmt = (n: number) =>
+    new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(n);
 
   return (
     <div className="public-page-shell">
@@ -102,17 +106,62 @@ export default function GuestBookingSuccess({ result }: GuestBookingSuccessProps
               </Alert>
             )}
 
+            {/* Info pembayaran */}
+            {result.payment && (
+              <div className="p-3 rounded mb-3" style={{ background: '#fefce8', border: '1px solid #fde047', fontSize: '0.875rem' }}>
+                <div className="fw-semibold mb-2">
+                  {result.payment.paymentChoice === 'FULL'
+                    ? '🧾 LUNAS — Bayar penuh sekarang'
+                    : '💰 DP 30% — Bayar sekarang untuk amankan kamar'}
+                </div>
+                <div className="d-flex justify-content-between">
+                  <span>Yang harus dibayar sekarang</span>
+                  <strong>
+                    <CurrencyDisplay amount={
+                      result.payment.paymentChoice === 'FULL'
+                        ? result.payment.agreedRentAmountRupiah + result.payment.depositAmountRupiah
+                        : result.payment.downPaymentAmountRupiah
+                    } />
+                  </strong>
+                </div>
+                {result.payment.paymentChoice === 'DP' && (
+                  <div className="small text-muted mt-1">
+                    Sisa sewa + deposit ({fmt(result.payment.agreedRentAmountRupiah - result.payment.downPaymentAmountRupiah + result.payment.depositAmountRupiah)}) dilunasi sebelum check-in.
+                  </div>
+                )}
+                {result.payment.hasPet && (
+                  <div className="small mt-1" style={{ color: '#0369a1' }}>
+                    🐾 Termasuk deposit hewan {fmt(result.payment.depositBreakdown.petDepositRupiah)} (refundable).
+                  </div>
+                )}
+              </div>
+            )}
+
             <div className="mt-4">
-              <h6 className="fw-semibold mb-3">Apa yang terjadi selanjutnya?</h6>
-              <ol className="small text-muted mb-0" style={{ paddingLeft: '1.25rem' }}>
-                <li className="mb-1"><strong>Admin review booking.</strong></li>
-                <li className="mb-1"><strong>Jika disetujui, tagihan muncul di portal.</strong></li>
-                <li className="mb-1"><strong>Kamar aman setelah pembayaran disetujui.</strong></li>
+              <h6 className="fw-semibold mb-3">🔐 Bagaimana kamar diamankan?</h6>
+              <ol className="small mb-0" style={{ paddingLeft: '1.25rem', lineHeight: 1.8 }}>
+                <li className="mb-2">
+                  <strong>Admin me-review booking Anda</strong> — biasanya dalam hitungan jam.
+                </li>
+                <li className="mb-2">
+                  <strong>Invoice resmi terbit di portal</strong> — login dengan akun yang baru dibuat untuk melihat tagihan.
+                </li>
+                <li className="mb-2">
+                  <strong>Bayar DP atau LUNAS sesuai pilihan Anda</strong> — begitu pembayaran disetujui admin,{' '}
+                  <span className="text-success fw-semibold">kamar resmi menjadi milik Anda</span>.
+                </li>
+                <li className="mb-2">
+                  <span className="text-danger">⚠️ Tanpa pembayaran, kamar bisa dipesan orang lain</span> — sistem kami menganut{' '}
+                  <strong>first-paid-wins</strong>: siapa yang bayar duluan (termasuk DP), dialah yang dapat kamar.
+                </li>
+                <li className="mb-2">
+                  <strong>Booking otomatis kedaluwarsa dalam 3 jam</strong> jika belum ada tindak lanjut pembayaran.
+                </li>
               </ol>
             </div>
 
             <Alert variant="warning" className="small mb-0 mt-3">
-              <strong>Jangan transfer sebelum tagihan resmi.</strong>
+              <strong>Jangan transfer sebelum tagihan resmi muncul di portal.</strong> Pantau status booking di portal penghuni.
             </Alert>
 
             <div className="d-flex gap-2 justify-content-center mt-4 flex-wrap">

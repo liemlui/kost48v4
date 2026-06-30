@@ -59,6 +59,17 @@ AI finance hanya boleh menjadi analis dan pembuat draft keputusan Owner/Admin. D
 - **Expense OCR draft:** nota biaya boleh di-OCR lokal lalu AI menormalkan teks menjadi draft expense. Admin/Owner tetap mengoreksi dan klik simpan; posting expense/jurnal mengikuti service existing.
 - **Audit trail:** jika rekomendasi AI dipakai untuk approve/reject pembayaran atau membuat expense, catat `AuditLog.meta.ai` berisi feature, model, promptHash, snapshotHash, confidence, dan humanDecision.
 
+## Update 2026-06-30 - Payment Booking Fase V
+
+Keputusan booking awal Fase V mengubah arti status kamar, tetapi tidak mengubah prinsip keuangan:
+
+- DP 30% approved dan pelunasan approved sama-sama mengunci room menjadi `RESERVED`.
+- `RESERVED` bukan bukti lunas; bukti lunas tetap invoice `PAID` atau total pembayaran invoice >= total tagihan.
+- Payment approval tidak boleh mengubah room ke `OCCUPIED`, tidak boleh promote meter, dan tidak boleh mengisi `initialMetersPromotedAt`.
+- Check-in/serah kunci wajib lunas penuh; baru setelah itu room `OCCUPIED` dan revenue/lifecycle hunian mengikuti flow promoted.
+- Payment proof wajib punya ownership server-side; batch payment tidak boleh membuat submission tanpa file bukti yang terikat user/tenant.
+- Guard no-partial tetap berlaku: nominal sah booking adalah DP tepat atau pelunasan tepat sesuai sisa kewajiban yang dihitung server.
+
 ## Bagian 1 - `docs/05_VERIFIKASI_KEUANGAN.md`
 
 ### 05 — HARNESS VERIFIKASI KEUANGAN (jaring pengaman AI eksekutor)
@@ -97,13 +108,13 @@ const test = require('node:test');
 const assert = require('node:assert');
 const P = require('../../dist/modules/tenant-bookings/pricing.helper.js');
 
-test('calculateRentByPricingTerm — tarif bulanan 1.700.000', () => {
+test('calculateRentByPricingTerm — tarif bulanan 1.700.000 (owner decision: WEEKLY=0.5, SMESTERLY=5.7, YEARLY=11)', () => {
   assert.strictEqual(P.calculateRentByPricingTerm(1700000, 'DAILY'), 225000);    // 221.000 → bulat naik 5.000
-  assert.strictEqual(P.calculateRentByPricingTerm(1700000, 'WEEKLY'), 765000);
-  assert.strictEqual(P.calculateRentByPricingTerm(1700000, 'BIWEEKLY'), 1275000);
+  assert.strictEqual(P.calculateRentByPricingTerm(1700000, 'WEEKLY'), 850000);   // 0.5 × 1.700.000 = 850.000
+  assert.strictEqual(P.calculateRentByPricingTerm(1700000, 'BIWEEKLY'), 1275000); // 0.75 × 1.700.000 = 1.275.000 → 1.275.000
   assert.strictEqual(P.calculateRentByPricingTerm(1700000, 'MONTHLY'), 1700000);
-  assert.strictEqual(P.calculateRentByPricingTerm(1700000, 'SMESTERLY'), 9350000);
-  assert.strictEqual(P.calculateRentByPricingTerm(1700000, 'YEARLY'), 17000000);
+  assert.strictEqual(P.calculateRentByPricingTerm(1700000, 'SMESTERLY'), 9690000); // 5.7 × 1.700.000 = 9.690.000 → 9.690.000
+  assert.strictEqual(P.calculateRentByPricingTerm(1700000, 'YEARLY'), 18700000);   // 11.0 × 1.700.000 = 18.700.000 → 18.700.000
 });
 test('pembulatan naik ke 5.000', () => {
   assert.strictEqual(P.calculateRentByPricingTerm(1333000, 'DAILY'), 175000);    // 173.290 → 175.000

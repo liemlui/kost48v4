@@ -80,7 +80,7 @@ export default function StaffTopWorkspaceNav() {
       warehouse: counts.warehouse,
       report: counts.report,
     };
-    return { to: link.to, label: link.label, count: countMap[key] ?? 0, key, hint: link.hint ?? link.label };
+    return { to: link.to, label: link.label, icon: link.icon, count: countMap[key] ?? 0, key, hint: link.hint ?? link.label };
   }), [navLinks, counts]);
 
   return (
@@ -95,7 +95,8 @@ export default function StaffTopWorkspaceNav() {
               title={link.hint}
               className={({ isActive }) => `staff-workspace-tab ${isActive ? 'active' : ''}${badgeTone(link.key, link.count)}`}
             >
-              <span>{link.label}</span>
+              <span aria-hidden="true">{link.icon}</span>
+              <strong>{link.label}</strong>
               {badge ? <em>{badge}</em> : null}
             </NavLink>
           );

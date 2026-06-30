@@ -867,28 +867,6 @@
   max-width: 780px;
   line-height: 1.55;
 }
-.staff-operational-progress {
-  min-width: 168px;
-  padding: 0.78rem 0.9rem;
-  border-radius: 20px;
-  background: rgba(255, 255, 255, 0.88);
-  border: 1px solid rgba(37, 99, 235, 0.12);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.75);
-}
-.staff-operational-progress strong {
-  display: block;
-  color: #1d4ed8;
-  font-size: 1.45rem;
-  line-height: 1;
-  font-weight: 800;
-}
-.staff-operational-progress span {
-  display: block;
-  color: #64748b;
-  font-size: 0.78rem;
-  font-weight: 700;
-  margin: 0.25rem 0 0.55rem;
-}
 .staff-board-lanes {
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
@@ -1075,9 +1053,6 @@
   .staff-operational-head,
   .staff-focus-title-row {
     flex-direction: column;
-  }
-  .staff-operational-progress {
-    width: 100%;
   }
   .staff-board-lanes {
     grid-template-columns: 1fr;

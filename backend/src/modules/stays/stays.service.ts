@@ -182,13 +182,15 @@ export class StaysService {
       throw new ConflictException("Tenant masih memiliki stay aktif");
     }
 
-    if (room.status !== RoomStatus.AVAILABLE) {
-      // Audit A9: MAINTENANCE (belum lolos inspeksi checkout) dan INACTIVE
-      // juga tidak boleh di-check-in, bukan hanya OCCUPIED/RESERVED.
+    // Check-in hanya untuk kamar AVAILABLE (booking walk-in) atau RESERVED (tenant
+    // sudah bayar lunas). BOOKING (baru DP) belum boleh check-in — tunggu pelunasan.
+    if (![RoomStatus.AVAILABLE, RoomStatus.RESERVED].includes(room.status as RoomStatus)) {
       throw new ConflictException(
         room.status === RoomStatus.MAINTENANCE
           ? "Kamar masih berstatus Perlu Dicek (belum lolos inspeksi checkout). Selesaikan tiket inspeksi sampai kamar AVAILABLE sebelum check-in."
-          : "Kamar tidak tersedia untuk check-in (sedang ditempati, dipesan, atau nonaktif)",
+          : room.status === RoomStatus.BOOKING
+            ? "Kamar masih berstatus Booking (DP diterima). Tenant harus melunasi dulu sebelum check-in."
+            : "Kamar tidak tersedia untuk check-in (sedang ditempati, atau nonaktif)",
       );
     }
 
@@ -676,6 +678,54 @@ export class StaysService {
         throw new NotFoundException(
           "Stay tidak ditemukan setelah checkout final",
         );
+
+      // Biaya kerusakan/penalti: buat invoice PENALTY setelah stay COMPLETED
+      // agar tidak memblokir checkout. Invoice otomatis disettle via processDeposit.
+      const damageChargeRupiah = dto.damageChargeRupiah ?? 0;
+      if (damageChargeRupiah > 0) {
+        const damageNote = (dto.damageNote ?? "Biaya kerusakan/penalti").trim();
+        const damageInvNumber = `INV-${stay.id}-DMG-${Date.now().toString().slice(-6)}`;
+        const damageInvoice = await tx.invoice.create({
+          data: {
+            invoiceNumber: damageInvNumber,
+            stayId: stay.id,
+            status: InvoiceStatus.DRAFT,
+            periodStart: actualCheckOutDate,
+            periodEnd: actualCheckOutDate,
+            dueDate: actualCheckOutDate,
+            notes: `Denda kerusakan: ${damageNote}`,
+            createdById: actor.id,
+          },
+        });
+        await tx.invoiceLine.create({
+          data: {
+            invoiceId: damageInvoice.id,
+            lineType: InvoiceLineType.PENALTY as any,
+            description: damageNote,
+            qty: 1,
+            unit: "paket",
+            unitPriceRupiah: damageChargeRupiah,
+            lineAmountRupiah: damageChargeRupiah,
+            sortOrder: 0,
+          },
+        });
+        await tx.invoice.update({
+          where: { id: damageInvoice.id },
+          data: {
+            totalAmountRupiah: damageChargeRupiah,
+            status: InvoiceStatus.ISSUED,
+            issuedAt: new Date(),
+          },
+        });
+        // best-effort journal — kegagalan tak menggagalkan checkout
+        await this.accountingPosting
+          .postInvoiceIssuedTx(tx, damageInvoice.id, actor.id)
+          .catch((err) => {
+            this.logger.warn(
+              `Auto Journal Lite gagal untuk invoice denda #${damageInvoice.id}: ${err instanceof Error ? err.message : String(err)}`,
+            );
+          });
+      }
 
       const otherActive = await tx.stay.count({
         where: {

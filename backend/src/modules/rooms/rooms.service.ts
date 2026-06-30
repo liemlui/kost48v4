@@ -8,6 +8,8 @@ import { CreateRoomDto, UpdateRoomDto } from './dto/room.dto';
 import { CreateRoomFacilityDto, UpdateRoomFacilityDto } from './dto/room-facility.dto';
 import { RoomsQueryDto } from './dto/rooms-query.dto';
 import { InvoiceStatus, PricingTerm, RoomStatus, UserRole, UtilityType } from '../../common/enums/app.enums';
+import { computeFacilityGap, type FacilityGapInput } from './room-facility-spec';
+import { evaluateAcCleaning, AC_DEFAULT_KWH_THRESHOLD } from '../auto-ops/ac-cleaning.helper';
 
 @Injectable()
 export class RoomsService {
@@ -145,12 +147,161 @@ export class RoomsService {
         inventoryItem: roomItem.item,
         item: undefined,
       })),
+      // Cek konsistensi Fasilitas ↔ Inventaris (AC disorot). Dihitung dari data yang
+      // sudah di-include di atas → tanpa query tambahan (hindari N+1).
+      facilityCheck: this.buildFacilityGapReport(item),
       meterSummary: {
         electricity: this.buildMeterSummary(latestElectricityReadings),
         water: this.buildMeterSummary(latestWaterReadings),
       },
       stays: undefined,
     };
+  }
+
+  /** Cek konsistensi fasilitas↔inventaris satu kamar (dipakai findOne). */
+  buildFacilityGapReport(room: FacilityGapInput) {
+    return computeFacilityGap(room);
+  }
+
+  /**
+   * Ringkasan gap fasilitas↔inventaris untuk banyak kamar sekaligus (reusable:
+   * filter katalog publik, roll-up dashboard). Satu query ringan + hitung di memori.
+   */
+  async getFacilityGapSummary(roomIds?: number[]) {
+    const rooms = await this.prisma.room.findMany({
+      where: roomIds && roomIds.length ? { id: { in: roomIds } } : undefined,
+      select: {
+        id: true,
+        category: true,
+        roomType: true,
+        roomSize: true,
+        hasAc: true,
+        roomItems: { select: { id: true, status: true, item: { select: { name: true } } } },
+        facilities: { select: { inventoryItemId: true } },
+      },
+    });
+
+    return rooms.map((room) => {
+      const check = computeFacilityGap(room as unknown as FacilityGapInput);
+      return { roomId: room.id, hasGap: check.hasGap, acGap: check.acGap };
+    });
+  }
+
+  /** Set roomId yang punya gap fasilitas↔inventaris belum terpenuhi (untuk sembunyikan dari katalog). */
+  async getRoomIdsWithFacilityGap(roomIds?: number[]): Promise<Set<number>> {
+    const summary = await this.getFacilityGapSummary(roomIds);
+    return new Set(summary.filter((s) => s.hasGap).map((s) => s.roomId));
+  }
+
+  // ── Monitoring AC + jadwal cuci (area admin) ─────────────────────────────────
+
+  /** Daftar kamar ber-AC + status jadwal cuci (interval + estimasi kWh hibrid). */
+  async getAcMaintenanceOverview() {
+    const kwhThresholdEnv = Number(process.env.AC_CLEAN_KWH_THRESHOLD ?? AC_DEFAULT_KWH_THRESHOLD);
+    const kwhThreshold = Number.isFinite(kwhThresholdEnv) ? kwhThresholdEnv : AC_DEFAULT_KWH_THRESHOLD;
+    const now = new Date();
+
+    const rooms = await this.prisma.room.findMany({
+      where: { hasAc: true, isActive: true },
+      select: {
+        id: true,
+        code: true,
+        name: true,
+        floor: true,
+        acWattage: true,
+        acUsageHoursPerDay: true,
+        acLastCleanedAt: true,
+        acCleanIntervalDays: true,
+      },
+      orderBy: [{ floor: 'asc' }, { code: 'asc' }],
+    });
+
+    // Tiket cuci AC terbuka per kamar (untuk badge "sedang dijadwalkan").
+    const openTickets = rooms.length
+      ? await this.prisma.ticket.findMany({
+          where: {
+            roomId: { in: rooms.map((r) => r.id) },
+            category: 'AC_CLEANING' as any,
+            status: { in: ['OPEN', 'IN_PROGRESS', 'DONE'] as any },
+          },
+          select: { id: true, roomId: true, status: true },
+        })
+      : [];
+    const openTicketByRoom = new Map<number, { id: number; status: string }>();
+    for (const t of openTickets) if (t.roomId && !openTicketByRoom.has(t.roomId)) openTicketByRoom.set(t.roomId, { id: t.id, status: String(t.status) });
+
+    const items = rooms.map((room) => {
+      const evalAc = evaluateAcCleaning(room, now, { kwhThreshold });
+      const intervalDays = Math.max(1, room.acCleanIntervalDays);
+      const nextDueAt = room.acLastCleanedAt
+        ? new Date(new Date(room.acLastCleanedAt).getTime() + intervalDays * 24 * 60 * 60 * 1000)
+        : null;
+
+      let status: 'NEVER' | 'OVERDUE' | 'SOON' | 'OK';
+      if (!room.acLastCleanedAt) status = 'NEVER';
+      else if (evalAc.due) status = 'OVERDUE';
+      else if (evalAc.daysSinceClean >= intervalDays * 0.8 || (kwhThreshold > 0 && evalAc.estimatedKwh >= kwhThreshold * 0.8)) status = 'SOON';
+      else status = 'OK';
+
+      return {
+        id: room.id,
+        code: room.code,
+        name: room.name,
+        floor: room.floor,
+        acWattage: room.acWattage,
+        acUsageHoursPerDay: room.acUsageHoursPerDay,
+        acLastCleanedAt: room.acLastCleanedAt,
+        acCleanIntervalDays: room.acCleanIntervalDays,
+        nextDueAt,
+        status,
+        due: evalAc.due,
+        reason: evalAc.reason,
+        daysSinceClean: Math.round(evalAc.daysSinceClean),
+        estimatedKwh: Math.round(evalAc.estimatedKwh),
+        kwhPerDay: Math.round(evalAc.kwhPerDay * 100) / 100,
+        openTicketId: openTicketByRoom.get(room.id)?.id ?? null,
+      };
+    });
+
+    return {
+      items,
+      summary: {
+        total: items.length,
+        overdue: items.filter((i) => i.status === 'OVERDUE' || i.status === 'NEVER').length,
+        soon: items.filter((i) => i.status === 'SOON').length,
+      },
+    };
+  }
+
+  /** Catat cuci AC selesai: acLastCleanedAt=now + tutup tiket AC_CLEANING terbuka. */
+  async recordAcCleaning(roomId: number, actor: CurrentUserPayload) {
+    this.assertOwnerOrAdmin(actor);
+    const room = await this.prisma.room.findUnique({ where: { id: roomId } });
+    if (!room) throw new NotFoundException('Kamar tidak ditemukan');
+    if (!room.hasAc) throw new ConflictException('Kamar ini tidak memiliki AC.');
+
+    const now = new Date();
+    const updated = await this.prisma.room.update({
+      where: { id: roomId },
+      data: { acLastCleanedAt: now },
+    });
+
+    // Tutup tiket cuci AC yang masih terbuka (selaras reset di tickets.service saat tiket AC ditutup).
+    await this.prisma.ticket.updateMany({
+      where: { roomId, category: 'AC_CLEANING' as any, status: { in: ['OPEN', 'IN_PROGRESS', 'DONE'] as any } },
+      data: { status: 'CLOSED' as any, closedAt: now },
+    });
+
+    await this.audit.log({
+      actorUserId: actor.id,
+      action: 'UPDATE',
+      entityType: 'Room',
+      entityId: String(roomId),
+      oldData: { acLastCleanedAt: room.acLastCleanedAt },
+      newData: { acLastCleanedAt: updated.acLastCleanedAt },
+    });
+
+    return updated;
   }
 
 

@@ -307,7 +307,7 @@ export class BookingSweepService {
   expiredBookingWhere(hasPendingReview: boolean): Prisma.StayWhereInput {
     return {
       status: StayStatus.ACTIVE,
-      room: { status: RoomStatus.RESERVED },
+      room: { status: { notIn: [RoomStatus.OCCUPIED, RoomStatus.INACTIVE] } },
       initialMetersPromotedAt: null,
       expiresAt: { not: null, lt: new Date() },
       paymentSubmissions: hasPendingReview
@@ -328,7 +328,7 @@ export class BookingSweepService {
         FROM "Stay" s JOIN "Room" r ON r.id = s."roomId"
         WHERE s.id = ${stayId} FOR UPDATE OF s, r`);
       const cur = rows[0];
-      if (!cur || cur.status !== 'ACTIVE' || cur.roomStatus !== 'RESERVED' || cur.promotedAt) {
+      if (!cur || cur.status !== 'ACTIVE' || cur.roomStatus === 'OCCUPIED' || cur.promotedAt) {
         return; // sudah berubah status — skip cancel
       }
       // Re-cek submission: pastikan tidak ada APPROVED baru

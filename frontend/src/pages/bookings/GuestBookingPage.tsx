@@ -105,6 +105,7 @@ export default function GuestBookingPage() {
     if (form.notes.trim()) payload.notes = form.notes.trim();
     if (form.occupantCount > 1) payload.occupantCount = form.occupantCount;
     if (form.hasPet) payload.hasPet = true;
+    if (form.paymentChoice) payload.paymentChoice = form.paymentChoice;
 
     mutation.mutate(payload);
   };

@@ -118,6 +118,17 @@ export class CompleteStayDto {
   @IsOptional()
   @IsString()
   notes?: string;
+
+  /** Biaya kerusakan/penalti yang akan dipotong dari deposit jaminan. */
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  damageChargeRupiah?: number;
+
+  /** Deskripsi kerusakan (wajib diisi bila ada biaya). */
+  @IsOptional()
+  @IsString()
+  damageNote?: string;
 }
 
 export class CancelStayDto {

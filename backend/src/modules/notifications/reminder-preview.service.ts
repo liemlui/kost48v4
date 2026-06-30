@@ -93,7 +93,7 @@ export class ReminderPreviewService {
       INNER JOIN "Tenant" t ON t.id = s."tenantId"
       INNER JOIN "Room" r ON r.id = s."roomId"
       WHERE s.status = CAST(${StayStatus.ACTIVE} AS "StayStatus")
-        AND r.status = CAST(${RoomStatus.RESERVED} AS "RoomStatus")
+        AND r.status NOT IN (CAST(${RoomStatus.OCCUPIED} AS "RoomStatus"), CAST(${RoomStatus.INACTIVE} AS "RoomStatus"))
         AND s."expiresAt" IS NOT NULL
         AND s."expiresAt" > NOW()
         AND s."expiresAt" <= NOW() + (${AUTO_OPS_DEADLINES.BOOKING_REVIEW_DEADLINE_HOURS} * INTERVAL '1 hour')

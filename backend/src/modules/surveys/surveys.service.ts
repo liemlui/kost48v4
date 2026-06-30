@@ -46,15 +46,68 @@ export class SurveysService {
     };
   }
 
-  /** Apakah penghuni ini sudah pernah mengisi survei (agar form bisa sembunyi/ubah). */
+  /**
+   * Status survei tenant — dengan timing gate (min 30 hari menginap) dan
+   * re-submit periodik (setiap 6 bulan bisa isi ulang).
+   *
+   * Response shape:
+   * - `submitted`: apakah tenant sudah pernah submit survei
+   * - `eligible`: apakah form boleh ditampilkan (false = belum waktunya)
+   * - `reason?`: alasan tidak eligible ('min_stay_30_days' | 'cooldown_6_months')
+   * - `eligibleAt?` / `nextEligibleAt?`: kapan form tersedia kembali (ISO string)
+   * - `last?`: survei terakhir (jika sudah pernah)
+   */
   async mineExists(actor: CurrentUserPayload) {
-    if (!actor.tenantId) return { submitted: false };
+    if (!actor.tenantId) return { submitted: false, eligible: false };
+
+    // Cari stay aktif penghuni untuk timing gate 30 hari
+    const activeStay = await this.prisma.stay.findFirst({
+      where: { tenantId: actor.tenantId, status: 'ACTIVE' },
+      orderBy: { checkInDate: 'desc' },
+      select: { checkInDate: true },
+    });
+
+    // Cari survei terakhir tenant
     const last = await this.prisma.satisfactionSurvey.findFirst({
       where: { tenantId: actor.tenantId },
       orderBy: { id: 'desc' },
       select: { id: true, overallRating: true, createdAt: true },
     });
-    return { submitted: Boolean(last), last };
+
+    const submitted = Boolean(last);
+
+    // Gate 1: minimal 30 hari sejak check-in stay aktif
+    if (activeStay) {
+      const msInDay = 1000 * 60 * 60 * 24;
+      const daysSinceCheckIn = Math.floor((Date.now() - activeStay.checkInDate.getTime()) / msInDay);
+      if (daysSinceCheckIn < 30) {
+        const eligibleDate = new Date(activeStay.checkInDate);
+        eligibleDate.setDate(eligibleDate.getDate() + 30);
+        return { submitted: false, eligible: false, reason: 'min_stay_30_days' as const, eligibleAt: eligibleDate.toISOString() };
+      }
+    }
+
+    // Gate 2: re-submit hanya tiap 6 bulan
+    if (last) {
+      const msInMonth = 1000 * 60 * 60 * 24 * 30.44; // rata-rata hari per bulan
+      const monthsSinceLast = (Date.now() - last.createdAt.getTime()) / msInMonth;
+      if (monthsSinceLast < 6) {
+        const nextEligible = new Date(last.createdAt);
+        nextEligible.setMonth(nextEligible.getMonth() + 6);
+        return {
+          submitted: true,
+          eligible: false,
+          reason: 'cooldown_6_months' as const,
+          last,
+          nextEligibleAt: nextEligible.toISOString(),
+        };
+      }
+      // Sudah lewat 6 bulan → boleh isi ulang
+      return { submitted: true, eligible: true, last };
+    }
+
+    // Belum pernah submit, tidak ada stay aktif, atau stay aktif >30 hari
+    return { submitted: false, eligible: true };
   }
 
   async findAll() {

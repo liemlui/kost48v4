@@ -242,7 +242,7 @@ export default function TenantInvoiceDetailPage() {
   if (detailQuery.isError) {
     return (
       <div>
-        <PageHeader eyebrow="Portal Penghuni" title="Tagihan Saya" description="Detail tagihan kamu." actionLabel="Kembali" onAction={() => navigate('/portal/invoices')} />
+        <PageHeader eyebrow="Portal Penghuni" title="Bayar Tagihan" description="Detail tagihan kamu." actionLabel="Kembali" onAction={() => navigate('/portal/invoices')} />
         <Alert variant="danger">Tagihan tidak ditemukan atau kamu tidak memiliki akses.</Alert>
       </div>
     );
@@ -251,7 +251,7 @@ export default function TenantInvoiceDetailPage() {
   if (!invoice) {
     return (
       <div>
-        <PageHeader eyebrow="Portal Penghuni" title="Tagihan Saya" description="Detail tagihan kamu." actionLabel="Kembali" onAction={() => navigate('/portal/invoices')} />
+        <PageHeader eyebrow="Portal Penghuni" title="Bayar Tagihan" description="Detail tagihan kamu." actionLabel="Kembali" onAction={() => navigate('/portal/invoices')} />
         <Alert variant="warning">Data tagihan tidak tersedia.</Alert>
       </div>
     );

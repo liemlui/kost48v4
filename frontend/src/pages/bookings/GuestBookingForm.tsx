@@ -494,7 +494,7 @@ export default function GuestBookingForm({
 
             {/* Estimasi tagihan */}
             <div className="p-3 rounded mb-3" style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', fontSize: '0.875rem' }}>
-              <div className="fw-semibold mb-2">Estimasi Tagihan Awal</div>
+              <div className="fw-semibold mb-2">Rincian Tagihan</div>
               <div className="d-flex flex-column gap-1">
                 <div className="d-flex justify-content-between">
                   <span>Sewa ({getStatusLabel(form.pricingTerm)})</span>
@@ -517,10 +517,19 @@ export default function GuestBookingForm({
                   </div>
                 )}
                 <hr className="my-1" />
-                <div className="d-flex justify-content-between fw-bold" style={{ fontSize: '1rem' }}>
-                  <span>Total estimasi</span>
+                <div className="d-flex justify-content-between" style={{ color: '#64748b' }}>
+                  <span>Total tagihan</span>
                   <span><CurrencyDisplay amount={initialTotal} /></span>
                 </div>
+                <div className="d-flex justify-content-between fw-bold" style={{ fontSize: '1rem', color: '#059669' }}>
+                  <span>{form.paymentChoice === 'FULL' ? 'Bayar sekarang (LUNAS)' : 'Bayar sekarang (DP 30%)'}</span>
+                  <span><CurrencyDisplay amount={form.paymentChoice === 'FULL' ? initialTotal : dpAmount} /></span>
+                </div>
+                {form.paymentChoice === 'DP' && (
+                  <div className="small text-muted mt-1">
+                    Sisa <strong>{fmt(totalRent - dpAmount)}</strong> + deposit dilunasi sebelum check-in.
+                  </div>
+                )}
               </div>
             </div>
 
@@ -543,8 +552,10 @@ export default function GuestBookingForm({
                     style={{ marginTop: 3, flexShrink: 0 }}
                   />
                   <div>
-                    <div className="fw-semibold">DP 30% sekarang — {fmt(dpAmount)}</div>
-                    <div className="small text-muted">Pelunasan sisa sewa ({fmt(totalRent - dpAmount)}) + semua deposit saat check-in.</div>
+                    <div className="fw-semibold">DP 30% — {fmt(dpAmount)} sekarang</div>
+                    <div className="small text-muted">
+                      Booking sah & kamar ditahan setelah DP disetujui admin. Sisa <strong>{fmt(totalRent - dpAmount)}</strong> + deposit dilunasi saat check-in.
+                    </div>
                   </div>
                 </label>
                 <label
@@ -563,13 +574,17 @@ export default function GuestBookingForm({
                   />
                   <div>
                     <div className="fw-semibold">Bayar Lunas — <CurrencyDisplay amount={initialTotal} /></div>
-                    <div className="small text-muted">Bayar semua sekaligus. Tidak ada tagihan tersisa saat check-in.</div>
+                    <div className="small text-muted">
+                      Semua lunas sekaligus. Tidak ada tagihan saat check-in. Booking langsung sah & kamar ditahan.
+                    </div>
                   </div>
                 </label>
               </div>
-              <div className="small text-muted mt-2">
-                Ini preferensi saja — tagihan resmi dibuat admin setelah booking disetujui.
-              </div>
+
+              {/* Info penting: DP vs belum bayar */}
+              <Alert variant="warning" className="small py-2 mt-2 mb-0">
+                <strong>⏳ Penting:</strong> DP atau LUNAS mengamankan kamar Anda. Tanpa pembayaran, kamar bisa dipesan orang lain (first-paid-wins). Booking kedaluwarsa dalam 3 jam jika tidak ada pembayaran.
+              </Alert>
             </div>
 
             {serverErrors.server && <Alert variant="danger">{serverErrors.server}</Alert>}

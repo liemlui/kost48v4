@@ -13,6 +13,7 @@ import CameraOrGalleryInput from '../../components/common/CameraOrGalleryInput';
 import MeterTab from '../../components/stays/MeterTab';
 import StaffInventoryStatusModal from '../../components/staff/StaffInventoryStatusModal';
 import FacilityManager from '../../components/rooms/FacilityManager';
+import FacilityGapPanel from '../../components/rooms/FacilityGapPanel';
 import { useAuth } from '../../context/AuthContext';
 import type { Room, RoomItem, Stay } from '../../types';
 import { compressImageFile } from '../../utils/compressImageFile';
@@ -328,8 +329,12 @@ export default function RoomDetailPage() {
         </Tab>
 
         {!isStaff ? (
-          <Tab eventKey="facilities" title={<><span className="me-2">🛋️</span>Fasilitas</>}>
+          <Tab
+            eventKey="facilities"
+            title={<><span className="me-2">🛋️</span>Fasilitas{room.facilityCheck?.hasGap ? <span className="ms-1" title="Ada fasilitas yang belum lengkap di inventaris">⚠️</span> : null}</>}
+          >
             <div className="pt-3">
+            <FacilityGapPanel check={room.facilityCheck} roomId={roomId} />
             <FacilityManager roomId={roomId} allowedToManage={user?.role !== 'STAFF'} />
             </div>
           </Tab>

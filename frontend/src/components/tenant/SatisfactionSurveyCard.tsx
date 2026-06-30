@@ -51,21 +51,76 @@ export default function SatisfactionSurveyCard() {
 
   if (statusQuery.isLoading) return null;
 
-  if (statusQuery.data?.submitted) {
+  const status = statusQuery.data;
+
+  // Gate 1: belum 30 hari menginap
+  if (status && !status.eligible && status.reason === 'min_stay_30_days') {
+    const eligibleDate = status.eligibleAt ? new Date(status.eligibleAt).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) : '30 hari setelah check-in';
     return (
-      <Card className="border-0 mb-3" style={{ background: 'linear-gradient(135deg,#f0fdf4,#eff6ff)' }}>
+      <Card className="border-0 mb-3" style={{ background: 'linear-gradient(135deg,#fefce8,#fef3c7)' }}>
         <Card.Body className="py-2 px-3">
-          <span className="fw-semibold">⭐ Terima kasih sudah menilai kos!</span>
-          <span className="text-muted small"> Masukanmu membantu kami jadi lebih baik.</span>
+          <span className="fw-semibold">⭐ Penilaian kos</span>
+          <span className="text-muted small"> Fitur penilaian tersedia setelah kamu tinggal minimal 30 hari — mulai {eligibleDate}.</span>
         </Card.Body>
       </Card>
     );
   }
 
+  // Gate 2: cooldown 6 bulan (sudah submit, belum bisa isi ulang)
+  if (status && status.submitted && !status.eligible && status.reason === 'cooldown_6_months') {
+    const nextDate = status.nextEligibleAt ? new Date(status.nextEligibleAt).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) : '6 bulan setelah penilaian terakhir';
+    return (
+      <Card className="border-0 mb-3" style={{ background: 'linear-gradient(135deg,#f0fdf4,#eff6ff)' }}>
+        <Card.Body className="py-2 px-3">
+          <span className="fw-semibold">⭐ Terima kasih sudah menilai kos!</span>
+          <span className="text-muted small"> Kamu bisa memberi penilaian lagi setelah {nextDate}.</span>
+        </Card.Body>
+      </Card>
+    );
+  }
+
+  // Sudah submit, sudah eligible re-submit — tetap tampilkan "terima kasih" + form baru
+  if (status?.submitted && status?.eligible) {
+    return (
+      <>
+        <Card className="border-0 mb-2" style={{ background: 'linear-gradient(135deg,#f0fdf4,#eff6ff)' }}>
+          <Card.Body className="py-2 px-3">
+            <span className="fw-semibold">⭐ Terima kasih sudah menilai sebelumnya!</span>
+            <span className="text-muted small"> Ada perubahan? Beri penilaian baru di bawah.</span>
+          </Card.Body>
+        </Card>
+        <SurveyForm error={error} mutation={mutation} overall={overall} setOverall={setOverall} aspects={aspects} setAspects={setAspects} recommend={recommend} setRecommend={setRecommend} comment={comment} setComment={setComment} />
+      </>
+    );
+  }
+
+  // Fresh form (belum pernah submit, eligible)
+  return (
+    <SurveyForm error={error} mutation={mutation} overall={overall} setOverall={setOverall} aspects={aspects} setAspects={setAspects} recommend={recommend} setRecommend={setRecommend} comment={comment} setComment={setComment} isFirstTime />
+  );
+}
+
+// ── SurveyForm: komponen form yang dipakai untuk first-time & re-submit ──
+
+type SurveyFormProps = {
+  error: string;
+  mutation: { mutate: () => void; isPending: boolean };
+  overall: number;
+  setOverall: (n: number) => void;
+  aspects: Record<string, number>;
+  setAspects: (fn: (prev: Record<string, number>) => Record<string, number>) => void;
+  recommend: boolean | null;
+  setRecommend: (v: boolean) => void;
+  comment: string;
+  setComment: (v: string) => void;
+  isFirstTime?: boolean;
+};
+
+function SurveyForm({ error, mutation, overall, setOverall, aspects, setAspects, recommend, setRecommend, comment, setComment, isFirstTime }: SurveyFormProps) {
   return (
     <Card className="content-card border-0 mb-3">
       <Card.Body>
-        <div className="fw-semibold mb-1">⭐ Beri penilaian kos kamu</div>
+        <div className="fw-semibold mb-1">{isFirstTime ? '⭐ Beri penilaian kos kamu' : '⭐ Perbarui penilaian kos kamu'}</div>
         <div className="text-muted small mb-2">Anonim untuk sesama penghuni; membantu kami memperbaiki layanan.</div>
         {error ? <div className="text-danger small mb-2">{error}</div> : null}
 

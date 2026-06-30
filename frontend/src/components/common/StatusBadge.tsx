@@ -3,7 +3,7 @@ import { getStatusLabel, getStatusVariant, type StatusLabelDomain, type StatusLa
 
 export type StatusType =
   | 'ACTIVE' | 'INACTIVE' | 'COMPLETED' | 'CANCELLED'
-  | 'AVAILABLE' | 'RESERVED' | 'OCCUPIED' | 'MAINTENANCE' | 'UNAVAILABLE'
+  | 'AVAILABLE' | 'BOOKING' | 'RESERVED' | 'OCCUPIED' | 'MAINTENANCE' | 'UNAVAILABLE'
   | 'SUCCESS' | 'WARNING' | 'DANGER' | 'INFO' | 'SECONDARY'
   | 'OVERDUE' | 'PAID' | 'PARTIAL' | 'ISSUED' | 'DRAFT'
   | 'GOOD' | 'DAMAGED' | 'MISSING'

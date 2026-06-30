@@ -4,6 +4,7 @@ import { PrismaService } from '../../prisma/prisma.service';
 
 interface BookingSchemaStatus {
   hasReservedRoomStatus: boolean;
+  hasBookingRoomStatus: boolean;
   hasStayExpiresAt: boolean;
 }
 
@@ -18,6 +19,7 @@ export async function isBookingSchemaReady(
   cache: { current: BookingSchemaStatus | null },
 ): Promise<boolean> {
   if (cache.current) {
+    // hasBookingRoomStatus (legacy) tidak lagi menjadi syarat — V5 flow: unpaid booking = AVAILABLE
     return cache.current.hasReservedRoomStatus && cache.current.hasStayExpiresAt;
   }
 
@@ -32,6 +34,13 @@ export async function isBookingSchemaReady(
       ) AS "hasReservedRoomStatus",
       EXISTS (
         SELECT 1
+        FROM pg_type t
+        INNER JOIN pg_enum e ON e.enumtypid = t.oid
+        WHERE t.typname = 'RoomStatus'
+          AND e.enumlabel = ${RoomStatus.BOOKING}
+      ) AS "hasBookingRoomStatus",
+      EXISTS (
+        SELECT 1
         FROM information_schema.columns
         WHERE table_schema = 'public'
           AND table_name = 'Stay'
@@ -39,12 +48,14 @@ export async function isBookingSchemaReady(
       ) AS "hasStayExpiresAt"
   `);
 
-  const status = rows[0] ?? { hasReservedRoomStatus: false, hasStayExpiresAt: false };
+  const status = rows[0] ?? { hasReservedRoomStatus: false, hasBookingRoomStatus: false, hasStayExpiresAt: false };
   cache.current = {
     hasReservedRoomStatus: Boolean(status.hasReservedRoomStatus),
+    hasBookingRoomStatus: Boolean(status.hasBookingRoomStatus),
     hasStayExpiresAt: Boolean(status.hasStayExpiresAt),
   };
 
+  // hasBookingRoomStatus (legacy) tidak lagi menjadi syarat — V5 flow: unpaid booking = AVAILABLE
   return cache.current.hasReservedRoomStatus && cache.current.hasStayExpiresAt;
 }
 

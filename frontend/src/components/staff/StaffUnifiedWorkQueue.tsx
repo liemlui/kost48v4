@@ -1,18 +1,18 @@
-import { ChangeEvent, useEffect, useMemo, useState } from 'react';
-import { Alert, Button, Card, Form, Modal, Spinner } from 'react-bootstrap';
+import { useEffect, useMemo, useState, type ReactNode } from 'react';
+import { Alert, Button, Card, Spinner } from 'react-bootstrap';
+import { CheckCircle2, ClipboardList, DoorOpen, Package, Sparkles, Wrench, Zap } from 'lucide-react';
+import EmptyState from '../common/EmptyState';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { completeStaffRoutine, sendStaffRoutineNeedHelp, startStaffRoutine, type StaffRoutineItem, type StaffRoutineTodayResponse } from '../../api/staffRoutines';
 import { postAction } from '../../api/resources';
 import { listStaffFieldReports } from '../../api/staffFieldReports';
 import { fieldReportStatusLabels, getTicketStatusLabel } from '../../constants/staffRepairOptions';
-import { uploadTicketImage, type UploadedImageMeta } from '../../api/mediaUploads';
 import PaginationControls from '../common/PaginationControls';
 import SegmentedTabs from '../common/SegmentedTabs';
-import CameraOrGalleryInput from '../common/CameraOrGalleryInput';
-import SafeImage from '../common/SafeImage';
 import { useClientPagination } from '../../hooks/useClientPagination';
+import { useStaffPhotoUpload } from '../../hooks/useStaffPhotoUpload';
+import StaffWorkActionModal from './StaffWorkActionModal';
 import type { StaffFieldReport, Ticket } from '../../types';
-import { compressImageFile as compressBrowserImage } from '../../utils/compressImageFile';
 
 type WorkType = 'CLEANING' | 'REPAIR' | 'ROOM' | 'WAREHOUSE' | 'METER' | 'OTHER';
 type WorkStatus = 'TODO' | 'IN_PROGRESS' | 'DONE' | 'WAITING_CHECK' | 'NEED_HELP';
@@ -57,8 +57,14 @@ const filters: Array<{ key: WorkFilterKey; label: string }> = [
   { key: 'DONE', label: 'Selesai' },
 ];
 
-const WORK_FILTER_ICONS: Partial<Record<WorkFilterKey, string>> = {
-  ALL: '📋', CLEANING: '🧹', REPAIR: '🔧', ROOM: '🚪', WAREHOUSE: '📦', METER: '⚡', DONE: '✅',
+const WORK_FILTER_ICONS: Partial<Record<WorkFilterKey, ReactNode>> = {
+  ALL: <ClipboardList size={14} aria-hidden />,
+  CLEANING: <Sparkles size={14} aria-hidden />,
+  REPAIR: <Wrench size={14} aria-hidden />,
+  ROOM: <DoorOpen size={14} aria-hidden />,
+  WAREHOUSE: <Package size={14} aria-hidden />,
+  METER: <Zap size={14} aria-hidden />,
+  DONE: <CheckCircle2 size={14} aria-hidden />,
 };
 
 
@@ -173,21 +179,16 @@ function buildWorkItems(routines: StaffRoutineItem[], tickets: Ticket[]): WorkIt
   return [...routineItems, ...ticketItems].sort((a, b) => a.sort - b.sort || a.title.localeCompare(b.title));
 }
 
-async function compressImageFile(file: File): Promise<File> {
-  return compressBrowserImage(file, { maxSide: 1400, quality: 0.78 });
-}
-
 export default function StaffUnifiedWorkQueue({ routines, tickets, isLoading, onUpdated }: Props) {
   const queryClient = useQueryClient();
   const [activeFilter, setActiveFilter] = useState<WorkFilterKey>('ALL');
   const [modal, setModal] = useState<ModalState>(null);
   const [note, setNote] = useState('');
-  const [photo, setPhoto] = useState<UploadedImageMeta | null>(null);
-  const [photoPreview, setPhotoPreview] = useState('');
   const [error, setError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
   const [page, setPage] = useState(1);
   const PAGE_SIZE = 10;
+  const photoHook = useStaffPhotoUpload();
 
   const reportsQuery = useQuery({
     queryKey: ['staff-field-reports', 'assigned-to-me'],
@@ -227,8 +228,7 @@ export default function StaffUnifiedWorkQueue({ routines, tickets, isLoading, on
   const resetModal = () => {
     setModal(null);
     setNote('');
-    setPhoto(null);
-    setPhotoPreview('');
+    photoHook.reset();
     setError('');
     setSuccessMessage('');
   };
@@ -237,6 +237,7 @@ export default function StaffUnifiedWorkQueue({ routines, tickets, isLoading, on
     await onUpdated?.();
     await Promise.all([
       queryClient.invalidateQueries({ queryKey: ['tickets'] }),
+      queryClient.invalidateQueries({ queryKey: ['dashboard-staff', 'routines-today'] }),
       queryClient.invalidateQueries({ queryKey: ['staff-workspace-nav'] }),
       queryClient.invalidateQueries({ queryKey: ['staff-performance-me-dashboard'] }),
       queryClient.invalidateQueries({ queryKey: ['staff-performance-me-evidence'] }),
@@ -248,7 +249,7 @@ export default function StaffUnifiedWorkQueue({ routines, tickets, isLoading, on
     mutationFn: async () => {
       if (!modal) return null;
       const item = modal.item;
-      const routinePayload = item.routine ? { assignmentId: item.routine.assignmentId ?? undefined, roomId: item.routine.roomId ?? undefined, dueDate: item.routine.dueDate, note: note.trim() || undefined, photoUrl: photo?.fileUrl } : undefined;
+      const routinePayload = item.routine ? { assignmentId: item.routine.assignmentId ?? undefined, roomId: item.routine.roomId ?? undefined, dueDate: item.routine.dueDate, note: note.trim() || undefined, photoUrl: photoHook.photo?.fileUrl } : undefined;
 
       if (modal.action === 'START') {
         if (item.source === 'ROUTINE' && item.routine) return startStaffRoutine(item.routine.templateId, routinePayload ?? {});
@@ -257,7 +258,7 @@ export default function StaffUnifiedWorkQueue({ routines, tickets, isLoading, on
 
       if (modal.action === 'COMPLETE') {
         if (item.source === 'ROUTINE' && item.routine) return completeStaffRoutine(item.routine.templateId, routinePayload ?? {});
-        if (item.source === 'TICKET') return postAction(`/tickets/${item.id}/mark-done`, { resolutionNote: note.trim() || 'Sudah dikerjakan', resolutionImageUrl: photo?.fileUrl, resolutionImageFileKey: photo?.fileKey, resolutionImageOriginalFilename: photo?.originalFilename, resolutionImageMimeType: photo?.mimeType, resolutionImageFileSizeBytes: photo?.fileSizeBytes });
+        if (item.source === 'TICKET') return postAction(`/tickets/${item.id}/mark-done`, { resolutionNote: note.trim() || 'Sudah dikerjakan', resolutionImageUrl: photoHook.photo?.fileUrl, resolutionImageFileKey: photoHook.photo?.fileKey, resolutionImageOriginalFilename: photoHook.photo?.originalFilename, resolutionImageMimeType: photoHook.photo?.mimeType, resolutionImageFileSizeBytes: photoHook.photo?.fileSizeBytes });
       }
 
       if (modal.action === 'NEED_HELP' && item.source === 'ROUTINE' && item.routine) {
@@ -279,27 +280,10 @@ export default function StaffUnifiedWorkQueue({ routines, tickets, isLoading, on
     onError: (err: any) => setError(err?.response?.data?.message || err?.message || 'Aksi belum berhasil. Coba sekali lagi.'),
   });
 
-  const handlePhoto = async (event: ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-    setError('');
-    try {
-      const compressed = await compressImageFile(file);
-      const uploaded = await uploadTicketImage(compressed);
-      setPhoto(uploaded);
-      setPhotoPreview(uploaded.fileUrl);
-    } catch (err: any) {
-      setError(err?.response?.data?.message || 'Foto belum berhasil diunggah. Coba foto lain.');
-    } finally {
-      event.target.value = '';
-    }
-  };
-
   const openModal = (action: NonNullable<ModalState>['action'], item: WorkItem) => {
     setModal({ action, item } as ModalState);
     setNote(action === 'COMPLETE' ? 'Sudah dikerjakan' : '');
-    setPhoto(null);
-    setPhotoPreview('');
+    photoHook.reset();
     setError('');
     setSuccessMessage('');
   };
@@ -386,7 +370,11 @@ export default function StaffUnifiedWorkQueue({ routines, tickets, isLoading, on
       {actionMutation.isError && error ? <Alert variant="danger" className="staff-alert">{error}</Alert> : null}
       {isLoading ? <div className="staff-empty-box">Memuat pekerjaan hari ini...</div> : null}
       {!isLoading && !filteredItems.length ? (
-        <div className="staff-empty-box"><strong>{activeFilter === 'DONE' ? 'Belum ada pekerjaan selesai.' : 'Tidak ada pekerjaan di filter ini.'}</strong><span>{activeFilter === 'DONE' ? 'Pekerjaan yang selesai hari ini akan muncul di sini.' : 'Pekerjaan rutin dan perbaikan aktif akan muncul di sini.'}</span></div>
+        <EmptyState
+          icon={activeFilter === 'DONE' ? '✅' : '🎉'}
+          title={activeFilter === 'DONE' ? 'Belum ada pekerjaan selesai.' : 'Semua beres di filter ini.'}
+          description={activeFilter === 'DONE' ? 'Pekerjaan yang selesai hari ini akan muncul di sini.' : 'Pekerjaan rutin dan perbaikan aktif akan muncul di sini.'}
+        />
       ) : null}
 
       <div className="staff-work-list unified tenant-like-dossier">
@@ -443,58 +431,19 @@ export default function StaffUnifiedWorkQueue({ routines, tickets, isLoading, on
           </div>
         ) : null}
 
-      <Modal show={Boolean(modal)} onHide={resetModal} centered>
-        <Modal.Header closeButton>
-          <Modal.Title>{modal?.action === 'START' ? 'Mulai pekerjaan?' : modal?.action === 'NEED_HELP' ? 'Kirim kendala?' : 'Tandai selesai?'}</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          {error ? <Alert variant="danger" className="py-2">{error}</Alert> : null}
-          {modal?.item ? (
-            <Alert variant="light" className="border py-2">
-              <strong>{modal.item.title}</strong><br />
-              <small>{modal.item.typeLabel} · {modal.item.location}</small>
-            </Alert>
-          ) : null}
-          {modal?.action === 'START' ? <p className="mb-0">Setelah dimulai, selesaikan pekerjaan ini dulu sebelum mulai pekerjaan lain.</p> : null}
-          {modal?.action !== 'START' ? (
-            <>
-              {/* R-23: Foto di ATAS form (sebelum catatan) dengan label tegas — pacu upload bukti */}
-              {modal?.action === 'COMPLETE' ? (
-                <Form.Group className="mb-3 staff-photo-proof-group">
-                  <Form.Label className="staff-photo-proof-label fw-semibold">
-                    📷 Foto bukti kerja (wajib untuk skor lengkap)
-                  </Form.Label>
-                  <CameraOrGalleryInput onChange={handlePhoto} />
-                  {photoPreview ? (
-                    <SafeImage className="staff-proof-preview" src={photoPreview} alt="Foto bukti" />
-                  ) : (
-                    <div className="staff-photo-proof-hint text-muted small mt-1">
-                      Foto tanpa bukti menurunkan skor laporan bulan ini.
-                    </div>
-                  )}
-                </Form.Group>
-              ) : null}
-              <Form.Group className="mb-3">
-                <Form.Label>{modal?.action === 'NEED_HELP' ? 'Apa kendalanya?' : 'Catatan hasil kerja'}</Form.Label>
-                <Form.Control as="textarea" rows={3} value={note} onChange={(event) => setNote(event.currentTarget.value)} placeholder={modal?.action === 'NEED_HELP' ? 'Contoh: butuh alat, barang rusak berat, atau tidak bisa masuk kamar' : 'Contoh: sudah bersih / sudah diganti / sudah dicek'} />
-              </Form.Group>
-              {modal?.action === 'NEED_HELP' ? (
-                <Form.Group>
-                  <Form.Label>Foto bukti (opsional)</Form.Label>
-                  <CameraOrGalleryInput onChange={handlePhoto} />
-                  {photoPreview ? <SafeImage className="staff-proof-preview" src={photoPreview} alt="Foto bukti" /> : null}
-                </Form.Group>
-              ) : null}
-            </>
-          ) : null}
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant="light" onClick={resetModal}>Batal</Button>
-          <Button variant={modal?.action === 'COMPLETE' ? 'success' : modal?.action === 'NEED_HELP' ? 'danger' : 'primary'} onClick={() => actionMutation.mutate()} disabled={actionMutation.isPending}>
-            {actionMutation.isPending ? <><Spinner size="sm" className="me-2" />Menyimpan...</> : modal?.action === 'START' ? 'Ya, mulai' : modal?.action === 'NEED_HELP' ? 'Kirim kendala' : 'Ya, sudah selesai'}
-          </Button>
-        </Modal.Footer>
-      </Modal>
+      <StaffWorkActionModal
+        show={Boolean(modal)}
+        onHide={resetModal}
+        action={modal?.action ?? null}
+        item={modal?.item ? { title: modal.item.title, typeLabel: modal.item.typeLabel, location: modal.item.location } : null}
+        error={error || photoHook.error}
+        note={note}
+        onNoteChange={setNote}
+        photoPreview={photoHook.preview}
+        onPhotoChange={photoHook.handlePhoto}
+        isPending={actionMutation.isPending}
+        onConfirm={() => actionMutation.mutate()}
+      />
     </section>
   );
 }

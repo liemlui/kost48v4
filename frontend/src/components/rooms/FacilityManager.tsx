@@ -1,10 +1,10 @@
 import { type FormEvent, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Alert, Button, Col, Collapse, Form, Row, Spinner, Table } from 'react-bootstrap';
-import { createResource, deleteResource, getResource, updateResource } from '../../api/resources';
+import { createResource, deleteResource, getResource, listResource, updateResource } from '../../api/resources';
 import EmptyState from '../common/EmptyState';
 import { useConfirm } from '../common/ConfirmProvider';
-import type { RoomFacility } from '../../types';
+import type { InventoryItem, RoomFacility } from '../../types';
 
 interface FacilityManagerProps {
   roomId: number;
@@ -18,6 +18,7 @@ interface FacilityFormState {
   publicVisible: boolean;
   condition: string;
   note: string;
+  inventoryItemId: string;
 }
 
 type FacilitiesEnvelope = {
@@ -33,6 +34,7 @@ const EMPTY_FACILITY: FacilityFormState = {
   publicVisible: true,
   condition: '',
   note: '',
+  inventoryItemId: '',
 };
 
 function normalizeFacilitiesResponse(response: unknown): RoomFacility[] {
@@ -93,6 +95,15 @@ export default function FacilityManager({ roomId, allowedToManage = true }: Faci
     enabled: Number.isFinite(roomId) && roomId > 0,
   });
 
+  // Daftar barang gudang untuk menautkan fasilitas → item inventaris (STF-GUDANG-2).
+  const inventoryItemsQuery = useQuery({
+    queryKey: ['inventory-items', 'for-facility-link'],
+    queryFn: () => listResource<InventoryItem>('/inventory-items', { limit: 200 }),
+    enabled: allowedToManage,
+    staleTime: 120_000,
+  });
+  const inventoryItems = inventoryItemsQuery.data?.items ?? [];
+
   const createMutation = useMutation({
     mutationFn: (payload: Record<string, unknown>) =>
       createResource<RoomFacility>(`/rooms/${roomId}/facilities`, payload),
@@ -139,6 +150,7 @@ export default function FacilityManager({ roomId, allowedToManage = true }: Faci
       publicVisible: facility.publicVisible !== false,
       condition: facility.condition ?? '',
       note: facility.note ?? '',
+      inventoryItemId: facility.inventoryItemId != null ? String(facility.inventoryItemId) : '',
     });
     setEditingId(facility.id);
     setShowForm(true);
@@ -172,9 +184,13 @@ export default function FacilityManager({ roomId, allowedToManage = true }: Faci
     };
 
     if (editingId !== null) {
+      // Saat edit, kirim null untuk melepas tautan jika dikosongkan.
+      payload.inventoryItemId = form.inventoryItemId ? Number(form.inventoryItemId) : null;
       updateMutation.mutate({ id: editingId, payload });
       return;
     }
+
+    if (form.inventoryItemId) payload.inventoryItemId = Number(form.inventoryItemId);
 
     createMutation.mutate(payload);
   }
@@ -282,7 +298,26 @@ export default function FacilityManager({ roomId, allowedToManage = true }: Faci
             </Row>
 
             <Row className="g-2 mt-2">
-              <Col md={6}>
+              <Col md={4}>
+                <Form.Group>
+                  <Form.Label className="small mb-1">Tautkan ke barang gudang</Form.Label>
+                  <Form.Select
+                    size="sm"
+                    value={form.inventoryItemId}
+                    onChange={(event) => setForm({ ...form, inventoryItemId: event.target.value })}
+                  >
+                    <option value="">Tidak ditautkan</option>
+                    {inventoryItems.map((it) => (
+                      <option key={it.id} value={String(it.id)}>
+                        {it.name}{it.sku ? ` (${it.sku})` : ''}
+                      </option>
+                    ))}
+                  </Form.Select>
+                  <Form.Text muted>Untuk cek konsistensi fasilitas ↔ inventaris yang akurat.</Form.Text>
+                </Form.Group>
+              </Col>
+
+              <Col md={4}>
                 <Form.Group>
                   <Form.Label className="small mb-1">Catatan Internal</Form.Label>
                   <Form.Control
@@ -294,7 +329,7 @@ export default function FacilityManager({ roomId, allowedToManage = true }: Faci
                 </Form.Group>
               </Col>
 
-              <Col md={6} className="d-flex align-items-end gap-2">
+              <Col md={4} className="d-flex align-items-end gap-2">
                 <Form.Check
                   type="checkbox"
                   id={`publicVisible-${roomId}`}

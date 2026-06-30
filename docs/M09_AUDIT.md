@@ -8,6 +8,66 @@ Konsolidasi audit fase, audit menyeluruh, dan laporan audit flow realita kode vs
 
 ## Sumber Digabung
 
+## Update 2026-06-30 - Audit Menyeluruh Terbaru + Keputusan Booking Flow
+
+**Scope:** backend NestJS/Prisma, frontend React/Vite, auth/role guard, endpoint publik, upload, payment submission, booking public flow, AutoOps, meter, dan lifecycle check-in.  
+**Verifikasi audit:** backend build lulus, frontend build lulus, backend unit test lulus 200/200, backend integration test lulus 18/18.
+
+### Temuan Utama
+
+| Area | Risiko | Severity | Status |
+|------|--------|----------|--------|
+| Booking publik phone/email | `phone` dan `email` optional; `Tenant.phone` wajib; `User.email` unique; phone-only bisa membuat email kosong dan email-only bisa gagal DB | High | Masuk Fase V-05 |
+| Payment proof ownership | `fileKey/fileUrl` diterima dari client; batch payment bisa tanpa proof; ownership proof belum server-side | High | Masuk Fase V-06 |
+| Booking room state | `RoomStatus.BOOKING` ambigu: kadang berarti unpaid, kadang DP; availability dan payment approval rawan salah | High | Masuk Fase V-00..V-04 |
+| Upload marketing/fasilitas | Validasi percaya MIME/original filename; public static `/uploads/room-images` berisiko MIME spoof | Medium | Masuk Fase V-07 |
+| Cron token | Secret diterima via query `?token=...` dan rawan bocor ke log/history | Medium | Masuk Fase V-07 |
+| Tenant meter cycle | Tenant bisa submit tanggal/delta meter yang langsung memicu invoice tanpa guard periode/kewajaran cukup | Medium | Masuk Fase V-07 |
+| Ticket image access | File tanpa ownership record bisa lolos untuk user terautentikasi jika filename diketahui | Low | Masuk Fase V-07 |
+| JWT localStorage | Token di `localStorage` memperbesar dampak XSS | Low/Architecture | Backlog hardening setelah upload aman |
+
+### Keputusan Booking Flow Baru
+
+`RoomStatus.BOOKING` tidak dipakai lagi sebagai status fisik kamar. Booking tetap konsep bisnis di level stay/payment/UI.
+
+State final:
+
+```txt
+Booking dibuat, belum bayar        -> Room AVAILABLE
+DP 30% approved                    -> Room RESERVED
+Full payment approved              -> Room RESERVED
+Check-in/serah kunci setelah lunas  -> Room OCCUPIED
+```
+
+Catatan penting:
+
+- Full payment approved tidak otomatis check-in.
+- `initialMetersPromotedAt` hanya boleh diisi saat check-in/serah kunci.
+- Lunas harus dibaca dari invoice/payment asli, bukan dari `downPaymentPaidRupiah`.
+- Jika enum DB `BOOKING` masih ada, perlakukan sebagai legacy-only sampai cleanup data/schema aman.
+- Checklist eksekusi aktif ada di `docs/M10_CHECKLIST_CHANGELOG.md` Fase V.
+
+### Pendalaman Lanjutan 2026-06-30 - Semua Flow dan Komponen
+
+Audit lanjutan membaca ulang kontrak domain, modul backend, route/frontend utama, upload/media helper, role guard, dan public/tenant/admin/staff workspace. Hasilnya bukan implementasi kode, tetapi perluasan checklist eksekusi detail di `docs/M10_CHECKLIST_CHANGELOG.md` V-00..V-16.
+
+| Area | Temuan pendalaman | Dampak | Checklist |
+|------|-------------------|--------|-----------|
+| Payment booking path | `payment-submissions.service.ts` masih menentukan booking path dari `RoomStatus.BOOKING/RESERVED`; unpaid booking baru sengaja tetap `AVAILABLE` | DP bisa salah masuk jalur invoice-only dan ditolak | V-01, V-02 |
+| Check-in booking | `stays.service.ts` pre-check mengizinkan `RESERVED`, tetapi lock transaction menolak selain `AVAILABLE` | Booking yang sudah reserved/lunas bisa gagal check-in atau dibuat lewat jalur yang salah | V-03 |
+| Public availability | `marketing-public-rooms.service.ts` dan `publicRoomDisplay.ts` masih menganggap `RESERVED` bookable | Publik bisa melihat janji booking untuk kamar yang seharusnya terkunci | V-09 |
+| Label status | `statusLabels.ts` masih menulis `RESERVED = Dipesan (Lunas)` | Owner/admin/tenant bisa salah baca reserved-DP sebagai lunas | V-04, V-10, V-11 |
+| Tenant portal | Stage tenant sudah berbasis room `OCCUPIED`, tetapi copy/action pembayaran perlu dipastikan membaca payment asli | UX bisa benar stage-nya tetapi salah instruksi bayar/check-in | V-10 |
+| Admin check-in UI | `StepRoomSelect` hanya blok `OCCUPIED/BOOKED`, bukan flow reserved booking pemenang | Admin bisa melihat pilihan kamar/aksi yang tidak sinkron dengan guard backend | V-03, V-11 |
+| Role/data exposure | `analytics/finance/summary` mengizinkan STAFF membaca total billed/paid/expense; `wifi-sales` GET juga STAFF | Perlu keputusan scope STAFF agar tidak bocor data finansial sensitif | V-12 |
+| Finance/accounting guard | Manual journal draft sudah disabled, tetapi create/update COA/cash account/asset masih perlu keputusan OWNER-only vs ADMIN | Risiko mutasi konfigurasi finansial terlalu lebar bila tidak sesuai owner | V-13 |
+| Upload/media | Announcement/ticket/tenant/private images sudah sebagian pakai magic-byte; marketing/facility masih perlu parity dan ownership static/public | MIME spoof dan file access perlu diseragamkan | V-07, V-14 |
+| Dokumen flow | M03/M05 masih menyimpan narasi lama "Booking = Room RESERVED" | AI eksekutor bisa mengikuti instruksi historis dan menghidupkan bug lama | V-08 |
+
+**Kesimpulan:** tetap direkomendasikan tidak memakai `RoomStatus.BOOKING` sebagai status kamar. "Booking" tetap nama proses bisnis/UI; status fisik kamar cukup `AVAILABLE -> RESERVED -> OCCUPIED`. Sumber kebenaran DP vs lunas harus invoice/payment, bukan enum room.
+
+### Sumber Historis yang Digabung
+
 - `docs/AUDIT_FASE4_FINAL.md` - konten dipertahankan
 - `docs/AUDIT_MENYELURUH_SEMUA_FASE.md` - konten dipertahankan
 - `docs/FLOW_AUDIT_LAPORAN.md` - konten dipertahankan

@@ -357,7 +357,7 @@ export default function AppLayout({ children }: { children?: ReactNode }) {
                 </span>
                 <TenantAvatar tenantId={user?.tenantId} fullName={user?.fullName} enabled={user?.role === 'TENANT'} />
               </button>
-              <Button variant="outline-danger" size="sm" onClick={handleLogoutClick}>Logout</Button>
+              <Button variant="outline-danger" size="sm" onClick={handleLogoutClick}>Keluar</Button>
             </div>
           </section>
 

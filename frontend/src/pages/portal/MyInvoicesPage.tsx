@@ -194,7 +194,7 @@ export default function MyInvoicesPage() {
         <Card.Body>
           <div className="table-meta align-items-start tenant-invoices-header">
             <div>
-              <div className="command-eyebrow">Tagihan Saya</div>
+              <div className="command-eyebrow">Bayar Tagihan</div>
               <div className="panel-title">Daftar tagihan</div>
               <div className="panel-subtitle">Status dan aksi cukup dilihat dari tabel. Bukti yang sedang diperiksa tidak perlu diupload ulang.</div>
             </div>

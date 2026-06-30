@@ -121,8 +121,26 @@ export type RoomFacility = {
   publicVisible: boolean;
   condition?: string | null;
   note?: string | null;
+  inventoryItemId?: number | null;
   createdAt?: string;
   updatedAt?: string;
+};
+
+// Cek konsistensi Fasilitas ↔ Inventaris (dihitung backend di GET /rooms/:id).
+export type RoomFacilityCheckStatus = 'OK' | 'PRESENT_PROBLEM' | 'MISSING' | 'UNLINKED';
+export type RoomFacilityCheckItem = {
+  key: string;
+  label: string;
+  kind: 'STRUCTURAL' | 'INVENTORY_BACKED';
+  critical?: boolean;
+  status: RoomFacilityCheckStatus;
+  matchedRoomItemId?: number | null;
+  matchedInventoryItemId?: number | null;
+};
+export type RoomFacilityCheck = {
+  hasGap: boolean;
+  acGap: boolean;
+  items: RoomFacilityCheckItem[];
 };
 
 export type Room = {
@@ -150,6 +168,14 @@ export type Room = {
   isAvailable?: boolean;
   canBook?: boolean;
   availabilityNote?: string | null;
+  // F4-15 / AUD-3: konfigurasi AC (semua kamar kos = ½ PK).
+  hasAc?: boolean | null;
+  acWattage?: number | null;
+  acLastCleanedAt?: string | null;
+  acCleanIntervalDays?: number | null;
+  acUsageHoursPerDay?: number | null;
+  // Cek konsistensi fasilitas↔inventaris (hanya pada GET /rooms/:id).
+  facilityCheck?: RoomFacilityCheck | null;
 };
 
 export type PricingTerm = 'DAILY' | 'WEEKLY' | 'BIWEEKLY' | 'MONTHLY' | 'SMESTERLY' | 'YEARLY' | string;
@@ -380,6 +406,8 @@ export type CompleteStayPayload = {
   actualCheckOutDate: string;
   checkoutReason?: string;
   notes?: string;
+  damageChargeRupiah?: number;
+  damageNote?: string;
 };
 
 export type CancelStayPayload = {
@@ -538,6 +566,7 @@ export type CreatePublicBookingPayload = {
   website?: string;
   occupantCount?: number;
   hasPet?: boolean;
+  paymentChoice?: 'DP' | 'FULL';
 };
 
 export type PublicBookingResult = {
@@ -549,6 +578,17 @@ export type PublicBookingResult = {
     expiresAt: string;
     checkInDate: string;
     pricingTerm: PricingTerm;
+  };
+  payment?: {
+    paymentChoice: 'DP' | 'FULL';
+    agreedRentAmountRupiah: number;
+    downPaymentAmountRupiah: number;
+    depositAmountRupiah: number;
+    depositBreakdown: {
+      roomDepositRupiah: number;
+      petDepositRupiah: number;
+    };
+    hasPet: boolean;
   };
   portalAccess: {
     email: string;

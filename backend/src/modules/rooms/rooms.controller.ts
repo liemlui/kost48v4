@@ -32,6 +32,19 @@ export class RoomsController {
     return { message: 'Daftar kamar berhasil diambil', data: await this.roomsService.findAll(query) };
   }
 
+  // Monitoring AC + jadwal cuci (deklarasi SEBELUM ':id' agar tidak ketangkap ParseIntPipe).
+  @Get('ac-maintenance')
+  @Roles(UserRole.OWNER, UserRole.ADMIN)
+  async acMaintenance() {
+    return { message: 'Status cuci AC berhasil diambil', data: await this.roomsService.getAcMaintenanceOverview() };
+  }
+
+  @Patch(':id/ac-clean')
+  @Roles(UserRole.OWNER, UserRole.ADMIN)
+  async recordAcCleaning(@Param('id', ParseIntPipe) id: number, @CurrentUser() actor: CurrentUserPayload) {
+    return { message: 'Cuci AC berhasil dicatat', data: await this.roomsService.recordAcCleaning(id, actor) };
+  }
+
   @Get(':id')
   @Roles(UserRole.OWNER, UserRole.ADMIN, UserRole.STAFF)
   async findOne(@Param('id', ParseIntPipe) id: number) {
