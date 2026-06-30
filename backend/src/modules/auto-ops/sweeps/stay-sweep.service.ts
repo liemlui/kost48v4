@@ -447,7 +447,16 @@ export class StaySweepService {
     const rooms = await this.prisma.room.findMany({
       where: {
         status: RoomStatus.RESERVED,
-        stays: { none: { status: StayStatus.ACTIVE } },
+        // V-04: tidak ada stay ACTIVE, dan tidak ada payment submission
+        // PENDING_REVIEW/APPROVED dari stay CANCELLED/COMPLETED yang belum diselesaikan
+        stays: {
+          none: {
+            OR: [
+              { status: StayStatus.ACTIVE },
+              { paymentSubmissions: { some: { status: { in: [PaymentSubmissionStatus.PENDING_REVIEW, PaymentSubmissionStatus.APPROVED] } } } },
+            ],
+          },
+        },
       },
       select: { id: true },
       take: 100,

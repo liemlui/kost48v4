@@ -37,7 +37,7 @@ export default function StepRoomSelect({
             <Row xs={1} md={2} lg={3} className="g-3">
               {rooms.map((room) => {
                 const isSelected = selectedRoomId === room.id;
-                const isOccupied = room.status === 'OCCUPIED' || room.status === 'BOOKED';
+                const isOccupied = room.status === 'OCCUPIED' || room.status === 'BOOKED' || room.status === 'RESERVED';
                 return (
                   <Col key={room.id}>
                     <Card

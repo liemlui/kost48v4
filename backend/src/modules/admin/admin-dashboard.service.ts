@@ -27,10 +27,19 @@ export class AdminDashboardService {
         include: {
           room: true,
           tenant: { select: { id: true, fullName: true } },
+          invoices: { orderBy: { id: 'desc' }, take: 1, select: { id: true, status: true } },
+          _count: { select: { invoices: true } },
         },
         take: 300,
         orderBy: { createdAt: 'desc' },
-      }),
+      }).then((rows) =>
+        rows.map(({ invoices: inv, _count: cnt, ...stay }) => ({
+          ...stay,
+          invoiceCount: cnt?.invoices ?? 0,
+          latestInvoiceId: inv[0]?.id ?? null,
+          latestInvoiceStatus: inv[0]?.status ?? null,
+        })),
+      ),
       this.prisma.invoice.findMany({
         include: {
           stay: {

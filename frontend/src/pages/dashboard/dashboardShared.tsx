@@ -183,6 +183,41 @@ export function isExpiredAdminBooking(stay: Stay): boolean {
   return Boolean(expiry && expiry.getTime() < Date.now());
 }
 
+// V-04: Label reserved berdasarkan status invoice: DP (PARTIAL) vs Lunas (PAID)
+export type ReservedLabel = {
+  label: string;
+  variant: 'success' | 'warning' | 'info' | 'danger' | 'secondary';
+};
+
+export function getReservedPaymentLabel(stay: Stay): ReservedLabel {
+  const roomStatus = stay.room?.status;
+  if (roomStatus === 'OCCUPIED') {
+    return { label: 'Terisi', variant: 'info' };
+  }
+  if (roomStatus === 'RESERVED') {
+    const invStatus = stay.latestInvoiceStatus;
+    if (invStatus === 'PAID') {
+      return { label: 'Reserved - Lunas', variant: 'success' };
+    }
+    if (invStatus === 'PARTIAL') {
+      return { label: 'Reserved - DP', variant: 'warning' };
+    }
+    // ISSUED/DRAFT atau tanpa invoice
+    const hasInvoice = Boolean(stay.latestInvoiceId) || Number(stay.invoiceCount ?? 0) > 0;
+    if (hasInvoice) {
+      return { label: 'Menunggu Pembayaran', variant: 'warning' };
+    }
+    return { label: 'Menunggu Persetujuan', variant: 'warning' };
+  }
+  if (roomStatus === 'AVAILABLE') {
+    return { label: 'Tersedia', variant: 'success' };
+  }
+  if (roomStatus === 'MAINTENANCE') {
+    return { label: 'Perlu Dicek', variant: 'secondary' };
+  }
+  return { label: roomStatus ?? '-', variant: 'secondary' };
+}
+
 export function getTimestampValue(item: unknown, keys: string[]): string | Date | null {
   if (!item || typeof item !== 'object') return null;
   const record = item as Record<string, unknown>;

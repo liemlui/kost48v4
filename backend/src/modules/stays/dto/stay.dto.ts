@@ -1,4 +1,4 @@
-import { IsBoolean, IsDateString, IsEnum, IsIn, IsInt, IsNotEmpty, IsNumberString, IsOptional, IsString, Min } from 'class-validator';
+import { IsBoolean, IsDateString, IsEnum, IsIn, IsInt, IsNotEmpty, IsNumberString, IsOptional, IsString, Matches, Min } from 'class-validator';
 import { LeadSource, PricingTerm, StayPurpose } from '../../../common/enums/app.enums';
 
 // F3-14/F3-16: admin paksa-checkout tenant (overstay nunggak / kabur). Deposit
@@ -172,6 +172,7 @@ export class ProcessDepositDto {
 export class ProcessLossRefundDto {
   @IsOptional()
   @IsString()
+  @Matches(/^\/api\/payment-submissions\/proofs\//, { message: 'proofUrl harus berasal dari upload server' })
   proofUrl?: string;
 
   @IsOptional()

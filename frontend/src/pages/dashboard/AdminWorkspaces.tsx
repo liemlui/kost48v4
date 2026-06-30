@@ -30,6 +30,7 @@ import {
   formatDateSafe, formatNumber,
   daysFromToday, isOpenInvoice, isTerlambat, isDueSoon,
   isReservedBookingPendingApproval, isReservedBookingWaitingPayment, isExpiredAdminBooking,
+  getReservedPaymentLabel,
   getStayCreatedAt, getStayDeadline, getInvoiceTime,
   makeClock, makeLastUpdatedLabel, makeQueueTime, earliestDeadlineLabel, priorityActionFromQueue,
   makePaymentCount, makeRoomPoints, makePercent, countExpiredDates, isLowStockItem,
@@ -128,10 +129,11 @@ export function AdminStaysUnifiedList({ activeStays, bookingReview, waitingPayme
   const bookingRows: AdminStayFlowRow[] = [...bookingReview, ...waitingPayment]
     .filter((stay) => stay.status === 'ACTIVE' && !isExpiredAdminBooking(stay))
     .map((stay) => {
+      const { label: paymentLabel, variant: paymentVariant } = getReservedPaymentLabel(stay);
       const needsReview = isReservedBookingPendingApproval(stay);
       const deadline = getStayDeadline(stay, needsReview ? ADMIN_SLA_HOURS.bookingReview : ADMIN_SLA_HOURS.tenantPayment);
       const meta = getDeadlineMeta(deadline, needsReview ? 'Batas review booking' : 'Batas bayar tenant');
-      return { id: `booking-${stay.id}`, group: 'BOOKING', tenant: stay.tenant?.fullName || `Tenant #${stay.tenantId}`, room: stay.room?.code || `Kamar #${stay.roomId}`, statusLabel: needsReview ? 'Booking baru' : 'Menunggu bayar', tone: meta.isExpired ? 'danger' : needsReview ? 'warning' : 'info', deadline: meta.hasDate ? `${meta.clockLabel} · ${meta.relativeLabel}` : undefined, helper: needsReview ? 'Perlu review admin sebelum tagihan awal.' : 'Penghuni wajib bayar dan kirim bukti dalam satu langkah.', to: `/stays/${stay.id}`, actionLabel: needsReview ? 'Review' : 'Detail' };
+      return { id: `booking-${stay.id}`, group: 'BOOKING', tenant: stay.tenant?.fullName || `Tenant #${stay.tenantId}`, room: stay.room?.code || `Kamar #${stay.roomId}`, statusLabel: paymentLabel, tone: meta.isExpired ? 'danger' : paymentVariant as AdminStayFlowRow['tone'], deadline: meta.hasDate ? `${meta.clockLabel} · ${meta.relativeLabel}` : undefined, helper: paymentLabel === 'Menunggu Persetujuan' ? 'Perlu review admin sebelum tagihan awal.' : paymentLabel === 'Reserved - DP' ? 'DP sudah masuk, menunggu pelunasan + check-in.' : paymentLabel === 'Reserved - Lunas' ? 'Lunas, menunggu check-in admin.' : 'Penghuni wajib bayar dan kirim bukti dalam satu langkah.', to: `/stays/${stay.id}`, actionLabel: needsReview ? 'Review' : 'Detail' };
     });
 
   const activeRows: AdminStayFlowRow[] = activeStays

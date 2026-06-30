@@ -20,7 +20,7 @@ export class AnalyticsController {
   }
 
   @Get('finance/summary')
-  @Roles(UserRole.OWNER, UserRole.ADMIN, UserRole.STAFF)
+  @Roles(UserRole.OWNER, UserRole.ADMIN)
   async financeSummary() {
     return { message: 'Ringkasan analytics finance berhasil diambil', data: await this.analyticsService.financeSummary() };
   }

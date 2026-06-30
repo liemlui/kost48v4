@@ -4,6 +4,42 @@
 
 ## Changelog Ringkas
 
+### 2026-06-30 — Fase V: Hardening Aktif (V-06..V-14) ✅
+- **V-06**: Payment Proof Ownership — upload-proof hardening (tenantId prefix, audit trail), validateAndResolveProof (ownership/file exists/consumed), SubmitBatchPaymentModal, "Bayar Semua" button wiring ✅
+- **V-08**: Sinkronisasi dokumen kontrak — M04 ditambahi override Fase V (M03/M05 sudah) ✅
+- **V-11**: `StepRoomSelect.tsx` — RESERVED kamar tenant lain tidak bisa dipilih ✅
+- **V-12**: `analytics/finance/summary` STAFF dihapus (OWNER/ADMIN only) ✅
+- **V-13**: `deposit-ledger backfill/dry-run` OWNER-only ✅; `ProcessLossRefundDto.proofUrl` validasi server path ✅
+- V-07, V-09, V-10, V-14 diverifikasi semua sudah diimplementasi ✅
+- V-15 manual UAT masih perlu eksekusi manusia.
+
+### 2026-06-30 — Fase X: Audit UI/UX Visual (Playwright + Inspeksi Visual) 🔴 dibuka
+- **Metode baru**: `frontend/e2e/visual-capture.spec.ts` memotret 132 screenshot (5 role × 2 viewport), tiap layar diinspeksi visual (bukan smoke-test teks). Re-seed event-path (perbaiki 2 stale seeder: `occupantCount`, `bookingSource:'ONLINE'`→`'WEBSITE'`).
+- **Temuan 🔴**: (X-01, DIKONFIRMASI API) tenant melihat tiket internal `EVICT_OVERSTAY` via `/tickets/my`; (X-02) katalog publik KOSONG saat go-live — bukan bug Fase U hide-gap (sengaja), tapi data normal bikin semua kamar tersembunyi tanpa peringatan admin + detail/booking error mentah.
+- **Temuan 🟠/🟡**: kontras judul wizard, blok navy kosong di landing, dashboard owner/admin "Network Error"+toast (perlu repro manual; API aggregate OK saat retest), `/portal/loyalty`+`/portal/bookings` fallback ke stay, chip mobile terpotong, nav publik tak konsisten.
+- **Output**: `docs/_AUDIT_UIUX_VISUAL_2026-06-30.md` + `docs/M10_CHECKLIST_CHANGELOG.md` Fase X (X-01..X-10, instruksi eksekutor detail). Inspeksi ~110 screenshot sisa = task X-10.
+
+### 2026-06-30 — TEMUAN Audit Fase V: Invoice Ganda + Meter di Payment ✅
+- **TEMUAN-1**: `stays.service.ts` — booking activation skip pembuatan invoice baru (stay sudah punya invoice PAID). Invoice+MeterReading dibungkus `if (lockedRoom.status !== RESERVED)`.
+- **TEMUAN-2**: `payment-submissions.service.ts` — hapus MeterReading.create() saat payment approval (melanggar aturan Fase V). `stays.service.ts` — promote pending meter snapshot ke MeterReading saat check-in activation.
+- **Gate**: Backend tsc ✅ | audit doc `_AUDIT_FASE_V_2026-06-30.md` dihapus (temuan sudah diimplement).
+
+### 2026-07-14 — V-05: Fix Booking Publik Phone/Email ✅
+- **V-05**: `create-public-booking.dto.ts` — `phone` jadi required + validasi `@Matches`.
+- **V-05**: `public-bookings.service.ts` — guard `normalizePhone` null → BadRequest.
+- **V-05**: `public-bookings.service.ts` — perbaiki OR lookup (filter null/empty conditions).
+- **V-05**: `public-bookings.service.ts` — User.email pakai placeholder `tenant-{id}@phone.local.kost48` saat email tidak diisi.
+- **V-05**: `public-bookings.service.ts` — portalAccess.email tetap pakai email asli (tidak bocorkan placeholder).
+- **Gate**: Backend tsc ✅
+
+### 2026-07-13 — V-04: AutoOps & Dashboard Label Flow Baru ✅
+- **V-04**: `booking-sweep.service.ts` — skip `releaseRoomAfterBookingCancelTx` jika room sudah `AVAILABLE`.
+- **V-04**: `stay-sweep.service.ts` — perkuat `runRoomHealer()`: pastikan tidak ada payment submission PENDING/APPROVED dari stay non-ACTIVE sebelum release room.
+- **V-04**: `admin-dashboard.service.ts` — tambah `latestInvoiceId`/`latestInvoiceStatus`/`invoiceCount` di stay query dashboard.
+- **V-04**: `dashboardShared.tsx` — tambah `getReservedPaymentLabel()`: Reserved-DP, Reserved-Lunas, Menunggu Pembayaran, Menunggu Persetujuan.
+- **V-04**: `AdminWorkspaces.tsx` — booking rows pakai label baru + helper text sesuai status pembayaran.
+- **Gate**: Backend tsc ✅ | Frontend tsc ✅
+
 ### 2026-07-13 — V-03: Check-in Wajib Lunas + Booking Activation ✅
 - **V-03**: `stays.service.ts` — lock transaction terima RESERVED untuk aktivasi booking.
 - **V-03**: Booking activation: cari existing stay unpromoted, verifikasi invoice PAID, promote stay.

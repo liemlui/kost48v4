@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useState } from 'react';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { Alert, Badge, Button, Card, Col, Row, Spinner, Table } from 'react-bootstrap';
 import { Bar, BarChart, CartesianGrid, Cell, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import DonutGauge from '../../components/charts/DonutGauge';
 import { listResource } from '../../api/resources';
-import { createBatchPaymentSubmission, listMyPaymentSubmissions } from '../../api/paymentSubmissions';
+import { listMyPaymentSubmissions } from '../../api/paymentSubmissions';
+import SubmitBatchPaymentModal from '../../components/portal/SubmitBatchPaymentModal';
 import CurrencyDisplay from '../../components/common/CurrencyDisplay';
 import EmptyState from '../../components/common/EmptyState';
 import PaginationControls from '../../components/common/PaginationControls';
@@ -145,19 +146,9 @@ export default function MyInvoicesPage() {
   });
 
   const qc = useQueryClient();
-  const batchMut = useMutation({
-    mutationFn: (payload: { stayId: number; invoiceIds: number[]; paidAt: string; paymentMethod: string }) =>
-      createBatchPaymentSubmission({
-        stayId: payload.stayId,
-        invoiceIds: payload.invoiceIds,
-        paidAt: payload.paidAt,
-        paymentMethod: payload.paymentMethod as any,
-      }),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['portal-invoices'] });
-      qc.invalidateQueries({ queryKey: ['portal-payment-submissions'] });
-    },
-  });
+  const [showBatchModal, setShowBatchModal] = useState(false);
+  const [batchInvoices, setBatchInvoices] = useState<Invoice[]>([]);
+  const [batchStayId, setBatchStayId] = useState<number>(0);
 
   const allItems = query.data?.items ?? [];
   const pendingReviewByInvoiceId = useMemo(() => getPendingReviewInvoiceIds(submissionsQuery.data?.items ?? []), [submissionsQuery.data]);
@@ -269,29 +260,15 @@ export default function MyInvoicesPage() {
                     <Button
                       size="sm"
                       variant="primary"
-                      disabled={batchMut.isPending}
                       onClick={() => {
-                        batchMut.mutate({
-                          stayId: invs[0].stayId,
-                          invoiceIds: invs.map((i) => i.id),
-                          paidAt: new Date().toISOString().slice(0, 10),
-                          paymentMethod: 'TRANSFER',
-                        });
+                        setBatchInvoices(invs);
+                        setBatchStayId(invs[0].stayId);
+                        setShowBatchModal(true);
                       }}
                     >
-                      {batchMut.isPending ? 'Mengirim...' : 'Bayar Semua'}
+                      Bayar Semua
                     </Button>
                   </div>
-                  {batchMut.isError && batchMut.variables?.stayId === invs[0].stayId ? (
-                    <div className="text-danger small mt-1 w-100">
-                      {getApiErrorMessage(batchMut.error, 'Gagal mengirim bukti bayar batch. Coba kirim satu per satu.')}
-                    </div>
-                  ) : null}
-                  {batchMut.isSuccess && batchMut.variables?.stayId === invs[0].stayId ? (
-                    <div className="text-success small mt-1 w-100">
-                      Bukti bayar batch terkirim! Admin akan memeriksa.
-                    </div>
-                  ) : null}
                 </Alert>
               );
             });
@@ -352,6 +329,17 @@ export default function MyInvoicesPage() {
           ) : null}
         </Card.Body>
       </Card>
+
+      <SubmitBatchPaymentModal
+        show={showBatchModal}
+        invoices={batchInvoices}
+        stayId={batchStayId}
+        onHide={() => setShowBatchModal(false)}
+        onSuccess={() => {
+          qc.invalidateQueries({ queryKey: ['portal-invoices'] });
+          qc.invalidateQueries({ queryKey: ['portal-payment-submissions'] });
+        }}
+      />
     </div>
   );
 }

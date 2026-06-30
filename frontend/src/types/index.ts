@@ -673,7 +673,6 @@ export type BatchPaymentSubmissionPayload = {
   referenceNumber?: string;
   notes?: string;
   fileKey?: string;
-  fileUrl?: string;
   originalFilename?: string;
   mimeType?: string;
   fileSizeBytes?: number;

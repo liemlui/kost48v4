@@ -7,6 +7,8 @@ import {
   NotFoundException,
   ServiceUnavailableException,
 } from '@nestjs/common';
+import { existsSync } from 'fs';
+import { join } from 'path';
 import { Prisma } from '../../generated/prisma';
 import {
   BookingDepositPaymentStatus,
@@ -53,6 +55,58 @@ export class PaymentSubmissionsService {
     private readonly depositLedger: DepositLedgerService,
     private readonly loyalty: LoyaltyService,
   ) {}
+
+  private readonly PROOF_DIR = join(process.cwd(), 'uploads', 'payment-proofs');
+
+  /**
+   * Validasi file proof:
+   * - Jika paymentMethod bukan CASH: wajib ada fileKey
+   * - fileKey harus ada di disk
+   * - fileKey harus dimiliki oleh tenant yang sama (prefix tenantId_)
+   * - fileKey tidak boleh sudah dipakai tenant lain (consumed)
+   * - Generate fileUrl server-side
+   */
+  private async validateAndResolveProof(
+    tenantId: number,
+    paymentMethod: string,
+    fileKey?: string,
+  ): Promise<{ fileKey: string; fileUrl: string } | null> {
+    if (!fileKey) {
+      if (paymentMethod !== 'CASH') {
+        throw new BadRequestException('File bukti pembayaran wajib diunggah (kecuali pembayaran tunai)');
+      }
+      return null;
+    }
+
+    // Validasi ownership: fileKey harus diawali tenantId_
+    if (!fileKey.startsWith(`${tenantId}_`)) {
+      throw new BadRequestException('File bukti pembayaran tidak valid (kepemilikan tidak cocok)');
+    }
+
+    // Validasi file exists
+    const filePath = join(this.PROOF_DIR, fileKey);
+    if (!existsSync(filePath)) {
+      throw new BadRequestException('File bukti pembayaran tidak ditemukan. Silakan unggah ulang.');
+    }
+
+    // Validasi consumed: cek apakah fileKey sudah dipakai tenant LAIN
+    const existing = await this.prisma.paymentSubmission.findFirst({
+      where: {
+        fileKey,
+        tenantId: { not: tenantId },
+        status: { notIn: ['REJECTED' as any] },
+      },
+      select: { id: true },
+    });
+    if (existing) {
+      throw new BadRequestException('File bukti pembayaran tidak valid (sudah dipakai pihak lain)');
+    }
+
+    // Generate fileUrl server-side (jangan percaya client)
+    const fileUrl = `/api/payment-submissions/proofs/${fileKey}`;
+
+    return { fileKey, fileUrl };
+  }
 
   async createSubmission(user: CurrentUserPayload, dto: CreatePaymentSubmissionDto) {
     const tenantId = user.tenantId;
@@ -166,6 +220,13 @@ export class PaymentSubmissionsService {
         }
       }
 
+      // V-06: Validasi proof wajib (ownership + file exists + consumed)
+      const resolvedProof = await this.validateAndResolveProof(
+        tenantId,
+        dto.paymentMethod as string,
+        dto.fileKey,
+      );
+
       const created = await this.prisma.$transaction(async (tx) => {
         // Kunci baris invoice agar concurrent submission untuk invoice yang sama
         // di-serialize — mencegah race condition TOCTOU pada cek existingPending.
@@ -202,8 +263,8 @@ export class PaymentSubmissionsService {
             senderBankName: dto.senderBankName ?? null,
             referenceNumber: dto.referenceNumber ?? null,
             notes: dto.notes ?? null,
-            fileKey: dto.fileKey ?? null,
-            fileUrl: dto.fileUrl ?? null,
+            fileKey: resolvedProof?.fileKey ?? null,
+            fileUrl: resolvedProof?.fileUrl ?? null,
             originalFilename: dto.originalFilename ?? null,
             mimeType: dto.mimeType ?? null,
             fileSizeBytes: dto.fileSizeBytes ?? null,
@@ -264,6 +325,13 @@ export class PaymentSubmissionsService {
     if (uniqueIds.length !== dto.invoiceIds.length) {
       throw new BadRequestException('Ada invoice duplikat dalam daftar pembayaran');
     }
+
+    // V-06: Validasi proof wajib (ownership + file exists + consumed)
+    const resolvedProof = await this.validateAndResolveProof(
+      tenantId,
+      dto.paymentMethod as string,
+      dto.fileKey,
+    );
 
     return this.prisma.$transaction(async (tx) => {
       // Validasi semua invoice milik stay yang sama dan tenant yang sama
@@ -337,8 +405,8 @@ export class PaymentSubmissionsService {
             senderBankName: dto.senderBankName ?? null,
             referenceNumber: dto.referenceNumber ?? null,
             notes: dto.notes ?? null,
-            fileKey: dto.fileKey ?? null,
-            fileUrl: dto.fileUrl ?? null,
+            fileKey: resolvedProof?.fileKey ?? null,
+            fileUrl: resolvedProof?.fileUrl ?? null,
             originalFilename: dto.originalFilename ?? null,
             mimeType: dto.mimeType ?? null,
             fileSizeBytes: dto.fileSizeBytes ?? null,
@@ -517,6 +585,23 @@ export class PaymentSubmissionsService {
         if (submission.status !== PaymentSubmissionStatus.PENDING_REVIEW) {
           throw new ConflictException('Bukti pembayaran ini sudah pernah diproses');
         }
+
+        // V-06: Gate proof — tolak submission tanpa bukti valid (kecuali CASH)
+        if ((submission.paymentMethod as string) !== 'CASH') {
+          if (!submission.fileKey) {
+            throw new BadRequestException('Bukti pembayaran tanpa file tidak dapat disetujui. Minta tenant mengunggah bukti.');
+          }
+          // Validasi ownership: fileKey harus diawali tenantId_
+          if (!submission.fileKey.startsWith(`${submission.tenantId}_`)) {
+            throw new BadRequestException('File bukti pembayaran tidak valid (kepemilikan tidak cocok)');
+          }
+          // Validasi file exists
+          const proofPath = join(this.PROOF_DIR, submission.fileKey);
+          if (!existsSync(proofPath)) {
+            throw new BadRequestException('File bukti pembayaran tidak ditemukan di server. Minta tenant mengunggah ulang.');
+          }
+        }
+
         await this.assertRenewalPaymentWithinDeadline(
           tx,
           submission.invoiceId,
@@ -857,97 +942,9 @@ export class PaymentSubmissionsService {
               });
             }
 
-            // Promote pending meter snapshot to operational MeterReading
-            const hasElectricity =
-              submission.stayInitialElectricityKwhPending != null;
-            const hasWater = submission.stayInitialWaterM3Pending != null;
-
-            const stay = await tx.stay.findUnique({
-              where: { id: submission.stayId },
-              select: { checkInDate: true, roomId: true },
-            });
-
-            // Audit M-07: promosi stay TIDAK boleh bergantung pada ada/tidaknya
-            // snapshot meter; meter dibuat kondisional di dalam blok ini.
-            if (stay) {
-              const readingAt = new Date(stay.checkInDate);
-              readingAt.setUTCHours(0, 0, 0, 0);
-
-              const recordedById =
-                submission.stayInitialMetersRecordedById ?? user.id;
-
-              if (hasElectricity) {
-                const electricityValue = submission.stayInitialElectricityKwhPending!;
-                const existingElectricity = await tx.meterReading.findFirst({
-                  where: {
-                    roomId: stay.roomId,
-                    utilityType: UtilityType.ELECTRICITY,
-                    readingAt,
-                  },
-                  select: { id: true, readingValue: true },
-                });
-                if (!existingElectricity) {
-                  await tx.meterReading.create({
-                    data: {
-                      roomId: stay.roomId,
-                      utilityType: UtilityType.ELECTRICITY,
-                      readingAt,
-                      readingValue: electricityValue,
-                      recordedById,
-                      note: 'Meter awal dipromote otomatis setelah pembayaran booking disetujui.',
-                    },
-                  });
-                } else if (Number(existingElectricity.readingValue) !== Number(electricityValue)) {
-                  // B-11: reading LISTRIK sudah ada di tanggal yang sama (mis. rebooking
-                  // sehari) → snapshot baru dibuang. Jangan diam-diam: catat agar admin
-                  // sadar tagihan utilitas awal mungkin perlu koreksi manual.
-                  this.logger.warn(
-                    `B-11: snapshot meter LISTRIK stay #${submission.stayId} (kamar ${stay.roomId}) diabaikan — sudah ada reading ${existingElectricity.readingValue} di ${readingAt.toISOString().slice(0, 10)}, snapshot baru ${electricityValue} dibuang. Cek tagihan utilitas awal.`,
-                  );
-                }
-              }
-
-              if (hasWater) {
-                const waterValue = submission.stayInitialWaterM3Pending!;
-                const existingWater = await tx.meterReading.findFirst({
-                  where: {
-                    roomId: stay.roomId,
-                    utilityType: UtilityType.WATER,
-                    readingAt,
-                  },
-                  select: { id: true, readingValue: true },
-                });
-                if (!existingWater) {
-                  await tx.meterReading.create({
-                    data: {
-                      roomId: stay.roomId,
-                      utilityType: UtilityType.WATER,
-                      readingAt,
-                      readingValue: waterValue,
-                      recordedById,
-                      note: 'Meter awal dipromote otomatis setelah pembayaran booking disetujui.',
-                    },
-                  });
-                } else if (Number(existingWater.readingValue) !== Number(waterValue)) {
-                  // B-11: reading AIR sudah ada di tanggal yang sama → snapshot baru
-                  // dibuang. Catat agar tidak hilang diam-diam (cek tagihan awal).
-                  this.logger.warn(
-                    `B-11: snapshot meter AIR stay #${submission.stayId} (kamar ${stay.roomId}) diabaikan — sudah ada reading ${existingWater.readingValue} di ${readingAt.toISOString().slice(0, 10)}, snapshot baru ${waterValue} dibuang. Cek tagihan utilitas awal.`,
-                  );
-                }
-              }
-
-              await tx.stay.update({
-                where: { id: submission.stayId },
-                data: {
-                  initialElectricityKwhPending: null,
-                  initialWaterM3Pending: null,
-                  initialMetersRecordedAt: null,
-                  initialMetersRecordedById: null,
-                  // V-03: jangan promote di payment — check-in terpisah nanti
-                },
-              });
-            }
+            // TEMUAN-2: MeterReading promote dipindah ke check-in (stays.service.ts create()).
+            // Pending fields (initialElectricityKwhPending, dll.) tetap di stay
+            // agar bisa dibaca saat check-in activation. Jangan hapus/clear di sini.
 
           }
 

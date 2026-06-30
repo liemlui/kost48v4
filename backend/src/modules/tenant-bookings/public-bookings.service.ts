@@ -135,6 +135,9 @@ export class PublicBookingsService {
     }
 
     const normalizedPhone = normalizePhone(dto.phone ?? '');
+    if (!normalizedPhone) {
+      throw new BadRequestException('Nomor telepon tidak valid. Gunakan nomor Indonesia minimal 8 digit.');
+    }
     const normalizedEmail = (dto.email?.trim() ?? '').toLowerCase();
     const trimmedFullName = dto.fullName.trim();
 
@@ -231,9 +234,9 @@ export class PublicBookingsService {
         const existingTenantWithActiveBooking = await tx.tenant.findFirst({
           where: {
             OR: [
-              { phone: normalizedPhone },
-              normalizedEmail ? { email: normalizedEmail } : {},
-            ].filter(Boolean),
+              ...(normalizedPhone ? [{ phone: normalizedPhone }] : []),
+              ...(normalizedEmail ? [{ email: normalizedEmail }] : []),
+            ],
             stays: {
               some: {
                 status: StayStatus.ACTIVE as any,
@@ -255,7 +258,7 @@ export class PublicBookingsService {
         let tenant = await tx.tenant.findFirst({
           where: {
             OR: [
-              { phone: normalizedPhone },
+              ...(normalizedPhone ? [{ phone: normalizedPhone }] : []),
               ...(normalizedEmail ? [{ email: normalizedEmail }] : []),
             ],
           },
@@ -292,7 +295,7 @@ export class PublicBookingsService {
           portalUser = await tx.user.create({
             data: {
               fullName: trimmedFullName,
-              email: normalizedEmail,
+              email: normalizedEmail || `tenant-${tenant.id}@phone.local.kost48`,
               passwordHash,
               role: UserRole.TENANT as any,
               tenantId: tenant.id,

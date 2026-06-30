@@ -316,6 +316,7 @@ export class StaysService {
 
         // V-03: Room RESERVED = aktivasi booking (stay sudah ada)
         let stay: { id: number };
+        let returnInvoice: { id: number } | undefined;
         if (lockedRoom.status === RoomStatus.RESERVED) {
           const bookingStay = await tx.stay.findFirst({
             where: {
@@ -327,6 +328,10 @@ export class StaysService {
               id: true,
               depositAmountRupiah: true,
               depositPaidAmountRupiah: true,
+              initialElectricityKwhPending: true,
+              initialWaterM3Pending: true,
+              checkInDate: true,
+              roomId: true,
             },
           });
           if (!bookingStay) {
@@ -336,7 +341,7 @@ export class StaysService {
           // Verifikasi invoice sewa awal sudah LUNAS
           const initialInvoice = await tx.invoice.findFirst({
             where: { stayId: bookingStay.id },
-            select: { status: true, totalAmountRupiah: true },
+            select: { id: true, status: true, totalAmountRupiah: true },
             orderBy: { id: 'asc' },
           });
           if (!initialInvoice || initialInvoice.status !== InvoiceStatus.PAID) {
@@ -350,6 +355,77 @@ export class StaysService {
             where: { id: bookingStay.id },
             data: { initialMetersPromotedAt: new Date() },
           });
+
+          // TEMUAN-2: promote pending meter snapshot ke MeterReading saat check-in
+          // (pemindahan dari payment-submissions.service.ts)
+          const baselineDateBooking = startOfDay(new Date(dto.checkInDate));
+
+          if (bookingStay.initialElectricityKwhPending != null) {
+            const existingElec = await tx.meterReading.findFirst({
+              where: {
+                roomId: dto.roomId,
+                utilityType: UtilityType.ELECTRICITY,
+                readingAt: baselineDateBooking,
+              },
+              select: { id: true },
+            });
+            if (!existingElec) {
+              await tx.meterReading.create({
+                data: {
+                  roomId: dto.roomId,
+                  utilityType: UtilityType.ELECTRICITY,
+                  readingAt: baselineDateBooking,
+                  readingValue: bookingStay.initialElectricityKwhPending,
+                  recordedById: actor.id,
+                  note: 'Meter awal dipromote dari pending booking saat check-in.',
+                },
+              });
+            } else {
+              this.logger.warn(
+                `TEMUAN-2: skip meter LISTRIK stay #${bookingStay.id} — sudah ada reading di ${baselineDateBooking.toISOString().slice(0, 10)}`,
+              );
+            }
+          }
+
+          if (bookingStay.initialWaterM3Pending != null) {
+            const existingWater = await tx.meterReading.findFirst({
+              where: {
+                roomId: dto.roomId,
+                utilityType: UtilityType.WATER,
+                readingAt: baselineDateBooking,
+              },
+              select: { id: true },
+            });
+            if (!existingWater) {
+              await tx.meterReading.create({
+                data: {
+                  roomId: dto.roomId,
+                  utilityType: UtilityType.WATER,
+                  readingAt: baselineDateBooking,
+                  readingValue: bookingStay.initialWaterM3Pending,
+                  recordedById: actor.id,
+                  note: 'Meter awal dipromote dari pending booking saat check-in.',
+                },
+              });
+            } else {
+              this.logger.warn(
+                `TEMUAN-2: skip meter AIR stay #${bookingStay.id} — sudah ada reading di ${baselineDateBooking.toISOString().slice(0, 10)}`,
+              );
+            }
+          }
+
+          // Clear pending fields setelah dipromote
+          await tx.stay.update({
+            where: { id: bookingStay.id },
+            data: {
+              initialElectricityKwhPending: null,
+              initialWaterM3Pending: null,
+              initialMetersRecordedAt: null,
+              initialMetersRecordedById: null,
+            },
+          });
+
+          returnInvoice = initialInvoice;
           stay = bookingStay;
         } else {
           // Walk-in: buat stay baru
@@ -409,113 +485,118 @@ export class StaysService {
           data: { status: RoomStatus.OCCUPIED },
         });
 
-        const invoiceNumber = `INV-${stay.id}-${Date.now().toString().slice(-6)}`;
-        const checkInDate = new Date(dto.checkInDate);
-        const plannedCheckOutDate = dto.plannedCheckOutDate
-          ? new Date(dto.plannedCheckOutDate)
-          : undefined;
-        const periodEnd = calculatePeriodEnd(
-          checkInDate,
-          dto.pricingTerm,
-          plannedCheckOutDate,
-        );
-        const dueDate = calculateDueDate(periodEnd);
+        // TEMUAN-1: booking activation sudah punya invoice sewa — jangan buat baru
+        if (lockedRoom.status !== RoomStatus.RESERVED) {
+          const invoiceNumber = `INV-${stay.id}-${Date.now().toString().slice(-6)}`;
+          const checkInDate = new Date(dto.checkInDate);
+          const plannedCheckOutDate = dto.plannedCheckOutDate
+            ? new Date(dto.plannedCheckOutDate)
+            : undefined;
+          const periodEnd = calculatePeriodEnd(
+            checkInDate,
+            dto.pricingTerm,
+            plannedCheckOutDate,
+          );
+          const dueDate = calculateDueDate(periodEnd);
 
-        // Invoice dibuat DRAFT dulu agar InvoiceLine bisa dibuat (DB guard: invoice_line_draft_only_trg)
-        const invoice = await tx.invoice.create({
-          data: {
-            invoiceNumber,
-            stayId: stay.id,
-            status: InvoiceStatus.DRAFT,
-            periodStart: checkInDate,
-            periodEnd,
-            dueDate,
-            createdById: actor.id,
-          },
-        });
-
-        const unit = mapPricingTermToUnit(dto.pricingTerm);
-        await tx.invoiceLine.create({
-          data: {
-            invoiceId: invoice.id,
-            lineType: "RENT" as any,
-            description: `Sewa kamar ${room.code} - ${dto.pricingTerm}`,
-            qty: 1,
-            unit,
-            unitPriceRupiah: agreed,
-            lineAmountRupiah: agreed,
-            sortOrder: 0,
-          },
-        });
-
-        // Setelah InvoiceLine dibuat, update invoice jadi ISSUED
-        const issuedAt = new Date();
-        const issuedInvoice = await tx.invoice.update({
-          where: { id: invoice.id },
-          data: {
-            status: InvoiceStatus.ISSUED,
-            issuedAt,
-            totalAmountRupiah: agreed,
-          },
-        });
-        await this.accountingPosting
-          .postInvoiceIssuedTx(tx, issuedInvoice.id, actor.id)
-          .catch((err) => {
-            this.logger.warn(
-              `Auto Journal Lite gagal untuk invoice awal #${issuedInvoice.id} (stay create): ${err instanceof Error ? err.message : String(err)}`,
-            );
-            return undefined;
+          // Invoice dibuat DRAFT dulu agar InvoiceLine bisa dibuat (DB guard: invoice_line_draft_only_trg)
+          const invoice = await tx.invoice.create({
+            data: {
+              invoiceNumber,
+              stayId: stay.id,
+              status: InvoiceStatus.DRAFT,
+              periodStart: checkInDate,
+              periodEnd,
+              dueDate,
+              createdById: actor.id,
+            },
           });
 
-        const baselineDate = startOfDay(new Date(dto.checkInDate));
+          const unit = mapPricingTermToUnit(dto.pricingTerm);
+          await tx.invoiceLine.create({
+            data: {
+              invoiceId: invoice.id,
+              lineType: "RENT" as any,
+              description: `Sewa kamar ${room.code} - ${dto.pricingTerm}`,
+              qty: 1,
+              unit,
+              unitPriceRupiah: agreed,
+              lineAmountRupiah: agreed,
+              sortOrder: 0,
+            },
+          });
 
-        const existingElectricityReading = await tx.meterReading.findFirst({
-          where: {
-            roomId: dto.roomId,
-            utilityType: UtilityType.ELECTRICITY,
-            readingAt: baselineDate,
-          },
-        });
-        if (existingElectricityReading) {
-          throw new BadRequestException(
-            `Meter awal listrik pada tanggal check-in ${baselineDate.toLocaleDateString("id-ID")} sudah pernah tercatat untuk kamar ini.`,
-          );
+          // Setelah InvoiceLine dibuat, update invoice jadi ISSUED
+          const issuedAt = new Date();
+          const issuedInvoice = await tx.invoice.update({
+            where: { id: invoice.id },
+            data: {
+              status: InvoiceStatus.ISSUED,
+              issuedAt,
+              totalAmountRupiah: agreed,
+            },
+          });
+          await this.accountingPosting
+            .postInvoiceIssuedTx(tx, issuedInvoice.id, actor.id)
+            .catch((err) => {
+              this.logger.warn(
+                `Auto Journal Lite gagal untuk invoice awal #${issuedInvoice.id} (stay create): ${err instanceof Error ? err.message : String(err)}`,
+              );
+              return undefined;
+            });
+          returnInvoice = issuedInvoice;
+
+          // Walk-in: buat MeterReading baseline dari DTO (booking activation sudah promote di atas)
+          const baselineDate = startOfDay(new Date(dto.checkInDate));
+
+          const existingElectricityReading = await tx.meterReading.findFirst({
+            where: {
+              roomId: dto.roomId,
+              utilityType: UtilityType.ELECTRICITY,
+              readingAt: baselineDate,
+            },
+          });
+          if (existingElectricityReading) {
+            throw new BadRequestException(
+              `Meter awal listrik pada tanggal check-in ${baselineDate.toLocaleDateString("id-ID")} sudah pernah tercatat untuk kamar ini.`,
+            );
+          }
+
+          const existingWaterReading = await tx.meterReading.findFirst({
+            where: {
+              roomId: dto.roomId,
+              utilityType: UtilityType.WATER,
+              readingAt: baselineDate,
+            },
+          });
+          if (existingWaterReading) {
+            throw new BadRequestException(
+              `Meter awal air pada tanggal check-in ${baselineDate.toLocaleDateString("id-ID")} sudah pernah tercatat untuk kamar ini.`,
+            );
+          }
+
+          await tx.meterReading.create({
+            data: {
+              roomId: dto.roomId,
+              utilityType: UtilityType.ELECTRICITY,
+              readingAt: baselineDate,
+              readingValue: initialElectricity,
+              recordedById: actor.id,
+              note: "Meter awal saat check-in",
+            },
+          });
+
+          await tx.meterReading.create({
+            data: {
+              roomId: dto.roomId,
+              utilityType: UtilityType.WATER,
+              readingAt: baselineDate,
+              readingValue: initialWater,
+              recordedById: actor.id,
+              note: "Meter awal saat check-in",
+            },
+          });
         }
-
-        const existingWaterReading = await tx.meterReading.findFirst({
-          where: {
-            roomId: dto.roomId,
-            utilityType: UtilityType.WATER,
-            readingAt: baselineDate,
-          },
-        });
-        if (existingWaterReading) {
-          throw new BadRequestException(
-            `Meter awal air pada tanggal check-in ${baselineDate.toLocaleDateString("id-ID")} sudah pernah tercatat untuk kamar ini.`,
-          );
-        }
-
-        await tx.meterReading.create({
-          data: {
-            roomId: dto.roomId,
-            utilityType: UtilityType.ELECTRICITY,
-            readingAt: baselineDate,
-            readingValue: initialElectricity,
-            recordedById: actor.id,
-            note: "Meter awal saat check-in",
-          },
-        });
-
-        await tx.meterReading.create({
-          data: {
-            roomId: dto.roomId,
-            utilityType: UtilityType.WATER,
-            readingAt: baselineDate,
-            readingValue: initialWater,
-            recordedById: actor.id,
-            note: "Meter awal saat check-in",
-          },
-        });
 
         // --- Portal user creation ---
         if (portalStatus === "CREATED" && passwordHash && portalEmail) {
@@ -533,7 +614,7 @@ export class StaysService {
           portalUserId = newPortalUser.id;
         }
 
-        return { stay, invoice: issuedInvoice };
+        return { stay, invoice: returnInvoice };
       });
 
       await this.audit.log({

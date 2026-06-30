@@ -61,7 +61,7 @@ export class DepositLedgerController {
   }
 
   @Post('backfill/dry-run')
-  @Roles(UserRole.OWNER, UserRole.ADMIN)
+  @Roles(UserRole.OWNER)
   async backfillDryRun(@Body() dto: DepositLedgerDryRunDto = {}) {
     return {
       message: 'Dry-run backfill deposit ledger berhasil diproses',

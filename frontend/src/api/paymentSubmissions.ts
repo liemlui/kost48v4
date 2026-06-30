@@ -58,7 +58,9 @@ export async function submitPaymentWithProof(payload: CreatePaymentSubmissionPay
 }
 
 /** M-4: Bayar sekaligus beberapa invoice (sewa + meter OPEN) milik stay yang sama. */
+/** M-4: Bayar sekaligus beberapa invoice (sewa + meter OPEN) milik stay yang sama. */
 export async function createBatchPaymentSubmission(payload: BatchPaymentSubmissionPayload) {
+  // Hanya kirim fileKey — fileUrl akan di-generate server-side
   const { data } = await apiClient.post('/payment-submissions/batch', payload);
   return data.data as PaymentSubmission[];
 }

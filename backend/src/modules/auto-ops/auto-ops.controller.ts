@@ -1,4 +1,4 @@
-import { Controller, ForbiddenException, Get, Headers, Post, Query, UseGuards } from '@nestjs/common';
+import { Controller, ForbiddenException, Get, Headers, HttpCode, Post, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { Public } from '../../common/decorators/public.decorator';
@@ -26,14 +26,15 @@ export class AutoOpsController {
    * Trigger cron eksternal (cPanel Cron Jobs). Di shared hosting/Passenger proses Node
    * di-idle saat sepi → setInterval in-process tak andal; cPanel cron memanggil URL ini
    * tiap N menit (sekaligus membangunkan app). Tanpa JWT — diproteksi token rahasia
-   * (env AUTO_OPS_CRON_TOKEN) via header `X-Cron-Token` ATAU query `?token=`.
-   * Contoh cPanel: curl -fsS -H "X-Cron-Token: RAHASIA" https://domain/api/auto-ops/cron
+   * (env AUTO_OPS_CRON_TOKEN) via header `X-Cron-Token` SAJA. Query `?token=` SUDAH DIHAPUS (V-07b).
+   * Contoh cPanel: curl -fsS -X POST -H "X-Cron-Token: RAHASIA" https://domain/api/auto-ops/cron
    */
   @Public()
-  @Get('cron')
-  async cron(@Headers('x-cron-token') headerToken?: string, @Query('token') queryToken?: string) {
+  @Post('cron')
+  @HttpCode(200)
+  async cron(@Headers('x-cron-token') headerToken?: string) {
     const expected = (process.env.AUTO_OPS_CRON_TOKEN ?? '').trim();
-    const provided = (headerToken ?? queryToken ?? '').trim();
+    const provided = (headerToken ?? '').trim();
     if (!expected || provided !== expected) {
       throw new ForbiddenException('Token cron auto-ops tidak valid');
     }

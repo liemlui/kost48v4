@@ -397,10 +397,14 @@ export class TicketsService {
       },
     });
 
-    // Routine evidence is stored outside Ticket. It remains protected by
-    // authentication plus an unguessable random filename.
-    if (!ticket) return true;
-    if (user.role === "OWNER" || user.role === "ADMIN") return true;
+    // V-07d: File tanpa metadata/ownership record TIDAK BOLEH diakses.
+    // OWNER/ADMIN boleh akses untuk debugging, tapi file orphan tetap ditolak
+    // untuk role lain karena tidak ada ownership record yang bisa diverifikasi.
+    if (user.role === "OWNER" || user.role === "ADMIN") {
+      if (!ticket) return true; // OWNER/ADMIN boleh akses orphan file untuk debug
+      return true;
+    }
+    if (!ticket) return false; // Tanpa metadata, tidak bisa verifikasi ownership — tolak
     if (user.role === "TENANT") return ticket.tenantId === user.tenantId;
     if (user.role === "STAFF") {
       return ticket.assignedToId === user.id || ticket.staffFieldReports.length > 0;

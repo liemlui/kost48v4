@@ -45,6 +45,11 @@ export class MeterReadingsService {
       throw new BadRequestException('Tanggal catat meter tidak valid');
     }
 
+    // V-07c: Tolak readingAt masa depan
+    if (params.readingAt > endOfDay(new Date())) {
+      throw new BadRequestException('Tanggal pembacaan meter tidak boleh di masa depan');
+    }
+
     const duplicate = await this.prisma.meterReading.findFirst({
       where: {
         roomId: params.roomId,
@@ -205,6 +210,18 @@ export class MeterReadingsService {
     const roomId = stay.roomId;
     const room = await this.prisma.room.findUnique({ where: { id: roomId } });
     if (!room) throw new NotFoundException('Kamar tidak ditemukan');
+
+    // V-07c: Tolak readingAt sebelum check-in (initialMetersPromotedAt)
+    const fullStay = await this.prisma.stay.findUnique({
+      where: { id: stay.id },
+      select: { initialMetersPromotedAt: true },
+    });
+    if (fullStay?.initialMetersPromotedAt) {
+      const readingAtDate = parseJakartaDateOnly(dto.readingAt, 'Tanggal catat meter tidak valid');
+      if (readingAtDate < fullStay.initialMetersPromotedAt) {
+        throw new BadRequestException('Tanggal pembacaan meter tidak boleh sebelum check-in');
+      }
+    }
 
     const setting = await this.settings.getOperational();
     const readingAt = parseJakartaDateOnly(dto.readingAt, 'Tanggal catat meter tidak valid');

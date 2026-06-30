@@ -16,6 +16,28 @@ Semua fondasi keuangan: harness verifikasi, pembayaran/invoice, accounting, lapo
 
 - Jadikan file ini pintu masuk tematik; bila butuh detail mentah, cek file sumber di arsip yang disebut di atas.
 - Heading asli dinaikkan levelnya agar tidak bertabrakan dengan struktur M-file.
+
+## Update 2026-06-30 — Override Booking Flow Fase V
+
+**Kontrak room status final mengikuti Fase V di `docs/M10_CHECKLIST_CHANGELOG.md`:**
+
+```txt
+Booking dibuat, belum bayar        -> Room AVAILABLE
+DP 30% approved                    -> Room RESERVED
+Full payment approved              -> Room RESERVED
+Check-in/serah kunci setelah lunas  -> Room OCCUPIED
+```
+
+Aturan baru yang memengaruhi keuangan:
+
+- **`RESERVED` bukan sinonim lunas.** DP dan lunas sama-sama reserved; status pembayaran dibaca dari invoice/payment, bukan dari status kamar dan bukan dari `downPaymentPaidRupiah`.
+- **Payment approval tidak boleh promote meter/occupancy.** `initialMetersPromotedAt` hanya di-set saat check-in.
+- **Check-in/serah kunci wajib invoice sewa awal lunas.** Saat itulah meter awal dipromosikan dan room menjadi `OCCUPIED`.
+- **Booking pesaing unpaid dibatalkan** saat pemenang payment approved; pesaing yang sudah transfer perlu jalur refund kalah-cepat.
+- Label `Reserved-DP` vs `Reserved-Lunas` dibedakan dari payment data, bukan room status.
+
+Untuk eksekusi coding, AI eksekutor WAJIB membaca `docs/M10_CHECKLIST_CHANGELOG.md` Fase V (V-00..V-16) sebagai sumber kebenaran, bukan narasi historis di bagian lama dokumen ini.
+
 ## Update 2026-06-20 — Fase K: Unifikasi Arus Kas ✅
 
 **Dua "Arus Kas" yang berbeda (operasional approximation vs ledger-backed direct method) sudah diunifikasi (R2).** `GET /reports/cash-flow` dihapus — semua laporan arus kas kini pakai `GET /accounting/cashflow` (direct method, termasuk deposit + investasi + pendanaan). Frontend `ReportsPage` tab Operasional kini mengambil dari `fetchCashflowStatement()`. Deposit handling normal checkout juga diselaraskan dengan forced checkout (auto-cover semua invoice, tidak hanya meter).

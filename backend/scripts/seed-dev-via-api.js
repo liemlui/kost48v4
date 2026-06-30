@@ -229,11 +229,10 @@ const summary = {
       checkInDate: ymd(checkIn),
       plannedCheckOutDate: ymd(planOut),
       depositCollected,
-      bookingSource: i % 3 === 0 ? 'WALK_IN' : i % 3 === 1 ? 'WHATSAPP' : 'ONLINE',
+      bookingSource: i % 3 === 0 ? 'WALK_IN' : i % 3 === 1 ? 'WHATSAPP' : 'WEBSITE',
       stayPurpose: t.occ === 'Mahasiswa' ? 'STUDY' : 'WORK',
       initialElectricityKwh: String(elec0),
       initialWaterM3: String(20 + i),
-      occupantCount: t.occ2,
     });
     const stayId = idOf(stay);
     stays.push({ stayId, code: t.code, monthly: rm.monthly, checkIn, planOut, elec0, tenantId, scenario: t.scenario, slug: t.slug });

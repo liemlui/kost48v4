@@ -402,7 +402,10 @@ export class BookingSweepService {
         },
       });
 
-      await releaseRoomAfterBookingCancelTx(tx, roomId);
+      // V-04: booking unpaid tidak mengunci room (status AVAILABLE), skip release
+      if (cur.roomStatus !== 'AVAILABLE') {
+        await releaseRoomAfterBookingCancelTx(tx, roomId);
+      }
       await tx.auditLog.create({
         data: {
           actorUserId,

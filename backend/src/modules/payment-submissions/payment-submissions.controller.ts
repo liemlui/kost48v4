@@ -20,6 +20,7 @@ import { RejectPaymentSubmissionDto } from './dto/reject-payment-submission.dto'
 import { ReviewQueueQueryDto } from './dto/review-queue-query.dto';
 import { PaymentSubmissionsService } from './payment-submissions.service';
 import { detectImageMime, deleteFileSafe } from '../../common/utils/file-signature.util';
+import { PrismaService } from '../../prisma/prisma.service';
 import { validate } from 'class-validator';
 import { plainToInstance } from 'class-transformer';
 
@@ -28,7 +29,10 @@ import { plainToInstance } from 'class-transformer';
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('payment-submissions')
 export class PaymentSubmissionsController {
-  constructor(private readonly paymentSubmissionsService: PaymentSubmissionsService) {}
+  constructor(
+    private readonly paymentSubmissionsService: PaymentSubmissionsService,
+    private readonly prisma: PrismaService,
+  ) {}
 
   private readonly UPLOAD_DIR = join(process.cwd(), 'uploads', 'payment-proofs');
 
@@ -229,8 +233,13 @@ export class PaymentSubmissionsController {
       limits: { fileSize: 2 * 1024 * 1024 },
     }),
   )
-  async uploadProof(@UploadedFile() file: any) {
+  async uploadProof(@UploadedFile() file: any, @CurrentUser() user: CurrentUserPayload) {
     if (!file) throw new BadRequestException('File bukti bayar wajib dipilih');
+
+    const tenantId = user.tenantId;
+    if (!tenantId) {
+      throw new BadRequestException('Akun tenant tidak valid');
+    }
 
     const filePath = join(this.UPLOAD_DIR, file.filename);
     const detectedMime = detectImageMime(filePath);
@@ -240,9 +249,27 @@ export class PaymentSubmissionsController {
     }
 
     const safeExt = extname(detectedMime === 'image/jpeg' ? 'x.jpg' : detectedMime === 'image/png' ? 'x.png' : 'x.webp');
-    const secureName = this.generateSecureFilename(safeExt);
+    // Ownership built-in via tenantId prefix
+    const secureName = `${tenantId}_${Date.now()}_${randomBytes(8).toString('hex')}${safeExt}`;
     const securePath = join(this.UPLOAD_DIR, secureName);
     renameSync(filePath, securePath);
+
+    // Audit log
+    await this.prisma.auditLog.create({
+      data: {
+        actorUserId: user.id,
+        action: 'UPLOAD_PAYMENT_PROOF',
+        entityType: 'PaymentProof',
+        entityId: secureName,
+        meta: {
+          tenantId,
+          fileKey: secureName,
+          originalFilename: file.originalname,
+          mimeType: detectedMime,
+          fileSizeBytes: file.size,
+        } as any,
+      },
+    });
 
     return {
       message: 'Bukti bayar berhasil diunggah',

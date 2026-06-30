@@ -1,4 +1,4 @@
-import { IsBoolean, IsDateString, IsEmail, IsEnum, IsIn, IsInt, IsOptional, IsString, Max, MaxLength, Min } from 'class-validator';
+import { IsBoolean, IsDateString, IsEmail, IsEnum, IsIn, IsInt, IsOptional, IsString, Matches, Max, MaxLength, Min } from 'class-validator';
 import { PricingTerm, StayPurpose } from '../../../common/enums/app.enums';
 
 export class CreatePublicBookingDto {
@@ -15,10 +15,10 @@ export class CreatePublicBookingDto {
   @MaxLength(120)
   fullName!: string;
 
-  @IsOptional()
   @IsString()
   @MaxLength(30)
-  phone?: string;
+  @Matches(/^[\d\s\+\-\(\)]{6,20}$/, { message: 'Format nomor telepon tidak valid' })
+  phone!: string;
 
   @IsOptional()
   @IsEmail()

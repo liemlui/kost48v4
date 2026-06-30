@@ -54,16 +54,8 @@ export class CreatePaymentSubmissionDto {
   @MaxLength(1000)
   notes?: string;
 
-  // File metadata — only accepted from multipart upload flow; JSON endpoint must reject external URLs.
-  @IsOptional()
-  @IsString()
-  @MaxLength(500)
-  @Matches(
-    /^\/api\/payment-submissions\/proofs\/[\w\-]+\.(jpg|jpeg|png|webp)$/i,
-    { message: 'fileUrl harus berupa path bukti bayar yang valid' },
-  )
-  fileUrl?: string;
-
+  // File metadata — fileUrl di-generate server-side, jangan dikirim client.
+  // fileKey opsional untuk CASH; wajib untuk metode pembayaran lain (dicek di service).
   @IsOptional()
   @IsString()
   @MaxLength(255)
