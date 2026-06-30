@@ -141,7 +141,7 @@ export class InvoicePaymentsService {
     // dibatalkan otomatis (temuan audit A1).
     if (
       invoiceSnapshot.stay &&
-      [RoomStatus.BOOKING, RoomStatus.RESERVED].includes(invoiceSnapshot.stay.room?.status as RoomStatus) &&
+      [RoomStatus.RESERVED].includes(invoiceSnapshot.stay.room?.status as RoomStatus) &&
       !invoiceSnapshot.stay.initialMetersPromotedAt
     ) {
       throw new ConflictException(

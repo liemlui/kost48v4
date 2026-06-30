@@ -139,7 +139,7 @@ export class TenantBookingsService {
         const bookableWhileCleaning =
           room.status === RoomStatus.MAINTENANCE && Boolean(room.allowBookingWhileCleaning);
         if (
-          ![RoomStatus.AVAILABLE, RoomStatus.BOOKING, RoomStatus.RESERVED].includes(room.status as RoomStatus) &&
+          room.status !== RoomStatus.AVAILABLE &&
           !bookableWhileCleaning
         ) {
           throw new ConflictException('Kamar belum bisa dipesan karena sudah aktif ditempati atau sedang tidak tersedia');
@@ -278,7 +278,7 @@ export class TenantBookingsService {
         // Room masih di status AVAILABLE/BOOKING/reservasi lain — approval invoice
         // tidak bergantung pada status kamar, cukup booking aktif & belum expired.
         if (
-          ![RoomStatus.AVAILABLE, RoomStatus.BOOKING, RoomStatus.RESERVED, RoomStatus.MAINTENANCE].includes(
+          ![RoomStatus.AVAILABLE, RoomStatus.RESERVED, RoomStatus.MAINTENANCE].includes(
             booking.roomStatus as RoomStatus,
           )
         ) {

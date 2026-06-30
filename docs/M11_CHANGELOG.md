@@ -4,10 +4,40 @@
 
 ## Changelog Ringkas
 
-### 2026-06-30 — V-00: Preflight RoomStatus.BOOKING (legacy-only, runtime tidak menulis)
-- **V-00**: `booking-schema.helper.ts` — `hasBookingRoomStatus` tidak lagi syarat `isBookingSchemaReady()` (V5 flow: unpaid booking = AVAILABLE).
-- **V-00**: `payment-submissions.service.ts` — hapus writer `RoomStatus.BOOKING`; payment approved (DP/lunas) selalu set `RoomStatus.RESERVED`.
-- **V-00**: Strategy legacy-only — enum `BOOKING` tetap di schema, runtime tidak boleh menulis.
+### 2026-07-13 — V-03: Check-in Wajib Lunas + Booking Activation ✅
+- **V-03**: `stays.service.ts` — lock transaction terima RESERVED untuk aktivasi booking.
+- **V-03**: Booking activation: cari existing stay unpromoted, verifikasi invoice PAID, promote stay.
+- **V-03**: `payment-submissions.service.ts` — hapus `initialMetersPromotedAt` dari payment approval (check-in terpisah).
+- **V-03**: Gate tenant stay aktif: booking unpromoted tidak dianggap stay aktif.
+- **V-03**: Walk-in: create stay baru + promote. Booking: activate existing stay.
+- **Gate**: Backend tsc ✅ | Frontend tsc ✅
+
+### 2026-07-13 — V-02: Payment Approved → RESERVED + Re-check Room + Cancel Pesaing ✅
+- **V-02**: `payment-submissions.service.ts` — DP/lunas approved selalu set room `RESERVED` (tidak lagi tergantung `nextInvoiceStatus === PAID`).
+- **V-02**: Re-check room sebelum approve: OCCUPIED tolak, RESERVED stay lain tolak + notes refund.
+- **V-02**: Cancel competing unpaid bookings + reject PENDING_REVIEW submissions pesaing.
+- **V-02**: Tidak set `initialMetersPromotedAt` di payment approval; meter promotion hanya saat PAID penuh.
+- **Gate**: Backend tsc ✅
+
+### 2026-07-13 — V-01: Booking Tidak Mengunci Room + Booking Path domain-based ✅
+- **V-01**: `public-bookings.service.ts` & `tenant-bookings.service.ts` — RESERVED tidak bisa dibooking (hanya AVAILABLE atau MAINTENANCE+allowBooking).
+- **V-01**: `payment-submissions.service.ts` — `isBookingPath` deteksi dari `stayPromotedAt==null`, bukan `Room.status`.
+- **V-01**: `owner-ai.service.ts` — `isBookingPath` pake `initialMetersPromotedAt==null`.
+- **V-01**: `marketing-public-rooms.service.ts` — `isAvailable`/`canBook` tidak include RESERVED.
+- **V-01**: `tenant-bookings-query.service.ts` — `isAvailable` tidak include RESERVED.
+- **V-01**: `publicRoomDisplay.ts` — RESERVED `canBook: false`, copy "Kamar sudah dikunci tenant lain".
+- **V-01**: `SubmissionLockRow` + `SubmissionEligibilityRow` — tambah `stayPromotedAt`.
+- **Gate**: Backend tsc ✅ | Frontend tsc ✅
+
+### 2026-07-13 — V-00: Hapus RoomStatus.BOOKING dari Enum Sepenuhnya ✅
+- **V-00**: `RoomStatus.BOOKING` **dihapus** dari `schema.prisma` dan `app.enums.ts` — enum sekarang: AVAILABLE, RESERVED, OCCUPIED, MAINTENANCE, INACTIVE.
+- **V-00**: **0 data `BOOKING` di DB** (AVAILABLE=2, OCCUPIED=11) — aman dihapus tanpa migrasi data.
+- **V-00**: 13 file backend + 3 file frontend dibersihkan dari referensi `RoomStatus.BOOKING`.
+- **V-00**: `hasBookingRoomStatus` dihapus dari `booking-schema.helper.ts`, `tenant-bookings.queries.ts`, `tenant-bookings.types.ts`, `tenant-bookings-query.service.ts`.
+- **V-00**: Label `RESERVED` diubah dari "Dipesan (Lunas)" jadi "Dipesan" (karena RESERVED bisa DP atau Lunas).
+- **V-00**: `publicRoomDisplay.ts` — blok `BOOKING` dihapus; `isAvailable`/`canBook` tidak lagi include BOOKING.
+- **V-00**: StatusBadge, statusLabels, finance service, auto-ops, marketing, payment-submissions, stays — semua bersih.
+- **Gate**: Backend `tsc --noEmit` ✅ | Frontend `tsc --noEmit` ✅
 
 ### 2026-07-01 — Sinkronisasi Docs MD vs Kode (Audit Total)
 - **Audit total 16 file MD vs kode riil** (schema, enum, modul, pricing helper): M01, M04, M05, M03, CODEMAP diperbarui — sync pricing multipliers (WEEKLY 0.5, SMESTERLY 5.7, YEARLY 11.0), model count (55→57), enum count (65→69), module count (38→42), stale anchor commit reference, arsip path references.
@@ -21,6 +51,7 @@
 - **Dokumentasi audit diperbarui**: `docs/M09_AUDIT.md` kini mencatat temuan audit terbaru 2026-06-30 (booking publik phone/email, proof ownership, room state `BOOKING`, upload spoof, cron token, meter guard, ticket image access, JWT localStorage) beserta hasil verifikasi build/test.
 - **Checklist aktif dipindah ke M10**: `docs/M10_CHECKLIST_CHANGELOG.md` menambah **Fase V — Audit 2026-06-30 + Booking Flow Baru** dengan keputusan room state final `AVAILABLE -> RESERVED -> OCCUPIED` dan task V-00..V-16 untuk dieksekusi bertahap. File checklist root yang salah tempat dihapus.
 - **Pendalaman flow/komponen ditambahkan**: Fase V diperluas menjadi V-00..V-16, mencakup payment booking path berbasis stay, check-in wajib lunas, public/tenant/admin/staff UI, role/data exposure, finance guard, media safety, dan regression matrix. `M03`, `M04`, `M05`, dan `M09` diberi update/override agar tidak mengikuti kontrak booking lama.
+- **Pendalaman maksimal status proyek ditambahkan**: `docs/M10_CHECKLIST_CHANGELOG.md` kini punya **Fase W — Audit Maksimal Status Proyek** (W-00..W-13) untuk security baseline, auth/PDP, role matrix, renew/checkout/deposit, AutoOps idempotency, media registry, finance controls, staff boundary, frontend state, observability, docs source-of-truth, dan UAT per role. `docs/M09_AUDIT.md` juga menambahkan ringkasan temuan maksimal tersebut.
 
 ### 2026-06-25 — Redesign total Dashboard Staff (`/dashboard`) — KPI strip + bento
 - **Hero ringkas + kontekstual** (`StaffMotivationDashboard`): tanggal + sapaan waktu (pagi/siang/sore/malam) + sekilas "{N} tugas · {M} perlu perhatian" + aksi cepat; paragraf motivasi/terima kasih panjang dipangkas jadi 1 baris halus.

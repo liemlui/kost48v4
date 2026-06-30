@@ -175,8 +175,13 @@ export class StaysService {
     });
     if (!room) throw new NotFoundException("Kamar tidak ditemukan");
 
+    // V-03: booking stay (RESERVED, unpromoted) tidak dianggap sebagai "stay aktif" untuk gate ini
     const existingTenantStay = await this.prisma.stay.findFirst({
-      where: { tenantId: dto.tenantId, status: StayStatus.ACTIVE },
+      where: {
+        tenantId: dto.tenantId,
+        status: StayStatus.ACTIVE,
+        initialMetersPromotedAt: { not: null },
+      },
     });
     if (existingTenantStay) {
       throw new ConflictException("Tenant masih memiliki stay aktif");
@@ -188,9 +193,7 @@ export class StaysService {
       throw new ConflictException(
         room.status === RoomStatus.MAINTENANCE
           ? "Kamar masih berstatus Perlu Dicek (belum lolos inspeksi checkout). Selesaikan tiket inspeksi sampai kamar AVAILABLE sebelum check-in."
-          : room.status === RoomStatus.BOOKING
-            ? "Kamar masih berstatus Booking (DP diterima). Tenant harus melunasi dulu sebelum check-in."
-            : "Kamar tidak tersedia untuk check-in (sedang ditempati, atau nonaktif)",
+          : "Kamar tidak tersedia untuk check-in (sedang ditempati, atau nonaktif)",
       );
     }
 
@@ -285,7 +288,8 @@ export class StaysService {
         await tx.$queryRaw`SELECT id FROM "Room" WHERE id = ${dto.roomId} FOR UPDATE`;
         const lockedRoom = await tx.room.findUnique({ where: { id: dto.roomId } });
         if (!lockedRoom) throw new NotFoundException("Kamar tidak ditemukan");
-        if (lockedRoom.status !== RoomStatus.AVAILABLE) {
+        // V-03: RESERVED diterima untuk aktivasi booking (cek pembayaran di bawah)
+        if (![RoomStatus.AVAILABLE, RoomStatus.RESERVED].includes(lockedRoom.status as RoomStatus)) {
           throw new ConflictException("Kamar tidak tersedia untuk check-in (sedang ditempati, dipesan, perlu dicek, atau nonaktif)");
         }
         const openCleaningTicket = await tx.ticket.findFirst({
@@ -309,36 +313,75 @@ export class StaysService {
         }
         // Audit E-3: jaminan tunai yang diterima saat check-in dicatat resmi.
         const depositCollected = Boolean(dto.depositCollected) && deposit > 0;
-        const stay = await tx.stay.create({
-          data: {
-            tenantId: dto.tenantId,
-            roomId: dto.roomId,
-            status: StayStatus.ACTIVE,
-            pricingTerm: dto.pricingTerm as PricingTerm,
-            agreedRentAmountRupiah: agreed,
-            checkInDate: new Date(dto.checkInDate),
-            plannedCheckOutDate: dto.plannedCheckOutDate
-              ? new Date(dto.plannedCheckOutDate)
-              : calculatePeriodEnd(new Date(dto.checkInDate), dto.pricingTerm),
-            depositAmountRupiah: deposit,
-            ...(depositCollected
-              ? {
-                  depositPaidAmountRupiah: deposit,
-                  depositPaymentStatus: "PAID" as any,
-                }
-              : {}),
-            electricityTariffPerKwhRupiah: electricity,
-            waterTariffPerM3Rupiah: water,
-            bookingSource: dto.bookingSource as LeadSource,
-            bookingSourceDetail: dto.bookingSourceDetail,
-            stayPurpose: dto.stayPurpose as StayPurpose,
-            notes: dto.notes,
-            createdById: actor.id,
-            // Audit M-14: check-in manual = langsung resmi huni; tanpa ini stay
-            // dianggap "unpromoted" dan tersisih dari seluruh lifecycle overstay.
-            initialMetersPromotedAt: new Date(),
-          },
-        });
+
+        // V-03: Room RESERVED = aktivasi booking (stay sudah ada)
+        let stay: { id: number };
+        if (lockedRoom.status === RoomStatus.RESERVED) {
+          const bookingStay = await tx.stay.findFirst({
+            where: {
+              roomId: dto.roomId,
+              status: StayStatus.ACTIVE,
+              initialMetersPromotedAt: null,
+            },
+            select: {
+              id: true,
+              depositAmountRupiah: true,
+              depositPaidAmountRupiah: true,
+            },
+          });
+          if (!bookingStay) {
+            throw new ConflictException('Tidak ada booking aktif untuk kamar ini.');
+          }
+
+          // Verifikasi invoice sewa awal sudah LUNAS
+          const initialInvoice = await tx.invoice.findFirst({
+            where: { stayId: bookingStay.id },
+            select: { status: true, totalAmountRupiah: true },
+            orderBy: { id: 'asc' },
+          });
+          if (!initialInvoice || initialInvoice.status !== InvoiceStatus.PAID) {
+            throw new ConflictException(
+              'Invoice sewa awal belum LUNAS. Tenant hanya bayar DP — belum bisa check-in. Setujui pelunasan terlebih dahulu.',
+            );
+          }
+
+          // V-03: promote stay — tandai sebagai resmi huni
+          await tx.stay.update({
+            where: { id: bookingStay.id },
+            data: { initialMetersPromotedAt: new Date() },
+          });
+          stay = bookingStay;
+        } else {
+          // Walk-in: buat stay baru
+          stay = await tx.stay.create({
+            data: {
+              tenantId: dto.tenantId,
+              roomId: dto.roomId,
+              status: StayStatus.ACTIVE,
+              pricingTerm: dto.pricingTerm as PricingTerm,
+              agreedRentAmountRupiah: agreed,
+              checkInDate: new Date(dto.checkInDate),
+              plannedCheckOutDate: dto.plannedCheckOutDate
+                ? new Date(dto.plannedCheckOutDate)
+                : calculatePeriodEnd(new Date(dto.checkInDate), dto.pricingTerm),
+              depositAmountRupiah: deposit,
+              ...(depositCollected
+                ? {
+                    depositPaidAmountRupiah: deposit,
+                    depositPaymentStatus: "PAID" as any,
+                  }
+                : {}),
+              electricityTariffPerKwhRupiah: electricity,
+              waterTariffPerM3Rupiah: water,
+              bookingSource: dto.bookingSource as LeadSource,
+              bookingSourceDetail: dto.bookingSourceDetail,
+              stayPurpose: dto.stayPurpose as StayPurpose,
+              notes: dto.notes,
+              createdById: actor.id,
+              initialMetersPromotedAt: new Date(),
+            },
+          });
+        }
 
         if (depositCollected) {
           // Ledger wajib sukses (sumber kebenaran riwayat jaminan);

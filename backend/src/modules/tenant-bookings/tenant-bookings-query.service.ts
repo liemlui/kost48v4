@@ -30,7 +30,7 @@ export class TenantBookingsQueryService {
     const where: Prisma.RoomWhereInput = {
       AND: [
         { isActive: true },
-        { status: { in: [RoomStatus.AVAILABLE as any, RoomStatus.BOOKING as any, RoomStatus.RESERVED as any] } },
+        { status: { in: [RoomStatus.AVAILABLE as any, RoomStatus.RESERVED as any] } },
         query.search
           ? {
               OR: [
@@ -76,13 +76,11 @@ export class TenantBookingsQueryService {
       roomType: room.roomType,
       roomSize: room.roomSize,
       roomCategory: room.category,
-      isAvailable: room.status === RoomStatus.AVAILABLE || room.status === RoomStatus.BOOKING || room.status === RoomStatus.RESERVED,
+      isAvailable: room.status === RoomStatus.AVAILABLE,
       availabilityNote:
-        room.status === RoomStatus.BOOKING
-          ? 'Sedang di-booking (DP dibayar) — masih bisa dipesan, first-paid-wins.'
-          : room.status === RoomStatus.RESERVED
-            ? 'Sudah lunas dibayar & dikunci untuk tenant.'
-            : null,
+        room.status === RoomStatus.RESERVED
+          ? 'Sudah dipesan tenant lain. Pilih kamar lain atau hubungi admin.'
+          : null,
     }));
 
     return {
@@ -210,13 +208,12 @@ export class TenantBookingsQueryService {
 
   private async isBookingSchemaReady() {
     if (this.bookingSchemaStatusCache) {
-      return this.bookingSchemaStatusCache.hasReservedRoomStatus && this.bookingSchemaStatusCache.hasBookingRoomStatus && this.bookingSchemaStatusCache.hasStayExpiresAt;
+      return this.bookingSchemaStatusCache.hasReservedRoomStatus && this.bookingSchemaStatusCache.hasStayExpiresAt;
     }
 
     const isReady = await checkBookingSchemaReady(this.prisma, this.bookingSchemaStatusCache);
     this.bookingSchemaStatusCache = {
       hasReservedRoomStatus: isReady,
-      hasBookingRoomStatus: isReady,
       hasStayExpiresAt: isReady,
     };
     return isReady;

@@ -56,6 +56,7 @@ export interface SubmissionLockRow extends SubmissionBaseRow {
   stayInitialWaterM3Pending: any | null;
   stayInitialMetersRecordedAt: Date | null;
   stayInitialMetersRecordedById: number | null;
+  stayPromotedAt: Date | null;
   invoiceNumber: string;
   invoiceStatus: string;
   invoiceIssuedAt: Date | null;
@@ -74,8 +75,10 @@ export interface SubmissionEligibilityRow {
   roomStatus: string;
   stayStatus: string;
   stayExpiresAt: Date | null;
+  stayPromotedAt: Date | null;
   invoiceNumber: string;
   invoiceStatus: string;
   invoiceTotalAmountRupiah: number;
   invoicePaidAmountRupiah: number;
 }
+

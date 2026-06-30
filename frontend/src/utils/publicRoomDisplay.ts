@@ -133,7 +133,7 @@ export function isPublicRoomBookable(room: PublicRoom): boolean {
   const status = String(room.status ?? "").toUpperCase();
   if (typeof room.canBook === "boolean") return room.canBook;
   if (typeof room.isAvailable === "boolean") return room.isAvailable;
-  return status === "AVAILABLE" || status === "BOOKING" || status === "RESERVED";
+  return status === "AVAILABLE";
 }
 
 export function getPublicRoomAvailabilityDisplay(room: PublicRoom): PublicRoomAvailabilityDisplay {
@@ -165,23 +165,13 @@ export function getPublicRoomAvailabilityDisplay(room: PublicRoom): PublicRoomAv
     };
   }
 
-  if (status === "BOOKING") {
-    return {
-      label: "Kosong",
-      tone: "is-limited",
-      shortCopy: "DP sudah dibayar — kamar ditahan. Masih bisa dipesan (first-paid-wins).",
-      detailCopy: "Kamar ini sudah ada yang bayar DP. Booking Anda tetap bisa diajukan — jika Anda bayar lunas duluan, kamar jadi milik Anda.",
-      canBook: true,
-    };
-  }
-
   if (status === "RESERVED") {
     return {
       label: "Kosong",
       tone: "is-limited",
-      shortCopy: "Kamar sudah lunas dibayar & dikunci untuk tenant.",
-      detailCopy: "Kamar sudah dikunci untuk tenant yang telah melunasi pembayaran. Booking baru tetap bisa diajukan sebagai cadangan jika tenant batal.",
-      canBook: true,
+      shortCopy: "Kamar sudah dikunci tenant — pilih kamar lain atau hubungi admin.",
+      detailCopy: "Kamar sudah dikunci untuk tenant yang sudah membayar (DP atau lunas). Belum bisa dibooking untuk tenant baru. Hubungi admin untuk info ketersediaan.",
+      canBook: false,
     };
   }
 

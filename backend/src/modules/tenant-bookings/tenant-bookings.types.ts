@@ -68,7 +68,6 @@ export interface ApprovalBookingSnapshot {
 
 export interface BookingSchemaStatus {
   hasReservedRoomStatus: boolean;
-  hasBookingRoomStatus: boolean;
   hasStayExpiresAt: boolean;
 }
 

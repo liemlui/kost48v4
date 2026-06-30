@@ -27,8 +27,7 @@ export function getStatusLabel(status?: string, customLabel?: string, options?: 
     ACTIVE: 'Masa Sewa Aktif',
     COMPLETED: 'Selesai',
     CANCELLED: 'Dibatalkan',
-    BOOKING: 'Booking (DP)',
-    RESERVED: 'Dipesan (Lunas)',
+    RESERVED: 'Dipesan',
   };
 
   if (tone === 'tenant') {
@@ -43,8 +42,7 @@ export function getStatusLabel(status?: string, customLabel?: string, options?: 
     COMPLETED: 'Selesai',
     CANCELLED: 'Dibatalkan',
     AVAILABLE: 'Tersedia',
-    BOOKING: 'Booking (DP)',
-    RESERVED: 'Dipesan (Lunas)',
+    RESERVED: 'Dipesan',
     OCCUPIED: 'Terisi',
     MAINTENANCE: 'Perlu dicek',
     INACTIVE_ROOM: 'Nonaktif',
@@ -149,7 +147,7 @@ export function getStatusVariant(status?: string): 'success' | 'warning' | 'dang
   const normalized = String(status ?? '').toUpperCase();
 
   if (['ACTIVE', 'AVAILABLE', 'PAID', 'SUCCESS', 'GOOD', 'REFUNDED', 'RESOLVED', 'DONE', 'APPROVED', 'OPPORTUNITY', 'PAYMENT_RECEIVED', 'INCREASE_LIABILITY'].includes(normalized)) return 'success';
-  if (['OPEN', 'PARTIAL', 'WARNING', 'HELD', 'COUNTDOWN_7PLUS', 'COUNTDOWN_3_6', 'BOOKING', 'RESERVED', 'PENDING_REVIEW', 'PENDING', 'PENDING_DECISION', 'AWAITING_DP', 'DP_SECURED', 'HIGH', 'MEDIUM', 'LOW_STOCK', 'PENDING_CHECK', 'NEEDS_REPAIR', 'DEDUCTION', 'FORFEIT'].includes(normalized)) return 'warning';
+  if (['OPEN', 'PARTIAL', 'WARNING', 'HELD', 'COUNTDOWN_7PLUS', 'COUNTDOWN_3_6', 'RESERVED', 'PENDING_REVIEW', 'PENDING', 'PENDING_DECISION', 'AWAITING_DP', 'DP_SECURED', 'HIGH', 'MEDIUM', 'LOW_STOCK', 'PENDING_CHECK', 'NEEDS_REPAIR', 'DEDUCTION', 'FORFEIT'].includes(normalized)) return 'warning';
   if (['CANCELLED', 'OVERDUE', 'DANGER', 'FORFEITED', 'EXPIRED_PRIORITY', 'REJECTED_BY_TENANT', 'COUNTDOWN_1_2', 'COUNTDOWN_0', 'COUNTDOWN_OVERDUE', 'REJECTED', 'BLOCKER', 'OUT_OF_STOCK', 'DAMAGED'].includes(normalized)) return 'danger';
   if (['COMPLETED', 'ISSUED', 'INFO', 'OCCUPIED', 'PARTIALLY_REFUNDED', 'IN_PROGRESS', 'REFUND', 'DECREASE_LIABILITY'].includes(normalized)) return 'info';
   if (['CLOSED', 'DRAFT', 'SECONDARY', 'INACTIVE', 'MAINTENANCE', 'UNAVAILABLE', 'COUNTDOWN_NODATE', 'EXPIRED'].includes(normalized)) return 'secondary';

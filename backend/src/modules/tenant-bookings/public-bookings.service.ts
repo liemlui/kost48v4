@@ -207,7 +207,7 @@ export class PublicBookingsService {
         const bookableWhileCleaning =
           room.status === RoomStatus.MAINTENANCE && Boolean(room.allowBookingWhileCleaning);
         if (
-          ![RoomStatus.AVAILABLE, RoomStatus.BOOKING, RoomStatus.RESERVED].includes(room.status as RoomStatus) &&
+          room.status !== RoomStatus.AVAILABLE &&
           !bookableWhileCleaning
         ) {
           throw new ConflictException('Kamar belum bisa dipesan karena sudah aktif ditempati atau sedang tidak tersedia.');
@@ -238,7 +238,7 @@ export class PublicBookingsService {
               some: {
                 status: StayStatus.ACTIVE as any,
                 room: {
-                  status: { in: [RoomStatus.BOOKING as any, RoomStatus.RESERVED as any, RoomStatus.OCCUPIED as any] },
+                  status: { in: [RoomStatus.RESERVED as any, RoomStatus.OCCUPIED as any] },
                 },
               },
             },

@@ -66,6 +66,32 @@ Audit lanjutan membaca ulang kontrak domain, modul backend, route/frontend utama
 
 **Kesimpulan:** tetap direkomendasikan tidak memakai `RoomStatus.BOOKING` sebagai status kamar. "Booking" tetap nama proses bisnis/UI; status fisik kamar cukup `AVAILABLE -> RESERVED -> OCCUPIED`. Sumber kebenaran DP vs lunas harus invoice/payment, bukan enum room.
 
+### Pendalaman Maksimal 2026-06-30 - Status Proyek
+
+Audit pendalaman kedua membaca fondasi proyek dari sisi security, auth, role exposure, lifecycle renew/checkout/deposit, AutoOps, finance, staff/ticket/inventory, upload/media, frontend state, dan release readiness. Pendalaman ini adalah audit kode/dokumen; build/test tidak dijalankan ulang pada sesi ini karena perubahan yang dibuat hanya dokumentasi checklist.
+
+| Area | Temuan maksimal | Dampak | Checklist |
+|------|-----------------|--------|-----------|
+| Security headers/static | `main.ts` memasang static room images sebelum middleware security header; static asset perlu no-sniff/CSP parity | Static image public bisa tidak menerima header security yang sama dengan API | W-01 |
+| Rate limit | Rate limiter in-memory punya jalur fail-open saat jumlah key penuh; route sensitif perlu keputusan fail-open vs fail-closed | Brute-force/upload abuse bisa melemah saat key-store penuh | W-01 |
+| Auth/JWT | JWT strategy sudah kuat: cek user aktif, role dari DB, dan `passwordChangedAt > pwdAt`; frontend masih menyimpan token di `localStorage` | Auth core baik, tetapi dampak XSS tetap besar sampai strategi token berubah | W-02, W-09 |
+| Password reset | Flow reset password enumeration-safe, token hashed, token reuse/expired ditolak secara desain | Perlu test regresi agar guard ini tidak rusak saat refactor | W-02 |
+| Role exposure | STAFF masih bisa membaca `analytics/finance/summary` dan `wifi-sales` GET; beberapa read endpoint operasional wajar tapi perlu matriks final | Data nominal revenue/expense bisa terlalu luas untuk role staff | W-03 |
+| Checkout vs renewal | `checkout-requests.service.ts` hanya memblokir `RenewRequestStatus.PENDING`, padahal status aktif sekarang juga `PENDING_DECISION`, `AWAITING_DP`, `DP_SECURED` | Tenant bisa mengajukan checkout saat renewal aktif dan membuat state lifecycle bertabrakan | W-04 |
+| Renewal flow | Renewal sudah memakai DP invoice terpisah, gate `PAID`, deadline hari-H, settlement H+7, dan finalisasi setelah settlement invoice `PAID` | Flow bagus, perlu helper status aktif dan UAT cross-block agar konsisten | W-04 |
+| Deposit ledger | Ada reconciliation lite dan dry-run backfill; ini bagus, tetapi harus menjadi gate go-live finance | Historical deposit mismatch bisa membuat laporan liability tidak kredibel | W-04, W-07 |
+| AutoOps cron | Cron masih menerima token lewat query `?token=...`; manual AutoOps finance-heavy masih OWNER/ADMIN | Risiko token bocor ke log/history dan keputusan role finance-heavy belum final | W-05 |
+| Upload/media | Ticket image sudah magic-byte dan protected by relation, tetapi staff report/routine/ticket/payment masih menerima `fileKey/fileUrl/photoUrl` dari DTO di beberapa jalur | File milik user lain atau URL palsu bisa diattach tanpa registry ownership server-side | W-06 |
+| Finance controls | Accounting controller banyak endpoint OWNER-only, tetapi beberapa jalur operasional OWNER/ADMIN dan auto journal lama punya histori best-effort | Perlu matrix mutasi uang, period close, reversal, dan reconciliation sebelum deploy | W-07 |
+| Staff/inventory boundary | Inventory movement resmi sudah OWNER/ADMIN; staff hanya laporan status. Staff routine perlu keputusan apakah `roomId` bebas tanpa assignment boleh | Boundary stok cukup baik, tetapi assignment routine dan bukti foto perlu dikunci | W-08 |
+| Ticket guard | Staff list/detail/start/mark-done/close sudah banyak guard; staff close dibatasi `CHECKOUT_INSPECTION`, tenant hanya tiket sendiri | Area relatif kuat, tetap perlu UAT role karena ticket menjadi hub operasional | W-08 |
+| Frontend XSS surface | Code-search tidak menemukan `dangerouslySetInnerHTML`, `innerHTML`, `eval`, atau `new Function`; token masih `localStorage` | Permukaan XSS saat ini rendah, tapi konsekuensi XSS tetap tinggi | W-09 |
+| Frontend external links | Code-search tidak menemukan `target="_blank"`/`window.open` yang perlu noopener pada audit ini | Tidak ada temuan aktif, tetap masuk checklist regresi | W-09 |
+| Release readiness | Script build/test tersedia (`backend build/test:unit/test:integration`, `frontend build/test:e2e/test:a11y`), tetapi belum ada satu gate release terpusat per role/flow | AI eksekutor bisa berhenti di build tanpa UAT lifecycle dan role | W-11, W-13 |
+| Dokumentasi | M10 kini menjadi checklist aktif; M09 audit; M11 changelog. File root checklist salah tempat sudah dibersihkan pada audit sebelumnya | Source-of-truth lebih kuat, tetapi CODEMAP/M-file harus tetap disinkronkan setelah implementasi | W-12 |
+
+**Kesimpulan pendalaman maksimal:** status proyek sudah cukup kaya dan banyak guard inti sudah ada, tetapi sebelum coding lanjutan perlu dua lapis kerja: Fase V untuk membetulkan state booking/payment/check-in, dan Fase W untuk memastikan security, role, media, lifecycle, finance, staff boundary, dan release gate tidak ikut longgar. Checklist eksekusi detail ada di `docs/M10_CHECKLIST_CHANGELOG.md` Fase W.
+
 ### Sumber Historis yang Digabung
 
 - `docs/AUDIT_FASE4_FINAL.md` - konten dipertahankan

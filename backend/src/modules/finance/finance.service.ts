@@ -228,7 +228,6 @@ export class FinanceService {
       operableRooms,
       occupiedRooms,
       availableRooms: byStatus[RoomStatus.AVAILABLE] ?? 0,
-      bookingRooms: byStatus[RoomStatus.BOOKING] ?? 0,
       reservedRooms: byStatus[RoomStatus.RESERVED] ?? 0,
       maintenanceRooms,
       occupancyRatePercent,
@@ -238,8 +237,7 @@ export class FinanceService {
       points: [
         { label: 'Terisi', value: occupiedRooms, route: '/reports?tab=operations' },
         { label: 'Kosong', value: byStatus[RoomStatus.AVAILABLE] ?? 0, route: '/rooms' },
-        { label: 'Booking (DP)', value: byStatus[RoomStatus.BOOKING] ?? 0, route: '/stays?status=BOOKINGS' },
-        { label: 'Reserved (Lunas)', value: byStatus[RoomStatus.RESERVED] ?? 0, route: '/stays?status=BOOKINGS' },
+        { label: 'Reserved', value: byStatus[RoomStatus.RESERVED] ?? 0, route: '/stays?status=BOOKINGS' },
         { label: 'Maintenance', value: maintenanceRooms, route: '/rooms' },
       ],
       note: 'Okupansi adalah snapshot real-time berdasarkan stay aktif dan kamar operasional.',

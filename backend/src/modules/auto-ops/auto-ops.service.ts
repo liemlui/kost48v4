@@ -75,7 +75,7 @@ export class AutoOpsService implements OnModuleInit, OnModuleDestroy {
       }),
       this.prisma.room.count({
         where: {
-          status: { in: [RoomStatus.BOOKING, RoomStatus.RESERVED] },
+          status: RoomStatus.RESERVED,
           stays: { none: { status: StayStatus.ACTIVE } },
         },
       }),

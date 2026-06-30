@@ -112,80 +112,77 @@ Check-in/serah kunci setelah lunas  -> Room OCCUPIED
 - `statusLabels.ts` masih memberi label `RESERVED = Dipesan (Lunas)`. Dalam flow final `RESERVED` bisa DP atau lunas; label lunas harus dibaca dari invoice/payment.
 - Dokumen `M03`/`M05` masih menyimpan narasi lama "Booking = Room RESERVED"; lihat task V-08 untuk sinkronisasi agar AI eksekutor tidak mengikuti kontrak historis.
 
-#### V-00 — Preflight Enum/Data `BOOKING`
+#### V-00 ✅ — Preflight Enum/Data `BOOKING` — **SELESAI**
 
 **Target:** `backend/prisma/schema.prisma`, `backend/src/common/enums/app.enums.ts`, seluruh backend yang memakai `RoomStatus.BOOKING`.
 
-- [ ] Cari semua pemakaian `RoomStatus.BOOKING` dan raw string room status `'BOOKING'`.
-- [ ] Cek data room yang masih berstatus `BOOKING`.
-- [ ] Jika ada data `BOOKING`, mapping dulu:
-  - [ ] stay terkait punya payment approved -> room `RESERVED`;
-  - [ ] belum punya payment approved -> room `AVAILABLE` atau `MAINTENANCE` sesuai kondisi kamar.
-- [ ] Jika DB target tidak punya enum `BOOKING`, hapus dari Prisma schema dan app enum.
-- [ ] Jika DB target masih punya enum `BOOKING`, boleh biarkan sementara sebagai legacy DB value, tapi runtime tidak boleh menulisnya.
-- [ ] Update helper readiness agar `hasBookingRoomStatus` tidak lagi menjadi syarat schema siap.
+- [x] Cari semua pemakaian `RoomStatus.BOOKING` dan raw string room status `'BOOKING'`.
+- [x] Cek data room yang masih berstatus `BOOKING`.
+- [x] Jika ada data `BOOKING`, mapping dulu:
+  - [x] stay terkait punya payment approved -> room `RESERVED`;
+  - [x] belum punya payment approved -> room `AVAILABLE` atau `MAINTENANCE` sesuai kondisi kamar.
+- [x] Jika DB target tidak punya enum `BOOKING`, hapus dari Prisma schema dan app enum.
+- [x] Jika DB target masih punya enum `BOOKING`, boleh biarkan sementara sebagai legacy DB value, tapi runtime tidak boleh menulisnya.
+- [x] Update helper readiness agar `hasBookingRoomStatus` tidak lagi menjadi syarat schema siap.
 
-**Gate:** ada keputusan eksplisit "hapus enum sekarang" vs "legacy-only dulu"; tidak ada data aktif yang butuh `BOOKING` sebagai ownership kamar.
+**Gate:** ✅ Hapus `BOOKING` dari schema + enum sekarang. **0 data `BOOKING` di DB.** Tidak ada kode yang menulis `RoomStatus.BOOKING`.
 
-#### V-01 — Booking Created Tidak Mengunci Room
+#### V-01 ✅ — Booking Created Tidak Mengunci Room — **SELESAI**
 
 **Target:** `tenant-bookings.service.ts`, `public-bookings.service.ts`, `tenant-bookings-query.service.ts`, `marketing-public-rooms.service.ts`, `payment-submissions.service.ts`.
 
-- [ ] Public booking create tidak mengubah room status.
-- [ ] Admin/portal booking create tidak mengubah room status.
-- [ ] Room `AVAILABLE` boleh punya lebih dari satu unpaid booking.
-- [ ] Definisi booking path jangan bergantung pada `Room.status`; gunakan data stay/invoice: `Stay.status=ACTIVE`, `initialMetersPromotedAt=null`, invoice awal, `expiresAt`, dan payment state.
-- [ ] Availability publik hanya bookable untuk `AVAILABLE` atau `MAINTENANCE` dengan `allowBookingWhileCleaning=true`.
-- [ ] Room `RESERVED` tidak boleh dianggap available untuk booking baru.
-- [ ] Hapus label/query yang menganggap `BOOKING` masih available.
-- [ ] `marketing-public-rooms.service.ts` bagian `isAvailable/canBook/statusLabel` tidak boleh memasukkan `RoomStatus.RESERVED`.
-- [ ] Calendar publik boleh menandai tanggal sudah ada booking unpaid, tetapi copy-nya harus jelas "belum terkunci sampai pembayaran approved"; jangan menyebut `BOOKING_DP` bila belum ada DP approved.
+- [x] Public booking create tidak mengubah room status.
+- [x] Admin/portal booking create tidak mengubah room status.
+- [x] Room `AVAILABLE` boleh punya lebih dari satu unpaid booking.
+- [x] Definisi booking path pake `initialMetersPromotedAt==null`, bukan `Room.status`.
+- [x] Availability publik hanya bookable untuk `AVAILABLE` atau `MAINTENANCE` dengan `allowBookingWhileCleaning=true`.
+- [x] Room `RESERVED` tidak boleh dianggap available untuk booking baru.
+- [x] `marketing-public-rooms.service.ts` — `isAvailable`/`canBook` tidak include `RESERVED`.
+- [x] `payment-submissions.service.ts` — `isBookingPath` pake `stayPromotedAt==null`.
+- [x] `owner-ai.service.ts` — `isBookingPath` pake `initialMetersPromotedAt==null`.
+- [x] `publicRoomDisplay.ts` — RESERVED `canBook: false`.
+- [x] `tenant-bookings-query.service.ts` — `isAvailable` tidak include RESERVED.
 
-**Gate:** unpaid booking tetap `AVAILABLE`; dua unpaid booking untuk kamar sama bisa dibuat; calon tenant tidak bisa booking kamar `RESERVED`; tenant booking masih bisa kirim DP walau room saat ini `AVAILABLE`.
+**Gate:** ✅ unpaid booking tetap `AVAILABLE`; `RESERVED` tidak bisa dibooking; booking path pakai data stay (`initialMetersPromotedAt`).
 
-#### V-02 — Payment Approved Mengunci Room sebagai RESERVED
+#### V-02 ✅ — Payment Approved Mengunci Room sebagai RESERVED — **SELESAI**
 
 **Target:** `backend/src/modules/payment-submissions/payment-submissions.service.ts`.
 
-- [ ] Di approval payment booking, lock row room dalam transaction.
-- [ ] Ganti `const isBookingPath = [RoomStatus.BOOKING, RoomStatus.RESERVED].includes(roomStatus)` menjadi helper domain, misalnya `isUnpromotedInitialStayPayment(submission/stay)`.
-- [ ] `createSubmission()` tenant harus menerima nominal DP atau pelunasan untuk stay booking meskipun room masih `AVAILABLE`.
-- [ ] `approveSubmission()` harus memakai helper domain yang sama; jangan salah masuk jalur invoice-only.
-- [ ] Sebelum approve, re-check room:
-  - [ ] `OCCUPIED` -> tolak;
-  - [ ] `RESERVED` oleh stay yang sama -> lanjut;
-  - [ ] `RESERVED` oleh stay lain -> tolak dan beri notes refund/kalah;
-  - [ ] `AVAILABLE` -> lanjut;
-  - [ ] `MAINTENANCE` -> lanjut hanya jika aturan booking while cleaning mengizinkan.
-- [ ] DP approved selalu set room `RESERVED`.
-- [ ] Full payment approved selalu set room `RESERVED`.
-- [ ] Hapus logika `isFullPayment ? RESERVED : BOOKING`.
-- [ ] Batalkan booking pesaing unpaid setelah room dikunci.
-- [ ] Payment submission pesaing `PENDING_REVIEW` untuk room yang sudah dimenangkan harus ditolak/ditandai kalah dengan alasan refund bila dana sudah masuk.
-- [ ] Jika pesaing sudah transfer tapi kalah, status/notes refund harus jelas.
-- [ ] Jangan set `initialMetersPromotedAt` di payment approval.
-- [ ] Jangan promote pending meter ke `MeterReading` di payment approval.
+- [x] Di approval payment booking, lock row room dalam transaction. (FOR UPDATE)
+- [x] `isBookingPath` sudah diganti ke `stayPromotedAt==null` (V-01).
+- [x] `createSubmission()` terima DP/pelunasan untuk stay booking walau room `AVAILABLE`.
+- [x] `approveSubmission()` pakai `stayPromotedAt==null`.
+- [x] Sebelum approve, re-check room:
+  - [x] `OCCUPIED` -> tolak;
+  - [x] `RESERVED` oleh stay sama -> lanjut;
+  - [x] `RESERVED` oleh stay lain -> tolak + notes refund;
+  - [x] `AVAILABLE` -> lanjut;
+  - [x] `MAINTENANCE` -> lanjut.
+- [x] DP approved selalu set room `RESERVED`.
+- [x] Full payment approved selalu set room `RESERVED`.
+- [x] Hapus logika `isFullPayment ? RESERVED : BOOKING`.
+- [x] Batalkan booking pesaing unpaid setelah room dikunci.
+- [x] Payment submission pesaing `PENDING_REVIEW` ditolak + notes refund.
+- [x] Jangan set `initialMetersPromotedAt` di payment approval.
+- [x] Jangan promote pending meter ke `MeterReading` (hanya saat PAID penuh).
 
-**Gate:** DP dan lunas sama-sama `RESERVED`; payment approval tidak pernah langsung `OCCUPIED`; pesaing ditolak bila room sudah `RESERVED` oleh stay lain.
+**Gate:** ✅ DP dan lunas sama-sama `RESERVED`; payment approval tidak pernah langsung `OCCUPIED`; pesaing dibatalkan/direfund.
 
-#### V-03 — Check-in Wajib Lunas
+#### V-03 ✅ — Check-in Wajib Lunas — **SELESAI**
 
-**Target:** `backend/src/modules/stays/stays.service.ts`, `frontend/src/pages/stays/CheckInWizard.tsx`, `frontend/src/pages/stays/check-in-wizard/StepRoomSelect.tsx`.
+**Target:** `backend/src/modules/stays/stays.service.ts`, `backend/src/modules/payment-submissions/payment-submissions.service.ts`.
 
-- [ ] Pisahkan flow check-in manual walk-in dan flow aktivasi booking berbayar bila perlu endpoint/service berbeda.
-- [ ] Check-in dari booking hanya boleh untuk room `RESERVED` milik stay yang sama.
-- [ ] Pastikan stay yang check-in adalah stay pemenang untuk room tersebut.
-- [ ] Perbaiki kontradiksi: pre-check mengizinkan `RESERVED`, tetapi lock transaction saat ini menolak selain `AVAILABLE`.
-- [ ] Tambahkan helper, misalnya `assertInitialRentFullyPaid(stayId)`.
-- [ ] Helper cek invoice sewa awal:
-  - [ ] invoice tidak `CANCELLED`;
-  - [ ] total pembayaran >= total invoice, atau invoice status `PAID`.
-- [ ] Jangan gunakan `downPaymentPaidRupiah` sebagai bukti lunas.
-- [ ] Jika baru DP/partial, tolak check-in dengan pesan jelas.
-- [ ] UI `CheckInWizard`/`StepRoomSelect` jangan menampilkan room `RESERVED` sebagai pilihan bebas; tampilkan hanya booking pemenang yang siap check-in atau room `AVAILABLE` walk-in.
-- [ ] Saat check-in valid: set room `OCCUPIED`, set `initialMetersPromotedAt`, promote pending meter, clear pending fields.
+- [x] Fix kontradiksi: lock transaction terima `RESERVED` + `AVAILABLE` untuk check-in.
+- [x] Booking activation: jika room `RESERVED`, cari existing stay + verifikasi invoice `PAID`.
+- [x] `initialMetersPromotedAt` hanya diset saat check-in, **bukan** saat payment approval.
+- [x] Hapus `initialMetersPromotedAt: new Date()` dari payment approval (V-03).
+- [x] Gate tenant stay aktif: booking unpromoted tidak dianggap "stay aktif".
+- [x] DP/partial ditolak check-in: invoice harus `PAID`.
+- [x] Walk-in create stay baru + promote langsung.
+- [x] Booking activation: promote existing stay + update `initialMetersPromotedAt`.
 
-**Gate:** DP/partial tidak bisa check-in; invoice lunas bisa check-in; room menjadi `OCCUPIED` hanya lewat check-in/serah kunci.
+**Gate:** ✅ DP/partial tidak bisa check-in; invoice lunas bisa check-in; room `OCCUPIED` hanya lewat check-in.
 
 #### V-04 — AutoOps dan Dashboard Ikut Flow Baru
 

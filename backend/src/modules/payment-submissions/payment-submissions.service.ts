@@ -76,10 +76,10 @@ export class PaymentSubmissionsService {
         throw new ConflictException('Booking tidak lagi aktif');
       }
 
-      const isBookingPath = [RoomStatus.BOOKING, RoomStatus.RESERVED].includes(eligibility.roomStatus as RoomStatus);
+      const isBookingPath = eligibility.stayPromotedAt == null;
 
       if (isBookingPath) {
-        // ── Booking combined payment (RESERVED) ──────────────────────────
+        // ── Booking combined payment (unpromoted stay) ──────────────────────────
         if (eligibility.invoiceStatus === InvoiceStatus.DRAFT) {
           // Audit A10: tanpa guard ini bukti bayar bisa masuk untuk invoice DRAFT
           // yang pasti gagal di-approve (:350) dan menggantung sampai expiry.
@@ -527,12 +527,36 @@ export class PaymentSubmissionsService {
           throw new ConflictException('Hunian tidak lagi aktif');
         }
 
-        const isBookingPath = [RoomStatus.BOOKING, RoomStatus.RESERVED].includes(submission.roomStatus as RoomStatus);
+        const isBookingPath = submission.stayPromotedAt == null;
 
         if (isBookingPath) {
           if (!submission.roomIsActive) {
             throw new ConflictException('Kamar tidak aktif untuk aktivasi booking');
           }
+
+          // V-02: Re-check room status — OCCUPIED tolak; RESERVED oleh stay lain tolak
+          const roomStatus = submission.roomStatus?.toUpperCase();
+          if (roomStatus === 'OCCUPIED') {
+            throw new ConflictException('Kamar sudah ditempati. Pembayaran tidak dapat disetujui.');
+          }
+          if (roomStatus === 'RESERVED') {
+            // Cek apakah ini stay yang sama atau berbeda
+            const otherReservedStay = await tx.stay.findFirst({
+              where: {
+                roomId: submission.roomId,
+                status: StayStatus.ACTIVE as any,
+                id: { not: submission.stayId },
+                initialMetersPromotedAt: null,
+              },
+              select: { id: true, tenantId: true },
+            });
+            if (otherReservedStay) {
+              throw new ConflictException(
+                'Kamar sudah dipesan oleh tenant lain. Pembayaran ditolak. Hubungi admin untuk refund.',
+              );
+            }
+          }
+
           // expiresAt hanya berlaku sebelum DP masuk (A18) — setelah DP,
           // deadline-nya adalah pelunasan H+1 check-in (sweeper DP forfeit).
           if (
@@ -767,10 +791,41 @@ export class PaymentSubmissionsService {
             }
           }
 
+          // V-02: Payment approved (DP atau Lunas) selalu set room RESERVED.
+          // Check-in akan mengubah ke OCCUPIED.
+          await tx.room.update({
+            where: { id: submission.roomId },
+            data: { status: RoomStatus.RESERVED, allowBookingWhileCleaning: false },
+          });
+
+          // V-02: Cancel competing unpaid bookings & reject pending payment submissions
+          const competingStays = await tx.stay.findMany({
+            where: {
+              roomId: submission.roomId,
+              status: StayStatus.ACTIVE as any,
+              id: { not: submission.stayId },
+              initialMetersPromotedAt: null,
+            },
+            select: { id: true },
+          });
+          for (const compStay of competingStays) {
+            await tx.stay.update({
+              where: { id: compStay.id },
+              data: {
+                status: StayStatus.CANCELLED,
+                cancelReason: 'Kamar sudah dipesan tenant lain (first-paid-wins). Hubungi admin untuk refund deposit jika sudah transfer.',
+              },
+            });
+            await tx.paymentSubmission.updateMany({
+              where: { stayId: compStay.id, status: PaymentSubmissionStatus.PENDING_REVIEW },
+              data: {
+                status: PaymentSubmissionStatus.REJECTED,
+                reviewNotes: 'Kamar sudah dipesan tenant lain. Hubungi admin untuk refund.',
+              },
+            });
+          }
+
           if (nextInvoiceStatus === InvoiceStatus.PAID) {
-            // Kamar bekas overstay: huni baru menunggu pembersihan selesai.
-            // DP boleh masuk kapan saja; pelunasan (yang memicu aktivasi) baru
-            // boleh disetujui setelah tiket pembersihan/inspeksi ditutup.
             const openCleaningTicket = await tx.ticket.findFirst({
               where: {
                 roomId: submission.roomId,
@@ -784,15 +839,6 @@ export class PaymentSubmissionsService {
                 `Kamar masih dalam proses pembersihan/inspeksi (tiket ${openCleaningTicket.ticketNumber}). Tutup tiket tersebut terlebih dahulu, lalu setujui pelunasan untuk mengaktifkan hunian.`,
               );
             }
-
-            // V-02: Payment approved (DP atau Lunas) selalu set room RESERVED.
-            // Tidak ada lagi room status BOOKING — unpaid booking = AVAILABLE.
-            // Check-in akan mengubah ke OCCUPIED.
-
-            await tx.room.update({
-              where: { id: submission.roomId },
-              data: { status: RoomStatus.RESERVED, allowBookingWhileCleaning: false },
-            });
 
             const activationStay = await tx.stay.findUnique({
               where: { id: submission.stayId },
@@ -898,7 +944,7 @@ export class PaymentSubmissionsService {
                   initialWaterM3Pending: null,
                   initialMetersRecordedAt: null,
                   initialMetersRecordedById: null,
-                  initialMetersPromotedAt: new Date(),
+                  // V-03: jangan promote di payment — check-in terpisah nanti
                 },
               });
             }
@@ -1249,7 +1295,7 @@ if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P20
       }
 
       if (
-        ![RoomStatus.AVAILABLE, RoomStatus.BOOKING, RoomStatus.RESERVED, RoomStatus.MAINTENANCE].includes(
+        ![RoomStatus.AVAILABLE, RoomStatus.RESERVED, RoomStatus.MAINTENANCE].includes(
           booking.room.status as RoomStatus,
         )
       ) {
@@ -1276,7 +1322,7 @@ if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P20
         if (
           !current ||
           current.status !== StayStatus.ACTIVE ||
-          ![RoomStatus.AVAILABLE, RoomStatus.BOOKING, RoomStatus.RESERVED, RoomStatus.MAINTENANCE].includes(current.roomStatus as RoomStatus) ||
+          ![RoomStatus.AVAILABLE, RoomStatus.RESERVED, RoomStatus.MAINTENANCE].includes(current.roomStatus as RoomStatus) ||
           current.promotedAt
         ) {
           throw new ConflictException(
@@ -1586,6 +1632,7 @@ if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P20
         tenantId: true,
         status: true,
         expiresAt: true,
+        initialMetersPromotedAt: true,
         depositAmountRupiah: true,
         depositPaidAmountRupiah: true,
         depositPaymentStatus: true,
@@ -1630,6 +1677,7 @@ if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P20
       roomStatus: stay.room.status,
       stayStatus: stay.status,
       stayExpiresAt: stay.expiresAt,
+      stayPromotedAt: stay.initialMetersPromotedAt,
       invoiceNumber: invoice.invoiceNumber,
       invoiceStatus: invoice.status,
       invoiceTotalAmountRupiah: invoiceTotalAmount,
@@ -1714,6 +1762,7 @@ if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P20
         s."initialWaterM3Pending" AS "stayInitialWaterM3Pending",
         s."initialMetersRecordedAt" AS "stayInitialMetersRecordedAt",
         s."initialMetersRecordedById" AS "stayInitialMetersRecordedById",
+        s."initialMetersPromotedAt" AS "stayPromotedAt",
         i."invoiceNumber",
         i.status AS "invoiceStatus",
         i."issuedAt" AS "invoiceIssuedAt",

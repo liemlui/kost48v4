@@ -23,7 +23,6 @@ enum Gender {
 
 enum RoomStatus {
   AVAILABLE
-  BOOKING
   RESERVED
   OCCUPIED
   MAINTENANCE

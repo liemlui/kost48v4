@@ -1002,8 +1002,7 @@ export class OwnerAiService {
     const invoicePaidAmount = submission.invoice?.payments?.reduce((sum, payment) => sum + Number(payment.amountRupiah ?? 0), 0) ?? 0;
     const invoiceRemaining = Math.max(invoiceTotal - invoicePaidAmount, 0);
     const submitted = submission.amountRupiah;
-    const roomStatus = submission.stay?.room?.status;
-    const isBookingPath = roomStatus != null && [RoomStatus.BOOKING, RoomStatus.RESERVED].includes(roomStatus as RoomStatus);
+    const isBookingPath = submission.stay?.initialMetersPromotedAt == null;
     const depositRemaining = isBookingPath
       ? Math.max((submission.stay?.depositAmountRupiah ?? 0) - (submission.stay?.depositPaidAmountRupiah ?? 0), 0)
       : 0;

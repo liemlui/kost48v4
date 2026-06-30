@@ -446,7 +446,7 @@ export class StaySweepService {
   async runRoomHealer(options: { actorUserId?: number | null; source?: string } = {}) {
     const rooms = await this.prisma.room.findMany({
       where: {
-        status: { in: [RoomStatus.BOOKING, RoomStatus.RESERVED] },
+        status: RoomStatus.RESERVED,
         stays: { none: { status: StayStatus.ACTIVE } },
       },
       select: { id: true },

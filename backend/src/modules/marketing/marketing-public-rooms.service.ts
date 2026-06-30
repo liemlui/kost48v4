@@ -514,7 +514,6 @@ export class MarketingPublicRoomsService {
         status: {
           in: [
             RoomStatus.AVAILABLE as any,
-            RoomStatus.BOOKING as any,
             RoomStatus.RESERVED as any,
             RoomStatus.OCCUPIED as any,
             RoomStatus.MAINTENANCE as any,
@@ -570,7 +569,6 @@ export class MarketingPublicRoomsService {
         status: {
           in: [
             RoomStatus.AVAILABLE as any,
-            RoomStatus.BOOKING as any,
             RoomStatus.RESERVED as any,
             RoomStatus.OCCUPIED as any,
             RoomStatus.MAINTENANCE as any,
@@ -678,20 +676,14 @@ export class MarketingPublicRoomsService {
       availablePricingTerms: this.getAvailablePricingTerms(room),
       isAvailable:
         room.status === RoomStatus.AVAILABLE ||
-        room.status === RoomStatus.BOOKING ||
-        room.status === RoomStatus.RESERVED ||
         (room.status === RoomStatus.MAINTENANCE && Boolean(room.allowBookingWhileCleaning)),
       canBook:
         room.status === RoomStatus.AVAILABLE ||
-        room.status === RoomStatus.BOOKING ||
-        room.status === RoomStatus.RESERVED ||
         (room.status === RoomStatus.MAINTENANCE && Boolean(room.allowBookingWhileCleaning)),
       availabilityNote:
-        room.status === RoomStatus.BOOKING
-          ? 'Sedang di-booking (DP dibayar) — masih bisa dipesan, first-paid-wins.'
-          : room.status === RoomStatus.RESERVED
-            ? 'Sudah lunas dibayar & dikunci untuk tenant.'
-            : room.status === RoomStatus.MAINTENANCE && Boolean(room.allowBookingWhileCleaning)
+        room.status === RoomStatus.RESERVED
+          ? 'Kamar sudah dikunci untuk tenant lain. Pilih kamar lain atau hubungi admin.'
+          : room.status === RoomStatus.MAINTENANCE && Boolean(room.allowBookingWhileCleaning)
               ? 'Bisa dipesan sekarang — kamar sedang dibersihkan staf dan siap dihuni setelah pembersihan selesai.'
             : room.status === RoomStatus.MAINTENANCE
               ? 'Kamar kosong, tetapi sedang dicek sebelum dibuka untuk booking.'
