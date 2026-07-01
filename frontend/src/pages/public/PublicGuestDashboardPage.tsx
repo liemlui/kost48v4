@@ -213,6 +213,14 @@ export default function PublicGuestDashboardPage() {
     total: rooms.length,
   }), [rooms]);
 
+  // Z-17: Sync displayStats immediately when data loads (not just on scroll)
+  useEffect(() => {
+    if (stats.total > 0) {
+      const pct = Math.round((stats.occupied / stats.total) * 100);
+      setDisplayStats({ bookable: stats.bookable, occupied: stats.occupied, total: stats.total, percent: pct });
+    }
+  }, [stats]);
+
   useEffect(() => {
     if (!statsVisible || roomsQuery.isLoading || countUpStarted.current) return undefined;
     countUpStarted.current = true;
@@ -467,7 +475,7 @@ export default function PublicGuestDashboardPage() {
               </div>
             </>
           ) : (
-            <div className="gx-home-empty">Belum ada kamar yang tersedia saat ini. <Link to="/rooms">Cek ketersediaan langsung</Link></div>
+            <div className="gx-home-empty">Belum ada kamar yang tersedia saat ini. <Link to="/rooms">Cek ketersediaan langsung</Link> atau <a href={buildWhatsAppUrl("Halo Admin KOST48, saya ingin tanya ketersediaan kamar.")} className="gx-btn gx-btn-whatsapp" target="_blank" rel="noopener noreferrer">Hubungi via WhatsApp</a></div>
           )}
         </Container>
       </section>

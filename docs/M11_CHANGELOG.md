@@ -4,6 +4,11 @@
 
 ## Changelog Ringkas
 
+### 2026-07-02 — Fase Z: Z-17..Z-18 ✅ 2 task LOW publik selesai
+
+- **Z-17 ✅** Stat counter publik: sync displayStats segera saat data rooms terload (tidak hanya saat scroll visibility). Cegah 0/0/0 di landing page.
+- **Z-18 ✅** Empty state kamar publik: tambah CTA WhatsApp di samping link Cek Ketersediaan.
+
 ### 2026-07-02 — Fase Z: Z-11..Z-16 ✅ 6 task MEDIUM selesai
 
 - **Z-11 ✅** RoomsRouteEntry sudah pakai PageLoadingSkeleton dengan label "Memuat kamar…".
