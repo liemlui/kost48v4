@@ -10,6 +10,7 @@ import {
   YAxis,
 } from 'recharts';
 import { CHART_PALETTE } from './chartPalette';
+import { ChartResponsiveWrapper } from '../../hooks/ChartResponsiveWrapper';
 
 export type HorizontalBarPoint = {
   label: string;
@@ -56,8 +57,9 @@ export default function HorizontalBarChart<T extends HorizontalBarPoint>({
 
   return (
     <div className="recharts-horizontal-bars" role="img" aria-label={ariaLabel}>
-      <ResponsiveContainer width="100%" height={height}>
-        <BarChart layout="vertical" data={safePoints} margin={{ top: 8, right: 76, bottom: 4, left: 4 }}>
+      <ChartResponsiveWrapper height={height}>
+        <ResponsiveContainer width="100%" height={height}>
+          <BarChart layout="vertical" data={safePoints} margin={{ top: 8, right: 76, bottom: 4, left: 4 }}>
           <CartesianGrid horizontal={false} stroke="rgba(148, 163, 184, 0.22)" strokeDasharray="3 3" />
           <XAxis type="number" domain={[0, domainMax]} hide />
           <YAxis type="category" dataKey="label" width={leftWidth} tick={{ fill: '#64748b', fontSize: 12, fontWeight: 700 }} axisLine={false} tickLine={false} />
@@ -88,6 +90,7 @@ export default function HorizontalBarChart<T extends HorizontalBarPoint>({
           </Bar>
         </BarChart>
       </ResponsiveContainer>
+      </ChartResponsiveWrapper>
     </div>
   );
 }

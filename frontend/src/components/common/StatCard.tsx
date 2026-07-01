@@ -11,6 +11,7 @@ export type StatCardProps = {
     label?: string;
   };
   onClick?: MouseEventHandler<HTMLDivElement>;
+  loading?: boolean;
 };
 
 export default function StatCard({
@@ -21,6 +22,7 @@ export default function StatCard({
   variant = 'default',
   trend,
   onClick,
+  loading = false,
 }: StatCardProps) {
   const trendClassName = trend
     ? trend.value > 0
@@ -50,9 +52,15 @@ export default function StatCard({
           </div>
         </div>
 
-        <div className="stat-card-value">{value}</div>
-        {trendLabel ? <div className={`stat-card-trend ${trendClassName}`}>{trendLabel}</div> : null}
-        {subtitle ? <div className="stat-card-subtitle">{subtitle}</div> : null}
+        {loading ? (
+          <div className="stat-card-value">
+            <span className="skeleton-inline skeleton-value" style={{ width: 64, height: 28, display: 'inline-block', borderRadius: 4 }}>&nbsp;</span>
+          </div>
+        ) : (
+          <div className="stat-card-value">{value}</div>
+        )}
+        {loading ? null : trendLabel ? <div className={`stat-card-trend ${trendClassName}`}>{trendLabel}</div> : null}
+        {loading ? <div className="stat-card-subtitle"><span className="skeleton-inline" style={{ width: 120, height: 14, display: 'inline-block', borderRadius: 4 }}>&nbsp;</span></div> : subtitle ? <div className="stat-card-subtitle">{subtitle}</div> : null}
         <div className="stat-card-spark" aria-hidden="true">
           <span />
           <span />

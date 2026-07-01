@@ -1,10 +1,11 @@
 import { useMemo, useState } from 'react';
-import { Button, Card, Table } from 'react-bootstrap';
+import { Button, Card, Spinner, Table } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from 'recharts';
 import HorizontalBarChart from './HorizontalBarChart';
 import ClickableRow from '../common/ClickableRow';
 import { CHART_PALETTE } from './chartPalette';
+import { ChartResponsiveWrapper } from '../../hooks/ChartResponsiveWrapper';
 
 export type SmartChartMode = 'summary' | 'donut' | 'bar' | 'table';
 export type SmartChartPoint = {
@@ -84,16 +85,18 @@ export default function SmartChartPanel({ title, subtitle, points, defaultMode =
           <div className="smart-chart-donut-wrap">
             <div className="smart-chart-donut-stage" role="img" aria-label={`${title}: ${formatNumber(total)} ${totalLabel}`}>
               {total > 0 ? (
-                <ResponsiveContainer width="100%" height={190}>
-                  <PieChart>
-                    <Pie data={chartPoints} dataKey="value" nameKey="label" cx="50%" cy="50%" innerRadius={58} outerRadius={88} paddingAngle={2} stroke="none">
-                      {chartPoints.map((point) => (
-                        <Cell key={point.label} fill={point.color} cursor={point.to ? 'pointer' : 'default'} onClick={() => point.to ? navigate(point.to) : undefined} />
-                      ))}
-                    </Pie>
-                    <Tooltip formatter={(value: unknown) => formatNumber(Number(Array.isArray(value) ? value[0] ?? 0 : value ?? 0))} />
-                  </PieChart>
-                </ResponsiveContainer>
+                <ChartResponsiveWrapper height={190}>
+                  <ResponsiveContainer width="100%" height={190}>
+                    <PieChart>
+                      <Pie data={chartPoints} dataKey="value" nameKey="label" cx="50%" cy="50%" innerRadius={58} outerRadius={88} paddingAngle={2} stroke="none">
+                        {chartPoints.map((point) => (
+                          <Cell key={point.label} fill={point.color} cursor={point.to ? 'pointer' : 'default'} onClick={() => point.to ? navigate(point.to) : undefined} />
+                        ))}
+                      </Pie>
+                      <Tooltip formatter={(value: unknown) => formatNumber(Number(Array.isArray(value) ? value[0] ?? 0 : value ?? 0))} />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </ChartResponsiveWrapper>
               ) : <div className="smart-chart-empty">Belum ada data</div>}
               <div className="smart-chart-donut-center"><strong>{formatNumber(total)}</strong><span>{totalLabel}</span></div>
             </div>

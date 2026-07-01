@@ -4,6 +4,12 @@
 
 ## Changelog Ringkas
 
+### 2026-07-02 — Fase Z: Z-08..Z-10 ✅ 3 task MEDIUM selesai
+
+- **Z-08 ✅** ChartResponsiveWrapper (ResizeObserver) + diterapkan ke SmartChartPanel, DonutGauge, HorizontalBarChart. Cegah Recharts width=-1 warning via conditional render.
+- **Z-09 ✅** StatCard.loading prop + skeleton animation. StaffMotivationDashboard cards stabil dengan isLoading gate.
+- **Z-10 ✅** Ganti Dropdown Bootstrap → button group langsung + modal. Setiap tombol buka modal report yang sesuai.
+
 ### 2026-07-02 — Fase Z: Z-02..Z-07 ✅ 6 task HIGH selesai
 
 - **Z-02 ✅** `/portal/guide` redirect ke `/portal/manual` — MyManualPage sudah ada sejak fase sebelumnya.

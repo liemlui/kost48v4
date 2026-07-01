@@ -3,7 +3,6 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Alert,
   Button,
-  Dropdown,
   Form,
   Modal,
   Spinner,
@@ -305,29 +304,37 @@ export default function StaffActionLauncher({
         }
       >
         {singleButton ? (
-          <Dropdown align="end">
-            <Dropdown.Toggle
+          <div className="d-flex flex-wrap gap-1">
+            <Button
               size="sm"
               variant="primary"
               className="staff-quick-report-toggle"
+              onClick={() => open("BARANG_RUSAK")}
             >
-              + Laporan Lapangan
-            </Dropdown.Toggle>
-            <Dropdown.Menu className="staff-quick-report-menu">
-              <Dropdown.Item onClick={() => open("BARANG_RUSAK")}>
-                Barang kamar rusak / hilang
-              </Dropdown.Item>
-              <Dropdown.Item onClick={() => open("CATAT_METER")}>
-                Catat meter listrik / air
-              </Dropdown.Item>
-              <Dropdown.Item onClick={() => open("STOK_HABIS")}>
-                Stok gudang / alat habis
-              </Dropdown.Item>
-              <Dropdown.Item onClick={() => open("CEK_KAMAR")}>
-                Catat kondisi kamar
-              </Dropdown.Item>
-            </Dropdown.Menu>
-          </Dropdown>
+              + Barang Rusak
+            </Button>
+            <Button
+              size="sm"
+              variant="outline-primary"
+              onClick={() => open("CATAT_METER")}
+            >
+              Meter
+            </Button>
+            <Button
+              size="sm"
+              variant="outline-primary"
+              onClick={() => open("STOK_HABIS")}
+            >
+              Stok Habis
+            </Button>
+            <Button
+              size="sm"
+              variant="outline-primary"
+              onClick={() => open("CEK_KAMAR")}
+            >
+              Kondisi Kamar
+            </Button>
+          </div>
         ) : (
           <div className="staff-action-group staff-action-grid" role="group" aria-label="Aksi laporan lapangan">
             <Button size="sm" variant="primary" onClick={() => open("BARANG_RUSAK")}>

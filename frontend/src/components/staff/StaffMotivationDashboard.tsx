@@ -140,19 +140,21 @@ export default function StaffMotivationDashboard({ user, tickets, rooms = [], in
         />
         <StatCard
           title="Meter belum dicatat"
-          value={meterLoading ? '…' : meterPending}
+          value={meterPending}
           subtitle={meterPending ? 'Kamar bulan ini' : 'Semua kamar tercatat ✓'}
           icon={<Gauge size={20} aria-hidden />}
           variant={meterPending ? 'warning' : 'success'}
           onClick={() => navigate('/rooms')}
+          loading={meterLoading}
         />
         <StatCard
           title="Kinerja bulan ini"
-          value={perf ? perfScore : '—'}
+          value={perfScore}
           subtitle={perf?.category?.label ?? 'Belum ada data'}
           icon={<TrendingUp size={20} aria-hidden />}
           variant={perfVariant(perf?.category?.tone)}
           onClick={() => navigate('/staff-report')}
+          loading={performanceQuery.isLoading}
         />
       </div>
 

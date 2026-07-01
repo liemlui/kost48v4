@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { Cell, Pie, PieChart, ResponsiveContainer } from 'recharts';
 import { OKABE_ITO } from './chartPalette';
+import { ChartResponsiveWrapper } from '../../hooks/ChartResponsiveWrapper';
 
 type DonutGaugeProps = {
   value: number;
@@ -48,24 +49,26 @@ export default function DonutGauge({
       role="img"
       aria-label={ariaLabel}
     >
-      <ResponsiveContainer width="100%" height="100%">
-        <PieChart>
-          <Pie
-            data={data}
-            dataKey="value"
-            cx="50%"
-            cy="50%"
-            innerRadius={innerRadius}
-            outerRadius={outerRadius}
-            startAngle={90}
-            endAngle={-270}
-            stroke="none"
-            isAnimationActive
-          >
-            {data.map((entry) => <Cell key={entry.name} fill={entry.color} />)}
-          </Pie>
-        </PieChart>
-      </ResponsiveContainer>
+      <ChartResponsiveWrapper height={size}>
+        <ResponsiveContainer width="100%" height="100%">
+          <PieChart>
+            <Pie
+              data={data}
+              dataKey="value"
+              cx="50%"
+              cy="50%"
+              innerRadius={innerRadius}
+              outerRadius={outerRadius}
+              startAngle={90}
+              endAngle={-270}
+              stroke="none"
+              isAnimationActive
+            >
+              {data.map((entry) => <Cell key={entry.name} fill={entry.color} />)}
+            </Pie>
+          </PieChart>
+        </ResponsiveContainer>
+      </ChartResponsiveWrapper>
       <div className={`recharts-donut-center ${centerClassName}`.trim()}>{center}</div>
     </div>
   );
