@@ -5,7 +5,7 @@ import SafeImage from '../common/SafeImage';
 import CameraOrGalleryInput from '../common/CameraOrGalleryInput';
 import { getInvoiceTotalAmount } from '../../utils/invoiceTotals';
 import { TENANT_PAYMENT_PROOF_ACCEPT, prepareTenantPaymentProof, tenantPaymentProofReadyLabel } from '../../utils/tenantPaymentProof';
-import { uploadPaymentProof, createBatchPaymentSubmission } from '../../api/paymentSubmissions';
+import { submitBatchPaymentWithProof } from '../../api/paymentSubmissions';
 import { getApiErrorMessage } from '../../utils/getApiErrorMessage';
 import type { Invoice, PaymentMethod } from '../../types';
 
@@ -124,11 +124,7 @@ export default function SubmitBatchPaymentModal({
     try {
       setUploading(true);
 
-      // Step 1: Upload proof
-      const proof = await uploadPaymentProof(selectedFile);
-
-      // Step 2: Submit batch dengan fileKey dari server
-      await createBatchPaymentSubmission({
+      await submitBatchPaymentWithProof({
         stayId,
         invoiceIds: invoices.map((i) => i.id),
         paidAt,
@@ -137,8 +133,7 @@ export default function SubmitBatchPaymentModal({
         senderBankName: senderBankName.trim() || undefined,
         referenceNumber: referenceNumber.trim() || undefined,
         notes: notes.trim() || undefined,
-        fileKey: proof.fileKey,
-      });
+      }, selectedFile);
 
       onSuccess();
       onHide();

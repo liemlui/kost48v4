@@ -2,6 +2,7 @@ import {
   ConflictException,
   ForbiddenException,
   Injectable,
+  Logger,
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -20,6 +21,8 @@ import { ResetPasswordDto } from './dto/reset-password.dto';
 
 @Injectable()
 export class AuthService {
+  private readonly logger = new Logger(AuthService.name);
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly jwtService: JwtService,
@@ -179,7 +182,7 @@ export class AuthService {
     if (user.email) {
       await this.sendResetEmail(user.email, rawToken).catch((err) => {
         // Log but never expose to caller (enumeration-safe)
-        console.error('[forgotPassword] Gagal mengirim email reset password:', err?.message ?? err);
+        this.logger.error(`[forgotPassword] Gagal mengirim email reset password: ${err?.message ?? 'unknown'}`);
       });
     }
 

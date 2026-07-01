@@ -188,7 +188,7 @@ export class StaysService {
     }
 
     // Check-in hanya untuk kamar AVAILABLE (booking walk-in) atau RESERVED (tenant
-    // sudah bayar lunas). BOOKING (baru DP) belum boleh check-in — tunggu pelunasan.
+    // sudah bayar lunas). Stay dengan DP saja (belum lunas) belum boleh check-in — tunggu pelunasan.
     if (![RoomStatus.AVAILABLE, RoomStatus.RESERVED].includes(room.status as RoomStatus)) {
       throw new ConflictException(
         room.status === RoomStatus.MAINTENANCE
@@ -197,8 +197,15 @@ export class StaysService {
       );
     }
 
+    const existingRoomStayWhere: Prisma.StayWhereInput = {
+      roomId: dto.roomId,
+      status: StayStatus.ACTIVE,
+      ...(room.status === RoomStatus.RESERVED
+        ? { initialMetersPromotedAt: { not: null } }
+        : {}),
+    };
     const existingRoomStay = await this.prisma.stay.findFirst({
-      where: { roomId: dto.roomId, status: StayStatus.ACTIVE },
+      where: existingRoomStayWhere,
     });
     if (existingRoomStay) {
       throw new ConflictException("Kamar sudah ditempati stay aktif lain");
@@ -305,8 +312,15 @@ export class StaysService {
             `Kamar masih dalam proses pembersihan/inspeksi (tiket ${openCleaningTicket.ticketNumber}). Tutup tiket tersebut sebelum check-in.`,
           );
         }
+        const existingRoomStayLockWhere: Prisma.StayWhereInput = {
+          roomId: dto.roomId,
+          status: StayStatus.ACTIVE,
+          ...(lockedRoom.status === RoomStatus.RESERVED
+            ? { initialMetersPromotedAt: { not: null } }
+            : {}),
+        };
         const existingRoomStayLock = await tx.stay.findFirst({
-          where: { roomId: dto.roomId, status: StayStatus.ACTIVE },
+          where: existingRoomStayLockWhere,
         });
         if (existingRoomStayLock) {
           throw new ConflictException("Kamar sudah ditempati stay aktif lain");
@@ -321,6 +335,7 @@ export class StaysService {
           const bookingStay = await tx.stay.findFirst({
             where: {
               roomId: dto.roomId,
+              tenantId: dto.tenantId,
               status: StayStatus.ACTIVE,
               initialMetersPromotedAt: null,
             },

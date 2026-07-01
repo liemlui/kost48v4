@@ -20,21 +20,47 @@ async function bootstrap() {
     logger: isProduction ? ['error', 'warn'] : ['log', 'error', 'warn', 'debug', 'verbose'],
   });
 
+  // ── W-01: Production security baseline ──────────────────────────────────────
   // Room images are public marketing content — safe to serve statically.
   // Payment proofs remain protected via the dedicated authenticated endpoint.
+  const ALLOWED_IMAGE_EXTENSIONS = /\.(jpg|jpeg|png|webp|gif|svg)$/i;
+
+  const staticSecurityHeaders = (res: Response, filePath?: string) => {
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.setHeader('X-Frame-Options', 'DENY');
+    res.setHeader('Referrer-Policy', 'no-referrer');
+    res.setHeader('Permissions-Policy', 'camera=(self), microphone=(), geolocation=()');
+    // CSP longgar khusus static images: hanya izinkan self + data URIs.
+    res.setHeader('Content-Security-Policy', "default-src 'none'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; font-src 'self'");
+    if (isProduction) {
+      res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
+    }
+  };
+
   const roomImagesPath = join(process.cwd(), 'uploads', 'room-images');
+  // W-01: filter extension sebelum static serve — tolak file non-image.
+  app.use('/uploads/room-images', (req: Request, res: Response, next: NextFunction) => {
+    if (!ALLOWED_IMAGE_EXTENSIONS.test(req.path)) {
+      res.status(404).json({ statusCode: 404, message: 'Not Found' });
+      return;
+    }
+    next();
+  });
   app.useStaticAssets(roomImagesPath, {
     prefix: '/uploads/room-images',
-    setHeaders: (res: Response) => {
-      res.setHeader('X-Content-Type-Options', 'nosniff');
-    },
+    setHeaders: (res: Response) => staticSecurityHeaders(res),
   });
   // Some deployments/proxies only forward /api/* to the backend. Keep a
   // public alias under /api so browser images work consistently in local/UAT.
+  app.use('/api/uploads/room-images', (req: Request, res: Response, next: NextFunction) => {
+    if (!ALLOWED_IMAGE_EXTENSIONS.test(req.path)) {
+      res.status(404).json({ statusCode: 404, message: 'Not Found' });
+      return;
+    }
+    next();
+  });
   const roomImagesStatic = express.static(roomImagesPath, {
-    setHeaders: (res: Response) => {
-      res.setHeader('X-Content-Type-Options', 'nosniff');
-    },
+    setHeaders: (res: Response) => staticSecurityHeaders(res),
   });
   app.use('/api/uploads/room-images', roomImagesStatic);
   const prismaService = app.get(PrismaService);
@@ -45,6 +71,20 @@ async function bootstrap() {
   app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true, forbidNonWhitelisted: true, disableErrorMessages: isProduction }));
   app.useGlobalFilters(new AllExceptionsFilter());
   app.useGlobalInterceptors(new RequestIdInterceptor(), new OwnerViewModeInterceptor(), new ResponseEnvelopeInterceptor());
+
+  // ── W-01: Production env guard ────────────────────────────────────────────
+  if (isProduction) {
+    const jwtSecret = process.env.JWT_SECRET;
+    if (!jwtSecret ||
+        jwtSecret.includes('your-super-secret') ||
+        jwtSecret.includes('ganti-dengan') ||
+        jwtSecret.length < 32) {
+      throw new Error(
+        'JWT_SECRET production must be a strong random key (≥32 chars). ' +
+        'Generate: `openssl rand -hex 32`. Refusing to start with dev/weak secret.',
+      );
+    }
+  }
 
   // ── CORS ──────────────────────────────────────────────────────────────────
   if (isProduction) {
@@ -78,11 +118,13 @@ async function bootstrap() {
     max: Number(process.env.RATE_LIMIT_GLOBAL_PER_MINUTE ?? 300),
   }));
   // Endpoint kredensial ketat: tahan brute-force login & enumerasi reset password.
+  // W-01: failClosed=true — saat bucket penuh, tolak (503) alih-alih lolos.
   const authLimiter = createRateLimiter({
     name: 'auth',
     windowMs: 15 * 60_000,
     max: Number(process.env.RATE_LIMIT_AUTH_PER_15MIN ?? 10),
     message: 'Terlalu banyak percobaan. Tunggu 15 menit sebelum mencoba lagi.',
+    failClosed: true,
   });
   app.use('/api/auth/login', authLimiter);
   app.use('/api/auth/forgot-password', authLimiter);
@@ -93,7 +135,8 @@ async function bootstrap() {
     res.setHeader('Referrer-Policy', 'no-referrer');
     // DEEP-02: izinkan kamera same-origin (OCR KTP/Tesseract, PUB-KTP-OCR); mic & geo tetap diblok.
     res.setHeader('Permissions-Policy', 'camera=(self), microphone=(), geolocation=()');
-    res.setHeader('Content-Security-Policy', "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'");
+    // W-01: CSP diperketat — frame-ancestors 'none' (anti-clickjacking), form-action 'self'.
+    res.setHeader('Content-Security-Policy', "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'; frame-ancestors 'none'; form-action 'self'");
     // DEEP-03: HSTS hanya di produksi (HTTPS) — jangan kirim di dev (localhost HTTP).
     if (isProduction) {
       res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');

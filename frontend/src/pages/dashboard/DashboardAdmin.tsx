@@ -238,6 +238,9 @@ export default function AdminDashboard() {
   const checkoutPendingRequests = aggregateQuery.data?.checkoutPending.items ?? [];
   const checkoutApprovedRequests = aggregateQuery.data?.checkoutApproved.items ?? [];
   const paymentReviewItems = aggregateQuery.data?.paymentReview.items ?? [];
+  const facilityGapSummary = aggregateQuery.data?.facilityGaps;
+  const facilityGapCount = facilityGapSummary?.meta.totalItems ?? 0;
+  const facilityGapPreview = facilityGapSummary?.items ?? [];
   const staffPerformanceItems = staffPerformanceQuery.data?.items ?? [];
   const pendingRenewCount = renewRequests.length;
   const pendingCheckoutRequestCount = checkoutPendingRequests.length;
@@ -324,6 +327,24 @@ export default function AdminDashboard() {
         tone={supportQueriesError ? 'warning' : urgentQueueCount ? 'warning' : topQueueItem ? 'info' : 'success'}
         message={supportQueriesError ? 'Data utama sudah tampil, tetapi sebagian data pendukung gagal dimuat.' : topQueueItem ? `${topQueueItem.type}: ${topQueueItem.issue}` : activeArea === 'overview' ? 'Tidak ada blocker besar. Gunakan tab area untuk membuka detail.' : `${activeAreaConfig.label} sedang aman.`}
       />
+      {activeArea === 'overview' && facilityGapCount > 0 ? (
+        <Alert variant="warning" className="d-flex flex-wrap align-items-center gap-2 py-2">
+          <div className="flex-fill">
+            <strong>{facilityGapCount} kamar disembunyikan dari katalog publik.</strong>
+            <span className="ms-1">
+              Lengkapi gap fasilitas-inventaris{facilityGapSummary?.meta.acGapItems ? `, termasuk ${facilityGapSummary.meta.acGapItems} gap AC` : ''}.
+            </span>
+            {facilityGapPreview.length ? (
+              <span className="d-block small text-muted">
+                Contoh: {facilityGapPreview.map((room) => room.code || room.name || `Kamar #${room.roomId}`).join(', ')}
+              </span>
+            ) : null}
+          </div>
+          <button type="button" className="btn btn-sm btn-outline-warning" onClick={() => navigate('/rooms')}>
+            Cek kamar
+          </button>
+        </Alert>
+      ) : null}
       {supportQueriesLoading ? <Alert variant="info" className="admin-support-loading-note">Data pendukung sedang dimuat. Dashboard utama tetap bisa dipakai.</Alert> : null}
       {/* N-02: AdminHealthBar ringkas — gantikan AdminTodayStatusStrip + AdminContinuityStrip */}
       {activeArea === 'overview' ? (

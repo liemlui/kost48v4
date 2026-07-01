@@ -11,6 +11,21 @@ export interface AdminDashboardAggregate {
   checkoutApproved: { items: CheckoutRequest[] };
   paymentReview: { items: PaymentSubmission[]; meta: { totalItems: number } };
   inventoryItems: { items: InventoryItem[] };
+  facilityGaps?: {
+    items: Array<{
+      roomId: number;
+      code?: string | null;
+      name?: string | null;
+      status?: string | null;
+      hasGap: boolean;
+      acGap: boolean;
+      missingCount: number;
+    }>;
+    meta: {
+      totalItems: number;
+      acGapItems: number;
+    };
+  };
 }
 
 export async function fetchAdminDashboardAggregate(): Promise<AdminDashboardAggregate> {

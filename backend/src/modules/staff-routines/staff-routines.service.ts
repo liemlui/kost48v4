@@ -163,7 +163,16 @@ export class StaffRoutinesService {
       if (assignment.staffUserId && assignment.staffUserId !== actor.id) throw new ConflictException('Pekerjaan ini bukan tugas akun ini');
     }
 
-    const roomId = dto.roomId ?? assignment?.roomId ?? null;
+    // W-08: validasi roomId — jika assignment punya roomId spesifik, staff tidak boleh
+    // mengganti ke roomId lain via DTO. RoomId bebas hanya untuk template area (global).
+    let roomId: number | null = null;
+    if (assignment?.roomId) {
+      roomId = assignment.roomId;
+    } else if (dto.roomId) {
+      roomId = dto.roomId;
+    } else {
+      roomId = null;
+    }
     const existing = await this.prisma.staffRoutineCompletion.findFirst({
       where: {
         templateId: template.id,
@@ -216,13 +225,23 @@ export class StaffRoutinesService {
       throw new ConflictException('Pekerjaan ini bukan jadwal hari tersebut');
     }
 
-let assignment = null as null | { id: number; templateId: number; staffUserId: number | null; roomId: number | null; isActive: boolean };    if (dto.assignmentId) {
+    let assignment = null as null | { id: number; templateId: number; staffUserId: number | null; roomId: number | null; isActive: boolean };
+    if (dto.assignmentId) {
       assignment = await this.prisma.staffRoutineAssignment.findUnique({ where: { id: dto.assignmentId } });
       if (!assignment || !assignment.isActive || assignment.templateId !== template.id) throw new NotFoundException('Jadwal pekerjaan tidak ditemukan');
       if (assignment.staffUserId && assignment.staffUserId !== actor.id) throw new ConflictException('Pekerjaan ini bukan tugas akun ini');
     }
 
-    const roomId = dto.roomId ?? assignment?.roomId ?? null;
+    // W-08: validasi roomId — jika assignment punya roomId spesifik, staff tidak boleh
+    // mengganti ke roomId lain via DTO.
+    let roomId: number | null = null;
+    if (assignment?.roomId) {
+      roomId = assignment.roomId;
+    } else if (dto.roomId) {
+      roomId = dto.roomId;
+    } else {
+      roomId = null;
+    }
     const status = dto.status === StaffRoutineStatus.NEED_HELP ? StaffRoutineStatus.NEED_HELP : StaffRoutineStatus.DONE;
     if (template.requiresPhoto && status === StaffRoutineStatus.DONE && !dto.photoUrl) {
       throw new ConflictException('Foto bukti wajib diisi untuk pekerjaan ini');

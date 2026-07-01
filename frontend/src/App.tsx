@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, type ReactNode } from 'react';
+import { lazy, Suspense, useEffect, useRef, type ReactNode } from 'react';
 import { Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import { PageLoadingSkeleton } from './components/common/SkeletonLoader';
 import AppLayout from './components/layout/AppLayout';
@@ -144,11 +144,20 @@ function RequireRoles({ allowed, children }: { allowed: Role[]; children: ReactN
   const isDenied = !!user && !allowed.includes(user.role as Role);
 
   // Tampilkan toast lalu redirect — satu kali saat isDenied terdeteksi (R-20 + R-29).
+  // X-05: jangan toast bila pathname = defaultRoute (redirect sudah terjadi / StrictMode double).
+  const deniedRef = useRef(false);
   useEffect(() => {
     if (!isDenied || !user || isStageLoading) return;
+    const defaultRoute = getDefaultRoute(user.role, stage);
+    if (pathname === defaultRoute) {
+      navigate(defaultRoute, { replace: true });
+      return; // jangan toast — user sudah di route seharusnya
+    }
+    if (deniedRef.current) return; // cegah double-invoke StrictMode
+    deniedRef.current = true;
     const message = getDeniedMessage(user.role, pathname);
     toast(message, 'warning', 5000);
-    navigate(getDefaultRoute(user.role, stage), { replace: true });
+    navigate(defaultRoute, { replace: true });
   }, [isDenied, user, stage, isStageLoading, pathname, toast, navigate]);
 
   if (!user) return null;

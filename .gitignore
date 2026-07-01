@@ -67,4 +67,9 @@ Thumbs.db
 frontend/test-results/
 frontend/playwright-report/
 frontend/e2e/uat-shots/
+frontend/screenshots-ui/
+
+# Temp/debug artifacts (jangan di-commit)
+test-output.txt
+backend/test/debug-*.js
 

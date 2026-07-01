@@ -103,10 +103,18 @@ export default function TenantInvoiceDetailPage() {
     setPayAmount(String(outstanding));
     setPayFile(null);
     setPayFileLabel('');
-    setPayProofPreviewUrl(null);
+    setPayProofPreviewUrl((old) => { if (old) URL.revokeObjectURL(old); return null; });
     setPayNotes('');
     setPayFormError('');
   }, [showPayModal, outstanding]);
+
+  // Cleanup objectURL saat komponen unmount atau payProofPreviewUrl berubah
+  useEffect(() => {
+    const url = payProofPreviewUrl;
+    return () => {
+      if (url) URL.revokeObjectURL(url);
+    };
+  }, [payProofPreviewUrl]);
 
   // ── Pending review detection ──
   const submissionsQuery = useQuery({
@@ -187,7 +195,7 @@ export default function TenantInvoiceDetailPage() {
       const prepared = await prepareTenantPaymentProof(file);
       setPayFile(prepared);
       setPayFileLabel(tenantPaymentProofReadyLabel(prepared));
-      setPayProofPreviewUrl(URL.createObjectURL(prepared));
+      setPayProofPreviewUrl((old) => { if (old) URL.revokeObjectURL(old); return URL.createObjectURL(prepared); });
       setPayFormError('');
     } catch (error) {
       setPayFile(null);

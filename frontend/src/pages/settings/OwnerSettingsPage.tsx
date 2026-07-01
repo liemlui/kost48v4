@@ -4,6 +4,7 @@ import { Alert, Badge, Button, Card, Col, Form, Modal, Row, Spinner, Tab, Tabs }
 import { useSearchParams } from 'react-router-dom';
 import client from '../../api/client';
 import SafeImage from '../../components/common/SafeImage';
+import { SkeletonBlock } from '../../components/common/SkeletonLoader';
 import { useConfirm } from '../../components/common/ConfirmProvider';
 import { createFaq, deleteFaq, fetchAllFaqs, updateFaq, type FaqItem } from '../../api/faqs';
 import { fetchOperationalSettings, updateOperationalSettings, type OperationalSetting } from '../../api/settings';
@@ -370,7 +371,20 @@ function FaqManagementPanel() {
         <Button size="sm" onClick={openNew}>+ Tambah FAQ</Button>
       </div>
 
-      {isLoading && <div className="py-4 text-center"><Spinner animation="border" /></div>}
+      {isLoading && (
+        <div className="d-grid gap-2 py-2" role="status" aria-label="Memuat FAQ" aria-busy="true">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <div key={i} className="d-flex align-items-center gap-3 p-3 border-bottom">
+              <SkeletonBlock width="60px" height="22px" />
+              <SkeletonBlock width="80px" height="22px" />
+              <div className="flex-fill">
+                <SkeletonBlock width="60%" height="16px" className="mb-1" />
+                <SkeletonBlock width="40%" height="14px" />
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
       {isError && !isLoading && (
         <Alert variant="warning" className="d-flex align-items-start gap-3">
           <div className="flex-fill">
@@ -691,6 +705,7 @@ function TariffSettingsPanel() {
       galonRupiah: Number(form?.galonRupiah ?? 20000),
       petDepositRupiah: Number(form?.petDepositRupiah ?? 100000),
       extraOccupantFeePercent: Number(form?.extraOccupantFeePercent ?? 20),
+      acCleanKwhThreshold: Number(form?.acCleanKwhThreshold ?? 200),
       tenantLoyaltyEnabled: Boolean(form?.tenantLoyaltyEnabled),
     }),
     onSuccess: (updated) => { setForm(updated); setSavedMsg('Konstanta tersimpan.'); qc.invalidateQueries({ queryKey: ['operational-settings'] }); },
@@ -775,6 +790,14 @@ function TariffSettingsPanel() {
               <Form.Label>Biaya penghuni ekstra (%)</Form.Label>
               <Form.Control type="number" min={0} max={100} value={form.extraOccupantFeePercent ?? 20} onChange={(e) => set('extraOccupantFeePercent', Number(e.target.value))} />
               <Form.Text muted>% dari sewa per penghuni ekstra (di atas batas gratis per roomSize).</Form.Text>
+            </Form.Group>
+          </Col>
+          <Col xs={12}><hr className="my-1" /><p className="text-muted small mb-0">Perawatan AC (jadwal cuci otomatis)</p></Col>
+          <Col md={6}>
+            <Form.Group>
+              <Form.Label>Ambang pemakaian AC → cuci (kWh)</Form.Label>
+              <Form.Control type="number" min={0} value={form.acCleanKwhThreshold ?? 200} onChange={(e) => set('acCleanKwhThreshold', Number(e.target.value))} />
+              <Form.Text muted>Sistem membuat tiket cuci AC bila estimasi pemakaian (watt × jam × hari sejak cuci terakhir) mencapai angka ini — pemicu dini selain interval hari/bulan per-kamar. Isi 0 untuk pakai interval saja.</Form.Text>
             </Form.Group>
           </Col>
           <Col xs={12}><hr className="my-1" /><p className="text-muted small mb-0">Fitur tenant</p></Col>

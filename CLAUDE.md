@@ -3,7 +3,7 @@
 Sistem manajemen kost 48 kamar. Backend NestJS+Prisma+PostgreSQL (`backend/`), frontend React+Vite (`frontend/`). Bahasa kerja: Indonesia.
 
 ## Pintu masuk docs (M-file — JANGAN baca semua)
-1. **`docs/M01_MASTER.md`** — blueprint + ground state + router AI (arsip `_PETA_AI` di `docs/archieve/`).Apa bisa 
+1. **`docs/M01_MASTER.md`** — blueprint + ground state + router AI (arsip `_PETA_AI` di `docs/archieve/`).
 2. **`docs/M02_KEPUTUSAN_OWNER.md`** — 84 keputusan owner (SUMBER KEBENARAN sebelum ubah flow).
 3. **`docs/M10_CHECKLIST_CHANGELOG.md`** — **CHECKLIST AKTIF + antrian eksekusi AI** (baca ANTRIAN, jangan ulang fase selesai). Changelog historis → `docs/M11_CHANGELOG.md`.
 4. **`docs/CODEMAP.md`** — peta modul→path→tanggung jawab + index model + anchor flow. Pakai INI dulu untuk navigasi kode (hemat token), baru Grep simbol.
@@ -27,7 +27,7 @@ Detail forensik 97 temuan & rencana lama sudah DIBUBARKAN ke dossier; arsip di `
 
 ## Aturan kerja hemat token
 - Navigasi kode: `docs/CODEMAP.md` dulu → lalu Grep simbol di `backend/src` / `frontend/src`. Spesifikasi task → `M10` ANTRIAN + M-file domain.
-- Selesai task: centang `M10` + prepend 1 baris changelog di `docs/M11_CHANGELOG.md`.
+- Selesai task: centang `M10` + prepend 1 baris changelog di `docs/M11_CHANGELOG.md`. **Syarat tambahan:** test terkait PASS, kode diverifikasi nyata (bukan hanya klaim dokumen).
 - Tulisan commit & docs berbahasa Indonesia; ikuti gaya entri CHANGELOG yang ada.
 
 ## Aturan efisiensi sesi (cache & /new)

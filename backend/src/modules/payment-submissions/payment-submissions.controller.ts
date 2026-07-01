@@ -1,7 +1,7 @@
 import { BadRequestException, Body, Controller, Get, Param, ParseIntPipe, Post, Query, Res, StreamableFile, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
 import { ApiBearerAuth, ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { Response } from 'express';
-import { createReadStream, existsSync, mkdirSync, renameSync, unlinkSync } from 'fs';
+import { createReadStream, existsSync, mkdirSync, renameSync } from 'fs';
 import { basename, extname, join } from 'path';
 import { randomBytes } from 'crypto';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
@@ -19,8 +19,7 @@ import { BatchPaymentSubmissionDto } from './dto/batch-payment-submission.dto';
 import { RejectPaymentSubmissionDto } from './dto/reject-payment-submission.dto';
 import { ReviewQueueQueryDto } from './dto/review-queue-query.dto';
 import { PaymentSubmissionsService } from './payment-submissions.service';
-import { detectImageMime, deleteFileSafe } from '../../common/utils/file-signature.util';
-import { PrismaService } from '../../prisma/prisma.service';
+import { detectImageMime, deleteFileSafe, MIME_TO_EXT } from '../../common/utils/file-signature.util';
 import { validate } from 'class-validator';
 import { plainToInstance } from 'class-transformer';
 
@@ -29,22 +28,9 @@ import { plainToInstance } from 'class-transformer';
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('payment-submissions')
 export class PaymentSubmissionsController {
-  constructor(
-    private readonly paymentSubmissionsService: PaymentSubmissionsService,
-    private readonly prisma: PrismaService,
-  ) {}
+  constructor(private readonly paymentSubmissionsService: PaymentSubmissionsService) {}
 
   private readonly UPLOAD_DIR = join(process.cwd(), 'uploads', 'payment-proofs');
-
-  private ensureUploadDir() {
-    if (!existsSync(this.UPLOAD_DIR)) mkdirSync(this.UPLOAD_DIR, { recursive: true });
-  }
-
-  private generateSecureFilename(ext: string): string {
-    const timestamp = Date.now();
-    const rand = randomBytes(8).toString('hex');
-    return `${timestamp}-${rand}${ext}`;
-  }
 
   /**
    * Protected endpoint — stream payment proof images.
@@ -116,10 +102,10 @@ export class PaymentSubmissionsController {
       amountRupiah: Number(body.amountRupiah),
       paidAt: body.paidAt,
       paymentMethod: body.paymentMethod,
-      senderName: body.senderName || undefined,
-      senderBankName: body.senderBankName || undefined,
-      referenceNumber: body.referenceNumber || undefined,
-      notes: body.notes || undefined,
+      senderName: this.optionalFormString(body.senderName),
+      senderBankName: this.optionalFormString(body.senderBankName),
+      referenceNumber: this.optionalFormString(body.referenceNumber),
+      notes: this.optionalFormString(body.notes),
       fileKey: file.filename,
       fileUrl: `/api/payment-submissions/proofs/${file.filename}`,
       originalFilename: file.originalname,
@@ -128,9 +114,74 @@ export class PaymentSubmissionsController {
     } as CreatePaymentSubmissionDto;
   }
 
+  private mapMultipartBodyToBatchDto(body: Record<string, any>, file: any): BatchPaymentSubmissionDto {
+    if (!file) throw new BadRequestException('File bukti bayar wajib dipilih');
+    return {
+      stayId: Number(body.stayId),
+      invoiceIds: this.parseInvoiceIds(body.invoiceIds),
+      paidAt: body.paidAt,
+      paymentMethod: body.paymentMethod,
+      senderName: this.optionalFormString(body.senderName),
+      senderBankName: this.optionalFormString(body.senderBankName),
+      referenceNumber: this.optionalFormString(body.referenceNumber),
+      notes: this.optionalFormString(body.notes),
+      fileKey: file.filename,
+      originalFilename: file.originalname,
+      mimeType: file.mimetype,
+      fileSizeBytes: file.size,
+    } as BatchPaymentSubmissionDto;
+  }
+
+  private optionalFormString(value: any): string | undefined {
+    const raw = Array.isArray(value) ? value[0] : value;
+    if (typeof raw !== 'string') return undefined;
+    const trimmed = raw.trim();
+    return trimmed.length > 0 ? trimmed : undefined;
+  }
+
+  private parseInvoiceIds(value: any): number[] {
+    if (Array.isArray(value)) {
+      return value.flatMap((item) => this.parseInvoiceIds(item));
+    }
+    if (typeof value === 'number') {
+      return [value];
+    }
+    if (typeof value !== 'string') {
+      throw new BadRequestException('Daftar invoice tidak valid');
+    }
+
+    const raw = value.trim();
+    if (!raw) {
+      throw new BadRequestException('Daftar invoice wajib diisi');
+    }
+
+    try {
+      if (raw.startsWith('[')) {
+        const parsed = JSON.parse(raw);
+        if (!Array.isArray(parsed)) throw new Error('invoiceIds must be an array');
+        return parsed.map((item) => Number(item));
+      }
+    } catch {
+      throw new BadRequestException('Daftar invoice tidak valid');
+    }
+
+    return raw.split(',').map((item) => Number(item.trim()));
+  }
+
+  private assertNoJsonProofMetadata(dto: {
+    fileKey?: string;
+    originalFilename?: string;
+    mimeType?: string;
+    fileSizeBytes?: number;
+  }) {
+    if (dto.fileKey || dto.originalFilename || dto.mimeType || dto.fileSizeBytes !== undefined) {
+      throw new BadRequestException('Metadata bukti pembayaran tidak boleh dikirim lewat JSON. Kirim file bukti lewat endpoint multipart.');
+    }
+  }
+
   /** Manual class-validator check for multipart DTO (bypasses global ValidationPipe). */
-  private async validateDto(dto: CreatePaymentSubmissionDto): Promise<string[]> {
-    const instance = plainToInstance(CreatePaymentSubmissionDto, dto);
+  private async validateDto<T extends object>(dto: T, metatype: new () => T): Promise<string[]> {
+    const instance = plainToInstance(metatype, dto);
     const errors = await validate(instance, { whitelist: true, forbidNonWhitelisted: false });
     const messages: string[] = [];
     for (const err of errors) {
@@ -184,9 +235,14 @@ export class PaymentSubmissionsController {
       throw new BadRequestException('File bukti pembayaran harus berupa gambar JPG, PNG, atau WebP yang valid');
     }
 
-    // ── Rename to secure filename ──────────────────────────────────────────
-    const safeExt = extname(detectedMime === 'image/jpeg' ? 'x.jpg' : detectedMime === 'image/png' ? 'x.png' : 'x.webp');
-    const secureName = this.generateSecureFilename(safeExt);
+    // ── Rename to secure filename with tenant ownership prefix ─────────────
+    const tenantId = user.tenantId;
+    if (!tenantId) {
+      deleteFileSafe(filePath);
+      throw new BadRequestException('Akun tenant tidak valid');
+    }
+    const safeExt = MIME_TO_EXT[detectedMime];
+    const secureName = `${tenantId}_${Date.now()}_${randomBytes(8).toString('hex')}${safeExt}`;
     const securePath = join(this.UPLOAD_DIR, secureName);
     renameSync(filePath, securePath);
 
@@ -197,19 +253,24 @@ export class PaymentSubmissionsController {
 
     // ── Manual DTO validation (multipart bypasses class-validator pipe) ────
     const dto = this.mapMultipartBodyToDto(body, file);
-    const errors = await this.validateDto(dto);
+    const errors = await this.validateDto(dto, CreatePaymentSubmissionDto);
     if (errors.length > 0) {
       deleteFileSafe(securePath);
       throw new BadRequestException(`Data pembayaran tidak valid: ${errors.join('; ')}`);
     }
 
-    return {
-      message: 'Pembayaran dan bukti berhasil dikirim dalam satu langkah. Admin akan memeriksa bukti pembayaran.',
-      data: await this.paymentSubmissionsService.createSubmission(user, dto),
-    };
+    try {
+      return {
+        message: 'Pembayaran dan bukti berhasil dikirim dalam satu langkah. Admin akan memeriksa bukti pembayaran.',
+        data: await this.paymentSubmissionsService.createSubmission(user, dto),
+      };
+    } catch (error) {
+      deleteFileSafe(securePath);
+      throw error;
+    }
   }
 
-  @Post('upload-proof')
+  @Post('submit-batch-with-proof')
   @Roles(UserRole.TENANT)
   @UseGuards(RateLimitGuard)
   @RateLimit('tenantUpload')
@@ -233,12 +294,13 @@ export class PaymentSubmissionsController {
       limits: { fileSize: 2 * 1024 * 1024 },
     }),
   )
-  async uploadProof(@UploadedFile() file: any, @CurrentUser() user: CurrentUserPayload) {
-    if (!file) throw new BadRequestException('File bukti bayar wajib dipilih');
-
-    const tenantId = user.tenantId;
-    if (!tenantId) {
-      throw new BadRequestException('Akun tenant tidak valid');
+  async submitBatchWithProof(
+    @UploadedFile() file: any,
+    @Body() body: Record<string, any>,
+    @CurrentUser() user: CurrentUserPayload,
+  ) {
+    if (!file) {
+      throw new BadRequestException('File bukti pembayaran wajib diunggah');
     }
 
     const filePath = join(this.UPLOAD_DIR, file.filename);
@@ -248,44 +310,42 @@ export class PaymentSubmissionsController {
       throw new BadRequestException('File bukti pembayaran harus berupa gambar JPG, PNG, atau WebP yang valid');
     }
 
-    const safeExt = extname(detectedMime === 'image/jpeg' ? 'x.jpg' : detectedMime === 'image/png' ? 'x.png' : 'x.webp');
-    // Ownership built-in via tenantId prefix
-    const secureName = `${tenantId}_${Date.now()}_${randomBytes(8).toString('hex')}${safeExt}`;
+    const tenantId = user.tenantId;
+    if (!tenantId) {
+      deleteFileSafe(filePath);
+      throw new BadRequestException('Akun tenant tidak valid');
+    }
+
+    const secureName = `${tenantId}_${Date.now()}_${randomBytes(8).toString('hex')}${MIME_TO_EXT[detectedMime]}`;
     const securePath = join(this.UPLOAD_DIR, secureName);
     renameSync(filePath, securePath);
 
-    // Audit log
-    await this.prisma.auditLog.create({
-      data: {
-        actorUserId: user.id,
-        action: 'UPLOAD_PAYMENT_PROOF',
-        entityType: 'PaymentProof',
-        entityId: secureName,
-        meta: {
-          tenantId,
-          fileKey: secureName,
-          originalFilename: file.originalname,
-          mimeType: detectedMime,
-          fileSizeBytes: file.size,
-        } as any,
-      },
-    });
+    file.filename = secureName;
+    file.originalname = file.originalname || 'proof';
+    file.mimetype = detectedMime;
 
-    return {
-      message: 'Bukti bayar berhasil diunggah',
-      data: {
-        fileKey: secureName,
-        fileUrl: `/api/payment-submissions/proofs/${secureName}`,
-        originalFilename: file.originalname,
-        mimeType: detectedMime,
-        fileSizeBytes: file.size,
-      },
-    };
+    const dto = this.mapMultipartBodyToBatchDto(body, file);
+    const errors = await this.validateDto(dto, BatchPaymentSubmissionDto);
+    if (errors.length > 0) {
+      deleteFileSafe(securePath);
+      throw new BadRequestException(`Data pembayaran tidak valid: ${errors.join('; ')}`);
+    }
+
+    try {
+      return {
+        message: 'Pembayaran batch dan bukti berhasil dikirim dalam satu langkah. Admin akan memeriksa bukti pembayaran.',
+        data: await this.paymentSubmissionsService.createBatchSubmission(user, dto),
+      };
+    } catch (error) {
+      deleteFileSafe(securePath);
+      throw error;
+    }
   }
 
   @Post()
   @Roles(UserRole.TENANT)
   async create(@Body() dto: CreatePaymentSubmissionDto, @CurrentUser() user: CurrentUserPayload) {
+    this.assertNoJsonProofMetadata(dto);
     return {
       message: 'Bukti pembayaran berhasil dikirim dan menunggu review',
       data: await this.paymentSubmissionsService.createSubmission(user, dto),
@@ -296,6 +356,7 @@ export class PaymentSubmissionsController {
   @Post('batch')
   @Roles(UserRole.TENANT)
   async createBatch(@Body() dto: BatchPaymentSubmissionDto, @CurrentUser() user: CurrentUserPayload) {
+    this.assertNoJsonProofMetadata(dto);
     return {
       message: 'Bukti pembayaran batch berhasil dikirim dan menunggu review',
       data: await this.paymentSubmissionsService.createBatchSubmission(user, dto),

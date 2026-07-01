@@ -41,6 +41,7 @@ interface ResourceTableProps {
   currentPage?: number;
   onPageChange?: (page: number) => void;
   onRowOpen?: (item: Record<string, unknown>) => void;
+  paginationResetKey?: string | number;
 }
 
 export default function ResourceTable({
@@ -61,6 +62,7 @@ export default function ResourceTable({
   currentPage,
   onPageChange,
   onRowOpen,
+  paginationResetKey,
 }: ResourceTableProps) {
   const navigate = useNavigate();
 
@@ -342,7 +344,7 @@ export default function ResourceTable({
   const serverPagination = Boolean(meta && onPageChange);
   const clientPagination = useClientPagination(
     filteredItems,
-    [config.path, filteredItems.length, searchTerm, showActiveOnly],
+    [config.path, filteredItems.length, searchTerm, showActiveOnly, paginationResetKey],
     10,
   );
   const tableItems = serverPagination

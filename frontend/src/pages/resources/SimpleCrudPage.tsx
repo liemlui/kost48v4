@@ -81,11 +81,20 @@ export default function SimpleCrudPage({ config, hideAreaMenu = false }: { confi
     [config.fields, config.supportsIsActiveFilter],
   );
 
+  // X-11: resource yang punya chip filter → ambil dataset penuh (master-data kecil) supaya
+  // hitungan badge + filter + pagination benar untuk SELURUH data, bukan hanya subset 1 halaman.
+  // Non-filter tetap paginasi server (PAGE_SIZE). Batas 500 selaras dgn reference query lain.
+  const isFilterableResource = useMemo(
+    () => getResourceFilterDefinitions(config.path, []).length > 0,
+    [config.path],
+  );
+  const queryPage = isFilterableResource ? 1 : page;
+
   const query = useQuery({
-    queryKey: [config.path, 'list', page, searchTerm, showActiveOnly],
+    queryKey: [config.path, 'list', isFilterableResource ? 'all' : page, searchTerm, showActiveOnly, isFilterableResource],
     queryFn: () => listResource<Record<string, unknown>>(config.path, {
-      page,
-      limit: PAGE_SIZE,
+      page: queryPage,
+      limit: isFilterableResource ? 500 : PAGE_SIZE,
       ...(searchTerm.trim() ? { search: searchTerm.trim() } : {}),
       ...(supportsIsActiveFilter && showActiveOnly && !['/tenants', '/rooms', '/announcements', '/expenses'].includes(config.path) ? { isActive: 'true' } : {}),
     }),
@@ -282,7 +291,7 @@ export default function SimpleCrudPage({ config, hideAreaMenu = false }: { confi
     });
   }, [config.path, query.data?.items, tenantPortalUsers]);
 
-  const resourceFilters = useMemo(() => getResourceFilterDefinitions(config.path, items), [config.path, items]);
+  const resourceFilters = useMemo(() => getResourceFilterDefinitions(config.path, items, query.data?.meta?.totalItems), [config.path, items, query.data?.meta?.totalItems]);
   const hasResourceFilters = resourceFilters.length > 0;
 
   const summaryItems = useMemo(() => {
@@ -530,6 +539,7 @@ export default function SimpleCrudPage({ config, hideAreaMenu = false }: { confi
     return [];
   }, [config.path]);
   const meta = query.data?.meta;
+  const tableMeta = isFilterableResource ? undefined : meta;
   const isReferenceLoading = [tenantsRefQuery, roomsRefQuery, inventoryItemsRefQuery, invoicesRefQuery, staysRefQuery]
     .filter((item) => item.isFetching && item.fetchStatus !== 'idle')
     .length > 0;
@@ -625,9 +635,10 @@ export default function SimpleCrudPage({ config, hideAreaMenu = false }: { confi
             searchTerm={searchTerm}
             setSearchTerm={setSearchTerm}
             referenceMaps={referenceMaps}
-            meta={meta}
-            currentPage={page}
-            onPageChange={setPage}
+            meta={tableMeta}
+            currentPage={isFilterableResource ? undefined : page}
+            onPageChange={isFilterableResource ? undefined : setPage}
+            paginationResetKey={resourceFilter}
             onRowOpen={(item) => {
               if (config.path === '/rooms') {
                 navigate(`/rooms/${item.id}`);

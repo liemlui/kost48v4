@@ -149,7 +149,7 @@ test('TC-CO05: Ada permintaan perpanjangan PENDING → blokir checkout', async (
   });
   await assert.rejects(
     () => svc.createRequest({ stayId: 10, requestedCheckOutDate: tomorrow(), checkoutReason: 'Pindah' }, TENANT_A),
-    /ada permintaan perpanjangan yang menunggu persetujuan/,
+    /ada permintaan perpanjangan yang sedang aktif/,
   );
 });
 

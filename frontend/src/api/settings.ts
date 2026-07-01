@@ -13,6 +13,8 @@ export type OperationalSetting = {
   galonRupiah: number;
   petDepositRupiah: number;
   extraOccupantFeePercent: number;
+  // AC cleaning — ambang kWh pemicu dini cuci AC (owner-settable)
+  acCleanKwhThreshold: number;
   // Fitur tenant toggle
   tenantLoyaltyEnabled: boolean;
   // R3: AI/DeepSeek fields

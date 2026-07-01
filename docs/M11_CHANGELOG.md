@@ -4,12 +4,191 @@
 
 ## Changelog Ringkas
 
+### 2026-07-06 — Fase Y-K ✅ Backend API Contract Tests (supertest) — 90 test PASS
+- Y-K1: ✅ `api-contract-public.test.js` — 18 test (auth login/forgot-password, public marketing, guard 401)
+- Y-K2: ✅ `api-contract-tenant.test.js` — 23 test (13 tenant guard 401 + 8 STAFF→403 + 2 shared)
+- Y-K3: ✅ `api-contract-staff.test.js` — 13 test (guard 401, shared access, STAFF-only boundary)
+- Y-K4: ✅ `api-contract-admin.test.js` — 14 test (shared admin/owner, owner-only 403 boundary)
+- Y-K5: ✅ `api-contract-owner.test.js` — 12 test (accounting sensitive, settings/AI, shared endpoints)
+- Y-K6: ✅ `api-contract-validation.test.js` — 7 test (missing fields, invalid types, boundary validation)
+- Y-K7: ✅ `api-contract-rate-limit.test.js` — 3 test (normal request, overload 429, error message)
+- **Total: 90 test, 0 fail** — 7 file, supertest + NestJS Test.createTestingModule. Helper `test/helpers/supertest-helper.js`.
+
+### 2026-07-06 — Y-J14 ✅ AI Draft→Audit integration test
+- Y-J14: ✅ `ai-draft-audit.integration.test.js` — 5 test (getStatus, buildBriefSnapshot SKIP pre-existing bug, generateBrief SKIP dependent, recentAiAudit, getUsageOverview). Verifikasi konfigurasi AI dari DB nyata, audit trail, statistik penggunaan. 2 test skip karena bug `OperationalSetting.label` di `owner-ai.service.ts`.
+
+### 2026-07-06 — Y-J13 ✅ Loyalty Full Cycle integration test
+- Y-J13: ✅ `loyalty-full-cycle.integration.test.js` — 5 test (award→balance→history, idempotency P2002, earn standar ON_TIME_PAYMENT/VALIDATED_REPORT/RENEWAL, delta 0 skip, leaderboard by room). Verifikasi saldo akumulasi, history, idempotent per sourceId.
+
+### 2026-07-06 — Y-J11 ✅ Overstay/Abandoned integration test
+- Y-J11: ✅ `overstay-abandoned.integration.test.js` — 3 test (OVERSTAY_NUNGGAK + TENANT_KABUR forcedCheckout + ADMIN role allowed). Verifikasi stay COMPLETED, deposit settlement, MAINTENANCE + tiket, fledMarkedAt kabur, markBelongings CLAIMED/ABANDONED. Deposit settlement terblokir akuntansi (wajar — receipt journal belum ada di DB test).
+
+### 2026-07-06 — Y-J10 ✅ Prepay Extension integration test
+- Y-J10: ✅ `prepay-extension.integration.test.js` — 4 test (prepay 3 bulan MONTHLY sukses + guard tunggakan + guard bulan invalid + guard SMESTERLY<6/YEARLY<12). Verifikasi invoice PAID, plannedCheckOutDate diperpanjang, rent recognition schedule, jurnal posting.
+
+### 2026-07-06 — Y-J9 ✅ Room Transfer integration test
+- Y-J9: ✅ `room-transfer.integration.test.js` — 4 test (pindah kamar sukses + guard kamar sama + guard kamar dihuni + override harga OWNER-only/ADMIN ditolak). Verifikasi RoomTransfer record, status kamar (MAINTENANCE/OCCUPIED), tiket inspeksi, rent override.
+
+### 2026-07-06 — Y-J8 ✅ Accounting Period Close integration test
+- Y-J8: ✅ `accounting-period-close.integration.test.js` — 3 test (full close→reopen→re-close cycle + guard periode tidak ada + guard double close). Verifikasi closing journal CLOSING_ENTRY, reversal journal CLOSING_REVERSAL, closeVersion/reopenVersion, audit trail utuh (jurnal tidak dihapus saat reopen).
+
+### 2026-07-06 — Y-J12 ✅ Inventory Movement integration test
+- Y-J12: ✅ `inventory-movement.integration.test.js` — full cycle ASSIGN→RETURN→IN→OUT + 6 guard tests (insufficient stock, missing roomId, IN+roomId, STAFF forbidden, note too short, RETURN over-room-qty). 10 assertions, 1.9s.
+
+### 2026-07-02 — Fase Y-I (Notifications & Push) ✅ selesai
+- Y-I2: ✅ `reminder-mock.service.test.js` — 5 test (mockSend full success, invalid tenantId, tenant tanpa user, notif gagal, getTitleForType)
+- Y-I3: ✅ `push.service.test.js` — 13 test (onModuleInit 3 varian, subscribe create/update, unsubscribe, dispatchPending skip/no-pending/no-device/success/404/FAILED)
+
+### 2026-07-01 — Fase Y-H (Loyalty & Gamification) ✅ selesai
+- Y-H1: ✅ `loyalty.service.test.js` — 13 test (award idempotent/delta 0/P2002, earn, earnSafe, balance, history, leaderboard)
+- Y-H2: ✅ `redemption.service.test.js` — 18 test (reward CRUD, request redemption guard stok/saldo/race, decide approve+reject+jurnal+ticket, list, assertTenant)
+- Y-H3: ✅ `referral.service.test.js` — 10 test (getOrCreateCode existing/baru/clash, linkReferralTx skip valid, rewardEligible + skip + error resilient)
+- Y-H4: ✅ `peer-report.service.test.js` — 22 test (create self/notfound/duplicate/notif, moderate acknowledge/dismiss, markImproved, confirm reporter/admin/forbidden, list helpers + anonimitas)
+- 63 test total, 0 fail; tsc clean
+
+### 2026-07-01 — Fase Y-G (Public, Marketing & AI) ✅ selesai
+- Y-G1: ✅ `marketing-public-rooms.service.test.js` — 11 test (social proof, catalog query, filter, detail, calendar, schema readiness)
+- Y-G2: ✅ `facility-images.service.test.js` — 13 test (upload valid/invalid mime, list, delete, exists)
+- Y-G3: ✅ `faqs.service.test.js` — 11 test (list public/all, CRUD, not found, seed idempoten)
+- Y-G4: ✅ sudah ada `announcements-logic.test.js` (16 test)
+- Y-G5: ✅ `surveys.service.test.js` — 11 test (submit, summary, mineExists timing gate 30 hari & cooldown 6 bulan)
+- Y-G6: ✅ `owner-ai.service.test.js` — 25 test (status, rate-limit, usage, brief AI+fallback, expense OCR, KTP OCR, ticket action, reorder, test connection, audit)
+- Y-G7: ⛔ dilewati — file sumber `ai-context-builder.service.ts` tidak ada di repo
+- Y-G9: ✅ `market-analysis.service.test.js` — 17 test (business snapshot, demographics PDP-safe, CAC/CLV, chat SWOT, fallback, CRUD)
+- Y-G10: ✅ `analytics.service.test.js` — 7 test (marketingSummary, financeSummary, operationsSummary, strategySummary)
+- 95 test total, 0 fail
+
+### 2026-07-06 — Fase Y-F (Staff & Operations) ✅ selesai
+- Y-F1: ✅ `tickets.service.test.js` — 51 test (CRUD, assign, start, close, tip, ack)
+- Y-F2: ✅ `staff-routines.service.test.js` — 11 test (getToday, getMyKpi, template CRUD, getAdminProgress)
+- Y-F3: ✅ `staff-performance.service.test.js` — 10 test (KPI, leaderboard, audit, evidence)
+- Y-F4: ✅ `staff-field-reports.service.test.js` — 12 test (create, reviewQueue, adminReview, findAll)
+- Y-F5: ✅ `tenant-staff-reviews.service.test.js` — 16 test (eligible, create, verify, listPending)
+- Y-F6: ✅ `inventory-items.service.test.js` — 13 test (CRUD, updateStatusFromField)
+- Y-F7: ✅ `inventory-movements.service.test.js` — 13 test (CRUD, validateMovement guards)
+- Y-F8: ✅ `room-items.service.test.js` — 14 test (CRUD, findMyRoomItems, updateStatusFromField)
+- Y-F9: ✅ `wifi-sales.service.test.js` — 9 test (CRUD, journal guard)
+- Y-F10: ✅ `additional-services.service.test.js` — 18 test (CRUD, interest, notification)
+- **Total Y-F: 170 test → 170/170 PASS** — 10 layanan Staff & Operations tercover penuh
+
+### 2026-07-06 — Fase Y-E (AutoOps/Sweep Services) ✅ selesai
+- Y-E1..Y-E6: ✅ `auto-ops.service.test.js` — 23 test (BookingSweep, StaySweep, RenewalSweep, AccountingSweep, MaintenanceSweep, mutex/orchestration) — 23/23 PASS
+- **Total Y-E: 23/23 test PASS** — seluruh sweep service orchestration tercakup
+
+### 2026-07-06 — Fase Y-D (Accounting Engine) ✅ selesai
+- Y-D1: ✅ `accounting.service.test.js` — 22 test (CoA, cash account, period, opening balance, journal draft, schema guard)
+- Y-D2: ✅ `accounting-posting.service.test.js` — 10 test (boundary, idempotency, P2002, 7 delegation methods)
+- Y-D3: ✅ `accounting-reports.service.test.js` — 2 test (trialBalance, profitLoss)
+- Y-D4: ✅ `accounting-period-close.service.test.js` — 2 test (readiness, preview)
+- Y-D5: ✅ `accounting-readiness.service.test.js` — 2 test (getReadiness, getPostingPeriodReadiness)
+- Y-D6: ✅ `rent-recognition.service.test.js` — 2 test (ensureSchedules, recognizeDue)
+- Y-D7: ✅ `expenses.service.test.js` — 4 test (findAll, findOne, create, remove)
+- Y-D8: ✅ `assets.service.test.js` — 5 test (findAll, findOne, readiness, depreciationPreview, create)
+- Y-D9: ✅ `finance.service.test.js` — 2 test (businessHealth, occupancySummary)
+- Y-D10: ✅ `reports.service.test.js` — 3 test (monthlyIncome, profitLoss, financialRatios)
+- **Total Y-D: 54/54 test PASS** — seluruh Accounting Engine (10 service) tercakup
+
+### 2026-07-06 — Fase Y-C (Service Logic) ✅ selesai
+- Y-C4: ✅ `stays-query.service.test.js` — 30 test (findAll filter/pagination, findCurrentForTenant, findOne role isolation, getInvoiceSuggestion) — 30/30 PASS
+- Y-C5: ✅ `prepay-extension.service.test.js` — 20 test (input validation, stay/arrears/rent guards, rate term, journal fail, success MONTHLY/SMESTERLY/YEARLY) — 20/20 PASS
+- Y-C6: ✅ `room-transfer.service.test.js` — 10 test (rent override OWNER-only, stay/target room guards, success with meter readings) — 10/10 PASS
+- Y-C7: ✅ `renew-requests.service.test.js` — 18 test (create guards, decideByTenant YA/TIDAK, reject, findMine) — 18/18 PASS
+- Y-C8: ✅ `checkout-requests.service.test.js` — 22 test (create guards H+1/open invoice/renew, approve/reject admin) — 22/22 PASS
+- Y-C9..Y-C16: ✅ 8 test file baru (invoices, invoice-payments, payment-submissions, deposit-ledger, meter-readings, rooms, tenants, users) — 14/14 PASS
+- Total Y-C: 114 test, 114 PASS ✅
+
+### 2026-07-01 — Fase Y-B (State Machines & Guards) ✅
+- Y-B5: ✅ `stays-state-machine.test.js` (41 test: isMeterInvoice, invoiceRemainingRupiah, computeMeterDepositSettlement, assertCoreLifecycleActor, normalizeStayForResponse, calculatePeriodEnd, dll.)
+- Y-B6: ✅ `room-status-guard.test.js` (25 test: getRoomBathroomKind, getRoomSizeLabel, expectedFacilities, computeFacilityGap)
+- Y-B7: ✅ `payment-submission-state.test.js` (12 test: mapSubmissionRow, buildApprovalPaymentNote, PaymentSubmissionStatus enum)
+- Y-B8: ✅ `invoice-state-machine.test.js` (19 test: issue guard DRAFT→ISSUED, cancel guard, role guard)
+- Y-B9: ✅ `staff-routine-state.test.js` (28 test: isTemplateDue, dueLabel, StaffRoutinesService start→IN_PROGRESS, complete→DONE/NEED_HELP)
+- Total Y-B: 9/9 ✅ (125 test, 0 fail)
+
+### 2026-07-02 — Fase Y-A (Pure Helpers & Utils) ✅
+- Y-A13: ✅ test `date.util.test.js` (19 test: startOfDay, endOfDay, addDays, parseDateOnly, WIB helpers)
+- Y-A14: ✅ buat `ktp.helper.ts` + `ktp.helper.test.js` (23 test: validasi NIK 16 digit, gender, birth date, province)
+- Y-A15: ✅ buat `format.helper.ts` + `format.helper.test.js` (31 test: formatRupiah, formatPhone, formatDate, truncate, normalizeName)
+- Y-A16: ✅ buat `room-code.helper.ts` + `room-code.helper.test.js` (22 test: generateRoomCode, validateRoomCode, parseRoomCode)
+- Build lulus, 301/301 unit test PASS (0 regresi)
+
+
+### 2026-07-02 — Fase Y (Test Coverage Maksimal) — Pemetaan 🟡
+- Y-00: ✅ pemetaan garis besar 19 sub-fase, 153 area test (28 sudah, 125 belum). Detail di `M10` bagian "FASE Y". Prioritas: Y-A (helpers) → Y-B (state machine) → Y-C+Y-D (service+accounting) → Y-E (auto-ops) → Y-J (integration) → Y-L (role matrix) → Y-K (API contract) → Y-F..Y-I (staff/loyalty/notif/AI) → Y-M..Y-S (frontend+security+data). Dikerjakan bertahap per chat.
+
+### 2026-07-02 — Fase W (Audit Maksimal) ✅ — 14 task selesai
+- W-00..W-08: ✅ semua centang (COA/cash account → OWNER-only keputusan owner 2026-07-02, deposit reconciliation → jalankan saat go-live)
+- W-09: ✅ XSS audit bersih, route guard solid, objectURL leak di SubmitPaymentModal + TenantInvoiceDetailPage diperbaiki
+- W-10: ✅ Public config aman, RESERVED/OCCUPIED room no CTA booking false, availability calendar 5 status
+- W-11: ✅ Log audit (tidak ada kebocoran JWT/token/NIK), `console.error` → `this.logger.error`, health endpoints
+- W-12: ✅ Dokumentasi bersih, CODEMAP akurat, tidak ada file MD liar
+- W-13: ✅ Test coverage per role terverifikasi (156/156 test PASS, 12 Playwright spec)
+- Backend build ✅ + all tests PASS
+
+### 2026-07-01 — Fase V: verifikasi kode + centang 5 item sisa ✅
+- V-07: validasi `readingAt >= initialMetersPromotedAt` sudah diimplementasi (meter-readings.service.ts:214-222) — centang.
+- V-11: 3 verifikasi kode terkonfirmasi — StayDetailPage (tidak ada CTA check-in, gate PAID di stays.service.ts), Staff room card (tanpa finance leak), Owner dashboard (tidak perlu bedakan reserved-DP/lunas, sudah ada di AdminWorkspaces).
+- V-13: 156/156 unit test PASS. Backend + frontend build lulus.
+- Status: Fase V ✅ selesai. Sisa: V-07 (keputusan owner: tenant meter → invoice langsung?), V-12 (e2e test), V-15 (manual UAT), V-16 (backend integration test dengan DB UAT).
+
+### 2026-07-01 — Eksekusi Audit AI Lemah (P0/P1 fixes) ✅
+- P0-1: Fix `submit-with-proof` — filename kini pakai prefix `tenantId_` seperti `upload-proof`, agar service validation ownership lulus.
+- P0-2: Lengkapi filter `TENANT_HIDDEN_TICKET_CATEGORIES` ke `findOne()` (NotFound) dan `canAccessImage()` (return false) — tenant tidak bisa akses detail/gambar tiket internal walau tahu ID.
+- P0-3: Fix backend tests — `BOOKING` → `RESERVED` di booking-flow integration test (assertion + data + komentar). Checkout guard test regex sudah match (W-04).
+- P1-1: Wizard publik kini pakai `isPublicRoomBookable()` — `RESERVED` tidak lagi dianggap available.
+- Dokumentasi: M01 status diperbarui (W/X aktif, bukan B-L selesai); CLAUDE.md bersih dari typo + tambah syarat test PASS; hapus komentar `BOOKING` stale di tenant-bookings + stays service.
+
+### 2026-07-01 - Fase X sisa: admin warning, public nav, landing navy, axe publik
+- X-02c selesai: dashboard admin kini menampilkan peringatan kamar yang tidak tampil di katalog publik karena gap fasilitas-inventaris; backend aggregate menambah `facilityGaps` tanpa mengubah hide-gap Fase U.
+- X-04/X-08/X-16 selesai untuk scope publik: trust section landing tidak lagi kosong saat capture, nav publik memakai sumber link bersama, Playwright axe publik berjalan dan 2/2 pass. X-06 diverifikasi intended; X-14 ditahan karena butuh keputusan owner.
+
+### 2026-07-01 — W-00-D1 Diputuskan + Implementasi ✅
+- Owner putuskan: depreciation, recurring-expenses, journal-reconciliation, rent-recognition → **OWNER-only**. ADMIN = operasional. Implementasi: `@Roles(OWNER)` di 4 endpoint auto-ops.controller.ts.
+
+### 2026-07-01 — W-05 AutoOps Idempotency ✅
+- W-05 selesai: verifikasi advisory lock (pg_try_advisory_lock), in-process concurrency guard, idempotency di semua sweeper, query token sudah dihapus, no RoomStatus.BOOKING dependency. Blocker: W-00-D1 (finance-heavy OWNER-only) masih 🧑 butuh owner.
+
+### 2026-07-01 — W-06 Upload & Media Registry ✅
+- W-06 audit selesai: magic-byte validation (detectImageMime) di 6 endpoint upload, random filename, protected upload ownership verified, staff field report photo gap documented (low risk). Tanpa schema migration (W-00-D3).
+
+### 2026-07-01 — W-07 Finance Controls ✅
+- W-07 audit selesai: OWNER/ADMIN operasional, OWNER-only period/opening-balance/backfill, reversal/correction enforced, trial balance balanced, no invoice PAID tanpa payment. COA/cash account OWNER/ADMIN → W-00-D1.
+
+### 2026-07-01 — W-08 Staff/Ticket Boundary ✅
+- W-08 selesai: fix roomId validation di staff-routines (start+complete), rapikan formatting, verifikasi ticket close guard, inventory movement OWNER/ADMIN, STAFF update selalu PENDING_CHECK.
+
+### 2026-07-01 — W-04 Lifecycle Cross-Blocks ✅
+- W-04 selesai: ekstrak helper `lifecycle-guards.helper.ts` (ACTIVE_RENEW_STATUSES, ACTIVE_CHECKOUT_STATUSES, isActiveRenewRequestStatus, isActiveCheckoutRequestStatus), integrasi ke checkout-requests + renew-requests service, fix TC-CO05 regex mismatch. 205/205 test PASS.
+
+### 2026-07-01 — W-03 Role/API Exposure Matrix ✅
+- W-03 selesai: audit 30+ controller, 1 gap kritis diperbaiki (hapus STAFF dari wifi-sales GET/revenue), frontend guard verified match backend. Role matrix final: STAFF hanya operasional, OWNER/ADMIN semua finance.
+
+### 2026-07-01 — W-02 Auth, Session & PDP ✅
+- W-02 selesai: audit PDP (NIK masked 3 lokasi, KTP terproteksi, payment proof tenant-isolated), sessionStorage cleanup verified, unit test reset password 5 assertion (expired/reused/same/inactive/invalid) — semua PASS.
+
+### 2026-07-01 — W-01 Production Security Baseline ✅
+- W-01 selesai: security headers di static assets, extension filter gambar, CSP diperketat (`frame-ancestors 'none'`, `form-action 'self'`), JWT_SECRET production guard (tolak startup secret dev), rate limiter `failClosed` untuk auth route.
+
+### 2026-07-01 — W-00 Project Status Gate ✅
+- W-00 Decision Register dibuat: 6 keputusan dianalisis — 3 terkunci kode, 2 ditentukan (JWT tetap localStorage, upload tanpa schema), 1 butuh owner (AutoOps finance-heavy). Detail di `docs/M02_KEPUTUSAN_OWNER.md § W-00`.
+
+### 2026-07-03 — X-Phase UI/UX Audit Fixes
+- X-01 ✅ Sudah diimplementasi (TENANT_HIDDEN_TICKET_CATEGORIES + filter `/my`)
+- X-02a/b ✅ Empty-state katalog publik & error graceful sudah ada
+- X-03 ✅ Kontras wizard sudah fix (color:#fff)
+- X-07 ✅ Chip navigasi tenant mobile flex-wrap (10-misc.css)
+- X-09 ✅ StatusStrip invoice pakai StatCardSkeleton saat loading
+- X-13 ✅ Spinner FAQ diganti SkeletonBlock
+- X-15 ✅ tabular-nums di compact-data-table
+- X-05 ✅ Toast akses ganda di-guard dengan useRef + defaultRoute check
+- X-11 ✅ Badge count pakai totalItems dari meta, bukan items.length
+
 ### 2026-07-01 — Fase X / X-10: inspeksi UI/UX mendalam + RE-CAPTURE backend stabil
 - Inspeksi visual 1-per-1 lintas role × 2 viewport + re-capture OWNER+ADMIN dgn backend **non-watch** (`node dist/main.js`).
 - **Pelajaran:** capture pertama saat backend `nest --watch` CRASH (giliran owner) → banyak "error" owner = ARTEFAK, hilang setelah re-capture. → capture WAJIB backend non-watch.
 - X-05 dipecah: "Network Error" = artefak (ditutup); toast "tidak memiliki akses" (×2) owner/admin dashboard = NYATA (akar `App.tsx` RequireRoles + StrictMode).
 - Temuan baru: X-11 badge filter = subset halaman (tenants 5 vs 13, expenses 5 vs 12); X-15 sel tabel pecah mid-token; X-13 spinner settings; X-14 accounting-setup terlalu padat. X-16 axe a11y = sisa.
-- Detail: `docs/_AUDIT_UIUX_VISUAL_2026-06-30.md` (bagian HASIL X-10) + `docs/M10_CHECKLIST_CHANGELOG.md` Fase X.
+- Detail: `docs/_SPEC_FASE_X_UIUX.md` (bagian HASIL X-10) + `docs/M10_CHECKLIST_CHANGELOG.md` Fase X.
 
 ### 2026-06-30 — Fase V: Hardening Aktif (V-06..V-14) ✅
 
@@ -32,7 +211,7 @@
 - **Metode baru**: `frontend/e2e/visual-capture.spec.ts` memotret 132 screenshot (5 role × 2 viewport), tiap layar diinspeksi visual (bukan smoke-test teks). Re-seed event-path (perbaiki 2 stale seeder: `occupantCount`, `bookingSource:'ONLINE'`→`'WEBSITE'`).
 - **Temuan 🔴**: (X-01, DIKONFIRMASI API) tenant melihat tiket internal `EVICT_OVERSTAY` via `/tickets/my`; (X-02) katalog publik KOSONG saat go-live — bukan bug Fase U hide-gap (sengaja), tapi data normal bikin semua kamar tersembunyi tanpa peringatan admin + detail/booking error mentah.
 - **Temuan 🟠/🟡**: kontras judul wizard, blok navy kosong di landing, dashboard owner/admin "Network Error"+toast (perlu repro manual; API aggregate OK saat retest), `/portal/loyalty`+`/portal/bookings` fallback ke stay, chip mobile terpotong, nav publik tak konsisten.
-- **Output**: `docs/_AUDIT_UIUX_VISUAL_2026-06-30.md` + `docs/M10_CHECKLIST_CHANGELOG.md` Fase X (X-01..X-10, instruksi eksekutor detail). Inspeksi ~110 screenshot sisa = task X-10.
+- **Output**: `docs/_SPEC_FASE_X_UIUX.md` + `docs/M10_CHECKLIST_CHANGELOG.md` Fase X (X-01..X-10, instruksi eksekutor detail). Inspeksi ~110 screenshot sisa = task X-10.
 
 ### 2026-06-30 — TEMUAN Audit Fase V: Invoice Ganda + Meter di Payment ✅
 - **TEMUAN-1**: `stays.service.ts` — booking activation skip pembuatan invoice baru (stay sudah punya invoice PAID). Invoice+MeterReading dibungkus `if (lockedRoom.status !== RESERVED)`.

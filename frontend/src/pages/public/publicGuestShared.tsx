@@ -40,6 +40,11 @@ export const NAV_LINKS = [
   { href: '#faq', icon: '❓', label: 'FAQ' },
 ];
 
+export const PUBLIC_EXTRA_LINKS = [
+  { to: '/panduan', icon: '📖', label: 'Panduan' },
+  { to: '/reviews', icon: '⭐', label: 'Ulasan Lengkap' },
+];
+
 export const GALLERY_ITEMS = [
   { id: 'profile', src: '/room-images/kost48-profile.webp', label: 'Profil KOST48' },
   { id: 'spanduk', src: '/room-images/spanduk-kost48-surabaya.webp', label: 'Spanduk KOST48' },
@@ -258,9 +263,11 @@ export function GuestTopbar({ scrolled }: { scrolled: boolean }) {
             <span aria-hidden="true" className="gx-nav-ico">{l.icon}</span> {l.label}
           </a>
         ))}
-        <Link to="/panduan" className="gx-nav-link">
-          <span aria-hidden="true" className="gx-nav-ico">📖</span> Panduan
-        </Link>
+        {PUBLIC_EXTRA_LINKS.map((l) => (
+          <Link key={l.to} to={l.to} className="gx-nav-link">
+            <span aria-hidden="true" className="gx-nav-ico">{l.icon}</span> {l.label}
+          </Link>
+        ))}
       </nav>
       <div className="gx-nav-cta">
         <Link to="/login" className="gx-btn-ghost"><span aria-hidden="true">🔑</span> Masuk Portal</Link>
@@ -395,12 +402,12 @@ export function MobileShortcutNav({ visible }: { visible: boolean }) {
       className="gx-section-shortcuts"
       aria-label="Pintasan navigasi halaman"
     >
-      <a href="#kamar" className="gx-shortcut-link">Kamar</a>
-      <a href="#fasilitas" className="gx-shortcut-link">Fasilitas</a>
-      <a href="#lokasi" className="gx-shortcut-link">Lokasi</a>
-      <a href="#ulasan" className="gx-shortcut-link">Ulasan</a>
-      <a href="#faq" className="gx-shortcut-link">FAQ</a>
-      <Link to="/panduan" className="gx-shortcut-link">Panduan</Link>
+      {NAV_LINKS.map((l) => (
+        <a key={l.href} href={l.href} className="gx-shortcut-link">{l.label}</a>
+      ))}
+      {PUBLIC_EXTRA_LINKS.map((l) => (
+        <Link key={l.to} to={l.to} className="gx-shortcut-link">{l.label}</Link>
+      ))}
     </nav>
   );
 }
@@ -420,8 +427,7 @@ export function GuestFooter() {
           <nav className="gx-footer-nav" aria-label="Navigasi footer">
             {NAV_LINKS.map((l) => <a key={l.href} href={l.href}>{l.label}</a>)}
             <a href="#kamar">Katalog Kamar</a>
-            <Link to="/panduan">Panduan</Link>
-            <Link to="/reviews">Ulasan</Link>
+            {PUBLIC_EXTRA_LINKS.map((l) => <Link key={l.to} to={l.to}>{l.label}</Link>)}
             <Link to="/login">Masuk Portal</Link>
           </nav>
           <div className="gx-footer-links">

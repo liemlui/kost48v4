@@ -123,9 +123,9 @@ export const propertyConfigs = {
       },
       {
         name: 'acCleanIntervalDays',
-        label: 'Interval Cuci AC (hari)',
+        label: 'Interval Cuci AC (hari — 30 ≈ 1 bln, 60 ≈ 2 bln, 90 ≈ 3 bln)',
         type: 'number' as const,
-        placeholder: 'Default 90 hari',
+        placeholder: 'Default 90 hari (≈ 3 bulan)',
       },
       {
         name: 'acUsageHoursPerDay',

@@ -59,8 +59,9 @@ export class AutoOpsController {
     return { message: 'AutoOps room healer berhasil dijalankan', data: await this.autoOpsService.runRoomHealer({ actorUserId: user.id, source: 'MANUAL_ROOM_HEALER_RUN' }) };
   }
 
+  // W-00-D1 (2026-07-01): OWNER-only — ADMIN = operasional, OWNER = investor.
   @Post('run/recurring-expenses')
-  @Roles(UserRole.OWNER, UserRole.ADMIN)
+  @Roles(UserRole.OWNER)
   async runRecurringExpenses(@CurrentUser() user: CurrentUserPayload) {
     return {
       message: 'AutoOps draft expense rutin berhasil dijalankan',
@@ -71,8 +72,9 @@ export class AutoOpsController {
     };
   }
 
+  // W-00-D1 (2026-07-01): OWNER-only.
   @Post('run/depreciation')
-  @Roles(UserRole.OWNER, UserRole.ADMIN)
+  @Roles(UserRole.OWNER)
   async runDepreciation(@CurrentUser() user: CurrentUserPayload) {
     return {
       message: 'AutoOps depresiasi berhasil dijalankan',
@@ -118,8 +120,9 @@ export class AutoOpsController {
   }
 
   // F5-6 (L-1): trigger manual rekonsiliasi jurnal warisan (backfill + alert owner).
+  // W-00-D1 (2026-07-01): OWNER-only — operasi keuangan.
   @Post('run/journal-reconciliation')
-  @Roles(UserRole.OWNER, UserRole.ADMIN)
+  @Roles(UserRole.OWNER)
   async runJournalReconciliation(@CurrentUser() user: CurrentUserPayload) {
     return { message: 'AutoOps rekonsiliasi jurnal berhasil dijalankan', data: await this.autoOpsService.runAutoJournalReconciliation({ actorUserId: user.id, source: 'MANUAL_JOURNAL_RECONCILIATION_RUN' }) };
   }
@@ -139,8 +142,9 @@ export class AutoOpsController {
   }
 
   // F4-1: trigger manual pengakuan pendapatan sewa (unearned) (UAT/ops).
+  // W-00-D1 (2026-07-01): OWNER-only — operasi keuangan (revenue recognition).
   @Post('run/rent-recognition')
-  @Roles(UserRole.OWNER, UserRole.ADMIN)
+  @Roles(UserRole.OWNER)
   async runRentRecognition(@CurrentUser() user: CurrentUserPayload) {
     return { message: 'AutoOps pengakuan pendapatan sewa berhasil dijalankan', data: await this.autoOpsService.runRentRecognition({ actorUserId: user.id, source: 'MANUAL_RENT_RECOGNITION_RUN' }) };
   }

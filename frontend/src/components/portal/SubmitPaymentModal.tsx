@@ -75,6 +75,13 @@ export default function SubmitPaymentModal({
     submittingRef.current = submitting || uploading;
   }, [submitting, uploading]);
 
+  // Cleanup objectURL saat komponen unmount atau previewUrl berubah
+  useEffect(() => {
+    return () => {
+      if (previewUrl) URL.revokeObjectURL(previewUrl);
+    };
+  }, [previewUrl]);
+
   useEffect(() => {
     if (!show || !booking) return;
     setPaymentOption(canChooseDownPayment ? 'DP' : 'FULL');
@@ -86,7 +93,7 @@ export default function SubmitPaymentModal({
     setNotes('');
     setSelectedFile(null);
     setSelectedFileName('');
-    setPreviewUrl(null);
+    setPreviewUrl((old) => { if (old) URL.revokeObjectURL(old); return null; });
     setShowZoom(false);
     setValidationError(null);
   }, [show, booking?.id]);
@@ -127,6 +134,7 @@ export default function SubmitPaymentModal({
       const prepared = await prepareTenantPaymentProof(file);
       setSelectedFile(prepared);
       setSelectedFileName(tenantPaymentProofReadyLabel(prepared));
+      if (previewUrl) URL.revokeObjectURL(previewUrl);
       setPreviewUrl(URL.createObjectURL(prepared));
       setValidationError(null);
     } catch (error) {

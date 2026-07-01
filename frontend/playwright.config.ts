@@ -5,5 +5,9 @@ export default defineConfig({
   testDir: './e2e',
   timeout: 30000,
   use: { baseURL: BASE, headless: true },
-  webServer: { command: 'npm run dev', url: BASE, reuseExistingServer: true },
+  webServer: {
+    command: `npm run dev -- --port ${PORT} --strictPort`,
+    url: BASE,
+    reuseExistingServer: true,
+  },
 });

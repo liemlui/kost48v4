@@ -672,10 +672,6 @@ export type BatchPaymentSubmissionPayload = {
   senderBankName?: string;
   referenceNumber?: string;
   notes?: string;
-  fileKey?: string;
-  originalFilename?: string;
-  mimeType?: string;
-  fileSizeBytes?: number;
 };
 
 export type ReviewQueueQuery = {

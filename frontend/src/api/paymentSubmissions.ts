@@ -57,19 +57,26 @@ export async function submitPaymentWithProof(payload: CreatePaymentSubmissionPay
   return data.data as PaymentSubmission;
 }
 
-/** M-4: Bayar sekaligus beberapa invoice (sewa + meter OPEN) milik stay yang sama. */
-/** M-4: Bayar sekaligus beberapa invoice (sewa + meter OPEN) milik stay yang sama. */
+/** M-4: Legacy JSON batch endpoint; proof metadata is not accepted. */
 export async function createBatchPaymentSubmission(payload: BatchPaymentSubmissionPayload) {
-  // Hanya kirim fileKey — fileUrl akan di-generate server-side
   const { data } = await apiClient.post('/payment-submissions/batch', payload);
   return data.data as PaymentSubmission[];
 }
 
-export async function uploadPaymentProof(file: File) {
+export async function submitBatchPaymentWithProof(payload: BatchPaymentSubmissionPayload, file: File) {
   const formData = new FormData();
   formData.append('file', file);
-  const { data } = await apiClient.post('/payment-submissions/upload-proof', formData, {
+  formData.append('stayId', String(payload.stayId));
+  formData.append('invoiceIds', JSON.stringify(payload.invoiceIds));
+  formData.append('paidAt', payload.paidAt);
+  formData.append('paymentMethod', payload.paymentMethod);
+  if (payload.senderName) formData.append('senderName', payload.senderName);
+  if (payload.senderBankName) formData.append('senderBankName', payload.senderBankName);
+  if (payload.referenceNumber) formData.append('referenceNumber', payload.referenceNumber);
+  if (payload.notes) formData.append('notes', payload.notes);
+
+  const { data } = await apiClient.post('/payment-submissions/submit-batch-with-proof', formData, {
     headers: { 'Content-Type': 'multipart/form-data' },
   });
-  return data.data as { fileKey: string; fileUrl: string; originalFilename: string; mimeType: string; fileSizeBytes: number };
+  return data.data as PaymentSubmission[];
 }

@@ -19,7 +19,7 @@
  *   - Tenant bayar pelunasan
  *   - Admin approve pelunasan
  *   - Verifikasi status kamar tiap langkah
- *   - Check-in manual (POST /api/stays) — Flow B only
+ *   - Check-in manual lewat StaysService.create() — Flow A dan Flow B
  */
 
 const test = require('node:test');
@@ -28,6 +28,7 @@ const { Test } = require('@nestjs/testing');
 const { AppModule } = require('../../dist/app.module.js');
 const { PrismaService } = require('../../dist/prisma/prisma.service.js');
 const { StaysService } = require('../../dist/modules/stays/stays.service.js');
+const { PaymentSubmissionsService } = require('../../dist/modules/payment-submissions/payment-submissions.service.js');
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -97,12 +98,13 @@ async function cleanupTestData(prisma, stayIds, roomId) {
   }
 }
 
-// ── Flow A: Public Booking → DP 30% → Pelunasan → Booking → Check-in ────────
+// ── Flow A: Public Booking → DP 30% → Pelunasan → RESERVED → Check-in ────────
 
-test('FLOW-A: Public Booking DP 30% → Admin Approve → DP Bayar → Pelunasan → BOOKING → Check-in', async (t) => {
+test('FLOW-A: Public Booking DP 30% → Admin Approve → DP Bayar → Pelunasan → RESERVED → Check-in', async (t) => {
   const { module, app } = await bootstrap();
   const prisma = module.get(PrismaService);
   const staysService = module.get(StaysService);
+  const paymentSubmissionsService = module.get(PaymentSubmissionsService);
   const adminActor = await getAdminActor(prisma);
   t.after(async () => { await app.close(); });
 
@@ -159,10 +161,10 @@ test('FLOW-A: Public Booking DP 30% → Admin Approve → DP Bayar → Pelunasan
 
       // Insert stay (booking)
       const [inserted] = await tx.$queryRawUnsafe(
-        `INSERT INTO "Stay" ("tenantId", "roomId", status, "pricingTerm", "agreedRentAmountRupiah", "occupantCount", "hasPet", "checkInDate", "plannedCheckOutDate", "expiresAt", "depositAmountRupiah", "downPaymentAmountRupiah", "electricityTariffPerKwhRupiah", "waterTariffPerM3Rupiah", "bookingSource", "createdById", "createdAt", "updatedAt")
-         VALUES ($1, $2, 'ACTIVE', 'MONTHLY', $3, 1, false, $4, $5, NOW() + INTERVAL '3 hours', $6, $7, 2500, 5000, 'WEBSITE', $8, NOW(), NOW())
+        `INSERT INTO "Stay" ("tenantId", "roomId", status, "pricingTerm", "agreedRentAmountRupiah", "occupantCount", "hasPet", "checkInDate", "plannedCheckOutDate", "expiresAt", "depositAmountRupiah", "downPaymentAmountRupiah", "electricityTariffPerKwhRupiah", "waterTariffPerM3Rupiah", "bookingSource", "createdById", "initialElectricityKwhPending", "initialWaterM3Pending", "initialMetersRecordedAt", "initialMetersRecordedById", "createdAt", "updatedAt")
+         VALUES ($1, $2, 'ACTIVE', 'MONTHLY', $3, 1, false, $4, $5, NOW() + INTERVAL '3 hours', $6, $7, 2500, 5000, 'WEBSITE', $8, $9, $10, NOW(), $8, NOW(), NOW())
          RETURNING id`,
-        tenantId, room.id, agreedRent, checkIn, periodEnd, deposit, dpAmount, portalUser.id
+        tenantId, room.id, agreedRent, checkIn, periodEnd, deposit, dpAmount, portalUser.id, 10.5, 2.25
       );
       stayId = Number(inserted.id);
 
@@ -249,22 +251,18 @@ test('FLOW-A: Public Booking DP 30% → Admin Approve → DP Bayar → Pelunasan
     const dpAmount = Math.round((1_500_000 * 30) / 100);
     const paidAt = ymd(new Date());
 
-    const dpSubmission = await prisma.paymentSubmission.create({
-      data: {
-        stay: { connect: { id: stayId } },
-        tenant: { connect: { id: tenantId } },
-        submittedBy: { connect: { id: tenantUserId } },
-        invoice: { connect: { id: invoiceId } },
-        targetType: 'INVOICE',
-        amountRupiah: dpAmount,
-        paidAt: new Date(paidAt),
-        paymentMethod: 'TRANSFER',
-        referenceNumber: `REF-DP-${stayId}`,
-        senderName: `Calon Tenant FLOW-A`,
-        senderBankName: 'BCA',
-        notes: 'Pembayaran DP 30% booking',
-        status: 'PENDING_REVIEW',
-      },
+    const tenantActor = { id: tenantUserId, role: 'TENANT', email: bookingResult.tenantEmail, tenantId };
+    const dpSubmission = await paymentSubmissionsService.createSubmission(tenantActor, {
+      stayId,
+      invoiceId,
+      targetType: 'INVOICE',
+      amountRupiah: dpAmount,
+      paidAt,
+      paymentMethod: 'CASH',
+      referenceNumber: `REF-DP-${stayId}`,
+      senderName: `Calon Tenant FLOW-A`,
+      senderBankName: 'CASH',
+      notes: 'Pembayaran DP 30% booking',
     });
 
     console.log(`     ✅ PaymentSubmission DP: #${dpSubmission.id}, Rp ${dpAmount.toLocaleString('id-ID')}`);
@@ -272,160 +270,82 @@ test('FLOW-A: Public Booking DP 30% → Admin Approve → DP Bayar → Pelunasan
     // ── STEP A4: Simulasi OCR + Admin Approve DP ──────────────────────────
     console.log('\n  📋 STEP A4: Admin Approve DP → Invoice PARTIAL');
 
-    const dpApproval = await prisma.$transaction(async (tx) => {
-      const sub = await tx.paymentSubmission.findUnique({ where: { id: dpSubmission.id } });
-      if (sub.status !== 'PENDING_REVIEW') throw new Error('Submission bukan PENDING_REVIEW');
+    const dpApproval = await paymentSubmissionsService.approveSubmission(adminActor, dpSubmission.id);
 
-      // Buat InvoicePayment
-      const invPayment = await tx.invoicePayment.create({
-        data: {
-          invoiceId,
-          paymentDate: new Date(sub.paidAt),
-          amountRupiah: sub.amountRupiah,
-          method: sub.paymentMethod,
-          referenceNo: sub.referenceNumber,
-          note: `DP booking disetujui (OCR verified)`,
-          capturedById: adminActor.id,
-        },
-      });
-
-      // Update invoice status → PARTIAL
-      await tx.invoice.update({
-        where: { id: invoiceId },
-        data: { status: 'PARTIAL' },
-      });
-
-      // Update submission
-      await tx.paymentSubmission.update({
-        where: { id: dpSubmission.id },
-        data: {
-          status: 'APPROVED',
-          reviewedById: adminActor.id,
-          reviewedAt: new Date(),
-        },
-      });
-
-      // Update stay: downPaymentPaidRupiah + matikan expiresAt
-      await tx.stay.update({
-        where: { id: stayId },
-        data: {
-          expiresAt: null,
-          downPaymentPaidRupiah: dpAmount,
-          downPaymentPaidAt: new Date(sub.paidAt),
-        },
-      });
-
-      return { submissionId: sub.id, paymentId: invPayment.id };
-    });
-
-    console.log(`     ✅ DP disetujui: InvoicePayment #${dpApproval.paymentId}`);
+    console.log(`     ✅ DP disetujui: PaymentSubmission #${dpApproval.id}`);
 
     const invAfterDp = await prisma.invoice.findUnique({ where: { id: invoiceId } });
     const stayAfterDp = await prisma.stay.findUnique({ where: { id: stayId } });
     const roomAfterDp = await prisma.room.findUnique({ where: { id: room.id } });
     assert.strictEqual(invAfterDp.status, 'PARTIAL', 'Invoice harus PARTIAL setelah DP');
     assert.strictEqual(stayAfterDp.downPaymentPaidRupiah, dpAmount, `DP terbayar harus Rp ${dpAmount}`);
-    assert.strictEqual(roomAfterDp.status, 'AVAILABLE', 'Kamar tetap AVAILABLE (invoice belum PAID)');
-    console.log('     ✅ Status: Invoice=PARTIAL, Room=AVAILABLE, DP tercatat');
+    assert.strictEqual(roomAfterDp.status, 'RESERVED', 'Kamar RESERVED setelah DP disetujui');
+    console.log('     ✅ Status: Invoice=PARTIAL, Room=RESERVED, DP tercatat');
 
     // ── STEP A5: Tenant Bayar Pelunasan ────────────────────────────────────
     console.log('\n  📋 STEP A5: Tenant Bayar Pelunasan (sisa Rp 1.050.000 + deposit Rp 500.000)');
 
     const settlementAmount = (1_500_000 - dpAmount) + room.defaultDepositRupiah; // 1,050,000 + 500,000 = 1,550,000
 
-    const settlementSub = await prisma.paymentSubmission.create({
-      data: {
-        stay: { connect: { id: stayId } },
-        tenant: { connect: { id: tenantId } },
-        submittedBy: { connect: { id: tenantUserId } },
-        invoice: { connect: { id: invoiceId } },
-        targetType: 'INVOICE',
-        amountRupiah: settlementAmount,
-        paidAt: new Date(paidAt),
-        paymentMethod: 'TRANSFER',
-        referenceNumber: `REF-SETTLE-${stayId}`,
-        senderName: `Calon Tenant FLOW-A`,
-        senderBankName: 'BCA',
-        notes: 'Pelunasan sisa sewa + deposit jaminan',
-        status: 'PENDING_REVIEW',
-      },
+    const settlementSub = await paymentSubmissionsService.createSubmission(tenantActor, {
+      stayId,
+      invoiceId,
+      targetType: 'INVOICE',
+      amountRupiah: settlementAmount,
+      paidAt,
+      paymentMethod: 'CASH',
+      referenceNumber: `REF-SETTLE-${stayId}`,
+      senderName: `Calon Tenant FLOW-A`,
+      senderBankName: 'CASH',
+      notes: 'Pelunasan sisa sewa + deposit jaminan',
     });
 
     console.log(`     ✅ PaymentSubmission Pelunasan: #${settlementSub.id}, Rp ${settlementAmount.toLocaleString('id-ID')}`);
 
-    // ── STEP A6: Admin Approve Pelunasan → Invoice PAID, Room BOOKING ─────
-    console.log('\n  📋 STEP A6: Admin Approve Pelunasan → Invoice PAID, Room BOOKING');
+    // ── STEP A6: Admin Approve Pelunasan → Invoice PAID, Room RESERVED ─────
+    console.log('\n  📋 STEP A6: Admin Approve Pelunasan → Invoice PAID, Room RESERVED');
 
-    const settleApproval = await prisma.$transaction(async (tx) => {
-      const sub = await tx.paymentSubmission.findUnique({ where: { id: settlementSub.id } });
+    const settleApproval = await paymentSubmissionsService.approveSubmission(adminActor, settlementSub.id);
 
-      const rentPortion = Math.min(sub.amountRupiah, 1_500_000 - dpAmount); // 1,050,000
-      const depositPortion = sub.amountRupiah - rentPortion; // 500,000
-
-      // InvoicePayment untuk porsi sewa
-      if (rentPortion > 0) {
-        await tx.invoicePayment.create({
-          data: {
-            invoiceId,
-            paymentDate: new Date(sub.paidAt),
-            amountRupiah: rentPortion,
-            method: sub.paymentMethod,
-            referenceNo: sub.referenceNumber,
-            note: `Pelunasan sewa disetujui (OCR verified)`,
-            capturedById: adminActor.id,
-          },
-        });
-      }
-
-      // Update invoice → PAID
-      await tx.invoice.update({
-        where: { id: invoiceId },
-        data: { status: 'PAID', paidAt: new Date(sub.paidAt) },
-      });
-
-      // Update stay: deposit
-      const stayBefore = await tx.stay.findUnique({ where: { id: stayId }, select: { depositPaidAmountRupiah: true } });
-      const newDepositPaid = Number(stayBefore.depositPaidAmountRupiah ?? 0) + depositPortion;
-
-      await tx.stay.update({
-        where: { id: stayId },
-        data: {
-          depositPaidAmountRupiah: newDepositPaid,
-          depositPaymentStatus: newDepositPaid >= room.defaultDepositRupiah ? 'PAID' : 'PARTIAL',
-          initialMetersPromotedAt: new Date(),
-        },
-      });
-
-      // Room → BOOKING (karena bukan full payment)
-      await tx.room.update({
-        where: { id: room.id },
-        data: { status: 'BOOKING' },
-      });
-
-      // Update submission
-      await tx.paymentSubmission.update({
-        where: { id: settlementSub.id },
-        data: {
-          status: 'APPROVED',
-          reviewedById: adminActor.id,
-          reviewedAt: new Date(),
-        },
-      });
-
-      return { rentPortion, depositPortion };
-    });
-
-    console.log(`     ✅ Pelunasan disetujui: sewa Rp ${settleApproval.rentPortion.toLocaleString('id-ID')} + deposit Rp ${settleApproval.depositPortion.toLocaleString('id-ID')}`);
+    console.log(`     ✅ Pelunasan disetujui: PaymentSubmission #${settleApproval.id}`);
 
     const invFinal = await prisma.invoice.findUnique({ where: { id: invoiceId } });
     const roomFinal = await prisma.room.findUnique({ where: { id: room.id } });
     const stayFinal = await prisma.stay.findUnique({ where: { id: stayId } });
     assert.strictEqual(invFinal.status, 'PAID', 'Invoice harus PAID');
-    assert.strictEqual(roomFinal.status, 'BOOKING', 'Kamar harus BOOKING (DP, bukan FULL)');
-    assert.ok(stayFinal.initialMetersPromotedAt, 'Stay harus promoted');
-    console.log('     ✅ Status: Invoice=PAID, Room=BOOKING, Stay=promoted');
+    assert.strictEqual(roomFinal.status, 'RESERVED', 'Kamar harus RESERVED (DP lunas, bukan full payment)');
+    assert.strictEqual(stayFinal.initialMetersPromotedAt, null, 'Stay belum boleh promoted sebelum check-in');
+    console.log('     ✅ Status: Invoice=PAID, Room=RESERVED, Stay=belum promoted');
 
-    console.log('\n  🎉 FLOW-A SELESAI: DP booking → pelunasan → Room BOOKING ✅');
+    // STEP A7: Admin Check-In -> Stay promoted, Room OCCUPIED
+    console.log('\n  📋 STEP A7: Admin Check-In -> Stay promoted, Room OCCUPIED');
+
+    await staysService.create({
+      tenantId,
+      roomId: room.id,
+      pricingTerm: 'MONTHLY',
+      agreedRentAmountRupiah: 1_500_000,
+      checkInDate: ymd(stayFinal.checkInDate),
+      plannedCheckOutDate: stayFinal.plannedCheckOutDate ? ymd(stayFinal.plannedCheckOutDate) : undefined,
+      initialElectricityKwh: '10.5',
+      initialWaterM3: '2.25',
+      bookingSource: 'WEBSITE',
+    }, adminActor);
+
+    const roomAfterCheckIn = await prisma.room.findUnique({ where: { id: room.id } });
+    const stayAfterCheckIn = await prisma.stay.findUnique({ where: { id: stayId } });
+    const meterReadingsAfterCheckIn = await prisma.meterReading.findMany({
+      where: { roomId: room.id },
+      orderBy: { utilityType: 'asc' },
+    });
+    assert.strictEqual(roomAfterCheckIn.status, 'OCCUPIED', 'Kamar harus OCCUPIED setelah check-in');
+    assert.ok(stayAfterCheckIn.initialMetersPromotedAt, 'Stay harus promoted saat check-in');
+    assert.strictEqual(stayAfterCheckIn.initialElectricityKwhPending, null, 'Meter listrik pending harus clear');
+    assert.strictEqual(stayAfterCheckIn.initialWaterM3Pending, null, 'Meter air pending harus clear');
+    assert.strictEqual(meterReadingsAfterCheckIn.length, 2, 'Meter awal listrik dan air harus dibuat saat check-in');
+    console.log('     ✅ Status: Room=OCCUPIED, Stay=promoted, meter awal tercatat');
+
+    console.log('\n  🎉 FLOW-A SELESAI: DP booking → pelunasan → check-in ✅');
 
   } finally {
     // Cleanup
@@ -447,6 +367,7 @@ test('FLOW-B: Tenant Portal Booking LUNAS → RESERVED → Check-in → OCCUPIED
   const { module, app } = await bootstrap();
   const prisma = module.get(PrismaService);
   const staysService = module.get(StaysService);
+  const paymentSubmissionsService = module.get(PaymentSubmissionsService);
   const adminActor = await getAdminActor(prisma);
   t.after(async () => { await app.close(); });
 
@@ -498,10 +419,10 @@ test('FLOW-B: Tenant Portal Booking LUNAS → RESERVED → Check-in → OCCUPIED
 
       // Full payment: downPaymentAmountRupiah = agreedRentAmountRupiah
       const [inserted] = await tx.$queryRawUnsafe(
-        `INSERT INTO "Stay" ("tenantId", "roomId", status, "pricingTerm", "agreedRentAmountRupiah", "occupantCount", "hasPet", "checkInDate", "plannedCheckOutDate", "expiresAt", "depositAmountRupiah", "downPaymentAmountRupiah", "electricityTariffPerKwhRupiah", "waterTariffPerM3Rupiah", "bookingSource", "createdById", "createdAt", "updatedAt")
-         VALUES ($1, $2, 'ACTIVE', 'MONTHLY', $3, 1, false, $4, $5, NOW() + INTERVAL '3 hours', $6, $7, 2500, 5000, 'WEBSITE', $8, NOW(), NOW())
+        `INSERT INTO "Stay" ("tenantId", "roomId", status, "pricingTerm", "agreedRentAmountRupiah", "occupantCount", "hasPet", "checkInDate", "plannedCheckOutDate", "expiresAt", "depositAmountRupiah", "downPaymentAmountRupiah", "electricityTariffPerKwhRupiah", "waterTariffPerM3Rupiah", "bookingSource", "createdById", "initialElectricityKwhPending", "initialWaterM3Pending", "initialMetersRecordedAt", "initialMetersRecordedById", "createdAt", "updatedAt")
+         VALUES ($1, $2, 'ACTIVE', 'MONTHLY', $3, 1, false, $4, $5, NOW() + INTERVAL '3 hours', $6, $7, 2500, 5000, 'WEBSITE', $8, $9, $10, NOW(), $8, NOW(), NOW())
          RETURNING id`,
-        tenantId, room.id, agreedRent, checkIn, periodEnd, deposit, agreedRent, portalUser.id
+        tenantId, room.id, agreedRent, checkIn, periodEnd, deposit, agreedRent, portalUser.id, 20.75, 3.5
       );
       stayId = Number(inserted.id);
 
@@ -573,22 +494,18 @@ test('FLOW-B: Tenant Portal Booking LUNAS → RESERVED → Check-in → OCCUPIED
     const fullAmount = 1_600_000 + room.defaultDepositRupiah; // 2,100,000
     const paidAt = ymd(new Date());
 
-    const fullSubmission = await prisma.paymentSubmission.create({
-      data: {
-        stay: { connect: { id: stayId } },
-        tenant: { connect: { id: tenantId } },
-        submittedBy: { connect: { id: tenantUserId } },
-        invoice: { connect: { id: invoiceId } },
-        targetType: 'INVOICE',
-        amountRupiah: fullAmount,
-        paidAt: new Date(paidAt),
-        paymentMethod: 'TRANSFER',
-        referenceNumber: `REF-FULL-${stayId}`,
-        senderName: `Tenant Portal FLOW-B`,
-        senderBankName: 'BCA',
-        notes: 'Pembayaran lunas + deposit jaminan',
-        status: 'PENDING_REVIEW',
-      },
+    const tenantActor = { id: tenantUserId, role: 'TENANT', email: bookingResult.tenantEmail, tenantId };
+    const fullSubmission = await paymentSubmissionsService.createSubmission(tenantActor, {
+      stayId,
+      invoiceId,
+      targetType: 'INVOICE',
+      amountRupiah: fullAmount,
+      paidAt,
+      paymentMethod: 'CASH',
+      referenceNumber: `REF-FULL-${stayId}`,
+      senderName: `Tenant Portal FLOW-B`,
+      senderBankName: 'CASH',
+      notes: 'Pembayaran lunas + deposit jaminan',
     });
 
     console.log(`     ✅ PaymentSubmission LUNAS: #${fullSubmission.id}, Rp ${fullAmount.toLocaleString('id-ID')}`);
@@ -596,69 +513,45 @@ test('FLOW-B: Tenant Portal Booking LUNAS → RESERVED → Check-in → OCCUPIED
     // ── STEP B4: Admin Approve → Invoice PAID, Room RESERVED ────────────
     console.log('\n  📋 STEP B4: Admin Approve → Invoice PAID, Room RESERVED');
 
-    await prisma.$transaction(async (tx) => {
-      const sub = await tx.paymentSubmission.findUnique({ where: { id: fullSubmission.id } });
-
-      const rentPortion = Math.min(sub.amountRupiah, 1_600_000);
-      const depositPortion = sub.amountRupiah - rentPortion;
-
-      if (rentPortion > 0) {
-        await tx.invoicePayment.create({
-          data: {
-            invoiceId,
-            paymentDate: new Date(sub.paidAt),
-            amountRupiah: rentPortion,
-            method: sub.paymentMethod,
-            referenceNo: sub.referenceNumber,
-            note: `Pembayaran lunas disetujui`,
-            capturedById: adminActor.id,
-          },
-        });
-      }
-
-      await tx.invoice.update({
-        where: { id: invoiceId },
-        data: { status: 'PAID', paidAt: new Date(sub.paidAt) },
-      });
-
-      const newDepositPaid = depositPortion;
-      await tx.stay.update({
-        where: { id: stayId },
-        data: {
-          expiresAt: null,
-          downPaymentPaidRupiah: 1_600_000,
-          downPaymentPaidAt: new Date(sub.paidAt),
-          depositPaidAmountRupiah: newDepositPaid,
-          depositPaymentStatus: newDepositPaid >= room.defaultDepositRupiah ? 'PAID' : 'PARTIAL',
-          initialMetersPromotedAt: new Date(),
-        },
-      });
-
-      // Karena FULL payment → RESERVED
-      await tx.room.update({
-        where: { id: room.id },
-        data: { status: 'RESERVED' },
-      });
-
-      await tx.paymentSubmission.update({
-        where: { id: fullSubmission.id },
-        data: {
-          status: 'APPROVED',
-          reviewedById: adminActor.id,
-          reviewedAt: new Date(),
-        },
-      });
-    });
+    await paymentSubmissionsService.approveSubmission(adminActor, fullSubmission.id);
 
     const invB = await prisma.invoice.findUnique({ where: { id: invoiceId } });
     const roomB = await prisma.room.findUnique({ where: { id: room.id } });
     const stayB = await prisma.stay.findUnique({ where: { id: stayId } });
     assert.strictEqual(invB.status, 'PAID', 'Invoice harus PAID');
     assert.strictEqual(roomB.status, 'RESERVED', 'Kamar harus RESERVED (FULL payment)');
-    assert.ok(stayB.initialMetersPromotedAt, 'Stay harus promoted');
-    console.log('     ✅ Status: Invoice=PAID, Room=RESERVED, Stay=promoted');
+    assert.strictEqual(stayB.initialMetersPromotedAt, null, 'Stay belum boleh promoted sebelum check-in');
+    console.log('     ✅ Status: Invoice=PAID, Room=RESERVED, Stay=belum promoted');
 
-    console.log('\n  🎉 FLOW-B SELESAI: Full payment → RESERVED → siap check-in ✅');
+    // STEP B5: Admin Check-In -> Stay promoted, Room OCCUPIED
+    console.log('\n  📋 STEP B5: Admin Check-In -> Stay promoted, Room OCCUPIED');
+
+    await staysService.create({
+      tenantId,
+      roomId: room.id,
+      pricingTerm: 'MONTHLY',
+      agreedRentAmountRupiah: 1_600_000,
+      checkInDate: ymd(stayB.checkInDate),
+      plannedCheckOutDate: stayB.plannedCheckOutDate ? ymd(stayB.plannedCheckOutDate) : undefined,
+      initialElectricityKwh: '20.75',
+      initialWaterM3: '3.5',
+      bookingSource: 'WEBSITE',
+    }, adminActor);
+
+    const roomAfterCheckInB = await prisma.room.findUnique({ where: { id: room.id } });
+    const stayAfterCheckInB = await prisma.stay.findUnique({ where: { id: stayId } });
+    const meterReadingsAfterCheckInB = await prisma.meterReading.findMany({
+      where: { roomId: room.id },
+      orderBy: { utilityType: 'asc' },
+    });
+    assert.strictEqual(roomAfterCheckInB.status, 'OCCUPIED', 'Kamar harus OCCUPIED setelah check-in');
+    assert.ok(stayAfterCheckInB.initialMetersPromotedAt, 'Stay harus promoted saat check-in');
+    assert.strictEqual(stayAfterCheckInB.initialElectricityKwhPending, null, 'Meter listrik pending harus clear');
+    assert.strictEqual(stayAfterCheckInB.initialWaterM3Pending, null, 'Meter air pending harus clear');
+    assert.strictEqual(meterReadingsAfterCheckInB.length, 2, 'Meter awal listrik dan air harus dibuat saat check-in');
+    console.log('     ✅ Status: Room=OCCUPIED, Stay=promoted, meter awal tercatat');
+
+    console.log('\n  🎉 FLOW-B SELESAI: Full payment → RESERVED → check-in ✅');
 
   } finally {
     await cleanupTestData(prisma, stayId ? [stayId] : [], room.id);

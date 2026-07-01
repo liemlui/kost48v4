@@ -176,7 +176,7 @@ export class TenantBookingsService {
           ? Prisma.sql`CAST(${dto.stayPurpose} AS "StayPurpose")`
           : Prisma.sql`NULL`;
 
-        // Room status left as-is — baru berubah saat DP/LUNAS dibayar (BOOKING/RESERVED).
+        // Room status left as-is — baru berubah ke RESERVED saat DP/LUNAS dibayar.
 
         const insertedRows = await tx.$queryRaw<Array<{ id: number }>>(Prisma.sql`
           INSERT INTO "Stay" (
@@ -275,7 +275,7 @@ export class TenantBookingsService {
         if (booking.stayStatus !== StayStatus.ACTIVE) {
           throw new ConflictException('Booking tidak lagi aktif dan tidak dapat disetujui');
         }
-        // Room masih di status AVAILABLE/BOOKING/reservasi lain — approval invoice
+        // Room bisa di status AVAILABLE/RESERVED/MAINTENANCE — approval invoice
         // tidak bergantung pada status kamar, cukup booking aktif & belum expired.
         if (
           ![RoomStatus.AVAILABLE, RoomStatus.RESERVED, RoomStatus.MAINTENANCE].includes(
@@ -566,7 +566,7 @@ if (error instanceof Prisma.PrismaClientKnownRequestError) {
         }
 
         // Tolak hanya bila kamar sudah OCCUPIED (penghuni aktif) — status lain
-        // (AVAILABLE/BOOKING/RESERVED/MAINTENANCE) masih bisa ditolak.
+        // (AVAILABLE/RESERVED/MAINTENANCE) masih bisa ditolak.
         if (row.roomStatus === RoomStatus.OCCUPIED) {
           throw new ConflictException('Booking sudah menjadi hunian aktif. Gunakan flow checkout yang sesuai.');
         }

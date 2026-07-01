@@ -13,6 +13,8 @@ export class UpdateOperationalSettingDto {
   @IsOptional() @IsInt() @Min(0) @Max(1000000) galonRupiah?: number;
   @IsOptional() @IsInt() @Min(0) @Max(1000000) petDepositRupiah?: number;
   @IsOptional() @IsInt() @Min(0) @Max(100) extraOccupantFeePercent?: number;
+  // AC cleaning — ambang kWh pemicu dini (0 = nonaktifkan pemicu kWh, pakai interval hari saja)
+  @IsOptional() @IsInt() @Min(0) @Max(100000) acCleanKwhThreshold?: number;
   // Fitur tenant toggle
   @IsOptional() @IsBoolean() tenantLoyaltyEnabled?: boolean;
   // AI / DeepSeek (R3)

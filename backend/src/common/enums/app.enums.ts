@@ -19,11 +19,15 @@ export enum TicketCategory { KEBERSIHAN = 'KEBERSIHAN', PERBAIKAN = 'PERBAIKAN',
 export const BACKOFFICE_TICKET_CATEGORIES = [TicketCategory.KEBERSIHAN, TicketCategory.PERBAIKAN, TicketCategory.AUDIT_INVENTARIS, TicketCategory.BARANG_PINDAH, TicketCategory.PEMERIKSAAN, TicketCategory.UMUM] as const;
 export const STAFF_FIELD_CATEGORY_SET = new Set([TicketCategory.BARANG_RUSAK, TicketCategory.CEK_KAMAR, TicketCategory.STOK_HABIS, TicketCategory.PERBAIKAN, TicketCategory.CATATAN_METER, TicketCategory.KEBERSIHAN]);
 // X-01: kategori tiket internal/operasional yang TIDAK boleh muncul di portal tenant.
+// PENTING: `Ticket.category` = String di Prisma. AutoOps membuat tiket dgn kategori RAW-STRING
+// yang TIDAK ada di enum TicketCategory: 'EVICT_OVERSTAY' (stay-sweep) & 'AC_CLEANING'
+// (maintenance-sweep). Ini justru yang bocor ke tenant → WAJIB ikut disaring (list/detail/image).
 export const TENANT_HIDDEN_TICKET_CATEGORIES = [
   TicketCategory.CHECKIN_CHECKOUT, TicketCategory.CHECKOUT_INSPECTION, TicketCategory.AUDIT_INVENTARIS,
   TicketCategory.BARANG_PINDAH, TicketCategory.PEMERIKSAAN, TicketCategory.CEK_KAMAR,
   TicketCategory.STOK_HABIS, TicketCategory.CATATAN_METER, TicketCategory.BARANG_RUSAK,
   TicketCategory.ROOM_REPAIR, TicketCategory.PAYMENT_ADMIN,
+  'EVICT_OVERSTAY', 'AC_CLEANING',
 ] as const;
 export enum RoomItemStatus { GOOD = 'GOOD', DAMAGED = 'DAMAGED', MAINTENANCE = 'MAINTENANCE', MISSING = 'MISSING' }
 export enum InventoryItemStatus { GOOD = 'GOOD', LOW_STOCK = 'LOW_STOCK', OUT_OF_STOCK = 'OUT_OF_STOCK', DAMAGED = 'DAMAGED', MISSING = 'MISSING', NEEDS_REPAIR = 'NEEDS_REPAIR', PENDING_CHECK = 'PENDING_CHECK' }

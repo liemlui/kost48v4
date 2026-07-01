@@ -2097,6 +2097,8 @@ model OperationalSetting {
   galonRupiah                   Int      @default(20000)   // Galon air Voila per galon
   petDepositRupiah              Int      @default(100000)  // Deposit jaminan hewan peliharaan (refundable)
   extraOccupantFeePercent       Int      @default(20)      // Biaya penghuni tambahan (% tarif/kepala/bulan)
+  // ── AC cleaning (owner-settable): ambang estimasi kWh untuk pemicu DINI cuci AC ──
+  acCleanKwhThreshold           Int      @default(200)     // kWh estimasi (watt×jam×hari) sejak cuci terakhir → buat tiket cuci AC (0 = matikan pemicu kWh)
   // ── R3: AI/DeepSeek owner-configurable settings ──────────────────────────
   deepseekModel                String   @default("deepseek-v4-flash")
   deepseekFinanceModel         String   @default("deepseek-v4-pro")

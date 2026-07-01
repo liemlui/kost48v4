@@ -251,4 +251,36 @@ Toggle Owner/Admin phase 1 berfungsi penuh. UI telah diperbaiki melalui Fase C (
 
 ---
 
+---
+
+## W-00 — Decision Register (Fase W Audit 2026-06-30)
+
+**Dibuat:** 2026-07-01 | **Sumber:** Fase W — Project Status Gate
+
+### Status: ✅ Sudah Terkunci di Kode
+
+| Keputusan | Status | Implementasi | Dicatat |
+|-----------|--------|-------------|---------|
+| STAFF boleh lihat `analytics/finance/summary`? | **TIDAK** — OWNER/ADMIN only | `@Roles(OWNER, ADMIN)` di controller | ✅ |
+| STAFF boleh lihat `wifi-sales`? | **READ-ONLY** — GET, tidak create/update/delete | `@Roles(OWNER, ADMIN, STAFF)` di GET, `@Roles(OWNER, ADMIN)` di POST/PATCH/DELETE | ✅ |
+| `RoomStatus.BOOKING` dihapus? | **SUDAH** — tidak ada di schema/enum sejak migrasi Fase V | Enum hanya: `AVAILABLE, RESERVED, OCCUPIED, MAINTENANCE, INACTIVE` | ✅ |
+
+### 🟡 Butuh Keputusan Owner
+
+| # | Keputusan | Rekomendasi AI | Dampak | Ditentukan |
+|---|-----------|---------------|--------|------------|
+| W-00-D1 | **ADMIN** boleh jalankan AutoOps finance-heavy? | **DIPUTUSKAN OWNER (2026-07-01):** `depreciation` + `recurring-expenses` → **OWNER-only**. ADMIN = operasional; OWNER = investor (rasio, laporan). OWNER bisa toggle ke Admin Mode kapan saja. | Guard di `auto-ops.controller.ts`: `@Roles(OWNER)` untuk depreciation + recurring-expenses. ADMIN tetap bisa run sweeps non-finance. | ✅ **Diputuskan** |
+| W-00-D2 | **JWT** tetap `localStorage` untuk rilis awal? | **Ya, untuk MVP.** Roadmap pindah ke httpOnly cookie + refresh-token rotation setelah go-live stabil. | Risiko XSS terdokumentasi; mitigasi: CSP ketat, no raw HTML/eval, protected media, logout → clear token. | **Sementara: localStorage** |
+| W-00-D3 | **Upload registry** perlu migration schema? | **Mulai tanpa schema** — tracking via service-level Map + file naming convention. Migration ditunda setelah go-live. | W-06 tetap bisa audit + validasi MIME/path tanpa schema baru. | **Tanpa schema dulu** |
+
+### Dampak ke Task Lain
+
+| Task | Dependensi ke W-00 | Jalan |
+|------|-------------------|-------|
+| W-05 (AutoOps) | Butuh W-00-D1 | Buat guard `isFinanceHeavy` di AutoOps, OWNER-only sesuai rekomendasi |
+| W-02 (Auth/Session) | Butuh W-00-D2 | Dokumentasi risiko + mitigasi jangka pendek; tidak perlu refactor httpOnly |
+| W-06 (Upload Registry) | Butuh W-00-D3 | Kerjakan tanpa schema — service-level registry |
+
+---
+
 **Akhir dokumen.** Semua keputusan di atas mengikat. Detail implementasi & kode spesifik → dossier domain `10`-`19`. Peta fase → `00_BLUEPRINT.md §4`.

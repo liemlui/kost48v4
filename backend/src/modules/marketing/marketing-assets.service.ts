@@ -1,6 +1,8 @@
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { randomBytes } from 'crypto';
 import { existsSync, mkdirSync, readdirSync, unlinkSync, writeFileSync } from 'fs';
 import { join } from 'path';
+import { detectImageMimeFromBuffer, MIME_TO_EXT } from '../../common/utils/file-signature.util';
 
 interface UploadFile {
   originalname: string;
@@ -10,11 +12,6 @@ interface UploadFile {
 }
 
 const MARKETING_ASSET_UPLOAD_DIR = 'uploads/room-images/marketing-assets';
-const ALLOWED_MIME_TO_EXT: Record<string, string> = {
-  'image/jpeg': '.jpg',
-  'image/png': '.png',
-  'image/webp': '.webp',
-};
 
 const MARKETING_ASSET_SLOTS = [
   {
@@ -85,11 +82,11 @@ export class MarketingAssetsService {
 
   upload(slug: string, file: UploadFile): { slug: string; url: string } {
     const slot = this.getSlot(slug);
-    const ext = ALLOWED_MIME_TO_EXT[file.mimetype];
-    if (!ext) throw new ConflictException('Format file harus JPG, PNG, atau WebP.');
+    const detectedMime = detectImageMimeFromBuffer(file.buffer);
+    if (!detectedMime) throw new ConflictException('Format file harus JPG, PNG, atau WebP yang valid.');
 
     this.deleteUploadedFiles(slot.slug);
-    const filename = `${slot.slug}${ext}`;
+    const filename = `${slot.slug}-${Date.now()}-${randomBytes(8).toString('hex')}${MIME_TO_EXT[detectedMime]}`;
     writeFileSync(join(this.getUploadDir(), filename), file.buffer);
 
     return { slug: slot.slug, url: `/uploads/room-images/marketing-assets/${filename}` };
@@ -108,13 +105,18 @@ export class MarketingAssetsService {
   }
 
   private findUploadedFilename(slug: string): string | null {
-    const files = readdirSync(this.getUploadDir()).filter((filename) => filename.startsWith(`${slug}.`));
+    const files = readdirSync(this.getUploadDir()).filter((filename) => this.isUploadedFilenameForSlug(filename, slug));
     return files[0] ?? null;
   }
 
   private deleteUploadedFiles(slug: string): boolean {
-    const files = readdirSync(this.getUploadDir()).filter((filename) => filename.startsWith(`${slug}.`));
+    const files = readdirSync(this.getUploadDir()).filter((filename) => this.isUploadedFilenameForSlug(filename, slug));
     for (const filename of files) unlinkSync(join(this.getUploadDir(), filename));
     return files.length > 0;
+  }
+
+  private isUploadedFilenameForSlug(filename: string, slug: string): boolean {
+    if (!/\.(jpg|jpeg|png|webp)$/i.test(filename)) return false;
+    return filename.startsWith(`${slug}.`) || filename.startsWith(`${slug}-`);
   }
 }

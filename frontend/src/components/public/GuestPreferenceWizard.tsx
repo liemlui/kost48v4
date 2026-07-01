@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { saveGuestSurvey } from '../../api/bookings';
 import RoomCard from '../rooms/RoomCard';
 import type { PublicRoom } from '../../types';
+import { isPublicRoomBookable } from '../../utils/publicRoomDisplay';
 
 // ── Pricing simulator formula ───────────────────────────────────────────────
 const BASE = 800_000;
@@ -172,8 +173,9 @@ export default function GuestPreferenceWizard({ rooms, roomsLoading = false, onD
     type:     answers.type     ?? 'any',
   }), [rooms, answers]);
 
-  const availableExact = exact.filter((r) => String(r.status ?? '').toUpperCase() === 'AVAILABLE' || String(r.status ?? '').toUpperCase() === 'RESERVED');
-  const availableNear  = near.filter((r) => String(r.status ?? '').toUpperCase() === 'AVAILABLE' || String(r.status ?? '').toUpperCase() === 'RESERVED');
+  // Hanya kamar yang bisa dibooking (AVAILABLE atau MAINTENANCE dengan allowBookingWhileCleaning)
+  const availableExact = exact.filter((r) => isPublicRoomBookable(r));
+  const availableNear  = near.filter((r) => isPublicRoomBookable(r));
   const occupiedExact  = exact.filter((r) => !availableExact.includes(r));
 
   const handleApplyFilters = useCallback(() => {

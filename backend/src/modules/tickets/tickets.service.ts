@@ -364,6 +364,11 @@ export class TicketsService {
       throw new ForbiddenException("Tidak berhak melihat tiket ini");
     }
 
+    // X-01: tenant tidak boleh melihat detail tiket kategori internal
+    if (user.role === "TENANT" && (TENANT_HIDDEN_TICKET_CATEGORIES as readonly string[]).includes(ticket.category)) {
+      throw new NotFoundException("Tiket tidak ditemukan");
+    }
+
     if (user.role === "STAFF") {
       const isAssignedToStaff = ticket.assignedToId === user.id;
       const hasOwnFieldReport = ticket.staffFieldReports.some(
@@ -389,6 +394,7 @@ export class TicketsService {
       },
       select: {
         tenantId: true,
+        category: true,
         assignedToId: true,
         staffFieldReports: {
           where: { reportedByStaffId: user.id },
@@ -406,7 +412,11 @@ export class TicketsService {
       return true;
     }
     if (!ticket) return false; // Tanpa metadata, tidak bisa verifikasi ownership — tolak
-    if (user.role === "TENANT") return ticket.tenantId === user.tenantId;
+    // X-01: tenant tidak boleh akses gambar tiket kategori internal
+    if (user.role === "TENANT") {
+      if ((TENANT_HIDDEN_TICKET_CATEGORIES as readonly string[]).includes(ticket.category)) return false;
+      return ticket.tenantId === user.tenantId;
+    }
     if (user.role === "STAFF") {
       return ticket.assignedToId === user.id || ticket.staffFieldReports.length > 0;
     }

@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
+import { computeFacilityGap, type FacilityGapInput } from '../rooms/room-facility-spec';
 
 @Injectable()
 export class AdminDashboardService {
@@ -17,6 +18,7 @@ export class AdminDashboardService {
       paymentReviewItems,
       paymentReviewTotal,
       inventoryItems,
+      facilityGapRooms,
     ] = await Promise.all([
       this.prisma.room.findMany({
         where: { isActive: true },
@@ -102,6 +104,37 @@ export class AdminDashboardService {
         take: 150,
         orderBy: { name: 'asc' },
       }),
+      this.prisma.room.findMany({
+        where: { isActive: true },
+        select: {
+          id: true,
+          code: true,
+          name: true,
+          status: true,
+          category: true,
+          roomType: true,
+          roomSize: true,
+          hasAc: true,
+          roomItems: { select: { id: true, status: true, item: { select: { name: true } } } },
+          facilities: { select: { inventoryItemId: true } },
+        },
+        orderBy: { code: 'asc' },
+      }).then((rows) =>
+        rows
+          .map((room) => {
+            const check = computeFacilityGap(room as unknown as FacilityGapInput);
+            return {
+              roomId: room.id,
+              code: room.code,
+              name: room.name,
+              status: room.status,
+              hasGap: check.hasGap,
+              acGap: check.acGap,
+              missingCount: check.items.filter((item) => item.status !== 'OK').length,
+            };
+          })
+          .filter((room) => room.hasGap),
+      ),
     ]);
 
     return {
@@ -114,6 +147,13 @@ export class AdminDashboardService {
       checkoutApproved: { items: checkoutApproved },
       paymentReview: { items: paymentReviewItems, meta: { totalItems: paymentReviewTotal } },
       inventoryItems: { items: inventoryItems },
+      facilityGaps: {
+        items: facilityGapRooms.slice(0, 8),
+        meta: {
+          totalItems: facilityGapRooms.length,
+          acGapItems: facilityGapRooms.filter((room) => room.acGap).length,
+        },
+      },
     };
   }
 }

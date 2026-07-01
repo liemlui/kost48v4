@@ -12,6 +12,7 @@ import { DecideRenewRequestDto } from './dto/decide-renew-request.dto';
 import { ConfirmDownPaymentDto } from './dto/confirm-down-payment.dto';
 import { CheckoutRequestStatus, StayStatus, RenewRequestStatus, UserRole, InvoiceStatus, PricingTerm } from '../../common/enums/app.enums';
 import { roundRupiah } from '../../common/business/money.helper';
+import { ACTIVE_CHECKOUT_STATUSES, ACTIVE_RENEW_STATUSES, isActiveRenewRequestStatus } from '../../common/business/lifecycle-guards.helper';
 import { LoyaltyService } from '../loyalty/loyalty.service';
 
 @Injectable()
@@ -47,8 +48,9 @@ export class RenewRequestsService {
     }
 
     // Cross-block: cannot create renew request if a checkout request is PENDING
+    // W-04: menggunakan helper domain ACTIVE_CHECKOUT_STATUSES
     const pendingCheckout = await this.prisma.checkoutRequest.findFirst({
-      where: { stayId: dto.stayId, status: CheckoutRequestStatus.PENDING },
+      where: { stayId: dto.stayId, status: { in: ACTIVE_CHECKOUT_STATUSES } },
     });
     if (pendingCheckout) {
       throw new ConflictException(
@@ -71,7 +73,7 @@ export class RenewRequestsService {
     const existingActive = await this.prisma.renewRequest.findFirst({
       where: {
         stayId: dto.stayId,
-        status: { in: [RenewRequestStatus.PENDING, RenewRequestStatus.PENDING_DECISION, RenewRequestStatus.AWAITING_DP, RenewRequestStatus.DP_SECURED] },
+        status: { in: ACTIVE_RENEW_STATUSES },
       },
     });
     if (existingActive) {

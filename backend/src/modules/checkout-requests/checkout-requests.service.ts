@@ -19,6 +19,7 @@ import {
   UserRole,
   InvoiceStatus,
 } from '../../common/enums/app.enums';
+import { ACTIVE_RENEW_STATUSES } from '../../common/business/lifecycle-guards.helper';
 
 @Injectable()
 export class CheckoutRequestsService {
@@ -66,15 +67,9 @@ export class CheckoutRequestsService {
     }
 
     // Cross-block: cannot create checkout request if a renew request is active
-    // W-04.2: blocking all active renew statuses (PENDING, PENDING_DECISION, AWAITING_DP, DP_SECURED)
-    const activeRenewStatuses: RenewRequestStatus[] = [
-      RenewRequestStatus.PENDING,
-      RenewRequestStatus.PENDING_DECISION,
-      RenewRequestStatus.AWAITING_DP,
-      RenewRequestStatus.DP_SECURED,
-    ];
+    // W-04: menggunakan helper domain ACTIVE_RENEW_STATUSES (PENDING, PENDING_DECISION, AWAITING_DP, DP_SECURED)
     const activeRenew = await this.prisma.renewRequest.findFirst({
-      where: { stayId: dto.stayId, status: { in: activeRenewStatuses } },
+      where: { stayId: dto.stayId, status: { in: ACTIVE_RENEW_STATUSES } },
     });
     if (activeRenew) {
       throw new ConflictException(

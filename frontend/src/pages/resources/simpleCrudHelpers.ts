@@ -218,7 +218,7 @@ export function automatedMovementNote(type: string) {
   }
 }
 
-export function getResourceFilterDefinitions(configPath: string, items: Array<Record<string, unknown>>) {
+export function getResourceFilterDefinitions(configPath: string, items: Array<Record<string, unknown>>, totalItems?: number) {
   const count = (predicate: (item: Record<string, unknown>) => boolean) => items.filter(predicate).length;
   const statusCount = (status: string) => count((item) => asString(item.status) === status);
   const movementCount = (type: string) => count((item) => asString(item.movementType) === type);
@@ -226,48 +226,48 @@ export function getResourceFilterDefinitions(configPath: string, items: Array<Re
   const activeCount = (value: boolean) => count((item) => Boolean(item.isActive) === value);
 
   if (configPath === '/tenants') return [
-    { id: 'ALL', label: 'Semua Tenant', count: items.length, tone: 'info' as const },
+    { id: 'ALL', label: 'Semua Tenant', count: totalItems ?? items.length, tone: 'info' as const },
     { id: 'ACTIVE', label: 'Aktif', count: activeCount(true), tone: 'success' as const },
     { id: 'WITH_STAY', label: 'Ada Masa Sewa', count: count((item) => Boolean(item.activeStayId || item.currentStay)), tone: 'success' as const },
     { id: 'NO_STAY', label: 'Belum Menempati', count: count((item) => !item.activeStayId && !item.currentStay), tone: 'warning' as const },
     { id: 'PORTAL_ACTIVE', label: 'Portal Aktif', count: count((item) => Boolean(getNested(item, 'portalUserSummary.portalIsActive'))), tone: 'info' as const },
   ];
   if (configPath === '/rooms') return [
-    { id: 'ALL', label: 'Semua Kamar', count: items.length, tone: 'info' as const },
+    { id: 'ALL', label: 'Semua Kamar', count: totalItems ?? items.length, tone: 'info' as const },
     { id: 'AVAILABLE', label: 'Tersedia', count: statusCount('AVAILABLE'), tone: 'success' as const },
     { id: 'OCCUPIED', label: 'Terisi', count: statusCount('OCCUPIED'), tone: 'info' as const },
     { id: 'RESERVED', label: 'Dipesan', count: statusCount('RESERVED'), tone: 'warning' as const },
     { id: 'MAINTENANCE', label: 'Perlu Cek', count: count((item) => ['MAINTENANCE', 'INACTIVE'].includes(asString(item.status))), tone: 'danger' as const },
   ];
   if (configPath === '/room-items') return [
-    { id: 'ALL', label: 'Semua Barang', count: items.length, tone: 'info' as const },
+    { id: 'ALL', label: 'Semua Barang', count: totalItems ?? items.length, tone: 'info' as const },
     { id: 'GOOD', label: 'Baik', count: statusCount('GOOD'), tone: 'success' as const },
     { id: 'MAINTENANCE', label: 'Perlu Dicek', count: statusCount('MAINTENANCE'), tone: 'warning' as const },
     { id: 'DAMAGED', label: 'Rusak', count: statusCount('DAMAGED'), tone: 'danger' as const },
     { id: 'MISSING', label: 'Hilang', count: statusCount('MISSING'), tone: 'danger' as const },
   ];
   if (configPath === '/inventory-items') return [
-    { id: 'ALL', label: 'Semua Stok', count: items.length, tone: 'info' as const },
+    { id: 'ALL', label: 'Semua Stok', count: totalItems ?? items.length, tone: 'info' as const },
     { id: 'LOW_AUTO', label: 'Stok Menipis', count: count(isLowStock), tone: 'warning' as const },
     { id: 'OUT_OF_STOCK', label: 'Habis', count: count((item) => Number(item.qtyOnHand ?? 0) <= 0), tone: 'danger' as const },
     { id: 'GOOD', label: 'Aman', count: count((item) => asString(item.status) === 'GOOD' && !isLowStock(item)), tone: 'success' as const },
     { id: 'DAMAGED', label: 'Rusak', count: statusCount('DAMAGED'), tone: 'danger' as const },
   ];
   if (configPath === '/inventory-movements') return [
-    { id: 'ALL', label: 'Semua Mutasi', count: items.length, tone: 'info' as const },
+    { id: 'ALL', label: 'Semua Mutasi', count: totalItems ?? items.length, tone: 'info' as const },
     { id: 'IN', label: 'Masuk', count: movementCount('IN'), tone: 'success' as const },
     { id: 'OUT', label: 'Keluar', count: movementCount('OUT'), tone: 'warning' as const },
     { id: 'ASSIGN_TO_ROOM', label: 'Pasang ke Kamar', count: movementCount('ASSIGN_TO_ROOM'), tone: 'info' as const },
     { id: 'RETURN_FROM_ROOM', label: 'Kembali', count: movementCount('RETURN_FROM_ROOM'), tone: 'neutral' as const },
   ];
   if (configPath === '/announcements') return [
-    { id: 'ALL', label: 'Semua', count: items.length, tone: 'info' as const },
+    { id: 'ALL', label: 'Semua', count: totalItems ?? items.length, tone: 'info' as const },
     { id: 'PUBLISHED', label: 'Published', count: publishedCount(true), tone: 'success' as const },
     { id: 'DRAFT', label: 'Draft', count: publishedCount(false), tone: 'warning' as const },
     { id: 'PINNED', label: 'Pinned', count: count((item) => Boolean(item.isPinned)), tone: 'info' as const },
   ];
   if (configPath === '/expenses') return [
-    { id: 'ALL', label: 'Semua Biaya', count: items.length, tone: 'info' as const },
+    { id: 'ALL', label: 'Semua Biaya', count: totalItems ?? items.length, tone: 'info' as const },
     { id: 'DRAFT', label: 'Perlu Konfirmasi', count: count((item) => asString(item.status) === 'DRAFT'), tone: 'warning' as const },
     { id: 'CONFIRMED', label: 'Terkonfirmasi', count: count((item) => asString(item.status) === 'CONFIRMED'), tone: 'success' as const },
     { id: 'CANCELLED', label: 'Dibatalkan', count: count((item) => asString(item.status) === 'CANCELLED'), tone: 'neutral' as const },
@@ -278,7 +278,7 @@ export function getResourceFilterDefinitions(configPath: string, items: Array<Re
     { id: 'ADMIN_COST', label: 'Admin/Platform', count: count((item) => ['TAX', 'MARKETING', 'OTHER'].includes(asString(item.category))), tone: 'neutral' as const },
   ];
   if (configPath === '/wifi-sales') return [
-    { id: 'ALL', label: 'Semua Voucher', count: items.length, tone: 'info' as const },
+    { id: 'ALL', label: 'Semua Voucher', count: totalItems ?? items.length, tone: 'info' as const },
     { id: 'DAILY', label: 'Harian', count: count((item) => String(item.packageName ?? '').toLowerCase().includes('hari')), tone: 'success' as const },
     { id: 'WEEKLY', label: 'Mingguan', count: count((item) => String(item.packageName ?? '').toLowerCase().includes('minggu')), tone: 'info' as const },
     { id: 'MONTHLY', label: 'Bulanan', count: count((item) => String(item.packageName ?? '').toLowerCase().includes('bulan')), tone: 'warning' as const },

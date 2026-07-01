@@ -2,10 +2,14 @@
 
 > Dokumen orientasi utama. Detail eksekusi → `docs/M10_CHECKLIST_CHANGELOG.md`. Navigasi kode → `docs/CODEMAP.md`.
 
-## Status Terkini (2026-06-20)
+## Status Terkini (2026-07-01)
 
 - **Fase A** — Pra-Go-Live: blocked owner (deploy nyata menunggu server/domain/env)
-- **Fase B–L** — semua SELESAI (publik, owner, staff, AI, UI, audit, hardening, UI/UX)
+- **Fase B–U** — SELESAI (publik, owner, staff, AI, UI, audit, hardening, wizard, fasilitas)
+- **Fase V** — Booking flow baru: inti benar (RoomStatus tanpa BOOKING), tapi sebagian verifikasi belum bersih (test + payment proof single-submit)
+- **Fase W** — Audit Maksimal Status Proyek: AKTIF (W-01..W-09 selesai, W-00-D1 menunggu owner)
+- **Fase X** — Audit UI/UX Visual: AKTIF (X-01..X-11, X-13, X-15, X-16 selesai; X-02d, X-14 menunggu owner)
+- **Fase Y** — Test Coverage Maksimal: AKTIF (pemetaan 19 sub-fase, 153 area; 125 belum — bertahap per chat, lihat `M10`)
 - **Finance:** Audit keuangan ultra LULUS — TB balanced, deposit MATCHED, 8 invarian PASS
 - **AI:** Fase G (G0-G9) + Fase J hardening selesai — manual-only, OWNER/ADMIN, audit meta.ai
 - **Schema terkini:** S-6 (migration `20260619140000_ai_draft_queue`)

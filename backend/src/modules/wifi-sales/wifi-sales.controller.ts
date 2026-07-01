@@ -17,14 +17,16 @@ import { WifiSalesService } from './wifi-sales.service';
 export class WifiSalesController {
   constructor(private readonly wifisalesService: WifiSalesService) {}
 
+  // W-03: STAFF dihapus dari GET — data penjualan WiFi mengandung revenue (amountRupiah).
+  // Default rekomendasi: financial data OWNER/ADMIN only.
   @Get()
-  @Roles(UserRole.OWNER, UserRole.ADMIN, UserRole.STAFF)
+  @Roles(UserRole.OWNER, UserRole.ADMIN)
   async findAll(@Query() query: WifiSalesQueryDto) {
     return { message: 'Daftar penjualan WiFi berhasil diambil', data: await this.wifisalesService.findAll(query) };
   }
 
   @Get(':id')
-  @Roles(UserRole.OWNER, UserRole.ADMIN, UserRole.STAFF)
+  @Roles(UserRole.OWNER, UserRole.ADMIN)
   async findOne(@Param('id', ParseIntPipe) id: number) {
     return { message: 'Detail penjualan WiFi berhasil diambil', data: await this.wifisalesService.findOne(id) };
   }

@@ -474,14 +474,14 @@ export default function PublicGuestDashboardPage() {
 
       <section className="gx-trust-section">
         <Container fluid="xl">
-          <div className="gx-section-head gx-section-head-center gx-reveal">
+          <div className="gx-section-head gx-section-head-center">
             <div className="gx-label">Beda dari kost lain</div>
             <h2>Semua info kamar bisa langsung dicek — tidak perlu chat tanya-tanya dulu.</h2>
             <p>Status kamar, jadwal booking, pembayaran, dan komunikasi — semua di satu portal. Kamu tahu posisinya di mana sejak hari pertama.</p>
           </div>
           <div className="gx-trust-grid gx-stagger">
             {TRUST_ITEMS.map((item) => (
-              <article className="gx-trust-card gx-reveal" key={item.title}>
+              <article className="gx-trust-card" key={item.title}>
                 <span className="gx-trust-mark">{item.mark}</span>
                 <h3>{item.title}</h3>
                 <p>{item.desc}</p>

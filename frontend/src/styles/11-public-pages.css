@@ -2198,7 +2198,8 @@
   margin: 0;
 }
 .gx-footer-version {
-  opacity: .5;
+  opacity: 1;
+  color: rgba(255, 255, 255, .78);
   font-size: .68rem;
   letter-spacing: .03em;
 }
@@ -3868,7 +3869,7 @@
 
 .gx-acc-cat {
   background: #f4f0e8;
-  color: var(--gx-coral);
+  color: #87341f;
   letter-spacing: 0;
 }
 

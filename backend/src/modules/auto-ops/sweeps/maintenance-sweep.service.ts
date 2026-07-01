@@ -51,7 +51,9 @@ export class MaintenanceSweepService {
     const enabled = String(process.env.AC_CLEANING_ENABLED ?? 'true').toLowerCase() !== 'false';
     if (!enabled) return { skipped: true, skippedReason: 'AC_CLEANING_DISABLED', source };
     const now = options.now ?? new Date();
-    const kwhThreshold = Number(process.env.AC_CLEAN_KWH_THRESHOLD ?? AC_DEFAULT_KWH_THRESHOLD);
+    // Ambang kWh: prioritas OperationalSetting (owner-settable dari UI) → ENV → default.
+    const opSetting = await this.prisma.operationalSetting.findUnique({ where: { id: 1 }, select: { acCleanKwhThreshold: true } });
+    const kwhThreshold = opSetting?.acCleanKwhThreshold ?? Number(process.env.AC_CLEAN_KWH_THRESHOLD ?? AC_DEFAULT_KWH_THRESHOLD);
     try {
       const rooms = await this.prisma.room.findMany({
         where: { hasAc: true, isActive: true },

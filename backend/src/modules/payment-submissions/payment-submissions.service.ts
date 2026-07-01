@@ -7,6 +7,7 @@ import {
   NotFoundException,
   ServiceUnavailableException,
 } from '@nestjs/common';
+import { createHash } from 'crypto';
 import { existsSync } from 'fs';
 import { join } from 'path';
 import { Prisma } from '../../generated/prisma';
@@ -58,18 +59,30 @@ export class PaymentSubmissionsService {
 
   private readonly PROOF_DIR = join(process.cwd(), 'uploads', 'payment-proofs');
 
+  private proofAdvisoryLockKeys(fileKey: string): [number, number] {
+    const digest = createHash('sha256').update(fileKey).digest();
+    return [digest.readInt32BE(0), digest.readInt32BE(4)];
+  }
+
+  private async lockProofFileKeyTx(tx: Prisma.TransactionClient, fileKey?: string | null): Promise<void> {
+    if (!fileKey) return;
+    const [key1, key2] = this.proofAdvisoryLockKeys(fileKey);
+    await tx.$queryRaw`SELECT pg_advisory_xact_lock(${key1}, ${key2})`;
+  }
+
   /**
    * Validasi file proof:
    * - Jika paymentMethod bukan CASH: wajib ada fileKey
    * - fileKey harus ada di disk
    * - fileKey harus dimiliki oleh tenant yang sama (prefix tenantId_)
-   * - fileKey tidak boleh sudah dipakai tenant lain (consumed)
+   * - fileKey tidak boleh sudah pernah dipakai submission lain (consumed)
    * - Generate fileUrl server-side
    */
   private async validateAndResolveProof(
     tenantId: number,
     paymentMethod: string,
     fileKey?: string,
+    client: Prisma.TransactionClient | Pick<PrismaService, 'paymentSubmission'> = this.prisma,
   ): Promise<{ fileKey: string; fileUrl: string } | null> {
     if (!fileKey) {
       if (paymentMethod !== 'CASH') {
@@ -89,17 +102,15 @@ export class PaymentSubmissionsService {
       throw new BadRequestException('File bukti pembayaran tidak ditemukan. Silakan unggah ulang.');
     }
 
-    // Validasi consumed: cek apakah fileKey sudah dipakai tenant LAIN
-    const existing = await this.prisma.paymentSubmission.findFirst({
+    // Validasi consumed: bukti yang sudah pernah masuk submission tidak boleh dipakai ulang.
+    const existing = await client.paymentSubmission.findFirst({
       where: {
         fileKey,
-        tenantId: { not: tenantId },
-        status: { notIn: ['REJECTED' as any] },
       },
       select: { id: true },
     });
     if (existing) {
-      throw new BadRequestException('File bukti pembayaran tidak valid (sudah dipakai pihak lain)');
+      throw new BadRequestException('File bukti pembayaran tidak valid (sudah pernah dipakai)');
     }
 
     // Generate fileUrl server-side (jangan percaya client)
@@ -221,18 +232,20 @@ export class PaymentSubmissionsService {
       }
 
       // V-06: Validasi proof wajib (ownership + file exists + consumed)
-      const resolvedProof = await this.validateAndResolveProof(
-        tenantId,
-        dto.paymentMethod as string,
-        dto.fileKey,
-      );
-
       const created = await this.prisma.$transaction(async (tx) => {
         // Kunci baris invoice agar concurrent submission untuk invoice yang sama
         // di-serialize — mencegah race condition TOCTOU pada cek existingPending.
         if (dto.invoiceId) {
           await tx.$queryRaw`SELECT id FROM "Invoice" WHERE id = ${dto.invoiceId} FOR UPDATE`;
         }
+
+        await this.lockProofFileKeyTx(tx, dto.fileKey);
+        const resolvedProof = await this.validateAndResolveProof(
+          tenantId,
+          dto.paymentMethod as string,
+          dto.fileKey,
+          tx,
+        );
 
         const existingPending = await tx.paymentSubmission.findFirst({
           where: {
@@ -326,14 +339,15 @@ export class PaymentSubmissionsService {
       throw new BadRequestException('Ada invoice duplikat dalam daftar pembayaran');
     }
 
-    // V-06: Validasi proof wajib (ownership + file exists + consumed)
-    const resolvedProof = await this.validateAndResolveProof(
-      tenantId,
-      dto.paymentMethod as string,
-      dto.fileKey,
-    );
-
     return this.prisma.$transaction(async (tx) => {
+      await this.lockProofFileKeyTx(tx, dto.fileKey);
+      const resolvedProof = await this.validateAndResolveProof(
+        tenantId,
+        dto.paymentMethod as string,
+        dto.fileKey,
+        tx,
+      );
+
       // Validasi semua invoice milik stay yang sama dan tenant yang sama
       const invoices = await tx.invoice.findMany({
         where: { id: { in: dto.invoiceIds } },

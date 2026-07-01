@@ -10,6 +10,7 @@ import StatusBadge from '../../components/common/StatusBadge';
 import CurrencyDisplay from '../../components/common/CurrencyDisplay';
 import EmptyState from '../../components/common/EmptyState';
 import PaginationControls from '../../components/common/PaginationControls';
+import { StatCardSkeleton } from '../../components/common/SkeletonLoader';
 import TanStackTable from '../../components/common/TanStackTable';
 import SearchableSelect from '../../components/common/SearchableSelect';
 import { type ActionQueueItem, type AssistantItem, type MetricChip } from '../../components/command-center';
@@ -513,15 +514,21 @@ export default function InvoicesPage() {
         </div>
       </div>
 
-      <StatusStrip
-        items={metrics.map((metric) => ({
-          id: metric.id,
-          label: metric.label,
-          value: metric.value,
-          helper: metric.helper,
-          tone: metric.status === 'DANGER' ? 'danger' : metric.status === 'WARNING' ? 'warning' : metric.status === 'SUCCESS' ? 'success' : 'info',
-        }))}
-      />
+      {invoicesQuery.isLoading ? (
+        <div className="d-flex gap-3 mb-3 flex-wrap" role="status" aria-label="Memuat ringkasan tagihan" aria-busy="true">
+          {Array.from({ length: 4 }).map((_, i) => <StatCardSkeleton key={i} />)}
+        </div>
+      ) : (
+        <StatusStrip
+          items={metrics.map((metric) => ({
+            id: metric.id,
+            label: metric.label,
+            value: metric.value,
+            helper: metric.helper,
+            tone: metric.status === 'DANGER' ? 'danger' : metric.status === 'WARNING' ? 'warning' : metric.status === 'SUCCESS' ? 'success' : 'info',
+          }))}
+        />
+      )}
 
       {allItems.length > 0 && <InvoiceAnalyticsPanel stats={stats} allItems={allItems} />}
 

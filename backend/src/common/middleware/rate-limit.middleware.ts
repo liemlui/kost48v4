@@ -16,6 +16,12 @@ export function createRateLimiter(options: {
   message?: string;
   /** Nama unik untuk membedakan bucket antar limiter. */
   name: string;
+  /**
+   * Saat `true`, request baru DITOLAK (503) bila Map penuh (MAX_TRACKED_KEYS terlampaui)
+   * alih-alih diloloskan diam-diam. Gunakan untuk route sensitif: auth, payment, upload.
+   * Default `false` (fail-open) — aman untuk route umum.
+   */
+  failClosed?: boolean;
 }) {
   const { windowMs, max, name } = options;
   const message =
@@ -39,10 +45,17 @@ export function createRateLimiter(options: {
 
     const entry = buckets.get(key);
     if (!entry || entry.resetAt <= now) {
-      // Audit E-9/M-03: hard cap — saat Map penuh oleh IP unik aktif (flood),
-      // request baru diloloskan tanpa tracking (fail-open) demi melindungi
-      // memori; entri lama yang masih aktif tetap dibatasi.
+      // W-01: hard cap — saat Map penuh oleh IP unik aktif (flood).
+      // `failClosed`: tolak (503) untuk route sensitif; default fail-open (lolos) untuk umum.
       if (!entry && buckets.size >= MAX_TRACKED_KEYS) {
+        if (options.failClosed) {
+          res.status(503).json({
+            statusCode: 503,
+            message: 'Layanan sibuk. Coba lagi beberapa saat lagi.',
+            error: 'Service Unavailable',
+          });
+          return;
+        }
         next();
         return;
       }

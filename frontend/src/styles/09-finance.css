@@ -1273,8 +1273,20 @@
 }
 .responsive-data-table th,
 .responsive-data-table td {
-  overflow-wrap: anywhere;
+  /* X-15: 'anywhere' memaksa pecah mid-token (mis. "16"->"1/6", "Rp 45.00"->"0").
+     'break-word' hanya memecah kata yang benar-benar tak muat, angka/ID pendek tetap utuh. */
+  overflow-wrap: break-word;
   word-break: normal;
+}
+/* X-15: kolom angka/kurs/ID tidak boleh pecah baris sama sekali. Pakai <td class="num-cell"> atau
+   kolom yang ditandai lewat data-col-kind bila tersedia; fallback: sel yang isinya di-align kanan. */
+.responsive-data-table td.num-cell,
+.responsive-data-table th.num-cell,
+.responsive-data-table td[data-col-kind="number"],
+.responsive-data-table td[data-col-kind="currency"],
+.responsive-data-table td[data-col-kind="id"] {
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
 }
 @media (min-width: 769px) and (max-width: 1180px) {
   .responsive-data-table th,

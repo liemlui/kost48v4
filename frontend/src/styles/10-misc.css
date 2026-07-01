@@ -457,11 +457,10 @@
 
   .tenant-workspace-tabs {
     display: flex;
+    flex-wrap: wrap;
     gap: .5rem;
-    overflow-x: auto;
     padding: .55rem;
     border-radius: 18px;
-    scroll-snap-type: x mandatory;
   }
 
   .tenant-workspace-tab {
@@ -804,9 +803,11 @@ body {
   border-radius: 14px;
   flex-direction: row;
   align-items: center;
+  min-width: 0; /* X-07: izinkan sel grid menyusut agar label tidak terpotong di 390px */
 }
-.tenant-workspace-tab > span { font-size: 1rem; }
-.tenant-workspace-tab strong { font-size: 0.78rem; font-weight: 800; }
+.tenant-workspace-tab > span { font-size: 1rem; flex: 0 0 auto; }
+/* X-07: label boleh wrap 2 baris (bukan terpotong "Pengumu…") di layar sempit */
+.tenant-workspace-tab strong { font-size: 0.78rem; font-weight: 800; min-width: 0; white-space: normal; overflow-wrap: break-word; line-height: 1.12; }
 .tenant-workspace-tab em { display: none; }
 .tenant-workspace-content { padding: 0.1rem 0 1rem; }
 
@@ -2560,6 +2561,7 @@ div.tenant-stay-fact-chip {
 .staff-performance-table,
 .compact-data-table {
   --bs-table-bg: transparent;
+  font-variant-numeric: tabular-nums;  /* X-15: angka/kurs/ID rata kolom */
 }
 
 .staff-compact-table tbody tr,

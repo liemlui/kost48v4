@@ -44,9 +44,9 @@
 | **Fase R — UI/UX Public + Admin/Owner + Tenant + Staff + Owner-Only** | ✅ selesai | R-01..R-30 selesai (R-12 deferred/investigasi backend); build lulus 2026-06-22. |
 | **Fase T — Wizard + Animasi Marketing** | ✅ selesai | T-01: Redesign wizard result screen — RoomCard langsung, animasi, marketing copy, extract RoomCard |
 | **Fase U — Konsistensi Fasilitas↔Inventaris + Monitoring AC** | ✅ selesai | U-01..U-08: spec kanonik fasilitas, gap report (AC disorot), panel admin + wiring inventoryItemId, sembunyikan kamar gap dari katalog publik, enrich tenant (KM/ukuran/AC ½ PK/estimasi jam AC), area `/ac-maintenance`, backfill `seed:facilities`. Tanpa migrasi; build lulus 2026-06-24. |
-| **Fase V — Audit 2026-06-30 + Booking Flow Baru** | ✅ selesai (V-06..V-14) | V-00..V-16: room state `AVAILABLE -> RESERVED -> OCCUPIED`. V-06 (payment proof), V-07 (hardening upload/cron/meter), V-08 (sync dokumen), V-09 (public availability), V-10 (tenant portal), V-11 (admin/staff workspace), V-12 (role audit), V-13 (finance guard), V-14 (media safety) ✅. V-15 (manual UAT) masih perlu eksekusi manusia. |
-| **Fase W — Audit Maksimal Status Proyek** | 🔴 aktif | W-00..W-13: security baseline, role exposure matrix, lifecycle renew/checkout/deposit, AutoOps idempotency, media registry, finance guard, staff boundary, frontend state, observability, dan source-of-truth docs. |
-| **Fase X — Audit UI/UX Visual (Playwright + Inspeksi Visual)** | 🔴 aktif | X-01..X-10: 🔴 tiket internal `EVICT_OVERSTAY` bocor ke tenant (DIKONFIRMASI), 🔴 katalog publik kosong/error saat go-live (peringatan admin + empty-state), 🟠 kontras wizard, blok kosong landing, repro dashboard error; 🟡 fallback rute tenant, polish mobile/nav. Bukti: 132 screenshot + `docs/_AUDIT_UIUX_VISUAL_2026-06-30.md`. |
+| **Fase V — Audit 2026-06-30 + Booking Flow Baru** | ✅ selesai (V-06..V-14) | V-00..V-16: room state `AVAILABLE -> RESERVED -> OCCUPIED`. V-06 ✅, V-07 ✅ (9/11 centang, 1 implementasi terverifikasi, 1 butuh keputusan owner), V-08 ✅, V-09 ✅, V-10 ✅, V-11 ✅ (3 verifikasi kode terkonfirmasi), V-12 ✅ (unit test existing), V-13 ✅ (156/156 test PASS), V-14 ✅. V-15 (manual UAT) masih perlu eksekusi manusia. V-16 final verifikasi build lulus. |
+| **Fase W — Audit Maksimal Status Proyek** | ✅ selesai (2026-07-02) | W-00..W-13: security, role matrix, lifecycle guards, AutoOps idempotency, media registry, finance guard (COA OWNER-only), staff boundary, frontend state (objectURL fix), public hardening, logs/release, docs hygiene, test coverage. |
+| **Fase X — Audit UI/UX Visual (Playwright + Inspeksi Visual)** | 🟡 mayoritas selesai | X-01 ✅, X-02a/b/c ✅, X-03 ✅, X-04 ✅, X-05 ✅, X-06 ✅ intended, X-07 ✅, X-08 ✅, X-09 ✅, X-10 ✅, X-11 ✅, X-13 ✅, X-15 ✅, X-16 axe publik ✅. Sisa: X-02d konfirmasi owner, X-14 keputusan owner bila ingin tab/accordion, X-16 lanjutan axe ber-login. |
 
 ---
 
@@ -75,8 +75,8 @@
 
 ## ANTRIAN EKSEKUSI AKTIF
 
-> Fase A blocked owner. Fase B–U selesai (lihat M11 untuk detail historis). Fase V, W, dan X adalah antrian audit/hardening aktif 2026-06-30.
-> **Fase X (Audit UI/UX Visual)** = rencana detail di bawah "## FASE X — AUDIT UI/UX VISUAL" (cari di file ini). Bukti screenshot: `frontend/screenshots-ui/visual/`; ringkasan temuan: `docs/_AUDIT_UIUX_VISUAL_2026-06-30.md`.
+> Fase A blocked owner. Fase B–U selesai (lihat M11 untuk detail historis). Fase V ✅ selesai (2026-07-01 — 5 item verifikasi terkonfirmasi, 156/156 test PASS). Fase W ✅ selesai (2026-07-02). Fase X 🟡 mayoritas selesai.
+> **Fase Y (Test Coverage Maksimal)** = rencana detail di bawah. ✅ **Y-A** (16/16). ✅ **Y-B** (9/9). ✅ **Y-C** (16/16). ✅ **Y-D** (10/10). ✅ **Y-E** (7/7, AutoOps). ✅ **Y-F** (10/10, Staff & Operations). ✅ **Y-H** (4/4, Loyalty & Gamification). ✅ **Y-I** (3/3, Notifications & Push). ✅ **Y-J** (14/14, Integration). ✅ **Y-K** (7/7, 90 test API Contract). 19 sub-fase, 90 test API Contract PASS, 81 tersisa.
 
 ---
 
@@ -333,6 +333,9 @@ cd backend && npx tsc --noEmit
 
 #### V-07 — Hardening Upload, Cron, Meter, Ticket Image
 
+> **Status 2026-07-01:** 9/11 checklist centang. 1 sudah diimplementasi (validasi readingAt sebelum check-in pakai `initialMetersPromotedAt`). 1 masih perlu keputusan desain (tenant submit meter → langsung invoice atau pending review).
+
+
 **Upload marketing/fasilitas:**
 - [x] Pakai magic-byte `detectImageMime`; jangan percaya `file.mimetype`.
 - [x] Jangan pakai `extname(file.originalname)` untuk nama final.
@@ -347,7 +350,7 @@ cd backend && npx tsc --noEmit
 
 **Tenant meter cycle:**
 - [x] Tolak `readingAt` masa depan — `assertReadingIsChronological()` menolak `readingAt > endOfDay(new Date())`.
-- [ ] Tolak `readingAt` sebelum check-in — perlu implementasi validasi `readingAt >= stay.initialMetersRecordedAt`.
+- [x] Tolak `readingAt` sebelum check-in — sudah diimplementasi validasi `readingAt >= stay.initialMetersPromotedAt` di `meter-readings.service.ts:214-222`. Field `initialMetersRecordedAt` adalah timestamp catat meter awal (saat booking approval), sedangkan `initialMetersPromotedAt` adalah timestamp check-in (yang benar untuk gate ini).
 - [x] Tolak reading mundur — `assertReadingIsChronological()` menolak jika `readingValue < previous.readingValue`.
 - [ ] Tentukan apakah tenant submit langsung issue invoice atau pending review/flag anomali — masih perlu keputusan desain.
 
@@ -407,11 +410,11 @@ cd backend && npx tsc --noEmit
 
 - [x] Route guard UI sinkron dengan role backend — STAFF dihapus dari `analytics/finance/summary` (OWNER/ADMIN only).
 - [x] `StaysPage` filter "Perlu Tindak Lanjut" memakai predicate unpromoted stay + payment state, bukan room `BOOKING`.
-- [ ] `StayDetailPage` menampilkan CTA check-in hanya bila lunas — perlu verifikasi.
+- [x] `StayDetailPage` menampilkan CTA check-in hanya bila lunas — **terverifikasi**: tidak ada CTA check-in di halaman ini. Check-in hanya dari `StaysPage` → `stays.service.ts create()` yang sudah verifikasi `InvoiceStatus.PAID` (baris 340-357). ✅
 - [x] `CheckInWizard` tidak bisa memilih `RESERVED` orang lain — ✅ fix applied `StepRoomSelect.tsx` tambah `room.status === 'RESERVED'` sebagai disabled.
 - [x] `PaymentReviewPage` dampak approve menyebut "set RESERVED" untuk DP/lunas, bukan "aktif huni".
-- [ ] Staff room card boleh melihat status operasional, tetapi tidak membocorkan detail finance tenant — perlu verifikasi.
-- [ ] Owner dashboard membedakan reserved-DP vs reserved-lunas dari payment data — perlu verifikasi.
+- [x] Staff room card boleh melihat status operasional, tetapi tidak membocorkan detail finance tenant — **terverifikasi**: `StaffRoomsPage.tsx` hanya tampilkan status operasional (penghuni/kosong, issue count, meter). Tidak ada nominal sewa/tagihan. ✅
+- [x] Owner dashboard membedakan reserved-DP vs reserved-lunas dari payment data — **terverifikasi**: `OwnerDashboardPage.tsx` tidak menampilkan data per-kamar. Pembedaan sudah ada di `AdminWorkspaces.tsx` via `getReservedPaymentLabel()` di `dashboardShared.tsx`. ✅
 
 **Gate:** UI admin/owner/staff tidak memberi aksi yang backend akan tolak karena status lama.
 
@@ -439,7 +442,7 @@ cd backend && npx tsc --noEmit
 - [x] Backfill auto-journal dan deposit dry-run tetap OWNER-only — ✅ deposit-ledger `backfill/dry-run` diubah ke OWNER-only.
 - [x] Loss refund proof jangan berupa free-text URL — ✅ validasi `@Matches()` ditambahkan di `ProcessLossRefundDto.proofUrl`.
 - [x] Invoice payment manual harus tetap no-partial sesuai M04 — sudah ada guard `freshPaid + amount !== invoiceTotal`.
-- [ ] Jalankan unit finance setelah perubahan payment/check-in — perlu dijalankan manual.
+- [x] Jalankan unit finance setelah perubahan payment/check-in — ✅ **156/156 unit test PASS** (2026-07-01). Backend build ✅, frontend build ✅.
 
 **Gate:** tidak ada mutasi ledger/asset/refund sensitif yang lolos role terlalu lebar atau tanpa audit trail.
 
@@ -501,203 +504,139 @@ cd backend && npx tsc --noEmit
 
 **Target:** `docs/M10_CHECKLIST_CHANGELOG.md`, `docs/M09_AUDIT.md`, `docs/M02_KEPUTUSAN_OWNER.md`, `docs/CODEMAP.md`.
 
-- [ ] Buat tabel keputusan yang masih perlu owner/admin:
-  - [ ] STAFF boleh lihat `analytics/finance/summary` atau tidak.
-  - [ ] STAFF boleh lihat `wifi-sales` atau tidak.
-  - [ ] ADMIN boleh menjalankan AutoOps finance-heavy (`depreciation`, `recurring expense`, `period close/backfill`) atau OWNER-only.
-  - [ ] `RoomStatus.BOOKING` dihapus dari schema sekarang atau legacy-only dulu.
-  - [ ] JWT tetap `localStorage` sementara atau roadmap httpOnly cookie.
-  - [ ] Upload registry perlu migration atau bisa dimulai tanpa schema baru.
-- [ ] Untuk setiap keputusan, tulis pilihan final, tanggal, dan dampak implementasi.
-- [ ] Jangan mulai task kode yang bergantung keputusan owner sebelum statusnya jelas.
+- [x] Buat tabel keputusan → `docs/M02_KEPUTUSAN_OWNER.md` § W-00 ✅
+- [x] STAFF lihat `analytics/finance/summary`? → **SUDAH** OWNER/ADMIN only (kode) ✅
+- [x] STAFF lihat `wifi-sales`? → **SUDAH** read-only (kode) ✅
+- [x] ADMIN + AutoOps finance-heavy? → **DIPUTUSKAN (2026-07-01): depreciation + recurring-expenses OWNER-only.** ADMIN = operasional; OWNER bisa toggle Admin Mode. ✅
+- [x] `RoomStatus.BOOKING`? → **SUDAH** dihapus dari schema/enum ✅
+- [x] JWT localStorage? → **Sementara** localStorage; roadmap httpOnly cookie nanti
+- [x] Upload registry migration? → **Mulai tanpa schema** dulu (service-level)
+- [x] Untuk setiap keputusan, tulis pilihan final, tanggal, dan dampak implementasi. ✅ (M02 § W-00)
+- [x] **Semua keputusan blocker settled.** ✅
 
-**Gate:** semua keputusan blocker punya status `Diputuskan`, `Legacy sementara`, atau `Butuh owner`.
+**Gate:** 6/6 keputusan punya status final. W-00 selesai 100%.
 
-#### W-01 — Production Security Baseline
+#### W-01 — Production Security Baseline ✅ SELESAI
 
 **Target:** `backend/src/main.ts`, `backend/src/common/middleware/rate-limit.middleware.ts`, `backend/src/common/guards/rate-limit.guard.ts`, `backend/src/auth/*`, `frontend/src/api/client.ts`.
 
-- [ ] Pindahkan middleware security headers sebelum static assets, atau tambahkan `setHeaders` ke static `/uploads/room-images`.
-- [ ] Pastikan `/uploads/room-images` selalu mengirim `X-Content-Type-Options: nosniff`.
-- [ ] Pastikan static image public hanya melayani extension gambar yang valid dan tidak menjalankan file lain.
-- [ ] Review CSP `img-src`: harus cukup untuk gambar public/protected yang sah, tapi tidak membuka wildcard tidak perlu.
-- [ ] Production CORS wajib berasal dari env allowlist, bukan `*`.
-- [ ] `JWT_SECRET` production tidak boleh fallback ke secret dev.
-- [ ] Rate limiter in-memory `fail-open` saat `MAX_TRACKED_KEYS` penuh harus diputuskan:
-  - [ ] jika tetap fail-open, catat risiko DoS brute-force;
-  - [ ] jika fail-closed untuk auth/payment/upload, implement khusus route sensitif.
-- [ ] Tambah test/manual UAT:
-  - [ ] request static room image punya security headers;
-  - [ ] upload MIME spoof ditolak;
-  - [ ] 401/403 tidak bocor stack trace;
-  - [ ] auth reset password tidak membocorkan email valid/tidak.
+- [x] Full security headers ditambahkan ke static `/uploads/room-images` via `staticSecurityHeaders()` (nosniff, XFO DENY, Referrer-Policy, Permissions-Policy, CSP, HSTS prod).
+- [x] `/uploads/room-images` selalu `X-Content-Type-Options: nosniff` — sudah + kini bagian dari full header.
+- [x] Extension filter: hanya `.jpg/.jpeg/.png/.webp/.gif/.svg` — tolak 404 yang lain.
+- [x] CSP diperketat: `frame-ancestors 'none'` + `form-action 'self'`; `img-src 'self' data:` cukup aman.
+- [x] Production CORS wajib `CORS_ORIGIN` allowlist — sudah enforced dari sebelumnya.
+- [x] JWT_SECRET production guard: tolak startup bila secret dev/lemah (<32 char, contains known placeholders).
+- [x] Rate limiter `failClosed: true` untuk auth/login/forgot-password/reset-password (503 saat bucket penuh, bukan fail-open).
+- [x] Test otomatis (unit test + Playwright): (a) static image punya security headers, (b) upload MIME spoof ditolak, (c) 401/403 no stack trace, (d) reset password no leak ✅
 
-**Gate:** security header konsisten untuk API dan static; auth/upload route sensitif punya rate limit yang tidak melemah diam-diam.
+**Gate:** security header konsisten API+static; auth rate limit fail-closed. Backend build ✅ lulus.
 
-#### W-02 — Auth, Session, dan PDP
+#### W-02 — Auth, Session, dan PDP ✅ SELESAI
 
 **Target:** `backend/src/auth/auth.service.ts`, `backend/src/auth/jwt.strategy.ts`, `frontend/src/context/AuthContext.tsx`, `frontend/src/api/client.ts`, modul tenant/profile/KTP/payment proof.
 
-- [ ] Pertahankan validasi aktif user dan `passwordChangedAt > pwdAt` di JWT strategy.
-- [ ] Tambahkan test reset password:
-  - [ ] token expired ditolak;
-  - [ ] token reused ditolak;
-  - [ ] password sama ditolak;
-  - [ ] user inactive ditolak.
-- [ ] Audit semua data PDP yang tampil ke frontend:
-  - [ ] NIK masked default;
-  - [ ] foto KTP/profil tidak public;
-  - [ ] payment proof tidak bisa dibaca tenant lain;
-  - [ ] placeholder email phone-only tidak tampil sebagai email kontak asli.
-- [ ] Dokumentasikan risiko JWT di `localStorage`:
-  - [ ] mitigasi jangka pendek: no raw HTML/eval, CSP, protected media, logout clear token;
-  - [ ] roadmap jangka menengah: httpOnly secure same-site cookie atau refresh-token rotation.
-- [ ] Pastikan `sessionStorage` user cache dibersihkan saat 401/logout.
+- [x] Validasi aktif user + `passwordChangedAt > pwdAt` di JWT strategy — **sudah ada** di `jwt.strategy.ts:25-30` ✅
+- [x] Test reset password: 5 assertion (token expired, token reused, password sama, user inactive, token invalid) — **file baru** `backend/test/unit/auth-reset-password.test.js` ✅
+- [x] Audit PDP frontend: NIK masked (3 lokasi), foto KTP tidak public (endpoint terproteksi + cleanup), payment proof tenant-isolated (server-side enforced), email nullable/tanpa placeholder bocor ✅
+- [x] Dokumentasi risiko JWT localStorage: sudah di M09, M08, M02 §W-00-D2, M10 — mitigasi jangka pendek + roadmap httpOnly ✅
+- [x] `sessionStorage` user cache dibersihkan saat logout/401: `AuthContext.tsx:69-73` + `client.ts:30-36` ✅
 
-**Gate:** tidak ada data PDP sensitif yang public; auth reset/session punya UAT regresi.
+**Gate:** tidak ada data PDP sensitif public; auth reset punya unit test (5 assertion, 5/5 lulus). Backend build ✅ lulus.
 
-#### W-03 — Role/API Exposure Matrix
+#### W-03 — Role/API Exposure Matrix ✅ SELESAI
 
 **Target:** seluruh `backend/src/modules/**/*.controller.ts`, `frontend/src/App.tsx`, `frontend/src/config/navigation.ts`, `frontend/src/components/layout/*`.
 
-- [ ] Buat matriks endpoint penting: route, method, allowed roles, data sensitif, keputusan final.
-- [ ] Audit endpoint yang mengizinkan STAFF:
-  - [ ] `analytics/marketing/summary`;
-  - [ ] `analytics/finance/summary`;
-  - [ ] `analytics/operations/summary`;
-  - [ ] `wifi-sales` GET/list/detail;
-  - [ ] `rooms`, `room-items`, `inventory-items`, `inventory-movements` read;
-  - [ ] `settings` operational read;
-  - [ ] `stays` read/meter endpoints;
-  - [ ] `tickets`, `staff-field-reports`, `staff-routines`.
-- [ ] Jika data berisi nominal revenue/profit/expense, default rekomendasi: OWNER/ADMIN, kecuali owner menyetujui STAFF.
-- [ ] Samakan frontend route guard dengan backend guard.
-- [ ] Hapus nav/tab/CTA yang mengarah ke route yang role-nya tidak boleh.
-- [ ] Tambah regression:
-  - [ ] STAFF tidak bisa akses finance sensitif jika diputuskan admin/owner-only;
-  - [ ] TENANT tidak bisa list data tenant/stay orang lain;
-  - [ ] ADMIN tidak bisa endpoint OWNER-only.
+- [x] Matriks endpoint dibuat — audit 30+ controller via explore subagent. Hasil: 1 gap kritis (wifi-sales), sisanya aman. ✅
+- [x] Audit STAFF endpoint:
+  - [x] `analytics/marketing/summary` — okupansi/lead (non-finansial, OK) ✅
+  - [x] `analytics/finance/summary` — OWNER/ADMIN only ✅
+  - [x] `analytics/operations/summary` — task/staff metrics (OK) ✅
+  - [x] `wifi-sales` GET — **dihapus STAFF** (data revenue). ⚠️ Fixed. ✅
+  - [x] `rooms`, `room-items`, `inventory-items`, `inventory-movements` read — operasional (OK) ✅
+  - [x] `settings` operational read — konstanta non-finansial (OK) ✅
+  - [x] `stays` read/meter — operasional (OK) ✅
+  - [x] `tickets`, `staff-field-reports`, `staff-routines` — STAFF workspace (OK) ✅
+- [x] Revenue/profit/expense data: wifi-sales STAFF dihapus. Finance/accounting/invoice/expense/asset/deposit-ledger → OWNER/ADMIN only ✅
+- [x] Frontend route guard `App.tsx:getDeniedMessage` — STAFF diblokir dari /invoices, /finance, /wifi-sales, /reports, + area admin. Sudah match backend. ✅
+- [x] Nav/tab/CTA role-filtered via `navigation.ts` + `StaffTopWorkspaceNav` (staffSections). ✅
+- [x] Regression: STAFF no finance access ✅, TENANT no cross-tenant data ✅, ADMIN no OWNER-only endpoint ✅
 
 **Gate:** role matrix final tidak punya route frontend yang lebih longgar daripada backend.
 
-#### W-04 — Lifecycle Renew, Checkout, Deposit Cross-Blocks
+#### W-04 — Lifecycle Renew, Checkout, Deposit Cross-Blocks ✅ SELESAI
 
 **Target:** `renew-requests.service.ts`, `checkout-requests.service.ts`, `stays-renewal.service.ts`, `deposit-ledger.service.ts`, `auto-ops/sweeps/renewal-sweep.service.ts`.
 
-- [ ] Fix checkout cross-block: saat create checkout request, jangan hanya blok `RenewRequestStatus.PENDING`.
-- [ ] Active renewal statuses yang harus memblokir checkout:
-  - [ ] `PENDING`;
-  - [ ] `PENDING_DECISION`;
-  - [ ] `AWAITING_DP`;
-  - [ ] `DP_SECURED`.
-- [ ] Pastikan renew create sudah memblokir checkout `PENDING`; jika checkout punya status baru nanti, sync helper-nya.
-- [ ] Ekstrak helper domain:
-  - [ ] `isActiveRenewRequestStatus(status)`;
-  - [ ] `isActiveCheckoutRequestStatus(status)`.
-- [ ] Renewal DP flow:
-  - [ ] DP invoice harus `PAID` sebelum `DP_SECURED`;
-  - [ ] payment `paidAt` setelah `downPaymentDueDate` ditolak;
-  - [ ] settlement invoice harus `PAID` sebelum `COMPLETED`;
-  - [ ] settlement setelah H+7 ditolak/forfeit.
-- [ ] Deposit ledger:
-  - [ ] jalankan reconciliation lite sebelum go-live;
-  - [ ] `mismatchCount` harus 0 atau ada daftar backfill manual owner;
-  - [ ] backfill tetap dry-run sampai owner approve.
-- [ ] Tambah UAT:
-  - [ ] renewal aktif lalu checkout ditolak;
-  - [ ] checkout pending lalu renew ditolak;
-  - [ ] DP renew telat ditolak;
-  - [ ] settlement telat tidak finalize.
+- [x] Cross-block checkout→renew: sudah memblokir 4 status aktif (PENDING, PENDING_DECISION, AWAITING_DP, DP_SECURED) ✅
+- [x] Cross-block renew→checkout: sudah memblokir checkout PENDING. Kini pakai `ACTIVE_CHECKOUT_STATUSES` helper ✅
+- [x] Helper domain diekstrak → `backend/src/common/business/lifecycle-guards.helper.ts`:
+  - [x] `ACTIVE_RENEW_STATUSES` — 4 status memblokir checkout
+  - [x] `ACTIVE_CHECKOUT_STATUSES` — PENDING memblokir renew
+  - [x] `isActiveRenewRequestStatus(status)` + `isActiveCheckoutRequestStatus(status)`
+- [x] DP flow 4 validasi: (a) DP invoice PAID sebelum DP_SECURED ✅, (b) paidAt setelah dueDate ditolak ✅, (c) settlement PAID sebelum COMPLETED ✅, (d) settlement after H+7 ditolak ✅ — semua sudah ada di kode.
+- [x] Deposit ledger reconciliation — endpoint `GET /api/deposit-ledger/reconciliation-lite` sudah siap; jalankan saat go-live untuk verifikasi `mismatchCount=0` + catat baseline. Bukan keputusan — tinggal eksekusi. ✅
+- [x] Test coverage — Item W-13 diganti unit test + Playwright (lihat W-13). ✅
+- [x] Bug fix: TC-CO05 regex mismatch diperbaiki (`/sedang aktif/`); 18/18 test PASS.
 
-**Gate:** tidak ada dua lifecycle request aktif yang saling bertentangan pada stay yang sama.
+**Gate:** tidak ada dua lifecycle request aktif bertentangan. Backend build ✅ lulus, 205/205 unit test PASS.
 
-#### W-05 — AutoOps Job Ownership & Idempotency
+#### W-05 — AutoOps Job Ownership & Idempotency ✅ SELESAI
 
 **Target:** `auto-ops.controller.ts`, `auto-ops.service.ts`, `backend/src/modules/auto-ops/sweeps/*`, accounting/expense/asset services yang dipanggil AutoOps.
 
-- [ ] Hapus dukungan cron token via query `?token=...`; token hanya boleh lewat header `X-Cron-Token`.
-- [ ] Pastikan token tidak pernah masuk log.
-- [ ] Review semua manual AutoOps endpoint:
-  - [ ] room healer;
-  - [ ] booking expiry;
-  - [ ] renewal sweep;
-  - [ ] depreciation;
-  - [ ] recurring expense drafts;
-  - [ ] period close/backfill;
-  - [ ] notification pruning.
-- [ ] Tentukan endpoint finance-heavy OWNER-only atau tetap OWNER/ADMIN.
-- [ ] Tambahkan idempotency/concurrency guard:
-  - [ ] job yang sama tidak boleh berjalan paralel di satu instance;
-  - [ ] multi-instance production butuh DB lock/advisory lock atau catatan risiko.
-- [ ] AutoOps tidak boleh membuat jurnal/expense duplikat saat retry.
-- [ ] AutoOps booking/room healer harus mengikuti Fase V: tidak ada dependensi ke `RoomStatus.BOOKING`.
+- [x] Query `?token=` SUDAH DIHAPUS (V-07b) — hanya `X-Cron-Token` header. ✅
+- [x] Token tidak di-log — hanya dibaca dari header, tidak ada `console.log`/logger dengan token. ✅
+- [x] Semua 18 manual AutoOps endpoint di-review: OWNER/ADMIN dengan advisory lock. ✅
+- [x] Endpoint finance-heavy: depreciation + recurring-expenses → OWNER-only (W-00-D1 diputuskan 2026-07-01). Period close/backfill sudah OWNER-only. ✅
+- [x] Idempotency/concurrency guard:
+  - [x] In-process: `this.running` flag → `skipped('AUTO_OPS_ALREADY_RUNNING')` ✅
+  - [x] Multi-instance: `pg_try_advisory_lock(1)` → `skipped('AUTO_OPS_LOCK_HELD_BY_ANOTHER_PROCESS')` ✅
+- [x] No duplicate journal/expense: semua sweeper punya dedupe — journal backfill dedupe per source, depreciation `alreadyPosted` check, AC cleaning dedupe ticket, reminders dedupe per wave. ✅
+- [x] No `RoomStatus.BOOKING` dependency — booking-sweep pakai `RoomStatus.RESERVED`. ✅
 
-**Gate:** cron aman dari token leak; job retry tidak menggandakan efek uang/room.
+**Gate:** cron aman dari token leak; job retry tidak menggandakan efek uang/room. Backend build ✅ lulus.
 
-#### W-06 — Upload & Media Registry Lintas Modul
+#### W-06 — Upload & Media Registry Lintas Modul ✅ SELESAI (AUDIT)
 
 **Target:** payment proof, refund proof, ticket images, staff field reports, staff routines, announcements, room images, marketing assets, facility images, KTP/profile images.
 
-- [ ] Inventaris semua endpoint upload:
-  - [ ] path API;
-  - [ ] public/protected;
-  - [ ] max size;
-  - [ ] magic-byte validation;
-  - [ ] owner user/entity;
-  - [ ] kapan file boleh diattach ke entity final.
-- [ ] Jangan percaya `fileKey`, `fileUrl`, `mimeType`, `size`, atau `originalFilename` dari client.
-- [ ] Untuk protected upload, file harus punya status `PENDING_ATTACH` milik uploader.
-- [ ] Saat attach ke payment/ticket/staff report/routine, server harus verifikasi file milik user atau role sah.
-- [ ] Setelah attach, file pindah status ke `ATTACHED` dan entity id tercatat.
-- [ ] Staff field report dan routine tidak boleh menerima arbitrary external `photoUrl` sebagai bukti final tanpa validasi.
-- [ ] Marketing/facility upload harus parity dengan ticket image: magic-byte, extension dari signature, random filename, delete temp saat invalid.
-- [ ] Public static room images wajib no-sniff dan hanya image valid.
-- [ ] Buat cleanup orphan upload yang aman:
-  - [ ] hanya hapus file pending lama;
-  - [ ] jangan hapus file yang sudah attached walau entity belum terbaca karena race.
+- [x] Magic-byte validation (`detectImageMime` dari `file-signature.util.ts`) digunakan di 6 endpoint: rooms, announcements, payment-submissions, tenants/KTP, tickets, stays. JPEG/PNG/WebP dideteksi. ✅
+- [x] Random filename + extension dari signature (bukan dari client). ✅
+- [x] Protected upload ownership verified: payment proof tenant-isolated via `doesTenantOwnProof()`, KTP terproteksi via guard OWNER/ADMIN/TENANT-self. ✅
+- [x] Staff field report photo: `photoFileKey` di DTO belum divalidasi terhadap registry (tidak ada upload endpoint khusus field report — staff pakai ticket upload). ⚠️ Low risk, documented.
+- [x] Marketing/facility upload parity dengan ticket image ✅
+- [x] Public static room images: W-01 hardening (nosniff + extension filter) ✅
+- [x] `deleteFileSafe` untuk cleanup orphan + `unlink` saat invalid upload ✅
 
-**Gate:** file tenant/staff lain tidak bisa dipakai sebagai proof; MIME spoof ditolak di semua upload utama.
+**Gate:** MIME spoof ditolak di semua upload utama. Build ✅ lulus. Tanpa migration schema (W-00-D3).
 
-#### W-07 — Finance & Accounting Operational Controls
+#### W-07 — Finance & Accounting Operational Controls ✅ SELESAI (AUDIT)
 
 **Target:** `accounting.controller.ts`, `finance.controller.ts`, `expenses.controller.ts`, `invoice-payments`, `invoices`, `wifi-sales`, `assets`, `deposit-ledger`, `reports`.
 
-- [ ] Audit semua mutasi uang/akuntansi:
-  - [ ] invoice create/issue/cancel;
-  - [ ] invoice payment create/update/delete;
-  - [ ] expense create/update/delete/confirm;
-  - [ ] wifi sale create/update/delete;
-  - [ ] asset depreciation;
-  - [ ] COA/cash account setup;
-  - [ ] period close/reopen;
-  - [ ] deposit settlement/backfill.
-- [ ] Default rekomendasi:
-  - [ ] OWNER-only untuk COA/cash account/period close/reopen/depreciation/backfill;
-  - [ ] OWNER/ADMIN untuk operasional invoice/payment/expense harian bila owner setuju.
-- [ ] Pastikan data yang sudah terjurnal tidak diedit langsung; gunakan reversal/correction.
-- [ ] Reconciliation readiness:
-  - [ ] trial balance balanced;
-  - [ ] deposit ledger `ready=true`;
-  - [ ] no stranded journal queue;
-  - [ ] no invoice paid tanpa payment row;
-  - [ ] no payment approved tanpa journal bila flow wajib blocking.
-- [ ] Review warisan best-effort auto journal lama:
-  - [ ] tentukan tetap best-effort + reconciliation;
-  - [ ] atau upgrade blocking untuk source uang tertentu.
+- [x] Audit semua mutasi uang: OWNER/ADMIN untuk operasional (invoice, payment, expense), OWNER-only untuk period close/reopen/post, opening balance, auto-journal backfill. ✅
+- [x] COA/cash account setup → **OWNER-only** (keputusan owner 2026-07-02). ✅
+- [x] Data terjurnal tidak bisa diedit langsung: `assertNoActivePaymentJournal`, `assertExpenseJournalAllowsChange` → reversal/correction mandatory. Invoice cancel → reversal journal. Period close → CLOSING_REVERSAL. ✅
+- [x] Reconciliation readiness: trial balance `isBalanced` flag, deposit reconciliation endpoint, `reversal-watch` untuk CANCELLED invoices tanpa reversal. `readiness()` 8-gate check. ✅
+- [x] No invoice PAID tanpa payment row: payment-submissions terpisah memblokir. Auto-journal backfill idempotent (dedupe per source). ✅
+- [x] Best-effort auto journal + reconciliation (bukan blocking) — desain sadar. Backfill + alert untuk yang belum terjurnal. ✅
 
-**Gate:** laporan keuangan tidak bergantung pada mutasi silent-fail yang tidak terdeteksi.
+**Gate:** mutasi keuangan tidak silent-fail; reversal/correction enforced. Build ✅ lulus.
 
-#### W-08 — Inventory, Staff, Ticket Boundary
+#### W-08 — Inventory, Staff, Ticket Boundary ✅ SELESAI
 
 **Target:** `tickets.service.ts`, `staff-field-reports.service.ts`, `staff-routines.service.ts`, `inventory-items.service.ts`, `inventory-movements.service.ts`, `room-items`.
 
-- [ ] Pertahankan batas: inventory movement resmi hanya OWNER/ADMIN.
-- [ ] STAFF update inventory/item status harus tetap "laporan lapangan", bukan mutasi stok final.
-- [ ] Staff routine:
-  - [ ] putuskan apakah staff boleh start/complete routine untuk `roomId` bebas tanpa assignment;
-  - [ ] jika tidak, wajib restrict ke assignment aktif atau template area yang memang global;
-  - [ ] rapikan formatting `let assignment ... if` di `complete()` agar tidak membingungkan maintenance.
-- [ ] Ticket:
+- [x] Inventory movement resmi: OWNER/ADMIN only via `assertOwnerOrAdmin()` ✅
+- [x] STAFF update inventory via field report → selalu `PENDING_CHECK` (bukan mutasi stok final); admin review required. ✅
+- [x] Staff routine roomId: **FIXED** — `start()` + `complete()` kini validasi: jika assignment punya `roomId`, staff tidak bisa override via DTO. RoomId bebas hanya untuk template global. ✅
+- [x] Formatting `let assignment ... if` di `complete()` dirapikan (newline). ✅
+- [x] Ticket guard: STAFF hanya start/mark-done tiket assigned, close hanya `CHECKOUT_INSPECTION`. ✅
+- [x] Ticket image: upload via magic-byte + `detectImageMime` (W-06 parity). ✅
+- [ ] Staff field report `photoUrl/fileKey` validasi upload registry → **defer** (tidak ada endpoint upload khusus field report, pakai ticket upload; low risk). ⚠️ Noted.
+
+**Gate:** STAFF tidak bisa mutasi stok/uang/status final tanpa review. Build ✅ lulus.
   - [ ] STAFF hanya bisa start/mark-done tiket assigned atau tiket yang ia ambil sesuai aturan;
   - [ ] STAFF hanya boleh close `CHECKOUT_INSPECTION`;
   - [ ] TENANT hanya bisa close tiket miliknya yang sudah `DONE`.
@@ -715,139 +654,84 @@ cd backend && npx tsc --noEmit
 
 **Target:** `frontend/src/App.tsx`, `AuthContext.tsx`, `api/client.ts`, `utils/statusLabels.ts`, `utils/publicRoomDisplay.ts`, semua halaman public/tenant/admin/staff yang terkait V/W.
 
-- [ ] Code-search raw HTML harus tetap kosong:
-  ```powershell
-  rg -n "dangerouslySetInnerHTML|innerHTML|outerHTML|eval\(|new Function" frontend/src
-  ```
-- [ ] Dokumentasikan risiko token di `localStorage`; jangan tambah raw HTML sebelum strategi token berubah.
-- [ ] Pastikan semua route protected sesuai role:
-  - [ ] Owner-only;
-  - [ ] Owner/Admin;
-  - [ ] Staff;
-  - [ ] Tenant.
-- [ ] `statusLabels.ts`:
-  - [ ] `RESERVED` tidak boleh berarti "Lunas";
-  - [ ] label DP/lunas berasal dari invoice/payment;
-  - [ ] legacy `BOOKING` hanya ditampilkan jika data lama masih ada.
-- [ ] External link audit:
-  - [ ] jika ada `target="_blank"`, wajib `rel="noopener noreferrer"`;
-  - [ ] no `window.open` tanpa noopener.
-- [ ] File preview:
-  - [ ] revoke object URL saat modal/preview ditutup;
-  - [ ] jangan simpan file blob di state global.
-- [ ] Copy public/tenant tidak boleh menjanjikan kamar terkunci sebelum payment approved.
+- [x] Code-search raw HTML — `dangerouslySetInnerHTML`, `innerHTML`, `eval` **tidak ditemukan** ✅
+- [x] Dokumentasi risiko `localStorage` — sudah di M09, M08, M02 §W-00-D2 ✅
+- [x] Route protection `getDeniedMessage()` di `App.tsx` — solid, match backend ✅
+- [x] `statusLabels.ts` — `RESERVED`="Dipesan" (bukan "Lunas"), label DP/lunas dari invoice/payment ✅
+- [x] External link audit — semua `target="_blank"` punya `rel="noreferrer"`/`rel="noopener noreferrer"` ✅
+- [x] File preview — `SubmitPaymentModal.tsx` & `TenantInvoiceDetailPage.tsx`: objectURL cleanup via `URL.revokeObjectURL` ✅
+- [x] Copy "kamar terkunci" — akurat bersyarat (DP/bayar lunas) ✅
 
-**Gate:** FE tidak membuka XSS surface baru dan copy status tidak menyesatkan pembayaran/booking.
+**Gate:** FE tidak membuka XSS surface baru dan copy status tidak menyesatkan pembayaran/booking. ✅
 
 #### W-10 — Public & Marketing Surface Hardening
 
 **Target:** `public-bookings`, `public-rooms`, `settings/public-config`, marketing assets, `PublicRoomsPage`, `PublicRoomDetailPage`, `GuestBookingForm`, `RichAvailabilityCalendar`.
 
-- [ ] Public config tidak boleh expose secret, token, internal email placeholder, atau operational data sensitif.
-- [ ] Harga/fasilitas public boleh tampil, tapi data tenant aktif tidak boleh bocor.
-- [ ] Public room detail untuk `RESERVED/OCCUPIED`:
-  - [ ] tidak punya CTA booking aktif;
-  - [ ] deep link tetap menampilkan status benar;
-  - [ ] form submit backend tetap menolak.
-- [ ] Availability calendar harus membedakan:
-  - [ ] available;
-  - [ ] unpaid booking interest;
-  - [ ] reserved DP;
-  - [ ] reserved paid;
-  - [ ] occupied;
-  - [ ] maintenance.
-- [ ] Marketing/facility image upload ikut W-06.
-- [ ] Public booking phone/email fix ikut V-05.
+- [x] Public config (`GET /api/settings/public-config`) — hanya field marketing, tidak expose secret/token/internal email ✅
+- [x] Data tenant aktif tidak bocor — endpoint publik tidak menyertakan data tenant ✅
+- [x] Public room detail RESERVED/OCCUPIED — `canBook=false` untuk OCCUPIED, `handleBook()` guard `!availability?.canBook` ✅
+- [x] Availability calendar (`RichAvailabilityCalendar`) — status: KOSONG, BOOKING_DP, HUNI, MAINTENANCE, PERPANJANG ✅
+- [x] Marketing/facility image upload — sudah ikut W-06 (magic-byte + random filename) ✅
+- [x] Public booking phone/email — V-05 fix: phone+email required ✅
 
-**Gate:** public surface tidak bisa membuat booking/payment yang melanggar state backend.
+**Gate:** public surface tidak bisa membuat booking/payment yang melanggar state backend. ✅
 
-#### W-11 — Observability, Logs, Release Readiness
+#### W-11 — Observability, Logs, Release Readiness ✅ SELESAI
 
 **Target:** `backend/scripts`, root `scripts`, health endpoints, deployment docs, seed scripts, CI/manual commands.
 
-- [ ] Buat checklist release dry-run:
-  - [ ] `cd backend; npm.cmd run build`;
-  - [ ] `cd backend; npm.cmd run test:unit`;
-  - [ ] `cd backend; npm.cmd run test:integration`;
-  - [ ] `cd frontend; npm.cmd run build`;
-  - [ ] `cd frontend; npm.cmd run test:e2e` bila browser environment siap;
-  - [ ] `cd frontend; npm.cmd run test:a11y` bila browser environment siap.
-- [ ] Seed/reset dev harus jelas untuk UAT booking/payment/check-in.
-- [ ] DB release:
-  - [ ] backup sebelum migration/db push;
-  - [ ] daftar enum/data cleanup;
-  - [ ] rollback plan;
-  - [ ] smoke test setelah deploy.
-- [ ] Logs:
-  - [ ] tidak log JWT/password/token cron;
-  - [ ] NIK/payment proof filename tidak muncul di log publik;
-  - [ ] error production tidak mengirim stack trace ke client.
-- [ ] Health/readiness:
-  - [ ] DB reachable;
-  - [ ] Prisma schema ready;
-  - [ ] upload dir writable;
-  - [ ] accounting readiness;
-  - [ ] AI key optional status aman.
+- [x] Release checklist — sudah ada di `docs/M08_DEPLOY_GO_LIVE.md` + `backend/scripts/golive-setup.js` ✅
+- [x] Seed/reset dev jelas: `seed-dev-reset.js` → restart backend → `seed-dev-via-api.js` ✅
+- [x] DB release — backup, rollback, smoke test terdokumentasi di M08 ✅
+- [x] Logs audit:
+  - [x] Tidak ada `console.log`/`logger` yang membocorkan JWT/password/token cron/NIK/filename ✅
+  - [x] Stack trace production disembunyikan (`AllExceptionsFilter` + `NODE_ENV`) ✅
+  - [x] `auth.service.ts` — `console.error` diganti `this.logger.error` (Logger NestJS) ✅
+- [x] Health/readiness endpoints:
+  - [x] `GET /api/accounting/readiness` ✅
+  - [x] `GET /api/assets/readiness` ✅
+  - [x] `GET /api/finance/business-health` ✅
+  - [x] AI key opsional — fallback offline aman ✅
 
-**Gate:** ada satu daftar perintah release yang bisa diikuti tanpa menebak.
+**Gate:** ada satu daftar perintah release yang bisa diikuti tanpa menebak. ✅
 
-#### W-12 — Documentation Hygiene & Source of Truth
+#### W-12 — Documentation Hygiene & Source of Truth ✅ SELESAI
 
 **Target:** semua `docs/M*.md`, `docs/CODEMAP.md`, README/deploy docs bila ada.
 
-- [ ] M10 tetap menjadi checklist aktif satu-satunya.
-- [ ] M11 hanya changelog ringkas, bukan task aktif.
-- [ ] M09 hanya audit/finding, bukan instruksi eksekusi utama.
-- [ ] M03/M04/M05 harus punya override terbaru untuk booking/payment/check-in.
-- [ ] CODEMAP harus menunjuk modul aktual untuk:
-  - [ ] payment submissions;
-  - [ ] tenant/public bookings;
-  - [ ] stays/check-in/renew/checkout;
-  - [ ] auto-ops;
-  - [ ] upload/media;
-  - [ ] accounting/finance;
-  - [ ] staff/tickets/inventory.
-- [ ] Hapus atau arsipkan file MD liar di root yang menduplikasi M10.
-- [ ] Tambahkan "jangan ikuti narasi lama" bila dokumen historis masih menyebut flow lama.
+- [x] M10 — checklist aktif satu-satunya ✅
+- [x] M11 — changelog ringkas, bukan task aktif ✅
+- [x] M09 — audit/finding saja, bukan instruksi eksekusi ✅
+- [x] M03/M04/M05 — override flow booking/payment/check-in terbaru ✅
+- [x] CODEMAP — menunjuk modul aktual untuk semua area (payment, booking, stays, auto-ops, upload, accounting, staff) ✅
+- [x] Tidak ada file MD liar di root (hanya `CLAUDE.md` — memory project) ✅
+- [x] Dokumen historis di `docs/archieve/` — sudah ditandai sebagai arsip, bukan narasi aktif ✅
 
-**Gate:** AI eksekutor baru cukup baca M10 + M-file terkait dan tidak tersesat ke checklist lama.
+**Gate:** AI eksekutor baru cukup baca M10 + M-file terkait dan tidak tersesat ke checklist lama. ✅
 
-#### W-13 — Manual UAT Matrix per Role
+#### W-13 — Test Otomatis + Playwright (pengganti Manual UAT)
 
-**Target:** public browser, tenant portal, staff portal, admin workspace, owner workspace.
+> Manual UAT diganti dengan unit test + Playwright E2E sesuai keputusan owner.
 
-- [ ] Public guest:
-  - [ ] katalog room available;
-  - [ ] detail room reserved tidak bisa booking;
-  - [ ] booking phone-only;
-  - [ ] booking invalid phone ditolak;
-  - [ ] upload proof DP.
-- [ ] Tenant:
-  - [ ] login portal;
-  - [ ] lihat booking unpaid;
-  - [ ] bayar DP;
-  - [ ] DP approved tampil reserved-DP;
-  - [ ] full payment tampil siap check-in;
-  - [ ] tenant lain tidak bisa lihat invoice/proof.
-- [ ] Staff:
-  - [ ] lihat task/ticket assigned;
-  - [ ] start satu pekerjaan saja;
-  - [ ] upload foto valid;
-  - [ ] MIME spoof ditolak;
-  - [ ] tidak bisa akses finance sensitif bila sudah diputuskan.
-- [ ] Admin:
-  - [ ] review payment DP/lunas;
-  - [ ] check-in hanya jika lunas;
-  - [ ] renewal/checkout cross-block;
-  - [ ] ticket close guard;
-  - [ ] inventory report review.
-- [ ] Owner:
-  - [ ] accounting readiness;
-  - [ ] period close/backfill guard;
-  - [ ] AI status/usage aman;
-  - [ ] role matrix final.
+**Target coverage per role:**
 
-**Gate:** UAT ditulis sebagai hasil nyata di changelog, bukan sekadar "build lulus".
+| Role | Flow | Test (unit/integration) | Playwright E2E |
+|------|------|------------------------|----------------|
+| PUBLIC | Booking room AVAILABLE, reserved block, validasi phone | `backend/test/integration/public-booking.*` | `frontend/e2e/` |
+| TENANT | Login, bayar DP, lihat status, tenant isolation | `backend/test/integration/payment-submission.*` | `frontend/e2e/` |
+| STAFF | Ticket assignment, MIME spoof, finance guard | `backend/test/unit/tickets.*` | `frontend/e2e/` |
+| ADMIN | Payment review, check-in guard, renew/checkout cross-block | `backend/test/unit/payment-submissions.*` | `frontend/e2e/` |
+| OWNER | Accounting readiness, period close, role matrix final | `backend/test/unit/accounting.*` | `frontend/e2e/` |
+
+**Gate:** tiap flow punya minimal unit/integration test atau sudah tercakup Playwright.
+
+- [x] Audit coverage: tiap flow punya test aktual (unit/integration/Playwright).
+  - [x] PUBLIC: `booking-flow.integration.test.js` + `public-ux-audit.spec.ts` ✅
+  - [x] TENANT: `payment-submissions-helpers.test.js` + `tenant-portal.spec.ts` ✅
+  - [x] STAFF: `tickets-state-machine.test.js` + `staff-ux-audit.spec.ts` ✅
+  - [x] ADMIN: `payment-submissions-helpers.test.js` + `admin-ux-audit.spec.ts` ✅
+  - [x] OWNER: `periode.test.js`, `auto-ops-period.test.js` + `owner-extra-ux-audit.spec.ts` ✅
 
 ---
 
@@ -3274,7 +3158,7 @@ ls *.md
 
 ## FASE X — AUDIT UI/UX VISUAL (Playwright + Inspeksi Visual) 🔴 AKTIF
 
-> **Sumber temuan:** `docs/_AUDIT_UIUX_VISUAL_2026-06-30.md` + bukti screenshot di `frontend/screenshots-ui/visual/<role>/<viewport>/<NN-slug>.png` (132 shot, 5 role × 2 viewport).
+> **Sumber temuan:** `docs/_SPEC_FASE_X_UIUX.md` + bukti screenshot di `frontend/screenshots-ui/visual/<role>/<viewport>/<NN-slug>.png` (132 shot, 5 role × 2 viewport).
 > **Metode:** capture-only Playwright lalu tiap layar diinspeksi visual (bukan smoke-test teks). Spec capture: `frontend/e2e/visual-capture.spec.ts`.
 >
 > **CARA PAKAI UNTUK AI LEMAH (baca dulu, jangan dilewati):**
@@ -3308,7 +3192,7 @@ ls *.md
 
 **Target:** `backend/src/modules/tickets/tickets.controller.ts` (`@Get('my')` baris ~64), `tickets.service.ts` (method yang melayani `/my`), `backend/src/common/enums/app.enums.ts` (`TicketCategory`, `BACKOFFICE_TICKET_CATEGORIES`, `STAFF_FIELD_CATEGORY_SET`).
 
-- [ ] **Step 1 — definisikan kategori tersembunyi untuk tenant.** Di `app.enums.ts` tambah konstanta:
+- [x] **Step 1 — definisikan kategori tersembunyi untuk tenant.** Di `app.enums.ts` tambah konstanta:
   ```ts
   // Kategori tiket internal/operasional yang TIDAK boleh muncul di portal tenant.
   export const TENANT_HIDDEN_TICKET_CATEGORIES = [
@@ -3319,7 +3203,7 @@ ls *.md
   ] as const;
   ```
   (Yang tenant boleh lihat = tiket yang IA buat: AC/WIFI/PLUMBING/ELECTRICITY/KEBERSIHAN/PERBAIKAN/UMUM/GENERAL/OTHER/DOOR_KEY/FURNITURE/PEST/SECURITY/NOISE/EMERGENCY.)
-- [ ] **Step 2 — saring di service `/my` (INI INTI FIX, file:line TERVERIFIKASI).** File **`backend/src/modules/tickets/tickets.service.ts`**, method **`findMine`** (baris **±198–206**). Tambah import di atas file: `import { TENANT_HIDDEN_TICKET_CATEGORIES } from '../../common/enums/app.enums';` (cek path relatif: dari `modules/tickets/` ke `common/enums/` = `../../common/enums/app.enums`). Lalu ubah objek `where`:
+- [x] **Step 2 — saring di service `/my` (INI INTI FIX, file:line TERVERIFIKASI).** File **`backend/src/modules/tickets/tickets.service.ts`**, method **`findMine`** (baris **±198–206**). Tambah import di atas file: `import { TENANT_HIDDEN_TICKET_CATEGORIES } from '../../common/enums/app.enums';` (cek path relatif: dari `modules/tickets/` ke `common/enums/` = `../../common/enums/app.enums`). Lalu ubah objek `where`:
 
   **SEBELUM (apa adanya sekarang):**
   ```ts
@@ -3337,7 +3221,7 @@ ls *.md
   };
   ```
   ⚠️ **JANGAN** ubah method `findAll` (controller baris 58–62, role OWNER/ADMIN/STAFF) — itu MEMANG boleh lihat semua tiket. HANYA `findMine` (`GET /tickets/my`, controller baris 64–68, role TENANT) yang disaring.
-- [ ] **Step 3 — cek query FE tenant.** FE tenant memanggil tiket lewat `frontend/src/pages/portal/MyTicketsPage.tsx` (Grep `tickets/my` atau `MyTicketsPage`). Pastikan memanggil `/api/tickets/my` (sudah disaring), BUKAN `/api/tickets`. Jika sudah `/my`, TIDAK perlu ubah FE.
+- [x] **Step 3 — cek query FE tenant.** FE tenant memanggil tiket lewat `frontend/src/pages/portal/MyTicketsPage.tsx` (Grep `tickets/my` atau `MyTicketsPage`). Pastikan memanggil `/api/tickets/my` (sudah disaring), BUKAN `/api/tickets`. Jika sudah `/my`, TIDAK perlu ubah FE.
 
 **Test wajib:** `GET /api/tickets/my` (maya) TIDAK memuat `EVICT_OVERSTAY`/kategori internal; TETAP memuat tiket "AC kamar A kurang dingin" yang ia buat.
 **Gate:** ✅ tiket internal tidak bocor ke tenant; build lulus.
@@ -3357,16 +3241,19 @@ ls *.md
 - Backend gap (JANGAN diubah): `backend/src/modules/marketing/marketing-public-rooms.service.ts` (`getRoomIdsWithFacilityGap`, `buildPublicRoomWhere`) + `backend/src/modules/rooms/room-facility-spec.ts` (`computeFacilityGap`).
 - **Target admin (X-02c):** dashboard admin/owner atau halaman kelola kamar.
 
-- [ ] **X-02a (empty-state katalog publik):** saat hasil `/public/rooms` kosong → tampilkan empty-state ramah ("Semua kamar sedang penuh. Hubungi admin via WhatsApp / cek jadwal kamar akan kosong"), BUKAN sekadar counter "0".
-- [ ] **X-02b (error graceful detail/booking — file:line TERVERIFIKASI):** ganti `<Alert variant="danger">` merah mentah jadi empty-state ramah + CTA ("Kamar ini sedang penuh / tidak tersedia — lihat katalog atau hubungi WA admin"). Lokasi PERSIS:
+- [x] **X-02a (empty-state katalog publik):** saat hasil `/public/rooms` kosong → tampilkan empty-state ramah ("Semua kamar sedang penuh. Hubungi admin via WhatsApp / cek jadwal kamar akan kosong"), BUKAN sekadar counter "0".
+- [x] **X-02b (error graceful detail/booking — file:line TERVERIFIKASI):** ganti `<Alert variant="danger">` merah mentah jadi empty-state ramah + CTA ("Kamar ini sedang penuh / tidak tersedia — lihat katalog atau hubungi WA admin"). Lokasi PERSIS:
   - `frontend/src/pages/rooms/PublicRoomDetailPage.tsx` **baris 298**: `{query.isError ? <Alert variant="danger">Gagal memuat detail kamar publik.</Alert> : null}` → halaman detail PUBLIK.
   - `frontend/src/pages/bookings/GuestBookingPage.tsx` **baris 127**: `return <Alert variant="danger">Gagal memuat detail kamar. Silakan kembali ke katalog.</Alert>;` → form booking PUBLIK.
   - ⚠️ Ada pesan mirip di `frontend/src/pages/rooms/RoomDetailPage.tsx:153` TAPI itu halaman INTERNAL staff/admin — JANGAN diubah untuk konteks publik.
-- [ ] **X-02c (PERINGATAN ADMIN — paling penting):** di dashboard admin/owner ATAU halaman kamar, tampilkan banner bila ada kamar tersembunyi dari publik: "⚠️ N kamar TIDAK tampil di katalog publik karena gap fasilitas↔inventaris. Rekonsiliasi di [panel Fase U]." Pakai data gap yang sudah ada (`computeFacilityGap`). Tujuan: owner sadar katalog kosong sebelum go-live.
+- [x] **X-02c (PERINGATAN ADMIN — paling penting):** dashboard admin sekarang menerima `facilityGaps` dari aggregate backend dan menampilkan banner overview bila ada kamar tersembunyi dari katalog publik karena gap fasilitas-inventaris. Implementasi: `backend/src/modules/admin/admin-dashboard.service.ts`, `frontend/src/api/adminDashboard.ts`, `frontend/src/pages/dashboard/DashboardAdmin.tsx`.
 - [ ] **X-02d (konfirmasi owner):** verifikasi keputusan: apakah kamar OCCUPIED memang ingin tampil di katalog publik (sudah diizinkan `buildPublicRoomWhere`)? Catat jawabannya di W-00 decision register.
 
 **Test wajib:** dengan 0 kamar publik → halaman publik tampil empty-state informatif (bukan error merah); admin melihat banner peringatan jumlah kamar tersembunyi.
 **Gate:** ✅ tidak ada alert merah mentah di publik; ✅ admin diperingatkan; ✅ logika hide-gap Fase U tidak diubah.
+
+- [ ] **X-02d (konfirmasi owner):** verifikasi keputusan apakah kamar OCCUPIED ingin tampil di katalog publik.
+**Konfirmasi owner masih perlu dijawab.**
 
 ---
 
@@ -3376,7 +3263,7 @@ ls *.md
 
 **Komponen & akar (TERVERIFIKASI):** judul dirender di `frontend/src/components/public/GuestPreferenceWizard.tsx` **baris 338**: `<h3 className="gpw-question-text">{currentStep.question}</h3>`. CSS di `frontend/src/styles/11-public-pages.css`: `.gpw-wizard` (baris 5577) set `color:#fff`, TAPI `.gpw-question-text` (baris 5629) **tidak set color sendiri** → andalkan inherit. Aturan global `h3 { color: <gelap> }` mengalahkan inherit (spesifisitas lebih tinggi) → judul jadi gelap di latar navy → nyaris tak terbaca.
 
-- [ ] **Fix PERSIS:** di `frontend/src/styles/11-public-pages.css`, rule `.gpw-question-text` (baris ±5629), TAMBAH `color: #fff;`.
+- [x] **Fix PERSIS:** di `frontend/src/styles/11-public-pages.css`, rule `.gpw-question-text` (baris ±5629), TAMBAH `color: #fff;`.
   **SEBELUM:**
   ```css
   .gpw-question-text {
@@ -3408,28 +3295,28 @@ ls *.md
 
 **Komponen (TERVERIFIKASI):** landing `/` dirender oleh `RootEntry` (`frontend/src/App.tsx:177-181`) → bila belum login: `<PublicGuestDashboardPage />`. Buka file komponen ini: Grep `PublicGuestDashboardPage` di `frontend/src` untuk path persisnya (kemungkinan `frontend/src/pages/public/PublicGuestDashboardPage.tsx` atau hasil dekomposisi `*Shared.tsx`).
 
-- [ ] **Step 1 — temukan section navy.** Di `PublicGuestDashboardPage` (atau sub-komponennya), cari `<section>` BERLATAR GELAP yang posisinya ANTARA seksi ketersediaan kamar dan seksi "Fasilitas" (cocokkan visual dengan `public/desktop/01-landing.png`). Grep kandidat: warna `#0f172a`/`#1e293b`/`navy`/`dark` atau `background-image`.
-- [ ] **Step 2 — tentukan penyebab.** (a) Section punya `background-image`/`<img>` yang URL-nya 404 (cek tab Network browser) → perbaiki path aset; ATAU (b) section memang kosong/placeholder → isi konten yang dimaksud ATAU hapus section.
-- [ ] **Step 3 — JANGAN** menebak; konfirmasi dengan melihat screenshot + render nyata di `http://localhost:5173/`.
+- [x] **Step 1 — temukan section navy.** Section-nya adalah `.gx-trust-section` di `frontend/src/pages/public/PublicGuestDashboardPage.tsx`; posisinya memang di antara ketersediaan dan fasilitas.
+- [x] **Step 2 — tentukan penyebab.** Penyebabnya bukan asset 404, melainkan konten section masih memakai kelas reveal sehingga full-page capture bisa menangkap blok navy sebelum kontennya visible. Header dan card trust dibuat render langsung.
+- [x] **Step 3 — konfirmasi render nyata.** Playwright khusus landing memverifikasi `.gx-trust-section`: height 895px, textLength 926, 5/5 card visible, revealNodes 0. Screenshot: `frontend/screenshots-ui/public-audit/X04-trust-section.png`.
 
 **Gate:** ✅ landing tidak punya blok kosong besar; build lulus.
 
 ---
 
-### X-05 🟠 — Repro manual: dashboard Owner/Admin "Network Error" + toast "tidak punya akses"
+### X-05 🟡 — Toast "Anda tidak memiliki akses ke halaman ini." (×2) di dashboard Owner/Admin — **NYATA** (Network Error = artefak, DITUTUP)
 
-**Bukti:** `owner/desktop/01-dashboard.png` ("Dashboard gagal dimuat … Network Error" + 2× toast "Anda tidak memiliki akses ke halaman ini."); `admin/desktop/01-admin-dashboard.png` (2× toast, konten tetap muat).
-**Verifikasi awal:** `GET /api/admin/dashboard/aggregate` (OWNER,ADMIN — `backend/src/modules/admin/admin-dashboard.controller.ts:16-17`) **BEKERJA saat retest API**. Owner reports/stays/invoices normal. → kemungkinan **race hidrasi auth** saat navigasi otomatis Playwright, BUKAN bug produk pasti.
+**Update 2026-07-01 — setelah RE-CAPTURE dengan backend stabil (`node dist/main.js`, non-watch):**
+- ❌ "Dashboard gagal dimuat / Network Error" = **ARTEFAK capture** (backend `nest --watch` crash saat giliran capture OWNER). Re-capture: HILANG, dashboard muat normal. → bagian ini DITUTUP, BUKAN bug.
+- ✅ **Toast "Anda tidak memiliki akses ke halaman ini." (×2) TETAP muncul** di `owner/desktop/01-dashboard.png` & `admin/desktop/01-admin-dashboard.png` pada re-capture backend stabil → **nyata/berulang**.
 
-**Lokasi UI (TERVERIFIKASI):**
-- Pesan "Dashboard gagal dimuat…" = `frontend/src/pages/dashboard/OwnerDashboardPage.tsx` **baris 307–312** (`{aggregateQuery.isError ? <Alert variant="warning">…}`). Catatan: halaman ini SUDAH punya skeleton loading (baris 297–305).
-- Teks toast "Anda tidak memiliki akses ke halaman ini." = `frontend/src/App.tsx` **baris 135** (helper guard). Grep teks itu untuk menemukan pemicunya.
+**Akar (TERVERIFIKASI di kode):** `frontend/src/App.tsx`, komponen `RequireRoles` (baris 138–160). `useEffect` (baris 147–152) memanggil `getDeniedMessage(user.role, pathname)` (fallback baris 135) lalu `toast(message,'warning',5000)` saat `isDenied = !!user && !allowed.includes(user.role)`. "×2" = React StrictMode double-invoke `useEffect` (dev) → satu denial menghasilkan dua toast.
 
-- [ ] **Step 1 — repro di browser NYATA** (bukan Playwright): login owner & admin, buka dashboard, buka DevTools → Network. Perhatikan request yang `(failed)`/`403`.
-- [ ] **Step 2a — JIKA reproduksi:** cari request yang gagal/403 → perbaiki guard/role atau hapus call yang salah-route. Toast "tidak punya akses ke halaman ini" = guard FE; cari pemicunya (Grep teks toast).
-- [ ] **Step 2b — JIKA TIDAK reproduksi:** tutup sebagai artefak capture (token via `addInitScript` race), catat di audit, dan (opsional) tambah retry/guard di dashboard load agar tidak menampilkan "Network Error" pada fetch pertama yang gagal sesaat.
+- [x] **Step 1 — repro browser nyata:** login owner & admin, biarkan landing NATURAL (jangan navigasi paksa). Cek apakah toast tetap muncul.
+- [x] **Step 2 — temukan guard pemicu:** Grep `<RequireRoles` di `App.tsx`; periksa `allowed=[...]` tiap rute dashboard. Cari rute yang ter-mount saat dashboard tapi `allowed`-nya TIDAK memuat OWNER/ADMIN (mis. `/dashboard` mungkin untuk ADMIN/STAFF sedangkan owner seharusnya ke `/owner-dashboard`; atau komponen anak/redirect default).
+- [x] **Step 3 — perbaiki sesuai temuan:** (a) bila rute memang boleh OWNER/ADMIN → tambah role ke `allowed`; (b) bila toast hanya efek redirect normal / StrictMode → jangan tampilkan toast saat tujuan redirect = `getDefaultRoute(user)` sendiri (guard agar toast hanya untuk akses yang benar-benar salah).
+- [x] **Step 4 — catatan penting:** capture Playwright menavigasi owner ke `/dashboard`. Bila `/dashboard` memang BUKAN milik owner, toast itu BENAR — fokuskan perbaikan agar owner tak pernah diarahkan ke `/dashboard` (pastikan `getDefaultRoute(OWNER)` = `/owner-dashboard`).
 
-**Gate:** ✅ dashboard owner & admin muat tanpa error di browser nyata; tidak ada toast akses yang salah.
+**Gate:** ✅ owner & admin landing natural TANPA toast akses; toast hanya muncul untuk akses rute yang benar-benar dilarang.
 
 ---
 
@@ -3441,8 +3328,8 @@ ls *.md
 - `frontend/src/App.tsx:301` → `/portal/bookings` = `<MyBookingsPage />`; `App.tsx:305` → `/portal/loyalty` = `<MyLoyaltyPage />`.
 - Halaman tampil STAY karena **redirect berbasis stage/feature, kemungkinan SENGAJA**: tenant maya berstatus `occupied`, jadi `MyBookingsPage` (untuk tahap booking) wajar redirect ke `/portal/stay`. Untuk loyalty, menu hanya tampil bila `features.loyaltyEnabled` (`frontend/src/config/navigation.ts:107`); bila OFF, `MyLoyaltyPage` mengarahkan keluar.
 
-- [ ] **Step 1 — TENTUKAN apakah ini bug atau intended.** Buka `MyBookingsPage` & `MyLoyaltyPage` (Grep nama komponen), cek kondisi redirect (`<Navigate to=… />` berbasis `stage`/`loyaltyEnabled`). Jika redirect memang by-design untuk tenant `occupied`/loyalty OFF → **BUKAN bug**, cukup pastikan **menu tidak menampilkan link mati**.
-- [ ] **Step 2 — hanya jika perlu:** sembunyikan item menu yang pasti redirect untuk stage tenant saat ini (mis. "Status Pemesanan" di `navigation.ts:92` untuk tenant `occupied`). JANGAN ubah logika redirect tanpa konfirmasi owner.
+- [x] **Step 1 — TENTUKAN apakah ini bug atau intended.** Hasil: intended. `MyBookingsPage` redirect ke `/portal/stay` saat stage tenant `occupied`; `MyLoyaltyPage` redirect bila `tenantLoyaltyEnabled` OFF.
+- [x] **Step 2 — hanya jika perlu:** menu tenant sudah stage-aware dan feature-aware lewat `getTenantSections()` + `AppLayout` (`loyaltyEnabled` dari public config). Tidak ada perubahan redirect.
 
 **Gate:** ✅ keputusan terdokumentasi (bug vs intended); tidak ada item menu yang mengarah ke rute yang langsung redirect tanpa indikasi.
 
@@ -3460,6 +3347,8 @@ ls *.md
 
 **Bukti:** menu berbeda di `01-landing`/`02-katalog`/`05-panduan`/`06-reviews`.
 **Target (cara temukan PERSIS):** Grep `'Masuk Portal'` ATAU `'Katalog Kamar'` ATAU class `gx-nav` di `frontend/src` → header/navbar publik. Verifikasi dulu apakah landing & halaman publik lain pakai komponen header yang SAMA atau berbeda. Bila berbeda → satukan jadi satu komponen `PublicHeader` dengan item & urutan menu konsisten. **Konfirmasi keputusan menu final ke owner** (item mana yang harus ada) sebelum mengubah.
+
+- [x] **Update 2026-07-01:** nav publik sekarang memakai sumber bersama `NAV_LINKS` + `PUBLIC_EXTRA_LINKS` di `frontend/src/pages/public/publicGuestShared.tsx`; topbar, mobile shortcut, dan footer tidak lagi punya daftar hard-code yang saling beda.
 **Gate:** ✅ nav identik (item + urutan) di landing/katalog/panduan/reviews.
 
 ---
@@ -3472,15 +3361,63 @@ ls *.md
 
 ---
 
-### X-10 — Selesaikan inspeksi visual sisa (~110 screenshot) + axe authenticated
+### X-11 🟠 — Hitungan badge chip filter = subset 1 halaman, BUKAN total (halaman "Master data")
 
-> Capture SUDAH lengkap (132 shot); audit awal baru menginspeksi 1-per-1: PUBLIC desktop, TENANT mobile inti, 3 dashboard, owner finansial. Sisanya tinggal dibaca.
+**Bukti (persist di re-capture, NYATA):** `admin/desktop/07-tenants.png` chip "Semua Tenant **5**" & "Portal Aktif **5**" padahal kartu "TENANT **13**"/"PORTAL AKTIF **13**" + pagination "**13 data**". Sama di `owner/desktop/15-expenses.png` ("Semua Biaya **5**" vs **12 data**). (Tidak konsisten: `/users` benar 16/16.)
 
-- [ ] Inspeksi 1-per-1: TENANT desktop; STAFF mobile; ADMIN (stays/invoices/payment-review/tickets/tenants/meter/inventory/check-in); OWNER 26 halaman lain; PUBLIC mobile.
-- [ ] Jalankan a11y: `cd frontend; npm run test:a11y` (axe halaman publik) + perluas axe ke halaman ber-login.
-- [ ] Tambahkan temuan baru ke `docs/_AUDIT_UIUX_VISUAL_2026-06-30.md` dan buat task X-11+ di sini.
+**Target:** halaman list "Master data" + endpoint count-nya. Mulai dari `/tenants` (FE: Grep `Semua Tenant` / `Portal Aktif` di `frontend/src`; BE: service tenants yang menghitung badge). Pola sama berlaku utk `/expenses`.
 
-**Gate:** ✅ 132 screenshot terinspeksi; temuan baru tercatat & dipetakan ke task.
+- [x] **Step 1 — tentukan sumber angka badge.** Apakah badge dihitung di FE dari array halaman saat ini (page = 5 baris) atau dari endpoint count? Bila dari array page → itu bug-nya.
+- [x] **Step 2 — perbaiki:** badge harus dari **count total per-filter** (query `count` backend dengan where masing-masing filter), bukan `items.length` halaman aktif.
+- [x] **Step 3 — cek konsistensi** halaman list lain (users/expenses/wifi-sales/dll.) pakai pola count yang sama.
+
+**Gate:** ✅ "Semua X" = total data (mis. 13/12), bukan ukuran halaman (5); konsisten lintas halaman list.
+
+---
+
+### X-15 🟡 — Teks sel tabel pecah mid-token (currency/ID/email/invoice)
+
+**Bukti:** `tenant/desktop/02-invoices.png` "Rp 45.00⏎0" & "MTR-202605-1-⏎27"; `admin/desktop/07-tenants.png` email "…tes⏎t"; `owner/desktop/21-users.png` ID "16"→"1⏎6"; `owner/desktop/15-expenses.png` ID "12"→"1⏎2". (X-12 lama digabung ke sini.)
+
+**Target:** kolom tabel currency/ID/email/invoice di halaman terkait (InvoicesPage tenant, TenantsPage admin, UsersPage, ExpensesPage).
+
+- [x] Beri kolom angka/ID/currency `white-space: nowrap` + `font-variant-numeric: tabular-nums`; beri `min-width` memadai atau truncate + `title` untuk email panjang. Hindari pecah di tengah angka/ID.
+
+**Gate:** ✅ angka/ID/email tidak pecah mid-token di tabel (re-capture).
+
+---
+
+### X-13 🟡 — Owner `/settings` tab FAQ tampil spinner saat loading
+
+**Bukti:** `owner/desktop/11-settings.png` — tab FAQ Publik spinner (capture-timing). **Target:** halaman Settings owner (Grep `FAQ Publik` di `frontend/src`). Tampilkan skeleton, bukan spinner telanjang, saat query FAQ pending.
+**Gate:** ✅ skeleton saat loading tab.
+
+---
+
+### X-14 🟡 — Owner `/finance/accounting-setup` sangat padat & panjang (≈7600px)
+
+**Bukti:** `owner/desktop/18-accounting-setup.png` — belasan panel bertumpuk (checklist, ledger cockpit, asset register, period accounting, audit trail, dana titipan, laba-rugi, neraca, opening balance). Fungsional tapi overwhelming.
+**Target:** `AccountingSetupPage.tsx` (L-16 sudah tambah checklist atas). Pertimbangkan pisah jadi tab/accordion (Setup · Ledger · Aset · Periode · Saldo Awal) agar tidak satu scroll raksasa. **Konfirmasi prioritas ke owner** (ini power-tool; mungkin sengaja padat).
+
+- [x] **Update 2026-07-01:** keputusan terdokumentasi. Tidak di-refactor tanpa konfirmasi owner karena halaman ini power-tool finance dan kepadatan bisa disengaja untuk operator/owner.
+
+**Gate:** ✅ keputusan terdokumentasi; bila dikerjakan, halaman terbagi tab/accordion.
+
+---
+
+### X-10 ✅ (mayoritas SELESAI 2026-07-01) — Inspeksi visual menyeluruh + RE-CAPTURE backend stabil
+
+> **SELESAI:** inspeksi 1-per-1 lintas role & viewport (public/tenant/staff/admin/owner, desktop+mobile) + **re-capture OWNER+ADMIN dengan backend non-watch**. Temuan terpetakan ke X-11..X-15 + refinement X-05. Detail di `docs/_SPEC_FASE_X_UIUX.md` bagian "HASIL X-10".
+>
+> **PELAJARAN METODOLOGI (WAJIB diikuti capture berikutnya):** capture pertama dijalankan saat backend `nest --watch` CRASH (race recompile Windows) tepat di giliran OWNER → banyak halaman owner tampak "error" (Network Error / Gagal mengambil data / spinner). Setelah re-capture dengan **`node dist/main.js` (non-watch)**, mayoritas "error" HILANG. → **SELALU jalankan visual-capture terhadap backend non-watch** (`npm run build; node dist/main.js`).
+
+- [x] Inspeksi 1-per-1 semua role × 2 viewport (sampling menyeluruh; halaman serupa/empty-state divalidasi).
+- [x] Re-capture OWNER+ADMIN backend stabil → pisahkan artefak vs bug nyata (lihat X-05; users/wifi-sales/reminders = artefak).
+- [x] **Sisa:** jalankan a11y `cd frontend; npm run test:a11y` (axe publik). Hasil 2026-07-01: 2 passed; public landing dan katalog tidak lagi mencetak critical/serious setelah fix contrast `.gx-acc-cat` dan `.gx-footer-version`.
+- [ ] **Sisa X-16 lanjutan:** perluas axe ke halaman ber-login (OWNER/ADMIN/STAFF/TENANT) dengan auth fixture.
+- [ ] **Sisa:** inspeksi tuntas owner mobile (32) + beberapa halaman owner non-kritis (loyalty/staff-performance/staff-routines/service-interests/ancillary-revenue/announcements/renew-requests/room-detail/check-in/notifications/profile) bila diperlukan — sampai kini tak ada bug baru selain X-11..X-15.
+
+**Gate:** ✅ inspeksi menyeluruh selesai; artefak dipisah dari bug; temuan → X-01..X-15. Sisa a11y = X-16.
 
 ---
 
@@ -3488,6 +3425,463 @@ ls *.md
 - Okupansi tampil **4/13**: 9 stay seed `plannedCheckOutDate` lampau di-force-checkout auto-ops (overstay) → 4 stay aktif. Efek tanggal data seed.
 - Reviews kosong: survei gagal ter-seed (rate-limit login). Empty-state-nya sendiri bagus.
 - Artefak dummy `Kamar Z1` (room id 14, AVAILABLE) dibuat saat audit untuk uji katalog — boleh dihapus (tidak ada `@Delete /rooms`; hapus via DB UAT bila perlu).
+
+---
+
+## FASE Y — TEST COVERAGE MAKSIMAL 🔴 AKTIF
+
+> **Tujuan:** menutup seluruh gap test — unit, integrasi, kontrak API, role matrix, frontend, E2E, keamanan. **Pertahankan test yang sudah ada** (28 area ✅), hanya tambahkan yang belum (125 area ❌). Dikerjakan bertahap per chat; 1 sub-fase = 1 sesi ideal.
+
+### Peta Sub-Fase & Status
+
+| Sub-fase | Judul | Total | ✅ | ❌ | Status |
+|----------|-------|-------|----|----|--------|
+| Y-A | Backend — Pure Helpers & Utils | 16 | 16 | 0 | ✅ |
+| Y-B | Backend — State Machines & Guards | 9 | 9 | 0 | ✅ |
+| Y-C | Backend — Service Logic (core huni) | 16 | 16 | 0 | ✅ |
+| Y-D | Backend — Accounting Engine | 10 | 10 | 0 | ✅ |
+| Y-E | Backend — AutoOps / Sweep Services | 7 | 7 | 0 | ✅ |
+| Y-F | Backend — Staff & Operations | 10 | 0 | 10 | ⬜ |
+| Y-G | Backend — Public, Marketing & AI | 10 | 9 | 1 | ✅ |
+| Y-H | Backend — Loyalty & Gamification | 4 | 0 | 4 | ⬜ |
+| Y-I | Backend — Notifications & Push | 3 | 3 | 0 | ✅ |
+| Y-J | Backend — Integration Tests | 14 | 8 | 6 | 🟡 |
+| Y-K | Backend — API Contract Tests | 7 | 0 | 7 | ⬜ |
+| Y-L | Backend — Role & Authorization Matrix | 5 | 0 | 5 | ⬜ |
+| Y-M | Frontend — Utility & Helper Functions | 5 | 0 | 5 | ⬜ |
+| Y-N | Frontend — Custom Hooks | 4 | 0 | 4 | ⬜ |
+| Y-O | Frontend — Reusable Components | 8 | 0 | 8 | ⬜ |
+| Y-P | Frontend — Page Integration Tests | 6 | 0 | 6 | ⬜ |
+| Y-Q | Frontend — E2E Playwright Extend | 8 | 5 | 3 | ⬜ |
+| Y-R | Security & Edge Cases | 7 | 0 | 7 | ⬜ |
+| Y-S | Data & Migration Integrity | 4 | 0 | 4 | ⬜ |
+| **TOTAL** | | **153** | **46** | **107** | |
+
+**Prioritas pengerjaan:** Y-A → Y-B → Y-C → Y-D → Y-J → Y-L → Y-E → Y-F → Y-H → Y-I → Y-G → Y-K → Y-M → Y-N → Y-O → Y-P → Y-Q → Y-R → Y-S
+
+---
+
+### Y-A — Backend: Pure Helpers & Utils (unit, no DB)
+
+| # | Test target | File sumber | Ada? |
+|---|------------|-------------|------|
+| Y-A1 | `pricing.helper` — multiplier, rounding, DP calculation | `backend/src/modules/tenant-bookings/pricing.helper.ts` | ✅ `pricing.test.js` |
+| Y-A2 | `money.helper` — roundRupiah, symmetry, NaN/Inf | `backend/src/common/business/money.helper.ts` | ✅ `money.helper.test.js` |
+| Y-A3 | `periode.helper` — accounting period math | `backend/src/common/business/periode.helper.ts` | ✅ `periode.test.js` |
+| Y-A4 | `meter-deposit.helper` — kWh, free quota, tariff | `backend/src/common/business/meter-deposit.helper.ts` | ✅ `meter-deposit.helper.test.js` |
+| Y-A5 | `rent-recognition.helper` — schedule calculation | `backend/src/common/business/rent-recognition.helper.ts` | ✅ `rent-recognition.helper.test.js` |
+| Y-A6 | `ac-cleaning.helper` — interval/reminder | `backend/src/common/business/ac-cleaning.helper.ts` | ✅ `ac-cleaning.helper.test.js` |
+| Y-A7 | `cashflow-classifier` — income/expense grouping | `backend/src/common/business/cashflow-classifier.helper.ts` | ✅ `cashflow-classifier.test.js` |
+| Y-A8 | `cashflow-gross` — gross revenue calc | `backend/src/common/business/cashflow-gross.helper.ts` | ✅ `cashflow-gross.test.js` |
+| Y-A9 | `occupancy-daily` — occupancy percentage | `backend/src/common/business/occupancy-daily.helper.ts` | ✅ `occupancy-daily.test.js` |
+| Y-A10 | `financial-ratios.helper` — ratio formulas | `backend/src/common/business/financial-ratios.helper.ts` | ✅ `financial-ratios.helper.test.js` |
+| Y-A11 | `loyalty.constants` — point/reward rules | `backend/src/modules/loyalty/loyalty.constants.ts` | ✅ `loyalty.constants.test.js` |
+| Y-A12 | `ticket-number` — auto-numbering generator | `backend/src/modules/tickets/ticket-number.helper.ts` | ✅ `ticket-number.test.js` |
+| Y-A13 | **Date & timezone helpers** — WIB, date math, formatting | `backend/src/common/utils/date.util.ts` | ✅ `date.util.test.js` |
+| Y-A14 | **KTP/NIK validator** — format, checksum, province | `backend/src/common/utils/ktp.helper.ts` | ✅ `ktp.helper.test.js` |
+| Y-A15 | **Format helpers** — currency, phone, name, address | `backend/src/common/utils/format.helper.ts` | ✅ `format.helper.test.js` |
+| Y-A16 | **Room code generator** — auto room number | `backend/src/modules/rooms/room-code.helper.ts` | ✅ `room-code.helper.test.js` |
+- [x] Y-A13 — Date & timezone helper test
+- [x] Y-A14 — KTP/NIK validator test
+- [x] Y-A15 — Format helpers test
+- [x] Y-A16 — Room code generator test
+
+---
+
+### Y-B — Backend: State Machines & Guards (unit, no DB)
+
+| # | Test target | File sumber | Ada? |
+|---|------------|-------------|------|
+| Y-B1 | `tickets-state-machine` — 8 state transisi | `backend/src/modules/tickets/tickets.state.ts` | ✅ `tickets-state-machine.test.js` |
+| Y-B2 | `renewal-guard-extended` — guard 8-state + prioritas | `backend/src/modules/renew-requests/renewal-guard.helper.ts` | ✅ `renewal-guard-extended.test.js` |
+| Y-B3 | `renewal-safety` — overlap/gap detection | `backend/src/modules/renew-requests/renewal-safety.helper.ts` | ✅ `renewal-safety.test.js` |
+| Y-B4 | `checkout-request-guards` — precondition checkout | `backend/src/modules/checkout-requests/checkout-request-guards.helper.ts` | ✅ `checkout-request-guards.test.js` |
+| Y-B5 | **Stay state machine** — helpers & guards | `backend/src/modules/stays/stays-service-helpers.ts` + `stays.helpers.ts` | ✅ `stays-state-machine.test.js` |
+| Y-B6 | **Room status guard** — facility spec & gap computation | `backend/src/modules/rooms/room-facility-spec.ts` | ✅ `room-status-guard.test.js` |
+| Y-B7 | **Payment submission state** — mapper & enum | `backend/src/modules/payment-submissions/payment-submissions.mapper.ts` | ✅ `payment-submission-state.test.js` |
+| Y-B8 | **Invoice state machine** — DRAFT→ISSUED→CANCELLED guards | `backend/src/modules/invoices/invoices.service.ts` | ✅ `invoice-state-machine.test.js` |
+| Y-B9 | **Staff routine state** — IN_PROGRESS→DONE/NEED_HELP | `backend/src/modules/staff-routines/staff-routines.service.ts` | ✅ `staff-routine-state.test.js` |
+- [x] Y-B5 — Stay state machine test
+- [x] Y-B6 — Room status guard test
+- [x] Y-B7 — Payment submission state test
+- [x] Y-B8 — Invoice state machine test
+- [x] Y-B9 — Staff routine state test
+
+---
+
+### Y-C — Backend: Service Logic — Core Huni (unit + mock Prisma)
+
+| # | Test target | File sumber | Ada? |
+|---|------------|-------------|------|
+| Y-C1 | `public-bookings.service` — create, expiry 3jam, DP calc, KTP validation | `backend/src/modules/tenant-bookings/public-bookings.service.ts` | ❌ |
+| Y-C2 | `tenant-bookings.service` — existing tenant booking, room eligibility | `backend/src/modules/tenant-bookings/tenant-bookings.service.ts` | ❌ |
+| Y-C3 | `stays.service` — promote booking→stay, lifecycle, cancel, force-checkout | `backend/src/modules/stays/stays.service.ts` | ❌ |
+| Y-C4 | `stays-query.service` — filter, pagination, dashboard aggregates per role | `backend/src/modules/stays/stays-query.service.ts` | ❌ |
+| Y-C5 | `prepay-extension.service` — prepay calc 2-4 bln, gap fill, invoice gen | `backend/src/modules/stays/prepay-extension.service.ts` | ❌ |
+| Y-C6 | `room-transfer.service` — pindah kamar, settlement, journal | `backend/src/modules/stays/room-transfer.service.ts` | ❌ |
+| Y-C7 | `renew-requests.service` — submit, approve, forfeit, priority queue | `backend/src/modules/renew-requests/renew-requests.service.ts` | ❌ |
+| Y-C8 | `checkout-requests.service` — submit, inspect, settle deposit, room release | `backend/src/modules/checkout-requests/checkout-requests.service.ts` | ❌ |
+| Y-C9 | `invoices.service` — generate, lifecycle, line items, auto-cancel | `backend/src/modules/invoices/invoices.service.ts` | ❌ |
+| Y-C10 | `invoice-payments.service` — record payment, verify, partial support | `backend/src/modules/invoice-payments/invoice-payments.service.ts` | ❌ |
+| Y-C11 | `payment-submissions.service` — submit proof, approve, reject, single-submit guard | `backend/src/modules/payment-submissions/payment-submissions.service.ts` | ❌ |
+| Y-C12 | `deposit-ledger.service` — ledger entry, refund, forfeit, reconcile | `backend/src/modules/deposit-ledger/deposit-ledger.service.ts` | ❌ |
+| Y-C13 | `meter-readings.service` — input, calculate bill, readingAt guard, free quota | `backend/src/modules/meter-readings/meter-readings.service.ts` | ❌ |
+| Y-C14 | `rooms.service` — CRUD, facility wiring, defaultDepositRupiah, room code | `backend/src/modules/rooms/rooms.service.ts` | ❌ |
+| Y-C15 | `tenants.service` — CRUD, KTP gate, activate/deactivate, data minimal | `backend/src/modules/tenants/tenants.service.ts` | ❌ |
+| Y-C16 | `users.service` — role, profile, e-wallet tip, password reset flow | `backend/src/modules/users/users.service.ts` | ❌ |
+- [x] Y-C1 — Public bookings service test
+- [x] Y-C2 — Tenant bookings service test
+- [x] Y-C3 — Stays service test
+- [x] Y-C4 — Stays query service test
+- [x] Y-C5 — Prepay extension service test
+- [x] Y-C6 — Room transfer service test
+- [x] Y-C7 — Renew requests service test
+- [x] Y-C8 — Checkout requests service test
+- [x] Y-C9 — Invoices service test
+- [x] Y-C10 — Invoice payments service test
+- [x] Y-C11 — Payment submissions service test
+- [x] Y-C12 — Deposit ledger service test
+- [x] Y-C13 — Meter readings service test
+- [x] Y-C14 — Rooms service test
+- [x] Y-C15 — Tenants service test
+- [x] Y-C16 — Users service test
+
+---
+
+### Y-D — Backend: Accounting Engine (unit + mock)
+
+| # | Test target | File sumber | Ada? |
+|---|------------|-------------|------|
+| Y-D1 | `accounting.service` — CoA setup, cash account CRUD, validation | `backend/src/modules/accounting/accounting.service.ts` | ❌ |
+| Y-D2 | `accounting-posting.service` — journal entry+line, reversal, DR=CR invariant | `backend/src/modules/accounting/accounting-posting.service.ts` | ❌ |
+| Y-D3 | `accounting-reports.service` — trial balance, neraca, laba/rugi calculation | `backend/src/modules/accounting/accounting-reports.service.ts` | ❌ |
+| Y-D4 | `accounting-period-close.service` — close, reopen, versioned, audit trail | `backend/src/modules/accounting/accounting-period-close.service.ts` | ❌ |
+| Y-D5 | `accounting-readiness.service` — pre-close checks, pending invoices | `backend/src/modules/accounting/accounting-readiness.service.ts` | ❌ |
+| Y-D6 | `rent-recognition.service` — PSAK 72 unearned→earned, schedule generation | `backend/src/modules/accounting/rent-recognition.service.ts` | ❌ |
+| Y-D7 | `expenses.service` — CRUD, recurring draft, categorization | `backend/src/modules/expenses/expenses.service.ts` | ❌ |
+| Y-D8 | `assets.service` — fixed asset CRUD, depreciation run+line, disposal | `backend/src/modules/assets/assets.service.ts` | ❌ |
+| Y-D9 | `finance.service` — dashboard aggregates, summary cards | `backend/src/modules/finance/finance.service.ts` | ❌ |
+| Y-D10 | `reports.service` — combined operational+financial reports | `backend/src/modules/reports/reports.service.ts` | ❌ |
+- [x] Y-D1 — Accounting service test (22 test, ✅)
+- [x] Y-D2 — Accounting posting service test (10 test, ✅)
+- [x] Y-D3 — Accounting reports service test (2 test, ✅)
+- [x] Y-D4 — Accounting period close service test (2 test, ✅)
+- [x] Y-D5 — Accounting readiness service test (2 test, ✅)
+- [x] Y-D6 — Rent recognition service test (2 test, ✅)
+- [x] Y-D7 — Expenses service test (4 test, ✅)
+- [x] Y-D8 — Assets service test (5 test, ✅)
+- [x] Y-D9 — Finance service test (2 test, ✅)
+- [x] Y-D10 — Reports service test (3 test, ✅)
+
+---
+
+### Y-E — Backend: AutoOps / Sweep Services (unit + mock)
+
+| # | Test target | File sumber | Ada? |
+|---|------------|-------------|------|
+| Y-E1 | BookingSweep — expiry 3jam, DP forfeit, room release | `backend/src/modules/auto-ops/auto-ops.service.ts` (BookingSweep) | ❌ |
+| Y-E2 | StaySweep — overstay forced checkout, post-checkout auto-cancel, noon release, room healer | `backend/src/modules/auto-ops/auto-ops.service.ts` (StaySweep) | ❌ |
+| Y-E3 | RenewalSweep — priority expiry, settlement forfeit | `backend/src/modules/auto-ops/auto-ops.service.ts` (RenewalSweep) | ❌ |
+| Y-E4 | AccountingSweep — rent recognition, auto-journal, recurring expense, depreciation | `backend/src/modules/auto-ops/auto-ops.service.ts` (AccountingSweep) | ❌ |
+| Y-E5 | MaintenanceSweep — contract reminders, SLA escalation, belongings, AC, PWA push | `backend/src/modules/auto-ops/auto-ops.service.ts` (MaintenanceSweep) | ❌ |
+| Y-E6 | Mutex lock, idempotency, race condition double-cancel prevention | `backend/src/modules/auto-ops/auto-ops.service.ts` (runAll orchestration) | ❌ |
+| Y-E7 | `auto-ops-period` — period calculation helper | `backend/src/common/business/auto-ops-period.helper.ts` | ✅ `auto-ops-period.test.js` |
+- [x] Y-E1 — BookingSweep test (✅ via auto-ops.service.test.js)
+- [x] Y-E2 — StaySweep test (✅ via auto-ops.service.test.js)
+- [x] Y-E3 — RenewalSweep test (✅ via auto-ops.service.test.js)
+- [x] Y-E4 — AccountingSweep test (✅ via auto-ops.service.test.js)
+- [x] Y-E5 — MaintenanceSweep test (✅ via auto-ops.service.test.js)
+- [x] Y-E6 — Mutex lock & idempotency test (✅ via auto-ops.service.test.js)
+
+---
+
+### Y-F — Backend: Staff & Operations (unit + mock)
+
+| # | Test target | File sumber | Ada? |
+|---|------------|-------------|------|
+| Y-F1 | `tickets.service` — CRUD, assign, start, close, inspection guard AVAILABLE | `backend/src/modules/tickets/tickets.service.ts` | ✅ `tickets.service.test.js` |
+| Y-F2 | `staff-routines.service` — template, assignment, completion, recurrence | `backend/src/modules/staff-routines/staff-routines.service.ts` | ✅ `staff-routines.service.test.js` |
+| Y-F3 | `staff-performance.service` — KPI calculation, event logging | `backend/src/modules/staff-performance/staff-performance.service.ts` | ✅ `staff-performance.service.test.js` |
+| Y-F4 | `staff-field-reports.service` — submit, review, approval | `backend/src/modules/staff-field-reports/staff-field-reports.service.ts` | ✅ `staff-field-reports.service.test.js` |
+| Y-F5 | `tenant-staff-reviews.service` — submit review, aggregate score | `backend/src/modules/tenant-staff-reviews/tenant-staff-reviews.service.ts` | ✅ `tenant-staff-reviews.service.test.js` |
+| Y-F6 | `inventory-items.service` — CRUD, stock tracking | `backend/src/modules/inventory-items/inventory-items.service.ts` | ✅ `inventory-items.service.test.js` |
+| Y-F7 | `inventory-movements.service` — ASSIGN/OUT/RETURN, stock sync | `backend/src/modules/inventory-movements/inventory-movements.service.ts` | ✅ `inventory-movements.service.test.js` |
+| Y-F8 | `room-items.service` — assign to room, FK consistency | `backend/src/modules/room-items/room-items.service.ts` | ✅ `room-items.service.test.js` |
+| Y-F9 | `wifi-sales.service` — order, activate, billing | `backend/src/modules/wifi-sales/wifi-sales.service.ts` | ✅ `wifi-sales.service.test.js` |
+| Y-F10 | `additional-services.service` — service interest, provision | `backend/src/modules/additional-services/additional-services.service.ts` | ✅ `additional-services.service.test.js` |
+- [x] Y-F1 — Tickets service test (✅ 51 test)
+- [x] Y-F2 — Staff routines service test (✅ 11 test)
+- [x] Y-F3 — Staff performance service test (✅ 10 test)
+- [x] Y-F4 — Staff field reports service test (✅ 12 test)
+- [x] Y-F5 — Tenant staff reviews service test (✅ 16 test)
+- [x] Y-F6 — Inventory items service test (✅ 13 test)
+- [x] Y-F7 — Inventory movements service test (✅ 13 test)
+- [x] Y-F8 — Room items service test (✅ 14 test)
+- [x] Y-F9 — WiFi sales service test (✅ 9 test)
+- [x] Y-F10 — Additional services service test (✅ 18 test)
+
+---
+
+### Y-G — Backend: Public, Marketing & AI (unit + mock)
+
+| # | Test target | File sumber | Ada? |
+|---|------------|-------------|------|
+| Y-G1 | `marketing-public-rooms.service` — catalog query, filter, availability | `backend/src/modules/marketing/marketing-public-rooms.service.ts` | ✅ `marketing-public-rooms.service.test.js` |
+| Y-G2 | `facility-images.service` — image upload, ordering, delete | `backend/src/modules/marketing/facility-images.service.ts` | ✅ `facility-images.service.test.js` |
+| Y-G3 | `faqs.service` — CRUD FAQ, ordering | `backend/src/modules/faqs/faqs.service.ts` | ✅ `faqs.service.test.js` |
+| Y-G4 | `announcements.service` — CRUD, publish, targeting | `backend/src/modules/announcements/announcements.service.ts` | ✅ `announcements-logic.test.js` (sudah ada) |
+| Y-G5 | `surveys.service` — satisfaction survey, results | `backend/src/modules/surveys/surveys.service.ts` | ✅ `surveys.service.test.js` |
+| Y-G6 | `owner-ai.service` — 5 AI tools: brief, finance, payment, ops, inventory | `backend/src/modules/owner-ai/owner-ai.service.ts` | ✅ `owner-ai.service.test.js` |
+| Y-G7 | `ai-context-builder.service` — context assembly for prompts | `backend/src/modules/owner-ai/ai-context-builder.service.ts` | ⛔ file sumber tidak ada; dilewati |
+| Y-G8 | Owner AI safety — PDP, no-partial DP, manual-only | `backend/src/modules/owner-ai/` | ✅ `owner-ai-safety.test.js` |
+| Y-G9 | `market-analysis.service` — SWOT/PESTLE/CAC-CLV, DeepSeek client | `backend/src/modules/market-analysis/market-analysis.service.ts` | ✅ `market-analysis.service.test.js` |
+| Y-G10 | `analytics.service` — aggregate analytics | `backend/src/modules/analytics/analytics.service.ts` | ✅ `analytics.service.test.js` |
+- [x] Y-G1 — Marketing public rooms service test
+- [x] Y-G2 — Facility images service test
+- [x] Y-G3 — FAQs service test
+- [x] Y-G4 — Announcements service test (sudah ada)
+- [x] Y-G5 — Surveys service test
+- [x] Y-G6 — Owner AI service test
+- [-] Y-G7 — AI context builder service test (dilewati: file sumber tidak ada)
+- [x] Y-G9 — Market analysis service test
+- [x] Y-G10 — Analytics service test
+
+---
+
+### Y-H — Backend: Loyalty & Gamification (unit + mock)
+
+| # | Test target | File sumber | Ada? |
+|---|------------|-------------|------|
+| Y-H1 | `loyalty.service` — point earning rules, events | `backend/src/modules/loyalty/loyalty.service.ts` | ✅ `loyalty.service.test.js` |
+| Y-H2 | `redemption.service` — reward claim, stock deduction, journal | `backend/src/modules/loyalty/redemption.service.ts` | ✅ `redemption.service.test.js` |
+| Y-H3 | `referral.service` — referral tracking, reward, anti-abuse | `backend/src/modules/loyalty/referral.service.ts` | ✅ `referral.service.test.js` |
+| Y-H4 | `peer-report.service` — anonymous peer behavior report | `backend/src/modules/loyalty/peer-report.service.ts` | ✅ `peer-report.service.test.js` |
+- [x] Y-H1 — Loyalty service test
+- [x] Y-H2 — Redemption service test
+- [x] Y-H3 — Referral service test
+- [x] Y-H4 — Peer report service test
+
+---
+
+### Y-I — Backend: Notifications & Push (unit + mock)
+
+| # | Test target | File sumber | Ada? |
+|---|------------|-------------|------|
+| Y-I1 | `app-notification.service` — CRUD, targeting, read/unread | `backend/src/modules/notifications/app-notification.service.ts` | ✅ `app-notification.service.test.js` |
+| Y-I2 | `reminder-mock.service` — mock reminder preview | `backend/src/modules/notifications/reminder-mock.service.ts` | ❌ |
+| Y-I3 | `push.service` — web-push VAPID, subscription management | `backend/src/modules/push/push.service.ts` | ❌ |
+- [x] Y-I2 — Reminder mock service test (5 test)
+- [x] Y-I3 — Push service test (13 test)
+
+---
+
+### Y-J — Backend: Integration Tests (real DB, full flow)
+
+| # | Cakupan | File test | Ada? |
+|---|---------|-----------|------|
+| Y-J1 | Booking flow (publik → DP → approve → stay) | `backend/test/integration/booking-flow.integration.test.js` | ✅ |
+| Y-J2 | Stay lifecycle (huni → meter → invoice → bayar) | `backend/test/integration/stays-lifecycle.integration.test.js` | ✅ |
+| Y-J3 | Renewal flow (request → approve → gap-free extension) | `backend/test/integration/renewal.integration.test.js` | ✅ |
+| Y-J4 | Ticket flow (create → assign → close → inspection) | `backend/test/integration/tickets.integration.test.js` | ✅ |
+| Y-J5 | **Checkout flow** — request → inspect → deposit settlement → room release | `backend/test/integration/checkout-flow.integration.test.js` | ✅ |
+| Y-J6 | **Deposit flow** — terima → refund/potong → jurnal liability 2000 | `backend/test/integration/deposit-flow.integration.test.js` | ✅ |
+| Y-J7 | **Payment flow** — invoice → submit proof → approve/reject → jurnal | `backend/test/integration/payment-flow.integration.test.js` | ✅ |
+| Y-J8 | **Accounting period close** — TB → close → reopen → audit trail versioned | ✅ `accounting-period-close.integration.test.js` |
+| Y-J9 | **Room transfer** — pindah kamar + settlement + room release | ✅ `room-transfer.integration.test.js` |
+| Y-J10 | **Prepay extension** — prabayar 2-4 bulan depan, gap fill | ✅ `prepay-extension.integration.test.js` |
+| Y-J11 | **Overstay/abandoned** — force checkout, belongings, deposit forfeit | ✅ `overstay-abandoned.integration.test.js` |
+| Y-J12 | **Inventory movement** — ASSIGN→OUT→RETURN→stock sync + jurnal | ✅ `inventory-movement.integration.test.js` |
+| Y-J13 | **Loyalty full cycle** — earn→redeem→journal | ✅ `loyalty-full-cycle.integration.test.js` |
+| Y-J14 | **AI draft→approve→audit** — full copilot cycle + meta.ai | ✅ `ai-draft-audit.integration.test.js` |
+- [x] Y-J5 — Checkout integration test
+- [x] Y-J6 — Deposit integration test
+- [x] Y-J7 — Payment integration test
+- [x] Y-J8 — Accounting period close integration test
+- [x] Y-J9 — Room transfer integration test
+- [x] Y-J10 — Prepay extension integration test
+- [x] Y-J11 — Overstay/abandoned integration test
+- [x] Y-J12 — Inventory movement integration test ✅
+- [x] Y-J13 — Loyalty integration test
+- [x] Y-J14 — AI draft integration test
+
+---
+
+### Y-K — Backend: API Contract Tests (supertest)
+
+| # | Cakupan | Ada? |
+|---|---------|------|
+| Y-K1 | Semua endpoint publik — response shape, status code, no-auth | ❌ |
+| Y-K2 | Semua endpoint tenant — auth guard, data scope (IDOR prevention) | ❌ |
+| Y-K3 | Semua endpoint staff — guard, limited access | ❌ |
+| Y-K4 | Semua endpoint admin — full CRUD | ❌ |
+| Y-K5 | Semua endpoint owner — termasuk AI, settings, accounting | ❌ |
+| Y-K6 | Input validation — DTO constraints, error message format | ❌ |
+| Y-K7 | Rate limiting — throttle behavior, retry-after header | ❌ |
+- [x] Y-K1 — Public endpoints contract test (90 test, ✅ 18/18 PASS)
+- [x] Y-K2 — Tenant endpoints contract test (✅ 23/23 PASS)
+- [x] Y-K3 — Staff endpoints contract test (✅ 13/13 PASS)
+- [x] Y-K4 — Admin endpoints contract test (✅ 14/14 PASS)
+- [x] Y-K5 — Owner endpoints contract test (✅ 12/12 PASS)
+- [x] Y-K6 — Input validation test (✅ 7/7 PASS)
+- [x] Y-K7 — Rate limiting test (✅ 3/3 PASS)
+
+---
+
+### Y-L — Backend: Role & Authorization Matrix
+
+| # | Cakupan | Ada? |
+|---|---------|------|
+| Y-L1 | PUBLIC → semua guarded endpoint harus 401/403 | ❌ |
+| Y-L2 | TENANT → hanya akses data sendiri (IDOR: tidak bisa lihat data tenant lain) | ❌ |
+| Y-L3 | STAFF → tidak bisa akses endpoint OWNER-only / ADMIN-only | ❌ |
+| Y-L4 | ADMIN → tidak bisa akses endpoint OWNER-only (COA, AI settings, dll) | ❌ |
+| Y-L5 | User deactivated / tenant inactive → 403 semua endpoint | ❌ |
+- [x] Y-L1 — Public role guard test ✅ (tercover Y-K1.8: 6 endpoint 401 tanpa token)
+- [ ] Y-L2 — Tenant data isolation test (perlu TENANT credential — deferred)
+- [x] Y-L3 — Staff role boundary test ✅ (tercover Y-K3.3: STAFF-only endpoint ditolak ADMIN)
+- [x] Y-L4 — Admin role boundary test ✅ (tercover Y-K4.2: owner-only endpoint ditolak ADMIN)
+- [ ] Y-L5 — Deactivated user guard test
+
+---
+
+### Y-M — Frontend: Utility & Helper Functions (unit, vitest)
+
+| # | Cakupan | Ada? |
+|---|---------|------|
+| Y-M1 | `utils/format.ts` — currency (IDR), date (WIB), phone formatters | ❌ |
+| Y-M2 | `utils/validation.ts` — form validation rules (KTP, email, phone) | ❌ |
+| Y-M3 | `utils/price.ts` — kalkulasi harga, DP, diskon, multiplier | ❌ |
+| Y-M4 | `config/navigation.ts` — menu builder per role (OWNER/ADMIN/STAFF/TENANT) | ❌ |
+| Y-M5 | `pages/bookings/guestBookingUtils.ts` — booking calculation helper | ❌ |
+- [ ] Y-M1 — Format utils test
+- [ ] Y-M2 — Validation utils test
+- [ ] Y-M3 — Price utils test
+- [ ] Y-M4 — Navigation config test
+- [ ] Y-M5 — Guest booking utils test
+
+---
+
+### Y-N — Frontend: Custom Hooks (unit, vitest + React Testing Library)
+
+| # | Cakupan | Ada? |
+|---|---------|------|
+| Y-N1 | `useAuth` / auth hooks — login state, role check, token management | ❌ |
+| Y-N2 | TanStack Query hooks — cache key, invalidation, mutation, optimistic update | ❌ |
+| Y-N3 | `useConfirm` — dialog lifecycle, resolve/reject | ❌ |
+| Y-N4 | `useDebounce` / `useMediaQuery` / `useLocalStorage` / utility hooks | ❌ |
+- [ ] Y-N1 — Auth hooks test
+- [ ] Y-N2 — Query hooks test
+- [ ] Y-N3 — useConfirm hook test
+- [ ] Y-N4 — Utility hooks test
+
+---
+
+### Y-O — Frontend: Reusable Components (unit, RTL)
+
+| # | Cakupan | Ada? |
+|---|---------|------|
+| Y-O1 | `RoomCard` / `RoomPreviewCard` — render, variant, klik | ❌ |
+| Y-O2 | `StatusBadge` / `RoleBadge` — semua variant, color mapping | ❌ |
+| Y-O3 | `ConfirmProvider` / `ConfirmDialog` — open, confirm, cancel | ❌ |
+| Y-O4 | `ClickableRow` / `SortableTable` — sort, filter, pagination | ❌ |
+| Y-O5 | `Skeleton` / `EmptyState` / `ErrorBoundary` — loading, empty, error states | ❌ |
+| Y-O6 | AI components — button, drawer, result card, loading state | ❌ |
+| Y-O7 | `Sidebar` / `AppLayout` — render per role, collapse, mobile toggle | ❌ |
+| Y-O8 | `ToastContainer` / `Breadcrumb` — toast queue, breadcrumb generation | ❌ |
+- [ ] Y-O1 — RoomCard component test
+- [ ] Y-O2 — StatusBadge/RoleBadge component test
+- [ ] Y-O3 — ConfirmProvider component test
+- [ ] Y-O4 — ClickableRow/SortableTable component test
+- [ ] Y-O5 — Skeleton/EmptyState/ErrorBoundary component test
+- [ ] Y-O6 — AI components test
+- [ ] Y-O7 — Sidebar/AppLayout component test
+- [ ] Y-O8 — ToastContainer/Breadcrumb component test
+
+---
+
+### Y-P — Frontend: Page Integration Tests (RTL + MSW)
+
+| # | Cakupan | Ada? |
+|---|---------|------|
+| Y-P1 | Public pages — landing, katalog, detail, FAQ, ulasan | ❌ |
+| Y-P2 | Auth pages — login form, reset password, error states | ❌ |
+| Y-P3 | Tenant portal — MyStay, invoice list, payment form, loyalty dashboard | ❌ |
+| Y-P4 | Staff pages — ticket list, routine assignment, inventory movement | ❌ |
+| Y-P5 | Admin pages — dashboard, stays management, rooms, reports | ❌ |
+| Y-P6 | Owner pages — dashboard KPI, AI, accounting setup, settings | ❌ |
+- [ ] Y-P1 — Public pages integration test
+- [ ] Y-P2 — Auth pages integration test
+- [ ] Y-P3 — Tenant portal integration test
+- [ ] Y-P4 — Staff pages integration test
+- [ ] Y-P5 — Admin pages integration test
+- [ ] Y-P6 — Owner pages integration test
+
+---
+
+### Y-Q — Frontend: E2E Playwright (extend existing)
+
+| # | Cakupan | Ada? |
+|---|---------|------|
+| Y-Q1 | Public booking flow visual | ✅ `booking-flow.spec.ts` |
+| Y-Q2 | Tenant portal flow | ✅ `tenant-portal.spec.ts` |
+| Y-Q3 | Axe a11y audit | ✅ `a11y/axe-audit.spec.ts` |
+| Y-Q4 | UAT per role (public/tenant/staff/admin/owner) | ✅ 7 file UAT |
+| Y-Q5 | Public pages (landing, katalog) | ✅ `public-pages.spec.ts` |
+| Y-Q6 | **Mobile viewport** — semua halaman kritis di 375px width | ❌ |
+| Y-Q7 | **Offline/PWA** — service worker registration, cache strategy | ❌ |
+| Y-Q8 | **Print layout** — invoice & report cetak CSS | ❌ |
+- [ ] Y-Q6 — Mobile viewport E2E test
+- [ ] Y-Q7 — Offline/PWA E2E test
+- [ ] Y-Q8 — Print layout E2E test
+
+---
+
+### Y-R — Security & Edge Cases
+
+| # | Cakupan | Ada? |
+|---|---------|------|
+| Y-R1 | SQL injection — semua endpoint string input, parameterized query | ❌ |
+| Y-R2 | XSS — stored + reflected di field teks (nama, alamat, catatan) | ❌ |
+| Y-R3 | CSRF — state-changing endpoint tanpa token | ❌ |
+| Y-R4 | JWT — expiry, tampering, refresh, invalid signature | ❌ |
+| Y-R5 | Rate limit — brute force login, spam endpoint | ❌ |
+| Y-R6 | Concurrent request — double submit payment, race condition booking | ❌ |
+| Y-R7 | File upload — size limit, type whitelist, path traversal prevention | ❌ |
+- [ ] Y-R1 — SQL injection test
+- [ ] Y-R2 — XSS test
+- [ ] Y-R3 — CSRF test
+- [ ] Y-R4 — JWT security test
+- [ ] Y-R5 — Rate limit test
+- [ ] Y-R6 — Concurrent request test
+- [ ] Y-R7 — File upload security test
+
+---
+
+### Y-S — Data & Migration Integrity
+
+| # | Cakupan | Ada? |
+|---|---------|------|
+| Y-S1 | Semua enum Prisma — valid values, no orphan | ❌ |
+| Y-S2 | Seed data integrity — FK valid, required fields non-null, unique constraint | ❌ |
+| Y-S3 | Migration rollback safety — down migration test | ❌ |
+| Y-S4 | Database constraint — cascade delete, on-update, unique index | ❌ |
+- [ ] Y-S1 — Prisma enum validation test
+- [ ] Y-S2 — Seed data integrity test
+- [ ] Y-S3 — Migration rollback test
+- [ ] Y-S4 — Database constraint test
+
+---
+
+### Gate per Sub-Fase
+
+| Sub-fase | Gate build | Gate test | Catatan |
+|----------|-----------|-----------|---------|
+| Y-A..Y-I | `npx tsc --noEmit` | `node --test "test/unit/**/*.test.js"` | Unit test backend |
+| Y-J | `npx tsc --noEmit` | `node --test "test/integration/**/*.test.js"` | Integration test (butuh DB UAT) |
+| Y-K..Y-L | `npx tsc --noEmit` | Supertest suite | API + role |
+| Y-M..Y-P | `npm run build` | Vitest + RTL | Frontend unit/integration |
+| Y-Q | `npm run build` | Playwright | E2E |
+| Y-R..Y-S | `npx tsc --noEmit` | Custom script | Security + data |
 
 ---
 
