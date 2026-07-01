@@ -167,7 +167,7 @@ export default function LoginPage() {
 
           {fieldErrors.form ? <div className="login-form-error" role="alert">{fieldErrors.form}</div> : null}
 
-          <Form onSubmit={handleSubmit} noValidate>
+          <Form onSubmit={handleSubmit}>
             <Form.Group className="mb-3">
               <Form.Label>{modeCopy.identifierLabel}</Form.Label>
               <Form.Control
@@ -176,11 +176,13 @@ export default function LoginPage() {
                   setIdentifier(e.target.value);
                   if (fieldErrors.identifier || fieldErrors.form) setFieldErrors((prev) => ({ ...prev, identifier: undefined, form: undefined }));
                 }}
-                type="text"
+                type={mode === 'BACKOFFICE' ? 'email' : 'text'}
                 placeholder={modeCopy.identifierPlaceholder}
                 autoCapitalize="none"
                 autoCorrect="off"
+                autoComplete={mode === 'BACKOFFICE' ? 'email' : 'username'}
                 inputMode={mode === 'TENANT' && /^\d/.test(identifier.trim()) ? 'tel' : 'email'}
+                required
                 isInvalid={Boolean(fieldErrors.identifier)}
               />
               {fieldErrors.identifier ? <div className="login-inline-error">{fieldErrors.identifier}</div> : null}
@@ -196,12 +198,13 @@ export default function LoginPage() {
                 }}
                 placeholder={modeCopy.passwordPlaceholder}
                 isInvalid={Boolean(fieldErrors.password)}
+                autoComplete="current-password"
               />
               {fieldErrors.password ? <div className="login-inline-error">{fieldErrors.password}</div> : null}
             </Form.Group>
 
             <div className="login-forgot-row">
-              <Link to="/forgot-password">Lupa password?</Link>
+              <a href="/forgot-password">Lupa password?</a>
             </div>
 
             <Button type="submit" disabled={submitting} className="w-100 login-submit-btn">

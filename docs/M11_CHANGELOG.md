@@ -4,6 +4,13 @@
 
 ## Changelog Ringkas
 
+### 2026-07-16 — Audit Login: autocomplete, type=email, validasi, WhatsApp link
+- **Issue #1:** Tambah `autoComplete="email"` (BACKOFFICE) / `autoComplete="username"` (TENANT) di input identifier + `autoComplete="current-password"` di input password — browser bisa menawarkan password manager / auto-fill.
+- **Issue #2:** Input email BACKOFFICE pakai `type="email"` (sebelumnya `type="text"`) — keyboard mobile tampilkan @ dan .com shortcut; input TENANT tetap `type="text"` karena bisa email atau nomor HP.
+- **Issue #3:** Hapus `noValidate` dari form + tambah `required` — browser validation aktif; custom inline error tetap jalan.
+- **Issue #4:** Link "Lupa password?" dari `<Link>` (SPA) diganti `<a href="/forgot-password">` — right-click open in new tab berfungsi.
+- **Issue #5:** Tombol "Hubungi Admin via WhatsApp" di tab Nomor HP — aktif selama ada input (tidak butuh nomor valid penuh), plus hint format nomor HP.
+
 ### 2026-07-02 — Fase Y TUNTAS (Y-M s/d Y-S) — 152/153 area, ≈1370 test PASS
 - **Y-R Security & Edge (7 area, 24 test PASS)** — `test/integration/security-edge-cases.test.js`: SQLi (Prisma parametrized), XSS (stored+reflected, JSON boundary), CSRF (Bearer-only, no cookie), JWT (none/malformed/tamper/wrong-sig/expired→401), rate-limit (brute-force login→429), concurrency (double-submit COA idempoten), file-upload (whitelist tipe+2MB+wajib).
 - **Y-S Data & Migration (4 area, 12 test PASS)** — `test/integration/data-migration-integrity.test.js`: enum DB==Prisma generated (+app.enums⊆DB), FK tak yatim, unique tak duplikat, model↔tabel in-sync, constraint P2002. **Menemukan+memperbaiki drift**: `app.enums.ts StaffPerformanceEventType` kurang `TIP_RECEIVED` (ada di schema) → ditambahkan.

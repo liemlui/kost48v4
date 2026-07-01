@@ -261,13 +261,16 @@ export default function ForgotPasswordPage() {
                 />
               </Form.Group>
 
+              <div className="mb-2 small text-muted">
+                {identifier.trim() ? (phoneValid ? '✓ Nomor HP valid. Klik WhatsApp untuk hubungi admin.' : 'Format nomor HP: 08xxxxxxxxx (10-13 digit). Kamar tetap bisa hubungi admin.') : 'Masukkan nomor HP dulu.'}
+              </div>
               <a
-                href={phoneValid ? buildWaUrl(identifier) : undefined}
+                href={identifier.trim() ? buildWaUrl(identifier.trim()) : buildWaUrl()}
                 target="_blank"
                 rel="noopener noreferrer"
-                className={`btn login-wa-btn w-100${!phoneValid ? ' disabled' : ''}`}
-                aria-disabled={!phoneValid}
-                onClick={!phoneValid ? (e) => e.preventDefault() : undefined}
+                className={`btn login-wa-btn w-100${!identifier.trim() ? ' disabled' : ''}`}
+                aria-disabled={!identifier.trim()}
+                onClick={!identifier.trim() ? (e) => e.preventDefault() : undefined}
               >
                 <WaIcon />
                 Hubungi Admin via WhatsApp
