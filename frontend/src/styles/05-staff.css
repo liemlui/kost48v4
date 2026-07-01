@@ -57,7 +57,7 @@
   color: #fff;
 }
 .staff-filter-chip.active strong {
-  background: rgba(255,255,255,0.2);
+  background: #1d4ed8;
   color: #fff;
 }
 .staff-work-list {

@@ -54,7 +54,7 @@ export default function StaffOperationalTaskBoard({ board, isLoading: _isLoading
           </div>
 
           {/* Komposisi tugas hari ini — chart ringkas modern (recharts). */}
-          <div className="staff-board-chart" aria-hidden="true">
+          <div className="staff-board-chart">
             <ResponsiveContainer width="100%" height={52}>
               <BarChart
                 layout="vertical"

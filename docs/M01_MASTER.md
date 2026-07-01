@@ -8,8 +8,8 @@
 - **Fase B–U** — SELESAI (publik, owner, staff, AI, UI, audit, hardening, wizard, fasilitas)
 - **Fase V** — Booking flow baru: inti benar (RoomStatus tanpa BOOKING), tapi sebagian verifikasi belum bersih (test + payment proof single-submit)
 - **Fase W** — Audit Maksimal Status Proyek: AKTIF (W-01..W-09 selesai, W-00-D1 menunggu owner)
-- **Fase X** — Audit UI/UX Visual: AKTIF (X-01..X-11, X-13, X-15, X-16 selesai; X-02d, X-14 menunggu owner)
-- **Fase Y** — Test Coverage Maksimal: AKTIF (pemetaan 19 sub-fase, 153 area; 125 belum — bertahap per chat, lihat `M10`)
+- **Fase X** — Audit UI/UX Visual: AKTIF (X-01..X-11, X-13, X-14, X-15, X-16 selesai; X-14 = accounting-setup dipecah 5 tab; sisa X-02d menunggu owner)
+- **Fase Y** — Test Coverage Maksimal: **hampir tuntas** (19 sub-fase, 153 area; **152 selesai / 1 sisa** per 2026-07-02 ≈ 1370 test PASS; sisa hanya Y-G7 N/A. Y-M..Y-S selesai; infra FE test vitest+RTL dibangun dari nol — lihat `M10`)
 - **Finance:** Audit keuangan ultra LULUS — TB balanced, deposit MATCHED, 8 invarian PASS
 - **AI:** Fase G (G0-G9) + Fase J hardening selesai — manual-only, OWNER/ADMIN, audit meta.ai
 - **Schema terkini:** S-6 (migration `20260619140000_ai_draft_queue`)

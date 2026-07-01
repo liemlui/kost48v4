@@ -48,7 +48,7 @@ Kredensial: `owner@kost48.com/Owner#2026` · `admin@kost48.com/admin123` · `sta
 - **X-09** — SUDAH beres di kode: `InvoicesPage.tsx:517-531` `{isLoading ? <StatCardSkeleton×4/> : <StatusStrip/>}` (skeleton, bukan "0"). "0" di screenshot dulu = artefak capture backend-crash.
 - **X-13** — BUKAN defect: `OwnerSettingsPage` pakai `<Spinner size="sm">` KONSISTEN di semua tab (Foto/Aset/FAQ). Skeleton hanya utk FAQ justru inkonsisten → dibiarkan.
 
-**⬜ Sisa (butuh owner/fixture, bukan bug FE):** X-02d (konfirmasi owner: kamar OCCUPIED tampil di katalog?) · X-05 (owner `/dashboard` = denial EXPECTED; cek hanya ADMIN natural di `/dashboard`) · X-14 (ditahan owner — power-tool) · X-16 (axe halaman ber-login — perlu auth fixture).
+**⬜ Sisa (butuh owner/fixture, bukan bug FE):** X-02d (konfirmasi owner: kamar OCCUPIED tampil di katalog?) · X-05 (owner `/dashboard` = denial EXPECTED; cek hanya ADMIN natural di `/dashboard`) · X-16 (axe halaman ber-login — perlu auth fixture). *(X-14 SELESAI: accounting-setup dipecah 5 tab.)*
 
 **⚠️ Koreksi X-05:** OWNER buka `/dashboard` = **denial EXPECTED** (`/dashboard` allowed=[ADMIN,STAFF] `App.tsx:208-214`; owner default `/owner-dashboard`). Jadi toast owner = benar, BUKAN bug (capture memaksa owner ke `/dashboard`). Yang perlu dicek HANYA: ADMIN natural di `/dashboard` — kalau masih toast, baru bug guard.
 
@@ -227,7 +227,8 @@ Kredensial: `owner@kost48.com/Owner#2026` · `admin@kost48.com/admin123` · `sta
 ### X-14 🟡 — Owner `/finance/accounting-setup` sangat padat (≈7600px)
 
 **Bukti:** `owner/desktop/18-accounting-setup.png` — belasan panel bertumpuk. **Target:** `AccountingSetupPage.tsx`. Pertimbangkan tab/accordion (Setup · Ledger · Aset · Periode · Saldo Awal). **Konfirmasi ke owner** (power-tool, mungkin sengaja padat).
-**Gate:** ✅ keputusan terdokumentasi; bila dikerjakan, terbagi tab/accordion.
+**✅ SELESAI 2026-07-01 (owner go-ahead):** dipecah 5 tab (`Setup · Ledger · Aset · Periode · Saldo Awal`), tab tersinkron URL `?tab=`. Logika query/mutasi utuh; navigasi lintas-section pindah-tab-lalu-scroll. Build lulus.
+**Gate:** ✅ keputusan terdokumentasi + dikerjakan; terbagi tab.
 
 ---
 

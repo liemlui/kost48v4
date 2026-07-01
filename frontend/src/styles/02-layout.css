@@ -1041,5 +1041,21 @@ body.offcanvas-open {
   gap: 12px;
 }
 .app-footer-phase {
-  opacity: 0.65;
+  color: #475569;
+}
+
+.badge.bg-warning:not(.text-dark) {
+  color: #5f3b00 !important;
+}
+
+.btn-outline-warning {
+  color: #8a4b00;
+  border-color: #b7791f;
+}
+
+.btn-outline-warning:hover,
+.btn-outline-warning:focus-visible {
+  color: #ffffff;
+  background-color: #8a4b00;
+  border-color: #8a4b00;
 }

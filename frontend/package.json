@@ -11,6 +11,8 @@
     "preview": "vite preview",
     "build:lan": "node scripts/golive-build.mjs",
     "golive": "vite preview --host 0.0.0.0 --port 5173 --strictPort",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "test:e2e": "npx playwright test",
     "test:a11y": "npx playwright test e2e/a11y/"
   },
@@ -40,10 +42,16 @@
   "devDependencies": {
     "@axe-core/playwright": "^4.11.3",
     "@playwright/test": "^1.61.0",
+    "@testing-library/dom": "^10.4.1",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
+    "@testing-library/user-event": "^14.6.1",
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",
     "@vitejs/plugin-react": "^4.3.3",
+    "jsdom": "^25.0.1",
     "typescript": "^5.6.3",
-    "vite": "^5.4.10"
+    "vite": "^5.4.10",
+    "vitest": "^2.1.9"
   }
 }

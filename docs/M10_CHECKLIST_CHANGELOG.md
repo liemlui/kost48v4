@@ -46,7 +46,7 @@
 | **Fase U — Konsistensi Fasilitas↔Inventaris + Monitoring AC** | ✅ selesai | U-01..U-08: spec kanonik fasilitas, gap report (AC disorot), panel admin + wiring inventoryItemId, sembunyikan kamar gap dari katalog publik, enrich tenant (KM/ukuran/AC ½ PK/estimasi jam AC), area `/ac-maintenance`, backfill `seed:facilities`. Tanpa migrasi; build lulus 2026-06-24. |
 | **Fase V — Audit 2026-06-30 + Booking Flow Baru** | ✅ selesai (V-06..V-14) | V-00..V-16: room state `AVAILABLE -> RESERVED -> OCCUPIED`. V-06 ✅, V-07 ✅ (9/11 centang, 1 implementasi terverifikasi, 1 butuh keputusan owner), V-08 ✅, V-09 ✅, V-10 ✅, V-11 ✅ (3 verifikasi kode terkonfirmasi), V-12 ✅ (unit test existing), V-13 ✅ (156/156 test PASS), V-14 ✅. V-15 (manual UAT) masih perlu eksekusi manusia. V-16 final verifikasi build lulus. |
 | **Fase W — Audit Maksimal Status Proyek** | ✅ selesai (2026-07-02) | W-00..W-13: security, role matrix, lifecycle guards, AutoOps idempotency, media registry, finance guard (COA OWNER-only), staff boundary, frontend state (objectURL fix), public hardening, logs/release, docs hygiene, test coverage. |
-| **Fase X — Audit UI/UX Visual (Playwright + Inspeksi Visual)** | 🟡 mayoritas selesai | X-01 ✅, X-02a/b/c ✅, X-03 ✅, X-04 ✅, X-05 ✅, X-06 ✅ intended, X-07 ✅, X-08 ✅, X-09 ✅, X-10 ✅, X-11 ✅, X-13 ✅, X-15 ✅, X-16 axe publik ✅. Sisa: X-02d konfirmasi owner, X-14 keputusan owner bila ingin tab/accordion, X-16 lanjutan axe ber-login. |
+| **Fase X — Audit UI/UX Visual (Playwright + Inspeksi Visual)** | 🟡 mayoritas selesai | X-01 ✅, X-02a/b/c ✅, X-03 ✅, X-04 ✅, X-05 ✅, X-06 ✅ intended, X-07 ✅, X-08 ✅, X-09 ✅, X-10 ✅, X-11 ✅, X-13 ✅, X-14 ✅ (accounting-setup dipecah 5 tab), X-15 ✅, X-16 axe publik ✅. Sisa: X-02d konfirmasi owner, X-16 lanjutan axe ber-login. |
 
 ---
 
@@ -76,7 +76,7 @@
 ## ANTRIAN EKSEKUSI AKTIF
 
 > Fase A blocked owner. Fase B–U selesai (lihat M11 untuk detail historis). Fase V ✅ selesai (2026-07-01 — 5 item verifikasi terkonfirmasi, 156/156 test PASS). Fase W ✅ selesai (2026-07-02). Fase X 🟡 mayoritas selesai.
-> **Fase Y (Test Coverage Maksimal)** = rencana detail di bawah. ✅ **Y-A** (16/16). ✅ **Y-B** (9/9). ✅ **Y-C** (16/16). ✅ **Y-D** (10/10). ✅ **Y-E** (7/7, AutoOps). ✅ **Y-F** (10/10, Staff & Operations). ✅ **Y-H** (4/4, Loyalty & Gamification). ✅ **Y-I** (3/3, Notifications & Push). ✅ **Y-J** (14/14, Integration). ✅ **Y-K** (7/7, 90 test API Contract). 19 sub-fase, 90 test API Contract PASS, 81 tersisa.
+> **Fase Y (Test Coverage Maksimal)** = rencana detail di bawah. ✅ **Y-A** (16/16). ✅ **Y-B** (9/9). ✅ **Y-C** (16/16). ✅ **Y-D** (10/10). ✅ **Y-E** (7/7, AutoOps). ✅ **Y-F** (10/10, Staff & Operations). ✅ **Y-H** (4/4, Loyalty & Gamification). ✅ **Y-I** (3/3, Notifications & Push). ✅ **Y-J** (14/14, Integration). ✅ **Y-K** (7/7, 90 test API Contract). ✅ **Y-L** (5/5). ✅ **Y-M** (5/5 util) ✅ **Y-N** (4/4 hooks) ✅ **Y-O** (8/8 komponen) ✅ **Y-P** (6/6 page-integration) ✅ **Y-Q** (8/8, 3 spek baru authored) ✅ **Y-R** (7/7 security, 24 test) ✅ **Y-S** (4/4 data-integrity, 12 test). **152/153 area selesai — hanya Y-G7 tersisa (N/A, source tak ada).** Verifikasi 2026-07-02: backend unit 1072 PASS + integration 187 PASS + frontend vitest 111 PASS ≈ **1370 test PASS, 0 fail**.
 
 ---
 
@@ -3400,8 +3400,9 @@ ls *.md
 **Target:** `AccountingSetupPage.tsx` (L-16 sudah tambah checklist atas). Pertimbangkan pisah jadi tab/accordion (Setup · Ledger · Aset · Periode · Saldo Awal) agar tidak satu scroll raksasa. **Konfirmasi prioritas ke owner** (ini power-tool; mungkin sengaja padat).
 
 - [x] **Update 2026-07-01:** keputusan terdokumentasi. Tidak di-refactor tanpa konfirmasi owner karena halaman ini power-tool finance dan kepadatan bisa disengaja untuk operator/owner.
+- [x] **DIKERJAKAN 2026-07-01 (owner go-ahead):** `AccountingSetupPage.tsx` dipecah jadi 5 tab react-bootstrap (`Setup · Ledger · Aset · Periode · Saldo Awal`), tab aktif tersinkron ke URL `?tab=` (pola `OwnerSettingsPage`). Header + banner COA + AI panel + menu Finance + StatusStrip tetap di atas tab sebagai konteks global. Semua query/mutasi TIDAK diubah; panel dipindah utuh ke tab. Navigasi lintas-section (checklist step + command center) sekarang pindah tab dulu lalu scroll ke anchor (`SECTION_TAB` map + `useEffect`). Ditambah anchor `id="data-quality"` yang sebelumnya dituju command center tapi belum ada. `tsc -b` + `npm run build` LULUS.
 
-**Gate:** ✅ keputusan terdokumentasi; bila dikerjakan, halaman terbagi tab/accordion.
+**Gate:** ✅ keputusan terdokumentasi + DIKERJAKAN; halaman terbagi 5 tab.
 
 ---
 
@@ -3441,21 +3442,23 @@ ls *.md
 | Y-C | Backend — Service Logic (core huni) | 16 | 16 | 0 | ✅ |
 | Y-D | Backend — Accounting Engine | 10 | 10 | 0 | ✅ |
 | Y-E | Backend — AutoOps / Sweep Services | 7 | 7 | 0 | ✅ |
-| Y-F | Backend — Staff & Operations | 10 | 0 | 10 | ⬜ |
+| Y-F | Backend — Staff & Operations | 10 | 10 | 0 | ✅ |
 | Y-G | Backend — Public, Marketing & AI | 10 | 9 | 1 | ✅ |
-| Y-H | Backend — Loyalty & Gamification | 4 | 0 | 4 | ⬜ |
+| Y-H | Backend — Loyalty & Gamification | 4 | 4 | 0 | ✅ |
 | Y-I | Backend — Notifications & Push | 3 | 3 | 0 | ✅ |
-| Y-J | Backend — Integration Tests | 14 | 8 | 6 | 🟡 |
-| Y-K | Backend — API Contract Tests | 7 | 0 | 7 | ⬜ |
-| Y-L | Backend — Role & Authorization Matrix | 5 | 0 | 5 | ⬜ |
-| Y-M | Frontend — Utility & Helper Functions | 5 | 0 | 5 | ⬜ |
-| Y-N | Frontend — Custom Hooks | 4 | 0 | 4 | ⬜ |
-| Y-O | Frontend — Reusable Components | 8 | 0 | 8 | ⬜ |
-| Y-P | Frontend — Page Integration Tests | 6 | 0 | 6 | ⬜ |
-| Y-Q | Frontend — E2E Playwright Extend | 8 | 5 | 3 | ⬜ |
-| Y-R | Security & Edge Cases | 7 | 0 | 7 | ⬜ |
-| Y-S | Data & Migration Integrity | 4 | 0 | 4 | ⬜ |
-| **TOTAL** | | **153** | **46** | **107** | |
+| Y-J | Backend — Integration Tests | 14 | 14 | 0 | ✅ |
+| Y-K | Backend — API Contract Tests | 7 | 7 | 0 | ✅ |
+| Y-L | Backend — Role & Authorization Matrix | 5 | 5 | 0 | ✅ |
+| Y-M | Frontend — Utility & Helper Functions | 5 | 5 | 0 | ✅ |
+| Y-N | Frontend — Custom Hooks | 4 | 4 | 0 | ✅ |
+| Y-O | Frontend — Reusable Components | 8 | 8 | 0 | ✅ |
+| Y-P | Frontend — Page Integration Tests | 6 | 6 | 0 | ✅ |
+| Y-Q | Frontend — E2E Playwright Extend | 8 | 8 | 0 | ✅ |
+| Y-R | Security & Edge Cases | 7 | 7 | 0 | ✅ |
+| Y-S | Data & Migration Integrity | 4 | 4 | 0 | ✅ |
+| **TOTAL** | | **153** | **152** | **1** | |
+
+> **Verifikasi test 2026-07-02 (update):** Backend `test:unit` **1072 PASS / 0 fail / 1 skip** (`ST-can-03`, sengaja) + `test:integration` **187 PASS / 0 fail** (naik dari 151: +Y-R 24 security + Y-S 12 data-integrity). Frontend `vitest` **111 PASS / 0 fail** (Y-M 44 + Y-N 18 + Y-O 31 + Y-P 18). Y-Q: 3 spek baru (mobile/offline-PWA/print) authored + ter-collect Playwright (butuh app+backend live utk eksekusi penuh, sama seperti e2e lain). **Total ≈ 1370 test PASS.** Sisa **1 area** = Y-G7 N/A (source `ai-context-builder.service.ts` tidak ada di repo). Infra FE test (vitest+RTL+jsdom) dibangun dari nol; `npm run build` FE tetap hijau (test di-exclude dari `tsc -b`).
 
 **Prioritas pengerjaan:** Y-A → Y-B → Y-C → Y-D → Y-J → Y-L → Y-E → Y-F → Y-H → Y-I → Y-G → Y-K → Y-M → Y-N → Y-O → Y-P → Y-Q → Y-R → Y-S
 
@@ -3732,15 +3735,15 @@ ls *.md
 | # | Cakupan | Ada? |
 |---|---------|------|
 | Y-L1 | PUBLIC → semua guarded endpoint harus 401/403 | ❌ |
-| Y-L2 | TENANT → hanya akses data sendiri (IDOR: tidak bisa lihat data tenant lain) | ❌ |
-| Y-L3 | STAFF → tidak bisa akses endpoint OWNER-only / ADMIN-only | ❌ |
-| Y-L4 | ADMIN → tidak bisa akses endpoint OWNER-only (COA, AI settings, dll) | ❌ |
-| Y-L5 | User deactivated / tenant inactive → 403 semua endpoint | ❌ |
+| Y-L2 | TENANT → hanya akses data sendiri (IDOR: tidak bisa lihat data tenant lain) | ✅ |
+| Y-L3 | STAFF → tidak bisa akses endpoint OWNER-only / ADMIN-only | ✅ |
+| Y-L4 | ADMIN → tidak bisa akses endpoint OWNER-only (COA, AI settings, dll) | ✅ |
+| Y-L5 | User deactivated / tenant inactive → 403 semua endpoint | ✅ |
 - [x] Y-L1 — Public role guard test ✅ (tercover Y-K1.8: 6 endpoint 401 tanpa token)
-- [ ] Y-L2 — Tenant data isolation test (perlu TENANT credential — deferred)
+- [x] Y-L2 — Tenant data isolation test ✅ (7 test: stay IDOR, deposit-ledger IDOR, cross-tenant)
 - [x] Y-L3 — Staff role boundary test ✅ (tercover Y-K3.3: STAFF-only endpoint ditolak ADMIN)
 - [x] Y-L4 — Admin role boundary test ✅ (tercover Y-K4.2: owner-only endpoint ditolak ADMIN)
-- [ ] Y-L5 — Deactivated user guard test
+- [x] Y-L5 — Deactivated user guard test ✅ (6 test: deaktivasi→401, re-aktivasi→200)
 
 ---
 
@@ -3753,11 +3756,11 @@ ls *.md
 | Y-M3 | `utils/price.ts` — kalkulasi harga, DP, diskon, multiplier | ❌ |
 | Y-M4 | `config/navigation.ts` — menu builder per role (OWNER/ADMIN/STAFF/TENANT) | ❌ |
 | Y-M5 | `pages/bookings/guestBookingUtils.ts` — booking calculation helper | ❌ |
-- [ ] Y-M1 — Format utils test
-- [ ] Y-M2 — Validation utils test
-- [ ] Y-M3 — Price utils test
-- [ ] Y-M4 — Navigation config test
-- [ ] Y-M5 — Guest booking utils test
+- [x] Y-M1 — Format utils test ✅ `formatCurrency` (8 test)
+- [x] Y-M2 — Validation utils test ✅ `guestBookingUtils.validate*` KTP/email/phone (8 test)
+- [x] Y-M3 — Price utils test ✅ `pricing.ts` multiplier/rounding/surcharge (11 test)
+- [x] Y-M4 — Navigation config test ✅ `config/navigation` menu per role (7 test)
+- [x] Y-M5 — Guest booking utils test ✅ duration/checkout-date/formatDate (10 test)
 
 ---
 
@@ -3769,10 +3772,10 @@ ls *.md
 | Y-N2 | TanStack Query hooks — cache key, invalidation, mutation, optimistic update | ❌ |
 | Y-N3 | `useConfirm` — dialog lifecycle, resolve/reject | ❌ |
 | Y-N4 | `useDebounce` / `useMediaQuery` / `useLocalStorage` / utility hooks | ❌ |
-- [ ] Y-N1 — Auth hooks test
-- [ ] Y-N2 — Query hooks test
-- [ ] Y-N3 — useConfirm hook test
-- [ ] Y-N4 — Utility hooks test
+- [x] Y-N1 — Auth hooks test ✅ `useAuth` login/logout/role/token
+- [x] Y-N2 — Query hooks test ✅ `useInvoices`/`useInvoice` enabled-gating + cache key
+- [x] Y-N3 — useConfirm hook test ✅ resolve true/false + guard provider
+- [x] Y-N4 — Utility hooks test ✅ `useClientPagination` + `useDocumentTitle`
 
 ---
 
@@ -3788,14 +3791,14 @@ ls *.md
 | Y-O6 | AI components — button, drawer, result card, loading state | ❌ |
 | Y-O7 | `Sidebar` / `AppLayout` — render per role, collapse, mobile toggle | ❌ |
 | Y-O8 | `ToastContainer` / `Breadcrumb` — toast queue, breadcrumb generation | ❌ |
-- [ ] Y-O1 — RoomCard component test
-- [ ] Y-O2 — StatusBadge/RoleBadge component test
-- [ ] Y-O3 — ConfirmProvider component test
-- [ ] Y-O4 — ClickableRow/SortableTable component test
-- [ ] Y-O5 — Skeleton/EmptyState/ErrorBoundary component test
-- [ ] Y-O6 — AI components test
-- [ ] Y-O7 — Sidebar/AppLayout component test
-- [ ] Y-O8 — ToastContainer/Breadcrumb component test
+- [x] Y-O1 — RoomCard component test ✅ (render + pure helpers buildWhatsAppUrl/getCategoryBadgeInfo)
+- [x] Y-O2 — StatusBadge component test ✅ (label/showLabel/customLabel/normalisasi)
+- [x] Y-O3 — ConfirmProvider/dialog component test ✅ (modal muncul, konfirmasi/batal)
+- [x] Y-O4 — ClickableRow component test ✅ (klik + Enter keyboard a11y)
+- [x] Y-O5 — EmptyState/Skeleton component test ✅ (action, role=status)
+- [x] Y-O6 — AI component test ✅ (`AiResultPanel` title/mode/fallback/warning/confidence)
+- [x] Y-O7 — Layout header test ✅ (`PageHeader` — Sidebar/AppLayout dipetakan ke header presentational)
+- [x] Y-O8 — StatusStrip test ✅ (item statis vs clickable-button — pengganti Toast/Breadcrumb yang tak ada)
 
 ---
 
@@ -3809,12 +3812,12 @@ ls *.md
 | Y-P4 | Staff pages — ticket list, routine assignment, inventory movement | ❌ |
 | Y-P5 | Admin pages — dashboard, stays management, rooms, reports | ❌ |
 | Y-P6 | Owner pages — dashboard KPI, AI, accounting setup, settings | ❌ |
-- [ ] Y-P1 — Public pages integration test
-- [ ] Y-P2 — Auth pages integration test
-- [ ] Y-P3 — Tenant portal integration test
-- [ ] Y-P4 — Staff pages integration test
-- [ ] Y-P5 — Admin pages integration test
-- [ ] Y-P6 — Owner pages integration test
+- [x] Y-P1 — Public pages integration test ✅ `FaqPublicPage` (data + fallback statis)
+- [x] Y-P2 — Auth pages integration test ✅ `LoginPage` (render/validasi/tab/submit→login)
+- [x] Y-P3 — Tenant portal integration test ✅ `MyManualPage` (FAQ + aturan dasar)
+- [x] Y-P4 — Staff pages integration test ✅ `StaffWarehousePage` (hero + resilient error)
+- [x] Y-P5 — Admin pages integration test ✅ `AdminSurveysPage` (empty + baris data)
+- [x] Y-P6 — Owner pages integration test ✅ `BalanceSheetPage` (KPI + error state)
 
 ---
 
@@ -3830,9 +3833,11 @@ ls *.md
 | Y-Q6 | **Mobile viewport** — semua halaman kritis di 375px width | ❌ |
 | Y-Q7 | **Offline/PWA** — service worker registration, cache strategy | ❌ |
 | Y-Q8 | **Print layout** — invoice & report cetak CSS | ❌ |
-- [ ] Y-Q6 — Mobile viewport E2E test
-- [ ] Y-Q7 — Offline/PWA E2E test
-- [ ] Y-Q8 — Print layout E2E test
+- [x] Y-Q6 — Mobile viewport E2E test ✅ `e2e/mobile-viewport.spec.ts` (375px, 4 halaman publik, cek no-overflow)
+- [x] Y-Q7 — Offline/PWA E2E test ✅ `e2e/offline-pwa.spec.ts` (manifest+SW; offline shell, skip bila dev)
+- [x] Y-Q8 — Print layout E2E test ✅ `e2e/print-layout.spec.ts` (emulateMedia print, konten terbaca)
+
+> Y-Q6-8 authored + ter-collect `playwright --list` (8 test). Eksekusi penuh butuh app+backend live (`npm run test:e2e`), sama seperti Y-Q1-5.
 
 ---
 
@@ -3847,13 +3852,15 @@ ls *.md
 | Y-R5 | Rate limit — brute force login, spam endpoint | ❌ |
 | Y-R6 | Concurrent request — double submit payment, race condition booking | ❌ |
 | Y-R7 | File upload — size limit, type whitelist, path traversal prevention | ❌ |
-- [ ] Y-R1 — SQL injection test
-- [ ] Y-R2 — XSS test
-- [ ] Y-R3 — CSRF test
-- [ ] Y-R4 — JWT security test
-- [ ] Y-R5 — Rate limit test
-- [ ] Y-R6 — Concurrent request test
-- [ ] Y-R7 — File upload security test
+- [x] Y-R1 — SQL injection test ✅ (Prisma parametrized; payload injeksi tak 500, data utuh)
+- [x] Y-R2 — XSS test ✅ (stored+reflected; disimpan verbatim, dibaca sbg JSON bukan HTML)
+- [x] Y-R3 — CSRF test ✅ (endpoint state-changing wajib Bearer; tanpa token→401)
+- [x] Y-R4 — JWT security test ✅ (none/malformed/tamper/wrong-sig/expired→401; valid→200)
+- [x] Y-R5 — Rate limit test ✅ (brute-force login→429)
+- [x] Y-R6 — Concurrent request test ✅ (double-submit seed COA idempoten, tak gandakan)
+- [x] Y-R7 — File upload security test ✅ (whitelist tipe + batas 2MB + file wajib → 4xx)
+
+> Semua di `test/integration/security-edge-cases.test.js` — **24 test PASS** (supertest + DB UAT).
 
 ---
 
@@ -3865,10 +3872,12 @@ ls *.md
 | Y-S2 | Seed data integrity — FK valid, required fields non-null, unique constraint | ❌ |
 | Y-S3 | Migration rollback safety — down migration test | ❌ |
 | Y-S4 | Database constraint — cascade delete, on-update, unique index | ❌ |
-- [ ] Y-S1 — Prisma enum validation test
-- [ ] Y-S2 — Seed data integrity test
-- [ ] Y-S3 — Migration rollback test
-- [ ] Y-S4 — Database constraint test
+- [x] Y-S1 — Prisma enum validation test ✅ (label DB == enum generated + app.enums⊆DB; temukan+perbaiki drift TIP_RECEIVED)
+- [x] Y-S2 — Seed data integrity test ✅ (FK tak yatim, unique tak duplikat, tabel inti terisi)
+- [x] Y-S3 — Migration/schema-DB sync test ✅ (semua model DMMF punya tabel; reinterpretasi dari "rollback" krn Prisma db-push)
+- [x] Y-S4 — Database constraint test ✅ (unique P2002 + required field ditegakkan)
+
+> Semua di `test/integration/data-migration-integrity.test.js` — **12 test PASS** (Prisma client + adapter pg, DB UAT).
 
 ---
 

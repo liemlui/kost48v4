@@ -1,8 +1,8 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useConfirm } from '../../components/common/ConfirmProvider';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Alert, Badge, Button, Card, Col, Row, Spinner } from 'react-bootstrap';
-import { useNavigate } from 'react-router-dom';
+import { Alert, Badge, Button, Card, Col, Row, Spinner, Tab, Tabs } from 'react-bootstrap';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import PageHeader from '../../components/common/PageHeader';
 import { StatusStrip } from '../../components/workspace';
@@ -73,6 +73,22 @@ const financeMenu = [
   { id: 'assets', icon: '🏗️', label: 'Asset Register', helper: 'Aset tetap, nilai buku, dan depresiasi bulanan.', to: '/finance/assets', active: false },
 ];
 
+// X-14: pemecahan halaman jadi tab. Peta section-anchor -> tab agar tombol
+// "lompat ke section" (checklist + command center) tetap bekerja lintas tab:
+// pindah tab dulu, lalu scroll ke anchor setelah pane target tampil.
+const ACCOUNTING_TABS = ['setup', 'ledger', 'aset', 'periode', 'saldo'] as const;
+type AccountingTabKey = (typeof ACCOUNTING_TABS)[number];
+const SECTION_TAB: Record<string, AccountingTabKey> = {
+  'data-quality': 'setup',
+  'trial-balance': 'ledger',
+  'balance-sheet': 'ledger',
+  'profit-loss': 'ledger',
+  'operational-posting': 'ledger',
+  'asset-readiness': 'aset',
+  'period-close': 'periode',
+  'opening-balance': 'saldo',
+};
+
 function currentAsOf() {
   return new Date().toISOString().slice(0, 10);
 }
@@ -86,12 +102,18 @@ export default function AccountingSetupPage() {
   const queryClient = useQueryClient();
   const { user } = useAuth();
   const confirm = useConfirm();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [actionMessage, setActionMessage] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
   const [periodCloseNotes, setPeriodCloseNotes] = useState('');
   const [periodReopenReason, setPeriodReopenReason] = useState('');
   const [periodClosePreview, setPeriodClosePreview] = useState<Awaited<ReturnType<typeof previewPeriodClose>> | undefined>(undefined);
   const [periodReopenPreview, setPeriodReopenPreview] = useState<Awaited<ReturnType<typeof previewPeriodReopen>> | undefined>(undefined);
+  const pendingScrollRef = useRef<string | null>(null);
+  const tabParam = searchParams.get('tab');
+  const activeTab: AccountingTabKey = (ACCOUNTING_TABS as readonly string[]).includes(tabParam ?? '')
+    ? (tabParam as AccountingTabKey)
+    : 'setup';
   const asOf = currentAsOf();
   const asOfDate = new Date(`${asOf}T00:00:00Z`);
   const closeYear = asOfDate.getUTCFullYear();
@@ -192,11 +214,36 @@ export default function AccountingSetupPage() {
   }, [accounts.length, activePostingPeriodReady, autoJournalEnabled, draftOpeningBalance, periods.length, postedOpeningBalance, readinessQuery.data]);
 
 
-  function focusAccountingSection(sectionId: string) {
+  const goToTab = useCallback((key: AccountingTabKey) => {
+    const next = new URLSearchParams(searchParams);
+    next.set('tab', key);
+    setSearchParams(next, { replace: true });
+  }, [searchParams, setSearchParams]);
+
+  const scrollToSection = useCallback((sectionId: string, delay = 0) => {
     window.setTimeout(() => {
       document.getElementById(sectionId)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }, 0);
-  }
+    }, delay);
+  }, []);
+
+  const focusAccountingSection = useCallback((sectionId: string) => {
+    const targetTab = SECTION_TAB[sectionId];
+    if (targetTab && targetTab !== activeTab) {
+      // Pindah tab dulu; scroll dijalankan oleh effect setelah pane target tampil.
+      pendingScrollRef.current = sectionId;
+      goToTab(targetTab);
+      return;
+    }
+    scrollToSection(sectionId);
+  }, [activeTab, goToTab, scrollToSection]);
+
+  // Jalankan scroll tertunda setelah tab berpindah dan pane target dirender.
+  useEffect(() => {
+    const pending = pendingScrollRef.current;
+    if (!pending) return;
+    pendingScrollRef.current = null;
+    scrollToSection(pending, 80);
+  }, [activeTab, scrollToSection]);
 
   async function refreshAccounting() {
     await Promise.all([
@@ -524,229 +571,246 @@ export default function AccountingSetupPage() {
         ]}
       />
 
-      <AccountingSetupChecklist
-        steps={setupChecklistSteps}
-        onFocusSection={focusAccountingSection}
-      />
+      <Tabs
+        id="accounting-setup-tabs"
+        activeKey={activeTab}
+        onSelect={(key) => { if (key && (ACCOUNTING_TABS as readonly string[]).includes(key)) goToTab(key as AccountingTabKey); }}
+        className="command-tabs mb-3"
+      >
+        <Tab eventKey="setup" title="Setup" className="pt-3">
+          <AccountingSetupChecklist
+            steps={setupChecklistSteps}
+            onFocusSection={focusAccountingSection}
+          />
 
-      <AccountingCommandCenterLite
-        readiness={readinessQuery.data}
-        trial={trialBalanceQuery.data}
-        balanceSheet={balanceSheetQuery.data}
-        profitLoss={profitLossQuery.data}
-        periodClose={periodCloseReadinessQuery.data}
-        assetReadiness={assetReadinessQuery.data}
-        unmapped={unmappedQuery.data}
-        depositPosition={depositPositionQuery.data}
-        depositReconciliation={depositReconciliationQuery.data}
-        reversalWatch={reversalWatchQuery.data}
-        recentJournals={recentJournals}
-        autoJournalEnabled={autoJournalEnabled}
-        isLoading={readinessQuery.isLoading || trialBalanceQuery.isLoading || profitLossQuery.isLoading}
-        onFocusSection={focusAccountingSection}
-      />
-
-      <Row className="g-3 mb-3">
-        <Col xl={7}>
-          <AccountingDataQualityPanel
+          <AccountingCommandCenterLite
             readiness={readinessQuery.data}
             trial={trialBalanceQuery.data}
             balanceSheet={balanceSheetQuery.data}
+            profitLoss={profitLossQuery.data}
             periodClose={periodCloseReadinessQuery.data}
-            unmapped={unmappedQuery.data}
             assetReadiness={assetReadinessQuery.data}
+            unmapped={unmappedQuery.data}
             depositPosition={depositPositionQuery.data}
             depositReconciliation={depositReconciliationQuery.data}
             reversalWatch={reversalWatchQuery.data}
-            isLoading={readinessQuery.isLoading || trialBalanceQuery.isLoading || balanceSheetQuery.isLoading}
+            recentJournals={recentJournals}
+            autoJournalEnabled={autoJournalEnabled}
+            isLoading={readinessQuery.isLoading || trialBalanceQuery.isLoading || profitLossQuery.isLoading}
+            onFocusSection={focusAccountingSection}
           />
-        </Col>
-        <Col xl={5}>
+
+          <Row className="g-3 mb-3">
+            <Col xl={7} id="data-quality">
+              <AccountingDataQualityPanel
+                readiness={readinessQuery.data}
+                trial={trialBalanceQuery.data}
+                balanceSheet={balanceSheetQuery.data}
+                periodClose={periodCloseReadinessQuery.data}
+                unmapped={unmappedQuery.data}
+                assetReadiness={assetReadinessQuery.data}
+                depositPosition={depositPositionQuery.data}
+                depositReconciliation={depositReconciliationQuery.data}
+                reversalWatch={reversalWatchQuery.data}
+                isLoading={readinessQuery.isLoading || trialBalanceQuery.isLoading || balanceSheetQuery.isLoading}
+              />
+            </Col>
+            <Col xl={5}>
+              <AccountingReadinessCard readiness={readinessQuery.data} />
+            </Col>
+          </Row>
+        </Tab>
+
+        <Tab eventKey="ledger" title="Ledger" className="pt-3">
+          <Row className="g-3 mb-3">
+            <Col xl={6} id="profit-loss">
+              <ProfitLossLitePanel profitLoss={profitLossQuery.data} />
+            </Col>
+            <Col xl={6} id="trial-balance">
+              <TrialBalancePreview trial={trialBalanceQuery.data} />
+            </Col>
+          </Row>
+
+          <div id="balance-sheet" className="mb-3">
+            <BalanceSheetGuardPanel guard={balanceSheetQuery.data} />
+          </div>
+
+          <JournalAuditTrailPanel
+            journals={recentJournals}
+            isLoading={recentJournalsQuery.isLoading}
+            note={recentJournalsQuery.data?.note}
+          />
+
+          <Card id="operational-posting" className="content-card border-0 mb-3">
+            <Card.Body className="d-flex flex-column flex-lg-row gap-3 justify-content-between align-items-lg-center">
+              <div>
+                <div className="section-kicker mb-2">Posting Operasional</div>
+                <h3 className="h5 mb-1">{autoJournalEnabled ? 'Auto journal operasional aktif' : 'Auto journal operasional belum aktif'}</h3>
+                <p className="text-muted mb-0">
+                  Tagihan, pembayaran, pengeluaran, dan voucher WiFi dicatat otomatis ke jurnal akuntansi. Gunakan fitur ini hanya untuk data operasional lama yang belum terjurnal.
+                </p>
+                {postingBoundaryQuery.data?.note ? <small className="text-muted d-block mt-2">{postingBoundaryQuery.data.note}</small> : null}
+              </div>
+              <div className="d-flex flex-column flex-sm-row gap-2 align-items-sm-center">
+                <div className="text-sm-end">
+                  <div className="fw-semibold">{unmappedQuery.isLoading ? 'Memuat...' : `${unmappedOperationalCount} sample belum terjurnal`}</div>
+                  <small className="text-muted">Tagihan, pembayaran, pengeluaran, WiFi</small>
+                </div>
+                <Button
+                  variant="outline-primary"
+                  disabled={!canManageOpeningBalance || backfillMutation.isPending}
+                  onClick={() => backfillMutation.mutate()}
+                >
+                  {backfillMutation.isPending ? 'Backfill...' : 'Backfill 25 Transaksi'}
+                </Button>
+              </div>
+            </Card.Body>
+          </Card>
+
+          <Card className="content-card border-0 mb-3">
+            <Card.Body className="d-flex flex-column flex-lg-row gap-3 justify-content-between align-items-lg-center">
+              <div>
+                <div className="section-kicker mb-2">Review Deposit Liability</div>
+                <h3 className="h5 mb-1">Dry-run sebelum backfill deposit</h3>
+                <p className="text-muted mb-2">
+                  Selisih deposit tidak otomatis berarti harus membuat jurnal baru. Jika berasal dari saldo awal, backfill deposit bisa menggandakan liability. Dry-run hanya membaca kandidat dan tidak membuat JournalEntry.
+                </p>
+                {depositReconciliationQuery.data?.summary ? (
+                  <div className="d-flex flex-wrap gap-2 small">
+                    <Badge bg={depositReconciliationQuery.data.summary.reconciliationStatus === 'MATCHED' ? 'success' : 'warning'}>{depositReconciliationQuery.data.summary.reconciliationStatus}</Badge>
+                    <span className="text-muted">Saldo awal: {formatRupiah(depositReconciliationQuery.data.summary.ledgerOpeningBalanceDepositRupiah)}</span>
+                    <span className="text-muted">Auto deposit: {formatRupiah(depositReconciliationQuery.data.summary.ledgerAutoJournalDepositRupiah)}</span>
+                    <span className="text-muted">Selisih: {formatRupiah(depositReconciliationQuery.data.summary.differenceRupiah)}</span>
+                  </div>
+                ) : null}
+              </div>
+              <Button
+                variant="outline-warning"
+                disabled={!canManageOpeningBalance || depositDryRunMutation.isPending}
+                onClick={() => depositDryRunMutation.mutate()}
+              >
+                {depositDryRunMutation.isPending ? 'Dry-run...' : 'Dry-run Deposit Backfill'}
+              </Button>
+            </Card.Body>
+          </Card>
+
+          <DepositOperationsPanel
+            summary={depositLedgerSummaryQuery.data}
+            reconciliation={depositLedgerReconciliationQuery.data}
+            isLoading={depositLedgerSummaryQuery.isLoading || depositLedgerReconciliationQuery.isLoading}
+            isError={depositLedgerSummaryQuery.isError || depositLedgerReconciliationQuery.isError}
+            onRefresh={() => void Promise.all([
+              queryClient.invalidateQueries({ queryKey: ['deposit-ledger', 'summary'] }),
+              queryClient.invalidateQueries({ queryKey: ['deposit-ledger', 'reconciliation-lite'] }),
+            ])}
+          />
+        </Tab>
+
+        <Tab eventKey="aset" title="Aset" className="pt-3">
+          <div id="asset-readiness">
+            <AssetReadinessPanel readiness={assetReadinessQuery.data} isLoading={assetReadinessQuery.isLoading} />
+          </div>
+        </Tab>
+
+        <Tab eventKey="periode" title="Periode" className="pt-3">
+          <Card className="content-card border-0 mb-3 accounting-setup-card">
+            <Card.Body className="d-flex flex-column flex-xl-row gap-3 justify-content-between align-items-xl-center">
+              <div>
+                <div className="section-kicker mb-2">Auto-Close Bulanan</div>
+                <h3 className="h5 mb-1">Tutup periode otomatis, tetapi tetap blocker-aware</h3>
+                <p className="text-muted mb-2">
+                  Sistem menargetkan bulan yang sudah lewat ({autoClosePolicyQuery.data?.targetPeriodKey ?? 'bulan lalu'}), bukan bulan berjalan. Auto-close hanya berjalan jika semua readiness aman dan preview jurnal closing balanced.
+                </p>
+                <div className="d-flex flex-wrap gap-2 small">
+                  <Badge bg={autoClosePolicyQuery.data?.enabled ? 'success' : 'warning'}>{autoClosePolicyQuery.data?.enabled ? 'Auto-close ON' : 'Auto-close OFF'}</Badge>
+                  <Badge bg="info">Monthly controlled close</Badge>
+                  <span className="text-muted">Buka ulang tetap Owner-only + alasan audit.</span>
+                </div>
+                {autoClosePolicyQuery.data?.note ? <small className="text-muted d-block mt-2">{autoClosePolicyQuery.data.note}</small> : null}
+              </div>
+              <div className="d-flex flex-column flex-sm-row gap-2 align-items-sm-center">
+                <Button
+                  variant="outline-primary"
+                  disabled={!canManageOpeningBalance || autoCloseMutation.isPending || !autoClosePolicyQuery.data?.enabled}
+                  onClick={() => autoCloseMutation.mutate()}
+                >
+                  {autoCloseMutation.isPending ? 'Mengecek...' : 'Jalankan Auto-Close Sekarang'}
+                </Button>
+              </div>
+            </Card.Body>
+          </Card>
+
+          <AccountingPeriodsPanel
+            periods={periods}
+            readiness={readinessQuery.data}
+            isLoading={periodsQuery.isLoading || readinessQuery.isLoading}
+            canManage={user?.role === 'OWNER'}
+            reopenReason={periodReopenReason}
+            isReopening={reopenCurrentPostingPeriodMutation.isPending}
+            onReopenReasonChange={setPeriodReopenReason}
+            onReopenCurrentPeriod={() => reopenCurrentPostingPeriodMutation.mutate()}
+            onFocusPeriodClose={() => focusAccountingSection('period-close')}
+          />
+
+          <div id="period-close">
+            <PeriodClosePanel
+              year={closeYear}
+              month={closeMonth}
+              readiness={periodCloseReadinessQuery.data}
+              preview={periodClosePreview}
+              reopenPreview={periodReopenPreview}
+              isLoading={periodCloseReadinessQuery.isLoading}
+              isPreviewing={previewCloseMutation.isPending}
+              isPosting={postCloseMutation.isPending}
+              isReopenPreviewing={previewReopenMutation.isPending}
+              isReopening={postReopenMutation.isPending}
+              canPost={user?.role === 'OWNER'}
+              notes={periodCloseNotes}
+              reopenReason={periodReopenReason}
+              onNotesChange={setPeriodCloseNotes}
+              onReopenReasonChange={setPeriodReopenReason}
+              onPreview={() => previewCloseMutation.mutate()}
+              onPost={() => postCloseMutation.mutate()}
+              onPreviewReopen={() => previewReopenMutation.mutate()}
+              onReopen={() => postReopenMutation.mutate()}
+            />
+          </div>
+
           <PeriodCloseTimeline
             readiness={periodCloseReadinessQuery.data}
             profitLoss={profitLossQuery.data}
             recentJournals={recentJournals}
           />
-        </Col>
-      </Row>
+        </Tab>
 
-      <Row className="g-3 mb-3">
-        <Col xl={6}><AccountingReadinessCard readiness={readinessQuery.data} /></Col>
-        <Col xl={6} id="balance-sheet"><BalanceSheetGuardPanel guard={balanceSheetQuery.data} /></Col>
-      </Row>
-
-      <div id="asset-readiness">
-        <AssetReadinessPanel readiness={assetReadinessQuery.data} isLoading={assetReadinessQuery.isLoading} />
-      </div>
-
-
-      <Card className="content-card border-0 mb-3 accounting-setup-card">
-        <Card.Body className="d-flex flex-column flex-xl-row gap-3 justify-content-between align-items-xl-center">
-          <div>
-            <div className="section-kicker mb-2">Auto-Close Bulanan</div>
-            <h3 className="h5 mb-1">Tutup periode otomatis, tetapi tetap blocker-aware</h3>
-            <p className="text-muted mb-2">
-              Sistem menargetkan bulan yang sudah lewat ({autoClosePolicyQuery.data?.targetPeriodKey ?? 'bulan lalu'}), bukan bulan berjalan. Auto-close hanya berjalan jika semua readiness aman dan preview jurnal closing balanced.
-            </p>
-            <div className="d-flex flex-wrap gap-2 small">
-              <Badge bg={autoClosePolicyQuery.data?.enabled ? 'success' : 'warning'}>{autoClosePolicyQuery.data?.enabled ? 'Auto-close ON' : 'Auto-close OFF'}</Badge>
-              <Badge bg="info">Monthly controlled close</Badge>
-              <span className="text-muted">Buka ulang tetap Owner-only + alasan audit.</span>
-            </div>
-            {autoClosePolicyQuery.data?.note ? <small className="text-muted d-block mt-2">{autoClosePolicyQuery.data.note}</small> : null}
-          </div>
-          <div className="d-flex flex-column flex-sm-row gap-2 align-items-sm-center">
-            <Button
-              variant="outline-primary"
-              disabled={!canManageOpeningBalance || autoCloseMutation.isPending || !autoClosePolicyQuery.data?.enabled}
-              onClick={() => autoCloseMutation.mutate()}
-            >
-              {autoCloseMutation.isPending ? 'Mengecek...' : 'Jalankan Auto-Close Sekarang'}
-            </Button>
-          </div>
-        </Card.Body>
-      </Card>
-
-      <AccountingPeriodsPanel
-        periods={periods}
-        readiness={readinessQuery.data}
-        isLoading={periodsQuery.isLoading || readinessQuery.isLoading}
-        canManage={user?.role === 'OWNER'}
-        reopenReason={periodReopenReason}
-        isReopening={reopenCurrentPostingPeriodMutation.isPending}
-        onReopenReasonChange={setPeriodReopenReason}
-        onReopenCurrentPeriod={() => reopenCurrentPostingPeriodMutation.mutate()}
-        onFocusPeriodClose={() => focusAccountingSection('period-close')}
-      />
-
-      <div id="period-close">
-        <PeriodClosePanel
-          year={closeYear}
-          month={closeMonth}
-          readiness={periodCloseReadinessQuery.data}
-          preview={periodClosePreview}
-          reopenPreview={periodReopenPreview}
-          isLoading={periodCloseReadinessQuery.isLoading}
-          isPreviewing={previewCloseMutation.isPending}
-          isPosting={postCloseMutation.isPending}
-          isReopenPreviewing={previewReopenMutation.isPending}
-          isReopening={postReopenMutation.isPending}
-          canPost={user?.role === 'OWNER'}
-          notes={periodCloseNotes}
-          reopenReason={periodReopenReason}
-          onNotesChange={setPeriodCloseNotes}
-          onReopenReasonChange={setPeriodReopenReason}
-          onPreview={() => previewCloseMutation.mutate()}
-          onPost={() => postCloseMutation.mutate()}
-          onPreviewReopen={() => previewReopenMutation.mutate()}
-          onReopen={() => postReopenMutation.mutate()}
-        />
-      </div>
-
-      <JournalAuditTrailPanel
-        journals={recentJournals}
-        isLoading={recentJournalsQuery.isLoading}
-        note={recentJournalsQuery.data?.note}
-      />
-
-      <Card id="operational-posting" className="content-card border-0 mb-3">
-        <Card.Body className="d-flex flex-column flex-lg-row gap-3 justify-content-between align-items-lg-center">
-          <div>
-            <div className="section-kicker mb-2">Posting Operasional</div>
-            <h3 className="h5 mb-1">{autoJournalEnabled ? 'Auto journal operasional aktif' : 'Auto journal operasional belum aktif'}</h3>
-            <p className="text-muted mb-0">
-              Tagihan, pembayaran, pengeluaran, dan voucher WiFi dicatat otomatis ke jurnal akuntansi. Gunakan fitur ini hanya untuk data operasional lama yang belum terjurnal.
-            </p>
-            {postingBoundaryQuery.data?.note ? <small className="text-muted d-block mt-2">{postingBoundaryQuery.data.note}</small> : null}
-          </div>
-          <div className="d-flex flex-column flex-sm-row gap-2 align-items-sm-center">
-            <div className="text-sm-end">
-              <div className="fw-semibold">{unmappedQuery.isLoading ? 'Memuat...' : `${unmappedOperationalCount} sample belum terjurnal`}</div>
-              <small className="text-muted">Tagihan, pembayaran, pengeluaran, WiFi</small>
-            </div>
-            <Button
-              variant="outline-primary"
-              disabled={!canManageOpeningBalance || backfillMutation.isPending}
-              onClick={() => backfillMutation.mutate()}
-            >
-              {backfillMutation.isPending ? 'Backfill...' : 'Backfill 25 Transaksi'}
-            </Button>
-          </div>
-        </Card.Body>
-      </Card>
-
-      <Card className="content-card border-0 mb-3">
-        <Card.Body className="d-flex flex-column flex-lg-row gap-3 justify-content-between align-items-lg-center">
-          <div>
-            <div className="section-kicker mb-2">Review Deposit Liability</div>
-            <h3 className="h5 mb-1">Dry-run sebelum backfill deposit</h3>
-            <p className="text-muted mb-2">
-              Selisih deposit tidak otomatis berarti harus membuat jurnal baru. Jika berasal dari saldo awal, backfill deposit bisa menggandakan liability. Dry-run hanya membaca kandidat dan tidak membuat JournalEntry.
-            </p>
-            {depositReconciliationQuery.data?.summary ? (
-              <div className="d-flex flex-wrap gap-2 small">
-                <Badge bg={depositReconciliationQuery.data.summary.reconciliationStatus === 'MATCHED' ? 'success' : 'warning'}>{depositReconciliationQuery.data.summary.reconciliationStatus}</Badge>
-                <span className="text-muted">Saldo awal: {formatRupiah(depositReconciliationQuery.data.summary.ledgerOpeningBalanceDepositRupiah)}</span>
-                <span className="text-muted">Auto deposit: {formatRupiah(depositReconciliationQuery.data.summary.ledgerAutoJournalDepositRupiah)}</span>
-                <span className="text-muted">Selisih: {formatRupiah(depositReconciliationQuery.data.summary.differenceRupiah)}</span>
-              </div>
-            ) : null}
-          </div>
-          <Button
-            variant="outline-warning"
-            disabled={!canManageOpeningBalance || depositDryRunMutation.isPending}
-            onClick={() => depositDryRunMutation.mutate()}
-          >
-            {depositDryRunMutation.isPending ? 'Dry-run...' : 'Dry-run Deposit Backfill'}
-          </Button>
-        </Card.Body>
-      </Card>
-
-      <DepositOperationsPanel
-        summary={depositLedgerSummaryQuery.data}
-        reconciliation={depositLedgerReconciliationQuery.data}
-        isLoading={depositLedgerSummaryQuery.isLoading || depositLedgerReconciliationQuery.isLoading}
-        isError={depositLedgerSummaryQuery.isError || depositLedgerReconciliationQuery.isError}
-        onRefresh={() => void Promise.all([
-          queryClient.invalidateQueries({ queryKey: ['deposit-ledger', 'summary'] }),
-          queryClient.invalidateQueries({ queryKey: ['deposit-ledger', 'reconciliation-lite'] }),
-        ])}
-      />
-
-      <Row className="g-3 mb-3">
-        <Col xl={6} id="profit-loss">
-          <ProfitLossLitePanel profitLoss={profitLossQuery.data} />
-        </Col>
-        <Col xl={6} id="trial-balance">
-          <TrialBalancePreview trial={trialBalanceQuery.data} />
-        </Col>
-      </Row>
-
-      <Row className="g-3 mb-3">
-        <Col xl={5}>
-          <CashAccountSetupPanel
-            accounts={accounts}
-            cashAccounts={cashAccounts}
-            onSubmit={(payload) => createCashMutation.mutate(payload)}
-            isSubmitting={createCashMutation.isPending}
-          />
-        </Col>
-        <Col xl={7} id="opening-balance">
-          <OpeningBalanceWizard
-            accounts={accounts}
-            periods={periods}
-            batches={openingBalances}
-            onCreatePeriod={(payload) => createPeriodMutation.mutate(payload)}
-            onCreateDraft={(payload) => createOpeningDraftMutation.mutate(payload)}
-            onPost={(id) => postOpeningMutation.mutate(id)}
-            onVoid={(id) => voidOpeningMutation.mutate(id)}
-            canManageOpeningBalance={canManageOpeningBalance}
-            isCreatingDraft={createOpeningDraftMutation.isPending}
-            isPosting={postOpeningMutation.isPending}
-            isVoiding={voidOpeningMutation.isPending}
-          />
-        </Col>
-      </Row>
+        <Tab eventKey="saldo" title="Saldo Awal" className="pt-3">
+          <Row className="g-3 mb-3">
+            <Col xl={5}>
+              <CashAccountSetupPanel
+                accounts={accounts}
+                cashAccounts={cashAccounts}
+                onSubmit={(payload) => createCashMutation.mutate(payload)}
+                isSubmitting={createCashMutation.isPending}
+              />
+            </Col>
+            <Col xl={7} id="opening-balance">
+              <OpeningBalanceWizard
+                accounts={accounts}
+                periods={periods}
+                batches={openingBalances}
+                onCreatePeriod={(payload) => createPeriodMutation.mutate(payload)}
+                onCreateDraft={(payload) => createOpeningDraftMutation.mutate(payload)}
+                onPost={(id) => postOpeningMutation.mutate(id)}
+                onVoid={(id) => voidOpeningMutation.mutate(id)}
+                canManageOpeningBalance={canManageOpeningBalance}
+                isCreatingDraft={createOpeningDraftMutation.isPending}
+                isPosting={postOpeningMutation.isPending}
+                isVoiding={voidOpeningMutation.isPending}
+              />
+            </Col>
+          </Row>
+        </Tab>
+      </Tabs>
 
     </div>
   );

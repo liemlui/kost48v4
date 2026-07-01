@@ -1830,8 +1830,12 @@ div.tenant-stay-fact-chip {
   text-transform: uppercase;
   letter-spacing: 0.06em;
   font-weight: 700;
-  color: #64748b;
+  color: #475569;
   line-height: 1;
+}
+
+.tenant-stay-fact-chip small {
+  color: #475569;
 }
 .tenant-stay-fact-chip .fact-label .fact-dot {
   display: inline-block;
@@ -1859,7 +1863,7 @@ div.tenant-stay-fact-chip {
 .tenant-stay-fact-chip small {
   display: block;
   font-size: 0.68rem;
-  color: #64748b;
+  color: #475569;
   line-height: 1.2;
 }
 
@@ -4449,7 +4453,7 @@ div.tenant-stay-fact-chip {
 }
 
 .stay-history-step small {
-  color: #64748b;
+  color: #475569;
   font-size: 0.68rem;
   line-height: 1.25;
 }

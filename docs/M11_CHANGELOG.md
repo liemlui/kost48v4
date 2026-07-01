@@ -4,6 +4,26 @@
 
 ## Changelog Ringkas
 
+### 2026-07-02 — Fase Y TUNTAS (Y-M s/d Y-S) — 152/153 area, ≈1370 test PASS
+- **Y-R Security & Edge (7 area, 24 test PASS)** — `test/integration/security-edge-cases.test.js`: SQLi (Prisma parametrized), XSS (stored+reflected, JSON boundary), CSRF (Bearer-only, no cookie), JWT (none/malformed/tamper/wrong-sig/expired→401), rate-limit (brute-force login→429), concurrency (double-submit COA idempoten), file-upload (whitelist tipe+2MB+wajib).
+- **Y-S Data & Migration (4 area, 12 test PASS)** — `test/integration/data-migration-integrity.test.js`: enum DB==Prisma generated (+app.enums⊆DB), FK tak yatim, unique tak duplikat, model↔tabel in-sync, constraint P2002. **Menemukan+memperbaiki drift**: `app.enums.ts StaffPerformanceEventType` kurang `TIP_RECEIVED` (ada di schema) → ditambahkan.
+- **Infra FE test dari nol**: vitest 2 + @testing-library/react + jsdom; `vitest.config.ts` + `src/test/setup.ts`; script `test`/`test:watch`; test di-exclude dari `tsc -b` (build FE tetap hijau).
+- **Y-M (5, 44 test)** util murni: formatCurrency, pricing, navigation menu-builder, guest-booking validation+calc. **Y-N (4, 18 test)** hooks: useAuth, useInvoices (TanStack Query), useConfirm, useClientPagination/useDocumentTitle. **Y-O (8, 31 test)** komponen: RoomCard, StatusBadge, ConfirmDialog, ClickableRow, EmptyState/Skeleton, AiResultPanel, PageHeader, StatusStrip. **Y-P (6, 18 test)** page-integration per role: FaqPublic(public), Login(auth), MyManual(tenant), StaffWarehouse(staff), AdminSurveys(admin), BalanceSheet(owner) — vi.mock API.
+- **Y-Q (3 spek baru)** Playwright: `mobile-viewport` (375px, no h-overflow), `offline-pwa` (manifest+SW, offline skip bila dev), `print-layout` (media print) — ter-collect via `--list` (eksekusi butuh app+backend live, sama seperti e2e lain).
+- Sisa 1 area: **Y-G7 N/A** (source `ai-context-builder.service.ts` tak ada di repo). Verifikasi: backend unit 1072 PASS/1 skip + integration 187 PASS + FE vitest 111 PASS. `npm run build` FE & backend hijau.
+
+### 2026-07-02 — Sinkron tabel Fase Y + fix test flaky TC-MP10
+- **Sinkron tabel Y (M10):** kolom ✅/❌ sebelumnya STALE (Y-F/Y-H/Y-J/Y-K/Y-L masih 0, total ✅ lama 46 padahal sub-total A–E saja 58). Disinkronkan ke hasil run nyata → **115/153 area selesai, 38 tersisa**. Verifikasi: `test:unit` **1072 PASS / 0 fail / 1 skip** (`ST-can-03`, skip disengaja) + `test:integration` **151 PASS / 0 fail** = **1223 PASS**. Ikut update narasi ANTRIAN + `M01_MASTER`.
+- **Fix TC-MP10** (`marketing-public-rooms.service.test.js`): `TODAY_STR` dulu pakai UTC (`toISOString`) → flaky saat 17:00–24:00 UTC (00:00–07:00 WIB) karena service memakai `localYMD` (WIB, sama dgn frontend). Test kini format tanggal lokal → robust setiap jam. Produk TIDAK diubah (service sudah benar).
+
+### 2026-07-01 — X-14 ✅ Accounting-Setup dipecah 5 tab
+- `AccountingSetupPage.tsx` (halaman ≈7600px satu-scroll) dipecah jadi 5 tab react-bootstrap: **Setup · Ledger · Aset · Periode · Saldo Awal**; tab aktif tersinkron ke URL `?tab=` (pola `OwnerSettingsPage`). Header, banner COA, panel AI, menu Finance, dan StatusStrip tetap di atas tab sebagai konteks global.
+- Zero perubahan logika: semua `useQuery`/`useMutation` utuh, panel dipindah apa adanya. Navigasi lintas-section (checklist + command center) kini pindah tab dulu lalu scroll ke anchor (`SECTION_TAB` map + `useEffect`); ditambah anchor `id="data-quality"` yang dulu dituju command center tapi belum ada. `tsc -b` + `npm run build` LULUS.
+
+### 2026-07-06 — Fase Y-L ✅ Role & Authorization Matrix — 13 test PASS
+- Y-L2: ✅ `api-contract-role-auth.test.js` — 7 test tenant data isolation (IDOR: stay + deposit-ledger cross-tenant)
+- Y-L5: ✅ `api-contract-role-auth.test.js` — 6 test deactivated user guard (deaktivasi→401, re-aktivasi→200)
+
 ### 2026-07-06 — Fase Y-K ✅ Backend API Contract Tests (supertest) — 90 test PASS
 - Y-K1: ✅ `api-contract-public.test.js` — 18 test (auth login/forgot-password, public marketing, guard 401)
 - Y-K2: ✅ `api-contract-tenant.test.js` — 23 test (13 tenant guard 401 + 8 STAFF→403 + 2 shared)

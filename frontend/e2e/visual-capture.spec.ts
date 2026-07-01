@@ -22,11 +22,28 @@ const tokens: Record<string, Tok> = {};
 let roomId = 1;
 
 async function apiLogin(identifier: string, password: string): Promise<Tok> {
-  const ctx = await pwRequest.newContext({ baseURL: API });
-  const res = await ctx.post('/api/auth/login', { data: { identifier, password } });
-  const body = res.ok() ? await res.json() : {};
-  await ctx.dispose();
-  return { token: body.data?.accessToken ?? '', user: body.data?.user ?? {} };
+  let lastStatus = 0;
+  let lastMessage = '';
+
+  for (let attempt = 1; attempt <= 3; attempt += 1) {
+    const ctx = await pwRequest.newContext({ baseURL: API });
+    try {
+      const res = await ctx.post('/api/auth/login', { data: { identifier, password } });
+      lastStatus = res.status();
+      const body = res.ok() ? await res.json() : {};
+      const token = body.data?.accessToken ?? '';
+      if (token) return { token, user: body.data?.user ?? {} };
+      lastMessage = body.message ?? 'token kosong';
+    } catch (error) {
+      lastMessage = (error as Error).message;
+    } finally {
+      await ctx.dispose();
+    }
+    await new Promise((resolve) => setTimeout(resolve, attempt * 500));
+  }
+
+  console.log(`  ⚠️ login gagal ${identifier} status=${lastStatus || '-'}: ${lastMessage}`);
+  return { token: '', user: {} };
 }
 
 async function cap(page: Page, role: string, vp: 'desktop' | 'mobile', name: string) {
@@ -59,11 +76,15 @@ async function visit(page: Page, role: string, route: string, name: string) {
 /** Inject token role ke storage sebelum tiap navigasi. */
 async function authAs(page: Page, role: string) {
   const t = tokens[role];
-  if (!t?.token) return;
+  if (!t?.token) {
+    console.log(`  ⚠️ skip ${role}: token kosong, screenshot role tidak ditimpa.`);
+    return false;
+  }
   await page.addInitScript(({ token, user }) => {
     localStorage.setItem('kost48_access_token', token);
     sessionStorage.setItem('kost48_last_authenticated_user', JSON.stringify(user));
   }, { token: t.token, user: t.user });
+  return true;
 }
 
 test.beforeAll(async () => {
@@ -102,7 +123,7 @@ test('capture PUBLIC', async ({ page }) => {
 // ── TENANT ───────────────────────────────────────────────────────────────────
 test('capture TENANT', async ({ page }) => {
   test.setTimeout(300000);
-  await authAs(page, 'tenant');
+  if (!(await authAs(page, 'tenant'))) return;
   const routes: [string, string][] = [
     ['/portal/stay', '01-stay'],
     ['/portal/invoices', '02-invoices'],
@@ -120,7 +141,7 @@ test('capture TENANT', async ({ page }) => {
 // ── STAFF ────────────────────────────────────────────────────────────────────
 test('capture STAFF', async ({ page }) => {
   test.setTimeout(300000);
-  await authAs(page, 'staff');
+  if (!(await authAs(page, 'staff'))) return;
   const routes: [string, string][] = [
     ['/dashboard', '01-dashboard'],
     ['/tickets', '02-tickets'],
@@ -136,7 +157,7 @@ test('capture STAFF', async ({ page }) => {
 // ── ADMIN ────────────────────────────────────────────────────────────────────
 test('capture ADMIN', async ({ page }) => {
   test.setTimeout(300000);
-  await authAs(page, 'admin');
+  if (!(await authAs(page, 'admin'))) return;
   const routes: [string, string][] = [
     ['/admin-dashboard', '01-admin-dashboard'],
     ['/dashboard', '02-dashboard'],
@@ -155,7 +176,7 @@ test('capture ADMIN', async ({ page }) => {
 // ── OWNER (paling lengkap) ───────────────────────────────────────────────────
 test('capture OWNER', async ({ page }) => {
   test.setTimeout(600000);
-  await authAs(page, 'owner');
+  if (!(await authAs(page, 'owner'))) return;
   const routes: [string, string][] = [
     ['/dashboard', '01-dashboard'],
     ['/owner-dashboard', '02-owner-dashboard'],

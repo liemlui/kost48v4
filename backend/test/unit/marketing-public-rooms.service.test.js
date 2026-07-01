@@ -29,7 +29,9 @@ const { MarketingPublicRoomsService } = require('../../dist/modules/marketing/ma
 
 // ── Helpers ────────────────────────────────────────────────────────────────
 const TODAY = new Date();
-const TODAY_STR = TODAY.toISOString().slice(0, 10);
+// Samakan dgn service (localYMD, zona WIB) — bukan UTC toISOString, agar tidak
+// flaky saat tanggal UTC ≠ tanggal lokal (17:00–24:00 UTC = 00:00–07:00 WIB).
+const TODAY_STR = `${TODAY.getFullYear()}-${String(TODAY.getMonth() + 1).padStart(2, '0')}-${String(TODAY.getDate()).padStart(2, '0')}`;
 
 function makeRoom(overrides = {}) {
   return {

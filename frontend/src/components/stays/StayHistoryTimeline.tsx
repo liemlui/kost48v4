@@ -251,7 +251,15 @@ export default function StayHistoryTimeline({
             <strong><CurrencyDisplay amount={depositPaid} showZero /> / <CurrencyDisplay amount={depositAmt} /></strong>
             <small>Diproses saat keluar final setelah semua tagihan selesai.</small>
           </div>
-          <div className="stay-history-deposit-meter" aria-label={`Deposit ${depositPct}%`}>
+          <div
+            className="stay-history-deposit-meter"
+            role="progressbar"
+            aria-label="Progress dana titipan deposit"
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-valuenow={depositPct}
+            aria-valuetext={`Deposit ${depositPct}%`}
+          >
             <div style={{ width: `${depositPct}%` }} />
           </div>
           <Badge bg={depositPaid >= depositAmt && depositAmt > 0 ? 'success' : 'secondary'}>

@@ -126,22 +126,23 @@ export default function ActionQueueTable({
                   {sortedItems.map((item) => {
                     const meta = priorityLabel[item.priority];
                     const isActionable = Boolean(item.actionTo || item.onAction);
+                    const isRowActionable = isActionable && hideActions;
                     const runPrimaryAction = () => item.onAction ? item.onAction() : item.actionTo ? openActionTarget(item.actionTo, navigate) : undefined;
                     return (
                       <tr
                         key={item.id}
-                        className={isActionable ? 'clickable-row' : undefined}
-                        role={isActionable ? 'button' : undefined}
-                        tabIndex={isActionable ? 0 : undefined}
-                        aria-label={isActionable ? `${item.recommendedAction}: ${item.subject}` : undefined}
+                        className={isRowActionable ? 'clickable-row' : undefined}
+                        role={isRowActionable ? 'button' : undefined}
+                        tabIndex={isRowActionable ? 0 : undefined}
+                        aria-label={isRowActionable ? `${item.recommendedAction}: ${item.subject}` : undefined}
                         onKeyDown={(event) => {
-                          if (!isActionable) return;
+                          if (!isRowActionable) return;
                           if (event.key === 'Enter' || event.key === ' ') {
                             event.preventDefault();
                             runPrimaryAction();
                           }
                         }}
-                        onClick={isActionable ? runPrimaryAction : undefined}
+                        onClick={isRowActionable ? runPrimaryAction : undefined}
                       >
                         <td data-label="Prioritas"><StatusBadge status={meta.status} customLabel={meta.label} /></td>
                         <td data-label="Alur"><span className="fw-semibold">{item.type}</span>{item.age ? <div className="small text-muted">{item.age}</div> : null}</td>

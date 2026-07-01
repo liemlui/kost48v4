@@ -5227,13 +5227,15 @@
 .gx-reveal,
 .gx-reveal-l,
 .gx-reveal-r {
-  opacity: 0;
+  opacity: 1;
   transition: opacity .72s cubic-bezier(.22, 1, .36, 1), transform .72s cubic-bezier(.22, 1, .36, 1);
-  will-change: opacity, transform;
+  will-change: auto;
 }
-.gx-reveal   { transform: translateY(30px); }
-.gx-reveal-l { transform: translateX(-42px); }
-.gx-reveal-r { transform: translateX(42px); }
+.gx-reveal,
+.gx-reveal-l,
+.gx-reveal-r {
+  transform: none;
+}
 
 .gx-reveal.gx-visible,
 .gx-reveal-l.gx-visible,
