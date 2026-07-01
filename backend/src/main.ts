@@ -25,10 +25,18 @@ async function bootstrap() {
   const roomImagesPath = join(process.cwd(), 'uploads', 'room-images');
   app.useStaticAssets(roomImagesPath, {
     prefix: '/uploads/room-images',
+    setHeaders: (res: Response) => {
+      res.setHeader('X-Content-Type-Options', 'nosniff');
+    },
   });
   // Some deployments/proxies only forward /api/* to the backend. Keep a
   // public alias under /api so browser images work consistently in local/UAT.
-  app.use('/api/uploads/room-images', express.static(roomImagesPath));
+  const roomImagesStatic = express.static(roomImagesPath, {
+    setHeaders: (res: Response) => {
+      res.setHeader('X-Content-Type-Options', 'nosniff');
+    },
+  });
+  app.use('/api/uploads/room-images', roomImagesStatic);
   const prismaService = app.get(PrismaService);
   await prismaService.enableShutdownHooks(app);
 

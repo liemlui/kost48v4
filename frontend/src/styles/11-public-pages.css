@@ -5631,6 +5631,7 @@
   font-weight: 800;
   margin: 0 0 .5rem;
   line-height: 1.3;
+  color: #fff;  /* X-03: override h3 global — judul harus terang di latar navy */
 }
 .gpw-question-sub {
   font-size: .88rem;

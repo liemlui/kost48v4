@@ -295,8 +295,8 @@ export default function PublicRoomDetailPage() {
         )}
 
         {query.isLoading ? <div className="py-5 text-center"><Spinner animation="border" /></div> : null}
-        {query.isError ? <Alert variant="danger">Gagal memuat detail kamar publik.</Alert> : null}
-        {!query.isLoading && !query.isError && !room ? <EmptyState icon="🛏️" title="Kamar tidak ditemukan" description="Data kamar publik tidak tersedia atau sudah tidak aktif." /> : null}
+        {query.isError ? <Alert variant="warning">Kamar ini sedang penuh / tidak tersedia saat ini. <a href="/katalog">Lihat katalog kamar</a> atau <a href="https://wa.me/6281234567890">hubungi admin via WhatsApp</a>.</Alert> : null}
+        {!query.isLoading && !query.isError && !room ? <EmptyState icon="🛏️" title="Kamar tidak tersedia" description="Kamar ini mungkin sedang diisi. Lihat katalog kamar atau hubungi admin via WhatsApp." /> : null}
 
         {room ? (
           <>

@@ -4,7 +4,22 @@
 
 ## Changelog Ringkas
 
+### 2026-07-01 — Fase X / X-10: inspeksi UI/UX mendalam + RE-CAPTURE backend stabil
+- Inspeksi visual 1-per-1 lintas role × 2 viewport + re-capture OWNER+ADMIN dgn backend **non-watch** (`node dist/main.js`).
+- **Pelajaran:** capture pertama saat backend `nest --watch` CRASH (giliran owner) → banyak "error" owner = ARTEFAK, hilang setelah re-capture. → capture WAJIB backend non-watch.
+- X-05 dipecah: "Network Error" = artefak (ditutup); toast "tidak memiliki akses" (×2) owner/admin dashboard = NYATA (akar `App.tsx` RequireRoles + StrictMode).
+- Temuan baru: X-11 badge filter = subset halaman (tenants 5 vs 13, expenses 5 vs 12); X-15 sel tabel pecah mid-token; X-13 spinner settings; X-14 accounting-setup terlalu padat. X-16 axe a11y = sisa.
+- Detail: `docs/_AUDIT_UIUX_VISUAL_2026-06-30.md` (bagian HASIL X-10) + `docs/M10_CHECKLIST_CHANGELOG.md` Fase X.
+
 ### 2026-06-30 — Fase V: Hardening Aktif (V-06..V-14) ✅
+
+### 2026-06-30 — Fase W + X: Security hardening, lifecycle fix, UI/UX audit 🔴
+- **W-01**: security headers `nosniff` ditambahkan ke static `/uploads/room-images` via `setHeaders` ✅
+- **W-04**: checkout request blokir semua active renew status (`PENDING_DECISION`/`AWAITING_DP`/`DP_SECURED`), bukan cuma `PENDING` ✅
+- **X-01**: tiket internal (`CHECKIN_CHECKOUT`, `CHECKOUT_INSPECTION`, dll.) tidak bocor ke tenant — filter `TENANT_HIDDEN_TICKET_CATEGORIES` di `findMine()` ✅
+- **X-02a**: empty-state katalog publik lebih informatif ("Semua kamar sedang penuh") ✅
+- **X-02b**: error graceful detail/booking publik — warning ramah bukan alert merah mentah ✅
+- **X-03**: kontras wizard — `.gpw-question-text` diberi `color: #fff` ✅
 - **V-06**: Payment Proof Ownership — upload-proof hardening (tenantId prefix, audit trail), validateAndResolveProof (ownership/file exists/consumed), SubmitBatchPaymentModal, "Bayar Semua" button wiring ✅
 - **V-08**: Sinkronisasi dokumen kontrak — M04 ditambahi override Fase V (M03/M05 sudah) ✅
 - **V-11**: `StepRoomSelect.tsx` — RESERVED kamar tenant lain tidak bisa dipilih ✅

@@ -65,13 +65,20 @@ export class CheckoutRequestsService {
       throw new ForbiddenException('Anda bukan pemilik stay ini');
     }
 
-    // Cross-block: cannot create checkout request if a renew request is PENDING
-    const pendingRenew = await this.prisma.renewRequest.findFirst({
-      where: { stayId: dto.stayId, status: RenewRequestStatus.PENDING },
+    // Cross-block: cannot create checkout request if a renew request is active
+    // W-04.2: blocking all active renew statuses (PENDING, PENDING_DECISION, AWAITING_DP, DP_SECURED)
+    const activeRenewStatuses: RenewRequestStatus[] = [
+      RenewRequestStatus.PENDING,
+      RenewRequestStatus.PENDING_DECISION,
+      RenewRequestStatus.AWAITING_DP,
+      RenewRequestStatus.DP_SECURED,
+    ];
+    const activeRenew = await this.prisma.renewRequest.findFirst({
+      where: { stayId: dto.stayId, status: { in: activeRenewStatuses } },
     });
-    if (pendingRenew) {
+    if (activeRenew) {
       throw new ConflictException(
-        'Tidak dapat mengajukan checkout karena ada permintaan perpanjangan yang menunggu persetujuan',
+        'Tidak dapat mengajukan checkout karena ada permintaan perpanjangan yang sedang aktif',
       );
     }
 

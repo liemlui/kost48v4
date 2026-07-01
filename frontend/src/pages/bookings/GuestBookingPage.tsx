@@ -124,7 +124,7 @@ export default function GuestBookingPage() {
     return <div className="py-5 text-center"><Spinner animation="border" /></div>;
   }
   if (roomQuery.isError) {
-    return <Alert variant="danger">Gagal memuat detail kamar. Silakan kembali ke katalog.</Alert>;
+    return <Alert variant="warning">Kamar ini sedang tidak tersedia untuk dipesan. <a href="/katalog">Kembali ke katalog</a> atau hubungi admin via WhatsApp.</Alert>;
   }
   if (!room) {
     return (

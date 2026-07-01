@@ -395,8 +395,8 @@ export default function PublicRoomsPage() {
               <div className="rm-empty">
                 <EmptyState
                   icon="🛏️"
-                  title="Tidak ada kamar yang cocok"
-                  description="Coba ubah atau reset filter di atas."
+                  title="Semua kamar sedang penuh"
+                  description="Saat ini belum ada kamar kosong yang bisa dipesan. Hubungi admin via WhatsApp atau cek lagi nanti untuk ketersediaan terbaru."
                 />
                 <a className="btn btn-outline-secondary mt-3" href={officialKost48Location.whatsappUrl} target="_blank" rel="noreferrer">
                   💬 Tanya ketersediaan via WhatsApp

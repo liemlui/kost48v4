@@ -11,7 +11,7 @@ import { AuditLogService } from "../../audit-log/audit-log.service";
 import { CurrentUserPayload } from "../../common/interfaces/current-user.interface";
 import { buildMeta, buildPagination } from "../../common/utils/pagination";
 import { PrismaService } from "../../prisma/prisma.service";
-import { STAFF_FIELD_CATEGORY_SET, UserRole } from "../../common/enums/app.enums";
+import { STAFF_FIELD_CATEGORY_SET, TENANT_HIDDEN_TICKET_CATEGORIES, UserRole } from "../../common/enums/app.enums";
 import { generateTicketNumberTx } from "../../common/utils/ticket-number.util";
 import { pickRoundRobinStaffTx } from "../../common/utils/staff-assignment.util";
 import { computeTicketDueAt } from "./ticket-sla";
@@ -202,6 +202,7 @@ export class TicketsService {
     );
     const where: Prisma.TicketWhereInput = {
       tenantId: user.tenantId ?? -1,
+      category: { notIn: [...TENANT_HIDDEN_TICKET_CATEGORIES] },
       ...(query.status ? { status: query.status } : {}),
     };
 
