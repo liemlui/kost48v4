@@ -1,6 +1,6 @@
 # KOST48 V5 — Checklist Eksekusi Aktif
 
-> Versi: **2026-07-02** | Changelog historis → `docs/M11_CHANGELOG.md`
+> Versi: **2026-07-02 (update audit cross-portal)** | Changelog historis → `docs/M11_CHANGELOG.md`
 
 ## Cara Pakai (AI Eksekutor — baca sebelum coding)
 
@@ -48,6 +48,7 @@
 | **Fase W — Audit Maksimal Status Proyek** | ✅ selesai (2026-07-02) | W-00..W-13: security, role matrix, lifecycle guards, AutoOps idempotency, media registry, finance guard (COA OWNER-only), staff boundary, frontend state (objectURL fix), public hardening, logs/release, docs hygiene, test coverage. |
 | **Fase X — Audit UI/UX Visual (Playwright + Inspeksi Visual)** | 🟡 mayoritas selesai | X-01..X-15 ✅; sisa X-02d (konfirmasi owner) + X-16 lanjutan (axe ber-login). |
 | **Fase Y — Test Coverage Maksimal** | ✅ hampir tuntas | **152/153** area selesai; sisa Y-G7 N/A (source tak ada di repo). 1372 test PASS. |
+| **Fase Z — Audit UI/UX Cross-Portal (2026-07-02)** | 🟡 19 task terverifikasi | 1 CRITICAL (data XSS test), 7 HIGH (404/kosong/nav), 8 MEDIUM (chart/race/loading), 3 LOW (publik). Rujukan di `docs/_AUDIT_CROSS_PORTAL_2026-07-02.md`. |
 
 ---
 
@@ -76,8 +77,9 @@
 >
 > **Sisa aktif:**
 > 1. **X-02d** — konfirmasi owner: apakah kamar OCCUPIED ingin tampil di katalog publik? (tidak perlu coding)
-> 2. **X-16 lanjutan** — perluas axe a11y ke halaman ber-login (OWNER/ADMIN/STAFF/TENANT) dengan auth fixture Playwright.
-> 3. **A1–A6** 🧑 — pra-go-live produksi (server, domain, env, seed OWNER, smoke test) — MANUSIA.
+> 2. **X-16 lanjutan** — perluas axe a11y ke halaman ber-login (OWNER/ADMIN/STAFF/TENANT) dengan auth fixture Playwright. (X-16 axe publik sudah ✅ 2 passed)
+> 3. **Z-01..Z-19** — Audit cross-portal: 19 task dari inspeksi browser real-time (2 Juli 2026) mencakup 4 portal + halaman publik. Lihat [Fase Z](#fase-z--audit-uiux-cross-portal-2026-07-02).
+> 4. **A1–A6** 🧑 — pra-go-live produksi (server, domain, env, seed OWNER, smoke test) — MANUSIA.
 >
 > **Verifikasi test 2026-07-02:** Backend unit **1072/1073 PASS** (1 skip intentional) · integration **187/187 PASS** · frontend vitest **111/111 PASS** · total ≈ **1370 test PASS, 0 fail**.
 
@@ -349,3 +351,61 @@
 **Infra frontend:** vitest 2 + RTL + jsdom dibangun dari nol; `npm run build` FE tetap hijau (test di-exclude dari `tsc -b` via `tsconfig.json`).
 
 **Y-G7** (AI context builder): `ai-context-builder.service.ts` tidak ada di repo — dilewati permanen.
+
+---
+
+### Fase Z — Audit UI/UX Cross-Portal (2026-07-02)
+
+**Metode:** Inspeksi browser real-time via `browser_navigate` + `browser_snapshot` + `browser_console` — bukan spekulasi. Login sebagai tenant (Maya/Kamar A), staff (staff@kost48.com), dan admin (admin@kost48.com). Halaman publik `/` tanpa login. Owner dashboard tidak bisa diakses (redirect→login via browser tool) — dishare dengan admin dashboard via toggle segmented control.  
+**Rujukan detail:** `docs/_AUDIT_CROSS_PORTAL_2026-07-02.md` (laporan lengkap dengan screenshot & kode fix).  
+**Verifikasi awal:** Autocomplete login + novalidate + type=email sudah fixed dari changelog 2026-07-16 ✅. Tidak diulang di sini.
+
+**Urutan prioritas:** Z-01 (critical data) > Z-02..Z-07 (halaman rusak/kosong) > Z-08..Z-16 (medium) > Z-17..Z-18 (publik).
+
+#### 🔴 CRITICAL — Data Test/Artifact
+
+- [x] **Z-01** 🔴 **Hapus "Uji XSS Y-R2" dari seed data** — muncul di 3 tempat: (a) dashboard staff → daftar kerja + prioritas terdekat, (b) dashboard admin → antrean aksi table (row "Tiket baru"). **Verifikasi:** `grep -r "XSS Y-R2" backend/src/ frontend/src/ scripts/` + `SELECT id, title FROM tickets WHERE title ILIKE '%xss%'`. 🔴 **4 tiket XSS** (id: 119, 123, 131, 139) berhasil dihapus dari DB. Seed scripts tidak mengandung "XSS" — data berasal dari integration test. ✅ Build lulus FE+BE. **Gate:** reseed aman — tidak ada XSS di seed scripts.
+
+#### 🔴 HIGH — Halaman Tenant Rusak/Kosong
+
+- [ ] **Z-02** 🔴 **Fix 404: `/portal/guide` + `/portal/guides`** — sidebar tenant "Panduan" mengarah ke route yang belum dibuat. **Verifikasi:** `grep -r "/portal/guide" frontend/src/`. Buat route + halaman dengan konten panduan (cara catat meter, bayar tagihan, lapor kerusakan, aturan kos, pesan WiFi, perpanjang sewa — dari `DEFAULT_DATA.md`). **Gate:** navigasi dari tenant sidebar → halaman panduan tampil, bukan 404.
+
+- [ ] **Z-03** 🔴 **Isi halaman `/portal/announcements`** — halaman kosong + sidebar layout berbeda. **Verifikasi:** `browser_navigate → http://localhost:5174/portal/announcements` → hanya header, konten kosong, sidebar hilang. Buat halaman dengan fetch API `/api/tenant/announcements` + tampilkan daftar pengumuman. **Gate:** halaman menampilkan konten (atau empty state ramah jika tidak ada pengumuman).
+
+- [ ] **Z-04** 🔴 **Isi halaman `/portal/wifi`** — hanya heading "Pesan WiFi", konten kosong. **Verifikasi:** `browser_navigate → http://localhost:5174/portal/wifi`. Buat form pemesanan WiFi dengan informasi harga (Rp50.000/bulan/perangkat dari `OperationalSetting`), daftar perangkat, dan tombol tambah perangkat. **Gate:** halaman menampilkan form + daftar perangkat (pakai data dari API `/api/tenant/wifi-devices`).
+
+- [ ] **Z-05** 🔴 **Fix tombol "Batal" di modal laporan** — tombol tidak menutup dialog. **Verifikasi:** `browser_navigate → /portal/tickets → klik "Buat Laporan Baru" → klik "Batal"` — dialog tetap terbuka. Fix handler `onClick` agar memanggil `setShowCreateModal(false)` + `resetForm()`. **Gate:** modal tertutup saat klik "Batal".
+
+- [ ] **Z-06** 🔴 **Implementasi navigasi sidebar staff** — 5 menu sidebar (Hari Ini, Tugas, Kamar & Stok, Gudang, Laporan) no-op — tidak ada scroll/state change saat diklik. Dashboard staff adalah single-page. **Verifikasi:** login staff → klik setiap link sidebar. Implementasi `scrollIntoView({ behavior: 'smooth' })` ke section IDs (atau ganti ke SPA state-tab). **Gate:** setiap klik sidebar men-scroll ke section yang sesuai.
+
+- [ ] **Z-07** 🔴 **Hapus "Kamar Z1 (Contoh Tersedia)" dari seed data** — muncul di `/rooms` dan `/ac-maintenance`. **Verifikasi:** `SELECT * FROM rooms WHERE code = 'Z1'` + `browser_navigate → /rooms → filter "Semua Kamar 22"`. Hapus dari DB seed. **Gate:** tidak ada kamar Z1 setelah reseed.
+
+#### 🟡 MEDIUM — Chart, Race Condition, Loading
+
+- [ ] **Z-08** 🟡 **Fix chart width/height = -1 warnings** — muncul 8× di staff dashboard, 2× di tenant dashboard, + di halaman admin. **Verifikasi:** `browser_console` → warnings "The width(-1) and height(-1) of chart should be greater than 0". Root cause: chart di-render sebelum container punya ukuran (hidden tab/race). **Fix:** conditional render chart hanya saat container width > 0 (via `ResizeObserver` + state `ready`). Pakai skeleton saat loading. **Gate:** 0 chart warnings di console.
+
+- [ ] **Z-09** 🟡 **Fix race condition data cards staff** — "METER BELUM DICATAT" & "KINERJA BULAN INI" berganti antara "…"/"--" dan "21"/"100" saat refresh. **Verifikasi:** refresh dashboard staff 2-3× → angka berubah. **Fix:** skeleton loading state + `useQuery.isLoading` gate sebelum render nilai. **Gate:** nilai konsisten tidak berubah antar refresh.
+
+- [ ] **Z-10** 🟡 **Fix tombol "Laporan Lapangan" staff** — state `expanded=false` tapi tidak bisa diklik untuk expand. **Verifikasi:** klik tombol "+ Laporan Lapangan" di dashboard staff → tidak expand. **Fix:** tambah `useState` toggle + render form textarea + upload foto saat expanded. **Gate:** klik tombol expand/collapse form.
+
+- [ ] **Z-11** 🟡 **Loading state tanpa fallback di `/rooms` admin** — "Memuat halaman…" muncul tanpa spinner atau skeleton. **Verifikasi:** `browser_navigate → /rooms` → loading text polos. **Fix:** tambah `Spinner` component + teks "Memuat data kamar…" saat loading. **Gate:** spinner terlihat saat loading.
+
+- [ ] **Z-12** 🟡 **Loyalitas & Reward semua tabel kosong** — "Belum ada penukaran", "Belum ada laporan", "Belum ada reward" di `/loyalty`. Perlu seed data reward + pastikan empty state informatif (CTA: "Tambah Reward" untuk admin). **Gate:** halaman menampilkan empty state dengan CTA, bukan tabel kosong mentah.
+
+- [ ] **Z-13** 🟡 **Hapus "LOYALTY_POINT_RUPIAH_VALUE" dari UI** — technical env variable exposed ke user di halaman `/loyalty`. **Fix:** ganti ke teks "1 poin ≈ Rp100. Nilai dapat disesuaikan oleh owner." **Gate:** tidak ada reference ke env variable di UI.
+
+- [ ] **Z-14** 🟡 **Tooltip untuk tombol disabled di tenant dashboard** — "Perpanjang" & "Ajukan Keluar" disabled tanpa penjelasan kenapa. **Fix:** tambah `title="..."` attribute. **Gate:** hover tombol disabled → muncul tooltip.
+
+- [ ] **Z-15** 🟡 **Konsistensi sidebar layout di tenant** — sidebar hilang di `/portal/announcements`. **Fix:** gunakan `TenantLayout` yang sama di semua halaman tenant. **Gate:** semua halaman `/portal/*` memiliki sidebar.
+
+- [ ] **Z-16** 🟡 **PWA install prompt dismiss persistence** — dialog "Pasang / Nanti" muncul di setiap halaman di ketiga portal. **Fix:** simpan timestamp dismiss ke `localStorage`, jangan tampilkan lagi selama 7 hari. **Gate:** setelah dismiss, prompt tidak muncul lagi di sesi yang sama.
+
+#### 🟢 LOW — Publik & Cross-Portal
+
+- [ ] **Z-17** 🟢 **Fix stat counter 0/0/0 di landing page** — "0 kamar tersedia / 0 terisi / 0 total kamar" membingungkan pengunjung. Admin dashboard menunjukkan 22 kamar total (12 terisi). **Verifikasi:** `browser_navigate → /` → lihat section "KETERSEDIAAN KAMAR". Kemungkinan root cause: API `/api/public/rooms-stats` tidak merespon atau semua kamar disembunyikan dari katalog. **Fix:** pastikan endpoint mengembalikan total real (22) + tampilkan "12 terisi / 1 tersedia / 22 total" atau empty state informatif. **Gate:** landing page menampilkan stat kamar yang akurat.
+
+- [ ] **Z-18** 🟢 **Landing page: "Belum ada kamar yang tersedia"** — empty state sudah informatif tapi tidak ada CTA untuk cek kapan ketersediaan berubah. **Fix:** tambah CTA "Dapatkan notifikasi saat kamar kosong" atau link ke WhatsApp admin. **Gate:** empty state memiliki CTA yang jelas.
+
+- [ ] **Z-19** 🟢 **Owner dashboard tidak teraudit penuh** — tidak bisa login sebagai OWNER via browser tool (redirect loop). Dashboard owner dishare dengan admin via toggle segmented control "Penghuni & Uang" / "Operasional". **Verifikasi manual 🧑:** login OWNER → periksa halaman accounting (`/owner-dashboard`), settings, COA, dan AI section. **Gate:** owner konfirmasi tidak ada issue blocking.
+
+**Gate akhir Fase Z:** `npm run build` FE + backend hijau. Tidak ada regression di test suite (≈1370 test).
