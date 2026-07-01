@@ -86,7 +86,7 @@ export default function LoyaltyAdminPage() {
         <h3 className="mb-0">Loyalitas & Reward</h3>
         <Badge bg="light" text="dark" className="border">1 poin ≈ Rp{perPoint.toLocaleString('id-ID')}</Badge>
       </div>
-      <p className="text-muted small">Estimasi nilai poin diatur lewat env <code>LOYALTY_POINT_RUPIAH_VALUE</code>. Saran: gunakan reward layanan in-house (pembersihan/cat ulang kamar, voucher WiFi) — lebih hemat daripada diskon sewa.</p>
+      <p className="text-muted small">1 poin ≈ Rp{perPoint.toLocaleString('id-ID')}. Nilai dapat disesuaikan oleh owner. Saran: gunakan reward layanan in-house (pembersihan/cat ulang kamar, voucher WiFi) — lebih hemat daripada diskon sewa.</p>
       {error && <Alert variant="danger" dismissible onClose={() => setError(null)}>{error}</Alert>}
 
       <Card className="mb-4">
@@ -97,7 +97,12 @@ export default function LoyaltyAdminPage() {
           <Table responsive hover className="mb-0 align-middle">
             <thead><tr><th>Tenant</th><th>Reward</th><th>Poin</th><th>Status</th><th>Tanggal</th><th className="text-end">Aksi</th></tr></thead>
             <tbody>
-              {redemptionsQuery.data?.length === 0 && <tr><td colSpan={6} className="text-muted text-center py-3">Belum ada penukaran.</td></tr>}
+              {(!redemptionsQuery.data || redemptionsQuery.data.length === 0) && (
+                <tr><td colSpan={6} className="text-center py-4">
+                  <div className="text-muted mb-2">Belum ada penukaran.</div>
+                  <small className="text-muted">Tenant akan melihat reward yang tersedia di portal mereka. Pastikan katalog reward sudah diisi.</small>
+                </td></tr>
+              )}
               {redemptionsQuery.data?.map((r) => (
                 <tr key={r.id}>
                   <td>{r.tenant?.fullName ?? `#${r.tenantId}`}</td>
@@ -126,7 +131,7 @@ export default function LoyaltyAdminPage() {
           <Table responsive hover className="mb-0 align-middle">
             <thead><tr><th>Pelapor</th><th>Terlapor</th><th>Kategori</th><th>Deskripsi</th><th>Status</th><th className="text-end">Aksi</th></tr></thead>
             <tbody>
-              {peerQuery.data?.length === 0 && <tr><td colSpan={6} className="text-muted text-center py-3">Belum ada laporan.</td></tr>}
+              {peerQuery.data?.length === 0 && <tr><td colSpan={6} className="text-center py-4"><div className="text-muted mb-2">Belum ada laporan.</div><small className="text-muted">Laporan sikap antar-tenant akan muncul di sini untuk dimoderasi.</small></td></tr>}
               {peerQuery.data?.map((r) => (
                 <tr key={r.id}>
                   <td><small>{r.reporter?.fullName ?? '-'}</small></td>
@@ -162,7 +167,7 @@ export default function LoyaltyAdminPage() {
           <Table responsive hover className="mb-0 align-middle">
             <thead><tr><th>Nama</th><th>Tipe</th><th>Poin</th><th>Nilai</th><th>Stok</th><th>Status</th>{isOwner && <th className="text-end">Aksi</th>}</tr></thead>
             <tbody>
-              {rewardsQuery.data?.length === 0 && <tr><td colSpan={isOwner ? 7 : 6} className="text-muted text-center py-3">Belum ada reward.</td></tr>}
+              {rewardsQuery.data?.length === 0 && <tr><td colSpan={isOwner ? 7 : 6} className="text-center py-4"><div className="text-muted mb-2">Belum ada reward.</div>{isOwner ? <small className="text-muted">Gunakan tombol <strong>+ Reward</strong> di atas untuk menambahkan katalog reward. Tenant akan melihat reward yang aktif di portal mereka.</small> : <small className="text-muted">Belum ada reward yang tersedia. Hubungi owner untuk menambahkan reward.</small>}</td></tr>}
               {rewardsQuery.data?.map((r) => (
                 <tr key={r.id}>
                   <td>{r.name}{r.description && <div className="text-muted small">{r.description}</div>}</td>

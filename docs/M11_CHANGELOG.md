@@ -4,6 +4,15 @@
 
 ## Changelog Ringkas
 
+### 2026-07-02 — Fase Z: Z-11..Z-16 ✅ 6 task MEDIUM selesai
+
+- **Z-11 ✅** RoomsRouteEntry sudah pakai PageLoadingSkeleton dengan label "Memuat kamar…".
+- **Z-12 ✅** Empty state loyalty: tambah teks informatif + CTA untuk admin di katalog reward.
+- **Z-13 ✅** Ganti env variable LOYALTY_POINT_RUPIAH_VALUE → teks ramah "1 poin ≈ RpN. Nilai dapat disesuaikan oleh owner."
+- **Z-14 ✅** Tombol disabled "Perpanjang" & "Ajukan Keluar" sudah punya title attribute.
+- **Z-15 ✅** Semua tenant route pakai AppLayout yang sama (TenantWorkspaceTabs). Tidak ada sidebar untuk TENANT.
+- **Z-16 ✅** PwaStatus.tsx sudah implementasi localStorage 7-hari cooldown.
+
 ### 2026-07-02 — Fase Z: Z-08..Z-10 ✅ 3 task MEDIUM selesai
 
 - **Z-08 ✅** ChartResponsiveWrapper (ResizeObserver) + diterapkan ke SmartChartPanel, DonutGauge, HorizontalBarChart. Cegah Recharts width=-1 warning via conditional render.

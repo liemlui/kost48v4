@@ -388,17 +388,17 @@
 
 - [x] **Z-10** 🟡 **Fix tombol "Laporan Lapangan" staff** — state `expanded=false` tapi tidak bisa diklik untuk expand. **Verifikasi:** klik tombol "+ Laporan Lapangan" di dashboard staff → tidak expand. **Fix:** tambah `useState` toggle + render form textarea + upload foto saat expanded. **Gate:** klik tombol expand/collapse form.
 
-- [ ] **Z-11** 🟡 **Loading state tanpa fallback di `/rooms` admin** — "Memuat halaman…" muncul tanpa spinner atau skeleton. **Verifikasi:** `browser_navigate → /rooms` → loading text polos. **Fix:** tambah `Spinner` component + teks "Memuat data kamar…" saat loading. **Gate:** spinner terlihat saat loading.
+- [x] **Z-11** 🟡 **Loading state tanpa fallback di `/rooms` admin** — "Memuat halaman…" muncul tanpa spinner atau skeleton. **Verifikasi:** `browser_navigate → /rooms` → loading text polos. **Fix:** tambah `Spinner` component + teks "Memuat data kamar…" saat loading. **Gate:** spinner terlihat saat loading.
 
-- [ ] **Z-12** 🟡 **Loyalitas & Reward semua tabel kosong** — "Belum ada penukaran", "Belum ada laporan", "Belum ada reward" di `/loyalty`. Perlu seed data reward + pastikan empty state informatif (CTA: "Tambah Reward" untuk admin). **Gate:** halaman menampilkan empty state dengan CTA, bukan tabel kosong mentah.
+- [x] **Z-12** 🟡 **Loyalitas & Reward semua tabel kosong** — "Belum ada penukaran", "Belum ada laporan", "Belum ada reward" di `/loyalty`. Perlu seed data reward + pastikan empty state informatif (CTA: "Tambah Reward" untuk admin). **Gate:** halaman menampilkan empty state dengan CTA, bukan tabel kosong mentah.
 
-- [ ] **Z-13** 🟡 **Hapus "LOYALTY_POINT_RUPIAH_VALUE" dari UI** — technical env variable exposed ke user di halaman `/loyalty`. **Fix:** ganti ke teks "1 poin ≈ Rp100. Nilai dapat disesuaikan oleh owner." **Gate:** tidak ada reference ke env variable di UI.
+- [x] **Z-13** 🟡 **Hapus "LOYALTY_POINT_RUPIAH_VALUE" dari UI** — technical env variable exposed ke user di halaman `/loyalty`. **Fix:** ganti ke teks "1 poin ≈ Rp100. Nilai dapat disesuaikan oleh owner." **Gate:** tidak ada reference ke env variable di UI.
 
-- [ ] **Z-14** 🟡 **Tooltip untuk tombol disabled di tenant dashboard** — "Perpanjang" & "Ajukan Keluar" disabled tanpa penjelasan kenapa. **Fix:** tambah `title="..."` attribute. **Gate:** hover tombol disabled → muncul tooltip.
+- [x] **Z-14** 🟡 **Tooltip untuk tombol disabled di tenant dashboard** — "Perpanjang" & "Ajukan Keluar" disabled tanpa penjelasan kenapa. **Fix:** tambah `title="..."` attribute. **Gate:** hover tombol disabled → muncul tooltip.
 
-- [ ] **Z-15** 🟡 **Konsistensi sidebar layout di tenant** — sidebar hilang di `/portal/announcements`. **Fix:** gunakan `TenantLayout` yang sama di semua halaman tenant. **Gate:** semua halaman `/portal/*` memiliki sidebar.
+- [x] **Z-15** 🟡 **Konsistensi sidebar layout di tenant** — sidebar hilang di `/portal/announcements`. **Fix:** gunakan `TenantLayout` yang sama di semua halaman tenant. **Gate:** semua halaman `/portal/*` memiliki sidebar.
 
-- [ ] **Z-16** 🟡 **PWA install prompt dismiss persistence** — dialog "Pasang / Nanti" muncul di setiap halaman di ketiga portal. **Fix:** simpan timestamp dismiss ke `localStorage`, jangan tampilkan lagi selama 7 hari. **Gate:** setelah dismiss, prompt tidak muncul lagi di sesi yang sama.
+- [x] **Z-16** 🟡 **PWA install prompt dismiss persistence** — dialog "Pasang / Nanti" muncul di setiap halaman di ketiga portal. **Fix:** simpan timestamp dismiss ke `localStorage`, jangan tampilkan lagi selama 7 hari. **Gate:** setelah dismiss, prompt tidak muncul lagi di sesi yang sama.
 
 #### 🟢 LOW — Publik & Cross-Portal
 
