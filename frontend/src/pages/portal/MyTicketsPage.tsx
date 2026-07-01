@@ -336,7 +336,7 @@ export default function MyTicketsPage() {
         )})}
       </div>
 
-      <Modal show={showCreate} onHide={() => setShowCreate(false)}>
+      <Modal show={showCreate} onHide={() => { setShowCreate(false); setFormState(initialForm); setError(''); }}>
         <Modal.Header closeButton>
           <Modal.Title>Buat Laporan Baru</Modal.Title>
         </Modal.Header>
@@ -386,7 +386,7 @@ export default function MyTicketsPage() {
           </Form.Group>
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="secondary" onClick={() => setShowCreate(false)}>Batal</Button>
+          <Button variant="secondary" onClick={() => { setShowCreate(false); setFormState(initialForm); setError(''); }}>Batal</Button>
           <Button onClick={() => createMutation.mutate()} disabled={createMutation.isPending || !formState.title.trim()}>
             {createMutation.isPending ? 'Menyimpan...' : 'Kirim Laporan'}
           </Button>

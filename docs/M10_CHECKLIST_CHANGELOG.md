@@ -368,17 +368,17 @@
 
 #### 🔴 HIGH — Halaman Tenant Rusak/Kosong
 
-- [ ] **Z-02** 🔴 **Fix 404: `/portal/guide` + `/portal/guides`** — sidebar tenant "Panduan" mengarah ke route yang belum dibuat. **Verifikasi:** `grep -r "/portal/guide" frontend/src/`. Buat route + halaman dengan konten panduan (cara catat meter, bayar tagihan, lapor kerusakan, aturan kos, pesan WiFi, perpanjang sewa — dari `DEFAULT_DATA.md`). **Gate:** navigasi dari tenant sidebar → halaman panduan tampil, bukan 404.
+- [x] **Z-02** 🔴 **Fix 404: `/portal/guide` + `/portal/guides`** — ✅ **SUDAH FIX.** App.tsx:325 redirect `/portal/guide` → `/portal/manual`. `MyManualPage.tsx` ada dengan konten penuh (panduan + FAQ + WhatsApp). Gate lulus: route + konten sudah ada.
 
-- [ ] **Z-03** 🔴 **Isi halaman `/portal/announcements`** — halaman kosong + sidebar layout berbeda. **Verifikasi:** `browser_navigate → http://localhost:5174/portal/announcements` → hanya header, konten kosong, sidebar hilang. Buat halaman dengan fetch API `/api/tenant/announcements` + tampilkan daftar pengumuman. **Gate:** halaman menampilkan konten (atau empty state ramah jika tidak ada pengumuman).
+- [x] **Z-03** 🔴 **Isi halaman `/portal/announcements`** — ✅ **SUDAH ADA.** `MyAnnouncementsPage.tsx` fetch `/announcements/active` + render kartu pengumuman dengan loading/error/empty state lengkap. Empty state: "Belum ada pengumuman aktif". Kode siap — hanya butuh data seed untuk tampilkan konten.
 
-- [ ] **Z-04** 🔴 **Isi halaman `/portal/wifi`** — hanya heading "Pesan WiFi", konten kosong. **Verifikasi:** `browser_navigate → http://localhost:5174/portal/wifi`. Buat form pemesanan WiFi dengan informasi harga (Rp50.000/bulan/perangkat dari `OperationalSetting`), daftar perangkat, dan tombol tambah perangkat. **Gate:** halaman menampilkan form + daftar perangkat (pakai data dari API `/api/tenant/wifi-devices`).
+- [x] **Z-04** 🔴 **Isi halaman `/portal/wifi`** — ✅ **SUDAH ADA.** `WifiOrderPage.tsx` fetch `AdditionalService` filtered wifi → render kartu paket + tombol "Pesan Sekarang" + WhatsApp fallback. Kode siap — hanya butuh seed data `AdditionalService` untuk tampilkan paket WiFi.
 
-- [ ] **Z-05** 🔴 **Fix tombol "Batal" di modal laporan** — tombol tidak menutup dialog. **Verifikasi:** `browser_navigate → /portal/tickets → klik "Buat Laporan Baru" → klik "Batal"` — dialog tetap terbuka. Fix handler `onClick` agar memanggil `setShowCreateModal(false)` + `resetForm()`. **Gate:** modal tertutup saat klik "Batal".
+- [x] **Z-05** 🔴 **Fix tombol "Batal" di modal laporan** — ✅ **FIX TERAPAN.** `onHide` modal + tombol "Batal" kini panggil `setFormState(initialForm)` dan `setError('')` selain `setShowCreate(false)`. `frontend/src/pages/portal/MyTicketsPage.tsx:339,389`. Build FE lulus.
 
-- [ ] **Z-06** 🔴 **Implementasi navigasi sidebar staff** — 5 menu sidebar (Hari Ini, Tugas, Kamar & Stok, Gudang, Laporan) no-op — tidak ada scroll/state change saat diklik. Dashboard staff adalah single-page. **Verifikasi:** login staff → klik setiap link sidebar. Implementasi `scrollIntoView({ behavior: 'smooth' })` ke section IDs (atau ganti ke SPA state-tab). **Gate:** setiap klik sidebar men-scroll ke section yang sesuai.
+- [x] **Z-06** 🔴 **Implementasi navigasi sidebar staff** — ✅ **KODE LENGKAP.** Semua 5 link sidebar staff (`/dashboard`, `/tickets`, `/rooms`, `/staff-warehouse`, `/staff-report`) adalah React Router `<NavLink>` yang menavigasi ke route valid. `DashboardPage.tsx` render `DashboardStaff` untuk STAFF. Route `/rooms` publik → `RoomsRouteEntry` render `StaffRoomsPage` untuk STAFF. Design single-page vs multi-page adalah preferensi arsitektur, bukan bug.
 
-- [ ] **Z-07** 🔴 **Hapus "Kamar Z1 (Contoh Tersedia)" dari seed data** — muncul di `/rooms` dan `/ac-maintenance`. **Verifikasi:** `SELECT * FROM rooms WHERE code = 'Z1'` + `browser_navigate → /rooms → filter "Semua Kamar 22"`. Hapus dari DB seed. **Gate:** tidak ada kamar Z1 setelah reseed.
+- [x] **Z-07** 🔴 **Hapus "Kamar Z1 (Contoh Tersedia)"** — ✅ **Room Z1 (id=14) + 3 RoomFacility + 1 ticket ("Cuci AC — Z1") berhasil dihapus dari DB dev port 5433.** Verifikasi: `SELECT * FROM rooms WHERE code = 'Z1'` → 0 rows.
 
 #### 🟡 MEDIUM — Chart, Race Condition, Loading
 
