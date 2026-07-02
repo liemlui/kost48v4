@@ -1,10 +1,11 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Container, Spinner } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import { fetchPublicSocialProof } from '../../api/marketing';
 import EmptyState from '../../components/common/EmptyState';
 import { officialKost48Location } from '../../data/officialKost48Content';
+import { GuestTopbar, GuestFooter } from './publicGuestShared';
 
 const PER_PAGE = 6;
 
@@ -76,10 +77,19 @@ export default function ReviewsPublicPage() {
     setPage(1);
   };
 
+  const [scrolled, setScrolled] = useState(false);
+  useEffect(() => {
+    const h = () => setScrolled(window.scrollY > 60);
+    h();
+    window.addEventListener('scroll', h, { passive: true });
+    return () => window.removeEventListener('scroll', h);
+  }, []);
+
   const data = query.data;
 
   return (
     <div className="public-page-shell">
+      <GuestTopbar scrolled={scrolled} />
       <div className="container py-4 py-lg-5" style={{ maxWidth: 820 }}>
         <div className="mb-4">
           <div className="page-eyebrow">✦ Ulasan Penghuni</div>
@@ -207,6 +217,7 @@ export default function ReviewsPublicPage() {
           </>
         )}
       </div>
+      <GuestFooter />
     </div>
   );
 }

@@ -22,7 +22,8 @@ export const INITIAL_FORM: GuestBookingFormState = {
   fullName: '',
   phone: '',
   email: '',
-  checkInDate: new Date().toISOString().slice(0, 10),
+  // AC-01: pakai waktu lokal WIB (bukan UTC) agar default tanggal tidak mundur di dini hari
+  checkInDate: (() => { const now = new Date(); const local = new Date(now.getTime() - now.getTimezoneOffset() * 60_000); return local.toISOString().slice(0, 10); })(),
   pricingTerm: 'MONTHLY' as PricingTerm,
   identityNumber: '',
   emergencyContactName: '',

@@ -150,7 +150,7 @@ export default function GuestPreferenceWizard({ rooms, roomsLoading = false, onD
   }, [answers, currentStep, step, totalSteps]);
 
   const handleSkip = useCallback(() => {
-    saveGuestSurvey({ skipped: true, sessionId: sessionId.current }).catch(() => {});
+    // C01-07: skip tidak perlu kirim survey — hanya lanjut ke katalog
     onSkip();
   }, [onSkip]);
 

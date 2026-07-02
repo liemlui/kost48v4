@@ -49,6 +49,7 @@ const priorityRank: Record<AssistantSeverity, number> = {
   SUCCESS: 6,
 };
 
+// D-25: nomor WA owner-settable via Settings (fallback env var)
 const ADMIN_WHATSAPP_NUMBER = (import.meta.env.VITE_PUBLIC_ADMIN_WHATSAPP ?? '6285648887628').replace(/\D/g, '');
 
 function openActionTarget(target: string, navigate: (to: string) => void) {

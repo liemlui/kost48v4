@@ -34,7 +34,16 @@ export function useTenantPortalStage() {
 
   const stayQuery = useQuery({
     queryKey: ['portal-stage', 'stay', { userId, tenantId }],
-    queryFn: () => getResource<Stay>('/stays/me/current'),
+    queryFn: async () => {
+      // AE-01: tangkap 404 sebagai hasil valid (null) agar staleTime bekerja
+      // dan refetchOnMount tidak memicu loop tak terbatas.
+      try {
+        return await getResource<Stay>('/stays/me/current');
+      } catch (err: unknown) {
+        if (isNotFoundError(err)) return null;
+        throw err;
+      }
+    },
     enabled: isTenant && Boolean(userId),
     retry: false,
     staleTime: 60_000,

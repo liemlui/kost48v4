@@ -27,9 +27,17 @@ export default function PwaStatus() {
   const [updateAvailable, setUpdateAvailable] = useState(false);
   const [nextBuildId, setNextBuildId] = useState<string>();
   const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null);
-  const [installDismissed, setInstallDismissed] = useState(
-    () => sessionStorage.getItem(INSTALL_DISMISSED_KEY) === '1',
-  );
+  const [installDismissed, setInstallDismissed] = useState(() => {
+    const stored = localStorage.getItem(INSTALL_DISMISSED_KEY);
+    if (stored) {
+      const parsed = Number(stored);
+      if (!Number.isNaN(parsed)) {
+        const daysSince = (Date.now() - parsed) / (1000 * 60 * 60 * 24);
+        if (daysSince < 7) return true; // masih dalam cooldown 7 hari
+      }
+    }
+    return false;
+  });
   const reloadingRef = useRef(false);
   const registrationRef = useRef<ServiceWorkerRegistration | null>(null);
 
@@ -163,7 +171,7 @@ export default function PwaStatus() {
   };
 
   const dismissInstall = () => {
-    sessionStorage.setItem(INSTALL_DISMISSED_KEY, '1');
+    localStorage.setItem(INSTALL_DISMISSED_KEY, String(Date.now()));
     setInstallDismissed(true);
   };
 

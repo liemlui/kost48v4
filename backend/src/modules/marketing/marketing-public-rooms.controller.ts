@@ -34,6 +34,14 @@ export class MarketingPublicRoomsController {
     };
   }
 
+  @Get('summary')
+  async summary() {
+    return {
+      message: 'Ringkasan kamar publik berhasil diambil',
+      data: await this.publicRoomsService.getPublicRoomSummary(),
+    };
+  }
+
   @Get('availability-calendar')
   async availabilityCalendar(@Query() query: AvailabilityCalendarQueryDto) {
     return {

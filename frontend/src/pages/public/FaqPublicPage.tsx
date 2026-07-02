@@ -1,10 +1,9 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Accordion, Alert, Spinner } from 'react-bootstrap';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { fetchPublicFaqs } from '../../api/faqs';
-import Kost48LogoMark from '../../components/common/Kost48LogoMark';
-import { HOME_FAQ_ITEMS, EXTRA_FAQ_ITEMS } from './publicGuestShared';
+import { HOME_FAQ_ITEMS, EXTRA_FAQ_ITEMS, GuestFooter, GuestTopbar } from './publicGuestShared';
 
 const CATEGORY_ORDER = ['Aturan', 'Tarif', 'Booking', 'Pembayaran', 'Perpanjangan', 'Checkout & Deposit', 'Fasilitas', 'Lokasi', 'KTP & Privasi', 'Keluhan & Poin', 'Umum'];
 
@@ -20,34 +19,6 @@ function sortByCategory(items: Array<{ id: number; category: string; question: s
 }
 
 const STATIC_FAQS = [...HOME_FAQ_ITEMS, ...EXTRA_FAQ_ITEMS];
-
-function FaqTopbar() {
-  const navigate = useNavigate();
-  const [logoError, setLogoError] = useState(false);
-  return (
-    <header className="rm-topbar" style={{ position: 'sticky', top: 0, zIndex: 20 }}>
-      <button type="button" className="rm-topbar-brand" onClick={() => navigate('/')}>
-        {!logoError ? (
-          <img className="rm-topbar-logo" src="/room-images/logo-kost48-sby.webp" alt="" aria-hidden="true" onError={() => setLogoError(true)} />
-        ) : (
-          <Kost48LogoMark size="small" />
-        )}
-        <div className="rm-topbar-brand-text">
-          <span>KOST<span className="gx-brand-accent">48</span> Surabaya</span>
-          <small>Surabaya Barat</small>
-        </div>
-      </button>
-      <nav className="rm-topbar-nav" aria-label="Navigasi">
-        <button type="button" onClick={() => navigate('/')}>🏠 Beranda</button>
-        <button type="button" onClick={() => navigate('/rooms')}>🔍 Katalog Kamar</button>
-        <button type="button" onClick={() => navigate('/reviews')}>⭐ Ulasan</button>
-      </nav>
-      <div className="rm-topbar-user">
-        <Link to="/rooms" className="btn btn-sm btn-primary">Cek Kamar</Link>
-      </div>
-    </header>
-  );
-}
 
 export default function FaqPublicPage() {
   const query = useQuery({
@@ -73,7 +44,7 @@ export default function FaqPublicPage() {
 
   return (
     <div className="public-page-shell" style={{ background: '#f8fafc' }}>
-      <FaqTopbar />
+      <GuestTopbar scrolled={false} />
       <div className="container py-4 py-lg-5" style={{ maxWidth: 820 }}>
         <div className="mb-4">
           <div className="page-eyebrow">✦ Panduan</div>
@@ -159,6 +130,7 @@ export default function FaqPublicPage() {
           </div>
         )}
       </div>
+      <GuestFooter />
     </div>
   );
 }

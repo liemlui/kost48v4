@@ -251,7 +251,7 @@ export default function RichAvailabilityCalendar({ filter }: Props) {
 
                           {isExpanded && (
                             <div className="wcal-detail">
-                              {room.currentTenantName && <div className="wcal-det-l">👤 {room.currentTenantName}</div>}
+                              {/* C01-02: nama penghuni dihapus — jangan bocorkan PII */}
                               {room.checkInDate && room.plannedCheckOutDate && (
                                 <div className="wcal-det-l">
                                   📅 {fmtTanggal(room.checkInDate)} → <strong>{fmtTanggal(room.plannedCheckOutDate)}</strong>
@@ -264,7 +264,6 @@ export default function RichAvailabilityCalendar({ filter }: Props) {
                                   <span className="wcal-renew-note"> — kamar akan kosong jika batal</span>
                                 </div>
                               )}
-                              {room.dpTenantName && <div className="wcal-det-l">👤 {room.dpTenantName} · 🕐 DP 30%</div>}
                               <div className="wcal-det-l wcal-det-pr">Rp{room.monthlyRateRupiah?.toLocaleString('id-ID')}/bln</div>
                               {statusLabel.key === 'huni' && room.checkInDate && room.plannedCheckOutDate && (
                                 <div className="wcal-prog">

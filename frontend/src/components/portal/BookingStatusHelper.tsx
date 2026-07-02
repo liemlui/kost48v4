@@ -129,6 +129,7 @@ export function canCancelBooking(booking: TenantBooking): boolean {
 }
 
 export function getAdminWhatsAppNumber(): string {
+  // D-25: nomor WA owner-settable via Settings (fallback env var)
   return import.meta.env.VITE_PUBLIC_ADMIN_WHATSAPP ?? '6285648887628';
 }
 

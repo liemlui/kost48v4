@@ -32,7 +32,7 @@ type AvailFilter = "" | "bookable" | "occupied" | "checking";
 type SortFilter = "price-asc" | "price-desc";
 
 const pricingTerm: PricingTerm = "MONTHLY";
-const ROOMS_PER_PAGE = 3; // F2-11 (W-03): paginasi katalog publik
+const ROOMS_PER_PAGE = 9; // F2-11 (W-03): paginasi katalog publik
 type PaginationItem = number | "gap";
 
 function getPaginationItems(totalPages: number, currentPage: number): PaginationItem[] {
@@ -193,7 +193,7 @@ export default function PublicRoomsPage() {
       if (cooling && getPublicRoomCooling(room) !== cooling) return false;
       const bookable = isPublicRoomBookable(room);
       const status = String(room.status ?? "").toUpperCase();
-      if (avail === "bookable" && (!bookable || status === "MAINTENANCE")) return false;
+      if (avail === "bookable" && !bookable) return false;
       if (avail === "occupied" && (bookable || status !== "OCCUPIED")) return false;
       if (avail === "checking" && status !== "MAINTENANCE") return false;
       return true;
@@ -211,7 +211,7 @@ export default function PublicRoomsPage() {
   const bookableCount = rooms.filter((r) => isPublicRoomBookable(r)).length;
   const lockedForTenant = isTenant && !isTenantStageLoading && stage !== "browsing";
 
-  // F2-11 (W-03): paginasi 12 per halaman; reset ke hal.1 saat filter/sort berubah.
+  // F2-11 (W-03): paginasi 9 per halaman (ROOMS_PER_PAGE); reset ke hal.1 saat filter/sort berubah.
   const [page, setPage] = useState(1);
   useEffect(() => { setPage(1); }, [bathroom, cooling, avail, sort]);
   const totalPages = Math.max(1, Math.ceil(rooms.length / ROOMS_PER_PAGE));

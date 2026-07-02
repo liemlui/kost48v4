@@ -41,13 +41,14 @@ export class AuthService {
       throw new UnauthorizedException(invalidCredentialsMessage);
     }
 
-    if (!user.isActive) {
-      throw new ForbiddenException('User tidak aktif');
-    }
-
     const passwordMatch = await bcrypt.compare(dto.password, user.passwordHash);
     if (!passwordMatch) {
       throw new UnauthorizedException(invalidCredentialsMessage);
+    }
+
+    // AD-02: cek isActive setelah password — hindari enumerasi akun nonaktif
+    if (!user.isActive) {
+      throw new ForbiddenException(invalidCredentialsMessage);
     }
 
     await this.prisma.user.update({

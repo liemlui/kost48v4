@@ -317,6 +317,8 @@ export default function App() {
           <Route path="/portal/checkout" element={<RequireRoles allowed={['TENANT']}><CheckoutPortalPage /></RequireRoles>} />
           <Route path="/portal/renewal" element={<RequireRoles allowed={['TENANT']}><RenewalPortalPage /></RequireRoles>} />
           <Route path="/loyalty" element={<RequireRoles allowed={['OWNER', 'ADMIN']}><LoyaltyAdminPage /></RequireRoles>} />
+          {/* R-17: redirect /portal/guide lama → /portal/manual */}
+          <Route path="/portal/guide" element={<Navigate to="/portal/manual" replace />} />
           <Route path="/portal/wifi" element={<RequireRoles allowed={['TENANT']}><WifiOrderPage /></RequireRoles>} />
           </Route>
           <Route path="*" element={<NotFoundPage />} />

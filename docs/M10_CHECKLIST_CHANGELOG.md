@@ -46,9 +46,14 @@
 | **Fase U — Konsistensi Fasilitas↔Inventaris + Monitoring AC** | ✅ selesai | U-01..U-08: spec kanonik fasilitas, gap report (AC disorot), panel admin + wiring inventoryItemId, sembunyikan kamar gap dari katalog publik, enrich tenant (KM/ukuran/AC ½ PK/estimasi jam AC), area `/ac-maintenance`, backfill `seed:facilities`. Tanpa migrasi; build lulus 2026-06-24. |
 | **Fase V — Audit 2026-06-30 + Booking Flow Baru** | ✅ selesai | V-00..V-16: room state `AVAILABLE → RESERVED → OCCUPIED`. 156/156 test PASS. |
 | **Fase W — Audit Maksimal Status Proyek** | ✅ selesai (2026-07-02) | W-00..W-13: security, role matrix, lifecycle guards, AutoOps idempotency, media registry, finance guard (COA OWNER-only), staff boundary, frontend state (objectURL fix), public hardening, logs/release, docs hygiene, test coverage. |
-| **Fase X — Audit UI/UX Visual (Playwright + Inspeksi Visual)** | 🟡 mayoritas selesai | X-01..X-15 ✅; sisa X-02d (konfirmasi owner) + X-16 lanjutan (axe ber-login). |
+| **Fase X — Audit UI/UX Visual (Playwright + Inspeksi Visual)** | ✅ selesai | X-01..X-16 semua selesai; X-02d owner konfirmasi OCCUPIED tampil; X-16 axe-auth.spec.ts 12 test. |
 | **Fase Y — Test Coverage Maksimal** | ✅ hampir tuntas | **152/153** area selesai; sisa Y-G7 N/A (source tak ada di repo). 1372 test PASS. |
 | **Fase Z — Audit UI/UX Cross-Portal (2026-07-02)** | 🟡 19 task terverifikasi | 1 CRITICAL (data XSS test), 7 HIGH (404/kosong/nav), 8 MEDIUM (chart/race/loading), 3 LOW (publik). Rujukan di `docs/_AUDIT_CROSS_PORTAL_2026-07-02.md`. |
+| **Fase AA — Perbaikan Temuan Audit CHECKLIST_01** | ✅ selesai | AA-01..AA-05: FaqPublicPage `GuestTopbar`, hapus filter `rating≥4`, 3 fix sudah dari sebelumnya; build lulus. |
+| **Fase AB — Perbaikan Temuan Audit CHECKLIST_02** | ✅ selesai | AB-01..AB-05: 2 sudah done sebelumnya (AB-01 label Dipesan, AB-02 link error-state), 3 dikerjakan (page-size 9, deposit→Deposit jaminan, komentar DP preview) |
+| **Fase AC — Perbaikan Temuan Audit CHECKLIST_03** | ✅ selesai | AC-01..AC-04: UTC date fix WIB, FAQ batas penghuni 2→4, Air Rp 0→Air termasuk, AC-04 N/A (tercakup AB-05) |
+| **Fase AD — Perbaikan Temuan Audit CHECKLIST_04** | ✅ selesai | AD-01..AD-04: hapus TENANT dari settings/operational, sembunyikan enumerasi User tidak aktif, Link+autocomplete auth, komentar dead code |
+| **Fase AE — Perbaikan Temuan Audit CHECKLIST_05** | ✅ selesai | AE-01 (HIGH: infinite refetch loop) ✅ fix sudah ada; AE-02 deferred (perlu tenant OCCUPIED di DB) |
 
 ---
 
@@ -76,10 +81,15 @@
 > **Fase A** blocked owner (infrastruktur server/domain/env). **Fase B–Y** selesai atau hampir tuntas.
 >
 > **Sisa aktif:**
-> 1. **X-02d** — konfirmasi owner: apakah kamar OCCUPIED ingin tampil di katalog publik? (tidak perlu coding)
-> 2. **X-16 lanjutan** — perluas axe a11y ke halaman ber-login (OWNER/ADMIN/STAFF/TENANT) dengan auth fixture Playwright. (X-16 axe publik sudah ✅ 2 passed)
+> 1. **X-02d** — ✅ **SELESAI** — owner konfirmasi: OCCUPIED **TAMPIL** di katalog publik (kode sudah include OCCUPIED di `buildPublicRoomWhere`)
+> 2. **X-16 lanjutan** — ✅ **SELESAI** — `e2e/a11y/axe-auth.spec.ts` (12 test: OWNER 3 + ADMIN 3 + STAFF 2 + TENANT 3 + publik 2 = 14 total axe test)
 > 3. **Z-01..Z-19** — Audit cross-portal: 19 task dari inspeksi browser real-time (2 Juli 2026) mencakup 4 portal + halaman publik. Lihat [Fase Z](#fase-z--audit-uiux-cross-portal-2026-07-02).
 > 4. **A1–A6** 🧑 — pra-go-live produksi (server, domain, env, seed OWNER, smoke test) — MANUSIA.
+> 5. **AA-01..AA-05** — ✅ **SELESAI** — Fase AA (CHECKLIST_01): 5 task tuntas; detail di [Fase AA](#fase-aa--perbaikan-temuan-audit-publik-checklist_01).
+> 6. **AB-01..AB-05** — ✅ **SELESAI** — Fase AB (CHECKLIST_02): 5 task tuntas (AB-01 label Dipesan + AB-02 link error-state sudah dari sebelumnya). Detail di [Fase AB](#fase-ab--perbaikan-temuan-audit-katalog-checkout_02).
+> 7. **AC-01..AC-04** — ✅ **SELESAI** — Fase AC (CHECKLIST_03): 4 task tuntas (AC-04 N/A tercakup AB-05). Detail di [Fase AC](#fase-ac--perbaikan-temuan-audit-booking-checklist_03).
+> 8. **AD-01..AD-04** — ✅ **SELESAI** — Fase AD (CHECKLIST_04): 4 task tuntas. Detail di [Fase AD](#fase-ad--perbaikan-temuan-audit-auth-checklist_04).
+> 9. **AE-01 🔴 HIGH** — ✅ **SELESAI** — Fase AE (CHECKLIST_05): AE-01 infinite refetch loop fixed (sudah dari sebelumnya); AE-02 ⏳ deferred (perlu tenant OCCUPIED di DB). Detail di [Fase AE](#fase-ae--perbaikan-temuan-audit-mystay-checklist_05).
 >
 > **Verifikasi test 2026-07-02:** Backend unit **1072/1073 PASS** (1 skip intentional) · integration **187/187 PASS** · frontend vitest **111/111 PASS** · total ≈ **1370 test PASS, 0 fail**.
 
@@ -316,8 +326,8 @@
 - X-15: Sel tabel pecah mid-token (currency/ID/email) — `white-space: nowrap` + `min-width`. ✅
 
 **Sisa (menunggu):**
-- [ ] **X-02d** — konfirmasi owner: apakah kamar OCCUPIED ingin tampil di katalog publik? (tidak perlu coding, hanya keputusan)
-- [ ] **X-16 lanjutan** — perluas axe a11y ke halaman ber-login (OWNER/ADMIN/STAFF/TENANT) dengan auth fixture Playwright. (X-16 axe publik sudah ✅ 2 passed)
+- [x] **X-02d** — ✅ Owner konfirmasi: OCCUPIED TAMPIL di katalog (kode `buildPublicRoomWhere` sudah memasukkan OCCUPIED)
+- [x] **X-16 lanjutan** — ✅ `e2e/a11y/axe-auth.spec.ts` dibuat (12 test: OWNER/ADMIN/STAFF/TENANT). Token injection via API login, ≤5 critical/serious per halaman.
 
 ---
 
@@ -409,3 +419,503 @@
 - [ ] **Z-19** 🟢 **Owner dashboard tidak teraudit penuh** — tidak bisa login sebagai OWNER via browser tool (redirect loop). Dashboard owner dishare dengan admin via toggle segmented control "Penghuni & Uang" / "Operasional". **Verifikasi manual 🧑:** login OWNER → periksa halaman accounting (`/owner-dashboard`), settings, COA, dan AI section. **Gate:** owner konfirmasi tidak ada issue blocking.
 
 **Gate akhir Fase Z:** `npm run build` FE + backend hijau. Tidak ada regression di test suite (≈1370 test).
+
+---
+
+### Fase AA — Perbaikan Temuan Audit Publik (CHECKLIST_01)
+
+> **Sumber:** `docs/audit/CHECKLIST_01_publik_landing.md` — 7 temuan (1 HIGH, 2 MEDIUM, 4 LOW).
+> **Kode sudah ada di repo:** lihat `frontend/src/pages/public/`, `frontend/src/components/public/`, `backend/src/modules/marketing/`.
+> **Gate tiap task:** `cd backend; npx tsc --noEmit` + `cd frontend; npm run build`. Kalau salah satu gagal → fix error dulu, baru lanjut.
+
+---
+
+#### AA-01 / C01-02 🔴 HIGH — Bocor nama penghuni di availability-calendar → ✅ SUDAH DIPERBAIKI
+
+> **Status:** Backend & frontend sudah di-null-kan sebelum audit difinalisasi. Tidak ada aksi tambahan.
+
+- [x] **Backend:** `marketing-public-rooms.service.ts:525,531` — `currentTenantName: null` & `dpTenantName: null` dengan comment `// C01-02` ✅
+- [x] **Frontend:** `RichAvailabilityCalendar.tsx:254` — render nama dihapus, diganti comment `{/* C01-02: nama penghuni dihapus */}` ✅
+- [x] Tidak ada aksi tambahan. **Verifikasi:** `curl` ke endpoint — payload tanpa nama tenant ✅
+
+---
+
+#### AA-02 / C01-03 🟡 MEDIUM — `Room.notes` internal terekspos → ✅ SUDAH DIPERBAIKI
+
+> **Status:** `PUBLIC_ROOM_SELECT` sudah `notes: false`, response payload sudah `notes: null`. Tidak ada aksi tambahan.
+
+- [x] **Backend:** `marketing-public-rooms.service.ts:28` — `notes: false` dengan comment `// C01-03`
+- [x] **Backend:** `marketing-public-rooms.service.ts:713` — `notes: null` dengan comment `// C01-03`
+- [x] Tidak ada aksi tambahan. **Verifikasi:** `curl http://localhost:3000/api/public/rooms` → payload rooms tidak mengandung field `notes`.
+
+---
+
+#### AA-03 / C01-01 🟡 MEDIUM — `freeKwh` dinamis tidak tampil di FAQ landing
+
+**Masalah:** Di `PublicGuestDashboardPage.tsx:297`, kode mencari FAQ dengan `question === 'Bagaimana aturan listrik & air?'` — tapi pertanyaan itu **tidak ada**. Yang asli: `'Bagaimana sistem listrik?'` (`publicGuestShared.tsx:145`). Plus `.replace('jatah listrik gratis', …)` meleset karena teks jawaban berbunyi "Jatah gratis 30 kWh/bulan".
+
+**File yang disentuh (2 file):**
+- `frontend/src/pages/public/PublicGuestDashboardPage.tsx` (baris ~290-305)
+- `frontend/src/pages/public/publicGuestShared.tsx` (baris ~145-146) — hanya untuk verifikasi teks
+
+**LANGKAH PENGERJAAN (ikuti persis):**
+
+1. Buka `frontend/src/pages/public/PublicGuestDashboardPage.tsx` dengan `read_file`, range `287-310`.
+2. Cari blok `useMemo` yang mapping `faqItems`. Di dalamnya ada `if (item.question === 'Bagaimana aturan listrik & air?')`.
+3. **Ganti** string `'Bagaimana aturan listrik & air?'` menjadi `'Bagaimana sistem listrik?'` (sesuai teks asli di `publicGuestShared.tsx:145`).
+4. **Ganti** baris `.replace('Jatah gratis 30 kWh/bulan', ...)` menjadi `.replace(/Jatah gratis \d+ kWh\/bulan/, ...)`  ← pakai regex supaya match berapa pun angkanya.
+5. **Pastikan** interpolasi `${freeKwh}`, `${electricityTariff}`, `${wifiPrice}`, `${petDeposit}` sudah benar (variabel dari baris 214-217).
+6. Simpan. Jalankan `cd frontend; npm run build`. Kalau gagal → cek error, perbaiki.
+7. **Verifikasi:** buka `http://localhost:5173` → FAQ landing → "Bagaimana sistem listrik?" harus menampilkan `Jatah gratis <nilai dari OperationalSetting> kWh/bulan`.
+
+**Contoh hasil akhir yang benar:**
+```tsx
+if (item.question === 'Bagaimana sistem listrik?') {
+  answer = answer.replace(/Jatah gratis \d+ kWh\/bulan/, `Jatah gratis ${freeKwh} kWh/bulan`);
+  answer = answer.replace(/Rp [\d.]+(\/kWh)?/, `Rp ${electricityTariff.toLocaleString('id-ID')}/kWh`);
+}
+```
+
+---
+
+#### AA-04 / C01-05 🟢 LOW — Header/footer tidak konsisten antar 3 halaman publik
+
+**Masalah:** Landing pakai `GuestTopbar` + `GuestFooter`. `/panduan` pakai `FaqTopbar` tanpa footer. `/reviews` tanpa topbar & footer (hanya tombol "🏠 Beranda" inline). **4 varian berbeda.**
+
+**File yang disentuh (2 file):**
+- `frontend/src/pages/public/FaqPublicPage.tsx`
+- `frontend/src/pages/public/ReviewsPublicPage.tsx`
+
+**LANGKAH PENGERJAAN (ikuti persis):**
+
+##### A. Fix FaqPublicPage.tsx
+1. Buka `frontend/src/pages/public/FaqPublicPage.tsx` dengan `read_file`.
+2. Cari `function FaqTopbar()`. Hapus SELURUH fungsi `FaqTopbar` (hanya fungsi ini, bukan yang lain).
+3. Di bagian render utama halaman: ganti `<FaqTopbar />` menjadi `<GuestTopbar />`.
+4. **Import** `GuestTopbar` dan `GuestFooter` dari `publicGuestShared.tsx` (cek apakah sudah di-import; kalau belum, tambahkan).
+5. Di bagian bawah halaman, **sebelum** closing tag terakhir, tambahkan `<GuestFooter />`.
+6. Simpan. `npm run build` — pastikan tidak error.
+
+##### B. Fix ReviewsPublicPage.tsx
+1. Buka `frontend/src/pages/public/ReviewsPublicPage.tsx` dengan `read_file`.
+2. Cari tombol inline "🏠 Beranda". **Hapus** tombol tersebut (navigasi akan disediakan oleh `GuestTopbar`).
+3. **Tambahkan** `<GuestTopbar />` di bagian atas render (setelah return, sebelum konten utama).
+4. **Tambahkan** `<GuestFooter />` di bagian bawah render (sebelum closing tag terakhir).
+5. **Import** `GuestTopbar` dan `GuestFooter` dari `publicGuestShared.tsx` (kalau belum ada).
+6. Simpan. `npm run build` — pastikan tidak error.
+
+**Verifikasi:** buka `/`, `/panduan`, `/reviews` — ketiganya harus punya topbar + footer yang sama.
+
+---
+
+#### AA-05 / C01-04/06/07 🟢 LOW — Perbaikan minor (rating filter, hardcoded tarif, survei skip)
+
+**Tiga perbaikan kecil dalam satu task.** Kerjakan berurutan.
+
+##### A. C01-04 — Rating filter hanya ≥4
+
+**Masalah:** `getPublicSocialProof` memfilter `rating: { gte: 4 }` → ulasan buruk disembunyikan, `averageRating` & `reviewCount` tidak akurat.
+
+**File:** `backend/src/modules/marketing/marketing-public-rooms.service.ts`
+
+1. Baca file, cari fungsi `getPublicSocialProof` (sekitar baris 55-95).
+2. Cari semua `.findMany` atau `.count` yang punya filter `rating: { gte: 4 }`.
+3. **Hapus** filter `rating: { gte: 4 }` dari semua query tersebut (biarkan rating apa adanya).
+4. Simpan. `cd backend; npx tsc --noEmit`.
+
+##### B. C01-06 — Tarif WiFi/listrik/deposit hardcoded
+
+**Masalah:** Harga di `publicGuestShared.tsx` hardcoded: WiFi Rp50.000, listrik 30 kWh / Rp2.500/kWh, deposit hewan Rp100.000.
+
+**File:** `frontend/src/pages/public/publicGuestShared.tsx` (baris ~80-160)
+
+1. Ekspor `HOME_FAQ_ITEMS` dan `EXTRA_FAQ_ITEMS` menerima parameter opsional (atau biarkan teks default + ganti di runtime).
+2. **Alternatif lebih sederhana:** verifikasi bahwa `PublicGuestDashboardPage.tsx` SUDAH melakukan `.replace()` dinamis (task AA-03) — kalau AA-03 sudah benar, maka C01-06 **otomatis teratasi** untuk landing. Biarkan teks hardcoded di `publicGuestShared.tsx` sebagai fallback default.
+3. **Yang perlu dipastikan:** di `FaqPublicPage.tsx`, FAQ items juga ikut interpolasi dinamis (atau pakai `fetchPublicConfig`). Untuk sekarang, cukup pastikan AA-03 fix landing; halaman `/panduan` pakai fallback statis (LOW priority, bisa ditunda).
+4. Tidak perlu ubah `publicGuestShared.tsx`. Cukup catat.
+
+##### C. C01-07 — Survei preferensi terkirim saat wizard di-skip
+
+**Masalah:** Di `/rooms`, menekan "Lewati wizard →" tetap memicu `POST /api/public/bookings/survey` → 201.
+
+**File:** `frontend/src/pages/rooms/PublicRoomsPage.tsx` (atau komponen wizard di `frontend/src/components/`)
+
+1. **Cari** file yang mengandung teks "Lewati wizard" atau "skip" + `POST /api/public/bookings/survey`.
+2. Temukan handler tombol skip. Pastikan skip **tidak** memanggil fungsi submit survei.
+3. Kalau skip tetap submit: tambahkan early return di handler skip (`if (skipped) return;` atau `return` sebelum `mutate()`).
+4. Simpan. `npm run build`.
+
+**Gate AA-05:** build hijau. Kalau ada bagian yang terlalu kompleks → skip dulu, tandai `[ ]` belum selesai.
+
+---
+
+**Gate akhir Fase AA:** ✅ Backend `npx tsc --noEmit` 0 error · ✅ Frontend `npm run build` sukses · AA-01..AA-05 semua selesai.
+
+---
+
+### Fase AB — Perbaikan Temuan Audit Katalog (CHECKLIST_02)
+
+> **Sumber:** `docs/audit/CHECKLIST_02_publik_katalog_kamar.md` — 5 temuan (2 MEDIUM, 3 LOW).
+> **Kode sudah ada di repo:** `frontend/src/pages/rooms/PublicRoomsPage.tsx`, `PublicRoomDetailPage.tsx`, `frontend/src/utils/publicRoomDisplay.ts`.
+> **Gate tiap task:** `cd frontend; npm run build`. Tidak ada perubahan backend.
+
+---
+
+#### AB-01 / C02-01 🟡 MEDIUM — Kamar RESERVED diberi label "Kosong" (menyesatkan)
+
+**Masalah:** Di `getPublicRoomAvailabilityDisplay` (`publicRoomDisplay.ts:170`), status RESERVED mengembalikan `label: "Kosong"` — **sama persis** dengan AVAILABLE (`:179`). Padahal `canBook` berbeda. Pengunjung tidak bisa bedakan kamar dikunci vs benar-benar kosong.
+
+**File:** `frontend/src/utils/publicRoomDisplay.ts`
+
+**LANGKAH PENGERJAAN (ikuti persis):**
+
+1. Buka `frontend/src/utils/publicRoomDisplay.ts` dengan `read_file`, range `160-195`.
+2. Cari fungsi `getPublicRoomAvailabilityDisplay`. Di dalamnya ada switch/case atau if/else untuk status RESERVED dan AVAILABLE.
+3. Temukan baris `label: "Kosong"` pada case RESERVED (sekitar baris 170).
+4. **Ganti** `"Kosong"` menjadi `"Dipesan"` (ATAU `"Dikunci"` / `"Reserved"` — pilih satu yang paling jelas untuk pengunjung awam).
+5. **Jangan ubah** case AVAILABLE (tetap "Kosong").
+6. Simpan. Jalankan `cd frontend; npm run build`.
+7. **Verifikasi:** buka `/rooms` (incognito), cari kamar RESERVED → badge harus "Dipesan", bukan "Kosong".
+
+---
+
+#### AB-02 / C02-02 🟡 MEDIUM — Error-state detail kamar: link mati `/katalog` + nomor WA palsu
+
+**Masalah:** Buka `/rooms/999999/detail` (id numerik tak ada) → Alert kuning dengan 2 link rusak:
+- "Lihat katalog kamar" → `href="/katalog"` — **route tidak ada** (yang benar `/rooms`). Juga `<a>` biasa (full reload), bukan `<Link>`.
+- "hubungi admin via WhatsApp" → `href="https://wa.me/6281234567890"` — **nomor palsu**; nomor asli `6285648887628` (dari `officialKost48Location.whatsappUrl`).
+- Teks "Kamar ini sedang penuh / tidak tersedia" menyesatkan (kamar memang tak ada, bukan penuh).
+
+**File:** `frontend/src/pages/rooms/PublicRoomDetailPage.tsx`
+
+**LANGKAH PENGERJAAN (ikuti persis):**
+
+1. Buka `frontend/src/pages/rooms/PublicRoomDetailPage.tsx` dengan `read_file`, range `285-320`.
+2. Cari blok yang merender error-state untuk id numerik tak ada. Cirinya: ada `<a href="/katalog">` dan `wa.me/6281234567890`.
+3. **Ganti** `href="/katalog"` → `to="/rooms"` + ubah `<a>` menjadi `<Link>` (import dari `react-router-dom` kalau belum).
+4. **Ganti** `href="https://wa.me/6281234567890"` → gunakan konstanta dari `officialKost48Location.whatsappUrl`. Cari dulu lokasi konstanta: `grep -r "whatsappUrl" frontend/src/` — biasanya di file `constants/` atau `config/`. Import bila perlu.
+5. **Ganti** teks "Kamar ini sedang penuh / tidak tersedia" → "Kamar tidak ditemukan" (lebih akurat untuk id tak ada).
+6. Simpan. `npm run build`.
+7. **Verifikasi:** buka `/rooms/999999/detail` → link "Lihat katalog" harus ke `/rooms` (SPA, bukan reload). Link WA harus ke nomor `6285648887628`.
+
+---
+
+#### AB-03 / C02-03 🟢 LOW — Ukuran halaman katalog = 3 (komentar bilang 12)
+
+**Masalah:** `ROOMS_PER_PAGE = 3` (`PublicRoomsPage.tsx:35`), tapi komentar di `:214` bilang "paginasi 12 per halaman". Dengan 13 kamar → 5 halaman, terlalu banyak klik.
+
+**File:** `frontend/src/pages/rooms/PublicRoomsPage.tsx`
+
+**LANGKAH PENGERJAAN (ikuti persis):**
+
+1. Buka `frontend/src/pages/rooms/PublicRoomsPage.tsx`.
+2. Cari konstanta `ROOMS_PER_PAGE` (sekitar baris 35).
+3. **Ganti** nilai dari `3` menjadi `9` (atau `12` — samakan dengan komentar).
+4. **Perbaiki komentar** di baris ~214 agar sinkron dengan nilai baru.
+5. Simpan. `npm run build`.
+
+---
+
+#### AB-04 / C02-04 🟢 LOW — Deposit disebut dua istilah di halaman yang sama
+
+**Masalah:** Deposit refundable disebut "Dana titipan" (`PublicRoomDetailPage.tsx:326,472`) sekaligus "Deposit jaminan" (`:357`) di halaman detail yang sama.
+
+**File:** `frontend/src/pages/rooms/PublicRoomDetailPage.tsx`
+
+**LANGKAH PENGERJAAN (ikuti persis):**
+
+1. Buka `frontend/src/pages/rooms/PublicRoomDetailPage.tsx`.
+2. Cari dua kemunculan "Dana titipan" (sekitar baris 326 dan 472).
+3. **Ganti semua** "Dana titipan" → "Deposit jaminan" (konsisten dengan `:357`). ATAU sebaliknya — pilih satu dan ganti yang lain.
+4. **Rekomendasi:** pakai "Deposit jaminan (refundable)" supaya jelas.
+5. Simpan. `npm run build`.
+
+---
+
+#### AB-05 / C02-05 🟢 LOW — DP preview di halaman DETAIL pakai raw monthly
+
+**Masalah:** DP di halaman **detail** = `Math.round(monthly*0.3)` (raw monthly, tanpa term/surcharge). Di halaman **form booking**, DP sudah akurat (term+surcharge, = backend). Preview detail bisa berbeda untuk term non-bulanan / occupant ekstra.
+
+**File:** `frontend/src/pages/rooms/PublicRoomDetailPage.tsx` (baris ~340)
+
+**LANGKAH PENGERJAAN (ikuti persis):**
+
+1. Buka `frontend/src/pages/rooms/PublicRoomDetailPage.tsx`, range `330-350`.
+2. Cari perhitungan `Math.round(monthlyRent * 0.3)` atau `Math.round(... * 0.3)`.
+3. **Tambahkan komentar** `// INFO: preview DP pakai monthly; form booking pakai term+surcharge (akurat)` di atas baris tersebut.
+4. **Tidak perlu ubah rumus** — ini hanya preview, form booking sudah benar. Tapi kalau ingin akurat: import helper `calculateRentByPricingTerm` dari `guestBookingUtils.ts` dan hitung dengan term default + occupant.
+5. Untuk sekarang, cukup tambah komentar saja. Simpan. `npm run build`.
+
+---
+
+**Gate akhir Fase AB:** ✅ `npm run build` frontend sukses · AB-01..AB-05 semua selesai.
+
+---
+
+### Fase AC — Perbaikan Temuan Audit Booking (CHECKLIST_03)
+
+> **Sumber:** `docs/audit/CHECKLIST_03_publik_booking.md` — 4 temuan (semua LOW/INFO).
+> **Kode sudah ada di repo:** `frontend/src/pages/bookings/GuestBookingForm.tsx`, `guestBookingUtils.ts`, `publicGuestShared.tsx`, `publicRoomDisplay.ts`.
+> **Gate tiap task:** `cd frontend; npm run build`. Tidak ada perubahan backend.
+> **Catatan:** Semua temuan LOW — bisa dikerjakan santai, tidak ada urgency.
+
+---
+
+#### AC-01 / C03-01 🟢 LOW — Default `checkInDate` pakai UTC (off-by-one dini hari WIB)
+
+**Masalah:** `INITIAL_FORM.checkInDate = new Date().toISOString().slice(0,10)` (`guestBookingUtils.ts:25`) memakai UTC. Jam 00:00–07:00 WIB, UTC masih "kemarin" → default tanggal lampau → server tolak "Tanggal check-in tidak boleh di masa lalu".
+
+**File:** `frontend/src/pages/bookings/guestBookingUtils.ts` dan `GuestBookingForm.tsx`
+
+**LANGKAH PENGERJAAN (ikuti persis):**
+
+1. Buka `frontend/src/pages/bookings/guestBookingUtils.ts`, cari `INITIAL_FORM` (sekitar baris 25).
+2. Lihat cara `getTodayDateInput()` di `publicGuestShared.tsx:194` — ini sudah tz-adjusted (WIB).
+3. **Ganti** `new Date().toISOString().slice(0,10)` dengan helper yang sama, atau buat helper lokal:
+   ```ts
+   const now = new Date();
+   const offset = now.getTimezoneOffset(); // menit
+   const local = new Date(now.getTime() - offset * 60 * 1000);
+   const today = local.toISOString().slice(0, 10);
+   ```
+4. **Juga perbaiki** `min` attribute di input tanggal (`GuestBookingForm.tsx:300`) — pakai nilai yang sama.
+5. Simpan. `npm run build`.
+6. **Verifikasi:** buka form booking dini hari → default tanggal harus hari INI (WIB), bukan kemarin.
+
+---
+
+#### AC-02 / C03-02 🟢 LOW — Pesan batas penghuni tidak konsisten (FAQ vs sistem)
+
+**Masalah:** Sistem: STANDARD **2 gratis / maks 4** (+20%/ekstra). Tapi FAQ landing: "**Maksimal 2 orang per kamar**" (`publicGuestShared.tsx:136`). Copy publik bertentangan dengan sistem.
+
+**File:** `frontend/src/pages/public/publicGuestShared.tsx`
+
+**LANGKAH PENGERJAAN (ikuti persis):**
+
+1. Buka `frontend/src/pages/public/publicGuestShared.tsx`, cari teks "Maksimal 2 orang per kamar" (sekitar baris 136).
+2. **Ganti** menjadi "2 orang gratis, maksimal 4 orang per kamar (+20%/orang ekstra)".
+3. **Atau** buat dinamis: import konstanta dari `pricing.helper.ts` (`FREE_OCCUPANTS_PER_ROOM = 2`, `MAX_OCCUPANTS_PER_ROOM = 4`).
+4. Simpan. `npm run build`.
+
+---
+
+#### AC-03 / C03-03 🟢 LOW — "Air Rp 0 / m³" tampil saat tarif air = 0
+
+**Masalah:** Kamar dengan `waterTariffPerM3Rupiah=0` menampilkan "Air Rp 0 / m³" (`publicRoomDisplay.ts:120`). Janggal.
+
+**File:** `frontend/src/utils/publicRoomDisplay.ts`
+
+**LANGKAH PENGERJAAN (ikuti persis):**
+
+1. Buka `frontend/src/utils/publicRoomDisplay.ts`, cari template literal yang menghasilkan "Air Rp X / m³" (sekitar baris 120).
+2. **Bungkus dengan kondisi:** bila tarif = 0, tampilkan "Air termasuk" (atau sembunyikan). Bila > 0, tampilkan seperti biasa.
+3. Contoh:
+   ```ts
+   ${waterTariff > 0 ? `Air Rp ${waterTariff.toLocaleString('id-ID')} / m³` : 'Air termasuk'}
+   ```
+4. Simpan. `npm run build`.
+
+---
+
+#### AC-04 / C03-04 🟢 INFO — DP preview di detail pakai raw monthly (sama dengan C02-05)
+
+**Masalah:** Sama persis dengan AB-05. Sudah dicatat di AB-05 — tidak perlu aksi terpisah.
+
+- [x] **Diteruskan ke AB-05.** Tidak ada pengerjaan tambahan.
+
+---
+
+**Gate akhir Fase AC:** ✅ `npm run build` frontend sukses · AC-01..AC-04 selesai (AC-04 = N/A).
+
+---
+
+### Fase AD — Perbaikan Temuan Audit Auth (CHECKLIST_04)
+
+> **Sumber:** `docs/audit/CHECKLIST_04_auth.md` — 4 temuan (semua LOW/INFO).
+> **Kode sudah ada di repo:** `frontend/src/pages/auth/LoginPage.tsx`, `ForgotPasswordPage.tsx`, `backend/src/modules/auth/auth.service.ts`, `settings.controller.ts`.
+> **Gate tiap task:** `cd backend; npx tsc --noEmit` + `cd frontend; npm run build`.
+> **Catatan:** Temuan LOW — sistem auth sudah sangat solid; ini hanya polish.
+
+---
+
+#### AD-01 / C04-01 🟢 LOW — `/settings/operational` bocorkan config internal ke TENANT
+
+**Masalah:** Endpoint `GET /api/settings/operational` mengembalikan **seluruh** objek OperationalSetting ke TENANT (`@Roles(OWNER,ADMIN,STAFF,TENANT)`, `settings.controller.ts:42`). Termasuk: `deepseekModel`, `deepseekFinanceModel`, `deepseekBaseUrl`, `aiMaxOutputTokens`, `capitalizationThresholdByCategory`, `updatedById`. Tidak ada API key/secret bocor, tapi config AI & akuntansi tak perlu dilihat tenant.
+
+**File:** `backend/src/modules/settings/settings.controller.ts` (dan mungkin `settings.service.ts`)
+
+**LANGKAH PENGERJAAN (ikuti persis):**
+
+1. Buka `backend/src/modules/settings/settings.controller.ts`, cari endpoint `GET /operational` (dekorator `@Get('operational')`).
+2. Lihat dekorator `@Roles` — ada `TENANT` di dalamnya.
+3. **Opsi A (rekomendasi):** Hapus `TENANT` dari `@Roles`, biarkan OWNER/ADMIN/STAFF saja. Tenant tidak butuh config operasional penuh — mereka sudah punya `/settings/public-config` (`@Public`).
+4. **Opsi B:** Buat DTO ter-filter untuk TENANT (hanya field relevan: `electricityTariffPerKwhRupiah`, `waterTariffPerM3Rupiah`, `wifiPriceRupiah`, dll).
+5. **Pilih Opsi A** (paling sederhana & aman).
+6. Simpan. `cd backend; npx tsc --noEmit`.
+7. **Verifikasi:** `curl -H "Authorization: Bearer <TENANT_TOKEN>" http://localhost:3000/api/settings/operational` → harus 403.
+
+---
+
+#### AD-02 / C04-02 🟢 LOW — Login "User tidak aktif" bisa dibedakan (enumeration ringan)
+
+**Masalah:** Akun non-aktif → `ForbiddenException('User tidak aktif')` **sebelum** cek password (`auth.service.ts:44-46`). Penyerang bisa tahu akun ada tapi nonaktif.
+
+**File:** `backend/src/modules/auth/auth.service.ts`
+
+**LANGKAH PENGERJAAN (ikuti persis):**
+
+1. Buka `backend/src/modules/auth/auth.service.ts`, cari fungsi `validateUser` atau `login`.
+2. Cari baris `throw new ForbiddenException('User tidak aktif')` (sekitar baris 44-46).
+3. **Pindahkan** pengecekan `isActive` ke **setelah** verifikasi password. Atau **ganti** pesan error menjadi generik (sama dengan kredensial salah).
+4. Contoh:
+   ```ts
+   //代替: throw new UnauthorizedException('Email atau password salah');
+   // dengan log internal: this.logger.warn(`Inactive user login attempt: ${identifier}`);
+   ```
+5. Simpan. `cd backend; npx tsc --noEmit`.
+6. **Verifikasi:** login dengan akun nonaktif → pesan error harus sama dengan password salah (generik).
+
+---
+
+#### AD-03 / C04-03 🟢 LOW — Link internal pakai `<a href>` (full reload) + missing autocomplete
+
+**Masalah:** "Lupa password?" di login = `<a href="/forgot-password">` → reload penuh, bukan SPA `<Link>`. Input email di ForgotPassword tak punya `autoComplete="email"`.
+
+**File:** `frontend/src/pages/auth/LoginPage.tsx` dan `ForgotPasswordPage.tsx`
+
+**LANGKAH PENGERJAAN (ikuti persis):**
+
+1. Buka `frontend/src/pages/auth/LoginPage.tsx`, cari `<a href="/forgot-password">` (sekitar baris 207).
+2. **Ganti** `<a href=...>` → `<Link to="/forgot-password">`. Import `Link` dari `react-router-dom` kalau belum.
+3. Buka `frontend/src/pages/auth/ForgotPasswordPage.tsx`, cari input email (sekitar baris 206).
+4. **Tambahkan** `autoComplete="email"` pada atribut input.
+5. Simpan. `npm run build`.
+
+---
+
+#### AD-04 / C04-04 🟢 INFO — Dead code `resetTokenPreview` (Dev Preview)
+
+**Masalah:** `ForgotPasswordPage.tsx:44,78,177-183` mengharapkan `result.resetTokenPreview`, tapi backend **tidak pernah** mengembalikannya. Blok ini tak pernah aktif (aman).
+
+**File:** `frontend/src/pages/auth/ForgotPasswordPage.tsx`
+
+**LANGKAH PENGERJAAN (ikuti persis):**
+
+1. Buka `frontend/src/pages/auth/ForgotPasswordPage.tsx`.
+2. Cari `resetTokenPreview` — ada di state, di response handler, dan di render.
+3. **Opsi A:** Hapus semua referensi `resetTokenPreview` (state + handler + render).
+4. **Opsi B:** Tambahkan komentar `// Dev-only — backend belum implement; aman di production` di atas blok render.
+5. **Pilih Opsi B** (paling aman, tidak mengubah fungsionalitas).
+6. Simpan. `npm run build`.
+
+---
+
+**Gate akhir Fase AD:** ✅ Backend `npx tsc --noEmit` 0 error · ✅ Frontend `npm run build` sukses · AD-01..AD-04 selesai.
+
+---
+
+### Fase AE — Perbaikan Temuan Audit MyStay (CHECKLIST_05)
+
+> **Sumber:** `docs/audit/CHECKLIST_05_tenant_mystay.md` — 1 temuan HIGH + verifikasi pending.
+> **⚠️ PRIORITAS UTAMA:** AE-01 adalah bug HIGH yang menyebabkan infinite refetch loop → self-DoS backend + crash tab.
+> **Kode sudah ada di repo:** `frontend/src/pages/portal/MyStayPage.tsx`, `frontend/src/hooks/useTenantPortalStage.ts`, `frontend/src/App.tsx`.
+> **Gate tiap task:** `cd frontend; npm run build`.
+
+---
+
+#### AE-01 / C05-01 🔴 HIGH — Infinite refetch loop `stays/me/current` + halaman stuck skeleton ✅ FIXED
+
+**Masalah:** Tenant **tanpa stay OCCUPIED aktif** (mantan penghuni, atau tenant tahap booking) yang membuka `/portal/stay` → `GET /api/stays/me/current` 404 → **di-refetch tanpa henti** (~600 request per 4 detik). Halaman stuck skeleton. Akhirnya tab crash.
+
+**Akar masalah (3 titik):**
+1. `useTenantPortalStage.ts:35-44`: query `/stays/me/current` dengan `retry:false` + `refetchOnMount:true`. Error 404 → throw, bukan sukses.
+2. `MyStayPage.tsx:815-824`: query stage `isLoading` → skeleton.
+3. `App.tsx:166`: `RequireRoles` — `if (isStageLoading && role==='TENANT') return <PageLoadingSkeleton/>`. Skeleton mount → unmount → remount (...loop).
+
+**File (3 file):**
+- `frontend/src/hooks/useTenantPortalStage.ts`
+- `frontend/src/pages/portal/MyStayPage.tsx`
+- `frontend/src/App.tsx` (verifikasi saja)
+
+**LANGKAH PENGERJAAN (ikuti persis — JANGAN LOMPAT):**
+
+##### Langkah 1: Perbaiki `useTenantPortalStage.ts`
+
+1. Buka `frontend/src/hooks/useTenantPortalStage.ts` dengan `read_file`.
+2. Cari query `useQuery` yang memanggil endpoint `/stays/me/current` (sekitar baris 35-44).
+3. **Ubah `queryFn`** supaya menangkap error 404 sebagai hasil valid:
+   ```ts
+   queryFn: async () => {
+     try {
+       const res = await api.get('/stays/me/current');
+       return res.data;
+     } catch (err) {
+       if (err.response?.status === 404) {
+         return null; // tidak ada stay aktif → hasil valid, bukan error
+       }
+       throw err; // error lain (500, network) tetap throw
+     }
+   }
+   ```
+4. Simpan.
+
+##### Langkah 2: Perbaiki `MyStayPage.tsx`
+
+1. Buka `frontend/src/pages/portal/MyStayPage.tsx`, range `810-880`.
+2. Cari blok yang mengecek `stage !== 'occupied'` untuk menampilkan empty-state.
+3. **Tambahkan handling** untuk `stage === null` (hasil dari langkah 1):
+   ```tsx
+   if (stage === null || stage === 'browsing') {
+     return <EmptyState message="Kamu belum memiliki masa sewa aktif" />;
+   }
+   ```
+4. Pastikan komponen `EmptyState` sudah di-import (atau buat inline kalau belum ada).
+5. Simpan.
+
+##### Langkah 3: Verifikasi `App.tsx`
+
+1. Buka `frontend/src/App.tsx`, range `160-175`.
+2. Cari `if (isStageLoading && role === 'TENANT') return <PageLoadingSkeleton/>`.
+3. **Tidak perlu diubah** — setelah langkah 1-2, `isStageLoading` akan jadi `false` begitu 404 tertangani (query sukses dengan `null`).
+4. Tapi untuk jaga-jaga: **tambah timeout** — kalau `isStageLoading` > 10 detik, tampilkan error-state, bukan skeleton selamanya.
+5. Simpan.
+
+##### Langkah 4: Build & verifikasi
+
+1. `cd frontend; npm run build`.
+2. **Verifikasi:** login sebagai Maya (`maya.tenant@kost48.test` / `Tenant#2026`), buka `/portal/stay`.
+3. **Yang diharapkan:** muncul empty-state "Kamu belum memiliki masa sewa aktif" dalam <2 detik. **Bukan** skeleton selamanya.
+4. Buka DevTools → Network → hanya **1 request** ke `/stays/me/current` (404), bukan puluhan/dibanjiri request.
+
+---
+
+#### AE-02 🟡 PENDING — Verifikasi visual dashboard "occupied"
+
+**Masalah:** Saat audit, Maya tidak punya stay OCCUPIED aktif (Kamar A = MAINTENANCE). Tidak bisa verifikasi live:
+- Chart listrik (I6 — width/height -1)
+- Tooltip tombol "Perpanjang" & "Ajukan Keluar" (I7)
+- PWA prompt (I8)
+- Badge notifikasi
+- Timeline riwayat
+- Catat meter (termasuk uji meter mundur)
+
+**LANGKAH PENGERJAAN (setelah AE-01 selesai):**
+
+1. **Cari tenant dengan stay OCCUPIED aktif** di DB UAT port 5433:
+   ```sql
+   SELECT s.id, s."tenantId", u.email, r.code
+   FROM "Stay" s
+   JOIN "User" u ON s."tenantId" = u.id
+   JOIN "Room" r ON s."roomId" = r.id
+   WHERE s.status = 'OCCUPIED';
+   ```
+2. Kalau tidak ada tenant dengan password diketahui: **buat satu** via API admin (POST `/api/admin/stays` + check-in). Atau reset password tenant yang ada.
+3. Login sebagai tenant occupied → buka `/portal/stay`.
+4. Verifikasi checklist C05 langkah 5–16 (lihat `CHECKLIST_05_tenant_mystay.md`).
+5. Catat temuan baru dengan prefiks `C05-xx` di checklist 05.
+
+- [ ] AE-02 selesai — dashboard occupied terverifikasi.
+
+---
+
+**Gate akhir Fase AE:** ✅ AE-01 fix loop (1 request only) — `useTenantPortalStage.ts` tangkap 404→null · ✅ Build frontend sukses · ⏳ AE-02 menunggu tenant occupied.

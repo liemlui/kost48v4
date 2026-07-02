@@ -295,7 +295,7 @@ export default function PublicRoomDetailPage() {
         )}
 
         {query.isLoading ? <div className="py-5 text-center"><Spinner animation="border" /></div> : null}
-        {query.isError ? <Alert variant="warning">Kamar ini sedang penuh / tidak tersedia saat ini. <a href="/katalog">Lihat katalog kamar</a> atau <a href="https://wa.me/6281234567890">hubungi admin via WhatsApp</a>.</Alert> : null}
+        {query.isError ? <Alert variant="warning">Kamar tidak ditemukan / tidak tersedia saat ini. <Link to="/rooms">Lihat katalog kamar</Link> atau <a href="https://wa.me/6285648887628">hubungi admin via WhatsApp</a>.</Alert> : null}
         {!query.isLoading && !query.isError && !room ? <EmptyState icon="🛏️" title="Kamar tidak tersedia" description="Kamar ini mungkin sedang diisi. Lihat katalog kamar atau hubungi admin via WhatsApp." /> : null}
 
         {room ? (
@@ -323,7 +323,7 @@ export default function PublicRoomDetailPage() {
                         <DetailFeatureCard {...getFeature(room, 'bathroom')} />
                         <DetailFeatureCard {...getFeature(room, 'cooling')} />
                         <DetailFeatureCard {...getFeature(room, 'size')} />
-                        <DetailFeatureCard icon="🛡️" label="Dana titipan" value={room.defaultDepositRupiah ? `Rp ${Number(room.defaultDepositRupiah).toLocaleString('id-ID')}` : 'Tanya admin'} />
+                        <DetailFeatureCard icon="🛡️" label="Deposit jaminan" value={room.defaultDepositRupiah ? `Rp ${Number(room.defaultDepositRupiah).toLocaleString('id-ID')}` : 'Tanya admin'} />
                       </div>
 
                       <div className="room-detail-amenities" aria-label="Fasilitas kamar">
@@ -336,6 +336,7 @@ export default function PublicRoomDetailPage() {
 
                       {/* R-04: DP dan deposit eksplisit */}
                       {(() => {
+                        // INFO: preview DP pakai tarif bulanan (raw monthly); form booking pakai term+surcharge (akurat)
                         const monthlyRent = getTermRent(room, 'MONTHLY');
                         const dpAmount = monthlyRent > 0 ? Math.round(monthlyRent * 0.3) : 0;
                         const depositAmount = Number(room.defaultDepositRupiah ?? 0);
@@ -406,7 +407,7 @@ export default function PublicRoomDetailPage() {
                       </Table>
 
                       <Alert variant="light" className="room-detail-disclaimer mt-3 mb-0">
-                        Estimasi awal: sewa pertama <strong><CurrencyDisplay amount={initialCost.rent} showZero={false} /></strong> + dana titipan <strong><CurrencyDisplay amount={initialCost.deposit} showZero={false} /></strong> = <strong><CurrencyDisplay amount={initialCost.total} showZero={false} /></strong>.
+                        Estimasi awal: sewa pertama <strong><CurrencyDisplay amount={initialCost.rent} showZero={false} /></strong> + deposit jaminan <strong><CurrencyDisplay amount={initialCost.deposit} showZero={false} /></strong> = <strong><CurrencyDisplay amount={initialCost.total} showZero={false} /></strong>.
                       </Alert>
                     </Card.Body>
                   </Card>
@@ -469,7 +470,7 @@ export default function PublicRoomDetailPage() {
 
                     <div className="room-detail-booking-summary">
                       <div><span>Sewa pertama</span><strong><CurrencyDisplay amount={initialCost.rent} showZero={false} /></strong></div>
-                      <div><span>Dana titipan</span><strong><CurrencyDisplay amount={initialCost.deposit} showZero={false} /></strong></div>
+                      <div><span>Deposit jaminan</span><strong><CurrencyDisplay amount={initialCost.deposit} showZero={false} /></strong></div>
                       <div><span>Total awal</span><strong><CurrencyDisplay amount={initialCost.total} showZero={false} /></strong></div>
                       <div><span>Kamar mandi</span><strong>{getBathroomType(room)}</strong></div>
                       <div><span>Pendingin</span><strong>{getCoolingType(room)}</strong></div>

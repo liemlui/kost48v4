@@ -16,6 +16,14 @@ export interface PublicSocialProof {
   reviews: PublicSocialProofReview[];
 }
 
+export interface PublicRoomSummary {
+  bookable: number;
+  occupied: number;
+  maintenance: number;
+  reserved: number;
+  total: number;
+}
+
 export interface CleanlinessRankEntry {
   roomId: number;
   code: string;
@@ -33,6 +41,11 @@ export interface CleanlinessRanking {
 
 export async function fetchPublicSocialProof(): Promise<PublicSocialProof> {
   const response = await apiClient.get('/public/rooms/social-proof');
+  return response.data.data;
+}
+
+export async function fetchPublicRoomSummary(): Promise<PublicRoomSummary> {
+  const response = await apiClient.get('/public/rooms/summary');
   return response.data.data;
 }
 

@@ -12,11 +12,18 @@ export type Kost48OfficialFaq = {
   category: 'Lokasi' | 'Tarif' | 'Fasilitas' | 'Aturan' | 'Layanan';
 };
 
+const DEFAULT_WA = (import.meta.env.VITE_PUBLIC_ADMIN_WHATSAPP ?? '6285648887628').replace(/\D/g, '');
+
+export function getWhatsappUrl(overrideWa?: string): string {
+  const wa = (overrideWa ?? DEFAULT_WA).replace(/\D/g, '');
+  return `https://wa.me/${wa}`;
+}
+
 export const officialKost48Location = {
   address: 'Jalan Hikmah V No. 48, Surabaya Barat',
   nearby: 'Dekat Pakuwon Mall / PTC, sekitar 7 menit berjalan kaki.',
   mapsUrl: 'https://maps.app.goo.gl/j2cZQzjZP87t6hja9',
-  whatsappUrl: 'https://wa.me/6285648887628',
+  whatsappUrl: getWhatsappUrl(),  // D-25: owner-settable via Settings → adminWhatsappNumber
   googleReviewUrl: 'https://g.page/r/CQoPM7OnWlRoEAE/review',
 };
 

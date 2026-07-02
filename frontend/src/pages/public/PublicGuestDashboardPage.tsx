@@ -3,8 +3,9 @@ import { useQuery } from '@tanstack/react-query';
 import { Accordion, Container, Modal, Spinner } from 'react-bootstrap';
 import { Link, Navigate, useLocation } from 'react-router-dom';
 import { listPublicRooms } from '../../api/bookings';
-import { fetchPublicSocialProof } from '../../api/marketing';
+import { fetchPublicRoomSummary, fetchPublicSocialProof } from '../../api/marketing';
 import { fetchPublicConfig } from '../../api/settings';
+import type { PublicConfig } from '../../api/settings';
 import { listFacilityImages } from '../../api/facilityImages';
 import { listMarketingAssets } from '../../api/marketingAssets';
 import Kost48LogoMark from '../../components/common/Kost48LogoMark';
@@ -193,6 +194,12 @@ export default function PublicGuestDashboardPage() {
     staleTime: 60_000,
   });
 
+  const roomSummaryQuery = useQuery({
+    queryKey: ['public-room-summary'],
+    queryFn: fetchPublicRoomSummary,
+    staleTime: 60_000,
+  });
+
   const socialProofQuery = useQuery({
     queryKey: ['public-social-proof'],
     queryFn: fetchPublicSocialProof,
@@ -204,14 +211,28 @@ export default function PublicGuestDashboardPage() {
     queryFn: fetchPublicConfig,
     staleTime: 30 * 60_000,
   });
-  const freeKwh = publicConfigQuery.data?.freeElectricityKwhPerMonth ?? 30;
+  const cfg = publicConfigQuery.data as PublicConfig | undefined;
+  const freeKwh = cfg?.freeElectricityKwhPerMonth ?? 30;
+  const electricityTariff = cfg?.electricityTariffPerKwhRupiah ?? 2500;
+  const wifiPrice = cfg?.wifiRupiah ?? 50000;
+  const petDeposit = cfg?.petDepositRupiah ?? 100000;
 
   const rooms = roomsQuery.data?.items ?? [];
-  const stats = useMemo(() => ({
+  const catalogStats = useMemo(() => ({
     bookable: rooms.filter((r) => isPublicRoomBookable(r) && String(r.status ?? '').toUpperCase() !== 'MAINTENANCE').length,
     occupied: rooms.filter((r) => String(r.status ?? '').toUpperCase() === 'OCCUPIED').length,
     total: rooms.length,
   }), [rooms]);
+  const stats = useMemo(() => {
+    const summary = roomSummaryQuery.data;
+    if (!summary) return catalogStats;
+    return {
+      bookable: summary.bookable,
+      occupied: summary.occupied,
+      total: summary.total,
+    };
+  }, [catalogStats, roomSummaryQuery.data]);
+  const isStatsLoading = roomSummaryQuery.isLoading && !roomSummaryQuery.data;
 
   // Z-17: Sync displayStats immediately when data loads (not just on scroll)
   useEffect(() => {
@@ -222,7 +243,7 @@ export default function PublicGuestDashboardPage() {
   }, [stats]);
 
   useEffect(() => {
-    if (!statsVisible || roomsQuery.isLoading || countUpStarted.current) return undefined;
+    if (!statsVisible || isStatsLoading || countUpStarted.current) return undefined;
     // Z-17: already synced by displayStats effect — skip count-up animation to avoid flash
     if (displayStats.total > 0) return undefined;
     countUpStarted.current = true;
@@ -237,7 +258,7 @@ export default function PublicGuestDashboardPage() {
       if (s >= steps) { clearInterval(id); setDisplayStats({ bookable, occupied, total, percent: actualPercent }); }
     }, Math.round(820 / steps));
     return () => clearInterval(id);
-  }, [statsVisible, stats, roomsQuery.isLoading]);
+  }, [statsVisible, stats, isStatsLoading]);
 
   const monthlyRates = useMemo(
     () => rooms.map((room) => getBestPublicRoomRate(room, 'MONTHLY')).filter((rate) => rate > 0),
@@ -273,12 +294,19 @@ export default function PublicGuestDashboardPage() {
 
   const faqItems = useMemo(() => {
     const base = showAllFaq ? [...HOME_FAQ_ITEMS, ...EXTRA_FAQ_ITEMS] : HOME_FAQ_ITEMS;
-    return base.map((item) =>
-      item.question === 'Bagaimana aturan listrik & air?'
-        ? { ...item, answer: item.answer.replace('jatah listrik gratis', `${freeKwh} kWh gratis`) }
-        : item,
-    );
-  }, [showAllFaq, freeKwh]);
+    return base.map((item) => {
+      let answer = item.answer;
+      if (item.question === 'Bagaimana sistem listrik?') {
+        answer = answer.replace('Jatah gratis 30 kWh/bulan', `Jatah gratis ${freeKwh} kWh/bulan`);
+        answer = answer.replace('Rp 2.500/kWh', `Rp ${electricityTariff.toLocaleString('id-ID')}/kWh`);
+      } else if (item.question === 'Apakah tersedia WiFi?') {
+        answer = answer.replace('Rp 50.000', `Rp ${wifiPrice.toLocaleString('id-ID')}`);
+      } else if (item.question === 'Apakah boleh membawa hewan peliharaan?') {
+        answer = answer.replace('Rp 100.000', `Rp ${petDeposit.toLocaleString('id-ID')}`);
+      }
+      return { ...item, answer };
+    });
+  }, [showAllFaq, freeKwh, electricityTariff, wifiPrice, petDeposit]);
   const activeFacility = FACILITY_GROUPS.find((group) => group.id === activeFacilityTab) ?? FACILITY_GROUPS[0];
   const ratingAvailable = Boolean((socialProofQuery.data?.reviewCount ?? 0) > 0 && (socialProofQuery.data?.averageRating ?? 0) > 0);
   const occupantCount = socialProofQuery.data?.occupantCount ?? stats.occupied;
@@ -372,23 +400,23 @@ export default function PublicGuestDashboardPage() {
               </p>
               <div className="gx-avail-live-badge" aria-live="polite">
                 <span className="gx-avail-live-dot" aria-hidden="true" />
-                {roomsQuery.isLoading ? 'Memuat ketersediaan…' : `${stats.bookable} kamar tersedia sekarang`}
+                {isStatsLoading ? 'Memuat ketersediaan…' : `${stats.bookable} kamar tersedia sekarang`}
               </div>
               <div className="gx-avail-stats">
                 <div className="gx-stat gx-stat-green">
-                  <span className="gx-stat-num">{roomsQuery.isLoading ? '...' : displayStats.bookable}</span>
+                  <span className="gx-stat-num">{isStatsLoading ? '...' : displayStats.bookable}</span>
                   <span className="gx-stat-label">Kamar tersedia</span>
                 </div>
                 <div className="gx-stat gx-stat-amber">
-                  <span className="gx-stat-num">{roomsQuery.isLoading ? '...' : displayStats.occupied}</span>
+                  <span className="gx-stat-num">{isStatsLoading ? '...' : displayStats.occupied}</span>
                   <span className="gx-stat-label">Terisi</span>
                 </div>
                 <div className="gx-stat gx-stat-gray">
-                  <span className="gx-stat-num">{roomsQuery.isLoading ? '...' : displayStats.total}</span>
+                  <span className="gx-stat-num">{isStatsLoading ? '...' : displayStats.total}</span>
                   <span className="gx-stat-label">Total kamar</span>
                 </div>
               </div>
-              {!roomsQuery.isLoading && stats.total > 0 && (
+              {!isStatsLoading && stats.total > 0 && (
                 <div className="gx-avail-progress-wrap">
                   <div className="gx-avail-progress-meta">
                     <span>Tingkat hunian saat ini</span>
@@ -782,7 +810,7 @@ export default function PublicGuestDashboardPage() {
       </section>
 
       <Link to="/rooms" className="gx-mobile-booking" aria-label="Cek kamar tersedia">
-        <strong>{roomsQuery.isLoading ? 'Cek kamar' : `${stats.bookable} kamar tersedia`}</strong>
+        <strong>{isStatsLoading ? 'Cek kamar' : `${stats.bookable} kamar tersedia`}</strong>
         <span><span aria-hidden="true">🔍</span> Cek</span>
       </Link>
 

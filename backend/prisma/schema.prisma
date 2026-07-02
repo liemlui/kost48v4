@@ -2115,6 +2115,8 @@ model OperationalSetting {
   capitalizationThresholdByCategory String? // JSON: {"SALARY":500000,...}
   // ── Fitur tenant toggle ──────────────────────────────────────────────────
   tenantLoyaltyEnabled          Boolean  @default(false)  // Loyalty/reward tenant (poin, leaderboard, katalog reward)
+  // ── Admin WhatsApp (owner-settable — D-25) ──────────────────────────────
+  adminWhatsappNumber           String   @default("6285648887628")
   // ──────────────────────────────────────────────────────────────────────────
   updatedAt                     DateTime @updatedAt
   updatedById                   Int?

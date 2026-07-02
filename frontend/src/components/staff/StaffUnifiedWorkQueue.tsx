@@ -403,7 +403,7 @@ export default function StaffUnifiedWorkQueue({ routines, tickets, isLoading, on
                     <span className="staff-done-note">Menunggu cek admin</span>
                     <small className="staff-waiting-check-hint">Admin sedang meninjau. Tunggu konfirmasi sebelum dikerjakan ulang.</small>
                     <a
-                      href={`https://wa.me/6285648887628?text=${encodeURIComponent(`Halo Admin, saya mau tanya status tugas: ${item.title}.`)}`}
+                      href={`https://wa.me/${(import.meta.env.VITE_PUBLIC_ADMIN_WHATSAPP ?? '6285648887628').replace(/\D/g, '')}?text=${encodeURIComponent(`Halo Admin, saya mau tanya status tugas: ${item.title}.`)}`}
                       target="_blank"
                       rel="noreferrer"
                       className="btn btn-outline-secondary btn-sm staff-waiting-ask-btn"

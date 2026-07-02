@@ -7,7 +7,8 @@ import Kost48DecorGallery from '../../components/common/Kost48DecorGallery';
 import { officialKost48Highlights, officialKost48Location } from '../../data/officialKost48Content';
 
 const COOLDOWN_SECONDS = 60;
-const ADMIN_WA = '6285648887628';
+// D-25: dari env var, fallback ke nomor default → owner bisa ganti via Settings
+const ADMIN_WA = (import.meta.env.VITE_PUBLIC_ADMIN_WHATSAPP ?? '6285648887628').replace(/\D/g, '');
 
 type ResetMode = 'email' | 'phone';
 
@@ -173,6 +174,7 @@ export default function ForgotPasswordPage() {
                   Jika akun dengan email <strong>{identifier}</strong> ditemukan, tautan reset password telah dikirim. Cek inbox atau folder spam Anda.
                 </p>
 
+                {/* Dev-only: backend belum mengembalikan resetTokenPreview — blok ini aman di production */}
                 {previewToken ? (
                   <div className="login-helper-card text-start mb-3">
                     <div className="fw-semibold small mb-1">Token Reset (Dev Preview)</div>
@@ -207,6 +209,7 @@ export default function ForgotPasswordPage() {
                       onChange={(e) => { setIdentifier(e.target.value); if (fieldError) setFieldError(null); }}
                       type="text"
                       placeholder="contoh: nama@email.com"
+                      autoComplete="email"
                       autoCapitalize="none"
                       autoCorrect="off"
                       inputMode="email"

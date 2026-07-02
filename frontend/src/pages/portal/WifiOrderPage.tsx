@@ -5,7 +5,8 @@ import PageHeader from '../../components/common/PageHeader';
 import CurrencyDisplay from '../../components/common/CurrencyDisplay';
 import { listActiveAdditionalServices, createServiceInterest, listMyServiceInterests, type AdditionalService } from '../../api/additionalServices';
 
-const KOST_WHATSAPP_NUMBER = '6285648887628';
+// D-25: nomor WA owner-settable via Settings (fallback env var → default)
+const KOST_WHATSAPP_NUMBER = (import.meta.env.VITE_PUBLIC_ADMIN_WHATSAPP ?? '6285648887628').replace(/\D/g, '');
 const WHATSAPP_URL = `https://wa.me/${KOST_WHATSAPP_NUMBER}`;
 const KOST_WHATSAPP_DISPLAY = `0${KOST_WHATSAPP_NUMBER.slice(2)}`.replace(/(\d{4})(\d{4})(\d+)/, '$1-$2-$3');
 

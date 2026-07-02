@@ -24,7 +24,7 @@ export default function StayQuickActions(props: Props) {
   const actions: QuickAction[] = [
     { key: 'meter', icon: '⚡', label: 'Catat Meter', onClick: props.onCatatMeter, disabled: !props.canRecordMeter, title: props.canRecordMeter ? undefined : 'Pencatatan dibuka H-10 sebelum akhir kontrak' },
     { key: 'renew', icon: '🔄', label: 'Perpanjang', onClick: props.onRenew, disabled: !props.canRenew, title: props.renewDisabledReason },
-    { key: 'checkout', icon: '🚪', label: 'Ajukan Keluar', onClick: props.onCheckout, disabled: !props.canCheckout },
+    { key: 'checkout', icon: '🚪', label: 'Ajukan Keluar', onClick: props.onCheckout, disabled: !props.canCheckout, title: !props.canCheckout ? 'Selesaikan tagihan aktif dulu sebelum mengajukan keluar.' : undefined },
     { key: 'wa', icon: '💬', label: 'Hubungi Admin', href: officialKost48Location.whatsappUrl },
   ];
 

@@ -25,7 +25,7 @@ const PUBLIC_ROOM_SELECT = {
   roomType: true,
   roomSize: true,
   images: true,
-  notes: true,
+  notes: false,  // C01-03: jangan ekspos catatan internal ke publik
   dailyRateRupiah: true,
   weeklyRateRupiah: true,
   biWeeklyRateRupiah: true,
@@ -37,6 +37,14 @@ const PUBLIC_ROOM_SELECT = {
 } satisfies Prisma.RoomSelect;
 
 type PublicRoomRecord = Prisma.RoomGetPayload<{ select: typeof PUBLIC_ROOM_SELECT }>;
+
+export interface PublicRoomSummary {
+  bookable: number;
+  occupied: number;
+  maintenance: number;
+  reserved: number;
+  total: number;
+}
 
 
 @Injectable()
@@ -50,7 +58,6 @@ export class MarketingPublicRoomsService {
       this.prisma.staffReview.findMany({
         where: {
           status: 'VISIBLE' as any,
-          rating: { gte: 4 },
         },
         select: {
           rating: true,
@@ -62,7 +69,7 @@ export class MarketingPublicRoomsService {
         take: 12,
       }),
       this.prisma.staffReview.aggregate({
-        where: { status: 'VISIBLE' as any, rating: { gte: 4 } },
+        where: { status: 'VISIBLE' as any },
         _avg: { rating: true },
         _count: { id: true },
       }),
@@ -71,13 +78,13 @@ export class MarketingPublicRoomsService {
         select: { tenantId: true },
       }),
       this.prisma.externalReview.findMany({
-        where: { isVisible: true, rating: { gte: 4 } },
+        where: { isVisible: true },
         select: { rating: true, comment: true, authorName: true, source: true, reviewedAt: true },
         orderBy: { reviewedAt: 'desc' },
         take: 20,
       }),
       this.prisma.externalReview.aggregate({
-        where: { isVisible: true, rating: { gte: 4 } },
+        where: { isVisible: true },
         _avg: { rating: true },
         _count: { id: true },
       }),
@@ -122,6 +129,47 @@ export class MarketingPublicRoomsService {
       averageRating,
       reviewCount: totalCount,
       reviews: allReviews,
+    };
+  }
+
+  async getPublicRoomSummary(): Promise<PublicRoomSummary> {
+    const rows = await this.prisma.room.groupBy({
+      by: ['status'],
+      where: {
+        isActive: true,
+        monthlyRateRupiah: { gt: 0 },
+        status: {
+          in: [
+            RoomStatus.AVAILABLE as any,
+            RoomStatus.RESERVED as any,
+            RoomStatus.OCCUPIED as any,
+            RoomStatus.MAINTENANCE as any,
+          ],
+        },
+      },
+      _count: { _all: true },
+    });
+
+    const countByStatus = new Map(rows.map((row) => [String(row.status), row._count._all]));
+    const bookableMaintenance = await this.prisma.room.count({
+      where: {
+        isActive: true,
+        monthlyRateRupiah: { gt: 0 },
+        status: RoomStatus.MAINTENANCE as any,
+        allowBookingWhileCleaning: true,
+      },
+    });
+    const available = countByStatus.get(RoomStatus.AVAILABLE) ?? 0;
+    const maintenance = countByStatus.get(RoomStatus.MAINTENANCE) ?? 0;
+    const reserved = countByStatus.get(RoomStatus.RESERVED) ?? 0;
+    const occupied = countByStatus.get(RoomStatus.OCCUPIED) ?? 0;
+
+    return {
+      bookable: available + bookableMaintenance,
+      occupied,
+      maintenance,
+      reserved,
+      total: available + maintenance + reserved + occupied,
     };
   }
 
@@ -473,13 +521,13 @@ export class MarketingPublicRoomsService {
         roomType: room.roomType ?? 'REGULAR',
         hasAc: room.hasAc ?? false,
         monthlyRateRupiah: room.monthlyRateRupiah ?? 0,
-        currentTenantName,
+        currentTenantName: null,  // C01-02: jangan bocorkan PII ke publik
         checkInDate,
         plannedCheckOutDate,
         remainingDays,
         hasPendingRenew,
         renewStatus,
-        dpTenantName,
+        dpTenantName: null,  // C01-02: jangan bocorkan PII ke publik
         dpCheckInDate,
         days,
       });
@@ -558,7 +606,13 @@ export class MarketingPublicRoomsService {
       },
     });
     return rooms
-      .filter((room) => computeFacilityGap(room as unknown as FacilityGapInput).hasGap)
+      .filter((room) => {
+        const hasInventorySignal =
+          room.roomItems.length > 0 ||
+          room.facilities.some((facility) => typeof facility.inventoryItemId === 'number');
+        if (!hasInventorySignal) return false;
+        return computeFacilityGap(room as unknown as FacilityGapInput).hasGap;
+      })
       .map((room) => room.id);
   }
 
@@ -661,7 +715,7 @@ export class MarketingPublicRoomsService {
       projectedAvailableDate: projected?.date ?? null,
       projectedAvailableReason: projected?.reason ?? null,
       images: this.resolveRoomMarketingImages(room),
-      notes: room.notes,
+      notes: null,  // C01-03: catatan internal tidak untuk publik
       pricing: {
         dailyRateRupiah: room.dailyRateRupiah,
         weeklyRateRupiah: room.weeklyRateRupiah,

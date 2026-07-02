@@ -117,7 +117,7 @@ export function getPublicRoomUtilityCopy(room: PublicRoom, pricingTerm: PricingT
   return {
     included,
     title: "Listrik & air pakai meter",
-    description: `Listrik Rp ${electricity.toLocaleString("id-ID")} / kWh · Air Rp ${water.toLocaleString("id-ID")} / m³.`,
+    description: `Listrik Rp ${electricity.toLocaleString("id-ID")} / kWh · ${water > 0 ? `Air Rp ${water.toLocaleString("id-ID")} / m³` : 'Air termasuk'}.`,
   };
 }
 
@@ -167,7 +167,7 @@ export function getPublicRoomAvailabilityDisplay(room: PublicRoom): PublicRoomAv
 
   if (status === "RESERVED") {
     return {
-      label: "Kosong",
+      label: "Dipesan",
       tone: "is-limited",
       shortCopy: "Kamar sudah dikunci tenant — pilih kamar lain atau hubungi admin.",
       detailCopy: "Kamar sudah dikunci untuk tenant yang sudah membayar (DP atau lunas). Belum bisa dibooking untuk tenant baru. Hubungi admin untuk info ketersediaan.",

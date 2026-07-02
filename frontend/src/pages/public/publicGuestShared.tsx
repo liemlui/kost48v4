@@ -133,7 +133,7 @@ export const HOME_FAQ_ITEMS = [
   {
     category: 'Aturan',
     question: 'Satu kamar untuk berapa orang?',
-    answer: 'Maksimal 2 orang per kamar. Penghuni tambahan dikenakan biaya air & kebersihan sebesar 20% dari tarif kamar per kepala per bulan, dan wajib dikonfirmasi ke pengelola.',
+    answer: '2 orang gratis, maksimal 4 orang per kamar. Penghuni tambahan (ke-3 dan ke-4) dikenakan biaya sebesar 20% dari tarif kamar per kepala per bulan, dan wajib dikonfirmasi ke pengelola.',
   },
   {
     category: 'Fasilitas',

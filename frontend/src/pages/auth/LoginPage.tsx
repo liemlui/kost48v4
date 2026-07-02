@@ -204,7 +204,7 @@ export default function LoginPage() {
             </Form.Group>
 
             <div className="login-forgot-row">
-              <a href="/forgot-password">Lupa password?</a>
+              <Link to="/forgot-password">Lupa password?</Link>
             </div>
 
             <Button type="submit" disabled={submitting} className="w-100 login-submit-btn">

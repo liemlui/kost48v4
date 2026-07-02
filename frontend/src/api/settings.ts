@@ -53,6 +53,7 @@ export type PublicConfig = {
   petDepositRupiah: number;
   extraOccupantFeePercent: number;
   tenantLoyaltyEnabled: boolean;
+  adminWhatsappNumber: string;  // D-25: nomor WA admin, owner-settable
 };
 
 export async function fetchPublicConfig() {

@@ -30,16 +30,18 @@ export class SettingsController {
         petDepositRupiah: s.petDepositRupiah,
         extraOccupantFeePercent: s.extraOccupantFeePercent,
         tenantLoyaltyEnabled: s.tenantLoyaltyEnabled,
+        adminWhatsappNumber: s.adminWhatsappNumber,  // D-25
       },
     };
   }
 
-  /** Semua peran terautentikasi boleh BACA konstanta (tarif/jatah/toggle = info publik
-   *  internal, dipakai mis. modal catat meter mandiri tenant). PUT tetap owner-only. */
+  /** OWNER/ADMIN/STAFF boleh BACA konstanta operasional (tarif/jatah/toggle).
+   *  TENANT tidak perlu config penuh — pakai /settings/public-config (@Public).
+   *  PUT tetap owner-only. */
   @Get('operational')
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.OWNER, UserRole.ADMIN, UserRole.STAFF, UserRole.TENANT)
+  @Roles(UserRole.OWNER, UserRole.ADMIN, UserRole.STAFF)
   async getOperational() {
     return { message: 'Konstanta operasional', data: await this.settingsService.getOperational() };
   }
