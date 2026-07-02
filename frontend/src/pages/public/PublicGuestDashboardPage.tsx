@@ -223,6 +223,8 @@ export default function PublicGuestDashboardPage() {
 
   useEffect(() => {
     if (!statsVisible || roomsQuery.isLoading || countUpStarted.current) return undefined;
+    // Z-17: already synced by displayStats effect — skip count-up animation to avoid flash
+    if (displayStats.total > 0) return undefined;
     countUpStarted.current = true;
     const { bookable, occupied, total } = stats;
     const actualPercent = total > 0 ? Math.round((occupied / total) * 100) : 0;
