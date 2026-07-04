@@ -1,1 +1,0 @@
-type __ = number; // dummy
