@@ -40,6 +40,10 @@ export class TicketsService {
     private readonly loyalty: LoyaltyService,
   ) {}
 
+  // ═══════════════════════════════════════════════════════════
+  //  SECTION: Query Methods — findAll, findMine
+  // ═══════════════════════════════════════════════════════════
+
   async findAll(query: TicketsQueryDto, actor?: CurrentUserPayload) {
     const { page, limit, skip, take } = buildPagination(
       query.page,
@@ -194,6 +198,10 @@ export class TicketsService {
 
     return { items, meta: buildMeta(page, limit, totalItems) };
   }
+
+  // ═══════════════════════════════════════════════════════════
+  //  SECTION: Tip Confirmation & Acknowledge
+  // ═══════════════════════════════════════════════════════════
 
   async findMine(user: CurrentUserPayload, query: TicketsQueryDto) {
     const { page, limit, skip, take } = buildPagination(
@@ -423,6 +431,10 @@ export class TicketsService {
     return false;
   }
 
+  // ═══════════════════════════════════════════════════════════
+  //  SECTION: Ticket Creation — Backoffice & Portal
+  // ═══════════════════════════════════════════════════════════
+
   async createBackoffice(
     dto: CreateBackofficeTicketDto,
     actor: CurrentUserPayload,
@@ -531,6 +543,10 @@ export class TicketsService {
     return created;
   }
 
+  // ═══════════════════════════════════════════════════════════
+  //  SECTION: Assignment & Vendor Management
+  // ═══════════════════════════════════════════════════════════
+
   async assign(id: number, dto: AssignTicketDto, actor: CurrentUserPayload) {
     const ticket = await this.prisma.ticket.findUnique({ where: { id } });
     if (!ticket) throw new NotFoundException("Tiket tidak ditemukan");
@@ -605,6 +621,10 @@ export class TicketsService {
     });
     return updated;
   }
+
+  // ═══════════════════════════════════════════════════════════
+  //  SECTION: Ticket Lifecycle — Start, Done, Close
+  // ═══════════════════════════════════════════════════════════
 
   async start(id: number, actor: CurrentUserPayload) {
     const ticket = await this.prisma.ticket.findUnique({ where: { id } });
@@ -1015,6 +1035,10 @@ export class TicketsService {
     return updated;
   }
 
+  // ═══════════════════════════════════════════════════════════
+  //  SECTION: Notification Helpers
+  // ═══════════════════════════════════════════════════════════
+
   private async resolveTicketContext(
     tenantId: number | null,
     stayId?: number,
@@ -1106,7 +1130,10 @@ export class TicketsService {
   }
 
 
-  // F3-1: penerima tugas tiket diberi tahu (best-effort, di luar tx).
+  // ═══════════════════════════════════════════════════════════
+  //  SECTION: Push Notifications
+  // ═══════════════════════════════════════════════════════════
+
   private async notifyTicketAssigned(
     ticketId: number,
     assigneeId: number,

@@ -66,9 +66,4 @@ export interface ApprovalBookingSnapshot {
   tenantIsActive: boolean;
 }
 
-export interface BookingSchemaStatus {
-  hasReservedRoomStatus: boolean;
-  hasStayExpiresAt: boolean;
-}
-
 export type RoomPayload = RoomPricingSnapshot | Prisma.RoomGetPayload<{}>;

@@ -61,8 +61,17 @@ function cbFailure() {
 
 // ── API ────────────────────────────────────────────────────────────────────
 
+// Owner-request 2026-07-04: key bisa diisi via Settings→AI (tersimpan di OperationalSetting)
+// dan di-set ke runtime tanpa restart. Env DEEPSEEK_API_KEY tetap jadi fallback.
+let runtimeApiKey: string | undefined;
+
+export function setDeepseekApiKey(key: string | null | undefined): void {
+  const trimmed = typeof key === 'string' ? key.trim() : '';
+  runtimeApiKey = trimmed || undefined;
+}
+
 export function deepseekApiKey(): string | undefined {
-  return process.env.DEEPSEEK_API_KEY || process.env.AI_PROVIDER_KEY || undefined;
+  return runtimeApiKey || process.env.DEEPSEEK_API_KEY || process.env.AI_PROVIDER_KEY || undefined;
 }
 
 export function deepseekConfigured(): boolean {
@@ -80,7 +89,7 @@ export async function deepseekChat(
   }
 
   const key = deepseekApiKey();
-  if (!key) throw new Error('DEEPSEEK_API_KEY belum dikonfigurasi di .env backend.');
+  if (!key) throw new Error('API key DeepSeek belum diisi. Isi di Pengaturan → AI & Biaya (login OWNER), atau set DEEPSEEK_API_KEY di env backend.');
   const baseURL = (process.env.DEEPSEEK_BASE_URL || 'https://api.deepseek.com').replace(/\/+$/, '');
   const model = opts.model || process.env.DEEPSEEK_MODEL || 'deepseek-v4-flash';
 

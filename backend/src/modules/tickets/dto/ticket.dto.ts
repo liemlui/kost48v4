@@ -15,6 +15,7 @@ import {
 import {
   BACKOFFICE_TICKET_CATEGORIES,
   InventoryItemStatus,
+  PORTAL_TICKET_CATEGORIES,
   RoomItemStatus,
 } from "../../../common/enums/app.enums";
 
@@ -99,7 +100,7 @@ export class CreatePortalTicketDto extends TicketImageFieldsDto {
   description!: string;
 
   @IsOptional()
-  @IsString()
+  @IsIn(PORTAL_TICKET_CATEGORIES as unknown as string[], { message: 'Kategori tiket portal tidak valid' })
   category?: string;
 }
 

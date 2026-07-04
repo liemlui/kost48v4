@@ -72,6 +72,10 @@ export class StaffFieldReportsService {
     private readonly audit: AuditLogService,
   ) {}
 
+  // ═══════════════════════════════════════════════════════════
+  //  SECTION: Field Report CRUD
+  // ═══════════════════════════════════════════════════════════
+
   async create(dto: CreateStaffFieldReportDto, actor: CurrentUserPayload) {
     if (
       actor.role === UserRole.STAFF &&
@@ -318,6 +322,10 @@ export class StaffFieldReportsService {
 
     return result;
   }
+
+  // ═══════════════════════════════════════════════════════════
+  //  SECTION: Review Queue & Admin Review
+  // ═══════════════════════════════════════════════════════════
 
   async findAll(query: StaffFieldReportsQueryDto, actor: CurrentUserPayload) {
     const where: Prisma.StaffFieldReportWhereInput = {

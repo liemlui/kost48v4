@@ -53,14 +53,14 @@ function KanbanCard({ item }: { item: ActionQueueItem }) {
   return (
     <div ref={setNodeRef} style={style} {...attributes} {...listeners} aria-label={`Kartu: ${item.subject}`}>
       <div className="d-flex align-items-center gap-1 mb-1">
-        <span className={`badge ${PRIORITY_BADGE[item.priority] ?? 'bg-secondary'}`} style={{ fontSize: '0.65em' }}>
+        <span className={`badge ${PRIORITY_BADGE[item.priority] ?? 'bg-secondary'} e3-fs-small`}>
           {item.priority}
         </span>
-        <span className="text-muted" style={{ fontSize: '0.72rem' }}>{item.type}</span>
+        <span className="text-muted e3-fs-xs">{item.type}</span>
       </div>
-      <div className="fw-semibold" style={{ fontSize: '0.82rem', lineHeight: 1.3 }}>{item.subject}</div>
+      <div className="fw-semibold e3-fs-sm" style={{ lineHeight: 1.3 }}>{item.subject}</div>
       {item.timeStatusLabel ? (
-        <div className="text-muted mt-1" style={{ fontSize: '0.72rem' }}>{item.timeStatusLabel}</div>
+        <div className="text-muted mt-1 e3-fs-xs">{item.timeStatusLabel}</div>
       ) : null}
     </div>
   );
@@ -91,7 +91,7 @@ function KanbanColumn({ col, items }: { col: typeof COLUMNS[0]; items: ActionQue
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
         {items.length === 0 ? (
-          <p className="text-muted small mb-0" style={{ fontStyle: 'italic' }}>Kosong</p>
+          <p className="text-muted small mb-0 fst-italic">Kosong</p>
         ) : (
           items.map((item) => <KanbanCard key={item.id} item={item} />)
         )}
@@ -153,8 +153,7 @@ export default function ActionKanbanBoard({ items, onColumnChange }: Props) {
   return (
     <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
       <div
-        className="action-kanban-board"
-        style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '0.75rem', marginBottom: '1rem' }}
+        className="action-kanban-board e3-kanban-grid"
         aria-label="Papan antrean aksi — drag kartu untuk pindah kolom, atau pakai keyboard (Space untuk ambil, panah untuk geser, Space untuk letakkan)"
       >
         {COLUMNS.map((col) => (

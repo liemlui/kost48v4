@@ -1,6 +1,6 @@
 import { ConflictException, Injectable, Logger } from '@nestjs/common';
 import { Prisma } from '../../../generated/prisma';
-import { InvoiceStatus, PaymentSubmissionStatus, RoomStatus, StayStatus } from '../../../common/enums/app.enums';
+import { InvoiceLineType, InvoiceStatus, PaymentSubmissionStatus, RoomStatus, StayStatus } from '../../../common/enums/app.enums';
 import { PrismaService } from '../../../prisma/prisma.service';
 import { AccountingPostingService } from '../../accounting/accounting-posting.service';
 import { AppNotificationService } from '../../notifications/app-notification.service';
@@ -102,10 +102,17 @@ export class BookingSweepService {
       const blockedInvoiceStatuses = params.forfeitDownPayment
         ? [InvoiceStatus.PAID]
         : [InvoiceStatus.PAID, InvoiceStatus.PARTIAL];
-      const paidInvoice = await tx.invoice.findFirst({
-        where: { stayId, status: { in: blockedInvoiceStatuses as any } },
-        select: { id: true },
-      });
+      // H4: di mode forfeit, hanya invoice SEWA yang PAID yang memblokir forfeit.
+      // WiFi/invoice non-sewa tidak relevan — tenant masih belum bayar sewa.
+      const paidInvoice = params.forfeitDownPayment
+        ? await tx.invoice.findFirst({
+            where: { stayId, status: InvoiceStatus.PAID, lines: { some: { lineType: InvoiceLineType.RENT } } },
+            select: { id: true },
+          })
+        : await tx.invoice.findFirst({
+            where: { stayId, status: { in: blockedInvoiceStatuses as any } },
+            select: { id: true },
+          });
       if (paidInvoice) return false;
 
       const reversibleStatuses = params.forfeitDownPayment

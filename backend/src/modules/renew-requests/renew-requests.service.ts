@@ -14,6 +14,7 @@ import { CheckoutRequestStatus, StayStatus, RenewRequestStatus, UserRole, Invoic
 import { roundRupiah } from '../../common/business/money.helper';
 import { ACTIVE_CHECKOUT_STATUSES, ACTIVE_RENEW_STATUSES, isActiveRenewRequestStatus } from '../../common/business/lifecycle-guards.helper';
 import { LoyaltyService } from '../loyalty/loyalty.service';
+import { calculateRentByPricingTerm, PRICING_MULTIPLIERS } from '../tenant-bookings/pricing.helper';
 
 @Injectable()
 export class RenewRequestsService {
@@ -126,6 +127,11 @@ export class RenewRequestsService {
    * YA → AWAITING_DP (prioritas tenant lama s/d hari-H, tunggu DP 30%).
    * TIDAK → REJECTED_BY_TENANT (kamar dibuka publik mulai tanggal checkout — room-publication inc.2b).
    */
+
+  // ═══════════════════════════════════════════════════════════
+  //  SECTION: Tenant Decision & DP Confirmation
+  // ═══════════════════════════════════════════════════════════
+
   async decideByTenant(id: number, dto: DecideRenewRequestDto, actor: CurrentUserPayload) {
     if (actor.role !== UserRole.TENANT) {
       throw new ForbiddenException('Hanya tenant yang dapat menjawab prompt perpanjangan');
@@ -139,11 +145,14 @@ export class RenewRequestsService {
 
     // TIDAK → REJECTED_BY_TENANT (kamar ikut flow checkout normal — keputusan owner #2 inc.2b).
     if (dto.decision !== 'YA') {
-      const rejected = await this.prisma.renewRequest.update({
-        where: { id },
-        data: { status: RenewRequestStatus.REJECTED_BY_TENANT, requestNotes: dto.notes ?? request.requestNotes },
+      const rejected = await this.prisma.$transaction(async (tx) => {
+        const upd = await tx.renewRequest.update({
+          where: { id },
+          data: { status: RenewRequestStatus.REJECTED_BY_TENANT, requestNotes: dto.notes ?? request.requestNotes },
+        });
+        await this.audit.log({ actorUserId: actor.id, action: 'RENEW_DECIDE_NO', entityType: 'RenewRequest', entityId: String(id), oldData: request, newData: upd });
+        return upd;
       });
-      await this.audit.log({ actorUserId: actor.id, action: 'RENEW_DECIDE_NO', entityType: 'RenewRequest', entityId: String(id), oldData: request, newData: rejected });
       const ctxNo = await this.loadStayNotifContext(request.stayId);
       await this.notifyAdminsRenew(
         rejected.id,
@@ -233,7 +242,10 @@ export class RenewRequestsService {
     return updated;
   }
 
-  /** Admin/owner approves a pending renew request and executes the renewal. */
+  // ═══════════════════════════════════════════════════════════
+  //  SECTION: Approve/Reject & Query Methods
+  // ═══════════════════════════════════════════════════════════
+
   async approveRequest(id: number, dto: ApproveRenewRequestDto, actor: CurrentUserPayload) {
     const result = await this.prisma.$transaction(async (tx) => {
       const lockedRows = await tx.$queryRaw<Array<{ id: number }>>`
@@ -255,8 +267,19 @@ export class RenewRequestsService {
       }
 
       // F2-1 rent-loyalty (D-16): harga sewa renewal = sewa SAAT INI (tak naik). Abaikan kenaikan via dto.
-      const currentStay = await tx.stay.findUnique({ where: { id: request.stayId }, select: { agreedRentAmountRupiah: true } });
+      const currentStay = await tx.stay.findUnique({ where: { id: request.stayId }, select: { agreedRentAmountRupiah: true, pricingTerm: true } });
       if (!currentStay) throw new NotFoundException('Stay tidak ditemukan');
+
+      // AL-FIX-3: re-multiply sewa kalau term berubah (mis. MONTHLY→YEARLY)
+      const renewalRent = (() => {
+        if (!request.requestedTerm || request.requestedTerm === currentStay.pricingTerm) {
+          return currentStay.agreedRentAmountRupiah ?? dto.agreedRentAmountRupiah ?? 0;
+        }
+        const oldMult = PRICING_MULTIPLIERS[currentStay.pricingTerm as keyof typeof PRICING_MULTIPLIERS] ?? 1;
+        if (oldMult <= 0) return currentStay.agreedRentAmountRupiah ?? 0;
+        const monthlyRate = Math.round(currentStay.agreedRentAmountRupiah / oldMult);
+        return calculateRentByPricingTerm(monthlyRate, request.requestedTerm as PricingTerm);
+      })();
 
       const finalPlannedCheckOutDate = dto.plannedCheckOutDate
         ?? (request.requestedCheckOutDate ? request.requestedCheckOutDate.toISOString() : undefined);
@@ -264,7 +287,7 @@ export class RenewRequestsService {
       const renewDto: RenewStayDto = {
         pricingTerm: request.requestedTerm as PricingTerm,
         plannedCheckOutDate: finalPlannedCheckOutDate,
-        agreedRentAmountRupiah: currentStay?.agreedRentAmountRupiah ?? dto.agreedRentAmountRupiah,
+        agreedRentAmountRupiah: renewalRent,
         // inc.2b: DP 30% sudah ditagih invoice terpisah & lunas → kurangi rent-line invoice pelunasan.
         priorDownPaymentRupiah: request.downPaymentAmountRupiah ?? 0,
         electricityReadingValue: dto.electricityReadingValue,
@@ -318,7 +341,7 @@ export class RenewRequestsService {
           stayId: request.stayId,
           settlementInvoiceId: settlementInvoice.id,
           pricingTerm: request.requestedTerm as PricingTerm,
-          agreedRentAmountRupiah: currentStay.agreedRentAmountRupiah,
+          agreedRentAmountRupiah: renewalRent,
         },
         actor,
       );
@@ -460,7 +483,10 @@ export class RenewRequestsService {
     return result.updated;
   }
 
-  /** Admin/owner list all renew requests with optional status filter. */
+  // ═══════════════════════════════════════════════════════════
+  //  SECTION: Query & Notification Helpers
+  // ═══════════════════════════════════════════════════════════
+
   async findAll(status?: RenewRequestStatus) {
     const where = status ? { status } : {};
     const items = await this.prisma.renewRequest.findMany({

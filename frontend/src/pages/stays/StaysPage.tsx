@@ -41,6 +41,10 @@ type StayViewFilter = 'ALL' | 'BOOKINGS' | 'ACTIVE';
 
 const STAY_CHART_COLORS = ['#2563eb', '#f59e0b', '#16a34a', '#ef4444', '#7c3aed', '#0ea5e9'];
 
+// ═══════════════════════════════════════════════════════════
+//  COMPONENT: StayAnalyticsPanel
+// ═══════════════════════════════════════════════════════════
+
 function StayAnalyticsPanel({ items, operationalActive, reservedBookings, checkoutDue, pendingApproval, waitingPayment }: {
   items: any[];
   operationalActive: any[];
@@ -141,6 +145,10 @@ function StayAnalyticsPanel({ items, operationalActive, reservedBookings, checko
     </Row>
   );
 }
+
+// ═══════════════════════════════════════════════════════════
+//  COMPONENT: StaysPage — Main
+// ═══════════════════════════════════════════════════════════
 
 export default function StaysPage() {
   const { user } = useAuth();

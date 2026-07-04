@@ -36,6 +36,10 @@ interface GuestBookingFormProps {
   onSubmit: (event: FormEvent) => void;
 }
 
+// ═══════════════════════════════════════════════════════════
+//  COMPONENT: GuestBookingForm — Wizard Steps & Main
+// ═══════════════════════════════════════════════════════════
+
 function WizardSteps({ step }: { step: number }) {
   const steps = ['Data Diri', 'Booking', 'Preferensi', 'Ringkasan'];
   return (

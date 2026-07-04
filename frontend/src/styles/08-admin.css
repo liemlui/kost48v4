@@ -928,6 +928,29 @@ button.status-strip-item:hover {
     flex-direction: column;
   }
 }
+@media (max-width: 480px) {
+  .admin-command-head,
+  .admin-command-head-slim {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.65rem;
+  }
+  .admin-command-actions {
+    width: 100%;
+  }
+  .admin-command-actions .btn {
+    flex: 1 1 0;
+    font-size: 0.82rem;
+    padding: 0.35rem 0.55rem;
+  }
+  .assistant-insight-line {
+    padding: 10px 10px;
+    gap: 8px;
+  }
+  .action-queue-card .card-body {
+    padding: 0.75rem;
+  }
+}
 
 .ticket-status-strip {
   display: flex;

@@ -110,3 +110,12 @@
 
 ## Flow & audit anchor
 Tabel flow + method-anchor: `M03_FLOW_KONTRAK.md` (kontrak/uang) & `M09_AUDIT.md` (job otomatis, mis. `runAccountingAutoClose`, `rent-recognition`). Keputusan owner (84): `M02_KEPUTUSAN_OWNER.md`.
+
+## Shared utilities (ditambahkan 2026-07-07)
+| Utility | Path | Tanggung jawab |
+|---------|------|----------------|
+| `dateOnlyWib` / `todayWib` / `isoDate` | `backend/src/common/utils/date-only.ts` | Normalisasi tanggal WIB (UTC+7) — pakai di semua modul akuntansi (unifikasi dari 5 implementasi) |
+
+## Dokumen audit terbaru
+- **Audit Fable (2-3 Jul 2026):** `docs/audit/00_INDEX.md` — 19 checklist C01-C19
+- **Audit Reasonix Code (7 Jul 2026):** `docs/audit-reasonix/RINGKASAN_EKSEKUTIF.md` — 82 temuan baru

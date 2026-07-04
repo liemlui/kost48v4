@@ -7,7 +7,7 @@ import { getAllSurveys, getSurveySummary, type SurveyItem, type SurveySummary } 
 
 function Stars({ value }: { value: number }) {
   return (
-    <span style={{ color: '#f59e0b', letterSpacing: 1 }}>
+    <span className="e3-text-amber" style={{ letterSpacing: 1 }}>
       {'★'.repeat(value)}{'☆'.repeat(5 - value)}
     </span>
   );
@@ -17,43 +17,43 @@ function SummaryPanel({ summary }: { summary: SurveySummary | undefined }) {
   if (!summary) return null;
   return (
     <div className="d-flex flex-wrap gap-3 mb-3">
-      <Card className="border-0 flex-fill" style={{ minWidth: 140 }}>
+      <Card className="border-0 flex-fill e3-minw-140">
         <Card.Body className="py-2 px-3 text-center">
           <div className="text-muted small">Total Survei</div>
           <div className="fw-bold fs-4">{summary.count}</div>
         </Card.Body>
       </Card>
-      <Card className="border-0 flex-fill" style={{ minWidth: 140 }}>
+      <Card className="border-0 flex-fill e3-minw-140">
         <Card.Body className="py-2 px-3 text-center">
           <div className="text-muted small">Rata-rata Keseluruhan</div>
-          <div className="fw-bold fs-4">{summary.avgOverall ?? '—'} <span style={{ color: '#f59e0b' }}>★</span></div>
+          <div className="fw-bold fs-4">{summary.avgOverall ?? '—'} <span className="e3-text-amber">★</span></div>
         </Card.Body>
       </Card>
-      <Card className="border-0 flex-fill" style={{ minWidth: 140 }}>
+      <Card className="border-0 flex-fill e3-minw-140">
         <Card.Body className="py-2 px-3 text-center">
           <div className="text-muted small">Rekomendasi</div>
           <div className="fw-bold fs-4">{summary.recommendRate ?? '—'}%</div>
         </Card.Body>
       </Card>
-      <Card className="border-0 flex-fill" style={{ minWidth: 140 }}>
+      <Card className="border-0 flex-fill e3-minw-140">
         <Card.Body className="py-2 px-3 text-center">
           <div className="text-muted small">Kebersihan</div>
           <div className="fw-bold fs-4">{summary.avgCleanliness ?? '—'} ★</div>
         </Card.Body>
       </Card>
-      <Card className="border-0 flex-fill" style={{ minWidth: 140 }}>
+      <Card className="border-0 flex-fill e3-minw-140">
         <Card.Body className="py-2 px-3 text-center">
           <div className="text-muted small">Pelayanan Staf</div>
           <div className="fw-bold fs-4">{summary.avgStaffService ?? '—'} ★</div>
         </Card.Body>
       </Card>
-      <Card className="border-0 flex-fill" style={{ minWidth: 140 }}>
+      <Card className="border-0 flex-fill e3-minw-140">
         <Card.Body className="py-2 px-3 text-center">
           <div className="text-muted small">Fasilitas</div>
           <div className="fw-bold fs-4">{summary.avgFacility ?? '—'} ★</div>
         </Card.Body>
       </Card>
-      <Card className="border-0 flex-fill" style={{ minWidth: 140 }}>
+      <Card className="border-0 flex-fill e3-minw-140">
         <Card.Body className="py-2 px-3 text-center">
           <div className="text-muted small">Harga Sepadan</div>
           <div className="fw-bold fs-4">{summary.avgValueForMoney ?? '—'} ★</div>
@@ -180,7 +180,7 @@ export default function AdminSurveysPage() {
                     <td>
                       {s.wouldRecommend === true ? <Badge bg="success">👍 Ya</Badge> : s.wouldRecommend === false ? <Badge bg="secondary">👎 Belum</Badge> : <span className="text-muted">—</span>}
                     </td>
-                    <td className="small" style={{ maxWidth: 320 }}>
+                    <td className="small e3-maxw-320">
                       {s.comment ? <span>{s.comment.length > 120 ? `${s.comment.slice(0, 120)}…` : s.comment}</span> : <span className="text-muted">—</span>}
                     </td>
                     <td className="small text-muted text-nowrap">{new Date(s.createdAt).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}</td>

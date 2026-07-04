@@ -4,12 +4,10 @@ import { PrismaService } from '../../prisma/prisma.service';
 import { AccountingPostingService } from './accounting-posting.service';
 import { buildRentRecognitionSchedule } from './rent-recognition.helper';
 import { addCalendarMonthsClamped, startOfDay } from '../stays/stays.helpers';
+import { dateOnlyWib } from '../../common/utils/date-only';
 
-/** Tanggal kalender WIB (UTC+7) sebagai UTC-midnight — bebas timezone server. */
-function wibDateOnly(now: Date): Date {
-  const wib = new Date(now.getTime() + 7 * 60 * 60 * 1000);
-  return new Date(Date.UTC(wib.getUTCFullYear(), wib.getUTCMonth(), wib.getUTCDate()));
-}
+/** @deprecated Gunakan dateOnlyWib dari ../../common/utils/date-only (unifikasi 2026-07-07). */
+const wibDateOnly = dateOnlyWib;
 
 /**
  * F4-1 (PSAK 72) — pengakuan pendapatan sewa panjang.

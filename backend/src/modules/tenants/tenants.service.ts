@@ -36,6 +36,10 @@ export class TenantsService {
     private readonly referral: ReferralService,
   ) {}
 
+  // ═══════════════════════════════════════════════════════════
+  //  SECTION: Tenant CRUD & Queries
+  // ═══════════════════════════════════════════════════════════
+
   private attachPortalSummary<T extends { id: number }>(tenant: T, portalUser?: { id: number; email: string; isActive: boolean; lastLoginAt: Date | null } | null) {
     return {
       ...tenant,

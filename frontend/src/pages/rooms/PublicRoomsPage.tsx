@@ -26,6 +26,10 @@ import {
   isPublicRoomBookable,
 } from "../../utils/publicRoomDisplay";
 
+// ═══════════════════════════════════════════════════════════
+//  COMPONENT: PublicRoomsPage
+// ═══════════════════════════════════════════════════════════
+
 type BathroomFilter = "" | "inside" | "outside";
 type CoolingFilter = "" | "ac" | "fan";
 type AvailFilter = "" | "bookable" | "occupied" | "checking";

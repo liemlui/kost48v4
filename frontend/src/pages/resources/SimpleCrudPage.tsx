@@ -50,6 +50,10 @@ type PortalTenantUser = {
 
 type ResourceFilterId = string;
 
+// ═══════════════════════════════════════════════════════════
+//  COMPONENT: SimpleCrudPage
+// ═══════════════════════════════════════════════════════════
+
 export default function SimpleCrudPage({ config, hideAreaMenu = false }: { config: ResourceConfig; hideAreaMenu?: boolean }) {
   const queryClient = useQueryClient();
   const toast = useToast();

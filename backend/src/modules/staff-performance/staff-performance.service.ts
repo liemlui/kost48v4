@@ -186,6 +186,10 @@ export class StaffPerformanceService {
     return created;
   }
 
+  // ═══════════════════════════════════════════════════════════
+  //  SECTION: Private Summary & Insight Builders
+  // ═══════════════════════════════════════════════════════════
+
   private async buildSummaryForStaff(staffId: number, range: ReturnType<typeof monthRange>, includeEvidence: boolean) {
     const staff = await this.prisma.user.findUnique({
       where: { id: staffId },

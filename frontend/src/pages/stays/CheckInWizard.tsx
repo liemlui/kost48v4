@@ -14,6 +14,10 @@ import StepRoomSelect from './check-in-wizard/StepRoomSelect';
 import StepDetailsAndMeters from './check-in-wizard/StepDetailsAndMeters';
 import StepReviewConfirm from './check-in-wizard/StepReviewConfirm';
 
+// ═══════════════════════════════════════════════════════════
+//  COMPONENT: CheckInWizard
+// ═══════════════════════════════════════════════════════════
+
 interface CheckInWizardProps {
   show?: boolean;
   onHide?: () => void;

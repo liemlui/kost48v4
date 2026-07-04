@@ -118,12 +118,12 @@ export class PublicBookingsService {
     private readonly referral: ReferralService,
   ) {}
 
-  // ---------------------------------------------------------------------------
-  // PUBLIC: createPublicBooking
-  // ---------------------------------------------------------------------------
+  // ═══════════════════════════════════════════════════════════
+  //  SECTION: Public Booking — Create & Survey
+  // ═══════════════════════════════════════════════════════════
 
   async createPublicBooking(dto: CreatePublicBookingDto) {
-    if (!(await isBookingSchemaReady(this.prisma, { current: null }))) {
+    if (!(await isBookingSchemaReady(this.prisma))) {
       throw new ServiceUnavailableException(
         'Fitur booking belum aktif penuh karena database belum sinkron. Jalankan sinkronisasi schema terlebih dahulu.',
       );

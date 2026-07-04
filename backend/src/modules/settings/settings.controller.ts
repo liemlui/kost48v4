@@ -42,8 +42,9 @@ export class SettingsController {
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.OWNER, UserRole.ADMIN, UserRole.STAFF)
-  async getOperational() {
-    return { message: 'Konstanta operasional', data: await this.settingsService.getOperational() };
+  async getOperational(@CurrentUser() user: CurrentUserPayload) {
+    // API key DeepSeek TIDAK pernah ikut respons — hanya status + preview (preview khusus OWNER).
+    return { message: 'Konstanta operasional', data: await this.settingsService.getOperationalView(user?.role) };
   }
 
   /** Hanya OWNER yang boleh UBAH (tarif/kuota/toggle air = dasar keuangan). */

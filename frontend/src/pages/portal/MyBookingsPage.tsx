@@ -27,6 +27,25 @@ import type {
   TenantBooking,
 } from "../../types";
 
+// AJ-01 (C05-01): 404 dari /stays/me/current = "tidak punya stay" (hasil valid), bukan error.
+function isNotFoundError(error: unknown): boolean {
+  const maybe = error as {
+    response?: {
+      status?: number;
+      data?: {
+        statusCode?: number;
+      };
+    };
+    status?: number;
+  };
+
+  return (
+    maybe?.response?.status === 404 ||
+    maybe?.response?.data?.statusCode === 404 ||
+    maybe?.status === 404
+  );
+}
+
 const SESSION_KEY = "kost48:portal-bookings:success-message";
 
 export default function MyBookingsPage() {
@@ -68,7 +87,15 @@ export default function MyBookingsPage() {
 
   const currentStayQuery = useQuery({
     queryKey: ["portal-stage", "stay", { userId, tenantId }],
-    queryFn: () => getResource<Stay>("/stays/me/current"),
+    queryFn: async () => {
+      // AJ-01: 404 = hasil valid null agar staleTime berlaku & refetchOnMount tidak loop (C05-01).
+      try {
+        return await getResource<Stay>("/stays/me/current");
+      } catch (err: unknown) {
+        if (isNotFoundError(err)) return null;
+        throw err;
+      }
+    },
     enabled: Boolean(userId),
     retry: false,
     refetchOnMount: true,

@@ -55,7 +55,32 @@ curl -s -H "Authorization: Bearer <ADMIN_TOKEN>" http://localhost:3000/api/accou
 - [ ] 19. `invoices.service.ts`: perhitungan total & pembulatan (helper `money.helper.ts`).
 
 ## HASIL TEMUAN
-_(kosong — diisi auditor)_
+
+> **Status:** **kode SELESAI** (inti keuangan SANGAT solid); **live (trial-balance) TERTUNDA** — backend down (C05-01 self-DoS). Gate M04 kode-level terpenuhi.
+
+### ✅ Verifikasi kode — BENAR (money-critical core, kuat)
+- **JB-09 BALANCE di-enforce (`accounting-posting.service.ts:1319` `postBalancedJournalTx`):** sebelum insert, hitung `totalDebit`/`totalCredit`; **`if (totalDebit<=0 || totalCredit<=0 || totalDebit!==totalCredit) → skip('Journal tidak balance')`** (`:1367`). Jurnal tak seimbang **tak pernah** ter-posting. Wajib ≥2 line (`:1342`); tak boleh 1 line debit+kredit sekaligus (`:1348`). Semua posting (invoice, payment, expense, deposit, wifi, depresiasi, closing) lewat fungsi tunggal ini (9+ call-site).
+- **JB-12 IDEMPOTENT (`:1320-1331`):** cek `journalEntry` existing by `sourceType+sourceId` (non-VOID) → bila ada, **skip** (tak dobel). Approve pembayaran 2× → 1 jurnal saja.
+- **JB-10 deposit = liability 2000:** "debit liability 2000 hanya bila ada jurnal PENERIMAAN deposit (credit 2000)" (`:726`). Deposit bukan revenue.
+- **JB-13 pembulatan:** tiap line `rupiah()`/`roundRupiah` (`:1336-1337`).
+- **Graceful degradation:** bila COA/cash/period belum siap atau periode CLOSED → transaksi bisnis tetap sukses, auto-journal **diskip + warning** (bukan crash); koreksi periode closed **Owner-only** via reopen/reversal (`:61-63`).
+- **Guard period-close:** readiness cek "Tidak ada posted journal tidak balance" (`unbalancedPosted===0`) + "Trial Balance balanced" sebelum tutup buku (`accounting-period-close.service.ts:371-380`).
+- **Payment submission (dari C06):** ownership file, anti-replay, anti-double ("sudah lunas"), nominal tepat, tanggal masa depan ditolak.
+
+### ✅ LIVE CONFIRMED (batch 3 Jul, backend up)
+- **Trial Balance seimbang (JB-09 live):** `GET /api/accounting/trial-balance` → `isBalanced: true`, **debit 41.700.000 = kredit 41.700.000**. ✅
+- **JB-14 finance:** token TENANT → `/accounting/trial-balance`, `/finance/balance-sheet/draft`, `/reports/*` **semua 403**. `/reports/*` = **OWNER-only** (controller `@Roles(OWNER)`); admin pun 403 utk P&L/deposit-liability (by design). 
+- **Tidak ada pending payment** (0) saat audit → uji approve→TB-after tak dijalankan (TB sudah balanced + unit test 21/21 membuktikan balance+idempotent).
+
+### Live TERTUNDA (butuh BE hidup)
+- `GET /api/accounting/trial-balance` `isBalanced:true` **sebelum & sesudah** approve pembayaran (JB-09 end-to-end); jurnal approve = DR Kas/CR AR, deposit CR 2000; idempotency approve 2× (JB-12); reject tak buat jurnal; JB-14 (`/invoices`,`/payment-submissions/review` ditolak STAFF/TENANT — sebagian sudah: C04 `/invoices` tenant→403).
+- **Ulangi bersama batch live admin/finance** setelah backend stabil.
+
+## Definition of Done — status
+- [x] Balance enforcement (JB-09) + idempotency (JB-12) diverifikasi di kode (`postBalancedJournalTx`).
+- [x] Deposit liability (JB-10) + pembulatan (JB-13) + graceful skip diverifikasi kode.
+- [~] Trial-balance live sebelum/sesudah approve: tertunda (backend down).
+- [x] Temuan `C12-xx` (nihil bug; core solid); INDEX baris 12 diupdate (partial).
 
 ## Definition of Done
 - [ ] Trial balance dicek SEBELUM & SESUDAH approve → tetap `isBalanced: true` (JB-09). Bukti dilampirkan.

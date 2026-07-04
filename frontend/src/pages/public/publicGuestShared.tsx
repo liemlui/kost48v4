@@ -13,6 +13,7 @@ import Kost48LogoMark from '../../components/common/Kost48LogoMark';
 import { useAuth } from '../../context/AuthContext';
 import { getDefaultRoute } from '../../config/navigation';
 import { useTenantPortalStage } from '../../hooks/useTenantPortalStage';
+import { formatRupiahWithoutSymbol } from '../../utils/formatCurrency';
 import { officialKost48Location } from '../../data/officialKost48Content';
 import {
   getKost48FrontPhotoUrl,

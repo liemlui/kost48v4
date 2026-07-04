@@ -81,6 +81,10 @@ const roomHandlingCopy: Record<
   },
 };
 
+// ═══════════════════════════════════════════════════════════
+//  SECTION: Helpers & Sub-Components
+// ═══════════════════════════════════════════════════════════
+
 async function compressImageFile(file: File): Promise<File> {
   return compressBrowserImage(file, { maxSide: 1600, quality: 0.78 });
 }
@@ -185,6 +189,10 @@ function getRoomReportChoice(
 
   return null;
 }
+
+// ═══════════════════════════════════════════════════════════
+//  COMPONENT: StaffInventoryStatusModal — Main
+// ═══════════════════════════════════════════════════════════
 
 export default function StaffInventoryStatusModal({
   target,

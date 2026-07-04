@@ -12,6 +12,10 @@ import SafeImage from '../common/SafeImage';
 import { uploadAnnouncementImage, uploadRoomImage } from '../../api/mediaUploads';
 import { compressImageFile as compressBrowserImage } from '../../utils/compressImageFile';
 
+// ═══════════════════════════════════════════════════════════
+//  SECTION: ResourceFormModal — Helpers
+// ═══════════════════════════════════════════════════════════
+
 async function compressImageFile(file: File): Promise<File> {
   return compressBrowserImage(file, { maxSide: 1600, quality: 0.78 });
 }

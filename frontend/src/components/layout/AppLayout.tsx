@@ -26,6 +26,10 @@ import { useAuth } from '../../context/AuthContext';
 import { useConfirm } from '../common/ConfirmProvider';
 import { fetchPublicConfig } from '../../api/settings';
 
+// ═══════════════════════════════════════════════════════════
+//  COMPONENT: AppLayout — Navigation & Shell
+// ═══════════════════════════════════════════════════════════
+
 function getRoleLabel(role?: string) {
   switch (role) {
     case 'OWNER':
@@ -232,7 +236,7 @@ export default function AppLayout({ children }: { children?: ReactNode }) {
       return saved === 'collapsed' ? 'collapsed' : 'expanded';
     } catch { return 'expanded'; }
   });
-  const { stage: tenantStage, isLoading: tenantStageLoading } = useTenantPortalStage();
+  const { stage: tenantStage, isLoading: tenantStageLoading, hasStayHistory } = useTenantPortalStage();
 
   const isStaff = user?.role === 'STAFF';
   const isTenant = user?.role === 'TENANT';
@@ -379,6 +383,7 @@ export default function AppLayout({ children }: { children?: ReactNode }) {
           <TenantWorkspaceTabs
             stage={tenantStage}
             stageLoading={tenantStageLoading}
+            hasStayHistory={hasStayHistory}
             fullName={user?.fullName}
             initials={getInitials(user?.fullName)}
             onLogout={logout}

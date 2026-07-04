@@ -11,6 +11,11 @@ import StatusBadge, { getStatusLabel } from '../../components/common/StatusBadge
 import { getKost48RoomGallery, resolveKost48MarketingImageUrl } from '../../data/kost48Assets';
 import { calculateRentByPricingTerm, isUtilitiesIncludedForPricingTerm, ALL_PRICING_TERMS } from '../../utils/pricing';
 import { getPublicRoomAvailabilityDisplay, getPublicRoomInitialCostEstimate, publicBookingSafetySteps } from '../../utils/publicRoomDisplay';
+import { formatRupiah, formatRupiahWithoutSymbol } from '../../utils/formatCurrency';
+
+// ═══════════════════════════════════════════════════════════
+//  COMPONENT: PublicRoomDetailPage
+// ═══════════════════════════════════════════════════════════
 
 type RoomFeatureKind = 'bathroom' | 'cooling' | 'size';
 
@@ -323,7 +328,7 @@ export default function PublicRoomDetailPage() {
                         <DetailFeatureCard {...getFeature(room, 'bathroom')} />
                         <DetailFeatureCard {...getFeature(room, 'cooling')} />
                         <DetailFeatureCard {...getFeature(room, 'size')} />
-                        <DetailFeatureCard icon="🛡️" label="Deposit jaminan" value={room.defaultDepositRupiah ? `Rp ${Number(room.defaultDepositRupiah).toLocaleString('id-ID')}` : 'Tanya admin'} />
+                        <DetailFeatureCard icon="🛡️" label="Deposit jaminan" value={room.defaultDepositRupiah ? `{formatRupiah(room.defaultDepositRupiah)}` : 'Tanya admin'} />
                       </div>
 
                       <div className="room-detail-amenities" aria-label="Fasilitas kamar">
@@ -346,7 +351,7 @@ export default function PublicRoomDetailPage() {
                               <div className="room-detail-dp-row">
                                 <span aria-hidden="true">📋</span>
                                 <div>
-                                  <strong>DP awal: Rp {dpAmount.toLocaleString('id-ID')}</strong>
+                                  <strong>DP awal: {formatRupiah(dpAmount)}</strong>
                                   <span>Dibayar saat booking dikonfirmasi. Hangus jika dibatalkan.</span>
                                 </div>
                               </div>
@@ -355,7 +360,7 @@ export default function PublicRoomDetailPage() {
                               <div className="room-detail-deposit-row">
                                 <span aria-hidden="true">🛡️</span>
                                 <div>
-                                  <em>Deposit jaminan: Rp {depositAmount.toLocaleString('id-ID')}</em>
+                                  <em>Deposit jaminan: {formatRupiah(depositAmount)}</em>
                                   <span>Dikembalikan penuh saat checkout (refundable).</span>
                                 </div>
                               </div>

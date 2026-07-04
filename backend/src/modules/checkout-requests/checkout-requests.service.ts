@@ -7,6 +7,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { CurrentUserPayload } from '../../common/interfaces/current-user.interface';
+import { Prisma } from '../../generated/prisma';
 import { PrismaService } from '../../prisma/prisma.service';
 import { AppNotificationService } from '../notifications/app-notification.service';
 import { CreateCheckoutRequestDto } from './dto/create-checkout-request.dto';
@@ -138,20 +139,18 @@ export class CheckoutRequestsService {
       );
     }
 
-    const request = await this.prisma.checkoutRequest.findUnique({
-      where: { id },
-    });
-    if (!request)
-      throw new NotFoundException('Permintaan checkout tidak ditemukan');
-    if (request.status !== CheckoutRequestStatus.PENDING) {
-      throw new ConflictException(
-        'Permintaan checkout sudah diproses sebelumnya',
-      );
-    }
-
     const updated = await this.prisma.$transaction(async (tx) => {
+      // H9: FOR UPDATE lock — cegah TOCTOU antara pengecekan status dan update.
+      const locked = await tx.$queryRaw<Array<{ id: number; status: string; stayId: number; requestedCheckOutDate: Date }>>(
+        Prisma.sql`SELECT id, status, "stayId", "requestedCheckOutDate" FROM "CheckoutRequest" WHERE id = ${id} FOR UPDATE`,
+      );
+      if (locked.length !== 1 || locked[0].status !== CheckoutRequestStatus.PENDING) {
+        throw new ConflictException('Permintaan checkout sudah diproses sebelumnya');
+      }
+      const lockedRequest = locked[0];
+
       await this.assertNoOpenInvoices(
-        request.stayId,
+        lockedRequest.stayId,
         'Pengajuan keluar belum bisa disetujui karena masih ada tagihan aktif',
         tx,
       );
@@ -173,10 +172,10 @@ export class CheckoutRequestsService {
       }
 
       const stay = await tx.stay.findUnique({
-        where: { id: request.stayId },
+        where: { id: lockedRequest.stayId },
         select: { plannedCheckOutDate: true },
       });
-      const requestedDate = new Date(request.requestedCheckOutDate);
+      const requestedDate = new Date(lockedRequest.requestedCheckOutDate);
       const currentCheckOut = stay?.plannedCheckOutDate
         ? new Date(stay.plannedCheckOutDate)
         : null;
@@ -186,7 +185,7 @@ export class CheckoutRequestsService {
         );
       }
       await tx.stay.updateMany({
-        where: { id: request.stayId, status: StayStatus.ACTIVE },
+        where: { id: lockedRequest.stayId, status: StayStatus.ACTIVE },
         data: { plannedCheckOutDate: requestedDate },
       });
 
@@ -194,7 +193,7 @@ export class CheckoutRequestsService {
     });
 
     // Notify tenant — non-blocking
-    await this.notifyTenantOnApprove(request.stayId, id);
+    await this.notifyTenantOnApprove(updated.stayId, id);
 
     return updated;
   }

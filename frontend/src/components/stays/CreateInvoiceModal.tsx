@@ -7,7 +7,9 @@ import { getStayInvoiceSuggestion } from '../../api/stays';
 import { useInvoices } from '../../hooks/useInvoices';
 import type { InvoiceSuggestionItem, MeterReading, Stay, WifiSale } from '../../types';
 import CurrencyDisplay from '../common/CurrencyDisplay';
+import CurrencyInput from '../common/CurrencyInput';
 import { buildCreateInvoiceSafety } from '../../utils/invoiceActionSafety';
+import { formatRupiah, formatRupiahWithoutSymbol } from '../../utils/formatCurrency';
 
 function today() {
   return new Date().toISOString().slice(0, 10);
@@ -309,7 +311,7 @@ export default function CreateInvoiceModal({
                   <option value="">Pilih penjualan WiFi</option>
                   {(wifiSalesQuery.data ?? []).map((sale) => (
                     <option key={sale.id} value={sale.id}>
-                      {(sale.packageName ?? 'Paket WiFi')} · Rp {Number(sale.soldPriceRupiah ?? 0).toLocaleString('id-ID')} · {sale.customerName ?? 'Customer'}
+                      {(sale.packageName ?? 'Paket WiFi')} · {formatRupiah(Number(sale.soldPriceRupiah ?? 0))} · {sale.customerName ?? 'Customer'}
                     </option>
                   ))}
                 </Form.Select>
@@ -369,12 +371,9 @@ export default function CreateInvoiceModal({
                 <div className="col-lg-2 col-md-4">
                   <Form.Group>
                     <Form.Label className="small text-muted">Harga Satuan</Form.Label>
-                    <Form.Control
-                      type="number"
-                      min="0"
-                      inputMode="numeric"
+                    <CurrencyInput
                       value={item.unitPriceRupiah}
-                      onChange={(event) => handleItemChange(index, 'unitPriceRupiah', Number(event.target.value))}
+                      onChange={(v) => handleItemChange(index, 'unitPriceRupiah', v ?? 0)}
                       isInvalid={Number(item.unitPriceRupiah || 0) < 0}
                     />
                   </Form.Group>

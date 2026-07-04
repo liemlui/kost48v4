@@ -1,16 +1,6 @@
 import React from 'react';
 import { formatDateSafe } from '../../pages/resources/simpleCrudHelpers';
-
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
-
-function formatRupiah(value: number | string | null | undefined): string {
-  if (value === null || value === undefined || value === '') return '-';
-  const num = typeof value === 'string' ? parseFloat(value) : value;
-  if (isNaN(num)) return '-';
-  return num.toLocaleString('id-ID');
-}
+import { formatRupiahWithoutSymbol } from '../../utils/formatCurrency';
 
 function maskPhone(phone: string | null | undefined): string {
   if (!phone) return '-';
@@ -219,10 +209,10 @@ export default function InvoicePrintLayout({ data }: Props) {
                   {line.unit ? ` ${line.unit}` : ''}
                 </td>
                 <td style={{ border: '0.5pt solid #ccc', padding: '4pt 6pt', textAlign: 'right' }}>
-                  Rp {formatRupiah(line.unitPriceRupiah)}
+                  Rp {formatRupiahWithoutSymbol(line.unitPriceRupiah)}
                 </td>
                 <td style={{ border: '0.5pt solid #ccc', padding: '4pt 6pt', textAlign: 'right', fontWeight: 500 }}>
-                  Rp {formatRupiah(line.lineAmountRupiah)}
+                  Rp {formatRupiahWithoutSymbol(line.lineAmountRupiah)}
                 </td>
               </tr>
             ))}
@@ -233,7 +223,7 @@ export default function InvoicePrintLayout({ data }: Props) {
                 TOTAL
               </td>
               <td style={{ border: '0.5pt solid #ccc', padding: '4pt 6pt', textAlign: 'right', fontWeight: 700, background: '#fafafa' }}>
-                Rp {formatRupiah(totalInvoice)}
+                Rp {formatRupiahWithoutSymbol(totalInvoice)}
               </td>
             </tr>
           </tfoot>
@@ -261,7 +251,7 @@ export default function InvoicePrintLayout({ data }: Props) {
                 <td style={{ border: '0.5pt solid #ccc', padding: '4pt 6pt' }}>{paymentMethodLabels[payment.method ?? ''] ?? payment.method ?? '-'}</td>
                 <td style={{ border: '0.5pt solid #ccc', padding: '4pt 6pt' }}>{payment.referenceNo || '-'}</td>
                 <td style={{ border: '0.5pt solid #ccc', padding: '4pt 6pt', textAlign: 'right', fontWeight: 500 }}>
-                  Rp {formatRupiah(payment.amountRupiah)}
+                  Rp {formatRupiahWithoutSymbol(payment.amountRupiah)}
                 </td>
               </tr>
             ))}
@@ -272,7 +262,7 @@ export default function InvoicePrintLayout({ data }: Props) {
                 Total Dibayar
               </td>
               <td style={{ border: '0.5pt solid #ccc', padding: '4pt 6pt', textAlign: 'right', fontWeight: 600, background: '#fafafa' }}>
-                Rp {formatRupiah(totalPaid)}
+                Rp {formatRupiahWithoutSymbol(totalPaid)}
               </td>
             </tr>
             <tr>
@@ -280,7 +270,7 @@ export default function InvoicePrintLayout({ data }: Props) {
                 Sisa
               </td>
               <td style={{ border: '0.5pt solid #ccc', padding: '4pt 6pt', textAlign: 'right', fontWeight: 700 }}>
-                Rp {formatRupiah(outstanding)}
+                Rp {formatRupiahWithoutSymbol(outstanding)}
               </td>
             </tr>
           </tfoot>
@@ -313,7 +303,7 @@ export default function InvoicePrintLayout({ data }: Props) {
             color: '#dc3545',
             fontWeight: 600,
           }}>
-            {outstanding > 0 ? `Belum Lunas — Sisa Rp ${formatRupiah(outstanding)}` : ''}
+            {outstanding > 0 ? `Belum Lunas — Sisa Rp ${formatRupiahWithoutSymbol(outstanding)}` : ''}
           </div>
         </div>
       )}

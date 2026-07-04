@@ -2,6 +2,7 @@ import { Card, Col, Form, Row, Spinner, Button, Badge } from 'react-bootstrap';
 import { Controller } from 'react-hook-form';
 import type { UseFormReturn } from 'react-hook-form';
 import type { WizardFormValues } from './types';
+import { formatRupiah, formatRupiahWithoutSymbol } from '../../../utils/formatCurrency';
 
 interface StepRoomSelectProps {
   form: UseFormReturn<WizardFormValues>;
@@ -64,12 +65,12 @@ export default function StepRoomSelect({
                         ) : null}
                         {room.price ? (
                           <div className="text-muted small">
-                            Harga Sewa: Rp {Number(room.price).toLocaleString('id-ID')} / bulan
+                            Harga Sewa: {formatRupiah(room.price)} / bulan
                           </div>
                         ) : null}
                         {room.deposit ? (
                           <div className="text-muted small">
-                            Deposit: Rp {Number(room.deposit).toLocaleString('id-ID')}
+                            Deposit: {formatRupiah(room.deposit)}
                           </div>
                         ) : null}
                         {isSelected ? (

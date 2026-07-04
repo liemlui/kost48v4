@@ -46,6 +46,10 @@ export class AssetsService {
     private readonly accountingPosting: AccountingPostingService,
   ) {}
 
+  // ═══════════════════════════════════════════════════════════
+  //  SECTION: Ledger Alignment & Readiness
+  // ═══════════════════════════════════════════════════════════
+
   async readiness() {
     const [assetCount, depreciableCount, activeCount, lastRun, totalCostAgg, accumulatedAgg] = await Promise.all([
       (this.prisma as any).fixedAsset.count(),

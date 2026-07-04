@@ -294,7 +294,9 @@ test('TC-MP10: getAvailabilityCalendar — room dengan stay aktif', async () => 
   assert.strictEqual(result.rooms.length, 1);
   const room = result.rooms[0];
   assert.strictEqual(room.status, 'OCCUPIED');
-  assert.strictEqual(room.currentTenantName, 'Budi Santoso');
+  // C01-02 (AA-01): endpoint publik TIDAK boleh bocorkan nama penghuni — selalu null.
+  assert.strictEqual(room.currentTenantName, null);
+  assert.strictEqual(room.dpTenantName, null);
   assert.strictEqual(room.days[TODAY_STR], 'HUNI');
 });
 

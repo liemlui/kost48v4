@@ -31,13 +31,44 @@ export type OperationalSetting = {
   aiLogUsage?: boolean;
   aiDraftRetentionDays?: number;
   capitalizationThresholdByCategory?: string | null;
+  // View-only status API key DeepSeek (nilai mentah TIDAK pernah dikirim backend)
+  deepseekApiKeySet?: boolean;
+  deepseekApiKeySource?: 'settings' | 'env' | null;
+  deepseekApiKeyPreview?: string | null;
   updatedAt: string;
   updatedById?: number | null;
 };
 
 export type UpdateOperationalSettingPayload = Partial<
-  Omit<OperationalSetting, 'id' | 'updatedAt' | 'updatedById'>
->;
+  Omit<
+    OperationalSetting,
+    'id' | 'updatedAt' | 'updatedById' | 'deepseekApiKeySet' | 'deepseekApiKeySource' | 'deepseekApiKeyPreview'
+  >
+> & {
+  /** Isi untuk mengganti key; string kosong = hapus key dari settings (kembali ke env fallback). */
+  deepseekApiKey?: string;
+};
+
+/** Field yang diterima PUT /settings/operational (DTO backend pakai forbidNonWhitelisted —
+ *  mengirim field asing seperti `id`/`updatedAt` membuat request DITOLAK 400). */
+const OPERATIONAL_UPDATE_KEYS = [
+  'freeElectricityKwhPerMonth', 'electricityTariffPerKwhRupiah', 'waterMeteringEnabled',
+  'waterTariffPerM3Rupiah', 'freeWaterM3PerMonth', 'wifiRupiah', 'galonRupiah',
+  'petDepositRupiah', 'extraOccupantFeePercent', 'acCleanKwhThreshold', 'tenantLoyaltyEnabled',
+  'deepseekModel', 'deepseekFinanceModel', 'deepseekBaseUrl', 'deepseekApiKey',
+  'aiFeaturesEnabled', 'aiManualOnly', 'aiOwnerAdminOnly', 'aiDailyRequestLimit',
+  'aiMaxInputChars', 'aiMaxOutputTokens', 'aiFinanceMaxOutputTokens', 'aiLogUsage',
+  'aiDraftRetentionDays', 'capitalizationThresholdByCategory',
+] as const;
+
+/** Saring objek form (mis. hasil spread dari GET) menjadi payload PUT yang valid. */
+export function pickOperationalPayload(form: Record<string, unknown>): UpdateOperationalSettingPayload {
+  const out: Record<string, unknown> = {};
+  for (const key of OPERATIONAL_UPDATE_KEYS) {
+    if (form[key] !== undefined) out[key] = form[key];
+  }
+  return out as UpdateOperationalSettingPayload;
+}
 
 export async function fetchOperationalSettings() {
   const res = await client.get<ApiEnvelope<OperationalSetting>>('/settings/operational');

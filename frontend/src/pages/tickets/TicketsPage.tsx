@@ -41,6 +41,10 @@ import {
 } from "./ticketsShared";
 import StaffTicketsMode from "./TicketsStaffMode";
 
+// ═══════════════════════════════════════════════════════════
+//  COMPONENT: TicketAnalyticsPanel
+// ═══════════════════════════════════════════════════════════
+
 function TicketAnalyticsPanel({ items, counts }: { items: TicketItem[]; counts: { all: number; open: number; inProgress: number; done: number; closed: number } }) {
   const statusData = [
     { name: 'Baru', value: counts.open, color: '#ef4444' },
@@ -146,6 +150,10 @@ function TicketAnalyticsPanel({ items, counts }: { items: TicketItem[]; counts: 
     </Row>
   );
 }
+
+// ═══════════════════════════════════════════════════════════
+//  COMPONENT: TicketsPage — State & Data Fetching
+// ═══════════════════════════════════════════════════════════
 
 export default function TicketsPage() {
   const { user } = useAuth();
@@ -278,6 +286,10 @@ export default function TicketsPage() {
   const canProgress =
     user?.role === "OWNER" || user?.role === "ADMIN" || user?.role === "STAFF";
 
+  // ═══════════════════════════════════════════════════════════
+  //  SECTION: Handlers — MarkDone, Close, TabChange
+  // ═══════════════════════════════════════════════════════════
+
   const handleResolutionImage = async (
     event: ChangeEvent<HTMLInputElement>,
   ) => {
@@ -390,6 +402,10 @@ export default function TicketsPage() {
     setActiveTab(tab);
     setPage(1);
   };
+
+  // ═══════════════════════════════════════════════════════════
+  //  SECTION: Render
+  // ═══════════════════════════════════════════════════════════
 
   if (user?.role === "STAFF") {
     return (

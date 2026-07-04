@@ -14,6 +14,10 @@ import { getRenewApprovalSafety, getRenewRequestRiskBadge } from '../../utils/re
 import { getRenewTermLabel } from '../../utils/renewTermLabels';
 import type { ApproveRenewRequestPayload, PaginatedResponse, RenewRequest } from '../../types';
 
+// ═══════════════════════════════════════════════════════════
+//  COMPONENT: RenewRequestsAdminPage
+// ═══════════════════════════════════════════════════════════
+
 function formatDate(value?: string | null) {
   if (!value) return '-';
   const date = new Date(value);

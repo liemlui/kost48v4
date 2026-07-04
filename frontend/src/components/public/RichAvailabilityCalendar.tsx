@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import { Spinner } from 'react-bootstrap';
 import { useQuery } from '@tanstack/react-query';
 import { getAvailabilityCalendar } from '../../api/bookings';
+import { formatRupiah } from '../../utils/formatCurrency';
 
 type CellStatus = 'KOSONG' | 'BOOKING_DP' | 'HUNI' | 'MAINTENANCE' | 'PERPANJANG';
 
@@ -264,7 +265,7 @@ export default function RichAvailabilityCalendar({ filter }: Props) {
                                   <span className="wcal-renew-note"> — kamar akan kosong jika batal</span>
                                 </div>
                               )}
-                              <div className="wcal-det-l wcal-det-pr">Rp{room.monthlyRateRupiah?.toLocaleString('id-ID')}/bln</div>
+                              <div className="wcal-det-l wcal-det-pr">{room.monthlyRateRupiah != null ? formatRupiah(room.monthlyRateRupiah) : '—'}/bln</div>
                               {statusLabel.key === 'huni' && room.checkInDate && room.plannedCheckOutDate && (
                                 <div className="wcal-prog">
                                   <div className="wcal-prog-bar">

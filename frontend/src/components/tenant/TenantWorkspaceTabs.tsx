@@ -82,12 +82,14 @@ function TenantAnnouncementStrip({ stage }: { stage: TenantPortalStage }) {
 export default function TenantWorkspaceTabs({
   stage,
   stageLoading = false,
+  hasStayHistory = false,
   fullName,
   initials,
   onLogout,
 }: {
   stage: TenantPortalStage;
   stageLoading?: boolean;
+  hasStayHistory?: boolean;
   fullName?: string;
   initials: string;
   onLogout: () => void;
@@ -136,7 +138,7 @@ export default function TenantWorkspaceTabs({
         <>
           <TenantAnnouncementStrip stage={stage} />
 
-          <GettingStartedGuide stage={stage} />
+          <GettingStartedGuide stage={stage} hasStayHistory={hasStayHistory} />
 
           <section className="tenant-workspace-guide-strip">
             <div>

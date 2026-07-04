@@ -51,60 +51,13 @@ export class TenantBookingsService {
     private readonly accountingPosting: AccountingPostingService,
   ) {}
 
-  // -------------------------------------------------------------------------
-  // CREATE BOOKING (tenant portal)
-  // -------------------------------------------------------------------------
+  // ═══════════════════════════════════════════════════════════
+  //  SECTION: Create Booking (tenant portal)
+  // ═══════════════════════════════════════════════════════════
 
   async createBooking(dto: CreateTenantBookingDto, user: CurrentUserPayload) {
-    if (!(await isBookingSchemaReady(this.prisma, { current: null }))) {
-      throw new ServiceUnavailableException(
-        'Fitur booking belum aktif penuh karena database belum sinkron. Jalankan sinkronisasi schema terlebih dahulu.',
-      );
-    }
-
-    const tenantId = user.tenantId;
-    if (!tenantId) {
-      throw new ConflictException('Akun tenant belum terhubung ke data tenant');
-    }
-
-    const checkInDate = parseDateOnly(dto.checkInDate, 'checkInDate tidak valid');
-    const plannedCheckOutDate = dto.plannedCheckOutDate
-      ? parseDateOnly(dto.plannedCheckOutDate, 'Tanggal renew/keluar tidak valid')
-      : null;
-
-    if (plannedCheckOutDate && plannedCheckOutDate <= checkInDate) {
-      throw new BadRequestException('Tanggal renew/keluar harus setelah check-in');
-    }
-
-    const now = new Date();
-    const today = startOfDay(now);
-    if (checkInDate < today) {
-      throw new BadRequestException('Tanggal check-in tidak boleh di masa lalu');
-    }
-
-    const isSameDayCheckIn = checkInDate.getTime() === today.getTime();
-    const jakartaHour = (now.getUTCHours() + 7) % 24;
-    if (isSameDayCheckIn && jakartaHour >= 21) {
-      throw new BadRequestException(
-        'Booking untuk hari ini sudah ditutup karena jam operasional sudah berakhir (pk 21.00 WIB). Silakan pilih tanggal check-in mulai besok.',
-      );
-    }
-
-    const tenant = await this.prisma.tenant.findUnique({ where: { id: tenantId } });
-    if (!tenant || !tenant.isActive) {
-      throw new NotFoundException('Tenant tidak ditemukan atau sudah nonaktif');
-    }
-
-    // F3-17: gate KTP — sama dengan jalur admin (stays.service.ts). Cek di sini
-    // agar tenant tanpa KTP terverifikasi tidak bisa komit DP sebelum KTP siap.
-    if (
-      String(process.env.KTP_ACTIVATION_GATE_ENABLED ?? 'false').toLowerCase() === 'true' &&
-      tenant.ktpVerifiedAt == null
-    ) {
-      throw new ConflictException(
-        'KTP tenant belum diverifikasi. Unggah & verifikasi KTP sebelum melakukan booking (gate onboarding).',
-      );
-    }
+    const { tenantId, checkInDate, plannedCheckOutDate, tenant } =
+      await this.validateBookingPreconditions(dto, user);
 
     try {
       const createdBooking = await this.prisma.$transaction(async (tx) => {
@@ -249,9 +202,9 @@ export class TenantBookingsService {
     }
   }
 
-  // -------------------------------------------------------------------------
-  // APPROVE BOOKING (admin)
-  // -------------------------------------------------------------------------
+  // ═══════════════════════════════════════════════════════════
+  //  SECTION: Approve Booking (admin)
+  // ═══════════════════════════════════════════════════════════
 
   async approveBooking(stayId: number, dto: ApproveBookingDto, actor: CurrentUserPayload) {
     const initialElectricity = new Prisma.Decimal(dto.initialElectricityKwh);
@@ -517,9 +470,9 @@ if (error instanceof Prisma.PrismaClientKnownRequestError) {
   }
 
 
-  // -------------------------------------------------------------------------
-  // REJECT BOOKING (admin)
-  // -------------------------------------------------------------------------
+  // ═══════════════════════════════════════════════════════════
+  //  SECTION: Reject Booking (admin)
+  // ═══════════════════════════════════════════════════════════
 
   async rejectBooking(stayId: number, dto: RejectBookingDto, actor: CurrentUserPayload) {
     const reviewNotes = dto.reviewNotes?.trim();
@@ -688,13 +641,9 @@ if (error instanceof Prisma.PrismaClientKnownRequestError) {
     }
   }
 
-  // -------------------------------------------------------------------------
-  // FIND MY BOOKINGS (tenant portal)
-  // -------------------------------------------------------------------------
-
-  // -------------------------------------------------------------------------
-  // CANCEL PENDING BOOKING (tenant portal)
-  // -------------------------------------------------------------------------
+  // ═══════════════════════════════════════════════════════════
+  //  SECTION: Cancel Pending Booking (tenant portal)
+  // ═══════════════════════════════════════════════════════════
 
   async cancelPendingBooking(
     stayId: number,
@@ -874,6 +823,10 @@ if (error instanceof Prisma.PrismaClientKnownRequestError) {
     }
   }
 
+  // ═══════════════════════════════════════════════════════════
+  //  SECTION: Query & Notifications
+  // ═══════════════════════════════════════════════════════════
+
   async findMine(user: CurrentUserPayload, query: TenantBookingsQueryDto) {
     const tenantId = user.tenantId;
     if (!tenantId) {
@@ -882,7 +835,7 @@ if (error instanceof Prisma.PrismaClientKnownRequestError) {
 
     const { page, limit, skip, take } = buildPagination(query.page, query.limit);
 
-    if (!(await isBookingSchemaReady(this.prisma, { current: null }))) {
+    if (!(await isBookingSchemaReady(this.prisma))) {
       return {
         items: [],
         meta: buildMeta(page, limit, 0),
@@ -1047,6 +1000,63 @@ if (error instanceof Prisma.PrismaClientKnownRequestError) {
     } catch {
       // Never throw — notification is non-critical side effect
     }
+  }
+
+
+  // ═══════════════════════════════════════════════════════════
+  //  SECTION: Helpers — Booking Preconditions
+  // ═══════════════════════════════════════════════════════════
+
+  private async validateBookingPreconditions(dto: CreateTenantBookingDto, user: CurrentUserPayload) {
+    if (!(await isBookingSchemaReady(this.prisma))) {
+      throw new ServiceUnavailableException(
+        'Fitur booking belum aktif penuh karena database belum sinkron. Jalankan sinkronisasi schema terlebih dahulu.',
+      );
+    }
+
+    const tenantId = user.tenantId;
+    if (!tenantId) {
+      throw new ConflictException('Akun tenant belum terhubung ke data tenant');
+    }
+
+    const checkInDate = parseDateOnly(dto.checkInDate, 'checkInDate tidak valid');
+    const plannedCheckOutDate = dto.plannedCheckOutDate
+      ? parseDateOnly(dto.plannedCheckOutDate, 'Tanggal renew/keluar tidak valid')
+      : null;
+
+    if (plannedCheckOutDate && plannedCheckOutDate <= checkInDate) {
+      throw new BadRequestException('Tanggal renew/keluar harus setelah check-in');
+    }
+
+    const now = new Date();
+    const today = startOfDay(now);
+    if (checkInDate < today) {
+      throw new BadRequestException('Tanggal check-in tidak boleh di masa lalu');
+    }
+
+    const isSameDayCheckIn = checkInDate.getTime() === today.getTime();
+    const jakartaHour = (now.getUTCHours() + 7) % 24;
+    if (isSameDayCheckIn && jakartaHour >= 21) {
+      throw new BadRequestException(
+        'Booking untuk hari ini sudah ditutup karena jam operasional sudah berakhir (pk 21.00 WIB). Silakan pilih tanggal check-in mulai besok.',
+      );
+    }
+
+    const tenant = await this.prisma.tenant.findUnique({ where: { id: tenantId } });
+    if (!tenant || !tenant.isActive) {
+      throw new NotFoundException('Tenant tidak ditemukan atau sudah nonaktif');
+    }
+
+    if (
+      String(process.env.KTP_ACTIVATION_GATE_ENABLED ?? 'false').toLowerCase() === 'true' &&
+      tenant.ktpVerifiedAt == null
+    ) {
+      throw new ConflictException(
+        'KTP tenant belum diverifikasi. Unggah & verifikasi KTP sebelum melakukan booking (gate onboarding).',
+      );
+    }
+
+    return { tenantId, checkInDate, plannedCheckOutDate, tenant };
   }
 
 }

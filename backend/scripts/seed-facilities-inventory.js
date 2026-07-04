@@ -36,7 +36,8 @@ async function api(method, path, body, { optional = false } = {}) {
   return j?.data ?? j;
 }
 const asList = (d) => (Array.isArray(d) ? d : (d?.items ?? d?.rows ?? d?.data ?? d?.results ?? []));
-const ymd = (d) => d.toISOString().slice(0, 10);
+// H11: toISOString() = UTC → bisa salah tanggal di WIB pagi. toLocaleDateString('en-CA') pakai timezone lokal.
+const ymd = (d) => d.toLocaleDateString('en-CA');
 const num = (v) => Number(v ?? 0);
 
 // Master barang gudang yang dibutuhkan (name harus cocok dgn nameMatchers room-facility-spec).

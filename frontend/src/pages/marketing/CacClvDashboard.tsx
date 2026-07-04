@@ -6,10 +6,7 @@ import HorizontalBarChart from '../../components/charts/HorizontalBarChart';
 import EmptyState from '../../components/common/EmptyState';
 import { getCacClvSnapshot, analyzeCacClv, type CacClvSnapshot, type CacClvAnalyzeResult } from '../../api/marketAnalysis';
 import { getApiErrorMessage } from '../../utils/getApiErrorMessage';
-
-function Rupiah(n: number): string {
-  return 'Rp ' + n.toLocaleString('id-ID');
-}
+import { formatRupiah, formatRupiahWithoutSymbol } from '../../utils/formatCurrency';
 
 function formatDate(ym: string): string {
   const [y, m] = ym.split('-');
@@ -92,9 +89,9 @@ export default function CacClvDashboard({ snapshotQuery }: Props) {
           <Card className="border-0 shadow-sm text-center h-100">
             <Card.Body className="py-2">
               <div className="text-muted small">Estimasi CLV</div>
-              <div className="fs-4 fw-bold">{clv ? Rupiah(clv.value) : '—'}</div>
+              <div className="fs-4 fw-bold">{clv ? formatRupiah(clv.value) : '—'}</div>
               <div className="text-muted" style={{ fontSize: '0.65rem' }}>
-                {clv ? `${retention.avgStayMonths ?? '?'} bln × ${Rupiah(retention.avgMonthlyRent)} × ${clv.multiplier}x` : 'Data belum cukup'}
+                {clv ? `${retention.avgStayMonths ?? '?'} bln × ${formatRupiah(retention.avgMonthlyRent)} × ${clv.multiplier}x` : 'Data belum cukup'}
               </div>
             </Card.Body>
           </Card>
@@ -163,7 +160,7 @@ export default function CacClvDashboard({ snapshotQuery }: Props) {
               <Card.Title className="fs-6">🔁 Retensi</Card.Title>
               <div className="mb-1"><strong>Renewal:</strong> {retention.renewalRate}%</div>
               <div className="mb-1"><strong>Rata-rata tinggal:</strong> {retention.avgStayMonths != null ? `${retention.avgStayMonths} bulan (${retention.avgStayDays} hari)` : '—'}</div>
-              <div><strong>Sewa rata-rata:</strong> {Rupiah(retention.avgMonthlyRent)}/bln</div>
+              <div><strong>Sewa rata-rata:</strong> {formatRupiah(retention.avgMonthlyRent)}/bln</div>
             </Card.Body>
           </Card>
         </Col>
@@ -180,8 +177,8 @@ export default function CacClvDashboard({ snapshotQuery }: Props) {
           <Card className="border-0 shadow-sm h-100">
             <Card.Body>
               <Card.Title className="fs-6">⭐ Loyalitas</Card.Title>
-              <div className="mb-1"><strong>Poin diberikan:</strong> {loyalty.pointsGiven.toLocaleString('id-ID')}</div>
-              <div className="mb-1"><strong>Poin ditukar:</strong> {loyalty.pointsRedeemed.toLocaleString('id-ID')}</div>
+              <div className="mb-1"><strong>Poin diberikan:</strong> {formatRupiahWithoutSymbol(loyalty.pointsGiven)}</div>
+              <div className="mb-1"><strong>Poin ditukar:</strong> {formatRupiahWithoutSymbol(loyalty.pointsRedeemed)}</div>
               <div><strong>Penukaran:</strong> {loyalty.redemptionCount}</div>
             </Card.Body>
           </Card>
@@ -233,7 +230,7 @@ export default function CacClvDashboard({ snapshotQuery }: Props) {
                   <div className="mb-2">
                     <strong>CLV:</strong> {(aiResult.result as any).clvEstimate.explanation}
                     {aiResult.result && (aiResult.result as any).clvEstimate?.value ? (
-                      <span className="ms-2 badge bg-primary">{Rupiah((aiResult.result as any).clvEstimate.value)}</span>
+                      <span className="ms-2 badge bg-primary">{formatRupiah((aiResult.result as any).clvEstimate.value)}</span>
                     ) : null}
                   </div>
                 ) : null}

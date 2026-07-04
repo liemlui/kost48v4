@@ -19,6 +19,7 @@ import { isPayableInvoiceStatus, tenantInvoiceStatusLabel } from '../../utils/te
 import { getInvoiceTotalAmount } from '../../utils/invoiceTotals';
 import { invoicePurposeMeta } from '../../utils/invoiceUtility';
 import { formatDateTimeWib, getDeadlineMeta } from '../../utils/dateTime';
+import { formatRupiah, formatRupiahWithoutSymbol } from '../../utils/formatCurrency';
 
 function fmtC(v: number) {
   const s = Math.abs(v || 0);
@@ -248,7 +249,7 @@ export default function MyInvoicesPage() {
               return (
                 <Alert key={`batch-${invs[0].stayId}`} variant="info" className="tenant-short-alert mb-3 d-flex flex-wrap align-items-center justify-content-between">
                   <div className="small">
-                    <strong>Bayar sekaligus</strong> — {invs.length} tagihan untuk masa sewa ini dapat dibayar bersama: total <strong>Rp {total.toLocaleString('id-ID')}</strong>.
+                    <strong>Bayar sekaligus</strong> — {invs.length} tagihan untuk masa sewa ini dapat dibayar bersama: total <strong>{formatRupiah(total)}</strong>.
                     Kirim 1 bukti bayar untuk semua.
                   </div>
                   <div className="d-flex gap-2">

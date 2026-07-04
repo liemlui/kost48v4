@@ -4,6 +4,7 @@ import { Alert, Badge, Button, Card, Col, Form, InputGroup, Modal, Row, Table } 
 import { useNavigate, useParams } from 'react-router-dom';
 import PageHeader from '../../components/common/PageHeader';
 import CurrencyDisplay from '../../components/common/CurrencyDisplay';
+import CurrencyInput from '../../components/common/CurrencyInput';
 import StatusBadge from '../../components/common/StatusBadge';
 import EmptyState from '../../components/common/EmptyState';
 import { createResource, getResource } from '../../api/resources';
@@ -22,6 +23,10 @@ const paymentMethodLabels: Record<string, string> = {
   EWALLET: 'E-Wallet',
   OTHER: 'Lainnya',
 };
+
+// ═══════════════════════════════════════════════════════════
+//  COMPONENT: InvoiceDetailPage
+// ═══════════════════════════════════════════════════════════
 
 const lineTypeLabels: Record<string, string> = {
   RENT: 'Sewa',
@@ -382,7 +387,7 @@ export default function InvoiceDetailPage() {
                           <Col md={6}>
                             <Form.Group>
                               <Form.Label>Harga Satuan</Form.Label>
-                              <Form.Control type="number" value={lineForm.unitPriceRupiah} onChange={(e) => setLineForm((prev) => ({ ...prev, unitPriceRupiah: e.target.value }))} />
+                              <CurrencyInput value={lineForm.unitPriceRupiah === '' ? undefined : Number(lineForm.unitPriceRupiah)} onChange={(v) => setLineForm((prev) => ({ ...prev, unitPriceRupiah: v == null ? '' : String(v) }))} />
                             </Form.Group>
                           </Col>
                         </Row>
@@ -500,10 +505,9 @@ export default function InvoiceDetailPage() {
               <Form.Label>Nominal</Form.Label>
               <InputGroup>
                 <InputGroup.Text>Rp</InputGroup.Text>
-                <Form.Control
-                  type="number"
-                  value={paymentForm.amountRupiah}
-                  onChange={(e) => setPaymentForm((prev) => ({ ...prev, amountRupiah: e.target.value }))}
+                <CurrencyInput
+                  value={paymentForm.amountRupiah === '' ? undefined : Number(paymentForm.amountRupiah)}
+                  onChange={(v) => setPaymentForm((prev) => ({ ...prev, amountRupiah: v == null ? '' : String(v) }))}
                   isInvalid={isOverpay}
                 />
                 {paymentPreview ? (

@@ -128,7 +128,7 @@ export default function MarketAnalysisPage() {
 
       {!configured ? (
         <Alert variant="warning">
-          <strong>DeepSeek belum aktif.</strong> Setel <code>DEEPSEEK_API_KEY</code> di <code>backend/.env</code> lalu restart backend.
+          <strong>DeepSeek belum aktif.</strong> Isi API key di <strong>Pengaturan → AI &amp; Biaya</strong> — langsung aktif tanpa restart.
           Tanpa key, chat berjalan mode panduan saja.
         </Alert>
       ) : null}

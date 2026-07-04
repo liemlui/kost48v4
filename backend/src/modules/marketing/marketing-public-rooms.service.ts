@@ -49,9 +49,11 @@ export interface PublicRoomSummary {
 
 @Injectable()
 export class MarketingPublicRoomsService {
-  private bookingSchemaStatusCache: { hasReservedRoomStatus: boolean; hasBookingRoomStatus: boolean; hasStayExpiresAt: boolean } | null = null;
-
   constructor(private readonly prisma: PrismaService) {}
+
+  // ═══════════════════════════════════════════════════════════
+  //  SECTION: Public Room Listings & Social Proof
+  // ═══════════════════════════════════════════════════════════
 
   async getPublicSocialProof() {
     const [staffReviews, staffAggregate, activeStays, externalReviews, externalAggregate] = await this.prisma.$transaction([
@@ -176,7 +178,7 @@ export class MarketingPublicRoomsService {
   async getPublicRooms(query: PublicRoomsQueryDto) {
     const { page, limit, skip, take } = buildPagination(query.page, query.limit);
 
-    if (!(await isBookingSchemaReady(this.prisma, { current: this.bookingSchemaStatusCache }))) {
+    if (!(await isBookingSchemaReady(this.prisma))) {
       return {
         items: [],
         meta: buildMeta(page, limit, 0),
@@ -256,6 +258,10 @@ export class MarketingPublicRoomsService {
     return map;
   }
 
+  // ═══════════════════════════════════════════════════════════
+  //  SECTION: Availability & Detail Methods
+  // ═══════════════════════════════════════════════════════════
+
   /** localYMD: format Date lokal → "YYYY-MM-DD" (sama seperti frontend) */
   private localYMD(d: Date): string {
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
@@ -331,9 +337,7 @@ export class MarketingPublicRoomsService {
         room: {
           select: { status: true },
         },
-        tenant: {
-          select: { fullName: true },
-        },
+        // C01-02: tenant.fullName sengaja TIDAK di-select — endpoint publik, PII dilarang.
       },
     });
 
@@ -406,13 +410,11 @@ export class MarketingPublicRoomsService {
         return start <= todayObj && (!end || end > todayObj);
       });
 
-      let currentTenantName: string | null = null;
       let checkInDate: string | null = null;
       let plannedCheckOutDate: string | null = null;
       let remainingDays = 0;
       let hasPendingRenew = false;
       let renewStatus: string | null = null;
-      let dpTenantName: string | null = null;
       let dpCheckInDate: string | null = null;
 
       if (todayStay) {
@@ -421,7 +423,6 @@ export class MarketingPublicRoomsService {
           todayStay.room.status === 'OCCUPIED';
 
         if (isOccupied) {
-          currentTenantName = todayStay.tenant?.fullName ?? null;
           checkInDate = todayStay.checkInDate
             ? this.localYMD(todayStay.checkInDate)
             : null;
@@ -439,7 +440,6 @@ export class MarketingPublicRoomsService {
           }
         } else {
           // DP booking — downPaymentPaidRupiah > 0 && belum occupied
-          dpTenantName = todayStay.tenant?.fullName ?? null;
           dpCheckInDate = todayStay.checkInDate
             ? this.localYMD(todayStay.checkInDate)
             : null;
@@ -452,7 +452,6 @@ export class MarketingPublicRoomsService {
           return bEnd - aEnd;
         });
         const latestStay = sortedStays[0];
-        currentTenantName = latestStay.tenant?.fullName ?? null;
         checkInDate = latestStay.checkInDate
           ? this.localYMD(latestStay.checkInDate)
           : null;
@@ -549,7 +548,7 @@ export class MarketingPublicRoomsService {
   }
 
   async getPublicRoomDetail(id: number) {
-    if (!(await isBookingSchemaReady(this.prisma, { current: this.bookingSchemaStatusCache }))) {
+    if (!(await isBookingSchemaReady(this.prisma))) {
       throw new ServiceUnavailableException(
         'Fitur booking belum aktif penuh karena database belum sinkron. Jalankan sinkronisasi schema terlebih dahulu.',
       );
@@ -745,6 +744,10 @@ export class MarketingPublicRoomsService {
       facilities,
     };
   }
+
+  // ═══════════════════════════════════════════════════════════
+  //  SECTION: Image Helpers & Pricing
+  // ═══════════════════════════════════════════════════════════
 
   private resolveRoomMarketingImages(room: Pick<PublicRoomRecord, 'id' | 'code' | 'name' | 'images'>): string[] {
     const existingImages = this.normalizeExistingRoomImages(room.images);

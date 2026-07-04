@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { AccountingReadinessService } from './accounting-readiness.service';
 import { TrialBalanceQueryDto } from './dto/journal-entry.dto';
@@ -27,11 +27,17 @@ function accountBalance(type: string, debit: number, credit: number) {
 
 @Injectable()
 export class AccountingReportsService {
+  private readonly logger = new Logger(AccountingReportsService.name);
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly readinessService: AccountingReadinessService,
     private readonly schemaGuard: AccountingSchemaGuard,
   ) {}
+
+  // ═══════════════════════════════════════════════════════════
+  //  SECTION: Core Reports — Trial Balance, Unmapped
+  // ═══════════════════════════════════════════════════════════
 
   async trialBalance(query: TrialBalanceQueryDto = {}) {
     await this.schemaGuard.assertReady();
@@ -40,8 +46,8 @@ export class AccountingReportsService {
 
     const openingJournalSourceIds = await mappedSourceIds(this.prisma,'OPENING_BALANCE');
     const [accounts, journalSums, openingSums] = await Promise.all([
-      (this.prisma as any).chartOfAccount.findMany({ where: { isActive: true }, orderBy: { code: 'asc' } }),
-      (this.prisma as any).journalLine.groupBy({
+      this.prisma.chartOfAccount.findMany({ where: { isActive: true }, orderBy: { code: 'asc' } }),
+      this.prisma.journalLine.groupBy({
         by: ['chartOfAccountId'],
         _sum: { debitRupiah: true, creditRupiah: true },
         where: {
@@ -51,7 +57,7 @@ export class AccountingReportsService {
           },
         },
       }),
-      (this.prisma as any).openingBalanceLine.groupBy({
+      this.prisma.openingBalanceLine.groupBy({
         by: ['chartOfAccountId'],
         _sum: { debitRupiah: true, creditRupiah: true },
         where: {
@@ -114,31 +120,31 @@ export class AccountingReportsService {
     ]);
 
     const [invoices, payments, expenses, wifiSales, deposits] = await Promise.all([
-      (this.prisma as any).invoice.findMany({
+      this.prisma.invoice.findMany({
         where: { status: { not: 'CANCELLED' as any }, id: { notIn: mappedInvoices } },
         select: { id: true, invoiceNumber: true, status: true, totalAmountRupiah: true, periodStart: true, periodEnd: true, createdAt: true },
         orderBy: { createdAt: 'desc' },
         take: 25,
       }),
-      (this.prisma as any).invoicePayment.findMany({
+      this.prisma.invoicePayment.findMany({
         where: { id: { notIn: mappedPayments } },
         select: { id: true, invoiceId: true, amountRupiah: true, paymentDate: true, method: true, createdAt: true },
         orderBy: { createdAt: 'desc' },
         take: 25,
       }),
-      (this.prisma as any).expense.findMany({
+      this.prisma.expense.findMany({
         where: { status: 'CONFIRMED' as any, id: { notIn: mappedExpenses } },
         select: { id: true, expenseDate: true, category: true, description: true, amountRupiah: true, createdAt: true },
         orderBy: { createdAt: 'desc' },
         take: 25,
       }),
-      (this.prisma as any).wifiSale.findMany({
+      this.prisma.wifiSale.findMany({
         where: { id: { notIn: mappedWifiSales } },
         select: { id: true, saleDate: true, customerName: true, packageName: true, soldPriceRupiah: true, createdAt: true },
         orderBy: { createdAt: 'desc' },
         take: 25,
       }),
-      (this.prisma as any).stay.findMany({
+      this.prisma.stay.findMany({
         where: { depositPaidAmountRupiah: { gt: 0 }, id: { notIn: mappedDeposits } },
         select: { id: true, tenantId: true, roomId: true, status: true, depositPaidAmountRupiah: true, createdAt: true },
         orderBy: { createdAt: 'desc' },
@@ -162,6 +168,9 @@ export class AccountingReportsService {
     };
   }
 
+  // ═══════════════════════════════════════════════════════════
+  //  SECTION: Journal Queries — recent, bySource
+  // ═══════════════════════════════════════════════════════════
 
   async recentJournals(query: { sourceTypes?: string; limit?: number } = {}) {
     await this.schemaGuard.assertReady();
@@ -172,7 +181,7 @@ export class AccountingReportsService {
       .filter((item) => allowedSourceTypes.includes(item));
     const limit = Math.min(Math.max(Number(query.limit ?? 20), 1), 50);
 
-    const entries = await (this.prisma as any).journalEntry.findMany({
+    const entries = await this.prisma.journalEntry.findMany({
       where: {
         status: 'POSTED' as any,
         ...(sourceTypes.length ? { sourceType: { in: sourceTypes as any } } : {}),
@@ -203,7 +212,7 @@ export class AccountingReportsService {
 
   async journalBySource(query: { sourceType: string; sourceId: string }) {
     await this.schemaGuard.assertReady();
-    const entry = await (this.prisma as any).journalEntry.findFirst({
+    const entry = await this.prisma.journalEntry.findFirst({
       where: {
         sourceType: String(query.sourceType).toUpperCase() as any,
         sourceId: String(query.sourceId),
@@ -236,11 +245,11 @@ export class AccountingReportsService {
   async profitLoss(query: TrialBalanceQueryDto = {}) {
     await this.schemaGuard.assertReady();
     const period = await resolveProfitLossPeriod(this.prisma, query);
-    const accounts = await (this.prisma as any).chartOfAccount.findMany({
+    const accounts = await this.prisma.chartOfAccount.findMany({
       where: { type: { in: ['REVENUE', 'COGS', 'EXPENSE'] as any }, isActive: true },
       orderBy: { code: 'asc' },
     });
-    const sums = await (this.prisma as any).journalLine.groupBy({
+    const sums = await this.prisma.journalLine.groupBy({
       by: ['chartOfAccountId'],
       _sum: { debitRupiah: true, creditRupiah: true },
       where: {
@@ -295,7 +304,7 @@ export class AccountingReportsService {
     const netProfit = totalRevenue - totalCogs - totalExpense;
 
     const closingJournal = period.accountingPeriod
-      ? await (this.prisma as any).journalEntry.findFirst({
+      ? await this.prisma.journalEntry.findFirst({
           where: {
             sourceType: 'CLOSING_ENTRY' as any,
             sourceId: { startsWith: `PERIOD_CLOSE:${period.key}` },
@@ -351,7 +360,9 @@ export class AccountingReportsService {
     };
   }
 
-
+  // ═══════════════════════════════════════════════════════════
+  //  SECTION: Balance Sheet
+  // ═══════════════════════════════════════════════════════════
 
   async balanceSheet(query: TrialBalanceQueryDto = {}) {
     const readiness = await this.readinessService.getReadiness();
@@ -424,15 +435,81 @@ export class AccountingReportsService {
     const assetRegisterDisclosureData = await assetRegisterDisclosure(this.prisma, grossFixedAssets, accumulatedDepreciation, netFixedAssets);
     const asOf = new Date(trial.asOf);
     asOf.setUTCHours(23, 59, 59, 999);
-    const latestClosedPeriod = await (this.prisma as any).accountingPeriod.findFirst({
+    const latestClosedPeriod = await this.prisma.accountingPeriod.findFirst({
       where: {
         status: 'CLOSED' as any,
         endDate: { lte: asOf },
         closingJournalEntryId: { not: null },
       },
       orderBy: [{ endDate: 'desc' }, { id: 'desc' }],
-      select: { id: true, year: true, month: true, closedAt: true, closingJournalEntryId: true, closingNote: true, closeBasis: true, reopenedAt: true, reopenJournalEntryId: true, reopenReason: true },
+      select: { id: true, year: true, month: true, closedAt: true, closingJournalEntryId: true, closingNote: true, closeBasis: true, reopenedAt: true, reopenJournalEntryId: true, reopenReason: true, endDate: true },
     });
+
+    // H6: Guard — jika asOf jatuh dalam periode yang SUDAH DITUTUP,
+    // currentProfit seharusnya 0 (P&L sudah dipindah ke retained earnings).
+    // Kalau tidak 0, force ke 0 untuk mencegah double-count.
+    const isAsOfWithinClosedPeriod = latestClosedPeriod != null &&
+      new Date(latestClosedPeriod.endDate).getTime() >= asOf.getTime() - 86400000; // toleransi 1 hari
+    if (isAsOfWithinClosedPeriod && currentProfit !== 0) {
+      this.logger.warn(
+        `[H6] Balance Sheet: currentProfit=Rp${currentProfit.toLocaleString('id-ID')} ` +
+        `saat asOf=${trial.asOf} berada dalam periode closed ${latestClosedPeriod!.month}/${latestClosedPeriod!.year}. ` +
+        `Dipaksa 0 — P&L seharusnya sudah dipindah ke retained earnings via CLOSING_ENTRY.`,
+      );
+      // Recalculate with currentProfit = 0
+      const correctedEquityIncludingCurrentProfit = equityBase;
+      const correctedLiabilitiesAndEquity = liabilities + correctedEquityIncludingCurrentProfit;
+      const correctedDifference = assets - correctedLiabilitiesAndEquity;
+      const correctedBalanced = correctedDifference === 0;
+
+      return {
+        ready: !guarded && correctedBalanced,
+        basis: 'LEDGER_BALANCE_SHEET_LITE_GUARDED',
+        ledgerBacked: true,
+        formalStatementReady: !guarded && correctedBalanced,
+        asOf: trial.asOf,
+        readiness,
+        trialBalancePreview: {
+          asOf: trial.asOf,
+          totalDebitRupiah: trial.totalDebitRupiah,
+          totalCreditRupiah: trial.totalCreditRupiah,
+          isBalanced: trial.isBalanced,
+        },
+        closing: {
+          latestClosedPeriod: latestClosedPeriod!,
+          retainedEarningsActive: true,
+          note: 'Periode tertutup sudah memindahkan laba/rugi ke Retained Earnings melalui CLOSING_ENTRY. Current profit/loss dipaksa 0 karena periode sudah closed (guard H6).',
+        },
+        statement: {
+          assetsRupiah: assets,
+          currentAssetsRupiah: currentAssets,
+          grossFixedAssetsRupiah: grossFixedAssets,
+          accumulatedDepreciationRupiah: accumulatedDepreciation,
+          netFixedAssetsRupiah: netFixedAssets,
+          liabilitiesRupiah: liabilities,
+          equityRupiah: equityBase,
+          currentProfitRupiah: 0,
+          equityIncludingCurrentProfitRupiah: correctedEquityIncludingCurrentProfit,
+          liabilitiesAndEquityRupiah: correctedLiabilitiesAndEquity,
+          differenceRupiah: correctedDifference,
+          balanced: correctedBalanced,
+        },
+        lines: {
+          assets: assetsLines,
+          currentAssets: currentAssetLines,
+          fixedAssets: fixedAssetLines,
+          contraAssets: contraAssetLines,
+          liabilities: liabilitiesLines,
+          equity: equityLines,
+        },
+        assetRegisterDisclosure: assetRegisterDisclosureData,
+        readinessNote: guarded
+          ? 'Balance Sheet Lite guarded: pastikan accounting readiness siap dan Trial Balance balanced sebelum membaca laporan sebagai statement formal.'
+          : correctedBalanced
+            ? 'Balance Sheet Lite siap dibaca. ⚠️ Current profit dipaksa 0 karena periode sudah ditutup (guard H6).'
+            : 'Balance Sheet Lite belum balance. Review journal dan P&L sebelum dipakai sebagai laporan formal.',
+      };
+    }
 
     return {
       ready: !guarded && balanced,
@@ -489,8 +566,9 @@ export class AccountingReportsService {
     };
   }
 
-
-
+  // ═══════════════════════════════════════════════════════════
+  //  SECTION: Readiness & Deposit Reports
+  // ═══════════════════════════════════════════════════════════
 
   async assetReadiness() {
     await this.schemaGuard.assertReady();
@@ -499,16 +577,16 @@ export class AccountingReportsService {
     const allAutoJournalSources = [...runtimeProofSources, 'DEPOSIT', 'ADJUSTMENT', 'DEPRECIATION'];
 
     const [requiredAccounts, inventoryCount, roomItemCount, assignedRoomItemCount, inboundMovementCount, candidateExpenses, journalCounts, latestProofJournals] = await Promise.all([
-      (this.prisma as any).chartOfAccount.findMany({
+      this.prisma.chartOfAccount.findMany({
         where: { code: { in: requiredAccountCodes }, isActive: true },
         select: { id: true, code: true, name: true, type: true, normalBalance: true },
         orderBy: { code: 'asc' },
       }),
-      (this.prisma as any).inventoryItem.count({ where: { isActive: true } }),
-      (this.prisma as any).roomItem.count(),
-      (this.prisma as any).roomItem.count({ where: { qty: { gt: 0 } } }),
-      (this.prisma as any).inventoryMovement.count({ where: { movementType: { in: ['IN', 'ASSIGN_TO_ROOM'] as any } } }),
-      (this.prisma as any).expense.findMany({
+      this.prisma.inventoryItem.count({ where: { isActive: true } }),
+      this.prisma.roomItem.count(),
+      this.prisma.roomItem.count({ where: { qty: { gt: 0 } } }),
+      this.prisma.inventoryMovement.count({ where: { movementType: { in: ['IN', 'ASSIGN_TO_ROOM'] as any } } }),
+      this.prisma.expense.findMany({
         where: {
           status: 'CONFIRMED' as any,
           category: { in: ['MAINTENANCE', 'SUPPLIES', 'OTHER'] as any },
@@ -518,12 +596,12 @@ export class AccountingReportsService {
         orderBy: [{ amountRupiah: 'desc' }, { expenseDate: 'desc' }],
         take: 10,
       }),
-      (this.prisma as any).journalEntry.groupBy({
+      this.prisma.journalEntry.groupBy({
         by: ['sourceType'],
         _count: { id: true },
         where: { status: 'POSTED' as any, sourceType: { in: allAutoJournalSources as any } },
       }),
-      (this.prisma as any).journalEntry.findMany({
+      this.prisma.journalEntry.findMany({
         where: { status: 'POSTED' as any, sourceType: { in: allAutoJournalSources as any } },
         select: { id: true, entryNumber: true, entryDate: true, sourceType: true, sourceId: true, totalDebitRupiah: true, totalCreditRupiah: true, isBalanced: true, postedAt: true },
         orderBy: [{ postedAt: 'desc' }, { createdAt: 'desc' }, { id: 'desc' }],
@@ -692,7 +770,7 @@ export class AccountingReportsService {
 
   async reversalWatch() {
     await this.schemaGuard.assertReady();
-    const cancelledInvoices = await (this.prisma as any).invoice.findMany({
+    const cancelledInvoices = await this.prisma.invoice.findMany({
       where: { status: 'CANCELLED' as any },
       select: { id: true, invoiceNumber: true, totalAmountRupiah: true, cancelReason: true, updatedAt: true },
       orderBy: { updatedAt: 'desc' },
@@ -700,11 +778,11 @@ export class AccountingReportsService {
     });
     const ids = cancelledInvoices.map((invoice: any) => String(invoice.id));
     const [invoiceJournals, reversalJournals] = await Promise.all([
-      (this.prisma as any).journalEntry.findMany({
+      this.prisma.journalEntry.findMany({
         where: { sourceType: 'INVOICE' as any, sourceId: { in: ids }, status: 'POSTED' as any },
         select: { id: true, sourceId: true, entryNumber: true, totalDebitRupiah: true, totalCreditRupiah: true },
       }),
-      (this.prisma as any).journalEntry.findMany({
+      this.prisma.journalEntry.findMany({
         where: { sourceType: 'ADJUSTMENT' as any, sourceId: { in: ids.map((id: string) => `INVOICE_REVERSAL:${id}`) }, status: 'POSTED' as any },
         select: { id: true, sourceId: true, entryNumber: true, totalDebitRupiah: true, totalCreditRupiah: true },
       }),
@@ -737,6 +815,9 @@ export class AccountingReportsService {
     };
   }
 
+  // ═══════════════════════════════════════════════════════════
+  //  SECTION: Cashflow & Financial Ratios
+  // ═══════════════════════════════════════════════════════════
 
   async cashflow(query: TrialBalanceQueryDto = {}) {
     await this.schemaGuard.assertReady();
@@ -749,8 +830,8 @@ export class AccountingReportsService {
     periodEnd.setUTCHours(23, 59, 59, 999);
 
     const [cashAccounts, journalLines, openingSums] = await Promise.all([
-      (this.prisma as any).cashAccount.findMany({ where: { isActive: true }, orderBy: { name: 'asc' } }),
-      (this.prisma as any).journalLine.findMany({
+      this.prisma.cashAccount.findMany({ where: { isActive: true }, orderBy: { name: 'asc' } }),
+      this.prisma.journalLine.findMany({
         where: {
           journalEntry: {
             status: 'POSTED' as any,
@@ -764,7 +845,7 @@ export class AccountingReportsService {
         },
         orderBy: { id: 'asc' },
       }),
-      (this.prisma as any).openingBalanceLine.findMany({
+      this.prisma.openingBalanceLine.findMany({
         where: {
           batch: { status: 'POSTED' as any },
           // F1-3b (F-01): saldo awal KAS = prefix '10' (1000/1010/1020), bukan '11' (1100=PIUTANG).
@@ -802,7 +883,7 @@ export class AccountingReportsService {
     // Audit E-4: saldo kas dihitung dari JURNAL (opening + Σ debit−kredit line
     // ber-cashAccountId pada entry POSTED), bukan field manual
     // CashAccount.currentBalanceRupiah yang tidak pernah di-update posting.
-    const cashLineSums = await (this.prisma as any).journalLine.groupBy({
+    const cashLineSums = await this.prisma.journalLine.groupBy({
       by: ['cashAccountId'],
       where: { cashAccountId: { not: null }, journalEntry: { status: 'POSTED' as any } },
       _sum: { debitRupiah: true, creditRupiah: true },
@@ -844,7 +925,7 @@ export class AccountingReportsService {
 
     // F1-3d: saldo awal periode = saldo akhir bulan lalu = opening CashAccount + Σ mutasi kas
     // POSTED SEBELUM periodStart. Lalu ending = beginning + netCashflow → invarian beginning+net=ending.
-    const priorCashSums = await (this.prisma as any).journalLine.groupBy({
+    const priorCashSums = await this.prisma.journalLine.groupBy({
       by: ['cashAccountId'],
       where: {
         cashAccountId: { not: null },
@@ -860,6 +941,38 @@ export class AccountingReportsService {
       ? totalCashOpening + priorCashDelta
       : openingBalanceFromJournal;
     const cashEnding = cashBeginning + netCashflow;
+
+    // H7: Guard — validasi invarian cashflow + deteksi opening balance mismatch.
+    // Saldo akhir harus cocok: beginning + netCashflow ≈ totalCashCurrent dari ledger penuh.
+    const cashReconciliationDelta = cashAccounts.length > 0
+      ? totalCashCurrent - cashEnding
+      : 0;
+    if (Math.abs(cashReconciliationDelta) > 1) {
+      this.logger.warn(
+        `[H7] Cashflow: saldo akhir tidak cocok — totalCashCurrent=Rp${totalCashCurrent.toLocaleString('id-ID')} ` +
+        `vs cashEnding=Rp${cashEnding.toLocaleString('id-ID')} (delta=Rp${cashReconciliationDelta.toLocaleString('id-ID')}). ` +
+        `Pastikan semua CashAccount memiliki openingBalanceRupiah yang benar. ` +
+        `Rumus: cashEnding = (ΣopeningBalance + ΣmutasiSebelumPeriode) + netCashflow.`,
+      );
+    }
+    // Deteksi CashAccount dengan opening=0 tapi ada mutasi journal sebelum periode —
+    // indikasi akun dibuat mid-stream tanpa opening balance yang benar.
+    const priorDeltaByCashId = new Map<number, number>(
+      priorCashSums.map((row: any) => [
+        Number(row.cashAccountId),
+        Number(row._sum?.debitRupiah ?? 0) - Number(row._sum?.creditRupiah ?? 0),
+      ]),
+    );
+    for (const ca of cashAccountBalances) {
+      const priorDelta = priorDeltaByCashId.get(ca.id) ?? 0;
+      if (ca.openingBalanceRupiah === 0 && priorDelta !== 0) {
+        this.logger.warn(
+          `[H7] CashAccount "${ca.name}" (id=${ca.id}): openingBalance=0 tapi ada mutasi journal ` +
+          `sebelum periode sebesar Rp${priorDelta.toLocaleString('id-ID')}. ` +
+          `Saldo awal (cashBeginning) mungkin tidak akurat. Pertimbangkan set openingBalanceRupiah yang benar.`,
+        );
+      }
+    }
 
     return {
       asOf: asOf.toISOString().slice(0, 10),
@@ -969,8 +1082,8 @@ export class AccountingReportsService {
     // F1-6 (F-04): hitung occupancy INLINE (bs.statement tak punya occupancyRate → dulu selalu 0).
     // operable = kamar isActive − (MAINTENANCE+INACTIVE); huni = stay ACTIVE & promoted. Konsisten finance.service.
     const [roomsByStatus, occupiedPromoted] = await Promise.all([
-      (this.prisma as any).room.groupBy({ by: ['status'], _count: { id: true }, where: { isActive: true } }),
-      (this.prisma as any).stay.count({ where: { status: 'ACTIVE' as any, initialMetersPromotedAt: { not: null } } }),
+      this.prisma.room.groupBy({ by: ['status'], _count: { id: true }, where: { isActive: true } }),
+      this.prisma.stay.count({ where: { status: 'ACTIVE' as any, initialMetersPromotedAt: { not: null } } }),
     ]);
     const roomCountByStatus: Record<string, number> = {};
     for (const r of roomsByStatus) roomCountByStatus[String(r.status)] = Number(r._count?.id ?? 0);
@@ -1020,6 +1133,10 @@ export class AccountingReportsService {
         : 'Rasio bersifat parsial karena Trial Balance belum balanced atau Balance Sheet belum siap. Beberapa rasio mungkin 0.',
     };
   }
+
+  // ═══════════════════════════════════════════════════════════
+  //  SECTION: Detail Reports (PL Detail, BS Detail)
+  // ═══════════════════════════════════════════════════════════
 
   async profitLossDetail(query: TrialBalanceQueryDto = {}) {
     await this.schemaGuard.assertReady();

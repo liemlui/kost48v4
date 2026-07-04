@@ -139,9 +139,11 @@ export class OwnerAiService {
     return this.getAiConfigSync().financeMaxOutputTokens;
   }
 
-  // ── G7: Settings, Budget & Observability ──────────────────────────────────
+  // ═══════════════════════════════════════════════════════════
+  //  SECTION: Usage Stats, Observability & Budget
+  // ═══════════════════════════════════════════════════════════
 
-  /** Statistik penggunaan AI hari ini (in-memory, per feature). Tanpa secret. */
+  /** Statistik penggunaan AI hari ini (in-memory, per feature). */
   getUsageStats() {
     const dayStart = new Date().setHours(0, 0, 0, 0);
     const dailyLimit = Number(process.env.AI_DAILY_REQUEST_LIMIT || 50);
@@ -192,10 +194,14 @@ export class OwnerAiService {
     return { ...this.getUsageStats(), recentAudit };
   }
 
+  // ═══════════════════════════════════════════════════════════
+  //  SECTION: Connection Test
+  // ═══════════════════════════════════════════════════════════
+
   /** Tes koneksi DeepSeek (OWNER). Minimal token; JANGAN bocorkan API key. */
   async testConnection(actorId: number) {
     if (!deepseekConfigured()) {
-      return { configured: false, ok: false, message: 'DEEPSEEK_API_KEY belum dikonfigurasi.' };
+      return { configured: false, ok: false, message: 'API key DeepSeek belum diisi. Isi di Pengaturan → AI & Biaya (login OWNER).' };
     }
     this.checkRateLimit(actorId, 'test-connection');
     const started = Date.now();
@@ -226,7 +232,9 @@ export class OwnerAiService {
     }
   }
 
-  // ── G1: Owner Brief ──────────────────────────────────────────────────────
+  // ═══════════════════════════════════════════════════════════
+  //  SECTION: G1 — Owner Brief & Generate
+  // ═══════════════════════════════════════════════════════════
 
   /** Snapshot ringkas bisnis untuk brief AI. */
   async buildBriefSnapshot() {
@@ -337,7 +345,10 @@ export class OwnerAiService {
     };
   }
 
-  // G4: Expense receipt OCR draft. This never creates Expense or journal rows.
+  // ═══════════════════════════════════════════════════════════
+  //  SECTION: G4/G5 — Expense OCR & KTP Validator
+  // ═══════════════════════════════════════════════════════════
+
   async draftExpenseFromOcr(ocrText: string, actorId: number) {
     this.checkRateLimit(actorId, 'expense-ocr-draft');
     const text = String(ocrText ?? '').trim();
@@ -426,7 +437,9 @@ export class OwnerAiService {
     };
   }
 
-  // ── G5: KTP OCR Validator ──────────────────────────────────────────────────
+  // ═══════════════════════════════════════════════════════════
+  //  SECTION: G5 — KTP OCR Validation
+  // ═══════════════════════════════════════════════════════════
 
   /**
    * Validasi teks OCR KTP vs data tenant. PDP: hanya TEKS OCR (bukan gambar);
@@ -558,7 +571,9 @@ export class OwnerAiService {
     };
   }
 
-  // G6: Operations & inventory assistant drafts. Read-only; final actions stay manual.
+  // ═══════════════════════════════════════════════════════════
+  //  SECTION: G6 — Ops Assistant & Finance Analysis
+  // ═══════════════════════════════════════════════════════════
 
   async draftTicketAction(ticketId: number, actorId: number) {
     this.checkRateLimit(actorId, 'ticket-action-draft');
@@ -961,7 +976,9 @@ export class OwnerAiService {
     };
   }
 
-  // ---- G3: Payment Review Assistant ---------------------------------------------
+  // ═══════════════════════════════════════════════════════════
+  //  SECTION: G8 — Payment Review & FAQ Draft
+  // ═══════════════════════════════════════════════════════════
 
   async reviewPaymentSubmission(submissionId: number, actorId: number) {
     this.checkRateLimit(actorId, 'payment-review');

@@ -218,7 +218,9 @@ export class MeterReadingsService {
     });
     if (fullStay?.initialMetersPromotedAt) {
       const readingAtDate = parseJakartaDateOnly(dto.readingAt, 'Tanggal catat meter tidak valid');
-      if (readingAtDate < fullStay.initialMetersPromotedAt) {
+      // Input meter bersifat date-only. Reading pada tanggal yang sama dengan
+      // check-in valid walau initialMetersPromotedAt punya jam aktual.
+      if (endOfDay(readingAtDate) < fullStay.initialMetersPromotedAt) {
         throw new BadRequestException('Tanggal pembacaan meter tidak boleh sebelum check-in');
       }
     }

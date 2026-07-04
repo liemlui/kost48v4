@@ -110,7 +110,7 @@ export function useBusinessHealthScore(input: BusinessHealthInput): BusinessHeal
       { id: 'collection', label: 'Collection', value: `${collectionRatio}%`, helper: `Rp ${formatCompact(collectedRupiah)} / Rp ${formatCompact(billedRupiah)}`, status: collectionRatio >= 85 ? 'SUCCESS' : 'WARNING', icon: '💰', to: '/reports?tab=finance' },
       { id: 'outstanding', label: 'Outstanding', value: `Rp ${formatCompact(outstandingRupiah)}`, helper: `${openInvoices.length} tagihan open`, status: outstandingRupiah ? 'WARNING' : 'SUCCESS', icon: '🧾', to: '/invoices' },
       { id: 'overdue', label: 'Overdue', value: overdue.length, helper: 'Perlu follow-up', status: overdue.length ? 'DANGER' : 'SUCCESS', icon: '⚠️', to: '/reports?tab=aging' },
-      { id: 'occupancy', label: 'Okupansi', value: `${occupancyRate}%`, helper: `${occupiedRooms}/${rooms.length} kamar terisi`, status: occupancyRate >= 80 ? 'SUCCESS' : 'INFO', icon: '🏠', to: '/reports?tab=operations' },
+      { id: 'occupancy', label: 'Okupansi semua kamar', value: `${occupancyRate}%`, helper: `${occupiedRooms}/${rooms.length} kamar fisik terisi (termasuk maintenance)`, status: occupancyRate >= 80 ? 'SUCCESS' : 'INFO', icon: '🏠', to: '/reports?tab=operations' },
       { id: 'net', label: 'Net snapshot', value: `Rp ${formatCompact(collectedRupiah - totalExpenseRupiah)}`, helper: 'Collected - expense tercatat', status: collectedRupiah >= totalExpenseRupiah ? 'SUCCESS' : 'WARNING', icon: '📊', to: '/reports?tab=finance' },
     ];
 

@@ -54,6 +54,10 @@ export class AccountingPostingService {
 
   constructor(private readonly prisma: PrismaService) {}
 
+  // ═══════════════════════════════════════════════════════════
+  //  SECTION: Public Posting API (idempotent entry points)
+  // ═══════════════════════════════════════════════════════════
+
   explainPostingBoundary() {
     return {
       autoPostingEnabled: true,
@@ -263,6 +267,10 @@ export class AccountingPostingService {
     });
   }
 
+  // ═══════════════════════════════════════════════════════════
+  //  SECTION: Transaction-Level Posting (Tx variants)
+  // ═══════════════════════════════════════════════════════════
+
   async postInvoiceIssuedTx(
     tx: any,
     invoiceId: number,
@@ -330,7 +338,7 @@ export class AccountingPostingService {
           `COA revenue ${code} belum tersedia.`,
         );
 
-      const isDiscountOrNegative = amount < 0;
+      const isDiscountOrNegative = amount < 0 || code === '4010';
       lines.push({
         chartOfAccountId: account.id,
         description:
@@ -419,6 +427,10 @@ export class AccountingPostingService {
       ],
     });
   }
+
+  // ═══════════════════════════════════════════════════════════
+  //  SECTION: Expense & WiFi Posting
+  // ═══════════════════════════════════════════════════════════
 
   async postExpenseTx(tx: any, expenseId: number, createdById?: number | null) {
     const expense = await tx.expense.findUnique({ where: { id: expenseId } });
@@ -705,10 +717,11 @@ export class AccountingPostingService {
     });
   }
 
-  // F3-16: settlement deposit saat FORCED-CHECKOUT — deposit menutup piutang (AR)
-  // tenant, kelebihan di-refund kas. BERBEDA dari postDepositSettlementTx yang
-  // mengkredit 4400 (potongan/forfeit damages); di sini "deduction" = pembayaran
-  // tunggakan tenant, jadi mengkredit AR 1100, bukan pendapatan.
+  // ═══════════════════════════════════════════════════════════
+  //  SECTION: Forced Checkout & Invoice Reversal
+  // ═══════════════════════════════════════════════════════════
+
+  // F3-16: settlement deposit saat FORCED-CHECKOUT
   async postForcedCheckoutDepositSettlementTx(
     tx: any,
     stayId: number,
@@ -872,6 +885,10 @@ export class AccountingPostingService {
     });
   }
 
+  // ═══════════════════════════════════════════════════════════
+  //  SECTION: DP Forfeit & Backfill
+  // ═══════════════════════════════════════════════════════════
+
   /**
    * DP hangus (audit A18, kebijakan G2=A): debit 1100 AR, kredit 4400 Penalty/
    * Admin Fee Revenue — menetralkan saldo AR yang tersisa setelah reversal
@@ -953,7 +970,7 @@ export class AccountingPostingService {
   async dryRunDepositBackfill(dto: { limit?: number } = {}) {
     const limit = Math.min(Math.max(Number(dto.limit ?? 25), 1), 50);
     const mappedDepositIds = await mappedDepositStaySourceIds(this.prisma);
-    const stays = await (this.prisma as any).stay.findMany({
+    const stays = await this.prisma.stay.findMany({
       where: { depositPaidAmountRupiah: { gt: 0 } },
       select: {
         id: true,
@@ -1151,11 +1168,12 @@ export class AccountingPostingService {
     };
   }
 
+  // ═══════════════════════════════════════════════════════════
+  //  SECTION: Rent Deferral / Recognition / Rewards
+  // ═══════════════════════════════════════════════════════════
+
   /**
-   * F4-1 (PSAK 72): penangguhan pendapatan sewa panjang — pindahkan seluruh sewa yang
-   * sudah dikreditkan ke 4000 (saat invoice issued) menjadi kewajiban Unearned (2200).
-   * Idempotent per (ADJUSTMENT, RENT_DEFERRAL:stayId). Jurnal BARU; tak menyentuh fungsi
-   * posting lama. DR 4000 (kurangi pendapatan) / CR 2200 (pendapatan diterima di muka).
+   * F4-1 (PSAK 72): penangguhan pendapatan sewa panjang.
    */
   async postRentDeferralTx(
     tx: any,
@@ -1258,6 +1276,10 @@ export class AccountingPostingService {
     });
   }
 
+  // ═══════════════════════════════════════════════════════════
+  //  SECTION: Source Router & Idempotent Runner
+  // ═══════════════════════════════════════════════════════════
+
   private async postBySourceType(
     sourceType: AutoSourceType,
     sourceId: number,
@@ -1278,7 +1300,7 @@ export class AccountingPostingService {
   ) {
     const mapped = await mappedSourceIds(this.prisma,sourceType);
     if (sourceType === "INVOICE") {
-      const rows = await (this.prisma as any).invoice.findMany({
+      const rows = await this.prisma.invoice.findMany({
         where: {
           status: { in: ["ISSUED", "PARTIAL", "PAID"] as any },
           id: { notIn: mapped },
@@ -1290,7 +1312,7 @@ export class AccountingPostingService {
       return rows.map((row: any) => row.id);
     }
     if (sourceType === "INVOICE_PAYMENT") {
-      const rows = await (this.prisma as any).invoicePayment.findMany({
+      const rows = await this.prisma.invoicePayment.findMany({
         where: { id: { notIn: mapped } },
         select: { id: true },
         orderBy: { id: "asc" },
@@ -1299,15 +1321,15 @@ export class AccountingPostingService {
       return rows.map((row: any) => row.id);
     }
     if (sourceType === "EXPENSE") {
-      const rows = await (this.prisma as any).expense.findMany({
-        where: { status: "CONFIRMED" as any, id: { notIn: mapped } },
+      const rows = await this.prisma.expense.findMany({
+        where: { status: "CONFIRMED", id: { notIn: mapped } },
         select: { id: true },
         orderBy: { id: "asc" },
         take: limit,
       });
       return rows.map((row: any) => row.id);
     }
-    const rows = await (this.prisma as any).wifiSale.findMany({
+    const rows = await this.prisma.wifiSale.findMany({
       where: { id: { notIn: mapped } },
       select: { id: true },
       orderBy: { id: "asc" },
@@ -1445,7 +1467,7 @@ export class AccountingPostingService {
     fn: (tx: any) => Promise<any>,
   ) {
     try {
-      return await (this.prisma as any).$transaction(fn);
+      return await this.prisma.$transaction(fn);
     } catch (error) {
       if (
         error instanceof Prisma.PrismaClientKnownRequestError &&

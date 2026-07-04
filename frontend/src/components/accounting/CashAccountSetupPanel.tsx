@@ -1,6 +1,7 @@
 import { FormEvent, useMemo, useState } from 'react';
 import { Button, Card, Form, Table } from 'react-bootstrap';
 import type { CashAccount, ChartOfAccount, CashAccountType } from '../../api/accounting';
+import CurrencyInput from '../common/CurrencyInput';
 import { formatRupiah } from '../../utils/formatCurrency';
 
 const cashTypes: CashAccountType[] = ['CASH', 'BANK', 'QRIS', 'EWALLET', 'OTHER'];
@@ -70,7 +71,7 @@ export default function CashAccountSetupPanel({
           </Form.Group>
           <Form.Group>
             <Form.Label>Saldo awal</Form.Label>
-            <Form.Control type="number" min={0} value={openingBalance} onChange={(event) => setOpeningBalance(event.target.value)} />
+            <CurrencyInput value={openingBalance === '' ? undefined : Number(openingBalance)} onChange={(v) => setOpeningBalance(v == null ? '' : String(v))} />
           </Form.Group>
           <Form.Group>
             <Form.Label>Nama bank</Form.Label>

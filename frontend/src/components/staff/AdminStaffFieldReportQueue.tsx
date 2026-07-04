@@ -26,6 +26,10 @@ import type { StaffFieldReport } from "../../types";
 import PaginationControls from "../common/PaginationControls";
 import { useClientPagination } from "../../hooks/useClientPagination";
 
+// ═══════════════════════════════════════════════════════════
+//  COMPONENT: AdminStaffFieldReportQueue
+// ═══════════════════════════════════════════════════════════
+
 function reportTitle(report: StaffFieldReport) {
   return (
     report.roomItem?.item?.name ||

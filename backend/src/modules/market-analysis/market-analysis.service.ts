@@ -368,7 +368,7 @@ export class MarketAnalysisService {
         configured: false,
         mode: 'RULE_FALLBACK',
         reply:
-          'Fitur analisa AI DeepSeek belum aktif. Setel DEEPSEEK_API_KEY di backend/.env lalu restart backend. ' +
+          'Fitur analisa AI DeepSeek belum aktif. Isi API key di Pengaturan → AI & Biaya (login OWNER) — langsung aktif tanpa restart. ' +
           `Saat aktif, AI memakai data nyata kos (okupansi ${snapshot.occupancyPercent}%, ` +
           `${snapshot.survey.count} survei) + wawancara untuk menyusun analisa ${kind}.`,
         done: false,

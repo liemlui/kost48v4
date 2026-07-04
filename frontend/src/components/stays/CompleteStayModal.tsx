@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { getApiErrorMessage } from '../../utils/getApiErrorMessage';
 import { Alert, Button, Form, Modal, Spinner } from "react-bootstrap";
 import { ReadinessChecklist } from "../command-center";
+import CurrencyInput from "../common/CurrencyInput";
 import { useStay } from "../../hooks/useStay";
 import { Invoice, Stay } from "../../types";
 import {
@@ -243,13 +244,10 @@ export default function CompleteStayModal({
 
         <Form.Group className="mb-2">
           <Form.Label className="small">Nominal Denda (Rp)</Form.Label>
-          <Form.Control
-            type="number"
-            min="0"
-            step="1000"
-            placeholder="Contoh: 50000"
-            value={damageChargeRupiah}
-            onChange={(e) => setDamageChargeRupiah(e.target.value)}
+          <CurrencyInput
+            placeholder="Contoh: 50.000"
+            value={damageChargeRupiah === "" ? undefined : Number(damageChargeRupiah)}
+            onChange={(v) => setDamageChargeRupiah(v == null ? "" : String(v))}
           />
         </Form.Group>
 

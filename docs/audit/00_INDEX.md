@@ -214,20 +214,46 @@ Bug paling berbahaya di aplikasi ini bukan tampilan, tapi **salah logika bisnis*
 | 02 | ✅ Selesai + REVISI (kode+API+live+build; responsive ke C19) | Fable + Reasonix | 2026-07-02 | 0/0/2/3 |
 | 03 | ✅ Selesai (kode+API+live; submit nyata & responsive ditunda) | Fable | 2026-07-02 | 0/0/0/3 |
 | 04 | ✅ Selesai (kode+API+live; JB-14 kuat) | Fable | 2026-07-02 | 0/0/0/3 |
-| 05 | 🟨 Sebagian (kode ✅ + live loop bug; occupied-view pending) | Fable | 2026-07-02 | 0/1/0/0 |
+| 05 | ✅ Kode+live (occupied✅: I6-resolved, JB-17 benar, no-loop) — **C05-01 ✅ FIXED via AE-01 + Fase AJ-01 (2026-07-04)** | Fable | 2026-07-04 | 1/0/0/0 |
 | 06 | ✅ Selesai (kode+API+live; submit flow via kode) | Fable | 2026-07-02 | 0/0/0/2 |
-| 07 | ⬜ Belum | | | |
-| 08 | ⬜ Belum | | | |
-| 09 | ⬜ Belum | | | |
-| 10 | ⬜ Belum | | | |
-| 11 | ⬜ Belum | | | |
-| 12 | ⬜ Belum | | | |
-| 13 | ⬜ Belum | | | |
-| 14 | ⬜ Belum | | | |
-| 15 | ⬜ Belum | | | |
-| 16 | ⬜ Belum | | | |
-| 17 | ⬜ Belum | | | |
-| 18 | ⬜ Belum | | | |
-| 19 | ⬜ Belum | | | |
+| 07 | ✅ Selesai (kode+live; I10 RESOLVED) | Fable | 2026-07-02 | 0/0/0/1 |
+| 08 | ✅ Selesai (I11=503→**RESOLVED** via schema-sync; I12/I13=STALE) | Fable | 2026-07-02 | 0/0/1/3 |
+| 09 | ✅ Selesai (C09-01 503=schema drift, **RESOLVED**; loop C05 tetap) | Fable | 2026-07-02 | 0/1/0/0 |
+| 10 | 🟨 Kode✅+live (JB-03 booking✅ kamar tak terkunci, JB-14 redirect✅, /stays✅); check-in end-to-end kode-only | Fable | 2026-07-03 | 0/0/1/0 |
+| 11 | ✅ Kode+live (/renew-requests render, 4-step rule + 8-state visible); alur end-to-end perlu re-seed | Fable | 2026-07-03 | 0/0/0/0 |
+| 12 | ✅ Kode+unit test+live (TB balanced 41.7jt, JB-14 finance 403) | Fable | 2026-07-03 | 0/0/0/0 |
+| 13 | ✅ Kode+unit test 21/21+live (TB balanced, deposit-liability 6.4jt, /expenses draft-not-posted, balance-sheet draft honest) | Fable | 2026-07-03 | 0/0/0/0 |
+| 14 | ✅ Kode+live (/tickets+/ac-maintenance+/surveys; survei REKALKULASI MANUAL lulus 4.2/4.6/80%; overstay auto-ops✅, JB-05 no-denda✅) | Fable | 2026-07-03 | 0/0/0/0 |
+| 15 | ✅ Kode+live (/staff-routines form+empty-state; /staff-performance insight rule-based Risiko-84 NaN-safe; JB-14) | Fable | 2026-07-03 | 0/0/0/0 |
+| 16 | ✅ Kode+live (JB-14 CRUD generik semua 403 C16-01 RESOLVED; /inventory+/loyalty render, peer-report JB-19 privasi surfaced) | Fable | 2026-07-03 | 0/0/0/0 |
+| 17 | ✅ Kode+live (owner dashboard✅, JB-08 manualOnly+no-key, /notifications money-guard sweep✅ JB-15); C17-01 okupansi 100% vs 3/13 | Fable | 2026-07-03 | 0/0/0/1 |
+| 18 | ✅ Kode+live (/profile+/settings render, 37 FAQ, JB-14 users OWNER-only); heavy pages timeout (BE degraded) | Fable | 2026-07-03 | 0/0/0/0 |
+| 19 | ✅ Kode+live (I8-resolved+version-sync; owner 390px OK; AJ-07c tenant/admin 375/768 diuji → C19-01/C19-02 tercatat) | Fable + Codex | 2026-07-04 | 0/0/2/0 |
 
 > Ganti ⬜ Belum → 🟨 Proses → ✅ Selesai. Isi jumlah temuan per severity, mis. `2/1/3/0`.
+
+---
+
+## 10. AUDIT LANJUTAN — Reasonix Code (2026-07-07)
+
+> **⚠️ BACA:** Audit Reasonix Code menemukan **82 temuan baru** yang tidak terdeteksi di checklist C01-C19. Jangan berhenti di sini — lanjut ke `docs/audit-reasonix/`.
+
+| File | Isi |
+|------|-----|
+| `docs/audit-reasonix/RINGKASAN_EKSEKUTIF.md` | **⭐ BACA INI DULU** — 82 temuan + rekomendasi |
+| `docs/audit-reasonix/01_FINANSIAL_PERHITUNGAN.md` | 18 temuan bug uang |
+| `docs/audit-reasonix/02_LOGIKA_BISNIS.md` | 16 temuan edge case |
+| `docs/audit-reasonix/03_LAPORAN_AKUNTANSI.md` | 8 temuan laporan |
+| `docs/audit-reasonix/04_UI_UX.md` | 20 temuan antarmuka |
+| `docs/audit-reasonix/05_MODUL_OPERASIONAL.md` | 15 temuan inventaris/tiket/AC/staf |
+| `docs/audit-reasonix/06_MODUL_LAINNYA.md` | 15 temuan WiFi/loyalty/survei |
+| `docs/audit-reasonix/07_CODE_QUALITY.md` | 22 temuan error handling/N+1/code smells |
+| `docs/audit-reasonix/08_REPORTING_DASHBOARD.md` | 27 temuan KPI & dashboard |
+
+Enam bug KRITIS yang tidak terdeteksi audit sebelumnya:
+1. **DISCOUNT line → journal tidak terposting** (Trial Balance bisa rusak)
+2. **Overdue aging pakai gross, bukan net** (laporan piutang menyesatkan)
+3. **Renewal cross-term undercharge** (MONTHLY→YEARLY cuma bayar 1/11)
+4. **Collection rate period mismatch** (akrual vs kas campur)
+5. **Journal gagal diswallow tanpa retry**
+6. **`dateOnly()` 4 implementasi berbeda** — ✅ SUDAH DIFIX (unifikasi)

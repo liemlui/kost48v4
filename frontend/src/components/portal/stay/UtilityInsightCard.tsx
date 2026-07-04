@@ -4,7 +4,7 @@ import { Button, Card, Spinner } from 'react-bootstrap';
 import HorizontalBarChart, { type HorizontalBarPoint } from '../../charts/HorizontalBarChart';
 import { OKABE_ITO } from '../../charts/chartPalette';
 import CurrencyDisplay from '../../common/CurrencyDisplay';
-import { fetchOperationalSettings } from '../../../api/settings';
+import { fetchPublicConfig } from '../../../api/settings';
 import { summarizeUsageSinceCheckIn, estimateUtilityCost, numeric } from '../../../utils/meterUsage';
 import type { MeterReading, Stay } from '../../../types';
 
@@ -23,9 +23,9 @@ export default function UtilityInsightCard({
   canRecord: boolean;
   onCatatMeter: () => void;
 }) {
-  const settings = useQuery({ queryKey: ['operational-settings'], queryFn: fetchOperationalSettings });
-  const freeKwh = settings.data?.freeElectricityKwhPerMonth ?? 30;
-  const waterEnabled = Boolean(settings.data?.waterMeteringEnabled);
+  const publicConfig = useQuery({ queryKey: ['public-config'], queryFn: fetchPublicConfig });
+  const freeKwh = publicConfig.data?.freeElectricityKwhPerMonth ?? 30;
+  const waterEnabled = Boolean(publicConfig.data?.waterMeteringEnabled);
   const elecTariff = numeric(stay.room?.electricityTariffPerKwhRupiah ?? stay.electricityTariffPerKwhRupiah);
   const waterTariff = numeric(stay.room?.waterTariffPerM3Rupiah ?? stay.waterTariffPerM3Rupiah);
 

@@ -38,6 +38,10 @@ export class InvoicesService {
     private readonly accountingReadiness: AccountingReadinessService,
   ) {}
 
+  // ═══════════════════════════════════════════════════════════
+  //  SECTION: Normalization & Accounting Helpers
+  // ═══════════════════════════════════════════════════════════
+
   private numeric(value: unknown): number {
     const parsed = Number(value ?? 0);
     return Number.isFinite(parsed) ? parsed : 0;
@@ -187,6 +191,9 @@ export class InvoicesService {
     };
   }
 
+  // ═══════════════════════════════════════════════════════════
+  //  SECTION: Query Methods
+  // ═══════════════════════════════════════════════════════════
 
   async findAll(query: InvoicesQueryDto) {
     const { page, limit, skip, take } = buildPagination(query.page, query.limit);
@@ -278,6 +285,10 @@ export class InvoicesService {
     return created;
   }
 
+  // ═══════════════════════════════════════════════════════════
+  //  SECTION: Invoice Create + Issue
+  // ═══════════════════════════════════════════════════════════
+
   async createWithLinesAndIssue(dto: CreateInvoiceWithLinesAndIssueDto, actor: CurrentUserPayload, opts?: { systemIssued?: boolean }) {
     // systemIssued: invoice yang nominalnya dihitung sistem (mis. tagihan meter dari
     // pencatatan mandiri tenant). Aman walau aktor bukan owner/admin karena tidak ada
@@ -312,6 +323,13 @@ export class InvoicesService {
 
     const existingNumber = await tx.invoice.findUnique({ where: { invoiceNumber: dto.invoiceNumber } });
     if (existingNumber) throw new ConflictException('Nomor tagihan sudah digunakan');
+
+    // H12: cegah duplicate invoice untuk stay+period yang sama.
+    const existingPeriod = await tx.invoice.findFirst({
+      where: { stayId: dto.stayId, periodStart: new Date(dto.periodStart), periodEnd: new Date(dto.periodEnd), status: { notIn: [InvoiceStatus.CANCELLED] as any } },
+      select: { id: true, invoiceNumber: true },
+    });
+    if (existingPeriod) throw new ConflictException(`Tagihan untuk periode ini sudah ada: ${existingPeriod.invoiceNumber}`);
 
     const created = await tx.invoice.create({
       data: {
@@ -391,11 +409,11 @@ export class InvoicesService {
     if (!line || line.invoiceId !== invoiceId) throw new NotFoundException('Invoice atau line tidak ditemukan');
     
     // Hitung lineAmountRupiah jika qty atau unitPriceRupiah berubah
-    const updateData: Prisma.InvoiceLineUpdateInput = { 
-      lineType: dto.lineType as InvoiceLineType, 
-      utilityType: dto.utilityType as UtilityType, 
-      description: dto.description, 
-      sortOrder: dto.sortOrder 
+    const updateData: Prisma.InvoiceLineUpdateInput = {
+      ...(dto.lineType !== undefined ? { lineType: dto.lineType as InvoiceLineType } : {}),
+      ...(dto.utilityType !== undefined ? { utilityType: dto.utilityType as UtilityType } : {}),
+      ...(dto.description !== undefined ? { description: dto.description } : {}),
+      ...(dto.sortOrder !== undefined ? { sortOrder: dto.sortOrder } : {}),
     };
     
     if (dto.qty !== undefined) {
@@ -491,6 +509,10 @@ export class InvoicesService {
     await this.audit.log({ actorUserId: actor.id, action: 'ISSUE', entityType: 'Invoice', entityId: String(result.updated.id), oldData: result.invoice, newData: response });
     return response;
   }
+
+  // ═══════════════════════════════════════════════════════════
+  //  SECTION: Cancel Invoice
+  // ═══════════════════════════════════════════════════════════
 
   async cancel(id: number, dto: CancelInvoiceDto, actor: CurrentUserPayload) {
     this.assertFinanceMutationAllowed(actor);

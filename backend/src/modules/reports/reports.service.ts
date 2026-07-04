@@ -8,6 +8,10 @@ import { roundRupiah } from '../../common/business/money.helper';
 export class ReportsService {
   constructor(private readonly prisma: PrismaService) {}
 
+  // ═══════════════════════════════════════════════════════════
+  //  SECTION: Income & Overdue Reports
+  // ═══════════════════════════════════════════════════════════
+
   private operationalApproximationMetadata(reportName: string) {
     return {
       reportName,
@@ -101,7 +105,7 @@ export class ReportsService {
         id: true,
         dueDate: true,
         totalAmountRupiah: true,
-        _count: { select: { payments: true } },
+        payments: { select: { amountRupiah: true } },
       },
     });
 
@@ -118,7 +122,11 @@ export class ReportsService {
     for (const inv of overdueInvoices) {
       const dueMs = new Date(inv.dueDate).getTime();
       const diffDays = Math.floor((todayMs - dueMs) / (1000 * 60 * 60 * 24));
-      const amount = Number(inv.totalAmountRupiah);
+      const paid = (inv as any).payments?.reduce(
+        (sum: number, p: any) => sum + Number(p.amountRupiah ?? 0),
+        0,
+      ) ?? 0;
+      const amount = Math.max(0, Number(inv.totalAmountRupiah) - paid);
 
       let bucket: keyof typeof buckets;
       if (diffDays <= 0) {
@@ -257,6 +265,10 @@ export class ReportsService {
    * Expense = all expenses in period
    * Net Profit = Revenue - Expense
    */
+  // ═══════════════════════════════════════════════════════════
+  //  SECTION: Profit/Loss & Financial Ratios
+  // ═══════════════════════════════════════════════════════════
+
   async profitLoss(year: number, month: number) {
     const start = new Date(Date.UTC(year, month - 1, 1));
     const end = new Date(Date.UTC(year, month, 1));
@@ -367,7 +379,9 @@ export class ReportsService {
       ? Math.round((netProfit / totalRevenue) * 10000) / 100
       : 0;
 
-    // Collection Rate (period: payments received / billed in the same month)
+    // Collection Rate (period: payments received vs billed — basis periode berbeda)
+    // AL-FIX-4: totalBilled = invoice.periodStart (akrual), totalPaid = paymentDate (kas).
+    // PERHATIAN: dua jendela berbeda → rate >100% mungkin terjadi.
     const collectionRate = totalBilled > 0
       ? Math.round((totalPaid / totalBilled) * 10000) / 100
       : 0;
@@ -474,6 +488,10 @@ export class ReportsService {
         'Total tagihan bulan ini dibagi jumlah kamar terisi saat ini (estimasi kasar, bukan revenue per room-day)',
     };
   }
+
+  // ═══════════════════════════════════════════════════════════
+  //  SECTION: Occupancy Reports
+  // ═══════════════════════════════════════════════════════════
 
   async occupancyDaily(fromInput: string, toInput: string) {
     const from = this.parseDateOnly(fromInput, 'from');

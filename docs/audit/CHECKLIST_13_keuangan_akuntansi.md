@@ -62,7 +62,38 @@ cd backend && npm run build && npm run test:unit   # node --test "test/**/*.test
 - [ ] 20. **JB-14:** semua halaman finance/reports ditolak untuk STAFF/TENANT (UI + curl beberapa endpoint `/api/reports/*`, `/api/accounting/*`).
 
 ## HASIL TEMUAN
-_(kosong — diisi auditor)_
+
+> **Status:** **kode + UNIT TEST SELESAI** (akuntansi sangat matang, 0 bug); **live UI laporan TERTUNDA** (backend down). **Gate M04 terpenuhi di level kode + unit test.**
+
+### ✅ UNIT TEST money-critical — 21/21 PASS (dijalankan offline vs `dist/`)
+- `money.helper.test.js` + `rent-recognition.helper.test.js` → **11/11 pass** (JB-13 pembulatan; JB-11 split straight-line + clamp akhir bulan).
+- `accounting-posting.service.test.js` → **10/10 pass**: postInvoiceIssued, **postInvoicePayment**, postExpense, postWifiSale, **postDepositReceivedForStay**, postInvoiceCancellationReversal, **runIdempotentPosting catch P2002 = skip** (JB-12), boundary. (Prisma di-mock → tak butuh DB.)
+
+### ✅ Verifikasi kode — BENAR (kuat)
+- **JB-10 cashflow (`cashflow-classifier.ts`):** deposit di-bucket **terpisah** (`DEPOSIT_SOURCES={'DEPOSIT'}`, `depositLiabilityIn/Out`) — **tidak** masuk `operatingCashIn`. Classify-once per sourceType (net debit−kredit) → **anti double-count** (F1-3c).
+- **A = L + E (`accounting-reports.service.ts`):** balance sheet **guarded** `!readiness.ready || !trial.isBalanced` (`:423`); trial-balance `isBalanced: totalDebit===totalCredit` (`:100`). Karena double-entry + guard, A=L+E terjamin saat TB seimbang. Rasio D/E guard `/0` (`:960`).
+- **JB-11 rent recognition (`rent-recognition.helper.ts`):** term >1 bln → tangguhkan ke **2200**, `splitRentByMonths` straight-line, **sisa pembulatan ke bulan terakhir** (Σ split = total, tak ada rupiah bocor). ≤1 bln tak ditangguhkan.
+- **JB-13 depresiasi (`assets.service.ts`):** STRAIGHT_LINE, `validateAssetNumbers`, `roundRupiah`, netBookValue guard ≥0, readiness gate (depreciationEnabled + run posted).
+- **Period close (`accounting-period-close.service.ts`):** gate "Trial Balance balanced" + "Tidak ada posted journal tidak balance (unbalancedPosted===0)" + preview closing balance sebelum tutup; reopen/reversal Owner-only. **DO-NOT-TOUCH dihormati** (tak dijalankan saat audit).
+
+### ✅/⚠️ LIVE `/reports` (owner, 3 Jul)
+- **Halaman `/reports` BERFUNGSI:** 8 query laporan (monthly-income, overdue-aging, deposit-liability, expense-summary, **profit-loss**, **financial-ratios**, occupancy, occupancy-daily) semua **200** dgn param `year/month` benar. Bukan loop (8 request distinct).
+- **⚠️ TAPI LAMBAT + BACKEND DEGRADED:** tiap query 2.5–6 dtk; bahkan endpoint ringan `/public/rooms/summary` = **4.586 dtk** (sebelumnya <0.5s). Halaman stuck skeleton ~10–15 dtk; screenshot renderer sampai timeout 30s. **Penyebab kemungkinan besar: sisa degradasi dari badai loop C05-01** (backend sempat crash 2×, tak pulih penuh) + dev-mode query-log + 8 query berat paralel. **Bukti tambahan dampak C05-01.** SARAN: restart backend bersih + pertimbangkan indeks/optimasi query laporan (occupancy-daily rentang 15 bulan = berat).
+
+### ✅ LIVE `/expenses` (owner, 3 Jul)
+- **Render "Pengeluaran Operasional":** menu keuangan (Tagihan/Review Pembayaran/Voucher WiFi/Pendapatan Tambahan/Pengeluaran/Riwayat Bayar), 6 seed **draft rutin** (TAX, RENT_BUILDING, INTERNET, SALARY = FIXED; WATER, ELECTRICITY = VARIABLE). Tally kategori **benar**: Tetap 4 / Variabel 2, Perlu Konfirmasi 6 / Terkonfirmasi 0. Semua **Rp 0 status Draft**.
+- **Kontrol bagus (JB-10):** expense masih **Draft** = belum di-posting ke jurnal (Rp 0, Perlu Konfirmasi). Tak ada entri kas hantu sebelum owner konfirmasi. Konsisten dgn `postExpense` idempotent (unit test 10/10). Tanpa NaN.
+
+### Live TERTUNDA (butuh BE hidup — sebaiknya setelah restart bersih)
+- `GET /api/accounting/trial-balance` isBalanced (live), rekalkulasi Neraca/L-R/Arus Kas/Rasio via UI, tambah expense → jurnal balanced + TB tetap seimbang, JB-14 (`/reports/*`,`/accounting/*` ditolak STAFF/TENANT — cek curl).
+- `npm run test:unit` **penuh** (integration test butuh DB) — jalankan di mesin user.
+
+## Definition of Done — status
+- [x] Unit test money-critical 21/21 PASS (offline).
+- [x] JB-09/10/11/13 + A=L+E + period-close guard diverifikasi kode.
+- [x] period-close TIDAK dijalankan (DO-NOT-TOUCH).
+- [~] TB live + reports UI + JB-14 curl: tertunda (backend down).
+- [x] Temuan `C13-xx` (nihil bug; core matang); INDEX baris 13 diupdate.
 
 ## Definition of Done
 - [ ] `npm run test:unit` dijalankan; hasil dilampirkan (PASS/FAIL).

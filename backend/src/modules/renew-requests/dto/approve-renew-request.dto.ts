@@ -1,4 +1,5 @@
-import { IsDateString, IsInt, IsNumberString, IsOptional, IsString, Min } from 'class-validator';
+import { Type } from 'class-transformer';
+import { IsDateString, IsInt, IsNumber, IsOptional, IsString, Min } from 'class-validator';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 
 export class ApproveRenewRequestDto {
@@ -13,15 +14,17 @@ export class ApproveRenewRequestDto {
   @Min(0)
   agreedRentAmountRupiah?: number;
 
-  @ApiPropertyOptional({ example: '1234.000', description: 'Wajib saat menerbitkan invoice pelunasan; tidak perlu saat finalisasi setelah invoice PAID' })
+  @ApiPropertyOptional({ example: '1234', description: 'Wajib saat menerbitkan invoice pelunasan; tidak perlu saat finalisasi setelah invoice PAID' })
   @IsOptional()
-  @IsNumberString({}, { message: 'Meter listrik terbaru harus berupa angka' })
-  electricityReadingValue?: string;
+  @Type(() => Number)
+  @IsNumber({}, { message: 'Meter listrik terbaru harus berupa angka' })
+  electricityReadingValue?: number;
 
-  @ApiPropertyOptional({ example: '88.000', description: 'Wajib saat menerbitkan invoice pelunasan; tidak perlu saat finalisasi setelah invoice PAID' })
+  @ApiPropertyOptional({ example: '88', description: 'Wajib saat menerbitkan invoice pelunasan; tidak perlu saat finalisasi setelah invoice PAID' })
   @IsOptional()
-  @IsNumberString({}, { message: 'Meter air terbaru harus berupa angka' })
-  waterReadingValue?: string;
+  @Type(() => Number)
+  @IsNumber({}, { message: 'Meter air terbaru harus berupa angka' })
+  waterReadingValue?: number;
 
   @ApiPropertyOptional({ example: '2026-06-30T10:00:00.000Z', description: 'Wajib saat menerbitkan invoice pelunasan; tidak perlu saat finalisasi setelah invoice PAID' })
   @IsOptional()

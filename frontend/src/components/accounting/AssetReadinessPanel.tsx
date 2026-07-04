@@ -1,14 +1,13 @@
 import { Alert, Badge, Card, Col, Row, Table } from 'react-bootstrap';
 import type { AssetReadiness } from '../../api/accounting';
+import { formatRupiah, formatRupiahWithoutSymbol } from '../../utils/formatCurrency';
 
 type Props = {
   readiness?: AssetReadiness;
   isLoading?: boolean;
 };
 
-function formatRupiah(value?: number | null) {
-  return `Rp ${Number(value ?? 0).toLocaleString('id-ID')}`;
-}
+
 
 function tone(ready?: boolean) {
   return ready ? 'success' : 'warning';

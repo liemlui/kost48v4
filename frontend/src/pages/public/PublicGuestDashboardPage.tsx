@@ -30,12 +30,17 @@ import {
   isPublicRoomBookable,
 } from '../../utils/publicRoomDisplay';
 import { resolveAbsoluteFileUrl } from '../../utils/resolveAbsoluteFileUrl';
+import { formatRupiah, formatRupiahWithoutSymbol } from '../../utils/formatCurrency';
 import {
   NAV_LINKS, GALLERY_ITEMS, FACILITY_GROUPS, TRUST_ITEMS, HOME_FAQ_ITEMS, EXTRA_FAQ_ITEMS, MAPS_EMBED_URL, CATALOG_BATCH_SIZE,
   resolvePublicMarketingAssetUrl, getTodayDateInput, formatCompactRupiah, formatMonthlyRange, buildWhatsAppUrl, buildRoomWhatsAppUrl, getRoomCover,
   Lightbox, GuestTopbar, RoomPreviewCard, RoomPreviewSkeleton, GuestFooter, MobileShortcutNav,
 } from './publicGuestShared';
 const HERO_SUB_TEXT = 'Kamar nyaman dengan pilihan AC atau kipas, fasilitas harian lengkap, dan proses booking yang lebih jelas dari awal.';
+
+// ═══════════════════════════════════════════════════════════
+//  COMPONENT: PublicGuestDashboardPage
+// ═══════════════════════════════════════════════════════════
 
 export default function PublicGuestDashboardPage() {
   const { user } = useAuth();
@@ -298,11 +303,11 @@ export default function PublicGuestDashboardPage() {
       let answer = item.answer;
       if (item.question === 'Bagaimana sistem listrik?') {
         answer = answer.replace('Jatah gratis 30 kWh/bulan', `Jatah gratis ${freeKwh} kWh/bulan`);
-        answer = answer.replace('Rp 2.500/kWh', `Rp ${electricityTariff.toLocaleString('id-ID')}/kWh`);
+        answer = answer.replace('Rp 2.500/kWh', `{formatRupiah(electricityTariff)}/kWh`);
       } else if (item.question === 'Apakah tersedia WiFi?') {
-        answer = answer.replace('Rp 50.000', `Rp ${wifiPrice.toLocaleString('id-ID')}`);
+        answer = answer.replace('Rp 50.000', `{formatRupiah(wifiPrice)}`);
       } else if (item.question === 'Apakah boleh membawa hewan peliharaan?') {
-        answer = answer.replace('Rp 100.000', `Rp ${petDeposit.toLocaleString('id-ID')}`);
+        answer = answer.replace('Rp 100.000', `{formatRupiah(petDeposit)}`);
       }
       return { ...item, answer };
     });

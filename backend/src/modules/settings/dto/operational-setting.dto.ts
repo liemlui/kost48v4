@@ -21,6 +21,8 @@ export class UpdateOperationalSettingDto {
   @IsOptional() @IsString() @MaxLength(100) deepseekModel?: string;
   @IsOptional() @IsString() @MaxLength(100) deepseekFinanceModel?: string;
   @IsOptional() @IsString() @MaxLength(300) deepseekBaseUrl?: string;
+  // API key DeepSeek (owner-request 2026-07-04): isi via Settings→AI; string kosong = hapus (kembali ke env fallback).
+  @IsOptional() @IsString() @MaxLength(200) deepseekApiKey?: string;
   @IsOptional() @IsBoolean() aiFeaturesEnabled?: boolean;
   @IsOptional() @IsBoolean() aiManualOnly?: boolean;
   @IsOptional() @IsBoolean() aiOwnerAdminOnly?: boolean;

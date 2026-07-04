@@ -1,16 +1,12 @@
 import { PrismaService } from '../../prisma/prisma.service';
+import { dateOnlyWib } from '../../common/utils/date-only';
 
 export const AUTO_SOURCE_TYPES = ['INVOICE', 'INVOICE_PAYMENT', 'EXPENSE', 'WIFI_SALE'] as const;
 export type AutoSourceType = (typeof AUTO_SOURCE_TYPES)[number];
 
-export function dateOnly(value: Date | string) {
-  const date = value instanceof Date ? new Date(value.getTime()) : new Date(value);
-  // F2-14 (F-25/E-6): bucket per TANGGAL WIB (UTC+7), bukan komponen UTC — agar transaksi
-  // dini hari WIB (00:00–07:00) tak jatuh ke tanggal/bulan kemarin. Hasil = UTC-midnight dari
-  // tanggal kalender WIB, konsisten dengan batas periode laporan akuntansi (Date.UTC(y,m,1)).
-  const wib = new Date(date.getTime() + 7 * 60 * 60 * 1000);
-  return new Date(Date.UTC(wib.getUTCFullYear(), wib.getUTCMonth(), wib.getUTCDate()));
-}
+// Unifikasi 2026-07-07 — pakai shared utility, re-export untuk backward compatibility.
+const dateOnly = dateOnlyWib;
+export { dateOnly };
 
 export async function mappedDepositStaySourceIds(prisma: PrismaService): Promise<Set<number>> {
   const entries = await (prisma as any).journalEntry.findMany({
@@ -73,6 +69,7 @@ export function revenueCodeForInvoiceLine(lineType?: string | null, utilityType?
   if (lineType === 'WATER' || utilityType === 'WATER') return '4110';
   if (lineType === 'WIFI') return '4200';
   if (lineType === 'PENALTY') return '4400';
+  if (lineType === 'DISCOUNT') return '4010'; // Contra-revenue — Sales Discount
   return '4300';
 }
 

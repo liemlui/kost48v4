@@ -4,10 +4,11 @@ import { Alert, Badge, Button, Card, Col, Form, Modal, Row, Spinner, Tab, Tabs }
 import { useSearchParams } from 'react-router-dom';
 import client from '../../api/client';
 import SafeImage from '../../components/common/SafeImage';
+import CurrencyInput from '../../components/common/CurrencyInput';
 import { SkeletonBlock } from '../../components/common/SkeletonLoader';
 import { useConfirm } from '../../components/common/ConfirmProvider';
 import { createFaq, deleteFaq, fetchAllFaqs, updateFaq, type FaqItem } from '../../api/faqs';
-import { fetchOperationalSettings, updateOperationalSettings, type OperationalSetting } from '../../api/settings';
+import { fetchOperationalSettings, pickOperationalPayload, updateOperationalSettings, type OperationalSetting } from '../../api/settings';
 import { getApiErrorMessage } from '../../utils/getApiErrorMessage';
 import { listFacilityImages, uploadFacilityImage, deleteFacilityImage } from '../../api/facilityImages';
 import { deleteMarketingAsset, listMarketingAssets, uploadMarketingAsset } from '../../api/marketingAssets';
@@ -32,6 +33,10 @@ const FACILITY_SLUGS: { slug: string; label: string }[] = [
   { slug: 'galon-air', label: 'Galon air' },
   { slug: 'tv-tambahan', label: 'TV tambahan' },
 ];
+
+// ═══════════════════════════════════════════════════════════
+//  COMPONENT: Helpers & Sub-Panels
+// ═══════════════════════════════════════════════════════════
 
 function resolvePublicPreviewUrl(url?: string | null) {
   if (!url) return null;
@@ -479,11 +484,9 @@ function FaqManagementPanel() {
             <Col md={4}>
               <Form.Group>
                 <Form.Label>Urutan tampil</Form.Label>
-                <Form.Control
-                  type="number"
-                  min={0}
+                <CurrencyInput
                   value={form.sortOrder}
-                  onChange={(e) => setForm((p) => ({ ...p, sortOrder: Number(e.target.value) }))}
+                  onChange={(v) => setForm((p) => ({ ...p, sortOrder: v ?? 0 }))}
                 />
                 <Form.Text>Angka kecil tampil lebih atas.</Form.Text>
               </Form.Group>
@@ -727,14 +730,14 @@ function TariffSettingsPanel() {
           <Col md={6}>
             <Form.Group>
               <Form.Label>Jatah listrik gratis / bulan (kWh)</Form.Label>
-              <Form.Control type="number" min={0} value={form.freeElectricityKwhPerMonth} onChange={(e) => set('freeElectricityKwhPerMonth', Number(e.target.value))} />
+              <CurrencyInput value={form.freeElectricityKwhPerMonth} onChange={(v) => set('freeElectricityKwhPerMonth', v ?? 0)} />
               <Form.Text muted>Pemakaian di bawah jatah ini tidak ditagih.</Form.Text>
             </Form.Group>
           </Col>
           <Col md={6}>
             <Form.Group>
               <Form.Label>Tarif listrik / kWh (Rp)</Form.Label>
-              <Form.Control type="number" min={0} value={form.electricityTariffPerKwhRupiah} onChange={(e) => set('electricityTariffPerKwhRupiah', Number(e.target.value))} />
+              <CurrencyInput value={form.electricityTariffPerKwhRupiah} onChange={(v) => set('electricityTariffPerKwhRupiah', v ?? 0)} />
               <Form.Text muted>Untuk pemakaian melebihi jatah gratis.</Form.Text>
             </Form.Group>
           </Col>
@@ -752,13 +755,13 @@ function TariffSettingsPanel() {
               <Col md={6}>
                 <Form.Group>
                   <Form.Label>Tarif air / m³ (Rp)</Form.Label>
-                  <Form.Control type="number" min={0} value={form.waterTariffPerM3Rupiah} onChange={(e) => set('waterTariffPerM3Rupiah', Number(e.target.value))} />
+                  <CurrencyInput value={form.waterTariffPerM3Rupiah} onChange={(v) => set('waterTariffPerM3Rupiah', v ?? 0)} />
                 </Form.Group>
               </Col>
               <Col md={6}>
                 <Form.Group>
                   <Form.Label>Jatah air gratis / bulan (m³)</Form.Label>
-                  <Form.Control type="number" min={0} value={form.freeWaterM3PerMonth} onChange={(e) => set('freeWaterM3PerMonth', Number(e.target.value))} />
+                  <CurrencyInput value={form.freeWaterM3PerMonth} onChange={(v) => set('freeWaterM3PerMonth', v ?? 0)} />
                 </Form.Group>
               </Col>
             </>
@@ -767,28 +770,28 @@ function TariffSettingsPanel() {
           <Col md={6}>
             <Form.Group>
               <Form.Label>WiFi per gadget / bulan (Rp)</Form.Label>
-              <Form.Control type="number" min={0} value={form.wifiRupiah ?? 50000} onChange={(e) => set('wifiRupiah', Number(e.target.value))} />
+              <CurrencyInput value={form.wifiRupiah ?? 50000} onChange={(v) => set('wifiRupiah', v ?? 0)} />
               <Form.Text muted>Biaya berlangganan WiFi per perangkat per bulan.</Form.Text>
             </Form.Group>
           </Col>
           <Col md={6}>
             <Form.Group>
               <Form.Label>Galon air (Voila) / galon (Rp)</Form.Label>
-              <Form.Control type="number" min={0} value={form.galonRupiah ?? 20000} onChange={(e) => set('galonRupiah', Number(e.target.value))} />
+              <CurrencyInput value={form.galonRupiah ?? 20000} onChange={(v) => set('galonRupiah', v ?? 0)} />
               <Form.Text muted>Harga jual galon air Voila dari pengelola.</Form.Text>
             </Form.Group>
           </Col>
           <Col md={6}>
             <Form.Group>
               <Form.Label>Deposit hewan peliharaan (Rp)</Form.Label>
-              <Form.Control type="number" min={0} value={form.petDepositRupiah ?? 100000} onChange={(e) => set('petDepositRupiah', Number(e.target.value))} />
+              <CurrencyInput value={form.petDepositRupiah ?? 100000} onChange={(v) => set('petDepositRupiah', v ?? 0)} />
               <Form.Text muted>Deposit refundable untuk tenant yang membawa hewan peliharaan.</Form.Text>
             </Form.Group>
           </Col>
           <Col md={6}>
             <Form.Group>
               <Form.Label>Biaya penghuni ekstra (%)</Form.Label>
-              <Form.Control type="number" min={0} max={100} value={form.extraOccupantFeePercent ?? 20} onChange={(e) => set('extraOccupantFeePercent', Number(e.target.value))} />
+              <CurrencyInput value={form.extraOccupantFeePercent ?? 20} onChange={(v) => set('extraOccupantFeePercent', Math.min(100, v ?? 0))} />
               <Form.Text muted>% dari sewa per penghuni ekstra (di atas batas gratis per roomSize).</Form.Text>
             </Form.Group>
           </Col>
@@ -796,7 +799,7 @@ function TariffSettingsPanel() {
           <Col md={6}>
             <Form.Group>
               <Form.Label>Ambang pemakaian AC → cuci (kWh)</Form.Label>
-              <Form.Control type="number" min={0} value={form.acCleanKwhThreshold ?? 200} onChange={(e) => set('acCleanKwhThreshold', Number(e.target.value))} />
+              <CurrencyInput value={form.acCleanKwhThreshold ?? 200} onChange={(v) => set('acCleanKwhThreshold', v ?? 0)} />
               <Form.Text muted>Sistem membuat tiket cuci AC bila estimasi pemakaian (watt × jam × hari sejak cuci terakhir) mencapai angka ini — pemicu dini selain interval hari/bulan per-kamar. Isi 0 untuk pakai interval saja.</Form.Text>
             </Form.Group>
           </Col>
@@ -855,7 +858,16 @@ function AiSettingsPanel() {
   useEffect(() => { if (db) setForm({ ...db }); }, [db]);
   const setF = (k: string, v: any) => setForm((p: any) => ({ ...p, [k]: v }));
 
-  const save = () => updateMutation.mutate(form as any);
+  // API key diketik terpisah dari form (GET tidak pernah memuat nilai key — hanya status/preview).
+  const [apiKeyInput, setApiKeyInput] = useState('');
+
+  const save = () => {
+    // pickOperationalPayload: buang field non-DTO (id/updatedAt/dll) — backend forbidNonWhitelisted menolak 400.
+    const payload = pickOperationalPayload(form);
+    const typedKey = apiKeyInput.trim();
+    if (typedKey) payload.deepseekApiKey = typedKey;
+    updateMutation.mutate(payload, { onSuccess: () => setApiKeyInput('') });
+  };
 
   return (
     <div>
@@ -863,7 +875,7 @@ function AiSettingsPanel() {
         <div>
           <h3 className="h5 mb-0">AI &amp; Biaya</h3>
           <small className="text-muted">
-            Status DeepSeek, batas harian, penggunaan, dan jejak keputusan. API key tetap diatur via <code>.env</code>. Model &amp; limit bisa diubah di sini.
+            Status DeepSeek, batas harian, penggunaan, dan jejak keputusan. API key cukup diisi di sini — tersimpan di database dan langsung aktif tanpa restart (env hanya fallback).
           </small>
         </div>
         <Button size="sm" variant="primary" onClick={save} disabled={updateMutation.isPending || !db}>
@@ -877,7 +889,15 @@ function AiSettingsPanel() {
         <Card className="content-card border-0 mb-3">
           <Card.Body>
             <Row className="g-3 mb-3">
-              <Col md={4}><div className="small text-muted">API Key</div>{s.configured ? <Badge bg="success">Terkonfigurasi</Badge> : <Badge bg="warning" text="dark">Belum diset (isi .env)</Badge>}</Col>
+              <Col md={4}><div className="small text-muted">API Key</div>
+                {db?.deepseekApiKeySet ? (
+                  <Badge bg="success">
+                    Terpasang {db.deepseekApiKeySource === 'settings' ? `dari Settings ${db.deepseekApiKeyPreview ?? ''}`.trim() : 'dari env'}
+                  </Badge>
+                ) : (
+                  <Badge bg="warning" text="dark">Belum diisi</Badge>
+                )}
+              </Col>
               <Col md={4}><div className="small text-muted">Fitur AI aktif</div><Form.Check type="switch" checked={form.aiFeaturesEnabled ?? false} onChange={e => setF('aiFeaturesEnabled', e.target.checked)} label={form.aiFeaturesEnabled ? 'Aktif' : 'Mati'} /></Col>
               <Col md={4}><div className="small text-muted">Manual-only</div><Form.Check type="switch" checked={form.aiManualOnly ?? true} onChange={e => setF('aiManualOnly', e.target.checked)} /></Col>
               <Col md={4}><div className="small text-muted">Hanya OWNER/ADMIN</div><Form.Check type="switch" checked={form.aiOwnerAdminOnly ?? true} onChange={e => setF('aiOwnerAdminOnly', e.target.checked)} /></Col>
@@ -895,9 +915,34 @@ function AiSettingsPanel() {
                 </Form.Select>
               </Col>
               <Col md={4}><div className="small text-muted">Base URL</div><Form.Control size="sm" value={form.deepseekBaseUrl || 'https://api.deepseek.com'} onChange={e => setF('deepseekBaseUrl', e.target.value)} /></Col>
-              <Col md={4}><div className="small text-muted">Limit harian</div><Form.Control size="sm" type="number" min={1} max={1000} value={form.aiDailyRequestLimit ?? 50} onChange={e => setF('aiDailyRequestLimit', Number(e.target.value))} /></Col>
+              <Col md={4}><div className="small text-muted">Limit harian</div><CurrencyInput size="sm" value={form.aiDailyRequestLimit ?? 50} onChange={(v) => setF('aiDailyRequestLimit', Math.min(1000, Math.max(1, v ?? 50)))} /></Col>
               <Col md={4}><div className="small text-muted">Sisa hari ini</div>{u?.remainingDaily ?? s.dailyRemaining}</Col>
               <Col md={4}><div className="small text-muted">Terpakai hari ini</div>{u?.todayTotal ?? 0}</Col>
+            </Row>
+            <hr />
+            <Row className="g-3 align-items-end mb-1">
+              <Col md={6}>
+                <div className="small text-muted">
+                  API Key DeepSeek{db?.deepseekApiKeyPreview ? <> — tersimpan: <code>{db.deepseekApiKeyPreview}</code></> : null}
+                </div>
+                <Form.Control
+                  size="sm"
+                  type="password"
+                  autoComplete="off"
+                  placeholder={db?.deepseekApiKeySet ? 'Isi hanya bila ingin mengganti key' : 'Tempel API key DeepSeek (sk-…)'}
+                  value={apiKeyInput}
+                  onChange={e => setApiKeyInput(e.target.value)}
+                />
+                <Form.Text muted>Tersimpan aman di database & langsung aktif tanpa restart. Tempel key lalu klik "Simpan Konfigurasi".</Form.Text>
+              </Col>
+              {db?.deepseekApiKeySource === 'settings' ? (
+                <Col md="auto">
+                  <Button size="sm" variant="outline-danger" disabled={updateMutation.isPending}
+                    onClick={() => updateMutation.mutate({ deepseekApiKey: '' })}>
+                    Hapus key
+                  </Button>
+                </Col>
+              ) : null}
             </Row>
             <hr />
             <div className="d-flex align-items-center gap-2 flex-wrap">
@@ -909,7 +954,7 @@ function AiSettingsPanel() {
                   {testMutation.data.ok ? `✅ ${testMutation.data.message} (${testMutation.data.latencyMs} ms, ${testMutation.data.model})` : `⚠️ ${testMutation.data.message}`}
                 </span>
               ) : null}
-              {!s.configured ? <span className="small text-muted">Set <code>DEEPSEEK_API_KEY</code> di backend/.env lalu restart backend untuk mengaktifkan.</span> : null}
+              {!s.configured ? <span className="small text-muted">Tempel API key pada kolom di atas lalu klik "Simpan Konfigurasi" — langsung aktif tanpa restart.</span> : null}
             </div>
           </Card.Body>
         </Card>
@@ -1054,6 +1099,10 @@ function AiDraftQueuePanel() {
     </div>
   );
 }
+
+// ═══════════════════════════════════════════════════════════
+//  COMPONENT: OwnerSettingsPage — Main Shell
+// ═══════════════════════════════════════════════════════════
 
 export default function OwnerSettingsPage() {
   const [searchParams, setSearchParams] = useSearchParams();

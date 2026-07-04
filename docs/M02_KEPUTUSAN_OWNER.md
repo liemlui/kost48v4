@@ -284,4 +284,45 @@ Toggle Owner/Admin phase 1 berfungsi penuh. UI telah diperbaiki melalui Fase C (
 
 ---
 
+---
+
+## Update 2026-07-07 — AUDIT REASONIX CODE ✅
+
+> **Sumber:** `docs/audit-reasonix/RINGKASAN_EKSEKUTIF.md` — 82 temuan Reasonix Code (DeepSeek V4 Pro).
+
+### Keputusan Baru (hasil konfirmasi owner 7 Jul 2026)
+
+| # | Keputusan | Jawaban Owner | Implementasi |
+|---|-----------|---------------|-------------|
+| **AL-01** | Apakah invoice boleh pakai line DISCOUNT? | **Ya** — sediakan line diskon. | Tambah case `DISCOUNT` di `revenueCodeForInvoiceLine()`, return contra-revenue `'4010'`, posting sebagai DEBIT (bukan credit). Saat ini BUG: DISCOUNT tidak punya journal entry. |
+| **AL-02** | Setelah kontrak habis, tenant boleh ganti durasi saat perpanjang? | **Ya** — bebas pilih term baru. | Perbaiki kalkulasi: kalau `requestedTerm ≠ stay.pricingTerm`, re-multiply `agreedRentAmountRupiah` dengan ratio multiplier. Saat ini BUG: MONTHLY→YEARLY cuma bayar 1/11. |
+| **AL-03** | Collection rate pakai basis akrual (tagihan) atau kas (penerimaan)? | **Basis tagihan (akrual)** — "Dari semua invoice periode X, berapa % yang sudah lunas?" | Samakan jendela waktu: `totalBilled` = invoice dengan `periodStart` bulan target, `totalPaid` = payment untuk invoice-invoice TERSEBUT (kapan pun dibayar). Saat ini BUG: dua jendela waktu berbeda. |
+| **AL-04** | WiFi — subscription system atau voucher? | **Voucher system.** Non-tenant juga bisa beli. Paket: sebulan 50k, 2 minggu 40k, seminggu 20k, sehari 5k. | **Mini project baru.** Implementasi: admin set paket + harga, pembeli (tenant & non-tenant) pilih paket → bayar → dapat kode voucher → aktivasi. Ganti sistem "expression of interest" saat ini. |
+
+### Temuan Kritis Reasonix (6 bug — harus difix sebelum go-live)
+
+| # | Bug | File |
+|---|-----|------|
+| C1 | DISCOUNT line → journal tidak terposting (silent, Σdebit≠Σkredit) | `accounting-posting-helpers.ts:70-76` |
+| C2 | Overdue aging pakai gross, bukan net (abaikan partial payment) | `reports.service.ts:117` |
+| C3 | Renewal cross-term: MONTHLY→YEARLY undercharge 1/11 | `renew-requests.service.ts:267` |
+| C4 | Collection rate: akrual vs kas campur (period mismatch) | `finance.service.ts:77-86` |
+| C5 | Journal gagal diswallow tanpa retry (`journalPending=true`) | `payment-submissions.service.ts:794` |
+| C6 | `dateOnly()` 4 implementasi berbeda — ✅ **SUDAH DIFIX 7 Jul** | unifikasi ke `common/utils/date-only.ts` |
+
+### Refactor 7 Juli 2026
+
+| Refactor | Status | File |
+|----------|--------|------|
+| Unifikasi `dateOnly()` — 1 shared utility | ✅ Selesai | `backend/src/common/utils/date-only.ts` |
+| `@ApiProperty` di DTO invoice + stays + room-transfer | ✅ Selesai | 3 file DTO |
+
+### Rujukan
+
+- Detail 82 temuan: `docs/audit-reasonix/` (10 file)
+- Antrian eksekusi: `docs/M10_CHECKLIST_CHANGELOG.md` § Fase AL
+- Changelog: `docs/M11_CHANGELOG.md`
+
+---
+
 **Akhir dokumen.** Semua keputusan di atas mengikat. Detail implementasi & kode spesifik → dossier domain `10`-`19`. Peta fase → `00_BLUEPRINT.md §4`.

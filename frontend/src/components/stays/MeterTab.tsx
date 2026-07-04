@@ -5,9 +5,10 @@ import MeterCycleModal from './MeterCycleModal';
 import { useAuth } from '../../context/AuthContext';
 import { MeterReading, Stay } from '../../types';
 import { numeric, buildMeterRows, categorizeReadings } from '../../utils/meterUsage';
+import { formatRupiah, formatRupiahWithoutSymbol } from '../../utils/formatCurrency';
 
 function rupiah(value: number) {
-  return `Rp ${Math.round(value).toLocaleString('id-ID')}`;
+  return `{formatRupiah(value)}`;
 }
 
 export default function MeterTab({

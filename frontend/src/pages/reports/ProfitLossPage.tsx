@@ -18,10 +18,10 @@ export default function ProfitLossPage() {
   const d=q.data;
   return (<Container fluid className="px-2 py-3">
     <div className="d-flex justify-content-between align-items-start mb-3 flex-wrap gap-2">
-      <div><h1 className="mb-0" style={{fontSize:'1.5rem',fontWeight:700}}>Laba Rugi</h1><small className="text-muted">P&L detail dengan perbandingan bulan lalu</small></div>
+      <div><h1 className="mb-0 rpt-title">Laba Rugi</h1><small className="text-muted">P&L detail dengan perbandingan bulan lalu</small></div>
       <div className="d-flex gap-2">
-        <Form.Control type="number" value={ym.year} min={2020} max={2100} onChange={e=>setYm(p=>({...p,year:+e.target.value}))} style={{width:80,height:32,fontSize:13}}/>
-        <Form.Select value={ym.month} onChange={e=>setYm(p=>({...p,month:+e.target.value}))} style={{width:120,height:32,fontSize:13}}>
+        <Form.Control type="number" value={ym.year} min={2020} max={2100} onChange={e=>setYm(p=>({...p,year:+e.target.value}))} className="rpt-input-sm"/>
+        <Form.Select value={ym.month} onChange={e=>setYm(p=>({...p,month:+e.target.value}))} className="rpt-select-sm">
           {Array.from({length:12},(_,i)=>i+1).map(m=><option key={m} value={m}>{new Date(0,m-1).toLocaleString('id-ID',{month:'long'})}</option>)}
         </Form.Select>
       </div>
@@ -36,12 +36,12 @@ export default function ProfitLossPage() {
         <Col xs={6} xl={3}><Card><Card.Body><div className="kpi-label">Margin</div><div className="kpi-value">{d.current.totals.netProfitMarginPercent}%</div></Card.Body></Card></Col>
       </Row>
       <Row className="g-3">
-        <Col lg={6}><Card><Card.Header style={{fontWeight:600,fontSize:14,background:'#f8fafc'}}>📈 Pendapatan</Card.Header><Card.Body className="p-0">
+        <Col lg={6}><Card><Card.Header className="rpt-card-header">📈 Pendapatan</Card.Header><Card.Body className="p-0">
           <Table size="sm" className="mb-0"><thead><tr><th>Akun</th><th className="text-end">Bulan Ini</th><th className="text-end">Bulan Lalu</th><th className="text-end">Δ</th></tr></thead><tbody>
             {d.current.revenueLines.map((l,i)=><tr key={i}><td>{l.name}</td><td className="text-end">{formatCompact(l.amountRupiah)}</td><td className="text-end">{formatCompact(l.prevAmountRupiah)}</td><td className="text-end" style={{color:l.changePercent>=0?'#22c55e':'#ef4444'}}>{pct(l.changePercent)}</td></tr>)}
             <tr className="border-top fw-bold"><td>Total Pendapatan</td><td className="text-end">{formatCompact(d.current.totals.revenueRupiah)}</td><td className="text-end">{formatCompact(d.previous.totals.revenueRupiah)}</td><td className="text-end" style={{color:d.change.revenueChangePercent>=0?'#22c55e':'#ef4444'}}>{pct(d.change.revenueChangePercent)}</td></tr>
           </tbody></Table></Card.Body></Card></Col>
-        <Col lg={6}><Card><Card.Header style={{fontWeight:600,fontSize:14,background:'#f8fafc'}}>📉 Beban</Card.Header><Card.Body className="p-0">
+        <Col lg={6}><Card><Card.Header className="rpt-card-header">📉 Beban</Card.Header><Card.Body className="p-0">
           <Table size="sm" className="mb-0"><thead><tr><th>Akun</th><th className="text-end">Bulan Ini</th><th className="text-end">Bulan Lalu</th><th className="text-end">Δ</th></tr></thead><tbody>
             {d.current.expenseLines.map((l,i)=><tr key={i}><td>{l.name}</td><td className="text-end">{formatCompact(l.amountRupiah)}</td><td className="text-end">{formatCompact(l.prevAmountRupiah)}</td><td className="text-end" style={{color:l.changePercent>=0?'#ef4444':'#22c55e'}}>{pct(l.changePercent)}</td></tr>)}
             <tr className="border-top fw-bold"><td>Total Beban</td><td className="text-end">{formatCompact(d.current.totals.expenseRupiah)}</td><td className="text-end">{formatCompact(d.previous.totals.expenseRupiah)}</td><td className="text-end" style={{color:d.change.expenseChangePercent>=0?'#ef4444':'#22c55e'}}>{pct(d.change.expenseChangePercent)}</td></tr>

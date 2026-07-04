@@ -1,3 +1,7 @@
+// ═══════════════════════════════════════════════════════════
+//  FILE: Frontend Shared Types
+// ═══════════════════════════════════════════════════════════
+
 export type ApiEnvelope<T> = {
   success: boolean;
   message: string;

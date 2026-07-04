@@ -39,7 +39,10 @@ export class AnnouncementsService {
   async findActive(user: CurrentUserPayload) {
     const now = new Date();
     const tenantHasOccupiedStay = user.role === UserRole.TENANT
-      ? await this.hasTenantOccupiedStay(user)
+      ? await this.hasTenantOccupiedStay(user).catch((err) => {
+          this.logger.warn('Gagal cek status huni tenant untuk filter pengumuman, asumsikan tidak menghuni', err?.message ?? err);
+          return false;
+        })
       : false;
 
     const audience = user.role === UserRole.TENANT
@@ -166,16 +169,23 @@ export class AnnouncementsService {
   private async hasTenantOccupiedStay(user: CurrentUserPayload): Promise<boolean> {
     if (!user.tenantId) return false;
 
-    const occupiedStay = await this.prisma.stay.findFirst({
-      where: {
-        tenantId: user.tenantId,
-        status: StayStatus.ACTIVE as any,
-        room: { status: RoomStatus.OCCUPIED as any },
-      },
-      select: { id: true },
-    });
+    try {
+      const occupiedStay = await this.prisma.stay.findFirst({
+        where: {
+          tenantId: user.tenantId,
+          status: StayStatus.ACTIVE as any,
+          room: { status: RoomStatus.OCCUPIED as any },
+        },
+        select: { id: true },
+      });
 
-    return Boolean(occupiedStay);
+      return Boolean(occupiedStay);
+    } catch (err: any) {
+      // AH-01: DB drift atau enum tidak sinkron → jangan 503;
+      // asumsikan tidak menghuni agar endpoint tetap 200 [].
+      this.logger.warn('Gagal query hasTenantOccupiedStay (kemungkinan schema drift DB)', err?.message ?? err);
+      return false;
+    }
   }
 
   private async notifyPublished(announcement: Announcement) {

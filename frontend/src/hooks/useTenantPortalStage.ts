@@ -80,14 +80,19 @@ export function useTenantPortalStage() {
     return 'browsing';
   }, [isTenant, stayQuery.data, bookingsQuery.data]);
 
-  /** True while stage is still being determined (initial fetch in progress) */
+  /** True while stage is still being determined (initial fetch in progress).
+   *  AI-01b: bookingsQuery bersifat supplementary — jangan blokir render portal
+   *  bila bookingsQuery gagal (503/drift DB). Cukup tunggu stayQuery settle. */
   const isStageLoading =
     isTenant &&
-    (stayQuery.isLoading || bookingsQuery.isLoading);
+    stayQuery.isLoading;
+
+  const hasStayHistory = isTenant && (bookingsQuery.data?.items?.length ?? 0) > 0;
 
   return {
     stage,
     isLoading: isStageLoading,
+    hasStayHistory,
 
     isError:
       isTenant &&

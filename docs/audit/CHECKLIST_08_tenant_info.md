@@ -46,8 +46,39 @@
 - [ ] 19. `MyAnnouncementsPage.tsx`, `MyManualPage.tsx`, `WifiOrderPage.tsx`: masing-masing — apakah benar-benar merender konten & memanggil API yang benar? Kalau ada `TODO`/return kosong/endpoint salah → itu penyebab bug nyata.
 
 ## HASIL TEMUAN
-_(kosong — diisi auditor)_
-> Untuk tiap halaman, WAJIB tulis kesimpulan: **"Klaim Hermes I1x = BENAR / STALE / SEBAGIAN"** + bukti.
+
+> **Status:** live (Maya) + kode + log backend **SELESAI**. **Verdict Hermes:** I11 = **BENAR (tapi beda root cause)**, I12 = **STALE**, I13 = **STALE**.
+
+### C08-01 🔴 `/api/announcements/active` 503 → Pengumuman stuck "Memuat halaman…" — 🟠 MEDIUM (potensi HIGH)
+- **Severity:** MEDIUM (bisa HIGH bila persisten di produksi) · **Kategori:** Reliability / backend
+- **Halaman/URL:** `/portal/announcements` · **Role:** TENANT
+- **Yang terjadi (bukti live):** `GET /api/announcements/active` → **503** berulang (≥21 request GET+OPTIONS teramati, bahkan **OPTIONS preflight 503** → browser blokir → "Failed to fetch"). Halaman **berhenti di "Memuat halaman…"** (tak pernah render / empty-state).
+- **Verdict Hermes I11 = BENAR** (halaman Pengumuman memang tidak berfungsi) — **TAPI** root cause **bukan** "sidebar hilang/kosong" seperti klaim Hermes, melainkan **error 503 backend** pada endpoint `announcements/active`.
+- **Akar masalah:** route ter-map & `tsc` 0 error (`backend-start.out.log`: "Mapped /api/announcements/active"). Jadi ini **error runtime** yang ditangkap `AllExceptionsFilter` → dipetakan 503. Query `getActive` (`announcements.service.ts:44-64`) tampak valid; kemungkinan **Prisma runtime / drift skema DB / komputasi `tenantHasOccupiedStay`** untuk tenant tanpa stay. **Perlu lihat stack trace di console backend live** (tak tertangkap di log yang ter-rotate).
+- **SARAN FIX:** cek console backend saat hit `/announcements/active` untuk stack persis; pastikan UAT DB ter-migrate (kolom `publishedAt`/enum `AnnouncementAudience`); tangani error → kembalikan 200 `[]` + empty-state, jangan 503. Batasi retry FE (hindari badai request).
+
+### C08-02 Hermes I12 (Panduan 404) = STALE ✅ — 🟢 INFO
+- **Bukti live:** `/portal/guide` **redirect** ke `/portal/manual` (R-17 jalan). `MyManualPage` **render**: "Panduan & Aturan Kos", accordion Aturan Dasar (Jam Tamu, Kebersihan, Larangan, Pembayaran, Lokasi), daftar perbaikan GRATIS, WA `0856-4888-7628`. Ada placeholder "Panduan resmi sedang disiapkan" (konten admin belum diisi) tapi **fungsional, bukan 404**.
+
+### C08-03 Hermes I13 (WiFi kosong) = STALE ✅ — 🟢 INFO
+- **Bukti live:** `/portal/wifi` (`WifiOrderPage`) **render** dengan empty-state rapi: "Pesan WiFi… **Paket WiFi belum tersedia. Hubungi pengelola langsung.**" + fallback WhatsApp 3-langkah (`0856-4888-7628`). **Bukan blank.** 
+- **Catatan:** paket WiFi kosong (belum di-seed). Verifikasi apakah paket default Rp50.000/perangkat (dari `OperationalSetting.wifiRupiah`) semestinya muncul otomatis. Tidak loop, tidak 503.
+
+### C08-04 Banner onboarding "3 langkah" (berulang, = C06-02/C07-01) — 🟢 LOW
+- Sama: Maya (mantan penghuni) melihat banner onboarding di ketiga halaman info. Perbaiki sekali di layout portal.
+
+### ✅ PENUTUP C08 (pasca schema-fix + admin, 3 Jul)
+- **503 Pengumuman RESOLVED** (schema-sync, lihat C09-01) → `/api/announcements/active` = 200.
+- **`/announcements` (admin) render:** empty-state "Belum ada data" (Total 0, Published 0, Draft 0, Pinned 0) + tombol "Buat Pengumuman". → **Pengumuman tenant kosong karena memang 0 pengumuman di-seed**, BUKAN bug (setelah 503 diperbaiki). Owner tinggal buat pengumuman. Fitur publish→tenant tak teruji end-to-end (belum ada data), tapi halaman admin fungsional.
+
+### Catatan positif
+- `/portal/manual` & `/portal/wifi` **tidak loop, tidak error** — render dengan empty-state/fallback yang baik + nomor WA benar. Route ketiga halaman terkonfirmasi ADA (bertentangan dengan klaim 404 Hermes).
+
+## Definition of Done — status
+- [x] 3 halaman dibuka (live, page-text); status ditentukan dengan **root cause**: Pengumuman = 503 endpoint; Manual = render OK; WiFi = empty-state OK.
+- [x] Redirect `/portal/guide`→`/portal/manual` diverifikasi (jalan).
+- [x] Verdict Hermes I11/I12/I13 dinyatakan (BENAR/STALE) dengan bukti live + log.
+- [x] Temuan `C08-xx`; INDEX baris 08 diupdate.
 
 ## Definition of Done
 - [ ] 3 halaman dibuka & di-screenshot; status kosong/isi ditentukan dengan **root cause** (data/endpoint/UI).

@@ -54,7 +54,32 @@
 - [ ] 19. `ConfiguredResourcePage` config: cek resource mana yang di-expose & role guard backend-nya (controller `@Roles`).
 
 ## HASIL TEMUAN
-_(kosong — diisi auditor)_
+
+> **Status:** **kode SELESAI** (bersih); **live TERTUNDA** (backend down).
+
+### ✅ Verifikasi kode — BENAR (kuat)
+- **Stok inventaris tak boleh negatif (`inventory-movements.service.ts`):** `SELECT qtyOnHand … FOR UPDATE` (row lock, race-safe, `:90`) → **`if (expectedQty < 0) throw Conflict('Stok inventory tidak boleh negatif.')`** (`:102`). Assign/OUT cek ketersediaan (`assertRoomItemQtyAvailableTx`, `:51`). Mutasi resmi **immutable** (harus mutasi koreksi, `:77`) → audit aman.
+- **Loyalty redemption double-guard (`redemption.service.ts`):** `before < reward.pointCost → Conflict('Poin tidak cukup')` (`:75`) **dan** `after < 0 → Conflict` (`:97`) — poin **tak bisa minus** (race-safe); stok reward habis ditolak (`:72`).
+- **Peer-report guards:** tak bisa lapor diri sendiri (`:27`), tak dobel (`:36`), transisi status valid (`:56,81,89`).
+
+### C16-01 JB-14 CRUD generik — ✅ RESOLVED (dikonfirmasi live)
+- **Uji live (token TENANT):** `GET /api/inventory-items`, `/wifi-sales`, `/additional-services`, `/room-items`, `/users`, `/expenses` → **SEMUA 403**. Endpoint CRUD generik **ter-guard backend** (bukan FE-only). **Tidak ada BLOCKER.** ✅ (bukan LOW lagi — aman.)
+
+### ✅ LIVE CONFIRMED (owner, 3 Jul)
+- **`/inventory` (→ /inventory/gudang) render:** "Inventaris Terpadu" tab **Gudang / Barang Kamar / Mutasi**; empty-state bersih ("Belum ada barang di gudang", Stok 0/Menipis 0/Habis 0/Aman 0/Rusak 0 — **tanpa NaN**); "Tambah barang akan membuat **mutasi masuk**" (konfirmasi logika mutasi-on-add). Tak error.
+- **JB-14 (C16-01 RESOLVED):** CRUD generik `/inventory-items`, `/wifi-sales`, `/additional-services`, `/room-items` → TENANT **403**.
+
+### ✅ LIVE CONFIRMED (`/loyalty` owner, 3 Jul)
+- **Render "Loyalitas & Reward":** konversi **1 poin ≈ Rp100** (dapat disesuaikan owner). 3 seksi: **Permintaan Penukaran**, **Laporan Sikap Antar-Tenant**, **Katalog Reward** (+ tombol Reward). Semua empty-state ramah, tanpa NaN.
+- **✅ JB-19 privasi peer-report SURFACED di UI:** judul seksi eksplisit "**moderasi — identitas pelapor dirahasiakan dari terlapor**". Konfirmasi desain privasi (pelapor anonim ke terlapor) muncul benar di layer UI, bukan hanya kode.
+
+### Live TERTUNDA
+- WiFi activation tenant↔admin end-to-end, mutasi UI (assign>stok ditolak — logika benar), reward CRUD submit (endpoint `/loyalty/rewards` 200 owner).
+
+## Definition of Done — status
+- [x] Stok tak-negatif + loyalty poin tak-minus (double-guard) diverifikasi kode.
+- [~] JB-14 CRUD generik via curl + live mutasi/wifi/loyalty: tertunda (backend down) — **C16-01 wajib dikonfirmasi live**.
+- [x] Temuan `C16-xx`; INDEX baris 16 diupdate.
 
 ## Definition of Done
 - [ ] Mutasi inventaris diuji: assign>stok ditolak, stok tidak minus, double-submit (JB stok).

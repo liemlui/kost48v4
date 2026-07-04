@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Alert, Badge, Button, Card, Form, Modal, Table } from 'react-bootstrap';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import CurrencyInput from '../../components/common/CurrencyInput';
 import {
   confirmPeerReport,
   createReward,
@@ -15,6 +16,7 @@ import {
   type RewardInput,
 } from '../../api/loyalty';
 import { useAuth } from '../../context/AuthContext';
+import { formatRupiah, formatRupiahWithoutSymbol } from '../../utils/formatCurrency';
 
 const REWARD_TYPES = ['RENT_DISCOUNT', 'SERVICE_ADDON', 'METER_DISCOUNT', 'BADGE', 'PHYSICAL'];
 const REWARD_TYPE_LABEL: Record<string, string> = {
@@ -84,9 +86,9 @@ export default function LoyaltyAdminPage() {
     <div className="container py-4">
       <div className="d-flex align-items-center gap-3 mb-4 flex-wrap">
         <h3 className="mb-0">Loyalitas & Reward</h3>
-        <Badge bg="light" text="dark" className="border">1 poin ≈ Rp{perPoint.toLocaleString('id-ID')}</Badge>
+        <Badge bg="light" text="dark" className="border">1 poin ≈ {formatRupiah(perPoint)}</Badge>
       </div>
-      <p className="text-muted small">1 poin ≈ Rp{perPoint.toLocaleString('id-ID')}. Nilai dapat disesuaikan oleh owner. Saran: gunakan reward layanan in-house (pembersihan/cat ulang kamar, voucher WiFi) — lebih hemat daripada diskon sewa.</p>
+      <p className="text-muted small">1 poin ≈ {formatRupiah(perPoint)}. Nilai dapat disesuaikan oleh owner. Saran: gunakan reward layanan in-house (pembersihan/cat ulang kamar, voucher WiFi) — lebih hemat daripada diskon sewa.</p>
       {error && <Alert variant="danger" dismissible onClose={() => setError(null)}>{error}</Alert>}
 
       <Card className="mb-4">
@@ -173,7 +175,7 @@ export default function LoyaltyAdminPage() {
                   <td>{r.name}{r.description && <div className="text-muted small">{r.description}</div>}</td>
                   <td><small>{REWARD_TYPE_LABEL[r.type] ?? r.type}</small></td>
                   <td>{r.pointCost}</td>
-                  <td>{r.valueRupiah ? `Rp${r.valueRupiah.toLocaleString('id-ID')}` : '-'}</td>
+                  <td>{r.valueRupiah ? `{formatRupiah(r.valueRupiah)}` : '-'}</td>
                   <td>{r.stockQty ?? '∞'}</td>
                   <td><Badge bg={r.isActive ? 'success' : 'secondary'}>{r.isActive ? 'Aktif' : 'Nonaktif'}</Badge></td>
                   {isOwner && <td className="text-end"><Button size="sm" variant="outline-secondary" onClick={() => openEdit(r)}>Ubah</Button></td>}
@@ -190,13 +192,13 @@ export default function LoyaltyAdminPage() {
           <Form.Group className="mb-3"><Form.Label>Nama</Form.Label><Form.Control value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} /></Form.Group>
           <Form.Group className="mb-3"><Form.Label>Deskripsi</Form.Label><Form.Control as="textarea" rows={2} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} /></Form.Group>
           <Form.Group className="mb-3"><Form.Label>Tipe</Form.Label><Form.Select value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value })}>{REWARD_TYPES.map((t) => <option key={t} value={t}>{REWARD_TYPE_LABEL[t] ?? t}</option>)}</Form.Select></Form.Group>
-          <Form.Group className="mb-3"><Form.Label>Biaya Poin</Form.Label><Form.Control type="number" min={1} value={form.pointCost} onChange={(e) => setForm({ ...form, pointCost: Number(e.target.value) })} /></Form.Group>
+          <Form.Group className="mb-3"><Form.Label>Biaya Poin</Form.Label><CurrencyInput value={form.pointCost} onChange={(v) => setForm({ ...form, pointCost: v ?? 0 })} /></Form.Group>
           <Form.Group className="mb-3">
             <Form.Label>Nilai (Rp, untuk jurnal reward)</Form.Label>
-            <Form.Control type="number" min={0} value={form.valueRupiah ?? 0} onChange={(e) => setForm({ ...form, valueRupiah: Number(e.target.value) })} />
+            <CurrencyInput value={form.valueRupiah ?? 0} onChange={(v) => setForm({ ...form, valueRupiah: v ?? 0 })} />
             {suggestedCost != null && suggestedCost !== form.pointCost && (
               <Form.Text>
-                Saran biaya poin: <strong>{suggestedCost}</strong> (≈ Rp{perPoint.toLocaleString('id-ID')}/poin).{' '}
+                Saran biaya poin: <strong>{suggestedCost}</strong> (≈ {formatRupiah(perPoint)}/poin).{' '}
                 <Button variant="link" size="sm" className="p-0 align-baseline" onClick={() => setForm({ ...form, pointCost: suggestedCost })}>Pakai saran</Button>
               </Form.Text>
             )}

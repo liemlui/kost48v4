@@ -4,6 +4,7 @@ import { Alert, Badge, Button, Col, Form, Row, Spinner } from 'react-bootstrap';
 import { draftExpenseReceiptFromOcr, getOwnerAiStatus, type ExpenseReceiptDraftResult } from '../../api/ai';
 import AiResultPanel from '../ai/AiResultPanel';
 import { useAuth } from '../../context/AuthContext';
+import { formatRupiah } from '../../utils/formatCurrency';
 
 type ExpenseDraftPatch = Record<string, unknown>;
 
@@ -174,7 +175,7 @@ export default function ExpenseReceiptUpload({ onApplyDraft, disabled }: Props) 
             </div>
             <div className="d-flex justify-content-between gap-3 border-bottom pb-2">
               <span>Nominal</span>
-              <strong>{result.result.amountRupiah.toLocaleString('id-ID')}</strong>
+              <strong>{formatRupiah(result.result.amountRupiah)}</strong>
             </div>
             <div className="d-flex justify-content-between gap-3 border-bottom pb-2">
               <span>Kategori</span>

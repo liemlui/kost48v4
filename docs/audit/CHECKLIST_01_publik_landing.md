@@ -63,6 +63,7 @@
 - **Yang terjadi:** respons memuat `currentTenantName` & `dpTenantName` (nama lengkap penghuni + pembayar DP), dan UI **menampilkannya**: `👤 {currentTenantName}`.
 - **Bukti kode:** `backend/src/modules/marketing/marketing-public-rooms.service.ts:525` & `:531` (field dikembalikan); controller `@Public()` di `.../public-bookings? → marketing-public-rooms.controller.ts` (class-level `@Public()`, endpoint `availability-calendar` tanpa guard tambahan). FE render: `frontend/src/components/public/RichAvailabilityCalendar.tsx:254` & `:267`; dipakai di `frontend/src/pages/rooms/PublicRoomsPage.tsx:468`.
 - **SARAN FIX:** hapus `currentTenantName`/`dpTenantName` dari payload publik (atau ganti jadi status generik "Terisi"/"DP"). Jangan pernah kirim nama tenant ke endpoint `@Public()`.
+- **⚠️ Catatan re-test (3 Jul):** panggilan ulang bisa mengembalikan `[]` bila **tak ada tenant yang leasenya mencakup 'hari ini'** (saat re-test, Bayu/Lani/Sari sudah lewat tanggal checkout → di-sweep). **Kerentanan KODE tetap ada** — endpoint tetap mengembalikan `currentTenantName` untuk tenant mana pun yang sedang dalam masa sewa aktif mencakup hari ini. Bukan fix, hanya artefak kondisi data. **Tetap HIGH.** Bukti awal: I=Bayu Nugroho, K=Lani Kusuma, F2=Sari Melati.
 
 ### C01-01 `freeKwh` dinamis tidak pernah tampil di FAQ landing (dead code) — 🟡 MEDIUM
 - **Severity:** MEDIUM · **Kategori:** Fungsional / config-drift

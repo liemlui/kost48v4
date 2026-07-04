@@ -50,7 +50,37 @@
 - [ ] 24. `meter-readings.service.ts`: guard meter mundur + milik stay benar.
 
 ## HASIL TEMUAN
-_(kosong — diisi auditor)_
+
+> **Status:** **kode SELESAI** (solid); **live TERTUNDA** (backend sempat down 2× karena loop C05-01 — hindari `/portal/stay`). Logika uang/data terverifikasi kuat.
+
+### ✅ Verifikasi kode — BENAR (kuat)
+- **Meter readings — guard lengkap (`meter-readings.service.ts`):**
+  - **Tidak boleh mundur:** `if (previous && readingValue.lt(previous.readingValue)) throw Conflict('Angka meter tidak boleh lebih kecil dari catatan sebelumnya')` (`:76-78`). ✅ (pakai Decimal `.lt`, presisi).
+  - Negatif ditolak (`:28`); **tanggal masa depan ditolak** (`:50`, JB-17); duplikat tanggal ditolak (`:63`).
+- **Checkout — guard tagihan tertunda (`checkout-requests.service.ts`):**
+  - **Ada invoice belum dibayar → Conflict** "Tagihan #X belum dibayar" (`:34-43`). ✅ Tak bisa checkout dengan tunggakan.
+  - **Ownership:** `throw Forbidden('Anda bukan pemilik stay ini')` (`:66`, JB-19); stay tak ada → 404 (`:58`).
+- **Renew (dari C09):** invoice renewal **rent-only**, deposit **tak** ditagih ulang (JB-01); forfeit DP bila pelunasan lewat H+7 (`renew-requests.service.ts:254`).
+- **Deposit settlement (dari C09):** liability `INCREASE/DECREASE_LIABILITY` (JB-10), refund = deposit−potongan (bukan DP), `deposit-ledger.service.ts:180-253`.
+
+### ✅ LIVE CONFIRMED (`/renew-requests` owner, 3 Jul)
+- **Render penuh:** "Pusat Perpanjangan" + **RULE 4 langkah**: (1) Review cek tenant & tanggal → (2) **Catat meter** (listrik & air wajib) → (3) Tagihan dibuat (**Sewa + listrik + air**) → (4) Tenant bayar ("**Belum lunas = tetap block**"). Konfirmasi flow renew + guard lunas.
+- **8-state machine terlihat** sebagai filter: Keputusan Tenant · Menunggu DP · DP Aman/Pelunasan · Selesai · Ditolak · Ditolak Tenant · Prioritas Berakhir · Hangus (= 8 state, cocok kode).
+- Empty-state (0 request — Dimas/B yang skenario renew sudah di-sweep bersama stay-nya). Stats 0/0/0 tanpa NaN.
+
+### ✅ LIVE CONFIRMED (`/meter-readings` owner, 3 Jul)
+- **Render "Riwayat Meter":** filter PERIODE (bulan+tahun, default Juli 2026); **STATUS PENCATATAN BULAN INI** = grid per kamar (A,B,C,D,G,H,I,J,K,L,M,F1,F2 = 13 kamar), tiap kamar "Belum dicatat" + tombol "+ Catat"; "SEMUA BACAAN — JULI 2026: **0 entri**" empty-state ramah + "Catat Meter Manual". Tanpa NaN/error. Konfirmasi UI catat-meter admin (guard mundur/negatif/future sudah kode-verified `:76-78/:28/:50`).
+
+### Live TERTUNDA (butuh BE hidup; JANGAN buka /portal/stay)
+- `/renew-requests` (approve/reject 8-state, JB-12), `/meter-readings` (input + hitung kWh×tarif cocokkan manual), checkout admin (settlement + jurnal), **`/loss-refunds`** (OWNER-only → login ADMIN harus DITOLAK, JB-14).
+- **Ulangi bersama batch live admin** setelah backend stabil.
+
+## Definition of Done — status
+- [x] Meter guard (mundur/negatif/future/duplikat) diverifikasi kode.
+- [x] Checkout guard (tagihan tertunda + ownership) diverifikasi kode.
+- [x] Renew JB-01 + deposit JB-10 diverifikasi kode (C09).
+- [~] Live admin (renew/meter/checkout/loss-refunds): tertunda — backend down (C05-01 self-DoS).
+- [x] Temuan `C11-xx`; INDEX baris 11 diupdate (partial).
 
 ## Definition of Done
 - [ ] Renew approve/reject diuji: perpanjang benar, deposit tidak ditagih ulang, double-submit.

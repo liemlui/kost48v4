@@ -38,6 +38,10 @@ function healthGrade(score: number) {
 export class FinanceService {
   constructor(private readonly prisma: PrismaService) {}
 
+  // ═══════════════════════════════════════════════════════════
+  //  SECTION: Business Health & Occupancy
+  // ═══════════════════════════════════════════════════════════
+
   async businessHealth(query: FinancePeriodQueryDto = {}) {
     const { year, month, start, end } = monthWindow(query);
     const today = new Date();
@@ -58,6 +62,7 @@ export class FinanceService {
       openTicketCount,
       highSignalTickets,
       depositAgg,
+      wifiAgg,
     ] = await Promise.all([
       this.prisma.room.groupBy({ by: ['status'], _count: { id: true }, where: { isActive: true } }),
       this.prisma.stay.count({ where: { status: StayStatus.ACTIVE as any, initialMetersPromotedAt: { not: null } } }),
@@ -117,6 +122,11 @@ export class FinanceService {
         // Audit E-5: liability = semua jaminan HELD (termasuk stay selesai yang belum di-settle).
         where: { depositStatus: 'HELD' as any, OR: [{ status: StayStatus.ACTIVE as any }, { depositPaidAmountRupiah: { gt: 0 } }], depositAmountRupiah: { gt: 0 } },
       }),
+      // H10: WiFi revenue — ownerDashboard include WiFi, businessHealth tidak.
+      this.prisma.wifiSale.aggregate({
+        _sum: { soldPriceRupiah: true },
+        where: { saleDate: { gte: start, lt: end } },
+      }),
     ]);
 
     const byStatus = roomStatusGroups.reduce<Record<string, number>>((acc, row) => {
@@ -129,13 +139,15 @@ export class FinanceService {
     const occupancyRate = operableRooms > 0 ? roundPercent((activeStayCount / operableRooms) * 100) : 0;
 
     const billedRupiah = Number(invoiceAgg._sum.totalAmountRupiah ?? 0);
+    const wifiRevenueRupiah = Number(wifiAgg._sum.soldPriceRupiah ?? 0);
+    const totalRevenueRupiah = billedRupiah + wifiRevenueRupiah;
     const paidRupiah = Number(paymentAgg._sum.amountRupiah ?? 0);
     const expenseRupiah = Number(expenseAgg._sum.amountRupiah ?? 0);
     const openInvoiceRupiah = Number(openInvoiceAgg._sum.totalAmountRupiah ?? 0);
     const overdueRupiah = Number(overdueRows[0]?.overdue ?? 0);
     const overdueCount = Number(overdueRows[0]?.cnt ?? 0);
-    const collectionRate = billedRupiah > 0 ? roundPercent((paidRupiah / billedRupiah) * 100) : 0;
-    const expenseRatio = billedRupiah > 0 ? roundPercent((expenseRupiah / billedRupiah) * 100) : 0;
+    const collectionRate = totalRevenueRupiah > 0 ? roundPercent((paidRupiah / totalRevenueRupiah) * 100) : 0;
+    const expenseRatio = totalRevenueRupiah > 0 ? roundPercent((expenseRupiah / totalRevenueRupiah) * 100) : 0;
     const netCashFlowRupiah = paidRupiah - expenseRupiah;
     const depositHeldRupiah = Number(depositAgg._sum.depositPaidAmountRupiah ?? 0);
 
@@ -169,6 +181,8 @@ export class FinanceService {
       headline: score >= 85 ? 'Operasional terlihat stabil.' : score >= 70 ? 'Ada beberapa titik yang perlu dipantau.' : 'Ada risiko bisnis yang perlu tindakan.' ,
       metrics: {
         billedRupiah,
+        wifiRevenueRupiah,
+        totalRevenueRupiah,
         paidRupiah,
         openInvoiceRupiah,
         overdueRupiah,
@@ -190,7 +204,7 @@ export class FinanceService {
       signals,
       financeReadiness: readiness,
       assumptions: [
-        'Collection rate memakai pembayaran yang diterima pada bulan yang sama dibanding tagihan periode bulan itu.',
+        'Penerimaan vs Tagihan: pembayaran yang diterima bulan ini dibanding tagihan periode akrual bulan ini. PERHATIAN: periode tagihan (periodStart) dan periode bayar (paymentDate) berbeda sehingga rate bisa >100%.',
         'Open invoice dihitung dari status bukan PAID dan bukan CANCELLED, termasuk DRAFT sesuai guard checkout.',
         'Deposit held dibaca sebagai liability operasional, bukan revenue.',
       ],
@@ -299,6 +313,10 @@ export class FinanceService {
       note: 'Draft ini sengaja tidak menampilkan formal ratio karena belum ada cash/bank, payables, equity, dan asset ledger yang reliable.',
     };
   }
+
+  // ═══════════════════════════════════════════════════════════
+  //  SECTION: Owner Dashboard
+  // ═══════════════════════════════════════════════════════════
 
   async ownerDashboard(query: FinancePeriodQueryDto = {}) {
     const { year, month, start, end } = monthWindow(query);

@@ -57,6 +57,10 @@ export class PaymentSubmissionsService {
     private readonly loyalty: LoyaltyService,
   ) {}
 
+  // ═══════════════════════════════════════════════════════════
+  //  SECTION: Proof File Helpers (_advisoryLock, validate)
+  // ═══════════════════════════════════════════════════════════
+
   private readonly PROOF_DIR = join(process.cwd(), 'uploads', 'payment-proofs');
 
   private proofAdvisoryLockKeys(fileKey: string): [number, number] {
@@ -119,6 +123,71 @@ export class PaymentSubmissionsService {
     return { fileKey, fileUrl };
   }
 
+  // ═══════════════════════════════════════════════════════════
+  //  SECTION: Submission Creation — Single & Batch
+  // ═══════════════════════════════════════════════════════════
+
+  /** Validasi pembayaran untuk jalur booking (belum OCCUPIED) */
+  private validateBookingPaymentSubmission(
+    eligibility: Awaited<ReturnType<PaymentSubmissionsService['findEligibleSubmissionTarget']>>,
+    dto: CreatePaymentSubmissionDto,
+  ): { isDownPaymentAmount: boolean; isSettlementAmount: boolean; settlementAmount: number } {
+    if (!eligibility) throw new NotFoundException('Booking atau invoice tidak ditemukan');
+    if (eligibility.stayStatus !== StayStatus.ACTIVE) {
+      throw new ConflictException('Booking tidak lagi aktif');
+    }
+    if (eligibility.invoiceStatus === InvoiceStatus.DRAFT) {
+      throw new ConflictException('Invoice ini masih dalam status draft dan belum dapat menerima pembayaran');
+    }
+    if ([InvoiceStatus.PAID, InvoiceStatus.CANCELLED].includes(eligibility.invoiceStatus as InvoiceStatus)) {
+      throw new ConflictException('Invoice ini tidak dapat menerima bukti pembayaran baru');
+    }
+    const dpPaidSoFar = eligibility.stayDownPaymentPaidRupiah ?? 0;
+    if (dpPaidSoFar <= 0 && eligibility.stayExpiresAt && new Date(eligibility.stayExpiresAt) < new Date()) {
+      throw new ConflictException('Booking sudah kedaluwarsa dan tidak dapat menerima bukti pembayaran');
+    }
+    const invoiceRemaining = Math.max(eligibility.invoiceTotalAmountRupiah - eligibility.invoicePaidAmountRupiah, 0);
+    const depositRemaining = Math.max(
+      (eligibility.stayDepositAmountRupiah ?? 0) - (eligibility.stayDepositPaidAmountRupiah ?? 0), 0);
+    const downPaymentRemaining = Math.max(
+      (eligibility.stayDownPaymentAmountRupiah ?? 0) - (eligibility.stayDownPaymentPaidRupiah ?? 0), 0);
+    const settlementAmount = invoiceRemaining + depositRemaining;
+    if (settlementAmount <= 0) {
+      throw new ConflictException('Pembayaran awal (sewa + deposit jaminan) sudah lunas');
+    }
+    const isDownPaymentAmount = downPaymentRemaining > 0 && dto.amountRupiah === downPaymentRemaining;
+    const isSettlementAmount = dto.amountRupiah === settlementAmount;
+    if (!isDownPaymentAmount && !isSettlementAmount) {
+      const accepted = [
+        downPaymentRemaining > 0 && downPaymentRemaining !== settlementAmount
+          ? `DP Rp ${downPaymentRemaining.toLocaleString('id-ID')}` : null,
+        `pelunasan Rp ${settlementAmount.toLocaleString('id-ID')} (sisa sewa + deposit jaminan)`,
+      ].filter(Boolean).join(' atau ');
+      throw new ConflictException(`Nominal pembayaran harus tepat: ${accepted}.`);
+    }
+    return { isDownPaymentAmount, isSettlementAmount, settlementAmount };
+  }
+
+  /** Validasi pembayaran untuk invoice-only (OCCUPIED / renewal / manual) */
+  private validateInvoicePaymentSubmission(
+    eligibility: Awaited<ReturnType<PaymentSubmissionsService['findEligibleSubmissionTarget']>>,
+    dto: CreatePaymentSubmissionDto,
+  ): void {
+    if (eligibility.invoiceStatus === InvoiceStatus.DRAFT) {
+      throw new ConflictException('Invoice ini masih dalam status draft dan belum dapat menerima pembayaran');
+    }
+    if ([InvoiceStatus.PAID, InvoiceStatus.CANCELLED].includes(eligibility.invoiceStatus as InvoiceStatus)) {
+      throw new ConflictException('Invoice ini tidak dapat menerima bukti pembayaran baru');
+    }
+    const invoiceRemaining = Math.max(
+      eligibility.invoiceTotalAmountRupiah - eligibility.invoicePaidAmountRupiah, 0);
+    if (invoiceRemaining <= 0) throw new ConflictException('Tagihan ini sudah lunas');
+    if (dto.amountRupiah !== invoiceRemaining) {
+      throw new ConflictException(
+        `Pembayaran harus melunasi tagihan penuh Rp ${invoiceRemaining.toLocaleString('id-ID')} (tidak ada pembayaran sebagian).`);
+    }
+  }
+
   async createSubmission(user: CurrentUserPayload, dto: CreatePaymentSubmissionDto) {
     const tenantId = user.tenantId;
     if (!tenantId) {
@@ -144,91 +213,9 @@ export class PaymentSubmissionsService {
       const isBookingPath = eligibility.stayPromotedAt == null;
 
       if (isBookingPath) {
-        // ── Booking combined payment (unpromoted stay) ──────────────────────────
-        if (eligibility.invoiceStatus === InvoiceStatus.DRAFT) {
-          // Audit A10: tanpa guard ini bukti bayar bisa masuk untuk invoice DRAFT
-          // yang pasti gagal di-approve (:350) dan menggantung sampai expiry.
-          throw new ConflictException('Invoice ini masih dalam status draft dan belum dapat menerima pembayaran');
-        }
-        if ([InvoiceStatus.PAID, InvoiceStatus.CANCELLED].includes(eligibility.invoiceStatus as InvoiceStatus)) {
-          throw new ConflictException('Invoice ini tidak dapat menerima bukti pembayaran baru');
-        }
-
-        // expiresAt (SLA 3 jam) hanya berlaku sebelum DP masuk; setelah DP
-        // disetujui, kamar terkunci sampai deadline pelunasan H+1 check-in (A18).
-        const dpPaidSoFar = eligibility.stayDownPaymentPaidRupiah ?? 0;
-        if (
-          dpPaidSoFar <= 0 &&
-          eligibility.stayExpiresAt &&
-          new Date(eligibility.stayExpiresAt) < new Date()
-        ) {
-          throw new ConflictException('Booking sudah kedaluwarsa dan tidak dapat menerima bukti pembayaran');
-        }
-
-        const invoiceRemaining = Math.max(
-          eligibility.invoiceTotalAmountRupiah - eligibility.invoicePaidAmountRupiah,
-          0,
-        );
-
-        // Deposit = uang jaminan (refundable, dicek saat checkout).
-        const depositRemaining = Math.max(
-          (eligibility.stayDepositAmountRupiah ?? 0) - (eligibility.stayDepositPaidAmountRupiah ?? 0),
-          0,
-        );
-
-        // DP = uang muka pesan kamar (bagian harga sewa, non-refundable).
-        const downPaymentRemaining = Math.max(
-          (eligibility.stayDownPaymentAmountRupiah ?? 0) - (eligibility.stayDownPaymentPaidRupiah ?? 0),
-          0,
-        );
-
-        // Pelunasan = sisa sewa + jaminan. (Sebelum DP dibayar, ini = sewa penuh + jaminan.)
-        const settlementAmount = invoiceRemaining + depositRemaining;
-
-        if (settlementAmount <= 0) {
-          throw new ConflictException('Pembayaran awal (sewa + deposit jaminan) sudah lunas');
-        }
-
-        // A18: dua nominal yang sah — DP 30% (kunci kamar) atau pelunasan sekaligus.
-        const isDownPaymentAmount = downPaymentRemaining > 0 && dto.amountRupiah === downPaymentRemaining;
-        const isSettlementAmount = dto.amountRupiah === settlementAmount;
-
-        if (!isDownPaymentAmount && !isSettlementAmount) {
-          const accepted = [
-            downPaymentRemaining > 0 && downPaymentRemaining !== settlementAmount
-              ? `DP Rp ${downPaymentRemaining.toLocaleString('id-ID')}`
-              : null,
-            `pelunasan Rp ${settlementAmount.toLocaleString('id-ID')} (sisa sewa + deposit jaminan)`,
-          ]
-            .filter(Boolean)
-            .join(' atau ');
-          throw new ConflictException(`Nominal pembayaran harus tepat: ${accepted}.`);
-        }
+        this.validateBookingPaymentSubmission(eligibility, dto);
       } else {
-        // ── Invoice-only payment (OCCUPIED / manual check-in / renewal) ──
-        if (eligibility.invoiceStatus === InvoiceStatus.DRAFT) {
-          throw new ConflictException('Invoice ini masih dalam status draft dan belum dapat menerima pembayaran');
-        }
-
-        if ([InvoiceStatus.PAID, InvoiceStatus.CANCELLED].includes(eligibility.invoiceStatus as InvoiceStatus)) {
-          throw new ConflictException('Invoice ini tidak dapat menerima bukti pembayaran baru');
-        }
-
-        const invoiceRemaining = Math.max(
-          eligibility.invoiceTotalAmountRupiah - eligibility.invoicePaidAmountRupiah,
-          0,
-        );
-
-        if (invoiceRemaining <= 0) {
-          throw new ConflictException('Tagihan ini sudah lunas');
-        }
-
-        // F1-1R (D-02): invoice-only (renewal/utilitas/manual) wajib LUNAS penuh — tidak ada cicilan.
-        if (dto.amountRupiah !== invoiceRemaining) {
-          throw new ConflictException(
-            `Pembayaran harus melunasi tagihan penuh Rp ${invoiceRemaining.toLocaleString('id-ID')} (tidak ada pembayaran sebagian).`,
-          );
-        }
+        this.validateInvoicePaymentSubmission(eligibility, dto);
       }
 
       // V-06: Validasi proof wajib (ownership + file exists + consumed)
@@ -463,6 +450,10 @@ export class PaymentSubmissionsService {
     });
   }
 
+  // ═══════════════════════════════════════════════════════════
+  //  SECTION: Query & Review Queue
+  // ═══════════════════════════════════════════════════════════
+
   async findMine(user: CurrentUserPayload, query: ReviewQueueQueryDto) {
     const tenantId = user.tenantId;
     if (!tenantId) {
@@ -584,6 +575,10 @@ export class PaymentSubmissionsService {
       throw error;
     }
   }
+
+  // ═══════════════════════════════════════════════════════════
+  //  SECTION: Approval Flow — approve, cancelCompeting, notify
+  // ═══════════════════════════════════════════════════════════
 
   async approveSubmission(user: CurrentUserPayload, submissionId: number) {
     let losingTenants: Array<{ stayId: number; tenantId: number }> = [];
@@ -804,8 +799,8 @@ export class PaymentSubmissionsService {
           // Auto Journal Lite tidak memblokir approval. Jurnal bisa diperbaiki via backfill.
           // journalPending=true dikembalikan ke caller agar admin tahu perlu repair.
           journalPending = true;
-          this.logger.warn(
-            `Auto Journal Lite gagal saat approval pembayaran (submission #${submissionId}, invoice #${submission.invoiceId}): ${err instanceof Error ? err.message : String(err)}`,
+          this.logger.error(
+            `[AL-FIX-5] Journal posting gagal untuk payment submission #${submissionId}, invoice #${submission.invoiceId}: ${err instanceof Error ? err.message : String(err)}`,
           );
         }
 
@@ -1020,7 +1015,78 @@ export class PaymentSubmissionsService {
       }
       return result;
     } catch (error) {
-if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
+      // H3: Auto-refund — jika sweeper batalkan stay duluan, submission harus
+      // di-reject otomatis agar tidak stuck PENDING_REVIEW selamanya.
+      // Tenant sudah bayar → perlu refund manual, tapi setidaknya submission
+      // ditandai REJECTED + tenant & admin dapat notifikasi.
+      if (
+        error instanceof ConflictException &&
+        error.message === 'Hunian tidak lagi aktif' &&
+        submissionId != null
+      ) {
+        try {
+          await this.prisma.paymentSubmission.update({
+            where: { id: submissionId },
+            data: {
+              status: PaymentSubmissionStatus.REJECTED,
+              reviewNotes:
+                'Ditolak otomatis: hunian sudah tidak aktif (kemungkinan dibatalkan sistem karena ' +
+                'kedaluwarsa atau kamar diambil tenant lain). Pembayaran yang sudah masuk perlu ' +
+                'direfund manual oleh admin. Hubungi tenant untuk proses refund.',
+              reviewedById: user.id,
+              reviewedAt: new Date(),
+            },
+          });
+          await this.prisma.auditLog.create({
+            data: {
+              actorUserId: user.id,
+              action: 'AUTO_REJECT_INACTIVE_STAY',
+              entityType: 'PaymentSubmission',
+              entityId: String(submissionId),
+              meta: {
+                reason: 'Hunian tidak lagi aktif saat approval — kemungkinan race dengan sweeper',
+                originalError: error.message,
+              } as unknown as Prisma.InputJsonValue,
+            },
+          });
+          // Notifikasi tenant bahwa pembayaran ditolak & perlu refund
+          try {
+            const submission = await this.prisma.paymentSubmission.findUnique({
+              where: { id: submissionId },
+              select: { tenantId: true, amountRupiah: true },
+            });
+            if (submission?.tenantId) {
+              await this.appNotificationService.create({
+                recipientUserId: submission.tenantId,
+                title: '⚠️ Pembayaran ditolak — hunian tidak aktif',
+                body:
+                  `Pembayaran Rp ${submission.amountRupiah.toLocaleString('id-ID')} tidak dapat disetujui ` +
+                  `karena hunian sudah tidak aktif (kemungkinan dibatalkan sistem). ` +
+                  `Silakan hubungi admin untuk proses refund.`,
+                linkTo: '/portal/invoices',
+                entityType: 'PaymentSubmission',
+                entityId: String(submissionId),
+              });
+            }
+          } catch (notifErr) {
+            this.logger.warn(
+              `[H3] Gagal mengirim notifikasi auto-reject untuk submission #${submissionId}: ` +
+                `${notifErr instanceof Error ? notifErr.message : String(notifErr)}`,
+            );
+          }
+          throw new ConflictException(
+            'Hunian tidak lagi aktif — pembayaran ditolak otomatis. ' +
+            'Submission telah ditandai REJECTED. Tenant perlu refund manual.',
+          );
+        } catch (handlingErr) {
+          // Jangan sampai error handling menutupi error asli
+          this.logger.error(
+            `[H3] Gagal auto-reject submission #${submissionId} setelah ConflictException: ` +
+              `${handlingErr instanceof Error ? handlingErr.message : String(handlingErr)}`,
+          );
+        }
+      }
+      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
         throw new ConflictException('Approval pembayaran bentrok dengan data yang sudah ada');
       }
       this.handleSchemaError(error);
@@ -1233,6 +1299,10 @@ if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P20
       }
     }
   }
+
+  // ═══════════════════════════════════════════════════════════
+  //  SECTION: Rejection & Expiry
+  // ═══════════════════════════════════════════════════════════
 
   async rejectSubmission(user: CurrentUserPayload, submissionId: number, reviewNotes: string) {
     try {
@@ -1561,6 +1631,9 @@ if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P20
     }
   }
 
+  // ═══════════════════════════════════════════════════════════
+  //  SECTION: Auto-Cancel for Expired/Rejected Bookings
+  // ═══════════════════════════════════════════════════════════
 
   private async autoCancelRejectedExpiredBookingTx(
     tx: Prisma.TransactionClient,
@@ -1835,9 +1908,9 @@ if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P20
     }
   }
 
-  // ---------------------------------------------------------------------------
-  // Notification helpers
-  // ---------------------------------------------------------------------------
+  // ═══════════════════════════════════════════════════════════
+  //  SECTION: Push Notifications
+  // ═══════════════════════════════════════════════════════════
 
   private async notifyOwnerAdminPaymentSubmitted(submission: SubmissionDetail) {
     try {

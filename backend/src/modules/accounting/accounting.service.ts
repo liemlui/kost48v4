@@ -1,6 +1,7 @@
 import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { CurrentUserPayload } from '../../common/interfaces/current-user.interface';
+import { dateOnlyWib as dateOnly } from '../../common/utils/date-only';
 import { DEFAULT_COA } from './constants/default-coa';
 import { AccountingAccountsQueryDto, CreateChartOfAccountDto, UpdateChartOfAccountDto } from './dto/accounting-account.dto';
 import { CashAccountsQueryDto, CreateCashAccountDto, UpdateCashAccountDto } from './dto/cash-account.dto';
@@ -17,12 +18,6 @@ function monthRange(year: number, month: number) {
   const start = new Date(Date.UTC(year, month - 1, 1));
   const end = new Date(Date.UTC(year, month, 0));
   return { start, end };
-}
-
-function dateOnly(value: Date | string) {
-  const date = value instanceof Date ? new Date(value.getTime()) : new Date(value);
-  date.setUTCHours(0, 0, 0, 0);
-  return date;
 }
 
 function isDateBetweenInclusive(value: Date, start: Date, end: Date) {
@@ -48,6 +43,10 @@ export class AccountingService {
     private readonly prisma: PrismaService,
     private readonly schemaGuard: AccountingSchemaGuard,
   ) {}
+
+  // ═══════════════════════════════════════════════════════════
+  //  SECTION: COA & Cash Account Management
+  // ═══════════════════════════════════════════════════════════
 
   async seedDefaultCoa() {
     await this.schemaGuard.assertReady();
@@ -211,6 +210,10 @@ export class AccountingService {
     });
   }
 
+  // ═══════════════════════════════════════════════════════════
+  //  SECTION: Period Management
+  // ═══════════════════════════════════════════════════════════
+
   async listPeriods(query: AccountingPeriodsQueryDto = {}) {
     await this.schemaGuard.assertReady();
     const today = new Date();
@@ -309,6 +312,10 @@ export class AccountingService {
       data: { notes: dto.notes },
     });
   }
+
+  // ═══════════════════════════════════════════════════════════
+  //  SECTION: Opening Balance & Journal Draft
+  // ═══════════════════════════════════════════════════════════
 
   async listOpeningBalances(query: OpeningBalancesQueryDto = {}) {
     await this.schemaGuard.assertReady();

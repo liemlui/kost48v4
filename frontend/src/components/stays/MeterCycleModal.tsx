@@ -2,8 +2,9 @@ import { useMemo, useState } from 'react';
 import { Alert, Button, Form, Modal, Spinner } from 'react-bootstrap';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { recordMeterCycle, type MeterCycleResult } from '../../api/meterReadings';
-import { fetchOperationalSettings } from '../../api/settings';
+import { fetchPublicConfig } from '../../api/settings';
 import { getApiErrorMessage } from '../../utils/getApiErrorMessage';
+import { formatRupiah, formatRupiahWithoutSymbol } from '../../utils/formatCurrency';
 import type { Stay } from '../../types';
 
 /**
@@ -12,9 +13,9 @@ import type { Stay } from '../../types';
  */
 export default function MeterCycleModal({ show, onHide, stay, onDone }: { show: boolean; onHide: () => void; stay: Stay; onDone?: () => void }) {
   const qc = useQueryClient();
-  const settings = useQuery({ queryKey: ['operational-settings'], queryFn: fetchOperationalSettings, enabled: show });
-  const waterEnabled = Boolean(settings.data?.waterMeteringEnabled);
-  const freeKwh = settings.data?.freeElectricityKwhPerMonth ?? 30;
+  const publicConfig = useQuery({ queryKey: ['public-config'], queryFn: fetchPublicConfig, enabled: show });
+  const waterEnabled = Boolean(publicConfig.data?.waterMeteringEnabled);
+  const freeKwh = publicConfig.data?.freeElectricityKwhPerMonth ?? 30;
   const elecTariff = Number(stay.room?.electricityTariffPerKwhRupiah ?? stay.electricityTariffPerKwhRupiah ?? 0);
   const waterTariff = Number(stay.room?.waterTariffPerM3Rupiah ?? stay.waterTariffPerM3Rupiah ?? 0);
   const [readingAt, setReadingAt] = useState(new Date().toISOString().slice(0, 10));
@@ -60,7 +61,7 @@ export default function MeterCycleModal({ show, onHide, stay, onDone }: { show: 
       <Modal.Header closeButton><Modal.Title>Catat Meter & Terbitkan Tagihan</Modal.Title></Modal.Header>
       <Modal.Body>
         <Alert variant="info" className="small">
-          Sistem menghitung pemakaian sejak catatan terakhir, mengurangi jatah gratis ({settings.data?.freeElectricityKwhPerMonth ?? 30} kWh listrik), lalu menerbitkan tagihan meter otomatis.{' '}
+          Sistem menghitung pemakaian sejak catatan terakhir, mengurangi jatah gratis ({publicConfig.data?.freeElectricityKwhPerMonth ?? 30} kWh listrik), lalu menerbitkan tagihan meter otomatis.{' '}
           {waterEnabled ? 'Listrik & air dicatat bersama.' : 'Air belum dihitung (aktifkan di Pengaturan ▸ Tarif & Konstanta).'}
         </Alert>
         {result ? (
@@ -68,7 +69,7 @@ export default function MeterCycleModal({ show, onHide, stay, onDone }: { show: 
             {result.invoice ? (
               <>
                 <div className="fw-semibold">Tagihan terbit: {result.invoice.invoiceNumber}</div>
-                <div>Total Rp {result.invoice.totalAmountRupiah.toLocaleString('id-ID')} · {result.invoice.status}</div>
+                <div>Total {formatRupiah(result.invoice.totalAmountRupiah)} · {result.invoice.status}</div>
               </>
             ) : (
               <div>{result.message}</div>
@@ -104,20 +105,20 @@ export default function MeterCycleModal({ show, onHide, stay, onDone }: { show: 
                 <div className="fw-semibold mb-1">Estimasi tagihan</div>
                 <div className="d-flex justify-content-between">
                   <span>Listrik: {parseFloat(elec) || 0} kWh</span>
-                  <span>{elecTariff > 0 ? `Rp ${elecTariff.toLocaleString('id-ID')}/kWh` : 'gratis'}</span>
+                  <span>{elecTariff > 0 ? `Rp ${formatRupiahWithoutSymbol(elecTariff)}/kWh` : 'gratis'}</span>
                 </div>
                 {parseFloat(elec) > freeKwh ? (
                   <div className="d-flex justify-content-between text-danger">
                     <span>{`Kena tagih (>${freeKwh} kWh gratis)`}</span>
-                    <span>Rp {chargeableElec.toLocaleString('id-ID')}</span>
+                    <span>{formatRupiah(chargeableElec)}</span>
                   </div>
                 ) : (
                   <div className="text-success">Dalam jatah gratis {freeKwh} kWh ✅</div>
                 )}
                 {waterEnabled && water.trim() ? (
                   <div className="d-flex justify-content-between mt-1">
-                    <span>Air: {parseFloat(water) || 0} m³ × Rp {waterTariff.toLocaleString('id-ID')}</span>
-                    <span>Rp {chargeableWater.toLocaleString('id-ID')}</span>
+                    <span>Air: {parseFloat(water) || 0} m³ × {formatRupiah(waterTariff)}</span>
+                    <span>{formatRupiah(chargeableWater)}</span>
                   </div>
                 ) : null}
                 {estimatedTotal > 0 ? (
@@ -126,7 +127,7 @@ export default function MeterCycleModal({ show, onHide, stay, onDone }: { show: 
                 {estimatedTotal > 0 ? (
                   <div className="d-flex justify-content-between fw-bold">
                     <span>Estimasi total tagihan</span>
-                    <span>Rp {estimatedTotal.toLocaleString('id-ID')}</span>
+                    <span>{formatRupiah(estimatedTotal)}</span>
                   </div>
                 ) : (
                   <div className="text-success mt-1">Tidak ada tagihan tambahan ✅</div>

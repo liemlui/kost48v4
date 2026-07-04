@@ -39,15 +39,31 @@ const idOf = (d) => d?.id ?? d?.stay?.id ?? d?.invoice?.id ?? d?.tenant?.id ?? n
 const asList = (d) => (Array.isArray(d) ? d : (d?.items ?? d?.rows ?? d?.data ?? d?.results ?? []));
 
 // Cache token per identifier → hindari login berulang.
+// AJ-04: rate limit login (W-01) = 10 req / 5 menit per IP — seed butuh ~15 login.
+// Saat kena 429, tunggu window-nya lewat lalu coba lagi (guard produksi TIDAK dilonggarkan).
 const tokenCache = new Map();
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 async function loginAs(identifier, password) {
   if (tokenCache.has(identifier)) return tokenCache.get(identifier);
-  const r = await api('POST', '/auth/login', { identifier, password }, { token: '' });
-  const tok = r?.accessToken ?? null;
-  if (tok) tokenCache.set(identifier, tok);
-  return tok;
+  for (let attempt = 1; attempt <= 3; attempt++) {
+    try {
+      const r = await api('POST', '/auth/login', { identifier, password }, { token: '' });
+      const tok = r?.accessToken ?? null;
+      if (tok) tokenCache.set(identifier, tok);
+      return tok;
+    } catch (err) {
+      if (String(err?.message ?? '').includes('429') && attempt < 3) {
+        console.log(`   ⏳ Rate limit login — menunggu 5,5 menit sebelum lanjut (percobaan ${attempt}/3)...`);
+        await sleep(5.5 * 60 * 1000);
+        continue;
+      }
+      throw err;
+    }
+  }
+  return null;
 }
-const ymd = (d) => d.toISOString().slice(0, 10);
+// H11: toISOString() = UTC → bisa salah tanggal di WIB pagi. toLocaleDateString('en-CA') pakai timezone lokal.
+const ymd = (d) => d.toLocaleDateString('en-CA');
 const addMonths = (d, n) => { const x = new Date(d); x.setMonth(x.getMonth() + n); return x; };
 const addDays = (d, n) => { const x = new Date(d); x.setDate(x.getDate() + n); return x; };
 
@@ -74,8 +90,8 @@ const ROOMS = [
 // ── 13 dummy tenant (satu per kamar) dengan status bervariasi ───────────────
 // Status dipilih untuk mendemonstrasikan berbagai kondisi bisnis:
 //   paid       = stay aktif + invoice lunas
-//   unpaid     = stay aktif + invoice BELUM bayar (menunggak)
-//   partial    = stay aktif + baru masuk, DP terbayar tapi belum lunas (F2/Sari)
+//   unpaid     = stay aktif + invoice bulan ke-2 BELUM bayar (menunggak)
+//   partial    = stay aktif + baru masuk, invoice bulan ke-2 open penuh (no-partial D-02)
 //   renew      = stay aktif + buat RenewRequest PENDING
 //   checkoutH10= stay aktif + planOut = hari ini + 10 hari (mendekati keluar)
 //   pet        = stay aktif + hasPet = true (demo konstanta pet deposit)
@@ -107,9 +123,8 @@ const summary = {
 (async () => {
   console.log('=== SI-1 SEED via HTTP (Kamar Nyata KOST48) ===\nAPI:', API);
 
-  // 1) Login OWNER
-  const login = await api('POST', '/auth/login', OWNER, { token: '' });
-  TOKEN = login?.accessToken ?? login?.token;
+  // 1) Login OWNER — lewat loginAs agar ikut retry rate-limit (AJ-04)
+  TOKEN = await loginAs(OWNER.identifier, OWNER.password);
   if (!TOKEN) throw new Error('Login owner gagal (token kosong).');
   console.log('✓ Login OWNER');
 
@@ -170,7 +185,10 @@ const summary = {
 
   // 3) Per tenant: buat akun → portal access → check-in → invoice → bayar (sesuai skenario)
   const stays = [];
-  const TODAY = new Date('2026-06-24');
+  // AJ-04: TODAY dinamis (dulu hardcode '2026-06-24' → seed langsung "menua": stay lewat
+  // kontrak, tersapu AutoOps, meter ditolak). Anchor jam 12 siang lokal agar ymd() stabil WIB.
+  const now = new Date();
+  const TODAY = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 12);
 
   for (let i = 0; i < TENANTS.length; i++) {
     const t = TENANTS[i];
@@ -202,7 +220,12 @@ const summary = {
     }, { optional: true });
     if (onb) summary.onboarded++;
 
-    // 3d) Hitung tanggal check-in & planOut sesuai skenario
+    // 3d) Hitung tanggal check-in & planOut sesuai skenario.
+    // AJ-04: dulu checkIn = TODAY - monthsAgo BULAN → planOut sudah lewat → begitu sewa awal
+    // lunas (AJ-03), StaySweep langsung meng-checkout otomatis (money-guard tak menahan lagi)
+    // dan kamar jadi MAINTENANCE. Kini offset MINGGUAN agar kontrak masih berjalan; khusus
+    // Bayu (unpaid) sengaja overdue + invoice ke-2 menunggak → money-guard menahan checkout
+    // otomatis (persis skenario notifikasi C17).
     let checkIn, planOut;
     if (t.scenario === 'checkoutH10') {
       // Lani: H-10 dari hari ini. planOut = hari ini + 10 hari
@@ -212,14 +235,19 @@ const summary = {
       // Sari (F2): baru masuk 2 minggu lalu
       checkIn   = addDays(TODAY, -14);
       planOut   = addMonths(checkIn, 1);
+    } else if (t.scenario === 'unpaid') {
+      // Bayu (I): kontrak lewat 10 hari + tagihan bulan ke-2 belum dibayar (menunggak nyata)
+      checkIn   = addDays(TODAY, -40);
+      planOut   = addMonths(checkIn, 1);
     } else {
-      // Lainnya: masuk beberapa bulan lalu
-      checkIn   = addMonths(TODAY, -(t.monthsAgo || 1));
+      // Lainnya: masuk 1-3 MINGGU lalu → planOut masih di depan (stay aktif stabil ±1 bulan)
+      checkIn   = addDays(TODAY, -7 * (t.monthsAgo || 1));
       planOut   = addMonths(checkIn, 1);
     }
 
     const elec0 = METER_START_BASE + i * 50;
-    const depositCollected = t.scenario !== 'partial'; // Sari belum deposit penuh
+    // AJ-03 (C10-02): deposit jaminan WAJIB terkumpul saat check-in untuk semua occupied.
+    const depositCollected = true;
 
     // 3e) Check-in
     const stay = await api('POST', '/stays', {
@@ -243,36 +271,47 @@ const summary = {
     const rentInv = issued.find((iv) => Number(iv.totalAmountRupiah) === rm.monthly) ?? issued[0] ?? null;
 
     if (rentInv) {
-      if (t.scenario === 'paid' || t.scenario === 'renew' || t.scenario === 'pet' || t.scenario === 'checkoutH10') {
-        await api('POST', '/invoice-payments', {
-          invoiceId: rentInv.id,
-          paymentDate: ymd(checkIn),
-          amountRupiah: Number(rentInv.totalAmountRupiah),
-          method: i % 2 === 0 ? 'TRANSFER' : 'CASH',
-          note: 'Pembayaran sewa bulan pertama (seed dummy)',
-        });
-        summary.paidFull++;
-      } else if (t.scenario === 'partial') {
-        // Sari: bayar DP 30% saja, belum lunas
-        const dp = Math.round(Number(rentInv.totalAmountRupiah) * 0.30);
-        await api('POST', '/invoice-payments', {
-          invoiceId: rentInv.id,
-          paymentDate: ymd(checkIn),
-          amountRupiah: dp,
-          method: 'TRANSFER',
-          note: 'DP 30% (seed dummy — pelunasan pending)',
-        }, { optional: true });
-        summary.partial++;
-      } else if (t.scenario === 'unpaid') {
-        // Bayu: tidak bayar sama sekali
-        summary.unpaid++;
-        console.log(`   ⚠️  [${t.code}] ${t.name}: invoice BELUM dibayar (menunggak)`);
-      }
+      // AJ-03 (C10-02): sewa bulan PERTAMA selalu LUNAS — rule Fase V "check-in wajib lunas".
+      // Skenario menunggak/bayar-sebagian dipindah ke invoice bulan ke-2 (lebih realistis).
+      await api('POST', '/invoice-payments', {
+        invoiceId: rentInv.id,
+        paymentDate: ymd(checkIn),
+        amountRupiah: Number(rentInv.totalAmountRupiah),
+        method: i % 2 === 0 ? 'TRANSFER' : 'CASH',
+        note: 'Pembayaran sewa bulan pertama (seed dummy)',
+      });
+      summary.paidFull++;
     } else {
       console.warn(`   ⚠️  Tidak menemukan invoice auto utk stay #${stayId} (kamar ${t.code}).`);
     }
+
+    // AJ-03: invoice sewa bulan ke-2 utk skenario tunggakan (Bayu/I) & open penuh (Sari/F2).
+    if (t.scenario === 'unpaid' || t.scenario === 'partial') {
+      const inv2 = await api('POST', '/invoices/create-with-lines-and-issue', {
+        stayId,
+        invoiceNumber: `SEED2-${t.code}-${Date.now()}`,
+        periodStart: ymd(planOut),
+        periodEnd: ymd(addMonths(planOut, 1)),
+        dueDate: ymd(addDays(planOut, 7)),
+        notes: 'Sewa perpanjangan bulan ke-2 (seed dummy)',
+        lines: [{ lineType: 'RENT', description: `Sewa kamar ${t.code} bulan ke-2`, qty: '1', unitPriceRupiah: rm.monthly }],
+      }, { optional: true });
+      // Catatan no-partial (D-02): pembayaran manual WAJIB lunas penuh — tidak ada
+      // pembayaran sebagian. Maka skenario "partial" pun = invoice ke-2 menunggak penuh
+      // (beda dari Bayu hanya pada narasi: penghuni baru yang belum bayar bulan ke-2).
+      const inv2Id = inv2 ? idOf(inv2) : null;
+      if (inv2Id && t.scenario === 'partial') {
+        summary.partial++;
+        console.log(`   ⚠️  [${t.code}] ${t.name}: invoice bulan ke-2 BELUM dibayar (baru masuk — no-partial D-02)`);
+      } else if (inv2Id) {
+        summary.unpaid++;
+        console.log(`   ⚠️  [${t.code}] ${t.name}: invoice bulan ke-2 BELUM dibayar (menunggak)`);
+      } else {
+        console.warn(`   ⚠️  Gagal membuat invoice bulan ke-2 utk kamar ${t.code} — skenario ${t.scenario} dilewati.`);
+      }
+    }
   }
-  console.log(`✓ ${summary.stays} check-in + ${summary.paidFull} lunas + ${summary.partial} DP saja + ${summary.unpaid} menunggak`);
+  console.log(`✓ ${summary.stays} check-in + ${summary.paidFull} sewa awal lunas + ${summary.partial + summary.unpaid} invoice bulan ke-2 open/menunggak (no-partial D-02)`);
 
   // 4) Catat meter siklus untuk kamar Deluxe AC (A, B, C, J, K)
   const meterCandidates = ['A', 'B', 'C', 'J', 'K'];
@@ -280,7 +319,9 @@ const summary = {
     const s = stays.find((x) => x.code === code);
     if (!s) continue;
     const usage = code === 'A' || code === 'K' ? 48 : 22; // A/K melebihi jatah 30 kWh; B/C/J dalam jatah
-    const readAt = addDays(s.checkIn, 28);
+    // AJ-04: server bisa menormalkan checkInDate lampau → baca meter "hari ini" agar
+    // selalu ≥ tanggal check-in tersimpan (dulu checkIn+28 hari → ditolak "sebelum check-in").
+    const readAt = TODAY;
     const r = await api('POST', '/meter-readings/cycle', {
       roomId: roomId[code],
       readingAt: ymd(readAt),
@@ -352,9 +393,7 @@ const summary = {
   {
     const dimasStay = stays.find((s) => s.code === 'B');
     if (dimasStay) {
-      const tLogin = await api('POST', '/auth/login',
-        { identifier: 'dimas.tenant@kost48.test', password: TENANT_PW }, { token: '', optional: true });
-      const tTok = tLogin?.accessToken ?? tLogin?.token;
+      const tTok = await loginAs('dimas.tenant@kost48.test', TENANT_PW).catch(() => null);
       if (tTok) {
         const rr = await api('POST', '/tenant/renew-requests', {
           stayId: dimasStay.stayId, requestedTerm: 'MONTHLY',
@@ -375,8 +414,8 @@ const summary = {
   console.log('   • Dimas (B): RenewRequest PENDING');
   console.log('   • Cindy (C): hasPet = true');
   console.log('   • Indah (H): 2 orang (occupantCount=2)');
-  console.log('   • Bayu  (I): invoice BELUM dibayar (menunggak)');
+  console.log('   • Bayu  (I): sewa awal lunas; invoice bulan ke-2 menunggak (belum dibayar)');
   console.log('   • Lani  (K): checkoutH10 (planOut = 10 hari dari sekarang)');
-  console.log('   • Sari  (F2): DP 30% saja, pelunasan masih pending');
+  console.log('   • Sari  (F2): sewa awal + deposit lunas; invoice bulan ke-2 open penuh (no-partial D-02)');
   process.exit(0);
 })().catch((e) => { console.error('\n❌ Seed GAGAL:', e?.message ?? e); process.exit(1); });

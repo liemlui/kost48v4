@@ -18,10 +18,10 @@ export default function BalanceSheetPage() {
   const d=q.data;
   return (<Container fluid className="px-2 py-3">
     <div className="d-flex justify-content-between align-items-start mb-3 flex-wrap gap-2">
-      <div><h1 className="mb-0" style={{fontSize:'1.5rem',fontWeight:700}}>Neraca</h1><small className="text-muted">Balance sheet dengan perbandingan bulan lalu</small></div>
+      <div><h1 className="mb-0 rpt-title">Neraca</h1><small className="text-muted">Balance sheet dengan perbandingan bulan lalu</small></div>
       <div className="d-flex gap-2">
-        <Form.Control type="number" value={ym.year} min={2020} max={2100} onChange={e=>setYm(p=>({...p,year:+e.target.value}))} style={{width:80,height:32,fontSize:13}}/>
-        <Form.Select value={ym.month} onChange={e=>setYm(p=>({...p,month:+e.target.value}))} style={{width:120,height:32,fontSize:13}}>
+        <Form.Control type="number" value={ym.year} min={2020} max={2100} onChange={e=>setYm(p=>({...p,year:+e.target.value}))} className="rpt-input-sm"/>
+        <Form.Select value={ym.month} onChange={e=>setYm(p=>({...p,month:+e.target.value}))} className="rpt-select-sm">
           {Array.from({length:12},(_,i)=>i+1).map(m=><option key={m} value={m}>{new Date(0,m-1).toLocaleString('id-ID',{month:'long'})}</option>)}
         </Form.Select>
       </div>
@@ -36,17 +36,17 @@ export default function BalanceSheetPage() {
         <Col xs={6} xl={3}><Card><Card.Body><div className="kpi-label">Status</div><div className="kpi-value"><Badge bg={d.current.statement.balanced?'success':'warning'}>{d.current.statement.balanced?'Balance':'Tidak Balance'}</Badge></div></Card.Body></Card></Col>
       </Row>
       <Row className="g-3">
-        <Col lg={4}><Card><Card.Header style={{fontWeight:600,fontSize:14,background:'#f8fafc'}}>🏦 Aset</Card.Header><Card.Body className="p-0">
+        <Col lg={4}><Card><Card.Header className="rpt-card-header">🏦 Aset</Card.Header><Card.Body className="p-0">
           <Table size="sm" className="mb-0"><thead><tr><th>Akun</th><th className="text-end">Nilai</th></tr></thead><tbody>
             {d.current.lines?.assets?.map((l:any,i:number)=>l.balanceRupiah!==0&&<tr key={i}><td style={{paddingLeft:l.isContraAsset?24:12}}>{l.presentationLabel??l.name}</td><td className="text-end">{formatCompact(l.balanceRupiah)}</td></tr>)}
             <tr className="border-top fw-bold"><td>Total Aset</td><td className="text-end">{formatCompact(d.current.statement.assetsRupiah)}</td></tr>
           </tbody></Table></Card.Body></Card></Col>
-        <Col lg={4}><Card><Card.Header style={{fontWeight:600,fontSize:14,background:'#f8fafc'}}>💳 Kewajiban</Card.Header><Card.Body className="p-0">
+        <Col lg={4}><Card><Card.Header className="rpt-card-header">💳 Kewajiban</Card.Header><Card.Body className="p-0">
           <Table size="sm" className="mb-0"><thead><tr><th>Akun</th><th className="text-end">Nilai</th></tr></thead><tbody>
             {d.current.lines?.liabilities?.map((l:any,i:number)=>l.balanceRupiah!==0&&<tr key={i}><td style={{paddingLeft:12}}>{l.presentationLabel??l.name}</td><td className="text-end">{formatCompact(l.balanceRupiah)}</td></tr>)}
             <tr className="border-top fw-bold"><td>Total Kewajiban</td><td className="text-end">{formatCompact(d.current.statement.liabilitiesRupiah)}</td></tr>
           </tbody></Table></Card.Body></Card></Col>
-        <Col lg={4}><Card><Card.Header style={{fontWeight:600,fontSize:14,background:'#f8fafc'}}>📊 Ekuitas</Card.Header><Card.Body className="p-0">
+        <Col lg={4}><Card><Card.Header className="rpt-card-header">📊 Ekuitas</Card.Header><Card.Body className="p-0">
           <Table size="sm" className="mb-0"><thead><tr><th>Akun</th><th className="text-end">Nilai</th></tr></thead><tbody>
             {d.current.lines?.equity?.map((l:any,i:number)=>l.balanceRupiah!==0&&<tr key={i}><td style={{paddingLeft:12}}>{l.presentationLabel??l.name}</td><td className="text-end">{formatCompact(l.balanceRupiah)}</td></tr>)}
             <tr className="border-top fw-bold"><td>Total Ekuitas</td><td className="text-end">{formatCompact(d.current.statement.equityRupiah)}</td></tr>

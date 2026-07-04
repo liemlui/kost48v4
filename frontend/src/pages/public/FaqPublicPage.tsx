@@ -43,13 +43,13 @@ export default function FaqPublicPage() {
   const showStatic = !query.isLoading && (query.isError || faqByCategory.length === 0);
 
   return (
-    <div className="public-page-shell" style={{ background: '#f8fafc' }}>
+    <div className="public-page-shell e3-bg-surface">
       <GuestTopbar scrolled={false} />
-      <div className="container py-4 py-lg-5" style={{ maxWidth: 820 }}>
+      <div className="container py-4 py-lg-5 e3-maxw-820">
         <div className="mb-4">
           <div className="page-eyebrow">✦ Panduan</div>
-          <h1 className="mb-2" style={{ color: '#0f172a' }}>Panduan & FAQ KOST48</h1>
-          <p style={{ color: '#475569', maxWidth: 600 }}>
+          <h1 className="mb-2 e3-text-gray-900">Panduan & FAQ KOST48</h1>
+          <p className="e3-maxw-600" style={{ color: '#475569' }}>
             Semua aturan, tata cara, dan informasi penting tentang KOST48 dalam satu halaman — mulai dari tarif,
             booking, perpanjangan, hingga checkout.
           </p>
@@ -79,8 +79,8 @@ export default function FaqPublicPage() {
                 <a
                   key={category}
                   href={`#faq-${category.replace(/\s+/g, '-').toLowerCase()}`}
-                  className="btn btn-outline-secondary btn-sm"
-                  style={{ borderRadius: 999, color: '#374151', borderColor: '#cbd5e1' }}
+                  className="btn btn-outline-secondary btn-sm e3-rounded-pill"
+                  style={{ color: '#374151', borderColor: '#cbd5e1' }}
                 >
                   {category}
                 </a>
@@ -89,17 +89,17 @@ export default function FaqPublicPage() {
 
             {faqByCategory.map(([category, items]) => (
               <section key={category} id={`faq-${category.replace(/\s+/g, '-').toLowerCase()}`} className="mb-5">
-                <h2 className="fs-5 fw-bold mb-3 pb-2 border-bottom" style={{ color: '#0f172a', borderColor: '#0ea5e9' }}>
+                <h2 className="fs-5 fw-bold mb-3 pb-2 border-bottom e3-text-gray-900" style={{ borderColor: '#0ea5e9' }}>
                   {category}
                 </h2>
                 <Accordion className="gx-accordion">
                   {items.map((item, idx) => (
                     <Accordion.Item eventKey={`${item.id}-${idx}`} key={item.id} className="gx-acc-item">
                       <Accordion.Header>
-                        <span className="gx-acc-cat" style={{ background: '#dbeafe', color: '#1e40af' }}>{item.category}</span>
-                        <span style={{ color: '#0f172a' }}>{item.question}</span>
+                        <span className="gx-acc-cat e3-bg-blue-100 e3-text-blue-800">{item.category}</span>
+                        <span className="e3-text-gray-900">{item.question}</span>
                       </Accordion.Header>
-                      <Accordion.Body style={{ color: '#374151', fontSize: '.9rem', lineHeight: 1.7 }}>
+                      <Accordion.Body style={{ color: '#374151', lineHeight: 1.7, fontSize: '.9rem' }}>
                         {item.answer}
                       </Accordion.Body>
                     </Accordion.Item>
@@ -113,7 +113,7 @@ export default function FaqPublicPage() {
         {/* Fallback statis saat DB kosong atau error */}
         {showStatic && (
           <div>
-            <h2 className="fs-5 fw-bold mb-3" style={{ color: '#0f172a' }}>Pertanyaan Umum</h2>
+            <h2 className="fs-5 fw-bold mb-3 e3-text-gray-900">Pertanyaan Umum</h2>
             <Accordion className="gx-accordion">
               {STATIC_FAQS.map((item, idx) => (
                 <Accordion.Item eventKey={`static-${idx}`} key={idx} className="gx-acc-item">

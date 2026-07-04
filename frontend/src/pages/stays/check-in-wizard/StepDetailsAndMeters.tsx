@@ -1,6 +1,7 @@
 import { Card, Col, Form, Row, Alert, InputGroup } from 'react-bootstrap';
 import { Controller } from 'react-hook-form';
 import type { UseFormReturn } from 'react-hook-form';
+import CurrencyInput from '../../../components/common/CurrencyInput';
 import type { WizardFormValues } from './types';
 import { bookingSourceOptions, pricingTermOptions, stayPurposeOptions } from './checkInWizardUtils';
 
@@ -68,14 +69,9 @@ export default function StepDetailsAndMeters({
                   <>
                     <InputGroup>
                       <InputGroup.Text className="bg-white border-end-0 text-muted" style={{ fontSize: '0.85rem' }}>Rp</InputGroup.Text>
-                      <Form.Control
-                        type="number"
-                        min={0}
-                        value={field.value ?? ''}
-                        onChange={(e) => {
-                          const val = e.target.value === '' ? '' : Number(e.target.value);
-                          field.onChange(val);
-                        }}
+                      <CurrencyInput
+                        value={field.value === '' || field.value == null ? undefined : Number(field.value)}
+                        onChange={(v) => field.onChange(v == null ? '' : v)}
                         placeholder="0"
                       />
                     </InputGroup>
@@ -101,12 +97,10 @@ export default function StepDetailsAndMeters({
                   <>
                     <InputGroup>
                       <InputGroup.Text className="bg-white border-end-0 text-muted" style={{ fontSize: '0.85rem' }}>Rp</InputGroup.Text>
-                      <Form.Control
-                        type="number"
-                        min={0}
-                        value={field.value ?? ''}
-                        onChange={(e) => {
-                          const val = e.target.value === '' ? '' : Number(e.target.value);
+                      <CurrencyInput
+                        value={field.value === '' || field.value == null ? undefined : Number(field.value)}
+                        onChange={(v) => {
+                          const val = v == null ? '' : v;
                           field.onChange(val);
                           if (val === '' || val === 0) {
                             setDepositWasManuallyCleared(true);

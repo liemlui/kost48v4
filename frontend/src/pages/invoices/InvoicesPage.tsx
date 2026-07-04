@@ -25,6 +25,10 @@ import { useAuth } from '../../context/AuthContext';
 import { getInvoiceTotalAmount } from '../../utils/invoiceTotals';
 import { buildCancelInvoiceSafety, buildIssueInvoiceSafety } from '../../utils/invoiceActionSafety';
 
+// ═══════════════════════════════════════════════════════════
+//  COMPONENT: InvoiceAnalyticsPanel & InvoicesPage
+// ═══════════════════════════════════════════════════════════
+
 function fmtCompact(value: number): string {
   const safe = Math.abs(value || 0);
   if (safe >= 1_000_000_000) return `Rp ${(safe / 1_000_000_000).toFixed(1)} M`;

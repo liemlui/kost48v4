@@ -1,6 +1,7 @@
 import { FormEvent, useEffect, useMemo, useState } from 'react';
 import { Alert, Button, Card, Col, Form, Row, Table } from 'react-bootstrap';
 import type { AccountingPeriod, ChartOfAccount, OpeningBalanceBatch, OpeningBalanceLinePayload } from '../../api/accounting';
+import CurrencyInput from '../common/CurrencyInput';
 import { formatRupiah } from '../../utils/formatCurrency';
 
 function todayInput() {
@@ -205,8 +206,8 @@ export default function OpeningBalanceWizard({
                     </Form.Select>
                   </td>
                   <td><Form.Control value={line.description ?? ''} disabled={!canManageOpeningBalance} onChange={(event) => updateLine(line.key, { description: event.target.value })} /></td>
-                  <td><Form.Control type="number" min={0} value={line.debitText} disabled={!canManageOpeningBalance} onChange={(event) => updateLine(line.key, { debitText: event.target.value, creditText: event.target.value !== '0' ? '0' : line.creditText })} /></td>
-                  <td><Form.Control type="number" min={0} value={line.creditText} disabled={!canManageOpeningBalance} onChange={(event) => updateLine(line.key, { creditText: event.target.value, debitText: event.target.value !== '0' ? '0' : line.debitText })} /></td>
+                  <td><CurrencyInput value={line.debitText === '' ? undefined : Number(line.debitText)} disabled={!canManageOpeningBalance} onChange={(v) => { const text = v == null ? '' : String(v); updateLine(line.key, { debitText: text, creditText: text !== '0' && text !== '' ? '0' : line.creditText }); }} /></td>
+                  <td><CurrencyInput value={line.creditText === '' ? undefined : Number(line.creditText)} disabled={!canManageOpeningBalance} onChange={(v) => { const text = v == null ? '' : String(v); updateLine(line.key, { creditText: text, debitText: text !== '0' && text !== '' ? '0' : line.debitText }); }} /></td>
                   <td><Button variant="link" disabled={!canManageOpeningBalance || lines.length <= 2} onClick={() => setLines((current) => current.filter((item) => item.key !== line.key))}>Hapus</Button></td>
                 </tr>
               ))}

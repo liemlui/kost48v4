@@ -2,6 +2,7 @@ import { FormEvent, useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Alert, Badge, Button, Card, Col, Form, Modal, Row, Spinner, Table } from 'react-bootstrap';
 import PageHeader from '../../components/common/PageHeader';
+import CurrencyInput from '../../components/common/CurrencyInput';
 import {
   createFixedAsset,
   fetchAssetLedgerAlignment,
@@ -20,10 +21,11 @@ import {
 } from '../../api/assets';
 import { listResource } from '../../api/resources';
 import { getApiErrorMessage } from '../../utils/getApiErrorMessage';
+import { formatRupiahWithoutSymbol } from '../../utils/formatCurrency';
 
 function formatRupiah(value?: number | null) {
   const parsed = Number(value ?? 0);
-  const abs = Math.abs(parsed).toLocaleString('id-ID');
+  const abs = formatRupiahWithoutSymbol(Math.abs(parsed));
   return parsed < 0 ? `(Rp ${abs})` : `Rp ${abs}`;
 }
 
@@ -371,13 +373,13 @@ export default function AssetRegisterPage() {
                 <Col sm={6}>
                   <Form.Group>
                     <Form.Label>Cost</Form.Label>
-                    <Form.Control type="number" min={1} value={form.acquisitionCostRupiah} onChange={(e) => setForm((prev) => ({ ...prev, acquisitionCostRupiah: e.target.value }))} required />
+                    <CurrencyInput required value={form.acquisitionCostRupiah === '' ? undefined : Number(form.acquisitionCostRupiah)} onChange={(v) => setForm((prev) => ({ ...prev, acquisitionCostRupiah: v == null ? '' : String(v) }))} />
                   </Form.Group>
                 </Col>
                 <Col sm={6}>
                   <Form.Group>
                     <Form.Label>Residu</Form.Label>
-                    <Form.Control type="number" min={0} value={form.salvageValueRupiah} onChange={(e) => setForm((prev) => ({ ...prev, salvageValueRupiah: e.target.value }))} />
+                    <CurrencyInput value={form.salvageValueRupiah === '' ? undefined : Number(form.salvageValueRupiah)} onChange={(v) => setForm((prev) => ({ ...prev, salvageValueRupiah: v == null ? '' : String(v) }))} />
                   </Form.Group>
                 </Col>
               </Row>
@@ -391,7 +393,7 @@ export default function AssetRegisterPage() {
                 <Col sm={6}>
                   <Form.Group>
                     <Form.Label>Akumulasi awal</Form.Label>
-                    <Form.Control type="number" min={0} value={form.accumulatedDepreciationRupiah} onChange={(e) => setForm((prev) => ({ ...prev, accumulatedDepreciationRupiah: e.target.value }))} />
+                    <CurrencyInput value={form.accumulatedDepreciationRupiah === '' ? undefined : Number(form.accumulatedDepreciationRupiah)} onChange={(v) => setForm((prev) => ({ ...prev, accumulatedDepreciationRupiah: v == null ? '' : String(v) }))} />
                   </Form.Group>
                 </Col>
               </Row>
@@ -439,7 +441,7 @@ export default function AssetRegisterPage() {
           {alignmentAsset ? <>
             <Alert variant="warning"><strong>Owner approval required.</strong> Jangan post alignment jika nilai aset sudah masuk Fixed Assets di opening balance. Adjustment ini memengaruhi Balance Sheet.</Alert>
             <div className="mb-3"><div className="fw-semibold">{alignmentAsset.assetCode} · {alignmentAsset.name}</div><small className="text-muted">Nilai perolehan {formatRupiah(alignmentAsset.acquisitionCostRupiah)} · nilai buku {formatRupiah(alignmentAsset.bookValueRupiah)}</small></div>
-            <Row className="g-2 mb-3"><Col md={6}><Form.Group><Form.Label>Metode</Form.Label><Form.Select value={alignmentForm.method} onChange={(e) => setAlignmentForm((prev) => ({ ...prev, method: e.target.value as FixedAssetLedgerAlignmentMethod }))}>{alignmentMethods.map((method) => <option key={method} value={method}>{alignmentLabels[method]}</option>)}</Form.Select></Form.Group></Col><Col md={3}><Form.Group><Form.Label>Akun kredit</Form.Label><Form.Control value={alignmentForm.method === 'OWNER_CAPITAL_CONTRIBUTION' ? '3000' : alignmentForm.creditAccountCode} disabled={alignmentForm.method !== 'RECLASSIFY_FROM_CASH'} onChange={(e) => setAlignmentForm((prev) => ({ ...prev, creditAccountCode: e.target.value }))} /></Form.Group></Col><Col md={3}><Form.Group><Form.Label>Jumlah</Form.Label><Form.Control type="number" min={1} disabled={alignmentForm.method === 'DISCLOSURE_ONLY'} value={alignmentForm.amountRupiah} onChange={(e) => setAlignmentForm((prev) => ({ ...prev, amountRupiah: e.target.value }))} /></Form.Group></Col></Row>
+            <Row className="g-2 mb-3"><Col md={6}><Form.Group><Form.Label>Metode</Form.Label><Form.Select value={alignmentForm.method} onChange={(e) => setAlignmentForm((prev) => ({ ...prev, method: e.target.value as FixedAssetLedgerAlignmentMethod }))}>{alignmentMethods.map((method) => <option key={method} value={method}>{alignmentLabels[method]}</option>)}</Form.Select></Form.Group></Col><Col md={3}><Form.Group><Form.Label>Akun kredit</Form.Label><Form.Control value={alignmentForm.method === 'OWNER_CAPITAL_CONTRIBUTION' ? '3000' : alignmentForm.creditAccountCode} disabled={alignmentForm.method !== 'RECLASSIFY_FROM_CASH'} onChange={(e) => setAlignmentForm((prev) => ({ ...prev, creditAccountCode: e.target.value }))} /></Form.Group></Col><Col md={3}><Form.Group><Form.Label>Jumlah</Form.Label><CurrencyInput disabled={alignmentForm.method === 'DISCLOSURE_ONLY'} value={alignmentForm.amountRupiah === '' ? undefined : Number(alignmentForm.amountRupiah)} onChange={(v) => setAlignmentForm((prev) => ({ ...prev, amountRupiah: v == null ? '' : String(v) }))} /></Form.Group></Col></Row>
             <Form.Group className="mb-3"><Form.Label>Catatan</Form.Label><Form.Control as="textarea" rows={2} value={alignmentForm.notes} onChange={(e) => setAlignmentForm((prev) => ({ ...prev, notes: e.target.value }))} /></Form.Group>
             {alignmentPreviewMutation.isError ? <Alert variant="danger">{getApiErrorMessage(alignmentPreviewMutation.error, 'Preview gagal')}</Alert> : null}
             {alignmentPostMutation.isError ? <Alert variant="danger">{getApiErrorMessage(alignmentPostMutation.error, 'Post alignment gagal')}</Alert> : null}

@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { getApiErrorMessage } from '../../utils/getApiErrorMessage';
 import { Alert, Button, Form, Modal, Spinner } from 'react-bootstrap';
 import { useStay } from '../../hooks/useStay';
+import CurrencyInput from '../common/CurrencyInput';
 import { Stay } from '../../types';
 import { getStatusLabel } from '../../utils/statusLabels';
 
@@ -228,12 +229,9 @@ export default function RenewStayModal({
 
         <Form.Group className="mb-3">
           <Form.Label>Tarif Sewa Periode Baru (Opsional)</Form.Label>
-          <Form.Control
-            type="number"
-            min="0"
-            inputMode="numeric"
-            value={agreedRentAmountRupiah}
-            onChange={(e) => setAgreedRentAmountRupiah(e.target.value)}
+          <CurrencyInput
+            value={agreedRentAmountRupiah === '' ? undefined : Number(agreedRentAmountRupiah)}
+            onChange={(v) => setAgreedRentAmountRupiah(v == null ? '' : String(v))}
             placeholder="Kosongkan untuk memakai tarif saat ini"
           />
           <div className="text-muted small mt-1">Kosongkan jika tarif sewa tidak berubah.</div>

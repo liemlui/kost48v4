@@ -64,6 +64,9 @@
   - MyStayPage sendiri sudah benar (empty-state saat `stage!=='occupied'`), tapi tak pernah tercapai karena loop upstream.
 - **SARAN FIX:** perlakukan **404 sebagai hasil valid "tidak ada stay"** (queryFn tangkap 404 → `return null` sukses, bukan throw) sehingga `staleTime` berlaku & loop berhenti; ATAU matikan `refetchOnMount` pada query ini; ATAU jadikan `isStageLoading` false begitu `stayNotFound` true. **Prioritaskan** — ini menghantam backend & bisa meng-crash tab.
 - **Catatan pemicu:** login normal tenant `browsing` biasanya diarahkan ke `/rooms` (bukan `/portal/stay`), jadi tidak semua tenant kena setiap saat — tapi mantan penghuni / akses langsung ke `/portal/stay` **pasti** kena. Mantan penghuni tetap punya role TENANT + akses portal.
+- **⚠️ UPDATE PASCA-FIX (2 Jul):** setelah owner sync schema + restart (yang menyembuhkan 503 `/tenant/bookings/my` & `/announcements/active`, lihat C09-01), loop `/portal/stay` **MASIH TERJADI** (tab tetap crash saat dibuka). → **C05-01 bug FE INDEPENDEN**, bukan efek 503. Akar tetap: query `/stays/me/current` **404** + `refetchOnMount:true` + gate `isStageLoading` di `RequireRoles`. **Wajib fix FE terpisah** (tangani 404 sebagai hasil valid `null`, atau matikan refetchOnMount pada query error).
+- **🚨 ESKALASI → SELF-DoS (severity efektif BLOCKER):** membuka `/portal/stay` (tenant tanpa stay aktif) **men-crash backend `localhost:3000` DUA KALI** selama audit — badai ~150 req/detik menjatuhkan server untuk **semua** pengguna (bukan cuma tab tenant itu). Diamati di mode dev (nodemon + prisma query-log memperparah); di produksi mungkin lebih tahan tapi tetap berisiko degradasi berat. **Naikkan prioritas ke paling atas.** Selama belum di-fix, JANGAN buka `/portal/stay` dgn akun tenant tanpa stay.
+- **🔎 POLA SISTEMIK (audit FE menyeluruh):** anti-pola penyebab loop = **`refetchOnMount:true` + `retry:false` pada query yang bisa error (404/503)**. Ada di **5 file portal tenant**: `MyStayPage.tsx`, `useTenantPortalStage.ts` (2×), `MyBookingsPage.tsx` (2×), `MyInvoicesPage.tsx`, `components/tenant/TenantBookingGate.tsx` (2×). Yang **aktif loop**: MyStayPage (`/stays/me/current` 404). Yang **pernah loop** via 503: MyBookingsPage (`/tenant/bookings/my`) — kini dorman pasca schema-sync tapi **anti-polanya tetap** → akan loop lagi bila endpoint error. Halaman non-portal (admin/owner) **bersih** dari pola ini. **SARAN FIX SISTEMIK:** perbaiki semua 5 (tangani error/404 sebagai hasil terminal, hapus `refetchOnMount:true` pada query error-prone, atau set `throwOnError:false` + gate loading yang settle saat error).
 
 ### ✅ Verifikasi kode (bagian yang BENAR)
 - **JB-17 (progress masa sewa) BENAR:** `getLeaseProgress` (`utils/dateTime.ts:159-170`) meng-clamp `percentElapsed` 0–100, `totalDays=max(1,…)`. "100% terlewati" (yang Hermes lihat) **benar** bila kontrak memang sudah habis (bukan bug). Overdue → "Lewat X hari" (`LeaseProgressHero.tsx:15-40`).
@@ -72,7 +75,16 @@
 - **I7 (tooltip tombol disabled) sebagian FIXED:** tombol "Catat Meter" disabled punya `title` penjelas (`MyStayPage.tsx:515-517`: "Dibuka H-10 sebelum akhir sewa…"). Tombol Perpanjang/Ajukan Keluar belum diverifikasi live.
 - **JB-19 (isolasi data) secara struktur aman:** tenant memakai endpoint self-scoped `/stays/me/current` (tak ada param id yang bisa dimanipulasi); `/stays` (list admin) → **403** utk TENANT (terverifikasi C04). Ada guard DEV-warning bila `stay.tenantId !== currentUserTenantId` (`MyStayPage.tsx:837-838`).
 
-### Belum terverifikasi live (butuh tenant dgn stay OCCUPIED aktif)
+### ✅ OCCUPIED DASHBOARD — DIKONFIRMASI LIVE (Bayu Nugroho, Kamar I, 3 Jul)
+Login `bayu.tenant@kost48.test` (stay aktif, `/stays/me/current`=**200**):
+- **C05-01 loop TIDAK terjadi utk tenant occupied:** buka `/portal/stay` → **0 request berulang** ke `/stays/me/current` (query fetch sekali, settle). Tab tak crash. → **membuktikan loop MURNI dari jalur 404/no-stay**; fix cukup tangani 404 sebagai hasil terminal.
+- **JB-17 "100% terlewati" BENAR (bukan bug):** Bayu sewa 24 Mei–24 Jun 2026, kini overdue → "**Lewat 9 hari**", state "Lewat/dari jadwal" (merah). Persis logika `getLeaseProgress` (clamp + overdue).
+- **I6 (chart -1) RESOLVED:** panel "Konsumsi Listrik & Air" tampilkan **empty-state** "Belum ada pemakaian tercatat…", **bukan** chart rusak width -1. ✅
+- **JB-01 DANA TITIPAN Rp 300.000 / Rp 300.000** = deposit Kamar I (benar, tanpa NaN). Kartu TAGIHAN 1 / LAPORAN 1 render benar.
+- **Nav tab lengkap** (Panduan/Bayar/Lapor/Pengumuman/Panduan/WiFi) — **tak ada "sidebar hilang"**. Banner invoice overdue ("Terlambat 16 jam"). Review "sudah menilai" (Bayu memang sudah survei).
+- **I7:** tombol Perpanjang & Ajukan Keluar **disabled** (Bayu overdue + ada tagihan) — state disabled terlihat; tooltip meter sudah dikonfirmasi kode (`:517`).
+
+### Belum terverifikasi live (opsional)
 - Tampilan dashboard "occupied": chart listrik nyata (I6), tooltip Perpanjang/Ajukan Keluar (I7), PWA prompt (I8), badge notifikasi, timeline riwayat, catat meter (termasuk uji meter mundur).
 - **Kredensial tenant occupied tidak tersedia** (Maya tak punya stay aktif; password tenant lain di seed tidak diketahui). **Rekomendasi:** sediakan 1 akun tenant occupied test, atau jalankan ulang bagian ini setelah C05-01 diperbaiki (agar Maya bisa render bila datanya diubah).
 

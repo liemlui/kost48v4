@@ -110,7 +110,7 @@ export function computeInvoiceDepositSettlement(params: {
   };
 }
 
-export function parseMeterDecimal(value: string, label: string) {
+export function parseMeterDecimal(value: string | number, label: string) {
   try {
     const decimalValue = new Prisma.Decimal(value);
     if (decimalValue.lt(0)) {

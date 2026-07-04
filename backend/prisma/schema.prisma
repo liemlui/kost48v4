@@ -2103,6 +2103,9 @@ model OperationalSetting {
   deepseekModel                String   @default("deepseek-v4-flash")
   deepseekFinanceModel         String   @default("deepseek-v4-pro")
   deepseekBaseUrl              String   @default("https://api.deepseek.com")
+  // API key DeepSeek — owner isi via Settings→AI (owner-request 2026-07-04); kosong = fallback env DEEPSEEK_API_KEY.
+  // JANGAN pernah kirim nilai mentah kolom ini ke client — hanya status/preview (settings.service toSafeView).
+  deepseekApiKey               String   @default("")
   aiFeaturesEnabled            Boolean  @default(false)
   aiManualOnly                 Boolean  @default(true)
   aiOwnerAdminOnly             Boolean  @default(true)

@@ -1,3 +1,7 @@
+// ═══════════════════════════════════════════════════════════
+//  FILE: Accounting API Types
+// ═══════════════════════════════════════════════════════════
+
 export type AccountingAccountType = 'ASSET' | 'LIABILITY' | 'EQUITY' | 'REVENUE' | 'COGS' | 'EXPENSE';
 export type NormalBalance = 'DEBIT' | 'CREDIT';
 export type CashAccountType = 'CASH' | 'BANK' | 'QRIS' | 'EWALLET' | 'OTHER';

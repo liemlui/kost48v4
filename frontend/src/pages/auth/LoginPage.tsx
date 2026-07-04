@@ -167,7 +167,9 @@ export default function LoginPage() {
 
           {fieldErrors.form ? <div className="login-form-error" role="alert">{fieldErrors.form}</div> : null}
 
-          <Form onSubmit={handleSubmit}>
+          {/* noValidate: validasi kustom berbahasa Indonesia di handleSubmit — tanpa ini,
+              atribut `required` membuat browser memblokir submit dgn bubble bawaan (Inggris). */}
+          <Form onSubmit={handleSubmit} noValidate>
             <Form.Group className="mb-3">
               <Form.Label>{modeCopy.identifierLabel}</Form.Label>
               <Form.Control

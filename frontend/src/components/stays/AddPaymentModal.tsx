@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import { getApiErrorMessage } from '../../utils/getApiErrorMessage';
 import { Alert, Button, Form, Modal, Spinner } from 'react-bootstrap';
 import { usePayments } from '../../hooks/usePayments';
+import CurrencyInput from '../common/CurrencyInput';
 import { Invoice, PaymentMethod } from '../../types';
 import { getInvoiceOutstandingAmount, getInvoicePaidAmount, getInvoiceTotalAmount } from '../../utils/invoiceTotals';
 
@@ -67,7 +68,7 @@ export default function AddPaymentModal({ show, onHide, invoice }: { show: boole
         </Alert>
         <Form.Group className="mb-3">
           <Form.Label>Nominal</Form.Label>
-          <Form.Control type="number" value={amountRupiah} onChange={(e) => setAmountRupiah(e.target.value)} />
+          <CurrencyInput value={amountRupiah === '' ? undefined : Number(amountRupiah)} onChange={(v) => setAmountRupiah(v == null ? '' : String(v))} />
         </Form.Group>
         <Form.Group className="mb-3">
           <Form.Label>Tanggal Bayar</Form.Label>

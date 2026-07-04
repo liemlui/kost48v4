@@ -1,7 +1,5 @@
 import { Prisma } from '../../generated/prisma';
-import { RoomStatus } from '../../common/enums/app.enums';
-import { PrismaService } from '../../prisma/prisma.service';
-import { ApprovalBookingSnapshot, BookingRow, BookingSchemaStatus } from './tenant-bookings.types';
+import { ApprovalBookingSnapshot, BookingRow } from './tenant-bookings.types';
 import { mapBookingRow } from './tenant-bookings.helpers';
 
 export async function lockApprovalBookingTx(tx: Prisma.TransactionClient, stayId: number) {
@@ -34,21 +32,4 @@ export async function findBookingByIdTx(tx: Prisma.TransactionClient, bookingId:
     LIMIT 1
   `);
   return rows[0] ? mapBookingRow(rows[0]) : null;
-}
-
-export async function isBookingSchemaReady(prisma: PrismaService, cache: BookingSchemaStatus | null) {
-  if (cache) return cache.hasReservedRoomStatus && cache.hasStayExpiresAt;
-  const rows = await prisma.$queryRaw<BookingSchemaStatus[]>(Prisma.sql`
-    SELECT
-      EXISTS (
-        SELECT 1 FROM pg_type t INNER JOIN pg_enum e ON e.enumtypid = t.oid
-        WHERE t.typname = 'RoomStatus' AND e.enumlabel = ${RoomStatus.RESERVED}
-      ) AS "hasReservedRoomStatus",
-      EXISTS (
-        SELECT 1 FROM information_schema.columns
-        WHERE table_schema = 'public' AND table_name = 'Stay' AND column_name = 'expiresAt'
-      ) AS "hasStayExpiresAt"
-  `);
-  const status = rows[0] ?? { hasReservedRoomStatus: false, hasStayExpiresAt: false };
-  return Boolean(status.hasReservedRoomStatus) && Boolean(status.hasStayExpiresAt);
 }

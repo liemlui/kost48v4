@@ -18,6 +18,10 @@ import CameraOrGalleryInput from "../common/CameraOrGalleryInput";
 import SafeImage from "../common/SafeImage";
 import { compressImageFile as compressBrowserImage } from "../../utils/compressImageFile";
 
+// ═══════════════════════════════════════════════════════════
+//  COMPONENT: StaffActionLauncher
+// ═══════════════════════════════════════════════════════════
+
 type FieldReportKind = "BARANG_RUSAK" | "CEK_KAMAR" | "STOK_HABIS";
 type LauncherMode = FieldReportKind | "CATAT_METER" | null;
 

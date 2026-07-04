@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { AccountingSchemaGuard, AccountingSchemaStatus } from './accounting-schema.guard';
+import { dateOnlyWib, isoDate } from '../../common/utils/date-only';
 
 export type AccountingReadinessResult = {
   ready: boolean;
@@ -37,14 +38,13 @@ export class AccountingReadinessService {
     private readonly schemaGuard: AccountingSchemaGuard,
   ) {}
 
+  // dateOnlyWib + isoDate imported from ../../common/utils/date-only (unifikasi 2026-07-07)
   private dateOnly(value: Date | string): Date {
-    const parsed = value instanceof Date ? value : new Date(value);
-    if (Number.isNaN(parsed.getTime())) return this.dateOnly(new Date());
-    return new Date(Date.UTC(parsed.getUTCFullYear(), parsed.getUTCMonth(), parsed.getUTCDate()));
+    return dateOnlyWib(value, true); // fallbackToToday = true (NaN-safe — perilaku lama)
   }
 
   private isoDate(value: Date): string {
-    return value.toISOString().slice(0, 10);
+    return isoDate(value);
   }
 
   private periodKey(period: { year: number; month: number } | null | undefined): string | null {

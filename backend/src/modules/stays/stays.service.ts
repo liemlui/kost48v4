@@ -77,6 +77,10 @@ export class StaysService {
     private readonly staysRenewalService: StaysRenewalService,
   ) {}
 
+  // ═══════════════════════════════════════════════════════════
+  //  SECTION: Update & Create Stay
+  // ═══════════════════════════════════════════════════════════
+
   async update(id: number, dto: UpdateStayDto, actor: CurrentUserPayload) {
     const existing = await this.prisma.stay.findUnique({ where: { id } });
     if (!existing) throw new NotFoundException("Stay tidak ditemukan");
@@ -235,60 +239,12 @@ export class StaysService {
     }
 
     // --- Portal pre-check: lakukan SEBELUM transaction untuk menghindari side effects ---
-    let portalStatus: "MISSING_EMAIL" | "CREATED" | "ALREADY_ACTIVE" =
-      "MISSING_EMAIL";
-    let portalEmail: string | undefined;
-    let temporaryPassword: string | undefined;
-    let portalUserId: number | undefined;
-    let passwordHash: string | undefined;
-
-    const tenantEmail = tenant.email?.trim().toLowerCase();
-
-    if (!tenantEmail) {
-      portalStatus = "MISSING_EMAIL";
-    } else {
-      portalEmail = tenantEmail;
-
-      // Guard tambahan V5.1: kontrak B1 menolak email yang dipakai tenant lain,
-      // bahkan jika belum ada User portal. Ini mencegah auto-create portal ke data tenant yang ambigu.
-      const tenantWithSameEmail = await this.prisma.tenant.findFirst({
-        where: {
-          email: { equals: tenantEmail, mode: Prisma.QueryMode.insensitive },
-          id: { not: tenant.id },
-        },
-        select: { id: true, fullName: true },
-      });
-
-      if (tenantWithSameEmail) {
-        throw new ConflictException(
-          `Email ${tenantEmail} sudah digunakan oleh tenant lain (${tenantWithSameEmail.fullName}). Tidak dapat melanjutkan check-in.`,
-        );
-      }
-
-      const existingPortalUser = await this.prisma.user.findFirst({
-        where: {
-          email: { equals: tenantEmail, mode: Prisma.QueryMode.insensitive },
-        },
-        select: { id: true, tenantId: true },
-      });
-
-      if (existingPortalUser) {
-        if (existingPortalUser.tenantId === tenant.id) {
-          portalStatus = "ALREADY_ACTIVE";
-          portalUserId = existingPortalUser.id;
-        } else {
-          throw new ConflictException(
-            `Email ${tenantEmail} sudah digunakan oleh user/tenant lain. Tidak dapat melanjutkan check-in. Hubungi administrator untuk menyelesaikan konflik data.`,
-          );
-        }
-      } else {
-        portalStatus = "CREATED";
-        const rawPassword = `kost48-${randomBytes(9).toString('base64url').slice(0, 12)}`;
-        temporaryPassword = rawPassword;
-        passwordHash = await bcrypt.hash(rawPassword, 10);
-      }
-    }
-
+    const portalResult = await this.resolvePortalUserForCheckIn(tenant);
+    let portalStatus = portalResult.status;
+    let portalEmail = portalResult.email;
+    let temporaryPassword = portalResult.temporaryPassword;
+    let portalUserId = portalResult.userId;
+    let passwordHash = portalResult.passwordHash;
     try {
       const created = await this.prisma.$transaction(async (tx) => {
         // Lock + re-validasi: cegah race condition double occupancy
@@ -719,6 +675,10 @@ export class StaysService {
     }
   }
 
+  // ═══════════════════════════════════════════════════════════
+  //  SECTION: Checkout / Complete Stay
+  // ═══════════════════════════════════════════════════════════
+
   async complete(id: number, dto: CompleteStayDto, actor: CurrentUserPayload) {
     assertCoreLifecycleActor(actor, "Final checkout");
     const actualCheckOutDate = parseJakartaDateOnly(
@@ -739,6 +699,15 @@ export class StaysService {
     }
 
     const updated = await this.prisma.$transaction(async (tx) => {
+      // H5: FOR UPDATE lock stay — cegah race condition: ada invoice baru dibuat
+      // antara pengecekan openInvoices dan updateMany stay.status.
+      const locked = await tx.$queryRaw<Array<{ id: number; status: string }>>(
+        Prisma.sql`SELECT id, status FROM "Stay" WHERE id = ${id} FOR UPDATE`,
+      );
+      if (locked.length !== 1 || locked[0].status !== StayStatus.ACTIVE) {
+        throw new ConflictException("Stay sudah berubah status. Muat ulang halaman.");
+      }
+
       // M5.1: meter listrik/air PASCABAYAR → catat meter final sebelum kamar
       // lepas. Bila kamar punya riwayat meter listrik tapi belum ada catatan
       // tertanggal >= hari checkout, blokir agar pemakaian akhir tidak luput
@@ -954,9 +923,10 @@ export class StaysService {
     });
   }
 
-  // F3-14/F3-16: paksa-checkout admin (overstay nunggak / tenant kabur). Deposit
-  // menutup tunggakan (AR), sisa TETAP jadi piutang AR; kelebihan deposit di-refund.
-  // OWNER-only. Guard deposit di-bypass khusus tx ini via GUC sesi-transaksi.
+  // ═══════════════════════════════════════════════════════════
+  //  SECTION: Forced Checkout (OWNER-only)
+  // ═══════════════════════════════════════════════════════════
+
   async forcedCheckout(id: number, dto: ForcedCheckoutDto, actor: CurrentUserPayload) {
     assertCoreLifecycleActor(actor, "Forced checkout");
     const actualCheckOutDate = dto.actualCheckOutDate
@@ -1259,6 +1229,10 @@ export class StaysService {
     });
     return updated;
   }
+
+  // ═══════════════════════════════════════════════════════════
+  //  SECTION: Cancel Stay
+  // ═══════════════════════════════════════════════════════════
 
   async cancel(id: number, dto: CancelStayDto, actor: CurrentUserPayload) {
     assertCoreLifecycleActor(actor, "Pembatalan stay");
@@ -1793,6 +1767,10 @@ export class StaysService {
     };
   }
 
+  // ═══════════════════════════════════════════════════════════
+  //  SECTION: Renewal & Loss Refund
+  // ═══════════════════════════════════════════════════════════
+
   async renewStay(id: number, dto: RenewStayDto, actor: CurrentUserPayload) {
     return this.staysRenewalService.renewStay(id, dto, actor);
   }
@@ -1837,6 +1815,10 @@ export class StaysService {
   ) {
     return this.staysRenewalService.cancelUnpaidRenewalInvoiceInTransaction(tx, invoiceId, actorUserId, reason);
   }
+
+  // ═══════════════════════════════════════════════════════════
+  //  SECTION: Loss Refunds (Booking Competition)
+  // ═══════════════════════════════════════════════════════════
 
   /** F2-3b: daftar refund kalah-cepat (loser sudah-transfer) yang menunggu diproses. */
   async listPendingLossRefunds() {
@@ -1893,4 +1875,48 @@ export class StaysService {
     });
     return updated;
   }
+
+  // ═══════════════════════════════════════════════════════════
+  //  SECTION: Helpers — Portal User Resolution
+  // ═══════════════════════════════════════════════════════════
+
+  private async resolvePortalUserForCheckIn(tenant: { id: number; email?: string | null; fullName: string }) {
+    const tenantEmail = tenant.email?.trim().toLowerCase();
+    if (!tenantEmail) {
+      return { status: 'MISSING_EMAIL' as const, email: undefined, temporaryPassword: undefined, userId: undefined, passwordHash: undefined };
+    }
+
+    // Guard V5.1: kontrak B1 menolak email yang dipakai tenant lain
+    const tenantWithSameEmail = await this.prisma.tenant.findFirst({
+      where: {
+        email: { equals: tenantEmail, mode: Prisma.QueryMode.insensitive },
+        id: { not: tenant.id },
+      },
+      select: { id: true, fullName: true },
+    });
+    if (tenantWithSameEmail) {
+      throw new ConflictException(
+        `Email ${tenantEmail} sudah digunakan oleh tenant lain (${tenantWithSameEmail.fullName}). Tidak dapat melanjutkan check-in.`,
+      );
+    }
+
+    const existingPortalUser = await this.prisma.user.findFirst({
+      where: { email: { equals: tenantEmail, mode: Prisma.QueryMode.insensitive } },
+      select: { id: true, tenantId: true },
+    });
+
+    if (existingPortalUser) {
+      if (existingPortalUser.tenantId === tenant.id) {
+        return { status: 'ALREADY_ACTIVE' as const, email: tenantEmail, temporaryPassword: undefined, userId: existingPortalUser.id, passwordHash: undefined };
+      }
+      throw new ConflictException(
+        `Email ${tenantEmail} sudah digunakan oleh user/tenant lain. Tidak dapat melanjutkan check-in. Hubungi administrator untuk menyelesaikan konflik data.`,
+      );
+    }
+
+    const rawPassword = `kost48-${randomBytes(9).toString('base64url').slice(0, 12)}`;
+    const passwordHash = await bcrypt.hash(rawPassword, 10);
+    return { status: 'CREATED' as const, email: tenantEmail, temporaryPassword: rawPassword, userId: undefined, passwordHash };
+  }
+
 }

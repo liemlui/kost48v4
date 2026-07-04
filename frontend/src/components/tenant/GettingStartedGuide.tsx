@@ -3,7 +3,13 @@ import type { TenantPortalStage } from '../../hooks/useTenantPortalStage';
 
 type Step = { icon: string; label: string; desc: string; to?: string };
 
-function getSteps(stage: TenantPortalStage): Step[] {
+function getSteps(stage: TenantPortalStage, hasStayHistory: boolean): Step[] {
+  if (stage === 'browsing' && hasStayHistory) {
+    return [
+      { icon: '🏠', label: 'Lihat katalog kamar', desc: 'Jelajahi kamar yang tersedia dan ajukan pemesanan baru.', to: '/rooms' },
+      { icon: '🧾', label: 'Riwayat tagihan', desc: 'Lihat tagihan lama dan status pembayaran sebelumnya.', to: '/portal/invoices' },
+    ];
+  }
   if (stage === 'browsing') {
     return [
       { icon: '🛏️', label: 'Pilih kamar', desc: 'Lihat katalog kamar yang tersedia dan pilih yang cocok untuk Anda.', to: '/rooms' },
@@ -21,16 +27,18 @@ function getSteps(stage: TenantPortalStage): Step[] {
   return [];
 }
 
-export default function GettingStartedGuide({ stage }: { stage: TenantPortalStage }) {
+export default function GettingStartedGuide({ stage, hasStayHistory = false }: { stage: TenantPortalStage; hasStayHistory?: boolean }) {
   const navigate = useNavigate();
-  const steps = getSteps(stage);
+  const steps = getSteps(stage, hasStayHistory);
   if (!steps.length) return null;
+
+  const isExTenant = stage === 'browsing' && hasStayHistory;
 
   return (
     <section className="getting-started-guide" aria-label="Panduan memulai">
       <div className="getting-started-head">
-        <span className="page-eyebrow">Panduan memulai</span>
-        <h3>{stage === 'browsing' ? '3 langkah menuju kamar Anda' : 'Status pemesanan Anda'}</h3>
+        <span className="page-eyebrow">{isExTenant ? 'Riwayat kamu' : 'Panduan memulai'}</span>
+        <h3>{isExTenant ? 'Kamu pernah menghuni KOST48' : stage === 'browsing' ? '3 langkah menuju kamar Anda' : 'Status pemesanan Anda'}</h3>
       </div>
       <div className="getting-started-steps">
         {steps.map((step, i) => (

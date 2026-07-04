@@ -7,14 +7,12 @@ import { serializePrismaResult } from '../../common/utils/serialization';
 import { PrismaService } from '../../prisma/prisma.service';
 import { PublicRoomsQueryDto } from './dto/public-rooms-query.dto';
 import { TenantBookingsQueryDto } from './dto/tenant-bookings-query.dto';
-import { BookingRow, BookingSchemaStatus } from './tenant-bookings.types';
+import { BookingRow } from './tenant-bookings.types';
 import { buildPricingAvailabilityWhere, getAvailablePricingTerms, isBookingSchemaDriftError, mapBookingRow, resolveRent } from './tenant-bookings.helpers';
-import { isBookingSchemaReady as checkBookingSchemaReady } from './tenant-bookings.queries';
+import { isBookingSchemaReady as checkBookingSchemaReady } from './booking-schema.helper';
 
 @Injectable()
 export class TenantBookingsQueryService {
-  private bookingSchemaStatusCache: BookingSchemaStatus | null = null;
-
   constructor(private readonly prisma: PrismaService) {}
 
   async getPublicRooms(query: PublicRoomsQueryDto) {
@@ -206,16 +204,9 @@ export class TenantBookingsQueryService {
     }
   }
 
+  // Delegasi ke helper bersama: ter-proteksi try-catch (AI-01a) + cache modul-level
+  // dengan re-check TTL — versi lokal lama tanpa try-catch bisa 503 saat DB drift.
   private async isBookingSchemaReady() {
-    if (this.bookingSchemaStatusCache) {
-      return this.bookingSchemaStatusCache.hasReservedRoomStatus && this.bookingSchemaStatusCache.hasStayExpiresAt;
-    }
-
-    const isReady = await checkBookingSchemaReady(this.prisma, this.bookingSchemaStatusCache);
-    this.bookingSchemaStatusCache = {
-      hasReservedRoomStatus: isReady,
-      hasStayExpiresAt: isReady,
-    };
-    return isReady;
+    return checkBookingSchemaReady(this.prisma);
   }
 }

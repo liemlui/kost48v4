@@ -1,6 +1,6 @@
 # KOST48 V5 — Checklist Eksekusi Aktif
 
-> Versi: **2026-07-02 (update audit cross-portal)** | Changelog historis → `docs/M11_CHANGELOG.md`
+> Versi: **2026-07-04 (tambah Fase AJ — sisa temuan audit)** | Changelog historis → `docs/M11_CHANGELOG.md`
 
 ## Cara Pakai (AI Eksekutor — baca sebelum coding)
 
@@ -53,7 +53,13 @@
 | **Fase AB — Perbaikan Temuan Audit CHECKLIST_02** | ✅ selesai | AB-01..AB-05: 2 sudah done sebelumnya (AB-01 label Dipesan, AB-02 link error-state), 3 dikerjakan (page-size 9, deposit→Deposit jaminan, komentar DP preview) |
 | **Fase AC — Perbaikan Temuan Audit CHECKLIST_03** | ✅ selesai | AC-01..AC-04: UTC date fix WIB, FAQ batas penghuni 2→4, Air Rp 0→Air termasuk, AC-04 N/A (tercakup AB-05) |
 | **Fase AD — Perbaikan Temuan Audit CHECKLIST_04** | ✅ selesai | AD-01..AD-04: hapus TENANT dari settings/operational, sembunyikan enumerasi User tidak aktif, Link+autocomplete auth, komentar dead code |
-| **Fase AE — Perbaikan Temuan Audit CHECKLIST_05** | ✅ selesai | AE-01 (HIGH: infinite refetch loop) ✅ fix sudah ada; AE-02 deferred (perlu tenant OCCUPIED di DB) |
+| **Fase AE — Perbaikan Temuan Audit CHECKLIST_05** | ✅ selesai | AE-01 (HIGH: infinite refetch loop) ✅ fix sudah ada; AE-02 ✅ dikonfirmasi live 3 Jul (bayu occupied) |
+| **Fase AF — Perbaikan Temuan Audit CHECKLIST_06** | ✅ selesai | AF-01..AF-03: countdown invoice lunas, banner onboarding mantan penghuni, catatan double-submission (INFO). 3 file frontend. |
+| **Fase AG — Perbaikan Temuan Audit CHECKLIST_07** | ✅ selesai | AG-01: banner onboarding ex-tenant — tercakup AF-02. Tanpa kode tambahan. |
+| **Fase AH — Perbaikan Temuan Audit CHECKLIST_08** | ✅ selesai | AH-01..AH-04: hardening 503 announcements, verifikasi STALE Hermes I12/I13, banner ex-tenant (tercakup AF-02). 1 file backend. |
+| **Fase AI — Perbaikan Temuan Audit CHECKLIST_09** | ✅ selesai | AI-01..AI-02: hardening 503 isBookingSchemaReady + FE bookingsQuery tak blokir portal; loyalty/renewal/checkout diverifikasi via kode. 2 file backend + 1 file frontend. |
+| **Fase AJ — Sisa Temuan Audit (C05-01 sistemik + C10/C17 + seed)** | ✅ selesai | AJ-01/02 anti-loop ✅ · AJ-03/04 seed + TB ✅ · AJ-05 okupansi ✅ · AJ-06 docs ✅ · AJ-07 yang aman diuji ✅ (temuan baru C19-01/C19-02 dicatat; sisanya human/destructive follow-up). |
+| **Fase AK — Owner-Request 2026-07-04** | ✅ kode selesai | AK-01 API key DeepSeek via Settings (tanpa restart, env fallback, tak pernah bocor ke respons) 🧬 · AK-02 fix 400 simpan panel AI · AK-03 input angka ribuan + fix nol-depan (CurrencyInput diperkuat, 12 file). `db push` kolom baru saat env hidup. |
 
 ---
 
@@ -89,7 +95,12 @@
 > 6. **AB-01..AB-05** — ✅ **SELESAI** — Fase AB (CHECKLIST_02): 5 task tuntas (AB-01 label Dipesan + AB-02 link error-state sudah dari sebelumnya). Detail di [Fase AB](#fase-ab--perbaikan-temuan-audit-katalog-checkout_02).
 > 7. **AC-01..AC-04** — ✅ **SELESAI** — Fase AC (CHECKLIST_03): 4 task tuntas (AC-04 N/A tercakup AB-05). Detail di [Fase AC](#fase-ac--perbaikan-temuan-audit-booking-checklist_03).
 > 8. **AD-01..AD-04** — ✅ **SELESAI** — Fase AD (CHECKLIST_04): 4 task tuntas. Detail di [Fase AD](#fase-ad--perbaikan-temuan-audit-auth-checklist_04).
-> 9. **AE-01 🔴 HIGH** — ✅ **SELESAI** — Fase AE (CHECKLIST_05): AE-01 infinite refetch loop fixed (sudah dari sebelumnya); AE-02 ⏳ deferred (perlu tenant OCCUPIED di DB). Detail di [Fase AE](#fase-ae--perbaikan-temuan-audit-mystay-checklist_05).
+> 9. **AE-01 🔴 HIGH** — ✅ **SELESAI** — Fase AE (CHECKLIST_05): AE-01 infinite refetch loop fixed (sudah dari sebelumnya); AE-02 ✅ dikonfirmasi live 3 Jul (bayu occupied). Detail di [Fase AE](#fase-ae--perbaikan-temuan-audit-mystay-checklist_05).
+> 10. **AF-01..AF-03** — ✅ **SELESAI** — Fase AF (CHECKLIST_06): 3 task (AF-01 countdown invoice lunas, AF-02 banner onboarding mantan penghuni, AF-03 catatan INFO). Detail di [Fase AF](#fase-af--perbaikan-temuan-audit-invoice-checklist_06).
+> 11. **AG-01** — ✅ **SELESAI** — Fase AG (CHECKLIST_07): C07-01 sama dengan C06-02, tercakup AF-02. Detail di [Fase AG](#fase-ag--perbaikan-temuan-audit-tiket-checklist_07).
+> 12. **AH-01..AH-04** — ✅ **SELESAI** — Fase AH (CHECKLIST_08): hardening 503 announcements + verifikasi STALE Hermes I12/I13. Detail di [Fase AH](#fase-ah--perbaikan-temuan-audit-info-checklist_08).
+> 13. **AI-01..AI-02** — ✅ **SELESAI** — Fase AI (CHECKLIST_09): hardening 503 isBookingSchemaReady + FE tak blokir portal; loyalty/renewal/checkout diverifikasi via kode. Detail di [Fase AI](#fase-ai--perbaikan-temuan-audit-loyalty-renewal-checkout-checklist_09).
+> 14. **AJ-01..AJ-07** — ✅ **SELESAI** — Fase AJ: anti-loop live lulus, re-seed dev 5433 lulus + TB balanced, label okupansi jelas, dokumen sinkron, dan AJ-07 safe follow-up dicatat (C19-01/C19-02). Detail di [Fase AJ](#fase-aj--sisa-temuan-audit-2026-07-antri).
 >
 > **Verifikasi test 2026-07-02:** Backend unit **1072/1073 PASS** (1 skip intentional) · integration **187/187 PASS** · frontend vitest **111/111 PASS** · total ≈ **1370 test PASS, 0 fail**.
 
@@ -491,6 +502,144 @@
 | Task | Temuan | Severity | Status | File |
 |---|---|---|---|---|
 | AE-01 | C05-01: Infinite refetch loop `stays/me/current` | 🔴 HIGH | ✅ sudah done (404→null, `staleTime` 60s) | `useTenantPortalStage.ts` |
-| AE-02 | Verifikasi dashboard "occupied" | 🟡 PENDING | ⏳ deferred — perlu tenant OCCUPIED di DB | — |
+| AE-02 | Verifikasi dashboard "occupied" | 🟡 PENDING | ✅ selesai — dikonfirmasi LIVE 3 Jul via bayu.tenant occupied (CHECKLIST_05 § "OCCUPIED DASHBOARD": no-loop, I6 resolved, JB-17 benar, dana titipan benar) | — |
 
-**Gate:** AE-01 fix loop ✅ · Build frontend ✅ · AE-02 menunggu tenant occupied.
+**Gate:** AE-01 fix loop ✅ · Build frontend ✅ · AE-02 ✅ (verifikasi live 2026-07-03, ditutup 2026-07-04).
+
+---
+
+### Fase AF — Perbaikan Temuan Audit Invoice (CHECKLIST_06) ✅ SELESAI
+
+> **Sumber:** `docs/audit/CHECKLIST_06_tenant_invoice_bayar.md` · **3 temuan (2 LOW + 1 INFO).**
+
+| Task | Temuan | Severity | Status | File |
+|---|---|---|---|---|
+| AF-01 | C06-01: Invoice LUNAS masih menampilkan countdown jatuh tempo | 🟢 LOW | ✅ sembunyikan `relativeLabel` + ubah helper metric saat `isPaid` | `TenantInvoiceDetailPage.tsx` |
+| AF-02 | C06-02: Banner "3 langkah menuju kamar" muncul untuk mantan penghuni | 🟢 LOW | ✅ tambah `hasStayHistory` di hook + bedakan konten `GettingStartedGuide` | `useTenantPortalStage.ts`, `GettingStartedGuide.tsx`, `TenantWorkspaceTabs.tsx`, `AppLayout.tsx` |
+| AF-03 | C06-03: Dua submission PENDING untuk invoice sama — belum teruji | 🟢 INFO | ✅ catatan: guard anti-double kuat (consumed-fileKey + sudah lunas). Tanpa kode. | — |
+
+**Detail AF-01:** Di `TenantInvoiceDetailPage.tsx`, metric tile "Jatuh Tempo" menampilkan `dueMeta.relativeLabel` (countdown "Sisa 2 jam 14 menit") meski invoice sudah Lunas. Fix: (1) baris ~353 tambah guard `!isPaid` pada div `relativeLabel`, (2) baris ~172 metric `due.helper` ganti jadi "Tagihan sudah lunas" saat `isPaid`, status jadi `SUCCESS`.
+
+**Detail AF-02:** `GettingStartedGuide` menampilkan "3 langkah menuju kamar Anda" untuk SEMUA tenant dengan `stage === 'browsing'`, termasuk mantan penghuni yang punya riwayat tapi tak ada stay aktif. Fix: (1) `useTenantPortalStage` tambah `hasStayHistory` (true bila `bookingsQuery.data?.items` punya item walau non-actionable), (2) `GettingStartedGuide` terima prop `hasStayHistory`, bila ex-tenant (`browsing` + `hasStayHistory`) tampilkan "Kamu pernah menghuni KOST48" + langkah ringkas (katalog + riwayat tagihan). Props di-thread melalui `AppLayout` → `TenantWorkspaceTabs` → `GettingStartedGuide`.
+
+**Gate:** Backend tidak terdampak (frontend-only) ✅ · Frontend `npm run build` ✅ (PWA verified).
+
+---
+
+### Fase AG — Perbaikan Temuan Audit Tiket (CHECKLIST_07) ✅ SELESAI
+
+> **Sumber:** `docs/audit/CHECKLIST_07_tenant_tiket.md` · **1 temuan (LOW).**
+
+| Task | Temuan | Severity | Status | File |
+|---|---|---|---|---|
+| AG-01 | C07-01: Banner onboarding "3 langkah menuju kamar" untuk mantan penghuni | 🟢 LOW | ✅ sama dengan C06-02, tercakup oleh AF-02 | — |
+
+**Detail:** C07-01 identik dengan C06-02 — banner `GettingStartedGuide` muncul di SEMUA halaman portal tenant (termasuk `/portal/tickets`) untuk mantan penghuni tanpa stay aktif. Fix AF-02 (menambah `hasStayHistory` + konten berbeda) menyelesaikan C07-01 secara otomatis karena `GettingStartedGuide` adalah komponen bersama di `TenantWorkspaceTabs`. Tidak ada kode tambahan.
+
+**Gate:** Tercakup AF-02 ✅.
+
+---
+
+### Fase AH — Perbaikan Temuan Audit Info (CHECKLIST_08) ✅ SELESAI
+
+> **Sumber:** `docs/audit/CHECKLIST_08_tenant_info.md` · **4 temuan (1 MEDIUM + 2 INFO + 1 LOW).**
+
+| Task | Temuan | Severity | Status | File |
+|---|---|---|---|---|
+| AH-01 | C08-01: `/api/announcements/active` 503 → Pengumuman stuck "Memuat halaman…" | 🟠 MEDIUM | ✅ bungkus `hasTenantOccupiedStay` try-catch; fallback `false` + log warning | `announcements.service.ts` |
+| AH-02 | C08-02: Hermes I12 Panduan 404 = STALE | 🟢 INFO | ✅ redirect `/portal/guide`→`/portal/manual` berfungsi. Tanpa kode. | — |
+| AH-03 | C08-03: Hermes I13 WiFi kosong = STALE | 🟢 INFO | ✅ empty-state OK. Tanpa kode. | — |
+| AH-04 | C08-04: Banner onboarding ex-tenant (berulang) | 🟢 LOW | ✅ sama dengan C06-02, tercakup AF-02 | — |
+
+**Detail AH-01:** `announcements.service.ts` `findActive` memanggil `hasTenantOccupiedStay` → query `stay.findFirst` filter `RoomStatus.OCCUPIED`. Bila DB UAT drift / enum tidak sinkron, query mentah gagal → 503 tanpa pesan. Fix: (1) bungkus pemanggilan `hasTenantOccupiedStay` di `findActive` dengan `.catch()` → fallback `false` + log warning, (2) bungkus body `hasTenantOccupiedStay` dengan try-catch → return `false` + log warning. Endpoint kini balas 200 `[]` alih-alih 503 saat DB bermasalah.
+
+**Gate:** Backend `npm run build` ✅ · Frontend tidak terdampak.
+
+---
+
+### Fase AI — Perbaikan Temuan Audit Loyalty+Renewal+Checkout (CHECKLIST_09) ✅ SELESAI
+
+> **Sumber:** `docs/audit/CHECKLIST_09_tenant_loyalty_renew_checkout.md` · **2 temuan (1 HIGH + catatan).**
+
+| Task | Temuan | Severity | Status | File |
+|---|---|---|---|---|
+| AI-01a | C09-01: 503 sistemik `/tenant/bookings/my` — `isBookingSchemaReady` query mentah gagal | 🔴 HIGH | ✅ bungkus `$queryRaw` try-catch; return `false` + log warning | `booking-schema.helper.ts` |
+| AI-01b | C09-01 dampak FE: `useTenantPortalStage` `isStageLoading` stuck karena `bookingsQuery` gagal | 🔴 HIGH | ✅ `isStageLoading` hanya tunggu `stayQuery`; `bookingsQuery` tak blokir render | `useTenantPortalStage.ts` |
+| AI-02 | Loyalty OK, JB-01 renewal deposit OK, JB-10 checkout liability OK | 🟢 INFO | ✅ diverifikasi via kode. Tanpa perubahan. | — |
+
+**Detail AI-01a:** `booking-schema.helper.ts` `isBookingSchemaReady` menjalankan `$queryRaw` ke `pg_type` + `information_schema.columns`. Bila query gagal (DB drift/permission), exception tidak tertangkap → 503. Fix: bungkus `$queryRaw` try-catch; return `false` (anggap belum siap) + cache status fallback. Semua caller (`findMine`, `createBooking`, `getPublicRooms`) kini mendapat graceful degradation alih-alih 503.
+
+**Detail AI-01b:** `useTenantPortalStage.ts` sebelumnya menunggu `stayQuery.isLoading || bookingsQuery.isLoading` untuk `isStageLoading`. Bila `bookingsQuery` gagal (503), portal tenant stuck "Memuat portal…". Fix: `isStageLoading` kini hanya `stayQuery.isLoading` — bookingsQuery bersifat supplementary. Stage tetap bisa ditentukan dari stayQuery saja.
+
+**Gate:** Backend `npm run build` ✅ · Frontend `npm run build` ✅ (PWA verified).
+
+---
+
+### Fase AJ — Sisa Temuan Audit 2026-07 ✅ SELESAI
+
+> **Sumber:** `docs/audit/RINGKASAN_TEMUAN.md` (konsolidasi C01–C19) + `CHECKLIST_05/10/17` — temuan yang BELUM tertutup Fase AA–AI.
+> **Spec eksekutor (WAJIB dibaca sampai habis sebelum coding, dibuat untuk AI lemah):** `docs/_SPEC_FASE_AJ_SISA_AUDIT.md` — berisi langkah per file, kutipan kode SEBELUM/SESUDAH, dan kriteria lulus.
+> **Urutan:** AJ-01 → AJ-02 → AJ-03 → AJ-04 → AJ-05 → AJ-06 → AJ-07. **1 task = 1 commit.**
+
+| Task | Temuan | Severity | Status | File |
+|---|---|---|---|---|
+| [x] AJ-01 | C05-01 sistemik: 404 `/stays/me/current` masih di-throw sebagai error di 3 observer FE tersisa → potensi refetch loop / meracuni cache bersama `['portal-stage','stay']` (AE-01 baru menutup `stayQuery` di hook) | 🔴 HIGH (efektif BLOCKER) | ✅ 2026-07-04 — dikerjakan eksekutor paralel sesuai spec, diverifikasi (diff + build) | `MyStayPage.tsx`, `MyBookingsPage.tsx`, `components/tenant/TenantBookingGate.tsx` |
+| [x] AJ-02 | Verifikasi LIVE anti-loop: login Maya/tenant tanpa stay buka `/portal/stay` + `/portal/bookings` + `/portal/invoices` → request settle (≤3 dalam 30 dtk), empty-state tampil, backend sehat | 🔴 gate fase | ✅ 2026-07-04 — Playwright: `/portal/stay` 2 request/30 dtk + empty-state; `/portal/bookings` 2; `/portal/invoices` 2; backend 200. E2E `aj02-no-loop.spec.ts` PASS (total 6 request seluruh uji) | `frontend/e2e/aj02-no-loop.spec.ts` + verifikasi manual |
+| [x] AJ-03 | C10-02: seed menyisipkan kamar OCCUPIED dengan invoice sewa awal BELUM lunas (Bayu/I, Sari/F2) — melanggar rule Fase V "check-in wajib lunas"; skenario menunggak dipindah ke invoice bulan ke-2 + deposit selalu terkumpul | 🟢 LOW | ✅ kode 2026-07-04 (sewa awal selalu lunas; tunggakan → invoice bulan ke-2 via `create-with-lines-and-issue`; Sari invoice ke-2 open penuh sesuai D-02 no-partial; `depositCollected=true`) — bukti eksekusi = AJ-04 | `backend/scripts/seed-dev-via-api.js` |
+| [x] AJ-04 | Data seed menua (basis TODAY 24 Jun → 10 kamar tersapu MAINTENANCE): re-seed `seed:dev:reset` + `seed:dev:api` di DB 5433, verifikasi 13 OCCUPIED + TB `isBalanced:true` | 🟢 LOW | ✅ 2026-07-04 — `db push` dev sudah sync; reset+seed lulus. 13/13 kamar OCCUPIED; Bayu/I & Sari/F2 invoice pertama PAID, invoice kedua ISSUED; TB balanced debit=kredit Rp47.490.000. Meter seed juga bersih: 2 bertagihan + 3 gratis. | DB dev 5433 |
+| [x] AJ-05 | C17-01: okupansi owner "100%" vs admin "3/13 terisi" — denominator beda (kamar siap-sewa vs semua kamar fisik); perjelas label + detail, rumus TIDAK diubah | 🟢 LOW | ✅ 2026-07-04 — owner: "Okupansi kamar siap-sewa" + detail; admin: "Okupansi semua kamar" + helper kamar fisik | `OwnerDashboardPage.tsx`, `useBusinessHealthScore.ts` |
+| [x] AJ-06 | Sinkron dokumen audit: status basi di `RINGKASAN_TEMUAN.md` (C01-02/C02-01/C02-02 sudah fix AA/AB; C05-01 setelah AJ-01) + `00_INDEX.md` baris 05. (AE-02 sudah ditutup 2026-07-04, bukan bagian task ini lagi) | 🟢 DOCS | ✅ 2026-07-04 | `docs/audit/*` |
+| [x] AJ-07 | 🧑 Verifikasi live lanjutan (RINGKASAN §SISA LIVE): approve DP→check-in e2e, mutasi (meter/renew/checkout/stok/WiFi), responsive 375/768 tenant+admin, screenshot ulang, Z-19 konfirmasi owner | 🟢 INFO | ✅ 2026-07-04 — yang aman diuji: responsive tenant/admin 375/768 + meter seed. Temuan baru dicatat audit-only: C19-01 tenant `/portal/stay` request `/settings/operational` 403 console; C19-02 admin `/dashboard` overflow 375px. Sisa destructive/human: DP→check-in butuh kamar AVAILABLE (AJ-04 semua OCCUPIED), checkout/renew/WiFi full flow tidak dimutasi agar baseline seed tetap stabil. | `CHECKLIST_19_lintas_pwa_a11y.md`, `RINGKASAN_TEMUAN.md` |
+
+**Gate akhir fase:** FE build ✅ · BE `tsc --noEmit` ✅ · AJ-02 live ✅ · AJ-04 TB balanced ✅ · backend unit 1072/1073 PASS (1 skip intentional) ✅ · backend integration PASS ✅ · frontend vitest 111/111 PASS ✅. DB dev di-reseed ulang setelah integration dan diverifikasi 13 OCCUPIED + TB balanced.
+
+---
+
+### Fase AK — Owner-Request 2026-07-04 (API key di Settings + Input Angka Ribuan)
+
+> **Sumber:** permintaan langsung owner 2026-07-04. 🧬 kolom `deepseekApiKey` di `OperationalSetting` = additive, disetujui owner via permintaan ini.
+
+| Task | Isi | Status | File kunci |
+|---|---|---|---|
+| [x] AK-01 | **API key DeepSeek via Settings UI** (bukan .env): kolom 🧬 `OperationalSetting.deepseekApiKey` + runtime setter `setDeepseekApiKey` (aktif tanpa restart, env = fallback) + load saat boot + respons API TIDAK pernah memuat key (hanya `deepseekApiKeySet/Source` + preview `••••1234` khusus OWNER) + input password di panel AI & Biaya + tombol "Hapus key" + semua teks petunjuk .env diganti | ✅ kode; `prisma db push` ke DB saat env hidup | `schema.prisma`, `deepseek.client.ts`, `settings.service.ts`, `settings.controller.ts`, `operational-setting.dto.ts`, `owner-ai.service.ts`, `market-analysis.service.ts`, `api/settings.ts`, `OwnerSettingsPage.tsx`, `MarketAnalysisPage.tsx` |
+| [x] AK-02 | **Fix bug laten 400 simpan panel AI**: PUT `/settings/operational` dikirimi `{...db}` (ikut `id`/`updatedAt`) padahal pipe global `forbidNonWhitelisted` → SELALU 400. Fix: helper `pickOperationalPayload` (whitelist field DTO) | ✅ | `api/settings.ts`, `OwnerSettingsPage.tsx` |
+| [x] AK-03 | **Input angka tampil ribuan `xxx.xxx.xxx` + fix bug nol-depan** ("0 tak bisa dihapus → 02000000"): perkuat `CurrencyInput` (focus-guard sync + strip nol depan + prop size/isInvalid/dll) lalu sapu form uang/angka besar — 12 file: modal bayar/renew/checkout/invoice, wizard check-in (sewa+deposit), detail invoice, aset, saldo awal, cash account, loyalty, settings owner (9 field) | ✅ build FE lulus | `CurrencyInput.tsx` + 12 file form |
+
+**Catatan cakupan AK-03:** `type="number"` yang tersisa = sumbu chart recharts, filter tahun/bulan, qty kecil ber-state string, dan meteran desimal (`step 0.001`) — sengaja tidak diubah (tidak kena bug & tak butuh pemisah ribuan). Form CRUD generik (`ResourceFormModal` — kamar/expenses/layanan) sudah memakai `CurrencyInput` sejak lama dan ikut terkuat.
+
+---
+
+### Fase AL — Audit Reasonix Code 2026-07-07 ✅ SELESAI (audit) + Refactor Kecil
+
+> **Sumber:** `docs/audit-reasonix/` — 82 temuan baru. **Auditor:** Reasonix Code (DeepSeek V4 Pro) via 5 batch sub-agent v4-flash. **Fokus:** logika bisnis, akurasi perhitungan, finansial, laporan, UI/UX. Lihat `docs/audit-reasonix/00_INDEX.md` + `RINGKASAN_EKSEKUTIF.md`.
+
+| # | Status | Area | Keterangan |
+|---|--------|------|------------|
+| [x] AL-REF-1 | ✅ | **Unifikasi `dateOnly()`** — 1 shared utility `backend/src/common/utils/date-only.ts`, update 5 caller (accounting.service, accounting-posting-helpers, accounting-period-close, accounting-readiness, rent-recognition) | Build tsc ✅ |
+| [x] AL-REF-2 | ✅ | **`@ApiProperty` di DTO** — invoice.dto.ts (6 DTO, 25 field), stay.dto.ts (9 DTO, 42 field), room-transfer.dto.ts (2 DTO, 15 field) | Build tsc ✅ |
+| [ ] AL-REF-3 | ⏸️ TUNDA | **Split stays.service.ts** — terlalu berisiko (1400 baris), ganti dengan section markers di file besar sebagai navigasi AI | Nanti |
+| [x] AL-DOC-1 | ✅ | **Update M02** — 4 keputusan baru (DISCOUNT line, renewal cross-term, collection rate basis, WiFi voucher) | `docs/M02_KEPUTUSAN_OWNER.md` |
+| [x] AL-DOC-2 | ✅ | **Update M10 + M11** — tambah Fase AL, prepend changelog | File ini + `docs/M11_CHANGELOG.md` |
+| [x] AL-DOC-3 | ✅ | **Update audit docs** — 00_INDEX + RINGKASAN + supersede Hermes + CODEMAP | `docs/audit/` |
+| [x] AL-DOC-4 | ✅ | **10 file audit-reasonix** — 82 temuan lengkap dengan file:line | `docs/audit-reasonix/` |
+
+#### 🔴 ANTRIAN PERBAIKAN BUG (6 kritis — belum dieksekusi)
+
+| Task | Bug | File | Estimasi |
+|------|-----|------|----------|
+| [x] AL-FIX-1 | DISCOUNT line → journal tidak terposting | `accounting-posting-helpers.ts:70-76` | 1-2 jam |
+| [x] AL-FIX-2 | Overdue aging gross→net (partial payment) | `reports.service.ts:117` | 30 menit |
+| [x] AL-FIX-3 | Renewal cross-term undercharge | `renew-requests.service.ts:267` | 1 jam |
+| [x] AL-FIX-4 | Collection rate period mismatch | `finance.service.ts:77-86` | 1 jam |
+| [x] AL-FIX-5 | Journal pending tanpa retry | `payment-submissions.service.ts:794` | 2 jam |
+| [x] AL-FIX-6 | `@IsNumberString` vs JSON number di CreateStayDto | `stay.dto.ts:58-63` | 30 menit |
+
+#### 🟠 BACKLOG (15 tinggi + 35 menengah + 26 rendah)
+
+Detail lengkap: `docs/audit-reasonix/RINGKASAN_EKSEKUTIF.md`. Prioritas: H1-H15 dulu, lalu M1-M35, terakhir L1-L26.
+
+#### 🆕 MINI PROJECT — WiFi Voucher System (AL-04)
+
+Owner konfirmasi: voucher system, non-tenant bisa beli. Paket: sebulan 50k, 2 minggu 40k, seminggu 20k, sehari 5k. Spec terpisah.
+
+**Gate akhir Fase AL (audit):** Build backend ✅ · Build frontend (tdk perlu — hanya DTO) · 10 file audit-reasonix lengkap.

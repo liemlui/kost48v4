@@ -55,7 +55,45 @@
 - [ ] 22. **Kode `auto-ops.service.ts` (StaySweep):** overstay (lewat akhir sewa tanpa renew) → forced checkout / penanganan benar? Room healer memperbaiki status kamar nyasar? Baca logika, catat bila mencurigakan. Tidak ada denda (JB-05).
 
 ## HASIL TEMUAN
-_(kosong — diisi auditor)_
+
+> **Status:** **kode SELESAI**; **live TERTUNDA** — backend jadi tak responsif saat audit (lihat C10-01). Logika inti (JB-03/JB-04/JB-01) diverifikasi via kode & solid.
+
+### ✅ Verifikasi kode — BENAR (kuat)
+- **JB-04 meter promote HANYA saat check-in:** check-in butuh **lunas** — stay dengan **DP saja belum boleh check-in** ("tunggu pelunasan", `stays.service.ts:190-196`); hanya kamar AVAILABLE/RESERVED (`:192,299`); `FOR UPDATE` lock (race-safe). `initialMetersPromotedAt` + OCCUPIED di-set di sini, bukan saat approve pembayaran.
+- **JB-03 approve pembayaran → RESERVED, bukan OCCUPIED:** konsisten Fase V (approve tak promote occupancy; check-in yang mengubah ke OCCUPIED).
+- **Room transfer robust (`room-transfer.service.ts`):** Stay sama dipertahankan, **deposit ikut apa adanya** (JB-01, tak ditagih ulang), harga dikunci (D-16), `FOR UPDATE` lock kamar tujuan (`:49-50`), tujuan tak boleh OCCUPIED/MAINTENANCE/INACTIVE (`:53-54`), tak boleh ada stay aktif lain di tujuan (`:56`), **utilitas kamar lama ditagih** (snapshot meter + invoice + jurnal, `:63`), kamar lama → MAINTENANCE + tiket CHECKOUT_INSPECTION, kamar baru → OCCUPIED, RoomTransfer = audit trail. Transfer hanya utk stay ACTIVE ter-promote (`:42`).
+- Guard email tenant unik saat check-in (`:264-281`); KTP-verified gate (configurable, `:162`).
+
+### C10-01 Backend tak responsif saat audit — memperkuat C05-01/C09-01 (self-DoS) — 🟠 catatan MEDIUM
+- **Yang terjadi:** setelah sesi navigasi tenant (yang memicu badai retry dari loop `/portal/stay` + 503 `/tenant/bookings/my` & `/announcements/active`), **backend `localhost:3000` berhenti merespons** (fetch → "Failed to fetch"; FE `:5173` tetap 200). Tidak pulih dalam 8+ detik (bukan restart nodemon biasa).
+- **Implikasi:** badai request dari bug loop (C05-01) & 503-retry (C09-01) **berpotensi menjatuhkan backend (self-DoS)** — menaikkan urgensi perbaikan bug-bug tersebut. 
+- **SARAN:** restart backend (`cd backend && npm run start:dev`); prioritaskan fix loop/503 + batasi retry FE (`retry:false` + backoff, jangan refetchOnMount pada query yang error).
+
+### ✅ LIVE CONFIRMED (batch 3 Jul)
+- **`/stays` (admin) render bagus:** Command Center sidebar konsisten; stats **MASA SEWA AKTIF: 3**, **MENUNGGU PERSETUJUAN: 0**, akhir-sewa-dekat 3, pengajuan keluar 0. Console **0 error**. Tombol "Check-in Baru" ada.
+- **JB-14 UI:** admin buka `/owner-dashboard` (OWNER-only) → **redirect ke `/dashboard`** (guard `RequireRoles` jalan). ✅
+- **Admin dashboard:** 3/13 kamar terisi; AutoOps panel jelas "**hanya reset booking & kamar; pembayaran/perpanjangan/checkout tetap manual**" + "booking maks 3 jam" (JB-06). Overstay → tiket cleanup otomatis (I/F1/M/L) terlihat (StaySweep aktif).
+- **✅ JB-03 CONFIRMED live (booking uji):** `POST /api/public/bookings` (kamar G/5) → **201 "Booking berhasil dibuat"**. Status kamar G **SEBELUM=MAINTENANCE, SESUDAH=MAINTENANCE** → **booking TIDAK mengunci/mengubah status kamar** (sesuai `stays.service` "no room UPDATE"). Booking uji auto-hangus 3 jam (JB-06, tak dibayar). Validasi DTO ketat (tolak field asing + email invalid).
+- **JB-04 (meter promote di check-in):** stay booking tak muncul di `/stays` list (stay unpromoted/booking), jadi read meter live terhalang shape endpoint — **tetap terverifikasi kode** (booking tak set meter; promote hanya di check-in). Approve DP + check-in end-to-end butuh alur upload-bukti (kompleks) + kamar MAINTENANCE tak bisa check-in langsung.
+
+### C10-02 Data seed OCCUPIED tanpa sewa lunas — kontradiksi rule check-in — 🟢 LOW/INFO (integritas data)
+- **Severity:** LOW/INFO · **Kategori:** Integritas data seed / cakupan uji
+- **Bukti live (cross-check DEFAULT_DATA):** tenant occupied punya invoice sewa **BELUM lunas** padahal `room.status=OCCUPIED`:
+  - **Bayu (I):** OCCUPIED, deposit 300k lunas, tapi **invoice sewa 850.000 paid 0** (ISSUED).
+  - **Sari (F2):** OCCUPIED, tapi **deposit paid 0**, DP 0, **invoice sewa 1.750.000 paid 0**.
+- **Masalah:** melanggar rule Fase V "**check-in wajib invoice sewa awal lunas**" (`stays.service.ts:190-196`). Artinya **`seed-dev-via-api.js` menyisipkan stay OCCUPIED langsung, mem-bypass guard check-in** → data uji "occupied" **tidak** mencerminkan alur nyata (bisa menyembunyikan bug di alur check-in/pembayaran saat testing).
+- **SARAN:** seed lewat alur asli (booking→bayar→check-in) ATAU owner konfirmasi guard produksi tetap menolak check-in tanpa lunas (kode-nya benar; hanya seed yang menerobos). Bukan lubang produksi (guard ada di kode), tapi rapikan seed agar uji valid.
+
+### Live TERTUNDA (butuh backend hidup + data booking pending)
+- Approve DP → verifikasi kamar RESERVED + `initialMetersPromotedAt=null` (JB-03/JB-04) via API.
+- Check-in wizard (guard lunas, promote di sini), pesaing (JB-07), room transfer live, `/stays/:id`, JB-14 (STAFF/TENANT akses /stays ditolak).
+- **Ulangi setelah backend di-restart** (idealnya setelah schema sync C09-01 agar endpoint stay/booking sehat).
+
+## Definition of Done — status
+- [x] JB-03/JB-04 (check-in lunas + promote di check-in) diverifikasi kode.
+- [x] Room transfer (deposit carried, race-safe, utilitas settled) diverifikasi kode.
+- [~] Approve DP / check-in / transfer **live**: tertunda (backend down) — C10-01.
+- [x] Temuan `C10-xx`; INDEX baris 10 diupdate (partial).
 
 ## Definition of Done
 - [ ] Approve DP diverifikasi: kamar→RESERVED, meter/occupied TIDAK ter-promote (JB-03/JB-04) via API.

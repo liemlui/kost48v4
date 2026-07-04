@@ -5,6 +5,7 @@ import { AuditLogService } from '../../audit-log/audit-log.service';
 import { AccountingReportsService } from './accounting-reports.service';
 import { AccountingSchemaGuard } from './accounting-schema.guard';
 import { PeriodClosePayloadDto, PeriodCloseQueryDto, PeriodReopenPayloadDto } from './dto/period-close.dto';
+import { dateOnlyWib as dateOnly } from '../../common/utils/date-only';
 
 const RETAINED_EARNINGS_CODE = '3200';
 const CLOSE_BASIS = 'PERIOD_CLOSE_RETAINED_EARNINGS_B8';
@@ -46,12 +47,6 @@ function reopenSourceIdFor(year: number, month: number, version = 1) {
   return `PERIOD_REOPEN:${monthKey(year, month)}:V${version}`;
 }
 
-function dateOnly(value: Date | string) {
-  const date = value instanceof Date ? new Date(value.getTime()) : new Date(value);
-  date.setUTCHours(0, 0, 0, 0);
-  return date;
-}
-
 function previousUtcMonth(now = new Date(), monthsBack = 1) {
   const safeMonthsBack = Math.min(12, Math.max(1, Math.round(Number(monthsBack) || 1)));
   const anchor = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - safeMonthsBack, 1));
@@ -71,6 +66,10 @@ export class AccountingPeriodCloseService {
     private readonly schemaGuard: AccountingSchemaGuard,
     private readonly audit: AuditLogService,
   ) {}
+
+  // ═══════════════════════════════════════════════════════════
+  //  SECTION: Public API — Readiness, Post, Reopen
+  // ═══════════════════════════════════════════════════════════
 
   async readiness(query: PeriodCloseQueryDto) {
     await this.schemaGuard.assertReady();
@@ -129,7 +128,7 @@ export class AccountingPeriodCloseService {
       return { ...policy, closed: false, skipped: true, skippedReason: 'ACCOUNTING_AUTO_CLOSE_DISABLED', source };
     }
 
-    const period = await (this.prisma as any).accountingPeriod.findUnique({ where: { year_month: { year: target.year, month: target.month } } });
+    const period = await this.prisma.accountingPeriod.findUnique({ where: { year_month: { year: target.year, month: target.month } } });
     if (!period) {
       return { ...policy, closed: false, skipped: true, skippedReason: `Accounting period ${monthKey(target.year, target.month)} belum dibuat.`, source };
     }
@@ -240,6 +239,10 @@ export class AccountingPeriodCloseService {
     return result;
   }
 
+  // ═══════════════════════════════════════════════════════════
+  //  SECTION: Reopen Period
+  // ═══════════════════════════════════════════════════════════
+
   async reopenPreview(dto: PeriodReopenPayloadDto) {
     await this.schemaGuard.assertReady();
     return this.buildReopenPreview(dto.year, dto.month, dto.reason);
@@ -321,6 +324,10 @@ export class AccountingPeriodCloseService {
     });
     return result;
   }
+
+  // ═══════════════════════════════════════════════════════════
+  //  SECTION: Readiness & Preview Builders
+  // ═══════════════════════════════════════════════════════════
 
   private async buildReadiness(year: number, month: number, txOverride?: any) {
     const db = txOverride ?? (this.prisma as any);

@@ -21,6 +21,10 @@ import { generateBrief, getOwnerAiStatus, type BriefResult } from '../../api/ai'
 import AiAssistButton from '../../components/ai/AiAssistButton';
 import AiResultPanel from '../../components/ai/AiResultPanel';
 
+// ═══════════════════════════════════════════════════════════
+//  COMPONENT: OwnerDashboardPage
+// ═══════════════════════════════════════════════════════════
+
 const MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
 // Catatan: key ini terpisah dari `kost48_owner_view_mode` (toggle Kokpit/Area Admin di AppLayout).
@@ -340,7 +344,7 @@ export default function OwnerDashboardPage() {
               <OwnerKpiCard label="Laba Bersih" value={formatCompactRupiah(data.kpi.netProfitRupiah)} change={changeLabel(data.kpi.netProfitChangePercent)} detail={`Margin ${data.kpi.netProfitMarginPercent}%`} tone="profit" />
             </Col>
             <Col xs={12} sm={6} xl={3}>
-              <OwnerKpiCard label="Okupansi" value={`${data.kpi.occupancyRatePercent}%`} change={changeLabel(data.kpi.occupancyRateChangePercent)} tone="occupancy" />
+              <OwnerKpiCard label="Okupansi kamar siap-sewa" value={`${data.kpi.occupancyRatePercent}%`} change={changeLabel(data.kpi.occupancyRateChangePercent)} detail="Kamar maintenance tidak dihitung" tone="occupancy" />
             </Col>
             <Col xs={12} sm={6} xl={3}>
               <OwnerKpiCard label="Kas Bersih" value={formatCompactRupiah(data.kpi.netCashFlowRupiah)} change={changeLabel(data.kpi.netCashFlowChangePercent)} tone="cash" />

@@ -46,7 +46,25 @@
 - [ ] 18. Cek `StaffWorkAudit` mencatat aktivitas (jejak audit ada).
 
 ## HASIL TEMUAN
-_(kosong — diisi auditor)_
+
+> **Status:** **kode SELESAI** (bersih); **live TERTUNDA** (backend down).
+
+### ✅ Verifikasi kode — BENAR
+- **KPI NaN-safe (`staff-performance.service.ts`):** helper `avg` **guard empty** — `if (!values.length) return null` (`:52-54`) → tak ada NaN (JB-18). Rasio lain ter-guard: resolution `resolutionHours.length ? … : …` (`:270`), `proofCompletionRate = proofRequired ? … : 100` (`:299`). Insight berbasis **rule** (`buildRuleInsight` `:526`), bukan AI berbayar.
+- Guard kepemilikan/transisi tiket & staf sudah dikonfirmasi (C07/C14). `StaffWorkAudit` = jejak audit.
+
+### ✅ LIVE CONFIRMED (`/staff-routines` owner, 3 Jul)
+- **Render:** "Atur Pekerjaan Rutin Staf" — form Tambah checklist (Nama, **Jadwal Harian/Mingguan/Bulanan**, **Area** [umum/bersih-bersih/KM/kamar/stok/meter/keamanan], Catatan, Urutan, **Butuh foto**, **Butuh catatan**, Aktif). Stats "Checklist aktif 0 / Selesai 7 hari 0 / Butuh bantuan 0" (tanpa NaN). Empty-state "Belum ada pekerjaan rutin". Copy: "Staff hanya melihat daftar kerja sederhana di beranda" (pemisahan admin vs staff).
+- Endpoint `/staff-performance` KPI 200 owner (agregasi NaN-safe sudah kode-verified); TENANT → 403/404 (JB-14).
+- **`/staff-performance` RENDER (live):** "Kinerja Staf" tampil **insight rule-based** — "Prioritas tinggi · **Risiko 84** · AC kamar K perlu service cuci — tugas selesai/ditutup tapi **belum ada foto penyelesaian** → sarankan audit random / minta foto bukti bulanan [Audit]". Skor risiko = angka valid (**tanpa NaN**), **rule-based** (bukan AI berbayar, selaras JB-08). Konfirmasi logika `proofCompletionRate` (tugas done tanpa foto → flag risiko).
+
+### Live TERTUNDA (butuh BE hidup)
+- Template→assign→completion (admin+staf), KPI rekalkulasi manual, `/staff-report` & `/staff-warehouse` (STAFF-only, JB-14), field report review.
+
+## Definition of Done — status
+- [x] KPI NaN-safe + insight rule-based diverifikasi kode.
+- [~] Live alur routine/KPI/laporan: tertunda (backend down).
+- [x] Temuan `C15-xx` (nihil bug kode); INDEX baris 15 diupdate.
 
 ## Definition of Done
 - [ ] Alur template→assign→completion diuji (admin + staf).

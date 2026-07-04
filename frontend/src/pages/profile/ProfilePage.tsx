@@ -8,7 +8,9 @@ import type { TenantProfileOnboardingPayload } from '../../api/tenants';
 import PageHeader from '../../components/common/PageHeader';
 import { useAuth } from '../../context/AuthContext';
 
-// ── helpers ───────────────────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════
+//  SECTION: Helpers
+// ═══════════════════════════════════════════════════════════
 
 function getUserTypeLabel(role?: string) {
   if (role === 'TENANT') return 'Penghuni';
@@ -355,7 +357,9 @@ const MARKETING_FIELD_DEFS: OnboardingFieldDef[] = [
   },
 ];
 
-// ── component ─────────────────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════
+//  COMPONENT: ProfilePage — Main
+// ═══════════════════════════════════════════════════════════
 
 export default function ProfilePage() {
   const { user } = useAuth();

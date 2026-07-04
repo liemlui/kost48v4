@@ -51,7 +51,35 @@
 - [ ] 22. `CheckoutPortalPage.tsx` + `checkout-requests` service: cek guard tagihan tertunda + nominal deposit refund.
 
 ## HASIL TEMUAN
-_(kosong — diisi auditor)_
+
+> **Status:** live (Maya) + kode + log **SELESAI**. ⚠️ Menemukan **503 sistemik** yang menyatukan beberapa bug (C05-01, C08-01). Renewal/Checkout flow tak bisa diuji live (Maya tak punya stay aktif → redirect ke /portal/stay yang kena loop) → logika uang diverifikasi via kode.
+
+### C09-01 ⛔ 503 sistemik `/tenant/bookings/my` (+ `/announcements/active`) — 🔴 HIGH ⭐ (menyatukan C05-01 & C08-01)
+- **Severity:** HIGH · **Kategori:** Reliability / backend (kemungkinan drift skema UAT)
+- **Bukti live:** `GET /api/tenant/bookings/my?limit=20` → **503** berulang (124 request GET+OPTIONS teramati). `/portal/bookings` **stuck "Memuat halaman…"**. Sama dengan `/announcements/active` (C08-01).
+- **Dampak luas (menyatukan 3 gejala):**
+  1. `/portal/bookings` broken (langsung).
+  2. `/portal/announcements` broken (C08-01, endpoint 503 serupa).
+  3. **`/portal/stay` loop (C05-01)** — hook `useTenantPortalStage` memanggil `/tenant/bookings/my` (`bookingsQuery`) yang 503 + `/stays/me/current` yang 404; keduanya error → `isStageLoading` tak settle → skeleton + refetch storm.
+  4. `/portal/renewal` & `/portal/checkout` **redirect ke `/portal/stay`** (tenant tanpa stay) → ikut kena loop.
+- **Akar masalah:** `ServiceUnavailableException` di `tenant-bookings.service.ts:59,243,885` (`findMine` line 877 memanggil `isBookingSchemaReady` line 885, atau catch `isBookingSchemaDriftError` → 503). Pesan kode: *"Fitur booking belum aktif penuh karena database belum sinkron. Jalankan sinkronisasi schema."* → **kemungkinan besar UAT DB (5433) drift** (kolom/enum yang di-select `findMine` tidak ada di DB, padahal `tsc` hijau karena cocok dgn `schema.prisma`). Endpoint publik `/public/rooms` pakai `PUBLIC_ROOM_SELECT` sempit → tak menyentuh kolom drift → tetap 200.
+- **SARAN FIX:** (1) **jalankan sinkronisasi schema di UAT** (`prisma migrate deploy` / `db push` pada `kost48_v3_pro`) lalu re-test — kemungkinan besar menyembuhkan C05/C08/C09 sekaligus; (2) perbaiki ketahanan FE: jangan refetch storm saat 503, tampilkan error-state; (3) konfirmasi via **console backend live** stack `ServiceUnavailable` persisnya (log ter-rotate tak menyimpan pesannya).
+- **Catatan:** bila di produksi schema sudah sinkron, gejala ini mungkin tak muncul — **verifikasi di lingkungan produksi**. Tetap HIGH karena menandakan degradasi tidak anggun (whole-page break + storm).
+- **✅ UPDATE PASCA-FIX (terverifikasi 2 Jul):** owner menjalankan **`prisma migrate deploy`/`db push` + restart backend** → `/api/tenant/bookings/my` & `/api/announcements/active` sekarang **200** (sebelumnya 503). **Root cause C09-01 = schema drift UAT — TERKONFIRMASI & RESOLVED.** C08-01 (announcements) juga sembuh. **NAMUN loop `/portal/stay` (C05-01) TETAP ADA** (tab masih crash) → C05-01 adalah bug FE independen (query `/stays/me/current` 404 + `refetchOnMount`), **bukan** disebabkan 503 — harus diperbaiki terpisah di FE.
+
+### ✅ Verifikasi (kode + live) — BENAR
+- **Loyalty (`/portal/loyalty`) live OK:** render "Poin Kebaikan & Reward — 0 poin", statistik 0/0/0 (Maya belum ada poin) — **tanpa NaN** (JB-18). Tab Katalog Reward / Penukaran / Riwayat ada. Tak loop, tak 503.
+- **JB-01 renewal tidak menagih deposit ulang:** invoice renewal = **rent-only** (`renew-requests.service.ts:84` `renewalRentRupiah = stay.agreedRentAmountRupiah`; DP 30% via invoice terpisah `:268`; **tak ada baris deposit**). Deposit satu kali, tetap.
+- **JB-10 checkout deposit = liability:** settlement di `deposit-ledger.service.ts` pakai `INCREASE_LIABILITY`/`DECREASE_LIABILITY` (`:180,229,242-253`); refund = `depositRefundedRupiah` (deposit − potongan), **bukan** dari DP. Konsisten dengan akun liability 2000.
+
+### Belum teruji live (butuh tenant dgn stay aktif + backend sehat)
+- Alur submit renewal (8-state, JB-12) & checkout (guard tagihan tertunda, JB-12), loyalty redeem (cukup/tidak cukup/double-click) — Maya 0 poin & tanpa stay aktif, plus 503 memblokir. Uji ulang setelah C09-01 (schema sync) + pakai tenant occupied.
+
+## Definition of Done — status
+- [x] Loyalty diuji live (0-state, no NaN). Redeem: tak teruji (0 poin).
+- [x] Renewal JB-01 (deposit tak ditagih ulang) + Checkout JB-10 (deposit liability) diverifikasi via kode.
+- [~] Renewal/checkout flow live: terblokir (redirect ke /portal/stay loop + 503) → **temuan C09-01**.
+- [x] Temuan `C09-xx` (termasuk 503 sistemik); INDEX baris 09 diupdate.
 
 ## Definition of Done
 - [ ] Loyalty redeem diuji (cukup/tidak cukup/double-click).

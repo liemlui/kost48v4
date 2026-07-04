@@ -61,6 +61,7 @@ import {
 } from '../../api/accounting';
 import { fetchDepositLedgerReconciliationLite, fetchDepositLedgerSummary } from '../../api/depositLedger';
 import { getApiErrorMessage } from '../../utils/getApiErrorMessage';
+import { formatRupiah, formatRupiahWithoutSymbol } from '../../utils/formatCurrency';
 
 const financeMenu = [
   { id: 'invoices', icon: '🧾', label: 'Tagihan', helper: 'Invoice sewa, deposit, utility, dan blocker checkout.', to: '/invoices', active: false },
@@ -93,8 +94,12 @@ function currentAsOf() {
   return new Date().toISOString().slice(0, 10);
 }
 
-function formatRupiah(value?: number | null) {
-  return `Rp ${Number(value ?? 0).toLocaleString('id-ID')}`;
+// ═══════════════════════════════════════════════════════════
+//  COMPONENT: AccountingSetupPage
+// ═══════════════════════════════════════════════════════════
+
+function formatRupiahLocal(value?: number | null) {
+  return `{formatRupiah(Number(value ?? 0))}`;
 }
 
 export default function AccountingSetupPage() {

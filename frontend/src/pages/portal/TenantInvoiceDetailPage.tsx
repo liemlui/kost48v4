@@ -33,6 +33,10 @@ const lineTypeLabels: Record<string, string> = {
   OTHER: 'Lainnya',
 };
 
+// ═══════════════════════════════════════════════════════════
+//  COMPONENT: TenantInvoiceDetailPage
+// ═══════════════════════════════════════════════════════════
+
 function isPastDue(dueDate: string | Date | null | undefined) {
   const due = parseDateTimeSafe(dueDate);
   if (!due) return false;
@@ -169,7 +173,7 @@ export default function TenantInvoiceDetailPage() {
     { id: 'total', label: 'Total Tagihan', value: <CurrencyDisplay amount={totalInvoice} /> as any, helper: invoice.invoiceNumber || `TG-${invoice.id}`, icon: '🧾', status: invoice.status },
     { id: 'paid', label: 'Sudah Dibayar', value: <CurrencyDisplay amount={totalPaid} /> as any, helper: `${invoice.payments?.length ?? 0} pembayaran tercatat`, icon: '💳', status: totalPaid > 0 ? 'SUCCESS' : 'INFO' },
     { id: 'outstanding', label: 'Sisa Tagihan', value: <CurrencyDisplay amount={outstanding} /> as any, helper: hasPendingReview ? 'Bukti sedang diperiksa' : canSubmitPayment ? hasPayableAmount ? 'Perlu dibayar' : 'Tidak ada nominal bayar' : invoice.status === 'DRAFT' ? 'Sedang disiapkan admin' : 'Selesai', icon: '⚖️', status: hasPendingReview ? 'INFO' : outstanding > 0 ? 'WARNING' : 'SUCCESS' },
-    { id: 'due', label: 'Jatuh Tempo', value: dueMeta.hasDate ? dueMeta.clockLabel : '-', helper: dueMeta.hasDate ? `${dueMeta.relativeLabel} · ${dueMeta.absoluteLabel}` : 'Jam belum tersedia', icon: '⏰', status: isOverdue ? 'DANGER' : 'INFO' },
+    { id: 'due', label: 'Jatuh Tempo', value: dueMeta.hasDate ? dueMeta.clockLabel : '-', helper: isPaid ? 'Tagihan sudah lunas' : dueMeta.hasDate ? `${dueMeta.relativeLabel} · ${dueMeta.absoluteLabel}` : 'Jam belum tersedia', icon: '⏰', status: isPaid ? 'SUCCESS' : isOverdue ? 'DANGER' : 'INFO' },
   ] : [];
 
   const timelineSteps: TimelineStep[] = invoice ? [
@@ -349,7 +353,7 @@ export default function TenantInvoiceDetailPage() {
                     <div className="metric-tile">
                       <div className="card-title-soft">Jatuh Tempo</div>
                       <div className="fw-semibold">{dueMeta.hasDate ? dueMeta.absoluteLabel : '-'}</div>
-                      {dueMeta.hasDate ? <div className={isOverdue ? 'small text-soft-danger mt-1' : 'small text-muted mt-1'}>{dueMeta.relativeLabel}</div> : null}
+                      {!isPaid && dueMeta.hasDate ? <div className={isOverdue ? 'small text-soft-danger mt-1' : 'small text-muted mt-1'}>{dueMeta.relativeLabel}</div> : null}
                     </div>
                   </Col>
                 </Row>

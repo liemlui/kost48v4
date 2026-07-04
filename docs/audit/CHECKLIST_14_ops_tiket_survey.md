@@ -42,7 +42,34 @@
 - [ ] 18. `tickets.service.ts`: guard kepemilikan (staf/tenant), guard status transisi valid (tidak bisa Close tiket yang belum Assign), kategori Darurat.
 
 ## HASIL TEMUAN
-_(kosong — diisi auditor)_
+
+> **Status:** **kode SELESAI** (bersih); **live TERTUNDA** (backend down). 
+
+### ✅ Verifikasi kode — BENAR
+- **Tiket guard (`tickets.service.ts`):** ownership/authorization berlapis — tenant hanya lihat miliknya, staf harus penanggung jawab (`:250,364,378`); tip hanya setelah tiket **selesai** + ada staf (`:302-304`); tenant wajib utk tiket admin (`:438`); jenis laporan staf divalidasi (`:434`). (Isolasi JB-19 sudah dikonfirmasi C07.)
+- **Survei NaN-safe (JB-18) (`surveys.service.ts`):** `avg = vals.length ? round(sum/len*10)/10 : null` (`:28-30`) — **pembagian ter-guard** (null bila kosong, bukan NaN). `recommendRate` idem (`:33`). Submission di-scope `actor.tenantId` (`:13`); eligibility gate 30 hari (`:61-63`).
+
+### ✅ LIVE CONFIRMED (`/tickets` owner, 3 Jul) — render kaya & bersih
+- **Halaman tiket admin render penuh:** menu (Semua Tiket / Perlu Assign / Checklist / Laporan Lapangan / Kinerja Staff), statistik **25 total, 20 baru, 5 selesai**, kategori (AC_CLEANING, EVICT_OVERSTAY, CHECKOUT_INSPECTION, ELECTRICITY, WIFI, PLUMBING), umur tiket, pagination (4 hal).
+- **5 tiket DONE = seed DEFAULT_DATA** persis (AC-K, Lampu-I, WiFi-G, Keran-C, AC-A). ✅ integritas data.
+- **✅ AUTO-OPS OVERSTAY (StaySweep) BEKERJA LIVE:** tenant yang lease berakhir 24 Jun & tak renew → **otomatis** dibuat tiket **`EVICT_OVERSTAY`** (Bayu-I "kontrak stay #7 berakhir 2026-06-24… lewat 12:00") + **`CHECKOUT_INSPECTION`** (F1/M/L/J: "checkout paksa otomatis H+1 lewat 12:00"). Ini penyebab 10 kamar MAINTENANCE. Konfirmasi C10 auto-ops.
+- **✅ JB-05 (tanpa denda):** teks tiket overstay = "**biaya overstay/pembersihan dipotong dari deposit jaminan** saat settlement" — potong deposit utk biaya riil, **BUKAN denda keterlambatan**. ✅
+- **Alur assign terlihat:** tiap tiket punya "Pilih petugas → Tugaskan → Mulai Kerjakan". "Antrian konfirmasi admin — 5 perlu cek" (tiket DONE menunggu ditutup admin).
+### ✅ LIVE CONFIRMED (`/ac-maintenance` owner, 3 Jul)
+- **Render "Perawatan AC":** 9 unit AC (Total 9, Perlu dicuci 9, Segera 0), tabel per kamar (A,B,C,D,J,F1,F2 = ½ PK; K,L = ¾ PK). **Jadwal hibrid** = cuci dipicu bila interval hari lewat ATAU estimasi kWh tinggi; "Estimasi kWh = daya × jam pakai/hari sejak cuci terakhir" (**tanpa NaN**, ~0 kWh krn belum ada pemakaian).
+- **Rekonsiliasi volume tiket:** tiap AC "belum pernah dicuci" → **Tiket #6–#14 auto-dibuat** (AC_CLEANING). Ini menjelaskan lonjakan tiket (#1–5 = seed, #6–14 = auto cuci-AC). Konsisten C14 auto-ops.
+
+### ✅ LIVE CONFIRMED (`/surveys` owner, 3 Jul) — REKALKULASI MANUAL LULUS (JB-18)
+- **Render "Survei Kepuasan":** 5 survei, komentar terbaru, filter rating + sort. Data seed 5 survei (rating overall 4,3,5,4,5).
+- **✅ AGREGASI DICOCOKKAN MANUAL — semua BENAR:** Rata-rata (4+3+5+4+5)/5 = **4.2★** ✓; Rekomendasi 4/5 = **80%** ✓; Kebersihan 21/5 = **4.2** ✓; Staf 23/5 = **4.6** ✓; Fasilitas 20/5 = **4.0** ✓; Harga 21/5 = **4.2** ✓; distribusi bintang **2/2/1/0/0** ✓. **Tak ada NaN / salah agregasi** (JB-18 lulus live).
+
+### Live TERTUNDA (butuh BE hidup)
+- Alur tiket admin (assign→start→close, JB-12 double-action), mode staf (hanya tiket ditugaskan, JB-14 via curl), AC maintenance (jadwal + tanggal), survei display (agregasi + empty-state + anonimitas), JB-14 (`/ac-maintenance`,`/surveys` ditolak STAFF/TENANT).
+
+## Definition of Done — status
+- [x] Guard tiket (ownership/transisi/tip) + survei NaN-safe diverifikasi kode.
+- [~] Live admin/staff tiket + AC + survei: tertunda (backend down).
+- [x] Temuan `C14-xx` (nihil bug kode); INDEX baris 14 diupdate.
 
 ## Definition of Done
 - [ ] Alur tiket admin (assign→start→close) + mode staf diuji.

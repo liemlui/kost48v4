@@ -25,10 +25,10 @@ export default function CashflowPage() {
   return (
     <Container fluid className="px-2 py-3">
       <div className="d-flex justify-content-between align-items-start mb-3 flex-wrap gap-2">
-        <div><h1 className="mb-0" style={{fontSize:'1.5rem',fontWeight:700}}>Arus Kas</h1><small className="text-muted">Laporan arus kas metode langsung</small></div>
+        <div><h1 className="mb-0 rpt-title">Arus Kas</h1><small className="text-muted">Laporan arus kas metode langsung</small></div>
         <div className="d-flex gap-2">
-          <Form.Control type="number" value={ym.year} min={2020} max={2100} onChange={e => setYm(p=>({...p,year:+e.target.value}))} style={{width:80,height:32,fontSize:13}} />
-          <Form.Select value={ym.month} onChange={e => setYm(p=>({...p,month:+e.target.value}))} style={{width:120,height:32,fontSize:13}}>
+          <Form.Control type="number" value={ym.year} min={2020} max={2100} onChange={e => setYm(p=>({...p,year:+e.target.value}))} className="rpt-input-sm" />
+          <Form.Select value={ym.month} onChange={e => setYm(p=>({...p,month:+e.target.value}))} className="rpt-select-sm">
             {Array.from({length:12},(_,i)=>i+1).map(m=><option key={m} value={m}>{new Date(0,m-1).toLocaleString('id-ID',{month:'long'})}</option>)}
           </Form.Select>
         </div>
@@ -43,7 +43,7 @@ export default function CashflowPage() {
           <Col xs={6} xl={3}><Card><Card.Body><div className="kpi-label">Status</div><div className="kpi-value"><Badge bg={data.formalStatementReady?'success':'warning'}>{data.formalStatementReady?'Formal':'Estimasi'}</Badge></div></Card.Body></Card></Col>
         </Row>
         <Row className="g-3">
-          <Col lg={4}><Card><Card.Header style={{fontWeight:600,fontSize:14,background:'#f8fafc'}}>💰 Arus Kas Operasi</Card.Header><Card.Body>
+          <Col lg={4}><Card><Card.Header className="rpt-card-header">💰 Arus Kas Operasi</Card.Header><Card.Body>
             {data.operating.cashIn.length === 0 && data.operating.cashOut.length === 0 ? (
               <EmptyState icon="💰" title="Belum ada arus kas operasi" description="Belum ada transaksi kas masuk/keluar operasional pada periode ini." />
             ) : (
@@ -54,18 +54,18 @@ export default function CashflowPage() {
             </tbody></Table>
             )}
           </Card.Body></Card></Col>
-          <Col lg={4}><Card><Card.Header style={{fontWeight:600,fontSize:14,background:'#f8fafc'}}>🏗️ Arus Kas Investasi</Card.Header><Card.Body>
+          <Col lg={4}><Card><Card.Header className="rpt-card-header">🏗️ Arus Kas Investasi</Card.Header><Card.Body>
             <Table size="sm" className="mb-0"><tbody>
               <tr><td className="text-danger">− Investasi Aset</td><td className="text-end">{formatCompact(data.investing.totalOutRupiah)}</td></tr>
               <tr className="border-top"><td><strong>Kas Bersih Investasi</strong></td><td className="text-end"><strong style={{color:data.investing.netRupiah>=0?'#22c55e':'#ef4444'}}>{formatCompact(data.investing.netRupiah)}</strong></td></tr>
             </tbody></Table></Card.Body></Card></Col>
-          <Col lg={4}><Card><Card.Header style={{fontWeight:600,fontSize:14,background:'#f8fafc'}}>🏦 Arus Kas Pendanaan</Card.Header><Card.Body>
+          <Col lg={4}><Card><Card.Header className="rpt-card-header">🏦 Arus Kas Pendanaan</Card.Header><Card.Body>
             <Table size="sm" className="mb-0"><tbody>
               <tr><td className="text-success">+ Setoran Modal</td><td className="text-end">{formatCompact(data.financing.totalInRupiah)}</td></tr>
               <tr className="border-top"><td><strong>Kas Bersih Pendanaan</strong></td><td className="text-end"><strong style={{color:data.financing.netRupiah>=0?'#22c55e':'#ef4444'}}>{formatCompact(data.financing.netRupiah)}</strong></td></tr>
             </tbody></Table></Card.Body></Card></Col>
         </Row>
-        {data.cashAccounts.length>0 && <Card className="mt-3"><Card.Header style={{fontWeight:600,fontSize:14,background:'#f8fafc'}}>🏦 Rekening Kas</Card.Header><Card.Body>
+        {data.cashAccounts.length>0 && <Card className="mt-3"><Card.Header className="rpt-card-header">🏦 Rekening Kas</Card.Header><Card.Body>
           <Table size="sm" bordered><thead><tr><th>Nama</th><th>Tipe</th><th className="text-end">Saldo Awal</th><th className="text-end">Saldo Akhir</th></tr></thead><tbody>
             {data.cashAccounts.map(ca=><tr key={ca.id}><td>{ca.name}</td><td>{ca.accountType}</td><td className="text-end">{formatCompact(ca.openingBalanceRupiah)}</td><td className="text-end">{formatCompact(ca.currentBalanceRupiah)}</td></tr>)}
           </tbody></Table></Card.Body></Card>}
