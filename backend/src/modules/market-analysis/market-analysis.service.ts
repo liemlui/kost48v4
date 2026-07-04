@@ -1,3 +1,4 @@
+// FILE: market-analysis.service.ts — analisis pasar + kompetitor + rekomendasi harga
 import { HttpException, HttpStatus, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { Prisma } from '../../generated/prisma';
 import { CurrentUserPayload } from '../../common/interfaces/current-user.interface';
@@ -61,9 +62,9 @@ export class MarketAnalysisService {
   async businessSnapshot() {
     const [totalRooms, occupiedRooms, availableRooms, activeStays, surveyAgg, recRows] = await Promise.all([
       this.prisma.room.count(),
-      this.prisma.room.count({ where: { status: 'OCCUPIED' as any } }),
-      this.prisma.room.count({ where: { status: 'AVAILABLE' as any } }),
-      this.prisma.stay.count({ where: { status: 'ACTIVE' as any } }),
+      this.prisma.room.count({ where: { status: 'OCCUPIED' } }),
+      this.prisma.room.count({ where: { status: 'AVAILABLE' } }),
+      this.prisma.stay.count({ where: { status: 'ACTIVE' } }),
       this.prisma.satisfactionSurvey.aggregate({ _count: { _all: true }, _avg: { overallRating: true } }),
       this.prisma.satisfactionSurvey.findMany({ select: { wouldRecommend: true } }),
     ]);

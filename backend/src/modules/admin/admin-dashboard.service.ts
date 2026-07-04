@@ -25,7 +25,7 @@ export class AdminDashboardService {
         orderBy: { code: 'asc' },
       }),
       this.prisma.stay.findMany({
-        where: { status: 'ACTIVE' as any },
+        where: { status: 'ACTIVE' },
         include: {
           room: true,
           tenant: { select: { id: true, fullName: true } },
@@ -59,7 +59,7 @@ export class AdminDashboardService {
         orderBy: { createdAt: 'desc' },
       }),
       this.prisma.renewRequest.findMany({
-        where: { status: { in: ['PENDING', 'PENDING_DECISION', 'AWAITING_DP', 'DP_SECURED'] as any[] } },
+        where: { status: { in: ['PENDING', 'PENDING_DECISION', 'AWAITING_DP', 'DP_SECURED'] } },
         include: {
           tenant: { select: { id: true, fullName: true } },
           stay: { include: { room: { select: { id: true, code: true } } } },
@@ -67,7 +67,7 @@ export class AdminDashboardService {
         orderBy: { createdAt: 'asc' },
       }),
       this.prisma.checkoutRequest.findMany({
-        where: { status: 'PENDING' as any },
+        where: { status: 'PENDING' },
         include: {
           stay: {
             include: {
@@ -79,7 +79,7 @@ export class AdminDashboardService {
         orderBy: { createdAt: 'asc' },
       }),
       this.prisma.checkoutRequest.findMany({
-        where: { status: 'APPROVED' as any },
+        where: { status: 'APPROVED' },
         include: {
           stay: {
             include: {
@@ -91,7 +91,7 @@ export class AdminDashboardService {
         orderBy: { createdAt: 'asc' },
       }),
       this.prisma.paymentSubmission.findMany({
-        where: { status: 'PENDING_REVIEW' as any },
+        where: { status: 'PENDING_REVIEW' },
         include: {
           invoice: { select: { id: true, invoiceNumber: true } },
           tenant: { select: { id: true, fullName: true } },
@@ -99,7 +99,7 @@ export class AdminDashboardService {
         orderBy: { createdAt: 'asc' },
         take: 25,
       }),
-      this.prisma.paymentSubmission.count({ where: { status: 'PENDING_REVIEW' as any } }),
+      this.prisma.paymentSubmission.count({ where: { status: 'PENDING_REVIEW' } }),
       this.prisma.inventoryItem.findMany({
         take: 150,
         orderBy: { name: 'asc' },

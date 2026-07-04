@@ -72,7 +72,7 @@ export class WifiSalesService {
   private async assertWifiSaleJournalAllowsChange(wifiSaleId: number, changingFinancials: boolean) {
     if (!changingFinancials) return;
     const journal = await this.prisma.journalEntry.findFirst({
-      where: { sourceType: 'WIFI_SALE' as any, sourceId: String(wifiSaleId), status: { not: 'VOID' as any } },
+      where: { sourceType: 'WIFI_SALE', sourceId: String(wifiSaleId), status: { not: 'VOID' } },
       select: { id: true, entryNumber: true },
     });
     if (journal) {
