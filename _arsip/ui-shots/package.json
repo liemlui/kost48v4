@@ -1,0 +1,9 @@
+{
+  "name": "kost48-ui-shots",
+  "private": true,
+  "type": "module",
+  "description": "Skrip sementara screenshot UI (responsivitas). Boleh dihapus.",
+  "dependencies": {
+    "playwright": "1.60.0"
+  }
+}

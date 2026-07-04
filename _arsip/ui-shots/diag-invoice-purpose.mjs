@@ -1,0 +1,16 @@
+import { chromium } from 'playwright';
+const API = 'http://localhost:3000/api', APP = 'http://localhost:5173';
+const r = await fetch(`${API}/auth/login`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ identifier: 'owner@kost48.com', password: 'Owner#2026' }) });
+const token = (await r.json())?.data?.accessToken;
+const b = await chromium.launch();
+const ctx = await b.newContext({ viewport: { width: 1280, height: 1000 } });
+await ctx.addInitScript((t) => window.localStorage.setItem('kost48_access_token', t), token);
+const p = await ctx.newPage();
+const errs = [];
+p.on('pageerror', (e) => errs.push(String(e.message || e)));
+await p.goto(APP + '/invoices', { waitUntil: 'networkidle', timeout: 30000 }).catch((e) => errs.push('GOTO ' + e.message));
+await p.waitForTimeout(1800);
+await p.screenshot({ path: 'ui-shots/invoice_purpose_owner.png', fullPage: true });
+const badges = await p.locator('text=/Sewa|Listrik|Air/').count();
+console.log('purpose-like badges:', badges, '| errors:', errs.length ? errs.slice(0, 3) : 'none');
+await b.close();

@@ -1,0 +1,50 @@
+[
+  {
+    "viewport": "mobile-390",
+    "page": "reports",
+    "file": "ui-shots/shot_reports_mobile-390.png",
+    "innerWidth": 390,
+    "bodyScrollWidth": 390,
+    "appShellGrid": 390,
+    "appMain": 390,
+    "ownerDashboard": null,
+    "firstCardWidth": 353,
+    "gridTemplateColumns": "390px"
+  },
+  {
+    "viewport": "tablet-834",
+    "page": "reports",
+    "file": "ui-shots/shot_reports_tablet-834.png",
+    "innerWidth": 834,
+    "bodyScrollWidth": 834,
+    "appShellGrid": 834,
+    "appMain": 834,
+    "ownerDashboard": null,
+    "firstCardWidth": 797,
+    "gridTemplateColumns": "834px"
+  },
+  {
+    "viewport": "desktop-1440",
+    "page": "reports",
+    "file": "ui-shots/shot_reports_desktop-1440.png",
+    "innerWidth": 1440,
+    "bodyScrollWidth": 1440,
+    "appShellGrid": 1412,
+    "appMain": 1138,
+    "ownerDashboard": null,
+    "firstCardWidth": 553,
+    "gridTemplateColumns": "260px 1138px"
+  },
+  {
+    "viewport": "wide-1920",
+    "page": "reports",
+    "file": "ui-shots/shot_reports_wide-1920.png",
+    "innerWidth": 1920,
+    "bodyScrollWidth": 1920,
+    "appShellGrid": 1892,
+    "appMain": 1618,
+    "ownerDashboard": null,
+    "firstCardWidth": 793,
+    "gridTemplateColumns": "260px 1618px"
+  }
+]
