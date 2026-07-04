@@ -4,11 +4,10 @@ import { Alert, Button, Card, Form, Modal, Spinner, Table } from 'react-bootstra
 import PageHeader from '../../components/common/PageHeader';
 import { listPendingLossRefunds, processLossRefund, type LossRefund } from '../../api/lossRefunds';
 import { formatRupiah } from '../../utils/formatCurrency';
+import { formatDateOnly } from '../../utils/dateTime';
 
 function formatDate(value?: string | null) {
-  if (!value) return '-';
-  const d = new Date(value);
-  return Number.isNaN(d.getTime()) ? '-' : d.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
+  return formatDateOnly(value);
 }
 
 export default function LossRefundsPage() {

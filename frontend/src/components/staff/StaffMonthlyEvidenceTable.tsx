@@ -3,15 +3,13 @@ import { Card, Table } from 'react-bootstrap';
 import PaginationControls from '../common/PaginationControls';
 import SafeImage from '../common/SafeImage';
 import type { StaffPerformanceSummary } from '../../api/staffPerformance';
+import { formatDateOnly } from '../../utils/dateTime';
 
 type Props = { performance?: StaffPerformanceSummary | null };
 type EvidenceFilter = 'ALL' | 'NEED_PROOF' | 'ROUTINE' | 'TICKET' | 'METER' | 'DONE';
 
 function formatDate(value?: string | null) {
-  if (!value) return '-';
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return '-';
-  return date.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
+  return formatDateOnly(value);
 }
 
 function statusText(status?: string | null) {

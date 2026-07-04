@@ -22,6 +22,7 @@ import {
 import { listResource } from '../../api/resources';
 import { getApiErrorMessage } from '../../utils/getApiErrorMessage';
 import { formatRupiahWithoutSymbol } from '../../utils/formatCurrency';
+import { formatDateOnly } from '../../utils/dateTime';
 
 function formatRupiah(value?: number | null) {
   const parsed = Number(value ?? 0);
@@ -30,10 +31,7 @@ function formatRupiah(value?: number | null) {
 }
 
 function formatDate(value?: string | null) {
-  if (!value) return '-';
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return '-';
-  return date.toLocaleDateString('id-ID', { dateStyle: 'medium' });
+  return formatDateOnly(value);
 }
 
 const categoryOptions: FixedAssetCategory[] = ['BUILDING', 'RENOVATION', 'ROOM_EQUIPMENT', 'FURNITURE', 'ELECTRONIC', 'UTILITY_EQUIPMENT', 'VEHICLE', 'SOFTWARE', 'OTHER'];

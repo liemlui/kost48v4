@@ -8,16 +8,10 @@ import { useTenantPortalStage } from '../../hooks/useTenantPortalStage';
 import type { Announcement } from '../../types';
 import { resolveAbsoluteFileUrl } from '../../utils/resolveAbsoluteFileUrl';
 import { getOfficialAnnouncementFallbackImage } from '../../data/officialKost48Content';
+import { formatDateOnly } from '../../utils/dateTime';
 
 function formatDate(value?: string | null) {
-  if (!value) return '-';
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return '-';
-  return date.toLocaleDateString('id-ID', {
-    day: '2-digit',
-    month: 'long',
-    year: 'numeric',
-  });
+  return formatDateOnly(value);
 }
 
 export default function MyAnnouncementsPage() {

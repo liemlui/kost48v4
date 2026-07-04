@@ -1,15 +1,13 @@
 import StaffAuditResultBadge from './StaffAuditResultBadge';
 import type { StaffPerformanceSummary } from '../../api/staffPerformance';
+import { formatDateOnly } from '../../utils/dateTime';
 
 type Props = {
   performance: StaffPerformanceSummary;
 };
 
 function formatDate(value?: string | null) {
-  if (!value) return '-';
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return '-';
-  return date.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
+  return formatDateOnly(value);
 }
 
 function formatPeriod(period?: StaffPerformanceSummary['period']) {
@@ -84,7 +82,7 @@ export default function StaffReportPrintView({ performance }: Props) {
   const rows = buildEvidenceRows(performance);
   const proofNeeds = rows.filter((row) => row.proof === 'Perlu foto').length;
   const auditTotal = (kpi.auditPass ?? 0) + (kpi.auditNeedsFix ?? 0) + (kpi.auditFailed ?? 0);
-  const printedAt = new Date().toLocaleString('id-ID', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+  const printedAt = `${formatDateOnly(new Date())} ${new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}`;
 
   return (
     <section className="staff-report-print-page" aria-label="Versi cetak laporan kerja staff">

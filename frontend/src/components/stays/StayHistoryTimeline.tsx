@@ -3,6 +3,7 @@ import { Badge, Card } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import CurrencyDisplay from '../common/CurrencyDisplay';
 import { invoicePurposeMeta } from '../../utils/invoiceUtility';
+import { formatDateOnly } from '../../utils/dateTime';
 
 // SI-3: Riwayat sewa yang jelas: kapan masuk kos, tiap periode
 // sewa/perpanjangan, dan tautannya ke invoice.
@@ -39,9 +40,7 @@ export type StayJourneyStep = {
 };
 
 function fmt(d?: string | null): string {
-  if (!d) return '-';
-  const dt = new Date(d);
-  return Number.isNaN(dt.getTime()) ? '-' : dt.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
+  return formatDateOnly(d);
 }
 
 function invStatusBadge(status: string): { label: string; bg: string } {

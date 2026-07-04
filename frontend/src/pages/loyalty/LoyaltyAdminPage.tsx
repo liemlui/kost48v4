@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Alert, Badge, Button, Card, Form, Modal, Table } from 'react-bootstrap';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import CurrencyInput from '../../components/common/CurrencyInput';
+import { formatDateOnly } from '../../utils/dateTime';
 import {
   confirmPeerReport,
   createReward,
@@ -111,7 +112,7 @@ export default function LoyaltyAdminPage() {
                   <td>{r.reward?.name ?? `#${r.rewardId}`}</td>
                   <td>{r.pointCost}</td>
                   <td><Badge bg={STATUS_VARIANT[r.status] ?? 'secondary'}>{r.status}</Badge></td>
-                  <td><small>{new Date(r.requestedAt).toLocaleDateString('id-ID')}</small></td>
+                  <td><small>{formatDateOnly(r.requestedAt)}</small></td>
                   <td className="text-end">
                     {r.status === 'PENDING' ? (
                       <>
