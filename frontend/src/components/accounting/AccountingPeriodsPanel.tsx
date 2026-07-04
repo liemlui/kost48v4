@@ -2,6 +2,7 @@ import { Alert, Badge, Button, Card, Form, Spinner, Table } from 'react-bootstra
 import type { AccountingPeriod, AccountingReadiness } from '../../api/accounting';
 import PaginationControls from '../common/PaginationControls';
 import { useClientPagination } from '../../hooks/useClientPagination';
+import { formatDateOnly } from '../../utils/dateTime';
 
 const statusVariant: Record<string, string> = {
   OPEN: 'success',
@@ -14,10 +15,7 @@ function periodKey(period: Pick<AccountingPeriod, 'year' | 'month' | 'key' | 'pe
 }
 
 function formatDate(value?: string | null) {
-  if (!value) return '-';
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return '-';
-  return date.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
+  return formatDateOnly(value);
 }
 
 type Props = {

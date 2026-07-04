@@ -4,6 +4,7 @@ import { Badge, Spinner } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import { useNotifications } from '../../hooks/useNotifications';
 import type { AppNotificationItem } from '../../api/notifications';
+import { formatDateOnly } from '../../utils/dateTime';
 
 function relativeTime(dateString: string): string {
   const then = new Date(dateString).getTime();
@@ -20,7 +21,7 @@ function relativeTime(dateString: string): string {
   if (diffHr < 24) return `${diffHr} jam lalu`;
   if (diffDay === 1) return 'Kemarin';
   if (diffDay < 7) return `${diffDay} hari lalu`;
-  return new Date(dateString).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
+  return formatDateOnly(dateString);
 }
 
 function truncateBody(body: string, maxLen = 60): string {

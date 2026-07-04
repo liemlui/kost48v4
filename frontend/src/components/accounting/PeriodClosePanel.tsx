@@ -3,6 +3,7 @@ import type { PeriodClosePreview, PeriodCloseReadiness, PeriodReopenPreview } fr
 import { formatRupiah } from '../../utils/formatCurrency';
 import PaginationControls from '../common/PaginationControls';
 import { useClientPagination } from '../../hooks/useClientPagination';
+import { formatDateTimeWib } from '../../utils/dateTime';
 
 type Props = {
   year: number;
@@ -31,10 +32,7 @@ function monthName(year: number, month: number) {
 }
 
 function formatDateTime(value?: string | null) {
-  if (!value) return '-';
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return '-';
-  return date.toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' });
+  return formatDateTimeWib(value);
 }
 
 function CheckBadge({ ready }: { ready: boolean }) {

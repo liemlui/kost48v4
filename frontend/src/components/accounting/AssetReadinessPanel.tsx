@@ -1,6 +1,7 @@
 import { Alert, Badge, Card, Col, Row, Table } from 'react-bootstrap';
 import type { AssetReadiness } from '../../api/accounting';
 import { formatRupiah, formatRupiahWithoutSymbol } from '../../utils/formatCurrency';
+import { formatDateOnly } from '../../utils/dateTime';
 
 type Props = {
   readiness?: AssetReadiness;
@@ -14,10 +15,7 @@ function tone(ready?: boolean) {
 }
 
 function formatDate(value?: string | null) {
-  if (!value) return '-';
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return '-';
-  return date.toLocaleDateString('id-ID', { dateStyle: 'medium' });
+  return formatDateOnly(value);
 }
 
 export default function AssetReadinessPanel({ readiness, isLoading }: Props) {
