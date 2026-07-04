@@ -4,6 +4,25 @@
 
 ## Changelog Ringkas
 
+### 2026-07-04 — E6 token-efficiency-report script selesai
+- E6: `scripts/token-efficiency-report.mjs` ditambahkan + `npm run token-efficiency-report` di root `package.json`
+- Gate awal PASS: backend 337 file / 44.843 baris, frontend 386 file / 64.319 baris, baseline Fase 6 terbaca normal
+
+### 2026-07-04 — Plan Fase 6 Efisiensi Token Lanjutan (audit-reasonix)
+- Baru: `docs/audit-reasonix/10_EFISIENSI_LANJUTAN.md` — spec 8 task E6-E13 untuk AI lemah (script pengukur, unifikasi tanggal FE, split types/index.ts, header file, `as any` backend, inline style batch 2, dead-code report-only, diet dokumen) + checklist FASE 6 di `00_INDEX.md` (baseline diukur ulang: 40 file tanggal mentah, 672 `as any` BE, 69 file >400 baris tanpa header, M11 1.468 baris)
+
+### 2026-07-04 — OC-01 AncillaryRevenue API+FE + sinkronisasi dokumentasi + keputusan owner
+- OC-01: Backend module `AncillaryRevenue` (`GET /ancillary-revenue/streams`) + FE `AncillaryRevenuePage` dinamis (dari statis)
+- M02_KEPUTUSAN_OWNER.md: 7 keputusan baru (OC-01 s/d OC-07) untuk item 🧑
+- 00_index.md: Fase 4=32/35 (91%), Fase 5=25/26 (96%) — M24/L19 fixed, M26/M27 skip, M31 tunda
+- BE tsc ✅ · FE build ✅
+
+### 2026-07-04 — L1 @ApiOperation + sinkronisasi dokumentasi
+- L1: @ApiOperation ditambahkan ke ~55 controller backend (>200 endpoint) — summary/docs API lengkap
+- tsc --noEmit: ✅ LULUS 0 error
+- 00_index.md: L1 dicentang [x], progress Fase 5=22/26 (85%)
+- RINGKASAN_EKSEKUTIF.md: H14 status fixed, tabel M/L selaras 00_index
+
 ### 2026-07-04 — Dokumentasi: 00_index.md jadi kanonik + antrian sesi berikutnya
 - 00_index.md: tanggal diperbaiki (7→4 Jul), struktur dokumen rapi, tambah "Antrian Sesi Berikutnya"
 - Semua progress: Fase 4=83%, Fase 5=81%

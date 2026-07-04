@@ -93,14 +93,14 @@
 | **M21** | `ADJUSTMENT` enum inventory tidak usable | 15 mnt | [x] | Reasonix Code | 7 Jul | ✅ via L23 — by design ("belum didukung")
 | **M22** | `BARANG_HILANG` / `AC_CLEANING` di luar enum | 15 mnt | [x] | Reasonix Code | 7 Jul |
 | **M23** | AC_CLEANING ticket CLOSED → duplikasi bisa terjadi | 30 mnt | [x] | Reasonix Code | 7 Jul | ✅ via L25 — closedThreshold dedup
-| **M24** | `AncillaryRevenuePage` statis tanpa API | 🧑 | [ ] | | |
+| **M24** | `AncillaryRevenuePage` statis tanpa API | 2 jam | [x] | Reasonix Code | 4 Jul | ✅ OC-01: API backend + FE selesai — build lulus
 | **M25** | Label admin dashboard "Pendapatan Bulan Ini" menyesatkan | 10 mnt | [x] | Reasonix Code | 7 Jul | ✅ via L21 — label sudah tidak ada di DashboardAdmin.tsx
-| **M26** | Tidak ada targetting per tenant di announcements | 🧑 | [ ] | | | butuh fitur multitenant + tabel baru
-| **M27** | Tidak ada auto-provisioning additional services | 🧑 | [ ] | | |
-| **M28** | `GuestPreferenceSurvey` tidak ada admin page | 🧑 | [ ] | | | butuh controller + FE page baru
-| **M29** | `ExternalReview` CRUD tidak diaudit | 🧑 | [ ] | | |
+| **M26** | Tidak ada targetting per tenant di announcements | — | [x] | Owner | 4 Jul | 🚫 SKIP (OC-02) — broadcast saja cukup
+| **M27** | Tidak ada auto-provisioning additional services | — | [x] | Owner | 4 Jul | 🚫 SKIP (OC-03) — tetap manual
+| **M28** | `GuestPreferenceSurvey` tidak ada admin page | 1 jam | [ ] | — | — | ✅ OC-04: bangun controller + admin page
+| **M29** | `ExternalReview` CRUD tidak diaudit | 1 jam | [ ] | — | — | ✅ OC-05: lakukan audit
 | **M30** | `MarketAnalysis` tidak ada validasi expiry | 30 mnt | [x] | Reasonix Code | 7 Jul | ✅ findAll filter 90 hari (cutoff createdAt)
-| **M31** | `AiDraft` queue tidak diverifikasi live | 🧑 | [ ] | | |
+| **M31** | `AiDraft` queue tidak diverifikasi live | — | [ ] | — | — | ⏸️ TUNDA (OC-06)
 | **M32** | Seed `addMonths` setMonth overflow | 10 mnt | [x] | Reasonix Code | 7 Jul | ✅ via L14
 | **M33** | Seed `ymd()` UTC bisa salah tanggal WIB pagi | 15 mnt | [x] | Reasonix Code | 7 Jul | ✅ via L11
 | **M34** | Seed hardcode year 2026 — expired Des 2026 | 10 mnt | [x] | Reasonix Code | 7 Jul | ✅ via L12
@@ -113,7 +113,7 @@
 
 | ID | Temuan | Estimasi | Status | Done by | Tgl | Catatan |
 |----|--------|----------|--------|---------|-----|---------|
-| **L1** | `@ApiOperation` di semua controller (~40+ endpoint) — tambah summary/api docs | 2 jam | [ ] | | | |
+| **L1** | `@ApiOperation` di semua controller (~55 file, ~200+ endpoint) — tambah summary/api docs | 2 jam | [x] | Reasonix Code | 4 Jul | ✅ Semua controller backend — tsc lulus |
 | **L2** | `@ApiProperty` di DTO (invoice, stays, room-transfer) — 91 field | 1 jam | [x] | Reasonix Code | 7 Jul | ✅ 17 DTO, 82 field sudah |
 | **L3** | `formatRupiah` duplikasi di 3+ file FE | 30 mnt | [x] | Reasonix Code | 7 Jul | ✅ via E2 |
 | **L4** | `console.error` / `console.warn` di production (6 lokasi) | 30 mnt | [x] | Reasonix Code | 7 Jul | ✅ 4/6 wrapped dgn DEV guard; 1 (PwaStatus) sdh empty catch; 1 (PwaRouteBoundary) error boundary wajar prod |
@@ -131,14 +131,33 @@
 | **L16** | `numeric()` method — NaN → 0 silent (`invoices.service.ts:38-40`) | 10 mnt | [x] | Reasonix Code | 7 Jul | ✅ By design — fallback 0 untuk Number.isFinite guard. Bukan bug. |
 | **L17** | `SimpleCrudPage` — tidak ada skeleton loading | 15 mnt | [x] | Reasonix Code | 7 Jul | ✅ via M20 | |
 | **L18** | C06-01: invoice LUNAS masih tampilkan countdown | 15 mnt | [x] | Reasonix Code | 7 Jul | ✅ Guard `!['PAID','CANCELLED']` di MyInvoicesPage.tsx |
-| **L19** | `AncillaryRevenuePage` — statis tanpa API | 🧑 | [ ] | | | butuh implementasi API |
+| **L19** | `AncillaryRevenuePage` — statis tanpa API | 2 jam | [x] | Reasonix Code | 4 Jul | ✅ Sama dengan M24 (OC-01)
 | **L20** | Tidak ada `useDocumentTitle` di mayoritas halaman FE | 15 mnt | [x] | Reasonix Code | 7 Jul | ✅ By design — RouteTitleSync global di App.tsx sudah handle semua halaman via routeTitles config |
 | **L21** | Label admin dashboard "Pendapatan Bulan Ini" menyesatkan | 10 mnt | [x] | Reasonix Code | 7 Jul | ✅ Label tsb sudah tidak ada di DashboardAdmin.tsx (diganti SmartChartPanel) |
-| **L22** | Staff dashboard — tidak ada halaman khusus (share DashboardAdmin) | 🧑 | [ ] | | | butuh desain |
+| **L22** | Staff dashboard — tidak ada halaman khusus (share DashboardAdmin) | 3 jam | [ ] | — | — | ✅ OC-07: bangun halaman khusus staff
 | **L23** | `ADJUSTMENT` enum inventory — tidak usable (selalu ditolak) | 15 mnt | [x] | Reasonix Code | 7 Jul | ✅ By design — conflictException "belum didukung" sesuai keputusan owner. ADJUSTMENT dipertahankan di enum utk masa depan. |
 | **L24** | `BARANG_HILANG` / `AC_CLEANING` — di luar enum `TicketCategory` | 15 mnt | [x] | Reasonix Code | 7 Jul | ✅ via M22 (Fase 4). Keduanya sudah ada di enum. |
 | **L25** | `AC_CLEANING` ticket CLOSED → duplikasi bisa terjadi | 30 mnt | [x] | Reasonix Code | 7 Jul | ✅ Tambah guard CLOSED + time-window (max acCleanIntervalDays) di maintenance-sweep dedup |
-| **L26** | Announcement — tidak ada targeting per tenant | 🧑 | [ ] | | | butuh desain fitur |
+| **L26** | Announcement — tidak ada targeting per tenant | — | [x] | Owner | 4 Jul | 🚫 SKIP (OC-02) — broadcast saja cukup
+
+### FASE 6 — EFISIENSI TOKEN LANJUTAN ⚡ (E6-E13)
+
+> **Tujuan:** lanjutan Fase 1 — skor ~71 → **~85** + diet dokumen. Baseline diukur ulang 4 Jul 2026.
+> **Spec WAJIB dibaca dulu:** `docs/audit-reasonix/10_EFISIENSI_LANJUTAN.md` — ATURAN + LARANGAN + resep copy-paste per task (dirancang untuk AI lemah).
+> **Durasi total:** ~15,5 jam. **Urutan aman:** E6 → E7 → E8 → E9 → E11 → E10 → E12 → E13.
+> ⛔ **JANGAN pecah monolit stateful** (TicketsPage/StaysPage/AccountingSetupPage/MyStayPage + service jalur uang) — lihat spec §ATURAN.
+
+| ID | Task | Estimasi | Status | Done by | Tgl | Catatan |
+|----|------|----------|--------|---------|-----|---------|
+| **E6** | **Script pengukur** `scripts/token-efficiency-report.mjs` — copy-paste dari spec §E6, jadi gate objektif semua task | 1 jam | [x] | Codex | 4 Jul 2026 | ✅ Script dibuat + `node scripts/token-efficiency-report.mjs` PASS |
+| **E7** | **Unifikasi format tanggal FE** — 40 file `toLocaleDateString/TimeString` → `formatDateOnly`/`formatDateTimeWib` dari `utils/dateTime.ts` (util SUDAH ADA) | 2 jam | [ ] | — | — | Angka non-uang & format kustom BIARKAN; 10 file/batch |
+| **E8** | **Pecah `frontend/src/types/index.ts`** (848 baris) per domain + re-export dari index — path import lain TIDAK berubah | 2 jam | [ ] | — | — | Type-only, nol risiko runtime |
+| **E9** | **Header tujuan 1 baris** (`// FILE: x — tujuan`) di 69 file >400 baris | 1,5 jam | [ ] | — | — | Komentar saja; wajib pakai `—` agar terdeteksi script |
+| **E10** | **Kurangi `as any` backend** 672 → <400 — per modul, non-uang dulu | 4 jam | [ ] | — | — | Modul uang: HANYA pola `(this.prisma as any)` |
+| **E11** | **Inline style batch 2** — 16 file >5 `style={{` → ≤8 file, pindah ke `styles/NN-*.css` | 2 jam | [ ] | — | — | Print layout + style dinamis DIKECUALIKAN |
+| **E12** | **Laporan dead-code** via ts-prune → `11_DEAD_CODE.md` — **REPORT ONLY** | 1 jam | [ ] | — | — | ⛔ DILARANG hapus kode |
+| **E13** | **Diet dokumen** — rangkas 00_INDEX fase selesai + arsip M11 (1.468→≤200 baris) + arsip 01-08 (bersyarat) | 2 jam | [ ] | — | — | E13c cek syarat dulu (M28/M29/M31/L22) |
+| | **GATE FASE 6:** `node scripts/token-efficiency-report.mjs` — semua target §BASELINE spec terpenuhi · tsc BE ✅ · build FE ✅ | | | | | |
 
 ---
 
@@ -149,8 +168,9 @@
 | 1 | Efisiensi Token (E1-E5) | 5/5 | ✅✅✅✅✅ 100% |
 | 2 | Bug Kritis (C1-C6) | 6/6 | ✅✅✅✅✅✅ 100% |
 | 3 | Temuan Tinggi (H1-H15) | 15/15 | ✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅ 100% |
-| 4 | Temuan Menengah (M1-M35) | 30/35 | ✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅⬜⬜⬜⬜⬜⬜ 86% |
-| 5 | Temuan Rendah (L1-L26) | 21/26 | ✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅⬜⬜⬜⬜⬜ 81% |
+| 4 | Temuan Menengah (M1-M35) | 32/35 | ✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅⬜⬜⬜ 91% |
+| 5 | Temuan Rendah (L1-L26) | 25/26 | ✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅⬜ 96% |
+| 6 | Efisiensi Lanjutan (E6-E13) | 0/8 | ⬜⬜⬜⬜⬜⬜⬜⬜ 0% |
 | — | **Fase 3 — H3/H6/H7 final** | ✅ 3/3 | SUDAH SELESAI |
 | — | **Refactor 4 Jul (dateOnly + @ApiProperty)** | ✅ 2/2 | SUDAH SELESAI |
 | — | **Audit + Dokumentasi** | ✅ 12/12 file | SUDAH SELESAI |
@@ -164,6 +184,7 @@
 | `00_index.md` | **📋 File ini** — indeks + checklist progres | Setiap mulai sesi |
 | `RINGKASAN_EKSEKUTIF.md` | Semua 82 temuan ringkas + rekomendasi | Orientasi awal |
 | `09_EFISIENSI_TOKEN.md` | Skor 35/100 + rekomendasi → 71 | **⚠️ Baca sebelum Fase 1** |
+| `10_EFISIENSI_LANJUTAN.md` | Fase 6 (E6-E13): baseline 4 Jul + aturan/larangan + resep per task utk AI lemah | **⚠️ Baca sebelum Fase 6** |
 | `SPEC_PERBAIKAN_KRITIS.md` | 6 bug kritis: SEBELUM/SESUDAH, Grep, Gate | **⚠️ Baca sebelum Fase 2** |
 | `01_FINANSIAL_PERHITUNGAN.md` | 18 temuan: penjelasan KENAPA + DAMPAK | Detail Fase 2-3 |
 | `02_LOGIKA_BISNIS.md` | 16 temuan edge case | Detail Fase 3 |
@@ -189,24 +210,35 @@
 
 > Prioritas berdasarkan rekomendasi Fase 5: (1) DEFAULT_COA + test, (2) C5 retry/alert real, (3) sync C19 + RINGKASAN, (4) M28 admin page, (5) M18 formatRupiah unifikasi.
 
-### 🔴 Teknis — Bisa langsung dikerjakan AI
-| ID | Task | File | Ketergantungan |
-|----|------|------|---------------|
-| **F6** | Tambah akun `4010` ke `DEFAULT_COA` + unit test | `backend/src/modules/accounting/constants/default-coa.ts` | — |
-| **C5** | Implementasi retry/alert sungguhan untuk journal pending | `payment-submissions.service.ts` | — |
-| **M18** | Unifikasi `formatRupiah` (9 file FE, 5 varian) | 9 file FE | — |
-| **L1** | `@ApiOperation` di ~40 endpoint controller | Semua controller | — |
+### 🔴 Teknis — ✅ SEMUA SELESAI (sesi 4 Jul 2026)
+| ID | Task | File | Status |
+|----|------|------|--------|
+| **F6** | Tambah akun `4010` ke `DEFAULT_COA` + unit test | `backend/src/modules/accounting/constants/default-coa.ts` | ✅ Unit test 4/4 PASS |
+| **C5** | Implementasi retry/alert sungguhan untuk journal pending | `payment-submissions.service.ts` | ✅ Retry + batch + max 5 × exponential alert |
+| **M18** | Unifikasi `formatRupiah` (9 file FE, 5 varian) | 9 file FE | ✅ `formatCompactRupiah()` + 9 file migrasi |
+| **L1** | `@ApiOperation` di ~40 endpoint controller | Semua controller | ✅ 54 controller, tsc lulus |
 
-### 🧑 Butuh keputusan owner
-| ID | Task | Estimasi |
-|----|------|----------|
-| **M28** | GuestPreferenceSurvey admin page (controller + FE) | 1-2 jam |
-| **L19/M24** | AncillaryRevenue API + FE | 3-4 jam |
-| **M29/M31** | Halaman manual entry review + DeepSeek generate 50 review | 2-3 jam |
+### 🟢 OC — Siap eksekusi AI (keputusan owner sudah)
+| ID | Task | Estimasi | OC ID |
+|----|------|----------|-------|
+| ~~M24/L19~~ | ~~AncillaryRevenue API backend + FE~~ | ✅ SELESAI | OC-01 |
+| **M28** | GuestPreferenceSurvey admin page (controller + FE) | 1-2 jam | OC-04 |
+| **M29** | ExternalReview CRUD audit | 1 jam | OC-05 |
+| **L22** | Staff dashboard halaman khusus | 3 jam | OC-07 |
 
-### 📝 Dokumentasi — selaraskan dengan 00_index kanonik
-| File | Yang perlu diperbaiki |
-|------|----------------------|
-| `RINGKASAN_EKSEKUTIF.md` | Penomoran C/H/M selaras 00_index; H14 C19 status → fixed; tanggal 7→4 Jul |
-| `M02_KEPUTUSAN_OWNER.md` | Referensi penomoran pakai 00_index, bukan RINGKASAN |
-| `M10_CHECKLIST_CHANGELOG.md` | Referensi penomoran pakai 00_index, bukan RINGKASAN |
+### ⚡ FASE 6 — Efisiensi token lanjutan (plan 4 Jul, siap eksekusi)
+> 8 task E6-E13, urutan E6→E7→E8→E9→E11→E10→E12→E13. Spec: `10_EFISIENSI_LANJUTAN.md`. Mulai dari **E6** (script pengukur) karena jadi gate semua task lain.
+
+### ⏸️ TUNDA / SKIP
+| ID | Task | Status |
+|----|------|--------|
+| **M26/L26** | Announcement targeting per tenant | 🚫 SKIP (OC-02) |
+| **M27** | Auto-provisioning additional services | 🚫 SKIP (OC-03) |
+| **M31** | AiDraft queue live test | ⏸️ TUNDA (OC-06) |
+
+### 📝 Dokumentasi — ✅ SELESAI
+| File | Status |
+|------|--------|
+| `RINGKASAN_EKSEKUTIF.md` | ✅ Fase 5 count 22→23/26; H14 ✅ FIXED; penomoran selaras 00_index |
+| `M02_KEPUTUSAN_OWNER.md` | ✅ Referensi sudah pakai penomoran C/H/M langsung (inline), bukan RINGKASAN |
+| `M10_CHECKLIST_CHANGELOG.md` | ✅ Referensi ke `docs/audit-reasonix/` sudah benar |
