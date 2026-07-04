@@ -199,7 +199,7 @@ function KtpOcrSection({ onApply }: KtpOcrSectionProps) {
             ref={fileRef}
             type="file"
             accept="image/*"
-            style={{ display: 'none' }}
+            className="profile-hidden-input"
             onChange={handleFileSelect}
           />
         </div>
@@ -209,25 +209,25 @@ function KtpOcrSection({ onApply }: KtpOcrSectionProps) {
             ref={imgRef}
             src={previewUrl}
             alt="Preview KTP"
-            style={{ maxWidth: '100%', maxHeight: 200, borderRadius: 8, border: '1px solid #dee2e6', marginBottom: 12 }}
+            className="profile-preview"
           />
         )}
 
         {ocrState === 'done' && hasAnyExtracted && (
           <div>
             <p className="small fw-semibold mb-2">Hasil OCR — periksa dan koreksi jika perlu:</p>
-            <div className="d-flex flex-column gap-2 mb-3" style={{ maxWidth: 360 }}>
+            <div className="d-flex flex-column gap-2 mb-3 profile-form-column">
               {extracted?.nik && (
                 <div className="d-flex align-items-center gap-2">
-                  <span className="text-muted small" style={{ minWidth: 120 }}>NIK (info)</span>
+                  <span className="text-muted small profile-field-label">NIK (info)</span>
                   <code className="small">{extracted.nik}</code>
                 </div>
               )}
               <div className="d-flex align-items-center gap-2">
-                <span className="text-muted small" style={{ minWidth: 120 }}>Jenis Kelamin</span>
+                <span className="text-muted small profile-field-label">Jenis Kelamin</span>
                 <Form.Select
                   size="sm"
-                  style={{ flex: 1 }}
+                  className="profile-field-control"
                   value={editedExtracted.gender ?? ''}
                   onChange={(e) => setEditedExtracted((p) => ({ ...p, gender: e.target.value || undefined }))}
                 >
@@ -237,21 +237,21 @@ function KtpOcrSection({ onApply }: KtpOcrSectionProps) {
                 </Form.Select>
               </div>
               <div className="d-flex align-items-center gap-2">
-                <span className="text-muted small" style={{ minWidth: 120 }}>Tgl Lahir</span>
+                <span className="text-muted small profile-field-label">Tgl Lahir</span>
                 <Form.Control
                   size="sm"
                   type="date"
-                  style={{ flex: 1 }}
+                  className="profile-field-control"
                   value={editedExtracted.birthDate ?? ''}
                   onChange={(e) => setEditedExtracted((p) => ({ ...p, birthDate: e.target.value || undefined }))}
                 />
               </div>
               <div className="d-flex align-items-center gap-2">
-                <span className="text-muted small" style={{ minWidth: 120 }}>Kota Lahir</span>
+                <span className="text-muted small profile-field-label">Kota Lahir</span>
                 <Form.Control
                   size="sm"
                   type="text"
-                  style={{ flex: 1 }}
+                  className="profile-field-control"
                   value={editedExtracted.originCity ?? ''}
                   onChange={(e) => setEditedExtracted((p) => ({ ...p, originCity: e.target.value || undefined }))}
                 />

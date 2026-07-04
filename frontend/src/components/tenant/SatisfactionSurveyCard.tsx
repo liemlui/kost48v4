@@ -13,7 +13,8 @@ function Stars({ value, onChange, ariaLabel }: { value: number; onChange: (n: nu
           type="button"
           onClick={() => onChange(n)}
           aria-label={`${n} dari 5`}
-          style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', fontSize: '1.5rem', lineHeight: 1, color: n <= value ? '#f59e0b' : '#cbd5e1' }}
+          className="survey-star"
+          style={{ color: n <= value ? '#f59e0b' : '#cbd5e1' }}
         >
           ★
         </button>
@@ -57,7 +58,7 @@ export default function SatisfactionSurveyCard() {
   if (status && !status.eligible && status.reason === 'min_stay_30_days') {
     const eligibleDate = status.eligibleAt ? new Intl.DateTimeFormat('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }).format(new Date(status.eligibleAt)) : '30 hari setelah check-in';
     return (
-      <Card className="border-0 mb-3" style={{ background: 'linear-gradient(135deg,#fefce8,#fef3c7)' }}>
+      <Card className="border-0 mb-3 survey-gradient-warn">
         <Card.Body className="py-2 px-3">
           <span className="fw-semibold">⭐ Penilaian kos</span>
           <span className="text-muted small"> Fitur penilaian tersedia setelah kamu tinggal minimal 30 hari — mulai {eligibleDate}.</span>
@@ -70,7 +71,7 @@ export default function SatisfactionSurveyCard() {
   if (status && status.submitted && !status.eligible && status.reason === 'cooldown_6_months') {
     const nextDate = status.nextEligibleAt ? new Intl.DateTimeFormat('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }).format(new Date(status.nextEligibleAt)) : '6 bulan setelah penilaian terakhir';
     return (
-      <Card className="border-0 mb-3" style={{ background: 'linear-gradient(135deg,#f0fdf4,#eff6ff)' }}>
+      <Card className="border-0 mb-3 survey-gradient-info">
         <Card.Body className="py-2 px-3">
           <span className="fw-semibold">⭐ Terima kasih sudah menilai kos!</span>
           <span className="text-muted small"> Kamu bisa memberi penilaian lagi setelah {nextDate}.</span>
@@ -83,7 +84,7 @@ export default function SatisfactionSurveyCard() {
   if (status?.submitted && status?.eligible) {
     return (
       <>
-        <Card className="border-0 mb-2" style={{ background: 'linear-gradient(135deg,#f0fdf4,#eff6ff)' }}>
+        <Card className="border-0 mb-2 survey-gradient-info">
           <Card.Body className="py-2 px-3">
             <span className="fw-semibold">⭐ Terima kasih sudah menilai sebelumnya!</span>
             <span className="text-muted small"> Ada perubahan? Beri penilaian baru di bawah.</span>
@@ -125,18 +126,18 @@ function SurveyForm({ error, mutation, overall, setOverall, aspects, setAspects,
         {error ? <div className="text-danger small mb-2">{error}</div> : null}
 
         <div className="d-flex align-items-center gap-2 mb-2">
-          <span className="small" style={{ minWidth: 130 }}>Penilaian keseluruhan</span>
+          <span className="small survey-star-label">Penilaian keseluruhan</span>
           <Stars value={overall} onChange={setOverall} ariaLabel="Penilaian keseluruhan" />
         </div>
         {ASPECTS.map((a) => (
           <div key={a.key} className="d-flex align-items-center gap-2 mb-1">
-            <span className="small text-muted" style={{ minWidth: 130 }}>{a.label}</span>
+            <span className="small text-muted survey-star-label">{a.label}</span>
             <Stars value={aspects[a.key] ?? 0} onChange={(n) => setAspects((p) => ({ ...p, [a.key]: n }))} ariaLabel={a.label} />
           </div>
         ))}
 
         <div className="d-flex align-items-center gap-2 my-2">
-          <span className="small" style={{ minWidth: 130 }}>Rekomendasikan ke teman?</span>
+          <span className="small survey-star-label">Rekomendasikan ke teman?</span>
           <Button size="sm" variant={recommend === true ? 'success' : 'outline-secondary'} onClick={() => setRecommend(true)}>Ya 👍</Button>
           <Button size="sm" variant={recommend === false ? 'danger' : 'outline-secondary'} onClick={() => setRecommend(false)}>Belum</Button>
         </div>

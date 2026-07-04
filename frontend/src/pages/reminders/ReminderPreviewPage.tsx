@@ -40,7 +40,7 @@ function SimulasiKirimButton({ type, candidateId, phone, message, sendingId, onS
 
 function CandidateTable({ children }: { children: ReactNode }) {
   return (
-    <Table size="sm" hover responsive className="mb-0" style={{ fontSize: '0.85rem' }}>
+    <Table size="sm" hover responsive className="mb-0 k48-report-table">
       <thead>
         <tr>
           <th>Nama</th>
@@ -49,7 +49,7 @@ function CandidateTable({ children }: { children: ReactNode }) {
           <th>Detail</th>
           <th>Waktu</th>
           <th>Pratinjau Pesan</th>
-          <th style={{ width: 130 }}>Aksi</th>
+          <th className="k48-table-action-col">Aksi</th>
         </tr>
       </thead>
       <tbody>{children}</tbody>

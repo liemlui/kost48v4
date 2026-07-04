@@ -220,7 +220,7 @@ export default function MeterReadingsPage() {
               size="sm"
               value={selectedMonth}
               onChange={(e) => setSelectedMonth(Number(e.target.value))}
-              style={{ width: 150 }}
+              className="meter-period-select"
             >
               {BULAN.map((nama, idx) => (
                 <option key={idx + 1} value={idx + 1}>{nama}</option>
@@ -230,7 +230,7 @@ export default function MeterReadingsPage() {
               size="sm"
               value={selectedYear}
               onChange={(e) => setSelectedYear(Number(e.target.value))}
-              style={{ width: 100 }}
+              className="meter-year-select"
             >
               {yearOptions.map((y) => <option key={y} value={y}>{y}</option>)}
             </Form.Select>
@@ -255,8 +255,7 @@ export default function MeterReadingsPage() {
                 return (
                   <div
                     key={room.id}
-                    className="border rounded p-2 d-flex flex-column align-items-center"
-                    style={{ minWidth: 90, fontSize: '0.8rem' }}
+                    className="border rounded p-2 d-flex flex-column align-items-center meter-room-box"
                   >
                     <span className="fw-semibold">{room.code}</span>
                     {allRecorded ? (
@@ -267,15 +266,14 @@ export default function MeterReadingsPage() {
                       </Badge>
                     ) : (
                       <>
-                        {!hasElec && <Badge bg="warning" text="dark" className="mt-1" style={{ fontSize: '0.65rem' }}>Listrik kosong</Badge>}
-                        {!hasWater && <Badge bg="warning" text="dark" className="mt-1" style={{ fontSize: '0.65rem' }}>Air kosong</Badge>}
+                        {!hasElec && <Badge bg="warning" text="dark" className="mt-1 meter-badge-small">Listrik kosong</Badge>}
+                        {!hasWater && <Badge bg="warning" text="dark" className="mt-1 meter-badge-small">Air kosong</Badge>}
                       </>
                     )}
                     <Button
                       size="sm"
                       variant="link"
-                      className="p-0 mt-1"
-                      style={{ fontSize: '0.7rem' }}
+                      className="p-0 mt-1 meter-link-btn"
                       title={`Catat meter untuk kamar ${room.code} bulan ${BULAN[selectedMonth - 1]} ${selectedYear}`}
                       onClick={() => openCreate(room.id)}
                     >

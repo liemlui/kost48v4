@@ -134,13 +134,12 @@ export default function StaffMeterStatusPanel({ rooms }: Props) {
           <>
             {/* Desktop: tabel scroll horizontal dengan sticky kolom kamar */}
             <div
-              className="staff-meter-table-desktop"
-              style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}
+              className="staff-meter-table-desktop k48-scroll-x-auto"
             >
               <table className="table table-sm table-borderless align-middle mb-0 staff-meter-table">
                 <thead>
                   <tr className="small text-muted">
-                    <th style={{ position: 'sticky', left: 0, background: 'var(--bs-body-bg, #fff)', zIndex: 1, whiteSpace: 'nowrap' }}>Kamar</th>
+                    <th className="k48-sticky-left">Kamar</th>
                     <th>Penghuni</th>
                     <th className="text-center">Status</th>
                     <th>Listrik</th>
@@ -152,12 +151,11 @@ export default function StaffMeterStatusPanel({ rooms }: Props) {
                   {rows.map((row) => (
                     <tr key={row.roomId} className={row.recorded ? '' : 'table-warning-subtle'}>
                       <td
-                        className="fw-semibold"
-                        style={{ position: 'sticky', left: 0, background: row.recorded ? 'var(--bs-body-bg, #fff)' : 'var(--bs-warning-bg-subtle, #fff8e1)', zIndex: 1, whiteSpace: 'nowrap' }}
+                        className={`fw-semibold ${row.recorded ? 'k48-sticky-left' : 'k48-sticky-left-muted'}`}
                       >
                         {row.roomCode}
                       </td>
-                      <td className="text-muted small" style={{ whiteSpace: 'nowrap' }}>{row.tenantName || '—'}</td>
+                      <td className="text-muted small k48-nowrap">{row.tenantName || '—'}</td>
                       <td className="text-center">
                         {row.recorded ? (
                           <span className="badge bg-success-subtle text-success border border-success-subtle">SUDAH</span>
@@ -165,9 +163,9 @@ export default function StaffMeterStatusPanel({ rooms }: Props) {
                           <span className="badge bg-warning-subtle text-warning border border-warning-subtle">BELUM</span>
                         )}
                       </td>
-                      <td className="small" style={{ whiteSpace: 'nowrap' }}>{row.lastElectricity || '—'}</td>
-                      <td className="small" style={{ whiteSpace: 'nowrap' }}>{row.lastWater || '—'}</td>
-                      <td className="small text-muted" style={{ whiteSpace: 'nowrap' }}>{formatShortDate(row.lastReadingAt)}</td>
+                      <td className="small k48-nowrap">{row.lastElectricity || '—'}</td>
+                      <td className="small k48-nowrap">{row.lastWater || '—'}</td>
+                      <td className="small text-muted k48-nowrap">{formatShortDate(row.lastReadingAt)}</td>
                     </tr>
                   ))}
                 </tbody>

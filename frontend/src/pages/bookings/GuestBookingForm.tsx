@@ -45,7 +45,7 @@ interface GuestBookingFormProps {
 function WizardSteps({ step }: { step: number }) {
   const steps = ['Data Diri', 'Booking', 'Preferensi', 'Ringkasan'];
   return (
-    <div className="d-flex align-items-center mb-4" style={{ gap: 4 }}>
+    <div className="booking-wizard-steps mb-4">
       {steps.flatMap((label, idx) => {
         const n = idx + 1;
         const done = n < step;
@@ -53,9 +53,8 @@ function WizardSteps({ step }: { step: number }) {
         const els = [
           <div key={`step-${n}`} className="d-flex align-items-center gap-1 flex-shrink-0">
             <span
-              className="rounded-circle d-inline-flex align-items-center justify-content-center"
+              className="rounded-circle d-inline-flex align-items-center justify-content-center booking-wizard-step-badge"
               style={{
-                width: 26, height: 26, fontSize: 12, fontWeight: 600,
                 background: done ? '#22c55e' : active ? '#0ea5e9' : '#e2e8f0',
                 color: done || active ? '#fff' : '#64748b',
               }}
@@ -69,7 +68,7 @@ function WizardSteps({ step }: { step: number }) {
         ];
         if (idx < steps.length - 1) {
           els.push(
-            <div key={`sep-${n}`} className="flex-grow-1" style={{ height: 2, minWidth: 8, background: done ? '#22c55e' : '#e2e8f0' }} />,
+            <div key={`sep-${n}`} className="flex-grow-1 booking-wizard-separator" style={{ background: done ? '#22c55e' : '#e2e8f0' }} />,
           );
         }
         return els;
@@ -155,7 +154,7 @@ export default function GuestBookingForm({
   const allErrors = { ...stepErrors, ...serverErrors };
 
   const honeypot = (
-    <div style={{ position: 'absolute', left: '-9999px', opacity: 0 }} aria-hidden="true">
+    <div className="booking-honeypot" aria-hidden="true">
       <label htmlFor="website">Website</label>
       <input
         id="website" type="text" name="website" value={form.website}
@@ -233,8 +232,7 @@ export default function GuestBookingForm({
                   <Form.Control.Feedback type="invalid">{allErrors.identityNumber}</Form.Control.Feedback>
                   <div className="mt-2 d-flex align-items-center flex-wrap gap-2">
                     <label
-                      className={`btn btn-outline-secondary btn-sm mb-0${ktpScanning ? ' disabled' : ''}`}
-                      style={{ cursor: ktpScanning ? 'wait' : 'pointer' }}
+                      className={`btn btn-outline-secondary btn-sm mb-0${ktpScanning ? ' disabled' : ''} ${ktpScanning ? 'booking-ktp-wait' : ''}`}
                     >
                       {ktpScanning ? '⏳ Memindai…' : '📷 Isi otomatis dari foto KTP'}
                       <input
@@ -429,7 +427,7 @@ export default function GuestBookingForm({
                     />
                   </div>
                   {form.hasPet && (
-                    <div className="small mt-1 p-2 rounded" style={{ background: '#eff6ff', border: '1px solid #bfdbfe', color: '#1e40af' }}>
+                    <div className="small mt-1 p-2 rounded booking-info-box">
                       Deposit hewan peliharaan <strong>{fmt(petDepositRupiah)}</strong> (refundable saat checkout bila tidak ada kerusakan) ditambahkan ke estimasi tagihan.
                     </div>
                   )}
@@ -465,7 +463,7 @@ export default function GuestBookingForm({
             <h6 className="fw-semibold mb-3">Ringkasan & Pembayaran</h6>
 
             {/* Booking recap */}
-            <div className="p-3 rounded mb-3" style={{ background: '#f8fafc', border: '1px solid #e2e8f0', fontSize: '0.875rem' }}>
+            <div className="p-3 rounded mb-3 booking-neutral-box">
               <div className="row g-1">
                 <div className="col-5 text-muted">Nama</div>
                 <div className="col-7 fw-semibold">{form.fullName}</div>
@@ -498,7 +496,7 @@ export default function GuestBookingForm({
             </div>
 
             {/* Estimasi tagihan */}
-            <div className="p-3 rounded mb-3" style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', fontSize: '0.875rem' }}>
+            <div className="p-3 rounded mb-3 booking-success-box">
               <div className="fw-semibold mb-2">Rincian Tagihan</div>
               <div className="d-flex flex-column gap-1">
                 <div className="d-flex justify-content-between">
@@ -506,7 +504,7 @@ export default function GuestBookingForm({
                   <strong>{fmt(baseRent)}</strong>
                 </div>
                 {occupantSurcharge > 0 && (
-                  <div className="d-flex justify-content-between" style={{ color: '#b45309' }}>
+                  <div className="d-flex justify-content-between booking-sum-label">
                     <span>Surcharge penghuni ekstra</span>
                     <strong>+{fmt(occupantSurcharge)}</strong>
                   </div>
@@ -516,17 +514,17 @@ export default function GuestBookingForm({
                   <strong>{fmt(depositJaminan)}</strong>
                 </div>
                 {form.hasPet && (
-                  <div className="d-flex justify-content-between" style={{ color: '#0369a1' }}>
+                  <div className="d-flex justify-content-between booking-sum-info">
                     <span>Deposit hewan (refundable)</span>
                     <strong>{fmt(depositHewan)}</strong>
                   </div>
                 )}
                 <hr className="my-1" />
-                <div className="d-flex justify-content-between" style={{ color: '#64748b' }}>
+                <div className="d-flex justify-content-between booking-sum-muted">
                   <span>Total tagihan</span>
                   <span><CurrencyDisplay amount={initialTotal} /></span>
                 </div>
-                <div className="d-flex justify-content-between fw-bold" style={{ fontSize: '1rem', color: '#059669' }}>
+                <div className="d-flex justify-content-between fw-bold booking-sum-total">
                   <span>{form.paymentChoice === 'FULL' ? 'Bayar sekarang (LUNAS)' : 'Bayar sekarang (DP 30%)'}</span>
                   <span><CurrencyDisplay amount={form.paymentChoice === 'FULL' ? initialTotal : dpAmount} /></span>
                 </div>

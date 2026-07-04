@@ -49,7 +49,7 @@ export default function FaqPublicPage() {
         <div className="mb-4">
           <div className="page-eyebrow">✦ Panduan</div>
           <h1 className="mb-2 e3-text-gray-900">Panduan & FAQ KOST48</h1>
-          <p className="e3-maxw-600" style={{ color: '#475569' }}>
+          <p className="e3-maxw-600 k48-text-soft">
             Semua aturan, tata cara, dan informasi penting tentang KOST48 dalam satu halaman — mulai dari tarif,
             booking, perpanjangan, hingga checkout.
           </p>
@@ -61,7 +61,7 @@ export default function FaqPublicPage() {
 
         {query.isLoading && (
           <div className="py-5 text-center">
-            <Spinner animation="border" /> <span className="ms-2" style={{ color: '#374151' }}>Memuat FAQ...</span>
+            <Spinner animation="border" /> <span className="ms-2 k48-text-muted-strong">Memuat FAQ...</span>
           </div>
         )}
 
@@ -79,8 +79,7 @@ export default function FaqPublicPage() {
                 <a
                   key={category}
                   href={`#faq-${category.replace(/\s+/g, '-').toLowerCase()}`}
-                  className="btn btn-outline-secondary btn-sm e3-rounded-pill"
-                  style={{ color: '#374151', borderColor: '#cbd5e1' }}
+                  className="btn btn-outline-secondary btn-sm e3-rounded-pill k48-text-muted-strong k48-border-muted"
                 >
                   {category}
                 </a>
@@ -89,7 +88,7 @@ export default function FaqPublicPage() {
 
             {faqByCategory.map(([category, items]) => (
               <section key={category} id={`faq-${category.replace(/\s+/g, '-').toLowerCase()}`} className="mb-5">
-                <h2 className="fs-5 fw-bold mb-3 pb-2 border-bottom e3-text-gray-900" style={{ borderColor: '#0ea5e9' }}>
+                <h2 className="fs-5 fw-bold mb-3 pb-2 border-bottom e3-text-gray-900 k48-border-accent">
                   {category}
                 </h2>
                 <Accordion className="gx-accordion">
@@ -99,7 +98,7 @@ export default function FaqPublicPage() {
                         <span className="gx-acc-cat e3-bg-blue-100 e3-text-blue-800">{item.category}</span>
                         <span className="e3-text-gray-900">{item.question}</span>
                       </Accordion.Header>
-                      <Accordion.Body style={{ color: '#374151', lineHeight: 1.7, fontSize: '.9rem' }}>
+                      <Accordion.Body className="k48-text-muted-strong" style={{ lineHeight: 1.7, fontSize: '.9rem' }}>
                         {item.answer}
                       </Accordion.Body>
                     </Accordion.Item>
@@ -119,9 +118,9 @@ export default function FaqPublicPage() {
                 <Accordion.Item eventKey={`static-${idx}`} key={idx} className="gx-acc-item">
                   <Accordion.Header>
                     <span className="gx-acc-cat" style={{ background: '#dbeafe', color: '#1e40af' }}>{item.category}</span>
-                    <span style={{ color: '#0f172a' }}>{item.question}</span>
+                    <span className="k48-text-muted-strong">{item.question}</span>
                   </Accordion.Header>
-                  <Accordion.Body style={{ color: '#374151', fontSize: '.9rem', lineHeight: 1.7 }}>
+                  <Accordion.Body className="k48-text-muted-strong" style={{ fontSize: '.9rem', lineHeight: 1.7 }}>
                     {item.answer}
                   </Accordion.Body>
                 </Accordion.Item>

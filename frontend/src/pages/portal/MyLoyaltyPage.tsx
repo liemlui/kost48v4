@@ -78,10 +78,10 @@ export default function MyLoyaltyPage() {
       </div>
 
       {/* Narasi: poin = ukuran kebaikan, bukan sekadar demi reward */}
-      <Card className="mb-3 border-0" style={{ background: 'linear-gradient(135deg, #eef2ff 0%, #f0fdf4 100%)' }}>
+      <Card className="mb-3 border-0 loyalty-hero-gradient">
         <Card.Body className="py-3">
           <div className="d-flex align-items-start gap-2">
-            <span style={{ fontSize: '1.5rem' }} aria-hidden>🌱</span>
+            <span className="loyalty-emoji" aria-hidden>🌱</span>
             <div>
               <div className="fw-semibold">Poin = cerminan kebaikanmu sebagai penghuni</div>
               <div className="text-muted small">
@@ -100,21 +100,21 @@ export default function MyLoyaltyPage() {
           <Card className="text-center h-100 border-0 shadow-sm"><Card.Body className="py-3">
             <div className="text-muted small">Total kebaikan</div>
             <div className="fs-4 fw-bold text-success">{totalEarned.toLocaleString('id-ID')}</div>
-            <div className="text-muted" style={{ fontSize: '0.75rem' }}>poin dikumpulkan</div>
+            <div className="text-muted loyalty-stat-note">poin dikumpulkan</div>
           </Card.Body></Card>
         </Col>
         <Col xs={4}>
           <Card className="text-center h-100 border-0 shadow-sm"><Card.Body className="py-3">
             <div className="text-muted small">Sudah ditukar</div>
             <div className="fs-4 fw-bold text-secondary">{totalRedeemed.toLocaleString('id-ID')}</div>
-            <div className="text-muted" style={{ fontSize: '0.75rem' }}>poin untuk reward</div>
+            <div className="text-muted loyalty-stat-note">poin untuk reward</div>
           </Card.Body></Card>
         </Col>
         <Col xs={4}>
           <Card className="text-center h-100 border-0 shadow-sm"><Card.Body className="py-3">
             <div className="text-muted small">Sisa poin</div>
             <div className="fs-4 fw-bold text-primary">{balance.toLocaleString('id-ID')}</div>
-            <div className="text-muted" style={{ fontSize: '0.75rem' }}>bisa ditukar</div>
+            <div className="text-muted loyalty-stat-note">bisa ditukar</div>
           </Card.Body></Card>
         </Col>
       </Row>
@@ -133,7 +133,7 @@ export default function MyLoyaltyPage() {
                 return (
                   <li key={row.roomId} className="list-group-item d-flex justify-content-between align-items-center">
                     <span>
-                      <span className="me-2" style={{ fontSize: '1.2rem' }} aria-hidden>{icon}</span>
+                      <span className="me-2 loyalty-rank-emoji" aria-hidden>{icon}</span>
                       <strong>Kamar {row.code}</strong>
                       <small className="text-muted ms-2">{row.doneCount ?? 0}/{row.expectedCount ?? 0} jadwal</small>
                     </span>
@@ -157,7 +157,7 @@ export default function MyLoyaltyPage() {
             <ul className="list-group list-group-flush">
               {leaderboard.map((row) => (
                 <li key={row.roomCode} className="list-group-item d-flex justify-content-between align-items-center">
-                  <span><span className="me-2" style={{ fontSize: '1.2rem' }} aria-hidden>{medal(row.rank)}</span><strong>Kamar {row.roomCode}</strong></span>
+                  <span><span className="me-2 loyalty-rank-emoji" aria-hidden>{medal(row.rank)}</span><strong>Kamar {row.roomCode}</strong></span>
                   <Badge bg="success" pill>{row.points.toLocaleString('id-ID')} poin</Badge>
                 </li>
               ))}
@@ -209,7 +209,7 @@ export default function MyLoyaltyPage() {
               {/* R-17: empty state lebih informatif — motivasi kumpul poin */}
               {rewardsQuery.data && rewardsQuery.data.length === 0 && (
                 <div className="text-center py-4">
-                  <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>🎁</div>
+                  <div className="loyalty-reward-empty">🎁</div>
                   <div className="fw-semibold mb-1">Reward segera hadir!</div>
                   <p className="text-muted small mb-2">Kumpulkan poin kamu sekarang agar siap ditukar saat katalog tersedia.</p>
                   <div className="text-start border rounded p-3 bg-light">

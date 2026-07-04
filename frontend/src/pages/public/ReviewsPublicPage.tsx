@@ -27,10 +27,9 @@ function ReviewPagination({ page, totalPages, onChange }: { page: number; totalP
         <button
           key={p}
           type="button"
-          className={`btn btn-sm ${p === page ? 'btn-primary' : 'btn-outline-secondary'}`}
+          className={`btn btn-sm ${p === page ? 'btn-primary' : 'btn-outline-secondary'} k48-rating-badge`}
           onClick={() => onChange(p)}
           aria-current={p === page ? 'page' : undefined}
-          style={{ minWidth: 36, borderRadius: 8 }}
         >
           {p}
         </button>
@@ -95,7 +94,7 @@ export default function ReviewsPublicPage() {
         <div className="mb-4">
           <div className="page-eyebrow">✦ Ulasan Penghuni</div>
           <h1 className="mb-2">Apa Kata Penghuni KOST48</h1>
-          <p className="text-muted" style={{ maxWidth: 600 }}>
+          <p className="text-muted k48-summary-max">
             Ulasan dari penghuni dan tamu yang pernah tinggal di KOST48.
           </p>
           <div className="d-flex gap-2 flex-wrap mt-3">
@@ -104,8 +103,7 @@ export default function ReviewsPublicPage() {
               href={officialKost48Location.googleReviewUrl}
               target="_blank"
               rel="noreferrer"
-              className="btn btn-outline-warning btn-sm"
-              style={{ color: '#92400e', borderColor: '#d97706' }}
+              className="btn btn-outline-warning btn-sm k48-text-muted-strong k48-border-accent"
             >
               ⭐ Tulis Ulasan di Google
             </a>
@@ -129,7 +127,7 @@ export default function ReviewsPublicPage() {
           <>
             {/* Summary box */}
             {data.reviewCount > 0 && (
-              <div className="gx-social-proof-summary mb-4 p-3 border rounded-4 bg-light-subtle" style={{ maxWidth: 400 }}>
+              <div className="gx-social-proof-summary mb-4 p-3 border rounded-4 bg-light-subtle k48-summary-box">
                 {data.averageRating > 0 && (
                   <div className="mb-2">
                     <strong className="fs-3">{data.averageRating.toFixed(1)}</strong>
@@ -150,9 +148,8 @@ export default function ReviewsPublicPage() {
                   type="button"
                   role="tab"
                   aria-selected={sortBy === 'recent'}
-                  className={`btn btn-sm ${sortBy === 'recent' ? 'btn-primary' : 'btn-outline-secondary'}`}
+                  className={`btn btn-sm ${sortBy === 'recent' ? 'btn-primary' : 'btn-outline-secondary'} k48-pill-round`}
                   onClick={() => handleSortChange('recent')}
-                  style={{ borderRadius: 999 }}
                 >
                   Terbaru
                 </button>
@@ -160,9 +157,8 @@ export default function ReviewsPublicPage() {
                   type="button"
                   role="tab"
                   aria-selected={sortBy === 'rating'}
-                  className={`btn btn-sm ${sortBy === 'rating' ? 'btn-primary' : 'btn-outline-secondary'}`}
+                  className={`btn btn-sm ${sortBy === 'rating' ? 'btn-primary' : 'btn-outline-secondary'} k48-pill-round`}
                   onClick={() => handleSortChange('rating')}
-                  style={{ borderRadius: 999 }}
                 >
                   Rating Tertinggi
                 </button>
@@ -196,7 +192,7 @@ export default function ReviewsPublicPage() {
                             <div className="d-flex align-items-center gap-2 flex-wrap">
                               <strong>{displayName}</strong>
                               {isGoogle && (
-                                <span style={{ fontSize: 11, background: '#fef9c3', color: '#92400e', border: '1px solid #fde68a', borderRadius: 6, padding: '1px 7px', fontWeight: 600, whiteSpace: 'nowrap' }}>
+                                <span className="k48-pill-muted">
                                   ⭐ Google Review
                                 </span>
                               )}

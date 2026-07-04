@@ -2239,3 +2239,211 @@ h1, h2, h3, h4, h5, h6,
   line-height: 1.55;
   margin-bottom: 1.35rem;
 }
+
+/* E11 batch helpers */
+.booking-wizard-steps {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.booking-wizard-step-badge {
+  width: 26px;
+  height: 26px;
+  font-size: 12px;
+  font-weight: 600;
+}
+.booking-wizard-separator {
+  height: 2px;
+  min-width: 8px;
+}
+.booking-honeypot {
+  position: absolute;
+  left: -9999px;
+  opacity: 0;
+}
+.booking-info-box {
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  color: #1e40af;
+}
+.booking-neutral-box {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  font-size: 0.875rem;
+}
+.booking-success-box {
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  font-size: 0.875rem;
+}
+.booking-sum-label { color: #b45309; }
+.booking-sum-info { color: #0369a1; }
+.booking-sum-muted { color: #64748b; }
+.booking-sum-total { font-size: 1rem; color: #059669; }
+.profile-hidden-input { display: none; }
+.profile-preview {
+  max-width: 100%;
+  max-height: 200px;
+  border-radius: 8px;
+  border: 1px solid #dee2e6;
+  margin-bottom: 12px;
+}
+.profile-form-column { max-width: 360px; }
+.profile-field-label { min-width: 120px; }
+.profile-field-control { flex: 1; }
+.loyalty-hero-gradient { background: linear-gradient(135deg, #eef2ff 0%, #f0fdf4 100%); }
+.loyalty-emoji { font-size: 1.5rem; }
+.loyalty-stat-note { font-size: 0.75rem; }
+.loyalty-rank-emoji { font-size: 1.2rem; }
+.loyalty-reward-empty { font-size: 2rem; margin-bottom: 0.5rem; }
+.survey-gradient-warn { background: linear-gradient(135deg,#fefce8,#fef3c7); }
+.survey-gradient-info { background: linear-gradient(135deg,#f0fdf4,#eff6ff); }
+.survey-star {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font-size: 1.5rem;
+  line-height: 1;
+}
+.survey-star-label {
+  min-width: 130px;
+}
+.meter-period-select {
+  width: 150px;
+}
+.meter-year-select {
+  width: 100px;
+}
+.meter-room-box {
+  min-width: 90px;
+  font-size: 0.8rem;
+}
+.meter-badge-small {
+  font-size: 0.65rem;
+}
+.meter-link-btn {
+  font-size: 0.7rem;
+}
+
+.k48-title-lg {
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.k48-text-soft {
+  color: #475569 !important;
+}
+
+.k48-text-muted-strong {
+  color: #374151 !important;
+}
+
+.k48-border-muted {
+  border-color: #cbd5e1 !important;
+}
+
+.k48-border-accent {
+  border-color: #0ea5e9 !important;
+}
+
+.k48-rating-badge {
+  min-width: 36px;
+  border-radius: 8px;
+}
+
+.k48-pill-round {
+  border-radius: 999px !important;
+}
+
+.k48-summary-box {
+  max-width: 400px;
+}
+
+.k48-summary-max {
+  max-width: 600px;
+}
+
+.k48-pill-muted {
+  font-size: 11px;
+  background: #fef9c3;
+  color: #92400e;
+  border: 1px solid #fde68a;
+  border-radius: 6px;
+  padding: 1px 7px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.k48-kpi-positive {
+  color: #22c55e !important;
+}
+
+.k48-kpi-negative {
+  color: #ef4444 !important;
+}
+
+.k48-table-pad-left-24 {
+  padding-left: 24px;
+}
+
+.k48-table-pad-left-12 {
+  padding-left: 12px;
+}
+
+.k48-table-action-col {
+  width: 130px;
+}
+
+.k48-table-message {
+  min-width: 200px;
+  max-width: 320px;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.k48-report-table {
+  font-size: 0.85rem;
+}
+
+.k48-report-table-action-col {
+  width: 190px;
+}
+
+.k48-image-thumb {
+  width: 72px;
+  height: 48px;
+  object-fit: cover;
+  border-radius: 6px;
+  display: block;
+}
+
+.k48-thumb-caption {
+  font-size: 0.65rem;
+  text-align: center;
+}
+
+.k48-scroll-x-auto {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.k48-sticky-left {
+  position: sticky;
+  left: 0;
+  background: var(--bs-body-bg, #fff);
+  z-index: 1;
+  white-space: nowrap;
+}
+
+.k48-sticky-left-muted {
+  position: sticky;
+  left: 0;
+  background: var(--bs-warning-bg-subtle, #fff8e1);
+  z-index: 1;
+  white-space: nowrap;
+}
+
+.k48-nowrap {
+  white-space: nowrap;
+}
