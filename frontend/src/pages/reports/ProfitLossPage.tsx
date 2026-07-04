@@ -3,13 +3,9 @@ import { Alert, Badge, Card, Col, Container, Form, Row, Spinner, Table } from 'r
 import { useQuery } from '@tanstack/react-query';
 import { fetchProfitLossDetail, type ProfitLossDetail } from '../../api/accounting';
 
+import { formatCompactRupiah } from '../../utils/formatCurrency';
+
 function currentYearMonth() { const d=new Date(); return {year:d.getFullYear(),month:d.getMonth()+1}; }
-function formatRupiah(v:number) { return new Intl.NumberFormat('id-ID').format(v||0); }
-function formatCompact(v:number) {
-  const s=Math.abs(v||0),sign=v<0?'-':''; if(s>=1e9)return `${sign}Rp${(s/1e9).toFixed(1)}M`;
-  if(s>=1e6)return `${sign}Rp${(s/1e6).toFixed(1)}jt`; if(s>=1e3)return `${sign}Rp${(s/1e3).toFixed(0)}rb`;
-  return `${sign}Rp${formatRupiah(s)}`;
-}
 function pct(v:number) { return `${v>=0?'+':''}${v}%`; }
 
 export default function ProfitLossPage() {
@@ -30,21 +26,21 @@ export default function ProfitLossPage() {
     {q.isError&&<Alert variant="warning">Gagal memuat data.</Alert>}
     {d&&<>
       <Row className="g-3 mb-3">
-        <Col xs={6} xl={3}><Card><Card.Body><div className="kpi-label">Revenue</div><div className="kpi-value">{formatCompact(d.current.totals.revenueRupiah)}</div><div className="kpi-change" style={{color:d.change.revenueChangePercent>=0?'#22c55e':'#ef4444'}}>{pct(d.change.revenueChangePercent)}</div></Card.Body></Card></Col>
-        <Col xs={6} xl={3}><Card><Card.Body><div className="kpi-label">Beban</div><div className="kpi-value">{formatCompact(d.current.totals.expenseRupiah)}</div><div className="kpi-change" style={{color:d.change.expenseChangePercent>=0?'#ef4444':'#22c55e'}}>{pct(d.change.expenseChangePercent)}</div></Card.Body></Card></Col>
-        <Col xs={6} xl={3}><Card><Card.Body><div className="kpi-label">Laba Bersih</div><div className="kpi-value" style={{color:d.current.totals.netProfitRupiah>=0?'#22c55e':'#ef4444'}}>{formatCompact(d.current.totals.netProfitRupiah)}</div><div className="kpi-change" style={{color:d.change.netProfitChangePercent>=0?'#22c55e':'#ef4444'}}>{pct(d.change.netProfitChangePercent)}</div></Card.Body></Card></Col>
+        <Col xs={6} xl={3}><Card><Card.Body><div className="kpi-label">Revenue</div><div className="kpi-value">{formatCompactRupiah(d.current.totals.revenueRupiah)}</div><div className="kpi-change" style={{color:d.change.revenueChangePercent>=0?'#22c55e':'#ef4444'}}>{pct(d.change.revenueChangePercent)}</div></Card.Body></Card></Col>
+        <Col xs={6} xl={3}><Card><Card.Body><div className="kpi-label">Beban</div><div className="kpi-value">{formatCompactRupiah(d.current.totals.expenseRupiah)}</div><div className="kpi-change" style={{color:d.change.expenseChangePercent>=0?'#ef4444':'#22c55e'}}>{pct(d.change.expenseChangePercent)}</div></Card.Body></Card></Col>
+        <Col xs={6} xl={3}><Card><Card.Body><div className="kpi-label">Laba Bersih</div><div className="kpi-value" style={{color:d.current.totals.netProfitRupiah>=0?'#22c55e':'#ef4444'}}>{formatCompactRupiah(d.current.totals.netProfitRupiah)}</div><div className="kpi-change" style={{color:d.change.netProfitChangePercent>=0?'#22c55e':'#ef4444'}}>{pct(d.change.netProfitChangePercent)}</div></Card.Body></Card></Col>
         <Col xs={6} xl={3}><Card><Card.Body><div className="kpi-label">Margin</div><div className="kpi-value">{d.current.totals.netProfitMarginPercent}%</div></Card.Body></Card></Col>
       </Row>
       <Row className="g-3">
         <Col lg={6}><Card><Card.Header className="rpt-card-header">📈 Pendapatan</Card.Header><Card.Body className="p-0">
           <Table size="sm" className="mb-0"><thead><tr><th>Akun</th><th className="text-end">Bulan Ini</th><th className="text-end">Bulan Lalu</th><th className="text-end">Δ</th></tr></thead><tbody>
-            {d.current.revenueLines.map((l,i)=><tr key={i}><td>{l.name}</td><td className="text-end">{formatCompact(l.amountRupiah)}</td><td className="text-end">{formatCompact(l.prevAmountRupiah)}</td><td className="text-end" style={{color:l.changePercent>=0?'#22c55e':'#ef4444'}}>{pct(l.changePercent)}</td></tr>)}
-            <tr className="border-top fw-bold"><td>Total Pendapatan</td><td className="text-end">{formatCompact(d.current.totals.revenueRupiah)}</td><td className="text-end">{formatCompact(d.previous.totals.revenueRupiah)}</td><td className="text-end" style={{color:d.change.revenueChangePercent>=0?'#22c55e':'#ef4444'}}>{pct(d.change.revenueChangePercent)}</td></tr>
+            {d.current.revenueLines.map((l,i)=><tr key={i}><td>{l.name}</td><td className="text-end">{formatCompactRupiah(l.amountRupiah)}</td><td className="text-end">{formatCompactRupiah(l.prevAmountRupiah)}</td><td className="text-end" style={{color:l.changePercent>=0?'#22c55e':'#ef4444'}}>{pct(l.changePercent)}</td></tr>)}
+            <tr className="border-top fw-bold"><td>Total Pendapatan</td><td className="text-end">{formatCompactRupiah(d.current.totals.revenueRupiah)}</td><td className="text-end">{formatCompactRupiah(d.previous.totals.revenueRupiah)}</td><td className="text-end" style={{color:d.change.revenueChangePercent>=0?'#22c55e':'#ef4444'}}>{pct(d.change.revenueChangePercent)}</td></tr>
           </tbody></Table></Card.Body></Card></Col>
         <Col lg={6}><Card><Card.Header className="rpt-card-header">📉 Beban</Card.Header><Card.Body className="p-0">
           <Table size="sm" className="mb-0"><thead><tr><th>Akun</th><th className="text-end">Bulan Ini</th><th className="text-end">Bulan Lalu</th><th className="text-end">Δ</th></tr></thead><tbody>
-            {d.current.expenseLines.map((l,i)=><tr key={i}><td>{l.name}</td><td className="text-end">{formatCompact(l.amountRupiah)}</td><td className="text-end">{formatCompact(l.prevAmountRupiah)}</td><td className="text-end" style={{color:l.changePercent>=0?'#ef4444':'#22c55e'}}>{pct(l.changePercent)}</td></tr>)}
-            <tr className="border-top fw-bold"><td>Total Beban</td><td className="text-end">{formatCompact(d.current.totals.expenseRupiah)}</td><td className="text-end">{formatCompact(d.previous.totals.expenseRupiah)}</td><td className="text-end" style={{color:d.change.expenseChangePercent>=0?'#ef4444':'#22c55e'}}>{pct(d.change.expenseChangePercent)}</td></tr>
+            {d.current.expenseLines.map((l,i)=><tr key={i}><td>{l.name}</td><td className="text-end">{formatCompactRupiah(l.amountRupiah)}</td><td className="text-end">{formatCompactRupiah(l.prevAmountRupiah)}</td><td className="text-end" style={{color:l.changePercent>=0?'#ef4444':'#22c55e'}}>{pct(l.changePercent)}</td></tr>)}
+            <tr className="border-top fw-bold"><td>Total Beban</td><td className="text-end">{formatCompactRupiah(d.current.totals.expenseRupiah)}</td><td className="text-end">{formatCompactRupiah(d.previous.totals.expenseRupiah)}</td><td className="text-end" style={{color:d.change.expenseChangePercent>=0?'#ef4444':'#22c55e'}}>{pct(d.change.expenseChangePercent)}</td></tr>
           </tbody></Table></Card.Body></Card></Col>
       </Row>
       <small className="text-muted mt-2 d-block">{d.note}</small>

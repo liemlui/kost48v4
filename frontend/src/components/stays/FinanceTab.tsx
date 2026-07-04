@@ -18,7 +18,10 @@ function isOverdue(invoice: Invoice) {
   if (!invoice.dueDate) return false;
   const status = invoice.status;
   if (status === 'PAID' || status === 'CANCELLED') return false;
-  return new Date(invoice.dueDate).getTime() < new Date(new Date().toISOString().slice(0, 10)).getTime();
+  const d = new Date(invoice.dueDate);
+  if (isNaN(d.getTime())) return false;
+  const today = new Date(new Date().toISOString().slice(0, 10));
+  return d.getTime() < today.getTime();
 }
 
 function paidAmount(invoice: Invoice): number | null {

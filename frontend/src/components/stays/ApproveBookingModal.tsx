@@ -5,6 +5,7 @@ import { approveBooking } from '../../api/bookings';
 import type { ApproveBookingPayload, Stay } from '../../types';
 import { formatDateId } from '../../utils/bookingExpiry';
 import { getApiErrorMessage } from '../../utils/getApiErrorMessage';
+import { formatRupiah } from '../../utils/formatCurrency';
 
 function formatMoneyRaw(value: string) {
   return value.replace(/\D/g, '');
@@ -14,12 +15,7 @@ function formatMoneyPreview(rawDigits: string) {
   if (!rawDigits) return null;
   const num = Number(rawDigits);
   if (!Number.isFinite(num) || num === 0) return null;
-  return new Intl.NumberFormat('id-ID', {
-    style: 'currency',
-    currency: 'IDR',
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(num);
+  return formatRupiah(num);
 }
 
 function roundUpToNearest(amount: number, nearest = 5000) {
@@ -211,8 +207,8 @@ export default function ApproveBookingModal({
 
         <Alert variant="light" className="border small">
           <div className="d-flex flex-wrap gap-3">
-            <span>Default sewa: <strong>{defaultRate ? new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(defaultRate) : '-'}</strong></span>
-            <span>Total awal: <strong>{new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(computedTotalAwal || 0)}</strong></span>
+            <span>Default sewa: <strong>{defaultRate ? formatRupiah(defaultRate) : '-'}</strong></span>
+            <span>Total awal: <strong>{formatRupiah(computedTotalAwal || 0)}</strong></span>
           </div>
         </Alert>
 

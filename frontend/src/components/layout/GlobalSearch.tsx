@@ -73,7 +73,7 @@ export default function GlobalSearch({ role }: { role?: string }) {
               subtitle: [item.phone, item.email].filter(Boolean).join(' · ') || `Tenant #${item.id}`,
               target: `/tenants?search=${encodeURIComponent(item.fullName ?? '')}`,
             })))
-            .catch((err) => { console.error('[GlobalSearch] tenants', err); return []; }),
+            .catch((err) => { if (import.meta.env.DEV) console.warn('[GlobalSearch] tenants', err); return []; }),
         );
       }
 

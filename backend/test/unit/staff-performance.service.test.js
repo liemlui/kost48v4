@@ -125,6 +125,32 @@ test('SP-ga-01: getAdminMonthly returns all staff KPI', async () => {
   assert.ok(r.summary);
 });
 
+test('SP-ga-02: getAdminMonthly uses WIB month boundaries for explicit month', async () => {
+  const captured = [];
+  const svc = makeSvc({
+    user: { findMany: async () => [mkStaff()], findUnique: async () => mkStaff() },
+    staffRoutineCompletion: {
+      findMany: async (args) => {
+        captured.push(args.where.dueDate);
+        return [];
+      },
+    },
+    ticket: { findMany: async () => [] },
+    meterReading: { findMany: async () => [] },
+    staffWorkAudit: { findMany: async () => [] },
+    staffReview: { findMany: async () => [] },
+    staffPerformanceEvent: { findMany: async () => [] },
+  });
+
+  await svc.getAdminMonthly('2026-07');
+
+  assert.strictEqual(captured.length, 1);
+  assert.ok(captured[0].gte instanceof Date);
+  assert.ok(captured[0].lt instanceof Date);
+  assert.strictEqual(captured[0].gte.toISOString(), '2026-06-30T17:00:00.000Z');
+  assert.strictEqual(captured[0].lt.toISOString(), '2026-07-31T17:00:00.000Z');
+});
+
 // ════════════════════════════════════════════════════════════════════════════
 // getLeaderboard
 // ════════════════════════════════════════════════════════════════════════════

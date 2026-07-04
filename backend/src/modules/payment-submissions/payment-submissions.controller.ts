@@ -424,4 +424,33 @@ export class PaymentSubmissionsController {
       data: await this.paymentSubmissionsService.rejectSubmission(user, id, dto.reviewNotes),
     };
   }
+
+  @Post(':id/retry-journal')
+  @Roles(UserRole.OWNER, UserRole.ADMIN)
+  async retryJournal(@Param('id', ParseIntPipe) id: number, @CurrentUser() user: CurrentUserPayload) {
+    const result = await this.paymentSubmissionsService.retryJournalPosting(user, id);
+    return {
+      message: result.success ? 'Journal berhasil diposting ulang' : 'Gagal memposting ulang journal',
+      data: result,
+    };
+  }
+
+  @Post('retry-pending-journals')
+  @Roles(UserRole.OWNER, UserRole.ADMIN)
+  async retryAllPendingJournals(@CurrentUser() user: CurrentUserPayload) {
+    const pending = await this.paymentSubmissionsService.findPendingJournalSubmissions();
+    const results: Array<{ id: number; success: boolean; error?: string }> = [];
+    for (const sub of pending) {
+      try {
+        await this.paymentSubmissionsService.retryJournalPosting(user, sub.id);
+        results.push({ id: sub.id, success: true });
+      } catch (err) {
+        results.push({ id: sub.id, success: false, error: err instanceof Error ? err.message : String(err) });
+      }
+    }
+    return {
+      message: `Retry otomatis: ${results.filter(r => r.success).length}/${results.length} berhasil`,
+      data: results,
+    };
+  }
 }

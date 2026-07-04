@@ -73,7 +73,7 @@ function RecentComments({ summary }: { summary: SurveySummary | undefined }) {
           <div key={c.id} className="border-bottom p-3">
             <div className="d-flex align-items-center gap-2 mb-1">
               <Stars value={c.overallRating} />
-              <small className="text-muted">{new Date(c.createdAt).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}</small>
+              <small className="text-muted">{(() => { const d = new Date(c.createdAt); return isNaN(d.getTime()) ? '-' : d.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }); })()}</small>
             </div>
             <p className="mb-0 small">{c.comment || '(tanpa komentar)'}</p>
           </div>
@@ -99,13 +99,32 @@ export default function AdminSurveysPage() {
     }
     switch (sortBy) {
       case 'highest':
-        result.sort((a, b) => b.overallRating - a.overallRating || new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+        result.sort((a, b) => {
+          const ratingDiff = b.overallRating - a.overallRating;
+          if (ratingDiff !== 0) return ratingDiff;
+          const da = new Date(a.createdAt).getTime();
+          const db = new Date(b.createdAt).getTime();
+          if (isNaN(da) || isNaN(db)) return 0;
+          return db - da;
+        });
         break;
       case 'lowest':
-        result.sort((a, b) => a.overallRating - b.overallRating || new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+        result.sort((a, b) => {
+          const ratingDiff = a.overallRating - b.overallRating;
+          if (ratingDiff !== 0) return ratingDiff;
+          const da = new Date(a.createdAt).getTime();
+          const db = new Date(b.createdAt).getTime();
+          if (isNaN(da) || isNaN(db)) return 0;
+          return db - da;
+        });
         break;
       default:
-        result.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+        result.sort((a, b) => {
+          const da = new Date(a.createdAt).getTime();
+          const db = new Date(b.createdAt).getTime();
+          if (isNaN(da) || isNaN(db)) return 0;
+          return db - da;
+        });
     }
     return result;
   }, [items, filterRating, sortBy]);
@@ -183,7 +202,7 @@ export default function AdminSurveysPage() {
                     <td className="small e3-maxw-320">
                       {s.comment ? <span>{s.comment.length > 120 ? `${s.comment.slice(0, 120)}…` : s.comment}</span> : <span className="text-muted">—</span>}
                     </td>
-                    <td className="small text-muted text-nowrap">{new Date(s.createdAt).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}</td>
+                    <td className="small text-muted text-nowrap">{(() => { const d = new Date(s.createdAt); return isNaN(d.getTime()) ? '-' : d.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }); })()}</td>
                   </tr>
                 ))}
               </tbody>

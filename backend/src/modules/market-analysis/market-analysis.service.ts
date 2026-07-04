@@ -425,8 +425,11 @@ export class MarketAnalysisService {
     });
   }
 
+  // M30: filter otomatis — hanya tampilkan analisa 90 hari terakhir; yang lebih lama dianggap basi.
   async findAll() {
+    const cutoff = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000);
     return this.prisma.marketAnalysis.findMany({
+      where: { createdAt: { gte: cutoff } },
       orderBy: { id: 'desc' },
       include: { createdBy: { select: { id: true, fullName: true } } },
     });

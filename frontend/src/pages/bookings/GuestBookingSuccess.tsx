@@ -5,6 +5,7 @@ import CurrencyDisplay from '../../components/common/CurrencyDisplay';
 import StatusBadge, { getStatusLabel } from '../../components/common/StatusBadge';
 import type { PublicBookingResult } from '../../types';
 import { formatDate } from './guestBookingUtils';
+import { formatRupiah } from '../../utils/formatCurrency';
 
 interface GuestBookingSuccessProps {
   result: PublicBookingResult;
@@ -29,8 +30,6 @@ export default function GuestBookingSuccess({ result }: GuestBookingSuccessProps
     }
   };
 
-  const fmt = (n: number) =>
-    new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(n);
 
   return (
     <div className="public-page-shell">
@@ -126,12 +125,12 @@ export default function GuestBookingSuccess({ result }: GuestBookingSuccessProps
                 </div>
                 {result.payment.paymentChoice === 'DP' && (
                   <div className="small text-muted mt-1">
-                    Sisa sewa + deposit ({fmt(result.payment.agreedRentAmountRupiah - result.payment.downPaymentAmountRupiah + result.payment.depositAmountRupiah)}) dilunasi sebelum check-in.
+                    Sisa sewa + deposit ({formatRupiah(result.payment.agreedRentAmountRupiah - result.payment.downPaymentAmountRupiah + result.payment.depositAmountRupiah)}) dilunasi sebelum check-in.
                   </div>
                 )}
                 {result.payment.hasPet && (
                   <div className="small mt-1" style={{ color: '#0369a1' }}>
-                    🐾 Termasuk deposit hewan {fmt(result.payment.depositBreakdown.petDepositRupiah)} (refundable).
+                    🐾 Termasuk deposit hewan {formatRupiah(result.payment.depositBreakdown.petDepositRupiah)} (refundable).
                   </div>
                 )}
               </div>

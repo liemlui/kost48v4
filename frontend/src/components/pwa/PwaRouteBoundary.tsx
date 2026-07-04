@@ -17,7 +17,7 @@ class RouteErrorBoundary extends Component<
   }
 
   componentDidCatch(error: Error, info: ErrorInfo) {
-    console.error('[PWA] Route failed to render', error, info);
+    console.warn('[PWA] Route failed to render', error, info);
   }
 
   render() {

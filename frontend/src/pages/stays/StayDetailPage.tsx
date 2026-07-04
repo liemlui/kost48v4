@@ -39,7 +39,11 @@ function formatDateSafe(dateValue: string | Date | null | undefined): string {
 }
 
 function hasOverdue(invoices: Array<{ dueDate?: string | null; status: string }>) {
-  return invoices.some((invoice) => invoice.dueDate && invoice.status !== 'PAID' && invoice.status !== 'CANCELLED' && new Date(invoice.dueDate).getTime() < Date.now());
+  return invoices.some((invoice) => {
+    if (!invoice.dueDate || invoice.status === 'PAID' || invoice.status === 'CANCELLED') return false;
+    const d = new Date(invoice.dueDate);
+    return !isNaN(d.getTime()) && d.getTime() < Date.now();
+  });
 }
 
 function hasUnpaidInvoices(invoices: Array<{ status: string }>) {
@@ -99,7 +103,10 @@ export default function StayDetailPage() {
     if (!readings.length) return null;
     return readings.reduce<string | null>((latest, reading) => {
       if (!latest) return reading.readingAt;
-      return new Date(reading.readingAt).getTime() > new Date(latest).getTime() ? reading.readingAt : latest;
+      const a = new Date(reading.readingAt).getTime();
+      const b = new Date(latest).getTime();
+      if (isNaN(a) || isNaN(b)) return latest;
+      return a > b ? reading.readingAt : latest;
     }, null);
   }, [metersQuery.data]);
 

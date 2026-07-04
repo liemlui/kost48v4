@@ -6,8 +6,9 @@ import { useNotifications } from '../../hooks/useNotifications';
 import type { AppNotificationItem } from '../../api/notifications';
 
 function relativeTime(dateString: string): string {
-  const now = Date.now();
   const then = new Date(dateString).getTime();
+  if (isNaN(then)) return dateString || '-';
+  const now = Date.now();
   const diffMs = now - then;
   const diffSec = Math.floor(diffMs / 1000);
   const diffMin = Math.floor(diffSec / 60);

@@ -23,6 +23,7 @@ import {
   computeCheckOutDate,
   formatDate,
 } from './guestBookingUtils';
+import { formatRupiah } from '../../utils/formatCurrency';
 
 interface GuestBookingFormProps {
   room: PublicRoom;
@@ -132,8 +133,7 @@ export default function GuestBookingForm({
     setWizardStep(4);
   }
 
-  const fmt = (n: number) =>
-    new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(n);
+  const fmt = formatRupiah;
 
   const roomSizeKey = String(room.roomSize ?? '').toUpperCase();
   const maxFree = ROOM_MAX_FREE_OCCUPANTS[roomSizeKey] ?? 2;

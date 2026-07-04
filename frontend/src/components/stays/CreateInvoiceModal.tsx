@@ -164,12 +164,12 @@ export default function CreateInvoiceModal({
     queryKey: ['stay', stay.id, 'wifi-sales'],
     enabled: show,
     queryFn: async () => {
-      const direct = await listResource<WifiSale>('/wifi-sales', { tenantId: stay.tenantId, stayId: stay.id, limit: 50 }).catch((err) => { console.error('[CreateInvoiceModal] wifi direct', err); return { items: [] }; });
+      const direct = await listResource<WifiSale>('/wifi-sales', { tenantId: stay.tenantId, stayId: stay.id, limit: 50 }).catch((err) => { if (import.meta.env.DEV) console.warn('[CreateInvoiceModal] wifi direct', err); return { items: [] }; });
       if (direct.items?.length) return direct.items;
       const fallback = await listResource<WifiSale>('/wifi-sales', {
         search: stay.tenant?.fullName ?? '',
         limit: 20,
-      }).catch((err) => { console.error('[CreateInvoiceModal] wifi fallback', err); return { items: [] }; });
+      }).catch((err) => { if (import.meta.env.DEV) console.warn('[CreateInvoiceModal] wifi fallback', err); return { items: [] }; });
       return fallback.items ?? [];
     },
   });

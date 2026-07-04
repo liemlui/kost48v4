@@ -16,6 +16,7 @@ import type {
 } from "../../types";
 import { calculateRentByPricingTerm, isUtilitiesIncludedForPricingTerm } from "../../utils/pricing";
 import { getKost48RoomGallery, resolveKost48MarketingImageUrl } from "../../data/kost48Assets";
+import { formatRupiah } from "../../utils/formatCurrency";
 import {
   getPublicRoomBathroomSentence,
   getPublicRoomBusinessHighlight,
@@ -346,7 +347,7 @@ export default function BookingPage() {
                               <option key={term} value={term}>
                                 {getStatusLabel(term)}
                                 {rent
-                                  ? ` — ${new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(rent)}`
+                                  ? ` — ${formatRupiah(rent)}`
                                   : ""}
                                 {incUtil ? " (termasuk listrik & air)" : ""}
                               </option>

@@ -49,7 +49,7 @@ function InvoiceAnalyticsPanel({ stats, allItems }: { stats: { total: number; dr
   const revenueData = useMemo(() => {
     const totalBilled = allItems.reduce((s, inv) => s + (Number(inv.totalAmountRupiah) || 0), 0);
     const totalPaid = allItems.reduce((s, inv) => s + (Number(inv.paidAmountRupiah) || 0), 0);
-    const totalOverdue = allItems.filter((inv) => ['ISSUED', 'PARTIAL'].includes(inv.status) && inv.dueDate && new Date(inv.dueDate) < new Date()).reduce((s, inv) => s + (Number(inv.totalAmountRupiah) - Number(inv.paidAmountRupiah || 0)), 0);
+    const totalOverdue = allItems.filter((inv) => isOverdue(inv)).reduce((s, inv) => s + (Number(inv.totalAmountRupiah) - Number(inv.paidAmountRupiah || 0)), 0);
     return [
       { label: 'Tagihan', value: totalBilled, color: '#2563eb' },
       { label: 'Terkumpul', value: totalPaid, color: '#16a34a' },
@@ -157,7 +157,9 @@ function getDueSoonBadge(invoice: any): { label: string; status: string } | null
 }
 
 function isOverdue(invoice: any) {
-  return ['ISSUED', 'PARTIAL'].includes(invoice.status) && invoice.dueDate && new Date(invoice.dueDate) < new Date();
+  if (!['ISSUED', 'PARTIAL'].includes(invoice.status) || !invoice.dueDate) return false;
+  const daysLeft = daysFromToday(invoice.dueDate);
+  return daysLeft !== null && daysLeft < 0;
 }
 
 const initialForm = { stayId: '', invoiceNumber: '', periodStart: '', periodEnd: '', dueDate: '', notes: '' };

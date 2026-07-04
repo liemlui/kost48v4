@@ -75,7 +75,15 @@ async function runSqlFile(rel) {
     }
 
     step(4, 'COA (akun default)…');
-    const { DEFAULT_COA } = require('../dist/modules/accounting/constants/default-coa.js');
+    // L13: graceful kalau dist/ belum build — beri pesan jelas.
+    let DEFAULT_COA;
+    try {
+      DEFAULT_COA = require('../dist/modules/accounting/constants/default-coa.js').DEFAULT_COA;
+    } catch {
+      console.error('\n❌ Gagal load DEFAULT_COA dari dist/. Jalankan "npm run build" dulu di backend/.');
+      console.error('   Atau: cd backend && npx tsc');
+      process.exit(1);
+    }
     for (const a of DEFAULT_COA) {
       await prisma.chartOfAccount.upsert({
         where: { code: a.code },
@@ -85,8 +93,9 @@ async function runSqlFile(rel) {
     }
     console.log(`   ${DEFAULT_COA.length} akun.`);
 
-    step(5, 'Periode akuntansi 2026 (12 bulan) = OPEN…');
-    const Y = 2026;
+    // L12: dinamis pakai tahun berjalan, bukan hardcode 2026.
+    const Y = new Date().getFullYear();
+    step(5, `Periode akuntansi ${Y} (12 bulan) = OPEN…`);
     for (let m = 1; m <= 12; m++) {
       await prisma.accountingPeriod.upsert({
         where: { year_month: { year: Y, month: m } },

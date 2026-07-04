@@ -796,12 +796,19 @@ export class PaymentSubmissionsService {
             await this.accountingPosting.postInvoicePaymentTx(tx, invoicePaymentId, user.id);
           }
         } catch (err) {
-          // Auto Journal Lite tidak memblokir approval. Jurnal bisa diperbaiki via backfill.
+          // Auto Journal Lite tidak memblokir approval. Jurnal bisa diperbaiki via retry.
           // journalPending=true dikembalikan ke caller agar admin tahu perlu repair.
           journalPending = true;
+          const errMsg = err instanceof Error ? err.message : String(err);
           this.logger.error(
-            `[AL-FIX-5] Journal posting gagal untuk payment submission #${submissionId}, invoice #${submission.invoiceId}: ${err instanceof Error ? err.message : String(err)}`,
+            `[C5] Journal posting gagal untuk payment submission #${submissionId}, invoice #${submission.invoiceId}: ${errMsg}`,
           );
+          // Simpan metadata retry di reviewNotes agar bisa di-retry otomatis
+          const retryMeta = JSON.stringify({ retryCount: 0, lastError: errMsg.slice(0, 500), lastRetryAt: new Date().toISOString() });
+          await tx.paymentSubmission.update({
+            where: { id: submissionId },
+            data: { reviewNotes: retryMeta },
+          });
         }
 
         await tx.paymentSubmission.update({
@@ -1092,6 +1099,138 @@ export class PaymentSubmissionsService {
       this.handleSchemaError(error);
       throw error;
     }
+  }
+
+  // ═══════════════════════════════════════════════════════════
+  //  SECTION: Journal Retry — retry posting untuk submission yang gagal
+  // ═══════════════════════════════════════════════════════════
+
+  /**
+   * Retry journal posting untuk submission yang sudah APPROVED tapi journalPending=true.
+   * Catat riwayat retry di reviewNotes sebagai JSON (tidak overwrite notes existing).
+   */
+  async retryJournalPosting(user: CurrentUserPayload, submissionId: number) {
+    const submission = await this.prisma.paymentSubmission.findUnique({
+      where: { id: submissionId },
+      select: {
+        id: true,
+        status: true,
+        invoiceId: true,
+        tenantId: true,
+        reviewNotes: true,
+        stay: { select: { id: true } },
+      },
+    });
+    if (!submission) {
+      throw new NotFoundException('Bukti pembayaran tidak ditemukan');
+    }
+    if (submission.status !== PaymentSubmissionStatus.APPROVED) {
+      throw new ConflictException('Hanya submission dengan status APPROVED yang bisa di-retry journal');
+    }
+    if (!submission.invoiceId) {
+      throw new BadRequestException('Submission ini tidak memiliki invoice — tidak ada journal untuk di-retry');
+    }
+
+    // Parse reviewNotes untuk dapat retryCount & lastError
+    let retryMeta: { retryCount?: number; lastError?: string; lastRetryAt?: string } = {};
+    if (submission.reviewNotes) {
+      try {
+        const parsed = JSON.parse(submission.reviewNotes);
+        if (parsed && typeof parsed === 'object' && 'retryCount' in parsed) {
+          retryMeta = parsed;
+        }
+      } catch {
+        // reviewNotes bukan JSON — simpan sebagai string biasa, jangan overwrite
+      }
+    }
+
+    const retryCount = (retryMeta.retryCount ?? 0) + 1;
+    const maxRetries = 5;
+
+    try {
+      // Posting journal (hanya issue — payment posting skip karena sudah di-post di approve time)
+      await this.accountingPosting.postInvoiceIssued(submission.invoiceId, user.id);
+
+      // Berhasil — bersihkan reviewNotes dari metadata retry, kembalikan ke null atau simpan sukses
+      // Kalau reviewNotes sebelumnya berisi teks (bukan JSON retry), pertahankan
+      const cleanNotes = submission.reviewNotes && !submission.reviewNotes.startsWith('{')
+        ? submission.reviewNotes
+        : null;
+
+      if (cleanNotes !== submission.reviewNotes) {
+        await this.prisma.paymentSubmission.update({
+          where: { id: submissionId },
+          data: { reviewNotes: cleanNotes },
+        });
+      }
+
+      this.logger.log(
+        `[C5] Journal retry BERHASIL untuk payment submission #${submissionId}, invoice #${submission.invoiceId} (percobaan ke-${retryCount})`,
+      );
+
+      return { success: true, retryCount, message: 'Journal berhasil diposting ulang' };
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : String(err);
+
+      // Update reviewNotes dengan metadata retry
+      const updatedMeta: typeof retryMeta = {
+        retryCount,
+        lastError: errorMessage.slice(0, 500),
+        lastRetryAt: new Date().toISOString(),
+      };
+
+      await this.prisma.paymentSubmission.update({
+        where: { id: submissionId },
+        data: { reviewNotes: JSON.stringify(updatedMeta) },
+      });
+
+      this.logger.error(
+        `[C5] Journal retry GAGAL untuk payment submission #${submissionId}, invoice #${submission.invoiceId} ` +
+        `(percobaan ke-${retryCount}/${maxRetries}): ${errorMessage}`,
+      );
+
+      if (retryCount >= maxRetries) {
+        this.logger.error(
+          `[C5] Gagal total — submission #${submissionId} sudah di-retry ${maxRetries} kali. Butuh intervensi admin.`,
+        );
+      }
+
+      throw new ServiceUnavailableException(
+        `Gagal memposting journal (percobaan ke-${retryCount}): ${errorMessage}`,
+      );
+    }
+  }
+
+  /** Cari semua submission APPROVED yang perlu retry journal (berdasarkan reviewNotes mengandung metadata retry) */
+  async findPendingJournalSubmissions() {
+    const sixHoursAgo = new Date(Date.now() - 6 * 60 * 60 * 1000);
+    const raw = await this.prisma.paymentSubmission.findMany({
+      where: {
+        status: PaymentSubmissionStatus.APPROVED,
+        invoiceId: { not: null },
+        updatedAt: { gte: sixHoursAgo },
+      },
+      select: {
+        id: true,
+        invoiceId: true,
+        tenantId: true,
+        reviewNotes: true,
+        updatedAt: true,
+      },
+      orderBy: { updatedAt: 'desc' },
+      take: 50,
+    });
+
+    // Filter yang reviewNotes-nya mengandung metadata retry atau error
+    return raw.filter((s) => {
+      if (!s.reviewNotes) return false;
+      try {
+        const parsed = JSON.parse(s.reviewNotes);
+        return parsed && typeof parsed === 'object' && 'retryCount' in parsed;
+      } catch {
+        return false;
+      }
+    });
   }
 
   private async cancelCompetingUnpaidBookingsTx(

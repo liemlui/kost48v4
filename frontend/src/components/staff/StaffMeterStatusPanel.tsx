@@ -29,6 +29,7 @@ function getMonthRange() {
 function formatShortDate(iso?: string | null) {
   if (!iso) return '—';
   const d = new Date(iso);
+  if (isNaN(d.getTime())) return '—';
   return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}`;
 }
 
@@ -59,15 +60,18 @@ export default function StaffMeterStatusPanel({ rooms }: Props) {
     const result: MeterRow[] = [];
     for (const [roomId, roomReadings] of byRoom) {
       const room = roomMap.get(roomId);
-      const latest = roomReadings.reduce((a, b) =>
-        new Date(a.readingAt) > new Date(b.readingAt) ? a : b,
-      );
+      const latest = roomReadings.reduce((a, b) => {
+        const da = new Date(a.readingAt).getTime();
+        const db = new Date(b.readingAt).getTime();
+        if (isNaN(da) || isNaN(db)) return a;
+        return da > db ? a : b;
+      });
       const elec = roomReadings
         .filter((r) => String(r.utilityType).toUpperCase() === 'ELECTRICITY')
-        .sort((a, b) => new Date(b.readingAt).getTime() - new Date(a.readingAt).getTime())[0];
+        .sort((a, b) => { const da = new Date(a.readingAt).getTime(); const db = new Date(b.readingAt).getTime(); return (isNaN(da) || isNaN(db)) ? 0 : db - da; })[0];
       const water = roomReadings
         .filter((r) => String(r.utilityType).toUpperCase() === 'WATER')
-        .sort((a, b) => new Date(b.readingAt).getTime() - new Date(a.readingAt).getTime())[0];
+        .sort((a, b) => { const da = new Date(a.readingAt).getTime(); const db = new Date(b.readingAt).getTime(); return (isNaN(da) || isNaN(db)) ? 0 : db - da; })[0];
 
       result.push({
         roomId,

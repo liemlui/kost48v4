@@ -64,7 +64,8 @@ async function loginAs(identifier, password) {
 }
 // H11: toISOString() = UTC → bisa salah tanggal di WIB pagi. toLocaleDateString('en-CA') pakai timezone lokal.
 const ymd = (d) => d.toLocaleDateString('en-CA');
-const addMonths = (d, n) => { const x = new Date(d); x.setMonth(x.getMonth() + n); return x; };
+// L14: setMonth overflow guard — set date ke 1 dulu agar 31 Jan + 1 bulan = 28 Feb, bukan 3 Mar.
+const addMonths = (d, n) => { const x = new Date(d); x.setDate(1); x.setMonth(x.getMonth() + n); return x; };
 const addDays = (d, n) => { const x = new Date(d); x.setDate(x.getDate() + n); return x; };
 
 // ── 13 kamar nyata KOST48 Surabaya (data real dari kost48surabaya.com) ──────
@@ -213,7 +214,7 @@ const summary = {
     const onb = await api('PATCH', `/tenants/${tenantId}`, {
       fullName: t.name, phone, identityNumber: ktp, gender: t.gender,
       originCity: 'Surabaya', occupation: t.occ,
-      birthDate: bd.toISOString().slice(0, 10),
+      birthDate: ymd(bd),
       companyOrCampus: t.occ === 'Karyawan' ? 'PT Maju Jaya Surabaya' : 'Universitas Airlangga',
       emergencyContactName: `Orang Tua ${t.name.split(' ')[0]}`,
       emergencyContactPhone: '0813' + String(20000000 + i).padStart(8, '0'),

@@ -21,7 +21,9 @@ function endOfMonth(year: number, month: number): string {
 
 function formatDate(v: string | null | undefined): string {
   if (!v) return '-';
-  return new Date(v).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
+  const d = new Date(v);
+  if (isNaN(d.getTime())) return '-';
+  return d.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
 }
 
 type RoomItem = {

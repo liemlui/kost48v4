@@ -2,19 +2,9 @@ import { Card, Col, Form, Row, Alert, InputGroup } from 'react-bootstrap';
 import { Controller } from 'react-hook-form';
 import type { UseFormReturn } from 'react-hook-form';
 import CurrencyInput from '../../../components/common/CurrencyInput';
+import { formatRupiah } from '../../../utils/formatCurrency';
 import type { WizardFormValues } from './types';
 import { bookingSourceOptions, pricingTermOptions, stayPurposeOptions } from './checkInWizardUtils';
-
-function formatRupiah(value: number | string | undefined | null): string {
-  const num = typeof value === 'string' ? parseFloat(value) : (value ?? 0);
-  if (isNaN(num)) return '';
-  return new Intl.NumberFormat('id-ID', {
-    style: 'currency',
-    currency: 'IDR',
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  }).format(num);
-}
 
 interface StepDetailsAndMetersProps {
   form: UseFormReturn<WizardFormValues>;

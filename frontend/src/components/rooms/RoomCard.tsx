@@ -14,6 +14,7 @@ import {
 } from '../../utils/publicRoomDisplay';
 import { calculateRentByPricingTerm, ALL_PRICING_TERMS } from '../../utils/pricing';
 import type { PublicRoom } from '../../types';
+import { formatRupiah } from '../../utils/formatCurrency';
 
 // ── Constants ──────────────────────────────────────────────────────────────
 const PRICING_TERM = 'MONTHLY' as const;
@@ -27,8 +28,7 @@ const TERM_LABELS: Record<string, string> = {
   YEARLY: 'Tahunan',
 };
 
-const fmt = (n: number) =>
-  new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(n);
+const fmt = formatRupiah;
 
 // ── WhatsApp URL builder ───────────────────────────────────────────────────
 export function buildWhatsAppUrl(room: PublicRoom, customMessage?: string): string {

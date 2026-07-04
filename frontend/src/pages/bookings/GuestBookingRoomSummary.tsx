@@ -15,6 +15,8 @@ import {
   getPublicRoomVisibleAmenities,
 } from '../../utils/publicRoomDisplay';
 import type { GuestBookingFormState } from './guestBookingUtils';
+import { formatRupiah } from '../../utils/formatCurrency';
+
 
 interface GuestBookingRoomSummaryProps {
   room: PublicRoom;
@@ -115,7 +117,7 @@ export default function GuestBookingRoomSummary({ room, form, selectedRate, init
             {form.hasPet && (
               <span className="text-info">
                 Deposit hewan{' '}
-                <strong>{new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(petDepositRupiah)}</strong>
+                <strong>{formatRupiah(petDepositRupiah)}</strong>
                 {' '}<small>(refundable)</small>
               </span>
             )}

@@ -418,6 +418,9 @@ export class FinanceService {
     const wifiRevenue = Number(wifiAgg._sum.soldPriceRupiah ?? 0);
     const totalRevenue = invoiceRevenue + wifiRevenue;
     const totalExpense = Number(expenseAgg._sum.amountRupiah ?? 0);
+    // M16: deposit jaminan adalah liabilitas (bukan revenue), jadi TIDAK dimasukkan ke netProfit.
+    // Pendapatan dari deposit yang hangus/dipotong sudah masuk via jurnal ADJUSTMENT —
+    // untuk dashboard KPI ini tidak signifikan (owner bisa lihat di laporan formal).
     const netProfit = totalRevenue - totalExpense;
     const cashIn = Number(paymentAgg._sum.amountRupiah ?? 0) + wifiRevenue;
     const cashOut = totalExpense;
@@ -446,6 +449,9 @@ export class FinanceService {
     const cashScore = netCashFlow >= 0 ? 25 : 10;
     const overdueCount = Number(overdueRows[0]?.cnt ?? 0);
     const overdueRupiah = Number(overdueRows[0]?.overdue ?? 0);
+    // M14: penalty di score BERBEDA dari sinyal — score = pembobot matematis, sinyal = alert visual.
+    // Overdue/pending dihitung sekali di score dan sekali di sinyal — ini INTENTIONAL:
+    // score menunjukkan dampak kuantitatif, sinyal menunjukkan aksi yang perlu diambil.
     const overduePenalty = overdueCount * 4;
     const pendingPenalty = pendingPaymentCount * 2;
     const score = Math.max(0, Math.min(100, occupancyScore + profitScore + cashScore + 25 - overduePenalty - pendingPenalty));
@@ -489,6 +495,8 @@ export class FinanceService {
           where: { saleDate: { gte: trendStart, lt: trendEnd } },
         }),
       ]);
+      // M15: invoice = akrual (berdasarkan periodStart), wifi = tunai (berdasarkan saleDate).
+      // WiFi tidak punya periodStart — ini adalah keterbatasan yang diketahui (PWA, bukan subscription).
       const rev = Number(trendInvoice._sum.totalAmountRupiah ?? 0) + Number(trendWifi._sum.soldPriceRupiah ?? 0);
       const exp = Number(trendExpense._sum.amountRupiah ?? 0);
       trendMonths.push({ year: ty, month: tm, revenue: rev, expense: exp, netProfit: rev - exp });

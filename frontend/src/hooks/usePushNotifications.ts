@@ -103,8 +103,8 @@ export function usePushNotifications() {
       const reg = await navigator.serviceWorker.getRegistration();
       const sub = await reg?.pushManager.getSubscription();
       if (sub) {
-        await unsubscribePush(sub.endpoint).catch((err) => { console.error('[PWA] unsubscribe failed', err); });
-        await sub.unsubscribe().catch((err) => { console.error('[PWA] sub.unsubscribe failed', err); });
+        await unsubscribePush(sub.endpoint).catch((err) => { if (import.meta.env.DEV) console.warn('[PWA] unsubscribe failed', err); });
+        await sub.unsubscribe().catch((err) => { if (import.meta.env.DEV) console.warn('[PWA] sub.unsubscribe failed', err); });
       }
       setState('disabled');
     } finally {

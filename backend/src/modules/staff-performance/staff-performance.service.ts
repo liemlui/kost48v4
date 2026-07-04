@@ -1,6 +1,8 @@
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma } from '../../generated/prisma';
 import { AuditLogService } from '../../audit-log/audit-log.service';
+
+const WIB_OFFSET_MS = 7 * 60 * 60 * 1000;
 import { StaffAuditResult, StaffReviewStatus, StaffRoutineStatus, StaffWorkSourceType, UserRole } from '../../common/enums/app.enums';
 import { CurrentUserPayload } from '../../common/interfaces/current-user.interface';
 import { PrismaService } from '../../prisma/prisma.service';
@@ -15,13 +17,13 @@ function monthRange(month?: string) {
     year = Number(month.slice(0, 4));
     mon0 = Number(month.slice(5, 7)) - 1;
   } else {
-    const wibNow = new Date(Date.now() + 7 * 60 * 60 * 1000);
+    const wibNow = new Date(Date.now() + WIB_OFFSET_MS);
     year = wibNow.getUTCFullYear();
     mon0 = wibNow.getUTCMonth();
   }
   // WIB 00:00 tanggal-1 sebagai instant UTC = Date.UTC(...) − 7 jam.
-  const start = new Date(Date.UTC(year, mon0, 1) - 7 * 60 * 60 * 1000);
-  const end = new Date(Date.UTC(year, mon0 + 1, 1) - 7 * 60 * 60 * 1000);
+  const start = new Date(Date.UTC(year, mon0, 1) - WIB_OFFSET_MS);
+  const end = new Date(Date.UTC(year, mon0 + 1, 1) - WIB_OFFSET_MS);
   return {
     start,
     end,

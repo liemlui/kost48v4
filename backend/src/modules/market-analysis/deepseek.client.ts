@@ -3,6 +3,8 @@
 // Fase G: upgrade ke model v4-flash, return usage, JSON mode, thinking toggle, hash helper.
 // P5: circuit breaker — 5 consecutive failures → 30 detik open, auto-recover.
 
+import { BadGatewayException, BadRequestException, GatewayTimeoutException, ServiceUnavailableException } from '@nestjs/common';
+
 export type ChatMsg = { role: 'system' | 'user' | 'assistant'; content: string };
 
 export type DeepseekUsage = {
@@ -85,11 +87,11 @@ export async function deepseekChat(
   // Circuit breaker gate
   const cb = circuitBreakerState();
   if (cb.open) {
-    throw new Error(`DeepSeek API sementara tidak tersedia (circuit breaker terbuka — ${cb.failures} kegagalan berturut-turut). Coba lagi dalam ${Math.ceil((cb.openUntil - Date.now()) / 1000)} detik.`);
+    throw new ServiceUnavailableException(`DeepSeek API sementara tidak tersedia (circuit breaker terbuka — ${cb.failures} kegagalan berturut-turut). Coba lagi dalam ${Math.ceil((cb.openUntil - Date.now()) / 1000)} detik.`);
   }
 
   const key = deepseekApiKey();
-  if (!key) throw new Error('API key DeepSeek belum diisi. Isi di Pengaturan → AI & Biaya (login OWNER), atau set DEEPSEEK_API_KEY di env backend.');
+  if (!key) throw new BadRequestException('API key DeepSeek belum diisi. Isi di Pengaturan → AI & Biaya (login OWNER), atau set DEEPSEEK_API_KEY di env backend.');
   const baseURL = (process.env.DEEPSEEK_BASE_URL || 'https://api.deepseek.com').replace(/\/+$/, '');
   const model = opts.model || process.env.DEEPSEEK_MODEL || 'deepseek-v4-flash';
 
@@ -121,13 +123,13 @@ export async function deepseekChat(
     if (!res.ok) {
       const text = await res.text().catch(() => '');
       cbFailure();
-      throw new Error(`DeepSeek API ${res.status}: ${text.slice(0, 300)}`);
+      throw new BadGatewayException(`DeepSeek API ${res.status}: ${text.slice(0, 300)}`);
     }
     const json: any = await res.json();
     const content = json?.choices?.[0]?.message?.content;
     if (typeof content !== 'string') {
       cbFailure();
-      throw new Error('Respon DeepSeek tidak terbaca.');
+      throw new BadGatewayException('Respon DeepSeek tidak terbaca.');
     }
     cbSuccess();
     return {
@@ -147,7 +149,7 @@ export async function deepseekChat(
     // timeout / network error juga dihitung sebagai failure
     if (err?.name === 'AbortError') {
       cbFailure();
-      throw new Error(`DeepSeek API timeout setelah ${opts.timeoutMs ?? 60_000}ms.`);
+      throw new GatewayTimeoutException(`DeepSeek API timeout setelah ${opts.timeoutMs ?? 60_000}ms.`);
     }
     // sudah di-handle di atas (cbFailure dipanggil), tapi pastikan untuk unexpected errors
     if (!String(err?.message ?? '').startsWith('DeepSeek API')) {

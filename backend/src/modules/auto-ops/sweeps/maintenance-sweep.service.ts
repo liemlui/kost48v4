@@ -61,12 +61,19 @@ export class MaintenanceSweepService {
         take: 100,
       });
       const roomIds = rooms.map((room) => room.id);
+      // L25: dedup juga untuk CLOSED dalam interval maksimal (90 hari) — cegah duplikasi
+      // bila tiket ditutup tanpa update acLastCleanedAt (mis. dibatalkan sebelum cuci).
+      const maxAcInterval = Math.max(...rooms.map((r) => r.acCleanIntervalDays ?? 90), 90);
+      const closedThreshold = new Date(now.getTime() - maxAcInterval * 24 * 60 * 60 * 1000);
       const existingAcTickets = roomIds.length
         ? await this.prisma.ticket.findMany({
             where: {
               roomId: { in: roomIds },
               category: 'AC_CLEANING' as any,
-              status: { in: ['OPEN', 'IN_PROGRESS', 'DONE'] as any },
+              OR: [
+                { status: { in: ['OPEN', 'IN_PROGRESS', 'DONE'] as any } },
+                { status: 'CLOSED' as any, closedAt: { gte: closedThreshold } },
+              ],
             },
             select: { roomId: true },
           })

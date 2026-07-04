@@ -583,7 +583,7 @@ function ActiveStayContent({ stay }: { stay: Stay }) {
                         {stay.room.acLastCleanedAt ? formatDate(stay.room.acLastCleanedAt) : 'Belum tercatat'}
                         {stay.room.acLastCleanedAt && stay.room.acCleanIntervalDays ? (
                           <em className="text-muted">
-                            {' '}· berikutnya ~{formatDate(new Date(new Date(stay.room.acLastCleanedAt).getTime() + stay.room.acCleanIntervalDays * 86400000).toISOString())}
+                            {' '}· berikutnya ~{(() => { const d = new Date(stay.room.acLastCleanedAt); if (isNaN(d.getTime())) return '-'; return formatDate(new Date(d.getTime() + stay.room.acCleanIntervalDays * 86400000).toISOString()); })()}
                           </em>
                         ) : null}
                       </strong>

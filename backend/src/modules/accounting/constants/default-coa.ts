@@ -25,6 +25,7 @@ export const DEFAULT_COA: DefaultCoaAccount[] = [
   { code: '3200', name: 'Retained Earnings', type: 'EQUITY', normalBalance: 'CREDIT', description: 'Laba ditahan setelah tutup periode.' },
 
   { code: '4000', name: 'Room Rent Revenue', type: 'REVENUE', normalBalance: 'CREDIT', description: 'Pendapatan sewa kamar.' },
+  { code: '4010', name: 'Rent Discount', type: 'REVENUE', normalBalance: 'DEBIT', description: 'Kontra-revenue — diskon sewa yang mengurangi pendapatan.' },
   { code: '4100', name: 'Electricity Revenue', type: 'REVENUE', normalBalance: 'CREDIT', description: 'Pendapatan tagihan listrik tenant.' },
   { code: '4110', name: 'Water Revenue', type: 'REVENUE', normalBalance: 'CREDIT', description: 'Pendapatan tagihan air tenant.' },
   { code: '4200', name: 'Wifi Voucher Revenue', type: 'REVENUE', normalBalance: 'CREDIT', description: 'Pendapatan voucher WiFi.' },

@@ -117,8 +117,8 @@ export default function PwaStatus() {
         updateTimer = window.setInterval(() => {
           void nextRegistration.update();
         }, 60 * 60 * 1000);
-      } catch (error) {
-        console.warn('[PWA] Service worker registration failed', error);
+      } catch {
+        // SW registration failure is non-critical; handled by offline fallback
       }
     };
 

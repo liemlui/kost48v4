@@ -9,24 +9,24 @@ import PushToggle from '../../components/notifications/PushToggle';
 
 function isSameDay(dateString: string, ref: Date): boolean {
   const d = new Date(dateString);
+  if (isNaN(d.getTime())) return false;
   return d.getFullYear() === ref.getFullYear()
     && d.getMonth() === ref.getMonth()
     && d.getDate() === ref.getDate();
 }
 
 function formatGroupHeader(dateString: string): string {
+  const d = new Date(dateString);
+  if (isNaN(d.getTime())) return dateString || '-';
   const now = new Date();
   if (isSameDay(dateString, now)) {
-    const d = new Date(dateString);
     return `Hari ini — ${d.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}`;
   }
   const yesterday = new Date();
   yesterday.setDate(yesterday.getDate() - 1);
   if (isSameDay(dateString, yesterday)) {
-    const d = new Date(dateString);
     return `Kemarin — ${d.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}`;
   }
-  const d = new Date(dateString);
   const diffMs = new Date().getTime() - d.getTime();
   if (diffMs < 7 * 24 * 60 * 60 * 1000) {
     return `Minggu ini — ${d.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}`;
@@ -36,11 +36,14 @@ function formatGroupHeader(dateString: string): string {
 
 function getDayKey(dateString: string): string {
   const d = new Date(dateString);
+  if (isNaN(d.getTime())) return 'unknown';
   return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
 }
 
 function formatDateTime(dateString: string): string {
-  return new Date(dateString).toLocaleString('id-ID', {
+  const d = new Date(dateString);
+  if (isNaN(d.getTime())) return dateString || '-';
+  return d.toLocaleString('id-ID', {
     day: 'numeric',
     month: 'short',
     year: 'numeric',

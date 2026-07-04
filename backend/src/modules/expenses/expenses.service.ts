@@ -1,4 +1,5 @@
 import { ConflictException, Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { Prisma } from '../../generated/prisma';
 import { PrismaService } from '../../prisma/prisma.service';
 import { buildMeta, buildPagination } from '../../common/utils/pagination';
 import { CreateExpenseDto, UpdateExpenseDto } from './dto/expense.dto';
@@ -19,7 +20,7 @@ export class ExpensesService {
 
   async findAll(query: ExpensesQueryDto) {
     const { page, limit, skip, take } = buildPagination(query.page, query.limit);
-    const where: any = {
+    const where: Prisma.ExpenseWhereInput = {
       AND: [
         query.search ? { OR: [{ description: { contains: query.search, mode: 'insensitive' } }, { vendorName: { contains: query.search, mode: 'insensitive' } }] } : {},
         query.type ? { type: query.type } : {},

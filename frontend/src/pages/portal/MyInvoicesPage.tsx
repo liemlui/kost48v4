@@ -19,14 +19,7 @@ import { isPayableInvoiceStatus, tenantInvoiceStatusLabel } from '../../utils/te
 import { getInvoiceTotalAmount } from '../../utils/invoiceTotals';
 import { invoicePurposeMeta } from '../../utils/invoiceUtility';
 import { formatDateTimeWib, getDeadlineMeta } from '../../utils/dateTime';
-import { formatRupiah, formatRupiahWithoutSymbol } from '../../utils/formatCurrency';
-
-function fmtC(v: number) {
-  const s = Math.abs(v || 0);
-  if (s >= 1_000_000) return `Rp ${(s / 1_000_000).toFixed(1)} jt`;
-  if (s >= 1_000) return `Rp ${(s / 1_000).toFixed(0)} rb`;
-  return `Rp ${new Intl.NumberFormat('id-ID').format(s)}`;
-}
+import { formatRupiah, formatRupiahWithoutSymbol, formatCompactRupiah } from '../../utils/formatCurrency';
 
 function TenantInvoiceSnapshot({ allItems, paidCount, unpaidCount, overdueCount }: { allItems: any[]; paidCount: number; unpaidCount: number; overdueCount: number }) {
   const totalBilled = useMemo(() => allItems.reduce((s, inv) => s + (Number(inv.totalAmountRupiah) || 0), 0), [allItems]);
@@ -72,8 +65,8 @@ function TenantInvoiceSnapshot({ allItems, paidCount, unpaidCount, overdueCount 
               />
             </div>
             <div className="invoice-gauge-labels mt-1">
-              <span>Terbayar: <strong>{fmtC(totalPaid)}</strong></span>
-              <span>Sisa: <strong>{fmtC(outstanding)}</strong></span>
+              <span>Terbayar: <strong>{formatCompactRupiah(totalPaid)}</strong></span>
+              <span>Sisa: <strong>{formatCompactRupiah(outstanding)}</strong></span>
             </div>
           </Card.Body>
         </Card>

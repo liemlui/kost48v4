@@ -52,7 +52,10 @@ export class AccountingReadinessService {
     return `${period.year}-${String(period.month).padStart(2, '0')}`;
   }
 
-  private getModelDelegate(modelName: string) {
+  // M10: dynamic model access — pakai runtime guard (hasCountDelegate/safeCount) sebagai pengganti
+  // tipe statis. ModelName dari caller: 'accountingPeriod', 'stay', 'invoice', dll.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private getModelDelegate(modelName: string): any {
     return (this.prisma as any)[modelName];
   }
 

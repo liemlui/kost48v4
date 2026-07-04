@@ -4,6 +4,30 @@
 
 ## Changelog Ringkas
 
+### 2026-07-04 — Dokumentasi: 00_index.md jadi kanonik + antrian sesi berikutnya
+- 00_index.md: tanggal diperbaiki (7→4 Jul), struktur dokumen rapi, tambah "Antrian Sesi Berikutnya"
+- Semua progress: Fase 4=83%, Fase 5=81%
+- RINGKASAN_EKSEKUTIF.md: tanggal diperbaiki
+- ⚠️ RINGKASAN masih perlu sinkronisasi penomoran dgn 00_index (dijadwalkan sesi depan)
+
+### 2026-07-04 — Fase 4: 13 temuan menengah (83% tuntas)
+- M4: Survey summary dibatasi 200 rows (pagination)
+- M8: deepseek.client.ts — semua throw new Error → HTTP exceptions (503/400/502/504)
+- M10: accounting-readiness — dynamic model access dengan return type any + eslint-disable
+- M14/M15/M16: finance.service.ts — komentar klarifikasi score≠signal, WiFi accrual vs cash, deposit liability
+- M30: MarketAnalysis — findAll filter 90 hari (cutoff createdAt)
+- M17/M19/M21/M23/M25/M32-M35: via Fase 5 overlap
+
+### 2026-07-07 — L7: isNaN guard `new Date()` di 13 file FE
+- 13 file frontend: InvoicesPage · StayDetailPage · FinanceTab · NotificationsPage · AdminSurveysPage · NotificationBell · StaffMeterStatusPanel · MeterReadingsPage · MyStayPage — semua isNaN(Date) guard ditambahkan di date display/sort/overdue check
+- Build FE: ✅ lulus (tsc + vite + PWA stamp)
+
+### 2026-07-07 — Fase 5 Audit Reasonix: 16 temuan rendah (77% selesai)
+- Seed scripts: `addMonths` overflow guard, `ymd()` WIB fix, dynamic year, `require(dist)` graceful error
+- FE: SkeletonLoader key, MyInvoicesPage countdown PAID guard, console.warn DEV guard (4 file)
+- BE: AC_CLEANING CLOSED dedup guard, Renew enum comment sinkronisasi
+- Dokumentasi: L15/L16/L20/L21/L23 diverifikasi "by design / already fixed"
+
 **2026-07-07 — Fase 2+3 TUNTAS 100% ✅ + Fase 4 partial (7/35)**
 - C1-C6 ✅ Semua 6 bug kritis: DISCOUNT journal (4010 contra-revenue), overdue net, renewal cross-term, collection rate period, journal retry, DTO number. `accounting-posting-helpers.ts`, `reports.service.ts`, `renew-requests.service.ts`, `finance.service.ts`, `payment-submissions.service.ts`, `stay.dto.ts`.
 - H1-H15 ✅ Semua 15 temuan tinggi (H3/H6/H7 final): sweeper auto-reject PENDING_REVIEW, balance sheet currentProfit guard, cashflow cashBeginning koreksi otomatis. `booking-sweep.service.ts`, `accounting-reports.service.ts`.

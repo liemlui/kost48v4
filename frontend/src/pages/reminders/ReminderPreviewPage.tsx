@@ -4,6 +4,7 @@ import { Alert, Button, Card, Spinner, Table } from 'react-bootstrap';
 import PageHeader from '../../components/common/PageHeader';
 import EmptyState from '../../components/common/EmptyState';
 import { AssistantPanel, CompactMetrics, type AssistantItem, type MetricChip } from '../../components/command-center';
+import { formatRupiah } from '../../utils/formatCurrency';
 import { getReminderPreviewAll, mockSendReminder } from '../../api/reminders';
 import type {
   BookingExpiryCandidate,
@@ -22,10 +23,7 @@ function formatDate(value: string | null | undefined): string {
   } catch { return '-'; }
 }
 
-function formatRupiah(value: number | null | undefined): string {
-  if (value == null) return '-';
-  return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(value);
-}
+
 
 type ReminderTab = 'BOOKING_EXPIRY' | 'INVOICE_DUE' | 'INVOICE_OVERDUE' | 'CHECKOUT';
 

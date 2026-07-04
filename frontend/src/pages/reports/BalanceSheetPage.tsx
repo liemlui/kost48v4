@@ -3,13 +3,9 @@ import { Alert, Badge, Card, Col, Container, Form, Row, Spinner, Table } from 'r
 import { useQuery } from '@tanstack/react-query';
 import { fetchBalanceSheetDetail, type BalanceSheetDetail } from '../../api/accounting';
 
+import { formatCompactRupiah } from '../../utils/formatCurrency';
+
 function currentYearMonth() { const d=new Date(); return {year:d.getFullYear(),month:d.getMonth()+1}; }
-function formatRupiah(v:number) { return new Intl.NumberFormat('id-ID').format(v||0); }
-function formatCompact(v:number) {
-  const s=Math.abs(v||0),sign=v<0?'-':''; if(s>=1e9)return `${sign}Rp${(s/1e9).toFixed(1)}M`;
-  if(s>=1e6)return `${sign}Rp${(s/1e6).toFixed(1)}jt`; if(s>=1e3)return `${sign}Rp${(s/1e3).toFixed(0)}rb`;
-  return `${sign}Rp${formatRupiah(s)}`;
-}
 function pct(v:number) { return `${v>=0?'+':''}${v.toFixed(1)}%`; }
 
 export default function BalanceSheetPage() {
@@ -30,26 +26,26 @@ export default function BalanceSheetPage() {
     {q.isError&&<Alert variant="warning">Gagal memuat data.</Alert>}
     {d&&<>
       <Row className="g-3 mb-3">
-        <Col xs={6} xl={3}><Card><Card.Body><div className="kpi-label">Total Aset</div><div className="kpi-value">{formatCompact(d.current.statement.assetsRupiah)}</div><div className="kpi-change" style={{color:d.change.assetsChangePercent>=0?'#22c55e':'#ef4444'}}>{pct(d.change.assetsChangePercent)}</div></Card.Body></Card></Col>
-        <Col xs={6} xl={3}><Card><Card.Body><div className="kpi-label">Kewajiban</div><div className="kpi-value">{formatCompact(d.current.statement.liabilitiesRupiah)}</div><div className="kpi-change" style={{color:d.change.liabilitiesChangePercent>=0?'#ef4444':'#22c55e'}}>{pct(d.change.liabilitiesChangePercent)}</div></Card.Body></Card></Col>
-        <Col xs={6} xl={3}><Card><Card.Body><div className="kpi-label">Ekuitas</div><div className="kpi-value">{formatCompact(d.current.statement.equityRupiah)}</div><div className="kpi-change" style={{color:d.change.equityChangePercent>=0?'#22c55e':'#ef4444'}}>{pct(d.change.equityChangePercent)}</div></Card.Body></Card></Col>
+        <Col xs={6} xl={3}><Card><Card.Body><div className="kpi-label">Total Aset</div><div className="kpi-value">{formatCompactRupiah(d.current.statement.assetsRupiah)}</div><div className="kpi-change" style={{color:d.change.assetsChangePercent>=0?'#22c55e':'#ef4444'}}>{pct(d.change.assetsChangePercent)}</div></Card.Body></Card></Col>
+        <Col xs={6} xl={3}><Card><Card.Body><div className="kpi-label">Kewajiban</div><div className="kpi-value">{formatCompactRupiah(d.current.statement.liabilitiesRupiah)}</div><div className="kpi-change" style={{color:d.change.liabilitiesChangePercent>=0?'#ef4444':'#22c55e'}}>{pct(d.change.liabilitiesChangePercent)}</div></Card.Body></Card></Col>
+        <Col xs={6} xl={3}><Card><Card.Body><div className="kpi-label">Ekuitas</div><div className="kpi-value">{formatCompactRupiah(d.current.statement.equityRupiah)}</div><div className="kpi-change" style={{color:d.change.equityChangePercent>=0?'#22c55e':'#ef4444'}}>{pct(d.change.equityChangePercent)}</div></Card.Body></Card></Col>
         <Col xs={6} xl={3}><Card><Card.Body><div className="kpi-label">Status</div><div className="kpi-value"><Badge bg={d.current.statement.balanced?'success':'warning'}>{d.current.statement.balanced?'Balance':'Tidak Balance'}</Badge></div></Card.Body></Card></Col>
       </Row>
       <Row className="g-3">
         <Col lg={4}><Card><Card.Header className="rpt-card-header">🏦 Aset</Card.Header><Card.Body className="p-0">
           <Table size="sm" className="mb-0"><thead><tr><th>Akun</th><th className="text-end">Nilai</th></tr></thead><tbody>
-            {d.current.lines?.assets?.map((l:any,i:number)=>l.balanceRupiah!==0&&<tr key={i}><td style={{paddingLeft:l.isContraAsset?24:12}}>{l.presentationLabel??l.name}</td><td className="text-end">{formatCompact(l.balanceRupiah)}</td></tr>)}
-            <tr className="border-top fw-bold"><td>Total Aset</td><td className="text-end">{formatCompact(d.current.statement.assetsRupiah)}</td></tr>
+            {d.current.lines?.assets?.map((l:any,i:number)=>l.balanceRupiah!==0&&<tr key={i}><td style={{paddingLeft:l.isContraAsset?24:12}}>{l.presentationLabel??l.name}</td><td className="text-end">{formatCompactRupiah(l.balanceRupiah)}</td></tr>)}
+            <tr className="border-top fw-bold"><td>Total Aset</td><td className="text-end">{formatCompactRupiah(d.current.statement.assetsRupiah)}</td></tr>
           </tbody></Table></Card.Body></Card></Col>
         <Col lg={4}><Card><Card.Header className="rpt-card-header">💳 Kewajiban</Card.Header><Card.Body className="p-0">
           <Table size="sm" className="mb-0"><thead><tr><th>Akun</th><th className="text-end">Nilai</th></tr></thead><tbody>
-            {d.current.lines?.liabilities?.map((l:any,i:number)=>l.balanceRupiah!==0&&<tr key={i}><td style={{paddingLeft:12}}>{l.presentationLabel??l.name}</td><td className="text-end">{formatCompact(l.balanceRupiah)}</td></tr>)}
-            <tr className="border-top fw-bold"><td>Total Kewajiban</td><td className="text-end">{formatCompact(d.current.statement.liabilitiesRupiah)}</td></tr>
+            {d.current.lines?.liabilities?.map((l:any,i:number)=>l.balanceRupiah!==0&&<tr key={i}><td style={{paddingLeft:12}}>{l.presentationLabel??l.name}</td><td className="text-end">{formatCompactRupiah(l.balanceRupiah)}</td></tr>)}
+            <tr className="border-top fw-bold"><td>Total Kewajiban</td><td className="text-end">{formatCompactRupiah(d.current.statement.liabilitiesRupiah)}</td></tr>
           </tbody></Table></Card.Body></Card></Col>
         <Col lg={4}><Card><Card.Header className="rpt-card-header">📊 Ekuitas</Card.Header><Card.Body className="p-0">
           <Table size="sm" className="mb-0"><thead><tr><th>Akun</th><th className="text-end">Nilai</th></tr></thead><tbody>
-            {d.current.lines?.equity?.map((l:any,i:number)=>l.balanceRupiah!==0&&<tr key={i}><td style={{paddingLeft:12}}>{l.presentationLabel??l.name}</td><td className="text-end">{formatCompact(l.balanceRupiah)}</td></tr>)}
-            <tr className="border-top fw-bold"><td>Total Ekuitas</td><td className="text-end">{formatCompact(d.current.statement.equityRupiah)}</td></tr>
+            {d.current.lines?.equity?.map((l:any,i:number)=>l.balanceRupiah!==0&&<tr key={i}><td style={{paddingLeft:12}}>{l.presentationLabel??l.name}</td><td className="text-end">{formatCompactRupiah(l.balanceRupiah)}</td></tr>)}
+            <tr className="border-top fw-bold"><td>Total Ekuitas</td><td className="text-end">{formatCompactRupiah(d.current.statement.equityRupiah)}</td></tr>
           </tbody></Table></Card.Body></Card></Col>
       </Row>
       <small className="text-muted mt-2 d-block">{d.note}</small>

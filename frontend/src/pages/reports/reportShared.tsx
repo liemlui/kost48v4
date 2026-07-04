@@ -68,18 +68,9 @@ export const EXPENSE_CATEGORY_LABELS: Record<string, string> = {
   OTHER: 'Lainnya',
 };
 
-export function formatRupiah(value: number): string {
-  return new Intl.NumberFormat('id-ID').format(value || 0);
-}
+import { formatRupiah, formatCompactRupiah } from '../../utils/formatCurrency';
 
-export function formatCompactRupiah(value: number): string {
-  const safe = Math.abs(value || 0);
-  const sign = value < 0 ? '-' : '';
-  if (safe >= 1_000_000_000) return `${sign}Rp ${(safe / 1_000_000_000).toFixed(1)} M`;
-  if (safe >= 1_000_000) return `${sign}Rp ${(safe / 1_000_000).toFixed(1)} jt`;
-  if (safe >= 1_000) return `${sign}Rp ${(safe / 1_000).toFixed(0)} rb`;
-  return `${sign}Rp ${formatRupiah(safe)}`;
-}
+export { formatRupiah, formatCompactRupiah };
 
 export function currentYearMonth(): { year: number; month: number } {
   const d = new Date();

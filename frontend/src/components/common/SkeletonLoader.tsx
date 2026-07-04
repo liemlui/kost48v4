@@ -47,7 +47,7 @@ export function HeroSkeleton() {
       <SkeletonBlock width={180} height={24} className="mb-3" />
       <div className="metric-grid mb-3">
         {Array.from({ length: 4 }).map((_, index) => (
-          <div className="metric-tile" key={index}>
+          <div className="metric-tile" key={`hero-metric-${index}`}>
             <SkeletonBlock width={90} height={12} className="mb-2" />
             <SkeletonBlock width={110} height={20} />
           </div>

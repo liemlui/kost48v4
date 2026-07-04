@@ -4,13 +4,9 @@ import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { fetchFinancialRatios, type FinancialRatiosStatement } from '../../api/accounting';
 
+import { formatCompactRupiah } from '../../utils/formatCurrency';
+
 function currentYearMonth() { const d=new Date(); return {year:d.getFullYear(),month:d.getMonth()+1}; }
-function formatRupiah(v:number) { return new Intl.NumberFormat('id-ID').format(v||0); }
-function formatCompact(v:number) {
-  const s=Math.abs(v||0),sign=v<0?'-':''; if(s>=1e9)return `${sign}Rp${(s/1e9).toFixed(1)}M`;
-  if(s>=1e6)return `${sign}Rp${(s/1e6).toFixed(1)}jt`; if(s>=1e3)return `${sign}Rp${(s/1e3).toFixed(0)}rb`;
-  return `${sign}Rp${formatRupiah(s)}`;
-}
 
 function labelBadge(label:string,scheme:{BAIK:string,CUKUP:string,EFISIEN?:string,RENDAH?:string,BOROS?:string,TINGGI?:string}) {
   const colorMap:Record<string,string>={BAIK:'success',CUKUP:'warning',EFISIEN:'success',RENDAH:'secondary',BOROS:'danger',TINGGI:'danger'};
@@ -42,7 +38,7 @@ export default function FinancialRatiosPage() {
             <tr><td>Rasio Lancar</td><td className="text-end"><strong>{d.liquidity.currentRatio.toFixed(2)}</strong></td><td>{labelBadge(d.liquidity.label,{BAIK:'BAIK',CUKUP:'CUKUP',RENDAH:'RENDAH'})}</td></tr>
             <tr><td>Rasio Cepat</td><td className="text-end"><strong>{d.liquidity.quickRatio.toFixed(2)}</strong></td><td></td></tr>
             <tr><td>Rasio Kas</td><td className="text-end"><strong>{d.liquidity.cashRatio.toFixed(2)}</strong></td><td></td></tr>
-            <tr><td>Modal Kerja</td><td className="text-end"><strong>{formatCompact(d.liquidity.workingCapitalRupiah)}</strong></td><td></td></tr>
+            <tr><td>Modal Kerja</td><td className="text-end"><strong>{formatCompactRupiah(d.liquidity.workingCapitalRupiah)}</strong></td><td></td></tr>
           </tbody></Table></Card.Body></Card></Col>
         <Col lg={6}><Card className="h-100"><Card.Header style={{fontWeight:600,fontSize:14,background:'#f8fafc'}}>📈 Profitabilitas</Card.Header><Card.Body>
           <Table size="sm" className="mb-0"><tbody>

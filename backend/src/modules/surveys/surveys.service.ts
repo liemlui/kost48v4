@@ -24,7 +24,8 @@ export class SurveysService {
   }
 
   async summary() {
-    const rows = await this.prisma.satisfactionSurvey.findMany({ orderBy: { id: 'desc' } });
+    // M4: batasi 200 row terbaru — summary cukup dari sampel representatif, tidak perlu semua historis.
+    const rows = await this.prisma.satisfactionSurvey.findMany({ orderBy: { id: 'desc' }, take: 200 });
     const avg = (pick: (r: (typeof rows)[number]) => number | null | undefined) => {
       const vals = rows.map(pick).filter((v): v is number => typeof v === 'number');
       return vals.length ? Math.round((vals.reduce((a, b) => a + b, 0) / vals.length) * 10) / 10 : null;

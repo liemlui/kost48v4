@@ -1,4 +1,5 @@
 import { useMemo, useState, type ReactNode } from 'react';
+import { formatRupiahWithoutSymbol, formatCompactRupiah } from '../../utils/formatCurrency';
 import { Alert, Badge, Button, Card, Col, Container, Form, Row } from 'react-bootstrap';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
@@ -56,18 +57,7 @@ function monthLabel(ym: { year: number; month: number }) {
   return new Date(ym.year, ym.month - 1).toLocaleString('id-ID', { month: 'long', year: 'numeric' });
 }
 
-function formatRupiah(value: number): string {
-  return new Intl.NumberFormat('id-ID').format(value || 0);
-}
 
-function formatCompactRupiah(value: number): string {
-  const safe = Math.abs(value || 0);
-  const sign = value < 0 ? '-' : '';
-  if (safe >= 1_000_000_000) return `${sign}Rp ${(safe / 1_000_000_000).toFixed(1)} M`;
-  if (safe >= 1_000_000) return `${sign}Rp ${(safe / 1_000_000).toFixed(1)} jt`;
-  if (safe >= 1_000) return `${sign}Rp ${(safe / 1_000).toFixed(0)} rb`;
-  return `${sign}Rp ${formatRupiah(safe)}`;
-}
 
 type ChangeMeta = { label: string; color: string };
 
@@ -373,7 +363,7 @@ export default function OwnerDashboardPage() {
                           <span className={`owner-signal-dot owner-signal-${signal.type}`} aria-hidden="true" />
                           <span className="owner-signal-content">
                             <strong>{signal.type === 'overdue' ? 'Tagihan overdue' : signal.type === 'pending_payment' ? 'Pembayaran pending' : 'Tagihan outstanding'}</strong>
-                            <small>{signal.count} item{signal.totalRupiah ? ` - Rp ${formatRupiah(signal.totalRupiah)}` : ''}</small>
+                            <small>{signal.count} item{signal.totalRupiah ? ` - Rp ${formatRupiahWithoutSymbol(signal.totalRupiah)}` : ''}</small>
                           </span>
                           <span className="owner-signal-arrow" aria-hidden="true">&rsaquo;</span>
                         </button>
