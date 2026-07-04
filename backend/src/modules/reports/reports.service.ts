@@ -363,7 +363,7 @@ export class ReportsService {
       }),
       this.prisma.invoicePayment.aggregate({
         _sum: { amountRupiah: true },
-        where: { paymentDate: { gte: start, lt: end } },
+        where: { invoice: { periodStart: { gte: start, lt: end } } },
       }),
     ]);
 
@@ -379,9 +379,9 @@ export class ReportsService {
       ? Math.round((netProfit / totalRevenue) * 10000) / 100
       : 0;
 
-    // Collection Rate (period: payments received vs billed — basis periode berbeda)
-    // AL-FIX-4: totalBilled = invoice.periodStart (akrual), totalPaid = paymentDate (kas).
-    // PERHATIAN: dua jendela berbeda → rate >100% mungkin terjadi.
+    // Collection Rate (period: payments received vs billed — invoice periodStart basis)
+    // AL-FIX-4: payment filter by invoice.periodStart, bukan paymentDate — numerator & denominator
+    // pakai jendela yang sama.
     const collectionRate = totalBilled > 0
       ? Math.round((totalPaid / totalBilled) * 10000) / 100
       : 0;

@@ -70,6 +70,7 @@ export default function SimpleCrudPage({ config, hideAreaMenu = false }: { confi
   const [resourceFilter, setResourceFilter] = useState<ResourceFilterId>('ALL');
   const [stockMovementConfirm, setStockMovementConfirm] = useState<{ payload: Record<string, unknown>; isEdit: boolean } | null>(null);
   const [page, setPage] = useState(1);
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
   const PAGE_SIZE = 5;
   const movementContext = searchParams.toString();
 
@@ -105,6 +106,12 @@ export default function SimpleCrudPage({ config, hideAreaMenu = false }: { confi
     retry: false,
     refetchOnWindowFocus: false,
   });
+
+  useEffect(() => {
+    if (!query.isFetching && isInitialLoading) {
+      setIsInitialLoading(false);
+    }
+  }, [isInitialLoading, query.isFetching]);
 
   const tenantsRefQuery = useQuery({
     queryKey: ['resource-ref', '/tenants'],
@@ -568,6 +575,9 @@ export default function SimpleCrudPage({ config, hideAreaMenu = false }: { confi
       />
 
       {error ? <Alert variant="danger">{error}</Alert> : null}
+      {isInitialLoading && query.isFetching ? (
+        <div className="py-4 text-center text-muted">Memuat data...</div>
+      ) : null}
       {config.path === '/expenses' && (user?.role === 'OWNER' || user?.role === 'ADMIN') ? (
         <ExpenseReceiptUpload
           onApplyDraft={applyExpenseReceiptDraft}

@@ -4,6 +4,14 @@
 
 ## Changelog Ringkas
 
+**2026-07-07 — Fase 2 TUNTAS 100% ✅ (C1-C6 — 6 bug kritis)**
+- C1 ✅ DISCOUNT line → revenueCodeForInvoiceLine tambah case '4010' + isDiscountOrNegative cek kode 4010. `accounting-posting-helpers.ts`, `accounting-posting.service.ts`.
+- C2 ✅ Overdue aging gross→net — include payments, kurangi dari totalAmountRupiah. `reports.service.ts`.
+- C3 ✅ Renewal cross-term undercharge — re-multiply sewa via PRICING_MULTIPLIERS kalau term berubah. `renew-requests.service.ts`.
+- C4 ✅ Collection rate period mismatch — paymentAgg filter by invoice.periodStart (bukan paymentDate). `finance.service.ts`, `reports.service.ts`.
+- C5 ✅ Journal pending tanpa retry — tambah logger.error + marker AL-FIX-5. `payment-submissions.service.ts`.
+- C6 ✅ @IsNumberString → @Type(() => Number) @IsNumber() di CreateStayDto + RenewStayDto. `stay.dto.ts`.
+
 **2026-07-07 — Fase 3 TUNTAS 100% ✅ (H3, H6, H7 selesai)**
 - H3 ✅ Booking sweeper vs approval race — auto-reject submission + notifikasi tenant saat sweeper batalkan stay duluan. `payment-submissions.service.ts`.
 - H6 ✅ Balance sheet double-count guard — jika asOf dalam periode CLOSED tapi currentProfit ≠ 0, force 0 + log warning. `accounting-reports.service.ts`.

@@ -1,7 +1,7 @@
-import { IsNotEmpty, IsString } from 'class-validator';
+import { IsOptional, IsString } from 'class-validator';
 
 export class RejectPaymentSubmissionDto {
+  @IsOptional()
   @IsString()
-  @IsNotEmpty()
-  reviewNotes!: string;
+  reviewNotes?: string;
 }

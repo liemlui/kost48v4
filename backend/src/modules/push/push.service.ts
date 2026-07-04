@@ -9,6 +9,14 @@ import { SubscribePushDto } from './dto/push-subscription.dto';
  * Outbox in-place: AppNotification.pushStatus (NONE/PENDING/SENT/FAILED) jadi antrean.
  * VAPID dibaca dari env; bila tak ada → push nonaktif (notif in-app tetap jalan).
  */
+export function normalizePushStatusCode(error: unknown): number | undefined {
+  const candidate = (error as { statusCode?: unknown } | undefined)?.statusCode;
+  if (candidate === null || candidate === undefined || candidate === '') return undefined;
+
+  const parsed = typeof candidate === 'number' ? candidate : Number(candidate);
+  return Number.isFinite(parsed) ? parsed : undefined;
+}
+
 @Injectable()
 export class PushService implements OnModuleInit {
   private readonly logger = new Logger(PushService.name);
@@ -134,14 +142,14 @@ export class PushService implements OnModuleInit {
             .update({ where: { id: sub.id }, data: { lastUsedAt: new Date() } })
             .catch(() => undefined);
         } catch (error: any) {
-          const status = Number(error?.statusCode);
+          const status = normalizePushStatusCode(error);
           if (status === 404 || status === 410) {
             await this.prisma.pushSubscription
               .update({ where: { id: sub.id }, data: { isActive: false } })
               .catch(() => undefined);
             deactivated += 1;
           } else {
-            this.logger.warn(`Push gagal (sub #${sub.id}, status ${status || '?'}): ${error?.message ?? error}`);
+            this.logger.warn(`Push gagal (sub #${sub.id}, status ${status ?? '?'}): ${error?.message ?? error}`);
           }
         }
       }

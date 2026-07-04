@@ -73,9 +73,10 @@ export class CreateBackofficeTicketDto extends TicketImageFieldsDto {
   @IsNotEmpty({ message: "Deskripsi tiket wajib diisi" })
   description!: string;
 
-  @IsOptional()
+  @IsString({ message: "Kategori tiket wajib diisi" })
+  @IsNotEmpty({ message: "Kategori tiket wajib diisi" })
   @IsIn(BACKOFFICE_TICKET_CATEGORIES as unknown as string[], { message: "Kategori tiket backoffice tidak valid" })
-  category?: string;
+  category!: string;
 }
 
 export class CreatePortalTicketDto extends TicketImageFieldsDto {

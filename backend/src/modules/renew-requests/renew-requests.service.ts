@@ -487,18 +487,35 @@ export class RenewRequestsService {
   //  SECTION: Query & Notification Helpers
   // ═══════════════════════════════════════════════════════════
 
-  async findAll(status?: RenewRequestStatus) {
+  async findAll(status?: RenewRequestStatus, page = 1, limit = 20) {
+    const safePage = Math.max(1, Math.floor(Number(page) || 1));
+    const safeLimit = Math.max(1, Math.min(100, Math.floor(Number(limit) || 20)));
+    const skip = (safePage - 1) * safeLimit;
     const where = status ? { status } : {};
-    const items = await this.prisma.renewRequest.findMany({
-      where,
-      include: {
-        stay: { select: { id: true, agreedRentAmountRupiah: true, tenant: { select: { fullName: true, phone: true } }, room: { select: { code: true } } } },
-        tenant: { select: { fullName: true } },
-        reviewedBy: { select: { fullName: true } },
+    const [items, totalItems] = await this.prisma.$transaction([
+      this.prisma.renewRequest.findMany({
+        where,
+        include: {
+          stay: { select: { id: true, agreedRentAmountRupiah: true, tenant: { select: { fullName: true, phone: true } }, room: { select: { code: true } } } },
+          tenant: { select: { fullName: true } },
+          reviewedBy: { select: { fullName: true } },
+        },
+        orderBy: { createdAt: 'desc' },
+        skip,
+        take: safeLimit,
+      }),
+      this.prisma.renewRequest.count({ where }),
+    ]);
+    const hydrated = await this.attachInvoiceSnapshots(items);
+    return {
+      items: hydrated,
+      meta: {
+        totalItems,
+        totalPages: Math.max(1, Math.ceil(totalItems / safeLimit)),
+        page: safePage,
+        limit: safeLimit,
       },
-      orderBy: { createdAt: 'desc' },
-    });
-    return this.attachInvoiceSnapshots(items);
+    };
   }
 
   /** Tenant gets their own renew requests. */

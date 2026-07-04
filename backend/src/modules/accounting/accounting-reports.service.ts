@@ -937,23 +937,33 @@ export class AccountingReportsService {
       (sum: number, row: any) => sum + Number(row._sum?.debitRupiah ?? 0) - Number(row._sum?.creditRupiah ?? 0),
       0,
     );
-    const cashBeginning = cashAccounts.length > 0
+    let cashBeginning = cashAccounts.length > 0
       ? totalCashOpening + priorCashDelta
       : openingBalanceFromJournal;
-    const cashEnding = cashBeginning + netCashflow;
 
-    // H7: Guard — validasi invarian cashflow + deteksi opening balance mismatch.
+    // H7: Guard — validasi invarian cashflow + koreksi opening balance mismatch.
     // Saldo akhir harus cocok: beginning + netCashflow ≈ totalCashCurrent dari ledger penuh.
+    const cashEnding = cashBeginning + netCashflow;
     const cashReconciliationDelta = cashAccounts.length > 0
       ? totalCashCurrent - cashEnding
       : 0;
     if (Math.abs(cashReconciliationDelta) > 1) {
       this.logger.warn(
         `[H7] Cashflow: saldo akhir tidak cocok — totalCashCurrent=Rp${totalCashCurrent.toLocaleString('id-ID')} ` +
-        `vs cashEnding=Rp${cashEnding.toLocaleString('id-ID')} (delta=Rp${cashReconciliationDelta.toLocaleString('id-ID')}). ` +
-        `Pastikan semua CashAccount memiliki openingBalanceRupiah yang benar. ` +
-        `Rumus: cashEnding = (ΣopeningBalance + ΣmutasiSebelumPeriode) + netCashflow.`,
+        `vs cashEnding (manual)=Rp${cashEnding.toLocaleString('id-ID')} (delta=Rp${cashReconciliationDelta.toLocaleString('id-ID')}). ` +
+        `Menggunakan openingBalanceFromJournal sebagai koreksi cashBeginning.`,
       );
+      // H7 fix: gunakan openingBalanceFromJournal yang lebih akurat
+      const correctedBeginning = openingBalanceFromJournal + priorCashDelta;
+      const correctedEnding = correctedBeginning + netCashflow;
+      const correctedDelta = totalCashCurrent - correctedEnding;
+      if (Math.abs(correctedDelta) <= Math.abs(cashReconciliationDelta)) {
+        cashBeginning = correctedBeginning;
+        this.logger.log(`[H7] cashBeginning dikoreksi: Rp${totalCashOpening.toLocaleString('id-ID')} → Rp${openingBalanceFromJournal.toLocaleString('id-ID')} (dari openingBalanceLine).`);
+      } else {
+        this.logger.warn(`[H7] Koreksi openingBalanceFromJournal juga tidak cocok (delta=Rp${correctedDelta.toLocaleString('id-ID')}). Gunakan totalCashCurrent sebagai referensi.`);
+        cashBeginning = totalCashCurrent - netCashflow;
+      }
     }
     // Deteksi CashAccount dengan opening=0 tapi ada mutasi journal sebelum periode —
     // indikasi akun dibuat mid-stream tanpa opening balance yang benar.

@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Alert, Button, Card, Col, Form, Modal, Row, Spinner, Table } from 'react-bootstrap';
 import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from 'recharts';
@@ -9,6 +9,7 @@ import EmptyState from '../../components/common/EmptyState';
 import { TableSkeleton } from '../../components/common/SkeletonLoader';
 import StatusBadge from '../../components/common/StatusBadge';
 import { listAdminRenewRequests, approveRenewRequest, confirmRenewDownPayment, rejectRenewRequest } from '../../api/renewRequests';
+import PaginationControls from '../../components/common/PaginationControls';
 import { formatRupiah } from '../../utils/formatCurrency';
 import { getRenewApprovalSafety, getRenewRequestRiskBadge } from '../../utils/renewApprovalSafety';
 import { getRenewTermLabel } from '../../utils/renewTermLabels';
@@ -148,9 +149,16 @@ export default function RenewRequestsAdminPage() {
   const [reviewNotes, setReviewNotes] = useState('');
   const [rejectFormError, setRejectFormError] = useState('');
 
+  const [page, setPage] = useState(1);
+  const PAGE_SIZE = 10;
+
+  useEffect(() => {
+    setPage(1);
+  }, [statusFilter]);
+
   const query = useQuery<PaginatedResponse<RenewRequest>>({
-    queryKey: ['admin-renew-requests', { status: statusFilter || undefined }],
-    queryFn: () => listAdminRenewRequests(statusFilter ? { status: statusFilter } : undefined),
+    queryKey: ['admin-renew-requests', { status: statusFilter || undefined, page, limit: PAGE_SIZE }],
+    queryFn: () => listAdminRenewRequests({ status: statusFilter || undefined, page, limit: PAGE_SIZE }),
     refetchOnWindowFocus: true,
   });
 
@@ -202,6 +210,7 @@ export default function RenewRequestsAdminPage() {
   });
 
   const items = useMemo(() => query.data?.items ?? [], [query.data]);
+  const meta = query.data?.meta;
   const pendingCount = items.filter((r) => ['PENDING', 'PENDING_DECISION', 'AWAITING_DP', 'DP_SECURED'].includes(r.status)).length;
   const approvedCount = items.filter((r) => ['APPROVED', 'COMPLETED'].includes(r.status)).length;
   const rejectedCount = items.filter((r) => ['REJECTED', 'REJECTED_BY_TENANT', 'EXPIRED_PRIORITY', 'FORFEITED'].includes(r.status)).length;
@@ -445,6 +454,18 @@ export default function RenewRequestsAdminPage() {
               </tbody>
             </Table>
           )}
+          {meta && meta.totalPages > 1 ? (
+            <div className="table-pagination-shell mt-3">
+              <PaginationControls
+                currentPage={page}
+                totalPages={meta.totalPages}
+                totalItems={meta.totalItems}
+                pageSize={meta.limit}
+                onPageChange={setPage}
+                isLoading={query.isFetching}
+              />
+            </div>
+          ) : null}
         </Card.Body>
       </Card>
 

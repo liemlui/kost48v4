@@ -22,13 +22,15 @@ export class RenewRequestsAdminController {
 
   @Get()
   @ApiQuery({ name: 'status', enum: RenewRequestStatus, required: false })
-  async findAll(@Query('status') status?: RenewRequestStatus) {
-    const items = await this.renewRequestsService.findAll(status);
+  async findAll(@Query('status') status?: RenewRequestStatus, @Query('page') page?: string, @Query('limit') limit?: string) {
+    const parsedPage = Number(page ?? 1);
+    const parsedLimit = Number(limit ?? 20);
+    const result = await this.renewRequestsService.findAll(status, parsedPage, parsedLimit);
     return {
       message: 'Daftar permintaan perpanjangan berhasil diambil',
       data: {
-        items,
-        meta: buildMeta(1, Math.max(items.length, 1), items.length),
+        items: result.items,
+        meta: buildMeta(result.meta.page, result.meta.limit, result.meta.totalItems),
       },
     };
   }

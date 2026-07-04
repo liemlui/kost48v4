@@ -21,7 +21,7 @@ export async function listMyRenewRequests(): Promise<PaginatedResponse<RenewRequ
   return normalizeRenewRequests(data);
 }
 
-export async function listAdminRenewRequests(params?: { status?: string }): Promise<PaginatedResponse<RenewRequest>> {
+export async function listAdminRenewRequests(params?: { status?: string; page?: number; limit?: number }): Promise<PaginatedResponse<RenewRequest>> {
   const data = await listResource<RenewRequest>('/admin/renew-requests', params as Record<string, unknown>) as unknown as RenewRequest[] | PaginatedResponse<RenewRequest>;
   return normalizeRenewRequests(data);
 }

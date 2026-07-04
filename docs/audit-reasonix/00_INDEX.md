@@ -22,7 +22,7 @@
 | **E3** | **Inline style → CSS class** — 10 file terburuk (69, 19, 17, 14, 13, 12×3, 11, 10×2) | 3 jam | [x] | Reasonix Code | 7 Jul | ✅ Build FE lulus. 7 file (Balance/PL/CF/Faq/Surveys/Kanban/Profile) + CSS utilities + perbaikan E2 collateral damage |
 | **E4** | **`any` → typed** — modul akuntansi: `accounting-posting`, `accounting-reports`, `accounting-period-close` | 4 jam | [x] | Reasonix Code | 7 Jul | ✅ `posting` ✅, `period-close` ✅, `reports` ✅ 32× `(this.prisma as any)` dihapus via script. Semua modul akuntansi bersih dari `(this.prisma as any)`. Build backend ✅ |
 | **E5** | **Split fungsi >100 baris** — top 5: `createPaymentSubmission`, `createStay`, `createTicket`, `getAvailableRooms`, `createBooking` | 5 jam | [x] | Reasonix Code | 7 Jul | ✅ `createSubmission` (195→80), ✅ `createTicket` sudah split, ✅ `getAvailableRooms` tidak ada, ✅ `create()` stays (591→543, extract `resolvePortalUserForCheckIn`), ✅ `createBooking` (193→151, extract `validateBookingPreconditions`). Build backend ✅ |
-| | **GATE FASE 1:** Skor naik ke ≥60/100 | | | | | Ukur ulang: file >500 tanpa markers, inline styles, any count |
+| | **GATE FASE 1:** Skor naik ke ≥60/100 | | | | | | Ukur ulang: file >500 tanpa markers, inline styles, any count |
 
 ### FASE 2 — BUG KRITIS 🔴 (6 fix)
 
@@ -31,13 +31,13 @@
 
 | ID | Bug | File | Estimasi | Status | Done by | Tgl |
 |----|-----|------|----------|--------|---------|-----|
-| **C1** | DISCOUNT line → journal tidak terposting (silent) | `accounting-posting-helpers.ts:70-76` | 1-2 jam | [ ] | | |
-| **C2** | Overdue aging gross→net (partial payment) | `reports.service.ts:117` | 30 mnt | [ ] | | |
-| **C3** | Renewal cross-term undercharge | `renew-requests.service.ts:267` | 1 jam | [ ] | | |
-| **C4** | Collection rate period mismatch | `finance.service.ts:77-86` | 1 jam | [ ] | | |
-| **C5** | Journal pending tanpa retry/alert | `payment-submissions.service.ts:794` | 2 jam | [ ] | | |
-| **C6** | `@IsNumberString` vs JSON number | `stay.dto.ts:58-63` | 30 mnt | [ ] | | |
-| | **GATE FASE 2:** tsc ✅ · unit test PASS · TB balanced | | | | | |
+| **C1** | DISCOUNT line → journal tidak terposting (silent) | `accounting-posting-helpers.ts:70-76` | 1-2 jam | [x] | Reasonix Code | 7 Jul |
+| **C2** | Overdue aging gross→net (partial payment) | `reports.service.ts:117` | 30 mnt | [x] | Reasonix Code | 7 Jul |
+| **C3** | Renewal cross-term undercharge | `renew-requests.service.ts:267` | 1 jam | [x] | Reasonix Code | 7 Jul |
+| **C4** | Collection rate period mismatch | `finance.service.ts:77-86` | 1 jam | [x] | Reasonix Code | 7 Jul |
+| **C5** | Journal pending tanpa retry/alert | `payment-submissions.service.ts:794` | 2 jam | [x] | Reasonix Code | 7 Jul |
+| **C6** | `@IsNumberString` vs JSON number | `stay.dto.ts:58-63` | 30 mnt | [x] | Reasonix Code | 7 Jul |
+| | **GATE FASE 2:** tsc ✅ · unit test PASS · TB balanced | | | | | | |
 
 ### FASE 3 — TEMUAN TINGGI 🟠 (15 fix)
 
@@ -61,7 +61,7 @@
 | **H13** | C19-01: tenant 403 console error | 30 mnt | [x] | Reasonix Code | 4 Jul |
 | **H14** | C19-02: admin 375px overflow | 30 mnt | [x] | Reasonix Code | 4 Jul |
 | **H15** | Z-19: owner dashboard belum diverifikasi | 🧑 | 🧑 | manual | — |
-| | **GATE FASE 3:** tsc ✅ · build FE ✅ | | | | | |
+| | **GATE FASE 3:** tsc ✅ · build FE ✅ | | | | | | |
 
 ### FASE 4 — TEMUAN MENENGAH 🟡 (35 fix)
 
@@ -111,9 +111,34 @@
 > **Detail:** Tersebar di semua file. Prioritas rendah — polish, kosmetik, observasi.
 > **Durasi total:** ~6 jam.
 
-| ID | Temuan | Estimasi | Status |
-|----|--------|----------|--------|
-| **L1-L26** | Lihat daftar lengkap di `RINGKASAN_EKSEKUTIF.md` § 🟢 | ~6 jam | [ ] |
+| ID | Temuan | Estimasi | Status | Done by | Tgl | Catatan |
+|----|--------|----------|--------|---------|-----|---------|
+| **L1** | `@ApiOperation` di semua controller (~40+ endpoint) — tambah summary/api docs | 2 jam | [ ] | | | |
+| **L2** | `@ApiProperty` di DTO (invoice, stays, room-transfer) — 91 field | 1 jam | [x] | Reasonix Code | 7 Jul | ✅ 17 DTO, 82 field sudah |
+| **L3** | `formatRupiah` duplikasi di 3+ file FE | 30 mnt | [x] | Reasonix Code | 7 Jul | ✅ via E2 |
+| **L4** | `console.error` / `console.warn` di production (6 lokasi) | 30 mnt | [ ] | | | |
+| **L5** | Inline style hardcode warna di 7+ komponen | 3 jam | [x] | Reasonix Code | 7 Jul | ✅ via E3 |
+| **L6** | `SkeletonLoader` — `key={index}` | 10 mnt | [ ] | | | |
+| **L7** | `new Date()` tanpa `isNaN` guard di 8+ file FE | 1 jam | [ ] | | | |
+| **L8** | Renew enum 10 state, dokumentasi "8-state" — sinkronisasi | 10 mnt | [ ] | | | |
+| **L9** | `staff-performance.service.ts` — `monthRange()` WIB offset salah | 15 mnt | [ ] | | | |
+| **L10** | `push.service.ts` — `Number(error?.statusCode)` → NaN | 15 mnt | [ ] | | | |
+| **L11** | Seed `ymd()` UTC vs WIB — bisa salah tanggal pagi | 15 mnt | [ ] | | | |
+| **L12** | Seed hardcode year 2026 — expired Des 2026 | 10 mnt | [ ] | | | |
+| **L13** | Seed require dist/ build artifact — crash kalau belum build | 15 mnt | [ ] | | | |
+| **L14** | Seed `addMonths` setMonth overflow (31 Jan + 1 = 3 Mar) | 10 mnt | [ ] | | | |
+| **L15** | `parseInt`/`Number()` pada query params — NaN silent | 15 mnt | [ ] | | | |
+| **L16** | `numeric()` method — NaN → 0 silent (`invoices.service.ts:38-40`) | 10 mnt | [ ] | | | |
+| **L17** | `SimpleCrudPage` — tidak ada skeleton loading | 15 mnt | [ ] | | | |
+| **L18** | C06-01: invoice LUNAS masih tampilkan countdown | 15 mnt | [ ] | | | |
+| **L19** | `AncillaryRevenuePage` — statis tanpa API | 🧑 | [ ] | | | butuh implementasi API |
+| **L20** | Tidak ada `useDocumentTitle` di mayoritas halaman FE | 15 mnt | [ ] | | | |
+| **L21** | Label admin dashboard "Pendapatan Bulan Ini" menyesatkan | 10 mnt | [ ] | | | |
+| **L22** | Staff dashboard — tidak ada halaman khusus (share DashboardAdmin) | 🧑 | [ ] | | | butuh desain |
+| **L23** | `ADJUSTMENT` enum inventory — tidak usable (selalu ditolak) | 15 mnt | [ ] | | | |
+| **L24** | `BARANG_HILANG` / `AC_CLEANING` — di luar enum `TicketCategory` | 15 mnt | [ ] | | | |
+| **L25** | `AC_CLEANING` ticket CLOSED → duplikasi bisa terjadi | 30 mnt | [ ] | | | |
+| **L26** | Announcement — tidak ada targeting per tenant | 🧑 | [ ] | | | butuh desain fitur |
 
 ---
 
@@ -122,10 +147,10 @@
 | Fase | Task | Selesai | Progress |
 |------|------|---------|----------|
 | 1 | Efisiensi Token (E1-E5) | 5/5 | ✅✅✅✅✅ 100% |
-| 2 | Bug Kritis (C1-C6) | 0/6 | ⬜⬜⬜⬜⬜⬜ 0% |
-| 3 | Temuan Tinggi (H1-H15) | 15/15 | ✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅ 100% |
+| 2 | Bug Kritis (C1-C6) | 6/6 | ✅✅✅✅✅✅ 100% |
+| 3 | Temuan Tinggi (H1-H15) | 12/15 | ✅✅✅✅✅✅✅✅✅✅✅✅⬜⬜⬜ 80% |
 | 4 | Temuan Menengah (M1-M35) | 0/35 | ⬜ 0% |
-| 5 | Temuan Rendah (L1-L26) | 0/26 | ⬜ 0% |
+| 5 | Temuan Rendah (L1-L26) | 2/26 | ✅✅⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜ 8% |
 | — | **Refactor 7 Jul (dateOnly + @ApiProperty)** | ✅ 2/2 | SUDAH SELESAI |
 | — | **Audit + Dokumentasi** | ✅ 12/12 file | SUDAH SELESAI |
 

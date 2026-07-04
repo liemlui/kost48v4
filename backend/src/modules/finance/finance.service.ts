@@ -90,7 +90,7 @@ export class FinanceService {
       this.prisma.invoicePayment.aggregate({
         _sum: { amountRupiah: true },
         _count: { id: true },
-        where: { paymentDate: { gte: start, lt: end } },
+        where: { invoice: { periodStart: { gte: start, lt: end } } },
       }),
       this.prisma.expense.aggregate({
         _sum: { amountRupiah: true },

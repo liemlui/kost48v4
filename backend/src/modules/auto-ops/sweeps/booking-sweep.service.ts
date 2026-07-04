@@ -93,11 +93,30 @@ export class BookingSweepService {
       const blockedSubmissionStatuses = params.forfeitDownPayment
         ? [PaymentSubmissionStatus.PENDING_REVIEW]
         : [PaymentSubmissionStatus.PENDING_REVIEW, PaymentSubmissionStatus.APPROVED];
-      const activeSubmission = await tx.paymentSubmission.findFirst({
-        where: { stayId, status: { in: blockedSubmissionStatuses as any } },
+      // H3: Auto-reject PENDING_REVIEW submissions instead of skipping —
+      // mencegah submission stuck selamanya saat sweeper vs admin race.
+      // APPROVED submission tetap block (uang sudah masuk = keputusan manusia).
+      const pendingReviewSubmissions = params.forfeitDownPayment
+        ? await tx.paymentSubmission.findMany({
+            where: { stayId, status: PaymentSubmissionStatus.PENDING_REVIEW },
+            select: { id: true },
+          })
+        : [];
+      if (pendingReviewSubmissions.length > 0) {
+        await tx.paymentSubmission.updateMany({
+          where: { stayId, status: PaymentSubmissionStatus.PENDING_REVIEW },
+          data: {
+            status: PaymentSubmissionStatus.REJECTED,
+            reviewNotes: 'Dibatalkan sistem: batas waktu pembayaran terlewati. Hubungi admin untuk refund.',
+          },
+        });
+      }
+      // APPROVED submission — jangan auto-cancel, biar keputusan manusia
+      const approvedSubmission = await tx.paymentSubmission.findFirst({
+        where: { stayId, status: PaymentSubmissionStatus.APPROVED },
         select: { id: true },
       });
-      if (activeSubmission) return false;
+      if (approvedSubmission) return false;
 
       const blockedInvoiceStatuses = params.forfeitDownPayment
         ? [InvoiceStatus.PAID]

@@ -60,16 +60,24 @@ export class MaintenanceSweepService {
         select: { id: true, code: true, name: true, acLastCleanedAt: true, acCleanIntervalDays: true, acWattage: true, acUsageHoursPerDay: true },
         take: 100,
       });
+      const roomIds = rooms.map((room) => room.id);
+      const existingAcTickets = roomIds.length
+        ? await this.prisma.ticket.findMany({
+            where: {
+              roomId: { in: roomIds },
+              category: 'AC_CLEANING' as any,
+              status: { in: ['OPEN', 'IN_PROGRESS', 'DONE'] as any },
+            },
+            select: { roomId: true },
+          })
+        : [];
+      const blockedRoomIds = new Set(existingAcTickets.map((ticket) => ticket.roomId));
       let created = 0;
       for (const room of rooms) {
         // F5-4 (AUD-3): hibrid — interval HARI + pemicu dini estimasi kWh (watt × jam/hari).
         const evalAc = evaluateAcCleaning(room, now, { kwhThreshold: Number.isFinite(kwhThreshold) ? kwhThreshold : undefined });
         if (!evalAc.due) continue;
-        const open = await this.prisma.ticket.findFirst({
-          where: { roomId: room.id, category: 'AC_CLEANING' as any, status: { in: ['OPEN', 'IN_PROGRESS', 'DONE'] as any } },
-          select: { id: true },
-        });
-        if (open) continue;
+        if (blockedRoomIds.has(room.id)) continue;
         // F5-3 (AUD-5/D-22.2): tiket cuci AC dibuat TANPA assignee → admin memilih staf internal
         // ATAU menandai vendor luar (handledByVendor). Jadi tak masuk round-robin/KPI staf otomatis.
         const roomLabel = room.code || room.name || `Kamar #${room.id}`;

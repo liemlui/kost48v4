@@ -90,12 +90,17 @@ export class ReminderMockService {
       });
     } catch (error) {
       // Log failure but never throw — mock send must still succeed
+      const message = error instanceof Error ? error.message : String(error);
+      const stack = error instanceof Error ? error.stack : undefined;
       await this.audit.log({
         actorUserId: input.actorUserId,
         action: 'APP_NOTIFICATION_CREATE_FAILED',
         entityType: `REMINDER_${input.type}`,
         entityId: input.candidateId,
-        meta: { error: String(error) },
+        meta: {
+          error: message,
+          ...(stack ? { stack } : {}),
+        },
       });
     }
   }

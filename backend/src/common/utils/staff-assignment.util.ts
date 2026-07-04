@@ -25,12 +25,18 @@ export async function pickRoundRobinStaffTx(db: any): Promise<number | undefined
   if (staff.length === 0) return undefined;
   if (staff.length === 1) return staff[0].id;
 
-  let bestId: number = staff[0].id;
+  const staffIds = staff.map((item: { id: number }) => item.id);
+  const loads = await db.ticket.groupBy({
+    by: ['assignedToId'],
+    where: { assignedToId: { in: staffIds }, status: { in: ACTIVE_TICKET_STATUSES as any } },
+    _count: { assignedToId: true },
+  });
+  const loadByStaff = new Map<number, number>(loads.map((item: { assignedToId: number | null; _count?: { assignedToId?: number } }) => [item.assignedToId ?? -1, item._count?.assignedToId ?? 0]));
+
+  let bestId = staff[0].id;
   let bestLoad = Number.POSITIVE_INFINITY;
   for (const s of staff) {
-    const load = await db.ticket.count({
-      where: { assignedToId: s.id, status: { in: ACTIVE_TICKET_STATUSES as any } },
-    });
+    const load = loadByStaff.get(s.id) ?? 0;
     if (load < bestLoad) {
       bestLoad = load;
       bestId = s.id;

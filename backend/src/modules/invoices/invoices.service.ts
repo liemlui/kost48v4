@@ -10,6 +10,7 @@ import { InvoicesQueryDto } from './dto/invoices-query.dto';
 import { InvoiceLineType, InvoiceStatus, UserRole, UtilityType } from '../../common/enums/app.enums';
 import { AccountingPostingService } from '../accounting/accounting-posting.service';
 import { AccountingReadinessResult, AccountingReadinessService } from '../accounting/accounting-readiness.service';
+import { roundRupiah } from '../../common/business/money.helper';
 
 type InvoiceAccountingPostingStatus = 'POSTED' | 'ALREADY_POSTED' | 'SKIPPED_ACCOUNTING_NOT_READY';
 
@@ -173,11 +174,11 @@ export class InvoicesService {
     if (qtyDecimal.lte(0)) {
       throw new ConflictException('Qty invoice harus lebih dari 0');
     }
-    const unitPriceRupiah = Number(dto.unitPriceRupiah ?? 0);
+    const unitPriceRupiah = roundRupiah(Number(dto.unitPriceRupiah ?? 0));
     if (!Number.isFinite(unitPriceRupiah) || unitPriceRupiah < 0) {
       throw new ConflictException('Harga satuan invoice tidak valid');
     }
-    const lineAmountRupiah = qtyDecimal.times(unitPriceRupiah).toNumber();
+    const lineAmountRupiah = roundRupiah(qtyDecimal.times(unitPriceRupiah).toNumber());
     return {
       invoice: { connect: { id: invoiceId } },
       lineType: dto.lineType as InvoiceLineType,

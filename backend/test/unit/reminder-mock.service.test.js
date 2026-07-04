@@ -153,6 +153,8 @@ test('Y-I2.4: mockSend — notifikasi create gagal, mock tetap sukses + audit er
   assert.strictEqual(failLog.entityType, 'REMINDER_INVOICE_DUE');
   assert.ok(failLog.meta.error);
   assert.ok(failLog.meta.error.includes('DB timeout'));
+  assert.ok(failLog.meta.stack);
+  assert.ok(failLog.meta.stack.includes('DB timeout'));
 });
 
 // ════════════════════════════════════════════════════════════════════════════
