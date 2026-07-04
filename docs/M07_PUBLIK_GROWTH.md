@@ -18,7 +18,7 @@ MKT-4 CAC/CLV Dashboard selesai (DeepSeek V4 Pro + offline fallback). Audit keua
 
 ## Update 2026-06-19 - Fase G AI Marketing & FAQ
 
-Analisa pasar AI yang sudah ada menjadi bagian Fase G `docs/M12_AI_OWNER_ADMIN.md`. Semua AI marketing tetap manual lewat tombol, OWNER/ADMIN only, hemat token, dan memiliki fallback offline. Default model baru disarankan `deepseek-v4-flash`; model berat hanya untuk analisa strategis/finance Owner-only.
+Analisa pasar AI yang sudah ada menjadi bagian Fase G `docs/M09_AI_OWNER_ADMIN.md`. Semua AI marketing tetap manual lewat tombol, OWNER/ADMIN only, hemat token, dan memiliki fallback offline. Default model baru disarankan `deepseek-v4-flash`; model berat hanya untuk analisa strategis/finance Owner-only.
 
 - **Market analysis:** SWOT/PESTLE/Competitor tetap owner-triggered; jangan auto-run saat halaman dibuka.
 - **CAC/CLV:** AI hanya memberi insight naratif dari snapshot agregat; jangan mengarang paid CAC jika biaya iklan belum diinput.
@@ -552,6 +552,6 @@ LoginPage placeholder "Contoh: nama@email.com atau 0812..." — tapi error messa
 | 5 | Gelapkan `--text-muted` ke `#475569` | WCAG AA compliance | 5 menit |
 | 6 | Tambah konfirmasi logout | Mencegah accidental logout | 15 menit |
 
-> **Instruksi eksekusi detail (SEARCH/REPLACE siap pakai) ada di `docs/M10_CHECKLIST_CHANGELOG.md` → Fase F.**
+> **Instruksi eksekusi detail (SEARCH/REPLACE siap pakai) ada di `docs/M12_CHECKLIST_CHANGELOG.md` → Fase F.**
 > Setiap task di M10 sudah dilengkapi: path file, nomor baris, blok SEARCH/REPLACE eksak, dan perintah verifikasi.
 > AI model kecil (V4 Flash) bisa langsung menjalankan tanpa membaca kode sumber.

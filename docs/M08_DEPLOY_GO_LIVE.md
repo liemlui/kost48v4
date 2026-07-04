@@ -18,7 +18,7 @@ Runbook deploy/PWA, checklist go-live, dan appendix akun dummy untuk DB pengemba
 
 ## Update 2026-06-19 - Env Fase G AI Owner/Admin
 
-Fitur AI berbayar bersifat opsional dan manual-only. Jika belum ingin memakai biaya API, kosongkan `DEEPSEEK_API_KEY` dan sistem harus tetap berjalan dengan fallback offline. Detail: `docs/M12_AI_OWNER_ADMIN.md`.
+Fitur AI berbayar bersifat opsional dan manual-only. Jika belum ingin memakai biaya API, kosongkan `DEEPSEEK_API_KEY` dan sistem harus tetap berjalan dengan fallback offline. Detail: `docs/M09_AI_OWNER_ADMIN.md`.
 
 Env produksi yang disarankan saat AI diaktifkan:
 

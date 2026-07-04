@@ -1,6 +1,6 @@
 # KOST48 V5 — Master Overview & Ground State
 
-> Dokumen orientasi utama. Detail eksekusi → `docs/M10_CHECKLIST_CHANGELOG.md`. Navigasi kode → `docs/CODEMAP.md`.
+> Dokumen orientasi utama. Detail eksekusi → `docs/M12_CHECKLIST_CHANGELOG.md`. Navigasi kode → `docs/M00_CODEMAP.md`.
 
 ## Status Terkini (2026-07-01)
 
@@ -53,11 +53,11 @@
 | `17_PUBLIK_MARKETING_UIUX` | katalog/SEO/UI/chart | 🟢 selesai (SEO 100/100) |
 | `18_AUTH_FONDASI_ONBOARDING` | auth/role/KTP gate | 🟢 selesai |
 | `19_GAMIFIKASI_LOYALITAS` | poin/reward/referral/peer report | 🟢 selesai (F4-9+F4-13) |
-| `M12_AI_OWNER_ADMIN` | AI berbayar DeepSeek (G0-G9) | 🟢 selesai |
+| `M09_AI_OWNER_ADMIN` | AI berbayar DeepSeek (G0-G9) | 🟢 selesai |
 | `archieve/2026-06-20_fase_selesai/M15_FASE_J_HARDENING_AI` | Hardening AI pra-go-live | 🗄️ arsip (J0-J4 selesai) |
 | `archieve/2026-06-20_fase_selesai/M16_PASCA_AUDIT_PLAN` | Pasca-Audit Total | 🗄️ arsip (13 task, commit ac4cc2f) |
 
-**Hierarki sumber kebenaran:** `M02_KEPUTUSAN_OWNER` → kode terverifikasi → dossier domain → `M10_CHECKLIST_CHANGELOG` (urutan eksekusi).
+**Hierarki sumber kebenaran:** `M02_KEPUTUSAN_OWNER` → kode terverifikasi → dossier domain → `M12_CHECKLIST_CHANGELOG` (urutan eksekusi).
 
 ---
 

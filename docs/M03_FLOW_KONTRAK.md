@@ -17,7 +17,7 @@ Peta alur kode krusial, lifecycle utama, kontrak domain, safety belt, dan aturan
 
 ## Update 2026-06-19 — Fase G AI sebagai Sidecar Approval
 
-AI/DeepSeek tidak menambah state machine baru untuk booking, invoice, stay, renewal, checkout, ticket, inventory, atau KTP. AI hanya menjadi sidecar manual Owner/Admin: membaca snapshot ringkas, membuat draft/rekomendasi, lalu manusia menekan tombol approve/simpan existing. Detail penuh: `docs/M12_AI_OWNER_ADMIN.md`.
+AI/DeepSeek tidak menambah state machine baru untuk booking, invoice, stay, renewal, checkout, ticket, inventory, atau KTP. AI hanya menjadi sidecar manual Owner/Admin: membaca snapshot ringkas, membuat draft/rekomendasi, lalu manusia menekan tombol approve/simpan existing. Detail penuh: `docs/M09_AI_OWNER_ADMIN.md`.
 
 - **Tidak ada transisi otomatis:** AI tidak boleh memanggil promote stay, approve payment, reject payment, verify KTP, close ticket, create inventory movement, post journal, atau open room tanpa aksi manusia.
 - **Endpoint domain tetap sumber kebenaran:** semua mutasi tetap lewat controller/service existing yang sudah punya guard status, role, transaksi, dan audit.
@@ -26,7 +26,7 @@ AI/DeepSeek tidak menambah state machine baru untuk booking, invoice, stay, rene
 
 ## Update 2026-06-30 - Override Booking Flow Fase V
 
-**Kontrak terbaru mengalahkan narasi historis di bagian lama dokumen ini.** Bagian `0.2 Representasi "Booking"` di bawah masih menyimpan model lama untuk konteks arsip, tetapi eksekusi baru wajib mengikuti Fase V di `docs/M10_CHECKLIST_CHANGELOG.md`.
+**Kontrak terbaru mengalahkan narasi historis di bagian lama dokumen ini.** Bagian `0.2 Representasi "Booking"` di bawah masih menyimpan model lama untuk konteks arsip, tetapi eksekusi baru wajib mengikuti Fase V di `docs/M12_CHECKLIST_CHANGELOG.md`.
 
 State final status kamar:
 
@@ -56,7 +56,7 @@ Aturan baru:
 ### KOST48 V5 — Flow Map (Peta Alur Kode Krusial)
 **Versi:** 2026-06-13 — sinkronisasi keputusan owner, status kode, dossier `10`-`19`, dan urutan Auto-Ops aktual.
 **Tujuan:** Peta NARASI alur lintas-domain (apa memanggil apa, transisi status, side-effect, invarian).
-> ⚠️ **ANCHOR BARIS:** angka `file:baris` di dokumen ini = posisi METODE pada snapshot audit **2026-06-13** — **INDIKATIF** (pasti bergeser sejak commit tersebut). **Sumber historis:** `docs/archieve/2026-06-16_root_docs_pre_M/_PETA_AI.md §2` + dossier `10`-`19`. Bila ragu, **grep nama metode di `backend/src/`**, jangan andalkan baris; pakai `docs/CODEMAP.md` untuk navigasi modul terkini.
+> ⚠️ **ANCHOR BARIS:** angka `file:baris` di dokumen ini = posisi METODE pada snapshot audit **2026-06-13** — **INDIKATIF** (pasti bergeser sejak commit tersebut). **Sumber historis:** `docs/archieve/2026-06-16_root_docs_pre_M/_PETA_AI.md §2` + dossier `10`-`19`. Bila ragu, **grep nama metode di `backend/src/`**, jangan andalkan baris; pakai `docs/M00_CODEMAP.md` untuk navigasi modul terkini.
 
 <!-- KOST48_DOCS_SYNC_20260630_FLOW_MAP_REVIEWED -->
 

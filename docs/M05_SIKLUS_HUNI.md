@@ -40,7 +40,7 @@ Sesuai analisa PDF, siklus tenant harus terbaca sebagai alur end-to-end: masuk k
 
 ## Update 2026-06-19 - Fase G AI untuk Siklus Huni
 
-AI dalam siklus huni hanya membantu Owner/Admin membaca data dan membuat draft. Detail: `docs/M12_AI_OWNER_ADMIN.md`.
+AI dalam siklus huni hanya membantu Owner/Admin membaca data dan membuat draft. Detail: `docs/M09_AI_OWNER_ADMIN.md`.
 
 - **Payment review assistant:** AI boleh memberi rekomendasi APPROVE/REJECT/ASK_MORE_INFO untuk `PaymentSubmission`, tetapi approval final tetap tombol Owner/Admin dan guard no-partial backend tetap menang.
 - **KTP OCR validator:** foto KTP tidak dikirim ke DeepSeek. OCR gambar tetap lokal; AI hanya boleh menerima teks OCR untuk menormalkan nama/NIK dan memberi warning. `verifyKtp` tetap Owner-only manual.
@@ -56,7 +56,7 @@ Bagian historis `DOSSIER 11` di bawah masih menyebut multi-booking `RESERVED` da
 - `RESERVED` tidak berarti lunas. Reserved-DP dan reserved-lunas harus dibedakan dari invoice/payment.
 - Check-in/serah kunci hanya boleh setelah sewa awal lunas; baru saat itu room menjadi `OCCUPIED` dan meter awal dipromosikan.
 - Booking pesaing yang belum bayar dibatalkan saat pemenang payment approved; pesaing yang sudah transfer perlu jalur refund kalah-cepat.
-- Checklist detail eksekusi ada di `docs/M10_CHECKLIST_CHANGELOG.md` V-00..V-16.
+- Checklist detail eksekusi ada di `docs/M12_CHECKLIST_CHANGELOG.md` V-00..V-16.
 
 ## Bagian 1 - `docs/11_BOOKING_RENEWAL.md`
 

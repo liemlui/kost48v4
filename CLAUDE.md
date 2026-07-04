@@ -3,11 +3,11 @@
 Sistem manajemen kost 48 kamar. Backend NestJS+Prisma+PostgreSQL (`backend/`), frontend React+Vite (`frontend/`). Bahasa kerja: Indonesia.
 
 ## Pintu masuk docs (M-file — JANGAN baca semua)
-1. **`docs/M01_MASTER.md`** — blueprint + ground state + router AI (arsip `_PETA_AI` di `docs/archieve/`).
+1. **`docs/M01_MASTER.md`** — blueprint + ground state + router AI.
 2. **`docs/M02_KEPUTUSAN_OWNER.md`** — 84 keputusan owner (SUMBER KEBENARAN sebelum ubah flow).
-3. **`docs/M10_CHECKLIST_CHANGELOG.md`** — **CHECKLIST AKTIF + antrian eksekusi AI** (baca ANTRIAN, jangan ulang fase selesai). Changelog historis → `docs/M11_CHANGELOG.md`.
-4. **`docs/CODEMAP.md`** — peta modul→path→tanggung jawab + index model + anchor flow. Pakai INI dulu untuk navigasi kode (hemat token), baru Grep simbol.
-5. Domain: **M04** keuangan · **M05** siklus huni · **M06** operasional · **M07** publik/marketing · **M08** deploy · **M09** audit · **M12** AI Owner/Admin.
+3. **`docs/M12_CHECKLIST_CHANGELOG.md`** — **CHECKLIST AKTIF + antrian eksekusi AI** (baca ANTRIAN, jangan ulang fase selesai). Changelog historis → `docs/M13_CHANGELOG.md`.
+4. **`docs/M00_CODEMAP.md`** — peta modul→path→tanggung jawab + index model + anchor flow. Pakai INI dulu untuk navigasi kode (hemat token), baru Grep simbol.
+5. Domain: **M04** keuangan · **M05** siklus huni · **M06** operasional · **M07** publik/marketing · **M08** deploy · **M09** AI Owner/Admin · **M10** peta scope · **M11** default data.
 6. Gate uang: **`docs/M04_KEUANGAN.md`** (verifikasi TB) — WAJIB tiap task finance.
 
 Detail forensik 97 temuan & rencana lama sudah DIBUBARKAN ke dossier; arsip di `docs/archieve/_DEPRECATED_*`. **JANGAN baca** (token bomb): `docs/archieve/*`, `*_STALE.md`, `node_modules`, `reference/*` (buku.md 2.2MB + PDF 5.7MB), `backend/src/generated/*` (Prisma generated, regen via `prisma generate`).
@@ -16,7 +16,7 @@ Detail forensik 97 temuan & rencana lama sudah DIBUBARKAN ke dossier; arsip di `
 - Tidak ada model `Booking` — satu `Stay` mewakili booking→huni→selesai (promoted = `initialMetersPromotedAt` terisi).
 - **DP** (`downPayment*`, 30% sewa, hangus) ≠ **deposit jaminan** (`deposit*`, refundable, dari `Room.defaultDepositRupiah`, SELALU tetap).
 - Tanpa denda keterlambatan. Notifikasi in-app (menuju PWA push). Role: OWNER/ADMIN/STAFF/TENANT.
-- AI/DeepSeek berbayar = **manual button only**, OWNER/ADMIN saja, AI membuat draft/rekomendasi; manusia tetap approve. Detail Fase G: `docs/M12_AI_OWNER_ADMIN.md`.
+- AI/DeepSeek berbayar = **manual button only**, OWNER/ADMIN saja, AI membuat draft/rekomendasi; manusia tetap approve. Detail Fase G: `docs/M09_AI_OWNER_ADMIN.md`.
 - **Lokasi: Jl. Hikmah V No. 48, Surabaya Barat (Pakuwon/PTC)** — bukan Ngagel (koreksi D-01).
 - **Belum publish (DB = data testing); 1 staf; tenant = pengawas kualitas staf; bayar tunai+transfer.** (lihat `M02_KEPUTUSAN_OWNER`)
 
@@ -26,8 +26,8 @@ Detail forensik 97 temuan & rencana lama sudah DIBUBARKAN ke dossier; arsip di `
 - DB UAT: postgres port 5433 `kost48_v3_pro`; produksi 5432 `kost48_v3`. Jangan mutasi DB produksi.
 
 ## Aturan kerja hemat token
-- Navigasi kode: `docs/CODEMAP.md` dulu → lalu Grep simbol di `backend/src` / `frontend/src`. Spesifikasi task → `M10` ANTRIAN + M-file domain.
-- Selesai task: centang `M10` + prepend 1 baris changelog di `docs/M11_CHANGELOG.md`. **Syarat tambahan:** test terkait PASS, kode diverifikasi nyata (bukan hanya klaim dokumen).
+- Navigasi kode: `docs/M00_CODEMAP.md` dulu → lalu Grep simbol di `backend/src` / `frontend/src`. Spesifikasi task → `docs/M12_CHECKLIST_CHANGELOG.md` ANTRIAN + M-file domain.
+- Selesai task: centang `docs/M12_CHECKLIST_CHANGELOG.md` + prepend 1 baris changelog di `docs/M13_CHANGELOG.md`. **Syarat tambahan:** test terkait PASS, kode diverifikasi nyata (bukan hanya klaim dokumen).
 - Tulisan commit & docs berbahasa Indonesia; ikuti gaya entri CHANGELOG yang ada.
 
 ## Aturan efisiensi sesi (cache & /new)
@@ -49,7 +49,7 @@ Detail forensik 97 temuan & rencana lama sudah DIBUBARKAN ke dossier; arsip di `
 - PWA: setiap build ulang (`npm run build`) otomatis dapat `BUILD_ID` baru via `stamp-pwa-build.mjs` — tidak perlu aksi manual; versi di footer terpisah dari build ID internal.
 
 ## Peta scope pengembangan
-- **`docs/PETA_SCOPE.md`** — pemetaan tugas berdasarkan ROLE (OWNER/ADMIN/STAFF/TENANT/PUBLIC) dan FLOW BISNIS (booking→huni→bayar→checkout→akuntansi). Pakai ini untuk langsung lompat ke file yang tepat saat mengerjakan fitur untuk role atau flow tertentu.
+- **`docs/M10_PETA_SCOPE.md`** — pemetaan tugas berdasarkan ROLE (OWNER/ADMIN/STAFF/TENANT/PUBLIC) dan FLOW BISNIS (booking→huni→bayar→checkout→akuntansi). Pakai ini untuk langsung lompat ke file yang tepat saat mengerjakan fitur untuk role atau flow tertentu.
 - 📋 LAPORAN AUDIT UI/UX — PORTAL PENGHUNI KOST48
 ## Hasil Audit + Penerapan Perbaikan
 

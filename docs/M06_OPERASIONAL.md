@@ -20,7 +20,7 @@ Operasional harian: inventaris, staf/tiket/KPI, notifikasi/pengumuman, auth/onbo
 
 ## Update 2026-06-19 - Fase G AI Operasional
 
-AI operasional hanya untuk OWNER/ADMIN dan selalu manual lewat tombol. Detail implementasi ada di `docs/M12_AI_OWNER_ADMIN.md`.
+AI operasional hanya untuk OWNER/ADMIN dan selalu manual lewat tombol. Detail implementasi ada di `docs/M09_AI_OWNER_ADMIN.md`.
 
 - **Ticket assistant:** AI boleh merangkum tiket, menyarankan prioritas, draft note, atau aksi lanjutan. Admin/Owner tetap klik assign/start/close/request-photo secara manual.
 - **Inventory assistant:** AI boleh menyusun rekomendasi reorder, stok rendah, atau estimasi pembelian. Mutasi stok, movement, expense, dan perubahan fasilitas tetap melalui endpoint existing dan approval manusia.

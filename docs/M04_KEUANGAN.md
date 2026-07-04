@@ -19,7 +19,7 @@ Semua fondasi keuangan: harness verifikasi, pembayaran/invoice, accounting, lapo
 
 ## Update 2026-06-30 — Override Booking Flow Fase V
 
-**Kontrak room status final mengikuti Fase V di `docs/M10_CHECKLIST_CHANGELOG.md`:**
+**Kontrak room status final mengikuti Fase V di `docs/M12_CHECKLIST_CHANGELOG.md`:**
 
 ```txt
 Booking dibuat, belum bayar        -> Room AVAILABLE
@@ -36,7 +36,7 @@ Aturan baru yang memengaruhi keuangan:
 - **Booking pesaing unpaid dibatalkan** saat pemenang payment approved; pesaing yang sudah transfer perlu jalur refund kalah-cepat.
 - Label `Reserved-DP` vs `Reserved-Lunas` dibedakan dari payment data, bukan room status.
 
-Untuk eksekusi coding, AI eksekutor WAJIB membaca `docs/M10_CHECKLIST_CHANGELOG.md` Fase V (V-00..V-16) sebagai sumber kebenaran, bukan narasi historis di bagian lama dokumen ini.
+Untuk eksekusi coding, AI eksekutor WAJIB membaca `docs/M12_CHECKLIST_CHANGELOG.md` Fase V (V-00..V-16) sebagai sumber kebenaran, bukan narasi historis di bagian lama dokumen ini.
 
 ## Update 2026-06-20 — Fase K: Unifikasi Arus Kas ✅
 
@@ -72,7 +72,7 @@ Sesuai analisa PDF dan temuan owner 2026-06-16, invoice tidak boleh hanya terbac
 
 ## Update 2026-06-19 - Fase G AI Finance Analyst
 
-AI finance hanya boleh menjadi analis dan pembuat draft keputusan Owner/Admin. Detail implementasi ada di `docs/M12_AI_OWNER_ADMIN.md`.
+AI finance hanya boleh menjadi analis dan pembuat draft keputusan Owner/Admin. Detail implementasi ada di `docs/M09_AI_OWNER_ADMIN.md`.
 
 - **Manual only:** tombol seperti "Analisa Finance dengan AI" tidak boleh terpanggil otomatis saat halaman finance dibuka.
 - **Owner-only untuk analisa mendalam:** AI membaca snapshot trial balance, P&L, cashflow, ratios, readiness, period close, dan deposit reconciliation; output berupa temuan, risiko, dan rekomendasi.

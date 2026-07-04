@@ -88,7 +88,7 @@ Semua keputusan owner terkait keuangan (no-partial, DP 30%, deposit=Room.default
 
 ### OWN-STRUKTUR-PHASE2 ✅ SELESAI (Fase C + H + I)
 
-Toggle Owner/Admin phase 1 berfungsi penuh. UI telah diperbaiki melalui Fase C (toggle segmented control, route split, sidebar context-aware, breadcrumb), Fase H (sidebar compact 18→7, dashboard 6→3 tab), dan Fase I (de-duplikasi navigasi, breadcrumb interaktif). Detail: `docs/M10_CHECKLIST_CHANGELOG.md` Fase C, H, I.
+Toggle Owner/Admin phase 1 berfungsi penuh. UI telah diperbaiki melalui Fase C (toggle segmented control, route split, sidebar context-aware, breadcrumb), Fase H (sidebar compact 18→7, dashboard 6→3 tab), dan Fase I (de-duplikasi navigasi, breadcrumb interaktif). Detail: `docs/M12_CHECKLIST_CHANGELOG.md` Fase C, H, I.
 
 ## Catatan Pemakaian
 
@@ -136,7 +136,7 @@ Toggle Owner/Admin phase 1 berfungsi penuh. UI telah diperbaiki melalui Fase C (
 | D-18 | **RENEWAL/PRABAYAR FLEKSIBEL KAPAN SAJA** (2026-06-14). Tenant boleh perpanjang / **bayar di muka 2-4 bulan ke depan dengan harga BULANAN**, KAPAN SAJA — **tak harus menunggu kontrak lama habis**. Ini menambah jalur "prabayar/perpanjang lebih awal" di samping renewal akhir-kontrak (R1-R5, prompt H-10). Prabayar >1 bulan = **pendapatan diterima di muka** (akui bertahap → F4-1 unearned revenue). Rent-lock D-16 tetap berlaku (harga tak naik selama renew berlanjut). | Backlog **F4-11**; terkait F4-1. |
 | D-19 | **FAQ DETAIL + "MANUAL BOOK" DI TENANT APP** (2026-06-14). Semua aturan/flow kos di-generate jadi **FAQ sangat detail** lalu disajikan sebagai **menu "Panduan/Aturan" di tenant app** — tenant bisa baca manual aturan kos secara mandiri. **Openness, TAPI jangan bikin tenant pusing** (ringkas, terstruktur, berkategori). Sumber konten: `03_KEPUTUSAN_OWNER` + dossier flow; input tambahan via **interview owner** atau **analisa percakapan WhatsApp** (pertanyaan & keluhan tenant yang sering). Fondasi `FaqsModule` sudah ada. | Backlog **F4-12**; dossier 17/16. |
 | D-20 | **PINDAH KAMAR RESMI** (2026-06-15). Stay SAMA (roomId diperbarui); deposit ikut apa adanya; harga dikunci (D-16) kecuali **override OWNER-only** (D-17); meter kamar baru di-snapshot; kamar lama→inspeksi, kamar baru→OCCUPIED. Detail di §D-20. | **F4-8 SELESAI**. |
-| D-23 | **AI Owner/Admin manual-only.** DeepSeek/API AI berbayar hanya dipakai setelah tombol manual Owner/Admin ditekan; AI membuat draft/rekomendasi dan manusia approve aksi final. Tidak ada AI otomatis dari cron/page-load; tidak ada akses Tenant/Staff; tidak ada mutasi uang/stok/kamar/KTP/jurnal tanpa approval manusia. | Fase G `docs/M12_AI_OWNER_ADMIN.md`; checklist M10. |
+| D-23 | **AI Owner/Admin manual-only.** DeepSeek/API AI berbayar hanya dipakai setelah tombol manual Owner/Admin ditekan; AI membuat draft/rekomendasi dan manusia approve aksi final. Tidak ada AI otomatis dari cron/page-load; tidak ada akses Tenant/Staff; tidak ada mutasi uang/stok/kamar/KTP/jurnal tanpa approval manusia. | Fase G `docs/M09_AI_OWNER_ADMIN.md`; checklist M12. |
 | D-24 | **BATAS PENGHUNI PER KAMAR + SURCHARGE EKSTRA** (2026-06-23). Kamar **standar** (2,5×3m): **2 orang gratis**, maks booking **4 orang** (2 ekstra). Kamar **besar** (3×3,5m): **4 orang gratis**, maks booking **6 orang** (2 ekstra). Kelebihan orang di atas batas gratis = **+20% harga sewa per kepala ekstra** (per term: harian/mingguan/bulanan/dst.). Batas +2 orang karena **extra bed mengisi hampir seluruh lantai kamar** sehingga kamar tidak lagi nyaman untuk bergerak. Lebih dari batas hard cap **ditolak sistem**. Penambahan 1-2 orang ekstra **BOLEH tapi TIDAK DIREKOMENDASIKAN** — sistem wajib menampilkan peringatan merah. Saran sistem: upgrade ke kamar besar jika tersedia. Diimplementasikan di `pricing.helper.ts` (`ROOM_MAX_FREE_OCCUPANTS`, `ROOM_MAX_OCCUPANTS`, `calculateOccupantSurcharge`) + `Stay.occupantCount`. | **Selesai 2026-06-23.** |
 | D-25 | **NOMOR WA ADMIN = SETTING OPERATIONAL** (2026-07-02). Nomor WhatsApp admin/owner TIDAK BOLEH hardcode. Disimpan di `OperationalSetting.adminWhatsappNumber` dan bisa diubah oleh OWNER via halaman Settings. Semua link WA di aplikasi (landing, katalog, auth, portal tenant, portal staff) membaca dari setting ini + env var `VITE_PUBLIC_ADMIN_WHATSAPP` sebagai fallback compile-time. | **Task: update OperationalSetting + PublicConfig + frontend.** |
 
@@ -288,7 +288,7 @@ Toggle Owner/Admin phase 1 berfungsi penuh. UI telah diperbaiki melalui Fase C (
 
 ## Update 2026-07-07 — AUDIT REASONIX CODE ✅
 
-> **Sumber:** `docs/audit-reasonix/RINGKASAN_EKSEKUTIF.md` — 82 temuan Reasonix Code (DeepSeek V4 Pro).
+> **Sumber:** `docs/archieve/audit_reasonix/RINGKASAN_EKSEKUTIF.md` — 82 temuan Reasonix Code (DeepSeek V4 Pro).
 
 ### Keputusan Baru (hasil konfirmasi owner 7 Jul 2026)
 
@@ -319,7 +319,7 @@ Toggle Owner/Admin phase 1 berfungsi penuh. UI telah diperbaiki melalui Fase C (
 
 ## Update 2026-07-04 — Keputusan Lanjutan Audit Reasonix ✅
 
-> **Sumber:** `docs/audit-reasonix/00_index.md` — item 🧑 yang butuh keputusan owner.
+> **Sumber:** `docs/archieve/audit_reasonix/00_index.md` — item 🧑 yang butuh keputusan owner.
 
 | ID | Task | Keputusan Owner | OC ID |
 |----|------|----------------|-------|
@@ -333,9 +333,9 @@ Toggle Owner/Admin phase 1 berfungsi penuh. UI telah diperbaiki melalui Fase C (
 
 ### Rujukan
 
-- Detail 82 temuan: `docs/audit-reasonix/` (10 file)
-- Antrian eksekusi: `docs/M10_CHECKLIST_CHANGELOG.md` § Fase AL
-- Changelog: `docs/M11_CHANGELOG.md`
+- Detail 82 temuan: `docs/archieve/audit_reasonix/` (10 file)
+- Antrian eksekusi: `docs/M12_CHECKLIST_CHANGELOG.md` § Fase AL
+- Changelog: `docs/M13_CHANGELOG.md`
 
 ---
 
