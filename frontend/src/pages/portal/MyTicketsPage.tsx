@@ -14,6 +14,7 @@ import FreeRepairPolicyCard from '../../components/tenant/FreeRepairPolicyCard';
 import { tenantCategoryLabel } from '../../utils/tenantCopy';
 import { toTenantFriendlyError } from '../../utils/tenantErrorCopy';
 import { compressImageFile } from '../../utils/compressImageFile';
+import { formatDateTimeWib } from '../../utils/dateTime';
 
 type PortalTicket = {
   issueImageUrl?: string | null;
@@ -57,27 +58,12 @@ function tipLines(staff: NonNullable<PortalTicket['assignedTo']>): { label: stri
 }
 
 function formatDate(value?: string) {
-  if (!value) return '-';
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return '-';
-  return date.toLocaleDateString('id-ID', {
-    day: '2-digit',
-    month: 'short',
-    year: 'numeric',
-  });
+  return formatDateTimeWib(value);
 }
 
 function formatDateTime(value?: string | null) {
   if (!value) return null;
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return null;
-  return date.toLocaleDateString('id-ID', {
-    day: '2-digit',
-    month: 'short',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  });
+  return formatDateTimeWib(value);
 }
 
 type TimelineNode = {

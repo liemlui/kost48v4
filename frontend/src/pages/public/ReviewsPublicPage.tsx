@@ -6,6 +6,7 @@ import { fetchPublicSocialProof } from '../../api/marketing';
 import EmptyState from '../../components/common/EmptyState';
 import { officialKost48Location } from '../../data/officialKost48Content';
 import { GuestTopbar, GuestFooter } from './publicGuestShared';
+import { formatDateOnly } from '../../utils/dateTime';
 
 const PER_PAGE = 6;
 
@@ -201,7 +202,7 @@ export default function ReviewsPublicPage() {
                               )}
                             </div>
                             <span className="text-muted small">
-                              {new Date(review.createdAt).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}
+                            {formatDateOnly(review.createdAt)}
                             </span>
                           </div>
                           <span className="ms-auto fw-bold">{review.rating.toFixed(1)} / 5</span>

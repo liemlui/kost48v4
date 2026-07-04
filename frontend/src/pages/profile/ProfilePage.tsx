@@ -7,6 +7,7 @@ import { getTenantProfile, fillTenantProfileOnboarding } from '../../api/tenants
 import type { TenantProfileOnboardingPayload } from '../../api/tenants';
 import PageHeader from '../../components/common/PageHeader';
 import { useAuth } from '../../context/AuthContext';
+import { formatDateOnly } from '../../utils/dateTime';
 
 // ═══════════════════════════════════════════════════════════
 //  SECTION: Helpers
@@ -28,10 +29,7 @@ function formatFieldDisplay(key: string, value: unknown): string {
     if (value === 'OTHER') return 'Lainnya';
   }
   if (key === 'birthDate') {
-    const d = new Date(value as string);
-    if (!Number.isNaN(d.getTime())) {
-      return d.toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' });
-    }
+    return formatDateOnly(value as string);
   }
   if (key === 'maritalStatus') {
     const map: Record<string, string> = { SINGLE: 'Belum Menikah', MARRIED: 'Menikah', DIVORCED: 'Cerai', WIDOWED: 'Janda/Duda' };
