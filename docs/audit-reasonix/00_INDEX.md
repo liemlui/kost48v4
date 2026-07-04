@@ -97,8 +97,8 @@
 | **M25** | Label admin dashboard "Pendapatan Bulan Ini" menyesatkan | 10 mnt | [x] | Reasonix Code | 7 Jul | ✅ via L21 — label sudah tidak ada di DashboardAdmin.tsx
 | **M26** | Tidak ada targetting per tenant di announcements | — | [x] | Owner | 4 Jul | 🚫 SKIP (OC-02) — broadcast saja cukup
 | **M27** | Tidak ada auto-provisioning additional services | — | [x] | Owner | 4 Jul | 🚫 SKIP (OC-03) — tetap manual
-| **M28** | `GuestPreferenceSurvey` tidak ada admin page | 1 jam | [ ] | — | — | ✅ OC-04: bangun controller + admin page
-| **M29** | `ExternalReview` CRUD tidak diaudit | 1 jam | [ ] | — | — | ✅ OC-05: lakukan audit
+| **M28** | `GuestPreferenceSurvey` tidak ada admin page | 1 jam | [x] | Reasonix Code | 4 Jul | ✅ OC-04: controller + FE page — build lulus
+| **M29** | `ExternalReview` CRUD — audit selesai | 1 jam | [x] | Reasonix Code | 4 Jul | ✅ OC-05: audit selesai — lihat `M29_AUDIT_EXTERNAL_REVIEW.md`
 | **M30** | `MarketAnalysis` tidak ada validasi expiry | 30 mnt | [x] | Reasonix Code | 7 Jul | ✅ findAll filter 90 hari (cutoff createdAt)
 | **M31** | `AiDraft` queue tidak diverifikasi live | — | [ ] | — | — | ⏸️ TUNDA (OC-06)
 | **M32** | Seed `addMonths` setMonth overflow | 10 mnt | [x] | Reasonix Code | 7 Jul | ✅ via L14
@@ -134,7 +134,7 @@
 | **L19** | `AncillaryRevenuePage` — statis tanpa API | 2 jam | [x] | Reasonix Code | 4 Jul | ✅ Sama dengan M24 (OC-01)
 | **L20** | Tidak ada `useDocumentTitle` di mayoritas halaman FE | 15 mnt | [x] | Reasonix Code | 7 Jul | ✅ By design — RouteTitleSync global di App.tsx sudah handle semua halaman via routeTitles config |
 | **L21** | Label admin dashboard "Pendapatan Bulan Ini" menyesatkan | 10 mnt | [x] | Reasonix Code | 7 Jul | ✅ Label tsb sudah tidak ada di DashboardAdmin.tsx (diganti SmartChartPanel) |
-| **L22** | Staff dashboard — tidak ada halaman khusus (share DashboardAdmin) | 3 jam | [ ] | — | — | ✅ OC-07: bangun halaman khusus staff
+| **L22** | Staff dashboard — tidak ada halaman khusus (share DashboardAdmin) | 3 jam | [x] | Reasonix Code | 4 Jul | ✅ OC-07: backend aggregate endpoint + perkuat DashboardStaff.tsx; build lulus
 | **L23** | `ADJUSTMENT` enum inventory — tidak usable (selalu ditolak) | 15 mnt | [x] | Reasonix Code | 7 Jul | ✅ By design — conflictException "belum didukung" sesuai keputusan owner. ADJUSTMENT dipertahankan di enum utk masa depan. |
 | **L24** | `BARANG_HILANG` / `AC_CLEANING` — di luar enum `TicketCategory` | 15 mnt | [x] | Reasonix Code | 7 Jul | ✅ via M22 (Fase 4). Keduanya sudah ada di enum. |
 | **L25** | `AC_CLEANING` ticket CLOSED → duplikasi bisa terjadi | 30 mnt | [x] | Reasonix Code | 7 Jul | ✅ Tambah guard CLOSED + time-window (max acCleanIntervalDays) di maintenance-sweep dedup |
@@ -168,9 +168,9 @@
 | 1 | Efisiensi Token (E1-E5) | 5/5 | ✅✅✅✅✅ 100% |
 | 2 | Bug Kritis (C1-C6) | 6/6 | ✅✅✅✅✅✅ 100% |
 | 3 | Temuan Tinggi (H1-H15) | 15/15 | ✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅ 100% |
-| 4 | Temuan Menengah (M1-M35) | 32/35 | ✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅⬜⬜⬜ 91% |
-| 5 | Temuan Rendah (L1-L26) | 25/26 | ✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅⬜ 96% |
-| 6 | Efisiensi Lanjutan (E6-E13) | 0/8 | ⬜⬜⬜⬜⬜⬜⬜⬜ 0% |
+| 4 | Temuan Menengah (M1-M35) | 33/35 | ✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅⬜⬜ 94% |
+| 5 | Temuan Rendah (L1-L26) | 26/26 | ✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅ 100% |
+| 6 | Efisiensi Lanjutan (E6-E13) | 1/8 | ✅⬜⬜⬜⬜⬜⬜⬜ 12% |
 | — | **Fase 3 — H3/H6/H7 final** | ✅ 3/3 | SUDAH SELESAI |
 | — | **Refactor 4 Jul (dateOnly + @ApiProperty)** | ✅ 2/2 | SUDAH SELESAI |
 | — | **Audit + Dokumentasi** | ✅ 12/12 file | SUDAH SELESAI |
@@ -222,9 +222,9 @@
 | ID | Task | Estimasi | OC ID |
 |----|------|----------|-------|
 | ~~M24/L19~~ | ~~AncillaryRevenue API backend + FE~~ | ✅ SELESAI | OC-01 |
-| **M28** | GuestPreferenceSurvey admin page (controller + FE) | 1-2 jam | OC-04 |
-| **M29** | ExternalReview CRUD audit | 1 jam | OC-05 |
-| **L22** | Staff dashboard halaman khusus | 3 jam | OC-07 |
+| ~~M28~~ | ~~GuestPreferenceSurvey admin page (controller + FE)~~ | ✅ SELESAI | OC-04 |
+| ~~M29~~ | ~~ExternalReview CRUD audit~~ | ✅ SELESAI | OC-05 |
+| ~~L22~~ | ~~Staff dashboard halaman khusus~~ | ✅ SELESAI | OC-07 |
 
 ### ⚡ FASE 6 — Efisiensi token lanjutan (plan 4 Jul, siap eksekusi)
 > 8 task E6-E13, urutan E6→E7→E8→E9→E11→E10→E12→E13. Spec: `10_EFISIENSI_LANJUTAN.md`. Mulai dari **E6** (script pengukur) karena jadi gate semua task lain.
