@@ -4,6 +4,12 @@
 
 ## Changelog Ringkas
 
+### 2026-07-04 — OC-05 ExternalReview CRUD audit
+- OC-05 (M29): Audit modul ExternalReview — model Prisma standalone, hanya read-only via social proof publik, tanpa CRUD endpoint/admin UI. Temuan: 1 critical (no admin CRUD), 1 high (no admin UI), 2 medium, 2 low. Laporan: `docs/audit-reasonix/M29_AUDIT_EXTERNAL_REVIEW.md`
+
+### 2026-07-04 — OC-04 GuestPreferenceSurvey admin page
+- OC-04 (M28): Backend module `guest-preferences` (`GET /guest-preferences` + `/guest-preferences/stats`) + FE `GuestPreferencesPage` — stat panel, preferensi breakdown, tabel paginated. Build backend ✅ frontend ✅
+
 ### 2026-07-04 — E6 token-efficiency-report script selesai
 - E6: `scripts/token-efficiency-report.mjs` ditambahkan + `npm run token-efficiency-report` di root `package.json`
 - Gate awal PASS: backend 337 file / 44.843 baris, frontend 386 file / 64.319 baris, baseline Fase 6 terbaca normal

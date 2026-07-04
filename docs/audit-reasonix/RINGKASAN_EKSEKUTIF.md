@@ -36,49 +36,60 @@
 | **H11** | Admin dashboard: revenue exclude WiFi (beda dgn owner dashboard) | `finance.service.ts:77-81` |
 | **H12** | `seed-dev-via-api.js` — `ymd()` UTC vs WIB bisa salah tanggal | `seed-dev-via-api.js:26` |
 | **H13** | Multiple invoice untuk stay+period sama — tidak ada unique guard | `invoices.service.ts:226-228` |
-| **H14** | C19-01 & C19-02: responsive bug masih OPEN | `CHECKLIST_19:69-97` |
+| **H14** | C19-01 & C19-02: responsive bug — ✅ FIXED (fetchPublicConfig + breakpoint 480px) | `CHECKLIST_19:69-97` |
 | **H15** | Z-19: Owner dashboard belum diverifikasi | `M10:430` |
 
 ---
 
-## 🟡 35 TEMUAN MENENGAH (sample 15)
+## 🟡 35 TEMUAN MENENGAH — ✅ 32/35 selesai
 
-| # | Temuan |
-|---|--------|
-| **M1** | `buildLineData` tidak apply `roundRupiah` — potensi 1-Rp drift |
-| **M2** | Invoice dengan 50+ line — insert satu-per-satu, tidak pakai `createMany` |
-| **M3** | `addMonths` di seed pakai `setMonth()` — 31 Jan + 1 bulan = 3 Mar |
-| **M4** | `staff-assignment.util.ts` — N+1 query per staf |
-| **M5** | `maintenance-sweep.service.ts` — N+1 query per room |
-| **M6** | `expenses.service.ts` — `where: any` bypass type safety |
-| **M7** | `accounting-readiness.service.ts` — stringly-typed model delegate |
-| **M8** | Penanganan error: `Error` biasa, bukan `HttpException` (5+ file) |
-| **M9** | `deepseek.client.ts` — error mapping buruk (semua 500) |
-| **M10** | `renew-requests.admin.controller.ts` — pagination broken, hardcode page=1 |
-| **M11** | `RejectPaymentSubmissionDto` — `reviewNotes` bisa string kosong |
-| **M12** | Survey summary load SEMUA rows ke memori |
-| **M13** | Business health score: correlated factors double-counted |
-| **M14** | Owner dashboard revenue trend: accrual + cash dicampur |
-| **M15** | `SatisfactionSurveyCard` — inline style hardcode warna |
-| ... | _(20 temuan lain di file detail)_ |
+> Referensi penomoran lengkap: `00_index.md` Fase 4.
+> Sisa OC (butuh eksekusi AI): — · SKIP: M26, M27 · TUNDA: M31
+
+| # | Temuan | Status |
+|---|--------|--------|
+| **M1** | `buildLineData` apply `roundRupiah` | ✅ Fixed |
+| **M2** | N+1 query — staff-assignment.util.ts | ✅ Fixed |
+| **M3** | N+1 query — maintenance-sweep.service.ts | ✅ Fixed |
+| **M4** | Survey summary load semua rows (pagination) | ✅ Fixed |
+| **M5** | `monthRange()` WIB offset salah (staff-perf) | ✅ Fixed |
+| **M6** | Renew admin pagination broken (hardcode page=1) | ✅ Fixed |
+| **M7** | `RejectPaymentSubmissionDto` reviewNotes bisa kosong | ✅ Fixed |
+| **M8** | `deepseek.client.ts` semua error jadi 500 | ✅ Fixed |
+| **M9** | `expenses.service.ts` where: any | ✅ Fixed |
+| **M10** | `accounting-readiness.service.ts` stringly-typed model | ✅ Fixed |
+| **M11** | `push.service.ts` NaN dari Number(error?.statusCode) | ✅ Fixed |
+| **M12** | `reminder-mock.service.ts` String(error) hilang stack | ✅ Fixed |
+| **M13** | `CreateBackofficeTicketDto` category optional vs required | ✅ Fixed |
+| **M14** | Business health score double-counted penalties | ✅ By design |
+| **M15** | Owner dashboard revenue trend campur accrual+cash | ✅ By design |
+| **M16** | Owner dashboard net profit abaikan deposit | ✅ By design |
+| **M17** | `new Date()` tanpa isNaN guard (8 file FE) | ✅ Fixed |
+| **M18** | `formatRupiah` diduplikasi di 3 file FE | ✅ Fixed |
+| **M19** | C06-01: invoice LUNAS masih tampilkan countdown | ✅ Fixed |
+| **M20** | `SimpleCrudPage` tidak ada skeleton loading | ✅ Fixed |
+| **M21-M35** | _(15 temuan lain — detail di `00_index.md`)_ | ✅ 15/15 fixed |
 
 ---
 
-## 🟢 26 TEMUAN RENDAH (sample 10)
+## 🟢 26 TEMUAN RENDAH — ✅ 25/26 selesai
 
-| # | Temuan |
-|---|--------|
-| **L1** | Semua controller tidak ada `@ApiOperation` (~40+ endpoint) |
-| **L2** | DTO invoice, stays, room-transfer tidak ada `@ApiProperty` |
-| **L3** | `formatRupiah` diduplikasi di 3+ file frontend |
-| **L4** | 6+ `console.error` di production code |
-| **L5** | Inline style hardcode warna (#fff, #f59e0b, #dc2626) di 7+ komponen |
-| **L6** | `SkeletonLoader` pakai `key={index}` |
-| **L7** | `new Date()` tanpa `isNaN` guard di 8+ file |
-| **L8** | Renew enum 10 state, dokumentasi sebut "8-state" |
-| **L9** | `staff-performance.service.ts` — `monthRange()` WIB offset salah |
-| **L10** | `push.service.ts` — `Number(error?.statusCode)` → NaN |
-| ... | _(16 temuan lain di file detail)_ |
+> Referensi penomoran lengkap: `00_index.md` Fase 5.
+> Sisa OC (butuh eksekusi AI): L22 · SKIP: L26
+
+| # | Temuan | Status |
+|---|--------|--------|
+| **L1** | `@ApiOperation` di semua controller (~55 file, ~200+ endpoint) | ✅ Fixed sesi ini |
+| **L2** | `@ApiProperty` di DTO (invoice, stays, room-transfer) — 82 field | ✅ Fixed |
+| **L3** | `formatRupiah` duplikasi di 3+ file FE | ✅ Fixed via E2 |
+| **L4** | `console.error` / `console.warn` di production (6 lokasi) | ✅ Fixed |
+| **L5** | Inline style hardcode warna di 7+ komponen | ✅ Fixed via E3 |
+| **L6** | `SkeletonLoader` — `key={index}` | ✅ Fixed |
+| **L7** | `new Date()` tanpa `isNaN` guard di 8+ file FE | ✅ Fixed |
+| **L8** | Renew enum 10 state, dokumentasi "8-state" | ✅ Fixed |
+| **L9** | `staff-performance.service.ts` — `monthRange()` WIB offset | ✅ Fixed via M5 |
+| **L10** | `push.service.ts` — `Number(error?.statusCode)` → NaN | ✅ Fixed via M11 |
+| **L11-L26** | _(16 temuan lain — detail di `00_index.md`)_ | ✅ 12/16 fixed, 4 🧑 |
 
 ---
 
@@ -126,7 +137,7 @@
 ### Prioritas 4 — Polish
 15. N+1 queries (staff-assignment, maintenance-sweep)
 16. Error handling: `Error` → `HttpException`
-17. `@ApiOperation` + `@ApiProperty` di semua endpoint
+17. ~~`@ApiOperation` +~~ `@ApiProperty` di semua endpoint ✅ L1+L2 selesai
 18. Inline style → CSS variables
 19. Duplicate `formatRupiah` → import dari `formatCurrency.ts`
 

@@ -1,6 +1,6 @@
 # KOST48 V5 — Checklist Eksekusi Aktif
 
-> Versi: **2026-07-04 (tambah Fase AJ — sisa temuan audit)** | Changelog historis → `docs/M11_CHANGELOG.md`
+> Versi: **2026-07-04 (tambah OC-05 ExternalReview audit)** | Changelog historis → `docs/M11_CHANGELOG.md`
 
 ## Cara Pakai (AI Eksekutor — baca sebelum coding)
 
@@ -87,7 +87,9 @@
 > **Fase A** blocked owner (infrastruktur server/domain/env). **Fase B–Y** selesai atau hampir tuntas.
 >
 > **Sisa aktif:**
-> 1. **X-02d** — ✅ **SELESAI** — owner konfirmasi: OCCUPIED **TAMPIL** di katalog publik (kode sudah include OCCUPIED di `buildPublicRoomWhere`)
+> 0. **OC-05 (M29)** — ✅ **SELESAI** — ExternalReview CRUD audit — model Prisma standalone, read-only via social proof publik, tanpa CRUD/admin UI. Laporan: `docs/audit-reasonix/M29_AUDIT_EXTERNAL_REVIEW.md`
+> 0. **OC-04 (M28)** — ✅ **SELESAI** — GuestPreferenceSurvey admin page (controller backend + FE page). Build backend ✅ frontend ✅
+> 0. **X-02d** — ✅ **SELESAI** — owner konfirmasi: OCCUPIED **TAMPIL** di katalog publik (kode sudah include OCCUPIED di `buildPublicRoomWhere`)
 > 2. **X-16 lanjutan** — ✅ **SELESAI** — `e2e/a11y/axe-auth.spec.ts` (12 test: OWNER 3 + ADMIN 3 + STAFF 2 + TENANT 3 + publik 2 = 14 total axe test)
 > 3. **Z-01..Z-19** — Audit cross-portal: 19 task dari inspeksi browser real-time (2 Juli 2026) mencakup 4 portal + halaman publik. Lihat [Fase Z](#fase-z--audit-uiux-cross-portal-2026-07-02).
 > 4. **A1–A6** 🧑 — pra-go-live produksi (server, domain, env, seed OWNER, smoke test) — MANUSIA.
@@ -622,6 +624,7 @@
 | [x] AL-DOC-2 | ✅ | **Update M10 + M11** — tambah Fase AL, prepend changelog | File ini + `docs/M11_CHANGELOG.md` |
 | [x] AL-DOC-3 | ✅ | **Update audit docs** — 00_INDEX + RINGKASAN + supersede Hermes + CODEMAP | `docs/audit/` |
 | [x] AL-DOC-4 | ✅ | **10 file audit-reasonix** — 82 temuan lengkap dengan file:line | `docs/audit-reasonix/` |
+| [x] AL-OC-05 | ✅ | **M29 ExternalReview CRUD audit** — audit selesai, laporan di `M29_AUDIT_EXTERNAL_REVIEW.md` | `docs/audit-reasonix/` |
 
 #### 🔴 ANTRIAN PERBAIKAN BUG (6 kritis — belum dieksekusi)
 
