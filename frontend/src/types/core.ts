@@ -1,3 +1,4 @@
+// FILE: core.ts — type definitions core: auth, room, stay, invoice, payment, ticket (JALUR UANG)
 // ═══════════════════════════════════════════════════════════
 //  FILE: Frontend Shared Types
 // ═══════════════════════════════════════════════════════════

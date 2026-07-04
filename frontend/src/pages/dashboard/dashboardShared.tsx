@@ -93,7 +93,7 @@ export function getCurrentMonthWindow() {
   const now = new Date();
   const start = new Date(now.getFullYear(), now.getMonth(), 1);
   const end = new Date(now.getFullYear(), now.getMonth() + 1, 1);
-  return { start, end, label: now.toLocaleDateString('id-ID', { month: 'long', year: 'numeric' }) };
+  return { start, end, label: formatDateTimeWib(now).split(' ')[0] };
 }
 
 export function isDateInsideWindow(value: string | Date | null | undefined, start: Date, end: Date) {

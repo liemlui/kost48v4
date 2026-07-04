@@ -1,3 +1,4 @@
+// FILE: auth.service.ts — autentikasi user: login, register, refresh token, role guard
 import {
   ConflictException,
   ForbiddenException,

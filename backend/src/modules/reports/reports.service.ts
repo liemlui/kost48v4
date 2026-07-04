@@ -1,3 +1,4 @@
+// FILE: reports.service.ts — laporan keuangan & KPI untuk dashboard owner/admin (JALUR UANG)
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { InvoiceStatus } from '../../common/enums/app.enums';

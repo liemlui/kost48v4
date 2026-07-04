@@ -1,3 +1,4 @@
+// FILE: PublicGuestDashboardPage.tsx — halaman utama publik: hero, kamar, fasilitas, CTA
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Accordion, Container, Modal, Spinner } from 'react-bootstrap';

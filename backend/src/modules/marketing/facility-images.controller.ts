@@ -11,7 +11,7 @@ import {
   FileTypeValidator,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { ApiBody, ApiConsumes, ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiConsumes, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Public } from '../../common/decorators/public.decorator';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { UserRole } from '../../common/enums/app.enums';
@@ -24,6 +24,7 @@ export class FacilityImagesController {
 
   /** Upload foto fasilitas (OWNER/ADMIN only). */
   @Post('upload/:slug')
+  @ApiOperation({ summary: 'Upload foto fasilitas — OWNER/ADMIN' })
   @Roles(UserRole.OWNER, UserRole.ADMIN)
   @UseInterceptors(FileInterceptor('file'))
   @ApiConsumes('multipart/form-data')
@@ -53,6 +54,7 @@ export class FacilityImagesController {
 
   /** Daftar semua foto fasilitas yang sudah diupload (publik). */
   @Get()
+  @ApiOperation({ summary: 'Daftar foto fasilitas — publik' })
   @Public()
   async list() {
     return { message: 'Daftar foto fasilitas berhasil diambil', data: this.service.list() };
@@ -60,6 +62,7 @@ export class FacilityImagesController {
 
   /** Hapus foto fasilitas (OWNER/ADMIN only). */
   @Delete(':slug')
+  @ApiOperation({ summary: 'Hapus foto fasilitas — OWNER/ADMIN' })
   @Roles(UserRole.OWNER, UserRole.ADMIN)
   async delete(@Param('slug') slug: string) {
     this.service.delete(slug);

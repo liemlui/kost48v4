@@ -1,5 +1,5 @@
 import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Query, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { UserRole } from '../../common/enums/app.enums';
@@ -17,36 +17,42 @@ export class StaffRoutinesAdminController {
   constructor(private readonly service: StaffRoutinesService) {}
 
   @Get('templates')
+  @ApiOperation({ summary: 'Daftar template pekerjaan rutin — OWNER/ADMIN' })
   @Roles(UserRole.OWNER, UserRole.ADMIN)
   async templates() {
     return { message: 'Daftar pekerjaan rutin berhasil diambil', data: await this.service.listTemplates() };
   }
 
   @Post('templates')
+  @ApiOperation({ summary: 'Buat template pekerjaan rutin — OWNER/ADMIN' })
   @Roles(UserRole.OWNER, UserRole.ADMIN)
   async createTemplate(@Body() dto: StaffRoutineTemplateDto, @CurrentUser() user: CurrentUserPayload) {
     return { message: 'Pekerjaan rutin berhasil dibuat', data: await this.service.createTemplate(dto, user) };
   }
 
   @Patch('templates/:id')
+  @ApiOperation({ summary: 'Perbarui template pekerjaan rutin — OWNER/ADMIN' })
   @Roles(UserRole.OWNER, UserRole.ADMIN)
   async updateTemplate(@Param('id', ParseIntPipe) id: number, @Body() dto: Partial<StaffRoutineTemplateDto>, @CurrentUser() user: CurrentUserPayload) {
     return { message: 'Pekerjaan rutin berhasil diperbarui', data: await this.service.updateTemplate(id, dto, user) };
   }
 
   @Delete('templates/:id')
+  @ApiOperation({ summary: 'Nonaktifkan template pekerjaan rutin — OWNER/ADMIN' })
   @Roles(UserRole.OWNER, UserRole.ADMIN)
   async deleteTemplate(@Param('id', ParseIntPipe) id: number, @CurrentUser() user: CurrentUserPayload) {
     return { message: 'Pekerjaan rutin dinonaktifkan', data: await this.service.deactivateTemplate(id, user) };
   }
 
   @Get('progress')
+  @ApiOperation({ summary: 'Progress checklist staf — OWNER/ADMIN' })
   @Roles(UserRole.OWNER, UserRole.ADMIN)
   async progress(@Query() query: StaffRoutineProgressQueryDto) {
     return { message: 'Progress checklist staf berhasil diambil', data: await this.service.getAdminProgress(query) };
   }
 
   @Get('kpi')
+  @ApiOperation({ summary: 'KPI checklist staf — OWNER/ADMIN' })
   @Roles(UserRole.OWNER, UserRole.ADMIN)
   async kpi(@Query() query: StaffRoutineProgressQueryDto) {
     return { message: 'KPI checklist staf berhasil diambil', data: await this.service.getAdminProgress(query) };

@@ -1,3 +1,4 @@
+// FILE: accounting-posting.service.ts — posting jurnal transaksi ke ledger akuntansi (JALUR UANG)
 import { Injectable, Logger } from "@nestjs/common";
 import { Prisma } from "../../generated/prisma";
 import { PrismaService } from "../../prisma/prisma.service";

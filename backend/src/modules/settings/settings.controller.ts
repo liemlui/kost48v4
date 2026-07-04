@@ -1,5 +1,5 @@
 import { Body, Controller, Get, Put, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { UserRole } from '../../common/enums/app.enums';
@@ -17,6 +17,7 @@ export class SettingsController {
 
   /** Endpoint publik: hanya field yang relevan untuk halaman marketing (tanpa auth). */
   @Get('public-config')
+  @ApiOperation({ summary: 'Konfigurasi publik untuk halaman marketing — tanpa auth' })
   @Public()
   async getPublicConfig() {
     const s = await this.settingsService.getOperational();
@@ -39,6 +40,7 @@ export class SettingsController {
    *  TENANT tidak perlu config penuh — pakai /settings/public-config (@Public).
    *  PUT tetap owner-only. */
   @Get('operational')
+  @ApiOperation({ summary: 'Konstanta operasional — OWNER/ADMIN/STAFF' })
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.OWNER, UserRole.ADMIN, UserRole.STAFF)
@@ -49,6 +51,7 @@ export class SettingsController {
 
   /** Hanya OWNER yang boleh UBAH (tarif/kuota/toggle air = dasar keuangan). */
   @Put('operational')
+  @ApiOperation({ summary: 'Update konstanta operasional — OWNER-only' })
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.OWNER)

@@ -42,6 +42,7 @@ const ROUTE_TITLES: Array<{ pattern: string; title: string }> = [
   { pattern: '/staff-routines', title: 'Rutinitas Staf' },
   { pattern: '/staff-performance', title: 'Kinerja Staf' },
   { pattern: '/surveys', title: 'Survei Penghuni' },
+  { pattern: '/guest-preferences', title: 'Preferensi Tamu' },
   { pattern: '/staff-report', title: 'Laporan Staf' },
   { pattern: '/staff-warehouse', title: 'Gudang' },
   { pattern: '/inventory/gudang', title: 'Inventaris · Gudang' },

@@ -1,3 +1,4 @@
+// FILE: accounting-reports.service.ts — generate laporan keuangan: neraca, laba-rugi, arus kas (JALUR UANG)
 import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { AccountingReadinessService } from './accounting-readiness.service';

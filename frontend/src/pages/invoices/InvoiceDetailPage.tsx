@@ -1,3 +1,4 @@
+// FILE: InvoiceDetailPage.tsx — detail invoice + riwayat pembayaran (JALUR UANG)
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Alert, Badge, Button, Card, Col, Form, InputGroup, Modal, Row, Table } from 'react-bootstrap';

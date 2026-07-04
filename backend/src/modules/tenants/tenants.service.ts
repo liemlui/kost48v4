@@ -1,3 +1,4 @@
+// FILE: tenants.service.ts — CRUD data penghuni + KTP + profil (master data)
 import { Injectable, NotFoundException, BadRequestException, ForbiddenException, ConflictException } from '@nestjs/common';
 import * as bcrypt from 'bcryptjs';
 import { Prisma, ProfilePhotoSource } from '../../generated/prisma';

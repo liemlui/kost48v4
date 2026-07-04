@@ -1,3 +1,4 @@
+// FILE: SimpleCrudPage.tsx — halaman CRUD generik: resources, settings, referensi
 import { useEffect, useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useToast } from '../../components/common/ToastProvider';

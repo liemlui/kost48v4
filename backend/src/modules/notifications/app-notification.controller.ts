@@ -1,5 +1,5 @@
 import { Controller, Get, Param, ParseIntPipe, Patch, Query, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
@@ -15,6 +15,7 @@ export class AppNotificationController {
   constructor(private readonly appNotificationService: AppNotificationService) {}
 
   @Get()
+  @ApiOperation({ summary: 'Daftar notifikasi saya' })
   async listMine(@CurrentUser() user: CurrentUserPayload, @Query() query: NotificationQueryDto) {
     const result = await this.appNotificationService.listMine(user.id, query);
     return {
@@ -24,6 +25,7 @@ export class AppNotificationController {
   }
 
   @Patch('read-all')
+  @ApiOperation({ summary: 'Tandai semua notifikasi sudah dibaca' })
   async markAllRead(@CurrentUser() user: CurrentUserPayload) {
     const result = await this.appNotificationService.markAllMineAsRead(user.id);
     return {
@@ -33,6 +35,7 @@ export class AppNotificationController {
   }
 
   @Patch(':id/read')
+  @ApiOperation({ summary: 'Tandai satu notifikasi sudah dibaca' })
   async markRead(
     @CurrentUser() user: CurrentUserPayload,
     @Param('id', ParseIntPipe) id: number,

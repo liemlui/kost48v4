@@ -1,3 +1,4 @@
+// FILE: RoomDetailPage.tsx — detail kamar admin: edit harga, fasilitas, foto, status
 import { ChangeEvent, useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Alert, Badge, Breadcrumb, Button, Card, Form, Spinner, Tab, Table, Tabs } from 'react-bootstrap';

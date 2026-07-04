@@ -1,5 +1,5 @@
 import { BadRequestException, Controller, Get, Param, ParseIntPipe, Query } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Public } from '../../common/decorators/public.decorator';
 import { AvailabilityCalendarQueryDto } from './dto/availability-calendar-query.dto';
 import { PublicRoomsQueryDto } from './dto/public-rooms-query.dto';
@@ -19,6 +19,7 @@ export class MarketingPublicRoomsController {
   constructor(private readonly publicRoomsService: MarketingPublicRoomsService) {}
 
   @Get()
+  @ApiOperation({ summary: 'Daftar kamar publik — tanpa auth' })
   async findAll(@Query() query: PublicRoomsQueryDto) {
     return {
       message: 'Daftar kamar publik berhasil diambil',
@@ -27,6 +28,7 @@ export class MarketingPublicRoomsController {
   }
 
   @Get('social-proof')
+  @ApiOperation({ summary: 'Social proof publik — tanpa auth' })
   async socialProof() {
     return {
       message: 'Social proof publik berhasil diambil',
@@ -35,6 +37,7 @@ export class MarketingPublicRoomsController {
   }
 
   @Get('summary')
+  @ApiOperation({ summary: 'Ringkasan kamar publik — tanpa auth' })
   async summary() {
     return {
       message: 'Ringkasan kamar publik berhasil diambil',
@@ -43,6 +46,7 @@ export class MarketingPublicRoomsController {
   }
 
   @Get('availability-calendar')
+  @ApiOperation({ summary: 'Kalender ketersediaan — tanpa auth' })
   async availabilityCalendar(@Query() query: AvailabilityCalendarQueryDto) {
     return {
       message: 'Kalender ketersediaan berhasil diambil',
@@ -51,6 +55,7 @@ export class MarketingPublicRoomsController {
   }
 
   @Get('cleanliness-ranking')
+  @ApiOperation({ summary: 'Ranking kebersihan kamar — tanpa auth' })
   async cleanlinessRanking(@Query('month') month?: string, @Query('year') year?: string) {
     const parsedMonth = parseOptionalInt(month, 'month');
     const parsedYear = parseOptionalInt(year, 'year');
@@ -67,6 +72,7 @@ export class MarketingPublicRoomsController {
   }
 
   @Get(':id')
+  @ApiOperation({ summary: 'Detail kamar publik — tanpa auth' })
   async findOne(@Param('id', ParseIntPipe) id: number) {
     return {
       message: 'Detail kamar publik berhasil diambil',

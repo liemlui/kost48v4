@@ -1,5 +1,5 @@
 import { Body, Controller, Get, Param, ParseIntPipe, Patch, Post, Query, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { UserRole } from '../../common/enums/app.enums';
@@ -18,12 +18,14 @@ export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Get()
+  @ApiOperation({ summary: 'Daftar user — OWNER/ADMIN' })
   @Roles(UserRole.OWNER, UserRole.ADMIN)
   async findAll(@Query() query: UsersQueryDto) {
     return { message: 'Daftar user berhasil diambil', data: await this.usersService.findAll(query) };
   }
 
   @Get(':id')
+  @ApiOperation({ summary: 'Detail user — OWNER/ADMIN' })
   @Roles(UserRole.OWNER, UserRole.ADMIN)
   async findOne(@Param('id', ParseIntPipe) id: number) {
     return { message: 'Detail user berhasil diambil', data: await this.usersService.findOne(id) };
@@ -31,12 +33,14 @@ export class UsersController {
 
   // F2-16 (D-17): buat/ubah user — termasuk ubah role (eskalasi privilege) & nonaktifkan (isActive) — OWNER-only.
   @Post()
+  @ApiOperation({ summary: 'Buat user — OWNER-only' })
   @Roles(UserRole.OWNER)
   async create(@Body() dto: CreateUserDto, @CurrentUser() user: CurrentUserPayload) {
     return { message: 'User berhasil dibuat', data: await this.usersService.create(dto, user) };
   }
 
   @Patch(':id')
+  @ApiOperation({ summary: 'Perbarui user — OWNER-only' })
   @Roles(UserRole.OWNER)
   async update(@Param('id', ParseIntPipe) id: number, @Body() dto: UpdateUserDto, @CurrentUser() user: CurrentUserPayload) {
     return { message: 'User berhasil diperbarui', data: await this.usersService.update(id, dto, user) };

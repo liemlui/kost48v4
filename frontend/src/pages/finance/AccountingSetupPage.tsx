@@ -1,3 +1,4 @@
+// FILE: AccountingSetupPage.tsx — pengaturan COA + neraca awal (JALUR UANG)
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useConfirm } from '../../components/common/ConfirmProvider';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';

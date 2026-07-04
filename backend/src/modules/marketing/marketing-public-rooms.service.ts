@@ -1,3 +1,4 @@
+// FILE: marketing-public-rooms.service.ts — katalog kamar publik + filter ketersediaan + harga
 import { Injectable, NotFoundException, ServiceUnavailableException } from '@nestjs/common';
 import { Prisma } from '../../generated/prisma';
 import { PricingTerm, RoomStatus } from '../../common/enums/app.enums';

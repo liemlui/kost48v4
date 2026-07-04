@@ -14,7 +14,7 @@ import {
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiConsumes, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiConsumes, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { randomBytes } from 'crypto';
 import { Response } from 'express';
@@ -56,12 +56,14 @@ export class TicketsController {
   constructor(private readonly ticketsService: TicketsService) {}
 
   @Get()
+  @ApiOperation({ summary: 'Daftar tiket — OWNER/ADMIN/STAFF' })
   @Roles(UserRole.OWNER, UserRole.ADMIN, UserRole.STAFF)
   async findAll(@Query() query: TicketsQueryDto, @CurrentUser() user: CurrentUserPayload) {
     return { message: 'Daftar tiket berhasil diambil', data: await this.ticketsService.findAll(query, user) };
   }
 
   @Get('my')
+  @ApiOperation({ summary: 'Daftar tiket saya — TENANT' })
   @Roles(UserRole.TENANT)
   async findMine(@CurrentUser() user: CurrentUserPayload, @Query() query: TicketsQueryDto) {
     return { message: 'Daftar tiket saya berhasil diambil', data: await this.ticketsService.findMine(user, query) };
@@ -69,6 +71,7 @@ export class TicketsController {
 
   // T-1: penghuni menandai sudah memberi tip ke staf (P2P, dihitung — bukan nominal).
   @Post(':id/tip-acknowledge')
+  @ApiOperation({ summary: 'Akui tip ke staf — TENANT' })
   @Roles(UserRole.TENANT)
   async acknowledgeTip(@Param('id', ParseIntPipe) id: number, @CurrentUser() user: CurrentUserPayload) {
     return { message: 'Terima kasih, tip dicatat', data: await this.ticketsService.acknowledgeTip(id, user) };
@@ -76,6 +79,7 @@ export class TicketsController {
 
   // STF-TIP-FLOW: staff konfirmasi apakah tip sudah masuk (P2P, di luar pembukuan).
   @Post(':id/tip-confirm')
+  @ApiOperation({ summary: 'Konfirmasi penerimaan tip — STAFF' })
   @Roles(UserRole.STAFF)
   async confirmTip(@Param('id', ParseIntPipe) id: number, @Body() dto: TipConfirmDto, @CurrentUser() user: CurrentUserPayload) {
     return {
@@ -85,6 +89,7 @@ export class TicketsController {
   }
 
   @Post('upload-image')
+  @ApiOperation({ summary: 'Upload foto tiket — semua role' })
   @Roles(UserRole.OWNER, UserRole.ADMIN, UserRole.STAFF, UserRole.TENANT)
   @UseGuards(RateLimitGuard)
   @RateLimit('imageUpload')
@@ -131,6 +136,7 @@ export class TicketsController {
   }
 
   @Get('images/:filename')
+  @ApiOperation({ summary: 'Ambil foto tiket — semua role' })
   @Roles(UserRole.OWNER, UserRole.ADMIN, UserRole.STAFF, UserRole.TENANT)
   async getImage(
     @Param('filename') filename: string,
@@ -165,24 +171,28 @@ export class TicketsController {
   }
 
   @Get(':id')
+  @ApiOperation({ summary: 'Detail tiket — semua role' })
   @Roles(UserRole.OWNER, UserRole.ADMIN, UserRole.STAFF, UserRole.TENANT)
   async findOne(@Param('id', ParseIntPipe) id: number, @CurrentUser() user: CurrentUserPayload) {
     return { message: 'Detail tiket berhasil diambil', data: await this.ticketsService.findOne(id, user) };
   }
 
   @Post()
+  @ApiOperation({ summary: 'Buat tiket backoffice — OWNER/ADMIN/STAFF' })
   @Roles(UserRole.OWNER, UserRole.ADMIN, UserRole.STAFF)
   async create(@Body() dto: CreateBackofficeTicketDto, @CurrentUser() user: CurrentUserPayload) {
     return { message: 'Tiket berhasil dibuat', data: await this.ticketsService.createBackoffice(dto, user) };
   }
 
   @Post('portal')
+  @ApiOperation({ summary: 'Buat tiket dari portal tenant — TENANT' })
   @Roles(UserRole.TENANT)
   async createPortal(@Body() dto: CreatePortalTicketDto, @CurrentUser() user: CurrentUserPayload) {
     return { message: 'Tiket berhasil dibuat', data: await this.ticketsService.createPortal(dto, user) };
   }
 
   @Post(':id/assign')
+  @ApiOperation({ summary: 'Assign tiket ke staf — OWNER/ADMIN' })
   @Roles(UserRole.OWNER, UserRole.ADMIN)
   async assign(@Param('id', ParseIntPipe) id: number, @Body() dto: AssignTicketDto, @CurrentUser() user: CurrentUserPayload) {
     return { message: 'Tiket berhasil di-assign', data: await this.ticketsService.assign(id, dto, user) };
@@ -190,18 +200,21 @@ export class TicketsController {
 
   // F5-3 (AUD-5): tandai tiket (mis. cuci AC) dikerjakan vendor luar / lepas penanda vendor.
   @Post(':id/vendor')
+  @ApiOperation({ summary: 'Tandai tiket vendor luar — OWNER/ADMIN' })
   @Roles(UserRole.OWNER, UserRole.ADMIN)
   async markVendor(@Param('id', ParseIntPipe) id: number, @Body() dto: MarkTicketVendorDto, @CurrentUser() user: CurrentUserPayload) {
     return { message: dto.handledByVendor ? 'Tiket ditandai dikerjakan vendor luar' : 'Penanda vendor dilepas', data: await this.ticketsService.markVendor(id, dto, user) };
   }
 
   @Post(':id/start')
+  @ApiOperation({ summary: 'Mulai proses tiket — OWNER/ADMIN/STAFF' })
   @Roles(UserRole.OWNER, UserRole.ADMIN, UserRole.STAFF)
   async start(@Param('id', ParseIntPipe) id: number, @CurrentUser() user: CurrentUserPayload) {
     return { message: 'Tiket berhasil diproses', data: await this.ticketsService.start(id, user) };
   }
 
   @Post(':id/mark-done')
+  @ApiOperation({ summary: 'Tandai tiket selesai — OWNER/ADMIN/STAFF' })
   @Roles(UserRole.OWNER, UserRole.ADMIN, UserRole.STAFF)
   async markDone(@Param('id', ParseIntPipe) id: number, @Body() dto: ResolutionDto, @CurrentUser() user: CurrentUserPayload) {
     return { message: 'Tiket berhasil ditandai selesai', data: await this.ticketsService.markDone(id, dto, user) };
@@ -210,6 +223,7 @@ export class TicketsController {
   // F2-18: STAFF boleh tutup CHECKOUT_INSPECTION; TENANT boleh tutup tiket mereka yang DONE.
   // Guard keselamatan tetap di service close().
   @Post(':id/close')
+  @ApiOperation({ summary: 'Tutup tiket — OWNER/ADMIN/STAFF/TENANT' })
   @Roles(UserRole.OWNER, UserRole.ADMIN, UserRole.STAFF, UserRole.TENANT)
   async close(@Param('id', ParseIntPipe) id: number, @Body() dto: CloseTicketDto, @CurrentUser() user: CurrentUserPayload) {
     return { message: 'Status tiket berhasil diperbarui', data: await this.ticketsService.close(id, dto, user) };

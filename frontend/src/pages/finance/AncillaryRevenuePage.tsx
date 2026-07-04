@@ -1,20 +1,12 @@
-import { Card, Col, Row, Table } from 'react-bootstrap';
+import { Card, Col, Row, Spinner, Table } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
 import PageHeader from '../../components/common/PageHeader';
 import ClickableRow from '../../components/common/ClickableRow';
 import { StatusStrip } from '../../components/workspace';
-
-const revenueStreams = [
-  { id: 'wifi', icon: '📶', name: 'Voucher WiFi', buyer: 'Tenant / tamu', status: 'Aktif sekarang', route: '/wifi-sales', note: 'Gunakan menu Voucher WiFi untuk mencatat penjualan.' },
-  { id: 'laundry', icon: '🧺', name: 'Laundry', buyer: 'Tenant', status: 'Belum aktif', route: '', note: 'Direncanakan untuk dikembangkan ke depannya.' },
-  { id: 'gallon', icon: '💧', name: 'Air Galon', buyer: 'Tenant', status: 'Belum aktif', route: '', note: 'Perlu stok galon isi/kosong dan status antar sebelum dibuka sebagai transaksi.' },
-  { id: 'cleaning', icon: '🧹', name: 'Jasa Bersih Kamar', buyer: 'Tenant', status: 'Belum aktif', route: '', note: 'Perlu order, jadwal, staff, dan status selesai.' },
-  { id: 'parking', icon: '🅿️', name: 'Parkir Tambahan', buyer: 'Tenant', status: 'Belum aktif', route: '', note: 'Perlu plat nomor, slot, periode, dan approval admin.' },
-  { id: 'guest', icon: '🛌', name: 'Extra Guest', buyer: 'Tenant', status: 'Belum aktif', route: '', note: 'Perlu aturan tanggal, jumlah orang, jam tamu, dan approval.' },
-  { id: 'key', icon: '🔑', name: 'Penggantian Kunci/Kartu', buyer: 'Tenant', status: 'Belum aktif', route: '', note: 'Terkait keamanan; kartu/kunci lama harus dinonaktifkan atau dicatat.' },
-  { id: 'linen', icon: '🧺', name: 'Sewa Linen / Handuk', buyer: 'Tenant', status: 'Belum aktif', route: '', note: 'Perlu stok, durasi sewa, dan biaya hilang/rusak.' },
-  { id: 'snack', icon: '🥤', name: 'Snack / Minuman', buyer: 'Tenant / staff', status: 'Belum aktif', route: '', note: 'Perlu stok, expiry, dan pencatatan kas kecil.' },
-];
+import { fetchAncillaryRevenueStreams } from '../../api/ancillaryRevenue';
+import { formatCompactRupiah } from '../../utils/formatCurrency';
+import type { AncillaryRevenueStream } from '../../api/ancillaryRevenue';
 
 const financeMenu = [
   { id: 'invoices', icon: '🧾', label: 'Tagihan', helper: 'Invoice sewa, deposit, utility, dan blocker checkout.', to: '/invoices', active: false },
@@ -28,8 +20,14 @@ const financeMenu = [
 
 export default function AncillaryRevenuePage() {
   const navigate = useNavigate();
-  const activeStreams = revenueStreams.filter((item) => item.route);
-  const futureStreams = revenueStreams.filter((item) => !item.route);
+  const { data, isLoading } = useQuery({
+    queryKey: ['ancillary-revenue', 'streams'],
+    queryFn: fetchAncillaryRevenueStreams,
+    staleTime: 30_000,
+  });
+
+  const activeStreams: AncillaryRevenueStream[] = data?.activeStreams ?? [];
+  const futureStreams: AncillaryRevenueStream[] = data?.futureStreams ?? [];
 
   return (
     <div>
@@ -65,66 +63,88 @@ export default function AncillaryRevenuePage() {
         </div>
       </div>
 
-      <StatusStrip
-        items={[
-          { id: 'ready', label: 'Aktif sekarang', value: activeStreams.length, helper: 'Voucher WiFi sudah bisa dicatat', tone: 'success' },
-          { id: 'future', label: 'Belum aktif', value: futureStreams.length, helper: 'Belum dibuka untuk admin', tone: 'info' },
-        ]}
-      />
+      {isLoading ? (
+        <div className="text-center py-5">
+          <Spinner animation="border" variant="primary" />
+          <p className="mt-2 text-muted">Memuat data pendapatan tambahan...</p>
+        </div>
+      ) : (
+        <>
+          <StatusStrip
+            items={[
+              { id: 'ready', label: 'Aktif sekarang', value: activeStreams.length, helper: 'Voucher WiFi sudah bisa dicatat', tone: 'success' },
+              { id: 'future', label: 'Belum aktif', value: futureStreams.length, helper: 'Belum dibuka untuk admin', tone: 'info' },
+            ]}
+          />
 
-      <Row className="g-3">
-        <Col lg={8}>
-          <Card className="content-card border-0 h-100">
-            <Card.Body>
-              <div className="table-meta align-items-start">
-                <div>
-                  <div className="panel-title">Revenue stream yang aktif</div>
-                  <div className="panel-subtitle">Hanya aksi yang sudah bisa dipakai admin ditampilkan sebagai jalur kerja utama.</div>
-                </div>
-              </div>
-              <Table hover responsive className="mb-0">
-                <thead>
-                  <tr>
-                    <th>Layanan</th>
-                    <th>Pembeli</th>
-                    <th>Status</th>
-                    <th>Catatan operasional</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {activeStreams.map((stream) => (
-                    <ClickableRow key={stream.id} onClick={() => navigate(stream.route)} label={`Buka detail ${stream.name}`}>
-                      <td><strong>{stream.icon} {stream.name}</strong></td>
-                      <td>{stream.buyer}</td>
-                      <td><span className="status-soft-pill success">{stream.status}</span></td>
-                      <td>{stream.note}</td>
-                    </ClickableRow>
-                  ))}
-                </tbody>
-              </Table>
+          <Row className="g-3">
+            <Col lg={8}>
+              <Card className="content-card border-0 h-100">
+                <Card.Body>
+                  <div className="table-meta align-items-start">
+                    <div>
+                      <div className="panel-title">Revenue stream yang aktif</div>
+                      <div className="panel-subtitle">Hanya aksi yang sudah bisa dipakai admin ditampilkan sebagai jalur kerja utama.</div>
+                    </div>
+                  </div>
+                  <Table hover responsive className="mb-0">
+                    <thead>
+                      <tr>
+                        <th>Layanan</th>
+                        <th>Pembeli</th>
+                        <th>Status</th>
+                        <th>Bulan Ini</th>
+                        <th>Total</th>
+                        <th>Catatan</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {activeStreams.map((stream) => (
+                        <ClickableRow key={stream.id} onClick={() => navigate(stream.route)} label={`Buka detail ${stream.name}`}>
+                          <td><strong>{stream.icon} {stream.name}</strong></td>
+                          <td>{stream.buyer}</td>
+                          <td><span className="status-soft-pill success">{stream.status}</span></td>
+                          <td>
+                            {stream.stats ? (
+                              <span>{stream.stats.thisMonth.count} penjualan · {formatCompactRupiah(stream.stats.thisMonth.revenue)}</span>
+                            ) : '—'}
+                          </td>
+                          <td>
+                            {stream.stats ? (
+                              <span>{stream.stats.total.count} total · {formatCompactRupiah(stream.stats.total.revenue)}</span>
+                            ) : '—'}
+                          </td>
+                          <td>{stream.note}</td>
+                        </ClickableRow>
+                      ))}
+                    </tbody>
+                  </Table>
 
-              <div className="ancillary-roadmap-box mt-3">
-                <div>
-                  <strong>Rencana pendapatan tambahan berikutnya</strong>
-                  <p className="mb-0 text-muted">Layanan ini direncanakan untuk dikembangkan ke depannya.</p>
-                </div>
-                <div className="ancillary-roadmap-grid">
-                  {futureStreams.map((stream) => (
-                    <div key={stream.id} className="ancillary-roadmap-item">
-                      <span aria-hidden="true">{stream.icon}</span>
+                  {futureStreams.length > 0 && (
+                    <div className="ancillary-roadmap-box mt-3">
                       <div>
-                        <strong>{stream.name}</strong>
-                        <small>{stream.note}</small>
+                        <strong>Rencana pendapatan tambahan berikutnya</strong>
+                        <p className="mb-0 text-muted">Layanan ini direncanakan untuk dikembangkan ke depannya.</p>
+                      </div>
+                      <div className="ancillary-roadmap-grid">
+                        {futureStreams.map((stream) => (
+                          <div key={stream.id} className="ancillary-roadmap-item">
+                            <span aria-hidden="true">{stream.icon}</span>
+                            <div>
+                              <strong>{stream.name}</strong>
+                              <small>{stream.note}</small>
+                            </div>
+                          </div>
+                        ))}
                       </div>
                     </div>
-                  ))}
-                </div>
-              </div>
-            </Card.Body>
-          </Card>
-        </Col>
-
-      </Row>
+                  )}
+                </Card.Body>
+              </Card>
+            </Col>
+          </Row>
+        </>
+      )}
     </div>
   );
 }

@@ -6,6 +6,7 @@ import EmptyState from '../../components/common/EmptyState';
 import { AssistantPanel, CompactMetrics, type AssistantItem, type MetricChip } from '../../components/command-center';
 import { formatRupiah } from '../../utils/formatCurrency';
 import { getReminderPreviewAll, mockSendReminder } from '../../api/reminders';
+import { formatDateOnly } from '../../utils/dateTime';
 import type {
   BookingExpiryCandidate,
   CheckoutCandidate,
@@ -15,12 +16,7 @@ import type {
 } from '../../api/reminders';
 
 function formatDate(value: string | null | undefined): string {
-  if (!value) return '-';
-  try {
-    const d = new Date(value);
-    if (Number.isNaN(d.getTime())) return '-';
-    return d.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
-  } catch { return '-'; }
+  return formatDateOnly(value);
 }
 
 

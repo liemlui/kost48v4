@@ -1,3 +1,4 @@
+// FILE: ResourceTable.tsx — tabel CRUD generik: list, filter, pagination, aksi
 import { Alert, Button, Spinner, Table } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import CurrencyDisplay from '../common/CurrencyDisplay';

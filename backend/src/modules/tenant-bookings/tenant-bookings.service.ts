@@ -1,3 +1,4 @@
+// FILE: tenant-bookings.service.ts — booking tenant: bikin, approve, cancel, konversi ke stay
 import {
   BadRequestException,
   ConflictException,

@@ -1,5 +1,6 @@
+// FILE: payment-submissions.controller.ts — endpoint CRUD + approval bukti bayar (JALUR UANG)
 import { BadRequestException, Body, Controller, Get, Param, ParseIntPipe, Post, Query, Res, StreamableFile, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
-import { ApiBearerAuth, ApiConsumes, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiConsumes, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Response } from 'express';
 import { createReadStream, existsSync, mkdirSync, renameSync } from 'fs';
 import { basename, extname, join } from 'path';
@@ -38,6 +39,7 @@ export class PaymentSubmissionsController {
    * STAFF is denied.
    */
   @Get('proofs/:filename')
+  @ApiOperation({ summary: 'Ambil file bukti pembayaran — OWNER/ADMIN/TENANT' })
   @Roles(UserRole.OWNER, UserRole.ADMIN, UserRole.TENANT)
   async getProof(
     @Param('filename') filename: string,
@@ -194,6 +196,7 @@ export class PaymentSubmissionsController {
 
 
   @Post('submit-with-proof')
+  @ApiOperation({ summary: 'Submit pembayaran + upload bukti — TENANT' })
   @Roles(UserRole.TENANT)
   @UseGuards(RateLimitGuard)
   @RateLimit('tenantUpload')
@@ -271,6 +274,7 @@ export class PaymentSubmissionsController {
   }
 
   @Post('submit-batch-with-proof')
+  @ApiOperation({ summary: 'Submit pembayaran batch + upload bukti — TENANT' })
   @Roles(UserRole.TENANT)
   @UseGuards(RateLimitGuard)
   @RateLimit('tenantUpload')
@@ -343,6 +347,7 @@ export class PaymentSubmissionsController {
   }
 
   @Post()
+  @ApiOperation({ summary: 'Kirim bukti pembayaran (JSON) — TENANT' })
   @Roles(UserRole.TENANT)
   async create(@Body() dto: CreatePaymentSubmissionDto, @CurrentUser() user: CurrentUserPayload) {
     this.assertNoJsonProofMetadata(dto);
@@ -354,6 +359,7 @@ export class PaymentSubmissionsController {
 
   /** M-4: Bayar sekaligus beberapa invoice (sewa + meter OPEN) milik stay yang sama. */
   @Post('batch')
+  @ApiOperation({ summary: 'Bayar beberapa invoice sekaligus — TENANT' })
   @Roles(UserRole.TENANT)
   async createBatch(@Body() dto: BatchPaymentSubmissionDto, @CurrentUser() user: CurrentUserPayload) {
     this.assertNoJsonProofMetadata(dto);
@@ -364,6 +370,7 @@ export class PaymentSubmissionsController {
   }
 
   @Get('my')
+  @ApiOperation({ summary: 'Riwayat bukti pembayaran saya — TENANT' })
   @Roles(UserRole.TENANT)
   async mine(@CurrentUser() user: CurrentUserPayload, @Query() query: ReviewQueueQueryDto) {
     return {
@@ -373,6 +380,7 @@ export class PaymentSubmissionsController {
   }
 
   @Get('review-queue')
+  @ApiOperation({ summary: 'Queue review pembayaran — OWNER/ADMIN' })
   @Roles(UserRole.OWNER, UserRole.ADMIN)
   async reviewQueue(@Query() query: ReviewQueueQueryDto) {
     return {
@@ -383,6 +391,7 @@ export class PaymentSubmissionsController {
 
 
   @Post('internal/expire-booking/:stayId')
+  @ApiOperation({ summary: 'Tutup booking reserved manual — OWNER/ADMIN' })
   @Roles(UserRole.OWNER, UserRole.ADMIN)
   async expireBooking(
     @Param('stayId', ParseIntPipe) stayId: number,
@@ -395,6 +404,7 @@ export class PaymentSubmissionsController {
   }
 
   @Post('internal/run-expiry-check')
+  @ApiOperation({ summary: 'Jalankan pengecekan booking kedaluwarsa — OWNER/ADMIN' })
   @Roles(UserRole.OWNER, UserRole.ADMIN)
   async runExpiryCheck(@CurrentUser() user: CurrentUserPayload) {
     return {
@@ -404,6 +414,7 @@ export class PaymentSubmissionsController {
   }
 
   @Post(':id/approve')
+  @ApiOperation({ summary: 'Setujui bukti pembayaran — OWNER/ADMIN' })
   @Roles(UserRole.OWNER, UserRole.ADMIN)
   async approve(@Param('id', ParseIntPipe) id: number, @CurrentUser() user: CurrentUserPayload) {
     return {
@@ -413,6 +424,7 @@ export class PaymentSubmissionsController {
   }
 
   @Post(':id/reject')
+  @ApiOperation({ summary: 'Tolak bukti pembayaran — OWNER/ADMIN' })
   @Roles(UserRole.OWNER, UserRole.ADMIN)
   async reject(
     @Param('id', ParseIntPipe) id: number,
@@ -426,6 +438,7 @@ export class PaymentSubmissionsController {
   }
 
   @Post(':id/retry-journal')
+  @ApiOperation({ summary: 'Retry posting journal pembayaran — OWNER/ADMIN' })
   @Roles(UserRole.OWNER, UserRole.ADMIN)
   async retryJournal(@Param('id', ParseIntPipe) id: number, @CurrentUser() user: CurrentUserPayload) {
     const result = await this.paymentSubmissionsService.retryJournalPosting(user, id);
@@ -436,6 +449,7 @@ export class PaymentSubmissionsController {
   }
 
   @Post('retry-pending-journals')
+  @ApiOperation({ summary: 'Retry semua journal pending — OWNER/ADMIN' })
   @Roles(UserRole.OWNER, UserRole.ADMIN)
   async retryAllPendingJournals(@CurrentUser() user: CurrentUserPayload) {
     const pending = await this.paymentSubmissionsService.findPendingJournalSubmissions();

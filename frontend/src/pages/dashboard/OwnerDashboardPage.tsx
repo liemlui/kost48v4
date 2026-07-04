@@ -1,3 +1,4 @@
+// FILE: OwnerDashboardPage.tsx — dashboard owner: KPI, tren pendapatan, okupansi (JALUR UANG)
 import { useMemo, useState, type ReactNode } from 'react';
 import { formatRupiahWithoutSymbol, formatCompactRupiah } from '../../utils/formatCurrency';
 import { Alert, Badge, Button, Card, Col, Container, Form, Row } from 'react-bootstrap';

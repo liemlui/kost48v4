@@ -1,3 +1,4 @@
+// FILE: OwnerSettingsPage.tsx — halaman pengaturan owner: billing, AI, notifikasi, dsb
 import { useEffect, useRef, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Alert, Badge, Button, Card, Col, Form, Modal, Row, Spinner, Tab, Tabs } from 'react-bootstrap';

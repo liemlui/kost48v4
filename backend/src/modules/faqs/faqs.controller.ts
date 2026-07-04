@@ -1,5 +1,5 @@
 import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Public } from '../../common/decorators/public.decorator';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { UserRole } from '../../common/enums/app.enums';
@@ -15,6 +15,7 @@ export class FaqsController {
 
   /** Public — no auth required */
   @Get('public')
+  @ApiOperation({ summary: 'Daftar FAQ publik — tanpa auth' })
   @Public()
   async listPublic() {
     return { message: 'Daftar FAQ publik', data: await this.faqsService.listPublic() };
@@ -22,6 +23,7 @@ export class FaqsController {
 
   /** Owner/Admin — list all including inactive */
   @Get()
+  @ApiOperation({ summary: 'Daftar FAQ (termasuk nonaktif) — OWNER/ADMIN' })
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.OWNER, UserRole.ADMIN)
@@ -31,6 +33,7 @@ export class FaqsController {
 
   /** Owner/Admin — seed default FAQs */
   @Post('seed')
+  @ApiOperation({ summary: 'Seed FAQ default — OWNER/ADMIN' })
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.OWNER, UserRole.ADMIN)
@@ -40,6 +43,7 @@ export class FaqsController {
 
   /** Owner/Admin — create */
   @Post()
+  @ApiOperation({ summary: 'Buat FAQ — OWNER/ADMIN' })
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.OWNER, UserRole.ADMIN)
@@ -49,6 +53,7 @@ export class FaqsController {
 
   /** Owner/Admin — update */
   @Patch(':id')
+  @ApiOperation({ summary: 'Perbarui FAQ — OWNER/ADMIN' })
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.OWNER, UserRole.ADMIN)
@@ -58,6 +63,7 @@ export class FaqsController {
 
   /** Owner/Admin — delete */
   @Delete(':id')
+  @ApiOperation({ summary: 'Hapus FAQ — OWNER/ADMIN' })
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.OWNER, UserRole.ADMIN)

@@ -5,6 +5,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { getLoyaltyLeaderboard, getMyLoyalty, getMyPeerReportsAboutMe, getMyRedemptions, getReferralCode, getRewards, markPeerReportImproved, requestRedemption } from '../../api/loyalty';
 import { getCleanlinessRanking } from '../../api/marketing';
 import { fetchPublicConfig } from '../../api/settings';
+import { formatDateOnly } from '../../utils/dateTime';
 
 const STATUS_VARIANT: Record<string, string> = {
   PENDING: 'warning',
@@ -264,7 +265,7 @@ export default function MyLoyaltyPage() {
                   <li key={r.id} className="list-group-item d-flex justify-content-between align-items-center">
                     <span>
                       <div className="fw-semibold">{r.reward?.name ?? `Reward #${r.rewardId}`}</div>
-                      <small className="text-muted">{new Date(r.requestedAt).toLocaleDateString('id-ID')} · {r.pointCost} poin</small>
+                      <small className="text-muted">{formatDateOnly(r.requestedAt)} · {r.pointCost} poin</small>
                     </span>
                     <Badge bg={STATUS_VARIANT[r.status] ?? 'secondary'}>{r.status}</Badge>
                   </li>
@@ -284,7 +285,7 @@ export default function MyLoyaltyPage() {
                   <li key={it.id} className="list-group-item d-flex justify-content-between align-items-center">
                     <span>
                       <div className="small">{it.note ?? it.reason}</div>
-                      <small className="text-muted">{new Date(it.createdAt).toLocaleDateString('id-ID')}</small>
+                      <small className="text-muted">{formatDateOnly(it.createdAt)}</small>
                     </span>
                     <span className={`fw-semibold ${it.delta >= 0 ? 'text-success' : 'text-danger'}`}>
                       {it.delta >= 0 ? '+' : ''}{it.delta}

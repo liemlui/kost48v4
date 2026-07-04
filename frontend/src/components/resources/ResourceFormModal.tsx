@@ -1,3 +1,4 @@
+// FILE: ResourceFormModal.tsx — modal form CRUD generik untuk resource data
 import { ChangeEvent, useEffect, useMemo, useState } from 'react';
 import { Alert, Button, Card, Col, Form, Modal, Row } from 'react-bootstrap';
 import { createPortalAccess, resetPortalPassword, togglePortalAccess } from '../../api/tenants';
@@ -11,6 +12,7 @@ import SearchableSelect from '../common/SearchableSelect';
 import SafeImage from '../common/SafeImage';
 import { uploadAnnouncementImage, uploadRoomImage } from '../../api/mediaUploads';
 import { compressImageFile as compressBrowserImage } from '../../utils/compressImageFile';
+import { formatDateOnly } from '../../utils/dateTime';
 
 // ═══════════════════════════════════════════════════════════
 //  SECTION: ResourceFormModal — Helpers
@@ -577,7 +579,7 @@ export default function ResourceFormModal({
                   <div><strong>Status:</strong> {currentPortalIsActive ? 'Aktif' : 'Nonaktif'}</div>
                   <div>
                     <strong>Terakhir login:</strong>{' '}
-                    {portalSummary?.lastLoginAt ? new Date(portalSummary.lastLoginAt).toLocaleDateString('id-ID') : 'Belum pernah login'}
+                    {portalSummary?.lastLoginAt ? formatDateOnly(portalSummary.lastLoginAt) : 'Belum pernah login'}
                   </div>
 
                   {toggleError ? <Alert variant="danger" className="mt-3 mb-0 py-2">{toggleError}</Alert> : null}

@@ -1,3 +1,4 @@
+// FILE: DashboardAdmin.tsx — dashboard admin: operasional, keuangan, okupansi
 import { useState, type ReactNode } from 'react';
 import { Alert, Col, Row } from 'react-bootstrap';
 import { useNavigate, useLocation } from 'react-router-dom';

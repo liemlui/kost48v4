@@ -1,5 +1,5 @@
 import { Controller, Get, Query, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import { Roles } from '../../common/decorators/roles.decorator';
@@ -27,6 +27,7 @@ export class OwnerDashboardController {
   constructor(private readonly service: OwnerDashboardService) {}
 
   @Get('aggregate')
+  @ApiOperation({ summary: 'Agregat dashboard owner — OWNER-only' })
   @Roles(UserRole.OWNER)
   async aggregate(@Query() query: OwnerDashboardAggregateQueryDto) {
     const data = await this.service.aggregate(query.year, query.month, query.trendMonths);

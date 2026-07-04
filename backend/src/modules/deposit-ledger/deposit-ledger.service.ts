@@ -1,3 +1,4 @@
+// FILE: deposit-ledger.service.ts — kelola deposit jaminan penghuni + refund (JALUR UANG)
 import { ConflictException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma } from '../../generated/prisma';
 import {

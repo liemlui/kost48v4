@@ -10,7 +10,7 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiQuery, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { Roles } from '../../common/decorators/roles.decorator';
 import {
@@ -35,6 +35,7 @@ export class CheckoutRequestsAdminController {
   ) {}
 
   @Get()
+  @ApiOperation({ summary: 'Daftar permintaan checkout — filter status/stay' })
   @ApiQuery({ name: 'status', enum: CheckoutRequestStatus, required: false })
   @ApiQuery({ name: 'stayId', type: Number, required: false })
   async findAll(
@@ -60,6 +61,7 @@ export class CheckoutRequestsAdminController {
   }
 
   @Patch(':id/approve')
+  @ApiOperation({ summary: 'Setujui permintaan checkout' })
   async approve(
     @Param('id', ParseIntPipe) id: number,
     @Body() dto: ApproveCheckoutRequestDto,
@@ -72,6 +74,7 @@ export class CheckoutRequestsAdminController {
   }
 
   @Patch(':id/reject')
+  @ApiOperation({ summary: 'Tolak permintaan checkout' })
   async reject(
     @Param('id', ParseIntPipe) id: number,
     @Body() dto: RejectCheckoutRequestDto,

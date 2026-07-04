@@ -1,3 +1,4 @@
+// FILE: PublicRoomsPage.tsx — katalog kamar publik: grid, filter, kalender ketersediaan
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Alert, Button, Col, Container, Row, Spinner } from "react-bootstrap";

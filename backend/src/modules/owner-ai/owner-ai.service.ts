@@ -1,3 +1,4 @@
+// FILE: owner-ai.service.ts — layanan AI Owner/Admin: draft rekomendasi, analisis, OCR
 import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { ExpenseCategory, ExpenseType, RoomStatus } from '../../common/enums/app.enums';

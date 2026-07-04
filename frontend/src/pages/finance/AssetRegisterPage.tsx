@@ -1,3 +1,4 @@
+// FILE: AssetRegisterPage.tsx — daftar aset tetap + penyusutan (JALUR UANG)
 import { FormEvent, useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Alert, Badge, Button, Card, Col, Form, Modal, Row, Spinner, Table } from 'react-bootstrap';

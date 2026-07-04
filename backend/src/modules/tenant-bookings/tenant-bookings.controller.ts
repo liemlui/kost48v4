@@ -1,5 +1,5 @@
 import { Body, Controller, Get, Param, Post, Query, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { UserRole } from '../../common/enums/app.enums';
@@ -20,6 +20,7 @@ export class TenantBookingsController {
   constructor(private readonly tenantBookingsService: TenantBookingsService) {}
 
   @Post()
+  @ApiOperation({ summary: 'Buat booking kamar — TENANT' })
   async create(@Body() dto: CreateTenantBookingDto, @CurrentUser() user: CurrentUserPayload) {
     return {
       message: 'Booking kamar berhasil dibuat',
@@ -28,6 +29,7 @@ export class TenantBookingsController {
   }
 
   @Get('my')
+  @ApiOperation({ summary: 'Daftar booking saya — TENANT' })
   async findMine(@CurrentUser() user: CurrentUserPayload, @Query() query: TenantBookingsQueryDto) {
     return {
       message: 'Daftar booking tenant berhasil diambil',
@@ -36,6 +38,7 @@ export class TenantBookingsController {
   }
 
   @Post(':id/cancel')
+  @ApiOperation({ summary: 'Batalkan booking — TENANT' })
   async cancel(
     @Param('id') id: string,
     @Body() dto: CancelTenantBookingDto,

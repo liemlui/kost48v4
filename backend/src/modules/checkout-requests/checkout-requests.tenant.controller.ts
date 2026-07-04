@@ -1,5 +1,5 @@
 import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { UserRole } from '../../common/enums/app.enums';
@@ -20,6 +20,7 @@ export class CheckoutRequestsTenantController {
   ) {}
 
   @Post()
+  @ApiOperation({ summary: 'Ajukan permintaan checkout — TENANT' })
   async create(
     @Body() dto: CreateCheckoutRequestDto,
     @CurrentUser() user: CurrentUserPayload,
@@ -31,6 +32,7 @@ export class CheckoutRequestsTenantController {
   }
 
   @Get('my')
+  @ApiOperation({ summary: 'Daftar permintaan checkout saya — TENANT' })
   async findMine(@CurrentUser() user: CurrentUserPayload) {
     return {
       message: 'Daftar permintaan checkout berhasil diambil',

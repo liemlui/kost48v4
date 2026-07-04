@@ -1,3 +1,4 @@
+// FILE: rooms.service.ts — CRUD kamar: status, harga, fasilitas, foto
 import { ConflictException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma } from '../../generated/prisma';
 import { AuditLogService } from '../../audit-log/audit-log.service';

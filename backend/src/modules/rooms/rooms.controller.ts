@@ -1,5 +1,5 @@
 import { BadRequestException, Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Query, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
-import { ApiBearerAuth, ApiConsumes, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiConsumes, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { UserRole } from '../../common/enums/app.enums';
@@ -27,6 +27,7 @@ export class RoomsController {
   constructor(private readonly roomsService: RoomsService) {}
 
   @Get()
+  @ApiOperation({ summary: 'Daftar kamar — OWNER/ADMIN/STAFF' })
   @Roles(UserRole.OWNER, UserRole.ADMIN, UserRole.STAFF)
   async findAll(@Query() query: RoomsQueryDto) {
     return { message: 'Daftar kamar berhasil diambil', data: await this.roomsService.findAll(query) };
@@ -34,18 +35,21 @@ export class RoomsController {
 
   // Monitoring AC + jadwal cuci (deklarasi SEBELUM ':id' agar tidak ketangkap ParseIntPipe).
   @Get('ac-maintenance')
+  @ApiOperation({ summary: 'Status cuci AC — OWNER/ADMIN' })
   @Roles(UserRole.OWNER, UserRole.ADMIN)
   async acMaintenance() {
     return { message: 'Status cuci AC berhasil diambil', data: await this.roomsService.getAcMaintenanceOverview() };
   }
 
   @Patch(':id/ac-clean')
+  @ApiOperation({ summary: 'Catat cuci AC — OWNER/ADMIN' })
   @Roles(UserRole.OWNER, UserRole.ADMIN)
   async recordAcCleaning(@Param('id', ParseIntPipe) id: number, @CurrentUser() actor: CurrentUserPayload) {
     return { message: 'Cuci AC berhasil dicatat', data: await this.roomsService.recordAcCleaning(id, actor) };
   }
 
   @Get(':id')
+  @ApiOperation({ summary: 'Detail kamar — OWNER/ADMIN/STAFF' })
   @Roles(UserRole.OWNER, UserRole.ADMIN, UserRole.STAFF)
   async findOne(@Param('id', ParseIntPipe) id: number) {
     return { message: 'Detail kamar berhasil diambil', data: await this.roomsService.findOne(id) };
@@ -54,6 +58,7 @@ export class RoomsController {
 
   // F2-16 (D-17): unggah gambar = bagian setelan kamar — OWNER-only.
   @Post('upload-image')
+  @ApiOperation({ summary: 'Upload gambar kamar — OWNER-only' })
   @Roles(UserRole.OWNER)
   @UseGuards(RateLimitGuard)
   @RateLimit('imageUpload')
@@ -102,18 +107,21 @@ export class RoomsController {
 
   // F2-16 (D-17): setelan kamar & harga (rent/deposit/tarif) — OWNER-only.
   @Post()
+  @ApiOperation({ summary: 'Buat kamar — OWNER-only' })
   @Roles(UserRole.OWNER)
   async create(@Body() dto: CreateRoomDto, @CurrentUser() user: CurrentUserPayload) {
     return { message: 'Kamar berhasil dibuat', data: await this.roomsService.create(dto, user) };
   }
 
   @Patch(':id')
+  @ApiOperation({ summary: 'Perbarui kamar — OWNER-only' })
   @Roles(UserRole.OWNER)
   async update(@Param('id', ParseIntPipe) id: number, @Body() dto: UpdateRoomDto, @CurrentUser() user: CurrentUserPayload) {
     return { message: 'Kamar berhasil diperbarui', data: await this.roomsService.update(id, dto, user) };
   }
 
   @Get(':roomId/facilities')
+  @ApiOperation({ summary: 'Daftar fasilitas kamar — OWNER/ADMIN/STAFF' })
   @Roles(UserRole.OWNER, UserRole.ADMIN, UserRole.STAFF)
   async findFacilities(@Param('roomId', ParseIntPipe) roomId: number) {
     return { message: 'Daftar fasilitas kamar berhasil diambil', data: await this.roomsService.findFacilities(roomId) };
@@ -121,18 +129,21 @@ export class RoomsController {
 
   // F2-16 (D-17): fasilitas = bagian setelan kamar — OWNER-only.
   @Post(':roomId/facilities')
+  @ApiOperation({ summary: 'Buat fasilitas kamar — OWNER-only' })
   @Roles(UserRole.OWNER)
   async createFacility(@Param('roomId', ParseIntPipe) roomId: number, @Body() dto: CreateRoomFacilityDto, @CurrentUser() user: CurrentUserPayload) {
     return { message: 'Fasilitas kamar berhasil dibuat', data: await this.roomsService.createFacility(roomId, dto, user) };
   }
 
   @Patch(':roomId/facilities/:facilityId')
+  @ApiOperation({ summary: 'Perbarui fasilitas kamar — OWNER-only' })
   @Roles(UserRole.OWNER)
   async updateFacility(@Param('roomId', ParseIntPipe) roomId: number, @Param('facilityId', ParseIntPipe) facilityId: number, @Body() dto: UpdateRoomFacilityDto, @CurrentUser() user: CurrentUserPayload) {
     return { message: 'Fasilitas kamar berhasil diperbarui', data: await this.roomsService.updateFacility(roomId, facilityId, dto, user) };
   }
 
   @Delete(':roomId/facilities/:facilityId')
+  @ApiOperation({ summary: 'Hapus fasilitas kamar — OWNER-only' })
   @Roles(UserRole.OWNER)
   async deleteFacility(@Param('roomId', ParseIntPipe) roomId: number, @Param('facilityId', ParseIntPipe) facilityId: number, @CurrentUser() user: CurrentUserPayload) {
     await this.roomsService.deleteFacility(roomId, facilityId, user);

@@ -317,6 +317,20 @@ Toggle Owner/Admin phase 1 berfungsi penuh. UI telah diperbaiki melalui Fase C (
 | Unifikasi `dateOnly()` — 1 shared utility | ✅ Selesai | `backend/src/common/utils/date-only.ts` |
 | `@ApiProperty` di DTO invoice + stays + room-transfer | ✅ Selesai | 3 file DTO |
 
+## Update 2026-07-04 — Keputusan Lanjutan Audit Reasonix ✅
+
+> **Sumber:** `docs/audit-reasonix/00_index.md` — item 🧑 yang butuh keputusan owner.
+
+| ID | Task | Keputusan Owner | OC ID |
+|----|------|----------------|-------|
+| **M24/L19** | `AncillaryRevenuePage` — statis, perlu API backend + FE | **A — Bangun API**. Halaman pendapatan tambahan harus hidup. | OC-01 |
+| **M26/L26** | Announcement — targeting per tenant | **B — SKIP**. Broadcast ke semua tenant cukup. | OC-02 |
+| **M27** | Auto-provisioning additional services | **B — SKIP**. Tetap manual (seperti sekarang). | OC-03 |
+| **M28** | `GuestPreferenceSurvey` — belum ada admin page | **A — Bangun**. Controller + admin page untuk survei preferensi kamar. | OC-04 |
+| **M29** | `ExternalReview` CRUD — belum diaudit | **A — Audit sekarang**. Periksa modul review eksternal. | OC-05 |
+| **M31** | `AiDraft` queue — belum diverifikasi live | **B — TUNDA**. Tes dengan DeepSeek asli ditunda ke fase berikutnya. | OC-06 |
+| **L22** | Staff dashboard — share DashboardAdmin, belum khusus | **A — Bangun**. Halaman staff dashboard terpisah. | OC-07 |
+
 ### Rujukan
 
 - Detail 82 temuan: `docs/audit-reasonix/` (10 file)

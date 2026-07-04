@@ -1,3 +1,4 @@
+// FILE: StayDetailPage.tsx — detail hunian: data penghuni, tagihan, histori
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Alert, Badge, Breadcrumb, Button, Card, Form, Spinner, Tab, Tabs } from 'react-bootstrap';
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';

@@ -1,3 +1,4 @@
+// FILE: publicGuestShared.tsx — helpers + komponen presentational halaman publik
 // Helpers/konstanta + 5 komponen presentational diekstrak dari PublicGuestDashboardPage.tsx (refactor 2026-06-19: AI-read).
 // Halaman publik (read-only, tanpa state global). Pola mengikuti reportShared/dashboardShared.
 import { useCallback, useEffect, useMemo, useState } from 'react';

@@ -1,3 +1,4 @@
+// FILE: accounting-types.ts — tipe data akuntansi: akun, jurnal, neraca, COA (JALUR UANG)
 // ═══════════════════════════════════════════════════════════
 //  FILE: Accounting API Types
 // ═══════════════════════════════════════════════════════════

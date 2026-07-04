@@ -1,3 +1,4 @@
+// FILE: stays.service.ts — CRUD siklus huni penghuni + orchestrator transisi status (JALUR UANG)
 import {
   BadRequestException,
   ConflictException,

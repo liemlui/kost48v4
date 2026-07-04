@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import PageHeader from '../../components/common/PageHeader';
 import EmptyState from '../../components/common/EmptyState';
 import { getAllSurveys, getSurveySummary, type SurveyItem, type SurveySummary } from '../../api/surveys';
+import { formatDateOnly } from '../../utils/dateTime';
 
 function Stars({ value }: { value: number }) {
   return (
@@ -73,7 +74,7 @@ function RecentComments({ summary }: { summary: SurveySummary | undefined }) {
           <div key={c.id} className="border-bottom p-3">
             <div className="d-flex align-items-center gap-2 mb-1">
               <Stars value={c.overallRating} />
-              <small className="text-muted">{(() => { const d = new Date(c.createdAt); return isNaN(d.getTime()) ? '-' : d.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }); })()}</small>
+              <small className="text-muted">{formatDateOnly(c.createdAt)}</small>
             </div>
             <p className="mb-0 small">{c.comment || '(tanpa komentar)'}</p>
           </div>
@@ -202,7 +203,7 @@ export default function AdminSurveysPage() {
                     <td className="small e3-maxw-320">
                       {s.comment ? <span>{s.comment.length > 120 ? `${s.comment.slice(0, 120)}…` : s.comment}</span> : <span className="text-muted">—</span>}
                     </td>
-                    <td className="small text-muted text-nowrap">{(() => { const d = new Date(s.createdAt); return isNaN(d.getTime()) ? '-' : d.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }); })()}</td>
+                    <td className="small text-muted text-nowrap">{formatDateOnly(s.createdAt)}</td>
                   </tr>
                 ))}
               </tbody>

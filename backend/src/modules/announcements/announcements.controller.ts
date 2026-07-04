@@ -15,7 +15,7 @@ import {
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiConsumes, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiConsumes, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { randomBytes } from 'crypto';
 import { Response } from 'express';
@@ -45,18 +45,21 @@ export class AnnouncementsController {
   constructor(private readonly announcementsService: AnnouncementsService) {}
 
   @Get()
+  @ApiOperation({ summary: 'Daftar pengumuman — OWNER/ADMIN/STAFF' })
   @Roles(UserRole.OWNER, UserRole.ADMIN, UserRole.STAFF)
   async findAll(@Query() query: AnnouncementsQueryDto) {
     return { message: 'Daftar pengumuman berhasil diambil', data: await this.announcementsService.findAll(query) };
   }
 
   @Get('active')
+  @ApiOperation({ summary: 'Pengumuman aktif — semua role' })
   @Roles(UserRole.OWNER, UserRole.ADMIN, UserRole.STAFF, UserRole.TENANT)
   async findActive(@CurrentUser() user: CurrentUserPayload) {
     return { message: 'Pengumuman aktif berhasil diambil', data: await this.announcementsService.findActive(user) };
   }
 
   @Post('upload-image')
+  @ApiOperation({ summary: 'Upload gambar pengumuman — OWNER/ADMIN' })
   @Roles(UserRole.OWNER, UserRole.ADMIN)
   @UseGuards(RateLimitGuard)
   @RateLimit('imageUpload')
@@ -103,6 +106,7 @@ export class AnnouncementsController {
   }
 
   @Get('images/:filename')
+  @ApiOperation({ summary: 'Ambil gambar pengumuman — semua role' })
   @Roles(UserRole.OWNER, UserRole.ADMIN, UserRole.STAFF, UserRole.TENANT)
   async getImage(
     @Param('filename') filename: string,
@@ -133,24 +137,28 @@ export class AnnouncementsController {
   }
 
   @Get(':id')
+  @ApiOperation({ summary: 'Detail pengumuman — semua role' })
   @Roles(UserRole.OWNER, UserRole.ADMIN, UserRole.STAFF, UserRole.TENANT)
   async findOne(@Param('id', ParseIntPipe) id: number, @CurrentUser() user: CurrentUserPayload) {
     return { message: 'Detail pengumuman berhasil diambil', data: await this.announcementsService.findOne(id, user) };
   }
 
   @Post()
+  @ApiOperation({ summary: 'Buat pengumuman — OWNER/ADMIN' })
   @Roles(UserRole.OWNER, UserRole.ADMIN)
   async create(@Body() dto: CreateAnnouncementDto, @CurrentUser() user: CurrentUserPayload) {
     return { message: 'Pengumuman berhasil dibuat', data: await this.announcementsService.create(dto, user) };
   }
 
   @Patch(':id')
+  @ApiOperation({ summary: 'Perbarui pengumuman — OWNER/ADMIN' })
   @Roles(UserRole.OWNER, UserRole.ADMIN)
   async update(@Param('id', ParseIntPipe) id: number, @Body() dto: UpdateAnnouncementDto, @CurrentUser() user: CurrentUserPayload) {
     return { message: 'Pengumuman berhasil diperbarui', data: await this.announcementsService.update(id, dto, user) };
   }
 
   @Post(':id/publish')
+  @ApiOperation({ summary: 'Publikasikan pengumuman — OWNER/ADMIN' })
   @Roles(UserRole.OWNER, UserRole.ADMIN)
   async publish(@Param('id', ParseIntPipe) id: number, @CurrentUser() user: CurrentUserPayload) {
     return { message: 'Pengumuman berhasil dipublikasikan', data: await this.announcementsService.publish(id, user) };

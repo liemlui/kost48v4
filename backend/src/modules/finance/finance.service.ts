@@ -1,4 +1,5 @@
-﻿import { Injectable } from '@nestjs/common';
+// FILE: finance.service.ts — agregasi data finansial + KPI dashboard keuangan (JALUR UANG)
+import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { CheckoutRequestStatus, InvoiceStatus, PaymentSubmissionStatus, RenewRequestStatus, RoomStatus, StayStatus, TicketStatus } from '../../common/enums/app.enums';
 import { FinancePeriodQueryDto } from './dto/finance-query.dto';

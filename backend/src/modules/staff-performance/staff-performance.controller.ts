@@ -1,5 +1,5 @@
 import { Controller, Get, Query, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { UserRole } from '../../common/enums/app.enums';
@@ -17,12 +17,14 @@ export class StaffPerformanceController {
   constructor(private readonly service: StaffPerformanceService) {}
 
   @Get('me/monthly')
+  @ApiOperation({ summary: 'Kinerja staf saya — STAFF' })
   @Roles(UserRole.STAFF)
   async myMonthly(@CurrentUser() user: CurrentUserPayload, @Query() query: StaffPerformanceMonthQueryDto) {
     return { message: 'Laporan kinerja staf berhasil diambil', data: await this.service.getMyMonthly(user, query.month) };
   }
 
   @Get('me/evidence')
+  @ApiOperation({ summary: 'Bukti kerja staf saya — STAFF' })
   @Roles(UserRole.STAFF)
   async myEvidence(@CurrentUser() user: CurrentUserPayload, @Query() query: StaffPerformanceMonthQueryDto) {
     return { message: 'Bukti kerja staf berhasil diambil', data: await this.service.getStaffEvidence(user.id, query.month) };

@@ -1,5 +1,5 @@
 import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Query, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { UserRole } from '../../common/enums/app.enums';
@@ -20,30 +20,35 @@ export class WifiSalesController {
   // W-03: STAFF dihapus dari GET — data penjualan WiFi mengandung revenue (amountRupiah).
   // Default rekomendasi: financial data OWNER/ADMIN only.
   @Get()
+  @ApiOperation({ summary: 'Daftar penjualan WiFi — OWNER/ADMIN' })
   @Roles(UserRole.OWNER, UserRole.ADMIN)
   async findAll(@Query() query: WifiSalesQueryDto) {
     return { message: 'Daftar penjualan WiFi berhasil diambil', data: await this.wifisalesService.findAll(query) };
   }
 
   @Get(':id')
+  @ApiOperation({ summary: 'Detail penjualan WiFi — OWNER/ADMIN' })
   @Roles(UserRole.OWNER, UserRole.ADMIN)
   async findOne(@Param('id', ParseIntPipe) id: number) {
     return { message: 'Detail penjualan WiFi berhasil diambil', data: await this.wifisalesService.findOne(id) };
   }
 
   @Post()
+  @ApiOperation({ summary: 'Catat penjualan WiFi — OWNER/ADMIN' })
   @Roles(UserRole.OWNER, UserRole.ADMIN)
   async create(@Body() dto: CreateWifiSaleDto, @CurrentUser() user: CurrentUserPayload) {
     return { message: 'Penjualan WiFi berhasil dicatat', data: await this.wifisalesService.create(dto, user) };
   }
 
   @Patch(':id')
+  @ApiOperation({ summary: 'Perbarui penjualan WiFi — OWNER/ADMIN' })
   @Roles(UserRole.OWNER, UserRole.ADMIN)
   async update(@Param('id', ParseIntPipe) id: number, @Body() dto: UpdateWifiSaleDto, @CurrentUser() user: CurrentUserPayload) {
     return { message: 'Penjualan WiFi berhasil diperbarui', data: await this.wifisalesService.update(id, dto, user) };
   }
 
   @Delete(':id')
+  @ApiOperation({ summary: 'Hapus penjualan WiFi — OWNER/ADMIN' })
   @Roles(UserRole.OWNER, UserRole.ADMIN)
   async remove(@Param('id', ParseIntPipe) id: number, @CurrentUser() user: CurrentUserPayload) {
     return { message: 'Penjualan WiFi berhasil dihapus', data: await this.wifisalesService.remove(id, user) };

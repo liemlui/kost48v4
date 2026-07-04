@@ -1,5 +1,5 @@
 import { Body, Controller, Get, Param, ParseIntPipe, Post, Query, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth, ApiQuery, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { UserRole, RenewRequestStatus } from '../../common/enums/app.enums';
@@ -21,6 +21,7 @@ export class RenewRequestsAdminController {
   constructor(private readonly renewRequestsService: RenewRequestsService) {}
 
   @Get()
+  @ApiOperation({ summary: 'Daftar permintaan perpanjangan — OWNER/ADMIN' })
   @ApiQuery({ name: 'status', enum: RenewRequestStatus, required: false })
   async findAll(@Query('status') status?: RenewRequestStatus, @Query('page') page?: string, @Query('limit') limit?: string) {
     const parsedPage = Number(page ?? 1);
@@ -36,6 +37,7 @@ export class RenewRequestsAdminController {
   }
 
   @Post(':id/confirm-dp')
+  @ApiOperation({ summary: 'Konfirmasi DP perpanjangan — OWNER/ADMIN' })
   async confirmDp(@Param('id', ParseIntPipe) id: number, @Body() dto: ConfirmDownPaymentDto, @CurrentUser() user: CurrentUserPayload) {
     return {
       message: 'DP perpanjangan dikonfirmasi; kamar aman untuk tenant lama, pelunasan maksimal H+7',
@@ -44,6 +46,7 @@ export class RenewRequestsAdminController {
   }
 
   @Post(':id/approve')
+  @ApiOperation({ summary: 'Setujui permintaan perpanjangan — OWNER/ADMIN' })
   async approve(@Param('id', ParseIntPipe) id: number, @Body() dto: ApproveRenewRequestDto, @CurrentUser() user: CurrentUserPayload) {
     return {
       message: 'Tahap perpanjangan berhasil diproses',
@@ -52,6 +55,7 @@ export class RenewRequestsAdminController {
   }
 
   @Post(':id/reject')
+  @ApiOperation({ summary: 'Tolak permintaan perpanjangan — OWNER/ADMIN' })
   async reject(@Param('id', ParseIntPipe) id: number, @Body() dto: RejectRenewRequestDto, @CurrentUser() user: CurrentUserPayload) {
     return {
       message: 'Permintaan perpanjangan ditolak',

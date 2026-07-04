@@ -4,6 +4,7 @@ import CurrencyDisplay from '../common/CurrencyDisplay';
 import StatusBadge from '../common/StatusBadge';
 import { Stay } from '../../types';
 import { getStatusLabel } from '../common/StatusBadge';
+import { formatDateOnly } from '../../utils/dateTime';
 
 function valueOrDash(value: ReactNode) {
   if (value === null || value === undefined || value === '') return '-';
@@ -11,14 +12,7 @@ function valueOrDash(value: ReactNode) {
 }
 
 function formatDate(value?: string | null) {
-  if (!value) return '-';
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return '-';
-  return date.toLocaleDateString('id-ID', {
-    day: '2-digit',
-    month: 'long',
-    year: 'numeric',
-  });
+  return formatDateOnly(value);
 }
 
 const DataField = ({ label, value }: { label: string; value: ReactNode }) => (

@@ -1,3 +1,4 @@
+// FILE: StaysPage.tsx — daftar hunian aktif + histori check-in/check-out
 import { useEffect, useMemo, useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';

@@ -1,5 +1,5 @@
 import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
@@ -23,12 +23,14 @@ export class LoyaltyController {
   ) {}
 
   @Get('referral-code')
+  @ApiOperation({ summary: 'Kode referral saya — TENANT' })
   async referralCode(@CurrentUser() user: CurrentUserPayload) {
     if (!user.tenantId) return { message: 'Kode referral', data: { code: null } };
     return { message: 'Kode referral', data: await this.referral.getOrCreateCode(user.tenantId) };
   }
 
   @Get()
+  @ApiOperation({ summary: 'Riwayat loyalitas saya — TENANT' })
   async mine(@CurrentUser() user: CurrentUserPayload) {
     if (!user.tenantId) {
       return { message: 'Loyalitas', data: { balance: 0, items: [] } };
@@ -37,17 +39,20 @@ export class LoyaltyController {
   }
 
   @Get('leaderboard')
+  @ApiOperation({ summary: 'Papan poin anonim per kamar' })
   async leaderboard() {
     return { message: 'Papan poin anonim per kamar', data: await this.loyalty.leaderboardByRoom(3) };
   }
 
   @Get('redemptions')
+  @ApiOperation({ summary: 'Penukaran reward saya — TENANT' })
   async myRedemptions(@CurrentUser() user: CurrentUserPayload) {
     if (!user.tenantId) return { message: 'Penukaran', data: [] };
     return { message: 'Penukaran', data: await this.redemption.myRedemptions(user.tenantId) };
   }
 
   @Post('redemptions')
+  @ApiOperation({ summary: 'Ajukan penukaran reward — TENANT' })
   async request(@CurrentUser() user: CurrentUserPayload, @Body() dto: RequestRedemptionDto) {
     const tenantId = this.redemption.assertTenant(user.tenantId);
     return { message: 'Penukaran diajukan', data: await this.redemption.requestRedemption(tenantId, dto.rewardId) };

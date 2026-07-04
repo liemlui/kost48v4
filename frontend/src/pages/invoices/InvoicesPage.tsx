@@ -1,3 +1,4 @@
+// FILE: InvoicesPage.tsx — daftar tagihan + aksi bayar inline (JALUR UANG)
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Alert, Badge, Button, Card, Col, Form, Modal, Row, Spinner } from 'react-bootstrap';

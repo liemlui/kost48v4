@@ -1,3 +1,4 @@
+// FILE: SubmitPaymentModal.tsx — modal upload bukti bayar tenant (JALUR UANG)
 import { ChangeEvent, useEffect, useMemo, useRef, useState } from 'react';
 import { Alert, Button, Form, Modal } from 'react-bootstrap';
 import CurrencyDisplay from '../common/CurrencyDisplay';

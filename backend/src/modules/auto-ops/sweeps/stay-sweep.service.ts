@@ -1,3 +1,4 @@
+// FILE: stay-sweep.service.ts — auto-sweep transisi status stay: selesai, overdue, notifikasi
 import { ConflictException, Injectable, Logger } from '@nestjs/common';
 import { Prisma } from '../../../generated/prisma';
 import { InvoiceStatus, PaymentSubmissionStatus, RoomStatus, StayStatus } from '../../../common/enums/app.enums';

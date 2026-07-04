@@ -1,3 +1,4 @@
+// FILE: staff-performance.service.ts — KPI performa staf: rating, laporan, skor
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma } from '../../generated/prisma';
 import { AuditLogService } from '../../audit-log/audit-log.service';

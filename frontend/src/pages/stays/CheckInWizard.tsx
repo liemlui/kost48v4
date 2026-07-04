@@ -1,3 +1,4 @@
+// FILE: CheckInWizard.tsx — wizard check-in penghuni baru: kamar, deposit, kontrak
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Alert, Button, Card, Form, InputGroup, Offcanvas, Spinner } from 'react-bootstrap';

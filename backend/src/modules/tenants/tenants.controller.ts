@@ -1,5 +1,5 @@
 import { BadRequestException, Body, Controller, Delete, ForbiddenException, Get, Logger, NotFoundException, Param, ParseIntPipe, Patch, Post, Query, Res, StreamableFile, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
-import { ApiBearerAuth, ApiConsumes, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiConsumes, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { randomBytes } from 'crypto';
 import { Response } from 'express';
@@ -38,30 +38,35 @@ export class TenantsController {
   private readonly profilePhotoUploadDir = join(process.cwd(), 'uploads', 'profile-photos');
 
   @Get()
+  @ApiOperation({ summary: 'Daftar tenant — OWNER/ADMIN' })
   @Roles(UserRole.OWNER, UserRole.ADMIN)
   async findAll(@Query() query: TenantsQueryDto) {
     return { message: 'Daftar tenant berhasil diambil', data: await this.tenantsService.findAll(query) };
   }
 
   @Get(':id')
+  @ApiOperation({ summary: 'Detail tenant — OWNER/ADMIN' })
   @Roles(UserRole.OWNER, UserRole.ADMIN)
   async findOne(@Param('id', ParseIntPipe) id: number, @CurrentUser() user: CurrentUserPayload) {
     return { message: 'Detail tenant berhasil diambil', data: await this.tenantsService.findOne(id, user) };
   }
 
   @Post()
+  @ApiOperation({ summary: 'Buat tenant — OWNER/ADMIN' })
   @Roles(UserRole.OWNER, UserRole.ADMIN)
   async create(@Body() dto: CreateTenantDto, @CurrentUser() user: CurrentUserPayload) {
     return { message: 'Tenant berhasil dibuat', data: await this.tenantsService.create(dto, user) };
   }
 
   @Patch(':id')
+  @ApiOperation({ summary: 'Perbarui data tenant — OWNER/ADMIN' })
   @Roles(UserRole.OWNER, UserRole.ADMIN)
   async update(@Param('id', ParseIntPipe) id: number, @Body() dto: UpdateTenantDto, @CurrentUser() user: CurrentUserPayload) {
     return { message: 'Tenant berhasil diperbarui', data: await this.tenantsService.update(id, dto, user) };
   }
 
   @Patch(':id/portal-access/status')
+  @ApiOperation({ summary: 'Toggle status portal tenant — OWNER/ADMIN' })
   @Roles(UserRole.OWNER, UserRole.ADMIN)
   async togglePortalAccess(
     @Param('id', ParseIntPipe) id: number,
@@ -75,6 +80,7 @@ export class TenantsController {
   }
 
   @Post(':id/portal-access')
+  @ApiOperation({ summary: 'Buat akun portal tenant — OWNER/ADMIN' })
   @Roles(UserRole.OWNER, UserRole.ADMIN)
   async createPortalAccess(
     @Param('id', ParseIntPipe) id: number,
@@ -88,6 +94,7 @@ export class TenantsController {
   }
 
   @Post(':id/portal-access/reset-password')
+  @ApiOperation({ summary: 'Reset password portal tenant — OWNER/ADMIN' })
   @Roles(UserRole.OWNER, UserRole.ADMIN)
   async resetPortalPassword(
     @Param('id', ParseIntPipe) id: number,
@@ -103,6 +110,7 @@ export class TenantsController {
   // ── F3-17: KTP upload + verifikasi + penyajian terproteksi + hapus PDP ───────
 
   @Post(':id/ktp/upload')
+  @ApiOperation({ summary: 'Upload foto KTP tenant — OWNER/ADMIN' })
   @Roles(UserRole.OWNER, UserRole.ADMIN)
   @UseGuards(RateLimitGuard)
   @RateLimit('imageUpload')
@@ -189,12 +197,14 @@ export class TenantsController {
   }
 
   @Post(':id/ktp/verify')
+  @ApiOperation({ summary: 'Verifikasi KTP tenant — OWNER-only' })
   @Roles(UserRole.OWNER)
   async verifyKtp(@Param('id', ParseIntPipe) id: number, @CurrentUser() user: CurrentUserPayload) {
     return { message: 'KTP tenant berhasil diverifikasi', data: await this.tenantsService.verifyKtp(id, user) };
   }
 
   @Get(':id/ktp/image')
+  @ApiOperation({ summary: 'Ambil foto KTP tenant — OWNER/ADMIN' })
   @Roles(UserRole.OWNER, UserRole.ADMIN)
   async getKtpImage(
     @Param('id', ParseIntPipe) id: number,
@@ -222,6 +232,7 @@ export class TenantsController {
   }
 
   @Delete(':id/ktp')
+  @ApiOperation({ summary: 'Hapus data KTP tenant (PDP) — OWNER-only' })
   @Roles(UserRole.OWNER)
   async deleteKtp(@Param('id', ParseIntPipe) id: number, @CurrentUser() user: CurrentUserPayload) {
     const result = await this.tenantsService.clearKtp(id, user, 'MANUAL_OWNER_PDP_DELETE');
@@ -234,6 +245,7 @@ export class TenantsController {
   // ── PUB-FOTO-PROFIL-KTP: avatar tenant (owner/admin ganti, disajikan terproteksi) ──
 
   @Post(':id/profile-photo/upload')
+  @ApiOperation({ summary: 'Upload foto profil tenant — OWNER/ADMIN' })
   @Roles(UserRole.OWNER, UserRole.ADMIN)
   @UseGuards(RateLimitGuard)
   @RateLimit('imageUpload')
@@ -285,6 +297,7 @@ export class TenantsController {
   }
 
   @Get(':id/profile-photo/image')
+  @ApiOperation({ summary: 'Ambil foto profil tenant — OWNER/ADMIN/TENANT' })
   @Roles(UserRole.OWNER, UserRole.ADMIN, UserRole.TENANT)
   async getProfilePhoto(
     @Param('id', ParseIntPipe) id: number,
@@ -318,6 +331,7 @@ export class TenantsController {
   }
 
   @Delete(':id/profile-photo')
+  @ApiOperation({ summary: 'Hapus foto profil tenant — OWNER/ADMIN' })
   @Roles(UserRole.OWNER, UserRole.ADMIN)
   async deleteProfilePhoto(@Param('id', ParseIntPipe) id: number, @CurrentUser() user: CurrentUserPayload) {
     const result = await this.tenantsService.clearProfilePhoto(id, user);

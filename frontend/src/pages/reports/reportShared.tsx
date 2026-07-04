@@ -1,3 +1,4 @@
+// FILE: reportShared.tsx — komponen presentational laporan keuangan: tabel, chart, filter (JALUR UANG)
 // Helpers + 21 komponen presentational diekstrak dari ReportsPage.tsx (refactor 2026-06-19: kecilkan file untuk AI-read).
 // Semua prop-driven / pure (read-only laporan). Pola mengikuti dashboardShared.tsx.
 import React, { useCallback, useMemo, useState } from 'react';

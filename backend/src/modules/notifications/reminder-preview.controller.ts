@@ -1,5 +1,5 @@
 import { Controller, Get, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { UserRole } from '../../common/enums/app.enums';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
@@ -15,6 +15,7 @@ export class ReminderPreviewController {
   constructor(private readonly reminderPreviewService: ReminderPreviewService) {}
 
   @Get('booking-expiry')
+  @ApiOperation({ summary: 'Pratinjau pengingat booking hampir kedaluwarsa' })
   async getBookingExpiry() {
     return {
       message: 'Pratinjau pengingat booking hampir kadaluarsa berhasil diambil',
@@ -23,6 +24,7 @@ export class ReminderPreviewController {
   }
 
   @Get('invoice-due')
+  @ApiOperation({ summary: 'Pratinjau pengingat invoice jatuh tempo' })
   async getInvoiceDue() {
     return {
       message: 'Pratinjau pengingat invoice jatuh tempo berhasil diambil',
@@ -31,6 +33,7 @@ export class ReminderPreviewController {
   }
 
   @Get('invoice-overdue')
+  @ApiOperation({ summary: 'Pratinjau pengingat invoice terlambat' })
   async getInvoiceOverdue() {
     return {
       message: 'Pratinjau pengingat invoice terlambat berhasil diambil',
@@ -39,6 +42,7 @@ export class ReminderPreviewController {
   }
 
   @Get('checkout')
+  @ApiOperation({ summary: 'Pratinjau pengingat checkout' })
   async getCheckout() {
     return {
       message: 'Pratinjau pengingat checkout berhasil diambil',
@@ -47,6 +51,7 @@ export class ReminderPreviewController {
   }
 
   @Get('all')
+  @ApiOperation({ summary: 'Pratinjau semua pengingat' })
   async getAll() {
     return {
       message: 'Pratinjau semua pengingat berhasil diambil',

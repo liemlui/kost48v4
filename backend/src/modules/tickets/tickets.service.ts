@@ -1,3 +1,4 @@
+// FILE: tickets.service.ts — kelola tiket laporan masalah penghuni (operasional)
 import {
   BadRequestException,
   ConflictException,

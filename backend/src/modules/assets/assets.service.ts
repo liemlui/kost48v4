@@ -1,3 +1,4 @@
+// FILE: assets.service.ts — kelola aset tetap + penyusutan + inventaris
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { buildMeta, buildPagination } from '../../common/utils/pagination';

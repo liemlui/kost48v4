@@ -1,5 +1,5 @@
 import { Body, Controller, Get, Param, ParseIntPipe, Post, Query, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { UserRole } from '../../common/enums/app.enums';
@@ -17,6 +17,7 @@ export class DepositLedgerController {
   constructor(private readonly depositLedgerService: DepositLedgerService) {}
 
   @Get('stays/:stayId')
+  @ApiOperation({ summary: 'Riwayat deposit berdasarkan stay' })
   @Roles(UserRole.OWNER, UserRole.ADMIN, UserRole.TENANT)
   async listByStay(
     @Param('stayId', ParseIntPipe) stayId: number,
@@ -30,6 +31,7 @@ export class DepositLedgerController {
   }
 
   @Get('tenants/:tenantId')
+  @ApiOperation({ summary: 'Riwayat deposit berdasarkan tenant' })
   @Roles(UserRole.OWNER, UserRole.ADMIN, UserRole.TENANT)
   async listByTenant(
     @Param('tenantId', ParseIntPipe) tenantId: number,
@@ -43,6 +45,7 @@ export class DepositLedgerController {
   }
 
   @Get('summary')
+  @ApiOperation({ summary: 'Ringkasan deposit ledger — OWNER/ADMIN' })
   @Roles(UserRole.OWNER, UserRole.ADMIN)
   async summary(@Query() query: DepositLedgerSummaryQueryDto) {
     return {
@@ -52,6 +55,7 @@ export class DepositLedgerController {
   }
 
   @Get('reconciliation-lite')
+  @ApiOperation({ summary: 'Rekonsiliasi ringan deposit ledger — OWNER/ADMIN' })
   @Roles(UserRole.OWNER, UserRole.ADMIN)
   async reconciliationLite(@Query() query: DepositLedgerSummaryQueryDto) {
     return {
@@ -61,6 +65,7 @@ export class DepositLedgerController {
   }
 
   @Post('backfill/dry-run')
+  @ApiOperation({ summary: 'Dry-run backfill deposit ledger — OWNER-only' })
   @Roles(UserRole.OWNER)
   async backfillDryRun(@Body() dto: DepositLedgerDryRunDto = {}) {
     return {

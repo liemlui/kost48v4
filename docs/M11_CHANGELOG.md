@@ -4,6 +4,9 @@
 
 ## Changelog Ringkas
 
+### 4 Jul 2026
+- **F6 E9** — Header tujuan 1 baris (`// FILE: x — tujuan`) di 69 file >400 baris backend+frontend. Script ukur `[E9] = 0`. tsc BE ✅ build FE ✅
+
 ### 2026-07-04 â€” E8 pecah shared types FE selesai
 - E8: `frontend/src/types/index.ts` dijadikan barrel export, isi shared types dipindah ke `frontend/src/types/core.ts`
 - Gate PASS: `cd frontend && npm run build`

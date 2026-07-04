@@ -1,5 +1,5 @@
 import { Body, Controller, Get, Param, ParseIntPipe, Patch, Post, Query, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { UserRole } from '../../common/enums/app.enums';
@@ -17,24 +17,28 @@ export class StaffFieldReportsController {
   constructor(private readonly service: StaffFieldReportsService) {}
 
   @Post()
+  @ApiOperation({ summary: 'Buat laporan kondisi lapangan — STAFF/OWNER/ADMIN' })
   @Roles(UserRole.OWNER, UserRole.ADMIN, UserRole.STAFF)
   async create(@Body() dto: CreateStaffFieldReportDto, @CurrentUser() user: CurrentUserPayload) {
     return { message: 'Laporan kondisi diterima dan menunggu konfirmasi admin', data: await this.service.create(dto, user) };
   }
 
   @Get()
+  @ApiOperation({ summary: 'Daftar laporan kondisi — STAFF/OWNER/ADMIN' })
   @Roles(UserRole.OWNER, UserRole.ADMIN, UserRole.STAFF)
   async findAll(@Query() query: StaffFieldReportsQueryDto, @CurrentUser() user: CurrentUserPayload) {
     return { message: 'Daftar laporan kondisi berhasil diambil', data: await this.service.findAll(query, user) };
   }
 
   @Get('review-queue')
+  @ApiOperation({ summary: 'Queue review laporan kondisi — OWNER/ADMIN' })
   @Roles(UserRole.OWNER, UserRole.ADMIN)
   async reviewQueue() {
     return { message: 'Queue review laporan kondisi berhasil diambil', data: await this.service.reviewQueue() };
   }
 
   @Patch(':id/admin-review')
+  @ApiOperation({ summary: 'Review laporan kondisi — OWNER/ADMIN' })
   @Roles(UserRole.OWNER, UserRole.ADMIN)
   async adminReview(@Param('id', ParseIntPipe) id: number, @Body() dto: AdminReviewStaffFieldReportDto, @CurrentUser() user: CurrentUserPayload) {
     return { message: 'Review laporan kondisi berhasil disimpan', data: await this.service.adminReview(id, dto, user) };

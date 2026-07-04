@@ -1,13 +1,13 @@
 import DonutGauge from '../../charts/DonutGauge';
 import { OKABE_ITO } from '../../charts/chartPalette';
-import { getLeaseProgress, formatTenure } from '../../../utils/dateTime';
+import { getLeaseProgress, formatTenure, formatDateOnly } from '../../../utils/dateTime';
 import type { Stay } from '../../../types';
 
 function formatShortDate(value?: string | Date | null): string {
   if (!value) return '-';
   const d = new Date(value);
   if (isNaN(d.getTime())) return '-';
-  return d.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
+  return formatDateOnly(d);
 }
 
 export default function LeaseProgressHero({ stay }: { stay: Stay }) {

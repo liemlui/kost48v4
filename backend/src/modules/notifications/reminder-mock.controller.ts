@@ -1,5 +1,5 @@
 import { Body, Controller, HttpCode, HttpStatus, Post, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { UserRole } from '../../common/enums/app.enums';
@@ -18,6 +18,7 @@ export class ReminderMockController {
   constructor(private readonly reminderMockService: ReminderMockService) {}
 
   @Post()
+  @ApiOperation({ summary: 'Mock kirim reminder untuk testing — OWNER/ADMIN' })
   @HttpCode(HttpStatus.OK)
   async mockSend(@Body() dto: MockSendDto, @CurrentUser() user: CurrentUserPayload) {
     const result = await this.reminderMockService.mockSend({

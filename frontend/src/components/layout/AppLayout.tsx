@@ -1,3 +1,4 @@
+// FILE: AppLayout.tsx — layout utama aplikasi: sidebar, topbar, routing per role
 import { type ReactNode, lazy, Suspense, useEffect, useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useTenantPortalStage } from '../../hooks/useTenantPortalStage';

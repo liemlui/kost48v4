@@ -1,5 +1,5 @@
 import { Controller, Get, Query, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { UserRole } from '../../common/enums/app.enums';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
@@ -23,6 +23,7 @@ export class ReportsController {
   constructor(private readonly reportsService: ReportsService) {}
 
   @Get('monthly-income')
+  @ApiOperation({ summary: 'Ringkasan pendapatan bulanan — OWNER-only' })
   async monthlyIncome(@Query() query: MonthlyIncomeQueryDto) {
     return {
       message: 'Ringkasan pendapatan bulanan berhasil diambil',
@@ -31,6 +32,7 @@ export class ReportsController {
   }
 
   @Get('overdue-aging')
+  @ApiOperation({ summary: 'Laporan aging overdue — OWNER-only' })
   async overdueAging(@Query() query: OverdueAgingQueryDto) {
     return {
       message: 'Laporan aging overdue berhasil diambil',
@@ -39,6 +41,7 @@ export class ReportsController {
   }
 
   @Get('deposit-liability')
+  @ApiOperation({ summary: 'Ringkasan liabilitas deposit — OWNER-only' })
   async depositLiability() {
     return {
       message: 'Ringkasan liabilitas deposit berhasil diambil',
@@ -47,6 +50,7 @@ export class ReportsController {
   }
 
   @Get('expense-summary')
+  @ApiOperation({ summary: 'Ringkasan pengeluaran bulanan — OWNER-only' })
   async expenseSummary(@Query() query: ExpenseSummaryQueryDto) {
     return {
       message: 'Ringkasan pengeluaran bulanan berhasil diambil',
@@ -57,6 +61,7 @@ export class ReportsController {
   // R2: GET /cash-flow dihapus — digantikan oleh GET /accounting/cashflow (direct method).
 
   @Get('profit-loss')
+  @ApiOperation({ summary: 'Laporan laba rugi — OWNER-only' })
   async profitLoss(@Query() query: OccupancyQueryDto) {
     return {
       message: 'Laporan laba rugi berhasil diambil',
@@ -65,6 +70,7 @@ export class ReportsController {
   }
 
   @Get('financial-ratios')
+  @ApiOperation({ summary: 'Rasio keuangan — OWNER-only' })
   async financialRatios(@Query() query: OccupancyQueryDto) {
     return {
       message: 'Rasio keuangan berhasil diambil',
@@ -73,6 +79,7 @@ export class ReportsController {
   }
 
   @Get('occupancy-daily')
+  @ApiOperation({ summary: 'Heatmap okupansi harian — OWNER-only' })
   async occupancyDaily(@Query() query: OccupancyDailyQueryDto) {
     return {
       message: 'Heatmap okupansi harian berhasil diambil',
@@ -81,6 +88,7 @@ export class ReportsController {
   }
 
   @Get('occupancy')
+  @ApiOperation({ summary: 'Laporan okupansi — OWNER-only' })
   async occupancy(@Query() query: OccupancyQueryDto) {
     return {
       message: 'Laporan okupansi berhasil diambil',

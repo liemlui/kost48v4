@@ -51,7 +51,7 @@ export function formatDate(iso: string) {
   if (!iso) return '';
   const d = new Date(iso);
   if (isNaN(d.getTime())) return iso;
-  return d.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+  return formatDateOnly(d);
 }
 
 export function getDurationOptions(term: string): Array<{ value: number; label: string }> {
@@ -134,3 +134,4 @@ export function validateStep2(form: GuestBookingFormState): FormErrors {
 export function validate(form: GuestBookingFormState): FormErrors {
   return { ...validateStep1(form), ...validateStep2(form) };
 }
+import { formatDateOnly } from '../../utils/dateTime';

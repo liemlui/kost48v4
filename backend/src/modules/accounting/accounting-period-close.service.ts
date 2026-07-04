@@ -1,3 +1,4 @@
+// FILE: accounting-period-close.service.ts — tutup periode akuntansi + validasi keseimbangan TB (JALUR UANG)
 import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { CurrentUserPayload } from '../../common/interfaces/current-user.interface';

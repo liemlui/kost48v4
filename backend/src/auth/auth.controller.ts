@@ -1,5 +1,5 @@
 ﻿import { Body, Controller, Get, Patch, Post, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { Public } from '../common/decorators/public.decorator';
 import { Roles } from '../common/decorators/roles.decorator';
@@ -21,6 +21,7 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('login')
+  @ApiOperation({ summary: 'Login user — publik, rate-limited' })
   @Public()
   @UseGuards(RateLimitGuard)
   async login(@Body() dto: LoginDto) {
@@ -29,6 +30,7 @@ export class AuthController {
   }
 
   @Get('me')
+  @ApiOperation({ summary: 'Ambil profil user saat ini' })
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   async me(@CurrentUser() user: CurrentUserPayload) {
@@ -38,6 +40,7 @@ export class AuthController {
 
 
   @Post('forgot-password')
+  @ApiOperation({ summary: 'Kirim instruksi reset password email/HP — publik, rate-limited' })
   @Public()
   @UseGuards(RateLimitGuard)
   async forgotPassword(@Body() dto: ForgotPasswordDto) {
@@ -46,6 +49,7 @@ export class AuthController {
   }
 
   @Post('reset-password')
+  @ApiOperation({ summary: 'Reset password dengan token — publik, rate-limited' })
   @Public()
   @UseGuards(RateLimitGuard)
   async resetPassword(@Body() dto: ResetPasswordDto) {
@@ -54,6 +58,7 @@ export class AuthController {
   }
 
   @Post('change-password')
+  @ApiOperation({ summary: 'Ubah password user saat ini' })
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   async changePassword(@CurrentUser() user: CurrentUserPayload, @Body() dto: ChangePasswordDto) {
@@ -63,6 +68,7 @@ export class AuthController {
 
   // F5-2 (AUD-2 / D-21.2): staf mengisi sendiri info tip P2P (e-wallet/bank). Self-service STAFF.
   @Patch('me/tip-info')
+  @ApiOperation({ summary: 'Perbarui info tip P2P staf (e-wallet/bank) — self-service STAFF' })
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.STAFF)
   @ApiBearerAuth()

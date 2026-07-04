@@ -1,3 +1,4 @@
+// FILE: StaffInventoryStatusModal.tsx — modal status stok gudang + inventaris
 import { ChangeEvent, useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Alert, Button, Form, Modal, Spinner } from "react-bootstrap";

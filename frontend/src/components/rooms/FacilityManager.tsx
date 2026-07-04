@@ -1,3 +1,4 @@
+// FILE: FacilityManager.tsx — manajemen fasilitas kamar: tambah, edit, hapus
 import { type FormEvent, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Alert, Button, Col, Collapse, Form, Row, Spinner, Table } from 'react-bootstrap';

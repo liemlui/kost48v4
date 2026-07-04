@@ -1,3 +1,4 @@
+// FILE: public-bookings.service.ts — booking tamu publik (non-tenant): cari kamar + submit
 import {
   BadRequestException,
   ConflictException,

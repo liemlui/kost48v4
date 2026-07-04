@@ -11,7 +11,7 @@ import {
   FileTypeValidator,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { ApiBody, ApiConsumes, ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiConsumes, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Public } from '../../common/decorators/public.decorator';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { UserRole } from '../../common/enums/app.enums';
@@ -23,12 +23,14 @@ export class MarketingAssetsController {
   constructor(private readonly service: MarketingAssetsService) {}
 
   @Get()
+  @ApiOperation({ summary: 'Daftar aset marketing — publik' })
   @Public()
   async list() {
     return { message: 'Daftar aset marketing berhasil diambil', data: this.service.list() };
   }
 
   @Post('upload/:slug')
+  @ApiOperation({ summary: 'Upload aset marketing — OWNER/ADMIN' })
   @Roles(UserRole.OWNER, UserRole.ADMIN)
   @UseInterceptors(FileInterceptor('file'))
   @ApiConsumes('multipart/form-data')
@@ -57,6 +59,7 @@ export class MarketingAssetsController {
   }
 
   @Delete(':slug')
+  @ApiOperation({ summary: 'Hapus aset marketing — OWNER/ADMIN' })
   @Roles(UserRole.OWNER, UserRole.ADMIN)
   async delete(@Param('slug') slug: string) {
     this.service.delete(slug);

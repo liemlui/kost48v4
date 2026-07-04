@@ -1,4 +1,4 @@
-import { formatDateTimeWib, getDeadlineMeta, parseDateTimeSafe } from './dateTime';
+import { formatDateOnly, formatDateTimeWib, getDeadlineMeta, parseDateTimeSafe } from './dateTime';
 
 export function parseDateSafe(value?: string | Date | null): Date | null {
   return parseDateTimeSafe(value);
@@ -7,11 +7,8 @@ export function parseDateSafe(value?: string | Date | null): Date | null {
 export function formatDateId(value?: string | Date | null, options?: Intl.DateTimeFormatOptions): string {
   const date = parseDateSafe(value);
   if (!date) return '-';
-  return date.toLocaleDateString('id-ID', options ?? {
-    day: 'numeric',
-    month: 'short',
-    year: 'numeric',
-  });
+  if (options) return new Intl.DateTimeFormat('id-ID', options).format(date);
+  return formatDateOnly(date);
 }
 
 export function formatDateTimeId(value?: string | Date | null): string {

@@ -1,3 +1,4 @@
+// FILE: StaffUnifiedWorkQueue.tsx — antrian kerja terpadu staf: tiket, tugas, jadwal
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { Alert, Button, Card, Spinner } from 'react-bootstrap';
 import { CheckCircle2, ClipboardList, DoorOpen, Package, Sparkles, Wrench, Zap } from 'lucide-react';

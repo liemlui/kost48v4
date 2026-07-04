@@ -1,3 +1,4 @@
+// FILE: AdminWorkspaces.tsx — komponen workspace admin: tab operasional, keuangan, laporan
 // Workspace components diekstrak dari DashboardAdmin.tsx (refactor 2026-06-19: kecilkan file 86KB untuk AI-read).
 // 5 workspace tabel filterable: Staff, Stays, Finance, Tickets, Rooms. Semua prop-driven (tanpa state bersama).
 import { useState, type ReactNode } from 'react';

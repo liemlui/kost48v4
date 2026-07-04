@@ -1,3 +1,4 @@
+// FILE: invoices.service.ts — buat/kelola invoice tagihan penghuni + due date + status (JALUR UANG)
 import { ConflictException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma } from '../../generated/prisma';
 import { PrismaService } from '../../prisma/prisma.service';

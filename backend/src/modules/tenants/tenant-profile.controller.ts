@@ -1,5 +1,5 @@
 import { Body, Controller, Get, Patch, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { UserRole } from '../../common/enums/app.enums';
@@ -17,6 +17,7 @@ export class TenantProfileController {
   constructor(private readonly tenantsService: TenantsService) {}
 
   @Get('profile')
+  @ApiOperation({ summary: 'Profil penghuni saya — TENANT' })
   @Roles(UserRole.TENANT)
   async getMyProfile(@CurrentUser() actor: CurrentUserPayload) {
     return {
@@ -27,6 +28,7 @@ export class TenantProfileController {
 
   // TEN-PROFILE-NOTIF: kelengkapan profil (ringan) untuk badge "Lengkapi Profil".
   @Get('profile/completeness')
+  @ApiOperation({ summary: 'Kelengkapan profil saya — TENANT' })
   @Roles(UserRole.TENANT)
   async getMyProfileCompleteness(@CurrentUser() actor: CurrentUserPayload) {
     return {
@@ -36,6 +38,7 @@ export class TenantProfileController {
   }
 
   @Patch('profile/onboarding')
+  @ApiOperation({ summary: 'Isi data profil onboarding — TENANT' })
   @Roles(UserRole.TENANT)
   async onboardingFill(
     @Body() dto: TenantProfileOnboardingDto,

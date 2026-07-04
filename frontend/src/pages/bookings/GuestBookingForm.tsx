@@ -1,3 +1,4 @@
+// FILE: GuestBookingForm.tsx — form booking publik: pilih kamar + durasi + data diri
 import { FormEvent, Fragment, useState } from 'react';
 import { Alert, Button, Card, Col, Form, Row } from 'react-bootstrap';
 import { Link } from 'react-router-dom';

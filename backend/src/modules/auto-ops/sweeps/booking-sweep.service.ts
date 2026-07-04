@@ -1,3 +1,4 @@
+// FILE: booking-sweep.service.ts — auto-sweep booking: expired, no-show, batalkan otomatis
 import { ConflictException, Injectable, Logger } from '@nestjs/common';
 import { Prisma } from '../../../generated/prisma';
 import { InvoiceLineType, InvoiceStatus, PaymentSubmissionStatus, RoomStatus, StayStatus } from '../../../common/enums/app.enums';

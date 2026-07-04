@@ -1,3 +1,4 @@
+// FILE: payment-submissions.service.ts — verifikasi bukti bayar tenant → posting jurnal + update invoice (JALUR UANG)
 import {
   BadRequestException,
   ConflictException,
