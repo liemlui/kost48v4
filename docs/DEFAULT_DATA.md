@@ -4,7 +4,7 @@
 > Seed scripts (`seed-dev-reset.js`, `seed-dev-via-api.js`) dan service seed (`faqs.service.ts`)
 > HARUS konsisten dengan file ini. Jika ada perbedaan, file ini yang benar — update script-nya.
 >
-> Diperbarui: 2026-06-24
+> Diperbarui: 2026-07-04
 
 ---
 
@@ -237,7 +237,27 @@ Seed via `seed-dev-via-api.js`. Tanggal seed berbasis `TODAY = 2026-06-24`.
 
 ---
 
-## 8. Ringkasan Perintah Seed
+## 8. DeepSeek AI — API Key & Konfigurasi
+
+| Item | Nilai | Lokasi |
+|------|-------|--------|
+| API Key | `sk-...` (dari platform.deepseek.com) | `backend/.env` `DEEPSEEK_API_KEY=` atau Settings → AI & Biaya (OWNER) |
+| Model default | `deepseek-chat` | `backend/.env` `DEEPSEEK_MODEL=` |
+| Base URL | `https://api.deepseek.com` | `backend/.env` `DEEPSEEK_BASE_URL=` (fallback) |
+| Status | ✅ Terverifikasi | `POST /owner-ai/test-connection` — latency ~1.2s, 18 token |
+
+**Cara pakai:**
+1. Daftar di https://platform.deepseek.com → buat API key
+2. Tempel di `backend/.env`: `DEEPSEEK_API_KEY=sk-xxx`
+3. Atau login OWNER → **Pengaturan → AI & Biaya** → isi key → Simpan (langsung aktif, tanpa restart)
+4. Klik **"Tes Koneksi DeepSeek"** untuk verifikasi
+
+> API key dari Settings (DB) lebih aman karena tidak tersimpan di file .env yang bisa ke-commit.
+> Env `DEEPSEEK_API_KEY` tetap jadi fallback bila Settings kosong.
+
+---
+
+## 9. Ringkasan Perintah Seed
 
 ```bash
 # DEV — Reset + seed ulang dari nol:
