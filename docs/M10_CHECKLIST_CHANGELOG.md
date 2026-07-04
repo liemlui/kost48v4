@@ -1,6 +1,6 @@
 # KOST48 V5 — Checklist Eksekusi Aktif
 
-> Versi: **2026-07-04 (OC-07 StaffDashboard selesai)** | Changelog historis → `docs/M11_CHANGELOG.md`
+> Versi: **2026-07-04 (Fase 4 = 35/35 100% — M31 DeepSeek verified)** | Changelog historis → `docs/M11_CHANGELOG.md`
 
 ## Cara Pakai (AI Eksekutor — baca sebelum coding)
 
@@ -87,6 +87,7 @@
 > **Fase A** blocked owner (infrastruktur server/domain/env). **Fase B–Y** selesai atau hampir tuntas.
 >
 > **Sisa aktif:**
+> 0. **M31** — ✅ **SELESAI** — AiDraft queue diverifikasi — DeepSeek test-connection PASS via .env API key. Fase 4 = 35/35 100%.
 > 0. **OC-07 (L22)** — ✅ **SELESAI** — Staff dashboard halaman khusus — backend endpoint aggregate `GET /staff/dashboard/aggregate` + perkuat DashboardStaff.tsx (3 query digabung jadi 1). Build backend ✅ frontend ✅
 > 0. **OC-05 (M29)** — ✅ **SELESAI** — ExternalReview CRUD audit — model Prisma standalone, read-only via social proof publik, tanpa CRUD/admin UI. Laporan: `docs/audit-reasonix/M29_AUDIT_EXTERNAL_REVIEW.md`
 > 0. **OC-04 (M28)** — ✅ **SELESAI** — GuestPreferenceSurvey admin page (controller backend + FE page). Build backend ✅ frontend ✅

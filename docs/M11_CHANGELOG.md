@@ -4,6 +4,11 @@
 
 ## Changelog Ringkas
 
+### 2026-07-04 — Fase 4 tuntas 35/35 100% — M31 DeepSeek verified
+- M31: DeepSeek test-connection via `.env` API key ✅ PASS (model deepseek-v4-flash, 1.2s, 18 token)
+- Fase 4 = 35/35 100% (M26/M27 SKIP, M31 fix)
+- Progres global: Fase 1-5 semua 100%, Fase 6 = 1/8 (12%)
+
 ### 2026-07-04 — OC-07 Staff dashboard halaman khusus
 - OC-07 (L22): Backend module `StaffDashboard` (`GET /staff/dashboard/aggregate`) — endpoint aggregate untuk data staff (rooms, tickets, inventory, routineSummary, meterPending). Frontend: API client `staffDashboard.ts`, DashboardStaff.tsx kini pakai 1 query aggregate (tambah dari 5 query terpisah). Build backend ✅ frontend ✅
 - 00_index.md: L22 dicentang [x], tabel OC L22 → ✅ SELESAI

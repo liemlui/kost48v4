@@ -100,7 +100,7 @@
 | **M28** | `GuestPreferenceSurvey` tidak ada admin page | 1 jam | [x] | Reasonix Code | 4 Jul | ✅ OC-04: controller + FE page — build lulus
 | **M29** | `ExternalReview` CRUD — audit selesai | 1 jam | [x] | Reasonix Code | 4 Jul | ✅ OC-05: audit selesai — lihat `M29_AUDIT_EXTERNAL_REVIEW.md`
 | **M30** | `MarketAnalysis` tidak ada validasi expiry | 30 mnt | [x] | Reasonix Code | 7 Jul | ✅ findAll filter 90 hari (cutoff createdAt)
-| **M31** | `AiDraft` queue tidak diverifikasi live | — | [ ] | — | — | ⏸️ TUNDA (OC-06)
+| **M31** | `AiDraft` queue tidak diverifikasi live | — | [x] | Reasonix Code | 4 Jul | ✅ DeepSeek test-connection PASS via .env — Fase 4 tuntas
 | **M32** | Seed `addMonths` setMonth overflow | 10 mnt | [x] | Reasonix Code | 7 Jul | ✅ via L14
 | **M33** | Seed `ymd()` UTC bisa salah tanggal WIB pagi | 15 mnt | [x] | Reasonix Code | 7 Jul | ✅ via L11
 | **M34** | Seed hardcode year 2026 — expired Des 2026 | 10 mnt | [x] | Reasonix Code | 7 Jul | ✅ via L12
@@ -168,7 +168,7 @@
 | 1 | Efisiensi Token (E1-E5) | 5/5 | ✅✅✅✅✅ 100% |
 | 2 | Bug Kritis (C1-C6) | 6/6 | ✅✅✅✅✅✅ 100% |
 | 3 | Temuan Tinggi (H1-H15) | 15/15 | ✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅ 100% |
-| 4 | Temuan Menengah (M1-M35) | 34/35 | ✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅⬜ 97% |
+| 4 | Temuan Menengah (M1-M35) | 35/35 | ✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅ 100% |
 | 5 | Temuan Rendah (L1-L26) | 26/26 | ✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅ 100% |
 | 6 | Efisiensi Lanjutan (E6-E13) | 1/8 | ✅⬜⬜⬜⬜⬜⬜⬜ 12% |
 | — | **Fase 3 — H3/H6/H7 final** | ✅ 3/3 | SUDAH SELESAI |
