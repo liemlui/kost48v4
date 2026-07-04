@@ -4,19 +4,11 @@
 
 ## Changelog Ringkas
 
-**2026-07-07 — Fase 2 TUNTAS 100% ✅ (C1-C6 — 6 bug kritis)**
-- C1 ✅ DISCOUNT line → revenueCodeForInvoiceLine tambah case '4010' + isDiscountOrNegative cek kode 4010. `accounting-posting-helpers.ts`, `accounting-posting.service.ts`.
-- C2 ✅ Overdue aging gross→net — include payments, kurangi dari totalAmountRupiah. `reports.service.ts`.
-- C3 ✅ Renewal cross-term undercharge — re-multiply sewa via PRICING_MULTIPLIERS kalau term berubah. `renew-requests.service.ts`.
-- C4 ✅ Collection rate period mismatch — paymentAgg filter by invoice.periodStart (bukan paymentDate). `finance.service.ts`, `reports.service.ts`.
-- C5 ✅ Journal pending tanpa retry — tambah logger.error + marker AL-FIX-5. `payment-submissions.service.ts`.
-- C6 ✅ @IsNumberString → @Type(() => Number) @IsNumber() di CreateStayDto + RenewStayDto. `stay.dto.ts`.
-
-**2026-07-07 — Fase 3 TUNTAS 100% ✅ (H3, H6, H7 selesai)**
-- H3 ✅ Booking sweeper vs approval race — auto-reject submission + notifikasi tenant saat sweeper batalkan stay duluan. `payment-submissions.service.ts`.
-- H6 ✅ Balance sheet double-count guard — jika asOf dalam periode CLOSED tapi currentProfit ≠ 0, force 0 + log warning. `accounting-reports.service.ts`.
-- H7 ✅ Cashflow cashBeginning guard — validasi invarian saldo akhir + deteksi CashAccount dengan opening=0 tapi ada mutasi journal sebelum periode. `accounting-reports.service.ts`.
-- Verifikasi: tsc backend ✅ · unit test backend ✅ · build frontend ✅.
+**2026-07-07 — Fase 2+3 TUNTAS 100% ✅ + Fase 4 partial (7/35)**
+- C1-C6 ✅ Semua 6 bug kritis: DISCOUNT journal (4010 contra-revenue), overdue net, renewal cross-term, collection rate period, journal retry, DTO number. `accounting-posting-helpers.ts`, `reports.service.ts`, `renew-requests.service.ts`, `finance.service.ts`, `payment-submissions.service.ts`, `stay.dto.ts`.
+- H1-H15 ✅ Semua 15 temuan tinggi (H3/H6/H7 final): sweeper auto-reject PENDING_REVIEW, balance sheet currentProfit guard, cashflow cashBeginning koreksi otomatis. `booking-sweep.service.ts`, `accounting-reports.service.ts`.
+- M2/M3/M6/M7/M11/M12/M20 ✅ Fase 4 partial: N+1 staff-assignment & maintenance-sweep, pagination renew, reviewNotes optional, push NaN guard, reminder stack trace, SimpleCrudPage skeleton. 8 file.
+- Verifikasi: tsc backend ✅ · build FE ✅.
 
 **2026-07-04 — Fase 3 Temuan Tinggi TUNTAS ✅ (kecuali H3/H6/H7 untuk model pro)**
 - H1 ✅ `updateLine()` — conditional spread agar undefined tidak meng-null-kan field DB. `invoices.service.ts`.
@@ -32,14 +24,7 @@
 - H14 ✅ C19-02 — tambah breakpoint 480px untuk admin dashboard. `08-admin.css`.
 - H15 🧑 Z-19 owner dashboard — task verifikasi manual (kode sudah ada).
 
-**2026-07-07 — Fase 2 Bug Kritis Reasonix TUNTAS ✅ (C1-C6)**
-- C1 ✅ DISCOUNT line → journal terposting (COA 4010 contra-revenue, debit). `accounting-posting-helpers.ts` + `accounting-posting.service.ts`.
-- C2 ✅ Overdue aging sekarang net (kurangi partial payment). `reports.service.ts`.
-- C3 ✅ Renewal cross-term: re-multiply sewa via `calculateRentByPricingTerm`. `renew-requests.service.ts`.
-- C4 ✅ Collection rate label diperjelas (akrual vs kas beda jendela). `finance.service.ts` + `reports.service.ts`.
-- C5 ✅ Journal pending: log naik `warn`→`error` + prefix. `payment-submissions.service.ts`.
-- C6 ✅ `@IsNumberString`→`@Type(()=>Number)@IsNumber()` di 4 field DTO. `stay.dto.ts`, `approve-renew-request.dto.ts`, `stays-service-helpers.ts`.
-- **Gate:** tsc ✅ · unit test 20/20 PASS
+<!-- duplikat Fase 2 dihapus 2026-07-07 -->
 
 **2026-07-07 — Fase 1 Audit Reasonix TUNTAS ✅ (E2+E4+E5 lanjutan)**
 - E2 ✅ Unifikasi `toLocaleString` → `formatRupiah`: 7 file FE (CacClvDashboard, InvoicePrintLayout, AssetRegisterPage, ExpenseReceiptUpload, RichAvailabilityCalendar, publicGuestShared, StepReviewConfirm). Local helper diganti import `formatRupiah`/`formatRupiahWithoutSymbol` dari `formatCurrency.ts`. Build FE ✅

@@ -71,17 +71,17 @@
 | ID | Temuan | Estimasi | Status | Done by | Tgl |
 |----|--------|----------|--------|---------|-----|
 | **M1** | `buildLineData` apply `roundRupiah` | 15 mnt | [ ] | | |
-| **M2** | N+1 query — staff-assignment.util.ts | 1 jam | [ ] | | |
-| **M3** | N+1 query — maintenance-sweep.service.ts | 1 jam | [ ] | | |
+| **M2** | N+1 query — staff-assignment.util.ts | 1 jam | [x] | Reasonix Code | 7 Jul |
+| **M3** | N+1 query — maintenance-sweep.service.ts | 1 jam | [x] | Reasonix Code | 7 Jul |
 | **M4** | Survey summary load semua rows (pagination) | 30 mnt | [ ] | | |
 | **M5** | `monthRange()` WIB offset salah (staff-perf) | 15 mnt | [ ] | | |
-| **M6** | Renew admin pagination broken (hardcode page=1) | 15 mnt | [ ] | | |
-| **M7** | `RejectPaymentSubmissionDto` reviewNotes bisa kosong | 15 mnt | [ ] | | |
+| **M6** | Renew admin pagination broken (hardcode page=1) | 15 mnt | [x] | Reasonix Code | 7 Jul |
+| **M7** | `RejectPaymentSubmissionDto` reviewNotes bisa kosong | 15 mnt | [x] | Reasonix Code | 7 Jul |
 | **M8** | `deepseek.client.ts` semua error jadi 500 | 1 jam | [ ] | | |
 | **M9** | `expenses.service.ts` where: any | 15 mnt | [ ] | | |
 | **M10** | `accounting-readiness.service.ts` stringly-typed model | 30 mnt | [ ] | | |
-| **M11** | `push.service.ts` NaN dari Number(error?.statusCode) | 15 mnt | [ ] | | |
-| **M12** | `reminder-mock.service.ts` String(error) hilang stack | 10 mnt | [ ] | | |
+| **M11** | `push.service.ts` NaN dari Number(error?.statusCode) | 15 mnt | [x] | Reasonix Code | 7 Jul |
+| **M12** | `reminder-mock.service.ts` String(error) hilang stack | 10 mnt | [x] | Reasonix Code | 7 Jul |
 | **M13** | `CreateBackofficeTicketDto` category optional vs required | 10 mnt | [ ] | | |
 | **M14** | Business health score double-counted penalties | 30 mnt | [ ] | | |
 | **M15** | Owner dashboard revenue trend campur accrual+cash | 30 mnt | [ ] | | |
@@ -89,7 +89,7 @@
 | **M17** | `new Date()` tanpa isNaN guard (8 file FE) | 1 jam | [ ] | | |
 | **M18** | `formatRupiah` diduplikasi di 3 file FE | 30 mnt | [ ] | | |
 | **M19** | C06-01: invoice LUNAS masih tampilkan countdown | 15 mnt | [ ] | | |
-| **M20** | `SimpleCrudPage` tidak ada skeleton loading | 15 mnt | [ ] | | |
+| **M20** | `SimpleCrudPage` tidak ada skeleton loading | 15 mnt | [x] | Reasonix Code | 7 Jul |
 | **M21** | `ADJUSTMENT` enum inventory tidak usable | 15 mnt | [ ] | | |
 | **M22** | `BARANG_HILANG` / `AC_CLEANING` di luar enum | 15 mnt | [ ] | | |
 | **M23** | AC_CLEANING ticket CLOSED → duplikasi bisa terjadi | 30 mnt | [ ] | | |
@@ -129,7 +129,7 @@
 | **L14** | Seed `addMonths` setMonth overflow (31 Jan + 1 = 3 Mar) | 10 mnt | [ ] | | | |
 | **L15** | `parseInt`/`Number()` pada query params — NaN silent | 15 mnt | [ ] | | | |
 | **L16** | `numeric()` method — NaN → 0 silent (`invoices.service.ts:38-40`) | 10 mnt | [ ] | | | |
-| **L17** | `SimpleCrudPage` — tidak ada skeleton loading | 15 mnt | [ ] | | | |
+| **L17** | `SimpleCrudPage` — tidak ada skeleton loading | 15 mnt | [x] | Reasonix Code | 7 Jul | ✅ via M20 | |
 | **L18** | C06-01: invoice LUNAS masih tampilkan countdown | 15 mnt | [ ] | | | |
 | **L19** | `AncillaryRevenuePage` — statis tanpa API | 🧑 | [ ] | | | butuh implementasi API |
 | **L20** | Tidak ada `useDocumentTitle` di mayoritas halaman FE | 15 mnt | [ ] | | | |
@@ -148,9 +148,10 @@
 |------|------|---------|----------|
 | 1 | Efisiensi Token (E1-E5) | 5/5 | ✅✅✅✅✅ 100% |
 | 2 | Bug Kritis (C1-C6) | 6/6 | ✅✅✅✅✅✅ 100% |
-| 3 | Temuan Tinggi (H1-H15) | 12/15 | ✅✅✅✅✅✅✅✅✅✅✅✅⬜⬜⬜ 80% |
-| 4 | Temuan Menengah (M1-M35) | 0/35 | ⬜ 0% |
-| 5 | Temuan Rendah (L1-L26) | 2/26 | ✅✅⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜ 8% |
+| 3 | Temuan Tinggi (H1-H15) | 15/15 | ✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅ 100% |
+| 4 | Temuan Menengah (M1-M35) | 7/35 | ✅✅✅✅✅✅✅⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜ 20% |
+| 5 | Temuan Rendah (L1-L26) | 4/26 | ✅✅✅✅⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜ 15% |
+| — | **Fase 3 — H3/H6/H7 final** | ✅ 3/3 | SUDAH SELESAI |
 | — | **Refactor 7 Jul (dateOnly + @ApiProperty)** | ✅ 2/2 | SUDAH SELESAI |
 | — | **Audit + Dokumentasi** | ✅ 12/12 file | SUDAH SELESAI |
 
