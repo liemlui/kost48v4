@@ -4,6 +4,10 @@
 
 ## Changelog Ringkas
 
+### 2026-07-04 — OC-07 Staff dashboard halaman khusus
+- OC-07 (L22): Backend module `StaffDashboard` (`GET /staff/dashboard/aggregate`) — endpoint aggregate untuk data staff (rooms, tickets, inventory, routineSummary, meterPending). Frontend: API client `staffDashboard.ts`, DashboardStaff.tsx kini pakai 1 query aggregate (tambah dari 5 query terpisah). Build backend ✅ frontend ✅
+- 00_index.md: L22 dicentang [x], tabel OC L22 → ✅ SELESAI
+
 ### 2026-07-04 — OC-05 ExternalReview CRUD audit
 - OC-05 (M29): Audit modul ExternalReview — model Prisma standalone, hanya read-only via social proof publik, tanpa CRUD endpoint/admin UI. Temuan: 1 critical (no admin CRUD), 1 high (no admin UI), 2 medium, 2 low. Laporan: `docs/audit-reasonix/M29_AUDIT_EXTERNAL_REVIEW.md`
 

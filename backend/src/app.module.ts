@@ -46,8 +46,11 @@ import { MarketAnalysisModule } from './modules/market-analysis/market-analysis.
 import { OwnerAiModule } from './modules/owner-ai/owner-ai.module';
 import { SurveysModule } from './modules/surveys/surveys.module';
 import { AdditionalServicesModule } from './modules/additional-services/additional-services.module';
+import { AncillaryRevenueModule } from './modules/ancillary-revenue/ancillary-revenue.module';
+import { GuestPreferencesModule } from './modules/guest-preferences/guest-preferences.module';
 import { AdminDashboardModule } from './modules/admin/admin-dashboard.module';
 import { OwnerDashboardModule } from './modules/owner/owner-dashboard.module';
+import { StaffDashboardModule } from './modules/staff-dashboard/staff-dashboard.module';
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
@@ -67,6 +70,8 @@ import { OwnerDashboardModule } from './modules/owner/owner-dashboard.module';
     RoomItemsModule,
     InventoryMovementsModule,
     WifiSalesModule,
+    AncillaryRevenueModule,
+    GuestPreferencesModule,
     ExpensesModule,
     AnalyticsModule,
     NotificationsModule,
@@ -96,6 +101,7 @@ import { OwnerDashboardModule } from './modules/owner/owner-dashboard.module';
     AdditionalServicesModule,
     AdminDashboardModule,
     OwnerDashboardModule,
+    StaffDashboardModule,
   ],
   providers: [
     // Audit E-1: default-deny — semua endpoint butuh JWT kecuali ditandai @Public().
