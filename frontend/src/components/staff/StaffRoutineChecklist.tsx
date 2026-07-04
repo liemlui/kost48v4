@@ -213,7 +213,7 @@ export default function StaffRoutineChecklist({ today, isLoading, onJumpToWorkQu
                   <div className="routine-task-footer">
                     <span>
                       {done && item.completedAt
-                        ? `Selesai ${new Date(item.completedAt).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}`
+                        ? `Selesai ${new Intl.DateTimeFormat('id-ID', { hour: '2-digit', minute: '2-digit' }).format(new Date(item.completedAt))}`
                         : `Status: ${statusLabel(item.status)} — kerjakan lewat Daftar Kerja`}
                     </span>
                   </div>

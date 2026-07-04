@@ -27,7 +27,7 @@ function formatDateInput(input?: string | Date | null): string {
 function formatDisplayDate(input?: string | Date | null): string {
   const date = toValidDate(input);
   if (!date) return '-';
-  return date.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
+  return new Intl.DateTimeFormat('id-ID', { day: '2-digit', month: 'short', year: 'numeric' }).format(date);
 }
 
 function addCalendarMonthsClamped(base: Date, months: number) {

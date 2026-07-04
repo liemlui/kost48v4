@@ -1,11 +1,12 @@
-import { useCallback, useMemo, useState } from 'react';
+﻿import { useCallback, useMemo, useState } from 'react';
 import { Alert, Badge, Button, Spinner } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import { useNotifications } from '../../hooks/useNotifications';
 import type { AppNotificationItem } from '../../api/notifications';
 import PushToggle from '../../components/notifications/PushToggle';
+import { formatDateOnly, formatDateTimeWib } from '../../utils/dateTime';
 
-// ── Helpers ──────────────────────────────────────────────────────────────────
+// â”€â”€ Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function isSameDay(dateString: string, ref: Date): boolean {
   const d = new Date(dateString);
@@ -20,18 +21,18 @@ function formatGroupHeader(dateString: string): string {
   if (isNaN(d.getTime())) return dateString || '-';
   const now = new Date();
   if (isSameDay(dateString, now)) {
-    return `Hari ini — ${d.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}`;
+    return `Hari ini — ${formatDateOnly(d)}`;
   }
   const yesterday = new Date();
   yesterday.setDate(yesterday.getDate() - 1);
   if (isSameDay(dateString, yesterday)) {
-    return `Kemarin — ${d.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}`;
+    return `Kemarin — ${formatDateOnly(d)}`;
   }
   const diffMs = new Date().getTime() - d.getTime();
   if (diffMs < 7 * 24 * 60 * 60 * 1000) {
-    return `Minggu ini — ${d.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}`;
+    return `Minggu ini — ${formatDateOnly(d)}`;
   }
-  return d.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+  return formatDateOnly(d);
 }
 
 function getDayKey(dateString: string): string {
@@ -43,13 +44,7 @@ function getDayKey(dateString: string): string {
 function formatDateTime(dateString: string): string {
   const d = new Date(dateString);
   if (isNaN(d.getTime())) return dateString || '-';
-  return d.toLocaleString('id-ID', {
-    day: 'numeric',
-    month: 'short',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  });
+  return formatDateTimeWib(d);
 }
 
 // Sembunyikan notifikasi data uji di production
@@ -80,7 +75,7 @@ const FILTER_TABS: { id: FilterCategory; label: string }[] = [
 
 const PAGE_SIZE = 20;
 
-// ── Component ─────────────────────────────────────────────────────────────────
+// â”€â”€ Component â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 export default function NotificationsPage() {
   const navigate = useNavigate();
@@ -205,7 +200,7 @@ export default function NotificationsPage() {
 
       {!isLoading && !isError && filtered.length === 0 && (
         <div className="text-center py-5">
-          <div style={{ fontSize: '3rem' }} role="img" aria-hidden="true">🔔</div>
+          <div style={{ fontSize: '3rem' }} role="img" aria-hidden="true">ðŸ””</div>
           <h5 className="mt-3 text-muted">
             {allNotifications.length === 0 ? 'Belum ada notifikasi' : 'Tidak ada notifikasi untuk kategori ini'}
           </h5>
@@ -254,7 +249,7 @@ export default function NotificationsPage() {
                         </Badge>
                         {item.linkTo && (
                           <span className="text-primary small" style={{ cursor: 'pointer' }}>
-                            Klik untuk buka →
+                            Klik untuk buka â†’
                           </span>
                         )}
                       </div>
@@ -282,3 +277,5 @@ export default function NotificationsPage() {
     </div>
   );
 }
+
+

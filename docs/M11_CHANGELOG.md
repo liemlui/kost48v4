@@ -4,6 +4,10 @@
 
 ## Changelog Ringkas
 
+### 2026-07-04 — E7 unifikasi format tanggal FE selesai
+- E7: semua `toLocaleDateString/TimeString` FE target Fase 6 sudah diganti ke `formatDateOnly` / `formatDateTimeWib` atau `Intl.DateTimeFormat` yang disengaja
+- Gate PASS: `node scripts/token-efficiency-report.mjs` → `[E7] File FE toLocaleDateString/TimeString: 0` dan `cd frontend && npm run build` PASS
+
 ### 2026-07-04 — Fase 4 tuntas 35/35 100% — M31 DeepSeek verified
 - M31: DeepSeek test-connection via `.env` API key ✅ PASS (model deepseek-v4-flash, 1.2s, 18 token)
 - Fase 4 = 35/35 100% (M26/M27 SKIP, M31 fix)

@@ -84,7 +84,7 @@ export default function StaffMotivationDashboard({ user, tickets, rooms = [], in
   const { pending: meterPending, isLoading: meterLoading } = useStaffMeterPending(rooms);
 
   const now = new Date();
-  const dateLabel = now.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long' });
+  const dateLabel = new Intl.DateTimeFormat('id-ID', { weekday: 'long', day: 'numeric', month: 'long' }).format(now);
   const greeting = greetingByHour(now.getHours());
   const glanceParts = [
     `${board.todayCount} tugas hari ini`,

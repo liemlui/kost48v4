@@ -54,7 +54,7 @@ function formatDate(dateValue?: string | Date | null) {
   if (!dateValue) return '-';
   const date = typeof dateValue === 'string' ? new Date(dateValue) : dateValue;
   if (Number.isNaN(date.getTime())) return '-';
-  return date.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
+  return new Intl.DateTimeFormat('id-ID', { day: '2-digit', month: 'short', year: 'numeric' }).format(date);
 }
 
 export function useBusinessHealthScore(input: BusinessHealthInput): BusinessHealthScore {

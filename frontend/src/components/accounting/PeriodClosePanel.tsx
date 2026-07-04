@@ -28,7 +28,9 @@ type Props = {
 };
 
 function monthName(year: number, month: number) {
-  return new Date(Date.UTC(year, month - 1, 1)).toLocaleDateString('id-ID', { month: 'long', year: 'numeric' });
+  return new Intl.DateTimeFormat('id-ID', { month: 'long', year: 'numeric', timeZone: 'UTC' }).format(
+    new Date(Date.UTC(year, month - 1, 1)),
+  );
 }
 
 function formatDateTime(value?: string | null) {

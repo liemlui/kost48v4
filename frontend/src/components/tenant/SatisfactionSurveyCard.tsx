@@ -55,7 +55,7 @@ export default function SatisfactionSurveyCard() {
 
   // Gate 1: belum 30 hari menginap
   if (status && !status.eligible && status.reason === 'min_stay_30_days') {
-    const eligibleDate = status.eligibleAt ? new Date(status.eligibleAt).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) : '30 hari setelah check-in';
+    const eligibleDate = status.eligibleAt ? new Intl.DateTimeFormat('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }).format(new Date(status.eligibleAt)) : '30 hari setelah check-in';
     return (
       <Card className="border-0 mb-3" style={{ background: 'linear-gradient(135deg,#fefce8,#fef3c7)' }}>
         <Card.Body className="py-2 px-3">
@@ -68,7 +68,7 @@ export default function SatisfactionSurveyCard() {
 
   // Gate 2: cooldown 6 bulan (sudah submit, belum bisa isi ulang)
   if (status && status.submitted && !status.eligible && status.reason === 'cooldown_6_months') {
-    const nextDate = status.nextEligibleAt ? new Date(status.nextEligibleAt).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) : '6 bulan setelah penilaian terakhir';
+    const nextDate = status.nextEligibleAt ? new Intl.DateTimeFormat('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }).format(new Date(status.nextEligibleAt)) : '6 bulan setelah penilaian terakhir';
     return (
       <Card className="border-0 mb-3" style={{ background: 'linear-gradient(135deg,#f0fdf4,#eff6ff)' }}>
         <Card.Body className="py-2 px-3">

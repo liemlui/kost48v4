@@ -92,7 +92,7 @@ export function occupancyHeatmapRange(): { from: string; to: string } {
 }
 
 export function monthLabel(ym: { year: number; month: number }) {
-  return new Date(ym.year, ym.month - 1).toLocaleString('id-ID', { month: 'long', year: 'numeric' });
+  return new Intl.DateTimeFormat('id-ID', { month: 'long', year: 'numeric' }).format(new Date(ym.year, ym.month - 1));
 }
 
 export function clampPercent(value: number): number {
@@ -226,11 +226,9 @@ export function OccupancyDailyHeatmap({ data }: { data: OccupancyDaily }) {
       <div className="occupancy-calendar-months">
         {months.map(([monthKey, days]) => {
           const firstWeekday = new Date(`${monthKey}-01T00:00:00.000Z`).getUTCDay();
-          const monthName = new Date(`${monthKey}-01T00:00:00.000Z`).toLocaleDateString('id-ID', {
-            month: 'long',
-            year: 'numeric',
-            timeZone: 'UTC',
-          });
+          const monthName = new Intl.DateTimeFormat('id-ID', { month: 'long', year: 'numeric', timeZone: 'UTC' }).format(
+            new Date(`${monthKey}-01T00:00:00.000Z`),
+          );
           return (
             <article className="occupancy-calendar-month" key={monthKey}>
               <h3>{monthName}</h3>

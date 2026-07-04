@@ -1,6 +1,6 @@
 import StaffAuditResultBadge from './StaffAuditResultBadge';
 import type { StaffPerformanceSummary } from '../../api/staffPerformance';
-import { formatDateOnly } from '../../utils/dateTime';
+import { formatClockWib, formatDateOnly } from '../../utils/dateTime';
 
 type Props = {
   performance: StaffPerformanceSummary;
@@ -82,7 +82,7 @@ export default function StaffReportPrintView({ performance }: Props) {
   const rows = buildEvidenceRows(performance);
   const proofNeeds = rows.filter((row) => row.proof === 'Perlu foto').length;
   const auditTotal = (kpi.auditPass ?? 0) + (kpi.auditNeedsFix ?? 0) + (kpi.auditFailed ?? 0);
-  const printedAt = `${formatDateOnly(new Date())} ${new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}`;
+  const printedAt = `${formatDateOnly(new Date())} ${formatClockWib(new Date())}`;
 
   return (
     <section className="staff-report-print-page" aria-label="Versi cetak laporan kerja staff">

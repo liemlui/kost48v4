@@ -205,7 +205,7 @@ export default function MeterTab({
               <div>
                 <h6 className="mb-0">Sejak penghuni masuk</h6>
                 <div className="text-muted small">
-                  Catatan meter sejak penghuni masuk tanggal {stay.checkInDate ? new Date(stay.checkInDate).toLocaleDateString('id-ID') : '-'}
+                  Catatan meter sejak penghuni masuk tanggal {stay.checkInDate ? new Intl.DateTimeFormat('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }).format(new Date(stay.checkInDate)) : '-'}
                 </div>
               </div>
               <div className="text-muted small">

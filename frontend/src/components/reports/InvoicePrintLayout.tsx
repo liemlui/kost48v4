@@ -108,11 +108,11 @@ export default function InvoicePrintLayout({ data }: Props) {
   );
   const outstanding = Math.max(totalInvoice - totalPaid, 0);
 
-  const printedDate = new Date().toLocaleDateString('id-ID', {
+  const printedDate = new Intl.DateTimeFormat('id-ID', {
     day: '2-digit',
     month: 'long',
     year: 'numeric',
-  });
+  }).format(new Date());
 
   // Data privacy
   const phone = maskPhone(data.stay?.tenant?.phone);

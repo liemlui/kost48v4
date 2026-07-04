@@ -40,7 +40,7 @@ function localYMD(d: Date): string {
 function fmtTanggal(iso: string): string {
   const [y, m, d] = iso.split('-').map(Number);
   const date = new Date(y, m - 1, d);
-  return Number.isNaN(date.getTime()) ? iso : date.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' });
+  return Number.isNaN(date.getTime()) ? iso : new Intl.DateTimeFormat('id-ID', { day: 'numeric', month: 'short' }).format(date);
 }
 function fmtHari(iso: string): string {
   const [y, m, d] = iso.split('-').map(Number);

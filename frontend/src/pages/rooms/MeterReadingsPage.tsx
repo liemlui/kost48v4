@@ -23,7 +23,7 @@ function formatDate(v: string | null | undefined): string {
   if (!v) return '-';
   const d = new Date(v);
   if (isNaN(d.getTime())) return '-';
-  return d.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
+  return new Intl.DateTimeFormat('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }).format(d);
 }
 
 type RoomItem = {

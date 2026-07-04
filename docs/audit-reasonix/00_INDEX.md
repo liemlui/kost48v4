@@ -150,7 +150,7 @@
 | ID | Task | Estimasi | Status | Done by | Tgl | Catatan |
 |----|------|----------|--------|---------|-----|---------|
 | **E6** | **Script pengukur** `scripts/token-efficiency-report.mjs` — copy-paste dari spec §E6, jadi gate objektif semua task | 1 jam | [x] | Codex | 4 Jul 2026 | ✅ Script dibuat + `node scripts/token-efficiency-report.mjs` PASS |
-| **E7** | **Unifikasi format tanggal FE** — 40 file `toLocaleDateString/TimeString` → `formatDateOnly`/`formatDateTimeWib` dari `utils/dateTime.ts` (util SUDAH ADA) | 2 jam | [ ] | — | — | Angka non-uang & format kustom BIARKAN; 10 file/batch |
+| **E7** | **Unifikasi format tanggal FE** — 40 file `toLocaleDateString/TimeString` → `formatDateOnly`/`formatDateTimeWib` dari `utils/dateTime.ts` (util SUDAH ADA) | 2 jam | [x] | Codex | 4 Jul 2026 | ✅ 0 file FE `toLocaleDateString/TimeString` tersisa; build FE PASS |
 | **E8** | **Pecah `frontend/src/types/index.ts`** (848 baris) per domain + re-export dari index — path import lain TIDAK berubah | 2 jam | [ ] | — | — | Type-only, nol risiko runtime |
 | **E9** | **Header tujuan 1 baris** (`// FILE: x — tujuan`) di 69 file >400 baris | 1,5 jam | [ ] | — | — | Komentar saja; wajib pakai `—` agar terdeteksi script |
 | **E10** | **Kurangi `as any` backend** 672 → <400 — per modul, non-uang dulu | 4 jam | [ ] | — | — | Modul uang: HANYA pola `(this.prisma as any)` |
@@ -170,7 +170,7 @@
 | 3 | Temuan Tinggi (H1-H15) | 15/15 | ✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅ 100% |
 | 4 | Temuan Menengah (M1-M35) | 35/35 | ✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅ 100% |
 | 5 | Temuan Rendah (L1-L26) | 26/26 | ✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅ 100% |
-| 6 | Efisiensi Lanjutan (E6-E13) | 1/8 | ✅⬜⬜⬜⬜⬜⬜⬜ 12% |
+| 6 | Efisiensi Lanjutan (E6-E13) | 2/8 | ✅✅⬜⬜⬜⬜⬜⬜ 25% |
 | — | **Fase 3 — H3/H6/H7 final** | ✅ 3/3 | SUDAH SELESAI |
 | — | **Refactor 4 Jul (dateOnly + @ApiProperty)** | ✅ 2/2 | SUDAH SELESAI |
 | — | **Audit + Dokumentasi** | ✅ 12/12 file | SUDAH SELESAI |

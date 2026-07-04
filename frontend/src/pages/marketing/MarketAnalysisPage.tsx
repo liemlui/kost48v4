@@ -90,7 +90,7 @@ export default function MarketAnalysisPage() {
 
   const saveMutation = useMutation({
     mutationFn: () => saveMarketAnalysis({
-      kind, title: title.trim() || `Analisa ${kind} ${new Date().toLocaleDateString('id-ID')}`,
+      kind, title: title.trim() || `Analisa ${kind} ${new Intl.DateTimeFormat('id-ID').format(new Date())}`,
       summary: typeof finalResult?.summary === 'string' ? (finalResult!.summary as string) : undefined,
       resultJson: finalResult ?? undefined, transcript: messages,
     }),
@@ -237,7 +237,7 @@ export default function MarketAnalysisPage() {
                           <Badge bg="secondary" className="me-2">{a.kind}</Badge>
                           <span className="fw-semibold">{a.title}</span>
                           {a.summary ? <div className="text-muted small mt-1">{a.summary}</div> : null}
-                          <div className="text-muted" style={{ fontSize: '0.7rem' }}>{new Date(a.createdAt).toLocaleString('id-ID')} · {a.createdBy?.fullName ?? '—'}</div>
+                          <div className="text-muted" style={{ fontSize: '0.7rem' }}>{new Intl.DateTimeFormat('id-ID', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }).format(new Date(a.createdAt))} · {a.createdBy?.fullName ?? '—'}</div>
                         </div>
                         <Button size="sm" variant="outline-danger" onClick={() => deleteMutation.mutate(a.id)} disabled={deleteMutation.isPending}>Hapus</Button>
                       </div>
