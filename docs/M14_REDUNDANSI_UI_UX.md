@@ -22,7 +22,7 @@
 | 7 | AM-07 | Fix RoomComparePanel spec detection (regex→utility) | 🔴 HIGH | 3 file | [ ] |
 | 8 | AM-08 | Buat RoomPriceTable komponen reusable | 🟢 LOW | 4 file | [x] |
 | 9 | AM-09 | Buat RoomSpecChips komponen reusable | 🟢 LOW | 4 file | [x] |
-| 10 | AM-11 | Hapus tombol "Buka laporan" di OwnerDashboard (duplikat sidebar) | 🟡 MED | 1 file | [ ] |
+| 10 | AM-11 | Hapus tombol "Buka laporan" di OwnerDashboard (duplikat sidebar) | 🟡 MED | 1 file | [x] |
 | 11 | AM-12 | Hapus tombol "Lengkapi setup akuntansi" di FinancialRatiosPage | 🟡 MED | 1 file | [ ] |
 | 12 | AM-10 | Dokumentasi + changelog | 🟢 LOW | 2 file | [x] |
 

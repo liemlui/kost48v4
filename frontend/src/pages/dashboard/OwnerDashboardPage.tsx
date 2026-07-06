@@ -1,7 +1,7 @@
 // FILE: OwnerDashboardPage.tsx — dashboard owner: KPI, tren pendapatan, okupansi (JALUR UANG)
 import { useMemo, useState, type ReactNode } from 'react';
 import { formatRupiahWithoutSymbol, formatCompactRupiah } from '../../utils/formatCurrency';
-import { Alert, Badge, Button, Card, Col, Container, Form, Row } from 'react-bootstrap';
+import { Alert, Badge, Card, Col, Container, Form, Row } from 'react-bootstrap';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { StatCardSkeleton, TableSkeleton } from '../../components/common/SkeletonLoader';
@@ -277,7 +277,6 @@ export default function OwnerDashboardPage() {
               ))}
             </Form.Select>
           </div>
-          <Button size="sm" className="owner-report-button" onClick={() => navigate('/reports')}>Buka laporan</Button>
           <div className="owner-view-toggle" role="radiogroup" aria-label="Tampilan dashboard">
             <button type="button" role="radio" aria-checked={viewMode === 'compact'} className={viewMode === 'compact' ? 'active' : ''} onClick={() => toggleViewMode()}>
               📋 Ringkas
