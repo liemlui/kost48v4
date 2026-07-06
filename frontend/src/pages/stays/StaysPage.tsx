@@ -15,8 +15,8 @@ import PageHeader from '../../components/common/PageHeader';
 import PaginationControls from '../../components/common/PaginationControls';
 import StatusBadge, { getStatusLabel } from '../../components/common/StatusBadge';
 import { getBookingStatusLabel } from '../../utils/statusLabels';
-import { ActionQueueTable, type ActionQueueItem, type AssistantItem, type MetricChip } from '../../components/command-center';
-import { AssistantInsightLine, EntityBadgeFilterBar, StatusStrip } from '../../components/workspace';
+import { ActionQueueTable, type ActionQueueItem, type AssistantItem } from '../../components/command-center';
+import { AssistantInsightLine, EntityBadgeFilterBar } from '../../components/workspace';
 import ApproveBookingModal from '../../components/stays/ApproveBookingModal';
 import RejectBookingModal from '../../components/stays/RejectBookingModal';
 import ApproveCheckoutModal from '../../components/checkout-requests/ApproveCheckoutModal';
@@ -38,7 +38,7 @@ import {
 } from './stayPredicates';
 
 
-type StayViewFilter = 'ALL' | 'BOOKINGS' | 'ACTIVE';
+type StayViewFilter = 'ALL' | 'BOOKINGS' | 'CHECKOUT' | 'ACTIVE';
 
 const STAY_CHART_COLORS = ['#2563eb', '#f59e0b', '#16a34a', '#ef4444', '#7c3aed', '#0ea5e9'];
 
@@ -157,8 +157,14 @@ export default function StaysPage() {
   const queryClient = useQueryClient();
   const [searchParams, setSearchParams] = useSearchParams();
   const statusFromUrl = searchParams.get('status') || undefined;
-  const initialFilter: StayViewFilter = statusFromUrl === 'BOOKINGS' ? 'BOOKINGS' : statusFromUrl === 'ALL' ? 'ALL' : 'ACTIVE';
-  const [statusFilter, setStatusFilter] = useState<StayViewFilter>(initialFilter);
+  const filterFromUrl: StayViewFilter = statusFromUrl === 'BOOKINGS'
+    ? 'BOOKINGS'
+    : statusFromUrl === 'CHECKOUT'
+      ? 'CHECKOUT'
+      : statusFromUrl === 'ALL'
+        ? 'ALL'
+        : 'ACTIVE';
+  const [statusFilter, setStatusFilter] = useState<StayViewFilter>(filterFromUrl);
   const [keyword, setKeyword] = useState('');
   const [page, setPage] = useState(1);
   const [selectedBooking, setSelectedBooking] = useState<Stay | null>(null);
@@ -168,7 +174,9 @@ export default function StaysPage() {
   const PAGE_SIZE = 5;
 
   const isBookingsMode = statusFilter === 'BOOKINGS';
-  const apiStatusFilter = statusFilter === 'ALL' || statusFilter === 'BOOKINGS' ? undefined : statusFilter;
+  const isCheckoutMode = statusFilter === 'CHECKOUT';
+  const isActionableMode = isBookingsMode || isCheckoutMode;
+  const apiStatusFilter = statusFilter === 'ACTIVE' ? 'ACTIVE' : undefined;
 
   const expireMutation = useMutation({
     mutationFn: async (stayId?: number) => (stayId ? expireReservedBooking(stayId) : runPaymentSubmissionExpiryCheck()),
@@ -202,14 +210,14 @@ export default function StaysPage() {
   const checkoutRequestsQuery = useQuery({
     queryKey: ['admin-checkout-requests', 'PENDING'],
     queryFn: () => listAdminCheckoutRequests({ status: 'PENDING' }),
-    enabled: isBookingsMode,
+    enabled: isActionableMode,
     staleTime: 30_000,
   });
 
   const approvedCheckoutRequestsQuery = useQuery({
     queryKey: ['admin-checkout-requests', 'APPROVED'],
     queryFn: () => listAdminCheckoutRequests({ status: 'APPROVED' }),
-    enabled: isBookingsMode,
+    enabled: isActionableMode,
     staleTime: 30_000,
   });
 
@@ -247,9 +255,9 @@ export default function StaysPage() {
   });
 
   const query = useQuery({
-    queryKey: ['stays', statusFilter, isBookingsMode ? 'bookings-all' : page],
+    queryKey: ['stays', statusFilter, isActionableMode ? 'bookings-all' : page],
     queryFn: () => (
-      isBookingsMode
+      isActionableMode
         ? listAllActiveStaysForBookings()
         : listStays({ status: apiStatusFilter, page, limit: PAGE_SIZE })
     ),
@@ -262,6 +270,7 @@ export default function StaysPage() {
 
   const filteredItems = useMemo(() => {
     if (statusFilter === 'BOOKINGS') return [...reservedBookings, ...checkoutDue];
+    if (statusFilter === 'CHECKOUT') return checkoutDue;
     if (statusFilter === 'ACTIVE') return operationalActive;
     return items;
   }, [checkoutDue, items, operationalActive, reservedBookings, statusFilter]);
@@ -278,23 +287,30 @@ export default function StaysPage() {
   };
 
   useEffect(() => {
+    if (statusFilter !== filterFromUrl) {
+      setStatusFilter(filterFromUrl);
+    }
+  }, [filterFromUrl, statusFilter]);
+
+  useEffect(() => {
     setPage(1);
   }, [statusFilter]);
 
   const checkoutSoonCount = checkoutDue.length;
   const pendingCheckoutRequestCount = pendingCheckoutRequests.length;
   const approvedCheckoutRequestCount = approvedCheckoutRequests.length;
+  const checkoutActionableCount = checkoutSoonCount + pendingCheckoutRequestCount + approvedCheckoutRequestCount;
   const expiredBookingsCount = items.filter((item) => isReservedBooking(item) && isExpiredReservedBooking(item)).length;
   const pendingApprovalCount = reservedBookings.filter((item) => getBookingApprovalMeta(item).isPendingApproval).length;
   const waitingPaymentCount = reservedBookings.filter((item) => !getBookingApprovalMeta(item).isPendingApproval).length;
   const meta = query.data?.meta;
-  const paginatedFilteredItems = isBookingsMode
+  const paginatedFilteredItems = isActionableMode
     ? filteredItems.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
     : filteredItems;
-  const bookingsTotalItems = isBookingsMode ? filteredItems.length : 0;
-  const bookingsTotalPages = isBookingsMode ? Math.max(1, Math.ceil(bookingsTotalItems / PAGE_SIZE)) : 1;
-  const visibleItems = isBookingsMode ? paginatedFilteredItems : filteredItems;
-  const tableCountText = isBookingsMode
+  const bookingsTotalItems = isActionableMode ? filteredItems.length : 0;
+  const bookingsTotalPages = isActionableMode ? Math.max(1, Math.ceil(bookingsTotalItems / PAGE_SIZE)) : 1;
+  const visibleItems = isActionableMode ? paginatedFilteredItems : filteredItems;
+  const tableCountText = isActionableMode
     ? `Menampilkan ${visibleItems.length} dari ${bookingsTotalItems} item butuh tindakan`
     : `Menampilkan ${filteredItems.length} dari ${meta?.totalItems ?? items.length} data`;
   const firstPendingApprovalBooking = reservedBookings.find((item) => getBookingApprovalMeta(item).isPendingApproval);
@@ -355,21 +371,18 @@ export default function StaysPage() {
       actionTo: firstCheckoutDue ? `/stays/${firstCheckoutDue.id}` : undefined,
     } : null,
   ].filter(Boolean) as AssistantItem[];
-
-  const metrics: MetricChip[] = [
-    { id: 'active', label: 'Masa sewa aktif', value: operationalActive.length, helper: 'Penghuni sedang menempati kamar', icon: '🏠', status: 'SUCCESS' },
-    { id: 'approval', label: 'Menunggu persetujuan', value: pendingApprovalCount, helper: 'Booking tanpa tagihan awal', icon: '📝', status: pendingApprovalCount ? 'WARNING' : 'SUCCESS' },
-    { id: 'due', label: 'Akhir masa sewa dekat', value: checkoutSoonCount, helper: 'H-10 sampai terlambat', icon: '⏰', status: checkoutSoonCount ? 'WARNING' : 'SUCCESS' },
-    { id: 'checkout', label: 'Pengajuan keluar', value: pendingCheckoutRequestCount + approvedCheckoutRequestCount, helper: `${approvedCheckoutRequestCount} sudah disetujui`, icon: '🚪', status: pendingCheckoutRequestCount || approvedCheckoutRequestCount ? 'DANGER' : 'SUCCESS' },
-  ];
+  const primaryAssistantItem = isCheckoutMode
+    ? assistantItems.find((item) => ['checkout-pending', 'checkout-approved', 'checkout-soon'].includes(String(item.id))) ?? assistantItems[0]
+    : assistantItems[0];
 
   const actionableCount = reservedBookings.length + checkoutSoonCount + pendingCheckoutRequestCount + approvedCheckoutRequestCount;
   const stayFilters = [
     { id: 'ALL', label: 'Semua', count: items.filter((item) => item.status === 'ACTIVE' && !isExpiredReservedBooking(item)).length, tone: 'info' as const },
     { id: 'BOOKINGS', label: 'Perlu Tindak Lanjut', count: actionableCount, tone: actionableCount ? 'warning' as const : 'success' as const },
+    { id: 'CHECKOUT', label: 'Checkout', count: checkoutActionableCount, tone: checkoutActionableCount ? 'warning' as const : 'info' as const },
     { id: 'ACTIVE', label: 'Aktif', count: operationalActive.length, tone: 'success' as const },
   ];
-  const hasCheckoutQueueItems = isBookingsMode && (pendingCheckoutRequests.length > 0 || approvedCheckoutRequests.length > 0);
+  const hasCheckoutQueueItems = isActionableMode && (pendingCheckoutRequests.length > 0 || approvedCheckoutRequests.length > 0);
 
   const actionQueueItems: ActionQueueItem[] = [
     ...approvedCheckoutRequests.map((cr) => ({
@@ -442,22 +455,12 @@ export default function StaysPage() {
 
       <AssistantInsightLine
         title="Asisten Lifecycle"
-        tone={assistantItems[0]?.severity === 'BLOCKER' || assistantItems[0]?.severity === 'HIGH' ? 'warning' : assistantItems[0] ? 'info' : 'success'}
-        message={assistantItems[0] ? `${assistantItems[0].title}. ${assistantItems[0].message}` : 'Tidak ada blocker besar.'}
-        actionLabel={assistantItems[0]?.actionLabel}
-        actionTo={assistantItems[0]?.actionTo}
-        onAction={assistantItems[0]?.onAction}
+        tone={primaryAssistantItem?.severity === 'BLOCKER' || primaryAssistantItem?.severity === 'HIGH' ? 'warning' : primaryAssistantItem ? 'info' : 'success'}
+        message={primaryAssistantItem ? `${primaryAssistantItem.title}. ${primaryAssistantItem.message}` : 'Tidak ada blocker besar.'}
+        actionLabel={primaryAssistantItem?.actionLabel}
+        actionTo={primaryAssistantItem?.actionTo}
+        onAction={primaryAssistantItem?.onAction}
       />
-      <StatusStrip
-        items={metrics.map((metric) => ({
-          id: metric.id,
-          label: metric.label,
-          value: metric.value,
-          helper: metric.helper,
-          tone: metric.status === 'DANGER' ? 'danger' : metric.status === 'WARNING' ? 'warning' : metric.status === 'SUCCESS' ? 'success' : 'info',
-        }))}
-      />
-
       {items.length > 0 && (
         <StayAnalyticsPanel
           items={items}
@@ -473,8 +476,8 @@ export default function StaysPage() {
         <Card.Body>
           <div className="table-meta align-items-start">
             <div>
-              <div className="panel-title">{isBookingsMode ? 'Perlu tindak lanjut' : statusFilter === 'ACTIVE' ? 'Masa sewa aktif' : 'Semua masa sewa'}</div>
-              <div className="panel-subtitle">Filter hanya menyaring daftar. Aksi utama ada di tabel.</div>
+              <div className="panel-title">{isBookingsMode ? 'Perlu tindak lanjut' : isCheckoutMode ? 'Alur checkout' : statusFilter === 'ACTIVE' ? 'Masa sewa aktif' : 'Semua masa sewa'}</div>
+              <div className="panel-subtitle">{isCheckoutMode ? 'Fokus ke pengajuan keluar, finalisasi, dan masa sewa yang mendekati akhir.' : 'Filter hanya menyaring daftar. Aksi utama ada di tabel.'}</div>
             </div>
             <EntityBadgeFilterBar
               ariaLabel="Filter daftar masa sewa"
@@ -488,16 +491,18 @@ export default function StaysPage() {
           {query.isError ? <Alert variant="danger">Gagal mengambil data masa sewa. Silakan coba lagi.</Alert> : null}
           {!query.isLoading && !query.isError && visibleItems.length === 0 && !hasCheckoutQueueItems ? (
             <EmptyState
-              icon={statusFilter === 'BOOKINGS' ? '🗓️' : '🏠'}
-              title={statusFilter === 'BOOKINGS' ? 'Tidak ada item yang perlu ditindaklanjuti' : 'Belum ada data masa sewa'}
-              description={statusFilter === 'BOOKINGS'
-                ? 'Semua booking sudah ditangani dan tidak ada masa sewa yang mendekati tanggal perpanjangan/keluar.'
-                : 'Coba ubah filter atau mulai check-in penghuni baru.'}
-              action={statusFilter === 'BOOKINGS' ? undefined : { label: 'Check-in Baru', onClick: () => navigate('/stays/check-in') }}
+              icon={isBookingsMode || isCheckoutMode ? '🗓️' : '🏠'}
+              title={isCheckoutMode ? 'Tidak ada item checkout yang perlu ditindaklanjuti' : statusFilter === 'BOOKINGS' ? 'Tidak ada item yang perlu ditindaklanjuti' : 'Belum ada data masa sewa'}
+              description={isCheckoutMode
+                ? 'Belum ada pengajuan keluar pending/final dan belum ada masa sewa aktif yang mendekati akhir.'
+                : statusFilter === 'BOOKINGS'
+                  ? 'Semua booking sudah ditangani dan tidak ada masa sewa yang mendekati tanggal perpanjangan/keluar.'
+                  : 'Coba ubah filter atau mulai check-in penghuni baru.'}
+              action={isBookingsMode || isCheckoutMode ? undefined : { label: 'Check-in Baru', onClick: () => navigate('/stays/check-in') }}
             />
           ) : null}
 
-          {isBookingsMode && pendingCheckoutRequests.length > 0 ? (
+          {isActionableMode && pendingCheckoutRequests.length > 0 ? (
             <>
               <h6 className="fw-semibold mt-3 mb-2">🔔 Pengajuan Keluar — Review Admin</h6>
               <Table hover responsive className="mb-3 responsive-data-table">
@@ -559,7 +564,7 @@ export default function StaysPage() {
             </>
           ) : null}
 
-          {isBookingsMode && approvedCheckoutRequests.length > 0 ? (
+          {isActionableMode && approvedCheckoutRequests.length > 0 ? (
             <>
               <h6 className="fw-semibold mt-4 mb-2">✅ Pengajuan Keluar Disetujui</h6>
               <p className="small text-muted mb-2">
@@ -616,6 +621,10 @@ export default function StaysPage() {
 
           {isBookingsMode && visibleItems.length > 0 ? (
             <h6 className="fw-semibold mt-3 mb-2">Booking / masa sewa butuh tindak lanjut</h6>
+          ) : null}
+
+          {isCheckoutMode && visibleItems.length > 0 ? (
+            <h6 className="fw-semibold mt-3 mb-2">Masa sewa mendekati keluar</h6>
           ) : null}
 
           {!query.isLoading && !query.isError && visibleItems.length > 0 && isBookingsMode ? (
@@ -728,7 +737,85 @@ export default function StaysPage() {
             </>
           ) : null}
 
-          {!query.isLoading && !query.isError && visibleItems.length > 0 && !isBookingsMode ? (
+          {!query.isLoading && !query.isError && visibleItems.length > 0 && isCheckoutMode ? (
+            <>
+              <Table hover responsive className="mb-0 responsive-data-table">
+                <thead>
+                  <tr>
+                    <th>Penghuni</th>
+                    <th>Kamar</th>
+                    <th>Target Keluar</th>
+                    <th>Status / Reminder</th>
+                    <th>Dana titipan</th>
+                    <th style={{ width: 140 }}>Aksi</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {visibleItems.map((item) => {
+                    const reminderBadge = getCheckoutReminderBadge(item);
+                    const daysLeft = daysFromToday(item.plannedCheckOutDate);
+                    const checkoutBadge = daysLeft === null
+                      ? null
+                      : daysLeft < 0
+                        ? { status: 'DANGER', label: `Terlambat ${Math.abs(daysLeft)} hari` }
+                        : daysLeft === 0
+                          ? { status: 'WARNING', label: 'Keluar hari ini' }
+                          : reminderBadge
+                            ? { status: reminderBadge.status, label: reminderBadge.label }
+                            : { status: 'INFO', label: `H-${daysLeft}` };
+                    return (
+                      <tr key={item.id}>
+                        <td data-label="Penghuni">
+                          <div className="fw-semibold">{item.tenant?.fullName ?? `Penghuni #${item.tenantId}`}</div>
+                          <div className="small text-muted">{item.bookingSource ? `Sumber: ${getStatusLabel(item.bookingSource)}` : item.stayPurpose ? getStatusLabel(item.stayPurpose) : 'Tanpa keterangan tambahan'}</div>
+                        </td>
+                        <td data-label="Kamar">
+                          <div className="fw-semibold">{item.room?.code ?? `Kamar #${item.roomId}`}</div>
+                          <div className="small text-muted">{item.room?.name || 'Nama kamar belum tersedia'}</div>
+                        </td>
+                        <td data-label="Target Keluar">
+                          <div className="fw-semibold">{formatDateSafe(item.plannedCheckOutDate)}</div>
+                          <div className="small text-muted">Check-in: {formatDateSafe(item.checkInDate)}</div>
+                        </td>
+                        <td data-label="Status / Reminder">
+                          <div className="d-flex flex-wrap gap-2 align-items-center">
+                            <StatusBadge status={item.status} />
+                            {checkoutBadge ? <StatusBadge status={checkoutBadge.status} customLabel={checkoutBadge.label} /> : null}
+                          </div>
+                          <div className="small text-muted mt-2">Pantau tagihan, deposit, dan kesiapan lepas kamar sebelum final checkout.</div>
+                        </td>
+                        <td data-label="Dana titipan">
+                          <CurrencyDisplay amount={item.depositAmountRupiah} showZero={false} />
+                          {item.depositStatus && item.depositStatus !== 'HELD' ? (
+                            <div className="small text-muted mt-1">
+                              {getDepositSettlementLabel(item)}
+                            </div>
+                          ) : null}
+                        </td>
+                        <td data-label="Aksi">
+                          <Button size="sm" variant="outline-primary" onClick={() => navigate(`/stays/${item.id}`)}>
+                            Buka Detail
+                          </Button>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </Table>
+              <div className="mt-3">
+                <PaginationControls
+                  currentPage={page}
+                  totalPages={bookingsTotalPages}
+                  totalItems={bookingsTotalItems}
+                  pageSize={PAGE_SIZE}
+                  onPageChange={setPage}
+                  isLoading={query.isLoading}
+                />
+              </div>
+            </>
+          ) : null}
+
+          {!query.isLoading && !query.isError && visibleItems.length > 0 && !isActionableMode ? (
             <Table hover responsive className="mb-0 responsive-data-table">
               <thead>
                 <tr>
@@ -811,7 +898,7 @@ export default function StaysPage() {
             </Table>
           ) : null}
 
-          {!isBookingsMode ? (
+          {!isActionableMode ? (
             <div className="mt-3">
               <PaginationControls
                 currentPage={page}
