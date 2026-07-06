@@ -60,6 +60,7 @@
 | **Fase AI — Perbaikan Temuan Audit CHECKLIST_09** | ✅ selesai | AI-01..AI-02: hardening 503 isBookingSchemaReady + FE bookingsQuery tak blokir portal; loyalty/renewal/checkout diverifikasi via kode. 2 file backend + 1 file frontend. |
 | **Fase AJ — Sisa Temuan Audit (C05-01 sistemik + C10/C17 + seed)** | ✅ selesai | AJ-01/02 anti-loop ✅ · AJ-03/04 seed + TB ✅ · AJ-05 okupansi ✅ · AJ-06 docs ✅ · AJ-07 yang aman diuji ✅ (temuan baru C19-01/C19-02 dicatat; sisanya human/destructive follow-up). |
 | **Fase AK — Owner-Request 2026-07-04** | ✅ kode selesai | AK-01 API key DeepSeek via Settings (tanpa restart, env fallback, tak pernah bocor ke respons) 🧬 · AK-02 fix 400 simpan panel AI · AK-03 input angka ribuan + fix nol-depan (CurrencyInput diperkuat, 12 file). `db push` kolom baru saat env hidup. |
+| **Fase AM — Redundansi UI/UX** | 🟡 0/12 | 12 task: unifikasi WA URL, hapus duplikasi nav admin+owner, RoomCard→FacilityList, fix RoomComparePanel. Detail: `docs/M14_REDUNDANSI_UI_UX.md`. |
 
 ---
 
@@ -86,9 +87,10 @@
 
 ## ANTRIAN EKSEKUSI AKTIF
 
-> **Fase A** blocked owner (infrastruktur server/domain/env). **Fase B–Y** selesai atau hampir tuntas.
+> **Fase A** blocked owner (infrastruktur server/domain/env). **Fase B–AJ** selesai.
 >
 > **Sisa aktif:**
+> 0. **Fase AM — Redundansi UI/UX (Admin + Owner + Publik)** — 12 task (AM-01..AM-12): unifikasi WA URL builder, hapus duplikasi navigasi admin+owner, RoomCard→FacilityList, fix RoomComparePanel spec detection. Detail: `docs/M14_REDUNDANSI_UI_UX.md`.
 > 0. **M31** — ✅ **SELESAI** — AiDraft queue diverifikasi — DeepSeek test-connection PASS via .env API key. Fase 4 = 35/35 100%.
 > 0. **OC-07 (L22)** — ✅ **SELESAI** — Staff dashboard halaman khusus — backend endpoint aggregate `GET /staff/dashboard/aggregate` + perkuat DashboardStaff.tsx (3 query digabung jadi 1). Build backend ✅ frontend ✅
 > 0. **OC-05 (M29)** — ✅ **SELESAI** — ExternalReview CRUD audit — model Prisma standalone, read-only via social proof publik, tanpa CRUD/admin UI. Laporan: `docs/archieve/audit_reasonix/M29_AUDIT_EXTERNAL_REVIEW.md`
