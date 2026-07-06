@@ -9,6 +9,7 @@
 - **AM-09** — Buat RoomSpecChips komponen reusable, dipakai di RoomCard (ganti `<div> 4 spec` inline).
 - **AM-10** — Dokumentasi: centang checklist M14, update M12 antrian, entri changelog.
 - **AM-11** — Hapus tombol "Buka laporan" duplikat di OwnerDashboardPage (sidebar sudah ada).
+- **AM-12** — Hapus tombol "Lengkapi setup akuntansi" duplikat di FinancialRatiosPage (sidebar sudah ada).
   Build FE ✅
 
 ### 4 Jul 2026
