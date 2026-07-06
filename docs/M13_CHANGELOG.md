@@ -3,6 +3,15 @@
 > Arsip changelog ringkas, dipisah dari M10 pada 2026-06-19 untuk hemat token AI (M10 = checklist aktif saja). **Entri changelog BARU ditulis DI SINI (paling atas)**, bukan di M10. Format: 1 header tanggal + 1-2 poin outcome per entri.
 > Entri lama (≤ 2026-07-16) diarsip ke docs/archieve/M11_CHANGELOG_ARSIP_S1_2026.md.
 
+### 6 Jul 2026
+- **AM-06** — RoomCard pakai FacilityList (ganti amenity inline `<span>`→`<FacilityList compact maxItems={3} />`).
+- **AM-08** — Buat RoomPriceTable komponen reusable, dipakai di RoomCard (ganti `<table>` inline).
+- **AM-09** — Buat RoomSpecChips komponen reusable, dipakai di RoomCard (ganti `<div> 4 spec` inline).
+- **AM-10** — Dokumentasi: centang checklist M14, update M12 antrian, entri changelog.
+  Build FE ✅
+
+### 4 Jul 2026
+- **DEPLOY-512MB** — Paket deploy cPanel jadi PREBUILT penuh (RAM host 512MB): `make-deploy` kini build backend di lokal (dist/ + Prisma client WASM ikut paket, binary `*.node` dibuang, tanpa `src/`), script baru `cpanel:install` (= `npm ci --omit=dev`, gantikan `cpanel:setup` build-di-server), `cpanel:migrate` pakai `--skip-generate`, `seed-owner.js` resolve client dari dist/. Paket = 686 file / 19,5 MB tgz. Runbook M08 §D diperbarui (NODE_OPTIONS=192, bootstrap addendum sudah konsolidasi). Verifikasi: boot produksi TANPA `.node` → `GET /api/public/rooms` 200 ✅
 ### 4 Jul 2026
 - **E11** — Inline style batch 2 selesai: report turun ke 6 file `style={{` >5 (di bawah batas 8) lewat utilitas CSS di `frontend/src/styles/06-tenant.css` dan rapikan beberapa halaman publik/laporan. Build frontend ✅
 ### 4 Jul 2026

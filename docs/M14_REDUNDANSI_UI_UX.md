@@ -15,16 +15,16 @@
 |---|-----|------|-----------|----------------|--------|
 | 1 | AM-01 | Unifikasi WhatsApp URL builder | 🔴 HIGH | 13 file | [ ] |
 | 2 | AM-02 | Hapus RoleWorkspaceTabs (duplikat dashboard tabs) | 🔴 HIGH | 2 file | [ ] |
-| 3 | AM-03 | Bedakan target "Cek Checkout" vs "Review Booking" | 🟡 MED | 1 file | [ ] |
+| 3 | AM-03 | Bedakan target "Cek Checkout" vs "Review Booking" | 🟡 MED | 1 file | [x] |
 | 4 | AM-04 | Sembunyikan RoleWorkspaceTabs di non-dashboard | 🟡 MED | 1 file | [ ] |
 | 5 | AM-05 | Tambahkan "Pengumuman" ke sidebar admin | 🟡 MED | 1 file | [ ] |
-| 6 | AM-06 | RoomCard pakai FacilityList (ganti amenity inline) | 🟢 LOW | 2 file | [ ] |
+| 6 | AM-06 | RoomCard pakai FacilityList (ganti amenity inline) | 🟢 LOW | 2 file | [x] |
 | 7 | AM-07 | Fix RoomComparePanel spec detection (regex→utility) | 🔴 HIGH | 3 file | [ ] |
-| 8 | AM-08 | Buat RoomPriceTable komponen reusable | 🟢 LOW | 4 file | [ ] |
-| 9 | AM-09 | Buat RoomSpecChips komponen reusable | 🟢 LOW | 4 file | [ ] |
+| 8 | AM-08 | Buat RoomPriceTable komponen reusable | 🟢 LOW | 4 file | [x] |
+| 9 | AM-09 | Buat RoomSpecChips komponen reusable | 🟢 LOW | 4 file | [x] |
 | 10 | AM-11 | Hapus tombol "Buka laporan" di OwnerDashboard (duplikat sidebar) | 🟡 MED | 1 file | [ ] |
 | 11 | AM-12 | Hapus tombol "Lengkapi setup akuntansi" di FinancialRatiosPage | 🟡 MED | 1 file | [ ] |
-| 12 | AM-10 | Dokumentasi + changelog | 🟢 LOW | 2 file | [ ] |
+| 12 | AM-10 | Dokumentasi + changelog | 🟢 LOW | 2 file | [x] |
 
 ---
 

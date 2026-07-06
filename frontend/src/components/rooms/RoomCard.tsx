@@ -5,33 +5,17 @@ import { useNavigate } from 'react-router-dom';
 import { getKost48RoomGallery, resolveKost48MarketingImageUrl } from '../../data/kost48Assets';
 import {
   getBestPublicRoomRate,
-  getPublicRoomBathroom,
-  getPublicRoomBathroomLabel,
-  getPublicRoomCooling,
-  getPublicRoomCoolingLabel,
   getPublicRoomAvailabilityDisplay,
-  getPublicRoomVisibleAmenities,
+  getPublicRoomBathroomLabel,
+  getPublicRoomCoolingLabel,
 } from '../../utils/publicRoomDisplay';
-import { calculateRentByPricingTerm, ALL_PRICING_TERMS } from '../../utils/pricing';
 import type { PublicRoom } from '../../types';
-import { formatRupiah } from '../../utils/formatCurrency';
+import FacilityList from './FacilityList';
+import RoomPriceTable from './RoomPriceTable';
+import RoomSpecChips from './RoomSpecChips';
 
-// ── Constants ──────────────────────────────────────────────────────────────
-const PRICING_TERM = 'MONTHLY' as const;
-
-const TERM_LABELS: Record<string, string> = {
-  DAILY: 'Harian',
-  WEEKLY: 'Mingguan',
-  BIWEEKLY: '2 Mingguan',
-  MONTHLY: 'Bulanan',
-  SMESTERLY: 'Semesteran',
-  YEARLY: 'Tahunan',
-};
-
-const fmt = formatRupiah;
-
-// ── WhatsApp URL builder ───────────────────────────────────────────────────
-export function buildWhatsAppUrl(room: PublicRoom, customMessage?: string): string {
+// ── WhatsApp URL builder (lokal, tidak di-export) ──────────────────────────
+function buildWhatsAppUrl(room: PublicRoom, customMessage?: string): string {
   const number = String(import.meta.env.VITE_PUBLIC_ADMIN_WHATSAPP ?? '').replace(/\D/g, '');
   const roomCode = room.code || `Kamar #${room.id}`;
   const msg = customMessage ?? (
@@ -43,6 +27,9 @@ export function buildWhatsAppUrl(room: PublicRoom, customMessage?: string): stri
     ? `https://wa.me/${number}?text=${encodeURIComponent(msg)}`
     : `https://wa.me/?text=${encodeURIComponent(msg)}`;
 }
+
+// ── Constants ──────────────────────────────────────────────────────────────
+const PRICING_TERM = 'MONTHLY' as const;
 
 // ── Category badge helper ──────────────────────────────────────────────────
 export function getCategoryBadgeInfo(room: PublicRoom) {
@@ -160,7 +147,6 @@ export default function RoomCard({
 }: RoomCardProps) {
   const navigate = useNavigate();
   const avail = getPublicRoomAvailabilityDisplay(room);
-  const amenities = getPublicRoomVisibleAmenities(room).slice(0, 3);
   const monthlyRate = room.pricing?.monthlyRateRupiah ?? getBestPublicRoomRate(room, PRICING_TERM) ?? 0;
 
   const goDetail = () => navigate(`/rooms/${room.id}/detail`, { state: { room } });
@@ -179,7 +165,6 @@ export default function RoomCard({
 
   const catBadge = getCategoryBadgeInfo(room);
   const isMezzanine = String(room.roomType ?? '').toUpperCase() === 'MEZZANINE';
-  const isLarge = String(room.roomSize ?? '').toUpperCase() === 'LARGE';
 
   const waUrl = buildWhatsAppUrl(room, waMessage);
 
@@ -227,37 +212,17 @@ export default function RoomCard({
         </div>
 
         {/* 4 spec chip: KM, Pendingin, Ukuran, Tipe */}
-        <div className="rm-card-specs">
-          <span>
-            {getPublicRoomBathroom(room) === 'inside' ? '🚿' : '🪣'} KM {getPublicRoomBathroomLabel(room)}
-          </span>
-          <span>
-            {getPublicRoomCooling(room) === 'ac' ? '❄️' : '🌬️'} {getPublicRoomCoolingLabel(room)}
-          </span>
-          <span>{isLarge ? '📐 Besar' : '📏 Standar'}</span>
-          <span>{isMezzanine ? '🏗️ Mezzanine' : '🛏️ Biasa'}</span>
-        </div>
+        <RoomSpecChips room={room} variant="card" />
 
-        {amenities.length > 0 && (
-          <div className="rm-card-amenities">
-            {amenities.map((a) => <span key={a}>{a}</span>)}
-          </div>
-        )}
+        <FacilityList
+          facilities={room.facilities ?? []}
+          compact
+          maxItems={3}
+          emptyMessage=""
+        />
 
         {/* Tabel harga lengkap semua term */}
-        <table className="rm-card-price-table" aria-label="Daftar harga sewa">
-          <tbody>
-            {ALL_PRICING_TERMS.map((term) => {
-              const rate = monthlyRate > 0 ? calculateRentByPricingTerm(monthlyRate, term) : 0;
-              return (
-                <tr key={term} className={term === 'MONTHLY' ? 'rm-price-monthly' : ''}>
-                  <td>{TERM_LABELS[term] ?? term}</td>
-                  <td>{rate > 0 ? fmt(rate) : '—'}</td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
+        <RoomPriceTable room={room} monthlyRate={monthlyRate} variant="card" />
         {monthlyRate === 0 && <div className="rm-card-price-ask">Hubungi admin untuk tarif</div>}
 
         <div className="rm-card-actions">
