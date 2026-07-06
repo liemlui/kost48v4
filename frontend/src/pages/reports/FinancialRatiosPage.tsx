@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
-import { Alert, Badge, Button, Card, Col, Container, Form, Row, Spinner, Table } from 'react-bootstrap';
+import { Alert, Badge, Card, Col, Container, Form, Row, Spinner, Table } from 'react-bootstrap';
 import { useQuery } from '@tanstack/react-query';
-import { useNavigate } from 'react-router-dom';
 import { fetchFinancialRatios, type FinancialRatiosStatement } from '../../api/accounting';
 
 import { formatCompactRupiah } from '../../utils/formatCurrency';
@@ -14,7 +13,6 @@ function labelBadge(label:string,scheme:{BAIK:string,CUKUP:string,EFISIEN?:strin
 }
 
 export default function FinancialRatiosPage() {
-  const navigate=useNavigate();
   const [ym,setYm]=useState(currentYearMonth());
   const q=useQuery({queryKey:['accounting','ratios',ym],queryFn:()=>fetchFinancialRatios({year:ym.year,month:ym.month}),staleTime:60_000,retry:1});
   const d=q.data;
@@ -68,11 +66,6 @@ export default function FinancialRatiosPage() {
           <span>Kewajiban Lancar: <Badge bg={d.readiness.currentLiabilitiesAvailable?'success':'secondary'}>{d.readiness.currentLiabilitiesAvailable?'Ada':'Kosong'}</Badge></span>
           <span>Ekuitas: <Badge bg={d.readiness.equityAvailable?'success':'secondary'}>{d.readiness.equityAvailable?'Ada':'Kosong'}</Badge></span>
         </div>
-        {!d.formalStatementReady ? (
-          <Button variant="outline-primary" size="sm" className="mt-3" onClick={()=>navigate('/finance/accounting-setup')}>
-            Lengkapi setup akuntansi
-          </Button>
-        ) : null}
       </Card.Body></Card>
       <small className="text-muted">{d.note}</small>
     </>}
