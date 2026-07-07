@@ -73,6 +73,20 @@ frontend/screenshots-ui/
 test-output.txt
 backend/test/debug-*.js
 
+# Temporary/setup scripts (root level)
+setup.sql
+fix-password.js
+env.txt
+backend/drop.sql
+backend/setup.sql
+sql/
+backend/scripts/*.sql
+backend/scripts/golive-*
+backend/scripts/insert-*
+backend/scripts/uat-*
+backend/scripts/m9-*
+!backend/scripts/seed-*.sql
+
 
 *storybook.log
 storybook-static
