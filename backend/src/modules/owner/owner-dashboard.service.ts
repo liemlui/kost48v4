@@ -29,13 +29,13 @@ export class OwnerDashboardService {
     const to = new Date(Date.UTC(y, m - 1, lastDay, 23, 59, 59, 999));
 
     const [stays, readings] = await Promise.all([
-      this.prisma.stay.findMany({
+      this.prisma.stay.groupBy({
+        by: ['roomId'],
         where: { status: 'ACTIVE' as any, initialMetersPromotedAt: { not: null } },
-        select: { roomId: true },
       }),
-      this.prisma.meterReading.findMany({
+      this.prisma.meterReading.groupBy({
+        by: ['roomId'],
         where: { readingAt: { gte: from, lte: to } },
-        select: { roomId: true },
       }),
     ]);
 

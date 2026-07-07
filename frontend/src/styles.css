@@ -10,13 +10,9 @@
 @import './styles/02-layout.css';
 @import './styles/03-components.css';
 @import './styles/04-operations.css';
-@import './styles/05-staff.css';
-@import './styles/06-tenant.css';
-@import './styles/07-public.css';
 @import './styles/08-admin.css';
 @import './styles/09-finance.css';
 @import './styles/10-misc.css';
-@import './styles/11-public-pages.css';
 @import './styles/12-owner.css';
 @import './styles/13-charts.css';
 @import './styles/14-reports.css';

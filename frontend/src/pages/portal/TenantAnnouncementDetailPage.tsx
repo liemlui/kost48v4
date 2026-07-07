@@ -1,3 +1,4 @@
+import '../../styles/tenant-area';
 import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate, useParams, Navigate } from 'react-router-dom';

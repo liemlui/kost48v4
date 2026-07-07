@@ -35,9 +35,70 @@ function healthGrade(score: number) {
   return 'KRITIS';
 }
 
+type InvoiceExposureRow = {
+  remaining: bigint | null;
+  cnt: bigint;
+};
+
+type MonthlyTrendRow = {
+  year: number;
+  month: number;
+  total: bigint | null;
+};
+
 @Injectable()
 export class FinanceService {
   constructor(private readonly prisma: PrismaService) {}
+
+  private async getOpenInvoiceExposure() {
+    return this.prisma.$queryRaw<Array<InvoiceExposureRow>>`
+      SELECT COALESCE(SUM(remaining.remaining_amount), 0)::bigint AS remaining,
+             COUNT(*)::bigint AS cnt
+      FROM (
+        SELECT GREATEST(i."totalAmountRupiah" - COALESCE(p.paid, 0), 0) AS remaining_amount
+        FROM "Invoice" i
+        LEFT JOIN (
+          SELECT "invoiceId", SUM("amountRupiah") AS paid
+          FROM "InvoicePayment"
+          GROUP BY "invoiceId"
+        ) p ON p."invoiceId" = i.id
+        WHERE i.status NOT IN ('PAID', 'CANCELLED')
+          AND GREATEST(i."totalAmountRupiah" - COALESCE(p.paid, 0), 0) > 0
+      ) remaining
+    `;
+  }
+
+  private async getMonthlyTrendRows(rangeStart: Date, rangeEnd: Date) {
+    const [paymentRows, expenseRows, wifiRows] = await Promise.all([
+      this.prisma.$queryRaw<Array<MonthlyTrendRow>>`
+        SELECT EXTRACT(YEAR FROM "paymentDate")::int AS year,
+               EXTRACT(MONTH FROM "paymentDate")::int AS month,
+               COALESCE(SUM("amountRupiah"), 0)::bigint AS total
+        FROM "InvoicePayment"
+        WHERE "paymentDate" >= ${rangeStart} AND "paymentDate" < ${rangeEnd}
+        GROUP BY 1, 2
+      `,
+      this.prisma.$queryRaw<Array<MonthlyTrendRow>>`
+        SELECT EXTRACT(YEAR FROM "expenseDate")::int AS year,
+               EXTRACT(MONTH FROM "expenseDate")::int AS month,
+               COALESCE(SUM("amountRupiah"), 0)::bigint AS total
+        FROM "Expense"
+        WHERE status = 'CONFIRMED'
+          AND "expenseDate" >= ${rangeStart} AND "expenseDate" < ${rangeEnd}
+        GROUP BY 1, 2
+      `,
+      this.prisma.$queryRaw<Array<MonthlyTrendRow>>`
+        SELECT EXTRACT(YEAR FROM "saleDate")::int AS year,
+               EXTRACT(MONTH FROM "saleDate")::int AS month,
+               COALESCE(SUM("soldPriceRupiah"), 0)::bigint AS total
+        FROM "WifiSale"
+        WHERE "saleDate" >= ${rangeStart} AND "saleDate" < ${rangeEnd}
+        GROUP BY 1, 2
+      `,
+    ]);
+
+    return { paymentRows, expenseRows, wifiRows };
+  }
 
   // ═══════════════════════════════════════════════════════════
   //  SECTION: Business Health & Occupancy
@@ -52,7 +113,7 @@ export class FinanceService {
       roomStatusGroups,
       activeStayCount,
       invoiceAgg,
-      openInvoiceAgg,
+      openInvoiceRows,
       overdueRows,
       paymentAgg,
       expenseAgg,
@@ -72,11 +133,7 @@ export class FinanceService {
         _count: { id: true },
         where: { status: { notIn: [InvoiceStatus.DRAFT, InvoiceStatus.CANCELLED] as any }, periodStart: { gte: start, lt: end } },
       }),
-      this.prisma.invoice.aggregate({
-        _sum: { totalAmountRupiah: true },
-        _count: { id: true },
-        where: { status: { notIn: [InvoiceStatus.PAID, InvoiceStatus.CANCELLED] as any } },
-      }),
+      this.getOpenInvoiceExposure(),
       // F2-12 (F-27): aging/overdue = SISA tagihan (total − Σ pembayaran), bukan total kotor —
       // invoice PARTIAL yang sudah dibayar sebagian tak lagi dihitung penuh.
       this.prisma.$queryRaw<Array<{ overdue: bigint | null; cnt: bigint }>>`
@@ -144,7 +201,7 @@ export class FinanceService {
     const totalRevenueRupiah = billedRupiah + wifiRevenueRupiah;
     const paidRupiah = Number(paymentAgg._sum.amountRupiah ?? 0);
     const expenseRupiah = Number(expenseAgg._sum.amountRupiah ?? 0);
-    const openInvoiceRupiah = Number(openInvoiceAgg._sum.totalAmountRupiah ?? 0);
+    const openInvoiceRupiah = Number(openInvoiceRows[0]?.remaining ?? 0);
     const overdueRupiah = Number(overdueRows[0]?.overdue ?? 0);
     const overdueCount = Number(overdueRows[0]?.cnt ?? 0);
     const collectionRate = totalRevenueRupiah > 0 ? roundPercent((paidRupiah / totalRevenueRupiah) * 100) : 0;
@@ -206,7 +263,7 @@ export class FinanceService {
       financeReadiness: readiness,
       assumptions: [
         'Penerimaan vs Tagihan: pembayaran yang diterima bulan ini dibanding tagihan periode akrual bulan ini. PERHATIAN: periode tagihan (periodStart) dan periode bayar (paymentDate) berbeda sehingga rate bisa >100%.',
-        'Open invoice dihitung dari status bukan PAID dan bukan CANCELLED, termasuk DRAFT sesuai guard checkout.',
+        'Open invoice dihitung sebagai sisa tagihan invoice non-PAID/non-CANCELLED, termasuk DRAFT sesuai guard checkout.',
         'Deposit held dibaca sebagai liability operasional, bukan revenue.',
       ],
       generatedAt: new Date().toISOString(),
@@ -263,19 +320,15 @@ export class FinanceService {
     return {
       ready: false,
       missing: ['cash/bank account balance', 'current liabilities model', 'equity/capital model', 'asset/capital employed model'],
-      assumptions: ['Open invoice dapat menjadi kandidat accounts receivable.', 'Deposit held diperlakukan sebagai liability.', 'Expense dan payment history tersedia sebagai data operasional, belum full ledger.'],
+      assumptions: ['Sisa open invoice dapat menjadi kandidat accounts receivable.', 'Deposit held diperlakukan sebagai liability.', 'Expense dan payment history tersedia sebagai data operasional, belum full ledger.'],
       nextDataNeeded: ['FinanceAccount atau CashAccount', 'Journal/LedgerEntry', 'Opening balance', 'Equity/capital injection records', 'Payables/current liabilities model'],
     };
   }
 
   async balanceSheetDraft(query: FinancePeriodQueryDto = {}) {
     const { year, month } = monthWindow(query);
-    const [openInvoiceAgg, depositAgg] = await Promise.all([
-      this.prisma.invoice.aggregate({
-        _sum: { totalAmountRupiah: true },
-        _count: { id: true },
-        where: { status: { notIn: [InvoiceStatus.PAID, InvoiceStatus.CANCELLED] as any } },
-      }),
+    const [openInvoiceRows, depositAgg] = await Promise.all([
+      this.getOpenInvoiceExposure(),
       this.prisma.stay.aggregate({
         _sum: { depositPaidAmountRupiah: true, depositAmountRupiah: true },
         _count: { id: true },
@@ -284,7 +337,7 @@ export class FinanceService {
       }),
     ]);
 
-    const accountsReceivableRupiah = Number(openInvoiceAgg._sum.totalAmountRupiah ?? 0);
+    const accountsReceivableRupiah = Number(openInvoiceRows[0]?.remaining ?? 0);
     const depositHeldLiabilityRupiah = Number(depositAgg._sum.depositPaidAmountRupiah ?? 0);
     const readiness = await this.formalRatiosReadiness();
 
@@ -294,7 +347,7 @@ export class FinanceService {
       status: 'DRAFT_NOT_BALANCE_SHEET_GRADE',
       ready: false,
       assets: [
-        { key: 'accounts_receivable_candidate', label: 'Accounts Receivable Candidate', amountRupiah: accountsReceivableRupiah, source: 'Open invoices excluding PAID/CANCELLED', confidence: 'MEDIUM' },
+        { key: 'accounts_receivable_candidate', label: 'Accounts Receivable Candidate', amountRupiah: accountsReceivableRupiah, source: 'Remaining open invoices excluding PAID/CANCELLED', confidence: 'MEDIUM' },
         { key: 'cash_bank', label: 'Cash/Bank', amountRupiah: null, source: 'Belum dimodelkan', confidence: 'LOCKED' },
       ],
       liabilities: [
@@ -337,7 +390,7 @@ export class FinanceService {
       prevPaymentAgg,
       expenseAgg,
       prevExpenseAgg,
-      openInvoiceAgg,
+      openInvoiceRows,
       overdueRows,
       wifiAgg,
       prevWifiAgg,
@@ -376,11 +429,7 @@ export class FinanceService {
         where: { status: 'CONFIRMED' as any, expenseDate: { gte: prevStart, lt: prevEnd } },
       }),
       // Open invoices
-      this.prisma.invoice.aggregate({
-        _sum: { totalAmountRupiah: true },
-        _count: { id: true },
-        where: { status: { notIn: [InvoiceStatus.PAID, InvoiceStatus.CANCELLED] as any } },
-      }),
+      this.getOpenInvoiceExposure(),
       // Overdue — F2-12 (F-27): SISA tagihan (total − Σ pembayaran), bukan total kotor.
       this.prisma.$queryRaw<Array<{ overdue: bigint | null; cnt: bigint }>>`
         SELECT COALESCE(SUM(i."totalAmountRupiah" - COALESCE(p.paid, 0)), 0)::bigint AS overdue,
@@ -473,40 +522,29 @@ export class FinanceService {
     if (pendingPaymentCount > 0) {
       signals.push({ type: 'pending_payment', count: pendingPaymentCount, route: '/payment-submissions/review' });
     }
-    const outstanding = Number(openInvoiceAgg._sum.totalAmountRupiah ?? 0);
-    const outstandingCount = Number(openInvoiceAgg._count.id ?? 0);
+    const outstanding = Number(openInvoiceRows[0]?.remaining ?? 0);
+    const outstandingCount = Number(openInvoiceRows[0]?.cnt ?? 0);
     if (outstanding > 0) {
       signals.push({ type: 'outstanding', count: outstandingCount, totalRupiah: outstanding, route: '/invoices' });
     }
 
     // --- Trend (dinamis berdasarkan query.trendMonths, default 6) ---
     const trendCount = query.trendMonths ?? 6;
+    const trendRangeStart = new Date(Date.UTC(year, month - trendCount, 1));
+    const trendRangeEnd = new Date(Date.UTC(year, month, 1));
+    const { paymentRows, expenseRows, wifiRows } = await this.getMonthlyTrendRows(trendRangeStart, trendRangeEnd);
+    const paymentMap = new Map(paymentRows.map((row) => [`${row.year}-${row.month}`, Number(row.total ?? 0)]));
+    const expenseMap = new Map(expenseRows.map((row) => [`${row.year}-${row.month}`, Number(row.total ?? 0)]));
+    const wifiMap = new Map(wifiRows.map((row) => [`${row.year}-${row.month}`, Number(row.total ?? 0)]));
     const trendMonths: Array<{ year: number; month: number; revenue: number; expense: number; netProfit: number }> = [];
     for (let i = trendCount - 1; i >= 0; i--) {
       const m = month - i;
       let ty = year;
       let tm = m;
       while (tm <= 0) { tm += 12; ty -= 1; }
-      const trendStart = new Date(Date.UTC(ty, tm - 1, 1));
-      const trendEnd = new Date(Date.UTC(ty, tm, 1));
-      const [trendPayment, trendExpense, trendWifi] = await Promise.all([
-        // M15: tren pendapatan sekarang KAS murni — pakai paymentDate (InvoicePayment), bukan periodStart (Invoice).
-        // Ini konsisten dengan WiFi yang juga kas (saleDate). Dulu campur: invoice=akrual + wifi=kas.
-        this.prisma.invoicePayment.aggregate({
-          _sum: { amountRupiah: true },
-          where: { paymentDate: { gte: trendStart, lt: trendEnd } },
-        }),
-        this.prisma.expense.aggregate({
-          _sum: { amountRupiah: true },
-          where: { status: 'CONFIRMED' as any, expenseDate: { gte: trendStart, lt: trendEnd } },
-        }),
-        this.prisma.wifiSale.aggregate({
-          _sum: { soldPriceRupiah: true },
-          where: { saleDate: { gte: trendStart, lt: trendEnd } },
-        }),
-      ]);
-      const rev = Number(trendPayment._sum.amountRupiah ?? 0) + Number(trendWifi._sum.soldPriceRupiah ?? 0);
-      const exp = Number(trendExpense._sum.amountRupiah ?? 0);
+      const trendKey = `${ty}-${tm}`;
+      const rev = (paymentMap.get(trendKey) ?? 0) + (wifiMap.get(trendKey) ?? 0);
+      const exp = expenseMap.get(trendKey) ?? 0;
       trendMonths.push({ year: ty, month: tm, revenue: rev, expense: exp, netProfit: rev - exp });
     }
 

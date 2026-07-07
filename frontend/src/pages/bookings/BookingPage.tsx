@@ -1,4 +1,5 @@
 // FILE: BookingPage.tsx — halaman booking admin/owner: daftar + approve/cancel
+import "../../styles/tenant-area";
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Alert, Button, Card, Col, Form, Row, Spinner } from "react-bootstrap";

@@ -1,4 +1,5 @@
 // FILE: TenantInvoiceDetailPage.tsx — detail tagihan portal penghuni (JALUR UANG)
+import '../../styles/tenant-area';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Alert, Button, Card, Col, Form, Modal, Row, Spinner, Table } from 'react-bootstrap';

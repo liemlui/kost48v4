@@ -1,3 +1,4 @@
+import '../../styles/tenant-area';
 import { useState } from 'react';
 import { Alert, Badge, Button, Card, Col, Row, Spinner } from 'react-bootstrap';
 import { Navigate } from 'react-router-dom';

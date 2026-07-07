@@ -1,3 +1,4 @@
+import '../../styles/staff-area';
 import StaffGeneralInventorySection from '../../components/staff/StaffGeneralInventorySection';
 
 export default function StaffWarehousePage() {

@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import '../../styles/public-area';
 import { useQuery } from '@tanstack/react-query';
 import { Container, Spinner } from 'react-bootstrap';
 import { Link } from 'react-router-dom';

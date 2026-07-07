@@ -27,6 +27,24 @@ const ONBOARDING_FIELDS = [
 ] as const;
 
 type OnboardingField = typeof ONBOARDING_FIELDS[number];
+type CountByValueRow = { value: string | null; count: bigint };
+type AgeGroupRow = {
+  age17_25: bigint | null;
+  age26_35: bigint | null;
+  age36_45: bigint | null;
+  age46_plus: bigint | null;
+  unknown: bigint | null;
+};
+type CompletenessRow = {
+  total: bigint | null;
+  gender: bigint | null;
+  origin_city: bigint | null;
+  origin_province: bigint | null;
+  occupation: bigint | null;
+  birth_date: bigint | null;
+  marital_status: bigint | null;
+  how_did_you_hear: bigint | null;
+};
 
 @Injectable()
 export class TenantsService {
@@ -53,6 +71,14 @@ export class TenantsService {
           }
         : null,
     };
+  }
+
+  private toCountMap(rows: CountByValueRow[]) {
+    return rows.reduce<Record<string, number>>((acc, row) => {
+      if (!row.value) return acc;
+      acc[row.value] = Number(row.count ?? 0);
+      return acc;
+    }, {});
   }
 
   async findAll(query: TenantsQueryDto) {
@@ -201,18 +227,284 @@ export class TenantsService {
     return { tenant: updated, previousFileKey: tenant.ktpImageFileKey, hadProfilePhoto: Boolean(tenant.profilePhotoFileKey) };
   }
 
-  /** OWNER memverifikasi KTP (gate aktivasi kamar bila diaktifkan). */
-  async verifyKtp(id: number, actor: CurrentUserPayload) {
-    const tenant = await this.prisma.tenant.findUnique({ where: { id }, select: { id: true, ktpImageFileKey: true, ktpVerifiedAt: true } });
+  /** Verifikasi KTP tenant. OWNER/ADMIN. Menerima metadata metode verifikasi & catatan. */
+  async verifyKtp(
+    id: number,
+    actor: CurrentUserPayload,
+    opts?: { method?: string; notes?: string },
+  ) {
+    const tenant = await this.prisma.tenant.findUnique({
+      where: { id },
+      select: { id: true, ktpImageFileKey: true, ktpVerifiedAt: true },
+    });
     if (!tenant) throw new NotFoundException('Tenant tidak ditemukan');
     if (!tenant.ktpImageFileKey) throw new ConflictException('Tenant belum mengunggah foto KTP.');
     if (tenant.ktpVerifiedAt) throw new ConflictException('KTP sudah terverifikasi.');
+
+    const method = opts?.method || 'MANUAL';
+    const validMethods = ['AI', 'AI_FAILED_MANUAL', 'MANUAL'];
+    if (!validMethods.includes(method)) {
+      throw new BadRequestException(`Metode verifikasi tidak valid: ${method}. Gunakan: ${validMethods.join(', ')}`);
+    }
+
     const updated = await this.prisma.tenant.update({
       where: { id },
-      data: { ktpVerifiedAt: new Date(), ktpVerifiedById: actor.id },
+      data: {
+        ktpVerifiedAt: new Date(),
+        ktpVerifiedById: actor.id,
+        ktpVerificationMethod: method,
+        ktpVerificationNotes: opts?.notes?.slice(0, 500) ?? null,
+      },
     });
-    await this.audit.log({ actorUserId: actor.id, action: 'KTP_VERIFY', entityType: 'Tenant', entityId: String(id) });
+    await this.audit.log({
+      actorUserId: actor.id,
+      action: 'KTP_VERIFY',
+      entityType: 'Tenant',
+      entityId: String(id),
+      meta: { method, notes: opts?.notes?.slice(0, 200) },
+    });
     return updated;
+  }
+
+  /**
+   * G5+: Perkaya data tenant dari hasil OCR/demografi KTP.
+   * Hanya mengisi field yang masih kosong (tidak overwrite data manual).
+   */
+  async enrichTenantFromKtp(
+    id: number,
+    data: {
+      gender?: string | null;
+      birthDate?: string | null;
+      originCity?: string | null;
+      originProvince?: string | null;
+      occupation?: string | null;
+    },
+    actor?: CurrentUserPayload,
+  ) {
+    const tenant = await this.prisma.tenant.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        gender: true,
+        birthDate: true,
+        originCity: true,
+        originProvince: true,
+        occupation: true,
+      },
+    });
+    if (!tenant) throw new NotFoundException('Tenant tidak ditemukan');
+
+    // Hanya isi field yang masih kosong (null)
+    const updates: Record<string, unknown> = {};
+    if (!tenant.gender && data.gender && ['MALE', 'FEMALE'].includes(data.gender)) {
+      updates.gender = data.gender;
+    }
+    if (!tenant.birthDate && data.birthDate && /^\d{4}-\d{2}-\d{2}$/.test(data.birthDate)) {
+      updates.birthDate = new Date(data.birthDate);
+    }
+    if (!tenant.originCity && data.originCity && data.originCity.trim().length >= 2) {
+      updates.originCity = data.originCity.trim().slice(0, 60);
+    }
+    if (!tenant.originProvince && data.originProvince && data.originProvince.trim().length >= 2) {
+      updates.originProvince = data.originProvince.trim().slice(0, 60);
+    }
+    if (!tenant.occupation && data.occupation && data.occupation.trim().length >= 2) {
+      updates.occupation = data.occupation.trim().slice(0, 80);
+    }
+
+    if (Object.keys(updates).length === 0) {
+      return { enriched: false, fields: [], tenant };
+    }
+
+    const updated = await this.prisma.tenant.update({
+      where: { id },
+      data: updates,
+    });
+
+    if (actor) {
+      await this.audit.log({
+        actorUserId: actor.id,
+        action: 'TENANT_ENRICH_FROM_KTP',
+        entityType: 'Tenant',
+        entityId: String(id),
+        meta: { fields: Object.keys(updates) },
+      });
+    }
+
+    return { enriched: true, fields: Object.keys(updates), tenant: updated };
+  }
+
+  /** G5+: Simpan data KTP hasil ekstraksi ke tenant. Admin bisa memilih field yang mau disimpan. */
+  async saveKtpData(
+    id: number,
+    data: {
+      gender?: string | null;
+      birthDate?: string | null;
+      originCity?: string | null;
+      originProvince?: string | null;
+      occupation?: string | null;
+      identityNumber?: string | null;
+    },
+    actor: CurrentUserPayload,
+  ) {
+    const tenant = await this.prisma.tenant.findUnique({
+      where: { id },
+      select: { id: true, identityNumber: true },
+    });
+    if (!tenant) throw new NotFoundException('Tenant tidak ditemukan');
+
+    const updates: Record<string, unknown> = {};
+
+    // NIK hanya bisa di-set sekali (unique constraint)
+    if (data.identityNumber && !tenant.identityNumber && /^\d{16}$/.test(data.identityNumber)) {
+      updates.identityNumber = data.identityNumber;
+    }
+
+    if (data.gender && ['MALE', 'FEMALE'].includes(data.gender)) updates.gender = data.gender;
+    if (data.birthDate && /^\d{4}-\d{2}-\d{2}$/.test(data.birthDate)) updates.birthDate = new Date(data.birthDate);
+    if (data.originCity?.trim()?.length) updates.originCity = data.originCity.trim().slice(0, 60);
+    if (data.originProvince?.trim()?.length) updates.originProvince = data.originProvince.trim().slice(0, 60);
+    if (data.occupation?.trim()?.length) updates.occupation = data.occupation.trim().slice(0, 80);
+
+    if (Object.keys(updates).length === 0) {
+      throw new BadRequestException('Tidak ada field valid yang bisa disimpan.');
+    }
+
+    const updated = await this.prisma.tenant.update({
+      where: { id },
+      data: updates,
+    });
+
+    await this.audit.log({
+      actorUserId: actor.id,
+      action: 'KTP_DATA_SAVE',
+      entityType: 'Tenant',
+      entityId: String(id),
+      meta: { fields: Object.keys(updates) },
+    });
+
+    return { savedFields: Object.keys(updates), tenant: updated };
+  }
+
+  /**
+   * G5+: Ringkasan demografi tenant untuk marketing analytics.
+   * Hanya OWNER — data agregat, bukan individual.
+   */
+  async getDemographicsSummary() {
+    const [
+      genderRows,
+      cityRows,
+      provinceRows,
+      occupationRows,
+      leadSourceRows,
+      maritalRows,
+      vehicleRows,
+      ageGroupRows,
+      completenessRows,
+    ] = await Promise.all([
+      this.prisma.$queryRaw<Array<CountByValueRow>>`
+        SELECT gender::text AS value, COUNT(*)::bigint AS count
+        FROM "Tenant"
+        WHERE "isActive" = true AND gender IS NOT NULL
+        GROUP BY gender
+      `,
+      this.prisma.$queryRaw<Array<CountByValueRow>>`
+        SELECT "originCity" AS value, COUNT(*)::bigint AS count
+        FROM "Tenant"
+        WHERE "isActive" = true AND "originCity" IS NOT NULL
+        GROUP BY "originCity"
+        ORDER BY count DESC, value ASC
+        LIMIT 10
+      `,
+      this.prisma.$queryRaw<Array<CountByValueRow>>`
+        SELECT "originProvince" AS value, COUNT(*)::bigint AS count
+        FROM "Tenant"
+        WHERE "isActive" = true AND "originProvince" IS NOT NULL
+        GROUP BY "originProvince"
+        ORDER BY count DESC, value ASC
+        LIMIT 10
+      `,
+      this.prisma.$queryRaw<Array<CountByValueRow>>`
+        SELECT occupation AS value, COUNT(*)::bigint AS count
+        FROM "Tenant"
+        WHERE "isActive" = true AND occupation IS NOT NULL
+        GROUP BY occupation
+        ORDER BY count DESC, value ASC
+        LIMIT 10
+      `,
+      this.prisma.$queryRaw<Array<CountByValueRow>>`
+        SELECT "howDidYouHear" AS value, COUNT(*)::bigint AS count
+        FROM "Tenant"
+        WHERE "isActive" = true AND "howDidYouHear" IS NOT NULL
+        GROUP BY "howDidYouHear"
+      `,
+      this.prisma.$queryRaw<Array<CountByValueRow>>`
+        SELECT "maritalStatus"::text AS value, COUNT(*)::bigint AS count
+        FROM "Tenant"
+        WHERE "isActive" = true AND "maritalStatus" IS NOT NULL
+        GROUP BY "maritalStatus"
+      `,
+      this.prisma.$queryRaw<Array<CountByValueRow>>`
+        SELECT "vehicleOwnership"::text AS value, COUNT(*)::bigint AS count
+        FROM "Tenant"
+        WHERE "isActive" = true AND "vehicleOwnership" IS NOT NULL
+        GROUP BY "vehicleOwnership"
+      `,
+      this.prisma.$queryRaw<Array<AgeGroupRow>>`
+        SELECT
+          COUNT(*) FILTER (WHERE "birthDate" IS NOT NULL AND EXTRACT(YEAR FROM age(CURRENT_DATE, "birthDate")) BETWEEN 17 AND 25)::bigint AS age17_25,
+          COUNT(*) FILTER (WHERE "birthDate" IS NOT NULL AND EXTRACT(YEAR FROM age(CURRENT_DATE, "birthDate")) BETWEEN 26 AND 35)::bigint AS age26_35,
+          COUNT(*) FILTER (WHERE "birthDate" IS NOT NULL AND EXTRACT(YEAR FROM age(CURRENT_DATE, "birthDate")) BETWEEN 36 AND 45)::bigint AS age36_45,
+          COUNT(*) FILTER (WHERE "birthDate" IS NOT NULL AND EXTRACT(YEAR FROM age(CURRENT_DATE, "birthDate")) >= 46)::bigint AS age46_plus,
+          COUNT(*) FILTER (WHERE "birthDate" IS NULL)::bigint AS unknown
+        FROM "Tenant"
+        WHERE "isActive" = true
+      `,
+      this.prisma.$queryRaw<Array<CompletenessRow>>`
+        SELECT
+          COUNT(*)::bigint AS total,
+          COUNT(gender)::bigint AS gender,
+          COUNT("originCity")::bigint AS origin_city,
+          COUNT("originProvince")::bigint AS origin_province,
+          COUNT(occupation)::bigint AS occupation,
+          COUNT("birthDate")::bigint AS birth_date,
+          COUNT("maritalStatus")::bigint AS marital_status,
+          COUNT("howDidYouHear")::bigint AS how_did_you_hear
+        FROM "Tenant"
+        WHERE "isActive" = true
+      `,
+    ]);
+
+    const count = Number(completenessRows[0]?.total ?? 0);
+    const ageBucket = ageGroupRows[0];
+    const ageGroups: Record<string, number> = {
+      '17-25': Number(ageBucket?.age17_25 ?? 0),
+      '26-35': Number(ageBucket?.age26_35 ?? 0),
+      '36-45': Number(ageBucket?.age36_45 ?? 0),
+      '46+': Number(ageBucket?.age46_plus ?? 0),
+      unknown: Number(ageBucket?.unknown ?? 0),
+    };
+
+    return {
+      totalTenants: count,
+      gender: this.toCountMap(genderRows),
+      topCities: cityRows.map((row) => [row.value, Number(row.count ?? 0)]),
+      topProvinces: provinceRows.map((row) => [row.value, Number(row.count ?? 0)]),
+      topOccupations: occupationRows.map((row) => [row.value, Number(row.count ?? 0)]),
+      ageGroups,
+      maritalStatus: this.toCountMap(maritalRows),
+      vehicleOwnership: this.toCountMap(vehicleRows),
+      leadSources: this.toCountMap(leadSourceRows),
+      dataCompleteness: {
+        gender: Number(completenessRows[0]?.gender ?? 0),
+        originCity: Number(completenessRows[0]?.origin_city ?? 0),
+        originProvince: Number(completenessRows[0]?.origin_province ?? 0),
+        occupation: Number(completenessRows[0]?.occupation ?? 0),
+        birthDate: Number(completenessRows[0]?.birth_date ?? 0),
+        maritalStatus: Number(completenessRows[0]?.marital_status ?? 0),
+        howDidYouHear: Number(completenessRows[0]?.how_did_you_hear ?? 0),
+      },
+    };
   }
 
   /** fileKey untuk penyajian terproteksi (controller batasi role OWNER/ADMIN). */

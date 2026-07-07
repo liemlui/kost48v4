@@ -1,4 +1,5 @@
 // FILE: PublicRoomDetailPage.tsx — detail kamar publik: fasilitas, foto, harga, booking
+import '../../styles/public-area';
 import { useEffect, useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Accordion, Alert, Badge, Button, Card, Carousel, Col, Container, Row, Spinner, Table } from 'react-bootstrap';

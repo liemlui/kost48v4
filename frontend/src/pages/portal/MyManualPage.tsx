@@ -1,3 +1,4 @@
+import '../../styles/tenant-area';
 import { useMemo } from 'react';
 import { Accordion, Alert, Button, Card, Spinner } from 'react-bootstrap';
 import { useQuery } from '@tanstack/react-query';

@@ -1,3 +1,4 @@
+import '../../styles/public-area';
 import { lazy } from 'react';
 import { PageLoadingSkeleton } from '../../components/common/SkeletonLoader';
 import AppLayout from '../../components/layout/AppLayout';
