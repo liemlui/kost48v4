@@ -19,7 +19,7 @@ import {
 } from '../../api/paymentSubmissions';
 import type { PaymentSubmission } from '../../types';
 import { resolveAbsoluteFileUrl } from '../../utils/resolveAbsoluteFileUrl';
-import { AssistantPanel, CompactMetrics, type AssistantItem, type MetricChip } from '../../components/command-center';
+import { CompactMetrics, type MetricChip } from '../../components/command-center';
 import { addHoursToDate, formatDateTimeWib, getDeadlineMeta } from '../../utils/dateTime';
 import { compactText } from '../../utils/readabilityRules';
 import {
@@ -240,13 +240,6 @@ export default function PaymentReviewPage() {
   const depositCount = useMemo(() => items.filter((item) => item.targetType === 'DEPOSIT').length, [items]);
   const invoiceCount = items.length - depositCount;
 
-  const assistantItems: AssistantItem[] = [
-    ...(status === 'PENDING_REVIEW' && items.length ? [{ id: 'pending', severity: 'HIGH' as const, title: 'Bukti menahan flow', message: `${items.length} bukti menunggu keputusan. Review maksimal 6 jam.`, count: items.length, source: 'Review pembayaran' }] : []),
-    ...(highRiskCount ? [{ id: 'high-risk', severity: 'HIGH' as const, title: 'Ada risiko tinggi', message: `${highRiskCount} bukti perlu cek manual.`, count: highRiskCount, source: 'Safety belt' }] : []),
-    ...(mismatchCount ? [{ id: 'mismatch', severity: 'WARNING' as const, title: 'Nominal tidak sama dengan sisa tagihan', message: `${mismatchCount} bukti bisa menjadi pembayaran parsial atau overpay. Jangan approve otomatis tanpa cek manual.`, count: mismatchCount, source: 'Amount check' }] : []),
-    ...(missingProofCount ? [{ id: 'missing-proof', severity: 'WARNING' as const, title: 'Ada submission tanpa file bukti', message: 'Approve dinonaktifkan untuk bukti tanpa file. Tolak dan minta tenant upload ulang agar audit trail aman.', count: missingProofCount, source: 'Proof file' }] : []),
-  ];
-
   const metrics: MetricChip[] = [
     { id: 'submission', label: 'Menunggu keputusan', value: items.length, helper: 'Sesuai filter status', status: status === 'PENDING_REVIEW' && items.length ? 'WARNING' : 'INFO', icon: '◈' },
     { id: 'amount', label: 'Nominal antrean', value: new Intl.NumberFormat('id-ID', { notation: 'compact' }).format(pendingAmount), helper: 'Total nominal pada filter', status: 'SUCCESS', icon: 'Rp' },
@@ -314,7 +307,6 @@ export default function PaymentReviewPage() {
       />
 
       <CommandFlowStrip />
-      <AssistantPanel title="Asisten Review Pembayaran" subtitle="Prioritaskan bukti yang menahan flow." items={assistantItems} emptyTitle="Belum ada pembayaran yang menunggu review saat ini" emptyMessage="Semua pembayaran sudah diproses atau belum ada bukti masuk. Refresh jika baru saja ada kiriman baru." />
       <CompactMetrics metrics={metrics} />
 
       {items.length > 0 && (

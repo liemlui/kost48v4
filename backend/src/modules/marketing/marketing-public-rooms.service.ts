@@ -57,11 +57,68 @@ export class MarketingPublicRoomsService {
   // ═══════════════════════════════════════════════════════════
 
   async getPublicSocialProof() {
-    const [staffReviews, staffAggregate, activeStays, externalReviews, externalAggregate] = await this.prisma.$transaction([
+    // DEFENSIVE: ExternalReview table mungkin belum ada di DB produksi (migrasi 20260624100000).
+    // Fallback graceful: coba full query dulu; jika gagal, retry hanya StaffReview.
+    try {
+      return await this.getPublicSocialProofInternal(true);
+    } catch (_err: any) {
+      // Kemungkinan tabel ExternalReview belum ada — retry tanpa external review.
+      try {
+        return await this.getPublicSocialProofInternal(false);
+      } catch (_err2: any) {
+        // Query dasar pun gagal (DB connection issue dsb.) — kembalikan kosong.
+        return { occupantCount: 0, averageRating: 0, reviewCount: 0, reviews: [] };
+      }
+    }
+  }
+
+  /** Implementasi social proof — dengan atau tanpa ExternalReview. */
+  private async getPublicSocialProofInternal(includeExternal: boolean) {
+    if (includeExternal) {
+      // Full query: StaffReview + ExternalReview dalam satu transaksi.
+      const [staffReviews, staffAggregate, activeStays, externalReviews, externalAggregate] =
+        await this.prisma.$transaction([
+          this.prisma.staffReview.findMany({
+            where: { status: 'VISIBLE' as any },
+            select: {
+              rating: true,
+              comment: true,
+              createdAt: true,
+              tenant: { select: { fullName: true } },
+            },
+            orderBy: { createdAt: 'desc' },
+            take: 12,
+          }),
+          this.prisma.staffReview.aggregate({
+            where: { status: 'VISIBLE' as any },
+            _avg: { rating: true },
+            _count: { id: true },
+          }),
+          this.prisma.stay.findMany({
+            where: { status: 'ACTIVE' as any, initialMetersPromotedAt: { not: null } },
+            select: { tenantId: true },
+          }),
+          this.prisma.externalReview.findMany({
+            where: { isVisible: true },
+            select: { rating: true, comment: true, authorName: true, source: true, reviewedAt: true },
+            orderBy: { reviewedAt: 'desc' },
+            take: 20,
+          }),
+          this.prisma.externalReview.aggregate({
+            where: { isVisible: true },
+            _avg: { rating: true },
+            _count: { id: true },
+          }),
+        ]);
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      return this.buildSocialProofResponse(staffReviews as any, staffAggregate, activeStays as any, externalReviews as any, externalAggregate);
+    }
+
+    // Fallback: hanya StaffReview (ExternalReview table belum ada).
+    const [staffReviews, staffAggregate, activeStays] = await this.prisma.$transaction([
       this.prisma.staffReview.findMany({
-        where: {
-          status: 'VISIBLE' as any,
-        },
+        where: { status: 'VISIBLE' as any },
         select: {
           rating: true,
           comment: true,
@@ -80,22 +137,22 @@ export class MarketingPublicRoomsService {
         where: { status: 'ACTIVE' as any, initialMetersPromotedAt: { not: null } },
         select: { tenantId: true },
       }),
-      this.prisma.externalReview.findMany({
-        where: { isVisible: true },
-        select: { rating: true, comment: true, authorName: true, source: true, reviewedAt: true },
-        orderBy: { reviewedAt: 'desc' },
-        take: 20,
-      }),
-      this.prisma.externalReview.aggregate({
-        where: { isVisible: true },
-        _avg: { rating: true },
-        _count: { id: true },
-      }),
     ]);
 
-    const occupantCount = new Set(activeStays.map((stay) => stay.tenantId)).size;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return this.buildSocialProofResponse(staffReviews as any, staffAggregate, activeStays as any, [], { _avg: { rating: null }, _count: { id: 0 } });
+  }
 
-    // Gabung StaffReview + ExternalReview untuk rata-rata dan pool ulasan.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private buildSocialProofResponse(
+    staffReviews: any[],
+    staffAggregate: { _avg: { rating: number | null }; _count: { id: number } },
+    activeStays: any[],
+    externalReviews: any[],
+    externalAggregate: { _avg: { rating: number | null }; _count: { id: number } },
+  ) {
+    const occupantCount = new Set(activeStays.map((stay: any) => stay.tenantId)).size;
+
     const totalCount = staffAggregate._count.id + externalAggregate._count.id;
     const weightedAvg = totalCount > 0
       ? ((staffAggregate._avg.rating ?? 0) * staffAggregate._count.id +
@@ -103,7 +160,7 @@ export class MarketingPublicRoomsService {
       : 0;
     const averageRating = weightedAvg > 0 ? Math.round(weightedAvg * 10) / 10 : 0;
 
-    const staffMapped = staffReviews.map((r) => ({
+    const staffMapped = staffReviews.map((r: any) => ({
       initials: this.toInitials(r.tenant.fullName),
       displayName: null as string | null,
       source: null as string | null,
@@ -112,7 +169,7 @@ export class MarketingPublicRoomsService {
       createdAt: r.createdAt,
     }));
 
-    const externalMapped = externalReviews.map((r) => ({
+    const externalMapped = externalReviews.map((r: any) => ({
       initials: this.toInitials(r.authorName),
       displayName: r.authorName,
       source: r.source,
@@ -121,10 +178,8 @@ export class MarketingPublicRoomsService {
       createdAt: r.reviewedAt,
     }));
 
-    // Campurkan: tampilkan Google reviews terbaru di depan, lalu StaffReview.
-    // Pool 20 batas agar FE bisa sort Terbaru/Rating.
     const allReviews = [...externalMapped, ...staffMapped]
-      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
+      .sort((a: any, b: any) => b.createdAt.getTime() - a.createdAt.getTime())
       .slice(0, 20);
 
     return {
@@ -136,44 +191,49 @@ export class MarketingPublicRoomsService {
   }
 
   async getPublicRoomSummary(): Promise<PublicRoomSummary> {
-    const rows = await this.prisma.room.groupBy({
-      by: ['status'],
-      where: {
-        isActive: true,
-        monthlyRateRupiah: { gt: 0 },
-        status: {
-          in: [
-            RoomStatus.AVAILABLE as any,
-            RoomStatus.RESERVED as any,
-            RoomStatus.OCCUPIED as any,
-            RoomStatus.MAINTENANCE as any,
-          ],
+    try {
+      const rows = await this.prisma.room.groupBy({
+        by: ['status'],
+        where: {
+          isActive: true,
+          monthlyRateRupiah: { gt: 0 },
+          status: {
+            in: [
+              RoomStatus.AVAILABLE as any,
+              RoomStatus.RESERVED as any,
+              RoomStatus.OCCUPIED as any,
+              RoomStatus.MAINTENANCE as any,
+            ],
+          },
         },
-      },
-      _count: { _all: true },
-    });
+        _count: { _all: true },
+      });
 
-    const countByStatus = new Map(rows.map((row) => [String(row.status), row._count._all]));
-    const bookableMaintenance = await this.prisma.room.count({
-      where: {
-        isActive: true,
-        monthlyRateRupiah: { gt: 0 },
-        status: RoomStatus.MAINTENANCE as any,
-        allowBookingWhileCleaning: true,
-      },
-    });
-    const available = countByStatus.get(RoomStatus.AVAILABLE) ?? 0;
-    const maintenance = countByStatus.get(RoomStatus.MAINTENANCE) ?? 0;
-    const reserved = countByStatus.get(RoomStatus.RESERVED) ?? 0;
-    const occupied = countByStatus.get(RoomStatus.OCCUPIED) ?? 0;
+      const countByStatus = new Map(rows.map((row) => [String(row.status), row._count._all]));
+      const bookableMaintenance = await this.prisma.room.count({
+        where: {
+          isActive: true,
+          monthlyRateRupiah: { gt: 0 },
+          status: RoomStatus.MAINTENANCE as any,
+          allowBookingWhileCleaning: true,
+        },
+      });
+      const available = countByStatus.get(RoomStatus.AVAILABLE) ?? 0;
+      const maintenance = countByStatus.get(RoomStatus.MAINTENANCE) ?? 0;
+      const reserved = countByStatus.get(RoomStatus.RESERVED) ?? 0;
+      const occupied = countByStatus.get(RoomStatus.OCCUPIED) ?? 0;
 
-    return {
-      bookable: available + bookableMaintenance,
-      occupied,
-      maintenance,
-      reserved,
-      total: available + maintenance + reserved + occupied,
-    };
+      return {
+        bookable: available + bookableMaintenance,
+        occupied,
+        maintenance,
+        reserved,
+        total: available + maintenance + reserved + occupied,
+      };
+    } catch (_err: any) {
+      // DEFENSIVE: jika groupBy/count gagal (schema drift, enum mismatch), kembalikan nol.
+      return { bookable: 0, occupied: 0, maintenance: 0, reserved: 0, total: 0 };
+    }
   }
 
   async getPublicRooms(query: PublicRoomsQueryDto) {

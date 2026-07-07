@@ -17,6 +17,43 @@ export type OperationalSetting = {
   acCleanKwhThreshold: number;
   // Fitur tenant toggle
   tenantLoyaltyEnabled: boolean;
+  ktpVerificationGateEnabled: boolean;
+  // Brevo Email
+  brevoApiKeySet?: boolean;
+  brevoApiKeySource?: 'settings' | 'env' | null;
+  brevoApiKeyPreview?: string | null;
+  mailFromEmail?: string;
+  mailFromName?: string;
+  // AutoOps
+  autoOpsEnabled: boolean;
+  // Accounting sweeps
+  recurringExpenseDraftsEnabled: boolean;
+  assetDepreciationAutoEnabled: boolean;
+  rentRecognitionEnabled: boolean;
+  notificationPruningEnabled: boolean;
+  notificationRetentionDays: number;
+  journalReconciliationEnabled: boolean;
+  journalReconciliationLimit: number;
+  // SLA Deadlines
+  bookingReviewDeadlineHours: number;
+  approvedBookingPaymentDeadlineHours: number;
+  paymentReviewUrgentHours: number;
+  paymentReviewEscalateHours: number;
+  paymentReviewMaxHours: number;
+  invoiceUrgentAfterHours: number;
+  invoiceDueAfterHours: number;
+  renewReminderDays: number;
+  renewLastCallHours: number;
+  renewPaymentDeadlineHours: number;
+  renewReviewUrgentHours: number;
+  renewReviewEscalateHours: number;
+  checkoutReviewUrgentHours: number;
+  checkoutReviewEscalateHours: number;
+  checkoutFinalUrgentHours: number;
+  lateTenantVacateHours: number;
+  autoOpsIntervalMinutes: number;
+  // Maintenance
+  acCleaningEnabled: boolean;
   // R3: AI/DeepSeek fields
   deepseekModel?: string;
   deepseekFinanceModel?: string;
@@ -47,6 +84,7 @@ export type UpdateOperationalSettingPayload = Partial<
 > & {
   /** Isi untuk mengganti key; string kosong = hapus key dari settings (kembali ke env fallback). */
   deepseekApiKey?: string;
+  brevoApiKey?: string;
 };
 
 /** Field yang diterima PUT /settings/operational (DTO backend pakai forbidNonWhitelisted —
@@ -54,7 +92,18 @@ export type UpdateOperationalSettingPayload = Partial<
 const OPERATIONAL_UPDATE_KEYS = [
   'freeElectricityKwhPerMonth', 'electricityTariffPerKwhRupiah', 'waterMeteringEnabled',
   'waterTariffPerM3Rupiah', 'freeWaterM3PerMonth', 'wifiRupiah', 'galonRupiah',
-  'petDepositRupiah', 'extraOccupantFeePercent', 'acCleanKwhThreshold', 'tenantLoyaltyEnabled',
+  'petDepositRupiah', 'extraOccupantFeePercent', 'acCleanKwhThreshold', 'tenantLoyaltyEnabled', 'ktpVerificationGateEnabled',
+  'brevoApiKey', 'mailFromEmail', 'mailFromName',
+  'autoOpsEnabled',
+  'recurringExpenseDraftsEnabled', 'assetDepreciationAutoEnabled', 'rentRecognitionEnabled',
+  'notificationPruningEnabled', 'notificationRetentionDays', 'journalReconciliationEnabled', 'journalReconciliationLimit',
+  'bookingReviewDeadlineHours', 'approvedBookingPaymentDeadlineHours',
+  'paymentReviewUrgentHours', 'paymentReviewEscalateHours', 'paymentReviewMaxHours',
+  'invoiceUrgentAfterHours', 'invoiceDueAfterHours',
+  'renewReminderDays', 'renewLastCallHours', 'renewPaymentDeadlineHours', 'renewReviewUrgentHours', 'renewReviewEscalateHours',
+  'checkoutReviewUrgentHours', 'checkoutReviewEscalateHours', 'checkoutFinalUrgentHours',
+  'lateTenantVacateHours', 'autoOpsIntervalMinutes',
+  'acCleaningEnabled',
   'deepseekModel', 'deepseekFinanceModel', 'deepseekBaseUrl', 'deepseekApiKey',
   'aiFeaturesEnabled', 'aiManualOnly', 'aiOwnerAdminOnly', 'aiDailyRequestLimit',
   'aiMaxInputChars', 'aiMaxOutputTokens', 'aiFinanceMaxOutputTokens', 'aiLogUsage',

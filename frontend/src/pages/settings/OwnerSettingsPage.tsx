@@ -711,6 +711,36 @@ function TariffSettingsPanel() {
       extraOccupantFeePercent: Number(form?.extraOccupantFeePercent ?? 20),
       acCleanKwhThreshold: Number(form?.acCleanKwhThreshold ?? 200),
       tenantLoyaltyEnabled: Boolean(form?.tenantLoyaltyEnabled),
+      ktpVerificationGateEnabled: Boolean(form?.ktpVerificationGateEnabled),
+      brevoApiKey: (form as any)?.brevoApiKey,
+      mailFromEmail: (form as any)?.mailFromEmail,
+      mailFromName: (form as any)?.mailFromName,
+      autoOpsEnabled: Boolean((form as any)?.autoOpsEnabled),
+      recurringExpenseDraftsEnabled: Boolean((form as any)?.recurringExpenseDraftsEnabled),
+      assetDepreciationAutoEnabled: Boolean((form as any)?.assetDepreciationAutoEnabled),
+      rentRecognitionEnabled: Boolean((form as any)?.rentRecognitionEnabled),
+      notificationPruningEnabled: Boolean((form as any)?.notificationPruningEnabled),
+      notificationRetentionDays: Number((form as any)?.notificationRetentionDays ?? 90),
+      journalReconciliationEnabled: Boolean((form as any)?.journalReconciliationEnabled),
+      journalReconciliationLimit: Number((form as any)?.journalReconciliationLimit ?? 100),
+      bookingReviewDeadlineHours: Number((form as any)?.bookingReviewDeadlineHours ?? 3),
+      approvedBookingPaymentDeadlineHours: Number((form as any)?.approvedBookingPaymentDeadlineHours ?? 3),
+      paymentReviewUrgentHours: Number((form as any)?.paymentReviewUrgentHours ?? 1),
+      paymentReviewEscalateHours: Number((form as any)?.paymentReviewEscalateHours ?? 3),
+      paymentReviewMaxHours: Number((form as any)?.paymentReviewMaxHours ?? 6),
+      invoiceUrgentAfterHours: Number((form as any)?.invoiceUrgentAfterHours ?? 6),
+      invoiceDueAfterHours: Number((form as any)?.invoiceDueAfterHours ?? 24),
+      renewReminderDays: Number((form as any)?.renewReminderDays ?? 3),
+      renewLastCallHours: Number((form as any)?.renewLastCallHours ?? 24),
+      renewPaymentDeadlineHours: Number((form as any)?.renewPaymentDeadlineHours ?? 3),
+      renewReviewUrgentHours: Number((form as any)?.renewReviewUrgentHours ?? 3),
+      renewReviewEscalateHours: Number((form as any)?.renewReviewEscalateHours ?? 6),
+      checkoutReviewUrgentHours: Number((form as any)?.checkoutReviewUrgentHours ?? 3),
+      checkoutReviewEscalateHours: Number((form as any)?.checkoutReviewEscalateHours ?? 6),
+      checkoutFinalUrgentHours: Number((form as any)?.checkoutFinalUrgentHours ?? 6),
+      lateTenantVacateHours: Number((form as any)?.lateTenantVacateHours ?? 3),
+      autoOpsIntervalMinutes: Number((form as any)?.autoOpsIntervalMinutes ?? 5),
+      acCleaningEnabled: Boolean((form as any)?.acCleaningEnabled),
     }),
     onSuccess: (updated) => { setForm(updated); setSavedMsg('Konstanta tersimpan.'); qc.invalidateQueries({ queryKey: ['operational-settings'] }); },
   });
@@ -718,7 +748,7 @@ function TariffSettingsPanel() {
   if (isLoading || !form) return <div className="text-muted py-3"><Spinner animation="border" size="sm" className="me-2" />Memuat konstanta...</div>;
   if (isError) return <Alert variant="danger">Gagal memuat konstanta operasional.</Alert>;
 
-  const set = (key: keyof OperationalSetting, value: number | boolean) => setForm((prev) => (prev ? { ...prev, [key]: value } : prev));
+  const set = (key: keyof OperationalSetting, value: number | boolean | string) => setForm((prev) => (prev ? { ...prev, [key]: value } : prev));
 
   return (
     <Card className="content-card border-0">
@@ -815,6 +845,71 @@ function TariffSettingsPanel() {
             />
             <Form.Text muted>Nonaktifkan saat katalog reward belum siap. Penghuni tidak akan melihat menu Loyalitas di portal.</Form.Text>
           </Col>
+          <Col md={12}>
+            <Form.Check
+              type="switch"
+              id="ktp-gate-toggle"
+              label="Wajibkan verifikasi KTP sebelum check-in & booking (gate UU PDP)"
+              checked={form.ktpVerificationGateEnabled ?? false}
+              onChange={(e) => set('ktpVerificationGateEnabled', e.target.checked)}
+            />
+            <Form.Text muted>Aktifkan setelah onboarding KTP siap. Tenant yang KTP-nya belum diverifikasi akan ditolak saat check-in atau booking.</Form.Text>
+          </Col>
+          <Col xs={12}><hr className="my-1" /><p className="text-muted small mb-0">Email (Brevo)</p></Col>
+          <Col md={6}>
+            <Form.Group>
+              <Form.Label>Brevo API Key</Form.Label>
+              <Form.Control type="password" value={(form as any).brevoApiKey ?? ''} onChange={(e) => set('brevoApiKey' as any, e.target.value)} placeholder={form.brevoApiKeySet ? (form.brevoApiKeyPreview ?? '••••') : 'Kosong = nonaktifkan email'} />
+              <Form.Text muted>{form.brevoApiKeySet ? `Tersimpan (sumber: ${form.brevoApiKeySource === 'env' ? '.env' : 'settings'}). Kosongkan untuk hapus.` : 'Isi untuk mengaktifkan email reset password via Brevo.'}</Form.Text>
+            </Form.Group>
+          </Col>
+          <Col md={3}>
+            <Form.Group>
+              <Form.Label>Email Pengirim</Form.Label>
+              <Form.Control type="email" value={(form as any).mailFromEmail ?? ''} onChange={(e) => set('mailFromEmail' as any, e.target.value)} placeholder="no-reply@kost48surabaya.com" />
+            </Form.Group>
+          </Col>
+          <Col md={3}>
+            <Form.Group>
+              <Form.Label>Nama Pengirim</Form.Label>
+              <Form.Control type="text" value={(form as any).mailFromName ?? ''} onChange={(e) => set('mailFromName' as any, e.target.value)} placeholder="Kost48 Surabaya" />
+            </Form.Group>
+          </Col>
+          <Col xs={12}><hr className="my-1" /><p className="text-muted small mb-0">AutoOps — Penjadwalan Otomatis</p></Col>
+          <Col md={4}>
+            <Form.Check type="switch" id="autoops-enabled" label="Aktifkan AutoOps (penjadwalan otomatis)" checked={(form as any).autoOpsEnabled ?? true} onChange={(e) => set('autoOpsEnabled' as any, e.target.checked)} />
+          </Col>
+          <Col md={4}>
+            <Form.Group><Form.Label>Interval (menit)</Form.Label><Form.Control type="number" min={1} max={60} value={(form as any).autoOpsIntervalMinutes ?? 5} onChange={(e) => set('autoOpsIntervalMinutes' as any, Number(e.target.value))} /></Form.Group>
+          </Col>
+          <Col md={4}>
+            <Form.Check type="switch" id="ac-cleaning" label="Jadwal cuci AC otomatis" checked={(form as any).acCleaningEnabled ?? true} onChange={(e) => set('acCleaningEnabled' as any, e.target.checked)} />
+          </Col>
+          <Col xs={12}><hr className="my-1" /><p className="text-muted small mb-0">Accounting Sweeps</p></Col>
+          <Col md={4}><Form.Check type="switch" id="recurring-expense" label="Draft pengeluaran berulang" checked={(form as any).recurringExpenseDraftsEnabled ?? false} onChange={(e) => set('recurringExpenseDraftsEnabled' as any, e.target.checked)} /></Col>
+          <Col md={4}><Form.Check type="switch" id="asset-depreciation" label="Penyusutan aset otomatis" checked={(form as any).assetDepreciationAutoEnabled ?? false} onChange={(e) => set('assetDepreciationAutoEnabled' as any, e.target.checked)} /></Col>
+          <Col md={4}><Form.Check type="switch" id="rent-recognition" label="PSAK 72 — pengakuan sewa" checked={(form as any).rentRecognitionEnabled ?? false} onChange={(e) => set('rentRecognitionEnabled' as any, e.target.checked)} /></Col>
+          <Col md={4}><Form.Check type="switch" id="notif-pruning" label="Bersihkan notifikasi lama" checked={(form as any).notificationPruningEnabled ?? true} onChange={(e) => set('notificationPruningEnabled' as any, e.target.checked)} /></Col>
+          <Col md={4}><Form.Group><Form.Label>Retensi notifikasi (hari)</Form.Label><Form.Control type="number" min={1} max={365} value={(form as any).notificationRetentionDays ?? 90} onChange={(e) => set('notificationRetentionDays' as any, Number(e.target.value))} /></Form.Group></Col>
+          <Col md={4}><Form.Check type="switch" id="journal-recon" label="Backfill jurnal otomatis" checked={(form as any).journalReconciliationEnabled ?? false} onChange={(e) => set('journalReconciliationEnabled' as any, e.target.checked)} /></Col>
+          <Col md={4}><Form.Group><Form.Label>Limit jurnal per run</Form.Label><Form.Control type="number" min={1} max={1000} value={(form as any).journalReconciliationLimit ?? 100} onChange={(e) => set('journalReconciliationLimit' as any, Number(e.target.value))} /></Form.Group></Col>
+          <Col xs={12}><hr className="my-1" /><p className="text-muted small mb-0">SLA Deadline AutoOps (jam)</p><Form.Text muted>Batas waktu untuk notifikasi urgensi. Default sesuai rekomendasi operasional.</Form.Text></Col>
+          <Col md={3}><Form.Group><Form.Label>Review booking</Form.Label><Form.Control type="number" min={1} max={168} value={(form as any).bookingReviewDeadlineHours ?? 3} onChange={(e) => set('bookingReviewDeadlineHours' as any, Number(e.target.value))} /></Form.Group></Col>
+          <Col md={3}><Form.Group><Form.Label>Bayar setelah approve</Form.Label><Form.Control type="number" min={1} max={168} value={(form as any).approvedBookingPaymentDeadlineHours ?? 3} onChange={(e) => set('approvedBookingPaymentDeadlineHours' as any, Number(e.target.value))} /></Form.Group></Col>
+          <Col md={3}><Form.Group><Form.Label>Review bayar (urgent)</Form.Label><Form.Control type="number" min={1} max={168} value={(form as any).paymentReviewUrgentHours ?? 1} onChange={(e) => set('paymentReviewUrgentHours' as any, Number(e.target.value))} /></Form.Group></Col>
+          <Col md={3}><Form.Group><Form.Label>Review bayar (eskalasi)</Form.Label><Form.Control type="number" min={1} max={168} value={(form as any).paymentReviewEscalateHours ?? 3} onChange={(e) => set('paymentReviewEscalateHours' as any, Number(e.target.value))} /></Form.Group></Col>
+          <Col md={3}><Form.Group><Form.Label>Review bayar (max)</Form.Label><Form.Control type="number" min={1} max={168} value={(form as any).paymentReviewMaxHours ?? 6} onChange={(e) => set('paymentReviewMaxHours' as any, Number(e.target.value))} /></Form.Group></Col>
+          <Col md={3}><Form.Group><Form.Label>Invoice urgent</Form.Label><Form.Control type="number" min={1} max={168} value={(form as any).invoiceUrgentAfterHours ?? 6} onChange={(e) => set('invoiceUrgentAfterHours' as any, Number(e.target.value))} /></Form.Group></Col>
+          <Col md={3}><Form.Group><Form.Label>Invoice jatuh tempo</Form.Label><Form.Control type="number" min={1} max={720} value={(form as any).invoiceDueAfterHours ?? 24} onChange={(e) => set('invoiceDueAfterHours' as any, Number(e.target.value))} /></Form.Group></Col>
+          <Col md={3}><Form.Group><Form.Label>Renew reminder (hari)</Form.Label><Form.Control type="number" min={1} max={30} value={(form as any).renewReminderDays ?? 3} onChange={(e) => set('renewReminderDays' as any, Number(e.target.value))} /></Form.Group></Col>
+          <Col md={3}><Form.Group><Form.Label>Renew last call</Form.Label><Form.Control type="number" min={1} max={168} value={(form as any).renewLastCallHours ?? 24} onChange={(e) => set('renewLastCallHours' as any, Number(e.target.value))} /></Form.Group></Col>
+          <Col md={3}><Form.Group><Form.Label>Bayar renew</Form.Label><Form.Control type="number" min={1} max={168} value={(form as any).renewPaymentDeadlineHours ?? 3} onChange={(e) => set('renewPaymentDeadlineHours' as any, Number(e.target.value))} /></Form.Group></Col>
+          <Col md={3}><Form.Group><Form.Label>Review renew (urgent)</Form.Label><Form.Control type="number" min={1} max={168} value={(form as any).renewReviewUrgentHours ?? 3} onChange={(e) => set('renewReviewUrgentHours' as any, Number(e.target.value))} /></Form.Group></Col>
+          <Col md={3}><Form.Group><Form.Label>Review renew (eskalasi)</Form.Label><Form.Control type="number" min={1} max={168} value={(form as any).renewReviewEscalateHours ?? 6} onChange={(e) => set('renewReviewEscalateHours' as any, Number(e.target.value))} /></Form.Group></Col>
+          <Col md={3}><Form.Group><Form.Label>Review checkout (urgent)</Form.Label><Form.Control type="number" min={1} max={168} value={(form as any).checkoutReviewUrgentHours ?? 3} onChange={(e) => set('checkoutReviewUrgentHours' as any, Number(e.target.value))} /></Form.Group></Col>
+          <Col md={3}><Form.Group><Form.Label>Review checkout (eskalasi)</Form.Label><Form.Control type="number" min={1} max={168} value={(form as any).checkoutReviewEscalateHours ?? 6} onChange={(e) => set('checkoutReviewEscalateHours' as any, Number(e.target.value))} /></Form.Group></Col>
+          <Col md={3}><Form.Group><Form.Label>Final checkout (urgent)</Form.Label><Form.Control type="number" min={1} max={168} value={(form as any).checkoutFinalUrgentHours ?? 6} onChange={(e) => set('checkoutFinalUrgentHours' as any, Number(e.target.value))} /></Form.Group></Col>
+          <Col md={3}><Form.Group><Form.Label>Grace telat keluar</Form.Label><Form.Control type="number" min={1} max={168} value={(form as any).lateTenantVacateHours ?? 3} onChange={(e) => set('lateTenantVacateHours' as any, Number(e.target.value))} /></Form.Group></Col>
         </Row>
         <Button className="mt-3" onClick={() => { setSavedMsg(''); save.mutate(); }} disabled={save.isPending}>
           {save.isPending ? 'Menyimpan...' : 'Simpan Konstanta'}

@@ -1,6 +1,6 @@
 # KOST48 V5 — Checklist Eksekusi Aktif
 
-> Versi: **2026-07-04 (Fase 4 = 35/35 100% — M31 DeepSeek verified)** | Changelog historis → `docs/M13_CHANGELOG.md`
+> Versi: **2026-07-09 (M14–M17 diarsip, konten → M00–M09)** | Changelog → `docs/M13_CHANGELOG.md`
 
 ## Cara Pakai (AI Eksekutor — baca sebelum coding)
 
@@ -60,7 +60,8 @@
 | **Fase AI — Perbaikan Temuan Audit CHECKLIST_09** | ✅ selesai | AI-01..AI-02: hardening 503 isBookingSchemaReady + FE bookingsQuery tak blokir portal; loyalty/renewal/checkout diverifikasi via kode. 2 file backend + 1 file frontend. |
 | **Fase AJ — Sisa Temuan Audit (C05-01 sistemik + C10/C17 + seed)** | ✅ selesai | AJ-01/02 anti-loop ✅ · AJ-03/04 seed + TB ✅ · AJ-05 okupansi ✅ · AJ-06 docs ✅ · AJ-07 yang aman diuji ✅ (temuan baru C19-01/C19-02 dicatat; sisanya human/destructive follow-up). |
 | **Fase AK — Owner-Request 2026-07-04** | ✅ kode selesai | AK-01 API key DeepSeek via Settings (tanpa restart, env fallback, tak pernah bocor ke respons) 🧬 · AK-02 fix 400 simpan panel AI · AK-03 input angka ribuan + fix nol-depan (CurrencyInput diperkuat, 12 file). `db push` kolom baru saat env hidup. |
-| **Fase AM — Redundansi UI/UX** | 🟡 0/12 | 12 task: unifikasi WA URL, hapus duplikasi nav admin+owner, RoomCard→FacilityList, fix RoomComparePanel. Detail: `docs/M14_REDUNDANSI_UI_UX.md`. |
+| **Fase AM — Redundansi UI/UX + Audit** | ✅ selesai (16/16) | AM-01 unifikasi WA URL, AM-02 hapus RoleWorkspaceTabs, AM-05 Pengumuman sidebar, AM-07 fix spec detection, AM-13 CSS Modules riset, AM-14 useForm wrapper, AM-15 Storybook, AM-16 E2E smoke. Build FE ✅ 6 Jul 2026. Detail: `docs/M14_REDUNDANSI_UI_UX.md`. |
+| **Fase M16 — Audit 360 Flow Huni** | ✅ selesai | 7 temuan: P2-01/02/04 fixed (+🧬), P2-03/05/06/07 diverifikasi valid. Detail: `docs/M16_AUDIT_360_FLOW_HUNI.md §7`. |
 
 ---
 
@@ -87,10 +88,11 @@
 
 ## ANTRIAN EKSEKUSI AKTIF
 
-> **Fase A** blocked owner (infrastruktur server/domain/env). **Fase B–AJ** selesai.
+> **Fase A** blocked owner (infrastruktur server/domain/env). **Fase B–AM** selesai.
 >
 > **Sisa aktif:**
-> 0. **Fase AM — Redundansi UI/UX (Admin + Owner + Publik)** — 12 task (AM-01..AM-12): unifikasi WA URL builder, hapus duplikasi navigasi admin+owner, RoomCard→FacilityList, fix RoomComparePanel spec detection. Detail: `docs/M14_REDUNDANSI_UI_UX.md`.
+> 0. **Fase M16 — Audit 360 Flow Huni** — ✅ **SELESAI** — 7 temuan: P2-01/02/04 fixed, P2-03/05/06/07 diverifikasi valid. Detail: `docs/M16_AUDIT_360_FLOW_HUNI.md §7`. Build FE ✅ BE ✅
+> 0. **Fase AM — Redundansi UI/UX + Audit (Admin + Owner + Publik)** — 7/16 (44%). 5 task lama tersisa: AM-01 (WA URL), AM-02 (RoleWorkspaceTabs), AM-04 (sembunyikan tabs), AM-05 (Pengumuman sidebar), AM-07 (RoomComparePanel spec). 4 task baru dari audit: AM-13 (CSS Modules), AM-14 (useForm wrapper), AM-15 (Storybook), AM-16 (E2E smoke). Detail: `docs/M14_REDUNDANSI_UI_UX.md`.
 > 0. **M31** — ✅ **SELESAI** — AiDraft queue diverifikasi — DeepSeek test-connection PASS via .env API key. Fase 4 = 35/35 100%.
 > 0. **OC-07 (L22)** — ✅ **SELESAI** — Staff dashboard halaman khusus — backend endpoint aggregate `GET /staff/dashboard/aggregate` + perkuat DashboardStaff.tsx (3 query digabung jadi 1). Build backend ✅ frontend ✅
 > 0. **OC-05 (M29)** — ✅ **SELESAI** — ExternalReview CRUD audit — model Prisma standalone, read-only via social proof publik, tanpa CRUD/admin UI. Laporan: `docs/archieve/audit_reasonix/M29_AUDIT_EXTERNAL_REVIEW.md`
@@ -614,6 +616,66 @@
 | [x] AK-03 | **Input angka tampil ribuan `xxx.xxx.xxx` + fix bug nol-depan** ("0 tak bisa dihapus → 02000000"): perkuat `CurrencyInput` (focus-guard sync + strip nol depan + prop size/isInvalid/dll) lalu sapu form uang/angka besar — 12 file: modal bayar/renew/checkout/invoice, wizard check-in (sewa+deposit), detail invoice, aset, saldo awal, cash account, loyalty, settings owner (9 field) | ✅ build FE lulus | `CurrencyInput.tsx` + 12 file form |
 
 **Catatan cakupan AK-03:** `type="number"` yang tersisa = sumbu chart recharts, filter tahun/bulan, qty kecil ber-state string, dan meteran desimal (`step 0.001`) — sengaja tidak diubah (tidak kena bug & tak butuh pemisah ribuan). Form CRUD generik (`ResourceFormModal` — kamar/expenses/layanan) sudah memakai `CurrencyInput` sejak lama dan ikut terkuat.
+
+---
+
+### Fase M17 — Perbaikan Temuan Audit 360° P3-P8 ✅ SELESAI (2026-07-09)
+
+> **Sumber:** `docs/M17_AUDIT_360_P3_P8.md` — 1 CRITICAL, 1 MEDIUM, 4 LOW.
+> **Eksekutor:** Reasonix Code (DeepSeek V4 Pro)
+
+| ID | Temuan | Severitas | Status | Detail |
+|----|--------|-----------|--------|--------|
+| P3-01 | Refresh token + httpOnly cookie | 🔴 CRITICAL | ✅ FIXED | 🧬 Model `RefreshToken` di schema; backend `/auth/refresh` + `/auth/logout`; frontend interceptor auto-refresh 401 + logout revoke. Token access 15 menit, refresh 7 hari (httpOnly cookie, XSS-safe). |
+| P7-01 | CTA booking tidak reusable | 🟠 MEDIUM | ✅ FIXED | BookingCtaButton komponen shared — dipakai di RoomCard + RoomPreviewCard. 1 file baru + 2 file update. |
+| P8-01 | Verifikasi FK index | 🟠 MEDIUM | ✅ VERIFIED | 215 `@@index` di schema; semua FK utama terindeks. Query DB live untuk konfirmasi. |
+| P8-02 | Skeleton dimensi hardcoded | 🔵 LOW | ✅ DOCUMENTED | Atom `SkeletonBlock` fleksibel via props; komposit pakai nilai tetap = pola normal. |
+| P8-03 | Chart empty state | 🔵 LOW | ✅ FIXED | Guard `points.length === 0` di Bar + Table mode SmartChartPanel + HorizontalBarChart. |
+| P3-02 | Rate limit in-memory | 🔵 LOW | ✅ DOCUMENTED | Single-instance safe; perlu Redis jika multi-instance. |
+| P8-04 | No 404 page | 🔵 LOW | ✅ PRE-EXISTING | Resolved Fase L. |
+| P8-05 | No toast feedback | 🔵 LOW | ✅ PRE-EXISTING | Resolved Fase F + M. |
+
+**File berubah:**
+- 🧬 `backend/prisma/schema.prisma` — model RefreshToken + relasi ke User
+- `backend/src/auth/auth.service.ts` — login + refresh + revoke methods
+- `backend/src/auth/auth.controller.ts` — endpoint refresh/logout + cookie helpers
+- `backend/src/main.ts` — rate limit refresh/logout
+- `frontend/src/api/client.ts` — 401 interceptor auto-refresh + refresh queue
+- `frontend/src/context/AuthContext.tsx` — logout revoke
+- `frontend/src/components/rooms/BookingCtaButton.tsx` — baru
+- `frontend/src/components/rooms/RoomCard.tsx` — ganti CTA dengan BookingCtaButton
+- `frontend/src/pages/public/publicGuestShared.tsx` — ganti WA CTA dengan BookingCtaButton
+- `frontend/src/components/charts/SmartChartPanel.tsx` — empty state guard bar+table
+- `frontend/src/components/charts/HorizontalBarChart.tsx` — empty state guard
+- `docs/M17_AUDIT_360_P3_P8.md` — status eksekusi
+
+**Gate:** `npx tsc --noEmit` backend ✅ (1 pre-existing error auto-ops) · `npm run build` FE ✅ · Schema siap `db push` saat env hidup.
+
+### Fase M16 — Perbaikan Temuan Audit 360° Flow Huni ✅ SELESAI (2026-07-06)
+
+> **Sumber:** `docs/M16_AUDIT_360_FLOW_HUNI.md` — 7 temuan (2 HIGH, 4 MEDIUM, 1 LOW).
+> **Eksekutor:** Reasonix Code (DeepSeek V4 Pro)
+
+| ID | Temuan | Severitas | Status | Detail |
+|----|--------|-----------|--------|--------|
+| P2-01 | BookingSource hardcode `WEBSITE` di portal tenant | 🔴 HIGH | ✅ FIXED | Tambah `PORTAL` ke enum LeadSource (🧬) + ganti `tenant-bookings.service.ts:150` → `LeadSource.PORTAL` |
+| P2-02 | Tidak ada guard checkout ≤ plannedCheckOutDate | 🔴 HIGH | ✅ FIXED | Guard di `checkout-requests.service.ts:createRequest` — tolak jika melebihi kontrak |
+| P2-03 | `LeadSource.WEBSITE` untuk public booking | 🟠 MEDIUM | ✅ VALID | Publik = website sudah benar; `leadSourceDetail` opsional untuk enhancement nanti |
+| P2-04 | `approveRequest` — updateMany tanpa lock stay | 🟠 MEDIUM | ✅ FIXED | Tambah `FOR UPDATE` lock pada Stay sebelum updateMany |
+| P2-05 | Damage charge invoice setelah COMPLETED | 🟠 MEDIUM | ✅ VALID | Desain intentional — tidak blokir checkout, auto-settle via processDeposit |
+| P2-06 | Deposit cover meter guard | 🟠 MEDIUM | ✅ VALID | Guard F1-8 defense-in-depth |
+| P2-07 | Link hardcode `/stays?status=BOOKINGS` | 🔵 LOW | ✅ VALID | Route masih valid di StaysPage.tsx |
+
+**File berubah:**
+- 🧬 `backend/prisma/schema.prisma` — PORTAL added to LeadSource enum (db push)
+- `backend/src/common/enums/app.enums.ts` — PORTAL added
+- `backend/src/modules/tenant-bookings/tenant-bookings.service.ts` — WEBSITE → PORTAL
+- `backend/src/modules/checkout-requests/checkout-requests.service.ts` — guard P2-02 + FOR UPDATE P2-04
+- `frontend/src/pages/stays/check-in-wizard/constants.ts` — bookingSourceOptions + PORTAL
+- `frontend/src/pages/stays/check-in-wizard/checkInWizardUtils.tsx` — bookingSourceOptions + PORTAL
+- `docs/M16_AUDIT_360_FLOW_HUNI.md` — Section 7 status eksekusi
+
+**Gate:** `npx -p typescript tsc -p backend/tsconfig.json --noEmit` ✅ · `npm run build` FE ✅ · `npx prisma db push` ✅ · `npx prisma generate` ✅
 
 ---
 

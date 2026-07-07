@@ -5,10 +5,9 @@ import { forgotPassword } from '../../api/auth';
 import Kost48LogoMark from '../../components/common/Kost48LogoMark';
 import Kost48DecorGallery from '../../components/common/Kost48DecorGallery';
 import { officialKost48Highlights, officialKost48Location } from '../../data/officialKost48Content';
+import { buildAdminWaUrl } from '../../utils/whatsapp';
 
 const COOLDOWN_SECONDS = 60;
-// D-25: dari env var, fallback ke nomor default → owner bisa ganti via Settings
-const ADMIN_WA = (import.meta.env.VITE_PUBLIC_ADMIN_WHATSAPP ?? '6285648887628').replace(/\D/g, '');
 
 type ResetMode = 'email' | 'phone';
 
@@ -25,7 +24,7 @@ function buildWaUrl(phone?: string) {
   const msg = phone
     ? `Halo admin, saya lupa password akun Kost48. Nomor HP saya: ${phone.trim()}. Mohon bantu reset password saya.`
     : 'Halo admin, saya lupa password akun Kost48. Mohon bantu reset password saya.';
-  return `https://wa.me/${ADMIN_WA}?text=${encodeURIComponent(msg)}`;
+  return buildAdminWaUrl(msg);
 }
 
 function WaIcon() {

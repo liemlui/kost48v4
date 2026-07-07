@@ -9,10 +9,16 @@
  *
  * Idempoten: bila email OWNER sudah ada, tidak menimpa (skip). Aman dijalankan ulang.
  */
-require('dotenv').config({ path: require('path').join(__dirname, '../.env') });
+try {
+  require('dotenv').config({ path: require('path').join(__dirname, '../.env') });
+} catch { /* dotenv opsional — env bisa dari shell/cPanel */ }
 const bcrypt = require('bcryptjs');
 const { PrismaPg } = require('@prisma/adapter-pg');
-const { PrismaClient } = require('../src/generated/prisma');
+// Paket deploy ramping tidak membawa src/ — pakai client hasil build (dist/) lebih dulu.
+const { PrismaClient } = (() => {
+  try { return require('../dist/generated/prisma'); }
+  catch { return require('../src/generated/prisma'); }
+})();
 
 const email = (process.env.OWNER_EMAIL || '').trim();
 const password = process.env.OWNER_PASSWORD || '';

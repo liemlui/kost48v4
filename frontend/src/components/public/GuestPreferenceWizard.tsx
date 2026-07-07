@@ -187,12 +187,6 @@ export default function GuestPreferenceWizard({ rooms, roomsLoading = false, onD
     });
   }, [answers, onDone]);
 
-  // ── Build WA message untuk booking via WA ─────────────────────────────────
-  const waBookingMessage = useCallback((room: PublicRoom) => {
-    const roomCode = room.code || `Kamar #${room.id}`;
-    return `Halo Admin KOST48, saya tertarik dengan ${roomCode}. Saya sudah cek preferensi di wizard dan cocok! Kira-kira kapan bisa mulai huni?`;
-  }, []);
-
   // ── Result screen ─────────────────────────────────────────────────────────
   if (step >= totalSteps) {
     // Tentukan card yang mau ditampilkan (max 6)
@@ -263,8 +257,6 @@ export default function GuestPreferenceWizard({ rooms, roomsLoading = false, onD
                   <RoomCard
                     room={r}
                     showCompare={false}
-                    bookViaWA
-                    waMessage={waBookingMessage(r)}
                   />
                 </div>
               ))}

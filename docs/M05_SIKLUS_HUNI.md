@@ -181,3 +181,22 @@ Gamifikasi (poin perpanjangan → reward) memperkuat retensi renewal — lihat d
 - **Invarian:** kamar tak pernah AVAILABLE tanpa tiket inspeksi ditutup (KECUALI lubang B-08 — diperbaiki F2-6); deposit diproses tepat 1× (blocking); Σ ledger = paid − refund − deduction; selama grace renewal sah, tenant lama tak kena overstay enforcement.
 - **UAT:** (1) checkout normal → inspeksi → settlement → ledger cocok (mismatch 0); (2) overstay penuh H-3→EVICT→forced H+1→kamar kotor-bisa-dipesan→settlement; (3) overstay nunggak → tidak auto-checkout + alert admin; (4) cancel stay promoted → kamar MAINTENANCE + tiket muncul (pasca F2-6); (5) paksa-checkout nunggak deposit kurang → sisa jadi piutang (pasca F3-16); (6) barang abandoned 30 hari (pasca F3-15).
 - **Lintas-dossier:** jurnal deposit/forfeit → dossier 13; tiket inspeksi & tutup-oleh-staf → dossier 15; notif overstay → dossier 16.
+
+---
+
+## Audit 360° Flow Huni (Jul 2026)
+
+**Status:** 🟢 93% SEHAT — 2 HIGH (✅ FIXED), 4 MEDIUM, 1 LOW. Detail → `docs/archieve/M16_AUDIT_360_FLOW_HUNI.md`
+
+### Temuan HIGH — ✅ FIXED
+
+| ID | Temuan | Fix |
+|----|--------|-----|
+| P2-01 | BookingSource hardcode `WEBSITE` di portal tenant | Tambah `PORTAL` ke enum LeadSource (🧬) + ganti kode |
+| P2-02 | Tidak ada guard checkout ≤ `plannedCheckOutDate` di `createRequest` | Tolak jika `requestedDate > plannedCheckOutDate` |
+
+### Temuan MEDIUM
+P2-03 `WEBSITE` untuk publik ✅ VALID · P2-04 lock stay ✅ FIXED · P2-05 damage charge ✅ VALID · P2-06 deposit vs meter ✅ VALID. LOW: P2-07 linkTo masih valid.
+
+### 10 Nota Positif
+1. Fase V compliance penuh · 2. FOR UPDATE di semua titik rawan · 3. Cross-block checkout vs renew · 4. Dedupe tiket CHECKOUT_INSPECTION · 5. Room readiness gate · 6. Rent-loyalty (D-16) · 7. Deposit = Room.defaultDepositRupiah · 8. Gate dua-nominal-sah · 9. Notifikasi lengkap · 10. Raw SQL INSERT

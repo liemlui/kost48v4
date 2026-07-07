@@ -149,9 +149,6 @@ export default function StayHistoryTimeline({
                 <strong>Masuk kos</strong>
                 <span>{fmt(stay.checkInDate)}</span>
               </div>
-              <p>
-                Deposit jaminan <CurrencyDisplay amount={depositAmt} /> ({depositLabel(depositPaid, depositAmt, stay.depositStatus)}).
-              </p>
             </div>
           </div>
 
@@ -248,7 +245,7 @@ export default function StayHistoryTimeline({
           <div>
             <span>Dana titipan deposit</span>
             <strong><CurrencyDisplay amount={depositPaid} showZero /> / <CurrencyDisplay amount={depositAmt} /></strong>
-            <small>Diproses saat keluar final setelah semua tagihan selesai.</small>
+            <small>Diproses setelah keluar final.</small>
           </div>
           <div
             className="stay-history-deposit-meter"

@@ -48,7 +48,8 @@ export class MaintenanceSweepService {
    */
   async runAcCleaningSchedule(options: { actorUserId?: number | null; source?: string; now?: Date } = {}) {
     const source = options.source ?? 'AUTO_OPS_AC_CLEANING';
-    const enabled = String(process.env.AC_CLEANING_ENABLED ?? 'true').toLowerCase() !== 'false';
+    const db = await this.prisma.operationalSetting.findUnique({ where: { id: 1 }, select: { acCleaningEnabled: true } });
+    const enabled = db?.acCleaningEnabled ?? (String(process.env.AC_CLEANING_ENABLED ?? 'true').toLowerCase() !== 'false');
     if (!enabled) return { skipped: true, skippedReason: 'AC_CLEANING_DISABLED', source };
     const now = options.now ?? new Date();
     // Ambang kWh: prioritas OperationalSetting (owner-settable dari UI) → ENV → default.

@@ -116,6 +116,27 @@ Tabel flow + method-anchor: `M03_FLOW_KONTRAK.md` (kontrak/uang). Job otomatis �
 |---------|------|----------------|
 | `dateOnlyWib` / `todayWib` / `isoDate` | `backend/src/common/utils/date-only.ts` | Normalisasi tanggal WIB (UTC+7) — pakai di semua modul akuntansi (unifikasi dari 5 implementasi) |
 
+## Frontend — Redundansi UI/UX (Fase AM)
+
+✅ **16/16 task selesai** — Detail → `docs/archieve/M14_REDUNDANSI_UI_UX.md`
+
+| Task | Dampak |
+|------|--------|
+| AM-01 Unifikasi WhatsApp URL | 13 instance → 1 `utils/whatsapp.ts` |
+| AM-02 Hapus RoleWorkspaceTabs | Duplikat dashboard tabs di AppLayout |
+| AM-05 Tambah Pengumuman sidebar | Ikon 📣 di nav admin |
+| AM-06/08/09 RoomCard reusable | FacilityList, RoomPriceTable, RoomSpecChips (3 komponen baru) |
+| AM-07 Fix RoomComparePanel | Regex inline → shared utility |
+| AM-11/12 Hapus tombol duplikat | Owner dashboard + FinancialRatiosPage |
+| AM-14 `useGenericForm` hook | Wrapper form non-wizard |
+| AM-15 Storybook pilot | 3 story (StatusBadge, EmptyState, StatCard) |
+| AM-16 E2E smoke test | 3 flow kritis (public, login, dashboard) |
+
+**Audit skor frontend:** 7/8 kategori ⭐⭐⭐⭐⭐, 1/8 ⭐⭐⭐⭐ (styling 99% CSS global)
+
+## Cross-Dimension (P8) — Audit 360°
+✅ 215 `@@index` di 57 model — semua FK utama terindeks · ✅ Global JWT default-deny + DTO validation + pagination + error handling + PWA · ✅ Code splitting + skeleton + empty state chart (✅ P8-03) + 404 (✅ Fase L) + toast (✅ Fase F+M)
+
 ## Dokumen audit terbaru
 - **Audit Fable (2-3 Jul 2026):** `docs/archieve/audit_fable/00_INDEX.md` — 19 checklist C01-C19
 - **Audit Reasonix Code (7 Jul 2026):** `docs/archieve/audit_reasonix/RINGKASAN_EKSEKUTIF.md` — 82 temuan baru

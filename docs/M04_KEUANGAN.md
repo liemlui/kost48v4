@@ -359,3 +359,33 @@ Lokasi: `accounting-reports.service.ts` `financialRatios()` (grep `async financi
 - **Batas akuntansi:** semua laporan, readiness, analytics, finance, dan posting jurnal hanya memakai expense `CONFIRMED`. Konfirmasi draft dan posting jurnal berjalan dalam satu transaksi.
 - **AutoOps:** setiap bulan membuat maksimal enam draft biaya rutin dari nilai confirmed terbaru, lalu menjalankan depresiasi bulan sebelumnya sebelum auto-close. Kedua proses dapat dipicu manual oleh OWNER/ADMIN dan aman dijalankan ulang.
 - **UAT:** transaksi rollback membuat tepat enam draft tanpa residu data; depresiasi pada 14 Juni 2026 menargetkan Mei 2026 dan safe-skip `NO_ELIGIBLE_ASSETS`. Migration Prisma deployed; backend build dan 18/18 unit test lulus.
+
+---
+
+## Audit 360° Flow Uang (Jul 2026)
+
+**Status:** 🟢 90% SEHAT — 3 HIGH, 4 MEDIUM, 2 LOW. Detail → `docs/archieve/M15_AUDIT_360_FLOW_UANG.md`
+
+### 8 Invarian Keuangan — Status Terkini
+
+| # | Invarian | Status |
+|---|----------|--------|
+| 1 | Σ debit = Σ kredit | ✅ DB-enforced |
+| 2 | Idempotent per (sourceType, sourceId) | ✅ unique constraint |
+| 3 | Deposit = LIABILITY (2000), tidak pernah debit | ⚠️ Gate ada, tapi receipt best-effort |
+| 4 | Kas = prefix 10, bukan 11 | ✅ F1-3 fix |
+| 5 | No-partial menyeluruh | ✅ Gate di create + approve |
+| 6 | Trial Balance seimbang | ⚠️ Bisa tidak seimbang jika P1-01 terjadi |
+| 7 | Deposit mismatch = 0 | ⚠️ Bisa mismatch jika P1-02 terjadi |
+| 8 | Revenue ≠ DRAFT | ✅ F1-7 exclude DRAFT |
+
+### Temuan HIGH — P0 sebelum go-live
+
+| ID | Temuan | Rekomendasi |
+|----|--------|-------------|
+| **P1-01** | Journal posting **best-effort** (try/catch) di `approveSubmission` — payment approve tp jurnal gagal | Jadikan **blocking** (throw, rollback tx approval) |
+| **P1-02** | Deposit ledger **best-effort** (logger.warn) — deposit diterima tp tak tercatat | Jadikan **blocking** |
+| **P1-03** | Accounting posting di tx **terpisah** dari business tx — window inconsistency | Unify tx / minimal advisory lock |
+
+### Temuan MEDIUM
+P1-04 deposit ledger sourceId dedupe · P1-05 EXPIRED→REJECTED · P1-06 reversal partial gagal · P1-07 pre-check di luar tx. LOW: P1-08 `paidAt` fallback · P1-09 note not verified.

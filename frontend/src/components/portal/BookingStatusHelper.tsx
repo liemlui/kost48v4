@@ -4,6 +4,7 @@ import type { TenantBooking } from '../../types';
 import { getBookingExpiryMeta } from '../../utils/bookingExpiry';
 import { formatDateTimeWib } from '../../utils/dateTime';
 import { toTenantFriendlyError } from '../../utils/tenantErrorCopy';
+import { buildAdminWaUrl } from '../../utils/whatsapp';
 
 export function ExpiryBadge({ expiresAt }: { expiresAt?: string | null }) {
   const expiryMeta = getBookingExpiryMeta(expiresAt);
@@ -140,5 +141,5 @@ export function buildWhatsAppFollowUpUrl(booking: TenantBooking): string | null 
   const roomCode = booking.room?.code ?? `Kamar #${booking.roomId}`;
   const message = `Halo Admin KOST48, saya ingin follow up pemesanan kamar ${roomCode}. Mohon info statusnya. Terima kasih.`;
 
-  return `https://wa.me/${waNumber}?text=${encodeURIComponent(message)}`;
+  return buildAdminWaUrl(message);
 }

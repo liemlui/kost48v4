@@ -24,6 +24,11 @@ import { ResetPasswordDto } from './dto/reset-password.dto';
 export class AuthService {
   private readonly logger = new Logger(AuthService.name);
 
+  /** Refresh token expiry: 7 hari */
+  private readonly REFRESH_TOKEN_DAYS = 7;
+  /** Access token expiry: 15 menit (dalam detik) */
+  private readonly ACCESS_TOKEN_EXPIRY_SEC = 900;
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly jwtService: JwtService,
@@ -57,16 +62,23 @@ export class AuthService {
       data: { lastLoginAt: new Date() },
     });
 
-    const accessToken = await this.jwtService.signAsync({
-      sub: user.id,
-      email: user.email,
-      role: user.role,
-      tenantId: user.tenantId,
-      pwdAt: user.passwordChangedAt?.getTime() ?? 0,
-    });
+    const accessToken = await this.jwtService.signAsync(
+      {
+        sub: user.id,
+        email: user.email,
+        role: user.role,
+        tenantId: user.tenantId,
+        pwdAt: user.passwordChangedAt?.getTime() ?? 0,
+      },
+      { expiresIn: this.ACCESS_TOKEN_EXPIRY_SEC },
+    );
+
+    // P3-01: Generate refresh token — SHA-256 hash, simpan di DB
+    const { refreshToken: refreshTokenRaw } = await this.createRefreshToken(user.id);
 
     return {
       accessToken,
+      refreshToken: refreshTokenRaw,
       user: {
         id: user.id,
         fullName: user.fullName,
@@ -76,6 +88,110 @@ export class AuthService {
         isActive: user.isActive,
       },
     };
+  }
+
+  /**
+   * P3-01: Validasi refresh token — jika valid, rotasi (hapus lama + buat baru).
+   * @param rawToken — raw refresh token dari cookie/body
+   * @returns { accessToken, refreshToken } — access token baru + refresh token baru (rotated)
+   */
+  async refresh(rawToken: string) {
+    if (!rawToken) {
+      throw new UnauthorizedException('Refresh token tidak ditemukan');
+    }
+
+    const tokenHash = createHash('sha256').update(rawToken).digest('hex');
+
+    const stored = await this.prisma.refreshToken.findUnique({
+      where: { token: tokenHash },
+    });
+
+    if (!stored) {
+      throw new UnauthorizedException('Refresh token tidak valid');
+    }
+
+    if (stored.revokedAt) {
+      throw new UnauthorizedException('Refresh token sudah dicabut');
+    }
+
+    if (new Date(stored.expiresAt).getTime() < Date.now()) {
+      // Hapus token kedaluwarsa
+      await this.prisma.refreshToken.delete({ where: { id: stored.id } }).catch(() => {});
+      throw new UnauthorizedException('Refresh token sudah kedaluwarsa, silakan login ulang');
+    }
+
+    // Rotasi: hapus token lama, buat yang baru
+    await this.prisma.refreshToken.delete({ where: { id: stored.id } }).catch(() => {});
+
+    const user = await this.prisma.user.findUnique({
+      where: { id: stored.userId, isActive: true },
+    });
+
+    if (!user) {
+      throw new UnauthorizedException('User tidak ditemukan atau tidak aktif');
+    }
+
+    const accessToken = await this.jwtService.signAsync(
+      {
+        sub: user.id,
+        email: user.email,
+        role: user.role,
+        tenantId: user.tenantId,
+        pwdAt: user.passwordChangedAt?.getTime() ?? 0,
+      },
+      { expiresIn: this.ACCESS_TOKEN_EXPIRY_SEC },
+    );
+
+    // Buat refresh token baru (rotasi)
+    const { refreshToken: newRefreshToken } = await this.createRefreshToken(user.id);
+
+    return {
+      accessToken,
+      refreshToken: newRefreshToken,
+    };
+  }
+
+  /**
+   * P3-01: Revoke refresh token (logout). Mencabut semua refresh token user.
+   * Juga mencabut token spesifik jika rawToken diberikan (single-session logout).
+   */
+  async revokeRefreshTokens(userId: number, rawToken?: string) {
+    if (rawToken) {
+      const tokenHash = createHash('sha256').update(rawToken).digest('hex');
+      const stored = await this.prisma.refreshToken.findUnique({
+        where: { token: tokenHash, userId },
+      });
+      if (stored && !stored.revokedAt) {
+        await this.prisma.refreshToken.update({
+          where: { id: stored.id },
+          data: { revokedAt: new Date() },
+        });
+      }
+    } else {
+      // Revoke ALL refresh tokens for this user (global logout)
+      await this.prisma.refreshToken.updateMany({
+        where: { userId, revokedAt: null },
+        data: { revokedAt: new Date() },
+      });
+    }
+  }
+
+  /**
+   * P3-01: Helper — generate dan simpan refresh token di DB.
+   */
+  private async createRefreshToken(userId: number) {
+    const rawToken = randomBytes(32).toString('hex');
+    const tokenHash = createHash('sha256').update(rawToken).digest('hex');
+
+    await this.prisma.refreshToken.create({
+      data: {
+        userId,
+        token: tokenHash,
+        expiresAt: new Date(Date.now() + this.REFRESH_TOKEN_DAYS * 24 * 60 * 60 * 1000),
+      },
+    });
+
+    return { refreshToken: rawToken };
   }
 
   async me(userId: number) {
@@ -358,9 +474,15 @@ export class AuthService {
   }
 
   private async sendResetEmail(email: string, rawToken: string): Promise<void> {
-    const apiKey = this.configService.get<string>('BREVO_API_KEY');
-    const fromEmail = this.configService.get<string>('MAIL_FROM_EMAIL', 'no-reply@kost48surabaya.com');
-    const fromName = this.configService.get<string>('MAIL_FROM_NAME', 'Kost48 Surabaya');
+    // Baca Brevo config dari OperationalSetting (DB), fallback ke env
+    const opSetting = await this.prisma.operationalSetting.findUnique({
+      where: { id: 1 },
+      select: { brevoApiKey: true, mailFromEmail: true, mailFromName: true },
+    });
+    const apiKey = opSetting?.brevoApiKey?.trim() || this.configService.get<string>('BREVO_API_KEY');
+    if (!apiKey) { this.logger.warn('Brevo API key tidak dikonfigurasi — email reset password tidak dikirim'); return; }
+    const fromEmail = opSetting?.mailFromEmail?.trim() || this.configService.get<string>('MAIL_FROM_EMAIL', 'no-reply@kost48surabaya.com');
+    const fromName = opSetting?.mailFromName?.trim() || this.configService.get<string>('MAIL_FROM_NAME', 'Kost48 Surabaya');
     const frontendUrl = this.configService.get<string>('FRONTEND_URL', 'http://localhost:5173');
 
     const resetLink = `${frontendUrl}/reset-password?token=${encodeURIComponent(rawToken)}`;

@@ -1,5 +1,8 @@
 // FILE: ProfilePage.tsx — halaman profil + edit data diri + foto KTP
 import { useCallback, useRef, useState } from 'react';
+import type { KtpOcrResult } from '../../utils/ktpOcr';
+import { parseKtpText } from '../../utils/ktpOcr';
+import { preprocessImage } from '../../utils/ocrPreprocess';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Alert, Button, Card, Col, Form, Row, Spinner } from 'react-bootstrap';
 import PasswordInput from '../../components/common/PasswordInput';
@@ -71,46 +74,6 @@ function maskNik(nik: string): string {
   return '****';
 }
 
-// ── KTP OCR parser (Indonesian KTP format) ───────────────────────────────────
-
-interface OcrResult {
-  nik?: string;
-  gender?: string;
-  birthDate?: string;
-  originCity?: string;
-}
-
-function parseKtpText(text: string): OcrResult {
-  const lines = text.split('\n').map((l) => l.trim()).filter(Boolean);
-  const joined = lines.join('\n');
-  const result: OcrResult = {};
-
-  // NIK: 16 consecutive digits
-  const nikMatch = joined.match(/\b(\d{16})\b/);
-  if (nikMatch) result.nik = nikMatch[1];
-
-  // Jenis Kelamin
-  if (/LAKI[\s-]*LAKI/i.test(joined)) result.gender = 'MALE';
-  else if (/PEREMPUAN/i.test(joined)) result.gender = 'FEMALE';
-
-  // Tempat/Tgl Lahir — format: KOTA, DD-MM-YYYY or DD/MM/YYYY
-  const tglMatch = joined.match(/(?:TEMPAT[^:]*:|TGL LAHIR[^:]*:|LAHIR[^:]*:)?\s*([A-Z\s]+),\s*(\d{2})[-/](\d{2})[-/](\d{4})/i);
-  if (tglMatch) {
-    const [, city, dd, mm, yyyy] = tglMatch;
-    result.originCity = city.trim().replace(/\s+/g, ' ');
-    result.birthDate = `${yyyy}-${mm}-${dd}`;
-  } else {
-    // Fallback: just date without city
-    const dateMatch = joined.match(/(\d{2})[-/](\d{2})[-/](\d{4})/);
-    if (dateMatch) {
-      const [, dd, mm, yyyy] = dateMatch;
-      result.birthDate = `${yyyy}-${mm}-${dd}`;
-    }
-  }
-
-  return result;
-}
-
 // ── KTP OCR section component ─────────────────────────────────────────────────
 
 type OcrState = 'idle' | 'selected' | 'processing' | 'done' | 'error';
@@ -122,8 +85,8 @@ interface KtpOcrSectionProps {
 function KtpOcrSection({ onApply }: KtpOcrSectionProps) {
   const [ocrState, setOcrState] = useState<OcrState>('idle');
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  const [extracted, setExtracted] = useState<OcrResult | null>(null);
-  const [editedExtracted, setEditedExtracted] = useState<OcrResult>({});
+  const [extracted, setExtracted] = useState<KtpOcrResult | null>(null);
+  const [editedExtracted, setEditedExtracted] = useState<KtpOcrResult>({});
   const [ocrError, setOcrError] = useState('');
   const fileRef = useRef<HTMLInputElement>(null);
   const imgRef = useRef<HTMLImageElement>(null);
@@ -147,11 +110,13 @@ function KtpOcrSection({ onApply }: KtpOcrSectionProps) {
     setOcrState('processing');
     setOcrError('');
     try {
+      // Preprocessing: perbaiki kontras & ketajaman sebelum OCR
+      const processed = await preprocessImage(fileRef.current.files[0]);
       const { createWorker } = await import('tesseract.js');
       const worker = await createWorker('ind+eng', 1, {
         logger: () => {},
       });
-      const { data: { text } } = await worker.recognize(fileRef.current.files[0]);
+      const { data: { text } } = await worker.recognize(processed);
       await worker.terminate();
       const parsed = parseKtpText(text);
       setExtracted(parsed);
@@ -229,7 +194,7 @@ function KtpOcrSection({ onApply }: KtpOcrSectionProps) {
                   size="sm"
                   className="profile-field-control"
                   value={editedExtracted.gender ?? ''}
-                  onChange={(e) => setEditedExtracted((p) => ({ ...p, gender: e.target.value || undefined }))}
+                  onChange={(e) => setEditedExtracted((p) => ({ ...p, gender: (e.target.value as KtpOcrResult['gender']) || undefined }))}
                 >
                   <option value="">Pilih...</option>
                   <option value="MALE">Laki-laki</option>

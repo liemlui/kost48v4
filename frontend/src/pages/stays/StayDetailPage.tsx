@@ -253,7 +253,7 @@ export default function StayDetailPage() {
       <PageHeader
         eyebrow="Detail Masa Sewa"
         title={stay.tenant?.fullName ?? `Masa Sewa #${stay.id}`}
-        description={`Kamar ${stay.room?.code ?? stay.roomId} · Status ${stay.status} · Deposit ${stay.depositStatus ?? 'HELD'}`}
+        description={`Kamar ${stay.room?.code ?? stay.roomId} · Status ${stay.status}`}
       />
 
       {stay.tenant?.id ? (
@@ -285,7 +285,6 @@ export default function StayDetailPage() {
           <div className="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-3">
             <div className="d-flex flex-wrap gap-2 align-items-center">
               <StatusBadge status={stay.status} />
-              <StatusBadge status="SECONDARY" customLabel={depositLabel} />
               {overdue ? <StatusBadge status="OVERDUE" /> : null}
             </div>
 
@@ -322,7 +321,10 @@ export default function StayDetailPage() {
               <div className="metric-tile-value">{formatRupiah(stay.agreedRentAmountRupiah ?? 0)}</div>
             </div>
             <div className="metric-tile">
-              <div className="metric-tile-label">Deposit</div>
+              <div className="metric-tile-label">
+                Deposit
+                <span className="badge bg-secondary ms-2" style={{fontSize:'0.7rem', verticalAlign:'middle'}}>{depositLabel}</span>
+              </div>
               <div className="metric-tile-value">{formatRupiah(stay.depositAmountRupiah ?? 0)}</div>
             </div>
             <div className="metric-tile">

@@ -945,3 +945,14 @@ try { Invoke-RestMethod -Method Post -Uri "http://localhost:3000/api/inventory-m
 - Blueprint: `docs/00_BLUEPRINT.md`
 
 **Sumber historis lengkap:** `docs/archieve/01_CONTRACTS.md` (2,489 baris, V5.9.8-A)
+
+---
+
+## Audit 360° P3 Auth & Security (Jul 2026)
+
+**Status:** 🟢 Solid (1 🔴 CRITICAL ✅ FIXED). Detail → `docs/archieve/M17_AUDIT_360_P3_P8.md`
+
+✅ Enumeration-safe login & forgotPassword · ✅ Suspend memutus sesi via JWT `pwdAt` claim · ✅ PasswordResetToken SHA-256 hash, one-time · ✅ bcrypt · ✅ Global default-deny JWT (APP_GUARD) · ✅ Role guard (`@Roles(OWNER, ADMIN)`) · ✅ OWNER-only: periode, user, kamar, harga, deposit · ✅ Staff restriction inventory official (`@Roles`) · ✅ Rate limit (300/menit global, 10/15menit auth)
+
+🔴 ~~P3-01: JWT 24 jam tanpa refresh token — XSS hijack risk~~ → ✅ **FIXED** 7 Jul 2026: model RefreshToken, httpOnly cookie, `/auth/refresh`, auto-refresh interceptor (🧬)
+🔵 P3-02: rate limit in-memory (✅ aman di single-instance cPanel; perlu Redis jika multi-instance)

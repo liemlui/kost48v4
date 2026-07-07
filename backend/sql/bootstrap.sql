@@ -300,7 +300,7 @@ $$;
 
 CREATE TRIGGER invoice_payment_no_overpay_trg
 BEFORE INSERT OR UPDATE OF "invoiceId", "amountRupiah" ON "InvoicePayment"
-FOR EACH ROW EXECUTE FUNCTION validate_invoice_payment_not_overpaid();
+FOR EACH ROW EXECUTE PROCEDURE validate_invoice_payment_not_overpaid();
 
 -- =========================================================
 -- InvoiceLine: auto-compute lineAmountRupiah = qty * unitPrice
@@ -318,7 +318,7 @@ $$;
 
 CREATE TRIGGER invoice_line_amount_sync_trg
 BEFORE INSERT OR UPDATE OF qty, "unitPriceRupiah", "lineAmountRupiah" ON "InvoiceLine"
-FOR EACH ROW EXECUTE FUNCTION sync_invoice_line_amount();
+FOR EACH ROW EXECUTE PROCEDURE sync_invoice_line_amount();
 
 -- =========================================================
 -- Invoice: auto-recalculate totalAmountRupiah
@@ -395,11 +395,11 @@ $$;
 
 CREATE TRIGGER invoice_total_manual_guard_trg
 BEFORE UPDATE OF "totalAmountRupiah" ON "Invoice"
-FOR EACH ROW EXECUTE FUNCTION prevent_manual_invoice_total_mutation();
+FOR EACH ROW EXECUTE PROCEDURE prevent_manual_invoice_total_mutation();
 
 CREATE TRIGGER invoice_line_recalc_total_trg
 AFTER INSERT OR UPDATE OR DELETE ON "InvoiceLine"
-FOR EACH ROW EXECUTE FUNCTION trg_recalc_invoice_total();
+FOR EACH ROW EXECUTE PROCEDURE trg_recalc_invoice_total();
 
 -- =========================================================
 -- InvoiceLine: hanya bisa diubah saat invoice DRAFT
@@ -429,7 +429,7 @@ $$;
 
 CREATE TRIGGER invoice_line_draft_only_trg
 BEFORE INSERT OR UPDATE OR DELETE ON "InvoiceLine"
-FOR EACH ROW EXECUTE FUNCTION prevent_non_draft_invoice_line_mutation();
+FOR EACH ROW EXECUTE PROCEDURE prevent_non_draft_invoice_line_mutation();
 
 -- =========================================================
 -- Stay deposit processing guard
@@ -481,7 +481,7 @@ $$;
 
 CREATE TRIGGER stay_deposit_processing_guard_trg
 BEFORE UPDATE ON "Stay"
-FOR EACH ROW EXECUTE FUNCTION guard_stay_deposit_processing();
+FOR EACH ROW EXECUTE PROCEDURE guard_stay_deposit_processing();
 
 -- =========================================================
 -- MeterReading monotonic per room + utility
@@ -527,7 +527,7 @@ $$;
 
 CREATE TRIGGER meter_reading_monotonic_trg
 BEFORE INSERT OR UPDATE ON "MeterReading"
-FOR EACH ROW EXECUTE FUNCTION meter_reading_monotonic();
+FOR EACH ROW EXECUTE PROCEDURE meter_reading_monotonic();
 
 -- =========================================================
 -- InventoryItem.qtyOnHand sync dari InventoryMovement
@@ -627,7 +627,7 @@ $$;
 
 CREATE TRIGGER inventory_movement_sync_qty_trg
 AFTER INSERT OR UPDATE OR DELETE ON "InventoryMovement"
-FOR EACH ROW EXECUTE FUNCTION sync_inventory_qty_from_movement();
+FOR EACH ROW EXECUTE PROCEDURE sync_inventory_qty_from_movement();
 
 -- ============================================================
 -- V4 ADDENDUM CONSOLIDATED

@@ -13,14 +13,7 @@ import GuestBookingForm from './GuestBookingForm';
 import GuestBookingRoomSummary from './GuestBookingRoomSummary';
 import GuestBookingSuccess from './GuestBookingSuccess';
 import { getPublicRoomAvailabilityDisplay } from '../../utils/publicRoomDisplay';
-
-function buildWaAvailabilityUrl(roomCode: string, isChecking = false) {
-  const number = String(import.meta.env.VITE_PUBLIC_ADMIN_WHATSAPP ?? '').replace(/\D/g, '');
-  const message = isChecking
-    ? `Halo Admin KOST48, saya tertarik dengan kamar ${roomCode}. Saya lihat kamar sedang dicek. Boleh tanya estimasi kapan siap ditempati?`
-    : `Halo Admin KOST48, saya tertarik dengan kamar ${roomCode}. Boleh tanya ketersediaan atau estimasi kapan kosong?`;
-  return number ? `https://wa.me/${number}?text=${encodeURIComponent(message)}` : `https://wa.me/?text=${encodeURIComponent(message)}`;
-}
+import { buildAvailabilityWaUrl } from '../../utils/whatsapp';
 
 export default function GuestBookingPage() {
   const { roomId } = useParams();
@@ -141,7 +134,7 @@ export default function GuestBookingPage() {
     const availability = roomAvailability;
     const isChecking = String(room.status ?? '').toUpperCase() === 'MAINTENANCE';
     const roomCode = room.code || `Kamar #${room.id}`;
-    const waUrl = buildWaAvailabilityUrl(roomCode, isChecking);
+    const waUrl = buildAvailabilityWaUrl(roomCode, isChecking);
 
     return (
       <div className="public-page-shell">

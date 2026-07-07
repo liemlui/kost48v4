@@ -8,6 +8,7 @@ import type { InventoryItem } from '../../types';
 import { getInventoryHealth, getInventoryPhysicalIssueLabel, isInventoryPhysicalIssue } from '../../utils/inventoryHealth';
 import StaffInventoryStatusModal from './StaffInventoryStatusModal';
 import SegmentedTabs from '../common/SegmentedTabs';
+import { buildAdminWaUrl } from '../../utils/whatsapp';
 
 type InventoryViewFilter = 'ALL' | 'ATTENTION' | 'OUT' | 'LOW' | 'PHYSICAL' | 'GOOD';
 
@@ -154,7 +155,7 @@ export default function StaffGeneralInventorySection({ embedded = false }: { emb
             <strong className="staff-gudang-empty-title">Belum ada barang yang terdaftar</strong>
             <p className="staff-gudang-empty-desc">Admin perlu menambahkan daftar barang terlebih dahulu. Hubungi admin untuk mendaftarkan barang gudang dan stok area umum.</p>
             <a
-              href={`https://wa.me/${(import.meta.env.VITE_PUBLIC_ADMIN_WHATSAPP ?? '6285648887628').replace(/\D/g, '')}?text=${encodeURIComponent('Halo Admin, tolong tambahkan daftar barang gudang di aplikasi Kost48 ya.')}`}
+              href={buildAdminWaUrl('Halo Admin, tolong tambahkan daftar barang gudang di aplikasi Kost48 ya.')}
               target="_blank"
               rel="noreferrer"
               className="btn btn-outline-success btn-sm staff-gudang-wa-btn"

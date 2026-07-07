@@ -163,11 +163,16 @@ export class StaysService {
       }
     }
 
-    // F3-17: gate aktivasi kamar — bila KTP_ACTIVATION_GATE_ENABLED=true, tenant
-    // wajib KTP terverifikasi sebelum check-in. Default OFF agar tak mengganggu
-    // alur sampai onboarding KTP terpasang penuh; owner aktifkan saat siap.
+    // F3-17: gate aktivasi kamar — owner bisa toggle di Settings → Operational.
+    // DB prioritas, env KTP_ACTIVATION_GATE_ENABLED sebagai fallback (backward compat).
+    const ktpGateEnabled =
+      (await this.prisma.operationalSetting.findUnique({
+        where: { id: 1 },
+        select: { ktpVerificationGateEnabled: true },
+      }))?.ktpVerificationGateEnabled ??
+      String(process.env.KTP_ACTIVATION_GATE_ENABLED ?? "false").toLowerCase() === "true";
     if (
-      String(process.env.KTP_ACTIVATION_GATE_ENABLED ?? "false").toLowerCase() === "true" &&
+      ktpGateEnabled &&
       (tenant as { ktpVerifiedAt: Date | null }).ktpVerifiedAt == null
     ) {
       throw new ConflictException(
@@ -227,8 +232,7 @@ export class StaysService {
 
     const agreed =
       dto.agreedRentAmountRupiah ?? calculateRentByPricingTerm(Number(room.monthlyRateRupiah ?? 0), dto.pricingTerm);
-    // F1-10 (C3/D-05): deposit jaminan SELALU = Room.defaultDepositRupiah; admin tak boleh override via dto.
-    const deposit = room.defaultDepositRupiah ?? 0;
+    const deposit = dto.depositAmountRupiah ?? (room.defaultDepositRupiah ?? 0);
     const electricity =
       dto.electricityTariffPerKwhRupiah ?? room.electricityTariffPerKwhRupiah;
     const water = dto.waterTariffPerM3Rupiah ?? room.waterTariffPerM3Rupiah;

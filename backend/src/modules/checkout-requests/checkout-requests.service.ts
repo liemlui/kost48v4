@@ -96,6 +96,13 @@ export class CheckoutRequestsService {
       );
     }
 
+    // P2-02: Guard — checkout tidak boleh melebihi akhir masa sewa saat ini
+    if (stay.plannedCheckOutDate && requestedDate > stay.plannedCheckOutDate) {
+      throw new BadRequestException(
+        'Tanggal checkout tidak boleh melebihi akhir masa sewa saat ini. Untuk perpanjangan, silakan ajukan perpanjangan sewa (renewal).',
+      );
+    }
+
     const request = await this.prisma.$transaction(async (tx) => {
       await this.assertNoOpenInvoices(
         dto.stayId,
@@ -149,6 +156,12 @@ export class CheckoutRequestsService {
         throw new ConflictException('Permintaan checkout sudah diproses sebelumnya');
       }
       const lockedRequest = locked[0];
+
+      // P2-04: FOR UPDATE lock Stay sebelum diupdate — cegah race condition
+      // stay berubah status antara pengecekan dan updateMany
+      await tx.$queryRaw<Array<{ id: number }>>(
+        Prisma.sql`SELECT id FROM "Stay" WHERE id = ${lockedRequest.stayId} FOR UPDATE`,
+      );
 
       await this.assertNoOpenInvoices(
         lockedRequest.stayId,

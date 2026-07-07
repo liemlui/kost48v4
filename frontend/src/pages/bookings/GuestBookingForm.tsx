@@ -14,6 +14,7 @@ import {
   ROOM_MAX_OCCUPANTS,
 } from '../../utils/pricing';
 import { parseKtpText } from '../../utils/ktpOcr';
+import { preprocessImage } from '../../utils/ocrPreprocess';
 import type { GuestBookingFormState, FormErrors } from './guestBookingUtils';
 import {
   stayPurposeOptions,
@@ -91,10 +92,13 @@ export default function GuestBookingForm({
   async function handleKtpScan(file?: File) {
     if (!file) return;
     setKtpScanning(true);
-    setKtpScanMsg('Memindai KTP di perangkat Anda (offline)…');
+    setKtpScanMsg('Mempersiapkan gambar…');
     try {
+      // Preprocessing: perbaiki kontras & ketajaman sebelum OCR
+      const processed = await preprocessImage(file);
+      setKtpScanMsg('Memindai KTP di perangkat Anda (offline)…');
       const { recognize } = await import('tesseract.js');
-      const { data } = await recognize(file, 'ind');
+      const { data } = await recognize(processed, 'ind');
       const { nik, name } = parseKtpText(data.text || '');
       if (nik) onChange('identityNumber', nik);
       if (name && !form.fullName.trim()) onChange('fullName', name);

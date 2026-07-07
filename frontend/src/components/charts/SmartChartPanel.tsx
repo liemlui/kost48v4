@@ -108,26 +108,32 @@ export default function SmartChartPanel({ title, subtitle, points, defaultMode =
 
         {safeMode === 'bar' && (
           <div className="smart-chart-bars">
-            <HorizontalBarChart
-              points={chartPoints}
-              ariaLabel={`${title} dalam diagram batang`}
-              valueFormatter={formatNumber}
-              onPointClick={(point) => point.to ? navigate(point.to) : undefined}
-              isPointClickable={(point) => Boolean(point.to)}
-            />
+            {chartPoints.length === 0 ? (
+              <div className="smart-chart-empty">Belum ada data</div>
+            ) : (
+              <HorizontalBarChart
+                points={chartPoints}
+                ariaLabel={`${title} dalam diagram batang`}
+                valueFormatter={formatNumber}
+                onPointClick={(point) => point.to ? navigate(point.to) : undefined}
+                isPointClickable={(point) => Boolean(point.to)}
+              />
+            )}
           </div>
         )}
 
         {safeMode === 'table' && (
           <Table responsive size="sm" className="mt-3 mb-0 smart-chart-table">
             <thead><tr><th>Kategori</th><th className="text-end">Nilai</th><th>Catatan</th></tr></thead>
-            <tbody>{points.map((point) => point.to ? (
+            <tbody>{points.length === 0 ? (
+              <tr><td colSpan={3} className="text-center text-muted py-4">Belum ada data</td></tr>
+            ) : (points.map((point) => point.to ? (
               <ClickableRow key={point.label} onClick={() => navigate(point.to!)} label={`Buka detail ${point.label}`}>
                 <td>{point.label}</td><td className="text-end fw-semibold">{formatNumber(point.value)}</td><td className="text-muted small">{point.detail ?? '-'}</td>
               </ClickableRow>
             ) : (
               <tr key={point.label}><td>{point.label}</td><td className="text-end fw-semibold">{formatNumber(point.value)}</td><td className="text-muted small">{point.detail ?? '-'}</td></tr>
-            ))}</tbody>
+            )))}</tbody>
           </Table>
         )}
       </Card.Body>

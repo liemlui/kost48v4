@@ -7,6 +7,8 @@ const client = axios.create({
     'Cache-Control': 'no-cache',
     Pragma: 'no-cache',
   },
+  // P3-01: Kirim cookie (refresh token) pada semua request ke /api/auth/*
+  withCredentials: true,
 });
 
 function clearAuthAndRedirect() {
@@ -18,6 +20,24 @@ function clearAuthAndRedirect() {
   if (currentPath !== '/login') {
     window.location.assign('/login');
   }
+}
+
+// P3-01: refresh token state — cegah multiple refresh bersamaan
+let isRefreshing = false;
+let failedQueue: Array<{
+  resolve: (token: string) => void;
+  reject: (err: unknown) => void;
+}> = [];
+
+function processQueue(token: string | null, error: unknown | null) {
+  failedQueue.forEach((p) => {
+    if (token) {
+      p.resolve(token);
+    } else {
+      p.reject(error);
+    }
+  });
+  failedQueue = [];
 }
 
 client.interceptors.request.use((config) => {
@@ -46,14 +66,53 @@ client.interceptors.request.use((config) => {
 
 client.interceptors.response.use(
   (response) => response,
-  (error) => {
+  async (error) => {
+    const originalRequest = error.config;
     const status = error?.response?.status;
     const hasToken = Boolean(localStorage.getItem('kost48_access_token'));
-    const requestUrl = String(error?.config?.url ?? '');
-    const isLoginRequest = requestUrl.includes('/auth/login');
+    const requestUrl = String(originalRequest?.url ?? '');
+    const isAuthRequest =
+      requestUrl.includes('/auth/login') ||
+      requestUrl.includes('/auth/refresh') ||
+      requestUrl.includes('/auth/logout');
 
-    if (status === 401 && hasToken && !isLoginRequest) {
-      clearAuthAndRedirect();
+    // P3-01: Jika 401 dan ada token dan bukan dari auth endpoint → coba refresh
+    if (status === 401 && hasToken && !isAuthRequest) {
+      if (isRefreshing) {
+        // Request lain sedang refresh — antri
+        return new Promise<string>((resolve, reject) => {
+          failedQueue.push({ resolve, reject });
+        }).then((newToken) => {
+          originalRequest.headers.Authorization = `Bearer ${newToken}`;
+          return client(originalRequest);
+        });
+      }
+
+      originalRequest._retry = true;
+      isRefreshing = true;
+
+      try {
+        // Panggil refresh endpoint — httpOnly cookie dikirim otomatis
+        const refreshResp = await axios.post(
+          `${import.meta.env.VITE_API_BASE_URL || '/api'}/auth/refresh`,
+          {},
+          { withCredentials: true },
+        );
+        const { accessToken } = refreshResp.data.data;
+        localStorage.setItem('kost48_access_token', accessToken);
+
+        // Proses antrian
+        processQueue(accessToken, null);
+
+        originalRequest.headers.Authorization = `Bearer ${accessToken}`;
+        return client(originalRequest);
+      } catch (refreshError) {
+        processQueue(null, refreshError);
+        clearAuthAndRedirect();
+        return Promise.reject(refreshError);
+      } finally {
+        isRefreshing = false;
+      }
     }
 
     // Timeout atau server tidak merespons → pesan yang bisa dibaca

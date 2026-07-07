@@ -17,6 +17,41 @@ export class UpdateOperationalSettingDto {
   @IsOptional() @IsInt() @Min(0) @Max(100000) acCleanKwhThreshold?: number;
   // Fitur tenant toggle
   @IsOptional() @IsBoolean() tenantLoyaltyEnabled?: boolean;
+  @IsOptional() @IsBoolean() ktpVerificationGateEnabled?: boolean;
+  // Brevo Email
+  @IsOptional() @IsString() @MaxLength(200) brevoApiKey?: string;
+  @IsOptional() @IsString() @MaxLength(100) mailFromEmail?: string;
+  @IsOptional() @IsString() @MaxLength(100) mailFromName?: string;
+  // AutoOps
+  @IsOptional() @IsBoolean() autoOpsEnabled?: boolean;
+  // Accounting sweeps
+  @IsOptional() @IsBoolean() recurringExpenseDraftsEnabled?: boolean;
+  @IsOptional() @IsBoolean() assetDepreciationAutoEnabled?: boolean;
+  @IsOptional() @IsBoolean() rentRecognitionEnabled?: boolean;
+  @IsOptional() @IsBoolean() notificationPruningEnabled?: boolean;
+  @IsOptional() @IsInt() @Min(1) @Max(365) notificationRetentionDays?: number;
+  @IsOptional() @IsBoolean() journalReconciliationEnabled?: boolean;
+  @IsOptional() @IsInt() @Min(1) @Max(1000) journalReconciliationLimit?: number;
+  // SLA Deadlines
+  @IsOptional() @IsInt() @Min(1) @Max(168) bookingReviewDeadlineHours?: number;
+  @IsOptional() @IsInt() @Min(1) @Max(168) approvedBookingPaymentDeadlineHours?: number;
+  @IsOptional() @IsInt() @Min(1) @Max(168) paymentReviewUrgentHours?: number;
+  @IsOptional() @IsInt() @Min(1) @Max(168) paymentReviewEscalateHours?: number;
+  @IsOptional() @IsInt() @Min(1) @Max(168) paymentReviewMaxHours?: number;
+  @IsOptional() @IsInt() @Min(1) @Max(168) invoiceUrgentAfterHours?: number;
+  @IsOptional() @IsInt() @Min(1) @Max(720) invoiceDueAfterHours?: number;
+  @IsOptional() @IsInt() @Min(1) @Max(30) renewReminderDays?: number;
+  @IsOptional() @IsInt() @Min(1) @Max(168) renewLastCallHours?: number;
+  @IsOptional() @IsInt() @Min(1) @Max(168) renewPaymentDeadlineHours?: number;
+  @IsOptional() @IsInt() @Min(1) @Max(168) renewReviewUrgentHours?: number;
+  @IsOptional() @IsInt() @Min(1) @Max(168) renewReviewEscalateHours?: number;
+  @IsOptional() @IsInt() @Min(1) @Max(168) checkoutReviewUrgentHours?: number;
+  @IsOptional() @IsInt() @Min(1) @Max(168) checkoutReviewEscalateHours?: number;
+  @IsOptional() @IsInt() @Min(1) @Max(168) checkoutFinalUrgentHours?: number;
+  @IsOptional() @IsInt() @Min(1) @Max(168) lateTenantVacateHours?: number;
+  @IsOptional() @IsInt() @Min(1) @Max(60) autoOpsIntervalMinutes?: number;
+  // Maintenance
+  @IsOptional() @IsBoolean() acCleaningEnabled?: boolean;
   // AI / DeepSeek (R3)
   @IsOptional() @IsString() @MaxLength(100) deepseekModel?: string;
   @IsOptional() @IsString() @MaxLength(100) deepseekFinanceModel?: string;

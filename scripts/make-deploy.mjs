@@ -1,93 +1,207 @@
-// KOST48 — buat PAKET DEPLOY RAMPING (combined single-server) untuk cPanel/VPS.
+// KOST48 — buat PAKET DEPLOY RAMPING (combined single-server) untuk cPanel/VPS hemat RAM/inode.
 // Pakai: npm run make-deploy
-// Hasil: folder `deploy/` = backend SOURCE (tanpa node_modules/dist/generated) + frontend PREBUILT (`client/`) + .env.example + README.
-// Di server (Linux, SSH): npm ci  ->  npm run build  ->  npm prune --omit=dev  ->  node dist/main.js
-// Kenapa build di server: query-engine Prisma platform-spesifik (Windows != Linux) -> di-generate di server.
-// Frontend TIDAK dibangun di server (sudah jadi di client/), jadi frontend/node_modules tak perlu di server.
-import { rmSync, mkdirSync, cpSync, writeFileSync, existsSync } from 'node:fs';
+// Hasil: folder `deploy/` = backend PREBUILT (`dist/`) + frontend PREBUILT (`client/`) + prisma/ + sql/ + seed-owner.
+// SEMUA build terjadi DI LOKAL. Di server cukup: `npm run cpanel:install` (= npm ci prod-only, tanpa scripts/audit) → start `dist/main.js`.
+// Kenapa TANPA build di server: hosting shared 512MB bisa OOM saat tsc/npm ci penuh, dan devDeps memboroskan inode.
+// Prisma client hasil generate = WASM query compiler + driver adapter pg → platform-independent;
+// binary engine `*.node` (Windows) dibuang dari paket karena tidak dipakai di Linux.
+import { rmSync, mkdirSync, cpSync, writeFileSync, existsSync, readdirSync, readFileSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
 
 const isWin = process.platform === 'win32';
 const npm = isWin ? 'npm.cmd' : 'npm';
 const OUT = 'deploy';
+const NO_BUILD = process.argv.includes('--no-build');
 
-console.log('[deploy] 1/4 build frontend (combined, VITE_API_BASE_URL=/api)...');
-writeFileSync('frontend/.env.production.local', '# auto (deploy) — jangan commit\nVITE_API_BASE_URL=/api\n');
-let r = spawnSync(npm, ['run', 'build'], { cwd: 'frontend', stdio: 'inherit', shell: true });
-if (r.status) { console.error('[deploy] build frontend GAGAL'); process.exit(r.status); }
+function readJson(file) {
+  return JSON.parse(readFileSync(file, 'utf8'));
+}
 
-console.log('[deploy] 2/4 siapkan folder ' + OUT + '/ ...');
+function writeJson(file, data) {
+  writeFileSync(file, JSON.stringify(data, null, 2) + '\n');
+}
+
+function sortObject(obj) {
+  return Object.fromEntries(Object.entries(obj).sort(([a], [b]) => a.localeCompare(b)));
+}
+
+function run(label, cmd, args, cwd) {
+  console.log('[deploy] ' + label);
+  const r = spawnSync(cmd, args, { cwd, stdio: 'inherit', shell: true });
+  if (r.status) { console.error('[deploy] GAGAL: ' + label); process.exit(r.status); }
+}
+
+function requirePath(path, hint) {
+  if (!existsSync(path)) {
+    console.error('[deploy] GAGAL: ' + path + ' tidak ditemukan. ' + hint);
+    process.exit(1);
+  }
+}
+
+function writeDeployPackageFiles() {
+  const backendPkg = readJson('backend/package.json');
+  const generatedPkgPath = 'backend/dist/generated/prisma/package.json';
+  const generatedDeps = existsSync(generatedPkgPath) ? (readJson(generatedPkgPath).dependencies || {}) : {};
+  const dependencies = { ...(backendPkg.dependencies || {}) };
+
+  // Runtime memakai dist/generated/prisma, jadi tiga paket ini hanya menambah biaya install deploy.
+  delete dependencies['kost48-golive'];
+  delete dependencies['@types/web-push'];
+  delete dependencies['@prisma/client'];
+
+  for (const [name, version] of Object.entries(generatedDeps)) {
+    if (!dependencies[name]) dependencies[name] = version;
+  }
+
+  writeJson(OUT + '/package.json', {
+    name: backendPkg.name,
+    version: backendPkg.version,
+    private: true,
+    license: backendPkg.license,
+    type: backendPkg.type,
+    main: backendPkg.main,
+    engines: backendPkg.engines,
+    scripts: {
+      'cpanel:install': 'npm ci --omit=dev --omit=optional --ignore-scripts --no-audit --no-fund --progress=false',
+      'install:prod': 'npm run cpanel:install',
+      'cpanel:migrate': 'npx --yes prisma db push --skip-generate',
+      'seed:owner': 'node scripts/seed-owner.js',
+      start: 'node dist/main.js',
+      'start:prod': 'node --max-old-space-size=192 dist/main.js',
+    },
+    dependencies: sortObject(dependencies),
+  });
+
+  writeFileSync(OUT + '/.npmrc', [
+    'omit=dev',
+    'omit=optional',
+    'ignore-scripts=true',
+    'audit=false',
+    'fund=false',
+    'progress=false',
+    'package-lock=true',
+    'engine-strict=false',
+    '',
+  ].join('\n'));
+}
+
+function countFiles(dir) {
+  let n = 0;
+  for (const e of readdirSync(dir, { withFileTypes: true })) {
+    const p = dir + '/' + e.name;
+    n += e.isDirectory() ? countFiles(p) : 1;
+  }
+  return n;
+}
+
+if (NO_BUILD) {
+  console.log('[deploy] 1/6 skip build (--no-build), pakai dist yang sudah ada...');
+  requirePath('frontend/dist', 'Jalankan build frontend lokal dulu, atau pakai npm run make-deploy tanpa --no-build.');
+  requirePath('backend/dist/generated/prisma/package.json', 'Jalankan build backend lokal dulu, atau pakai npm run make-deploy tanpa --no-build.');
+} else {
+  writeFileSync('frontend/.env.production.local', '# auto (deploy) — jangan commit\nVITE_API_BASE_URL=/api\n');
+  run('1/6 build frontend (combined, VITE_API_BASE_URL=/api)...', npm, ['run', 'build'], 'frontend');
+
+  run('2/6 build backend (tsc + prisma generate → dist/ + dist/generated)...', npm, ['run', 'build'], 'backend');
+}
+
+console.log('[deploy] 3/6 siapkan folder ' + OUT + '/ ...');
 rmSync(OUT, { recursive: true, force: true });
-mkdirSync(OUT, { recursive: true });
+mkdirSync(OUT + '/scripts', { recursive: true });
 
-console.log('[deploy] 3/4 copy backend source (tanpa node_modules/dist/generated)...');
-for (const item of ['src', 'prisma', 'sql', 'package.json', 'package-lock.json', 'tsconfig.json', 'tsconfig.build.json', 'nest-cli.json']) {
+console.log('[deploy] 4/6 copy backend PREBUILT (dist tanpa binary *.node) + prisma/sql + package deploy + frontend client/ ...');
+// dist/ prebuilt — buang engine binary platform-spesifik (query_engine-*.dll.node dsb; Linux pakai WASM).
+cpSync('backend/dist', OUT + '/dist', { recursive: true, filter: (src) => !src.endsWith('.node') });
+for (const item of ['prisma', 'sql']) {
   const from = 'backend/' + item;
   if (existsSync(from)) cpSync(from, OUT + '/' + item, { recursive: true });
 }
-rmSync(OUT + '/src/generated', { recursive: true, force: true }); // prisma client di-regenerate di server (engine Linux)
-
-console.log('[deploy] 4/4 copy frontend prebuilt -> ' + OUT + '/client ...');
+if (existsSync('backend/setup.sql')) cpSync('backend/setup.sql', OUT + '/setup.sql');
+writeDeployPackageFiles();
+cpSync('backend/scripts/seed-owner.js', OUT + '/scripts/seed-owner.js'); // seed OWNER pertama (F1-12) di server
 cpSync('frontend/dist', OUT + '/client', { recursive: true });
 
+run('5/6 buat package-lock produksi (tanpa install node_modules)...', npm, ['install', '--package-lock-only', '--omit=dev', '--omit=optional', '--ignore-scripts', '--no-audit', '--no-fund', '--progress=false'], OUT);
+
+console.log('[deploy] 6/6 tulis .env.example + README + arsip tgz ...');
 writeFileSync(OUT + '/.env.example', [
-  '# Salin jadi .env (VPS) atau isi di cPanel "Environment Variables".',
-  'DATABASE_URL="postgresql://USER:PASS@HOST:5432/kost48_v3?schema=public"',
+  '# Salin jadi `.env` di ROOT folder app (dibaca app + script seed). JANGAN commit.',
+  'DATABASE_URL="postgresql://USER:PASS@localhost:5432/kost48_v3?schema=public"',
   'JWT_SECRET="ganti-dengan-secret-acak-kuat-min-32-char"',
   'NODE_ENV=production',
   'CORS_ORIGIN="https://domain-anda"   # combined same-origin: cukup domainnya',
+  'KTP_ACTIVATION_GATE_ENABLED=true    # L-4 WAJIB true di produksi',
   '# Auto-ops: VPS/always-on -> AUTO_OPS_ENABLED=true. Shared hosting/Passenger (idle-sleep)',
-  '# -> AUTO_OPS_ENABLED=false + AUTO_OPS_CRON_TOKEN, lalu cPanel Cron panggil GET /api/auto-ops/cron.',
-  'AUTO_OPS_ENABLED=true',
-  'AUTO_OPS_CRON_TOKEN="ganti-token-cron-acak-panjang"   # wajib bila pakai cron (shared hosting)',
+  '# -> AUTO_OPS_ENABLED=false + AUTO_OPS_CRON_TOKEN, lalu cPanel Cron panggil POST /api/auto-ops/cron.',
+  'AUTO_OPS_ENABLED=false',
+  'AUTO_OPS_CRON_TOKEN="ganti-token-cron-acak-panjang"',
+  '# Web push (opsional, butuh HTTPS): VAPID_PUBLIC_KEY / VAPID_PRIVATE_KEY / VAPID_SUBJECT=mailto:owner@...',
+  '# Email reset password (opsional): BREVO_API_KEY + MAIL_FROM_EMAIL + MAIL_FROM_NAME',
   '# PORT: cPanel/Passenger mengatur sendiri. VPS: set mis. PORT=3000.',
-  '# FRONTEND_DIST_PATH opsional (default <backend>/client sudah benar).',
+  '# FRONTEND_DIST_PATH opsional (default <app>/client sudah benar).',
+  '# ⚠️ NODE_OPTIONS=--max-old-space-size=192 TIDAK bisa lewat .env — set di cPanel',
+  '#    "Setup Node.js App" → Environment Variables (dibaca node saat start).',
   '',
 ].join('\n'));
 
-writeFileSync(OUT + '/README-DEPLOY.md', `# KOST48 — Deploy (combined single-server)
+writeFileSync(OUT + '/README-DEPLOY.md', `# KOST48 — Deploy cPanel/VPS (combined, PREBUILT, hemat RAM 512MB)
 
-Paket ini = backend (source) + frontend sudah di-build (\`client/\`). Server menjalankan SATU proses Node yang melayani frontend + API.
+Paket ini SUDAH di-build di lokal: backend \`dist/\` + frontend \`client/\`. Server TIDAK build apa pun
+(tanpa tsc, tanpa prisma generate, tanpa devDependencies) → aman untuk hosting RAM 512MB & limit inode.
 
-## Prasyarat host
-- Node.js (>=18) — cPanel "Setup Node.js App" / VPS.
-- PostgreSQL (buat DB \`kost48_v3\` + user).
-- SSH (untuk perintah di bawah).
+## Langkah cPanel (urut)
+1. **PostgreSQL Databases**: buat DB \`kost48_v3\` + user + all privileges. Catat kredensial.
+2. **Upload** \`kost48-deploy.tgz\` ke folder app (mis. \`~/kost48\`) → File Manager: Extract.
+3. **Setup Node.js App**: Node 22 · Application root = folder app · **Startup file = \`dist/main.js\`** ·
+   Environment Variables: **\`NODE_OPTIONS=--max-old-space-size=192\`** (batas heap; tidak bisa via .env).
+4. **SSH** (masuk venv Node dari halaman Setup Node.js App):
+   \`\`\`bash
+   npm run cpanel:install        # prod deps saja, TANPA build/postinstall/audit
+   cp .env.example .env && nano .env   # isi DATABASE_URL, JWT_SECRET, CORS_ORIGIN, token cron
+   \`\`\`
+5. **Schema DB (sekali)** — pilih salah satu:
+   - **A (disarankan, tanpa download apa pun):** jalankan SQL schema penuh via psql/pgAdmin Query Tool:
+     \`\`\`bash
+     psql "<DATABASE_URL>" -f setup.sql
+     \`\`\`
+   - **B (fallback):** \`npm run cpanel:migrate\` (= npx prisma db push --skip-generate; unduh CLI sementara,
+     jalankan saat app TIDAK running agar tidak rebutan RAM).
 
-## Langkah (SSH di folder app, di dalam Node venv cPanel)
-\`\`\`bash
-# 1. Setup 1 perintah: install + build (prisma generate engine Linux + tsc) + buang devDeps -> RAMPING
-npm run cpanel:setup
+   Lalu **WAJIB** pagar DB (trigger/CHECK di luar schema Prisma; addendum v4 sudah ter-konsolidasi di dalamnya):
+   \`\`\`bash
+   psql "<DATABASE_URL>" -f sql/bootstrap.sql
+   \`\`\`
+6. **Seed data default** (kamar nyata, foto, barang, fasilitas, FAQ, layanan tambahan):
+   \`\`\`bash
+   psql "<DATABASE_URL>" -f sql/seed-kost48-default-data.sql
+   \`\`\`
+   Di phpPgAdmin, upload file \`sql/seed-kost48-default-data.sql\` lewat SQL script bila \`psql\` tidak tersedia.
 
-# 2. Env: isi DATABASE_URL/JWT_SECRET/CORS_ORIGIN (cPanel "Environment Variables" atau .env dari .env.example)
+7. **Seed OWNER pertama** (idempoten):
+   \`\`\`bash
+   OWNER_EMAIL=owner@domain-anda OWNER_PASSWORD='GANTI_kuat' OWNER_FULLNAME='Pemilik KOST48' npm run seed:owner
+   \`\`\`
+   Lalu login OWNER → seed COA (\`POST /api/accounting/default-coa/seed\`) + periode OPEN + CashAccount.
+8. **Restart App** (Setup Node.js App) + **AutoSSL** domain → HTTPS (wajib untuk PWA/push).
+9. **Cron Jobs** (auto-ops, tiap 5–10 menit — WAJIB di shared hosting karena Passenger idle-sleep):
+   \`curl -fsS -X POST -H "X-Cron-Token: <token>" https://domain-anda/api/auto-ops/cron >/dev/null 2>&1\`
+10. **Smoke**: \`https://domain/\` tampil · \`/api/public/rooms\` 200 · login OWNER · trial-balance seimbang ·
+   cPanel Resource Usage: memory faults 0.
 
-# 3. Skema + seed DB (sekali)
-npm run cpanel:migrate        # = prisma db push (skema ke PostgreSQL)
-psql "<DATABASE_URL>" -f sql/bootstrap.sql
-psql "<DATABASE_URL>" -f sql/bootstrap_v4_addendum.sql
-# Buat OWNER pertama (ganti password!) — contoh:
-#   INSERT INTO "User"("fullName",email,"passwordHash",role,"isActive","createdAt","updatedAt")
-#   VALUES('Owner','owner@domain', '<bcrypt-hash>', 'OWNER', true, now(), now());
-# Lalu login OWNER -> seed COA (POST /api/accounting/default-coa/seed) + periode OPEN + CashAccount.
+## Catatan RAM/inode 512MB
+- Semua prebuilt; server hanya \`npm ci\` production-only dari lockfile deploy ramping.
+- Binary engine Prisma \`*.node\` dibuang — runtime pakai WASM query compiler + driver adapter pg.
+- Passenger meng-idle-kan proses saat sepi (RAM turun sendiri); cron membangunkannya.
+- Jika Resource Usage menunjukkan memory faults: turunkan \`NODE_OPTIONS\` ke 160.
 
-# 4. Start
-#   cPanel: set Startup File = dist/main.js, lalu Restart App.
-#   VPS:    pm2 start dist/main.js --name kost48   (atau: node dist/main.js)
-\`\`\`
-
-## Setelah jalan
-- Buka https://domain-anda (frontend) — API di /api (same-origin, tanpa CORS).
-- AutoSSL/Let's Encrypt untuk HTTPS (PWA penuh).
-- **Auto-ops (shared hosting/Passenger idle-sleep):** set AUTO_OPS_ENABLED=false + AUTO_OPS_CRON_TOKEN, lalu cPanel **Cron Jobs** tiap 5-10 menit:
-  \`curl -fsS -H "X-Cron-Token: <token>" https://domain-anda/api/auto-ops/cron >/dev/null 2>&1\`
-  (Always-on/VPS: cukup AUTO_OPS_ENABLED=true, cron opsional.)
-- **Yang TIDAK perlu di server:** \`frontend/node_modules\` (frontend sudah di-build di \`client/\`).
+⚠️ Ganti password OWNER default & JANGAN commit \`.env\`. VPS: \`pm2 start dist/main.js --name kost48\`.
 `);
 
 let tarOk = false;
 try { spawnSync('tar', ['-czf', 'kost48-deploy.tgz', '-C', OUT, '.'], { stdio: 'ignore', shell: true }); tarOk = existsSync('kost48-deploy.tgz'); } catch {}
 
+const total = countFiles(OUT);
 console.log('\n[deploy] SELESAI.');
-console.log('  Folder siap-upload : ' + OUT + '/');
+console.log('  Folder siap-upload : ' + OUT + '/  (' + total + ' file — estimasi pemakaian inode upload)');
 if (tarOk) console.log('  Arsip (opsional)   : kost48-deploy.tgz');
-console.log('  Di server: npm ci -> npm run build -> npm prune --omit=dev -> node dist/main.js  (lihat ' + OUT + '/README-DEPLOY.md)');
+console.log('  Di server: npm run cpanel:install -> isi .env -> schema+seed -> Restart App  (lihat ' + OUT + '/README-DEPLOY.md)');

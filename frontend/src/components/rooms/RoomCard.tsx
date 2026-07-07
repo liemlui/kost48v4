@@ -13,20 +13,7 @@ import type { PublicRoom } from '../../types';
 import FacilityList from './FacilityList';
 import RoomPriceTable from './RoomPriceTable';
 import RoomSpecChips from './RoomSpecChips';
-
-// ── WhatsApp URL builder (lokal, tidak di-export) ──────────────────────────
-function buildWhatsAppUrl(room: PublicRoom, customMessage?: string): string {
-  const number = String(import.meta.env.VITE_PUBLIC_ADMIN_WHATSAPP ?? '').replace(/\D/g, '');
-  const roomCode = room.code || `Kamar #${room.id}`;
-  const msg = customMessage ?? (
-    String(room.status ?? '').toUpperCase() === 'MAINTENANCE'
-      ? `Halo Admin KOST48, saya tertarik dengan kamar ${roomCode}. Saya lihat kamar sedang dicek. Boleh tanya estimasi kapan siap ditempati?`
-      : `Halo Admin KOST48, saya tertarik dengan kamar ${roomCode}. Boleh tanya ketersediaan atau estimasi kapan kosong?`
-  );
-  return number
-    ? `https://wa.me/${number}?text=${encodeURIComponent(msg)}`
-    : `https://wa.me/?text=${encodeURIComponent(msg)}`;
-}
+import BookingCtaButton from './BookingCtaButton';
 
 // ── Constants ──────────────────────────────────────────────────────────────
 const PRICING_TERM = 'MONTHLY' as const;
@@ -166,8 +153,6 @@ export default function RoomCard({
   const catBadge = getCategoryBadgeInfo(room);
   const isMezzanine = String(room.roomType ?? '').toUpperCase() === 'MEZZANINE';
 
-  const waUrl = buildWhatsAppUrl(room, waMessage);
-
   return (
     <article
       className="rm-card"
@@ -225,40 +210,20 @@ export default function RoomCard({
         <RoomPriceTable room={room} monthlyRate={monthlyRate} variant="card" />
         {monthlyRate === 0 && <div className="rm-card-price-ask">Hubungi admin untuk tarif</div>}
 
-        <div className="rm-card-actions">
-          {avail.canBook && !bookViaWA && (
-            <Button size="sm" className="rm-btn-book" onClick={(e) => { e.stopPropagation(); goBook(); }}>
-              Ajukan Booking
-            </Button>
-          )}
-          {avail.canBook && bookViaWA && (
-            <a
-              className="btn btn-sm rm-btn-book rm-btn-book-wa"
-              href={waUrl}
-              target="_blank"
-              rel="noreferrer"
-              onClick={(e) => e.stopPropagation()}
-            >
-              💬 Booking via WA
-            </a>
-          )}
-          <a
-            className="btn btn-sm btn-outline-secondary rm-btn-wa"
-            href={waUrl}
-            target="_blank"
-            rel="noreferrer"
-            onClick={(e) => e.stopPropagation()}
-          >
-            💬 {avail.canBook ? 'Tanya via WA' : 'Tanya Ketersediaan'}
-          </a>
-          <button
-            type="button"
-            className="rm-btn-detail"
-            onClick={(e) => { e.stopPropagation(); goDetail(); }}
-          >
-            Lihat detail →
-          </button>
-        </div>
+        <BookingCtaButton
+          room={room}
+          isTenant={isTenant}
+          bookViaWA={bookViaWA}
+          waMessage={waMessage}
+          variant="primary"
+        />
+        <button
+          type="button"
+          className="rm-btn-detail"
+          onClick={(e) => { e.stopPropagation(); goDetail(); }}
+        >
+          Lihat detail →
+        </button>
       </div>
     </article>
   );

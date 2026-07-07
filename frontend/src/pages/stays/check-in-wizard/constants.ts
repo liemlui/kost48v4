@@ -37,6 +37,7 @@ export const bookingSourceOptions = [
   { value: 'WHATSAPP', label: 'WhatsApp' },
   { value: 'FACEBOOK', label: 'Facebook' },
   { value: 'WEBSITE', label: 'Website' },
+  { value: 'PORTAL', label: 'Portal Tenant' },
   { value: 'OTA', label: 'OTA' },
   { value: 'OTHER', label: 'Lainnya' },
 ];

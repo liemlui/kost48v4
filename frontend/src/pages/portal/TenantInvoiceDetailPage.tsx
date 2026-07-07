@@ -11,7 +11,7 @@ import CameraOrGalleryInput from '../../components/common/CameraOrGalleryInput';
 import PageHeader from '../../components/common/PageHeader';
 import StatusBadge from '../../components/common/StatusBadge';
 import TenantPriorityBoard from '../../components/tenant/TenantPriorityBoard';
-import { LifecycleTimeline, type AssistantItem, type MetricChip, type TimelineStep } from '../../components/command-center';
+import { LifecycleTimeline, type AssistantItem, type TimelineStep } from '../../components/command-center';
 import { AssistantInsightLine, StatusStrip } from '../../components/workspace';
 import InvoicePrintLayout from '../../components/reports/InvoicePrintLayout';
 import type { InvoicePrintData } from '../../components/reports/InvoicePrintLayout';
@@ -169,13 +169,6 @@ export default function TenantInvoiceDetailPage() {
       source: 'Riwayat',
     } : null,
   ].filter(Boolean) as AssistantItem[] : [];
-
-  const metrics: MetricChip[] = invoice ? [
-    { id: 'total', label: 'Total Tagihan', value: <CurrencyDisplay amount={totalInvoice} /> as any, helper: invoice.invoiceNumber || `TG-${invoice.id}`, icon: '🧾', status: invoice.status },
-    { id: 'paid', label: 'Sudah Dibayar', value: <CurrencyDisplay amount={totalPaid} /> as any, helper: `${invoice.payments?.length ?? 0} pembayaran tercatat`, icon: '💳', status: totalPaid > 0 ? 'SUCCESS' : 'INFO' },
-    { id: 'outstanding', label: 'Sisa Tagihan', value: <CurrencyDisplay amount={outstanding} /> as any, helper: hasPendingReview ? 'Bukti sedang diperiksa' : canSubmitPayment ? hasPayableAmount ? 'Perlu dibayar' : 'Tidak ada nominal bayar' : invoice.status === 'DRAFT' ? 'Sedang disiapkan admin' : 'Selesai', icon: '⚖️', status: hasPendingReview ? 'INFO' : outstanding > 0 ? 'WARNING' : 'SUCCESS' },
-    { id: 'due', label: 'Jatuh Tempo', value: dueMeta.hasDate ? dueMeta.clockLabel : '-', helper: isPaid ? 'Tagihan sudah lunas' : dueMeta.hasDate ? `${dueMeta.relativeLabel} · ${dueMeta.absoluteLabel}` : 'Jam belum tersedia', icon: '⏰', status: isPaid ? 'SUCCESS' : isOverdue ? 'DANGER' : 'INFO' },
-  ] : [];
 
   const timelineSteps: TimelineStep[] = invoice ? [
     { id: 'issued', label: 'Tagihan tersedia', description: 'Tagihan tersedia.', status: invoice.status === 'DRAFT' ? 'pending' : 'done' },

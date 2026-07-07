@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Alert, Button, Card, Form, Spinner } from 'react-bootstrap';
 import { useAuth } from '../../context/AuthContext';
 import { getOwnerAiStatus, validateKtpOcr, type KtpOcrValidateResult } from '../../api/ai';
+import { preprocessImage } from '../../utils/ocrPreprocess';
 import AiResultPanel from './AiResultPanel';
 
 type Props = {
@@ -40,11 +41,13 @@ export default function KtpOcrValidateCard({ tenantId, tenantName }: Props) {
   async function handleKtpScan(file?: File) {
     if (!file) return;
     setScanning(true);
-    setScanMsg('Memindai KTP di perangkat (offline)…');
+    setScanMsg('Mempersiapkan gambar…');
     setResult(null);
     try {
+      const processed = await preprocessImage(file);
+      setScanMsg('Memindai KTP di perangkat (offline)…');
       const { recognize } = await import('tesseract.js');
-      const { data } = await recognize(file, 'ind');
+      const { data } = await recognize(processed, 'ind');
       setOcrText((data.text || '').trim());
       setScanMsg('Teks KTP terbaca. PERIKSA & koreksi bila perlu, lalu klik "Bantu Validasi KTP".');
     } catch {

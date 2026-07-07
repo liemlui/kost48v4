@@ -13,6 +13,7 @@ import { getKost48RoomGallery, resolveKost48MarketingImageUrl } from '../../data
 import { calculateRentByPricingTerm, isUtilitiesIncludedForPricingTerm, ALL_PRICING_TERMS } from '../../utils/pricing';
 import { getPublicRoomAvailabilityDisplay, getPublicRoomInitialCostEstimate, publicBookingSafetySteps } from '../../utils/publicRoomDisplay';
 import { formatRupiah, formatRupiahWithoutSymbol } from '../../utils/formatCurrency';
+import { buildAdminWaUrl, buildRoomWaUrl } from '../../utils/whatsapp';
 
 // ═══════════════════════════════════════════════════════════
 //  COMPONENT: PublicRoomDetailPage
@@ -121,16 +122,6 @@ function getDefaultTerm(rows: TermRow[]) {
   return rows.find((row) => row.term === 'MONTHLY')?.term ?? rows[0]?.term ?? 'MONTHLY';
 }
 
-function buildWhatsAppUrl(room: PublicRoom) {
-  const number = String(import.meta.env.VITE_PUBLIC_ADMIN_WHATSAPP ?? '').replace(/\D/g, '');
-  const roomCode = room.code || `Kamar #${room.id}`;
-  const isChecking = String(room.status ?? '').toUpperCase() === 'MAINTENANCE';
-  const message = isChecking
-    ? `Halo Admin KOST48, saya tertarik dengan kamar ${roomCode}. Saya lihat kamar sedang dicek. Boleh tanya estimasi kapan siap ditempati?`
-    : `Halo Admin KOST48, saya tertarik dengan kamar ${roomCode}. Boleh tanya ketersediaan atau estimasi kapan kosong?`;
-  return number ? `https://wa.me/${number}?text=${encodeURIComponent(message)}` : `https://wa.me/?text=${encodeURIComponent(message)}`;
-}
-
 function DetailFeatureCard({ icon, label, value }: { icon: string; label: string; value: string }) {
   return (
     <div className="room-detail-feature-card">
@@ -184,7 +175,7 @@ function RoomImageBlock({ room }: { room: PublicRoom }) {
           <strong>Foto kamar menyusul</strong>
           <span>Admin bisa mengirim foto terbaru lewat WhatsApp sebelum kamu booking.</span>
         </div>
-        <a href={buildWhatsAppUrl(room)} target="_blank" rel="noreferrer" className="btn btn-outline-primary btn-sm">
+        <a href={buildRoomWaUrl(room.code || `Kamar #${room.id}`)} target="_blank" rel="noreferrer" className="btn btn-outline-primary btn-sm">
           Minta foto via WhatsApp
         </a>
       </div>
@@ -289,12 +280,12 @@ export default function PublicRoomDetailPage() {
                   Booking Kamar Ini
                 </button>
               ) : (
-                <a className="btn btn-warning btn-lg room-detail-cta-main" href={buildWhatsAppUrl(room)} target="_blank" rel="noreferrer">
+                <a className="btn btn-warning btn-lg room-detail-cta-main" href={buildRoomWaUrl(room.code || `Kamar #${room.id}`)} target="_blank" rel="noreferrer">
                   💬 Tanya Ketersediaan via WhatsApp
                 </a>
               )}
               {availability.canBook && (
-                <a className="btn btn-outline-secondary" href={buildWhatsAppUrl(room)} target="_blank" rel="noreferrer">💬 Tanya via WhatsApp</a>
+                <a className="btn btn-outline-secondary" href={buildRoomWaUrl(room.code || `Kamar #${room.id}`)} target="_blank" rel="noreferrer">💬 Tanya via WhatsApp</a>
               )}
             </div>
           </div>
@@ -486,7 +477,7 @@ export default function PublicRoomDetailPage() {
                       {availability?.canBook ? (
                         <Button size="lg" onClick={handleBook}>Ajukan Booking</Button>
                       ) : null}
-                      <a className="btn btn-outline-secondary" href={buildWhatsAppUrl(room)} target="_blank" rel="noreferrer">💬 {availability?.canBook ? 'Tanya via WhatsApp' : 'Tanya Ketersediaan'}</a>
+                      <a className="btn btn-outline-secondary" href={buildRoomWaUrl(room.code || `Kamar #${room.id}`)} target="_blank" rel="noreferrer">💬 {availability?.canBook ? 'Tanya via WhatsApp' : 'Tanya Ketersediaan'}</a>
                     </div>
                   </Card.Body>
                 </Card>
@@ -504,7 +495,7 @@ export default function PublicRoomDetailPage() {
               {availability?.canBook ? (
                 <Button onClick={handleBook}>Booking Kamar Ini</Button>
               ) : (
-                <a className="btn btn-warning" href={buildWhatsAppUrl(room)} target="_blank" rel="noreferrer">💬 Tanya via WhatsApp</a>
+                <a className="btn btn-warning" href={buildRoomWaUrl(room.code || `Kamar #${room.id}`)} target="_blank" rel="noreferrer">💬 Tanya via WhatsApp</a>
               )}
             </div>
           </>

@@ -20,6 +20,43 @@ export class AccountingSweepService {
     private readonly rentRecognitionService: RentRecognitionService,
   ) {}
 
+  /** Baca semua toggle sweep dari OperationalSetting (DB), env fallback. */
+  private async loadSweepToggles() {
+    try {
+      const db = await this.prisma.operationalSetting.findUnique({
+        where: { id: 1 },
+        select: {
+          recurringExpenseDraftsEnabled: true,
+          assetDepreciationAutoEnabled: true,
+          rentRecognitionEnabled: true,
+          notificationPruningEnabled: true,
+          notificationRetentionDays: true,
+          journalReconciliationEnabled: true,
+          journalReconciliationLimit: true,
+        },
+      });
+      return {
+        recurringExpenseDrafts: db?.recurringExpenseDraftsEnabled ?? (String(process.env.RECURRING_EXPENSE_DRAFTS_ENABLED ?? 'true').toLowerCase() !== 'false'),
+        assetDepreciation: db?.assetDepreciationAutoEnabled ?? (String(process.env.ASSET_DEPRECIATION_AUTO_ENABLED ?? 'true').toLowerCase() !== 'false'),
+        rentRecognition: db?.rentRecognitionEnabled ?? (String(process.env.RENT_RECOGNITION_ENABLED ?? 'true').toLowerCase() !== 'false'),
+        notificationPruning: db?.notificationPruningEnabled ?? (String(process.env.NOTIFICATION_PRUNING_ENABLED ?? 'true').toLowerCase() !== 'false'),
+        notificationRetentionDays: db?.notificationRetentionDays ?? Number(process.env.NOTIFICATION_RETENTION_DAYS ?? 90),
+        journalReconciliation: db?.journalReconciliationEnabled ?? (String(process.env.JOURNAL_RECONCILIATION_ENABLED ?? 'true').toLowerCase() !== 'false'),
+        journalReconciliationLimit: db?.journalReconciliationLimit ?? Number(process.env.JOURNAL_RECONCILIATION_LIMIT ?? 50),
+      };
+    } catch {
+      return {
+        recurringExpenseDrafts: String(process.env.RECURRING_EXPENSE_DRAFTS_ENABLED ?? 'true').toLowerCase() !== 'false',
+        assetDepreciation: String(process.env.ASSET_DEPRECIATION_AUTO_ENABLED ?? 'true').toLowerCase() !== 'false',
+        rentRecognition: String(process.env.RENT_RECOGNITION_ENABLED ?? 'true').toLowerCase() !== 'false',
+        notificationPruning: String(process.env.NOTIFICATION_PRUNING_ENABLED ?? 'true').toLowerCase() !== 'false',
+        notificationRetentionDays: Number(process.env.NOTIFICATION_RETENTION_DAYS ?? 90),
+        journalReconciliation: String(process.env.JOURNAL_RECONCILIATION_ENABLED ?? 'true').toLowerCase() !== 'false',
+        journalReconciliationLimit: Number(process.env.JOURNAL_RECONCILIATION_LIMIT ?? 50),
+      };
+    }
+  }
+
   wibToday(): Date {
     const now = new Date();
     const jakartaNow = new Date(now.getTime() + 7 * 3600 * 1000);
@@ -27,7 +64,7 @@ export class AccountingSweepService {
   }
 
   async runRecurringExpenseDrafts(options: { actorUserId?: number | null; source?: string; now?: Date } = {}) {
-    const enabled = String(process.env.RECURRING_EXPENSE_DRAFTS_ENABLED ?? 'true').toLowerCase() !== 'false';
+    const { recurringExpenseDrafts: enabled } = await this.loadSweepToggles();
     const source = options.source ?? 'AUTO_OPS_RECURRING_EXPENSE_DRAFTS';
     if (!enabled) return { createdCount: 0, skipped: true, skippedReason: 'RECURRING_EXPENSE_DRAFTS_DISABLED', source };
 
@@ -104,7 +141,7 @@ export class AccountingSweepService {
   }
 
   async runAutomaticDepreciation(options: { actorUserId?: number | null; source?: string; now?: Date } = {}) {
-    const enabled = String(process.env.ASSET_DEPRECIATION_AUTO_ENABLED ?? 'true').toLowerCase() !== 'false';
+    const { assetDepreciation: enabled } = await this.loadSweepToggles();
     const source = options.source ?? 'AUTO_OPS_ASSET_DEPRECIATION';
     if (!enabled) return { posted: false, skipped: true, skippedReason: 'ASSET_DEPRECIATION_AUTO_DISABLED', source };
 
@@ -159,7 +196,7 @@ export class AccountingSweepService {
    */
   async runRentRecognition(options: { actorUserId?: number | null; source?: string } = {}) {
     const source = options.source ?? 'AUTO_OPS_RENT_RECOGNITION';
-    const enabled = String(process.env.RENT_RECOGNITION_ENABLED ?? 'true').toLowerCase() !== 'false';
+    const { rentRecognition: enabled } = await this.loadSweepToggles();
     if (!enabled) return { skipped: true, skippedReason: 'RENT_RECOGNITION_DISABLED', source };
     try {
       const result = await this.rentRecognitionService.run({ actorUserId: options.actorUserId ?? null });
@@ -178,10 +215,8 @@ export class AccountingSweepService {
    */
   async runNotificationPruning(options: { actorUserId?: number | null; source?: string } = {}) {
     const source = options.source ?? 'AUTO_OPS_NOTIFICATION_PRUNING';
-    const enabled = String(process.env.NOTIFICATION_PRUNING_ENABLED ?? 'true').toLowerCase() !== 'false';
+    const { notificationPruning: enabled, notificationRetentionDays: retentionDays } = await this.loadSweepToggles();
     if (!enabled) return { deleted: 0, skipped: true, skippedReason: 'NOTIFICATION_PRUNING_DISABLED', source };
-
-    const retentionDays = Number(process.env.NOTIFICATION_RETENTION_DAYS ?? 90);
     try {
       const result = await this.appNotification.pruneOlderThan(retentionDays);
       return { ...result, skipped: false, source };
@@ -200,9 +235,8 @@ export class AccountingSweepService {
    */
   async runAutoJournalReconciliation(options: { actorUserId?: number | null; source?: string } = {}) {
     const source = options.source ?? 'AUTO_OPS_JOURNAL_RECONCILIATION';
-    const enabled = String(process.env.JOURNAL_RECONCILIATION_ENABLED ?? 'true').toLowerCase() !== 'false';
+    const { journalReconciliation: enabled, journalReconciliationLimit: limit } = await this.loadSweepToggles();
     if (!enabled) return { skipped: true, skippedReason: 'JOURNAL_RECONCILIATION_DISABLED', source };
-    const limit = Number(process.env.JOURNAL_RECONCILIATION_LIMIT ?? 50);
     try {
       const result = await this.accountingPosting.backfillAutoJournal(
         { limit: Number.isFinite(limit) ? limit : 50 },

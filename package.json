@@ -9,6 +9,7 @@
     "golive:1": "node scripts/golive-combined.mjs",
     "golive:1:fast": "node scripts/golive-combined.mjs --no-build",
     "make-deploy": "node scripts/make-deploy.mjs",
+    "make-deploy:fast": "node scripts/make-deploy.mjs --no-build",
     "token-efficiency-report": "node scripts/token-efficiency-report.mjs"
   }
 }

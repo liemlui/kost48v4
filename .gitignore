@@ -73,3 +73,6 @@ frontend/screenshots-ui/
 test-output.txt
 backend/test/debug-*.js
 
+
+*storybook.log
+storybook-static

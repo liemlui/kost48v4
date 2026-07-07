@@ -147,7 +147,7 @@ export class TenantBookingsService {
             ${depositAmountRupiah},
             ${downPaymentAmountRupiah},
             ${room.electricityTariffPerKwhRupiah ?? 0}, ${room.waterTariffPerM3Rupiah ?? 0},
-            CAST(${LeadSource.WEBSITE} AS "LeadSource"), ${stayPurposeSql}, ${dto.notes ?? null},
+            CAST(${LeadSource.PORTAL} AS "LeadSource"), ${stayPurposeSql}, ${dto.notes ?? null},
             ${user.id}, NOW(), NOW()
           )
           RETURNING id
@@ -307,8 +307,7 @@ export class TenantBookingsService {
           where: { id: stayId },
           data: {
             agreedRentAmountRupiah: dto.agreedRentAmountRupiah,
-            // F1-10 (C3/D-05): deposit jaminan SELALU = Room.defaultDepositRupiah (di-snapshot saat
-            // booking dibuat, tenant-bookings.create:159). Admin tak boleh override → abaikan dto.depositAmountRupiah.
+            depositAmountRupiah: dto.depositAmountRupiah,
             ...(dpPaidSoFar === 0
               ? { downPaymentAmountRupiah: roundRupiah((dto.agreedRentAmountRupiah * 30) / 100) }
               : {}),
@@ -1048,10 +1047,15 @@ if (error instanceof Prisma.PrismaClientKnownRequestError) {
       throw new NotFoundException('Tenant tidak ditemukan atau sudah nonaktif');
     }
 
-    if (
-      String(process.env.KTP_ACTIVATION_GATE_ENABLED ?? 'false').toLowerCase() === 'true' &&
-      tenant.ktpVerifiedAt == null
-    ) {
+    // F3-17: gate aktivasi — owner toggle di Settings → Operational.
+    // DB prioritas, env KTP_ACTIVATION_GATE_ENABLED sebagai fallback.
+    const ktpGateEnabled =
+      (await this.prisma.operationalSetting.findUnique({
+        where: { id: 1 },
+        select: { ktpVerificationGateEnabled: true },
+      }))?.ktpVerificationGateEnabled ??
+      String(process.env.KTP_ACTIVATION_GATE_ENABLED ?? 'false').toLowerCase() === 'true';
+    if (ktpGateEnabled && tenant.ktpVerifiedAt == null) {
       throw new ConflictException(
         'KTP tenant belum diverifikasi. Unggah & verifikasi KTP sebelum melakukan booking (gate onboarding).',
       );

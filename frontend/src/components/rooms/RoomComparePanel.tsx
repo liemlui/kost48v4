@@ -3,48 +3,12 @@ import { useNavigate } from 'react-router-dom';
 import CurrencyDisplay from '../common/CurrencyDisplay';
 import FacilityList from './FacilityList';
 import type { PublicRoom } from '../../types';
-import { getPublicRoomAvailabilityDisplay, getPublicRoomInitialCostEstimate } from '../../utils/publicRoomDisplay';
-
-function buildWaInterestUrl(room: PublicRoom) {
-  const number = String(import.meta.env.VITE_PUBLIC_ADMIN_WHATSAPP ?? '').replace(/\D/g, '');
-  const roomCode = room.code || `Kamar #${room.id}`;
-  const message = `Halo Admin KOST48, saya tertarik dengan kamar ${roomCode}. Kapan kira-kira kamar ini bisa tersedia?`;
-  return number ? `https://wa.me/${number}?text=${encodeURIComponent(message)}` : `https://wa.me/?text=${encodeURIComponent(message)}`;
-}
+import { getPublicRoomAvailabilityDisplay, getPublicRoomInitialCostEstimate, getPublicRoomBathroomLabel, getPublicRoomCoolingLabel } from '../../utils/publicRoomDisplay';
+import { buildAvailabilityWaUrl } from '../../utils/whatsapp';
 
 interface RoomComparePanelProps {
   rooms: PublicRoom[];
   onClear: () => void;
-}
-
-function normalizeText(value: unknown) {
-  return String(value ?? '').toLowerCase();
-}
-
-function allRoomText(room: PublicRoom) {
-  return [
-    room.code,
-    room.name,
-    room.notes,
-    room.floor,
-    ...(room.facilities ?? []).map((facility) => `${facility.name} ${facility.category ?? ''} ${facility.note ?? ''}`),
-  ]
-    .map(normalizeText)
-    .join(' ');
-}
-
-function getBathroomLabel(room: PublicRoom) {
-  return /km\s*dalam|kamar mandi dalam|mandi dalam|private bathroom|bathroom dalam|toilet dalam/.test(allRoomText(room))
-    ? 'Kamar mandi dalam'
-    : 'Kamar mandi luar';
-}
-
-function getCoolingLabel(room: PublicRoom) {
-  return /\bac\b|air conditioner|pendingin ruangan/.test(allRoomText(room)) ? 'AC' : 'Kipas angin';
-}
-
-function getSizeLabel(room: PublicRoom) {
-  return /besar|large|deluxe|luas|vip|premium|superior/.test(allRoomText(room)) ? 'Besar' : 'Standar';
 }
 
 function priceAmount(room: PublicRoom, key: 'monthlyRateRupiah' | 'weeklyRateRupiah' | 'dailyRateRupiah') {
@@ -130,15 +94,15 @@ export default function RoomComparePanel({ rooms, onClear }: RoomComparePanelPro
               </tr>
               <tr>
                 <td className="text-muted">Kamar mandi</td>
-                {rooms.map((room) => <td key={room.id} className="text-center">{getBathroomLabel(room)}</td>)}
+                {rooms.map((room) => <td key={room.id} className="text-center">{getPublicRoomBathroomLabel(room)}</td>)}
               </tr>
               <tr>
                 <td className="text-muted">Pendingin</td>
-                {rooms.map((room) => <td key={room.id} className="text-center">{getCoolingLabel(room)}</td>)}
+                {rooms.map((room) => <td key={room.id} className="text-center">{getPublicRoomCoolingLabel(room)}</td>)}
               </tr>
               <tr>
                 <td className="text-muted">Ukuran</td>
-                {rooms.map((room) => <td key={room.id} className="text-center">{getSizeLabel(room)}</td>)}
+                {rooms.map((room) => <td key={room.id} className="text-center">{room.pricing?.monthlyRateRupiah && room.pricing.monthlyRateRupiah > 2_000_000 ? 'Besar' : 'Standar'}</td>)}
               </tr>
               <tr>
                 <td className="text-muted">Fasilitas lain</td>
@@ -166,7 +130,7 @@ export default function RoomComparePanel({ rooms, onClear }: RoomComparePanelPro
                       </Button>
                     ) : (
                       <a
-                        href={buildWaInterestUrl(room)}
+                        href={buildAvailabilityWaUrl(room.code || `Kamar #${room.id}`)}
                         target="_blank"
                         rel="noreferrer"
                         className="btn btn-sm btn-outline-secondary"

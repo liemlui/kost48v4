@@ -773,3 +773,11 @@ Untuk setiap task G:
 9. Update M10 status task.
 10. Tambah satu baris M11 changelog.
 
+---
+
+## Audit 360° P6 AI Flow (Jul 2026)
+
+**Status:** 🟢 Solid — semua pilar arsitektur AI manual-only terverifikasi. Detail → `docs/archieve/M17_AUDIT_360_P3_P8.md`
+
+✅ **Manual-only** — tidak ada cron/page-load/auto-ops · ✅ **OWNER/ADMIN only** (`@Roles`) · ✅ **Circuit breaker**: 5 gagal → open 30 detik · ✅ **Fallback offline** (MarketAnalysis.chat → `RULE_FALLBACK`) · ✅ **AI configurable** (model, base URL, daily limit dari Owner Settings) · ✅ **Budget guard** (env AI_DAILY_REQUEST_LIMIT, AI_MAX_INPUT_CHARS, AI_MAX_OUTPUT_TOKENS) · ✅ **Snapshot aggregated** (top 10-20, hemat token + PDP) · ✅ **Audit trail** (`AuditLog.meta.ai`: feature, model, promptHash, confidence, humanDecision) · ✅ **No direct mutation** (tidak approve payment, create expense, close ticket, posting journal) · ✅ **KTP OCR lokal** (Tesseract.js offline, teks saja ke DeepSeek)
+

@@ -42,13 +42,20 @@ export class AutoOpsService implements OnModuleInit, OnModuleDestroy {
     private readonly maintenanceSweep: MaintenanceSweepService,
   ) {}
 
-  private static parseEnabled(): boolean {
+  private async loadEnabled(): Promise<boolean> {
+    try {
+      const db = await this.prisma.operationalSetting.findUnique({
+        where: { id: 1 },
+        select: { autoOpsEnabled: true },
+      });
+      if (db && typeof db.autoOpsEnabled === 'boolean') return db.autoOpsEnabled;
+    } catch { /* DB not ready — fallback env */ }
     const raw = String(process.env.AUTO_OPS_ENABLED ?? 'true').trim().toLowerCase();
     return ['true', '1', 'yes', 'y', 'on'].includes(raw);
   }
 
-  onModuleInit() {
-    const enabled = AutoOpsService.parseEnabled();
+  async onModuleInit() {
+    const enabled = await this.loadEnabled();
     if (!enabled) return;
     const intervalMs = Math.max(60_000, AUTO_OPS_DEADLINES.AUTO_OPS_INTERVAL_MINUTES * 60_000);
     this.timer = setInterval(() => {

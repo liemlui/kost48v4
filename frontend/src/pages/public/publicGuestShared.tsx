@@ -33,6 +33,8 @@ import {
   isPublicRoomBookable,
 } from '../../utils/publicRoomDisplay';
 import { resolveAbsoluteFileUrl } from '../../utils/resolveAbsoluteFileUrl';
+import { buildAdminWaUrl, buildRoomWaUrl } from '../../utils/whatsapp';
+import BookingCtaButton from '../../components/rooms/BookingCtaButton';
 
 export const NAV_LINKS = [
   { href: '#kamar', icon: '🛏️', label: 'Kamar' },
@@ -213,14 +215,8 @@ export function formatMonthlyRange(minimum: number, maximum: number) {
   return `${formatCompactRupiah(minimum)} - ${formatCompactRupiah(maximum)}`;
 }
 
-export function buildWhatsAppUrl(message: string) {
-  return `${officialKost48Location.whatsappUrl}?text=${encodeURIComponent(message)}`;
-}
-
-export function buildRoomWhatsAppUrl(room: PublicRoom) {
-  const roomName = room.code || room.name || `Kamar ${room.id}`;
-  return buildWhatsAppUrl(`Halo Admin KOST48, saya tertarik dengan ${roomName}. Boleh tanya ketersediaan dan estimasi siap huni?`);
-}
+// Re-export dari utils/whatsapp untuk backward compatibility consumer imports
+export { buildAdminWaUrl as buildWhatsAppUrl, buildRoomWaUrl as buildRoomWhatsAppUrl };
 
 export function getRoomCover(room: PublicRoom) {
   const apiImage = (room.images ?? [])
@@ -373,9 +369,12 @@ export function RoomPreviewCard({ room }: { room: PublicRoom }) {
           {availability.canBook ? (
             <Link className="gx-room-action-primary" to={`/booking/${room.id}`} state={{ room }}><span aria-hidden="true">📝</span> Ajukan Booking</Link>
           ) : (
-            // PUB-BTN-COLOR: kamar belum bisa dibooking → "Tanya" pakai gaya outline (bukan tombol utama).
-            // R-06: kamar terisi bisa diklik ke detail (state penuh), tombol WA tetap tersedia.
-            <a className="gx-room-action-secondary" href={buildRoomWhatsAppUrl(room)} target="_blank" rel="noreferrer"><span aria-hidden="true">💬</span> Tanya Ketersediaan</a>
+            <BookingCtaButton
+              room={room}
+              variant="wa-only"
+              canBookOverride={false}
+              className="gx-room-action-secondary"
+            />
           )}
         </div>
       </div>

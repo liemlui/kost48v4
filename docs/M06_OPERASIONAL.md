@@ -529,3 +529,15 @@ Sumber TUNGGAL (hindari duplikasi). Per-kamar tetap bisa override tarif bila per
   / meterReadingAt → meterSummary). M-2 menggeneralisasi ini jadi siklus mandiri + bukan-perpanjangan.
 - Model sudah ada: `MeterReading`, `InvoiceLineType.ELECTRICITY/WATER`, `Room/Stay.electricityTariffPerKwhRupiah`,
   `waterTariffPerM3Rupiah`. Belum ada: konstanta global free-quota + toggle air + siklus 1×/bulan generik.
+
+---
+
+## Audit 360° P4–P5 (Jul 2026)
+
+**Status:** 🟢 Solid. Detail → `docs/archieve/M17_AUDIT_360_P3_P8.md`
+
+### P4 Staff Ops & Inventory
+✅ Ticket lifecycle valid (OPEN→IN_PROGRESS→DONE→CLOSED) · ✅ CHECKOUT_INSPECTION dedupe · ✅ Room readiness gate · ✅ SLA escalation (L0→admin, L1→owner) · ✅ Staff close inspeksi (model tenant-pengawas) · ✅ Assignment round-robin · ✅ One-active-work guard · ✅ KPI calculation akurat · ✅ Review tenant→owner verify · ✅ Single-writer inventory trigger · ✅ Staff 403 official inventory · ✅ Edit movement banned · ✅ Field report→admin review
+
+### P5 Auto-Ops
+✅ Advisory lock mutex (`pg_try_advisory_lock(1)`) — multi-instance safe · ✅ 5 sweeper (Booking, Stay, Renewal, Accounting, Maintenance) × banyak operasi · ✅ Uang masuk = STOP (PENDING_REVIEW/APPROVED/AWAITING_PAYMENT skip) · ✅ Idempotent · ✅ FOR UPDATE re-cek setelah lock · ✅ Sequential execution

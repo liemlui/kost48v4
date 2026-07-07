@@ -179,7 +179,7 @@ export default function RoomDetailPage() {
           <PageHeader
             eyebrow="Detail Kamar"
             title={`${room.code}${room.name ? ` · ${room.name}` : ''}`}
-            description={`Lantai ${formatValue(room.floor)} · Status kamar: ${room.status}`}
+            description={`Lantai ${formatValue(room.floor)}`}
           />
 
           <Card className="detail-hero border-0 mb-4">

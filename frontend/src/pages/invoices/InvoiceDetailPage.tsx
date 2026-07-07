@@ -14,7 +14,7 @@ import { getInvoiceOutstandingAmount, getInvoicePaidAmount, getInvoiceTotalAmoun
 import { invoicePurposeMeta } from '../../utils/invoiceUtility';
 import InvoicePrintLayout from '../../components/reports/InvoicePrintLayout';
 import { useAuth } from '../../context/AuthContext';
-import { AssistantPanel, BlockedReasonCard, CompactMetrics, LifecycleTimeline, type AssistantItem, type MetricChip, type TimelineStep } from '../../components/command-center';
+import { AssistantPanel, BlockedReasonCard, LifecycleTimeline, type AssistantItem, type TimelineStep } from '../../components/command-center';
 import { buildManualPaymentSafety } from '../../utils/invoiceActionSafety';
 
 const paymentMethodLabels: Record<string, string> = {
@@ -151,13 +151,6 @@ export default function InvoiceDetailPage() {
     } : null,
   ].filter(Boolean) as AssistantItem[] : [];
 
-  const metrics: MetricChip[] = invoice ? [
-    { id: 'total', label: 'Total Tagihan', value: <CurrencyDisplay amount={totalInvoice} /> as any, helper: invoice.invoiceNumber || `INV-${invoice.id}`, icon: '🧾', status: invoice.status },
-    { id: 'paid', label: 'Sudah Dibayar', value: <CurrencyDisplay amount={totalPaid} /> as any, helper: `${invoice.payments?.length ?? 0} pembayaran tercatat`, icon: '💳', status: totalPaid > 0 ? 'SUCCESS' : 'INFO' },
-    { id: 'remaining', label: 'Sisa Tagihan', value: <CurrencyDisplay amount={outstanding} /> as any, helper: isOpenInvoice ? 'Harus selesai sebelum final keluar' : 'Tidak ada sisa', icon: '⚖️', status: outstanding > 0 ? 'WARNING' : 'SUCCESS' },
-    { id: 'due', label: 'Jatuh Tempo', value: formatDateSafe(invoice.dueDate), helper: isOverdue ? 'Sudah overdue' : 'Tanggal follow-up', icon: '⏰', status: isOverdue ? 'DANGER' : 'INFO' },
-  ] : [];
-
   const timelineSteps: TimelineStep[] = invoice ? [
     { id: 'draft', label: 'Draft tagihan', description: 'Rincian dibuat dan belum tampil ke penghuni.', status: invoice.status === 'DRAFT' ? 'active' : 'done' },
     { id: 'issued', label: 'Tagihan diterbitkan', description: 'Penghuni dapat melihat dan membayar tagihan.', status: invoice.status === 'DRAFT' ? 'pending' : ['CANCELLED'].includes(invoice.status) ? 'blocked' : 'done' },
@@ -217,8 +210,6 @@ export default function InvoiceDetailPage() {
             emptyTitle="Tagihan aman"
             emptyMessage="Tidak ada blocker besar pada tagihan ini."
           />
-
-          <CompactMetrics metrics={metrics} />
 
           {isOpenInvoice ? (
             <BlockedReasonCard

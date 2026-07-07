@@ -129,6 +129,17 @@ async function bootstrap() {
   app.use('/api/auth/login', authLimiter);
   app.use('/api/auth/forgot-password', authLimiter);
   app.use('/api/auth/reset-password', authLimiter);
+  // P3-01: refresh dan logout pakai moderate rate limit (20 req/menit) — bukan auth ketat karena user legitimate sering refresh
+  app.use('/api/auth/refresh', createRateLimiter({
+    name: 'refresh',
+    windowMs: 60_000,
+    max: 20,
+  }));
+  app.use('/api/auth/logout', createRateLimiter({
+    name: 'logout',
+    windowMs: 60_000,
+    max: 20,
+  }));
   app.use((_req: Request, res: Response, next: NextFunction) => {
     res.setHeader('X-Content-Type-Options', 'nosniff');
     res.setHeader('X-Frame-Options', 'DENY');

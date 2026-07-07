@@ -10,7 +10,6 @@ import StaffTopWorkspaceNav from '../staff/StaffTopWorkspaceNav';
 import TenantWorkspaceTabs from '../tenant/TenantWorkspaceTabs';
 import MobileBottomNav from './MobileBottomNav';
 const CommandPalette = lazy(() => import('../common/CommandPalette'));
-import RoleWorkspaceTabs from '../workspace/RoleWorkspaceTabs';
 import GlobalSearch from './GlobalSearch';
 import PaymentUrgencyChip from '../payment-urgency/PaymentUrgencyChip';
 import Kost48LogoMark from '../common/Kost48LogoMark';
@@ -533,7 +532,6 @@ export default function AppLayout({ children }: { children?: ReactNode }) {
             ) : null}
           </section>
 
-          {isAdmin || isOwner ? <RoleWorkspaceTabs role={user?.role} ownerViewMode={isOwner ? ownerViewMode : undefined} /> : null}
           {children ?? <Outlet />}
         </main>
 

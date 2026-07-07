@@ -55,6 +55,14 @@ export default function HorizontalBarChart<T extends HorizontalBarPoint>({
   }));
   const domainMax = maxValue && maxValue > 0 ? maxValue : 'dataMax';
 
+  if (safePoints.length === 0) {
+    return (
+      <div className="recharts-horizontal-bars recharts-horizontal-bars--empty" role="img" aria-label={ariaLabel}>
+        <div className="smart-chart-empty">Belum ada data</div>
+      </div>
+    );
+  }
+
   return (
     <div className="recharts-horizontal-bars" role="img" aria-label={ariaLabel}>
       <ChartResponsiveWrapper height={height}>

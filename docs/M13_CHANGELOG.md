@@ -3,6 +3,24 @@
 > Arsip changelog ringkas, dipisah dari M10 pada 2026-06-19 untuk hemat token AI (M10 = checklist aktif saja). **Entri changelog BARU ditulis DI SINI (paling atas)**, bukan di M10. Format: 1 header tanggal + 1-2 poin outcome per entri.
 > Entri lama (≤ 2026-07-16) diarsip ke docs/archieve/M11_CHANGELOG_ARSIP_S1_2026.md.
 
+### 9 Jul 2026
+- **M17** — Implementasi audit P3-P8: 🔴 P3-01 refresh token (🧬 model RefreshToken + endpoint `/auth/refresh` + httpOnly cookie + FE auto-refresh interceptor); 🟠 P7-01 BookingCtaButton shared component; 🟠 P8-01 FK index verified (215 `@@index`); 🔵 P8-03 chart empty state guard. Semua LOW (P3-02/P8-02/P8-04/P8-05) didokumentasikan/diverifikasi selesai. File: `backend/prisma/schema.prisma`, `backend/src/auth/*`, `frontend/src/api/client.ts`, `frontend/src/context/AuthContext.tsx`, `frontend/src/components/rooms/BookingCtaButton.tsx`, `frontend/src/components/charts/SmartChartPanel.tsx`, `frontend/src/components/charts/HorizontalBarChart.tsx`, `docs/M17_AUDIT_360_P3_P8.md`.
+
+### 8 Jul 2026
+- **M16** — Perbaikan temuan Audit 360° Flow Huni: P2-01 LeadSource PORTAL (🧬 schema + kode), P2-02 guard checkout ≤ plannedCheckOutDate, P2-04 FOR UPDATE lock Stay di approveRequest. 3 temuan lain diverifikasi valid (P2-03/05/06/07). File: `backend/src/modules/checkout-requests/checkout-requests.service.ts`, `backend/prisma/schema.prisma`, `backend/src/common/enums/app.enums.ts`, `backend/src/modules/tenant-bookings/tenant-bookings.service.ts`, `frontend/src/pages/stays/check-in-wizard/{constants,checkInWizardUtils}.tsx`, `docs/M16_AUDIT_360_FLOW_HUNI.md`.
+- **M15** — Unifikasi basis revenue dashboard owner: KPI `totalRevenue` + tren jadi **KAS murni** (`InvoicePayment.paymentDate` + `WifiSale.saleDate`), bukan campur akrual (Invoice.periodStart) + kas. `netProfit` tetap akrual (invoice-based) untuk membedakan dari `netCashFlow`. File: `backend/src/modules/finance/finance.service.ts` (2 blok: KPI section ~20 line + trend loop ~10 line).
+
+### 6 Jul 2026
+- **M14 SELESAI (16/16 100%)** — Redundansi UI/UX + audit: AM-01 unifikasi 12 WA URL builder → 1 `utils/whatsapp.ts`, AM-02 hapus RoleWorkspaceTabs dari AppLayout, AM-05 tambah Pengumuman ke sidebar admin (navigation.ts), AM-07 fix RoomComparePanel spec detection (regex→shared utility). AM-13 riset CSS Modules (Vite native support, 1/200+ file). AM-14 buat `useGenericForm` hook. AM-15 setup Storybook (3 story pilot: StatusBadge, EmptyState, StatCard). AM-16 setup Playwright E2E (3 smoke test: public + login). AM-10 dokumentasi lengkap. Build FE ✅
+- **AM-01** — Unifikasi WhatsApp URL builder: `utils/whatsapp.ts` (buildAdminWaUrl, buildRoomWaUrl, buildAvailabilityWaUrl) gantikan 6 fungsi duplikat + 6 raw wa.me/ inline di 13 file.
+- **AM-02** — Hapus RoleWorkspaceTabs dari AppLayout (render + import). AM-04 N/A (sudah dihapus total).
+- **AM-05** — Tambah "Pengumuman" (📣) ke sidebar admin antara Perawatan AC dan Loyalitas & Reward.
+- **AM-07** — Fix RoomComparePanel spec detection: hapus 4 fungsi regex (getBathroomLabel/getCoolingLabel/getSizeLabel/allRoomText/normalizeText), ganti dengan getPublicRoomBathroomLabel/getPublicRoomCoolingLabel dari utility shared.
+  Build FE ✅
+
+### 4 Jul 2026
+- **audit(M14):** Audit UI/UX komprehensif — validasi 8 kategori (struktur, design system, routing, data fetching, styling, error states, form, aksesibilitas). Hasil: 7/8 KUAT (⭐5), 1/8 CUKUP (⭐4). 23 shared components verified, 13 ARIA pattern, 100% React Query, 16-file CSS cascade. 4 task baru dibuat dari temuan: AM-13 (CSS Modules bertahap), AM-14 (useForm wrapper shared), AM-15 (Storybook), AM-16 (E2E smoke test). Total Fase AM: 16 task (7 selesai, 9 tersisa).
+
 ### 6 Jul 2026
 - **AM-06** — RoomCard pakai FacilityList (ganti amenity inline `<span>`→`<FacilityList compact maxItems={3} />`).
 - **AM-08** — Buat RoomPriceTable komponen reusable, dipakai di RoomCard (ganti `<table>` inline).

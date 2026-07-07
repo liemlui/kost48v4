@@ -1,7 +1,7 @@
 generator client {
   provider      = "prisma-client-js"
   output        = "../src/generated/prisma"
-  binaryTargets = ["native"]
+  binaryTargets = ["native", "rhel-openssl-1.0.x", "rhel-openssl-3.0.x", "debian-openssl-1.1.x"]
 }
 
 datasource db {
@@ -303,6 +303,7 @@ enum LeadSource {
   WHATSAPP
   FACEBOOK
   WEBSITE
+  PORTAL
   OTA
   OTHER
 }
@@ -543,6 +544,7 @@ model User {
   peerReportsModerated      PeerBehaviorReport[]       @relation("PeerReportModeratedBy")
   marketAnalysesCreated     MarketAnalysis[]           @relation("MarketAnalysisCreatedBy")
   satisfactionSurveysCreated SatisfactionSurvey[]
+  refreshTokens             RefreshToken[]
 
   @@index([role])
   @@index([isActive])
@@ -551,6 +553,21 @@ model User {
 // Marketing/strategi (owner): analisa pasar (SWOT/PESTLE/kompetitor) hasil chat AI DeepSeek
 // — disusun lewat wawancara AI ke owner + pengetahuan pasar; transcript & hasil terstruktur disimpan.
 // (Riset web LIVE = fase lanjutan; lihat docs.)
+// P3-01: Refresh token for secure auth — stored as SHA-256 hash, supports revocation.
+model RefreshToken {
+  id        Int       @id @default(autoincrement())
+  userId    Int
+  token     String    @unique // SHA-256 hash of the raw refresh token
+  expiresAt DateTime
+  revokedAt DateTime?
+  createdAt DateTime  @default(now())
+
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([token])
+}
+
 model MarketAnalysis {
   id             Int      @id @default(autoincrement())
   kind           String   // SWOT | PESTLE | COMPETITOR | OTHER
@@ -2118,8 +2135,43 @@ model OperationalSetting {
   capitalizationThresholdByCategory String? // JSON: {"SALARY":500000,...}
   // ── Fitur tenant toggle ──────────────────────────────────────────────────
   tenantLoyaltyEnabled          Boolean  @default(false)  // Loyalty/reward tenant (poin, leaderboard, katalog reward)
+  ktpVerificationGateEnabled    Boolean  @default(false)  // F3-17: verifikasi KTP wajib sebelum check-in/booking (gate UU PDP)
   // ── Admin WhatsApp (owner-settable — D-25) ──────────────────────────────
   adminWhatsappNumber           String   @default("6285648887628")
+  // ── Brevo Email (owner-settable) ────────────────────────────────────────
+  brevoApiKey                   String   @default("")        // API key Brevo; kosong = nonaktifkan email (secret, never sent to client)
+  mailFromEmail                 String   @default("no-reply@kost48surabaya.com")
+  mailFromName                  String   @default("Kost48 Surabaya")
+  // ── AutoOps Master Toggle ───────────────────────────────────────────────
+  autoOpsEnabled                Boolean  @default(true)      // Master toggle semua AutoOps sweeps
+  // ── Accounting Sweep Toggles ────────────────────────────────────────────
+  recurringExpenseDraftsEnabled Boolean  @default(false)     // Recurring expense draft generation
+  assetDepreciationAutoEnabled  Boolean  @default(false)     // Automatic asset depreciation
+  rentRecognitionEnabled        Boolean  @default(false)     // PSAK 72 rent recognition
+  notificationPruningEnabled    Boolean  @default(true)      // Old notification cleanup
+  notificationRetentionDays     Int      @default(90)        // Days to retain notifications
+  journalReconciliationEnabled  Boolean  @default(false)     // Auto journal backfill
+  journalReconciliationLimit    Int      @default(100)       // Max journals per reconciliation run
+  // ── AutoOps SLA Deadlines (jam) ─────────────────────────────────────────
+  bookingReviewDeadlineHours           Int @default(3)   // Booking review deadline
+  approvedBookingPaymentDeadlineHours  Int @default(3)   // Payment deadline after booking approved
+  paymentReviewUrgentHours             Int @default(1)   // Payment review → urgent threshold
+  paymentReviewEscalateHours           Int @default(3)   // Payment review escalation
+  paymentReviewMaxHours                Int @default(6)   // Payment review max before forced action
+  invoiceUrgentAfterHours              Int @default(6)   // Invoice overdue → urgent
+  invoiceDueAfterHours                 Int @default(24)  // Invoice due horizon
+  renewReminderDays                    Int @default(3)   // Days before checkout start renewal reminders
+  renewLastCallHours                   Int @default(24)  // Renewal last-call window
+  renewPaymentDeadlineHours            Int @default(3)   // Renewal payment deadline
+  renewReviewUrgentHours               Int @default(3)   // Renewal review urgent
+  renewReviewEscalateHours             Int @default(6)   // Renewal review escalate
+  checkoutReviewUrgentHours            Int @default(3)   // Checkout review urgent
+  checkoutReviewEscalateHours          Int @default(6)   // Checkout review escalate
+  checkoutFinalUrgentHours             Int @default(6)   // Checkout final urgent window
+  lateTenantVacateHours                Int @default(3)   // Late tenant vacate grace
+  autoOpsIntervalMinutes               Int @default(5)   // AutoOps sweeper interval
+  // ── Maintenance Toggle ──────────────────────────────────────────────────
+  acCleaningEnabled             Boolean  @default(true)      // AC cleaning schedule enabled
   // ──────────────────────────────────────────────────────────────────────────
   updatedAt                     DateTime @updatedAt
   updatedById                   Int?

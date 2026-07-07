@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
 import { Alert, Button } from 'react-bootstrap';
-import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../common/ToastProvider';
 
 const PWA_UPDATED_KEY = 'kost48_pwa_just_updated';
@@ -20,7 +19,6 @@ function shortBuildId(buildId: string | undefined) {
 }
 
 export default function PwaStatus() {
-  const { user } = useAuth();
   const { toast } = useToast();
   const [isOffline, setIsOffline] = useState(() => !navigator.onLine);
   const [registration, setRegistration] = useState<ServiceWorkerRegistration | null>(null);
@@ -175,9 +173,10 @@ export default function PwaStatus() {
     setInstallDismissed(true);
   };
 
-  // Tunda prompt "Pasang aplikasi" sampai user login — jangan ganggu/menimpa
-  // halaman publik & login (review UI/UX). Alert offline/update tetap di semua halaman.
-  const showInstall = Boolean(installPrompt) && !installDismissed && Boolean(user);
+  // Tampilkan prompt "Pasang aplikasi" di SEMUA halaman — termasuk landing page publik.
+  // Pengunjung adalah audiens utama yang perlu didorong install PWA dari halaman marketing.
+  // Alert offline/update juga tetap di semua halaman.
+  const showInstall = Boolean(installPrompt) && !installDismissed;
 
   if (!isOffline && !updateAvailable && !showInstall) {
     return null;

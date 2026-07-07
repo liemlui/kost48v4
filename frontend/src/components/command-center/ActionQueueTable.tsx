@@ -3,6 +3,7 @@ import { Button, Card, Collapse, Table } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import EmptyState from '../common/EmptyState';
 import StatusBadge from '../common/StatusBadge';
+import { buildAdminWaUrl } from '../../utils/whatsapp';
 import type { AssistantSeverity } from './AssistantPanel';
 
 export type ActionQueueItem = {
@@ -62,7 +63,7 @@ function openActionTarget(target: string, navigate: (to: string) => void) {
 
 function buildStaffUnavailableUrl(item: ActionQueueItem) {
   const message = `Admin KOST48: staff sedang libur/tidak tersedia untuk ${item.subject}. Mohon koordinasi via WhatsApp. Target penanganan mengikuti kesepakatan chat ini.`;
-  return `https://wa.me/${ADMIN_WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
+  return buildAdminWaUrl(message);
 }
 
 export default function ActionQueueTable({

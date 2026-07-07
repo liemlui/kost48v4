@@ -94,6 +94,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return result.user;
     },
     logout() {
+      // P3-01: revoke refresh token di server (httpOnly cookie dikirim otomatis)
+      fetch((import.meta.env.VITE_API_BASE_URL || '/api') + '/auth/logout', {
+        method: 'POST',
+        credentials: 'include',
+      }).catch(() => {
+        // silent — tetap logout lokal walau server error
+      });
       localStorage.removeItem(AUTH_TOKEN_KEY);
       cacheUser(null);
       clearTenantSessionStorage();

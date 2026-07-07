@@ -555,3 +555,11 @@ LoginPage placeholder "Contoh: nama@email.com atau 0812..." — tapi error messa
 > **Instruksi eksekusi detail (SEARCH/REPLACE siap pakai) ada di `docs/M12_CHECKLIST_CHANGELOG.md` → Fase F.**
 > Setiap task di M10 sudah dilengkapi: path file, nomor baris, blok SEARCH/REPLACE eksak, dan perintah verifikasi.
 > AI model kecil (V4 Flash) bisa langsung menjalankan tanpa membaca kode sumber.
+
+---
+
+## Audit 360° P7 Marketing & Growth (Jul 2026)
+
+**Status:** 🟢 Solid. Detail → `docs/archieve/M17_AUDIT_360_P3_P8.md`
+
+✅ Room filter publik · ✅ Badge status kamar (hijau/merah/kuning/abu) · ✅ SEO 100/100 · ✅ JSON-LD (LodgingBusiness) · ✅ Social proof (rating≥4, inisial anonim) · ✅ Availability calendar · ✅ Code splitting · ✅ **CTA booking** — `BookingCtaButton` shared component (P7-01 ✅ FIXED) · ✅ Loyalty poin idempotent (4 trigger) · ✅ Reward accounting (RENT_DISCOUNT/METER_DISCOUNT/SERVICE_ADDON/BADGE) · ✅ Referral system · ✅ Rent-loyalty (D-16 harga tidak naik) · ✅ Market Analysis (DeepSeek + offline fallback) · ✅ Guest Preference Survey (OC-04)

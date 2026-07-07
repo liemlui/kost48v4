@@ -1,7 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
-import RoomCard, { buildWhatsAppUrl, getCategoryBadgeInfo } from '../../components/rooms/RoomCard';
+import RoomCard, { getCategoryBadgeInfo } from '../../components/rooms/RoomCard';
+import { buildAdminWaUrl } from '../../utils/whatsapp';
 import type { PublicRoom } from '../../types';
 
 const room = {
@@ -17,15 +18,11 @@ const room = {
 } as unknown as PublicRoom;
 
 describe('Y-O1 — RoomCard', () => {
-  describe('buildWhatsAppUrl (pure)', () => {
-    it('membuat url wa.me berisi kode kamar (encoded)', () => {
-      const url = buildWhatsAppUrl(room);
+  describe('buildAdminWaUrl (pure)', () => {
+    it('membuat url wa.me berisi teks (encoded)', () => {
+      const url = buildAdminWaUrl(`Halo Admin KOST48, saya tertarik dengan kamar ${room.code || `#${room.id}`}.`);
       expect(url).toMatch(/^https:\/\/wa\.me\//);
       expect(decodeURIComponent(url)).toContain('A-01');
-    });
-    it('status MAINTENANCE → pesan menanyakan kesiapan', () => {
-      const url = buildWhatsAppUrl({ ...room, status: 'MAINTENANCE' } as PublicRoom);
-      expect(decodeURIComponent(url)).toMatch(/dicek|siap ditempati/i);
     });
   });
 

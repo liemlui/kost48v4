@@ -20,7 +20,7 @@ export type TenantPortalStage = 'browsing' | 'booking' | 'occupied';
 // 🔧 Area Admin. Beberapa route digabung lewat `activePaths` agar tetap reachable tanpa nambah item:
 // - "Akuntansi & Aset" mencakup /finance/accounting-setup + /finance/assets + /loss-refunds (Refund Kalah-Cepat, OWNER-only).
 // - "Akun & Layanan" mencakup /users + /tenants + /additional-services + /service-interests.
-// Pengumuman (/announcements) diakses via tombol 📣 di topbar (sebelah lonceng), bukan sidebar.
+// Pengumuman (/announcements) ada di sidebar admin + tombol 📣 di topbar (sebelah lonceng).
 const ownerSections: NavigationSection[] = [
   {
     title: 'Keputusan Owner',
@@ -48,6 +48,7 @@ export const adminSections: NavigationSection[] = [
       { to: '/guest-preferences', label: 'Preferensi Tamu', icon: '🎯', hint: 'Data preferensi kamar dari wizard publik.' },
       { to: '/rooms', label: 'Kamar & Stok', icon: '🏘️', hint: 'Status kamar, barang kamar, stok gudang, mutasi stok, dan catatan meter.', activePaths: ['/rooms', '/inventory', '/room-items', '/inventory-items', '/inventory-movements', '/meter-readings'] },
       { to: '/ac-maintenance', label: 'Perawatan AC', icon: '❄️', hint: 'Pantau pemakaian AC dan jadwalkan cuci AC secara konsisten.' },
+      { to: '/announcements', label: 'Pengumuman', icon: '📣', hint: 'Buat dan kelola pengumuman untuk penghuni dan staff.' },
       { to: '/loyalty', label: 'Loyalitas & Reward', icon: '🎁', hint: 'Setujui penukaran reward tenant dan lihat katalog.' },
     ],
   },

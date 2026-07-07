@@ -417,24 +417,31 @@ export class FinanceService {
     // --- KPI values (current month) ---
     const invoiceRevenue = Number(invoiceAgg._sum.totalAmountRupiah ?? 0);
     const wifiRevenue = Number(wifiAgg._sum.soldPriceRupiah ?? 0);
-    const totalRevenue = invoiceRevenue + wifiRevenue;
+    const paymentRevenue = Number(paymentAgg._sum.amountRupiah ?? 0);
+    // M15: totalRevenue sekarang KAS murni (paymentDate + saleDate), bukan campur akrual (periodStart) + kas.
+    // WiFi tidak punya periodStart (PWA point-of-sale, bukan subscription) sehingga tidak bisa akrual.
+    // "Pendapatan" di KPI card = uang yang benar-benar masuk bulan ini.
+    const totalRevenue = paymentRevenue + wifiRevenue;
     const totalExpense = Number(expenseAgg._sum.amountRupiah ?? 0);
     // M16: deposit jaminan adalah liabilitas (bukan revenue), jadi TIDAK dimasukkan ke netProfit.
     // Pendapatan dari deposit yang hangus/dipotong sudah masuk via jurnal ADJUSTMENT —
     // untuk dashboard KPI ini tidak signifikan (owner bisa lihat di laporan formal).
-    const netProfit = totalRevenue - totalExpense;
-    const cashIn = Number(paymentAgg._sum.amountRupiah ?? 0) + wifiRevenue;
+    // netProfit = akrual sewa (invoice) + kas WiFi − beban. Berbeda dari totalRevenue (kas murni)
+    // sehingga KPI "Laba Bersih" tetap mencerminkan pendapatan yang "diperoleh" bulan ini.
+    const netProfit = invoiceRevenue + wifiRevenue - totalExpense;
+    const cashIn = paymentRevenue + wifiRevenue;
     const cashOut = totalExpense;
     const netCashFlow = cashIn - cashOut;
-    const netProfitMargin = totalRevenue > 0 ? roundPercent((netProfit / totalRevenue) * 100) : 0;
+    const netProfitMargin = invoiceRevenue + wifiRevenue > 0 ? roundPercent((netProfit / (invoiceRevenue + wifiRevenue)) * 100) : 0;
 
     // --- KPI values (prev month) ---
     const prevInvoiceRevenue = Number(prevInvoiceAgg._sum.totalAmountRupiah ?? 0);
     const prevWifiRevenue = Number(prevWifiAgg._sum.soldPriceRupiah ?? 0);
-    const prevTotalRevenue = prevInvoiceRevenue + prevWifiRevenue;
+    const prevPaymentRevenue = Number(prevPaymentAgg._sum.amountRupiah ?? 0);
+    const prevTotalRevenue = prevPaymentRevenue + prevWifiRevenue;
     const prevTotalExpense = Number(prevExpenseAgg._sum.amountRupiah ?? 0);
-    const prevNetProfit = prevTotalRevenue - prevTotalExpense;
-    const prevCashIn = Number(prevPaymentAgg._sum.amountRupiah ?? 0) + prevWifiRevenue;
+    const prevNetProfit = prevInvoiceRevenue + prevWifiRevenue - prevTotalExpense;
+    const prevCashIn = prevPaymentRevenue + prevWifiRevenue;
     const prevCashOut = prevTotalExpense;
     const prevNetCashFlow = prevCashIn - prevCashOut;
 
@@ -482,10 +489,12 @@ export class FinanceService {
       while (tm <= 0) { tm += 12; ty -= 1; }
       const trendStart = new Date(Date.UTC(ty, tm - 1, 1));
       const trendEnd = new Date(Date.UTC(ty, tm, 1));
-      const [trendInvoice, trendExpense, trendWifi] = await Promise.all([
-        this.prisma.invoice.aggregate({
-          _sum: { totalAmountRupiah: true },
-          where: { status: { notIn: [InvoiceStatus.DRAFT, InvoiceStatus.CANCELLED] as any }, periodStart: { gte: trendStart, lt: trendEnd } },
+      const [trendPayment, trendExpense, trendWifi] = await Promise.all([
+        // M15: tren pendapatan sekarang KAS murni — pakai paymentDate (InvoicePayment), bukan periodStart (Invoice).
+        // Ini konsisten dengan WiFi yang juga kas (saleDate). Dulu campur: invoice=akrual + wifi=kas.
+        this.prisma.invoicePayment.aggregate({
+          _sum: { amountRupiah: true },
+          where: { paymentDate: { gte: trendStart, lt: trendEnd } },
         }),
         this.prisma.expense.aggregate({
           _sum: { amountRupiah: true },
@@ -496,9 +505,7 @@ export class FinanceService {
           where: { saleDate: { gte: trendStart, lt: trendEnd } },
         }),
       ]);
-      // M15: invoice = akrual (berdasarkan periodStart), wifi = tunai (berdasarkan saleDate).
-      // WiFi tidak punya periodStart — ini adalah keterbatasan yang diketahui (PWA, bukan subscription).
-      const rev = Number(trendInvoice._sum.totalAmountRupiah ?? 0) + Number(trendWifi._sum.soldPriceRupiah ?? 0);
+      const rev = Number(trendPayment._sum.amountRupiah ?? 0) + Number(trendWifi._sum.soldPriceRupiah ?? 0);
       const exp = Number(trendExpense._sum.amountRupiah ?? 0);
       trendMonths.push({ year: ty, month: tm, revenue: rev, expense: exp, netProfit: rev - exp });
     }
