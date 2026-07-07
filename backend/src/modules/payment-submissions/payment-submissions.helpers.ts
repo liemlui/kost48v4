@@ -1,5 +1,6 @@
 import { BadRequestException } from '@nestjs/common';
 import { Prisma } from '../../generated/prisma';
+import { evaluatePaymentPolicy, PaymentPolicyResult } from './payment-policy.helper';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -14,6 +15,7 @@ export type SubmissionDetail = {
   amountRupiah: number;
   paidAt: Date;
   paymentMethod: string;
+  targetType: string;
   senderName: string | null;
   senderBankName: string | null;
   referenceNumber: string | null;
@@ -31,7 +33,18 @@ export type SubmissionDetail = {
   updatedAt: Date;
   tenant: { id: number; fullName: string; phone: string };
   room: { id: number; code: string; name: string | null; status: string };
-  stay: { id: number; status: string; expiresAt: Date | null };
+  stay: {
+    id: number;
+    status: string;
+    expiresAt: Date | null;
+    initialMetersPromotedAt?: Date | null;
+    depositAmountRupiah?: number | null;
+    depositPaidAmountRupiah?: number | null;
+    depositPaymentStatus?: string | null;
+    downPaymentAmountRupiah?: number | null;
+    downPaymentPaidRupiah?: number | null;
+  };
+  paymentPolicy: PaymentPolicyResult;
   invoice: {
     id: number;
     invoiceNumber: string;
@@ -112,6 +125,18 @@ export function mapSubmissionFromPrisma(item: PaymentSubmissionWithIncludes): Su
   const storedTotal = Number(item.invoice?.totalAmountRupiah ?? 0);
   const totalAmount = storedTotal > 0 ? storedTotal : lineTotal;
   const remainingAmount = Math.max(totalAmount - paidAmount, 0);
+  const isBookingPath = item.stay.initialMetersPromotedAt == null;
+  const paymentPolicy = evaluatePaymentPolicy({
+    amountRupiah: item.amountRupiah,
+    invoiceStatus: item.invoice?.status ?? '',
+    invoiceTotalAmountRupiah: totalAmount,
+    invoicePaidAmountRupiah: paidAmount,
+    isBookingPath,
+    stayDepositAmountRupiah: item.stay.depositAmountRupiah,
+    stayDepositPaidAmountRupiah: item.stay.depositPaidAmountRupiah,
+    stayDownPaymentAmountRupiah: item.stay.downPaymentAmountRupiah,
+    stayDownPaymentPaidRupiah: item.stay.downPaymentPaidRupiah,
+  });
 
   return {
     id: item.id,
@@ -122,6 +147,7 @@ export function mapSubmissionFromPrisma(item: PaymentSubmissionWithIncludes): Su
     amountRupiah: item.amountRupiah,
     paidAt: item.paidAt,
     paymentMethod: item.paymentMethod,
+    targetType: item.targetType,
     senderName: item.senderName,
     senderBankName: item.senderBankName,
     referenceNumber: item.referenceNumber,
@@ -152,6 +178,12 @@ export function mapSubmissionFromPrisma(item: PaymentSubmissionWithIncludes): Su
       id: item.stay.id,
       status: item.stay.status,
       expiresAt: item.stay.expiresAt,
+      initialMetersPromotedAt: item.stay.initialMetersPromotedAt,
+      depositAmountRupiah: item.stay.depositAmountRupiah,
+      depositPaidAmountRupiah: item.stay.depositPaidAmountRupiah,
+      depositPaymentStatus: item.stay.depositPaymentStatus,
+      downPaymentAmountRupiah: item.stay.downPaymentAmountRupiah,
+      downPaymentPaidRupiah: item.stay.downPaymentPaidRupiah,
     },
     invoice: {
       id: item.invoice?.id ?? 0,
@@ -171,6 +203,7 @@ export function mapSubmissionFromPrisma(item: PaymentSubmissionWithIncludes): Su
           fullName: item.reviewedBy.fullName,
         }
       : null,
+    paymentPolicy,
   };
 }
 

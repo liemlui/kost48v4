@@ -113,8 +113,8 @@ export function buildManualPaymentSafety(input: {
   if (input.amountRupiah <= 0) blockers.push('Nominal harus lebih dari Rp0.');
   if (input.amountRupiah > input.outstanding) blockers.push('Nominal melebihi sisa tagihan.');
   if (input.method === 'TRANSFER' && !String(input.referenceNo ?? '').trim()) warnings.push('Transfer sebaiknya punya no. referensi.');
-  if (input.amountRupiah > 0 && input.amountRupiah < input.outstanding && String(input.note ?? '').trim().length < 8) {
-    blockers.push('Pembayaran parsial wajib catatan minimal 8 karakter.');
+  if (input.amountRupiah > 0 && input.amountRupiah < input.outstanding) {
+    blockers.push('Pembayaran sebagian tidak diterima. Masukkan nominal pelunasan penuh.');
   }
 
   return {

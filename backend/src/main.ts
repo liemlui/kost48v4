@@ -2,7 +2,6 @@ import { ValidationPipe } from '@nestjs/common';
 import compression from 'compression';
 import { NestFactory } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
-import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { join } from 'path';
 import { existsSync } from 'fs';
 import { AppModule } from './app.module';
@@ -32,6 +31,7 @@ async function bootstrap() {
     res.setHeader('Permissions-Policy', 'camera=(self), microphone=(), geolocation=()');
     // CSP longgar khusus static images: hanya izinkan self + data URIs.
     res.setHeader('Content-Security-Policy', "default-src 'none'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; font-src 'self'");
+    res.setHeader('Cache-Control', 'public, max-age=604800, stale-while-revalidate=86400');
     if (isProduction) {
       res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
     }
@@ -160,6 +160,7 @@ async function bootstrap() {
   //    GET /api/payment-submissions/proofs/:filename.
 
   if (!isProduction) {
+    const { DocumentBuilder, SwaggerModule } = await import('@nestjs/swagger');
     const swaggerConfig = new DocumentBuilder()
       .setTitle('Kost48 Surabaya V3 API')
       .setDescription('Generated baseline backend')

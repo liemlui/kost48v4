@@ -27,7 +27,7 @@ function normalizeBackendError(message?: string | null) {
     return 'Pembayaran belum bisa disetujui karena catatan meter pada masa sewa ini tidak konsisten. Cek tab Meter di detail masa sewa, pastikan angka meter awal/terbaru tidak turun, lalu coba approve lagi.';
   }
   if (lower.includes('overpay') || lower.includes('lebih')) {
-    return 'Nominal bukti lebih besar dari kewajiban aktif. Jangan approve sebelum admin memastikan apakah ini memang pelunasan gabungan yang valid atau perlu dikoreksi tenant.';
+    return 'Nominal bukti lebih besar dari kewajiban aktif. Sistem menolak overpay; tolak bukti ini atau minta tenant koreksi nominal.';
   }
   return joined;
 }
@@ -87,6 +87,11 @@ export default function ReviewPaymentModal({
   const approveDisabledBySafety = Boolean(safety.approveDisabledReason) || (safety.requiresChecklist && !requiredChecked);
   const approveDisabledReason = safety.approveDisabledReason
     ?? (safety.requiresChecklist && !requiredChecked ? 'Centang checklist dulu.' : null);
+  const acceptedAmountsText = submission?.paymentPolicy?.acceptedAmounts?.length
+    ? submission.paymentPolicy.acceptedAmounts
+      .map((amount) => `${amount.label} Rp ${Number(amount.amountRupiah ?? 0).toLocaleString('id-ID')}`)
+      .join(' atau ')
+    : null;
 
   const decisionCards = useMemo(() => {
     if (!submission) return [];
@@ -103,14 +108,14 @@ export default function ReviewPaymentModal({
         value: safety.amountTone === 'EXACT'
           ? 'Nominal pas.'
           : safety.amountTone === 'PARTIAL'
-            ? 'Parsial. Masih tertahan.'
+            ? 'Tidak diterima. Tolak/koreksi.'
             : safety.amountTone === 'OVERPAY'
-              ? 'Nominal lebih. Cek manual.'
+              ? 'Nominal lebih. Tolak/koreksi.'
               : 'Sisa belum jelas.',
         tone: safety.amountTone === 'EXACT' ? 'success' : safety.amountTone === 'OVERPAY' ? 'danger' : 'warning',
       },
-      { label: '2. Dampak approve', value: safety.impactText, tone: safety.amountTone === 'PARTIAL' ? 'warning' : 'success' },
-      { label: '3. Setelah approve', value: 'Cek ulang jika sistem menolak.', tone: 'info' },
+      { label: '2. Dampak approve', value: safety.impactText, tone: safety.amountTone === 'EXACT' ? 'success' : 'danger' },
+      { label: '3. Follow-up', value: safety.approveDisabledReason ? 'Gunakan tolak dengan alasan jelas untuk tenant.' : 'Cek ulang data terkait setelah approval.', tone: 'info' },
     ];
   }, [safety, submission]);
 
@@ -182,6 +187,11 @@ export default function ReviewPaymentModal({
                         <strong>{safety.differenceRupiah === 0 ? 'Pas' : <CurrencyDisplay amount={Math.abs(safety.differenceRupiah)} />}</strong>
                       </div>
                     </div>
+                    {acceptedAmountsText ? (
+                      <Alert variant={safety.amountTone === 'EXACT' ? 'success' : 'warning'} className="small mt-3 mb-0">
+                        <strong>Nominal diterima sistem:</strong> {acceptedAmountsText}
+                      </Alert>
+                    ) : null}
                     <div className="payment-proof-meta mt-3">
                       <div><span>Target</span><strong>{targetLabel}</strong></div>
                       <div><span>Metode</span><strong>{submission.paymentMethod}</strong></div>

@@ -607,6 +607,28 @@ export type PublicBookingResult = {
 
 export type PaymentSubmissionStatus = 'PENDING_REVIEW' | 'APPROVED' | 'REJECTED' | 'EXPIRED' | string;
 export type PaymentTargetType = 'INVOICE' | 'DEPOSIT';
+export type PaymentAmountTone = 'EXACT' | 'PARTIAL' | 'OVERPAY' | 'UNKNOWN';
+export type AcceptedPaymentKind = 'DOWN_PAYMENT' | 'SETTLEMENT' | 'INVOICE_FULL';
+
+export type AcceptedPaymentAmount = {
+  kind: AcceptedPaymentKind;
+  label: string;
+  amountRupiah: number;
+};
+
+export type PaymentPolicy = {
+  policyKind: 'BOOKING_INITIAL' | 'INVOICE_ONLY';
+  canApprove: boolean;
+  amountTone: PaymentAmountTone;
+  expectedAmountRupiah: number;
+  invoiceRemainingAmountRupiah?: number;
+  depositRemainingAmountRupiah?: number;
+  downPaymentRemainingAmountRupiah?: number;
+  acceptedAmounts: AcceptedPaymentAmount[];
+  matchedAcceptedKind?: AcceptedPaymentKind | null;
+  blockingReason?: string | null;
+  impactText: string;
+};
 
 export type PaymentSubmission = {
   id: number;
@@ -633,7 +655,14 @@ export type PaymentSubmission = {
   updatedAt?: string;
   tenant?: Pick<Tenant, 'id' | 'fullName' | 'phone'> | null;
   room?: Pick<Room, 'id' | 'code' | 'name' | 'status'> | null;
-  stay?: Pick<Stay, 'id' | 'status' | 'expiresAt'> | null;
+  stay?: (Pick<Stay, 'id' | 'status' | 'expiresAt'> & {
+    initialMetersPromotedAt?: string | null;
+    depositAmountRupiah?: number | null;
+    depositPaidAmountRupiah?: number | null;
+    depositPaymentStatus?: string | null;
+    downPaymentAmountRupiah?: number | null;
+    downPaymentPaidRupiah?: number | null;
+  }) | null;
   invoice?: {
     id: number;
     invoiceNumber?: string | null;
@@ -648,6 +677,7 @@ export type PaymentSubmission = {
     remainingAmountRupiah?: number | null;
     paymentStatus?: 'UNPAID' | 'PARTIAL' | 'PAID' | string;
   } | null;
+  paymentPolicy?: PaymentPolicy | null;
   submittedBy?: { id: number; fullName?: string | null } | null;
   reviewedBy?: { id: number; fullName?: string | null } | null;
 };

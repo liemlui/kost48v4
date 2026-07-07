@@ -64,6 +64,7 @@ export class AdminDashboardService {
           tenant: { select: { id: true, fullName: true } },
           stay: { include: { room: { select: { id: true, code: true } } } },
         },
+        take: 50,
         orderBy: { createdAt: 'asc' },
       }),
       this.prisma.checkoutRequest.findMany({
@@ -76,6 +77,7 @@ export class AdminDashboardService {
             },
           },
         },
+        take: 50,
         orderBy: { createdAt: 'asc' },
       }),
       this.prisma.checkoutRequest.findMany({
@@ -88,6 +90,7 @@ export class AdminDashboardService {
             },
           },
         },
+        take: 50,
         orderBy: { createdAt: 'asc' },
       }),
       this.prisma.paymentSubmission.findMany({

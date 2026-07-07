@@ -324,13 +324,14 @@ export class DepositLedgerService {
       take: this.normalizeLimit(query.limit, 50, 200),
     });
 
-    const all = await this.prisma.tenantDepositLedgerEntry.findMany({
-      select: { type: true, direction: true, amountRupiah: true },
+    const groupedTotals = await this.prisma.tenantDepositLedgerEntry.groupBy({
+      by: ['type', 'direction'],
+      _sum: { amountRupiah: true },
     });
 
-    const totals = all.reduce(
+    const totals = groupedTotals.reduce(
       (acc, entry) => {
-        const amount = Number(entry.amountRupiah ?? 0);
+        const amount = Number(entry._sum.amountRupiah ?? 0);
         if (entry.direction === TenantDepositLedgerDirection.INCREASE_LIABILITY) acc.increaseRupiah += amount;
         if (entry.direction === TenantDepositLedgerDirection.DECREASE_LIABILITY) acc.decreaseRupiah += amount;
         acc.byType[entry.type] = (acc.byType[entry.type] ?? 0) + amount;
@@ -372,6 +373,7 @@ export class DepositLedgerService {
     const ledgerEntries = stayIds.length
       ? await this.prisma.tenantDepositLedgerEntry.findMany({
           where: { stayId: { in: stayIds } },
+          select: { stayId: true, direction: true, amountRupiah: true },
           orderBy: [{ occurredAt: 'asc' }, { id: 'asc' }],
         })
       : [];

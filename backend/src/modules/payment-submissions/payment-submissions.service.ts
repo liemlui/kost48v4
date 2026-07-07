@@ -45,6 +45,7 @@ import {
   parseDateOnly,
   endOfDay,
 } from './payment-submissions.helpers';
+import { evaluatePaymentPolicy } from './payment-policy.helper';
 
 @Injectable()
 export class PaymentSubmissionsService {
@@ -147,26 +148,25 @@ export class PaymentSubmissionsService {
     if (dpPaidSoFar <= 0 && eligibility.stayExpiresAt && new Date(eligibility.stayExpiresAt) < new Date()) {
       throw new ConflictException('Booking sudah kedaluwarsa dan tidak dapat menerima bukti pembayaran');
     }
-    const invoiceRemaining = Math.max(eligibility.invoiceTotalAmountRupiah - eligibility.invoicePaidAmountRupiah, 0);
-    const depositRemaining = Math.max(
-      (eligibility.stayDepositAmountRupiah ?? 0) - (eligibility.stayDepositPaidAmountRupiah ?? 0), 0);
-    const downPaymentRemaining = Math.max(
-      (eligibility.stayDownPaymentAmountRupiah ?? 0) - (eligibility.stayDownPaymentPaidRupiah ?? 0), 0);
-    const settlementAmount = invoiceRemaining + depositRemaining;
-    if (settlementAmount <= 0) {
-      throw new ConflictException('Pembayaran awal (sewa + deposit jaminan) sudah lunas');
+    const policy = evaluatePaymentPolicy({
+      amountRupiah: dto.amountRupiah,
+      invoiceStatus: eligibility.invoiceStatus,
+      invoiceTotalAmountRupiah: eligibility.invoiceTotalAmountRupiah,
+      invoicePaidAmountRupiah: eligibility.invoicePaidAmountRupiah,
+      isBookingPath: true,
+      stayDepositAmountRupiah: eligibility.stayDepositAmountRupiah,
+      stayDepositPaidAmountRupiah: eligibility.stayDepositPaidAmountRupiah,
+      stayDownPaymentAmountRupiah: eligibility.stayDownPaymentAmountRupiah,
+      stayDownPaymentPaidRupiah: eligibility.stayDownPaymentPaidRupiah,
+    });
+    if (!policy.canApprove) {
+      throw new ConflictException(policy.blockingReason ?? 'Nominal pembayaran booking tidak sesuai kebijakan.');
     }
-    const isDownPaymentAmount = downPaymentRemaining > 0 && dto.amountRupiah === downPaymentRemaining;
-    const isSettlementAmount = dto.amountRupiah === settlementAmount;
-    if (!isDownPaymentAmount && !isSettlementAmount) {
-      const accepted = [
-        downPaymentRemaining > 0 && downPaymentRemaining !== settlementAmount
-          ? `DP Rp ${downPaymentRemaining.toLocaleString('id-ID')}` : null,
-        `pelunasan Rp ${settlementAmount.toLocaleString('id-ID')} (sisa sewa + deposit jaminan)`,
-      ].filter(Boolean).join(' atau ');
-      throw new ConflictException(`Nominal pembayaran harus tepat: ${accepted}.`);
-    }
-    return { isDownPaymentAmount, isSettlementAmount, settlementAmount };
+    return {
+      isDownPaymentAmount: policy.matchedAcceptedKind === 'DOWN_PAYMENT',
+      isSettlementAmount: policy.matchedAcceptedKind === 'SETTLEMENT',
+      settlementAmount: policy.acceptedAmounts.find((item) => item.kind === 'SETTLEMENT')?.amountRupiah ?? 0,
+    };
   }
 
   /** Validasi pembayaran untuk invoice-only (OCCUPIED / renewal / manual) */
@@ -180,12 +180,15 @@ export class PaymentSubmissionsService {
     if ([InvoiceStatus.PAID, InvoiceStatus.CANCELLED].includes(eligibility.invoiceStatus as InvoiceStatus)) {
       throw new ConflictException('Invoice ini tidak dapat menerima bukti pembayaran baru');
     }
-    const invoiceRemaining = Math.max(
-      eligibility.invoiceTotalAmountRupiah - eligibility.invoicePaidAmountRupiah, 0);
-    if (invoiceRemaining <= 0) throw new ConflictException('Tagihan ini sudah lunas');
-    if (dto.amountRupiah !== invoiceRemaining) {
-      throw new ConflictException(
-        `Pembayaran harus melunasi tagihan penuh Rp ${invoiceRemaining.toLocaleString('id-ID')} (tidak ada pembayaran sebagian).`);
+    const policy = evaluatePaymentPolicy({
+      amountRupiah: dto.amountRupiah,
+      invoiceStatus: eligibility.invoiceStatus,
+      invoiceTotalAmountRupiah: eligibility.invoiceTotalAmountRupiah,
+      invoicePaidAmountRupiah: eligibility.invoicePaidAmountRupiah,
+      isBookingPath: false,
+    });
+    if (!policy.canApprove) {
+      throw new ConflictException(policy.blockingReason ?? 'Pembayaran harus melunasi tagihan penuh.');
     }
   }
 
@@ -681,6 +684,23 @@ export class PaymentSubmissionsService {
           submission.invoiceTotalAmountRupiah - freshPaidAmount,
           0,
         );
+
+        const approvalPolicy = evaluatePaymentPolicy({
+          amountRupiah: submission.amountRupiah,
+          invoiceStatus: submission.invoiceStatus,
+          invoiceTotalAmountRupiah: submission.invoiceTotalAmountRupiah,
+          invoicePaidAmountRupiah: freshPaidAmount,
+          isBookingPath,
+          stayDepositAmountRupiah: submission.stayDepositAmountRupiah,
+          stayDepositPaidAmountRupiah: submission.stayDepositPaidAmountRupiah,
+          stayDownPaymentAmountRupiah: submission.stayDownPaymentAmountRupiah,
+          stayDownPaymentPaidRupiah: submission.stayDownPaymentPaidRupiah,
+        });
+        if (!approvalPolicy.canApprove) {
+          throw new ConflictException(
+            approvalPolicy.blockingReason ?? 'Nominal pembayaran tidak sesuai kebijakan KOST48.',
+          );
+        }
 
         // ── F1-1R (D-02): NO-PARTIAL — tegakkan ulang dua nominal sah di titik approve.
         // Submission lama/race bisa lolos meski gate createSubmission (:121-160) berubah; cegah invoice PARTIAL liar.

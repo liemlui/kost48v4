@@ -48,6 +48,8 @@ export function asPaymentNumber(value: unknown) {
 
 export function getPaymentRemainingAmount(item: PaymentSubmission | null | undefined) {
   if (!item) return 0;
+  const policyExpected = asPaymentNumber(item.paymentPolicy?.expectedAmountRupiah);
+  if (policyExpected > 0) return policyExpected;
   return item.targetType === 'DEPOSIT'
     ? asPaymentNumber(item.deposit?.remainingAmountRupiah ?? item.deposit?.amountRupiah)
     : asPaymentNumber(item.invoice?.remainingAmountRupiah ?? item.invoice?.totalAmountRupiah);
@@ -59,6 +61,7 @@ export function getPaymentRemainingAmount(item: PaymentSubmission | null | undef
  */
 export function isDownPaymentExactAmount(item: PaymentSubmission | null | undefined): boolean {
   if (!item) return false;
+  if (item.paymentPolicy?.matchedAcceptedKind === 'DOWN_PAYMENT') return true;
   const stay = (item as { stay?: { downPaymentAmountRupiah?: number | null; downPaymentPaidRupiah?: number | null } }).stay;
   const dpRemaining = Math.max(
     asPaymentNumber(stay?.downPaymentAmountRupiah) - asPaymentNumber(stay?.downPaymentPaidRupiah),
@@ -69,6 +72,7 @@ export function isDownPaymentExactAmount(item: PaymentSubmission | null | undefi
 
 export function getPaymentAmountTone(item: PaymentSubmission | null | undefined): PaymentAmountTone {
   if (!item) return 'UNKNOWN';
+  if (item.paymentPolicy?.amountTone) return item.paymentPolicy.amountTone as PaymentAmountTone;
   const remaining = getPaymentRemainingAmount(item);
   const submitted = asPaymentNumber(item.amountRupiah);
   if (remaining <= 0 || submitted <= 0) return 'UNKNOWN';
@@ -88,14 +92,15 @@ export function getPaymentAmountLabel(tone: PaymentAmountTone) {
 }
 
 function getAmountImpact(item: PaymentSubmission, amountTone: PaymentAmountTone) {
+  if (item.paymentPolicy?.impactText) return item.paymentPolicy.impactText;
   if (item.targetType === 'DEPOSIT') {
     return 'Deposit titipan, bukan omzet.';
   }
   if (amountTone === 'PARTIAL') {
-    return 'Parsial: blocker tetap ada sampai lunas.';
+    return 'Pembayaran sebagian tidak diterima. Tolak atau minta tenant koreksi nominal.';
   }
   if (amountTone === 'OVERPAY') {
-    return 'Nominal lebih. Sistem bisa menolak.';
+    return 'Nominal lebih ditolak sistem. Tolak atau minta tenant koreksi nominal.';
   }
   if (amountTone === 'EXACT') {
     if (isDownPaymentExactAmount(item)) {
@@ -112,6 +117,7 @@ export function getPaymentReviewSafety(item: PaymentSubmission | null | undefine
   const differenceRupiah = submittedAmountRupiah - remainingAmountRupiah;
   const amountTone = getPaymentAmountTone(item);
   const amountLabel = getPaymentAmountLabel(amountTone);
+  const policy = item?.paymentPolicy ?? null;
   const hasProof = Boolean(item?.fileUrl);
   const isDeposit = item?.targetType === 'DEPOSIT';
   const reviewDeadline = item ? getDeadlineMeta(addHoursToDate(item.createdAt ?? item.paidAt, 6), 'Batas review') : null;
@@ -138,30 +144,43 @@ export function getPaymentReviewSafety(item: PaymentSubmission | null | undefine
     });
   }
 
-  if (item && amountTone === 'OVERPAY') {
-    warnings.push({
-      id: 'overpay',
-      title: 'Nominal lebih besar dari kewajiban',
-      message: 'Cek manual. Bisa salah transfer.',
+  if (item && policy && !policy.canApprove) {
+    blockers.push({
+      id: 'policy-blocker',
+      title: amountTone === 'PARTIAL'
+        ? 'Pembayaran sebagian tidak diterima'
+        : amountTone === 'OVERPAY'
+          ? 'Nominal lebih ditolak sistem'
+          : 'Nominal belum sesuai kebijakan',
+      message: policy.blockingReason ?? 'Nominal ini belum masuk daftar nominal yang diterima sistem.',
       tone: 'danger',
     });
   }
 
-  if (item && amountTone === 'PARTIAL') {
-    warnings.push({
+  if (item && !policy && amountTone === 'OVERPAY') {
+    blockers.push({
+      id: 'overpay',
+      title: 'Nominal lebih besar dari kewajiban',
+      message: 'Nominal lebih ditolak sistem. Tolak atau minta tenant koreksi nominal.',
+      tone: 'danger',
+    });
+  }
+
+  if (item && !policy && amountTone === 'PARTIAL') {
+    blockers.push({
       id: 'partial',
-      title: 'Pembayaran parsial',
-      message: 'Masih ada sisa tagihan.',
-      tone: 'warning',
+      title: 'Pembayaran sebagian tidak diterima',
+      message: 'Tidak ada cicilan bebas. Tolak atau minta tenant mengirim nominal yang tepat.',
+      tone: 'danger',
     });
   }
 
   if (item && amountTone === 'UNKNOWN') {
-    warnings.push({
+    blockers.push({
       id: 'unknown-remaining',
       title: 'Sisa kewajiban belum terbaca jelas',
       message: 'Cek invoice/booking detail sebelum approve agar tidak salah memutasi flow.',
-      tone: 'warning',
+      tone: 'danger',
     });
   }
 
@@ -183,18 +202,20 @@ export function getPaymentReviewSafety(item: PaymentSubmission | null | undefine
     });
   }
 
-  const highRisk = blockers.length > 0 || amountTone === 'OVERPAY' || amountTone === 'UNKNOWN';
-  const mediumRisk = !highRisk && (amountTone === 'PARTIAL' || isDeposit || isReviewOverdue);
+  const highRisk = blockers.length > 0;
+  const mediumRisk = !highRisk && (isDeposit || isReviewOverdue);
   const riskLevel: PaymentRiskLevel = highRisk ? 'HIGH' : mediumRisk ? 'MEDIUM' : 'LOW';
   const riskLabel = riskLevel === 'HIGH' ? 'Risiko tinggi' : riskLevel === 'MEDIUM' ? 'Perlu cek manual' : 'Aman dicek';
   const riskTone: SafetyTone = riskLevel === 'HIGH' ? 'danger' : riskLevel === 'MEDIUM' ? 'warning' : 'success';
-  const requiresChecklist = riskLevel !== 'LOW';
+  const requiresChecklist = riskLevel !== 'LOW' && blockers.length === 0;
 
   const checklist: PaymentSafetyChecklistItem[] = [
     {
       id: 'amount-checked',
       label: 'Nominal sudah dicocokkan dengan kewajiban aktif.',
-      helper: amountTone === 'EXACT' ? 'Nominal pas.' : `Status nominal: ${amountLabel}.`,
+      helper: policy?.acceptedAmounts?.length
+        ? `Sistem menerima: ${policy.acceptedAmounts.map((amount) => `${amount.label} Rp ${asPaymentNumber(amount.amountRupiah).toLocaleString('id-ID')}`).join(' atau ')}.`
+        : amountTone === 'EXACT' ? 'Nominal pas.' : `Status nominal: ${amountLabel}.`,
       required: true,
       tone: amountTone === 'EXACT' ? 'success' : amountTone === 'OVERPAY' ? 'danger' : 'warning',
     },
@@ -217,18 +238,18 @@ export function getPaymentReviewSafety(item: PaymentSubmission | null | undefine
   if (amountTone === 'PARTIAL') {
     checklist.push({
       id: 'partial-understood',
-      label: 'Saya paham pembayaran parsial belum menyelesaikan semua blocker.',
-      helper: 'Tenant masih perlu melunasi sisa tagihan.',
+      label: 'Pembayaran sebagian tidak boleh disetujui.',
+      helper: 'Arahkan ke reject/koreksi nominal, bukan approve.',
       required: true,
-      tone: 'warning',
+      tone: 'danger',
     });
   }
 
   if (amountTone === 'OVERPAY') {
     checklist.push({
       id: 'overpay-understood',
-      label: 'Saya paham nominal lebih besar dan sistem bisa menolak persetujuan.',
-      helper: 'Koreksi dengan tenant lebih aman jika nominal memang salah.',
+      label: 'Nominal lebih tidak boleh disetujui.',
+      helper: 'Arahkan ke reject/koreksi nominal, bukan approve.',
       required: true,
       tone: 'danger',
     });
@@ -246,10 +267,10 @@ export function getPaymentReviewSafety(item: PaymentSubmission | null | undefine
 
   let approveLabel = 'Setujui Pembayaran';
   if (!hasProof && item) approveLabel = 'Bukti Belum Ada';
+  else if (amountTone === 'PARTIAL') approveLabel = 'Nominal Parsial - Tolak/Koreksi';
+  else if (amountTone === 'OVERPAY') approveLabel = 'Nominal Lebih - Tolak/Koreksi';
+  else if (amountTone === 'UNKNOWN') approveLabel = 'Belum Aman Disetujui';
   else if (isDeposit) approveLabel = 'Setujui Deposit Titipan';
-  else if (amountTone === 'PARTIAL') approveLabel = 'Setujui Pembayaran Parsial';
-  else if (amountTone === 'OVERPAY') approveLabel = 'Kirim untuk Dicek Sistem';
-  else if (amountTone === 'UNKNOWN') approveLabel = 'Setujui Setelah Cek Manual';
 
   const approveDisabledReason = blockers[0]?.message;
 

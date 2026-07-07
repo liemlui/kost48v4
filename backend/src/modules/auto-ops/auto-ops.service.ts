@@ -91,7 +91,7 @@ export class AutoOpsService implements OnModuleInit, OnModuleDestroy {
     const accountingAutoClosePolicy = await this.accountingPeriodCloseService.autoClosePolicy(now);
 
     return {
-      enabled: AutoOpsService.parseEnabled(),
+      enabled: await this.loadEnabled(),
       now,
       intervalMinutes: AUTO_OPS_DEADLINES.AUTO_OPS_INTERVAL_MINUTES,
       deadlines: AUTO_OPS_DEADLINES,
