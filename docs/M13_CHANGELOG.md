@@ -3,6 +3,18 @@
 > Arsip changelog ringkas, dipisah dari M10 pada 2026-06-19 untuk hemat token AI (M10 = checklist aktif saja). **Entri changelog BARU ditulis DI SINI (paling atas)**, bukan di M10. Format: 1 header tanggal + 1-2 poin outcome per entri.
 > Entri lama (≤ 2026-07-16) diarsip ke docs/archieve/M11_CHANGELOG_ARSIP_S1_2026.md.
 
+### 9 Jul 2026 (malam)
+- **G5+** — Perkuat OCR Verifikasi KTP + fallback manual + bank data tenant:
+  - **Algoritma OCR bertingkat** (`owner-ai.helpers.ts`): `cleanOcrText()` normalisasi whitespace + koreksi O→0/l→1 + gabung baris pecah; `extractNameFromOcr/Address/BirthPlace/Province` multi-strategi; `isDeterministicResultSolid` skip AI bila NIK+nama sudah cocok (hemat token).
+  - **Pipeline validasi** (`owner-ai.service.ts`): pre-clean → deterministik solid (skip AI) → DeepSeek → fallback enriched. `ktpFallback()` sekarang membawa data enriched (nama/alamat/TTL/provinsi deterministik).
+  - **Verifikasi manual** (`tenants.service.ts`): `verifyKtp()` diperluas terima `method` (AI/AI_FAILED_MANUAL/MANUAL) + `notes`; ADMIN bisa verifikasi (sebelumnya OWNER-only).
+  - **Bank data KTP** (`tenants.service.ts`): `enrichTenantFromKtp()` auto-isi field kosong dari data OCR; `saveKtpData()` simpan hasil ekstraksi ke tenant; `getDemographicsSummary()` ringkasan demografi untuk marketing (OWNER-only).
+  - **Schema** (`schema.prisma`): field `ktpVerificationMethod` + `ktpVerificationNotes` di model Tenant (additive, 🧬).
+  - **Endpoint baru** (`tenants.controller.ts`): `PATCH :id/ktp-data`, `GET demographics/summary`.
+  - **UI verifikasi manual** (`KtpOcrValidateCard.tsx`): tombol "Verifikasi Manual" dengan modal (pilih metode + catatan); tombol "Simpan Data KTP ke Profil"; badge status "Terverifikasi ✅" / "Belum ⚠️"; auto-detect metode verifikasi dari hasil AI.
+  - **API frontend** (`tenants.ts`): `verifyTenantKtp()`, `saveTenantKtpData()`, `getDemographicsSummary()`.
+  - Build: backend tsc ✅, frontend 136 chunks ✅.
+
 ### 9 Jul 2026
 - **M17** — Implementasi audit P3-P8: 🔴 P3-01 refresh token (🧬 model RefreshToken + endpoint `/auth/refresh` + httpOnly cookie + FE auto-refresh interceptor); 🟠 P7-01 BookingCtaButton shared component; 🟠 P8-01 FK index verified (215 `@@index`); 🔵 P8-03 chart empty state guard. Semua LOW (P3-02/P8-02/P8-04/P8-05) didokumentasikan/diverifikasi selesai. File: `backend/prisma/schema.prisma`, `backend/src/auth/*`, `frontend/src/api/client.ts`, `frontend/src/context/AuthContext.tsx`, `frontend/src/components/rooms/BookingCtaButton.tsx`, `frontend/src/components/charts/SmartChartPanel.tsx`, `frontend/src/components/charts/HorizontalBarChart.tsx`, `docs/M17_AUDIT_360_P3_P8.md`.
 

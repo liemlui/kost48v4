@@ -197,10 +197,37 @@ export class TenantsController {
   }
 
   @Post(':id/ktp/verify')
-  @ApiOperation({ summary: 'Verifikasi KTP tenant — OWNER-only' })
+  @ApiOperation({ summary: 'Verifikasi KTP tenant — OWNER/ADMIN' })
+  @Roles(UserRole.OWNER, UserRole.ADMIN)
+  async verifyKtp(
+    @Param('id', ParseIntPipe) id: number,
+    @CurrentUser() user: CurrentUserPayload,
+    @Body() body?: { method?: string; notes?: string },
+  ) {
+    return {
+      message: 'KTP tenant berhasil diverifikasi',
+      data: await this.tenantsService.verifyKtp(id, user, body),
+    };
+  }
+
+  /** G5+: Simpan data KTP hasil ekstraksi OCR ke tenant (bank data marketing). */
+  @Patch(':id/ktp-data')
+  @ApiOperation({ summary: 'Simpan data KTP hasil ekstraksi ke tenant — OWNER/ADMIN' })
+  @Roles(UserRole.OWNER, UserRole.ADMIN)
+  async saveKtpData(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() body: { gender?: string; birthDate?: string; originCity?: string; originProvince?: string; occupation?: string; identityNumber?: string },
+    @CurrentUser() user: CurrentUserPayload,
+  ) {
+    return { message: 'Data KTP berhasil disimpan', data: await this.tenantsService.saveKtpData(id, body, user) };
+  }
+
+  /** G5+: Ringkasan demografi tenant untuk marketing analytics — OWNER only. */
+  @Get('demographics/summary')
+  @ApiOperation({ summary: 'Ringkasan demografi tenant untuk marketing — OWNER-only' })
   @Roles(UserRole.OWNER)
-  async verifyKtp(@Param('id', ParseIntPipe) id: number, @CurrentUser() user: CurrentUserPayload) {
-    return { message: 'KTP tenant berhasil diverifikasi', data: await this.tenantsService.verifyKtp(id, user) };
+  async demographicsSummary() {
+    return { data: await this.tenantsService.getDemographicsSummary() };
   }
 
   @Get(':id/ktp/image')

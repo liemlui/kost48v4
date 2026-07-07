@@ -17,13 +17,19 @@ import {
 } from './prompts/ops-inventory.prompt';
 import {
   ageDays,
+  cleanOcrText,
   cleanShortText,
   decidePaymentReviewGuard,
+  extractAddressFromOcr,
+  extractBirthPlaceFromOcr,
   extractLikelyAmount,
   extractLikelyDate,
   extractLikelyVendor,
+  extractNameFromOcr,
   extractNikFromOcr,
+  extractProvinceFromOcr,
   inventoryItemSnapshot,
+  isDeterministicResultSolid,
   maskNik,
   maskNikInText,
   normalizeExpenseOcrDraft,
@@ -446,17 +452,24 @@ export class OwnerAiService {
    * Validasi teks OCR KTP vs data tenant. PDP: hanya TEKS OCR (bukan gambar);
    * NIK tenant dikirim ter-mask ke AI; NIK di hasil/return juga ter-mask.
    * Verifikasi final TETAP tombol Owner/Admin existing — method ini tidak verify.
+   *
+   * Pipeline bertingkat (G5+):
+   * 1. Pre-clean teks OCR → koreksi noise umum
+   * 2. Ekstraksi deterministik multi-strategi (NIK, nama, alamat, TTL, provinsi)
+   * 3. Jika deterministik solid (NIK+nama cocok) → skip AI, return confidence tinggi
+   * 4. Jika ragu → panggil DeepSeek dengan teks bersih
+   * 5. Jika AI gagal → fallback rule-based
    */
   async validateKtpOcr(tenantId: number, ocrText: string, actorId: number) {
     this.checkRateLimit(actorId, 'ktp-ocr');
 
-    const text = (ocrText || '').trim();
-    if (!text) throw new BadRequestException('Teks OCR KTP kosong.');
-    if (text.length > this.getMaxInputChars()) {
+    const raw = (ocrText || '').trim();
+    if (!raw) throw new BadRequestException('Teks OCR KTP kosong.');
+    if (raw.length > this.getMaxInputChars()) {
       throw new BadRequestException('Teks OCR terlalu panjang.');
     }
     // PDP guard: tolak bila yang dikirim ternyata gambar/base64, bukan teks OCR.
-    if (/data:image\//i.test(text) || /;base64,/i.test(text) || /^[A-Za-z0-9+/=\s]{800,}$/.test(text)) {
+    if (/data:image\//i.test(raw) || /;base64,/i.test(raw) || /^[A-Za-z0-9+/=\s]{800,}$/.test(raw)) {
       throw new BadRequestException('Kirim TEKS hasil OCR, bukan gambar/base64 KTP.');
     }
 
@@ -466,18 +479,32 @@ export class OwnerAiService {
     });
     if (!tenant) throw new NotFoundException('Tenant tidak ditemukan.');
 
-    // ── Cek deterministik (backend yang menang, bukan AI) ──
-    const ocrNik = extractNikFromOcr(text);
+    // ── Step 1: Pre-clean teks OCR ──────────────────────────────────────
+    const { cleaned: text, confidenceBoost } = cleanOcrText(raw);
+
+    // ── Step 2: Ekstraksi deterministik multi-strategi ─────────────────
+    const ocrNik = extractNikFromOcr(text) || extractNikFromOcr(raw); // fallback ke raw
     const nikFormatValid = !!ocrNik && ocrNik.length === 16;
     const tenantNikDigits = (tenant.identityNumber || '').replace(/\D/g, '');
     const nikMatchesTenant = nikFormatValid && tenantNikDigits.length === 16 && ocrNik === tenantNikDigits;
     const demographics = parseNikDemographics(ocrNik);
     const tenantMaskedNik = maskNik(tenant.identityNumber);
 
+    // Ekstraksi nama + alamat + TTL deterministik
+    const detName = extractNameFromOcr(text) || extractNameFromOcr(raw);
+    const detAddress = extractAddressFromOcr(text) || extractAddressFromOcr(raw);
+    const detBirthPlace = extractBirthPlaceFromOcr(text) || extractBirthPlaceFromOcr(raw);
+    const detProvince = extractProvinceFromOcr(text) || extractProvinceFromOcr(raw);
+
+    // Cek nama deterministik vs tenant
+    const tenantNameNorm = normalizeName(tenant.fullName);
+    const detNameNorm = detName ? normalizeName(detName) : null;
+    const nameMatchesTenant = detNameNorm ? detNameNorm === tenantNameNorm : null;
+
     // Hash dari objek yang sudah diminimalkan — TANPA NIK penuh / OCR mentah (PDP).
     const snapshotHash = stableHash({
       tenantId: tenant.id,
-      tenantName: normalizeName(tenant.fullName),
+      tenantName: tenantNameNorm,
       tenantNikMasked: tenantMaskedNik,
       ocrLen: text.length,
       ocrNikMasked: maskNik(ocrNik),
@@ -490,11 +517,53 @@ export class OwnerAiService {
       demographicsFromNik: demographics,
     };
 
+    const detExtracted = {
+      nik: maskNik(ocrNik),
+      name: detName,
+      birthPlace: detBirthPlace,
+      birthDate: demographics.birthDate,
+      gender: demographics.gender,
+      address: detAddress,
+      province: detProvince,
+    };
+
+    // ── Step 3: Jika deterministik sudah solid → skip AI (hemat token) ─
     const aicfg = await this.getAiConfig();
-    if (!deepseekConfigured() || !aicfg.featuresEnabled) {
-      return this.ktpFallback(tenant, deterministic, snapshotHash);
+    const aiAvailable = deepseekConfigured() && aicfg.featuresEnabled;
+
+    if (isDeterministicResultSolid(nikMatchesTenant, nameMatchesTenant)) {
+      const boost = Math.min((confidenceBoost / 10) + 0.85, 0.98);
+      return {
+        mode: 'DETERMINISTIC_SOLID',
+        model: 'rule-based',
+        usage: undefined,
+        snapshotHash,
+        promptHash: '',
+        fallback: false,
+        confidence: boost,
+        warnings: ['Hasil deterministik solid — tidak memanggil AI (hemat token).'],
+        result: {
+          extracted: detExtracted,
+          nikFormatValid,
+          demographicsFromNik: demographics,
+          match: { nameMatchesTenant: true, nikMatchesTenant: true, warnings: [] },
+          recommendation: 'VERIFY' as const,
+        },
+        missingData: [],
+      };
     }
 
+    // ── Step 4: AI tidak tersedia → fallback diperkaya ─────────────────
+    if (!aiAvailable) {
+      return this.ktpFallback(tenant, deterministic, snapshotHash, {
+        detName,
+        detAddress,
+        detBirthPlace,
+        detProvince,
+      });
+    }
+
+    // ── Step 5: Panggil DeepSeek dengan teks yang sudah dibersihkan ────
     const messages = buildKtpOcrPrompt({
       ocrText: maskNikInText(text),
       tenant: { fullName: tenant.fullName, nikMasked: tenantMaskedNik },
@@ -509,9 +578,18 @@ export class OwnerAiService {
       const parsed = JSON.parse(ai.content);
       // Mask NIK apa pun yang dikembalikan AI sebelum keluar dari backend (PDP).
       if (parsed?.extracted) parsed.extracted.nik = maskNik(parsed.extracted.nik);
-      // Backend menang untuk cek deterministik.
+      // Gabung hasil AI dengan deterministik
+      const mergedExtracted = {
+        nik: parsed?.extracted?.nik ?? detExtracted.nik,
+        name: parsed?.extracted?.name ?? detExtracted.name,
+        birthPlace: parsed?.extracted?.birthPlace ?? detExtracted.birthPlace,
+        birthDate: parsed?.extracted?.birthDate ?? detExtracted.birthDate,
+        gender: parsed?.extracted?.gender ?? detExtracted.gender,
+        address: parsed?.extracted?.address ?? detExtracted.address,
+        province: detExtracted.province,
+      };
       const match = {
-        nameMatchesTenant: parsed?.match?.nameMatchesTenant ?? null,
+        nameMatchesTenant: parsed?.match?.nameMatchesTenant ?? nameMatchesTenant,
         nikMatchesTenant,
         warnings: Array.isArray(parsed?.match?.warnings) ? parsed.match.warnings : [],
       };
@@ -525,7 +603,7 @@ export class OwnerAiService {
         confidence: typeof parsed?.confidence === 'number' ? parsed.confidence : undefined,
         warnings: [],
         result: {
-          extracted: parsed?.extracted ?? {},
+          extracted: mergedExtracted,
           nikFormatValid,
           demographicsFromNik: demographics,
           match,
@@ -534,19 +612,25 @@ export class OwnerAiService {
         missingData: [],
       };
     } catch (err: any) {
-      return this.ktpFallback(tenant, deterministic, snapshotHash, err.message);
+      return this.ktpFallback(tenant, deterministic, snapshotHash, {
+        detName,
+        detAddress,
+        detBirthPlace,
+        detProvince,
+        aiError: err.message,
+      });
     }
   }
 
-  /** Fallback rule-based KTP: tanpa AI, pakai cek deterministik NIK saja. */
+  /** Fallback rule-based KTP: tanpa AI, pakai cek deterministik NIK + ekstraksi enriched. */
   private ktpFallback(
     tenant: { fullName: string },
     det: { nikFormatValid: boolean; nikMatchesTenant: boolean; ocrNikMasked: string | null; demographicsFromNik: { birthDate: string | null; gender: 'MALE' | 'FEMALE' | null } },
     snapshotHash: string,
-    errorMsg?: string,
+    enriched?: { detName?: string | null; detAddress?: string | null; detBirthPlace?: string | null; detProvince?: string | null; aiError?: string },
   ) {
     const warnings: string[] = [];
-    if (errorMsg) warnings.push('AI gagal: ' + errorMsg);
+    if (enriched?.aiError) warnings.push('AI gagal: ' + enriched.aiError);
     warnings.push('Hasil tanpa AI (rule fallback) — hanya cek format NIK; nama wajib dicek manual.');
     if (!det.nikFormatValid) warnings.push('NIK pada OCR tidak terbaca 16 digit.');
     if (det.nikFormatValid && !det.nikMatchesTenant) warnings.push('NIK OCR tidak cocok dengan data tenant.');
@@ -562,7 +646,15 @@ export class OwnerAiService {
       confidence: undefined,
       warnings,
       result: {
-        extracted: { nik: det.ocrNikMasked, name: null, birthPlace: null, birthDate: det.demographicsFromNik.birthDate, gender: det.demographicsFromNik.gender, address: null },
+        extracted: {
+          nik: det.ocrNikMasked,
+          name: enriched?.detName ?? null,
+          birthPlace: enriched?.detBirthPlace ?? null,
+          birthDate: det.demographicsFromNik.birthDate,
+          gender: det.demographicsFromNik.gender,
+          address: enriched?.detAddress ?? null,
+          province: enriched?.detProvince ?? null,
+        },
         nikFormatValid: det.nikFormatValid,
         demographicsFromNik: det.demographicsFromNik,
         match: { nameMatchesTenant: null, nikMatchesTenant: det.nikMatchesTenant, warnings: [] },

@@ -621,6 +621,9 @@ model Tenant {
   ktpImageFileSizeBytes    Int?
   ktpVerifiedAt            DateTime?
   ktpVerifiedById          Int?
+  // G5+: metadata verifikasi KTP — metode (AI / AI_FAILED_MANUAL / MANUAL) + catatan admin.
+  ktpVerificationMethod    String?
+  ktpVerificationNotes     String?
   ktpDeletedAt             DateTime?
 
   // PUB-FOTO-PROFIL-KTP: foto profil/avatar tenant. Default diturunkan dari foto KTP

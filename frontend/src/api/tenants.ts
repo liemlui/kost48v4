@@ -42,6 +42,72 @@ export async function deleteTenantProfilePhoto(tenantId: number): Promise<void> 
   await client.delete(`/tenants/${tenantId}/profile-photo`);
 }
 
+// ── G5+: KTP Verification — manual approve + save OCR data ─────────────────────
+
+export interface VerifyKtpPayload {
+  method?: 'AI' | 'AI_FAILED_MANUAL' | 'MANUAL';
+  notes?: string;
+}
+
+export interface VerifyKtpResponse {
+  id: number;
+  ktpVerifiedAt: string;
+  ktpVerifiedById: number;
+  ktpVerificationMethod: string | null;
+  ktpVerificationNotes: string | null;
+}
+
+/** Verifikasi KTP tenant secara manual (OWNER/ADMIN). */
+export async function verifyTenantKtp(tenantId: number, payload?: VerifyKtpPayload): Promise<VerifyKtpResponse> {
+  const response = await client.post<ApiEnvelope<VerifyKtpResponse>>(
+    `/tenants/${tenantId}/ktp/verify`,
+    payload ?? {},
+  );
+  return response.data.data;
+}
+
+export interface SaveKtpDataPayload {
+  gender?: string;
+  birthDate?: string;
+  originCity?: string;
+  originProvince?: string;
+  occupation?: string;
+  identityNumber?: string;
+}
+
+export interface SaveKtpDataResponse {
+  savedFields: string[];
+  tenant: Record<string, unknown>;
+}
+
+/** Simpan data KTP hasil ekstraksi OCR ke profil tenant. */
+export async function saveTenantKtpData(tenantId: number, payload: SaveKtpDataPayload): Promise<SaveKtpDataResponse> {
+  const response = await client.patch<ApiEnvelope<SaveKtpDataResponse>>(
+    `/tenants/${tenantId}/ktp-data`,
+    payload,
+  );
+  return response.data.data;
+}
+
+export interface DemographicsSummary {
+  totalTenants: number;
+  gender: Record<string, number>;
+  topCities: Array<[string, number]>;
+  topProvinces: Array<[string, number]>;
+  topOccupations: Array<[string, number]>;
+  ageGroups: Record<string, number>;
+  maritalStatus: Record<string, number>;
+  vehicleOwnership: Record<string, number>;
+  leadSources: Record<string, number>;
+  dataCompleteness: Record<string, number>;
+}
+
+/** Ringkasan demografi tenant untuk marketing analytics — OWNER only. */
+export async function getDemographicsSummary(): Promise<DemographicsSummary> {
+  const response = await client.get<ApiEnvelope<DemographicsSummary>>('/tenants/demographics/summary');
+  return response.data.data;
+}
+
 export async function togglePortalAccess(tenantId: number, isActive: boolean): Promise<TogglePortalAccessResponse> {
   const response = await client.patch<ApiEnvelope<TogglePortalAccessResponse>>(
     `/tenants/${tenantId}/portal-access/status`,

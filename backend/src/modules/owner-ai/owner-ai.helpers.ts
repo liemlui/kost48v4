@@ -98,6 +98,174 @@ export function normalizeName(name?: string | null): string {
   return (name || '').toUpperCase().replace(/[^A-Z\s]/g, '').replace(/\s+/g, ' ').trim();
 }
 
+// ── G5+: KTP OCR preprocessing & multi-strategy extraction ─────────────────────
+
+/**
+ * Bersihkan teks OCR KTP: normalisasi whitespace, gabung baris pendek pecah,
+ * koreksi salah-baca OCR umum (O→0, I→1, l→1 di segmen numerik).
+ * Return teks yang sudah dibersihkan + metadata.
+ */
+export function cleanOcrText(raw: string): { cleaned: string; confidenceBoost: number } {
+  if (!raw) return { cleaned: '', confidenceBoost: 0 };
+  let text = raw;
+
+  // Normalisasi: ganti karakter aneh yang sering muncul dari OCR Indonesia
+  text = text
+    .replace(/[\u2018\u2019\u201A\u201B]/g, "'") // smart quotes
+    .replace(/[\u201C\u201D\u201E\u201F]/g, '"')
+    .replace(/[\u2013\u2014\u2015]/g, '-') // en/em dash
+    .replace(/\u00A0/g, ' ') // non-breaking space
+    .replace(/\t/g, ' ');
+
+  // Gabung baris-baris pendek yang kemungkinan pecahan baris yang sama
+  const lines = text.split(/\r?\n/).map((l) => l.trim());
+  const merged: string[] = [];
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    if (!line) continue;
+    // Baris yang sangat pendek (< 8 char, tidak ada digit) → gabung dengan baris berikutnya
+    if (line.length < 8 && merged.length > 0 && !/\d/.test(line)) {
+      merged[merged.length - 1] += ' ' + line;
+    } else {
+      merged.push(line);
+    }
+  }
+
+  text = merged.join('\n');
+
+  // Koreksi salah-baca umum: huruf → angka di segmen numerik
+  // Pola "1O" → "10", "O1" → "01" (O jadi 0 di sekitar digit), "l" → "1"
+  let boost = 0;
+  const corrected = text.replace(/(\d)([Oo])(\d)/g, (_m, a, _o, b) => {
+    boost += 0.5;
+    return `${a}0${b}`;
+  }).replace(/(\d)([Il|])(\d)/g, (_m, a, _i, b) => {
+    boost += 0.5;
+    return `${a}1${b}`;
+  }).replace(/^([Oo])(\d)/gm, (_m, _o, d) => {
+    boost += 0.5;
+    return `0${d}`;
+  });
+
+  return { cleaned: corrected, confidenceBoost: Math.min(boost, 2) };
+}
+
+/**
+ * Ekstrak nama dari teks OCR KTP menggunakan multi-strategi.
+ * Lebih agresif dari frontend — backend bisa coba beberapa pola.
+ */
+export function extractNameFromOcr(text: string): string | null {
+  const flat = text.replace(/\r?\n/g, ' ');
+  const lines = text.split(/\r?\n/).map((l) => l.trim()).filter(Boolean);
+
+  // Strategy 1: Label "Nama"
+  const labelPatterns = [
+    /nama\s*[:.\-]?\s*(.+)/i,
+    /n\s*a\s*m\s*a\s*[:.\-]?\s*(.+)/i,
+    /name\s*[:.\-]?\s*(.+)/i,
+  ];
+  for (const pat of labelPatterns) {
+    const m = flat.match(pat);
+    if (m) {
+      const cleaned = normalizeName(m[1]);
+      if (cleaned.length >= 3) return cleaned;
+    }
+  }
+
+  // Strategy 2: Cari baris ALL-CAPS mayoritas huruf di antara NIK dan TTL
+  const nikIdx = lines.findIndex((l) => /\d{16}/.test(l.replace(/[^0-9]/g, '')));
+  const ttlIdx = lines.findIndex((l) => /tempat|tgl|lahir/i.test(l));
+  const start = nikIdx >= 0 ? nikIdx + 1 : 0;
+  const end = ttlIdx >= 0 ? ttlIdx : lines.length;
+  for (let i = start; i < end; i++) {
+    const line = lines[i];
+    const letters = line.replace(/[^A-Za-z]/g, '');
+    if (letters.length >= 6 && letters.length > line.length * 0.6) {
+      const cleaned = normalizeName(line);
+      if (cleaned.length >= 3) return cleaned;
+    }
+  }
+
+  return null;
+}
+
+/**
+ * Ekstrak alamat dari teks OCR KTP.
+ */
+export function extractAddressFromOcr(text: string): string | null {
+  const flat = text.replace(/\r?\n/g, ' ');
+  const lines = text.split(/\r?\n/).map((l) => l.trim()).filter(Boolean);
+
+  // Strategy 1: Label "Alamat"
+  const m = flat.match(/alamat\s*[:.\-]?\s*(.+)/i);
+  if (m) {
+    const cleaned = m[1].replace(/\s+/g, ' ').trim();
+    if (cleaned.length >= 5) return cleaned.slice(0, 200);
+  }
+
+  // Strategy 2: Baris setelah "Alamat"
+  const addrIdx = lines.findIndex((l) => /^alamat/i.test(l));
+  if (addrIdx >= 0 && addrIdx + 1 < lines.length) {
+    const nextLine = lines[addrIdx + 1];
+    if (nextLine.length >= 5) return nextLine.slice(0, 200);
+  }
+
+  return null;
+}
+
+/**
+ * Ekstrak tempat lahir dari teks OCR KTP.
+ */
+export function extractBirthPlaceFromOcr(text: string): string | null {
+  const flat = text.replace(/\r?\n/g, ' ');
+
+  // Cari "KOTA, DD-MM-YYYY" — ambil bagian kota
+  const m = flat.match(/(?:tempat\s*\/?\s*tgl\s*lahir|tempat\s*lahir|tgl\s*lahir|ttl)\s*[:.\-]?\s*([A-Z][A-Z\s]{2,40})[,;]/i);
+  if (m) {
+    return m[1].replace(/[^A-Za-z\s]/g, '').replace(/\s+/g, ' ').trim();
+  }
+
+  // Fallback: kota + koma + tanggal
+  const m2 = flat.match(/([A-Z][A-Z\s]{2,30}),\s*\d{2}[-/]\d{2}[-/]\d{4}/i);
+  if (m2) {
+    return m2[1].replace(/[^A-Za-z\s]/g, '').replace(/\s+/g, ' ').trim();
+  }
+
+  return null;
+}
+
+/**
+ * Ekstrak provinsi dari alamat OCR KTP.
+ */
+export function extractProvinceFromOcr(text: string): string | null {
+  const knownProvinces = [
+    'ACEH', 'SUMATERA UTARA', 'SUMATERA BARAT', 'RIAU', 'JAMBI', 'SUMATERA SELATAN',
+    'BENGKULU', 'LAMPUNG', 'BANGKA BELITUNG', 'KEPULAUAN RIAU',
+    'DKI JAKARTA', 'JAWA BARAT', 'JAWA TENGAH', 'JAWA TIMUR', 'BANTEN',
+    'BALI', 'NUSA TENGGARA BARAT', 'NUSA TENGGARA TIMUR',
+    'KALIMANTAN BARAT', 'KALIMANTAN TENGAH', 'KALIMANTAN SELATAN', 'KALIMANTAN TIMUR', 'KALIMANTAN UTARA',
+    'SULAWESI UTARA', 'SULAWESI TENGAH', 'SULAWESI SELATAN', 'SULAWESI TENGGARA', 'GORONTALO', 'SULAWESI BARAT',
+    'MALUKU', 'MALUKU UTARA', 'PAPUA', 'PAPUA BARAT',
+  ];
+  const upper = text.toUpperCase();
+  for (const prov of knownProvinces) {
+    if (upper.includes(prov)) return prov;
+  }
+  return null;
+}
+
+/**
+ * Cek apakah hasil deterministik cukup solid untuk skip AI (hemat token).
+ * Return true jika NIK 16 digit + cocok tenant + nama OCR cocok tenant,
+ * artinya confidence tinggi tanpa perlu validasi AI.
+ */
+export function isDeterministicResultSolid(
+  nikMatchesTenant: boolean,
+  nameMatchesTenant: boolean | null,
+): boolean {
+  return nikMatchesTenant && nameMatchesTenant === true;
+}
+
 export function normalizeExpenseOcrDraft(input: any): ExpenseOcrDraft {
   const needsReview: string[] = Array.isArray(input?.needsReview)
     ? input.needsReview.map((item: unknown) => String(item)).filter(Boolean).slice(0, 8)
