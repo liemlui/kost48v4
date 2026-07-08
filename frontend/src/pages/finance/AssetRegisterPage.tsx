@@ -13,12 +13,14 @@ import {
   postAssetLedgerAlignment,
   previewAssetLedgerAlignment,
   runDepreciation,
+  updateFixedAsset,
   type AssetLedgerAlignmentPayload,
   type CreateFixedAssetPayload,
   type FixedAsset,
   type FixedAssetCategory,
   type FixedAssetCapitalizationSource,
   type FixedAssetLedgerAlignmentMethod,
+  type UpdateFixedAssetPayload,
 } from '../../api/assets';
 import { listResource } from '../../api/resources';
 import { getApiErrorMessage } from '../../utils/getApiErrorMessage';
@@ -108,6 +110,7 @@ export default function AssetRegisterPage() {
   const queryClient = useQueryClient();
   const [form, setForm] = useState(initialForm);
   const [showCreateAsset, setShowCreateAsset] = useState(false);
+  const [editingAsset, setEditingAsset] = useState<FixedAsset | null>(null);
   const now = useMemo(() => new Date(), []);
   const [runPeriod, setRunPeriod] = useState({ year: now.getFullYear(), month: now.getMonth() + 1 });
   const [alignmentAsset, setAlignmentAsset] = useState<FixedAsset | null>(null);
@@ -131,6 +134,16 @@ export default function AssetRegisterPage() {
     mutationFn: createFixedAsset,
     onSuccess: () => {
       setForm(initialForm);
+      setShowCreateAsset(false);
+      queryClient.invalidateQueries({ queryKey: ['assets'] });
+    },
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: ({ assetId, payload }: { assetId: number; payload: UpdateFixedAssetPayload }) => updateFixedAsset(assetId, payload),
+    onSuccess: () => {
+      setForm(initialForm);
+      setEditingAsset(null);
       setShowCreateAsset(false);
       queryClient.invalidateQueries({ queryKey: ['assets'] });
     },
@@ -180,17 +193,46 @@ export default function AssetRegisterPage() {
       inventoryItemId: form.inventoryItemId ? Number(form.inventoryItemId) : undefined,
       notes: form.notes || undefined,
     };
+    if (editingAsset) {
+      updateMutation.mutate({ assetId: editingAsset.id, payload });
+      return;
+    }
     createMutation.mutate(payload);
   }
 
   function openCreateAssetModal() {
+    setEditingAsset(null);
     createMutation.reset();
+    updateMutation.reset();
+    setForm(initialForm);
     setShowCreateAsset(true);
   }
 
   function closeCreateAssetModal() {
-    if (createMutation.isPending) return;
+    if (createMutation.isPending || updateMutation.isPending) return;
     setShowCreateAsset(false);
+    setEditingAsset(null);
+  }
+
+  function openEditAssetModal(asset: FixedAsset) {
+    createMutation.reset();
+    updateMutation.reset();
+    setEditingAsset(asset);
+    setForm({
+      name: asset.name,
+      category: asset.category,
+      capitalizationSource: asset.capitalizationSource,
+      acquisitionDate: asset.acquisitionDate?.slice(0, 10) ?? new Date().toISOString().slice(0, 10),
+      depreciationStartDate: asset.depreciationStartDate?.slice(0, 10) ?? asset.acquisitionDate?.slice(0, 10) ?? new Date().toISOString().slice(0, 10),
+      acquisitionCostRupiah: String(asset.acquisitionCostRupiah ?? ''),
+      salvageValueRupiah: String(asset.salvageValueRupiah ?? 0),
+      usefulLifeMonths: String(asset.usefulLifeMonths ?? 36),
+      accumulatedDepreciationRupiah: String(asset.accumulatedDepreciationRupiah ?? 0),
+      depreciationEnabled: asset.depreciationEnabled,
+      inventoryItemId: asset.inventoryItemId ? String(asset.inventoryItemId) : '',
+      notes: asset.notes ?? '',
+    });
+    setShowCreateAsset(true);
   }
 
   function openAlignmentModal(asset: FixedAsset) {
@@ -289,7 +331,12 @@ export default function AssetRegisterPage() {
                         <td>{formatRupiah(asset.accumulatedDepreciationRupiah)}</td>
                         <td>{formatRupiah(asset.bookValueRupiah)}</td>
                         <td><Badge bg={alignmentBadge(status)} text={alignmentBadge(status) === 'warning' || alignmentBadge(status) === 'light' ? 'dark' : undefined} title={ALIGNMENT_STATUS_TOOLTIP[status] ?? 'Status alignment aset terhadap ledger Fixed Assets.'}>{alignmentStatusLabels[status] ?? status}</Badge></td>
-                        <td><Button size="sm" variant="outline-primary" disabled={status === 'ALIGNED'} onClick={() => openAlignmentModal(asset)}>{status === 'ALIGNED' ? 'Aligned' : 'Review'}</Button></td>
+                        <td>
+                          <div className="d-flex gap-2">
+                            <Button size="sm" variant="outline-secondary" onClick={() => openEditAssetModal(asset)}>Edit</Button>
+                            <Button size="sm" variant="outline-primary" disabled={status === 'ALIGNED'} onClick={() => openAlignmentModal(asset)}>{status === 'ALIGNED' ? 'Aligned' : 'Review'}</Button>
+                          </div>
+                        </td>
                       </tr>;
                     })}</tbody>
                   </Table>
@@ -319,7 +366,7 @@ export default function AssetRegisterPage() {
       <Modal show={showCreateAsset} onHide={closeCreateAssetModal} size="lg" centered>
         <Form onSubmit={submitAsset}>
           <Modal.Header closeButton>
-            <Modal.Title>Tambah Aset Baru</Modal.Title>
+            <Modal.Title>{editingAsset ? 'Edit Aset' : 'Tambah Aset Baru'}</Modal.Title>
           </Modal.Header>
           <Modal.Body>
             <div className="small text-uppercase text-muted fw-semibold mb-1">Pendaftaran aset baru</div>
@@ -423,12 +470,13 @@ export default function AssetRegisterPage() {
                 />
               </Form.Group>
               {createMutation.isError ? <Alert variant="danger" className="mb-0">{getApiErrorMessage(createMutation.error, 'Gagal membuat aset')}</Alert> : null}
+              {updateMutation.isError ? <Alert variant="danger" className="mb-0">{getApiErrorMessage(updateMutation.error, 'Gagal memperbarui aset')}</Alert> : null}
             </div>
           </Modal.Body>
           <Modal.Footer>
-            <Button type="button" variant="outline-secondary" onClick={closeCreateAssetModal} disabled={createMutation.isPending}>Batal</Button>
-            <Button type="submit" disabled={createMutation.isPending}>
-              {createMutation.isPending ? 'Menyimpan...' : 'Simpan Aset'}
+            <Button type="button" variant="outline-secondary" onClick={closeCreateAssetModal} disabled={createMutation.isPending || updateMutation.isPending}>Batal</Button>
+            <Button type="submit" disabled={createMutation.isPending || updateMutation.isPending}>
+              {createMutation.isPending || updateMutation.isPending ? 'Menyimpan...' : editingAsset ? 'Simpan Perubahan' : 'Simpan Aset'}
             </Button>
           </Modal.Footer>
         </Form>

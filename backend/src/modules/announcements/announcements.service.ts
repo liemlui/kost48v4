@@ -155,17 +155,6 @@ export class AnnouncementsService {
     return updated;
   }
 
-  async publish(id: number, actor: CurrentUserPayload) {
-    const existing = await this.prisma.announcement.findUnique({ where: { id } });
-    if (!existing) throw new NotFoundException('Announcement tidak ditemukan');
-    if (existing.isPublished) throw new ConflictException('Announcement sudah dipublikasikan');
-    const updated = await this.prisma.announcement.update({ where: { id }, data: { isPublished: true, publishedAt: new Date() } });
-    await this.audit.log({ actorUserId: actor.id, action: 'PUBLISH', entityType: 'Announcement', entityId: String(updated.id), oldData: existing, newData: updated });
-    this.notifyPublished(updated).catch((err) => this.logger.error('Gagal membuat notifikasi pengumuman', err));
-    return updated;
-  }
-
-
   private async hasTenantOccupiedStay(user: CurrentUserPayload): Promise<boolean> {
     if (!user.tenantId) return false;
 

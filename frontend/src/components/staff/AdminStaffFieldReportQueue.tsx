@@ -16,6 +16,7 @@ import {
   getStaffFieldReportReviewQueue,
   reviewStaffFieldReport,
 } from "../../api/staffFieldReports";
+import { reviewFieldReportWithAi, type FieldReportReviewDraftResult } from "../../api/ai";
 import {
   adminDecisionOptions,
   fieldReportStatusLabels,
@@ -26,6 +27,8 @@ import {
 import type { StaffFieldReport } from "../../types";
 import PaginationControls from "../common/PaginationControls";
 import { useClientPagination } from "../../hooks/useClientPagination";
+import AiAssistButton from "../ai/AiAssistButton";
+import AiResultPanel from "../ai/AiResultPanel";
 
 // ═══════════════════════════════════════════════════════════
 //  COMPONENT: AdminStaffFieldReportQueue
@@ -68,6 +71,7 @@ export default function AdminStaffFieldReportQueue() {
   const [evidenceChecked, setEvidenceChecked] = useState(false);
   const [finalDecisionChecked, setFinalDecisionChecked] = useState(false);
   const [stockMovementChecked, setStockMovementChecked] = useState(false);
+  const [aiDraft, setAiDraft] = useState<FieldReportReviewDraftResult | null>(null);
 
   const queueQuery = useQuery({
     queryKey: ["staff-field-report-review-queue"],
@@ -125,6 +129,7 @@ export default function AdminStaffFieldReportQueue() {
       setEvidenceChecked(false);
       setFinalDecisionChecked(false);
       setStockMovementChecked(false);
+      setAiDraft(null);
     },
   });
 
@@ -175,6 +180,7 @@ export default function AdminStaffFieldReportQueue() {
     setStockMovementChecked(false);
     setAdminNotes("");
     setAdminNotesTouched(false);
+    setAiDraft(null);
   };
 
   return (
@@ -343,6 +349,7 @@ export default function AdminStaffFieldReportQueue() {
           setStockMovementChecked(false);
           setAdminNotes("");
           setAdminNotesTouched(false);
+          setAiDraft(null);
         }}
         centered
       >
@@ -369,6 +376,55 @@ export default function AdminStaffFieldReportQueue() {
                 Laporan ini menjadi bahan tindak lanjut. Periksa catatan dan
                 foto sebelum menyimpan keputusan.
               </Alert>
+              <div className="mb-3">
+                <AiAssistButton<FieldReportReviewDraftResult>
+                  label="Bantu Review dengan AI"
+                  loadingLabel="Menyusun draft review..."
+                  run={async () => {
+                    const draft = await reviewFieldReportWithAi(selected.id);
+                    setAiDraft(draft);
+                    return draft;
+                  }}
+                  renderResult={(draft) => (
+                    <AiResultPanel
+                      title="Draft Review Laporan Staff"
+                      mode={draft.mode}
+                      fallback={draft.fallback}
+                      warnings={draft.warnings}
+                      missingData={draft.missingData}
+                      usage={draft.usage}
+                      model={draft.model}
+                    >
+                      <p className="mb-2">{draft.result.summary}</p>
+                      <div className="small mb-2">
+                        <strong>Saran keputusan:</strong> {draft.result.recommendedDecision}
+                        {" · "}
+                        <strong>Prioritas:</strong> {draft.result.priority}
+                      </div>
+                      {draft.result.riskFlags.length ? (
+                        <Alert variant="warning" className="py-1 px-2 small">
+                          {draft.result.riskFlags.join(" | ")}
+                        </Alert>
+                      ) : null}
+                      <Button
+                        size="sm"
+                        variant="outline-primary"
+                        onClick={() => {
+                          setDecision(draft.result.recommendedDecision);
+                          setAdminNotes(draft.result.suggestedAdminNote);
+                          setAdminNotesTouched(true);
+                          setCreateMovement(draft.result.suggestedMovement.needed);
+                          if (draft.result.suggestedMovement.movementType) {
+                            setMovementType(draft.result.suggestedMovement.movementType);
+                          }
+                        }}
+                      >
+                        Pakai Draft ke Form
+                      </Button>
+                    </AiResultPanel>
+                  )}
+                />
+              </div>
               <div className="mb-3 rounded-4 border bg-light p-3">
                 <Form.Check
                   className="mb-2"
@@ -526,6 +582,11 @@ export default function AdminStaffFieldReportQueue() {
                   Catatan admin minimal 8 karakter.
                 </Form.Control.Feedback>
               </Form.Group>
+              {aiDraft?.result.suggestedMovement.reason ? (
+                <div className="small text-muted mt-2">
+                  Saran AI mutasi stok: {aiDraft.result.suggestedMovement.reason}
+                </div>
+              ) : null}
             </>
           ) : null}
         </Modal.Body>
@@ -539,6 +600,7 @@ export default function AdminStaffFieldReportQueue() {
               setStockMovementChecked(false);
               setAdminNotes("");
               setAdminNotesTouched(false);
+              setAiDraft(null);
             }}
           >
             Batal

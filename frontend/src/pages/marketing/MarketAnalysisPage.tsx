@@ -21,6 +21,7 @@ import {
   type ChatTurn,
   type MarketAnalysis,
 } from '../../api/marketAnalysis';
+import { getDemographicsSummary } from '../../api/tenants';
 
 const KIND_LABELS: Record<string, string> = {
   strengths: 'Kekuatan (Strengths)', weaknesses: 'Kelemahan (Weaknesses)',
@@ -76,6 +77,7 @@ export default function MarketAnalysisPage() {
   const snapshotQuery = useQuery({ queryKey: ['market-snapshot'], queryFn: getMarketSnapshot });
   const cacClvQuery = useQuery({ queryKey: ['cac-clv'], queryFn: () => getCacClvSnapshot(), enabled: view === 'cacclv' });
   const demographicsQuery = useQuery({ queryKey: ['customer-demographics'], queryFn: getCustomerDemographics, enabled: view === 'demografi' });
+  const tenantDemographicsQuery = useQuery({ queryKey: ['tenant-demographics-summary'], queryFn: getDemographicsSummary, enabled: view === 'demografi' });
   const configured = statusQuery.data?.configured ?? true;
 
   const chatMutation = useMutation({
@@ -150,7 +152,7 @@ export default function MarketAnalysisPage() {
       {view === 'cacclv' ? (
         <CacClvDashboard snapshotQuery={cacClvQuery} />
       ) : view === 'demografi' ? (
-        <DemographicsPanel query={demographicsQuery} />
+        <DemographicsPanel query={demographicsQuery} tenantSummaryQuery={tenantDemographicsQuery} />
       ) : (
         <Row className="g-4 mt-0">
           <Col lg={7}>

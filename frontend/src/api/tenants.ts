@@ -1,5 +1,26 @@
 import client from './client';
-import { ApiEnvelope, TenantProfileResponse } from '../types';
+import { ApiEnvelope, Tenant, TenantProfileResponse } from '../types';
+
+/** Detail tenant (OWNER/ADMIN) — termasuk field KTP untuk kartu verifikasi. */
+export async function getTenant(tenantId: number): Promise<Tenant> {
+  const response = await client.get<ApiEnvelope<Tenant>>(`/tenants/${tenantId}`);
+  return response.data.data;
+}
+
+/** Upload foto KTP tenant (OWNER/ADMIN) — wajib sebelum verifikasi (F3-17). */
+export async function uploadTenantKtpImage(tenantId: number, file: File): Promise<Tenant> {
+  const form = new FormData();
+  form.append('file', file);
+  const response = await client.post<ApiEnvelope<Tenant>>(`/tenants/${tenantId}/ktp/upload`, form, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  });
+  return response.data.data;
+}
+
+export async function deleteTenantKtp(tenantId: number): Promise<Tenant> {
+  const response = await client.delete<ApiEnvelope<Tenant>>(`/tenants/${tenantId}/ktp`);
+  return response.data.data;
+}
 
 export interface TogglePortalAccessResponse {
   tenantId: number;

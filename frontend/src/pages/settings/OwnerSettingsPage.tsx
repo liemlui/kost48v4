@@ -16,7 +16,10 @@ import { listFacilityImages, uploadFacilityImage, deleteFacilityImage } from '..
 import { deleteMarketingAsset, listMarketingAssets, uploadMarketingAsset } from '../../api/marketingAssets';
 import { resolveAbsoluteFileUrl } from '../../utils/resolveAbsoluteFileUrl';
 import { getOwnerAiStatus, getOwnerAiUsage, testOwnerAiConnection } from '../../api/ai';
+import { generateFaqDraft, type FaqDraftResult } from '../../api/ai';
 import { listAiDrafts, reviewAiDraft, expireAiDrafts, type AiDraft, type AiDraftStatus } from '../../api/aiDrafts';
+import AiAssistButton from '../../components/ai/AiAssistButton';
+import AiResultPanel from '../../components/ai/AiResultPanel';
 
 /* ─── Facility Photos ──────────────────────────────────────────────── */
 
@@ -301,6 +304,7 @@ function FaqManagementPanel() {
   const [editingId, setEditingId] = useState<number | null>(null);
   const [form, setForm] = useState<FaqForm>(EMPTY_FORM);
   const [error, setError] = useState('');
+  const [lastDraft, setLastDraft] = useState<FaqDraftResult | null>(null);
 
   const { data: faqs = [], isLoading, isError, refetch } = useQuery({
     queryKey: ['owner-faqs'],
@@ -368,6 +372,19 @@ function FaqManagementPanel() {
     saveMutation.mutate({ ...form, editId: editingId });
   };
 
+  const applyDraftItem = (item: FaqDraftResult['result']['items'][number]) => {
+    setEditingId(null);
+    setForm({
+      question: item.question,
+      answer: item.answer,
+      category: FAQ_CATEGORIES.includes(item.category) ? item.category : 'Umum',
+      sortOrder: item.sortOrder,
+      isActive: true,
+    });
+    setShowForm(true);
+    setError('');
+  };
+
   return (
     <div>
       <div className="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
@@ -375,8 +392,53 @@ function FaqManagementPanel() {
           <h3 className="h5 mb-0">FAQ Publik</h3>
           <small className="text-muted">FAQ ini tampil di halaman publik /. Owner dan Admin bisa mengelola.</small>
         </div>
-        <Button size="sm" onClick={openNew}>+ Tambah FAQ</Button>
+        <div className="d-flex gap-2 flex-wrap">
+          <AiAssistButton<FaqDraftResult>
+            label="Buat Draft FAQ dengan AI"
+            loadingLabel="Menyusun draft FAQ..."
+            run={async () => {
+              const draft = await generateFaqDraft();
+              setLastDraft(draft);
+              return draft;
+            }}
+            renderResult={(draft) => (
+              <AiResultPanel
+                title="Draft FAQ Owner AI"
+                mode={draft.mode}
+                fallback={draft.fallback}
+                warnings={draft.warnings}
+                usage={draft.usage}
+              >
+                <div className="small text-muted mb-2">
+                  Pilih item yang ingin dimasukkan ke form. Draft ini belum mengubah FAQ publik.
+                </div>
+                <div className="d-grid gap-2">
+                  {draft.result.items.slice(0, 6).map((item, index) => (
+                    <div key={`${item.question}-${index}`} className="border rounded p-2">
+                      <div className="d-flex flex-wrap gap-2 align-items-center mb-1">
+                        <Badge bg="light" text="dark" className="border">{item.category}</Badge>
+                        <Badge bg="light" text="dark" className="border">#{item.sortOrder}</Badge>
+                      </div>
+                      <div className="fw-semibold">{item.question}</div>
+                      <div className="small text-muted mb-2">{item.answer}</div>
+                      <Button size="sm" variant="outline-primary" onClick={() => applyDraftItem(item)}>
+                        Pakai ke Form FAQ
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              </AiResultPanel>
+            )}
+          />
+          <Button size="sm" onClick={openNew}>+ Tambah FAQ</Button>
+        </div>
       </div>
+
+      {lastDraft?.result.publicCopyDraft ? (
+        <Alert variant="light" className="border small">
+          <strong>Ringkasan copy publik draft:</strong> {lastDraft.result.publicCopyDraft}
+        </Alert>
+      ) : null}
 
       {isLoading && (
         <div className="d-grid gap-2 py-2" role="status" aria-label="Memuat FAQ" aria-busy="true">

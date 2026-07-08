@@ -1,6 +1,6 @@
 import { FormEvent, useMemo, useState } from 'react';
-import { Button, Card, Form, Table } from 'react-bootstrap';
-import type { CashAccount, ChartOfAccount, CashAccountType } from '../../api/accounting';
+import { Button, Card, Form, Modal, Table } from 'react-bootstrap';
+import type { CashAccount, ChartOfAccount, CashAccountType, UpdateCashAccountPayload } from '../../api/accounting';
 import CurrencyInput from '../common/CurrencyInput';
 import { formatRupiah } from '../../utils/formatCurrency';
 
@@ -10,11 +10,13 @@ export default function CashAccountSetupPanel({
   accounts,
   cashAccounts,
   onSubmit,
+  onUpdate,
   isSubmitting,
 }: {
   accounts: ChartOfAccount[];
   cashAccounts: CashAccount[];
   onSubmit: (payload: { name: string; accountType: CashAccountType; chartOfAccountId: number; openingBalanceRupiah: number; currentBalanceRupiah: number; bankName?: string; holderName?: string; isDefault: boolean; isActive: boolean; notes?: string }) => void;
+  onUpdate?: (cashAccountId: number, payload: UpdateCashAccountPayload) => void;
   isSubmitting?: boolean;
 }) {
   const assetAccounts = useMemo(() => accounts.filter((account) => account.type === 'ASSET' && account.isActive), [accounts]);
@@ -25,6 +27,17 @@ export default function CashAccountSetupPanel({
   const [openingBalance, setOpeningBalance] = useState('0');
   const [bankName, setBankName] = useState('');
   const [holderName, setHolderName] = useState('');
+  const [editing, setEditing] = useState<CashAccount | null>(null);
+  const [editForm, setEditForm] = useState({
+    name: '',
+    accountType: 'BANK' as CashAccountType,
+    chartOfAccountId: defaultAsset?.id ?? 0,
+    currentBalanceRupiah: '0',
+    bankName: '',
+    holderName: '',
+    isDefault: false,
+    isActive: true,
+  });
 
   const selectedAccountId = chartOfAccountId || defaultAsset?.id || 0;
 
@@ -44,6 +57,36 @@ export default function CashAccountSetupPanel({
       isActive: true,
       notes: 'Dibuat dari halaman Laporan Keuangan.',
     });
+  }
+
+  function openEdit(item: CashAccount) {
+    setEditing(item);
+    setEditForm({
+      name: item.name,
+      accountType: item.accountType,
+      chartOfAccountId: item.chartOfAccountId,
+      currentBalanceRupiah: String(item.currentBalanceRupiah ?? 0),
+      bankName: item.bankName ?? '',
+      holderName: item.holderName ?? '',
+      isDefault: item.isDefault,
+      isActive: item.isActive,
+    });
+  }
+
+  function submitEdit(event: FormEvent) {
+    event.preventDefault();
+    if (!editing || !onUpdate) return;
+    onUpdate(editing.id, {
+      name: editForm.name.trim(),
+      accountType: editForm.accountType,
+      chartOfAccountId: editForm.chartOfAccountId,
+      currentBalanceRupiah: Number(editForm.currentBalanceRupiah || 0),
+      bankName: editForm.bankName.trim() || undefined,
+      holderName: editForm.holderName.trim() || undefined,
+      isDefault: editForm.isDefault,
+      isActive: editForm.isActive,
+    });
+    setEditing(null);
   }
 
   return (
@@ -85,7 +128,7 @@ export default function CashAccountSetupPanel({
         </Form>
 
         <Table responsive hover className="mt-3 mb-0 small">
-          <thead><tr><th>Akun</th><th>Tipe</th><th>Akun (COA)</th><th>Saldo</th></tr></thead>
+          <thead><tr><th>Akun</th><th>Tipe</th><th>Akun (COA)</th><th>Saldo</th><th></th></tr></thead>
           <tbody>
             {cashAccounts.length ? cashAccounts.map((item) => (
               <tr key={item.id}>
@@ -93,11 +136,58 @@ export default function CashAccountSetupPanel({
                 <td>{item.accountType}</td>
                 <td>{item.chartOfAccount?.code} · {item.chartOfAccount?.name}</td>
                 <td>{formatRupiah(item.currentBalanceRupiah)}</td>
+                <td className="text-end">{onUpdate ? <Button size="sm" variant="outline-primary" onClick={() => openEdit(item)}>Edit</Button> : null}</td>
               </tr>
-            )) : <tr><td colSpan={4} className="text-muted">Belum ada cash/bank account.</td></tr>}
+            )) : <tr><td colSpan={5} className="text-muted">Belum ada cash/bank account.</td></tr>}
           </tbody>
         </Table>
       </Card.Body>
+
+      <Modal show={Boolean(editing)} onHide={() => setEditing(null)} centered>
+        <Form onSubmit={submitEdit}>
+          <Modal.Header closeButton>
+            <Modal.Title>Edit Cash Account</Modal.Title>
+          </Modal.Header>
+          <Modal.Body className="d-grid gap-3">
+            <Form.Group>
+              <Form.Label>Nama akun</Form.Label>
+              <Form.Control value={editForm.name} onChange={(event) => setEditForm((prev) => ({ ...prev, name: event.target.value }))} />
+            </Form.Group>
+            <Form.Group>
+              <Form.Label>Tipe</Form.Label>
+              <Form.Select value={editForm.accountType} onChange={(event) => setEditForm((prev) => ({ ...prev, accountType: event.target.value as CashAccountType }))}>
+                {cashTypes.map((type) => <option key={type} value={type}>{type}</option>)}
+              </Form.Select>
+            </Form.Group>
+            <Form.Group>
+              <Form.Label>Akun Aset (COA)</Form.Label>
+              <Form.Select value={editForm.chartOfAccountId} onChange={(event) => setEditForm((prev) => ({ ...prev, chartOfAccountId: Number(event.target.value) }))}>
+                {assetAccounts.map((account) => <option key={account.id} value={account.id}>{account.code} · {account.name}</option>)}
+              </Form.Select>
+            </Form.Group>
+            <Form.Group>
+              <Form.Label>Saldo sekarang</Form.Label>
+              <CurrencyInput value={Number(editForm.currentBalanceRupiah || 0)} onChange={(value) => setEditForm((prev) => ({ ...prev, currentBalanceRupiah: String(value ?? 0) }))} />
+            </Form.Group>
+            <Form.Group>
+              <Form.Label>Nama bank</Form.Label>
+              <Form.Control value={editForm.bankName} onChange={(event) => setEditForm((prev) => ({ ...prev, bankName: event.target.value }))} />
+            </Form.Group>
+            <Form.Group>
+              <Form.Label>Atas nama</Form.Label>
+              <Form.Control value={editForm.holderName} onChange={(event) => setEditForm((prev) => ({ ...prev, holderName: event.target.value }))} />
+            </Form.Group>
+            <div className="d-flex gap-3">
+              <Form.Check type="switch" label="Default" checked={editForm.isDefault} onChange={(event) => setEditForm((prev) => ({ ...prev, isDefault: event.target.checked }))} />
+              <Form.Check type="switch" label="Aktif" checked={editForm.isActive} onChange={(event) => setEditForm((prev) => ({ ...prev, isActive: event.target.checked }))} />
+            </div>
+          </Modal.Body>
+          <Modal.Footer>
+            <Button type="button" variant="light" onClick={() => setEditing(null)}>Batal</Button>
+            <Button type="submit" disabled={isSubmitting || !editForm.name.trim() || !editForm.chartOfAccountId}>Simpan Perubahan</Button>
+          </Modal.Footer>
+        </Form>
+      </Modal>
     </Card>
   );
 }

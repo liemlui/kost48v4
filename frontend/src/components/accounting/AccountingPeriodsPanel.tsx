@@ -1,4 +1,5 @@
-import { Alert, Badge, Button, Card, Form, Spinner, Table } from 'react-bootstrap';
+import { useState } from 'react';
+import { Alert, Badge, Button, Card, Form, Modal, Spinner, Table } from 'react-bootstrap';
 import type { AccountingPeriod, AccountingReadiness } from '../../api/accounting';
 import PaginationControls from '../common/PaginationControls';
 import { useClientPagination } from '../../hooks/useClientPagination';
@@ -28,15 +29,24 @@ type Props = {
   onReopenReasonChange: (value: string) => void;
   onReopenCurrentPeriod: () => void;
   onFocusPeriodClose?: () => void;
+  onUpdatePeriodNotes?: (periodId: number, notes: string) => void;
+  isUpdatingPeriod?: boolean;
 };
 
-export default function AccountingPeriodsPanel({ periods, readiness, isLoading, canManage, reopenReason, isReopening, onReopenReasonChange, onReopenCurrentPeriod, onFocusPeriodClose }: Props) {
+export default function AccountingPeriodsPanel({ periods, readiness, isLoading, canManage, reopenReason, isReopening, onReopenReasonChange, onReopenCurrentPeriod, onFocusPeriodClose, onUpdatePeriodNotes, isUpdatingPeriod }: Props) {
   const postingPeriodId = readiness?.postingPeriod?.id ?? null;
   const currentPeriod = periods.find((period) => period.isCurrentPostingPeriod || (postingPeriodId && period.id === postingPeriodId));
   const postingBlocked = Boolean(readiness?.postingPeriod && !readiness.postingPeriod.ready);
   const periodPagination = useClientPagination(periods, [periods.length], 10);
   const latestPeriods = periodPagination.pagedItems;
   const canSubmitReopen = Boolean(canManage && currentPeriod?.status === 'CLOSED' && reopenReason.trim().length >= 8 && !isReopening);
+  const [editingPeriod, setEditingPeriod] = useState<AccountingPeriod | null>(null);
+  const [periodNotes, setPeriodNotes] = useState('');
+
+  function openNotesEditor(period: AccountingPeriod) {
+    setEditingPeriod(period);
+    setPeriodNotes(period.notes ?? '');
+  }
 
   return (
     <Card className="content-card border-0 mb-3 accounting-setup-card">
@@ -99,6 +109,7 @@ export default function AccountingPeriodsPanel({ periods, readiness, isLoading, 
                   <th>Jurnal</th>
                   <th>Closing/Reopen</th>
                   <th>Catatan</th>
+                  {canManage ? <th></th> : null}
                 </tr>
               </thead>
               <tbody>
@@ -117,9 +128,14 @@ export default function AccountingPeriodsPanel({ periods, readiness, isLoading, 
                       {period.reopenJournalEntryId ? <small className="d-block">Jurnal reversal #{period.reopenJournalEntryId}</small> : null}
                     </td>
                     <td className="text-muted">{period.statusNarrative ?? period.notes ?? '-'}</td>
+                    {canManage ? (
+                      <td className="text-end">
+                        {onUpdatePeriodNotes ? <Button size="sm" variant="outline-primary" onClick={() => openNotesEditor(period)}>Edit catatan</Button> : null}
+                      </td>
+                    ) : null}
                   </tr>
                 )) : (
-                  <tr><td colSpan={6} className="text-muted">Belum ada accounting period.</td></tr>
+                  <tr><td colSpan={canManage ? 7 : 6} className="text-muted">Belum ada accounting period.</td></tr>
                 )}
               </tbody>
             </Table>
@@ -138,6 +154,34 @@ export default function AccountingPeriodsPanel({ periods, readiness, isLoading, 
           </div>
         )}
       </Card.Body>
+
+      <Modal show={Boolean(editingPeriod)} onHide={() => setEditingPeriod(null)} centered>
+        <Modal.Header closeButton>
+          <Modal.Title>Edit Catatan Period</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <div className="small text-muted mb-2">
+            Catatan internal untuk periode {editingPeriod ? periodKey(editingPeriod) : '-'}.
+          </div>
+          <Form.Group>
+            <Form.Label>Catatan owner</Form.Label>
+            <Form.Control as="textarea" rows={4} value={periodNotes} onChange={(event) => setPeriodNotes(event.target.value)} placeholder="Contoh: bulan ini ada koreksi utility terlambat, review sebelum close." />
+          </Form.Group>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="light" onClick={() => setEditingPeriod(null)}>Batal</Button>
+          <Button
+            onClick={() => {
+              if (!editingPeriod || !onUpdatePeriodNotes) return;
+              onUpdatePeriodNotes(editingPeriod.id, periodNotes);
+              setEditingPeriod(null);
+            }}
+            disabled={isUpdatingPeriod}
+          >
+            {isUpdatingPeriod ? 'Menyimpan...' : 'Simpan Catatan'}
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </Card>
   );
 }

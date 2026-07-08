@@ -173,6 +173,12 @@ export type CreateFixedAssetPayload = {
   notes?: string;
 };
 
+export type UpdateFixedAssetPayload = Partial<CreateFixedAssetPayload> & {
+  status?: FixedAssetStatus;
+  disposedAt?: string | null;
+  disposalNote?: string | null;
+};
+
 async function unwrap<T>(promise: Promise<{ data: ApiEnvelope<T> }>) {
   const response = await promise;
   return response.data.data;
@@ -200,6 +206,10 @@ export async function postAssetLedgerAlignment(assetId: number, payload: AssetLe
 
 export async function createFixedAsset(payload: CreateFixedAssetPayload) {
   return unwrap<FixedAsset>(client.post('/assets', payload));
+}
+
+export async function updateFixedAsset(assetId: number, payload: UpdateFixedAssetPayload) {
+  return unwrap<FixedAsset>(client.patch(`/assets/${assetId}`, payload));
 }
 
 export async function fetchDepreciationPreview(params?: { year?: number; month?: number }) {

@@ -2,7 +2,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useConfirm } from '../../components/common/ConfirmProvider';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Alert, Badge, Button, Card, Col, Row, Spinner, Tab, Tabs } from 'react-bootstrap';
+import { Alert, Badge, Button, Card, Col, Form, Row, Spinner, Tab, Tabs } from 'react-bootstrap';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import PageHeader from '../../components/common/PageHeader';
@@ -27,6 +27,7 @@ import { DepositOperationsPanel } from '../../components/deposit';
 import JournalAuditTrailPanel from '../../components/accounting/JournalAuditTrailPanel';
 import {
   createAccountingPeriod,
+  createAccount,
   createCashAccount,
   createOpeningBalanceDraft,
   fetchAccountingPeriods,
@@ -56,11 +57,19 @@ import {
   runDepositBackfillDryRun,
   runPeriodAutoClose,
   seedDefaultCoa,
+  updateAccountingPeriod,
+  updateAccount,
+  updateCashAccount,
   voidOpeningBalance,
+  type AccountingAccountType,
+  type ChartOfAccount,
   type CreateCashAccountPayload,
+  type CreateChartOfAccountPayload,
   type CreateOpeningBalanceDraftPayload,
+  type NormalBalance,
 } from '../../api/accounting';
 import { fetchDepositLedgerReconciliationLite, fetchDepositLedgerSummary } from '../../api/depositLedger';
+import { runDepositLedgerBackfillDryRun } from '../../api/depositLedger';
 import { getApiErrorMessage } from '../../utils/getApiErrorMessage';
 import { formatRupiah, formatRupiahWithoutSymbol } from '../../utils/formatCurrency';
 
@@ -80,6 +89,8 @@ const financeMenu = [
 // pindah tab dulu, lalu scroll ke anchor setelah pane target tampil.
 const ACCOUNTING_TABS = ['setup', 'ledger', 'aset', 'periode', 'saldo'] as const;
 type AccountingTabKey = (typeof ACCOUNTING_TABS)[number];
+const coaTypes: AccountingAccountType[] = ['ASSET', 'LIABILITY', 'EQUITY', 'REVENUE', 'COGS', 'EXPENSE'];
+const normalBalances: NormalBalance[] = ['DEBIT', 'CREDIT'];
 const SECTION_TAB: Record<string, AccountingTabKey> = {
   'data-quality': 'setup',
   'trial-balance': 'ledger',
@@ -124,6 +135,15 @@ export default function AccountingSetupPage() {
   const asOfDate = new Date(`${asOf}T00:00:00Z`);
   const closeYear = asOfDate.getUTCFullYear();
   const closeMonth = asOfDate.getUTCMonth() + 1;
+  const [coaForm, setCoaForm] = useState<CreateChartOfAccountPayload>({
+    code: '',
+    name: '',
+    type: 'ASSET',
+    normalBalance: 'DEBIT',
+    description: '',
+    isActive: true,
+  });
+  const [editingCoaId, setEditingCoaId] = useState<number | null>(null);
 
   const readinessQuery = useQuery({ queryKey: ['accounting-readiness'], queryFn: fetchAccountingReadiness, staleTime: 30_000 });
   const accountsQuery = useQuery({ queryKey: ['accounting-accounts'], queryFn: () => fetchAccounts({ isActive: true }), staleTime: 60_000 });
@@ -173,6 +193,10 @@ export default function AccountingSetupPage() {
   const draftOpeningBalance = useMemo(() => openingBalances.find((batch) => batch.status === 'DRAFT'), [openingBalances]);
   const canManageOpeningBalance = user?.role === 'OWNER';
   const canUseFinanceAi = user?.role === 'OWNER' && ownerAiStatusQuery.data?.configured === true;
+  const parentAccountOptions = useMemo(
+    () => accounts.filter((account) => !editingCoaId || account.id !== editingCoaId),
+    [accounts, editingCoaId],
+  );
   const activePostingPeriodReady = Boolean(
     readinessQuery.data?.postingPeriod?.ready
       || periods.some((period) => period.isCurrentPostingPeriod || period.isPostingOpen || period.status === 'OPEN'),
@@ -243,6 +267,24 @@ export default function AccountingSetupPage() {
     scrollToSection(sectionId);
   }, [activeTab, goToTab, scrollToSection]);
 
+  const beginEditCoa = useCallback((account: ChartOfAccount) => {
+    setEditingCoaId(account.id);
+    setCoaForm({
+      code: account.code,
+      name: account.name,
+      type: account.type,
+      normalBalance: account.normalBalance,
+      description: account.description ?? '',
+      parentId: account.parentId ?? undefined,
+      isActive: account.isActive,
+    });
+  }, []);
+
+  const resetCoaForm = useCallback(() => {
+    setEditingCoaId(null);
+    setCoaForm({ code: '', name: '', type: 'ASSET', normalBalance: 'DEBIT', description: '', isActive: true });
+  }, []);
+
   // Jalankan scroll tertunda setelah tab berpindah dan pane target dirender.
   useEffect(() => {
     const pending = pendingScrollRef.current;
@@ -310,6 +352,35 @@ export default function AccountingSetupPage() {
     onError: (error: unknown) => { setActionMessage(null); setActionError(getApiErrorMessage(error, 'Gagal menyimpan cash account.')); },
   });
 
+  const saveCoaMutation = useMutation({
+    mutationFn: async (payload: CreateChartOfAccountPayload) => {
+      if (editingCoaId) {
+        return updateAccount(editingCoaId, payload);
+      }
+      return createAccount(payload);
+    },
+    onMutate: () => { setActionError(null); setActionMessage(null); },
+    onSuccess: async () => {
+      setActionError(null);
+      setActionMessage(editingCoaId ? 'Akun COA berhasil diperbarui.' : 'Akun COA baru berhasil dibuat.');
+      setCoaForm({ code: '', name: '', type: 'ASSET', normalBalance: 'DEBIT', description: '', isActive: true });
+      setEditingCoaId(null);
+      await refreshAccounting();
+    },
+    onError: (error: unknown) => { setActionMessage(null); setActionError(getApiErrorMessage(error, 'Gagal menyimpan akun COA.')); },
+  });
+
+  const updateCashMutation = useMutation({
+    mutationFn: ({ id, payload }: { id: number; payload: Parameters<typeof updateCashAccount>[1] }) => updateCashAccount(id, payload),
+    onMutate: () => { setActionError(null); setActionMessage(null); },
+    onSuccess: async () => {
+      setActionError(null);
+      setActionMessage('Cash account berhasil diperbarui.');
+      await refreshAccounting();
+    },
+    onError: (error: unknown) => { setActionMessage(null); setActionError(getApiErrorMessage(error, 'Gagal memperbarui cash account.')); },
+  });
+
   const createPeriodMutation = useMutation({
     mutationFn: createAccountingPeriod,
     onMutate: () => { setActionError(null); setActionMessage(null); },
@@ -319,6 +390,17 @@ export default function AccountingSetupPage() {
       await refreshAccounting();
     },
     onError: (error: unknown) => { setActionMessage(null); setActionError(getApiErrorMessage(error, 'Gagal membuat accounting period.')); },
+  });
+
+  const updatePeriodMutation = useMutation({
+    mutationFn: ({ id, notes }: { id: number; notes: string }) => updateAccountingPeriod(id, { notes }),
+    onMutate: () => { setActionError(null); setActionMessage(null); },
+    onSuccess: async () => {
+      setActionError(null);
+      setActionMessage('Catatan accounting period berhasil diperbarui.');
+      await refreshAccounting();
+    },
+    onError: (error: unknown) => { setActionMessage(null); setActionError(getApiErrorMessage(error, 'Gagal memperbarui catatan accounting period.')); },
   });
 
   const createOpeningDraftMutation = useMutation({
@@ -456,6 +538,17 @@ export default function AccountingSetupPage() {
       await refreshAccounting();
     },
     onError: (error: unknown) => { setActionMessage(null); setActionError(getApiErrorMessage(error, 'Gagal menjalankan dry-run backfill deposit.')); },
+  });
+
+  const depositLedgerDryRunMutation = useMutation({
+    mutationFn: () => runDepositLedgerBackfillDryRun({ limit: 25 }),
+    onMutate: () => { setActionError(null); setActionMessage(null); },
+    onSuccess: async (result) => {
+      setActionError(null);
+      setActionMessage(`Dry-run ledger deposit lama selesai: ${result.wouldCreateEntriesForStays} stay kandidat dari limit ${result.limit}. Tidak ada entry dibuat.`);
+      await refreshAccounting();
+    },
+    onError: (error: unknown) => { setActionMessage(null); setActionError(getApiErrorMessage(error, 'Gagal menjalankan dry-run legacy deposit ledger.')); },
   });
 
   return (
@@ -697,6 +790,13 @@ export default function AccountingSetupPage() {
               >
                 {depositDryRunMutation.isPending ? 'Dry-run...' : 'Dry-run Deposit Backfill'}
               </Button>
+              <Button
+                variant="outline-secondary"
+                disabled={!canManageOpeningBalance || depositLedgerDryRunMutation.isPending}
+                onClick={() => depositLedgerDryRunMutation.mutate()}
+              >
+                {depositLedgerDryRunMutation.isPending ? 'Dry-run...' : 'Dry-run Legacy Ledger'}
+              </Button>
             </Card.Body>
           </Card>
 
@@ -753,9 +853,11 @@ export default function AccountingSetupPage() {
             canManage={user?.role === 'OWNER'}
             reopenReason={periodReopenReason}
             isReopening={reopenCurrentPostingPeriodMutation.isPending}
+            isUpdatingPeriod={updatePeriodMutation.isPending}
             onReopenReasonChange={setPeriodReopenReason}
             onReopenCurrentPeriod={() => reopenCurrentPostingPeriodMutation.mutate()}
             onFocusPeriodClose={() => focusAccountingSection('period-close')}
+            onUpdatePeriodNotes={(periodId, notes) => updatePeriodMutation.mutate({ id: periodId, notes })}
           />
 
           <div id="period-close">
@@ -791,15 +893,86 @@ export default function AccountingSetupPage() {
 
         <Tab eventKey="saldo" title="Saldo Awal" className="pt-3">
           <Row className="g-3 mb-3">
-            <Col xl={5}>
+            <Col xl={4}>
+              <Card className="content-card border-0 h-100 accounting-setup-card">
+                <Card.Body>
+                  <div className="section-kicker mb-2">COA manager</div>
+                  <h3 className="panel-title mb-1">Bagan akun manual</h3>
+                  <p className="text-muted">Gunakan form ini saat perlu menambah atau memperbaiki akun COA tanpa seed ulang seluruh chart.</p>
+                  <Form
+                    className="accounting-mini-form"
+                    onSubmit={(event) => {
+                      event.preventDefault();
+                      saveCoaMutation.mutate(coaForm);
+                    }}
+                  >
+                    <Form.Group>
+                      <Form.Label>Kode akun</Form.Label>
+                      <Form.Control value={coaForm.code} onChange={(event) => setCoaForm((prev) => ({ ...prev, code: event.target.value }))} placeholder="1015" />
+                    </Form.Group>
+                    <Form.Group>
+                      <Form.Label>Nama akun</Form.Label>
+                      <Form.Control value={coaForm.name} onChange={(event) => setCoaForm((prev) => ({ ...prev, name: event.target.value }))} placeholder="Bank Operasional Cadangan" />
+                    </Form.Group>
+                    <Form.Group>
+                      <Form.Label>Tipe</Form.Label>
+                      <Form.Select value={coaForm.type} onChange={(event) => setCoaForm((prev) => ({ ...prev, type: event.target.value as AccountingAccountType }))}>
+                        {coaTypes.map((type) => <option key={type} value={type}>{type}</option>)}
+                      </Form.Select>
+                    </Form.Group>
+                    <Form.Group>
+                      <Form.Label>Normal balance</Form.Label>
+                      <Form.Select value={coaForm.normalBalance} onChange={(event) => setCoaForm((prev) => ({ ...prev, normalBalance: event.target.value as NormalBalance }))}>
+                        {normalBalances.map((balance) => <option key={balance} value={balance}>{balance}</option>)}
+                      </Form.Select>
+                    </Form.Group>
+                    <Form.Group>
+                      <Form.Label>Parent account</Form.Label>
+                      <Form.Select value={coaForm.parentId ?? ''} onChange={(event) => setCoaForm((prev) => ({ ...prev, parentId: event.target.value ? Number(event.target.value) : undefined }))}>
+                        <option value="">Tidak ada parent</option>
+                        {parentAccountOptions.map((account) => <option key={account.id} value={account.id}>{account.code} - {account.name}</option>)}
+                      </Form.Select>
+                    </Form.Group>
+                    <Form.Group>
+                      <Form.Label>Deskripsi</Form.Label>
+                      <Form.Control value={coaForm.description ?? ''} onChange={(event) => setCoaForm((prev) => ({ ...prev, description: event.target.value }))} />
+                    </Form.Group>
+                    <Form.Check type="switch" label="Akun aktif" checked={coaForm.isActive ?? true} onChange={(event) => setCoaForm((prev) => ({ ...prev, isActive: event.target.checked }))} />
+                    <div className="d-flex gap-2 flex-wrap">
+                      <Button type="submit" disabled={saveCoaMutation.isPending || !coaForm.code.trim() || !coaForm.name.trim()}>
+                        {saveCoaMutation.isPending ? 'Menyimpan...' : editingCoaId ? 'Simpan Perubahan COA' : 'Tambah Akun COA'}
+                      </Button>
+                      {editingCoaId ? <Button type="button" variant="light" onClick={resetCoaForm}>Batal Edit</Button> : null}
+                    </div>
+                  </Form>
+
+                  <div className="mt-3 border-top pt-3">
+                    <div className="small text-uppercase text-muted fw-semibold mb-2">Akun terbaru</div>
+                    <div className="d-grid gap-2">
+                      {accounts.slice(0, 8).map((account) => (
+                        <div key={account.id} className="border rounded p-2 d-flex justify-content-between align-items-start gap-2">
+                          <div>
+                            <div className="fw-semibold">{account.code} - {account.name}</div>
+                            <div className="small text-muted">{account.type} · {account.normalBalance}{account.parentId ? ` · parent #${account.parentId}` : ''}</div>
+                          </div>
+                          <Button size="sm" variant="outline-primary" onClick={() => beginEditCoa(account)}>Edit</Button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </Card.Body>
+              </Card>
+            </Col>
+            <Col xl={4}>
               <CashAccountSetupPanel
                 accounts={accounts}
                 cashAccounts={cashAccounts}
                 onSubmit={(payload) => createCashMutation.mutate(payload)}
-                isSubmitting={createCashMutation.isPending}
+                onUpdate={(id, payload) => updateCashMutation.mutate({ id, payload })}
+                isSubmitting={createCashMutation.isPending || updateCashMutation.isPending}
               />
             </Col>
-            <Col xl={7} id="opening-balance">
+            <Col xl={4} id="opening-balance">
               <OpeningBalanceWizard
                 accounts={accounts}
                 periods={periods}

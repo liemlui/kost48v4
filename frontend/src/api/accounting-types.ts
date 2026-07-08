@@ -693,9 +693,30 @@ export type CreateCashAccountPayload = {
   notes?: string;
 };
 
+export type CreateChartOfAccountPayload = {
+  code: string;
+  name: string;
+  type: AccountingAccountType;
+  normalBalance: NormalBalance;
+  description?: string;
+  parentId?: number;
+  isActive?: boolean;
+};
+
+export type UpdateChartOfAccountPayload = Partial<CreateChartOfAccountPayload>;
+
+export type UpdateCashAccountPayload = Partial<CreateCashAccountPayload>;
+
 export type CreatePeriodPayload = {
   year: number;
   month: number;
+  startDate?: string;
+  endDate?: string;
+  status?: AccountingPeriodStatus;
+  notes?: string;
+};
+
+export type UpdatePeriodPayload = {
   startDate?: string;
   endDate?: string;
   status?: AccountingPeriodStatus;

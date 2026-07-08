@@ -3,7 +3,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Alert, Badge, Button, Card, Form, Modal, Spinner } from 'react-bootstrap';
 import { useAuth } from '../../context/AuthContext';
 import { getOwnerAiStatus, validateKtpOcr, type KtpOcrValidateResult } from '../../api/ai';
-import { verifyTenantKtp, saveTenantKtpData, type VerifyKtpPayload } from '../../api/tenants';
+import { verifyTenantKtp, saveTenantKtpData, getTenant, uploadTenantKtpImage, deleteTenantKtp, type VerifyKtpPayload } from '../../api/tenants';
 import { preprocessImage } from '../../utils/ocrPreprocess';
 import { getApiErrorMessage } from '../../utils/getApiErrorMessage';
 import { useToast } from '../common/ToastProvider';
@@ -45,12 +45,21 @@ export default function KtpOcrValidateCard({ tenantId, tenantName, ktpVerifiedAt
     staleTime: 60_000,
   });
 
+  // Sumber kebenaran status foto/verifikasi KTP — caller (StepTenantSelect) tidak
+  // mengirim prop ktpVerifiedAt/ktpVerificationMethod, jadi kartu ini fetch sendiri.
+  const { data: tenantData } = useQuery({
+    queryKey: ['tenant', tenantId],
+    queryFn: () => getTenant(tenantId),
+    enabled: isOwnerAdmin,
+  });
+
   const [ocrText, setOcrText] = useState('');
   const [scanning, setScanning] = useState(false);
   const [scanMsg, setScanMsg] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<KtpOcrValidateResult | null>(null);
+  const [pickedFile, setPickedFile] = useState<File | null>(null);
 
   // Manual verify state
   const [showVerifyModal, setShowVerifyModal] = useState(false);
@@ -72,11 +81,36 @@ export default function KtpOcrValidateCard({ tenantId, tenantName, ktpVerifiedAt
     },
   });
 
+  const uploadMutation = useMutation({
+    mutationFn: (file: File) => uploadTenantKtpImage(tenantId, file),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['tenant', tenantId] });
+      queryClient.invalidateQueries({ queryKey: ['tenants'] });
+    },
+  });
+
+  const deleteKtpMutation = useMutation({
+    mutationFn: () => deleteTenantKtp(tenantId),
+    onSuccess: () => {
+      setPickedFile(null);
+      setOcrText('');
+      setResult(null);
+      setSavedFields([]);
+      queryClient.invalidateQueries({ queryKey: ['tenant', tenantId] });
+      queryClient.invalidateQueries({ queryKey: ['tenants'] });
+      toast('Foto dan metadata KTP tenant dihapus dari berkas.', 'success');
+    },
+    onError: (err) => {
+      toast(getApiErrorMessage(err, 'Gagal menghapus data KTP tenant.'), 'danger');
+    },
+  });
+
   if (!isOwnerAdmin) return null;
 
   const configured = !!status?.configured;
-  const isVerified = verified || !!ktpVerifiedAt;
-  const verificationMethod = verified ? verifyMethod : ktpVerificationMethod;
+  const hasKtpPhoto = !!tenantData?.ktpImageUrl;
+  const isVerified = verified || !!(tenantData?.ktpVerifiedAt ?? ktpVerifiedAt);
+  const verificationMethod = verified ? verifyMethod : (tenantData?.ktpVerificationMethod ?? ktpVerificationMethod);
 
   // G5+ fix #3: AI option only valid when DeepSeek actually succeeded
   const aiOptionValid = !!(
@@ -94,6 +128,7 @@ export default function KtpOcrValidateCard({ tenantId, tenantName, ktpVerifiedAt
 
   async function handleKtpScan(file?: File) {
     if (!file) return;
+    setPickedFile(file);
     setScanning(true);
     setScanMsg('Mempersiapkan gambar…');
     setResult(null);
@@ -139,6 +174,12 @@ export default function KtpOcrValidateCard({ tenantId, tenantName, ktpVerifiedAt
 
   async function handleManualVerify() {
     await verifyMutation.mutateAsync({ method: effectiveVerifyMethod, notes: verifyNotes || undefined });
+  }
+
+  async function handleDeleteKtp() {
+    const ok = window.confirm(`Hapus foto dan metadata KTP tenant ${tenantName || `#${tenantId}`}?`);
+    if (!ok) return;
+    await deleteKtpMutation.mutateAsync();
   }
 
   async function handleSaveKtpData() {
@@ -208,6 +249,24 @@ export default function KtpOcrValidateCard({ tenantId, tenantName, ktpVerifiedAt
           ) : null}
         </p>
 
+        {hasKtpPhoto ? (
+          <div className="mb-3">
+            <Button
+              type="button"
+              variant="outline-danger"
+              size="sm"
+              disabled={deleteKtpMutation.isPending}
+              onClick={handleDeleteKtp}
+            >
+              {deleteKtpMutation.isPending ? (
+                <><Spinner animation="border" size="sm" className="me-2" />Menghapusâ€¦</>
+              ) : (
+                'Hapus Data KTP dari Berkas'
+              )}
+            </Button>
+          </div>
+        ) : null}
+
         {!isVerified ? (
           <>
             <Form.Group className="mb-2">
@@ -227,6 +286,54 @@ export default function KtpOcrValidateCard({ tenantId, tenantName, ktpVerifiedAt
                 <div className="small text-muted mt-2">{scanMsg}</div>
               ) : null}
             </Form.Group>
+
+            <div className="d-flex align-items-center gap-2 flex-wrap mb-2">
+              {hasKtpPhoto ? (
+                <Badge bg="success" className="small">📄 Foto KTP tersimpan di berkas tenant</Badge>
+              ) : (
+                <Badge bg="danger" className="small">📄 Foto KTP belum diunggah — wajib sebelum verifikasi</Badge>
+              )}
+              {pickedFile ? (
+                <Button
+                  type="button"
+                  variant="outline-primary"
+                  size="sm"
+                  disabled={uploadMutation.isPending}
+                  onClick={() => uploadMutation.mutate(pickedFile)}
+                >
+                  {uploadMutation.isPending ? (
+                    <><Spinner animation="border" size="sm" className="me-2" />Mengunggah…</>
+                  ) : (
+                    '💾 Simpan Foto KTP ke Berkas Tenant'
+                  )}
+                </Button>
+              ) : null}
+              {hasKtpPhoto ? (
+                <Button
+                  type="button"
+                  variant="outline-danger"
+                  size="sm"
+                  disabled={deleteKtpMutation.isPending}
+                  onClick={handleDeleteKtp}
+                >
+                  {deleteKtpMutation.isPending ? (
+                    <><Spinner animation="border" size="sm" className="me-2" />Menghapusâ€¦</>
+                  ) : (
+                    'Hapus Data KTP'
+                  )}
+                </Button>
+              ) : null}
+            </div>
+            {uploadMutation.isError ? (
+              <Alert variant="danger" className="py-1 px-2 small mb-2">
+                {getApiErrorMessage(uploadMutation.error, 'Gagal mengunggah foto KTP.')}
+              </Alert>
+            ) : null}
+            {uploadMutation.isSuccess ? (
+              <Alert variant="success" className="py-1 px-2 small mb-2">
+                ✅ Foto KTP tersimpan. Sekarang bisa diverifikasi.
+              </Alert>
+            ) : null}
 
             <Form.Group className="mb-2">
               <Form.Label className="small mb-1">Teks OCR KTP</Form.Label>
@@ -264,6 +371,8 @@ export default function KtpOcrValidateCard({ tenantId, tenantName, ktpVerifiedAt
                 type="button"
                 variant="outline-success"
                 size="sm"
+                disabled={!hasKtpPhoto}
+                title={!hasKtpPhoto ? 'Upload & simpan foto KTP dulu sebelum verifikasi' : undefined}
                 onClick={() => setShowVerifyModal(true)}
               >
                 ✅ Verifikasi Manual

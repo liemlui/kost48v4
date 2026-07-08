@@ -28,7 +28,16 @@ export class SettingsService implements OnModuleInit {
     try {
       const existing = await this.prisma.operationalSetting.findUnique({ where: { id: 1 } });
       if (existing) return existing;
-      return this.prisma.operationalSetting.create({ data: { id: 1 } });
+      // Nilai AWAL gate KTP diambil dari env (runbook deploy menyuruh set env ini).
+      // Tanpa ini, row terbentuk dengan default false dan env diabaikan selamanya —
+      // pembaca gate (stays/tenant-bookings) memakai nilai DB begitu row ada.
+      return this.prisma.operationalSetting.create({
+        data: {
+          id: 1,
+          ktpVerificationGateEnabled:
+            String(process.env.KTP_ACTIVATION_GATE_ENABLED ?? 'false').toLowerCase() === 'true',
+        },
+      });
     } catch (err: any) {
       // Kolom / tabel belum sinkron dengan schema.prisma — kembalikan default lengkap.
       this.logger.warn('getOperational() gagal (schema DB belum sinkron?), fallback ke default', err?.message ?? err);

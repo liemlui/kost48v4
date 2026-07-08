@@ -76,6 +76,11 @@ export type Tenant = {
   activeStayId?: number | null;
   currentStay?: Stay | null;
   portalUserSummary?: PortalUserSummary | null;
+  // F3-17 / G5+: foto KTP + verifikasi (kosong untuk role STAFF, lihat backend tenants.service).
+  ktpImageUrl?: string | null;
+  ktpVerifiedAt?: string | null;
+  ktpVerificationMethod?: string | null;
+  ktpVerificationNotes?: string | null;
 };
 
 export type TenantProfileCompletionSummary = {

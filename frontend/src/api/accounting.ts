@@ -6,6 +6,7 @@ import type {
   AccountingPeriod, ChartOfAccount, CashAccount, OpeningBalanceBatch, OpeningBalanceStatus,
   PeriodReopenPostResult, ReopenAccountingPeriodPayload,
   CreateOpeningBalanceDraftPayload, CreateCashAccountPayload, CreatePeriodPayload,
+  UpdatePeriodPayload,
   TrialBalance, BalanceSheetGuard, AssetReadiness, ProfitLossLite,
   PeriodAutoClosePolicy, PeriodAutoCloseRunPayload, PeriodCloseReadiness,
   PeriodClosePreview, PeriodClosePayload, PeriodClosePostResult,
@@ -14,6 +15,7 @@ import type {
   DepositPosition, DepositReconciliation, DepositBackfillDryRunResult,
   ReversalWatch, JournalBySourceResult,
   CashflowStatement, FinancialRatiosStatement, ProfitLossDetail, BalanceSheetDetail,
+  CreateChartOfAccountPayload, UpdateChartOfAccountPayload, UpdateCashAccountPayload,
 } from './accounting-types';
 
 async function unwrap<T>(promise: Promise<{ data: ApiEnvelope<T> }>) {
@@ -33,6 +35,14 @@ export async function fetchAccounts(params?: { type?: AccountingAccountType; isA
   return unwrap<ChartOfAccount[]>(client.get('/accounting/accounts', { params }));
 }
 
+export async function createAccount(payload: CreateChartOfAccountPayload) {
+  return unwrap<ChartOfAccount>(client.post('/accounting/accounts', payload));
+}
+
+export async function updateAccount(id: number, payload: UpdateChartOfAccountPayload) {
+  return unwrap<ChartOfAccount>(client.patch(`/accounting/accounts/${id}`, payload));
+}
+
 export async function fetchCashAccounts(params?: { accountType?: CashAccountType; isActive?: boolean; search?: string }) {
   return unwrap<CashAccount[]>(client.get('/accounting/cash-accounts', { params }));
 }
@@ -41,12 +51,20 @@ export async function createCashAccount(payload: CreateCashAccountPayload) {
   return unwrap<CashAccount>(client.post('/accounting/cash-accounts', payload));
 }
 
+export async function updateCashAccount(id: number, payload: UpdateCashAccountPayload) {
+  return unwrap<CashAccount>(client.patch(`/accounting/cash-accounts/${id}`, payload));
+}
+
 export async function fetchAccountingPeriods(params?: { year?: number; month?: number; status?: AccountingPeriodStatus }) {
   return unwrap<AccountingPeriod[]>(client.get('/accounting/periods', { params }));
 }
 
 export async function createAccountingPeriod(payload: CreatePeriodPayload) {
   return unwrap<AccountingPeriod>(client.post('/accounting/periods', payload));
+}
+
+export async function updateAccountingPeriod(id: number, payload: UpdatePeriodPayload) {
+  return unwrap<AccountingPeriod>(client.patch(`/accounting/periods/${id}`, payload));
 }
 
 export async function reopenAccountingPeriod(id: number, payload: ReopenAccountingPeriodPayload) {
