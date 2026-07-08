@@ -11,6 +11,9 @@ import { expireReservedBooking, runPaymentSubmissionExpiryCheck } from '../../ap
 import { approveCheckoutRequest, listAdminCheckoutRequests, rejectCheckoutRequest } from '../../api/checkoutRequests';
 import CurrencyDisplay from '../../components/common/CurrencyDisplay';
 import EmptyState from '../../components/common/EmptyState';
+import { useToast } from '../../components/common/ToastProvider';
+import { useConfirm } from '../../components/common/ConfirmProvider';
+import { getApiErrorMessage } from '../../utils/getApiErrorMessage';
 import PageHeader from '../../components/common/PageHeader';
 import PaginationControls from '../../components/common/PaginationControls';
 import StatusBadge, { getStatusLabel } from '../../components/common/StatusBadge';
@@ -155,6 +158,8 @@ export default function StaysPage() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { toast } = useToast();
+  const confirm = useConfirm();
   const [searchParams, setSearchParams] = useSearchParams();
   const statusFromUrl = searchParams.get('status') || undefined;
   const filterFromUrl: StayViewFilter = statusFromUrl === 'BOOKINGS'
@@ -187,6 +192,9 @@ export default function StaysPage() {
         queryClient.invalidateQueries({ queryKey: ['payment-submissions'] }),
       ]);
     },
+    onError: (err: unknown) => {
+      toast(getApiErrorMessage(err, 'Gagal menjalankan kedaluwarsa booking.'), 'danger');
+    },
   });
 
   const rejectBookingMutation = useMutation({
@@ -204,6 +212,9 @@ export default function StaysPage() {
         }),
       ]);
       setRejectBookingTarget(null);
+    },
+    onError: (err: unknown) => {
+      toast(getApiErrorMessage(err, 'Gagal menolak booking.'), 'danger');
     },
   });
 
@@ -240,6 +251,9 @@ export default function StaysPage() {
         queryClient.invalidateQueries({ queryKey: ['stays'] }),
       ]);
     },
+    onError: (err: unknown) => {
+      toast(getApiErrorMessage(err, 'Gagal menyetujui pengajuan keluar.'), 'danger');
+    },
   });
 
   const rejectCrMutation = useMutation({
@@ -251,6 +265,9 @@ export default function StaysPage() {
         queryClient.invalidateQueries({ queryKey: ['stays'] }),
       ]);
       setRejectTarget(null);
+    },
+    onError: (err: unknown) => {
+      toast(getApiErrorMessage(err, 'Gagal menolak pengajuan keluar.'), 'danger');
     },
   });
 
@@ -708,7 +725,20 @@ export default function StaysPage() {
                               </>
                             ) : null}
                             {expiryMeta.isExpired ? (
-                              <Button size="sm" variant="outline-danger" onClick={() => expireMutation.mutate(item.id)} disabled={expireMutation.isPending}>
+                              <Button
+                                size="sm"
+                                variant="outline-danger"
+                                disabled={expireMutation.isPending}
+                                onClick={async () => {
+                                  const ok = await confirm({
+                                    title: 'Jalankan Kedaluwarsa',
+                                    message: `Batalkan booking ${item.tenant?.fullName ?? `#${item.id}`} yang sudah lewat tenggat dan lepas kamarnya?`,
+                                    confirmLabel: 'Jalankan',
+                                    variant: 'danger',
+                                  });
+                                  if (ok) expireMutation.mutate(item.id);
+                                }}
+                              >
                                 {expireMutation.isPending ? 'Memproses...' : 'Jalankan Kedaluwarsa'}
                               </Button>
                             ) : null}

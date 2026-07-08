@@ -999,6 +999,7 @@ const aiFeatureLabel = (k: string) => AI_FEATURE_LABELS[k] ?? k;
 
 function AiSettingsPanel() {
   const qc = useQueryClient();
+  const confirm = useConfirm();
   const statusQuery = useQuery({ queryKey: ['owner-ai', 'status'], queryFn: getOwnerAiStatus });
   const usageQuery = useQuery({ queryKey: ['owner-ai', 'usage'], queryFn: getOwnerAiUsage });
   const settingsQuery = useQuery({ queryKey: ['settings', 'operational'], queryFn: fetchOperationalSettings });
@@ -1097,7 +1098,15 @@ function AiSettingsPanel() {
               {db?.deepseekApiKeySource === 'settings' ? (
                 <Col md="auto">
                   <Button size="sm" variant="outline-danger" disabled={updateMutation.isPending}
-                    onClick={() => updateMutation.mutate({ deepseekApiKey: '' })}>
+                    onClick={async () => {
+                      const ok = await confirm({
+                        title: 'Hapus API Key',
+                        message: 'Hapus API key DeepSeek dari database? Fitur AI berhenti bekerja sampai key baru diisi (env fallback tetap dipakai bila ada).',
+                        confirmLabel: 'Hapus',
+                        variant: 'danger',
+                      });
+                      if (ok) updateMutation.mutate({ deepseekApiKey: '' });
+                    }}>
                     Hapus key
                   </Button>
                 </Col>

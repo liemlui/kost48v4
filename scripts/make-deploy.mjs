@@ -130,7 +130,7 @@ writeFileSync(OUT + '/.env.example', [
   'JWT_SECRET="ganti-dengan-secret-acak-kuat-min-32-char"',
   'NODE_ENV=production',
   'CORS_ORIGIN="https://domain-anda"   # combined same-origin: cukup domainnya',
-  'KTP_ACTIVATION_GATE_ENABLED=true    # L-4 WAJIB true di produksi',
+  'KTP_ACTIVATION_GATE_ENABLED=true    # L-4 WAJIB true di produksi (nilai awal row settings; sesudahnya dikelola via UI Settings → Operasional)',
   '# Auto-ops: VPS/always-on -> AUTO_OPS_ENABLED=true. Shared hosting/Passenger (idle-sleep)',
   '# -> AUTO_OPS_ENABLED=false + AUTO_OPS_CRON_TOKEN, lalu cPanel Cron panggil POST /api/auto-ops/cron.',
   'AUTO_OPS_ENABLED=false',

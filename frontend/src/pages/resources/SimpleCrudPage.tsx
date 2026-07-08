@@ -2,6 +2,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useToast } from '../../components/common/ToastProvider';
+import { useConfirm } from '../../components/common/ConfirmProvider';
+import { getApiErrorMessage } from '../../utils/getApiErrorMessage';
 import { Alert, Button, Card, Modal } from 'react-bootstrap';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { createResource, deleteResource, listResource, updateResource } from '../../api/resources';
@@ -58,6 +60,7 @@ type ResourceFilterId = string;
 export default function SimpleCrudPage({ config, hideAreaMenu = false }: { config: ResourceConfig; hideAreaMenu?: boolean }) {
   const queryClient = useQueryClient();
   const toast = useToast();
+  const confirm = useConfirm();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const { user } = useAuth();
@@ -213,6 +216,9 @@ export default function SimpleCrudPage({ config, hideAreaMenu = false }: { confi
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: [config.path, 'list'] });
       toast.toast('Data berhasil dihapus.', 'warning');
+    },
+    onError: (err: unknown) => {
+      toast.toast(getApiErrorMessage(err, 'Gagal menghapus data.'), 'danger');
     },
   });
 
@@ -394,7 +400,7 @@ export default function SimpleCrudPage({ config, hideAreaMenu = false }: { confi
     setShowModal(true);
   };
 
-  const handleDelete = (id: number) => {
+  const handleDelete = async (id: number) => {
     const target = items.find((item) => Number(item.id) === id);
     if (!target) return;
     const deleteGuard = canDeleteResourceItem(config, user?.role, target);
@@ -402,6 +408,16 @@ export default function SimpleCrudPage({ config, hideAreaMenu = false }: { confi
       setError(deleteGuard.reason ?? 'Anda tidak memiliki izin untuk menghapus item ini.');
       return;
     }
+    const t = target as Record<string, unknown>;
+    const label =
+      asString(t.name) || asString(t.fullName) || asString(t.title) || asString(t.code) || `#${id}`;
+    const ok = await confirm({
+      title: 'Hapus Data',
+      message: `Hapus "${label}" dari ${config.title}? Tindakan ini tidak bisa dibatalkan.`,
+      confirmLabel: 'Hapus',
+      variant: 'danger',
+    });
+    if (!ok) return;
     deleteMutation.mutate(id);
   };
 

@@ -12,6 +12,19 @@
 6. **DB dev:** postgres **5433** `kost48_v3_pro` · reseed: `node scripts/seed-dev-reset.js && node scripts/seed-dev-via-api.js`.
 7. **Larangan:** no npm dep baru · no `schema.prisma` tanpa approval owner (🧬) · no `git push` · no sentuh file milik AI lain.
 
+## Efisiensi Sesi & Bump Versi
+
+- Satu sesi ideal = 1 episode kerja yang masih berhubungan. Jika topik sudah berubah total atau konteks mulai jenuh, mulai sesi baru lebih hemat daripada menyeret konteks lama.
+- Navigasi token: buka `M00`/`M01`/`M12` dulu, lalu grep simbol spesifik. Jangan baca seluruh arsip saat tidak dibutuhkan.
+- Bump versi aplikasi hanya saat owner minta eksplisit. Sumber kebenaran versi:
+  - `frontend/src/config/version.ts`
+  - `frontend/public/version.json`
+- Format versi:
+  - `PATCH` untuk bugfix / polish kecil
+  - `MINOR` untuk fitur baru yang terasa ke user
+  - `MAJOR` untuk perubahan besar / breaking change
+- Saat bump versi, ikut update `APP_BUILD_DATE` ke tanggal hari ini. Build ID PWA tetap dihasilkan otomatis saat `npm run build`.
+
 | Marker | Arti |
 |--------|------|
 | 🧑 / [OWNER] | Langkah manusia — STOP & lapor, jangan tebak env/server |
@@ -91,11 +104,14 @@
 > **Fase A** blocked owner (infrastruktur server/domain/env). **Fase B–AM** selesai.
 >
 > **Sisa aktif:**
-> 0. **G5+ Fixlist KTP (spec `docs/AI_WEAK_FIXLIST_KTP_G5_REVIEW.md`)** — ✅ **SELESAI (3/3 + hardening review)** — migration `ktpVerificationMethod/Notes`, rate-limit hemat kuota (deterministik/fallback tak potong kuota), method `AI` di `verifyKtp` butuh bukti sukses AI (`KtpAiApprovalService` baru, TTL 30 mnt, sekali pakai); hardening cache AI (prune+cap, clone anti-mutasi, key model konsisten). Build BE ✅ FE ✅
-> 0. **G5+ gap kritis: UI upload foto KTP** — ✅ **SELESAI** — endpoint `ktp/upload` sudah ada sejak F3-17 tapi tak pernah dipanggil UI manapun (blocker aktivasi tenant bila gate ON). `KtpOcrValidateCard.tsx` kini upload foto asli + fetch state tenant sendiri. Build FE ✅. Menyusul: audit orphaned-endpoint Admin/Owner+Inventory `docs/AI_AUDIT_ORPHANED_ENDPOINTS_ADMIN_OWNER.md` (agent berjalan).
+> 0. **G5+ Fixlist KTP** — ✅ **SELESAI (3/3 + hardening review)** — migration `ktpVerificationMethod/Notes`, rate-limit hemat kuota (deterministik/fallback tak potong kuota), method `AI` di `verifyKtp` butuh bukti sukses AI (`KtpAiApprovalService` baru, TTL 30 mnt, sekali pakai); hardening cache AI (prune+cap, clone anti-mutasi, key model konsisten). Build BE ✅ FE ✅
+> 0. **G5+ gap kritis: UI upload foto KTP + audit orphaned endpoint** — ✅ **SELESAI** — endpoint `ktp/upload` yang sebelumnya tak pernah dipanggil UI kini aktif; audit orphaned endpoint Admin/Owner/Inventory juga sudah ditutup: delete KTP, create/update COA, update cash account, update period notes, edit aset, draft FAQ AI, review laporan staff AI, legacy deposit-ledger dry-run, dan integrasi demographics summary sudah tersambung atau dibersihkan bila redundant. Build FE ✅ BE ✅
 > 0. **Fase M16 — Audit 360 Flow Huni** — ✅ **SELESAI** — 7 temuan: P2-01/02/04 fixed, P2-03/05/06/07 diverifikasi valid. Detail: `docs/M16_AUDIT_360_FLOW_HUNI.md §7`. Build FE ✅ BE ✅
 > 0. **Fase AM — Redundansi UI/UX + Audit (Admin + Owner + Publik)** — ✅ **SELESAI (16/16)** — AM-01..AM-16. Detail: `docs/M14_REDUNDANSI_UI_UX.md`.
-> 0. **Fase M18 — Celah Peningkatan (Review 9 Jul 2026)** — ✅ **11/11** — 11 task: P0-01 race condition token, P1-01..P1-03 PDP & integritas data, P2-01..P2-05 robustness & test coverage, P3-01..P3-02 observability & error boundary. Detail: `docs/M18_CELAH_PENINGKATAN.md`.
+> 0. **Fase M18 — Celah Peningkatan (Review 9 Jul 2026)** — ✅ **11/11** — 11 task tuntas: refresh token race condition, masking NIK, unique `identityNumber`, saveKtpData tidak overwrite field existing, feedback error KTP save, DTO validasi KTP-data, unit test OCR FE/BE, logging silent catch, dan `FeatureErrorBoundary` untuk halaman kritis.
+> 0. **AU-01..AU-03 — Sisa audit kedalaman UI/UX Admin/Owner** — ✅ **SELESAI (8 Jul, Fable5)** — AU-01 `SimpleCrudPage` confirm dialog + `onError` toast di delete (dampak: expenses/invoice-payments/wifi-sales/additional-services); AU-02 `StaysPage` 4 mutation (expire/reject booking, approve/reject checkout) dapat `onError` toast; AU-03 confirm di "Jalankan Kedaluwarsa" (`StaysPage`) + "Hapus key" DeepSeek (`OwnerSettingsPage`). `tsc` FE ✅
+> 0. **GATE-KTP-ENV 🔴 — Jebakan gate KTP produksi** — ✅ **SELESAI (8 Jul, Fable5)** — pembaca gate memakai nilai DB begitu row `OperationalSetting` ada (kolom non-nullable → `?? env` mati), row terbentuk otomatis default `false` → env `KTP_ACTIVATION_GATE_ENABLED=true` yang diwajibkan runbook diabaikan, gate diam-diam OFF. Fix: `settings.service.ts` semai nilai awal row dari env + catatan verifikasi di docs deploy. `tsc` BE ✅
+> 0. **RUNBOOK onboarding 13 tenant nyata** — 📘 `docs/RUNBOOK_ONBOARDING_TENANT_NYATA.md` — urutan tenant→KTP→verify→stay, `checkInDate` = siklus terakhir bulan berjalan, jebakan due-date invoice 24 jam (lunasi sebelum buka portal), prasyarat: NIK Dini/Theo, kamar Annisa, catat meter 13 kamar.
 > 0. **M31** — ✅ **SELESAI** — AiDraft queue diverifikasi — DeepSeek test-connection PASS via .env API key. Fase 4 = 35/35 100%.
 > 0. **OC-07 (L22)** — ✅ **SELESAI** — Staff dashboard halaman khusus — backend endpoint aggregate `GET /staff/dashboard/aggregate` + perkuat DashboardStaff.tsx (3 query digabung jadi 1). Build backend ✅ frontend ✅
 > 0. **OC-05 (M29)** — ✅ **SELESAI** — ExternalReview CRUD audit — model Prisma standalone, read-only via social proof publik, tanpa CRUD/admin UI. Laporan: `docs/archieve/audit_reasonix/M29_AUDIT_EXTERNAL_REVIEW.md`

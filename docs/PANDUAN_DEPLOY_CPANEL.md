@@ -138,7 +138,7 @@ npm run make-deploy:fast
 | `JWT_SECRET` | generate acak min 32 karakter | Server **menolak start** kalau <12 karakter |
 | `NODE_ENV` | `production` | |
 | `CORS_ORIGIN` | `https://domainmu.com` | Combined same-origin, tanpa `/api` |
-| `KTP_ACTIVATION_GATE_ENABLED` | `true` | ⚠️ WAJIB `true` di produksi |
+| `KTP_ACTIVATION_GATE_ENABLED` | `true` | ⚠️ WAJIB `true` di produksi. Env ini hanya menentukan **nilai awal** saat row settings pertama terbentuk; setelah itu gate dikelola via UI **Settings → Operasional** (nilai DB yang menang). Verifikasi setelah deploy: coba aktivasi kamar tanpa KTP terverifikasi → harus DITOLAK |
 | `AUTO_OPS_ENABLED` | `false` | Shared hosting — cron eksternal |
 | `AUTO_OPS_CRON_TOKEN` | generate acak 48 karakter | Untuk proteksi endpoint cron |
 
