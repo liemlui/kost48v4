@@ -1,8 +1,9 @@
 // FILE: owner-ai.service.ts — layanan AI Owner/Admin: draft rekomendasi, analisis, OCR
 import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
+import { KtpAiApprovalService } from '../tenants/ktp-ai-approval.service';
 import { ExpenseCategory, ExpenseType, RoomStatus } from '../../common/enums/app.enums';
-import { deepseekConfigured, deepseekChat } from '../market-analysis/deepseek.client';
+import { circuitBreakerState, deepseekConfigured, deepseekChat, type ChatMsg, type DeepseekChatOpts } from '../market-analysis/deepseek.client';
 import { stableHash } from './ai-snapshot-hash.util';
 import { buildBriefPrompt } from './prompts/brief.prompt';
 import { buildFinancePrompt } from './prompts/finance.prompt';
@@ -40,13 +41,28 @@ import {
   parseNikDemographics,
 } from './owner-ai.helpers';
 
+type CachedAiResult = {
+  expiresAt: number;
+  parsed: any;
+  model: string;
+};
+
 @Injectable()
 export class OwnerAiService {
   private readonly buckets = new Map<string, { count: number; resetAt: number }>();
+  private readonly aiResultCache = new Map<string, CachedAiResult>();
+  private readonly aiResultCacheTtlMs = 10 * 60_000;
+  private readonly aiResultCacheMax = 200;
+  // Request identik (sama feature+model+snapshot+prompt) yang sedang diproses —
+  // waiter berikutnya menumpang hasil yang sama alih-alih memanggil DeepSeek lagi.
+  private readonly inFlightAiCalls = new Map<string, Promise<{ model: string; usage: any; parsed: any }>>();
   private aiConfigCache: { data: Awaited<ReturnType<typeof this.getAiConfigInternal>>; ts: number } | null = null;
   private aiConfigSync: Awaited<ReturnType<typeof this.getAiConfigInternal>> | null = null;
 
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly ktpAiApproval: KtpAiApprovalService,
+  ) {}
 
   /** Baca konfigurasi AI dari DB (cache 5 menit). Fallback env. */
   private async getAiConfigInternal() {
@@ -80,6 +96,8 @@ export class OwnerAiService {
   async getStatus() {
     const configured = deepseekConfigured();
     const db = await this.prisma.operationalSetting.findUnique({ where: { id: 1 } });
+    const cb = circuitBreakerState();
+    const dailyLimit = db?.aiDailyRequestLimit ?? Number(process.env.AI_DAILY_REQUEST_LIMIT || 50);
     return {
       configured,
       enabled: db?.aiFeaturesEnabled ?? (process.env.AI_FEATURES_ENABLED === 'true'),
@@ -88,13 +106,15 @@ export class OwnerAiService {
       baseUrl: db?.deepseekBaseUrl || process.env.DEEPSEEK_BASE_URL || 'https://api.deepseek.com',
       manualOnly: db?.aiManualOnly ?? (process.env.AI_MANUAL_ONLY !== 'false'),
       ownerAdminOnly: db?.aiOwnerAdminOnly ?? (process.env.AI_OWNER_ADMIN_ONLY !== 'false'),
-      dailyLimit: db?.aiDailyRequestLimit ?? Number(process.env.AI_DAILY_REQUEST_LIMIT || 50),
-      dailyRemaining: this.getDailyRemaining(),
+      dailyLimit,
+      dailyRemaining: this.getDailyRemaining(dailyLimit),
       logUsage: db?.aiLogUsage ?? (process.env.AI_LOG_USAGE !== 'false'),
       maxInputChars: db?.aiMaxInputChars ?? Number(process.env.AI_MAX_INPUT_CHARS || 12000),
       maxOutputTokens: db?.aiMaxOutputTokens ?? Number(process.env.AI_MAX_OUTPUT_TOKENS || 1400),
       financeMaxOutputTokens: db?.aiFinanceMaxOutputTokens ?? Number(process.env.AI_FINANCE_MAX_OUTPUT_TOKENS || 2200),
       draftRetentionDays: db?.aiDraftRetentionDays ?? Number(process.env.AI_DRAFT_RETENTION_DAYS || 60),
+      circuitBreaker: cb,
+      cache: this.getAiCacheStats(),
     };
   }
 
@@ -110,7 +130,7 @@ export class OwnerAiService {
       return;
     }
     b.count += 1;
-    const dailyLimit = Number(process.env.AI_DAILY_REQUEST_LIMIT || 50);
+    const dailyLimit = this.getAiConfigSync().dailyLimit;
     if (b.count > dailyLimit) {
       throw Object.assign(
         new Error('Batas harian AI tercapai. Coba lagi besok.'),
@@ -119,10 +139,8 @@ export class OwnerAiService {
     }
   }
 
-  /** Hitung sisa daily limit (global — tanpa actor). */
-  private getDailyRemaining(): number {
-    const dailyLimit = Number(process.env.AI_DAILY_REQUEST_LIMIT || 50);
-    const now = Date.now();
+  /** Hitung sisa daily limit (global — tanpa actor). dailyLimit wajib dari sumber yang sama dengan pemanggil agar tidak mismatch. */
+  private getDailyRemaining(dailyLimit: number): number {
     const dayStart = new Date().setHours(0, 0, 0, 0);
     let used = 0;
     for (const [, b] of this.buckets) {
@@ -134,11 +152,6 @@ export class OwnerAiService {
   /** Max input chars dari env. */
   getMaxInputChars(): number {
     return Number(process.env.AI_MAX_INPUT_CHARS || 12000);
-  }
-
-  /** Max output tokens (default) — DB config dengan fallback env. */
-  getMaxOutputTokens(): number {
-    return this.getAiConfigSync().maxOutputTokens;
   }
 
   /** Max output tokens (finance) — DB config dengan fallback env. */
@@ -153,7 +166,7 @@ export class OwnerAiService {
   /** Statistik penggunaan AI hari ini (in-memory, per feature). */
   getUsageStats() {
     const dayStart = new Date().setHours(0, 0, 0, 0);
-    const dailyLimit = Number(process.env.AI_DAILY_REQUEST_LIMIT || 50);
+    const dailyLimit = this.getAiConfigSync().dailyLimit;
     const byFeature: Record<string, number> = {};
     let todayTotal = 0;
     for (const [key, b] of this.buckets) {
@@ -169,7 +182,160 @@ export class OwnerAiService {
       todayTotal,
       remainingDaily: Math.max(0, dailyLimit - todayTotal),
       byFeature,
+      cache: this.getAiCacheStats(),
+      circuitBreaker: circuitBreakerState(),
     };
+  }
+
+  private getAiCacheStats() {
+    const now = Date.now();
+    let active = 0;
+    for (const [, entry] of this.aiResultCache) {
+      if (entry.expiresAt > now) active += 1;
+    }
+    return { activeEntries: active, ttlMs: this.aiResultCacheTtlMs };
+  }
+
+  private buildPromptHash(messages: ChatMsg[]) {
+    return stableHash(messages.map((m) => `${m.role}:${m.content}`).join('|'));
+  }
+
+  private parseStructuredJson(content: string): any {
+    const raw = String(content ?? '').trim();
+    if (!raw) throw new BadRequestException('Respon AI kosong.');
+    try {
+      return JSON.parse(raw) as Record<string, unknown>;
+    } catch {
+      const fenceMatch = raw.match(/```(?:json)?\s*([\s\S]*?)```/i);
+      const candidate = (fenceMatch?.[1] ?? raw).trim();
+      try {
+        return JSON.parse(candidate) as Record<string, unknown>;
+      } catch {
+        const firstBrace = candidate.indexOf('{');
+        const lastBrace = candidate.lastIndexOf('}');
+        if (firstBrace >= 0 && lastBrace > firstBrace) {
+          return JSON.parse(candidate.slice(firstBrace, lastBrace + 1)) as Record<string, unknown>;
+        }
+        throw new BadRequestException('Respon AI bukan JSON yang valid.');
+      }
+    }
+  }
+
+  private getCachedStructuredResult(feature: string, snapshotHash: string, promptHash: string, model: string): CachedAiResult | null {
+    const cacheKey = `${feature}:${model}:${snapshotHash}:${promptHash}`;
+    const hit = this.aiResultCache.get(cacheKey);
+    if (!hit) return null;
+    if (hit.expiresAt <= Date.now()) {
+      this.aiResultCache.delete(cacheKey);
+      return null;
+    }
+    return hit;
+  }
+
+  private setCachedStructuredResult(feature: string, snapshotHash: string, promptHash: string, model: string, parsed: any, reportedModel?: string) {
+    // Key HARUS memakai model yang sama dengan lookup (resolvedModel), bukan echo server —
+    // kalau tidak, entry tersimpan di key yang tidak pernah dicari.
+    const cacheKey = `${feature}:${model}:${snapshotHash}:${promptHash}`;
+    this.pruneAiResultCache();
+    this.aiResultCache.set(cacheKey, {
+      expiresAt: Date.now() + this.aiResultCacheTtlMs,
+      // Simpan salinan agar mutasi oleh caller (mis. masking NIK) tidak merusak isi cache.
+      parsed: structuredClone(parsed),
+      model: reportedModel ?? model,
+    });
+  }
+
+  /** Buang entry kedaluwarsa + cap ukuran (Map = insertion order → entry tertua keluar dulu). */
+  private pruneAiResultCache() {
+    const now = Date.now();
+    for (const [key, entry] of this.aiResultCache) {
+      if (entry.expiresAt <= now) this.aiResultCache.delete(key);
+    }
+    while (this.aiResultCache.size >= this.aiResultCacheMax) {
+      const oldest = this.aiResultCache.keys().next().value;
+      if (oldest === undefined) break;
+      this.aiResultCache.delete(oldest);
+    }
+  }
+
+  private async callStructuredAi(params: {
+    actorId: number;
+    feature: string;
+    snapshotHash: string;
+    messages: ChatMsg[];
+    model?: string;
+    temperature?: number;
+    maxTokens?: number;
+    thinking?: DeepseekChatOpts['thinking'];
+  }) {
+    const config = await this.getAiConfig();
+    if (!deepseekConfigured()) return { ok: false as const, reason: 'AI tidak dikonfigurasi' };
+    if (!config.featuresEnabled) return { ok: false as const, reason: 'AI dimatikan di Settings' };
+
+    const resolvedModel = params.model || config.defaultModel;
+    const promptHash = this.buildPromptHash(params.messages);
+    const cached = this.getCachedStructuredResult(params.feature, params.snapshotHash, promptHash, resolvedModel);
+    if (cached) {
+      return {
+        ok: true as const,
+        model: cached.model,
+        usage: undefined,
+        promptHash,
+        // Salinan — caller boleh memutasi hasilnya tanpa merusak isi cache.
+        parsed: structuredClone(cached.parsed),
+        cacheHit: true,
+      };
+    }
+
+    // Dedup in-flight: request identik yang sedang berjalan dipakai bersama,
+    // supaya double-click / tab ganda tidak memicu 2x panggilan API berbayar + 2x potong kuota.
+    const inFlightKey = `${params.feature}:${resolvedModel}:${params.snapshotHash}:${promptHash}`;
+    const existing = this.inFlightAiCalls.get(inFlightKey);
+    if (existing) {
+      const shared = await existing;
+      return {
+        ok: true as const,
+        model: shared.model,
+        usage: shared.usage,
+        promptHash,
+        parsed: structuredClone(shared.parsed),
+        cacheHit: false,
+      };
+    }
+
+    this.checkRateLimit(params.actorId, params.feature);
+    // maxTokens diresolusi dari config yang SUDAH di-await di atas — bukan dari
+    // this.getMaxOutputTokens() yang dievaluasi caller sebelum config sempat warm.
+    const resolvedMaxTokens = params.maxTokens ?? config.maxOutputTokens;
+    const callPromise = (async () => {
+      const result = await deepseekChat(params.messages, {
+        json: true,
+        model: resolvedModel,
+        temperature: params.temperature,
+        maxTokens: resolvedMaxTokens,
+        thinking: params.thinking,
+      });
+      const parsed = this.parseStructuredJson(result.content);
+      this.setCachedStructuredResult(params.feature, params.snapshotHash, promptHash, resolvedModel, parsed, result.model);
+      return { model: result.model, usage: result.usage, parsed };
+    })();
+    this.inFlightAiCalls.set(inFlightKey, callPromise);
+    try {
+      const fresh = await callPromise;
+      return {
+        ok: true as const,
+        model: fresh.model,
+        usage: fresh.usage,
+        promptHash,
+        // Clone: callPromise bisa juga ditumpangi waiter lain (lihat cabang `existing`
+        // di atas) — tiap caller wajib dapat objek privat agar mutasi (mis. mask NIK
+        // di validateKtpOcr) tidak bocor ke waiter lain yang menunggu promise yang sama.
+        parsed: structuredClone(fresh.parsed),
+        cacheHit: false,
+      };
+    } finally {
+      this.inFlightAiCalls.delete(inFlightKey);
+    }
   }
 
   /** 20 jejak audit terakhir yang memakai AI (AuditLog.meta.ai). Tanpa secret. */
@@ -210,6 +376,7 @@ export class OwnerAiService {
     if (!deepseekConfigured()) {
       return { configured: false, ok: false, message: 'API key DeepSeek belum diisi. Isi di Pengaturan → AI & Biaya (login OWNER).' };
     }
+    await this.getAiConfig(); // warm aiConfigSync agar checkRateLimit tidak pakai default hardcoded
     this.checkRateLimit(actorId, 'test-connection');
     const started = Date.now();
     try {
@@ -290,28 +457,23 @@ export class OwnerAiService {
 
   /** Generate brief AI. Fallback rule-based bila AI gagal/disabled. */
   async generateBrief(actorId: number) {
-    this.checkRateLimit(actorId, 'brief');
     const snapshot = await this.buildBriefSnapshot();
     const snapshotHash = stableHash(snapshot);
 
-    const aicfg = await this.getAiConfig();
-    if (!deepseekConfigured() || !aicfg.featuresEnabled) {
-      return this.briefFallback(snapshot, snapshotHash);
-    }
-
     const messages = buildBriefPrompt(snapshot as unknown as Record<string, unknown>);
     try {
-      const result = await deepseekChat(messages, { json: true, temperature: 0.3 });
-      const parsed = JSON.parse(result.content);
+      const result = await this.callStructuredAi({ actorId, feature: 'brief', snapshotHash, messages, temperature: 0.3 });
+      if (!result.ok) return this.briefFallback(snapshot, snapshotHash, result.reason);
+      const parsed = result.parsed;
       return {
         mode: 'DEEPSEEK',
         model: result.model,
         usage: result.usage,
         snapshotHash,
-        promptHash: stableHash(messages.map((m) => m.content).join('|')),
+        promptHash: result.promptHash,
         fallback: false,
         result: parsed,
-        warnings: [],
+        warnings: result.cacheHit ? ['Menggunakan cache AI lokal untuk snapshot yang sama.'] : [],
         missingData: parsed.missingData || [],
       };
     } catch (err: any) {
@@ -357,7 +519,6 @@ export class OwnerAiService {
   // ═══════════════════════════════════════════════════════════
 
   async draftExpenseFromOcr(ocrText: string, actorId: number) {
-    this.checkRateLimit(actorId, 'expense-ocr-draft');
     const text = String(ocrText ?? '').trim();
     const maxChars = this.getMaxInputChars();
 
@@ -380,28 +541,27 @@ export class OwnerAiService {
     };
     const snapshotHash = stableHash(snapshot);
 
-    const aicfg = await this.getAiConfig();
-    if (!deepseekConfigured() || !aicfg.featuresEnabled) {
-      return this.expenseOcrFallback(text, snapshotHash);
-    }
-
     const messages = buildExpenseOcrPrompt(snapshot);
-    const promptHash = stableHash(messages.map((m) => m.content).join('|'));
     try {
-      const result = await deepseekChat(messages, {
-        json: true,
+      const result = await this.callStructuredAi({
+        actorId,
+        feature: 'expense-ocr-draft',
+        snapshotHash,
+        messages,
         temperature: 0.1,
-        maxTokens: this.getMaxOutputTokens(),
+        // maxTokens sengaja tidak diisi di sini — callStructuredAi meresolusinya
+        // dari config yang sudah di-await (menghindari default stale saat cold-start).
       });
-      const parsed = JSON.parse(result.content);
+      if (!result.ok) return this.expenseOcrFallback(text, snapshotHash, result.reason);
+      const parsed = result.parsed;
       return {
         mode: 'DEEPSEEK',
         model: result.model,
         usage: result.usage,
         snapshotHash,
-        promptHash,
+        promptHash: result.promptHash,
         fallback: false,
-        warnings: [],
+        warnings: result.cacheHit ? ['Menggunakan cache AI lokal untuk OCR yang sama.'] : [],
         result: normalizeExpenseOcrDraft(parsed),
       };
     } catch (err: any) {
@@ -461,8 +621,6 @@ export class OwnerAiService {
    * 5. Jika AI gagal → fallback rule-based
    */
   async validateKtpOcr(tenantId: number, ocrText: string, actorId: number) {
-    this.checkRateLimit(actorId, 'ktp-ocr');
-
     const raw = (ocrText || '').trim();
     if (!raw) throw new BadRequestException('Teks OCR KTP kosong.');
     if (raw.length > this.getMaxInputChars()) {
@@ -528,9 +686,6 @@ export class OwnerAiService {
     };
 
     // ── Step 3: Jika deterministik sudah solid → skip AI (hemat token) ─
-    const aicfg = await this.getAiConfig();
-    const aiAvailable = deepseekConfigured() && aicfg.featuresEnabled;
-
     if (isDeterministicResultSolid(nikMatchesTenant, nameMatchesTenant)) {
       const boost = Math.min((confidenceBoost / 10) + 0.85, 0.98);
       return {
@@ -553,29 +708,33 @@ export class OwnerAiService {
       };
     }
 
-    // ── Step 4: AI tidak tersedia → fallback diperkaya ─────────────────
-    if (!aiAvailable) {
-      return this.ktpFallback(tenant, deterministic, snapshotHash, {
-        detName,
-        detAddress,
-        detBirthPlace,
-        detProvince,
-      });
-    }
-
-    // ── Step 5: Panggil DeepSeek dengan teks yang sudah dibersihkan ────
+    // ── Step 4: Panggil DeepSeek dengan teks yang sudah dibersihkan ────
+    //    (AI tidak tersedia/gagal → callStructuredAi ok:false → ktpFallback)
     const messages = buildKtpOcrPrompt({
       ocrText: maskNikInText(text),
       tenant: { fullName: tenant.fullName, nikMasked: tenantMaskedNik },
     });
 
     try {
-      const ai = await deepseekChat(messages, {
-        json: true,
+      const ai = await this.callStructuredAi({
+        actorId,
+        feature: 'ktp-ocr',
+        snapshotHash,
+        messages,
         temperature: 0.1,
-        maxTokens: this.getMaxOutputTokens(),
+        // maxTokens sengaja tidak diisi di sini — callStructuredAi meresolusinya
+        // dari config yang sudah di-await (menghindari default stale saat cold-start).
       });
-      const parsed = JSON.parse(ai.content);
+      if (!ai.ok) {
+        return this.ktpFallback(tenant, deterministic, snapshotHash, {
+          detName,
+          detAddress,
+          detBirthPlace,
+          detProvince,
+          aiError: ai.reason,
+        });
+      }
+      const parsed = ai.parsed;
       // Mask NIK apa pun yang dikembalikan AI sebelum keluar dari backend (PDP).
       if (parsed?.extracted) parsed.extracted.nik = maskNik(parsed.extracted.nik);
       // Gabung hasil AI dengan deterministik
@@ -593,21 +752,25 @@ export class OwnerAiService {
         nikMatchesTenant,
         warnings: Array.isArray(parsed?.match?.warnings) ? parsed.match.warnings : [],
       };
+      const recommendation = parsed?.recommendation ?? 'REVIEW_MANUALLY';
+      // G5+ fix #3: catat bukti sukses AI agar verifyKtp bisa menerima method 'AI'
+      // tanpa mempercayai payload frontend secara buta.
+      if (recommendation === 'VERIFY') this.ktpAiApproval.record(tenant.id);
       return {
         mode: 'DEEPSEEK',
         model: ai.model,
         usage: ai.usage,
         snapshotHash,
-        promptHash: stableHash(messages.map((m) => m.content).join('|')),
+        promptHash: ai.promptHash,
         fallback: false,
         confidence: typeof parsed?.confidence === 'number' ? parsed.confidence : undefined,
-        warnings: [],
+        warnings: ai.cacheHit ? ['Menggunakan cache AI lokal untuk OCR tenant yang sama.'] : [],
         result: {
           extracted: mergedExtracted,
           nikFormatValid,
           demographicsFromNik: demographics,
           match,
-          recommendation: parsed?.recommendation ?? 'REVIEW_MANUALLY',
+          recommendation,
         },
         missingData: [],
       };
@@ -669,7 +832,6 @@ export class OwnerAiService {
   // ═══════════════════════════════════════════════════════════
 
   async draftTicketAction(ticketId: number, actorId: number) {
-    this.checkRateLimit(actorId, 'ticket-action-draft');
     const ticket = await this.prisma.ticket.findUnique({
       where: { id: ticketId },
       include: {
@@ -702,23 +864,27 @@ export class OwnerAiService {
 
     const snapshot = this.buildTicketOpsSnapshot(ticket);
     const snapshotHash = stableHash(snapshot);
-    const aicfg = await this.getAiConfig();
-    if (!deepseekConfigured() || !aicfg.featuresEnabled) {
-      return this.ticketActionFallback(snapshot, snapshotHash, 'AI tidak dikonfigurasi');
-    }
-
     const messages = buildTicketActionPrompt(snapshot);
     try {
-      const ai = await deepseekChat(messages, { json: true, temperature: 0.2, maxTokens: this.getMaxOutputTokens() });
-      const parsed = JSON.parse(ai.content);
+      const ai = await this.callStructuredAi({
+        actorId,
+        feature: 'ticket-action-draft',
+        snapshotHash,
+        messages,
+        temperature: 0.2,
+        // maxTokens sengaja tidak diisi di sini — callStructuredAi meresolusinya
+        // dari config yang sudah di-await (menghindari default stale saat cold-start).
+      });
+      if (!ai.ok) return this.ticketActionFallback(snapshot, snapshotHash, ai.reason);
+      const parsed = ai.parsed;
       return {
         mode: 'DEEPSEEK',
         model: ai.model,
         usage: ai.usage,
         snapshotHash,
-        promptHash: stableHash(messages.map((m) => m.content).join('|')),
+        promptHash: ai.promptHash,
         fallback: false,
-        warnings: [],
+        warnings: ai.cacheHit ? ['Menggunakan cache AI lokal untuk tiket yang sama.'] : [],
         result: normalizeTicketActionDraft(parsed),
         missingData: [],
       };
@@ -728,7 +894,6 @@ export class OwnerAiService {
   }
 
   async draftReorder(actorId: number) {
-    this.checkRateLimit(actorId, 'inventory-reorder-draft');
     const since = new Date(Date.now() - 30 * 86_400_000);
     const [items, recentMovements, openStockTickets] = await Promise.all([
       this.prisma.inventoryItem.findMany({
@@ -786,23 +951,27 @@ export class OwnerAiService {
     };
     const snapshotHash = stableHash(snapshot);
 
-    const aicfg = await this.getAiConfig();
-    if (!deepseekConfigured() || !aicfg.featuresEnabled) {
-      return this.inventoryReorderFallback(snapshot, snapshotHash, 'AI tidak dikonfigurasi');
-    }
-
     const messages = buildInventoryReorderPrompt(snapshot);
     try {
-      const ai = await deepseekChat(messages, { json: true, temperature: 0.2, maxTokens: this.getMaxOutputTokens() });
-      const parsed = JSON.parse(ai.content);
+      const ai = await this.callStructuredAi({
+        actorId,
+        feature: 'inventory-reorder-draft',
+        snapshotHash,
+        messages,
+        temperature: 0.2,
+        // maxTokens sengaja tidak diisi di sini — callStructuredAi meresolusinya
+        // dari config yang sudah di-await (menghindari default stale saat cold-start).
+      });
+      if (!ai.ok) return this.inventoryReorderFallback(snapshot, snapshotHash, ai.reason);
+      const parsed = ai.parsed;
       return {
         mode: 'DEEPSEEK',
         model: ai.model,
         usage: ai.usage,
         snapshotHash,
-        promptHash: stableHash(messages.map((m) => m.content).join('|')),
+        promptHash: ai.promptHash,
         fallback: false,
-        warnings: [],
+        warnings: ai.cacheHit ? ['Menggunakan cache AI lokal untuk snapshot stok yang sama.'] : [],
         result: normalizeInventoryDraft(parsed, lowStockItems),
         missingData: [],
       };
@@ -812,7 +981,6 @@ export class OwnerAiService {
   }
 
   async reviewFieldReport(reportId: number, actorId: number) {
-    this.checkRateLimit(actorId, 'field-report-review-draft');
     const report = await this.prisma.staffFieldReport.findUnique({
       where: { id: reportId },
       include: {
@@ -849,23 +1017,27 @@ export class OwnerAiService {
     };
     const snapshotHash = stableHash(snapshot);
 
-    const aicfg = await this.getAiConfig();
-    if (!deepseekConfigured() || !aicfg.featuresEnabled) {
-      return this.fieldReportFallback(snapshot, snapshotHash, 'AI tidak dikonfigurasi');
-    }
-
     const messages = buildFieldReportReviewPrompt(snapshot);
     try {
-      const ai = await deepseekChat(messages, { json: true, temperature: 0.2, maxTokens: this.getMaxOutputTokens() });
-      const parsed = JSON.parse(ai.content);
+      const ai = await this.callStructuredAi({
+        actorId,
+        feature: 'field-report-review-draft',
+        snapshotHash,
+        messages,
+        temperature: 0.2,
+        // maxTokens sengaja tidak diisi di sini — callStructuredAi meresolusinya
+        // dari config yang sudah di-await (menghindari default stale saat cold-start).
+      });
+      if (!ai.ok) return this.fieldReportFallback(snapshot, snapshotHash, ai.reason);
+      const parsed = ai.parsed;
       return {
         mode: 'DEEPSEEK',
         model: ai.model,
         usage: ai.usage,
         snapshotHash,
-        promptHash: stableHash(messages.map((m) => m.content).join('|')),
+        promptHash: ai.promptHash,
         fallback: false,
-        warnings: [],
+        warnings: ai.cacheHit ? ['Menggunakan cache AI lokal untuk laporan yang sama.'] : [],
         result: normalizeFieldReportDraft(parsed),
         missingData: [],
       };
@@ -1035,17 +1207,23 @@ export class OwnerAiService {
   }
 
   async analyzeFinance(actorId: number) {
-    this.checkRateLimit(actorId, 'finance');
     const snapshot = await this.buildFinanceSnapshot();
     const snapshotHash = stableHash(snapshot);
-    if (!deepseekConfigured()) return this.financeFallback(snapshot, snapshotHash, 'AI tidak dikonfigurasi');
-    const config = await this.getAiConfig();
-    if (!config.featuresEnabled) return this.financeFallback(snapshot, snapshotHash, 'AI dimatikan di Settings');
     const messages = buildFinancePrompt(snapshot as any);
     try {
-      const result = await deepseekChat(messages, { json: true, temperature: 0.3, model: config.financeModel, maxTokens: config.financeMaxOutputTokens });
-      const parsed = JSON.parse(result.content);
-      return { mode: 'DEEPSEEK', model: result.model, usage: result.usage, snapshotHash, promptHash: stableHash(messages.map(m=>m.content).join('|')), fallback: false, warnings: [], result: parsed, missingData: parsed.missingData || [] };
+      const config = await this.getAiConfig();
+      const result = await this.callStructuredAi({
+        actorId,
+        feature: 'finance',
+        snapshotHash,
+        messages,
+        model: config.financeModel,
+        temperature: 0.3,
+        maxTokens: config.financeMaxOutputTokens,
+      });
+      if (!result.ok) return this.financeFallback(snapshot, snapshotHash, result.reason);
+      const parsed = result.parsed;
+      return { mode: 'DEEPSEEK', model: result.model, usage: result.usage, snapshotHash, promptHash: result.promptHash, fallback: false, warnings: result.cacheHit ? ['Menggunakan cache AI lokal untuk snapshot finance yang sama.'] : [], result: parsed, missingData: parsed.missingData || [] };
     } catch (err: any) {
       return this.financeFallback(snapshot, snapshotHash, err.message);
     }
@@ -1074,7 +1252,6 @@ export class OwnerAiService {
   // ═══════════════════════════════════════════════════════════
 
   async reviewPaymentSubmission(submissionId: number, actorId: number) {
-    this.checkRateLimit(actorId, 'payment-review');
     const submission = await this.prisma.paymentSubmission.findUnique({
       where: { id: submissionId },
       include: {
@@ -1159,19 +1336,22 @@ export class OwnerAiService {
     };
     const snapshotHash = stableHash(snapshot);
 
-    const aicfg = await this.getAiConfig();
-    if (!deepseekConfigured() || !aicfg.featuresEnabled) {
-      return this.paymentFallback(snapshotHash, 'AI tidak dikonfigurasi');
-    }
-
     const messages = buildPaymentReviewPrompt(snapshot as any);
     try {
-      const result = await deepseekChat(messages, { json: true, temperature: 0.2, maxTokens: 1000 });
-      const parsed = JSON.parse(result.content);
+      const result = await this.callStructuredAi({
+        actorId,
+        feature: 'payment-review',
+        snapshotHash,
+        messages,
+        temperature: 0.2,
+        maxTokens: 1000,
+      });
+      if (!result.ok) return this.paymentFallback(snapshotHash, result.reason);
+      const parsed = result.parsed;
       return {
         mode: 'DEEPSEEK', model: result.model, usage: result.usage,
-        snapshotHash, promptHash: stableHash(messages.map(m=>m.content).join('|')),
-        fallback: false, warnings: [], result: parsed, missingData: [],
+        snapshotHash, promptHash: result.promptHash,
+        fallback: false, warnings: result.cacheHit ? ['Menggunakan cache AI lokal untuk submission yang sama.'] : [], result: parsed, missingData: [],
       };
     } catch (err: any) {
       return this.paymentFallback(snapshotHash, err.message);
@@ -1194,32 +1374,35 @@ export class OwnerAiService {
   // ---- G8: FAQ Generator ----------------------------------------------------
 
   async generateFaqDraft(actorId: number) {
-    this.checkRateLimit(actorId, 'faq-generate');
     const layanan = await this.prisma.additionalService.findMany({
       where: { isActive: true },
       select: { name: true, description: true },
     });
     const messages = buildFaqPrompt(layanan.map(l => ({ name: l.name, description: l.description || undefined })));
 
-    const promptHash = stableHash(messages.map(m => m.content).join('|'));
-
-    const aicfg = await this.getAiConfig();
-    if (!deepseekConfigured() || !aicfg.featuresEnabled) {
-      return {
-        mode: 'RULE_FALLBACK', fallback: true, promptHash,
-        warnings: ['AI tidak dikonfigurasi'],
-        result: { items: [], publicCopyDraft: '', tenantManualDraft: 'Aturan KOST48: DP 30%, deposit jaminan, no-partial.', warnings: [] },
-        missingData: [],
-      };
-    }
+    const promptHash = this.buildPromptHash(messages);
 
     try {
-      const result = await deepseekChat(messages, { json: true, temperature: 0.3 });
-      const parsed = JSON.parse(result.content);
+      const result = await this.callStructuredAi({
+        actorId,
+        feature: 'faq-generate',
+        snapshotHash: stableHash(layanan),
+        messages,
+        temperature: 0.3,
+      });
+      if (!result.ok) {
+        return {
+          mode: 'RULE_FALLBACK', fallback: true, promptHash,
+          warnings: [result.reason],
+          result: { items: [], publicCopyDraft: '', tenantManualDraft: 'Aturan KOST48: DP 30%, deposit jaminan, no-partial.', warnings: [] },
+          missingData: [],
+        };
+      }
+      const parsed = result.parsed;
       return {
         mode: 'DEEPSEEK', model: result.model, usage: result.usage,
-        promptHash, snapshotHash: '',
-        fallback: false, warnings: parsed.warnings || [],
+        promptHash: result.promptHash, snapshotHash: stableHash(layanan),
+        fallback: false, warnings: [...(Array.isArray(parsed.warnings) ? parsed.warnings : []), ...(result.cacheHit ? ['Menggunakan cache AI lokal untuk layanan aktif yang sama.'] : [])],
         result: parsed, missingData: [],
       };
     } catch (err: any) {

@@ -622,7 +622,7 @@ model Tenant {
   ktpVerifiedAt            DateTime?
   ktpVerifiedById          Int?
   // G5+: metadata verifikasi KTP — metode (AI / AI_FAILED_MANUAL / MANUAL) + catatan admin.
-  ktpVerificationMethod    String?
+  ktpVerificationMethod    String?   @db.VarChar(50)
   ktpVerificationNotes     String?
   ktpDeletedAt             DateTime?
 

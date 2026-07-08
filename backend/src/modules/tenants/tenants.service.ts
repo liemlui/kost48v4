@@ -11,6 +11,7 @@ import { TogglePortalAccessDto } from './dto/toggle-portal-access.dto';
 import { ResetPortalPasswordDto } from './dto/reset-portal-password.dto';
 import { TenantProfileOnboardingDto } from './dto/tenant-profile-onboarding.dto';
 import { AuditLogService } from '../../audit-log/audit-log.service';
+import { KtpAiApprovalService } from './ktp-ai-approval.service';
 import { LoyaltyService } from '../loyalty/loyalty.service';
 import { ReferralService } from '../loyalty/referral.service';
 import { CurrentUserPayload } from '../../common/interfaces/current-user.interface';
@@ -53,6 +54,7 @@ export class TenantsService {
     private readonly audit: AuditLogService,
     private readonly loyalty: LoyaltyService,
     private readonly referral: ReferralService,
+    private readonly ktpAiApproval: KtpAiApprovalService,
   ) {}
 
   // ═══════════════════════════════════════════════════════════
@@ -245,6 +247,14 @@ export class TenantsService {
     const validMethods = ['AI', 'AI_FAILED_MANUAL', 'MANUAL'];
     if (!validMethods.includes(method)) {
       throw new BadRequestException(`Metode verifikasi tidak valid: ${method}. Gunakan: ${validMethods.join(', ')}`);
+    }
+    // G5+ fix #3: method AI hanya sah bila ada bukti sukses AI dari alur validateKtpOcr
+    // (dicatat in-memory oleh OwnerAiService, TTL 30 menit, sekali pakai) — payload
+    // frontend tidak dipercaya buta. Admin tetap bisa memilih AI_FAILED_MANUAL atau MANUAL.
+    if (method === 'AI' && !this.ktpAiApproval.consume(id)) {
+      throw new BadRequestException(
+        'Method AI hanya valid setelah validasi AI sukses (maks. 30 menit terakhir). Ulangi "Bantu Validasi KTP", atau gunakan AI_FAILED_MANUAL/MANUAL.',
+      );
     }
 
     const updated = await this.prisma.tenant.update({

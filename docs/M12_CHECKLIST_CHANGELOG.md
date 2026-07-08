@@ -91,6 +91,7 @@
 > **Fase A** blocked owner (infrastruktur server/domain/env). **Fase B–AM** selesai.
 >
 > **Sisa aktif:**
+> 0. **G5+ Fixlist KTP (spec `docs/AI_WEAK_FIXLIST_KTP_G5_REVIEW.md`)** — ✅ **SELESAI (3/3 + hardening review)** — migration `ktpVerificationMethod/Notes`, rate-limit hemat kuota (deterministik/fallback tak potong kuota), method `AI` di `verifyKtp` butuh bukti sukses AI (`KtpAiApprovalService` baru, TTL 30 mnt, sekali pakai); hardening cache AI (prune+cap, clone anti-mutasi, key model konsisten). Build BE ✅ FE ✅
 > 0. **Fase M16 — Audit 360 Flow Huni** — ✅ **SELESAI** — 7 temuan: P2-01/02/04 fixed, P2-03/05/06/07 diverifikasi valid. Detail: `docs/M16_AUDIT_360_FLOW_HUNI.md §7`. Build FE ✅ BE ✅
 > 0. **Fase AM — Redundansi UI/UX + Audit (Admin + Owner + Publik)** — ✅ **SELESAI (16/16)** — AM-01..AM-16. Detail: `docs/M14_REDUNDANSI_UI_UX.md`.
 > 0. **Fase M18 — Celah Peningkatan (Review 9 Jul 2026)** — ✅ **11/11** — 11 task: P0-01 race condition token, P1-01..P1-03 PDP & integritas data, P2-01..P2-05 robustness & test coverage, P3-01..P3-02 observability & error boundary. Detail: `docs/M18_CELAH_PENINGKATAN.md`.

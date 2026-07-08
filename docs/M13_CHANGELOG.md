@@ -3,6 +3,9 @@
 > Arsip changelog ringkas, dipisah dari M10 pada 2026-06-19 untuk hemat token AI (M10 = checklist aktif saja). **Entri changelog BARU ditulis DI SINI (paling atas)**, bukan di M10. Format: 1 header tanggal + 1-2 poin outcome per entri.
 > Entri lama (≤ 2026-07-16) diarsip ke docs/archieve/M11_CHANGELOG_ARSIP_S1_2026.md.
 
+### 8 Jul 2026 (entri terbaru)
+- **G5+ Fixlist KTP + review Fable5 (xhigh, 2 putaran)** — 3 fix spec tuntas: migration `20260708000000_add_ktp_verification_metadata` (schema disinkron `@db.VarChar(50)`), rate-limit AI hanya terpotong saat DeepSeek benar dipanggil, method `AI` di `verifyKtp` kini wajib bukti sukses AI via `KtpAiApprovalService` baru (TTL 30 mnt, sekali pakai — jalur sukses AI tak lagi 400). Hardening cache AI: prune+cap 200 entry, `structuredClone` anti-mutasi (mask NIK aman di cache-hit), cache key pakai model request (bukan echo server), dedup in-flight (double-click tak lagi 2x panggilan berbayar). Fix `stableHash()` — replacer array lama membuang key nested secara rekursif (canonicalize + sort tiap level). Fix cold-start: `maxTokens`/`dailyRemaining` tak lagi pakai default hardcoded sebelum config DB pernah ke-await. File: `backend/src/modules/tenants/*`, `backend/src/modules/owner-ai/*`, `backend/prisma/*`. Verifikasi: `tsc --noEmit` ✅, unit test 26/26 PASS, FE build ✅, backend boot DI sukses.
+
 ### 10 Jul 2026
 - **M18-P3-02** — Error boundary per fitur kritis: `FeatureErrorBoundary.tsx` + wrap 3 halaman (TicketsPage, OwnerSettingsPage, MyStayPage). File: `frontend/src/components/common/FeatureErrorBoundary.tsx`.
 - **M18-P3-01** — Logging di silent catches: 7 lokasi (auth, payment-submissions, auto-ops, AuthContext). File: 4 file backend + 1 file frontend.

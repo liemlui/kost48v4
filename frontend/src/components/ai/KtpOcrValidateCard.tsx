@@ -78,6 +78,17 @@ export default function KtpOcrValidateCard({ tenantId, tenantName, ktpVerifiedAt
   const isVerified = verified || !!ktpVerifiedAt;
   const verificationMethod = verified ? verifyMethod : ktpVerificationMethod;
 
+  // G5+ fix #3: AI option only valid when DeepSeek actually succeeded
+  const aiOptionValid = !!(
+    result &&
+    result.mode === 'DEEPSEEK' &&
+    !result.fallback &&
+    result.result.recommendation === 'VERIFY'
+  );
+
+  // Jika AI tidak valid, fallback ke MANUAL
+  const effectiveVerifyMethod = !aiOptionValid && verifyMethod === 'AI' ? 'MANUAL' : verifyMethod;
+
   const aiFailed = result?.fallback || result?.mode === 'RULE_FALLBACK' || error;
   const canManualVerify = aiFailed || !configured;
 
@@ -111,9 +122,14 @@ export default function KtpOcrValidateCard({ tenantId, tenantName, ktpVerifiedAt
       const res = await validateKtpOcr(tenantId, ocrText.trim());
       setResult(res);
       // Auto-set verify method based on result
-      if (res.result.recommendation === 'VERIFY') setVerifyMethod('AI');
-      else if (res.fallback) setVerifyMethod('AI_FAILED_MANUAL');
-      else setVerifyMethod('MANUAL');
+      // Hanya set AI jika AI benar-benar sukses (DEEPSEEK mode, bukan deterministik)
+      if (res.mode === 'DEEPSEEK' && !res.fallback && res.result.recommendation === 'VERIFY') {
+        setVerifyMethod('AI');
+      } else if (res.fallback) {
+        setVerifyMethod('AI_FAILED_MANUAL');
+      } else {
+        setVerifyMethod('MANUAL');
+      }
     } catch (err: any) {
       setError(err?.response?.data?.message ?? 'Validasi gagal. Data tetap aman dan tidak berubah.');
     } finally {
@@ -122,7 +138,7 @@ export default function KtpOcrValidateCard({ tenantId, tenantName, ktpVerifiedAt
   }
 
   async function handleManualVerify() {
-    await verifyMutation.mutateAsync({ method: verifyMethod, notes: verifyNotes || undefined });
+    await verifyMutation.mutateAsync({ method: effectiveVerifyMethod, notes: verifyNotes || undefined });
   }
 
   async function handleSaveKtpData() {
@@ -352,10 +368,12 @@ export default function KtpOcrValidateCard({ tenantId, tenantName, ktpVerifiedAt
               <Form.Label className="small">Metode Verifikasi</Form.Label>
               <Form.Select
                 size="sm"
-                value={verifyMethod}
-                onChange={(e) => setVerifyMethod(e.target.value as any)}
+                value={effectiveVerifyMethod}
+                onChange={(e) => setVerifyMethod(e.target.value as 'AI' | 'AI_FAILED_MANUAL' | 'MANUAL')}
               >
-                <option value="AI">AI Berhasil — DeepSeek merekomendasikan VERIFY</option>
+                {aiOptionValid ? (
+                  <option value="AI">AI Berhasil — DeepSeek merekomendasikan VERIFY</option>
+                ) : null}
                 <option value="AI_FAILED_MANUAL">AI Gagal — Manual (fallback)</option>
                 <option value="MANUAL">Manual Penuh — tanpa bantuan AI</option>
               </Form.Select>
