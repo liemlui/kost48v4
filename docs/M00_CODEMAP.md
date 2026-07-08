@@ -5,7 +5,7 @@
 
 ## Konvensi (sekali paham, berlaku semua modul)
 - **Backend modul:** `backend/src/modules/<nama>/` berisi `<nama>.controller.ts` (route `/<nama>`), `<nama>.service.ts` (logika), `<nama>.module.ts` (wiring), `dto/`. Modul besar dipecah multi-service (lihat tabel).
-- **Infra backend:** `backend/src/prisma/` (PrismaService), `backend/src/auth/` (JWT+guard role), `backend/src/audit-log/` (AuditLog writer), `backend/src/common/` (`guards/ decorators/ filters/ interceptors/ enums/ utils/ business/`), `backend/src/main.ts` (bootstrap, CORS, prefix `/api`).
+- **Infra backend:** `backend/src/prisma/` (PrismaService), `backend/src/auth/` (JWT+guard role + RefreshToken), `backend/src/audit-log/` (AuditLog writer), `backend/src/common/` (`guards/ decorators/ filters/ interceptors/ enums/ utils/ business/`), `backend/src/main.ts` (bootstrap, CORS, prefix `/api`).
 - **Frontend halaman:** `frontend/src/pages/<grup>/<Halaman>Page.tsx`; komponen reusable `frontend/src/components/`; util `frontend/src/utils/`.
 - **Schema:** `backend/prisma/schema.prisma` (57 model, 69 enum). Generated client `backend/src/generated/prisma/` = **JANGAN baca** (32MB, regen `prisma generate`).
 
@@ -74,20 +74,9 @@
 | Modul/Service | Path | Tanggung jawab |
 |---|---|---|
 | market-analysis (existing) | `market-analysis/{deepseek.client,market-analysis}.service.ts` | Integrasi DeepSeek awal: SWOT/PESTLE/CAC-CLV, fallback offline |
-| owner-ai (target Fase G) | `owner-ai/{owner-ai,ai-context-builder}.service.ts` | Tombol manual Owner/Admin: brief, finance analyst, payment review draft, OCR text normalizer, ops/inventory suggestions |
+| owner-ai (Fase G) | `owner-ai/{owner-ai,ai-context-builder}.service.ts` | Tombol manual Owner/Admin: brief, finance analyst, payment review draft, OCR text normalizer, ops/inventory suggestions |
 | audit-log | `audit-log/audit-log.service.ts` | Catat `meta.ai` saat manusia memakai draft AI untuk aksi final |
 | settings/env | `settings/settings.service.ts` + env | Status AI, budget guard, model, manual-only flag |
-
-### UI/UX Compact (Fase H) — detail: `docs/archieve/2026-06-20_fase_selesai/M13_FASE_H_UIUX_COMPACT.md` (🗄️ arsip)
-| Area | Path | Tanggung jawab |
-|---|---|---|
-| navigation config | `frontend/src/config/navigation.ts` | Sidebar sections OWNER/ADMIN/STAFF/TENANT |
-| AppLayout + toggle | `frontend/src/components/layout/AppLayout.tsx` | Owner view mode toggle + sidebar adaptif |
-| DashboardAdmin | `frontend/src/pages/dashboard/DashboardAdmin.tsx` | Command center 6-area (target compact 3) |
-| AdminWorkspaces | `frontend/src/pages/dashboard/AdminWorkspaces.tsx` | Tabel workspace per area (stays/finance/tickets/rooms) |
-| OwnerDashboard | `frontend/src/pages/dashboard/OwnerDashboardPage.tsx` | Kokpit owner KPI+chart+AI |
-| RoleWorkspaceTabs | `frontend/src/components/workspace/RoleWorkspaceTabs.tsx` | Tab navigasi per-role (owner 7 / admin 6) |
-| CSS owner + admin | `frontend/src/styles/12-owner.css` + `08-admin.css` | Styling dashboard & sidebar |
 
 ### Notifikasi & Sistem
 | Modul/Service | Path | Tanggung jawab |
@@ -97,24 +86,37 @@
 | users | `users/users.service.ts` | User/role (OWNER/ADMIN/STAFF/TENANT), profil, tip e-wallet |
 | settings | `settings/settings.service.ts` | OperationalSetting (toggle meter air, dll) |
 
+### Modul Baru (Fase Audit Reasonix + OC)
+| Modul/Service | Path | Tanggung jawab |
+|---|---|---|
+| guest-preferences | `guest-preferences/guest-preferences.service.ts` | Survei preferensi kamar (OC-04) |
+| staff-dashboard | `staff-dashboard/staff-dashboard.service.ts` | Dashboard aggregate staff (OC-07) |
+| ancillary-revenue | `ancillary-revenue/ancillary-revenue.service.ts` | Pendapatan tambahan dinamis (OC-01) |
+
 ## Frontend grup halaman (`frontend/src/pages/`)
-`public` katalog+booking publik · `auth` login · `portal` area tenant (MyStay, invoice, loyalty, manual) · `dashboard` (DashboardAdmin owner/admin) · `stays` · `bookings` · `renew-requests` · `invoices` · `payments` · `finance` (AccountingSetup) · `reports` · `rooms` · `resources`+`admin` (CRUD generik via ConfiguredResourcePage/SimpleCrudPage) · `tickets` · `staff`+`staff-routines` · `services` · `marketing` · `loyalty` · `notifications`+`reminders` · `settings` · `profile` · `components/ai` (target Fase G reusable AI button/drawer).
+`public` katalog+booking publik · `auth` login · `portal` area tenant (MyStay, invoice, loyalty, manual) · `dashboard` (DashboardAdmin owner/admin) · `stays` · `bookings` · `renew-requests` · `invoices` · `payments` · `finance` (AccountingSetup) · `reports` · `rooms` · `resources`+`admin` (CRUD generik via ConfiguredResourcePage/SimpleCrudPage) · `tickets` · `staff`+`staff-routines` · `services` · `marketing` · `loyalty` · `notifications`+`reminders` · `settings` · `profile` · `components/ai` (Fase G reusable AI button/drawer).
 
 ## Index model (57) — grup → `schema.prisma`
-- **Identitas/akses:** User, Tenant, PasswordResetToken, AuditLog, PushSubscription, AppNotification, OperationalSetting
+- **Identitas/akses:** User, Tenant, PasswordResetToken, RefreshToken, AuditLog, PushSubscription, AppNotification, OperationalSetting
 - **Huni:** Room, RoomFacility, Stay, RoomTransfer, RenewRequest, CheckoutRequest, MeterReading
 - **Uang:** Invoice, InvoiceLine, InvoicePayment, PaymentSubmission, TenantDepositLedgerEntry, Expense, WifiSale
 - **Akuntansi:** ChartOfAccount, CashAccount, AccountingPeriod, OpeningBalanceBatch, OpeningBalanceLine, JournalEntry, JournalLine, RentRecognitionSchedule, FixedAsset, AssetDepreciationRun, AssetDepreciationLine
 - **Operasional/staf:** Ticket, StaffRoutineTemplate/Assignment/Completion, StaffWorkAudit, StaffPerformanceEvent, StaffReview, StaffFieldReport, InventoryItem, RoomItem, InventoryMovement, Announcement
-- **Growth/AI:** LoyaltyPoint, LoyaltyReward, Redemption, PeerBehaviorReport, TenantReferral, Faq, AdditionalService, ServiceInterest, SatisfactionSurvey, TenantStaffReview, MarketAnalysis, AiDraft, GuestPreferenceSurvey, ExternalReview
+- **Growth/AI:** LoyaltyPoint, LoyaltyReward, Redemption, PeerBehaviorReport, TenantReferral, Faq, AdditionalService, ServiceInterest, SatisfactionSurvey, MarketAnalysis, AiDraft, GuestPreferenceSurvey, ExternalReview
 
 ## Flow & audit anchor
-Tabel flow + method-anchor: `M03_FLOW_KONTRAK.md` (kontrak/uang). Job otomatis → `M06_OPERASIONAL.md` § Auto-Ops. Keputusan owner (84): `M02_KEPUTUSAN_OWNER.md`. Audit terdahulu → `docs/archieve/M09_AUDIT.md`.
+Tabel flow + method-anchor: `M03_FLOW_KONTRAK.md` (kontrak/uang). Job otomatis → `M06_OPERASIONAL.md` § Auto-Ops. Keputusan owner (84+): `M02_KEPUTUSAN_OWNER.md`. Audit terdahulu → `docs/archieve/M09_AUDIT.md`.
 
 ## Shared utilities (ditambahkan 2026-07-07)
 | Utility | Path | Tanggung jawab |
 |---------|------|----------------|
 | `dateOnlyWib` / `todayWib` / `isoDate` | `backend/src/common/utils/date-only.ts` | Normalisasi tanggal WIB (UTC+7) — pakai di semua modul akuntansi (unifikasi dari 5 implementasi) |
+| `roundRupiah` / `rupiahAmount` | `backend/src/common/business/money.helper.ts` | Standarisasi pembulatan Rupiah (F4-10) |
+| `cashflow-classifier` | `backend/src/common/utils/cashflow-classifier.ts` | Klasifikasi kas vs AR (F1-3) |
+| `financial-ratios.helper` | `backend/src/common/utils/financial-ratios.helper.ts` | Helper rasio keuangan (F1-4) |
+| `room-booking.util` | `backend/src/common/utils/room-booking.util.ts` | Konsolidasi helper booking (F2-5) |
+| `staff-assignment.util` | `backend/src/common/utils/staff-assignment.util.ts` | Round-robin assignment staf |
+| `ticket-number.util` | `backend/src/common/utils/ticket-number.util.ts` | Generate nomor tiket |
 
 ## Frontend — Redundansi UI/UX (Fase AM)
 
@@ -135,8 +137,11 @@ Tabel flow + method-anchor: `M03_FLOW_KONTRAK.md` (kontrak/uang). Job otomatis �
 **Audit skor frontend:** 7/8 kategori ⭐⭐⭐⭐⭐, 1/8 ⭐⭐⭐⭐ (styling 99% CSS global)
 
 ## Cross-Dimension (P8) — Audit 360°
-✅ 215 `@@index` di 57 model — semua FK utama terindeks · ✅ Global JWT default-deny + DTO validation + pagination + error handling + PWA · ✅ Code splitting + skeleton + empty state chart (✅ P8-03) + 404 (✅ Fase L) + toast (✅ Fase F+M)
+✅ 215 `@@index` di 57 model — semua FK utama terindeks · ✅ Global JWT default-deny + DTO validation + pagination + error handling + PWA · ✅ Code splitting + skeleton + empty state chart (✅ P8-03) + 404 (✅ Fase L) + toast (✅ Fase F+M) · ✅ Refresh Token httpOnly cookie (M17 P3-01)
 
 ## Dokumen audit terbaru
 - **Audit Fable (2-3 Jul 2026):** `docs/archieve/audit_fable/00_INDEX.md` — 19 checklist C01-C19
 - **Audit Reasonix Code (7 Jul 2026):** `docs/archieve/audit_reasonix/RINGKASAN_EKSEKUTIF.md` — 82 temuan baru
+- **Audit 360° P3-P8 (Jul 2026):** `docs/archieve/M17_AUDIT_360_P3_P8.md`
+- **Audit 360° Flow Uang (Jul 2026):** `docs/archieve/M15_AUDIT_360_FLOW_UANG.md`
+- **Audit 360° Flow Huni (Jul 2026):** `docs/archieve/M16_AUDIT_360_FLOW_HUNI.md`

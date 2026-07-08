@@ -1,4 +1,4 @@
-# KOST48 V5 - Fase G AI Owner/Admin Approval Copilot
+# KOST48 V5 — Fase G AI Owner/Admin Approval Copilot
 
 > Dossier baru untuk semua fitur DeepSeek/AI berbayar. Fokus: Owner dan Admin saja, selalu manual lewat tombol, hemat token, dan semua output yang mengubah data wajib menunggu persetujuan manusia.
 
@@ -543,7 +543,7 @@ Jika manusia mengabaikan hasil AI, tidak wajib membuat AuditLog baru kecuali ada
 
 - Jika amount tidak terbaca, jangan buat angka palsu; set `amountRupiah: 0` dan `needsReview`.
 - Jika kategori tidak yakin, pakai `OTHER`.
-- Jika amount > Rp500.000, tampilkan peringatan kapitalisasi aset sesuai aturan aset.
+- Jika amount > Rp100.000 dan item tampak barang tahan lama, tampilkan peringatan kapitalisasi aset (aturan owner 2026-07-08: aset tetap = barang tahan lama ≥ Rp100rb; barang ganti rutin = beban).
 - AI tidak boleh posting jurnal; jurnal expense mengikuti service existing.
 
 ### G5 - KTP OCR Validator

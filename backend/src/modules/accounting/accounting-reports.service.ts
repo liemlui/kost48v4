@@ -591,7 +591,7 @@ export class AccountingReportsService {
         where: {
           status: 'CONFIRMED' as any,
           category: { in: ['MAINTENANCE', 'SUPPLIES', 'OTHER'] as any },
-          amountRupiah: { gte: 500000 },
+          amountRupiah: { gte: 100000 },
         },
         select: { id: true, expenseDate: true, category: true, description: true, amountRupiah: true, vendorName: true, roomId: true },
         orderBy: [{ amountRupiah: 'desc' }, { expenseDate: 'desc' }],

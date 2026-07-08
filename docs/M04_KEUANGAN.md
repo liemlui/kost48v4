@@ -1,4 +1,4 @@
-# KOST48 V5 - Keuangan, Pembayaran, Invoice, Akuntansi
+# KOST48 V5 — Keuangan, Pembayaran, Invoice, Akuntansi
 
 > File hasil pemampatan dari dokumen root `docs/`. File sumber lama sudah diarsipkan ke `docs/archieve/2026-06-16_root_docs_pre_M/`.
 
@@ -16,6 +16,22 @@ Semua fondasi keuangan: harness verifikasi, pembayaran/invoice, accounting, lapo
 
 - Jadikan file ini pintu masuk tematik; bila butuh detail mentah, cek file sumber di arsip yang disebut di atas.
 - Heading asli dinaikkan levelnya agar tidak bertabrakan dengan struktur M-file.
+
+## Update 2026-07-08 — Sinkronisasi Status Keuangan
+
+Semua invarian keuangan tetap terjaga pasca audit Reasonix (82 temuan, 6 critical bug ✅ fixed). DISCOUNT line kini punya journal entry (contra-revenue 4010). Collection rate menggunakan basis akrual yang konsisten. Renewal cross-term sudah diperbaiki. Tidak ada perubahan fundamental pada flow keuangan.
+
+## Update 2026-07-08 — Kebijakan Kapitalisasi Aset & Saldo Awal Audit Inventaris
+
+Keputusan owner (kuis 2026-07-08 — detail di M02 "Kuis Audit Aset & Nilai"):
+
+- **Aset tetap = barang TAHAN LAMA (umur pakai > 1 tahun) harga ≥ Rp 100.000/unit** — kipas Rp150-250rb & lemari plastik Rp200rb MASUK; bohlam/sprei/gayung = beban berapa pun harganya. (Revisi dari Rp500rb di hari yang sama.)
+- Umur ekonomis default: elektronik/AC/CCTV/kipas 48 bln · furniture 48-96 bln · pompa/tandon/instalasi 96 bln · bangunan 240 bln · tanah tidak disusutkan.
+- Cut-off audit inventaris & neraca awal: **31 Juli 2026**. Nota hampir tidak ada → harga default E (estimasi).
+- Tanah + bangunan MASUK pembukuan via **saldo awal** (`FixedAsset.capitalizationSource=OPENING_BALANCE`): tanah = NJOP SPPT PBB; bangunan dinilai SEKALI kondisi kini per cut-off, susut fresh 240 bln (renovasi 2011-kini tidak dirunut per proyek).
+- Rekening bank campur pribadi → saldo porsi kos dipilah per cut-off. Tidak ada hutang bisnis → kewajiban = deposit tenant + sewa diterima di muka.
+
+**Penyesuaian kode (ambang warning/insight saja — TANPA dampak jurnal/TB):** `owner-ai.helpers.ts`, `owner-ai.service.ts`, `prompts/expense-ocr.prompt.ts` (warning kapitalisasi expense-OCR: >Rp500rb → >Rp100rb barang tahan lama) dan `accounting-reports.service.ts` (kandidat expense besar `gte 500000` → `100000`; filter kategori MAINTENANCE/SUPPLIES/OTHER tetap). Form lapangan: `docs/filePrint/05-07` + RUNBOOK §9A.
 
 ## Update 2026-06-30 — Override Booking Flow Fase V
 

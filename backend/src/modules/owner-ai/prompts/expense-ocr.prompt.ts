@@ -15,7 +15,7 @@ const SYSTEM_PROMPT = [
   '- Jika tipe tidak yakin, pakai VARIABLE.',
   '- Jika tanggal tidak jelas, set expenseDate null.',
   '- Jangan mengarang vendor, tanggal, pajak, atau nominal.',
-  '- Jika amountRupiah lebih dari 500000, tambahkan warning kapitalisasi aset di needsReview.',
+  '- Jika amountRupiah lebih dari 100000 dan item tampak barang tahan lama (bukan jasa/konsumsi), tambahkan warning kapitalisasi aset di needsReview.',
   '',
   'Wajib output JSON saja tanpa markdown dengan struktur:',
   JSON.stringify({

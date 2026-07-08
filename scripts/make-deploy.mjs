@@ -171,21 +171,22 @@ Paket ini SUDAH di-build di lokal: backend \`dist/\` + frontend \`client/\`. Ser
    \`\`\`bash
    psql "<DATABASE_URL>" -f sql/bootstrap.sql
    \`\`\`
-6. **Seed data default** (kamar nyata, foto, barang, fasilitas, FAQ, layanan tambahan):
+6. **Seed OWNER pertama** (idempoten, wajib agar bisa login):
+   \`\`\`bash
+   OWNER_EMAIL=owner@domain-anda OWNER_PASSWORD='GANTI_kuat' OWNER_FULLNAME='Pemilik KOST48' npm run seed:owner
+   \`\`\`
+7. **Minimal setelah login OWNER**: seed COA (\`POST /api/accounting/default-coa/seed\`) + buat periode OPEN + CashAccount.
+8. **Opsional / boleh belakangan: seed data detail** (kamar nyata, foto, barang, fasilitas, FAQ, layanan tambahan):
    \`\`\`bash
    psql "<DATABASE_URL>" -f sql/seed-kost48-default-data.sql
    \`\`\`
    Di phpPgAdmin, upload file \`sql/seed-kost48-default-data.sql\` lewat SQL script bila \`psql\` tidak tersedia.
+   Lewati langkah ini dulu kalau targetnya hanya deploy aplikasi hidup; data detail bisa diisi setelah domain dan login OWNER beres.
 
-7. **Seed OWNER pertama** (idempoten):
-   \`\`\`bash
-   OWNER_EMAIL=owner@domain-anda OWNER_PASSWORD='GANTI_kuat' OWNER_FULLNAME='Pemilik KOST48' npm run seed:owner
-   \`\`\`
-   Lalu login OWNER → seed COA (\`POST /api/accounting/default-coa/seed\`) + periode OPEN + CashAccount.
-8. **Restart App** (Setup Node.js App) + **AutoSSL** domain → HTTPS (wajib untuk PWA/push).
-9. **Cron Jobs** (auto-ops, tiap 5–10 menit — WAJIB di shared hosting karena Passenger idle-sleep):
+9. **Restart App** (Setup Node.js App) + **AutoSSL** domain → HTTPS (wajib untuk PWA/push).
+10. **Cron Jobs** (auto-ops, tiap 5–10 menit — WAJIB di shared hosting karena Passenger idle-sleep):
    \`curl -fsS -X POST -H "X-Cron-Token: <token>" https://domain-anda/api/auto-ops/cron >/dev/null 2>&1\`
-10. **Smoke**: \`https://domain/\` tampil · \`/api/public/rooms\` 200 · login OWNER · trial-balance seimbang ·
+11. **Smoke**: \`https://domain/\` tampil · \`/api/public/rooms\` 200 · login OWNER · trial-balance seimbang ·
    cPanel Resource Usage: memory faults 0.
 
 ## Catatan RAM/inode 512MB
@@ -204,4 +205,4 @@ const total = countFiles(OUT);
 console.log('\n[deploy] SELESAI.');
 console.log('  Folder siap-upload : ' + OUT + '/  (' + total + ' file — estimasi pemakaian inode upload)');
 if (tarOk) console.log('  Arsip (opsional)   : kost48-deploy.tgz');
-console.log('  Di server: npm run cpanel:install -> isi .env -> schema+seed -> Restart App  (lihat ' + OUT + '/README-DEPLOY.md)');
+console.log('  Di server: npm run cpanel:install -> isi .env -> schema+OWNER -> Restart App  (lihat ' + OUT + '/README-DEPLOY.md)');

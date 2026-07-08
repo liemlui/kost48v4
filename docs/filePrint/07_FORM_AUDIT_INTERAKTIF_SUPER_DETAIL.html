@@ -1,0 +1,688 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Audit Inventaris Interaktif KOST48</title>
+<style>
+  :root {
+    --teal: #0e7490; --teal-d: #155e75; --teal-bg: #ecfeff;
+    --ink: #1e293b; --line: #94a3b8; --soft: #f1f5f9;
+    --cB: #16a34a; --cC: #0891b2; --cR: #d97706; --cRB: #dc2626; --cH: #7c3aed; --cT: #64748b;
+    --amber-bg: #fef3c7; --amber-bd: #d97706;
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  body { font: 10pt/1.4 "Segoe UI", Arial, sans-serif; color: var(--ink); margin: 0; background: #e8eef3; }
+
+  /* ===== App bar & tabs (layar saja) ===== */
+  .appbar { background: #fff; border-bottom: 3px solid var(--teal); padding: 10px 16px; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; position: sticky; top: 0; z-index: 20; }
+  .appbar h2 { margin: 0; font-size: 13pt; color: var(--teal-d); flex: 1 1 auto; }
+  .appbar small { display: block; color: #64748b; font-weight: normal; }
+  .btn { border: none; border-radius: 8px; padding: 8px 14px; font: bold 9.5pt "Segoe UI", Arial; cursor: pointer; color: #fff; }
+  .btn-print { background: var(--teal); }
+  .btn-csv { background: var(--cH); }
+  .btn-reset { background: #94a3b8; }
+  .btn:active { transform: translateY(1px); }
+  .tabs { display: flex; flex-wrap: wrap; gap: 6px; padding: 10px 16px; background: #fff; border-bottom: 1px solid #cbd5e1; position: sticky; top: 58px; z-index: 19; }
+  .tab { border: 1.5px solid var(--teal); background: #fff; color: var(--teal-d); border-radius: 999px; padding: 5px 12px; font: bold 9pt "Segoe UI", Arial; cursor: pointer; }
+  .tab .pct { font-weight: normal; font-size: 7.5pt; color: #64748b; margin-left: 4px; }
+  .tab.act { background: var(--teal); color: #fff; }
+  .tab.act .pct { color: #cffafe; }
+  .tab.special { border-color: var(--cH); color: var(--cH); }
+  .tab.special.act { background: var(--cH); color: #fff; }
+
+  /* ===== Halaman ===== */
+  main { padding: 14px; }
+  section.page { display: none; background: #fff; max-width: 1150px; margin: 0 auto 16px; padding: 20px 26px; border-radius: 10px; box-shadow: 0 2px 10px rgba(15,60,80,.15); }
+  section.page.act { display: block; }
+  .ph { display: flex; align-items: center; gap: 12px; border-bottom: 3px solid var(--teal); padding-bottom: 6px; margin-bottom: 8px; }
+  .badge { min-width: 46px; height: 46px; border-radius: 10px; background: var(--teal); color: #fff; display: flex; align-items: center; justify-content: center; font: bold 15pt "Segoe UI", Arial; padding: 0 8px; }
+  .badge.violet { background: var(--cH); }
+  .ph h1 { margin: 0; font-size: 14pt; color: var(--teal-d); flex: 1; }
+  .ph .prog { font-size: 8.5pt; color: #475569; background: var(--soft); border-radius: 8px; padding: 4px 10px; white-space: nowrap; }
+  .idrow { display: flex; flex-wrap: wrap; gap: 10px 22px; font-weight: bold; margin: 6px 0; font-size: 9.5pt; }
+  .idrow label { display: flex; align-items: center; gap: 6px; }
+  .idrow input { border: none; border-bottom: 1.5px dashed var(--line); font: inherit; padding: 2px 4px; min-width: 150px; background: transparent; }
+  .legendline { border: 1.5px solid var(--amber-bd); background: var(--amber-bg); border-radius: 8px; padding: 6px 10px; font-size: 8.6pt; margin: 6px 0; line-height: 1.5; }
+  .legendline .sw { display: inline-block; border-radius: 6px; padding: 0 6px; color: #fff; font-weight: bold; font-size: 8pt; }
+  .hint { font-style: italic; font-size: 8.6pt; margin: 2px 0 6px; color: #475569; }
+
+  /* ===== Tabel ===== */
+  .tblwrap { overflow-x: auto; }
+  table { width: 100%; min-width: 880px; border-collapse: collapse; table-layout: fixed; }
+  th, td { border: 1px solid var(--line); padding: 3px 5px; vertical-align: middle; }
+  th { background: var(--teal-bg); color: var(--teal-d); font-size: 8.6pt; }
+  td { font-size: 9pt; height: 26px; }
+  tr.group td { background: var(--teal); color: #fff; font-weight: bold; font-size: 9pt; height: auto; padding: 4px 8px; }
+  tbody tr:nth-child(even):not(.group):not(.prow) td { background: #f8fafc; }
+  tr.prow td { background: #eef2f7; }
+  td.chkc { text-align: center; font-style: italic; color: #64748b; font-size: 7.8pt; background: #e2e8f0 !important; }
+  td.pit { font-style: italic; }
+  .c-no { width: 4%; text-align: center; color: #64748b; }
+  .c-item { width: 26%; }
+  .c-jml { width: 5%; }
+  .c-merk { width: 12%; }
+  .c-thn { width: 7%; }
+  .c-hrg { width: 10%; }
+  .c-kon { width: 18%; }
+  .c-cat { width: 18%; }
+  input.cin { width: 100%; border: none; border-bottom: 1px dashed #cbd5e1; background: transparent; font: 9pt "Segoe UI", Arial; padding: 1px 2px; color: var(--ink); }
+  input.cin:focus { outline: none; border-bottom: 1.5px solid var(--teal); background: var(--teal-bg); }
+
+  /* ===== Chips ===== */
+  .chips { display: flex; flex-wrap: wrap; gap: 3px; justify-content: center; }
+  .chip { border-radius: 7px; padding: 2px 7px; font: bold 8pt "Segoe UI", Arial; cursor: pointer; background: #fff; }
+  .chip.kB { border: 1.5px solid var(--cB); color: var(--cB); }
+  .chip.kC { border: 1.5px solid var(--cC); color: var(--cC); }
+  .chip.kR { border: 1.5px solid var(--cR); color: var(--cR); }
+  .chip.kRB { border: 1.5px solid var(--cRB); color: var(--cRB); }
+  .chip.kH { border: 1.5px solid var(--cH); color: var(--cH); }
+  .chip.kT { border: 1.5px solid var(--cT); color: var(--cT); }
+  .chip.sel.kB { background: var(--cB); } .chip.sel.kC { background: var(--cC); }
+  .chip.sel.kR { background: var(--cR); } .chip.sel.kRB { background: var(--cRB); }
+  .chip.sel.kH { background: var(--cH); } .chip.sel.kT { background: var(--cT); }
+  .chip.sel { color: #fff !important; }
+
+  /* ===== Ringkasan ===== */
+  .sumttl { background: var(--teal); color: #fff; border-radius: 8px; padding: 5px 12px; font-weight: bold; margin: 12px 0 6px; font-size: 10pt; }
+  .sumttl.red { background: var(--cRB); }
+  .sumttl.green { background: var(--cB); }
+  .sumttl.violet { background: var(--cH); }
+  .stbadge { display: inline-block; border-radius: 6px; padding: 1px 8px; color: #fff; font-weight: bold; font-size: 8pt; }
+  .empty { color: #64748b; font-style: italic; padding: 6px 2px; }
+  .tot td { font-weight: bold; background: var(--amber-bg) !important; }
+  .sign { margin-top: 8mm; display: flex; justify-content: flex-end; gap: 26mm; text-align: center; }
+  .sign div { width: 58mm; }
+  .sign .line { margin-top: 14mm; border-top: 1px solid var(--ink); font-size: 8.5pt; padding-top: 2px; }
+  ul.compact { margin: 4px 0; padding-left: 18px; }
+  ul.compact li { margin-bottom: 4px; }
+  .kotak { border: 1.5px solid var(--teal); border-radius: 8px; background: var(--teal-bg); padding: 8px 12px; margin-top: 8px; font-size: 9pt; }
+
+  /* ===== CETAK ===== */
+  @page { size: A4 landscape; margin: 9mm 11mm; }
+  @media print {
+    body { background: #fff; font-size: 8.8pt; }
+    .appbar, .tabs, .no-print { display: none !important; }
+    main { padding: 0; }
+    section.page { display: block !important; box-shadow: none; border-radius: 0; max-width: none; padding: 0; margin: 0; page-break-after: always; }
+    section.page:last-child { page-break-after: auto; }
+    .tblwrap { overflow: visible; }
+    table { min-width: 0; }
+    thead { display: table-header-group; }
+    tr { page-break-inside: avoid; }
+    td { height: 22px; font-size: 8.3pt; }
+    input.cin, .idrow input { border-bottom: 1px dotted #94a3b8; }
+    .chip { padding: 1px 5px; font-size: 7.4pt; }
+    .ph .prog { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="appbar">
+  <h2>🏠 Audit Inventaris KOST48 <small>Isian tersimpan otomatis di perangkat ini · Cut-off data: 31 Juli 2026</small></h2>
+  <button class="btn btn-print" onclick="window.print()">🖨️ Cetak Semua</button>
+  <button class="btn btn-csv" id="btnCsv">⬇️ Unduh CSV</button>
+  <button class="btn btn-reset" id="btnReset">🗑️ Hapus Isian</button>
+</div>
+<div class="tabs" id="tabs"></div>
+
+<main id="main">
+
+<!-- ===== PETUNJUK ===== -->
+<section class="page" id="pg-INFO">
+  <div class="ph"><div class="badge">📋</div><h1>Petunjuk Pengisian</h1></div>
+  <ul class="compact">
+    <li><b>Cara pakai di HP/laptop:</b> pilih tab kamar di atas → ketuk tombol kondisi (langsung tersimpan otomatis di perangkat ini) → isi jumlah/merek seperlunya. Selesai semua → buka tab <b>RINGKASAN</b> (temuan &amp; daftar aset terhitung otomatis) → <b>Unduh CSV</b> untuk arsip/input aplikasi.</li>
+    <li><b>Cara pakai di kertas:</b> klik <b>Cetak Semua</b> dalam keadaan kosong → setiap kamar jadi 1 form sendiri (sudah ada kode kamar + cara isi di tiap halaman) → bagikan ke tenant A, B, dst. atau staff → mereka tinggal <b>melingkari</b> pilihan.</li>
+    <li>Baris <b>BARANG</b>: isi Jml &amp; Merek → pilih/lingkari kondisi: <b style="color:#16a34a">B</b>=Baik · <b style="color:#0891b2">C</b>=Cukup · <b style="color:#d97706">R</b>=Rusak ringan · <b style="color:#dc2626">RB</b>=Rusak berat · <b style="color:#7c3aed">H</b>=Hilang · <b style="color:#64748b">T</b>=Tidak ada.</li>
+    <li>Kolom <b>± Thn</b> &amp; <b>± Harga</b> = perkiraan tahun beli &amp; harga per unit — <u>boleh dikosongkan bila tidak tahu</u> (owner melengkapi). Ada nota → tulis <b>N</b> di Catatan.</li>
+    <li>Baris abu-abu <b>PEMERIKSAAN</b>: bukan barang — pilih <b style="color:#16a34a">OK</b> bila normal atau <b style="color:#dc2626">MASALAH</b> lalu jelaskan singkat di Catatan.</li>
+    <li>Angka kWh, jadwal cuci AC, harga sewa &amp; deposit: data resmi di aplikasi — di sini hanya cek silang.</li>
+  </ul>
+  <div class="kotak">
+    <b>Aturan aset (khusus owner):</b> barang <b>TAHAN LAMA</b> (umur pakai &gt; 1 tahun) dengan harga <b>≥ Rp 100.000/unit</b> = <b>Aset Tetap</b> (disusutkan) — kipas angin Rp150–250rb ✔, lemari plastik Rp200rb ✔, AC, kasur, CCTV ✔. Barang ganti rutin (bohlam lampu 20–40rb, sprei, gayung, sikat) = beban, <u>bukan</u> aset — berapa pun harganya.
+    <br>Umur default: elektronik/AC/CCTV/kipas 48 bln · furniture 48–96 bln · pompa/tandon 96 bln · bangunan 240 bln · tanah tidak disusutkan. Aset lama diinput ke aplikasi lewat <b>SALDO AWAL</b>. Prioritas tiket: P0 bahaya · P1 penting · P2 dijadwalkan · P3 kosmetik.
+  </div>
+  <p class="hint">13 kamar: A, B, C, D, F1, F2, G, H, I, J, K, L, M (F3/F4 sudah tidak ada — blok F dirombak menjadi F1 &amp; F2). Isian digital tersimpan hanya di perangkat/browser ini (localStorage) — unduh CSV untuk memindahkan.</p>
+</section>
+
+<div id="generated"></div>
+
+<!-- ===== RINGKASAN OTOMATIS ===== -->
+<section class="page" id="pg-SUM">
+  <div class="ph"><div class="badge violet">Σ</div><h1>Ringkasan Otomatis</h1><span class="prog" id="prog-SUM"></span></div>
+  <p class="hint no-print">Terhitung otomatis dari semua isian. Dibangun ulang setiap kali tab ini dibuka atau sebelum mencetak.</p>
+
+  <div class="sumttl">Kelengkapan Pengisian</div>
+  <div id="sum-progress"></div>
+
+  <div class="sumttl red">A. Temuan Perlu Tindakan (R / RB / H / T / MASALAH) → beli / perbaiki / buat tiket</div>
+  <div id="sum-temuan"></div>
+
+  <div class="sumttl green">B. Calon Aset Tetap — barang tahan lama ± ≥ Rp 100.000 → input modul Aset Tetap (saldo awal)</div>
+  <p class="hint">Kategori aplikasi: BUILDING / RENOVATION / ROOM_EQUIPMENT / FURNITURE / ELECTRONIC / UTILITY_EQUIPMENT / OTHER.</p>
+  <div id="sum-aset"></div>
+
+  <div class="sumttl violet">C. Rekap Estimasi Nilai per Lokasi</div>
+  <div id="sum-rekap"></div>
+  <div class="idrow" style="margin-top:8px">
+    <label>Tanah (NJOP, tidak disusutkan) : Rp <input class="cin" style="min-width:130px" data-k="SUM|tanah" inputmode="numeric"></label>
+    <label>Bangunan (nilai kondisi kini) : Rp <input class="cin" style="min-width:130px" data-k="SUM|bangunan" inputmode="numeric"></label>
+  </div>
+
+  <div class="sign">
+    <div><div class="line">Tanda Tangan Pengecek</div></div>
+    <div><div class="line">Tanda Tangan Owner</div></div>
+  </div>
+</section>
+
+</main>
+
+<script>
+// =================== DATA ===================
+// string        = BARANG tahan lama (calon aset bila >= Rp100rb)
+// {k:'...'}     = BARANG ganti rutin / konsumsi (bukan calon aset)
+// {p:'...'}     = PEMERIKSAAN (OK / MASALAH)
+var ROOMS = [
+  { k: 'A',  km: 'dalam' }, { k: 'B',  km: 'dalam' }, { k: 'C',  km: 'dalam' }, { k: 'D',  km: 'dalam' },
+  { k: 'F1', km: 'dalam', kloset: 'JONGKOK' }, { k: 'F2', km: 'dalam' },
+  { k: 'G',  km: 'luar' }, { k: 'H',  km: 'luar' }, { k: 'I',  km: 'luar' },
+  { k: 'J',  km: 'dalam' }, { k: 'K',  km: 'dalam' }, { k: 'L',  km: 'dalam' }, { k: 'M',  km: 'dalam' }
+];
+
+var G_STRUKTUR = { g: 'Struktur & Fisik Kamar', items: [
+  { p: 'Dinding — ada retak / lembab / cat mengelupas?' },
+  { p: 'Plafon — ada noda bocor / berlubang?' },
+  { p: 'Lantai — ada keramik pecah / nat rusak?' },
+  { p: 'Ventilasi udara kamar cukup?' },
+  { p: 'Bau kamar normal? (tidak apek / lembab)' },
+  { p: 'Ada tanda hama? (rayap / tikus / kecoa / semut)' },
+  'Gorden + rel gorden (bila ada)'
+]};
+var G_PINTU = { g: 'Pintu, Jendela & Kunci', items: [
+  'Daun pintu kamar',
+  'Handle / gagang + kunci utama — total anak kunci',
+  'Anak kunci cadangan (dipegang owner)',
+  'Grendel / selot pengaman dalam',
+  'Jendela + kaca',
+  'Selot / kunci jendela',
+  { p: 'Engsel pintu & jendela lancar? (tidak seret / karat)' },
+  { p: 'Pintu / kusen — ada lapuk / keropos / rayap?' }
+]};
+var G_FURNITURE = { g: 'Furniture & Tidur', items: [
+  'Kasur — merek + ukuran (90/100/120/160)',
+  { p: 'Kondisi kasur — ada noda / sobek / per rusak?' },
+  { k: 'Sprei' },
+  { k: 'Bantal + sarung bantal' },
+  { k: 'Guling + sarung (bila ada)' },
+  'Lemari — jenis: plastik / multiplek / besi',
+  { p: 'Engsel / rel / pintu lemari berfungsi?' },
+  { k: 'Hanger baju' },
+  { k: 'Bak sampah kamar' },
+  'Meja / kursi (bila ada)',
+  'Mezzanine + tangga (bila ada)',
+  { p: 'Railing & tangga mezzanine aman?' }
+]};
+var G_LISTRIK = { g: 'Listrik Kamar (angka resmi di aplikasi — di sini hanya cek silang)', items: [
+  { k: 'Lampu utama + fitting (watt di kolom merek)' },
+  'Saklar lampu',
+  'Stop kontak (jumlah titik)',
+  { p: 'Ada stop kontak longgar / bekas gosong?' },
+  { k: 'Stekker listrik' },
+  { k: 'Tee / terminal listrik' },
+  { p: 'Ada kabel terkelupas / sambungan bahaya?' },
+  'Unit kWh meter (fisik)',
+  { p: 'kWh meter — tulis NOMOR METER di Catatan' },
+  { p: 'kWh meter — tulis ANGKA meter saat ini di Catatan' },
+  { p: 'Segel & kaca kWh utuh, angka terbaca?' },
+  'MCB (ampere di kolom merek)'
+]};
+var G_PENDINGIN = { g: 'Pendingin — pilih jenis: AC / KIPAS (jadwal cuci resmi di aplikasi)', items: [
+  'Unit AC — merek + PK, tahun pasang',
+  'Remote AC + baterai',
+  'Kipas angin (untuk kamar non-AC)',
+  { p: 'AC / kipas dingin & berfungsi normal?' },
+  { p: 'Filter / evaporator AC bersih?' },
+  { p: 'Ada tetes air / bocor di unit dalam?' },
+  { p: 'Pipa + bracket + unit luar aman? (tidak karat / getar)' },
+  { p: 'Suara AC / kipas halus? (tidak berisik)' }
+]};
+var G_KM_DALAM = { g: 'Kamar Mandi Dalam', items: [
+  'Kloset',
+  { p: 'Flush / siram berfungsi?' },
+  { p: 'Tanki kloset — ada bocor / air ngalir terus?' },
+  'Double stop kran toilet',
+  'Selang fleksibel ke tanki kloset',
+  'Jet shower + kepala jet shower',
+  'Double kran air',
+  'Selang shower utama',
+  'Kepala shower utama',
+  'Ember',
+  { k: 'Gayung' },
+  { k: 'Sikat lantai' },
+  { k: 'Sikat kloset' },
+  { k: 'Hanger / gantungan kamar mandi' },
+  'Saringan air lantai (floor drain)',
+  { p: 'Saluran pembuangan lancar? (tidak mampet)' },
+  'Pintu kamar mandi',
+  { p: 'Pintu KM — ada lapuk bagian bawah?' },
+  { k: 'Lampu kamar mandi' },
+  'Ventilasi / exhaust (bila ada)',
+  { p: 'Dinding & lantai KM bersih? (tidak jamur / lumut)' },
+  { p: 'Ada kebocoran / rembes ke luar KM?' }
+]};
+
+var EXTRA = [
+  {
+    id: 'KML', tab: 'KM Luar', title: 'Kamar Mandi Luar Bersama (2 Unit)',
+    sub: 'Dipakai kamar: G, H, I · Standar: bak air plastik besar (bukan ember kecil), TANPA shower.',
+    groups: [
+      { g: 'Unit KM 1 — dengan Kloset Duduk', items: [
+        'Kloset duduk',
+        { p: 'Flush berfungsi? Tanki tidak bocor?' },
+        'Bak air plastik besar',
+        { p: 'Bak — ada retak / lumut?' },
+        'Kran air',
+        { k: 'Gayung' },
+        { k: 'Sikat lantai + sikat kloset' },
+        { k: 'Lampu kamar mandi' },
+        'Pintu + selot',
+        'Saringan air lantai (floor drain)',
+        { p: 'Saluran pembuangan lancar?' },
+        { p: 'Dinding & lantai bersih? (tidak jamur / lumut)' },
+        { p: 'Bersih & tidak bau?' },
+        { p: 'Ada kebocoran / genangan air?' }
+      ]},
+      { g: 'Unit KM 2 — Khusus Mandi', items: [
+        'Bak air plastik besar',
+        { p: 'Bak — ada retak / lumut?' },
+        'Kran air',
+        { k: 'Gayung' },
+        { k: 'Sikat lantai' },
+        { k: 'Lampu kamar mandi' },
+        'Pintu + selot',
+        'Saringan air lantai (floor drain)',
+        { p: 'Saluran pembuangan lancar?' },
+        { p: 'Dinding & lantai bersih? (tidak jamur / lumut)' },
+        { p: 'Bersih & tidak bau?' },
+        { p: 'Ada kebocoran / genangan air?' }
+      ]}
+    ]
+  },
+  {
+    id: 'AREA', tab: 'Area Bersama', title: 'Fasilitas Luar / Area Bersama',
+    sub: 'Isi watt lampu & kapasitas di kolom Merek/Tipe.',
+    groups: [
+      { g: 'Penerangan — 7 titik (lampu + fitting + saklar per titik)', items: [
+        { k: 'Lampu depan bagian poster' },
+        { k: 'Lampu teras depan' },
+        { k: 'Lampu area dapur' },
+        { k: 'Lampu lorong' },
+        { k: 'Lampu pojok lorong' },
+        { k: 'Lampu depan KM belakang' },
+        { k: 'Lampu lorong belakang' }
+      ]},
+      { g: 'Keamanan — CCTV & Perekam', items: [
+        'Kamera CCTV depan 1',
+        'Kamera CCTV depan 2',
+        'Kamera CCTV depan dapur',
+        'Kamera CCTV depan KM belakang',
+        'Kamera CCTV lorong belakang',
+        'DVR / NVR perekam',
+        'Hard disk perekam (kapasitas di kolom merek)',
+        'Monitor / layar CCTV (bila ada)',
+        { p: 'Semua 5 kamera tampil & merekam di DVR?' },
+        { p: 'Rekaman tersimpan berapa hari? (tulis di Catatan)' },
+        { p: 'Sudut kamera dekat KM aman privasi?' },
+        { p: 'Akses CCTV dari HP owner berfungsi?' }
+      ]},
+      { g: 'APAR / Bola Pemadam (rencana 3–5 titik — lokasi & TGL KEDALUWARSA di Catatan)', items: [
+        'APAR titik 1',
+        'APAR titik 2',
+        'APAR titik 3',
+        'APAR titik 4 (rencana)',
+        'APAR titik 5 (rencana)'
+      ]},
+      { g: 'Dapur Outdoor & Gas', items: [
+        'Kran air dapur',
+        { k: 'Tempat sampah dapur' },
+        'Kompor gas',
+        { p: 'Pematik & nyala api kompor normal?' },
+        'Tabung LPG (jumlah tabung)',
+        'Selang gas — TAHUN PASANG wajib diisi (rawan umur)',
+        'Regulator gas',
+        'Meja / rak dapur (bila ada)',
+        { p: 'Dinding & area dapur bersih? (tidak berminyak tebal)' }
+      ]},
+      { g: 'Air Bersih & Sanitasi', items: [
+        'Tandon air (kapasitas liter di kolom merek)',
+        { p: 'Penutup tandon rapat? Terakhir dikuras kapan? (Catatan)' },
+        'Mesin pompa air',
+        { p: 'Otomatis pompa berfungsi?' },
+        { p: 'Ada pipa bocor / karat? (lokasi di Catatan)' },
+        { p: 'Tekanan air normal di semua kamar?' },
+        { p: 'Saluran got / drainase lancar?' },
+        { p: 'Septic tank — terakhir disedot kapan? (Catatan)' }
+      ]},
+      { g: 'Listrik Induk', items: [
+        'Panel / MCB utama',
+        { p: 'Meteran PLN induk — tulis nomor + daya VA di Catatan' },
+        { p: 'Instalasi kabel area bersama aman? (tidak terkelupas)' }
+      ]},
+      { g: 'Jaringan Internet', items: [
+        'Router internet',
+        'Access point / switch',
+        'Kabel LAN / adaptor',
+        'UPS / stabilizer (bila ada)',
+        { p: 'Paket internet — tulis nama + biaya/bulan di Catatan' },
+        { p: 'Sinyal WiFi kuat di depan / lorong / belakang?' }
+      ]},
+      { g: 'Struktur Bangunan Umum', items: [
+        'Papan nama / poster depan',
+        { p: 'Atap + talang air — ada bocor / tersumbat?' },
+        { p: 'Dinding luar + cat depan masih bagus?' },
+        { p: 'Lantai lorong / teras aman? (tidak pecah / licin)' },
+        { p: 'Kanopi / teras (bila ada) — kondisi baik?' },
+        { p: 'Pagar / gerbang + kunci gerbang berfungsi?' },
+        { p: 'Area parkir motor (bila ada) — kondisi baik?' },
+        { p: 'Ada tanda hama area bersama? (tikus / rayap)' }
+      ]},
+      { g: 'Kebersihan & Lain-lain', items: [
+        { k: 'Sapu' },
+        { k: 'Alat pel' },
+        { k: 'Cikrak / pengki' },
+        { k: 'Ember + sikat area bersama' },
+        { k: 'Tempat sampah area bersama' },
+        { k: 'Stok cairan pembersih / sabun' },
+        'Jemuran bersama besar (di belakang)',
+        'Kursi santai (bila ada)',
+        'Tangga lipat / alat kerja (bila ada)'
+      ]}
+    ]
+  }
+];
+
+// =================== BANGUN DAFTAR SECTION ===================
+function roomGroups(r) {
+  var gs = [G_STRUKTUR, G_PINTU, G_FURNITURE, G_LISTRIK, G_PENDINGIN];
+  if (r.km === 'dalam') {
+    var kmItems = G_KM_DALAM.items.map(function (it) {
+      if (typeof it === 'string' && it === 'Kloset') return r.kloset ? 'Kloset JONGKOK' : 'Kloset duduk';
+      return it;
+    });
+    gs = gs.concat([{ g: G_KM_DALAM.g, items: kmItems }]);
+  }
+  return gs;
+}
+var SECTIONS = ROOMS.map(function (r) {
+  return {
+    id: r.k, tab: r.k, title: 'Kamar ' + r.k,
+    sub: r.km === 'dalam'
+      ? 'Tipe: kamar mandi DALAM' + (r.kloset ? ' — kloset ' + r.kloset : ' — kloset duduk') + '.'
+      : 'Tipe: kamar mandi LUAR bersama — KM luar dicek di tab/halaman "KM Luar".',
+    idfield: 'Diisi oleh (tenant / staff)',
+    groups: roomGroups(r)
+  };
+}).concat(EXTRA.map(function (f) {
+  return { id: f.id, tab: f.tab, title: f.title, sub: f.sub, idfield: 'Diisi oleh (staff / owner)', groups: f.groups };
+}));
+
+// Peta baris untuk ringkasan & CSV
+var ROWMAP = {};
+SECTIONS.forEach(function (s) {
+  var rows = [], ri = 0;
+  s.groups.forEach(function (grp) {
+    grp.items.forEach(function (it) {
+      var type = (typeof it === 'string') ? 'b' : (it.p ? 'p' : 'k');
+      var label = (typeof it === 'string') ? it : (it.p || it.k);
+      rows.push({ ri: ri, grp: grp.g, label: label, type: type });
+      ri++;
+    });
+  });
+  ROWMAP[s.id] = rows;
+});
+
+// =================== PENYIMPANAN ===================
+var KEY = 'k48audit_v2';
+var store = {};
+try { store = JSON.parse(localStorage.getItem(KEY) || '{}'); } catch (e) { store = {}; }
+function sv() { try { localStorage.setItem(KEY, JSON.stringify(store)); } catch (e) {} }
+function g(k) { return store[k] || ''; }
+
+// =================== RENDER ===================
+var KONDISI = ['B', 'C', 'R', 'RB', 'H', 'T'];
+var LEGEND =
+  '<div class="legendline"><b>CARA ISI:</b> baris BARANG → isi Jml &amp; Merek, pilih/lingkari: ' +
+  '<span class="sw" style="background:var(--cB)">B</span> Baik · ' +
+  '<span class="sw" style="background:var(--cC)">C</span> Cukup · ' +
+  '<span class="sw" style="background:var(--cR)">R</span> Rusak ringan · ' +
+  '<span class="sw" style="background:var(--cRB)">RB</span> Rusak berat · ' +
+  '<span class="sw" style="background:var(--cH)">H</span> Hilang · ' +
+  '<span class="sw" style="background:var(--cT)">T</span> Tidak ada. ' +
+  '<b>± Thn / ± Harga</b> = perkiraan, <u>kosongkan bila tidak tahu</u> (owner melengkapi). ' +
+  'Baris abu-abu = <b>pemeriksaan</b>: pilih <span class="sw" style="background:var(--cB)">OK</span> bila normal atau ' +
+  '<span class="sw" style="background:var(--cRB)">MASALAH</span> lalu tulis di Catatan.</div>';
+
+function chipHtml(key, opts) {
+  var h = '<div class="chips" data-k="' + key + '">';
+  opts.forEach(function (o) {
+    var cls = (o === 'OK') ? 'kB' : (o === 'MASALAH') ? 'kRB' : 'k' + o;
+    h += '<button type="button" class="chip ' + cls + (g(key) === o ? ' sel' : '') + '">' + o + '</button>';
+  });
+  return h + '</div>';
+}
+function inputHtml(key, extra) {
+  return '<input class="cin" data-k="' + key + '" value="' + (g(key) + '').replace(/"/g, '&quot;') + '"' + (extra || '') + '>';
+}
+
+function renderSection(s) {
+  var html = '<section class="page" id="pg-' + s.id + '">' +
+    '<div class="ph"><div class="badge">' + s.tab + '</div><h1>Form Audit — ' + s.title + '</h1>' +
+    '<span class="prog" id="prog-' + s.id + '"></span></div>' +
+    '<div class="idrow">' +
+    '<label>' + s.idfield + ' : ' + inputHtml(s.id + '|by') + '</label>' +
+    '<label>Tanggal : ' + inputHtml(s.id + '|tgl', ' style="min-width:110px"') + '</label>' +
+    '</div>' + LEGEND +
+    (s.sub ? '<p class="hint">' + s.sub + '</p>' : '') +
+    '<div class="tblwrap"><table><thead><tr>' +
+    '<th class="c-no">No</th><th class="c-item">Nama Barang / Pemeriksaan</th><th class="c-jml">Jml</th>' +
+    '<th class="c-merk">Merek / Tipe</th><th class="c-thn">± Thn</th><th class="c-hrg">± Harga (Rp)</th>' +
+    '<th class="c-kon">Kondisi / Hasil</th><th class="c-cat">Catatan</th></tr></thead><tbody>';
+
+  var lastGrp = null;
+  ROWMAP[s.id].forEach(function (row) {
+    if (row.grp !== lastGrp) { html += '<tr class="group"><td colspan="8">' + row.grp + '</td></tr>'; lastGrp = row.grp; }
+    var base = s.id + '|' + row.ri + '|';
+    if (row.type === 'p') {
+      html += '<tr class="prow"><td class="c-no">' + (row.ri + 1) + '</td><td class="pit">' + row.label + '</td>' +
+        '<td class="chkc" colspan="4">— pemeriksaan —</td>' +
+        '<td>' + chipHtml(base + 'kon', ['OK', 'MASALAH']) + '</td>' +
+        '<td>' + inputHtml(base + 'cat') + '</td></tr>';
+    } else {
+      html += '<tr><td class="c-no">' + (row.ri + 1) + '</td><td>' + row.label + (row.type === 'k' ? ' <small style="color:#94a3b8">(ganti rutin)</small>' : '') + '</td>' +
+        '<td>' + inputHtml(base + 'jml', ' inputmode="numeric"') + '</td>' +
+        '<td>' + inputHtml(base + 'merk') + '</td>' +
+        '<td>' + inputHtml(base + 'thn', ' inputmode="numeric"') + '</td>' +
+        '<td>' + inputHtml(base + 'hrg', ' inputmode="numeric"') + '</td>' +
+        '<td>' + chipHtml(base + 'kon', KONDISI) + '</td>' +
+        '<td>' + inputHtml(base + 'cat') + '</td></tr>';
+    }
+  });
+  return html + '</tbody></table></div>' +
+    '<div class="sign"><div><div class="line">Tanda Tangan Pengisi</div></div></div></section>';
+}
+
+var genHtml = '';
+SECTIONS.forEach(function (s) { genHtml += renderSection(s); });
+document.getElementById('generated').innerHTML = genHtml;
+
+// =================== TAB ===================
+var TABS = [{ id: 'INFO', label: '📋 Petunjuk' }]
+  .concat(SECTIONS.map(function (s) { return { id: s.id, label: s.tab }; }))
+  .concat([{ id: 'SUM', label: 'Σ RINGKASAN', special: true }]);
+
+var tabsEl = document.getElementById('tabs');
+tabsEl.innerHTML = TABS.map(function (t) {
+  return '<button type="button" class="tab' + (t.special ? ' special' : '') + '" data-t="' + t.id + '">' +
+    t.label + (ROWMAP[t.id] ? '<span class="pct" id="pct-' + t.id + '"></span>' : '') + '</button>';
+}).join('');
+
+function activate(id) {
+  Array.prototype.forEach.call(document.querySelectorAll('section.page'), function (p) {
+    p.classList.toggle('act', p.id === 'pg-' + id);
+  });
+  Array.prototype.forEach.call(tabsEl.children, function (b) {
+    b.classList.toggle('act', b.getAttribute('data-t') === id);
+  });
+  if (id === 'SUM') buildSummary();
+  window.scrollTo(0, 0);
+}
+tabsEl.addEventListener('click', function (e) {
+  var b = e.target.closest('.tab');
+  if (b) activate(b.getAttribute('data-t'));
+});
+
+// =================== PROGRES ===================
+function updateProgress(sid) {
+  var rows = ROWMAP[sid]; if (!rows) return;
+  var done = 0;
+  rows.forEach(function (r) { if (g(sid + '|' + r.ri + '|kon')) done++; });
+  var pct = Math.round(done / rows.length * 100);
+  var el = document.getElementById('prog-' + sid);
+  if (el) el.textContent = done + '/' + rows.length + ' terisi (' + pct + '%)';
+  var pc = document.getElementById('pct-' + sid);
+  if (pc) pc.textContent = pct > 0 ? pct + '%' : '';
+}
+SECTIONS.forEach(function (s) { updateProgress(s.id); });
+
+// =================== EVENT ISIAN ===================
+document.getElementById('main').addEventListener('click', function (e) {
+  var chip = e.target.closest('.chip'); if (!chip) return;
+  var grp = chip.parentNode, key = grp.getAttribute('data-k'), val = chip.textContent;
+  if (store[key] === val) delete store[key]; else store[key] = val;
+  sv();
+  Array.prototype.forEach.call(grp.children, function (c) {
+    c.classList.toggle('sel', store[key] === c.textContent);
+  });
+  updateProgress(key.split('|')[0]);
+});
+document.getElementById('main').addEventListener('input', function (e) {
+  var el = e.target; if (!el.classList.contains('cin')) return;
+  var key = el.getAttribute('data-k');
+  if (el.value) store[key] = el.value; else delete store[key];
+  sv();
+});
+
+// =================== RINGKASAN ===================
+function num(v) { var n = parseInt(String(v || '').replace(/[^0-9]/g, ''), 10); return isNaN(n) ? 0 : n; }
+function rp(n) { return 'Rp ' + n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.'); }
+var STCOLOR = { R: 'var(--cR)', RB: 'var(--cRB)', H: 'var(--cH)', T: 'var(--cT)', MASALAH: 'var(--cRB)' };
+var STLABEL = { R: 'Rusak ringan', RB: 'Rusak berat', H: 'Hilang', T: 'Tidak ada', MASALAH: 'MASALAH' };
+
+function buildSummary() {
+  var temuan = [], aset = [], rekap = {}, progHtml = '';
+
+  SECTIONS.forEach(function (s) {
+    var rows = ROWMAP[s.id], done = 0, nilai = 0;
+    rows.forEach(function (r) {
+      var base = s.id + '|' + r.ri + '|';
+      var st = g(base + 'kon'); if (st) done++;
+      var harga = num(g(base + 'hrg'));
+      var qty = num(g(base + 'jml')) || 1;
+      if (harga > 0) nilai += harga * qty;
+      if (st && (st === 'R' || st === 'RB' || st === 'H' || st === 'T' || st === 'MASALAH')) {
+        temuan.push({ lok: s.title, item: r.label, st: st, cat: g(base + 'cat') });
+      }
+      if (r.type === 'b' && harga >= 100000) {
+        aset.push({ lok: s.title, item: r.label, merk: g(base + 'merk'), thn: g(base + 'thn'), qty: qty, hrg: harga, tot: harga * qty });
+      }
+    });
+    rekap[s.id] = { title: s.title, nilai: nilai };
+    var pct = Math.round(done / rows.length * 100);
+    progHtml += '<span class="stbadge" style="background:' + (pct >= 100 ? 'var(--cB)' : pct > 0 ? 'var(--cR)' : 'var(--cT)') + ';margin:2px">' + s.tab + ' ' + pct + '%</span> ';
+  });
+  document.getElementById('sum-progress').innerHTML = progHtml;
+
+  // Temuan
+  var h;
+  if (!temuan.length) {
+    h = '<p class="empty">Belum ada temuan — pilih kondisi R / RB / H / T atau MASALAH di form, otomatis muncul di sini.</p>';
+  } else {
+    h = '<div class="tblwrap"><table><thead><tr><th style="width:6%">No</th><th style="width:16%">Lokasi</th><th style="width:34%">Item</th><th style="width:14%">Status</th><th style="width:30%">Catatan</th></tr></thead><tbody>';
+    temuan.forEach(function (t, i) {
+      h += '<tr><td class="c-no">' + (i + 1) + '</td><td>' + t.lok + '</td><td>' + t.item + '</td>' +
+        '<td><span class="stbadge" style="background:' + STCOLOR[t.st] + '">' + STLABEL[t.st] + '</span></td><td>' + (t.cat || '') + '</td></tr>';
+    });
+    h += '</tbody></table></div>';
+  }
+  document.getElementById('sum-temuan').innerHTML = h;
+
+  // Calon aset
+  if (!aset.length) {
+    h = '<p class="empty">Belum ada — barang tahan lama dengan ± Harga ≥ Rp 100.000 otomatis muncul di sini.</p>';
+  } else {
+    var tot = 0;
+    h = '<div class="tblwrap"><table><thead><tr><th style="width:5%">No</th><th style="width:14%">Lokasi</th><th style="width:29%">Nama aset</th><th style="width:14%">Merek</th><th style="width:8%">± Thn</th><th style="width:6%">Jml</th><th style="width:12%">± Harga/unit</th><th style="width:12%">± Total</th></tr></thead><tbody>';
+    aset.forEach(function (a, i) {
+      tot += a.tot;
+      h += '<tr><td class="c-no">' + (i + 1) + '</td><td>' + a.lok + '</td><td>' + a.item + '</td><td>' + (a.merk || '') + '</td><td>' + (a.thn || '') + '</td><td style="text-align:center">' + a.qty + '</td><td>' + rp(a.hrg) + '</td><td>' + rp(a.tot) + '</td></tr>';
+    });
+    h += '<tr class="tot"><td colspan="7">TOTAL CALON ASET TETAP</td><td>' + rp(tot) + '</td></tr></tbody></table></div>';
+  }
+  document.getElementById('sum-aset').innerHTML = h;
+
+  // Rekap per lokasi
+  var grand = 0;
+  h = '<div class="tblwrap"><table><thead><tr><th style="width:40%">Lokasi</th><th style="width:30%">± Total Nilai Barang</th><th style="width:30%">Catatan</th></tr></thead><tbody>';
+  SECTIONS.forEach(function (s) {
+    grand += rekap[s.id].nilai;
+    h += '<tr><td>' + rekap[s.id].title + '</td><td>' + (rekap[s.id].nilai ? rp(rekap[s.id].nilai) : '—') + '</td><td></td></tr>';
+  });
+  var tanah = num(g('SUM|tanah')), bgn = num(g('SUM|bangunan'));
+  h += '<tr><td><b>Tanah</b> (NJOP — tidak disusutkan)</td><td>' + (tanah ? rp(tanah) : '—') + '</td><td>isi di bawah tabel</td></tr>';
+  h += '<tr><td><b>Bangunan</b> (nilai kondisi kini per cut-off)</td><td>' + (bgn ? rp(bgn) : '—') + '</td><td>isi di bawah tabel</td></tr>';
+  h += '<tr class="tot"><td>TOTAL ESTIMASI</td><td>' + rp(grand + tanah + bgn) + '</td><td></td></tr>';
+  h += '</tbody></table></div>';
+  document.getElementById('sum-rekap').innerHTML = h;
+}
+window.addEventListener('beforeprint', buildSummary);
+
+// =================== CSV ===================
+document.getElementById('btnCsv').addEventListener('click', function () {
+  var sep = ';', lines = ['Bagian' + sep + 'Kelompok' + sep + 'No' + sep + 'Item' + sep + 'Jenis' + sep + 'Jml' + sep + 'Merek' + sep + 'Thn' + sep + 'Harga' + sep + 'Kondisi/Hasil' + sep + 'Catatan' + sep + 'DiisiOleh' + sep + 'Tanggal'];
+  function cl(v) { return String(v || '').replace(/[;\r\n]+/g, ' '); }
+  SECTIONS.forEach(function (s) {
+    var by = g(s.id + '|by'), tgl = g(s.id + '|tgl');
+    ROWMAP[s.id].forEach(function (r) {
+      var base = s.id + '|' + r.ri + '|';
+      lines.push([s.title, cl(r.grp), r.ri + 1, cl(r.label),
+        r.type === 'p' ? 'pemeriksaan' : r.type === 'k' ? 'barang-ganti-rutin' : 'barang',
+        cl(g(base + 'jml')), cl(g(base + 'merk')), cl(g(base + 'thn')), num(g(base + 'hrg')) || '',
+        cl(g(base + 'kon')), cl(g(base + 'cat')), cl(by), cl(tgl)].join(sep));
+    });
+  });
+  lines.push(['Ringkasan', 'Properti', '', 'Tanah (NJOP)', 'aset', '', '', '', num(g('SUM|tanah')) || '', '', '', '', ''].join(sep));
+  lines.push(['Ringkasan', 'Properti', '', 'Bangunan (kondisi kini)', 'aset', '', '', '', num(g('SUM|bangunan')) || '', '', '', '', ''].join(sep));
+  var blob = new Blob(['﻿' + lines.join('\r\n')], { type: 'text/csv;charset=utf-8' });
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  var d = new Date(), pad = function (n) { return (n < 10 ? '0' : '') + n; };
+  a.download = 'audit-kost48-' + d.getFullYear() + pad(d.getMonth() + 1) + pad(d.getDate()) + '.csv';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+});
+
+// =================== RESET ===================
+document.getElementById('btnReset').addEventListener('click', function () {
+  if (confirm('Hapus SEMUA isian audit di perangkat ini? (Unduh CSV dulu bila perlu arsip)')) {
+    store = {}; sv(); location.reload();
+  }
+});
+
+// =================== MULAI ===================
+activate('INFO');
+</script>
+
+</body>
+</html>

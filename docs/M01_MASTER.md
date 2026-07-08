@@ -12,17 +12,26 @@
 
 Hindari membaca arsip besar kecuali benar-benar perlu forensik: `docs/archieve/*`, file `*_STALE.md`, `reference/*`, dan `backend/src/generated/*`.
 
-## Status Terkini (2026-07-01)
+## Status Terkini (2026-07-08)
 
 - **Fase A** — Pra-Go-Live: blocked owner (deploy nyata menunggu server/domain/env)
 - **Fase B–U** — SELESAI (publik, owner, staff, AI, UI, audit, hardening, wizard, fasilitas)
-- **Fase V** — Booking flow baru: inti benar (RoomStatus tanpa BOOKING), tapi sebagian verifikasi belum bersih (test + payment proof single-submit)
-- **Fase W** — Audit Maksimal Status Proyek: AKTIF (W-01..W-09 selesai, W-00-D1 menunggu owner)
-- **Fase X** — Audit UI/UX Visual: AKTIF (X-01..X-11, X-13, X-14, X-15, X-16 selesai; X-14 = accounting-setup dipecah 5 tab; sisa X-02d menunggu owner)
-- **Fase Y** — Test Coverage Maksimal: **hampir tuntas** (19 sub-fase, 153 area; **152 selesai / 1 sisa** per 2026-07-02 ≈ 1370 test PASS; sisa hanya Y-G7 N/A. Y-M..Y-S selesai; infra FE test vitest+RTL dibangun dari nol — lihat `M10`)
+- **Fase V** — Booking flow baru: inti benar (RoomStatus tanpa BOOKING), sebagian verifikasi sudah bersih
+- **Fase W** — Audit Maksimal Status Proyek: SELESAI (W-01..W-09 + W-00-D1 owner decision)
+- **Fase X** — Audit UI/UX Visual: SELESAI (X-01..X-16; X-14 accounting-setup 5 tab)
+- **Fase Y** — Test Coverage Maksimal: **SELESAI** (19 sub-fase, 153 area; 153 PASS)
+- **Fase Z** — Cross-Portal Audit: SELESAI (19 task: 1 CRITICAL, 7 HIGH, 8 MEDIUM, 3 LOW)
+- **Fase AA–AJ** — Perbaikan Temuan Audit Fable: SELESAI (CHECKLIST_01–19)
+- **Fase AK** — Owner-Request API Key DeepSeek via Settings: SELESAI
+- **Fase AL** — Audit Reasonix Code (82 temuan, 6 critical bug): SELESAI
+- **Fase AM** — Redundansi UI/UX: SELESAI (16/16)
+- **Fase M14–M18** — Audit 360° + Celah Peningkatan: SELESAI
+- **Fase AU** — Fix UX Admin/Owner orphaned endpoints: SELESAI
 - **Finance:** Audit keuangan ultra LULUS — TB balanced, deposit MATCHED, 8 invarian PASS
-- **AI:** Fase G (G0-G9) + Fase J hardening selesai — manual-only, OWNER/ADMIN, audit meta.ai
-- **Schema terkini:** S-6 (migration `20260619140000_ai_draft_queue`)
+- **AI:** Fase G (G0-G9) + Fase J hardening + Fase K pasca-audit SELESAI — manual-only, OWNER/ADMIN, audit meta.ai
+- **G5+** — Perkuat OCR verifikasi KTP + fallback manual + bank data tenant: SELESAI
+- **Schema terkini:** S-6 (migration `20260619140000_ai_draft_queue`) + S-5 + S-4 + additive KTP fields
+- **Commit terkini:** `8bfb713` — feat: finalize AU fixes and consolidate docs
 
 ---
 
@@ -46,6 +55,7 @@ Hindari membaca arsip besar kecuali benar-benar perlu forensik: `docs/archieve/*
 - **NO-PARTIAL menyeluruh.** Nominal bayar harus tepat (DP atau pelunasan penuh). **First-paid-wins.** Booking expiry 3 jam flat.
 - **Tanpa denda keterlambatan.** Notifikasi in-app → PWA push. **AI = tombol manual Owner/Admin saja** (D-23).
 - **Sewa per term:** Harian 13% · Mingguan 50% · 2Mingguan 75% · Bulanan 100% · Semester 5.7× · Tahunan 11×. (✅ owner-confirmed 2026-06-24: `pricing.helper.ts`)
+- **Occupant surcharge (D-24):** Standar 2 org gratis, maks 4 (+20%/orang ekstra). Besar 4 org gratis, maks 6.
 
 ---
 
@@ -102,10 +112,10 @@ Semua operasi dijalankan sequential dalam `runAll()` untuk menghindari race cond
 
 ## 6. Stack & Model Aktif
 
-- **Backend:** NestJS + TypeScript + Prisma 7 + PostgreSQL. Auth JWT Bearer 24jam. CORS + rate-limit in-memory. 42 modul.
+- **Backend:** NestJS + TypeScript + Prisma 7 + PostgreSQL. Auth JWT Bearer 24jam + Refresh Token (httpOnly cookie sejak M17). CORS + rate-limit in-memory. 42 modul.
 - **Frontend:** React 18 + Vite 5 + React-Bootstrap + TanStack Query + Recharts. ±50 route.
 - **DB:** `kost48_v3_pro` (UAT, port 5433) / `kost48_v3` (produksi, port 5432).
-- **57 Prisma model (69 enum):** `User`, `Tenant`, `Room`, `RoomFacility`, `Stay`, `TenantDepositLedgerEntry`, `MeterReading`, `Invoice`, `InvoiceLine`, `InvoicePayment`, `PasswordResetToken`, `PaymentSubmission`, `Ticket`, `StaffRoutineTemplate`, `StaffRoutineAssignment`, `StaffRoutineCompletion`, `StaffWorkAudit`, `StaffPerformanceEvent`, `StaffReview`, `Announcement`, `InventoryItem`, `RoomItem`, `InventoryMovement`, `StaffFieldReport`, `RenewRequest`, `CheckoutRequest`, `WifiSale`, `Expense`, `FixedAsset`, `AssetDepreciationRun`, `AssetDepreciationLine`, `AppNotification`, `PushSubscription`, `AuditLog`, `AiDraft`, `ChartOfAccount`, `CashAccount`, `AccountingPeriod`, `OpeningBalanceBatch`, `OpeningBalanceLine`, `JournalEntry`, `JournalLine`, `RentRecognitionSchedule`, `RoomTransfer`, `LoyaltyPoint`, `LoyaltyReward`, `Redemption`, `PeerBehaviorReport`, `TenantReferral`, `Faq`, `OperationalSetting`, `AdditionalService`, `ServiceInterest`, `SatisfactionSurvey`, `MarketAnalysis`, `GuestPreferenceSurvey`, `ExternalReview`.
+- **57 Prisma model (69 enum):** `User`, `Tenant`, `Room`, `RoomFacility`, `Stay`, `TenantDepositLedgerEntry`, `MeterReading`, `Invoice`, `InvoiceLine`, `InvoicePayment`, `PasswordResetToken`, `PaymentSubmission`, `Ticket`, `StaffRoutineTemplate`, `StaffRoutineAssignment`, `StaffRoutineCompletion`, `StaffWorkAudit`, `StaffPerformanceEvent`, `StaffReview`, `Announcement`, `InventoryItem`, `RoomItem`, `InventoryMovement`, `StaffFieldReport`, `RenewRequest`, `CheckoutRequest`, `WifiSale`, `Expense`, `FixedAsset`, `AssetDepreciationRun`, `AssetDepreciationLine`, `AppNotification`, `PushSubscription`, `AuditLog`, `AiDraft`, `ChartOfAccount`, `CashAccount`, `AccountingPeriod`, `OpeningBalanceBatch`, `OpeningBalanceLine`, `JournalEntry`, `JournalLine`, `RentRecognitionSchedule`, `RoomTransfer`, `LoyaltyPoint`, `LoyaltyReward`, `Redemption`, `PeerBehaviorReport`, `TenantReferral`, `Faq`, `OperationalSetting`, `AdditionalService`, `ServiceInterest`, `SatisfactionSurvey`, `MarketAnalysis`, `GuestPreferenceSurvey`, `ExternalReview`, `RefreshToken`.
 
 ---
 
@@ -127,4 +137,4 @@ npm run dev               # dev server
 node scripts/seed-dev-reset.js && node scripts/seed-dev-via-api.js
 ```
 
-**Akun dev:** `owner@kost48.com / Owner#2026` (OWNER) · `admin@kost48.com / admin123` (ADMIN) · `staff@kost48.com / staff123` · `maya.tenant@kost48.test / Tenant#2026` (contoh tenant; ada 16: maya, dimas, cindy, hendra, gita, indah, bayu, karin, lani, rizky, putri, fajar, sari, andi, nadia, eko — semua `@kost48.test / Tenant#2026`).
+**Akun dev:** `owner@kost48.com / Owner#2026` (OWNER) · `admin@kost48.com / admin123` (ADMIN) · `staff@kost48.com / staff123` · 16 tenant `@kost48.test / Tenant#2026`.

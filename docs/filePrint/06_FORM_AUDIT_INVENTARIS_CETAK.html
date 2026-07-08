@@ -1,0 +1,384 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<title>Form Audit Inventaris &amp; Fasilitas KOST48</title>
+<style>
+  @page { size: A4 landscape; margin: 10mm 12mm; }
+  * { box-sizing: border-box; }
+  body { font: 10pt/1.35 "Segoe UI", Arial, sans-serif; color: #000; margin: 0; }
+  section.page { page-break-after: always; }
+  section.page:last-child { page-break-after: auto; }
+  h1 { font-size: 15pt; text-align: center; margin: 0 0 2mm; letter-spacing: .5px; }
+  .rule { border-bottom: 2px solid #000; margin-bottom: 3mm; }
+  .idrow { display: flex; justify-content: space-between; gap: 12px; font-weight: bold; margin-bottom: 3mm; }
+  .idrow span { flex: 1; }
+  .sect-title { background: #d9d9d9; border: 1px solid #000; text-align: center; font-weight: bold; padding: 3px; margin-bottom: 2mm; font-size: 11pt; }
+  .hint { font-style: italic; font-size: 9pt; margin: 0 0 2mm; }
+  table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+  th, td { border: 1px solid #000; padding: 3px 5px; vertical-align: middle; overflow: hidden; }
+  th { background: #efefef; font-size: 9pt; }
+  td { height: 24px; font-size: 9.5pt; }
+  tr.group td { background: #e8e8e8; font-weight: bold; height: auto; }
+  td.chk { background: #f1f1f1; text-align: center; font-style: italic; color: #555; font-size: 8.5pt; }
+  td.pit { font-style: italic; }
+  thead { display: table-header-group; }
+  tr { page-break-inside: avoid; }
+  .c-no { width: 4%; text-align: center; }
+  .c-item { width: 27%; }
+  .c-jml { width: 6%; }
+  .c-merk { width: 15%; }
+  .c-thn { width: 8%; }
+  .c-hrg { width: 12%; }
+  .c-kon { width: 11%; }
+  .c-cat { width: 17%; }
+  .sign { margin-top: 8mm; display: flex; justify-content: flex-end; gap: 30mm; text-align: center; }
+  .sign div { width: 60mm; }
+  .sign .line { margin-top: 18mm; }
+  ul.compact { margin: 2mm 0; padding-left: 6mm; }
+  ul.compact li { margin-bottom: 1.2mm; }
+  .kode { border: 1px solid #000; padding: 3mm; margin-top: 3mm; }
+  .kode b { display: block; margin-bottom: 1mm; }
+  .footer-note { font-size: 8.5pt; font-style: italic; margin-top: 2mm; }
+  @media screen {
+    body { background: #eee; }
+    section.page { background: #fff; max-width: 1123px; margin: 16px auto; padding: 24px 30px; box-shadow: 0 2px 8px rgba(0,0,0,.25); }
+  }
+</style>
+</head>
+<body>
+
+<!-- ===================== HALAMAN 0: PETUNJUK ===================== -->
+<section class="page">
+  <h1>FORM AUDIT INVENTARIS &amp; FASILITAS KOST48</h1>
+  <div class="rule"></div>
+  <div class="idrow">
+    <span>Nama Pengecek : ..................................</span>
+    <span>Tanggal Audit : ..................................</span>
+    <span>Cut-off Data : <u>31 Juli 2026</u></span>
+  </div>
+  <div class="sect-title">PETUNJUK PENGISIAN</div>
+  <ul class="compact">
+    <li>Ini <b>audit inventaris total oleh owner/staff</b> untuk pendataan aset — BUKAN form serah-terima tenant.</li>
+    <li>Cetak: <b>10×</b> Form Kamar KM Dalam (A, B, C, D, F1, F2, J, K, L, M) · <b>3×</b> Form Kamar KM Luar (G, H, I) · <b>1×</b> Form KM Luar Bersama · <b>1×</b> Form Area Bersama · <b>1×</b> Ringkasan Temuan.</li>
+    <li>Isi <b>Jumlah</b>, <b>Merek/Tipe</b>, <b>± Tahun Beli</b> (perkiraan boleh), <b>± Harga</b> (perkiraan harga beli; tulis <b>N</b> di catatan bila ada nota), <b>Kondisi</b>, dan catatan.</li>
+    <li>Foto setiap barang besar + pelat merk/tipe AC + kerusakan yang ditemukan.</li>
+    <li>Angka kWh meter, jadwal cuci AC, harga sewa &amp; deposit: <b>resmi di aplikasi</b> — di form ini hanya kondisi fisiknya.</li>
+    <li>Barang <b>tahan lama dengan harga ≥ Rp 100.000</b> (kipas, lemari plastik, AC, kasur, dll) = calon <b>Aset Tetap</b> (wajib tahun + harga terisi) → pindahkan ke halaman Ringkasan. Barang ganti rutin (bohlam, sprei, gayung) = bukan aset.</li>
+    <li>Selesai keliling: isi halaman <b>Ringkasan Temuan</b> (beli / perbaiki / input aplikasi).</li>
+  </ul>
+  <div class="kode">
+    <b>KODE KONDISI:</b>
+    B = Baik &nbsp;·&nbsp; C = Cukup/terpakai &nbsp;·&nbsp; R = Rusak ringan (perlu perbaikan) &nbsp;·&nbsp; RB = Rusak berat (ganti) &nbsp;·&nbsp; H = Hilang &nbsp;·&nbsp; T = Tidak ada
+    <br><b>KODE HARGA:</b> N = sesuai nota &nbsp;·&nbsp; E = estimasi (default, karena nota hampir tidak ada)
+    <br><b>PRIORITAS (untuk ringkasan):</b> P0 = bahaya/segera &nbsp;·&nbsp; P1 = penting &nbsp;·&nbsp; P2 = dijadwalkan &nbsp;·&nbsp; P3 = kosmetik
+  </div>
+  <p class="footer-note">Total 13 kamar: A, B, C, D, F1, F2, G, H, I, J, K, L, M. (F3/F4 sudah tidak ada — blok F telah dirombak menjadi F1 dan F2.)</p>
+</section>
+
+<!-- ===================== FORM 1: KAMAR KM DALAM ===================== -->
+<section class="page">
+  <h1>FORM AUDIT KAMAR — TIPE KAMAR MANDI DALAM</h1>
+  <div class="rule"></div>
+  <div class="idrow">
+    <span>Kamar : [ &nbsp;&nbsp;&nbsp; ]</span>
+    <span>Tenant saat ini (opsional, tanpa NIK) : ..................................</span>
+    <span>Tanggal : ......................</span>
+  </div>
+  <p class="hint">Kamar tipe ini: A, B, C, D, F1, F2, J, K, L, M. &nbsp;•&nbsp; Kloset: duduk (khusus F1: jongkok).</p>
+  <table>
+    <thead>
+      <tr>
+        <th class="c-no">No</th><th class="c-item">Nama Barang / Fasilitas</th><th class="c-jml">Jml</th>
+        <th class="c-merk">Merek / Tipe</th><th class="c-thn">± Thn Beli</th><th class="c-hrg">± Harga (Rp)</th>
+        <th class="c-kon">Kondisi / Hasil</th><th class="c-cat">Catatan</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr class="group"><td colspan="8">Area Kamar Tidur</td></tr>
+      <tr><td class="c-no">1</td><td>Kunci utama pintu — total anak kunci</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+      <tr><td class="c-no">2</td><td>Anak kunci cadangan (dipegang owner)</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+      <tr><td class="c-no">3</td><td>Pintu kamar</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+      <tr><td class="c-no">4</td><td>Jendela kamar + kaca</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+      <tr><td class="c-no">5</td><td>Selot / kunci jendela</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+      <tr><td class="c-no">6</td><td>Kasur — ukuran: 90 / 100 / 120 / 160</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+      <tr><td class="c-no">7</td><td>Sprei</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+      <tr><td class="c-no">8</td><td>Bantal + sarung bantal</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+      <tr><td class="c-no">9</td><td>Guling + sarung (bila ada)</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+      <tr><td class="c-no">10</td><td>Lemari pakaian — jenis: plastik / multiplek / besi</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+      <tr><td class="c-no">11</td><td>Hanger baju</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+      <tr><td class="c-no">12</td><td>Bak sampah kamar</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+      <tr><td class="c-no">13</td><td>Meja / kursi (bila ada)</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+      <tr><td class="c-no">14</td><td>Mezzanine + tangga (bila ada)</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+      <tr class="group"><td colspan="8">Listrik Kamar (kondisi fisik — angka kWh resmi di aplikasi)</td></tr>
+      <tr><td class="c-no">15</td><td>Lampu utama kamar (watt di kolom merek)</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+      <tr><td class="c-no">16</td><td>Stop kontak listrik (jumlah titik)</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+      <tr><td class="c-no">17</td><td>Stekker listrik</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+      <tr><td class="c-no">18</td><td>Tee / terminal listrik</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+      <tr><td class="c-no">19</td><td>Unit kWh meter (fisik: segel, kaca, terbaca)</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+      <tr><td class="c-no">20</td><td>MCB listrik (ampere di kolom merek)</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+      <tr class="group"><td colspan="8">Pendingin (lingkari: AC / KIPAS — jadwal cuci AC resmi di aplikasi)</td></tr>
+      <tr><td class="c-no">21</td><td>Unit AC — merek + PK + tahun pasang</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+      <tr><td class="c-no">22</td><td>Remote AC</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+      <tr><td class="c-no">23</td><td class="pit">AC dingin normal? (Ya / Kurang)</td><td class="chk" colspan="4">— pemeriksaan —</td><td></td><td></td></tr>
+      <tr><td class="c-no">24</td><td>Kipas angin (untuk kamar non-AC)</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+      <tr class="group"><td colspan="8">Area Kamar Mandi Dalam</td></tr>
+      <tr><td class="c-no">25</td><td>Kloset (duduk / khusus F1: jongkok)</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+      <tr><td class="c-no">26</td><td>Double stop kran toilet</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+      <tr><td class="c-no">27</td><td>Selang fleksibel ke tanki kloset</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+      <tr><td class="c-no">28</td><td>Jet shower + kepala jet shower</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+      <tr><td class="c-no">29</td><td>Double kran air</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+      <tr><td class="c-no">30</td><td>Selang shower utama</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+      <tr><td class="c-no">31</td><td>Kepala shower utama</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+      <tr><td class="c-no">32</td><td>Ember</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+      <tr><td class="c-no">33</td><td>Gayung</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+      <tr><td class="c-no">34</td><td>Sikat lantai</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+      <tr><td class="c-no">35</td><td>Sikat kloset</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+      <tr><td class="c-no">36</td><td>Hanger / gantungan kamar mandi</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+      <tr><td class="c-no">37</td><td>Saringan air lantai (floor drain)</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+      <tr><td class="c-no">38</td><td>Pintu kamar mandi</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+      <tr><td class="c-no">39</td><td>Lampu kamar mandi</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+      <tr><td class="c-no">40</td><td>Ventilasi / exhaust (bila ada)</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+      <tr><td class="c-no">41</td><td class="pit">Kebocoran / rembes? (Ya + lokasi / Tidak)</td><td class="chk" colspan="4">— pemeriksaan —</td><td></td><td></td></tr>
+      <tr><td class="c-no">42</td><td class="pit">Jamur / lumut dinding &amp; lantai? (Ya / Tidak)</td><td class="chk" colspan="4">— pemeriksaan —</td><td></td><td></td></tr>
+    </tbody>
+  </table>
+  <div class="sign">
+    <div>Tanda Tangan Pengecek:<div class="line">( _______________________ )</div></div>
+  </div>
+</section>
+
+<!-- ===================== FORM 2: KAMAR KM LUAR ===================== -->
+<section class="page">
+  <h1>FORM AUDIT KAMAR — TIPE KAMAR MANDI LUAR</h1>
+  <div class="rule"></div>
+  <div class="idrow">
+    <span>Kamar : [ &nbsp;&nbsp;&nbsp; ]</span>
+    <span>Tenant saat ini (opsional, tanpa NIK) : ..................................</span>
+    <span>Tanggal : ......................</span>
+  </div>
+  <p class="hint">Kamar tipe ini: G, H, I. Kamar mandi luar bersama diaudit di form terpisah (Form 3).</p>
+  <table>
+    <thead>
+      <tr>
+        <th class="c-no">No</th><th class="c-item">Nama Barang / Fasilitas</th><th class="c-jml">Jml</th>
+        <th class="c-merk">Merek / Tipe</th><th class="c-thn">± Thn Beli</th><th class="c-hrg">± Harga (Rp)</th>
+        <th class="c-kon">Kondisi / Hasil</th><th class="c-cat">Catatan</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr class="group"><td colspan="8">Area Kamar Tidur</td></tr>
+      <tr><td class="c-no">1</td><td>Kunci utama pintu — total anak kunci</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+      <tr><td class="c-no">2</td><td>Anak kunci cadangan (dipegang owner)</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+      <tr><td class="c-no">3</td><td>Pintu kamar</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+      <tr><td class="c-no">4</td><td>Jendela kamar + kaca</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+      <tr><td class="c-no">5</td><td>Selot / kunci jendela</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+      <tr><td class="c-no">6</td><td>Kasur — ukuran: 90 / 100 / 120 / 160</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+      <tr><td class="c-no">7</td><td>Sprei</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+      <tr><td class="c-no">8</td><td>Bantal + sarung bantal</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+      <tr><td class="c-no">9</td><td>Guling + sarung (bila ada)</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+      <tr><td class="c-no">10</td><td>Lemari pakaian — jenis: plastik / multiplek / besi</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+      <tr><td class="c-no">11</td><td>Hanger baju</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+      <tr><td class="c-no">12</td><td>Bak sampah kamar</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+      <tr><td class="c-no">13</td><td>Meja / kursi (bila ada)</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+      <tr><td class="c-no">14</td><td>Mezzanine + tangga (bila ada)</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+      <tr class="group"><td colspan="8">Listrik Kamar (kondisi fisik — angka kWh resmi di aplikasi)</td></tr>
+      <tr><td class="c-no">15</td><td>Lampu utama kamar (watt di kolom merek)</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+      <tr><td class="c-no">16</td><td>Stop kontak listrik (jumlah titik)</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+      <tr><td class="c-no">17</td><td>Stekker listrik</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+      <tr><td class="c-no">18</td><td>Tee / terminal listrik</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+      <tr><td class="c-no">19</td><td>Unit kWh meter (fisik: segel, kaca, terbaca)</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+      <tr><td class="c-no">20</td><td>MCB listrik (ampere di kolom merek)</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+      <tr class="group"><td colspan="8">Pendingin (lingkari: AC / KIPAS — jadwal cuci AC resmi di aplikasi)</td></tr>
+      <tr><td class="c-no">21</td><td>Unit AC — merek + PK + tahun pasang</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+      <tr><td class="c-no">22</td><td>Remote AC</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+      <tr><td class="c-no">23</td><td class="pit">AC dingin normal? (Ya / Kurang)</td><td class="chk" colspan="4">— pemeriksaan —</td><td></td><td></td></tr>
+      <tr><td class="c-no">24</td><td>Kipas angin (untuk kamar non-AC)</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+    </tbody>
+  </table>
+  <div class="sign">
+    <div>Tanda Tangan Pengecek:<div class="line">( _______________________ )</div></div>
+  </div>
+</section>
+
+<!-- ===================== FORM 3: KM LUAR BERSAMA ===================== -->
+<section class="page">
+  <h1>FORM AUDIT KAMAR MANDI LUAR BERSAMA (2 UNIT)</h1>
+  <div class="rule"></div>
+  <div class="idrow">
+    <span>Nama Pengecek : ..................................</span>
+    <span>Dipakai kamar : G, H, I</span>
+    <span>Tanggal : ......................</span>
+  </div>
+  <p class="hint">Standar: bak air plastik besar (bukan ember kecil), TANPA shower.</p>
+  <table>
+    <thead>
+      <tr>
+        <th class="c-no">No</th><th class="c-item">Nama Barang / Fasilitas</th><th class="c-jml">Jml</th>
+        <th class="c-merk">Merek / Tipe</th><th class="c-thn">± Thn Beli</th><th class="c-hrg">± Harga (Rp)</th>
+        <th class="c-kon">Kondisi / Hasil</th><th class="c-cat">Catatan</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr class="group"><td colspan="8">Unit KM 1 — dengan Kloset Duduk</td></tr>
+      <tr><td class="c-no">1</td><td>Kloset duduk</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+      <tr><td class="c-no">2</td><td>Bak air plastik besar</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+      <tr><td class="c-no">3</td><td>Kran air</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+      <tr><td class="c-no">4</td><td>Gayung</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+      <tr><td class="c-no">5</td><td>Sikat (lantai + kloset)</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+      <tr><td class="c-no">6</td><td>Lampu kamar mandi</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+      <tr><td class="c-no">7</td><td>Pintu kamar mandi + kunci/selot</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+      <tr><td class="c-no">8</td><td>Saringan air lantai (floor drain)</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+      <tr><td class="c-no">9</td><td class="pit">Kebersihan / bau? (B-C-Kotor / bau Ya-Tidak)</td><td class="chk" colspan="4">— pemeriksaan —</td><td></td><td></td></tr>
+      <tr><td class="c-no">10</td><td class="pit">Kebocoran / rembes / genangan?</td><td class="chk" colspan="4">— pemeriksaan —</td><td></td><td></td></tr>
+      <tr class="group"><td colspan="8">Unit KM 2 — Khusus Mandi</td></tr>
+      <tr><td class="c-no">11</td><td>Bak air plastik besar</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+      <tr><td class="c-no">12</td><td>Kran air</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+      <tr><td class="c-no">13</td><td>Gayung</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+      <tr><td class="c-no">14</td><td>Sikat lantai</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+      <tr><td class="c-no">15</td><td>Lampu kamar mandi</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+      <tr><td class="c-no">16</td><td>Pintu kamar mandi + kunci/selot</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+      <tr><td class="c-no">17</td><td>Saringan air lantai (floor drain)</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+      <tr><td class="c-no">18</td><td class="pit">Kebersihan / bau?</td><td class="chk" colspan="4">— pemeriksaan —</td><td></td><td></td></tr>
+      <tr><td class="c-no">19</td><td class="pit">Kebocoran / rembes / genangan?</td><td class="chk" colspan="4">— pemeriksaan —</td><td></td><td></td></tr>
+    </tbody>
+  </table>
+  <div class="sign">
+    <div>Tanda Tangan Pengecek:<div class="line">( _______________________ )</div></div>
+  </div>
+</section>
+
+<!-- ===================== FORM 4: AREA BERSAMA ===================== -->
+<section class="page">
+  <h1>FORM AUDIT FASILITAS LUAR / AREA BERSAMA</h1>
+  <div class="rule"></div>
+  <div class="idrow">
+    <span>Nama Pengecek : ..................................</span>
+    <span>Area : FASILITAS BERSAMA</span>
+    <span>Tanggal : ......................</span>
+  </div>
+  <table>
+    <thead>
+      <tr>
+        <th class="c-no">No</th><th class="c-item">Nama Barang / Fasilitas</th><th class="c-jml">Jml</th>
+        <th class="c-merk">Merek / Tipe</th><th class="c-thn">± Thn Beli</th><th class="c-hrg">± Harga (Rp)</th>
+        <th class="c-kon">Kondisi / Hasil</th><th class="c-cat">Catatan</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr class="group"><td colspan="8">Sistem Penerangan — 7 titik (isi watt di kolom merek)</td></tr>
+      <tr><td class="c-no">1</td><td>Lampu depan bagian poster</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+      <tr><td class="c-no">2</td><td>Lampu teras depan</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+      <tr><td class="c-no">3</td><td>Lampu area dapur</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+      <tr><td class="c-no">4</td><td>Lampu lorong</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+      <tr><td class="c-no">5</td><td>Lampu pojok lorong</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+      <tr><td class="c-no">6</td><td>Lampu depan kamar mandi belakang</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+      <tr><td class="c-no">7</td><td>Lampu lorong belakang</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+      <tr class="group"><td colspan="8">Sistem Keamanan — CCTV 5 kamera + perekam + APAR</td></tr>
+      <tr><td class="c-no">8</td><td>Kamera CCTV depan 1</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+      <tr><td class="c-no">9</td><td>Kamera CCTV depan 2</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+      <tr><td class="c-no">10</td><td>Kamera CCTV depan dapur</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+      <tr><td class="c-no">11</td><td>Kamera CCTV area depan KM belakang</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+      <tr><td class="c-no">12</td><td>Kamera CCTV lorong belakang</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+      <tr><td class="c-no">13</td><td class="pit">Sudut kamera dekat KM aman privasi? (Ya / Perlu geser)</td><td class="chk" colspan="4">— pemeriksaan —</td><td></td><td></td></tr>
+      <tr><td class="c-no">14</td><td>DVR / NVR perekam CCTV</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+      <tr><td class="c-no">15</td><td>Hard disk perekam (kapasitas di kolom merek)</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+      <tr><td class="c-no">16</td><td>Monitor / layar CCTV (bila ada)</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+      <tr><td class="c-no">17</td><td>APAR / bola pemadam — titik 1 (lokasi di catatan)</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+      <tr><td class="c-no">18</td><td>APAR / bola pemadam — titik 2</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+      <tr><td class="c-no">19</td><td>APAR / bola pemadam — titik 3</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+      <tr><td class="c-no">20</td><td>APAR / bola pemadam — titik 4 (rencana)</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+      <tr><td class="c-no">21</td><td>APAR / bola pemadam — titik 5 (rencana)</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+      <tr class="group"><td colspan="8">Dapur Outdoor &amp; Gas</td></tr>
+      <tr><td class="c-no">22</td><td>Kran air dapur</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+      <tr><td class="c-no">23</td><td>Tempat sampah dapur</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+      <tr><td class="c-no">24</td><td>Kompor gas</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+      <tr><td class="c-no">25</td><td>Tabung LPG (jumlah tabung)</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+      <tr><td class="c-no">26</td><td>Selang gas — tahun pasang WAJIB diisi</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+      <tr><td class="c-no">27</td><td>Regulator gas</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+      <tr><td class="c-no">28</td><td>Meja / rak dapur (bila ada)</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+      <tr class="group"><td colspan="8">Air Bersih</td></tr>
+      <tr><td class="c-no">29</td><td>Tandon air besar (kapasitas liter di kolom merek)</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+      <tr><td class="c-no">30</td><td>Mesin pompa air</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+      <tr><td class="c-no">31</td><td class="pit">Instalasi pipa — ada bocor / karat? (Ya + lokasi / Tidak)</td><td class="chk" colspan="4">— pemeriksaan —</td><td></td><td></td></tr>
+      <tr class="group"><td colspan="8">Jaringan Internet</td></tr>
+      <tr><td class="c-no">32</td><td>Router internet</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+      <tr><td class="c-no">33</td><td>Access point / switch</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+      <tr><td class="c-no">34</td><td>Kabel LAN / adaptor</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+      <tr><td class="c-no">35</td><td>UPS / stabilizer (bila ada)</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+      <tr class="group"><td colspan="8">Kebersihan &amp; Lain-lain</td></tr>
+      <tr><td class="c-no">36</td><td>Sapu</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+      <tr><td class="c-no">37</td><td>Alat pel</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+      <tr><td class="c-no">38</td><td>Cikrak / pengki</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+      <tr><td class="c-no">39</td><td>Ember + sikat area bersama</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+      <tr><td class="c-no">40</td><td>Tempat sampah area bersama</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+      <tr><td class="c-no">41</td><td>Stok cairan pembersih / sabun</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+      <tr><td class="c-no">42</td><td>Jemuran bersama besar (di belakang)</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+      <tr><td class="c-no">43</td><td>Kursi santai (bila ada)</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+      <tr><td class="c-no">44</td><td>Tangga lipat / alat kerja (bila ada)</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+      <tr><td class="c-no">45</td><td>Papan nama / poster depan</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+    </tbody>
+  </table>
+  <div class="sign">
+    <div>Tanda Tangan Pengecek:<div class="line">( _______________________ )</div></div>
+  </div>
+</section>
+
+<!-- ===================== FORM 5: RINGKASAN TEMUAN ===================== -->
+<section class="page">
+  <h1>RINGKASAN TEMUAN AUDIT</h1>
+  <div class="rule"></div>
+  <div class="idrow">
+    <span>Nama Pengecek : ..................................</span>
+    <span>Periode audit : .................. s/d ..................</span>
+    <span>Cut-off : <u>31 Juli 2026</u></span>
+  </div>
+
+  <div class="sect-title">A. BARANG YANG PERLU DIBELI</div>
+  <table>
+    <thead><tr><th class="c-no">No</th><th style="width:34%">Barang</th><th style="width:10%">Jumlah</th><th style="width:16%">± Harga (Rp)</th><th style="width:12%">Prioritas (P0–P3)</th><th style="width:24%">Untuk kamar/area</th></tr></thead>
+    <tbody>
+      <tr><td class="c-no">1</td><td></td><td></td><td></td><td></td><td></td></tr>
+      <tr><td class="c-no">2</td><td></td><td></td><td></td><td></td><td></td></tr>
+      <tr><td class="c-no">3</td><td></td><td></td><td></td><td></td><td></td></tr>
+      <tr><td class="c-no">4</td><td></td><td></td><td></td><td></td><td></td></tr>
+      <tr><td class="c-no">5</td><td></td><td></td><td></td><td></td><td></td></tr>
+    </tbody>
+  </table>
+
+  <div class="sect-title" style="margin-top:4mm">B. PERLU PERBAIKAN / GANTI → BUAT TIKET DI APLIKASI</div>
+  <table>
+    <thead><tr><th class="c-no">No</th><th style="width:30%">Item &amp; masalah</th><th style="width:16%">Lokasi</th><th style="width:12%">Prioritas (P0–P3)</th><th style="width:20%">Aksi (perbaiki/ganti)</th><th style="width:18%">Tiket dibuat? (✓)</th></tr></thead>
+    <tbody>
+      <tr><td class="c-no">1</td><td></td><td></td><td></td><td></td><td></td></tr>
+      <tr><td class="c-no">2</td><td></td><td></td><td></td><td></td><td></td></tr>
+      <tr><td class="c-no">3</td><td></td><td></td><td></td><td></td><td></td></tr>
+      <tr><td class="c-no">4</td><td></td><td></td><td></td><td></td><td></td></tr>
+      <tr><td class="c-no">5</td><td></td><td></td><td></td><td></td><td></td></tr>
+    </tbody>
+  </table>
+
+  <div class="sect-title" style="margin-top:4mm">C. ASET TAHAN LAMA ≥ Rp 100.000 → INPUT KE MODUL ASET TETAP APLIKASI</div>
+  <p class="hint">Kategori: BUILDING / RENOVATION / ROOM_EQUIPMENT / FURNITURE / ELECTRONIC / UTILITY_EQUIPMENT / OTHER · Umur default: elektronik 48 bln, furniture 48–96 bln, utilitas 96 bln, bangunan 240 bln · Aset lama diinput lewat SALDO AWAL.</p>
+  <table>
+    <thead><tr><th class="c-no">No</th><th style="width:22%">Nama aset</th><th style="width:16%">Kategori</th><th style="width:12%">Lokasi</th><th style="width:10%">± Thn</th><th style="width:14%">± Harga (Rp)</th><th style="width:10%">Umur (bln)</th><th style="width:12%">Sudah diinput? (✓)</th></tr></thead>
+    <tbody>
+      <tr><td class="c-no">1</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+      <tr><td class="c-no">2</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+      <tr><td class="c-no">3</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+      <tr><td class="c-no">4</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+      <tr><td class="c-no">5</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+      <tr><td class="c-no">6</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+      <tr><td class="c-no">7</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+      <tr><td class="c-no">8</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+    </tbody>
+  </table>
+
+  <div class="sign">
+    <div>Tanda Tangan Pengecek:<div class="line">( _______________________ )</div></div>
+    <div>Tanda Tangan Owner:<div class="line">( _______________________ )</div></div>
+  </div>
+</section>
+
+</body>
+</html>

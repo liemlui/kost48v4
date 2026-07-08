@@ -5,7 +5,7 @@
 ## 0. Prasyarat — selesaikan SEBELUM hari onboarding
 
 - [ ] **NIK Dini (kamar B) & Theo Wijaya (kamar I) belum ada** — kumpulkan dulu. Form tenant menolak tanpa NIK 16 digit (`tenant.dto.ts` — `@Matches(^\d{16}$)`).
-- [ ] **Annisa**: NIK sudah ada (`7310035704070001`) tapi **kamar belum jelas** di daftar owner — konfirmasi kamar mana (F3/F4?).
+- [ ] **Annisa**: NIK sudah ada (`7310035704070001`) tapi **kamar belum jelas** di daftar owner — konfirmasi kamar mana. (Catatan: F3/F4 TIDAK ADA — blok F sudah dirombak menjadi F1+F2; pilih dari 13 kamar riil.)
 - [ ] **Catat angka meteran listrik 13 kamar** hari onboarding (foto tiap meteran). Wajib saat buat Stay (`CreateStayDto.initialElectricityKwh`). Meter air isi `0` (metering air default nonaktif).
 - [ ] **Foto KTP tiap tenant** siap di HP/laptop (untuk upload + verifikasi).
 - [ ] **Gate KTP ON**: cek **Settings → Operasional → gate verifikasi KTP** tercentang. (Sejak fix 8 Jul: env `KTP_ACTIVATION_GATE_ENABLED=true` hanya menentukan nilai awal; setelah row settings ada, UI yang menang.)

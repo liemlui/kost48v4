@@ -579,7 +579,7 @@ export class OwnerAiService {
     const needsReview = [
       'Periksa ulang tanggal, vendor, kategori, dan nominal sebelum simpan.',
       ...(amountRupiah <= 0 ? ['Nominal tidak terbaca jelas dari nota.'] : []),
-      ...(amountRupiah > 500000 ? ['Nominal di atas Rp500.000; cek apakah perlu dicatat sebagai aset/kapitalisasi.'] : []),
+      ...(amountRupiah > 100000 ? ['Nominal di atas Rp100.000; bila barang tahan lama, cek apakah perlu dicatat sebagai aset/kapitalisasi (aturan owner 2026-07-08).'] : []),
     ];
 
     return {

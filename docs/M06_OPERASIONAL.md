@@ -1,4 +1,4 @@
-# KOST48 V5 - Operasional, Inventaris, Staf, Notifikasi, Auth
+# KOST48 V5 — Operasional, Inventaris, Staf, Notifikasi, Auth
 
 > File hasil pemampatan dari dokumen root `docs/`. File sumber lama sudah diarsipkan ke `docs/archieve/2026-06-16_root_docs_pre_M/`.
 
@@ -13,6 +13,10 @@ Operasional harian: inventaris, staf/tiket/KPI, notifikasi/pengumuman, auth/onbo
 - `docs/16_NOTIFIKASI_PENGUMUMAN.md` - konten dipertahankan
 - `docs/18_AUTH_FONDASI_ONBOARDING.md` - konten dipertahankan
 - `docs/_PROPOSAL_METER_LISTRIK_AIR.md` - konten dipertahankan
+
+## Update 2026-07-08 — Sinkronisasi Operasional
+
+Semua modul operasional (inventaris, staf, notifikasi, auth) telah terverifikasi dalam audit 360° P4-P5. Staff dashboard (OC-07) dan GuestPreferenceSurvey (OC-04) sudah dibangun. Gate KTP env (GATE-KTP-ENV) sudah diperbaiki. Tidak ada perubahan fundamental pada flow operasional.
 
 ## Update 2026-06-17 — AUDIT KEUANGAN ULTRA ✅
 

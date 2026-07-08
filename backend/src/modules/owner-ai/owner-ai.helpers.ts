@@ -292,8 +292,8 @@ export function normalizeExpenseOcrDraft(input: any): ExpenseOcrDraft {
   if (amountRupiah <= 0 && !needsReview.some((item) => item.includes('Nominal'))) {
     needsReview.push('Nominal belum terbaca jelas.');
   }
-  if (amountRupiah > 500000 && !needsReview.some((item) => item.includes('Rp500.000'))) {
-    needsReview.push('Nominal di atas Rp500.000; cek apakah perlu dicatat sebagai aset/kapitalisasi.');
+  if (amountRupiah > 100000 && !needsReview.some((item) => item.includes('Rp100.000'))) {
+    needsReview.push('Nominal di atas Rp100.000; bila barang tahan lama, cek apakah perlu dicatat sebagai aset/kapitalisasi (aturan owner 2026-07-08).');
   }
 
   const expenseDate = isDateOnly(input?.expenseDate ?? input?.date)

@@ -1,4 +1,4 @@
-# KOST48 V5 - Siklus Huni, Renewal, Checkout, Deposit
+# KOST48 V5 — Siklus Huni, Renewal, Checkout, Deposit
 
 > File hasil pemampatan dari dokumen root `docs/`. File sumber lama sudah diarsipkan ke `docs/archieve/2026-06-16_root_docs_pre_M/`.
 
@@ -15,6 +15,11 @@ Dokumen lifecycle penghuni dari booking/renewal sampai checkout, deposit, overst
 
 - Jadikan file ini pintu masuk tematik; bila butuh detail mentah, cek file sumber di arsip yang disebut di atas.
 - Heading asli dinaikkan levelnya agar tidak bertabrakan dengan struktur M-file.
+
+## Update 2026-07-08 — Sinkronisasi Siklus Huni
+
+Semua flow siklus huni telah terverifikasi dalam audit 360° (M15/M16). Perbaikan P2-01 (LeadSource PORTAL) dan P2-02 (guard checkout) sudah diimplementasikan di M16. Tidak ada perubahan fundamental pada lifecycle stay/checkout/deposit.
+
 ## Update 2026-06-17 — AUDIT KEUANGAN ULTRA ✅
 
 **High-Risk Flows terverifikasi SEHAT (Audit 17 Jun 2026):**

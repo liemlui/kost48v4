@@ -1,4 +1,4 @@
-# KOST48 V5 - Deploy, PWA, Go-Live, Akun Dev
+# KOST48 V5 — Deploy, PWA, Go-Live, Akun Dev
 
 > File hasil pemampatan dari dokumen root `docs/`. File sumber lama sudah diarsipkan ke `docs/archieve/2026-06-16_root_docs_pre_M/`.
 
@@ -11,6 +11,10 @@ Runbook deploy/PWA, checklist go-live, dan appendix akun dummy untuk DB pengemba
 - `docs/04_DEPLOY_AND_PWA.md` - konten dipertahankan
 - `docs/GO_LIVE_CHECKLIST.md` - konten dipertahankan
 - `docs/archieve/2026-06-16_si_notes/_AKUN_DUMMY_DEV.md` - update SI-1 event-path diserap
+
+## Update 2026-07-08 — GATE-KTP-ENV Fix + Deploy Docs
+
+Gate KTP diam-diam OFF di produksi telah diperbaiki (`settings.service.ts` semai nilai awal row dari env). Panduan deploy di §5 ditambah catatan "env = nilai awal, selanjutnya UI Settings → Operasional". Runbook onboarding tenant nyata sudah tersedia di `docs/RUNBOOK_ONBOARDING_TENANT_NYATA.md`.
 
 ## Update 2026-06-17 — AUDIT KEUANGAN ULTRA ✅
 

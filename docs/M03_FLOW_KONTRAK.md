@@ -1,4 +1,4 @@
-# KOST48 V5 - Flow Map dan Kontrak Sistem
+# KOST48 V5 — Flow Map dan Kontrak Sistem
 
 > File hasil pemampatan dari dokumen root `docs/`. File sumber lama sudah diarsipkan ke `docs/archieve/2026-06-16_root_docs_pre_M/`.
 
@@ -10,6 +10,10 @@ Peta alur kode krusial, lifecycle utama, kontrak domain, safety belt, dan aturan
 
 - `docs/02_FLOW_MAP.md` - konten dipertahankan
 - `docs/06_CONTRACTS.md` - konten dipertahankan
+
+## Update 2026-07-08 — Sinkronisasi Status Terkini
+
+Dokumen ini diselaraskan dengan commit `8bfb713` (finalize AU fixes and consolidate docs). Semua flow kritis (booking, checkout, renewal, forced-checkout, meter) telah terverifikasi dalam audit 360°. Tidak ada perubahan fundamental pada flow map sejak update 2026-06-30.
 
 ## Update 2026-06-17 — AUDIT KEUANGAN ULTRA ✅
 
