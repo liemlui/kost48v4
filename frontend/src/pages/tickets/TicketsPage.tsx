@@ -1,4 +1,5 @@
 // FILE: TicketsPage.tsx — halaman daftar tiket + filter + aksi admin/staff
+import FeatureErrorBoundary from '../../components/common/FeatureErrorBoundary';
 import { ChangeEvent, useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
@@ -551,6 +552,7 @@ export default function TicketsPage() {
   }
 
   return (
+    <FeatureErrorBoundary>
     <div>
       <PageHeader
         eyebrow="Operasional"
@@ -1374,5 +1376,6 @@ export default function TicketsPage() {
         </Modal.Body>
       </Modal>
     </div>
+    </FeatureErrorBoundary>
   );
 }

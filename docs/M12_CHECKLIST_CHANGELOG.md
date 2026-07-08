@@ -92,7 +92,8 @@
 >
 > **Sisa aktif:**
 > 0. **Fase M16 — Audit 360 Flow Huni** — ✅ **SELESAI** — 7 temuan: P2-01/02/04 fixed, P2-03/05/06/07 diverifikasi valid. Detail: `docs/M16_AUDIT_360_FLOW_HUNI.md §7`. Build FE ✅ BE ✅
-> 0. **Fase AM — Redundansi UI/UX + Audit (Admin + Owner + Publik)** — 7/16 (44%). 5 task lama tersisa: AM-01 (WA URL), AM-02 (RoleWorkspaceTabs), AM-04 (sembunyikan tabs), AM-05 (Pengumuman sidebar), AM-07 (RoomComparePanel spec). 4 task baru dari audit: AM-13 (CSS Modules), AM-14 (useForm wrapper), AM-15 (Storybook), AM-16 (E2E smoke). Detail: `docs/M14_REDUNDANSI_UI_UX.md`.
+> 0. **Fase AM — Redundansi UI/UX + Audit (Admin + Owner + Publik)** — ✅ **SELESAI (16/16)** — AM-01..AM-16. Detail: `docs/M14_REDUNDANSI_UI_UX.md`.
+> 0. **Fase M18 — Celah Peningkatan (Review 9 Jul 2026)** — ✅ **11/11** — 11 task: P0-01 race condition token, P1-01..P1-03 PDP & integritas data, P2-01..P2-05 robustness & test coverage, P3-01..P3-02 observability & error boundary. Detail: `docs/M18_CELAH_PENINGKATAN.md`.
 > 0. **M31** — ✅ **SELESAI** — AiDraft queue diverifikasi — DeepSeek test-connection PASS via .env API key. Fase 4 = 35/35 100%.
 > 0. **OC-07 (L22)** — ✅ **SELESAI** — Staff dashboard halaman khusus — backend endpoint aggregate `GET /staff/dashboard/aggregate` + perkuat DashboardStaff.tsx (3 query digabung jadi 1). Build backend ✅ frontend ✅
 > 0. **OC-05 (M29)** — ✅ **SELESAI** — ExternalReview CRUD audit — model Prisma standalone, read-only via social proof publik, tanpa CRUD/admin UI. Laporan: `docs/archieve/audit_reasonix/M29_AUDIT_EXTERNAL_REVIEW.md`

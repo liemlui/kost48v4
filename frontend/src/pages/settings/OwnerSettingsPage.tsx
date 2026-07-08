@@ -1,4 +1,5 @@
 // FILE: OwnerSettingsPage.tsx — halaman pengaturan owner: billing, AI, notifikasi, dsb
+import FeatureErrorBoundary from '../../components/common/FeatureErrorBoundary';
 import { useEffect, useRef, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Alert, Badge, Button, Card, Col, Form, Modal, Row, Spinner, Tab, Tabs } from 'react-bootstrap';
@@ -1207,6 +1208,7 @@ export default function OwnerSettingsPage() {
   const activeTab = tabParam && validTabs.has(tabParam) ? tabParam : 'faq';
 
   return (
+    <FeatureErrorBoundary>
     <div className="settings-page">
       <div className="page-eyebrow mb-1">Owner · Pengaturan</div>
       <h1 className="h3 mb-1">Pengaturan Aplikasi</h1>
@@ -1245,5 +1247,6 @@ export default function OwnerSettingsPage() {
         </Tab>
       </Tabs>
     </div>
+    </FeatureErrorBoundary>
   );
 }

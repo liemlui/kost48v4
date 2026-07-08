@@ -5,7 +5,17 @@ import { useAuth } from '../../context/AuthContext';
 import { getOwnerAiStatus, validateKtpOcr, type KtpOcrValidateResult } from '../../api/ai';
 import { verifyTenantKtp, saveTenantKtpData, type VerifyKtpPayload } from '../../api/tenants';
 import { preprocessImage } from '../../utils/ocrPreprocess';
+import { getApiErrorMessage } from '../../utils/getApiErrorMessage';
+import { useToast } from '../common/ToastProvider';
 import AiResultPanel from './AiResultPanel';
+
+/** Mask NIK — tampilkan 6 digit awal + ******* + 3 digit akhir */
+function maskNik(nik?: string | null): string | null {
+  if (!nik) return null;
+  const digits = nik.replace(/\D/g, '');
+  if (digits.length !== 16) return nik;
+  return digits.replace(/(\d{6})\d{7}(\d{3})/, '$1*******$2');
+}
 
 type Props = {
   tenantId: number;
@@ -25,6 +35,7 @@ type Props = {
 export default function KtpOcrValidateCard({ tenantId, tenantName, ktpVerifiedAt, ktpVerificationMethod }: Props) {
   const { user } = useAuth();
   const queryClient = useQueryClient();
+  const { toast } = useToast();
   const isOwnerAdmin = user?.role === 'OWNER' || user?.role === 'ADMIN';
 
   const { data: status } = useQuery({
@@ -127,8 +138,15 @@ export default function KtpOcrValidateCard({ tenantId, tenantName, ktpVerifiedAt
         occupation: undefined,
       });
       setSavedFields(res.savedFields);
-    } catch {
-      // ignore — data already saved or duplicate
+    } catch (err: any) {
+      // P2-01: Beri feedback — silent error jadi info/error toast
+      console.error('[saveKtpData]', err);
+      const status = err?.response?.status;
+      if (status === 409) {
+        toast('Data KTP sudah tersimpan sebelumnya.', 'info');
+      } else {
+        toast(getApiErrorMessage(err, 'Gagal menyimpan data KTP. Coba lagi.'), 'danger');
+      }
     } finally {
       setSaving(false);
     }
@@ -274,7 +292,7 @@ export default function KtpOcrValidateCard({ tenantId, tenantName, ktpVerifiedAt
                 {result.result.match.nameMatchesTenant === true ? '✅ cocok' : result.result.match.nameMatchesTenant === false ? '⚠️ beda dengan tenant' : '(cek manual)'}
               </li>
               <li>
-                NIK OCR: <strong>{result.result.extracted.nik ?? '—'}</strong> (mask){' '}
+                NIK OCR: <strong>{maskNik(result.result.extracted.nik) ?? '—'}</strong> (mask){' '}
                 {result.result.nikFormatValid ? '' : '⚠️ format bukan 16 digit'}{' '}
                 {result.result.match.nikMatchesTenant ? '✅ cocok tenant' : '⚠️ tidak cocok tenant'}
               </li>

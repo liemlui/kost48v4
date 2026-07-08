@@ -137,7 +137,7 @@ export class AutoOpsService implements OnModuleInit, OnModuleDestroy {
           this.logger.warn(`AutoOps advisory unlock gagal: ${error?.message ?? error}`);
         });
       }
-      await client.end().catch(() => undefined);
+      await client.end().catch((e) => { this.logger.warn('AutoOps client.end gagal', { error: e?.message ?? e }); return undefined; });
     }
   }
 

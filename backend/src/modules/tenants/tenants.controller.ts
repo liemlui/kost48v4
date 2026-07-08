@@ -18,6 +18,7 @@ import { CurrentUserPayload } from '../../common/interfaces/current-user.interfa
 import { deleteFileSafe, detectImageMime, MIME_TO_EXT } from '../../common/utils/file-signature.util';
 import { CreatePortalAccessDto } from './dto/create-portal-access.dto';
 import { CreateTenantDto, UpdateTenantDto } from './dto/tenant.dto';
+import { SaveKtpDataDto } from './dto/save-ktp-data.dto';
 import { TenantsQueryDto } from './dto/tenants-query.dto';
 import { TogglePortalAccessDto } from './dto/toggle-portal-access.dto';
 import { ResetPortalPasswordDto } from './dto/reset-portal-password.dto';
@@ -216,7 +217,7 @@ export class TenantsController {
   @Roles(UserRole.OWNER, UserRole.ADMIN)
   async saveKtpData(
     @Param('id', ParseIntPipe) id: number,
-    @Body() body: { gender?: string; birthDate?: string; originCity?: string; originProvince?: string; occupation?: string; identityNumber?: string },
+    @Body() body: SaveKtpDataDto,
     @CurrentUser() user: CurrentUserPayload,
   ) {
     return { message: 'Data KTP berhasil disimpan', data: await this.tenantsService.saveKtpData(id, body, user) };

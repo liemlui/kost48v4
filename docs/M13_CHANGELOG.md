@@ -3,6 +3,20 @@
 > Arsip changelog ringkas, dipisah dari M10 pada 2026-06-19 untuk hemat token AI (M10 = checklist aktif saja). **Entri changelog BARU ditulis DI SINI (paling atas)**, bukan di M10. Format: 1 header tanggal + 1-2 poin outcome per entri.
 > Entri lama (≤ 2026-07-16) diarsip ke docs/archieve/M11_CHANGELOG_ARSIP_S1_2026.md.
 
+### 10 Jul 2026
+- **M18-P3-02** — Error boundary per fitur kritis: `FeatureErrorBoundary.tsx` + wrap 3 halaman (TicketsPage, OwnerSettingsPage, MyStayPage). File: `frontend/src/components/common/FeatureErrorBoundary.tsx`.
+- **M18-P3-01** — Logging di silent catches: 7 lokasi (auth, payment-submissions, auto-ops, AuthContext). File: 4 file backend + 1 file frontend.
+- **M18-P2-05** — Unit test `preprocessImage()` FE. File: `frontend/src/test/utils/ocrPreprocess.test.ts`.
+- **M18-P2-04** — Unit test `parseNikDemographics()` BE (6 suite, 19 test). File: `backend/test/unit/ocr-helpers.test.js`.
+- **M18-P2-03** — Unit test `parseKtpText()` FE (7 test). File: `frontend/src/test/utils/ktpOcr.test.ts`.
+- **M18-P2-02** — DTO validasi `PATCH /tenants/:id/ktp-data` — `SaveKtpDataDto` dengan class-validator. File: `backend/src/modules/tenants/dto/save-ktp-data.dto.ts`.
+- **M18-P2-01** — Fix silent error `handleSaveKtpData` FE: toast feedback + console.error. File: `frontend/src/components/ai/KtpOcrValidateCard.tsx`.
+- **M18-P1-03** — `saveKtpData` jangan overwrite field existing: tambah `!tenant.X` guard di tiap field. File: `backend/src/modules/tenants/tenants.service.ts`.
+- **M18-P1-02** — Unique constraint `identityNumber` + tangkap error P2002 di `saveKtpData`. File: `backend/src/modules/tenants/tenants.service.ts`.
+- **M18-P1-01** — Mask NIK di UI KTP OCR: tambah fungsi `maskNik()` frontend + panggil di render NIK. File: `frontend/src/components/ai/KtpOcrValidateCard.tsx`.
+- **M18-P0-01** — Fix race condition refresh token rotation: bungkus delete+create dalam `prisma.$transaction` dengan single-use enforcement (`findUnique` di dalam transaksi). File: `backend/src/auth/auth.service.ts`.
+- **M18** — Dokumen celah peningkatan dari review Reasonix (11 task, sisanya P1-P3). File: `docs/M18_CELAH_PENINGKATAN.md`.
+
 ### 9 Jul 2026 (malam)
 - **G5+** — Perkuat OCR Verifikasi KTP + fallback manual + bank data tenant:
   - **Algoritma OCR bertingkat** (`owner-ai.helpers.ts`): `cleanOcrText()` normalisasi whitespace + koreksi O→0/l→1 + gabung baris pecah; `extractNameFromOcr/Address/BirthPlace/Province` multi-strategi; `isDeterministicResultSolid` skip AI bila NIK+nama sudah cocok (hemat token).

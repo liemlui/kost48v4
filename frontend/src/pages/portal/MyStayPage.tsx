@@ -1,4 +1,5 @@
 // FILE: MyStayPage.tsx — dashboard penghuni: status sewa, info kamar, aksi
+import FeatureErrorBoundary from '../../components/common/FeatureErrorBoundary';
 import '../../styles/tenant-area';
 import { type ReactNode, useEffect, useMemo, useState, useCallback } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -876,6 +877,7 @@ export default function MyStayPage() {
     : false;
 
   return (
+    <FeatureErrorBoundary>
     <div>
       {!(stage === 'occupied' && stay && stayBelongsToUser && roomStatusOccupied) ? (
         <PageHeader
@@ -966,5 +968,6 @@ export default function MyStayPage() {
         <ActiveStayContent stay={stay} />
       ) : null}
     </div>
+    </FeatureErrorBoundary>
   );
 }

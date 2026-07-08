@@ -1017,9 +1017,9 @@ export class PaymentSubmissionsService {
       });
 
       const result = { ...serializePrismaResult(approved), journalPending };
-      this.notifyPaymentApproved(approved.tenantId, submissionId).catch(() => {});
+      this.notifyPaymentApproved(approved.tenantId, submissionId).catch((e) => this.logger.warn('Notif payment-approved gagal', { error: e?.message ?? e }));
       if (losingTenants.length > 0) {
-        this.notifyLosingTenants(losingTenants).catch(() => {});
+        this.notifyLosingTenants(losingTenants).catch((e) => this.logger.warn('Notif losing-tenants gagal', { error: e?.message ?? e }));
       }
 
       // F4-9: poin bayar-tepat-waktu (best-effort, idempotent per invoiceId, di luar tx).
@@ -1039,7 +1039,7 @@ export class PaymentSubmissionsService {
             }
             return undefined;
           })
-          .catch(() => undefined);
+          .catch((e) => { this.logger.warn('Bonus points gagal', { error: e?.message ?? e }); return undefined; });
       }
       return result;
     } catch (error) {
@@ -1506,7 +1506,7 @@ export class PaymentSubmissionsService {
       });
 
       const result = serializePrismaResult(rejected);
-      this.notifyPaymentRejected(rejected.tenantId, submissionId, reviewNotes).catch(() => {});
+      this.notifyPaymentRejected(rejected.tenantId, submissionId, reviewNotes).catch((e) => this.logger.warn('Notif payment-rejected gagal', { error: e?.message ?? e }));
       return result;
     } catch (error) {
       this.handleSchemaError(error);

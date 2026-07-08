@@ -116,39 +116,62 @@ export class AuthService {
 
     if (new Date(stored.expiresAt).getTime() < Date.now()) {
       // Hapus token kedaluwarsa
-      await this.prisma.refreshToken.delete({ where: { id: stored.id } }).catch(() => {});
+      await this.prisma.refreshToken.delete({ where: { id: stored.id } }).catch((e) => this.logger.warn('Gagal hapus refresh token kedaluwarsa', { error: e?.message ?? e }));
       throw new UnauthorizedException('Refresh token sudah kedaluwarsa, silakan login ulang');
     }
 
-    // Rotasi: hapus token lama, buat yang baru
-    await this.prisma.refreshToken.delete({ where: { id: stored.id } }).catch(() => {});
+    // 🔴 P0-01: Bungkus rotasi dalam transaksi — cegah race condition
+    // Dua request concurrent dengan token yang sama tidak bisa lolos berdua
+    return this.prisma.$transaction(async (tx) => {
+      // Single-use enforcement: verifikasi token masih ada di dalam transaksi
+      const stillExists = await tx.refreshToken.findUnique({
+        where: { id: stored.id },
+      });
 
-    const user = await this.prisma.user.findUnique({
-      where: { id: stored.userId, isActive: true },
+      if (!stillExists) {
+        throw new UnauthorizedException('Refresh token sudah digunakan');
+      }
+
+      // Hapus token lama
+      await tx.refreshToken.delete({ where: { id: stored.id } });
+
+      // Cari user
+      const user = await tx.user.findUnique({
+        where: { id: stored.userId, isActive: true },
+      });
+
+      if (!user) {
+        throw new UnauthorizedException('User tidak ditemukan atau tidak aktif');
+      }
+
+      const accessToken = await this.jwtService.signAsync(
+        {
+          sub: user.id,
+          email: user.email,
+          role: user.role,
+          tenantId: user.tenantId,
+          pwdAt: user.passwordChangedAt?.getTime() ?? 0,
+        },
+        { expiresIn: this.ACCESS_TOKEN_EXPIRY_SEC },
+      );
+
+      // Buat refresh token baru (rotasi) — inline untuk gunakan tx
+      const newRawToken = randomBytes(32).toString('hex');
+      const newTokenHash = createHash('sha256').update(newRawToken).digest('hex');
+
+      await tx.refreshToken.create({
+        data: {
+          userId: user.id,
+          token: newTokenHash,
+          expiresAt: new Date(Date.now() + this.REFRESH_TOKEN_DAYS * 24 * 60 * 60 * 1000),
+        },
+      });
+
+      return {
+        accessToken,
+        refreshToken: newRawToken,
+      };
     });
-
-    if (!user) {
-      throw new UnauthorizedException('User tidak ditemukan atau tidak aktif');
-    }
-
-    const accessToken = await this.jwtService.signAsync(
-      {
-        sub: user.id,
-        email: user.email,
-        role: user.role,
-        tenantId: user.tenantId,
-        pwdAt: user.passwordChangedAt?.getTime() ?? 0,
-      },
-      { expiresIn: this.ACCESS_TOKEN_EXPIRY_SEC },
-    );
-
-    // Buat refresh token baru (rotasi)
-    const { refreshToken: newRefreshToken } = await this.createRefreshToken(user.id);
-
-    return {
-      accessToken,
-      refreshToken: newRefreshToken,
-    };
   }
 
   /**

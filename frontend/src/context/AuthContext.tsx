@@ -98,8 +98,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       fetch((import.meta.env.VITE_API_BASE_URL || '/api') + '/auth/logout', {
         method: 'POST',
         credentials: 'include',
-      }).catch(() => {
-        // silent — tetap logout lokal walau server error
+      }).catch((e) => {
+        console.warn("[Auth] Logout fetch gagal:", e);
+        // tetap logout lokal walau server error
       });
       localStorage.removeItem(AUTH_TOKEN_KEY);
       cacheUser(null);

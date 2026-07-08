@@ -349,10 +349,19 @@ export class TenantsService {
   ) {
     const tenant = await this.prisma.tenant.findUnique({
       where: { id },
-      select: { id: true, identityNumber: true },
+      select: {
+        id: true,
+        identityNumber: true,
+        gender: true,
+        birthDate: true,
+        originCity: true,
+        originProvince: true,
+        occupation: true,
+      },
     });
     if (!tenant) throw new NotFoundException('Tenant tidak ditemukan');
 
+    // P1-03: Hanya isi field yang masih kosong — jangan overwrite data manual admin
     const updates: Record<string, unknown> = {};
 
     // NIK hanya bisa di-set sekali (unique constraint)
@@ -360,20 +369,39 @@ export class TenantsService {
       updates.identityNumber = data.identityNumber;
     }
 
-    if (data.gender && ['MALE', 'FEMALE'].includes(data.gender)) updates.gender = data.gender;
-    if (data.birthDate && /^\d{4}-\d{2}-\d{2}$/.test(data.birthDate)) updates.birthDate = new Date(data.birthDate);
-    if (data.originCity?.trim()?.length) updates.originCity = data.originCity.trim().slice(0, 60);
-    if (data.originProvince?.trim()?.length) updates.originProvince = data.originProvince.trim().slice(0, 60);
-    if (data.occupation?.trim()?.length) updates.occupation = data.occupation.trim().slice(0, 80);
+    if (!tenant.gender && data.gender && ['MALE', 'FEMALE'].includes(data.gender)) {
+      updates.gender = data.gender;
+    }
+    if (!tenant.birthDate && data.birthDate && /^\d{4}-\d{2}-\d{2}$/.test(data.birthDate)) {
+      updates.birthDate = new Date(data.birthDate);
+    }
+    if (!tenant.originCity && data.originCity?.trim()?.length) {
+      updates.originCity = data.originCity.trim().slice(0, 60);
+    }
+    if (!tenant.originProvince && data.originProvince?.trim()?.length) {
+      updates.originProvince = data.originProvince.trim().slice(0, 60);
+    }
+    if (!tenant.occupation && data.occupation?.trim()?.length) {
+      updates.occupation = data.occupation.trim().slice(0, 80);
+    }
 
     if (Object.keys(updates).length === 0) {
       throw new BadRequestException('Tidak ada field valid yang bisa disimpan.');
     }
 
-    const updated = await this.prisma.tenant.update({
-      where: { id },
-      data: updates,
-    });
+    let updated: typeof tenant & Record<string, unknown>;
+    try {
+      updated = await this.prisma.tenant.update({
+        where: { id },
+        data: updates,
+      });
+    } catch (err: any) {
+      // P1-02: Tangkap unique constraint violation (P2002) — NIK duplikat dari request concurrent
+      if (err?.code === 'P2002' && err?.meta?.target?.includes('identityNumber')) {
+        throw new ConflictException('NIK sudah terdaftar di tenant lain.');
+      }
+      throw err;
+    }
 
     await this.audit.log({
       actorUserId: actor.id,
