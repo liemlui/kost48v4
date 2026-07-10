@@ -9,6 +9,7 @@ import SafeImage from '../../components/common/SafeImage';
 import CurrencyInput from '../../components/common/CurrencyInput';
 import { SkeletonBlock } from '../../components/common/SkeletonLoader';
 import { useConfirm } from '../../components/common/ConfirmProvider';
+import { useAuth } from '../../context/AuthContext';
 import { createFaq, deleteFaq, fetchAllFaqs, updateFaq, type FaqItem } from '../../api/faqs';
 import { fetchOperationalSettings, pickOperationalPayload, updateOperationalSettings, type OperationalSetting } from '../../api/settings';
 import { getApiErrorMessage } from '../../utils/getApiErrorMessage';
@@ -1000,8 +1001,11 @@ const aiFeatureLabel = (k: string) => AI_FEATURE_LABELS[k] ?? k;
 function AiSettingsPanel() {
   const qc = useQueryClient();
   const confirm = useConfirm();
+  const { user } = useAuth();
+  const isOwner = user?.role === 'OWNER';
   const statusQuery = useQuery({ queryKey: ['owner-ai', 'status'], queryFn: getOwnerAiStatus });
-  const usageQuery = useQuery({ queryKey: ['owner-ai', 'usage'], queryFn: getOwnerAiUsage });
+  // /owner-ai/usage = OWNER-only di backend (G7 observability biaya); ADMIN tidak fetch agar tidak 403.
+  const usageQuery = useQuery({ queryKey: ['owner-ai', 'usage'], queryFn: getOwnerAiUsage, enabled: isOwner });
   const settingsQuery = useQuery({ queryKey: ['settings', 'operational'], queryFn: fetchOperationalSettings });
   const updateMutation = useMutation({
     mutationFn: updateOperationalSettings,
@@ -1135,7 +1139,9 @@ function AiSettingsPanel() {
           <Card className="content-card border-0 h-100">
             <Card.Body>
               <div className="fw-semibold mb-2">Penggunaan hari ini (per fitur)</div>
-              {u && Object.keys(u.byFeature).length ? (
+              {!isOwner ? (
+                <div className="text-muted small">Data pemakaian AI hanya tersedia untuk OWNER.</div>
+              ) : u && Object.keys(u.byFeature).length ? (
                 <ul className="list-unstyled mb-0 small">
                   {Object.entries(u.byFeature).sort((a, b) => b[1] - a[1]).map(([k, v]) => (
                     <li key={k} className="d-flex justify-content-between border-bottom py-1">
@@ -1153,7 +1159,9 @@ function AiSettingsPanel() {
           <Card className="content-card border-0 h-100">
             <Card.Body>
               <div className="fw-semibold mb-2">Jejak keputusan memakai AI (20 terakhir)</div>
-              {usageQuery.isLoading ? (
+              {!isOwner ? (
+                <div className="text-muted small">Jejak pemakaian AI hanya tersedia untuk OWNER.</div>
+              ) : usageQuery.isLoading ? (
                 <div className="text-muted small"><Spinner animation="border" size="sm" className="me-2" />Memuat…</div>
               ) : u && u.recentAudit.length ? (
                 <div className="d-grid gap-2">
