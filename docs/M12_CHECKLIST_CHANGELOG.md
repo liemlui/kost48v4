@@ -132,7 +132,7 @@
 > 13. **AI-01..AI-02** — ✅ **SELESAI** — Fase AI (CHECKLIST_09): hardening 503 isBookingSchemaReady + FE tak blokir portal; loyalty/renewal/checkout diverifikasi via kode. Detail di [Fase AI](#fase-ai--perbaikan-temuan-audit-loyalty-renewal-checkout-checklist_09).
 > 14. **AJ-01..AJ-07** — ✅ **SELESAI** — Fase AJ: anti-loop live lulus, re-seed dev 5433 lulus + TB balanced, label okupansi jelas, dokumen sinkron, dan AJ-07 safe follow-up dicatat (C19-01/C19-02). Detail di [Fase AJ](#fase-aj--sisa-temuan-audit-2026-07-antri).
 >
-> **Verifikasi test 2026-07-02:** Backend unit **1072/1073 PASS** (1 skip intentional) · integration **187/187 PASS** · frontend vitest **111/111 PASS** · total ≈ **1370 test PASS, 0 fail**.
+> **Verifikasi test 2026-07-02 (HISTORIS — JANGAN dikutip lagi):** angka 1072 unit + 187 integration berasal dari suite yang **DIHAPUS di commit `e505894`** (bersih-bersih repo; recoverable dari git history). **Kondisi nyata 10 Jul 2026:** BE unit **26/26 PASS** · FE vitest **121/121 PASS** · verifikasi utama kini = `tsc` BE/FE + **boot-test paket deploy** (install prod-only + start + smoke endpoint + query DB — lihat M13 10 Jul).
 
 ---
 
