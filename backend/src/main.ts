@@ -17,6 +17,9 @@ async function bootstrap() {
   const isProduction = process.env.NODE_ENV === 'production';
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
     logger: isProduction ? ['error', 'warn'] : ['log', 'error', 'warn', 'debug', 'verbose'],
+    // M15-IOT: raw bytes wajib dipertahankan agar signature HMAC ESP32 dapat
+    // diverifikasi terhadap body persis yang dikirim perangkat.
+    rawBody: true,
   });
 
   // ── W-01: Production security baseline ──────────────────────────────────────

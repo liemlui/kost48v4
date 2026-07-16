@@ -24,6 +24,8 @@
     "seed:dev:reset": "node scripts/seed-dev-reset.js",
     "seed:dev:api": "node scripts/seed-dev-via-api.js",
     "seed:facilities": "node scripts/seed-facilities-inventory.js",
+    "iot:bootstrap-tuya": "node scripts/bootstrap-tuya-kwh.js",
+    "iot:sync-tuya": "node scripts/bootstrap-tuya-kwh.js --sync",
     "cpanel:install": "npm ci --omit=dev --omit=optional --ignore-scripts --no-audit --no-fund --progress=false",
     "cpanel:migrate": "npx --yes prisma db push --skip-generate",
     "start:prod": "node --max-old-space-size=192 dist/main.js",

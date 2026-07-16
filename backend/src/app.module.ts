@@ -51,6 +51,7 @@ import { GuestPreferencesModule } from './modules/guest-preferences/guest-prefer
 import { AdminDashboardModule } from './modules/admin/admin-dashboard.module';
 import { OwnerDashboardModule } from './modules/owner/owner-dashboard.module';
 import { StaffDashboardModule } from './modules/staff-dashboard/staff-dashboard.module';
+import { IotModule } from './modules/iot/iot.module';
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
@@ -102,6 +103,7 @@ import { StaffDashboardModule } from './modules/staff-dashboard/staff-dashboard.
     AdminDashboardModule,
     OwnerDashboardModule,
     StaffDashboardModule,
+    IotModule,
   ],
   providers: [
     // Audit E-1: default-deny — semua endpoint butuh JWT kecuali ditandai @Public().

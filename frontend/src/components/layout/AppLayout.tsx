@@ -104,6 +104,7 @@ const segmentLabelMap: Record<string, string> = {
   'room-items': 'Inventaris Kamar',
   'wifi-sales': 'Penjualan WiFi',
   'meter-readings': 'Catatan Meter',
+  iot: 'IoT Listrik & Air',
   'ac-maintenance': 'Perawatan AC',
   'announcements': 'Pengumuman',
   'check-in': 'Check-in Baru',

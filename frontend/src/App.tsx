@@ -73,6 +73,7 @@ const OwnerSettingsPage = lazy(() => import('./pages/settings/OwnerSettingsPage'
 const ServiceInterestsPage = lazy(() => import('./pages/services/ServiceInterestsPage'));
 const MeterReadingsPage = lazy(() => import('./pages/rooms/MeterReadingsPage'));
 const AcMaintenancePage = lazy(() => import('./pages/operations/AcMaintenancePage'));
+const IotOverviewPage = lazy(() => import('./pages/iot/IotOverviewPage'));
 
 type Role = 'OWNER' | 'ADMIN' | 'STAFF' | 'TENANT';
 
@@ -112,6 +113,7 @@ function getDeniedMessage(role: string, targetPath: string): string {
     targetPath.startsWith('/renew-requests') ||
     targetPath.startsWith('/announcements') ||
     targetPath.startsWith('/meter-readings') ||
+    targetPath.startsWith('/iot') ||
     targetPath.startsWith('/additional-services') ||
     targetPath.startsWith('/service-interests') ||
     targetPath.startsWith('/loyalty') ||
@@ -277,6 +279,7 @@ export default function App() {
           <Route path="/invoices/:id" element={<RequireRoles allowed={['OWNER', 'ADMIN']}><InvoiceDetailPage /></RequireRoles>} />
           <Route path="/announcements" element={<RequireRoles allowed={['OWNER', 'ADMIN']}><ConfiguredResourcePage resource="announcements" /></RequireRoles>} />
           <Route path="/meter-readings" element={<RequireRoles allowed={['OWNER', 'ADMIN']}><MeterReadingsPage /></RequireRoles>} />
+          <Route path="/iot" element={<RequireRoles allowed={['OWNER', 'ADMIN']}><IotOverviewPage /></RequireRoles>} />
           <Route path="/ac-maintenance" element={<RequireRoles allowed={['OWNER', 'ADMIN']}><AcMaintenancePage /></RequireRoles>} />
           <Route path="/additional-services" element={<RequireRoles allowed={['OWNER', 'ADMIN']}><ConfiguredResourcePage resource="additionalServices" /></RequireRoles>} />
           <Route path="/service-interests" element={<RequireRoles allowed={['OWNER', 'ADMIN']}><ServiceInterestsPage /></RequireRoles>} />

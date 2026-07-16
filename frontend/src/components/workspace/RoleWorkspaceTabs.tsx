@@ -7,7 +7,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 function buildAdminTabs(base: string) {
   return [
     { id: 'stays-finance', label: 'Penghuni & Uang', to: `${base}?area=stays-finance`, match: (path: string, search: URLSearchParams) => ['/stays', '/tenants', '/renew-requests', '/invoices', '/payment-submissions', '/invoice-payments', '/expenses'].some((prefix) => path.startsWith(prefix)) || (path === base && search.get('area') === 'stays-finance') },
-    { id: 'ops', label: 'Operasional', to: `${base}?area=ops`, match: (path: string, search: URLSearchParams) => ['/tickets', '/staff', '/staff-routines', '/rooms', '/inventory', '/room-items', '/inventory-items', '/inventory-movements', '/meter-readings'].some((prefix) => path.startsWith(prefix)) || (path === base && search.get('area') === 'ops') },
+    { id: 'ops', label: 'Operasional', to: `${base}?area=ops`, match: (path: string, search: URLSearchParams) => ['/tickets', '/staff', '/staff-routines', '/rooms', '/inventory', '/room-items', '/inventory-items', '/inventory-movements', '/meter-readings', '/iot'].some((prefix) => path.startsWith(prefix)) || (path === base && search.get('area') === 'ops') },
   ];
 }
 

@@ -1,0 +1,94 @@
+.iot-page .alert {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.65rem;
+}
+
+.iot-safety-banner {
+  border: 1px solid rgba(14, 165, 233, 0.22);
+  background: linear-gradient(135deg, rgba(224, 242, 254, 0.9), rgba(239, 246, 255, 0.96));
+}
+
+.iot-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.9rem;
+  margin: 1rem 0;
+}
+
+.iot-kpi-card {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  min-height: 118px;
+  padding: 1rem;
+  border: 1px solid rgba(30, 64, 175, 0.11);
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 14px 34px rgba(30, 64, 175, 0.07);
+}
+
+.iot-kpi-icon,
+.iot-device-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  border-radius: 14px;
+}
+
+.iot-kpi-icon { width: 46px; height: 46px; }
+.iot-kpi-icon svg { width: 23px; }
+.iot-kpi-icon.is-blue { color: #2563eb; background: #dbeafe; }
+.iot-kpi-icon.is-green { color: #15803d; background: #dcfce7; }
+.iot-kpi-icon.is-amber { color: #b45309; background: #fef3c7; }
+.iot-kpi-icon.is-cyan { color: #0369a1; background: #e0f2fe; }
+
+.iot-kpi-card small,
+.iot-kpi-card span { display: block; color: #64748b; }
+.iot-kpi-card small { font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em; font-size: 0.68rem; }
+.iot-kpi-card strong { display: block; color: #0f172a; font-family: var(--font-mono); font-size: 1.75rem; line-height: 1.1; }
+.iot-kpi-card span { font-size: 0.76rem; }
+
+.iot-device-panel { margin-top: 1rem; }
+.iot-panel-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-bottom: 1rem; }
+.iot-panel-toolbar h2 { margin: 0; font-size: 1.1rem; font-weight: 900; color: #0f172a; }
+.iot-panel-toolbar p { margin: 0.2rem 0 0; color: #64748b; font-size: 0.86rem; }
+.iot-filter-group { display: inline-flex; padding: 0.25rem; gap: 0.2rem; border-radius: 999px; background: #f1f5f9; }
+.iot-filter-group button { border: 0; border-radius: 999px; padding: 0.42rem 0.8rem; background: transparent; color: #64748b; font-size: 0.78rem; font-weight: 800; }
+.iot-filter-group button.active { color: #1d4ed8; background: #fff; box-shadow: 0 5px 14px rgba(30, 64, 175, 0.12); }
+
+.iot-device-icon { width: 36px; height: 36px; }
+.iot-device-icon.is-electric { color: #b45309; background: #fef3c7; }
+.iot-device-icon.is-water { color: #0369a1; background: #e0f2fe; }
+.iot-device-table th { white-space: nowrap; font-size: 0.74rem; text-transform: uppercase; letter-spacing: 0.04em; }
+.iot-reading-list { display: flex; flex-wrap: wrap; gap: 0.3rem; }
+.iot-reading-pill { padding: 0.3rem 0.48rem; border: 1px solid rgba(37, 99, 235, 0.14); border-radius: 8px; background: #eff6ff; color: #1e40af; font-family: var(--font-mono); font-size: 0.72rem; font-weight: 800; white-space: nowrap; }
+.iot-reading-pill.is-suspect { color: #92400e; border-color: #fde68a; background: #fffbeb; }
+
+.iot-empty-state { display: grid; justify-items: center; padding: 3rem 1rem; text-align: center; color: #64748b; }
+.iot-empty-state > svg { width: 42px; height: 42px; padding: 0.55rem; border-radius: 14px; color: #2563eb; background: #eff6ff; }
+.iot-empty-state h3 { margin: 0.8rem 0 0.3rem; color: #0f172a; font-size: 1rem; }
+.iot-empty-state p { max-width: 540px; margin-bottom: 0.8rem; font-size: 0.86rem; }
+
+.iot-readiness-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; margin-top: 1rem; }
+.iot-readiness-title { display: flex; gap: 0.75rem; align-items: center; }
+.iot-readiness-title > svg { color: #2563eb; }
+.iot-readiness-title h3 { margin: 0 0 0.25rem; font-size: 1rem; font-weight: 900; }
+.iot-readiness-grid p { margin: 0.85rem 0 0; color: #64748b; font-size: 0.84rem; }
+
+.iot-spin { animation: iot-spin 0.9s linear infinite; }
+@keyframes iot-spin { to { transform: rotate(360deg); } }
+
+@media (max-width: 1050px) {
+  .iot-kpi-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 720px) {
+  .iot-kpi-grid,
+  .iot-readiness-grid { grid-template-columns: 1fr; }
+  .iot-panel-toolbar { align-items: stretch; flex-direction: column; }
+  .iot-filter-group { align-self: flex-start; max-width: 100%; overflow-x: auto; }
+  .iot-page .page-header-actions .d-flex { width: 100%; }
+  .iot-page .page-header-actions .btn { flex: 1; }
+}

@@ -82,6 +82,24 @@ enum UtilityType {
   WATER
 }
 
+// M15-IOT: telemetry perangkat dipisahkan tegas dari MeterReading yang dipakai
+// sebagai snapshot billing. Data IoT tidak pernah otomatis menerbitkan tagihan.
+enum IotProvider {
+  TUYA
+  KOST48_ESP32
+}
+
+enum IotDeviceType {
+  ELECTRICITY_METER
+  WATER_FLOW_METER
+}
+
+enum IotReadingQuality {
+  GOOD
+  SUSPECT
+  REJECTED
+}
+
 enum InvoiceStatus {
   DRAFT
   ISSUED
@@ -732,6 +750,7 @@ model Room {
 
   stays              Stay[]
   meterReadings      MeterReading[]
+  iotDevices         IotDevice[]
   tickets            Ticket[]
   roomItems          RoomItem[]
   transfersFrom      RoomTransfer[] @relation("RoomTransferFrom")
@@ -930,6 +949,81 @@ model MeterReading {
   @@unique([roomId, utilityType, readingAt])
   @@index([roomId, utilityType])
   @@index([readingAt])
+}
+
+// M15-IOT: registry perangkat fisik/cloud. `externalDeviceId` adalah Tuya
+// device ID untuk provider TUYA; deviceCode adalah ID publik perangkat ESP32.
+model IotDevice {
+  id                     Int           @id @default(autoincrement())
+  deviceCode             String        @unique @db.VarChar(80)
+  displayName            String?       @db.VarChar(120)
+  provider               IotProvider
+  deviceType             IotDeviceType
+  roomId                 Int?
+  externalDeviceId       String?       @db.VarChar(128)
+  productId              String?       @db.VarChar(128)
+  enabled                 Boolean       @default(true)
+  online                  Boolean?
+  lastSeenAt              DateTime?
+  lastSuccessfulSyncAt    DateTime?
+  firmwareVersion         String?       @db.VarChar(80)
+  configVersion           Int           @default(1)
+  metadata                Json?
+  // Secret ESP32 dienkripsi AES-256-GCM dengan IOT_MASTER_KEY; tidak pernah
+  // dikirim kembali sesudah provisioning/rotasi.
+  credentialCiphertext    String?
+  credentialVersion       Int           @default(1)
+  createdAt               DateTime       @default(now())
+  updatedAt               DateTime       @updatedAt
+
+  room           Room?              @relation(fields: [roomId], references: [id], onDelete: SetNull)
+  ingestMessages IotIngestMessage[]
+
+  @@unique([provider, externalDeviceId])
+  @@index([provider, enabled])
+  @@index([deviceType, enabled])
+  @@index([roomId])
+  @@index([lastSeenAt])
+}
+
+// Satu envelope asli per event/poll. Unique message ID memberikan idempotensi
+// dan menjadi perlindungan replay untuk endpoint ESP32.
+model IotIngestMessage {
+  id                BigInt    @id @default(autoincrement())
+  deviceId          Int
+  messageId         String    @db.VarChar(160)
+  observedAt        DateTime
+  receivedAt        DateTime  @default(now())
+  sequence          BigInt?
+  providerTimestamp BigInt?
+  rawPayload        Json?
+  diagnostics       Json?
+
+  device   IotDevice      @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+  telemetry IotTelemetry[]
+
+  @@unique([deviceId, messageId])
+  @@index([deviceId, observedAt])
+  @@index([receivedAt])
+}
+
+// Nilai yang sudah dinormalisasi. Meter billing tetap memakai MeterReading.
+model IotTelemetry {
+  id              BigInt            @id @default(autoincrement())
+  ingestMessageId BigInt
+  metric          String            @db.VarChar(100)
+  valueDecimal    Decimal?          @db.Decimal(18, 6)
+  valueText       String?
+  unit            String?           @db.VarChar(24)
+  observedAt      DateTime
+  quality         IotReadingQuality @default(GOOD)
+  reason          String?
+
+  ingestMessage IotIngestMessage @relation(fields: [ingestMessageId], references: [id], onDelete: Cascade)
+
+  @@unique([ingestMessageId, metric])
+  @@index([metric, observedAt])
+  @@index([quality, observedAt])
 }
 
 model Invoice {

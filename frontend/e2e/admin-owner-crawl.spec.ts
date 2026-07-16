@@ -6,7 +6,7 @@ import { test, expect, type Page } from '@playwright/test';
 const SHARED = [
   '/renew-requests', '/users', '/tenants', '/stays', '/stays/check-in', '/invoices',
   '/invoice-payments', '/payment-submissions/review', '/announcements', '/meter-readings',
-  '/ac-maintenance', '/additional-services', '/service-interests', '/tickets',
+  '/iot', '/ac-maintenance', '/additional-services', '/service-interests', '/tickets',
   '/staff-routines', '/staff-performance', '/surveys', '/guest-preferences',
   '/inventory/gudang', '/inventory/barang-kamar', '/inventory/mutasi', '/wifi-sales',
   '/ancillary-revenue', '/finance/accounting-setup', '/finance/assets', '/expenses',

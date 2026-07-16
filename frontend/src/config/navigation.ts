@@ -15,7 +15,7 @@ export type NavigationSection = {
 
 export type TenantPortalStage = 'browsing' | 'booking' | 'occupied';
 
-// OWN-STATUS-CARDS / FASE-H: Kokpit Owner dipadatkan jadi 1 grup strategis "Keputusan Owner" (7 item).
+// OWN-STATUS-CARDS / FASE-H: Kokpit Owner dipadatkan jadi 1 grup strategis "Keputusan Owner".
 // Item operasional harian yang duplikat dengan sidebar Admin DIHAPUS — owner mengaksesnya via toggle
 // 🔧 Area Admin. Beberapa route digabung lewat `activePaths` agar tetap reachable tanpa nambah item:
 // - "Akuntansi & Aset" mencakup /finance/accounting-setup + /finance/assets + /loss-refunds (Refund Kalah-Cepat, OWNER-only).
@@ -30,6 +30,7 @@ const ownerSections: NavigationSection[] = [
       { to: '/finance/accounting-setup', label: 'Akuntansi & Aset', icon: '📘', hint: 'Bagan Akun, periode, saldo awal, jurnal, aset & depresiasi, dan refund kalah-cepat.', activePaths: ['/finance/accounting-setup', '/finance/assets', '/loss-refunds'] },
       { to: '/loyalty', label: 'Loyalitas & Reward', icon: '🎁', hint: 'Katalog reward, kelola poin, dan setujui penukaran tenant.' },
       { to: '/users', label: 'Akun & Layanan', icon: '👤', hint: 'Kelola akun owner/admin/staff/penghuni, layanan tambahan, dan minat tenant.', activePaths: ['/users', '/tenants', '/additional-services', '/service-interests'] },
+      { to: '/iot', label: 'IoT Listrik & Air', icon: '⚡', hint: 'Koneksi Tuya KWH, telemetry listrik, dan persiapan water meter ESP32.' },
       { to: '/settings', label: 'Pengaturan', icon: '⚙️', hint: 'FAQ publik, foto kamar, konten halaman tamu, tarif dasar, dan konfigurasi AI.' },
     ],
   },
@@ -49,6 +50,7 @@ export const adminSections: NavigationSection[] = [
     links: [
       { to: '/tickets', label: 'Staff & Tiket', icon: '👷', hint: 'Tiket operasional, staff, checklist, laporan lapangan, dan kinerja.', activePaths: ['/tickets', '/staff-routines', '/staff-performance'] },
       { to: '/rooms', label: 'Kamar & Stok', icon: '🏘️', hint: 'Status kamar, barang kamar, stok gudang, mutasi stok, dan catatan meter.', activePaths: ['/rooms', '/inventory', '/room-items', '/inventory-items', '/inventory-movements', '/meter-readings'] },
+      { to: '/iot', label: 'IoT Listrik & Air', icon: '⚡', hint: 'Sinkronkan KWH Tuya dan pantau kesiapan water meter ESP32.' },
       { to: '/ac-maintenance', label: 'Perawatan AC', icon: '❄️', hint: 'Pantau pemakaian AC dan jadwalkan cuci AC secara konsisten.' },
     ],
   },

@@ -38,6 +38,7 @@ const ROUTE_TITLES: Array<{ pattern: string; title: string }> = [
 
   { pattern: '/announcements', title: 'Pengumuman' },
   { pattern: '/meter-readings', title: 'Catatan Meter' },
+  { pattern: '/iot', title: 'IoT Listrik & Air' },
   { pattern: '/tickets', title: 'Tiket' },
   { pattern: '/staff-routines', title: 'Rutinitas Staf' },
   { pattern: '/staff-performance', title: 'Kinerja Staf' },

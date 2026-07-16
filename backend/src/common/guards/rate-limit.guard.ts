@@ -44,6 +44,9 @@ export class RateLimitGuard implements CanActivate {
     // Authenticated tenant file uploads — prevent disk exhaustion abuse.
     tenantUpload: { maxRequests: 10, windowMs: 60 * 60 * 1000 },
     imageUpload: { maxRequests: 60, windowMs: 60 * 60 * 1000 },
+    // ESP32 retry normal tetap lolos; flood dari satu IP dipotong sebelum DB.
+    // Multi-replica production harus memindahkan bucket ini ke Redis/gateway.
+    iotIngest: { maxRequests: 180, windowMs: 60 * 1000 },
   };
 
   canActivate(context: ExecutionContext): boolean {
