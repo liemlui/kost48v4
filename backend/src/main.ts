@@ -147,7 +147,7 @@ async function bootstrap() {
     // DEEP-02: izinkan kamera same-origin (OCR KTP/Tesseract, PUB-KTP-OCR); mic & geo tetap diblok.
     res.setHeader('Permissions-Policy', 'camera=(self), microphone=(), geolocation=()');
     // W-01: CSP diperketat — frame-ancestors 'none' (anti-clickjacking), form-action 'self'.
-    res.setHeader('Content-Security-Policy', "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'; frame-ancestors 'none'; form-action 'self'");
+    res.setHeader('Content-Security-Policy', "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'; frame-src https://www.google.com; frame-ancestors 'none'; form-action 'self'");
     // DEEP-03: HSTS hanya di produksi (HTTPS) — jangan kirim di dev (localhost HTTP).
     if (isProduction) {
       res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');

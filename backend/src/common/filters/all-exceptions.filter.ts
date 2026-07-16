@@ -7,6 +7,11 @@ export class AllExceptionsFilter implements ExceptionFilter {
     const response = ctx.getResponse();
     const request = ctx.getRequest();
 
+    // 🛡️ Cegah ERR_HTTP_HEADERS_SENT — jangan kirim response dua kali
+    if (response.headersSent) {
+      return;
+    }
+
     const status = exception instanceof HttpException ? exception.getStatus() : HttpStatus.INTERNAL_SERVER_ERROR;
     const exceptionResponse = exception instanceof HttpException ? exception.getResponse() : null;
 

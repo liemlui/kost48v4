@@ -337,13 +337,19 @@ export class TenantsController {
       throw new ForbiddenException('Tidak boleh mengakses foto profil tenant lain');
     }
     const fileKey = await this.tenantsService.getProfilePhotoKey(id);
-    if (!fileKey) { res.status(204).end(); return; }
+    if (!fileKey) {
+      res.status(204);
+      return;
+    }
     const safe = basename(fileKey);
     if (safe !== fileKey || !/^[a-zA-Z0-9._-]+\.(jpg|jpeg|png|webp)$/i.test(safe)) {
       throw new BadRequestException('Nama file foto profil tidak valid');
     }
     const filePath = join(this.profilePhotoUploadDir, safe);
-    if (!existsSync(filePath)) { res.status(204).end(); return; }
+    if (!existsSync(filePath)) {
+      res.status(204);
+      return;
+    }
 
     const mimeMap: Record<string, string> = {
       '.jpg': 'image/jpeg',

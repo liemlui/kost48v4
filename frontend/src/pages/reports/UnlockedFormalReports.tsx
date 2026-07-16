@@ -1,3 +1,4 @@
+import PageHeader from '../../components/common/PageHeader';
 import React, { useState } from 'react';
 import { Card, Nav } from 'react-bootstrap';
 import BalanceSheetPage from './BalanceSheetPage';
@@ -16,7 +17,13 @@ const subTabs: { key: SubTab; label: string }[] = [
 export default function UnlockedFormalReports() {
   const [active, setActive] = useState<SubTab>('balance-sheet');
   return (
-    <Card>
+    <div>
+      <PageHeader
+        eyebrow="Laporan Keuangan"
+        title="Laporan Formal"
+        description="Neraca, laba rugi, arus kas, dan rasio keuangan berdasarkan jurnal/neraca saldo."
+      />
+      <Card>
       <Card.Header className="p-0">
         <Nav variant="tabs" activeKey={active} onSelect={(k) => k && setActive(k as SubTab)} className="px-2 pt-2">
           {subTabs.map((t) => (
@@ -33,5 +40,6 @@ export default function UnlockedFormalReports() {
         {active === 'ratios' && <FinancialRatiosPage />}
       </Card.Body>
     </Card>
+    </div>
   );
 }

@@ -1,3 +1,4 @@
+import PageHeader from '../../components/common/PageHeader';
 import React, { useState } from 'react';
 import { Alert, Badge, Card, Col, Container, Form, Row, Spinner, Table } from 'react-bootstrap';
 import { useQuery } from '@tanstack/react-query';
@@ -17,15 +18,18 @@ export default function CashflowPage() {
   });
   const data = q.data;
   return (
-    <Container fluid className="px-2 py-3">
-      <div className="d-flex justify-content-between align-items-start mb-3 flex-wrap gap-2">
-        <div><h1 className="mb-0 rpt-title">Arus Kas</h1><small className="text-muted">Laporan arus kas metode langsung</small></div>
-        <div className="d-flex gap-2">
+    <div>
+      <PageHeader
+        eyebrow="Laporan Keuangan"
+        title="Arus Kas"
+        description="Laporan arus kas metode langsung."
+      />
+      <Container fluid className="px-2 py-3">
+      <div className="d-flex justify-content-end gap-2 mb-3">
           <Form.Control type="number" value={ym.year} min={2020} max={2100} onChange={e => setYm(p=>({...p,year:+e.target.value}))} className="rpt-input-sm" />
           <Form.Select value={ym.month} onChange={e => setYm(p=>({...p,month:+e.target.value}))} className="rpt-select-sm">
             {Array.from({length:12},(_,i)=>i+1).map(m=><option key={m} value={m}>{new Date(0,m-1).toLocaleString('id-ID',{month:'long'})}</option>)}
           </Form.Select>
-        </div>
       </div>
       {q.isLoading && <Card><Card.Body className="text-center py-4"><Spinner animation="border" size="sm"/><span className="ms-2">Memuat...</span></Card.Body></Card>}
       {q.isError && <Alert variant="warning">Gagal memuat data.</Alert>}
@@ -70,5 +74,6 @@ export default function CashflowPage() {
         .kpi-value{font-size:20px;font-weight:700;color:#0f172a;line-height:1.2}
       `}</style>
     </Container>
+    </div>
   );
 }

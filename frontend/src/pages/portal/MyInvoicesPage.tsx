@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { Alert, Badge, Button, Card, Col, Row, Spinner, Table } from 'react-bootstrap';
 import { Bar, BarChart, CartesianGrid, Cell, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import DonutGauge from '../../components/charts/DonutGauge';
+import PageHeader from '../../components/common/PageHeader';
 import { listResource } from '../../api/resources';
 import { listMyPaymentSubmissions } from '../../api/paymentSubmissions';
 import SubmitBatchPaymentModal from '../../components/portal/SubmitBatchPaymentModal';
@@ -175,13 +176,17 @@ export default function MyInvoicesPage() {
   const pagedItems = visibleItems.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
   return (
-    <div className="tenant-invoices-page">
+    <div>
+      <PageHeader
+        eyebrow="Portal Penghuni"
+        title="Tagihan Saya"
+        description="Daftar tagihan kos, pantau status bayar, dan kirim bukti transfer."
+      />
+      <div className="tenant-invoices-page">
       <Card className="content-card border-0 tenant-invoices-compact-card">
         <Card.Body>
           <div className="table-meta align-items-start tenant-invoices-header">
             <div>
-              <div className="command-eyebrow">Bayar Tagihan</div>
-              <div className="panel-title">Daftar tagihan</div>
               <div className="panel-subtitle">Status dan aksi cukup dilihat dari tabel. Bukti yang sedang diperiksa tidak perlu diupload ulang.</div>
             </div>
             <div className="status-tab-bar compact-tabs">
@@ -335,6 +340,7 @@ export default function MyInvoicesPage() {
           qc.invalidateQueries({ queryKey: ['portal-payment-submissions'] });
         }}
       />
+    </div>
     </div>
   );
 }

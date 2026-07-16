@@ -1,4 +1,5 @@
 import '../../styles/tenant-area';
+import PageHeader from '../../components/common/PageHeader';
 import { useMemo } from 'react';
 import { Accordion, Alert, Button, Card, Spinner } from 'react-bootstrap';
 import { useQuery } from '@tanstack/react-query';
@@ -80,9 +81,13 @@ export default function MyManualPage() {
   }, [faqsQuery.data]);
 
   return (
-    <div className="container py-4">
-      <h3 className="mb-1">Panduan &amp; Aturan Kos</h3>
-      <p className="text-muted">Manual lengkap aturan, pembayaran, dan layanan KOST48. Klik tiap topik untuk membuka.</p>
+    <div>
+      <PageHeader
+        eyebrow="Portal Penghuni"
+        title="Panduan Penghuni"
+        description="Manual lengkap aturan, pembayaran, dan layanan KOST48."
+      />
+      <div className="container py-4">
 
       <FreeRepairPolicyCard />
 
@@ -135,6 +140,7 @@ export default function MyManualPage() {
           </Card.Body>
         </Card>
       )}
+    </div>
     </div>
   );
 }

@@ -14,6 +14,7 @@ import GlobalSearch from './GlobalSearch';
 import PaymentUrgencyChip from '../payment-urgency/PaymentUrgencyChip';
 import Kost48LogoMark from '../common/Kost48LogoMark';
 import TenantAvatar from '../common/TenantAvatar';
+import { useBreadcrumbLabel } from '../../context/BreadcrumbContext';
 import {
   getDefaultRoute,
   getNavigationLinks,
@@ -102,15 +103,27 @@ const segmentLabelMap: Record<string, string> = {
   'room-items': 'Inventaris Kamar',
   'wifi-sales': 'Penjualan WiFi',
   'meter-readings': 'Catatan Meter',
+  'ac-maintenance': 'Perawatan AC',
   'announcements': 'Pengumuman',
+  'check-in': 'Check-in Baru',
   'expenses': 'Pengeluaran',
+  'guest-preferences': 'Preferensi Tamu',
+  'loss-refunds': 'Refund',
+  'loyalty': 'Loyalitas',
+  'market-analysis': 'Analisa Pasar',
+  'renew-requests': 'Perpanjangan',
+  'settings': 'Pengaturan',
+  'staff-performance': 'Kinerja Staff',
+  'staff-routines': 'Rutinitas Staff',
+  'surveys': 'Survei',
+  'tenants': 'Data Penghuni',
 };
 
 function toLabel(segment: string): string {
   return segmentLabelMap[segment] ?? titleCaseSegment(segment);
 }
 
-function getBreadcrumbParts(pathname: string, links: NavigationLink[]) {
+function getBreadcrumbParts(pathname: string, links: NavigationLink[], breadcrumbLabel?: string | null) {
   const matched = links.find((link) => pathname === link.to || pathname.startsWith(`${link.to}/`));
   const parts: string[] = [];
 
@@ -124,7 +137,7 @@ function getBreadcrumbParts(pathname: string, links: NavigationLink[]) {
 
   remainingSegments.forEach((segment) => {
     if (/^\d+$/.test(segment)) {
-      parts.push('Detail');
+      parts.push(breadcrumbLabel ?? 'Detail');
       return;
     }
     parts.push(toLabel(segment));
@@ -237,6 +250,7 @@ export default function AppLayout({ children }: { children?: ReactNode }) {
     } catch { return 'expanded'; }
   });
   const { stage: tenantStage, isLoading: tenantStageLoading, hasStayHistory } = useTenantPortalStage();
+  const { breadcrumbLabel } = useBreadcrumbLabel();
 
   const isStaff = user?.role === 'STAFF';
   const isTenant = user?.role === 'TENANT';
@@ -318,14 +332,14 @@ export default function AppLayout({ children }: { children?: ReactNode }) {
   }, [user?.role, tenantStage, isOwner, ownerViewMode, tenantFeatures]);
 
   const breadcrumbParts = useMemo(() => {
-    const parts = getBreadcrumbParts(location.pathname, links);
+    const parts = getBreadcrumbParts(location.pathname, links, breadcrumbLabel);
     // OWN-BREADCRUMB-MODE: root hard-label sesuai mode owner aktif.
     if (isOwner) {
       const root = ownerViewMode === 'admin' ? 'Area Admin' : 'Kokpit Owner';
       if (parts[0] !== root) return [root, ...parts];
     }
     return parts;
-  }, [location.pathname, links, isOwner, ownerViewMode]);
+  }, [location.pathname, links, isOwner, ownerViewMode, breadcrumbLabel]);
   const defaultRoute = getDefaultRoute(user?.role, tenantStage);
 
   useEffect(() => {

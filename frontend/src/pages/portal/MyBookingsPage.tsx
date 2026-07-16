@@ -10,6 +10,7 @@ import {
   listMyPaymentSubmissions,
   submitPaymentWithProof,
 } from "../../api/paymentSubmissions";
+import PageHeader from '../../components/common/PageHeader';
 import EmptyState from "../../components/common/EmptyState";
 import SubmitPaymentModal from "../../components/portal/SubmitPaymentModal";
 import BookingCard from "../../components/portal/BookingCard";
@@ -242,7 +243,13 @@ export default function MyBookingsPage() {
   };
 
   return (
-    <div className="tenant-booking-workspace-dedup">
+    <div>
+      <PageHeader
+        eyebrow="Portal Penghuni"
+        title="Booking Saya"
+        description="Daftar pemesanan kamar yang sedang diproses dan perlu dibayar."
+      />
+      <div className="tenant-booking-workspace-dedup">
       {successMessage ? (
         <Alert
           variant="success"
@@ -401,6 +408,7 @@ export default function MyBookingsPage() {
           </Button>
         </Modal.Footer>
       </Modal>
+    </div>
     </div>
   );
 }

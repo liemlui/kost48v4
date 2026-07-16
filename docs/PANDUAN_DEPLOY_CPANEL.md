@@ -86,6 +86,13 @@ Kalau `frontend/dist` dan `backend/dist` sudah fresh dari build sebelumnya, bisa
 npm run make-deploy:fast
 ```
 
+Mode `:fast` hanya diterima jika sebelumnya sudah ada satu `npm run make-deploy` yang berhasil dengan script
+terbaru dan sidik-jari source, konfigurasi build, serta lockfile masih sama. Jika salah satu berubah, packaging
+berhenti dan menghapus artefak deploy lama agar TGZ stale tidak ikut ter-upload. Jalankan mode normal kembali.
+
+Paket deploy mem-pin versi dependency runtime ke `backend/package-lock.json`; packaging akan gagal jika lockfile
+deploy mencoba memperkenalkan versi dependency yang tidak ada di lockfile backend.
+
 > 💡 **Kenapa prebuilt?** Di server RAM 512MB, `tsc` sendirian bisa OOM, dan `npm ci` penuh (dengan devDeps) bisa puluhan ribu file — memboroskan inode. Prebuilt = server hanya install dependensi produksi.
 
 ---
@@ -128,6 +135,34 @@ npm run make-deploy:fast
 | **Application root** | `/home/username/kost48v3` |
 | **Application URL** | Pilih domain |
 | **Application startup file** | `dist/main.js` |
+
+### Storage `uploads/` wajib persisten
+
+`kost48-deploy.tgz` adalah paket **kode**, bukan backup data. Script packaging memverifikasi bahwa folder
+`uploads/` dan file `.env` tidak masuk arsip. Ini mencegah foto KTP, profil tenant, bukti pembayaran, foto tiket,
+dan data pribadi lain ikut tersebar bersama paket deploy.
+
+Untuk deploy pertama dengan application root yang tetap:
+
+```bash
+cd /home/username/kost48v3
+mkdir -p uploads
+chmod 700 uploads
+```
+
+Jika setiap release memakai folder baru, simpan uploads di direktori persisten di luar release dan buat symlink
+`uploads` dari application root. Pastikan user Passenger mempunyai izin baca/tulis. Jangan membuat symlink di atas
+folder uploads yang sudah berisi data sebelum data tersebut dimigrasikan dan diverifikasi.
+
+Saat **redeploy/update produksi**:
+
+1. Stop aplikasi.
+2. Backup PostgreSQL dan folder `uploads/` sebagai satu pasangan yang konsisten.
+3. Extract TGZ baru ke application root yang sama tanpa menghapus `.env` maupun `uploads/`.
+4. Jalankan `npm run cpanel:install`, restart, lalu uji satu file dari setiap kategori upload penting.
+
+Backup uploads mengandung data pribadi: batasi akses, enkripsi, dan jangan menaruhnya di repository atau TGZ kode.
+Jika database direstore, restore juga snapshot uploads yang pas karena database hanya menyimpan file key/path.
 
 ### Environment Variables (Add Variable satu per satu)
 
@@ -321,6 +356,7 @@ cPanel → **Metrics → Errors** — pastikan kosong dari aplikasi kost48.
 - [ ] **Ganti password OWNER** dari `PasswordKuat#2026!` ke password produksi
 - [ ] **Simpan kredensial:** DATABASE_URL, JWT_SECRET, AUTO_OPS_CRON_TOKEN, password OWNER
 - [ ] **Catat commit SHA** (`git log -1 --oneline`)
+- [ ] **Jadwalkan backup berpasangan:** PostgreSQL + `uploads/`; simpan terenkripsi di luar application root
 
 ### Opsional
 

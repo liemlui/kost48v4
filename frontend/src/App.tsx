@@ -1,3 +1,4 @@
+import { BreadcrumbProvider } from './context/BreadcrumbContext';
 import { lazy, Suspense, useEffect, useRef, type ReactNode } from 'react';
 import { Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import { PageLoadingSkeleton } from './components/common/SkeletonLoader';
@@ -203,6 +204,7 @@ export default function App() {
     <PwaRouteBoundary>
       <RouteTitleSync />
       <Suspense fallback={<PageLoadingSkeleton />}>
+        <BreadcrumbProvider>
         <Routes>
         <Route path="/login" element={<LoginPage />} />
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
@@ -326,6 +328,7 @@ export default function App() {
           <Route path="*" element={<NotFoundPage />} />
         </Route>
         </Routes>
+        </BreadcrumbProvider>
       </Suspense>
     </PwaRouteBoundary>
   );

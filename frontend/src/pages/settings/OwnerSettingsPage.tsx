@@ -9,6 +9,7 @@ import SafeImage from '../../components/common/SafeImage';
 import CurrencyInput from '../../components/common/CurrencyInput';
 import { SkeletonBlock } from '../../components/common/SkeletonLoader';
 import { useConfirm } from '../../components/common/ConfirmProvider';
+import PageHeader from '../../components/common/PageHeader';
 import { useAuth } from '../../context/AuthContext';
 import { createFaq, deleteFaq, fetchAllFaqs, updateFaq, type FaqItem } from '../../api/faqs';
 import { fetchOperationalSettings, pickOperationalPayload, updateOperationalSettings, type OperationalSetting } from '../../api/settings';
@@ -1288,10 +1289,13 @@ export default function OwnerSettingsPage() {
 
   return (
     <FeatureErrorBoundary>
-    <div className="settings-page">
-      <div className="page-eyebrow mb-1">Owner · Pengaturan</div>
-      <h1 className="h3 mb-1">Pengaturan Aplikasi</h1>
-      <p className="text-muted mb-4">Kelola FAQ publik, foto kamar, dan tarif/konstanta operasional.</p>
+    <div>
+      <PageHeader
+        eyebrow="Owner · Pengaturan"
+        title="Pengaturan Aplikasi"
+        description="Kelola FAQ publik, foto kamar, dan tarif/konstanta operasional."
+      />
+      <div className="settings-page">
 
       <Tabs
         activeKey={activeTab}
@@ -1325,6 +1329,7 @@ export default function OwnerSettingsPage() {
           <AiDraftQueuePanel />
         </Tab>
       </Tabs>
+    </div>
     </div>
     </FeatureErrorBoundary>
   );

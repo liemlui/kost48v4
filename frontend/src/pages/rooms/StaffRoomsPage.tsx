@@ -1,3 +1,4 @@
+import PageHeader from '../../components/common/PageHeader';
 import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Alert, Card, Spinner } from 'react-bootstrap';
@@ -59,12 +60,13 @@ export default function StaffRoomsPage() {
   }, [rooms, roomItems]);
 
   return (
-    <div className="staff-page-simple staff-rooms-page">
-      <section className="staff-simple-hero compact">
-        <span className="staff-hero-pill">Kamar</span>
-        <h1>Cek Kamar</h1>
-        <p>Pilih kamar, lalu laporkan kondisi barang kamar, catat meter listrik/air, atau tulis catatan kondisi.</p>
-      </section>
+    <div>
+      <PageHeader
+        eyebrow="Kamar"
+        title="Cek Kamar"
+        description="Pilih kamar, lalu laporkan kondisi barang kamar, catat meter listrik/air, atau tulis catatan kondisi."
+      />
+      <div className="staff-page-simple staff-rooms-page">
 
       {(roomsQuery.isLoading || roomItemsQuery.isLoading) ? <div className="py-5 text-center"><Spinner /> Memuat kamar...</div> : null}
       {roomsQuery.isError ? <Alert variant="danger">Gagal memuat daftar kamar.</Alert> : null}
@@ -118,6 +120,7 @@ export default function StaffRoomsPage() {
           );
         })}
       </div>
+    </div>
     </div>
   );
 }

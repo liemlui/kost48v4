@@ -1,3 +1,4 @@
+import PageHeader from '../../components/common/PageHeader';
 import React, { useState } from 'react';
 import { Alert, Badge, Card, Col, Container, Form, Row, Spinner, Table } from 'react-bootstrap';
 import { useQuery } from '@tanstack/react-query';
@@ -16,16 +17,20 @@ export default function FinancialRatiosPage() {
   const [ym,setYm]=useState(currentYearMonth());
   const q=useQuery({queryKey:['accounting','ratios',ym],queryFn:()=>fetchFinancialRatios({year:ym.year,month:ym.month}),staleTime:60_000,retry:1});
   const d=q.data;
-  return (<Container fluid className="px-2 py-3">
-    <div className="d-flex justify-content-between align-items-start mb-3 flex-wrap gap-2">
-      <div><h1 className="mb-0" style={{fontSize:'1.5rem',fontWeight:700}}>Rasio Keuangan</h1><small className="text-muted">Analisis rasio dari Balance Sheet & P&L</small></div>
-      <div className="d-flex gap-2">
+  return (
+    <div>
+      <PageHeader
+        eyebrow="Laporan Keuangan"
+        title="Rasio Keuangan"
+        description="Analisis rasio dari Balance Sheet & P&L."
+      />
+      <Container fluid className="px-2 py-3">
+      <div className="d-flex justify-content-end gap-2 mb-3">
         <Form.Control type="number" value={ym.year} min={2020} max={2100} onChange={e=>setYm(p=>({...p,year:+e.target.value}))} style={{width:80,height:32,fontSize:13}}/>
         <Form.Select value={ym.month} onChange={e=>setYm(p=>({...p,month:+e.target.value}))} style={{width:120,height:32,fontSize:13}}>
           {Array.from({length:12},(_,i)=>i+1).map(m=><option key={m} value={m}>{new Date(0,m-1).toLocaleString('id-ID',{month:'long'})}</option>)}
         </Form.Select>
       </div>
-    </div>
     {q.isLoading&&<Card><Card.Body className="text-center py-4"><Spinner animation="border" size="sm"/><span className="ms-2">Memuat...</span></Card.Body></Card>}
     {q.isError&&<Alert variant="warning">Gagal memuat data.</Alert>}
     {d&&<>
@@ -73,5 +78,7 @@ export default function FinancialRatiosPage() {
       .kpi-label{font-size:12px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px}
       .kpi-value{font-size:20px;font-weight:700;color:#0f172a;line-height:1.2}
     `}</style>
-  </Container>);
+  </Container>
+    </div>
+  );
 }

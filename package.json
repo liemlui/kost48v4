@@ -10,6 +10,8 @@
     "golive:1:fast": "node scripts/golive-combined.mjs --no-build",
     "make-deploy": "node scripts/make-deploy.mjs",
     "make-deploy:fast": "node scripts/make-deploy.mjs --no-build",
+    "bundle:deploy": "node scripts/bundle-deploy.mjs",
+    "bundle:deploy:fast": "node scripts/bundle-deploy.mjs --no-build",
     "token-efficiency-report": "node scripts/token-efficiency-report.mjs"
   }
 }

@@ -1,3 +1,4 @@
+import PageHeader from '../../components/common/PageHeader';
 import { lazy, Suspense, useMemo, useState } from 'react';
 import { Alert, Badge, Button, Card, Col, Container, Form, Row, Spinner, Table } from 'react-bootstrap';
 import { useSearchParams } from 'react-router-dom';
@@ -98,18 +99,18 @@ export default function ReportsPage() {
   };
 
   return (
-    <Container fluid className="reports-command-page px-2 py-3">
+    <div>
+      <PageHeader
+        eyebrow="Laporan Bisnis"
+        title="Keuangan dan Operasional"
+        description="Ringkasan pendapatan, arus kas, piutang, deposit, okupansi, margin laba, dan posisi keuangan."
+      />
+      <Container fluid className="reports-command-page px-2 py-3">
       {/* R-30: chip penanda halaman eksklusif owner */}
       <div className="mb-2">
         <span className="badge bg-danger-subtle text-danger-emphasis small" title="Halaman ini tidak dapat dilihat oleh Admin, Staf, atau Penghuni.">Hanya Owner</span>
       </div>
-      <section className="report-hero mb-3">
-        <div>
-          <div className="report-eyebrow">Laporan bisnis</div>
-          <h1>Keuangan dan Operasional</h1>
-          <p>Ringkasan pendapatan, arus kas, piutang, deposit, okupansi, margin laba, dan posisi keuangan.</p>
-        </div>
-        <div className="report-hero-controls">
+      <div className="report-hero-controls mb-3">
           <div className="report-period-card">
             <Form.Label>Tahun</Form.Label>
             <Form.Control type="number" value={ym.year} min={2020} max={2100} onChange={(e) => handleChange('year', e.target.value)} />
@@ -134,8 +135,7 @@ export default function ReportsPage() {
             occupancy={occupancy}
           />
         </div>
-      </section>
-
+      
       {/* F3-9: hierarki laporan — perjelas tier angka agar Estimasi tak disalahartikan sbg audit-grade. */}
       <Alert variant="warning" className="report-formality-note d-flex align-items-start gap-2 mb-3 py-2 small">
         <span aria-hidden="true">≈</span>
@@ -308,5 +308,6 @@ export default function ReportsPage() {
         </>
       )}
     </Container>
+    </div>
   );
 }

@@ -9,6 +9,7 @@ import { useTenantPortalStage } from '../../hooks/useTenantPortalStage';
 import type { Announcement } from '../../types';
 import { resolveAbsoluteFileUrl } from '../../utils/resolveAbsoluteFileUrl';
 import { getOfficialAnnouncementFallbackImage } from '../../data/officialKost48Content';
+import PageHeader from '../../components/common/PageHeader';
 import { formatDateOnly } from '../../utils/dateTime';
 
 function formatDate(value?: string | null) {
@@ -41,7 +42,13 @@ export default function MyAnnouncementsPage() {
   })).filter((item) => item.id > 0);
 
   return (
-    <div className="tenant-announcements-compact-page">
+    <div>
+      <PageHeader
+        eyebrow="Portal Penghuni"
+        title="Pengumuman"
+        description="Informasi penting dari pengelola KOST48 untuk seluruh penghuni."
+      />
+      <div className="tenant-announcements-compact-page">
       {query.isLoading ? <div className="py-4 text-center"><Spinner animation="border" /></div> : null}
       {query.isError ? (
         <Alert variant="danger">
@@ -91,6 +98,7 @@ export default function MyAnnouncementsPage() {
           </Card>
         ))}
       </div>
+    </div>
     </div>
   );
 }

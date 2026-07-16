@@ -1,4 +1,5 @@
-﻿import { useCallback, useMemo, useState } from 'react';
+﻿import PageHeader from '../../components/common/PageHeader';
+import { useCallback, useMemo, useState } from 'react';
 import { Alert, Badge, Button, Spinner } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import { useNotifications } from '../../hooks/useNotifications';
@@ -139,7 +140,13 @@ export default function NotificationsPage() {
   );
 
   return (
-    <div className="container py-4">
+    <div>
+      <PageHeader
+        eyebrow="Notifikasi"
+        title="Notifikasi"
+        description="Pemberitahuan sistem, tagihan, dan aktivitas terkait akun kamu."
+      />
+      <div className="container py-4">
       {/* Header */}
       <div className="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-3">
         <div className="d-flex align-items-center gap-3">
@@ -274,6 +281,7 @@ export default function NotificationsPage() {
           )}
         </>
       )}
+    </div>
     </div>
   );
 }

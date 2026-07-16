@@ -1,3 +1,4 @@
+import PageHeader from '../../components/common/PageHeader';
 import { useState } from 'react';
 import { Alert, Button } from 'react-bootstrap';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
@@ -47,13 +48,12 @@ export default function InventoryShellPage() {
   });
 
   return (
-    <div className="inventory-shell">
-      <div className="inventory-shell-head d-flex flex-wrap justify-content-between align-items-start gap-2">
-        <div>
-          <span className="owner-section-kicker">Inventaris terpadu</span>
-          <p className="app-caption mb-2">Stok gudang, barang per kamar, dan mutasi resmi dalam satu tempat.</p>
-        </div>
-        {canUseAi ? (
+    <div>
+      <PageHeader
+        eyebrow="Master Data"
+        title="Inventaris"
+        description="Stok gudang, barang per kamar, dan mutasi resmi dalam satu tempat."
+        secondaryAction={canUseAi ? (
           <Button
             size="sm"
             variant="outline-primary"
@@ -62,8 +62,9 @@ export default function InventoryShellPage() {
           >
             {reorderAi.isPending ? 'Mengecek stok...' : 'Cek Stok AI'}
           </Button>
-        ) : null}
-      </div>
+        ) : undefined}
+      />
+      <div className="inventory-shell">
       {aiError ? (
         <Alert variant="danger" className="py-2 px-3 small">
           {aiError}
@@ -120,6 +121,7 @@ export default function InventoryShellPage() {
       <div className="mt-3">
         <Outlet />
       </div>
+    </div>
     </div>
   );
 }

@@ -9,6 +9,7 @@ coverage/
 backend/client/
 deploy/
 kost48-deploy.tgz
+kost48-deploy-bundled.tgz
 
 # Generated sources
 src/generated/

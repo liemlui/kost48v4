@@ -5,13 +5,62 @@
 // Kenapa TANPA build di server: hosting shared 512MB bisa OOM saat tsc/npm ci penuh, dan devDeps memboroskan inode.
 // Prisma client hasil generate = WASM query compiler + driver adapter pg → platform-independent;
 // binary engine `*.node` (Windows) dibuang dari paket karena tidak dipakai di Linux.
-import { rmSync, mkdirSync, cpSync, writeFileSync, existsSync, readdirSync, readFileSync } from 'node:fs';
+import {
+  rmSync,
+  mkdirSync,
+  cpSync,
+  writeFileSync,
+  existsSync,
+  readdirSync,
+  readFileSync,
+  renameSync,
+  statSync,
+} from 'node:fs';
 import { spawnSync } from 'node:child_process';
+import { createHash } from 'node:crypto';
 
 const isWin = process.platform === 'win32';
 const npm = isWin ? 'npm.cmd' : 'npm';
 const OUT = 'deploy';
+const ARCHIVE = 'kost48-deploy.tgz';
+const ARCHIVE_TMP = ARCHIVE + '.tmp';
+const BUILD_MARKER = '.kost48-build-manifest.json';
 const NO_BUILD = process.argv.includes('--no-build');
+
+const BUILD_TARGETS = {
+  frontend: {
+    marker: 'frontend/dist/' + BUILD_MARKER,
+    inputs: [
+      'frontend/src',
+      'frontend/public',
+      'frontend/index.html',
+      'frontend/package.json',
+      'frontend/package-lock.json',
+      'frontend/tsconfig.json',
+      'frontend/vite.config.ts',
+      'frontend/vitest.shims.d.ts',
+      'frontend/.env.production',
+      'frontend/.env.production.local',
+      'frontend/scripts/stamp-pwa-build.mjs',
+      'frontend/scripts/verify-pwa.mjs',
+    ],
+    outputs: ['frontend/dist/index.html'],
+  },
+  backend: {
+    marker: 'backend/dist/' + BUILD_MARKER,
+    inputs: [
+      'backend/src',
+      'backend/prisma/schema.prisma',
+      'backend/package.json',
+      'backend/package-lock.json',
+      'backend/nest-cli.json',
+      'backend/prisma.config.ts',
+      'backend/tsconfig.json',
+      'backend/tsconfig.build.json',
+    ],
+    outputs: ['backend/dist/main.js', 'backend/dist/generated/prisma/package.json'],
+  },
+};
 
 function readJson(file) {
   return JSON.parse(readFileSync(file, 'utf8'));
@@ -25,21 +74,120 @@ function sortObject(obj) {
   return Object.fromEntries(Object.entries(obj).sort(([a], [b]) => a.localeCompare(b)));
 }
 
+function fail(message, exitCode = 1) {
+  console.error('[deploy] GAGAL: ' + message);
+  process.exit(exitCode);
+}
+
 function run(label, cmd, args, cwd) {
   console.log('[deploy] ' + label);
   const r = spawnSync(cmd, args, { cwd, stdio: 'inherit', shell: true });
-  if (r.status) { console.error('[deploy] GAGAL: ' + label); process.exit(r.status); }
+  if (r.error || r.status !== 0) {
+    if (r.error) console.error(r.error.message);
+    fail(label, Number.isInteger(r.status) && r.status > 0 ? r.status : 1);
+  }
+  return r;
+}
+
+function runCaptured(label, cmd, args, cwd) {
+  console.log('[deploy] ' + label);
+  const r = spawnSync(cmd, args, {
+    cwd,
+    encoding: 'utf8',
+    maxBuffer: 16 * 1024 * 1024,
+    shell: true,
+  });
+  if (r.error || r.status !== 0) {
+    if (r.stderr) console.error(r.stderr.trim());
+    if (r.error) console.error(r.error.message);
+    fail(label, Number.isInteger(r.status) && r.status > 0 ? r.status : 1);
+  }
+  return r.stdout || '';
 }
 
 function requirePath(path, hint) {
   if (!existsSync(path)) {
-    console.error('[deploy] GAGAL: ' + path + ' tidak ditemukan. ' + hint);
-    process.exit(1);
+    fail(path + ' tidak ditemukan. ' + hint);
   }
+}
+
+function collectFiles(path, files) {
+  requirePath(path, 'Input build wajib tidak boleh hilang.');
+  const entry = statSync(path);
+  if (entry.isFile()) {
+    files.push(path.replaceAll('\\', '/'));
+    return;
+  }
+  for (const child of readdirSync(path, { withFileTypes: true })) {
+    collectFiles(path + '/' + child.name, files);
+  }
+}
+
+function fingerprintInputs(paths) {
+  const files = [];
+  for (const path of paths) collectFiles(path, files);
+  files.sort();
+
+  const hash = createHash('sha256');
+  for (const file of files) {
+    hash.update(file);
+    hash.update('\0');
+    hash.update(readFileSync(file));
+    hash.update('\0');
+  }
+  return { sha256: hash.digest('hex'), fileCount: files.length };
+}
+
+function writeBuildMarkers() {
+  const createdAt = new Date().toISOString();
+  for (const [target, config] of Object.entries(BUILD_TARGETS)) {
+    const fingerprint = fingerprintInputs(config.inputs);
+    writeJson(config.marker, {
+      version: 1,
+      target,
+      createdAt,
+      node: process.version,
+      ...fingerprint,
+    });
+  }
+}
+
+function verifyFreshBuilds() {
+  for (const [target, config] of Object.entries(BUILD_TARGETS)) {
+    for (const output of config.outputs) {
+      requirePath(output, 'Jalankan `npm run make-deploy` agar build dibuat ulang.');
+    }
+    requirePath(
+      config.marker,
+      '`--no-build` hanya aman setelah minimal satu `npm run make-deploy` berhasil dengan script terbaru.',
+    );
+
+    let marker;
+    try {
+      marker = readJson(config.marker);
+    } catch {
+      fail(config.marker + ' rusak. Jalankan `npm run make-deploy` agar build dibuat ulang.');
+    }
+    const current = fingerprintInputs(config.inputs);
+    if (marker.version !== 1 || marker.target !== target || marker.sha256 !== current.sha256) {
+      fail(
+        'build ' + target + ' sudah stale terhadap source/config/lockfile. ' +
+        'Jalankan `npm run make-deploy` (tanpa `:fast`).',
+      );
+    }
+  }
+}
+
+function invalidateOldPackagingOutputs() {
+  // Jangan biarkan kegagalan build/package membuat arsip lama terlihat seperti hasil baru.
+  rmSync(ARCHIVE, { force: true });
+  rmSync(ARCHIVE_TMP, { force: true });
+  rmSync(OUT, { recursive: true, force: true });
 }
 
 function writeDeployPackageFiles() {
   const backendPkg = readJson('backend/package.json');
+  const backendLock = readJson('backend/package-lock.json');
   const generatedPkgPath = 'backend/dist/generated/prisma/package.json';
   const generatedDeps = existsSync(generatedPkgPath) ? (readJson(generatedPkgPath).dependencies || {}) : {};
   const dependencies = { ...(backendPkg.dependencies || {}) };
@@ -51,6 +199,20 @@ function writeDeployPackageFiles() {
 
   for (const [name, version] of Object.entries(generatedDeps)) {
     if (!dependencies[name]) dependencies[name] = version;
+  }
+
+  // Package deploy harus memakai versi runtime yang benar-benar diuji oleh lockfile backend.
+  // Membiarkan range ^/~ di sini pernah membuat pg/Nest ikut naik saat packaging saja.
+  const pinnedDependencies = {};
+  for (const name of Object.keys(dependencies)) {
+    const locked = backendLock.packages?.['node_modules/' + name];
+    if (!locked?.version) {
+      fail(
+        'dependency runtime `' + name + '` tidak ditemukan di backend/package-lock.json. ' +
+        'Jalankan `npm install` yang sesuai di backend lalu commit lockfile.',
+      );
+    }
+    pinnedDependencies[name] = locked.version;
   }
 
   writeJson(OUT + '/package.json', {
@@ -69,8 +231,13 @@ function writeDeployPackageFiles() {
       start: 'node dist/main.js',
       'start:prod': 'node --max-old-space-size=192 dist/main.js',
     },
-    dependencies: sortObject(dependencies),
+    dependencies: sortObject(pinnedDependencies),
+    ...(backendPkg.overrides ? { overrides: backendPkg.overrides } : {}),
   });
+
+  // Seed npm dengan lockfile backend agar pohon runtime tidak di-resolve ulang dari nol.
+  // `npm install --package-lock-only` di bawah hanya merekonsiliasi subset production deploy.
+  cpSync('backend/package-lock.json', OUT + '/package-lock.json');
 
   writeFileSync(OUT + '/.npmrc', [
     'omit=dev',
@@ -85,6 +252,59 @@ function writeDeployPackageFiles() {
   ].join('\n'));
 }
 
+function dependencyNameFromLockPath(path) {
+  const marker = 'node_modules/';
+  const index = path.lastIndexOf(marker);
+  return index === -1 ? null : path.slice(index + marker.length);
+}
+
+function validateDeployLock() {
+  const deployPkg = readJson(OUT + '/package.json');
+  const deployLock = readJson(OUT + '/package-lock.json');
+  const backendLock = readJson('backend/package-lock.json');
+  const rootDependencies = deployLock.packages?.['']?.dependencies || {};
+  const expectedDependencies = deployPkg.dependencies || {};
+
+  if (JSON.stringify(sortObject(rootDependencies)) !== JSON.stringify(sortObject(expectedDependencies))) {
+    fail('daftar dependency root package-lock deploy tidak identik dengan package.json deploy.');
+  }
+
+  for (const [name, expectedVersion] of Object.entries(expectedDependencies)) {
+    if (rootDependencies[name] !== expectedVersion) {
+      fail('package-lock deploy tidak sinkron untuk `' + name + '` (root dependency).');
+    }
+    const locked = deployLock.packages?.['node_modules/' + name];
+    if (locked?.version !== expectedVersion) {
+      fail(
+        'package-lock deploy mengunci `' + name + '` ke ' + (locked?.version || 'versi kosong') +
+        ', seharusnya ' + expectedVersion + '.',
+      );
+    }
+  }
+
+  const allowedVersions = new Map();
+  for (const [path, entry] of Object.entries(backendLock.packages || {})) {
+    const name = dependencyNameFromLockPath(path);
+    if (!name || !entry.version) continue;
+    if (!allowedVersions.has(name)) allowedVersions.set(name, new Set());
+    allowedVersions.get(name).add(entry.version);
+  }
+
+  for (const [path, entry] of Object.entries(deployLock.packages || {})) {
+    const name = dependencyNameFromLockPath(path);
+    if (!name || !entry.version) continue;
+    if (name === '@prisma/client') {
+      fail('package-lock deploy masih memuat @prisma/client yang sengaja dikeluarkan dari runtime prebuilt.');
+    }
+    if (!allowedVersions.get(name)?.has(entry.version)) {
+      fail(
+        'dependency drift: lock deploy memuat `' + name + '@' + entry.version +
+        '` yang tidak ada di backend/package-lock.json.',
+      );
+    }
+  }
+}
+
 function countFiles(dir) {
   let n = 0;
   for (const e of readdirSync(dir, { withFileTypes: true })) {
@@ -94,24 +314,75 @@ function countFiles(dir) {
   return n;
 }
 
+function createVerifiedArchive() {
+  if (existsSync(OUT + '/uploads')) {
+    fail('folder uploads tidak boleh masuk paket deploy; backup data upload harus dikelola terpisah.');
+  }
+  if (existsSync(OUT + '/.env')) {
+    fail('file .env rahasia tidak boleh masuk paket deploy.');
+  }
+
+  rmSync(ARCHIVE, { force: true });
+  rmSync(ARCHIVE_TMP, { force: true });
+  run('buat arsip deploy...', 'tar', ['-czf', ARCHIVE_TMP, '-C', OUT, '.']);
+
+  if (!existsSync(ARCHIVE_TMP) || statSync(ARCHIVE_TMP).size === 0) {
+    rmSync(ARCHIVE_TMP, { force: true });
+    fail('tar selesai tanpa menghasilkan arsip yang valid.');
+  }
+
+  const listing = runCaptured('verifikasi isi arsip deploy...', 'tar', ['-tzf', ARCHIVE_TMP]);
+  const entries = new Set(
+    listing
+      .split(/\r?\n/)
+      .map((entry) => entry.replaceAll('\\', '/').replace(/^\.\//, '').replace(/\/$/, ''))
+      .filter(Boolean),
+  );
+  for (const required of ['dist/main.js', 'client/index.html', 'package.json', 'package-lock.json']) {
+    if (!entries.has(required)) {
+      rmSync(ARCHIVE_TMP, { force: true });
+      fail('arsip tidak lengkap: `' + required + '` tidak ditemukan.');
+    }
+  }
+  for (const entry of entries) {
+    const segments = entry.split('/');
+    const basename = segments.at(-1);
+    if (segments.includes('uploads')) {
+      rmSync(ARCHIVE_TMP, { force: true });
+      fail('arsip memuat uploads; data pengguna tidak boleh ikut ke paket kode.');
+    }
+    if ((basename === '.env' || basename.startsWith('.env.')) && basename !== '.env.example') {
+      rmSync(ARCHIVE_TMP, { force: true });
+      fail('arsip memuat file environment rahasia: `' + entry + '`.');
+    }
+  }
+
+  renameSync(ARCHIVE_TMP, ARCHIVE);
+}
+
+invalidateOldPackagingOutputs();
+
 if (NO_BUILD) {
-  console.log('[deploy] 1/6 skip build (--no-build), pakai dist yang sudah ada...');
-  requirePath('frontend/dist', 'Jalankan build frontend lokal dulu, atau pakai npm run make-deploy tanpa --no-build.');
-  requirePath('backend/dist/generated/prisma/package.json', 'Jalankan build backend lokal dulu, atau pakai npm run make-deploy tanpa --no-build.');
+  console.log('[deploy] 1/6 verifikasi build existing (--no-build)...');
+  verifyFreshBuilds();
+  console.log('[deploy] build existing cocok dengan source/config/lockfile.');
 } else {
   writeFileSync('frontend/.env.production.local', '# auto (deploy) — jangan commit\nVITE_API_BASE_URL=/api\n');
   run('1/6 build frontend (combined, VITE_API_BASE_URL=/api)...', npm, ['run', 'build'], 'frontend');
 
   run('2/6 build backend (tsc + prisma generate → dist/ + dist/generated)...', npm, ['run', 'build'], 'backend');
+  writeBuildMarkers();
 }
 
 console.log('[deploy] 3/6 siapkan folder ' + OUT + '/ ...');
-rmSync(OUT, { recursive: true, force: true });
 mkdirSync(OUT + '/scripts', { recursive: true });
 
 console.log('[deploy] 4/6 copy backend PREBUILT (dist tanpa binary *.node) + prisma/sql + package deploy + frontend client/ ...');
 // dist/ prebuilt — buang engine binary platform-spesifik (query_engine-*.dll.node dsb; Linux pakai WASM).
-cpSync('backend/dist', OUT + '/dist', { recursive: true, filter: (src) => !src.endsWith('.node') });
+cpSync('backend/dist', OUT + '/dist', {
+  recursive: true,
+  filter: (src) => !src.endsWith('.node') && !src.endsWith(BUILD_MARKER),
+});
 for (const item of ['prisma', 'sql']) {
   const from = 'backend/' + item;
   if (existsSync(from)) cpSync(from, OUT + '/' + item, { recursive: true });
@@ -119,9 +390,13 @@ for (const item of ['prisma', 'sql']) {
 if (existsSync('backend/setup.sql')) cpSync('backend/setup.sql', OUT + '/setup.sql');
 writeDeployPackageFiles();
 cpSync('backend/scripts/seed-owner.js', OUT + '/scripts/seed-owner.js'); // seed OWNER pertama (F1-12) di server
-cpSync('frontend/dist', OUT + '/client', { recursive: true });
+cpSync('frontend/dist', OUT + '/client', {
+  recursive: true,
+  filter: (src) => !src.endsWith(BUILD_MARKER),
+});
 
 run('5/6 buat package-lock produksi (tanpa install node_modules)...', npm, ['install', '--package-lock-only', '--omit=dev', '--omit=optional', '--ignore-scripts', '--no-audit', '--no-fund', '--progress=false'], OUT);
+validateDeployLock();
 
 console.log('[deploy] 6/6 tulis .env.example + README + arsip tgz ...');
 writeFileSync(OUT + '/.env.example', [
@@ -189,6 +464,17 @@ Paket ini SUDAH di-build di lokal: backend \`dist/\` + frontend \`client/\`. Ser
 11. **Smoke**: \`https://domain/\` tampil · \`/api/public/rooms\` 200 · login OWNER · trial-balance seimbang ·
    cPanel Resource Usage: memory faults 0.
 
+## Upload persisten & redeploy
+- Arsip kode ini **sengaja tidak memuat** folder \`uploads/\` maupun file \`.env\`. Foto KTP, profil,
+  bukti pembayaran, tiket, pengumuman, dan aset kamar harus disimpan serta dibackup terpisah.
+- Deploy pertama: dari application root jalankan \`mkdir -p uploads && chmod 700 uploads\` sebelum app dipakai.
+- Saat update: stop app, backup database **dan** \`uploads/\`, lalu extract paket baru ke root yang sama tanpa
+  menghapus \`uploads/\` atau \`.env\`. Jangan memakai langkah "clean deploy" untuk update produksi.
+- Jika release selalu memakai folder baru, gunakan storage tetap di luar folder release lalu symlink \`uploads\`
+  ke storage tersebut. Pastikan user Passenger punya izin baca/tulis.
+- Backup upload mengandung data pribadi. Batasi akses dan enkripsi; jangan masukkan backup itu ke TGZ kode ini.
+  File key di database dan backup \`uploads/\` harus dipulihkan sebagai satu pasangan yang konsisten.
+
 ## Catatan RAM/inode 512MB
 - Semua prebuilt; server hanya \`npm ci\` production-only dari lockfile deploy ramping.
 - Binary engine Prisma \`*.node\` dibuang — runtime pakai WASM query compiler + driver adapter pg.
@@ -198,11 +484,10 @@ Paket ini SUDAH di-build di lokal: backend \`dist/\` + frontend \`client/\`. Ser
 ⚠️ Ganti password OWNER default & JANGAN commit \`.env\`. VPS: \`pm2 start dist/main.js --name kost48\`.
 `);
 
-let tarOk = false;
-try { spawnSync('tar', ['-czf', 'kost48-deploy.tgz', '-C', OUT, '.'], { stdio: 'ignore', shell: true }); tarOk = existsSync('kost48-deploy.tgz'); } catch {}
+createVerifiedArchive();
 
 const total = countFiles(OUT);
 console.log('\n[deploy] SELESAI.');
 console.log('  Folder siap-upload : ' + OUT + '/  (' + total + ' file — estimasi pemakaian inode upload)');
-if (tarOk) console.log('  Arsip (opsional)   : kost48-deploy.tgz');
+console.log('  Arsip terverifikasi: ' + ARCHIVE);
 console.log('  Di server: npm run cpanel:install -> isi .env -> schema+OWNER -> Restart App  (lihat ' + OUT + '/README-DEPLOY.md)');

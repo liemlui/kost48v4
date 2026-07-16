@@ -1,3 +1,4 @@
+import PageHeader from '../../components/common/PageHeader';
 import React, { useState } from 'react';
 import { Alert, Badge, Card, Col, Container, Form, Row, Spinner, Table } from 'react-bootstrap';
 import { useQuery } from '@tanstack/react-query';
@@ -12,16 +13,20 @@ export default function BalanceSheetPage() {
   const [ym,setYm]=useState(currentYearMonth());
   const q=useQuery({queryKey:['accounting','bs',ym],queryFn:()=>fetchBalanceSheetDetail({year:ym.year,month:ym.month}),staleTime:60_000,retry:1});
   const d=q.data;
-  return (<Container fluid className="px-2 py-3">
-    <div className="d-flex justify-content-between align-items-start mb-3 flex-wrap gap-2">
-      <div><h1 className="mb-0 rpt-title">Neraca</h1><small className="text-muted">Balance sheet dengan perbandingan bulan lalu</small></div>
-      <div className="d-flex gap-2">
+  return (
+    <div>
+      <PageHeader
+        eyebrow="Laporan Keuangan"
+        title="Neraca"
+        description="Balance sheet dengan perbandingan bulan lalu."
+      />
+      <Container fluid className="px-2 py-3">
+      <div className="d-flex justify-content-end gap-2 mb-3">
         <Form.Control type="number" value={ym.year} min={2020} max={2100} onChange={e=>setYm(p=>({...p,year:+e.target.value}))} className="rpt-input-sm"/>
         <Form.Select value={ym.month} onChange={e=>setYm(p=>({...p,month:+e.target.value}))} className="rpt-select-sm">
           {Array.from({length:12},(_,i)=>i+1).map(m=><option key={m} value={m}>{new Date(0,m-1).toLocaleString('id-ID',{month:'long'})}</option>)}
         </Form.Select>
       </div>
-    </div>
     {q.isLoading&&<Card><Card.Body className="text-center py-4"><Spinner animation="border" size="sm"/><span className="ms-2">Memuat...</span></Card.Body></Card>}
     {q.isError&&<Alert variant="warning">Gagal memuat data.</Alert>}
     {d&&<>
@@ -55,5 +60,7 @@ export default function BalanceSheetPage() {
       .kpi-value{font-size:20px;font-weight:700;color:#0f172a;line-height:1.2}
       .kpi-change{font-size:12px;font-weight:600;margin-top:2px}
     `}</style>
-  </Container>);
+  </Container>
+    </div>
+  );
 }
