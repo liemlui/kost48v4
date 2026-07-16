@@ -116,6 +116,9 @@ Status: OWNER-CONFIRMED untuk aturan/ground truth, tetapi sebagian besar BELUM M
 ## Keputusan UI/UX Dashboard — 2026-06-17
 
 ### Toggle Owner/Admin View
+- **OWN-DETAIL-WITHOUT-CLUTTER (2026-07-16):** UI lengkap dan detail tetapi dibuka bertahap. Ringkasan dan aksi utama tampil lebih dulu; detail, riwayat, audit, dan data teknis tersedia saat item dibuka. Fitur tidak dihapus hanya demi tampilan sederhana. Sumber: `docs/UI_UX_OWNER_ADMIN.md`.
+- **OWN-VIEW-AUTHORITY:** Toggle hanya mengganti konteks tampilan. OWNER di Area Admin tetap memiliki role dan kewenangan OWNER.
+- **KTP-LEGACY-PORTAL:** Penghuni lama dapat ditandai `LEGACY` saat migrasi. Tenant dapat upload KTP miliknya dari portal; upload baru mereset verifikasi dan masuk antrean Admin. OCR lokal dan AI hanya rekomendasi; keputusan final tetap OWNER/ADMIN.
 - **OWN-TOGGLE**: Owner bisa switch antara "Kokpit Owner" (bisnis) dan "Area Admin" (operasional) via toggle di navbar. Default = Kokpit Owner. Area Admin menampilkan Command Center operasional harian dengan sidebar 6 link.
 - **OWN-AUTOOPS-CLEAN**: Checklist UAT AutoOps dipindahkan dari UI ke docs. Panel AutoOps di dashboard hanya menampilkan metrik ringkas + tombol eksekusi + riwayat run kolapsibel.
 - **OWN-NAV-SPLIT**: Sidebar Kokpit Owner = 13 link bisnis (6 section). Sidebar Area Admin = 6 link operasional (1 section). Tidak campur.

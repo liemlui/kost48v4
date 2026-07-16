@@ -112,7 +112,7 @@ export class TenantsController {
 
   @Post(':id/ktp/upload')
   @ApiOperation({ summary: 'Upload foto KTP tenant — OWNER/ADMIN' })
-  @Roles(UserRole.OWNER, UserRole.ADMIN)
+  @Roles(UserRole.OWNER, UserRole.ADMIN, UserRole.TENANT)
   @UseGuards(RateLimitGuard)
   @RateLimit('imageUpload')
   @ApiConsumes('multipart/form-data')
@@ -191,7 +191,7 @@ export class TenantsController {
       }
     }
     return {
-      message: avatarWarning ?? 'Foto KTP berhasil diunggah; menunggu verifikasi OWNER',
+      message: avatarWarning ?? 'Foto KTP berhasil diunggah; menunggu pemeriksaan admin',
       data: responseTenant,
       warning: avatarWarning ?? undefined,
     };

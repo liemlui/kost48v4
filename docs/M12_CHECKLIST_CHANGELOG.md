@@ -4,6 +4,15 @@
 
 ## Cara Pakai (AI Eksekutor — baca sebelum coding)
 
+## Update 2026-07-16 — KTP Portal dan Simplifikasi Owner/Admin
+
+- [x] Tenant dapat upload KTP miliknya sendiri; akses lintas tenant ditolak backend.
+- [x] Upload baru mereset verifikasi dan masuk antrean pemeriksaan Admin.
+- [x] Dashboard Admin menampilkan KTP pending; detail review berada di modal tenant.
+- [x] Toggle Kokpit Owner/Area Admin diverifikasi pada desktop/mobile dan route terpisah.
+- [x] Standar UI dibukukan di `docs/UI_UX_OWNER_ADMIN.md`.
+- **Gate:** TypeScript backend dan frontend lulus.
+
 1. **Orientasi:** buka bagian [ANTRIAN EKSEKUSI AKTIF](#antrian-eksekusi-aktif) di file ini.
 2. **Spesifikasi domain:** buka M-file yang ditunjuk fase/task (`M01`-`M09`).
 3. **Anchor kode:** grep **nama simbol/fungsi** di `backend/src` / `frontend/src` — **JANGAN** edit buta.

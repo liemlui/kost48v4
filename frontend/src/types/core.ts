@@ -115,6 +115,10 @@ export type TenantSelfProfile = {
   howDidYouHear?: string | null;
   // PUB-FOTO-PROFIL-KTP: url avatar terproteksi (disajikan via endpoint authed).
   profilePhotoUrl?: string | null;
+  ktpImageUrl?: string | null;
+  ktpVerifiedAt?: string | null;
+  ktpVerificationMethod?: string | null;
+  ktpVerificationNotes?: string | null;
 };
 
 export type TenantProfileResponse = {

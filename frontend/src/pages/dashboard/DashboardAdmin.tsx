@@ -36,6 +36,7 @@ import {
 } from './dashboardShared';
 import { AdminStaffFrontlineList, AdminStaysUnifiedList, AdminFinanceWorkspace, AdminTicketsWorkspace, AdminRoomsStockWorkspace } from './AdminWorkspaces';
 import { useAuth } from '../../context/AuthContext';
+import { getTenantKtpReviewQueue } from '../../api/tenants';
 
 // FASE-H: area kerja admin dipadatkan dari 6 → 3 (Ringkasan · Penghuni & Uang · Operasional).
 type AdminQueueArea = 'overview' | 'stays-finance' | 'ops';
@@ -229,6 +230,7 @@ export default function AdminDashboard() {
   // H4: status AI untuk conditional render AiAssistButton di area overview
   const aiStatusQuery = useQuery({ queryKey: ['owner-ai-status'], queryFn: getOwnerAiStatus, staleTime: 300_000, retry: 1 });
   const surveySummaryQuery = useQuery({ queryKey: ['survey-summary'], queryFn: getSurveySummary, staleTime: 300_000, retry: 1 });
+  const ktpReviewQuery = useQuery({ queryKey: ['tenants', 'ktp-review'], queryFn: getTenantKtpReviewQueue, staleTime: 60_000, retry: 1 });
   const canUseAdminBriefAi = user?.role === 'OWNER' && aiStatusQuery.data?.configured === true;
 
   const rooms = aggregateQuery.data?.rooms.items ?? [];
@@ -263,6 +265,7 @@ export default function AdminDashboard() {
   const checkoutReviewDeadlines = checkoutPendingRequests.map((request: CheckoutRequest) => addHoursToDate(request.createdAt, ADMIN_SLA_HOURS.checkoutReview));
   const checkoutFinalDeadlines = checkoutApprovedRequests.map((request: CheckoutRequest) => addHoursToDate(request.reviewedAt ?? request.updatedAt ?? request.createdAt, ADMIN_SLA_HOURS.checkoutFinal));
   const lowStockCount = inventoryItems.filter(isLowStockItem).length;
+  const ktpReviewItems = ktpReviewQuery.data ?? [];
   const activeTicketCount = tickets.filter((ticket) => ['OPEN', 'IN_PROGRESS', 'DONE'].includes(ticket.status)).length;
   const ticketWaitingAdminCount = tickets.filter((ticket) => ticket.status === 'DONE').length;
   const unassignedTicketCount = tickets.filter((ticket) => ticket.status === 'OPEN' && !ticket.assignedToId).length;
@@ -276,6 +279,7 @@ export default function AdminDashboard() {
   const expiredCheckoutCount = countExpiredDates([...checkoutReviewDeadlines, ...checkoutFinalDeadlines]);
 
   const adminWorkLanes: AdminWorkLane[] = [
+    { id: 'ktp-review', step: '0', title: 'Verifikasi KTP', value: ktpReviewItems.length, helper: ktpReviewItems.length ? 'Periksa foto, cocokkan data, lihat rekomendasi AI, lalu putuskan.' : 'Tidak ada KTP yang menunggu pemeriksaan.', sla: 'secepatnya', nextDeadline: undefined, action: 'Buka Data Penghuni', to: '/tenants', tone: ktpReviewItems.length ? 'warning' : 'success' },
     { id: 'booking-review', step: '1', title: 'Review booking', value: pendingApprovalCount, helper: pendingApprovalCount ? 'Putuskan booking sebelum kamar tertahan terlalu lama.' : 'Tidak ada booking baru yang menunggu admin.', sla: `${ADMIN_SLA_HOURS.bookingReview} jam`, nextDeadline: earliestDeadlineLabel(bookingReviewDeadlines), action: 'Review Booking', to: '/stays?status=BOOKINGS', tone: expiredBookingReviewCount ? 'danger' : pendingApprovalCount ? 'warning' : 'success' },
     { id: 'payment-review', step: '2', title: 'Verifikasi pembayaran', value: pendingPaymentReviewCount, helper: pendingPaymentReviewCount ? 'Bukti pending tidak boleh auto-cancel; admin harus putuskan.' : 'Tidak ada bukti bayar pending review.', sla: `${ADMIN_SLA_HOURS.paymentReviewUrgent}/${ADMIN_SLA_HOURS.paymentReviewMax} jam`, nextDeadline: earliestDeadlineLabel(paymentMaxDeadlines), action: 'Verifikasi Pembayaran', to: '/payment-submissions/review', tone: expiredPaymentReviewCount ? 'danger' : pendingPaymentReviewCount ? 'warning' : 'success' },
     { id: 'renew-checkpoint', step: '3', title: 'Review Perpanjangan', value: pendingRenewCount, helper: pendingRenewCount ? 'Catat meter sebelum approve dan tagihan perpanjangan.' : 'Tidak ada perpanjangan menunggu approval.', sla: `${ADMIN_SLA_HOURS.renewReview} jam`, nextDeadline: earliestDeadlineLabel(renewReviewDeadlines), action: 'Review Perpanjangan', to: '/renew-requests', tone: expiredRenewCount ? 'danger' : pendingRenewCount ? 'warning' : 'success' },
@@ -284,6 +288,7 @@ export default function AdminDashboard() {
   ];
 
   const queueItems: ActionQueueItem[] = dedupeCommandItems([
+    ...ktpReviewItems.slice(0, 5).map((tenant) => ({ id: `ktp-review-${tenant.id}`, ruleId: 'ktp-review', entityType: 'tenant', entityId: tenant.id, priority: 'MEDIUM' as const, type: 'Verifikasi KTP', subject: tenant.fullName, issue: 'Foto sudah diunggah. Periksa hasil OCR dan rekomendasi AI sebelum approve.', recommendedAction: 'Review KTP', actionTo: '/tenants' })),
     ...pendingApprovalBookings.slice(0, 4).map((stay) => { const createdAt = getStayCreatedAt(stay); const deadline = getStayDeadline(stay, ADMIN_SLA_HOURS.bookingReview); const meta = getDeadlineMeta(deadline, 'Batas review booking'); return { id: `booking-approval-${stay.id}`, ruleId: 'booking-review-sla', entityType: 'stay', entityId: stay.id, priority: meta.isExpired ? 'HIGH' as const : 'MEDIUM' as const, type: '1. Review booking', subject: stay.tenant?.fullName || stay.room?.code || `Booking #${stay.id}`, issue: meta.isExpired ? 'Melewati batas review. AutoOps dapat reset pemesanan.' : 'Putuskan booking sebelum deadline.', receivedAtLabel: createdAt ? makeClock(createdAt) : undefined, ...makeQueueTime(deadline), recommendedAction: 'Review Booking', actionTo: '/stays?status=BOOKINGS' }; }),
     ...paymentReviewItems.slice(0, 4).map((submission: PaymentSubmission) => { const receivedAt = submission.createdAt ?? submission.paidAt; const urgentAt = addHoursToDate(receivedAt, ADMIN_SLA_HOURS.paymentReviewUrgent); const escalateAt = addHoursToDate(receivedAt, ADMIN_SLA_HOURS.paymentReviewEscalate); const maxAt = addHoursToDate(receivedAt, ADMIN_SLA_HOURS.paymentReviewMax); const maxMeta = getDeadlineMeta(maxAt, 'Batas maksimal review bukti'); const urgentMeta = getDeadlineMeta(urgentAt, 'Urgent sejak'); return { id: `payment-review-${submission.id}`, ruleId: 'payment-review-sla', entityType: 'payment-submission', entityId: submission.id, priority: urgentMeta.isExpired ? 'HIGH' as const : 'MEDIUM' as const, type: '2. Review pembayaran', subject: submission.invoice?.invoiceNumber || submission.tenant?.fullName || `Bukti #${submission.id}`, issue: `Urgent sejak ${urgentAt ? makeClock(urgentAt) : '-'}; escalate ${escalateAt ? makeClock(escalateAt) : '-'}.`, receivedAtLabel: receivedAt ? makeClock(receivedAt) : undefined, deadlineLabel: maxMeta.hasDate ? maxMeta.absoluteLabel : undefined, timeStatusLabel: urgentMeta.hasDate ? urgentMeta.relativeLabel : undefined, timeStatusTone: urgentMeta.isExpired ? 'warning' as const : 'info' as const, recommendedAction: 'Verifikasi', actionTo: '/payment-submissions/review' }; }),
     ...renewRequests.slice(0, 3).map((request: RenewRequest) => { const deadline = addHoursToDate(request.createdAt, ADMIN_SLA_HOURS.renewReview); const meta = getDeadlineMeta(deadline, 'Batas review perpanjangan'); return { id: `renew-${request.id}`, ruleId: 'renew-meter-sla', entityType: 'renew', entityId: request.id, priority: meta.isExpired ? 'HIGH' as const : 'MEDIUM' as const, type: '3. Renew meter', subject: request.tenant?.fullName || request.stay?.room?.code || `Renew #${request.id}`, issue: 'Catat meter listrik/air sebelum setujui.', receivedAtLabel: request.createdAt ? makeClock(request.createdAt) : undefined, ...makeQueueTime(deadline), recommendedAction: 'Review Renew', actionTo: '/renew-requests' }; }),
@@ -333,6 +338,15 @@ export default function AdminDashboard() {
           <button type="button" className="btn btn-sm btn-outline-warning" onClick={() => navigate('/rooms')}>
             Cek kamar
           </button>
+        </Alert>
+      ) : null}
+      {activeArea === 'overview' && ktpReviewItems.length > 0 ? (
+        <Alert variant="warning" className="d-flex flex-wrap align-items-center gap-2 py-2">
+          <div className="flex-fill">
+            <strong>{ktpReviewItems.length} KTP menunggu pemeriksaan admin.</strong>
+            <span className="d-block small text-muted">{ktpReviewItems.slice(0, 3).map((tenant) => tenant.fullName).join(', ')}{ktpReviewItems.length > 3 ? ` dan ${ktpReviewItems.length - 3} lainnya` : ''}. AI hanya rekomendasi; admin tetap memutuskan.</span>
+          </div>
+          <button type="button" className="btn btn-sm btn-outline-warning" onClick={() => navigate('/tenants')}>Buka antrean KTP</button>
         </Alert>
       ) : null}
       {supportQueriesLoading ? <Alert variant="info" className="admin-support-loading-note">Data pendukung sedang dimuat. Dashboard utama tetap bisa dipakai.</Alert> : null}

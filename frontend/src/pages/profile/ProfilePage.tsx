@@ -7,7 +7,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Alert, Button, Card, Col, Form, Row, Spinner } from 'react-bootstrap';
 import PasswordInput from '../../components/common/PasswordInput';
 import { changePassword, updateMyTipInfo } from '../../api/auth';
-import { getTenantProfile, fillTenantProfileOnboarding } from '../../api/tenants';
+import { getTenantProfile, fillTenantProfileOnboarding, uploadMyKtpImage } from '../../api/tenants';
 import type { TenantProfileOnboardingPayload } from '../../api/tenants';
 import PageHeader from '../../components/common/PageHeader';
 import { useAuth } from '../../context/AuthContext';
@@ -475,6 +475,18 @@ export default function ProfilePage() {
     });
   };
 
+  const ktpUploadMutation = useMutation({
+    mutationFn: (file: File) => {
+      if (!user?.tenantId) throw new Error('Akun belum terhubung ke data penghuni.');
+      return uploadMyKtpImage(user.tenantId, file);
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['tenant-self-profile'] }),
+  });
+
+  const ktpStatus = tenantData?.ktpVerifiedAt
+    ? (tenantData.ktpVerificationMethod === 'LEGACY' ? 'LEGACY_VERIFIED' : 'VERIFIED')
+    : tenantData?.ktpImageUrl ? 'PENDING_REVIEW' : 'NOT_SUBMITTED';
+
   const hasAnyInput = ONBOARDING_FIELD_DEFS.some(
     (f) =>
       (completion?.missingFields ?? []).includes(f.key) &&
@@ -626,7 +638,36 @@ export default function ProfilePage() {
 
       {/* ── Tenant: KTP OCR ── */}
       {isTenant && (
-        <KtpOcrSection onApply={handleOcrApply} />
+        <>
+          <Card className="content-card border-0 mt-4">
+            <Card.Body>
+              <div className="d-flex flex-wrap justify-content-between align-items-start gap-3">
+                <div>
+                  <div className="text-uppercase text-muted small fw-semibold mb-1">Verifikasi Identitas</div>
+                  <h5 className="mb-1">Foto KTP</h5>
+                  <p className="text-muted small mb-0">AI hanya memberi rekomendasi. Keputusan verifikasi tetap dilakukan admin.</p>
+                </div>
+                <span className={`badge ${ktpStatus === 'VERIFIED' ? 'bg-success' : ktpStatus === 'LEGACY_VERIFIED' ? 'bg-info text-dark' : ktpStatus === 'PENDING_REVIEW' ? 'bg-warning text-dark' : 'bg-secondary'}`}>
+                  {ktpStatus === 'VERIFIED' ? 'Terverifikasi admin' : ktpStatus === 'LEGACY_VERIFIED' ? 'Terverifikasi dari data lama' : ktpStatus === 'PENDING_REVIEW' ? 'Menunggu pemeriksaan admin' : 'Belum mengunggah KTP'}
+                </span>
+              </div>
+              {ktpUploadMutation.isSuccess ? <Alert variant="success" className="mt-3 mb-0">Foto KTP berhasil dikirim dan masuk antrean pemeriksaan admin.</Alert> : null}
+              {ktpUploadMutation.isError ? <Alert variant="danger" className="mt-3 mb-0">{getApiErrorMessage(ktpUploadMutation.error, 'Upload KTP gagal. Coba kembali.')}</Alert> : null}
+              <div className="d-flex flex-wrap align-items-center gap-2 mt-3">
+                <Button as="label" variant={ktpStatus === 'NOT_SUBMITTED' ? 'primary' : 'outline-primary'} size="sm" className="mb-0">
+                  {ktpUploadMutation.isPending ? 'Mengunggah...' : ktpStatus === 'NOT_SUBMITTED' ? 'Upload Foto KTP' : 'Ganti Foto KTP'}
+                  <input type="file" accept="image/jpeg,image/png,image/webp" capture="environment" hidden disabled={ktpUploadMutation.isPending} onChange={(event) => {
+                    const file = event.currentTarget.files?.[0];
+                    event.currentTarget.value = '';
+                    if (file) ktpUploadMutation.mutate(file);
+                  }} />
+                </Button>
+                <small className="text-muted">JPG, PNG, atau WebP; maksimal 4 MB. Upload baru akan diperiksa ulang.</small>
+              </div>
+            </Card.Body>
+          </Card>
+          <KtpOcrSection onApply={handleOcrApply} />
+        </>
       )}
 
       {/* ── Tenant onboarding: Data Penghuni Tambahan ── */}

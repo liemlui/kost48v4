@@ -1,6 +1,11 @@
 import client from './client';
 import { ApiEnvelope, Tenant, TenantProfileResponse } from '../types';
 
+export async function getTenantKtpReviewQueue(): Promise<Tenant[]> {
+  const response = await client.get<ApiEnvelope<{ items: Tenant[] }>>('/tenants?limit=300&isActive=true');
+  return (response.data.data?.items ?? []).filter((tenant) => !!tenant.ktpImageUrl && !tenant.ktpVerifiedAt);
+}
+
 /** Detail tenant (OWNER/ADMIN) — termasuk field KTP untuk kartu verifikasi. */
 export async function getTenant(tenantId: number): Promise<Tenant> {
   const response = await client.get<ApiEnvelope<Tenant>>(`/tenants/${tenantId}`);
@@ -15,6 +20,11 @@ export async function uploadTenantKtpImage(tenantId: number, file: File): Promis
     headers: { 'Content-Type': 'multipart/form-data' },
   });
   return response.data.data;
+}
+
+/** Upload mandiri dari portal; backend memastikan tenantId milik akun aktif. */
+export async function uploadMyKtpImage(tenantId: number, file: File): Promise<Tenant> {
+  return uploadTenantKtpImage(tenantId, file);
 }
 
 export async function deleteTenantKtp(tenantId: number): Promise<Tenant> {

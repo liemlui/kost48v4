@@ -3,6 +3,11 @@
 > Arsip changelog ringkas, dipisah dari M12 pada 2026-06-19 untuk hemat token AI (M12 = checklist aktif saja). **Entri changelog BARU ditulis DI SINI (paling atas)**, bukan di M12. Format: 1 header tanggal + 1-2 poin outcome per entri.
 > Entri lama (≤ 2026-07-16) diarsip ke docs/archieve/M13_CHANGELOG_ARSIP_S1_2026.md.
 
+## 2026-07-16 — KTP Portal dan UI Owner/Admin Bertahap
+
+- Tenant dapat upload/ganti KTP sendiri dengan guard kepemilikan; Admin mendapat antrean KTP pending dan detail review terpadu.
+- Standar UI dibukukan: **ringkas saat dilihat, lengkap saat dibuka**. Toggle Owner/Admin mengganti konteks, bukan kewenangan OWNER. Gate TypeScript backend/frontend lulus.
+
 ### 10 Jul 2026 (entri terbaru)
 - **Crawl E2E UI/UX Admin+Owner (Playwright) — 66 halaman LULUS bersih** — suite baru `frontend/e2e/admin-owner-crawl.spec.ts`: login nyata via UI terhadap **server combined paket deploy** (production-like, port 3100, DB UAT ter-seed 13 kamar), kunjungi OWNER 35 route + ADMIN 31 route; deteksi pageerror / console.error / HTTP≥500 / 4xx API / request gagal / halaman blank + screenshot per halaman (`frontend/e2e-out/`). Hasil akhir: **OWNER 35/35 & ADMIN 31/31 render OK, 0 temuan** setelah 1 fix: ADMIN membuka /settings memicu 403 `GET /owner-ai/usage` (endpoint memang OWNER-only, G7) → `OwnerSettingsPage` AiSettingsPanel kini fetch usage hanya bila OWNER + tampil catatan "hanya OWNER" untuk ADMIN. Catatan infra: vite dev tak punya proxy `/api` (e2e memakai `E2E_BASE` → combined 3100); suite a11y `axe-auth.spec.ts` yang tercatat di M12 ikut terhapus di `e505894`.
 

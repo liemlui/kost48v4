@@ -208,6 +208,9 @@ export class TenantsService {
     file: { fileKey: string; fileUrl: string; originalFilename?: string; mimeType: string; fileSizeBytes?: number },
     actor: CurrentUserPayload,
   ) {
+    if (actor.role === UserRole.TENANT && actor.tenantId !== id) {
+      throw new ForbiddenException('Kamu hanya dapat mengunggah KTP milikmu sendiri.');
+    }
     const tenant = await this.prisma.tenant.findUnique({ where: { id }, select: { id: true, ktpImageFileKey: true, profilePhotoFileKey: true } });
     if (!tenant) throw new NotFoundException('Tenant tidak ditemukan');
     const updated = await this.prisma.tenant.update({
@@ -220,6 +223,8 @@ export class TenantsService {
         ktpImageFileSizeBytes: file.fileSizeBytes ?? null,
         ktpVerifiedAt: null,
         ktpVerifiedById: null,
+        ktpVerificationMethod: null,
+        ktpVerificationNotes: null,
         ktpDeletedAt: null,
       },
     });
@@ -1006,6 +1011,10 @@ export class TenantsService {
         updatedAt: true,
         // PUB-FOTO-PROFIL-KTP: url avatar terproteksi (disajikan via endpoint authed).
         profilePhotoUrl: true,
+        ktpImageUrl: true,
+        ktpVerifiedAt: true,
+        ktpVerificationMethod: true,
+        ktpVerificationNotes: true,
         // notes deliberately excluded — admin-internal field
       },
     });

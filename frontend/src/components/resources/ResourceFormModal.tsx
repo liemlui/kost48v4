@@ -13,6 +13,7 @@ import SafeImage from '../common/SafeImage';
 import { uploadAnnouncementImage, uploadRoomImage } from '../../api/mediaUploads';
 import { compressImageFile as compressBrowserImage } from '../../utils/compressImageFile';
 import { formatDateOnly } from '../../utils/dateTime';
+import KtpOcrValidateCard from '../ai/KtpOcrValidateCard';
 
 // ═══════════════════════════════════════════════════════════
 //  SECTION: ResourceFormModal — Helpers
@@ -691,6 +692,16 @@ export default function ResourceFormModal({
               )}
             </Card.Body>
           </Card>
+        ) : null}
+        {config.path === '/tenants' && editingItem?.id ? (
+          <div className="mt-4">
+            <KtpOcrValidateCard
+              tenantId={Number(editingItem.id)}
+              tenantName={String(editingItem.fullName ?? '')}
+              ktpVerifiedAt={(editingItem.ktpVerifiedAt as string | null | undefined) ?? null}
+              ktpVerificationMethod={(editingItem.ktpVerificationMethod as string | null | undefined) ?? null}
+            />
+          </div>
         ) : null}
       </Modal.Body>
       <Modal.Footer>

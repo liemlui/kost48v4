@@ -9,6 +9,7 @@
 3. `docs/M12_CHECKLIST_CHANGELOG.md` — checklist aktif, urutan eksekusi, dan gate verifikasi.
 4. `docs/M00_CODEMAP.md` — peta modul ke file; pakai ini dulu sebelum grep liar ke seluruh repo.
 5. Domain khusus: `M04` keuangan, `M05` siklus huni, `M06` operasional, `M07` publik/marketing, `M08` deploy, `M09` AI Owner/Admin.
+6. `docs/UI_UX_OWNER_ADMIN.md` — standar aktif UI Owner/Admin: ringkas saat dilihat, lengkap saat dibuka.
 
 Hindari membaca arsip besar kecuali benar-benar perlu forensik: `docs/archieve/*`, file `*_STALE.md`, `reference/*`, dan `backend/src/generated/*`.
 
@@ -107,6 +108,7 @@ Semua operasi dijalankan sequential dalam `runAll()` untuk menghindari race cond
 6. Data sensitif (KTP/NIK) minimal + terproteksi + dihapus saat keluar (UU PDP).
 7. Reward/benefit selalu berjejak akuntansi (DR/CR sesuai tipe reward).
 8. AI tidak langsung mutasi data; output AI = draft/rekomendasi; aksi final = approval manusia.
+9. UI tidak memilih antara lengkap atau sederhana: kemampuan tetap lengkap, tetapi detail dibuka bertahap.
 
 ---
 

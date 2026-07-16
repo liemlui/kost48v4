@@ -8,6 +8,8 @@ Fase G menjadikan AI sebagai pembantu keputusan Owner/Admin, bukan autopilot. AI
 
 ## Status Saat Ini
 
+- **Update 16 Jul 2026 — KTP portal/admin:** tenant dapat upload KTP miliknya dari Profil Saya dan upload masuk antrean Admin. OCR tetap lokal, AI hanya rekomendasi, OWNER/ADMIN melakukan keputusan final. Detail teknis dibuka bertahap agar antrean tetap ringkas.
+
 - **Fase G (G0-G9) SELESAI** 19-20 Jun 2026 — modul `backend/src/modules/owner-ai/` (15 file) + `frontend/src/components/ai/*`.
 - **Fase J — Hardening SELESAI** 20 Jun 2026 — J0-J4: helper/test PDP+uang, guard no-partial DP, hardening FE AI, audit PDP dibukukan di M09. Detail: `docs/M15_FASE_J_HARDENING_AI.md`.
 - **Fase K — Pasca-Audit SELESAI** 20 Jun 2026 — 13 task termasuk:
@@ -780,4 +782,3 @@ Untuk setiap task G:
 **Status:** 🟢 Solid — semua pilar arsitektur AI manual-only terverifikasi. Detail → `docs/archieve/M17_AUDIT_360_P3_P8.md`
 
 ✅ **Manual-only** — tidak ada cron/page-load/auto-ops · ✅ **OWNER/ADMIN only** (`@Roles`) · ✅ **Circuit breaker**: 5 gagal → open 30 detik · ✅ **Fallback offline** (MarketAnalysis.chat → `RULE_FALLBACK`) · ✅ **AI configurable** (model, base URL, daily limit dari Owner Settings) · ✅ **Budget guard** (env AI_DAILY_REQUEST_LIMIT, AI_MAX_INPUT_CHARS, AI_MAX_OUTPUT_TOKENS) · ✅ **Snapshot aggregated** (top 10-20, hemat token + PDP) · ✅ **Audit trail** (`AuditLog.meta.ai`: feature, model, promptHash, confidence, humanDecision) · ✅ **No direct mutation** (tidak approve payment, create expense, close ticket, posting journal) · ✅ **KTP OCR lokal** (Tesseract.js offline, teks saja ke DeepSeek)
-
