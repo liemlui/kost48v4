@@ -919,6 +919,40 @@ button.status-strip-item:hover {
 }
 
 @media (max-width: 576px) {
+  .admin-dashboard-queue-first {
+    overflow-x: clip;
+  }
+  .admin-command-head,
+  .admin-command-head-slim,
+  .assistant-insight-line,
+  .action-queue-card,
+  .owner-panel {
+    max-width: 100%;
+    min-width: 0;
+  }
+  .admin-command-head,
+  .admin-command-head-slim,
+  .assistant-insight-line,
+  .table-meta,
+  .queue-header-actions,
+  .owner-panel-heading,
+  .owner-panel-body {
+    width: 100%;
+  }
+  .admin-command-head h1,
+  .admin-command-head p,
+  .assistant-insight-copy span,
+  .panel-subtitle,
+  .action-queue-subject-cell small {
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+  .queue-header-actions {
+    justify-content: flex-start;
+  }
+  .admin-command-status-line {
+    min-width: 0;
+  }
   .status-strip-v2 {
     grid-template-columns: 1fr;
   }

@@ -55,3 +55,8 @@ Contoh KTP:
 - Dashboard Admin: `frontend/src/pages/dashboard/DashboardAdmin.tsx`.
 - Detail tenant/KTP: `frontend/src/components/resources/ResourceFormModal.tsx`, `frontend/src/components/ai/KtpOcrValidateCard.tsx`.
 - Portal upload KTP: `frontend/src/pages/profile/ProfilePage.tsx`.
+
+## Verifikasi Visual Terakhir
+
+- Playwright crawl admin/owner pada 16 Jul 2026 lulus bersih: OWNER 35/35 route, ADMIN 31/31 route, 0 blank, 0 temuan.
+- Mobile 375px untuk Dashboard, Masa Sewa & Penghuni, Keuangan, dan Staff & Tiket tidak lagi horizontal overflow; bottom nav admin tampil normal.

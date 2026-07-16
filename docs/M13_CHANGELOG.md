@@ -1,5 +1,10 @@
 # KOST48 V5 — M13 Changelog
 
+## 2026-07-16 -- Fase 7 Playwright Crawl dan Fix Overflow Mobile Dashboard
+
+- Crawl Playwright admin/owner lulus bersih di server lokal: OWNER 35/35 route render OK, ADMIN 31/31 route render OK, 0 blank, 0 temuan, 0 console/pageerror/request gagal.
+- Mobile dashboard 375px sempat overflow 439px; diperbaiki lewat clamp CSS di `frontend/src/styles/08-admin.css` sehingga dashboard/stays/invoices/tickets tetap pas lebar viewport, bottom nav muncul, dan screenshot mobile tersimpan di `frontend/e2e-out/phase7-mobile-admin-*.png`.
+
 > Arsip changelog ringkas, dipisah dari M12 pada 2026-06-19 untuk hemat token AI (M12 = checklist aktif saja). **Entri changelog BARU ditulis DI SINI (paling atas)**, bukan di M12. Format: 1 header tanggal + 1-2 poin outcome per entri.
 > Entri lama (≤ 2026-07-16) diarsip ke docs/archieve/M13_CHANGELOG_ARSIP_S1_2026.md.
 

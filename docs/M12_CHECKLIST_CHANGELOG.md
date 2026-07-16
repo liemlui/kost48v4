@@ -11,6 +11,7 @@
 - [x] Dashboard Admin menampilkan KTP pending; detail review berada di modal tenant.
 - [x] Toggle Kokpit Owner/Area Admin diverifikasi pada desktop/mobile dan route terpisah.
 - [x] Standar UI dibukukan di `docs/UI_UX_OWNER_ADMIN.md`.
+- [x] Crawl Playwright admin/owner lulus bersih; mobile 375px dashboard/stays/invoices/tickets tanpa overflow horizontal.
 - **Gate:** TypeScript backend dan frontend lulus.
 
 1. **Orientasi:** buka bagian [ANTRIAN EKSEKUSI AKTIF](#antrian-eksekusi-aktif) di file ini.
