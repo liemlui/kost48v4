@@ -14,6 +14,7 @@ import PaginationControls from '../../components/common/PaginationControls';
 import { formatRupiah } from '../../utils/formatCurrency';
 import { getRenewApprovalSafety, getRenewRequestRiskBadge } from '../../utils/renewApprovalSafety';
 import { getRenewTermLabel } from '../../utils/renewTermLabels';
+import { getStatusLabel } from '../../utils/statusLabels';
 import type { ApproveRenewRequestPayload, PaginatedResponse, RenewRequest } from '../../types';
 import { formatDateOnly } from '../../utils/dateTime';
 
@@ -444,7 +445,7 @@ export default function RenewRequestsAdminPage() {
                         </Button>
                       ) : rr.status === 'DP_SECURED' && rr.settlementInvoice ? (
                         <Button variant="outline-primary" size="sm" href={`/invoices/${rr.settlementInvoice.id}`}>
-                          Pelunasan: {rr.settlementInvoice.status}
+                          Pelunasan: {getStatusLabel(rr.settlementInvoice.status, undefined, { domain: 'invoice' })}
                         </Button>
                       ) : rr.status === 'PENDING_DECISION' ? (
                         <span className="text-muted small">Menunggu keputusan tenant</span>

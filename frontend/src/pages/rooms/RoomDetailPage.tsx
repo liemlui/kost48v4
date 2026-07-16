@@ -219,7 +219,7 @@ export default function RoomDetailPage() {
                 </div>
                 <div className="metric-tile">
                   <div className="metric-tile-label">Status</div>
-                  <div className="metric-tile-value">{room.status}</div>
+                  <div className="metric-tile-value">{staffRoomStatusLabel(room.status)}</div>
                 </div>
                 <div className="metric-tile">
                   <div className="metric-tile-label">Ukuran kamar</div>

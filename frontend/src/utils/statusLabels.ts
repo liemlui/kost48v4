@@ -1,5 +1,5 @@
 export type StatusLabelTone = 'admin' | 'tenant';
-export type StatusLabelDomain = 'invoice' | 'payment' | 'stay' | 'room' | 'deposit' | 'ticket' | 'renew' | 'checkout' | 'default';
+export type StatusLabelDomain = 'invoice' | 'payment' | 'stay' | 'room' | 'deposit' | 'ticket' | 'renew' | 'checkout' | 'loyalty' | 'default';
 
 export function getStatusLabel(status?: string, customLabel?: string, options?: { tone?: StatusLabelTone; domain?: StatusLabelDomain }): string {
   if (customLabel) return customLabel;
@@ -30,11 +30,26 @@ export function getStatusLabel(status?: string, customLabel?: string, options?: 
     RESERVED: 'Dipesan',
   };
 
+  const loyaltyLabels: Record<string, string> = {
+    PENDING: 'Menunggu review',
+    PENDING_REVIEW: 'Menunggu review',
+    APPROVED: 'Disetujui',
+    FULFILLED: 'Selesai',
+    REJECTED: 'Ditolak',
+    CANCELLED: 'Dibatalkan',
+    ACKNOWLEDGED: 'Sudah diakui',
+    IMPROVED: 'Menunggu konfirmasi',
+    CONFIRMED: 'Selesai (+poin)',
+    DISMISSED: 'Ditolak',
+  };
+
   if (tone === 'tenant') {
     if (domain === 'invoice' && tenantInvoiceLabels[normalized]) return tenantInvoiceLabels[normalized];
     if (domain === 'payment' && tenantPaymentLabels[normalized]) return tenantPaymentLabels[normalized];
     if (domain === 'stay' && tenantStayLabels[normalized]) return tenantStayLabels[normalized];
   }
+
+  if (domain === 'loyalty' && loyaltyLabels[normalized]) return loyaltyLabels[normalized];
 
   const labels: Record<string, string> = {
     ACTIVE: 'Aktif',
@@ -116,6 +131,7 @@ export function getStatusLabel(status?: string, customLabel?: string, options?: 
     OTA: 'OTA',
     DIRECT: 'Langsung',
     MANUAL: 'Manual Admin',
+    FULFILLED: 'Selesai',
     WORK: 'Kerja',
     STUDY: 'Studi',
     TRANSIT: 'Transit',

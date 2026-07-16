@@ -1,4 +1,5 @@
 import '../../styles/tenant-area';
+import PageHeader from '../../components/common/PageHeader';
 import { useState } from 'react';
 import { Alert, Badge, Button, Card, Col, Row, Spinner } from 'react-bootstrap';
 import { Navigate } from 'react-router-dom';
@@ -7,6 +8,7 @@ import { getLoyaltyLeaderboard, getMyLoyalty, getMyPeerReportsAboutMe, getMyRede
 import { getCleanlinessRanking } from '../../api/marketing';
 import { fetchPublicConfig } from '../../api/settings';
 import { formatDateOnly } from '../../utils/dateTime';
+import { getStatusLabel } from '../../utils/statusLabels';
 
 const STATUS_VARIANT: Record<string, string> = {
   PENDING: 'warning',
@@ -72,9 +74,14 @@ export default function MyLoyaltyPage() {
   });
 
   return (
-    <div className="container py-4">
+    <div>
+      <PageHeader
+        eyebrow="Portal Penghuni"
+        title="Program Loyalitas"
+        description="Kumpulkan poin dari kebaikan dan tukarkan dengan reward."
+      />
+      <div className="container py-4">
       <div className="d-flex align-items-center gap-3 mb-3 flex-wrap">
-        <h3 className="mb-0">Poin Kebaikan & Reward</h3>
         <Badge bg="primary" pill className="fs-6">{balance.toLocaleString('id-ID')} poin tersisa</Badge>
       </div>
 
@@ -192,7 +199,7 @@ export default function MyLoyaltyPage() {
                   {r.status === 'ACKNOWLEDGED' ? (
                     <Button size="sm" variant="success" disabled={improveMutation.isPending} onClick={() => improveMutation.mutate(r.id)}>Sudah saya perbaiki</Button>
                   ) : (
-                    <Badge bg={r.status === 'CONFIRMED' ? 'success' : 'secondary'}>{r.status === 'IMPROVED' ? 'Menunggu konfirmasi' : r.status === 'CONFIRMED' ? 'Selesai (+poin)' : r.status}</Badge>
+                    <Badge bg={r.status === 'CONFIRMED' ? 'success' : 'secondary'}>{getStatusLabel(r.status, undefined, { domain: 'loyalty' })}</Badge>
                   )}
                 </li>
               ))}
@@ -268,7 +275,7 @@ export default function MyLoyaltyPage() {
                       <div className="fw-semibold">{r.reward?.name ?? `Reward #${r.rewardId}`}</div>
                       <small className="text-muted">{formatDateOnly(r.requestedAt)} · {r.pointCost} poin</small>
                     </span>
-                    <Badge bg={STATUS_VARIANT[r.status] ?? 'secondary'}>{r.status}</Badge>
+                    <Badge bg={STATUS_VARIANT[r.status] ?? 'secondary'}>{getStatusLabel(r.status, undefined, { domain: 'loyalty' })}</Badge>
                   </li>
                 ))}
               </ul>
@@ -298,6 +305,7 @@ export default function MyLoyaltyPage() {
           </Card>
         </Col>
       </Row>
+    </div>
     </div>
   );
 }

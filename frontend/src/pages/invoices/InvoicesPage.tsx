@@ -25,6 +25,7 @@ import { fetchAccountingReadiness } from '../../api/accounting';
 import { useAuth } from '../../context/AuthContext';
 import { getInvoiceTotalAmount } from '../../utils/invoiceTotals';
 import { buildCancelInvoiceSafety, buildIssueInvoiceSafety } from '../../utils/invoiceActionSafety';
+import { getStatusLabel } from '../../utils/statusLabels';
 
 // ═══════════════════════════════════════════════════════════
 //  COMPONENT: InvoiceAnalyticsPanel & InvoicesPage
@@ -663,7 +664,7 @@ export default function InvoicesPage() {
               </Alert>
               <div className="border rounded-4 p-3 mb-3">
                 <div className="fw-semibold">{cancelTarget.invoiceNumber || `INV-${cancelTarget.id}`}</div>
-                <div className="small text-muted">Status: {cancelTarget.status} · Total <CurrencyDisplay amount={getInvoiceTotalAmount(cancelTarget)} /></div>
+                <div className="small text-muted">Status: {getStatusLabel(cancelTarget.status, undefined, { domain: 'invoice' })} · Total <CurrencyDisplay amount={getInvoiceTotalAmount(cancelTarget)} /></div>
               </div>
               <Form.Group>
                 <Form.Label>Alasan pembatalan</Form.Label>

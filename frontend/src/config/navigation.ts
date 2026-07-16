@@ -20,7 +20,6 @@ export type TenantPortalStage = 'browsing' | 'booking' | 'occupied';
 // 🔧 Area Admin. Beberapa route digabung lewat `activePaths` agar tetap reachable tanpa nambah item:
 // - "Akuntansi & Aset" mencakup /finance/accounting-setup + /finance/assets + /loss-refunds (Refund Kalah-Cepat, OWNER-only).
 // - "Akun & Layanan" mencakup /users + /tenants + /additional-services + /service-interests.
-// Pengumuman (/announcements) ada di sidebar admin + tombol 📣 di topbar (sebelah lonceng).
 const ownerSections: NavigationSection[] = [
   {
     title: 'Keputusan Owner',
@@ -38,29 +37,49 @@ const ownerSections: NavigationSection[] = [
 
 export const adminSections: NavigationSection[] = [
   {
-    title: 'Operasional Kos',
+    title: 'Huni & Uang',
     links: [
       { to: '/dashboard', label: 'Dashboard', icon: '📊', hint: 'Command Center ringkas berisi prioritas paling penting dari semua menu.' },
       { to: '/stays', label: 'Masa Sewa & Penghuni', icon: '🏠', hint: 'Booking, masa sewa aktif, perpanjangan, keluar, dan daftar penghuni.', activePaths: ['/stays', '/tenants', '/renew-requests'] },
       { to: '/invoices', label: 'Keuangan', icon: '🧾', hint: 'Tagihan, review pembayaran, voucher WiFi, pendapatan tambahan, dan pengeluaran.', activePaths: ['/invoices', '/invoice-payments', '/payment-submissions/review', '/wifi-sales', '/ancillary-revenue', '/expenses', '/finance/accounting-setup', '/finance/assets'] },
+    ],
+  },
+  {
+    title: 'Operasional',
+    links: [
       { to: '/tickets', label: 'Staff & Tiket', icon: '👷', hint: 'Tiket operasional, staff, checklist, laporan lapangan, dan kinerja.', activePaths: ['/tickets', '/staff-routines', '/staff-performance'] },
-      { to: '/surveys', label: 'Survei Penghuni', icon: '⭐', hint: 'Lihat semua survei kepuasan, rating, komentar, dan ringkasan.' },
-      { to: '/guest-preferences', label: 'Preferensi Tamu', icon: '🎯', hint: 'Data preferensi kamar dari wizard publik.' },
       { to: '/rooms', label: 'Kamar & Stok', icon: '🏘️', hint: 'Status kamar, barang kamar, stok gudang, mutasi stok, dan catatan meter.', activePaths: ['/rooms', '/inventory', '/room-items', '/inventory-items', '/inventory-movements', '/meter-readings'] },
       { to: '/ac-maintenance', label: 'Perawatan AC', icon: '❄️', hint: 'Pantau pemakaian AC dan jadwalkan cuci AC secara konsisten.' },
+    ],
+  },
+  {
+    title: 'Penghuni & Komunikasi',
+    links: [
+      { to: '/surveys', label: 'Survei Penghuni', icon: '⭐', hint: 'Lihat semua survei kepuasan, rating, komentar, dan ringkasan.' },
+      { to: '/guest-preferences', label: 'Preferensi Tamu', icon: '🎯', hint: 'Data preferensi kamar dari wizard publik.' },
       { to: '/announcements', label: 'Pengumuman', icon: '📣', hint: 'Buat dan kelola pengumuman untuk penghuni dan staff.' },
-      { to: '/loyalty', label: 'Loyalitas & Reward', icon: '🎁', hint: 'Setujui penukaran reward tenant dan lihat katalog.' },
+      { to: '/loyalty', label: 'Reward', icon: '🎁', hint: 'Setujui penukaran reward tenant dan lihat katalog.' },
     ],
   },
 ];
 
 // OWN-ROUTE-SPLIT: OWNER dalam mode admin memakai route nyata `/admin-dashboard`
-// (bukan `/dashboard` milik ADMIN/STAFF). Sama persis dengan adminSections,
-// hanya tautan dashboard yang diarahkan ke route owner-admin.
+// (bukan `/dashboard` milik ADMIN/STAFF). Sama seperti adminSections,
+// tetapi tautan dashboard diarahkan ke route owner-admin dan label tertentu disesuaikan.
 export const ownerAdminSections: NavigationSection[] = adminSections.map((section) => ({
   ...section,
-  links: section.links.map((link) => (link.to === '/dashboard' ? { ...link, to: '/admin-dashboard' } : link)),
+  links: section.links.map((link) => {
+    const withDashboard = link.to === '/dashboard' ? { ...link, to: '/admin-dashboard' } : link;
+    return mapOwnerAdminLabel(withDashboard);
+  }),
 }));
+
+function mapOwnerAdminLabel(link: NavigationLink): NavigationLink {
+  if (link.label === 'Reward' && link.to === '/loyalty') {
+    return { ...link, label: 'Loyalitas & Reward', hint: 'Katalog reward, kelola poin, dan setujui penukaran tenant.' };
+  }
+  return link;
+}
 
 const staffSections: NavigationSection[] = [
   {

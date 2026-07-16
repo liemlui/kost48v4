@@ -1,8 +1,10 @@
+import PageHeader from '../../components/common/PageHeader';
 import { useState } from 'react';
 import { Alert, Badge, Button, Card, Form, Modal, Table } from 'react-bootstrap';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import CurrencyInput from '../../components/common/CurrencyInput';
 import { formatDateOnly } from '../../utils/dateTime';
+import { getStatusLabel } from '../../utils/statusLabels';
 import {
   confirmPeerReport,
   createReward,
@@ -84,9 +86,14 @@ export default function LoyaltyAdminPage() {
   const pending = redemptionsQuery.data?.filter((r) => r.status === 'PENDING') ?? [];
 
   return (
-    <div className="container py-4">
+    <div>
+      <PageHeader
+        eyebrow="Loyalitas"
+        title="Loyalitas & Reward"
+        description="Atur reward, penukaran poin, dan pantau laporan sesama penghuni."
+      />
+      <div className="container py-4">
       <div className="d-flex align-items-center gap-3 mb-4 flex-wrap">
-        <h3 className="mb-0">Loyalitas & Reward</h3>
         <Badge bg="light" text="dark" className="border">1 poin ≈ {formatRupiah(perPoint)}</Badge>
       </div>
       <p className="text-muted small">1 poin ≈ {formatRupiah(perPoint)}. Nilai dapat disesuaikan oleh owner. Saran: gunakan reward layanan in-house (pembersihan/cat ulang kamar, voucher WiFi) — lebih hemat daripada diskon sewa.</p>
@@ -111,7 +118,7 @@ export default function LoyaltyAdminPage() {
                   <td>{r.tenant?.fullName ?? `#${r.tenantId}`}</td>
                   <td>{r.reward?.name ?? `#${r.rewardId}`}</td>
                   <td>{r.pointCost}</td>
-                  <td><Badge bg={STATUS_VARIANT[r.status] ?? 'secondary'}>{r.status}</Badge></td>
+                  <td><Badge bg={STATUS_VARIANT[r.status] ?? 'secondary'}>{getStatusLabel(r.status, undefined, { domain: 'loyalty' })}</Badge></td>
                   <td><small>{formatDateOnly(r.requestedAt)}</small></td>
                   <td className="text-end">
                     {r.status === 'PENDING' ? (
@@ -141,7 +148,7 @@ export default function LoyaltyAdminPage() {
                   <td><small>{r.reportee?.fullName ?? '-'}</small></td>
                   <td><small>{r.category}</small></td>
                   <td><small>{r.description}</small></td>
-                  <td><Badge bg={r.status === 'CONFIRMED' ? 'success' : r.status === 'DISMISSED' ? 'secondary' : 'warning'} text={r.status === 'CONFIRMED' || r.status === 'DISMISSED' ? undefined : 'dark'}>{r.status}</Badge></td>
+                  <td><Badge bg={r.status === 'CONFIRMED' ? 'success' : r.status === 'DISMISSED' ? 'secondary' : 'warning'} text={r.status === 'CONFIRMED' || r.status === 'DISMISSED' ? undefined : 'dark'}>{getStatusLabel(r.status, undefined, { domain: 'loyalty' })}</Badge></td>
                   <td className="text-end">
                     {r.status === 'PENDING_REVIEW' && (
                       <>
@@ -216,6 +223,7 @@ export default function LoyaltyAdminPage() {
           <Button variant="primary" disabled={saveMutation.isPending || !form.name.trim()} onClick={() => saveMutation.mutate({ id: editId, input: form })}>{saveMutation.isPending ? 'Menyimpan...' : editId ? 'Simpan Perubahan' : 'Tambah Reward'}</Button>
         </Modal.Footer>
       </Modal>
+    </div>
     </div>
   );
 }
