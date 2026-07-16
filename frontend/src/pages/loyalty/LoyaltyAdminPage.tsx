@@ -84,21 +84,41 @@ export default function LoyaltyAdminPage() {
   };
 
   const pending = redemptionsQuery.data?.filter((r) => r.status === 'PENDING') ?? [];
+  const [activeTab, setActiveTab] = useState<string>(isOwner ? 'catalog' : 'redemption');
 
   return (
     <div>
       <PageHeader
         eyebrow="Loyalitas"
-        title="Loyalitas & Reward"
-        description="Atur reward, penukaran poin, dan pantau laporan sesama penghuni."
+        title={isOwner ? 'Loyalitas & Reward' : 'Penukaran Reward'}
+        description={isOwner
+          ? 'Atur katalog reward, kelola poin, dan setujui penukaran.'
+          : 'Proses permintaan penukaran reward dari tenant.'}
       />
       <div className="container py-4">
-      <div className="d-flex align-items-center gap-3 mb-4 flex-wrap">
-        <Badge bg="light" text="dark" className="border">1 poin ≈ {formatRupiah(perPoint)}</Badge>
+      <div className="admin-sub-nav mb-3" aria-label="Sub-navigasi loyalitas">
+        {isOwner ? (
+          <>
+            <button type="button" className={`admin-sub-nav-link${activeTab === 'catalog' ? ' active' : ''}`} onClick={() => setActiveTab('catalog')}>Katalog</button>
+            <button type="button" className={`admin-sub-nav-link${activeTab === 'redemption' ? ' active' : ''}`} onClick={() => setActiveTab('redemption')}>Penukaran</button>
+            <button type="button" className={`admin-sub-nav-link${activeTab === 'policy' ? ' active' : ''}`} onClick={() => setActiveTab('policy')}>Kebijakan</button>
+          </>
+        ) : (
+          <>
+            <button type="button" className={`admin-sub-nav-link${activeTab === 'redemption' ? ' active' : ''}`} onClick={() => setActiveTab('redemption')}>Penukaran</button>
+            <button type="button" className={`admin-sub-nav-link${activeTab === 'catalog' ? ' active' : ''}`} onClick={() => setActiveTab('catalog')}>Katalog</button>
+          </>
+        )}
       </div>
-      <p className="text-muted small">1 poin ≈ {formatRupiah(perPoint)}. Nilai dapat disesuaikan oleh owner. Saran: gunakan reward layanan in-house (pembersihan/cat ulang kamar, voucher WiFi) — lebih hemat daripada diskon sewa.</p>
       {error && <Alert variant="danger" dismissible onClose={() => setError(null)}>{error}</Alert>}
 
+      <div className="d-flex align-items-center gap-3 mb-4 flex-wrap">
+        <Badge bg="light" text="dark" className="border">1 poin ≈ {formatRupiah(perPoint)}</Badge>
+        {isOwner && activeTab === 'policy' && <Badge bg="info">Kebijakan — atur nilai poin di Pengaturan</Badge>}
+      </div>
+
+      {activeTab === 'redemption' && (
+      <>
       <Card className="mb-4">
         <Card.Header className="d-flex justify-content-between align-items-center">
           <strong>Permintaan Penukaran {pending.length > 0 && <Badge bg="warning" text="dark">{pending.length} menunggu</Badge>}</strong>
@@ -167,7 +187,10 @@ export default function LoyaltyAdminPage() {
           </Table>
         </Card.Body>
       </Card>
+      </>
+      )}
 
+      {activeTab === 'catalog' && (
       <Card>
         <Card.Header className="d-flex justify-content-between align-items-center">
           <strong>Katalog Reward</strong>
@@ -193,6 +216,30 @@ export default function LoyaltyAdminPage() {
           </Table>
         </Card.Body>
       </Card>
+      )}
+
+      {isOwner && activeTab === 'policy' && (
+        <Card className="mb-4">
+          <Card.Header><strong>Kebijakan Loyalitas</strong></Card.Header>
+          <Card.Body>
+            <p className="text-muted small mb-3">1 poin ≈ {formatRupiah(perPoint)}. Nilai dapat disesuaikan oleh owner. Saran: gunakan reward layanan in-house (pembersihan/cat ulang kamar, voucher WiFi) — lebih hemat daripada diskon sewa.</p>
+            <div className="d-flex flex-wrap gap-3">
+              <div className="border rounded p-3" style={{ minWidth: 160 }}>
+                <div className="text-muted small">Nilai per Poin</div>
+                <div className="fs-5 fw-bold">{formatRupiah(perPoint)}</div>
+              </div>
+              <div className="border rounded p-3" style={{ minWidth: 160 }}>
+                <div className="text-muted small">Total Reward Aktif</div>
+                <div className="fs-5 fw-bold">{rewardsQuery.data?.length ?? 0}</div>
+              </div>
+              <div className="border rounded p-3" style={{ minWidth: 160 }}>
+                <div className="text-muted small">Penukaran Menunggu</div>
+                <div className="fs-5 fw-bold">{pending.length}</div>
+              </div>
+            </div>
+          </Card.Body>
+        </Card>
+      )}
 
       <Modal show={showForm} onHide={() => setShowForm(false)}>
         <Modal.Header closeButton><Modal.Title>{editId ? 'Ubah Reward' : 'Reward Baru'}</Modal.Title></Modal.Header>

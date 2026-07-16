@@ -1,5 +1,6 @@
 import '../../styles/public-area';
 import { lazy } from 'react';
+import { NavLink } from 'react-router-dom';
 import { PageLoadingSkeleton } from '../../components/common/SkeletonLoader';
 import AppLayout from '../../components/layout/AppLayout';
 import { useAuth } from '../../context/AuthContext';
@@ -27,6 +28,14 @@ export default function RoomsRouteEntry() {
   if (user && ['OWNER', 'ADMIN'].includes(user.role)) {
     return (
       <AppLayout>
+        <div className="admin-sub-nav" aria-label="Sub-navigasi kamar & inventaris">
+          <NavLink to="/rooms" end className={({ isActive }) =>
+            `admin-sub-nav-link${isActive ? ' active' : ''}`}>Status Kamar</NavLink>
+          <NavLink to="/meter-readings" className={({ isActive }) =>
+            `admin-sub-nav-link${isActive ? ' active' : ''}`}>Catatan Meter</NavLink>
+          <NavLink to="/inventory" className={({ isActive }) =>
+            `admin-sub-nav-link${isActive ? ' active' : ''}`}>Inventaris</NavLink>
+        </div>
         <ConfiguredResourcePage resource="rooms" />
       </AppLayout>
     );

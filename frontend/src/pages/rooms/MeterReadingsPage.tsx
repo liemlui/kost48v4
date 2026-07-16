@@ -242,7 +242,15 @@ export default function MeterReadingsPage() {
       </Card>
 
       {/* Ringkasan per Kamar — badge belum dicatat */}
-      {rooms.length > 0 && (
+      {roomsQuery.isLoading ? (
+        <Card className="content-card border-0 mb-3">
+          <Card.Body><div className="py-2 text-muted small">Memuat data kamar...</div></Card.Body>
+        </Card>
+      ) : roomsQuery.isError ? (
+        <Card className="content-card border-0 mb-3">
+          <Card.Body><Alert variant="warning" className="py-2 mb-0 small">Status kamar tidak dapat dimuat.</Alert></Card.Body>
+        </Card>
+      ) : rooms.length > 0 ? (
         <Card className="content-card border-0 mb-3">
           <Card.Body>
             <div className="small text-uppercase text-muted fw-semibold mb-2">Status Pencatatan Bulan Ini</div>
@@ -285,7 +293,7 @@ export default function MeterReadingsPage() {
             </div>
           </Card.Body>
         </Card>
-      )}
+      ) : null}
 
       {/* Tabel Bacaan */}
       <Card className="content-card border-0">

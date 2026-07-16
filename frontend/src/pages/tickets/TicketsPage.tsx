@@ -13,7 +13,7 @@ import {
   Table,
 } from "react-bootstrap";
 import { Bar, BarChart, CartesianGrid, Cell, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, NavLink } from "react-router-dom";
 import PageHeader from "../../components/common/PageHeader";
 import PaginationControls from "../../components/common/PaginationControls";
 import EmptyState from "../../components/common/EmptyState";
@@ -193,6 +193,7 @@ export default function TicketsPage() {
   const [adminCheckedFinalImpact, setAdminCheckedFinalImpact] = useState(false);
   const [closeSubmitAttempted, setCloseSubmitAttempted] = useState(false);
   const [lightboxUrl, setLightboxUrl] = useState<string | null>(null);
+  const [showAnalytics, setShowAnalytics] = useState(true);
 
   const PAGE_SIZE = 5;
   const ticketsQuery = useQuery({
@@ -264,6 +265,10 @@ export default function TicketsPage() {
     done: items.filter((i) => i.status === "DONE").length,
     closed: items.filter((i) => i.status === "CLOSED").length,
   };
+
+  const unassignedOpenCount = items.filter(
+    (i) => i.status === "OPEN" && !i.assignedToId
+  ).length;
 
   const filteredItems = useMemo(() => {
     return items.filter((item) =>
@@ -427,6 +432,7 @@ export default function TicketsPage() {
           onHide={() => setDetailTicket(null)}
           centered
           size="lg"
+          backdrop="static"
         >
           <Modal.Header closeButton>
             <Modal.Title>
@@ -562,97 +568,39 @@ export default function TicketsPage() {
         onAction={canAssign ? () => setShowCreateTicket(true) : undefined}
       />
 
-      <div
-        className="admin-area-internal-menu finance-inline-menu"
-        aria-label="Sub-menu Staff dan Tiket"
-      >
-        <div className="admin-area-internal-menu-head">
-          <span>Menu Operasional</span>
-          <small>Pilih area kerja yang perlu dicek tanpa membuka menu berulang.</small>
-        </div>
-        <div className="admin-area-internal-menu-scroll">
-          {[
-            {
-              id: "tickets",
-              icon: "🎫",
-              label: "Semua Tiket",
-              helper: "Daftar tiket aktif dan selesai.",
-              to: "/tickets",
-              count: counts.all,
-              active: true,
-            },
-            {
-              id: "assign",
-              icon: "👷",
-              label: "Perlu Assign",
-              helper: "Tiket baru yang belum ada petugas.",
-              to: "/tickets",
-              count: items.filter(
-                (ticket) => ticket.status === "OPEN" && !ticket.assignedToId,
-              ).length,
-              active: false,
-            },
-            {
-              id: "checklist",
-              icon: "📋",
-              label: "Checklist",
-              helper: "Checklist harian/mingguan/bulanan staff.",
-              to: "/staff-routines",
-              count: undefined,
-              active: false,
-            },
-            {
-              id: "field",
-              icon: "📝",
-              label: "Laporan Lapangan",
-              helper: "Laporan kondisi dari staff.",
-              to: "/tickets",
-              count: items.filter((ticket) =>
-                Boolean(
-                  ticket.linkedRoomItemId || ticket.linkedInventoryItemId,
-                ),
-              ).length,
-              active: false,
-            },
-            {
-              id: "score",
-              icon: "📈",
-              label: "Kinerja Staff",
-              helper: "Skor staff dan ulasan.",
-              to: "/staff-performance",
-              count: undefined,
-              active: false,
-            },
-          ].map((item) => (
-            <button
-              type="button"
-              key={item.id}
-              className={`admin-area-internal-chip info ${item.active ? "is-active" : ""}`.trim()}
-              onClick={() => navigate(item.to)}
-              title={item.helper}
-            >
-              <span className="admin-area-internal-chip-main">
-                <span className="admin-area-internal-icon" aria-hidden="true">
-                  {item.icon}
-                </span>
-                <span className="admin-area-internal-label">{item.label}</span>
-                {typeof item.count === "number" ? (
-                  <strong className="admin-area-internal-count">
-                    {item.count}
-                  </strong>
-                ) : null}
-              </span>
-              <small>{item.helper}</small>
-            </button>
-          ))}
-        </div>
+      <div className="admin-sub-nav" aria-label="Sub-navigasi operasional">
+        <NavLink to="/tickets" end className={({ isActive }) =>
+          `admin-sub-nav-link${isActive ? ' active' : ''}`}>Tiket</NavLink>
+        <NavLink to="/staff-routines" className={({ isActive }) =>
+          `admin-sub-nav-link${isActive ? ' active' : ''}`}>Rutinitas Staff</NavLink>
+        <NavLink to="/staff-performance" className={({ isActive }) =>
+          `admin-sub-nav-link${isActive ? ' active' : ''}`}>Kinerja</NavLink>
       </div>
+
+      {unassignedOpenCount > 0 || counts.done > 0 ? (
+        <Alert variant="warning" className="perlu-tindakan-alert mb-3">
+          <strong>⚠️ Prioritas:</strong>{' '}
+          {unassignedOpenCount > 0 ? `${unassignedOpenCount} tiket baru belum ditugaskan. ` : ''}
+          {counts.done > 0 ? `${counts.done} tiket selesai menunggu pengecekan admin.` : ''}
+        </Alert>
+      ) : null}
 
       {user?.role === "OWNER" || user?.role === "ADMIN" ? (
         <AdminStaffFieldReportQueue />
       ) : null}
 
-      {items.length > 0 && <TicketAnalyticsPanel items={items} counts={counts} />}
+      <div className="d-flex align-items-center gap-2 mb-2">
+        <button
+          type="button"
+          className="btn btn-sm btn-outline-secondary"
+          onClick={() => setShowAnalytics(!showAnalytics)}
+          aria-expanded={showAnalytics}
+          aria-label="Toggle analitik tiket"
+        >
+          {showAnalytics ? '🔽' : '▶️'} Analitik Tiket
+        </button>
+      </div>
+      {items.length > 0 && showAnalytics && <TicketAnalyticsPanel items={items} counts={counts} />}
 
       <div className="ticket-status-strip mb-3">
         <button

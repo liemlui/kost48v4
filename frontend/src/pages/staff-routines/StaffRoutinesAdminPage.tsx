@@ -251,7 +251,10 @@ export default function StaffRoutinesAdminPage() {
         <Card.Body>
           <h2 className="h5 mb-3">Daftar pekerjaan rutin</h2>
           {templatesQuery.isLoading ? <div className="py-4 text-muted">Memuat pekerjaan rutin...</div> : null}
-          {!templatesQuery.isLoading && !templates.length ? <EmptyState title="Belum ada pekerjaan rutin" description="Tambahkan checklist pertama untuk staf." /> : null}
+          {templatesQuery.isError ? (
+            <Alert variant="danger">Gagal memuat data pekerjaan rutin. <Button size="sm" onClick={() => templatesQuery.refetch()}>Coba Lagi</Button></Alert>
+          ) : null}
+          {!templatesQuery.isLoading && !templatesQuery.isError && !templates.length ? <EmptyState title="Belum ada pekerjaan rutin" description="Tambahkan checklist pertama untuk staf." /> : null}
           {templates.length ? (
             <Table responsive hover className="align-middle">
               <thead><tr><th>Pekerjaan</th><th>Jadwal</th><th>Area</th><th>Bukti</th><th>Status</th><th></th></tr></thead>

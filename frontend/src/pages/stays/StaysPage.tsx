@@ -4,7 +4,7 @@ import { useAuth } from '../../context/AuthContext';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Alert, Button, Card, Col, Form, Row, Spinner, Table } from 'react-bootstrap';
 import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { NavLink, useNavigate, useSearchParams } from 'react-router-dom';
 import { listStays } from '../../api/stays';
 import { rejectBooking } from '../../api/bookings';
 import { expireReservedBooking, runPaymentSubmissionExpiryCheck } from '../../api/paymentSubmissions';
@@ -176,6 +176,7 @@ export default function StaysPage() {
   const [rejectBookingTarget, setRejectBookingTarget] = useState<Stay | null>(null);
   const [approveTarget, setApproveTarget] = useState<CheckoutRequest | null>(null);
   const [rejectTarget, setRejectTarget] = useState<CheckoutRequest | null>(null);
+  const [analyticsOpen, setAnalyticsOpen] = useState(false);
   const PAGE_SIZE = 5;
 
   const isBookingsMode = statusFilter === 'BOOKINGS';
@@ -448,26 +449,13 @@ export default function StaysPage() {
         onAction={() => navigate('/stays/check-in')}
       />
 
-      <div className="admin-area-internal-menu finance-inline-menu" aria-label="Sub-menu masa sewa dan penghuni">
-        <div className="admin-area-internal-menu-head">
-          <span>Menu Masa Sewa & Penghuni</span>
-          <small>Navigasi</small>
-        </div>
-        <div className="admin-area-internal-menu-scroll">
-          {[
-            { id: 'process', icon: '🏠', label: 'Masa Sewa', helper: 'Booking dan masa sewa aktif.', to: '/stays', active: true },
-            { id: 'renew', icon: '🔁', label: 'Perpanjangan', helper: 'Review perpanjangan dan catatan meter.', to: '/renew-requests', active: false },
-            { id: 'tenant', icon: '👤', label: 'Penghuni', helper: 'Daftar penghuni dan akses portal.', to: '/tenants', active: false },
-            { id: 'checkin', icon: '➕', label: 'Check-in', helper: 'Masukkan tenant ke kamar.', to: '/stays/check-in', active: false },
-          ].map((item) => (
-            <button type="button" key={item.id} className={`admin-area-internal-chip info ${item.active ? 'is-active' : ''}`.trim()} onClick={() => navigate(item.to)} title={item.helper}>
-              <span className="admin-area-internal-chip-main">
-                <span className="admin-area-internal-icon" aria-hidden="true">{item.icon}</span>
-                <span className="admin-area-internal-label">{item.label}</span>
-              </span>
-            </button>
-          ))}
-        </div>
+      <div className="admin-sub-nav" aria-label="Sub-navigasi huni">
+        <NavLink to="/stays?status=BOOKINGS" className={({ isActive }) => `admin-sub-nav-link${isActive || statusFilter === 'BOOKINGS' ? ' active' : ''}`}>Booking</NavLink>
+        <NavLink to="/stays?status=ACTIVE" className={({ isActive }) => `admin-sub-nav-link${isActive || statusFilter === 'ACTIVE' ? ' active' : ''}`}>Aktif</NavLink>
+        <NavLink to="/stays?status=CHECKOUT" className={({ isActive }) => `admin-sub-nav-link${isActive || statusFilter === 'CHECKOUT' ? ' active' : ''}`}>Checkout</NavLink>
+        <NavLink to="/tenants?ktpStatus=PENDING_REVIEW" className="admin-sub-nav-link">Data Penghuni</NavLink>
+        <NavLink to="/renew-requests" className="admin-sub-nav-link">Perpanjangan</NavLink>
+        <NavLink to="/stays/check-in" className="admin-sub-nav-link admin-sub-nav-cta">+ Check-in</NavLink>
       </div>
 
       <AssistantInsightLine
@@ -478,7 +466,26 @@ export default function StaysPage() {
         actionTo={primaryAssistantItem?.actionTo}
         onAction={primaryAssistantItem?.onAction}
       />
+
+      {pendingApprovalCount > 0 || pendingCheckoutRequestCount > 0 ? (
+        <Alert variant="warning" className="perlu-tindakan-alert">
+          <strong>⚠️ Perlu Tindakan:</strong>{' '}
+          {pendingApprovalCount > 0 ? `${pendingApprovalCount} booking perlu disetujui. ` : ''}
+          {pendingCheckoutRequestCount > 0 ? `${pendingCheckoutRequestCount} checkout perlu direview.` : ''}
+        </Alert>
+      ) : null}
+
       {items.length > 0 && (
+        <>
+        <button
+          type="button"
+          className="analytics-toggle-btn mb-2"
+          onClick={() => setAnalyticsOpen((prev) => !prev)}
+          aria-expanded={analyticsOpen}
+        >
+          📊 {analyticsOpen ? 'Sembunyikan' : 'Lihat'} Analitik {analyticsOpen ? '▲' : '▼'}
+        </button>
+        {analyticsOpen ? (
         <StayAnalyticsPanel
           items={items}
           operationalActive={operationalActive}
@@ -487,6 +494,8 @@ export default function StaysPage() {
           pendingApproval={pendingApprovalCount}
           waitingPayment={waitingPaymentCount}
         />
+        ) : null}
+        </>
       )}
 
       <Card className="content-card border-0">

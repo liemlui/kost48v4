@@ -3,7 +3,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Alert, Badge, Button, Card, Col, Form, Modal, Row, Spinner } from 'react-bootstrap';
 import type { ColumnDef } from '@tanstack/react-table';
-import { useNavigate } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import { Bar, BarChart, CartesianGrid, Cell, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import DonutGauge from '../../components/charts/DonutGauge';
 import PageHeader from '../../components/common/PageHeader';
@@ -37,6 +37,14 @@ function fmtCompact(value: number): string {
   if (safe >= 1_000_000) return `Rp ${(safe / 1_000_000).toFixed(1)} jt`;
   if (safe >= 1_000) return `Rp ${(safe / 1_000).toFixed(0)} rb`;
   return `Rp ${new Intl.NumberFormat('id-ID').format(safe)}`;
+}
+
+function computeInvoiceSummary(allItems: any[]) {
+  const totalRupiah = allItems.reduce((s, inv) => s + (Number(inv.totalAmountRupiah) || 0), 0);
+  const collectionRupiah = allItems.reduce((s, inv) => s + (Number(inv.paidAmountRupiah) || 0), 0);
+  const totalOverdue = allItems.filter((inv) => isOverdue(inv)).reduce((s, inv) => s + (Number(inv.totalAmountRupiah) - Number(inv.paidAmountRupiah || 0)), 0);
+  const collectionRate = totalRupiah > 0 ? Math.round((collectionRupiah / totalRupiah) * 100) : 0;
+  return { totalRupiah, collectionRupiah, totalOverdue, collectionRate };
 }
 
 function InvoiceAnalyticsPanel({ stats, allItems }: { stats: { total: number; draft: number; billing: number; paid: number; overdue: number; cancelled: number }; allItems: any[] }) {
@@ -424,15 +432,6 @@ export default function InvoicesPage() {
     { key: 'CANCELLED', label: 'Dibatalkan', count: stats.cancelled },
   ];
 
-  const financeMenu = [
-    { id: 'invoices', icon: '🧾', label: 'Tagihan', helper: 'Tagihan sewa, deposit, utilitas, dan penghambat proses keluar.', to: '/invoices', active: true },
-    { id: 'review', icon: '✅', label: 'Review Pembayaran', helper: 'Bukti bayar yang perlu diverifikasi.', to: '/payment-submissions/review', count: undefined, active: false },
-    { id: 'wifi', icon: '📶', label: 'Voucher WiFi', helper: 'Pendapatan tambahan dari penjualan voucher WiFi.', to: '/wifi-sales', count: undefined, active: false },
-    { id: 'ancillary', icon: '🛒', label: 'Pendapatan Tambahan', helper: 'Laundry, galon, cleaning, parkir, dan add-on lain.', to: '/ancillary-revenue', count: undefined, active: false },
-    { id: 'expenses', icon: '💸', label: 'Pengeluaran', helper: 'Biaya operasional kos dan COGS layanan tambahan.', to: '/expenses', count: undefined, active: false },
-    { id: 'history', icon: '📚', label: 'Riwayat Bayar', helper: 'Pembayaran invoice yang sudah tercatat.', to: '/invoice-payments', count: undefined, active: false },
-  ];
-
   // P-04: TanStack Table columns — cell renderers bisa closure atas state modal karena definisi di sini
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const invoiceColumns = useMemo<ColumnDef<any, unknown>[]>(() => [
@@ -497,29 +496,13 @@ export default function InvoicesPage() {
         onAction={canManageFinance ? () => { setError(''); setShowCreate(true); } : undefined}
       />
 
-      <div className="admin-area-internal-menu finance-inline-menu" aria-label="Sub-menu keuangan">
-        <div className="admin-area-internal-menu-head">
-          <span>Menu Keuangan</span>
-          <small>Tagihan, pembayaran, voucher WiFi, pendapatan tambahan, pengeluaran, dan riwayat tetap satu area.</small>
-        </div>
-        <div className="admin-area-internal-menu-scroll">
-          {financeMenu.map((item) => (
-            <button
-              type="button"
-              key={item.id}
-              className={`admin-area-internal-chip info ${item.active ? 'is-active' : ''}`.trim()}
-              onClick={() => navigate(item.to)}
-              title={item.helper}
-            >
-              <span className="admin-area-internal-chip-main">
-                <span className="admin-area-internal-icon" aria-hidden="true">{item.icon}</span>
-                <span className="admin-area-internal-label">{item.label}</span>
-                {typeof item.count === 'number' ? <strong className="admin-area-internal-count">{item.count}</strong> : null}
-              </span>
-              <small>{item.helper}</small>
-            </button>
-          ))}
-        </div>
+      <div className="admin-sub-nav" aria-label="Sub-navigasi keuangan">
+        <NavLink to="/invoices" end className={({ isActive }) => `admin-sub-nav-link${isActive ? ' active' : ''}`}>Tagihan</NavLink>
+        <NavLink to="/payment-submissions/review" className={({ isActive }) => `admin-sub-nav-link${isActive ? ' active' : ''}`}>Review Pembayaran</NavLink>
+        <NavLink to="/wifi-sales" className={({ isActive }) => `admin-sub-nav-link${isActive ? ' active' : ''}`}>WiFi</NavLink>
+        <NavLink to="/ancillary-revenue" className={({ isActive }) => `admin-sub-nav-link${isActive ? ' active' : ''}`}>Pendapatan Lain</NavLink>
+        <NavLink to="/expenses" className={({ isActive }) => `admin-sub-nav-link${isActive ? ' active' : ''}`}>Pengeluaran</NavLink>
+        <NavLink to="/invoice-payments" className={({ isActive }) => `admin-sub-nav-link${isActive ? ' active' : ''}`}>Riwayat Bayar</NavLink>
       </div>
 
       {invoicesQuery.isLoading ? (
@@ -538,7 +521,37 @@ export default function InvoicesPage() {
         />
       )}
 
-      {allItems.length > 0 && <InvoiceAnalyticsPanel stats={stats} allItems={allItems} />}
+      {allItems.length > 0 && (
+        <>
+        <Row className="g-2 mb-3">
+          <Col xs={6} md={3}>
+            <div className="stat-mini-card">
+              <div className="stat-mini-label">Total Tagihan</div>
+              <div className="stat-mini-value">{fmtCompact(computeInvoiceSummary(allItems).totalRupiah)}</div>
+            </div>
+          </Col>
+          <Col xs={6} md={3}>
+            <div className="stat-mini-card text-success">
+              <div className="stat-mini-label">Terkumpul</div>
+              <div className="stat-mini-value">{fmtCompact(computeInvoiceSummary(allItems).collectionRupiah)}</div>
+            </div>
+          </Col>
+          <Col xs={6} md={3}>
+            <div className="stat-mini-card text-danger">
+              <div className="stat-mini-label">Overdue</div>
+              <div className="stat-mini-value">{fmtCompact(computeInvoiceSummary(allItems).totalOverdue)}</div>
+            </div>
+          </Col>
+          <Col xs={6} md={3}>
+            <div className="stat-mini-card">
+              <div className="stat-mini-label">Rasio Penagihan</div>
+              <div className="stat-mini-value">{computeInvoiceSummary(allItems).collectionRate}%</div>
+            </div>
+          </Col>
+        </Row>
+        <InvoiceAnalyticsPanel stats={stats} allItems={allItems} />
+        </>
+      )}
 
       <Card className="content-card border-0">
         <Card.Body>

@@ -1227,6 +1227,106 @@ button.status-strip-item:hover {
   vertical-align: middle;
 }
 
+/* ── V5.24 — admin-sub-nav: NavLink-based horizontal sub-navigation ── */
+.admin-sub-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin: 0.75rem 0 1rem;
+  padding: 0.5rem 0.65rem;
+  border-bottom: 1px solid #e2e8f0;
+  overflow-x: auto;
+}
+.admin-sub-nav-link {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.42rem 0.9rem;
+  border-radius: 10px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #475569;
+  text-decoration: none;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+.admin-sub-nav-link:hover {
+  background: #eff6ff;
+  color: #2563eb;
+  border-color: #bfdbfe;
+  text-decoration: none;
+}
+.admin-sub-nav-link.active {
+  background: #2563eb;
+  color: #fff;
+  border-color: #2563eb;
+}
+.admin-sub-nav-cta {
+  background: #ecfdf5;
+  color: #059669;
+  border-color: #a7f3d0;
+}
+.admin-sub-nav-cta:hover {
+  background: #d1fae5;
+  color: #047857;
+  border-color: #6ee7b7;
+}
+
+/* ── Ringkasan angka ── */
+.stat-mini-card {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 0.8rem 1rem;
+  text-align: center;
+  height: 100%;
+}
+.stat-mini-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #94a3b8;
+  margin-bottom: 0.25rem;
+}
+.stat-mini-value {
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: #0f172a;
+  letter-spacing: -0.02em;
+}
+.stat-mini-card.text-success .stat-mini-value { color: #059669; }
+.stat-mini-card.text-danger .stat-mini-value { color: #dc2626; }
+
+/* ── Analytics toggle ── */
+.analytics-toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: none;
+  border: 1px dashed #cbd5e1;
+  border-radius: 8px;
+  padding: 0.38rem 0.8rem;
+  font-size: 0.82rem;
+  color: #64748b;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.analytics-toggle-btn:hover {
+  border-color: #2563eb;
+  color: #2563eb;
+  background: #f8fafc;
+}
+
+/* ── Perlu Tindakan alert ── */
+.perlu-tindakan-alert {
+  border-left: 4px solid #f59e0b;
+  background: #fffbeb;
+  color: #92400e;
+  font-size: 0.88rem;
+}
+
 /* V5.22-H — Iconic internal area menus: compact chips with icon, count, and active state */
 .admin-area-internal-menu {
   display: grid;

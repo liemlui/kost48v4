@@ -8,6 +8,7 @@ import { Alert, Button, Card, Modal } from 'react-bootstrap';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { createResource, deleteResource, listResource, updateResource } from '../../api/resources';
 import PageHeader from '../../components/common/PageHeader';
+import { resourceHeaders } from '../../config/resourceHeaders';
 import { EntityBadgeFilterBar, StatusStrip } from '../../components/workspace';
 import ResourceFormModal from '../../components/resources/ResourceFormModal';
 import ResourceTable from '../../components/resources/ResourceTable';
@@ -581,12 +582,17 @@ export default function SimpleCrudPage({ config, hideAreaMenu = false }: { confi
           ? `Cek data ${config.title.toLowerCase()} yang perlu tindakan.`
           : `Data ${config.title.toLowerCase()} dengan menu dan filter terpisah.`;
 
+  const headerKey = config.path.replace(/^\//, '');
+  const headerOverride = resourceHeaders[headerKey];
+  const headerTitle = headerOverride?.title ?? config.title;
+  const headerDescription = headerOverride?.subtitle ?? pageDescription;
+
   return (
     <div className={isStaffView ? 'staff-simple-mode' : undefined}>
       <PageHeader
         eyebrow={isStaffView ? 'Daftar Cek' : 'Master data'}
-        title={config.title}
-        description={pageDescription}
+        title={headerTitle}
+        description={headerDescription}
         actionLabel={createGuard.allowed ? (config.createLabel || 'Tambah Data') : undefined}
         onAction={createGuard.allowed ? openCreate : undefined}
       />
