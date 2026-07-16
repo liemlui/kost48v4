@@ -7,7 +7,10 @@
 
 ## 1. Tujuan perangkat
 
-Satu node meter air membaca pulse dari flow sensor D20, mempertahankan total kumulatif walau reboot, dan mengirim telemetri yang terautentikasi ke backend KOST48.
+Satu node ESP32-C3 membaca 1-4 flow sensor, mempertahankan total kumulatif setiap
+channel walau reboot, dan mengirim telemetri yang terautentikasi ke backend
+KOST48. Setiap sensor diregistrasikan sebagai logical device tersendiri agar
+mapping kamar, secret, counter, dan histori tidak tercampur.
 
 Node harus tetap berguna ketika Wi-Fi atau API sementara mati:
 
@@ -45,20 +48,22 @@ Jika datasheet tidak jelas, anggap output **tidak aman untuk GPIO 3.3 V** sampai
 | Komponen | Kriteria minimum | Catatan |
 |---|---|---|
 | ESP32-C3 board | Wi-Fi 2.4 GHz, flash cukup, USB programming | Model board harus dicatat sebelum pilih GPIO |
-| Flow sensor D20 | Model/datasheet terverifikasi | Jangan mengandalkan listing marketplace saja |
+| Flow sensor D20 | 1-4 unit; model/datasheet terverifikasi | Jangan mengandalkan listing marketplace saja |
 | Isolated DC power supply | Bersertifikasi dan sesuai instalasi | Sumber listrik jauh dari sambungan air |
 | Buck converter | Bila sensor/board membutuhkan rail berbeda | Pilih dengan margin dan proteksi |
-| Level shifter/opto/input conditioner | Sesuai tipe dan level output sensor | Wajib bila output dapat melebihi 3.3 V |
+| Level shifter/opto/input conditioner | Satu channel per sensor | Wajib bila output dapat melebihi 3.3 V |
 | Fuse/polyfuse | Sesuai daya prototype | Proteksi cabang supply |
 | IP-rated enclosure | Minimal tahan cipratan dan kondensasi sesuai lokasi | Cable gland menghadap aman dari aliran air |
 | Terminal/connector | Locking, berlabel, tahan lingkungan | Hindari kabel lepas terbuka |
-| Isolation valve | Sebelum sensor | Memudahkan servis tanpa mematikan seluruh bangunan |
-| Union fitting | Sebelum/sesudah sensor | Memudahkan pelepasan sensor |
+| Isolation valve | Satu sebelum setiap sensor | Memudahkan servis tanpa mematikan seluruh bangunan |
+| Union fitting | Sebelum/sesudah setiap sensor | Memudahkan pelepasan sensor |
 | Strainer | Jika direkomendasikan sensor/plumber | Mencegah impeller macet oleh kotoran |
 | Seal/fitting plumbing | Sesuai material pipa dan tekanan | Dikerjakan teknisi/plumber |
 | Reference container/meter | Volume diketahui | Untuk kalibrasi |
 
-Satu node per kamar hanya valid jika jalur pipa yang diukur eksklusif untuk kamar itu. Survey pipa adalah gate sebelum rollout.
+Satu sensor hanya boleh dipetakan ke satu jalur pipa yang eksklusif untuk kamar
+atau area tersebut. Satu ESP32-C3 boleh mengagregasi 1-4 sensor yang berdekatan,
+misalnya satu cluster manifold/lantai. Survey pipa adalah gate sebelum rollout.
 
 ## 4. Arsitektur hardware
 
@@ -67,11 +72,11 @@ AC mains
   -> certified isolated DC supply
       -> protected low-voltage rail
           -> ESP32-C3
-          -> flow sensor supply (sesuai datasheet)
+          -> 1-4 flow sensor supply (sesuai datasheet)
 
-Flow sensor pulse output
-  -> protection / level conditioning
-  -> ESP32-C3 GPIO edge-interrupt input
+Setiap flow sensor pulse output
+  -> protection / level conditioning terpisah
+  -> GPIO edge-interrupt ESP32-C3 yang unik
 ```
 
 Aturan electrical:
@@ -90,7 +95,10 @@ Pin assignment belum ditetapkan karena varian board ESP32-C3 memiliki pin bootst
 ```text
 Board model       :
 Board revision    :
-Pulse GPIO        :
+Pulse GPIO ch 1   :
+Pulse GPIO ch 2   :
+Pulse GPIO ch 3   :
+Pulse GPIO ch 4   :
 Status LED GPIO   :
 Provision button  :
 Sensor voltage    :
@@ -105,7 +113,7 @@ Modul yang disarankan:
 
 ```text
 src/
-  pulse_counter.*       # GPIO edge ISR + ISR-safe software counter
+  pulse_counter.*       # 1-4 GPIO ISR + counter terpisah per channel
   flow_calculator.*     # pulse -> liter dan L/min
   cumulative_store.*    # NVS checkpoint + recovery
   telemetry_queue.*     # persistent bounded queue
@@ -165,7 +173,12 @@ Glitch filter:
 - filter terlalu agresif dapat menghilangkan pulse valid dan membuat volume kurang;
 - filter terlalu longgar dapat menghitung noise sebagai air.
 
-Sebelum memilih C3 sebagai board produksi, ukur frekuensi pulse maksimum sensor pada flow maksimum yang aman. Jalankan stress test sambil Wi-Fi reconnect, TLS handshake, upload, NVS checkpoint, dan logging aktif. Bila ada pulse loss, masalah diselesaikan di arsitektur hardware/board, bukan dikompensasi dengan faktor kalibrasi palsu.
+Dengan listing `F = 8.1Q - 3` dan maksimum 45 L/min, frekuensi maksimum teoritis
+adalah 361,5 Hz per sensor atau sekitar 1.446 interrupt/detik untuk empat sensor.
+Ini tetap harus dibuktikan melalui stress test sambil Wi-Fi reconnect, TLS
+handshake, upload, NVS checkpoint, dan logging aktif. Bila ada pulse loss,
+masalah diselesaikan di arsitektur hardware/board, bukan dikompensasi dengan
+faktor kalibrasi palsu.
 
 ## 7. Perhitungan volume dan flow
 
@@ -299,6 +312,14 @@ Reconnect:
 
 ## 12. HTTPS dan device signature
 
+Implementasi Arduino siap salin tersedia di:
+
+`firmware/esp32-c3-water-meter/esp32-c3-water-meter.ino`
+
+Semua nilai yang boleh diedit pengguna dipusatkan di:
+
+`firmware/esp32-c3-water-meter/water_meter_config.h`
+
 Endpoint:
 
 ```http
@@ -314,34 +335,32 @@ Wajib:
 - timeout koneksi dan response terbatas;
 - payload JSON maksimal 16 KB;
 - HMAC-SHA256 sesuai canonical request di `M15`;
-- `X-Device-Id`, timestamp, nonce, dan signature baru per attempt, kecuali retry transport yang belum mendapat respons dapat mempertahankan `messageId` payload;
-- `messageId` tetap sama untuk isi event yang sama.
+- `X-Device-Id` tetap sesuai registry perangkat;
+- request baru memakai `X-Nonce` baru;
+- retry mempertahankan body dan `X-Nonce`, tetapi memperbarui timestamp dan signature agar tetap berada dalam toleransi waktu API.
 
-Payload minimum:
+Payload yang diterima backend saat ini:
 
 ```json
 {
-  "schemaVersion": 1,
-  "messageId": "water-A-01:boot-id:sequence",
-  "bootId": "boot-id",
+  "observedAt": "2026-07-16T03:30:00.000Z",
   "sequence": 1042,
-  "observedAt": "2026-07-16T03:30:00Z",
-  "firmwareVersion": "0.1.0",
-  "readings": [
-    { "metric": "water.pulse_total", "value": "128994", "unit": "pulse" },
-    { "metric": "water.volume_total_l", "value": "2579.880", "unit": "L" },
-    { "metric": "water.flow_rate_lpm", "value": "4.210", "unit": "L/min" }
-  ],
+  "pulseTotal": 128994,
+  "volumeTotalLiters": 270.428,
+  "flowRateLpm": 4.21,
+  "rssiDbm": -62,
+  "firmwareVersion": "water-c3-1.0.0",
   "diagnostics": {
-    "rssiDbm": -62,
     "uptimeSec": 86420,
-    "queueDepth": 0,
-    "resetReason": "power_on",
-    "calibrationVersion": 1,
-    "timeQuality": "synced"
+    "pulsesPerLiter": 477,
+    "counterEpoch": 1
   }
 }
 ```
+
+`X-Nonce` adalah message/idempotency ID. Karena itu field `messageId` terpisah
+tidak dikirim di body. Jika request gagal tanpa respons, firmware mempertahankan
+body dan nonce, lalu membuat ulang timestamp dan signature pada retry.
 
 Device tidak pernah mengirim `roomId`, tenant ID, tarif, invoice amount, atau role user.
 
@@ -354,8 +373,12 @@ Default prototype:
 | Ada flow | agregat tiap 60 detik |
 | Flow berubah menjadi nol | kirim event akhir sesi |
 | Tidak ada flow | heartbeat tiap 5 menit |
-| Queue tertunda | replay oldest-first dengan rate limit |
-| Config version server lebih baru | ambil config melalui endpoint terautentikasi |
+| Request tertunda | simpan satu body+nonce di NVS dan retry tiap 30 detik |
+
+Satu pending request cukup untuk prototype karena `pulseTotal` dan volume bersifat
+kumulatif. Setelah pending diterima, snapshot terbaru akan dikirim pada interval
+berikutnya. Queue multi-event dapat ditambahkan jika grafik tanpa celah menjadi
+kebutuhan produksi.
 
 Jangan upload per pulse. Ini boros network/server dan tidak menambah akurasi total kumulatif.
 
@@ -379,6 +402,8 @@ Firmware boleh memiliki fail-safe local flag seperti `continuousFlowMinutes`, te
 ### Commissioning
 
 - buat `deviceCode` yang tidak berubah, contoh `water-room-a-01`;
+- beri `displayName` firmware yang mudah dibaca, misalnya `Kamar A`; nilai ini
+  hanya untuk log/diagnostics dan bukan sumber mapping kamar;
 - generate secret acak unik per device;
 - flash firmware release dan catat checksum/version;
 - provision network dan secret;
@@ -413,7 +438,7 @@ Device tidak boleh hanya mengirim room ID baru. Backend menutup mapping lama dan
 ### Unit/host tests
 
 - pulse-to-liter dengan beberapa calibration factor;
-- sequence dan `messageId` generation;
+- sequence dan `X-Nonce` generation;
 - HMAC canonical request fixture;
 - NVS record checksum/version selection;
 - queue wrap-around dan overflow;
