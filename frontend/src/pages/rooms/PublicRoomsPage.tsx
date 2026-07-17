@@ -147,7 +147,8 @@ export default function PublicRoomsPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [comparedRoomIds, setComparedRoomIds] = useState<number[]>([]);
   const comparePanelRef = useRef<HTMLDivElement | null>(null);
-  const [wizardDone, setWizardDone] = useState(false);
+  // /rooms is primarily a catalogue; the preference flow is optional assistance.
+  const [showPreferenceWizard, setShowPreferenceWizard] = useState(false);
   const { user } = useAuth();
   const { stage, isLoading: isTenantStageLoading } = useTenantPortalStage();
   const isTenant = user?.role === "TENANT";
@@ -182,7 +183,7 @@ export default function PublicRoomsPage() {
 
   const bathroom = (searchParams.get("bathroom") ?? "") as BathroomFilter;
   const cooling = (searchParams.get("cooling") ?? "") as CoolingFilter;
-  const avail = (searchParams.get("avail") ?? "bookable") as AvailFilter;
+  const avail = (searchParams.get("avail") ?? "") as AvailFilter;
   const sort = (searchParams.get("sort") ?? "price-asc") as SortFilter;
 
   const query = useQuery({
@@ -245,7 +246,7 @@ export default function PublicRoomsPage() {
     setSearchParams(p, { replace: true });
   };
 
-  const hasActiveFilter = !!(bathroom || cooling || avail !== "bookable" || sort !== "price-asc");
+  const hasActiveFilter = !!(bathroom || cooling || avail || sort !== "price-asc");
   const [filtersOpen, setFiltersOpen] = useState(false);
   const paginationItems = useMemo(() => getPaginationItems(totalPages, safePage), [safePage, totalPages]);
 
@@ -258,10 +259,11 @@ export default function PublicRoomsPage() {
         {lockedForTenant && <TenantBookingGate mode="rooms" />}
 
         {!lockedForTenant && (
-          <>
+          <main id="main-content">
             {/* ── Wizard intercept: ambil alih halaman sebelum katalog ── */}
-            {!isTenant && !wizardDone ? (
-              <div className="gpw-intercept-shell">
+            {!isTenant && showPreferenceWizard ? (
+              <section className="gpw-section" aria-labelledby="preference-wizard-title">
+                <h2 id="preference-wizard-title" className="visually-hidden">Bantuan memilih kamar</h2>
                 <GuestPreferenceWizard
                   rooms={roomsFromApi}
                   roomsLoading={query.isLoading}
@@ -272,11 +274,11 @@ export default function PublicRoomsPage() {
                     if (filters.cooling === 'ac')         p.set('cooling', 'ac');
                     else if (filters.cooling === 'fan')   p.set('cooling', 'fan');
                     setSearchParams(p, { replace: true });
-                    setWizardDone(true);
+                    setShowPreferenceWizard(false);
                   }}
-                  onSkip={() => setWizardDone(true)}
+                  onSkip={() => setShowPreferenceWizard(false)}
                 />
-              </div>
+              </section>
             ) : (
             <>
 
@@ -298,6 +300,9 @@ export default function PublicRoomsPage() {
                   <span>✓ Status jelas dan transparan</span>
                   <span>✓ Booking dibantu admin</span>
                 </div>
+                <button type="button" className="rm-preference-trigger" onClick={() => setShowPreferenceWizard(true)}>
+                  Bantu pilih kamar
+                </button>
               </div>
             )}
 
@@ -317,10 +322,11 @@ export default function PublicRoomsPage() {
                 <span className="rm-filter-label">Ketersediaan</span>
                 {/* UD-07: "Semua Kamar" lebih jujur — termasuk kamar terisi & yang sedang dicek (tidak semua bisa diajukan). */}
                 <FilterChip label="Semua Kamar" active={!avail} onClick={() => update({ avail: "" })} />
-                <FilterChip label="Kosong" active={avail === "bookable"} onClick={() => update({ avail: "bookable" })} />
+                <FilterChip label="Bisa diajukan" active={avail === "bookable"} onClick={() => update({ avail: "bookable" })} />
                 <FilterChip label="Dibersihkan / Maintenance" active={avail === "checking"} onClick={() => update({ avail: "checking" })} />
                 <FilterChip label="Penuh / Terisi" active={avail === "occupied"} onClick={() => update({ avail: "occupied" })} />
                 {!avail && <span className="rm-filter-hint">Termasuk kamar terisi &amp; yang sedang dicek</span>}
+                {avail === "bookable" && <span className="rm-filter-hint">Termasuk kamar yang masih dibersihkan tetapi sudah bisa diajukan.</span>}
               </div>
               <div className="rm-filter-divider" aria-hidden="true" />
               <div className="rm-filter-group">
@@ -457,7 +463,7 @@ export default function PublicRoomsPage() {
             <div className="rm-guide-shell">
               <div className="rm-guide-header">
                 <span className="rm-guide-icon">🏠</span>
-                <h3 className="rm-guide-title">Panduan Kategori Kamar</h3>
+                <h2 className="rm-guide-title">Panduan Kategori Kamar</h2>
               </div>
               <div className="rm-guide-cards">
                 <div className="rm-guide-card"><span className="rm-guide-card-icon">🌬️</span><div><strong>Ekonomi</strong><small>Kipas angin · Kamar mandi luar bersama · Tarif paling terjangkau</small></div></div>
@@ -497,12 +503,10 @@ export default function PublicRoomsPage() {
                 </div>
               </>
             )}
-
-
-          </>
+            </>
+            )}
+            </main>
           )}
-          </>
-        )}
       </Container>
     </div>
   );

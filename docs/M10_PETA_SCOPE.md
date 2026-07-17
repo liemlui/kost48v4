@@ -96,6 +96,16 @@
 | BE module | `backend/src/modules/market-analysis/` | Analisa pasar AI |
 | Docs | `M04_KEUANGAN.md` · `M09_AI_OWNER_ADMIN.md` · `M02_KEPUTUSAN_OWNER.md` | Sumber kebenaran |
 
+### A6. SYSTEM / IoT (Device — tanpa login, cron)
+**Apa yang dilihat/dilakukan:** ESP32-C3 kirim water flow reading, backend polling Tuya KWH meter via cron, auto-ops deteksi kebocoran + anomali kWh.
+
+| Layer | File | Catatan |
+|-------|------|---------|
+| BE module | `backend/src/modules/iot/` | IoT controller + Tuya client + device guard (🔜 belum dibuat) |
+| BE cron | `backend/src/modules/auto-ops/` | KwhPollingSweep (10 menit), LeakDetectionSweep |
+| BE model | `backend/prisma/schema.prisma` | IotDevice, FlowSensor, FlowReading, KwhReading (🔜 belum dibuat) |
+| Docs | `M14_IOT_TUYA_DEVICES.md` · memory `iot-water-kwh-spec` | Inventaris 27 perangkat Tuya + spek implementasi |
+
 ---
 
 ## B. Scope Berdasarkan Flow Bisnis
@@ -233,7 +243,21 @@ Owner/Admin klik tombol AI → DeepSeek proses → AiDraft tersimpan
 | BE | `audit-log/audit-log.service.ts` | Catat `meta.ai` |
 | FE | `components/ai/` | Tombol + drawer AI |
 | FE | `pages/dashboard/OwnerDashboardPage.tsx` | Integrasi AI |
-| Docs | `M09_AI_OWNER_ADMIN.md` | **Manual-only, OWNER/ADMIN** |
+### B9. IOT FLOW (ESP32 Water → POST / KWH → Tuya Polling → Reading → Alert)
+```
+ESP32-C3+D20 → HTTP POST /api/iot/flow (JWT device token) → FlowReading
+Tuya KWH Meter → Tuya Cloud API → cron polling tiap 10 menit → KwhReading
+Cron sweep → leak detection (flow > 0 jam 23-05 atau tanpa penghuni)
+           → over limit (total liter > threshold)
+           → kWh anomaly (lonjakan > 2x rata-rata)
+```
+
+| Layer | File | Catatan |
+|-------|------|---------|
+| BE | `iot/iot.controller.ts` | POST endpoint flow + JWT device guard (🔜) |
+| BE | `iot/tuya-client.service.ts` | HMAC-SHA256 sign + polling (🔜) |
+| BE | `auto-ops/auto-ops.service.ts` | KwhPollingSweep + LeakDetectionSweep (🔜) |
+| Docs | `M14_IOT_TUYA_DEVICES.md` · memory `iot-water-kwh-spec` | |
 
 ---
 
@@ -253,6 +277,7 @@ Owner/Admin klik tombol AI → DeepSeek proses → AiDraft tersimpan
 | Tambah field di model Prisma | — | `backend/prisma/schema.prisma` ⚠️ BUTUH APPROVAL OWNER |
 | Perbaiki UI/UX | — | `frontend/src/styles/` + `frontend/src/components/` |
 | Cek aturan owner | — | `docs/M02_KEPUTUSAN_OWNER.md` (84 keputusan, **SUMBER KEBENARAN**) |
+| Tambah IoT / KWH meter | SYSTEM | `docs/M14_IOT_TUYA_DEVICES.md` + `backend/src/modules/iot/` |
 
 ---
 

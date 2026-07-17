@@ -10,10 +10,10 @@ describe('Y-M2 — guest booking validation (KTP/email/phone)', () => {
     it('nama kosong → error fullName', () => {
       expect(validateStep1(form({ fullName: '' })).fullName).toBeTruthy();
     });
-    it('tanpa phone & email → error keduanya', () => {
+    it('tanpa phone & email → satu pesan pada field kontak pertama', () => {
       const e = validateStep1(form({ fullName: 'Budi', phone: '', email: '', identityNumber: '1234567890123456' }));
       expect(e.phone).toBeTruthy();
-      expect(e.email).toBeTruthy();
+      expect(e.email).toBeUndefined();
     });
     it('email format salah → error email', () => {
       const e = validateStep1(form({ fullName: 'Budi', email: 'bukan-email', identityNumber: '1234567890123456' }));

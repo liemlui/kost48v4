@@ -15,7 +15,7 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
 
     const pool = new Pool({
       connectionString,
-      max: 5,
+      max: 3,
       Client: SerializedPgClient,
     });
     const adapter = new PrismaPg(pool, { disposeExternalPool: true });

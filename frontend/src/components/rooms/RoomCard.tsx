@@ -143,24 +143,13 @@ export default function RoomCard({
     if ((e.target as HTMLElement).closest('button,a')) return;
     goDetail();
   };
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLElement>) => {
-    if (e.key !== 'Enter' && e.key !== ' ') return;
-    if ((e.target as HTMLElement).closest('button,a')) return;
-    e.preventDefault();
-    goDetail();
-  };
-
   const catBadge = getCategoryBadgeInfo(room);
   const isMezzanine = String(room.roomType ?? '').toUpperCase() === 'MEZZANINE';
 
   return (
     <article
       className="rm-card"
-      role="link"
-      tabIndex={0}
       onClick={handleCardClick}
-      onKeyDown={handleKeyDown}
-      aria-label={`Lihat detail ${room.name || room.code || `kamar ${room.id}`}`}
     >
       {/* Image */}
       <div className="rm-card-img-shell">

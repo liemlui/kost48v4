@@ -18,28 +18,30 @@
 | ADMIN | `admin@kost48.com`     | `admin123`  | DEV only; produksi buat manual    |
 | STAFF | `staff@kost48.com`     | `staff123`  | DEV only; produksi buat manual    |
 
-### 1b. Akun Tenant Dummy (DEV only)
+### 1b. Data Tenant Produksi (GO-LIVE)
 
-Format email: `{slug}.tenant@kost48.test` · Password semua: `Tenant#2026`
+**Sumber data:** Owner KOST48, 2026-07. NIK (KTP) sudah diverifikasi.
+Email & HP placeholder — akan dilengkapi via **UI Owner → Manajemen Tenant** sebelum aktivasi portal.
 
-| Kamar | Nama              | Email Login                         | Slug    |
-|-------|-------------------|-------------------------------------|---------|
-| A     | Maya Pratiwi      | `maya.tenant@kost48.test`           | maya    |
-| B     | Dimas Saputra     | `dimas.tenant@kost48.test`          | dimas   |
-| C     | Cindy Wijaya      | `cindy.tenant@kost48.test`          | cindy   |
-| D     | Hendra Gunawan    | `hendra.tenant@kost48.test`         | hendra  |
-| G     | Gita Lestari      | `gita.tenant@kost48.test`           | gita    |
-| H     | Indah Permata     | `indah.tenant@kost48.test`          | indah   |
-| I     | Bayu Nugroho      | `bayu.tenant@kost48.test`           | bayu    |
-| J     | Karin Salsabila   | `karin.tenant@kost48.test`          | karin   |
-| K     | Lani Kusuma       | `lani.tenant@kost48.test`           | lani    |
-| L     | Rizky Ramadhan    | `rizky.tenant@kost48.test`          | rizky   |
-| M     | Putri Anggraini   | `putri.tenant@kost48.test`          | putri   |
-| F1    | Fajar Maulana     | `fajar.tenant@kost48.test`          | fajar   |
-| F2    | Sari Melati       | `sari.tenant@kost48.test`           | sari    |
+| Kamar | Nama                   | NIK                 | Tgl Masuk | Tarif Kontrak/bln | Deposit     | Keterangan               |
+|-------|------------------------|---------------------|-----------|-------------------|-------------|--------------------------|
+| A     | Shinta Larista         | 3574036206990003    | 26        | 1.700.000         | —           | DELUXE Mezzanine, AC     |
+| B     | Dini Widiastutik       | 3275085012800021    | 1         | 1.500.000         | —           | DELUXE, AC               |
+| C     | Miko Rakatama A. W.    | 6471051708970006    | 28        | 1.600.000         | —           | DELUXE, AC               |
+| D     | Ade Chandra            | 3173052309720009    | 24        | 1.500.000         | 200.000     | DELUXE, AC               |
+| F1    | Yufita Hieng           | 6405025701970003    | 26        | 1.700.000         | —           | DELUXE Mezzanine, AC     |
+| F2    | Patrick Wilfred        | 3275020504910019    | 8         | 1.600.000         | —           | DELUXE Mezzanine, AC     |
+| G     | Yofi Nurkolifah        | 3519122204030003    | 1         | 800.000           | —           | ECONOMY, Kipas            |
+| H     | Welly Tanoto           | 3578070811730004    | 10        | 800.000           | —           | ECONOMY, Kipas            |
+| I     | Agus Settiyo Budi      | 3571021308860003    | 5         | 800.000           | —           | ECONOMY, Kipas            |
+| J     | Lovandra               | 3175070312930003    | 30        | 1.500.000         | —           | DELUXE, AC               |
+| K     | Meliana Tamara         | 3578125102000002    | 10        | 1.600.000         | —           | DELUXE, LARGE, AC        |
+| L     | Destarika Hasan        | 1671065812020008    | 1         | 1.600.000         | —           | DELUXE, LARGE, AC        |
+| M     | Gabriel Excelly P.     | 3511115908030001    | 3         | 1.200.000         | —           | STANDARD, LARGE, Kipas   |
 
-> **Catatan:** DB saat ini mungkin berisi seed LAMA dengan format `tenant.kamar{X}@kost48-dummy.com` / `tenant123`.
-> Jalankan `npm run seed:dev:reset` lalu `npm run seed:dev:api` untuk migrasi ke format baru.
+> **Catatan:** `Tgl Masuk` = tanggal hari (bulan bervariasi per tenant — akan dilengkapi via UI).
+> **Deposit:** Hanya Ade Chandra (Kamar D) Rp200.000. Sisanya tidak ada deposit.
+> **Email & HP tenant** belum tersedia — input via UI Owner sebelum aktivasi portal penghuni.
 
 ---
 
@@ -47,39 +49,41 @@ Format email: `{slug}.tenant@kost48.test` · Password semua: `Tenant#2026`
 
 Sumber: kost48surabaya.com. Semua kamar saat ini OCCUPIED (per data real 2026-06).
 
-| Kode | Nama     | Kategori | Tipe       | Ukuran   | KM     | Pendingin | Tarif/bln  | Deposit   | Lantai |
-|------|----------|----------|------------|----------|--------|-----------|------------|-----------|--------|
-| A    | Kamar A  | DELUXE   | MEZZANINE  | STANDARD | Dalam  | AC        | 1.700.000  | 500.000   | 1      |
-| B    | Kamar B  | DELUXE   | REGULAR    | STANDARD | Dalam  | AC        | 1.700.000  | 500.000   | 1      |
-| C    | Kamar C  | DELUXE   | REGULAR    | STANDARD | Dalam  | AC        | 1.700.000  | 500.000   | 1      |
-| D    | Kamar D  | DELUXE   | REGULAR    | STANDARD | Dalam  | AC        | 1.600.000  | 500.000   | 1      |
-| G    | Kamar G  | ECONOMY  | REGULAR    | STANDARD | Luar   | Kipas     | 850.000    | 300.000   | 1      |
-| H    | Kamar H  | ECONOMY  | REGULAR    | STANDARD | Luar   | Kipas     | 850.000    | 300.000   | 1      |
-| I    | Kamar I  | ECONOMY  | REGULAR    | STANDARD | Luar   | Kipas     | 850.000    | 300.000   | 1      |
-| J    | Kamar J  | DELUXE   | REGULAR    | STANDARD | Dalam  | AC        | 1.600.000  | 500.000   | 1      |
-| K    | Kamar K  | DELUXE   | REGULAR    | LARGE    | Dalam  | AC        | 1.800.000  | 600.000   | 1      |
-| L    | Kamar L  | DELUXE   | REGULAR    | LARGE    | Dalam  | AC        | 1.800.000  | 600.000   | 1      |
-| M    | Kamar M  | STANDARD | REGULAR    | LARGE    | Dalam  | Kipas     | 1.400.000  | 500.000   | 1      |
-| F1   | Kamar F1 | DELUXE   | MEZZANINE  | STANDARD | Dalam  | AC        | 1.750.000  | 500.000   | 2      |
-| F2   | Kamar F2 | DELUXE   | MEZZANINE  | STANDARD | Dalam  | AC        | 1.750.000  | 500.000   | 2      |
+| Kode | Nama     | Kategori | Tipe       | Ukuran   | KM     | Pendingin | Tarif Publik | Tarif Kontrak* | Deposit   | Lantai |
+|------|----------|----------|------------|----------|--------|-----------|-------------|----------------|-----------|--------|
+| A    | Kamar A  | DELUXE   | MEZZANINE  | STANDARD | Dalam  | AC        | 1.700.000   | 1.700.000      | 500.000   | 1      |
+| B    | Kamar B  | DELUXE   | REGULAR    | STANDARD | Dalam  | AC        | 1.700.000   | 1.500.000      | 500.000   | 1      |
+| C    | Kamar C  | DELUXE   | REGULAR    | STANDARD | Dalam  | AC        | 1.700.000   | 1.600.000      | 500.000   | 1      |
+| D    | Kamar D  | DELUXE   | REGULAR    | STANDARD | Dalam  | AC        | 1.600.000   | 1.500.000      | 500.000   | 1      |
+| G    | Kamar G  | ECONOMY  | REGULAR    | STANDARD | Luar   | Kipas     | 850.000     | 800.000        | 300.000   | 1      |
+| H    | Kamar H  | ECONOMY  | REGULAR    | STANDARD | Luar   | Kipas     | 850.000     | 800.000        | 300.000   | 1      |
+| I    | Kamar I  | ECONOMY  | REGULAR    | STANDARD | Luar   | Kipas     | 850.000     | 800.000        | 300.000   | 1      |
+| J    | Kamar J  | DELUXE   | REGULAR    | STANDARD | Dalam  | AC        | 1.600.000   | 1.500.000      | 500.000   | 1      |
+| K    | Kamar K  | DELUXE   | REGULAR    | LARGE    | Dalam  | AC        | 1.800.000   | 1.600.000      | 600.000   | 1      |
+| L    | Kamar L  | DELUXE   | REGULAR    | LARGE    | Dalam  | AC        | 1.800.000   | 1.600.000      | 600.000   | 1      |
+| M    | Kamar M  | STANDARD | REGULAR    | LARGE    | Dalam  | Kipas     | 1.400.000   | 1.200.000      | 500.000   | 1      |
+| F1   | Kamar F1 | DELUXE   | MEZZANINE  | STANDARD | Dalam  | AC        | 1.750.000   | 1.700.000      | 500.000   | 2      |
+| F2    | Kamar F2 | DELUXE   | MEZZANINE  | STANDARD | Dalam  | AC        | 1.750.000   | 1.600.000      | 500.000   | 2      |
+
+> **\* Tarif Kontrak** = harga yang dibayar tenant saat ini (berdasarkan kontrak awal saat join, bisa berbeda dari tarif publik).
 
 ### Catatan Fisik Kamar
 
 | Kode | Dimensi & Detail                                                                                  |
 |------|---------------------------------------------------------------------------------------------------|
-| A    | 2m×3,5m + Mezanin 2m×2m; KM Dalam 1,2m×1,5m; Kasur busa tebal 180×200                          |
-| B    | 2,5m×3,5m (medium); KM Dalam 1,2m×1,5m; Kasur busa tebal 180×200                               |
-| C    | 2,5m×3,5m (medium); KM Dalam 1,5m×1,5m; Kasur busa tebal 180×200                               |
-| D    | 2m×3,5m (small); KM Dalam 1,5m×1,5m; Kasur busa tebal 180×200                                  |
-| G    | 2m×3,5m (medium); KM Luar bersama; Kasur busa tebal 180×200                                     |
-| H    | 2m×3,5m (medium); KM Luar bersama; Kasur busa tebal 180×200                                     |
-| I    | 2m×3,5m (medium); KM Luar bersama; Kasur busa tebal 180×200                                     |
-| J    | 2m×3,5m (medium); KM Dalam 1,2m×1,5m; Kasur busa tebal 180×200                                 |
-| K    | 3m×3,5m (besar); KM Dalam 1,2m×1,5m; Kasur busa tebal 180×200                                  |
-| L    | 3m×3,5m (besar); KM Dalam 1,2m×1,5m; Kasur busa tebal 180×200                                  |
-| M    | 3m×3,5m (besar); KM Dalam 1,2m×1,5m; Kasur busa tebal 180×200; Superior/Economy tanpa AC       |
-| F1   | 2,5m×3m (standar) + Mezanin 1,5m×3m; KM Dalam 1,5m×1,2m; Kasur busa 90×200 atau double bed    |
-| F2   | 2,5m×3m (standar) + Mezanin 1,5m×3m; KM Dalam 1,5m×1,2m; Kasur double bed; Perabot lengkap    |
+| A    | 2m×3,5m + Mezanin 2m×2m; KM Dalam 1,2m×1,5m; Kasur ukuran 160                               |
+| B    | 2,5m×3,5m (medium); KM Dalam 1,2m×1,5m; **Kasur kosong** (tenant tidak mau)                               |
+| C    | 2,5m×3,5m (medium); KM Dalam 1,5m×1,5m; Kasur ukuran 120                                               |
+| D    | 2m×3,5m (small); KM Dalam 1,5m×1,5m; Kasur ukuran 140                                                |
+| G    | 2m×3,5m (medium); KM Luar bersama; Kasur **belum diaudit**                                                |
+| H    | 2m×3,5m (medium); KM Luar bersama; Kasur **belum diaudit**                                                |
+| I    | 2m×3,5m (medium); KM Luar bersama; Kasur ukuran 140                                                |
+| J    | 2m×3,5m (medium); KM Dalam 1,2m×1,5m; Springbed ukuran 160                                            |
+| K    | 3m×3,5m (besar); KM Dalam 1,2m×1,5m; Springbed ukuran 180                                             |
+| L    | 3m×3,5m (besar); KM Dalam 1,2m×1,5m; Springbed ukuran 180                                             |
+| M    | 3m×3,5m (besar); KM Dalam 1,2m×1,5m; Springbed ukuran 160; Superior/Economy tanpa AC       |
+| F1   | 2,5m×3m (standar) + Mezanin 1,5m×3m; KM Dalam 1,5m×1,2m; **2 kasur ukuran 90**    |
+| F2   | 2,5m×3m (standar) + Mezanin 1,5m×3m; KM Dalam 1,5m×1,2m; Kasur ukuran 90; Perabot lengkap    |
 
 ### Fasilitas Per Kamar (seed via POST /rooms/:id/facilities)
 
@@ -108,12 +112,13 @@ Kamar ber-AC (A, B, C, D, J, K, L, F1, F2): acWattage 380W (K & L: 450W), acClea
 
 Sumber: konfirmasi owner 2026-07-08. Data ini adalah ground truth lapangan awal, tetapi **belum boleh dianggap sudah ada di database produksi** sampai diinput lewat UI/seed/runbook. Jangan masukkan full NIK, foto KTP, password jaringan, token, atau API key ke repo.
 
+**✅ Status NIK per 2026-07: Semua 13 tenant sudah punya NIK lengkap.**
+- Dini Widiastutik (Kamar B) ✅ NIK 3275085012800021 — data lengkap, tinggal upload foto KTP via UI
+- Theo Wijaya → **Agus Settiyo Budi** (Kamar I) ✅ NIK 3571021308860003 — data lengkap
+
 | Area | Data owner-confirmed | Status DB/aplikasi | Target input |
 |------|----------------------|--------------------|--------------|
 | Kamar F3/F4 | FINAL (owner 2026-07-08): TIDAK ADA — blok F dirombak menjadi F1+F2 | Tidak dibuat di master `Room`; total kamar tetap 13 | — |
-| Annisa | Tenant ada, kamar dan siklus belum pasti | BELUM SIAP onboarding | `Tenant` + `Stay` setelah kamar/siklus final |
-| Dini | Foto KTP diberikan owner, data perlu diverifikasi dari foto asli | BELUM DIINPUT produksi | `Tenant.identityNumber`, upload foto KTP via UI, verifikasi KTP |
-| Theo Wijaya | NIK belum ada | BLOCKER onboarding | Lengkapi NIK + KTP sebelum aktivasi stay |
 | Lampu area bersama | 7 titik: depan poster, teras depan, dapur, lorong, pojok lorong, depan KM belakang, lorong belakang | BELUM jadi inventory/aset | `InventoryItem`/`FixedAsset` bila ingin dilacak, atau checklist operasional |
 | CCTV area bersama | 5 titik: depan 2, depan dapur 1, area depan KM belakang 1, lorong belakang 1 | BELUM jadi inventory/aset; wajib review privasi angle kamera | `InventoryItem`/`FixedAsset`; dokumen notice CCTV |
 | Bola pemadam api/APAR | Rencana 3-5 titik | BELUM dibeli/dipasang/final | `InventoryItem`/`FixedAsset` + checklist emergency |
@@ -223,47 +228,231 @@ Seed via `POST /api/faqs/seed` (idempoten, aman diulang).
 
 ---
 
-## 7. Dummy Tenant DEV — Skenario per Kamar
+## 7. Data Tenant Produksi — Skenario per Kamar
 
-Seed via `seed-dev-via-api.js`. Tanggal seed berbasis `TODAY = 2026-06-24`.
+Data real dari owner. Seed via `seed-prod.js`. Tgl Masuk = tanggal hari (bulan menyusul — akan dilengkapi via UI Owner).
 
-| Kamar | Nama              | Slug   | Gender | Pekerjaan  | Skenario      | Keterangan Skenario                          |
-|-------|-------------------|--------|--------|------------|---------------|----------------------------------------------|
-| A     | Maya Pratiwi      | maya   | F      | Karyawan   | paid          | Stay aktif, invoice lunas                    |
-| B     | Dimas Saputra     | dimas  | M      | Mahasiswa  | renew         | Stay aktif, lunas + RenewRequest PENDING     |
-| C     | Cindy Wijaya      | cindy  | F      | Karyawan   | pet           | Stay aktif, lunas, **hasPet = true**         |
-| D     | Hendra Gunawan    | hendra | M      | Karyawan   | paid          | Stay aktif, invoice lunas                    |
-| G     | Gita Lestari      | gita   | F      | Mahasiswa  | paid          | Stay aktif, invoice lunas                    |
-| H     | Indah Permata     | indah  | F      | Mahasiswa  | paid          | Stay aktif, lunas, **occupantCount = 2**     |
-| I     | Bayu Nugroho      | bayu   | M      | Karyawan   | unpaid        | Stay aktif, invoice **BELUM dibayar**        |
-| J     | Karin Salsabila   | karin  | F      | Mahasiswa  | paid          | Stay aktif, invoice lunas                    |
-| K     | Lani Kusuma       | lani   | F      | Karyawan   | checkoutH10   | Stay aktif, **planOut = H+10** (mau habis)   |
-| L     | Rizky Ramadhan    | rizky  | M      | Mahasiswa  | paid          | Stay aktif, invoice lunas                    |
-| M     | Putri Anggraini   | putri  | F      | Karyawan   | paid          | Stay aktif, invoice lunas                    |
-| F1    | Fajar Maulana     | fajar  | M      | Karyawan   | paid          | Stay aktif, invoice lunas                    |
-| F2    | Sari Melati       | sari   | F      | Mahasiswa  | partial       | Baru masuk, **DP 30% saja**, pelunasan pending|
+| Kamar | Nama                   | NIK                 | Tgl Msk | Tarif Kontrak | Deposit  | Gender | Keterangan                     |
+|-------|------------------------|---------------------|---------|---------------|----------|--------|--------------------------------|
+| A     | Shinta Larista         | 3574036206990003    | 26      | 1.700.000     | —        | F      | DELUXE Mezzanine, AC           |
+| B     | Dini Widiastutik       | 3275085012800021    | 1       | 1.500.000     | —        | F      | DELUXE, AC                     |
+| C     | Miko Rakatama A. W.    | 6471051708970006    | 28      | 1.600.000     | —        | M      | DELUXE, AC                     |
+| D     | Ade Chandra            | 3173052309720009    | 24      | 1.500.000     | 200.000  | M      | DELUXE, AC                     |
+| F1    | Yufita Hieng           | 6405025701970003    | 26      | 1.700.000     | —        | F      | DELUXE Mezzanine, AC           |
+| F2    | Patrick Wilfred        | 3275020504910019    | 8       | 1.600.000     | —        | M      | DELUXE Mezzanine, AC           |
+| G     | Yofi Nurkolifah        | 3519122204030003    | 1       | 800.000       | —        | F      | ECONOMY, Kipas                 |
+| H     | Welly Tanoto           | 3578070811730004    | 10      | 800.000       | —        | M      | ECONOMY, Kipas                 |
+| I     | Agus Settiyo Budi      | 3571021308860003    | 5       | 800.000       | —        | M      | ECONOMY, Kipas                 |
+| J     | Lovandra               | 3175070312930003    | 30      | 1.500.000     | —        | M?     | DELUXE, AC                     |
+| K     | Meliana Tamara         | 3578125102000002    | 10      | 1.600.000     | —        | F      | DELUXE LARGE, AC               |
+| L     | Destarika Hasan        | 1671065812020008    | 1       | 1.600.000     | —        | F      | DELUXE LARGE, AC               |
+| M     | Gabriel Excelly P.     | 3511115908030001    | 3       | 1.200.000     | —        | F?     | STANDARD LARGE, Kipas          |
 
-### Tiket Keluhan Dummy
+> **Catatan:**
+> - Gender `?` = perlu konfirmasi owner.
+> - Email/HP/occupation → input via UI Owner.
+> - **Deposit:** Hanya Ade Chandra (Kamar D) Rp200.000. Sisanya tidak ada deposit.
+> - Data tanggal check-in (Tgl Msk) hanya hari; bulan menyesuaikan realitas masing-masing tenant.
 
-| Tenant (slug) | Judul Tiket                       | Kategori    | Tips Staf |
-|---------------|-----------------------------------|-------------|-----------|
-| maya          | AC kamar A kurang dingin          | AC          | ya        |
-| cindy         | Keran kamar mandi bocor           | PLUMBING    | ya        |
-| gita          | WiFi sering putus di lantai 1     | WIFI        | ya        |
-| bayu          | Lampu kamar I mati                | ELECTRICITY | tidak     |
-| lani          | AC kamar K perlu service cuci     | AC          | ya        |
+---
 
-### Survei Kepuasan Dummy
+## 7b. Data Audit Fasilitas Lapangan
 
-| Tenant (slug) | Rating | Rekomendasi | Komentar (ringkas)                              |
-|---------------|--------|-------------|-------------------------------------------------|
-| maya          | 5      | ya          | Kos bersih, staf ramah, lokasi strategis        |
-| cindy         | 4      | ya          | Nyaman; WiFi kadang lambat jam 8 malam          |
-| gita          | 5      | ya          | Puas, respons keluhan cepat dan transparan      |
-| bayu          | 3      | tidak       | KM luar perlu perawatan lebih sering            |
-| karin         | 4      | ya          | (tanpa komentar)                                |
-| rizky         | 5      | ya          | Recommended untuk mahasiswa dan pekerja muda    |
-| fajar         | 4      | ya          | Harga sesuai fasilitas, listrik transparan      |
+> **Status:** Template siap diisi. Data dikumpulkan owner saat audit keliling.
+> Kolom `Kondisi` & `Catatan` diisi manual — hasil audit lapangan.
+>
+> **Audit 2026-07 — Kondisi umum SEMUA KAMAR:**
+> - KM dalam: closet standar duduk + jet shower + shower ✅ kondisi prima
+> - Ember & gayung: ✅ ada
+> - **Gantungan baju**: ✅ ada di setiap kamar & kamar mandi
+> - **Tempat sabun**: ✅ ada di setiap kamar mandi
+> - Kunci pintu & jendela: ✅ aman, semua ok
+> - Plafond & tembok: ✅ baik, beberapa sudah cat ulang
+> - Semua yg ada kasur: ✅ ada sprei
+> - **Kamar B: kasur kosong** (tenant tidak mau)
+
+### Per Kamar (13 kamar: A–D, F1–F2, G–M)
+
+| Kamar | Item | Ada? | Kondisi | Catatan |
+|-------|------|------|---------|---------|
+| **A** | Lampu kamar | ✅ | baik | |
+| | AC Midea | ✅ | baik, remote ada | |
+| | Kasur | ukuran 160 | | |
+| | Lemari plastik kecil | ✅ | | |
+| | Meja | — | tdk ada | |
+| | Sprei | ✅ ada | | |
+| | Bantal | ✅ ada | | |
+| | Tempat sampah | ✅ ada | | |
+| | Kloset Toto duduk + jet shower + shower | ✅ | ✅ prima | |
+| | Meter listrik awal | | | |
+| **B** | Lampu kamar | ✅ | baik | |
+| | AC Midea | ✅ | baik, remote ada | |
+| | Kasur | **kosong** | | tenant tidak mau |
+| | Lemari | — | tdk ada | |
+| | Meja | — | tdk ada | |
+| | Sprei | — | | tdk ada kasur |
+| | Bantal | — | | |
+| | Tempat sampah | ✅ ada | | |
+| | Kloset Toto duduk + jet shower + shower | ✅ | ✅ prima | |
+| | Meter listrik awal | | | |
+| **C** | Lampu kamar | ✅ | baik | |
+| | AC Akari | ✅ | baik, remote ada | |
+| | Kasur | ukuran 120 | | |
+| | Lemari plastik | ✅ | | |
+| | Meja | — | tdk ada | |
+| | Sprei | ✅ ada | | |
+| | Bantal | ✅ ada | | |
+| | Guling | ✅ ada | | inventaris? |
+| | Tempat sampah | ✅ ada | | |
+| | Kloset Toto duduk + jet shower + shower | ✅ | ✅ prima | |
+| | Meter listrik awal | | | |
+| **D** | Lampu kamar | ✅ | baik | |
+| | AC Sharp | ✅ | baik, remote ada | |
+| | Kasur | ukuran 140 | | |
+| | Lemari | ✅ | tipe? | |
+| | Meja | — | tdk ada | |
+| | Sprei | ✅ ada | | |
+| | Bantal | ✅ ada | | |
+| | Tempat sampah | ✅ ada | | |
+| | Kloset American Standard duduk + jet shower + shower | ✅ | ✅ prima | |
+| | Meter listrik awal | | | |
+| **F1** | Lampu kamar | ✅ | baik | |
+| | AC Daikin | ✅ | baik, remote ada | |
+| | Kasur | **2 unit ukuran 90** | | |
+| | Lemari triplek besar | ✅ | | |
+| | Meja | — | tdk ada | |
+| | Sprei | ✅ ada | | |
+| | Bantal | ✅ ada | | |
+| | Guling | ✅ ada | | inventaris? |
+| | Tempat sampah | ✅ ada | | |
+| | Kloset American Standard **jongkok** + jet shower + shower | ✅ | ✅ prima | |
+| | Meter listrik awal | | | |
+| **F2** | Lampu kamar | ✅ | baik | |
+| | AC Samsung | ✅ | baik, remote ada | |
+| | Kasur | ukuran 90 | | |
+| | Lemari plastik | ✅ | | |
+| | Meja | — | tdk ada | |
+| | Sprei | ✅ ada | | |
+| | Bantal | ✅ ada | | |
+| | Tempat sampah | ✅ ada | | |
+| | Kloset DBS duduk + jet shower + shower | ✅ | ✅ prima | |
+| | Meter listrik awal | | | |
+| **G** | Lampu kamar | ✅ | baik | |
+| | Kipas | **1 unit** | | |
+| | KM Luar bersama | — | | |
+| | Kasur | **belum diaudit** | | |
+| | Lemari | **belum diaudit** | | |
+| | Meja | — | tdk ada | |
+| | Tempat sampah | ✅ ada | | |
+| | Meter listrik awal | | | |
+| **H** | Lampu kamar | ✅ | baik | |
+| | Kipas | **1 unit** | | |
+| | KM Luar bersama | — | | |
+| | Kasur | **belum diaudit** | | |
+| | Lemari | **belum diaudit** | | |
+| | Meja | — | tdk ada | |
+| | Tempat sampah | ✅ ada | | |
+| | Meter listrik awal | | | |
+| **I** | Lampu kamar | ✅ | baik | |
+| | Kipas | **1 unit** | | |
+| | KM Luar bersama | — | | |
+| | Kasur | ukuran 140 | | |
+| | Lemari plastik | ✅ | | |
+| | Meja belajar | ✅ | | |
+| | Sprei | ✅ ada | | |
+| | Bantal | ✅ ada | | |
+| | Guling | ✅ ada | | inventaris? |
+| | Tempat sampah | ✅ ada | | |
+| | Meter listrik awal | | | |
+| **J** | Lampu kamar | ✅ | baik | |
+| | AC LG AV-A5UCY | ✅ | baik, remote ada | |
+| | Kasur | **Springbed ukuran 160** | | |
+| | Lemari plastik | ✅ | | |
+| | Meja | — | tdk ada | |
+| | Sprei | ✅ ada | | |
+| | Bantal | ✅ ada | | |
+| | Guling | ✅ ada | | inventaris? |
+| | Tempat sampah | ✅ ada | | |
+| | Kloset Toto duduk + jet shower + shower | ✅ | ✅ prima | |
+| | Meter listrik awal | | | |
+| **K** | Lampu kamar | ✅ | baik | |
+| | AC LG AV-A5UCY | ✅ | baik, remote ada | |
+| | Kasur | **Springbed ukuran 180** | | |
+| | Lemari | **belum diaudit** | | |
+| | Meja | — | tdk ada | |
+| | Sprei | ✅ ada | | |
+| | Bantal | ✅ ada | | |
+| | Tempat sampah | ✅ ada | | |
+| | Kloset Toto duduk + jet shower + shower | ✅ | ✅ prima | |
+| | Meter listrik awal | | | |
+| **L** | Lampu kamar | ✅ | baik | |
+| | AC Aqua | ✅ | baik, remote ada | |
+| | Kasur | **Springbed ukuran 180** | | |
+| | Lemari | ✅ | | |
+| | Meja belajar | ✅ | | |
+| | Sprei | ✅ ada | | |
+| | Bantal | ✅ ada | | |
+| | Tempat sampah | ✅ ada | | |
+| | Kloset Toto duduk + jet shower + shower | ✅ | ✅ prima | |
+| | Meter listrik awal | | | |
+| **M** | Lampu kamar | ✅ | baik | |
+| | Kipas | **2 unit** | | |
+| | KM dalam | — | | |
+| | Kasur | **Springbed ukuran 160** | | |
+| | Lemari plastik | ✅ | | |
+| | Meja | — | tdk ada | |
+| | Sprei | ✅ ada | | |
+| | Bantal | ✅ ada | | |
+| | Guling | ✅ ada | | inventaris? |
+| | Tempat sampah | ✅ ada | | |
+| | Kloset Toto duduk + jet shower + shower | ✅ | ✅ prima | |
+| | Meter listrik awal | | | |
+
+### Area Bersama
+
+| Area | Item | Ada? | Kondisi | Catatan |
+|------|------|------|---------|---------|
+| **Lampu** | Depan poster | 1 | | |
+| | Teras depan | 1 | | |
+| | Dapur | 1 | | |
+| | Lorong | 1 | | |
+| | Pojok lorong | 1 | | |
+| | Depan KM belakang | 1 | | |
+| | Lorong belakang | 1 | | |
+| **CCTV** | Depan (2) | 2 | | |
+| | Depan dapur | 1 | | |
+| | Area depan KM belakang | 1 | | |
+| | Lorong belakang | 1 | | |
+| **KM Luar** | Closet duduk | 1 | | |
+| | Khusus mandi | 1 | | |
+| | Bak plastik besar | 2 | | |
+| | Ember & gayung | ✅ ada | ✅ prima | |
+| | Gantungan baju | ✅ ada | | |
+| | Tempat sabun | ✅ ada | | |
+| **Dapur** | Kompor + LPG | | | |
+| | Kran | | | |
+| | Tempat sampah | | | |
+| **Lain** | Tandon air | | | |
+| | Pompa air | | | |
+| | Jemuran besar | | | |
+| | APAR/ pemadam | rencana 3-5 | | |
+| | Anak kunci cadangan | | | |
+| | Kunci pintu & jendela (semua kamar) | ✅ | ✅ aman | |
+| | Plafond & tembok | ✅ | ✅ baik, cat ulang | |
+
+> **Data yang masih perlu dilengkapi audit lanjutan:**
+> - Ukuran kamar & KM P×L×T — belum diukur
+> - Model/PK/watt/serial/tahun AC — via foto label
+> - Merek, model, watt kipas — belum dicatat
+> - Kasur & lemari G, H — belum diaudit
+> - Lemari K — belum diaudit
+> - Tipe/bahan lemari D — belum spesifik
+> - Jumlah bantal per kamar — inventaris KOST48
+> - Jumlah sikat per KM (sikat lantai & kloset) — inventaris KOST48
+> - Kepastian guling inventaris (C, F1, I, J, M)
+> - **Gudang** — belum diaudit
+> - **Ruang umum** — belum diaudit
+> - Referensi lengkap: `docs/AUDIT_INVENTARIS_LENGKAP.md`
 
 ---
 
@@ -299,10 +488,14 @@ npm run seed:dev:api       # Buat tenant + stay + invoice + bayar + tiket + surv
 # FAQ (idempoten — aman diulang):
 # POST http://localhost:3000/api/faqs/seed  (perlu login OWNER)
 
-# Produksi — hanya OWNER & data wajib:
-node scripts/golive-setup.js
+# PRODUKSI — input data tenant real (nama, NIK, kamar, tarif):
+# 1. Pastikan DB fresh & kamar sudah terbuat (via golive-setup atau seed:dev:reset)
+# 2. Jalankan seed-prod:
+node scripts/seed-prod.js
+# 3. Email/HP/occupation tenant → input via UI Owner → Manajemen Tenant
+# 4. Deposit → atur via UI Owner
 ```
 
 ---
 
-*Diperbarui: 2026-06-24 · Sumber: kost48surabaya.com + faqs.service.ts + seed-dev-via-api.js*
+*Diperbarui: 2026-07-08 · Sumber: owner KOST48 (data tenant real) + kost48surabaya.com + faqs.service.ts*

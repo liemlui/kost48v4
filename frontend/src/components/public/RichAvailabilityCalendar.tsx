@@ -105,7 +105,10 @@ function matchesFilter(room: RoomDay, filter?: CalendarFilter): boolean {
 
 // ── Component ──
 export default function RichAvailabilityCalendar({ filter }: Props) {
-  const [collapsed, setCollapsed] = useState(false);
+  // Keep the lengthy seven-day grid out of the way by default on phones.
+  const [collapsed, setCollapsed] = useState(
+    () => typeof window !== 'undefined' && window.matchMedia?.('(max-width: 767.98px)')?.matches === true,
+  );
   const [weekOffset, setWeekOffset] = useState(0);
   const [expandedId, setExpandedId] = useState<number | null>(null);
 
@@ -155,17 +158,19 @@ export default function RichAvailabilityCalendar({ filter }: Props) {
         <div className="wcal-h-left">
           <span className="wcal-icon">📅</span>
           <div>
-            <h3 className="wcal-title">Ketersediaan Kamar</h3>
+            <h2 className="wcal-title">Ketersediaan Kamar</h2>
             <span className="wcal-sub">{data.rooms.length} kamar · {fmtTanggal(weekDates[0])} — {fmtTanggal(weekDates[6])}</span>
           </div>
         </div>
         <div className="wcal-h-right">
           <div className="wcal-nav">
-            <button className="wcal-nav-btn" disabled={weekOffset === 0} onClick={() => setWeekOffset((w) => Math.max(0, w - 1))}>‹</button>
+            <button type="button" className="wcal-nav-btn" aria-label="Minggu sebelumnya" disabled={weekOffset === 0} onClick={() => setWeekOffset((w) => Math.max(0, w - 1))}>‹</button>
             <span className="wcal-nav-label">{weekOffset === 0 ? 'Minggu Ini' : `Minggu ${weekOffset === 1 ? 'Depan' : `+${weekOffset}`}`}</span>
-            <button className="wcal-nav-btn" onClick={() => setWeekOffset((w) => w + 1)}>›</button>
+            <button type="button" className="wcal-nav-btn" aria-label="Minggu berikutnya" onClick={() => setWeekOffset((w) => w + 1)}>›</button>
           </div>
-          <button className="wcal-collapse" onClick={() => setCollapsed((c) => !c)}>{collapsed ? '▼' : '▲'}</button>
+          <button type="button" className="wcal-collapse" aria-expanded={!collapsed} onClick={() => setCollapsed((c) => !c)}>
+            {collapsed ? 'Tampilkan jadwal 7 hari' : 'Sembunyikan jadwal'}
+          </button>
         </div>
       </div>
 
@@ -179,7 +184,7 @@ export default function RichAvailabilityCalendar({ filter }: Props) {
               <span className="wcal-stat">🟡 <strong>{stats.booking}</strong> Booking</span>
               <span className="wcal-stat">⚙️ <strong>{stats.maint}</strong> Perbaikan</span>
               {stats.renew > 0 && <span className="wcal-stat" style={{ color: '#7c3aed' }}>🔄 <strong>{stats.renew}</strong> Perpanjang</span>}
-              <span className="wcal-stat" style={{ marginLeft: 'auto', color: '#94a3b8', fontSize: '0.7rem' }}>
+              <span className="wcal-stat" style={{ marginLeft: 'auto', color: '#475569', fontSize: '0.7rem' }}>
                 {rooms.length} kamar
               </span>
             </div>
@@ -187,7 +192,7 @@ export default function RichAvailabilityCalendar({ filter }: Props) {
 
           {/* ═══ TABLE ═══ */}
           <div className="wcal-table-wrap">
-            <table className="wcal-table">
+            <table className="wcal-table keep-wide-table" data-keep-wide="true">
               <thead>
                 <tr>
                   <th className="wcal-th-room">Kamar</th>
@@ -217,15 +222,15 @@ export default function RichAvailabilityCalendar({ filter }: Props) {
                       todayStatus === 'MAINTENANCE' ? { key: 'maint', label: 'Perbaikan' } :
                       { key: 'kosong', label: 'Kosong' };
                     const warna =
-                      statusLabel.key === 'huni' ? '#dc2626' :
-                      statusLabel.key === 'booking' ? '#d97706' :
-                      statusLabel.key === 'maint' ? '#6b7280' :
-                      statusLabel.key === 'renew' ? '#7c3aed' : '#16a34a';
+                      statusLabel.key === 'huni' ? '#b91c1c' :
+                      statusLabel.key === 'booking' ? '#92400e' :
+                      statusLabel.key === 'maint' ? '#475569' :
+                      statusLabel.key === 'renew' ? '#6d28d9' : '#166534';
                     const isExpanded = expandedId === room.id;
 
                     return (
                       <tr key={room.id} className={`wcal-row${isExpanded ? ' exp' : ''}`}>
-                        <td className="wcal-td-room" onClick={() => setExpandedId(isExpanded ? null : room.id)} style={{ borderLeftColor: warna }}>
+                        <td className="wcal-td-room" data-label="Kamar" onClick={() => setExpandedId(isExpanded ? null : room.id)} style={{ borderLeftColor: warna }}>
                           <div className="wcal-r-top">
                             <span className="wcal-r-code">{room.code}</span>
                             <span className="wcal-r-badge" style={{ background: warna + '18', color: warna }}>{statusLabel.label}</span>
@@ -233,7 +238,7 @@ export default function RichAvailabilityCalendar({ filter }: Props) {
                           </div>
                           <div className="wcal-r-meta">
                             {statusLabel.key === 'huni' && room.plannedCheckOutDate && (
-                              <span className="wcal-r-end" style={{ color: room.remainingDays <= 14 ? '#dc2626' : room.remainingDays <= 30 ? '#d97706' : '#16a34a' }}>
+                              <span className="wcal-r-end" style={{ color: room.remainingDays <= 14 ? '#b91c1c' : room.remainingDays <= 30 ? '#92400e' : '#166534' }}>
                                 sd {fmtTanggal(room.plannedCheckOutDate)}
                               </span>
                             )}
@@ -295,7 +300,7 @@ export default function RichAvailabilityCalendar({ filter }: Props) {
                           else if (raw === 'MAINTENANCE') { dotColor = '#9ca3af'; cellBg = '#f9fafb'; }
                           else if (raw === 'PERPANJANG') { dotColor = '#7c3aed'; cellBg = '#f5f3ff'; }
                           return (
-                            <td key={d} className={`wcal-cell${isToday ? ' today' : ''}`} style={{ background: cellBg }}
+                            <td key={d} className={`wcal-cell${isToday ? ' today' : ''}`} data-label={`${fmtHari(d)} ${d.slice(8, 10)}`} style={{ background: cellBg }}
                               title={`${room.code} ${d}: ${raw === 'KOSONG' ? 'Kosong' : raw === 'HUNI' ? 'Terisi' : raw === 'BOOKING_DP' ? 'Booking DP' : raw === 'PERPANJANG' ? 'Perpanjangan' : 'Perbaikan'}`}>
                               <span className="wcal-cell-dot" style={{ background: dotColor }} />
                             </td>

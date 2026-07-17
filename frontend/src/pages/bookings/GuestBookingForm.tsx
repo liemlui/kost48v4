@@ -1,5 +1,5 @@
 // FILE: GuestBookingForm.tsx — form booking publik: pilih kamar + durasi + data diri
-import { FormEvent, Fragment, useState } from 'react';
+import { FormEvent, Fragment, useRef, useState } from 'react';
 import { Alert, Button, Card, Col, Form, Row } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import CurrencyDisplay from '../../components/common/CurrencyDisplay';
@@ -38,6 +38,8 @@ interface GuestBookingFormProps {
   onChange: <K extends keyof GuestBookingFormState>(key: K, value: GuestBookingFormState[K]) => void;
   onSubmit: (event: FormEvent) => void;
 }
+
+type Step1Field = 'fullName' | 'phone' | 'email' | 'identityNumber';
 
 // ═══════════════════════════════════════════════════════════
 //  COMPONENT: GuestBookingForm — Wizard Steps & Main
@@ -86,6 +88,7 @@ export default function GuestBookingForm({
   const [showEmergency, setShowEmergency] = useState(false);
   const [ktpScanning, setKtpScanning] = useState(false);
   const [ktpScanMsg, setKtpScanMsg] = useState<string | null>(null);
+  const step1FieldRefs = useRef<Partial<Record<Step1Field, HTMLInputElement | null>>>({});
 
   const availableTerms: string[] = room.availablePricingTerms?.length ? room.availablePricingTerms : [];
 
@@ -118,7 +121,15 @@ export default function GuestBookingForm({
   function goNext() {
     if (wizardStep === 1) {
       const errs = validateStep1(form);
-      if (Object.keys(errs).length) { setStepErrors(errs); return; }
+      if (Object.keys(errs).length) {
+        setStepErrors(errs);
+        const firstInvalidField = (['fullName', 'phone', 'email', 'identityNumber'] as Step1Field[])
+          .find((field) => Boolean(errs[field]));
+        if (firstInvalidField) {
+          window.requestAnimationFrame(() => step1FieldRefs.current[firstInvalidField]?.focus());
+        }
+        return;
+      }
     } else if (wizardStep === 2) {
       const errs = validateStep2(form);
       if (Object.keys(errs).length) { setStepErrors(errs); return; }
@@ -176,12 +187,13 @@ export default function GuestBookingForm({
         {/* ─── STEP 1: DATA DIRI ─── */}
         {wizardStep === 1 && (
           <Form onSubmit={(e) => { e.preventDefault(); goNext(); }}>
-            <h6 className="fw-semibold mb-3">Data Diri</h6>
+            <h2 className="h6 fw-semibold mb-3">Data Diri</h2>
             <Row className="g-3">
               <Col xs={12}>
                 <Form.Group>
                   <Form.Label>Nama Lengkap <span className="text-danger">*</span></Form.Label>
                   <Form.Control
+                    ref={(element) => { step1FieldRefs.current.fullName = element; }}
                     value={form.fullName}
                     onChange={(e) => onChange('fullName', e.target.value)}
                     placeholder="Masukkan nama lengkap Anda"
@@ -196,6 +208,7 @@ export default function GuestBookingForm({
                 <Form.Group>
                   <Form.Label>Telepon <span className="text-muted small">(minimal salah satu)</span></Form.Label>
                   <Form.Control
+                    ref={(element) => { step1FieldRefs.current.phone = element; }}
                     value={form.phone}
                     onChange={(e) => onChange('phone', e.target.value)}
                     placeholder="08xxxxxxxxxx"
@@ -210,6 +223,7 @@ export default function GuestBookingForm({
                 <Form.Group>
                   <Form.Label>Email <span className="text-muted small">(minimal salah satu)</span></Form.Label>
                   <Form.Control
+                    ref={(element) => { step1FieldRefs.current.email = element; }}
                     value={form.email}
                     onChange={(e) => onChange('email', e.target.value)}
                     placeholder="contoh@email.com"
@@ -225,6 +239,7 @@ export default function GuestBookingForm({
                 <Form.Group>
                   <Form.Label>No. KTP/NIK <span className="text-danger">*</span></Form.Label>
                   <Form.Control
+                    ref={(element) => { step1FieldRefs.current.identityNumber = element; }}
                     value={form.identityNumber}
                     onChange={(e) => onChange('identityNumber', e.target.value)}
                     placeholder="16 digit NIK dari KTP"
@@ -297,7 +312,7 @@ export default function GuestBookingForm({
         {/* ─── STEP 2: DETAIL BOOKING ─── */}
         {wizardStep === 2 && (
           <Form onSubmit={(e) => { e.preventDefault(); goNext(); }}>
-            <h6 className="fw-semibold mb-3">Detail Booking</h6>
+            <h2 className="h6 fw-semibold mb-3">Detail Booking</h2>
             <Row className="g-3">
               <Col md={6}>
                 <Form.Group>
@@ -401,7 +416,7 @@ export default function GuestBookingForm({
         {/* ─── STEP 3: PREFERENSI ─── */}
         {wizardStep === 3 && (
           <div>
-            <h6 className="fw-semibold mb-1">Preferensi</h6>
+            <h2 className="h6 fw-semibold mb-1">Preferensi</h2>
             <p className="small text-muted mb-3">Semua opsional — klik <strong>Lewati</strong> jika tidak relevan.</p>
             <Row className="g-3">
               <Col md={6}>
@@ -464,7 +479,7 @@ export default function GuestBookingForm({
         {/* ─── STEP 4: RINGKASAN & PEMBAYARAN ─── */}
         {wizardStep === 4 && (
           <Form onSubmit={onSubmit}>
-            <h6 className="fw-semibold mb-3">Ringkasan & Pembayaran</h6>
+            <h2 className="h6 fw-semibold mb-3">Ringkasan & Pembayaran</h2>
 
             {/* Booking recap */}
             <div className="p-3 rounded mb-3 booking-neutral-box">

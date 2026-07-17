@@ -316,9 +316,8 @@ Implementasi Arduino siap salin tersedia di:
 
 `firmware/esp32-c3-water-meter/esp32-c3-water-meter.ino`
 
-Semua nilai yang boleh diedit pengguna dipusatkan di:
-
-`firmware/esp32-c3-water-meter/water_meter_config.h`
+Firmware hanya memerlukan satu file `.ino`. Semua nilai yang boleh diedit
+pengguna dipusatkan pada blok `USER CONFIGURATION` di bagian atas file tersebut.
 
 Endpoint:
 
@@ -372,7 +371,7 @@ Default prototype:
 |---|---|
 | Ada flow | agregat tiap 60 detik |
 | Flow berubah menjadi nol | kirim event akhir sesi |
-| Tidak ada flow | heartbeat tiap 5 menit |
+| Tidak ada flow | heartbeat tiap 15 menit |
 | Request tertunda | simpan satu body+nonce di NVS dan retry tiap 30 detik |
 
 Satu pending request cukup untuk prototype karena `pulseTotal` dan volume bersifat

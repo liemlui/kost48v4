@@ -110,8 +110,7 @@ export function validateStep1(form: GuestBookingFormState): FormErrors {
   const hasPhone = form.phone.trim().length > 0;
   const hasEmail = form.email.trim().length > 0;
   if (!hasPhone && !hasEmail) {
-    errors.phone = 'Minimal isi nomor telepon atau email.';
-    errors.email = 'Minimal isi nomor telepon atau email.';
+    errors.phone = 'Masukkan nomor telepon atau email agar admin dapat menghubungi Anda.';
   }
   if (hasEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
     errors.email = 'Format email tidak valid.';

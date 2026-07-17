@@ -1,5 +1,12 @@
 # KOST48 V5 — M13 Changelog
 
+## 2026-07-17 -- Audit Total IoT + Deploy Readiness + Fix Blocker
+
+- Audit total IoT: kWh Tuya backend+frontend lengkap (HMAC-SHA256, 13 device, polling+cron, dashboard KPI), water flow ESP32 firmware compiled+backend ingest siap (hardware menunggu fisik).
+- Fix 3 blocker deploy: (1) salin modul IoT + bootstrap script ke paket deploy, (2) tambah 8 variabel Tuya/IoT ke `deploy/.env.example`, (3) hapus `TUYA_PROJECT_CODE` dari docs (tidak dikonsumsi kode Tuya client).
+- Optimasi memori: pool connection Prisma 5→3 (hemat ~4-6MB).
+- Verifikasi build: backend `tsc --noEmit` ✅ · frontend `npm run build` ✅ (141 chunks, PWA).
+
 ## 2026-07-16 -- Fase 7 Playwright Crawl dan Fix Overflow Mobile Dashboard
 
 - Crawl Playwright admin/owner lulus bersih di server lokal: OWNER 35/35 route render OK, ADMIN 31/31 route render OK, 0 blank, 0 temuan, 0 console/pageerror/request gagal.

@@ -176,9 +176,9 @@ export function getPublicRoomAvailabilityDisplay(room: PublicRoom): PublicRoomAv
   }
 
   return {
-    label: "Kosong",
+    label: "Bisa diajukan",
     tone: "is-available",
-    shortCopy: "Ajukan booking dulu, lalu tunggu review admin.",
+    shortCopy: "Kamar siap diajukan. Admin akan meninjau booking Anda.",
     detailCopy: "Kamar bisa diajukan. Aman setelah pembayaran disetujui.",
     canBook: true,
   };

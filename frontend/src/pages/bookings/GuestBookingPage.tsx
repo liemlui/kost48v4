@@ -173,7 +173,7 @@ export default function GuestBookingPage() {
   // ---- BOOKING FORM ----
   return (
     <div className="public-page-shell">
-      <div className="container py-4 py-lg-5" style={{ maxWidth: 960 }}>
+      <main className="container py-4 py-lg-5" style={{ maxWidth: 960 }}>
         <div className="mb-4">
           <div className="page-eyebrow">✦ Booking tamu publik</div>
           <h1 className="mb-1">Form Booking — {room.code}</h1>
@@ -204,7 +204,7 @@ export default function GuestBookingPage() {
             />
           </Col>
         </Row>
-      </div>
+      </main>
     </div>
   );
 }

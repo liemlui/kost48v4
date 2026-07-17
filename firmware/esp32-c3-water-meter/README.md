@@ -1,8 +1,9 @@
 # Firmware Water Meter ESP32-C3
 
-Logika firmware berada di `esp32-c3-water-meter.ino`, sedangkan **semua
-pengaturan pengguna berada di satu file**: `water_meter_config.h`. Untuk
-instalasi normal, edit file config saja dan jangan mengubah logika `.ino`.
+Firmware siap upload berada dalam **satu file saja**:
+`esp32-c3-water-meter.ino`. Semua pengaturan pengguna dipusatkan pada blok
+`USER CONFIGURATION` di bagian atas file tersebut. Untuk instalasi normal,
+edit Bagian 1-3 saja dan jangan mengubah logika setelah `END USER CONFIGURATION`.
 
 Satu ESP32-C3 dapat
 menangani 1-4 sensor flow kuningan 3/4 inci. Setiap sensor memiliki GPIO,
@@ -63,9 +64,8 @@ signal-GND dan jauhkan dari kabel AC.
 
 1. Arduino IDE: install board package `esp32 by Espressif Systems`.
 2. Pilih board yang benar; untuk board generik gunakan `ESP32C3 Dev Module`.
-3. Buka folder sketch; Arduino IDE menampilkan tab `.ino` dan
-   `water_meter_config.h`.
-4. Buka tab `water_meter_config.h`; isi Bagian 1-3 dari atas ke bawah.
+3. Buka file `esp32-c3-water-meter.ino` di Arduino IDE.
+4. Isi Bagian 1-3 pada blok `USER CONFIGURATION` di bagian atas `.ino`.
 5. Set `ACTIVE_FLOW_SENSOR_COUNT` ke 1, 2, 3, atau 4 lalu isi `gpio`,
    `deviceId`, `deviceSecret`, `pulsesPerLiter`, dan `counterEpoch` untuk setiap
    entry `SENSORS` yang aktif.
@@ -80,7 +80,7 @@ commit sketch yang sudah berisi password Wi-Fi atau device secret.
 
 ## Mengaktifkan 1, 2, 3, atau 4 sensor
 
-Cari Bagian 2 di `water_meter_config.h`:
+Cari Bagian 2 di bagian atas `esp32-c3-water-meter.ino`:
 
 ```cpp
 static constexpr size_t ACTIVE_FLOW_SENSOR_COUNT = 1;
@@ -112,25 +112,23 @@ placeholder. Jangan mengisi urutan dengan loncat, misalnya mengaktifkan nilai
 
 ## Mengubah nama sensor/kamar
 
-Nama yang mudah dibaca adalah nilai pertama pada setiap entry di Bagian 3
-`water_meter_config.h`:
+Nama setiap sensor memiliki variabel tersendiri di Bagian 3A
+`esp32-c3-water-meter.ino`. Ganti teks di sebelah kanan saja:
 
 ```cpp
-static const SensorConfig SENSORS[] = {
-  {"Kamar A", 3, "water-kamar-a", "GANTI_SECRET_SENSOR_1", 477.0, 1},
-  {"Kamar B", 4, "water-kamar-b", "GANTI_SECRET_SENSOR_2", 477.0, 1},
-  {"Dapur",   5, "water-dapur",   "GANTI_SECRET_SENSOR_3", 477.0, 1},
-  {"Tandon",  6, "water-tandon",  "GANTI_SECRET_SENSOR_4", 477.0, 1},
-};
+static const char NAMA_KAMAR_1[] = "Kamar A";
+static const char NAMA_KAMAR_2[] = "Kamar B";
+static const char NAMA_KAMAR_3[] = "Dapur";
+static const char NAMA_KAMAR_4[] = "Tandon Atas";
 ```
 
-Format setiap baris:
+Tabel teknis di Bagian 3B otomatis memakai variabel tersebut:
 
-```text
-{ displayName, gpio, deviceId, deviceSecret, pulsesPerLiter, counterEpoch }
+```cpp
+{NAMA_KAMAR_1, 3, "water-kamar-a", "GANTI_SECRET_SENSOR_1", 477.0, 1},
 ```
 
-- `displayName`: bebas diubah, 1-40 karakter; tampil pada Serial Monitor dan
+- `NAMA_KAMAR_1` sampai `NAMA_KAMAR_4`: bebas diubah, 1-40 karakter; tampil pada Serial Monitor dan
   diagnostics API.
 - `deviceId`: identitas teknis dan harus sama persis dengan `deviceCode` yang
   dibuat pada dashboard `/iot`.
@@ -146,7 +144,7 @@ Format setiap baris:
 - volume total memakai faktor awal 477 pulse/liter;
 - flow sesaat memakai `Q = (F + 3) / 8.1`;
 - saat ada aliran, data dikirim setiap 60 detik;
-- saat idle, heartbeat dikirim setiap 5 menit;
+- saat idle, heartbeat dikirim setiap 15 menit (masih di bawah batas stale backend 30 menit);
 - event flow berhenti dikirim tanpa menunggu heartbeat;
 - total pulse, sequence, dan satu request pending per channel disimpan di NVS;
 - request gagal diulang dengan body dan nonce yang sama sehingga idempoten;

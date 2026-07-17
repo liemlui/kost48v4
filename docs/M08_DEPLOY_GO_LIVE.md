@@ -106,6 +106,18 @@ psql -h <host> -p 5432 -U postgres -d kost48_v3 -f sql/bootstrap_v4_addendum.sql
 - [ ] Buat periode OPEN dan opening balance produksi.
 - [ ] Buat `CashAccount` Cash (1000) dan Bank (1010).
 
+> **Seed data tenant real (13 kamar, 13 tenant):** setelah DB seed fondasi, jalankan:
+> ```powershell
+> # Pastikan backend sudah running (atau start dulu: npm run start:prod &)
+> node scripts/seed-prod.js
+> ```
+> - Membuat 13 kamar dengan **tarif real** sesuai konfirmasi owner
+> - Membuat 13 tenant dengan **nama & NIK asli**
+> - Email/HP placeholder — **wajib dilengkapi via UI Owner → Manajemen Tenant**
+> - Deposit → atur via UI Owner
+> - Stays (check-in) → buat via UI Owner setelah data tenant siap
+> - Detail data: `docs/M11_DEFAULT_DATA.md §1b`
+
 ##### 3. Restart & Smoke
 1. Restart backend (PM2/systemd). Tunggu log "AutoOps aktif".
 2. Smoke API:

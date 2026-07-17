@@ -178,6 +178,22 @@
   font-weight: 700;
 }
 
+.rm-preference-trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: .75rem;
+  padding: .42rem .8rem;
+  border: 1px solid rgba(3, 105, 161, .24);
+  border-radius: 999px;
+  background: #fff;
+  color: #075985;
+  font-size: .8rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+.rm-preference-trigger:hover { background: #e0f2fe; }
+
 /* ── Filter bar — layout vertikal (tiap grup satu baris) ── */
 .rm-filter-bar {
   display: flex;
@@ -4367,6 +4383,7 @@
 /* ── Table ── */
 .wcal-table {
   width: 100%;
+  min-width: 542px;
   border-collapse: collapse;
   font-size: 0.72rem;
 }
@@ -4381,7 +4398,7 @@
   text-align: left;
   font-weight: 800;
   font-size: 0.65rem;
-  color: #94a3b8;
+  color: #475569;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   border-bottom: 2px solid rgba(148,163,184,0.12);
@@ -4479,7 +4496,7 @@
 }
 .wcal-renew-note {
   font-weight: 400;
-  color: #94a3b8;
+  color: #475569;
   font-size: 0.6rem;
 }
 
@@ -4563,7 +4580,7 @@
 .wcal-legend-r {
   margin-left: auto;
   font-weight: 700;
-  color: #94a3b8;
+  color: #475569;
 }
 
 /* ── Alternating rows ── */
@@ -4581,9 +4598,41 @@
   .wcal-th-room { width: 120px; min-width: 120px; }
   .wcal-td-room { width: 120px; min-width: 120px; }
   .wcal-th-day { width: 40px; min-width: 40px; }
+  .wcal-table { min-width: 400px; }
   .wcal-cell { width: 40px; min-width: 40px; height: 30px; }
   .wcal-cell-dot { width: 12px; height: 12px; }
   .wcal-r-code { font-size: 0.75rem; }
+}
+
+/* Public catalogue controls meet the comfortable 44px mobile touch target. */
+@media (max-width: 767.98px) {
+  .rm-topbar-nav button,
+  .rm-topbar-nav a,
+  .rm-preference-trigger,
+  .rm-filter-toggle,
+  .rm-filter-chip,
+  .rm-filter-reset,
+  .rm-card-compare-btn,
+  .rm-btn-book,
+  .rm-btn-wa,
+  .rm-btn-detail,
+  .wcal-nav-btn,
+  .wcal-collapse {
+    min-height: 44px;
+  }
+
+  .rm-filter-chip,
+  .rm-filter-reset,
+  .rm-btn-detail,
+  .wcal-nav-btn,
+  .wcal-collapse {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .rm-btn-detail { width: 100%; }
+  .wcal-collapse { white-space: nowrap; }
 }
 
 /* ── Stats bar ── */

@@ -536,7 +536,57 @@ Sumber TUNGGAL (hindari duplikasi). Per-kamar tetap bisa override tarif bila per
 
 ---
 
-## Audit 360° P4–P5 (Jul 2026)
+## Bagian 6 — IoT Monitoring (KWH Tuya + Water Flow ESP32)
+
+> 🔜 **Belum diimplementasi.** Spek lengkap: memory `iot-water-kwh-spec` + `M14_IOT_TUYA_DEVICES.md`.
+
+### Hardware Terpasang
+
+| Jenis | Jumlah | Status | Integrasi |
+|---|---|---|---|
+| **KWH Meter Tuya per kamar** | 13 (11 online) | Tuya Cloud API | Polling cron 10 menit → `KwhReading` |
+| **CCTV BARDI IP Camera** | 5 (4 online) | Tuya Cloud | Fase lanjutan (snapshot dashboard) |
+| **Smart Lock** | 1 (online) | Tuya Cloud | Fase lanjutan (remote unlock) |
+| **Water Flow D20 + ESP32-C3** | 2-3 unit (🔜) | HTTP POST | `/api/iot/flow` (JWT device token) |
+
+### Arsitektur Backend (rencana)
+
+```
+ESP32-C3+D20 → HTTP POST /api/iot/flow (JWT) → FlowReading
+Tuya KWH Meter → Tuya Cloud API → cron KwhPollingSweep (10 menit) → KwhReading
+                                    cron LeakDetectionSweep → FlowAlert / KwhAlert
+```
+
+- **1 backend** (tidak bikin backend baru — hemat RAM shared hosting)
+- **Tanpa MQTT/WebSocket** — polling REST saja
+- **Tanpa library baru** (kecuali terpaksa + ringan)
+- **JWT device** berbeda dari user JWT (long-lived 30 hari, device-scoped)
+
+### Model Prisma (🔜)
+
+- `IotDevice` — registrasi ESP32 / device Tuya, device token
+- `FlowSensor` — sensor D20 per kamar
+- `FlowReading` — data water flow (liter, timestamp)
+- `KwhReading` — data kWh dari Tuya (device_id, kWh, timestamp)
+- `KwhAlert` / `FlowAlert` — alert anomali
+
+### Auto-Ops Cron (🔜)
+
+| Sweeper | Trigger | Aksi |
+|---|---|---|
+| **KwhPollingSweep** | Tiap 10 menit | Polling 11 KWH meter via Tuya API → simpan |
+| **LeakDetectionSweep** | Tiap 30 menit | Flow > 0 jam 23-05 ATAU tanpa penghuni → alert |
+
+### Referensi
+
+| Topik | Dokumen |
+|---|---|
+| Inventaris device + Device ID | `docs/M14_IOT_TUYA_DEVICES.md` |
+| Spek implementasi | memory `iot-water-kwh-spec` |
+| Peta scope | `docs/M10_PETA_SCOPE.md` § IoT & Monitoring |
+| Proposal meter pascabayar | `docs/M06_OPERASIONAL.md` § Bagian 5 (M-1..M-5 ✅) |
+
+---
 
 **Status:** 🟢 Solid. Detail → `docs/archieve/M17_AUDIT_360_P3_P8.md`
 

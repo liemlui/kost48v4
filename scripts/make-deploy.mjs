@@ -390,6 +390,7 @@ for (const item of ['prisma', 'sql']) {
 if (existsSync('backend/setup.sql')) cpSync('backend/setup.sql', OUT + '/setup.sql');
 writeDeployPackageFiles();
 cpSync('backend/scripts/seed-owner.js', OUT + '/scripts/seed-owner.js'); // seed OWNER pertama (F1-12) di server
+if (existsSync('backend/scripts/bootstrap-tuya-kwh.js')) cpSync('backend/scripts/bootstrap-tuya-kwh.js', OUT + '/scripts/bootstrap-tuya-kwh.js'); // register 13 KWH Tuya device
 cpSync('frontend/dist', OUT + '/client', {
   recursive: true,
   filter: (src) => !src.endsWith(BUILD_MARKER),
@@ -416,6 +417,24 @@ writeFileSync(OUT + '/.env.example', [
   '# FRONTEND_DIST_PATH opsional (default <app>/client sudah benar).',
   '# ⚠️ NODE_OPTIONS=--max-old-space-size=192 TIDAK bisa lewat .env — set di cPanel',
   '#    "Setup Node.js App" → Environment Variables (dibaca node saat start).',
+  '',
+  '# ── Tuya IoT Cloud (KWH meter per kamar) ──────────────────────────────────────',
+  '# Access ID/Client ID dan Secret dari Tuya IoT Console.',
+  '# Dipakai untuk polling 13 KWH meter per kamar (lihat docs/M14_IOT_TUYA_DEVICES.md).',
+  '# TUYA_ACCESS_KEY=isi_********************key',
+  '# TUYA_SECRET_KEY=isi_**********************cret',
+  '# TUYA_API_BASE=https://openapi.tuyaus.com',
+  '# Shared hosting: IOT_TUYA_POLL_ENABLED=false + cPanel Cron panggil',
+  '# POST /api/iot/tuya/cron tiap 5-10 menit dengan header X-Iot-Cron-Token.',
+  '# IOT_TUYA_POLL_ENABLED=false',
+  '# IOT_TUYA_POLL_MINUTES=10',
+  '# IOT_TUYA_CRON_TOKEN=gant********************jang',
+  '# IOT_STALE_AFTER_MINUTES=30',
+  '',
+  '# ── IoT ESP32 Water Flow (opsional, untuk sensor air) ─────────────────────────',
+  '# 32 byte random base64. Dipakai mengenkripsi secret device ESP32-C3.',
+  '# Generate: node -e "console.log(require(\'crypto\').randomBytes(32).toString(\'base64\'))"',
+  '# IOT_MASTER_KEY=',
   '',
 ].join('\n'));
 
