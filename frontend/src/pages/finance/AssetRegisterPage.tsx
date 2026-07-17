@@ -267,7 +267,7 @@ export default function AssetRegisterPage() {
   }
 
   return (
-    <div>
+    <div className="finance-workspace">
   <PageHeader
     title="Daftar Aset Tetap"
     description="Daftar aset tetap, depresiasi, dan penyesuaian ledger — pastikan aset tercatat dengan benar di Neraca."

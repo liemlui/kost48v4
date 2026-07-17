@@ -49,7 +49,7 @@ export default function LossRefundsPage() {
   const items = data ?? [];
 
   return (
-    <div>
+    <div className="finance-workspace">
       <PageHeader
         title="Refund Kalah-Cepat"
         description="Tenant yang kalah first-paid-wins padahal sudah transfer — kembalikan dananya lalu tandai selesai."

@@ -12,6 +12,7 @@ describe('preprocessImage', () => {
     const file = new File(['dummy'], 'test.jpg', { type: 'image/jpeg' });
     const result = mod.preprocessImage(file);
     expect(result).toBeInstanceOf(Promise);
+    await expect(result).rejects.toThrow(); // jsdom tidak menyediakan URL.createObjectURL/Image nyata
   });
 
   it('preprocessImage menolak file kosong (error handling)', async () => {

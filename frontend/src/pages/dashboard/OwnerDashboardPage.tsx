@@ -1,7 +1,7 @@
 // FILE: OwnerDashboardPage.tsx — dashboard owner: KPI, tren pendapatan, okupansi (JALUR UANG)
 import { useMemo, useState, type ReactNode } from 'react';
 import { formatRupiahWithoutSymbol, formatCompactRupiah } from '../../utils/formatCurrency';
-import { Alert, Badge, Card, Col, Container, Form, Row } from 'react-bootstrap';
+import { Alert, Badge, Button, Card, Col, Container, Form, Row, Spinner } from 'react-bootstrap';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { StatCardSkeleton, TableSkeleton } from '../../components/common/SkeletonLoader';
@@ -223,7 +223,10 @@ export default function OwnerDashboardPage() {
     queryKey: ['owner-dashboard-aggregate', ym, trendMonths],
     queryFn: () => fetchOwnerDashboardAggregate(ym.year, ym.month, trendMonths),
     staleTime: 60_000,
-    retry: 1,
+    retry: 2,
+    refetchInterval: 60_000,
+    refetchOnWindowFocus: true,
+    refetchOnReconnect: true,
   });
   const ownerAiStatusQuery = useQuery({
     queryKey: ['owner-ai', 'status', 'owner-dashboard'],
@@ -237,6 +240,14 @@ export default function OwnerDashboardPage() {
   const grade = data ? gradeBadge(data.grade) : null;
   const selectedPeriodLabel = monthLabel(ym);
   const canUseOwnerAi = ownerAiStatusQuery.data?.configured === true;
+  const lastUpdatedLabel = aggregateQuery.dataUpdatedAt
+    ? new Date(aggregateQuery.dataUpdatedAt).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })
+    : null;
+  const isRefreshing = aggregateQuery.isFetching || ownerAiStatusQuery.isFetching;
+
+  const refreshDashboard = () => {
+    void Promise.all([aggregateQuery.refetch(), ownerAiStatusQuery.refetch()]);
+  };
 
   const extraSignals = useMemo(() => {
     const items: { key: string; label: string; helper: string; route: string; type: string }[] = [];
@@ -285,6 +296,12 @@ export default function OwnerDashboardPage() {
               📊 Lengkap
             </button>
           </div>
+          <div className="owner-refresh-control">
+            <Button type="button" variant="outline-secondary" size="sm" onClick={refreshDashboard} disabled={isRefreshing}>
+              {isRefreshing ? <><Spinner animation="border" size="sm" className="me-1" />Memuat</> : '↻ Refresh'}
+            </Button>
+            <small aria-live="polite">{lastUpdatedLabel ? `Terakhir diperbarui ${lastUpdatedLabel}` : 'Belum diperbarui'}</small>
+          </div>
         </div>
       </section>
 
@@ -302,6 +319,9 @@ export default function OwnerDashboardPage() {
         <Alert variant="warning" className="mb-3">
           Dashboard gagal dimuat. Pastikan backend API berjalan dan data transaksi tersedia.
           {aggregateQuery.error ? <div className="small mt-1">{(aggregateQuery.error as any)?.message ?? ''}</div> : null}
+          <Button type="button" size="sm" variant="outline-warning" className="mt-2" onClick={refreshDashboard} disabled={isRefreshing}>
+            {isRefreshing ? 'Memuat ulang…' : 'Coba lagi'}
+          </Button>
         </Alert>
       ) : null}
 

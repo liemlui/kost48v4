@@ -5,14 +5,48 @@ import HorizontalBarChart, { type HorizontalBarPoint } from '../../charts/Horizo
 import { OKABE_ITO } from '../../charts/chartPalette';
 import CurrencyDisplay from '../../common/CurrencyDisplay';
 import { fetchPublicConfig } from '../../../api/settings';
+import type { TenantRoomUtilityTelemetry, TenantUtilityDevice } from '../../../api/iot';
 import { summarizeUsageSinceCheckIn, estimateUtilityCost, numeric } from '../../../utils/meterUsage';
 import type { MeterReading, Stay } from '../../../types';
+
+const statusLabel: Record<TenantUtilityDevice['status'], string> = {
+  NO_DEVICE: 'Belum terpasang',
+  NOT_CONNECTED: 'Belum terhubung',
+  OFFLINE: 'Perlu diperiksa',
+  STALE: 'Perlu diperiksa',
+  NO_FLOW: 'Tidak ada aliran',
+  ONLINE: 'Online',
+};
+
+function liveValue(value: number | null, unit: string) {
+  if (value == null) return '—';
+  return `${new Intl.NumberFormat('id-ID', { maximumFractionDigits: 3 }).format(value)} ${unit === 'm3' ? 'm³' : unit}`;
+}
+
+function LiveMeterTile({ device }: { device: TenantUtilityDevice }) {
+  const isWater = device.utilityType === 'WATER';
+  const stateClass = ['ONLINE', 'NO_FLOW'].includes(device.status) ? 'is-ok' : 'is-warning';
+  return (
+    <div className={`tenant-live-meter ${stateClass}`}>
+      <div className="tenant-live-meter-head">
+        <strong>{isWater ? 'Meter air' : 'Meter listrik'}</strong>
+        <span>{statusLabel[device.status]}</span>
+      </div>
+      <div className="tenant-live-meter-value">{liveValue(device.total, device.unit)}</div>
+      {isWater && device.flowRateLpm != null ? <div className="tenant-live-meter-flow">Aliran saat ini: {liveValue(device.flowRateLpm, 'L/menit')}</div> : null}
+      <small>{device.statusMessage}</small>
+    </div>
+  );
+}
 
 export default function UtilityInsightCard({
   stay,
   readings,
   isLoading,
   isError,
+  telemetry,
+  isTelemetryLoading,
+  isTelemetryError,
   canRecord,
   onCatatMeter,
 }: {
@@ -20,6 +54,9 @@ export default function UtilityInsightCard({
   readings: MeterReading[];
   isLoading: boolean;
   isError: boolean;
+  telemetry?: TenantRoomUtilityTelemetry;
+  isTelemetryLoading: boolean;
+  isTelemetryError: boolean;
   canRecord: boolean;
   onCatatMeter: () => void;
 }) {
@@ -65,6 +102,26 @@ export default function UtilityInsightCard({
       <Card.Body>
         <div className="command-eyebrow">Konsumsi Listrik &amp; Air</div>
         <h3 className="tenant-utility-insight-title">Pemakaian &amp; estimasi biaya</h3>
+
+        <section className="tenant-live-meter-panel" aria-live="polite" aria-label="Status meter otomatis">
+          <div className="tenant-live-meter-panel-head">
+            <strong>Status meter otomatis</strong>
+            <span>Pembaruan dicek tiap menit</span>
+          </div>
+          {isTelemetryLoading ? (
+            <div className="tenant-live-meter-loading"><Spinner animation="border" size="sm" /> Memuat status meter…</div>
+          ) : isTelemetryError ? (
+            <p className="tenant-live-meter-error">Status meter otomatis belum tersedia. Pembacaan tagihan tidak terpengaruh.</p>
+          ) : telemetry ? (
+            <>
+              <div className="tenant-live-meter-grid">
+                <LiveMeterTile device={telemetry.electricity} />
+                <LiveMeterTile device={telemetry.water} />
+              </div>
+              <p className="tenant-live-meter-notice">{telemetry.billingNotice}</p>
+            </>
+          ) : null}
+        </section>
 
         {isLoading ? (
           <div className="py-4 text-center"><Spinner animation="border" size="sm" /></div>

@@ -271,6 +271,45 @@
   }
 }
 
+/* Laporan Owner harus tetap terbaca saat dicetak atau disimpan sebagai PDF. */
+@media print {
+  @page { margin: 12mm; size: A4 landscape; }
+
+  .app-sidebar,
+  .app-topbar,
+  .app-mobile-bottom-nav,
+  .report-hero-controls,
+  .report-tabbar,
+  .report-print-btn,
+  .report-export-btn,
+  .report-formality-note {
+    display: none !important;
+  }
+
+  .app-shell,
+  .app-shell-grid,
+  .app-main,
+  .reports-command-page {
+    display: block !important;
+    min-height: 0 !important;
+    padding: 0 !important;
+    background: #fff !important;
+  }
+
+  .reports-command-page .report-panel,
+  .reports-command-page .report-kpi-card,
+  .reports-command-page .report-command-status,
+  .reports-command-page .report-warning-card {
+    break-inside: avoid;
+    box-shadow: none !important;
+  }
+
+  .reports-command-page .card,
+  .reports-command-page .alert {
+    border-color: #cbd5e1 !important;
+  }
+}
+
 /* ═══════════════════════════════════════════════════════════
    E3 — Inline style → CSS class (shared report patterns)
    ═══════════════════════════════════════════════════════════ */

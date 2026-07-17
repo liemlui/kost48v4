@@ -593,13 +593,26 @@
 .owner-chart-tooltip {
   display: grid;
   gap: 0.16rem;
-  max-width: 230px;
+  max-width: min(230px, calc(100vw - 2rem));
   padding: 0.55rem 0.68rem;
   border: 1px solid var(--owner-border);
   border-radius: 6px;
   background: #ffffff;
   box-shadow: 0 8px 18px rgba(15, 23, 42, 0.12);
   font-size: 0.72rem;
+  overflow-wrap: anywhere;
+}
+
+.owner-refresh-control {
+  display: grid;
+  gap: 0.2rem;
+  justify-items: end;
+}
+
+.owner-refresh-control small {
+  color: var(--owner-muted);
+  font-size: 0.7rem;
+  white-space: nowrap;
 }
 
 .owner-chart-legend {
@@ -640,6 +653,11 @@
     display: grid;
     grid-template-columns: 82px minmax(132px, 1fr);
     width: 100%;
+  }
+
+  .owner-refresh-control {
+    grid-column: 1 / -1;
+    justify-items: start;
   }
 
   .owner-period-field .form-control,

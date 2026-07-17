@@ -1,4 +1,4 @@
-import { ConflictException, Injectable, NotFoundException, ServiceUnavailableException } from '@nestjs/common';
+import { ConflictException, ForbiddenException, Injectable, NotFoundException, ServiceUnavailableException } from '@nestjs/common';
 import { IotDeviceType, IotProvider, Prisma } from '../../generated/prisma';
 import { AuditLogService } from '../../audit-log/audit-log.service';
 import { CurrentUserPayload } from '../../common/interfaces/current-user.interface';
@@ -50,6 +50,51 @@ export class IotService {
     };
   }
 
+  /**
+   * Read-only telemetry for the tenant's current room. IoT telemetry deliberately
+   * remains separate from MeterReading, which is the verified billing snapshot.
+   */
+  async tenantCurrentRoomUtilities(actor: CurrentUserPayload) {
+    if (!actor.tenantId) {
+      throw new ForbiddenException('Akun tenant belum terhubung ke data tenant');
+    }
+
+    const stay = await this.prisma.stay.findFirst({
+      where: { tenantId: actor.tenantId, status: 'ACTIVE' as any },
+      orderBy: { id: 'desc' },
+      select: { roomId: true, room: { select: { code: true, name: true } } },
+    });
+    if (!stay) throw new NotFoundException('Stay aktif tidak ditemukan');
+
+    const devices = await this.prisma.iotDevice.findMany({
+      where: {
+        roomId: stay.roomId,
+        enabled: true,
+        deviceType: { in: [IotDeviceType.ELECTRICITY_METER, IotDeviceType.WATER_FLOW_METER] },
+      },
+      include: {
+        ingestMessages: {
+          take: 1,
+          orderBy: { observedAt: 'desc' },
+          include: { telemetry: { orderBy: { metric: 'asc' } } },
+        },
+      },
+    });
+    const byType = (type: IotDeviceType) => devices
+      .filter((device) => device.deviceType === type)
+      .sort((left, right) => (right.lastSeenAt?.getTime() ?? 0) - (left.lastSeenAt?.getTime() ?? 0))[0];
+    const staleAfterMinutes = Number(process.env.IOT_STALE_AFTER_MINUTES ?? 30);
+
+    return {
+      room: stay.room,
+      refreshedAt: new Date(),
+      staleAfterMinutes,
+      billingNotice: 'Data sensor hanya untuk monitoring dan bukan dasar tagihan.',
+      electricity: this.toTenantUtilityDevice(byType(IotDeviceType.ELECTRICITY_METER), 'ELECTRICITY', staleAfterMinutes),
+      water: this.toTenantUtilityDevice(byType(IotDeviceType.WATER_FLOW_METER), 'WATER', staleAfterMinutes),
+    };
+  }
+
   async listDevices(query: IotDeviceQueryDto = {}) {
     const items = await this.prisma.iotDevice.findMany({
       where: {
@@ -61,6 +106,64 @@ export class IotService {
       orderBy: [{ enabled: 'desc' }, { deviceCode: 'asc' }],
     });
     return items.map((item) => this.toDeviceView(item));
+  }
+
+  private toTenantUtilityDevice(
+    device: any | undefined,
+    utilityType: 'ELECTRICITY' | 'WATER',
+    staleAfterMinutes: number,
+  ) {
+    if (!device) {
+      return {
+        utilityType,
+        status: 'NO_DEVICE',
+        statusMessage: 'Meter belum terpasang atau belum dipetakan ke kamar ini.',
+        lastSeenAt: null,
+        observedAt: null,
+        total: null,
+        unit: utilityType === 'ELECTRICITY' ? 'kWh' : 'm3',
+        flowRateLpm: null,
+        quality: null,
+      };
+    }
+
+    const latestMessage = device.ingestMessages[0];
+    const metric = (name: string) => latestMessage?.telemetry?.find((item: any) => item.metric === name);
+    const totalMetric = metric(utilityType === 'ELECTRICITY' ? 'electricity.energy_total_kwh' : 'water.volume_total_m3');
+    const flowMetric = utilityType === 'WATER' ? metric('water.flow_rate_lpm') : undefined;
+    const total = totalMetric?.valueDecimal == null ? null : Number(totalMetric.valueDecimal);
+    const flowRateLpm = flowMetric?.valueDecimal == null ? null : Number(flowMetric.valueDecimal);
+    const lastSeenAt = device.lastSeenAt ?? null;
+    const observedAt = totalMetric?.observedAt ?? latestMessage?.observedAt ?? lastSeenAt;
+    const stale = !lastSeenAt || Date.now() - lastSeenAt.getTime() > staleAfterMinutes * 60_000;
+    let status = 'ONLINE';
+    let statusMessage = 'Data meter terakhir berhasil diterima.';
+
+    if (!lastSeenAt) {
+      status = 'NOT_CONNECTED';
+      statusMessage = 'Meter terdaftar, tetapi belum pernah mengirim data.';
+    } else if (device.online === false) {
+      status = 'OFFLINE';
+      statusMessage = 'Meter sedang offline. Periksa daya dan koneksi perangkat.';
+    } else if (stale) {
+      status = 'STALE';
+      statusMessage = `Data belum diterima lebih dari ${staleAfterMinutes} menit. Periksa daya, Wi-Fi, atau sensor.`;
+    } else if (utilityType === 'WATER' && flowRateLpm !== null && flowRateLpm <= 0) {
+      status = 'NO_FLOW';
+      statusMessage = 'Meter aktif, tetapi belum mendeteksi aliran air.';
+    }
+
+    return {
+      utilityType,
+      status,
+      statusMessage,
+      lastSeenAt,
+      observedAt,
+      total,
+      unit: totalMetric?.unit ?? (utilityType === 'ELECTRICITY' ? 'kWh' : 'm3'),
+      flowRateLpm,
+      quality: totalMetric?.quality ?? null,
+    };
   }
 
   async createDevice(dto: CreateIotDeviceDto, actor: CurrentUserPayload) {

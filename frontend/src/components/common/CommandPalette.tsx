@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react';
 import { Command } from 'cmdk';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { getNavigationLinks, ownerAdminSections } from '../../config/navigation';
+import { getNavigationLinks, ownerAdminSections, ownerSections } from '../../config/navigation';
 
 type Props = {
   onClose: () => void;
@@ -21,7 +21,18 @@ export default function CommandPalette({ onClose }: Props) {
   const overlayRef = useRef<HTMLDivElement>(null);
 
   const navLinks = (() => {
-    if (user?.role === 'OWNER') return ownerAdminSections.flatMap((s) => s.links);
+    if (user?.role === 'OWNER') {
+      // Owner bekerja di dua konteks. Jangan hanya tampilkan menu operasional
+      // (Area Admin), karena itu membuat Kokpit Owner tidak dapat dicari via Ctrl/Cmd+K.
+      const seen = new Set<string>();
+      return [...ownerSections, ...ownerAdminSections]
+        .flatMap((section) => section.links)
+        .filter((link) => {
+          if (seen.has(link.to)) return false;
+          seen.add(link.to);
+          return true;
+        });
+    }
     return getNavigationLinks(user?.role);
   })();
 

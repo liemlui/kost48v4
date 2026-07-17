@@ -1,18 +1,23 @@
-import { Body, Controller, Get, Param, ParseIntPipe, Patch, Post, Query } from '@nestjs/common';
+import { Body, Controller, ForbiddenException, Get, Headers, HttpCode, Param, ParseIntPipe, Patch, Post, Query } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { UserRole } from '../../common/enums/app.enums';
 import { CurrentUserPayload } from '../../common/interfaces/current-user.interface';
+import { Public } from '../../common/decorators/public.decorator';
 import { CreateIotDeviceDto, IotDeviceQueryDto, IotTelemetryQueryDto, TuyaProbeDto, UpdateIotDeviceDto } from './dto/iot-device.dto';
 import { IotService } from './iot.service';
+import { IotPollingService } from './iot-polling.service';
 
 @ApiTags('iot')
 @ApiBearerAuth()
 @Controller('iot')
 @Roles(UserRole.OWNER, UserRole.ADMIN)
 export class IotController {
-  constructor(private readonly iot: IotService) {}
+  constructor(
+    private readonly iot: IotService,
+    private readonly polling: IotPollingService,
+  ) {}
 
   @Get('overview')
   @ApiOperation({ summary: 'Ringkasan perangkat dan telemetry IoT — OWNER/ADMIN' })
@@ -24,6 +29,13 @@ export class IotController {
   @ApiOperation({ summary: 'Daftar perangkat IoT — OWNER/ADMIN' })
   async devices(@Query() query: IotDeviceQueryDto) {
     return { message: 'Daftar perangkat IoT berhasil diambil', data: await this.iot.listDevices(query) };
+  }
+
+  @Get('tenant/my-room')
+  @Roles(UserRole.TENANT)
+  @ApiOperation({ summary: 'Telemetry meter kamar aktif saya - TENANT, monitoring-only' })
+  async tenantCurrentRoomUtilities(@CurrentUser() actor: CurrentUserPayload) {
+    return { message: 'Telemetry meter kamar berhasil diambil', data: await this.iot.tenantCurrentRoomUtilities(actor) };
   }
 
   @Post('devices')
@@ -42,6 +54,20 @@ export class IotController {
   @ApiOperation({ summary: 'Tarik telemetry semua perangkat Tuya aktif — OWNER/ADMIN' })
   async syncAllTuya(@CurrentUser() actor: CurrentUserPayload) {
     return { message: 'Sinkronisasi semua perangkat Tuya selesai', data: await this.iot.syncAllTuya(actor) };
+  }
+
+  @Public()
+  @Roles()
+  @Post('tuya/cron')
+  @HttpCode(200)
+  @ApiOperation({ summary: 'Trigger polling Tuya dari cron server - token X-Iot-Cron-Token wajib' })
+  async pollTuyaFromCron(@Headers('x-iot-cron-token') headerToken?: string) {
+    const expected = (process.env.IOT_TUYA_CRON_TOKEN ?? '').trim();
+    const provided = (headerToken ?? '').trim();
+    if (!expected || provided !== expected) {
+      throw new ForbiddenException('Token cron IoT tidak valid');
+    }
+    return { message: 'Polling Tuya dari cron selesai', data: await this.polling.runExternalCron() };
   }
 
   @Patch('devices/:id')

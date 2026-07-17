@@ -18,7 +18,7 @@ describe('Y-P3 — MyManualPage (tenant portal integration)', () => {
   it('merender judul panduan', () => {
     (fetchPublicFaqs as any).mockResolvedValue([]);
     renderPage(<MyManualPage />);
-    expect(screen.getByRole('heading', { name: /Panduan & Aturan Kos/i })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /Panduan Penghuni/i })).toBeInTheDocument();
   });
 
   it('menampilkan aturan dasar saat FAQ kosong', async () => {

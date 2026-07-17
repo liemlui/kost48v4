@@ -13,8 +13,8 @@ describe('Y-M4 — navigation (menu builder per role)', () => {
       expect(s[0].title).toBe('Keputusan Owner');
     });
     it('role tak dikenal / undefined → fallback ke adminSections', () => {
-      expect(getNavigationSections(undefined)[0].title).toBe('Operasional Kos');
-      expect(getNavigationSections('WHATEVER')[0].title).toBe('Operasional Kos');
+      expect(getNavigationSections(undefined)[0].title).toBe('Huni & Uang');
+      expect(getNavigationSections('WHATEVER')[0].title).toBe('Huni & Uang');
     });
   });
 

@@ -16,6 +16,7 @@ import { listMyCheckoutRequests } from '../../api/checkoutRequests';
 import { listMyPaymentSubmissions } from '../../api/paymentSubmissions';
 import { getProfileCompleteness } from '../../api/tenants';
 import { getMeterReadingsByRoom } from '../../api/meterReadings';
+import { getMyRoomUtilityTelemetry, type TenantRoomUtilityTelemetry } from '../../api/iot';
 import { fetchPublicConfig } from '../../api/settings';
 import CheckoutRequestModal from '../../components/checkout-requests/CheckoutRequestModal';
 import RenewRequestModal from '../../components/tenant/RenewRequestModal';
@@ -157,6 +158,16 @@ function ActiveStayContent({ stay }: { stay: Stay }) {
     }),
     enabled: Boolean(stay.roomId),
     staleTime: 60_000,
+    retry: false,
+  });
+
+  const utilityTelemetryQuery = useQuery<TenantRoomUtilityTelemetry>({
+    queryKey: ['portal-utility-telemetry', stay.roomId],
+    queryFn: getMyRoomUtilityTelemetry,
+    enabled: Boolean(stay.roomId),
+    staleTime: 20_000,
+    refetchInterval: 60_000,
+    refetchOnWindowFocus: true,
     retry: false,
   });
 
@@ -472,6 +483,9 @@ function ActiveStayContent({ stay }: { stay: Stay }) {
             readings={monthMeterReadings}
             isLoading={meterReadingsQuery.isLoading}
             isError={meterReadingsQuery.isError}
+            telemetry={utilityTelemetryQuery.data}
+            isTelemetryLoading={utilityTelemetryQuery.isLoading}
+            isTelemetryError={utilityTelemetryQuery.isError}
             canRecord={meterWindow.windowOpen}
             onCatatMeter={() => setShowMeter(true)}
           />

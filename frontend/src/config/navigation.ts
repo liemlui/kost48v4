@@ -20,7 +20,7 @@ export type TenantPortalStage = 'browsing' | 'booking' | 'occupied';
 // 🔧 Area Admin. Beberapa route digabung lewat `activePaths` agar tetap reachable tanpa nambah item:
 // - "Akuntansi & Aset" mencakup /finance/accounting-setup + /finance/assets + /loss-refunds (Refund Kalah-Cepat, OWNER-only).
 // - "Akun & Layanan" mencakup /users + /tenants + /additional-services + /service-interests.
-const ownerSections: NavigationSection[] = [
+export const ownerSections: NavigationSection[] = [
   {
     title: 'Keputusan Owner',
     links: [

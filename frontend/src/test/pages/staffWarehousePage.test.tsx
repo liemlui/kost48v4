@@ -25,6 +25,6 @@ describe('Y-P4 — StaffWarehousePage (staff integration)', () => {
     (listResource as any).mockRejectedValue(new Error('network'));
     renderPage(<StaffWarehousePage />);
     // hero statis tetap tampil meski section inventaris error
-    expect(await screen.findByText('Gudang')).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { name: /Barang Umum & Gudang/i })).toBeInTheDocument();
   });
 });

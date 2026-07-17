@@ -134,6 +134,9 @@ export default function ReportsPage() {
             financialRatios={financialRatios}
             occupancy={occupancy}
           />
+          <Button type="button" variant="outline-secondary" size="sm" className="report-print-btn" onClick={() => window.print()}>
+            🖨 Cetak / PDF
+          </Button>
         </div>
       
       {/* F3-9: hierarki laporan — perjelas tier angka agar Estimasi tak disalahartikan sbg audit-grade. */}

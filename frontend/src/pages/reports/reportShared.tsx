@@ -31,6 +31,7 @@ import { createBusinessNarrative } from '../../api/ai';
 import AiAssistButton from '../../components/ai/AiAssistButton';
 import DonutGauge from '../../components/charts/DonutGauge';
 import HorizontalBarChart from '../../components/charts/HorizontalBarChart';
+import { ChartResponsiveWrapper } from '../../hooks/ChartResponsiveWrapper';
 
 export type HealthLevel = 'Baik' | 'Perlu Dipantau' | 'Buruk';
 export type CashFlowStatus = 'Positif' | 'Netral' | 'Negatif';
@@ -313,25 +314,27 @@ export function OverdueHeatmap({ data }: { data: OverdueAging }) {
   ];
   return (
     <div className="report-aging-chart" role="img" aria-label="Nilai invoice berdasarkan umur tunggakan">
-      <ResponsiveContainer width="100%" height={260}>
-        <BarChart data={buckets} margin={{ top: 26, right: 8, bottom: 8, left: 0 }}>
-          <CartesianGrid vertical={false} stroke="rgba(148, 163, 184, 0.22)" strokeDasharray="3 3" />
-          <XAxis dataKey="label" tick={{ fill: '#64748b', fontSize: 11, fontWeight: 700 }} axisLine={false} tickLine={false} />
-          <YAxis hide />
-          <Tooltip
-            cursor={{ fill: 'rgba(37, 99, 235, 0.05)' }}
-            content={({ active, payload }) => {
-              const bucket = payload?.[0]?.payload as typeof buckets[number] | undefined;
-              if (!active || !bucket) return null;
-              return <div className="recharts-tooltip"><strong>{bucket.label} hari</strong><span>{formatCompactRupiah(bucket.value)}</span><small>{bucket.count} invoice</small></div>;
-            }}
-          />
-          <Bar dataKey="value" radius={[6, 6, 0, 0]}>
-            {buckets.map((bucket) => <Cell key={bucket.label} fill={bucket.color} />)}
-            <LabelList dataKey="count" position="top" fill="#475569" fontSize={12} fontWeight={800} />
-          </Bar>
-        </BarChart>
-      </ResponsiveContainer>
+      <ChartResponsiveWrapper height={260} minWidth={120}>
+        <ResponsiveContainer width="100%" height={260}>
+          <BarChart data={buckets} margin={{ top: 26, right: 8, bottom: 8, left: 0 }}>
+            <CartesianGrid vertical={false} stroke="rgba(148, 163, 184, 0.22)" strokeDasharray="3 3" />
+            <XAxis dataKey="label" tick={{ fill: '#64748b', fontSize: 11, fontWeight: 700 }} axisLine={false} tickLine={false} />
+            <YAxis hide />
+            <Tooltip
+              cursor={{ fill: 'rgba(37, 99, 235, 0.05)' }}
+              content={({ active, payload }) => {
+                const bucket = payload?.[0]?.payload as typeof buckets[number] | undefined;
+                if (!active || !bucket) return null;
+                return <div className="recharts-tooltip"><strong>{bucket.label} hari</strong><span>{formatCompactRupiah(bucket.value)}</span><small>{bucket.count} invoice</small></div>;
+              }}
+            />
+            <Bar dataKey="value" radius={[6, 6, 0, 0]}>
+              {buckets.map((bucket) => <Cell key={bucket.label} fill={bucket.color} />)}
+              <LabelList dataKey="count" position="top" fill="#475569" fontSize={12} fontWeight={800} />
+            </Bar>
+          </BarChart>
+        </ResponsiveContainer>
+      </ChartResponsiveWrapper>
     </div>
   );
 }

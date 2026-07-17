@@ -552,7 +552,7 @@ export default function AccountingSetupPage() {
   });
 
   return (
-    <div className="accounting-setup-page">
+    <div className="finance-workspace accounting-setup-page">
       <PageHeader
         eyebrow="Finance · Laporan Keuangan"
         title="Laporan Keuangan & Kesehatan Ledger"

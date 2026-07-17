@@ -85,8 +85,36 @@ export type DeviceSecretResult = {
   warning: string;
 };
 
+export type TenantUtilityStatus = 'NO_DEVICE' | 'NOT_CONNECTED' | 'OFFLINE' | 'STALE' | 'NO_FLOW' | 'ONLINE';
+
+export type TenantUtilityDevice = {
+  utilityType: 'ELECTRICITY' | 'WATER';
+  status: TenantUtilityStatus;
+  statusMessage: string;
+  lastSeenAt: string | null;
+  observedAt: string | null;
+  total: number | null;
+  unit: string;
+  flowRateLpm: number | null;
+  quality: IotReadingQuality | null;
+};
+
+export type TenantRoomUtilityTelemetry = {
+  room: { code: string; name: string | null } | null;
+  refreshedAt: string;
+  staleAfterMinutes: number;
+  billingNotice: string;
+  electricity: TenantUtilityDevice;
+  water: TenantUtilityDevice;
+};
+
 export async function getIotOverview(): Promise<IotOverview> {
   const response = await client.get<ApiEnvelope<IotOverview>>('/iot/overview');
+  return response.data.data;
+}
+
+export async function getMyRoomUtilityTelemetry(): Promise<TenantRoomUtilityTelemetry> {
+  const response = await client.get<ApiEnvelope<TenantRoomUtilityTelemetry>>('/iot/tenant/my-room');
   return response.data.data;
 }
 
