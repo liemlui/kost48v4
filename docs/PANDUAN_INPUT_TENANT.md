@@ -1,59 +1,55 @@
-# 📋 Panduan — Input Data 13 Tenant via Admin UI
+# 📋 Panduan — Input 13 Tenant KOST48 (Data REAL)
 
-> **Metode paling simpel.** Tidak perlu Google Sheets, Apps Script, atau Vercel.
-> Semua dari halaman `/tenants` yang sudah ada di aplikasi.
+> **8 tenant SUDAH punya email + akun portal** (auto-generated oleh `seed-prod.js`).
+> **5 tenant BELUM** — lengkapi via WhatsApp.
 
 ---
 
-## Alur Kerja (13 tenant ≈ 30 menit)
+## Setelah `node scripts/seed-prod.js` Selesai
 
-### Untuk Setiap Tenant:
+### ✅ 8 Tenant — SUDAH SIAP (email + akun portal)
 
-**1. WhatsApp tenant** (minta 2 data wajib):
-```
-Halo Kak [Nama], untuk akses portal KOST48, mohon kirim:
-1. Email aktif (untuk login)
-2. Nomor HP (WhatsApp)
+| Kamar | Nama | Email | Password |
+|-------|------|-------|----------|
+| A | Shinta Larista | shinta22larista@gmail.com | (default) |
+| B | Dini Widiastutik | diniwidi11@gmail.com | (default) |
+| C | Miko Rakatama A.W. | Mikorakatamaa@gmail.com | (default) |
+| D | Ade Chandra | adhechan72@gmail.com | (default) |
+| F2 | Patrick Wilfred | wilfredpatrick@hotmail.com | (default) |
+| H | Welly Tanoto | Wellytanoto73@gmail.com | (default) |
+| I | Agus Settiyo Budi | theowijaya0886@gmail.com | (default) |
+| K | Meliana Tamara | melontamara556@gmail.com | (default) |
 
-Opsional — kalau berkenan:
-3. Nama kontak darurat + nomor HP-nya
-4. Pekerjaan + nama perusahaan/kampus
-5. Tanggal lahir (DD-MM-YYYY)
-```
+> Password default lihat output `seed-prod.js`. Kirim via WA ke masing-masing.
 
-**2. Buka Admin UI:**
-```
-https://[domain]/tenants
-```
-Login sebagai OWNER/ADMIN.
+### ⚠️ 5 Tenant — BELUM ADA EMAIL
 
-**3. Cari tenant → klik Edit:**
-- Cari nama tenant di tabel atau search bar
-- Klik tombol **Edit** (pensil)
+| Kamar | Nama | Minta via WA |
+|-------|------|-------------|
+| **F1** | Yufita Hieng | `Halo Kak Yufita, mohon kirim email aktif untuk akun portal KOST48 ya 🙏` |
+| **G** | Yofi Nurkolifah | `Halo Kak Yofi, mohon kirim email aktif untuk akun portal KOST48 ya 🙏` |
+| **J** | Lovandra | `Halo Kak Lovandra, mohon kirim email aktif untuk akun portal KOST48 ya 🙏` |
+| **L** | Destarika Hasan | `Halo Kak Destarika, mohon kirim email aktif untuk akun portal KOST48 ya 🙏` |
+| **M** | Gabriel Excelly P. | `Halo Kak Gabriel, mohon kirim email aktif untuk akun portal KOST48 ya 🙏` |
 
-**4. Isi field:**
-| Field | Isi |
-|-------|-----|
-| Email Tenant | (dari WhatsApp tenant) |
-| No. HP | (dari WhatsApp tenant) |
-| Nama Kontak Darurat | (opsional) |
-| Telp Kontak Darurat | (opsional) |
-| Pekerjaan | (opsional) |
-| Instansi / Kampus | (opsional) |
-| Tanggal Lahir | (opsional) |
-| Jenis Kelamin | (opsional) |
-| Kota Asal | Surabaya (default) |
-| Provinsi Asal | (opsional) |
+Setelah dapat email, input di `/tenants`:
+1. Cari tenant → Edit → isi Email → Simpan
+2. Klik **Akses Portal** → **Buat Akses Portal** → sistem kasih password
+3. Kirim kredensial ke tenant
 
-Klik **Simpan**.
+---
 
-**5. Buat akses portal:**
-- Setelah simpan, klik **Akses Portal** (atau buka tab "Portal" di detail tenant)
-- Klik **Buat Akses Portal**
-- Sistem akan generate password otomatis
-- Catat email + password
+## Data Deposit (REAL)
 
-**6. Kirim kredensial ke tenant via WA:**
+| Tenant | Deposit |
+|--------|---------|
+| **Ade Chandra (D)** | **Rp200.000** |
+| 12 tenant lainnya | **Tidak ada deposit** |
+
+---
+
+## Template WhatsApp — Kirim Kredensial
+
 ```
 Halo Kak [Nama], akun portal KOST48 sudah siap! 🎉
 
@@ -63,59 +59,37 @@ Halo Kak [Nama], akun portal KOST48 sudah siap! 🎉
 
 Di portal bisa:
 ✅ Lihat status sewa & tagihan
-✅ Bayar & upload bukti
+✅ Bayar & upload bukti transfer
 ✅ Pantau listrik (kWh meter live)
-✅ Lapor kerusakan
-✅ Baca aturan & panduan
+✅ Lapor kerusakan / masalah
+✅ Baca aturan & panduan lengkap
 
 Password bisa diganti sendiri setelah login ya 🙏
 ```
 
-**7. Ulangi untuk tenant berikutnya.**
-
 ---
 
-## Daftar 13 Tenant (contekan)
-
-| Kamar | Nama | NIK (4 digit akhir) |
-|-------|------|---------------------|
-| A | Shinta Larista | xxxx6990003 |
-| B | Dini Widiastutik | xxxx2800021 |
-| C | Miko Rakatama Adhi Winarto | xxxx8970006 |
-| D | Ade Chandra | xxxx9720009 |
-| F1 | Yufita Hieng | xxxx1970003 |
-| F2 | Patrick Wilfred | xxxx4910019 |
-| G | Yofi Nurkolifah | xxxx4030003 |
-| H | Welly Tanoto | xxxx1730004 |
-| I | Agus Settiyo Budi | xxxx8860003 |
-| J | Lovandra | xxxx2930003 |
-| K | Meliana Tamara | xxxx2000002 |
-| L | Destarika Hasan | xxxx2020008 |
-| M | Gabriel Excelly Pranajaya | xxxx8030001 |
-
----
-
-## Field yang TIDAK bisa diedit di form ini
-
-4 field marketing hanya bisa diisi tenant sendiri via profil:
-
-| Field | Cara isi |
-|-------|----------|
-| Status Pernikahan | Tenant buka Profil → isi sendiri |
-| Kendaraan | Tenant buka Profil → isi sendiri |
-| Kebiasaan Merokok | Tenant buka Profil → isi sendiri |
-| Tahu Kos dari mana | Tenant buka Profil → isi sendiri |
-
-> Tidak kritis untuk go-live — bisa diisi tenant nanti setelah login.
-
----
-
-## Fallback: Import CSV (jika suatu saat perlu bulk import)
-
-Script `backend/scripts/import-tenant-sheet.js` tetap tersedia. Pakai jika:
-- Tenant data sudah terkumpul di spreadsheet (format CSV)
-- Mau import sekaligus 13 tenant
+## Urutan Setup Produksi (RINGKAS)
 
 ```bash
-node scripts/import-tenant-sheet.js tenant-data.csv
+# 1. DB fresh
+dropdb kost48_v3 && createdb kost48_v3
+
+# 2. Schema + pagar
+psql "$DATABASE_URL" -f setup.sql
+psql "$DATABASE_URL" -f sql/bootstrap.sql
+
+# 3. Seed OWNER
+OWNER_EMAIL=owner@domain.com OWNER_PASSWORD='...' OWNER_FULLNAME='Pemilik KOST48' npm run seed:owner
+
+# 4. Seed 13 kamar + 13 tenant + 8 akun portal
+node scripts/seed-prod.js
+
+# 5. Buat STAY (check-in) untuk 13 tenant via Admin UI /stays
+#    gunakan agreedRent = TARIF KONTRAK (lihat output seed-prod)
+
+# 6. Input email 5 tenant + buat akun portal via /tenants
+
+# 7. Bootstrap Tuya KWH
+node scripts/bootstrap-tuya-kwh.js --sync
 ```

@@ -70,21 +70,23 @@ const ROOMS = [
 ];
 
 // ── 13 TENANT REAL — nama + NIK + TARIF KONTRAK (harga yg dibayar tenant saat join) ──
+// email: null = belum ada email (isi via Admin UI setelah deploy); string = email real dari owner
+// phone: null = belum ada nomor HP; string = nomor real
 // deposit: null = tidak ada deposit; angka = nominal deposit
 const TENANTS = [
-  { code: 'A',  name: 'Shinta Larista',         nik: '3574036206990003', tgl: 26, tarif: 1700000, gender: 'FEMALE', deposit: null    },
-  { code: 'B',  name: 'Dini Widiastutik',       nik: '3275085012800021', tgl: 1,  tarif: 1500000, gender: 'FEMALE', deposit: null    },
-  { code: 'C',  name: 'Miko Rakatama Adhi Winarto', nik: '6471051708970006', tgl: 28, tarif: 1600000, gender: 'MALE',   deposit: null },
-  { code: 'D',  name: 'Ade Chandra',            nik: '3173052309720009', tgl: 24, tarif: 1500000, gender: 'MALE',   deposit: 200000 },
-  { code: 'F1', name: 'Yufita Hieng',           nik: '6405025701970003', tgl: 26, tarif: 1700000, gender: 'FEMALE', deposit: null    },
-  { code: 'F2', name: 'Patrick Wilfred',        nik: '3275020504910019', tgl: 8,  tarif: 1600000, gender: 'MALE',   deposit: null    },
-  { code: 'G',  name: 'Yofi Nurkolifah',        nik: '3519122204030003', tgl: 1,  tarif: 800000,  gender: 'FEMALE', deposit: null    },
-  { code: 'H',  name: 'Welly Tanoto',           nik: '3578070811730004', tgl: 10, tarif: 800000,  gender: 'MALE',   deposit: null    },
-  { code: 'I',  name: 'Agus Settiyo Budi',      nik: '3571021308860003', tgl: 5,  tarif: 800000,  gender: 'MALE',   deposit: null    },
-  { code: 'J',  name: 'Lovandra',               nik: '3175070312930003', tgl: 30, tarif: 1500000, gender: null,     deposit: null    },
-  { code: 'K',  name: 'Meliana Tamara',         nik: '3578125102000002', tgl: 10, tarif: 1600000, gender: 'FEMALE', deposit: null    },
-  { code: 'L',  name: 'Destarika Hasan',        nik: '1671065812020008', tgl: 1,  tarif: 1600000, gender: 'FEMALE', deposit: null    },
-  { code: 'M',  name: 'Gabriel Excelly Pranajaya', nik: '3511115908030001', tgl: 3, tarif: 1200000, gender: null,   deposit: null    },
+  { code: 'A',  name: 'Shinta Larista',         nik: '3574036206990003', tgl: 26, tarif: 1700000, gender: 'FEMALE', deposit: null,    email: 'shinta22larista@gmail.com',     phone: null },
+  { code: 'B',  name: 'Dini Widiastutik',       nik: '3275085012800021', tgl: 1,  tarif: 1500000, gender: 'FEMALE', deposit: null,    email: 'diniwidi11@gmail.com',          phone: null },
+  { code: 'C',  name: 'Miko Rakatama Adhi Winarto', nik: '6471051708970006', tgl: 28, tarif: 1600000, gender: 'MALE',   deposit: null,    email: 'Mikorakatamaa@gmail.com',       phone: null },
+  { code: 'D',  name: 'Ade Chandra',            nik: '3173052309720009', tgl: 24, tarif: 1500000, gender: 'MALE',   deposit: 200000,  email: 'adhechan72@gmail.com',           phone: null },
+  { code: 'F1', name: 'Yufita Hieng',           nik: '6405025701970003', tgl: 26, tarif: 1700000, gender: 'FEMALE', deposit: null,    email: null,                            phone: null },
+  { code: 'F2', name: 'Patrick Wilfred',        nik: '3275020504910019', tgl: 8,  tarif: 1600000, gender: 'MALE',   deposit: null,    email: 'wilfredpatrick@hotmail.com',    phone: null },
+  { code: 'G',  name: 'Yofi Nurkolifah',        nik: '3519122204030003', tgl: 1,  tarif: 800000,  gender: 'FEMALE', deposit: null,    email: null,                            phone: null },
+  { code: 'H',  name: 'Welly Tanoto',           nik: '3578070811730004', tgl: 10, tarif: 800000,  gender: 'MALE',   deposit: null,    email: 'Wellytanoto73@gmail.com',       phone: null },
+  { code: 'I',  name: 'Agus Settiyo Budi',      nik: '3571021308860003', tgl: 5,  tarif: 800000,  gender: 'MALE',   deposit: null,    email: 'theowijaya0886@gmail.com',      phone: null },
+  { code: 'J',  name: 'Lovandra',               nik: '3175070312930003', tgl: 30, tarif: 1500000, gender: null,     deposit: null,    email: null,                            phone: null },
+  { code: 'K',  name: 'Meliana Tamara',         nik: '3578125102000002', tgl: 10, tarif: 1600000, gender: 'FEMALE', deposit: null,    email: 'melontamara556@gmail.com',      phone: null },
+  { code: 'L',  name: 'Destarika Hasan',        nik: '1671065812020008', tgl: 1,  tarif: 1600000, gender: 'FEMALE', deposit: null,    email: null,                            phone: null },
+  { code: 'M',  name: 'Gabriel Excelly Pranajaya', nik: '3511115908030001', tgl: 3, tarif: 1200000, gender: null,   deposit: null,    email: null,                            phone: null },
 ];
 
 const summary = { rooms: 0, facilities: 0, tenants: 0 };
@@ -156,23 +158,28 @@ const summary = { rooms: 0, facilities: 0, tenants: 0 };
     }
     summary.tenants++;
 
-    // 3b) Portal access — GUNAKAN placeholder, OWNER harus ganti email real via UI
-    await api('POST', `/tenants/${idOf(tenant)}/portal-access`, {
-      email: placeholderEmail,
-      password: 'Tenant#2026',  // password default — bisa direset tenant nanti
-      fullName: t.name,
-    }, { optional: true });
+    // 3b) Portal access — hanya untuk tenant yang SUDAH punya email real (8 dari 13)
+    if (t.email) {
+      await api('POST', `/tenants/${idOf(tenant)}/portal-access`, {
+        email: t.email,
+        password: 'Kost48#2026',
+        fullName: t.name,
+      }, { optional: true });
+    }
   }
   console.log(`✓ ${summary.tenants} tenant`);
 
   // ── RINGKASAN ──
   console.log('\n=== SEED PRODUKSI SELESAI ===');
   console.log(`  ${summary.rooms} kamar + ${summary.facilities} fasilitas + ${summary.tenants} tenant`);
-  console.log('\n⚠️  LANGKAH SELANJUTNYA (via UI Owner → Manajemen Tenant):');
-  console.log('  1. Lengkapi EMAIL & HP real untuk setiap tenant');
-  console.log('  2. Set TANGGAL CHECK-IN lengkap (tanggal + bulan + tahun)');
-  console.log('  3. Buat STAY (check-in) — gunakan agreedRent = TARIF KONTRAK tenant');
-  console.log('  4. DEPOSIT — hanya Ade Chandra Rp200.000; sisanya tidak ada');
-  console.log('  5. Verifikasi KTP — upload foto KTP via UI');
-  console.log('\n📋 Rujukan: docs/M11_DEFAULT_DATA.md §1b (Tarif Kontrak & Deposit) & §2 (Tarif Publik)');
+  console.log('\n📧 8 tenant dengan email SUDAH mendapat akun portal (password: Kost48#2026)');
+  console.log('⚠️  5 tenant BELUM ada email — lengkapi via Admin UI /tenants:');
+  console.log('    - Yufita Hieng (F1)');
+  console.log('    - Yofi Nurkolifah (G)');
+  console.log('    - Lovandra (J)');
+  console.log('    - Destarika Hasan (L)');
+  console.log('    - Gabriel Excelly Pranajaya (M)');
+  console.log('\n📋 Langkah selanjutnya: buat STAY (check-in) via /stays → gunakan agreedRent = TARIF KONTRAK');
+  console.log('   Deposit: hanya Ade Chandra (D) Rp200.000 — sisanya tidak ada');
+  console.log('📘 Panduan lengkap: docs/PANDUAN_INPUT_TENANT.md');
 })();
