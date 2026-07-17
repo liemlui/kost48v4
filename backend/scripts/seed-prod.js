@@ -74,19 +74,19 @@ const ROOMS = [
 // phone: null = belum ada nomor HP; string = nomor real
 // deposit: null = tidak ada deposit; angka = nominal deposit
 const TENANTS = [
-  { code: 'A',  name: 'Shinta Larista',         nik: '3574036206990003', tgl: 26, tarif: 1700000, gender: 'FEMALE', deposit: null,    email: 'shinta22larista@gmail.com',     phone: null },
-  { code: 'B',  name: 'Dini Widiastutik',       nik: '3275085012800021', tgl: 1,  tarif: 1500000, gender: 'FEMALE', deposit: null,    email: 'diniwidi11@gmail.com',          phone: null },
-  { code: 'C',  name: 'Miko Rakatama Adhi Winarto', nik: '6471051708970006', tgl: 28, tarif: 1600000, gender: 'MALE',   deposit: null,    email: 'Mikorakatamaa@gmail.com',       phone: null },
-  { code: 'D',  name: 'Ade Chandra',            nik: '3173052309720009', tgl: 24, tarif: 1500000, gender: 'MALE',   deposit: 200000,  email: 'adhechan72@gmail.com',           phone: null },
-  { code: 'F1', name: 'Yufita Hieng',           nik: '6405025701970003', tgl: 26, tarif: 1700000, gender: 'FEMALE', deposit: null,    email: null,                            phone: null },
-  { code: 'F2', name: 'Patrick Wilfred',        nik: '3275020504910019', tgl: 8,  tarif: 1600000, gender: 'MALE',   deposit: null,    email: 'wilfredpatrick@hotmail.com',    phone: null },
-  { code: 'G',  name: 'Yofi Nurkolifah',        nik: '3519122204030003', tgl: 1,  tarif: 800000,  gender: 'FEMALE', deposit: null,    email: null,                            phone: null },
-  { code: 'H',  name: 'Welly Tanoto',           nik: '3578070811730004', tgl: 10, tarif: 800000,  gender: 'MALE',   deposit: null,    email: 'Wellytanoto73@gmail.com',       phone: null },
-  { code: 'I',  name: 'Agus Settiyo Budi',      nik: '3571021308860003', tgl: 5,  tarif: 800000,  gender: 'MALE',   deposit: null,    email: 'theowijaya0886@gmail.com',      phone: null },
-  { code: 'J',  name: 'Lovandra',               nik: '3175070312930003', tgl: 30, tarif: 1500000, gender: null,     deposit: null,    email: null,                            phone: null },
-  { code: 'K',  name: 'Meliana Tamara',         nik: '3578125102000002', tgl: 10, tarif: 1600000, gender: 'FEMALE', deposit: null,    email: 'melontamara556@gmail.com',      phone: null },
-  { code: 'L',  name: 'Destarika Hasan',        nik: '1671065812020008', tgl: 1,  tarif: 1600000, gender: 'FEMALE', deposit: null,    email: null,                            phone: null },
-  { code: 'M',  name: 'Gabriel Excelly Pranajaya', nik: '3511115908030001', tgl: 3, tarif: 1200000, gender: null,   deposit: null,    email: null,                            phone: null },
+  { code: 'A',  name: 'Shinta Larista',         nik: '3574036206990003', tgl: 26, tarif: 1700000, gender: 'FEMALE', deposit: null,    email: 'shinta22larista@gmail.com',     phone: '082230184559' },
+  { code: 'B',  name: 'Dini Widiastutik',       nik: '3275085012800021', tgl: 1,  tarif: 1500000, gender: 'FEMALE', deposit: null,    email: 'diniwidi11@gmail.com',          phone: '089679596799' },
+  { code: 'C',  name: 'Miko Rakatama Adhi Winarto', nik: '6471051708970006', tgl: 28, tarif: 1600000, gender: 'MALE',   deposit: null,    email: 'Mikorakatamaa@gmail.com',       phone: '089682611559' },
+  { code: 'D',  name: 'Ade Chandra',            nik: '3173052309720009', tgl: 24, tarif: 1500000, gender: 'MALE',   deposit: 200000,  email: 'adhechan72@gmail.com',           phone: '085716345588' },
+  { code: 'F1', name: 'Yufita Hieng',           nik: '6405025701970003', tgl: 26, tarif: 1700000, gender: 'FEMALE', deposit: null,    email: null,                            phone: '081330787868' },
+  { code: 'F2', name: 'Patrick Wilfred',        nik: '3275020504910019', tgl: 8,  tarif: 1600000, gender: 'MALE',   deposit: null,    email: 'wilfredpatrick@hotmail.com',    phone: '081289399915' },
+  { code: 'G',  name: 'Yofi Nurkolifah',        nik: '3519122204030003', tgl: 1,  tarif: 800000,  gender: 'FEMALE', deposit: null,    email: null,                            phone: '082244277043' },
+  { code: 'H',  name: 'Welly Tanoto',           nik: '3578070811730004', tgl: 10, tarif: 800000,  gender: 'MALE',   deposit: null,    email: 'Wellytanoto73@gmail.com',       phone: '082139730928' },
+  { code: 'I',  name: 'Agus Settiyo Budi',      nik: '3571021308860003', tgl: 5,  tarif: 800000,  gender: 'MALE',   deposit: null,    email: 'theowijaya0886@gmail.com',      phone: '081717531937' },
+  { code: 'J',  name: 'Lovandra',               nik: '3175070312930003', tgl: 30, tarif: 1500000, gender: null,     deposit: null,    email: null,                            phone: '08812149261' },
+  { code: 'K',  name: 'Meliana Tamara',         nik: '3578125102000002', tgl: 10, tarif: 1600000, gender: 'FEMALE', deposit: null,    email: 'melontamara556@gmail.com',      phone: '085334192220' },
+  { code: 'L',  name: 'Destarika Hasan',        nik: '1671065812020008', tgl: 1,  tarif: 1600000, gender: 'FEMALE', deposit: null,    email: null,                            phone: '085964263779' },
+  { code: 'M',  name: 'Gabriel Excelly Pranajaya', nik: '3511115908030001', tgl: 3, tarif: 1200000, gender: null,   deposit: null,    email: null,                            phone: '082228871199' },
 ];
 
 const summary = { rooms: 0, facilities: 0, tenants: 0 };
