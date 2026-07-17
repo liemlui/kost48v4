@@ -17,7 +17,7 @@ import {
   statSync,
 } from 'node:fs';
 import { spawnSync } from 'node:child_process';
-import { createHash } from 'node:crypto';
+import { createHash, randomBytes } from 'node:crypto';
 
 const isWin = process.platform === 'win32';
 const npm = isWin ? 'npm.cmd' : 'npm';
@@ -434,7 +434,8 @@ writeFileSync(OUT + '/.env.example', [
   '# ── IoT ESP32 Water Flow (opsional, untuk sensor air) ─────────────────────────',
   '# 32 byte random base64. Dipakai mengenkripsi secret device ESP32-C3.',
   '# Generate: node -e "console.log(require(\'crypto\').randomBytes(32).toString(\'base64\'))"',
-  '# IOT_MASTER_KEY=',
+  '# ⚠️ SIMPAN IOT_MASTER_KEY ini — JANGAN diubah antar deploy. Kalau hilang, ESP32 harus di-provision ulang.',
+  '# IOT_MASTER_KEY=' + randomBytes(32).toString('base64'),
   '',
 ].join('\n'));
 
