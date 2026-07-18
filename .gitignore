@@ -85,7 +85,7 @@ sql/
 # diabaikan karena hanya artefak setup database fresh.
 !backend/sql/
 backend/sql/*
-!backend/sql/seed-master-data.sql
+!backend/sql/seed.sql
 backend/scripts/*.sql
 backend/scripts/golive-*
 backend/scripts/insert-*
