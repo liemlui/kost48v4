@@ -3,18 +3,33 @@ BEGIN;
 -- =========================================================
 -- FIX OWNERSHIP — transfer tabel/sequence ke user .env
 -- GANTI 'kost48s1_lurin' jika user berbeda di DATABASE_URL
+-- Tiap tabel dibungkus exception handler — skip jika bukan owner
 -- =========================================================
 DO $$ DECLARE
   target_user text := 'kost48s1_lurin';
   r record;
-  seq record;
 BEGIN
   FOR r IN SELECT tablename FROM pg_tables WHERE schemaname = 'public'
-  LOOP EXECUTE format('ALTER TABLE %I OWNER TO %I', r.tablename, target_user); END LOOP;
-  FOR seq IN SELECT sequencename FROM pg_sequences WHERE schemaname = 'public'
-  LOOP EXECUTE format('ALTER SEQUENCE %I OWNER TO %I', seq.sequencename, target_user); END LOOP;
-  BEGIN EXECUTE format('ALTER DATABASE %I OWNER TO %I', current_database(), target_user);
-  EXCEPTION WHEN OTHERS THEN RAISE NOTICE 'Skip ALTER DATABASE (perlu superuser)'; END;
+  LOOP
+    BEGIN
+      EXECUTE format('ALTER TABLE %I OWNER TO %I', r.tablename, target_user);
+    EXCEPTION WHEN OTHERS THEN
+      RAISE NOTICE 'Skip table % (not owner)', r.tablename;
+    END;
+  END LOOP;
+  FOR r IN SELECT sequencename FROM pg_sequences WHERE schemaname = 'public'
+  LOOP
+    BEGIN
+      EXECUTE format('ALTER SEQUENCE %I OWNER TO %I', r.sequencename, target_user);
+    EXCEPTION WHEN OTHERS THEN
+      RAISE NOTICE 'Skip sequence % (not owner)', r.sequencename;
+    END;
+  END LOOP;
+  BEGIN
+    EXECUTE format('ALTER DATABASE %I OWNER TO %I', current_database(), target_user);
+  EXCEPTION WHEN OTHERS THEN
+    RAISE NOTICE 'Skip ALTER DATABASE (perlu superuser)';
+  END;
 END $$;
 
 -- =========================================================
