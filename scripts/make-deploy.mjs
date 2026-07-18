@@ -439,69 +439,52 @@ writeFileSync(OUT + '/.env.example', [
   '',
 ].join('\n'));
 
-writeFileSync(OUT + '/README-DEPLOY.md', `# KOST48 — Deploy cPanel/VPS (combined, PREBUILT, hemat RAM 512MB)
+writeFileSync(OUT + '/README-DEPLOY.md', `# KOST48 v1.2.0 — Deploy cPanel/VPS (PREBUILT, include node_modules)
 
-Paket ini SUDAH di-build di lokal: backend \`dist/\` + frontend \`client/\`. Server TIDAK build apa pun
-(tanpa tsc, tanpa prisma generate, tanpa devDependencies) → aman untuk hosting RAM 512MB & limit inode.
+Paket ini SUDAH di-build + node_modules di lokal. Server **TIDAK build/npm install apa pun**.
+Tanpa tsc, tanpa prisma generate, tanpa devDependencies — aman untuk hosting RAM 512MB & limit inode.
 
-## Langkah cPanel (urut)
+## 🚀 Langkah cPanel (1x run, ≈20 menit)
+
 1. **PostgreSQL Databases**: buat DB \`kost48_v3\` + user + all privileges. Catat kredensial.
-2. **Upload** \`kost48-deploy.tgz\` ke folder app (mis. \`~/kost48\`) → File Manager: Extract.
-3. **Setup Node.js App**: Node 22 · Application root = folder app · **Startup file = \`dist/main.js\`** ·
-   Environment Variables: **\`NODE_OPTIONS=--max-old-space-size=192\`** (batas heap; tidak bisa via .env).
+2. **Upload** \`kost48-deploy-bundled.tgz\` ke folder app (mis. \`~/kost48\`) → File Manager: Extract.
+3. **Setup Node.js App**: Node **22** · Application root = folder app · **Startup file = \`dist/main.js\`**
+   - Environment Variables: **\`NODE_OPTIONS=--max-old-space-size=192\`** (batas heap; tidak bisa via .env)
 4. **SSH** (masuk venv Node dari halaman Setup Node.js App):
    \`\`\`bash
-   npm run cpanel:install        # prod deps saja, TANPA build/postinstall/audit
-   cp .env.example .env && nano .env   # isi DATABASE_URL, JWT_SECRET, CORS_ORIGIN, token cron
+   cp .env.example .env && nano .env
+   # isi: DATABASE_URL, JWT_SECRET, CORS_ORIGIN, AUTO_OPS_CRON_TOKEN, IOT_TUYA_CRON_TOKEN, IOT_MASTER_KEY
    \`\`\`
-5. **Schema DB (sekali)** — pilih salah satu:
-   - **A (disarankan, tanpa download apa pun):** jalankan SQL schema penuh via psql/pgAdmin Query Tool:
-     \`\`\`bash
-     psql "<DATABASE_URL>" -f setup.sql
-     \`\`\`
-   - **B (fallback):** \`npm run cpanel:migrate\` (= npx prisma db push --skip-generate; unduh CLI sementara,
-     jalankan saat app TIDAK running agar tidak rebutan RAM).
-
-   Lalu **WAJIB** pagar DB (trigger/CHECK di luar schema Prisma; addendum v4 sudah ter-konsolidasi di dalamnya):
+5. **Setup Database (1 perintah)**:
    \`\`\`bash
-   psql "<DATABASE_URL>" -f sql/bootstrap.sql
+   npx prisma db push
+   psql "<DATABASE_URL>" -f sql/seed.sql
    \`\`\`
-6. **Seed OWNER pertama** (idempoten, wajib agar bisa login):
+   > seed.sql sudah include: fix ownership + trigger/function + data master (13 tenant, COA, transaksi historis).
+6. **Seed OWNER pertama**:
    \`\`\`bash
-   OWNER_EMAIL=owner@domain-anda OWNER_PASSWORD='GANTI_kuat' OWNER_FULLNAME='Pemilik KOST48' npm run seed:owner
+   OWNER_EMAIL=owner@domain.com OWNER_PASSWORD='GANTI_kuat' OWNER_FULLNAME='Pemilik KOST48' npm run seed:owner
    \`\`\`
-7. **Minimal setelah login OWNER**: seed COA (\`POST /api/accounting/default-coa/seed\`) + buat periode OPEN + CashAccount.
-8. **Opsional / boleh belakangan: seed data detail** (kamar nyata, foto, barang, fasilitas, FAQ, layanan tambahan):
-   \`\`\`bash
-   psql "<DATABASE_URL>" -f sql/seed-kost48-default-data.sql
+7. **Start App** (Setup Node.js App → Start) + **AutoSSL** domain → HTTPS.
+8. **Cron Jobs** (WAJIB — Passenger idle-sleep):
    \`\`\`
-   Di phpPgAdmin, upload file \`sql/seed-kost48-default-data.sql\` lewat SQL script bila \`psql\` tidak tersedia.
-   Lewati langkah ini dulu kalau targetnya hanya deploy aplikasi hidup; data detail bisa diisi setelah domain dan login OWNER beres.
+   */5  * * * * curl -fsS -X POST -H "X-Cron-Token: <TOKEN>" https://domain/api/auto-ops/cron
+   */10 * * * * curl -fsS -X POST -H "X-Iot-Cron-Token: <TOKEN>" https://domain/api/iot/tuya/cron
+   \`\`\`
+9. **Smoke**: \`https://domain/\` tampil · \`/api/public/rooms\` 200 · login OWNER.
 
-9. **Restart App** (Setup Node.js App) + **AutoSSL** domain → HTTPS (wajib untuk PWA/push).
-10. **Cron Jobs** (auto-ops, tiap 5–10 menit — WAJIB di shared hosting karena Passenger idle-sleep):
-   \`curl -fsS -X POST -H "X-Cron-Token: <token>" https://domain-anda/api/auto-ops/cron >/dev/null 2>&1\`
-11. **Smoke**: \`https://domain/\` tampil · \`/api/public/rooms\` 200 · login OWNER · trial-balance seimbang ·
-   cPanel Resource Usage: memory faults 0.
+## Redeploy (update)
+\`\`\`bash
+# Stop app → backup DB + uploads/ → extract TGZ baru → Start app
+# TIDAK perlu npm install — node_modules sudah include di TGZ.
+\`\`\`
 
-## Upload persisten & redeploy
-- Arsip kode ini **sengaja tidak memuat** folder \`uploads/\` maupun file \`.env\`. Foto KTP, profil,
-  bukti pembayaran, tiket, pengumuman, dan aset kamar harus disimpan serta dibackup terpisah.
-- Deploy pertama: dari application root jalankan \`mkdir -p uploads && chmod 700 uploads\` sebelum app dipakai.
-- Saat update: stop app, backup database **dan** \`uploads/\`, lalu extract paket baru ke root yang sama tanpa
-  menghapus \`uploads/\` atau \`.env\`. Jangan memakai langkah "clean deploy" untuk update produksi.
-- Jika release selalu memakai folder baru, gunakan storage tetap di luar folder release lalu symlink \`uploads\`
-  ke storage tersebut. Pastikan user Passenger punya izin baca/tulis.
-- Backup upload mengandung data pribadi. Batasi akses dan enkripsi; jangan masukkan backup itu ke TGZ kode ini.
-  File key di database dan backup \`uploads/\` harus dipulihkan sebagai satu pasangan yang konsisten.
+## Catatan RAM 512MB
+- Semua prebuilt; server tidak build apa pun.
+- Passenger idle-sleep saat sepi; cron membangunkannya.
+- Jika memory faults: turunkan \`NODE_OPTIONS\` ke 160.
 
-## Catatan RAM/inode 512MB
-- Semua prebuilt; server hanya \`npm ci\` production-only dari lockfile deploy ramping.
-- Binary engine Prisma \`*.node\` dibuang — runtime pakai WASM query compiler + driver adapter pg.
-- Passenger meng-idle-kan proses saat sepi (RAM turun sendiri); cron membangunkannya.
-- Jika Resource Usage menunjukkan memory faults: turunkan \`NODE_OPTIONS\` ke 160.
-
-⚠️ Ganti password OWNER default & JANGAN commit \`.env\`. VPS: \`pm2 start dist/main.js --name kost48\`.
+⚠️ Ganti password OWNER & JANGAN commit \`.env\`. VPS: \`pm2 start dist/main.js --name kost48\`.
 `);
 
 createVerifiedArchive();
