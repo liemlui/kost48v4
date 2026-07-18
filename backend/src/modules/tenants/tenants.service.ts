@@ -667,12 +667,58 @@ export class TenantsService {
   }
 
   async update(id: number, dto: UpdateTenantDto, actor: CurrentUserPayload) {
-    const existing = await this.prisma.tenant.findUnique({ where: { id } });
+    const existing = await this.prisma.tenant.findUnique({
+      where: { id },
+      include: {
+        user: {
+          select: { id: true, email: true },
+        },
+      },
+    });
     if (!existing) throw new NotFoundException('Tenant tidak ditemukan');
     const data = this.normalizeTenantData(dto);
     await this.validateTenantUniqueness(data, id);
-    const updated = await this.prisma.tenant.update({ where: { id }, data: data as Prisma.TenantUpdateInput });
-    await this.audit.log({ actorUserId: actor.id, action: 'UPDATE', entityType: 'Tenant', entityId: String(updated.id), oldData: existing, newData: updated });
+    const nextEmail = typeof data.email === 'string' ? data.email : undefined;
+    const portalEmailChanged = Boolean(existing.user && nextEmail && existing.user.email !== nextEmail);
+
+    let updated;
+    try {
+      // Email pada data tenant adalah sumber utama. Jika tenant sudah memiliki akun
+      // portal, ubah email login dalam transaksi yang sama agar keduanya tidak bisa
+      // terpisah saat salah satu query gagal.
+      updated = await this.prisma.$transaction(async (tx) => {
+        const tenant = await tx.tenant.update({
+          where: { id },
+          data: data as Prisma.TenantUpdateInput,
+        });
+        if (portalEmailChanged && existing.user && nextEmail) {
+          await tx.user.update({
+            where: { id: existing.user.id },
+            data: { email: nextEmail },
+          });
+        }
+        return tenant;
+      });
+    } catch (error) {
+      // Validasi di atas menangani alur normal; tangani juga request paralel yang
+      // lolos sebelum unique constraint database diperiksa.
+      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
+        throw new ConflictException('Email sudah digunakan oleh user atau tenant lain');
+      }
+      throw error;
+    }
+
+    await this.audit.log({
+      actorUserId: actor.id,
+      action: 'UPDATE',
+      entityType: 'Tenant',
+      entityId: String(updated.id),
+      oldData: existing,
+      newData: updated,
+      meta: portalEmailChanged
+        ? { portalEmailSynced: true, previousPortalEmail: existing.user?.email, portalEmail: nextEmail }
+        : undefined,
+    });
 
     // F4-9: poin quest onboarding — sekali, saat seluruh field profil (kecuali KTP) terisi.
     // Idempotent per tenantId (earnSafe), best-effort.
@@ -709,11 +755,16 @@ export class TenantsService {
 
     if (data.email) {
       const dupTenantEmail = await this.prisma.tenant.findFirst({
-        where: { email: data.email as string, id: idFilter } as Prisma.TenantWhereInput,
+        where: {
+          email: { equals: data.email as string, mode: Prisma.QueryMode.insensitive },
+          id: idFilter,
+        } as Prisma.TenantWhereInput,
       });
       if (dupTenantEmail) throw new ConflictException('Email sudah digunakan oleh tenant lain');
 
-      const dupUser = await this.prisma.user.findUnique({ where: { email: data.email as string } });
+      const dupUser = await this.prisma.user.findFirst({
+        where: { email: { equals: data.email as string, mode: Prisma.QueryMode.insensitive } },
+      });
       if (dupUser) {
         if (!excludeId || dupUser.tenantId !== excludeId) {
           throw new ConflictException('Email sudah digunakan oleh user lain');
@@ -726,6 +777,12 @@ export class TenantsService {
     const data: Record<string, unknown> = { ...dto };
     // B-9 (F5-5): referredByCode bukan kolom Tenant — jangan diteruskan ke Prisma.
     delete (data as { referredByCode?: unknown }).referredByCode;
+
+    if (typeof data.email === 'string') {
+      const email = data.email.trim().toLowerCase();
+      if (email) data.email = email;
+      else delete data.email;
+    }
 
     if (data.birthDate !== undefined && data.birthDate !== null) {
       if (typeof data.birthDate === 'string' && data.birthDate.trim() !== '') {

@@ -3,9 +3,12 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Alert, Badge, Button, Card, Col, Form, Modal, Row, Spinner, Table } from 'react-bootstrap';
 import {
   AlertTriangle,
+  CalendarDays,
   CheckCircle2,
+  ChevronRight,
   Copy,
   Droplets,
+  Gauge,
   KeyRound,
   Plus,
   Radio,
@@ -18,9 +21,12 @@ import PageHeader from '../../components/common/PageHeader';
 import { useToast } from '../../components/common/ToastProvider';
 import { useAuth } from '../../context/AuthContext';
 import { listResource } from '../../api/resources';
-import type { Room } from '../../types';
+import { listStays } from '../../api/stays';
+import { fetchPublicConfig } from '../../api/settings';
+import type { Room, Stay } from '../../types';
 import {
   createIotDevice,
+  getIotDeviceTelemetry,
   getIotOverview,
   probeTuya,
   rotateIotDeviceSecret,
@@ -60,6 +66,33 @@ function relativeTime(value?: string | null) {
   return new Intl.DateTimeFormat('id-ID', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(value));
 }
 
+type UsageCycle = { start: Date; end: Date; anchorDay: number };
+
+function dateAtAnchor(year: number, month: number, anchorDay: number) {
+  return new Date(year, month, Math.min(anchorDay, new Date(year, month + 1, 0).getDate()), 0, 0, 0, 0);
+}
+
+/** Siklus bulanan mengikuti tanggal check-in; 5 Juli → 5 Agustus, dst. */
+function getUsageCycle(checkInDate?: string | null, now = new Date()): UsageCycle | null {
+  if (!checkInDate) return null;
+  const checkIn = new Date(checkInDate);
+  if (Number.isNaN(checkIn.getTime())) return null;
+  const anchorDay = checkIn.getDate();
+  let start = dateAtAnchor(now.getFullYear(), now.getMonth(), anchorDay);
+  if (start.getTime() > now.getTime()) start = dateAtAnchor(now.getFullYear(), now.getMonth() - 1, anchorDay);
+  return { start, end: dateAtAnchor(start.getFullYear(), start.getMonth() + 1, anchorDay), anchorDay };
+}
+
+function formatUsageDate(value: Date | string) {
+  return new Intl.DateTimeFormat('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }).format(new Date(value));
+}
+
+function metricForDevice(device: IotDevice) {
+  return device.deviceType === 'ELECTRICITY_METER'
+    ? { key: 'electricity.energy_total_kwh', label: 'Listrik', unit: 'kWh' }
+    : { key: 'water.volume_total_m3', label: 'Air', unit: 'm³' };
+}
+
 function DeviceState({ device }: { device: IotDevice }) {
   if (!device.enabled) return <Badge bg="secondary">Nonaktif</Badge>;
   if (device.online === true) return <Badge bg="success">Online</Badge>;
@@ -94,6 +127,7 @@ export default function IotOverviewPage() {
   const [showCreate, setShowCreate] = useState(false);
   const [form, setForm] = useState<CreateIotDevicePayload>(emptyForm);
   const [secretResult, setSecretResult] = useState<DeviceSecretResult | null>(null);
+  const [selectedDevice, setSelectedDevice] = useState<IotDevice | null>(null);
 
   const overviewQuery = useQuery({
     queryKey: ['iot', 'overview'],
@@ -104,6 +138,16 @@ export default function IotOverviewPage() {
   const roomsQuery = useQuery({
     queryKey: ['rooms', 'iot-mapping'],
     queryFn: () => listResource<Room>('/rooms', { isActive: true, limit: 100 }),
+    staleTime: 5 * 60_000,
+  });
+  const staysQuery = useQuery({
+    queryKey: ['stays', 'iot-usage-cycle'],
+    queryFn: () => listStays({ status: 'ACTIVE', page: 1, limit: 200 }),
+    staleTime: 60_000,
+  });
+  const publicConfigQuery = useQuery({
+    queryKey: ['public-config'],
+    queryFn: fetchPublicConfig,
     staleTime: 5 * 60_000,
   });
 
@@ -150,6 +194,39 @@ export default function IotOverviewPage() {
 
   const overview = overviewQuery.data;
   const devices = useMemo(() => (overview?.devices ?? []).filter((device) => filter === 'ALL' || device.provider === filter), [overview, filter]);
+  const activeStay = useMemo<Stay | null>(() => {
+    if (!selectedDevice?.roomId) return null;
+    return (staysQuery.data?.items ?? []).find((stay) => stay.roomId === selectedDevice.roomId && stay.room?.status === 'OCCUPIED') ?? null;
+  }, [selectedDevice?.roomId, staysQuery.data?.items]);
+  const usageCycle = useMemo(() => getUsageCycle(activeStay?.checkInDate), [activeStay?.checkInDate]);
+  const selectedMetric = selectedDevice ? metricForDevice(selectedDevice) : null;
+  const telemetryQuery = useQuery({
+    queryKey: ['iot', 'telemetry', selectedDevice?.id, selectedMetric?.key, usageCycle?.start.toISOString()],
+    queryFn: () => getIotDeviceTelemetry(selectedDevice!.id, {
+      metric: selectedMetric!.key,
+      from: usageCycle!.start.toISOString(),
+      to: usageCycle!.end.toISOString(),
+      limit: 500,
+    }),
+    enabled: Boolean(selectedDevice && selectedMetric && usageCycle),
+    staleTime: 20_000,
+  });
+  const usageSummary = useMemo(() => {
+    if (!usageCycle || !selectedMetric) return null;
+    const readings = (telemetryQuery.data ?? [])
+      .map((item) => ({ ...item, numericValue: Number(item.value) }))
+      .filter((item) => item.metric === selectedMetric.key && Number.isFinite(item.numericValue))
+      .sort((left, right) => new Date(left.observedAt).getTime() - new Date(right.observedAt).getTime());
+    const baseline = [...readings].reverse().find((item) => new Date(item.observedAt).getTime() <= usageCycle.start.getTime());
+    const periodReadings = readings.filter((item) => new Date(item.observedAt).getTime() >= usageCycle.start.getTime());
+    const latest = periodReadings[periodReadings.length - 1];
+    const usage = baseline && latest ? Math.max(0, latest.numericValue - baseline.numericValue) : null;
+    return { baseline, latest, usage, sampleCount: periodReadings.length };
+  }, [selectedMetric, telemetryQuery.data, usageCycle]);
+  const freeKwh = publicConfigQuery.data?.freeElectricityKwhPerMonth ?? 30;
+  const usagePercent = selectedDevice?.deviceType === 'ELECTRICITY_METER' && usageSummary?.usage != null && freeKwh > 0
+    ? Math.min(100, (usageSummary.usage / freeKwh) * 100)
+    : 0;
 
   const setProvider = (provider: IotProvider) => {
     setForm((current) => ({
@@ -226,7 +303,7 @@ export default function IotOverviewPage() {
           <Card className="content-card border-0 iot-device-panel">
             <Card.Body>
               <div className="iot-panel-toolbar">
-                <div><h2>Registry perangkat</h2><p>Mapping perangkat ke kamar dan nilai telemetry terakhir.</p></div>
+                <div><h2>Registry perangkat</h2><p>Klik baris untuk melihat detail telemetry dan pemakaian sesuai periode sewa.</p></div>
                 <div className="iot-filter-group" role="group" aria-label="Filter provider">
                   {(['ALL', 'TUYA', 'KOST48_ESP32'] as Filter[]).map((item) => (
                     <button key={item} type="button" className={filter === item ? 'active' : ''} onClick={() => setFilter(item)}>
@@ -248,7 +325,19 @@ export default function IotOverviewPage() {
                   <thead><tr><th>Perangkat</th><th>Kamar</th><th>Status</th><th>Nilai terakhir</th><th>Terakhir masuk</th><th className="text-end">Aksi</th></tr></thead>
                   <tbody>
                     {devices.map((device) => (
-                      <tr key={device.id}>
+                      <tr
+                        key={device.id}
+                        className="clickable-row iot-device-row"
+                        onClick={() => setSelectedDevice(device)}
+                        onKeyDown={(event) => {
+                          if (event.key === 'Enter' || event.key === ' ') {
+                            event.preventDefault();
+                            setSelectedDevice(device);
+                          }
+                        }}
+                        tabIndex={0}
+                        aria-label={`Buka detail perangkat ${device.displayName || device.deviceCode}`}
+                      >
                         <td>
                           <div className="d-flex align-items-center gap-2">
                             <span className={`iot-device-icon ${device.provider === 'TUYA' ? 'is-electric' : 'is-water'}`}>{device.provider === 'TUYA' ? <Zap size={18} /> : <Droplets size={18} />}</span>
@@ -259,7 +348,7 @@ export default function IotOverviewPage() {
                         <td><DeviceState device={device} /></td>
                         <td><LatestValues device={device} /></td>
                         <td><span title={device.lastSeenAt ?? undefined}>{relativeTime(device.lastSeenAt)}</span></td>
-                        <td>
+                        <td className="iot-device-actions" onClick={(event) => event.stopPropagation()}>
                           <div className="d-flex justify-content-end flex-wrap gap-1">
                             {device.provider === 'TUYA' ? (
                               <Button size="sm" variant="outline-primary" onClick={() => syncMutation.mutate(device.id)} disabled={syncMutation.isPending || !device.enabled}>
@@ -273,6 +362,7 @@ export default function IotOverviewPage() {
                             <Button size="sm" variant={device.enabled ? 'outline-secondary' : 'outline-success'} onClick={() => toggleMutation.mutate({ id: device.id, enabled: !device.enabled })} disabled={toggleMutation.isPending}>
                               {device.enabled ? 'Nonaktifkan' : 'Aktifkan'}
                             </Button>
+                            <span className="row-arrow-cell" aria-hidden="true"><ChevronRight size={18} /></span>
                           </div>
                         </td>
                       </tr>
@@ -310,6 +400,79 @@ export default function IotOverviewPage() {
           </Modal.Body>
           <Modal.Footer><Button variant="outline-secondary" onClick={() => setShowCreate(false)} disabled={createMutation.isPending}>Batal</Button><Button type="submit" disabled={createMutation.isPending}>{createMutation.isPending ? <Spinner size="sm" /> : 'Daftarkan perangkat'}</Button></Modal.Footer>
         </Form>
+      </Modal>
+
+      <Modal show={Boolean(selectedDevice)} onHide={() => setSelectedDevice(null)} centered size="lg">
+        <Modal.Header closeButton>
+          <Modal.Title>Detail pemakaian perangkat</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {selectedDevice ? (
+            <>
+              <section className="iot-detail-device-head">
+                <span className={`iot-device-icon ${selectedDevice.provider === 'TUYA' ? 'is-electric' : 'is-water'}`}>
+                  {selectedDevice.provider === 'TUYA' ? <Zap size={20} /> : <Droplets size={20} />}
+                </span>
+                <div>
+                  <strong>{selectedDevice.displayName || selectedDevice.deviceCode}</strong>
+                  <span>{selectedDevice.room ? `Kamar ${selectedDevice.room.code}` : 'Belum dipetakan ke kamar'} · {selectedMetric?.label} · {selectedDevice.provider === 'TUYA' ? 'Tuya Cloud' : 'ESP32'}</span>
+                </div>
+                <DeviceState device={selectedDevice} />
+              </section>
+
+              {!selectedDevice.roomId ? (
+                <Alert variant="secondary" className="mt-3 mb-0"><Gauge size={18} /> Petakan perangkat ke kamar terlebih dahulu agar periode pemakaian dapat dihitung.</Alert>
+              ) : staysQuery.isLoading ? (
+                <div className="py-4 text-center"><Spinner animation="border" size="sm" /> Memuat masa sewa kamar…</div>
+              ) : !activeStay || !usageCycle ? (
+                <Alert variant="secondary" className="mt-3 mb-0"><CalendarDays size={18} /> Belum ada masa sewa aktif untuk kamar ini, sehingga periode pemakaian belum dapat ditentukan.</Alert>
+              ) : (
+                <section className="iot-usage-cycle-card">
+                  <div className="iot-usage-cycle-head">
+                    <div>
+                      <span>Siklus monitoring penghuni</span>
+                      <strong>{formatUsageDate(usageCycle.start)} – {formatUsageDate(usageCycle.end)}</strong>
+                      <small>Mengikuti tanggal masuk {formatUsageDate(activeStay.checkInDate ?? usageCycle.start)} (setiap tanggal {usageCycle.anchorDay}).</small>
+                    </div>
+                    <span className="iot-cycle-badge">Masa sewa #{activeStay.id}</span>
+                  </div>
+
+                  {telemetryQuery.isLoading ? (
+                    <div className="py-4 text-center"><Spinner animation="border" size="sm" /> Menghitung pemakaian dari sensor…</div>
+                  ) : telemetryQuery.isError ? (
+                    <Alert variant="danger" className="mb-0">{getApiErrorMessage(telemetryQuery.error, 'Riwayat telemetry tidak dapat dimuat.')}</Alert>
+                  ) : !usageSummary?.baseline || !usageSummary.latest || usageSummary.usage == null ? (
+                    <Alert variant="secondary" className="mb-0">Belum ada pembacaan pembanding pada atau sebelum awal periode. Sinkronkan meter agar total periode berikutnya dapat dihitung akurat.</Alert>
+                  ) : (
+                    <div className="iot-usage-content">
+                      {selectedDevice.deviceType === 'ELECTRICITY_METER' ? (
+                        <div className="iot-usage-donut" style={{ background: `conic-gradient(#2563eb ${usagePercent}%, #dbeafe 0)` }} aria-label={`${usageSummary.usage.toFixed(2)} dari ${freeKwh} kWh jatah gratis`}>
+                          <div><strong>{usageSummary.usage.toLocaleString('id-ID', { maximumFractionDigits: 2 })}</strong><span>kWh dipakai</span></div>
+                        </div>
+                      ) : null}
+                      <div className="iot-usage-summary">
+                        <span>{selectedMetric?.label} periode ini</span>
+                        <strong>{usageSummary.usage.toLocaleString('id-ID', { maximumFractionDigits: 3 })} {selectedMetric?.unit}</strong>
+                        {selectedDevice.deviceType === 'ELECTRICITY_METER' ? (
+                          <small>{usageSummary.usage > freeKwh ? `${(usageSummary.usage - freeKwh).toLocaleString('id-ID', { maximumFractionDigits: 2 })} kWh melewati jatah ${freeKwh} kWh.` : `${Math.max(0, freeKwh - usageSummary.usage).toLocaleString('id-ID', { maximumFractionDigits: 2 })} kWh jatah gratis tersisa.`}</small>
+                        ) : <small>{usageSummary.sampleCount} pembacaan pada periode ini.</small>}
+                      </div>
+                      <div className="iot-reading-comparison">
+                        <span>Awal periode<strong>{usageSummary.baseline.numericValue.toLocaleString('id-ID', { maximumFractionDigits: 3 })} {selectedMetric?.unit}</strong><small>{relativeTime(usageSummary.baseline.observedAt)}</small></span>
+                        <span>Terakhir<strong>{usageSummary.latest.numericValue.toLocaleString('id-ID', { maximumFractionDigits: 3 })} {selectedMetric?.unit}</strong><small>{relativeTime(usageSummary.latest.observedAt)}</small></span>
+                      </div>
+                    </div>
+                  )}
+                  <p className="iot-usage-note">Monitoring sensor saja, bukan dasar tagihan. Tagihan resmi tetap memakai pencatatan dan review meter.</p>
+                </section>
+              )}
+            </>
+          ) : null}
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="outline-secondary" onClick={() => setSelectedDevice(null)}>Tutup</Button>
+          {selectedDevice?.provider === 'TUYA' ? <Button onClick={() => syncMutation.mutate(selectedDevice.id)} disabled={syncMutation.isPending || !selectedDevice.enabled}><RefreshCw size={16} className={syncMutation.isPending ? 'iot-spin' : ''} /> Sinkronkan</Button> : null}
+        </Modal.Footer>
       </Modal>
 
       <Modal show={Boolean(secretResult)} onHide={() => setSecretResult(null)} centered backdrop="static">

@@ -32,6 +32,136 @@
   line-height: 1.2;
 }
 
+/* Shared controls ---------------------------------------------------------
+ * SegmentedTabs and the profile trigger are used by every workspace.  They
+ * used to be styled only by the staff chunk, so Admin/Owner/Tenant could show
+ * native browser buttons when that chunk had not been loaded yet.
+ */
+.segmented-tabs,
+.staff-filter-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  margin-bottom: 0.65rem;
+}
+
+.segmented-tabs {
+  max-width: 100%;
+}
+
+.staff-filter-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.38rem;
+  min-height: var(--tap-min);
+  appearance: none;
+  border: 1px solid rgba(37, 99, 235, 0.16);
+  border-radius: 999px;
+  background: #ffffff;
+  color: #1e3a8a;
+  padding: 0.35rem 0.65rem;
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 750;
+  line-height: 1.2;
+  cursor: pointer;
+  transition: background 0.16s ease, border-color 0.16s ease, color 0.16s ease, box-shadow 0.16s ease;
+}
+
+.staff-filter-chip:hover:not(:disabled) {
+  border-color: rgba(37, 99, 235, 0.38);
+  background: #eff6ff;
+}
+
+.staff-filter-chip:focus-visible {
+  outline: 3px solid rgba(37, 99, 235, 0.28);
+  outline-offset: 2px;
+}
+
+.staff-filter-chip:disabled,
+.staff-filter-chip.is-empty {
+  cursor: not-allowed;
+  opacity: 0.62;
+}
+
+.staff-filter-chip strong {
+  display: inline-grid;
+  min-width: 1.3rem;
+  height: 1.3rem;
+  place-items: center;
+  border-radius: 999px;
+  background: rgba(37, 99, 235, 0.1);
+  color: inherit;
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+
+.staff-filter-chip.active {
+  border-color: #2563eb;
+  background: #2563eb;
+  color: #ffffff;
+}
+
+.staff-filter-chip.active strong {
+  background: #1d4ed8;
+  color: #ffffff;
+}
+
+.topbar-profile-trigger,
+.staff-user-profile-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.58rem;
+  min-width: var(--tap-min);
+  min-height: var(--tap-min);
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: #0f172a;
+  padding: 0.22rem 0.35rem;
+  text-align: right;
+  cursor: pointer;
+  transition: background 0.16s ease;
+}
+
+.topbar-profile-trigger:hover,
+.staff-user-profile-trigger:hover {
+  background: #eff6ff;
+}
+
+.topbar-profile-trigger:focus-visible,
+.staff-user-profile-trigger:focus-visible {
+  outline: 3px solid rgba(37, 99, 235, 0.28);
+  outline-offset: 2px;
+}
+
+.topbar-profile-trigger strong,
+.topbar-profile-trigger em,
+.staff-user-profile-trigger strong,
+.staff-user-profile-trigger em {
+  display: block;
+}
+
+.topbar-profile-trigger strong,
+.staff-user-profile-trigger strong {
+  max-width: 210px;
+  overflow: hidden;
+  color: #0f172a;
+  font-size: 0.86rem;
+  font-weight: 800;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.topbar-profile-trigger em,
+.staff-user-profile-trigger em {
+  color: #64748b;
+  font-size: 0.74rem;
+  font-style: normal;
+  font-weight: 650;
+}
+
 /* Danger variant - overdue invoice / imminent booking deadline */
 .payment-urgency-chip-danger {
   background: var(--color-danger-bg);

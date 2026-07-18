@@ -116,12 +116,6 @@ export const propertyConfigs = {
         type: 'checkbox' as const,
       },
       {
-        name: 'acWattage',
-        label: 'Daya AC (watt)',
-        type: 'number' as const,
-        placeholder: 'mis. 400 (AC 1/2 PK ~ 380-450 watt)',
-      },
-      {
         name: 'acCleanIntervalDays',
         label: 'Interval Cuci AC (hari — 30 ≈ 1 bln, 60 ≈ 2 bln, 90 ≈ 3 bln)',
         type: 'number' as const,

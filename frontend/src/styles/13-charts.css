@@ -64,6 +64,178 @@
   flex-shrink: 0;
 }
 
+/* Ringkasan masa sewa: donut agregat + deretan donut tenant yang dapat dibuka. */
+.rent-expiry-overview {
+  overflow: hidden;
+}
+.rent-expiry-overview-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: .85rem;
+}
+.rent-expiry-order-note {
+  flex: 0 0 auto;
+  padding: .35rem .6rem;
+  border-radius: 999px;
+  background: #eff6ff;
+  color: #2563eb;
+  font-size: .72rem;
+  font-weight: 800;
+}
+.rent-expiry-overview-content {
+  display: grid;
+  grid-template-columns: 210px minmax(0, 1fr);
+  gap: 1rem;
+  align-items: stretch;
+}
+.rent-expiry-summary {
+  padding: .5rem .65rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  background: linear-gradient(145deg, #f8fbff, #fff);
+}
+.rent-expiry-summary-donut,
+.rent-expiry-mini-donut {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.rent-expiry-summary-center,
+.rent-expiry-mini-donut > span {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+.rent-expiry-summary-center {
+  flex-direction: column;
+}
+.rent-expiry-summary-center strong {
+  color: var(--text-main);
+  font-size: 1.25rem;
+  line-height: 1;
+}
+.rent-expiry-summary-center span {
+  color: var(--text-muted);
+  font-size: .65rem;
+  margin-top: 2px;
+}
+.rent-expiry-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .3rem .55rem;
+}
+.rent-expiry-legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: .25rem;
+  color: var(--text-muted);
+  font-size: .67rem;
+  white-space: nowrap;
+}
+.rent-expiry-legend i {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+}
+.rent-expiry-tenant-scroll {
+  display: flex;
+  gap: .65rem;
+  min-width: 0;
+  overflow-x: auto;
+  padding: .1rem .15rem .55rem;
+  scrollbar-color: #bfdbfe transparent;
+  scrollbar-width: thin;
+}
+.rent-expiry-tenant-card {
+  display: flex;
+  flex: 0 0 228px;
+  align-items: center;
+  gap: .45rem;
+  min-height: 86px;
+  padding: .48rem;
+  border: 1px solid #dbe5f1;
+  border-radius: 13px;
+  background: #fff;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color .16s ease, box-shadow .16s ease, transform .16s ease;
+}
+.rent-expiry-tenant-card:hover,
+.rent-expiry-tenant-card:focus-visible {
+  border-color: #60a5fa;
+  box-shadow: 0 6px 15px rgba(37, 99, 235, .12);
+  outline: none;
+  transform: translateY(-1px);
+}
+.rent-expiry-tenant-card.is-danger { border-left: 4px solid #ef4444; }
+.rent-expiry-tenant-card.is-warning { border-left: 4px solid #f59e0b; }
+.rent-expiry-tenant-card.is-info { border-left: 4px solid #2563eb; }
+.rent-expiry-tenant-card.is-success { border-left: 4px solid #16a34a; }
+.rent-expiry-tenant-card.is-muted { border-left: 4px solid #94a3b8; }
+.rent-expiry-mini-donut {
+  flex: 0 0 72px;
+  width: 72px;
+  height: 72px;
+}
+.rent-expiry-mini-donut > span {
+  color: var(--text-main);
+  font-size: .82rem;
+  font-weight: 850;
+}
+.rent-expiry-tenant-copy {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  flex-direction: column;
+  gap: .08rem;
+}
+.rent-expiry-tenant-copy strong,
+.rent-expiry-tenant-copy span,
+.rent-expiry-tenant-copy em {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.rent-expiry-tenant-copy strong {
+  color: var(--text-main);
+  font-size: .8rem;
+}
+.rent-expiry-tenant-copy span {
+  color: var(--text-muted);
+  font-size: .68rem;
+}
+.rent-expiry-tenant-copy em {
+  color: #2563eb;
+  font-size: .7rem;
+  font-style: normal;
+  font-weight: 800;
+}
+.rent-expiry-tenant-card.is-danger .rent-expiry-tenant-copy em { color: #dc2626; }
+.rent-expiry-tenant-card.is-warning .rent-expiry-tenant-copy em { color: #b45309; }
+.rent-expiry-tenant-card.is-success .rent-expiry-tenant-copy em { color: #15803d; }
+
+@media (max-width: 767.98px) {
+  .rent-expiry-overview-head {
+    align-items: stretch;
+    flex-direction: column;
+    gap: .5rem;
+  }
+  .rent-expiry-order-note { align-self: flex-start; }
+  .rent-expiry-overview-content { grid-template-columns: 1fr; }
+  .rent-expiry-summary {
+    display: grid;
+    grid-template-columns: 135px 1fr;
+    align-items: center;
+  }
+  .rent-expiry-summary-donut .recharts-responsive-container { height: 112px !important; }
+}
+
 /* Invoice collection gauge */
 .invoice-collection-gauge-wrap {
   display: flex;

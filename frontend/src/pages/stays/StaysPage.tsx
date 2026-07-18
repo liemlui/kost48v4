@@ -45,6 +45,124 @@ type StayViewFilter = 'ALL' | 'BOOKINGS' | 'CHECKOUT' | 'ACTIVE';
 
 const STAY_CHART_COLORS = ['#2563eb', '#f59e0b', '#16a34a', '#ef4444', '#7c3aed', '#0ea5e9'];
 
+type RentExpiryTone = 'danger' | 'warning' | 'info' | 'success' | 'muted';
+
+type RentExpiryItem = {
+  stay: Stay;
+  daysLeft: number | null;
+  remainingPercent: number;
+  tone: RentExpiryTone;
+  label: string;
+};
+
+function getRentExpiryItem(stay: Stay): RentExpiryItem {
+  const daysLeft = daysFromToday(stay.plannedCheckOutDate);
+  const checkIn = stay.checkInDate ? new Date(stay.checkInDate).getTime() : Number.NaN;
+  const periodEnd = stay.plannedCheckOutDate ? new Date(stay.plannedCheckOutDate).getTime() : Number.NaN;
+  const totalDays = Number.isFinite(checkIn) && Number.isFinite(periodEnd)
+    ? Math.max(1, Math.round((periodEnd - checkIn) / 86_400_000))
+    : 0;
+  const remainingPercent = daysLeft === null || totalDays === 0
+    ? 0
+    : Math.max(0, Math.min(100, Math.round((daysLeft / totalDays) * 100)));
+
+  if (daysLeft === null) return { stay, daysLeft, remainingPercent, tone: 'muted', label: 'Tanggal akhir belum ada' };
+  if (daysLeft < 0) return { stay, daysLeft, remainingPercent, tone: 'danger', label: `Lewat ${Math.abs(daysLeft)} hari` };
+  if (daysLeft === 0) return { stay, daysLeft, remainingPercent, tone: 'danger', label: 'Keluar hari ini' };
+  if (daysLeft <= 3) return { stay, daysLeft, remainingPercent, tone: 'danger', label: `H-${daysLeft}` };
+  if (daysLeft <= 10) return { stay, daysLeft, remainingPercent, tone: 'warning', label: `H-${daysLeft}` };
+  if (daysLeft <= 30) return { stay, daysLeft, remainingPercent, tone: 'info', label: `H-${daysLeft}` };
+  return { stay, daysLeft, remainingPercent, tone: 'success', label: `H-${daysLeft}` };
+}
+
+function RentExpiryOverview({ items, onOpen }: { items: Stay[]; onOpen: (stayId: number) => void }) {
+  const expiryItems = useMemo(
+    () => items
+      .map(getRentExpiryItem)
+      .sort((left, right) => (left.daysLeft ?? Number.POSITIVE_INFINITY) - (right.daysLeft ?? Number.POSITIVE_INFINITY)),
+    [items],
+  );
+
+  const overviewData = useMemo(() => {
+    const buckets = [
+      { name: 'Lewat target', color: '#dc2626', match: (item: RentExpiryItem) => item.daysLeft !== null && item.daysLeft < 0 },
+      { name: 'H-0 s/d H-3', color: '#ef4444', match: (item: RentExpiryItem) => item.daysLeft !== null && item.daysLeft >= 0 && item.daysLeft <= 3 },
+      { name: 'H-4 s/d H-10', color: '#f59e0b', match: (item: RentExpiryItem) => item.daysLeft !== null && item.daysLeft >= 4 && item.daysLeft <= 10 },
+      { name: 'H-11 s/d H-30', color: '#2563eb', match: (item: RentExpiryItem) => item.daysLeft !== null && item.daysLeft >= 11 && item.daysLeft <= 30 },
+      { name: '> H-30', color: '#16a34a', match: (item: RentExpiryItem) => item.daysLeft !== null && item.daysLeft > 30 },
+      { name: 'Tanpa tanggal akhir', color: '#94a3b8', match: (item: RentExpiryItem) => item.daysLeft === null },
+    ];
+    return buckets
+      .map((bucket) => ({ name: bucket.name, color: bucket.color, value: expiryItems.filter(bucket.match).length }))
+      .filter((bucket) => bucket.value > 0);
+  }, [expiryItems]);
+
+  if (!expiryItems.length) return null;
+
+  return (
+    <Card className="content-card border-0 mb-3 rent-expiry-overview">
+      <Card.Body>
+        <div className="rent-expiry-overview-head">
+          <div>
+            <div className="panel-title">Pantauan akhir masa sewa</div>
+            <div className="panel-subtitle">Setiap donut menunjukkan sisa periode tenant. Urutan paling kiri paling mendesak.</div>
+          </div>
+          <div className="rent-expiry-order-note">Urut: tanggal akhir terdekat</div>
+        </div>
+        <div className="rent-expiry-overview-content">
+          <div className="rent-expiry-summary">
+            <div className="rent-expiry-summary-donut">
+              <ResponsiveContainer width="100%" height={132}>
+                <PieChart>
+                  <Pie data={overviewData} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius={39} outerRadius={58} paddingAngle={2} stroke="none">
+                    {overviewData.map((entry) => <Cell key={entry.name} fill={entry.color} />)}
+                  </Pie>
+                  <Tooltip formatter={(value, name) => [`${Number(value ?? 0)} tenant`, String(name ?? '')]} />
+                </PieChart>
+              </ResponsiveContainer>
+              <div className="rent-expiry-summary-center"><strong>{expiryItems.length}</strong><span>Aktif</span></div>
+            </div>
+            <div className="rent-expiry-legend">
+              {overviewData.map((entry) => <span key={entry.name}><i style={{ background: entry.color }} />{entry.name}: {entry.value}</span>)}
+            </div>
+          </div>
+          <div className="rent-expiry-tenant-scroll" aria-label="Pantauan masa sewa per tenant">
+            {expiryItems.map((item) => {
+              const ringData = [
+                { name: 'Sisa periode', value: item.remainingPercent, color: item.tone === 'danger' ? '#ef4444' : item.tone === 'warning' ? '#f59e0b' : item.tone === 'info' ? '#2563eb' : item.tone === 'success' ? '#16a34a' : '#94a3b8' },
+                { name: 'Periode berjalan', value: 100 - item.remainingPercent, color: '#e8eef7' },
+              ];
+              return (
+                <button
+                  key={item.stay.id}
+                  type="button"
+                  className={`rent-expiry-tenant-card is-${item.tone}`}
+                  onClick={() => onOpen(item.stay.id)}
+                  aria-label={`Buka masa sewa ${item.stay.tenant?.fullName ?? item.stay.tenantId}, ${item.label}`}
+                >
+                  <div className="rent-expiry-mini-donut">
+                    <PieChart width={72} height={72}>
+                      <Pie data={ringData} dataKey="value" cx="50%" cy="50%" innerRadius={21} outerRadius={30} stroke="none">
+                        {ringData.map((segment) => <Cell key={segment.name} fill={segment.color} />)}
+                      </Pie>
+                    </PieChart>
+                    <span>{item.daysLeft === null ? '-' : item.daysLeft < 0 ? `+${Math.abs(item.daysLeft)}` : item.daysLeft}</span>
+                  </div>
+                  <div className="rent-expiry-tenant-copy">
+                    <strong>{item.stay.tenant?.fullName ?? `Penghuni #${item.stay.tenantId}`}</strong>
+                    <span>Kamar {item.stay.room?.code ?? item.stay.roomId} · {formatDateSafe(item.stay.plannedCheckOutDate)}</span>
+                    <em>{item.label}</em>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      </Card.Body>
+    </Card>
+  );
+}
+
 // ═══════════════════════════════════════════════════════════
 //  COMPONENT: StayAnalyticsPanel
 // ═══════════════════════════════════════════════════════════
@@ -281,7 +399,20 @@ export default function StaysPage() {
     ),
   });
 
+  // Ringkasan rent expiry harus mencakup semua tenant aktif, bukan hanya lima
+  // baris pada halaman tabel saat ini.
+  const rentExpiryQuery = useQuery({
+    queryKey: ['stays', 'rent-expiry-overview'],
+    queryFn: () => listStays({ status: 'ACTIVE', page: 1, limit: 200 }),
+    enabled: statusFilter === 'ACTIVE',
+    staleTime: 30_000,
+  });
+
   const items = useMemo(() => query.data?.items ?? [], [query.data]);
+  const rentExpiryItems = useMemo(
+    () => (rentExpiryQuery.data?.items ?? []).filter((item) => isOperationalActiveStay(item)),
+    [rentExpiryQuery.data],
+  );
   const reservedBookings = useMemo(() => items.filter((item) => isReservedBooking(item) && !isExpiredReservedBooking(item)), [items]);
   const operationalActive = useMemo(() => items.filter((item) => isOperationalActiveStay(item)), [items]);
   const checkoutDue = useMemo(() => operationalActive.filter((item) => isCheckoutDueOrOverdue(item)), [operationalActive]);
@@ -455,7 +586,6 @@ export default function StaysPage() {
         <NavLink to="/stays?status=CHECKOUT" className={({ isActive }) => `admin-sub-nav-link${isActive || statusFilter === 'CHECKOUT' ? ' active' : ''}`}>Checkout</NavLink>
         <NavLink to="/tenants?ktpStatus=PENDING_REVIEW" className="admin-sub-nav-link">Data Penghuni</NavLink>
         <NavLink to="/renew-requests" className="admin-sub-nav-link">Perpanjangan</NavLink>
-        <NavLink to="/stays/check-in" className="admin-sub-nav-link admin-sub-nav-cta">+ Check-in</NavLink>
       </div>
 
       <AssistantInsightLine
@@ -473,6 +603,10 @@ export default function StaysPage() {
           {pendingApprovalCount > 0 ? `${pendingApprovalCount} booking perlu disetujui. ` : ''}
           {pendingCheckoutRequestCount > 0 ? `${pendingCheckoutRequestCount} checkout perlu direview.` : ''}
         </Alert>
+      ) : null}
+
+      {statusFilter === 'ACTIVE' ? (
+        <RentExpiryOverview items={rentExpiryItems} onOpen={(stayId) => navigate(`/stays/${stayId}`)} />
       ) : null}
 
       {items.length > 0 && (

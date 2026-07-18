@@ -61,7 +61,7 @@ static const char API_URL[] =
 // 2 = Sensor 1 + Sensor 2
 // 3 = Sensor 1 + Sensor 2 + Sensor 3
 // 4 = semua baris sensor
-static constexpr size_t ACTIVE_FLOW_SENSOR_COUNT = 1;
+static constexpr size_t ACTIVE_FLOW_SENSOR_COUNT = 2;
 
 // ----------------------------------------------------------------------------
 // 3. KONFIGURASI SETIAP SENSOR

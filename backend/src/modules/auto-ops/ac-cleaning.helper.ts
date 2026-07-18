@@ -7,7 +7,10 @@
  */
 
 // Default wajar bila data kamar kosong (AC 1/2 PK ~ 380–450W; pemakaian ~8 jam/hari).
-export const AC_DEFAULT_WATTAGE = 400;
+// Kebijakan properti: seluruh kamar memakai AC ½ PK. Estimasi perawatan tidak
+// boleh berubah karena nilai lama yang pernah tersimpan per kamar.
+export const AC_HALF_PK_WATTAGE = 380;
+export const AC_DEFAULT_WATTAGE = AC_HALF_PK_WATTAGE;
 export const AC_DEFAULT_USAGE_HOURS_PER_DAY = 8;
 // Ambang kWh untuk pemicu dini (default; override via env AC_CLEAN_KWH_THRESHOLD).
 export const AC_DEFAULT_KWH_THRESHOLD = 200;
@@ -38,7 +41,7 @@ export function evaluateAcCleaning(
   now: Date,
   options: { kwhThreshold?: number } = {},
 ): AcCleaningEvaluation {
-  const wattage = room.acWattage ?? AC_DEFAULT_WATTAGE;
+  const wattage = AC_HALF_PK_WATTAGE;
   const usageHours = room.acUsageHoursPerDay ?? AC_DEFAULT_USAGE_HOURS_PER_DAY;
   const kwhPerDay = estimateKwhPerDay(wattage, usageHours);
   const kwhThreshold = options.kwhThreshold ?? AC_DEFAULT_KWH_THRESHOLD;

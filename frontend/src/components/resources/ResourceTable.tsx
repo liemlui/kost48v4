@@ -321,11 +321,6 @@ export default function ResourceTable({
     if (config.path === '/room-items') {
       return (
         <>
-          {item.roomId ? (
-            <Button size="sm" variant="outline-primary" onClick={() => navigate(`/rooms/${item.roomId}`)}>
-              Detail kamar
-            </Button>
-          ) : null}
           {item.itemId && item.roomId ? (
             <Button size="sm" variant="outline-primary" onClick={() => navigate(`/inventory/mutasi?movementType=RETURN_FROM_ROOM&itemId=${item.itemId}&roomId=${item.roomId}&qty=${item.qty ?? 1}`)}>
               Kembalikan ke Gudang

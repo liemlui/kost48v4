@@ -578,6 +578,9 @@ export default function ResourceFormModal({
                   <div className="fw-semibold mb-2">Informasi Portal</div>
                   <div><strong>Email portal:</strong> {portalSummary?.portalEmail ?? '-'}</div>
                   <div><strong>Status:</strong> {currentPortalIsActive ? 'Aktif' : 'Nonaktif'}</div>
+                  <div className="small text-muted mt-1">
+                    Ubah field “Email Tenant & Login Portal” di atas lalu simpan untuk memperbarui email login ini.
+                  </div>
                   <div>
                     <strong>Terakhir login:</strong>{' '}
                     {portalSummary?.lastLoginAt ? formatDateOnly(portalSummary.lastLoginAt) : 'Belum pernah login'}

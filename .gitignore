@@ -81,6 +81,11 @@ env.txt
 backend/drop.sql
 backend/setup.sql
 sql/
+# Patch produksi yang idempoten perlu ikut source control. File SQL seed lama tetap
+# diabaikan karena hanya artefak setup database fresh.
+!backend/sql/
+backend/sql/*
+!backend/sql/patch-13-tenant-master-data.sql
 backend/scripts/*.sql
 backend/scripts/golive-*
 backend/scripts/insert-*
@@ -88,6 +93,9 @@ backend/scripts/uat-*
 backend/scripts/m9-*
 !backend/scripts/seed-*.sql
 
+
+# Scan dokumen sumber (PDF/Excel terlalu besar untuk git)
+Scan/
 
 *storybook.log
 storybook-static

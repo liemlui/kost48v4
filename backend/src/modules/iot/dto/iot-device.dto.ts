@@ -1,6 +1,7 @@
 import { Type } from 'class-transformer';
 import {
   IsBoolean,
+  IsDateString,
   IsEnum,
   IsInt,
   IsOptional,
@@ -102,6 +103,16 @@ export class IotTelemetryQueryDto {
   @IsOptional()
   @IsString()
   metric?: string;
+
+  /** Awal periode telemetry (ISO 8601). Satu pembacaan tepat sebelum titik ini
+   * juga dikirim sebagai baseline agar pemakaian kumulatif dapat dihitung. */
+  @IsOptional()
+  @IsDateString()
+  from?: string;
+
+  @IsOptional()
+  @IsDateString()
+  to?: string;
 }
 
 export class TuyaProbeDto {

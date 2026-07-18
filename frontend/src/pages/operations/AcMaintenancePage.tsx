@@ -14,12 +14,8 @@ const STATUS_META: Record<AcMaintenanceStatus, { label: string; bg: string }> = 
   OK: { label: 'Terjadwal aman', bg: 'success' },
 };
 
-function acCapacity(watt?: number | null): string {
-  // Semua kamar kos memakai AC ½ PK (keputusan owner). Tetap turunkan dari watt bila ada.
-  if (!watt) return '½ PK';
-  if (watt <= 400) return '½ PK';
-  if (watt <= 600) return '¾ PK';
-  return '1 PK';
+function acCapacity(): string {
+  return '½ PK';
 }
 
 export default function AcMaintenancePage() {
@@ -95,14 +91,26 @@ export default function AcMaintenancePage() {
                   {data.items.map((room) => {
                     const meta = STATUS_META[room.status];
                     return (
-                      <tr key={room.id}>
+                      <tr
+                        key={room.id}
+                        className="clickable-row"
+                        tabIndex={0}
+                        aria-label={`Buka detail kamar ${room.code}`}
+                        onClick={() => navigate(`/rooms/${room.id}`)}
+                        onKeyDown={(event) => {
+                          if (event.key === 'Enter' || event.key === ' ') {
+                            event.preventDefault();
+                            navigate(`/rooms/${room.id}`);
+                          }
+                        }}
+                      >
                         <td>
                           <button type="button" className="btn btn-link p-0 fw-semibold" onClick={() => navigate(`/rooms/${room.id}`)}>
                             {room.code}
                           </button>
                           {room.name ? <div className="small text-muted">{room.name}</div> : null}
                         </td>
-                        <td>{acCapacity(room.acWattage)}</td>
+                        <td>{acCapacity()}</td>
                         <td>{room.acUsageHoursPerDay != null ? `${room.acUsageHoursPerDay} jam` : <span className="text-muted">default</span>}</td>
                         <td>{room.acLastCleanedAt ? formatDateOnly(room.acLastCleanedAt) : <span className="text-muted">—</span>}</td>
                         <td>{room.nextDueAt ? formatDateOnly(room.nextDueAt) : <span className="text-muted">—</span>}</td>
@@ -111,7 +119,7 @@ export default function AcMaintenancePage() {
                           <Badge bg={meta.bg} className={meta.bg === 'warning' ? 'text-dark' : undefined}>{meta.label}</Badge>
                           {room.openTicketId ? <div className="small text-muted mt-1">Tiket #{room.openTicketId}</div> : null}
                         </td>
-                        <td className="text-end">
+                        <td className="text-end" onClick={(event) => event.stopPropagation()}>
                           <Button
                             size="sm"
                             variant={room.status === 'OK' ? 'outline-secondary' : 'primary'}

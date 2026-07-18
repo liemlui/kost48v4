@@ -18,13 +18,13 @@ describe('Y-P3 — MyManualPage (tenant portal integration)', () => {
   it('merender judul panduan', () => {
     (fetchPublicFaqs as any).mockResolvedValue([]);
     renderPage(<MyManualPage />);
-    expect(screen.getByRole('heading', { name: /Panduan Penghuni/i })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /Panduan & Aturan Kos/i })).toBeInTheDocument();
   });
 
-  it('menampilkan aturan dasar saat FAQ kosong', async () => {
+  it('menampilkan tab Aturan Kos aktif saat FAQ kosong', async () => {
     (fetchPublicFaqs as any).mockResolvedValue([]);
     renderPage(<MyManualPage />);
-    expect(await screen.findByText('Aturan Dasar KOST48')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /📋 Aturan Kos/i })).toBeInTheDocument();
   });
 
   it('menampilkan FAQ dari API saat tersedia', async () => {

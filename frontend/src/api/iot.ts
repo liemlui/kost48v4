@@ -13,6 +13,9 @@ export type IotTelemetryValue = {
   observedAt: string;
   quality: IotReadingQuality;
   reason?: string | null;
+  ingestMessageId?: string;
+  messageId?: string;
+  receivedAt?: string;
 };
 
 export type IotDevice = {
@@ -115,6 +118,14 @@ export async function getIotOverview(): Promise<IotOverview> {
 
 export async function getMyRoomUtilityTelemetry(): Promise<TenantRoomUtilityTelemetry> {
   const response = await client.get<ApiEnvelope<TenantRoomUtilityTelemetry>>('/iot/tenant/my-room');
+  return response.data.data;
+}
+
+export async function getIotDeviceTelemetry(
+  id: number,
+  params: { metric?: string; from?: string; to?: string; limit?: number } = {},
+): Promise<IotTelemetryValue[]> {
+  const response = await client.get<ApiEnvelope<IotTelemetryValue[]>>(`/iot/devices/${id}/telemetry`, { params });
   return response.data.data;
 }
 

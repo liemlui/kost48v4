@@ -53,7 +53,12 @@ export class StaysQueryService {
             },
           },
         },
-        orderBy: { id: 'desc' },
+        // Daftar hunian aktif adalah antrean operasional: yang tanggal akhir
+        // masa sewanya paling dekat harus muncul lebih dahulu, lintas halaman.
+        // Riwayat/nonaktif tetap mempertahankan urutan terbaru berdasarkan ID.
+        orderBy: query.status === StayStatus.ACTIVE
+          ? [{ plannedCheckOutDate: 'asc' }, { id: 'desc' }]
+          : { id: 'desc' },
       }),
       this.prisma.stay.count({ where }),
     ]);

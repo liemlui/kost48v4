@@ -265,16 +265,38 @@ export class IotService {
 
   async telemetry(id: number, query: IotTelemetryQueryDto) {
     await this.requireDevice(id);
+    const from = query.from ? new Date(query.from) : undefined;
+    const to = query.to ? new Date(query.to) : undefined;
+    const baseWhere: Prisma.IotTelemetryWhereInput = {
+      ingestMessage: { deviceId: id },
+      metric: query.metric,
+    };
+    const observedAt = from || to
+      ? { ...(from ? { gte: from } : {}), ...(to ? { lte: to } : {}) }
+      : undefined;
     const items = await this.prisma.iotTelemetry.findMany({
       where: {
-        ingestMessage: { deviceId: id },
-        metric: query.metric,
+        ...baseWhere,
+        ...(observedAt ? { observedAt } : {}),
       },
       orderBy: { observedAt: 'desc' },
       take: Math.min(query.limit || 100, 500),
       include: { ingestMessage: { select: { id: true, messageId: true, receivedAt: true } } },
     });
-    return items.map((item) => ({
+
+    // Nilai energi/volume bersifat kumulatif. Mengirim satu titik sebelum awal
+    // periode membuat UI bisa menghitung selisih tepat dari tanggal cycle,
+    // bukan dari pembacaan pertama yang kebetulan ada di dalam periode.
+    const baseline = from
+      ? await this.prisma.iotTelemetry.findFirst({
+          where: { ...baseWhere, observedAt: { lt: from } },
+          orderBy: { observedAt: 'desc' },
+          include: { ingestMessage: { select: { id: true, messageId: true, receivedAt: true } } },
+        })
+      : null;
+    const rows = baseline ? [baseline, ...items] : items;
+
+    return rows.map((item) => ({
       id: item.id.toString(),
       metric: item.metric,
       value: item.valueDecimal == null ? item.valueText : Number(item.valueDecimal),

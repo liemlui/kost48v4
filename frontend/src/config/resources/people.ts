@@ -105,7 +105,7 @@ export const peopleConfigs = {
       },
       {
         name: 'email',
-        label: 'Email Tenant (untuk kontak)',
+        label: 'Email Tenant & Login Portal',
         type: 'email' as const,
         placeholder: 'email@contoh.com',
       },

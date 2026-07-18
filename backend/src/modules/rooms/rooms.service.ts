@@ -10,7 +10,7 @@ import { CreateRoomFacilityDto, UpdateRoomFacilityDto } from './dto/room-facilit
 import { RoomsQueryDto } from './dto/rooms-query.dto';
 import { InvoiceStatus, PricingTerm, RoomStatus, UserRole, UtilityType } from '../../common/enums/app.enums';
 import { computeFacilityGap, type FacilityGapInput } from './room-facility-spec';
-import { evaluateAcCleaning, AC_DEFAULT_KWH_THRESHOLD } from '../auto-ops/ac-cleaning.helper';
+import { evaluateAcCleaning, AC_DEFAULT_KWH_THRESHOLD, AC_HALF_PK_WATTAGE } from '../auto-ops/ac-cleaning.helper';
 
 @Injectable()
 export class RoomsService {
@@ -249,7 +249,7 @@ export class RoomsService {
         code: room.code,
         name: room.name,
         floor: room.floor,
-        acWattage: room.acWattage,
+        acWattage: AC_HALF_PK_WATTAGE,
         acUsageHoursPerDay: room.acUsageHoursPerDay,
         acLastCleanedAt: room.acLastCleanedAt,
         acCleanIntervalDays: room.acCleanIntervalDays,
@@ -318,6 +318,8 @@ export class RoomsService {
     const createData: Prisma.RoomCreateInput = {
       ...dto,
       status: 'AVAILABLE',
+      // Kebijakan properti: semua unit yang ber-AC memakai ½ PK (380 W).
+      acWattage: dto.hasAc ? AC_HALF_PK_WATTAGE : null,
     };
 
     const created = await this.prisma.room.create({ data: createData });
@@ -364,6 +366,9 @@ export class RoomsService {
 
     const updateData: Prisma.RoomUpdateInput = {
       ...dto,
+      // Setiap perubahan kamar sekaligus menormalkan nilai lama agar daftar,
+      // estimasi kWh, dan data API selalu menyebut AC ½ PK.
+      acWattage: (dto.hasAc ?? existing.hasAc) ? AC_HALF_PK_WATTAGE : null,
     };
 
     const updated = await this.prisma.room.update({
