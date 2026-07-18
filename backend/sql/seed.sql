@@ -1889,21 +1889,21 @@ ORDER BY room.code;
 
 -- Tenant: Patrick Wilfred (NIK: 3275020504910019)
 INSERT INTO "Tenant" ("fullName", phone, email, "identityNumber", "isActive", "createdAt", "updatedAt")
-SELECT 'Patrick Wilfred', '-', NULL, '3275020504910019', true, NOW(), NOW()
+SELECT 'Patrick Wilfred', '081289399915', NULL, '3275020504910019', true, NOW(), NOW()
 WHERE NOT EXISTS (
   SELECT 1 FROM "Tenant" WHERE "identityNumber" = '3275020504910019'
 );
 
 -- Tenant: Yufita Hieng (NIK: 6405025701970003)
 INSERT INTO "Tenant" ("fullName", phone, email, "identityNumber", "isActive", "createdAt", "updatedAt")
-SELECT 'Yufita Hieng', '-', NULL, '6405025701970003', true, NOW(), NOW()
+SELECT 'Yufita Hieng', '081330089800', NULL, '6405025701970003', true, NOW(), NOW()
 WHERE NOT EXISTS (
   SELECT 1 FROM "Tenant" WHERE "identityNumber" = '6405025701970003'
 );
 
 -- Tenant: Ade Chandra (NIK: 3173052309720009)
 INSERT INTO "Tenant" ("fullName", phone, email, "identityNumber", "isActive", "createdAt", "updatedAt")
-SELECT 'Ade Chandra', '-', NULL, '3173052309720009', true, NOW(), NOW()
+SELECT 'Ade Chandra', '085716121153', NULL, '3173052309720009', true, NOW(), NOW()
 WHERE NOT EXISTS (
   SELECT 1 FROM "Tenant" WHERE "identityNumber" = '3173052309720009'
 );
@@ -1917,21 +1917,21 @@ WHERE NOT EXISTS (
 
 -- Tenant: Theo Wijaya (NIK: 3571021308860003)
 INSERT INTO "Tenant" ("fullName", phone, email, "identityNumber", "isActive", "createdAt", "updatedAt")
-SELECT 'Theo Wijaya', '-', NULL, '3571021308860003', true, NOW(), NOW()
+SELECT 'Theo Wijaya', '081717007782', NULL, '3571021308860003', true, NOW(), NOW()
 WHERE NOT EXISTS (
   SELECT 1 FROM "Tenant" WHERE "identityNumber" = '3571021308860003'
 );
 
 -- Tenant: Yofi Nurkolifah (NIK: 3519122204030003)
 INSERT INTO "Tenant" ("fullName", phone, email, "identityNumber", "isActive", "createdAt", "updatedAt")
-SELECT 'Yofi Nurkolifah', '-', NULL, '3519122204030003', true, NOW(), NOW()
+SELECT 'Yofi Nurkolifah', '082244297001', NULL, '3519122204030003', true, NOW(), NOW()
 WHERE NOT EXISTS (
   SELECT 1 FROM "Tenant" WHERE "identityNumber" = '3519122204030003'
 );
 
 -- Tenant: Welly Tanoto (NIK: 3578070811730004)
 INSERT INTO "Tenant" ("fullName", phone, email, "identityNumber", "isActive", "createdAt", "updatedAt")
-SELECT 'Welly Tanoto', '-', NULL, '3578070811730004', true, NOW(), NOW()
+SELECT 'Welly Tanoto', '082139058228', NULL, '3578070811730004', true, NOW(), NOW()
 WHERE NOT EXISTS (
   SELECT 1 FROM "Tenant" WHERE "identityNumber" = '3578070811730004'
 );
@@ -1945,35 +1945,35 @@ WHERE NOT EXISTS (
 
 -- Tenant: Lovandra (NIK: 3175070312930003)
 INSERT INTO "Tenant" ("fullName", phone, email, "identityNumber", "isActive", "createdAt", "updatedAt")
-SELECT 'Lovandra', '-', NULL, '3175070312930003', true, NOW(), NOW()
+SELECT 'Lovandra', '08812149261', NULL, '3175070312930003', true, NOW(), NOW()
 WHERE NOT EXISTS (
   SELECT 1 FROM "Tenant" WHERE "identityNumber" = '3175070312930003'
 );
 
 -- Tenant: Gabriel Excelly Pranajaya (NIK: 3511115908030001)
 INSERT INTO "Tenant" ("fullName", phone, email, "identityNumber", "isActive", "createdAt", "updatedAt")
-SELECT 'Gabriel Excelly Pranajaya', '-', NULL, '3511115908030001', true, NOW(), NOW()
+SELECT 'Gabriel Excelly Pranajaya', '082228429498', NULL, '3511115908030001', true, NOW(), NOW()
 WHERE NOT EXISTS (
   SELECT 1 FROM "Tenant" WHERE "identityNumber" = '3511115908030001'
 );
 
 -- Tenant: Destarika Hasan (NIK: 1671065812020008)
 INSERT INTO "Tenant" ("fullName", phone, email, "identityNumber", "isActive", "createdAt", "updatedAt")
-SELECT 'Destarika Hasan', '-', NULL, '1671065812020008', true, NOW(), NOW()
+SELECT 'Destarika Hasan', '085964354198', NULL, '1671065812020008', true, NOW(), NOW()
 WHERE NOT EXISTS (
   SELECT 1 FROM "Tenant" WHERE "identityNumber" = '1671065812020008'
 );
 
 -- Tenant: Dini (NIK: 3275085012800021)
 INSERT INTO "Tenant" ("fullName", phone, email, "identityNumber", "isActive", "createdAt", "updatedAt")
-SELECT 'Dini', '-', NULL, '3275085012800021', true, NOW(), NOW()
+SELECT 'Dini', '089679292921', NULL, '3275085012800021', true, NOW(), NOW()
 WHERE NOT EXISTS (
   SELECT 1 FROM "Tenant" WHERE "identityNumber" = '3275085012800021'
 );
 
 -- Tenant: Meliana Tamara (NIK: 3578125102000002)
 INSERT INTO "Tenant" ("fullName", phone, email, "identityNumber", "isActive", "createdAt", "updatedAt")
-SELECT 'Meliana Tamara', '-', NULL, '3578125102000002', true, NOW(), NOW()
+SELECT 'Meliana Tamara', '085334655052', NULL, '3578125102000002', true, NOW(), NOW()
 WHERE NOT EXISTS (
   SELECT 1 FROM "Tenant" WHERE "identityNumber" = '3578125102000002'
 );
@@ -1987,7 +1987,7 @@ WHERE NOT EXISTS (
 
 -- Tenant: Miko Rakatama Adhi (NIK: 6471051708970006)
 INSERT INTO "Tenant" ("fullName", phone, email, "identityNumber", "isActive", "createdAt", "updatedAt")
-SELECT 'Miko Rakatama Adhi', '-', NULL, '6471051708970006', true, NOW(), NOW()
+SELECT 'Miko Rakatama Adhi', '089682637789', NULL, '6471051708970006', true, NOW(), NOW()
 WHERE NOT EXISTS (
   SELECT 1 FROM "Tenant" WHERE "identityNumber" = '6471051708970006'
 );
@@ -2015,7 +2015,7 @@ WHERE NOT EXISTS (
 
 -- Tenant: Shinta Larista (NIK: 3574036206990003)
 INSERT INTO "Tenant" ("fullName", phone, email, "identityNumber", "isActive", "createdAt", "updatedAt")
-SELECT 'Shinta Larista', '-', NULL, '3574036206990003', true, NOW(), NOW()
+SELECT 'Shinta Larista', '082230380006', NULL, '3574036206990003', true, NOW(), NOW()
 WHERE NOT EXISTS (
   SELECT 1 FROM "Tenant" WHERE "identityNumber" = '3574036206990003'
 );
