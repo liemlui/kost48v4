@@ -1,33 +1,28 @@
-# Patch data 13 tenant yang aman
+# Seed Master Data — Satu File untuk Semua
 
-Gunakan [patch-13-tenant-master-data.sql](../backend/sql/patch-13-tenant-master-data.sql) untuk melengkapi NIK, WhatsApp, email, tarif kontrak, dan deposit 13 tenant. Patch ini dapat dijalankan ulang tanpa menggunakan ID tetap dan tidak menghapus data.
+Gunakan **[seed-master-data.sql](../backend/sql/seed-master-data.sql)** — satu file yang menggabungkan semua patch data awal. Jalankan sekali, semua data masuk.
 
-Sebelum menjalankan, backup database. Jalankan dengan `ON_ERROR_STOP` agar satu konflik membatalkan seluruh transaksi:
+## Isi
 
-```bash
-psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f sql/patch-13-tenant-master-data.sql
-```
+| Bagian | Sumber | Target Tabel |
+|--------|--------|-------------|
+| 13 Tenant Master | NIK, WhatsApp, email, tarif sewa, deposit | `Tenant`, `Stay`, `User` |
+| Update Kontak | WhatsApp lengkap + 2 email baru (Lovandra, Destarika) | `Tenant`, `User` |
+| ~180 Kwitansi | Riwayat pembayaran Jul 2025 – Jul 2026 | `Invoice`, `InvoiceLine`, `InvoicePayment` |
+| ~50 Tenant Historis | Tenant non-aktif dari data kwitansi | `Tenant` (isActive=false) |
+| ~100 Stay Historis | Periode sewa historis | `Stay` (INACTIVE) |
+| ~92 Expense | Pengeluaran 2021-2025 (listrik, wifi, air, renovasi, dll) | `Expense` |
 
-Patch hanya menyelaraskan email akun portal yang sudah terhubung. Ia tidak membuat akun portal baru atau mengubah password. Email kosong pada sumber dibiarkan apa adanya untuk menghindari penghapusan data yang belum terkonfirmasi.
-
-Kolom tanggal masuk yang tersedia hanya berisi angka hari. Karena bulan dan tahun tidak diberikan, patch tidak membuat atau mengubah `checkInDate`; ia hanya memperbarui sewa/deposit apabila stay aktif di kamar yang sesuai sudah ada. Periksa hasil `MISSING_ACTIVE_STAY` atau `CHECK_DATE_NEEDS_REVIEW` dari query akhir, lalu lengkapi tanggal sebenarnya lewat menu Masa Sewa.
-
-Patch memasukkan nomor NIK, bukan foto KTP. Foto KTP tetap perlu diunggah dari detail tenant bila diperlukan.
-
----
-
-## Patch 15 — Update Data Kontak (18 Juli 2026)
-
-Setelah patch-13, jalankan [patch-15-update-tenant-contact.sql](../backend/sql/patch-15-update-tenant-contact.sql) untuk mengupdate nomor WhatsApp lengkap (format `+62 xxx-xxxx-xxxx`) dan 2 email baru yang sebelumnya kosong:
-
-| Tenant | Delta |
-|--------|-------|
-| Lovandra (J) | 🆕 Email `lovandra.fachri103@gmail.com` |
-| Destarika Hasan (L) | 🆕 Email `desterikahasan@gmail.com` |
-| Semua 13 tenant | WhatsApp dari parsial/terpotong → format lengkap dengan dash |
+## Cara Menjalankan
 
 ```bash
-psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f sql/patch-15-update-tenant-contact.sql
+# Backup database dulu
+pg_dump "$DATABASE_URL" > backup_before_seed.sql
+
+# Jalankan satu file untuk semua
+psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f sql/seed-master-data.sql
 ```
 
-Patch-15 hanya UPDATE — tidak membuat record baru, aman dijalankan ulang, dan menyinkronkan email ke akun portal (User) terkait.
+## Idempoten
+
+Aman dijalankan ulang. Semua INSERT pakai `WHERE NOT EXISTS`, semua UPDATE pakai `IS DISTINCT FROM`. Tidak ada DELETE.
