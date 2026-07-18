@@ -1,6 +1,23 @@
 BEGIN;
 
 -- =========================================================
+-- FIX OWNERSHIP — transfer tabel/sequence ke user .env
+-- GANTI 'kost48s1_lurin' jika user berbeda di DATABASE_URL
+-- =========================================================
+DO $$ DECLARE
+  target_user text := 'kost48s1_lurin';
+  r record;
+  seq record;
+BEGIN
+  FOR r IN SELECT tablename FROM pg_tables WHERE schemaname = 'public'
+  LOOP EXECUTE format('ALTER TABLE %I OWNER TO %I', r.tablename, target_user); END LOOP;
+  FOR seq IN SELECT sequencename FROM pg_sequences WHERE schemaname = 'public'
+  LOOP EXECUTE format('ALTER SEQUENCE %I OWNER TO %I', seq.sequencename, target_user); END LOOP;
+  BEGIN EXECUTE format('ALTER DATABASE %I OWNER TO %I', current_database(), target_user);
+  EXCEPTION WHEN OTHERS THEN RAISE NOTICE 'Skip ALTER DATABASE (perlu superuser)'; END;
+END $$;
+
+-- =========================================================
 -- WEBKOST48 V3 - MINIMAL BOOTSTRAP SQL
 -- Jalankan SETELAH Prisma migrate
 -- Tujuan:

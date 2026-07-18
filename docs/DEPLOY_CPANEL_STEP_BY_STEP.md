@@ -132,49 +132,18 @@ node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"
 
 ---
 
-### 5. FIX OWNERSHIP (WAJIB — sebelum setup database)
-
-Jika DB sebelumnya sudah ada (redeploy), tabel mungkin dimiliki user berbeda. Jalankan ini dulu:
-
-```
-cPanel → phpPgAdmin → pilih DB → tab SQL → upload / paste isi file:
-```
-
-**Atau copy-paste SQL ini:**
-
-```sql
-DO $$ DECLARE
-  target_user text := 'kost48s1_lurin';  -- GANTI sesuai user di DATABASE_URL
-  r record;
-  seq record;
-BEGIN
-  FOR r IN SELECT tablename FROM pg_tables WHERE schemaname = 'public'
-  LOOP
-    EXECUTE format('ALTER TABLE %I OWNER TO %I', r.tablename, target_user);
-  END LOOP;
-  FOR seq IN SELECT sequencename FROM pg_sequences WHERE schemaname = 'public'
-  LOOP
-    EXECUTE format('ALTER SEQUENCE %I OWNER TO %I', seq.sequencename, target_user);
-  END LOOP;
-END $$;
-```
-
-> File lengkap: `sql/fix-ownership.sql` (sudah include di TGZ).
-
-**Jika masih gagal — drop & recreate:**
-```bash
-psql "postgresql://postgres:PASS@localhost:5432/postgres" -c "DROP DATABASE IF EXISTS kost48_v3; CREATE DATABASE kost48_v3 OWNER kost48_user;"
-```
-
-### 6. SETUP DATABASE
+### 5. SETUP DATABASE
 
 ```bash
 # 1. Schema via Prisma
 npx prisma db push
 
-# 2. Seed (trigger + function + data master)
+# 2. Seed — fix ownership + trigger + data master (1 file, 1x run)
 psql "postgresql://kost48_user:PASS@localhost:5432/kost48_v3" -f sql/seed.sql
 ```
+
+> ⚠️ **Ganti `kost48s1_lurin`** di baris 5 `seed.sql` jika user PostgreSQL di `DATABASE_URL` berbeda.
+> File `sql/fix-ownership.sql` tetap disertakan sebagai referensi standalone.
 
 ---
 
