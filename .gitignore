@@ -86,6 +86,7 @@ sql/
 !backend/sql/
 backend/sql/*
 !backend/sql/patch-13-tenant-master-data.sql
+!backend/sql/patch-14-master-data-finance.sql
 backend/scripts/*.sql
 backend/scripts/golive-*
 backend/scripts/insert-*
@@ -96,6 +97,9 @@ backend/scripts/m9-*
 
 # Scan dokumen sumber (PDF/Excel terlalu besar untuk git)
 Scan/
+
+# Generated intermediate files
+scripts/_parsed_master_data.json
 
 *storybook.log
 storybook-static

@@ -13,5 +13,8 @@
     "bundle:deploy": "node scripts/bundle-deploy.mjs",
     "bundle:deploy:fast": "node scripts/bundle-deploy.mjs --no-build",
     "token-efficiency-report": "node scripts/token-efficiency-report.mjs"
+  },
+  "devDependencies": {
+    "xlsx": "^0.18.5"
   }
 }
