@@ -17,7 +17,7 @@ BEGIN
       RAISE NOTICE 'Skip table % (not owner)', r.tablename;
     END;
   END LOOP;
-  FOR r IN SELECT sequencename FROM pg_sequences WHERE schemaname = 'public'
+  FOR r IN SELECT c.relname AS sequencename FROM pg_class c JOIN pg_namespace n ON c.relnamespace = n.oid WHERE c.relkind = 'S' AND n.nspname = 'public'
   LOOP
     BEGIN
       EXECUTE format('ALTER SEQUENCE %I OWNER TO %I', r.sequencename, target_user);
