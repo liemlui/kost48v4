@@ -1,10 +1,15 @@
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Alert, Button, Card, Form, Modal, Spinner, Table } from 'react-bootstrap';
+import { Alert, Button, Card, Form, Modal, Table } from 'react-bootstrap';
 import PageHeader from '../../components/common/PageHeader';
+import FeatureErrorBoundary from '../../components/common/FeatureErrorBoundary';
+import EmptyState from '../../components/common/EmptyState';
+import { TableSkeleton } from '../../components/common/SkeletonLoader';
+import { useDocumentTitle } from '../../hooks/useDocumentTitle';
 import { listPendingLossRefunds, processLossRefund, type LossRefund } from '../../api/lossRefunds';
 import { formatRupiah } from '../../utils/formatCurrency';
 import { formatDateOnly } from '../../utils/dateTime';
+import '../../styles/admin-area';
 
 function formatDate(value?: string | null) {
   return formatDateOnly(value);
@@ -12,6 +17,7 @@ function formatDate(value?: string | null) {
 
 export default function LossRefundsPage() {
   const queryClient = useQueryClient();
+  useDocumentTitle('Refund Kalah-Cepat');
   const [target, setTarget] = useState<LossRefund | null>(null);
   const [note, setNote] = useState('');
   const [proofUrl, setProofUrl] = useState('');
@@ -49,7 +55,8 @@ export default function LossRefundsPage() {
   const items = data ?? [];
 
   return (
-    <div className="finance-workspace">
+    <FeatureErrorBoundary>
+      <div className="finance-workspace">
       <PageHeader
         title="Refund Kalah-Cepat"
         description="Tenant yang kalah first-paid-wins padahal sudah transfer — kembalikan dananya lalu tandai selesai."
@@ -62,9 +69,9 @@ export default function LossRefundsPage() {
       <Card>
         <Card.Body>
           {isLoading ? (
-            <div className="text-center py-4"><Spinner animation="border" /></div>
+            <div className="p-4"><TableSkeleton rows={5} cols={6} /></div>
           ) : items.length === 0 ? (
-            <Alert variant="success" className="mb-0">Tidak ada refund yang menunggu diproses. ✅</Alert>
+            <div className="p-4"><EmptyState icon="💰" title="Tidak ada refund" description="Tidak ada refund yang menunggu diproses." /></div>
           ) : (
             <Table responsive hover className="align-middle">
               <thead>
@@ -133,5 +140,6 @@ export default function LossRefundsPage() {
         </Modal.Footer>
       </Modal>
     </div>
+    </FeatureErrorBoundary>
   );
 }

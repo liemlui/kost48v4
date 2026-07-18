@@ -1,7 +1,11 @@
-import { Card, Col, Row, Spinner, Table } from 'react-bootstrap';
+import { Card, Col, Row, Table } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import PageHeader from '../../components/common/PageHeader';
+import FeatureErrorBoundary from '../../components/common/FeatureErrorBoundary';
+import StatusBadge from '../../components/common/StatusBadge';
+import { TableSkeleton } from '../../components/common/SkeletonLoader';
+import { useDocumentTitle } from '../../hooks/useDocumentTitle';
 import ClickableRow from '../../components/common/ClickableRow';
 import { StatusStrip } from '../../components/workspace';
 import { fetchAncillaryRevenueStreams } from '../../api/ancillaryRevenue';
@@ -20,6 +24,7 @@ const financeMenu = [
 
 export default function AncillaryRevenuePage() {
   const navigate = useNavigate();
+  useDocumentTitle('Pendapatan Tambahan');
   const { data, isLoading } = useQuery({
     queryKey: ['ancillary-revenue', 'streams'],
     queryFn: fetchAncillaryRevenueStreams,
@@ -30,7 +35,8 @@ export default function AncillaryRevenuePage() {
   const futureStreams: AncillaryRevenueStream[] = data?.futureStreams ?? [];
 
   return (
-    <div>
+    <FeatureErrorBoundary>
+      <div>
       <PageHeader
         eyebrow="Finance · Revenue Stream"
         title="Pendapatan Tambahan"
@@ -64,10 +70,7 @@ export default function AncillaryRevenuePage() {
       </div>
 
       {isLoading ? (
-        <div className="text-center py-5">
-          <Spinner animation="border" variant="primary" />
-          <p className="mt-2 text-muted">Memuat data pendapatan tambahan...</p>
-        </div>
+        <div className="p-4"><TableSkeleton rows={3} cols={6} /></div>
       ) : (
         <>
           <StatusStrip
@@ -103,7 +106,7 @@ export default function AncillaryRevenuePage() {
                         <ClickableRow key={stream.id} onClick={() => navigate(stream.route)} label={`Buka detail ${stream.name}`}>
                           <td><strong>{stream.icon} {stream.name}</strong></td>
                           <td>{stream.buyer}</td>
-                          <td><span className="status-soft-pill success">{stream.status}</span></td>
+                          <td><StatusBadge status="SUCCESS" customLabel={stream.status} /></td>
                           <td>
                             {stream.stats ? (
                               <span>{stream.stats.thisMonth.count} penjualan · {formatCompactRupiah(stream.stats.thisMonth.revenue)}</span>
@@ -146,5 +149,6 @@ export default function AncillaryRevenuePage() {
         </>
       )}
     </div>
+    </FeatureErrorBoundary>
   );
 }

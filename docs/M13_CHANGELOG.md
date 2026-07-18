@@ -1,5 +1,24 @@
 # KOST48 V5 — M13 Changelog
 
+## 2026-07-18 -- Modernisasi UI/UX Owner Portal (batch 1: 7 halaman)
+
+- Owner portal kini setara Admin/Tenant/Staff: **FeatureErrorBoundary** di 7 halaman owner (OwnerDashboard, Reports, MarketAnalysis, LossRefunds, LoyaltyAdmin, ServiceInterests, IotOverview), **StatusBadge** ganti raw Badge (17+ tempat), **TableSkeleton** ganti Spinner (3 halaman), **EmptyState** ganti inline (5 tempat), error handling secondary queries (LoyaltyAdmin).
+- Build FE ✅ (16.47s) BE ✅
+
+## 2026-07-18 -- Modernisasi UI/UX Owner Portal (batch 2: 33 celah audit mendalam)
+
+- **CRITICAL (5):** FeatureErrorBoundary di AccountingSetupPage (55KB, 20+ query), AssetRegisterPage, SimpleCrudPage, AncillaryRevenuePage + mutation onError di AssetRegisterPage (5 mutation).
+- **HIGH (8):** Badge→StatusBadge di AccountingSetupPage (4), AssetRegisterPage (6), AncillaryRevenuePage (1); Spinner→TableSkeleton di AccountingSetupPage, AssetRegisterPage (2), AncillaryRevenuePage; dead code STATUS_VARIANT dihapus dari LoyaltyAdminPage.
+- **MEDIUM (12):** `useDocumentTitle` ditambahkan ke 9 halaman (OwnerDashboard, Reports, MarketAnalysis, LoyaltyAdmin, IotOverview, LossRefunds, AccountingSetup, AssetRegister, AncillaryRevenue); bug `formatRupiahLocal` di AccountingSetupPage diperbaiki.
+- **LOW (8):** EmptyState fallback di AssetRegisterPage + AccountingSetupPage.
+- Build FE ✅ (15.26s) PWA `ezxWxjYZ12Xj`
+
+## 2026-07-18 -- Modernisasi UI/UX Admin Portal (9 gap)
+
+- Admin portal kini setara Tenant & Staff: **FeatureErrorBoundary** di 3 halaman admin (AdminStaffPerformancePage, AdminSurveysPage, GuestPreferencesPage), **StatusBadge** ganti raw Badge, **PaginationControls** ganti raw Pagination, barrel file **admin-area.ts**, **TableSkeleton** ganti Spinner, **StatCard animasi** di dashboard staff performance, error handling secondary queries (leaderboard/summary/stats), **EmptyState** ganti staff-empty-box inline.
+- CSS tokens: `08-admin.css` direfactor — 87 hardcoded hex colors diganti `var(--*)` dari `00-tokens.css` (gray/blue scale).
+- Build FE ✅ BE ✅
+
 ## 2026-07-17 -- Audit Total IoT + Deploy Readiness + Fix Blocker
 
 - Audit total IoT: kWh Tuya backend+frontend lengkap (HMAC-SHA256, 13 device, polling+cron, dashboard KPI), water flow ESP32 firmware compiled+backend ingest siap (hardware menunggu fisik).

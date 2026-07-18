@@ -27,8 +27,10 @@ import LeaseProgressHero from '../../components/portal/stay/LeaseProgressHero';
 import UtilityInsightCard from '../../components/portal/stay/UtilityInsightCard';
 import StayQuickActions from '../../components/portal/stay/StayQuickActions';
 import StayAnnouncementBanner from '../../components/portal/stay/StayAnnouncementBanner';
+import StayTabs from '../../components/portal/stay/StayTabs';
 import { useAuth } from '../../context/AuthContext';
 import { useTenantPortalStage } from '../../hooks/useTenantPortalStage';
+import { useIotTelemetrySse } from '../../hooks/useIotTelemetrySse';
 import type { PaginatedResponse } from '../../types';
 import type { CheckoutRequest, Invoice, MeterReading, RenewRequest, RoomItem, Stay, Ticket } from '../../types';
 import { getApiErrorMessage } from '../../utils/getApiErrorMessage';
@@ -170,6 +172,9 @@ function ActiveStayContent({ stay }: { stay: Stay }) {
     refetchOnWindowFocus: true,
     retry: false,
   });
+
+  // SSE real-time telemetry updates (invalidates React Query cache)
+  useIotTelemetrySse(Boolean(stay.roomId));
 
   // ── derived data ────────────────────────────────────────────────────────────
 
@@ -474,9 +479,13 @@ function ActiveStayContent({ stay }: { stay: Stay }) {
       {/* ── Pengumuman terbaru ── */}
       <StayAnnouncementBanner />
 
-      {/* ── Dashboard grid 2 kolom ── */}
-      <div className="tenant-stay-dashboard-grid">
-        <div className="tenant-stay-col-left">
+      {/* ── Tab navigasi ── */}
+      <StayTabs>
+        {(activeTab) => (
+          <>
+            <div hidden={activeTab !== 'ringkasan'}>
+              <div className="tenant-stay-dashboard-grid">
+                <div className="tenant-stay-col-left">
           {/* ── Konsumsi listrik & air + estimasi ── */}
           <UtilityInsightCard
             stay={stay}
@@ -822,6 +831,32 @@ function ActiveStayContent({ stay }: { stay: Stay }) {
 
         </div>{/* tenant-stay-col-right */}
       </div>{/* tenant-stay-dashboard-grid */}
+            </div>{/* ringkasan tab */}
+            <div hidden={activeTab !== 'listrik'} className="tenant-stay-col-full">
+              <UtilityInsightCard
+                stay={stay}
+                readings={monthMeterReadings}
+                isLoading={meterReadingsQuery.isLoading}
+                isError={meterReadingsQuery.isError}
+                telemetry={utilityTelemetryQuery.data}
+                isTelemetryLoading={utilityTelemetryQuery.isLoading}
+                isTelemetryError={utilityTelemetryQuery.isError}
+                canRecord={meterWindow.windowOpen}
+                onCatatMeter={() => setShowMeter(true)}
+              />
+            </div>{/* listrik tab */}
+            <div hidden={activeTab !== 'kamar'} className="tenant-stay-col-full">
+              <SatisfactionSurveyCard />
+              <StayHistoryTimeline
+                stay={stay}
+                invoices={invoices}
+                invoiceHrefBase="/portal/invoices"
+                journeySteps={stayJourneySteps}
+              />
+            </div>{/* kamar tab */}
+          </>
+        )}
+      </StayTabs>
 
       <RenewRequestModal show={showRenewModal} onHide={() => setShowRenewModal(false)} onSuccess={() => {
         queryClient.invalidateQueries({ queryKey: ['portal-renew-requests', stay.id] });

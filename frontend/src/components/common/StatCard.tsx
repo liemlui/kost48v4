@@ -1,4 +1,5 @@
 import type { ReactNode, MouseEventHandler } from 'react';
+import AnimatedCounter from './AnimatedCounter';
 
 export type StatCardProps = {
   title: string;
@@ -12,6 +13,8 @@ export type StatCardProps = {
   };
   onClick?: MouseEventHandler<HTMLDivElement>;
   loading?: boolean;
+  /** Animate the value with AnimatedCounter (number values only) */
+  animated?: boolean;
 };
 
 export default function StatCard({
@@ -23,6 +26,7 @@ export default function StatCard({
   trend,
   onClick,
   loading = false,
+  animated = false,
 }: StatCardProps) {
   const trendClassName = trend
     ? trend.value > 0
@@ -57,7 +61,13 @@ export default function StatCard({
             <span className="skeleton-inline skeleton-value" style={{ width: 64, height: 28, display: 'inline-block', borderRadius: 4 }}>&nbsp;</span>
           </div>
         ) : (
-          <div className="stat-card-value">{value}</div>
+          <div className="stat-card-value">
+            {animated && typeof value === 'number' ? (
+              <AnimatedCounter value={value} duration={1000} />
+            ) : (
+              value
+            )}
+          </div>
         )}
         {loading ? null : trendLabel ? <div className={`stat-card-trend ${trendClassName}`}>{trendLabel}</div> : null}
         {loading ? <div className="stat-card-subtitle"><span className="skeleton-inline" style={{ width: 120, height: 14, display: 'inline-block', borderRadius: 4 }}>&nbsp;</span></div> : subtitle ? <div className="stat-card-subtitle">{subtitle}</div> : null}

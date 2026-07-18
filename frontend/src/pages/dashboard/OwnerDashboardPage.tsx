@@ -1,10 +1,14 @@
 // FILE: OwnerDashboardPage.tsx — dashboard owner: KPI, tren pendapatan, okupansi (JALUR UANG)
 import { useMemo, useState, type ReactNode } from 'react';
 import { formatRupiahWithoutSymbol, formatCompactRupiah } from '../../utils/formatCurrency';
-import { Alert, Badge, Button, Card, Col, Container, Form, Row, Spinner } from 'react-bootstrap';
+import { Alert, Button, Card, Col, Container, Form, Row, Spinner } from 'react-bootstrap';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { StatCardSkeleton, TableSkeleton } from '../../components/common/SkeletonLoader';
+import FeatureErrorBoundary from '../../components/common/FeatureErrorBoundary';
+import EmptyState from '../../components/common/EmptyState';
+import StatusBadge from '../../components/common/StatusBadge';
+import { useDocumentTitle } from '../../hooks/useDocumentTitle';
 import {
   Bar,
   BarChart,
@@ -22,6 +26,7 @@ import { cc } from '../../config/chartPalette';
 import { generateBrief, getOwnerAiStatus, type BriefResult } from '../../api/ai';
 import AiAssistButton from '../../components/ai/AiAssistButton';
 import AiResultPanel from '../../components/ai/AiResultPanel';
+import '../../styles/admin-area';
 
 // ═══════════════════════════════════════════════════════════
 //  COMPONENT: OwnerDashboardPage
@@ -213,6 +218,7 @@ const CARD_ERROR_VALUE = 'Gagal';
 export default function OwnerDashboardPage() {
   const navigate = useNavigate();
   const { mode: viewMode, toggle: toggleViewMode } = useOwnerViewMode();
+  useDocumentTitle('Dashboard Owner');
   const [ym, setYm] = useState<{ year: number; month: number }>(currentYearMonth());
   const [trendMonths, setTrendMonths] = useState<number>(6);
   const [chartMode, setChartMode] = useState<TrendChartMode>('line');
@@ -268,7 +274,8 @@ export default function OwnerDashboardPage() {
   };
 
   return (
-    <Container fluid className={`owner-dashboard owner-view-${viewMode} px-2 py-3`}>
+    <FeatureErrorBoundary>
+      <Container fluid className={`owner-dashboard owner-view-${viewMode} px-2 py-3`}>
       <section className="owner-workspace-head mb-3">
         <div>
           <span className="owner-section-kicker">Kokpit bisnis</span>
@@ -369,13 +376,11 @@ export default function OwnerDashboardPage() {
                     <span className="owner-section-kicker">Prioritas</span>
                     <h2>Butuh perhatian</h2>
                   </div>
-                  <Badge bg={data.signals.length === 0 && extraSignals.length === 0 ? 'success' : 'warning'}>
-                    {data.signals.length === 0 && extraSignals.length === 0 ? 'Aman' : `${data.signals.length + extraSignals.length} sinyal`}
-                  </Badge>
+                  <StatusBadge status={data.signals.length === 0 && extraSignals.length === 0 ? 'SUCCESS' : 'WARNING'} customLabel={data.signals.length === 0 && extraSignals.length === 0 ? 'Aman' : `${data.signals.length + extraSignals.length} sinyal`} />
                 </div>
                 <div className="owner-panel-body">
                   {data.signals.length === 0 && extraSignals.length === 0 ? (
-                    <p className="owner-empty-state mb-0">Tidak ada tindak lanjut mendesak pada periode ini.</p>
+                    <div className="p-4"><EmptyState icon="✅" title="Semua aman" description="Tidak ada tindak lanjut mendesak pada periode ini." /></div>
                   ) : (
                     <div className="owner-signal-list">
                       {data.signals.map((signal, index) => (
@@ -503,7 +508,7 @@ export default function OwnerDashboardPage() {
             </div>
             <div className="owner-panel-body">
               {trendData.length === 0 ? (
-                <div className="owner-empty-state text-center py-4">Data tren tidak tersedia.</div>
+                <div className="p-4"><EmptyState icon="📈" title="Belum ada data tren" description="Data tren tidak tersedia untuk periode ini." /></div>
               ) : (
                 <div className="owner-chart-stage">
                   <TrendChart data={trendData} mode={chartMode} showBestFit={showBestFit} />
@@ -521,5 +526,6 @@ export default function OwnerDashboardPage() {
         </>
       ) : null}
     </Container>
+    </FeatureErrorBoundary>
   );
 }

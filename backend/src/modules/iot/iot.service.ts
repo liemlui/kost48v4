@@ -7,6 +7,7 @@ import { CreateIotDeviceDto, IotDeviceQueryDto, IotTelemetryQueryDto, UpdateIotD
 import { DeviceCredentialService } from './device-credential.service';
 import { TuyaClientService } from './tuya/tuya-client.service';
 import { getTuyaStatusDefinitions, normalizeTuyaStatus, tuyaObservedAt } from './tuya/tuya-normalizer';
+import { IotSseService } from './iot-sse.service';
 import { createHash } from 'crypto';
 
 const deviceInclude = {
@@ -25,6 +26,7 @@ export class IotService {
     private readonly audit: AuditLogService,
     private readonly tuya: TuyaClientService,
     private readonly credentials: DeviceCredentialService,
+    private readonly sse: IotSseService,
   ) {}
 
   async overview(query: IotDeviceQueryDto = {}) {
@@ -48,6 +50,88 @@ export class IotService {
       },
       devices,
     };
+  }
+
+  /**
+   * Lightweight query: get the tenant's active stay roomId.
+   * Used by SSE controller to subscribe to room-specific events.
+   */
+  async getTenantActiveRoomId(tenantId: number): Promise<number | null> {
+    const stay = await this.prisma.stay.findFirst({
+      where: { tenantId, status: 'ACTIVE' as any },
+      orderBy: { id: 'desc' },
+      select: { roomId: true },
+    });
+    return stay?.roomId ?? null;
+  }
+
+  // In-memory rate limit map for tenant refresh (prevents Tuya API abuse)
+  private readonly tenantRefreshCooldown = new Map<number, number>();
+
+  /**
+   * Tenant-triggered Tuya sync for their own room.
+   * Rate-limited: 1 request per 2 minutes per tenant.
+   */
+  async tenantRefreshMeter(actor: CurrentUserPayload) {
+    if (!actor.tenantId) {
+      throw new ForbiddenException('Akun tenant belum terhubung ke data tenant');
+    }
+
+    // Rate limit check
+    const lastRefresh = this.tenantRefreshCooldown.get(actor.tenantId);
+    const now = Date.now();
+    if (lastRefresh && (now - lastRefresh) < 120_000) {
+      const remaining = Math.ceil((120_000 - (now - lastRefresh)) / 1000);
+      throw new ConflictException(
+        `Sinkronisasi meter baru bisa dilakukan dalam ${remaining} detik lagi. ` +
+        `Maksimal 1× per 2 menit untuk menghindari pembatasan Tuya API.`
+      );
+    }
+    this.tenantRefreshCooldown.set(actor.tenantId, now);
+
+    const stay = await this.prisma.stay.findFirst({
+      where: { tenantId: actor.tenantId, status: 'ACTIVE' as any },
+      orderBy: { id: 'desc' },
+      select: { roomId: true },
+    });
+    if (!stay) throw new NotFoundException('Stay aktif tidak ditemukan');
+
+    // Find Tuya devices for this room
+    const devices = await this.prisma.iotDevice.findMany({
+      where: {
+        roomId: stay.roomId,
+        enabled: true,
+        provider: IotProvider.TUYA,
+        deviceType: { in: [IotDeviceType.ELECTRICITY_METER, IotDeviceType.WATER_FLOW_METER] },
+      },
+    });
+
+    if (devices.length === 0) {
+      return { synced: 0, message: 'Tidak ada perangkat Tuya untuk kamar ini' };
+    }
+
+    // Sync each device
+    let succeeded = 0;
+    for (const device of devices) {
+      try {
+        await this.syncTuyaDevice(device.id, actor);
+        succeeded++;
+      } catch {
+        // Skip failed devices
+      }
+    }
+
+    // Notify SSE subscribers
+    if (succeeded > 0 && stay.roomId) {
+      this.sse.emit(stay.roomId, {
+        type: 'MANUAL_REFRESH',
+        roomId: stay.roomId,
+        timestamp: new Date().toISOString(),
+        message: `${succeeded} perangkat berhasil disinkronkan (manual refresh)`,
+      });
+    }
+
+    return { synced: succeeded, total: devices.length };
   }
 
   /**

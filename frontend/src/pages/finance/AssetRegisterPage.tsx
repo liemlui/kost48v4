@@ -1,8 +1,13 @@
 // FILE: AssetRegisterPage.tsx — daftar aset tetap + penyusutan (JALUR UANG)
 import { FormEvent, useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Alert, Badge, Button, Card, Col, Form, Modal, Row, Spinner, Table } from 'react-bootstrap';
+import { Alert, Button, Card, Col, Form, Modal, Row, Table } from 'react-bootstrap';
 import PageHeader from '../../components/common/PageHeader';
+import FeatureErrorBoundary from '../../components/common/FeatureErrorBoundary';
+import EmptyState from '../../components/common/EmptyState';
+import StatusBadge from '../../components/common/StatusBadge';
+import { TableSkeleton } from '../../components/common/SkeletonLoader';
+import { useDocumentTitle } from '../../hooks/useDocumentTitle';
 import CurrencyInput from '../../components/common/CurrencyInput';
 import {
   createFixedAsset,
@@ -108,6 +113,8 @@ const initialForm = {
 
 export default function AssetRegisterPage() {
   const queryClient = useQueryClient();
+  const [error, setError] = useState<string | null>(null);
+  useDocumentTitle('Aset Tetap');
   const [form, setForm] = useState(initialForm);
   const [showCreateAsset, setShowCreateAsset] = useState(false);
   const [editingAsset, setEditingAsset] = useState<FixedAsset | null>(null);
@@ -137,6 +144,7 @@ export default function AssetRegisterPage() {
       setShowCreateAsset(false);
       queryClient.invalidateQueries({ queryKey: ['assets'] });
     },
+    onError: (err) => setError(getApiErrorMessage(err, 'Gagal membuat aset')),
   });
 
   const updateMutation = useMutation({
@@ -147,6 +155,7 @@ export default function AssetRegisterPage() {
       setShowCreateAsset(false);
       queryClient.invalidateQueries({ queryKey: ['assets'] });
     },
+    onError: (err) => setError(getApiErrorMessage(err, 'Gagal memperbarui aset')),
   });
 
   const runMutation = useMutation({
@@ -155,10 +164,12 @@ export default function AssetRegisterPage() {
       queryClient.invalidateQueries({ queryKey: ['assets'] });
       queryClient.invalidateQueries({ queryKey: ['accounting'] });
     },
+    onError: (err) => setError(getApiErrorMessage(err, 'Gagal posting depresiasi')),
   });
 
   const alignmentPreviewMutation = useMutation({
     mutationFn: ({ assetId, payload }: { assetId: number; payload: AssetLedgerAlignmentPayload }) => previewAssetLedgerAlignment(assetId, payload),
+    onError: (err) => setError(getApiErrorMessage(err, 'Preview alignment gagal')),
   });
 
   const alignmentPostMutation = useMutation({
@@ -169,6 +180,7 @@ export default function AssetRegisterPage() {
       setAlignmentAsset(null);
       alignmentPreviewMutation.reset();
     },
+    onError: (err) => setError(getApiErrorMessage(err, 'Post alignment gagal')),
   });
 
   const assets = assetsQuery.data?.items ?? [];
@@ -267,13 +279,14 @@ export default function AssetRegisterPage() {
   }
 
   return (
-    <div className="finance-workspace">
+    <FeatureErrorBoundary>
+      <div className="finance-workspace">
   <PageHeader
     title="Daftar Aset Tetap"
     description="Daftar aset tetap, depresiasi, dan penyesuaian ledger — pastikan aset tercatat dengan benar di Neraca."
     secondaryAction={(
       <div className="d-flex flex-wrap gap-2 align-items-center">
-        <Badge bg="primary">Fixed Asset</Badge>
+        <StatusBadge status="INFO" customLabel="Fixed Asset" />
         <Button type="button" onClick={openCreateAssetModal}>Tambah Aset Baru</Button>
       </div>
     )}
@@ -309,11 +322,11 @@ export default function AssetRegisterPage() {
               <div className="d-flex justify-content-between align-items-start mb-3 gap-2">
                 <div><div className="small text-uppercase text-muted fw-semibold mb-1">Register</div><h3 className="h5 mb-1">Daftar aset</h3><p className="text-muted mb-0">Gunakan alignment hanya setelah owner yakin treatment ledger-nya benar.</p></div>
                 <div className="d-flex flex-wrap gap-2 align-items-center justify-content-end">
-                  <Badge bg={assets.length ? 'success' : 'secondary'}>{assets.length} aset</Badge>
+                  <StatusBadge status={assets.length ? 'SUCCESS' : 'SECONDARY'} customLabel={`${assets.length} aset`} />
                   <Button type="button" size="sm" onClick={openCreateAssetModal}>Tambah Aset Baru</Button>
                 </div>
               </div>
-              {assetsQuery.isLoading ? <div className="text-muted"><Spinner animation="border" size="sm" className="me-2" /> Memuat aset...</div> : assets.length ? (
+              {assetsQuery.isLoading ? <div className="p-3"><TableSkeleton rows={3} cols={6} /></div> : assets.length ? (
                 <div className="table-responsive">
                   <Table hover size="sm" className="align-middle mb-0">
                     <thead><tr><th>Aset</th><th>Cost</th><th>Akum.</th><th>Nilai buku</th><th>Alignment</th><th>Aksi</th></tr></thead>
@@ -330,7 +343,7 @@ export default function AssetRegisterPage() {
                         <td>{formatRupiah(asset.acquisitionCostRupiah)}</td>
                         <td>{formatRupiah(asset.accumulatedDepreciationRupiah)}</td>
                         <td>{formatRupiah(asset.bookValueRupiah)}</td>
-                        <td><Badge bg={alignmentBadge(status)} text={alignmentBadge(status) === 'warning' || alignmentBadge(status) === 'light' ? 'dark' : undefined} title={ALIGNMENT_STATUS_TOOLTIP[status] ?? 'Status alignment aset terhadap ledger Fixed Assets.'}>{alignmentStatusLabels[status] ?? status}</Badge></td>
+                        <td><StatusBadge status={status === 'ALIGNED' ? 'SUCCESS' : status === 'NEEDS_REVIEW' || status === 'PREVIEWED' ? 'WARNING' : 'SECONDARY'} customLabel={alignmentStatusLabels[status] ?? status} /></td>
                         <td>
                           <div className="d-flex gap-2">
                             <Button size="sm" variant="outline-secondary" onClick={() => openEditAssetModal(asset)}>Edit</Button>
@@ -354,8 +367,8 @@ export default function AssetRegisterPage() {
             <div><div className="small text-uppercase text-muted fw-semibold mb-1">Depresiasi Bulanan</div><h3 className="h5 mb-1">Preview &amp; posting depresiasi</h3><p className="text-muted mb-0">Posting beban penyusutan bulanan ke jurnal akuntansi berdasarkan aset yang aktif dan eligible.</p></div>
             <div className="d-flex gap-2 align-items-end"><Form.Group><Form.Label className="small mb-1">Tahun</Form.Label><Form.Control type="number" value={runPeriod.year} onChange={(e) => setRunPeriod((prev) => ({ ...prev, year: Number(e.target.value) }))} style={{ width: 110 }} /></Form.Group><Form.Group><Form.Label className="small mb-1">Bulan</Form.Label><Form.Control type="number" min={1} max={12} value={runPeriod.month} onChange={(e) => setRunPeriod((prev) => ({ ...prev, month: Number(e.target.value) }))} style={{ width: 90 }} /></Form.Group><Button variant="outline-primary" disabled={!canRunDepreciation || runMutation.isPending} onClick={() => runMutation.mutate({ ...runPeriod, notes: 'Monthly depreciation run' })}>{runMutation.isPending ? 'Memposting...' : 'Posting Depresiasi'}</Button></div>
           </div>
-          {previewQuery.isLoading ? <div className="text-muted"><Spinner animation="border" size="sm" className="me-2" /> Menghitung preview...</div> : <>
-            <div className="d-flex flex-wrap gap-2 mb-3"><Badge bg={preview?.alreadyPosted ? 'secondary' : 'primary'}>{preview?.alreadyPosted ? 'Sudah diposting' : 'Belum diposting'}</Badge><Badge bg="light" text="dark" className="border">Eligible: {preview?.eligibleAssetCount ?? 0}</Badge><Badge bg="light" text="dark" className="border">Total: {formatRupiah(preview?.totalDepreciationRupiah)}</Badge></div>
+          {previewQuery.isLoading ? <div className="p-3"><TableSkeleton rows={3} cols={4} /></div> : <>
+            <div className="d-flex flex-wrap gap-2 mb-3"><StatusBadge status={preview?.alreadyPosted ? 'SECONDARY' : 'INFO'} customLabel={preview?.alreadyPosted ? 'Sudah diposting' : 'Belum diposting'} /><StatusBadge status="SECONDARY" customLabel={`Eligible: ${preview?.eligibleAssetCount ?? 0}`} /><StatusBadge status="SECONDARY" customLabel={`Total: ${formatRupiah(preview?.totalDepreciationRupiah)}`} /></div>
             {runMutation.isError ? <Alert variant="danger">{getApiErrorMessage(runMutation.error, 'Gagal post depresiasi')}</Alert> : null}
             {runMutation.isSuccess ? <Alert variant="success">Depresiasi berhasil diposting dan JournalEntry sudah dibuat.</Alert> : null}
             {preview?.eligibleLines.length ? <div className="table-responsive"><Table hover size="sm" className="align-middle mb-0"><thead><tr><th>Aset</th><th>Beban bulan ini</th><th>Akum. setelah</th><th>Nilai buku setelah</th></tr></thead><tbody>{preview.eligibleLines.map((line) => <tr key={line.fixedAssetId}><td><div className="fw-semibold">{line.asset.assetCode} · {line.asset.name}</div><small className="text-muted">{line.asset.usefulLifeMonths} bulan</small></td><td>{formatRupiah(line.depreciationAmountRupiah)}</td><td>{formatRupiah(line.accumulatedAfterRupiah)}</td><td>{formatRupiah(line.bookValueAfterRupiah)}</td></tr>)}</tbody></Table></div> : <Alert variant="light" className="border mb-0">Belum ada aset eligible. Aktifkan depreciationEnabled pada aset yang aman untuk disusutkan.</Alert>}
@@ -492,11 +505,12 @@ export default function AssetRegisterPage() {
             <Form.Group className="mb-3"><Form.Label>Catatan</Form.Label><Form.Control as="textarea" rows={2} value={alignmentForm.notes} onChange={(e) => setAlignmentForm((prev) => ({ ...prev, notes: e.target.value }))} /></Form.Group>
             {alignmentPreviewMutation.isError ? <Alert variant="danger">{getApiErrorMessage(alignmentPreviewMutation.error, 'Preview gagal')}</Alert> : null}
             {alignmentPostMutation.isError ? <Alert variant="danger">{getApiErrorMessage(alignmentPostMutation.error, 'Post alignment gagal')}</Alert> : null}
-            {alignmentPreviewMutation.data ? <Card className="border-0 bg-light"><Card.Body><div className="small text-uppercase text-muted fw-semibold mb-2">Preview Journal</div>{alignmentPreviewMutation.data.journalPreview ? <><div>Debit {alignmentPreviewMutation.data.journalPreview.debit.accountCode} {alignmentPreviewMutation.data.journalPreview.debit.accountName}: <strong>{formatRupiah(alignmentPreviewMutation.data.journalPreview.debit.amountRupiah)}</strong></div><div>Credit {alignmentPreviewMutation.data.journalPreview.credit.accountCode} {alignmentPreviewMutation.data.journalPreview.credit.accountName}: <strong>{formatRupiah(alignmentPreviewMutation.data.journalPreview.credit.amountRupiah)}</strong></div><Badge bg="success" className="mt-2">Seimbang</Badge></> : <div className="text-muted">Metode ini tidak membuat journal.</div>}</Card.Body></Card> : null}
+            {alignmentPreviewMutation.data ? <Card className="border-0 bg-light"><Card.Body><div className="small text-uppercase text-muted fw-semibold mb-2">Preview Journal</div>{alignmentPreviewMutation.data?.journalPreview ? <><div>Debit {alignmentPreviewMutation.data.journalPreview.debit.accountCode} {alignmentPreviewMutation.data.journalPreview.debit.accountName}: <strong>{formatRupiah(alignmentPreviewMutation.data.journalPreview.debit.amountRupiah)}</strong></div><div>Credit {alignmentPreviewMutation.data.journalPreview.credit.accountCode} {alignmentPreviewMutation.data.journalPreview.credit.accountName}: <strong>{formatRupiah(alignmentPreviewMutation.data.journalPreview.credit.amountRupiah)}</strong></div><StatusBadge status="SUCCESS" customLabel="Seimbang" /></> : <div className="text-muted">Metode ini tidak membuat journal.</div>}</Card.Body></Card> : null}
           </> : null}
         </Modal.Body>
         <Modal.Footer><Button variant="outline-secondary" onClick={() => setAlignmentAsset(null)}>Tutup</Button><Button variant="outline-primary" onClick={previewAlignment} disabled={alignmentPreviewMutation.isPending}>{alignmentPreviewMutation.isPending ? 'Memuat preview...' : 'Preview Jurnal'}</Button><Button variant="primary" onClick={postAlignment} disabled={alignmentPostMutation.isPending}>{alignmentPostMutation.isPending ? 'Memposting...' : 'Posting Penyesuaian'}</Button></Modal.Footer>
       </Modal>
     </div>
+    </FeatureErrorBoundary>
   );
 }

@@ -2,6 +2,9 @@ import { useRef, useState } from 'react';
 import { Alert, Badge, Button, Card, Col, Form, Row, Spinner } from 'react-bootstrap';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import PageHeader from '../../components/common/PageHeader';
+import FeatureErrorBoundary from '../../components/common/FeatureErrorBoundary';
+import StatusBadge from '../../components/common/StatusBadge';
+import { useDocumentTitle } from '../../hooks/useDocumentTitle';
 import SegmentedTabs from '../../components/common/SegmentedTabs';
 import EmptyState from '../../components/common/EmptyState';
 import CacClvDashboard from './CacClvDashboard';
@@ -61,6 +64,7 @@ function ResultView({ result }: { result: Record<string, unknown> }) {
 
 export default function MarketAnalysisPage() {
   const queryClient = useQueryClient();
+  useDocumentTitle('Analisa Pasar');
   // view: 'chat' = SWOT/PESTLE/Kompetitor + saved; 'cacclv' = CAC/CLV dashboard
   const [view, setView] = useState<'chat' | 'cacclv' | 'demografi'>('chat');
   const [kind, setKind] = useState<AnalysisKind>('SWOT');
@@ -121,7 +125,8 @@ export default function MarketAnalysisPage() {
   const saved = savedQuery.data ?? [];
 
   return (
-    <div className="container py-4">
+    <FeatureErrorBoundary>
+      <div className="container py-4">
       <PageHeader eyebrow="Marketing & Strategi" title="Analisa Pasar & CAC/CLV" description="Ditemani analis AI DeepSeek: wawancara SWOT/PESTLE/Kompetitor, atau dashboard CAC/CLV berbasis data nyata." />
       {/* R-30: chip penanda halaman eksklusif owner */}
       <div className="mb-3">
@@ -253,5 +258,6 @@ export default function MarketAnalysisPage() {
         </Row>
       )}
     </div>
+    </FeatureErrorBoundary>
   );
 }

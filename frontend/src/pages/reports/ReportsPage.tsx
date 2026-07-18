@@ -1,6 +1,6 @@
 import PageHeader from '../../components/common/PageHeader';
 import { lazy, Suspense, useMemo, useState } from 'react';
-import { Alert, Badge, Button, Card, Col, Container, Form, Row, Spinner, Table } from 'react-bootstrap';
+import { Alert, Button, Card, Col, Container, Form, Row, Spinner, Table } from 'react-bootstrap';
 import { useSearchParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { Bar, BarChart, CartesianGrid, Cell, LabelList, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
@@ -25,6 +25,9 @@ import {
 } from '../../api/reports';
 import { fetchCashflowStatement } from '../../api/accounting';
 import { StatCardSkeleton, TableSkeleton } from '../../components/common/SkeletonLoader';
+import FeatureErrorBoundary from '../../components/common/FeatureErrorBoundary';
+import StatusBadge from '../../components/common/StatusBadge';
+import { useDocumentTitle } from '../../hooks/useDocumentTitle';
 import { createBusinessNarrative } from '../../api/ai';
 import AiAssistButton from '../../components/ai/AiAssistButton';
 import DonutGauge from '../../components/charts/DonutGauge';
@@ -43,6 +46,7 @@ const UnlockedFormalReports = lazy(() => import('./UnlockedFormalReports'));
 
 export default function ReportsPage() {
   const [searchParams, setSearchParams] = useSearchParams();
+  useDocumentTitle('Laporan Bisnis');
   const [ym, setYm] = useState<{ year: number; month: number }>(currentYearMonth());
   const [activeTab, setActiveTab] = useState<ReportTab>(() => normalizeReportTab(searchParams.get('tab')));
   const heatmapRange = useMemo(occupancyHeatmapRange, []);
@@ -99,7 +103,8 @@ export default function ReportsPage() {
   };
 
   return (
-    <div>
+    <FeatureErrorBoundary>
+      <div>
       <PageHeader
         eyebrow="Laporan Bisnis"
         title="Keuangan dan Operasional"
@@ -187,7 +192,7 @@ export default function ReportsPage() {
               <Card className="report-panel h-100">
                 <Card.Header>
                   <span>Pergerakan Pendapatan</span>
-                  <Badge bg="primary">{monthLabel(ym)}</Badge>
+                  <StatusBadge status="INFO" customLabel={monthLabel(ym)} />
                 </Card.Header>
                 <Card.Body>
                   <RevenueRadar monthlyIncome={monthlyIncome.data!} cashFlow={cashFlow.data!} profitLoss={profitLoss.data!} />
@@ -198,7 +203,7 @@ export default function ReportsPage() {
               <Card className="report-panel h-100">
                 <Card.Header>
                   <span>Pergerakan Pengeluaran</span>
-                  <Badge bg="warning" text="dark">{monthLabel(ym)}</Badge>
+                  <StatusBadge status="WARNING" customLabel={monthLabel(ym)} />
                 </Card.Header>
                 <Card.Body>
                   <ExpenseMovement expenseSummary={expenseSummary.data!} />
@@ -218,7 +223,7 @@ export default function ReportsPage() {
             </Col>
             <Col xl={8} lg={6}>
               <Card className="report-panel h-100">
-                <Card.Header><span>Umur Tunggakan</span><Badge bg="danger">Risiko</Badge></Card.Header>
+                <Card.Header><span>Umur Tunggakan</span><StatusBadge status="DANGER" customLabel="Risiko" /></Card.Header>
                 <Card.Body>
                   <OverdueHeatmap data={overdueAging.data!} />
                 </Card.Body>
@@ -232,13 +237,13 @@ export default function ReportsPage() {
             <Row className="g-3">
               <Col xl={7}>
                 <Card className="report-panel h-100">
-                  <Card.Header><span>Matriks Kesehatan Keuangan</span><Badge bg={overall?.color ?? 'secondary'} title={overall?.label === 'Bermasalah' ? 'Status bermasalah: terdapat tunggakan signifikan, arus kas negatif, atau rasio keuangan di bawah ambang batas.' : overall?.label === 'Perlu Dipantau' ? 'Ada satu atau lebih indikator keuangan yang perlu diawasi — belum kritis tapi butuh perhatian.' : undefined}>{overall?.label}</Badge></Card.Header>
+                  <Card.Header><span>Matriks Kesehatan Keuangan</span><StatusBadge status={overall?.color === 'green' ? 'SUCCESS' : overall?.color === 'orange' ? 'WARNING' : 'DANGER'} customLabel={overall?.label} /></Card.Header>
                   <Card.Body className="p-0"><OwnerHealthMatrix financialRatios={financialRatios.data!} profitLoss={profitLoss.data!} occupancy={occupancy.data!} cashFlow={cashFlow.data!} /></Card.Body>
                 </Card>
               </Col>
               <Col xl={5}>
                 <Card className="report-panel h-100">
-                  <Card.Header><span>Sinyal Utama</span><Badge bg="info">Siap AI</Badge></Card.Header>
+                  <Card.Header><span>Sinyal Utama</span><StatusBadge status="INFO" customLabel="Siap AI" /></Card.Header>
                   <Card.Body>
                     <InsightStack monthlyIncome={monthlyIncome.data!} cashFlow={cashFlow.data!} overdueAging={overdueAging.data!} occupancy={occupancy.data!} financialRatios={financialRatios.data!} />
                     <div className="mt-3">
@@ -312,5 +317,6 @@ export default function ReportsPage() {
       )}
     </Container>
     </div>
+    </FeatureErrorBoundary>
   );
 }

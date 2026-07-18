@@ -1,5 +1,6 @@
 import DonutGauge from '../../charts/DonutGauge';
 import { OKABE_ITO } from '../../charts/chartPalette';
+import AnimatedCounter from '../../common/AnimatedCounter';
 import { getLeaseProgress, formatTenure, formatDateOnly } from '../../../utils/dateTime';
 import type { Stay } from '../../../types';
 
@@ -62,7 +63,9 @@ export default function LeaseProgressHero({ stay }: { stay: Stay }) {
       />
       <div className="tenant-lease-hero-stats">
         <div className="tenant-lease-hero-pct">
-          {progress.hasRange ? `${progress.percentElapsed}% terlewati` : 'Periode belum ditentukan'}
+          {progress.hasRange ? (
+            <><AnimatedCounter value={progress.percentElapsed} duration={1000} formatter={(v) => `${Math.round(v)}%`} /> terlewati</>
+          ) : 'Periode belum ditentukan'}
         </div>
         <ul className="tenant-lease-hero-list">
           <li><span>Periode</span><strong>{periodeLabel}</strong></li>

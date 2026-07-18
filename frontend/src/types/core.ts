@@ -303,6 +303,8 @@ export type MeterReading = {
   readingAt: string;
   readingValue: number | string;
   note?: string | null;
+  usageElectricityKwh?: number | null;
+  usageWaterM3?: number | null;
 };
 
 export type InventoryItemStatus = 'GOOD' | 'LOW_STOCK' | 'OUT_OF_STOCK' | 'DAMAGED' | 'MISSING' | 'NEEDS_REPAIR' | 'PENDING_CHECK' | string;

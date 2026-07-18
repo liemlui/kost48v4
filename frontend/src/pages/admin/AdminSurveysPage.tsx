@@ -1,10 +1,14 @@
 import { useMemo, useState } from 'react';
-import { Alert, Badge, Card, Form, Spinner, Table } from 'react-bootstrap';
+import { Alert, Card, Form, Table } from 'react-bootstrap';
 import { useQuery } from '@tanstack/react-query';
 import PageHeader from '../../components/common/PageHeader';
+import FeatureErrorBoundary from '../../components/common/FeatureErrorBoundary';
 import EmptyState from '../../components/common/EmptyState';
+import StatusBadge from '../../components/common/StatusBadge';
+import { TableSkeleton } from '../../components/common/SkeletonLoader';
 import { getAllSurveys, getSurveySummary, type SurveyItem, type SurveySummary } from '../../api/surveys';
 import { formatDateOnly } from '../../utils/dateTime';
+import '../../styles/admin-area';
 
 function Stars({ value }: { value: number }) {
   return (
@@ -134,18 +138,20 @@ export default function AdminSurveysPage() {
   const notRecommendCount = items.filter((s) => s.wouldRecommend === false).length;
 
   return (
-    <div className="container py-4">
-      <PageHeader
-        eyebrow="Ulasan & Kepuasan"
-        title="Survei Kepuasan Penghuni"
-        description={`${items.length} survei terkumpul · 👍 ${recommendCount} rekomendasi · 👎 ${notRecommendCount} belum merekomendasikan`}
-      />
+    <FeatureErrorBoundary>
+      <div className="container py-4">
+        <PageHeader
+          eyebrow="Ulasan & Kepuasan"
+          title="Survei Kepuasan Penghuni"
+          description={`${items.length} survei terkumpul · 👍 ${recommendCount} rekomendasi · 👎 ${notRecommendCount} belum merekomendasikan`}
+        />
 
-      {listQuery.isLoading ? <div className="py-5 text-center"><Spinner animation="border" /></div> : null}
-      {listQuery.isError ? <Alert variant="danger">Gagal memuat data survei.</Alert> : null}
+        {listQuery.isLoading ? <TableSkeleton rows={5} cols={6} /> : null}
+        {listQuery.isError ? <Alert variant="danger">Gagal memuat data survei.</Alert> : null}
 
-      {/* Ringkasan agregat */}
-      {summaryQuery.data ? <SummaryPanel summary={summaryQuery.data} /> : null}
+        {/* Ringkasan agregat */}
+        {summaryQuery.isError ? <Alert variant="warning">Ringkasan survei belum bisa dimuat.</Alert> : null}
+        {summaryQuery.data ? <SummaryPanel summary={summaryQuery.data} /> : null}
 
       {/* Komentar terbaru */}
       <RecentComments summary={summaryQuery.data} />
@@ -198,7 +204,7 @@ export default function AdminSurveysPage() {
                       {!s.cleanliness && !s.staffService && !s.facility && !s.valueForMoney ? <span className="text-muted">—</span> : null}
                     </td>
                     <td>
-                      {s.wouldRecommend === true ? <Badge bg="success">👍 Ya</Badge> : s.wouldRecommend === false ? <Badge bg="secondary">👎 Belum</Badge> : <span className="text-muted">—</span>}
+                      {s.wouldRecommend === true ? <StatusBadge status="SUCCESS" customLabel="👍 Ya" /> : s.wouldRecommend === false ? <StatusBadge status="SECONDARY" customLabel="👎 Belum" /> : <span className="text-muted">—</span>}
                     </td>
                     <td className="small e3-maxw-320">
                       {s.comment ? <span>{s.comment.length > 120 ? `${s.comment.slice(0, 120)}…` : s.comment}</span> : <span className="text-muted">—</span>}
@@ -211,6 +217,7 @@ export default function AdminSurveysPage() {
           )}
         </Card.Body>
       </Card>
-    </div>
+      </div>
+    </FeatureErrorBoundary>
   );
 }

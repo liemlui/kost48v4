@@ -3,7 +3,6 @@ import { useEffect, useMemo, useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { Alert, Badge, Button, Card, Col, Row, Spinner, Table } from 'react-bootstrap';
-import { Bar, BarChart, CartesianGrid, Cell, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import DonutGauge from '../../components/charts/DonutGauge';
 import PageHeader from '../../components/common/PageHeader';
 import { listResource } from '../../api/resources';
@@ -78,30 +77,30 @@ function TenantInvoiceSnapshot({ allItems, paidCount, unpaidCount, overdueCount 
           <Card.Body>
             <div className="panel-title mb-1">Tagihan per Status</div>
             <div className="panel-subtitle mb-2">Jumlah tagihan berdasarkan kondisi bayar</div>
-            {/* R-18: fallback teks di mobile (chart recharts sering kosong di xs karena zero-width container) */}
-            <div className="d-sm-none mb-2">
-              <div className="d-flex flex-wrap gap-2">
-                {statusBars.map((d) => (
-                  <span key={d.label} className="badge fs-6 px-3 py-2" style={{ background: d.color, color: '#fff' }}>
-                    {d.label}: <strong>{d.value}</strong>
-                  </span>
-                ))}
-              </div>
+            {/* Mini bar chart — works at all widths (no ResponsiveContainer zero-width issue) */}
+            <div className="invoice-status-minibars">
+              {statusBars.length === 0 ? (
+                <p className="text-muted small mb-0">Belum ada tagihan</p>
+              ) : (
+                statusBars.map((d) => {
+                  const maxVal = Math.max(...statusBars.map((s) => s.value), 1);
+                  const pct = Math.round((d.value / maxVal) * 100);
+                  return (
+                    <div key={d.label} className="invoice-status-minibar-row">
+                      <span className="invoice-status-minibar-label">{d.label}</span>
+                      <div className="invoice-status-minibar-track">
+                        <div
+                          className="invoice-status-minibar-fill"
+                          style={{ width: `${pct}%`, background: d.color }}
+                        />
+                      </div>
+                      <strong className="invoice-status-minibar-value">{d.value}</strong>
+                    </div>
+                  );
+                })
+              )}
             </div>
-            {/* Chart: tampilkan di sm ke atas agar ResponsiveContainer punya lebar cukup */}
-            <div className="d-none d-sm-block">
-              <ResponsiveContainer width="100%" height={130}>
-                <BarChart layout="vertical" data={statusBars} margin={{ top: 4, right: 48, bottom: 4, left: 4 }}>
-                  <CartesianGrid horizontal={false} stroke="rgba(148,163,184,0.18)" strokeDasharray="3 3" />
-                  <XAxis type="number" hide />
-                  <YAxis type="category" dataKey="label" width={90} tick={{ fill: '#64748b', fontSize: 11, fontWeight: 600 }} axisLine={false} tickLine={false} />
-                  <Tooltip formatter={(v: unknown) => [`${Number(v ?? 0)} tagihan`, '']} />
-                  <Bar dataKey="value" radius={[0, 6, 6, 0]} background={{ fill: 'rgba(148,163,184,0.10)' }}>
-                    {statusBars.map((d) => <Cell key={d.label} fill={d.color} />)}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
+
           </Card.Body>
         </Card>
       </Col>

@@ -38,6 +38,13 @@ export class IotController {
     return { message: 'Telemetry meter kamar berhasil diambil', data: await this.iot.tenantCurrentRoomUtilities(actor) };
   }
 
+  @Post('tenant/refresh')
+  @Roles(UserRole.TENANT)
+  @ApiOperation({ summary: 'Paksa sinkronisasi Tuya untuk kamar tenant — rate-limited 1× per 2 menit' })
+  async tenantRefreshMeter(@CurrentUser() actor: CurrentUserPayload) {
+    return { message: 'Sinkronisasi meter berhasil', data: await this.iot.tenantRefreshMeter(actor) };
+  }
+
   @Post('devices')
   @ApiOperation({ summary: 'Daftarkan perangkat IoT — OWNER/ADMIN' })
   async create(@Body() dto: CreateIotDeviceDto, @CurrentUser() actor: CurrentUserPayload) {

@@ -8,6 +8,7 @@ import { Alert, Button, Card, Modal } from 'react-bootstrap';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { createResource, deleteResource, listResource, updateResource } from '../../api/resources';
 import PageHeader from '../../components/common/PageHeader';
+import FeatureErrorBoundary from '../../components/common/FeatureErrorBoundary';
 import { resourceHeaders } from '../../config/resourceHeaders';
 import { EntityBadgeFilterBar, StatusStrip } from '../../components/workspace';
 import ResourceFormModal from '../../components/resources/ResourceFormModal';
@@ -588,7 +589,8 @@ export default function SimpleCrudPage({ config, hideAreaMenu = false }: { confi
   const headerDescription = headerOverride?.subtitle ?? pageDescription;
 
   return (
-    <div className={isStaffView ? 'staff-simple-mode' : undefined}>
+    <FeatureErrorBoundary>
+      <div className={isStaffView ? 'staff-simple-mode' : undefined}>
       <PageHeader
         eyebrow={isStaffView ? 'Daftar Cek' : 'Master data'}
         title={headerTitle}
@@ -759,5 +761,6 @@ export default function SimpleCrudPage({ config, hideAreaMenu = false }: { confi
         } : undefined}
       />
     </div>
+    </FeatureErrorBoundary>
   );
 }

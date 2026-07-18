@@ -1,7 +1,11 @@
 // FILE: StaffUnifiedWorkQueue.tsx — antrian kerja terpadu staf: tiket, tugas, jadwal
+// Phase 3 uplift: lane-based drag-and-drop dengan @dnd-kit
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { Alert, Button, Card, Spinner } from 'react-bootstrap';
-import { CheckCircle2, ClipboardList, DoorOpen, Package, Sparkles, Wrench, Zap } from 'lucide-react';
+import { CheckCircle2, ClipboardList, DoorOpen, GripVertical, Package, Sparkles, Wrench, Zap } from 'lucide-react';
+import { DndContext, PointerSensor, TouchSensor, useSensor, useSensors, type DragEndEvent } from '@dnd-kit/core';
+import { useDraggable, useDroppable } from '@dnd-kit/core';
+import { CSS } from '@dnd-kit/utilities';
 import EmptyState from '../common/EmptyState';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { completeStaffRoutine, sendStaffRoutineNeedHelp, startStaffRoutine, type StaffRoutineItem, type StaffRoutineTodayResponse } from '../../api/staffRoutines';
@@ -181,6 +185,102 @@ function buildWorkItems(routines: StaffRoutineItem[], tickets: Ticket[]): WorkIt
   return [...routineItems, ...ticketItems].sort((a, b) => a.sort - b.sort || a.title.localeCompare(b.title));
 }
 
+/* ──────────────── DnD Lane Components ──────────────── */
+
+const LANE_CONFIG: Array<{ id: WorkStatus | 'TODO_LANE'; label: string; icon: string; accepts: WorkStatus[] }> = [
+  { id: 'TODO_LANE', label: 'Belum Mulai', icon: '📋', accepts: ['TODO'] },
+  { id: 'IN_PROGRESS', label: 'Sedang Dikerjakan', icon: '🔧', accepts: ['IN_PROGRESS', 'NEED_HELP'] },
+  { id: 'DONE', label: 'Selesai', icon: '✅', accepts: ['DONE', 'WAITING_CHECK'] },
+];
+
+function DroppableLane({ laneId, label, icon, count, children }: { laneId: string; label: string; icon: string; count: number; children: ReactNode }) {
+  const { setNodeRef, isOver } = useDroppable({ id: laneId });
+  return (
+    <div
+      ref={setNodeRef}
+      className={`staff-dnd-lane${isOver ? ' staff-dnd-lane-over' : ''}`}
+      data-lane={laneId}
+    >
+      <div className="staff-dnd-lane-header">
+        <span>{icon} {label}</span>
+        <span className="staff-dnd-lane-count">{count}</span>
+      </div>
+      <div className="staff-dnd-lane-body">
+        {children}
+      </div>
+    </div>
+  );
+}
+
+function DraggableWorkCard({
+  item,
+  index,
+  disabled,
+  blocked,
+  onStart,
+  onComplete,
+  onNeedHelp,
+}: {
+  item: WorkItem;
+  index: number;
+  disabled: boolean;
+  blocked: boolean;
+  onStart: (item: WorkItem) => void;
+  onComplete: (item: WorkItem) => void;
+  onNeedHelp: (item: WorkItem) => void;
+}) {
+  const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({ id: item.uid, disabled: disabled || blocked });
+  const style = transform ? { transform: CSS.Translate.toString(transform), zIndex: isDragging ? 100 : undefined, opacity: isDragging ? 0.7 : undefined } : undefined;
+
+  return (
+    <article
+      ref={setNodeRef}
+      style={style}
+      className={`staff-work-card staff-status-${item.status.toLowerCase()} ${item.source.toLowerCase()}${isDragging ? ' staff-dragging' : ''}`}
+      {...attributes}
+    >
+      <div className="staff-work-rank">
+        <span {...listeners} className="staff-drag-handle" title="Seret untuk pindah">
+          <GripVertical size={16} aria-hidden />
+        </span>
+        <span>{index + 1}</span>
+      </div>
+      <div className="staff-work-main">
+        <div className="staff-work-topline">
+          <span className={`staff-status-pill status-${item.status.toLowerCase().replace(/_/g, '-')}`}>{item.statusLabel}</span>
+          <span className="staff-category-pill">{item.typeLabel}</span>
+          <span className="staff-category-pill soft">{item.source === 'ROUTINE' ? 'Rutin' : item.ticket?.category === 'CHECKOUT_INSPECTION' ? 'Siapkan kamar' : 'Perbaikan'}</span>
+        </div>
+        <h3>{item.title}</h3>
+        <p>{item.location}</p>
+        {item.description ? <small>{item.description}</small> : null}
+        {blocked ? <small className="staff-lock-note">Selesaikan pekerjaan aktif dulu sebelum mulai ini.</small> : null}
+      </div>
+      <div className="staff-work-action">
+        {item.status === 'TODO' ? <Button size="sm" className="staff-action-button" disabled={disabled || blocked} onClick={() => onStart(item)}>Mulai</Button> : null}
+        {item.status === 'IN_PROGRESS' ? <Button size="sm" variant="success" className="staff-action-button" disabled={disabled} onClick={() => onComplete(item)}>Tandai selesai</Button> : null}
+        {item.status === 'WAITING_CHECK' ? (
+          <div className="staff-waiting-check-block">
+            <span className="staff-done-note">Menunggu cek admin</span>
+            <small className="staff-waiting-check-hint">Admin sedang meninjau. Tunggu konfirmasi sebelum dikerjakan ulang.</small>
+            <a
+              href={buildAdminWaUrl(`Halo Admin, saya mau tanya status tugas: ${item.title}.`)}
+              target="_blank"
+              rel="noreferrer"
+              className="btn btn-outline-secondary btn-sm staff-waiting-ask-btn"
+            >
+              Tanya Admin
+            </a>
+          </div>
+        ) : null}
+        {item.status === 'NEED_HELP' ? <span className="staff-done-note danger">Kendala terkirim</span> : null}
+      </div>
+    </article>
+  );
+}
+
+/* ──────────────── Main Component ──────────────── */
+
 export default function StaffUnifiedWorkQueue({ routines, tickets, isLoading, onUpdated }: Props) {
   const queryClient = useQueryClient();
   const [activeFilter, setActiveFilter] = useState<WorkFilterKey>('ALL');
@@ -191,6 +291,11 @@ export default function StaffUnifiedWorkQueue({ routines, tickets, isLoading, on
   const [page, setPage] = useState(1);
   const PAGE_SIZE = 10;
   const photoHook = useStaffPhotoUpload();
+
+  // DnD sensors — pointer + touch untuk desktop & mobile
+  const pointerSensor = useSensor(PointerSensor, { activationConstraint: { distance: 5 } });
+  const touchSensor = useSensor(TouchSensor, { activationConstraint: { delay: 200, tolerance: 5 } });
+  const sensors = useSensors(pointerSensor, touchSensor);
 
   const reportsQuery = useQuery({
     queryKey: ['staff-field-reports', 'assigned-to-me'],
@@ -209,6 +314,34 @@ export default function StaffUnifiedWorkQueue({ routines, tickets, isLoading, on
   const activeItem = workItems.find((item) => item.status === 'IN_PROGRESS') ?? null;
   const activeWorkItems = useMemo(() => workItems.filter((item) => item.status !== 'DONE'), [workItems]);
   const doneWorkItems = useMemo(() => workItems.filter((item) => item.status === 'DONE'), [workItems]);
+
+  // Lane grouping untuk DnD
+  const todoItems = useMemo(() => activeWorkItems.filter((item) => item.status === 'TODO'), [activeWorkItems]);
+  const doingItems = useMemo(() => activeWorkItems.filter((item) => item.status === 'IN_PROGRESS' || item.status === 'NEED_HELP'), [activeWorkItems]);
+  const doneLaneItems = useMemo(() => doneWorkItems, [doneWorkItems]);
+
+  // DnD handler: seret antar lane → ubah status
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over) return;
+    const targetLane = String(over.id);
+    const item = workItems.find((w) => w.uid === String(active.id));
+    if (!item) return;
+
+    // Tentukan aksi berdasarkan lane tujuan
+    if (targetLane === 'TODO_LANE' && item.status !== 'TODO') {
+      // Tidak bisa mundur ke TODO (harus restart via admin)
+      return;
+    }
+    if (targetLane === 'IN_PROGRESS' && item.status === 'TODO') {
+      openModal('START', item);
+      return;
+    }
+    if (targetLane === 'DONE' && (item.status === 'IN_PROGRESS' || item.status === 'NEED_HELP')) {
+      openModal('COMPLETE', item);
+      return;
+    }
+  };
   const filteredItems = useMemo(() => {
     if (activeFilter === 'DONE') return doneWorkItems;
     const base = activeFilter === 'ALL' ? activeWorkItems : activeWorkItems.filter((item) => item.type === activeFilter);
@@ -379,48 +512,62 @@ export default function StaffUnifiedWorkQueue({ routines, tickets, isLoading, on
         />
       ) : null}
 
-      <div className="staff-work-list unified tenant-like-dossier">
-        {visibleWorkItems.map((item, index) => {
-          const disabled = Boolean(blockedByActive(item) || actionMutation.isPending);
-          return (
-            <article key={item.uid} className={`staff-work-card staff-status-${item.status.toLowerCase()} ${item.source.toLowerCase()}`}>
-              <div className="staff-work-rank">{(page - 1) * PAGE_SIZE + index + 1}</div>
-              <div className="staff-work-main">
-                <div className="staff-work-topline">
-                  <span className={`staff-status-pill status-${item.status.toLowerCase().replace(/_/g, '-')}`}>{item.statusLabel}</span>
-                  <span className="staff-category-pill">{item.typeLabel}</span>
-                  <span className="staff-category-pill soft">{item.source === 'ROUTINE' ? 'Rutin' : item.ticket?.category === 'CHECKOUT_INSPECTION' ? 'Siapkan kamar' : 'Perbaikan'}</span>
-                </div>
-                <h3>{item.title}</h3>
-                <p>{item.location}</p>
-                {item.description ? <small>{item.description}</small> : null}
-                {blockedByActive(item) ? <small className="staff-lock-note">Selesaikan pekerjaan aktif dulu sebelum mulai ini.</small> : null}
-              </div>
-              <div className="staff-work-action">
-                {item.status === 'TODO' ? <Button size="sm" className="staff-action-button" disabled={disabled} onClick={() => openModal('START', item)}>Mulai</Button> : null}
-                {item.status === 'IN_PROGRESS' ? <Button size="sm" variant="success" className="staff-action-button" disabled={actionMutation.isPending} onClick={() => openModal('COMPLETE', item)}>Tandai selesai</Button> : null}
-                {/* R-24: WAITING_CHECK — tambah penjelasan + CTA Tanya Admin */}
-                {item.status === 'WAITING_CHECK' ? (
-                  <div className="staff-waiting-check-block">
-                    <span className="staff-done-note">Menunggu cek admin</span>
-                    <small className="staff-waiting-check-hint">Admin sedang meninjau. Tunggu konfirmasi sebelum dikerjakan ulang.</small>
-                    <a
-                      href={buildAdminWaUrl(`Halo Admin, saya mau tanya status tugas: ${item.title}.`)}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="btn btn-outline-secondary btn-sm staff-waiting-ask-btn"
-                    >
-                      Tanya Admin
-                    </a>
-                  </div>
-                ) : null}
-                {item.status === 'NEED_HELP' ? <span className="staff-done-note danger">Kendala terkirim</span> : null}
-              </div>
-            </article>
-          );
-        })}
-      </div>
-        {filteredItems.length > PAGE_SIZE ? (
+      {/* DnD 3-Lane Board */}
+      {!isLoading && filteredItems.length > 0 ? (
+        <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
+          <div className="staff-dnd-board">
+            <DroppableLane laneId="TODO_LANE" label="Belum Mulai" icon="📋" count={todoItems.length}>
+              {todoItems.map((item, i) => (
+                <DraggableWorkCard
+                  key={item.uid}
+                  item={item}
+                  index={i}
+                  disabled={Boolean(blockedByActive(item) || actionMutation.isPending)}
+                  blocked={Boolean(blockedByActive(item))}
+                  onStart={(it) => openModal('START', it)}
+                  onComplete={(it) => openModal('COMPLETE', it)}
+                  onNeedHelp={(it) => openModal('NEED_HELP', it)}
+                />
+              ))}
+            </DroppableLane>
+
+            <DroppableLane laneId="IN_PROGRESS" label="Sedang Dikerjakan" icon="🔧" count={doingItems.length}>
+              {doingItems.map((item, i) => (
+                <DraggableWorkCard
+                  key={item.uid}
+                  item={item}
+                  index={i}
+                  disabled={Boolean(actionMutation.isPending)}
+                  blocked={false}
+                  onStart={(it) => openModal('START', it)}
+                  onComplete={(it) => openModal('COMPLETE', it)}
+                  onNeedHelp={(it) => openModal('NEED_HELP', it)}
+                />
+              ))}
+            </DroppableLane>
+
+            <DroppableLane laneId="DONE" label="Selesai" icon="✅" count={doneLaneItems.length}>
+              {doneLaneItems.slice(0, 10).map((item, i) => (
+                <DraggableWorkCard
+                  key={item.uid}
+                  item={item}
+                  index={i}
+                  disabled={true}
+                  blocked={false}
+                  onStart={(it) => openModal('START', it)}
+                  onComplete={(it) => openModal('COMPLETE', it)}
+                  onNeedHelp={(it) => openModal('NEED_HELP', it)}
+                />
+              ))}
+              {doneLaneItems.length > 10 ? (
+                <div className="staff-dnd-lane-more">+{doneLaneItems.length - 10} selesai lainnya</div>
+              ) : null}
+            </DroppableLane>
+          </div>
+        </DndContext>
+      ) : null}
+
+      {filteredItems.length > PAGE_SIZE ? (
           <div className="staff-work-pagination">
             <PaginationControls
               currentPage={page}

@@ -3107,3 +3107,96 @@
   .staff-hero-ringkas-actions { width: 100%; }
   .staff-hero-ringkas-actions .btn { width: 100%; }
 }
+
+/* ──────────────── DnD Work Queue Lanes ──────────────── */
+
+.staff-dnd-board {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-3, 12px);
+  margin-top: var(--space-3, 12px);
+  min-height: 300px;
+}
+
+.staff-dnd-lane {
+  background: var(--bg-subtle, #f8fafc);
+  border-radius: 12px;
+  border: 2px dashed transparent;
+  display: flex;
+  flex-direction: column;
+  transition: border-color 0.2s, background 0.2s;
+}
+
+.staff-dnd-lane-over {
+  border-color: #2563eb;
+  background: #eff6ff;
+}
+
+.staff-dnd-lane-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  border-bottom: 1px solid var(--border-default, #e5e7eb);
+  position: sticky;
+  top: 0;
+  background: inherit;
+  border-radius: 12px 12px 0 0;
+  z-index: 2;
+}
+
+.staff-dnd-lane-count {
+  background: var(--bg-surface, #fff);
+  border-radius: 20px;
+  padding: 2px 10px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--text-muted, #6b7280);
+  min-width: 28px;
+  text-align: center;
+}
+
+.staff-dnd-lane-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 80px;
+}
+
+.staff-dnd-lane-more {
+  text-align: center;
+  padding: 8px;
+  font-size: 0.8rem;
+  color: var(--text-muted, #6b7280);
+  font-style: italic;
+}
+
+.staff-drag-handle {
+  cursor: grab;
+  display: inline-flex;
+  align-items: center;
+  color: var(--text-muted, #9ca3af);
+  touch-action: none;
+  padding: 2px;
+}
+.staff-drag-handle:active { cursor: grabbing; }
+
+.staff-dragging {
+  box-shadow: 0 8px 24px rgba(0,0,0,0.15) !important;
+}
+
+/* Mobile: stack lanes vertically */
+@media (max-width: 768px) {
+  .staff-dnd-board {
+    grid-template-columns: 1fr;
+    gap: var(--space-2, 8px);
+  }
+  .staff-dnd-lane-body {
+    max-height: 320px;
+  }
+}

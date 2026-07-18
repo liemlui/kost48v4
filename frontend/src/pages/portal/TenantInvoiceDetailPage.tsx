@@ -12,6 +12,7 @@ import CameraOrGalleryInput from '../../components/common/CameraOrGalleryInput';
 import PageHeader from '../../components/common/PageHeader';
 import StatusBadge from '../../components/common/StatusBadge';
 import TenantPriorityBoard from '../../components/tenant/TenantPriorityBoard';
+import InvoiceBreakdownDonut from '../../components/portal/InvoiceBreakdownDonut';
 import { LifecycleTimeline, type AssistantItem, type TimelineStep } from '../../components/command-center';
 import { AssistantInsightLine, StatusStrip } from '../../components/workspace';
 import InvoicePrintLayout from '../../components/reports/InvoicePrintLayout';
@@ -352,6 +353,11 @@ export default function TenantInvoiceDetailPage() {
                     </div>
                   </Col>
                 </Row>
+
+                {/* Breakdown donut — rincian komposisi tagihan */}
+                <div className="mt-4 pt-3 border-top">
+                  <InvoiceBreakdownDonut lines={invoice.lines} totalAmount={totalInvoice} />
+                </div>
               </Card.Body>
             </Card>
           </Col>

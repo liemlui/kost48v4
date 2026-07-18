@@ -2,10 +2,14 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useConfirm } from '../../components/common/ConfirmProvider';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Alert, Badge, Button, Card, Col, Form, Row, Spinner, Tab, Tabs } from 'react-bootstrap';
+import { Alert, Button, Card, Col, Form, Row, Tab, Tabs } from 'react-bootstrap';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import PageHeader from '../../components/common/PageHeader';
+import FeatureErrorBoundary from '../../components/common/FeatureErrorBoundary';
+import { useDocumentTitle } from '../../hooks/useDocumentTitle';
+import StatusBadge from '../../components/common/StatusBadge';
+import { TableSkeleton } from '../../components/common/SkeletonLoader';
 import { StatusStrip } from '../../components/workspace';
 import { analyzeFinance, getOwnerAiStatus, type FinanceResult } from '../../api/ai';
 import AiAssistButton from '../../components/ai/AiAssistButton';
@@ -111,7 +115,7 @@ function currentAsOf() {
 // ═══════════════════════════════════════════════════════════
 
 function formatRupiahLocal(value?: number | null) {
-  return `{formatRupiah(Number(value ?? 0))}`;
+  return formatRupiah(Number(value ?? 0));
 }
 
 export default function AccountingSetupPage() {
@@ -119,6 +123,7 @@ export default function AccountingSetupPage() {
   const queryClient = useQueryClient();
   const { user } = useAuth();
   const confirm = useConfirm();
+  useDocumentTitle('Laporan Keuangan');
   const [searchParams, setSearchParams] = useSearchParams();
   const [actionMessage, setActionMessage] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
@@ -552,7 +557,8 @@ export default function AccountingSetupPage() {
   });
 
   return (
-    <div className="finance-workspace accounting-setup-page">
+    <FeatureErrorBoundary>
+      <div className="finance-workspace accounting-setup-page">
       <PageHeader
         eyebrow="Finance · Laporan Keuangan"
         title="Laporan Keuangan & Kesehatan Ledger"
@@ -652,7 +658,7 @@ export default function AccountingSetupPage() {
       ) : null}
 
       {isInitialLoading ? (
-        <Card className="content-card border-0"><Card.Body><Spinner animation="border" size="sm" className="me-2" /> Memuat laporan keuangan...</Card.Body></Card>
+        <Card className="content-card border-0"><Card.Body><TableSkeleton rows={5} cols={2} /></Card.Body></Card>
       ) : null}
 
       <StatusStrip
@@ -776,7 +782,7 @@ export default function AccountingSetupPage() {
                 </p>
                 {depositReconciliationQuery.data?.summary ? (
                   <div className="d-flex flex-wrap gap-2 small">
-                    <Badge bg={depositReconciliationQuery.data.summary.reconciliationStatus === 'MATCHED' ? 'success' : 'warning'}>{depositReconciliationQuery.data.summary.reconciliationStatus}</Badge>
+                    <StatusBadge status={depositReconciliationQuery.data.summary.reconciliationStatus === 'MATCHED' ? 'SUCCESS' : 'WARNING'} customLabel={depositReconciliationQuery.data.summary.reconciliationStatus} />
                     <span className="text-muted">Saldo awal: {formatRupiah(depositReconciliationQuery.data.summary.ledgerOpeningBalanceDepositRupiah)}</span>
                     <span className="text-muted">Auto deposit: {formatRupiah(depositReconciliationQuery.data.summary.ledgerAutoJournalDepositRupiah)}</span>
                     <span className="text-muted">Selisih: {formatRupiah(depositReconciliationQuery.data.summary.differenceRupiah)}</span>
@@ -828,8 +834,8 @@ export default function AccountingSetupPage() {
                   Sistem menargetkan bulan yang sudah lewat ({autoClosePolicyQuery.data?.targetPeriodKey ?? 'bulan lalu'}), bukan bulan berjalan. Auto-close hanya berjalan jika semua readiness aman dan preview jurnal closing balanced.
                 </p>
                 <div className="d-flex flex-wrap gap-2 small">
-                  <Badge bg={autoClosePolicyQuery.data?.enabled ? 'success' : 'warning'}>{autoClosePolicyQuery.data?.enabled ? 'Auto-close ON' : 'Auto-close OFF'}</Badge>
-                  <Badge bg="info">Monthly controlled close</Badge>
+                  <StatusBadge status={autoClosePolicyQuery.data?.enabled ? 'SUCCESS' : 'WARNING'} customLabel={autoClosePolicyQuery.data?.enabled ? 'Auto-close ON' : 'Auto-close OFF'} />
+                  <StatusBadge status="INFO" customLabel="Monthly controlled close" />
                   <span className="text-muted">Buka ulang tetap Owner-only + alasan audit.</span>
                 </div>
                 {autoClosePolicyQuery.data?.note ? <small className="text-muted d-block mt-2">{autoClosePolicyQuery.data.note}</small> : null}
@@ -992,5 +998,6 @@ export default function AccountingSetupPage() {
       </Tabs>
 
     </div>
+    </FeatureErrorBoundary>
   );
 }

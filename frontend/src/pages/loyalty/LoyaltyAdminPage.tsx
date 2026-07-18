@@ -1,8 +1,12 @@
 import PageHeader from '../../components/common/PageHeader';
 import { useState } from 'react';
-import { Alert, Badge, Button, Card, Form, Modal, Table } from 'react-bootstrap';
+import { Alert, Button, Card, Form, Modal, Table } from 'react-bootstrap';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import CurrencyInput from '../../components/common/CurrencyInput';
+import FeatureErrorBoundary from '../../components/common/FeatureErrorBoundary';
+import EmptyState from '../../components/common/EmptyState';
+import StatusBadge from '../../components/common/StatusBadge';
+import { TableSkeleton } from '../../components/common/SkeletonLoader';
 import { formatDateOnly } from '../../utils/dateTime';
 import { getStatusLabel } from '../../utils/statusLabels';
 import {
@@ -20,6 +24,8 @@ import {
 } from '../../api/loyalty';
 import { useAuth } from '../../context/AuthContext';
 import { formatRupiah, formatRupiahWithoutSymbol } from '../../utils/formatCurrency';
+import { useDocumentTitle } from '../../hooks/useDocumentTitle';
+import '../../styles/admin-area';
 
 const REWARD_TYPES = ['RENT_DISCOUNT', 'SERVICE_ADDON', 'METER_DISCOUNT', 'BADGE', 'PHYSICAL'];
 const REWARD_TYPE_LABEL: Record<string, string> = {
@@ -29,13 +35,13 @@ const REWARD_TYPE_LABEL: Record<string, string> = {
   BADGE: 'Lencana',
   PHYSICAL: 'Barang Fisik',
 };
-const STATUS_VARIANT: Record<string, string> = { PENDING: 'warning', APPROVED: 'info', FULFILLED: 'success', REJECTED: 'danger', CANCELLED: 'secondary' };
 
 const emptyForm: RewardInput = { name: '', description: '', pointCost: 100, type: 'PHYSICAL', valueRupiah: 0, stockQty: undefined, isActive: true };
 
 export default function LoyaltyAdminPage() {
   const { user } = useAuth();
   const isOwner = user?.role === 'OWNER';
+  useDocumentTitle('Loyalitas & Reward');
   const queryClient = useQueryClient();
   const [error, setError] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
@@ -87,7 +93,8 @@ export default function LoyaltyAdminPage() {
   const [activeTab, setActiveTab] = useState<string>(isOwner ? 'catalog' : 'redemption');
 
   return (
-    <div>
+    <FeatureErrorBoundary>
+      <div>
       <PageHeader
         eyebrow="Loyalitas"
         title={isOwner ? 'Loyalitas & Reward' : 'Penukaran Reward'}
@@ -111,26 +118,27 @@ export default function LoyaltyAdminPage() {
         )}
       </div>
       {error && <Alert variant="danger" dismissible onClose={() => setError(null)}>{error}</Alert>}
+      {rewardsQuery.isError && <Alert variant="warning">Gagal memuat data reward.</Alert>}
+      {redemptionsQuery.isError && <Alert variant="warning">Gagal memuat data penukaran.</Alert>}
 
       <div className="d-flex align-items-center gap-3 mb-4 flex-wrap">
-        <Badge bg="light" text="dark" className="border">1 poin ≈ {formatRupiah(perPoint)}</Badge>
-        {isOwner && activeTab === 'policy' && <Badge bg="info">Kebijakan — atur nilai poin di Pengaturan</Badge>}
+        <StatusBadge status={perPoint > 0 ? 'INFO' : 'WARNING'} customLabel={`1 poin ≈ ${formatRupiah(perPoint)}`} />
+        {isOwner && activeTab === 'policy' && <StatusBadge status="INFO" customLabel="Kebijakan — atur nilai poin di Pengaturan" />}
       </div>
 
       {activeTab === 'redemption' && (
       <>
       <Card className="mb-4">
         <Card.Header className="d-flex justify-content-between align-items-center">
-          <strong>Permintaan Penukaran {pending.length > 0 && <Badge bg="warning" text="dark">{pending.length} menunggu</Badge>}</strong>
+          <strong>Permintaan Penukaran {pending.length > 0 && <StatusBadge status="WARNING" customLabel={`${pending.length} menunggu`} />}</strong>
         </Card.Header>
         <Card.Body className="p-0">
           <Table responsive hover className="mb-0 align-middle">
             <thead><tr><th>Tenant</th><th>Reward</th><th>Poin</th><th>Status</th><th>Tanggal</th><th className="text-end">Aksi</th></tr></thead>
             <tbody>
               {(!redemptionsQuery.data || redemptionsQuery.data.length === 0) && (
-                <tr><td colSpan={6} className="text-center py-4">
-                  <div className="text-muted mb-2">Belum ada penukaran.</div>
-                  <small className="text-muted">Tenant akan melihat reward yang tersedia di portal mereka. Pastikan katalog reward sudah diisi.</small>
+                <tr><td colSpan={6} className="p-4">
+                  <EmptyState icon="🎁" title="Belum ada penukaran" description="Tenant akan melihat reward yang tersedia di portal mereka." />
                 </td></tr>
               )}
               {redemptionsQuery.data?.map((r) => (
@@ -138,7 +146,7 @@ export default function LoyaltyAdminPage() {
                   <td>{r.tenant?.fullName ?? `#${r.tenantId}`}</td>
                   <td>{r.reward?.name ?? `#${r.rewardId}`}</td>
                   <td>{r.pointCost}</td>
-                  <td><Badge bg={STATUS_VARIANT[r.status] ?? 'secondary'}>{getStatusLabel(r.status, undefined, { domain: 'loyalty' })}</Badge></td>
+                  <td><StatusBadge status={r.status} customLabel={getStatusLabel(r.status, undefined, { domain: 'loyalty' })} /></td>
                   <td><small>{formatDateOnly(r.requestedAt)}</small></td>
                   <td className="text-end">
                     {r.status === 'PENDING' ? (
@@ -161,14 +169,14 @@ export default function LoyaltyAdminPage() {
           <Table responsive hover className="mb-0 align-middle">
             <thead><tr><th>Pelapor</th><th>Terlapor</th><th>Kategori</th><th>Deskripsi</th><th>Status</th><th className="text-end">Aksi</th></tr></thead>
             <tbody>
-              {peerQuery.data?.length === 0 && <tr><td colSpan={6} className="text-center py-4"><div className="text-muted mb-2">Belum ada laporan.</div><small className="text-muted">Laporan sikap antar-tenant akan muncul di sini untuk dimoderasi.</small></td></tr>}
+              {peerQuery.data?.length === 0 && <tr><td colSpan={6} className="p-4"><EmptyState icon="🤝" title="Belum ada laporan" description="Laporan sikap antar-tenant akan muncul di sini." /></td></tr>}
               {peerQuery.data?.map((r) => (
                 <tr key={r.id}>
                   <td><small>{r.reporter?.fullName ?? '-'}</small></td>
                   <td><small>{r.reportee?.fullName ?? '-'}</small></td>
                   <td><small>{r.category}</small></td>
                   <td><small>{r.description}</small></td>
-                  <td><Badge bg={r.status === 'CONFIRMED' ? 'success' : r.status === 'DISMISSED' ? 'secondary' : 'warning'} text={r.status === 'CONFIRMED' || r.status === 'DISMISSED' ? undefined : 'dark'}>{getStatusLabel(r.status, undefined, { domain: 'loyalty' })}</Badge></td>
+                  <td><StatusBadge status={r.status} customLabel={getStatusLabel(r.status, undefined, { domain: 'loyalty' })} /></td>
                   <td className="text-end">
                     {r.status === 'PENDING_REVIEW' && (
                       <>
@@ -200,7 +208,7 @@ export default function LoyaltyAdminPage() {
           <Table responsive hover className="mb-0 align-middle">
             <thead><tr><th>Nama</th><th>Tipe</th><th>Poin</th><th>Nilai</th><th>Stok</th><th>Status</th>{isOwner && <th className="text-end">Aksi</th>}</tr></thead>
             <tbody>
-              {rewardsQuery.data?.length === 0 && <tr><td colSpan={isOwner ? 7 : 6} className="text-center py-4"><div className="text-muted mb-2">Belum ada reward.</div>{isOwner ? <small className="text-muted">Gunakan tombol <strong>+ Reward</strong> di atas untuk menambahkan katalog reward. Tenant akan melihat reward yang aktif di portal mereka.</small> : <small className="text-muted">Belum ada reward yang tersedia. Hubungi owner untuk menambahkan reward.</small>}</td></tr>}
+              {rewardsQuery.data?.length === 0 && <tr><td colSpan={isOwner ? 7 : 6} className="p-4"><EmptyState icon="🏷️" title="Belum ada reward" description={isOwner ? 'Gunakan tombol + Reward untuk menambahkan katalog.' : 'Hubungi owner untuk menambahkan reward.'} /></td></tr>}
               {rewardsQuery.data?.map((r) => (
                 <tr key={r.id}>
                   <td>{r.name}{r.description && <div className="text-muted small">{r.description}</div>}</td>
@@ -208,7 +216,7 @@ export default function LoyaltyAdminPage() {
                   <td>{r.pointCost}</td>
                   <td>{r.valueRupiah ? `{formatRupiah(r.valueRupiah)}` : '-'}</td>
                   <td>{r.stockQty ?? '∞'}</td>
-                  <td><Badge bg={r.isActive ? 'success' : 'secondary'}>{r.isActive ? 'Aktif' : 'Nonaktif'}</Badge></td>
+                  <td><StatusBadge status={r.isActive ? 'ACTIVE' : 'INACTIVE'} /></td>
                   {isOwner && <td className="text-end"><Button size="sm" variant="outline-secondary" onClick={() => openEdit(r)}>Ubah</Button></td>}
                 </tr>
               ))}
@@ -272,5 +280,6 @@ export default function LoyaltyAdminPage() {
       </Modal>
     </div>
     </div>
+    </FeatureErrorBoundary>
   );
 }

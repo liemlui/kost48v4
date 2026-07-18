@@ -1,14 +1,19 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Alert, Button, Card, Col, Form, Row, Spinner, Table } from 'react-bootstrap';
+import { Alert, Button, Card, Col, Form, Row, Table } from 'react-bootstrap';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { Bar, BarChart, CartesianGrid, Cell, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import PageHeader from '../../components/common/PageHeader';
 import PaginationControls from '../../components/common/PaginationControls';
+import FeatureErrorBoundary from '../../components/common/FeatureErrorBoundary';
+import EmptyState from '../../components/common/EmptyState';
+import StatCard from '../../components/common/StatCard';
+import { TableSkeleton } from '../../components/common/SkeletonLoader';
 import StaffAuditModal from '../../components/admin/StaffAuditModal';
 import AdminSmartAuditPanel from '../../components/admin/AdminSmartAuditPanel';
 import DonutGauge from '../../components/charts/DonutGauge';
 import { fetchAdminStaffAuditSuggestions, fetchAdminStaffPerformance, fetchStaffLeaderboard, type StaffPerformanceSummary } from '../../api/staffPerformance';
+import '../../styles/admin-area';
 
 const CATEGORY_COLORS: Record<string, string> = {
   'Sangat Baik': '#16a34a',
@@ -177,7 +182,7 @@ export default function AdminStaffPerformancePage() {
   }, [month]);
 
   return (
-    <div>
+    <FeatureErrorBoundary>
       <PageHeader
         eyebrow="Akuntabilitas Staff"
         title="Kinerja Staff"
@@ -185,18 +190,19 @@ export default function AdminStaffPerformancePage() {
         secondaryAction={<Form.Control type="month" value={month} onChange={(event) => setMonth(event.currentTarget.value)} style={{ maxWidth: 190 }} />}
       />
 
-      {query.isLoading ? <div className="py-5 text-center"><Spinner animation="border" /></div> : null}
+      {query.isLoading ? <TableSkeleton rows={5} cols={9} /> : null}
       {query.isError ? <Alert variant="danger">Data kinerja staff belum bisa dimuat.</Alert> : null}
 
       {query.data ? (
         <div className="staff-admin-summary-grid">
-          <Card className="border-0"><Card.Body><span>Total staff</span><strong>{query.data.summary.totalStaff}</strong><small>Staff aktif</small></Card.Body></Card>
-          <Card className="border-0"><Card.Body><span>Sangat baik</span><strong>{query.data.summary.veryGood}</strong><small>Kinerja kuat</small></Card.Body></Card>
-          <Card className="border-0"><Card.Body><span>Perlu dibantu/diawasi</span><strong>{query.data.summary.needWatch}</strong><small>Butuh follow-up</small></Card.Body></Card>
-          <Card className="border-0"><Card.Body><span>Sinyal negatif</span><strong>{query.data.summary.negativeValue}</strong><small>Audit gagal/bukti kurang</small></Card.Body></Card>
+          <StatCard title="Total staff" value={query.data.summary.totalStaff} subtitle="Staff aktif" icon="👥" animated />
+          <StatCard title="Sangat baik" value={query.data.summary.veryGood} subtitle="Kinerja kuat" icon="⭐" variant="success" animated />
+          <StatCard title="Perlu dibantu/diawasi" value={query.data.summary.needWatch} subtitle="Butuh follow-up" icon="🔍" variant="warning" animated />
+          <StatCard title="Sinyal negatif" value={query.data.summary.negativeValue} subtitle="Audit gagal/bukti kurang" icon="🚩" variant="danger" animated />
         </div>
       ) : null}
 
+      {leaderboardQuery.isError ? <Alert variant="warning" className="mt-3">Leaderboard staff belum bisa dimuat.</Alert> : null}
       {leaderboardQuery.data ? (
         <Card className="content-card border-0 mt-3">
           <Card.Body>
@@ -297,7 +303,7 @@ export default function AdminStaffPerformancePage() {
             </div>
             <span className="table-meta-count">{items.length} staff</span>
           </div>
-          {!items.length && !query.isLoading ? <div className="staff-empty-box mt-3"><strong>Belum ada data staff.</strong><span>Data akan muncul setelah user staff aktif tersedia.</span></div> : null}
+          {!items.length && !query.isLoading ? <div className="p-4"><EmptyState icon="👥" title="Belum ada data staff" description="Data akan muncul setelah user staff aktif tersedia." /></div> : null}
           {items.length ? (
             <Table responsive hover className="mt-3 staff-performance-table">
               <thead><tr><th>Staff</th><th>Kategori</th><th>Skor</th><th>Checklist</th><th>Tugas</th><th>Meter</th><th>Rating Penghuni</th><th>Sinyal</th><th>Aksi</th></tr></thead>
@@ -339,6 +345,6 @@ export default function AdminStaffPerformancePage() {
       </Card>
 
       <StaffAuditModal show={Boolean(selected)} staff={selected} onHide={() => setSelected(null)} />
-    </div>
+    </FeatureErrorBoundary>
   );
 }

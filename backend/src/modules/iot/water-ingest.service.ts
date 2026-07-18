@@ -3,6 +3,7 @@ import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/
 import { IotProvider, IotReadingQuality, Prisma } from '../../generated/prisma';
 import { PrismaService } from '../../prisma/prisma.service';
 import { DeviceCredentialService } from './device-credential.service';
+import { IotSseService } from './iot-sse.service';
 import { WaterIngestDto } from './dto/water-ingest.dto';
 
 export type WaterIngestHeaders = {
@@ -28,6 +29,7 @@ export class WaterIngestService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly credentials: DeviceCredentialService,
+    private readonly sse: IotSseService,
   ) {}
 
   async ingest(headers: WaterIngestHeaders, rawBody: Buffer, payload: WaterIngestDto) {
@@ -93,6 +95,17 @@ export class WaterIngestService {
           firmwareVersion: payload.firmwareVersion,
         },
       });
+
+      // Notify SSE subscribers
+      if (device.roomId) {
+        this.sse.emit(device.roomId, {
+          type: 'WATER_INGEST',
+          roomId: device.roomId,
+          timestamp: observedAt.toISOString(),
+          message: `Data meter air diterima (${volumeM3.toFixed(3)} m³)`,
+        });
+      }
+
       return { accepted: true, duplicate: false, quality, ingestMessageId: message.id.toString() };
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {

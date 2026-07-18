@@ -1,8 +1,11 @@
 import { useState } from 'react';
-import { Badge, Button, Card, Spinner } from 'react-bootstrap';
+import { Button, Card } from 'react-bootstrap';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import PageHeader from '../../components/common/PageHeader';
+import FeatureErrorBoundary from '../../components/common/FeatureErrorBoundary';
 import EmptyState from '../../components/common/EmptyState';
+import StatusBadge from '../../components/common/StatusBadge';
+import { TableSkeleton } from '../../components/common/SkeletonLoader';
 import CurrencyDisplay from '../../components/common/CurrencyDisplay';
 import { useDocumentTitle } from '../../hooks/useDocumentTitle';
 import {
@@ -11,6 +14,7 @@ import {
   type ServiceInterest,
   type ServiceInterestStatus,
 } from '../../api/additionalServices';
+import '../../styles/admin-area';
 
 const STATUS_META: Record<ServiceInterestStatus, { label: string; bg: string }> = {
   PENDING: { label: 'Baru', bg: 'warning' },
@@ -45,8 +49,9 @@ export default function ServiceInterestsPage() {
   const items = (query.data?.items ?? []) as ServiceInterest[];
 
   return (
-    <div>
-      <PageHeader eyebrow="Layanan Tambahan" title="Minat Penghuni" description="Penghuni yang menyatakan minat atas layanan tambahan. Hubungi lalu tandai selesai." />
+    <FeatureErrorBoundary>
+      <div>
+        <PageHeader eyebrow="Layanan Tambahan" title="Minat Penghuni" description="Penghuni yang menyatakan minat atas layanan tambahan. Hubungi lalu tandai selesai." />
 
       <div className="d-flex flex-wrap gap-2 mb-3">
         {TABS.map((t) => (
@@ -57,7 +62,7 @@ export default function ServiceInterestsPage() {
       </div>
 
       {query.isLoading ? (
-        <div className="text-center py-4"><Spinner animation="border" size="sm" /> Memuat minat…</div>
+        <div className="p-4"><TableSkeleton rows={4} cols={4} /></div>
       ) : items.length === 0 ? (
         <EmptyState icon="🛎️" title="Belum ada minat" description="Belum ada penghuni yang menyatakan minat pada kategori ini." />
       ) : (
@@ -70,7 +75,7 @@ export default function ServiceInterestsPage() {
                   <div>
                     <div className="d-flex align-items-center gap-2">
                       <strong>{it.service?.name ?? 'Layanan'}</strong>
-                      <Badge bg={meta.bg}>{meta.label}</Badge>
+                      <StatusBadge status={it.status === 'PENDING' ? 'WARNING' : it.status === 'CONTACTED' ? 'INFO' : it.status === 'DONE' ? 'SUCCESS' : 'SECONDARY'} customLabel={meta.label} />
                     </div>
                     <div className="small text-muted">
                       {it.tenant?.fullName ?? 'Penghuni'}{it.tenant?.phone ? ` · ${it.tenant.phone}` : ''}
@@ -100,5 +105,6 @@ export default function ServiceInterestsPage() {
         </div>
       )}
     </div>
+    </FeatureErrorBoundary>
   );
 }

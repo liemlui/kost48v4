@@ -121,6 +121,11 @@ export async function getMyRoomUtilityTelemetry(): Promise<TenantRoomUtilityTele
   return response.data.data;
 }
 
+export async function refreshMyRoomMeter(): Promise<{ synced: number; total: number; message?: string }> {
+  const response = await client.post<ApiEnvelope<{ synced: number; total: number; message?: string }>>('/iot/tenant/refresh');
+  return response.data.data;
+}
+
 export async function getIotDeviceTelemetry(
   id: number,
   params: { metric?: string; from?: string; to?: string; limit?: number } = {},

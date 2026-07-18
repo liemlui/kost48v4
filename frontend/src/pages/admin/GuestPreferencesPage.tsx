@@ -1,8 +1,12 @@
-import { useState, useMemo } from 'react';
-import { Alert, Badge, Card, Form, Pagination, Spinner, Table } from 'react-bootstrap';
+import { useState } from 'react';
+import { Alert, Card, Form, Table } from 'react-bootstrap';
 import { useQuery } from '@tanstack/react-query';
 import PageHeader from '../../components/common/PageHeader';
+import FeatureErrorBoundary from '../../components/common/FeatureErrorBoundary';
 import EmptyState from '../../components/common/EmptyState';
+import StatusBadge from '../../components/common/StatusBadge';
+import PaginationControls from '../../components/common/PaginationControls';
+import { TableSkeleton } from '../../components/common/SkeletonLoader';
 import {
   fetchGuestPreferences,
   fetchGuestPreferencesStats,
@@ -10,6 +14,7 @@ import {
   type GuestPreferencesStats,
 } from '../../api/guestPreferences';
 import { formatDateOnly } from '../../utils/dateTime';
+import '../../styles/admin-area';
 
 // ---------------------------------------------------------------------------
 // HELPERS
@@ -149,18 +154,11 @@ export default function GuestPreferencesPage() {
   const stats = statsQuery.data;
   const rows: GuestPreferenceRow[] = data?.rows ?? [];
   const totalPages = data?.totalPages ?? 1;
-
-  // Render pagination
-  const paginationItems = useMemo(() => {
-    const items: number[] = [];
-    const start = Math.max(1, page - 2);
-    const end = Math.min(totalPages, page + 2);
-    for (let i = start; i <= end; i++) items.push(i);
-    return items;
-  }, [page, totalPages]);
+  const totalItems = data?.total ?? 0;
 
   return (
-    <div className="container py-4">
+    <FeatureErrorBoundary>
+      <div className="container py-4">
       <PageHeader
         eyebrow="Marketing · Preferensi Pengunjung"
         title="Survei Preferensi Tamu"
@@ -168,12 +166,11 @@ export default function GuestPreferencesPage() {
       />
 
       {/* Loading / Error */}
-      {listQuery.isLoading && statsQuery.isLoading ? (
-        <div className="py-5 text-center"><Spinner animation="border" /></div>
-      ) : null}
+      {listQuery.isLoading && statsQuery.isLoading ? <TableSkeleton rows={5} cols={7} /> : null}
       {listQuery.isError ? <Alert variant="danger">Gagal memuat data survei preferensi.</Alert> : null}
 
       {/* Stat panel */}
+      {statsQuery.isError ? <Alert variant="warning">Statistik preferensi belum bisa dimuat.</Alert> : null}
       <StatsPanel stats={stats} />
 
       {/* Preferensi breakdown */}
@@ -198,7 +195,7 @@ export default function GuestPreferencesPage() {
         </Card.Header>
         <Card.Body className="p-0">
           {listQuery.isLoading ? (
-            <div className="py-5 text-center"><Spinner animation="border" /></div>
+            <div className="p-4"><TableSkeleton rows={5} cols={7} /></div>
           ) : !rows.length ? (
             <div className="p-4">
               <EmptyState icon="📭" title="Belum ada data" description="Pengunjung belum mengisi wizard preferensi." />
@@ -253,8 +250,8 @@ export default function GuestPreferencesPage() {
                       </td>
                       <td>
                         {row.skipped
-                          ? <Badge bg="secondary">Skip</Badge>
-                          : <Badge bg="success">Selesai</Badge>}
+                          ? <StatusBadge status="SECONDARY" customLabel="Skip" />
+                          : <StatusBadge status="SUCCESS" customLabel="Selesai" />}
                       </td>
                       <td className="small text-muted">
                         {row.sessionId ? (
@@ -271,23 +268,21 @@ export default function GuestPreferencesPage() {
               {/* Pagination */}
               {totalPages > 1 && (
                 <div className="d-flex justify-content-center p-3">
-                  <Pagination size="sm">
-                    <Pagination.Prev disabled={page <= 1} onClick={() => setPage((p) => Math.max(1, p - 1))} />
-                    {paginationItems[0] > 1 && <Pagination.Ellipsis disabled />}
-                    {paginationItems.map((p) => (
-                      <Pagination.Item key={p} active={p === page} onClick={() => setPage(p)}>
-                        {p}
-                      </Pagination.Item>
-                    ))}
-                    {paginationItems[paginationItems.length - 1] < totalPages && <Pagination.Ellipsis disabled />}
-                    <Pagination.Next disabled={page >= totalPages} onClick={() => setPage((p) => Math.min(totalPages, p + 1))} />
-                  </Pagination>
+                  <PaginationControls
+                    currentPage={page}
+                    totalPages={totalPages}
+                    totalItems={totalItems}
+                    pageSize={pageSize}
+                    onPageChange={setPage}
+                    isLoading={listQuery.isLoading}
+                  />
                 </div>
               )}
             </>
           )}
         </Card.Body>
       </Card>
-    </div>
+      </div>
+    </FeatureErrorBoundary>
   );
 }

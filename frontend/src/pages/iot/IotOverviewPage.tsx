@@ -18,6 +18,8 @@ import {
   Zap,
 } from 'lucide-react';
 import PageHeader from '../../components/common/PageHeader';
+import FeatureErrorBoundary from '../../components/common/FeatureErrorBoundary';
+import { useDocumentTitle } from '../../hooks/useDocumentTitle';
 import { useToast } from '../../components/common/ToastProvider';
 import { useAuth } from '../../context/AuthContext';
 import { listResource } from '../../api/resources';
@@ -120,6 +122,7 @@ function LatestValues({ device }: { device: IotDevice }) {
 }
 
 export default function IotOverviewPage() {
+  useDocumentTitle('IoT Listrik & Air');
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const { user } = useAuth();
@@ -260,7 +263,8 @@ export default function IotOverviewPage() {
   };
 
   return (
-    <div className="iot-page">
+    <FeatureErrorBoundary>
+      <div className="iot-page">
       <PageHeader
         eyebrow="Utility Telemetry"
         title="IoT Listrik & Air"
@@ -486,5 +490,6 @@ export default function IotOverviewPage() {
         <Modal.Footer><Button onClick={() => setSecretResult(null)}>Saya sudah menyimpan</Button></Modal.Footer>
       </Modal>
     </div>
+    </FeatureErrorBoundary>
   );
 }

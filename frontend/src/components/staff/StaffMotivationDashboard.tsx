@@ -9,6 +9,7 @@ import StaffRoutineChecklist from './StaffRoutineChecklist';
 import StaffActionLauncher from './StaffActionLauncher';
 import StaffOperationalTaskBoard from './StaffOperationalTaskBoard';
 import StatCard from '../common/StatCard';
+import { HeroSkeleton, StatCardSkeleton } from '../common/SkeletonLoader';
 import { listResource } from '../../api/resources';
 import { computeStaffBoard } from '../../utils/staffBoardStats';
 import type { ActionQueueItem } from '../command-center';
@@ -96,6 +97,20 @@ export default function StaffMotivationDashboard({ user, tickets, rooms = [], in
 
   const scrollToQueue = () => document.getElementById('staff-work-queue')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
+  const isInitialLoading = routinesLoading && !routineToday;
+
+  if (isInitialLoading) {
+    return (
+      <div className="staff-motivation-dashboard staff-compact-surface" role="status" aria-label="Memuat dashboard…" aria-busy="true">
+        <HeroSkeleton />
+        <div className="staff-kpi-strip">
+          {Array.from({ length: 5 }).map((_, i) => <StatCardSkeleton key={i} />)}
+        </div>
+        <span className="visually-hidden">Memuat dashboard…</span>
+      </div>
+    );
+  }
+
   return (
     <div className="staff-motivation-dashboard staff-compact-surface">
       <Card className="staff-motivation-hero border-0 compact calmer staff-hero-ringkas">
@@ -122,6 +137,7 @@ export default function StaffMotivationDashboard({ user, tickets, rooms = [], in
           icon={<ListChecks size={20} aria-hidden />}
           variant={board.todayCount ? 'info' : 'success'}
           onClick={scrollToQueue}
+          animated
         />
         <StatCard
           title="Selesai hari ini"
@@ -129,6 +145,7 @@ export default function StaffMotivationDashboard({ user, tickets, rooms = [], in
           subtitle={`${board.progress}% dari beban hari ini`}
           icon={<CheckCircle2 size={20} aria-hidden />}
           variant="success"
+          animated
         />
         <StatCard
           title="Perlu bantuan"
@@ -137,6 +154,7 @@ export default function StaffMotivationDashboard({ user, tickets, rooms = [], in
           icon={<AlertTriangle size={20} aria-hidden />}
           variant={board.urgentCount ? 'danger' : 'success'}
           onClick={board.urgentCount ? scrollToQueue : undefined}
+          animated
         />
         <StatCard
           title="Meter belum dicatat"
@@ -146,6 +164,7 @@ export default function StaffMotivationDashboard({ user, tickets, rooms = [], in
           variant={meterPending ? 'warning' : 'success'}
           onClick={() => navigate('/rooms')}
           loading={meterLoading}
+          animated
         />
         <StatCard
           title="Kinerja bulan ini"
@@ -155,6 +174,7 @@ export default function StaffMotivationDashboard({ user, tickets, rooms = [], in
           variant={perfVariant(perf?.category?.tone)}
           onClick={() => navigate('/staff-report')}
           loading={performanceQuery.isLoading}
+          animated
         />
       </div>
 

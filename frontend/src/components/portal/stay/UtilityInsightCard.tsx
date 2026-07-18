@@ -1,10 +1,18 @@
 import { useMemo } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button, Card, Spinner } from 'react-bootstrap';
 import HorizontalBarChart, { type HorizontalBarPoint } from '../../charts/HorizontalBarChart';
+import LineAreaChart from '../../charts/LineAreaChart';
+import Sparkline from '../../charts/Sparkline';
+import UsageGauge from '../../charts/UsageGauge';
 import { OKABE_ITO } from '../../charts/chartPalette';
 import CurrencyDisplay from '../../common/CurrencyDisplay';
+import AnimatedCounter from '../../common/AnimatedCounter';
 import { fetchPublicConfig } from '../../../api/settings';
+import { refreshMyRoomMeter } from '../../../api/iot';
+import WaterFlowIndicator from './WaterFlowIndicator';
+import UtilityProjection from './UtilityProjection';
+import AnomalyAlert from './AnomalyAlert';
 import type { TenantRoomUtilityTelemetry, TenantUtilityDevice } from '../../../api/iot';
 import { summarizeUsageSinceCheckIn, estimateUtilityCost, numeric } from '../../../utils/meterUsage';
 import type { MeterReading, Stay } from '../../../types';
@@ -97,6 +105,16 @@ export default function UtilityInsightCard({
 
   const hasUsage = summary.rows.length > 1;
 
+  // Manual refresh mutation
+  const queryClient = useQueryClient();
+  const refreshMutation = useMutation({
+    mutationFn: refreshMyRoomMeter,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['portal-utility-telemetry'] });
+      queryClient.invalidateQueries({ queryKey: ['portal-meter-readings'] });
+    },
+  });
+
   return (
     <Card className="tenant-utility-insight border-0">
       <Card.Body>
@@ -106,7 +124,23 @@ export default function UtilityInsightCard({
         <section className="tenant-live-meter-panel" aria-live="polite" aria-label="Status meter otomatis">
           <div className="tenant-live-meter-panel-head">
             <strong>Status meter otomatis</strong>
-            <span>Pembaruan dicek tiap menit</span>
+            <div className="d-flex align-items-center gap-2">
+              <span>Pembaruan dicek tiap menit</span>
+              <Button
+                size="sm"
+                variant="outline-secondary"
+                className="btn-refresh-meter"
+                disabled={refreshMutation.isPending}
+                onClick={() => refreshMutation.mutate()}
+                title="Sinkronkan data terbaru dari meteran (maks 1× per 2 menit)"
+              >
+                {refreshMutation.isPending ? (
+                  <><Spinner animation="border" size="sm" className="me-1" /> Menyegarkan…</>
+                ) : (
+                  <>🔄 Segarkan</>
+                )}
+              </Button>
+            </div>
           </div>
           {isTelemetryLoading ? (
             <div className="tenant-live-meter-loading"><Spinner animation="border" size="sm" /> Memuat status meter…</div>
@@ -118,10 +152,22 @@ export default function UtilityInsightCard({
                 <LiveMeterTile device={telemetry.electricity} />
                 <LiveMeterTile device={telemetry.water} />
               </div>
+              {telemetry.water.status !== 'NO_DEVICE' ? (
+                <WaterFlowIndicator
+                  flowRateLpm={telemetry.water.flowRateLpm}
+                  totalM3={telemetry.water.total}
+                  status={telemetry.water.status}
+                  statusMessage={telemetry.water.statusMessage}
+                />
+              ) : null}
               <p className="tenant-live-meter-notice">{telemetry.billingNotice}</p>
             </>
           ) : null}
         </section>
+
+        {/* Anomaly detection alerts */}
+        <AnomalyAlert readings={readings} utilityType="ELECTRICITY" />
+        <AnomalyAlert readings={readings} utilityType="WATER" />
 
         {isLoading ? (
           <div className="py-4 text-center"><Spinner animation="border" size="sm" /></div>
@@ -139,10 +185,43 @@ export default function UtilityInsightCard({
           </div>
         ) : (
           <>
+            {/* Live electricity usage gauge */}
+            <div className="tenant-utility-gauge-row">
+              <UsageGauge
+                value={lastElecUsage}
+                maxValue={freeKwh}
+                unit="kWh"
+                label="Listrik"
+                thresholds={{ warning: 50, danger: 100 }}
+                size={150}
+              />
+              {waterEnabled ? (
+                <UsageGauge
+                  value={lastWaterUsage}
+                  maxValue={Math.max(lastWaterUsage * 1.5, 5)}
+                  unit="m³"
+                  label="Air"
+                  thresholds={{ warning: 70, danger: 90 }}
+                  size={150}
+                />
+              ) : null}
+            </div>
+
             <div className="tenant-utility-tiles">
               <div className="tenant-utility-tile">
                 <span className="ut-label">Listrik periode terakhir</span>
-                <strong className="ut-usage">{lastElecUsage.toFixed(2)} kWh</strong>
+                <div className="ut-usage-row">
+                  <strong className="ut-usage">{lastElecUsage.toFixed(2)} kWh</strong>
+                  {trendPoints.length >= 2 ? (
+                    <Sparkline
+                      points={trendPoints}
+                      ariaLabel="Tren listrik mini"
+                      width={72}
+                      height={22}
+                      strokeColor={OKABE_ITO.blue}
+                    />
+                  ) : null}
+                </div>
                 <span className="ut-cost">est. <CurrencyDisplay amount={estimate.electricity} showZero /></span>
                 <small className="ut-note">Jatah gratis {freeKwh} kWh/bulan</small>
               </div>
@@ -165,20 +244,41 @@ export default function UtilityInsightCard({
             {trendPoints.length >= 2 ? (
               <div className="tenant-utility-trend">
                 <div className="ut-trend-head">Tren pemakaian listrik (kWh)</div>
-                <HorizontalBarChart
+                <LineAreaChart
                   points={trendPoints}
                   ariaLabel="Tren pemakaian listrik per pencatatan"
                   valueFormatter={(v) => `${v} kWh`}
-                  height={Math.max(140, trendPoints.length * 34)}
-                  leftWidth={64}
-                  barSize={14}
+                  height={180}
                 />
+                {/* Mobile: fallback ke bar chart ringkas */}
+                <div className="d-sm-none mt-2">
+                  <HorizontalBarChart
+                    points={trendPoints}
+                    ariaLabel="Tren pemakaian listrik per pencatatan"
+                    valueFormatter={(v) => `${v} kWh`}
+                    height={Math.max(120, trendPoints.length * 32)}
+                    leftWidth={64}
+                    barSize={12}
+                  />
+                </div>
               </div>
             ) : null}
 
+            <div className="mt-3">
+              <UtilityProjection
+                currentUsageKwh={lastElecUsage}
+                freeKwh={freeKwh}
+                tariffPerKwh={elecTariff}
+                estimatedCost={estimate.electricity}
+              />
+            </div>
+
             <div className="tenant-utility-total">
-              Total sejak masuk: <strong>{summary.totalElectricityKwh.toFixed(2)} kWh</strong>
-              {waterEnabled ? <> · <strong>{summary.totalWaterM3.toFixed(2)} m³</strong></> : null}
+              Total sejak masuk:{' '}
+              <strong>
+                <AnimatedCounter value={summary.totalElectricityKwh} duration={900} formatter={(v) => `${v.toFixed(2)} kWh`} />
+              </strong>
+              {waterEnabled ? <> · <strong><AnimatedCounter value={summary.totalWaterM3} duration={900} formatter={(v) => `${v.toFixed(2)} m³`} /></strong></> : null}
             </div>
             <p className="text-muted small mb-0 mt-2">
               Estimasi — nominal final dihitung admin saat siklus meter &amp; muncul di tagihan.

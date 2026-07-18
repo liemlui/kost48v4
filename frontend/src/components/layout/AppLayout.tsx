@@ -10,6 +10,7 @@ import StaffTopWorkspaceNav from '../staff/StaffTopWorkspaceNav';
 import TenantWorkspaceTabs from '../tenant/TenantWorkspaceTabs';
 import MobileBottomNav from './MobileBottomNav';
 import AdminMobileBottomNav from './AdminMobileBottomNav';
+import StaffMobileBottomNav from './StaffMobileBottomNav';
 const CommandPalette = lazy(() => import('../common/CommandPalette'));
 import GlobalSearch from './GlobalSearch';
 import PaymentUrgencyChip from '../payment-urgency/PaymentUrgencyChip';
@@ -357,37 +358,40 @@ export default function AppLayout({ children }: { children?: ReactNode }) {
 
   if (isStaff) {
     return (
-      <div className="staff-workspace-shell">
-        <main className="staff-workspace-main">
-          <section className="staff-workspace-topbar">
-            <button type="button" className="staff-workspace-brand" onClick={() => navigate('/dashboard')}>
-              <Kost48LogoMark size="small" />
-              <span>
-                <strong>Operasional KOST48</strong>
-                <em>Kerja harian, kamar, gudang, dan laporan</em>
-              </span>
-            </button>
-
-            <div className="staff-workspace-userbar">
-              <NotificationBell />
-              <button type="button" className="staff-user-profile-trigger" onClick={() => navigate('/profile')} title="Buka profil">
-                <span className="text-end">
-                  <strong>{user?.fullName}</strong>
-                  <em>{getRoleLabel(user?.role)}</em>
+      <>
+        <div className="staff-workspace-shell">
+          <main className="staff-workspace-main">
+            <section className="staff-workspace-topbar">
+              <button type="button" className="staff-workspace-brand" onClick={() => navigate('/dashboard')}>
+                <Kost48LogoMark size="small" />
+                <span>
+                  <strong>Operasional KOST48</strong>
+                  <em>Kerja harian, kamar, gudang, dan laporan</em>
                 </span>
-                <TenantAvatar tenantId={user?.tenantId} fullName={user?.fullName} enabled={user?.role === 'TENANT'} />
               </button>
-              <Button variant="outline-danger" size="sm" onClick={handleLogoutClick}>Keluar</Button>
-            </div>
-          </section>
 
-          <StaffTopWorkspaceNav />
+              <div className="staff-workspace-userbar">
+                <NotificationBell />
+                <button type="button" className="staff-user-profile-trigger" onClick={() => navigate('/profile')} title="Buka profil">
+                  <span className="text-end">
+                    <strong>{user?.fullName}</strong>
+                    <em>{getRoleLabel(user?.role)}</em>
+                  </span>
+                  <TenantAvatar tenantId={user?.tenantId} fullName={user?.fullName} enabled={user?.role === 'TENANT'} />
+                </button>
+                <Button variant="outline-danger" size="sm" onClick={handleLogoutClick}>Keluar</Button>
+              </div>
+            </section>
 
-          <section className="staff-workspace-content">
-            {children ?? <Outlet />}
-          </section>
-        </main>
-      </div>
+            <StaffTopWorkspaceNav />
+
+            <section className="staff-workspace-content">
+              {children ?? <Outlet />}
+            </section>
+          </main>
+        </div>
+        <StaffMobileBottomNav />
+      </>
     );
   }
 
