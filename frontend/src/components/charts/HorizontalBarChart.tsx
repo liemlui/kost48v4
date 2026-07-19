@@ -29,6 +29,10 @@ type HorizontalBarChartProps<T extends HorizontalBarPoint> = {
   barSize?: number;
   onPointClick?: (point: T) => void;
   isPointClickable?: (point: T) => boolean;
+  /** Tambahkan separator/gap antar bar untuk visual distinction (default true) */
+  showSeparators?: boolean;
+  /** Ukuran gap antar bar dalam px (default 4) */
+  barGap?: number;
 };
 
 const DEFAULT_COLORS = CHART_PALETTE; // F3-12 (V-5): palet Okabe-Ito colorblind-safe
@@ -47,12 +51,19 @@ export default function HorizontalBarChart<T extends HorizontalBarPoint>({
   barSize = 18,
   onPointClick,
   isPointClickable = () => Boolean(onPointClick),
+  showSeparators = true,
+  barGap = 4,
 }: HorizontalBarChartProps<T>) {
   const safePoints = points.map((point, index) => ({
     ...point,
     value: Number.isFinite(point.value) ? Math.max(0, point.value) : 0,
     color: point.color ?? DEFAULT_COLORS[index % DEFAULT_COLORS.length],
   }));
+
+  // Height adjustment: tambah tinggi untuk separators
+  const adjustedHeight = showSeparators && safePoints.length > 1
+    ? height + safePoints.length * barGap * 0.5
+    : height;
   const domainMax = maxValue && maxValue > 0 ? maxValue : 'dataMax';
 
   if (safePoints.length === 0) {

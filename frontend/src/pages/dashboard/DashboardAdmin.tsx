@@ -1,4 +1,4 @@
-// FILE: DashboardAdmin.tsx â€” dashboard admin: operasional, keuangan, okupansi
+// FILE: DashboardAdmin.tsx — dashboard admin: operasional, keuangan, okupansi
 import { useState, type ReactNode } from 'react';
 import { Alert, Col, Row, Table } from 'react-bootstrap';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
@@ -10,6 +10,12 @@ import SegmentedTabs from '../../components/common/SegmentedTabs';
 import { AssistantInsightLine, EntityBadgeFilterBar } from '../../components/workspace';
 import AutoOpsControlPanel from '../../components/auto-ops/AutoOpsControlPanel';
 import SmartChartPanel, { type SmartChartPoint } from '../../components/charts/SmartChartPanel';
+import GaugeChart from '../../components/charts/GaugeChart';
+import ActivityRing from '../../components/charts/ActivityRing';
+import ComplicationGrid, { type ComplicationItem } from '../../components/common/ComplicationGrid';
+import SnippetCard from '../../components/common/SnippetCard';
+import RatingDisplay from '../../components/common/RatingDisplay';
+import DateRangeFilter, { type DateRangeValue, computeRange } from '../../components/common/DateRangeFilter';
 import { generateBrief, getOwnerAiStatus, type BriefResult } from '../../api/ai';
 import AiAssistButton from '../../components/ai/AiAssistButton';
 import AiResultPanel from '../../components/ai/AiResultPanel';
@@ -38,7 +44,7 @@ import { AdminStaffFrontlineList, AdminStaysUnifiedList, AdminFinanceWorkspace, 
 import { useAuth } from '../../context/AuthContext';
 import { getTenantKtpReviewQueue } from '../../api/tenants';
 
-// FASE-H: area kerja admin dipadatkan dari 6 â†’ 3 (Ringkasan Â· Penghuni & Uang Â· Operasional).
+// FASE-H: area kerja admin dipadatkan dari 6 → 3 (Ringkasan · Penghuni & Uang · Operasional).
 type AdminQueueArea = 'overview' | 'stays-finance' | 'ops';
 const CHECKOUT_STAYS_ROUTE = '/stays?status=CHECKOUT';
 
@@ -126,7 +132,7 @@ function AdminCommandHeader({ totalQueue, urgentCount, activeAreaLabel, dense, o
           <span>Terakhir update: {makeLastUpdatedLabel()}</span>
           {onToggleDense ? (
             <button type="button" className="btn btn-outline-secondary btn-sm admin-density-toggle" onClick={onToggleDense} aria-pressed={dense}>
-              {dense ? 'âŠž Lengkap' : 'âŠŸ Ringkas'}
+              {dense ? '⊕ Lengkap' : '⊟ Ringkas'}
             </button>
           ) : null}
         </div>
@@ -225,15 +231,12 @@ export default function AdminDashboard() {
   };
   const toggleQueueExpanded = () => setQueueExpanded((value) => !value);
   const toggleAiBrief = () => setAiBriefOpen((value) => !value);
-  // OWN-ROUTE-SPLIT: tetap di dashboard yang sama (OWNER `/admin-dashboard` atau ADMIN `/dashboard`) saat pindah area.
   const dashboardBase = location.pathname === '/admin-dashboard' ? '/admin-dashboard' : '/dashboard';
   const isOverview = activeArea === 'overview';
 
-  // N-05: 9+ query individual â†’ 1 aggregate (staleTime 60 s). AutoOps & staffPerformance tetap terpisah.
   const aggregateQuery = useQuery({ queryKey: ['admin-dashboard-aggregate'], queryFn: fetchAdminDashboardAggregate, staleTime: 60_000, retry: 1, retryDelay: 1000 });
   const staffPerformanceQuery = useQuery({ queryKey: ['dashboard-admin', 'staff-performance'], queryFn: () => fetchAdminStaffPerformance(), enabled: activeArea === 'ops', ...ACTION_QUERY_OPTIONS });
   const autoOpsQuery = useQuery({ queryKey: ['dashboard-admin', 'auto-ops-status'], queryFn: fetchAutoOpsStatus, enabled: isOverview || (activeArea === 'ops' && opsSubTab === 'tickets'), ...ACTION_QUERY_OPTIONS });
-  // H4: status AI untuk conditional render AiAssistButton di area overview
   const aiStatusQuery = useQuery({ queryKey: ['owner-ai-status'], queryFn: getOwnerAiStatus, staleTime: 300_000, retry: 1 });
   const surveySummaryQuery = useQuery({ queryKey: ['survey-summary'], queryFn: getSurveySummary, staleTime: 300_000, retry: 1 });
   const ktpReviewQuery = useQuery({ queryKey: ['tenants', 'ktp-review'], queryFn: getTenantKtpReviewQueue, staleTime: 60_000, retry: 1 });
@@ -351,7 +354,7 @@ export default function AdminDashboard() {
         </Alert>
       ) : null}
       {supportQueriesLoading ? <Alert variant="info" className="admin-support-loading-note">Data pendukung sedang dimuat. Dashboard utama tetap bisa dipakai.</Alert> : null}
-      {/* N-02: AdminHealthBar ringkas â€” gantikan AdminTodayStatusStrip + AdminContinuityStrip */}
+      {/* N-02: AdminHealthBar ringkas */}
       {activeArea === 'overview' ? (
         <AdminHealthBar
           occupiedCount={rooms.filter((room) => room.status === 'OCCUPIED').length}
@@ -363,21 +366,117 @@ export default function AdminDashboard() {
           lowStockCount={lowStockCount}
         />
       ) : null}
-      {/* Survei kepuasan ringkas â€” tampil di overview */}
+      {/* Visual Dashboard: Gauge, ActivityRing, SnippetCard, ComplicationGrid, RatingDisplay */}
+      {activeArea === 'overview' ? (
+        <section className="owner-panel mt-3 mb-3">
+          <div className="owner-panel-heading p-3">
+            <div>
+              <span className="owner-section-kicker">Visual Dashboard</span>
+              <h2 className="mb-0">Metrik Cepat</h2>
+            </div>
+          </div>
+          <div className="owner-panel-body p-3">
+            <Row className="g-3">
+              <Col xs={12} md={6} lg={3}>
+                <div className="d-flex flex-column align-items-center">
+                  <GaugeChart
+                    value={rooms.filter((room) => room.status === 'OCCUPIED').length}
+                    max={rooms.length || 1}
+                    label="Okupansi"
+                    unit="%"
+                    size={140}
+                    helperText={`${rooms.filter((room) => room.status === 'OCCUPIED').length} dari ${rooms.length} kamar terisi`}
+                  />
+                </div>
+              </Col>
+              <Col xs={12} md={6} lg={3}>
+                <div className="d-flex flex-column align-items-center">
+                  <ActivityRing
+                    segments={[
+                      { label: 'Terisi', value: rooms.length > 0 ? rooms.filter((r) => r.status === 'OCCUPIED').length / rooms.length : 0, color: '#16a34a' },
+                      { label: 'Booking', value: rooms.length > 0 ? rooms.filter((r) => r.status === 'RESERVED').length / rooms.length : 0, color: '#3b82f6' },
+                      { label: 'Kosong', value: rooms.length > 0 ? rooms.filter((r) => r.status === 'AVAILABLE').length / rooms.length : 0, color: '#94a3b8' },
+                    ]}
+                    size={120}
+                    centerValue={`${rooms.length > 0 ? Math.round((rooms.filter((r) => r.status === 'OCCUPIED').length / rooms.length) * 100) : 0}%`}
+                    centerLabel="Okupansi"
+                  />
+                </div>
+              </Col>
+              <Col xs={12} md={6} lg={3}>
+                <SnippetCard
+                  icon={<span>🧾</span>}
+                  title="Tagihan Open"
+                  value={openInvoiceCount}
+                  unit="tagihan"
+                  accentColor={overdueInvoiceCount > 0 ? '#dc2626' : '#3b82f6'}
+                  badge={overdueInvoiceCount > 0 ? `${overdueInvoiceCount} overdue` : undefined}
+                  badgeColor={overdueInvoiceCount > 0 ? '#dc2626' : undefined}
+                  to="/invoices"
+                  trend={overdueInvoiceCount > 0 ? 'up' : 'flat'}
+                  trendLabel={overdueInvoiceCount > 0 ? 'perlu perhatian' : 'aman'}
+                />
+              </Col>
+              <Col xs={12} md={6} lg={3}>
+                <SnippetCard
+                  icon={<span>🎫</span>}
+                  title="Tiket Aktif"
+                  value={activeTicketCount}
+                  unit="tiket"
+                  accentColor={unassignedTicketCount > 0 ? '#f59e0b' : '#3b82f6'}
+                  badge={unassignedTicketCount > 0 ? `${unassignedTicketCount} unassigned` : undefined}
+                  badgeColor={unassignedTicketCount > 0 ? '#f59e0b' : undefined}
+                  to="/tickets"
+                  trend={activeTicketCount > 0 ? 'up' : 'flat'}
+                  trendLabel={activeTicketCount > 0 ? 'sedang berjalan' : 'tidak ada'}
+                />
+              </Col>
+            </Row>
+            <Row className="g-3 mt-2">
+              <Col xs={12}>
+                <ComplicationGrid
+                  columns={4}
+                  items={[
+                    { id: 'occupancy', icon: <span>🏠</span>, label: 'Okupansi', value: rooms.length > 0 ? Math.round((rooms.filter((r) => r.status === 'OCCUPIED').length / rooms.length) * 100) : 0, unit: '%', color: '#16a34a', to: '/rooms', badge: `${rooms.filter((r) => r.status === 'OCCUPIED').length}/${rooms.length}` },
+                    { id: 'pending-approval', icon: <span>📋</span>, label: 'Review Booking', value: pendingApprovalCount, color: pendingApprovalCount > 0 ? '#f59e0b' : '#16a34a', to: '/stays?status=BOOKINGS', badge: pendingApprovalCount || undefined },
+                    { id: 'payment-review', icon: <span>💳</span>, label: 'Review Bayar', value: pendingPaymentReviewCount, color: pendingPaymentReviewCount > 0 ? '#f59e0b' : '#16a34a', to: '/payment-submissions/review', badge: pendingPaymentReviewCount || undefined },
+                    { id: 'renew', icon: <span>🔄</span>, label: 'Perpanjangan', value: pendingRenewCount, color: pendingRenewCount > 0 ? '#3b82f6' : '#16a34a', to: '/renew-requests', badge: pendingRenewCount || undefined },
+                    { id: 'checkout', icon: <span>🚪</span>, label: 'Checkout', value: checkoutWorkCount, color: checkoutWorkCount > 0 ? '#f59e0b' : '#16a34a', to: '/stays?status=CHECKOUT', badge: checkoutWorkCount || undefined },
+                    { id: 'overdue', icon: <span>⚠️</span>, label: 'Overdue', value: overdueInvoiceCount, color: overdueInvoiceCount > 0 ? '#dc2626' : '#16a34a', to: '/invoices', badge: overdueInvoiceCount || undefined },
+                    { id: 'tickets', icon: <span>🎫</span>, label: 'Tiket Aktif', value: activeTicketCount, color: activeTicketCount > 0 ? '#f59e0b' : '#16a34a', to: '/tickets', badge: activeTicketCount || undefined },
+                    { id: 'low-stock', icon: <span>📦</span>, label: 'Stok Menipis', value: lowStockCount, color: lowStockCount > 0 ? '#f59e0b' : '#16a34a', to: '/inventory/gudang', badge: lowStockCount || undefined },
+                  ]}
+                />
+              </Col>
+            </Row>
+            {surveySummaryQuery.data && surveySummaryQuery.data.count > 0 ? (
+              <div className="d-flex align-items-center gap-2 mt-3 p-2 rounded-3" style={{ background: '#f8fafc' }}>
+                <span className="fw-semibold small">⭐ Survei Penghuni</span>
+                <RatingDisplay value={Number(surveySummaryQuery.data.avgOverall ?? 0)} maxRating={5} size={16} showValue label={`dari ${surveySummaryQuery.data.count} respons`} />
+                {surveySummaryQuery.data.recommendRate !== null ? (
+                  <span className="small text-muted">| 👍 {surveySummaryQuery.data.recommendRate}% rekomendasi</span>
+                ) : null}
+                <Link to="/surveys" className="small ms-auto" style={{ whiteSpace: 'nowrap' }}>Lihat semua →</Link>
+              </div>
+            ) : null}
+          </div>
+        </section>
+      ) : null}
+      {/* Survei kepuasan ringkas — tampil di overview */}
       {activeArea === 'overview' && surveySummaryQuery.data && surveySummaryQuery.data.count > 0 ? (
         <div className="d-flex align-items-center gap-3 mb-2 p-2 rounded-3" style={{ background: 'linear-gradient(135deg,#fefce8,#fffbeb)', border: '1px solid #fcd34d' }}>
-          <span className="fw-semibold small">â­ Survei Penghuni</span>
+          <span className="fw-semibold small">⭐ Survei Penghuni</span>
           <span className="text-muted small">|</span>
           <span className="small">{surveySummaryQuery.data.count} respons</span>
           <span className="text-muted small">|</span>
-          <span className="small">Rata-rata <strong>{surveySummaryQuery.data.avgOverall ?? 'â€”'}</strong> â˜…</span>
+          <span className="small">Rata-rata <strong>{surveySummaryQuery.data.avgOverall ?? '—'}</strong> ★</span>
           {surveySummaryQuery.data.recommendRate !== null ? (
             <>
               <span className="text-muted small">|</span>
-              <span className="small">ðŸ‘ {surveySummaryQuery.data.recommendRate}% rekomendasi</span>
+              <span className="small">👍 {surveySummaryQuery.data.recommendRate}% rekomendasi</span>
             </>
           ) : null}
-          <Link to="/surveys" className="small ms-auto" style={{ whiteSpace: 'nowrap' }}>Lihat semua â†’</Link>
+          <Link to="/surveys" className="small ms-auto" style={{ whiteSpace: 'nowrap' }}>Lihat semua →</Link>
         </div>
       ) : null}
       {activeArea === 'overview' && (autoOpsQuery.isError || autoOpsNeedsAction) ? (
@@ -463,8 +562,7 @@ export default function AdminDashboard() {
           ) : null}
         </section>
       ) : null}
-      {/* N-02: AssistantPanel full-width di bawah antrean */}
-      {/* Daily Assistant digantikan oleh AdminWorkLane cards di atas — hindari duplikasi count */}
+      {/* Daily Assistant digantikan oleh AdminWorkLane cards di atas */}
       {activeArea === 'stays-finance' ? <AdminProcessLine /> : null}
       {activeArea === 'stays-finance' ? (
         <SegmentedTabs<'stays' | 'finance'>
