@@ -847,6 +847,15 @@ body.offcanvas-open {
   100% { background-position: -200% 0; }
 }
 
+/* Skeleton → content fade transition */
+@keyframes contentFadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.skeleton-fade-in {
+  animation: contentFadeIn 0.3s ease-out;
+}
+
 .wizard-steps {
   display: flex;
   align-items: center;

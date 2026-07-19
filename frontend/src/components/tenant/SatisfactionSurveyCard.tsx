@@ -4,23 +4,10 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { getMySurveyStatus, submitSurvey } from '../../api/surveys';
 import { getApiErrorMessage } from '../../utils/getApiErrorMessage';
 
+import StarRating from '../common/StarRating';
+
 function Stars({ value, onChange, ariaLabel }: { value: number; onChange: (n: number) => void; ariaLabel: string }) {
-  return (
-    <div className="d-inline-flex gap-1" role="group" aria-label={ariaLabel}>
-      {[1, 2, 3, 4, 5].map((n) => (
-        <button
-          key={n}
-          type="button"
-          onClick={() => onChange(n)}
-          aria-label={`${n} dari 5`}
-          className="survey-star"
-          style={{ color: n <= value ? '#f59e0b' : '#cbd5e1' }}
-        >
-          ★
-        </button>
-      ))}
-    </div>
-  );
+  return <StarRating value={value} onChange={onChange} ariaLabel={ariaLabel} size={20} />;
 }
 
 const ASPECTS: Array<{ key: 'cleanliness' | 'staffService' | 'facility' | 'valueForMoney'; label: string }> = [

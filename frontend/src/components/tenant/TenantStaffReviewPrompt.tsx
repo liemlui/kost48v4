@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Alert, Button, Card, Form, Modal, Spinner } from 'react-bootstrap';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import StarRating from '../common/StarRating';
 import { fetchEligibleStaffReviews, submitTenantStaffReview, type EligibleStaffReviewItem } from '../../api/tenantStaffReviews';
 
 const COMPLAINT_CATEGORIES = [
@@ -37,7 +38,6 @@ export default function TenantStaffReviewPrompt() {
   const queryClient = useQueryClient();
   const [selected, setSelected] = useState<EligibleStaffReviewItem | null>(null);
   const [rating, setRating] = useState(5);
-  const [hoveredStar, setHoveredStar] = useState(0);
   const [complaintCategory, setComplaintCategory] = useState('');
   const [praiseTag, setPraiseTag] = useState('');
   const [comment, setComment] = useState('');
@@ -47,7 +47,6 @@ export default function TenantStaffReviewPrompt() {
 
   const isComplaint = rating <= 2;
   const isPraise = rating >= 4;
-  const ratingMeta = RATING_LABELS[rating] ?? RATING_LABELS[5];
 
   const canSubmit = !isComplaint || complaintCategory !== '';
 
@@ -69,7 +68,6 @@ export default function TenantStaffReviewPrompt() {
       await queryClient.invalidateQueries({ queryKey: ['portal-tickets'] });
       setSelected(null);
       setRating(5);
-      setHoveredStar(0);
       setComplaintCategory('');
       setPraiseTag('');
       setComment('');
@@ -79,7 +77,6 @@ export default function TenantStaffReviewPrompt() {
   const openReview = (item: EligibleStaffReviewItem) => {
     setSelected(item);
     setRating(5);
-    setHoveredStar(0);
     setComplaintCategory('');
     setPraiseTag('');
     setComment('');
@@ -132,27 +129,14 @@ export default function TenantStaffReviewPrompt() {
           {/* Star Rating */}
           <div className="review-star-section mb-3">
             <Form.Label className="fw-semibold mb-2">Beri rating hasil pekerjaan</Form.Label>
-            <div className="tenant-star-row-enhanced">
-              {[1, 2, 3, 4, 5].map((value) => {
-                const active = value <= (hoveredStar || rating);
-                return (
-                  <button
-                    key={value}
-                    type="button"
-                    className={`star-btn ${active ? 'active' : ''}`}
-                    onMouseEnter={() => setHoveredStar(value)}
-                    onMouseLeave={() => setHoveredStar(0)}
-                    onClick={() => { setRating(value); setComplaintCategory(''); setPraiseTag(''); }}
-                    aria-label={`${value} bintang`}
-                  >
-                    ★
-                  </button>
-                );
-              })}
-            </div>
-            <div className="review-rating-label" style={{ color: ratingMeta.color }}>
-              {'★'.repeat(rating)}{'☆'.repeat(5 - rating)} — {ratingMeta.text}
-            </div>
+            <StarRating
+              value={rating}
+              onChange={(v) => { setRating(v); setComplaintCategory(''); setPraiseTag(''); }}
+              size={28}
+              showLabel
+              labels={Object.fromEntries(Object.entries(RATING_LABELS).map(([k, v]) => [k, v.text]))}
+              activeColor="#f59e0b"
+            />
           </div>
 
           {/* Complaint categories for low rating */}
