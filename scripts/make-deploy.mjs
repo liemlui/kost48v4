@@ -402,7 +402,7 @@ validateDeployLock();
 console.log('[deploy] 6/6 tulis .env.example + README + arsip tgz ...');
 writeFileSync(OUT + '/.env.example', [
   '# Salin jadi `.env` di ROOT folder app (dibaca app + script seed). JANGAN commit.',
-  'DATABASE_URL="postgresql://USER:PASS@localhost:5432/kost48_v3?schema=public"',
+  'DATABASE_URL="postgresql://USER:PASS@127.0.0.1:5432/kost48_v3?schema=public"',
   'JWT_SECRET="ganti-dengan-secret-acak-kuat-min-32-char"',
   'NODE_ENV=production',
   'CORS_ORIGIN="https://domain-anda"   # combined same-origin: cukup domainnya',

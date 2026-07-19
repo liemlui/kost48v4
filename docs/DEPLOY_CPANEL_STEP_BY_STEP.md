@@ -31,7 +31,7 @@ cPanel → PostgreSQL Databases
 
 Catat:
 ```
-DATABASE_URL=postgresql://kost48_user:PASSWORD@localhost:5432/kost48_v3?schema=public
+DATABASE_URL=postgresql://kost48_user:PASSWORD@127.0.0.1:5432/kost48_v3?schema=public
 ```
 
 ---
@@ -97,7 +97,7 @@ nano .env
 
 **Isi minimal `.env`:**
 ```env
-DATABASE_URL="postgresql://kost48_user:PASSWORD@localhost:5432/kost48_v3?schema=public"
+DATABASE_URL="postgresql://kost48_user:PASSWORD@127.0.0.1:5432/kost48_v3?schema=public"
 JWT_SECRET="(generate di bawah)"
 NODE_ENV=production
 CORS_ORIGIN="https://domain-anda.com"
@@ -139,7 +139,7 @@ node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"
 npx prisma db push
 
 # 2. Seed — fix ownership + trigger + data master (1 file, 1x run)
-psql "postgresql://kost48_user:PASS@localhost:5432/kost48_v3" -f sql/seed.sql
+psql "postgresql://kost48_user:PASS@127.0.0.1:5432/kost48_v3" -f sql/seed.sql
 ```
 
 > ⚠️ **Ganti `kost48s1_lurin`** di baris 5 `seed.sql` jika user PostgreSQL di `DATABASE_URL` berbeda.
