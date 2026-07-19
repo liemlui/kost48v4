@@ -33,8 +33,11 @@ export default function UsageGauge({
 }: UsageGaugeProps) {
   const safeMax = maxValue > 0 ? maxValue : 1;
   const pct = Math.min(Math.max((value / safeMax) * 100, 0), 100);
+  const isEmpty = maxValue <= 0 || (value <= 0 && maxValue <= 0);
 
-  const color = pct >= thresholds.danger
+  const color = isEmpty
+    ? '#94a3b8'   // grey — empty state
+    : pct >= thresholds.danger
     ? '#D55E00'   // vermillion (danger)
     : pct >= thresholds.warning
       ? '#E69F00'   // orange (warning)
@@ -112,13 +115,17 @@ export default function UsageGauge({
 
       {showValue ? (
         <div className="usage-gauge-value" style={{ color }}>
-          <strong>{value.toFixed(1)}</strong>
+          <strong>{isEmpty ? '—' : value.toFixed(1)}</strong>
           <span>{unit}</span>
         </div>
       ) : null}
       <div className="usage-gauge-label">
         {label}
-        <small>{Math.round(pct)}% dari jatah gratis {maxValue} {unit}</small>
+        {isEmpty ? (
+          <small>Belum ada data</small>
+        ) : (
+          <small>{Math.round(pct)}% dari jatah gratis {maxValue} {unit}</small>
+        )}
       </div>
     </div>
   );

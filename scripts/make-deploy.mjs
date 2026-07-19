@@ -355,10 +355,6 @@ function createVerifiedArchive() {
       rmSync(ARCHIVE_TMP, { force: true });
       fail('arsip memuat file environment rahasia: `' + entry + '`.');
     }
-    if (entry === 'setup.sql' || entry.startsWith('sql/')) {
-      rmSync(ARCHIVE_TMP, { force: true });
-      fail('arsip memuat SQL legacy/seed: `' + entry + '`. Data database tidak boleh ikut ke paket kode.');
-    }
     if (
       entry === 'scripts/seed-prod-reset.js'
       || entry === 'scripts/seed-prod-real.js'
@@ -391,13 +387,14 @@ if (NO_BUILD) {
 console.log('[deploy] 3/6 siapkan folder ' + OUT + '/ ...');
 mkdirSync(OUT + '/scripts', { recursive: true });
 
-console.log('[deploy] 4/6 copy backend PREBUILT (dist tanpa binary *.node) + prisma + package deploy + frontend client/ ...');
+console.log('[deploy] 4/6 copy backend PREBUILT (dist tanpa binary *.node) + prisma + SQL schema/seed + package deploy + frontend client/ ...');
 // dist/ prebuilt — buang engine binary platform-spesifik (query_engine-*.dll.node dsb; Linux pakai WASM).
 cpSync('backend/dist', OUT + '/dist', {
   recursive: true,
   filter: (src) => !src.endsWith('.node') && !src.endsWith(BUILD_MARKER),
 });
 cpSync('backend/prisma', OUT + '/prisma', { recursive: true });
+if (existsSync('backend/sql')) cpSync('backend/sql', OUT + '/sql', { recursive: true });
 writeDeployPackageFiles();
 cpSync('backend/scripts/seed-owner.js', OUT + '/scripts/seed-owner.js'); // seed OWNER pertama (F1-12) di server
 if (existsSync('backend/scripts/bootstrap-tuya-kwh.js')) cpSync('backend/scripts/bootstrap-tuya-kwh.js', OUT + '/scripts/bootstrap-tuya-kwh.js'); // register 13 KWH Tuya device
@@ -466,12 +463,19 @@ Tanpa tsc, tanpa prisma generate, tanpa devDependencies — aman untuk hosting R
    # isi: DATABASE_URL, JWT_SECRET, CORS_ORIGIN, AUTO_OPS_CRON_TOKEN, IOT_TUYA_CRON_TOKEN, IOT_MASTER_KEY
    npm run cpanel:install
    \`\`\`
-5. **Setup database + owner pertama** (database baru/kosong):
+5. **Setup database** — pilih **satu** jalur, hanya untuk database baru/kosong:
    \`\`\`bash
+   # Jalur A: schema terbaru, tanpa data historis
    npm run cpanel:migrate
    OWNER_EMAIL=owner@domain-anda OWNER_PASSWORD='buat-password-kuat' OWNER_FULLNAME='Pemilik KOST48' node scripts/seed-owner.js
    \`\`\`
-   > Paket deploy sengaja **tidak membawa** data tenant, KTP/NIK, kwitansi, atau password default. Input/impor data bisnis dilakukan dari workstation operator yang terlindungi, setelah owner pertama dibuat.
+   Atau untuk memulihkan data teraudit yang disertakan paket:
+   \`\`\`bash
+   # Jalur B: schema + seed teraudit. Jangan jalankan Jalur A setelah ini.
+   psql "<DATABASE_URL>" -f sql/schema.sql
+   psql "<DATABASE_URL>" -f sql/seed.sql
+   \`\`\`
+   > Folder \`sql/\` dapat berisi data bisnis/tenant teraudit. Paket ini hanya boleh disimpan dan diunggah ke server tepercaya; jangan dibagikan secara publik atau dipakai pada database yang sudah berisi data.
 7. **Start App** (Setup Node.js App → Start) + **AutoSSL** domain → HTTPS.
 8. **Cron Jobs** (WAJIB — Passenger idle-sleep):
    \`\`\`
@@ -500,4 +504,4 @@ const total = countFiles(OUT);
 console.log('\n[deploy] SELESAI.');
 console.log('  Folder siap-upload : ' + OUT + '/  (' + total + ' file — estimasi pemakaian inode upload)');
 console.log('  Arsip terverifikasi: ' + ARCHIVE);
-console.log('  Di server: npm run cpanel:install -> isi .env -> migrate+OWNER -> Restart App  (lihat ' + OUT + '/README-DEPLOY.md)');
+console.log('  Di server: npm run cpanel:install -> isi .env -> pilih migrate+OWNER atau SQL seed -> Restart App  (lihat ' + OUT + '/README-DEPLOY.md)');

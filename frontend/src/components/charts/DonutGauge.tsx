@@ -37,9 +37,11 @@ export default function DonutGauge({
 }: DonutGaugeProps) {
   const safeMax = Number.isFinite(max) && max > 0 ? max : 100;
   const safeValue = clamp(value, safeMax);
+  const isEmpty = Number(!Number.isFinite(value)) || (value <= 0 && (max <= 0 || !Number.isFinite(max)));
+  const displayColor = isEmpty ? '#94a3b8' : color;
   const data = [
-    { name: 'Nilai', value: safeValue, color },
-    { name: 'Sisa', value: Math.max(safeMax - safeValue, 0), color: trackColor },
+    { name: 'Nilai', value: isEmpty ? 0 : safeValue, color: displayColor },
+    { name: 'Sisa', value: isEmpty ? 100 : Math.max(safeMax - safeValue, 0), color: trackColor },
   ];
 
   return (

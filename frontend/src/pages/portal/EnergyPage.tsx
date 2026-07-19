@@ -1,9 +1,10 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { Card, Spinner } from 'react-bootstrap';
 import FeatureErrorBoundary from '../../components/common/FeatureErrorBoundary';
 import LineAreaChart from '../../components/charts/LineAreaChart';
+import ChartRangeSelector, { type ChartGranularity } from '../../components/charts/ChartRangeSelector';
 import UsageGauge from '../../components/charts/UsageGauge';
 import HorizontalBarChart, { type HorizontalBarPoint } from '../../components/charts/HorizontalBarChart';
 import CurrencyDisplay from '../../components/common/CurrencyDisplay';
@@ -187,6 +188,9 @@ export default function EnergyPage() {
   const isLoading = meterReadingsQuery.isLoading || utilityTelemetryQuery.isLoading;
   const isError = meterReadingsQuery.isError;
 
+  // Chart granularity state
+  const [chartGranularity, setChartGranularity] = useState<ChartGranularity>('monthly');
+
   // Loading / no stay
   if (stayQuery.isLoading) {
     return (
@@ -314,7 +318,9 @@ export default function EnergyPage() {
           {/* Trend chart */}
           {trendPoints.length >= 2 ? (
             <section className="energy-trend-section">
-              <h2 className="energy-section-title">Tren Pemakaian Listrik (kWh)</h2>
+              <div className="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                <h2 className="energy-section-title" style={{ margin: 0 }}>Tren Pemakaian Listrik</h2>
+                <ChartRangeSelector value={chartGranularity} onChange={setChartGranularity} compact />
               <div className="energy-chart-wrapper">
                 <LineAreaChart
                   points={trendPoints}
