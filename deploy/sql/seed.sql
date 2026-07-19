@@ -12,7 +12,12 @@ BEGIN;
 --   6) InvoiceLine.updatedAt diisi dan DISCOUNT dibuat non-negatif
 --   7) F3/F4 dipertahankan sebagai Room INACTIVE untuk relasi historis;
 --      kamar operasional aktif tetap hanya F1/F2
--- Jangan jalankan pada production DB tanpa backup dan review.
+--   8) cleanup trigger/constraint memakai regclass yang benar agar rerun aman.
+--
+-- HANYA UNTUK DB KOSONG, atau DB yang sejak awal diinisialisasi oleh seed ini.
+-- Seed memakai ID historis eksplisit; JANGAN gunakan untuk menggabungkan data ke
+-- DB aplikasi yang sudah punya Tenant/Stay/Invoice. Backup dan migrasi khusus
+-- wajib dibuat serta direview sebelum impor ke DB tersebut.
 -- ============================================================================
 
 -- =========================================================
@@ -29,7 +34,10 @@ DO $$ DECLARE r record; BEGIN
     'meter_reading_monotonic_trg','inventory_movement_sync_qty_trg'
   ) AND NOT tgisinternal
   LOOP
-    BEGIN EXECUTE format('DROP TRIGGER IF EXISTS %I ON %I', r.tgname, r.tablename);
+    -- `regclass::text` sudah berupa identifier SQL yang ter-quote bila perlu.
+    -- Jangan format sebagai %I lagi karena `public."Invoice"` akan menjadi
+    -- satu identifier literal dan trigger lama tidak pernah terhapus.
+    BEGIN EXECUTE format('DROP TRIGGER IF EXISTS %I ON %s', r.tgname, r.tablename);
     EXCEPTION WHEN OTHERS THEN RAISE NOTICE 'Skip drop trigger % on %', r.tgname, r.tablename; END;
   END LOOP;
 
@@ -43,7 +51,9 @@ DO $$ DECLARE r record; BEGIN
   -- DROP constraints (skip if not owner)
   FOR r IN SELECT conname, conrelid::regclass::text AS tbl FROM pg_constraint WHERE connamespace = 'public'::regnamespace AND contype = 'c'
   LOOP
-    BEGIN EXECUTE format('ALTER TABLE %I DROP CONSTRAINT IF EXISTS %I', r.tbl, r.conname);
+    -- Sama seperti trigger: gunakan %s untuk nilai regclass::text agar nama
+    -- tabel CamelCase tetap valid saat seed dijalankan ulang.
+    BEGIN EXECUTE format('ALTER TABLE %s DROP CONSTRAINT IF EXISTS %I', r.tbl, r.conname);
     EXCEPTION WHEN OTHERS THEN RAISE NOTICE 'Skip drop constraint % on %', r.conname, r.tbl; END;
   END LOOP;
 

@@ -455,12 +455,13 @@ Tanpa tsc, tanpa prisma generate, tanpa devDependencies — aman untuk hosting R
    cp .env.example .env && nano .env
    # isi: DATABASE_URL, JWT_SECRET, CORS_ORIGIN, AUTO_OPS_CRON_TOKEN, IOT_TUYA_CRON_TOKEN, IOT_MASTER_KEY
    \`\`\`
-5. **Setup Database (1 perintah)**:
+5. **Setup Database (hanya database baru/kosong)**:
    \`\`\`bash
-   npx prisma db push
+   psql "<DATABASE_URL>" -f sql/schema.sql
    psql "<DATABASE_URL>" -f sql/seed.sql
    \`\`\`
-   > seed.sql sudah include: fix ownership + trigger/function + data master (13 tenant, COA, transaksi historis).
+   > \`seed.sql\` sudah include pagar database + data master dan transaksi historis teraudit.
+   > **Jangan jalankan \`schema.sql\` atau \`seed.sql\` pada database yang sudah berisi data aplikasi.** Seed memakai ID historis eksplisit dan bukan alat migrasi/merge data. Backup lalu gunakan migrasi khusus yang telah direview.
 6. **Seed OWNER pertama**:
    \`\`\`bash
    OWNER_EMAIL=owner@domain.com OWNER_PASSWORD='GANTI_kuat' OWNER_FULLNAME='Pemilik KOST48' npm run seed:owner
@@ -474,6 +475,7 @@ Tanpa tsc, tanpa prisma generate, tanpa devDependencies — aman untuk hosting R
 9. **Smoke**: \`https://domain/\` tampil · \`/api/public/rooms\` 200 · login OWNER.
 
 ## Redeploy (update)
+Untuk redeploy kode, jangan jalankan \`schema.sql\` atau \`seed.sql\` pada database yang sudah ada.
 \`\`\`bash
 # Stop app → backup DB + uploads/ → extract TGZ baru → Start app
 # TIDAK perlu npm install — node_modules sudah include di TGZ.

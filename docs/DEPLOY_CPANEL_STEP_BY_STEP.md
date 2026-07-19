@@ -134,6 +134,8 @@ node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"
 
 ### 5. SETUP DATABASE
 
+> Jalankan blok ini hanya pada database baru/kosong. `seed.sql` memakai ID historis eksplisit, sehingga bukan alat untuk menggabungkan data ke database aplikasi yang sudah terisi. Untuk redeploy kode, backup lalu restart aplikasi tanpa menjalankan schema atau seed.
+
 ```bash
 # 1. Schema via Prisma
 npx prisma db push
