@@ -100,5 +100,15 @@ Scan/
 # Generated intermediate files
 scripts/_parsed_master_data.json
 
+# Data sumber dan helper impor bisnis nyata: hanya untuk workstation operator,
+# tidak boleh ikut commit atau paket deploy.
+backend/scripts/seed-data.json
+scripts/seed-data.json
+backend/scripts/*real*.js
+backend/scripts/import-real-historical-assets.js
+backend/scripts/sync-real-expenses-assets.js
+backend/scripts/correct-real-seed-pricing.js
+backend/scripts/real-seed-source-audit.js
+
 *storybook.log
 storybook-static

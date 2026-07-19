@@ -10,6 +10,7 @@ export const peopleConfigs = {
     title: 'Users & Akses',
     supportsIsActiveFilter: true,
     path: '/users',
+    emptyMessage: 'Belum ada pengguna terdaftar. Klik "Tambah" untuk menambahkan user pertama.',
     columns: [
       { key: 'id', label: 'ID' },
       { key: 'fullName', label: 'Nama' },
@@ -61,6 +62,7 @@ export const peopleConfigs = {
     title: 'Tenants & Portal Access',
     supportsIsActiveFilter: true,
     path: '/tenants',
+    emptyMessage: 'Belum ada tenant terdaftar. Klik "Tambah" untuk mendaftarkan tenant pertama.',
     columns: [
       { key: 'fullName', label: 'Nama Tenant' },
       { key: 'phone', label: 'HP' },

@@ -12,9 +12,7 @@ import { getOfficialAnnouncementFallbackImage } from '../../data/officialKost48C
 import PageHeader from '../../components/common/PageHeader';
 import { formatDateOnly } from '../../utils/dateTime';
 
-function formatDate(value?: string | null) {
-  return formatDateOnly(value);
-}
+
 
 export default function MyAnnouncementsPage() {
   const navigate = useNavigate();
@@ -77,8 +75,8 @@ export default function MyAnnouncementsPage() {
                     {item.audience ? <Badge bg="secondary">{item.audience === 'ALL' ? 'Semua Pengguna' : 'Penghuni'}</Badge> : null}
                   </div>
                   <div className="app-caption">
-                    Dipublikasikan {formatDate(item.publishedAt)}
-                    {item.expiresAt ? ` · Berlaku sampai ${formatDate(item.expiresAt)}` : ''}
+                    Dipublikasikan {formatDateOnly(item.publishedAt)}
+                    {item.expiresAt ? ` · Berlaku sampai ${formatDateOnly(item.expiresAt)}` : ''}
                   </div>
                 </div>
                 <Button variant="outline-primary" size="sm" onClick={() => navigate(`/portal/announcements/${item.id}`)}>Lihat</Button>

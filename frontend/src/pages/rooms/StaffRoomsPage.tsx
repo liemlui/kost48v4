@@ -70,6 +70,7 @@ export default function StaffRoomsPage() {
 
       {(roomsQuery.isLoading || roomItemsQuery.isLoading) ? <div className="py-5 text-center"><Spinner /> Memuat kamar...</div> : null}
       {roomsQuery.isError ? <Alert variant="danger">Gagal memuat daftar kamar.</Alert> : null}
+      {roomItemsQuery.isError ? <Alert variant="warning">Gagal memuat data barang kamar. Jumlah masalah mungkin tidak akurat.</Alert> : null}
       {!roomsQuery.isLoading && !roomsQuery.isError && !sortedRooms.length ? <Alert variant="secondary">Belum ada kamar aktif.</Alert> : null}
 
       {/* R-21: Tabel meter dipindah ke sini dari dashboard Hari Ini agar mobile lebih ramping */}

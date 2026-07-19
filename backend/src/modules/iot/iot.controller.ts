@@ -1,13 +1,23 @@
-import { Body, Controller, ForbiddenException, Get, Headers, HttpCode, Param, ParseIntPipe, Patch, Post, Query } from '@nestjs/common';
+import { timingSafeEqual } from 'node:crypto';
+import { Body, Controller, ForbiddenException, Get, Headers, HttpCode, Param, ParseIntPipe, Patch, Post, Query, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { UserRole } from '../../common/enums/app.enums';
 import { CurrentUserPayload } from '../../common/interfaces/current-user.interface';
 import { Public } from '../../common/decorators/public.decorator';
+import { RateLimit } from '../../common/decorators/rate-limit.decorator';
+import { RateLimitGuard } from '../../common/guards/rate-limit.guard';
 import { CreateIotDeviceDto, IotDeviceQueryDto, IotTelemetryQueryDto, TuyaProbeDto, UpdateIotDeviceDto } from './dto/iot-device.dto';
 import { IotService } from './iot.service';
 import { IotPollingService } from './iot-polling.service';
+
+function tokensMatch(expected: string, provided: string): boolean {
+  if (!expected || !provided) return false;
+  const expectedBytes = Buffer.from(expected);
+  const providedBytes = Buffer.from(provided);
+  return expectedBytes.length === providedBytes.length && timingSafeEqual(expectedBytes, providedBytes);
+}
 
 @ApiTags('iot')
 @ApiBearerAuth()
@@ -65,13 +75,15 @@ export class IotController {
 
   @Public()
   @Roles()
+  @UseGuards(RateLimitGuard)
+  @RateLimit('cron')
   @Post('tuya/cron')
   @HttpCode(200)
   @ApiOperation({ summary: 'Trigger polling Tuya dari cron server - token X-Iot-Cron-Token wajib' })
   async pollTuyaFromCron(@Headers('x-iot-cron-token') headerToken?: string) {
     const expected = (process.env.IOT_TUYA_CRON_TOKEN ?? '').trim();
     const provided = (headerToken ?? '').trim();
-    if (!expected || provided !== expected) {
+    if (!tokensMatch(expected, provided)) {
       throw new ForbiddenException('Token cron IoT tidak valid');
     }
     return { message: 'Polling Tuya dari cron selesai', data: await this.polling.runExternalCron() };

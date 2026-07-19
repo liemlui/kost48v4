@@ -33,10 +33,6 @@ function monthName(year: number, month: number) {
   );
 }
 
-function formatDateTime(value?: string | null) {
-  return formatDateTimeWib(value);
-}
-
 function CheckBadge({ ready }: { ready: boolean }) {
   return <Badge bg={ready ? 'success' : 'warning'}>{ready ? 'OK' : 'Blokir'}</Badge>;
 }
@@ -148,10 +144,10 @@ export default function PeriodClosePanel({
 
         {isClosed && readiness?.period ? (
           <Row className="g-2 mb-3">
-            <Col md={3}><div className="p-3 rounded-3 border bg-white h-100"><div className="small text-muted">Ditutup pada</div><div className="fw-semibold">{formatDateTime(readiness.period.closedAt)}</div></div></Col>
+            <Col md={3}><div className="p-3 rounded-3 border bg-white h-100"><div className="small text-muted">Ditutup pada</div><div className="fw-semibold">{formatDateTimeWib(readiness.period.closedAt)}</div></div></Col>
             <Col md={3}><div className="p-3 rounded-3 border bg-white h-100"><div className="small text-muted">Jurnal closing</div><div className="fw-semibold">#{readiness.period.closingJournalEntryId ?? '-'}</div></div></Col>
             <Col md={3}><div className="p-3 rounded-3 border bg-white h-100"><div className="small text-muted">Versi closing</div><div className="fw-semibold">V{readiness.period.closeVersion ?? 1}</div></div></Col>
-            <Col md={3}><div className="p-3 rounded-3 border bg-white h-100"><div className="small text-muted">Reopen terakhir</div><div className="fw-semibold">{readiness.period.reopenedAt ? formatDateTime(readiness.period.reopenedAt) : '-'}</div></div></Col>
+            <Col md={3}><div className="p-3 rounded-3 border bg-white h-100"><div className="small text-muted">Reopen terakhir</div><div className="fw-semibold">{readiness.period.reopenedAt ? formatDateTimeWib(readiness.period.reopenedAt) : '-'}</div></div></Col>
           </Row>
         ) : null}
 

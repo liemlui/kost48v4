@@ -122,6 +122,7 @@ function getTenantSections(stage: TenantPortalStage = 'occupied', features?: Ten
     title: 'Portal Penghuni',
     links: [
       { to: '/portal/stay', label: 'Panduan Kos Saya', icon: '🏠', hint: 'Kamar, masa sewa, tagihan, dan aksi berikutnya.' },
+      { to: '/portal/energy', label: 'Energi', icon: '⚡', hint: 'Monitoring listrik & air real-time. Meteran otomatis.' },
       { to: '/portal/invoices', label: 'Bayar Tagihan', icon: '💳', hint: 'Tagihan, status, dan tindak lanjut pembayaran.' },
       { to: '/portal/tickets', label: 'Lapor Masalah', icon: '🛠️', hint: 'Laporkan kerusakan atau kebutuhan bantuan dan pantau progresnya.' },
       { to: '/portal/announcements', label: 'Pengumuman', icon: '📢', hint: 'Info terbaru dari pengelola KOST48.' },

@@ -35,6 +35,7 @@ const AncillaryRevenuePage = lazy(() => import('./pages/finance/AncillaryRevenue
 const LossRefundsPage = lazy(() => import('./pages/finance/LossRefundsPage'));
 const AccountingSetupPage = lazy(() => import('./pages/finance/AccountingSetupPage'));
 const AssetRegisterPage = lazy(() => import('./pages/finance/AssetRegisterPage'));
+const PurchaseOperationsPage = lazy(() => import('./pages/finance/PurchaseOperationsPage'));
 const PaymentReviewPage = lazy(() => import('./pages/payments/PaymentReviewPage'));
 const ReminderPreviewPage = lazy(() => import('./pages/reminders/ReminderPreviewPage'));
 const ReportsPage = lazy(() => import('./pages/reports/ReportsPage'));
@@ -46,6 +47,7 @@ const TenantInvoiceDetailPage = lazy(() => import('./pages/portal/TenantInvoiceD
 const MyBookingsPage = lazy(() => import('./pages/portal/MyBookingsPage'));
 const ProfilePage = lazy(() => import('./pages/profile/ProfilePage'));
 const MyStayPage = lazy(() => import('./pages/portal/MyStayPage'));
+const EnergyPage = lazy(() => import('./pages/portal/EnergyPage'));
 const MyTicketsPage = lazy(() => import('./pages/portal/MyTicketsPage'));
 const MyLoyaltyPage = lazy(() => import('./pages/portal/MyLoyaltyPage'));
 const MyManualPage = lazy(() => import('./pages/portal/MyManualPage'));
@@ -305,7 +307,7 @@ export default function App() {
           <Route path="/ancillary-revenue" element={<RequireRoles allowed={['OWNER', 'ADMIN']}><AncillaryRevenuePage /></RequireRoles>} />
           <Route path="/finance/accounting-setup" element={<RequireRoles allowed={['OWNER', 'ADMIN']}><AccountingSetupPage /></RequireRoles>} />
           <Route path="/finance/assets" element={<RequireRoles allowed={['OWNER', 'ADMIN']}><AssetRegisterPage /></RequireRoles>} />
-          <Route path="/expenses" element={<RequireRoles allowed={['OWNER', 'ADMIN']}><ConfiguredResourcePage resource="expenses" /></RequireRoles>} />
+          <Route path="/expenses" element={<RequireRoles allowed={['OWNER', 'ADMIN']}><PurchaseOperationsPage /></RequireRoles>} />
           <Route path="/reminders" element={<RequireRoles allowed={['OWNER', 'ADMIN']}><ReminderPreviewPage /></RequireRoles>} />
           <Route path="/reports" element={<RequireRoles allowed={['OWNER']}><ReportsPage /></RequireRoles>} />
           <Route path="/settings" element={<RequireRoles allowed={['OWNER', 'ADMIN']}><OwnerSettingsPage /></RequireRoles>} />
@@ -314,6 +316,7 @@ export default function App() {
           <Route path="/portal/announcements" element={<RequireRoles allowed={['TENANT']}><MyAnnouncementsPage /></RequireRoles>} />
           <Route path="/portal/announcements/:id" element={<RequireRoles allowed={['TENANT']}><TenantAnnouncementDetailPage /></RequireRoles>} />
           <Route path="/portal/stay" element={<RequireRoles allowed={['TENANT']}><MyStayPage /></RequireRoles>} />
+          <Route path="/portal/energy" element={<RequireRoles allowed={['TENANT']}><EnergyPage /></RequireRoles>} />
           <Route path="/portal/bookings" element={<RequireRoles allowed={['TENANT']}><MyBookingsPage /></RequireRoles>} />
           <Route path="/portal/invoices" element={<RequireRoles allowed={['TENANT']}><MyInvoicesPage /></RequireRoles>} />
           <Route path="/portal/invoices/:id" element={<RequireRoles allowed={['TENANT']}><TenantInvoiceDetailPage /></RequireRoles>} />

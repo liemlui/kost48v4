@@ -2,6 +2,7 @@ export const financeConfigs = {
   'invoice-payments': {
     title: 'Invoice Payments',
     path: '/invoice-payments',
+    emptyMessage: 'Belum ada pembayaran invoice tercatat. Klik "Tambah" untuk mencatat pembayaran pertama.',
     allowDelete: true,
     columns: [
       { key: 'id', label: 'ID' },
@@ -63,6 +64,7 @@ export const financeConfigs = {
   'wifi-sales': {
     title: 'Penjualan Voucher WiFi',
     path: '/wifi-sales',
+    emptyMessage: 'Belum ada penjualan voucher WiFi. Klik "Tambah" untuk mencatat penjualan pertama.',
     allowDelete: true,
     columns: [
       { key: 'id', label: 'ID' },
@@ -113,6 +115,7 @@ export const financeConfigs = {
     title: 'Pengeluaran Operasional',
     supportsIsActiveFilter: true,
     path: '/expenses',
+    emptyMessage: 'Belum ada pengeluaran tercatat. Klik "Tambah" untuk mencatat pengeluaran operasional pertama.',
     allowDelete: true,
     columns: [
       { key: 'id', label: 'ID' },

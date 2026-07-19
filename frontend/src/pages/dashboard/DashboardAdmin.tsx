@@ -1,7 +1,7 @@
 // FILE: DashboardAdmin.tsx â€” dashboard admin: operasional, keuangan, okupansi
 import { useState, type ReactNode } from 'react';
 import { Alert, Col, Row, Table } from 'react-bootstrap';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import EmptyState from '../../components/common/EmptyState';
 import PaginationControls from '../../components/common/PaginationControls';
 import StatusBadge from '../../components/common/StatusBadge';
@@ -377,7 +377,7 @@ export default function AdminDashboard() {
               <span className="small">ðŸ‘ {surveySummaryQuery.data.recommendRate}% rekomendasi</span>
             </>
           ) : null}
-          <a href="/surveys" className="small ms-auto" style={{ whiteSpace: 'nowrap' }}>Lihat semua â†’</a>
+          <Link to="/surveys" className="small ms-auto" style={{ whiteSpace: 'nowrap' }}>Lihat semua â†’</Link>
         </div>
       ) : null}
       {activeArea === 'overview' && (autoOpsQuery.isError || autoOpsNeedsAction) ? (

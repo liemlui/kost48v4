@@ -35,9 +35,7 @@ function normalizeStayDetailTab(value: string | null | undefined) {
   return value && STAY_DETAIL_TABS.has(value) ? value : 'info';
 }
 
-function formatDateSafe(dateValue: string | Date | null | undefined): string {
-  return formatDateTimeWib(dateValue);
-}
+
 
 function hasOverdue(invoices: Array<{ dueDate?: string | null; status: string }>) {
   return invoices.some((invoice) => {
@@ -236,8 +234,8 @@ export default function StayDetailPage() {
   const checkoutReadinessSummary = getCheckoutReadinessSummary(invoices, Boolean(approvedCheckoutRequest));
 
   const timelineSteps: TimelineStep[] = [
-    { id: 'checkin', label: 'Check-in', description: formatDateSafe(stay.checkInDate), status: 'done' },
-    { id: 'active', label: 'Masa sewa aktif', description: `Akhir masa sewa: ${formatDateSafe(stay.plannedCheckOutDate)}`, status: stay.status === 'ACTIVE' ? 'active' : 'done' },
+    { id: 'checkin', label: 'Check-in', description: formatDateTimeWib(stay.checkInDate), status: 'done' },
+    { id: 'active', label: 'Masa sewa aktif', description: `Akhir masa sewa: ${formatDateTimeWib(stay.plannedCheckOutDate)}`, status: stay.status === 'ACTIVE' ? 'active' : 'done' },
     { id: 'checkout-request', label: 'Ajukan keluar', description: approvedCheckoutRequest ? 'Request disetujui.' : pendingCheckoutRequest ? 'Menunggu review.' : 'Belum ada request aktif.', status: approvedCheckoutRequest ? 'done' : pendingCheckoutRequest ? 'active' : 'pending' },
     { id: 'final', label: 'Final keluar', description: openInvoiceCount > 0 ? 'Terblokir tagihan aktif.' : 'Bisa diproses jika cek kamar, meter akhir, dan deposit sudah siap.', status: openInvoiceCount > 0 ? 'blocked' : approvedCheckoutRequest ? 'active' : 'pending' },
   ];
@@ -311,7 +309,7 @@ export default function StayDetailPage() {
               {['COMPLETED', 'CANCELLED'].includes(stay.status) && stay.depositStatus !== 'HELD' ? (
                 <span className="text-muted small">Deposit: {depositLabel}</span>
               ) : null}
-              <span className="app-caption text-end stay-hero-caption">Check-in {formatDateSafe(stay.checkInDate)} · Room {stay.room?.code ?? stay.roomId}</span>
+              <span className="app-caption text-end stay-hero-caption">Check-in {formatDateTimeWib(stay.checkInDate)} · Room {stay.room?.code ?? stay.roomId}</span>
             </div>
           </div>
 
@@ -329,7 +327,7 @@ export default function StayDetailPage() {
             </div>
             <div className="metric-tile">
               <div className="metric-tile-label">Akhir Masa Sewa</div>
-              <div className="metric-tile-value">{formatDateSafe(stay.plannedCheckOutDate)}</div>
+              <div className="metric-tile-value">{formatDateTimeWib(stay.plannedCheckOutDate)}</div>
             </div>
             <div className="metric-tile">
               <div className="metric-tile-label">Tagihan aktif</div>
@@ -359,8 +357,8 @@ export default function StayDetailPage() {
               <div>
                 <strong>🔔 Pengajuan Rencana Keluar Kamar</strong>
                 <div className="small mt-1">
-                  Diajukan {formatDateSafe(pendingCheckoutRequest.createdAt)} ·{' '}
-                  Rencana keluar {formatDateSafe(pendingCheckoutRequest.requestedCheckOutDate)}{' '}
+                  Diajukan {formatDateTimeWib(pendingCheckoutRequest.createdAt)} ·{' '}
+                  Rencana keluar {formatDateTimeWib(pendingCheckoutRequest.requestedCheckOutDate)}{' '}
                   · Alasan: {pendingCheckoutRequest.checkoutReason || pendingCheckoutRequest.requestNotes || '-'}
                 </div>
                 <div className="small mt-1 text-muted">
@@ -399,8 +397,8 @@ export default function StayDetailPage() {
               <div>
                 <strong>✅ Rencana Keluar Kamar — Rencana Disetujui</strong>
                 <div className="small mt-1">
-                  Disetujui {formatDateSafe(approvedCheckoutRequest.reviewedAt)} ·{' '}
-                  Rencana keluar {formatDateSafe(approvedCheckoutRequest.requestedCheckOutDate)}{' '}
+                  Disetujui {formatDateTimeWib(approvedCheckoutRequest.reviewedAt)} ·{' '}
+                  Rencana keluar {formatDateTimeWib(approvedCheckoutRequest.requestedCheckOutDate)}{' '}
                   · Alasan: {approvedCheckoutRequest.checkoutReason || approvedCheckoutRequest.requestNotes || '-'}
                 </div>
                 <div className="small mt-1 text-muted">

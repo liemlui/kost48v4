@@ -36,6 +36,18 @@ export function createRateLimiter(options: {
     }
   };
 
+  const evictEarliestBucket = () => {
+    let earliestKey: string | undefined;
+    let earliestResetAt = Number.POSITIVE_INFINITY;
+    for (const [key, entry] of buckets) {
+      if (entry.resetAt < earliestResetAt) {
+        earliestKey = key;
+        earliestResetAt = entry.resetAt;
+      }
+    }
+    if (earliestKey) buckets.delete(earliestKey);
+  };
+
   return (req: Request, res: Response, next: NextFunction) => {
     const now = Date.now();
     const ip = req.ip ?? req.socket?.remoteAddress ?? 'unknown';
@@ -56,8 +68,7 @@ export function createRateLimiter(options: {
           });
           return;
         }
-        next();
-        return;
+        evictEarliestBucket();
       }
       buckets.set(key, { count: 1, resetAt: now + windowMs });
       next();

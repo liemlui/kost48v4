@@ -3,6 +3,7 @@ export const propertyConfigs = {
     title: 'Kamar & Stok',
     supportsIsActiveFilter: true,
     path: '/rooms',
+    emptyMessage: 'Belum ada kamar terdaftar. Klik "Tambah" untuk mencatat kamar pertama.',
     columns: [
       { key: 'code', label: 'Kamar' },
       { key: 'floor', label: 'Lantai' },
@@ -146,6 +147,7 @@ export const propertyConfigs = {
   stays: {
     title: 'Hunian & Check-in',
     path: '/stays',
+    emptyMessage: 'Belum ada hunian aktif. Klik "Check-in Baru" untuk mencatat check-in pertama.',
     createLabel: 'Check-in Baru',
     columns: [
       { key: 'id', label: 'Masa Sewa' },
@@ -247,6 +249,7 @@ export const propertyConfigs = {
   'meter-readings': {
     title: 'Riwayat Meter & Input Manual',
     path: '/meter-readings',
+    emptyMessage: 'Belum ada catatan meter. Klik "Catat Meter Manual" untuk input pembacaan pertama.',
     createLabel: 'Catat Meter Manual',
     columns: [
       { key: 'roomId', label: 'Kamar' },
@@ -299,6 +302,7 @@ export const propertyConfigs = {
   additionalServices: {
     title: 'Layanan Tambahan',
     path: '/additional-services',
+    emptyMessage: 'Belum ada layanan tambahan. Klik "Tambah" untuk menambahkan layanan seperti galon, laundry, dll.',
     allowDelete: true,
     supportsIsActiveFilter: true,
     columns: [

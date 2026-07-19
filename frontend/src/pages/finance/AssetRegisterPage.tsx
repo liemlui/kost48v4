@@ -30,16 +30,11 @@ import {
 import { listResource } from '../../api/resources';
 import { getApiErrorMessage } from '../../utils/getApiErrorMessage';
 import { formatRupiahWithoutSymbol } from '../../utils/formatCurrency';
-import { formatDateOnly } from '../../utils/dateTime';
 
 function formatRupiah(value?: number | null) {
   const parsed = Number(value ?? 0);
   const abs = formatRupiahWithoutSymbol(Math.abs(parsed));
   return parsed < 0 ? `(Rp ${abs})` : `Rp ${abs}`;
-}
-
-function formatDate(value?: string | null) {
-  return formatDateOnly(value);
 }
 
 const categoryOptions: FixedAssetCategory[] = ['BUILDING', 'RENOVATION', 'ROOM_EQUIPMENT', 'FURNITURE', 'ELECTRONIC', 'UTILITY_EQUIPMENT', 'VEHICLE', 'SOFTWARE', 'OTHER'];

@@ -15,9 +15,7 @@ import {
   rejectNoteExamples,
 } from '../../utils/paymentReviewSafety';
 
-function formatSafeDate(value?: string | null) {
-  return formatDateTimeWib(value);
-}
+
 
 function normalizeBackendError(message?: string | null) {
   if (!message) return null;
@@ -155,7 +153,7 @@ export default function ReviewPaymentModal({
                 <div>
                   <div className="payment-review-eyebrow">Safety pembayaran</div>
                   <h4>{submission.room?.code ?? `Kamar #${submission.room?.id ?? '-'}`} · {submission.tenant?.fullName ?? 'Tenant tidak diketahui'}</h4>
-                  <p>{submission.targetType === 'DEPOSIT' ? 'Deposit booking' : (submission.invoice?.invoiceNumber ?? `INV-${submission.invoiceId}`)} · Dibayar {formatSafeDate(submission.paidAt)} · {submission.paymentMethod}</p>
+                  <p>{submission.targetType === 'DEPOSIT' ? 'Deposit booking' : (submission.invoice?.invoiceNumber ?? `INV-${submission.invoiceId}`)} · Dibayar {formatDateTimeWib(submission.paidAt)} · {submission.paymentMethod}</p>
                   <p className={reviewDeadline.isExpired ? 'text-soft-danger fw-semibold' : 'text-muted'}>{reviewDeadline.hasDate ? `${reviewDeadline.relativeLabel} · max review ${reviewDeadline.absoluteLabel}` : 'Deadline belum ada'}</p>
                 </div>
                 <div className="payment-review-statuses">
@@ -198,7 +196,7 @@ export default function ReviewPaymentModal({
                       <div><span>Pengirim</span><strong>{submission.senderName || 'Belum diisi'}</strong></div>
                       <div><span>Bank</span><strong>{submission.senderBankName || 'Belum diisi'}</strong></div>
                       <div><span>Referensi</span><strong>{submission.referenceNumber || 'Belum diisi'}</strong></div>
-                      <div><span>Dikirim ke sistem</span><strong>{formatSafeDate(submission.createdAt ?? submission.paidAt)}</strong></div>
+                      <div><span>Dikirim ke sistem</span><strong>{formatDateTimeWib(submission.createdAt ?? submission.paidAt)}</strong></div>
                       <div><span>Urgent / Eskalasi</span><strong>{urgentSince.clockLabel} / {escalateSince.clockLabel}</strong></div>
                       <div><span>Batas review</span><strong>{reviewDeadline.hasDate ? reviewDeadline.absoluteLabel : '-'}</strong></div>
                     </div>

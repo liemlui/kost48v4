@@ -14,9 +14,6 @@ function tone(ready?: boolean) {
   return ready ? 'success' : 'warning';
 }
 
-function formatDate(value?: string | null) {
-  return formatDateOnly(value);
-}
 
 export default function AssetReadinessPanel({ readiness, isLoading }: Props) {
   const proof = readiness?.runtimeProof.requiredSources ?? [];
@@ -128,7 +125,7 @@ export default function AssetReadinessPanel({ readiness, isLoading }: Props) {
                 <tbody>
                   {candidates.map((expense) => (
                     <tr key={expense.id}>
-                      <td>{formatDate(expense.expenseDate)}</td>
+                      <td>{formatDateOnly(expense.expenseDate)}</td>
                       <td><Badge bg="light" text="dark" className="border">{expense.category}</Badge></td>
                       <td>{expense.description}</td>
                       <td>{formatRupiah(expense.amountRupiah)}</td>

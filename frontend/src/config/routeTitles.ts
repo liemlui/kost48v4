@@ -58,7 +58,7 @@ const ROUTE_TITLES: Array<{ pattern: string; title: string }> = [
   { pattern: '/ancillary-revenue', title: 'Pendapatan Tambahan' },
   { pattern: '/finance/accounting-setup', title: 'Akuntansi' },
   { pattern: '/finance/assets', title: 'Aset' },
-  { pattern: '/expenses', title: 'Pengeluaran' },
+  { pattern: '/expenses', title: 'Pembelian & Operasional' },
   { pattern: '/reminders', title: 'Pengingat' },
   { pattern: '/reports', title: 'Laporan' },
   { pattern: '/settings', title: 'Pengaturan' },

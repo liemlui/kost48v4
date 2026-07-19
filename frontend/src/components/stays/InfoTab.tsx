@@ -11,9 +11,7 @@ function valueOrDash(value: ReactNode) {
   return value;
 }
 
-function formatDate(value?: string | null) {
-  return formatDateOnly(value);
-}
+
 
 const DataField = ({ label, value }: { label: string; value: ReactNode }) => (
   <div className="mb-3">
@@ -94,9 +92,9 @@ export default function InfoTab({ stay }: { stay: Stay }) {
                 <DataField label="Sewa Disepakati" value={<CurrencyDisplay amount={stay.agreedRentAmountRupiah} />} />
               </Col>
               <Col md={6}>
-                <DataField label="Tanggal Masuk" value={formatDate(stay.checkInDate)} />
-                <DataField label="Akhir Masa Sewa" value={formatDate(stay.plannedCheckOutDate)} />
-                <DataField label="Tanggal Keluar Aktual" value={formatDate(stay.actualCheckOutDate)} />
+                <DataField label="Tanggal Masuk" value={formatDateOnly(stay.checkInDate)} />
+                <DataField label="Akhir Masa Sewa" value={formatDateOnly(stay.plannedCheckOutDate)} />
+                <DataField label="Tanggal Keluar Aktual" value={formatDateOnly(stay.actualCheckOutDate)} />
                 <DataField label="Deposit" value={<CurrencyDisplay amount={stay.depositAmountRupiah} />} />
                 {stay.status === 'CANCELLED' ? (
                   <DataField label="Alasan Pembatalan" value={stay.cancelReason ?? stay.checkoutReason ?? '-'} />

@@ -11,9 +11,7 @@ import { formatRupiah } from '../../utils/formatCurrency';
 import { formatDateOnly } from '../../utils/dateTime';
 import '../../styles/admin-area';
 
-function formatDate(value?: string | null) {
-  return formatDateOnly(value);
-}
+
 
 export default function LossRefundsPage() {
   const queryClient = useQueryClient();
@@ -94,7 +92,7 @@ export default function LossRefundsPage() {
                     <td>{r.room?.code ? `${r.room.code}${r.room.name ? ` - ${r.room.name}` : ''}` : '-'}</td>
                     <td className="text-end fw-semibold">{formatRupiah(r.lossRefundAmountRupiah)}</td>
                     <td className="small text-muted">{r.lossRefundNote ?? r.cancelReason ?? '-'}</td>
-                    <td className="small">{formatDate(r.updatedAt)}</td>
+                    <td className="small">{formatDateOnly(r.updatedAt)}</td>
                     <td className="text-end">
                       <Button size="sm" variant="primary" onClick={() => { setTarget(r); setNote(''); setProofUrl(''); setError(null); }}>
                         Tandai sudah direfund

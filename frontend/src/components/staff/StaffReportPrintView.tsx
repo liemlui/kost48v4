@@ -6,13 +6,11 @@ type Props = {
   performance: StaffPerformanceSummary;
 };
 
-function formatDate(value?: string | null) {
-  return formatDateOnly(value);
-}
+
 
 function formatPeriod(period?: StaffPerformanceSummary['period']) {
   if (!period) return '-';
-  return `${formatDate(period.from)} - ${formatDate(period.to)}`;
+  return `${formatDateOnly(period.from)} - ${formatDateOnly(period.to)}`;
 }
 
 function netKpi(score?: StaffPerformanceSummary['score']) {
@@ -141,7 +139,7 @@ export default function StaffReportPrintView({ performance }: Props) {
             <tbody>
               {rows.slice(0, 10).map((row) => (
                 <tr key={row.id}>
-                  <td>{formatDate(row.date)}</td>
+                  <td>{formatDateOnly(row.date)}</td>
                   <td>{row.type}</td>
                   <td>{row.title}</td>
                   <td>{row.location}</td>

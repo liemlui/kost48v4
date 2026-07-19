@@ -59,14 +59,7 @@ function tipLines(staff: NonNullable<PortalTicket['assignedTo']>): { label: stri
   return out;
 }
 
-function formatDate(value?: string) {
-  return formatDateTimeWib(value);
-}
 
-function formatDateTime(value?: string | null) {
-  if (!value) return null;
-  return formatDateTimeWib(value);
-}
 
 type TimelineNode = {
   key: string;
@@ -82,35 +75,35 @@ function buildTimeline(ticket: PortalTicket): TimelineNode[] {
       key: 'created',
       icon: '🕐',
       label: 'Dibuat',
-      ts: formatDateTime(ticket.createdAt),
+      ts: ticket.createdAt ? formatDateTimeWib(ticket.createdAt) : null,
       done: true,
     },
     {
       key: 'assigned',
       icon: '👤',
       label: ticket.assignedTo ? `Ditugaskan ke ${ticket.assignedTo.fullName}` : 'Ditugaskan ke staff',
-      ts: formatDateTime(ticket.assignedAt),
+      ts: ticket.assignedAt ? formatDateTimeWib(ticket.assignedAt) : null,
       done: Boolean(ticket.assignedAt),
     },
     {
       key: 'escalated',
       icon: '🚨',
       label: 'Dieskalasi',
-      ts: formatDateTime(ticket.escalatedAt),
+      ts: ticket.escalatedAt ? formatDateTimeWib(ticket.escalatedAt) : null,
       done: Boolean(ticket.escalatedAt),
     },
     {
       key: 'resolved',
       icon: '✅',
       label: 'Selesai dikerjakan',
-      ts: formatDateTime(ticket.resolvedAt),
+      ts: ticket.resolvedAt ? formatDateTimeWib(ticket.resolvedAt) : null,
       done: Boolean(ticket.resolvedAt),
     },
     {
       key: 'closed',
       icon: '🔒',
       label: 'Ditutup',
-      ts: formatDateTime(ticket.closedAt),
+      ts: ticket.closedAt ? formatDateTimeWib(ticket.closedAt) : null,
       done: Boolean(ticket.closedAt),
     },
   ].filter((n) => {

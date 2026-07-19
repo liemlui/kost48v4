@@ -15,10 +15,6 @@ function periodKey(period: Pick<AccountingPeriod, 'year' | 'month' | 'key' | 'pe
   return period.periodKey ?? period.key ?? `${period.year}-${String(period.month).padStart(2, '0')}`;
 }
 
-function formatDate(value?: string | null) {
-  return formatDateOnly(value);
-}
-
 type Props = {
   periods: AccountingPeriod[];
   readiness?: AccountingReadiness;
@@ -117,7 +113,7 @@ export default function AccountingPeriodsPanel({ periods, readiness, isLoading, 
                   <tr key={period.id}>
                     <td>
                       <div className="fw-semibold">{periodKey(period)}</div>
-                      <small className="text-muted">{formatDate(period.startDate)} – {formatDate(period.endDate)}</small>
+                      <small className="text-muted">{formatDateOnly(period.startDate)} – {formatDateOnly(period.endDate)}</small>
                     </td>
                     <td><Badge bg={statusVariant[period.status] ?? 'secondary'}>{period.status}</Badge></td>
                     <td>{period.isCurrentPostingPeriod ? <Badge bg={period.isPostingOpen ? 'success' : 'danger'}>{period.isPostingOpen ? 'Periode berjalan OPEN' : 'Periode berjalan diblokir'}</Badge> : <span className="text-muted">Riwayat</span>}</td>

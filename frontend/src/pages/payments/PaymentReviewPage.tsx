@@ -28,9 +28,6 @@ import {
 
 const ReviewPaymentModal = lazy(() => import('../../components/payments/ReviewPaymentModal'));
 
-function formatDate(value?: string | null) {
-  return formatDateTimeWib(value);
-}
 
 function getReviewDeadline(item: PaymentSubmission) {
   return addHoursToDate(item.createdAt ?? item.paidAt, 6);
@@ -398,8 +395,8 @@ export default function PaymentReviewPage() {
                       <td data-label="Tenant & Kamar">
                         <div className="fw-semibold">{item.tenant?.fullName ?? '-'}</div>
                         <div className="small text-muted">{item.room?.code ?? '-'} · {item.room?.name ?? 'Nama kamar belum tersedia'}</div>
-                        <div className="small text-muted">Dibayar: {formatDate(item.paidAt)} · {item.paymentMethod}</div>
-                        <div className={reviewMeta.isExpired ? 'small text-soft-danger' : 'small text-muted'}>Masuk: {formatDate(item.createdAt ?? item.paidAt)}</div>
+                        <div className="small text-muted">Dibayar: {formatDateTimeWib(item.paidAt)} · {item.paymentMethod}</div>
+                        <div className={reviewMeta.isExpired ? 'small text-soft-danger' : 'small text-muted'}>Masuk: {formatDateTimeWib(item.createdAt ?? item.paidAt)}</div>
                         <div className={reviewMeta.isExpired ? 'small text-soft-danger fw-semibold' : 'small text-muted'}>{getReviewSlaText(item)}</div>
                       </td>
                       <td data-label="Target">

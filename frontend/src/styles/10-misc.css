@@ -4785,6 +4785,10 @@ div.tenant-stay-fact-chip {
 .tenant-live-meter.is-warning .tenant-live-meter-head > span { background:#fffbeb; color:#b45309; }
 .tenant-live-meter-value { margin:.26rem 0 .12rem; color:#102033; font-size:1rem; font-weight:750; }
 .tenant-live-meter-flow, .tenant-live-meter small { display:block; color:#64748b; font-size:.68rem; line-height:1.35; }
+.tenant-live-meter-power { display:flex; align-items:center; gap:.5rem; margin:.2rem 0 .1rem; flex-wrap:wrap; }
+.live-power-watt { font-size:.82rem; font-weight:700; color:#0b5e42; background:#d1fae5; padding:.1rem .45rem; border-radius:6px; white-space:nowrap; }
+.live-power-detail { font-size:.68rem; color:#52627a; background:#f1f4f9; padding:.08rem .4rem; border-radius:5px; white-space:nowrap; }
+.tenant-live-meter.is-warning .live-power-watt { color:#92400e; background:#fef3c7; }
 .tenant-live-meter-notice, .tenant-live-meter-error { margin:.55rem 0 0; color:#64748b; font-size:.68rem; line-height:1.4; }
 .tenant-live-meter-error { color:#a16207; }
 .tenant-live-meter-loading { display:flex; align-items:center; gap:.45rem; min-height:2rem; color:#64748b; font-size:.76rem; }
@@ -4792,6 +4796,53 @@ div.tenant-stay-fact-chip {
 .tenant-utility-trend .ut-trend-head { font-size:.76rem; font-weight:700; color:#52627a; margin-bottom:.3rem; }
 .tenant-utility-total { margin-top:.8rem; font-size:.84rem; color:#334155; }
 .tenant-utility-empty { padding:.4rem 0; }
+
+/* Link "Lihat detail energi" dari tab Listrik ke /portal/energy */
+.tenant-energy-link { display:inline-flex; align-items:center; gap:.35rem; font-size:.78rem; font-weight:650; color:#0e7490; text-decoration:none; }
+.tenant-energy-link:hover { color:#0891b2; text-decoration:underline; }
+.tenant-energy-link-hint { font-weight:400; color:#94a3b8; font-size:.7rem; }
+
+/* ===== /portal/energy — dedicated IoT energy page ===== */
+.energy-page { max-width:960px; margin:0 auto; padding:1.5rem 1rem 2.5rem; }
+.energy-breadcrumb { margin-bottom:.6rem; }
+.energy-breadcrumb a { font-size:.78rem; color:#0e7490; text-decoration:none; font-weight:600; }
+.energy-breadcrumb a:hover { text-decoration:underline; }
+.energy-header { margin-bottom:1.5rem; }
+.energy-header h1 { font-size:1.35rem; font-weight:750; color:#1e3a5f; margin:0 0 .25rem; }
+.energy-subtitle { color:#64748b; font-size:.82rem; margin:0; }
+.energy-section-title { font-size:.88rem; font-weight:700; color:#334155; margin:1.2rem 0 .6rem; }
+.energy-live-section { background:#fff; border-radius:14px; padding:1rem 1.15rem; box-shadow:0 2px 12px rgba(14,30,60,.05); margin-bottom:1.2rem; }
+.energy-live-grid { display:grid; grid-template-columns:1fr 1fr; gap:.75rem; }
+.energy-billing-notice { margin:.55rem 0 0; color:#94a3b8; font-size:.68rem; }
+.energy-gauge-section { background:#fff; border-radius:14px; padding:1rem 1.15rem; box-shadow:0 2px 12px rgba(14,30,60,.05); margin-bottom:1.2rem; }
+.energy-gauge-row { display:flex; justify-content:center; gap:2rem; flex-wrap:wrap; padding:.5rem 0; }
+.energy-summary-tiles { display:flex; gap:.75rem; margin-top:.75rem; flex-wrap:wrap; }
+.energy-summary-tile { flex:1; min-width:140px; background:#f8fbff; border:1px solid rgba(148,163,184,.18); border-radius:11px; padding:.7rem .85rem; display:flex; flex-direction:column; gap:.15rem; }
+.energy-summary-tile .est-label { font-size:.7rem; color:#64748b; font-weight:600; text-transform:uppercase; letter-spacing:.02em; }
+.energy-summary-tile strong { font-size:1.1rem; color:#102033; }
+.energy-summary-tile .est-cost { font-size:.8rem; color:#0b5e42; font-weight:650; }
+.energy-summary-tile small { font-size:.66rem; color:#94a3b8; }
+.energy-trend-section { background:#fff; border-radius:14px; padding:1rem 1.15rem; box-shadow:0 2px 12px rgba(14,30,60,.05); margin-bottom:1.2rem; }
+.energy-chart-wrapper { margin-top:.3rem; }
+.energy-projection-section { background:#fff; border-radius:14px; padding:1rem 1.15rem; box-shadow:0 2px 12px rgba(14,30,60,.05); margin-bottom:1.2rem; }
+.energy-cumulative { margin-top:.8rem; font-size:.84rem; color:#334155; text-align:center; }
+.energy-empty { padding:2rem 0; text-align:center; color:#94a3b8; }
+.energy-footer-note { text-align:center; color:#94a3b8; font-size:.7rem; margin-top:.6rem; }
+
+/* Larger live meter tile for energy page */
+.tenant-live-meter--large { padding:.85rem; }
+.tenant-live-meter--large .tenant-live-meter-value { font-size:1.25rem; }
+.tenant-live-meter--large .tenant-live-meter-power { margin:.35rem 0 .15rem; }
+.tenant-live-meter-observed { display:block; color:#94a3b8; font-size:.64rem; margin-top:.15rem; }
+.tenant-live-meter-status-badge { padding:.12rem .4rem; border-radius:999px; font-size:.66rem; font-weight:700; }
+.tenant-live-meter-status-badge.badge-ok { background:#ecfdf5; color:#047857; }
+.tenant-live-meter-status-badge.badge-warn { background:#fffbeb; color:#b45309; }
+
+@media (max-width:576px) {
+  .energy-live-grid { grid-template-columns:1fr; }
+  .energy-gauge-row { gap:1rem; }
+  .energy-summary-tiles { flex-direction:column; }
+}
 
 .tenant-deposit-bar { height:8px; border-radius:6px; background:rgba(148,163,184,.2); overflow:hidden; }
 .tenant-deposit-bar-fill { height:100%; background:#0072B2; border-radius:6px; transition:width .3s ease; }

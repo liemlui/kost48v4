@@ -15,9 +15,6 @@ import type {
   MockReminderType,
 } from '../../api/reminders';
 
-function formatDate(value: string | null | undefined): string {
-  return formatDateOnly(value);
-}
 
 
 
@@ -243,7 +240,7 @@ export default function ReminderPreviewPage() {
                       <td>{item.phone ?? '-'}</td>
                       <td>{item.roomCode ?? '-'}</td>
                       <td>{item.invoiceNumber ?? '-'}<br /><small className="text-muted">{formatRupiah(item.amountRupiah)}</small></td>
-                      <td className="text-danger fw-semibold">Terlambat {item.daysOverdue} hari<br /><small className="text-muted">{formatDate(item.dueDate)}</small></td>
+                      <td className="text-danger fw-semibold">Terlambat {item.daysOverdue} hari<br /><small className="text-muted">{formatDateOnly(item.dueDate)}</small></td>
                       <td style={{ minWidth: 200, maxWidth: 320, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{item.messagePreview}</td>
                       <td><SimulasiKirimButton type="INVOICE_OVERDUE" candidateId={String(item.invoiceId)} phone={item.phone} message={item.messagePreview} sendingId={sendingId} onSend={handleMockSend} /></td>
                     </tr>
@@ -261,7 +258,7 @@ export default function ReminderPreviewPage() {
                       <td>{item.phone ?? '-'}</td>
                       <td>{item.roomCode ?? '-'}</td>
                       <td>{item.invoiceNumber ?? '-'}<br /><small className="text-muted">{formatRupiah(item.amountRupiah)}</small></td>
-                      <td>{item.daysRemaining} hari lagi<br /><small className="text-muted">Jatuh tempo {formatDate(item.dueDate)}</small></td>
+                      <td>{item.daysRemaining} hari lagi<br /><small className="text-muted">Jatuh tempo {formatDateOnly(item.dueDate)}</small></td>
                       <td style={{ minWidth: 200, maxWidth: 320, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{item.messagePreview}</td>
                       <td><SimulasiKirimButton type="INVOICE_DUE" candidateId={String(item.invoiceId)} phone={item.phone} message={item.messagePreview} sendingId={sendingId} onSend={handleMockSend} /></td>
                     </tr>
@@ -297,7 +294,7 @@ export default function ReminderPreviewPage() {
                       <td>{item.phone ?? '-'}</td>
                       <td>{item.roomCode ?? '-'}</td>
                       <td>Masa sewa #{item.stayId}</td>
-                      <td>{item.daysRemaining} hari lagi<br /><small className="text-muted">Akhir masa sewa {formatDate(item.plannedCheckOutDate)}</small></td>
+                      <td>{item.daysRemaining} hari lagi<br /><small className="text-muted">Akhir masa sewa {formatDateOnly(item.plannedCheckOutDate)}</small></td>
                       <td style={{ minWidth: 200, maxWidth: 320, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{item.messagePreview}</td>
                       <td><SimulasiKirimButton type="CHECKOUT" candidateId={String(item.stayId)} phone={item.phone} message={item.messagePreview} sendingId={sendingId} onSend={handleMockSend} /></td>
                     </tr>

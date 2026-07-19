@@ -1,5 +1,14 @@
 # KOST48 V5 — M13 Changelog
 
+## 2026-07-19 -- Seed data asli dari laporan teraudit
+
+- Seed `seed-dev-real.js` menggantikan `seed-dev-via-api.js` (data dummy). Data bersumber dari `Scan/KOST48_Laporan_Bulanan_FINAL_Teraudit.xlsx`.
+- Output: 14 kamar (13 OCCUPIED + F3), 48 tenant + user portal (password `Kost48#2026`), 52 stay (12 ACTIVE), 186 invoice PAID, 186 payment, total Rp 219.710.000.
+- Tenant aktif (Juli 2026): Shinta (A), Dini (B), Miko (C), Ade (D), Yufita (F1), Patrick (F2), Yofi (G), Welly (H), Lovandra (J), Meliana (K), Destarika (L), Gabriel (M). Theo (I) tidak ACTIVE karena last payment April 2026.
+- InvoiceLine: RENT + ELECTRICITY + WIFI sesuai kwitansi asli. Semua payment method CASH.
+- OperationalSetting singleton terisi (listrik Rp2.500/kWh, WiFi Rp50.000, pet deposit Rp100.000).
+- File: `backend/scripts/seed-dev-real.js`, `backend/scripts/seed-data.json`. Prasyarat: `seed-dev-reset.js` dulu.
+
 ## 2026-07-18 -- Modernisasi UI/UX Owner Portal (batch 1: 7 halaman)
 
 - Owner portal kini setara Admin/Tenant/Staff: **FeatureErrorBoundary** di 7 halaman owner (OwnerDashboard, Reports, MarketAnalysis, LossRefunds, LoyaltyAdmin, ServiceInterests, IotOverview), **StatusBadge** ganti raw Badge (17+ tempat), **TableSkeleton** ganti Spinner (3 halaman), **EmptyState** ganti inline (5 tempat), error handling secondary queries (LoyaltyAdmin).

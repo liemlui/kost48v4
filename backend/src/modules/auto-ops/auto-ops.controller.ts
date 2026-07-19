@@ -1,13 +1,23 @@
+import { timingSafeEqual } from 'node:crypto';
 import { Controller, ForbiddenException, Get, Headers, HttpCode, Post, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { Public } from '../../common/decorators/public.decorator';
+import { RateLimit } from '../../common/decorators/rate-limit.decorator';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { UserRole } from '../../common/enums/app.enums';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
+import { RateLimitGuard } from '../../common/guards/rate-limit.guard';
 import { CurrentUserPayload } from '../../common/interfaces/current-user.interface';
 import { AutoOpsService } from './auto-ops.service';
+
+function tokensMatch(expected: string, provided: string): boolean {
+  if (!expected || !provided) return false;
+  const expectedBytes = Buffer.from(expected);
+  const providedBytes = Buffer.from(provided);
+  return expectedBytes.length === providedBytes.length && timingSafeEqual(expectedBytes, providedBytes);
+}
 
 @ApiTags('auto-ops')
 @ApiBearerAuth()
@@ -31,13 +41,15 @@ export class AutoOpsController {
    * Contoh cPanel: curl -fsS -X POST -H "X-Cron-Token: RAHASIA" https://domain/api/auto-ops/cron
    */
   @Public()
+  @UseGuards(RateLimitGuard)
+  @RateLimit('cron')
   @Post('cron')
   @ApiOperation({ summary: 'Trigger cron eksternal AutoOps — via X-Cron-Token' })
   @HttpCode(200)
   async cron(@Headers('x-cron-token') headerToken?: string) {
     const expected = (process.env.AUTO_OPS_CRON_TOKEN ?? '').trim();
     const provided = (headerToken ?? '').trim();
-    if (!expected || provided !== expected) {
+    if (!tokensMatch(expected, provided)) {
       throw new ForbiddenException('Token cron auto-ops tidak valid');
     }
     return { message: 'AutoOps cron berhasil dijalankan', data: await this.autoOpsService.runAll({ actorUserId: null, source: 'CRON_AUTO_OPS' }) };

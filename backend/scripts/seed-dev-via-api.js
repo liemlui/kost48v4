@@ -9,7 +9,9 @@
  *   (E, F, N, O, P, Q sudah tidak ada / dikonsolidasi ke F1/F2)
  *
  * Prasyarat: jalankan `node scripts/seed-dev-reset.js` dulu, lalu START backend dev.
- * Pakai: node scripts/seed-dev-via-api.js   (opsional: API_BASE=http://localhost:3000/api)
+ * Pakai: SEED_DEV_OWNER_PASSWORD='password-kuat' SEED_DEV_STAFF_PASSWORD='password-kuat'
+ *        SEED_DEV_TENANT_PASSWORD='password-kuat' node scripts/seed-dev-via-api.js
+ * (opsional: API_BASE=http://localhost:3000/api)
  *
  * Urutan kejadian per kamar berpenghuni:
  *   POST /tenants → POST /tenants/:id/portal-access → POST /stays (check-in, deposit, meter awal)
@@ -17,7 +19,22 @@
  *   + sebagian: POST /meter-readings/cycle, sebagian: POST /stays/:id/renew (riwayat perpanjang).
  */
 const API = process.env.API_BASE || 'http://localhost:3000/api';
-const OWNER = { identifier: 'owner@kost48.com', password: 'Owner#2026' };
+function requireSeedPassword(name) {
+  const value = String(process.env[name] ?? '');
+  if (value.length < 12) {
+    throw new Error(`${name} wajib diisi dan minimal 12 karakter. Password seed tidak disimpan di source.`);
+  }
+  return value;
+}
+
+const OWNER = {
+  identifier: process.env.SEED_DEV_OWNER_EMAIL || 'owner@kost48.com',
+  password: requireSeedPassword('SEED_DEV_OWNER_PASSWORD'),
+};
+const STAFF = {
+  identifier: process.env.SEED_DEV_STAFF_EMAIL || 'staff@kost48.com',
+  password: requireSeedPassword('SEED_DEV_STAFF_PASSWORD'),
+};
 
 let TOKEN = '';
 async function api(method, path, body, { token = TOKEN, optional = false } = {}) {
@@ -112,7 +129,7 @@ const TENANTS = [
   { code: 'F2', name: 'Sari Melati',     slug: 'sari',   gender: 'FEMALE', occ: 'Mahasiswa',   scenario: 'partial',     monthsAgo: 0, occ2: 1 }, // baru masuk
 ];
 
-const TENANT_PW = 'Tenant#2026';
+const TENANT_PW = requireSeedPassword('SEED_DEV_TENANT_PASSWORD');
 const METER_START_BASE = 1000;
 
 const summary = {
@@ -337,7 +354,7 @@ const summary = {
   console.log(`✓ Meter: ${summary.meterInvoices} bertagihan, ${summary.meterFree} dalam jatah gratis`);
 
   // 5) Tiket + tip staf
-  const staffTok = await loginAs('staff@kost48.com', 'staff123');
+  const staffTok = await loginAs(STAFF.identifier, STAFF.password);
   if (staffTok) {
     await api('PATCH', '/auth/me/tip-info', {
       tipGopay: '0812-3456-7890', tipShopeepay: '0899-1111-2222',
@@ -408,8 +425,8 @@ const summary = {
   console.log('\n=== RINGKASAN ===');
   console.log(JSON.stringify(summary, null, 2));
   console.log('\n✅ SELESAI. Semua data via endpoint nyata (aturan bisnis berlaku).');
-  console.log('   Login: owner@kost48.com / Owner#2026 · admin@kost48.com / admin123 · staff@kost48.com / staff123');
-  console.log('   Tenant: <slug>.tenant@kost48.test / Tenant#2026 (mis. maya.tenant@kost48.test)');
+  console.log('   Kredensial seed diambil dari environment dan tidak pernah dicetak.');
+  console.log('   Password tenant seed diambil dari SEED_DEV_TENANT_PASSWORD dan tidak dicetak.');
   console.log('   Kamar: A B C D G H I J K L M F1 F2 (13 kamar, semua OCCUPIED)');
   console.log('\n   Status bervariasi:');
   console.log('   • Dimas (B): RenewRequest PENDING');

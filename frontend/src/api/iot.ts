@@ -100,6 +100,12 @@ export type TenantUtilityDevice = {
   unit: string;
   flowRateLpm: number | null;
   quality: IotReadingQuality | null;
+  /** Live wattage — hanya untuk ELECTRICITY (null untuk WATER) */
+  powerW: number | null;
+  /** Live voltage — hanya untuk ELECTRICITY (null untuk WATER) */
+  voltageV: number | null;
+  /** Live current — hanya untuk ELECTRICITY (null untuk WATER) */
+  currentA: number | null;
 };
 
 export type TenantRoomUtilityTelemetry = {

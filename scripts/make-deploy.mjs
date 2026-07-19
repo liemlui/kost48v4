@@ -1,6 +1,6 @@
 // KOST48 — buat PAKET DEPLOY RAMPING (combined single-server) untuk cPanel/VPS hemat RAM/inode.
 // Pakai: npm run make-deploy
-// Hasil: folder `deploy/` = backend PREBUILT (`dist/`) + frontend PREBUILT (`client/`) + prisma/ + sql/ + seed-owner.
+// Hasil: folder `deploy/` = backend PREBUILT (`dist/`) + frontend PREBUILT (`client/`) + prisma/ + seed-owner.
 // SEMUA build terjadi DI LOKAL. Di server cukup: `npm run cpanel:install` (= npm ci prod-only, tanpa scripts/audit) → start `dist/main.js`.
 // Kenapa TANPA build di server: hosting shared 512MB bisa OOM saat tsc/npm ci penuh, dan devDeps memboroskan inode.
 // Prisma client hasil generate = WASM query compiler + driver adapter pg → platform-independent;
@@ -17,7 +17,7 @@ import {
   statSync,
 } from 'node:fs';
 import { spawnSync } from 'node:child_process';
-import { createHash, randomBytes } from 'node:crypto';
+import { createHash } from 'node:crypto';
 
 const isWin = process.platform === 'win32';
 const npm = isWin ? 'npm.cmd' : 'npm';
@@ -355,6 +355,20 @@ function createVerifiedArchive() {
       rmSync(ARCHIVE_TMP, { force: true });
       fail('arsip memuat file environment rahasia: `' + entry + '`.');
     }
+    if (entry === 'setup.sql' || entry.startsWith('sql/')) {
+      rmSync(ARCHIVE_TMP, { force: true });
+      fail('arsip memuat SQL legacy/seed: `' + entry + '`. Data database tidak boleh ikut ke paket kode.');
+    }
+    if (
+      entry === 'scripts/seed-prod-reset.js'
+      || entry === 'scripts/seed-prod-real.js'
+      || entry === 'scripts/seed-data.json'
+      || entry === 'scripts/real-seed-assets.js'
+      || entry === 'scripts/import-real-historical-assets.js'
+    ) {
+      rmSync(ARCHIVE_TMP, { force: true });
+      fail('arsip memuat seed/data bisnis sensitif: `' + entry + '`. Data real tidak boleh dibawa ke paket kode.');
+    }
   }
 
   renameSync(ARCHIVE_TMP, ARCHIVE);
@@ -377,17 +391,13 @@ if (NO_BUILD) {
 console.log('[deploy] 3/6 siapkan folder ' + OUT + '/ ...');
 mkdirSync(OUT + '/scripts', { recursive: true });
 
-console.log('[deploy] 4/6 copy backend PREBUILT (dist tanpa binary *.node) + prisma/sql + package deploy + frontend client/ ...');
+console.log('[deploy] 4/6 copy backend PREBUILT (dist tanpa binary *.node) + prisma + package deploy + frontend client/ ...');
 // dist/ prebuilt — buang engine binary platform-spesifik (query_engine-*.dll.node dsb; Linux pakai WASM).
 cpSync('backend/dist', OUT + '/dist', {
   recursive: true,
   filter: (src) => !src.endsWith('.node') && !src.endsWith(BUILD_MARKER),
 });
-for (const item of ['prisma', 'sql']) {
-  const from = 'backend/' + item;
-  if (existsSync(from)) cpSync(from, OUT + '/' + item, { recursive: true });
-}
-if (existsSync('backend/setup.sql')) cpSync('backend/setup.sql', OUT + '/setup.sql');
+cpSync('backend/prisma', OUT + '/prisma', { recursive: true });
 writeDeployPackageFiles();
 cpSync('backend/scripts/seed-owner.js', OUT + '/scripts/seed-owner.js'); // seed OWNER pertama (F1-12) di server
 if (existsSync('backend/scripts/bootstrap-tuya-kwh.js')) cpSync('backend/scripts/bootstrap-tuya-kwh.js', OUT + '/scripts/bootstrap-tuya-kwh.js'); // register 13 KWH Tuya device
@@ -435,13 +445,13 @@ writeFileSync(OUT + '/.env.example', [
   '# 32 byte random base64. Dipakai mengenkripsi secret device ESP32-C3.',
   '# Generate: node -e "console.log(require(\'crypto\').randomBytes(32).toString(\'base64\'))"',
   '# ⚠️ SIMPAN IOT_MASTER_KEY ini — JANGAN diubah antar deploy. Kalau hilang, ESP32 harus di-provision ulang.',
-  '# IOT_MASTER_KEY=' + randomBytes(32).toString('base64'),
+  '# IOT_MASTER_KEY=isi_dengan_base64_32_byte_yang_disimpan_aman',
   '',
 ].join('\n'));
 
 writeFileSync(OUT + '/README-DEPLOY.md', `# KOST48 v1.2.0 — Deploy cPanel/VPS (PREBUILT, include node_modules)
 
-Paket ini SUDAH di-build + node_modules di lokal. Server **TIDAK build/npm install apa pun**.
+Kode aplikasi sudah di-build di lokal. Server tetap memasang dependency runtime terkunci dengan \`npm run cpanel:install\`.
 Tanpa tsc, tanpa prisma generate, tanpa devDependencies — aman untuk hosting RAM 512MB & limit inode.
 
 ## 🚀 Langkah cPanel (1x run, ≈20 menit)
@@ -454,18 +464,14 @@ Tanpa tsc, tanpa prisma generate, tanpa devDependencies — aman untuk hosting R
    \`\`\`bash
    cp .env.example .env && nano .env
    # isi: DATABASE_URL, JWT_SECRET, CORS_ORIGIN, AUTO_OPS_CRON_TOKEN, IOT_TUYA_CRON_TOKEN, IOT_MASTER_KEY
+   npm run cpanel:install
    \`\`\`
-5. **Setup Database (hanya database baru/kosong)**:
+5. **Setup database + owner pertama** (database baru/kosong):
    \`\`\`bash
-   psql "<DATABASE_URL>" -f sql/schema.sql
-   psql "<DATABASE_URL>" -f sql/seed.sql
+   npm run cpanel:migrate
+   OWNER_EMAIL=owner@domain-anda OWNER_PASSWORD='buat-password-kuat' OWNER_FULLNAME='Pemilik KOST48' node scripts/seed-owner.js
    \`\`\`
-   > \`seed.sql\` sudah include pagar database + data master dan transaksi historis teraudit.
-   > **Jangan jalankan \`schema.sql\` atau \`seed.sql\` pada database yang sudah berisi data aplikasi.** Seed memakai ID historis eksplisit dan bukan alat migrasi/merge data. Backup lalu gunakan migrasi khusus yang telah direview.
-6. **Seed OWNER pertama**:
-   \`\`\`bash
-   OWNER_EMAIL=owner@domain.com OWNER_PASSWORD='GANTI_kuat' OWNER_FULLNAME='Pemilik KOST48' npm run seed:owner
-   \`\`\`
+   > Paket deploy sengaja **tidak membawa** data tenant, KTP/NIK, kwitansi, atau password default. Input/impor data bisnis dilakukan dari workstation operator yang terlindungi, setelah owner pertama dibuat.
 7. **Start App** (Setup Node.js App → Start) + **AutoSSL** domain → HTTPS.
 8. **Cron Jobs** (WAJIB — Passenger idle-sleep):
    \`\`\`
@@ -475,10 +481,9 @@ Tanpa tsc, tanpa prisma generate, tanpa devDependencies — aman untuk hosting R
 9. **Smoke**: \`https://domain/\` tampil · \`/api/public/rooms\` 200 · login OWNER.
 
 ## Redeploy (update)
-Untuk redeploy kode, jangan jalankan \`schema.sql\` atau \`seed.sql\` pada database yang sudah ada.
 \`\`\`bash
 # Stop app → backup DB + uploads/ → extract TGZ baru → Start app
-# TIDAK perlu npm install — node_modules sudah include di TGZ.
+# Jalankan npm run cpanel:install kembali bila package-lock berubah.
 \`\`\`
 
 ## Catatan RAM 512MB
@@ -486,7 +491,7 @@ Untuk redeploy kode, jangan jalankan \`schema.sql\` atau \`seed.sql\` pada datab
 - Passenger idle-sleep saat sepi; cron membangunkannya.
 - Jika memory faults: turunkan \`NODE_OPTIONS\` ke 160.
 
-⚠️ Ganti password OWNER & JANGAN commit \`.env\`. VPS: \`pm2 start dist/main.js --name kost48\`.
+⚠️ Jangan commit \`.env\`, data tenant, KTP/NIK, atau password. VPS: \`pm2 start dist/main.js --name kost48\`.
 `);
 
 createVerifiedArchive();
@@ -495,4 +500,4 @@ const total = countFiles(OUT);
 console.log('\n[deploy] SELESAI.');
 console.log('  Folder siap-upload : ' + OUT + '/  (' + total + ' file — estimasi pemakaian inode upload)');
 console.log('  Arsip terverifikasi: ' + ARCHIVE);
-console.log('  Di server: npm run cpanel:install -> isi .env -> schema+OWNER -> Restart App  (lihat ' + OUT + '/README-DEPLOY.md)');
+console.log('  Di server: npm run cpanel:install -> isi .env -> migrate+OWNER -> Restart App  (lihat ' + OUT + '/README-DEPLOY.md)');

@@ -5,7 +5,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import PageHeader from '../../components/common/PageHeader';
 import CurrencyDisplay from '../../components/common/CurrencyDisplay';
 import { listActiveAdditionalServices, createServiceInterest, listMyServiceInterests, type AdditionalService } from '../../api/additionalServices';
-import { formatRupiah, formatRupiahWithoutSymbol } from '../../utils/formatCurrency';
+import { formatRupiah } from '../../utils/formatCurrency';
 
 // D-25: nomor WA owner-settable via Settings (fallback env var → default)
 const KOST_WHATSAPP_NUMBER = (import.meta.env.VITE_PUBLIC_ADMIN_WHATSAPP ?? '6285648887628').replace(/\D/g, '');
@@ -70,7 +70,7 @@ export default function WifiOrderPage() {
                           size="sm"
                           disabled={isPending}
                           onClick={async () => {
-                            const ok = await confirm({ title: 'Pesan Layanan', message: `Pesan "${svc.name}" ({formatRupiah(svc.priceRupiah)})? Pengelola akan menghubungi untuk konfirmasi.`, confirmLabel: 'Pesan', variant: 'primary' });
+                            const ok = await confirm({ title: 'Pesan Layanan', message: `Pesan "${svc.name}" (${formatRupiah(svc.priceRupiah)})? Pengelola akan menghubungi untuk konfirmasi.`, confirmLabel: 'Pesan', variant: 'primary' });
                             if (!ok) return;
                             interestMutation.mutate(svc.id);
                           }}

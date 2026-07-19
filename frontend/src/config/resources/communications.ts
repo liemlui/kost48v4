@@ -8,6 +8,7 @@ export const communicationsConfigs = {
     title: 'Pengumuman & Komunikasi',
     supportsIsActiveFilter: true,
     path: '/announcements',
+    emptyMessage: 'Belum ada pengumuman. Klik "Buat Pengumuman" untuk membuat pengumuman pertama.',
     createLabel: 'Buat Pengumuman',
     columns: [
       { key: 'id', label: 'ID' },

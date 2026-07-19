@@ -208,6 +208,9 @@ export class IotService {
         unit: utilityType === 'ELECTRICITY' ? 'kWh' : 'm3',
         flowRateLpm: null,
         quality: null,
+        powerW: null,
+        voltageV: null,
+        currentA: null,
       };
     }
 
@@ -215,8 +218,14 @@ export class IotService {
     const metric = (name: string) => latestMessage?.telemetry?.find((item: any) => item.metric === name);
     const totalMetric = metric(utilityType === 'ELECTRICITY' ? 'electricity.energy_total_kwh' : 'water.volume_total_m3');
     const flowMetric = utilityType === 'WATER' ? metric('water.flow_rate_lpm') : undefined;
+    const powerMetric = utilityType === 'ELECTRICITY' ? metric('electricity.power_w') : undefined;
+    const voltageMetric = utilityType === 'ELECTRICITY' ? metric('electricity.voltage_v') : undefined;
+    const currentMetric = utilityType === 'ELECTRICITY' ? metric('electricity.current_a') : undefined;
     const total = totalMetric?.valueDecimal == null ? null : Number(totalMetric.valueDecimal);
     const flowRateLpm = flowMetric?.valueDecimal == null ? null : Number(flowMetric.valueDecimal);
+    const powerW = powerMetric?.valueDecimal == null ? null : Number(powerMetric.valueDecimal);
+    const voltageV = voltageMetric?.valueDecimal == null ? null : Number(voltageMetric.valueDecimal);
+    const currentA = currentMetric?.valueDecimal == null ? null : Number(currentMetric.valueDecimal);
     const lastSeenAt = device.lastSeenAt ?? null;
     const observedAt = totalMetric?.observedAt ?? latestMessage?.observedAt ?? lastSeenAt;
     const stale = !lastSeenAt || Date.now() - lastSeenAt.getTime() > staleAfterMinutes * 60_000;
@@ -247,6 +256,9 @@ export class IotService {
       unit: totalMetric?.unit ?? (utilityType === 'ELECTRICITY' ? 'kWh' : 'm3'),
       flowRateLpm,
       quality: totalMetric?.quality ?? null,
+      powerW,
+      voltageV,
+      currentA,
     };
   }
 

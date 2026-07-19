@@ -12,9 +12,7 @@ import { resolveAbsoluteFileUrl } from '../../utils/resolveAbsoluteFileUrl';
 import { getOfficialAnnouncementFallbackImage } from '../../data/officialKost48Content';
 import { formatDateOnly } from '../../utils/dateTime';
 
-function formatDate(value?: string | null) {
-  return formatDateOnly(value);
-}
+
 
 function normalizeAnnouncement(item: Announcement | undefined | null) {
   if (!item || !item.id) return null;
@@ -72,8 +70,8 @@ export default function TenantAnnouncementDetailPage() {
                   {item.audience ? <Badge bg="secondary">{item.audience === 'ALL' ? 'Semua Pengguna' : 'Penghuni'}</Badge> : null}
                 </div>
                 <div className="app-caption">
-                  Dipublikasikan {formatDate(item.publishedAt)}
-                  {item.expiresAt ? ` · Berlaku sampai ${formatDate(item.expiresAt)}` : ''}
+                  Dipublikasikan {formatDateOnly(item.publishedAt)}
+                  {item.expiresAt ? ` · Berlaku sampai ${formatDateOnly(item.expiresAt)}` : ''}
                 </div>
               </div>
               <Button variant="outline-primary" size="sm" onClick={() => navigate('/portal/announcements')}>Daftar Pengumuman</Button>

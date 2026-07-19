@@ -33,7 +33,9 @@ function liveValue(value: number | null, unit: string) {
 
 function LiveMeterTile({ device }: { device: TenantUtilityDevice }) {
   const isWater = device.utilityType === 'WATER';
-  const stateClass = ['ONLINE', 'NO_FLOW'].includes(device.status) ? 'is-ok' : 'is-warning';
+  const isOnline = ['ONLINE', 'NO_FLOW'].includes(device.status);
+  const stateClass = isOnline ? 'is-ok' : 'is-warning';
+  const hasLivePower = !isWater && device.powerW != null;
   return (
     <div className={`tenant-live-meter ${stateClass}`}>
       <div className="tenant-live-meter-head">
@@ -41,6 +43,23 @@ function LiveMeterTile({ device }: { device: TenantUtilityDevice }) {
         <span>{statusLabel[device.status]}</span>
       </div>
       <div className="tenant-live-meter-value">{liveValue(device.total, device.unit)}</div>
+      {hasLivePower ? (
+        <div className="tenant-live-meter-power">
+          <span className="live-power-watt" title="Daya real-time">
+            ⚡ {device.powerW!.toFixed(0)} W
+          </span>
+          {device.voltageV != null ? (
+            <span className="live-power-detail" title="Tegangan">
+              {device.voltageV.toFixed(0)} V
+            </span>
+          ) : null}
+          {device.currentA != null ? (
+            <span className="live-power-detail" title="Arus">
+              {device.currentA.toFixed(1)} A
+            </span>
+          ) : null}
+        </div>
+      ) : null}
       {isWater && device.flowRateLpm != null ? <div className="tenant-live-meter-flow">Aliran saat ini: {liveValue(device.flowRateLpm, 'L/menit')}</div> : null}
       <small>{device.statusMessage}</small>
     </div>
@@ -78,16 +97,35 @@ export default function UtilityInsightCard({
   const lastElecUsage = summary.latestRow?.usageElectricityKwh ?? 0;
   const lastWaterUsage = summary.latestRow?.usageWaterM3 ?? 0;
 
+  // Pemakaian bulan kalender berjalan (untuk gauge & estimasi biaya)
+  const currentMonthUsage = useMemo(() => {
+    const now = new Date();
+    const monthPrefix = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+    const monthRows = summary.rows.filter((r) => r.dateKey.startsWith(monthPrefix));
+    if (monthRows.length === 0) {
+      // Belum ada pencatatan bulan ini — fallback ke periode terakhir
+      return { electricityKwh: lastElecUsage, waterM3: lastWaterUsage, isPartialMonth: true };
+    }
+    const elecSum = monthRows.reduce((s, r) => s + (r.usageElectricityKwh ?? 0), 0);
+    const waterSum = monthRows.reduce((s, r) => s + (r.usageWaterM3 ?? 0), 0);
+    // Parsial jika tenant masuk pertengahan bulan atau bulan belum berakhir
+    const isPartial = (stay.checkInDate && stay.checkInDate.startsWith(monthPrefix)) || now.getDate() < 25;
+    return { electricityKwh: elecSum, waterM3: waterSum, isPartialMonth: isPartial };
+  }, [summary.rows, stay.checkInDate, lastElecUsage, lastWaterUsage]);
+
+  const gaugeElecUsage = currentMonthUsage.electricityKwh;
+  const gaugeWaterUsage = currentMonthUsage.waterM3;
+
   const estimate = useMemo(
     () => estimateUtilityCost({
-      electricityUsageKwh: lastElecUsage,
-      waterUsageM3: lastWaterUsage,
+      electricityUsageKwh: gaugeElecUsage,
+      waterUsageM3: gaugeWaterUsage,
       electricityTariff: elecTariff,
       waterTariff,
       freeKwh,
       waterEnabled,
     }),
-    [lastElecUsage, lastWaterUsage, elecTariff, waterTariff, freeKwh, waterEnabled],
+    [gaugeElecUsage, gaugeWaterUsage, elecTariff, waterTariff, freeKwh, waterEnabled],
   );
 
   const trendPoints: HorizontalBarPoint[] = useMemo(
@@ -188,17 +226,17 @@ export default function UtilityInsightCard({
             {/* Live electricity usage gauge */}
             <div className="tenant-utility-gauge-row">
               <UsageGauge
-                value={lastElecUsage}
+                value={gaugeElecUsage}
                 maxValue={freeKwh}
                 unit="kWh"
-                label="Listrik"
+                label={currentMonthUsage.isPartialMonth ? 'Listrik (parsial)' : 'Listrik'}
                 thresholds={{ warning: 50, danger: 100 }}
                 size={150}
               />
               {waterEnabled ? (
                 <UsageGauge
-                  value={lastWaterUsage}
-                  maxValue={Math.max(lastWaterUsage * 1.5, 5)}
+                  value={gaugeWaterUsage}
+                  maxValue={Math.max(gaugeWaterUsage * 1.5, 5)}
                   unit="m³"
                   label="Air"
                   thresholds={{ warning: 70, danger: 90 }}
@@ -209,9 +247,9 @@ export default function UtilityInsightCard({
 
             <div className="tenant-utility-tiles">
               <div className="tenant-utility-tile">
-                <span className="ut-label">Listrik periode terakhir</span>
+                <span className="ut-label">Listrik bulan ini</span>
                 <div className="ut-usage-row">
-                  <strong className="ut-usage">{lastElecUsage.toFixed(2)} kWh</strong>
+                  <strong className="ut-usage">{gaugeElecUsage.toFixed(2)} kWh</strong>
                   {trendPoints.length >= 2 ? (
                     <Sparkline
                       points={trendPoints}
@@ -223,12 +261,12 @@ export default function UtilityInsightCard({
                   ) : null}
                 </div>
                 <span className="ut-cost">est. <CurrencyDisplay amount={estimate.electricity} showZero /></span>
-                <small className="ut-note">Jatah gratis {freeKwh} kWh/bulan</small>
+                <small className="ut-note">Jatah gratis {freeKwh} kWh/bulan{currentMonthUsage.isPartialMonth ? ' · parsial' : ''}</small>
               </div>
               {waterEnabled ? (
                 <div className="tenant-utility-tile">
-                  <span className="ut-label">Air periode terakhir</span>
-                  <strong className="ut-usage">{lastWaterUsage.toFixed(2)} m³</strong>
+                  <span className="ut-label">Air bulan ini</span>
+                  <strong className="ut-usage">{gaugeWaterUsage.toFixed(2)} m³</strong>
                   <span className="ut-cost">est. <CurrencyDisplay amount={estimate.water} showZero /></span>
                   <small className="ut-note">Tarif <CurrencyDisplay amount={waterTariff} />/m³</small>
                 </div>
@@ -266,7 +304,7 @@ export default function UtilityInsightCard({
 
             <div className="mt-3">
               <UtilityProjection
-                currentUsageKwh={lastElecUsage}
+                currentUsageKwh={gaugeElecUsage}
                 freeKwh={freeKwh}
                 tariffPerKwh={elecTariff}
                 estimatedCost={estimate.electricity}

@@ -32,6 +32,7 @@ interface BucketEntry {
 export class RateLimitGuard implements CanActivate {
   // Static store so all guard instances share the same bucket (DI creates new instances per request for guards)
   private static readonly store = new Map<string, BucketEntry>();
+  private static readonly maxTrackedKeys = 10_000;
 
   constructor(private readonly reflector?: Reflector) {}
 
@@ -39,6 +40,9 @@ export class RateLimitGuard implements CanActivate {
     login: { maxRequests: 10, windowMs: 5 * 60 * 1000 },
     forgotPassword: { maxRequests: 3, windowMs: 10 * 60 * 1000 },
     resetPassword: { maxRequests: 5, windowMs: 10 * 60 * 1000 },
+    // Public cron hooks are token-protected, but still need a small outer
+    // throttle so invalid traffic cannot repeatedly wake expensive jobs.
+    cron: { maxRequests: 30, windowMs: 5 * 60 * 1000 },
     // Unauthenticated public booking creation — guard against spam/DoS abuse.
     publicBooking: { maxRequests: 5, windowMs: 10 * 60 * 1000 },
     // Authenticated tenant file uploads — prevent disk exhaustion abuse.
@@ -48,6 +52,26 @@ export class RateLimitGuard implements CanActivate {
     // Multi-replica production harus memindahkan bucket ini ke Redis/gateway.
     iotIngest: { maxRequests: 180, windowMs: 60 * 1000 },
   };
+
+  /** Keeps the process-local fallback bounded during a unique-IP flood. */
+  private static pruneStore(now: number): void {
+    if (RateLimitGuard.store.size < RateLimitGuard.maxTrackedKeys) return;
+
+    for (const [key, entry] of RateLimitGuard.store) {
+      if (entry.resetAt <= now) RateLimitGuard.store.delete(key);
+    }
+    if (RateLimitGuard.store.size < RateLimitGuard.maxTrackedKeys) return;
+
+    let earliestKey: string | undefined;
+    let earliestResetAt = Number.POSITIVE_INFINITY;
+    for (const [key, entry] of RateLimitGuard.store) {
+      if (entry.resetAt < earliestResetAt) {
+        earliestKey = key;
+        earliestResetAt = entry.resetAt;
+      }
+    }
+    if (earliestKey) RateLimitGuard.store.delete(earliestKey);
+  }
 
   canActivate(context: ExecutionContext): boolean {
     const request = context.switchToHttp().getRequest();
@@ -67,6 +91,7 @@ export class RateLimitGuard implements CanActivate {
     const identity = request.user?.id ? `user-${request.user.id}` : `ip-${ip}`;
     const key = `${bucket}:${identity}`;
     const now = Date.now();
+    RateLimitGuard.pruneStore(now);
     const existing = RateLimitGuard.store.get(key);
 
     if (!existing || now > existing.resetAt) {

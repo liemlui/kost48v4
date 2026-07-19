@@ -8,10 +8,6 @@ import { formatDateOnly } from '../../utils/dateTime';
 type Props = { performance?: StaffPerformanceSummary | null };
 type EvidenceFilter = 'ALL' | 'NEED_PROOF' | 'ROUTINE' | 'TICKET' | 'METER' | 'DONE';
 
-function formatDate(value?: string | null) {
-  return formatDateOnly(value);
-}
-
 function statusText(status?: string | null) {
   const value = String(status ?? '').toUpperCase();
   if (value === 'OPEN') return 'Belum dikerjakan';
@@ -88,7 +84,7 @@ export default function StaffMonthlyEvidenceTable({ performance }: Props) {
             <tbody>
               {pagedRows.map((row) => (
                 <tr key={row.id}>
-                  <td>{formatDate(row.date)}</td>
+                  <td>{formatDateOnly(row.date)}</td>
                   <td>{row.type}</td>
                   <td><div className="fw-semibold">{row.title}</div></td>
                   <td>{row.location}</td>

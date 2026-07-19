@@ -501,7 +501,7 @@ export default function InvoicesPage() {
         <NavLink to="/payment-submissions/review" className={({ isActive }) => `admin-sub-nav-link${isActive ? ' active' : ''}`}>Review Pembayaran</NavLink>
         <NavLink to="/wifi-sales" className={({ isActive }) => `admin-sub-nav-link${isActive ? ' active' : ''}`}>WiFi</NavLink>
         <NavLink to="/ancillary-revenue" className={({ isActive }) => `admin-sub-nav-link${isActive ? ' active' : ''}`}>Pendapatan Lain</NavLink>
-        <NavLink to="/expenses" className={({ isActive }) => `admin-sub-nav-link${isActive ? ' active' : ''}`}>Pengeluaran</NavLink>
+        <NavLink to="/expenses" className={({ isActive }) => `admin-sub-nav-link${isActive ? ' active' : ''}`}>Pembelian & Operasional</NavLink>
         <NavLink to="/invoice-payments" className={({ isActive }) => `admin-sub-nav-link${isActive ? ' active' : ''}`}>Riwayat Bayar</NavLink>
       </div>
 

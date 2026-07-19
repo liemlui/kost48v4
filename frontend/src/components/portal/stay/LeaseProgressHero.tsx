@@ -4,12 +4,7 @@ import AnimatedCounter from '../../common/AnimatedCounter';
 import { getLeaseProgress, formatTenure, formatDateOnly } from '../../../utils/dateTime';
 import type { Stay } from '../../../types';
 
-function formatShortDate(value?: string | Date | null): string {
-  if (!value) return '-';
-  const d = new Date(value);
-  if (isNaN(d.getTime())) return '-';
-  return formatDateOnly(d);
-}
+
 
 export default function LeaseProgressHero({ stay }: { stay: Stay }) {
   const progress = getLeaseProgress(stay.checkInDate, stay.plannedCheckOutDate);
@@ -41,7 +36,7 @@ export default function LeaseProgressHero({ stay }: { stay: Stay }) {
         : ` · Sisa ${progress.daysRemaining} hari`;
 
   const periodeLabel = progress.hasRange
-    ? `${formatShortDate(stay.checkInDate)} – ${formatShortDate(stay.plannedCheckOutDate)}${countdownLabel}`
+    ? `${formatDateOnly(stay.checkInDate)} – ${formatDateOnly(stay.plannedCheckOutDate)}${countdownLabel}`
     : 'Periode belum ditentukan';
 
   return (
