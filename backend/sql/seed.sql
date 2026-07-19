@@ -8,7 +8,7 @@ BEGIN;
 
 DO $$ DECLARE r record; BEGIN
   -- DROP triggers (skip if not owner)
-  FOR r IN SELECT tablename, tgname FROM pg_trigger WHERE tgname IN (
+  FOR r IN SELECT tgrelid::regclass::text AS tablename, tgname FROM pg_trigger WHERE tgname IN (
     'invoice_payment_no_overpay_trg','invoice_line_amount_sync_trg','invoice_total_manual_guard_trg',
     'invoice_line_recalc_total_trg','invoice_line_draft_only_trg','stay_deposit_processing_guard_trg',
     'meter_reading_monotonic_trg','inventory_movement_sync_qty_trg'
