@@ -86,6 +86,7 @@ sql/
 !backend/sql/
 backend/sql/*
 !backend/sql/seed.sql
+!backend/sql/patches/
 backend/scripts/*.sql
 backend/scripts/golive-*
 backend/scripts/insert-*

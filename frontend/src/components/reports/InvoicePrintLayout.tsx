@@ -1,6 +1,7 @@
 import React from 'react';
 import { formatDateSafe } from '../../pages/resources/simpleCrudHelpers';
 import { formatRupiahWithoutSymbol } from '../../utils/formatCurrency';
+import { sumInvoiceLines } from '../../utils/invoiceTotals';
 
 function maskPhone(phone: string | null | undefined): string {
   if (!phone) return '-';
@@ -99,7 +100,7 @@ export default function InvoicePrintLayout({ data }: Props) {
     : '-';
   const lines = data.lines ?? [];
   const payments = data.payments ?? [];
-  const lineTotal = lines.reduce((sum, line) => sum + Number(line.lineAmountRupiah ?? 0), 0);
+  const lineTotal = sumInvoiceLines(lines as any);
   const totalInvoice = lineTotal > 0 ? lineTotal : Number(data.totalAmountRupiah ?? 0);
 
   const totalPaid = payments.reduce(

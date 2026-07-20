@@ -182,7 +182,10 @@ export default function CreateInvoiceModal({
   }, [show, suggestionQuery.data, stay]);
 
   const totalAmount = useMemo(
-    () => items.reduce((sum, item) => sum + Number(item.qty || 0) * Number(item.unitPriceRupiah || 0), 0),
+    () => items.reduce((sum, item) => {
+      const amount = Number(item.qty || 0) * Number(item.unitPriceRupiah || 0);
+      return item.lineType === 'DISCOUNT' ? sum - amount : sum + amount;
+    }, 0),
     [items],
   );
 

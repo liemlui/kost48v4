@@ -13,7 +13,10 @@ function money(value: unknown): number {
 }
 
 export function sumInvoiceLines(lines?: Array<Partial<InvoiceLine>> | null): number {
-  return (lines ?? []).reduce((sum, line) => sum + money(line.lineAmountRupiah), 0);
+  return (lines ?? []).reduce((sum, line) => {
+    const amount = money(line.lineAmountRupiah);
+    return line.lineType === 'DISCOUNT' ? sum - amount : sum + amount;
+  }, 0);
 }
 
 export function sumInvoicePayments(payments?: Array<Partial<InvoicePayment>> | null): number {

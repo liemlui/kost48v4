@@ -5,6 +5,7 @@ import HorizontalBarChart, { type HorizontalBarPoint } from '../../charts/Horizo
 import LineAreaChart from '../../charts/LineAreaChart';
 import Sparkline from '../../charts/Sparkline';
 import UsageGauge from '../../charts/UsageGauge';
+import DonutGauge from '../../charts/DonutGauge';
 import { OKABE_ITO } from '../../charts/chartPalette';
 import CurrencyDisplay from '../../common/CurrencyDisplay';
 import AnimatedCounter from '../../common/AnimatedCounter';
@@ -225,6 +226,14 @@ export default function UtilityInsightCard({
           <>
             {/* Live electricity usage gauge */}
             <div className="tenant-utility-gauge-row">
+              <DonutGauge
+                value={gaugeElecUsage}
+                max={freeKwh}
+                center={<><strong>{Math.min(Math.round((gaugeElecUsage / freeKwh) * 100), 999)}%</strong><small>dari {freeKwh} kWh</small></>}
+                ariaLabel={`Pemakaian listrik ${gaugeElecUsage} dari ${freeKwh} kWh`}
+                size={140}
+                color={gaugeElecUsage > freeKwh ? '#dc2626' : gaugeElecUsage / freeKwh > 0.5 ? '#f59e0b' : '#16a34a'}
+              />
               <UsageGauge
                 value={gaugeElecUsage}
                 maxValue={freeKwh}

@@ -4827,6 +4827,9 @@ div.tenant-stay-fact-chip {
 .energy-projection-section { background:#fff; border-radius:14px; padding:1rem 1.15rem; box-shadow:0 2px 12px rgba(14,30,60,.05); margin-bottom:1.2rem; }
 .energy-cumulative { margin-top:.8rem; font-size:.84rem; color:#334155; text-align:center; }
 .energy-empty { padding:2rem 0; text-align:center; color:#94a3b8; }
+.energy-period-badge { display:inline-block; margin-left:.5rem; padding:.15rem .55rem; background:#e0f2fe; color:#0369a1; border-radius:999px; font-size:.68rem; font-weight:700; vertical-align:middle; }
+.energy-empty-state { padding:1.2rem 0; text-align:center; color:#64748b; }
+.energy-empty-state p { margin:0 0 .35rem; font-size:.85rem; font-weight:600; }
 .energy-footer-note { text-align:center; color:#94a3b8; font-size:.7rem; margin-top:.6rem; }
 
 /* Larger live meter tile for energy page */

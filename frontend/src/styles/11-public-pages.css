@@ -110,6 +110,19 @@
   background: #e0f2fe;
 }
 
+/* ── Simulasikan Tarif nav button — accent ── */
+.rm-nav-simulate {
+  color: #0369a1 !important;
+  background: linear-gradient(135deg, #dbeafe, #e0f2fe) !important;
+  border: 1px solid rgba(3, 105, 161, .18) !important;
+  font-weight: 800 !important;
+}
+.rm-nav-simulate:hover {
+  color: #fff !important;
+  background: linear-gradient(135deg, #0284c7, #0369a1) !important;
+  border-color: #0369a1 !important;
+}
+
 .rm-topbar-user {
   display: flex;
   align-items: center;
@@ -181,18 +194,25 @@
 .rm-preference-trigger {
   display: inline-flex;
   align-items: center;
-  justify-content: center;
-  margin-top: .75rem;
-  padding: .42rem .8rem;
-  border: 1px solid rgba(3, 105, 161, .24);
-  border-radius: 999px;
-  background: #fff;
-  color: #075985;
-  font-size: .8rem;
+  gap: .5rem;
+  margin-top: 1rem;
+  padding: .65rem 1.4rem;
+  border: none;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #0284c7, #0369a1);
+  color: #fff;
+  font-size: .9rem;
   font-weight: 800;
   cursor: pointer;
+  box-shadow: 0 2px 12px rgba(3, 105, 161, .35);
+  transition: transform .15s ease, box-shadow .15s ease;
 }
-.rm-preference-trigger:hover { background: #e0f2fe; }
+.rm-preference-trigger:hover {
+  background: linear-gradient(135deg, #0369a1, #075985);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 18px rgba(3, 105, 161, .45);
+  color: #fff;
+}
 
 /* ── Filter bar — layout vertikal (tiap grup satu baris) ── */
 .rm-filter-bar {

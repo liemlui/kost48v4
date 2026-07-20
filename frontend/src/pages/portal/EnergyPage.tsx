@@ -147,29 +147,29 @@ export default function EnergyPage() {
     return summarizeUsageSinceCheckIn(readings, stay.checkInDate);
   }, [readings, stay?.checkInDate]);
 
-  const currentMonthUsage = useMemo(() => {
-    if (!summary) return { electricityKwh: 0, waterM3: 0, isPartialMonth: true };
+  // Usage since check-in (bukan bulan kalender)
+  const periodUsage = useMemo(() => {
+    if (!summary) return { electricityKwh: 0, waterM3: 0 };
+    return { electricityKwh: summary.totalElectricityKwh, waterM3: summary.totalWaterM3 };
+  }, [summary]);
+
+  // Label periode: "8 Jul – 8 Agu"
+  const periodLabel = useMemo(() => {
+    if (!stay?.checkInDate) return '';
+    const checkIn = new Date(stay.checkInDate);
     const now = new Date();
-    const monthPrefix = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
-    const monthRows = summary.rows.filter((r) => r.dateKey.startsWith(monthPrefix));
-    if (monthRows.length === 0) {
-      const last = summary.latestRow;
-      return { electricityKwh: last?.usageElectricityKwh ?? 0, waterM3: last?.usageWaterM3 ?? 0, isPartialMonth: true };
-    }
-    const elecSum = monthRows.reduce((s, r) => s + (r.usageElectricityKwh ?? 0), 0);
-    const waterSum = monthRows.reduce((s, r) => s + (r.usageWaterM3 ?? 0), 0);
-    const isPartial = (stay?.checkInDate && stay.checkInDate.startsWith(monthPrefix)) || now.getDate() < 25;
-    return { electricityKwh: elecSum, waterM3: waterSum, isPartialMonth: isPartial };
-  }, [summary, stay?.checkInDate]);
+    const fmt = (d: Date) => d.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' });
+    return `${fmt(checkIn)} – ${fmt(now)}`;
+  }, [stay?.checkInDate]);
 
   const estimate = useMemo(() => estimateUtilityCost({
-    electricityUsageKwh: currentMonthUsage.electricityKwh,
-    waterUsageM3: currentMonthUsage.waterM3,
+    electricityUsageKwh: periodUsage.electricityKwh,
+    waterUsageM3: periodUsage.waterM3,
     electricityTariff: elecTariff,
     waterTariff,
     freeKwh,
     waterEnabled,
-  }), [currentMonthUsage, elecTariff, waterTariff, freeKwh, waterEnabled]);
+  }), [periodUsage, elecTariff, waterTariff, freeKwh, waterEnabled]);
 
   const trendPoints: HorizontalBarPoint[] = useMemo(() => {
     if (!summary) return [];
@@ -184,7 +184,7 @@ export default function EnergyPage() {
       }));
   }, [summary]);
 
-  const hasUsage = summary && summary.rows.length > 1;
+  const hasData = summary !== null;
   const isLoading = meterReadingsQuery.isLoading || utilityTelemetryQuery.isLoading;
   const isError = meterReadingsQuery.isError;
 
@@ -256,60 +256,61 @@ export default function EnergyPage() {
             ) : null}
           </section>
 
-          {/* Gauges */}
-          {hasUsage ? (
-            <section className="energy-gauge-section">
-              <h2 className="energy-section-title">
-                Pemakaian Bulan Ini{currentMonthUsage.isPartialMonth ? ' (parsial)' : ''}
-              </h2>
-              <div className="energy-gauge-row">
+          {/* Gauges — selalu terlihat */}
+          <section className="energy-gauge-section">
+            <h2 className="energy-section-title">
+              Pemakaian Periode Ini
+              {periodLabel ? <span className="energy-period-badge">📅 {periodLabel}</span> : null}
+            </h2>
+            <div className="energy-gauge-row">
+              <UsageGauge
+                value={periodUsage.electricityKwh}
+                maxValue={freeKwh}
+                unit="kWh"
+                label="Listrik"
+                thresholds={{ warning: 50, danger: 100 }}
+                size={200}
+              />
+              {waterEnabled ? (
                 <UsageGauge
-                  value={currentMonthUsage.electricityKwh}
-                  maxValue={freeKwh}
-                  unit="kWh"
-                  label={currentMonthUsage.isPartialMonth ? 'Listrik (parsial)' : 'Listrik'}
-                  thresholds={{ warning: 50, danger: 100 }}
+                  value={periodUsage.waterM3}
+                  maxValue={Math.max(periodUsage.waterM3 * 1.5, 5)}
+                  unit="m³"
+                  label="Air"
+                  thresholds={{ warning: 70, danger: 90 }}
                   size={200}
                 />
-                {waterEnabled ? (
-                  <UsageGauge
-                    value={currentMonthUsage.waterM3}
-                    maxValue={Math.max(currentMonthUsage.waterM3 * 1.5, 5)}
-                    unit="m³"
-                    label="Air"
-                    thresholds={{ warning: 70, danger: 90 }}
-                    size={200}
-                  />
-                ) : null}
-              </div>
+              ) : null}
+            </div>
 
-              {/* Summary tiles */}
+            {hasData ? (
               <div className="energy-summary-tiles">
                 <div className="energy-summary-tile">
-                  <span className="est-label">Listrik bulan ini</span>
-                  <strong>{currentMonthUsage.electricityKwh.toFixed(2)} kWh</strong>
+                  <span className="est-label">Listrik periode ini</span>
+                  <strong>{periodUsage.electricityKwh.toFixed(2)} kWh</strong>
                   <span className="est-cost">est. <CurrencyDisplay amount={estimate.electricity} showZero /></span>
                   <small>Jatah gratis {freeKwh} kWh/bulan</small>
                 </div>
                 {waterEnabled ? (
                   <div className="energy-summary-tile">
-                    <span className="est-label">Air bulan ini</span>
-                    <strong>{currentMonthUsage.waterM3.toFixed(2)} m³</strong>
+                    <span className="est-label">Air periode ini</span>
+                    <strong>{periodUsage.waterM3.toFixed(2)} m³</strong>
                     <span className="est-cost">est. <CurrencyDisplay amount={estimate.water} showZero /></span>
                     <small>Tarif <CurrencyDisplay amount={waterTariff} />/m³</small>
                   </div>
                 ) : null}
               </div>
-            </section>
-          ) : isLoading ? (
-            <div className="text-center py-4"><Spinner animation="border" size="sm" /></div>
-          ) : isError ? (
-            <p className="text-muted">Data meter belum bisa dimuat.</p>
-          ) : (
-            <div className="energy-empty">
-              <p>Belum ada pemakaian tercatat. Catat meter secara berkala untuk melihat estimasi.</p>
-            </div>
-          )}
+            ) : isLoading ? (
+              <div className="text-center py-3"><Spinner animation="border" size="sm" /> <span className="text-muted ms-2">Memuat data meter...</span></div>
+            ) : isError ? (
+              <p className="text-muted">Data meter belum bisa dimuat.</p>
+            ) : (
+              <div className="energy-empty-state">
+                <p>⏳ Menunggu pencatatan meter pertama.</p>
+                <small className="text-muted">Catat meter secara berkala untuk melihat estimasi biaya. Gauge di atas akan terisi otomatis.</small>
+              </div>
+            )}
+          </section>
 
           {/* Anomaly alerts */}
           <AnomalyAlert readings={readings} utilityType="ELECTRICITY" />
@@ -344,10 +345,10 @@ export default function EnergyPage() {
           ) : null}
 
           {/* Projection */}
-          {hasUsage ? (
+          {hasData ? (
             <section className="energy-projection-section">
               <UtilityProjection
-                currentUsageKwh={currentMonthUsage.electricityKwh}
+                currentUsageKwh={periodUsage.electricityKwh}
                 freeKwh={freeKwh}
                 tariffPerKwh={elecTariff}
                 estimatedCost={estimate.electricity}

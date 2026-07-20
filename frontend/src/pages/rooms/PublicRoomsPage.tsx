@@ -75,7 +75,7 @@ function FilterChip({
 }
 
 // ── Public topbar for rooms page ───────────────────────────────────────────
-function RoomsTopbar() {
+function RoomsTopbar({ onSimulateClick }: { onSimulateClick: () => void }) {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
   const [iconBroken, setIconBroken] = useState(false);
@@ -106,6 +106,10 @@ function RoomsTopbar() {
         <button type="button" onClick={() => navigate("/panduan")}>
           <svg className="rm-nav-icon" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M12 20h9" /><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z" /></svg>
           Panduan & FAQ
+        </button>
+        <button type="button" onClick={onSimulateClick} className="rm-nav-simulate">
+          <svg className="rm-nav-icon" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><line x1="12" y1="1" x2="12" y2="23" /><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" /></svg>
+          Simulasikan Tarif
         </button>
         <button type="button" onClick={() => navigate("/reviews")}>
           <svg className="rm-nav-icon" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" /></svg>
@@ -252,7 +256,7 @@ export default function PublicRoomsPage() {
 
   return (
     <div className={isTenant ? "tenant-room-discovery-page" : "rm-page"}>
-      {!isTenant && <RoomsTopbar />}
+      {!isTenant && <RoomsTopbar onSimulateClick={() => setShowPreferenceWizard(true)} />}
 
       <Container fluid="xl" className={isTenant ? "py-0" : "rm-container"}>
         {isTenantStageLoading && <div className="py-5 text-center"><Spinner animation="border" /></div>}
@@ -301,7 +305,7 @@ export default function PublicRoomsPage() {
                   <span>✓ Booking dibantu admin</span>
                 </div>
                 <button type="button" className="rm-preference-trigger" onClick={() => setShowPreferenceWizard(true)}>
-                  Bantu pilih kamar
+                  🔍 Bantu pilih kamar — gratis, 1 menit!
                 </button>
               </div>
             )}

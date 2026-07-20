@@ -49,8 +49,11 @@ export class InvoicesService {
     return Number.isFinite(parsed) ? parsed : 0;
   }
 
-  private normalizeInvoiceTotals<T extends { totalAmountRupiah?: number | null; paidAmountRupiah?: number | null; lines?: Array<{ lineAmountRupiah?: number | null }>; payments?: Array<{ amountRupiah?: number | null }> }>(invoice: T): T {
-    const lineTotal = (invoice.lines ?? []).reduce((sum, line) => sum + this.numeric(line.lineAmountRupiah), 0);
+  private normalizeInvoiceTotals<T extends { totalAmountRupiah?: number | null; paidAmountRupiah?: number | null; lines?: Array<{ lineAmountRupiah?: number | null; lineType?: string | null }>; payments?: Array<{ amountRupiah?: number | null }> }>(invoice: T): T {
+    const lineTotal = (invoice.lines ?? []).reduce((sum, line) => {
+      const amount = this.numeric(line.lineAmountRupiah);
+      return line.lineType === 'DISCOUNT' ? sum - amount : sum + amount;
+    }, 0);
     const storedTotal = this.numeric(invoice.totalAmountRupiah);
     const paymentTotal = (invoice.payments ?? []).reduce((sum, payment) => sum + this.numeric(payment.amountRupiah), 0);
     return {
@@ -60,7 +63,7 @@ export class InvoicesService {
     };
   }
 
-  private normalizeInvoiceList<T extends { totalAmountRupiah?: number | null; paidAmountRupiah?: number | null; lines?: Array<{ lineAmountRupiah?: number | null }>; payments?: Array<{ amountRupiah?: number | null }> }>(items: T[]): T[] {
+  private normalizeInvoiceList<T extends { totalAmountRupiah?: number | null; paidAmountRupiah?: number | null; lines?: Array<{ lineAmountRupiah?: number | null; lineType?: string | null }>; payments?: Array<{ amountRupiah?: number | null }> }>(items: T[]): T[] {
     return items.map((item) => this.normalizeInvoiceTotals(item));
   }
 
