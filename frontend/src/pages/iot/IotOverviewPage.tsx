@@ -510,6 +510,30 @@ export default function IotOverviewPage() {
                       />
                     </div>
                   ) : null}
+                  {/* Mini telemetry table — 5 titik terakhir */}
+                  {telemetryQuery.data && telemetryQuery.data.length > 0 ? (
+                    <div className="iot-telemetry-table-wrap">
+                      <div className="iot-trend-mini-head">Riwayat pembacaan</div>
+                      <table className="iot-telemetry-mini-table">
+                        <thead><tr><th>Waktu</th><th>Nilai</th><th>Kualitas</th></tr></thead>
+                        <tbody>
+                          {(() => {
+                            const rows = (telemetryQuery.data ?? [])
+                              .filter((item: any) => item.metric === selectedMetric?.key)
+                              .sort((a: any, b: any) => new Date(b.observedAt).getTime() - new Date(a.observedAt).getTime())
+                              .slice(0, 5);
+                            return rows.map((item: any, i: number) => (
+                              <tr key={i}>
+                                <td>{new Date(item.observedAt).toLocaleString('id-ID', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}</td>
+                                <td><strong>{Number(item.value).toLocaleString('id-ID', { maximumFractionDigits: 3 })}</strong> {selectedMetric?.unit}</td>
+                                <td>{item.quality === 'SUSPECT' ? <span className="iot-quality-badge badge-suspect">⚠️</span> : item.quality === 'REJECTED' ? <span className="iot-quality-badge badge-rejected">❌</span> : <span className="iot-quality-badge badge-good">✅</span>}</td>
+                              </tr>
+                            ));
+                          })()}
+                        </tbody>
+                      </table>
+                    </div>
+                  ) : null}
                   <p className="iot-usage-note">Monitoring sensor saja, bukan dasar tagihan. Tagihan resmi tetap memakai pencatatan dan review meter.</p>
                 </section>
               )}
