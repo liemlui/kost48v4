@@ -149,9 +149,15 @@ export default function EnergyPage() {
 
   // Usage since check-in (bukan bulan kalender)
   const periodUsage = useMemo(() => {
-    if (!summary) return { electricityKwh: 0, waterM3: 0 };
-    return { electricityKwh: summary.totalElectricityKwh, waterM3: summary.totalWaterM3 };
-  }, [summary]);
+    if (summary) return { electricityKwh: summary.totalElectricityKwh, waterM3: summary.totalWaterM3 };
+    // Fallback ke IoT telemetry kalau belum ada catatan meter manual
+    const iotKwh = Number(telemetry?.electricity?.total ?? 0);
+    const iotWater = Number(telemetry?.water?.total ?? 0);
+    return { electricityKwh: iotKwh, waterM3: iotWater };
+  }, [summary, telemetry]);
+
+  // Apakah data berasal dari IoT (bukan meter reading)
+  const isIotFallback = !summary && (Number(telemetry?.electricity?.total ?? 0) > 0 || Number(telemetry?.water?.total ?? 0) > 0);
 
   // Label periode: "8 Jul – 8 Agu"
   const periodLabel = useMemo(() => {
@@ -282,6 +288,12 @@ export default function EnergyPage() {
                 />
               ) : null}
             </div>
+
+            {isIotFallback ? (
+              <div className="energy-iot-notice">
+                📡 Data dari sensor IoT — bukan dasar tagihan. Catat meter secara berkala untuk akurasi billing.
+              </div>
+            ) : null}
 
             {hasData ? (
               <div className="energy-summary-tiles">

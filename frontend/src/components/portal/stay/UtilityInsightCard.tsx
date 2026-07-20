@@ -114,8 +114,13 @@ export default function UtilityInsightCard({
     return { electricityKwh: elecSum, waterM3: waterSum, isPartialMonth: isPartial };
   }, [summary.rows, stay.checkInDate, lastElecUsage, lastWaterUsage]);
 
-  const gaugeElecUsage = currentMonthUsage.electricityKwh;
-  const gaugeWaterUsage = currentMonthUsage.waterM3;
+  const gaugeElecUsage = currentMonthUsage.electricityKwh > 0
+    ? currentMonthUsage.electricityKwh
+    : Number(telemetry?.electricity?.total ?? 0);
+  const gaugeWaterUsage = currentMonthUsage.waterM3 > 0
+    ? currentMonthUsage.waterM3
+    : Number(telemetry?.water?.total ?? 0);
+  const isIotFallback = currentMonthUsage.electricityKwh === 0 && gaugeElecUsage > 0;
 
   const estimate = useMemo(
     () => estimateUtilityCost({
@@ -287,6 +292,10 @@ export default function UtilityInsightCard({
                 </div>
               )}
             </div>
+
+            {isIotFallback ? (
+              <div className="ut-iot-notice">📡 Data sensor IoT — bukan dasar tagihan</div>
+            ) : null}
 
             {trendPoints.length >= 2 ? (
               <div className="tenant-utility-trend">

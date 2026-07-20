@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import PageHeader from '../../components/common/PageHeader';
 import FeatureErrorBoundary from '../../components/common/FeatureErrorBoundary';
+import Sparkline from '../../components/charts/Sparkline';
 import { useDocumentTitle } from '../../hooks/useDocumentTitle';
 import { useToast } from '../../components/common/ToastProvider';
 import { useAuth } from '../../context/AuthContext';
@@ -485,6 +486,30 @@ export default function IotOverviewPage() {
                       ) : null}
                     </div>
                   )}
+                  {/* Mini trend chart dari telemetry historis */}
+                  {telemetryQuery.data && telemetryQuery.data.length >= 2 ? (
+                    <div className="iot-trend-mini">
+                      <div className="iot-trend-mini-head">Tren 20 titik terakhir</div>
+                      <Sparkline
+                        points={(() => {
+                          const filtered = (telemetryQuery.data ?? [])
+                            .filter((item: any) => item.metric === selectedMetric?.key && Number.isFinite(Number(item.value)))
+                            .sort((a: any, b: any) => new Date(a.observedAt).getTime() - new Date(b.observedAt).getTime())
+                            .slice(-20);
+                          if (filtered.length < 2) return [];
+                          const baseVal = Number(filtered[0].value);
+                          return filtered.map((item: any) => ({
+                            label: new Date(item.observedAt).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' }),
+                            value: Number((Number(item.value) - baseVal).toFixed(3)),
+                          }));
+                        })()}
+                        width={280}
+                        height={50}
+                        strokeColor="#2563eb"
+                        ariaLabel="Tren telemetry"
+                      />
+                    </div>
+                  ) : null}
                   <p className="iot-usage-note">Monitoring sensor saja, bukan dasar tagihan. Tagihan resmi tetap memakai pencatatan dan review meter.</p>
                 </section>
               )}

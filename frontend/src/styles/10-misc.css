@@ -4773,6 +4773,7 @@ div.tenant-stay-fact-chip {
 }
 .tenant-utility-tile .ut-cost { display:block; font-size:.82rem; color:#1e3a5f; font-weight:600; }
 .tenant-utility-tile .ut-note { display:block; font-size:.68rem; color:#64748b; margin-top:.2rem; }
+.ut-iot-notice { padding:.3rem .55rem; background:#f0f9ff; border:1px solid #bae6fd; border-radius:6px; color:#0369a1; font-size:.68rem; text-align:center; margin-top:.4rem; }
 .tenant-live-meter-panel { margin:0 0 .9rem; padding:.75rem; border:1px solid rgba(14,116,144,.16); border-radius:14px; background:linear-gradient(135deg,#f0fdfa,#f8fbff); }
 .tenant-live-meter-panel-head { display:flex; justify-content:space-between; gap:.75rem; align-items:center; margin-bottom:.55rem; font-size:.76rem; color:#155e75; }
 .tenant-live-meter-panel-head > span { color:#64748b; font-size:.7rem; }
@@ -4830,6 +4831,7 @@ div.tenant-stay-fact-chip {
 .energy-period-badge { display:inline-block; margin-left:.5rem; padding:.15rem .55rem; background:#e0f2fe; color:#0369a1; border-radius:999px; font-size:.68rem; font-weight:700; vertical-align:middle; }
 .energy-empty-state { padding:1.2rem 0; text-align:center; color:#64748b; }
 .energy-empty-state p { margin:0 0 .35rem; font-size:.85rem; font-weight:600; }
+.energy-iot-notice { margin:.4rem 0 0; padding:.45rem .7rem; background:#f0f9ff; border:1px solid #bae6fd; border-radius:8px; color:#0369a1; font-size:.72rem; text-align:center; }
 .energy-footer-note { text-align:center; color:#94a3b8; font-size:.7rem; margin-top:.6rem; }
 
 /* Larger live meter tile for energy page */
