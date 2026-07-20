@@ -462,23 +462,7 @@ export default function AdminDashboard() {
           </div>
         </section>
       ) : null}
-      {/* Survei kepuasan ringkas — tampil di overview */}
-      {activeArea === 'overview' && surveySummaryQuery.data && surveySummaryQuery.data.count > 0 ? (
-        <div className="d-flex align-items-center gap-3 mb-2 p-2 rounded-3" style={{ background: 'linear-gradient(135deg,#fefce8,#fffbeb)', border: '1px solid #fcd34d' }}>
-          <span className="fw-semibold small">⭐ Survei Penghuni</span>
-          <span className="text-muted small">|</span>
-          <span className="small">{surveySummaryQuery.data.count} respons</span>
-          <span className="text-muted small">|</span>
-          <span className="small">Rata-rata <strong>{surveySummaryQuery.data.avgOverall ?? '—'}</strong> ★</span>
-          {surveySummaryQuery.data.recommendRate !== null ? (
-            <>
-              <span className="text-muted small">|</span>
-              <span className="small">👍 {surveySummaryQuery.data.recommendRate}% rekomendasi</span>
-            </>
-          ) : null}
-          <Link to="/surveys" className="small ms-auto" style={{ whiteSpace: 'nowrap' }}>Lihat semua →</Link>
-        </div>
-      ) : null}
+
       {activeArea === 'overview' && (autoOpsQuery.isError || autoOpsNeedsAction) ? (
         <Alert variant={autoOpsQuery.isError ? 'danger' : 'warning'} className="d-flex flex-wrap align-items-center gap-2 py-2">
           <div className="flex-fill">

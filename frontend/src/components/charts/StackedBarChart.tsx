@@ -58,7 +58,7 @@ export default function StackedBarChart({
   showLabels = false,
 }: StackedBarChartProps) {
   const safePoints = points.map((p) => {
-    const clean: Record<string, number> = { label: String(p.label) };
+    const clean: Record<string, string | number> = { label: String(p.label) };
     segments.forEach((seg) => {
       const val = Number(p[seg.key] ?? 0);
       clean[seg.key] = Number.isFinite(val) ? Math.max(0, val) : 0;
@@ -111,8 +111,8 @@ export default function StackedBarChart({
                   <div className="recharts-tooltip">
                     <strong>{point?.label}</strong>
                     {payload.map((entry) => (
-                      <span key={entry.dataKey} style={{ color: entry.color }}>
-                        {segments.find((s) => s.key === entry.dataKey)?.label ?? entry.dataKey}:{' '}
+                      <span key={String(entry.dataKey)} style={{ color: entry.color }}>
+                        {segments.find((s) => s.key === entry.dataKey)?.label ?? String(entry.dataKey)}:{' '}
                         {valueFormatter(Number(entry.value ?? 0))}
                       </span>
                     ))}
@@ -137,7 +137,7 @@ export default function StackedBarChart({
                         fontSize: 10,
                         fill: '#fff',
                         fontWeight: 600,
-                        formatter: (v: number) => (v > 0 ? valueFormatter(v) : ''),
+                        formatter: (v: any) => (Number(v) > 0 ? valueFormatter(Number(v)) : ''),
                       }
                     : undefined
                 }

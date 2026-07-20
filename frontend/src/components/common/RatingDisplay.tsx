@@ -23,7 +23,7 @@ export type RatingDisplayProps = {
   className?: string;
 };
 
-function StarIcon({ fill, size, activeColor }: { fill: 'full' | 'half' | 'empty'; size: number; activeColor: string }) {
+function StarIcon({ fill, size, activeColor, inactiveColor }: { fill: 'full' | 'half' | 'empty'; size: number; activeColor: string; inactiveColor: string }) {
   const id = useMemo(() => `star-grad-${Math.random().toString(36).slice(2, 8)}`, []);
   if (fill === 'full') {
     return (
@@ -38,7 +38,7 @@ function StarIcon({ fill, size, activeColor }: { fill: 'full' | 'half' | 'empty'
         <defs>
           <linearGradient id={id}>
             <stop offset="50%" stopColor={activeColor} />
-            <stop offset="50%" stopColor="#e2e8f0" />
+            <stop offset="50%" stopColor={inactiveColor} />
           </linearGradient>
         </defs>
         <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" fill={`url(#${id})`} stroke="#cbd5e1" strokeWidth={1} />
@@ -46,13 +46,13 @@ function StarIcon({ fill, size, activeColor }: { fill: 'full' | 'half' | 'empty'
     );
   }
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="#e2e8f0" stroke="#cbd5e1" strokeWidth={1}>
+    <svg width={size} height={size} viewBox="0 0 24 24" fill={inactiveColor} stroke="#cbd5e1" strokeWidth={1}>
       <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
     </svg>
   );
 }
 
-function HeartIcon({ fill, size, activeColor }: { fill: 'full' | 'half' | 'empty'; size: number; activeColor: string }) {
+function HeartIcon({ fill, size, activeColor, inactiveColor }: { fill: 'full' | 'half' | 'empty'; size: number; activeColor: string; inactiveColor: string }) {
   if (fill === 'full') {
     return (
       <svg width={size} height={size} viewBox="0 0 24 24" fill={activeColor} stroke={activeColor} strokeWidth={1}>
@@ -67,7 +67,7 @@ function HeartIcon({ fill, size, activeColor }: { fill: 'full' | 'half' | 'empty
         <defs>
           <linearGradient id={id}>
             <stop offset="50%" stopColor={activeColor} />
-            <stop offset="50%" stopColor="#e2e8f0" />
+            <stop offset="50%" stopColor={inactiveColor} />
           </linearGradient>
         </defs>
         <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" fill={`url(#${id})`} stroke="#cbd5e1" strokeWidth={1} />
@@ -75,13 +75,13 @@ function HeartIcon({ fill, size, activeColor }: { fill: 'full' | 'half' | 'empty
     );
   }
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="#e2e8f0" stroke="#cbd5e1" strokeWidth={1}>
+    <svg width={size} height={size} viewBox="0 0 24 24" fill={inactiveColor} stroke="#cbd5e1" strokeWidth={1}>
       <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
     </svg>
   );
 }
 
-function CircleIcon({ fill, size, activeColor }: { fill: 'full' | 'half' | 'empty'; size: number; activeColor: string }) {
+function CircleIcon({ fill, size, activeColor, inactiveColor }: { fill: 'full' | 'half' | 'empty'; size: number; activeColor: string; inactiveColor: string }) {
   if (fill === 'full') {
     return <svg width={size} height={size} viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill={activeColor} /></svg>;
   }
@@ -92,14 +92,14 @@ function CircleIcon({ fill, size, activeColor }: { fill: 'full' | 'half' | 'empt
         <defs>
           <linearGradient id={id}>
             <stop offset="50%" stopColor={activeColor} />
-            <stop offset="50%" stopColor="#e2e8f0" />
+            <stop offset="50%" stopColor={inactiveColor} />
           </linearGradient>
         </defs>
         <circle cx="12" cy="12" r="10" fill={`url(#${id})`} stroke="#cbd5e1" strokeWidth={1} />
       </svg>
     );
   }
-  return <svg width={size} height={size} viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="#e2e8f0" stroke="#cbd5e1" strokeWidth={1} /></svg>;
+  return <svg width={size} height={size} viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill={inactiveColor} stroke="#cbd5e1" strokeWidth={1} /></svg>;
 }
 
 export default function RatingDisplay({
@@ -134,7 +134,7 @@ export default function RatingDisplay({
   return (
     <div className={`rating-display ${className}`} style={{ display: 'inline-flex', alignItems: 'center', gap: 2 }} role="img" aria-label={`Rating ${safeValue} dari ${maxRating}`}>
       {items.map((fill, i) => (
-        <IconComponent key={`${fill}-${i}`} fill={fill} size={size} activeColor={activeColor} />
+        <IconComponent key={`${fill}-${i}`} fill={fill} size={size} activeColor={activeColor} inactiveColor={inactiveColor} />
       ))}
       {showValue ? (
         <span style={{ marginLeft: 4, fontWeight: 600, fontSize: size * 0.8, color: '#1e293b' }}>

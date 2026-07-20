@@ -321,6 +321,7 @@ export default function EnergyPage() {
               <div className="d-flex justify-content-between align-items-center flex-wrap gap-2">
                 <h2 className="energy-section-title" style={{ margin: 0 }}>Tren Pemakaian Listrik</h2>
                 <ChartRangeSelector value={chartGranularity} onChange={setChartGranularity} compact />
+              </div>
               <div className="energy-chart-wrapper">
                 <LineAreaChart
                   points={trendPoints}

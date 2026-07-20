@@ -76,8 +76,8 @@ export default function HorizontalBarChart<T extends HorizontalBarPoint>({
 
   return (
     <div className="recharts-horizontal-bars" role="img" aria-label={ariaLabel}>
-      <ChartResponsiveWrapper height={height}>
-        <ResponsiveContainer width="100%" height={height}>
+      <ChartResponsiveWrapper height={adjustedHeight}>
+        <ResponsiveContainer width="100%" height={adjustedHeight}>
           <BarChart layout="vertical" data={safePoints} margin={{ top: 8, right: 76, bottom: 4, left: 4 }}>
           <CartesianGrid horizontal={false} stroke="rgba(148, 163, 184, 0.22)" strokeDasharray="3 3" />
           <XAxis type="number" domain={[0, domainMax]} hide />
