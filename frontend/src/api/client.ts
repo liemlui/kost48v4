@@ -11,9 +11,13 @@ const client = axios.create({
   withCredentials: true,
 });
 
+// P3-01: flag global — cegah request flood setelah auth gagal
+let authPermanentlyFailed = false;
+
 function clearAuthAndRedirect() {
   localStorage.removeItem('kost48_access_token');
   sessionStorage.removeItem('kost48_last_authenticated_user');
+  authPermanentlyFailed = true;
 
   if (typeof window === 'undefined') return;
   const currentPath = window.location.pathname;
@@ -49,6 +53,11 @@ client.interceptors.request.use((config) => {
       'ERR_NETWORK_OFFLINE',
       config,
     );
+  }
+
+  // Jika auth sudah gagal permanen, jangan kirim request — cegah flood 401
+  if (authPermanentlyFailed) {
+    return Promise.reject(new axios.AxiosError('Sesi berakhir. Silakan login kembali.', 'AUTH_EXPIRED', config));
   }
 
   const token = localStorage.getItem('kost48_access_token');
@@ -100,6 +109,7 @@ client.interceptors.response.use(
         );
         const { accessToken } = refreshResp.data.data;
         localStorage.setItem('kost48_access_token', accessToken);
+        authPermanentlyFailed = false; // reset flag setelah sukses
 
         // Proses antrian
         processQueue(accessToken, null);
@@ -107,9 +117,11 @@ client.interceptors.response.use(
         originalRequest.headers.Authorization = `Bearer ${accessToken}`;
         return client(originalRequest);
       } catch (refreshError) {
+        // Refresh gagal → reject antrian + redirect login
         processQueue(null, refreshError);
         clearAuthAndRedirect();
-        return Promise.reject(refreshError);
+        // Jangan reject dengan error asli — pakai pesan yang jelas
+        return Promise.reject(new axios.AxiosError('Sesi berakhir. Silakan login kembali.', 'AUTH_EXPIRED', originalRequest));
       } finally {
         isRefreshing = false;
       }

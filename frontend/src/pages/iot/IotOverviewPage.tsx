@@ -465,6 +465,24 @@ export default function IotOverviewPage() {
                         <span>Awal periode<strong>{usageSummary.baseline.numericValue.toLocaleString('id-ID', { maximumFractionDigits: 3 })} {selectedMetric?.unit}</strong><small>{relativeTime(usageSummary.baseline.observedAt)}</small></span>
                         <span>Terakhir<strong>{usageSummary.latest.numericValue.toLocaleString('id-ID', { maximumFractionDigits: 3 })} {selectedMetric?.unit}</strong><small>{relativeTime(usageSummary.latest.observedAt)}</small></span>
                       </div>
+                      {/* Live metrics: watt, volt, ampere dari telemetry terbaru */}
+                      {selectedDevice.latestTelemetry && selectedDevice.latestTelemetry.length > 0 ? (
+                        <div className="iot-live-metrics">
+                          {(() => {
+                            const powerW = selectedDevice.latestTelemetry.find((m: any) => m.metric === 'electricity.power_w');
+                            const voltageV = selectedDevice.latestTelemetry.find((m: any) => m.metric === 'electricity.voltage_v');
+                            const currentA = selectedDevice.latestTelemetry.find((m: any) => m.metric === 'electricity.current_a');
+                            if (!powerW && !voltageV && !currentA) return null;
+                            return (
+                              <div className="iot-live-metrics-row">
+                                {powerW ? <span className="iot-live-chip">⚡ {Number(powerW.value).toFixed(0)} W</span> : null}
+                                {voltageV ? <span className="iot-live-chip">🔌 {Number(voltageV.value).toFixed(1)} V</span> : null}
+                                {currentA ? <span className="iot-live-chip">🔧 {Number(currentA.value).toFixed(2)} A</span> : null}
+                              </div>
+                            );
+                          })()}
+                        </div>
+                      ) : null}
                     </div>
                   )}
                   <p className="iot-usage-note">Monitoring sensor saja, bukan dasar tagihan. Tagihan resmi tetap memakai pencatatan dan review meter.</p>

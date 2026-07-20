@@ -22,6 +22,7 @@ import {
 } from 'recharts';
 import type { OwnerDashboardTrendMonth } from '../../api/finance';
 import { fetchOwnerDashboardAggregate } from '../../api/ownerDashboard';
+import { getIotOverview } from '../../api/iot';
 import { cc } from '../../config/chartPalette';
 import { generateBrief, getOwnerAiStatus, type BriefResult } from '../../api/ai';
 import AiAssistButton from '../../components/ai/AiAssistButton';
@@ -255,6 +256,13 @@ export default function OwnerDashboardPage() {
     void Promise.all([aggregateQuery.refetch(), ownerAiStatusQuery.refetch()]);
   };
 
+  // IoT device health
+  const iotQuery = useQuery({
+    queryKey: ['owner-iot-overview'],
+    queryFn: getIotOverview,
+    staleTime: 120_000,
+  });
+
   const extraSignals = useMemo(() => {
     const items: { key: string; label: string; helper: string; route: string; type: string }[] = [];
     const meter = aggregateQuery.data?.meterDue;
@@ -265,8 +273,16 @@ export default function OwnerDashboardPage() {
     if (!aggregateQuery.isLoading && !aggregateQuery.isError && readiness && !readiness.ready) {
       items.push({ key: 'readiness', label: 'Akuntansi belum siap', helper: `${readiness.missing.length} gate tersisa — skor ${readiness.score ?? 0}%`, route: '/finance/accounting-setup', type: 'outstanding' });
     }
+    // IoT device health
+    const iotData = iotQuery.data;
+    if (!iotQuery.isLoading && !iotQuery.isError && iotData?.devices?.length) {
+      const offlineCount = iotData.devices.filter((d: any) => !d.online).length;
+      if (offlineCount > 0) {
+        items.push({ key: 'iot-offline', label: `${offlineCount} perangkat IoT offline`, helper: `${iotData.devices.filter((d: any) => d.online).length}/${iotData.devices.length} online — cek halaman IoT`, route: '/iot', type: 'overdue' });
+      }
+    }
     return items;
-  }, [aggregateQuery.data, aggregateQuery.isLoading, aggregateQuery.isError]);
+  }, [aggregateQuery.data, aggregateQuery.isLoading, aggregateQuery.isError, iotQuery.data, iotQuery.isLoading, iotQuery.isError]);
 
   const handleChange = (field: 'year' | 'month', val: string) => {
     const num = parseInt(val, 10);

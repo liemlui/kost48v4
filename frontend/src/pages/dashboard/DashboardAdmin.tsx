@@ -23,6 +23,7 @@ import { fetchAdminDashboardAggregate } from '../../api/adminDashboard';
 import { fetchAutoOpsStatus } from '../../api/autoOps';
 import { fetchAdminStaffPerformance } from '../../api/staffPerformance';
 import { getSurveySummary } from '../../api/surveys';
+import { getIotOverview } from '../../api/iot';
 import { useOperationalStressIndex } from '../../hooks/useOperationalStressIndex';
 import { useClientPagination } from '../../hooks/useClientPagination';
 import { dedupeCommandItems } from '../../utils/commandCenterDedup';
@@ -317,6 +318,21 @@ export default function AdminDashboard() {
   const urgentQueueCount = filteredQueueItems.filter((item) => item.priority === 'BLOCKER' || item.priority === 'HIGH' || item.timeStatusTone === 'danger').length;
   const activeAreaConfig = ADMIN_QUEUE_AREAS.find((area) => area.id === activeArea) ?? ADMIN_QUEUE_AREAS[0];
 
+  // IoT device health
+  const iotOverviewQuery = useQuery({
+    queryKey: ['dashboard-iot-overview'],
+    queryFn: getIotOverview,
+    staleTime: 60_000,
+    refetchInterval: 120_000,
+  });
+  const iotOverview = iotOverviewQuery.data;
+  const iotOnlineCount = iotOverview?.devices?.filter((d: any) => d.online).length ?? 0;
+  const iotTotalCount = iotOverview?.devices?.length ?? 0;
+  const iotLastSync = iotOverview?.devices?.reduce((latest: number, d: any) => {
+    const ts = d.lastSuccessfulSyncAt ? new Date(d.lastSuccessfulSyncAt).getTime() : 0;
+    return ts > latest ? ts : latest;
+  }, 0) ?? 0;
+
   const refreshDashboard = () => {
     void Promise.all([aggregateQuery.refetch(), autoOpsQuery.refetch()]);
   };
@@ -365,6 +381,19 @@ export default function AdminDashboard() {
           stayWorkCount={pendingApprovalCount + pendingRenewCount + checkoutWorkCount}
           lowStockCount={lowStockCount}
         />
+      ) : null}
+      {/* IoT Device Health Strip */}
+      {activeArea === 'overview' && iotTotalCount > 0 ? (
+        <div className="d-flex align-items-center gap-3 mt-2 mb-1 p-2 rounded-3" style={{ background: iotOnlineCount === iotTotalCount ? '#f0fdf4' : '#fffbeb', border: `1px solid ${iotOnlineCount === iotTotalCount ? '#bbf7d0' : '#fcd34d'}` }}>
+          <span style={{ fontSize: '1.1rem' }}>{iotOnlineCount === iotTotalCount ? '✅' : '⚠️'}</span>
+          <span className="fw-semibold small">{iotOnlineCount}/{iotTotalCount} perangkat IoT online</span>
+          {iotLastSync > 0 ? (
+            <span className="text-muted small">
+              · Sinkron {Math.round((Date.now() - iotLastSync) / 60_000)} menit lalu
+            </span>
+          ) : null}
+          <Link to="/iot" className="small ms-auto" style={{ whiteSpace: 'nowrap' }}>Buka IoT →</Link>
+        </div>
       ) : null}
       {/* Visual Dashboard: Gauge, ActivityRing, SnippetCard, ComplicationGrid, RatingDisplay */}
       {activeArea === 'overview' ? (
