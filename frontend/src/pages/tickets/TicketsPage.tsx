@@ -135,6 +135,7 @@ function TicketAnalyticsPanel({ items, counts }: { items: TicketItem[]; counts: 
           <Card.Body>
             <div className="panel-title mb-1">Umur Tiket Aktif</div>
             <div className="panel-subtitle mb-2">Tiket Open/In Progress berdasarkan usia</div>
+            {agingData.length > 0 ? (
             <ResponsiveContainer width="100%" height={160}>
               <BarChart layout="vertical" data={agingData} margin={{ top: 4, right: 48, bottom: 4, left: 4 }}>
                 <CartesianGrid horizontal={false} stroke="rgba(148,163,184,0.18)" strokeDasharray="3 3" />
@@ -146,6 +147,7 @@ function TicketAnalyticsPanel({ items, counts }: { items: TicketItem[]; counts: 
                 </Bar>
               </BarChart>
             </ResponsiveContainer>
+            ) : <div className="text-muted small mt-4 text-center">Belum ada tiket aktif</div>}
           </Card.Body>
         </Card>
       </Col>

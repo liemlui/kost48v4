@@ -1,5 +1,5 @@
 import { ConflictException, ForbiddenException, Injectable, NotFoundException, ServiceUnavailableException } from '@nestjs/common';
-import { IotDeviceType, IotProvider, Prisma } from '../../generated/prisma';
+import { IotDeviceType, IotProvider, IotReadingQuality, Prisma } from '../../generated/prisma';
 import { AuditLogService } from '../../audit-log/audit-log.service';
 import { CurrentUserPayload } from '../../common/interfaces/current-user.interface';
 import { PrismaService } from '../../prisma/prisma.service';
@@ -466,6 +466,63 @@ export class IotService {
       meta: { total: devices.length, succeeded, failed: devices.length - succeeded },
     });
     return { total: devices.length, succeeded, failed: devices.length - succeeded, results };
+  }
+
+  /** Backfill data Tuya yang terlewat — tarik log historis dari Tuya API.
+   *  Cocok dipanggil saat startup atau setelah polling lama mati. */
+  async backfillTuyaHistory(deviceId: number, daysBack = 7) {
+    const device = await this.requireDevice(deviceId);
+    if (device.provider !== IotProvider.TUYA || !device.externalDeviceId) {
+      throw new ConflictException('Backfill hanya untuk perangkat Tuya dengan externalDeviceId');
+    }
+
+    const endTime = Date.now();
+    const startTime = endTime - daysBack * 24 * 3600_000;
+
+    // Ambil DP code dari metadata device terakhir
+    const dpCode = 'add_ele'; // default — DP code untuk total kWh
+    const logs = await this.tuya.getDeviceLogs(device.externalDeviceId, dpCode, startTime, endTime, 100);
+
+    let stored = 0;
+    for (const log of logs.logs ?? []) {
+      const observedAt = new Date(log.event_time);
+      const messageId = `tuya:backfill:${device.externalDeviceId}:${observedAt.getTime()}:${log.code}:${log.value}`;
+
+      try {
+        await this.prisma.iotIngestMessage.create({
+          data: {
+            deviceId: device.id,
+            messageId,
+            observedAt,
+            providerTimestamp: BigInt(log.event_time),
+            rawPayload: { tuyaLog: { code: log.code, value: log.value, eventTime: log.event_time } } as Prisma.InputJsonValue,
+            telemetry: {
+              create: [{
+                metric: 'electricity.energy_total_kwh',
+                valueDecimal: Number(log.value ?? 0),
+                unit: 'kWh',
+                observedAt,
+                quality: IotReadingQuality.SUSPECT,
+                reason: `Tuya history backfill — ${daysBack} hari ke belakang`,
+              }],
+            },
+          },
+        });
+        stored++;
+      } catch {
+        // Skip duplicate (P2002)
+      }
+    }
+
+    await this.audit.log({
+      actorUserId: null,
+      action: 'IOT_TUYA_BACKFILL',
+      entityType: 'IotDevice',
+      entityId: String(device.id),
+      meta: { deviceId, daysBack, dpCode, totalLogs: logs.logs?.length ?? 0, stored },
+    });
+
+    return { deviceId, dpCode, daysBack, totalLogs: logs.logs?.length ?? 0, stored };
   }
 
   private async pollAndStoreTuya(device: Awaited<ReturnType<IotService['requireDevice']>>) {

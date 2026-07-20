@@ -41,7 +41,10 @@ export function useIotTelemetrySse(enabled = true) {
       }
 
       const baseUrl = import.meta.env.VITE_API_BASE_URL || '';
-      const url = `${baseUrl}/iot/stream/tenant/raw`;
+      // EventSource tidak bisa kirim header Authorization — token dikirim via query param
+      const token = localStorage.getItem('kost48_access_token');
+      const tokenParam = token ? `?token=${encodeURIComponent(token)}` : '';
+      const url = `${baseUrl}/iot/stream/tenant/raw${tokenParam}`;
 
       try {
         const es = new EventSource(url, { withCredentials: true });

@@ -85,6 +85,61 @@ export class TuyaClientService {
     return { detail, status, specification };
   }
 
+  /** Ambil data log historis Tuya (property data per DP code).
+   *  dpCode: kode DP (mis. 'add_ele', 'cur_power')
+   *  startTime/endTime: 13-digit epoch ms (kosongkan untuk default 7 hari terakhir)
+   *  limit: max 100 per halaman */
+  async getDeviceLogs(
+    externalDeviceId: string,
+    dpCode: string,
+    startTime?: number,
+    endTime?: number,
+    limit = 100,
+  ) {
+    const id = encodeURIComponent(externalDeviceId.trim());
+    const now = Date.now();
+    const params = new URLSearchParams({
+      code: dpCode,
+      type: '1', // property data
+      start_time: String(startTime ?? now - 7 * 24 * 3600_000),
+      end_time: String(endTime ?? now),
+      limit: String(Math.min(limit, 100)),
+    });
+    return this.businessRequest<{
+      total: number;
+      has_more: boolean;
+      last_row_key?: string;
+      logs: Array<{ code: string; value: unknown; event_time: number }>;
+    }>(`/v1.0/iot-03/devices/${id}/logs?${params.toString()}`);
+  }
+
+  /** Ambil statistik agregat Tuya (harian/bulanan).
+   *  dpId: DP ID numerik (dari specification)
+   *  startDay/endDay: format YYYYMMDD
+   *  type: 'sum' | 'avg' | 'max' | 'min'
+   *  dateType: 'days' | 'months' */
+  async getDeviceStatistics(
+    externalDeviceId: string,
+    dpId: number,
+    startDay: string,
+    endDay: string,
+    type: 'sum' | 'avg' | 'max' | 'min' = 'sum',
+    dateType: 'days' | 'months' = 'days',
+  ) {
+    const id = encodeURIComponent(externalDeviceId.trim());
+    const params = new URLSearchParams({
+      dp_id: String(dpId),
+      start_day: startDay,
+      end_day: endDay,
+      type,
+      date_type: dateType,
+    });
+    return this.businessRequest<{
+      dp_id: number;
+      values: Array<{ date: string; value: number }>;
+    }>(`/v1.1/iot-03/devices/${id}/statistics?${params.toString()}`);
+  }
+
   private clientId(): string {
     return String(this.config.get('TUYA_CLIENT_ID') ?? this.config.get('TUYA_ACCESS_KEY') ?? '').trim();
   }

@@ -80,6 +80,7 @@ function StaffAnalyticsPanel({ items, summary }: { items: StaffPerformanceSummar
           <Card.Body>
             <div className="panel-title mb-1">Distribusi Kategori</div>
             <div className="panel-subtitle mb-2">Komposisi kinerja tim bulan ini</div>
+            {categoryData.length > 0 ? (
             <ResponsiveContainer width="100%" height={160}>
               <BarChart layout="vertical" data={categoryData} margin={{ top: 4, right: 48, bottom: 4, left: 4 }}>
                 <CartesianGrid horizontal={false} stroke="rgba(148,163,184,0.18)" strokeDasharray="3 3" />
@@ -91,6 +92,7 @@ function StaffAnalyticsPanel({ items, summary }: { items: StaffPerformanceSummar
                 </Bar>
               </BarChart>
             </ResponsiveContainer>
+            ) : <div className="text-muted small mt-4 text-center">Belum ada data kategori</div>}
           </Card.Body>
         </Card>
       </Col>
@@ -99,6 +101,7 @@ function StaffAnalyticsPanel({ items, summary }: { items: StaffPerformanceSummar
           <Card.Body>
             <div className="panel-title mb-1">Aktivitas Tim</div>
             <div className="panel-subtitle mb-2">Total pekerjaan terdokumentasi bulan ini</div>
+            {kpiData.length > 0 ? (
             <ResponsiveContainer width="100%" height={160}>
               <BarChart layout="vertical" data={kpiData} margin={{ top: 4, right: 48, bottom: 4, left: 4 }}>
                 <CartesianGrid horizontal={false} stroke="rgba(148,163,184,0.18)" strokeDasharray="3 3" />
@@ -110,6 +113,7 @@ function StaffAnalyticsPanel({ items, summary }: { items: StaffPerformanceSummar
                 </Bar>
               </BarChart>
             </ResponsiveContainer>
+            ) : <div className="text-muted small mt-4 text-center">Belum ada data aktivitas</div>}
           </Card.Body>
         </Card>
       </Col>

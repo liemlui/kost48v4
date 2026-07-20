@@ -1,7 +1,9 @@
 import { Controller, Get, Param, Req, Res, Sse } from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Request, Response } from 'express';
 import { Observable, map } from 'rxjs';
+import { Public } from '../../common/decorators/public.decorator';
 import { IotSseService } from './iot-sse.service';
 import { IotService } from './iot.service';
 
@@ -18,6 +20,7 @@ export class IotSseController {
   constructor(
     private readonly sse: IotSseService,
     private readonly iot: IotService,
+    private readonly jwtService: JwtService,
   ) {}
 
   /**
@@ -45,13 +48,24 @@ export class IotSseController {
    * Raw SSE implementation using Response object.
    * Supports JWT auth extraction via middleware.
    */
+  @Public()
   @Get('tenant/raw')
-  @ApiOperation({ summary: 'SSE stream (raw) telemetry meter kamar tenant' })
+  @ApiOperation({ summary: 'SSE stream (raw) telemetry meter kamar tenant — dukung ?token= query param untuk EventSource' })
   async streamTenantRaw(@Req() req: Request, @Res() res: Response) {
-    // Extract tenant info from JWT (set by global auth guard)
-    const user = (req as any).user;
+    // Extract tenant info from JWT (global guard skipped by @Public, manual verify via ?token=)
+    let user = (req as any).user;
     if (!user?.tenantId) {
-      res.status(401).json({ message: 'Unauthorized — tenant login required' });
+      const token = String(req.query.token ?? '').trim();
+      if (token) {
+        try {
+          user = await this.jwtService.verifyAsync(token);
+        } catch {
+          // token invalid — fall through to 401
+        }
+      }
+    }
+    if (!user?.tenantId) {
+      res.status(401).json({ message: 'Unauthorized — tenant login required. Gunakan ?token=<jwt> untuk EventSource.' });
       return;
     }
 

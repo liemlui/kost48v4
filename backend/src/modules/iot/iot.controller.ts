@@ -1,5 +1,5 @@
 import { timingSafeEqual } from 'node:crypto';
-import { Body, Controller, ForbiddenException, Get, Headers, HttpCode, Param, ParseIntPipe, Patch, Post, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, DefaultValuePipe, ForbiddenException, Get, Headers, HttpCode, Param, ParseIntPipe, Patch, Post, Query, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { Roles } from '../../common/decorators/roles.decorator';
@@ -103,6 +103,16 @@ export class IotController {
   @ApiOperation({ summary: 'Tarik telemetry satu perangkat Tuya — OWNER/ADMIN' })
   async syncTuya(@Param('id', ParseIntPipe) id: number, @CurrentUser() actor: CurrentUserPayload) {
     return { message: 'Telemetry Tuya berhasil disinkronkan', data: await this.iot.syncTuyaDevice(id, actor) };
+  }
+
+  @Post('devices/:id/backfill')
+  @ApiOperation({ summary: 'Backfill history Tuya — isi gap data dari log Tuya (default 7 hari)' })
+  async backfillTuya(
+    @Param('id', ParseIntPipe) id: number,
+    @Query('days', new DefaultValuePipe(7), ParseIntPipe) days: number,
+    @CurrentUser() actor: CurrentUserPayload,
+  ) {
+    return { message: 'Backfill Tuya selesai', data: await this.iot.backfillTuyaHistory(id, days) };
   }
 
   @Post('devices/:id/rotate-secret')
