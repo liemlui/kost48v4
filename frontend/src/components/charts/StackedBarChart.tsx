@@ -8,7 +8,6 @@ import {
   YAxis,
 } from 'recharts';
 import { ChartResponsiveWrapper } from '../../hooks/ChartResponsiveWrapper';
-import { OKABE_ITO } from './chartPalette';
 
 export type StackedBarSegment = {
   /** Segment key (must match dataKey in Bar) */

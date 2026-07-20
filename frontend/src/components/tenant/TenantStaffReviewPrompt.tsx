@@ -134,7 +134,7 @@ export default function TenantStaffReviewPrompt() {
               onChange={(v) => { setRating(v); setComplaintCategory(''); setPraiseTag(''); }}
               size={28}
               showLabel
-              labels={Object.fromEntries(Object.entries(RATING_LABELS).map(([k, v]) => [k, v.text]))}
+              labels={Object.fromEntries(Object.entries(RATING_LABELS).map(([k, v]) => [Number(k), v.text]))}
               activeColor="#f59e0b"
             />
           </div>
