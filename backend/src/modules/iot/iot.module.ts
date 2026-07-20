@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { JwtModule } from '@nestjs/jwt';
 import { IotController } from './iot.controller';
 import { IotSseController } from './iot-sse.controller';
 import { IotService } from './iot.service';
@@ -10,6 +11,7 @@ import { IotPollingService } from './iot-polling.service';
 import { IotSseService } from './iot-sse.service';
 
 @Module({
+  imports: [JwtModule.register({ secret: process.env.JWT_SECRET || 'kost48-jwt-fallback' })],
   controllers: [IotController, IotSseController, WaterIngestController],
   providers: [IotService, IotPollingService, IotSseService, WaterIngestService, DeviceCredentialService, TuyaClientService],
   exports: [IotService, IotSseService],
