@@ -42,7 +42,7 @@ export class ReminderMockService {
       meta: {
         type: input.type,
         candidateId: input.candidateId,
-        phone: normalizedPhone,
+        phone: normalizedPhone ?? '',
         messagePreview: input.message.slice(0, 200),
         sentAt,
       },
@@ -56,7 +56,7 @@ export class ReminderMockService {
       status: 'MOCK_SENT',
       type: input.type,
       candidateId: input.candidateId,
-      phone: normalizedPhone,
+      phone: normalizedPhone ?? '',
       messagePreview: input.message,
       sentAt,
     };

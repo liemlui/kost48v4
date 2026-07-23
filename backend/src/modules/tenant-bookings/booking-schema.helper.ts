@@ -15,8 +15,6 @@ interface BookingSchemaStatus {
  * - TenantBookingsService
  * - PublicBookingsService
  * - PublicRoomsService (marketing)
- * - TenantBookingsQueryService
- *
  * AI-01a: wrapped $queryRaw in try-catch — bila query sistem (pg_type / information_schema)
  * gagal karena DB drift atau permission, return false (anggap belum siap) alih-alih 503.
  *

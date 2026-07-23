@@ -19,6 +19,7 @@ import { PrismaService } from '../../prisma/prisma.service';
 import { calculateRentByPricingTerm, calculateOccupantSurcharge, ROOM_MAX_FREE_OCCUPANTS, ROOM_MAX_OCCUPANTS } from './pricing.helper';
 import { startOfDay, endOfDay, addDays, parseDateOnly } from '../../common/utils/date.util';
 import { isBookingSchemaReady, isBookingSchemaDriftError } from './booking-schema.helper';
+import { findBookingByIdTx } from './tenant-bookings.helpers';
 import { CreatePublicBookingDto } from './dto/create-public-booking.dto';
 import { CreatePublicSurveyDto } from './dto/create-public-survey.dto';
 
@@ -40,77 +41,6 @@ interface RoomPricingSnapshot {
   waterTariffPerM3Rupiah: number;
   notes: string | null;
 }
-
-interface BookingRow {
-  id: number;
-  tenantId: number;
-  roomId: number;
-  status: string;
-  pricingTerm: string;
-  agreedRentAmountRupiah: number;
-  checkInDate: Date;
-  plannedCheckOutDate: Date | null;
-  expiresAt: Date | null;
-  depositAmountRupiah: number;
-  depositPaidAmountRupiah?: number | null;
-  depositPaymentStatus?: string | null;
-  downPaymentAmountRupiah?: number | null;
-  downPaymentPaidRupiah?: number | null;
-  electricityTariffPerKwhRupiah: number;
-  waterTariffPerM3Rupiah: number;
-  bookingSource: string | null;
-  stayPurpose: string | null;
-  notes: string | null;
-  createdById: number | null;
-  createdAt: Date;
-  updatedAt: Date;
-  tenantFullName: string;
-  tenantPhone: string;
-  tenantEmail: string | null;
-  roomCode: string;
-  roomName: string | null;
-  roomFloor: string | null;
-  roomStatus: string;
-  invoiceCount?: number;
-  latestInvoiceId?: number | null;
-  latestInvoiceNumber?: string | null;
-  latestInvoiceStatus?: string | null;
-  invoiceTotalAmountRupiah?: number | null;
-  invoicePaidAmountRupiah?: number | null;
-  invoiceRemainingAmountRupiah?: number | null;
-}
-
-const BOOKING_SELECT = Prisma.sql`
-  s.id,
-  s."tenantId",
-  s."roomId",
-  s.status,
-  s."pricingTerm",
-  s."agreedRentAmountRupiah",
-  s."checkInDate",
-  s."plannedCheckOutDate",
-  s."expiresAt",
-  s."depositAmountRupiah",
-  COALESCE(s."downPaymentAmountRupiah", 0) AS "downPaymentAmountRupiah",
-  COALESCE(s."downPaymentPaidRupiah", 0) AS "downPaymentPaidRupiah",
-  COALESCE(s."depositPaidAmountRupiah", 0) AS "depositPaidAmountRupiah",
-  s."depositPaymentStatus",
-  s."electricityTariffPerKwhRupiah",
-  s."waterTariffPerM3Rupiah",
-  s."bookingSource",
-  s."stayPurpose",
-  s.notes,
-  s."createdById",
-  s."createdAt",
-  s."updatedAt",
-  t."fullName" AS "tenantFullName",
-  t.phone AS "tenantPhone",
-  t.email AS "tenantEmail",
-  r.code AS "roomCode",
-  r.name AS "roomName",
-  r.floor AS "roomFloor",
-  r.status AS "roomStatus"
-`;
 
 @Injectable()
 export class PublicBookingsService {
@@ -393,7 +323,7 @@ export class PublicBookingsService {
           throw new ConflictException('Booking gagal dibuat');
         }
 
-        const booking = await this.findBookingByIdTx(tx, bookingId, tenant.id);
+        const booking = await findBookingByIdTx(tx, bookingId, tenant.id);
         if (!booking) {
           throw new NotFoundException('Booking yang baru dibuat tidak ditemukan');
         }
@@ -503,68 +433,7 @@ export class PublicBookingsService {
   // PRIVATE HELPERS
   // ---------------------------------------------------------------------------
 
-  private async findBookingByIdTx(
-    tx: Prisma.TransactionClient,
-    stayId: number,
-    tenantId: number,
-  ) {
-    const rows = await tx.$queryRaw<BookingRow[]>(Prisma.sql`
-      SELECT
-        ${BOOKING_SELECT}
-      FROM "Stay" s
-      JOIN "Tenant" t ON t.id = s."tenantId"
-      JOIN "Room" r ON r.id = s."roomId"
-      WHERE s.id = ${stayId} AND s."tenantId" = ${tenantId}
-      LIMIT 1
-    `);
-    if (rows.length === 0) return null;
-    return this.mapBookingRow(rows[0]);
-  }
-
-  private mapBookingRow(row: BookingRow) {
-    return {
-      id: row.id,
-      tenantId: row.tenantId,
-      roomId: row.roomId,
-      status: row.status,
-      pricingTerm: row.pricingTerm,
-      agreedRentAmountRupiah: row.agreedRentAmountRupiah,
-      checkInDate: row.checkInDate,
-      plannedCheckOutDate: row.plannedCheckOutDate,
-      expiresAt: row.expiresAt,
-      depositAmountRupiah: row.depositAmountRupiah,
-      depositPaidAmountRupiah: row.depositPaidAmountRupiah ?? 0,
-      depositPaymentStatus: row.depositPaymentStatus ?? 'UNPAID',
-      electricityTariffPerKwhRupiah: row.electricityTariffPerKwhRupiah,
-      waterTariffPerM3Rupiah: row.waterTariffPerM3Rupiah,
-      bookingSource: row.bookingSource,
-      stayPurpose: row.stayPurpose,
-      notes: row.notes,
-      createdById: row.createdById,
-      createdAt: row.createdAt,
-      updatedAt: row.updatedAt,
-      tenant: {
-        id: row.tenantId,
-        fullName: row.tenantFullName,
-        phone: row.tenantPhone,
-        email: row.tenantEmail,
-      },
-      room: {
-        id: row.roomId,
-        code: row.roomCode,
-        name: row.roomName,
-        floor: row.roomFloor,
-        status: row.roomStatus,
-      },
-      invoiceCount: Number(row.invoiceCount ?? 0),
-      latestInvoiceId: row.latestInvoiceId ?? null,
-      latestInvoiceNumber: row.latestInvoiceNumber ?? null,
-      latestInvoiceStatus: row.latestInvoiceStatus ?? null,
-      invoiceTotalAmountRupiah: row.invoiceTotalAmountRupiah ?? null,
-      invoicePaidAmountRupiah: row.invoicePaidAmountRupiah ?? null,
-      invoiceRemainingAmountRupiah: row.invoiceRemainingAmountRupiah ?? null,
-    };
-  }
+  // (findBookingByIdTx dan mapBookingRow dihapus — gunakan versi shared dari tenant-bookings.helpers.ts)
 
   private resolveRent(room: RoomPricingSnapshot, pricingTerm: PricingTerm): number {
     const monthlyRate = Number(room.monthlyRateRupiah ?? 0);

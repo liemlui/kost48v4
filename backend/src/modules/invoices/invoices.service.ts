@@ -210,7 +210,7 @@ export class InvoicesService {
         query.status ? { status: query.status } : undefined,
         query.periodStartFrom || query.periodEndTo ? { periodStart: { gte: query.periodStartFrom ? new Date(query.periodStartFrom) : undefined }, periodEnd: { lte: query.periodEndTo ? new Date(query.periodEndTo) : undefined } } : undefined,
         query.dueDateFrom || query.dueDateTo ? { dueDate: { gte: query.dueDateFrom ? new Date(query.dueDateFrom) : undefined, lte: query.dueDateTo ? new Date(query.dueDateTo) : undefined } } : undefined,
-      ].filter(Boolean),
+      ].filter(Boolean) as any[],
     };
     const [items, totalItems] = await this.prisma.$transaction([
       this.prisma.invoice.findMany({ where, skip, take, include: { lines: { orderBy: { sortOrder: 'asc' } }, payments: true, stay: { include: { tenant: true, room: true } } }, orderBy: { id: 'desc' } }),
@@ -239,7 +239,7 @@ export class InvoicesService {
               },
             }
           : undefined,
-      ].filter(Boolean),
+      ].filter(Boolean) as any[],
     };
 
     const [items, totalItems] = await this.prisma.$transaction([

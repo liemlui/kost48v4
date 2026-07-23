@@ -81,7 +81,7 @@ export class InvoicePaymentsService {
               },
             }
           : undefined,
-      ].filter(Boolean),
+      ].filter(Boolean) as Prisma.InvoicePaymentWhereInput[],
     };
 
     const [items, totalItems] = await this.prisma.$transaction([

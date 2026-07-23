@@ -37,7 +37,6 @@ import {
   MarkBelongingsDto,
   ProcessDepositDto,
   ProcessLossRefundDto,
-  RenewStayDto,
   UpdateStayDto,
 } from "./dto/stay.dto";
 import { Prisma } from "../../generated/prisma";
@@ -57,9 +56,8 @@ import {
   isMeterInvoice,
   invoiceRemainingRupiah,
   computeInvoiceDepositSettlement,
-} from "./stays-service-helpers";
+} from "./stays-service.helpers";
 import { DepositLedgerService } from "../deposit-ledger/deposit-ledger.service";
-import { StaysRenewalService } from "./stays-renewal.service";
 import {
   endOfDay,
   parseJakartaDateOnly,
@@ -75,7 +73,6 @@ export class StaysService {
     private readonly audit: AuditLogService,
     private readonly accountingPosting: AccountingPostingService,
     private readonly depositLedger: DepositLedgerService,
-    private readonly staysRenewalService: StaysRenewalService,
   ) {}
 
   // ═══════════════════════════════════════════════════════════
@@ -604,8 +601,8 @@ export class StaysService {
         actorUserId: actor.id,
         action: "CREATE",
         entityType: "Invoice",
-        entityId: String(created.invoice.id),
-        newData: created.invoice,
+        entityId: String(created.invoice!.id),
+        newData: created.invoice!,
       });
       if (portalStatus === "CREATED" && portalUserId) {
         await this.audit.log({
@@ -1770,55 +1767,6 @@ export class StaysService {
         },
       },
     };
-  }
-
-  // ═══════════════════════════════════════════════════════════
-  //  SECTION: Renewal & Loss Refund
-  // ═══════════════════════════════════════════════════════════
-
-  async renewStay(id: number, dto: RenewStayDto, actor: CurrentUserPayload) {
-    return this.staysRenewalService.renewStay(id, dto, actor);
-  }
-
-  async issueRenewalDownPaymentInvoiceTx(
-    tx: Prisma.TransactionClient,
-    stayId: number,
-    downPaymentRupiah: number,
-    actor: CurrentUserPayload,
-  ) {
-    return this.staysRenewalService.issueRenewalDownPaymentInvoiceTx(tx, stayId, downPaymentRupiah, actor);
-  }
-
-  async prepareRenewalSettlementInTransaction(
-    tx: Prisma.TransactionClient,
-    id: number,
-    dto: RenewStayDto,
-    actor: CurrentUserPayload,
-    settlementDueDate?: Date | null,
-  ) {
-    return this.staysRenewalService.prepareRenewalSettlementInTransaction(tx, id, dto, actor, settlementDueDate);
-  }
-
-  async finalizePreparedRenewalInTransaction(
-    tx: Prisma.TransactionClient,
-    params: {
-      stayId: number;
-      settlementInvoiceId: number;
-      pricingTerm: PricingTerm;
-      agreedRentAmountRupiah: number;
-    },
-    actor: CurrentUserPayload,
-  ) {
-    return this.staysRenewalService.finalizePreparedRenewalInTransaction(tx, params, actor);
-  }
-
-  async cancelUnpaidRenewalInvoiceInTransaction(
-    tx: Prisma.TransactionClient,
-    invoiceId: number,
-    actorUserId: number,
-    reason: string,
-  ) {
-    return this.staysRenewalService.cancelUnpaidRenewalInvoiceInTransaction(tx, invoiceId, actorUserId, reason);
   }
 
   // ═══════════════════════════════════════════════════════════

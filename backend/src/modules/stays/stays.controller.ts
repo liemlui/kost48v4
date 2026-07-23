@@ -13,6 +13,7 @@ import { StaysQueryService } from './stays-query.service';
 import { StaysService } from './stays.service';
 import { RoomTransferService } from './room-transfer.service';
 import { PrepayExtensionService } from './prepay-extension.service';
+import { StaysRenewalService } from './stays-renewal.service';
 
 @ApiTags('stays')
 @ApiBearerAuth()
@@ -24,6 +25,7 @@ export class StaysController {
     private readonly staysQueryService: StaysQueryService,
     private readonly roomTransferService: RoomTransferService,
     private readonly prepayExtensionService: PrepayExtensionService,
+    private readonly staysRenewalService: StaysRenewalService,
   ) {}
 
   // F4-8: pindah kamar resmi (OWNER/ADMIN; override harga OWNER-only di service).
@@ -137,7 +139,7 @@ export class StaysController {
   @ApiOperation({ summary: 'Perpanjang stay — OWNER/ADMIN' })
   @Roles(UserRole.OWNER, UserRole.ADMIN)
   async renewStay(@Param('id', ParseIntPipe) id: number, @Body() dto: RenewStayDto, @CurrentUser() user: CurrentUserPayload) {
-    return { message: 'Stay berhasil diperpanjang', data: await this.staysService.renewStay(id, dto, user) };
+    return { message: 'Stay berhasil diperpanjang', data: await this.staysRenewalService.renewStay(id, dto, user) };
   }
 
   // F3-14/F3-16: paksa-checkout admin (overstay nunggak / tenant kabur) + settle deposit -> AR. OWNER-only.

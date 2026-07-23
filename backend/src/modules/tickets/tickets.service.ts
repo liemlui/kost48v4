@@ -374,7 +374,7 @@ export class TicketsService {
     }
 
     // X-01: tenant tidak boleh melihat detail tiket kategori internal
-    if (user.role === "TENANT" && (TENANT_HIDDEN_TICKET_CATEGORIES as readonly string[]).includes(ticket.category)) {
+    if (user.role === "TENANT" && (TENANT_HIDDEN_TICKET_CATEGORIES as readonly string[]).includes(ticket.category!)) {
       throw new NotFoundException("Tiket tidak ditemukan");
     }
 
@@ -423,7 +423,7 @@ export class TicketsService {
     if (!ticket) return false; // Tanpa metadata, tidak bisa verifikasi ownership — tolak
     // X-01: tenant tidak boleh akses gambar tiket kategori internal
     if (user.role === "TENANT") {
-      if ((TENANT_HIDDEN_TICKET_CATEGORIES as readonly string[]).includes(ticket.category)) return false;
+      if ((TENANT_HIDDEN_TICKET_CATEGORIES as readonly string[]).includes(ticket.category!)) return false;
       return ticket.tenantId === user.tenantId;
     }
     if (user.role === "STAFF") {

@@ -119,16 +119,16 @@ export class TenantsController {
   @UseInterceptors(
     FileInterceptor('file', {
       storage: diskStorage({
-        destination: (_req, _file, cb) => {
+        destination: (_req: any, _file: any, cb: any) => {
           const targetDir = join(process.cwd(), 'uploads', 'ktp-images');
           if (!existsSync(targetDir)) mkdirSync(targetDir, { recursive: true });
           cb(null, targetDir);
         },
-        filename: (_req, _file, cb) => {
+        filename: (_req: any, _file: any, cb: any) => {
           cb(null, `tmp_${Date.now()}_${randomBytes(8).toString('hex')}.bin`);
         },
       }),
-      fileFilter: (_req, _file, cb) => cb(null, true),
+      fileFilter: (_req: any, _file: any, cb: any) => cb(null, true),
       limits: { fileSize: 4 * 1024 * 1024 },
     }),
   )
@@ -281,16 +281,16 @@ export class TenantsController {
   @UseInterceptors(
     FileInterceptor('file', {
       storage: diskStorage({
-        destination: (_req, _file, cb) => {
+        destination: (_req: any, _file: any, cb: any) => {
           const targetDir = join(process.cwd(), 'uploads', 'profile-photos');
           if (!existsSync(targetDir)) mkdirSync(targetDir, { recursive: true });
           cb(null, targetDir);
         },
-        filename: (_req, _file, cb) => {
+        filename: (_req: any, _file: any, cb: any) => {
           cb(null, `tmp_${Date.now()}_${randomBytes(8).toString('hex')}.bin`);
         },
       }),
-      fileFilter: (_req, _file, cb) => cb(null, true),
+      fileFilter: (_req: any, _file: any, cb: any) => cb(null, true),
       limits: { fileSize: 4 * 1024 * 1024 },
     }),
   )

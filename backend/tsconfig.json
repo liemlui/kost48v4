@@ -14,7 +14,11 @@
     "incremental": true,
     "skipLibCheck": true,
     "strict": false,
-    "noImplicitAny": false,
+    "strictNullChecks": true,
+    "strictFunctionTypes": true,
+    "strictBindCallApply": true,
+    "noImplicitAny": true,
+    "strictPropertyInitialization": false,
     "moduleResolution": "node"
   },
   "include": ["src/**/*.ts", "test/**/*.ts"],

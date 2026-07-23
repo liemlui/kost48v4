@@ -66,16 +66,16 @@ export class RoomsController {
   @UseInterceptors(
     FileInterceptor('file', {
       storage: diskStorage({
-        destination: (_req, _file, cb) => {
+        destination: (_req: any, _file: any, cb: any) => {
           const targetDir = join(process.cwd(), 'uploads', 'room-images');
           if (!existsSync(targetDir)) mkdirSync(targetDir, { recursive: true });
           cb(null, targetDir);
         },
-        filename: (_req, _file, cb) => {
+        filename: (_req: any, _file: any, cb: any) => {
           cb(null, `tmp_${Date.now()}_${randomBytes(8).toString('hex')}.bin`);
         },
       }),
-      fileFilter: (_req, _file, cb) => cb(null, true),
+      fileFilter: (_req: any, _file: any, cb: any) => cb(null, true),
       limits: { fileSize: 2 * 1024 * 1024 },
     }),
   )

@@ -101,7 +101,7 @@ export class TenantsService {
         query.originCity ? { originCity: { contains: query.originCity, mode: Prisma.QueryMode.insensitive } } : undefined,
         query.occupation ? { occupation: { contains: query.occupation, mode: Prisma.QueryMode.insensitive } } : undefined,
         query.companyOrCampus ? { companyOrCampus: { contains: query.companyOrCampus, mode: Prisma.QueryMode.insensitive } } : undefined,
-      ].filter(Boolean),
+      ].filter(Boolean) as any[],
     };
     const [items, totalItems] = await this.prisma.$transaction([
       this.prisma.tenant.findMany({

@@ -7,7 +7,7 @@ import { AccountingPostingService } from '../accounting/accounting-posting.servi
 import { CurrentUserPayload } from '../../common/interfaces/current-user.interface';
 import { InvoiceLineType, InvoiceStatus, RoomStatus, UserRole, UtilityType } from '../../common/enums/app.enums';
 import { pickRoundRobinStaffTx } from '../../common/utils/staff-assignment.util';
-import { createRenewUtilityCheckpointLineTx } from './stays-service-helpers';
+import { createRenewUtilityCheckpointLineTx } from './stays-service.helpers';
 import { startOfDay } from './stays.helpers';
 import { TransferRoomDto } from './dto/room-transfer.dto';
 

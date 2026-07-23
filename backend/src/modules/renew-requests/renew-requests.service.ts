@@ -291,9 +291,9 @@ export class RenewRequestsService {
         agreedRentAmountRupiah: renewalRent,
         // inc.2b: DP 30% sudah ditagih invoice terpisah & lunas → kurangi rent-line invoice pelunasan.
         priorDownPaymentRupiah: request.downPaymentAmountRupiah ?? 0,
-        electricityReadingValue: dto.electricityReadingValue,
-        waterReadingValue: dto.waterReadingValue,
-        meterReadingAt: dto.meterReadingAt,
+        electricityReadingValue: dto.electricityReadingValue!,
+        waterReadingValue: dto.waterReadingValue!,
+        meterReadingAt: dto.meterReadingAt!,
       };
 
       if (!request.settlementInvoiceId) {

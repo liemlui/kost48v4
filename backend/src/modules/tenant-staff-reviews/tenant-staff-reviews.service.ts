@@ -156,7 +156,7 @@ export class TenantStaffReviewsService {
     // Beri tahu staf hanya bila review jadi VISIBLE (mempengaruhi KPI).
     if (next === StaffReviewStatus.VISIBLE) {
       await this.notification.create({
-        recipientUserId: review.staffId,
+        recipientUserId: review.staffId!,
         title: 'ℹ️ Review tenant diverifikasi',
         body: `Sebuah review (rating ${review.rating}/5) telah diverifikasi owner dan kini tercatat pada kinerja Anda.`,
         linkTo: '/staff/monthly-report',

@@ -121,7 +121,7 @@ export class ReportsService {
     const todayMs = today.getTime();
 
     for (const inv of overdueInvoices) {
-      const dueMs = new Date(inv.dueDate).getTime();
+      const dueMs = new Date(inv.dueDate!).getTime();
       const diffDays = Math.floor((todayMs - dueMs) / (1000 * 60 * 60 * 24));
       const paid = (inv as any).payments?.reduce(
         (sum: number, p: any) => sum + Number(p.amountRupiah ?? 0),

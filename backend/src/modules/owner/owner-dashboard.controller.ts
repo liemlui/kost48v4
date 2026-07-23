@@ -4,20 +4,8 @@ import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { UserRole } from '../../common/enums/app.enums';
-import { IsInt, IsOptional, Max, Min } from 'class-validator';
-import { Type } from 'class-transformer';
 import { OwnerDashboardService } from './owner-dashboard.service';
-
-class OwnerDashboardAggregateQueryDto {
-  @IsOptional() @Type(() => Number) @IsInt() @Min(2020) @Max(2100)
-  year?: number;
-
-  @IsOptional() @Type(() => Number) @IsInt() @Min(1) @Max(12)
-  month?: number;
-
-  @IsOptional() @Type(() => Number) @IsInt() @Min(1) @Max(24)
-  trendMonths?: number;
-}
+import { OwnerDashboardAggregateQueryDto } from './dto/owner-dashboard-aggregate-query.dto';
 
 @ApiTags('owner-dashboard')
 @ApiBearerAuth()

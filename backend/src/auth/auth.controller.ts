@@ -45,7 +45,7 @@ export class AuthController {
   @Public()
   async refresh(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
     const rawToken = this.extractRefreshToken(req);
-    const data = await this.authService.refresh(rawToken);
+    const data = await this.authService.refresh(rawToken!);
     // Rotasi refresh token: set cookie baru
     this.setRefreshCookie(res, data.refreshToken);
     return { message: 'Token berhasil diperbarui', data: { accessToken: data.accessToken } };
@@ -58,7 +58,7 @@ export class AuthController {
     const rawToken = this.extractRefreshToken(req);
     if (user) {
       // Jika ada user (akses token valid), revoke spesifik
-      await this.authService.revokeRefreshTokens(user.id, rawToken);
+      await this.authService.revokeRefreshTokens(user.id, rawToken ?? undefined);
     } else if (rawToken) {
       // Tanpa user, coba revoke via token saja
       const tokenHash = createHash('sha256').update(rawToken).digest('hex');

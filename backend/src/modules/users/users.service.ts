@@ -27,7 +27,7 @@ export class UsersService {
           : undefined,
         query.role ? { role: query.role } : undefined,
         typeof query.isActive === 'string' ? { isActive: query.isActive === 'true' } : undefined,
-      ].filter(Boolean),
+      ].filter(Boolean) as any[],
     };
     const [items, totalItems] = await this.prisma.$transaction([
       this.prisma.user.findMany({

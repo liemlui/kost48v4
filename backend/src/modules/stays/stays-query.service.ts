@@ -29,7 +29,7 @@ export class StaysQueryService {
             }
           : undefined,
         query.depositStatus ? { depositStatus: query.depositStatus } : undefined,
-      ].filter(Boolean),
+      ].filter(Boolean) as any[],
     };
 
     const [items, totalItems] = await this.prisma.$transaction([

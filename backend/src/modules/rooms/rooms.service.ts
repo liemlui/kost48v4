@@ -31,7 +31,7 @@ export class RoomsService {
         query.status ? { status: query.status } : undefined,
         typeof query.isActive === 'string' ? { isActive: query.isActive === 'true' } : undefined,
         query.floor ? { floor: query.floor } : undefined,
-      ].filter(Boolean),
+      ].filter(Boolean) as any[],
     };
 
     const [items, totalItems] = await this.prisma.$transaction([

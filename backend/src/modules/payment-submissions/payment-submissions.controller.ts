@@ -204,18 +204,18 @@ export class PaymentSubmissionsController {
   @UseInterceptors(
     FileInterceptor('file', {
       storage: diskStorage({
-        destination: (_req, _file, cb) => {
+        destination: (_req: any, _file: any, cb: any) => {
           const targetDir = join(process.cwd(), 'uploads', 'payment-proofs');
           if (!existsSync(targetDir)) mkdirSync(targetDir, { recursive: true });
           cb(null, targetDir);
         },
-        filename: (_req, _file, cb) => {
+        filename: (_req: any, _file: any, cb: any) => {
           // Temporary filename; will be renamed after magic-byte verification
           const tmp = `tmp_${Date.now()}_${randomBytes(4).toString('hex')}.bin`;
           cb(null, tmp);
         },
       }),
-      fileFilter: (_req, _file, cb) => {
+      fileFilter: (_req: any, _file: any, cb: any) => {
         // Accept all initially; we validate magic bytes after save
         cb(null, true);
       },
@@ -282,17 +282,17 @@ export class PaymentSubmissionsController {
   @UseInterceptors(
     FileInterceptor('file', {
       storage: diskStorage({
-        destination: (_req, _file, cb) => {
+        destination: (_req: any, _file: any, cb: any) => {
           const targetDir = join(process.cwd(), 'uploads', 'payment-proofs');
           if (!existsSync(targetDir)) mkdirSync(targetDir, { recursive: true });
           cb(null, targetDir);
         },
-        filename: (_req, _file, cb) => {
+        filename: (_req: any, _file: any, cb: any) => {
           const tmp = `tmp_${Date.now()}_${randomBytes(4).toString('hex')}.bin`;
           cb(null, tmp);
         },
       }),
-      fileFilter: (_req, _file, cb) => {
+      fileFilter: (_req: any, _file: any, cb: any) => {
         cb(null, true);
       },
       limits: { fileSize: 2 * 1024 * 1024 },
@@ -433,7 +433,7 @@ export class PaymentSubmissionsController {
   ) {
     return {
       message: 'Bukti pembayaran berhasil ditolak',
-      data: await this.paymentSubmissionsService.rejectSubmission(user, id, dto.reviewNotes),
+      data: await this.paymentSubmissionsService.rejectSubmission(user, id, dto.reviewNotes ?? ''),
     };
   }
 

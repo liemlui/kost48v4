@@ -174,6 +174,9 @@ export class PaymentSubmissionsService {
     eligibility: Awaited<ReturnType<PaymentSubmissionsService['findEligibleSubmissionTarget']>>,
     dto: CreatePaymentSubmissionDto,
   ): void {
+    if (!eligibility) {
+      throw new ConflictException('Tagihan tidak ditemukan untuk pembayaran ini');
+    }
     if (eligibility.invoiceStatus === InvoiceStatus.DRAFT) {
       throw new ConflictException('Invoice ini masih dalam status draft dan belum dapat menerima pembayaran');
     }
@@ -617,7 +620,7 @@ export class PaymentSubmissionsService {
 
         await this.assertRenewalPaymentWithinDeadline(
           tx,
-          submission.invoiceId,
+          submission.invoiceId!!,
           new Date(submission.paidAt),
         );
 
@@ -675,10 +678,10 @@ export class PaymentSubmissionsService {
         }
 
         const freshPayments = await tx.invoicePayment.aggregate({
-          where: { invoiceId: submission.invoiceId },
+          where: { invoiceId: submission.invoiceId! },
           _sum: { amountRupiah: true },
         });
-        const freshPaidAmount = freshPayments._sum.amountRupiah ?? 0;
+        const freshPaidAmount = freshPayments._sum?.amountRupiah ?? 0;
 
         const invoiceRemaining = Math.max(
           submission.invoiceTotalAmountRupiah - freshPaidAmount,
@@ -767,7 +770,7 @@ export class PaymentSubmissionsService {
         if (rentPortion > 0) {
           const invoicePayment = await tx.invoicePayment.create({
             data: {
-              invoiceId: submission.invoiceId,
+              invoiceId: submission.invoiceId!,
               paymentDate: new Date(submission.paidAt),
               amountRupiah: rentPortion,
               method: submission.paymentMethod as PaymentMethod,
@@ -798,7 +801,7 @@ export class PaymentSubmissionsService {
             : null;
 
         await tx.invoice.update({
-          where: { id: submission.invoiceId },
+          where: { id: submission.invoiceId! },
           data: {
             status: nextInvoiceStatus,
             issuedAt: nextIssuedAt,
@@ -808,11 +811,11 @@ export class PaymentSubmissionsService {
 
         // F4-9: tandai invoice yang LUNAS untuk evaluasi poin bayar-tepat-waktu (pasca-commit).
         if (nextInvoiceStatus === InvoiceStatus.PAID) {
-          paidInvoiceId = submission.invoiceId;
+          paidInvoiceId = submission.invoiceId!;
         }
 
         try {
-          await this.accountingPosting.postInvoiceIssuedTx(tx, submission.invoiceId, user.id);
+          await this.accountingPosting.postInvoiceIssuedTx(tx, submission.invoiceId!, user.id);
           if (invoicePaymentId) {
             await this.accountingPosting.postInvoicePaymentTx(tx, invoicePaymentId, user.id);
           }
@@ -822,7 +825,7 @@ export class PaymentSubmissionsService {
           journalPending = true;
           const errMsg = err instanceof Error ? err.message : String(err);
           this.logger.error(
-            `[C5] Journal posting gagal untuk payment submission #${submissionId}, invoice #${submission.invoiceId}: ${errMsg}`,
+            `[C5] Journal posting gagal untuk payment submission #${submissionId}, invoice #${submission.invoiceId!}: ${errMsg}`,
           );
           // Simpan metadata retry di reviewNotes agar bisa di-retry otomatis
           const retryMeta = JSON.stringify({ retryCount: 0, lastError: errMsg.slice(0, 500), lastRetryAt: new Date().toISOString() });
@@ -1006,7 +1009,7 @@ export class PaymentSubmissionsService {
             meta: {
               stayId: submission.stayId,
               roomId: submission.roomId,
-              invoiceId: submission.invoiceId,
+              invoiceId: submission.invoiceId!,
               invoicePayment: { rentPortion, depositPortion },
               invoiceStatusAfter: nextInvoiceStatus,
             } as unknown as Prisma.InputJsonValue,
@@ -1149,7 +1152,7 @@ export class PaymentSubmissionsService {
     if (submission.status !== PaymentSubmissionStatus.APPROVED) {
       throw new ConflictException('Hanya submission dengan status APPROVED yang bisa di-retry journal');
     }
-    if (!submission.invoiceId) {
+    if (!submission.invoiceId!) {
       throw new BadRequestException('Submission ini tidak memiliki invoice — tidak ada journal untuk di-retry');
     }
 
@@ -1171,7 +1174,7 @@ export class PaymentSubmissionsService {
 
     try {
       // Posting journal (hanya issue — payment posting skip karena sudah di-post di approve time)
-      await this.accountingPosting.postInvoiceIssued(submission.invoiceId, user.id);
+      await this.accountingPosting.postInvoiceIssued(submission.invoiceId!, user.id);
 
       // Berhasil — bersihkan reviewNotes dari metadata retry, kembalikan ke null atau simpan sukses
       // Kalau reviewNotes sebelumnya berisi teks (bukan JSON retry), pertahankan
@@ -1187,7 +1190,7 @@ export class PaymentSubmissionsService {
       }
 
       this.logger.log(
-        `[C5] Journal retry BERHASIL untuk payment submission #${submissionId}, invoice #${submission.invoiceId} (percobaan ke-${retryCount})`,
+        `[C5] Journal retry BERHASIL untuk payment submission #${submissionId}, invoice #${submission.invoiceId!} (percobaan ke-${retryCount})`,
       );
 
       return { success: true, retryCount, message: 'Journal berhasil diposting ulang' };
@@ -1207,7 +1210,7 @@ export class PaymentSubmissionsService {
       });
 
       this.logger.error(
-        `[C5] Journal retry GAGAL untuk payment submission #${submissionId}, invoice #${submission.invoiceId} ` +
+        `[C5] Journal retry GAGAL untuk payment submission #${submissionId}, invoice #${submission.invoiceId!} ` +
         `(percobaan ke-${retryCount}/${maxRetries}): ${errorMessage}`,
       );
 
@@ -1498,7 +1501,7 @@ export class PaymentSubmissionsService {
             entityId: String(submissionId),
             meta: {
               stayId: submission.stayId,
-              invoiceId: submission.invoiceId,
+              invoiceId: submission.invoiceId!,
               reviewNotes,
             } as unknown as Prisma.InputJsonValue,
           },

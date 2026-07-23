@@ -40,7 +40,7 @@ export class CheckoutRequestsService {
     });
     if (openInvoices.length > 0) {
       const refs = openInvoices
-        .map((invoice) => `${invoice.invoiceNumber || `Tagihan #${invoice.id}`} belum dibayar`)
+        .map((invoice: any) => `${invoice.invoiceNumber || `Tagihan #${invoice.id}`} belum dibayar`)
         .join(', ');
       throw new ConflictException(`${messagePrefix}: ${refs}`);
     }
