@@ -250,7 +250,7 @@ Staff **TIDAK BOLEH** memulai/menyetujui pemesanan layanan berbayar (WiFi, galon
 ### DOSSIER 14 — INVENTARIS & BARANG KAMAR
 **Domain:** stok gudang, pergerakan (movement), barang per kamar (RoomItem), laporan kondisi staf, sinkronisasi 3 jalur. **Flow 9.**
 **Status:** 🟢 SEHAT — qty single-writer via trigger DB; ghost-stock TIDAK ada di jalur resmi. 1 lubang nyata (I-02) di jalur admin-review.
-**File inti:** `inventory-movements.service.ts` (176), `room-items.service.ts` (284), `staff-field-reports.service.ts` (651), `inventory-items.service.ts` (16.5KB), trigger `sql/bootstrap.sql:558-622`.
+**File inti:** `inventory-movements.service.ts` (176), `room-items.service.ts` (284), `staff-field-reports.service.ts` (651), `inventory-items.service.ts` (16.5KB), trigger `sql/seed.sql:534-625`.
 
 ---
 #### 1. Aturan bisnis

@@ -183,6 +183,7 @@ export class InventoryItemsService {
         query.search ? { OR: [{ name: { contains: query.search, mode: 'insensitive' } }, { sku: { contains: query.search, mode: 'insensitive' } }] } : {},
         query.category ? { category: query.category } : {},
         typeof query.isActive === 'string' ? { isActive: query.isActive === 'true' } : {},
+        query.status ? { status: query.status } : {},
       ],
     };
     const [rawItems, totalItems, facilityCounts] = await Promise.all([
@@ -200,7 +201,8 @@ export class InventoryItemsService {
       ? rawItems.filter((item) => Number(item.qtyOnHand) <= Number(item.minQty))
       : rawItems;
     const items = filteredItems.map((item) => this.decorateInventoryItem(item, facilityCounts));
-    return { items, meta: buildMeta(page, limit, totalItems) };
+    const effectiveTotal = query.lowStockOnly === 'true' ? filteredItems.length : totalItems;
+    return { items, meta: buildMeta(page, limit, effectiveTotal) };
   }
 
   async findOne(id: number) {
