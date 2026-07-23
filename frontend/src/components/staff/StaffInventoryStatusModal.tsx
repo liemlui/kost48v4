@@ -19,7 +19,7 @@ import type { InventoryItem, RoomItem } from "../../types";
 import { getInventoryHealth } from "../../utils/inventoryHealth";
 import CameraOrGalleryInput from "../common/CameraOrGalleryInput";
 import SafeImage from "../common/SafeImage";
-import { compressImageFile as compressBrowserImage } from "../../utils/compressImageFile";
+import { compressImageFile } from "../../utils/compressImageFile";
 
 type Target =
   | { type: "room-item"; item: RoomItem }
@@ -85,10 +85,6 @@ const roomHandlingCopy: Record<
 // ═══════════════════════════════════════════════════════════
 //  SECTION: Helpers & Sub-Components
 // ═══════════════════════════════════════════════════════════
-
-async function compressImageFile(file: File): Promise<File> {
-  return compressBrowserImage(file, { maxSide: 1600, quality: 0.78 });
-}
 
 function targetTitle(target: Target | null) {
   if (!target) return "Laporkan kondisi barang";

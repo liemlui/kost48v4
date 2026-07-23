@@ -11,6 +11,7 @@ import { useAuth } from '../../context/AuthContext';
 import { createFaq, deleteFaq, fetchAllFaqs, updateFaq, type FaqItem } from '../../api/faqs';
 import { fetchOperationalSettings, pickOperationalPayload, updateOperationalSettings, type OperationalSetting } from '../../api/settings';
 import { getApiErrorMessage } from '../../utils/getApiErrorMessage';
+import { WIFI_DEFAULT_PRICE_RUPIAH } from '../../config/constants';
 import { listFacilityImages, uploadFacilityImage, deleteFacilityImage } from '../../api/facilityImages';
 import { deleteMarketingAsset, listMarketingAssets, uploadMarketingAsset } from '../../api/marketingAssets';
 import { resolveAbsoluteFileUrl } from '../../utils/resolveAbsoluteFileUrl';
@@ -768,7 +769,7 @@ export function TariffSettingsPanel() {
       waterMeteringEnabled: Boolean(form?.waterMeteringEnabled),
       waterTariffPerM3Rupiah: Number(form?.waterTariffPerM3Rupiah ?? 0),
       freeWaterM3PerMonth: Number(form?.freeWaterM3PerMonth ?? 0),
-      wifiRupiah: Number(form?.wifiRupiah ?? 50000),
+      wifiRupiah: Number(form?.wifiRupiah ?? WIFI_DEFAULT_PRICE_RUPIAH),
       galonRupiah: Number(form?.galonRupiah ?? 20000),
       petDepositRupiah: Number(form?.petDepositRupiah ?? 100000),
       extraOccupantFeePercent: Number(form?.extraOccupantFeePercent ?? 20),
@@ -876,7 +877,7 @@ export function TariffSettingsPanel() {
           <Col md={6}>
             <Form.Group>
               <Form.Label>WiFi per gadget / bulan (Rp)</Form.Label>
-              <CurrencyInput value={form.wifiRupiah ?? 50000} onChange={(v) => set('wifiRupiah', v ?? 0)} />
+              <CurrencyInput value={form.wifiRupiah ?? WIFI_DEFAULT_PRICE_RUPIAH} onChange={(v) => set('wifiRupiah', v ?? 0)} />
               <Form.Text muted>Biaya berlangganan WiFi per perangkat per bulan.</Form.Text>
             </Form.Group>
           </Col>

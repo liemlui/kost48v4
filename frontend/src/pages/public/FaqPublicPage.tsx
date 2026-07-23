@@ -1,5 +1,4 @@
 import { useEffect, useMemo } from 'react';
-import '../../styles/public-area';
 import { useQuery } from '@tanstack/react-query';
 import { Accordion, Alert, Spinner } from 'react-bootstrap';
 import { Link } from 'react-router-dom';

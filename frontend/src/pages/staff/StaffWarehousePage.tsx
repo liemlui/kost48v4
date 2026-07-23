@@ -1,4 +1,3 @@
-import '../../styles/staff-area';
 import PageHeader from '../../components/common/PageHeader';
 import StaffGeneralInventorySection from '../../components/staff/StaffGeneralInventorySection';
 

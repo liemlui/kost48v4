@@ -1,4 +1,3 @@
-import '../../styles/tenant-area';
 import PageHeader from '../../components/common/PageHeader';
 import { useState } from 'react';
 import { Alert, Badge, Button, Card, Col, Row, Spinner } from 'react-bootstrap';

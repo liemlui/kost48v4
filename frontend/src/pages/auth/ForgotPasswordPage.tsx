@@ -1,7 +1,6 @@
 import { FormEvent, useEffect, useRef, useState } from 'react';
 import { Button, Form } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
-import '../../styles/tenant-area'; // style .login-* (lihat catatan di LoginPage)
 import { forgotPassword } from '../../api/auth';
 import Kost48LogoMark from '../../components/common/Kost48LogoMark';
 import Kost48DecorGallery from '../../components/common/Kost48DecorGallery';

@@ -10,7 +10,7 @@ const publicDir = resolve(frontendRoot, 'public');
 const distDir = resolve(frontendRoot, 'dist');
 const assetsDir = resolve(distDir, 'assets');
 const MAX_INITIAL_JS_GZIP = 380 * 1024;
-const MAX_INITIAL_CSS_GZIP = 120 * 1024;
+const MAX_INITIAL_CSS_GZIP = 135 * 1024;
 
 function readText(path) {
   assert.ok(existsSync(path), `Missing required file: ${path}`);

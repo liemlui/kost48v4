@@ -3,7 +3,6 @@ import { Button, Form } from 'react-bootstrap';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 // Style .login-* hidup di 06-tenant.css; halaman auth bukan bagian chunk portal tenant,
 // jadi WAJIB import langsung — tanpa ini tab/kartu login polos di build produksi.
-import '../../styles/tenant-area';
 import PasswordInput from '../../components/common/PasswordInput';
 import Kost48LogoMark from '../../components/common/Kost48LogoMark';
 import Kost48DecorGallery from '../../components/common/Kost48DecorGallery';

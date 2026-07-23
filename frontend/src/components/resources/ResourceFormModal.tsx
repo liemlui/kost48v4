@@ -11,17 +11,13 @@ import PasswordInput from '../common/PasswordInput';
 import SearchableSelect from '../common/SearchableSelect';
 import SafeImage from '../common/SafeImage';
 import { uploadAnnouncementImage, uploadRoomImage } from '../../api/mediaUploads';
-import { compressImageFile as compressBrowserImage } from '../../utils/compressImageFile';
+import { compressImageFile } from '../../utils/compressImageFile';
 import { formatDateOnly } from '../../utils/dateTime';
 import KtpOcrValidateCard from '../ai/KtpOcrValidateCard';
 
 // ═══════════════════════════════════════════════════════════
 //  SECTION: ResourceFormModal — Helpers
 // ═══════════════════════════════════════════════════════════
-
-async function compressImageFile(file: File): Promise<File> {
-  return compressBrowserImage(file, { maxSide: 1600, quality: 0.78 });
-}
 
 function resolveAbsoluteFileUrl(fileUrl?: string | null) {
   if (!fileUrl) return null;

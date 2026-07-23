@@ -1,4 +1,3 @@
-import '../../styles/tenant-area';
 import { Button, Card, Spinner, Badge } from 'react-bootstrap';
 import { useConfirm } from '../../components/common/ConfirmProvider';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';

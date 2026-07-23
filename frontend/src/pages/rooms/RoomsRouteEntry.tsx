@@ -1,4 +1,3 @@
-import '../../styles/public-area';
 import { lazy } from 'react';
 import { NavLink } from 'react-router-dom';
 import { PageLoadingSkeleton } from '../../components/common/SkeletonLoader';

@@ -4,7 +4,6 @@
  * 7 tab terstruktur: Aturan, Perpanjangan, Checkout, kWh Meter, Cara Bayar, WiFi, Kontak.
  * Konten di bawah adalah DRAFT AI — silakan review & edit oleh owner.
  */
-import '../../styles/tenant-area';
 import PageHeader from '../../components/common/PageHeader';
 import { useState, useMemo } from 'react';
 import { Accordion, Alert, Button, Card, Nav, Spinner } from 'react-bootstrap';

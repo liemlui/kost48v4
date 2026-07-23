@@ -1,4 +1,3 @@
-import '../../styles/staff-area';
 import { useEffect, useMemo, useState } from 'react';
 import { Alert, Card, Col, Form, Row, Spinner } from 'react-bootstrap';
 import { Bar, BarChart, CartesianGrid, Cell, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';

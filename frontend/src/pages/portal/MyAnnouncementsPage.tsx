@@ -1,4 +1,3 @@
-import '../../styles/tenant-area';
 import { useQuery } from '@tanstack/react-query';
 import { Navigate, useNavigate } from 'react-router-dom';
 import { Alert, Badge, Button, Card, Spinner } from 'react-bootstrap';

@@ -1,5 +1,4 @@
 // FILE: PublicGuestDashboardPage.tsx — halaman utama publik: hero, kamar, fasilitas, CTA
-import '../../styles/public-area';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Accordion, Container, Modal, Spinner } from 'react-bootstrap';
@@ -33,6 +32,7 @@ import {
 } from '../../utils/publicRoomDisplay';
 import { resolveAbsoluteFileUrl } from '../../utils/resolveAbsoluteFileUrl';
 import { formatRupiah, formatRupiahWithoutSymbol } from '../../utils/formatCurrency';
+import { WIFI_DEFAULT_PRICE_RUPIAH } from '../../config/constants';
 import {
   NAV_LINKS, GALLERY_ITEMS, FACILITY_GROUPS, TRUST_ITEMS, HOME_FAQ_ITEMS, EXTRA_FAQ_ITEMS, MAPS_EMBED_URL, CATALOG_BATCH_SIZE,
   resolvePublicMarketingAssetUrl, getTodayDateInput, formatCompactRupiah, formatMonthlyRange, buildWhatsAppUrl, buildRoomWhatsAppUrl, getRoomCover,
@@ -221,7 +221,7 @@ export default function PublicGuestDashboardPage() {
   const cfg = publicConfigQuery.data as PublicConfig | undefined;
   const freeKwh = cfg?.freeElectricityKwhPerMonth ?? 30;
   const electricityTariff = cfg?.electricityTariffPerKwhRupiah ?? 2500;
-  const wifiPrice = cfg?.wifiRupiah ?? 50000;
+  const wifiPrice = cfg?.wifiRupiah ?? WIFI_DEFAULT_PRICE_RUPIAH;
   const petDeposit = cfg?.petDepositRupiah ?? 100000;
 
   const rooms = roomsQuery.data?.items ?? [];

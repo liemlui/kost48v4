@@ -1,5 +1,4 @@
 // FILE: PublicRoomDetailPage.tsx — detail kamar publik: fasilitas, foto, harga, booking
-import '../../styles/public-area';
 import { useEffect, useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Accordion, Alert, Badge, Button, Card, Carousel, Col, Container, Row, Spinner, Table } from 'react-bootstrap';
@@ -14,6 +13,7 @@ import { getKost48RoomGallery, resolveKost48MarketingImageUrl } from '../../data
 import { calculateRentByPricingTerm, isUtilitiesIncludedForPricingTerm, ALL_PRICING_TERMS } from '../../utils/pricing';
 import { getPublicRoomAvailabilityDisplay, getPublicRoomInitialCostEstimate, publicBookingSafetySteps } from '../../utils/publicRoomDisplay';
 import { formatRupiah, formatRupiahWithoutSymbol } from '../../utils/formatCurrency';
+import { DP_RATIO } from '../../config/constants';
 import { buildAdminWaUrl, buildRoomWaUrl } from '../../utils/whatsapp';
 
 // ═══════════════════════════════════════════════════════════
@@ -336,7 +336,7 @@ export default function PublicRoomDetailPage() {
                       {(() => {
                         // INFO: preview DP pakai tarif bulanan (raw monthly); form booking pakai term+surcharge (akurat)
                         const monthlyRent = getTermRent(room, 'MONTHLY');
-                        const dpAmount = monthlyRent > 0 ? Math.round(monthlyRent * 0.3) : 0;
+                        const dpAmount = monthlyRent > 0 ? Math.round(monthlyRent * DP_RATIO) : 0;
                         const depositAmount = Number(room.defaultDepositRupiah ?? 0);
                         return (
                           <div className="room-detail-dp-deposit-info mt-3">

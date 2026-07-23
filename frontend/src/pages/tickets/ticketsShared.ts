@@ -1,5 +1,5 @@
 import { getTicketStatusLabel } from '../../constants/staffRepairOptions';
-import { compressImageFile as compressBrowserImage } from '../../utils/compressImageFile';
+export { compressImageFile } from '../../utils/compressImageFile';
 
 export type TicketItem = {
   issueImageUrl?: string | null;
@@ -45,10 +45,6 @@ export function formatRelations(item: TicketItem): string {
   if (item.stay?.id) parts.push(`Masa sewa #${item.stay.id}`);
   else if (item.stayId) parts.push(`Masa sewa #${item.stayId}`);
   return parts.join(' · ') || 'Tidak ada lokasi';
-}
-
-export async function compressImageFile(file: File): Promise<File> {
-  return compressBrowserImage(file, { maxSide: 1600, quality: 0.78 });
 }
 
 export function getStaffStatusText(status: string) {

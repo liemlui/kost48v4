@@ -14,7 +14,7 @@ export function useStaffPhotoUpload() {
     if (!file) return;
     setError('');
     try {
-      const compressed = await compressBrowserImage(file, { maxSide: 1400, quality: 0.78 });
+      const compressed = await compressBrowserImage(file, { maxSide: 1600, quality: 0.78 });
       const uploaded = await uploadTicketImage(compressed);
       setPhoto(uploaded);
       setPreview(uploaded.fileUrl);

@@ -1,4 +1,3 @@
-import '../../styles/public-area';
 import { FormEvent, useMemo, useState } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { Alert, Row, Col, Spinner } from 'react-bootstrap';

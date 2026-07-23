@@ -1,4 +1,3 @@
-import '../../styles/tenant-area';
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Alert, Button, Card } from 'react-bootstrap';

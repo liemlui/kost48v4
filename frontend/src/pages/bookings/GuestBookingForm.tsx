@@ -26,6 +26,7 @@ import {
   formatDate,
 } from './guestBookingUtils';
 import { formatRupiah } from '../../utils/formatCurrency';
+import { DP_RATIO } from '../../config/constants';
 
 interface GuestBookingFormProps {
   room: PublicRoom;
@@ -161,7 +162,7 @@ export default function GuestBookingForm({
   const totalRent = baseRent + occupantSurcharge;
   const depositJaminan = Number(room.defaultDepositRupiah ?? 0);
   const depositHewan = form.hasPet ? petDepositRupiah : 0;
-  const dpAmount = Math.round(totalRent * 0.3);
+  const dpAmount = Math.round(totalRent * DP_RATIO);
 
   const durationOptions = getDurationOptions(form.pricingTerm);
   const computedCheckOut = computeCheckOutDate(form.checkInDate, form.pricingTerm, form.leaseDurationCount);

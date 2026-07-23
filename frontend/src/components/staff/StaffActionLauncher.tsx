@@ -17,7 +17,7 @@ import {
 import type { Room } from "../../types";
 import CameraOrGalleryInput from "../common/CameraOrGalleryInput";
 import SafeImage from "../common/SafeImage";
-import { compressImageFile as compressBrowserImage } from "../../utils/compressImageFile";
+import { compressImageFile } from "../../utils/compressImageFile";
 
 // ═══════════════════════════════════════════════════════════
 //  COMPONENT: StaffActionLauncher
@@ -86,10 +86,6 @@ function activeTenantId(room?: StaffRoomOption | null) {
 
 function activeStayId(room?: StaffRoomOption | null) {
   return room?.currentStay?.id ?? room?.activeStayId ?? null;
-}
-
-async function compressImageFile(file: File): Promise<File> {
-  return compressBrowserImage(file, { maxSide: 1600, quality: 0.78 });
 }
 
 export default function StaffActionLauncher({

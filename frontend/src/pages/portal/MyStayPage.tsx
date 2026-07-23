@@ -1,7 +1,6 @@
 // FILE: MyStayPage.tsx — dashboard penghuni: status sewa, info kamar, aksi
 import ActiveStayContent from '../../components/portal/stay/ActiveStayContent';
 import FeatureErrorBoundary from '../../components/common/FeatureErrorBoundary';
-import '../../styles/tenant-area';
 import { type ReactNode, useEffect, useMemo, useState, useCallback } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Accordion, Alert, Button, Card, Spinner } from 'react-bootstrap';
