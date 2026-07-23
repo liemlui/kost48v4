@@ -9,6 +9,7 @@ import { StaySweepService } from './sweeps/stay-sweep.service';
 import { RenewalSweepService } from './sweeps/renewal-sweep.service';
 import { AccountingSweepService } from './sweeps/accounting-sweep.service';
 import { MaintenanceSweepService } from './sweeps/maintenance-sweep.service';
+import { AnnouncementSweepService } from './sweeps/announcement-sweep.service';
 
 type AutoOpsRunResult = {
   expiredBookings: number;
@@ -20,6 +21,7 @@ type AutoOpsRunResult = {
   recurringExpenseDrafts?: unknown;
   automaticDepreciation?: unknown;
   notificationPruning?: unknown;
+  announcementDispatch?: unknown;
   pushDispatch?: unknown;
   rentRecognition?: unknown;
   acCleaning?: unknown;
@@ -40,6 +42,7 @@ export class AutoOpsService implements OnModuleInit, OnModuleDestroy {
     private readonly renewalSweep: RenewalSweepService,
     private readonly accountingSweep: AccountingSweepService,
     private readonly maintenanceSweep: MaintenanceSweepService,
+    private readonly announcementSweep: AnnouncementSweepService,
   ) {}
 
   private async loadEnabled(): Promise<boolean> {
@@ -183,6 +186,7 @@ export class AutoOpsService implements OnModuleInit, OnModuleDestroy {
     const journalReconciliation = await this.accountingSweep.runAutoJournalReconciliation(options);
     const accountingAutoClose = await this.accountingSweep.runAccountingAutoClose(options);
     const notificationPruning = await this.accountingSweep.runNotificationPruning(options);
+    const announcementDispatch = await this.announcementSweep.sweepAnnouncementDispatch();
     const pushDispatch = await this.maintenanceSweep.runPushDispatch(options);
     return {
       expiredBookings: bookingResult.expiredStayIds.length,
@@ -195,6 +199,7 @@ export class AutoOpsService implements OnModuleInit, OnModuleDestroy {
       rentRecognition,
       accountingAutoClose,
       notificationPruning,
+      announcementDispatch,
       pushDispatch,
       acCleaning,
       journalReconciliation,
@@ -281,6 +286,10 @@ export class AutoOpsService implements OnModuleInit, OnModuleDestroy {
 
   async runNotificationPruning(options: { actorUserId?: number | null; source?: string } = {}) {
     return this.accountingSweep.runNotificationPruning(options);
+  }
+
+  async runAnnouncementDispatch() {
+    return this.announcementSweep.sweepAnnouncementDispatch();
   }
 
   async runPushDispatch(options: { actorUserId?: number | null; source?: string } = {}) {

@@ -160,6 +160,16 @@ export class AutoOpsController {
     return { message: 'AutoOps pruning notifikasi berhasil dijalankan', data: await this.autoOpsService.runNotificationPruning({ actorUserId: user.id, source: 'MANUAL_NOTIFICATION_PRUNING_RUN' }) };
   }
 
+  @Post('run/announcement-dispatch')
+  @ApiOperation({ summary: 'Dispatch pengumuman terjadwal — OWNER/ADMIN' })
+  @Roles(UserRole.OWNER, UserRole.ADMIN)
+  async runAnnouncementDispatch() {
+    return {
+      message: 'Dispatch pengumuman terjadwal berhasil dijalankan',
+      data: await this.autoOpsService.runAnnouncementDispatch(),
+    };
+  }
+
   // F4-2: trigger manual dispatch Web Push notifikasi PENDING (UAT/ops).
   @Post('run/push-dispatch')
   @ApiOperation({ summary: 'Trigger dispatch push — OWNER/ADMIN' })

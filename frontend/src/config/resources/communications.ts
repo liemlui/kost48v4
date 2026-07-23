@@ -43,6 +43,16 @@ export const communicationsConfigs = {
       { name: 'isPublished', label: 'Published', type: 'checkbox' as const },
       { name: 'isPinned', label: 'Pinned', type: 'checkbox' as const },
       {
+        name: 'imageUrl',
+        label: 'Gambar Cover',
+        type: 'text' as const,
+        placeholder: 'Unggah gambar cover pengumuman',
+      },
+      { name: 'imageFileKey', label: 'Image file key', type: 'hidden' as const },
+      { name: 'imageOriginalFilename', label: 'Image filename', type: 'hidden' as const },
+      { name: 'imageMimeType', label: 'Image MIME type', type: 'hidden' as const },
+      { name: 'imageFileSizeBytes', label: 'Image file size', type: 'hidden' as const },
+      {
         name: 'startsAt',
         label: 'Mulai Tayang',
         type: 'date' as const,

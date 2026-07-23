@@ -32,6 +32,7 @@ export class NotificationItemResponse {
   linkTo!: string | null;
   entityType!: string | null;
   entityId!: string | null;
+  category!: 'FINANCE' | 'OPERATIONS' | 'SYSTEM';
   isRead!: boolean;
   readAt!: string | null;
   createdAt!: string;

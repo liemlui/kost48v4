@@ -485,6 +485,18 @@ export default function SimpleCrudPage({ config, hideAreaMenu = false }: { confi
     }
 
     const payload = normalizeFormDataForSubmit(formState, config.fields);
+
+    // Metadata gambar announcement hanya dikirim setelah upload. Saat admin
+    // menghapus cover, kirim null eksplisit supaya PATCH benar-benar
+    // membersihkan record lama, bukan sekadar mengabaikan field kosong.
+    if (config.path === '/announcements' && formState.imageUrl === '') {
+      payload.imageUrl = null;
+      payload.imageFileKey = null;
+      payload.imageOriginalFilename = null;
+      payload.imageMimeType = null;
+      payload.imageFileSizeBytes = null;
+    }
+
     if (config.path === '/expenses' && !editingItem && formState.aiDraftMeta) {
       payload.aiDraftMeta = formState.aiDraftMeta;
     }

@@ -345,6 +345,10 @@ export default function ResourceFormModal({
 
         <Row className="g-3">
           {config.fields.map((field) => {
+            if (field.type === 'hidden') {
+              return null;
+            }
+
             const relationSpec = getRelationSpec(config.path, field.name);
             const relationSourceOptions = relationSpec ? (referenceOptions[relationSpec.sourcePath] ?? []) : [];
             const relationValue = getReferenceLabel(config.path, field.name, formState[field.name], referenceMaps);

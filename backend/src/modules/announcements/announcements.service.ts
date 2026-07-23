@@ -104,7 +104,7 @@ export class AnnouncementsService {
   }
 
   async create(dto: CreateAnnouncementDto, actor: CurrentUserPayload) {
-    this.validateWindow(dto.startsAt, dto.expiresAt);
+    this.validateCreateWindow(dto.startsAt, dto.expiresAt);
     const isPublishing = !!dto.isPublished;
     const created = await this.prisma.announcement.create({
       data: {
@@ -130,9 +130,11 @@ export class AnnouncementsService {
     const isNowPublishing = typeof dto.isPublished === 'boolean' ? dto.isPublished : existing.isPublished;
     const transitionedToPublished = wasUnpublished && isNowPublishing;
 
-    this.validateWindow(
-      dto.startsAt ?? existing.startsAt?.toISOString(),
-      dto.expiresAt ?? existing.expiresAt?.toISOString(),
+    this.validateUpdateWindow(
+      dto.startsAt,
+      dto.expiresAt,
+      existing.startsAt?.toISOString() ?? null,
+      existing.expiresAt?.toISOString() ?? null,
     );
 
     const updateData: any = { ...dto };
@@ -153,6 +155,40 @@ export class AnnouncementsService {
       this.notifyPublished(updated).catch((err) => this.logger.error('Gagal membuat notifikasi pengumuman', err));
     }
     return updated;
+  }
+
+  /**
+   * P2: pengumuman adalah konten operasional, sehingga penghapusan dilakukan
+   * secara hard delete. Notifikasi broadcast yang menunjuk pengumuman ini ikut
+   * dibersihkan agar tenant tidak menerima link yang akan menghasilkan 404.
+   */
+  async remove(id: number, actor: CurrentUserPayload) {
+    const existing = await this.prisma.announcement.findUnique({ where: { id } });
+    if (!existing) throw new NotFoundException('Announcement tidak ditemukan');
+
+    const [deletedNotifications] = await this.prisma.$transaction([
+      this.prisma.appNotification.deleteMany({
+        where: {
+          entityType: 'ANNOUNCEMENT',
+          entityId: String(id),
+        },
+      }),
+      this.prisma.announcement.delete({ where: { id } }),
+    ]);
+
+    await this.audit.log({
+      actorUserId: actor.id,
+      action: 'DELETE',
+      entityType: 'Announcement',
+      entityId: String(existing.id),
+      oldData: existing,
+    });
+
+    return {
+      deletedId: existing.id,
+      imageFileKey: existing.imageFileKey,
+      deletedNotifications: deletedNotifications.count,
+    };
   }
 
   private async hasTenantOccupiedStay(user: CurrentUserPayload): Promise<boolean> {
@@ -180,7 +216,7 @@ export class AnnouncementsService {
   private async notifyPublished(announcement: Announcement) {
     // N-02: jangan kirim notifikasi bila konten belum tayang (startsAt di masa
     // depan). Sebelumnya notif instan menunjuk pengumuman yang belum bisa dibuka.
-    // (Pengiriman tepat di startsAt butuh sweeper terjadwal — peningkatan lanjutan.)
+    // AnnouncementSweepService akan mengirimnya saat startsAt tercapai.
     if (announcement.startsAt && announcement.startsAt.getTime() > Date.now()) {
       this.logger.log(
         `Notif pengumuman #${announcement.id} ditahan: startsAt ${announcement.startsAt.toISOString()} masih di masa depan.`,
@@ -242,6 +278,7 @@ export class AnnouncementsService {
           linkTo,
           entityType: 'ANNOUNCEMENT',
           entityId: String(announcement.id),
+          category: 'OPERATIONS',
         });
       } catch (err) {
         this.logger.error(
@@ -251,9 +288,22 @@ export class AnnouncementsService {
         // jangan rethrow agar satu penerima gagal tidak memblok penerima lain
       }
     }
+
+    // P2-2: tandai sudah didispatch setelah notifikasi berhasil dikirim
+    try {
+      await this.prisma.announcement.update({
+        where: { id: announcement.id },
+        data: { dispatchedAt: new Date() },
+      });
+    } catch (err) {
+      this.logger.error(`Gagal update dispatchedAt untuk announcement #${announcement.id}`, err);
+    }
   }
 
-  private validateWindow(startsAt?: string | null, expiresAt?: string | null) {
+  /**
+   * Validasi untuk CREATE: startsAt baru harus di masa depan, expiresAt > startsAt.
+   */
+  private validateCreateWindow(startsAt?: string | null, expiresAt?: string | null) {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
@@ -269,6 +319,51 @@ export class AnnouncementsService {
       const startsDate = new Date(startsAt);
       startsDate.setHours(0, 0, 0, 0);
       const expiresDate = new Date(expiresAt);
+      expiresDate.setHours(0, 0, 0, 0);
+      if (expiresDate <= startsDate) {
+        throw new ConflictException('Tanggal berakhir harus setelah tanggal mulai tayang.');
+      }
+    }
+  }
+
+  /**
+   * Validasi untuk UPDATE:
+   * - Jika startsAt DIUBAH (dto.startsAt disertakan), baru divalidasi tidak boleh di masa lalu.
+   * - Jika startsAt tidak diubah (undefined), startsAt lama (boleh di masa lalu) tetap dipakai.
+   * - expiresAt jika diubah harus > startsAt (baik startsAt baru maupun existing).
+   */
+  private validateUpdateWindow(
+    dtoStartsAt: string | undefined | null,
+    dtoExpiresAt: string | undefined | null,
+    existingStartsAt: string | null,
+    existingExpiresAt: string | null,
+  ) {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    // Tentukan startsAt efektif: pakai DTO jika diubah, else existing
+    const effectiveStartsAt = dtoStartsAt !== undefined ? dtoStartsAt : existingStartsAt;
+    const effectiveExpiresAt = dtoExpiresAt !== undefined ? dtoExpiresAt : existingExpiresAt;
+
+    // Jika startsAt DIUBAH (disertakan dalam body), validasi tidak boleh masa lalu
+    if (dtoStartsAt !== undefined && dtoStartsAt !== null) {
+      const startsDate = new Date(dtoStartsAt);
+      startsDate.setHours(0, 0, 0, 0);
+      if (startsDate < today) {
+        throw new ConflictException('Tanggal mulai tayang tidak boleh di masa lalu.');
+      }
+    }
+
+    // Jika expiresAt diubah menjadi null, hapus batas waktu — tidak perlu validasi
+    if (dtoExpiresAt !== undefined && dtoExpiresAt === null) {
+      return;
+    }
+
+    // Validasi expiresAt > startsAt (gunakan effective)
+    if (effectiveStartsAt && effectiveExpiresAt) {
+      const startsDate = new Date(effectiveStartsAt);
+      startsDate.setHours(0, 0, 0, 0);
+      const expiresDate = new Date(effectiveExpiresAt);
       expiresDate.setHours(0, 0, 0, 0);
       if (expiresDate <= startsDate) {
         throw new ConflictException('Tanggal berakhir harus setelah tanggal mulai tayang.');

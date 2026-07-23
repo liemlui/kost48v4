@@ -1094,6 +1094,7 @@ export class PaymentSubmissionsService {
                 linkTo: '/portal/invoices',
                 entityType: 'PaymentSubmission',
                 entityId: String(submissionId),
+                category: 'FINANCE',
               });
             }
           } catch (notifErr) {
@@ -1414,6 +1415,9 @@ export class PaymentSubmissionsService {
           linkTo: '/rooms',
           entityType: 'Stay',
           entityId: String(loser.stayId),
+          // Entity Stay juga dipakai event operasional. Event ini spesifik
+          // pembayaran/refund, jadi kategori harus eksplisit FINANCE.
+          category: 'FINANCE',
         });
       } catch (err) {
         this.logger.warn(`Notifikasi tenant kalah gagal (stay #${loser.stayId}): ${err instanceof Error ? err.message : String(err)}`);
@@ -2097,6 +2101,7 @@ export class PaymentSubmissionsService {
             linkTo: '/payment-submissions/review',
             entityType: 'PaymentSubmission',
             entityId: String(submission.id),
+            category: 'FINANCE',
           }),
         ),
       );
@@ -2149,6 +2154,7 @@ export class PaymentSubmissionsService {
         entityType,
         entityId,
         linkTo: '/portal/stay',
+        category: 'FINANCE',
       });
     } catch {
       // Notification failure must not rollback approval

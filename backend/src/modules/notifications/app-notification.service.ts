@@ -9,7 +9,43 @@ export type CreateAppNotificationInput = {
   linkTo?: string;
   entityType?: string;
   entityId?: string;
+  category?: 'FINANCE' | 'OPERATIONS' | 'SYSTEM';
 };
+
+type NotificationCategory = NonNullable<CreateAppNotificationInput['category']>;
+
+const FINANCE_ENTITY_TYPES = new Set([
+  'INVOICE',
+  'PAYMENT',
+  'PAYMENTSUBMISSION',
+  'DEPOSIT',
+  'LOYALTY',
+  'ACCOUNTING',
+]);
+
+const OPERATIONS_ENTITY_TYPES = new Set([
+  'ANNOUNCEMENT',
+  'BOOKING',
+  'STAY',
+  'RENEWREQUEST',
+  'CHECKOUTREQUEST',
+  'TICKET',
+  'TICKETSLA',
+  'ROOM',
+  'ROOMTRANSFER',
+  'SERVICEINTEREST',
+  'BELONGINGSABANDONED',
+  'STAFFFIELDREPORT',
+]);
+
+function resolveCategory(input: CreateAppNotificationInput): NotificationCategory {
+  if (input.category) return input.category;
+
+  const entityType = (input.entityType ?? '').replace(/[^a-z0-9]/gi, '').toUpperCase();
+  if (FINANCE_ENTITY_TYPES.has(entityType)) return 'FINANCE';
+  if (OPERATIONS_ENTITY_TYPES.has(entityType)) return 'OPERATIONS';
+  return 'SYSTEM';
+}
 
 @Injectable()
 export class AppNotificationService {
@@ -24,6 +60,10 @@ export class AppNotificationService {
         linkTo: input.linkTo ?? null,
         entityType: input.entityType ?? null,
         entityId: input.entityId ?? null,
+        // Kategori tersimpan sebagai data eksplisit. Call-site perlu mengirim
+        // category untuk event dengan konteks khusus; fallback ini menjaga
+        // event lama dan event baru tetap memiliki nilai yang aman.
+        category: resolveCategory(input),
         // F4-2: setiap notifikasi in-app diantre untuk Web Push (outbox in-place).
         // Sweeper PushService.dispatchPending memprosesnya; bila VAPID nonaktif /
         // tenant tak punya device, status diselesaikan tanpa efek samping.
@@ -78,6 +118,7 @@ export class AppNotificationService {
         linkTo: n.linkTo,
         entityType: n.entityType,
         entityId: n.entityId,
+        category: n.category,
         isRead: n.isRead,
         readAt: n.readAt?.toISOString() ?? null,
         createdAt: n.createdAt.toISOString(),

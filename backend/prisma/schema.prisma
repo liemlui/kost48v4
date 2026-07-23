@@ -21,6 +21,12 @@ enum Gender {
   OTHER
 }
 
+enum NotificationCategory {
+  FINANCE
+  OPERATIONS
+  SYSTEM
+}
+
 enum RoomStatus {
   AVAILABLE
   RESERVED
@@ -1359,6 +1365,9 @@ model Announcement {
   publishedAt           DateTime?
   startsAt              DateTime?
   expiresAt             DateTime?
+  // P2-2: menandai apakah notifikasi untuk announcement ini sudah dikirim.
+  // null = belum dikirim; terisi = sudah didispatch.
+  dispatchedAt          DateTime?
   imageUrl              String?
   imageFileKey          String?
   imageOriginalFilename String?
@@ -1707,14 +1716,17 @@ model AssetDepreciationLine {
 }
 
 model AppNotification {
-  id              Int       @id @default(autoincrement())
+  id              Int                  @id @default(autoincrement())
   recipientUserId Int
   title           String
   body            String
   linkTo          String?
   entityType      String?
   entityId        String?
-  isRead          Boolean   @default(false)
+  // P2-1: kategori eksplisit — FINANCE, OPERATIONS, SYSTEM.
+  // Data lama (legacy) akan di-set SYSTEM oleh migration.
+  category        NotificationCategory @default(SYSTEM)
+  isRead          Boolean              @default(false)
   readAt          DateTime?
 
   // F4-2: outbox PWA Web Push (in-place). NONE = tak perlu push; PENDING = antre kirim;
@@ -1731,6 +1743,7 @@ model AppNotification {
   @@index([recipientUserId, isRead, createdAt])
   @@index([recipientUserId, createdAt])
   @@index([pushStatus])
+  @@index([category])
 }
 
 enum PushDeliveryStatus {

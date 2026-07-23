@@ -7,7 +7,8 @@ export type FieldType =
   | 'textarea'
   | 'checkbox'
   | 'password'
-  | 'currency';
+  | 'currency'
+  | 'hidden';
 
 export type ResourceField = {
   name: string;

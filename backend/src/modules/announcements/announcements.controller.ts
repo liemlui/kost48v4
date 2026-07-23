@@ -2,6 +2,7 @@ import {
   BadRequestException,
   Body,
   Controller,
+  Delete,
   Get,
   NotFoundException,
   Param,
@@ -155,5 +156,23 @@ export class AnnouncementsController {
   @Roles(UserRole.OWNER, UserRole.ADMIN)
   async update(@Param('id', ParseIntPipe) id: number, @Body() dto: UpdateAnnouncementDto, @CurrentUser() user: CurrentUserPayload) {
     return { message: 'Pengumuman berhasil diperbarui', data: await this.announcementsService.update(id, dto, user) };
+  }
+
+  @Delete(':id')
+  @ApiOperation({ summary: 'Hapus pengumuman - OWNER/ADMIN' })
+  @Roles(UserRole.OWNER, UserRole.ADMIN)
+  async remove(@Param('id', ParseIntPipe) id: number, @CurrentUser() user: CurrentUserPayload) {
+    const result = await this.announcementsService.remove(id, user);
+
+    // File hanya dihapus setelah transaksi DB berhasil. Validasi nama menjaga
+    // target tetap di direktori upload pengumuman.
+    if (result.imageFileKey && /^[\w.-]+\.(jpg|jpeg|png|webp)$/i.test(result.imageFileKey)) {
+      deleteFileSafe(join(this.uploadDir, result.imageFileKey));
+    }
+
+    return {
+      message: 'Pengumuman berhasil dihapus',
+      data: { deletedId: result.deletedId, deletedNotifications: result.deletedNotifications },
+    };
   }
 }

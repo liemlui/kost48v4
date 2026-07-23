@@ -1,5 +1,4 @@
 import '../../styles/tenant-area';
-import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate, useParams, Navigate } from 'react-router-dom';
 import { Alert, Badge, Button, Card, Spinner } from 'react-bootstrap';
@@ -11,8 +10,6 @@ import type { Announcement } from '../../types';
 import { resolveAbsoluteFileUrl } from '../../utils/resolveAbsoluteFileUrl';
 import { getOfficialAnnouncementFallbackImage } from '../../data/officialKost48Content';
 import { formatDateOnly } from '../../utils/dateTime';
-
-
 
 function normalizeAnnouncement(item: Announcement | undefined | null) {
   if (!item || !item.id) return null;
@@ -31,24 +28,52 @@ export default function TenantAnnouncementDetailPage() {
 
   const query = useQuery({
     queryKey: ['portal-announcements', 'detail', id],
-    queryFn: () => getResource<{ items: Announcement[] }>('/announcements/active'),
+    queryFn: async () => {
+      try {
+        // Gunakan endpoint /announcements/:id langsung, bukan filter client-side
+        const response = await getResource<{ data: Announcement }>(`/announcements/${id}`);
+        // Backend response: { message, data: { ... } } — getResource mengembalikan data
+        if (response && typeof response === 'object' && 'data' in response) {
+          return (response as any).data as Announcement;
+        }
+        return response as unknown as Announcement;
+      } catch (err: any) {
+        // Tangkap 403/404 sebagai error khusus agar UI menampilkan "tidak berhak/tidak tersedia"
+        const status = err?.response?.status;
+        if (status === 403 || status === 404) {
+          throw new Error('NOT_AVAILABLE');
+        }
+        throw err;
+      }
+    },
     enabled: Boolean(id),
     staleTime: 5 * 60_000,
     retry: false,
   });
 
-  const item = useMemo(() => {
-    const targetId = Number(id);
-    const items = Array.isArray(query.data?.items) ? query.data.items : [];
-    return normalizeAnnouncement(items.find((announcement) => Number(announcement.id) === targetId));
-  }, [query.data, id]);
+  const item = normalizeAnnouncement(query.data);
 
   if (!isStageLoading && stage !== 'occupied') return <Navigate to="/portal/bookings" replace />;
+
+  // Deteksi error "tidak tersedia/tidak berhak"
+  const isNotAvailable = query.isError && query.error?.message === 'NOT_AVAILABLE';
 
   return (
     <div className="tenant-announcement-detail-page">
       {query.isLoading ? <div className="py-5 text-center"><Spinner animation="border" /></div> : null}
-      {query.isError ? <Alert variant="danger">Gagal memuat pengumuman. Coba lagi atau hubungi admin.</Alert> : null}
+
+      {isNotAvailable ? (
+        <EmptyState
+          icon="🔒"
+          title="Pengumuman tidak tersedia"
+          description="Pengumuman ini mungkin sudah tidak aktif, belum tayang, atau kamu tidak memiliki akses. Buka daftar pengumuman untuk melihat informasi terbaru."
+          action={{ label: 'Lihat Pengumuman', onClick: () => navigate('/portal/announcements') }}
+        />
+      ) : null}
+
+      {query.isError && !isNotAvailable ? (
+        <Alert variant="danger">Gagal memuat pengumuman. Coba lagi atau hubungi admin.</Alert>
+      ) : null}
 
       {!query.isLoading && !query.isError && !item ? (
         <EmptyState

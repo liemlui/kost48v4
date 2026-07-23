@@ -3,11 +3,12 @@ import { useCallback, useMemo, useState } from 'react';
 import { Alert, Badge, Button, Spinner } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import { useNotifications } from '../../hooks/useNotifications';
+import { useNotificationsInfinite } from '../../hooks/useNotificationsInfinite';
 import type { AppNotificationItem } from '../../api/notifications';
 import PushToggle from '../../components/notifications/PushToggle';
 import { formatDateOnly, formatDateTimeWib } from '../../utils/dateTime';
 
-// â”€â”€ Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Helpers ────────────────────────────────────────────────────────────────────
 
 function isSameDay(dateString: string, ref: Date): boolean {
   const d = new Date(dateString);
@@ -57,14 +58,19 @@ function isTestNotification(item: AppNotificationItem): boolean {
     || title.includes('harap abaikan') || body.includes('harap abaikan');
 }
 
-// Kategori berdasarkan entityType
+// Kategori datang dari backend saat notifikasi dibuat. Jangan infer dari
+// entityType karena sebuah entity (mis. Stay) bisa memicu event finansial
+// maupun operasional.
 type FilterCategory = 'SEMUA' | 'KEUANGAN' | 'OPERASIONAL' | 'SISTEM';
 
 function getCategory(item: AppNotificationItem): Exclude<FilterCategory, 'SEMUA'> {
-  const t = (item.entityType ?? '').toLowerCase();
-  if (['invoice', 'payment', 'stay', 'deposit', 'loyalty'].some((k) => t.includes(k))) return 'KEUANGAN';
-  if (['ticket', 'room', 'announcement', 'checkout', 'renew'].some((k) => t.includes(k))) return 'OPERASIONAL';
-  return 'SISTEM';
+  switch (item.category) {
+    case 'FINANCE': return 'KEUANGAN';
+    case 'OPERATIONS': return 'OPERASIONAL';
+    case 'SYSTEM':
+    default:
+      return 'SISTEM';
+  }
 }
 
 const FILTER_TABS: { id: FilterCategory; label: string }[] = [
@@ -76,18 +82,39 @@ const FILTER_TABS: { id: FilterCategory; label: string }[] = [
 
 const PAGE_SIZE = 20;
 
-// â”€â”€ Component â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Component ──────────────────────────────────────────────────────────────────
 
 export default function NotificationsPage() {
   const navigate = useNavigate();
-  const { query, markReadMutation, markAllReadMutation } = useNotifications();
-  const { data, isLoading, isError, refetch } = query;
+  // Infinite query — mengambil seluruh notifikasi dengan pagination server-side
+  const {
+    data: infiniteData,
+    isLoading: isInfiniteLoading,
+    isError: isInfiniteError,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    refetch: refetchInfinite,
+  } = useNotificationsInfinite();
+
+  // Mutation hook memakai cache yang sama tanpa membuat request halaman pertama
+  // kedua; data halaman tetap datang dari infinite query di atas.
+  const firstPageQuery = useNotifications({ limit: PAGE_SIZE, offset: 0 }, { enabled: false });
+  const { markReadMutation, markAllReadMutation } = firstPageQuery;
+
+  // Gabung semua halaman
+  const allNotifications = useMemo(
+    () => infiniteData?.pages.flatMap((page) => page.items) ?? [],
+    [infiniteData],
+  );
+
+  const total = infiniteData?.pages[0]?.total ?? 0;
+  const unreadCount = infiniteData?.pages[0]?.unreadCount ?? 0;
+
+  // PERTIMBANGAN: unreadCount hanya dari halaman pertama adalah perkiraan.
+  // Tepat karena API mengembalikan unreadCount global (bukan per halaman).
 
   const [activeFilter, setActiveFilter] = useState<FilterCategory>('SEMUA');
-  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
-
-  const unreadCount = data?.unreadCount ?? 0;
-  const allNotifications = data?.items ?? [];
 
   // Sembunyikan notifikasi INT TEST di production
   const withoutTestData = useMemo(
@@ -101,15 +128,11 @@ export default function NotificationsPage() {
     return withoutTestData.filter((item) => getCategory(item) === activeFilter);
   }, [withoutTestData, activeFilter]);
 
-  // Slice untuk "muat lebih banyak"
-  const visible = filtered.slice(0, visibleCount);
-  const hasMore = filtered.length > visibleCount;
-
   // Group per hari
   type DayGroup = { dayKey: string; header: string; items: AppNotificationItem[] };
   const grouped = useMemo<DayGroup[]>(() => {
     const map = new Map<string, DayGroup>();
-    for (const item of visible) {
+    for (const item of filtered) {
       const key = getDayKey(item.createdAt);
       if (!map.has(key)) {
         map.set(key, { dayKey: key, header: formatGroupHeader(item.createdAt), items: [] });
@@ -117,7 +140,7 @@ export default function NotificationsPage() {
       map.get(key)!.items.push(item);
     }
     return Array.from(map.values());
-  }, [visible]);
+  }, [filtered]);
 
   const handleMarkAllRead = useCallback(() => {
     markAllReadMutation.mutate();
@@ -139,6 +162,9 @@ export default function NotificationsPage() {
     [markReadMutation, navigate],
   );
 
+  const isLoading = isInfiniteLoading;
+  const isError = isInfiniteError;
+
   return (
     <div>
       <PageHeader
@@ -156,7 +182,7 @@ export default function NotificationsPage() {
               {unreadCount} belum dibaca
             </Badge>
           )}
-          {unreadCount === 0 && !isLoading && allNotifications.length > 0 && (
+          {unreadCount === 0 && !isLoading && total > 0 && (
             <Badge pill bg="secondary" className="fs-6">
               Semua sudah dibaca
             </Badge>
@@ -183,7 +209,7 @@ export default function NotificationsPage() {
             key={tab.id}
             size="sm"
             variant={activeFilter === tab.id ? 'primary' : 'outline-secondary'}
-            onClick={() => { setActiveFilter(tab.id); setVisibleCount(PAGE_SIZE); }}
+            onClick={() => setActiveFilter(tab.id)}
           >
             {tab.label}
           </Button>
@@ -199,7 +225,7 @@ export default function NotificationsPage() {
       {isError && !isLoading && (
         <Alert variant="danger" className="d-flex align-items-center justify-content-between">
           <span>Gagal memuat notifikasi. Silakan coba lagi.</span>
-          <Button variant="outline-danger" size="sm" onClick={() => refetch()}>
+          <Button variant="outline-danger" size="sm" onClick={() => refetchInfinite()}>
             Coba Lagi
           </Button>
         </Alert>
@@ -207,9 +233,9 @@ export default function NotificationsPage() {
 
       {!isLoading && !isError && filtered.length === 0 && (
         <div className="text-center py-5">
-          <div style={{ fontSize: '3rem' }} role="img" aria-hidden="true">ðŸ””</div>
+          <div style={{ fontSize: '3rem' }} role="img" aria-hidden="true">🔔</div>
           <h5 className="mt-3 text-muted">
-            {allNotifications.length === 0 ? 'Belum ada notifikasi' : 'Tidak ada notifikasi untuk kategori ini'}
+            {total === 0 ? 'Belum ada notifikasi' : 'Tidak ada notifikasi untuk kategori ini'}
           </h5>
           <p className="text-muted small">Notifikasi dari pengelola kos akan muncul di sini.</p>
         </div>
@@ -256,7 +282,7 @@ export default function NotificationsPage() {
                         </Badge>
                         {item.linkTo && (
                           <span className="text-primary small" style={{ cursor: 'pointer' }}>
-                            Klik untuk buka â†’
+                            Klik untuk buka →
                           </span>
                         )}
                       </div>
@@ -267,15 +293,16 @@ export default function NotificationsPage() {
             </div>
           ))}
 
-          {/* Muat lebih banyak */}
-          {hasMore && (
+          {/* Muat lebih banyak — server-side pagination */}
+          {hasNextPage && (
             <div className="text-center mt-3">
               <Button
                 variant="outline-secondary"
                 size="sm"
-                onClick={() => setVisibleCount((prev) => prev + PAGE_SIZE)}
+                onClick={() => fetchNextPage()}
+                disabled={isFetchingNextPage}
               >
-                Muat lebih banyak ({filtered.length - visibleCount} tersisa)
+                {isFetchingNextPage ? 'Memuat...' : `Muat lebih banyak (${total - allNotifications.length} tersisa)`}
               </Button>
             </div>
           )}
@@ -285,5 +312,3 @@ export default function NotificationsPage() {
     </div>
   );
 }
-
-

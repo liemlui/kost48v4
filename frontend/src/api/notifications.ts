@@ -11,6 +11,7 @@ export interface AppNotificationItem {
   linkTo: string | null;
   entityType: string | null;
   entityId: string | null;
+  category?: 'FINANCE' | 'OPERATIONS' | 'SYSTEM' | null;
   isRead: boolean;
   readAt: string | null;
   createdAt: string;
@@ -25,8 +26,10 @@ export interface NotificationsListResponse {
 
 // ── API calls ────────────────────────────────────
 
-export async function getMyNotifications(): Promise<NotificationsListResponse> {
-  const response = await client.get<ApiEnvelope<NotificationsListResponse>>('/me/notifications');
+export async function getMyNotifications(params?: { limit?: number; offset?: number }): Promise<NotificationsListResponse> {
+  const response = await client.get<ApiEnvelope<NotificationsListResponse>>('/me/notifications', {
+    params: params ?? {},
+  });
   return response.data.data;
 }
 

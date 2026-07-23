@@ -29,12 +29,28 @@ function truncateBody(body: string, maxLen = 60): string {
   return `${body.slice(0, maxLen).trimEnd()}…`;
 }
 
+type NotificationCategory = 'FINANCE' | 'OPERATIONS' | 'SYSTEM';
+
+function categoryLabel(category: unknown) {
+  switch (category as NotificationCategory) {
+    case 'FINANCE': return { label: 'Keuangan', bg: 'success' };
+    case 'OPERATIONS': return { label: 'Operasional', bg: 'primary' };
+    case 'SYSTEM': return { label: 'Sistem', bg: 'secondary' };
+    default: return null;
+  }
+}
+
 interface NotificationItemRowProps {
   item: AppNotificationItem;
   onClick: (item: AppNotificationItem) => void;
 }
 
 function NotificationItemRow({ item, onClick }: NotificationItemRowProps) {
+  // `category` akan tersedia setelah migrasi AppNotification P2. Jangan
+  // mengklasifikasikan ulang dari entityType di sini karena satu entity dapat
+  // menghasilkan event finansial maupun operasional.
+  const category = categoryLabel((item as AppNotificationItem & { category?: unknown }).category);
+
   return (
     <button
       type="button"
@@ -47,8 +63,11 @@ function NotificationItemRow({ item, onClick }: NotificationItemRowProps) {
           aria-hidden="true"
         />
         <div className="min-w-0">
-          <div className={`notification-title text-truncate ${item.isRead ? '' : 'fw-bold'}`}>
-            {item.title}
+          <div className="d-flex align-items-center gap-1 min-w-0">
+            <div className={`notification-title text-truncate ${item.isRead ? '' : 'fw-bold'}`}>
+              {item.title}
+            </div>
+            {category ? <Badge bg={category.bg} className="flex-shrink-0" style={{ fontSize: '0.62rem' }}>{category.label}</Badge> : null}
           </div>
           <div className="notification-body text-truncate text-muted small">
             {truncateBody(item.body)}
