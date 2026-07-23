@@ -496,6 +496,65 @@ export class RoomsService {
     });
   }
 
+  /** Auto-tautkan fasilitas kamar ke RoomItem berdasarkan pencocokan nama.
+   *  Untuk setiap fasilitas yang belum punya `inventoryItemId`, cari RoomItem 
+   *  di kamar ini yang namanya cocok lalu set `inventoryItemId`-nya. */
+  async autoLinkFacilities(roomId: number, actor: CurrentUserPayload) {
+    this.assertOwnerOrAdmin(actor);
+    const room = await this.prisma.room.findUnique({ where: { id: roomId } });
+    if (!room) throw new NotFoundException('Kamar tidak ditemukan');
+
+    const [facilities, roomItems] = await Promise.all([
+      this.prisma.roomFacility.findMany({ where: { roomId } }),
+      this.prisma.roomItem.findMany({
+        where: { roomId },
+        include: { item: { select: { id: true, name: true } } },
+      }),
+    ]);
+
+    const linked: Array<{ facilityId: number; facilityName: string; inventoryItemId: number; itemName: string }> = [];
+    const skipped: Array<{ facilityId: number; facilityName: string; reason: string }> = [];
+
+    for (const facility of facilities) {
+      if (facility.inventoryItemId) {
+        skipped.push({ facilityId: facility.id, facilityName: facility.name, reason: 'Sudah tertaut' });
+        continue;
+      }
+
+      // Cari RoomItem yang item.name mengandung nama fasilitas (case-insensitive)
+      const facilityNameLower = facility.name.toLowerCase();
+      const matched = roomItems.find((ri) => {
+        const itemName = (ri.item?.name ?? '').toLowerCase();
+        return itemName.includes(facilityNameLower) || facilityNameLower.includes(itemName);
+      });
+
+      if (matched && matched.item) {
+        await this.prisma.roomFacility.update({
+          where: { id: facility.id },
+          data: { inventoryItemId: matched.item.id },
+        });
+        linked.push({
+          facilityId: facility.id,
+          facilityName: facility.name,
+          inventoryItemId: matched.item.id,
+          itemName: matched.item.name ?? '',
+        });
+      } else {
+        skipped.push({ facilityId: facility.id, facilityName: facility.name, reason: 'Tidak ada RoomItem cocok' });
+      }
+    }
+
+    await this.audit.log({
+      actorUserId: actor.id,
+      action: 'AUTO_LINK',
+      entityType: 'RoomFacility',
+      entityId: String(roomId),
+      newData: { linked: linked.length, skipped: skipped.length },
+    });
+
+    return { linked, skipped };
+  }
+
   private assertOwnerOrAdmin(actor: CurrentUserPayload) {
     if (![UserRole.OWNER, UserRole.ADMIN].includes(actor.role)) {
       throw new ForbiddenException('Staff hanya boleh melihat data kamar. Perubahan kamar/fasilitas hanya boleh dilakukan Owner/Admin.');

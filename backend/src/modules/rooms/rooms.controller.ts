@@ -120,11 +120,25 @@ export class RoomsController {
     return { message: 'Kamar berhasil diperbarui', data: await this.roomsService.update(id, dto, user) };
   }
 
+  @Get('facility-gap-summary')
+  @ApiOperation({ summary: 'Ringkasan gap fasilitas semua kamar — OWNER/ADMIN' })
+  @Roles(UserRole.OWNER, UserRole.ADMIN)
+  async facilityGapSummary() {
+    return { message: 'Ringkasan gap fasilitas berhasil diambil', data: await this.roomsService.getFacilityGapSummary() };
+  }
+
   @Get(':roomId/facilities')
   @ApiOperation({ summary: 'Daftar fasilitas kamar — OWNER/ADMIN/STAFF' })
   @Roles(UserRole.OWNER, UserRole.ADMIN, UserRole.STAFF)
   async findFacilities(@Param('roomId', ParseIntPipe) roomId: number) {
     return { message: 'Daftar fasilitas kamar berhasil diambil', data: await this.roomsService.findFacilities(roomId) };
+  }
+
+  @Post(':roomId/facilities/auto-link')
+  @ApiOperation({ summary: 'Auto-tautkan fasilitas ke RoomItem berdasarkan nama — OWNER' })
+  @Roles(UserRole.OWNER)
+  async autoLinkFacilities(@Param('roomId', ParseIntPipe) roomId: number, @CurrentUser() user: CurrentUserPayload) {
+    return { message: 'Fasilitas berhasil ditautkan otomatis', data: await this.roomsService.autoLinkFacilities(roomId, user) };
   }
 
   // F2-16 (D-17): fasilitas = bagian setelan kamar — OWNER-only.

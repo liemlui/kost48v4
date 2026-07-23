@@ -17,6 +17,13 @@ import { InventoryItemsService } from './inventory-items.service';
 export class InventoryItemsController {
   constructor(private readonly inventoryitemsService: InventoryItemsService) {}
 
+  @Get('summary')
+  @ApiOperation({ summary: 'Ringkasan inventaris — OWNER/ADMIN/STAFF' })
+  @Roles(UserRole.OWNER, UserRole.ADMIN, UserRole.STAFF)
+  async summary() {
+    return { message: 'Ringkasan inventaris berhasil diambil', data: await this.inventoryitemsService.getSummary() };
+  }
+
   @Get()
   @ApiOperation({ summary: 'Daftar item inventory — OWNER/ADMIN/STAFF' })
   @Roles(UserRole.OWNER, UserRole.ADMIN, UserRole.STAFF)

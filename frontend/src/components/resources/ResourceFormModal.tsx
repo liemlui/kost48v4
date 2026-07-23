@@ -427,25 +427,36 @@ export default function ResourceFormModal({
                   </Form.Label>
 
                   {relationSpec && relationFieldNames.has(field.name) ? (
-                    <SearchableSelect<number>
-                      key={`${config.path}-${field.name}-${relationSourceOptions.map((option) => option.value).join('-')}`}
-                      value={relationValue ? { value: relationValue.value, label: relationValue.label } : null}
-                      onChange={(option) => updateField(field.name, option?.value ?? '')}
-                      defaultOptions={relationSourceOptions.map((option) => ({ value: option.value, label: option.label }))}
-                      loadOptions={async (inputValue) => {
-                        const normalized = inputValue.trim().toLowerCase();
-                        const sourceOptions = relationSourceOptions;
-                        return sourceOptions
-                          .filter((option) => {
-                            if (!normalized) return true;
-                            const caption = option.caption?.toLowerCase() ?? '';
-                            return option.label.toLowerCase().includes(normalized) || caption.includes(normalized);
-                          })
-                          .map((option) => ({ value: option.value, label: option.label }));
-                      }}
-                      placeholder={relationSpec.placeholder}
-                      isDisabled={isTenantIdDisabled}
-                    />
+                    <>
+                      <SearchableSelect<number>
+                        key={`${config.path}-${field.name}-${relationSourceOptions.map((option) => option.value).join('-')}`}
+                        value={relationValue ? { value: relationValue.value, label: relationValue.label } : null}
+                        onChange={(option) => updateField(field.name, option?.value ?? '')}
+                        defaultOptions={relationSourceOptions.map((option) => ({ value: option.value, label: option.label }))}
+                        loadOptions={async (inputValue) => {
+                          const normalized = inputValue.trim().toLowerCase();
+                          const sourceOptions = relationSourceOptions;
+                          return sourceOptions
+                            .filter((option) => {
+                              if (!normalized) return true;
+                              const caption = option.caption?.toLowerCase() ?? '';
+                              return option.label.toLowerCase().includes(normalized) || caption.includes(normalized);
+                            })
+                            .map((option) => ({ value: option.value, label: option.label }));
+                        }}
+                        placeholder={relationSpec.placeholder}
+                        isDisabled={isTenantIdDisabled}
+                      />
+                      {config.path === '/inventory-movements' && field.name === 'itemId' && currentValue ? (
+                        (() => {
+                          const selectedOption = relationSourceOptions.find((o) => o.value === Number(currentValue));
+                          const selectedItem = selectedOption ? (referenceMaps[relationSpec.sourcePath]?.get(String(currentValue))) : null;
+                          return selectedItem?.caption ? (
+                            <Form.Text muted>{selectedItem.caption}</Form.Text>
+                          ) : null;
+                        })()
+                      ) : null}
+                    </>
                   ) : field.type === 'select' && (config.path === '/expenses' || config.path === '/announcements') ? (
                     <div className="flow-choice-grid" role="group" aria-label={field.label}>
                       {getFieldOptionsForContext(config, field.name, user?.role).map((option) => (

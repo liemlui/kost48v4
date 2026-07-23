@@ -6,7 +6,7 @@ import { useConfirm } from '../../components/common/ConfirmProvider';
 import { getApiErrorMessage } from '../../utils/getApiErrorMessage';
 import { Alert, Button, Card, Modal } from 'react-bootstrap';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { createResource, deleteResource, listResource, updateResource } from '../../api/resources';
+import { createResource, deleteResource, getResource, listResource, updateResource } from '../../api/resources';
 import PageHeader from '../../components/common/PageHeader';
 import FeatureErrorBoundary from '../../components/common/FeatureErrorBoundary';
 import { resourceHeaders } from '../../config/resourceHeaders';
@@ -149,6 +149,19 @@ export default function SimpleCrudPage({ config, hideAreaMenu = false }: { confi
     enabled: requiredReferencePaths.includes('/stays'),
   });
 
+  // Fase 2: gap fasilitas untuk daftar kamar — tampilkan badge & filter
+  const facilityGapQuery = useQuery({
+    queryKey: ['rooms', 'facility-gap-summary'],
+    queryFn: async () => {
+      const res = await getResource<unknown>('/rooms/facility-gap-summary');
+      if (Array.isArray(res)) return res as Array<{ roomId: number; hasGap: boolean; acGap: boolean }>;
+      const d = res as Record<string, unknown>;
+      return (Array.isArray(d?.data) ? d.data : Array.isArray(d) ? d : []) as Array<{ roomId: number; hasGap: boolean; acGap: boolean }>;
+    },
+    enabled: config.path === '/rooms' && (user?.role === 'OWNER' || user?.role === 'ADMIN'),
+    staleTime: 60_000,
+  });
+
   const tenantUsersQuery = useQuery({
     queryKey: ['/users', 'tenant-links'],
     queryFn: () => listResource<PortalTenantUser>('/users', { limit: 500 }),
@@ -289,6 +302,23 @@ export default function SimpleCrudPage({ config, hideAreaMenu = false }: { confi
 
   const items = useMemo(() => {
     const rawItems = query.data?.items ?? [];
+    if (config.path === '/rooms') {
+      const gapMap = new Map<number, { hasGap: boolean; acGap: boolean }>();
+      if (facilityGapQuery.data) {
+        for (const g of facilityGapQuery.data) {
+          gapMap.set(g.roomId, { hasGap: g.hasGap, acGap: g.acGap });
+        }
+      }
+      return rawItems.map((room) => {
+        const gap = gapMap.get(Number(room.id));
+        return {
+          ...room,
+          facilityGapCount: gap ? (gap.hasGap ? 1 : 0) : undefined,
+          acGap: gap?.acGap ?? false,
+          _facilityGap: gap,
+        };
+      });
+    }
     if (config.path !== '/tenants') return rawItems;
 
     return rawItems.map((tenant) => {
@@ -337,9 +367,12 @@ export default function SimpleCrudPage({ config, hideAreaMenu = false }: { confi
     }
     if (config.path === '/rooms') {
       const available = items.filter((item) => asString(item.status) === 'AVAILABLE').length;
+      const gapItems = items.filter((item) => Boolean((item as any)._facilityGap?.hasGap)).length;
+      const gapTone: 'warning' | 'success' = gapItems > 0 ? 'warning' : 'success';
       return [
         { id: 'room-total', label: 'Kamar', value: total, helper: 'Total aktif', tone: 'info' as const },
         { id: 'room-available', label: 'Tersedia', value: available, helper: 'Siap ditawarkan', tone: available ? 'success' as const : 'warning' as const },
+        ...(facilityGapQuery.data ? [{ id: 'room-gap', label: 'Belum Lengkap', value: gapItems, helper: 'Fasilitas perlu dilengkapi', tone: gapTone }] : []),
       ];
     }
     if (config.path === '/tenants') {

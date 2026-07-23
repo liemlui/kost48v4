@@ -140,6 +140,42 @@ export class InventoryItemsService {
     }
   }
 
+  /** Ringkasan inventaris untuk dashboard: total, low stock, out of stock, dll. */
+  async getSummary() {
+    const [allItems, facilityCounts] = await Promise.all([
+      this.prisma.inventoryItem.findMany({
+        where: { isActive: true },
+        select: { id: true, qtyOnHand: true, minQty: true, status: true, name: true },
+      }),
+      this.loadFacilityCounts(),
+    ]);
+
+    const totalItems = allItems.length;
+    const lowStockItems = allItems.filter((i) => Number(i.qtyOnHand ?? 0) <= Number(i.minQty ?? 0) && Number(i.qtyOnHand ?? 0) > 0);
+    const outOfStockItems = allItems.filter((i) => Number(i.qtyOnHand ?? 0) <= 0);
+    const damagedItems = allItems.filter((i) => ['DAMAGED', 'MISSING', 'NEEDS_REPAIR', 'PENDING_CHECK'].includes(i.status));
+    const totalQtyInWarehouse = allItems.reduce((sum, i) => sum + Number(i.qtyOnHand ?? 0), 0);
+    const totalQtyInRooms = await this.prisma.roomItem.aggregate({
+      _sum: { qty: true },
+    });
+
+    return {
+      totalItems,
+      lowStockCount: lowStockItems.length,
+      outOfStockCount: outOfStockItems.length,
+      damagedCount: damagedItems.length,
+      totalQtyInWarehouse,
+      totalQtyInRooms: Number(totalQtyInRooms._sum.qty ?? 0),
+      lowStockItems: lowStockItems.slice(0, 10).map((i) => ({
+        id: i.id,
+        name: i.name,
+        qtyOnHand: Number(i.qtyOnHand ?? 0),
+        minQty: Number(i.minQty ?? 0),
+        status: i.status,
+      })),
+    };
+  }
+
   async findAll(query: InventoryItemsQueryDto) {
     const { page, limit, skip, take } = buildPagination(query.page, query.limit);
     const where: any = {

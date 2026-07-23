@@ -1,5 +1,8 @@
-import { Alert, Badge, Button } from 'react-bootstrap';
+import { useState } from 'react';
+import { Alert, Badge, Button, Spinner } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { createResource } from '../../api/resources';
 import type { RoomFacilityCheck, RoomFacilityCheckStatus } from '../../types';
 
 interface FacilityGapPanelProps {
@@ -16,11 +19,26 @@ const STATUS_META: Record<RoomFacilityCheckStatus, { label: string; bg: string }
 
 export default function FacilityGapPanel({ check, roomId }: FacilityGapPanelProps) {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const [autoLinkResult, setAutoLinkResult] = useState<{ linked: number; skipped: number } | null>(null);
+
+  const autoLinkMutation = useMutation({
+    mutationFn: () => createResource<unknown>(`/rooms/${roomId}/facilities/auto-link`, {}),
+    onSuccess: (data: any) => {
+      const linked = data?.linked?.length ?? data?.data?.linked?.length ?? 0;
+      const skipped = data?.skipped?.length ?? data?.data?.skipped?.length ?? 0;
+      setAutoLinkResult({ linked, skipped });
+      queryClient.invalidateQueries({ queryKey: ['room-facilities', roomId] });
+      queryClient.invalidateQueries({ queryKey: ['room', roomId] });
+    },
+  });
+
   if (!check) return null;
 
   const inventoryBacked = check.items.filter((it) => it.kind === 'INVENTORY_BACKED');
   const structural = check.items.filter((it) => it.kind === 'STRUCTURAL');
   const gapCount = inventoryBacked.filter((it) => it.status === 'MISSING' || it.status === 'UNLINKED').length;
+  const unlinkedCount = inventoryBacked.filter((it) => it.status === 'UNLINKED').length;
 
   return (
     <div className="facility-gap-panel mb-3">
@@ -30,6 +48,34 @@ export default function FacilityGapPanel({ check, roomId }: FacilityGapPanelProp
           <div className="small mt-1">
             Kamar dengan kekurangan barang otomatis <strong>disembunyikan dari katalog publik</strong> sampai lengkap.
           </div>
+          {unlinkedCount > 0 ? (
+            <div className="mt-2">
+              <Button
+                size="sm"
+                variant="outline-warning"
+                disabled={autoLinkMutation.isPending}
+                onClick={() => autoLinkMutation.mutate()}
+              >
+                {autoLinkMutation.isPending ? (
+                  <><Spinner size="sm" /> Menautkan...</>
+                ) : (
+                  '🔗 Tautkan Otomatis'
+                )}
+              </Button>
+              <span className="text-muted small ms-2">
+                Cocokkan fasilitas dengan barang inventaris yang sudah ada di kamar ini.
+              </span>
+            </div>
+          ) : null}
+          {autoLinkResult ? (
+            <div className="small mt-2">
+              ✅ {autoLinkResult.linked} fasilitas berhasil ditautkan
+              {autoLinkResult.skipped > 0 ? `, ${autoLinkResult.skipped} dilewati (tidak ada kecocokan).` : '.'}
+            </div>
+          ) : null}
+          {autoLinkMutation.isError ? (
+            <div className="text-danger small mt-1">Gagal menautkan. Coba lagi.</div>
+          ) : null}
         </Alert>
       ) : (
         <Alert variant="success" className="mb-2">
@@ -52,7 +98,12 @@ export default function FacilityGapPanel({ check, roomId }: FacilityGapPanelProp
       ) : null}
 
       <div className="facility-gap-list">
-        <div className="card-title-soft mb-2">Barang wajib (sesuai kriteria kamar)</div>
+        <div className="card-title-soft mb-2">
+          Barang wajib (sesuai kriteria kamar)
+          <span className="text-muted small ms-2">
+            — Fasilitas = deklarasi · RoomItem = barang fisik dari gudang
+          </span>
+        </div>
         <ul className="list-unstyled mb-3">
           {inventoryBacked.map((it) => {
             const meta = STATUS_META[it.status];

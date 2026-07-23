@@ -178,9 +178,15 @@ export default function ResourceTable({
       if (column.key === 'code') {
         const currentStay = item.currentStay as { tenant?: { fullName?: string } } | undefined;
         const occupant = currentStay?.tenant?.fullName;
+        const hasGap = Boolean((item as any)._facilityGap?.hasGap);
+        const acGap = Boolean((item as any)._facilityGap?.acGap);
         return (
           <div>
-            <div className="fw-semibold">{formatValue(value)}{item.name ? ` - ${formatValue(item.name)}` : ''}</div>
+            <div className="fw-semibold">
+              {formatValue(value)}{item.name ? ` - ${formatValue(item.name)}` : ''}
+              {hasGap ? <span className="ms-2 badge bg-warning text-dark" style={{ fontSize: '0.7em' }} title="Fasilitas belum lengkap">⚠️</span> : null}
+              {acGap ? <span className="ms-1 badge bg-danger" style={{ fontSize: '0.7em' }} title="AC belum ada di inventaris">❄️</span> : null}
+            </div>
             <div className="small">
               {occupant
                 ? (String(item.status || '') === 'RESERVED' ? `Pemesan: ${occupant}` : `Penghuni: ${occupant}`)

@@ -238,6 +238,7 @@ export function getResourceFilterDefinitions(configPath: string, items: Array<Re
     { id: 'OCCUPIED', label: 'Terisi', count: statusCount('OCCUPIED'), tone: 'info' as const },
     { id: 'RESERVED', label: 'Dipesan', count: statusCount('RESERVED'), tone: 'warning' as const },
     { id: 'MAINTENANCE', label: 'Perlu Cek', count: count((item) => ['MAINTENANCE', 'INACTIVE'].includes(asString(item.status))), tone: 'danger' as const },
+    { id: 'GAP', label: 'Fasilitas Belum Lengkap', count: count((item) => Boolean((item as any)._facilityGap?.hasGap)), tone: 'warning' as const },
   ];
   if (configPath === '/room-items') return [
     { id: 'ALL', label: 'Semua Barang', count: totalItems ?? items.length, tone: 'info' as const },
@@ -295,6 +296,7 @@ export function applyResourceFilter(configPath: string, item: Record<string, unk
     if (filter === 'PORTAL_ACTIVE') return Boolean(getNested(item, 'portalUserSummary.portalIsActive'));
   }
   if (configPath === '/rooms') {
+    if (filter === 'GAP') return Boolean((item as any)._facilityGap?.hasGap);
     if (filter === 'MAINTENANCE') return ['MAINTENANCE', 'INACTIVE'].includes(asString(item.status));
     return asString(item.status) === filter;
   }

@@ -5,6 +5,7 @@ import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import SegmentedTabs, { type SegmentedTabItem } from '../../components/common/SegmentedTabs';
 import AiResultPanel from '../../components/ai/AiResultPanel';
+import InventorySummaryPanel from '../../components/inventory/InventorySummaryPanel';
 import { draftInventoryReorder, getOwnerAiStatus, type InventoryReorderDraftResult } from '../../api/ai';
 import { useAuth } from '../../context/AuthContext';
 
@@ -111,6 +112,7 @@ export default function InventoryShellPage() {
           ) : null}
         </AiResultPanel>
       ) : null}
+      <InventorySummaryPanel />
       <SegmentedTabs
         items={items}
         value={active}
