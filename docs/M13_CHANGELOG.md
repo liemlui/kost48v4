@@ -1,5 +1,11 @@
 # KOST48 V5 — M13 Changelog
 
+## 2026-07-23 -- Perbaikan audit inventaris (pagination, filter status, koreksi dok)
+- **Fix pagination lowStockOnly:** meta `totalItems` kini dihitung setelah filter client-side (`effectiveTotal`), bukan unfiltered count — mencegah pagination menyesatkan saat filter "Stok Menipis" aktif.
+- **Filter status server-side:** backend `InventoryItemsQueryDto` + service WHERE kini mendukung `?status=DAMAGED` (dikirim ke Prisma) — siap untuk frontend filter server-side ke depan.
+- **Koreksi dok M06:** referensi trigger dari `bootstrap.sql:558-622` → `seed.sql:534-625` (lokasi function `apply_inventory_qty_delta` + trigger `inventory_movement_sync_qty_trg` yang sebenarnya).
+- **Verifikasi audit:** trigger DB single-writer TERKONFIRMASI aktif dan menangani semua INSERT/UPDATE/DELETE `InventoryMovement` termasuk dari `adminReview`. False positive audit sebelumnya ("adminReview tidak sync qtyOnHand") dibantah — trigger menanganinya.
+
 ## 2026-07-19 -- Seed data asli dari laporan teraudit
 
 - Seed `seed-dev-real.js` menggantikan `seed-dev-via-api.js` (data dummy). Data bersumber dari `Scan/KOST48_Laporan_Bulanan_FINAL_Teraudit.xlsx`.
