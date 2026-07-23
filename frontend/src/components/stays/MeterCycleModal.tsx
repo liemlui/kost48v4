@@ -77,6 +77,11 @@ export default function MeterCycleModal({ show, onHide, stay, onDone }: { show: 
             <div className="small text-muted mt-1">
               Listrik terpakai {result.summary.elecUsage} kWh (ditagih {result.summary.elecChargeable} kWh){waterEnabled ? `, air ${result.summary.waterUsage} m³ (ditagih ${result.summary.waterChargeable} m³)` : ''}.
             </div>
+            {result.summary.electricityCycle ? (
+              <div className="small text-muted">
+                Kuota periode sewa: {result.summary.electricityCycle.freeKwh} kWh untuk {result.summary.electricityCycle.allowanceMonths} bulan.
+              </div>
+            ) : null}
           </Alert>
         ) : (
           <Form>

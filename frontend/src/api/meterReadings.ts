@@ -20,7 +20,13 @@ export async function createMeterReading(payload: {
 export type MeterCycleResult = {
   readings: { electricity: MeterReading; water: MeterReading | null };
   invoice: { id: number; invoiceNumber: string; totalAmountRupiah: number; status: string } | null;
-  summary: { elecUsage: number; elecChargeable: number; waterUsage: number; waterChargeable: number };
+  summary: {
+    elecUsage: number;
+    elecChargeable: number;
+    waterUsage: number;
+    waterChargeable: number;
+    electricityCycle?: { start: string; end: string; allowanceMonths: number; freeKwh: number };
+  };
   message?: string;
 };
 

@@ -113,8 +113,54 @@ export type TenantRoomUtilityTelemetry = {
   refreshedAt: string;
   staleAfterMinutes: number;
   billingNotice: string;
+  cycle: {
+    start: string;
+    end: string;
+    allowanceMonths: number;
+    source: 'IOT_TELEMETRY' | 'METER_READING' | 'NONE';
+    electricity: {
+      usageKwh: number | null;
+      freeKwh: number;
+      chargeableKwh: number | null;
+      tariffRupiah: number;
+      estimatedChargeRupiah: number | null;
+      billingReady: boolean;
+      resetDetected: boolean;
+    };
+    meter: {
+      baselineKwh: number | null;
+      baselineAt: string | null;
+      latestKwh: number | null;
+      latestAt: string | null;
+      usageKwh: number | null;
+    };
+    telemetry: {
+      baselineKwh: number | null;
+      baselineAt: string | null;
+      latestKwh: number | null;
+      latestAt: string | null;
+      usageKwh: number | null;
+      quality: IotReadingQuality | null;
+    };
+  };
   electricity: TenantUtilityDevice;
   water: TenantUtilityDevice;
+};
+
+export type TenantElectricityTimeline = {
+  start: string;
+  end: string;
+  source: 'IOT_TELEMETRY' | 'NONE';
+  baselineAvailable: boolean;
+  resetDetected: boolean;
+  points: Array<{
+    /** Jakarta calendar date, one final sensor reading per day. */
+    date: string;
+    observedAt: string;
+    /** Cumulative usage from the active paid lease-period baseline. */
+    totalUsageKwh: number;
+    quality: IotReadingQuality;
+  }>;
 };
 
 export async function getIotOverview(): Promise<IotOverview> {
@@ -124,6 +170,11 @@ export async function getIotOverview(): Promise<IotOverview> {
 
 export async function getMyRoomUtilityTelemetry(): Promise<TenantRoomUtilityTelemetry> {
   const response = await client.get<ApiEnvelope<TenantRoomUtilityTelemetry>>('/iot/tenant/my-room');
+  return response.data.data;
+}
+
+export async function getMyRoomElectricityTimeline(): Promise<TenantElectricityTimeline> {
+  const response = await client.get<ApiEnvelope<TenantElectricityTimeline>>('/iot/tenant/electricity-timeline');
   return response.data.data;
 }
 
@@ -157,6 +208,19 @@ export async function probeTuya(externalDeviceId: string): Promise<TuyaProbeResu
 
 export async function syncTuyaDevice(id: number) {
   const response = await client.post<ApiEnvelope<{ duplicate: boolean; telemetryCount: number; observedAt: string }>>(`/iot/devices/${id}/sync`, {});
+  return response.data.data;
+}
+
+export async function backfillIotDeviceHistory(id: number, days = 7) {
+  const response = await client.post<ApiEnvelope<{
+    deviceId: number;
+    dpCode: string;
+    daysBack: number;
+    totalLogs: number;
+    stored: number;
+    pageCount: number;
+    truncated: boolean;
+  }>>(`/iot/devices/${id}/backfill`, {}, { params: { days }, timeout: 60_000 });
   return response.data.data;
 }
 

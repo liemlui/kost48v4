@@ -85,10 +85,37 @@ export class TuyaClientService {
     return { detail, status, specification };
   }
 
-  /** Ambil data log historis Tuya (property data per DP code).
-   *  dpCode: kode DP (mis. 'add_ele', 'cur_power')
-   *  startTime/endTime: 13-digit epoch ms (kosongkan untuk default 7 hari terakhir)
-   *  limit: max 100 per halaman */
+  /**
+   * Historical DP reports, for example a meter's cumulative `add_ele` value.
+   * This is intentionally different from `/logs`, which is an operational
+   * event log (online/offline/reset) and cannot be used as billing telemetry.
+   */
+  async getDeviceReportLogs(
+    externalDeviceId: string,
+    dpCodes: string[],
+    startTime?: number,
+    endTime?: number,
+    size = 100,
+    lastRowKey?: string,
+  ) {
+    const id = encodeURIComponent(externalDeviceId.trim());
+    const now = Date.now();
+    const params = new URLSearchParams({
+      codes: dpCodes.join(','),
+      start_time: String(startTime ?? now - 7 * 24 * 3600_000),
+      end_time: String(endTime ?? now),
+      size: String(Math.min(size, 100)),
+    });
+    if (lastRowKey) params.set('last_row_key', lastRowKey);
+    return this.businessRequest<{
+      total: number;
+      has_more: boolean;
+      last_row_key?: string;
+      logs: Array<{ code: string; value: unknown; event_time: number }>;
+    }>(`/v1.0/iot-03/devices/${id}/report-logs?${params.toString()}`);
+  }
+
+  /** @deprecated Use getDeviceReportLogs so all callers use the DP-report API. */
   async getDeviceLogs(
     externalDeviceId: string,
     dpCode: string,
@@ -96,21 +123,7 @@ export class TuyaClientService {
     endTime?: number,
     limit = 100,
   ) {
-    const id = encodeURIComponent(externalDeviceId.trim());
-    const now = Date.now();
-    const params = new URLSearchParams({
-      code: dpCode,
-      type: '1', // property data
-      start_time: String(startTime ?? now - 7 * 24 * 3600_000),
-      end_time: String(endTime ?? now),
-      limit: String(Math.min(limit, 100)),
-    });
-    return this.businessRequest<{
-      total: number;
-      has_more: boolean;
-      last_row_key?: string;
-      logs: Array<{ code: string; value: unknown; event_time: number }>;
-    }>(`/v1.0/iot-03/devices/${id}/logs?${params.toString()}`);
+    return this.getDeviceReportLogs(externalDeviceId, [dpCode], startTime, endTime, limit);
   }
 
   /** Ambil statistik agregat Tuya (harian/bulanan).

@@ -37,11 +37,13 @@ import {
   computeMeterDepositSettlement,
 } from './stays-service-helpers';
 import { AccountingPostingService } from '../accounting/accounting-posting.service';
+import { SettingsService } from '../settings/settings.service';
 import {
   endOfDay,
   parseJakartaDateOnly,
   startOfJakartaBusinessDay,
 } from '../../common/utils/date.util';
+import { getUtilityAllowanceMonths } from '../../common/business/utility-billing-cycle.helper';
 
 @Injectable()
 export class StaysRenewalService {
@@ -50,7 +52,91 @@ export class StaysRenewalService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly accountingPosting: AccountingPostingService,
+    private readonly settings: SettingsService,
   ) {}
+
+  /**
+   * The free allowance belongs to the lease period being closed, not to every
+   * meter checkpoint. If a MTR invoice was issued mid-period, only the unused
+   * part of that single allowance can be applied at renewal.
+   */
+  private async getRenewalElectricityFreeAllowanceTx(
+    tx: Prisma.TransactionClient,
+    params: {
+      stayId: number;
+      roomId: number;
+      checkInDate: Date;
+      previousPeriodEnd: Date;
+      currentReadingValue: Prisma.Decimal;
+      configuredFreeKwh: number;
+    },
+  ) {
+    const configuredFreeKwh = Math.max(0, params.configuredFreeKwh);
+    const closedLeaseInvoice = await tx.invoice.findFirst({
+      where: {
+        stayId: params.stayId,
+        status: InvoiceStatus.PAID,
+        periodEnd: params.previousPeriodEnd,
+        NOT: { invoiceNumber: { contains: '-RDP-' } },
+        lines: { some: { lineType: InvoiceLineType.RENT as any } },
+      },
+      orderBy: [{ periodStart: 'desc' }, { id: 'desc' }],
+      select: { periodStart: true, periodEnd: true },
+    });
+    const periodStart = closedLeaseInvoice?.periodStart ?? startOfJakartaBusinessDay(params.checkInDate);
+    const allowanceMonths = closedLeaseInvoice
+      ? getUtilityAllowanceMonths({ start: closedLeaseInvoice.periodStart, end: closedLeaseInvoice.periodEnd })
+      : 1;
+    const totalFreeKwh = configuredFreeKwh * allowanceMonths;
+
+    const [periodBaseline, previousReading, priorMeterLines] = await Promise.all([
+      tx.meterReading.findFirst({
+        where: {
+          roomId: params.roomId,
+          utilityType: UtilityType.ELECTRICITY,
+          readingAt: { lte: periodStart },
+        },
+        orderBy: { readingAt: 'desc' },
+        select: { readingValue: true },
+      }),
+      tx.meterReading.findFirst({
+        where: {
+          roomId: params.roomId,
+          utilityType: UtilityType.ELECTRICITY,
+          readingAt: { lt: params.previousPeriodEnd },
+        },
+        orderBy: { readingAt: 'desc' },
+        select: { readingValue: true },
+      }),
+      tx.invoiceLine.findMany({
+        where: {
+          lineType: InvoiceLineType.ELECTRICITY as any,
+          invoice: {
+            stayId: params.stayId,
+            invoiceNumber: { startsWith: 'MTR-' },
+            status: { not: InvoiceStatus.CANCELLED },
+            periodStart: { gte: periodStart, lt: params.previousPeriodEnd },
+          },
+        },
+        select: { qty: true },
+      }),
+    ]);
+
+    if (!periodBaseline || !previousReading) return totalFreeKwh;
+
+    const wholePeriodUsage = params.currentReadingValue.minus(periodBaseline.readingValue);
+    const usageSincePreviousReading = params.currentReadingValue.minus(previousReading.readingValue);
+    if (wholePeriodUsage.lt(0) || usageSincePreviousReading.lt(0)) return 0;
+
+    const previouslyBilledKwh = priorMeterLines.reduce((total, line) => total + Number(line.qty), 0);
+    const remainingChargeableKwh = Math.max(
+      0,
+      wholePeriodUsage.toNumber() - totalFreeKwh - previouslyBilledKwh,
+    );
+    // The checkpoint helper charges `usage since last reading - allowance`.
+    // Convert the remaining charge into the part of this interval's allowance.
+    return Math.max(0, usageSincePreviousReading.toNumber() - remainingChargeableKwh);
+  }
 
   async renewStay(id: number, dto: RenewStayDto, actor: CurrentUserPayload) {
     assertCoreLifecycleActor(actor, 'Perpanjangan masa sewa');
@@ -225,6 +311,15 @@ export class StaysRenewalService {
       },
     });
 
+    const settings = await this.settings.getOperational();
+    const electricityFreeAllowanceKwh = await this.getRenewalElectricityFreeAllowanceTx(tx, {
+      stayId: stay.id,
+      roomId: stay.roomId,
+      checkInDate: stay.checkInDate,
+      previousPeriodEnd: logicalPeriodStart,
+      currentReadingValue: electricityReadingValue,
+      configuredFreeKwh: Number(settings.freeElectricityKwhPerMonth ?? 0),
+    });
     const electricitySummary = await createRenewUtilityCheckpointLineTx(
       tx,
       {
@@ -236,6 +331,7 @@ export class StaysRenewalService {
         newReadingValue: electricityReadingValue,
         readingAt: meterReadingAt,
         tariffRupiah: stay.electricityTariffPerKwhRupiah,
+        freeAllowanceKwh: electricityFreeAllowanceKwh,
         actorId: actor.id,
         sortOrder: 1,
       },

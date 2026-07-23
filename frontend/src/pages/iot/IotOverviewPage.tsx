@@ -28,6 +28,7 @@ import { listStays } from '../../api/stays';
 import { fetchPublicConfig } from '../../api/settings';
 import type { Room, Stay } from '../../types';
 import {
+  backfillIotDeviceHistory,
   createIotDevice,
   getIotDeviceTelemetry,
   getIotOverview,
@@ -181,6 +182,13 @@ export default function IotOverviewPage() {
     mutationFn: syncAllTuya,
     onSuccess: async (result) => {
       toast(`Sinkronisasi selesai: ${result.succeeded}/${result.total} perangkat berhasil.`, result.failed ? 'warning' : 'success');
+      await invalidate();
+    },
+  });
+  const backfillMutation = useMutation({
+    mutationFn: (id: number) => backfillIotDeviceHistory(id, 7),
+    onSuccess: async (result) => {
+      toast(`Riwayat Tuya diperbarui: ${result.stored}/${result.totalLogs} telemetry historis disimpan.`, result.truncated ? 'warning' : 'success');
       await invalidate();
     },
   });
@@ -542,6 +550,7 @@ export default function IotOverviewPage() {
         </Modal.Body>
         <Modal.Footer>
           <Button variant="outline-secondary" onClick={() => setSelectedDevice(null)}>Tutup</Button>
+          {selectedDevice?.provider === 'TUYA' ? <Button variant="outline-primary" onClick={() => backfillMutation.mutate(selectedDevice.id)} disabled={backfillMutation.isPending || !selectedDevice.enabled} title="Ambil dan simpan riwayat report-log Tuya hingga 7 hari terakhir"><CalendarDays size={16} className={backfillMutation.isPending ? 'iot-spin' : ''} /> Ambil riwayat 7 hari</Button> : null}
           {selectedDevice?.provider === 'TUYA' ? <Button onClick={() => syncMutation.mutate(selectedDevice.id)} disabled={syncMutation.isPending || !selectedDevice.enabled}><RefreshCw size={16} className={syncMutation.isPending ? 'iot-spin' : ''} /> Sinkronkan</Button> : null}
         </Modal.Footer>
       </Modal>

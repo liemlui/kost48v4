@@ -4,8 +4,10 @@ import AnimatedCounter from '../../common/AnimatedCounter';
 type UtilityProjectionProps = {
   /** Current electricity usage this period (kWh) */
   currentUsageKwh: number;
-  /** Free kWh allowance per month */
+  /** Free kWh allowance for the active paid lease period */
   freeKwh: number;
+  /** Number of monthly quotas included in the active paid lease period. */
+  allowanceMonths?: number;
   /** Tariff per kWh (rupiah) */
   tariffPerKwh: number;
   /** Current estimated electricity cost */
@@ -23,6 +25,7 @@ type UtilityProjectionProps = {
 export default function UtilityProjection({
   currentUsageKwh,
   freeKwh,
+  allowanceMonths = 1,
   tariffPerKwh,
   estimatedCost,
   daysElapsed,
@@ -104,7 +107,9 @@ export default function UtilityProjection({
 
         <div className="utility-projection-rate">
           <small>
+            {allowanceMonths === 1 ? <>
             Tarif: <CurrencyDisplay amount={tariffPerKwh} />/kWh · Jatah gratis {freeKwh} kWh/bulan
+            </> : <>Tarif: <CurrencyDisplay amount={tariffPerKwh} />/kWh · Jatah gratis {freeKwh} kWh untuk {allowanceMonths} bulan sewa</>}
           </small>
         </div>
       </div>

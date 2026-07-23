@@ -89,10 +89,13 @@ export default function UtilityInsightCard({
   onCatatMeter: () => void;
 }) {
   const publicConfig = useQuery({ queryKey: ['public-config'], queryFn: fetchPublicConfig });
-  const freeKwh = publicConfig.data?.freeElectricityKwhPerMonth ?? 30;
+  const monthlyFreeKwh = publicConfig.data?.freeElectricityKwhPerMonth ?? 30;
   const waterEnabled = Boolean(publicConfig.data?.waterMeteringEnabled);
   const elecTariff = numeric(stay.room?.electricityTariffPerKwhRupiah ?? stay.electricityTariffPerKwhRupiah);
   const waterTariff = numeric(stay.room?.waterTariffPerM3Rupiah ?? stay.waterTariffPerM3Rupiah);
+  const cycleElectricity = telemetry?.cycle?.electricity;
+  const freeKwh = cycleElectricity?.freeKwh ?? monthlyFreeKwh;
+  const allowanceMonths = telemetry?.cycle?.allowanceMonths ?? 1;
 
   const summary = useMemo(() => summarizeUsageSinceCheckIn(readings, stay.checkInDate), [readings, stay.checkInDate]);
   const lastElecUsage = summary.latestRow?.usageElectricityKwh ?? 0;
@@ -114,13 +117,12 @@ export default function UtilityInsightCard({
     return { electricityKwh: elecSum, waterM3: waterSum, isPartialMonth: isPartial };
   }, [summary.rows, stay.checkInDate, lastElecUsage, lastWaterUsage]);
 
-  const gaugeElecUsage = currentMonthUsage.electricityKwh > 0
-    ? currentMonthUsage.electricityKwh
-    : Number(telemetry?.electricity?.total ?? 0);
+  const gaugeElecUsage = cycleElectricity?.usageKwh
+    ?? (currentMonthUsage.electricityKwh > 0 ? currentMonthUsage.electricityKwh : 0);
   const gaugeWaterUsage = currentMonthUsage.waterM3 > 0
     ? currentMonthUsage.waterM3
     : Number(telemetry?.water?.total ?? 0);
-  const isIotFallback = currentMonthUsage.electricityKwh === 0 && gaugeElecUsage > 0;
+  const isIotFallback = telemetry?.cycle?.source === 'IOT_TELEMETRY';
 
   const estimate = useMemo(
     () => estimateUtilityCost({
@@ -147,7 +149,7 @@ export default function UtilityInsightCard({
     [summary.rows],
   );
 
-  const hasUsage = summary.rows.length > 1;
+  const hasUsage = cycleElectricity?.usageKwh != null || summary.rows.length > 1;
 
   // Manual refresh mutation
   const queryClient = useQueryClient();
@@ -243,7 +245,7 @@ export default function UtilityInsightCard({
                 value={gaugeElecUsage}
                 maxValue={freeKwh}
                 unit="kWh"
-                label={currentMonthUsage.isPartialMonth ? 'Listrik (parsial)' : 'Listrik'}
+                label={cycleElectricity ? 'Listrik periode' : currentMonthUsage.isPartialMonth ? 'Listrik (parsial)' : 'Listrik'}
                 thresholds={{ warning: 50, danger: 100 }}
                 size={150}
               />
@@ -261,7 +263,7 @@ export default function UtilityInsightCard({
 
             <div className="tenant-utility-tiles">
               <div className="tenant-utility-tile">
-                <span className="ut-label">Listrik bulan ini</span>
+                <span className="ut-label">Listrik periode ini</span>
                 <div className="ut-usage-row">
                   <strong className="ut-usage">{gaugeElecUsage.toFixed(2)} kWh</strong>
                   {trendPoints.length >= 2 ? (
@@ -275,7 +277,7 @@ export default function UtilityInsightCard({
                   ) : null}
                 </div>
                 <span className="ut-cost">est. <CurrencyDisplay amount={estimate.electricity} showZero /></span>
-                <small className="ut-note">Jatah gratis {freeKwh} kWh/bulan{currentMonthUsage.isPartialMonth ? ' · parsial' : ''}</small>
+                <small className="ut-note">Jatah gratis {freeKwh} kWh untuk {allowanceMonths} bulan sewa</small>
               </div>
               {waterEnabled ? (
                 <div className="tenant-utility-tile">
@@ -324,6 +326,7 @@ export default function UtilityInsightCard({
               <UtilityProjection
                 currentUsageKwh={gaugeElecUsage}
                 freeKwh={freeKwh}
+                allowanceMonths={allowanceMonths}
                 tariffPerKwh={elecTariff}
                 estimatedCost={estimate.electricity}
               />

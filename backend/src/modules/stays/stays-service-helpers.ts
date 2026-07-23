@@ -134,6 +134,8 @@ export async function createRenewUtilityCheckpointLineTx(
     newReadingValue: Prisma.Decimal;
     readingAt: Date;
     tariffRupiah: number;
+    /** Electricity allowance granted once for the lease period being closed. */
+    freeAllowanceKwh?: number;
     actorId: number;
     sortOrder: number;
   },
@@ -167,10 +169,12 @@ export async function createRenewUtilityCheckpointLineTx(
   }
 
   const usageDelta = params.newReadingValue.minus(previousReading.readingValue);
-  const billingQty = usageDelta.toDecimalPlaces(2);
+  const freeAllowance = Math.max(0, Number(params.freeAllowanceKwh ?? 0));
+  const remainingAfterAllowance = usageDelta.minus(freeAllowance);
+  const billingQty = (remainingAfterAllowance.gt(0) ? remainingAfterAllowance : new Prisma.Decimal(0)).toDecimalPlaces(2);
   const tariff = params.tariffRupiah ?? 0;
 
-  if (usageDelta.gt(0) && tariff <= 0) {
+  if (billingQty.gt(0) && tariff <= 0) {
     throw new ConflictException(`Tarif ${params.label} belum diatur, tidak bisa menghitung tagihan perpanjangan`);
   }
 
@@ -183,7 +187,7 @@ export async function createRenewUtilityCheckpointLineTx(
       readingAt: params.readingAt,
       readingValue: params.newReadingValue,
       recordedById: params.actorId,
-      note: `Checkpoint perpanjangan masa sewa. Pemakaian ${params.label}: ${billingQty.toString()} ${params.unit}.`,
+      note: `Checkpoint perpanjangan masa sewa. Pemakaian ${params.label}: ${usageDelta.toString()} ${params.unit}; jatah gratis ${freeAllowance.toFixed(2)} ${params.unit}; ditagih ${billingQty.toString()} ${params.unit}.`,
     },
   });
 
@@ -192,7 +196,7 @@ export async function createRenewUtilityCheckpointLineTx(
       invoiceId: params.invoiceId,
       lineType: (params.utilityType === UtilityType.ELECTRICITY ? InvoiceLineType.ELECTRICITY : InvoiceLineType.WATER) as any,
       utilityType: params.utilityType,
-      description: `Pemakaian ${params.label} periode sebelumnya: ${billingQty.toString()} ${params.unit}`,
+      description: `Pemakaian ${params.label} periode sebelumnya: ${usageDelta.toString()} ${params.unit} - ${freeAllowance.toFixed(2)} ${params.unit} gratis = ${billingQty.toString()} ${params.unit} ditagih`,
       qty: billingQty,
       unit: params.unit,
       unitPriceRupiah: tariff,
@@ -207,6 +211,8 @@ export async function createRenewUtilityCheckpointLineTx(
     previousReadingValue: previousReading.readingValue,
     readingValue: params.newReadingValue,
     usageDelta,
+    freeAllowance,
+    chargeableQty: billingQty,
     tariffRupiah: tariff,
     amountRupiah: lineAmount,
   };

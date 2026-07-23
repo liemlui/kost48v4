@@ -11,6 +11,7 @@ import { StayStatus, UserRole, UtilityType } from '../../common/enums/app.enums'
 import { endOfDay, parseJakartaDateOnly } from '../../common/utils/date.util';
 import { InvoicesService } from '../invoices/invoices.service';
 import { SettingsService } from '../settings/settings.service';
+import { getUtilityAllowanceMonths, getUtilityBillingCycle, toUtilityCycleDateKey } from '../../common/business/utility-billing-cycle.helper';
 
 @Injectable()
 export class MeterReadingsService {
@@ -20,6 +21,31 @@ export class MeterReadingsService {
     private readonly invoices: InvoicesService,
     private readonly settings: SettingsService,
   ) {}
+
+  private async resolveUtilityCycle(stayId: number, checkInDate: Date, asOf: Date) {
+    // A new allowance starts only when the renewal settlement is paid. The DP
+    // invoice is intentionally excluded because it has not extended the stay.
+    const paidLeaseInvoice = await this.prisma.invoice.findFirst({
+      where: {
+        stayId,
+        status: 'PAID' as any,
+        periodStart: { lte: asOf },
+        periodEnd: { gt: asOf },
+        NOT: { invoiceNumber: { contains: '-RDP-' } },
+        lines: { some: { lineType: 'RENT' as any } },
+      },
+      orderBy: [{ periodStart: 'desc' }, { id: 'desc' }],
+      select: { periodStart: true, periodEnd: true },
+    });
+
+    return getUtilityBillingCycle(
+      checkInDate,
+      asOf,
+      paidLeaseInvoice
+        ? { start: paidLeaseInvoice.periodStart, end: paidLeaseInvoice.periodEnd }
+        : null,
+    );
+  }
 
   private parseReadingValue(value: string | Prisma.Decimal, label = 'meter') {
     try {
@@ -214,7 +240,7 @@ export class MeterReadingsService {
     // V-07c: Tolak readingAt sebelum check-in (initialMetersPromotedAt)
     const fullStay = await this.prisma.stay.findUnique({
       where: { id: stay.id },
-      select: { initialMetersPromotedAt: true },
+      select: { initialMetersPromotedAt: true, checkInDate: true },
     });
     if (fullStay?.initialMetersPromotedAt) {
       const readingAtDate = parseJakartaDateOnly(dto.readingAt, 'Tanggal catat meter tidak valid');
@@ -227,9 +253,19 @@ export class MeterReadingsService {
 
     const setting = await this.settings.getOperational();
     const readingAt = parseJakartaDateOnly(dto.readingAt, 'Tanggal catat meter tidak valid');
+    const utilityCycle = await this.resolveUtilityCycle(
+      stay.id,
+      fullStay?.checkInDate ?? readingAt,
+      readingAt,
+    );
+    const allowanceMonths = getUtilityAllowanceMonths(utilityCycle);
 
     const elecValue = this.parseReadingValue(dto.electricityReadingValue, 'meter listrik');
     const prevElec = await this.prisma.meterReading.findFirst({ where: { roomId, utilityType: UtilityType.ELECTRICITY, readingAt: { lt: readingAt } }, orderBy: { readingAt: 'desc' } });
+    const cycleElecBaseline = await this.prisma.meterReading.findFirst({
+      where: { roomId, utilityType: UtilityType.ELECTRICITY, readingAt: { lte: utilityCycle.start } },
+      orderBy: { readingAt: 'desc' },
+    });
     await this.assertReadingIsChronological({ roomId, utilityType: UtilityType.ELECTRICITY, readingAt, readingValue: elecValue });
 
     const waterEnabled = Boolean(setting.waterMeteringEnabled) && dto.waterReadingValue != null && dto.waterReadingValue !== '';
@@ -241,15 +277,40 @@ export class MeterReadingsService {
       await this.assertReadingIsChronological({ roomId, utilityType: UtilityType.WATER, readingAt, readingValue: waterValue });
     }
 
+    // Jatah listrik hanya boleh diklaim sekali per siklus tenant. Invoice meter
+    // baru selalu ditandai dengan periodStart awal siklus, sehingga pencatatan
+    // susulan hanya menagih tambahan yang belum pernah masuk invoice.
+    const previouslyBilledElectricity = await this.prisma.invoiceLine.findMany({
+      where: {
+        lineType: 'ELECTRICITY' as any,
+        invoice: {
+          stayId: stay.id,
+          invoiceNumber: { startsWith: 'MTR-' },
+          periodStart: { gte: utilityCycle.start, lt: utilityCycle.end },
+        },
+      },
+      select: { qty: true },
+    });
+    const alreadyBilledElectricityKwh = previouslyBilledElectricity
+      .reduce((total, line) => total + Number(line.qty), 0);
+
     const lines: Array<{ lineType: string; utilityType: string; description: string; qty: string; unit: string; unitPriceRupiah: number; sortOrder: number }> = [];
     let elecUsage = 0; let elecChargeable = 0;
     if (prevElec) {
       elecUsage = elecValue.minus(prevElec.readingValue).toNumber();
-      const free = Number(setting.freeElectricityKwhPerMonth ?? 0);
-      elecChargeable = Math.max(0, elecUsage - free);
+      const free = Number(setting.freeElectricityKwhPerMonth ?? 0) * allowanceMonths;
+      const totalCycleUsage = cycleElecBaseline
+        ? Math.max(0, elecValue.minus(cycleElecBaseline.readingValue).toNumber())
+        : elecUsage;
+      const totalCycleChargeable = Math.max(0, totalCycleUsage - free);
+      elecChargeable = Math.max(0, totalCycleChargeable - alreadyBilledElectricityKwh);
       const tariff = Number(room.electricityTariffPerKwhRupiah || setting.electricityTariffPerKwhRupiah || 0);
+      const electricityDescription = `Listrik periode ${toUtilityCycleDateKey(utilityCycle.start)} s.d. ${toUtilityCycleDateKey(utilityCycle.end)}: ${totalCycleUsage.toFixed(2)} kWh; ${free} kWh gratis; ${alreadyBilledElectricityKwh.toFixed(2)} kWh sudah ditagih; ${elecChargeable.toFixed(2)} kWh ditagih sekarang`;
       if (elecChargeable > 0 && tariff > 0) {
         lines.push({ lineType: 'ELECTRICITY', utilityType: 'ELECTRICITY', description: `Listrik: ${elecUsage.toFixed(2)} kWh − ${free} kWh gratis = ${elecChargeable.toFixed(2)} kWh`, qty: elecChargeable.toFixed(3), unit: 'kWh', unitPriceRupiah: tariff, sortOrder: 0 });
+      }
+      if (lines.length > 0) {
+        lines[lines.length - 1].description = electricityDescription;
       }
     }
     let waterUsage = 0; let waterChargeable = 0;
@@ -263,13 +324,26 @@ export class MeterReadingsService {
       }
     }
 
-    const summary = { elecUsage, elecChargeable, waterUsage, waterChargeable };
+    const summary = {
+      elecUsage,
+      elecChargeable,
+      electricityCycle: {
+        start: utilityCycle.start,
+        end: utilityCycle.end,
+        allowanceMonths,
+        freeKwh: Number(setting.freeElectricityKwhPerMonth ?? 0) * allowanceMonths,
+        alreadyBilledKwh: alreadyBilledElectricityKwh,
+        baselineAvailable: Boolean(cycleElecBaseline),
+      },
+      waterUsage,
+      waterChargeable,
+    };
 
     // Bungkus pembuatan meter + invoice dalam satu $transaction agar atomis:
     // jika invoice gagal (periode CLOSED, nomor duplikat, dll.) angka meter
     // tidak tersimpan — mencegah selisih meter yang salah di bulan berikutnya.
-    const ym = `${readingAt.getUTCFullYear()}${String(readingAt.getUTCMonth() + 1).padStart(2, '0')}`;
-    const periodStart = (prevElec?.readingAt ?? prevWater?.readingAt ?? readingAt);
+    const ym = utilityCycle.key.replaceAll('-', '');
+    const periodStart = utilityCycle.start;
     const due = new Date(readingAt); due.setUTCDate(due.getUTCDate() + 7);
 
     const txResult = await (this.prisma as any).$transaction(async (tx: any) => {

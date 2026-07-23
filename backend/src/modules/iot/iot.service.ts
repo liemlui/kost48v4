@@ -9,6 +9,9 @@ import { TuyaClientService } from './tuya/tuya-client.service';
 import { getTuyaStatusDefinitions, normalizeTuyaStatus, tuyaObservedAt } from './tuya/tuya-normalizer';
 import { IotSseService } from './iot-sse.service';
 import { createHash } from 'crypto';
+import { SettingsService } from '../settings/settings.service';
+import { getUtilityAllowanceMonths, getUtilityBillingCycle } from '../../common/business/utility-billing-cycle.helper';
+import { startOfJakartaBusinessDay } from '../../common/utils/date.util';
 
 const deviceInclude = {
   room: { select: { id: true, code: true, name: true } },
@@ -19,6 +22,10 @@ const deviceInclude = {
   },
 };
 
+function jakartaDateKey(value: Date) {
+  return startOfJakartaBusinessDay(value).toISOString().slice(0, 10);
+}
+
 @Injectable()
 export class IotService {
   constructor(
@@ -27,6 +34,7 @@ export class IotService {
     private readonly tuya: TuyaClientService,
     private readonly credentials: DeviceCredentialService,
     private readonly sse: IotSseService,
+    private readonly settings: SettingsService,
   ) {}
 
   async overview(query: IotDeviceQueryDto = {}) {
@@ -146,7 +154,13 @@ export class IotService {
     const stay = await this.prisma.stay.findFirst({
       where: { tenantId: actor.tenantId, status: 'ACTIVE' as any },
       orderBy: { id: 'desc' },
-      select: { roomId: true, room: { select: { code: true, name: true } } },
+      select: {
+        id: true,
+        roomId: true,
+        checkInDate: true,
+        electricityTariffPerKwhRupiah: true,
+        room: { select: { code: true, name: true, electricityTariffPerKwhRupiah: true } },
+      },
     });
     if (!stay) throw new NotFoundException('Stay aktif tidak ditemukan');
 
@@ -169,14 +183,264 @@ export class IotService {
       .sort((left, right) => (right.lastSeenAt?.getTime() ?? 0) - (left.lastSeenAt?.getTime() ?? 0))[0];
     const staleAfterMinutes = Number(process.env.IOT_STALE_AFTER_MINUTES ?? 30);
 
+    const cycle = await this.getTenantElectricityCycle(stay);
     return {
       room: stay.room,
       refreshedAt: new Date(),
       staleAfterMinutes,
       billingNotice: 'Data sensor hanya untuk monitoring dan bukan dasar tagihan.',
+      cycle,
       electricity: this.toTenantUtilityDevice(byType(IotDeviceType.ELECTRICITY_METER), 'ELECTRICITY', staleAfterMinutes),
       water: this.toTenantUtilityDevice(byType(IotDeviceType.WATER_FLOW_METER), 'WATER', staleAfterMinutes),
     };
+  }
+
+  /**
+   * History shown to a tenant is limited to their own active room and is
+   * deliberately a monitoring timeline, never a billing source.
+   */
+  async tenantElectricityTimeline(actor: CurrentUserPayload) {
+    if (!actor.tenantId) {
+      throw new ForbiddenException('Akun tenant belum terhubung ke data tenant');
+    }
+
+    const stay = await this.prisma.stay.findFirst({
+      where: { tenantId: actor.tenantId, status: 'ACTIVE' as any },
+      orderBy: { id: 'desc' },
+      select: { id: true, roomId: true, checkInDate: true },
+    });
+    if (!stay) throw new NotFoundException('Stay aktif tidak ditemukan');
+
+    const asOf = new Date();
+    const period = await this.resolvePaidLeaseUtilityCycle(stay, asOf);
+    const device = await this.prisma.iotDevice.findFirst({
+      where: { roomId: stay.roomId, enabled: true, deviceType: IotDeviceType.ELECTRICITY_METER },
+      orderBy: [{ lastSeenAt: 'desc' }, { id: 'desc' }],
+      select: { id: true },
+    });
+    if (!device) {
+      return {
+        start: period.start,
+        end: period.end,
+        source: 'NONE' as const,
+        baselineAvailable: false,
+        resetDetected: false,
+        points: [],
+      };
+    }
+
+    const metric = 'electricity.energy_total_kwh';
+    const [baseline, rows] = await Promise.all([
+      this.prisma.iotTelemetry.findFirst({
+        where: {
+          metric,
+          valueDecimal: { not: null },
+          quality: { not: IotReadingQuality.REJECTED },
+          ingestMessage: { deviceId: device.id },
+          observedAt: { lte: period.start },
+        },
+        orderBy: { observedAt: 'desc' },
+        select: { valueDecimal: true, observedAt: true, quality: true },
+      }),
+      this.prisma.iotTelemetry.findMany({
+        where: {
+          metric,
+          valueDecimal: { not: null },
+          quality: { not: IotReadingQuality.REJECTED },
+          ingestMessage: { deviceId: device.id },
+          observedAt: { gt: period.start, lte: asOf },
+        },
+        orderBy: { observedAt: 'asc' },
+        take: 10_000,
+        select: { valueDecimal: true, observedAt: true, quality: true },
+      }),
+    ]);
+
+    if (!baseline?.valueDecimal) {
+      return {
+        start: period.start,
+        end: period.end,
+        source: 'IOT_TELEMETRY' as const,
+        baselineAvailable: false,
+        resetDetected: false,
+        points: [],
+      };
+    }
+
+    // Keep the final sensor value of each Jakarta day. This gives a compact,
+    // legible timeline without pretending that a cumulative raw meter value is
+    // daily consumption.
+    const finalReadingByDay = new Map<string, (typeof rows)[number]>();
+    rows.forEach((row) => finalReadingByDay.set(jakartaDateKey(row.observedAt), row));
+    const baselineKwh = Number(baseline.valueDecimal);
+    let resetDetected = false;
+    const points = [...finalReadingByDay.entries()].map(([date, row]) => {
+      const totalUsageKwh = Number(row.valueDecimal) - baselineKwh;
+      if (totalUsageKwh < 0) resetDetected = true;
+      return {
+        date,
+        observedAt: row.observedAt,
+        totalUsageKwh: totalUsageKwh < 0 ? null : totalUsageKwh,
+        quality: row.quality,
+      };
+    }).filter((point) => point.totalUsageKwh !== null);
+
+    return {
+      start: period.start,
+      end: period.end,
+      source: 'IOT_TELEMETRY' as const,
+      baselineAvailable: true,
+      resetDetected,
+      points,
+    };
+  }
+
+  /**
+   * One canonical electricity calculation for the active tenant. The raw Tuya
+   * counter is cumulative, therefore it is never presented as period usage
+   * without a baseline from the start of the tenant's billing cycle.
+   */
+  private async getTenantElectricityCycle(stay: {
+    id: number;
+    roomId: number;
+    checkInDate: Date;
+    electricityTariffPerKwhRupiah: number;
+    room: { electricityTariffPerKwhRupiah: number } | null;
+  }) {
+    const asOf = new Date();
+    const period = await this.resolvePaidLeaseUtilityCycle(stay, asOf);
+    const electricityMetric = 'electricity.energy_total_kwh';
+    const [settings, meterBaseline, meterLatest, device] = await Promise.all([
+      this.settings.getOperational(),
+      this.prisma.meterReading.findFirst({
+        where: { roomId: stay.roomId, utilityType: 'ELECTRICITY' as any, readingAt: { lte: period.start } },
+        orderBy: { readingAt: 'desc' },
+        select: { readingValue: true, readingAt: true },
+      }),
+      this.prisma.meterReading.findFirst({
+        where: {
+          roomId: stay.roomId,
+          utilityType: 'ELECTRICITY' as any,
+          readingAt: { gte: period.start, lte: asOf },
+        },
+        orderBy: { readingAt: 'desc' },
+        select: { readingValue: true, readingAt: true },
+      }),
+      this.prisma.iotDevice.findFirst({
+        where: { roomId: stay.roomId, enabled: true, deviceType: IotDeviceType.ELECTRICITY_METER },
+        orderBy: [{ lastSeenAt: 'desc' }, { id: 'desc' }],
+        select: { id: true },
+      }),
+    ]);
+
+    const [telemetryBaseline, telemetryLatest] = device
+      ? await Promise.all([
+          this.prisma.iotTelemetry.findFirst({
+            where: {
+              metric: electricityMetric,
+              valueDecimal: { not: null },
+              ingestMessage: { deviceId: device.id },
+              observedAt: { lte: period.start },
+            },
+            orderBy: { observedAt: 'desc' },
+            select: { valueDecimal: true, observedAt: true, quality: true },
+          }),
+          this.prisma.iotTelemetry.findFirst({
+            where: {
+              metric: electricityMetric,
+              valueDecimal: { not: null },
+              ingestMessage: { deviceId: device.id },
+              observedAt: { gte: period.start, lte: asOf },
+            },
+            orderBy: { observedAt: 'desc' },
+            select: { valueDecimal: true, observedAt: true, quality: true },
+          }),
+        ])
+      : [null, null];
+
+    const meterUsage = meterBaseline && meterLatest
+      ? Number(meterLatest.readingValue.minus(meterBaseline.readingValue))
+      : null;
+    const telemetryUsage = telemetryBaseline && telemetryLatest
+      ? Number(telemetryLatest.valueDecimal!.minus(telemetryBaseline.valueDecimal!))
+      : null;
+    const meterResetDetected = meterUsage !== null && meterUsage < 0;
+    const telemetryResetDetected = telemetryUsage !== null && telemetryUsage < 0;
+    const usableTelemetry = telemetryResetDetected ? null : telemetryUsage;
+    const usableMeter = meterResetDetected ? null : meterUsage;
+    const source = usableTelemetry !== null
+      ? 'IOT_TELEMETRY'
+      : usableMeter !== null
+        ? 'METER_READING'
+        : 'NONE';
+    const usageKwh = usableTelemetry ?? usableMeter;
+    const allowanceMonths = getUtilityAllowanceMonths(period);
+    const freeKwh = Number(settings.freeElectricityKwhPerMonth ?? 0) * allowanceMonths;
+    const chargeableKwh = usageKwh === null ? null : Math.max(0, usageKwh - freeKwh);
+    const tariffRupiah = Number(
+      stay.room?.electricityTariffPerKwhRupiah
+      || stay.electricityTariffPerKwhRupiah
+      || settings.electricityTariffPerKwhRupiah
+      || 0,
+    );
+
+    return {
+      start: period.start,
+      end: period.end,
+      allowanceMonths,
+      source,
+      electricity: {
+        usageKwh,
+        freeKwh,
+        chargeableKwh,
+        tariffRupiah,
+        estimatedChargeRupiah: chargeableKwh === null ? null : Math.round(chargeableKwh * tariffRupiah),
+        billingReady: usableMeter !== null,
+        resetDetected: meterResetDetected || telemetryResetDetected,
+      },
+      meter: {
+        baselineKwh: meterBaseline ? Number(meterBaseline.readingValue) : null,
+        baselineAt: meterBaseline?.readingAt ?? null,
+        latestKwh: meterLatest ? Number(meterLatest.readingValue) : null,
+        latestAt: meterLatest?.readingAt ?? null,
+        usageKwh: usableMeter,
+      },
+      telemetry: {
+        baselineKwh: telemetryBaseline?.valueDecimal == null ? null : Number(telemetryBaseline.valueDecimal),
+        baselineAt: telemetryBaseline?.observedAt ?? null,
+        latestKwh: telemetryLatest?.valueDecimal == null ? null : Number(telemetryLatest.valueDecimal),
+        latestAt: telemetryLatest?.observedAt ?? null,
+        usageKwh: usableTelemetry,
+        quality: telemetryLatest?.quality ?? null,
+      },
+    };
+  }
+
+  private async resolvePaidLeaseUtilityCycle(
+    stay: { id: number; checkInDate: Date },
+    asOf: Date,
+  ) {
+    // Only a PAID rent invoice is eligible. A paid DP (RDP) does not yet start
+    // a new stay period, so it must not reset a tenant's electricity allowance.
+    const paidLeaseInvoice = await this.prisma.invoice.findFirst({
+      where: {
+        stayId: stay.id,
+        status: 'PAID' as any,
+        periodStart: { lte: asOf },
+        periodEnd: { gt: asOf },
+        NOT: { invoiceNumber: { contains: '-RDP-' } },
+        lines: { some: { lineType: 'RENT' as any } },
+      },
+      orderBy: [{ periodStart: 'desc' }, { id: 'desc' }],
+      select: { periodStart: true, periodEnd: true },
+    });
+    return getUtilityBillingCycle(
+      stay.checkInDate,
+      asOf,
+      paidLeaseInvoice
+        ? { start: paidLeaseInvoice.periodStart, end: paidLeaseInvoice.periodEnd }
+        : null,
+    );
   }
 
   async listDevices(query: IotDeviceQueryDto = {}) {
@@ -523,6 +787,100 @@ export class IotService {
     });
 
     return { deviceId, dpCode, daysBack, totalLogs: logs.logs?.length ?? 0, stored };
+  }
+
+  /**
+   * Correct Tuya DP-report backfill. The legacy method above remains only for
+   * binary compatibility; all HTTP entry points use this pagination-aware path.
+   */
+  async backfillTuyaReportHistory(deviceId: number, daysBack = 7, actor?: CurrentUserPayload) {
+    const device = await this.requireDevice(deviceId);
+    if (device.provider !== IotProvider.TUYA || !device.externalDeviceId) {
+      throw new ConflictException('Backfill hanya untuk perangkat Tuya dengan externalDeviceId');
+    }
+
+    // Default Tuya log retention is short. Keep the default-plan backfill safe
+    // and predictable; long-term history comes from local scheduled polling.
+    const boundedDays = Math.max(1, Math.min(daysBack, 7));
+    const endTime = Date.now();
+    const startTime = endTime - boundedDays * 24 * 3600_000;
+    const snapshot = await this.tuya.getDeviceSnapshot(device.externalDeviceId);
+    const supportedCodes = getTuyaStatusDefinitions(snapshot.specification)
+      .map((item) => typeof item.code === 'string' ? item.code : '')
+      .filter((code) => ['add_ele', 'total_forward_energy'].includes(code));
+    const dpCode = supportedCodes[0];
+    if (!dpCode) {
+      throw new ConflictException('Datapoint energi kumulatif Tuya tidak ditemukan. Jalankan probe dan periksa specification perangkat.');
+    }
+
+    let lastRowKey: string | undefined;
+    let hasMore = true;
+    let pageCount = 0;
+    let totalLogs = 0;
+    let stored = 0;
+    while (hasMore && pageCount < 100) {
+      const page = await this.tuya.getDeviceReportLogs(
+        device.externalDeviceId,
+        [dpCode],
+        startTime,
+        endTime,
+        100,
+        lastRowKey,
+      );
+      pageCount++;
+      totalLogs += page.logs?.length ?? 0;
+
+      for (const log of page.logs ?? []) {
+        const eventTime = Number(log.event_time);
+        const observedAt = new Date(eventTime);
+        if (!Number.isFinite(eventTime) || Number.isNaN(observedAt.getTime())) continue;
+        const normalized = normalizeTuyaStatus(
+          [{ code: log.code, value: log.value }],
+          snapshot.specification,
+        ).find((metric) => metric.metric === 'electricity.energy_total_kwh' && metric.valueDecimal !== undefined);
+        if (!normalized || normalized.valueDecimal === undefined) continue;
+
+        const messageId = `tuya:backfill:${device.externalDeviceId}:${observedAt.getTime()}:${log.code}:${String(log.value)}`;
+        try {
+          await this.prisma.iotIngestMessage.create({
+            data: {
+              deviceId: device.id,
+              messageId,
+              observedAt,
+              providerTimestamp: BigInt(Math.trunc(eventTime)),
+              rawPayload: { tuyaReportLog: { code: log.code, value: log.value, eventTime } } as Prisma.InputJsonValue,
+              telemetry: {
+                create: [{
+                  metric: normalized.metric,
+                  valueDecimal: normalized.valueDecimal,
+                  unit: normalized.unit ?? 'kWh',
+                  observedAt,
+                  quality: normalized.quality,
+                  reason: `Tuya report-log backfill (${boundedDays} hari): ${normalized.reason ?? 'nilai historis'}`,
+                }],
+              },
+            },
+          });
+          stored++;
+        } catch (error) {
+          if (!(error instanceof Prisma.PrismaClientKnownRequestError) || error.code !== 'P2002') {
+            throw error;
+          }
+        }
+      }
+
+      hasMore = Boolean(page.has_more && page.last_row_key);
+      lastRowKey = page.last_row_key;
+    }
+
+    await this.audit.log({
+      actorUserId: actor?.id ?? null,
+      action: 'IOT_TUYA_BACKFILL',
+      entityType: 'IotDevice',
+      entityId: String(device.id),
+      meta: { deviceId, daysBack: boundedDays, dpCode, totalLogs, stored, pageCount, truncated: hasMore },
+    });
+    return { deviceId, dpCode, daysBack: boundedDays, totalLogs, stored, pageCount, truncated: hasMore };
   }
 
   private async pollAndStoreTuya(device: Awaited<ReturnType<IotService['requireDevice']>>) {

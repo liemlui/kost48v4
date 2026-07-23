@@ -48,6 +48,13 @@ export class IotController {
     return { message: 'Telemetry meter kamar berhasil diambil', data: await this.iot.tenantCurrentRoomUtilities(actor) };
   }
 
+  @Get('tenant/electricity-timeline')
+  @Roles(UserRole.TENANT)
+  @ApiOperation({ summary: 'Timeline pemakaian listrik kamar aktif saya - TENANT, monitoring-only' })
+  async tenantElectricityTimeline(@CurrentUser() actor: CurrentUserPayload) {
+    return { message: 'Timeline listrik berhasil diambil', data: await this.iot.tenantElectricityTimeline(actor) };
+  }
+
   @Post('tenant/refresh')
   @Roles(UserRole.TENANT)
   @ApiOperation({ summary: 'Paksa sinkronisasi Tuya untuk kamar tenant — rate-limited 1× per 2 menit' })
@@ -112,7 +119,7 @@ export class IotController {
     @Query('days', new DefaultValuePipe(7), ParseIntPipe) days: number,
     @CurrentUser() actor: CurrentUserPayload,
   ) {
-    return { message: 'Backfill Tuya selesai', data: await this.iot.backfillTuyaHistory(id, days) };
+    return { message: 'Backfill Tuya selesai', data: await this.iot.backfillTuyaReportHistory(id, days, actor) };
   }
 
   @Post('devices/:id/rotate-secret')

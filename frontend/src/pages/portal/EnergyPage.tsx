@@ -13,7 +13,13 @@ import { OKABE_ITO } from '../../components/charts/chartPalette';
 import WaterFlowIndicator from '../../components/portal/stay/WaterFlowIndicator';
 import UtilityProjection from '../../components/portal/stay/UtilityProjection';
 import AnomalyAlert from '../../components/portal/stay/AnomalyAlert';
-import { getMyRoomUtilityTelemetry, type TenantRoomUtilityTelemetry, type TenantUtilityDevice } from '../../api/iot';
+import {
+  getMyRoomElectricityTimeline,
+  getMyRoomUtilityTelemetry,
+  type TenantElectricityTimeline,
+  type TenantRoomUtilityTelemetry,
+  type TenantUtilityDevice,
+} from '../../api/iot';
 import { getMeterReadingsByRoom } from '../../api/meterReadings';
 import { fetchPublicConfig } from '../../api/settings';
 import { getResource } from '../../api/resources';
@@ -35,6 +41,25 @@ const statusLabel: Record<TenantUtilityDevice['status'], string> = {
 function liveValue(value: number | null, unit: string) {
   if (value == null) return '—';
   return `${new Intl.NumberFormat('id-ID', { maximumFractionDigits: 3 }).format(value)} ${unit === 'm3' ? 'm³' : unit}`;
+}
+
+function timelineBucket(dateKey: string, granularity: ChartGranularity) {
+  const date = new Date(`${dateKey}T00:00:00.000Z`);
+  if (granularity === 'monthly') return dateKey.slice(0, 7);
+  if (granularity === 'weekly') {
+    const mondayOffset = (date.getUTCDay() + 6) % 7;
+    date.setUTCDate(date.getUTCDate() - mondayOffset);
+    return date.toISOString().slice(0, 10);
+  }
+  return dateKey;
+}
+
+function timelineLabel(bucket: string, granularity: ChartGranularity) {
+  const date = new Date(`${bucket}T00:00:00.000Z`);
+  if (granularity === 'monthly') {
+    return date.toLocaleDateString('id-ID', { month: 'short', year: '2-digit' });
+  }
+  return date.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' });
 }
 
 function LiveMeterTileLarge({ device }: { device: TenantUtilityDevice }) {
@@ -136,10 +161,22 @@ export default function EnergyPage() {
     retry: false,
   });
 
+  const electricityTimelineQuery = useQuery<TenantElectricityTimeline>({
+    queryKey: ['energy-electricity-timeline', stay?.roomId],
+    queryFn: getMyRoomElectricityTimeline,
+    enabled: Boolean(stay?.roomId),
+    staleTime: 60_000,
+    refetchInterval: 5 * 60_000,
+    retry: false,
+  });
+
   useIotTelemetrySse(Boolean(stay?.roomId));
 
   const readings: MeterReading[] = meterReadingsQuery.data ?? [];
   const telemetry = utilityTelemetryQuery.data;
+  const cycleFreeKwh = telemetry?.cycle?.electricity?.freeKwh ?? freeKwh;
+  const allowanceMonths = telemetry?.cycle?.allowanceMonths ?? 1;
+  const [chartGranularity, setChartGranularity] = useState<ChartGranularity>('monthly');
 
   // Derived data
   const summary = useMemo(() => {
@@ -147,37 +184,55 @@ export default function EnergyPage() {
     return summarizeUsageSinceCheckIn(readings, stay.checkInDate);
   }, [readings, stay?.checkInDate]);
 
-  // Usage since check-in (bukan bulan kalender)
+  // Backend supplies one canonical tenant cycle (anchored to check-in) with a
+  // baseline. Never treat the cumulative IoT counter itself as period usage.
   const periodUsage = useMemo(() => {
+    const cycleUsage = telemetry?.cycle?.electricity?.usageKwh;
+    if (cycleUsage != null) {
+      return { electricityKwh: cycleUsage, waterM3: summary?.totalWaterM3 ?? 0 };
+    }
     if (summary) return { electricityKwh: summary.totalElectricityKwh, waterM3: summary.totalWaterM3 };
-    // Fallback ke IoT telemetry kalau belum ada catatan meter manual
-    const iotKwh = Number(telemetry?.electricity?.total ?? 0);
-    const iotWater = Number(telemetry?.water?.total ?? 0);
-    return { electricityKwh: iotKwh, waterM3: iotWater };
+    return { electricityKwh: 0, waterM3: 0 };
   }, [summary, telemetry]);
 
-  // Apakah data berasal dari IoT (bukan meter reading)
-  const isIotFallback = !summary && (Number(telemetry?.electricity?.total ?? 0) > 0 || Number(telemetry?.water?.total ?? 0) > 0);
+  const isIotFallback = telemetry?.cycle?.source === 'IOT_TELEMETRY';
 
   // Label periode: "8 Jul – 8 Agu"
   const periodLabel = useMemo(() => {
+    if (telemetry?.cycle) {
+      const fmt = (d: string) => new Date(d).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' });
+      return `${fmt(telemetry.cycle.start)} - ${fmt(telemetry.cycle.end)}`;
+    }
     if (!stay?.checkInDate) return '';
     const checkIn = new Date(stay.checkInDate);
     const now = new Date();
     const fmt = (d: Date) => d.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' });
     return `${fmt(checkIn)} – ${fmt(now)}`;
-  }, [stay?.checkInDate]);
+  }, [stay?.checkInDate, telemetry?.cycle]);
 
   const estimate = useMemo(() => estimateUtilityCost({
     electricityUsageKwh: periodUsage.electricityKwh,
     waterUsageM3: periodUsage.waterM3,
     electricityTariff: elecTariff,
     waterTariff,
-    freeKwh,
+    freeKwh: cycleFreeKwh,
     waterEnabled,
-  }), [periodUsage, elecTariff, waterTariff, freeKwh, waterEnabled]);
+  }), [periodUsage, elecTariff, waterTariff, cycleFreeKwh, waterEnabled]);
 
   const trendPoints: HorizontalBarPoint[] = useMemo(() => {
+    const sensorPoints = electricityTimelineQuery.data?.points ?? [];
+    if (sensorPoints.length >= 2) {
+      const buckets = new Map<string, (typeof sensorPoints)[number]>();
+      sensorPoints.forEach((point) => {
+        buckets.set(timelineBucket(point.date, chartGranularity), point);
+      });
+      return [...buckets.entries()].map(([bucket, point]) => ({
+        label: timelineLabel(bucket, chartGranularity),
+        value: Number(point.totalUsageKwh.toFixed(2)),
+        detail: `Akumulasi ${point.totalUsageKwh.toFixed(2)} kWh sejak awal periode`,
+        color: OKABE_ITO.blue,
+      }));
+    }
     if (!summary) return [];
     return summary.rows
       .filter((r) => (r.usageElectricityKwh ?? 0) > 0)
@@ -188,14 +243,13 @@ export default function EnergyPage() {
         detail: `${(r.usageElectricityKwh ?? 0).toFixed(2)} kWh`,
         color: OKABE_ITO.blue,
       }));
-  }, [summary]);
+  }, [chartGranularity, electricityTimelineQuery.data?.points, summary]);
 
-  const hasData = summary !== null;
+  const usingIotTimeline = (electricityTimelineQuery.data?.points.length ?? 0) >= 2;
+
+  const hasData = telemetry?.cycle?.electricity?.usageKwh != null || summary !== null;
   const isLoading = meterReadingsQuery.isLoading || utilityTelemetryQuery.isLoading;
   const isError = meterReadingsQuery.isError;
-
-  // Chart granularity state
-  const [chartGranularity, setChartGranularity] = useState<ChartGranularity>('monthly');
 
   // Loading / no stay
   if (stayQuery.isLoading) {
@@ -271,7 +325,7 @@ export default function EnergyPage() {
             <div className="energy-gauge-row">
               <UsageGauge
                 value={periodUsage.electricityKwh}
-                maxValue={freeKwh}
+                maxValue={cycleFreeKwh}
                 unit="kWh"
                 label="Listrik"
                 thresholds={{ warning: 50, danger: 100 }}
@@ -301,7 +355,7 @@ export default function EnergyPage() {
                   <span className="est-label">Listrik periode ini</span>
                   <strong>{periodUsage.electricityKwh.toFixed(2)} kWh</strong>
                   <span className="est-cost">est. <CurrencyDisplay amount={estimate.electricity} showZero /></span>
-                  <small>Jatah gratis {freeKwh} kWh/bulan</small>
+                  <small>Jatah gratis {cycleFreeKwh} kWh untuk {allowanceMonths} bulan sewa</small>
                 </div>
                 {waterEnabled ? (
                   <div className="energy-summary-tile">
@@ -332,14 +386,21 @@ export default function EnergyPage() {
           {trendPoints.length >= 2 ? (
             <section className="energy-trend-section">
               <div className="d-flex justify-content-between align-items-center flex-wrap gap-2">
-                <h2 className="energy-section-title" style={{ margin: 0 }}>Tren Pemakaian Listrik</h2>
+                <h2 className="energy-section-title" style={{ margin: 0 }}>
+                  {usingIotTimeline ? 'Timeline Pemakaian Listrik' : 'Tren Pemakaian Listrik'}
+                </h2>
                 <ChartRangeSelector value={chartGranularity} onChange={setChartGranularity} compact />
               </div>
+              {usingIotTimeline ? (
+                <p className="text-muted small mt-2 mb-0">
+                  Akumulasi kWh dari sensor sejak awal periode sewa aktif. Satu titik mewakili pembacaan terakhir pada hari tersebut.
+                </p>
+              ) : null}
               <div className="energy-chart-wrapper">
                 <LineAreaChart
                   points={trendPoints}
-                  ariaLabel="Tren pemakaian listrik per pencatatan"
-                  valueFormatter={(v) => `${v} kWh`}
+                  ariaLabel={usingIotTimeline ? 'Timeline akumulasi pemakaian listrik dari sensor IoT' : 'Tren pemakaian listrik per pencatatan'}
+                  valueFormatter={(v) => usingIotTimeline ? `${v} kWh terpakai` : `${v} kWh`}
                   height={220}
                 />
                 <div className="d-sm-none mt-2">
@@ -361,7 +422,8 @@ export default function EnergyPage() {
             <section className="energy-projection-section">
               <UtilityProjection
                 currentUsageKwh={periodUsage.electricityKwh}
-                freeKwh={freeKwh}
+                freeKwh={cycleFreeKwh}
+                allowanceMonths={allowanceMonths}
                 tariffPerKwh={elecTariff}
                 estimatedCost={estimate.electricity}
               />
