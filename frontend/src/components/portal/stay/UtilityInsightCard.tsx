@@ -1,30 +1,35 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button, Card, Spinner } from 'react-bootstrap';
-import HorizontalBarChart, { type HorizontalBarPoint } from '../../charts/HorizontalBarChart';
+import { ChevronDown, Radio, RefreshCw, ShieldCheck } from 'lucide-react';
+import type { HorizontalBarPoint } from '../../charts/HorizontalBarChart';
 import LineAreaChart from '../../charts/LineAreaChart';
 import Sparkline from '../../charts/Sparkline';
-import UsageGauge from '../../charts/UsageGauge';
 import DonutGauge from '../../charts/DonutGauge';
 import { OKABE_ITO } from '../../charts/chartPalette';
 import CurrencyDisplay from '../../common/CurrencyDisplay';
-import AnimatedCounter from '../../common/AnimatedCounter';
+import { useToast } from '../../common/ToastProvider';
 import { fetchPublicConfig } from '../../../api/settings';
-import { refreshMyRoomMeter } from '../../../api/iot';
-import WaterFlowIndicator from './WaterFlowIndicator';
+import { iotQueryKeys, refreshMyRoomMeter } from '../../../api/iot';
 import UtilityProjection from './UtilityProjection';
 import AnomalyAlert from './AnomalyAlert';
 import type { TenantRoomUtilityTelemetry, TenantUtilityDevice } from '../../../api/iot';
 import { summarizeUsageSinceCheckIn, estimateUtilityCost, numeric } from '../../../utils/meterUsage';
 import type { MeterReading, Stay } from '../../../types';
+import { getApiErrorMessage } from '../../../utils/getApiErrorMessage';
 
 const statusLabel: Record<TenantUtilityDevice['status'], string> = {
   NO_DEVICE: 'Belum terpasang',
   NOT_CONNECTED: 'Belum terhubung',
-  OFFLINE: 'Perlu diperiksa',
-  STALE: 'Perlu diperiksa',
+  OFFLINE: 'Offline',
+  STALE: 'Data terlambat',
   NO_FLOW: 'Tidak ada aliran',
   ONLINE: 'Online',
+};
+
+const qualityLabel: Partial<Record<NonNullable<TenantUtilityDevice['quality']>, string>> = {
+  SUSPECT: 'data perlu diperiksa',
+  REJECTED: 'data ditolak',
 };
 
 function liveValue(value: number | null, unit: string) {
@@ -35,18 +40,21 @@ function liveValue(value: number | null, unit: string) {
 function LiveMeterTile({ device }: { device: TenantUtilityDevice }) {
   const isWater = device.utilityType === 'WATER';
   const isOnline = ['ONLINE', 'NO_FLOW'].includes(device.status);
-  const stateClass = isOnline ? 'is-ok' : 'is-warning';
-  const hasLivePower = !isWater && device.powerW != null;
+  const qualityWarning = device.quality ? qualityLabel[device.quality] : undefined;
+  const rejected = device.quality === 'REJECTED';
+  const stateClass = isOnline && !qualityWarning ? 'is-ok' : 'is-warning';
+  const hasLivePower = !isWater && !rejected && device.powerW != null;
   return (
     <div className={`tenant-live-meter ${stateClass}`}>
       <div className="tenant-live-meter-head">
         <strong>{isWater ? 'Meter air' : 'Meter listrik'}</strong>
-        <span>{statusLabel[device.status]}</span>
+        <span>{statusLabel[device.status]}{qualityWarning ? ` · ${qualityWarning}` : ''}</span>
       </div>
-      <div className="tenant-live-meter-value">{liveValue(device.total, device.unit)}</div>
+      <div className="tenant-live-meter-value">{liveValue(rejected ? null : device.total, device.unit)}</div>
+      <div className="tenant-live-meter-reading-label">{rejected ? 'Pembacaan terakhir tidak dipakai' : 'Angka meter kumulatif'}</div>
       {hasLivePower ? (
         <div className="tenant-live-meter-power">
-          <span className="live-power-watt" title="Daya real-time">
+            <span className="live-power-watt" title="Daya pada pembaruan terakhir">
             ⚡ {device.powerW!.toFixed(0)} W
           </span>
           {device.voltageV != null ? (
@@ -61,8 +69,13 @@ function LiveMeterTile({ device }: { device: TenantUtilityDevice }) {
           ) : null}
         </div>
       ) : null}
-      {isWater && device.flowRateLpm != null ? <div className="tenant-live-meter-flow">Aliran saat ini: {liveValue(device.flowRateLpm, 'L/menit')}</div> : null}
+      {isWater && !rejected && device.flowRateLpm != null ? <div className="tenant-live-meter-flow">Aliran saat ini: {liveValue(device.flowRateLpm, 'L/menit')}</div> : null}
       <small>{device.statusMessage}</small>
+      {device.observedAt ? (
+        <small className="tenant-live-meter-observed">
+          Terakhir dibaca {new Date(device.observedAt).toLocaleString('id-ID', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Jakarta' })} WIB
+        </small>
+      ) : null}
     </div>
   );
 }
@@ -88,41 +101,47 @@ export default function UtilityInsightCard({
   canRecord: boolean;
   onCatatMeter: () => void;
 }) {
+  const { toast } = useToast();
+  const [refreshCooldownSeconds, setRefreshCooldownSeconds] = useState(0);
   const publicConfig = useQuery({ queryKey: ['public-config'], queryFn: fetchPublicConfig });
-  const monthlyFreeKwh = publicConfig.data?.freeElectricityKwhPerMonth ?? 30;
   const waterEnabled = Boolean(publicConfig.data?.waterMeteringEnabled);
   const elecTariff = numeric(stay.room?.electricityTariffPerKwhRupiah ?? stay.electricityTariffPerKwhRupiah);
   const waterTariff = numeric(stay.room?.waterTariffPerM3Rupiah ?? stay.waterTariffPerM3Rupiah);
   const cycleElectricity = telemetry?.cycle?.electricity;
-  const freeKwh = cycleElectricity?.freeKwh ?? monthlyFreeKwh;
+  const freeKwh = cycleElectricity?.freeKwh ?? 0;
   const allowanceMonths = telemetry?.cycle?.allowanceMonths ?? 1;
+  const allowanceKnown = Boolean(cycleElectricity);
 
   const summary = useMemo(() => summarizeUsageSinceCheckIn(readings, stay.checkInDate), [readings, stay.checkInDate]);
-  const lastElecUsage = summary.latestRow?.usageElectricityKwh ?? 0;
-  const lastWaterUsage = summary.latestRow?.usageWaterM3 ?? 0;
+  const hasMeterElectricityUsage = useMemo(
+    () => summary.rows.filter((row) => typeof row.electricityKwh === 'number').length >= 2,
+    [summary.rows],
+  );
+  const hasMeterWaterUsage = useMemo(
+    () => summary.rows.filter((row) => typeof row.waterM3 === 'number').length >= 2,
+    [summary.rows],
+  );
 
   // Pemakaian bulan kalender berjalan (untuk gauge & estimasi biaya)
   const currentMonthUsage = useMemo(() => {
     const now = new Date();
-    const monthPrefix = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+    const dateParts = new Intl.DateTimeFormat('en-CA', {
+      timeZone: 'Asia/Jakarta', year: 'numeric', month: '2-digit', day: '2-digit',
+    }).formatToParts(now);
+    const part = (type: Intl.DateTimeFormatPartTypes) => dateParts.find((item) => item.type === type)?.value ?? '';
+    const monthPrefix = `${part('year')}-${part('month')}`;
     const monthRows = summary.rows.filter((r) => r.dateKey.startsWith(monthPrefix));
-    if (monthRows.length === 0) {
-      // Belum ada pencatatan bulan ini — fallback ke periode terakhir
-      return { electricityKwh: lastElecUsage, waterM3: lastWaterUsage, isPartialMonth: true };
-    }
-    const elecSum = monthRows.reduce((s, r) => s + (r.usageElectricityKwh ?? 0), 0);
+    const hasWaterData = hasMeterWaterUsage && monthRows.some((row) => typeof row.waterM3 === 'number');
     const waterSum = monthRows.reduce((s, r) => s + (r.usageWaterM3 ?? 0), 0);
-    // Parsial jika tenant masuk pertengahan bulan atau bulan belum berakhir
-    const isPartial = (stay.checkInDate && stay.checkInDate.startsWith(monthPrefix)) || now.getDate() < 25;
-    return { electricityKwh: elecSum, waterM3: waterSum, isPartialMonth: isPartial };
-  }, [summary.rows, stay.checkInDate, lastElecUsage, lastWaterUsage]);
+    return { waterM3: hasWaterData ? waterSum : 0, hasWaterData };
+  }, [hasMeterWaterUsage, summary.rows]);
 
-  const gaugeElecUsage = cycleElectricity?.usageKwh
-    ?? (currentMonthUsage.electricityKwh > 0 ? currentMonthUsage.electricityKwh : 0);
+  const gaugeElecUsage = cycleElectricity?.usageKwh ?? 0;
   const gaugeWaterUsage = currentMonthUsage.waterM3 > 0
     ? currentMonthUsage.waterM3
-    : Number(telemetry?.water?.total ?? 0);
+    : 0;
   const isIotFallback = telemetry?.cycle?.source === 'IOT_TELEMETRY';
+  const showWaterSensor = waterEnabled || Boolean(telemetry && telemetry.water.status !== 'NO_DEVICE');
 
   const estimate = useMemo(
     () => estimateUtilityCost({
@@ -135,6 +154,29 @@ export default function UtilityInsightCard({
     }),
     [gaugeElecUsage, gaugeWaterUsage, elecTariff, waterTariff, freeKwh, waterEnabled],
   );
+  const electricityEstimate = cycleElectricity?.estimatedChargeRupiah ?? null;
+  const canonicalElecTariff = cycleElectricity ? cycleElectricity.tariffRupiah : elecTariff;
+  const remainingFreeKwh = Math.max(0, freeKwh - gaugeElecUsage);
+  const excessKwh = Math.max(0, gaugeElecUsage - freeKwh);
+
+  const periodLabel = useMemo(() => {
+    if (!telemetry?.cycle) return 'Periode berjalan';
+    const format = (value: string) => new Date(value).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', timeZone: 'Asia/Jakarta' });
+    return `${format(telemetry.cycle.start)} – ${format(telemetry.cycle.end)}`;
+  }, [telemetry?.cycle]);
+
+  const sourceMeta = useMemo(() => {
+    if (!telemetry?.cycle) {
+      if (isTelemetryLoading) return { label: 'Menyiapkan snapshot', detail: 'Mengambil periode resmi dari server', tone: 'empty' };
+      if (isTelemetryError) return { label: 'Snapshot belum tersedia', detail: 'Riwayat lokal tidak digunakan untuk menebak tagihan', tone: 'review' };
+      return { label: 'Menunggu snapshot', detail: hasMeterElectricityUsage ? 'Catatan lokal tersedia, tetapi periode belum dapat diverifikasi' : 'Belum ada sumber pemakaian periode', tone: hasMeterElectricityUsage ? 'review' : 'empty' };
+    }
+    const source = telemetry.cycle.source;
+    if (source === 'METER_READING' && cycleElectricity?.billingReady !== false) return { label: 'Catatan meter resmi', detail: 'Siap untuk perhitungan tagihan', tone: 'official' };
+    if (source === 'METER_READING') return { label: 'Catatan perlu diperiksa', detail: 'Baseline atau catatan terbaru belum lengkap', tone: 'review' };
+    if (source === 'IOT_TELEMETRY') return { label: 'Perkiraan sensor', detail: 'Belum menjadi dasar tagihan', tone: 'sensor' };
+    return { label: 'Menunggu pencatatan', detail: 'Belum ada sumber pemakaian periode', tone: 'empty' };
+  }, [cycleElectricity?.billingReady, hasMeterElectricityUsage, isTelemetryError, isTelemetryLoading, telemetry?.cycle]);
 
   const trendPoints: HorizontalBarPoint[] = useMemo(
     () => summary.rows
@@ -149,201 +191,133 @@ export default function UtilityInsightCard({
     [summary.rows],
   );
 
-  const hasUsage = cycleElectricity?.usageKwh != null || summary.rows.length > 1;
+  const hasUsage = cycleElectricity?.usageKwh != null;
 
   // Manual refresh mutation
   const queryClient = useQueryClient();
   const refreshMutation = useMutation({
     mutationFn: refreshMyRoomMeter,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['portal-utility-telemetry'] });
-      queryClient.invalidateQueries({ queryKey: ['portal-meter-readings'] });
+    onSuccess: async (result) => {
+      if (result.total > 0) setRefreshCooldownSeconds(120);
+      toast(
+        result.synced > 0
+          ? `${result.synced}/${result.total} meter berhasil disinkronkan.`
+          : result.message ?? 'Tidak ada meter yang perlu disinkronkan.',
+        result.synced > 0 ? 'success' : 'info',
+      );
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: iotQueryKeys.tenantUtilityRoot }),
+        queryClient.invalidateQueries({ queryKey: ['portal-meter-readings'] }),
+        queryClient.invalidateQueries({ queryKey: ['tenant-meter-history'] }),
+      ]);
     },
+    onError: (error) => toast(getApiErrorMessage(error, 'Meter belum berhasil disinkronkan.'), 'danger'),
   });
+
+  useEffect(() => {
+    if (refreshCooldownSeconds <= 0) return;
+    const timer = window.setInterval(() => {
+      setRefreshCooldownSeconds((current) => Math.max(0, current - 1));
+    }, 1_000);
+    return () => window.clearInterval(timer);
+  }, [refreshCooldownSeconds > 0]);
 
   return (
     <Card className="tenant-utility-insight border-0">
       <Card.Body>
-        <div className="command-eyebrow">Konsumsi Listrik &amp; Air</div>
-        <h3 className="tenant-utility-insight-title">Pemakaian &amp; estimasi biaya</h3>
-
-        <section className="tenant-live-meter-panel" aria-live="polite" aria-label="Status meter otomatis">
-          <div className="tenant-live-meter-panel-head">
-            <strong>Status meter otomatis</strong>
-            <div className="d-flex align-items-center gap-2">
-              <span>Pembaruan dicek tiap menit</span>
-              <Button
-                size="sm"
-                variant="outline-secondary"
-                className="btn-refresh-meter"
-                disabled={refreshMutation.isPending}
-                onClick={() => refreshMutation.mutate()}
-                title="Sinkronkan data terbaru dari meteran (maks 1× per 2 menit)"
-              >
-                {refreshMutation.isPending ? (
-                  <><Spinner animation="border" size="sm" className="me-1" /> Menyegarkan…</>
-                ) : (
-                  <>🔄 Segarkan</>
-                )}
-              </Button>
-            </div>
+        <header className="tenant-utility-heading">
+          <div><div className="command-eyebrow">Konsumsi listrik &amp; air</div><h3 className="tenant-utility-insight-title">Ringkasan periode berjalan</h3></div>
+          <div className="tenant-utility-context">
+            <span>{periodLabel}</span>
+            <span className={`tenant-utility-source is-${sourceMeta.tone}`} title={sourceMeta.detail}>{sourceMeta.label}</span>
           </div>
-          {isTelemetryLoading ? (
-            <div className="tenant-live-meter-loading"><Spinner animation="border" size="sm" /> Memuat status meter…</div>
-          ) : isTelemetryError ? (
-            <p className="tenant-live-meter-error">Status meter otomatis belum tersedia. Pembacaan tagihan tidak terpengaruh.</p>
-          ) : telemetry ? (
-            <>
-              <div className="tenant-live-meter-grid">
-                <LiveMeterTile device={telemetry.electricity} />
-                <LiveMeterTile device={telemetry.water} />
-              </div>
-              {telemetry.water.status !== 'NO_DEVICE' ? (
-                <WaterFlowIndicator
-                  flowRateLpm={telemetry.water.flowRateLpm}
-                  totalM3={telemetry.water.total}
-                  status={telemetry.water.status}
-                  statusMessage={telemetry.water.statusMessage}
+        </header>
+
+        {(isLoading || isTelemetryLoading) && !hasUsage ? (
+          <div className="tenant-utility-skeleton" role="status"><Spinner animation="border" size="sm" /><span>Menyiapkan ringkasan pemakaian…</span></div>
+        ) : (isError || isTelemetryError) && !hasUsage ? (
+          <div className="tenant-utility-message is-error"><strong>Snapshot periode belum bisa dimuat</strong><span>Catatan meter tetap aman dan tidak dihitung ulang di perangkat ini. Muat ulang halaman untuk mencoba kembali.</span></div>
+        ) : !hasUsage ? (
+          <div className="tenant-utility-empty">
+            <p>Belum ada pemakaian periode yang dapat dihitung.</p>
+            <span>Catat angka awal dan terbaru agar pemakaian serta estimasi biaya muncul.</span>
+            <Button size="sm" variant="outline-primary" disabled={!canRecord} onClick={onCatatMeter} aria-describedby={!canRecord ? 'meter-window-help' : undefined}>Catat meter</Button>
+            {!canRecord ? <small id="meter-window-help">Pencatatan mandiri tersedia mulai H-10 sebelum kontrak berakhir.</small> : null}
+          </div>
+        ) : (
+          <section className="tenant-utility-period-card" aria-label={`Pemakaian ${periodLabel}`}>
+            <div className={`tenant-utility-period-body${freeKwh > 0 ? '' : ' no-gauge'}`}>
+              {allowanceKnown && freeKwh > 0 ? (
+                <DonutGauge
+                  value={gaugeElecUsage}
+                  max={freeKwh}
+                  center={<><strong>{Math.min(Math.round((gaugeElecUsage / freeKwh) * 100), 999)}%</strong><small>dari jatah</small></>}
+                  ariaLabel={`Pemakaian listrik ${gaugeElecUsage} dari ${freeKwh} kWh`}
+                  size={132}
+                  innerRadius={43}
+                  outerRadius={62}
+                  color={gaugeElecUsage > freeKwh ? '#dc2626' : gaugeElecUsage / freeKwh > 0.5 ? '#f59e0b' : '#16a34a'}
                 />
               ) : null}
-              <p className="tenant-live-meter-notice">{telemetry.billingNotice}</p>
-            </>
-          ) : null}
-        </section>
+              <div className="tenant-utility-primary-reading">
+                <span>Listrik terpakai</span>
+                <div className="ut-usage-row">
+                  <strong>{gaugeElecUsage.toFixed(2)} kWh</strong>
+                  {trendPoints.length >= 2 ? <Sparkline points={trendPoints} ariaLabel="Tren listrik mini" width={72} height={22} strokeColor={OKABE_ITO.blue} /> : null}
+                </div>
+                <small>{allowanceKnown ? freeKwh > 0 ? `Jatah ${freeKwh} kWh untuk ${allowanceMonths} bulan sewa` : `Tarif ${new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(canonicalElecTariff)}/kWh` : 'Menyiapkan informasi jatah listrik…'}</small>
+              </div>
+            </div>
+            <div className="tenant-utility-facts">
+              <div><span>{allowanceKnown ? excessKwh > 0 ? 'Melebihi jatah' : 'Sisa jatah' : 'Jatah listrik'}</span><strong>{allowanceKnown ? `${(excessKwh > 0 ? excessKwh : remainingFreeKwh).toFixed(2)} kWh` : '—'}</strong></div>
+              <div><span>Estimasi listrik</span><strong>{electricityEstimate == null ? '—' : <CurrencyDisplay amount={electricityEstimate} showZero />}</strong><small>{electricityEstimate == null ? 'Ditahan sampai sumber dan baseline valid' : sourceMeta.tone === 'official' ? 'Berdasar catatan meter' : 'Belum menjadi nominal final'}</small></div>
+              {waterEnabled ? <div><span>Air bulan berjalan</span><strong>{isLoading ? '…' : isError || !currentMonthUsage.hasWaterData ? '—' : `${gaugeWaterUsage.toFixed(2)} m³`}</strong><small>{isLoading ? 'Memuat catatan air…' : isError ? 'Riwayat air belum dapat dimuat' : currentMonthUsage.hasWaterData ? <>Est. <CurrencyDisplay amount={estimate.water} showZero /></> : 'Belum cukup catatan air bulan ini'}</small></div> : null}
+            </div>
+          </section>
+        )}
 
-        {/* Anomaly detection alerts */}
+        {telemetry?.cycle?.electricity?.resetDetected ? <div className="tenant-utility-message is-warning"><strong>Perubahan angka meter terdeteksi</strong><span>Pengelola perlu memeriksa baseline sebelum angka digunakan untuk tagihan.</span></div> : null}
+        {isIotFallback ? <div className="ut-iot-notice"><ShieldCheck size={16} aria-hidden="true" /><div><strong>Angka periode sementara berasal dari sensor</strong><span>Gunakan sebagai pemantauan. Tagihan resmi tetap menunggu catatan meter yang ditinjau pengelola.</span></div></div> : null}
+
         <AnomalyAlert readings={readings} utilityType="ELECTRICITY" />
         <AnomalyAlert readings={readings} utilityType="WATER" />
 
-        {isLoading ? (
-          <div className="py-4 text-center"><Spinner animation="border" size="sm" /></div>
-        ) : isError ? (
-          <p className="text-muted small mb-0">Status meter belum bisa dimuat. Coba muat ulang halaman.</p>
-        ) : !hasUsage ? (
-          <div className="tenant-utility-empty">
-            <p className="text-muted small mb-2">
-              Belum ada pemakaian tercatat untuk periode ini. Catat angka meter agar estimasi biaya muncul.
-            </p>
-            <Button size="sm" variant="outline-primary" disabled={!canRecord} onClick={onCatatMeter}
-              title={canRecord ? undefined : 'Pencatatan meter dibuka H-10 sebelum akhir kontrak'}>
-              Catat Meter
-            </Button>
+        <details className="tenant-monitoring-disclosure">
+          <summary>
+            <span className="tenant-monitoring-icon" aria-hidden="true"><Radio size={18} /></span>
+            <span className="tenant-monitoring-copy"><strong>Pemantauan otomatis</strong><small>Tidak digunakan langsung untuk tagihan</small></span>
+            <span className="tenant-monitoring-status">{isTelemetryLoading ? 'Memeriksa sensor…' : telemetry ? `${statusLabel[telemetry.electricity.status]}${showWaterSensor ? ` · Air ${statusLabel[telemetry.water.status]}` : ''}` : 'Status belum tersedia'}</span>
+            <ChevronDown className="tenant-monitoring-chevron" size={18} aria-hidden="true" />
+          </summary>
+          <div className="tenant-live-meter-panel" aria-live="polite" aria-busy={isTelemetryLoading}>
+            <div className="tenant-live-meter-panel-head">
+              <div><strong>Status sensor terbaru</strong><span>{telemetry?.refreshedAt ? `Diperbarui ${new Date(telemetry.refreshedAt).toLocaleString('id-ID', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Jakarta' })} WIB` : 'Pembaruan diperiksa otomatis setiap menit'}</span></div>
+              <Button size="sm" variant="outline-secondary" className="btn-refresh-meter" disabled={refreshMutation.isPending || refreshCooldownSeconds > 0} onClick={() => refreshMutation.mutate()} aria-label={refreshCooldownSeconds > 0 ? `Tunggu ${refreshCooldownSeconds} detik sebelum menyegarkan kembali` : 'Segarkan status sensor'}>
+                {refreshMutation.isPending ? <><Spinner animation="border" size="sm" /> Menyegarkan…</> : <><RefreshCw size={15} aria-hidden="true" /> {refreshCooldownSeconds > 0 ? `Tunggu ${refreshCooldownSeconds} dtk` : 'Segarkan'}</>}
+              </Button>
+            </div>
+            {isTelemetryLoading ? <div className="tenant-live-meter-loading"><Spinner animation="border" size="sm" /> Memuat status sensor…</div>
+              : isTelemetryError ? <p className="tenant-live-meter-error">Pemantauan otomatis sedang tidak tersedia. Catatan dan tagihan resmi tidak terpengaruh.</p>
+                : telemetry ? <><div className="tenant-live-meter-grid"><LiveMeterTile device={telemetry.electricity} />{showWaterSensor ? <LiveMeterTile device={telemetry.water} /> : null}</div><p className="tenant-live-meter-notice">{telemetry.billingNotice}</p></>
+                  : <p className="tenant-live-meter-error">Belum ada sensor yang terhubung ke kamar ini.</p>}
           </div>
-        ) : (
-          <>
-            {/* Live electricity usage gauge */}
-            <div className="tenant-utility-gauge-row">
-              <DonutGauge
-                value={gaugeElecUsage}
-                max={freeKwh}
-                center={<><strong>{Math.min(Math.round((gaugeElecUsage / freeKwh) * 100), 999)}%</strong><small>dari {freeKwh} kWh</small></>}
-                ariaLabel={`Pemakaian listrik ${gaugeElecUsage} dari ${freeKwh} kWh`}
-                size={140}
-                color={gaugeElecUsage > freeKwh ? '#dc2626' : gaugeElecUsage / freeKwh > 0.5 ? '#f59e0b' : '#16a34a'}
-              />
-              <UsageGauge
-                value={gaugeElecUsage}
-                maxValue={freeKwh}
-                unit="kWh"
-                label={cycleElectricity ? 'Listrik periode' : currentMonthUsage.isPartialMonth ? 'Listrik (parsial)' : 'Listrik'}
-                thresholds={{ warning: 50, danger: 100 }}
-                size={150}
-              />
-              {waterEnabled ? (
-                <UsageGauge
-                  value={gaugeWaterUsage}
-                  maxValue={Math.max(gaugeWaterUsage * 1.5, 5)}
-                  unit="m³"
-                  label="Air"
-                  thresholds={{ warning: 70, danger: 90 }}
-                  size={150}
-                />
-              ) : null}
-            </div>
+        </details>
 
-            <div className="tenant-utility-tiles">
-              <div className="tenant-utility-tile">
-                <span className="ut-label">Listrik periode ini</span>
-                <div className="ut-usage-row">
-                  <strong className="ut-usage">{gaugeElecUsage.toFixed(2)} kWh</strong>
-                  {trendPoints.length >= 2 ? (
-                    <Sparkline
-                      points={trendPoints}
-                      ariaLabel="Tren listrik mini"
-                      width={72}
-                      height={22}
-                      strokeColor={OKABE_ITO.blue}
-                    />
-                  ) : null}
-                </div>
-                <span className="ut-cost">est. <CurrencyDisplay amount={estimate.electricity} showZero /></span>
-                <small className="ut-note">Jatah gratis {freeKwh} kWh untuk {allowanceMonths} bulan sewa</small>
-              </div>
-              {waterEnabled ? (
-                <div className="tenant-utility-tile">
-                  <span className="ut-label">Air bulan ini</span>
-                  <strong className="ut-usage">{gaugeWaterUsage.toFixed(2)} m³</strong>
-                  <span className="ut-cost">est. <CurrencyDisplay amount={estimate.water} showZero /></span>
-                  <small className="ut-note">Tarif <CurrencyDisplay amount={waterTariff} />/m³</small>
-                </div>
-              ) : (
-                <div className="tenant-utility-tile">
-                  <span className="ut-label">Air</span>
-                  <strong className="ut-usage">—</strong>
-                  <small className="ut-note">Tagihan air belum diaktifkan pengelola</small>
-                </div>
-              )}
-            </div>
+        {hasUsage && trendPoints.length >= 2 ? <div className="tenant-utility-trend"><div className="ut-trend-head">Tren listrik berdasarkan pencatatan</div><LineAreaChart points={trendPoints} ariaLabel="Tren pemakaian listrik per pencatatan" valueFormatter={(v) => `${v} kWh`} height={180} /></div> : null}
 
-            {isIotFallback ? (
-              <div className="ut-iot-notice">📡 Data sensor IoT — bukan dasar tagihan</div>
-            ) : null}
-
-            {trendPoints.length >= 2 ? (
-              <div className="tenant-utility-trend">
-                <div className="ut-trend-head">Tren pemakaian listrik (kWh)</div>
-                <LineAreaChart
-                  points={trendPoints}
-                  ariaLabel="Tren pemakaian listrik per pencatatan"
-                  valueFormatter={(v) => `${v} kWh`}
-                  height={180}
-                />
-                {/* Mobile: fallback ke bar chart ringkas */}
-                <div className="d-sm-none mt-2">
-                  <HorizontalBarChart
-                    points={trendPoints}
-                    ariaLabel="Tren pemakaian listrik per pencatatan"
-                    valueFormatter={(v) => `${v} kWh`}
-                    height={Math.max(120, trendPoints.length * 32)}
-                    leftWidth={64}
-                    barSize={12}
-                  />
-                </div>
-              </div>
-            ) : null}
-
-            <div className="mt-3">
-              <UtilityProjection
-                currentUsageKwh={gaugeElecUsage}
-                freeKwh={freeKwh}
-                allowanceMonths={allowanceMonths}
-                tariffPerKwh={elecTariff}
-                estimatedCost={estimate.electricity}
-              />
-            </div>
-
-            <div className="tenant-utility-total">
-              Total sejak masuk:{' '}
-              <strong>
-                <AnimatedCounter value={summary.totalElectricityKwh} duration={900} formatter={(v) => `${v.toFixed(2)} kWh`} />
-              </strong>
-              {waterEnabled ? <> · <strong><AnimatedCounter value={summary.totalWaterM3} duration={900} formatter={(v) => `${v.toFixed(2)} m³`} /></strong></> : null}
-            </div>
-            <p className="text-muted small mb-0 mt-2">
-              Estimasi — nominal final dihitung admin saat siklus meter &amp; muncul di tagihan.
-            </p>
-          </>
-        )}
+        {hasUsage ? <>
+          {allowanceKnown && electricityEstimate != null ? <div className="mt-3"><UtilityProjection currentUsageKwh={gaugeElecUsage} freeKwh={freeKwh} allowanceMonths={allowanceMonths} tariffPerKwh={canonicalElecTariff} estimatedCost={electricityEstimate} /></div> : null}
+          {isLoading ? (
+            <div className="tenant-utility-total" role="status">Menyiapkan total catatan sejak masuk…</div>
+          ) : isError ? (
+            <div className="tenant-utility-total">Total catatan sejak masuk belum dapat dimuat.</div>
+          ) : hasMeterElectricityUsage || (waterEnabled && hasMeterWaterUsage) ? (
+            <div className="tenant-utility-total">Total catatan sejak masuk: {hasMeterElectricityUsage ? <strong>{summary.totalElectricityKwh.toFixed(2)} kWh</strong> : null}{hasMeterElectricityUsage && waterEnabled && hasMeterWaterUsage ? ' · ' : null}{waterEnabled && hasMeterWaterUsage ? <strong>{summary.totalWaterM3.toFixed(2)} m³</strong> : null}</div>
+          ) : (
+            <div className="tenant-utility-total">Belum cukup catatan manual untuk menghitung total sejak masuk.</div>
+          )}
+          <p className="tenant-utility-final-note">Estimasi bukan tagihan final. Nominal resmi muncul setelah catatan meter ditinjau pengelola.</p>
+        </> : null}
       </Card.Body>
     </Card>
   );

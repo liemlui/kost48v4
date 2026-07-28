@@ -14,6 +14,15 @@
 - [x] Crawl Playwright admin/owner lulus bersih; mobile 375px dashboard/stays/invoices/tickets tanpa overflow horizontal.
 - **Gate:** TypeScript backend dan frontend lulus.
 
+## Update 2026-07-29 — Hardening UI/UX IoT dan energi
+
+- [x] Dashboard IoT owner memprioritaskan perangkat bermasalah, membedakan online/offline/stale/nonaktif, dan menyediakan kartu mobile serta detail kualitas telemetri.
+- [x] Portal penghuni memisahkan snapshot periode resmi dari monitoring sensor; nilai kosong, loading, error, dan reset counter tidak lagi berubah menjadi angka nol atau estimasi palsu.
+- [x] Kalender bisnis meter diseragamkan ke WIB; tab, chart, gauge, modal, fokus keyboard, reduced motion, dan kontras diperkuat.
+- [x] Gate frontend lulus: 31 file/135 tes, 4 skenario Playwright + Axe, build TypeScript/Vite/PWA, serta pemeriksaan diff.
+- **Batas rilis:** artefak TGZ lama yang memuat seed historis/PII tidak termasuk commit ini; integrasi perangkat fisik tetap memerlukan UAT lapangan.
+
+
 1. **Orientasi:** buka bagian [ANTRIAN EKSEKUSI AKTIF](#antrian-eksekusi-aktif) di file ini.
 2. **Spesifikasi domain:** buka M-file yang ditunjuk fase/task (`M01`-`M09`).
 3. **Anchor kode:** grep **nama simbol/fungsi** di `backend/src` / `frontend/src` — **JANGAN** edit buta.

@@ -22,7 +22,7 @@ import {
 } from 'recharts';
 import type { OwnerDashboardTrendMonth } from '../../api/finance';
 import { fetchOwnerDashboardAggregate } from '../../api/ownerDashboard';
-import { getIotOverview } from '../../api/iot';
+import { getIotOverview, iotQueryKeys } from '../../api/iot';
 import { cc } from '../../config/chartPalette';
 import { generateBrief, getOwnerAiStatus, type BriefResult } from '../../api/ai';
 import AiAssistButton from '../../components/ai/AiAssistButton';
@@ -252,16 +252,16 @@ export default function OwnerDashboardPage() {
     : null;
   const isRefreshing = aggregateQuery.isFetching || ownerAiStatusQuery.isFetching;
 
-  const refreshDashboard = () => {
-    void Promise.all([aggregateQuery.refetch(), ownerAiStatusQuery.refetch()]);
-  };
-
   // IoT device health
   const iotQuery = useQuery({
-    queryKey: ['owner-iot-overview'],
+    queryKey: iotQueryKeys.overview,
     queryFn: getIotOverview,
     staleTime: 120_000,
   });
+
+  const refreshDashboard = () => {
+    void Promise.all([aggregateQuery.refetch(), ownerAiStatusQuery.refetch(), iotQuery.refetch()]);
+  };
 
   const extraSignals = useMemo(() => {
     const items: { key: string; label: string; helper: string; route: string; type: string }[] = [];
@@ -273,12 +273,13 @@ export default function OwnerDashboardPage() {
     if (!aggregateQuery.isLoading && !aggregateQuery.isError && readiness && !readiness.ready) {
       items.push({ key: 'readiness', label: 'Akuntansi belum siap', helper: `${readiness.missing.length} gate tersisa — skor ${readiness.score ?? 0}%`, route: '/finance/accounting-setup', type: 'outstanding' });
     }
-    // IoT device health
+    // A device that intentionally reports an offline cloud state is not an
+    // operational incident. Surface only data that has actually gone stale.
     const iotData = iotQuery.data;
-    if (!iotQuery.isLoading && !iotQuery.isError && iotData?.devices?.length) {
-      const offlineCount = iotData.devices.filter((d: any) => !d.online).length;
-      if (offlineCount > 0) {
-        items.push({ key: 'iot-offline', label: `${offlineCount} perangkat IoT offline`, helper: `${iotData.devices.filter((d: any) => d.online).length}/${iotData.devices.length} online — cek halaman IoT`, route: '/iot', type: 'overdue' });
+    if (!iotQuery.isLoading && !iotQuery.isError && (iotData?.summary?.enabled ?? 0) > 0) {
+      const staleCount = iotData?.summary?.stale ?? 0;
+      if (staleCount > 0) {
+        items.push({ key: 'iot-stale', label: `${staleCount} perangkat IoT belum mengirim data`, helper: 'Cek waktu pembaruan dan sinkronisasi perangkat.', route: '/iot', type: 'overdue' });
       }
     }
     return items;

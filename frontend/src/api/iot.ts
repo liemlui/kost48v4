@@ -5,6 +5,14 @@ export type IotProvider = 'TUYA' | 'KOST48_ESP32';
 export type IotDeviceType = 'ELECTRICITY_METER' | 'WATER_FLOW_METER';
 export type IotReadingQuality = 'GOOD' | 'SUSPECT' | 'REJECTED';
 
+export const iotQueryKeys = {
+  all: ['iot'] as const,
+  overview: ['iot', 'overview'] as const,
+  tenantUtility: (roomId?: number | null) => ['iot', 'tenant-utility', roomId ?? null] as const,
+  tenantUtilityRoot: ['iot', 'tenant-utility'] as const,
+  tenantTimeline: (roomId?: number | null) => ['iot', 'tenant-electricity-timeline', roomId ?? null] as const,
+};
+
 export type IotTelemetryValue = {
   id: string;
   metric: string;
@@ -39,6 +47,8 @@ export type IotDevice = {
 };
 
 export type IotOverview = {
+  /** Dikirim backend baru; client lama tetap memakai fallback 30 menit. */
+  staleAfterMinutes?: number;
   configuration: {
     tuya: {
       configured: boolean;
@@ -178,8 +188,8 @@ export async function getMyRoomElectricityTimeline(): Promise<TenantElectricityT
   return response.data.data;
 }
 
-export async function refreshMyRoomMeter(): Promise<{ synced: number; total: number; message?: string }> {
-  const response = await client.post<ApiEnvelope<{ synced: number; total: number; message?: string }>>('/iot/tenant/refresh');
+export async function refreshMyRoomMeter(): Promise<{ synced: number; total: number; failed: number; message?: string }> {
+  const response = await client.post<ApiEnvelope<{ synced: number; total: number; failed: number; message?: string }>>('/iot/tenant/refresh');
   return response.data.data;
 }
 

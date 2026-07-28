@@ -30,7 +30,7 @@ export const ownerSections: NavigationSection[] = [
       { to: '/finance/accounting-setup', label: 'Akuntansi & Aset', icon: '📘', hint: 'Bagan Akun, periode, saldo awal, jurnal, aset & depresiasi, dan refund kalah-cepat.', activePaths: ['/finance/accounting-setup', '/finance/assets', '/loss-refunds'] },
       { to: '/loyalty', label: 'Loyalitas & Reward', icon: '🎁', hint: 'Katalog reward, kelola poin, dan setujui penukaran tenant.' },
       { to: '/users', label: 'Akun & Layanan', icon: '👤', hint: 'Kelola akun owner/admin/staff/penghuni, layanan tambahan, dan minat tenant.', activePaths: ['/users', '/tenants', '/additional-services', '/service-interests'] },
-      { to: '/iot', label: 'IoT Listrik & Air', icon: '⚡', hint: 'Koneksi Tuya KWH, telemetry listrik, dan persiapan water meter ESP32.' },
+      { to: '/iot', label: 'IoT Listrik & Air', icon: '⚡', hint: 'Koneksi Tuya kWh, telemetri listrik, dan persiapan sensor air ESP32.' },
       { to: '/settings', label: 'Pengaturan', icon: '⚙️', hint: 'FAQ publik, foto kamar, konten halaman tamu, tarif dasar, dan konfigurasi AI.' },
     ],
   },
@@ -50,7 +50,7 @@ export const adminSections: NavigationSection[] = [
     links: [
       { to: '/tickets', label: 'Staff & Tiket', icon: '👷', hint: 'Tiket operasional, staff, checklist, laporan lapangan, dan kinerja.', activePaths: ['/tickets', '/staff-routines', '/staff-performance'] },
       { to: '/rooms', label: 'Kamar & Stok', icon: '🏘️', hint: 'Status kamar, barang kamar, stok gudang, mutasi stok, dan catatan meter.', activePaths: ['/rooms', '/inventory', '/room-items', '/inventory-items', '/inventory-movements', '/meter-readings'] },
-      { to: '/iot', label: 'IoT Listrik & Air', icon: '⚡', hint: 'Sinkronkan KWH Tuya dan pantau kesiapan water meter ESP32.' },
+      { to: '/iot', label: 'IoT Listrik & Air', icon: '⚡', hint: 'Sinkronkan meter kWh Tuya dan pantau kesiapan sensor air ESP32.' },
       { to: '/ac-maintenance', label: 'Perawatan AC', icon: '❄️', hint: 'Pantau pemakaian AC dan jadwalkan cuci AC secara konsisten.' },
     ],
   },
@@ -122,7 +122,7 @@ function getTenantSections(stage: TenantPortalStage = 'occupied', features?: Ten
     title: 'Portal Penghuni',
     links: [
       { to: '/portal/stay', label: 'Panduan Kos Saya', icon: '🏠', hint: 'Kamar, masa sewa, tagihan, dan aksi berikutnya.' },
-      { to: '/portal/energy', label: 'Energi', icon: '⚡', hint: 'Monitoring listrik & air real-time. Meteran otomatis.' },
+      { to: '/portal/energy', label: 'Energi', icon: '⚡', hint: 'Pantau pembacaan listrik & air terbaru dari meter otomatis.' },
       { to: '/portal/invoices', label: 'Bayar Tagihan', icon: '💳', hint: 'Tagihan, status, dan tindak lanjut pembayaran.' },
       { to: '/portal/tickets', label: 'Lapor Masalah', icon: '🛠️', hint: 'Laporkan kerusakan atau kebutuhan bantuan dan pantau progresnya.' },
       { to: '/portal/announcements', label: 'Pengumuman', icon: '📢', hint: 'Info terbaru dari pengelola KOST48.' },

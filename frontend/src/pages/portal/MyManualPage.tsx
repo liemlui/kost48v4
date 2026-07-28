@@ -47,7 +47,7 @@ const GUIDE_TABS = [
       },
       {
         heading: 'Hak & Kewajiban',
-        body: `HAK PENGHUNI:\n• Mendapatkan fasilitas sesuai yang tercantum di inventaris kamar.\n• Mendapatkan perbaikan gratis untuk kerusakan wajar (lampu, kran, shower, kloset, stop kontak, kebocoran).\n• Mendapatkan kuota listrik gratis 30 kWh/bulan.\n• Mendapatkan akses portal penghuni 24 jam untuk bayar, lapor, pantau meter.\n\nKEWAJIBAN PENGHUNI:\n• Membayar sewa tepat waktu sesuai jatuh tempo.\n• Menjaga fasilitas kos — kerusakan akibat kelalaian ditanggung penghuni.\n• Melapor ke pengelola jika ada masalah (kerusakan, gangguan, darurat).\n• Mengikuti aturan yang berlaku — pelanggaran berulang dapat berakibat pemutusan sewa.`,
+        body: `HAK PENGHUNI:\n• Mendapatkan fasilitas sesuai yang tercantum di inventaris kamar.\n• Mendapatkan perbaikan gratis untuk kerusakan wajar (lampu, kran, shower, kloset, stop kontak, kebocoran).\n• Mendapatkan jatah listrik sesuai kontrak dan konfigurasi kamar yang tampil di portal.\n• Mendapatkan akses portal penghuni 24 jam untuk bayar, lapor, pantau meter.\n\nKEWAJIBAN PENGHUNI:\n• Membayar sewa tepat waktu sesuai jatuh tempo.\n• Menjaga fasilitas kos — kerusakan akibat kelalaian ditanggung penghuni.\n• Melapor ke pengelola jika ada masalah (kerusakan, gangguan, darurat).\n• Mengikuti aturan yang berlaku — pelanggaran berulang dapat berakibat pemutusan sewa.`,
       },
     ],
   },
@@ -100,19 +100,19 @@ const GUIDE_TABS = [
     sections: [
       {
         heading: 'Cara Kerja',
-        body: `Setiap kamar punya meteran listrik digital (KWH meter Tuya).\nPemakaian listrik tercatat otomatis dan bisa kamu pantau di portal!`,
+        body: `Kamar menggunakan pencatatan meter resmi. Jika meter otomatis tersedia dan sudah dipetakan ke kamarmu, pembaruan sensor juga dapat dipantau di portal.\nData sensor bersifat monitoring; nominal tagihan tetap mengikuti catatan meter yang ditinjau pengelola.`,
       },
       {
-        heading: 'Kuota Gratis',
-        body: `• Listrik GRATIS 30 kWh per bulan.\n• Lebih dari 30 kWh: Rp2.500/kWh.\n• Contoh: pemakaian 45 kWh = 30 kWh gratis + 15 kWh × Rp2.500 = Rp37.500.\n• Kuota reset setiap awal bulan.`,
+        heading: 'Jatah & Tarif',
+        body: `• Besar jatah listrik gratis dan tarif kelebihan dapat berbeda menurut kontrak/kamar.\n• Nilai yang berlaku selalu ditampilkan pada halaman energi dan rincian tagihan.\n• Siklus mengikuti periode sewa/tagihan aktif, bukan otomatis awal bulan kalender.`,
       },
       {
         heading: 'Cara Catat Meter',
-        body: `1. Buka menu "Panduan Kos Saya" → klik tombol "Catat Meter".\n2. Masukkan angka yang tertera di meteran listrik kamarmu.\n3. Foto meteran sebagai bukti (opsional).\n4. Klik "Simpan" — pemakaian otomatis dihitung.\n\n📸 Tips: Foto meteran setiap tanggal 1 supaya catatan akurat.\n\n⏰ Jendela pencatatan: H-10 sebelum akhir sewa sampai H+3.`,
+        body: `1. Buka menu "Panduan Kos Saya" → klik tombol "Catat Meter".\n2. Masukkan angka yang tertera di meteran listrik kamarmu.\n3. Foto meteran sebagai bukti (opsional).\n4. Klik "Simpan" — pemakaian otomatis dihitung.\n\n📸 Tips: Pastikan angka dan seluruh layar meter terbaca jelas pada foto.\n\n⏰ Tombol pencatatan dibuka mulai H-10 sampai tanggal akhir sewa yang tampil di portal.`,
       },
       {
-        heading: 'Pantau Pemakaian Realtime',
-        body: `Di dashboard "Panduan Kos Saya", kamu bisa lihat:\n• Pemakaian kWh saat ini (live update tiap 10 menit).\n• Estimasi biaya listrik bulan ini.\n• Riwayat pemakaian 6 bulan terakhir.\n• Status meteran: online/offline.`,
+        heading: 'Pantau Pemakaian Terkini',
+        body: `Di dashboard "Panduan Kos Saya", kamu bisa melihat:\n• Pembacaan sensor terbaru, bila perangkat otomatis tersedia.\n• Pemakaian periode aktif dan simulasi biaya berdasarkan data yang tersedia.\n• Riwayat yang sudah tersimpan pada sistem.\n• Status koneksi serta kesegaran data meter.\n\nPortal memeriksa pembaruan secara berkala; ini bukan jaminan sensor mengirim nilai baru pada setiap pemeriksaan.`,
       },
       {
         heading: 'Hemat Listrik 💡',
@@ -135,7 +135,7 @@ const GUIDE_TABS = [
       },
       {
         heading: 'Jenis Tagihan',
-        body: `• Tagihan Sewa (bulanan / sesuai kontrak).\n• Tagihan Listrik (pemakaian di atas kuota gratis 30 kWh).\n• Tagihan WiFi (Rp50.000/bulan/perangkat — opsional).\n• Tagihan Kerusakan (jika ada, atas kelalaian penghuni).`,
+        body: `• Tagihan Sewa (bulanan / sesuai kontrak).\n• Tagihan Listrik (pemakaian di atas jatah yang berlaku pada kontrak/kamar).\n• Tagihan WiFi (Rp50.000/bulan/perangkat — opsional).\n• Tagihan Kerusakan (jika ada, atas kelalaian penghuni).`,
       },
       {
         heading: 'Jatuh Tempo & Keterlambatan',

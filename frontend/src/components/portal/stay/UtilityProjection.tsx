@@ -1,5 +1,4 @@
 import CurrencyDisplay from '../../common/CurrencyDisplay';
-import AnimatedCounter from '../../common/AnimatedCounter';
 
 type UtilityProjectionProps = {
   /** Current electricity usage this period (kWh) */
@@ -19,8 +18,10 @@ type UtilityProjectionProps = {
 };
 
 /**
- * Monthly bill projection — shows current usage vs free allowance,
- * estimated bill, and extrapolated end-of-month projection.
+ * Period cost estimate — shows the canonical usage snapshot vs free allowance,
+ * estimated bill, and (when dates are supplied) an end-of-period projection.
+ * Billing values are intentionally static: animating between stale and refreshed
+ * values can briefly display a contradictory cost/usage combination.
  */
 export default function UtilityProjection({
   currentUsageKwh,
@@ -31,8 +32,9 @@ export default function UtilityProjection({
   daysElapsed,
   daysTotal,
 }: UtilityProjectionProps) {
-  const usagePct = freeKwh > 0 ? Math.min(Math.round((currentUsageKwh / freeKwh) * 100), 200) : 0;
-  const overFree = currentUsageKwh > freeKwh;
+  const hasAllowance = freeKwh > 0;
+  const usagePct = hasAllowance ? Math.min(Math.round((currentUsageKwh / freeKwh) * 100), 200) : 0;
+  const overFree = hasAllowance && currentUsageKwh > freeKwh;
   const overFreeKwh = overFree ? currentUsageKwh - freeKwh : 0;
 
   // Extrapolate to end of period
@@ -45,35 +47,42 @@ export default function UtilityProjection({
   return (
     <div className="utility-projection">
       <div className="utility-projection-header">
-        <span className="utility-projection-title">📊 Proyeksi Tagihan</span>
+        <span className="utility-projection-title">📊 Estimasi biaya periode</span>
       </div>
 
       <div className="utility-projection-body">
         <div className="utility-projection-row">
           <span>Pemakaian saat ini</span>
-          <strong>
-            <AnimatedCounter value={currentUsageKwh} duration={700} formatter={(v) => `${v.toFixed(1)} kWh`} />
-          </strong>
+          <strong>{currentUsageKwh.toFixed(1)} kWh</strong>
         </div>
 
-        {overFree ? (
+        {!hasAllowance ? (
+          <div className="utility-projection-row">
+            <span>Skema listrik</span>
+            <strong>Tanpa jatah gratis</strong>
+          </div>
+        ) : overFree ? (
           <div className="utility-projection-row text-danger">
             <span>Melebihi jatah gratis</span>
-            <strong>
-              <AnimatedCounter value={overFreeKwh} duration={700} formatter={(v) => `+${v.toFixed(1)} kWh`} />
-            </strong>
+            <strong>+{overFreeKwh.toFixed(1)} kWh</strong>
           </div>
         ) : (
           <div className="utility-projection-row text-success">
             <span>Sisa jatah gratis</span>
-            <strong>
-              <AnimatedCounter value={freeKwh - currentUsageKwh} duration={700} formatter={(v) => `${v.toFixed(1)} kWh`} />
-            </strong>
+            <strong>{(freeKwh - currentUsageKwh).toFixed(1)} kWh</strong>
           </div>
         )}
 
-        {/* Usage progress bar */}
-        <div className="utility-projection-bar-track">
+        {/* Progress terhadap jatah hanya bermakna ketika jatah lebih dari nol. */}
+        {hasAllowance ? <div
+          className="utility-projection-bar-track"
+          role="progressbar"
+          aria-label="Pemakaian terhadap jatah listrik"
+          aria-valuemin={0}
+          aria-valuemax={Math.max(freeKwh, 1)}
+          aria-valuenow={Math.min(currentUsageKwh, Math.max(freeKwh, 1))}
+          aria-valuetext={`${currentUsageKwh.toFixed(1)} kWh terpakai dari jatah ${freeKwh.toFixed(1)} kWh`}
+        >
           <div
             className={`utility-projection-bar-fill ${overFree ? 'over' : ''}`}
             style={{ width: `${Math.min(usagePct, 100)}%` }}
@@ -84,7 +93,7 @@ export default function UtilityProjection({
               style={{ width: `${Math.min(usagePct - 100, 100)}%` }}
             />
           ) : null}
-        </div>
+        </div> : null}
 
         <div className="utility-projection-row">
           <span>Estimasi biaya listrik</span>
@@ -107,7 +116,7 @@ export default function UtilityProjection({
 
         <div className="utility-projection-rate">
           <small>
-            {allowanceMonths === 1 ? <>
+            {!hasAllowance ? <>Tarif: <CurrencyDisplay amount={tariffPerKwh} />/kWh · Seluruh pemakaian dihitung sesuai tarif</> : allowanceMonths === 1 ? <>
             Tarif: <CurrencyDisplay amount={tariffPerKwh} />/kWh · Jatah gratis {freeKwh} kWh/bulan
             </> : <>Tarif: <CurrencyDisplay amount={tariffPerKwh} />/kWh · Jatah gratis {freeKwh} kWh untuk {allowanceMonths} bulan sewa</>}
           </small>

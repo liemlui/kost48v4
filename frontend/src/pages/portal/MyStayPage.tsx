@@ -30,7 +30,6 @@ import StayAnnouncementBanner from '../../components/portal/stay/StayAnnouncemen
 import StayTabs from '../../components/portal/stay/StayTabs';
 import { useAuth } from '../../context/AuthContext';
 import { useTenantPortalStage } from '../../hooks/useTenantPortalStage';
-import { useIotTelemetrySse } from '../../hooks/useIotTelemetrySse';
 import type { PaginatedResponse } from '../../types';
 import type { CheckoutRequest, Invoice, MeterReading, RenewRequest, RoomItem, Stay, Ticket } from '../../types';
 import { getApiErrorMessage } from '../../utils/getApiErrorMessage';

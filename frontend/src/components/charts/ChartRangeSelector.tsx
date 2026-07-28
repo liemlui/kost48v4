@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import type { KeyboardEvent } from 'react';
 
 export type ChartGranularity = 'daily' | 'weekly' | 'monthly';
 
@@ -40,15 +40,23 @@ export default function ChartRangeSelector({
     ? [...DEFAULT_OPTIONS, ...extraOptions.map((o) => ({ key: o.key as ChartGranularity, label: o.label }))]
     : DEFAULT_OPTIONS;
 
-  const handleKeyDown = useCallback(
-    (e: React.KeyboardEvent, key: ChartGranularity) => {
-      if (e.key === 'Enter' || e.key === ' ') {
-        e.preventDefault();
-        onChange(key);
-      }
-    },
-    [onChange],
-  );
+  const handleKeyDown = (event: KeyboardEvent<HTMLButtonElement>, index: number) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      onChange(options[index].key);
+      return;
+    }
+    let nextIndex: number | null = null;
+    if (event.key === 'ArrowRight' || event.key === 'ArrowDown') nextIndex = (index + 1) % options.length;
+    if (event.key === 'ArrowLeft' || event.key === 'ArrowUp') nextIndex = (index - 1 + options.length) % options.length;
+    if (event.key === 'Home') nextIndex = 0;
+    if (event.key === 'End') nextIndex = options.length - 1;
+    if (nextIndex == null) return;
+    event.preventDefault();
+    onChange(options[nextIndex].key);
+    const group = event.currentTarget.parentElement;
+    requestAnimationFrame(() => (group?.querySelectorAll('button')[nextIndex!] as HTMLButtonElement | undefined)?.focus());
+  };
 
   return (
     <div
@@ -56,7 +64,7 @@ export default function ChartRangeSelector({
       role="radiogroup"
       aria-label={ariaLabel}
     >
-      {options.map((opt) => (
+      {options.map((opt, index) => (
         <button
           key={opt.key}
           type="button"
@@ -64,7 +72,7 @@ export default function ChartRangeSelector({
           aria-checked={value === opt.key}
           className={`chart-range-selector__btn${value === opt.key ? ' is-active' : ''}`}
           onClick={() => onChange(opt.key)}
-          onKeyDown={(e) => handleKeyDown(e, opt.key)}
+          onKeyDown={(event) => handleKeyDown(event, index)}
           tabIndex={value === opt.key ? 0 : -1}
         >
           {opt.label}

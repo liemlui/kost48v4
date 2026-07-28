@@ -37,6 +37,20 @@ export function formatDateOnly(value?: string | Date | null): string {
   }).format(date);
 }
 
+/** Date key untuk kontrak/API yang secara bisnis selalu mengikuti kalender WIB. */
+export function toDateKeyWib(value?: string | Date | null): string {
+  const date = parseDateTimeSafe(value);
+  if (!date) return '';
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    timeZone: DEFAULT_TIME_ZONE,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).formatToParts(date);
+  const read = (type: Intl.DateTimeFormatPartTypes) => parts.find((part) => part.type === type)?.value ?? '';
+  return `${read('year')}-${read('month')}-${read('day')}`;
+}
+
 export function formatClockWib(value?: string | Date | null): string {
   const date = parseDateTimeSafe(value);
   if (!date) return '-';

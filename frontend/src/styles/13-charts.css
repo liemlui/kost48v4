@@ -871,6 +871,12 @@
   .recharts-line-area {
     display: none;
   }
+
+  /* Halaman energi tidak menyediakan chart pengganti; pertahankan tren
+     periode yang ringkas agar pemilih Hari/Minggu/Bulan tetap bermakna. */
+  .energy-trend-section .recharts-line-area {
+    display: block;
+  }
 }
 
 /* ─── Invoice Breakdown Donut ─── */
@@ -993,6 +999,7 @@
   align-items: baseline;
   gap: 4px;
   margin-top: -8px;
+  color: #1e293b;
 }
 
 .usage-gauge-value strong {
@@ -1002,9 +1009,9 @@
 }
 
 .usage-gauge-value span {
-  font-size: 0.7rem;
-  font-weight: 600;
-  opacity: 0.8;
+  color: #475569;
+  font-size: 0.72rem;
+  font-weight: 650;
 }
 
 .usage-gauge-label {
@@ -1017,8 +1024,8 @@
 
 .usage-gauge-label small {
   display: block;
-  font-size: 0.65rem;
-  color: var(--text-muted);
+  font-size: 0.72rem;
+  color: #475569;
   font-weight: 400;
 }
 
@@ -1236,7 +1243,7 @@
 .chart-range-selector__btn {
   border: none;
   background: transparent;
-  color: #64748b;
+  color: #475569;
   font-size: 0.72rem;
   font-weight: 600;
   padding: 4px 12px;
@@ -1268,5 +1275,3 @@
   flex-direction: column;
   align-items: center;
 }
-
-

@@ -10,7 +10,7 @@ import { decideRenewRequest, listMyRenewRequests } from '../../../api/renewReque
 import { listMyCheckoutRequests } from '../../../api/checkoutRequests';
 import { listMyPaymentSubmissions } from '../../../api/paymentSubmissions';
 import { getMeterReadingsByRoom } from '../../../api/meterReadings';
-import { getMyRoomUtilityTelemetry, type TenantRoomUtilityTelemetry } from '../../../api/iot';
+import { getMyRoomUtilityTelemetry, iotQueryKeys, type TenantRoomUtilityTelemetry } from '../../../api/iot';
 import { fetchPublicConfig } from '../../../api/settings';
 import CheckoutRequestModal from '../../checkout-requests/CheckoutRequestModal';
 import RenewRequestModal from '../../tenant/RenewRequestModal';
@@ -22,7 +22,6 @@ import UtilityInsightCard from './UtilityInsightCard';
 import StayQuickActions from './StayQuickActions';
 import StayAnnouncementBanner from './StayAnnouncementBanner';
 import StayTabs from './StayTabs';
-import { useIotTelemetrySse } from '../../../hooks/useIotTelemetrySse';
 import type { PaginatedResponse } from '../../../types';
 import type { CheckoutRequest, Invoice, MeterReading, RenewRequest, RoomItem, Stay, Ticket } from '../../../types';
 import { getApiErrorMessage } from '../../../utils/getApiErrorMessage';
@@ -35,6 +34,46 @@ import {
 } from '../../../pages/portal/myStayShared';
 import { acCapacityLabel, roomBathroomLabel, roomSizeLabel, roomMaxOccupants } from '../../../utils/roomFacilitySpec';
 import { formatAcHoursEstimate } from '../../../utils/acUsageEstimate';
+
+function StayUtilityDetails({
+  stay,
+  telemetry,
+  isTelemetryLoading,
+  isTelemetryError,
+  canRecord,
+  onCatatMeter,
+}: {
+  stay: Stay;
+  telemetry?: TenantRoomUtilityTelemetry;
+  isTelemetryLoading: boolean;
+  isTelemetryError: boolean;
+  canRecord: boolean;
+  onCatatMeter: () => void;
+}) {
+  const startKey = stay.checkInDate ? toDateKey(new Date(stay.checkInDate)) : '';
+  const endKey = toDateKey(new Date());
+  const readingsQuery = useQuery<MeterReading[]>({
+    queryKey: ['tenant-meter-history', stay.roomId, startKey, endKey],
+    queryFn: () => getMeterReadingsByRoom(stay.roomId, { from: startKey, to: endKey, limit: 100 }),
+    enabled: Boolean(stay.roomId && startKey),
+    staleTime: 60_000,
+    retry: false,
+  });
+
+  return (
+    <UtilityInsightCard
+      stay={stay}
+      readings={readingsQuery.data ?? []}
+      isLoading={readingsQuery.isLoading}
+      isError={readingsQuery.isError}
+      telemetry={telemetry}
+      isTelemetryLoading={isTelemetryLoading}
+      isTelemetryError={isTelemetryError}
+      canRecord={canRecord}
+      onCatatMeter={onCatatMeter}
+    />
+  );
+}
 
 export default function ActiveStayContent({ stay }: { stay: Stay }) {
   const queryClient = useQueryClient();
@@ -133,7 +172,7 @@ export default function ActiveStayContent({ stay }: { stay: Stay }) {
   });
 
   const utilityTelemetryQuery = useQuery<TenantRoomUtilityTelemetry>({
-    queryKey: ['portal-utility-telemetry', stay.roomId],
+    queryKey: iotQueryKeys.tenantUtility(stay.roomId),
     queryFn: getMyRoomUtilityTelemetry,
     enabled: Boolean(stay.roomId),
     staleTime: 20_000,
@@ -142,10 +181,11 @@ export default function ActiveStayContent({ stay }: { stay: Stay }) {
     retry: false,
   });
 
-  // SSE real-time telemetry updates (invalidates React Query cache)
-  useIotTelemetrySse(Boolean(stay.roomId));
+  // Telemetry uses only the bounded refresh query above on shared hosting.
 
   // ── derived data ────────────────────────────────────────────────────────────
+
+  const activeCycleUsageKwh = utilityTelemetryQuery.data?.cycle?.electricity?.usageKwh;
 
   const invoices = invoicesQuery.data?.items ?? [];
   const paymentSubmissions = submissionsQuery.data?.items ?? [];
@@ -452,21 +492,28 @@ export default function ActiveStayContent({ stay }: { stay: Stay }) {
       <StayTabs>
         {(activeTab) => (
           <>
-            <div hidden={activeTab !== 'ringkasan'}>
+            <div id="stay-panel-ringkasan" role="tabpanel" aria-label="Ringkasan" hidden={activeTab !== 'ringkasan'}>
               <div className="tenant-stay-dashboard-grid">
                 <div className="tenant-stay-col-left">
-          {/* ── Konsumsi listrik & air + estimasi ── */}
-          <UtilityInsightCard
-            stay={stay}
-            readings={monthMeterReadings}
-            isLoading={meterReadingsQuery.isLoading}
-            isError={meterReadingsQuery.isError}
-            telemetry={utilityTelemetryQuery.data}
-            isTelemetryLoading={utilityTelemetryQuery.isLoading}
-            isTelemetryError={utilityTelemetryQuery.isError}
-            canRecord={meterWindow.windowOpen}
-            onCatatMeter={() => setShowMeter(true)}
-          />
+          {/* Ringkasan ringan; panel grafik lengkap hanya di tab Listrik & Air. */}
+          <Card className="content-card border-0">
+            <Card.Body className="d-flex flex-wrap align-items-center justify-content-between gap-3">
+              <div>
+                <div className="command-eyebrow">Listrik &amp; Air</div>
+                <strong className="d-block">
+                  {utilityTelemetryQuery.isLoading
+                    ? 'Menyiapkan snapshot periode…'
+                    : utilityTelemetryQuery.isError
+                      ? 'Snapshot periode belum dapat dimuat'
+                    : activeCycleUsageKwh == null
+                    ? 'Pemakaian periode belum tersedia'
+                    : `${activeCycleUsageKwh.toFixed(2)} kWh periode ini`}
+                </strong>
+                <small className="text-muted">{utilityTelemetryQuery.isError ? 'Catatan meter tetap aman; buka detail untuk mencoba kembali.' : 'Monitoring sensor terpisah dari pembacaan resmi tagihan.'}</small>
+              </div>
+              <Link to="/portal/energy" className="btn btn-sm btn-outline-primary">Buka detail energi</Link>
+            </Card.Body>
+          </Card>
 
           {/* ── Compact dossier card ── */}
           <Card className="tenant-stay-main-card border-0">
@@ -801,18 +848,17 @@ export default function ActiveStayContent({ stay }: { stay: Stay }) {
         </div>{/* tenant-stay-col-right */}
       </div>{/* tenant-stay-dashboard-grid */}
             </div>{/* ringkasan tab */}
-            <div hidden={activeTab !== 'listrik'} className="tenant-stay-col-full">
-              <UtilityInsightCard
-                stay={stay}
-                readings={monthMeterReadings}
-                isLoading={meterReadingsQuery.isLoading}
-                isError={meterReadingsQuery.isError}
-                telemetry={utilityTelemetryQuery.data}
-                isTelemetryLoading={utilityTelemetryQuery.isLoading}
-                isTelemetryError={utilityTelemetryQuery.isError}
-                canRecord={meterWindow.windowOpen}
-                onCatatMeter={() => setShowMeter(true)}
-              />
+            <div id="stay-panel-listrik" role="tabpanel" aria-label="Listrik dan air" hidden={activeTab !== 'listrik'} className="tenant-stay-col-full">
+              {activeTab === 'listrik' ? (
+                <StayUtilityDetails
+                  stay={stay}
+                  telemetry={utilityTelemetryQuery.data}
+                  isTelemetryLoading={utilityTelemetryQuery.isLoading}
+                  isTelemetryError={utilityTelemetryQuery.isError}
+                  canRecord={meterWindow.windowOpen}
+                  onCatatMeter={() => setShowMeter(true)}
+                />
+              ) : null}
               <div className="text-end mt-2">
                 <Link to="/portal/energy" className="tenant-energy-link">
                   Lihat detail energi →{" "}
@@ -820,7 +866,7 @@ export default function ActiveStayContent({ stay }: { stay: Stay }) {
                 </Link>
               </div>
             </div>{/* listrik tab */}
-            <div hidden={activeTab !== 'kamar'} className="tenant-stay-col-full">
+            <div id="stay-panel-kamar" role="tabpanel" aria-label="Kamar dan riwayat" hidden={activeTab !== 'kamar'} className="tenant-stay-col-full">
               <SatisfactionSurveyCard />
               <StayHistoryTimeline
                 stay={stay}
@@ -845,9 +891,9 @@ export default function ActiveStayContent({ stay }: { stay: Stay }) {
       <MeterCycleModal show={showMeter} onHide={() => setShowMeter(false)} stay={stay} onDone={() => {
         queryClient.invalidateQueries({ queryKey: ['portal-invoices'] });
         queryClient.invalidateQueries({ queryKey: ['portal-meter-readings', stay.roomId] });
+        queryClient.invalidateQueries({ queryKey: ['tenant-meter-history', stay.roomId] });
         queryClient.invalidateQueries({ queryKey: ['portal-stay'] });
       }} />
     </>
   );
 }
-

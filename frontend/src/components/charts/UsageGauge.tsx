@@ -114,7 +114,7 @@ export default function UsageGauge({
       </svg>
 
       {showValue ? (
-        <div className="usage-gauge-value" style={{ color }}>
+        <div className="usage-gauge-value">
           <strong>{isEmpty ? '—' : value.toFixed(1)}</strong>
           <span>{unit}</span>
         </div>

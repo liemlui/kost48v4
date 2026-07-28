@@ -23,7 +23,7 @@ import { fetchAdminDashboardAggregate } from '../../api/adminDashboard';
 import { fetchAutoOpsStatus } from '../../api/autoOps';
 import { fetchAdminStaffPerformance } from '../../api/staffPerformance';
 import { getSurveySummary } from '../../api/surveys';
-import { getIotOverview } from '../../api/iot';
+import { getIotOverview, iotQueryKeys } from '../../api/iot';
 import { useOperationalStressIndex } from '../../hooks/useOperationalStressIndex';
 import { useClientPagination } from '../../hooks/useClientPagination';
 import { dedupeCommandItems } from '../../utils/commandCenterDedup';
@@ -320,21 +320,23 @@ export default function AdminDashboard() {
 
   // IoT device health
   const iotOverviewQuery = useQuery({
-    queryKey: ['dashboard-iot-overview'],
+    queryKey: iotQueryKeys.overview,
     queryFn: getIotOverview,
     staleTime: 60_000,
     refetchInterval: 120_000,
+    enabled: activeArea === 'overview',
   });
   const iotOverview = iotOverviewQuery.data;
-  const iotOnlineCount = iotOverview?.devices?.filter((d: any) => d.online).length ?? 0;
-  const iotTotalCount = iotOverview?.devices?.length ?? 0;
+  const iotEnabledCount = iotOverview?.summary?.enabled ?? 0;
+  const iotStaleCount = iotOverview?.summary?.stale ?? 0;
+  const iotFreshCount = Math.max(0, iotEnabledCount - iotStaleCount);
   const iotLastSync = iotOverview?.devices?.reduce((latest: number, d: any) => {
     const ts = d.lastSuccessfulSyncAt ? new Date(d.lastSuccessfulSyncAt).getTime() : 0;
     return ts > latest ? ts : latest;
   }, 0) ?? 0;
 
   const refreshDashboard = () => {
-    void Promise.all([aggregateQuery.refetch(), autoOpsQuery.refetch()]);
+    void Promise.all([aggregateQuery.refetch(), autoOpsQuery.refetch(), iotOverviewQuery.refetch()]);
   };
 
   const supportQueriesLoading = staffPerformanceQuery.isLoading || autoOpsQuery.isLoading;
@@ -383,10 +385,10 @@ export default function AdminDashboard() {
         />
       ) : null}
       {/* IoT Device Health Strip */}
-      {activeArea === 'overview' && iotTotalCount > 0 ? (
-        <div className="d-flex align-items-center gap-3 mt-2 mb-1 p-2 rounded-3" style={{ background: iotOnlineCount === iotTotalCount ? '#f0fdf4' : '#fffbeb', border: `1px solid ${iotOnlineCount === iotTotalCount ? '#bbf7d0' : '#fcd34d'}` }}>
-          <span style={{ fontSize: '1.1rem' }}>{iotOnlineCount === iotTotalCount ? '✅' : '⚠️'}</span>
-          <span className="fw-semibold small">{iotOnlineCount}/{iotTotalCount} perangkat IoT online</span>
+      {activeArea === 'overview' && iotEnabledCount > 0 ? (
+        <div className="d-flex align-items-center gap-3 mt-2 mb-1 p-2 rounded-3" style={{ background: iotStaleCount === 0 ? '#f0fdf4' : '#fffbeb', border: `1px solid ${iotStaleCount === 0 ? '#bbf7d0' : '#fcd34d'}` }}>
+          <span style={{ fontSize: '1.1rem' }}>{iotStaleCount === 0 ? '✅' : '⚠️'}</span>
+          <span className="fw-semibold small">{iotStaleCount === 0 ? `${iotFreshCount}/${iotEnabledCount} perangkat dengan data terbaru` : `${iotStaleCount} dari ${iotEnabledCount} perangkat belum mengirim data terbaru`}</span>
           {iotLastSync > 0 ? (
             <span className="text-muted small">
               · Sinkron {Math.round((Date.now() - iotLastSync) / 60_000)} menit lalu

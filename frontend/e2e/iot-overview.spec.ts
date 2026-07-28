@@ -1,6 +1,10 @@
 import { expect, test, type Page } from '@playwright/test';
 
 const BASE = process.env.E2E_BASE ?? 'http://127.0.0.1:5174';
+const OWNER_IDENTIFIER = process.env.E2E_OWNER_IDENTIFIER;
+const OWNER_PASSWORD = process.env.E2E_OWNER_PASSWORD;
+const ADMIN_IDENTIFIER = process.env.E2E_ADMIN_IDENTIFIER;
+const ADMIN_PASSWORD = process.env.E2E_ADMIN_PASSWORD;
 
 async function login(page: Page, identifier: string, password: string) {
   await page.goto(`${BASE}/login`);
@@ -13,6 +17,7 @@ async function login(page: Page, identifier: string, password: string) {
 
 test.describe('IoT Listrik & Air', () => {
   test('OWNER: telemetry Tuya, filter, modal, responsive, dan console bersih', async ({ page }) => {
+    test.skip(!OWNER_IDENTIFIER || !OWNER_PASSWORD, 'Isi E2E_OWNER_IDENTIFIER dan E2E_OWNER_PASSWORD untuk menjalankan test owner.');
     test.setTimeout(90_000);
     const findings: string[] = [];
     page.on('pageerror', (error) => findings.push(`pageerror: ${error.message}`));
@@ -24,22 +29,18 @@ test.describe('IoT Listrik & Air', () => {
     });
 
     await page.setViewportSize({ width: 1440, height: 1000 });
-    await login(page, 'owner@kost48.com', 'Owner#2026');
+    await login(page, OWNER_IDENTIFIER!, OWNER_PASSWORD!);
     await page.goto(`${BASE}/iot`);
     await expect(page.getByRole('heading', { name: 'IoT Listrik & Air' })).toBeVisible();
-    await expect(page.getByText('Mode aman read-only.')).toBeVisible();
-    await expect(page.getByText('13', { exact: true }).first()).toBeVisible();
-    await expect(page.locator('.iot-device-table tbody tr')).toHaveCount(13);
-    await expect(page.getByText('KWH Kmr A', { exact: true })).toBeVisible();
-    await expect(page.getByRole('heading', { name: 'Tuya KWH', exact: true })).toBeVisible();
+    await expect(page.getByText('Pemantauan aman.')).toBeVisible();
+    await expect(page.locator('.iot-kpi-grid')).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Tuya kWh', exact: true })).toBeVisible();
     await page.screenshot({ path: 'e2e-out/iot-owner-desktop.png', fullPage: true });
 
-    await page.getByRole('button', { name: 'ESP32 Air' }).click();
-    await expect(page.getByRole('heading', { name: 'Belum ada perangkat pada kategori ini' })).toBeVisible();
     await page.getByRole('button', { name: 'Tambah perangkat', exact: true }).click();
     await expect(page.getByRole('dialog')).toBeVisible();
-    await expect(page.getByLabel('Provider', { exact: true })).toHaveValue('TUYA');
-    await page.getByLabel('Provider', { exact: true }).selectOption('KOST48_ESP32');
+    await expect(page.getByLabel('Jenis koneksi', { exact: true })).toHaveValue('TUYA');
+    await page.getByLabel('Jenis koneksi', { exact: true }).selectOption('KOST48_ESP32');
     await expect(page.getByLabel('Tuya device ID')).toHaveCount(0);
     await expect(page.getByText('ESP32 akan memakai HMAC device secret')).toBeVisible();
     await page.getByRole('button', { name: 'Batal' }).click();
@@ -50,16 +51,22 @@ test.describe('IoT Listrik & Air', () => {
     await expect(page.getByRole('heading', { name: 'IoT Listrik & Air' })).toBeVisible();
     await expect(page.getByRole('button', { name: 'Sinkronkan Tuya' })).toBeVisible();
     await expect(page.locator('.iot-kpi-grid')).toBeVisible();
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
+    if (await page.locator('.iot-device-mobile-card').count()) {
+      await expect(page.locator('.iot-device-mobile-card').first()).toBeVisible();
+      await expect(page.locator('.iot-device-desktop')).toBeHidden();
+    }
     await page.screenshot({ path: 'e2e-out/iot-owner-mobile.png', fullPage: false });
 
     expect(findings).toEqual([]);
   });
 
   test('ADMIN: route dan data IoT dapat dibaca', async ({ page }) => {
-    await login(page, 'admin@kost48.com', 'admin123');
+    test.skip(!ADMIN_IDENTIFIER || !ADMIN_PASSWORD, 'Isi E2E_ADMIN_IDENTIFIER dan E2E_ADMIN_PASSWORD untuk menjalankan test admin.');
+    await login(page, ADMIN_IDENTIFIER!, ADMIN_PASSWORD!);
     await page.goto(`${BASE}/iot`);
     await expect(page.getByRole('heading', { name: 'IoT Listrik & Air' })).toBeVisible();
-    await expect(page.locator('.iot-device-table tbody tr')).toHaveCount(13);
+    await expect(page.locator('.iot-kpi-grid')).toBeVisible();
     await expect(page.getByRole('button', { name: 'Sinkronkan Tuya' })).toBeVisible();
   });
 });

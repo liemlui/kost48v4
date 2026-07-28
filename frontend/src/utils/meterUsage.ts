@@ -1,4 +1,5 @@
 import type { MeterReading, MeterRow } from '../types';
+import { toDateKeyWib } from './dateTime';
 
 export function numeric(value: number | string | null | undefined): number {
   const parsed = Number(value ?? 0);
@@ -7,10 +8,12 @@ export function numeric(value: number | string | null | undefined): number {
 
 // Bangun baris meter per-tanggal + hitung selisih pemakaian (usage) dari catatan sebelumnya.
 export function buildMeterRows(readings: MeterReading[]): MeterRow[] {
-  const sorted = [...readings].sort((a, b) => new Date(a.readingAt).getTime() - new Date(b.readingAt).getTime());
+  const sorted = readings
+    .filter((reading) => Boolean(toDateKeyWib(reading.readingAt)))
+    .sort((a, b) => new Date(a.readingAt).getTime() - new Date(b.readingAt).getTime());
   const grouped = new Map<string, MeterRow>();
   sorted.forEach((reading) => {
-    const dateKey = String(reading.readingAt).slice(0, 10);
+    const dateKey = toDateKeyWib(reading.readingAt);
     const row = grouped.get(dateKey) ?? { dateKey, readingAt: reading.readingAt };
     if (String(reading.utilityType).toUpperCase() === 'ELECTRICITY') row.electricityKwh = numeric(reading.readingValue);
     if (String(reading.utilityType).toUpperCase() === 'WATER') row.waterM3 = numeric(reading.readingValue);
@@ -36,15 +39,13 @@ export function buildMeterRows(readings: MeterReading[]): MeterRow[] {
 // Pisahkan catatan: sejak penghuni masuk vs sebelum masuk (catatan kamar lama).
 export function categorizeReadings(readings: MeterReading[], checkInDate?: string) {
   if (!checkInDate) return { sinceCheckIn: readings, beforeCheckIn: [] as MeterReading[] };
-  const checkIn = new Date(checkInDate);
-  if (Number.isNaN(checkIn.getTime())) return { sinceCheckIn: readings, beforeCheckIn: [] as MeterReading[] };
-  checkIn.setHours(0, 0, 0, 0);
+  const checkInKey = toDateKeyWib(checkInDate);
+  if (!checkInKey) return { sinceCheckIn: readings, beforeCheckIn: [] as MeterReading[] };
   const sinceCheckIn: MeterReading[] = [];
   const beforeCheckIn: MeterReading[] = [];
   readings.forEach((reading) => {
-    const d = new Date(reading.readingAt);
-    d.setHours(0, 0, 0, 0);
-    (d >= checkIn ? sinceCheckIn : beforeCheckIn).push(reading);
+    const readingKey = toDateKeyWib(reading.readingAt);
+    (readingKey && readingKey >= checkInKey ? sinceCheckIn : beforeCheckIn).push(reading);
   });
   return { sinceCheckIn, beforeCheckIn };
 }
