@@ -6,12 +6,10 @@ import { PrismaService } from '../../prisma/prisma.service';
 import { CreateIotDeviceDto, IotDeviceQueryDto, IotTelemetryQueryDto, UpdateIotDeviceDto } from './dto/iot-device.dto';
 import { DeviceCredentialService } from './device-credential.service';
 import { TuyaClientService } from './tuya/tuya-client.service';
-import { getTuyaStatusDefinitions, normalizeTuyaStatus, tuyaObservedAt } from './tuya/tuya-normalizer';
-import { IotSseService } from './iot-sse.service';
+import { getTuyaStatusDefinitions, isSupportedTuyaStatusCode, normalizeTuyaStatus, tuyaObservedAt } from './tuya/tuya-normalizer';
 import { createHash } from 'crypto';
 import { SettingsService } from '../settings/settings.service';
-import { getUtilityAllowanceMonths, getUtilityBillingCycle } from '../../common/business/utility-billing-cycle.helper';
-import { startOfJakartaBusinessDay } from '../../common/utils/date.util';
+import { getUtilityAllowanceMonths, getUtilityBillingCycle, toUtilityCycleInstantRange } from '../../common/business/utility-billing-cycle.helper';
 
 const deviceInclude = {
   room: { select: { id: true, code: true, name: true } },
@@ -22,9 +20,43 @@ const deviceInclude = {
   },
 };
 
-function jakartaDateKey(value: Date) {
-  return startOfJakartaBusinessDay(value).toISOString().slice(0, 10);
+type TenantElectricityTimelineRow = {
+  dateKey: string;
+  observedAt: Date;
+  valueDecimal: { toString(): string } | number | string;
+  quality: IotReadingQuality;
+};
+
+export function resolveIotStaleAfterMinutes(raw = process.env.IOT_STALE_AFTER_MINUTES): number {
+  const parsed = Number(raw ?? 30);
+  return Number.isFinite(parsed) ? Math.max(1, Math.min(1_440, parsed)) : 30;
 }
+
+export function resolveTenantElectricityUsage(
+  meterUsage: number | null,
+  telemetryUsage: number | null,
+) {
+  const meterResetDetected = meterUsage !== null && meterUsage < 0;
+  const telemetryResetDetected = telemetryUsage !== null && telemetryUsage < 0;
+  const usableMeter = meterResetDetected ? null : meterUsage;
+  const usableTelemetry = telemetryResetDetected ? null : telemetryUsage;
+  const source = usableMeter !== null
+    ? 'METER_READING' as const
+    : usableTelemetry !== null
+      ? 'IOT_TELEMETRY' as const
+      : 'NONE' as const;
+
+  return {
+    source,
+    usageKwh: usableMeter ?? usableTelemetry,
+    usableMeter,
+    usableTelemetry,
+    billingReady: usableMeter !== null,
+    resetDetected: meterResetDetected || telemetryResetDetected,
+  };
+}
+
+const IOT_TUYA_DEVICE_LOCK_BASE = 48_150_000;
 
 @Injectable()
 export class IotService {
@@ -33,15 +65,16 @@ export class IotService {
     private readonly audit: AuditLogService,
     private readonly tuya: TuyaClientService,
     private readonly credentials: DeviceCredentialService,
-    private readonly sse: IotSseService,
     private readonly settings: SettingsService,
   ) {}
 
   async overview(query: IotDeviceQueryDto = {}) {
     const devices = await this.listDevices(query);
     const now = Date.now();
-    const staleAfterMs = Number(process.env.IOT_STALE_AFTER_MINUTES ?? 30) * 60_000;
+    const staleAfterMinutes = resolveIotStaleAfterMinutes();
+    const staleAfterMs = staleAfterMinutes * 60_000;
     return {
+      staleAfterMinutes,
       configuration: {
         tuya: this.tuya.getConfigurationStatus(),
         esp32CredentialVaultConfigured: this.credentials.isConfigured(),
@@ -51,26 +84,13 @@ export class IotService {
       summary: {
         total: devices.length,
         enabled: devices.filter((item) => item.enabled).length,
-        online: devices.filter((item) => item.online === true).length,
+        online: devices.filter((item) => item.enabled && item.online === true).length,
         stale: devices.filter((item) => item.enabled && (!item.lastSeenAt || now - new Date(item.lastSeenAt).getTime() > staleAfterMs)).length,
         tuya: devices.filter((item) => item.provider === IotProvider.TUYA).length,
         water: devices.filter((item) => item.deviceType === IotDeviceType.WATER_FLOW_METER).length,
       },
       devices,
     };
-  }
-
-  /**
-   * Lightweight query: get the tenant's active stay roomId.
-   * Used by SSE controller to subscribe to room-specific events.
-   */
-  async getTenantActiveRoomId(tenantId: number): Promise<number | null> {
-    const stay = await this.prisma.stay.findFirst({
-      where: { tenantId, status: 'ACTIVE' as any },
-      orderBy: { id: 'desc' },
-      select: { roomId: true },
-    });
-    return stay?.roomId ?? null;
   }
 
   // In-memory rate limit map for tenant refresh (prevents Tuya API abuse)
@@ -84,18 +104,6 @@ export class IotService {
     if (!actor.tenantId) {
       throw new ForbiddenException('Akun tenant belum terhubung ke data tenant');
     }
-
-    // Rate limit check
-    const lastRefresh = this.tenantRefreshCooldown.get(actor.tenantId);
-    const now = Date.now();
-    if (lastRefresh && (now - lastRefresh) < 120_000) {
-      const remaining = Math.ceil((120_000 - (now - lastRefresh)) / 1000);
-      throw new ConflictException(
-        `Sinkronisasi meter baru bisa dilakukan dalam ${remaining} detik lagi. ` +
-        `Maksimal 1× per 2 menit untuk menghindari pembatasan Tuya API.`
-      );
-    }
-    this.tenantRefreshCooldown.set(actor.tenantId, now);
 
     const stay = await this.prisma.stay.findFirst({
       where: { tenantId: actor.tenantId, status: 'ACTIVE' as any },
@@ -115,8 +123,19 @@ export class IotService {
     });
 
     if (devices.length === 0) {
-      return { synced: 0, message: 'Tidak ada perangkat Tuya untuk kamar ini' };
+      return { synced: 0, total: 0, failed: 0, message: 'Tidak ada perangkat Tuya untuk kamar ini' };
     }
+
+    const lastRefresh = this.tenantRefreshCooldown.get(actor.tenantId);
+    const now = Date.now();
+    if (lastRefresh && (now - lastRefresh) < 120_000) {
+      const remaining = Math.ceil((120_000 - (now - lastRefresh)) / 1000);
+      throw new ConflictException(
+        `Sinkronisasi meter baru bisa dilakukan dalam ${remaining} detik lagi. ` +
+        'Maksimal 1× per 2 menit untuk menghindari pembatasan Tuya API.',
+      );
+    }
+    this.tenantRefreshCooldown.set(actor.tenantId, now);
 
     // Sync each device
     let succeeded = 0;
@@ -129,17 +148,11 @@ export class IotService {
       }
     }
 
-    // Notify SSE subscribers
-    if (succeeded > 0 && stay.roomId) {
-      this.sse.emit(stay.roomId, {
-        type: 'MANUAL_REFRESH',
-        roomId: stay.roomId,
-        timestamp: new Date().toISOString(),
-        message: `${succeeded} perangkat berhasil disinkronkan (manual refresh)`,
-      });
+    const failed = devices.length - succeeded;
+    if (succeeded === 0) {
+      throw new ServiceUnavailableException('Meter belum berhasil disinkronkan. Coba lagi setelah proses sinkronisasi lain selesai.');
     }
-
-    return { synced: succeeded, total: devices.length };
+    return { synced: succeeded, total: devices.length, failed };
   }
 
   /**
@@ -181,7 +194,7 @@ export class IotService {
     const byType = (type: IotDeviceType) => devices
       .filter((device) => device.deviceType === type)
       .sort((left, right) => (right.lastSeenAt?.getTime() ?? 0) - (left.lastSeenAt?.getTime() ?? 0))[0];
-    const staleAfterMinutes = Number(process.env.IOT_STALE_AFTER_MINUTES ?? 30);
+    const staleAfterMinutes = resolveIotStaleAfterMinutes();
 
     const cycle = await this.getTenantElectricityCycle(stay);
     return {
@@ -213,6 +226,7 @@ export class IotService {
 
     const asOf = new Date();
     const period = await this.resolvePaidLeaseUtilityCycle(stay, asOf);
+    const telemetryPeriod = toUtilityCycleInstantRange(period);
     const device = await this.prisma.iotDevice.findFirst({
       where: { roomId: stay.roomId, enabled: true, deviceType: IotDeviceType.ELECTRICITY_METER },
       orderBy: [{ lastSeenAt: 'desc' }, { id: 'desc' }],
@@ -237,23 +251,33 @@ export class IotService {
           valueDecimal: { not: null },
           quality: { not: IotReadingQuality.REJECTED },
           ingestMessage: { deviceId: device.id },
-          observedAt: { lte: period.start },
+          observedAt: { lte: telemetryPeriod.start },
         },
         orderBy: { observedAt: 'desc' },
         select: { valueDecimal: true, observedAt: true, quality: true },
       }),
-      this.prisma.iotTelemetry.findMany({
-        where: {
-          metric,
-          valueDecimal: { not: null },
-          quality: { not: IotReadingQuality.REJECTED },
-          ingestMessage: { deviceId: device.id },
-          observedAt: { gt: period.start, lte: asOf },
-        },
-        orderBy: { observedAt: 'asc' },
-        take: 10_000,
-        select: { valueDecimal: true, observedAt: true, quality: true },
-      }),
+      // This view needs the final value per Jakarta day, never every raw
+      // telemetry event. Aggregate in PostgreSQL so a busy meter cannot send
+      // thousands of Prisma records into one Passenger worker.
+      this.prisma.$queryRaw<TenantElectricityTimelineRow[]>(Prisma.sql`
+        SELECT DISTINCT ON ((telemetry."observedAt" + INTERVAL '7 hours')::date)
+          to_char(telemetry."observedAt" + INTERVAL '7 hours', 'YYYY-MM-DD') AS "dateKey",
+          telemetry."observedAt",
+          telemetry."valueDecimal",
+          telemetry."quality"
+        FROM "IotTelemetry" AS telemetry
+        INNER JOIN "IotIngestMessage" AS message
+          ON message."id" = telemetry."ingestMessageId"
+        WHERE message."deviceId" = ${device.id}
+          AND telemetry."metric" = ${metric}
+          AND telemetry."valueDecimal" IS NOT NULL
+          AND telemetry."quality" <> 'REJECTED'::"IotReadingQuality"
+          AND telemetry."observedAt" > ${telemetryPeriod.start}
+          AND telemetry."observedAt" <= ${asOf}
+        ORDER BY
+          (telemetry."observedAt" + INTERVAL '7 hours')::date ASC,
+          telemetry."observedAt" DESC
+      `),
     ]);
 
     if (!baseline?.valueDecimal) {
@@ -267,18 +291,13 @@ export class IotService {
       };
     }
 
-    // Keep the final sensor value of each Jakarta day. This gives a compact,
-    // legible timeline without pretending that a cumulative raw meter value is
-    // daily consumption.
-    const finalReadingByDay = new Map<string, (typeof rows)[number]>();
-    rows.forEach((row) => finalReadingByDay.set(jakartaDateKey(row.observedAt), row));
     const baselineKwh = Number(baseline.valueDecimal);
     let resetDetected = false;
-    const points = [...finalReadingByDay.entries()].map(([date, row]) => {
+    const points = rows.map((row) => {
       const totalUsageKwh = Number(row.valueDecimal) - baselineKwh;
       if (totalUsageKwh < 0) resetDetected = true;
       return {
-        date,
+        date: row.dateKey,
         observedAt: row.observedAt,
         totalUsageKwh: totalUsageKwh < 0 ? null : totalUsageKwh,
         quality: row.quality,
@@ -309,6 +328,7 @@ export class IotService {
   }) {
     const asOf = new Date();
     const period = await this.resolvePaidLeaseUtilityCycle(stay, asOf);
+    const telemetryPeriod = toUtilityCycleInstantRange(period);
     const electricityMetric = 'electricity.energy_total_kwh';
     const [settings, meterBaseline, meterLatest, device] = await Promise.all([
       this.settings.getOperational(),
@@ -339,8 +359,9 @@ export class IotService {
             where: {
               metric: electricityMetric,
               valueDecimal: { not: null },
+              quality: IotReadingQuality.GOOD,
               ingestMessage: { deviceId: device.id },
-              observedAt: { lte: period.start },
+              observedAt: { lte: telemetryPeriod.start },
             },
             orderBy: { observedAt: 'desc' },
             select: { valueDecimal: true, observedAt: true, quality: true },
@@ -349,8 +370,9 @@ export class IotService {
             where: {
               metric: electricityMetric,
               valueDecimal: { not: null },
+              quality: IotReadingQuality.GOOD,
               ingestMessage: { deviceId: device.id },
-              observedAt: { gte: period.start, lte: asOf },
+              observedAt: { gte: telemetryPeriod.start, lte: asOf },
             },
             orderBy: { observedAt: 'desc' },
             select: { valueDecimal: true, observedAt: true, quality: true },
@@ -358,22 +380,17 @@ export class IotService {
         ])
       : [null, null];
 
-    const meterUsage = meterBaseline && meterLatest
+    const meterUsage = meterBaseline && meterLatest && meterLatest.readingAt.getTime() > meterBaseline.readingAt.getTime()
       ? Number(meterLatest.readingValue.minus(meterBaseline.readingValue))
       : null;
-    const telemetryUsage = telemetryBaseline && telemetryLatest
+    const telemetryUsage = telemetryBaseline && telemetryLatest && telemetryLatest.observedAt.getTime() > telemetryBaseline.observedAt.getTime()
       ? Number(telemetryLatest.valueDecimal!.minus(telemetryBaseline.valueDecimal!))
       : null;
-    const meterResetDetected = meterUsage !== null && meterUsage < 0;
-    const telemetryResetDetected = telemetryUsage !== null && telemetryUsage < 0;
-    const usableTelemetry = telemetryResetDetected ? null : telemetryUsage;
-    const usableMeter = meterResetDetected ? null : meterUsage;
-    const source = usableTelemetry !== null
-      ? 'IOT_TELEMETRY'
-      : usableMeter !== null
-        ? 'METER_READING'
-        : 'NONE';
-    const usageKwh = usableTelemetry ?? usableMeter;
+    // Verified manual readings remain authoritative for the tenant's period
+    // and charge estimate. IoT is a monitoring fallback only; it never
+    // displaces a valid billing-grade meter pair.
+    const resolvedUsage = resolveTenantElectricityUsage(meterUsage, telemetryUsage);
+    const { source, usageKwh, usableMeter, usableTelemetry } = resolvedUsage;
     const allowanceMonths = getUtilityAllowanceMonths(period);
     const freeKwh = Number(settings.freeElectricityKwhPerMonth ?? 0) * allowanceMonths;
     const chargeableKwh = usageKwh === null ? null : Math.max(0, usageKwh - freeKwh);
@@ -395,8 +412,8 @@ export class IotService {
         chargeableKwh,
         tariffRupiah,
         estimatedChargeRupiah: chargeableKwh === null ? null : Math.round(chargeableKwh * tariffRupiah),
-        billingReady: usableMeter !== null,
-        resetDetected: meterResetDetected || telemetryResetDetected,
+        billingReady: resolvedUsage.billingReady,
+        resetDetected: resolvedUsage.resetDetected,
       },
       meter: {
         baselineKwh: meterBaseline ? Number(meterBaseline.readingValue) : null,
@@ -695,7 +712,7 @@ export class IotService {
       throw new ConflictException('Perangkat bukan Tuya atau Tuya device ID belum diisi');
     }
     if (!device.enabled) throw new ConflictException('Perangkat sedang dinonaktifkan');
-    const result = await this.pollAndStoreTuya(device);
+    const result = await this.pollAndStoreTuyaCoordinated(device);
     await this.audit.log({
       actorUserId: actor.id,
       action: 'IOT_TUYA_SYNCED',
@@ -712,11 +729,13 @@ export class IotService {
       orderBy: { id: 'asc' },
     });
     const results: Array<Record<string, unknown>> = [];
-    for (let offset = 0; offset < devices.length; offset += 3) {
-      const batch = devices.slice(offset, offset + 3);
+    // Dua lock memegang dua dari tiga koneksi pool; satu koneksi tetap bebas
+    // untuk write telemetry agar batch tidak saling menunggu.
+    for (let offset = 0; offset < devices.length; offset += 2) {
+      const batch = devices.slice(offset, offset + 2);
       results.push(...await Promise.all(batch.map(async (device) => {
         try {
-          return { deviceId: device.id, deviceCode: device.deviceCode, ok: true, ...(await this.pollAndStoreTuya(device)) };
+          return { deviceId: device.id, deviceCode: device.deviceCode, ok: true, ...(await this.pollAndStoreTuyaCoordinated(device)) };
         } catch (error) {
           return { deviceId: device.id, deviceCode: device.deviceCode, ok: false, message: error instanceof Error ? error.message : 'Sync gagal' };
         }
@@ -732,68 +751,19 @@ export class IotService {
     return { total: devices.length, succeeded, failed: devices.length - succeeded, results };
   }
 
-  /** Backfill data Tuya yang terlewat — tarik log historis dari Tuya API.
-   *  Cocok dipanggil saat startup atau setelah polling lama mati. */
-  async backfillTuyaHistory(deviceId: number, daysBack = 7) {
-    const device = await this.requireDevice(deviceId);
-    if (device.provider !== IotProvider.TUYA || !device.externalDeviceId) {
-      throw new ConflictException('Backfill hanya untuk perangkat Tuya dengan externalDeviceId');
+  /** Pull pagination-aware cumulative-energy report logs from Tuya. */
+  async backfillTuyaReportHistory(deviceId: number, daysBack = 7, actor?: CurrentUserPayload) {
+    const locked = await this.prisma.withPostgresAdvisoryLock(
+      IOT_TUYA_DEVICE_LOCK_BASE + deviceId,
+      () => this.runTuyaReportBackfill(deviceId, daysBack, actor),
+    );
+    if (!locked.acquired) {
+      throw new ConflictException('Perangkat sedang disinkronkan. Coba backfill lagi setelah proses selesai.');
     }
-
-    const endTime = Date.now();
-    const startTime = endTime - daysBack * 24 * 3600_000;
-
-    // Ambil DP code dari metadata device terakhir
-    const dpCode = 'add_ele'; // default — DP code untuk total kWh
-    const logs = await this.tuya.getDeviceLogs(device.externalDeviceId, dpCode, startTime, endTime, 100);
-
-    let stored = 0;
-    for (const log of logs.logs ?? []) {
-      const observedAt = new Date(log.event_time);
-      const messageId = `tuya:backfill:${device.externalDeviceId}:${observedAt.getTime()}:${log.code}:${log.value}`;
-
-      try {
-        await this.prisma.iotIngestMessage.create({
-          data: {
-            deviceId: device.id,
-            messageId,
-            observedAt,
-            providerTimestamp: BigInt(log.event_time),
-            rawPayload: { tuyaLog: { code: log.code, value: log.value, eventTime: log.event_time } } as Prisma.InputJsonValue,
-            telemetry: {
-              create: [{
-                metric: 'electricity.energy_total_kwh',
-                valueDecimal: Number(log.value ?? 0),
-                unit: 'kWh',
-                observedAt,
-                quality: IotReadingQuality.SUSPECT,
-                reason: `Tuya history backfill — ${daysBack} hari ke belakang`,
-              }],
-            },
-          },
-        });
-        stored++;
-      } catch {
-        // Skip duplicate (P2002)
-      }
-    }
-
-    await this.audit.log({
-      actorUserId: null,
-      action: 'IOT_TUYA_BACKFILL',
-      entityType: 'IotDevice',
-      entityId: String(device.id),
-      meta: { deviceId, daysBack, dpCode, totalLogs: logs.logs?.length ?? 0, stored },
-    });
-
-    return { deviceId, dpCode, daysBack, totalLogs: logs.logs?.length ?? 0, stored };
+    return locked.value;
   }
 
-  /**
-   * Correct Tuya DP-report backfill. The legacy method above remains only for
-   * binary compatibility; all HTTP entry points use this pagination-aware path.
-   */
-  async backfillTuyaReportHistory(deviceId: number, daysBack = 7, actor?: CurrentUserPayload) {
+  private async runTuyaReportBackfill(deviceId: number, daysBack = 7, actor?: CurrentUserPayload) {
     const device = await this.requireDevice(deviceId);
     if (device.provider !== IotProvider.TUYA || !device.externalDeviceId) {
       throw new ConflictException('Backfill hanya untuk perangkat Tuya dengan externalDeviceId');
@@ -818,7 +788,8 @@ export class IotService {
     let pageCount = 0;
     let totalLogs = 0;
     let stored = 0;
-    while (hasMore && pageCount < 100) {
+    const maxPages = 20;
+    while (hasMore && pageCount < maxPages) {
       const page = await this.tuya.getDeviceReportLogs(
         device.externalDeviceId,
         [dpCode],
@@ -830,6 +801,18 @@ export class IotService {
       pageCount++;
       totalLogs += page.logs?.length ?? 0;
 
+      const normalizedLogs: Array<{
+        messageId: string;
+        observedAt: Date;
+        eventTime: number;
+        code: string;
+        rawValue: unknown;
+        metric: string;
+        valueDecimal: number;
+        unit: string;
+        quality: IotReadingQuality;
+        reason: string;
+      }> = [];
       for (const log of page.logs ?? []) {
         const eventTime = Number(log.event_time);
         const observedAt = new Date(eventTime);
@@ -841,35 +824,63 @@ export class IotService {
         if (!normalized || normalized.valueDecimal === undefined) continue;
 
         const messageId = `tuya:backfill:${device.externalDeviceId}:${observedAt.getTime()}:${log.code}:${String(log.value)}`;
-        try {
-          await this.prisma.iotIngestMessage.create({
-            data: {
-              deviceId: device.id,
-              messageId,
-              observedAt,
-              providerTimestamp: BigInt(Math.trunc(eventTime)),
-              rawPayload: { tuyaReportLog: { code: log.code, value: log.value, eventTime } } as Prisma.InputJsonValue,
-              telemetry: {
-                create: [{
-                  metric: normalized.metric,
-                  valueDecimal: normalized.valueDecimal,
-                  unit: normalized.unit ?? 'kWh',
-                  observedAt,
-                  quality: normalized.quality,
-                  reason: `Tuya report-log backfill (${boundedDays} hari): ${normalized.reason ?? 'nilai historis'}`,
-                }],
-              },
-            },
-          });
-          stored++;
-        } catch (error) {
-          if (!(error instanceof Prisma.PrismaClientKnownRequestError) || error.code !== 'P2002') {
-            throw error;
-          }
+        if (messageId.length > 160) continue;
+        normalizedLogs.push({
+          messageId,
+          observedAt,
+          eventTime,
+          code: log.code,
+          rawValue: log.value,
+          metric: normalized.metric,
+          valueDecimal: normalized.valueDecimal,
+          unit: normalized.unit ?? 'kWh',
+          quality: normalized.quality,
+          reason: `Tuya report-log backfill (${boundedDays} hari): ${normalized.reason ?? 'nilai historis'}`,
+        });
+      }
+
+      if (normalizedLogs.length > 0) {
+        await this.prisma.iotIngestMessage.createMany({
+          data: normalizedLogs.map((log) => ({
+            deviceId: device.id,
+            messageId: log.messageId,
+            observedAt: log.observedAt,
+            providerTimestamp: BigInt(Math.trunc(log.eventTime)),
+            rawPayload: { tuyaReportLog: { code: log.code, value: log.rawValue, eventTime: log.eventTime } } as Prisma.InputJsonValue,
+          })),
+          skipDuplicates: true,
+        });
+        const messages = await this.prisma.iotIngestMessage.findMany({
+          where: { deviceId: device.id, messageId: { in: normalizedLogs.map((log) => log.messageId) } },
+          select: { id: true, messageId: true },
+        });
+        const messageIds = new Map(messages.map((message) => [message.messageId, message.id]));
+        const telemetryRows = normalizedLogs.flatMap((log) => {
+          const ingestMessageId = messageIds.get(log.messageId);
+          return ingestMessageId == null ? [] : [{
+            ingestMessageId,
+            metric: log.metric,
+            valueDecimal: log.valueDecimal,
+            unit: log.unit,
+            observedAt: log.observedAt,
+            quality: log.quality,
+            reason: log.reason,
+          }];
+        });
+        if (telemetryRows.length > 0) {
+          const inserted = await this.prisma.iotTelemetry.createMany({ data: telemetryRows, skipDuplicates: true });
+          stored += inserted.count;
         }
       }
 
-      hasMore = Boolean(page.has_more && page.last_row_key);
+      if (page.has_more && !page.last_row_key) {
+        hasMore = false;
+      } else {
+        hasMore = Boolean(page.has_more && page.last_row_key);
+        if (page.last_row_key === lastRowKey) {
+          hasMore = false;
+        }
+      }
       lastRowKey = page.last_row_key;
     }
 
@@ -883,18 +894,32 @@ export class IotService {
     return { deviceId, dpCode, daysBack: boundedDays, totalLogs, stored, pageCount, truncated: hasMore };
   }
 
+  private async pollAndStoreTuyaCoordinated(device: Awaited<ReturnType<IotService['requireDevice']>>) {
+    const locked = await this.prisma.withPostgresAdvisoryLock(
+      IOT_TUYA_DEVICE_LOCK_BASE + device.id,
+      () => this.pollAndStoreTuya(device),
+    );
+    if (!locked.acquired) {
+      throw new ConflictException('Perangkat sedang disinkronkan oleh proses lain');
+    }
+    return locked.value;
+  }
+
   private async pollAndStoreTuya(device: Awaited<ReturnType<IotService['requireDevice']>>) {
     const snapshot = await this.tuya.getDeviceSnapshot(device.externalDeviceId!);
-    const observedAt = tuyaObservedAt(snapshot.status);
-    const metrics = normalizeTuyaStatus(snapshot.status, snapshot.specification);
+    const relevantStatus = snapshot.status.filter((item) => isSupportedTuyaStatusCode(item.code));
+    const observedAt = tuyaObservedAt(relevantStatus);
+    const metrics = normalizeTuyaStatus(relevantStatus, snapshot.specification);
     if (!metrics.length) throw new ServiceUnavailableException('Tuya tidak mengembalikan status datapoint');
-    const statusHash = createHash('sha256').update(JSON.stringify(snapshot.status)).digest('hex').slice(0, 20);
+    const statusHash = createHash('sha256').update(JSON.stringify(relevantStatus)).digest('hex').slice(0, 20);
     const messageId = `tuya:${device.externalDeviceId}:${observedAt.getTime()}:${statusHash}`;
     const detail = this.safeTuyaDetail(snapshot.detail);
     const metadata: Prisma.InputJsonValue = {
       tuya: {
         ...detail,
-        statusDefinitions: getTuyaStatusDefinitions(snapshot.specification).map((item) => ({
+        statusDefinitions: getTuyaStatusDefinitions(snapshot.specification)
+          .filter((item) => isSupportedTuyaStatusCode(item.code))
+          .map((item) => ({
           code: item.code,
           type: item.type,
           values: item.values,
@@ -911,7 +936,7 @@ export class IotService {
           messageId,
           observedAt,
           providerTimestamp: BigInt(observedAt.getTime()),
-          rawPayload: { status: snapshot.status } as Prisma.InputJsonValue,
+          rawPayload: { status: relevantStatus } as Prisma.InputJsonValue,
           telemetry: {
             create: metrics.map((metric) => ({
               metric: metric.metric,
@@ -944,12 +969,18 @@ export class IotService {
       where: { id: device.id },
       data: {
         online: typeof snapshot.detail.online === 'boolean' ? snapshot.detail.online : true,
-        lastSeenAt: observedAt,
         lastSuccessfulSyncAt: new Date(),
         displayName: device.displayName || (typeof snapshot.detail.name === 'string' ? snapshot.detail.name : undefined),
         productId: device.productId || (typeof snapshot.detail.product_id === 'string' ? snapshot.detail.product_id : undefined),
         metadata,
       },
+    });
+    await this.prisma.iotDevice.updateMany({
+      where: {
+        id: device.id,
+        OR: [{ lastSeenAt: null }, { lastSeenAt: { lt: observedAt } }],
+      },
+      data: { lastSeenAt: observedAt },
     });
     return { duplicate, ingestMessageId, telemetryCount: metrics.length, observedAt };
   }

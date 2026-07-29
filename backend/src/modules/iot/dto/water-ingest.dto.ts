@@ -20,22 +20,26 @@ export class WaterIngestDto {
   @Type(() => Number)
   @IsInt()
   @Min(0)
+  @Max(Number.MAX_SAFE_INTEGER)
   sequence?: number;
 
   @Type(() => Number)
   @IsInt()
   @Min(0)
+  @Max(Number.MAX_SAFE_INTEGER)
   pulseTotal!: number;
 
   @Type(() => Number)
   @IsNumber({ maxDecimalPlaces: 6 })
   @Min(0)
+  @Max(1_000_000_000)
   volumeTotalLiters!: number;
 
   @IsOptional()
   @Type(() => Number)
   @IsNumber({ maxDecimalPlaces: 6 })
   @Min(0)
+  @Max(10_000)
   flowRateLpm?: number;
 
   @IsOptional()

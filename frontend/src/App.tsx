@@ -19,6 +19,7 @@ import TenantBookingGate from './components/tenant/TenantBookingGate';
 // F2-11 (V-1): code-split halaman publik (dashboard tamu, katalog, detail, booking)
 // agar bundle utama lebih ramping; semua dirender di dalam <Suspense> App.
 const PublicGuestDashboardPage = lazy(() => import('./pages/public/PublicGuestDashboardPage'));
+const PublicAvailabilityWizardPage = lazy(() => import('./pages/public/PublicAvailabilityWizardPage'));
 const GuestBookingPage = lazy(() => import('./pages/bookings/GuestBookingPage'));
 const RoomsRouteEntry = lazy(() => import('./pages/rooms/RoomsRouteEntry'));
 const PublicRoomDetailPage = lazy(() => import('./pages/rooms/PublicRoomDetailPage'));
@@ -216,6 +217,8 @@ export default function App() {
         <Route path="/rooms" element={<RoomsRouteEntry />} />
         <Route path="/rooms/:roomId/detail" element={<PublicRoomDetailPage />} />
         <Route path="/booking/:roomId" element={<GuestBookingPage />} />
+        <Route path="/update-kamar" element={<PublicAvailabilityWizardPage />} />
+        <Route path="/availability-setup" element={<PublicAvailabilityWizardPage />} />
         <Route path="/panduan" element={<FaqPublicPage />} />
         <Route path="/reviews" element={<ReviewsPublicPage />} />
         <Route path="/" element={<RootEntry />} />

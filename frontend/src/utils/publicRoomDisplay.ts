@@ -126,21 +126,29 @@ export type PublicRoomAvailabilityDisplay = {
   tone: "is-available" | "is-limited" | "is-full" | "is-occupied" | "is-maintenance";
   shortCopy: string;
   detailCopy: string;
+  isAvailable: boolean;
   canBook: boolean;
 };
 
 export function isPublicRoomBookable(room: PublicRoom): boolean {
+  // Nama lama dipertahankan agar pemanggil katalog tidak berubah. Dalam mode
+  // landing page, fungsi ini berarti "tersedia untuk ditanyakan", bukan selalu
+  // berarti form booking online aktif.
+  if (typeof room.isAvailable === "boolean") return room.isAvailable;
+  const publicStatus = String(room.publicAvailabilityStatus ?? "").toUpperCase();
+  if (publicStatus === "AVAILABLE") return true;
+  if (publicStatus === "FULL" || publicStatus === "HIDDEN") return false;
   const status = String(room.status ?? "").toUpperCase();
   if (typeof room.canBook === "boolean") return room.canBook;
-  if (typeof room.isAvailable === "boolean") return room.isAvailable;
   return status === "AVAILABLE";
 }
 
 export function getPublicRoomAvailabilityDisplay(room: PublicRoom): PublicRoomAvailabilityDisplay {
   const status = String(room.status ?? "").toUpperCase();
-  const isBookable = isPublicRoomBookable(room);
+  const isAvailable = isPublicRoomBookable(room);
+  const canBook = isAvailable && room.onlineBookingEnabled !== false && room.canBook !== false;
 
-  if (!isBookable) {
+  if (!isAvailable) {
     const isMaintenance = status === "MAINTENANCE";
     return {
       label: isMaintenance ? "Dibersihkan / Maintenance" : "Penuh / Terisi",
@@ -149,6 +157,7 @@ export function getPublicRoomAvailabilityDisplay(room: PublicRoom): PublicRoomAv
       detailCopy: isMaintenance
         ? "Kamar ini belum dibuka untuk booking karena tim masih mengecek kebersihan, kunci, inventaris, dan kondisi akhir. Anda tetap bisa tanya admin untuk estimasi siap ditempati."
         : "Kamar ini sedang penuh atau terisi. Anda tetap bisa melihat detail dan tanya ke admin kapan kamar ini bisa kosong lagi.",
+      isAvailable: false,
       canBook: false,
     };
   }
@@ -161,7 +170,8 @@ export function getPublicRoomAvailabilityDisplay(room: PublicRoom): PublicRoomAv
       tone: "is-limited",
       shortCopy: "Kamar sedang dibersihkan atau maintenance. Booking bisa diajukan jika tombol booking tersedia.",
       detailCopy: "Kamar baru dikosongkan dan sedang dibersihkan atau maintenance. Jika tombol booking tersedia, Anda bisa mengajukan booking sekarang dan check-in dilakukan setelah kamar siap.",
-      canBook: true,
+      isAvailable: true,
+      canBook,
     };
   }
 
@@ -171,16 +181,18 @@ export function getPublicRoomAvailabilityDisplay(room: PublicRoom): PublicRoomAv
       tone: "is-limited",
       shortCopy: "Kamar sudah dikunci tenant — pilih kamar lain atau hubungi admin.",
       detailCopy: "Kamar sudah dikunci untuk tenant yang sudah membayar (DP atau lunas). Belum bisa dibooking untuk tenant baru. Hubungi admin untuk info ketersediaan.",
+      isAvailable: false,
       canBook: false,
     };
   }
 
   return {
-    label: "Bisa diajukan",
+    label: "Tersedia",
     tone: "is-available",
-    shortCopy: "Kamar siap diajukan. Admin akan meninjau booking Anda.",
-    detailCopy: "Kamar bisa diajukan. Aman setelah pembayaran disetujui.",
-    canBook: true,
+    shortCopy: canBook ? "Kamar siap diajukan. Admin akan meninjau booking Anda." : "Kamar tersedia. Hubungi admin melalui WhatsApp untuk reservasi.",
+    detailCopy: canBook ? "Kamar bisa diajukan. Aman setelah pembayaran disetujui." : "Booking online sementara dinonaktifkan. Hubungi admin melalui WhatsApp untuk menanyakan atau mereservasi kamar ini.",
+    isAvailable: true,
+    canBook,
   };
 }
 

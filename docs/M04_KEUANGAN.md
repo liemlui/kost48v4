@@ -58,6 +58,13 @@ Untuk eksekusi coding, AI eksekutor WAJIB membaca `docs/M12_CHECKLIST_CHANGELOG.
 
 **Dua "Arus Kas" yang berbeda (operasional approximation vs ledger-backed direct method) sudah diunifikasi (R2).** `GET /reports/cash-flow` dihapus — semua laporan arus kas kini pakai `GET /accounting/cashflow` (direct method, termasuk deposit + investasi + pendanaan). Frontend `ReportsPage` tab Operasional kini mengambil dari `fetchCashflowStatement()`. Deposit handling normal checkout juga diselaraskan dengan forced checkout (auto-cover semua invoice, tidak hanya meter).
 
+## Update 2026-07-23 — Quota utilitas berbasis periode sewa lunas
+
+- Dasar quota listrik gratis bukan lagi selalu satu bulan kalender. `MeterReadingsService` dan settlement renewal memakai periode sewa awal/perpanjangan dengan invoice `RENT` berstatus `PAID` sebagai sumber utama.
+- Perpanjangan tiga bulan menerima tiga kali `freeElectricityKwhPerMonth`; pembacaan meter di tengah periode hanya boleh menagihkan sisa quota yang belum dipakai/ditagihkan dalam periode yang sama.
+- Invoice DP renewal sengaja dikecualikan: DP belum memperpanjang masa tinggal sehingga tidak boleh mereset quota.
+- `IotTelemetry` tidak menjadi jurnal atau invoice. Hanya `MeterReading` melalui service bisnis ber-audit yang dapat menerbitkan tagihan utilitas.
+
 ## Update 2026-06-17 — AUDIT KEUANGAN ULTRA ✅
 
 **Hasil audit menyeluruh (17 Juni 2026):**

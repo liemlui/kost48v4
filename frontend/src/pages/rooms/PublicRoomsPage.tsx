@@ -15,6 +15,7 @@ import RoomCard from "../../components/rooms/RoomCard";
 import type { PricingTerm, PublicRoom } from "../../types";
 import { useAuth } from "../../context/AuthContext";
 import { useTenantPortalStage } from "../../hooks/useTenantPortalStage";
+import { useAvailabilityShortcut } from "../../hooks/useAvailabilityShortcut";
 import { officialKost48Location } from "../../data/officialKost48Content";
 import {
   getBestPublicRoomRate,
@@ -79,9 +80,10 @@ function RoomsTopbar({ onSimulateClick }: { onSimulateClick: () => void }) {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
   const [iconBroken, setIconBroken] = useState(false);
+  const openAvailabilityShortcut = useAvailabilityShortcut();
 
   return (
-    <header className="rm-topbar">
+    <header className="rm-topbar" onClick={openAvailabilityShortcut}>
       <button type="button" className="rm-topbar-brand" onClick={() => navigate("/")}>
         {!iconBroken ? (
           <img
@@ -326,11 +328,11 @@ export default function PublicRoomsPage() {
                 <span className="rm-filter-label">Ketersediaan</span>
                 {/* UD-07: "Semua Kamar" lebih jujur — termasuk kamar terisi & yang sedang dicek (tidak semua bisa diajukan). */}
                 <FilterChip label="Semua Kamar" active={!avail} onClick={() => update({ avail: "" })} />
-                <FilterChip label="Bisa diajukan" active={avail === "bookable"} onClick={() => update({ avail: "bookable" })} />
-                <FilterChip label="Dibersihkan / Maintenance" active={avail === "checking"} onClick={() => update({ avail: "checking" })} />
+                <FilterChip label="Tersedia" active={avail === "bookable"} onClick={() => update({ avail: "bookable" })} />
+                <FilterChip label="Sedang disiapkan" active={avail === "checking"} onClick={() => update({ avail: "checking" })} />
                 <FilterChip label="Penuh / Terisi" active={avail === "occupied"} onClick={() => update({ avail: "occupied" })} />
                 {!avail && <span className="rm-filter-hint">Termasuk kamar terisi &amp; yang sedang dicek</span>}
-                {avail === "bookable" && <span className="rm-filter-hint">Termasuk kamar yang masih dibersihkan tetapi sudah bisa diajukan.</span>}
+                {avail === "bookable" && <span className="rm-filter-hint">Kamar tersedia dapat ditanyakan atau direservasi melalui WhatsApp.</span>}
               </div>
               <div className="rm-filter-divider" aria-hidden="true" />
               <div className="rm-filter-group">
@@ -373,7 +375,7 @@ export default function PublicRoomsPage() {
                     <><strong>{rooms.length}</strong> kamar ditampilkan</>
                   )}
                   {bookableCount > 0 && rooms.length !== bookableCount && (
-                    <> · <strong className="rm-count-bookable">{bookableCount}</strong> bisa diajukan sekarang</>
+                    <> · <strong className="rm-count-bookable">{bookableCount}</strong> tersedia sekarang</>
                   )}
                 </span>
               )}

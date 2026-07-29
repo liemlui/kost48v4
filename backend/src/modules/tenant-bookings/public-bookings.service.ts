@@ -54,6 +54,15 @@ export class PublicBookingsService {
   // ═══════════════════════════════════════════════════════════
 
   async createPublicBooking(dto: CreatePublicBookingDto) {
+    const onlineBookingEnabled = ['true', '1', 'yes', 'on'].includes(
+      String(process.env.PUBLIC_ONLINE_BOOKING_ENABLED ?? 'false').trim().toLowerCase(),
+    );
+    if (!onlineBookingEnabled) {
+      throw new ServiceUnavailableException(
+        'Booking online sedang dinonaktifkan. Silakan hubungi admin KOST48 melalui WhatsApp untuk cek dan reservasi kamar.',
+      );
+    }
+
     if (!(await isBookingSchemaReady(this.prisma))) {
       throw new ServiceUnavailableException(
         'Fitur booking belum aktif penuh karena database belum sinkron. Jalankan sinkronisasi schema terlebih dahulu.',

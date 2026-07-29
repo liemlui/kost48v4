@@ -86,6 +86,8 @@ sql/
 !backend/sql/
 backend/sql/*
 !backend/sql/seed.sql
+!backend/sql/seed-production-rooms.sql
+!backend/sql/bootstrap-production-schema.sql
 !backend/sql/patches/
 backend/scripts/*.sql
 backend/scripts/golive-*

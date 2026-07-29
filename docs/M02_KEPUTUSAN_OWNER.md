@@ -141,13 +141,13 @@ Toggle Owner/Admin phase 1 berfungsi penuh. UI telah diperbaiki melalui Fase C (
 **Sumber:** wawancara owner 2026-06-13 + catatan owner 2026-06-14. Dokumen ini MENGIKAT; bila konflik dengan dokumen lain, file ini menang. Dossier menjelaskan status kode dan cara implementasi, bukan mengganti keputusan bisnis di sini.
 
 #### 🔴 TEMUAN BESAR DARI WAWANCARA — D-06: DATABASE MASIH DATA TESTING, BELUM PUBLISH
-> Kutipan owner: *"Itu hanya testing, lebih baik data dihapus semua juga tidak masalah sebab kita belum publish kok."*
+> Kutipan owner: *"Itu hanya testing, lebih baik data dihapus semua juga tidak masalah sebab kita belum publish kok."* Keputusan pelaksanaan diperjelas oleh D-30 pada 2026-07-23: buat database produksi baru; jangan drop database UAT secara otomatis.
 
 **Konsekuensi yang mengubah seluruh rencana:**
 1. **Tidak ada migrasi data lama.** Deploy produksi = START BERSIH (fresh DB + seed COA + opening balance produksi), BUKAN memindahkan data UAT.
 2. **Semua kekhawatiran "data lama" GUGUR:** F-24 (saldo 2000 historis), F-06/F-07 backfill deposit lama, E-2 backfill 11 stay promoted, F-15 historis — semua tidak relevan untuk data testing yang akan dihapus.
 3. **Tetap perbaiki KODE-nya** (agar produksi ke depan bersih): F1-8 (guard settlement), F1-3..F1-7 (laporan) tetap wajib — yang gugur hanya tugas "perbaiki data historis".
-4. **Deploy = FRESH** (drop DB → seed COA → opening balance), BUKAN migrasi. Runbook: `M08_DEPLOY_GO_LIVE.md`.
+4. **Deploy = FRESH** (database produksi BARU → seed COA → opening balance), BUKAN migrasi data UAT. Database UAT dipertahankan sebagai backup sampai ada persetujuan penghapusan tersendiri. Runbook: `DEPLOYMENT_ONLINE_20260723.md`.
 
 ---
 
@@ -160,7 +160,7 @@ Toggle Owner/Admin phase 1 berfungsi penuh. UI telah diperbaiki melalui Fase C (
 | D-03 | **DRAFT invoice TIDAK memblokir forced checkout.** Exclude dan auto-cancel DRAFT agar satu draft terlupakan tidak membuat overstay tertahan selamanya. Checkout normal tetap mengikuti guard invoice terbuka. | ✅ F3-13 selesai. |
 | D-04 | **Expiry booking = 3 JAM FLAT semua jalur** (bukan cutoff 21:00 WIB). Booking malam berlaku 3 jam berikutnya. | ✅ F1-11 selesai. |
 | D-05 | **Admin tidak boleh ubah deposit.** Deposit jaminan SELALU = `Room.defaultDepositRupiah`. | ✅ F1-10 selesai. |
-| D-06 | **DATABASE MASIH TESTING → deploy FRESH.** Lihat bagian atas. | Panduan di M08. |
+| D-06 | **DATABASE MASIH TESTING → deploy FRESH.** Lihat bagian atas; detail keselamatan pelaksanaan ada di D-30. | Panduan `DEPLOYMENT_ONLINE_20260723.md`. |
 | D-07 | **KTP wajib sebelum aktivasi kamar.** Upload foto KTP saat check-in; tanpa verified → blokir OCCUPIED. Simpan terproteksi, hapus saat keluar. Cukup FOTO (tidak baca NIK). | ✅ F3-17 selesai + G5+ KTP. |
 | D-08 | **Deposit = dana titipan / LIABILITY, BUKAN revenue.** Jangan tampilkan di cashflow operasional; pisahkan ke section liabilitas. | ✅ F1-9 selesai. |
 | D-09 | **Social proof publik = rating≥4 anonim + count penghuni.** Boleh tampilkan inisial (UU PDP). | ✅ F3-4 selesai. |
@@ -178,6 +178,12 @@ Toggle Owner/Admin phase 1 berfungsi penuh. UI telah diperbaiki melalui Fase C (
 | D-23 | **AI Owner/Admin manual-only.** DeepSeek/API AI berbayar hanya dipakai setelah tombol manual Owner/Admin ditekan; AI membuat draft/rekomendasi dan manusia approve aksi final. Tidak ada AI otomatis dari cron/page-load; tidak ada akses Tenant/Staff; tidak ada mutasi uang/stok/kamar/KTP/jurnal tanpa approval manusia. | ✅ Fase G `docs/M09_AI_OWNER_ADMIN.md`. |
 | D-24 | **BATAS PENGHUNI PER KAMAR + SURCHARGE EKSTRA** (2026-06-23). Kamar **standar** (2,5×3m): **2 orang gratis**, maks booking **4 orang** (2 ekstra). Kamar **besar** (3×3,5m): **4 orang gratis**, maks booking **6 orang** (2 ekstra). Kelebihan orang di atas batas gratis = **+20% harga sewa per kepala ekstra**. | ✅ Selesai 2026-06-23. |
 | D-25 | **NOMOR WA ADMIN = SETTING OPERATIONAL** (2026-07-02). Nomor WhatsApp admin/owner TIDAK BOLEH hardcode. Disimpan di `OperationalSetting.adminWhatsappNumber` dan bisa diubah oleh OWNER via halaman Settings. Semua link WA di aplikasi membaca dari setting ini + env var `VITE_PUBLIC_ADMIN_WHATSAPP` sebagai fallback. | ✅ Terimplementasi. |
+| D-26 | **Kategori notifikasi adalah data bisnis tersimpan:** `FINANCE`, `OPERATIONS`, `SYSTEM`. Pembayaran/akuntansi eksplisit FINANCE; pengumuman, huni, tiket, kamar, booking = OPERATIONS; fallback = SYSTEM. | UI Bell dan analitik tidak lagi menebak kategori dari tipe entitas. |
+| D-27 | **Pengumuman terjadwal dikirim saat aktif, bukan saat dibuat.** `startsAt` masa depan menahan notifikasi; AutoOps dispatch sekali dan mengisi `dispatchedAt`. | Ketepatan waktu mengikuti cadence AutoOps/cron; bukan real-time per detik. |
+| D-28 | **Hapus pengumuman = hard delete OWNER/ADMIN.** Notifikasi yang menunjuk pengumuman dan file gambar terkait dibersihkan; AuditLog tetap ada. Gunakan unpublish bila hanya ingin menghentikan tayang. | Mencegah link inbox menuju 404. |
+| D-29 | **In-app notification adalah sumber kebenaran; Web Push best-effort dan opt-in.** | Push gagal/tidak aktif tidak boleh menghilangkan inbox. |
+| D-30 | **Go-live pertama memakai database produksi BARU/kosong, bukan drop DB UAT.** Data UAT tidak dimigrasikan. Bila target ternyata berisi data nyata, jalur otomatis berubah menjadi patch migration dan wajib persetujuan owner. Setelah go-live: patch-only, tanpa reset. | Runbook `DEPLOYMENT_ONLINE_20260723.md` menggantikan instruksi deploy lama yang ambigu. |
+| D-31 | **Quota listrik gratis mengikuti periode sewa yang sudah LUNAS.** Perpanjangan tiga bulan memperoleh tiga quota bulanan; invoice DP renewal tidak memulai periode baru. Telemetry IoT hanya monitoring/estimasi dan tidak boleh menerbitkan tagihan sendiri. | Mencegah quota reset saat DP dan memastikan meter cycle/renewal/tampilan tenant memakai dasar periode yang sama. |
 
 ---
 

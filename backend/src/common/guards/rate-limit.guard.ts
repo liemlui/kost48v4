@@ -51,6 +51,9 @@ export class RateLimitGuard implements CanActivate {
     // ESP32 retry normal tetap lolos; flood dari satu IP dipotong sebelum DB.
     // Multi-replica production harus memindahkan bucket ini ke Redis/gateway.
     iotIngest: { maxRequests: 180, windowMs: 60 * 1000 },
+    // Service-level cooldown memberi pesan sisa waktu; guard ini menjadi pagar
+    // luar bila route dipukul berulang-ulang atau validasi gagal lebih awal.
+    tenantIotRefresh: { maxRequests: 3, windowMs: 2 * 60 * 1000 },
   };
 
   /** Keeps the process-local fallback bounded during a unique-IP flood. */

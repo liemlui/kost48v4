@@ -11,6 +11,9 @@ type TuyaEnvelope<T> = {
 };
 
 type CachedToken = { value: string; expiresAt: number };
+type CachedSpecification = { value: Record<string, unknown>; expiresAt: number };
+
+const TUYA_SPECIFICATION_CACHE_MS = 6 * 60 * 60_000;
 
 const TUYA_HOSTS = new Set([
   'openapi.tuyacn.com',
@@ -48,6 +51,8 @@ export function createTuyaSignature(input: {
 export class TuyaClientService {
   private token?: CachedToken;
   private tokenPromise?: Promise<string>;
+  private readonly specificationCache = new Map<string, CachedSpecification>();
+  private readonly specificationPromises = new Map<string, Promise<Record<string, unknown>>>();
 
   constructor(private readonly config: ConfigService) {}
 
@@ -76,13 +81,41 @@ export class TuyaClientService {
     if (!externalDeviceId?.trim()) {
       throw new ServiceUnavailableException('Tuya device ID belum diisi');
     }
-    const id = encodeURIComponent(externalDeviceId.trim());
+    const deviceId = externalDeviceId.trim();
+    const id = encodeURIComponent(deviceId);
     const [detail, status, specification] = await Promise.all([
       this.businessRequest<Record<string, unknown>>(`/v1.0/iot-03/devices/${id}`),
       this.businessRequest<Array<Record<string, unknown>>>(`/v1.0/iot-03/devices/${id}/status`),
-      this.businessRequest<Record<string, unknown>>(`/v1.0/iot-03/devices/${id}/specification`),
+      this.getDeviceSpecification(deviceId, id),
     ]);
     return { detail, status, specification };
+  }
+
+  /**
+   * Device specifications are effectively static. Caching them avoids one
+   * signed Tuya request per device on every polling cycle while detail/status
+   * remain fresh. The in-flight map also coalesces simultaneous sync paths.
+   */
+  private async getDeviceSpecification(deviceId: string, encodedDeviceId: string) {
+    const cached = this.specificationCache.get(deviceId);
+    if (cached && cached.expiresAt > Date.now()) return cached.value;
+
+    const inFlight = this.specificationPromises.get(deviceId);
+    if (inFlight) return inFlight;
+
+    const request = this.businessRequest<Record<string, unknown>>(
+      `/v1.0/iot-03/devices/${encodedDeviceId}/specification`,
+    ).then((value) => {
+      this.specificationCache.set(deviceId, {
+        value,
+        expiresAt: Date.now() + TUYA_SPECIFICATION_CACHE_MS,
+      });
+      return value;
+    }).finally(() => {
+      this.specificationPromises.delete(deviceId);
+    });
+    this.specificationPromises.set(deviceId, request);
+    return request;
   }
 
   /**
@@ -113,17 +146,6 @@ export class TuyaClientService {
       last_row_key?: string;
       logs: Array<{ code: string; value: unknown; event_time: number }>;
     }>(`/v1.0/iot-03/devices/${id}/report-logs?${params.toString()}`);
-  }
-
-  /** @deprecated Use getDeviceReportLogs so all callers use the DP-report API. */
-  async getDeviceLogs(
-    externalDeviceId: string,
-    dpCode: string,
-    startTime?: number,
-    endTime?: number,
-    limit = 100,
-  ) {
-    return this.getDeviceReportLogs(externalDeviceId, [dpCode], startTime, endTime, limit);
   }
 
   /** Ambil statistik agregat Tuya (harian/bulanan).
@@ -186,7 +208,9 @@ export class TuyaClientService {
       const path = '/v1.0/token?grant_type=1';
       const result = await this.signedRequest<{ access_token: string; expire_time?: number }>(path);
       if (!result.access_token) throw new ServiceUnavailableException('Tuya tidak mengembalikan access token');
-      const ttlMs = Math.max(120, Number(result.expire_time ?? 7200)) * 1000;
+      const rawTtlSeconds = Number(result.expire_time ?? 7200);
+      const ttlSeconds = Number.isFinite(rawTtlSeconds) && rawTtlSeconds > 0 ? rawTtlSeconds : 7200;
+      const ttlMs = ttlSeconds * 1000;
       this.token = { value: result.access_token, expiresAt: Date.now() + ttlMs };
       return result.access_token;
     })();

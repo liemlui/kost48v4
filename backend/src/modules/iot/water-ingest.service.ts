@@ -3,7 +3,6 @@ import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/
 import { IotProvider, IotReadingQuality, Prisma } from '../../generated/prisma';
 import { PrismaService } from '../../prisma/prisma.service';
 import { DeviceCredentialService } from './device-credential.service';
-import { IotSseService } from './iot-sse.service';
 import { WaterIngestDto } from './dto/water-ingest.dto';
 
 export type WaterIngestHeaders = {
@@ -24,12 +23,24 @@ export function createWaterIngestSignature(secret: string, input: {
   return createHmac('sha256', secret).update(canonical).digest('hex');
 }
 
+export function parseWaterObservedAt(value: string, nowMillis = Date.now()): Date {
+  const observedAt = new Date(value);
+  if (Number.isNaN(observedAt.getTime())) {
+    throw new BadRequestException('observedAt tidak valid');
+  }
+  // Paket historis dari buffer offline tetap diterima, tetapi waktu masa depan
+  // tidak boleh membuat meter tampak segar lebih lama dari keadaan sebenarnya.
+  if (observedAt.getTime() > nowMillis + 5 * 60_000) {
+    throw new BadRequestException('observedAt tidak boleh lebih dari 5 menit di masa depan');
+  }
+  return observedAt;
+}
+
 @Injectable()
 export class WaterIngestService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly credentials: DeviceCredentialService,
-    private readonly sse: IotSseService,
   ) {}
 
   async ingest(headers: WaterIngestHeaders, rawBody: Buffer, payload: WaterIngestDto) {
@@ -46,18 +57,23 @@ export class WaterIngestService {
       throw new UnauthorizedException('Signature perangkat tidak valid');
     }
 
+    const observedAt = parseWaterObservedAt(payload.observedAt);
     const duplicate = await this.prisma.iotIngestMessage.findUnique({
       where: { deviceId_messageId: { deviceId: device.id, messageId: headers.nonce } },
       select: { id: true },
     });
-    if (duplicate) return { accepted: true, duplicate: true, ingestMessageId: duplicate.id.toString() };
+    if (duplicate) {
+      await this.prisma.$transaction((tx) => this.updateDeviceHealth(tx, device.id, observedAt, payload.firmwareVersion));
+      return { accepted: true, duplicate: true, ingestMessageId: duplicate.id.toString() };
+    }
 
-    const observedAt = new Date(payload.observedAt);
     const volumeM3 = payload.volumeTotalLiters / 1000;
     const previous = await this.prisma.iotTelemetry.findFirst({
       where: {
         metric: 'water.volume_total_m3',
         ingestMessage: { deviceId: device.id },
+        observedAt: { lt: observedAt },
+        quality: { not: IotReadingQuality.REJECTED },
       },
       orderBy: { observedAt: 'desc' },
       select: { valueDecimal: true },
@@ -74,37 +90,22 @@ export class WaterIngestService {
     ];
 
     try {
-      const message = await this.prisma.iotIngestMessage.create({
-        data: {
-          deviceId: device.id,
-          messageId: headers.nonce,
-          observedAt,
-          sequence: payload.sequence == null ? undefined : BigInt(payload.sequence),
-          rawPayload: payload as unknown as Prisma.InputJsonValue,
-          diagnostics: payload.diagnostics as Prisma.InputJsonValue,
-          telemetry: { create: metrics },
-        },
-        select: { id: true },
-      });
-      await this.prisma.iotDevice.update({
-        where: { id: device.id },
-        data: {
-          online: true,
-          lastSeenAt: observedAt,
-          lastSuccessfulSyncAt: new Date(),
-          firmwareVersion: payload.firmwareVersion,
-        },
-      });
-
-      // Notify SSE subscribers
-      if (device.roomId) {
-        this.sse.emit(device.roomId, {
-          type: 'WATER_INGEST',
-          roomId: device.roomId,
-          timestamp: observedAt.toISOString(),
-          message: `Data meter air diterima (${volumeM3.toFixed(3)} m³)`,
+      const message = await this.prisma.$transaction(async (tx) => {
+        const created = await tx.iotIngestMessage.create({
+          data: {
+            deviceId: device.id,
+            messageId: headers.nonce,
+            observedAt,
+            sequence: payload.sequence == null ? undefined : BigInt(payload.sequence),
+            rawPayload: payload as unknown as Prisma.InputJsonValue,
+            diagnostics: payload.diagnostics == null ? undefined : payload.diagnostics as Prisma.InputJsonValue,
+            telemetry: { create: metrics },
+          },
+          select: { id: true },
         });
-      }
+        await this.updateDeviceHealth(tx, device.id, observedAt, payload.firmwareVersion);
+        return created;
+      });
 
       return { accepted: true, duplicate: false, quality, ingestMessageId: message.id.toString() };
     } catch (error) {
@@ -113,10 +114,37 @@ export class WaterIngestService {
           where: { deviceId_messageId: { deviceId: device.id, messageId: headers.nonce } },
           select: { id: true },
         });
-        return { accepted: true, duplicate: true, ingestMessageId: existing?.id.toString() };
+        if (existing) {
+          await this.prisma.$transaction((tx) => this.updateDeviceHealth(tx, device.id, observedAt, payload.firmwareVersion));
+          return { accepted: true, duplicate: true, ingestMessageId: existing.id.toString() };
+        }
       }
       throw error;
     }
+  }
+
+  private async updateDeviceHealth(
+    tx: Prisma.TransactionClient,
+    deviceId: number,
+    observedAt: Date,
+    firmwareVersion?: string,
+  ) {
+    await tx.iotDevice.update({
+      where: { id: deviceId },
+      data: {
+        online: true,
+        lastSuccessfulSyncAt: new Date(),
+        firmwareVersion,
+      },
+    });
+    // Out-of-order buffer replay must never move telemetry freshness backward.
+    await tx.iotDevice.updateMany({
+      where: {
+        id: deviceId,
+        OR: [{ lastSeenAt: null }, { lastSeenAt: { lt: observedAt } }],
+      },
+      data: { lastSeenAt: observedAt },
+    });
   }
 
   private validateHeaders(headers: WaterIngestHeaders) {

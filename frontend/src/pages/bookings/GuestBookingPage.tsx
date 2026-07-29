@@ -130,6 +130,26 @@ export default function GuestBookingPage() {
     );
   }
   const roomAvailability = getPublicRoomAvailabilityDisplay(room);
+  if (room.onlineBookingEnabled === false) {
+    const roomCode = room.code || `Kamar #${room.id}`;
+    return (
+      <div className="public-page-shell">
+        <div className="container py-5" style={{ maxWidth: 640 }}>
+          <div className="content-card border-0 card">
+            <div className="card-body text-center">
+              <div className="fs-1 mb-2">ðŸ’¬</div>
+              <h5 className="mb-2">Booking online sementara ditutup</h5>
+              <p className="text-muted small">Ketersediaan kamar tetap diperbarui. Hubungi admin melalui WhatsApp untuk menanyakan atau mereservasi kamar ini.</p>
+              <div className="d-grid gap-2">
+                <a href={buildAvailabilityWaUrl(roomCode)} target="_blank" rel="noreferrer" className="btn btn-primary">Hubungi Admin via WhatsApp</a>
+                <a href="/rooms" className="btn btn-outline-secondary">Lihat Kamar Lain</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
   if (!roomAvailability.canBook) {
     const availability = roomAvailability;
     const isChecking = String(room.status ?? '').toUpperCase() === 'MAINTENANCE';

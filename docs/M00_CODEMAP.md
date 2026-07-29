@@ -1,13 +1,22 @@
 # CODEMAP — Peta Navigasi Kode KOST48 V5 (untuk AI)
 
 > **Tujuan:** lompat langsung ke file yang benar tanpa scan buta. **Ini peta NAVIGASI, bukan sumber kebenaran perilaku** — detail aturan/flow ada di M-file domain (kolom "Detail"). Verifikasi simbol via Grep sebelum edit; path bisa bergeser.
-> Stack: backend NestJS+Prisma+PostgreSQL (`backend/`), frontend React+Vite (`frontend/`). 42 modul · 57 model · 24 grup halaman.
+> Stack: backend NestJS+Prisma+PostgreSQL (`backend/`), frontend React+Vite (`frontend/`). 46 modul · 61 model · 24 grup halaman.
 
 ## Konvensi (sekali paham, berlaku semua modul)
 - **Backend modul:** `backend/src/modules/<nama>/` berisi `<nama>.controller.ts` (route `/<nama>`), `<nama>.service.ts` (logika), `<nama>.module.ts` (wiring), `dto/`. Modul besar dipecah multi-service (lihat tabel).
 - **Infra backend:** `backend/src/prisma/` (PrismaService), `backend/src/auth/` (JWT+guard role + RefreshToken), `backend/src/audit-log/` (AuditLog writer), `backend/src/common/` (`guards/ decorators/ filters/ interceptors/ enums/ utils/ business/`), `backend/src/main.ts` (bootstrap, CORS, prefix `/api`).
 - **Frontend halaman:** `frontend/src/pages/<grup>/<Halaman>Page.tsx`; komponen reusable `frontend/src/components/`; util `frontend/src/utils/`.
-- **Schema:** `backend/prisma/schema.prisma` (57 model, 69 enum). Generated client `backend/src/generated/prisma/` = **JANGAN baca** (32MB, regen `prisma generate`).
+- **Schema:** `backend/prisma/schema.prisma` (61 model, 73 enum). Generated client `backend/src/generated/prisma/` = **JANGAN baca** (32MB, regen `prisma generate`).
+
+## Update implementasi 2026-07-23
+
+Baseline kode `main` adalah `8627289`. Rangkuman lintas perubahan AI pada release ini ada di `M13_CHANGELOG.md` dan `RELEASE_20260723_ANNOUNCEMENT_NOTIFICATIONS.md`.
+
+- Backend sekarang diperiksa dengan `strictNullChecks`, `noImplicitAny`, `strictFunctionTypes`, dan `strictBindCallApply`; gunakan `common/utils/error-handler.ts` untuk pola log/rethrow yang seragam.
+- `TenantBookingsQueryService` sudah dihapus. Jalur booking memakai service aktif dan helper bersama di `tenant-bookings/`; jangan membuat ulang service query lama.
+- `StaysController` memanggil `StaysRenewalService` langsung untuk renewal; `StaysService` tetap fokus lifecycle inti.
+- CSS frontend dimuat terpusat dari `frontend/src/styles.css`; file wrapper `public-area.ts`, `staff-area.ts`, dan `tenant-area.ts` sudah tidak ada. Konstanta lintas halaman ada di `frontend/src/config/constants.ts`.
 
 ## Backend modul → path → tanggung jawab
 
@@ -36,12 +45,12 @@
 | stays (query) | `stays/stays-query.service.ts` | Read/list stay |
 | stays (prepay) | `stays/prepay-extension.service.ts` | Perpanjang prabayar fleksibel (2-4 bln ke depan) |
 | stays (transfer) | `stays/room-transfer.service.ts` | Pindah kamar (RoomTransfer) |
-| tenant-bookings | `tenant-bookings/{public-bookings,tenant-bookings,*-query}.service.ts` | Booking publik & tenant (DP 30% hangus) |
+| tenant-bookings | `tenant-bookings/{public-bookings,tenant-bookings}.service.ts` + `*.helpers.ts` | Booking publik & tenant (DP 30% hangus); query/map booking bersama, tanpa `TenantBookingsQueryService` |
 | tenants | `tenants/tenants.service.ts` | Data tenant + KTP (minimal, terproteksi, hapus saat keluar) |
 | renew-requests | `renew-requests/renew-requests.service.ts` | Request perpanjang + approve owner; DP≤hari-H, lunas≤DP+7 |
 | checkout-requests | `checkout-requests/checkout-requests.service.ts` | Request checkout tenant |
 | rooms | `rooms/rooms.service.ts` | Kamar + RoomFacility (defaultDepositRupiah) |
-| meter-readings | `meter-readings/meter-readings.service.ts` | Meter listrik/air pascabayar (free 30kWh + Rp2500/kWh) |
+| meter-readings | `meter-readings/meter-readings.service.ts` | Meter listrik/air pascabayar; quota listrik mengikuti periode sewa lunas (bukan selalu bulan kalender) |
 
 ### Operasional & Staff — detail: `M06_OPERASIONAL.md`
 | Modul/Service | Path | Tanggung jawab |
@@ -55,6 +64,7 @@
 | inventory-items | `inventory-items/inventory-items.service.ts` | Barang gudang (InventoryItem) |
 | room-items | `room-items/room-items.service.ts` | Barang per kamar (RoomItem, FK ke InventoryItem) |
 | inventory-movements | `inventory-movements/inventory-movements.service.ts` | Mutasi ASSIGN/OUT/RETURN |
+| iot | `iot/{iot,iot-polling,water-ingest}.service.ts` | Telemetri Tuya/ESP32, overview tenant/owner, timeline listrik; monitoring-only tanpa SSE |
 | wifi-sales | `wifi-sales/wifi-sales.service.ts` | Order/penjualan WiFi tenant |
 | additional-services | `additional-services/additional-services.service.ts` | Layanan tambahan + minat (ServiceInterest) |
 
@@ -68,7 +78,7 @@
 | loyalty | `loyalty/{loyalty,redemption,referral,peer-report}.service.ts` | Poin, reward/redemption, referral, laporan sikap anonim |
 | surveys | `surveys/surveys.service.ts` | Survei kepuasan tenant |
 | faqs | `faqs/faqs.service.ts` | FAQ (rule flow) |
-| announcements | `announcements/announcements.service.ts` | Pengumuman |
+| announcements | `announcements/{announcements.service,announcements.controller}.ts` | Pengumuman, akses detail, gambar terproteksi, hard delete + cleanup notifikasi |
 
 ### AI Owner/Admin — detail: `M09_AI_OWNER_ADMIN.md`
 | Modul/Service | Path | Tanggung jawab |
@@ -83,6 +93,7 @@
 |---|---|---|
 | notifications | `notifications/{app-notification,reminder-mock,reminder-preview}.service.ts` | Notif in-app + preview reminder |
 | push | `push/push.service.ts` | Web-push PWA (VAPID) |
+| auto-ops announcement | `auto-ops/sweeps/announcement-sweep.service.ts` | Dispatch pengumuman terjadwal, dedupe penerima, `dispatchedAt` |
 | users | `users/users.service.ts` | User/role (OWNER/ADMIN/STAFF/TENANT), profil, tip e-wallet |
 | settings | `settings/settings.service.ts` | OperationalSetting (toggle meter air, dll) |
 
@@ -97,9 +108,10 @@
 Standar struktur dan progressive disclosure Owner/Admin: `docs/UI_UX_OWNER_ADMIN.md`.
 `public` katalog+booking publik · `auth` login · `portal` area tenant (MyStay, invoice, loyalty, manual) · `dashboard` (DashboardAdmin owner/admin) · `stays` · `bookings` · `renew-requests` · `invoices` · `payments` · `finance` (AccountingSetup) · `reports` · `rooms` · `resources`+`admin` (CRUD generik via ConfiguredResourcePage/SimpleCrudPage) · `tickets` · `staff`+`staff-routines` · `services` · `marketing` · `loyalty` · `notifications`+`reminders` · `settings` · `profile` · `components/ai` (Fase G reusable AI button/drawer).
 
-## Index model (57) — grup → `schema.prisma`
+## Index model (61) — grup → `schema.prisma`
 - **Identitas/akses:** User, Tenant, PasswordResetToken, RefreshToken, AuditLog, PushSubscription, AppNotification, OperationalSetting
 - **Huni:** Room, RoomFacility, Stay, RoomTransfer, RenewRequest, CheckoutRequest, MeterReading
+- **IoT/telemetri:** IotDevice, IotIngestMessage, IotTelemetry
 - **Uang:** Invoice, InvoiceLine, InvoicePayment, PaymentSubmission, TenantDepositLedgerEntry, Expense, WifiSale
 - **Akuntansi:** ChartOfAccount, CashAccount, AccountingPeriod, OpeningBalanceBatch, OpeningBalanceLine, JournalEntry, JournalLine, RentRecognitionSchedule, FixedAsset, AssetDepreciationRun, AssetDepreciationLine
 - **Operasional/staf:** Ticket, StaffRoutineTemplate/Assignment/Completion, StaffWorkAudit, StaffPerformanceEvent, StaffReview, StaffFieldReport, InventoryItem, RoomItem, InventoryMovement, Announcement
@@ -118,6 +130,8 @@ Tabel flow + method-anchor: `M03_FLOW_KONTRAK.md` (kontrak/uang). Job otomatis �
 | `room-booking.util` | `backend/src/common/utils/room-booking.util.ts` | Konsolidasi helper booking (F2-5) |
 | `staff-assignment.util` | `backend/src/common/utils/staff-assignment.util.ts` | Round-robin assignment staf |
 | `ticket-number.util` | `backend/src/common/utils/ticket-number.util.ts` | Generate nomor tiket |
+| `catchError` / `logError` | `backend/src/common/utils/error-handler.ts` | Log error ber-konteks; `catchError` rethrow, `logError` untuk fire-and-forget |
+| `getUtilityBillingCycle` / `getUtilityAllowanceMonths` | `backend/src/common/business/utility-billing-cycle.helper.ts` | Siklus quota listrik berdasarkan periode sewa lunas, termasuk renewal multi-bulan |
 
 ## Frontend — Redundansi UI/UX (Fase AM)
 
@@ -138,7 +152,7 @@ Tabel flow + method-anchor: `M03_FLOW_KONTRAK.md` (kontrak/uang). Job otomatis �
 **Audit skor frontend:** 7/8 kategori ⭐⭐⭐⭐⭐, 1/8 ⭐⭐⭐⭐ (styling 99% CSS global)
 
 ## Cross-Dimension (P8) — Audit 360°
-✅ 215 `@@index` di 57 model — semua FK utama terindeks · ✅ Global JWT default-deny + DTO validation + pagination + error handling + PWA · ✅ Code splitting + skeleton + empty state chart (✅ P8-03) + 404 (✅ Fase L) + toast (✅ Fase F+M) · ✅ Refresh Token httpOnly cookie (M17 P3-01)
+✅ 215 `@@index` di 61 model — semua FK utama terindeks · ✅ Global JWT default-deny + DTO validation + pagination + error handling + PWA · ✅ Code splitting + skeleton + empty state chart (✅ P8-03) + 404 (✅ Fase L) + toast (✅ Fase F+M) · ✅ Refresh Token httpOnly cookie (M17 P3-01)
 
 ## Dokumen audit terbaru
 - **Audit Fable (2-3 Jul 2026):** `docs/archieve/audit_fable/00_INDEX.md` — 19 checklist C01-C19

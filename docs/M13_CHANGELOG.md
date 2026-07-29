@@ -1,5 +1,36 @@
 # KOST48 V5 — M13 Changelog
 
+## 2026-07-29 — Hardening UI/UX IoT owner dan penghuni
+
+- Dashboard owner menjadi command center berbasis perhatian: status operasional, kesegaran data, kualitas GOOD/SUSPECT/REJECTED, reset counter, filter provider, detail siklus, form terkunci saat submit, dan layout mobile.
+- Portal penghuni memakai snapshot periode resmi sebagai sumber utama pemakaian/tarif/estimasi; monitoring sensor dipisahkan, sedangkan loading/error/tidak cukup catatan listrik-air ditampilkan secara jujur tanpa fallback angka nol.
+- Normalisasi tanggal meter mengikuti WIB, tab dan pemilih rentang mendukung keyboard, chart/gauge mobile serta kontras/fokus/reduced-motion diperbaiki.
+- Verifikasi: 31 file/135 tes frontend lulus, 4/4 Playwright + Axe lulus, dan build TypeScript/Vite/PWA berhasil. TGZ stale berisi seed historis/PII sengaja tidak dimasukkan.
+
+## 2026-07-23 — Rekonsiliasi perubahan implementasi lintas AI
+
+> Entri ini mengonsolidasikan perubahan kode yang masuk setelah baseline changelog 2026-07-16. Ini mencakup perubahan oleh seluruh AI/kontributor pada jalur rilis, bukan hanya perubahan dokumentasi sesi ini. Baseline `main` yang diaudit: `8627289`.
+
+| Area rilis | Commit kode yang direkonsiliasi | Keadaan produk yang berlaku | Batas/gate penting |
+|---|---|---|---|
+| UI/UX lintas portal | `a1f1d4e`, `d3fb612`, `7174d8b`, `aee7868`, `5e36ec1`, `2c228e1` | Komponen visual bersama, dashboard, skeleton/error state, dan perbaikan owner/admin sudah masuk. | Tetap perlu UAT visual pada viewport/role nyata. |
+| IoT, dashboard, dan quota energi | `298bcca`, `d790c4b`, `763a5dc`, `3779432`, `01c6b38`, `d7be459`, `8af53d6` | Telemetri Tuya/ESP32, dashboard/detail/timeline, dan quota berbasis periode sewa lunas tersedia. | Mapping hardware, credential, dan UAT perangkat masih wajib; tidak ada auto-billing/auto-alert. |
+| Inventaris dan fasilitas kamar | `1eb11d9`, `0701327` | KPI stok, gap fasilitas, auto-link yang dapat ditinjau, filter status, dan pagination akurat tersedia. | Operator memeriksa hasil auto-link; trigger stok tetap single writer. |
+| Pengumuman, notifikasi, dan push | `f9387d2` | P1-P3: pagination/detail, kategori persisted, dispatch terjadwal, gambar, Bell, dan outbox push. | UAT HTTPS/VAPID serta pengumuman terjadwal sebelum go-live. |
+| Hardening backend | `e327e9b` | Strict null/implicit-any aktif; renewal, booking helper, DTO dashboard, dan error handling dibersihkan tanpa mengubah kontrak bisnis. | Build/typecheck dari SHA rilis wajib lulus. |
+| Konsolidasi frontend | `8a589e6` | Wrapper kompresi/ekspor duplikat dihapus, konstanta bisnis dibagi, dan CSS masuk satu entrypoint. | UAT visual lintas portal; budget CSS 135 KB gzip. |
+| Artefak dan tooling UAT/deploy historis | Seri `ab21d3b`–`a0cb232`, lalu `8627289` | Seed data teraudit, perbaikan kompatibilitas tool/redeploy, dan artefak bundle pernah diperbarui. Bundle aktif kembali memuat runtime `node_modules`, sehingga server tidak menjalankan install/build. | Tidak menjadi izin memakai seed historis, `schema.sql`, atau `db push` di produksi; patch database diputuskan terpisah dari bundle. |
+
+- Keputusan bisnis yang lahir dari integrasi ini dicatat di `M02_KEPUTUSAN_OWNER.md` D-26 s.d. D-31.
+- Peta modul/file aktif diperbarui di `M00_CODEMAP.md`; status tugas/gate aktif ada di `M12_CHECKLIST_CHANGELOG.md`.
+
+## 2026-07-23 -- Release documentation: announcement/notification and online deployment
+
+- P1-P3 audit Pengumuman vs Notifikasi dicatat sebagai selesai: kategori notifikasi persisted, announcement dispatch terjadwal idempoten, gambar CRUD, Bell/push UAT, serta build backend/frontend lulus.
+- Keputusan go-live dipertegas: buat database produksi baru/kosong tanpa menghapus database UAT atau memigrasikan data testing; sesudah go-live gunakan patch migration saja. Runbook aktif: `DEPLOYMENT_ONLINE_20260723.md`.
+- Gate yang belum tertutup didokumentasikan: bootstrap guard DB bersih, bug pencarian tenant booking, dan UAT visual lintas portal.
+- M06/M10/M11/M14/M15 ikut diselaraskan: implementasi IoT tidak lagi ditandai belum dibuat, dan data master lapangan tidak lagi diperlakukan sebagai seed produksi.
+
 ## 2026-07-23 -- Perbaikan audit inventaris (pagination, filter status, koreksi dok)
 - **Fix pagination lowStockOnly:** meta `totalItems` kini dihitung setelah filter client-side (`effectiveTotal`), bukan unfiltered count — mencegah pagination menyesatkan saat filter "Stok Menipis" aktif.
 - **Filter status server-side:** backend `InventoryItemsQueryDto` + service WHERE kini mendukung `?status=DAMAGED` (dikirim ke Prisma) — siap untuk frontend filter server-side ke depan.
@@ -330,3 +361,127 @@
 - **Issue #5:** Tombol "Hubungi Admin via WhatsApp" di tab Nomor HP — aktif selama ada input (tidak butuh nomor valid penuh), plus hint format nomor HP.
 
 
+
+---
+
+## Release 2026-07-23 — Pengumuman, Notifikasi, dan Konsolidasi Kode
+
+
+#### Status release
+
+P1, P2, dan P3 untuk audit Pengumuman vs Notifikasi sudah diimplementasikan di `main`.
+
+- P1: infinite list pengumuman tidak lagi membekukan halaman pertama di cache; detail dibuka dari API; validasi edit tanggal tidak menolak `startsAt` lama yang tidak diubah.
+- P2: kategori notifikasi disimpan sebagai data, pengumuman terjadwal benar-benar didispatch ketika aktif, dan CRUD pengumuman mendukung gambar.
+- P3: Bell menampilkan indikator kategori dan Web Push memakai outbox dari notifikasi in-app.
+- Verifikasi statis terakhir: backend `npm run build` dan frontend `npm run build` lulus, termasuk verifikasi PWA.
+
+Status ini bukan pengganti UAT manusia. Sebelum go-live, jalankan checklist di bawah (UAT Push Notification Production).
+
+#### Cakupan release lintas AI
+
+Dokumen ini mencatat release yang dipersiapkan dari seluruh perubahan kode terkait, bukan hanya P1-P3. Baseline source `main` yang diaudit adalah `8627289`; dokumentasi dan penyesuaian paket deploy pada worktree harus ikut di-commit ke SHA rilis sebelum diunggah.
+
+| Area | Commit utama | Dampak rilis |
+|---|---|---|
+| Inventaris/fasilitas | `1eb11d9`, `0701327` | Ringkasan stok, gap fasilitas, auto-link yang ditinjau operator, serta filter/pagination yang benar. |
+| IoT dan utilitas | `298bcca`–`8af53d6` | Telemetri/dashboard/timeline tersedia; quota listrik mengikuti periode sewa lunas dan telemetry tidak menerbitkan invoice. |
+| Pengumuman/notifikasi | `f9387d2` | P1-P3 yang diringkas pada dokumen ini. |
+| Hardening backend | `e327e9b` | Strict type checking, helper error baku, dan konsolidasi jalur renewal/booking. |
+| Frontend/CSS | `8a589e6` | Konstanta bersama dan satu entry CSS; perlu UAT visual. |
+| Artefak baseline | `8627289` | Bundled artifact/session tracking diperbarui; artefak produksi harus diregenerasi dari SHA final. |
+
+Riwayat perubahan lebih rinci dan jejak commit lintas AI: `docs/M13_CHANGELOG.md`.
+
+#### Perilaku yang menjadi kontrak bisnis
+
+| Area | Keputusan aktif | Konsekuensi operasional |
+|---|---|---|
+| Audiens pengumuman `TENANT` | Hanya tenant aktif dengan `Stay ACTIVE` dan kamar `OCCUPIED`. | Tenant yang baru booking tidak menerima pengumuman tenant. |
+| Audiens `ALL` | Semua pengguna aktif. | Dipakai untuk informasi yang relevan lintas peran. |
+| Pengumuman terjadwal | Tidak ada notifikasi sebelum `startsAt`. AutoOps mengirim saat pengumuman sudah aktif dan belum `dispatchedAt`. | Ketepatan waktu mengikuti frekuensi AutoOps/cron, bukan janji real-time per detik. |
+| Masa berlaku | Pengumuman yang sudah kedaluwarsa tidak didispatch. | Hindari inbox berisi informasi usang. |
+| Kategori notifikasi | `FINANCE`, `OPERATIONS`, atau `SYSTEM` tersimpan di database. | UI tidak boleh lagi menyimpulkan kategori hanya dari `entityType`. |
+| Fallback kategori | Event pembayaran/akuntansi = `FINANCE`; pengumuman, stay, tiket, kamar, dan booking = `OPERATIONS`; lainnya = `SYSTEM`. | Call-site dengan konteks khusus wajib mengirim kategori eksplisit. |
+| Penghapusan pengumuman | OWNER/ADMIN melakukan hard delete; notifikasi terkait dan file gambar dihapus setelah transaksi database sukses. AuditLog tetap mencatat aksi. | Hapus bersifat tidak dapat dipulihkan dari UI; gunakan unpublish bila hanya ingin menghentikan tayang. |
+| Push | Notifikasi in-app adalah sumber kebenaran. Push adalah best-effort dan opt-in browser. | Push gagal, VAPID belum ada, atau perangkat tidak tersubscribe tidak boleh menghilangkan notifikasi in-app. |
+
+#### Implementasi teknis yang relevan
+
+- Migration `20260723000000_announcement_notification_delivery` menambah enum `NotificationCategory`, `Announcement.dispatchedAt`, kolom kategori, indeks, dan backfill kategori data lama.
+- `AnnouncementSweepService` dipanggil oleh `AutoOpsService.runAll()` dan dapat diuji manual melalui `POST /api/auto-ops/run/announcement-dispatch` oleh OWNER/ADMIN.
+- Endpoint cron eksternal adalah `POST /api/auto-ops/cron` dengan header `X-Cron-Token`; token query tidak didukung.
+- `POST /api/auto-ops/run/push-dispatch` memproses outbox push manual untuk UAT. Cron biasa juga menjalankan dispatch announcement dan push.
+- Gambar pengumuman dibatasi 2 MB, diperiksa signature JPG/PNG/WebP, dan dibaca melalui endpoint terproteksi.
+
+#### UAT minimum sebelum rilis
+
+1. Buat pengumuman langsung untuk audiens TENANT dan ALL; cek penerima sesuai aturan di atas dan link membuka detail yang benar.
+2. Buat pengumuman publish dengan `startsAt` beberapa menit ke depan; pastikan belum ada notifikasi. Setelah waktu lewat, jalankan endpoint dispatch manual atau tunggu cron lalu cek `dispatchedAt` dan deduplikasi penerima.
+3. Ubah pengumuman aktif yang memiliki `startsAt` lampau tanpa mengubah tanggal tersebut; pembaruan harus berhasil. Ubah tanggal baru ke masa lampau; harus ditolak.
+4. Upload, ganti, hapus gambar pengumuman; pastikan gambar lama tidak tetap dapat diakses setelah penghapusan pengumuman.
+5. Uji Bell pada tiap kategori dan jalankan UAT push lengkap melalui `docs/UAT_PUSH_NOTIFICATIONS.md` di HTTPS.
+
+#### Risiko/go-live gate yang masih terbuka
+
+- Perlu UAT visual lintas portal setelah refactor CSS global yang masuk pada release terakhir.
+- Endpoint pencarian `/tenant/bookings/my?search=...` memiliki temuan SQL terpisah: query hitung memakai alias kamar tanpa join. Perbaiki atau nonaktifkan pencarian tersebut sebelum go-live.
+- Jalur bootstrap database harus diverifikasi pada database kosong. Jangan menjalankan `sql/seed.sql` yang berisi data historis/PII sebagai cara memasang schema atau pagar database produksi.
+
+#### Rujukan
+
+- Keputusan owner: `docs/M02_KEPUTUSAN_OWNER.md` D-26 s.d. D-31.
+- Deployment: `docs/DEPLOYMENT_ONLINE_20260723.md`.
+
+---
+
+##### UAT Push Notification Produksi
+
+#### Tujuan
+
+Memverifikasi alur end-to-end Web Push KOST48 tanpa membocorkan secret VAPID atau mengganggu akun penghuni nyata.
+
+#### Prasyarat
+
+- Frontend berjalan melalui HTTPS dan service worker aktif.
+- Backend memiliki `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, dan `VAPID_SUBJECT` yang valid. Jangan salin nilainya ke ticket, chat, atau screenshot.
+- AutoOps aktif: proses always-on menjalankan interval, atau cPanel cron memanggil `POST /api/auto-ops/cron` dengan header `X-Cron-Token` secara berkala.
+- Gunakan akun uji OWNER/ADMIN/TENANT dan perangkat/browser uji. Jangan mengirim data pribadi melalui notifikasi uji.
+
+#### Prosedur
+
+1. Login sebagai akun uji, buka `/notifications`, dan pastikan kartu push ditampilkan.
+2. Tekan **Aktifkan**, setujui permission browser, lalu muat ulang halaman. Kartu harus berubah menjadi aktif.
+3. Dengan token akun yang sama, panggil `GET /api/push/vapid-public-key`. Respons harus menyatakan `enabled: true`; jangan menyimpan nilai `publicKey` pada laporan UAT.
+4. Buat satu notifikasi yang aman di lingkungan UAT, atau pakai event uji yang sudah tersedia. Pastikan notifikasi muncul di halaman dan Bell.
+5. Jalankan AutoOps biasa atau trigger OWNER/ADMIN `POST /api/auto-ops/run/push-dispatch`.
+6. Pastikan perangkat menerima push dengan judul, isi, dan aksi navigasi yang sesuai. Ketuk push dan pastikan aplikasi membuka `linkTo` yang benar.
+7. Ulangi langkah 5. Notifikasi yang sama tidak boleh dikirim ulang setelah statusnya `SENT`.
+8. Matikan push melalui kartu notifikasi dan pastikan subscription perangkat tidak lagi menerima push baru.
+9. Buat pengumuman terjadwal untuk akun uji dengan `startsAt` beberapa menit di masa depan. Pastikan inbox/push belum ada sebelum waktunya; sesudah aktif jalankan `POST /api/auto-ops/run/announcement-dispatch`, lalu dispatch push. Catat bahwa pengumuman hanya diproses sekali (`dispatchedAt` terisi) dan link membuka detail yang benar.
+
+#### Bukti yang Dicatat
+
+- Waktu pengujian, environment, role akun uji, dan browser/perangkat.
+- Hasil `enabled` endpoint VAPID (boolean saja).
+- Hasil dispatch: `processed`, `sent`, `failed`, `noDevice`, dan `deactivated`.
+- Screenshot permission browser dan push yang diterima, tanpa token, endpoint subscription, atau data personal.
+- Hasil klik push menuju halaman tujuan.
+- Untuk pengumuman terjadwal: `startsAt`, waktu dispatch, hasil dispatch announcement, dan bukti tidak ada kiriman sebelum waktu aktif.
+
+#### Troubleshooting
+
+| Gejala | Pemeriksaan |
+|---|---|
+| Kartu menyatakan push belum aktif | Pastikan VAPID env terpasang lalu restart backend; cek endpoint public key. |
+| Tombol aktif gagal | Pastikan HTTPS, service worker terdaftar, dan browser tidak memblokir permission. |
+| Subscription ada tetapi tidak ada push | Pastikan AutoOps/cron berjalan dan `PUSH_DISPATCH_ENABLED` bukan `false`; trigger endpoint dispatch manual untuk diagnosis. |
+| `failed` bertambah | Periksa log backend. Status 404/410 menonaktifkan subscription usang; pengguna perlu mengaktifkan ulang. |
+| Push diterima dua kali | Catat ID notifikasi, status push, dan waktu dispatch; ini regresi idempotensi yang harus diperbaiki sebelum go-live. |
+
+#### Kriteria Lulus
+
+- Push dapat diaktifkan dan dimatikan pada perangkat uji.
+- Satu notifikasi `PENDING` terkirim sekali, menjadi `SENT`, dan membuka tujuan yang benar.
+- Notifikasi in-app tetap tersedia bila VAPID tidak dikonfigurasi atau perangkat tidak memiliki subscription.
+- Tidak ada secret, token, endpoint subscription, atau data penghuni pada bukti UAT.

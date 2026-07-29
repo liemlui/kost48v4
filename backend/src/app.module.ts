@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { APP_GUARD } from '@nestjs/core';
 import { ConfigModule } from '@nestjs/config';
+import { join } from 'node:path';
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 import { RolesGuard } from './common/guards/roles.guard';
 import { AuthModule } from './auth/auth.module';
@@ -52,9 +53,23 @@ import { AdminDashboardModule } from './modules/admin/admin-dashboard.module';
 import { OwnerDashboardModule } from './modules/owner/owner-dashboard.module';
 import { StaffDashboardModule } from './modules/staff-dashboard/staff-dashboard.module';
 import { IotModule } from './modules/iot/iot.module';
+
+// Passenger/cPanel dapat menjalankan startup file dengan cwd yang berbeda dari
+// application root. __dirname selalu berada di src/ saat development dan dist/
+// saat production; parent-nya adalah root aplikasi tempat .env berada.
+// process.env dari Passenger tetap menang karena dotenv tidak override env yang
+// sudah diberikan proses Node.
+const ENV_FILE_PATHS = [
+  join(__dirname, '..', '.env'),
+  join(process.cwd(), '.env'),
+];
+
 @Module({
   imports: [
-    ConfigModule.forRoot({ isGlobal: true }),
+    ConfigModule.forRoot({
+      isGlobal: true,
+      envFilePath: ENV_FILE_PATHS,
+    }),
     PrismaModule,
     AuditLogModule,
     AuthModule,

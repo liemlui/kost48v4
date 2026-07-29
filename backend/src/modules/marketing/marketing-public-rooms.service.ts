@@ -1,6 +1,8 @@
 // FILE: marketing-public-rooms.service.ts — katalog kamar publik + filter ketersediaan + harga
-import { Injectable, NotFoundException, ServiceUnavailableException } from '@nestjs/common';
-import { Prisma } from '../../generated/prisma';
+import { BadRequestException, ForbiddenException, Injectable, NotFoundException, ServiceUnavailableException } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { timingSafeEqual } from 'node:crypto';
+import { Prisma, PublicRoomAvailabilityStatus } from '../../generated/prisma';
 import { PricingTerm, RoomStatus } from '../../common/enums/app.enums';
 import { StaffRoutineAreaType, StaffRoutineFrequency, StaffRoutineStatus } from '../../generated/prisma';
 import { buildMeta, buildPagination } from '../../common/utils/pagination';
@@ -35,6 +37,7 @@ const PUBLIC_ROOM_SELECT = {
   allowBookingWhileCleaning: true,
   electricityTariffPerKwhRupiah: true,
   waterTariffPerM3Rupiah: true,
+  publicAvailability: { select: { status: true } },
 } satisfies Prisma.RoomSelect;
 
 type PublicRoomRecord = Prisma.RoomGetPayload<{ select: typeof PUBLIC_ROOM_SELECT }>;
@@ -50,7 +53,10 @@ export interface PublicRoomSummary {
 
 @Injectable()
 export class MarketingPublicRoomsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly configService: ConfigService,
+  ) {}
 
   // ═══════════════════════════════════════════════════════════
   //  SECTION: Public Room Listings & Social Proof
@@ -192,8 +198,7 @@ export class MarketingPublicRoomsService {
 
   async getPublicRoomSummary(): Promise<PublicRoomSummary> {
     try {
-      const rows = await this.prisma.room.groupBy({
-        by: ['status'],
+      const rooms = await this.prisma.room.findMany({
         where: {
           isActive: true,
           monthlyRateRupiah: { gt: 0 },
@@ -206,34 +211,110 @@ export class MarketingPublicRoomsService {
             ],
           },
         },
-        _count: { _all: true },
-      });
-
-      const countByStatus = new Map(rows.map((row) => [String(row.status), row._count._all]));
-      const bookableMaintenance = await this.prisma.room.count({
-        where: {
-          isActive: true,
-          monthlyRateRupiah: { gt: 0 },
-          status: RoomStatus.MAINTENANCE as any,
-          allowBookingWhileCleaning: true,
+        select: {
+          status: true,
+          publicAvailability: { select: { status: true } },
         },
       });
-      const available = countByStatus.get(RoomStatus.AVAILABLE) ?? 0;
-      const maintenance = countByStatus.get(RoomStatus.MAINTENANCE) ?? 0;
-      const reserved = countByStatus.get(RoomStatus.RESERVED) ?? 0;
-      const occupied = countByStatus.get(RoomStatus.OCCUPIED) ?? 0;
+
+      let available = 0;
+      let occupied = 0;
+      let maintenance = 0;
+      let reserved = 0;
+
+      for (const room of rooms) {
+        const publicStatus = this.resolvePublicAvailabilityStatus(room);
+        if (publicStatus === PublicRoomAvailabilityStatus.HIDDEN) continue;
+        if (publicStatus === PublicRoomAvailabilityStatus.AVAILABLE) {
+          available += 1;
+          continue;
+        }
+        // Pada mode katalog manual, semua status non-tersedia ditampilkan
+        // konsisten sebagai "Penuh"; status operasional asli tidak diekspos.
+        occupied += 1;
+      }
 
       return {
-        bookable: available + bookableMaintenance,
+        bookable: available,
         occupied,
         maintenance,
         reserved,
-        total: available + maintenance + reserved + occupied,
+        total: available + occupied,
       };
     } catch (_err: any) {
       // DEFENSIVE: jika groupBy/count gagal (schema drift, enum mismatch), kembalikan nol.
       return { bookable: 0, occupied: 0, maintenance: 0, reserved: 0, total: 0 };
     }
+  }
+
+  /**
+   * Pengaturan katalog ringan untuk owner. PIN hanya hidup di environment
+   * server dan tidak pernah dikirim ke browser atau database.
+   */
+  async getPublicAvailabilitySetup(ownerPin: string | undefined) {
+    this.assertAvailabilityOwnerPin(ownerPin);
+    const rooms = await this.prisma.room.findMany({
+      where: { isActive: true },
+      select: {
+        id: true,
+        code: true,
+        name: true,
+        floor: true,
+        status: true,
+        publicAvailability: { select: { status: true } },
+      },
+      orderBy: [{ floor: 'asc' }, { code: 'asc' }],
+    });
+
+    return {
+      onlineBookingEnabled: this.isPublicOnlineBookingEnabled(),
+      rooms: rooms.map((room) => ({
+        id: room.id,
+        code: room.code,
+        name: room.name,
+        floor: room.floor,
+        publicStatus: this.resolvePublicAvailabilityStatus(room),
+      })),
+    };
+  }
+
+  async updatePublicAvailabilitySetup(
+    ownerPin: string | undefined,
+    entries: Array<{ roomId: number; status: PublicRoomAvailabilityStatus }>,
+  ) {
+    this.assertAvailabilityOwnerPin(ownerPin);
+    if (!entries.length) throw new BadRequestException('Pilih minimal satu status kamar untuk disimpan.');
+    if (entries.length > 100) throw new BadRequestException('Terlalu banyak kamar dalam satu penyimpanan.');
+
+    const uniqueEntries = new Map<number, PublicRoomAvailabilityStatus>();
+    for (const entry of entries) {
+      if (!Number.isInteger(entry.roomId) || entry.roomId <= 0) {
+        throw new BadRequestException('ID kamar tidak valid.');
+      }
+      if (uniqueEntries.has(entry.roomId)) {
+        throw new BadRequestException('Setiap kamar hanya boleh diatur satu kali.');
+      }
+      uniqueEntries.set(entry.roomId, entry.status);
+    }
+
+    const roomIds = [...uniqueEntries.keys()];
+    const existingRooms = await this.prisma.room.findMany({
+      where: { id: { in: roomIds }, isActive: true },
+      select: { id: true },
+    });
+    if (existingRooms.length !== roomIds.length) {
+      throw new BadRequestException('Ada kamar yang tidak aktif atau tidak ditemukan. Muat ulang wizard lalu coba lagi.');
+    }
+
+    await this.prisma.$transaction(
+      roomIds.map((roomId) => this.prisma.publicRoomAvailability.upsert({
+        where: { roomId },
+        create: { roomId, status: uniqueEntries.get(roomId)! },
+        update: { status: uniqueEntries.get(roomId)! },
+      })),
+    );
+
+    return this.getPublicAvailabilitySetup(ownerPin);
   }
 
   async getPublicRooms(query: PublicRoomsQueryDto) {
@@ -617,16 +698,21 @@ export class MarketingPublicRoomsService {
 
     const room = await this.prisma.room.findFirst({
       where: {
-        id,
-        isActive: true,
-        status: {
-          in: [
-            RoomStatus.AVAILABLE as any,
-            RoomStatus.RESERVED as any,
-            RoomStatus.OCCUPIED as any,
-            RoomStatus.MAINTENANCE as any,
-          ],
-        },
+        AND: [
+          {
+            id,
+            isActive: true,
+            status: {
+              in: [
+                RoomStatus.AVAILABLE as any,
+                RoomStatus.RESERVED as any,
+                RoomStatus.OCCUPIED as any,
+                RoomStatus.MAINTENANCE as any,
+              ],
+            },
+          },
+          this.buildPublicVisibilityWhere(),
+        ],
       },
       select: PUBLIC_ROOM_SELECT,
     });
@@ -679,6 +765,7 @@ export class MarketingPublicRoomsService {
   private buildPublicRoomWhere(query: PublicRoomsQueryDto): Prisma.RoomWhereInput {
     const conditions: Prisma.RoomWhereInput[] = [
       { isActive: true },
+      this.buildPublicVisibilityWhere(),
       {
         status: {
           in: [
@@ -723,6 +810,46 @@ export class MarketingPublicRoomsService {
     return { AND: conditions };
   }
 
+  private buildPublicVisibilityWhere(): Prisma.RoomWhereInput {
+    return {
+      OR: [
+        { publicAvailability: { is: null } },
+        { publicAvailability: { is: { status: { not: PublicRoomAvailabilityStatus.HIDDEN } } } },
+      ],
+    };
+  }
+
+  private resolvePublicAvailabilityStatus(room: {
+    status: RoomStatus | string;
+    publicAvailability?: { status: PublicRoomAvailabilityStatus } | null;
+  }): PublicRoomAvailabilityStatus {
+    if (room.publicAvailability?.status) return room.publicAvailability.status;
+    return room.status === RoomStatus.AVAILABLE
+      ? PublicRoomAvailabilityStatus.AVAILABLE
+      : PublicRoomAvailabilityStatus.FULL;
+  }
+
+  private isPublicOnlineBookingEnabled() {
+    return ['true', '1', 'yes', 'on'].includes(
+      String(this.configService.get<string>('PUBLIC_ONLINE_BOOKING_ENABLED') ?? 'false').trim().toLowerCase(),
+    );
+  }
+
+  private assertAvailabilityOwnerPin(ownerPin: string | undefined) {
+    const expected = String(this.configService.get<string>('AVAILABILITY_OWNER_PIN') ?? '').trim();
+    const provided = String(ownerPin ?? '').trim();
+    if (expected.length < 6) {
+      throw new ServiceUnavailableException(
+        'Wizard ketersediaan belum dikonfigurasi. Isi AVAILABILITY_OWNER_PIN di Environment Variables atau .env application root, lalu Restart Application.',
+      );
+    }
+    const expectedBytes = Buffer.from(expected);
+    const providedBytes = Buffer.from(provided);
+    if (expectedBytes.length !== providedBytes.length || !timingSafeEqual(expectedBytes, providedBytes)) {
+      throw new ForbiddenException('PIN owner tidak valid.');
+    }
+  }
+
   private async getPublicFacilitiesByRoomId(roomIds: number[]) {
     const publicFacilities =
       roomIds.length > 0
@@ -761,13 +888,19 @@ export class MarketingPublicRoomsService {
     projected?: { date: string; reason: 'checkout-approved' | 'short-term' },
   ) {
     const highlightedPricingTerm = pricingTerm ?? PricingTerm.MONTHLY;
+    const publicStatus = this.resolvePublicAvailabilityStatus(room);
+    const isPubliclyAvailable = publicStatus === PublicRoomAvailabilityStatus.AVAILABLE;
+    const onlineBookingEnabled = this.isPublicOnlineBookingEnabled();
 
     return {
       id: room.id,
       code: room.code,
       name: room.name,
       floor: room.floor,
-      status: room.status,
+      // Jangan mengekspos status operasional untuk tampilan katalog. Status
+      // tersebut tetap dipakai secara internal untuk stay dan billing.
+      status: isPubliclyAvailable ? RoomStatus.AVAILABLE : RoomStatus.OCCUPIED,
+      publicAvailabilityStatus: publicStatus,
       category: room.category,
       roomType: room.roomType,
       roomSize: room.roomSize,
@@ -788,15 +921,19 @@ export class MarketingPublicRoomsService {
       highlightedPricingTerm,
       highlightedRateRupiah: this.resolveRent(room, highlightedPricingTerm),
       availablePricingTerms: this.getAvailablePricingTerms(room),
-      isAvailable:
-        room.status === RoomStatus.AVAILABLE ||
-        (room.status === RoomStatus.MAINTENANCE && Boolean(room.allowBookingWhileCleaning)),
-      canBook:
-        room.status === RoomStatus.AVAILABLE ||
-        (room.status === RoomStatus.MAINTENANCE && Boolean(room.allowBookingWhileCleaning)),
+      isAvailable: isPubliclyAvailable,
+      // canBook artinya booking online; ketersediaan katalog ada di isAvailable.
+      canBook: isPubliclyAvailable && onlineBookingEnabled,
+      onlineBookingEnabled,
       availabilityNote:
-        room.status === RoomStatus.RESERVED
-          ? 'Kamar sudah dikunci untuk tenant lain. Pilih kamar lain atau hubungi admin.'
+        isPubliclyAvailable
+          ? (onlineBookingEnabled
+            ? 'Kamar tersedia untuk booking online.'
+            : 'Kamar tersedia. Hubungi admin via WhatsApp untuk booking.')
+          : publicStatus === PublicRoomAvailabilityStatus.FULL
+            ? 'Kamar sedang penuh. Hubungi admin via WhatsApp untuk pilihan lain.'
+            : room.status === RoomStatus.RESERVED
+              ? 'Kamar sudah dikunci untuk tenant lain. Pilih kamar lain atau hubungi admin.'
           : room.status === RoomStatus.MAINTENANCE && Boolean(room.allowBookingWhileCleaning)
               ? 'Bisa dipesan sekarang — kamar sedang dibersihkan staf dan siap dihuni setelah pembersihan selesai.'
             : room.status === RoomStatus.MAINTENANCE

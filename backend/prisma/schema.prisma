@@ -35,6 +35,15 @@ enum RoomStatus {
   INACTIVE
 }
 
+// Status pemasaran dipisahkan dari status operasional Room. Owner dapat
+// menutup atau menampilkan kamar di katalog tanpa mengubah data stay,
+// tagihan, meter, maupun workflow checkout.
+enum PublicRoomAvailabilityStatus {
+  AVAILABLE
+  FULL
+  HIDDEN
+}
+
 // PUB-ROOM-CATEGORY (additive, owner-approved 2026-06-17): kategori & tipe kamar
 // untuk katalog publik (badge + filter). Default STANDARD/REGULAR agar baris lama aman.
 enum RoomCategory {
@@ -759,6 +768,7 @@ model Room {
   iotDevices         IotDevice[]
   tickets            Ticket[]
   roomItems          RoomItem[]
+  publicAvailability PublicRoomAvailability?
   transfersFrom      RoomTransfer[] @relation("RoomTransferFrom")
   transfersTo        RoomTransfer[] @relation("RoomTransferTo")
   staffRoutineAssignments StaffRoutineAssignment[] @relation("StaffRoutineAssignmentRoom")
@@ -774,6 +784,18 @@ model Room {
   @@index([isActive])
   @@index([floor, category])
   @@index([category, roomType, roomSize])
+}
+
+// Override tampilan ketersediaan di katalog publik. Tidak ada baris berarti
+// katalog mengikuti status operasional kamar yang sudah ada.
+model PublicRoomAvailability {
+  roomId    Int                          @id
+  status    PublicRoomAvailabilityStatus @default(FULL)
+  updatedAt DateTime                     @updatedAt
+
+  room Room @relation(fields: [roomId], references: [id], onDelete: Cascade)
+
+  @@index([status])
 }
 
 model RoomFacility {

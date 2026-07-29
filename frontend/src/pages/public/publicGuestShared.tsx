@@ -1,7 +1,7 @@
 // FILE: publicGuestShared.tsx — helpers + komponen presentational halaman publik
 // Helpers/konstanta + 5 komponen presentational diekstrak dari PublicGuestDashboardPage.tsx (refactor 2026-06-19: AI-read).
 // Halaman publik (read-only, tanpa state global). Pola mengikuti reportShared/dashboardShared.
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { APP_VERSION } from '../../config/version';
 import { useQuery } from '@tanstack/react-query';
 import { Accordion, Container, Modal, Spinner } from 'react-bootstrap';
@@ -14,6 +14,7 @@ import Kost48LogoMark from '../../components/common/Kost48LogoMark';
 import { useAuth } from '../../context/AuthContext';
 import { getDefaultRoute } from '../../config/navigation';
 import { useTenantPortalStage } from '../../hooks/useTenantPortalStage';
+import { useAvailabilityShortcut } from '../../hooks/useAvailabilityShortcut';
 import { formatRupiahWithoutSymbol } from '../../utils/formatCurrency';
 import { officialKost48Location } from '../../data/officialKost48Content';
 import {
@@ -244,9 +245,13 @@ export function Lightbox({ src, onClose }: { src: string; onClose: () => void })
 
 export function GuestTopbar({ scrolled }: { scrolled: boolean }) {
   const [iconBroken, setIconBroken] = useState(false);
+  const openAvailabilityShortcut = useAvailabilityShortcut();
 
   return (
-    <header className={`gx-topbar${scrolled ? ' gx-topbar-solid' : ''}`}>
+    <header
+      className={`gx-topbar${scrolled ? ' gx-topbar-solid' : ''}`}
+      onClick={openAvailabilityShortcut}
+    >
       <Link to="/" className="gx-brand" aria-label="KOST48 Beranda">
         {!iconBroken ? (
           <img src="/room-images/logo-kost48-sby.webp" alt="" aria-hidden="true" className="gx-logo-icon" onError={() => setIconBroken(true)} />
@@ -322,7 +327,7 @@ export function RoomPreviewCard({ room }: { room: PublicRoom }) {
   const rate = getBestPublicRoomRate(room, 'MONTHLY');
   // R-06: deteksi kamar terisi untuk visual berbeda
   const isOccupied = availability.tone === 'is-occupied' || availability.tone === 'is-full';
-  const isAvailable = availability.canBook && availability.tone !== 'is-maintenance';
+  const isAvailable = availability.isAvailable && availability.tone !== 'is-maintenance';
 
   return (
     <article className={`gx-room-card${isOccupied ? ' gx-room-card-occupied' : ''}${isAvailable ? ' gx-room-card-available' : ''}`}>
@@ -414,6 +419,25 @@ export function MobileShortcutNav({ visible }: { visible: boolean }) {
 }
 
 export function GuestFooter() {
+  const [secretClicks, setSecretClicks] = useState(0);
+  const secretTimerRef = useRef<ReturnType<typeof window.setTimeout> | null>(null);
+
+  const openAvailabilityWizard = () => {
+    if (secretTimerRef.current) window.clearTimeout(secretTimerRef.current);
+    const next = secretClicks + 1;
+    if (next >= 10) {
+      setSecretClicks(0);
+      window.location.assign('/availability-setup');
+      return;
+    }
+    setSecretClicks(next);
+    secretTimerRef.current = window.setTimeout(() => setSecretClicks(0), 5_000);
+  };
+
+  useEffect(() => () => {
+    if (secretTimerRef.current) window.clearTimeout(secretTimerRef.current);
+  }, []);
+
   return (
     <footer className="gx-footer">
       <Container fluid="xl">
@@ -438,7 +462,15 @@ export function GuestFooter() {
         </div>
         <p className="gx-footer-copy">
           KOST48 Surabaya Barat — Kos nyaman dekat Pakuwon Mall / PTC.{' '}
-          <span className="gx-footer-version">v{APP_VERSION}</span>
+          <button
+            type="button"
+            className="gx-footer-version gx-footer-owner-shortcut"
+            onClick={openAvailabilityWizard}
+            aria-label="Versi aplikasi"
+            title=""
+          >
+            v{APP_VERSION}
+          </button>
         </p>
       </Container>
     </footer>

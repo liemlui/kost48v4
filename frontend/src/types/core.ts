@@ -468,6 +468,8 @@ export type PublicRoom = {
   name?: string | null;
   floor?: string | null;
   status: string;
+  /** Status yang dipilih owner untuk katalog; tidak mengubah status operasional kamar. */
+  publicAvailabilityStatus?: 'AVAILABLE' | 'FULL' | 'HIDDEN' | string;
   category?: RoomCategory | null;
   roomType?: RoomType | null;
   roomSize?: RoomSize | null;
@@ -491,6 +493,8 @@ export type PublicRoom = {
   facilities?: RoomFacility[];
   isAvailable?: boolean;
   canBook?: boolean;
+  /** False ketika katalog memakai WhatsApp dan form booking publik dimatikan. */
+  onlineBookingEnabled?: boolean;
   availabilityNote?: string | null;
 };
 

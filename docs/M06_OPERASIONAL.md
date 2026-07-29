@@ -252,6 +252,8 @@ Staff **TIDAK BOLEH** memulai/menyetujui pemesanan layanan berbayar (WiFi, galon
 **Status:** 🟢 SEHAT — qty single-writer via trigger DB; ghost-stock TIDAK ada di jalur resmi. 1 lubang nyata (I-02) di jalur admin-review.
 **File inti:** `inventory-movements.service.ts` (176), `room-items.service.ts` (284), `staff-field-reports.service.ts` (651), `inventory-items.service.ts` (16.5KB), trigger `sql/seed.sql:534-625`.
 
+**Update UI/UX inventaris 2026-07-23:** `GET /inventory-items/summary` memberi enam KPI stok; `GET /rooms/facility-gap-summary` menampilkan gap fasilitas; `POST /rooms/:roomId/facilities/auto-link` hanya menautkan `RoomFacility` ke `RoomItem` lewat pencocokan nama. Operator tetap wajib meninjau hasil tautan. Filter `status` kini diterapkan server-side dan total pagination `lowStockOnly` dihitung setelah filter efektif.
+
 ---
 #### 1. Aturan bisnis
 - **Qty single-writer:** satu-satunya pengubah qty = trigger DB `inventory_movement_sync_qty_trg`; service hanya self-healing (tulis bila beda), bukan penambah kedua.
@@ -375,7 +377,7 @@ Staff **TIDAK BOLEH** memulai/menyetujui pemesanan layanan berbayar (WiFi, galon
 | N-01 | ✅ RESOLVED | Copy A17 sudah dua varian berdasarkan keberadaan submission/DP; pencatatan refund lossRefund* sudah task F2-3b SELESAI. | `payment-submissions.notifyLosingTenants` | **F2-3 selesai; F2-3b selesai** |
 | Renew notif | ✅ RESOLVED | Notif siklus renewal + prompt H-10 + fallback admin tenant tanpa portal sudah selesai 2026-06-14. | `renew-requests.service.ts`, `auto-ops.service.ts` | **F2-2 selesai** |
 | Sweeper-cancel | ✅ RESOLVED | Booking yang dibatalkan expiry/H+1/DP-forfeit mengirim notif tenant di luar transaksi; UAT tercatat lulus. | `cancelEndedUnpaidStay`/`expireBookingTx` | **F2-17 selesai** |
-| N-02 | ✅ RESOLVED (F3-13, 2026-06-14) | `notifyPublished` menahan notif bila `startsAt` masih di masa depan → tak ada lagi notif instan ke konten yang belum tayang. (Pengiriman tepat di `startsAt` butuh sweeper terjadwal = lanjutan.) | `announcements.service.ts` `notifyPublished` | **F3-13 (N-02 selesai)** |
+| N-02 | ✅ RESOLVED (P2, 2026-07-23) | `notifyPublished` menahan notif bila `startsAt` masih di masa depan; `AnnouncementSweepService` di AutoOps mendispatch ketika aktif, mendeduplikasi penerima, dan mengisi `dispatchedAt`. Pengumuman kedaluwarsa tidak dikirim. | `announcements.service.ts`, `announcement-sweep.service.ts` | **F3-13 + P2 selesai** |
 | Coverage 5 | 🟡 PARSIAL | payment-submitted→OWNER/ADMIN dan prompt-review tenant sudah selesai; tersisa ticket-assigned→staf, wifi-order, room-ready, dan K-8 penerima. | berbagai | **F3-2 selesai**; lanjut **F3-1** |
 | N-04 | ✅ RESOLVED (F4-7, 2026-06-14) | `pruneOlderThan(90)` + sweeper `runNotificationPruning` di `runAll` (env `NOTIFICATION_RETENTION_DAYS`/`NOTIFICATION_PRUNING_ENABLED`) menghapus notif `createdAt < now−retensi`, batch 5000. UAT ROLLBACK: 100hr terhapus, 10hr tetap. | `app-notification.service.ts`, `auto-ops.service.ts` | **F4-7 selesai** |
 | B-14 | ✅ RESOLVED (F3-13, 2026-06-14) | `runContractEndReminders` pakai window (`daysLeft <= threshold`) + dedupe per (stay, gelombang) via judul stabil `H-{wave}`; downtime sweeper di hari-H gelombang tak lagi menghilangkan reminder. Fallback admin tenant-tanpa-portal ikut per-gelombang. | `auto-ops.service.ts` `runContractEndReminders` | **F3-13 (B-14 selesai)** |
@@ -387,7 +389,7 @@ Staff **TIDAK BOLEH** memulai/menyetujui pemesanan layanan berbayar (WiFi, galon
 - **F3-1 · FASE 3:** coverage tersisa (ticket-assign+K-8 penerima, wifi, room-ready, sweeper) best-effort+dedupe.
 - **F3-2 · FASE 3 (SELESAI 2026-06-14):** submission pembayaran yang sudah commit mengirim inbox dedupe ke seluruh OWNER/ADMIN aktif dengan deep-link review. UAT rollback: 3 penerima, dua pemanggilan tetap 3 notifikasi, residu 0.
 - **F3-20 · FASE 3 (SELESAI 2026-06-14):** tiket tenant ber-assignee STAFF pada DONE/CLOSED mengirim ajakan review dedupe ke portal tenant. UAT rollback tiket #12: dua pemanggilan tetap 1 notifikasi, residu 0.
-- **F3-13:** N-02 + B-14. **F4-7 (SELESAI 2026-06-14):** pruning notif >90 hari (sweeper `runNotificationPruning`). **F4-2 (SELESAI 2026-06-15):** PWA Web Push — `PushSubscription` + outbox in-place (`AppNotification.pushStatus/pushAttempts/pushedAt`) + sweeper `runPushDispatch` (VAPID, web-push) + service worker push/notificationclick + UI opt-in `PushToggle`. Endpoint: `GET /push/vapid-public-key`, `POST /push/subscribe`, `POST /push/unsubscribe`, `POST /auto-ops/run/push-dispatch`.
+- **F3-13/P2:** N-02 + B-14. Pengumuman terjadwal diproses `AnnouncementSweepService` melalui `runAll()` atau `POST /auto-ops/run/announcement-dispatch`; target tenant tetap hanya stay ACTIVE + room OCCUPIED. **F4-7 (SELESAI 2026-06-14):** pruning notif >90 hari. **F4-2 (SELESAI 2026-06-15):** PWA Web Push — `PushSubscription` + outbox in-place (`AppNotification.pushStatus/pushAttempts/pushedAt`) + sweeper `runPushDispatch` (VAPID, web-push) + service worker push/notificationclick + UI opt-in `PushToggle`. Endpoint: `GET /push/vapid-public-key`, `POST /push/subscribe`, `POST /push/unsubscribe`, `POST /auto-ops/run/push-dispatch`.
 
 #### 5. Konvensi & invarian
 - **Konvensi event baru:** penerima eksplisit; linkTo terdalam relevan; dedupe key (recipient, entityType, entityId, title); best-effort never-throw; di LUAR tx bila pasca-commit.
@@ -538,44 +540,45 @@ Sumber TUNGGAL (hindari duplikasi). Per-kamar tetap bisa override tarif bila per
 
 ## Bagian 6 — IoT Monitoring (KWH Tuya + Water Flow ESP32)
 
-> 🔜 **Belum diimplementasi.** Spek lengkap: memory `iot-water-kwh-spec` + `M14_IOT_TUYA_DEVICES.md`.
+> **Fondasi implementasi selesai (2026-07-23); rollout hardware dan UAT masih gate.** Spek lengkap: `M15_IOT_KWH_WATER_IMPLEMENTATION_PLAN.md` + `M14_IOT_TUYA_DEVICES.md`. Telemetry tidak pernah otomatis membuat tagihan.
+
+**Update quota energi:** quota gratis listrik mengikuti periode sewa awal/perpanjangan yang sudah lunas. Perpanjangan tiga bulan memperoleh tiga kali quota bulanan; pembayaran DP renewal sendiri tidak mereset quota. Catat meter/renewal tetap jalur bisnis yang menerbitkan invoice, bukan polling Tuya.
 
 ### Hardware Terpasang
 
 | Jenis | Jumlah | Status | Integrasi |
 |---|---|---|---|
-| **KWH Meter Tuya per kamar** | 13 (11 online) | Tuya Cloud API | Polling cron 10 menit → `KwhReading` |
+| **KWH Meter Tuya per kamar** | 13 (snapshot: 11 online) | Tuya Cloud API | Polling cron 10 menit → `IotTelemetry` (bukan `MeterReading` billing) |
 | **CCTV BARDI IP Camera** | 5 (4 online) | Tuya Cloud | Fase lanjutan (snapshot dashboard) |
 | **Smart Lock** | 1 (online) | Tuya Cloud | Fase lanjutan (remote unlock) |
-| **Water Flow D20 + ESP32-C3** | 2-3 unit (🔜) | HTTP POST | `/api/iot/flow` (JWT device token) |
+| **Water Flow D20 + ESP32-C3** | 2-3 unit (rollout hardware) | Signed HTTP POST | `/api/iot/v1/readings` (HMAC per device) |
 
-### Arsitektur Backend (rencana)
+### Arsitektur Backend (aktif)
 
 ```
-ESP32-C3+D20 → HTTP POST /api/iot/flow (JWT) → FlowReading
-Tuya KWH Meter → Tuya Cloud API → cron KwhPollingSweep (10 menit) → KwhReading
-                                    cron LeakDetectionSweep → FlowAlert / KwhAlert
+ESP32-C3+D20 → signed POST /api/iot/v1/readings → IotIngestMessage + IotTelemetry
+Tuya KWH Meter → Tuya Cloud API → IotPollingService (interval/cron 10 menit) → IotTelemetry
+Tenant/owner → overview dan history dengan pembaruan berkala; billing tetap memakai MeterReading terpisah
 ```
 
 - **1 backend** (tidak bikin backend baru — hemat RAM shared hosting)
-- **Tanpa MQTT/WebSocket** — polling REST saja
-- **Tanpa library baru** (kecuali terpaksa + ringan)
-- **JWT device** berbeda dari user JWT (long-lived 30 hari, device-scoped)
+- **Tanpa MQTT**; Tuya dipoll melalui REST dan portal tenant memakai polling terikat agar worker shared hosting tidak tertahan koneksi panjang.
+- **Kredensial ESP32** disimpan terenkripsi per device dan request ditandatangani HMAC; bukan JWT pengguna.
+- Endpoint cron Tuya: `POST /api/iot/tuya/cron` dengan header `X-Iot-Cron-Token`.
 
-### Model Prisma (🔜)
+### Model Prisma (aktif)
 
-- `IotDevice` — registrasi ESP32 / device Tuya, device token
-- `FlowSensor` — sensor D20 per kamar
-- `FlowReading` — data water flow (liter, timestamp)
-- `KwhReading` — data kWh dari Tuya (device_id, kWh, timestamp)
-- `KwhAlert` / `FlowAlert` — alert anomali
+- `IotDevice` — registry ESP32/Tuya, mapping kamar, credential terenkripsi
+- `IotIngestMessage` — envelope idempoten/replay-safe per event atau poll
+- `IotTelemetry` — metrik dinormalisasi dari water flow maupun Tuya, lengkap kualitas data
+- `MeterReading` — tetap satu-satunya snapshot yang dipakai billing
 
-### Auto-Ops Cron (🔜)
+### Polling dan tindak lanjut
 
 | Sweeper | Trigger | Aksi |
 |---|---|---|
-| **KwhPollingSweep** | Tiap 10 menit | Polling 11 KWH meter via Tuya API → simpan |
-| **LeakDetectionSweep** | Tiap 30 menit | Flow > 0 jam 23-05 ATAU tanpa penghuni → alert |
+| **IotPollingService** | Interval always-on atau cron tiap 10 menit | Polling perangkat Tuya aktif → simpan telemetry |
+| **Anomali/kebocoran** | Belum diaktifkan sebagai auto-action | Tetap kandidat observability; perlu threshold, UAT sensor, dan keputusan operasional sebelum alert otomatis |
 
 ### Referensi
 
@@ -594,4 +597,4 @@ Tuya KWH Meter → Tuya Cloud API → cron KwhPollingSweep (10 menit) → KwhRea
 ✅ Ticket lifecycle valid (OPEN→IN_PROGRESS→DONE→CLOSED) · ✅ CHECKOUT_INSPECTION dedupe · ✅ Room readiness gate · ✅ SLA escalation (L0→admin, L1→owner) · ✅ Staff close inspeksi (model tenant-pengawas) · ✅ Assignment round-robin · ✅ One-active-work guard · ✅ KPI calculation akurat · ✅ Review tenant→owner verify · ✅ Single-writer inventory trigger · ✅ Staff 403 official inventory · ✅ Edit movement banned · ✅ Field report→admin review
 
 ### P5 Auto-Ops
-✅ Advisory lock mutex (`pg_try_advisory_lock(1)`) — multi-instance safe · ✅ 5 sweeper (Booking, Stay, Renewal, Accounting, Maintenance) × banyak operasi · ✅ Uang masuk = STOP (PENDING_REVIEW/APPROVED/AWAITING_PAYMENT skip) · ✅ Idempotent · ✅ FOR UPDATE re-cek setelah lock · ✅ Sequential execution
+✅ Advisory lock mutex (`pg_try_advisory_lock(1)`) — multi-instance safe · ✅ 6 sweep service (Booking, Stay, Renewal, Accounting, Maintenance, Announcement) × banyak operasi · ✅ Uang masuk = STOP (PENDING_REVIEW/APPROVED/AWAITING_PAYMENT skip) · ✅ Idempotent · ✅ FOR UPDATE re-cek setelah lock · ✅ Sequential execution

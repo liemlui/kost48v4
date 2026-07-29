@@ -27,7 +27,7 @@
     "iot:bootstrap-tuya": "node scripts/bootstrap-tuya-kwh.js",
     "iot:sync-tuya": "node scripts/bootstrap-tuya-kwh.js --sync",
     "cpanel:install": "npm ci --omit=dev --omit=optional --ignore-scripts --no-audit --no-fund --progress=false",
-    "cpanel:migrate": "npx --yes prisma db push --skip-generate",
+    "cpanel:migrate": "npx --yes prisma@7.8.0 migrate deploy",
     "start:prod": "node --max-old-space-size=192 dist/main.js",
     "build:prod": "npm ci && npm run build",
     "install:prod": "npm ci --omit=dev",

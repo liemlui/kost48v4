@@ -34,6 +34,8 @@ Semua flow siklus huni telah terverifikasi dalam audit 360° (M15/M16). Perbaika
 
 **Invarian deposit:** 16 stay × Rp500.000 = Rp8.000.000, MATCHED, akun 2000 tak pernah debit.
 
+**Update 2026-07-23 — kontrak quota utilitas:** periode quota listrik mengikuti invoice sewa `PAID` untuk masa awal/renewal. DP renewal tidak mengubah periode; renewal multi-bulan membawa quota sebanyak jumlah bulan periode. Telemetry IoT hanya memberi observability dan tidak dapat mengubah meter billing tanpa jalur `MeterReading`.
+
 ## Update 2026-06-16 - SI-2/SI-3 Riwayat Sewa
 
 Sesuai analisa PDF, siklus tenant harus terbaca sebagai alur end-to-end: masuk kos, periode berjalan, perpanjangan, invoice, meter, checkout, dan kamar siap jual lagi.

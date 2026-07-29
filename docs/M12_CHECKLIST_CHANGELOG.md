@@ -1,6 +1,6 @@
 # KOST48 V5 — Checklist Eksekusi Aktif
 
-> Versi: **2026-07-09 (M14–M17 diarsip, konten → M00–M09)** | Changelog → `docs/M13_CHANGELOG.md`
+> Versi aktif: **2026-07-23** | Changelog → `docs/M13_CHANGELOG.md` | Riwayat fase lama tetap dipertahankan sebagai arsip konteks.
 
 ## Cara Pakai (AI Eksekutor — baca sebelum coding)
 
@@ -22,6 +22,18 @@
 - [x] Gate frontend lulus: 31 file/135 tes, 4 skenario Playwright + Axe, build TypeScript/Vite/PWA, serta pemeriksaan diff.
 - **Batas rilis:** artefak TGZ lama yang memuat seed historis/PII tidak termasuk commit ini; integrasi perangkat fisik tetap memerlukan UAT lapangan.
 
+## Update 2026-07-23 — Rekonsiliasi perubahan lintas AI
+
+| Area | Status kode | Bukti commit | Gate sisa |
+|---|---|---|---|
+| Inventaris & fasilitas kamar | Summary stok, gap fasilitas, auto-link dengan review operator, dan fix filter/pagination selesai | `1eb11d9`, `0701327` | UAT operator untuk hasil auto-link |
+| IoT & quota energi | Dashboard/telemetri aktif; quota mengikuti sewa lunas dan renewal multi-bulan | `298bcca`–`8af53d6` | Mapping device/hardware, UAT Tuya/ESP32; tanpa auto-billing/auto-alert |
+| Pengumuman/notifikasi/push | P1-P3 selesai, migration delivery tersedia | `f9387d2` | UAT visual + HTTPS/VAPID push |
+| Kualitas backend | Strict null/implicit-any aktif, dead code/helper duplikat dibersihkan | `e327e9b` | Build/typecheck release SHA |
+| Kualitas frontend | CSS entry disatukan, wrapper/konstanta duplikat dibersihkan | `8a589e6` | UAT visual lintas portal |
+| Paket/source baseline | Bundle rilis memuat build artifact dan runtime `node_modules`; server tidak melakukan install/build | `8627289` + generator rilis terkini | Commit dokumentasi/runbook dan pilih SHA rilis |
+
+Catatan: perubahan tool/seed deploy 2026-07-19 adalah riwayat UAT. Produksi mengikuti `DEPLOYMENT_ONLINE_20260723.md`, bukan seed historis atau `db push`.
 
 1. **Orientasi:** buka bagian [ANTRIAN EKSEKUSI AKTIF](#antrian-eksekusi-aktif) di file ini.
 2. **Spesifikasi domain:** buka M-file yang ditunjuk fase/task (`M01`-`M09`).
@@ -52,7 +64,7 @@
 
 ---
 
-## Status Ringkas (2026-07-04)
+## Status Ringkas (2026-07-23)
 
 | Blok | Status | Catatan |
 |------|--------|---------|
@@ -163,7 +175,7 @@
 **Rujukan:** `docs/M08_DEPLOY_GO_LIVE.md` · `backend/.env.production.example`.
 
 - [ ] **A1 / F1-12** 🧑 Owner konfirmasi VPS/cPanel, domain, HTTPS, PostgreSQL prod 5432, env rahasia siap.
-- [ ] **A2** Fresh provision: DB kosong → `prisma db push` → bootstrap.sql + addendum → OWNER pertama → seed COA/periode/cash account.
+- [ ] **A2** Fresh provision: buat DB produksi BARU/kosong (jangan drop UAT) → verifikasi dan putuskan patch schema secara terpisah dari bundle → bootstrap guard teruji → OWNER pertama → seed COA/periode/cash account. Server bundle tidak menjalankan npm/Prisma; `db push` dan seed historis dilarang untuk produksi.
 - [ ] **A3** Set env produksi wajib: `NODE_ENV=production`, JWT secret kuat, CORS domain final, VAPID keys, `KTP_ACTIVATION_GATE_ENABLED=true`.
 - [ ] **A4** Ganti password OWNER dummy/dev ke password real sebelum dipakai owner.
 - [ ] **A5** Isi opening balance bila ada modal/saldo awal; kalau mulai nol, dokumentasikan zero-start.
@@ -171,7 +183,7 @@
 - [x] **A7** `backend/package.json` sudah punya `pretest:unit = npm run build` — test unit pakai `dist` segar.
 - [x] **A8** Hardening hasil audit DEEP-01..05 selesai; HSTS dan `Permissions-Policy: camera=(self)` sudah masuk changelog.
 
-**Gate:** `docs/M08_DEPLOY_GO_LIVE.md §3` smoke PASS. **Jangan** backfill data UAT ke produksi.
+**Gate:** `docs/DEPLOYMENT_ONLINE_20260723.md` smoke PASS. **Jangan** backfill data UAT ke produksi; setelah go-live semua release database patch-only.
 
 ---
 

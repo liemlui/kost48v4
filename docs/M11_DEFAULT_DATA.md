@@ -1,10 +1,16 @@
-# DEFAULT DATA — Sumber Kebenaran Data KOST48
+# DEFAULT DATA — Referensi Master dan Nilai Default KOST48
 
-> **Ini adalah satu-satunya sumber kebenaran** untuk semua data seed, dummy, dan nilai default.
+> **Sumber kebenaran untuk nilai default dan referensi lapangan, bukan instruksi seed produksi.**
 > Seed scripts (`seed-dev-reset.js`, `seed-dev-via-api.js`) dan service seed (`faqs.service.ts`)
-> HARUS konsisten dengan file ini. Jika ada perbedaan, file ini yang benar — update script-nya.
+> HARUS konsisten dengan nilai default yang relevan dalam file ini. Data penghuni nyata tidak boleh dimasukkan otomatis ke database produksi.
 >
-> Diperbarui: 2026-07-04
+> Diperbarui: 2026-07-23
+
+## Status penggunaan data untuk go-live
+
+- Go-live pertama menggunakan database produksi baru/kosong. **Jangan menjalankan seed tenant/transaksi historis atau menyalin data UAT** hanya karena data tersebut tercantum di dokumen ini.
+- Tabel penghuni dan data lapangan adalah referensi onboarding yang wajib dikonfirmasi ulang owner pada hari input. Input penghuni nyata dilakukan melalui UI/runbook terlindungi, setelah KTP dan dasar akuntansi siap.
+- NIK, foto KTP, password, token, dan kredensial lain adalah data sensitif. Jangan salin ke paket deploy, log, screenshot, atau artefak publik. Lihat `DEPLOYMENT_ONLINE_20260723.md` dan runbook onboarding untuk jalur produksi.
 
 ---
 
@@ -499,3 +505,35 @@ node scripts/seed-prod.js
 ---
 
 *Diperbarui: 2026-07-08 · Sumber: owner KOST48 (data tenant real) + kost48surabaya.com + faqs.service.ts*
+
+---
+
+## Appendix — Seed Master Data (Patch Tenant Aman)
+
+
+Gunakan **[seed-master-data.sql](../backend/sql/seed-master-data.sql)** — satu file yang menggabungkan semua patch data awal. Jalankan sekali, semua data masuk.
+
+#### Isi
+
+| Bagian | Sumber | Target Tabel |
+|--------|--------|-------------|
+| 13 Tenant Master | NIK, WhatsApp, email, tarif sewa, deposit | `Tenant`, `Stay`, `User` |
+| Update Kontak | WhatsApp lengkap + 2 email baru (Lovandra, Destarika) | `Tenant`, `User` |
+| ~180 Kwitansi | Riwayat pembayaran Jul 2025 – Jul 2026 | `Invoice`, `InvoiceLine`, `InvoicePayment` |
+| ~50 Tenant Historis | Tenant non-aktif dari data kwitansi | `Tenant` (isActive=false) |
+| ~100 Stay Historis | Periode sewa historis | `Stay` (INACTIVE) |
+| ~92 Expense | Pengeluaran 2021-2025 (listrik, wifi, air, renovasi, dll) | `Expense` |
+
+#### Cara Menjalankan
+
+```bash
+### Backup database dulu
+pg_dump "$DATABASE_URL" > backup_before_seed.sql
+
+### Jalankan satu file untuk semua
+psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f sql/seed-master-data.sql
+```
+
+#### Idempoten
+
+Aman dijalankan ulang. Semua INSERT pakai `WHERE NOT EXISTS`, semua UPDATE pakai `IS DISTINCT FROM`. Tidak ada DELETE.

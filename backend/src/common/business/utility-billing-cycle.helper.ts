@@ -1,5 +1,7 @@
 import { startOfJakartaBusinessDay } from '../utils/date.util';
 
+const JAKARTA_OFFSET_MS = 7 * 60 * 60 * 1000;
+
 export type UtilityBillingCycle = {
   /** Inclusive, represented as the UTC date for the Jakarta business day. */
   start: Date;
@@ -68,6 +70,17 @@ export function getUtilityBillingCycle(
 
 export function toUtilityCycleDateKey(value: Date) {
   return dateKey(value);
+}
+
+/**
+ * Utility cycles are UTC-midnight date labels for PostgreSQL `date` columns.
+ * Telemetry uses real instants, so Jakarta midnight is seven hours earlier.
+ */
+export function toUtilityCycleInstantRange(cycle: Pick<UtilityBillingCycle, 'start' | 'end'>) {
+  return {
+    start: new Date(cycle.start.getTime() - JAKARTA_OFFSET_MS),
+    end: new Date(cycle.end.getTime() - JAKARTA_OFFSET_MS),
+  };
 }
 
 /**

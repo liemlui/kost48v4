@@ -1,6 +1,5 @@
 import { Injectable, Logger, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
 import { IotService } from './iot.service';
-import { IotSseService } from './iot-sse.service';
 
 @Injectable()
 export class IotPollingService implements OnModuleInit, OnModuleDestroy {
@@ -8,10 +7,7 @@ export class IotPollingService implements OnModuleInit, OnModuleDestroy {
   private timer: ReturnType<typeof setInterval> | null = null;
   private running = false;
 
-  constructor(
-    private readonly iot: IotService,
-    private readonly sse: IotSseService,
-  ) {}
+  constructor(private readonly iot: IotService) {}
 
   onModuleInit() {
     if (!this.intervalPollingEnabled()) return;
@@ -52,17 +48,6 @@ export class IotPollingService implements OnModuleInit, OnModuleDestroy {
     try {
       const result = await this.iot.syncAllTuya();
       this.logger.log(`Polling Tuya ${source}: ${result.succeeded}/${result.total} perangkat berhasil`);
-      
-      // Notify all connected SSE clients
-      if (result.succeeded > 0) {
-        this.sse.emitAll({
-          type: 'TUYA_SYNC',
-          roomId: 0, // broadcast
-          timestamp: new Date().toISOString(),
-          message: `${result.succeeded} perangkat Tuya berhasil disinkronkan`,
-        });
-      }
-      
       return { skipped: false, ...result };
     } finally {
       this.running = false;

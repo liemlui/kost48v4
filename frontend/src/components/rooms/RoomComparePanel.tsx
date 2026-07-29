@@ -121,7 +121,7 @@ export default function RoomComparePanel({ rooms, onClear }: RoomComparePanelPro
                 <td className="text-muted">Aksi</td>
                 {rooms.map((room) => (
                   <td key={room.id} className="text-center">
-                    {room.isAvailable !== false ? (
+                    {room.isAvailable !== false && room.onlineBookingEnabled !== false ? (
                       <Button
                         size="sm"
                         onClick={() => navigate(`/booking/${room.id}`, { state: { room } })}

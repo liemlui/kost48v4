@@ -4,6 +4,7 @@ const test = require('node:test');
 const {
   getUtilityBillingCycle,
   getUtilityAllowanceMonths,
+  toUtilityCycleInstantRange,
 } = require('../../dist/common/business/utility-billing-cycle.helper.js');
 
 test('siklus utilitas mengikuti tanggal check-in tenant', () => {
@@ -47,4 +48,13 @@ test('perpanjangan tiga bulan menerima tiga kuota bulanan', () => {
     start: new Date('2026-08-12T00:00:00.000Z'),
     end: new Date('2026-11-12T00:00:00.000Z'),
   }), 3);
+});
+
+test('batas date-only siklus dikonversi ke tengah malam Jakarta untuk telemetry', () => {
+  const range = toUtilityCycleInstantRange({
+    start: new Date('2026-07-05T00:00:00.000Z'),
+    end: new Date('2026-08-05T00:00:00.000Z'),
+  });
+  assert.equal(range.start.toISOString(), '2026-07-04T17:00:00.000Z');
+  assert.equal(range.end.toISOString(), '2026-08-04T17:00:00.000Z');
 });

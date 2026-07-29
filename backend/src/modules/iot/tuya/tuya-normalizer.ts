@@ -20,6 +20,10 @@ const METRIC_MAP: Record<string, { metric: string; unit?: string }> = {
   cur_current: { metric: 'electricity.current_a', unit: 'A' },
 };
 
+export function isSupportedTuyaStatusCode(code: unknown): code is string {
+  return typeof code === 'string' && Object.prototype.hasOwnProperty.call(METRIC_MAP, code);
+}
+
 function parseValues(raw: unknown): Record<string, unknown> {
   if (raw && typeof raw === 'object') return raw as Record<string, unknown>;
   if (typeof raw !== 'string') return {};
@@ -46,15 +50,15 @@ export function normalizeTuyaStatus(
   );
 
   return (statuses as TuyaStatus[])
-    .filter((item) => typeof item.code === 'string')
+    .filter((item) => isSupportedTuyaStatusCode(item.code))
     .map((item) => {
       const code = String(item.code);
       const definition = definitions.get(code);
       const values = parseValues(definition?.values);
       const mapped = METRIC_MAP[code];
-      const metric = mapped?.metric ?? `tuya.${code}`;
+      const metric = mapped.metric;
       const rawUnit = typeof values.unit === 'string' ? values.unit : undefined;
-      const unit = mapped?.unit ?? rawUnit;
+      const unit = mapped.unit ?? rawUnit;
 
       if (typeof item.value === 'number' && Number.isFinite(item.value)) {
         const hasScale = Number.isInteger(Number(values.scale));
@@ -78,9 +82,13 @@ export function normalizeTuyaStatus(
 }
 
 export function tuyaObservedAt(statuses: Array<Record<string, unknown>>, fallback = new Date()): Date {
+  const fallbackMillis = fallback.getTime();
+  const safeFallback = Number.isFinite(fallbackMillis) ? fallback : new Date();
+  const latestAllowedMillis = safeFallback.getTime() + 5 * 60_000;
   const timestamps = statuses
     .map((item) => Number(item.t))
     .filter((value) => Number.isFinite(value) && value > 0)
-    .map((value) => value < 10_000_000_000 ? value * 1000 : value);
-  return timestamps.length ? new Date(Math.max(...timestamps)) : fallback;
+    .map((value) => value < 10_000_000_000 ? value * 1000 : value)
+    .filter((value) => value <= latestAllowedMillis && value <= 8_640_000_000_000_000);
+  return timestamps.length ? new Date(Math.max(...timestamps)) : safeFallback;
 }

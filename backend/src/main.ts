@@ -1,4 +1,5 @@
 import { ValidationPipe } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import compression from 'compression';
 import { NestFactory } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
@@ -14,13 +15,28 @@ import express, { NextFunction, Request, Response } from 'express';
 import { createRateLimiter } from './common/middleware/rate-limit.middleware';
 
 async function bootstrap() {
-  const isProduction = process.env.NODE_ENV === 'production';
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
-    logger: isProduction ? ['error', 'warn'] : ['log', 'error', 'warn', 'debug', 'verbose'],
+    // NODE_ENV dari Passenger biasanya sudah tersedia pada titik ini. Bila hanya
+    // ada di .env, ConfigModule akan memuatnya segera setelah app dibuat.
+    logger: process.env.NODE_ENV === 'production' ? ['error', 'warn'] : ['log', 'error', 'warn', 'debug', 'verbose'],
     // M15-IOT: raw bytes wajib dipertahankan agar signature HMAC ESP32 dapat
     // diverifikasi terhadap body persis yang dikirim perangkat.
     rawBody: true,
   });
+  const configService = app.get(ConfigService);
+  const isProduction = configService.get<string>('NODE_ENV') === 'production';
+
+  // Jangan pernah tulis PIN ke log. Status ini cukup untuk mendiagnosis apakah
+  // Passenger/.env sudah dibaca setelah application restart.
+  if (isProduction) {
+    const availabilityPinConfigured = String(
+      configService.get<string>('AVAILABILITY_OWNER_PIN') ?? '',
+    ).trim().length >= 6;
+    console.log(
+      `[config] AVAILABILITY_OWNER_PIN ${availabilityPinConfigured ? 'configured' : 'missing-or-too-short'} ` +
+      `(env file fallback: ${join(__dirname, '..', '.env')})`,
+    );
+  }
 
   // ── W-01: Production security baseline ──────────────────────────────────────
   // Room images are public marketing content — safe to serve statically.
@@ -77,7 +93,7 @@ async function bootstrap() {
 
   // ── W-01: Production env guard ────────────────────────────────────────────
   if (isProduction) {
-    const jwtSecret = process.env.JWT_SECRET;
+    const jwtSecret = configService.get<string>('JWT_SECRET');
     if (!jwtSecret ||
         jwtSecret.includes('your-super-secret') ||
         jwtSecret.includes('ganti-dengan') ||
@@ -91,7 +107,7 @@ async function bootstrap() {
 
   // ── CORS ──────────────────────────────────────────────────────────────────
   if (isProduction) {
-    const corsOrigin = process.env.CORS_ORIGIN;
+    const corsOrigin = configService.get<string>('CORS_ORIGIN');
     if (!corsOrigin) {
       throw new Error('CORS_ORIGIN must be set in production');
     }
@@ -143,6 +159,15 @@ async function bootstrap() {
     windowMs: 60_000,
     max: 20,
   }));
+  // Wizard ketersediaan memakai PIN owner, bukan sesi admin. Batasi ketat
+  // untuk menahan tebakan PIN walaupun URL pintas ditemukan orang lain.
+  app.use('/api/public/availability', createRateLimiter({
+    name: 'public-availability-owner-pin',
+    windowMs: 15 * 60_000,
+    max: 20,
+    message: 'Terlalu banyak percobaan PIN. Tunggu 15 menit sebelum mencoba lagi.',
+    failClosed: true,
+  }));
   app.use((_req: Request, res: Response, next: NextFunction) => {
     res.setHeader('X-Content-Type-Options', 'nosniff');
     res.setHeader('X-Frame-Options', 'DENY');
@@ -177,20 +202,30 @@ async function bootstrap() {
   // ── Combined single-server: sajikan frontend build (SPA) bila tersedia ──────
   // 1 proses/port/origin (tanpa CORS). Default: <backend>/client (hasil copy frontend/dist).
   // Override path via FRONTEND_DIST_PATH. Build frontend dgn VITE_API_BASE_URL=/api (relatif).
-  const frontendDir = process.env.FRONTEND_DIST_PATH || join(__dirname, '..', 'client');
+  const frontendDir = configService.get<string>('FRONTEND_DIST_PATH') || join(__dirname, '..', 'client');
   if (existsSync(join(frontendDir, 'index.html'))) {
-    app.useStaticAssets(frontendDir);
+    app.useStaticAssets(frontendDir, {
+      setHeaders: (res, filePath) => {
+        const normalized = filePath.replaceAll('\\', '/');
+        if (/\/(?:index\.html|sw\.js|version\.json|manifest\.webmanifest)$/.test(normalized)) {
+          res.setHeader('Cache-Control', 'no-store, max-age=0');
+        } else if (normalized.includes('/assets/')) {
+          res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+        }
+      },
+    });
     app.use((req: Request, res: Response, next: NextFunction) => {
       if (req.method !== 'GET' && req.method !== 'HEAD') return next();
       if (req.path.startsWith('/api')) return next();
       if (req.path.includes('.')) return next(); // aset hilang -> biarkan 404, jangan kirim index.html
+      res.setHeader('Cache-Control', 'no-store, max-age=0');
       res.sendFile(join(frontendDir, 'index.html'));
     });
     // eslint-disable-next-line no-console
     console.log('[combined] Frontend SPA disajikan dari ' + frontendDir);
   }
 
-  await app.listen(Number(process.env.PORT || 3000));
+  await app.listen(Number(configService.get<string>('PORT') || 3000));
 }
 
 bootstrap();

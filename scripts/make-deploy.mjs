@@ -1,8 +1,8 @@
 // KOST48 — buat PAKET DEPLOY RAMPING (combined single-server) untuk cPanel/VPS hemat RAM/inode.
 // Pakai: npm run make-deploy
-// Hasil: folder `deploy/` = backend PREBUILT (`dist/`) + frontend PREBUILT (`client/`) + prisma/ + seed-owner.
-// SEMUA build terjadi DI LOKAL. Di server cukup: `npm run cpanel:install` (= npm ci prod-only, tanpa scripts/audit) → start `dist/main.js`.
-// Kenapa TANPA build di server: hosting shared 512MB bisa OOM saat tsc/npm ci penuh, dan devDeps memboroskan inode.
+// Hasil: folder `deploy/` = backend PREBUILT (`dist/`) + frontend PREBUILT (`client/`) + runtime `node_modules` + prisma/ + seed-owner.
+// SEMUA build dan install dependency terjadi DI LOKAL. Di server hanya isi env → start `dist/main.js`; tidak ada npm install atau prisma db push.
+// Kenapa TANPA build/install di server: hosting shared 512MB bisa OOM saat tsc/npm ci penuh, dan devDeps memboroskan inode.
 // Prisma client hasil generate = WASM query compiler + driver adapter pg → platform-independent;
 // binary engine `*.node` (Windows) dibuang dari paket karena tidak dipakai di Linux.
 import {
@@ -22,7 +22,8 @@ import { createHash } from 'node:crypto';
 const isWin = process.platform === 'win32';
 const npm = isWin ? 'npm.cmd' : 'npm';
 const OUT = 'deploy';
-const ARCHIVE = 'kost48-deploy.tgz';
+const ARCHIVE = 'kost48-deploy-bundled.tgz';
+const STALE_ARCHIVE = 'kost48-deploy.tgz';
 const ARCHIVE_TMP = ARCHIVE + '.tmp';
 const BUILD_MARKER = '.kost48-build-manifest.json';
 const NO_BUILD = process.argv.includes('--no-build');
@@ -182,6 +183,7 @@ function invalidateOldPackagingOutputs() {
   // Jangan biarkan kegagalan build/package membuat arsip lama terlihat seperti hasil baru.
   rmSync(ARCHIVE, { force: true });
   rmSync(ARCHIVE_TMP, { force: true });
+  rmSync(STALE_ARCHIVE, { force: true });
   rmSync(OUT, { recursive: true, force: true });
 }
 
@@ -224,9 +226,6 @@ function writeDeployPackageFiles() {
     main: backendPkg.main,
     engines: backendPkg.engines,
     scripts: {
-      'cpanel:install': 'npm ci --omit=dev --omit=optional --ignore-scripts --no-audit --no-fund --progress=false',
-      'install:prod': 'npm run cpanel:install',
-      'cpanel:migrate': 'npx --yes prisma db push --skip-generate',
       'seed:owner': 'node scripts/seed-owner.js',
       start: 'node dist/main.js',
       'start:prod': 'node --max-old-space-size=192 dist/main.js',
@@ -305,6 +304,18 @@ function validateDeployLock() {
   }
 }
 
+function verifyBundledRuntime() {
+  for (const required of [
+    'node_modules/.package-lock.json',
+    'node_modules/@nestjs/common/package.json',
+    'node_modules/@prisma/adapter-pg/package.json',
+    'node_modules/pg/package.json',
+    'node_modules/web-push/package.json',
+  ]) {
+    requirePath(OUT + '/' + required, 'runtime dependency wajib dibundel lokal; jangan install di server.');
+  }
+}
+
 function countFiles(dir) {
   let n = 0;
   for (const e of readdirSync(dir, { withFileTypes: true })) {
@@ -312,6 +323,41 @@ function countFiles(dir) {
     n += e.isDirectory() ? countFiles(p) : 1;
   }
   return n;
+}
+
+function verifyNoLongLivedIotStream() {
+  const forbiddenRules = [
+    { label: 'IotSseController', test: (content) => content.includes('IotSseController') },
+    { label: 'IotSseService', test: (content) => content.includes('IotSseService') },
+    { label: 'text/event-stream', test: (content) => content.includes('text/event-stream') },
+    // FullCalendar legitimately uses its own `EventSource` model. Only the
+    // browser constructor opens a long-lived HTTP connection.
+    { label: 'new EventSource(...)', test: (content) => /\bnew\s+EventSource\s*\(/.test(content) },
+  ];
+  const matches = [];
+
+  function scan(path) {
+    for (const entry of readdirSync(path, { withFileTypes: true })) {
+      const child = path + '/' + entry.name;
+      if (entry.isDirectory()) {
+        scan(child);
+        continue;
+      }
+      if (!/\.(?:js|html)$/i.test(entry.name)) continue;
+      const content = readFileSync(child, 'utf8');
+      const rule = forbiddenRules.find((candidate) => candidate.test(content));
+      if (rule) matches.push(child + ' [' + rule.label + ']');
+      if (child.startsWith(OUT + '/client/') && content.includes('/api/iot/stream/tenant/raw')) {
+        matches.push(child + ' [retired tenant stream endpoint]');
+      }
+    }
+  }
+
+  scan(OUT + '/dist');
+  scan(OUT + '/client');
+  if (matches.length > 0) {
+    fail('runtime deploy masih memuat stream IoT jangka panjang: ' + matches.slice(0, 8).join(', '));
+  }
 }
 
 function createVerifiedArchive() {
@@ -338,7 +384,15 @@ function createVerifiedArchive() {
       .map((entry) => entry.replaceAll('\\', '/').replace(/^\.\//, '').replace(/\/$/, ''))
       .filter(Boolean),
   );
-  for (const required of ['dist/main.js', 'client/index.html', 'package.json', 'package-lock.json']) {
+  for (const required of [
+    'dist/main.js',
+    'client/index.html',
+    'package.json',
+    'package-lock.json',
+    'node_modules/.package-lock.json',
+    'node_modules/@nestjs/common/package.json',
+    'node_modules/@prisma/adapter-pg/package.json',
+  ]) {
     if (!entries.has(required)) {
       rmSync(ARCHIVE_TMP, { force: true });
       fail('arsip tidak lengkap: `' + required + '` tidak ditemukan.');
@@ -354,6 +408,10 @@ function createVerifiedArchive() {
     if ((basename === '.env' || basename.startsWith('.env.')) && basename !== '.env.example') {
       rmSync(ARCHIVE_TMP, { force: true });
       fail('arsip memuat file environment rahasia: `' + entry + '`.');
+    }
+    if (/iot-sse\.(?:controller|service)\.js$/i.test(entry)) {
+      rmSync(ARCHIVE_TMP, { force: true });
+      fail('arsip memuat implementasi SSE IoT yang sudah dipensiunkan: `' + entry + '`.');
     }
     if (
       entry === 'scripts/seed-prod-reset.js'
@@ -402,9 +460,12 @@ cpSync('frontend/dist', OUT + '/client', {
   recursive: true,
   filter: (src) => !src.endsWith(BUILD_MARKER),
 });
+verifyNoLongLivedIotStream();
 
-run('5/6 buat package-lock produksi (tanpa install node_modules)...', npm, ['install', '--package-lock-only', '--omit=dev', '--omit=optional', '--ignore-scripts', '--no-audit', '--no-fund', '--progress=false'], OUT);
+run('5/6 buat package-lock runtime produksi...', npm, ['install', '--package-lock-only', '--omit=dev', '--omit=optional', '--ignore-scripts', '--no-audit', '--no-fund', '--progress=false'], OUT);
 validateDeployLock();
+run('5/6 bundel dependency runtime secara lokal (server tidak install)...', npm, ['ci', '--omit=dev', '--omit=optional', '--ignore-scripts', '--no-audit', '--no-fund', '--progress=false'], OUT);
+verifyBundledRuntime();
 
 console.log('[deploy] 6/6 tulis .env.example + README + arsip tgz ...');
 writeFileSync(OUT + '/.env.example', [
@@ -414,6 +475,10 @@ writeFileSync(OUT + '/.env.example', [
   'NODE_ENV=production',
   'CORS_ORIGIN="https://domain-anda"   # combined same-origin: cukup domainnya',
   'KTP_ACTIVATION_GATE_ENABLED=true    # L-4 WAJIB true di produksi (nilai awal row settings; sesudahnya dikelola via UI Settings → Operasional)',
+  '# Landing page: booking online ditutup; status kamar diubah lewat wizard footer.',
+  'PUBLIC_ONLINE_BOOKING_ENABLED=false',
+  '# PIN owner wizard (minimal 6 karakter); tidak pernah disimpan browser.',
+  'AVAILABILITY_OWNER_PIN="ganti-dengan-pin-panjang-acak"',
   '# Auto-ops: VPS/always-on -> AUTO_OPS_ENABLED=true. Shared hosting/Passenger (idle-sleep)',
   '# -> AUTO_OPS_ENABLED=false + AUTO_OPS_CRON_TOKEN, lalu cPanel Cron panggil POST /api/auto-ops/cron.',
   'AUTO_OPS_ENABLED=false',
@@ -446,15 +511,15 @@ writeFileSync(OUT + '/.env.example', [
   '',
 ].join('\n'));
 
-writeFileSync(OUT + '/README-DEPLOY.md', `# KOST48 v1.2.0 — Deploy cPanel/VPS (PREBUILT, include node_modules)
+writeFileSync(OUT + '/README-DEPLOY.md', `# KOST48 v1.3.0 — Deploy cPanel/VPS (PREBUILT, include node_modules)
 
 Kode aplikasi sudah di-build di lokal. Server tetap memasang dependency runtime terkunci dengan \`npm run cpanel:install\`.
 Tanpa tsc, tanpa prisma generate, tanpa devDependencies — aman untuk hosting RAM 512MB & limit inode.
 
 ## 🚀 Langkah cPanel (1x run, ≈20 menit)
 
-1. **PostgreSQL Databases**: buat DB \`kost48_v3\` + user + all privileges. Catat kredensial.
-2. **Upload** \`kost48-deploy-bundled.tgz\` ke folder app (mis. \`~/kost48\`) → File Manager: Extract.
+1. **PostgreSQL Databases**: buat DB produksi BARU (mis. \`kost48_prod\`) + user + all privileges. Jangan drop DB UAT. Catat kredensial.
+2. **Upload** \`kost48-deploy.tgz\` ke folder app (mis. \`~/kost48\`) → File Manager: Extract.
 3. **Setup Node.js App**: Node **22** · Application root = folder app · **Startup file = \`dist/main.js\`**
    - Environment Variables: **\`NODE_OPTIONS=--max-old-space-size=192\`** (batas heap; tidak bisa via .env)
 4. **SSH** (masuk venv Node dari halaman Setup Node.js App):
@@ -463,31 +528,25 @@ Tanpa tsc, tanpa prisma generate, tanpa devDependencies — aman untuk hosting R
    # isi: DATABASE_URL, JWT_SECRET, CORS_ORIGIN, AUTO_OPS_CRON_TOKEN, IOT_TUYA_CRON_TOKEN, IOT_MASTER_KEY
    npm run cpanel:install
    \`\`\`
-5. **Setup database** — pilih **satu** jalur, hanya untuk database baru/kosong:
+5. **Setup database** — hanya untuk database produksi baru/kosong. Jangan drop UAT, jangan impor seed historis, dan jangan gunakan db push:
    \`\`\`bash
-   # Jalur A: schema terbaru, tanpa data historis
+   # Migration ledger produksi (Prisma 7.8.0)
    npm run cpanel:migrate
    OWNER_EMAIL=owner@domain-anda OWNER_PASSWORD='buat-password-kuat' OWNER_FULLNAME='Pemilik KOST48' node scripts/seed-owner.js
    \`\`\`
-   Atau untuk memulihkan data teraudit yang disertakan paket:
-   \`\`\`bash
-   # Jalur B: schema + seed teraudit. Jangan jalankan Jalur A setelah ini.
-   psql "<DATABASE_URL>" -f sql/schema.sql
-   psql "<DATABASE_URL>" -f sql/seed.sql
-   \`\`\`
-   > Folder \`sql/\` dapat berisi data bisnis/tenant teraudit. Paket ini hanya boleh disimpan dan diunggah ke server tepercaya; jangan dibagikan secara publik atau dipakai pada database yang sudah berisi data.
-7. **Start App** (Setup Node.js App → Start) + **AutoSSL** domain → HTTPS.
-8. **Cron Jobs** (WAJIB — Passenger idle-sleep):
+   > Sebelum start, pasang dan verifikasi bootstrap guard database yang khusus schema. \`sql/seed.sql\` membawa data historis/PII dan DILARANG untuk produksi. Lihat \`docs/DEPLOYMENT_ONLINE_20260723.md\` di source release untuk gate lengkap.
+6. **Start App** (Setup Node.js App → Start) + **AutoSSL** domain → HTTPS.
+7. **Cron Jobs** (WAJIB — Passenger idle-sleep):
    \`\`\`
    */5  * * * * curl -fsS -X POST -H "X-Cron-Token: <TOKEN>" https://domain/api/auto-ops/cron
    */10 * * * * curl -fsS -X POST -H "X-Iot-Cron-Token: <TOKEN>" https://domain/api/iot/tuya/cron
    \`\`\`
-9. **Smoke**: \`https://domain/\` tampil · \`/api/public/rooms\` 200 · login OWNER.
+8. **Smoke**: \`https://domain/\` tampil · \`/api/public/rooms\` 200 · login OWNER.
 
 ## Redeploy (update)
 \`\`\`bash
-# Stop app → backup DB + uploads/ → extract TGZ baru → Start app
-# Jalankan npm run cpanel:install kembali bila package-lock berubah.
+# Stop app → backup DB + uploads/ → extract TGZ baru → npm run cpanel:install bila lockfile berubah
+# Untuk produksi yang sudah berisi data: npm run cpanel:migrate (patch-only) → Start app.
 \`\`\`
 
 ## Catatan RAM 512MB
@@ -498,10 +557,46 @@ Tanpa tsc, tanpa prisma generate, tanpa devDependencies — aman untuk hosting R
 ⚠️ Jangan commit \`.env\`, data tenant, KTP/NIK, atau password. VPS: \`pm2 start dist/main.js --name kost48\`.
 `);
 
+// Override README lama: bundle sekarang benar-benar membawa runtime node_modules.
+writeFileSync(OUT + '/README-DEPLOY.md', [
+  '# KOST48 — Bundle cPanel/VPS siap-jalankan',
+  '',
+  'Kode backend, frontend, Prisma client hasil generate, dan runtime node_modules sudah dibundel dari workstation.',
+  'Di server jangan menjalankan npm install, npm ci, prisma db push, atau build/generate apa pun.',
+  '',
+  '## Langkah server',
+  '',
+  '1. Upload kost48-deploy-bundled.tgz ke application root lalu extract.',
+  '2. Setup Node.js App: Node 22, mode Production, application root folder hasil extract, startup file dist/main.js.',
+  '   Atur NODE_OPTIONS=--max-old-space-size=192 pada Environment Variables cPanel.',
+  '3. Salin dan isi environment: cp .env.example .env lalu edit .env tanpa mengirim secret ke chat.',
+  '   Untuk shared hosting gunakan AUTO_OPS_ENABLED=false dan IOT_TUYA_POLL_ENABLED=false.',
+  '4. Database BARU/kosong: jalankan bootstrap schema sekali dari Terminal. Perintah ini berhenti bila database sudah berisi tabel:',
+  '   psql "$DATABASE_URL" --single-transaction -v ON_ERROR_STOP=1 -f sql/bootstrap-production-schema.sql',
+  '   psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f sql/seed-production-rooms.sql',
+  '   Bootstrap memasang schema.sql dan migration 20260723 + 20260724. Seed hanya membuat 13 kamar tanpa tenant/transaksi.',
+  '   Jangan jalankan pada database UAT/produksi yang sudah berisi data; jangan gunakan prisma db push/reset atau sql/seed.sql.',
+  '5. Setelah bootstrap schema berhasil, buat OWNER sekali saja:',
+  "   OWNER_EMAIL=owner@domain-anda OWNER_PASSWORD='password-kuat-unik' OWNER_FULLNAME='Pemilik KOST48' node scripts/seed-owner.js",
+  '   Jangan menyimpan OWNER_PASSWORD permanen di .env.',
+  '6. Klik Restart Application di cPanel, aktifkan AutoSSL/HTTPS, lalu smoke test / dan /api/public/rooms.',
+  '7. Setelah UAT lulus, pasang cron hanya bila AUTO_OPS/IOT memang diaktifkan:',
+  '   */5  * * * * curl -fsS -X POST -H "X-Cron-Token: <TOKEN>" https://domain/api/auto-ops/cron >/dev/null 2>&1',
+  '   */10 * * * * curl -fsS -X POST -H "X-Iot-Cron-Token: <TOKEN>" https://domain/api/iot/tuya/cron >/dev/null 2>&1',
+  '',
+  '## Redeploy',
+  '',
+  'Stop aplikasi → backup DB/uploads → extract bundle baru tanpa menimpa .env/uploads → Restart Application → smoke/UAT.',
+  'Bundle sudah memuat dependency runtime; tidak ada perintah npm di server.',
+  '',
+  'Jangan commit .env, data tenant, KTP/NIK, atau password.',
+  '',
+].join('\n'));
+
 createVerifiedArchive();
 
 const total = countFiles(OUT);
 console.log('\n[deploy] SELESAI.');
 console.log('  Folder siap-upload : ' + OUT + '/  (' + total + ' file — estimasi pemakaian inode upload)');
 console.log('  Arsip terverifikasi: ' + ARCHIVE);
-console.log('  Di server: npm run cpanel:install -> isi .env -> pilih migrate+OWNER atau SQL seed -> Restart App  (lihat ' + OUT + '/README-DEPLOY.md)');
+console.log('  Di server: extract bundle -> isi .env -> verifikasi DB/guard -> Restart App (tanpa npm install/prisma db push; lihat ' + OUT + '/README-DEPLOY.md)');

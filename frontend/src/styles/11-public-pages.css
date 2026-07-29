@@ -2240,6 +2240,18 @@
   letter-spacing: .03em;
 }
 
+/* Pintasan owner: tampil seperti teks versi biasa, tetapi tetap elemen button
+   yang dapat diakses keyboard. Membuka wizard setelah 10 klik cepat. */
+.gx-footer-owner-shortcut {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  padding: 0;
+  cursor: default;
+}
+
 /* ── Responsive ── */
 @media (max-width: 1100px) {
   .gx-topbar { padding: .9rem 1.5rem; }

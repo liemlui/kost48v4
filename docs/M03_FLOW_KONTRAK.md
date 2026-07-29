@@ -11,9 +11,9 @@ Peta alur kode krusial, lifecycle utama, kontrak domain, safety belt, dan aturan
 - `docs/02_FLOW_MAP.md` - konten dipertahankan
 - `docs/06_CONTRACTS.md` - konten dipertahankan
 
-## Update 2026-07-08 — Sinkronisasi Status Terkini
+## Update 2026-07-23 — Sinkronisasi Status dan Batas Refactor
 
-Dokumen ini diselaraskan dengan commit `8bfb713` (finalize AU fixes and consolidate docs). Semua flow kritis (booking, checkout, renewal, forced-checkout, meter) telah terverifikasi dalam audit 360°. Tidak ada perubahan fundamental pada flow map sejak update 2026-06-30.
+Baseline kode adalah `8627289`. Kontrak bisnis booking, checkout, renewal, forced-checkout, dan meter tidak berubah oleh refactor backend/frontend terakhir; yang berubah adalah batas tanggung jawab kode: controller renewal memanggil `StaysRenewalService` langsung, query/map booking memakai helper bersama, dan quota utilitas kini mengikuti periode sewa yang sudah lunas. Detail perubahan lintas AI ada di `M13_CHANGELOG.md`.
 
 ## Update 2026-06-17 — AUDIT KEUANGAN ULTRA ✅
 
@@ -97,10 +97,12 @@ SELESAI   = Stay(status=COMPLETED)  |  BATAL/EXPIRED = Stay(status=CANCELLED)
 >
 > **Alur booking:** bayar DP 30% (atau lunas langsung) → DP approved = kamar terkunci (pesaing dibatalkan, `expiresAt` mati) → pelunasan + jaminan saat check-in → gagal lunas H+1 pk 12:00 → DP hangus (jurnal `DP_FORFEIT`). Overstay: tenant promoted lewat `plannedCheckOutDate` → tiket EVICT_OVERSTAY → H+1 forced checkout otomatis.
 
-Constraint DB penunjang (sql/bootstrap.sql):
+Constraint DB penunjang (secara historis berada dalam `sql/bootstrap.sql`; sumber saat ini `sql/seed.sql` juga membawa data historis/PII):
 - `stay_one_active_per_tenant_uidx` — 1 stay ACTIVE per tenant (termasuk fase booking).
 - `stay_one_active_per_room_uidx` — 1 stay ACTIVE per room **hanya jika sudah promoted** → multi-booking RESERVED pada 1 kamar DIIZINKAN (first paid wins).
 - `stay_deposit_payment_amount_chk` — depositPaid ≤ depositAmount.
+
+> Untuk produksi, constraint/trigger ini harus diekstrak menjadi bootstrap guard khusus dan diuji pada DB kosong. Jangan menjalankan `sql/seed.sql` untuk memperoleh constraint tersebut. Rujukan otoritatif: `DEPLOYMENT_ONLINE_20260723.md`.
 
 ##### 0.3 Enum status inti (schema.prisma)
 | Entitas | Status |
@@ -227,16 +229,13 @@ Manajemen identitas:
 6. Gagal lunas H+7 → DP hangus, deposit dapat dipotong, dan forced checkout.
 7. Harga tenant yang renew tanpa putus kontrak tidak naik.
 
-##### Status implementasi kode saat ini:
-- `renew-requests.service.ts:21` `createRequest` — tenant ajukan (PENDING).
-- `:77` admin approve → `stays.renewStayInTransaction` stays.service.ts:997:
-  - Stay harus ACTIVE; `assertNoOpenInvoicesTx`.
-  - Tolak jika hari ini > plannedCheckOutDate → wajib rebooking :973-977.
-  - Periode baru mulai dari `plannedCheckOutDate` lama (exclusive) :980.
-  - Wajib input meter → invoice DRAFT (RENT + utilitas) → ISSUED.
-- `:147` admin reject. `:182` tenant lihat milik sendiri.
+##### Status implementasi kode saat ini (F2-1 selesai):
+- Tenant memilih YA/TIDAK melalui state `PENDING_DECISION` → `AWAITING_DP` atau `REJECTED_BY_TENANT`; tenant lama memiliki prioritas sampai hari-H.
+- DP renewal 30% yang diverifikasi admin mengubah request menjadi `DP_SECURED` dan menetapkan batas pelunasan H+7 dari waktu DP diterima.
+- Setelah pelunasan penuh, service menerbitkan/mengecek settlement lalu menyelesaikan renewal menjadi `COMPLETED`; periode tetap kontinu dan rent-lock berlaku.
+- AutoOps menandai `AWAITING_DP` lewat hari-H sebagai `EXPIRED_PRIORITY`, serta `DP_SECURED` yang gagal lunas H+7 sebagai `FORFEITED`. Forced checkout/settlement deposit tetap diproses melalui flow admin yang terkontrol.
 
-> ⚠️ **GAP #2 (owner):** Flow target di atas belum diimplementasikan. Kode saat ini masih langsung memperpanjang stay saat request disetujui.
+> ✅ **GAP #2 ditutup:** approval renewal tidak lagi langsung memperpanjang stay. Jalur lama `APPROVED` dipertahankan hanya untuk kompatibilitas data/flow lama yang valid.
 
 **Invarian:** renewal tidak boleh menumpuk tunggakan; periode kontinu tanpa gap/overlap.
 **Fokus audit:** implementasi fase DP 30% renewal + grace period H+7 + kamar muncul di katalog publik + auto-cancel jika tidak lunas.
@@ -270,7 +269,7 @@ Tiket CHECKOUT_INSPECTION di-close → cek tidak ada stay ACTIVE lain :622 → s
 
 #### 7. Flow Auto-Ops (jam biologis sistem)
 
-**File:** `modules/auto-ops/auto-ops.service.ts` — 5 sweep service sejak Fase E, mutex advisory lock `pg_try_advisory_lock(1)`, `runAll()` sequential:
+**File:** `modules/auto-ops/auto-ops.service.ts` — 6 sweep service, mutex advisory lock `pg_try_advisory_lock(1)`, `runAll()` sequential:
 
 | Sweep | Operasi | Aksi |
 |---|---|---|
@@ -295,6 +294,7 @@ Tiket CHECKOUT_INSPECTION di-close → cek tidak ada stay ACTIVE lain :622 → s
 | | `runAcCleaningSchedule` | Tiket cuci AC saat lewat interval. |
 | | `runReferralRewards` | Beri poin referral saat teman aktif. |
 | | `runPushDispatch` | Kirim push PWA queued. |
+| **AnnouncementSweep** | `sweepAnnouncementDispatch` | Dispatch pengumuman aktif yang belum `dispatchedAt`, dedupe penerima. |
 
 **Invarian:** job idempotent & aman dijalankan berulang; tidak pernah membatalkan stay yang sudah promoted/dibayar. Semua lewat `FOR UPDATE` re-cek. Uang masuk (submission PENDING/APPROVED, invoice PAID/PARTIAL) = STOP otomatisasi.
 
@@ -483,13 +483,11 @@ readiness:75 → preview:80 → post:93 (manual) / autoCloseMonthly:122 → reop
 
 ---
 
-##### 🔴 GAP #2 — DP untuk Renewal: Fase Kamar Belum Aman
+##### ✅ GAP #2 — DP Renewal: Ditutup F2-1
 
-**Aturan owner:** DP 30% perpanjangan → kamar belum aman, bisa dipesan online sampai lunas (maks H+7). Staff bersihkan & usir jika tidak lunas.
+**Implementasi aktif:** prompt H-10; prioritas tenant lama sampai hari-H; `AWAITING_DP` berakhir `EXPIRED_PRIORITY` bila melewati hari-H; DP yang terverifikasi menjadi `DP_SECURED`; pelunasan maksimal H+7; dan kegagalan menjadi `FORFEITED` melalui AutoOps. Harga renewal tetap mengikuti rent-lock.
 
-**Fakta kode:** Renew approval langsung perpanjang stay. Tidak ada fase "kamar bisa dipesan online."
-
-**Perbaikan:** prompt H-10; prioritas tenant lama sampai hari-H tanpa DP; DP mengamankan renewal; tanpa DP di hari-H kamar dibuka; pelunasan maksimal H+7 dari DP; harga renewal tetap.
+**Keputusan operasional:** proses forced checkout dan settlement deposit setelah forfeit tetap dijalankan admin melalui flow checkout yang terkontrol, bukan tindakan otomatis tanpa review.
 
 ---
 
@@ -868,7 +866,7 @@ Matrix ini memuat kontrak target keputusan owner. Area bertanda OWNER-only belum
 
 #### 14. Deploy & Environment Rules
 
-- **DEPLOY = FRESH** (keputusan V3/D-06): drop DB → seed COA → opening balance, BUKAN migrasi.
+- **DEPLOY = FRESH** (keputusan V3/D-06, diperjelas D-30): buat database produksi BARU → seed COA → opening balance, BUKAN migrasi data UAT dan bukan drop otomatis database UAT. Setelah go-live gunakan patch migration saja; lihat `DEPLOYMENT_ONLINE_20260723.md`.
 - Backfill data lama TIDAK berlaku.
 - Generated Prisma files adalah build artifacts, harus di-restore sebelum commit.
 - No production DB mutation.

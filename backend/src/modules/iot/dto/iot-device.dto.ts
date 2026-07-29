@@ -7,6 +7,7 @@ import {
   IsOptional,
   IsString,
   Matches,
+  Max,
   MaxLength,
   Min,
 } from 'class-validator';
@@ -98,6 +99,7 @@ export class IotTelemetryQueryDto {
   @Type(() => Number)
   @IsInt()
   @Min(1)
+  @Max(500)
   limit: number = 100;
 
   @IsOptional()

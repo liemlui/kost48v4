@@ -5,9 +5,10 @@ import { FacilityImagesController } from './facility-images.controller';
 import { FacilityImagesService } from './facility-images.service';
 import { MarketingAssetsController } from './marketing-assets.controller';
 import { MarketingAssetsService } from './marketing-assets.service';
+import { PublicAvailabilityController } from './public-availability.controller';
 
 @Module({
-  controllers: [MarketingPublicRoomsController, FacilityImagesController, MarketingAssetsController],
+  controllers: [MarketingPublicRoomsController, FacilityImagesController, MarketingAssetsController, PublicAvailabilityController],
   providers: [MarketingPublicRoomsService, FacilityImagesService, MarketingAssetsService],
 })
 export class MarketingModule {}

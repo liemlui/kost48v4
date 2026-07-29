@@ -16,6 +16,16 @@ Runbook deploy/PWA, checklist go-live, dan appendix akun dummy untuk DB pengemba
 
 Gate KTP diam-diam OFF di produksi telah diperbaiki (`settings.service.ts` semai nilai awal row dari env). Panduan deploy di §5 ditambah catatan "env = nilai awal, selanjutnya UI Settings → Operasional". Runbook onboarding tenant nyata sudah tersedia di `docs/RUNBOOK_ONBOARDING_TENANT_NYATA.md`.
 
+## Update 2026-07-23 — Otoritas Deploy Online dan P1-P3
+
+Bagian deploy lama di bawah adalah riwayat teknis dan tidak boleh dipakai tanpa pembaruan ini. Runbook aktif adalah `docs/DEPLOYMENT_ONLINE_20260723.md`.
+
+- Go-live pertama: provision database produksi **baru dan kosong**. Jangan drop database UAT; jangan migrasikan data testing atau menjalankan seed historis.
+- Sesudah go-live: patch migration saja. Untuk database berisi data nyata, `prisma db push`, reset, penghapusan `_prisma_migrations`, dan `sql/seed.sql` dilarang.
+- Endpoint cron AutoOps yang benar adalah **`POST /api/auto-ops/cron`** dengan header `X-Cron-Token`.
+- PWA Web Push sudah diimplementasikan. Pengumuman terjadwal diproses oleh `AnnouncementSweepService`; kategori notifikasi tersimpan di database. Detail rilis/UAT: `docs/RELEASE_20260723_ANNOUNCEMENT_NOTIFICATIONS.md` dan `docs/UAT_PUSH_NOTIFICATIONS.md`.
+- Backend kini memakai pemeriksaan null/implicit-any yang ketat; frontend memuat CSS dari satu entry `styles.css`. Gate yang masih terbuka: uji bootstrap guard database pada DB kosong, perbaikan pencarian tenant booking, dan UAT visual lintas portal setelah konsolidasi CSS. Budget CSS release saat ini 135 KB gzip; angka 80 KB di riwayat PWA lama bukan gate aktif.
+
 ## Update 2026-06-17 — AUDIT KEUANGAN ULTRA ✅
 
 **READY FOR GO-LIVE.** Audit keuangan ultra teliti LULUS: Trial balance balanced, deposit MATCHED, 8 invarian PASS, 0 unmapped transactions. DO-NOT-TOUCH blocks UTUH. Dead code minor `postPaymentReversalTx`. Runbook `M08 §3` smoke + env checklist siap.
@@ -66,8 +76,8 @@ Catatan deploy: jangan pernah expose API key ke frontend; semua panggilan DeepSe
 - [ ] Semua commit di `origin/main`; `npx tsc --noEmit` backend & frontend = 0 error.
 - [ ] Fase 1 di `08_CHECKLIST.md` selesai, termasuk harness finance dan rekonsiliasi.
 - [ ] Owner mengonfirmasi database target masih kosong/testing dan menyetujui pembuatan ulang. Snapshot `pg_dump` boleh dibuat sebagai pengaman, tetapi **tidak untuk dimigrasikan** ke produksi baru.
-- [ ] Env produksi WAJIB: `DATABASE_URL`, `JWT_SECRET`, `CORS_ORIGIN` (domain frontend — backend tolak start tanpa ini), `NODE_ENV=production`, `FRONTEND_URL`, `BREVO_API_KEY` + `MAIL_FROM_*`. Auto-ops: **VPS/always-on** → `AUTO_OPS_ENABLED=true` (+`AUTO_OPS_INTERVAL_MINUTES`); **shared hosting/Passenger (mis. IDwebhost)** → `AUTO_OPS_ENABLED=false` + `AUTO_OPS_CRON_TOKEN` + cPanel Cron ke `GET /api/auto-ops/cron` (Bagian D).
-- [ ] **F4-2 PWA Web Push (opsional tapi disarankan):** set `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT` (`mailto:owner@...`). Generate sekali: `node -e "console.log(require('web-push').generateVAPIDKeys())"` (dependency `web-push` sudah terpasang). **Tanpa env ini push otomatis NONAKTIF** (notif in-app tetap jalan, tak error). Dispatch push ikut sweeper auto-ops (`runPushDispatch`) → di shared hosting pastikan cPanel Cron `GET /api/auto-ops/cron` aktif. Frontend butuh HTTPS (service worker) agar tenant bisa opt-in.
+- [ ] Env produksi WAJIB: `DATABASE_URL`, `JWT_SECRET`, `CORS_ORIGIN` (domain frontend — backend tolak start tanpa ini), `NODE_ENV=production`, `FRONTEND_URL`, `BREVO_API_KEY` + `MAIL_FROM_*`. Auto-ops: **VPS/always-on** → `AUTO_OPS_ENABLED=true` (+`AUTO_OPS_INTERVAL_MINUTES`); **shared hosting/Passenger (mis. IDwebhost)** → `AUTO_OPS_ENABLED=false` + `AUTO_OPS_CRON_TOKEN` + cPanel Cron ke `POST /api/auto-ops/cron` (Bagian D).
+- [ ] **F4-2 PWA Web Push (opsional tapi disarankan):** set `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT` (`mailto:owner@...`). Generate sekali: `node -e "console.log(require('web-push').generateVAPIDKeys())"` (dependency `web-push` sudah terpasang). **Tanpa env ini push otomatis NONAKTIF** (notif in-app tetap jalan, tak error). Dispatch push ikut sweeper auto-ops (`runPushDispatch`) → di shared hosting pastikan cPanel Cron `POST /api/auto-ops/cron` aktif. Frontend butuh HTTPS (service worker) agar tenant bisa opt-in.
 - [ ] **F3-17 Gate aktivasi KTP (L-4, WAJIB di produksi):** set **`KTP_ACTIVATION_GATE_ENABLED=true`**. **Default OFF** (agar UAT lancar) → bila lupa di-set, kamar bisa diaktifkan TANPA KTP terverifikasi (lawan maksud E1/UU PDP & D-17). Konsekuensi ON: aktivasi kamar (`stays.create`/approve booking) menolak bila tenant belum ada foto KTP terverifikasi. Opsional terkait: ambang cuci AC kWh `AC_CLEAN_KWH_THRESHOLD` (default 200) & rekonsiliasi jurnal `JOURNAL_RECONCILIATION_ENABLED` (default on, F5-6).
 - [ ] **Fase G AI (opsional):** bila mengaktifkan DeepSeek, set `DEEPSEEK_API_KEY`, `DEEPSEEK_MODEL=deepseek-v4-flash`, `DEEPSEEK_FINANCE_MODEL=deepseek-v4-pro`, `AI_FEATURES_ENABLED=true`, `AI_MANUAL_ONLY=true`, limit harian, dan pastikan tombol AI hanya OWNER/ADMIN.
 - [ ] Canonical frontend: `https://app.kost48surabaya.com`. `CORS_ORIGIN` dan `FRONTEND_URL` pakai host ini.
@@ -81,22 +91,20 @@ cd ../frontend; npm ci; npm run build   # tsc + vite build -> dist/
 ##### 2. Database Bersih, Skema & Pagar DB
 Provision database produksi kosong `kost48_v3`. Bila database bernama sama sudah berisi data, berhenti dan minta persetujuan owner sebelum drop/recreate.
 
-**Skema = 2 opsi SETARA** (pilih salah satu), **lalu WAJIB jalankan `bootstrap.sql` + addendum**:
+**Skema produksi memakai migration ledger saja; `db push` bukan jalur produksi.** Jalur bootstrap guard harus diverifikasi pada DB kosong sebelum go-live:
 ```powershell
 cd backend
-# --- Opsi A (disarankan utk prod, sejak squash baseline 2026-06-14): replay migration ---
-npx prisma migrate deploy        # buat seluruh schema dari migrations/00000000000000_baseline
-# --- Opsi B (lama, tetap valid): db push ---
-# npx prisma db push             # schema.prisma langsung ke DB (tanpa ledger migration)
+# --- Jalur produksi ---
+npx --yes prisma@7.8.0 migrate deploy  # replay seluruh migration dari baseline
 
-# --- WAJIB sesudahnya (kedua opsi) — pagar DB di LUAR schema Prisma ---
-psql -h <host> -p 5432 -U postgres -d kost48_v3 -f sql/bootstrap.sql
-psql -h <host> -p 5432 -U postgres -d kost48_v3 -f sql/bootstrap_v4_addendum.sql
+# --- Pagar DB ---
+# Jalankan hanya artefak bootstrap guard yang sudah diekstrak, diuji, dan disetujui.
+# sql/seed.sql BUKAN bootstrap: file ini membawa data historis/PII dan dilarang di produksi.
 ```
-- **Squash baseline (2026-06-14):** rantai migration lama (tak lengkap) di-arsip ke `prisma/_archive_migrations_pre_baseline/`; kini ada **1 baseline** `prisma/migrations/00000000000000_baseline/migration.sql` = SELURUH schema (41 tabel/54 enum/192 index/90 FK). Terverifikasi: `migrate deploy` ke DB kosong → 42 tabel sukses; `migrate diff` baseline vs schema = empty.
-- **`bootstrap.sql` WAJIB** baik pakai Opsi A maupun B: trigger, CHECK constraint (mis. konsistensi deposit), advisory lock generate ticket-number, index tambahan, dan **carve-out guard deposit F3-16** TIDAK ada di schema Prisma. Idempotent (DROP IF EXISTS lalu CREATE).
-- **Rehearsal 2026-06-13 (DB throwaway 5433): `db push`→41 tabel + `bootstrap.sql`+addendum apply BERSIH (0 error), 2 unique index + 7 check constraint + 8 trigger + 231 index terbentuk.** Aman di produksi.
-- **DB yang sudah ada tapi dibangun via `db push` (mis. UAT lama):** ledger `_prisma_migrations` tak sinkron. Selaraskan sekali: `DELETE FROM "_prisma_migrations"` lalu `npx prisma migrate resolve --applied 00000000000000_baseline` → `migrate status` "up to date". (Prod fresh tak perlu ini.)
+- **Squash baseline (2026-06-14):** rantai migration lama (tak lengkap) di-arsip ke `prisma/_archive_migrations_pre_baseline/`; baseline tetap awal rantai dan harus diikuti semua migration setelahnya, termasuk release 2026-07-23. Jalankan `migrate deploy`, bukan file baseline secara manual.
+- **Pagar database di luar Prisma:** trigger, CHECK constraint, advisory lock generate ticket-number, indeks tambahan, dan carve-out deposit historis tidak boleh diasumsikan sudah ikut migration. Sebelum go-live, artefak bootstrap khusus schema harus diekstrak/direview dan diuji pada database kosong; `sql/seed.sql` tidak boleh dipakai karena menyertakan data.
+- **Rehearsal 2026-06-13:** hasil `db push` terdahulu hanya bukti historis. Ini bukan izin memakai `db push` pada deployment produksi sekarang.
+- **DB yang sudah ada tapi dibangun via `db push` (mis. UAT lama):** jangan menghapus ledger atau menjalankan resolve secara buta. Produksi baru tidak memakai DB tersebut; bila suatu DB nyata perlu dipertahankan, gunakan jalur patch dan review ledger/schema terlebih dahulu sesuai `DEPLOYMENT_ONLINE_20260723.md`.
 
 **Tidak ada backfill E-2 atau migrasi data UAT.** Seed hanya data fondasi: COA, periode OPEN, opening balance produksi, dan CashAccount.
 
@@ -186,7 +194,7 @@ psql -h <host> -p 5432 -U postgres -d kost48_v3 -f sql/bootstrap_v4_addendum.sql
 | PWA-14 | MEDIUM | Cold start berat (552 kB gzip) | SELESAI tahap 1 (272 KiB) |
 | PWA-15 | MEDIUM | Runbook belum uji kontrak PWA | Sudah merge ke sini |
 | PWA-16 | MEDIUM | Belum test/observability PWA | BELUM |
-| PWA-17 | PLANNED | Push notification belum | Phase 3 |
+| PWA-17 | DONE | Web Push outbox + opt-in browser | UAT produksi masih wajib |
 
 ##### Plan Perkuatan Bertahap
 
@@ -212,15 +220,13 @@ psql -h <host> -p 5432 -U postgres -d kost48_v3 -f sql/bootstrap_v4_addendum.sql
 - [x] Shortcut manifest publik.
 - [x] Code split per role/route.
 - [ ] Ikon launcher/maskable/badge desain ulang.
-- [ ] Screenshots manifest + budget akhir JS <250 kB gzip, CSS <80 kB gzip.
+- [ ] **Historis, bukan gate aktif:** screenshots manifest + budget akhir JS <250 kB gzip, CSS <80 kB gzip. Untuk release kini, budget CSS yang diverifikasi adalah 135 KB gzip; gunakan gate UAT visual pada pembaruan di bagian atas.
 
-###### Phase 3 — Web Push dengan Outbox (4-8 hari)
-- Data model: `PushSubscription`, `PushDelivery`, `NotificationPreference`.
-- Backend: VAPID, subscribe/unsubscribe, outbox delivery, retry 429/5xx, cleanup 410.
-- Frontend: permission dari klik user, register setelah login, detach saat logout.
-- `push` handler: payload minimal, `notificationclick` hanya path same-origin.
-- In-app notification tetap source of truth.
-- Urutan kategori: reminder kontrak → pembayaran → checkout/renew → tiket → announcement.
+###### Phase 3 — Web Push dengan Outbox (SELESAI, UAT wajib)
+- Data aktif: `PushSubscription` dan outbox pada `AppNotification` (`pushStatus`, attempts, timestamp); kategori notifikasi tersimpan sebagai `FINANCE`, `OPERATIONS`, atau `SYSTEM`.
+- Backend: VAPID, subscribe/unsubscribe, dispatch best-effort, cleanup subscription 404/410; trigger manual `POST /api/auto-ops/run/push-dispatch`.
+- Frontend: permission dari klik pengguna dan service worker `push`/`notificationclick`; in-app notification tetap source of truth.
+- Announcement terjadwal memakai `Announcement.dispatchedAt` dan `AnnouncementSweepService`, melalui `runAll()` atau endpoint manual OWNER/ADMIN.
 
 ###### Phase 4 — Offline Operasional Terbatas (opsional)
 Draft tiket/laporan staf setelah Phase 0-3 stabil. Wajib: IndexedDB, idempotency key, status queued/sent/failed. JANGAN queue approval pembayaran, jurnal, invoice, checkout, mutasi stok.
@@ -232,7 +238,7 @@ Draft tiket/laporan staf setelah Phase 0-3 stabil. Wajib: IndexedDB, idempotency
 | Offline app shell | AKTIF |
 | Mutation offline | DILARANG |
 | Kamera langsung | AKTIF OPT-IN |
-| Push notification | DITUNDA (Phase 3) |
+| Push notification | AKTIF opt-in; UAT HTTPS/VAPID wajib sebelum diumumkan ke penghuni |
 | Background Sync | DITUNDA KETAT |
 | Web Share, App Badge | OPSIONAL NANTI |
 | Wake Lock, Geo, Mic, NFC | TIDAK AKTIF |
@@ -297,18 +303,18 @@ New-NetFirewallRule -DisplayName "KOST48 LAN frontend 5173" -Direction Inbound -
 **Resource host (statistik owner 2026-07-04):** RAM LVE **512MB** (139MB terpakai situs lama) · inode **46,7rb/75rb (62%)** · entry process 5/15 · Postgres OK. **Kesimpulan: CUKUP** dengan syarat: (a) **JANGAN build di server** (tsc/npm ci penuh bisa OOM + devDeps boros inode) → paket PREBUILT dari lokal; (b) situs lama di-off-kan (bebaskan RAM+inode); (c) heap Node dibatasi `NODE_OPTIONS=--max-old-space-size=192` via env cPanel (flag di `start:prod` package.json TIDAK dipakai Passenger). Estimasi runtime: idle 120-180MB, puncak ~250-300MB. Prisma client = WASM query compiler + driver adapter pg → platform-independent, TANPA `prisma generate` di server (binary `*.node` dibuang dari paket).
 
 **Status kode:** ✅ Combined single-server SUDAH dibangun (entry `dist/main.js` serve `client/` + API). ✅ Paket deploy ramping & script cPanel tersedia. ✅ **Endpoint cron auto-ops SUDAH dibuat.**
-- **Auto-ops via cron (SELESAI):** di shared hosting set **`AUTO_OPS_ENABLED=false`** (matikan setInterval in-process yang tak andal) + **`AUTO_OPS_CRON_TOKEN=<rahasia panjang>`**. Endpoint publik token-protected: **`GET /api/auto-ops/cron`** dengan header `X-Cron-Token: <rahasia>` (atau query `?token=<rahasia>`). Panggilan ini sekaligus membangunkan app + menjalankan `runAll`. cPanel **Cron Jobs** tiap 5–10 menit:
+- **Auto-ops via cron (SELESAI):** di shared hosting set **`AUTO_OPS_ENABLED=false`** (matikan setInterval in-process yang tak andal) + **`AUTO_OPS_CRON_TOKEN=<rahasia panjang>`**. Endpoint publik token-protected: **`POST /api/auto-ops/cron`** dengan header `X-Cron-Token: <rahasia>` saja; token query tidak didukung. Panggilan ini sekaligus membangunkan app + menjalankan `runAll`. cPanel **Cron Jobs** tiap 5–10 menit:
   `curl -fsS -X POST -H "X-Cron-Token: <rahasia>" https://domain/api/auto-ops/cron >/dev/null 2>&1` (fallback wget: `wget -q -O /dev/null --post-data="" --header="X-Cron-Token: <rahasia>" "https://domain/api/auto-ops/cron"`).
   Token salah/kosong → 403. (Di VPS/always-on boleh sebaliknya: `AUTO_OPS_ENABLED=true`, cron opsional.)
 
 **Runbook cPanel (combined, PREBUILT — update 2026-07-04 utk RAM 512MB):**
-1. **LOKAL:** `npm run make-deploy` → folder `deploy/` = backend **PREBUILT** `dist/` (+`dist/generated` Prisma client, binary `*.node` dibuang) + frontend prebuilt `client/` + `prisma/` + `sql/` + `scripts/seed-owner.js`; TANPA `src/`, TANPA node_modules; + `kost48-deploy.tgz`. **Server tidak build apa pun.** Jika `dist` sudah fresh, `npm run make-deploy:fast` bisa dipakai untuk bungkus ulang tanpa build.
+1. **LOKAL:** `npm run make-deploy` → folder `deploy/` = backend **PREBUILT** `dist/` (+`dist/generated` Prisma client, binary `*.node` dibuang) + frontend prebuilt `client/` + runtime `node_modules` + `prisma/` + `sql/` + `scripts/seed-owner.js`; hasil `kost48-deploy-bundled.tgz`. **Server tidak build atau install apa pun.** Jika `dist` sudah fresh, `npm run make-deploy:fast` bisa dipakai untuk bungkus ulang tanpa build.
 2. **PostgreSQL** (cPanel → PostgreSQL Databases): buat DB `kost48_v3` + user; catat kredensial.
-3. **Upload** `kost48-deploy.tgz` ke folder app cPanel → File Manager extract.
+3. **Upload** `kost48-deploy-bundled.tgz` ke folder app cPanel → File Manager extract.
 4. **Setup Node.js App**: Node 22, **Application startup file = `dist/main.js`**, env **`NODE_OPTIONS=--max-old-space-size=192`** (WAJIB via env cPanel, tidak bisa via `.env`).
-5. **SSH (di Node venv): `npm run cpanel:install`** (= `npm ci --omit=dev --omit=optional --ignore-scripts --no-audit --no-fund --progress=false` — prod deps saja dari lockfile deploy; tanpa tsc/prisma generate).
+5. **SSH (di Node venv): tidak ada `npm install`/`npm ci`/Prisma CLI.** Runtime `node_modules` sudah ada di bundle dan server hanya membaca `.env` lalu menjalankan `dist/main.js`.
 6. **Env**: salin `.env.example` → `.env` di root app (dibaca app via @nestjs/config + script seed): `DATABASE_URL`(postgres cPanel), `JWT_SECRET`(baru, kuat), `NODE_ENV=production`, `CORS_ORIGIN=https://domain` (same-origin → domain saja), **`AUTO_OPS_ENABLED=false`** (shared hosting: digerakkan cron, bukan setInterval), **`AUTO_OPS_CRON_TOKEN=<rahasia panjang>`**, **`KTP_ACTIVATION_GATE_ENABLED=true`** (L-4 — default OFF, wajib ON di produksi), VAPID (opsional, push). (PORT diatur Passenger.)
-7. **Schema+seed (sekali):** schema via **psql/pgAdmin Query Tool**: `psql "<DATABASE_URL>" -f prisma/migrations/00000000000000_baseline/migration.sql` (fallback: `npm run cpanel:migrate` = `npx prisma db push --skip-generate`, jalankan saat app stop — npx unduh CLI sementara) → **WAJIB** `psql "<DATABASE_URL>" -f sql/bootstrap.sql` (trigger/CHECK/carve-out F3-16 di luar schema Prisma; addendum v4 SUDAH terkonsolidasi di dalamnya sejak file terpisah dihapus) → seed **OWNER**: `OWNER_EMAIL=... OWNER_PASSWORD=... npm run seed:owner` → login OWNER lalu seed COA (`POST /api/accounting/default-coa/seed`) + periode OPEN + CashAccount.
+7. **Schema+seed (sekali):** bundle tidak mengubah database. Verifikasi/putuskan patch database terpisah, lalu jalankan bootstrap guard yang telah diuji (bukan `sql/seed.sql`). Bila DB telah sah, seed **OWNER** sekali dengan `OWNER_EMAIL=... OWNER_PASSWORD=... node scripts/seed-owner.js`, lalu login OWNER untuk seed COA (`POST /api/accounting/default-coa/seed`) + periode OPEN + CashAccount. Lihat `DEPLOYMENT_ONLINE_20260723.md` untuk gate lengkap.
 8. **Restart App** (Passenger pakai `dist/main.js`). **AutoSSL** domain → HTTPS (PWA penuh).
 9. **Auto-ops**: pasang cPanel **Cron Job** tiap 5–10 menit memanggil `POST /api/auto-ops/cron` dgn `X-Cron-Token` (perintah lengkap di "Status kode" atas). Verifikasi: jalankan manual sekali → cek notif/sweeper berjalan.
 10. Smoke: `https://domain/` (frontend) · `https://domain/api/public/rooms` 200 · login OWNER · trial-balance balanced · reconciliation-lite mismatch=0 · cPanel **Resource Usage: memory faults = 0** (bila ada fault → turunkan `NODE_OPTIONS` ke 160 atau upgrade paket).
@@ -317,6 +323,8 @@ New-NetFirewallRule -DisplayName "KOST48 LAN frontend 5173" -Direction Inbound -
 
 
 ## Bagian 2 - `docs/GO_LIVE_CHECKLIST.md`
+
+> **ARSIP LAN — bukan prosedur produksi.** Jangan gunakan `golive:setup`, nama database, seed, atau instruksi env di bagian lama ini untuk online deployment. Untuk production gunakan hanya `DEPLOYMENT_ONLINE_20260723.md` dan `DEPLOY_CPANEL_STEP_BY_STEP.md`.
 
 ### GO-LIVE CHECKLIST — LAN dulu (2026-06-15)
 **Target terpilih:** Lokal/LAN via `npm run golive` (uji di jaringan rumah/kos sebelum publik internet). Detail lengkap & opsi cPanel/VPS di `04_DEPLOY_AND_PWA.md`. **Kode siap:** Fase 1–5 + audit menyeluruh tuntas, `tsc` 0, unit 47/47, tak ada 🔴 bug.
@@ -338,7 +346,7 @@ Ada **4** `package.json`, masing-masing beda peran. **Frontend & backend tetap T
 - **`npm run golive:1`** (dari root) → **COMBINED 1 server/1 port** (`:3000`): backend menyajikan frontend + API sekaligus. Ini wujud "frontend+backend jadi satu" (mirip produksi).
 - **`npm run make-deploy`** (dari root) → buat folder `deploy/` siap upload ke hosting (cPanel/VPS), nanti di server: `npm ci → npm run build → node dist/main.js`.
 
-> Folder lain di root yang **bukan source** (artefak/abaikan): `node_modules/`, `*.zip`, `kost48-deploy.tgz`, `tmp_*.log`, `deploy/`, `frontend/dist`, `backend/dist`.
+> Folder lain di root yang **bukan source** (artefak/abaikan): `node_modules/`, `*.zip`, `kost48-deploy-bundled.tgz`, `tmp_*.log`, `deploy/`, `frontend/dist`, `backend/dist`.
 
 #### ⚡ RINGKAS — 3 langkah (LAN)
 1. **Buat DB kosong** `kost48_v3` (Postgres port 5432) + isi `backend/.env` (lihat §0).
@@ -359,7 +367,7 @@ Ada **4** `package.json`, masing-masing beda peran. **Frontend & backend tetap T
 cd backend
 OWNER_EMAIL=owner@kost48surabaya.com OWNER_PASSWORD='GANTI_password_kuat' OWNER_FULLNAME='Pemilik KOST48' npm run golive:setup
 ```
-Otomatis & **idempoten** (aman diulang): build → `prisma db push` → `bootstrap.sql`+addendum → OWNER pertama → 37 akun COA → periode bulan berjalan OPEN → CashAccount **Kas Tunai (1000)** + **Bank Utama (1010, default)**.
+Otomatis & **idempoten** (aman diulang hanya untuk DB baru yang telah disetujui): build → migration ledger → bootstrap guard tervalidasi → OWNER pertama → 37 akun COA → periode bulan berjalan OPEN → CashAccount **Kas Tunai (1000)** + **Bank Utama (1010, default)**. Untuk produksi yang sudah berjalan gunakan patch migration, bukan skrip ini.
 - [ ] Skrip selesai dengan **"✅ SETUP SELESAI"**.
 - [ ] (Opsional) **FAQ panduan tenant**: setelah `golive` jalan & login OWNER → `POST /api/faqs/seed` (atau kapan saja).
 - [ ] (Opsional) **Saldo awal (opening balance)** kas/aset bila ada → isi via UI Akuntansi (default 0).
@@ -471,3 +479,216 @@ Kamar `K-Q` sampai `K-T` tersedia untuk uji booking/check-in.
 - 19 invoice: 16 sewa + 3 meter listrik; 12 PAID, 7 ISSUED.
 - 16 deposit HELD Rp500.000/kamar, terjurnal.
 - Trial balance seimbang dan tidak ada dobel-tagih.
+
+---
+
+## Appendix A — Runbook Deploy Online (2026-07-23)
+
+
+#### Keputusan database
+
+**Pilihan untuk go-live pertama: fresh bootstrap pada database BARU, bukan menghapus database UAT yang ada dan bukan memigrasikan data UAT.** Keputusan ini mengikuti D-06: data lama masih testing dan belum menjadi data operasional.
+
+Praktiknya, buat database dan user PostgreSQL produksi baru, misalnya `kost48_prod`, lalu arahkan `DATABASE_URL` produksi ke sana. Database UAT lama dipertahankan read-only sebagai cadangan sampai owner menyetujui penghapusannya secara terpisah. Dengan cara ini kita mendapat database bersih tanpa tindakan drop yang tidak perlu.
+
+Pengecualian mutlak: bila verifikasi membuktikan target sudah berisi data penghuni, tagihan, pembayaran, atau saldo awal yang nyata, jalur fresh batal. Gunakan patch migration terkontrol dan minta persetujuan owner tertulis sebelum perubahan skema. Setelah go-live pertama, **semua release berikutnya patch-only**; reset database produksi dilarang.
+
+| Kondisi target | Jalur | Dilarang |
+|---|---|---|
+| Database baru/kosong untuk go-live pertama | Jalankan semua migration berurutan, bootstrap aman, buat OWNER pertama, lalu master data/neraca awal. | Mengimpor seed historis/UAT atau menghapus DB UAT tanpa persetujuan terpisah. |
+| Database produksi dengan data nyata | Backup teruji, cek ledger migration, migration additive/patch satu per satu, smoke test. | `db push`, reset, import seed, atau menghapus `_prisma_migrations`. |
+| Database UAT lama | Pertahankan sebagai referensi/backup sampai masa retensi diputuskan owner. | Menganggapnya otomatis boleh dihapus. |
+
+#### Gate sebelum menjadwalkan deployment
+
+**Status artefak saat dokumentasi ini diperbarui:** kode `main` yang telah diaudit berada di `8627289`, sedangkan dokumentasi/runbook dan penyesuaian command migration paket masih harus disatukan ke commit SHA final. Jangan deploy worktree kotor atau bundle yang tidak dapat ditelusuri ke SHA tersebut.
+
+- [ ] Owner mengonfirmasi domain, hosting, dan bahwa database target benar-benar baru/kosong.
+- [ ] SHA final mencakup seluruh perubahan release dan dokumen/runbook ini; backend dan frontend build dari SHA tersebut lulus.
+- [ ] Database UAT dan folder uploads dibackup terenskripsi; backup diuji dapat dibuka.
+- [ ] Perbaikan query pencarian tenant booking dan UAT visual lintas portal sudah ditutup.
+- [ ] Jalur bootstrap diuji pada PostgreSQL kosong yang setara hosting. Pagar database (constraint/trigger) harus diverifikasi ada; `sql/seed.sql` tidak boleh dipakai karena membawa data historis.
+- [ ] Kunci production dibuat baru: `JWT_SECRET`, `AUTO_OPS_CRON_TOKEN`, VAPID private key, kredensial DB, dan secret IoT bila dipakai. Tidak ada secret di repo, ticket, atau screenshot.
+- [ ] HTTPS aktif sebelum UAT PWA/push; `CORS_ORIGIN` dan `FRONTEND_URL` memakai domain final.
+
+#### Jalur A - Fresh bootstrap (dipilih bila semua data masih testing)
+
+1. Buat database dan user PostgreSQL baru; berikan hak hanya pada database tersebut.
+2. Buat `.env` produksi dengan `DATABASE_URL` baru, `NODE_ENV=production`, JWT kuat, CORS/domain final, `KTP_ACTIVATION_GATE_ENABLED=true`, token cron, dan VAPID bila push diaktifkan.
+3. Bundle tidak menjalankan `npm install`, `npm ci`, atau Prisma CLI di server. Sebelum aplikasi dimulai, verifikasi status target database dan putuskan patch schema secara terpisah. Jangan menggantinya dengan `prisma db push`.
+
+4. Jalankan bootstrap **khusus schema guard** hanya setelah artefaknya diuji pada DB kosong dan metode eksekusinya disetujui. Saat ini `sql/seed.sql` mengandung data historis/PII sehingga bukan artefak bootstrap yang aman. Ini adalah gate wajib, bukan langkah yang boleh dilewati.
+5. Buat OWNER pertama melalui `npm run seed:owner` dengan environment sementara `OWNER_EMAIL`, `OWNER_PASSWORD`, dan `OWNER_FULLNAME`. Hapus password dari history shell setelahnya.
+6. Login OWNER dan isi data fondasi melalui UI: COA, periode OPEN, cash account, opening balance (atau catat zero-start), kamar/fasilitas, serta data penghuni nyata melalui runbook onboarding. Jangan menjalankan seed data teraudit.
+7. Start/restart aplikasi, lalu jalankan smoke test dan UAT push. Baru setelah itu aktifkan cron.
+
+#### Jalur B - Patch database produksi yang sudah nyata
+
+1. Aktifkan maintenance window dan buat `pg_dump` terenskripsi beserta backup `uploads/`; uji restore ke database non-produksi.
+2. Catat versi aplikasi, hasil `prisma migrate status`, jumlah migration pada `_prisma_migrations`, dan schema fingerprint sebelum perubahan.
+3. Review setiap migration untuk dampak data/lock. Migration release ini bersifat additive dan memiliki backfill kategori notifikasi; tetap jalankan dalam jendela pemeliharaan.
+4. Jangan menjalankan Prisma CLI dari cPanel bundle. Review dan setujui patch database secara terpisah dari release aplikasi; jangan memakai `db push`, `migrate reset`, menghapus ledger, atau menjalankan seed.
+5. Jalankan smoke test dan monitor error/database log. Rollback kode hanya bila migration additive tetap kompatibel; rollback data dilakukan dari backup hanya untuk korupsi nyata dan atas keputusan owner.
+
+#### Konfigurasi AutoOps dan Push
+
+Untuk shared hosting/Passenger, gunakan cron setiap 5 menit:
+
+```cron
+*/5 * * * * curl -fsS -X POST -H "X-Cron-Token: <AUTO_OPS_CRON_TOKEN>" https://<domain>/api/auto-ops/cron >/dev/null 2>&1
+```
+
+- Endpoint harus `POST`, bukan `GET` dan bukan token query string.
+- Cron ini menjalankan dispatch announcement terjadwal dan push outbox selain operasi AutoOps lainnya.
+- Jalankan `docs/UAT_PUSH_NOTIFICATIONS.md` setelah HTTPS dan VAPID aktif. Push boleh ditunda bila VAPID belum siap, tetapi inbox in-app tetap wajib berfungsi.
+
+#### Smoke test dan bukti rilis
+
+- [ ] `/` dan `/api/public/rooms` merespons sesuai domain HTTPS.
+- [ ] Login OWNER berhasil; route terproteksi menolak tanpa token.
+- [ ] Accounting readiness serta trial balance diperiksa setelah master data/neraca awal diisi.
+- [ ] `POST /api/auto-ops/run` oleh OWNER/ADMIN berhasil sekali; cron menggunakan token yang sama tetapi tidak dicatat di log.
+- [ ] Pengumuman langsung dan terjadwal lulus UAT; `dispatchedAt` terisi sekali saja.
+- [ ] Push opt-in lulus atau secara eksplisit dicatat belum diaktifkan tanpa menghambat inbox in-app.
+- [ ] Simpan SHA rilis, waktu, hasil migration, hasil smoke, dan lokasi backup tanpa menyimpan secret/PII.
+
+#### Larangan permanen
+
+- Jangan menjalankan `prisma db push` pada produksi yang memiliki data nyata.
+- Jangan menjalankan `prisma migrate reset`, menghapus `_prisma_migrations`, atau menjalankan `sql/seed.sql` terhadap database produksi.
+- Jangan drop database hanya karena ingin memperbarui aplikasi. Untuk go-live pertama, prefer database baru; untuk release berikutnya, patch-only.
+
+---
+
+## Appendix B — Deploy cPanel Step-by-Step
+
+
+> Runbook ini berlaku untuk release setelah 2026-07-23. Keputusan database dan gate lengkap ada di `docs/DEPLOYMENT_ONLINE_20260723.md`; bila ada konflik, dokumen tersebut menang.
+
+#### Keputusan sebelum mulai
+
+Untuk go-live pertama, buat **database produksi baru dan kosong**. Jangan drop database UAT dan jangan memasukkan data UAT/seed historis ke produksi. Sesudah go-live, pembaruan database hanya melalui patch migration.
+
+Jangan mulai jika salah satu kondisi berikut belum terpenuhi:
+
+- SHA `main` rilis, backup UAT/uploads, dan build backend/frontend sudah tercatat.
+- Domain HTTPS, kredensial DB baru, dan seluruh secret produksi sudah tersedia.
+- Bootstrap guard database (constraint/trigger di luar Prisma) sudah diuji pada PostgreSQL kosong. `sql/seed.sql` bukan bootstrap karena membawa data historis/PII.
+- Temuan pencarian tenant booking serta UAT visual lintas portal sudah ditutup.
+
+#### 1. Buat database baru
+
+Di **PostgreSQL Databases**, buat database baru, user baru, password kuat, lalu berikan hak hanya pada database itu. Contoh URL:
+
+```env
+DATABASE_URL="postgresql://USER:PASSWORD@127.0.0.1:5432/kost48_prod?schema=public"
+```
+
+Simpan database UAT lama sebagai backup read-only. Penghapusan membutuhkan persetujuan owner terpisah.
+
+#### 2. Unggah paket rilis
+
+Bangun bundle dari SHA rilis di mesin tepercaya, unggah `kost48-deploy-bundled.tgz` ke folder app (misalnya `/home/USER/kost48`), dan extract. Bundle ini sudah memuat backend/frontend prebuilt serta runtime `node_modules`; jangan menimpa `.env` atau `uploads/` bila melakukan redeploy.
+
+Di **Setup Node.js App** gunakan Node 22, mode Production, application root folder app, dan startup file `dist/main.js`. Set `NODE_OPTIONS=--max-old-space-size=192` di environment cPanel, bukan di `.env`.
+
+#### 3. Isi environment
+
+Salin `.env.example` ke `.env`, lalu isi minimal:
+
+```env
+NODE_ENV=production
+DATABASE_URL="...database produksi baru..."
+JWT_SECRET="...acak dan kuat..."
+CORS_ORIGIN="https://domain-anda"
+FRONTEND_URL="https://domain-anda"
+KTP_ACTIVATION_GATE_ENABLED=true
+AUTO_OPS_ENABLED=false
+AUTO_OPS_CRON_TOKEN="...acak dan kuat..."
+TUYA_ACCESS_KEY="...Tuya Access ID..."
+TUYA_SECRET_KEY="...Tuya Access Secret..."
+TUYA_API_BASE=https://openapi.tuyaus.com
+IOT_TUYA_POLL_ENABLED=false
+IOT_TUYA_CRON_TOKEN="...acak dan kuat..."
+IOT_STALE_AFTER_MINUTES=30
+##### Isi hanya jika ESP32 water meter dipakai; simpan permanen di password manager.
+IOT_MASTER_KEY="...32 byte base64 atau 64 hex..."
+```
+
+Tambahkan VAPID (`VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT`) sebelum mengaktifkan push. Jangan menaruh secret di command history, ticket, atau screenshot.
+
+#### 4. Jangan install atau menjalankan Prisma di server
+
+Tidak ada perintah berikut yang boleh dijalankan di server:
+
+```bash
+npm install
+npm ci
+prisma db push
+prisma migrate deploy
+```
+
+Database tidak disentuh otomatis oleh bundle. Verifikasi dulu apakah target benar-benar fresh atau sudah memiliki schema/data nyata. Patch database—bila memang dibutuhkan—harus ditentukan terpisah, dibackup, direview, dan dilakukan melalui metode yang disetujui owner. `prisma db push`, reset, penghapusan ledger, dan `sql/seed.sql` tetap dilarang.
+
+Setelah migration, pasang hanya bootstrap guard yang telah diuji dan disetujui. Bila artefak guard belum tersedia/terverifikasi, berhenti: aplikasi belum siap go-live.
+
+#### 5. Seed fondasi tanpa data historis
+
+```bash
+OWNER_EMAIL=owner@domain-anda \
+OWNER_PASSWORD='password-kuat-sementara' \
+OWNER_FULLNAME='Pemilik KOST48' \
+npm run seed:owner
+```
+
+Kemudian login sebagai OWNER dan buat COA, periode OPEN, cash account, opening balance atau catatan zero-start, kamar/fasilitas, dan onboarding penghuni nyata melalui UI/runbook. Jangan menjalankan seed teraudit yang membawa tenant, transaksi, atau PII.
+
+Setelah 13 kamar produksi tersedia, daftarkan registry Tuya secara idempoten dan tarik snapshot pertama:
+
+```bash
+node scripts/bootstrap-tuya-kwh.js --sync
+```
+
+Periksa mapping device ID ke kode kamar sebelum melanjutkan. Jangan jalankan bootstrap ini bila daftar perangkat produksi belum diverifikasi.
+
+#### 6. Start, HTTPS, dan cron
+
+Start aplikasi dari cPanel, aktifkan AutoSSL, lalu pastikan domain HTTPS sudah aktif sebelum UAT push.
+
+Tambahkan cron AutoOps setiap lima menit:
+
+```cron
+*/5 * * * * curl -fsS -X POST -H "X-Cron-Token: <AUTO_OPS_CRON_TOKEN>" https://<domain>/api/auto-ops/cron >/dev/null 2>&1
+```
+
+Endpoint cron hanya menerima `POST` dan header `X-Cron-Token`; token query string tidak didukung. Cron ini juga menjalankan dispatch pengumuman terjadwal serta push outbox.
+
+Tambahkan tepat satu cron IoT setiap sepuluh menit. Timer internal harus tetap OFF pada Passenger:
+
+```cron
+*/10 * * * * curl -fsS -X POST -H "X-Iot-Cron-Token: <IOT_TUYA_CRON_TOKEN>" https://<domain>/api/iot/tuya/cron >/dev/null 2>&1
+```
+
+Kill procedure IoT yang benar: hapus/nonaktifkan cron di atas, pastikan `IOT_TUYA_POLL_ENABLED=false`, lalu nonaktifkan device melalui registry bila perlu. Variabel `IOT_ENABLED` tidak ada dan tidak boleh dijadikan prosedur rollback.
+
+#### 7. Smoke test dan UAT
+
+- Buka `/` dan cek `/api/public/rooms` menghasilkan respons sehat.
+- Login OWNER; endpoint terproteksi harus menolak tanpa token.
+- Jalankan `POST /api/auto-ops/run` sekali melalui UI/API OWNER/ADMIN.
+- Login OWNER, buka `/iot`, pastikan 13 mapping yang diverifikasi tampil dan tidak ada data `stale` setelah snapshot awal.
+- Panggil `POST /api/iot/tuya/cron` sekali dengan header token; respons harus selesai tanpa polling device ganda.
+- Pastikan endpoint kompatibilitas klien lama `/api/iot/stream/tenant/raw` merespons `204` dan tidak membuka `text/event-stream`.
+- Pastikan `/sw.js`, `/version.json`, dan navigasi HTML mengirim `Cache-Control: no-store`; aset hash `/assets/*` harus `immutable`.
+- Uji pengumuman langsung dan terjadwal; pastikan `dispatchedAt` hanya terisi sekali.
+- Jalankan `docs/UAT_PUSH_NOTIFICATIONS.md` bila VAPID/push diaktifkan.
+- Catat SHA rilis, waktu, hasil migration, hasil smoke, dan lokasi backup tanpa menyimpan secret/PII.
+
+#### Redeploy setelah go-live
+
+1. Jadwalkan maintenance window bila migration ada.
+2. Backup database dan `uploads/`; uji backup pada lingkungan non-produksi.
+3. Extract bundle SHA baru tanpa menimpa `.env`/`uploads`, lalu restart aplikasi. Evaluasi patch database secara terpisah bila release memang mengubah schema.
+4. Restart dan jalankan smoke/UAT yang relevan.
+
+Jangan reset database, menjalankan seed, atau memakai `db push` pada produksi yang telah berisi data nyata.

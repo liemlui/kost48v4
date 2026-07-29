@@ -13,7 +13,11 @@
 
 Hindari membaca arsip besar kecuali benar-benar perlu forensik: `docs/archieve/*`, file `*_STALE.md`, `reference/*`, dan `backend/src/generated/*`.
 
-## Status Terkini (2026-07-08)
+## Status Terkini (2026-07-23)
+
+- **Release Pengumuman/Notifikasi P1-P3:** implementasi selesai dan build backend/frontend lulus. Keputusan bisnis, UAT, dan gate rilis ada di `docs/RELEASE_20260723_ANNOUNCEMENT_NOTIFICATIONS.md`.
+- **Perubahan lintas AI pada release ini:** uplift inventaris/fasilitas, quota utilitas berbasis periode sewa, dashboard IoT, P1-P3, hardening strict TypeScript backend, dan konsolidasi frontend/CSS telah direkonsiliasi di `M13_CHANGELOG.md`.
+- **Deploy pertama:** database produksi baru dan kosong, bukan drop database UAT dan bukan migrasi data testing. Sesudah go-live, perubahan database patch-only. Runbook otoritatif: `docs/DEPLOYMENT_ONLINE_20260723.md`.
 
 - **Fase A** — Pra-Go-Live: blocked owner (deploy nyata menunggu server/domain/env)
 - **Fase B–U** — SELESAI (publik, owner, staff, AI, UI, audit, hardening, wizard, fasilitas)
@@ -31,8 +35,8 @@ Hindari membaca arsip besar kecuali benar-benar perlu forensik: `docs/archieve/*
 - **Finance:** Audit keuangan ultra LULUS — TB balanced, deposit MATCHED, 8 invarian PASS
 - **AI:** Fase G (G0-G9) + Fase J hardening + Fase K pasca-audit SELESAI — manual-only, OWNER/ADMIN, audit meta.ai
 - **G5+** — Perkuat OCR verifikasi KTP + fallback manual + bank data tenant: SELESAI
-- **Schema terkini:** S-6 (migration `20260619140000_ai_draft_queue`) + S-5 + S-4 + additive KTP fields
-- **Commit terkini:** `8bfb713` — feat: finalize AU fixes and consolidate docs
+- **Schema terkini:** 61 model / 73 enum; migration rilis terbaru `20260723000000_announcement_notification_delivery` menambah kategori notifikasi dan delivery pengumuman. Gunakan ledger migration, bukan `db push`, di produksi.
+- **Baseline kode terkini:** `8627289` — artefak build/session tracking sesudah perubahan P1-P3 dan refactor. Dokumentasi/runbook release di worktree ini perlu ikut di-commit bersama artefak yang disetujui sebelum deploy.
 
 ---
 
@@ -42,7 +46,7 @@ Hindari membaca arsip besar kecuali benar-benar perlu forensik: `docs/archieve/*
 - **Lokasi:** Jl. Hikmah V No. 48, Surabaya Barat (dekat Pakuwon Mall/PTC — bukan Ngagel, koreksi D-01)
 - **Stack:** NestJS + Prisma + PostgreSQL · React + Vite + React-Bootstrap + TanStack Query + Recharts
 - **Role:** OWNER / ADMIN / STAFF / TENANT (tidak ada SUPER_ADMIN/FINANCE)
-- **Status:** BELUM PUBLISH — DB = data testing. Deploy = START BERSIH (fresh, bukan migrasi). **1 staf.** Bayar tunai+transfer.
+- **Status:** BELUM PUBLISH — data UAT/testing tidak dimigrasikan. Go-live pertama memakai database produksi BARU/kosong; database UAT tidak di-drop otomatis. Sesudah go-live, gunakan patch migration saja. **1 staf.** Bayar tunai+transfer.
 - **Filosofi:** retensi > akuisisi; tenant = pengawas kualitas staf; auto-ops maksimal; laporan keuangan jujur.
 
 ---
@@ -82,9 +86,9 @@ Hindari membaca arsip besar kecuali benar-benar perlu forensik: `docs/archieve/*
 
 ---
 
-## 4. Auto-Ops Engine (5 Sweep Service, 18+ Operasi)
+## 4. Auto-Ops Engine (6 Sweep Service, 18+ Operasi)
 
-Mutex (DB advisory lock `pg_try_advisory_lock(1)`). **Prinsip:** uang masuk (submission PENDING/APPROVED, invoice PAID/PARTIAL) = STOP otomatisasi. Lock `FOR UPDATE` + re-cek. Timezone WIB (UTC+7). Sejak Fase E di-split ke 5 sweep service:
+Mutex (DB advisory lock `pg_try_advisory_lock(1)`). **Prinsip:** uang masuk (submission PENDING/APPROVED, invoice PAID/PARTIAL) = STOP otomatisasi. Lock `FOR UPDATE` + re-cek. Timezone WIB (UTC+7). Struktur awal Fase E dipecah menjadi 5 sweep service; release P2 menambah `AnnouncementSweepService` sebagai service ke-6:
 
 | Sweep Service | Operasi |
 |---|---|
@@ -93,6 +97,7 @@ Mutex (DB advisory lock `pg_try_advisory_lock(1)`). **Prinsip:** uang masuk (sub
 | **RenewalSweep** | renewal priority expiry, renewal settlement forfeit |
 | **AccountingSweep** | rent recognition (PSAK 72), auto-journal reconciliation, recurring expense draft, automatic depreciation, accounting auto-close, notification pruning |
 | **MaintenanceSweep** | contract end reminders, SLA escalation, belongings abandonment, AC cleaning, referral rewards, PWA push dispatch |
+| **AnnouncementSweep** | dispatch pengumuman aktif yang belum `dispatchedAt`, dedupe per penerima |
 
 Semua operasi dijalankan sequential dalam `runAll()` untuk menghindari race condition double-cancel.
 
@@ -114,10 +119,10 @@ Semua operasi dijalankan sequential dalam `runAll()` untuk menghindari race cond
 
 ## 6. Stack & Model Aktif
 
-- **Backend:** NestJS + TypeScript + Prisma 7 + PostgreSQL. Auth JWT Bearer 24jam + Refresh Token (httpOnly cookie sejak M17). CORS + rate-limit in-memory. 42 modul.
+- **Backend:** NestJS + TypeScript + Prisma 7 + PostgreSQL. Auth JWT Bearer 24jam + Refresh Token (httpOnly cookie sejak M17). CORS + rate-limit in-memory. 46 modul.
 - **Frontend:** React 18 + Vite 5 + React-Bootstrap + TanStack Query + Recharts. ±50 route.
-- **DB:** `kost48_v3_pro` (UAT, port 5433) / `kost48_v3` (produksi, port 5432).
-- **57 Prisma model (69 enum):** `User`, `Tenant`, `Room`, `RoomFacility`, `Stay`, `TenantDepositLedgerEntry`, `MeterReading`, `Invoice`, `InvoiceLine`, `InvoicePayment`, `PasswordResetToken`, `PaymentSubmission`, `Ticket`, `StaffRoutineTemplate`, `StaffRoutineAssignment`, `StaffRoutineCompletion`, `StaffWorkAudit`, `StaffPerformanceEvent`, `StaffReview`, `Announcement`, `InventoryItem`, `RoomItem`, `InventoryMovement`, `StaffFieldReport`, `RenewRequest`, `CheckoutRequest`, `WifiSale`, `Expense`, `FixedAsset`, `AssetDepreciationRun`, `AssetDepreciationLine`, `AppNotification`, `PushSubscription`, `AuditLog`, `AiDraft`, `ChartOfAccount`, `CashAccount`, `AccountingPeriod`, `OpeningBalanceBatch`, `OpeningBalanceLine`, `JournalEntry`, `JournalLine`, `RentRecognitionSchedule`, `RoomTransfer`, `LoyaltyPoint`, `LoyaltyReward`, `Redemption`, `PeerBehaviorReport`, `TenantReferral`, `Faq`, `OperationalSetting`, `AdditionalService`, `ServiceInterest`, `SatisfactionSurvey`, `MarketAnalysis`, `GuestPreferenceSurvey`, `ExternalReview`, `RefreshToken`.
+- **DB:** `kost48_v3_pro` (UAT, port 5433). Produksi pertama memakai database baru yang ditetapkan owner (mis. `kost48_prod`), bukan asumsi/reuse database lama `kost48_v3`.
+- **61 Prisma model (73 enum):** `User`, `Tenant`, `Room`, `RoomFacility`, `Stay`, `TenantDepositLedgerEntry`, `MeterReading`, `IotDevice`, `IotIngestMessage`, `IotTelemetry`, `Invoice`, `InvoiceLine`, `InvoicePayment`, `PasswordResetToken`, `PaymentSubmission`, `Ticket`, `StaffRoutineTemplate`, `StaffRoutineAssignment`, `StaffRoutineCompletion`, `StaffWorkAudit`, `StaffPerformanceEvent`, `StaffReview`, `Announcement`, `InventoryItem`, `RoomItem`, `InventoryMovement`, `StaffFieldReport`, `RenewRequest`, `CheckoutRequest`, `WifiSale`, `Expense`, `FixedAsset`, `AssetDepreciationRun`, `AssetDepreciationLine`, `AppNotification`, `PushSubscription`, `AuditLog`, `AiDraft`, `ChartOfAccount`, `CashAccount`, `AccountingPeriod`, `OpeningBalanceBatch`, `OpeningBalanceLine`, `JournalEntry`, `JournalLine`, `RentRecognitionSchedule`, `RoomTransfer`, `LoyaltyPoint`, `LoyaltyReward`, `Redemption`, `PeerBehaviorReport`, `TenantReferral`, `Faq`, `OperationalSetting`, `AdditionalService`, `ServiceInterest`, `SatisfactionSurvey`, `MarketAnalysis`, `GuestPreferenceSurvey`, `ExternalReview`, `RefreshToken`.
 
 ---
 

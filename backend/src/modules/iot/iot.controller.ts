@@ -57,6 +57,8 @@ export class IotController {
 
   @Post('tenant/refresh')
   @Roles(UserRole.TENANT)
+  @UseGuards(RateLimitGuard)
+  @RateLimit('tenantIotRefresh')
   @ApiOperation({ summary: 'Paksa sinkronisasi Tuya untuk kamar tenant — rate-limited 1× per 2 menit' })
   async tenantRefreshMeter(@CurrentUser() actor: CurrentUserPayload) {
     return { message: 'Sinkronisasi meter berhasil', data: await this.iot.tenantRefreshMeter(actor) };

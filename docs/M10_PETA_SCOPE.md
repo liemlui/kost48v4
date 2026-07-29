@@ -97,14 +97,15 @@
 | Docs | `M04_KEUANGAN.md` · `M09_AI_OWNER_ADMIN.md` · `M02_KEPUTUSAN_OWNER.md` | Sumber kebenaran |
 
 ### A6. SYSTEM / IoT (Device — tanpa login, cron)
-**Apa yang dilihat/dilakukan:** ESP32-C3 kirim water flow reading, backend polling Tuya KWH meter via cron, auto-ops deteksi kebocoran + anomali kWh.
+**Apa yang dilihat/dilakukan:** ESP32-C3 kirim water flow reading dan backend polling Tuya KWH meter via cron untuk observability owner/admin/tenant. Deteksi kebocoran/anomali dan aksi otomatis belum diaktifkan; telemetri tidak boleh membuat invoice otomatis.
 
 | Layer | File | Catatan |
 |-------|------|---------|
-| BE module | `backend/src/modules/iot/` | IoT controller + Tuya client + device guard (🔜 belum dibuat) |
-| BE cron | `backend/src/modules/auto-ops/` | KwhPollingSweep (10 menit), LeakDetectionSweep |
-| BE model | `backend/prisma/schema.prisma` | IotDevice, FlowSensor, FlowReading, KwhReading (🔜 belum dibuat) |
-| Docs | `M14_IOT_TUYA_DEVICES.md` · memory `iot-water-kwh-spec` | Inventaris 27 perangkat Tuya + spek implementasi |
+| BE module | `backend/src/modules/iot/` | IoT controller, Tuya client/polling, registry credential ESP32, water ingest, dan pembaruan tenant terikat (sudah dibuat) |
+| BE cron | `backend/src/modules/iot/iot-polling.service.ts` | Poll Tuya interval atau `POST /api/iot/tuya/cron` setiap 10 menit |
+| BE model | `backend/prisma/schema.prisma` | `IotDevice`, `IotIngestMessage`, `IotTelemetry`; telemetry dipisahkan dari `MeterReading` billing |
+| FE tenant | `frontend/src/pages/portal/EnergyPage.tsx` | Timeline konsumsi dan quota berdasarkan periode sewa lunas; hanya estimasi/monitoring |
+| Docs | `M14_IOT_TUYA_DEVICES.md` · `M15_IOT_KWH_WATER_IMPLEMENTATION_PLAN.md` | Inventaris perangkat Tuya, rollout, dan spek implementasi |
 
 ---
 
@@ -243,21 +244,21 @@ Owner/Admin klik tombol AI → DeepSeek proses → AiDraft tersimpan
 | BE | `audit-log/audit-log.service.ts` | Catat `meta.ai` |
 | FE | `components/ai/` | Tombol + drawer AI |
 | FE | `pages/dashboard/OwnerDashboardPage.tsx` | Integrasi AI |
-### B9. IOT FLOW (ESP32 Water → POST / KWH → Tuya Polling → Reading → Alert)
+### B9. IOT FLOW (ESP32 Water → signed ingest / KWH → Tuya polling → telemetry → review)
 ```
-ESP32-C3+D20 → HTTP POST /api/iot/flow (JWT device token) → FlowReading
-Tuya KWH Meter → Tuya Cloud API → cron polling tiap 10 menit → KwhReading
-Cron sweep → leak detection (flow > 0 jam 23-05 atau tanpa penghuni)
-           → over limit (total liter > threshold)
-           → kWh anomaly (lonjakan > 2x rata-rata)
+ESP32-C3+D20 → signed POST /api/iot/v1/readings → IotIngestMessage + IotTelemetry
+Tuya KWH Meter → Tuya Cloud API → IotPollingService / POST /api/iot/tuya/cron → IotTelemetry
+Owner/Admin review → kandidat billing/manual → MeterReading → invoice cycle
 ```
+
+Quota listrik untuk pembacaan meter bisnis dihitung dari periode sewa lunas; DP renewal tidak memulai periode baru. Telemetry pada flow ini dapat menjadi sumber tampilan/estimasi, tetapi tidak menjadi bukti invoice tanpa proses `MeterReading` yang ber-audit.
 
 | Layer | File | Catatan |
 |-------|------|---------|
-| BE | `iot/iot.controller.ts` | POST endpoint flow + JWT device guard (🔜) |
-| BE | `iot/tuya-client.service.ts` | HMAC-SHA256 sign + polling (🔜) |
-| BE | `auto-ops/auto-ops.service.ts` | KwhPollingSweep + LeakDetectionSweep (🔜) |
-| Docs | `M14_IOT_TUYA_DEVICES.md` · memory `iot-water-kwh-spec` | |
+| BE | `iot/{iot,water-ingest}.controller.ts` | Owner/Admin API, cron Tuya, dan signed ESP32 ingest |
+| BE | `iot/{tuya/tuya-client,iot-polling}.service.ts` | HMAC-SHA256 Tuya dan polling terikat |
+| BE | `iot/{iot,water-ingest}.service.ts` | Registry/mapping, telemetry, idempotensi/replay guard, credential device |
+| Docs | `M14_IOT_TUYA_DEVICES.md` · `M15_IOT_KWH_WATER_IMPLEMENTATION_PLAN.md` | Alert/kandidat billing masih UAT dan tidak otomatis |
 
 ---
 
@@ -288,4 +289,4 @@ Cron sweep → leak detection (flow > 0 jam 23-05 atau tanpa penghuni)
 3. **Buka M00_CODEMAP.md** — verifikasi path modul backend + frontend
 4. **Grep simbol** di `backend/src` / `frontend/src` sebelum edit
 5. **Gate build:** `npx tsc --noEmit` (backend) + `npm run build` (frontend). Kalau task uang: **WAJIB** `M04_KEUANGAN.md` gate.
-6. **Tutup:** centang `M10` + entri changelog di `M11`.
+6. **Tutup:** perbarui checklist terkait di `M12` + entri changelog di `M13`.
