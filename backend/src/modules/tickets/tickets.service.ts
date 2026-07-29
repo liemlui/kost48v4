@@ -683,6 +683,10 @@ export class TicketsService {
           throw new ConflictException("Tiket ini bukan tugas akun ini");
         }
 
+        // OS-05: lock row User staf dulu agar dua transaksi paralel pada
+        // tiket berbeda tidak sama-sama lolos cek "pekerjaan aktif".
+        await tx.$queryRaw`SELECT id FROM "User" WHERE id = ${actor.id} FOR UPDATE`;
+
         // Cek pekerjaan aktif staf — di dalam tx agar konsisten.
         const [activeTicket, activeRoutine] = await Promise.all([
           tx.ticket.findFirst({

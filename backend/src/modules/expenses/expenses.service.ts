@@ -69,9 +69,7 @@ export class ExpensesService {
       newData: created,
       meta: this.buildAiDraftAuditMeta(aiDraftMeta),
     });
-    await this.accountingPosting.postExpense(created.id, actor.id).catch((err) =>
-      this.logger.warn(`Jurnal expense #${created.id} gagal (Auto Journal Lite): ${err instanceof Error ? err.message : String(err)}`)
-    );
+    await this.accountingPosting.postExpense(created.id, actor.id);
     return created;
   }
 

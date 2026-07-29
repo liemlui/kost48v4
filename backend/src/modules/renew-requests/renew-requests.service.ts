@@ -41,7 +41,11 @@ export class RenewRequestsService {
       throw new ForbiddenException('Hanya tenant yang dapat mengajukan permintaan perpanjangan');
     }
 
-    const stay = await this.prisma.stay.findUnique({ where: { id: dto.stayId } });
+    // S-01: lock Stay FOR UPDATE agar renew & checkout tidak race. Checkout juga
+    // mengunci Stay yang sama dengan FOR UPDATE sehingga hanya satu yang lanjut.
+    const [stay] = await this.prisma.$queryRawUnsafe<
+      Array<{ id: number; status: string; tenantId: number; agreedRentAmountRupiah: number; plannedCheckOutDate: string }>
+    >(`SELECT * FROM "Stay" WHERE id = $1 FOR UPDATE`, dto.stayId);
     if (!stay) throw new NotFoundException('Stay tidak ditemukan');
     if (stay.status !== StayStatus.ACTIVE) throw new ConflictException('Stay tidak aktif, tidak dapat mengajukan perpanjangan');
 
@@ -83,7 +87,7 @@ export class RenewRequestsService {
     }
 
     // F2-1: DP 30% perpanjangan = 30% × sewa SAAT INI (rent-loyalty D-16: tak naik saat renew).
-    const renewalRentRupiah = stay.agreedRentAmountRupiah ?? 0;
+    const renewalRentRupiah = Number(stay.agreedRentAmountRupiah) ?? 0;
     const downPaymentAmountRupiah = roundRupiah((renewalRentRupiah * 30) / 100);
 
     const request = await this.prisma.renewRequest.create({

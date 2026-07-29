@@ -38,9 +38,13 @@ export class WifiSalesService {
   }
 
   async create(dto: CreateWifiSaleDto, actor: CurrentUserPayload) {
-    const created = await this.prisma.wifiSale.create({ data: { ...dto, saleDate: new Date(dto.saleDate), createdById: actor.id } });
+    // OS-01: WiFi sale + jurnal dalam satu transaksi atomik.
+    const created = await this.prisma.$transaction(async (tx) => {
+      const sale = await tx.wifiSale.create({ data: { ...dto, saleDate: new Date(dto.saleDate), createdById: actor.id } });
+      await this.accountingPosting.postWifiSaleTx(tx, sale.id, actor.id); // BLOCKING dalam tx
+      return sale;
+    });
     await this.audit.log({ actorUserId: actor.id, action: 'CREATE', entityType: 'WifiSale', entityId: String(created.id), newData: created });
-    await this.accountingPosting.postWifiSale(created.id, actor.id); // BLOCKING: jika gagal, WifiSale tidak akan tercatat di jurnal
     return created;
   }
 

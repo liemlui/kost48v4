@@ -42,11 +42,11 @@ export class PeerReportService {
 
     // Notif admin/owner untuk moderasi (tanpa membuka identitas ke tenant).
     const admins = await this.prisma.user.findMany({ where: { role: { in: ['ADMIN', 'OWNER'] as any }, isActive: true }, select: { id: true } });
-    for (const admin of admins) {
-      await this.appNotification
+    await Promise.all(admins.map((admin) =>
+      this.appNotification
         .createOnce({ recipientUserId: admin.id, title: '🧑‍⚖️ Laporan sikap tenant perlu moderasi', body: `Ada laporan antar-tenant kategori ${dto.category}. Tinjau & validasi.`, linkTo: '/loyalty', entityType: 'PeerReport', entityId: String(report.id) })
-        .catch(() => undefined);
-    }
+        .catch(() => undefined),
+    ));
     return report;
   }
 

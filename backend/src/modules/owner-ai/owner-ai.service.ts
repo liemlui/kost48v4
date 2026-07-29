@@ -126,7 +126,7 @@ export class OwnerAiService {
     const now = Date.now();
     const dayStart = startOfJakartaBusinessDay(new Date()).getTime();
     const b = this.buckets.get(key);
-    if (!b || b.resetAt < dayStart) {
+    if (!b || b.resetAt <= dayStart) {
       this.buckets.set(key, { count: 1, resetAt: dayStart + 86_400_000 });
       return;
     }

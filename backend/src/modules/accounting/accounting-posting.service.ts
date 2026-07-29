@@ -1,5 +1,5 @@
 // FILE: accounting-posting.service.ts — posting jurnal transaksi ke ledger akuntansi (JALUR UANG)
-import { Injectable, Logger } from "@nestjs/common";
+import { Injectable, InternalServerErrorException, Logger } from "@nestjs/common";
 import { Prisma } from "../../generated/prisma";
 import { PrismaService } from "../../prisma/prisma.service";
 import { rupiahAmount } from "../../common/business/money.helper";
@@ -148,7 +148,7 @@ export class AccountingPostingService {
   ) {
     const amount = rupiah(input.amountRupiah);
     if (amount <= 0) {
-      return this.skip(
+      return this.skipSilent(
         "ADJUSTMENT",
         `FIXED_ASSET_ALIGNMENT:${input.assetId}`,
         "Jumlah alignment aset harus lebih dari 0.",
@@ -157,7 +157,7 @@ export class AccountingPostingService {
 
     const fixedAsset = await findAccountByCodeTx(tx, "1500");
     if (!fixedAsset) {
-      return this.skip(
+      return this.skipSilent(
         "ADJUSTMENT",
         `FIXED_ASSET_ALIGNMENT:${input.assetId}`,
         "COA 1500 Fixed Assets belum tersedia.",
@@ -170,7 +170,7 @@ export class AccountingPostingService {
         : input.creditAccountCode || "1010";
     const creditAccount = await findAccountByCodeTx(tx, creditCode);
     if (!creditAccount) {
-      return this.skip(
+      return this.skipSilent(
         "ADJUSTMENT",
         `FIXED_ASSET_ALIGNMENT:${input.assetId}`,
         `COA kredit ${creditCode} belum tersedia.`,
@@ -218,7 +218,7 @@ export class AccountingPostingService {
   ) {
     const amount = rupiah(amountRupiah);
     if (amount <= 0) {
-      return this.skip(
+      return this.skipSilent(
         "DEPRECIATION",
         depreciationRunId,
         "Jumlah depresiasi 0.",
@@ -227,7 +227,7 @@ export class AccountingPostingService {
 
     const depreciationExpense = await findAccountByCodeTx(tx, "6700");
     if (!depreciationExpense) {
-      return this.skip(
+      return this.skipSilent(
         "DEPRECIATION",
         depreciationRunId,
         "COA 6700 Depreciation belum tersedia.",
@@ -236,7 +236,7 @@ export class AccountingPostingService {
 
     const accumulatedDepreciation = await findAccountByCodeTx(tx, "1590");
     if (!accumulatedDepreciation) {
-      return this.skip(
+      return this.skipSilent(
         "DEPRECIATION",
         depreciationRunId,
         "COA 1590 Accumulated Depreciation belum tersedia.",
@@ -735,7 +735,7 @@ export class AccountingPostingService {
     const total = applied + refunded;
     const sourceId = `FORCED_CHECKOUT_DEPOSIT:${stayId}`;
     if (total <= 0)
-      return { ...this.skip("ADJUSTMENT", sourceId, "Tidak ada deposit untuk disetel."), benign: true };
+      return { ...this.skipSilent("ADJUSTMENT", sourceId, "Tidak ada deposit untuk disetel."), benign: true };
 
     // F-24: hanya debit liability 2000 bila ada jurnal PENERIMAAN deposit (credit 2000).
     const receipt = await tx.journalEntry.findFirst({
@@ -744,7 +744,7 @@ export class AccountingPostingService {
     });
     if (!receipt)
       return {
-        ...this.skip(
+        ...this.skipSilent(
           "ADJUSTMENT",
           sourceId,
           "Belum ada jurnal penerimaan deposit (2000 tak pernah dikredit); settlement deposit forced-checkout dilewati (F-24).",
@@ -754,7 +754,7 @@ export class AccountingPostingService {
 
     const depositLiability = await findAccountByCodeTx(tx, "2000");
     if (!depositLiability)
-      return this.skip("ADJUSTMENT", sourceId, "COA 2000 Tenant Deposit Liability belum tersedia.");
+      return this.skipSilent("ADJUSTMENT", sourceId, "COA 2000 Tenant Deposit Liability belum tersedia.");
 
     const lines: JournalLineInput[] = [
       {
@@ -769,7 +769,7 @@ export class AccountingPostingService {
     if (applied > 0) {
       const ar = await findAccountByCodeTx(tx, "1100");
       if (!ar)
-        return this.skip("ADJUSTMENT", sourceId, "COA 1100 Accounts Receivable belum tersedia.");
+        return this.skipSilent("ADJUSTMENT", sourceId, "COA 1100 Accounts Receivable belum tersedia.");
       lines.push({
         chartOfAccountId: ar.id,
         description: `Deposit menutup tunggakan (AR) stay #${stayId}`,
@@ -781,7 +781,7 @@ export class AccountingPostingService {
     if (refunded > 0) {
       const cash = await findDefaultCashAccountTx(tx);
       if (!cash)
-        return this.skip("ADJUSTMENT", sourceId, "Cash/bank account aktif belum tersedia untuk refund deposit.");
+        return this.skipSilent("ADJUSTMENT", sourceId, "Cash/bank account aktif belum tersedia untuk refund deposit.");
       lines.push({
         chartOfAccountId: cash.chartOfAccountId,
         cashAccountId: cash.id,
@@ -817,7 +817,7 @@ export class AccountingPostingService {
       orderBy: [{ postedAt: "desc" }, { id: "desc" }],
     });
     if (!original)
-      return this.skip(
+      return this.skipSilent(
         "ADJUSTMENT",
         `INVOICE_REVERSAL:${invoiceId}`,
         "Original INVOICE journal belum ada; reversal tidak diperlukan.",
@@ -825,13 +825,13 @@ export class AccountingPostingService {
 
     const invoice = await tx.invoice.findUnique({ where: { id: invoiceId } });
     if (!invoice)
-      return this.skip(
+      return this.skipSilent(
         "ADJUSTMENT",
         `INVOICE_REVERSAL:${invoiceId}`,
         "Invoice tidak ditemukan untuk reversal.",
       );
     if (invoice.status !== "CANCELLED")
-      return this.skip(
+      return this.skipSilent(
         "ADJUSTMENT",
         `INVOICE_REVERSAL:${invoiceId}`,
         `Invoice status ${invoice.status}; reversal hanya untuk CANCELLED.`,
@@ -907,7 +907,7 @@ export class AccountingPostingService {
     const sourceId = `DP_FORFEIT:${stayId}`;
     const amount = rupiah(amountRupiah);
     if (amount <= 0) {
-      return { ...this.skip("ADJUSTMENT", sourceId, "Nominal DP hangus 0."), benign: true };
+      return { ...this.skipSilent("ADJUSTMENT", sourceId, "Nominal DP hangus 0."), benign: true };
     }
 
     const payments = await tx.invoicePayment.findMany({
@@ -927,7 +927,7 @@ export class AccountingPostingService {
       : null;
     if (!postedPaymentJournal) {
       return {
-        ...this.skip(
+        ...this.skipSilent(
           "ADJUSTMENT",
           sourceId,
           "Pembayaran DP belum pernah terjurnal; forfeit tidak diposting agar tidak membuat piutang fiktif.",
@@ -938,10 +938,10 @@ export class AccountingPostingService {
 
     const ar = await findAccountByCodeTx(tx, "1100");
     if (!ar)
-      return this.skip("ADJUSTMENT", sourceId, "COA 1100 Accounts Receivable belum tersedia.");
+      return this.skipSilent("ADJUSTMENT", sourceId, "COA 1100 Accounts Receivable belum tersedia.");
     const penalty = await findAccountByCodeTx(tx, "4400");
     if (!penalty)
-      return this.skip("ADJUSTMENT", sourceId, "COA 4400 Penalty/Admin Fee Revenue belum tersedia.");
+      return this.skipSilent("ADJUSTMENT", sourceId, "COA 4400 Penalty/Admin Fee Revenue belum tersedia.");
 
     return this.postBalancedJournalTx(tx, {
       sourceType: "ADJUSTMENT",
@@ -1182,11 +1182,11 @@ export class AccountingPostingService {
   ) {
     const sourceId = `RENT_DEFERRAL:${params.sourceKey ?? params.stayId}`;
     const amount = rupiah(params.unearnedAmountRupiah);
-    if (amount <= 0) return this.skip("ADJUSTMENT", sourceId, "Nominal deferral 0.");
+    if (amount <= 0) return this.skipSilent("ADJUSTMENT", sourceId, "Nominal deferral 0.");
     const rentRevenue = await findAccountByCodeTx(tx, "4000");
     const unearned = await findAccountByCodeTx(tx, "2200");
     if (!rentRevenue || !unearned)
-      return this.skip("ADJUSTMENT", sourceId, "COA 4000/2200 belum tersedia.");
+      return this.skipSilent("ADJUSTMENT", sourceId, "COA 4000/2200 belum tersedia.");
     return this.postBalancedJournalTx(tx, {
       sourceType: "ADJUSTMENT",
       sourceId,
@@ -1211,11 +1211,11 @@ export class AccountingPostingService {
   ) {
     const sourceId = `RENT_RECOGNITION:${params.stayId}:${params.periodIndex}`;
     const amount = rupiah(params.amountRupiah);
-    if (amount <= 0) return this.skip("ADJUSTMENT", sourceId, "Nominal recognition 0.");
+    if (amount <= 0) return this.skipSilent("ADJUSTMENT", sourceId, "Nominal recognition 0.");
     const rentRevenue = await findAccountByCodeTx(tx, "4000");
     const unearned = await findAccountByCodeTx(tx, "2200");
     if (!rentRevenue || !unearned)
-      return this.skip("ADJUSTMENT", sourceId, "COA 4000/2200 belum tersedia.");
+      return this.skipSilent("ADJUSTMENT", sourceId, "COA 4000/2200 belum tersedia.");
     return this.postBalancedJournalTx(tx, {
       sourceType: "ADJUSTMENT",
       sourceId,
@@ -1244,9 +1244,9 @@ export class AccountingPostingService {
   ) {
     const sourceId = `REWARD_FULFILL:${params.redemptionId}`;
     const amount = rupiah(params.valueRupiah);
-    if (amount <= 0) return this.skip("ADJUSTMENT", sourceId, "Reward tanpa nilai rupiah; tak menjurnal.");
+    if (amount <= 0) return this.skipSilent("ADJUSTMENT", sourceId, "Reward tanpa nilai rupiah; tak menjurnal.");
     const payable = await findAccountByCodeTx(tx, "2100");
-    if (!payable) return this.skip("ADJUSTMENT", sourceId, "COA 2100 belum tersedia.");
+    if (!payable) return this.skipSilent("ADJUSTMENT", sourceId, "COA 2100 belum tersedia.");
 
     // L-3: diskon sewa/listrik = pengurang pendapatan (kontra-revenue); reward lain = beban marketing.
     const revenueCode = params.rewardType === "RENT_DISCOUNT" ? "4000" : params.rewardType === "METER_DISCOUNT" ? "4100" : null;
@@ -1259,7 +1259,7 @@ export class AccountingPostingService {
       debitDescription = params.rewardType === "RENT_DISCOUNT" ? "Diskon sewa loyalitas (pengurang pendapatan)" : "Diskon listrik loyalitas (pengurang pendapatan)";
     } else {
       const expense = await findAccountByCodeTx(tx, "6300");
-      if (!expense) return this.skip("ADJUSTMENT", sourceId, "COA 6300/2100 belum tersedia.");
+      if (!expense) return this.skipSilent("ADJUSTMENT", sourceId, "COA 6300/2100 belum tersedia.");
       debitAccountId = expense.id;
       debitDescription = "Beban reward loyalitas";
     }
@@ -1363,20 +1363,16 @@ export class AccountingPostingService {
       .filter((line) => line.debitRupiah > 0 || line.creditRupiah > 0);
 
     if (normalizedLines.length < 2)
-      return this.skip(
-        input.sourceType,
-        input.sourceId,
-        "Journal line kurang dari 2.",
+      throw new InternalServerErrorException(
+        `Gagal mencatat jurnal (${input.sourceType} #${input.sourceId}): Journal line kurang dari 2.`,
       );
     if (
       normalizedLines.some(
         (line) => line.debitRupiah > 0 && line.creditRupiah > 0,
       )
     )
-      return this.skip(
-        input.sourceType,
-        input.sourceId,
-        "Ada line debit dan kredit sekaligus.",
+      throw new InternalServerErrorException(
+        `Gagal mencatat jurnal (${input.sourceType} #${input.sourceId}): Ada line debit dan kredit sekaligus.`,
       );
 
     const totalDebit = normalizedLines.reduce(
@@ -1388,25 +1384,19 @@ export class AccountingPostingService {
       0,
     );
     if (totalDebit <= 0 || totalCredit <= 0 || totalDebit !== totalCredit) {
-      return this.skip(
-        input.sourceType,
-        input.sourceId,
-        `Journal tidak balance: debit ${totalDebit}, kredit ${totalCredit}.`,
+      throw new InternalServerErrorException(
+        `Gagal mencatat jurnal (${input.sourceType} #${input.sourceId}): Journal tidak balance (debit ${totalDebit}, kredit ${totalCredit}).`,
       );
     }
 
     const period = await findAccountingPeriodForPostingTx(tx, input.entryDate);
     if (!period)
-      return this.skip(
-        input.sourceType,
-        input.sourceId,
-        "Tidak ada accounting period untuk tanggal transaksi.",
+      throw new InternalServerErrorException(
+        `Gagal mencatat jurnal (${input.sourceType} #${input.sourceId}): Tidak ada accounting period untuk tanggal transaksi.`,
       );
     if (period.status !== "OPEN") {
-      return this.skip(
-        input.sourceType,
-        input.sourceId,
-        `Periode ${period.year}-${String(period.month).padStart(2, "0")} sudah ${period.status}; journal baru harus memakai workflow reopen/reversal Owner-only atau adjustment periode berjalan.`,
+      throw new InternalServerErrorException(
+        `Gagal mencatat jurnal (${input.sourceType} #${input.sourceId}): Periode ${period.year}-${String(period.month).padStart(2, "0")} sudah ${period.status}.`,
       );
     }
 
@@ -1447,7 +1437,19 @@ export class AccountingPostingService {
     return { posted: true, skipped: false, journalEntry: journal };
   }
 
-  private skip(sourceType: string, sourceId: string | number, reason: string) {
+  /**
+   * ⚠️ BLOCKING: lempar exception agar transaksi bisnis gagal jika jurnal
+   * tidak bisa diposting. Hanya ADJUSTMENT dan case idempoten yang pakai skipSilent().
+   */
+  private skip(sourceType: string, sourceId: string | number, reason: string): never {
+    this.logger.error(`GAGAL posting auto journal ${sourceType} #${sourceId}: ${reason}`);
+    throw new InternalServerErrorException(
+      `Gagal mencatat jurnal otomatis (${sourceType} #${sourceId}): ${reason}`,
+    );
+  }
+
+  /** Non-throwing variant — hanya untuk case idempoten (journal sudah ada). */
+  private skipSilent(sourceType: string, sourceId: string | number, reason: string) {
     this.logger.warn(`Skip auto journal ${sourceType} #${sourceId}: ${reason}`);
     return {
       posted: false,
@@ -1456,6 +1458,19 @@ export class AccountingPostingService {
       sourceId: String(sourceId),
       reason,
     };
+  }
+
+  /**
+   * Helper publik: throw jika posting gagal (call site kritis pakai ini).
+   * Tidak throw untuk case idempoten (journal sudah ada) karena aman.
+   */
+  assertPosted(result: any, label: string): void {
+    if (!result || result.posted === false) {
+      const reason = result?.reason ?? 'tanpa keterangan';
+      throw new InternalServerErrorException(
+        `Gagal mencatat jurnal otomatis (${label}): ${reason}`,
+      );
+    }
   }
 
   // F3-10: jalankan posting jurnal idempoten yang punya transaksinya sendiri.
@@ -1477,7 +1492,7 @@ export class AccountingPostingService {
         this.logger.warn(
           `Auto journal duplikat (race P2002) untuk ${sourceLabel} diperlakukan sebagai sudah-terposting.`,
         );
-        return this.skip(sourceLabel, sourceLabel, "Journal sudah ada (race duplicate, P2002).");
+        return this.skipSilent(sourceLabel, sourceLabel, "Journal sudah ada (race duplicate, P2002).");
       }
       throw error;
     }

@@ -1,5 +1,18 @@
 # KOST48 V5 — M13 Changelog
 
+## 2026-07-29b — Koreksi pasca-audit: race condition, journal BLOCKING, atomisitas WiFi
+
+- **S-01 🔴 Race renew vs checkout:** `renew-requests.service.ts` — `findUnique` diganti `$queryRawUnsafe SELECT ... FOR UPDATE` pada Stay. Renew & checkout kini sama-sama mengunci row Stay sehingga hanya satu yang menang.
+- **OS-05 🔴 Guard single-active ticket:** `tickets.service.ts:start()` — tambah `SELECT ... FOR UPDATE` pada row User staf sebelum cek tiket aktif. Dua transaksi paralel pada tiket berbeda tidak bisa lagi sama-sama lolos.
+- **Journal BLOCKING sejati:** `accounting-posting.service.ts` — `skip()` sekarang throw `InternalServerErrorException` (bukan return silent). `postBalancedJournalTx` throw untuk semua precondition error (unbalanced, no period, period closed, line < 2). Case idempoten (journal sudah ada) tetap return soft. ADJUSTMENT/DEPRECIATION tetap pakai `skipSilent()`.
+- **Expenses BLOCKING:** `expenses.service.ts` — hapus `.catch()` di `postExpense`. Journal expense gagal → throw.
+- **OS-01 Atomisitas WiFi:** `wifi-sales.service.ts` — `wifiSale.create` + `postWifiSaleTx` dibungkus `$transaction`. Jika jurnal gagal, sale ikut rollback.
+- **X4 Fix resetAt equality:** `owner-ai.service.ts` — `b.resetAt < dayStart` → `b.resetAt <= dayStart`. Bucket rate-limit kini reset tepat saat hari baru.
+- **N+1 peer report:** `loyalty/peer-report.service.ts` — loop `for` sequential diganti `Promise.all`.
+- **Cleanup:** trailing whitespace + backup file sed dihapus.
+
+**Gate:** tsc 0 errors ✅ · 67/67 test PASS ✅ · FE build 162 chunks PWA ✅
+
 ## 2026-07-29 — Hardening keuangan + lintas scope pasca audit deep (Fase AN + TODO MX)
 
 - **AN-01 🔴 Deposit ledger blocking:** `payment-submissions.service.ts` — 2 try/catch (deposit ledger + liability journal) dihapus. Jika ledger/jurnal gagal, approval payment submission sekarang throw → seluruh transaksi rollback. Sebelumnya: best-effort (logger.warn, approval tetap lanjut).
