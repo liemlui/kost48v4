@@ -590,7 +590,6 @@ export class PaymentSubmissionsService {
   async approveSubmission(user: CurrentUserPayload, submissionId: number) {
     let losingTenants: Array<{ stayId: number; tenantId: number }> = [];
     let paidInvoiceId: number | null = null; // F4-9: dipakai untuk poin ON_TIME_PAYMENT pasca-commit
-    let journalPending = false; // set true jika Auto Journal Lite gagal — dikembalikan ke caller
     try {
       const approved = await this.prisma.$transaction(async (tx) => {
         const submission = await this.lockSubmissionTx(tx, submissionId);
@@ -814,25 +813,9 @@ export class PaymentSubmissionsService {
           paidInvoiceId = submission.invoiceId!;
         }
 
-        try {
-          await this.accountingPosting.postInvoiceIssuedTx(tx, submission.invoiceId!, user.id);
-          if (invoicePaymentId) {
-            await this.accountingPosting.postInvoicePaymentTx(tx, invoicePaymentId, user.id);
-          }
-        } catch (err) {
-          // Auto Journal Lite tidak memblokir approval. Jurnal bisa diperbaiki via retry.
-          // journalPending=true dikembalikan ke caller agar admin tahu perlu repair.
-          journalPending = true;
-          const errMsg = err instanceof Error ? err.message : String(err);
-          this.logger.error(
-            `[C5] Journal posting gagal untuk payment submission #${submissionId}, invoice #${submission.invoiceId!}: ${errMsg}`,
-          );
-          // Simpan metadata retry di reviewNotes agar bisa di-retry otomatis
-          const retryMeta = JSON.stringify({ retryCount: 0, lastError: errMsg.slice(0, 500), lastRetryAt: new Date().toISOString() });
-          await tx.paymentSubmission.update({
-            where: { id: submissionId },
-            data: { reviewNotes: retryMeta },
-          });
+        await this.accountingPosting.postInvoiceIssuedTx(tx, submission.invoiceId!, user.id);
+        if (invoicePaymentId) {
+          await this.accountingPosting.postInvoicePaymentTx(tx, invoicePaymentId, user.id);
         }
 
         await tx.paymentSubmission.update({
@@ -879,41 +862,28 @@ export class PaymentSubmissionsService {
           });
 
           if (depositPortion > 0) {
-            try {
-              await this.depositLedger.recordDepositReceivedTx(tx, {
-                stayId: submission.stayId,
-                amountRupiah: depositPortion,
-                actorUserId: user.id,
-                paymentSubmissionId: submissionId,
-                invoicePaymentId,
-                occurredAt: new Date(submission.paidAt),
-                note: 'Deposit diterima dari approval pembayaran booking.',
-                metadata: {
-                  paymentMethod: submission.paymentMethod,
-                  referenceNumber: submission.referenceNumber,
-                  rentPortion,
-                  depositPortion,
-                },
-              });
-            } catch (err) {
-              this.logger.warn(
-                `Deposit ledger gagal saat approval (submission #${submissionId}, stay #${submission.stayId}): ${err instanceof Error ? err.message : String(err)}`,
-              );
-            }
-            try {
-              await this.accountingPosting.postDepositReceivedForStayTx(
-                tx,
-                submission.stayId,
-                user.id,
-                submission.paymentMethod,
-                new Date(submission.paidAt),
-              );
-            } catch (err) {
-              // Deposit liability journal is best-effort; do not block payment approval.
-              this.logger.warn(
-                `Jurnal deposit (liability) gagal saat approval pembayaran (submission #${submissionId}, stay #${submission.stayId}): ${err instanceof Error ? err.message : String(err)}`,
-              );
-            }
+            await this.depositLedger.recordDepositReceivedTx(tx, {
+              stayId: submission.stayId,
+              amountRupiah: depositPortion,
+              actorUserId: user.id,
+              paymentSubmissionId: submissionId,
+              invoicePaymentId,
+              occurredAt: new Date(submission.paidAt),
+              note: 'Deposit diterima dari approval pembayaran booking.',
+              metadata: {
+                paymentMethod: submission.paymentMethod,
+                referenceNumber: submission.referenceNumber,
+                rentPortion,
+                depositPortion,
+              },
+            });
+            await this.accountingPosting.postDepositReceivedForStayTx(
+              tx,
+              submission.stayId,
+              user.id,
+              submission.paymentMethod,
+              new Date(submission.paidAt),
+            );
           }
 
           // V-02: Payment approved (DP atau Lunas) selalu set room RESERVED.
@@ -1019,7 +989,7 @@ export class PaymentSubmissionsService {
         return this.findSubmissionByIdTx(tx, submissionId);
       });
 
-      const result = { ...serializePrismaResult(approved), journalPending };
+      const result = serializePrismaResult(approved);
       this.notifyPaymentApproved(approved.tenantId, submissionId).catch((e) => this.logger.warn('Notif payment-approved gagal', { error: e?.message ?? e }));
       if (losingTenants.length > 0) {
         this.notifyLosingTenants(losingTenants).catch((e) => this.logger.warn('Notif losing-tenants gagal', { error: e?.message ?? e }));

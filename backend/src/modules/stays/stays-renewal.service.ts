@@ -13,6 +13,7 @@ import {
   InvoiceStatus,
   InvoiceLineType,
   UtilityType,
+  CheckoutRequestStatus,
 } from '../../common/enums/app.enums';
 import { PrismaService } from '../../prisma/prisma.service';
 import { Prisma } from '../../generated/prisma';
@@ -193,12 +194,7 @@ export class StaysRenewalService {
       where: { id: invoice.id },
       data: { totalAmountRupiah: downPaymentRupiah, status: InvoiceStatus.ISSUED, issuedAt: new Date() },
     });
-    await this.accountingPosting.postInvoiceIssuedTx(tx, issued.id, actor.id).catch((err) => {
-      this.logger.warn(
-        `Auto Journal Lite gagal untuk invoice DP renewal #${issued.id}: ${err instanceof Error ? err.message : String(err)}`,
-      );
-      return undefined;
-    });
+    await this.accountingPosting.postInvoiceIssuedTx(tx, issued.id, actor.id);
     return issued;
   }
 
@@ -221,6 +217,21 @@ export class StaysRenewalService {
     if (!stay) throw new NotFoundException('Stay tidak ditemukan');
     if (stay.status !== StayStatus.ACTIVE)
       throw new ConflictException('Stay tidak aktif, tidak dapat diperpanjang');
+
+    // S-01: cross-block — cegah renewal saat checkout request PENDING/APPROVED
+    // masih aktif. Karena Stay sudah di-lock FOR UPDATE di atas, pengecekan ini
+    // serialized terhadap checkout createRequest / approveRequest.
+    const activeCheckout = await tx.checkoutRequest.findFirst({
+      where: {
+        stayId: id,
+        status: { in: [CheckoutRequestStatus.PENDING, CheckoutRequestStatus.APPROVED] },
+      },
+    });
+    if (activeCheckout) {
+      throw new ConflictException(
+        'Tidak dapat memperpanjang karena ada permintaan checkout yang sedang aktif atau sudah disetujui. Selesaikan atau batalkan permintaan checkout terlebih dahulu.',
+      );
+    }
 
     await assertNoOpenInvoicesTx(tx, id, 'Perpanjangan masa sewa');
     if (!dto.electricityReadingValue || !dto.waterReadingValue || !dto.meterReadingAt) {
@@ -363,14 +374,7 @@ export class StaysRenewalService {
         issuedAt: new Date(),
       },
     });
-    await this.accountingPosting
-      .postInvoiceIssuedTx(tx, invoice.id, actor.id)
-      .catch((err) => {
-        this.logger.warn(
-          `Auto Journal Lite gagal untuk invoice perpanjangan #${invoice.id} (renew): ${err instanceof Error ? err.message : String(err)}`,
-        );
-        return undefined;
-      });
+    await this.accountingPosting.postInvoiceIssuedTx(tx, invoice.id, actor.id);
 
     const issuedInvoice = await tx.invoice.findUnique({
       where: { id: invoice.id },

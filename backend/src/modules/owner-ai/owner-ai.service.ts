@@ -5,6 +5,7 @@ import { KtpAiApprovalService } from '../tenants/ktp-ai-approval.service';
 import { ExpenseCategory, ExpenseType, RoomStatus } from '../../common/enums/app.enums';
 import { circuitBreakerState, deepseekConfigured, deepseekChat, type ChatMsg, type DeepseekChatOpts } from '../market-analysis/deepseek.client';
 import { stableHash } from './ai-snapshot-hash.util';
+import { startOfJakartaBusinessDay } from '../../common/utils/date.util';
 import { buildBriefPrompt } from './prompts/brief.prompt';
 import { buildFinancePrompt } from './prompts/finance.prompt';
 import { buildPaymentReviewPrompt } from './prompts/payment-review.prompt';
@@ -123,7 +124,7 @@ export class OwnerAiService {
     if (!this.getAiConfigSync().featuresEnabled) return; // no limit if disabled
     const key = `${actorId}:${feature}`;
     const now = Date.now();
-    const dayStart = new Date().setHours(0, 0, 0, 0);
+    const dayStart = startOfJakartaBusinessDay(new Date()).getTime();
     const b = this.buckets.get(key);
     if (!b || b.resetAt < dayStart) {
       this.buckets.set(key, { count: 1, resetAt: dayStart + 86_400_000 });
@@ -141,7 +142,7 @@ export class OwnerAiService {
 
   /** Hitung sisa daily limit (global — tanpa actor). dailyLimit wajib dari sumber yang sama dengan pemanggil agar tidak mismatch. */
   private getDailyRemaining(dailyLimit: number): number {
-    const dayStart = new Date().setHours(0, 0, 0, 0);
+    const dayStart = startOfJakartaBusinessDay(new Date()).getTime();
     let used = 0;
     for (const [, b] of this.buckets) {
       if (b.resetAt >= dayStart) used += b.count;
@@ -165,7 +166,7 @@ export class OwnerAiService {
 
   /** Statistik penggunaan AI hari ini (in-memory, per feature). */
   getUsageStats() {
-    const dayStart = new Date().setHours(0, 0, 0, 0);
+    const dayStart = startOfJakartaBusinessDay(new Date()).getTime();
     const dailyLimit = this.getAiConfigSync().dailyLimit;
     const byFeature: Record<string, number> = {};
     let todayTotal = 0;

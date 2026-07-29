@@ -433,9 +433,7 @@ export class StaysService {
         }
 
         if (depositCollected) {
-          // Ledger wajib sukses (sumber kebenaran riwayat jaminan);
-          // jurnal liability best-effort (paritas dengan jalur booking,
-          // readiness unmapped akan menandai bila gagal).
+          // Ledger + jurnal liability wajib sukses — jika gagal, seluruh check-in dibatalkan.
           await this.depositLedger.recordDepositReceivedTx(tx, {
             stayId: stay.id,
             amountRupiah: deposit,
@@ -444,13 +442,9 @@ export class StaysService {
             note: "Jaminan diterima tunai saat check-in manual.",
             metadata: { source: "MANUAL_CHECKIN" },
           });
-          await this.accountingPosting
-            .postDepositReceivedForStayTx(tx, stay.id, actor.id, "CASH", new Date(dto.checkInDate))
-            .catch((err) => {
-              this.logger.warn(
-                `Jurnal deposit (liability) gagal saat check-in manual stay #${stay.id}: ${err instanceof Error ? err.message : String(err)}`,
-              );
-            });
+          await this.accountingPosting.postDepositReceivedForStayTx(
+            tx, stay.id, actor.id, "CASH", new Date(dto.checkInDate),
+          );
         }
 
         await tx.room.update({
@@ -509,14 +503,7 @@ export class StaysService {
               totalAmountRupiah: agreed,
             },
           });
-          await this.accountingPosting
-            .postInvoiceIssuedTx(tx, issuedInvoice.id, actor.id)
-            .catch((err) => {
-              this.logger.warn(
-                `Auto Journal Lite gagal untuk invoice awal #${issuedInvoice.id} (stay create): ${err instanceof Error ? err.message : String(err)}`,
-              );
-              return undefined;
-            });
+          await this.accountingPosting.postInvoiceIssuedTx(tx, issuedInvoice.id, actor.id);
           returnInvoice = issuedInvoice;
 
           // Walk-in: buat MeterReading baseline dari DTO (booking activation sudah promote di atas)
@@ -827,14 +814,7 @@ export class StaysService {
             issuedAt: new Date(),
           },
         });
-        // best-effort journal — kegagalan tak menggagalkan checkout
-        await this.accountingPosting
-          .postInvoiceIssuedTx(tx, damageInvoice.id, actor.id)
-          .catch((err) => {
-            this.logger.warn(
-              `Auto Journal Lite gagal untuk invoice denda #${damageInvoice.id}: ${err instanceof Error ? err.message : String(err)}`,
-            );
-          });
+        await this.accountingPosting.postInvoiceIssuedTx(tx, damageInvoice.id, actor.id);
       }
 
       const otherActive = await tx.stay.count({

@@ -182,7 +182,9 @@ export class DepositLedgerService {
       amountRupiah: amount,
       balanceAfterRupiah: this.heldBalanceFromSnapshot(stay),
       sourceType: 'PAYMENT_SUBMISSION',
-      sourceId: String(params.paymentSubmissionId ?? params.stayId),
+      sourceId: params.invoicePaymentId
+        ? `PS_${params.paymentSubmissionId ?? params.stayId}_IP_${params.invoicePaymentId}`
+        : String(params.paymentSubmissionId ?? params.stayId),
       paymentSubmissionId: params.paymentSubmissionId ?? null,
       invoicePaymentId: params.invoicePaymentId ?? null,
       actorUserId: params.actorUserId ?? null,

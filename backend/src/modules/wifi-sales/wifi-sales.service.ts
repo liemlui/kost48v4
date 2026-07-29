@@ -1,4 +1,4 @@
-import { ConflictException, Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { buildMeta, buildPagination } from '../../common/utils/pagination';
 import { CreateWifiSaleDto, UpdateWifiSaleDto } from './dto/wifi-sale.dto';
@@ -9,7 +9,6 @@ import { AccountingPostingService } from '../accounting/accounting-posting.servi
 
 @Injectable()
 export class WifiSalesService {
-  private readonly logger = new Logger(WifiSalesService.name);
   constructor(
     private readonly prisma: PrismaService,
     private readonly audit: AuditLogService,
@@ -41,9 +40,7 @@ export class WifiSalesService {
   async create(dto: CreateWifiSaleDto, actor: CurrentUserPayload) {
     const created = await this.prisma.wifiSale.create({ data: { ...dto, saleDate: new Date(dto.saleDate), createdById: actor.id } });
     await this.audit.log({ actorUserId: actor.id, action: 'CREATE', entityType: 'WifiSale', entityId: String(created.id), newData: created });
-    await this.accountingPosting.postWifiSale(created.id, actor.id).catch((err) =>
-      this.logger.warn(`Jurnal WiFi sale #${created.id} gagal (Auto Journal Lite): ${err instanceof Error ? err.message : String(err)}`)
-    );
+    await this.accountingPosting.postWifiSale(created.id, actor.id); // BLOCKING: jika gagal, WifiSale tidak akan tercatat di jurnal
     return created;
   }
 

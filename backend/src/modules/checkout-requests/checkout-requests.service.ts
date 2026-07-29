@@ -68,17 +68,6 @@ export class CheckoutRequestsService {
       throw new ForbiddenException('Anda bukan pemilik stay ini');
     }
 
-    // Cross-block: cannot create checkout request if a renew request is active
-    // W-04: menggunakan helper domain ACTIVE_RENEW_STATUSES (PENDING, PENDING_DECISION, AWAITING_DP, DP_SECURED)
-    const activeRenew = await this.prisma.renewRequest.findFirst({
-      where: { stayId: dto.stayId, status: { in: ACTIVE_RENEW_STATUSES } },
-    });
-    if (activeRenew) {
-      throw new ConflictException(
-        'Tidak dapat mengajukan checkout karena ada permintaan perpanjangan yang sedang aktif',
-      );
-    }
-
     // Normalize requestedCheckOutDate to UTC start-of-day so business dates stay stable across server timezones
     const requestedDate = new Date(dto.requestedCheckOutDate);
     if (isNaN(requestedDate.getTime())) {
@@ -104,6 +93,22 @@ export class CheckoutRequestsService {
     }
 
     const request = await this.prisma.$transaction(async (tx) => {
+      // S-01: FOR UPDATE lock Stay untuk serialisasi terhadap renewal
+      // (prepareRenewalSettlementInTransaction juga mengambil lock yang sama).
+      await tx.$queryRaw`SELECT id FROM "Stay" WHERE id = ${dto.stayId} FOR UPDATE`;
+
+      // S-01: cross-block — cegah checkout saat renew request masih aktif.
+      // Dipindahkan ke dalam transaction setelah FOR UPDATE agar serialized
+      // terhadap renew-request createRequest.
+      const activeRenew = await tx.renewRequest.findFirst({
+        where: { stayId: dto.stayId, status: { in: ACTIVE_RENEW_STATUSES } },
+      });
+      if (activeRenew) {
+        throw new ConflictException(
+          'Tidak dapat mengajukan checkout karena ada permintaan perpanjangan yang sedang aktif',
+        );
+      }
+
       await this.assertNoOpenInvoices(
         dto.stayId,
         'Selesaikan tagihan aktif sebelum mengajukan keluar',
@@ -162,6 +167,19 @@ export class CheckoutRequestsService {
       await tx.$queryRaw<Array<{ id: number }>>(
         Prisma.sql`SELECT id FROM "Stay" WHERE id = ${lockedRequest.stayId} FOR UPDATE`,
       );
+
+      // S-01: cross-block — cegah approve checkout saat renew request
+      // masih aktif (PENDING, PENDING_DECISION, AWAITING_DP, DP_SECURED).
+      // Karena Stay sudah di-lock FOR UPDATE, pengecekan ini serialized
+      // terhadap prepareRenewalSettlementInTransaction.
+      const activeRenew = await tx.renewRequest.findFirst({
+        where: { stayId: lockedRequest.stayId, status: { in: ACTIVE_RENEW_STATUSES } },
+      });
+      if (activeRenew) {
+        throw new ConflictException(
+          'Tidak dapat menyetujui checkout karena ada permintaan perpanjangan yang sedang aktif. Selesaikan atau tolak permintaan perpanjangan terlebih dahulu.',
+        );
+      }
 
       await this.assertNoOpenInvoices(
         lockedRequest.stayId,

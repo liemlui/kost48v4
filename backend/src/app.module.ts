@@ -53,6 +53,7 @@ import { AdminDashboardModule } from './modules/admin/admin-dashboard.module';
 import { OwnerDashboardModule } from './modules/owner/owner-dashboard.module';
 import { StaffDashboardModule } from './modules/staff-dashboard/staff-dashboard.module';
 import { IotModule } from './modules/iot/iot.module';
+import { AppConfigModule } from './common/config/app-config.module';
 
 // Passenger/cPanel dapat menjalankan startup file dengan cwd yang berbeda dari
 // application root. __dirname selalu berada di src/ saat development dan dist/
@@ -70,6 +71,7 @@ const ENV_FILE_PATHS = [
       isGlobal: true,
       envFilePath: ENV_FILE_PATHS,
     }),
+    AppConfigModule,
     PrismaModule,
     AuditLogModule,
     AuthModule,

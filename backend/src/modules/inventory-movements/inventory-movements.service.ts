@@ -1,9 +1,10 @@
-import { ConflictException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { buildMeta, buildPagination } from '../../common/utils/pagination';
 import { AuditLogService } from '../../audit-log/audit-log.service';
-import { InventoryMovementType, UserRole } from '../../common/enums/app.enums';
+import { InventoryMovementType } from '../../common/enums/app.enums';
 import { CurrentUserPayload } from '../../common/interfaces/current-user.interface';
+import { assertOwnerOrAdmin } from '../../common/guards/owner-admin.guard';
 import { assertRoomItemQtyAvailableTx, syncRoomItemTx } from '../../common/utils/room-booking.util';
 import { CreateInventoryMovementDto, UpdateInventoryMovementDto } from './dto/inventory-movement.dto';
 import { InventoryMovementsQueryDto } from './dto/inventory-movements-query.dto';
@@ -42,7 +43,7 @@ export class InventoryMovementsService {
   }
 
   async create(dto: CreateInventoryMovementDto, actor: CurrentUserPayload) {
-    this.assertOwnerOrAdmin(actor);
+    assertOwnerOrAdmin(actor, 'riwayat stok');
     this.assertMeaningfulNote(dto.note);
     await this.validateMovement(dto.itemId, dto.movementType, dto.roomId, dto.qty);
     const created = await this.prisma.$transaction(async (tx) => {
@@ -71,7 +72,7 @@ export class InventoryMovementsService {
   }
 
   async update(id: number, dto: UpdateInventoryMovementDto, actor: CurrentUserPayload) {
-    this.assertOwnerOrAdmin(actor);
+    assertOwnerOrAdmin(actor, 'riwayat stok');
     const existing = await this.prisma.inventoryMovement.findUnique({ where: { id } });
     if (!existing) throw new NotFoundException('Movement tidak ditemukan');
     throw new ConflictException('Mutasi stok resmi tidak diedit langsung. Buat mutasi koreksi agar stok gudang/kamar dan audit tetap aman.');
@@ -101,12 +102,6 @@ export class InventoryMovementsService {
     if (Math.abs(currentQty - expectedQty) > 0.0001) {
       if (expectedQty < 0) throw new ConflictException('Stok inventory tidak boleh negatif.');
       await tx.inventoryItem.update({ where: { id: itemId }, data: { qtyOnHand: String(expectedQty) as any } });
-    }
-  }
-
-  private assertOwnerOrAdmin(actor: CurrentUserPayload) {
-    if (![UserRole.OWNER, UserRole.ADMIN].includes(actor.role)) {
-      throw new ForbiddenException('Staff hanya boleh melihat riwayat stok. Mutasi stok hanya boleh dilakukan Owner/Admin.');
     }
   }
 

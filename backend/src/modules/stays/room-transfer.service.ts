@@ -253,12 +253,7 @@ export class RoomTransferService {
       where: { id: invoice.id },
       data: { totalAmountRupiah: total, status: InvoiceStatus.ISSUED, issuedAt: new Date() },
     });
-    await this.accountingPosting.postInvoiceIssuedTx(tx, invoice.id, actorId).catch((err) => {
-      this.logger.warn(
-        `Jurnal utilitas kamar lama (invoice #${invoice.id}, pindah kamar) gagal — invoice tetap tertagih, akan di-backfill F5-6: ${err instanceof Error ? err.message : String(err)}`,
-      );
-      return undefined;
-    });
+    await this.accountingPosting.postInvoiceIssuedTx(tx, invoice.id, actorId);
 
     return { invoiceId: invoice.id, totalAmountRupiah: total };
   }

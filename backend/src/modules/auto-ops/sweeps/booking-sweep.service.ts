@@ -414,7 +414,7 @@ export class BookingSweepService {
 
       await tx.paymentSubmission.updateMany({
         where: { stayId, status: PaymentSubmissionStatus.PENDING_REVIEW },
-        data: { status: PaymentSubmissionStatus.EXPIRED },
+        data: { status: PaymentSubmissionStatus.REJECTED },
       });
 
       await tx.stay.update({

@@ -135,12 +135,12 @@ Keputusan booking awal Fase V mengubah arti status kamar, tetapi tidak mengubah 
 #### 2. ⛔ DO-NOT-TOUCH (kode SUDAH BENAR — jangan "diperbaiki")
 | Kode | Lokasi | Kenapa jangan disentuh |
 |---|---|---|
-| `postBalancedJournalTx` (inti jurnal) | `accounting-posting.service.ts:1110-1216` | Guard balance+idempotent+periode OPEN. Mesin jurnal SEHAT. |
+| `postBalancedJournalTx` (inti jurnal) | `accounting-posting.service.ts:1342-1448` | Guard balance+idempotent+periode OPEN. Mesin jurnal SEHAT. ⚠️ Line numbers diperbarui 2026-07-29 (sebelumnya 1110-1216 — stale). |
 | Blok saldo kas E-4 | `accounting-reports.service.ts:837-862` | Saldo per CashAccount = opening + Σ(D−K) line ber-cashAccountId. SUDAH BENAR — F1-3 meniru pola INI, jangan ubah blok ini. |
 | 10 fungsi posting (D/K) | `accounting-posting.service.ts:128-849` | Semua balance+idempotent. Hanya F1-8 (settlement guard) yang menambah CEK, bukan ubah jurnal. |
 | Trial Balance + opening fallback | `accounting-reports.service.ts:27-95` | Anti-double-count. |
 | Tutup buku (closing/reopen versioned) | `accounting-period-close.service.ts` | Paling matang; jangan utak-atik. |
-| `recalculateInvoiceTotal` (DISCOUNT−) | `invoices.service.ts:423-442` | Konsisten dgn trigger DB. |
+| `recalculateInvoiceTotal` (DISCOUNT−) | `invoices.service.ts:461-480` | Konsisten dgn trigger DB. ⚠️ Line numbers diperbarui 2026-07-29 (sebelumnya 423-442 — stale). |
 
 #### 3. UNIT TEST (zero-dependency — pakai test runner BAWAAN Node, TANPA npm install)
 > Proyek belum punya jest. JANGAN install. Pakai `node --test` (Node ≥18) terhadap hasil build `dist/`. Test = file CommonJS di `backend/test/unit/`.
@@ -294,7 +294,7 @@ Di DB bersih + COA seeded + CashAccount Cash(1000)+Bank(1010) + periode OPEN:
 ---
 #### 1. Aturan bisnis
 - **COA 38 akun** (dikoreksi V3 dari klaim V1 17/17). Prefix mapping: 1xxx=Aset, 2xxx=Liabilitas, 3xxx=Ekuitas, 4xxx=Pendapatan, 5xxx=Beban.
-- **Auto Journal Lite:** 10 fungsi posting idempotent per `(sourceType, sourceId)`:
+- **Auto Journal Lite:** 15 fungsi posting idempotent per `(sourceType, sourceId)`:
   1. `postStayInitialRentRevenueTx` — pendapatan sewa awal
   2. `postStayRenewRentRevenueTx` — pendapatan perpanjangan
   3. `postStayMeterRevenueTx` — pendapatan meter
@@ -307,6 +307,7 @@ Di DB bersih + COA seeded + CashAccount Cash(1000)+Bank(1010) + periode OPEN:
   10. `postPaymentReversalTx` — reversal pembayaran (DEAD CODE sejak A8)
 - **Auto-close bulanan** ter-gate readiness: `unmapped-operational` menghitung penuh sebelum auto-close.
 - **Reversal CANCEL invoice = BLOCKING** di semua jalur (pola A8); reversal gagal → cancel invoice ditolak.
+- **⚠️ CATATAN PENTING (2026-07-29):** 4 unit test yang didokumentasikan di §3 (pricing.test.js, periode.test.js, cashflow-classifier.test.js, financial-ratios.helper.test.js) **script-nya sudah ada di M04 ini, tapi file-nya BELUM dibuat** di `backend/test/unit/`. Jangan klaim test sudah ada sebelum file dibuat. Test yang sudah ada: iot-signatures, ocr-helpers, payment-policy, response-envelope, serialized-pg-client, utility-billing-cycle (48 tests, 0 failures).
 
 #### 2. Peta kode
 | Aksi | Lokasi |

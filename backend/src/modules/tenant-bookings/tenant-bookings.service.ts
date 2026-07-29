@@ -359,9 +359,7 @@ export class TenantBookingsService {
             issuedAt: new Date(),
           },
         });
-        await this.accountingPosting.postInvoiceIssuedTx(tx, issuedInvoice.id, actor.id).catch((err) =>
-          this.logger.warn(`Jurnal invoice booking #${issuedInvoice.id} gagal (Auto Journal Lite): ${err instanceof Error ? err.message : String(err)}`)
-        );
+        await this.accountingPosting.postInvoiceIssuedTx(tx, issuedInvoice.id, actor.id);
 
         await tx.stay.update({
           where: { id: updatedStay.id },

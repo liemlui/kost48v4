@@ -1,5 +1,97 @@
 # KOST48 V5 — M13 Changelog
 
+## 2026-07-29 — Hardening keuangan + lintas scope pasca audit deep (Fase AN + TODO MX)
+
+- **AN-01 🔴 Deposit ledger blocking:** `payment-submissions.service.ts` — 2 try/catch (deposit ledger + liability journal) dihapus. Jika ledger/jurnal gagal, approval payment submission sekarang throw → seluruh transaksi rollback. Sebelumnya: best-effort (logger.warn, approval tetap lanjut).
+- **AN-02 🟠 Journal posting blocking:** `payment-submissions.service.ts` — try/catch + `journalPending=true` dihapus. Journal posting gagal → throw, transaksi batal. Variabel `journalPending` dihapus. Method `retryJournalPosting` dipertahankan untuk legacy data.
+- **AN-03 🟠 Seragamkan 9 call site journal → BLOCKING:** `.catch()` dihapus dari 6 file: `tenant-bookings.service.ts`, `stays-renewal.service.ts` (2 titik), `stays.service.ts` (3 titik: check-in deposit, invoice awal, damage invoice), `room-transfer.service.ts`. Semua journal posting kini BLOCKING — tidak ada lagi silent data loss.
+- **AN-04 🟡 Fix dedupe deposit ledger:** `deposit-ledger.service.ts` — `sourceId` kini menyertakan `invoicePaymentId` (format `PS_xxx_IP_yyy`) agar setoran jaminan ke-2 tidak kena dedupe false positive.
+- **AN-05 🟡 4 unit test keuangan:** `pricing.test.js` (4 test), `periode.test.js` (2 test), `cashflow-classifier.test.js` (5 test), `financial-ratios.helper.test.js` (8 test). Semua 19 test baru PASS. Total backend: 67/67 PASS.
+- **AN-06 🟢 Auto-reject sweeper:** `booking-sweep.service.ts` — payment submission PENDING_REVIEW → REJECTED (sebelumnya: EXPIRED).
+- **X1 (=AN-03):** Semua journal posting best-effort diseragamkan → BLOCKING.
+- **X2 🟠 Extract assertOwnerOrAdmin:** 4 private method duplikat → 1 shared function di `common/guards/owner-admin.guard.ts`. 13 titik pemanggilan di-refactor.
+- **X3 🟠 AppConfigService:** Service terpusat untuk SEMUA env var (11 section, 80+ var). Validasi startup (production wajib DATABASE_URL, warning untuk missing keys). Caching: tiap env var dibaca sekali. Wiring: `main.ts` (CORS, rate limit). `@Global()` module — siap injection di semua module.
+- **X4 🟠 Fix timezone owner-ai:** 3 lokasi `new Date().setHours(0,0,0,0)` → `startOfJakartaBusinessDay(new Date()).getTime()`. Rate limit & usage stats kini WIB-aware.
+- **S-01 🔴 Cross-block renew/checkout:** `stays-renewal.service.ts` + `checkout-requests.service.ts` — keduanya kini `FOR UPDATE` lock Stay + cross-check status opposite operation. Renew tolak jika checkout PENDING/APPROVED; checkout tolak jika renew PENDING/DP_SECURED.
+- **OS-01 🔴 WiFi journal blocking:** `wifi-sales.service.ts` — `.catch()` dihapus. Journal WiFi gagal → throw.
+- **OS-04/05 🟡 Ticket assign/start race condition:** `tickets.service.ts` — method `assign` dan `start` dibungkus `$transaction` + optimistic lock (`updateMany` dengan WHERE condition pada `assignedToId` + `status`). ConflictException jika data berubah sejak read.
+
+**File berubah (backend):** 16 file + 5 file baru.
+**Gate:** `tsc --noEmit` BE ✅ (0 errors) · `npm run test:unit` 67/67 PASS ✅ · `npm run build` FE ✅ (162 chunks, PWA verified).
+
+## 2026-07-29 — Deep audit siklus huni + integrasi ke M05
+
+- **Deep audit terhadap laporan M16 (Reasonix):** verifikasi line-number claims di 7 file backend + `grep` seluruh `.catch()` di `backend/src`. Akurasi M16: 85% — 3 best-effort journal tercatat, 6 hilang.
+- **Temuan kunci:** 9 titik best-effort journal di siklus huni (HS-01 s/d HS-09), termasuk 2 CRITICAL di `payment-submissions.service.ts:898-916` (deposit ledger + liability journal — tumpang tindih dengan Fase AN). S-01 (cross-block race condition) severity dikoreksi MEDIUM → HIGH.
+- **Risk rating dikoreksi:** MODERATE (3 HIGH) → HIGH (1 CRITICAL, 8 HIGH).
+- **Cross-reference ke Fase AN:** HS-07 = AN-01 (deposit ledger blocking), HS-08 = AN-02 (deposit liability journal). HS-01 s/d HS-06 + HS-09 tambahan murni siklus huni.
+- **Dokumen diperbarui:** `docs/M05_SIKLUS_HUNI.md` (section Deep Audit baru, 50+ baris), `docs/M12_CHECKLIST_CHANGELOG.md` (Fase M16-Deep). File standalone `AUDIT_LAPORAN_SIKLUS_HUNI.md` dihapus (bukan MXX).
+
+## 2026-07-29 — Verifikasi Codex Sol + koreksi M01/M05/M06
+
+- **18 temuan deep audit diverifikasi oleh Codex Sol (model tertinggi):** 12 BENAR (67%), 1 SALAH (A9 — expenses BUKAN kontrol positif, create() juga best-effort), 5 PARSIAL (B1/B4/C1/D1/A7).
+- **Koreksi diterapkan:** (1) Root cause journal — tidak ada modul 100% blocking. (2) C1 timezone — `setHours()` pakai TZ lokal, bukan selalu UTC. (3) B1 cross-block — `renewRequest.createRequest()` TIDAK pakai $transaction sama sekali. (4) B4/IV-01 severity downgrade HIGH→MEDIUM — FOR UPDATE sudah mencegah ghost-stok. (5) A7 terminologi — record WifiSale, bukan invoice. (6) D1 — duplikasi semantik, bukan byte-identik. (7) A9 — expenses.create() juga best-effort, pola blocking hanya di confirmExpense().
+- **Dokumen dikoreksi:** `docs/M01_MASTER.md` (5 edit), `docs/M05_SIKLUS_HUNI.md` (1 edit), `docs/M06_OPERASIONAL.md` (2 edit), `docs/M12_CHECKLIST_CHANGELOG.md` (MX-Verify).
+
+## 2026-07-29 — Audit lintas scope + integrasi ke M01
+
+- **Cross-scope audit 8 domain (Reasonix):** identifikasi interaksi antar scope, inkonsistensi, peluang shared module, dan efisiensi kode.
+- **1 CRITICAL:** Journal posting best-effort di 7 scope → semua mengirim data ke keuangan via `.catch()`, hanya expenses yang benar (BLOCKING).
+- **2 HIGH:** (1) Timezone inconsistency — `owner-ai.service.ts` pakai UTC midnight (bug WIB), `staff-performance` pakai raw offset. (2) DRY violations — `assertOwnerOrAdmin` 4 duplikat, 20+ boilerplate pagination.
+- **10 rekomendasi X1-X10:** prioritas X1-X4 harus sebelum go-live. X1 (journal blocking) = paling kritis.
+- **Temuan arsitektural:** Scope Keuangan adalah **sink** — semua scope mengirim data ke sana. Harus jadi scope paling ketat, bukan paling longgar.
+- **Dokumen diperbarui:** `docs/M01_MASTER.md` (section Audit Lintas Scope ~150 baris), `docs/M12_CHECKLIST_CHANGELOG.md` (Fase MX).
+
+## 2026-07-29 — Deep audit IoT & telemetri + integrasi ke M06
+
+- **Deep scan modul iot/ (Reasonix):** 10 file, 1911 baris — Tuya client, ESP32 water ingest, polling, device credentials.
+- **Temuan: 0 isu.** 0 best-effort journal, 0 race condition. Semua auth benar: HMAC timingSafeEqual untuk ESP32, cron token timingSafeEqual, polling mutex, RateLimitGuard di endpoint publik.
+- **4 positive patterns:** cron token anti-timing, ESP32 HMAC anti-forgery, polling mutex anti-double-poll, RateLimitGuard anti-DDoS.
+- **Dokumen diperbarui:** `docs/M06_OPERASIONAL.md` (section Deep Audit IoT), `docs/M12_CHECKLIST_CHANGELOG.md` (Fase M22-Deep).
+
+## 2026-07-29 — Deep audit AI & growth + integrasi ke M07
+
+- **Deep scan 7 modul AI/growth (Reasonix):** owner-ai, ai, market-analysis, loyalty, analytics, ancillary-revenue — 2599 baris.
+- **Temuan: 0 isu baru.** 0 best-effort journal, 0 race condition. Positive patterns: loyalty redemption FOR UPDATE lock (anti-overselling), owner-ai OWNER-only segregation, AI cache prune/cap.
+- **Domain terbersih** dari semua 7 domain yang diaudit.
+- **Dokumen diperbarui:** `docs/M07_PUBLIK_GROWTH.md` (section Deep Audit AI), `docs/M12_CHECKLIST_CHANGELOG.md` (Fase M21-Deep).
+
+## 2026-07-29 — Deep audit notifikasi & sistem + integrasi ke M06
+
+- **Deep scan 6 modul notifikasi/sistem (Reasonix):** notifications, push, announcements, settings, users, auth — 1138 baris.
+- **Temuan: 0 isu.** 0 best-effort journal, 0 race condition. Semua `.catch()` acceptable (push subscription housekeeping, email reset enumeration-safe, notifyPublished). Positive pattern: auth refresh token rotation P0-01 dalam `$transaction`.
+- **Domain paling bersih** dari semua domain — bersama publik/marketing.
+- **Dokumen diperbarui:** `docs/M06_OPERASIONAL.md` (section Deep Audit Notifikasi), `docs/M12_CHECKLIST_CHANGELOG.md` (Fase M20-Deep).
+
+## 2026-07-29 — Deep audit inventaris + integrasi ke M06
+
+- **Verifikasi AUDIT_LAPORAN_INVENTARIS.md (Reasonix):** audit existing 85% benar — line counts akurat, staff access verified, 0 .catch() terkonfirmasi.
+- **Koreksi:** IV-01 (I-01 di audit existing) severity MEDIUM→HIGH. `validateMovement()` di luar `$transaction` = read-check-write race. Bisa ghost-stok jika 2 admin drain stok bersamaan. Pola sama dengan S-01 (M05) dan OS-04 (M06).
+- **3 positive pattern kuat:** room-item create/qty DIBLOKIR (paksa lewat mutasi stok), inventory create SATU `$transaction` (stok awal + movement + sync), movement update DIBLOKIR (harus buat koreksi).
+- **Dokumen diperbarui:** `docs/M06_OPERASIONAL.md` (section Deep Audit Inventaris), `docs/M12_CHECKLIST_CHANGELOG.md` (Fase M19-Deep). File standalone `AUDIT_LAPORAN_INVENTARIS.md` dihapus (bukan MXX).
+
+## 2026-07-29 — Deep audit publik & marketing + integrasi ke M07
+
+- **Deep audit 6 modul publik/marketing (Reasonix):** `grep` `.catch()` + `@Public` + auth bypass + data leak di marketing, faqs, surveys, guest-preferences, loyalty/peer-report, market-analysis (17 file, 1834 baris).
+- **Temuan:** 2 isu — PM-01 silent swallow notifikasi peer-report (LOW), PM-04 PIN-based auth wizard ketersediaan (MEDIUM). 0 best-effort journal, 0 race condition, 0 auth bypass, 0 data leak.
+- **Domain paling bersih** dari 4 domain yang diaudit — 6 modul backend BERSIH, auth guard verifikasi benar, data leak prevention aktif (`notes:false`), `timingSafeEqual` untuk PIN.
+- **Dokumen diperbarui:** `docs/M07_PUBLIK_GROWTH.md` (section Deep Audit baru), `docs/M12_CHECKLIST_CHANGELOG.md` (Fase M18-Deep).
+
+## 2026-07-29 — Deep audit operasional & staf + integrasi ke M06
+
+- **Deep audit 11 modul operasional (Reasonix):** `grep` seluruh `.catch()` + `$transaction` + read-check-write pattern di tickets, wifi-sales, additional-services, staff-field-reports, staff-routines, staff-dashboard, staff-performance, tenant-staff-reviews, announcements, dan 6 auto-ops sweeps (total 5782 baris).
+- **Temuan:** 5 isu baru — OS-01 best-effort journal WiFi sale (HIGH), OS-02 silent swallow tiket (MEDIUM), OS-03 silent swallow announcements (MEDIUM), OS-04 race condition ticket assign (MEDIUM), OS-05 race condition ticket start (MEDIUM). 7 modul BERSIH tanpa isu.
+- **Auto-ops 6 sweeps diverifikasi:** semua `.catch()` adalah notifikasi best-effort yang sesuai pola M06 §Dossier 16. Tidak ada best-effort journal di sweeps.
+- **Cross-reference:** OS-01 setara HS-01..HS-03 (best-effort journal) → harus dikoordinasikan dengan AN-03. OS-04/OS-05 setara S-01 (read-check-write tanpa lock).
+- **Dokumen diperbarui:** `docs/M06_OPERASIONAL.md` (section Deep Audit baru), `docs/M12_CHECKLIST_CHANGELOG.md` (Fase M17-Deep).
+
+## 2026-07-29 — Audit mendalam keuangan & akuntansi + koreksi dokumen
+
+- **Audit verifikasi independent** terhadap `AUDIT_LAPORAN_KEUANGAN.md` (Reasonix): akurasi ~65%. Temuan: 3 klaim P0 diverifikasi (P1-01/P1-02 confirmed, P1-03 DIKOREKSI — bukan tx terpisah, tapi SATU tx dengan try/catch swallow error). 4 unit test diklaim ada tapi BELUM dibuat (pricing, periode, cashflow-classifier, financial-ratios). PaymentSubmissionPage.tsx diklaim ada tapi TIDAK PERNAH ADA (fungsi di-embed). 6 klaim ukuran halaman + 3 path frontend dikoreksi.
+- **Temuan baru (N4):** inkonsistensi journal handling — expenses pakai BLOCKING, payment-submissions pakai BEST-EFFORT. Recovery path P1-01 (`retry-journal` endpoint + sweeper) sudah ada tapi tidak disebut audit sebelumnya. P1-02 (deposit ledger) lebih risk karena TANPA recovery path.
+- **Dokumen dikoreksi:** `docs/M04_KEUANGAN.md` (update stale line numbers: postBalancedJournalTx 1110-1216→1342-1448, recalculateInvoiceTotal 423-442→461-480, 10→15 fungsi posting, catatan unit test belum dibuat, tambah temuan N4).
+- **Verifikasi runtime:** tsc 0 errors, backend build ✅, 48/48 unit test PASS, frontend build ✅ (162 chunks, PWA stamped).
+
 ## 2026-07-29 — Hardening UI/UX IoT owner dan penghuni
 
 - Dashboard owner menjadi command center berbasis perhatian: status operasional, kesegaran data, kualitas GOOD/SUSPECT/REJECTED, reset counter, filter provider, detail siklus, form terkunci saat submit, dan layout mobile.

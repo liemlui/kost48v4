@@ -191,7 +191,7 @@ Gamifikasi (poin perpanjangan → reward) memperkuat retensi renewal — lihat d
 
 ---
 
-## Audit 360° Flow Huni (Jul 2026)
+## Audit 360° Flow Huni — Jul 2026 (M16)
 
 **Status:** 🟢 93% SEHAT — 2 HIGH (✅ FIXED), 4 MEDIUM, 1 LOW. Detail → `docs/archieve/M16_AUDIT_360_FLOW_HUNI.md`
 
@@ -207,3 +207,55 @@ P2-03 `WEBSITE` untuk publik ✅ VALID · P2-04 lock stay ✅ FIXED · P2-05 dam
 
 ### 10 Nota Positif
 1. Fase V compliance penuh · 2. FOR UPDATE di semua titik rawan · 3. Cross-block checkout vs renew · 4. Dedupe tiket CHECKOUT_INSPECTION · 5. Room readiness gate · 6. Rent-loyalty (D-16) · 7. Deposit = Room.defaultDepositRupiah · 8. Gate dua-nominal-sah · 9. Notifikasi lengkap · 10. Raw SQL INSERT
+
+---
+
+## 🆕 Deep Audit Siklus Huni — 29 Jul 2026 (Reasonix)
+
+**Auditor:** Reasonix (deep audit terhadap laporan M16 + kode sumber).  
+**Metode:** verifikasi line-number claims di 7 file backend + `grep` seluruh `.catch()` di `backend/src`.  
+**Kesimpulan:** Audit M16 85% benar tapi **under-count best-effort journal 3× lipat** (3 → 9 titik) dan melewatkan modul `payment-submissions`.
+
+### Temuan best-effort journal LENGKAP (9 titik)
+
+| ID | Lokasi | Deskripsi | Severity | Tercatat M16? |
+|----|--------|-----------|----------|---------------|
+| **HS-01** | `tenant-bookings.service.ts:362-364` | Jurnal invoice booking approval | 🔴 HIGH | ✅ P1-01 |
+| **HS-02** | `stays-renewal.service.ts:366-373` | Jurnal invoice settlement renewal | 🔴 HIGH | ✅ P1-02 |
+| **HS-03** | `stays.service.ts:831-837` | Jurnal invoice denda (damage) saat complete | 🔴 HIGH | ✅ P1-03 |
+| **HS-04** | `stays.service.ts:447-453` | Jurnal deposit LIABILITY saat walk-in check-in | 🔴 HIGH | ❌ **HILANG** |
+| **HS-05** | `stays.service.ts:512-519` | Jurnal invoice sewa awal saat walk-in check-in | 🔴 HIGH | ❌ **HILANG** |
+| **HS-06** | `stays-renewal.service.ts:196-201` | Jurnal invoice DP renewal | 🔴 HIGH | ❌ **HILANG** |
+| **HS-07** | `payment-submissions.service.ts:898-902` | Deposit ledger `recordDepositReceivedTx` — try/catch swallow → ledger bisa bolong | 🔴 **CRITICAL** | ❌ **HILANG** |
+| **HS-08** | `payment-submissions.service.ts:903-916` | Jurnal deposit LIABILITY saat approve submission | 🔴 HIGH | ❌ **HILANG** |
+| **HS-09** | `room-transfer.service.ts:256` | Jurnal invoice room transfer | 🟠 MEDIUM | ❌ **HILANG** |
+
+### Koreksi severity S-01 (cross-block race condition)
+
+**S-01** — cross-block renew/checkout di luar transaction (`renew-requests.service.ts:54-61`, `checkout-requests.service.ts:73-80`). Pengecekan `prisma.renewRequest.findFirst` / `prisma.checkoutRequest.findFirst` dilakukan SEBELUM `$transaction`. **🆕 KOREKSI Codex Sol:** `renewRequest.createRequest()` TIDAK pakai `$transaction` sama sekali — lebih parah dari klaim awal. Celah: antara `findFirst` dan create, request bisa dibuat dari sesi lain.
+**Severity dikoreksi:** MEDIUM → 🔴 **HIGH** (bisa menghasilkan renew + checkout bersamaan untuk stay yang sama).
+
+### Cross-reference ke Fase AN hardening keuangan
+
+HS-07 dan HS-08 tumpang tindih dengan **Fase AN** (`fase-an-hardening-keuangan`):
+- **AN-01** (P1-02 keuangan) = HS-07 — deposit ledger blocking di `payment-submissions.service.ts:898-915`
+- **AN-02** (P1-01 keuangan) = journal posting blocking di `payment-submissions.service.ts:817-836`
+
+HS-01 s/d HS-06 dan HS-09 adalah tambahan murni dari sisi siklus huni — belum tercakup Fase AN. Koordinasikan perbaikan agar pola blocking seragam di semua modul (AN-03).
+
+### Risk rating dikoreksi
+
+| Sebelum (M16) | Sesudah (deep audit) |
+|---|---|
+| 🟡 MODERATE — 3 HIGH, 2 MEDIUM, 2 LOW | 🔴 **HIGH** — 1 CRITICAL, 8 HIGH, 1 MEDIUM, 2 LOW |
+
+### Rekomendasi prioritas (direvisi)
+
+1. **HS-07** (AN-01) — Deposit ledger blocking — PALING URGENT
+2. **HS-08** (AN-02) — Deposit liability journal blocking
+3. **HS-01 s/d HS-06, HS-09** — Seragamkan SEMUA journal posting jadi blocking (AN-03)
+4. **S-01** — Pindahkan cross-block renew/checkout ke dalam transaction
+5. Pertahankan S-02/S-03/S-04 (sudah benar)
+6. Verifikasi `prepay-extension.service.ts` (belum tersentuh audit)
+7. Verifikasi B-08 (`stays.cancel` stay promoted — M05 klaim "KODE FIXED/UAT PENDING")
+8. Verifikasi sweeper belongings 30 hari (F3-15) — runtime check

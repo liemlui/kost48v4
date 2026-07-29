@@ -7,6 +7,7 @@ import { InventoryItemsQueryDto } from './dto/inventory-items-query.dto';
 import { AuditLogService } from '../../audit-log/audit-log.service';
 import { InventoryItemStatus, InventoryMovementType, UserRole } from '../../common/enums/app.enums';
 import { CurrentUserPayload } from '../../common/interfaces/current-user.interface';
+import { assertOwnerOrAdmin } from '../../common/guards/owner-admin.guard';
 import { generateTicketNumberTx } from '../../common/utils/ticket-number.util';
 
 const STAFF_ALLOWED_INVENTORY_STATUSES = new Set<InventoryItemStatus>([
@@ -134,12 +135,6 @@ export class InventoryItemsService {
     }
   }
 
-  private assertOwnerOrAdmin(actor: CurrentUserPayload) {
-    if (![UserRole.OWNER, UserRole.ADMIN].includes(actor.role)) {
-      throw new ForbiddenException('Staff hanya boleh melihat data stok. Perubahan stok hanya boleh dilakukan Owner/Admin.');
-    }
-  }
-
   /** Ringkasan inventaris untuk dashboard: total, low stock, out of stock, dll. */
   async getSummary() {
     const [allItems, facilityCounts] = await Promise.all([
@@ -212,7 +207,7 @@ export class InventoryItemsService {
   }
 
   async create(dto: CreateInventoryItemDto, actor: CurrentUserPayload) {
-    this.assertOwnerOrAdmin(actor);
+    assertOwnerOrAdmin(actor, 'stok');
     if (dto.sku) {
       const exists = await this.prisma.inventoryItem.findUnique({ where: { sku: dto.sku } });
       if (exists) throw new ConflictException('SKU sudah digunakan');
@@ -264,7 +259,7 @@ export class InventoryItemsService {
   }
 
   async update(id: number, dto: UpdateInventoryItemDto, actor: CurrentUserPayload) {
-    this.assertOwnerOrAdmin(actor);
+    assertOwnerOrAdmin(actor, 'stok');
     const existing = await this.prisma.inventoryItem.findUnique({ where: { id } });
     if (!existing) throw new NotFoundException('Item inventory tidak ditemukan');
     if (dto.sku && dto.sku !== existing.sku) {

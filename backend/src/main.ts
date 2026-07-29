@@ -13,6 +13,7 @@ import { ResponseEnvelopeInterceptor } from './common/interceptors/response-enve
 import { PrismaService } from './prisma/prisma.service';
 import express, { NextFunction, Request, Response } from 'express';
 import { createRateLimiter } from './common/middleware/rate-limit.middleware';
+import { AppConfigService } from './common/config/app-config.service';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
@@ -24,7 +25,8 @@ async function bootstrap() {
     rawBody: true,
   });
   const configService = app.get(ConfigService);
-  const isProduction = configService.get<string>('NODE_ENV') === 'production';
+  const appConfig = app.get(AppConfigService);
+  const isProduction = appConfig.isProduction;
 
   // Jangan pernah tulis PIN ke log. Status ini cukup untuk mendiagnosis apakah
   // Passenger/.env sudah dibaca setelah application restart.
@@ -116,7 +118,7 @@ async function bootstrap() {
     // Dev: SELALU izinkan localhost/127.0.0.1 di port mana pun (Vite bisa bergeser 5173→5174→5175
     // saat port dipakai) — meski CORS_ORIGIN di .env hanya menyebut satu port. Origin eksplisit
     // non-localhost dari CORS_ORIGIN tetap diizinkan. Produksi tetap wajib CORS_ORIGIN eksplisit (atas).
-    const allowList = (process.env.CORS_ORIGIN?.split(',') ?? []).map((s) => s.trim()).filter(Boolean);
+    const allowList = appConfig.corsOrigin;
     app.enableCors({
       origin: (origin: string | undefined, cb: (err: Error | null, allow?: boolean) => void) => {
         const ok = !origin || /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin) || allowList.includes(origin);
@@ -134,14 +136,14 @@ async function bootstrap() {
   app.use('/api', createRateLimiter({
     name: 'global',
     windowMs: 60_000,
-    max: Number(process.env.RATE_LIMIT_GLOBAL_PER_MINUTE ?? 300),
+    max: appConfig.rateLimitGlobalPerMinute,
   }));
   // Endpoint kredensial ketat: tahan brute-force login & enumerasi reset password.
   // W-01: failClosed=true — saat bucket penuh, tolak (503) alih-alih lolos.
   const authLimiter = createRateLimiter({
     name: 'auth',
     windowMs: 15 * 60_000,
-    max: Number(process.env.RATE_LIMIT_AUTH_PER_15MIN ?? 10),
+    max: appConfig.rateLimitAuthPer15Min,
     message: 'Terlalu banyak percobaan. Tunggu 15 menit sebelum mencoba lagi.',
     failClosed: true,
   });

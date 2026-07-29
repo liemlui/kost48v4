@@ -548,14 +548,17 @@ export class TicketsService {
   //  SECTION: Assignment & Vendor Management
   // ═══════════════════════════════════════════════════════════
 
+  /**
+   * Assign tiket ke staf/admin/owner.
+   *
+   * **OS-04 — optimistic-lock terhadap race Admin vs Admin:**
+   * Read & write dibungkus interactive transaction. Update dilakukan via
+   * `updateMany` dengan WHERE `assignedToId = oldValue` sehingga jika admin
+   * lain sudah mengubah `assignedToId` sejak kita baca, count = 0 dan kita
+   * lempar ConflictException.
+   */
   async assign(id: number, dto: AssignTicketDto, actor: CurrentUserPayload) {
-    const ticket = await this.prisma.ticket.findUnique({ where: { id } });
-    if (!ticket) throw new NotFoundException("Tiket tidak ditemukan");
-    // Audit M-27: tiket final tidak boleh dipindah-tangankan lagi.
-    if (["CLOSED", "CANCELLED"].includes(String(ticket.status))) {
-      throw new ConflictException("Tiket yang sudah ditutup/dibatalkan tidak dapat di-assign ulang");
-    }
-
+    // Validasi assignee di luar tx — read-only, tidak rawan race.
     const assignee = await this.prisma.user.findUnique({
       where: { id: dto.assignedToId },
     });
@@ -564,28 +567,58 @@ export class TicketsService {
       throw new ConflictException("Assignee tidak valid untuk role ticketing");
     }
 
-    // F3-19: set assignedAt + dueAt (SLA) saat penugasan PERTAMA (clock SLA mulai
-    // dari penugasan, bukan pembuatan). Re-assign tak me-reset jam SLA.
-    const slaPatch =
-      ticket.assignedAt == null
-        ? { assignedAt: new Date(), dueAt: computeTicketDueAt(ticket.category, new Date()) }
-        : {};
-    const updated = await this.prisma.ticket.update({
-      where: { id },
-      data: { assignedToId: dto.assignedToId, ...slaPatch },
+    // OS-04: baca + tulis dalam satu interactive transaction agar read & write
+    // konsisten, lalu optimistic-lock pada kolom `assignedToId`.
+    const { updated, oldTicket, assigneeChanged } = await this.prisma.$transaction(async (tx) => {
+      const ticket = await tx.ticket.findUnique({ where: { id } });
+      if (!ticket) throw new NotFoundException("Tiket tidak ditemukan");
+      // Audit M-27: tiket final tidak boleh dipindah-tangankan lagi.
+      if (["CLOSED", "CANCELLED"].includes(String(ticket.status))) {
+        throw new ConflictException("Tiket yang sudah ditutup/dibatalkan tidak dapat di-assign ulang");
+      }
+
+      // F3-19: set assignedAt + dueAt (SLA) saat penugasan PERTAMA (clock SLA mulai
+      // dari penugasan, bukan pembuatan). Re-assign tak me-reset jam SLA.
+      // Karena dibaca di dalam tx, nilai assignedAt sudah aktual — tidak staleness.
+      const slaPatch =
+        ticket.assignedAt == null
+          ? { assignedAt: new Date(), dueAt: computeTicketDueAt(ticket.category, new Date()) }
+          : {};
+
+      // OS-04: optimistic-lock — pastikan `assignedToId` belum berubah sejak dibaca.
+      // `updateMany` bisa memakai WHERE non-unique (berbeda dengan `update`).
+      const oldAssignedToId = ticket.assignedToId;
+      const result = await tx.ticket.updateMany({
+        where: { id, assignedToId: oldAssignedToId },
+        data: { assignedToId: dto.assignedToId, ...slaPatch },
+      });
+      if (result.count === 0) {
+        throw new ConflictException(
+          "Tiket sudah di-assign oleh admin lain — silakan muat ulang",
+        );
+      }
+
+      // Baca ulang hasil akhir untuk dikembalikan & dicatat audit.
+      const updated = await tx.ticket.findUnique({ where: { id } });
+      const assigneeChanged = ticket.assignedToId !== dto.assignedToId;
+
+      return { updated: updated!, oldTicket: ticket, assigneeChanged };
     });
+
+    // Audit log di luar tx (best-effort, konsisten dengan pola `close`).
     await this.audit.log({
       actorUserId: actor.id,
       action: "ASSIGN",
       entityType: "Ticket",
       entityId: String(updated.id),
-      oldData: ticket,
+      oldData: oldTicket,
       newData: updated,
       meta: { assigneeId: dto.assignedToId },
     });
-    // F3-1: beri tahu penerima tugas (di luar audit, best-effort) hanya saat
+
+    // F3-1: beri tahu penerima tugas (best-effort) hanya saat
     // assignee benar-benar berubah — hindari notif duplikat untuk reassign no-op.
-    if (ticket.assignedToId !== dto.assignedToId) {
+    if (assigneeChanged) {
       await this.notifyTicketAssigned(updated.id, dto.assignedToId, actor.id);
     }
     return updated;
@@ -627,64 +660,93 @@ export class TicketsService {
   //  SECTION: Ticket Lifecycle — Start, Done, Close
   // ═══════════════════════════════════════════════════════════
 
+  /**
+   * Mulai mengerjakan tiket (OPEN → IN_PROGRESS).
+   *
+   * **OS-05 — optimistic-lock terhadap race Admin assign vs Staff start:**
+   * Seluruh read & write dibungkus interactive transaction. Update dilakukan
+   * via `updateMany` dengan WHERE `status = "OPEN" AND assignedToId = oldValue`
+   * sehingga jika admin meng-assign atau staff lain memulai tiket yang sama
+   * secara bersamaan, count = 0 dan kita lempar ConflictException.
+   * SLA clock (`assignedAt`/`dueAt`) hanya di-set sekali karena dibaca dari
+   * dalam tx yang sama dengan write.
+   */
   async start(id: number, actor: CurrentUserPayload) {
-    const ticket = await this.prisma.ticket.findUnique({ where: { id } });
-    if (!ticket) throw new NotFoundException("Tiket tidak ditemukan");
-    if (ticket.status !== "OPEN")
-      throw new ConflictException("Transisi status tidak valid");
+    const { updated, oldTicket } = await this.prisma.$transaction(async (tx) => {
+      const ticket = await tx.ticket.findUnique({ where: { id } });
+      if (!ticket) throw new NotFoundException("Tiket tidak ditemukan");
+      if (ticket.status !== "OPEN")
+        throw new ConflictException("Transisi status tidak valid");
 
-    if (actor.role === "STAFF") {
-      if (ticket.assignedToId && ticket.assignedToId !== actor.id) {
-        throw new ConflictException("Tiket ini bukan tugas akun ini");
+      if (actor.role === "STAFF") {
+        if (ticket.assignedToId && ticket.assignedToId !== actor.id) {
+          throw new ConflictException("Tiket ini bukan tugas akun ini");
+        }
+
+        // Cek pekerjaan aktif staf — di dalam tx agar konsisten.
+        const [activeTicket, activeRoutine] = await Promise.all([
+          tx.ticket.findFirst({
+            where: {
+              id: { not: id },
+              assignedToId: actor.id,
+              status: "IN_PROGRESS",
+            },
+            select: { id: true, title: true, ticketNumber: true },
+          }),
+          tx.staffRoutineCompletion.findFirst({
+            where: { staffUserId: actor.id, status: "IN_PROGRESS" as any },
+            include: { template: { select: { title: true } } },
+          }),
+        ]);
+
+        if (activeTicket) {
+          throw new ConflictException(
+            `Selesaikan pekerjaan aktif dulu: ${activeTicket.title || activeTicket.ticketNumber || `Tiket #${activeTicket.id}`}`,
+          );
+        }
+        if (activeRoutine) {
+          throw new ConflictException(
+            `Selesaikan pekerjaan aktif dulu: ${activeRoutine.template?.title || `Pekerjaan rutin #${activeRoutine.id}`}`,
+          );
+        }
       }
 
-      const [activeTicket, activeRoutine] = await Promise.all([
-        this.prisma.ticket.findFirst({
-          where: {
-            id: { not: id },
-            assignedToId: actor.id,
-            status: "IN_PROGRESS",
-          },
-          select: { id: true, title: true, ticketNumber: true },
-        }),
-        this.prisma.staffRoutineCompletion.findFirst({
-          where: { staffUserId: actor.id, status: "IN_PROGRESS" as any },
-          include: { template: { select: { title: true } } },
-        }),
-      ]);
+      // F3-19: bila tiket dikerjakan tanpa pernah di-assign formal (mis. STAFF
+      // mulai langsung), mulai jam SLA sekarang. Nilai `assignedAt` dibaca dari
+      // dalam tx sehingga tidak staleness — SLA hanya di-set SEKALI.
+      const slaPatch =
+        ticket.assignedAt == null
+          ? { assignedAt: new Date(), dueAt: computeTicketDueAt(ticket.category, new Date()) }
+          : {};
 
-      if (activeTicket) {
+      // OS-05: optimistic-lock pada `status` + `assignedToId`.
+      // Cegah race: Admin assign vs Staff start, serta double-start.
+      const oldAssignedToId = ticket.assignedToId;
+      const result = await tx.ticket.updateMany({
+        where: { id, status: "OPEN", assignedToId: oldAssignedToId },
+        data: {
+          status: "IN_PROGRESS",
+          ...(actor.role === "STAFF" ? { assignedToId: actor.id } : {}),
+          ...slaPatch,
+        },
+      });
+      if (result.count === 0) {
         throw new ConflictException(
-          `Selesaikan pekerjaan aktif dulu: ${activeTicket.title || activeTicket.ticketNumber || `Tiket #${activeTicket.id}`}`,
+          "Tiket sudah berubah status atau di-assign oleh admin lain — silakan muat ulang",
         );
       }
-      if (activeRoutine) {
-        throw new ConflictException(
-          `Selesaikan pekerjaan aktif dulu: ${activeRoutine.template?.title || `Pekerjaan rutin #${activeRoutine.id}`}`,
-        );
-      }
-    }
 
-    // F3-19: bila tiket dikerjakan tanpa pernah di-assign formal (mis. STAFF
-    // mulai langsung), mulai jam SLA sekarang.
-    const slaPatch =
-      ticket.assignedAt == null
-        ? { assignedAt: new Date(), dueAt: computeTicketDueAt(ticket.category, new Date()) }
-        : {};
-    const updated = await this.prisma.ticket.update({
-      where: { id },
-      data: {
-        status: "IN_PROGRESS",
-        ...(actor.role === "STAFF" ? { assignedToId: actor.id } : {}),
-        ...slaPatch,
-      },
+      const updated = await tx.ticket.findUnique({ where: { id } });
+      return { updated: updated!, oldTicket: ticket };
     });
+
+    // Audit log di luar tx (best-effort, konsisten dengan pola `close`).
     await this.audit.log({
       actorUserId: actor.id,
       action: "START",
       entityType: "Ticket",
       entityId: String(updated.id),
-      oldData: ticket,
+      oldData: oldTicket,
       newData: updated,
     });
     return updated;

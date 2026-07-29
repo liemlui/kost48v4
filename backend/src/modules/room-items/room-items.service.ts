@@ -4,6 +4,7 @@ import { PrismaService } from '../../prisma/prisma.service';
 import { AuditLogService } from '../../audit-log/audit-log.service';
 import { RoomItemStatus, UserRole } from '../../common/enums/app.enums';
 import { CurrentUserPayload } from '../../common/interfaces/current-user.interface';
+import { assertOwnerOrAdmin } from '../../common/guards/owner-admin.guard';
 import { generateTicketNumberTx } from '../../common/utils/ticket-number.util';
 import { CreateRoomItemDto, StaffUpdateRoomItemStatusDto, UpdateRoomItemDto } from './dto/room-item.dto';
 
@@ -61,12 +62,6 @@ function buildStaffReportBlock(input: {
 export class RoomItemsService {
   constructor(private readonly prisma: PrismaService, private readonly audit: AuditLogService) {}
 
-  private assertOwnerOrAdmin(actor: CurrentUserPayload) {
-    if (![UserRole.OWNER, UserRole.ADMIN].includes(actor.role)) {
-      throw new ForbiddenException('Staff hanya boleh melihat inventaris kamar. Perubahan inventaris kamar hanya boleh dilakukan Owner/Admin.');
-    }
-  }
-
   async findAll(roomId?: number) {
     return { items: await this.prisma.roomItem.findMany({ where: roomId ? { roomId } : undefined, include: { room: true, item: true }, orderBy: { id: 'desc' } }) };
   }
@@ -97,12 +92,12 @@ export class RoomItemsService {
   }
 
   async create(_dto: CreateRoomItemDto, actor: CurrentUserPayload) {
-    this.assertOwnerOrAdmin(actor);
+    assertOwnerOrAdmin(actor, 'inventaris kamar');
     throw new ConflictException('Gunakan Mutasi Stok tipe Pasang ke Kamar untuk menambah barang kamar. Ini menjaga stok gudang dan inventaris kamar tetap sinkron.');
   }
 
   async update(id: number, dto: UpdateRoomItemDto, actor: CurrentUserPayload) {
-    this.assertOwnerOrAdmin(actor);
+    assertOwnerOrAdmin(actor, 'inventaris kamar');
     const existing = await this.prisma.roomItem.findUnique({ where: { id } });
     if (!existing) throw new NotFoundException('Room item tidak ditemukan');
     if (dto.qty !== undefined && String(dto.qty) !== String(existing.qty)) {
