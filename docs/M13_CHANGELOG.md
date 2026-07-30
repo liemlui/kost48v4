@@ -1,5 +1,14 @@
 # KOST48 V5 — M13 Changelog
 
+## 2026-07-30 — Triage audit dashboard Area Admin desktop
+
+- Review eksternal Admin dipetakan ke `DashboardAdmin.tsx`, queue/alert component, dan shell shared; skor otomatis tidak dijadikan metrik release tanpa audit dinamis ADMIN/OWNER.
+- Dibuka AO-22 P1 untuk hierarchy exception dan queue-first action; dibuka AO-23 P2 untuk normalisasi komponen/shell desktop yang harus dikoordinasikan dengan AO-21.
+- Koreksi audit mentah: `ActionQueueTable` dengan deadline/CTA sudah ada, tetapi muncul setelah metrik; health chip sudah memiliki ikon + teks; sidebar sudah collapse. Perubahan berfokus pada urutan dan pattern yang belum redundant.
+- Kontras tetap merge AO-08; lokasi/assignee/owner/due date tidak dibuat tanpa kontrak data dan semua interaksi hover/focus/keyboard menunggu UAT.
+
+**Perubahan:** dokumentasi dan antrean kolaboratif saja; tidak ada kode aplikasi, schema, dependency, atau data yang diubah.
+
 ## 2026-07-30 — Triage audit dashboard Owner desktop
 
 - Masukan audit eksternal dashboard Owner disaring ke bukti `CODE`; skor otomatisnya tidak dijadikan metrik release karena audit OWNER dinamis masih menunggu fixture UAT.

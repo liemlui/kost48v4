@@ -200,6 +200,31 @@ Bukti kode:
 
 **Handoff Figma/implementasi (bukan file Figma):** gunakan inventory `page-header`, `data-toolbar`, `alert/warning`, `kpi/metric`, `task-row/alert`, `ai/setup`, dan `nav-item/selected`. Usulan token lokal: card radius `12px`, pill `20–24px`, control sekunder `40px`, CTA primer `44px`, serta variant bernama `card/info`, `card/warning`, `card/metric`, `row/selected`, `row/alert`. Variasi `loading`, `error`, `empty`, `zero-valid`, dan `not-configured` harus menjadi state eksplisit, bukan turunan visual dari card berisi data.
 
+### 2.9 Page-level review: dashboard Area Admin desktop
+
+Masukan owner berupa export statis UX Audit untuk dashboard Area Admin tanggal 30 Juli 2026. Sama seperti review Owner, skor otomatis eksternal tidak dipakai sebagai metrik release. Kode menunjukkan dashboard Admin telah memiliki queue, direct action, icon status, dan sidebar collapse; masalah yang sah adalah urutan visual dan konsistensi action—notifikasi bukan ketiadaan fitur tersebut.
+
+Bukti kode:
+
+- Susunan overview saat ini adalah command header → `AssistantInsightLine` → warning kamar tersembunyi → `AdminHealthBar`/IoT → `Metrik Cepat` → AutoOps → `ActionQueueTable`. Queue lima item sudah ada, tetapi berada setelah visual KPI.
+- `ActionQueueTable` sudah mengurutkan prioritas dan memuat subject, masalah, waktu masuk, deadline, status waktu, serta CTA. Payload saat ini tidak menjamin lokasi/assignee untuk setiap item, sehingga metadata itu tidak boleh direka.
+- Warning kamar tersembunyi dan AutoOps memakai tombol `btn-sm btn-outline-warning`; `AssistantInsightLine` mendukung action, tetapi pemanggilan dashboard saat ini tidak memberikannya CTA.
+- `AdminHealthBar` sudah memakai ikon Lucide + label teks untuk chip; `AssistantInsightLine` masih memakai dot `aria-hidden` tanpa label severity yang persisten. Jadi temuan color-only hanya berlaku parsial pada pattern tertentu.
+- Header utilitas dan sidebar berada di `AppLayout` lintas role. Sidebar desktop telah memiliki collapse 260 → 60 px serta active indicator kiri; baris khusus Admin minimum 42 px. Pengubahan shell harus dikoordinasikan dengan AO-21, bukan dilakukan sebagai refactor Admin terpisah.
+
+| Kelompok masukan | Putusan | Alasan/tujuan |
+|---|---|---|
+| Exception kritis/warning/KPI berebut bobot | AO-22 P1 | Terkonfirmasi urutan stack dan variasi surface; gunakan hierarchy berdasarkan severity/data nyata |
+| `Cek kamar` dan `Detail kondisi` lemah | AO-22 P1 | CTA ada tetapi outline/text kecil; perkuat hanya saat ada remediasi jelas |
+| Queue tidak tersedia di viewport awal | AO-22 P1, koreksi | Queue sudah ada; pindahkan/kompres lima prioritas ke atas metrik, jangan membuat queue duplikat |
+| Kontras label/button diduga gagal AA | Merge AO-08 | Perlu pengukuran per surface; screenshot/score otomatis bukan rasio kontras |
+| Status terlalu bergantung pada warna | `PARTIAL / AO-22` | Health chip sudah icon + teks; tambahkan label/ikon severity pada banner yang masih hanya dot warna |
+| Header utility action tidak konsisten | AO-23 P2 | Shared AppLayout; perlu kontrak utility zone dan regresi lintas role |
+| Sidebar terlalu card-like/padat | AO-23 P2, `EXISTING COLLAPSE` | Collapse/active indicator telah ada; nilai density/nav row dengan UAT, jangan menduplikasi fitur |
+| KPI tidak punya direct action | `PARTIAL` | Snippet/queue sudah membawa route/CTA; samakan pattern action dan pilih KPI yang layak tampil di atas fold |
+
+**Handoff Figma/implementasi (bukan file Figma):** inventory Admin: `nav-item/default-hover-active-collapsed`, `utility-header`, `status-badge/info-success-warning-critical`, `alert-banner/warning-critical`, `kpi/value-trend-status-action`, dan `queue-row`. Gunakan grid 8 px, gutter desktop 24 px, padding card 16 px, card radius 12 px, serta pill `999px` hanya untuk chip yang benar-benar ringkas. Variant `link`, `button/secondary`, dan `button/primary` harus menggantikan action outlined/text ad hoc. Semua token teks diuji pada white, blue-tint, dan warning surface.
+
 ---
 
 ## 3. Metode Penilaian
@@ -707,6 +732,63 @@ Owner workspace mencampur radius 6/8/9/12 px, top-border KPI, left-border alert,
 
 ---
 
+### AO-22 — P1 — Dashboard Area Admin belum menempatkan exception dan antrean aksi sebelum metrik ringkasan
+
+**Bukti:** `EXTERNAL-STATIC`, `CODE`, `BLOCKED-UAT` untuk validasi interaksi ADMIN/OWNER mode Admin.
+
+Dashboard saat ini sudah memiliki `ActionQueueTable` lima prioritas dengan deadline dan CTA, tetapi menaruhnya setelah alert, health chip, IoT strip, dan `Metrik Cepat`. Warning fasilitas/AutoOps memiliki CTA, namun masih outline kecil; `AssistantInsightLine` bahkan tidak menerima action meski komponennya mendukung. Hasilnya adalah action hierarchy datar, bukan tidak adanya queue.
+
+**File utama:**
+
+- `frontend/src/pages/dashboard/DashboardAdmin.tsx`
+- `frontend/src/components/workspace/AssistantInsightLine.tsx`
+- `frontend/src/components/command-center/AdminHealthBar.tsx`
+- `frontend/src/components/command-center/ActionQueueTable.tsx`
+- `frontend/src/styles/08-admin.css`
+- `frontend/src/components/command-center/AdminHealthBar.module.css`
+
+**Acceptance criteria:**
+
+- Pada overview desktop, stack pertama mengikuti data: maksimal satu banner critical/blocker, lalu satu warning remediasi, lalu antrean lima prioritas, baru KPI/visual insight. Jangan tampilkan banner severity tinggi bila data tidak mendukungnya.
+- `ActionQueueTable` yang sudah ada digunakan ulang dan diletakkan sebelum `Metrik Cepat` atau disajikan sebagai strip queue yang memakai sumber/sorting sama; jangan membuat sumber antrean kedua.
+- Queue ringkas menampilkan subject, severity berlabel, umur/deadline/status waktu, dan satu CTA nyata per row. Lokasi/assignee hanya ditambahkan ketika payload menjamin field tersebut; API/kontrak harus diperluas lebih dulu bila diperlukan.
+- Warning kamar tersembunyi memiliki judul ringkas, maksimal tiga fakta yang terverifikasi, CTA primer filled `Cek kamar` minimum 40 px, serta link sekunder ke daftar lengkap bila memang ada.
+- AutoOps dan assistant memiliki CTA adjacent hanya jika target remediasi tersedia. `AssistantInsightLine` warning/danger membawa label severity dan ikon selain dot warna.
+- `Detail kondisi` tetap collapse yang dapat dioperasikan keyboard atau dinaikkan menjadi secondary button/link yang jelas; state expanded memiliki `aria-expanded` dan focus visible.
+- KPI di first viewport ringkas dan konsisten: label, nilai, trend/status berlabel, serta optional action yang tidak bersaing dengan exception. Jangan menampilkan gauge dekoratif sebelum pekerjaan blocker bila viewport tidak cukup.
+- Loading, error data pendukung, queue kosong, satu warning, dan multiple blocker diuji; tidak ada action yang mengarah ke route role-terlarang.
+- Kontras warning/outlined/fill mengikuti AO-08 dan state tidak dibedakan hanya dengan warna.
+
+---
+
+### AO-23 — P2 — Sistem komponen dan shell desktop Area Admin perlu dikonsolidasikan lintas role
+
+**Bukti:** `EXTERNAL-STATIC`, `CODE`, `BLOCKED-UAT` untuk visual/keyboard screenshot nyata.
+
+Admin menggunakan banyak surface rounded, pill status, action outlined, dan utilitas shell bersama. Sidebar sudah collapse serta active indicator; fokus task ini adalah density, hierarchy, dan kontrak komponen—notifikasi bukan penambahan collapse baru. Karena `AppLayout` dipakai OWNER/ADMIN, setiap perubahan shell harus dikoordinasikan dengan AO-21.
+
+**File utama:**
+
+- `frontend/src/components/layout/AppLayout.tsx`
+- `frontend/src/styles/02-layout.css`
+- `frontend/src/styles/03-components.css`
+- `frontend/src/pages/dashboard/DashboardAdmin.tsx`
+- `frontend/src/styles/08-admin.css`
+- `frontend/src/components/common/StatusBadge.tsx` bila contract badge berubah
+
+**Acceptance criteria:**
+
+- Tetapkan inventory/variant shared untuk nav item, utility header, status badge, alert banner, KPI, dan queue row sebelum mengubah style; pakai token named, bukan override satu-off.
+- Header mengelompokkan breadcrumb/title, search, dan utility action tanpa memindahkan global search atau logout secara spekulatif. Perubahan pola logout/profile memerlukan review security/product owner karena memengaruhi seluruh role.
+- Role switch tetap menjelaskan perpindahan workspace Owner/Admin dan dapat dioperasikan keyboard; jangan menyamakan dengan density toggle halaman.
+- Sidebar mempertahankan collapse/persistensi/active indicator yang sudah ada. Tetapkan target density desktop setelah UAT (target klik minimum 44 px; tinggi visual boleh berbeda jika hit area aman), bukan mengadopsi angka screenshot tanpa uji.
+- Status `info/success/warning/critical` selalu memiliki label teks dan/atau ikon semantik; warna melengkapi, bukan satu-satunya pembeda.
+- Radius card, pill, border, spacing grid, dan action hierarchy mengikuti inventory 2.9; pill `999px` dibatasi untuk metadata ringkas, bukan seluruh container.
+- Verifikasi semua token yang berubah pada white, blue-tint, warning surface melalui AO-08; fokus visible dan hover diuji keyboard/mouse.
+- Screenshot before/after bebas PII mencakup ADMIN desktop 1280/1440 px dan regression OWNER shell sebelum task ditutup.
+
+---
+
 ## 5. Hal yang Sudah Baik
 
 - 66 kombinasi route–viewport tidak menghasilkan halaman root kosong.
@@ -771,7 +853,9 @@ Gunakan status berikut di tabel:
 | AO-19 Audit aset/galeri publik | P2 | `OPEN` | data aset, `room-images`, gallery renderer | inventory + touch/keyboard |
 | AO-20 Dashboard Owner: exception/actionability | P1 | `OPEN` | `OwnerDashboardPage.tsx`, `12-owner.css` | data state + desktop/touch/keyboard |
 | AO-21 Sistem visual/terminologi Owner | P2 | `OPEN` | Owner dashboard + AppLayout/nav/title/CSS shell | 1024/1280/1440 + regression role |
-| AO-14 Re-audit final 5 role | P0 gate | `BLOCKED:AO-01..AO-13+AO-15..AO-21` | QA only | seluruh Definition of Done + gate Baymard relevan |
+| AO-22 Admin dashboard: queue-first action hierarchy | P1 | `OPEN` | `DashboardAdmin.tsx`, queue/alert components, `08-admin.css` | ADMIN desktop + keyboard/data states |
+| AO-23 Sistem komponen/shell Area Admin | P2 | `OPEN` | AppLayout/shared CSS + Admin dashboard | ADMIN + OWNER shell regression |
+| AO-14 Re-audit final 5 role | P0 gate | `BLOCKED:AO-01..AO-13+AO-15..AO-23` | QA only | seluruh Definition of Done + gate Baymard relevan |
 
 ### 7.2 Gelombang kerja
 
@@ -787,6 +871,7 @@ Gunakan status berikut di tabel:
 - Agent Public Homepage: AO-17 → AO-18 → AO-15 secara serial karena berbagi `PublicGuestDashboardPage`/CSS publik.
 - Agent Asset: AO-19 dapat mulai dari inventory, tetapi koordinasikan perubahan renderer/CSS dengan Agent Public Homepage.
 - Agent Owner Dashboard: AO-20 dapat dimulai tanpa mengubah AppLayout; fokus `OwnerDashboardPage.tsx` + `12-owner.css`.
+- Agent Admin Dashboard: AO-22 dapat dimulai pada `DashboardAdmin.tsx` + komponen queue/alert; jangan mengubah AppLayout.
 - Agent Tenant Shell: AO-04; jangan menyentuh `MyStayPage`/`ProfilePage`.
 - Agent Tenant Logic: AO-02 + AO-05; jangan menyentuh shell/CSS global.
 - Agent A11y Form: AO-06 + AO-07; jangan menyentuh navigation.
@@ -798,6 +883,7 @@ Gunakan status berikut di tabel:
 - AO-17, AO-18, dan AO-15 harus serial; jangan dikerjakan paralel pada `11-public-pages.css`.
 - AO-19 menunggu owner hanya jika sumber foto pengganti memang dibutuhkan; inventory dan audit interaction cue dapat dikerjakan lebih dulu.
 - AO-21 setelah AO-20 direview; koordinasikan dulu bila AppLayout, navigation, route title, atau CSS shell akan disentuh.
+- AO-23 setelah AO-22 direview; serial dengan AO-21 bila menyentuh AppLayout, `02-layout.css`, atau `03-components.css`.
 - AO-13 crawl role.
 - AO-14 audit final dan penutupan checklist.
 
@@ -838,6 +924,8 @@ Gunakan status berikut di tabel:
 - [ ] Aset publik terinventarisasi dan cue galeri dapat ditemukan pada touch/keyboard.
 - [ ] Dashboard Owner mengubah exception menjadi CTA yang benar, membedakan state data KPI, dan toolbar lokal dapat dipindai pada desktop/touch/keyboard.
 - [ ] Komponen Owner memakai sistem visual/terminologi yang konsisten tanpa regresi AppLayout atau role lain.
+- [ ] Dashboard Area Admin menampilkan exception dan antrean aksi yang berurutan sebelum metrik dekoratif, dengan CTA/label status yang benar.
+- [ ] Shell/komponen Area Admin konsisten dan regresi Owner tervalidasi bila shared header/sidebar berubah.
 - [ ] `npm run build` frontend lulus.
 - [ ] `npx vitest run` lulus.
 - [ ] Backend `npx tsc --noEmit` lulus jika ada perubahan backend/deploy.
