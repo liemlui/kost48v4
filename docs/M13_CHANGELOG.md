@@ -1,10 +1,20 @@
 # KOST48 V5 — M13 Changelog
 
+## 2026-07-30 — Integrasi masukan Baymard UX-Ray ke Fase AO
+
+- Export UX-Ray owner disaring berdasarkan tingkat kepastian: hanya 5/317 guideline auto-rated, 2 `Not Applicable`, dan 310 `Not Rated`; item yang tidak dinilai tidak dicatat sebagai defect.
+- Empat sinyal `Best-in-Class`—guided browsing, kategori navigasi, visibilitas akun, dan hierarki homepage—ditambahkan ke M14 sebagai regression guard.
+- Satu `Small Issue` organisasi link footer dikonfirmasi melalui kode dan dibuka sebagai AO-15 P3.
+- Guideline relevan yang belum dinilai dijadikan gate AO-14: transparansi biaya, status kamar, filter/back-state, galeri, ulasan, serta CTA/input booking.
+- Guideline generik cart, shipping, kartu kredit, dan gifting dikeluarkan karena industry UX-Ray belum dipilih dan tidak sesuai model bisnis kost.
+
+**Perubahan:** dokumentasi saja; tidak ada kode aplikasi, dependency, schema, atau data UAT yang diubah.
+
 ## 2026-07-30 — Audit mendalam UI/UX lintas portal (Fase AO)
 
 - Audit browser nyata mencakup **66 kombinasi route–viewport**: 7 route publik, 13 route tenant tanpa stay aktif, dan 13 route tenant aktif pada desktop/mobile.
 - Audit statis memeriksa **74 deklarasi route**, role guard, navigasi STAFF, state loading/error/empty, dan titik aksesibilitas utama.
-- Dibuat `docs/M14_AUDIT_UI_UX.md` sebagai sumber kerja kolaboratif AO-00..AO-14; M00, M01, dan M12 disinkronkan.
+- Dibuat `docs/M14_AUDIT_UI_UX.md` sebagai sumber kerja kolaboratif AO-00..AO-15; M00, M01, dan M12 disinkronkan.
 - Gate P0: database UAT memiliki dua migration pending. Dampak teramati berupa 500 katalog publik, notifikasi, dan pengumuman serta state publik yang saling bertentangan.
 - Temuan utama lain: urutan hook halaman loyalitas, duplikasi shell tenant mobile, semantik stay lewat periode, asosiasi label auth/profile, overflow profil 7 px, kontras, landmark, dan kepadatan manual/filter mobile.
 - Crawl OWNER/ADMIN/STAFF belum diklaim lulus karena akun fixture UAT belum tersedia. Tidak ada kredensial atau bukti berisi PII yang dimasukkan ke repository.

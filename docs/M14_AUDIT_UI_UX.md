@@ -78,6 +78,37 @@ Route tenant: `/portal/stay`, `/portal/energy`, `/portal/bookings`, `/portal/inv
 - Tidak ada reset database, perubahan password, pembuatan akun, atau bypass autentikasi selama audit.
 - Kredensial OWNER/ADMIN yang tercantum di docs tidak cocok dengan database UAT saat ini. Database juga tidak memiliki akun STAFF aktif. Karena itu audit dinamis ketiga role tersebut dinyatakan terbatas, bukan dipaksakan.
 
+### 2.5 Benchmark eksternal: Baymard UX-Ray
+
+Masukan owner berupa export Baymard UX-Ray untuk `kost48surabaya.com`, dipindai 30 Juli 2026. Export mentah tidak disalin ke repository karena berisi katalog riset berlisensi; dokumen ini hanya menyimpan ringkasan dan keputusan yang relevan.
+
+Interpretasi wajib:
+
+- UX-Ray menampilkan 317 guideline, tetapi hanya **5 guideline auto-rated**: 4 `Best-in-Class` dan 1 `Small Issue`; 2 lainnya `Not Applicable`.
+- **310 guideline berstatus `Not Rated`**. Status itu bukan bukti lulus ataupun gagal.
+- Cakupan penilaian otomatis sangat sempit: 5 guideline desktop dan hanya 1 guideline mobile.
+- Industry belum dipilih, sehingga guideline cart, shipping, kartu kredit, gifting, dan pola e-commerce umum tidak otomatis cocok untuk bisnis kost.
+- Benchmark ini melengkapi audit browser/Axe M14; tidak menggantikan pengujian API, state data, role, portal tenant, atau aksesibilitas.
+
+| Sinyal Baymard | Kondisi kode KOST48 | Keputusan |
+|---|---|---|
+| Guided/thematic browsing — `Best-in-Class` | `GuestPreferenceWizard` menjadi bantuan opsional, bukan gerbang katalog | `PRESERVE` — jangan memaksa wizard sebelum pengguna dapat melihat kamar |
+| Kategori pada navigasi utama — `Best-in-Class` | UX-Ray membaca tujuan publik KOST48 sebagai kategori; konteks KOST48 adalah katalog, panduan, ulasan, tarif, lokasi, dan WhatsApp, bukan taxonomy produk e-commerce | `PRESERVE` — pertahankan jalur utama, tetapi jangan menciptakan menu tipe kamar yang padat hanya demi mengikuti istilah e-commerce |
+| Visibilitas menu akun — `Best-in-Class` | `Masuk Portal` terlihat pada topbar dan footer | `PRESERVE` — pertahankan CTA akun yang jelas pada desktop/mobile |
+| Homepage tidak terasa seperti kumpulan iklan — `Best-in-Class` | CTA, panduan, kamar, ulasan, dan galeri memiliki hierarki konten | `PRESERVE` — konten bantuan tetap lebih dominan daripada promo dekoratif |
+| Organisasi link footer — `Small Issue` | Footer mencampur anchor halaman, route publik, login, Maps, dan WhatsApp dalam daftar datar | Buka AO-15 P3 |
+
+Guideline `Not Rated` yang tetap layak dijadikan **gate verifikasi**, bukan temuan baru:
+
+- kejelasan harga dan total biaya awal pada card/detail/booking;
+- status tersedia/terisi dan CTA yang sesuai status;
+- filter aktif, jumlah hasil, persistensi filter, dan pemulihan posisi saat kembali dari detail;
+- thumbnail serta kontrol galeri kamar;
+- sorting ulasan dan ringkasan jumlah/rating;
+- primary CTA booking yang konsisten serta input pengguna tetap tersimpan saat validasi gagal.
+
+Fitur terkait sudah terlihat di kode (`PublicRoomsPage`, `PublicRoomDetailPage`, `ReviewsPublicPage`, `GuestPreferenceWizard`). Karena katalog UAT sedang 500, seluruh butir di atas diverifikasi ulang pada AO-14 setelah AO-00; jangan mengklaim lulus hanya dari inspeksi kode.
+
 ---
 
 ## 3. Metode Penilaian
@@ -406,6 +437,28 @@ Command pada AGENTS/CLAUDE harus berhasil tanpa langkah tersembunyi.
 
 ---
 
+### AO-15 — P3 — Organisasi link footer publik belum membentuk kelompok tujuan
+
+**Bukti:** benchmark eksternal `Small Issue`, lalu dikonfirmasi melalui `CODE`.
+
+`GuestFooter` saat ini menempatkan anchor halaman, katalog, halaman panduan/ulasan, login, Maps, dan WhatsApp dalam kumpulan link yang datar. Semua tujuan tersedia, tetapi pengguna harus memindai terlalu banyak item tanpa kelompok informasi.
+
+**File utama:**
+
+- `frontend/src/pages/public/publicGuestShared.tsx`
+- `frontend/src/styles/11-public-pages.css`
+
+**Acceptance criteria:**
+
+- Kelompokkan link dengan heading semantik, misalnya `Cari Kamar`, `Bantuan`, dan `Kontak & Akun`.
+- Hilangkan tujuan duplikat atau anchor yang tidak valid pada route publik selain homepage.
+- `Masuk Portal`, WhatsApp, alamat, dan Maps tetap mudah ditemukan.
+- Urutan mobile mengikuti prioritas calon tenant: cari kamar → panduan/biaya → kontak → akun.
+- Gunakan markup `<nav aria-label>` dan heading kelompok; keyboard/focus tetap jelas.
+- Verifikasi footer pada `/`, `/rooms`, `/panduan`, `/reviews`, `/login`, serta mobile 320–414 px.
+
+---
+
 ## 5. Hal yang Sudah Baik
 
 - 66 kombinasi route–viewport tidak menghasilkan halaman root kosong.
@@ -417,6 +470,7 @@ Command pada AGENTS/CLAUDE harus berhasil tanpa langkah tersembunyi.
 - Role guard STAFF untuk keuangan sesuai keputusan owner; tidak ada link invoice di navigasi STAFF.
 - Top-level route OWNER/ADMIN/TENANT/STAFF dipisahkan dengan `RequireRoles` dan pesan denied khusus role.
 - Public landing memiliki hierarki dan CTA yang konsisten pada desktop/mobile.
+- Benchmark Baymard memberi sinyal `Best-in-Class` pada guided browsing, kategori navigasi, visibilitas akun, dan hierarki homepage. Keempat pola ini menjadi regression guard, bukan alasan menghentikan audit.
 
 ---
 
@@ -462,7 +516,8 @@ Gunakan status berikut di tabel:
 | AO-11 Filter/tap target mobile | P2 | `OPEN` | invoice + shared mobile controls | 44 px + active-visible |
 | AO-12 Kontrak API dev | P2 | `OPEN` | `vite.config.ts` atau `.env.development`, docs command | login dev tanpa langkah tersembunyi |
 | AO-13 Crawl OWNER/ADMIN/STAFF | P0 gate | `BLOCKED:AO-00+AO-03` | `frontend/e2e/admin-owner-crawl.spec.ts` + staff crawl | 0 crash/5xx/blank/guard salah |
-| AO-14 Re-audit final 5 role | P0 gate | `BLOCKED:AO-01..AO-13` | QA only | seluruh Definition of Done |
+| AO-15 Struktur footer publik | P3 | `OPEN` | `publicGuestShared.tsx`, `11-public-pages.css` | 6 route publik + 320–414 px |
+| AO-14 Re-audit final 5 role | P0 gate | `BLOCKED:AO-01..AO-13+AO-15` | QA only | seluruh Definition of Done + gate Baymard relevan |
 
 ### 7.2 Gelombang kerja
 
@@ -474,7 +529,7 @@ Gunakan status berikut di tabel:
 
 **Wave 1 — dapat paralel setelah AO-00**
 
-- Agent Public: AO-01 + bagian public AO-08/AO-09.
+- Agent Public: AO-01 + bagian public AO-08/AO-09, lalu AO-15 secara serial karena berbagi `11-public-pages.css`.
 - Agent Tenant Shell: AO-04; jangan menyentuh `MyStayPage`/`ProfilePage`.
 - Agent Tenant Logic: AO-02 + AO-05; jangan menyentuh shell/CSS global.
 - Agent A11y Form: AO-06 + AO-07; jangan menyentuh navigation.
@@ -482,6 +537,7 @@ Gunakan status berikut di tabel:
 **Wave 2 — integrasi**
 
 - AO-10 dan AO-11 setelah shell mobile stabil.
+- AO-15 setelah perubahan CSS AO-01 selesai/review; jangan dikerjakan paralel pada `11-public-pages.css`.
 - AO-13 crawl role.
 - AO-14 audit final dan penutupan checklist.
 
@@ -514,6 +570,8 @@ Gunakan status berikut di tabel:
 - [ ] Tepat satu main dan satu H1 bermakna per route/shell.
 - [ ] Navigasi tenant mobile tidak diduplikasi sebagai dua menu primer.
 - [ ] Status kontrak lewat tanggal memiliki copy + CTA yang tidak kontradiktif.
+- [ ] Footer publik dikelompokkan secara semantik dan tetap mudah dipindai pada enam route publik utama.
+- [ ] Gate Baymard yang relevan terverifikasi: harga/biaya awal, status kamar, filter/back-state, galeri, ulasan, dan CTA booking.
 - [ ] `npm run build` frontend lulus.
 - [ ] `npx vitest run` lulus.
 - [ ] Backend `npx tsc --noEmit` lulus jika ada perubahan backend/deploy.
