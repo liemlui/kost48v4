@@ -1,5 +1,16 @@
 # KOST48 V5 — M13 Changelog
 
+## 2026-07-30 — Verifikasi page-level homepage produksi
+
+- Audit read-only produksi mengonfirmasi API sehat dengan 0 kamar bookable, 13 occupied, total 13; hero nol kamar adalah state bisnis nyata, bukan error jaringan.
+- Bukti DOM/visual: tujuh blok hero, overlay gelap tanpa CSS blur, trust grid 4+1, cue galeri opacity 0 sampai hover, FAQ uppercase, copy empty-review berulang, dan 11 link footer dalam satu grup.
+- Dibuka AO-17 P1 untuk hero/teaser state nol, AO-18 P2 untuk hierarki/trust homepage, dan AO-19 P2 untuk audit aset/cue galeri.
+- Kontras digabung ke AO-08 dan struktur footer ke AO-15. Google Maps info-window dikeluarkan karena dikendalikan pihak ketiga.
+- Rekomendasi seal palsu, menyebut properti “exclusive/new” saat ulasan kosong, serta klaim respons `24/7` ditolak. Trust copy hanya boleh memakai fakta owner, termasuk CCTV area bersama yang tercatat di M02.
+- Dua screenshot viewport produksi bebas PII ditambahkan ke `docs/assets/m14-uiux-audit/`.
+
+**Perubahan:** dokumentasi + bukti screenshot publik; tidak ada kode aplikasi, dependency, schema, atau data yang diubah.
+
 ## 2026-07-30 — Integrasi guideline page-level katalog publik
 
 - Dua puluh guideline Search Results Page dipetakan ke `/rooms`; KOST48 tidak memiliki sitewide text search sehingga istilah e-commerce tidak diterapkan secara literal.

@@ -66,6 +66,7 @@ Route tenant: `/portal/stay`, `/portal/energy`, `/portal/bookings`, `/portal/inv
 | Label | Arti |
 |---|---|
 | `DYNAMIC` | Terlihat pada browser aktual dan dapat direproduksi |
+| `PROD-DYNAMIC` | Terlihat read-only pada situs produksi dan dikonfirmasi dengan DOM/API produksi |
 | `CODE` | Dikonfirmasi langsung dari implementasi |
 | `ENV` | Berasal dari keadaan UAT/deploy, bukan kesimpulan desain |
 | `BLOCKED-UAT` | Belum dapat diuji dinamis karena akun/data/gate lingkungan |
@@ -131,6 +132,43 @@ Inspeksi kode menemukan dua gap yang dapat ditindaklanjuti:
 
 1. Empty state selalu menulis `Semua kamar sedang penuh` ketika `rooms.length === 0`, termasuk saat API sukses tetapi filter aktif menghasilkan nol kecocokan.
 2. Filter dan posisi scroll sudah dipulihkan dari `sessionStorage`, tetapi `comparedRoomIds` hanya state lokal sehingga shortlist hilang setelah masuk detail lalu kembali.
+
+### 2.7 Page-level benchmark: homepage produksi
+
+Masukan owner berikutnya berisi 28 observasi visual untuk hero, katalog teaser, trust/value proposition, lokasi, galeri/brosur, FAQ, kontak, dan footer. Verifikasi read-only dilakukan pada `https://kost48surabaya.com/` tanggal 30 Juli 2026 pada viewport `1440 × 1000` dan `375 × 812`.
+
+Bukti produksi:
+
+- `GET /api/public/rooms/summary` → 200 dengan `bookable=0`, `occupied=13`, `total=13`; angka nol bukan error API.
+- `GET /api/public/rooms?...` → 200 dan mengembalikan data kamar terisi.
+- Hero memiliki tujuh blok anak langsung: lokasi, H1, headline, subcopy, badge harga/ketersediaan, CTA, dan tagline.
+- CSS hero tidak memakai blur (`filter: blur(0px)`); kesan gelap berasal dari dua overlay gradient sampai opacity gelap `0.88`.
+- Lima trust card tersusun empat kartu pada baris pertama dan satu kartu sendiri pada baris kedua.
+- Cue galeri `Lihat` ada di DOM, tetapi opacity default `0`; pada perangkat sentuh cue tidak selalu terlihat.
+- Tag FAQ memakai `text-transform: uppercase`.
+- Empty-review section mengulang frasa `Belum ada ulasan` dua kali.
+- Footer berisi satu navigation group dengan 11 link.
+
+![Hero produksi desktop — nol ketersediaan nyata](assets/m14-uiux-audit/homepage-production-desktop.png)
+
+![Hero produksi mobile — nol ketersediaan nyata](assets/m14-uiux-audit/homepage-production-mobile.png)
+
+| Kelompok masukan | Putusan | Alasan/tujuan |
+|---|---|---|
+| Hero nol kamar, label/CTA negatif, warna hijau untuk nol | AO-17 P1 | Terkonfirmasi produksi; harus menangkap minat tanpa menyatakan kamar tersedia |
+| Hero terlalu padat | AO-17 P1 | Tujuh blok pesan bersaing di atas fold |
+| Foto hero “blur” | AO-17 parsial | Tidak ada CSS blur; audit opacity/crop overlay, bukan mengganti gambar secara spekulatif |
+| Katalog teaser kosong, kategori kurang terlihat, CTA berjauhan | AO-17/AO-18 | Saat 13 kamar terisi dan 0 bookable, branch data sukses menghasilkan grid kosong karena hanya merender kamar bookable |
+| Trust card angka 01–05 dan grid 4+1 | AO-18 P2 | Terkonfirmasi DOM/screenshot; perbaiki scanability dan keseimbangan |
+| Security seal/verified badge | `REJECT AS WRITTEN` | Jangan membuat seal palsu; boleh menyebut fakta CCTV area bersama dari M02 secara privacy-safe |
+| Kontras aksen lemah | Merge AO-08 | Wajib diukur, bukan dinilai dari selera warna saja |
+| Empty review diberi label “exclusive/new” | `REJECT AS WRITTEN` | Menyesatkan; ringkas empty state tetapi tetap jujur bahwa belum ada ulasan |
+| CTA lokasi/FAQ/contact dan hierarki alamat | AO-18 P2 | Optimasi scannability serta keseimbangan CTA |
+| Google Maps info-window overload | `OUT-OF-CONTROL` | Konten iframe dikendalikan Google; KOST48 hanya menjamin fallback link |
+| Kualitas foto/brosur dan cue thumbnail | AO-19 P2 | Perlu audit aset asli; cue hover-only tidak memadai untuk touch |
+| CTA dekat fold edge | `NEEDS-VISUAL-VERIFY` | Full-page screenshot tidak membuktikan fold; cek viewport nyata pada AO-14 |
+| Klaim respons cepat/24 jam | `REJECT WITHOUT OWNER SLA` | Jangan menjanjikan waktu respons yang belum diputuskan owner |
+| Footer grouping dan Maps/WhatsApp prominence | Merge AO-15 | Sudah menjadi task struktur footer; tambah ikon/label utility |
 
 ---
 
@@ -505,6 +543,85 @@ Command pada AGENTS/CLAUDE harus berhasil tanpa langkah tersembunyi.
 
 ---
 
+### AO-17 — P1 — Homepage nol ketersediaan memberi sinyal mati dan teaser katalog kosong
+
+**Bukti:** `PROD-DYNAMIC`, `CODE`.
+
+Produksi sedang memiliki 0 kamar bookable dari 13 kamar. Hero tetap menampilkan CTA `Lihat Kamar Tersedia`, angka `0 kamar tersedia` berwarna hijau, dan section katalog masuk branch `rooms.length > 0` tetapi grid-nya kosong karena hanya memetakan kamar bookable. Ini adalah state bisnis sah yang dipresentasikan seperti dead end sekaligus menyisakan ruang kosong besar.
+
+**File utama:**
+
+- `frontend/src/pages/public/PublicGuestDashboardPage.tsx`
+- `frontend/src/styles/11-public-pages.css`
+- helper WhatsApp publik yang sudah ada; tidak membuat model waitlist baru tanpa keputusan owner
+
+**Acceptance criteria:**
+
+- Loading/error tidak pernah dirender sebagai angka nol.
+- Jika `bookable > 0`, pertahankan CTA `Lihat Kamar Tersedia` dan semantics positif.
+- Jika request sukses dan `bookable === 0`, gunakan warna netral/caution dan copy jujur seperti `Semua kamar sedang terisi`.
+- State nol menyediakan lead capture via WhatsApp berpesan awal `Kabari saya saat kamar tersedia`/waitlist serta CTA sekunder melihat jadwal atau seluruh kamar.
+- Jangan membuat database/email/SMS waitlist baru sebelum owner menyetujui flow dan privasi lead.
+- Teaser katalog tidak kosong: tampilkan kategori/alternatif relevan, kamar dengan proyeksi tersedia, atau satu compact waitlist state; jangan merender grid tanpa card.
+- Ringkas hero menjadi satu pesan utama: pertahankan H1, value proposition, status/price, dan action; gabungkan atau hapus quote/next-copy yang berulang.
+- Overlay/crop membuat bangunan dapat dinilai tanpa mengorbankan kontras AA; jangan menyebut gambar “blur” ketika `filter` memang nol.
+- Test state loading, error, `bookable=0`, `bookable=1`, dan data summary/list yang sementara tidak sinkron pada desktop/mobile.
+
+---
+
+### AO-18 — P2 — Hierarki section homepage dan trust signal belum efisien
+
+**Bukti:** `PROD-DYNAMIC`, `CODE`.
+
+Homepage memiliki beberapa masalah kecil-menengah yang saling menumpuk: CTA katalog berjauhan dari heading, trust grid 4+1, mark angka 01–05 kurang semantik, empty review mengulang pesan negatif, FAQ tag uppercase dengan CTA kecil, serta CTA Maps lebih dominan daripada WhatsApp. Perbaikan harus tetap faktual dan tidak menambah badge/promosi palsu.
+
+**File utama:**
+
+- `frontend/src/pages/public/PublicGuestDashboardPage.tsx`
+- `frontend/src/pages/public/publicGuestShared.tsx` bila shared copy/mark berubah
+- `frontend/src/styles/11-public-pages.css`
+
+**Acceptance criteria:**
+
+- CTA `Lihat Katalog Lengkap` berada dekat heading/copy yang dijelaskannya pada desktop/mobile.
+- Jika memakai quick category tiles, setiap tile mempunyai destination/filter yang benar dan memakai aset kamar nyata; jangan menambah kategori dekoratif tanpa fungsi.
+- Trust grid seimbang pada desktop, misalnya 3+2 centered atau layout responsif lain tanpa satu card yatim.
+- Ganti angka 01–05 dengan ikon semantik yang mempunyai `aria-hidden` dan teks card tetap menjadi accessible name.
+- Trust keamanan hanya memakai fakta terverifikasi, misalnya CCTV area bersama dari M02; tidak memakai logo `Verified`, seal, atau klaim sertifikasi palsu.
+- Empty-review menyebut ketiadaan ulasan satu kali, lalu mengarahkan ke manfaat faktual/CTA; jangan menyamarkannya sebagai properti “exclusive” atau “baru”.
+- Ringkas paragraph intro yang panjang tanpa menghapus informasi biaya/status penting.
+- Tag FAQ menggunakan sentence/title case dan CTA semua FAQ cukup terlihat serta target sentuh minimal 44 px.
+- CTA Maps dan WhatsApp seimbang; address memakai ikon/lapis tipografi yang mudah dipindai.
+- Tidak ada klaim `24/7`/`fast response` sampai owner menetapkan jam/SLA resmi.
+- Kontras perubahan mengikuti AO-08 dan diuji pada desktop/mobile, bukan hanya dilihat secara subjektif.
+
+---
+
+### AO-19 — P2 — Audit kualitas aset publik dan interaction cue galeri
+
+**Bukti:** review eksternal, `PROD-DYNAMIC`, `CODE`; kualitas sumber foto perlu pemeriksaan file asli.
+
+Galeri/brosur sudah berupa button dengan label dan cue `Lihat`, sehingga klaim “tidak ada interaction cue” tidak sepenuhnya benar. Namun cue tersebut opacity `0` sampai hover dan tidak dapat diandalkan pada touch. Kualitas/resolusi hero, foto profil/properti, serta brochure artwork harus diaudit sebelum meminta penggantian.
+
+**File utama:**
+
+- `frontend/src/data/officialKost48Content.ts`
+- `frontend/src/data/kost48Assets.ts`
+- aset aktual di `frontend/public/room-images/` atau media registry
+- renderer gallery di `PublicGuestDashboardPage.tsx`
+
+**Acceptance criteria:**
+
+- Inventaris tiap aset: sumber, pixel dimension, aspect ratio, ukuran file, crop desktop/mobile, alt text, dan status hak pakai.
+- Foto properti harus foto KOST48 asli; jangan memakai AI-generated property image atau stock photo yang menyesatkan.
+- Jika sumber tidak cukup tajam, tandai `BLOCKED:owner menyediakan foto asli resolusi tinggi`; jangan meng-upscale lalu mengklaim detail baru.
+- Thumbnail brosur memakai cover/judul yang mudah dipindai, sementara dokumen penuh tetap tersedia di lightbox/download.
+- Cue `Buka ukuran penuh`/zoom selalu terlihat pada touch dan keyboard, tidak hanya saat hover.
+- Lightbox mempunyai close/focus behavior, caption, dan fallback gambar rusak yang dapat diakses.
+- Verifikasi pada DPR 1/2 serta viewport 320–1440 px; optimasi ukuran tanpa membuat teks/gambar kabur.
+
+---
+
 ## 5. Hal yang Sudah Baik
 
 - 66 kombinasi route–viewport tidak menghasilkan halaman root kosong.
@@ -564,7 +681,10 @@ Gunakan status berikut di tabel:
 | AO-13 Crawl OWNER/ADMIN/STAFF | P0 gate | `BLOCKED:AO-00+AO-03` | `frontend/e2e/admin-owner-crawl.spec.ts` + staff crawl | 0 crash/5xx/blank/guard salah |
 | AO-15 Struktur footer publik | P3 | `OPEN` | `publicGuestShared.tsx`, `11-public-pages.css` | 6 route publik + 320–414 px |
 | AO-16 Empty result + persistensi shortlist | P2 | `OPEN` | `PublicRoomsPage.tsx`, test katalog | filtered-zero + detail/back |
-| AO-14 Re-audit final 5 role | P0 gate | `BLOCKED:AO-01..AO-13+AO-15+AO-16` | QA only | seluruh Definition of Done + gate Baymard relevan |
+| AO-17 Hero/teaser state nol | P1 | `OPEN` | `PublicGuestDashboardPage.tsx`, `11-public-pages.css` | prod-like 0/1/error/loading |
+| AO-18 Hierarki homepage/trust | P2 | `OPEN` | `PublicGuestDashboardPage.tsx`, `publicGuestShared.tsx`, CSS publik | desktop/mobile + truthfulness |
+| AO-19 Audit aset/galeri publik | P2 | `OPEN` | data aset, `room-images`, gallery renderer | inventory + touch/keyboard |
+| AO-14 Re-audit final 5 role | P0 gate | `BLOCKED:AO-01..AO-13+AO-15..AO-19` | QA only | seluruh Definition of Done + gate Baymard relevan |
 
 ### 7.2 Gelombang kerja
 
@@ -576,7 +696,9 @@ Gunakan status berikut di tabel:
 
 **Wave 1 — dapat paralel setelah AO-00**
 
-- Agent Public: AO-01 + bagian public AO-08/AO-09, lalu AO-16 dan AO-15 secara serial karena berbagi area katalog/CSS publik.
+- Agent Public Catalog: AO-01 + bagian public AO-08/AO-09, lalu AO-16.
+- Agent Public Homepage: AO-17 → AO-18 → AO-15 secara serial karena berbagi `PublicGuestDashboardPage`/CSS publik.
+- Agent Asset: AO-19 dapat mulai dari inventory, tetapi koordinasikan perubahan renderer/CSS dengan Agent Public Homepage.
 - Agent Tenant Shell: AO-04; jangan menyentuh `MyStayPage`/`ProfilePage`.
 - Agent Tenant Logic: AO-02 + AO-05; jangan menyentuh shell/CSS global.
 - Agent A11y Form: AO-06 + AO-07; jangan menyentuh navigation.
@@ -585,7 +707,8 @@ Gunakan status berikut di tabel:
 
 - AO-10 dan AO-11 setelah shell mobile stabil.
 - AO-16 setelah AO-01 selesai/review karena sama-sama menyentuh `PublicRoomsPage.tsx`.
-- AO-15 setelah perubahan CSS AO-01 selesai/review; jangan dikerjakan paralel pada `11-public-pages.css`.
+- AO-17, AO-18, dan AO-15 harus serial; jangan dikerjakan paralel pada `11-public-pages.css`.
+- AO-19 menunggu owner hanya jika sumber foto pengganti memang dibutuhkan; inventory dan audit interaction cue dapat dikerjakan lebih dulu.
 - AO-13 crawl role.
 - AO-14 audit final dan penutupan checklist.
 
@@ -621,6 +744,9 @@ Gunakan status berikut di tabel:
 - [ ] Footer publik dikelompokkan secara semantik dan tetap mudah dipindai pada enam route publik utama.
 - [ ] Gate Baymard yang relevan terverifikasi: harga/biaya awal, status kamar, filter/back-state, galeri, ulasan, dan CTA booking.
 - [ ] Empty result membedakan filter-nol, data benar-benar kosong, dan request error; shortlist perbandingan bertahan selama sesi detail/back.
+- [ ] Homepage `bookable=0` tidak memakai sinyal hijau/CTA palsu, tetap menangkap minat, dan tidak menyisakan teaser grid kosong.
+- [ ] Hierarki homepage ringkas, trust claim faktual, review empty-state jujur, serta CTA/FAQ/contact mudah dipindai.
+- [ ] Aset publik terinventarisasi dan cue galeri dapat ditemukan pada touch/keyboard.
 - [ ] `npm run build` frontend lulus.
 - [ ] `npx vitest run` lulus.
 - [ ] Backend `npx tsc --noEmit` lulus jika ada perubahan backend/deploy.
