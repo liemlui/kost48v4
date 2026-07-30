@@ -41,72 +41,80 @@ export class RenewRequestsService {
       throw new ForbiddenException('Hanya tenant yang dapat mengajukan permintaan perpanjangan');
     }
 
-    // S-01: lock Stay FOR UPDATE agar renew & checkout tidak race. Checkout juga
-    // mengunci Stay yang sama dengan FOR UPDATE sehingga hanya satu yang lanjut.
-    const [stay] = await this.prisma.$queryRawUnsafe<
-      Array<{ id: number; status: string; tenantId: number; agreedRentAmountRupiah: number; plannedCheckOutDate: string }>
-    >(`SELECT * FROM "Stay" WHERE id = $1 FOR UPDATE`, dto.stayId);
-    if (!stay) throw new NotFoundException('Stay tidak ditemukan');
-    if (stay.status !== StayStatus.ACTIVE) throw new ConflictException('Stay tidak aktif, tidak dapat mengajukan perpanjangan');
+    // S-01: lock, seluruh cross-check, dan create WAJIB berada dalam transaksi
+    // yang sama. FOR UPDATE di luar $transaction hanya hidup selama statement
+    // tersebut dan tidak melindungi read-check-write berikutnya.
+    const { stay, request, downPaymentAmountRupiah } = await this.prisma.$transaction(async (tx) => {
+      const lockedStay = await tx.$queryRaw<Array<{ id: number }>>`
+        SELECT id FROM "Stay" WHERE id = ${dto.stayId} FOR UPDATE
+      `;
+      if (lockedStay.length === 0) throw new NotFoundException('Stay tidak ditemukan');
 
-    if (stay.tenantId !== actor.tenantId) {
-      throw new ForbiddenException('Anda bukan pemilik stay ini');
-    }
+      const stay = await tx.stay.findUnique({ where: { id: dto.stayId } });
+      if (!stay) throw new NotFoundException('Stay tidak ditemukan');
+      if (stay.status !== StayStatus.ACTIVE) {
+        throw new ConflictException('Stay tidak aktif, tidak dapat mengajukan perpanjangan');
+      }
+      if (stay.tenantId !== actor.tenantId) {
+        throw new ForbiddenException('Anda bukan pemilik stay ini');
+      }
 
-    // Cross-block: cannot create renew request if a checkout request is PENDING
-    // W-04: menggunakan helper domain ACTIVE_CHECKOUT_STATUSES
-    const pendingCheckout = await this.prisma.checkoutRequest.findFirst({
-      where: { stayId: dto.stayId, status: { in: ACTIVE_CHECKOUT_STATUSES } },
-    });
-    if (pendingCheckout) {
-      throw new ConflictException(
-        'Tidak dapat mengajukan perpanjangan karena ada permintaan checkout yang menunggu persetujuan',
-      );
-    }
+      // W-04: checkout dan renew mengunci row Stay yang sama sebelum memeriksa
+      // status lawannya, sehingga keduanya tidak dapat dibuat bersamaan.
+      const pendingCheckout = await tx.checkoutRequest.findFirst({
+        where: { stayId: dto.stayId, status: { in: ACTIVE_CHECKOUT_STATUSES } },
+      });
+      if (pendingCheckout) {
+        throw new ConflictException(
+          'Tidak dapat mengajukan perpanjangan karena ada permintaan checkout yang menunggu persetujuan',
+        );
+      }
 
-    const openInvoices = await this.prisma.invoice.findMany({
-      where: { stayId: dto.stayId, status: { notIn: [InvoiceStatus.PAID, InvoiceStatus.CANCELLED] } },
-      select: { id: true, invoiceNumber: true, status: true },
-      orderBy: { id: 'asc' },
-    });
-    if (openInvoices.length > 0) {
-      const refs = openInvoices
-        .map((invoice) => `${invoice.invoiceNumber || `Tagihan #${invoice.id}`} belum dibayar`)
-        .join(', ');
-      throw new ConflictException(`Selesaikan tagihan aktif sebelum mengajukan perpanjangan: ${refs}`);
-    }
+      const openInvoices = await tx.invoice.findMany({
+        where: { stayId: dto.stayId, status: { notIn: [InvoiceStatus.PAID, InvoiceStatus.CANCELLED] } },
+        select: { id: true, invoiceNumber: true, status: true },
+        orderBy: { id: 'asc' },
+      });
+      if (openInvoices.length > 0) {
+        const refs = openInvoices
+          .map((invoice) => `${invoice.invoiceNumber || `Tagihan #${invoice.id}`} belum dibayar`)
+          .join(', ');
+        throw new ConflictException(`Selesaikan tagihan aktif sebelum mengajukan perpanjangan: ${refs}`);
+      }
 
-    const existingActive = await this.prisma.renewRequest.findFirst({
-      where: {
-        stayId: dto.stayId,
-        status: { in: ACTIVE_RENEW_STATUSES },
-      },
-    });
-    if (existingActive) {
-      throw new ConflictException('Masih ada permintaan perpanjangan yang sedang berjalan');
-    }
+      const existingActive = await tx.renewRequest.findFirst({
+        where: {
+          stayId: dto.stayId,
+          status: { in: ACTIVE_RENEW_STATUSES },
+        },
+      });
+      if (existingActive) {
+        throw new ConflictException('Masih ada permintaan perpanjangan yang sedang berjalan');
+      }
 
-    // F2-1: DP 30% perpanjangan = 30% × sewa SAAT INI (rent-loyalty D-16: tak naik saat renew).
-    const renewalRentRupiah = Number(stay.agreedRentAmountRupiah) ?? 0;
-    const downPaymentAmountRupiah = roundRupiah((renewalRentRupiah * 30) / 100);
+      // F2-1: DP 30% perpanjangan = 30% × sewa SAAT INI (rent-loyalty D-16: tak naik saat renew).
+      const renewalRentRupiah = Number(stay.agreedRentAmountRupiah ?? 0);
+      const downPaymentAmountRupiah = roundRupiah((renewalRentRupiah * 30) / 100);
+      const request = await tx.renewRequest.create({
+        data: {
+          stayId: dto.stayId,
+          tenantId: actor.tenantId!,
+          requestedTerm: dto.requestedTerm,
+          requestedCheckOutDate: dto.requestedCheckOutDate ? new Date(dto.requestedCheckOutDate) : undefined,
+          requestNotes: dto.requestNotes,
+          // F2-1 state machine: mulai dari keputusan tenant (perpanjang atau tidak).
+          status: RenewRequestStatus.PENDING_DECISION,
+          downPaymentAmountRupiah,
+          downPaymentDueDate: stay.plannedCheckOutDate ?? undefined, // hari-H = batas prioritas tenant lama
+          // F4-11: prabayar fleksibel (jumlah bulan + penanda early). F4-13a: review tenant.
+          prepaidMonths: dto.prepaidMonths ?? undefined,
+          isEarly: stay.plannedCheckOutDate ? new Date() < new Date(stay.plannedCheckOutDate) : false,
+          tenantReview: dto.tenantReview ?? undefined,
+          tenantReviewAt: dto.tenantReview ? new Date() : undefined,
+        },
+      });
 
-    const request = await this.prisma.renewRequest.create({
-      data: {
-        stayId: dto.stayId,
-        tenantId: actor.tenantId!,
-        requestedTerm: dto.requestedTerm,
-        requestedCheckOutDate: dto.requestedCheckOutDate ? new Date(dto.requestedCheckOutDate) : undefined,
-        requestNotes: dto.requestNotes,
-        // F2-1 state machine: mulai dari keputusan tenant (perpanjang atau tidak).
-        status: RenewRequestStatus.PENDING_DECISION,
-        downPaymentAmountRupiah,
-        downPaymentDueDate: stay.plannedCheckOutDate ?? undefined, // hari-H = batas prioritas tenant lama
-        // F4-11: prabayar fleksibel (jumlah bulan + penanda early). F4-13a: review tenant.
-        prepaidMonths: dto.prepaidMonths ?? undefined,
-        isEarly: stay.plannedCheckOutDate ? new Date() < new Date(stay.plannedCheckOutDate) : false,
-        tenantReview: dto.tenantReview ?? undefined,
-        tenantReviewAt: dto.tenantReview ? new Date() : undefined,
-      },
+      return { stay, request, downPaymentAmountRupiah };
     });
 
     // F4-13a: poin review saat perpanjang (best-effort, idempotent per renewRequestId).

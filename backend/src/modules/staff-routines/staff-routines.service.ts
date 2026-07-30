@@ -8,6 +8,7 @@ import { PrismaService } from '../../prisma/prisma.service';
 import { CompleteRoutineDto, StaffRoutineProgressQueryDto, StaffRoutineTemplateDto } from './dto/staff-routine.dto';
 
 const DAY_MS = 24 * 60 * 60 * 1000;
+type StaffWorkClient = Pick<Prisma.TransactionClient, 'ticket' | 'staffRoutineCompletion'>;
 
 function startOfLocalDate(input = new Date()) {
   // F2-14/E-6: "hari ini" = tanggal kalender WIB (UTC+7) sebagai UTC-midnight, bebas timezone
@@ -49,15 +50,15 @@ function dueLabel(template: { frequency: string; dayOfWeek?: number | null; dayO
 export class StaffRoutinesService {
   constructor(private readonly prisma: PrismaService, private readonly audit: AuditLogService) {}
 
-  private async assertNoActiveWork(actor: CurrentUserPayload, currentRoutineId?: number) {
+  private async assertNoActiveWork(actor: CurrentUserPayload, currentRoutineId?: number, db: StaffWorkClient = this.prisma) {
     if (actor.role !== UserRole.STAFF) return;
 
     const [activeTicket, activeRoutine] = await Promise.all([
-      this.prisma.ticket.findFirst({
+      db.ticket.findFirst({
         where: { assignedToId: actor.id, status: 'IN_PROGRESS' as any },
         select: { id: true, title: true, ticketNumber: true },
       }),
-      this.prisma.staffRoutineCompletion.findFirst({
+      db.staffRoutineCompletion.findFirst({
         where: {
           staffUserId: actor.id,
           status: StaffRoutineStatus.IN_PROGRESS,
@@ -174,36 +175,53 @@ export class StaffRoutinesService {
     } else {
       roomId = null;
     }
-    const existing = await this.prisma.staffRoutineCompletion.findFirst({
-      where: {
-        templateId: template.id,
-        assignmentId: assignment?.id ?? null,
-        staffUserId: actor.id,
-        roomId,
-        dueDate,
-      },
+    const { saved, existing, changed } = await this.prisma.$transaction(async (tx) => {
+      // OS-05: ticket.start() mengambil lock User yang sama. Lock dipertahankan
+      // sampai pemeriksaan pekerjaan aktif dan write routine selesai.
+      if (actor.role === UserRole.STAFF) {
+        const lockedUser = await tx.$queryRaw<Array<{ id: number }>>`
+          SELECT id FROM "User" WHERE id = ${actor.id} FOR UPDATE
+        `;
+        if (lockedUser.length === 0) throw new NotFoundException('Akun staf tidak ditemukan');
+      }
+
+      const existing = await tx.staffRoutineCompletion.findFirst({
+        where: {
+          templateId: template.id,
+          assignmentId: assignment?.id ?? null,
+          staffUserId: actor.id,
+          roomId,
+          dueDate,
+        },
+      });
+
+      if (existing?.status === StaffRoutineStatus.DONE) throw new ConflictException('Pekerjaan ini sudah selesai');
+      if (existing?.status === StaffRoutineStatus.NEED_HELP) throw new ConflictException('Pekerjaan ini sudah dikirim sebagai kendala');
+      if (existing?.status === StaffRoutineStatus.IN_PROGRESS) {
+        return { saved: existing, existing, changed: false };
+      }
+
+      await this.assertNoActiveWork(actor, existing?.id, tx);
+
+      const saved = existing
+        ? await tx.staffRoutineCompletion.update({ where: { id: existing.id }, data: { status: StaffRoutineStatus.IN_PROGRESS, completedAt: null, note: dto.note?.trim() || null } })
+        : await tx.staffRoutineCompletion.create({
+            data: {
+              template: { connect: { id: template.id } },
+              assignment: assignment ? { connect: { id: assignment.id } } : undefined,
+              staffUser: { connect: { id: actor.id } },
+              room: roomId ? { connect: { id: roomId } } : undefined,
+              dueDate,
+              status: StaffRoutineStatus.IN_PROGRESS,
+              completedAt: null,
+              note: dto.note?.trim() || null,
+            },
+          });
+
+      return { saved, existing, changed: true };
     });
 
-    if (existing?.status === StaffRoutineStatus.DONE) throw new ConflictException('Pekerjaan ini sudah selesai');
-    if (existing?.status === StaffRoutineStatus.NEED_HELP) throw new ConflictException('Pekerjaan ini sudah dikirim sebagai kendala');
-    if (existing?.status === StaffRoutineStatus.IN_PROGRESS) return existing;
-
-    await this.assertNoActiveWork(actor);
-
-    const saved = existing
-      ? await this.prisma.staffRoutineCompletion.update({ where: { id: existing.id }, data: { status: StaffRoutineStatus.IN_PROGRESS, completedAt: null, note: dto.note?.trim() || null } })
-      : await this.prisma.staffRoutineCompletion.create({
-          data: {
-            template: { connect: { id: template.id } },
-            assignment: assignment ? { connect: { id: assignment.id } } : undefined,
-            staffUser: { connect: { id: actor.id } },
-            room: roomId ? { connect: { id: roomId } } : undefined,
-            dueDate,
-            status: StaffRoutineStatus.IN_PROGRESS,
-            completedAt: null,
-            note: dto.note?.trim() || null,
-          },
-        });
+    if (!changed) return saved;
 
     await this.audit.log({
       actorUserId: actor.id,

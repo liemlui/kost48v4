@@ -145,7 +145,7 @@ export class OwnerAiService {
     const dayStart = startOfJakartaBusinessDay(new Date()).getTime();
     let used = 0;
     for (const [, b] of this.buckets) {
-      if (b.resetAt >= dayStart) used += b.count;
+      if (b.resetAt > dayStart) used += b.count;
     }
     return Math.max(0, dailyLimit - used);
   }
@@ -171,7 +171,7 @@ export class OwnerAiService {
     const byFeature: Record<string, number> = {};
     let todayTotal = 0;
     for (const [key, b] of this.buckets) {
-      if (b.resetAt < dayStart) continue; // bucket kemarin → diabaikan
+      if (b.resetAt <= dayStart) continue; // bucket kemarin → diabaikan, termasuk tepat di boundary
       const idx = key.indexOf(':');
       const feature = idx >= 0 ? key.slice(idx + 1) : 'unknown';
       byFeature[feature] = (byFeature[feature] ?? 0) + b.count;

@@ -65,7 +65,7 @@ export class AccountingPostingService {
       basis: "V5.28_B8_CLOSED_PERIOD_GOVERNANCE",
       sourceTypes: ["INVOICE", "INVOICE_PAYMENT", "EXPENSE", "WIFI_SALE", "DEPOSIT", "ADJUSTMENT", "DEPRECIATION", "CLOSING_ENTRY", "CLOSING_REVERSAL"],
       behavior:
-        "Idempotent by sourceType/sourceId. Jika COA/cash/period belum siap atau periode sudah CLOSED, transaksi bisnis tetap aman dan journal auto-posting diskip dengan warning; koreksi periode closed harus lewat reopen/reversal Owner-only.",
+        "Idempotent by sourceType/sourceId. Posting operasional utama (invoice, payment, expense, WiFi, deposit) bersifat BLOCKING bila COA/cash/period belum siap atau periode CLOSED. ADJUSTMENT/DEPRECIATION tertentu dapat diskip untuk kasus benign; koreksi periode closed harus lewat reopen/reversal Owner-only.",
       excluded: ["INVENTORY", "PAYMENT_REVERSAL"],
       note: "B8 menambahkan closed-period guard: tidak ada journal baru yang boleh masuk periode CLOSED kecuali workflow close/reopen yang terkontrol.",
     };
@@ -1448,7 +1448,7 @@ export class AccountingPostingService {
     );
   }
 
-  /** Non-throwing variant — hanya untuk case idempoten (journal sudah ada). */
+  /** Non-throwing variant untuk case benign/idempoten dan adjustment opsional. */
   private skipSilent(sourceType: string, sourceId: string | number, reason: string) {
     this.logger.warn(`Skip auto journal ${sourceType} #${sourceId}: ${reason}`);
     return {
@@ -1458,19 +1458,6 @@ export class AccountingPostingService {
       sourceId: String(sourceId),
       reason,
     };
-  }
-
-  /**
-   * Helper publik: throw jika posting gagal (call site kritis pakai ini).
-   * Tidak throw untuk case idempoten (journal sudah ada) karena aman.
-   */
-  assertPosted(result: any, label: string): void {
-    if (!result || result.posted === false) {
-      const reason = result?.reason ?? 'tanpa keterangan';
-      throw new InternalServerErrorException(
-        `Gagal mencatat jurnal otomatis (${label}): ${reason}`,
-      );
-    }
   }
 
   // F3-10: jalankan posting jurnal idempoten yang punya transaksinya sendiri.

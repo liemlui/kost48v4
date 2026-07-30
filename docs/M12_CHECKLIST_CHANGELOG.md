@@ -123,6 +123,7 @@ Catatan: perubahan tool/seed deploy 2026-07-19 adalah riwayat UAT. Produksi meng
 | **Fase M22-Deep — Audit IoT & Telemetri (Reasonix)** | ✅ selesai (29 Jul) | Deep scan modul iot/ (1911 baris): 0 isu. timingSafeEqual di cron token + ESP32 HMAC, polling mutex, RateLimitGuard. Temuan terintegrasi ke `docs/M06_OPERASIONAL.md` §Deep Audit IoT. |
 | **Fase MX — Audit Lintas Scope (Reasonix)** | ✅ selesai (29 Jul) | Cross-scope audit terhadap 8 domain: 1 CRITICAL (journal consistency), 2 HIGH (timezone, DRY), 10 rekomendasi X1-X10. Scope Keuangan = sink terlemah. Temuan terintegrasi ke `docs/M01_MASTER.md` §Audit Lintas Scope. |
 | **Fase MX-Verify — Verifikasi Codex Sol** | ✅ selesai (29 Jul) | 18 temuan diverifikasi oleh Codex Sol (model tertinggi): 12 BENAR, 1 SALAH (A9 expenses), 5 PARSIAL (B1/B4/C1/D1/A7). 8 koreksi diterapkan ke M01/M05/M06. |
+| **Fase MX-Final — Koreksi sign-off pasca commit 6223a30** | ✅ selesai (30 Jul) | S-01 lock dipindahkan ke satu transaksi penuh; OS-05 lock User disamakan untuk ticket+routine; seluruh boundary bucket AI diperbaiki; fan-out peer-report menjadi bulk; 7 regression test khusus ditambahkan. |
 
 ---
 
@@ -196,12 +197,12 @@ Catatan: perubahan tool/seed deploy 2026-07-19 adalah riwayat UAT. Produksi meng
 > 1. **X1 🔴** — ✅ SELESAI (29 Jul) — Seragamkan SEMUA journal posting → BLOCKING (20+ call site). = AN-03.
 > 2. **X2 🟠** — ✅ SELESAI (29 Jul) — Extract `assertOwnerOrAdmin` ke shared guard (4→1).
 > 3. **X3 🟠** — ✅ SELESAI (29 Jul) — Buat `AppConfigService` — validasi env startup + cache.
-> 4. **X4 🟠** — ✅ SELESAI (29 Jul) — Fix timezone `owner-ai.service.ts` — eksplisit WIB.
+> 4. **X4 🟠** — ✅ SELESAI (30 Jul) — Timezone eksplisit WIB + equality diperbaiki pada rate-limit, remaining quota, dan usage stats.
 > 5. **AN-01 🔴** — ✅ SELESAI (29 Jul) — Deposit ledger blocking.
 > 6. **AN-02 🟠** — ✅ SELESAI (29 Jul) — Journal posting blocking.
-> 7. **S-01 🔴** — ✅ SELESAI (29 Jul) — Cross-block renew/checkout dalam tx.
+> 7. **S-01 🔴** — ✅ SELESAI (30 Jul) — Lock Stay + seluruh cross-check + create renew/checkout berada dalam transaksi masing-masing yang memakai lock sama.
 > 8. **OS-01 🔴** — ✅ SELESAI (29 Jul) — Journal WiFi sale blocking.
-> 9. **OS-04/OS-05 🟡** — ✅ SELESAI (29 Jul) — Ticket assign/start dalam tx.
+> 9. **OS-04/OS-05 🟡** — ✅ SELESAI (30 Jul) — Ticket assign/start dalam tx; ticket dan staff routine mengambil lock User yang sama sebelum guard single-active-work.
 >
 > **Verifikasi test 2026-07-02 (HISTORIS — JANGAN dikutip lagi):** angka 1072 unit + 187 integration berasal dari suite yang **DIHAPUS di commit `e505894`** (bersih-bersih repo; recoverable dari git history). **Kondisi nyata 10 Jul 2026:** BE unit **26/26 PASS** · FE vitest **121/121 PASS** · verifikasi utama kini = `tsc` BE/FE + **boot-test paket deploy** (install prod-only + start + smoke endpoint + query DB — lihat M13 10 Jul).
 

@@ -47,6 +47,20 @@ function resolveCategory(input: CreateAppNotificationInput): NotificationCategor
   return 'SYSTEM';
 }
 
+function notificationDedupeKey(input: {
+  recipientUserId: number;
+  title: string;
+  entityType?: string | null;
+  entityId?: string | null;
+}) {
+  return JSON.stringify([
+    input.recipientUserId,
+    input.title,
+    input.entityType ?? null,
+    input.entityId ?? null,
+  ]);
+}
+
 @Injectable()
 export class AppNotificationService {
   constructor(private readonly prisma: PrismaService) {}
@@ -89,6 +103,50 @@ export class AppNotificationService {
 
     const notification = await this.create(input);
     return { created: true, notificationId: notification.id };
+  }
+
+  /**
+   * Versi bulk createOnce: satu query untuk mencari duplikat dan satu createMany
+   * untuk seluruh penerima baru. Cocok untuk fan-out notifikasi admin/owner agar
+   * jumlah query tidak bertambah mengikuti jumlah penerima.
+   */
+  async createManyOnce(inputs: CreateAppNotificationInput[]) {
+    if (inputs.length === 0) return { created: 0, skipped: 0 };
+
+    const uniqueInputs = [...new Map(inputs.map((input) => [notificationDedupeKey(input), input])).values()];
+    const existing = await this.prisma.appNotification.findMany({
+      where: {
+        OR: uniqueInputs.map((input) => ({
+          recipientUserId: input.recipientUserId,
+          title: input.title,
+          entityType: input.entityType ?? null,
+          entityId: input.entityId ?? null,
+        })),
+      },
+      select: {
+        recipientUserId: true,
+        title: true,
+        entityType: true,
+        entityId: true,
+      },
+    });
+    const existingKeys = new Set(existing.map((row) => notificationDedupeKey(row)));
+    const missing = uniqueInputs.filter((input) => !existingKeys.has(notificationDedupeKey(input)));
+    if (missing.length === 0) return { created: 0, skipped: uniqueInputs.length };
+
+    const result = await this.prisma.appNotification.createMany({
+      data: missing.map((input) => ({
+        recipientUserId: input.recipientUserId,
+        title: input.title,
+        body: input.body,
+        linkTo: input.linkTo ?? null,
+        entityType: input.entityType ?? null,
+        entityId: input.entityId ?? null,
+        category: resolveCategory(input),
+        pushStatus: 'PENDING' as const,
+      })),
+    });
+    return { created: result.count, skipped: uniqueInputs.length - result.count };
   }
 
   async listMine(userId: number, query: NotificationQueryDto) {

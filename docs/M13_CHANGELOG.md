@@ -1,5 +1,16 @@
 # KOST48 V5 — M13 Changelog
 
+## 2026-07-30 — Finalisasi hardening pasca verifikasi commit 6223a30
+
+- **S-01 benar-benar atomik:** `renew-requests.service.ts:createRequest()` sekarang menjalankan lock Stay, validasi ownership/status, cross-check checkout/invoice/renew, dan `renewRequest.create()` dalam satu interactive transaction. Lock tidak lagi dilepas sebelum check–create selesai.
+- **OS-05 lintas ticket–routine:** `staff-routines.service.ts:start()` mengambil `FOR UPDATE` pada row User yang sama dengan `tickets.service.ts:start()`, lalu memeriksa dan menulis pekerjaan aktif dalam transaksi tersebut.
+- **X4 seluruh boundary WIB:** bucket dengan `resetAt === dayStart` kini dikeluarkan dari remaining quota dan usage stats, bukan hanya di-reset oleh `checkRateLimit()`.
+- **N+1 peer report selesai:** tambah `AppNotificationService.createManyOnce()`; fan-out admin/owner memakai satu lookup duplikat + satu `createMany`, bukan N pemanggilan `createOnce()`.
+- **Accounting docs sinkron:** boundary runtime menjelaskan journal operasional BLOCKING dan `skipSilent()` hanya untuk kasus benign/idempoten/adjustment opsional.
+- **Regression coverage:** tambah 7 test khusus untuk transaksi S-01, lock OS-05, dua boundary X4, bulk notification, strict journal, dan atomisitas WiFi.
+
+**Gate:** backend build ✅ · `tsc --noEmit` ✅ · 74/74 unit test PASS ✅ · frontend build 162 chunks + PWA verification ✅.
+
 ## 2026-07-29b — Koreksi pasca-audit: race condition, journal BLOCKING, atomisitas WiFi
 
 - **S-01 🔴 Race renew vs checkout:** `renew-requests.service.ts` — `findUnique` diganti `$queryRawUnsafe SELECT ... FOR UPDATE` pada Stay. Renew & checkout kini sama-sama mengunci row Stay sehingga hanya satu yang menang.
