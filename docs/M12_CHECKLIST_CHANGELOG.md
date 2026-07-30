@@ -12,6 +12,7 @@
 - [x] Masukan Baymard UX-Ray disaring: 4 pola `Best-in-Class` menjadi regression guard, 1 `Small Issue` menjadi AO-15, 2 `Not Applicable`, dan 310 `Not Rated` tidak disalahartikan sebagai defect.
 - [x] Guideline page-level Search Results dipetakan ke katalog `/rooms`: 12 guideline relevan/diadaptasi, 3 dikeluarkan, dan 1 task baru AO-16 untuk filtered-zero state serta persistensi shortlist.
 - [x] Review page-level homepage diverifikasi read-only terhadap produksi: 0/13 kamar memang state data sah; 28 observasi ditriage menjadi AO-17..AO-19, merge AO-08/AO-15, atau ditolak bila menuntut klaim palsu.
+- [x] Review dashboard Owner desktop ditriage terhadap kode: alert/actionability, toolbar, KPI data states, AI setup, dan sistem visual menjadi AO-20/AO-21; sidebar collapse dan label status teks tidak dicatat ulang sebagai defect palsu.
 - [ ] Gate awal AO-00: sinkronkan dua migration UAT yang masih pending melalui prosedur migration resmi; jangan gunakan `db push`.
 - [ ] Crawl dinamis OWNER/ADMIN/STAFF diulang setelah akun fixture UAT tersedia. Audit statis bukan pengganti bukti runtime.
 - **Putusan:** status UI/UX pra-go-live **RED** sampai AO-00 selesai dan regresi lintas role dapat dijalankan.
@@ -136,7 +137,7 @@ Catatan: perubahan tool/seed deploy 2026-07-19 adalah riwayat UAT. Produksi meng
 | **Fase MX — Audit Lintas Scope (Reasonix)** | ✅ selesai (29 Jul) | Cross-scope audit terhadap 8 domain: 1 CRITICAL (journal consistency), 2 HIGH (timezone, DRY), 10 rekomendasi X1-X10. Scope Keuangan = sink terlemah. Temuan terintegrasi ke `docs/M01_MASTER.md` §Audit Lintas Scope. |
 | **Fase MX-Verify — Verifikasi Codex Sol** | ✅ selesai (29 Jul) | 18 temuan diverifikasi oleh Codex Sol (model tertinggi): 12 BENAR, 1 SALAH (A9 expenses), 5 PARSIAL (B1/B4/C1/D1/A7). 8 koreksi diterapkan ke M01/M05/M06. |
 | **Fase MX-Final — Koreksi sign-off pasca commit 6223a30** | ✅ selesai (30 Jul) | S-01 lock dipindahkan ke satu transaksi penuh; OS-05 lock User disamakan untuk ticket+routine; seluruh boundary bucket AI diperbaiki; fan-out peer-report menjadi bulk; 7 regression test khusus ditambahkan. |
-| **Fase AO — Audit & Hardening UI/UX Lintas Portal** | 🔴 audit selesai, eksekusi terbuka | 66 kombinasi awal + verifikasi produksi homepage; 1 P0 environment, 7 P1, 9 P2, 1 P3. Sumber kerja: `docs/M14_AUDIT_UI_UX.md`. |
+| **Fase AO — Audit & Hardening UI/UX Lintas Portal** | 🔴 audit selesai, eksekusi terbuka | 66 kombinasi awal + verifikasi produksi homepage + review Owner static-code; 1 P0 environment, 8 P1, 10 P2, 1 P3. Sumber kerja: `docs/M14_AUDIT_UI_UX.md`. |
 
 ---
 
@@ -205,7 +206,7 @@ Catatan: perubahan tool/seed deploy 2026-07-19 adalah riwayat UAT. Produksi meng
 > 22. **M22-Deep** — ✅ **SELESAI (29 Jul)** — Deep audit IoT & telemetri: 0 isu. timingSafeEqual HMAC + cron token, polling mutex, RateLimitGuard. Temuan terintegrasi ke `docs/M06_OPERASIONAL.md`.
 > 23. **MX** — ✅ **SELESAI (29 Jul)** — Audit lintas scope: 1 CRITICAL (journal consistency), 2 HIGH (timezone, DRY), 10 rekomendasi X1-X10. Temuan terintegrasi ke `docs/M01_MASTER.md`.
 > 24. **MX-Verify** — ✅ **SELESAI (29 Jul)** — Verifikasi Codex Sol: 12/18 benar, 6 koreksi diterapkan ke M01/M05/M06. Memory `codex-sol-verify-koreksi` tersimpan.
-> 25. **AO-00..AO-19** — 🔴 **ANTRIAN AKTIF** — audit UI/UX lintas portal dan benchmark homepage produksi 30 Jul 2026. Mulai dari sinkronisasi migration UAT, lalu perbaikan P1, crawl role, benchmark publik, dan audit ulang. Detail otoritatif: [M14 Audit UI/UX](M14_AUDIT_UI_UX.md).
+> 25. **AO-00..AO-21** — 🔴 **ANTRIAN AKTIF** — audit UI/UX lintas portal, benchmark homepage produksi, dan review statis dashboard Owner 30 Jul 2026. Mulai dari sinkronisasi migration UAT, lalu perbaikan P1, crawl role, benchmark publik, dan audit ulang. Detail otoritatif: [M14 Audit UI/UX](M14_AUDIT_UI_UX.md).
 >
 > **🆕 TODO untuk /new berikutnya — Perbaikan Prioritas Pasca Audit (urutan):**
 > 1. **X1 🔴** — ✅ SELESAI (29 Jul) — Seragamkan SEMUA journal posting → BLOCKING (20+ call site). = AN-03.
@@ -261,6 +262,8 @@ Catatan: perubahan tool/seed deploy 2026-07-19 adalah riwayat UAT. Produksi meng
 - [ ] **AO-17 🟠 P1** — adaptasikan hero/teaser homepage untuk state 0 kamar tanpa sinyal hijau, CTA palsu, atau grid kosong; tangkap minat via WhatsApp.
 - [ ] **AO-18 🟡 P2** — rapikan hierarchy homepage, trust grid/copy, review empty-state, FAQ, lokasi, dan CTA tanpa klaim palsu.
 - [ ] **AO-19 🟡 P2** — inventarisasi kualitas aset publik dan buat cue galeri selalu terlihat pada touch/keyboard; foto pengganti menunggu aset asli owner bila perlu.
+- [ ] **AO-20 🟠 P1** — buat exception dashboard Owner actionable, pisahkan toolbar lokal, bedakan state KPI, dan beri CTA konfigurasi AI yang sah.
+- [ ] **AO-21 🟡 P2** — normalisasi sistem visual/terminologi Owner setelah AO-20 review; perubahan AppLayout harus dikoordinasikan.
 - [ ] **AO-14** — audit ulang desktop/mobile + Axe + gate Baymard relevan, build/test, screenshot bebas PII, dan sign-off Fase AO.
 
 **Gate akhir:** tidak ada 500/blank page, tidak ada overflow global pada 375 px, Axe serious/critical = 0 pada route prioritas, dan matriks role dinamis lengkap.

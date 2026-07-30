@@ -155,7 +155,7 @@ Tabel flow + method-anchor: `M03_FLOW_KONTRAK.md` (kontrak/uang). Job otomatis �
 ✅ 215 `@@index` di 61 model — semua FK utama terindeks · ✅ Global JWT default-deny + DTO validation + pagination + error handling + PWA · ✅ Code splitting + skeleton + empty state chart (✅ P8-03) + 404 (✅ Fase L) + toast (✅ Fase F+M) · ✅ Refresh Token httpOnly cookie (M17 P3-01)
 
 ## Dokumen audit terbaru
-- **Audit UI/UX lintas portal aktif (30 Jul 2026):** `docs/M14_AUDIT_UI_UX.md` — 66 kombinasi awal, verifikasi homepage produksi, benchmark Baymard terkurasi, antrean kolaboratif AO-00..AO-19
+- **Audit UI/UX lintas portal aktif (30 Jul 2026):** `docs/M14_AUDIT_UI_UX.md` — 66 kombinasi awal, verifikasi homepage produksi dan review statis dashboard Owner, benchmark terkurasi, antrean kolaboratif AO-00..AO-21
 - **Audit Fable (2-3 Jul 2026):** `docs/archieve/audit_fable/00_INDEX.md` — 19 checklist C01-C19
 - **Audit Reasonix Code (7 Jul 2026):** `docs/archieve/audit_reasonix/RINGKASAN_EKSEKUTIF.md` — 82 temuan baru
 - **Audit 360° P3-P8 (Jul 2026):** `docs/archieve/M17_AUDIT_360_P3_P8.md`

@@ -67,6 +67,7 @@ Route tenant: `/portal/stay`, `/portal/energy`, `/portal/bookings`, `/portal/inv
 |---|---|
 | `DYNAMIC` | Terlihat pada browser aktual dan dapat direproduksi |
 | `PROD-DYNAMIC` | Terlihat read-only pada situs produksi dan dikonfirmasi dengan DOM/API produksi |
+| `EXTERNAL-STATIC` | Masukan audit/screenshot pihak luar yang ditriage ke kode, tetapi belum dapat direproduksi pada sesi OWNER UAT |
 | `CODE` | Dikonfirmasi langsung dari implementasi |
 | `ENV` | Berasal dari keadaan UAT/deploy, bukan kesimpulan desain |
 | `BLOCKED-UAT` | Belum dapat diuji dinamis karena akun/data/gate lingkungan |
@@ -169,6 +170,35 @@ Bukti produksi:
 | CTA dekat fold edge | `NEEDS-VISUAL-VERIFY` | Full-page screenshot tidak membuktikan fold; cek viewport nyata pada AO-14 |
 | Klaim respons cepat/24 jam | `REJECT WITHOUT OWNER SLA` | Jangan menjanjikan waktu respons yang belum diputuskan owner |
 | Footer grouping dan Maps/WhatsApp prominence | Merge AO-15 | Sudah menjadi task struktur footer; tambah ikon/label utility |
+
+### 2.8 Page-level review: dashboard Owner desktop
+
+Masukan owner berupa export statis UX Audit untuk `/owner-dashboard` tanggal 30 Juli 2026. Skor otomatis dari layanan luar tidak dipakai sebagai metrik release karena metodologinya bukan gate KOST48; dokumen ini hanya menyimpan triage yang dapat diverifikasi. Audit dinamis OWNER masih `BLOCKED-UAT`, sehingga hover, focus, keyboard, ukuran target nyata, serta kontras terhitung tetap harus diuji pada AO-14.
+
+Bukti kode:
+
+- `OwnerDashboardPage.tsx` merender alert kondisi bulan langsung sebelum KPI, namun surface-nya masih putih dengan `border-left` dan tanpa CTA.
+- Toolbar lokal mencampur tahun, bulan, toggle Ringkas/Lengkap, refresh, dan timestamp; control period saat ini memiliki `min-height: 34px`, belum keluarga desktop 40–44 px.
+- `owner-signal-item` sudah merupakan `<button>` dengan navigasi dan hover/focus, tetapi hanya memuat judul, helper, dan chevron; payload aggregate belum memiliki owner, due date, atau risk object untuk ditampilkan secara jujur.
+- KPI memakai accent top border dan panel/status memakai left border; radius aktif bercampur 6/8/9/12 px. Ini bukti inkonsistensi pattern, bukan alasan mengubah semua komponen global sekaligus.
+- Status grade dan signal sudah punya label teks; dot hanya `aria-hidden`. Jadi temuan “makna hanya dari warna” bersifat parsial, bukan defect color-only yang sudah terbukti.
+- Sidebar desktop sudah dapat diciutkan dari 260 px menjadi 60 px melalui `AppLayout`; rekomendasi membuat sidebar collapsible dinyatakan sudah ada. Kepadatan defaultnya tetap perlu verifikasi visual OWNER.
+- Dashboard OWNER mempunyai akses sah ke `/settings?tab=ai`; empty state AI dapat diberi CTA konfigurasi langsung, bukan instruksi mati atau CTA “Ajukan ke Admin”.
+
+| Kelompok masukan | Putusan | Alasan/tujuan |
+|---|---|---|
+| Alert `Bulan ini perlu perhatian lebih` tidak dominan/beraksi | AO-20 P1 | Terkonfirmasi `CODE`; perlu alert component dan CTA yang mengarah ke prioritas nyata |
+| Toolbar padat dan tinggi control kecil | AO-20 P1 | Terkonfirmasi `CODE`; pisahkan scope data, mode density, dan status sistem |
+| KPI nol mendapat bobot sama dengan data bermakna | AO-20 P1 | Bedakan nilai nol yang valid, belum ada data, stale, dan gagal muat tanpa menyembunyikan fakta |
+| Baris `Akuntansi belum siap` kurang action-oriented | AO-20 P1, parsial | Seluruh baris sudah clickable; tambahkan intent CTA. Owner/due/risk hanya bila kontrak API menyediakannya |
+| Teks mute diduga gagal AA | Merge AO-08 | `#64748b` tidak boleh disimpulkan gagal dari screenshot; ukur tiap foreground/surface dengan Axe/manual contrast |
+| Status hanya dari warna | `PARTIAL / VERIFY` | Label teks sudah ada; pertahankan teks/ikon dan uji keyboard, jangan menambah chip dekoratif tanpa makna |
+| Nama Kokpit Owner/Dashboard Owner berulang | AO-21 P2 | Perjelas pemisahan label workspace, breadcrumb, dan satu judul halaman agar tidak berlapis tanpa fungsi |
+| Card, toggle, accent, dan helper tidak konsisten | AO-21 P2 | Inventaris desktop Owner diperlukan sebelum normalisasi token lokal |
+| Sidebar terlalu lebar/tidak bisa diciutkan | `ALREADY IMPLEMENTED` | Collapse 260 → 60 px telah ada; hanya evaluasi kepadatan dan discoverability pada UAT OWNER |
+| AI setup berupa dead end | AO-20 P1 | CTA langsung ke tab AI tersedia untuk OWNER; jelaskan manfaat singkat dan state konfigurasi |
+
+**Handoff Figma/implementasi (bukan file Figma):** gunakan inventory `page-header`, `data-toolbar`, `alert/warning`, `kpi/metric`, `task-row/alert`, `ai/setup`, dan `nav-item/selected`. Usulan token lokal: card radius `12px`, pill `20–24px`, control sekunder `40px`, CTA primer `44px`, serta variant bernama `card/info`, `card/warning`, `card/metric`, `row/selected`, `row/alert`. Variasi `loading`, `error`, `empty`, `zero-valid`, dan `not-configured` harus menjadi state eksplisit, bukan turunan visual dari card berisi data.
 
 ---
 
@@ -622,6 +652,61 @@ Galeri/brosur sudah berupa button dengan label dan cue `Lihat`, sehingga klaim �
 
 ---
 
+### AO-20 — P1 — Dashboard Owner belum mengubah exception dan state data menjadi tindakan cepat
+
+**Bukti:** `EXTERNAL-STATIC`, `CODE`, `BLOCKED-UAT` untuk validasi desktop OWNER nyata.
+
+Alert bulanan ditempatkan sebelum KPI, tetapi masih surface putih beraksen kiri tanpa CTA. Toolbar lokal menempatkan scope periode, density view, refresh, dan timestamp dalam satu cluster 34 px. KPI tidak membedakan `Rp 0` yang valid dari data belum tersedia, sementara signal `Akuntansi belum siap` sudah clickable tetapi tidak menyatakan tindakan tujuan. State AI hanya memberi instruksi teks, padahal OWNER memiliki route konfigurasi yang sah.
+
+**File utama:**
+
+- `frontend/src/pages/dashboard/OwnerDashboardPage.tsx`
+- `frontend/src/styles/12-owner.css`
+- test komponen/dashboard Owner yang baru atau diperluas
+
+**Acceptance criteria:**
+
+- Alert grade `PERHATIAN`/`RISIKO`/`KRITIS` memakai variant warning/risk yang berbeda dari card biasa, mempunyai icon + label teks, headline ringkas, detail faktual, dan CTA `Buka prioritas` atau route spesifik yang benar.
+- Alert ditempatkan sebelum KPI pada desktop; CTA tidak muncul bila tidak ada action yang benar-benar dapat dilakukan.
+- Toolbar lokal dibagi secara semantik menjadi `Scope data` (tahun/bulan), `Tampilan` (Ringkas/Lengkap), dan `Status sistem` (refresh/terakhir diperbarui), dengan gap antarkelompok sekitar 16 px.
+- Semua control toolbar lokal tingginya minimum 40 px; CTA primer bila ditambahkan minimum 44 px. Tidak mengubah ukuran global AppLayout tanpa task AO-21.
+- Mode `Ringkas`/`Lengkap` memakai setter eksplisit, tombol aktif idempotent, dan semantics radio/pressed yang konsisten; keyboard/focus visible diverifikasi.
+- KPI menyatakan perbedaan antara nilai nol yang valid, data belum ada, stale, loading, dan error. Jangan mengganti angka bisnis nol dengan placeholder yang menyembunyikan kondisi nyata.
+- Priority item memiliki label tindakan eksplisit, misalnya `Buka setup akuntansi`, serta hover/focus/target klik seluruh baris yang jelas. Jangan membuat owner, tenggat, atau ringkasan risiko palsu; perluas API lebih dulu bila metadata tersebut memang dibutuhkan.
+- AI `not configured` menjelaskan satu manfaat bisnis yang faktual dan memberi CTA OWNER ke `/settings?tab=ai`; jangan memberi CTA konfigurasi kepada role yang tidak berwenang.
+- Perubahan warna/status memenuhi AO-08: label teks tidak dihapus dan state tidak dibedakan dengan warna saja.
+- Uji loading/error/zero-valid/no-data/stale/not-configured dan satu signal accounting pada desktop 1440 px + laptop touch/hybrid.
+
+---
+
+### AO-21 — P2 — Sistem visual dan penamaan workspace Owner perlu dinormalisasi tanpa merombak shell lintas role
+
+**Bukti:** `EXTERNAL-STATIC`, `CODE`, `BLOCKED-UAT` untuk observasi visual OWNER desktop.
+
+Owner workspace mencampur radius 6/8/9/12 px, top-border KPI, left-border alert, pill terseleksi, dan beberapa label konteks `Kokpit Owner`/`Dashboard Owner`. Sidebar dapat diciutkan, sehingga problem yang tersisa adalah konsistensi density dan kejelasan label, bukan ketiadaan fitur collapse.
+
+**File utama:**
+
+- `frontend/src/pages/dashboard/OwnerDashboardPage.tsx`
+- `frontend/src/styles/12-owner.css`
+- `frontend/src/components/layout/AppLayout.tsx`
+- `frontend/src/config/navigation.ts`
+- `frontend/src/config/routeTitles.ts`
+- `frontend/src/styles/02-layout.css` hanya bila hasil review menunjukkan perubahan shell lintas role memang perlu
+
+**Acceptance criteria:**
+
+- Buat inventory komponen desktop Owner pada M14/review: page header, data toolbar, alert, KPI, task row, AI setup, dan selected navigation; tetapkan token/variant sebelum mengubah CSS.
+- Gunakan satu sistem radius, stroke, accent placement, dan control-height untuk komponen Owner yang disentuh. Jangan melakukan replace global tanpa visual regression role lain.
+- Pisahkan secara eksplisit label workspace (`Kokpit Owner`) dari satu judul page bisnis; hapus pengulangan berdekatan pada sidebar, breadcrumb/topbar, dan H1 tanpa menghilangkan orientasi pengguna.
+- Global search, profil, notifikasi, dan logout tetap berada di app shell. Scope periode/view tetap toolbar lokal; jangan memindahkan kontrol antarlayer hanya karena screenshot tampak padat.
+- Sidebar collapse existing tetap keyboard-accessible, discoverable, dan menyimpan preferensi. Nilai ulang lebar default/teks konteks hanya dengan screenshot OWNER UAT 1280/1440 px.
+- Style terpilih, alert, metric, dan empty/setup state mempunyai token/variant bernama, bukan kombinasi border/fill ad hoc.
+- Verifikasi kontras semua token yang berubah pada white/pale-blue surface sesuai AO-08; ukur, jangan memakai skor otomatis eksternal sebagai bukti AA.
+- Dokumentasikan before/after bebas PII dan uji desktop 1280/1440 px, 1024 px, serta keyboard-only.
+
+---
+
 ## 5. Hal yang Sudah Baik
 
 - 66 kombinasi route–viewport tidak menghasilkan halaman root kosong.
@@ -684,7 +769,9 @@ Gunakan status berikut di tabel:
 | AO-17 Hero/teaser state nol | P1 | `OPEN` | `PublicGuestDashboardPage.tsx`, `11-public-pages.css` | prod-like 0/1/error/loading |
 | AO-18 Hierarki homepage/trust | P2 | `OPEN` | `PublicGuestDashboardPage.tsx`, `publicGuestShared.tsx`, CSS publik | desktop/mobile + truthfulness |
 | AO-19 Audit aset/galeri publik | P2 | `OPEN` | data aset, `room-images`, gallery renderer | inventory + touch/keyboard |
-| AO-14 Re-audit final 5 role | P0 gate | `BLOCKED:AO-01..AO-13+AO-15..AO-19` | QA only | seluruh Definition of Done + gate Baymard relevan |
+| AO-20 Dashboard Owner: exception/actionability | P1 | `OPEN` | `OwnerDashboardPage.tsx`, `12-owner.css` | data state + desktop/touch/keyboard |
+| AO-21 Sistem visual/terminologi Owner | P2 | `OPEN` | Owner dashboard + AppLayout/nav/title/CSS shell | 1024/1280/1440 + regression role |
+| AO-14 Re-audit final 5 role | P0 gate | `BLOCKED:AO-01..AO-13+AO-15..AO-21` | QA only | seluruh Definition of Done + gate Baymard relevan |
 
 ### 7.2 Gelombang kerja
 
@@ -699,6 +786,7 @@ Gunakan status berikut di tabel:
 - Agent Public Catalog: AO-01 + bagian public AO-08/AO-09, lalu AO-16.
 - Agent Public Homepage: AO-17 → AO-18 → AO-15 secara serial karena berbagi `PublicGuestDashboardPage`/CSS publik.
 - Agent Asset: AO-19 dapat mulai dari inventory, tetapi koordinasikan perubahan renderer/CSS dengan Agent Public Homepage.
+- Agent Owner Dashboard: AO-20 dapat dimulai tanpa mengubah AppLayout; fokus `OwnerDashboardPage.tsx` + `12-owner.css`.
 - Agent Tenant Shell: AO-04; jangan menyentuh `MyStayPage`/`ProfilePage`.
 - Agent Tenant Logic: AO-02 + AO-05; jangan menyentuh shell/CSS global.
 - Agent A11y Form: AO-06 + AO-07; jangan menyentuh navigation.
@@ -709,6 +797,7 @@ Gunakan status berikut di tabel:
 - AO-16 setelah AO-01 selesai/review karena sama-sama menyentuh `PublicRoomsPage.tsx`.
 - AO-17, AO-18, dan AO-15 harus serial; jangan dikerjakan paralel pada `11-public-pages.css`.
 - AO-19 menunggu owner hanya jika sumber foto pengganti memang dibutuhkan; inventory dan audit interaction cue dapat dikerjakan lebih dulu.
+- AO-21 setelah AO-20 direview; koordinasikan dulu bila AppLayout, navigation, route title, atau CSS shell akan disentuh.
 - AO-13 crawl role.
 - AO-14 audit final dan penutupan checklist.
 
@@ -747,6 +836,8 @@ Gunakan status berikut di tabel:
 - [ ] Homepage `bookable=0` tidak memakai sinyal hijau/CTA palsu, tetap menangkap minat, dan tidak menyisakan teaser grid kosong.
 - [ ] Hierarki homepage ringkas, trust claim faktual, review empty-state jujur, serta CTA/FAQ/contact mudah dipindai.
 - [ ] Aset publik terinventarisasi dan cue galeri dapat ditemukan pada touch/keyboard.
+- [ ] Dashboard Owner mengubah exception menjadi CTA yang benar, membedakan state data KPI, dan toolbar lokal dapat dipindai pada desktop/touch/keyboard.
+- [ ] Komponen Owner memakai sistem visual/terminologi yang konsisten tanpa regresi AppLayout atau role lain.
 - [ ] `npm run build` frontend lulus.
 - [ ] `npx vitest run` lulus.
 - [ ] Backend `npx tsc --noEmit` lulus jika ada perubahan backend/deploy.

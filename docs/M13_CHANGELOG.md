@@ -1,5 +1,14 @@
 # KOST48 V5 — M13 Changelog
 
+## 2026-07-30 — Triage audit dashboard Owner desktop
+
+- Masukan audit eksternal dashboard Owner disaring ke bukti `CODE`; skor otomatisnya tidak dijadikan metrik release karena audit OWNER dinamis masih menunggu fixture UAT.
+- Dibuka AO-20 P1 untuk alert/actionability, pengelompokan toolbar, state data KPI, dan CTA setup AI; dibuka AO-21 P2 untuk sistem visual, penamaan workspace, serta density shell terkoordinasi.
+- Tidak semua rekomendasi diterima mentah: sidebar collapse 260→60 px sudah tersedia, status utama mempunyai label teks dan bukan color-only murni, sementara owner/due/risk tidak akan dibuat tanpa kontrak API.
+- Kontras Owner digabungkan ke AO-08 dan harus diukur pada surface nyata; validasi hover/focus/keyboard ditunda ke crawl OWNER/AO-14.
+
+**Perubahan:** dokumentasi dan antrean kolaboratif saja; tidak ada kode aplikasi, schema, dependency, atau data yang diubah.
+
 ## 2026-07-30 — Verifikasi page-level homepage produksi
 
 - Audit read-only produksi mengonfirmasi API sehat dengan 0 kamar bookable, 13 occupied, total 13; hero nol kamar adalah state bisnis nyata, bukan error jaringan.
