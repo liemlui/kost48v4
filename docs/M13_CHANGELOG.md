@@ -1,5 +1,15 @@
 # KOST48 V5 — M13 Changelog
 
+## 2026-07-30 — Integrasi guideline page-level katalog publik
+
+- Dua puluh guideline Search Results Page dipetakan ke `/rooms`; KOST48 tidak memiliki sitewide text search sehingga istilah e-commerce tidak diterapkan secara literal.
+- Lima guideline assessed tidak diberi label pass/fail karena nilai assessment tidak tersedia pada masukan owner.
+- Thumbnail, harga, struktur card, jumlah hasil, atribut mobile, sorting, filter, dan pagination terdeteksi di kode lalu dijadikan gate dinamis AO-14 setelah migration pulih.
+- Rating per kamar, typo query, combine variations, dan featured promo mobile dikeluarkan atau diadaptasi karena tidak sesuai model data/tujuan katalog kost.
+- Dibuka AO-16 P2: empty state filter saat ini salah menyimpulkan semua kamar penuh dan shortlist perbandingan belum bertahan saat detail/back.
+
+**Perubahan:** dokumentasi saja; tidak ada kode aplikasi, dependency, schema, atau data UAT yang diubah.
+
 ## 2026-07-30 — Integrasi masukan Baymard UX-Ray ke Fase AO
 
 - Export UX-Ray owner disaring berdasarkan tingkat kepastian: hanya 5/317 guideline auto-rated, 2 `Not Applicable`, dan 310 `Not Rated`; item yang tidak dinilai tidak dicatat sebagai defect.

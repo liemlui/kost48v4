@@ -109,6 +109,29 @@ Guideline `Not Rated` yang tetap layak dijadikan **gate verifikasi**, bukan temu
 
 Fitur terkait sudah terlihat di kode (`PublicRoomsPage`, `PublicRoomDetailPage`, `ReviewsPublicPage`, `GuestPreferenceWizard`). Karena katalog UAT sedang 500, seluruh butir di atas diverifikasi ulang pada AO-14 setelah AO-00; jangan mengklaim lulus hanya dari inspeksi kode.
 
+### 2.6 Page-level benchmark: katalog sebagai padanan Search Results Page
+
+Masukan lanjutan owner memuat 20 guideline Baymard untuk Search Results Page: 5 telah assessed dan 15 belum dinilai. Nilai kelima assessment tidak ikut tercantum, sehingga dokumen ini **tidak** memberi label pass/fail. KOST48 juga tidak memiliki pencarian teks sitewide; padanan terdekat adalah katalog `/rooms` dengan filter dan sorting.
+
+| Guideline assessed | Pemetaan KOST48 | Keputusan |
+|---|---|---|
+| Rating pada list item | Review KOST48 bersifat properti/pengelola, bukan rating per kamar | `N/A` — jangan menggandakan rating global pada setiap kamar seolah room-specific |
+| Alternative search query | Tidak ada query teks; padanannya adalah saran melonggarkan/reset filter ketika hasil nol | AO-16 |
+| Thumbnail list item | `RoomCardImage` sudah memuat foto, fallback, kontrol, dan indikator multi-foto | `CODE-PRESENT`, verifikasi mobile di AO-14 |
+| Kejelasan harga | `RoomPriceTable` dan fallback `Hubungi admin untuk tarif` tersedia pada setiap card | `CODE-PRESENT`, verifikasi data/visual di AO-14 |
+| Pemisahan visual informasi | `RoomCard` memisahkan status, kategori, spesifikasi, fasilitas, harga, dan CTA | `CODE-PRESENT`, verifikasi konsistensi di AO-14 |
+
+Triage 15 guideline yang belum dinilai:
+
+- **12 relevan/diadaptasi:** konsistensi atribut antar-card, informasi card mobile, jumlah hasil, dua guideline indikator/jumlah foto, sorting harga, filter khusus kamar, prioritas filter ketersediaan, pagination, relevansi filter, duplikasi filter, dan shortlist.
+- **3 dikeluarkan:** combine product variations karena setiap kamar adalah unit inventaris unik; misspelling karena tidak ada input pencarian teks; featured promo mobile karena akan mengganggu scan katalog.
+- **Adaptasi domain:** sitewide sorting/filter diterapkan pada katalog kamar; `Saving Items` diterjemahkan menjadi mempertahankan pilihan bandingkan maksimal tiga kamar dalam satu sesi, bukan membuat wishlist atau akun baru.
+
+Inspeksi kode menemukan dua gap yang dapat ditindaklanjuti:
+
+1. Empty state selalu menulis `Semua kamar sedang penuh` ketika `rooms.length === 0`, termasuk saat API sukses tetapi filter aktif menghasilkan nol kecocokan.
+2. Filter dan posisi scroll sudah dipulihkan dari `sessionStorage`, tetapi `comparedRoomIds` hanya state lokal sehingga shortlist hilang setelah masuk detail lalu kembali.
+
 ---
 
 ## 3. Metode Penilaian
@@ -459,6 +482,29 @@ Command pada AGENTS/CLAUDE harus berhasil tanpa langkah tersembunyi.
 
 ---
 
+### AO-16 — P2 — Empty state filter menyesatkan dan shortlist perbandingan tidak persisten
+
+**Bukti:** benchmark page-level, lalu dikonfirmasi melalui `CODE`.
+
+`PublicRoomsPage` memakai satu empty state `Semua kamar sedang penuh` untuk seluruh kondisi `rooms.length === 0`. Dengan filter aktif, nol hasil tidak membuktikan semua kamar penuh. Pada saat yang sama, pengguna dapat membandingkan tiga kamar tetapi pilihan tersebut hilang setelah membuka detail dan kembali, sementara filter/scroll sudah dipersistensikan.
+
+**File utama:**
+
+- `frontend/src/pages/rooms/PublicRoomsPage.tsx`
+- test katalog/room discovery; ubah `RoomCard.tsx` hanya jika indikator shortlist memang perlu
+
+**Acceptance criteria:**
+
+- Request sukses + filter aktif + nol hasil menampilkan `Tidak ada kamar sesuai filter`, daftar filter aktif, tombol `Reset filter`, dan opsi bantuan memilih/WhatsApp.
+- Request sukses tanpa filter + nol item memakai pesan netral `Belum ada kamar yang dapat ditampilkan`, bukan menyimpulkan okupansi tanpa data pendukung.
+- Error request tetap memakai error state AO-01; tidak pernah berubah menjadi empty state.
+- Pilihan bandingkan maksimal tiga kamar bertahan selama sesi ketika membuka detail lalu kembali.
+- ID shortlist yang tidak lagi ada pada response dibuang dengan aman; tidak menyimpan PII.
+- Jumlah hasil, filter aktif, sorting, pagination, dan atribut card konsisten pada desktop/mobile.
+- Rating global KOST48 tidak ditempel pada setiap kamar kecuali kelak tersedia model review per-kamar yang sah.
+
+---
+
 ## 5. Hal yang Sudah Baik
 
 - 66 kombinasi route–viewport tidak menghasilkan halaman root kosong.
@@ -517,7 +563,8 @@ Gunakan status berikut di tabel:
 | AO-12 Kontrak API dev | P2 | `OPEN` | `vite.config.ts` atau `.env.development`, docs command | login dev tanpa langkah tersembunyi |
 | AO-13 Crawl OWNER/ADMIN/STAFF | P0 gate | `BLOCKED:AO-00+AO-03` | `frontend/e2e/admin-owner-crawl.spec.ts` + staff crawl | 0 crash/5xx/blank/guard salah |
 | AO-15 Struktur footer publik | P3 | `OPEN` | `publicGuestShared.tsx`, `11-public-pages.css` | 6 route publik + 320–414 px |
-| AO-14 Re-audit final 5 role | P0 gate | `BLOCKED:AO-01..AO-13+AO-15` | QA only | seluruh Definition of Done + gate Baymard relevan |
+| AO-16 Empty result + persistensi shortlist | P2 | `OPEN` | `PublicRoomsPage.tsx`, test katalog | filtered-zero + detail/back |
+| AO-14 Re-audit final 5 role | P0 gate | `BLOCKED:AO-01..AO-13+AO-15+AO-16` | QA only | seluruh Definition of Done + gate Baymard relevan |
 
 ### 7.2 Gelombang kerja
 
@@ -529,7 +576,7 @@ Gunakan status berikut di tabel:
 
 **Wave 1 — dapat paralel setelah AO-00**
 
-- Agent Public: AO-01 + bagian public AO-08/AO-09, lalu AO-15 secara serial karena berbagi `11-public-pages.css`.
+- Agent Public: AO-01 + bagian public AO-08/AO-09, lalu AO-16 dan AO-15 secara serial karena berbagi area katalog/CSS publik.
 - Agent Tenant Shell: AO-04; jangan menyentuh `MyStayPage`/`ProfilePage`.
 - Agent Tenant Logic: AO-02 + AO-05; jangan menyentuh shell/CSS global.
 - Agent A11y Form: AO-06 + AO-07; jangan menyentuh navigation.
@@ -537,6 +584,7 @@ Gunakan status berikut di tabel:
 **Wave 2 — integrasi**
 
 - AO-10 dan AO-11 setelah shell mobile stabil.
+- AO-16 setelah AO-01 selesai/review karena sama-sama menyentuh `PublicRoomsPage.tsx`.
 - AO-15 setelah perubahan CSS AO-01 selesai/review; jangan dikerjakan paralel pada `11-public-pages.css`.
 - AO-13 crawl role.
 - AO-14 audit final dan penutupan checklist.
@@ -572,6 +620,7 @@ Gunakan status berikut di tabel:
 - [ ] Status kontrak lewat tanggal memiliki copy + CTA yang tidak kontradiktif.
 - [ ] Footer publik dikelompokkan secara semantik dan tetap mudah dipindai pada enam route publik utama.
 - [ ] Gate Baymard yang relevan terverifikasi: harga/biaya awal, status kamar, filter/back-state, galeri, ulasan, dan CTA booking.
+- [ ] Empty result membedakan filter-nol, data benar-benar kosong, dan request error; shortlist perbandingan bertahan selama sesi detail/back.
 - [ ] `npm run build` frontend lulus.
 - [ ] `npx vitest run` lulus.
 - [ ] Backend `npx tsc --noEmit` lulus jika ada perubahan backend/deploy.
