@@ -1,8 +1,17 @@
 # KOST48 V5 — Checklist Eksekusi Aktif
 
-> Versi aktif: **2026-07-23** | Changelog → `docs/M13_CHANGELOG.md` | Riwayat fase lama tetap dipertahankan sebagai arsip konteks.
+> Versi aktif: **2026-07-30** | Changelog → `docs/M13_CHANGELOG.md` | Riwayat fase lama tetap dipertahankan sebagai arsip konteks.
 
 ## Cara Pakai (AI Eksekutor — baca sebelum coding)
+
+## Update 2026-07-30 — Audit Mendalam UI/UX Lintas Portal
+
+- [x] Audit browser nyata mencakup 66 kombinasi route–viewport: publik, tenant aktif, dan tenant tanpa stay aktif pada desktop/mobile.
+- [x] Audit statis mencakup 74 deklarasi route, guard role, navigasi STAFF, state loading/error/empty, serta titik aksesibilitas utama.
+- [x] Temuan, bukti, file ownership, dependensi, dan Definition of Done dibukukan di `docs/M14_AUDIT_UI_UX.md` sebagai sumber eksekusi Fase AO.
+- [ ] Gate awal AO-00: sinkronkan dua migration UAT yang masih pending melalui prosedur migration resmi; jangan gunakan `db push`.
+- [ ] Crawl dinamis OWNER/ADMIN/STAFF diulang setelah akun fixture UAT tersedia. Audit statis bukan pengganti bukti runtime.
+- **Putusan:** status UI/UX pra-go-live **RED** sampai AO-00 selesai dan regresi lintas role dapat dijalankan.
 
 ## Update 2026-07-16 — KTP Portal dan Simplifikasi Owner/Admin
 
@@ -72,7 +81,7 @@ Catatan: perubahan tool/seed deploy 2026-07-19 adalah riwayat UAT. Produksi meng
 
 ---
 
-## Status Ringkas (2026-07-23)
+## Status Ringkas (2026-07-30)
 
 | Blok | Status | Catatan |
 |------|--------|---------|
@@ -124,6 +133,7 @@ Catatan: perubahan tool/seed deploy 2026-07-19 adalah riwayat UAT. Produksi meng
 | **Fase MX — Audit Lintas Scope (Reasonix)** | ✅ selesai (29 Jul) | Cross-scope audit terhadap 8 domain: 1 CRITICAL (journal consistency), 2 HIGH (timezone, DRY), 10 rekomendasi X1-X10. Scope Keuangan = sink terlemah. Temuan terintegrasi ke `docs/M01_MASTER.md` §Audit Lintas Scope. |
 | **Fase MX-Verify — Verifikasi Codex Sol** | ✅ selesai (29 Jul) | 18 temuan diverifikasi oleh Codex Sol (model tertinggi): 12 BENAR, 1 SALAH (A9 expenses), 5 PARSIAL (B1/B4/C1/D1/A7). 8 koreksi diterapkan ke M01/M05/M06. |
 | **Fase MX-Final — Koreksi sign-off pasca commit 6223a30** | ✅ selesai (30 Jul) | S-01 lock dipindahkan ke satu transaksi penuh; OS-05 lock User disamakan untuk ticket+routine; seluruh boundary bucket AI diperbaiki; fan-out peer-report menjadi bulk; 7 regression test khusus ditambahkan. |
+| **Fase AO — Audit & Hardening UI/UX Lintas Portal** | 🔴 audit selesai, eksekusi terbuka | 66 kombinasi browser + 74 route statis; 1 P0 environment, 6 P1, 6 P2. Sumber kerja: `docs/M14_AUDIT_UI_UX.md`. |
 
 ---
 
@@ -150,7 +160,7 @@ Catatan: perubahan tool/seed deploy 2026-07-19 adalah riwayat UAT. Produksi meng
 
 ## ANTRIAN EKSEKUSI AKTIF
 
-> **Fase A** blocked owner (infrastruktur server/domain/env). **Fase B–AM** selesai.
+> **Fase A** blocked owner (infrastruktur server/domain/env). **Fase AO** adalah antrean UI/UX aktif; fase lama yang sudah selesai tetap menjadi konteks historis.
 >
 > **Sisa aktif:**
 > 0. **SEED-DATA-ASLI ✅** — Seed data asli dari KOST48_Laporan_Bulanan_FINAL_Teraudit.xlsx menggantikan dummy `seed-dev-via-api.js`. 14 kamar, 48 tenant (dengan portal access), 52 stay (12 ACTIVE), 186 invoice PAID, 186 payment, total Rp 219.710.000. Script: `backend/scripts/seed-dev-real.js` + `backend/scripts/seed-data.json`. (19 Jul 2026)
@@ -192,6 +202,7 @@ Catatan: perubahan tool/seed deploy 2026-07-19 adalah riwayat UAT. Produksi meng
 > 22. **M22-Deep** — ✅ **SELESAI (29 Jul)** — Deep audit IoT & telemetri: 0 isu. timingSafeEqual HMAC + cron token, polling mutex, RateLimitGuard. Temuan terintegrasi ke `docs/M06_OPERASIONAL.md`.
 > 23. **MX** — ✅ **SELESAI (29 Jul)** — Audit lintas scope: 1 CRITICAL (journal consistency), 2 HIGH (timezone, DRY), 10 rekomendasi X1-X10. Temuan terintegrasi ke `docs/M01_MASTER.md`.
 > 24. **MX-Verify** — ✅ **SELESAI (29 Jul)** — Verifikasi Codex Sol: 12/18 benar, 6 koreksi diterapkan ke M01/M05/M06. Memory `codex-sol-verify-koreksi` tersimpan.
+> 25. **AO-00..AO-14** — 🔴 **ANTRIAN AKTIF** — audit UI/UX lintas portal 30 Jul 2026. Mulai dari sinkronisasi migration UAT, lalu perbaikan P1, crawl role, dan audit ulang. Detail otoritatif: [M14 Audit UI/UX](M14_AUDIT_UI_UX.md).
 >
 > **🆕 TODO untuk /new berikutnya — Perbaikan Prioritas Pasca Audit (urutan):**
 > 1. **X1 🔴** — ✅ SELESAI (29 Jul) — Seragamkan SEMUA journal posting → BLOCKING (20+ call site). = AN-03.
@@ -219,6 +230,32 @@ Catatan: perubahan tool/seed deploy 2026-07-19 adalah riwayat UAT. Produksi meng
 - [x] **AN-04 🟡 F-30 — Fix dedupe deposit ledger** — `deposit-ledger.service.ts:185`: sertakan `invoicePaymentId` di `sourceId` (format `PS_xxx_IP_yyy`). Idempotent guard tetap bekerja.
 - [x] **AN-05 🟡 N1 — Buat 4 unit test keuangan** — 4 file: pricing (4 test), periode (2 test), cashflow-classifier (5 test), financial-ratios (8 test). 19 test baru PASS.
 - [x] **AN-06 🟢 P1-04 — Auto-reject sweeper EXPIRED** — `booking-sweep.service.ts:415`: PENDING_REVIEW → REJECTED (bukan EXPIRED).
+
+---
+
+### Fase AO — Audit & Hardening UI/UX Lintas Portal
+
+**Sumber:** audit browser + kode 30 Juli 2026 — `docs/M14_AUDIT_UI_UX.md`.
+**Aturan:** detail bukti, scope file, dependensi, dan DoD mengikuti M14; checklist ini hanya ringkasan antrean.
+
+- [x] **AO-AUDIT** — audit 66 kombinasi route–viewport dan 74 deklarasi route; bukti aman disimpan di `docs/assets/m14-uiux-audit/`.
+- [ ] **AO-00 🔴 P0** — terapkan dua migration UAT pending melalui ledger resmi, backup, dan smoke test. **Owner/DevOps; perubahan DB memerlukan persetujuan.**
+- [ ] **AO-01 🟠 P1** — satukan state katalog publik saat API daftar kamar gagal; jangan tampilkan “0 kamar” bersamaan dengan kalender berisi kamar.
+- [ ] **AO-02 🟠 P1** — perbaiki urutan hooks halaman loyalitas agar feature redirect tidak memicu ErrorBoundary.
+- [ ] **AO-03 🟠 P1** — sediakan fixture/kredensial UAT non-personal untuk OWNER, ADMIN, STAFF, dan dua state TENANT tanpa menulis secret ke repo.
+- [ ] **AO-04 🟠 P1** — kurangi duplikasi navigasi tenant mobile dan dominance onboarding global.
+- [ ] **AO-05 🟠 P1** — selaraskan istilah masa sewa aktif, lewat jatuh tempo, renewal, dan checkout.
+- [ ] **AO-06 🟠 P1** — asosiasikan label form auth/profile secara programatis.
+- [ ] **AO-07 🟡 P2** — hilangkan overflow horizontal `/profile` dan pecah halaman profil yang terlalu panjang.
+- [ ] **AO-08 🟡 P2** — perbaiki semua pelanggaran kontras serius yang terverifikasi.
+- [ ] **AO-09 🟡 P2** — lengkapi landmark `<main>` dan heading utama yang hilang.
+- [ ] **AO-10 🟡 P2** — ringkas manual tenant mobile dengan progressive disclosure.
+- [ ] **AO-11 🟡 P2** — perjelas scroll/filter horizontal dan target sentuh mobile.
+- [ ] **AO-12 🟡 P2** — buat kontrak koneksi API saat `npm run dev` eksplisit dan reproducible.
+- [ ] **AO-13** — crawl regresi OWNER/ADMIN/STAFF setelah AO-00 dan AO-03.
+- [ ] **AO-14** — audit ulang desktop/mobile + Axe, build/test, screenshot bebas PII, dan sign-off Fase AO.
+
+**Gate akhir:** tidak ada 500/blank page, tidak ada overflow global pada 375 px, Axe serious/critical = 0 pada route prioritas, dan matriks role dinamis lengkap.
 
 ---
 

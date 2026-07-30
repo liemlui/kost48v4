@@ -1,5 +1,16 @@
 # KOST48 V5 — M13 Changelog
 
+## 2026-07-30 — Audit mendalam UI/UX lintas portal (Fase AO)
+
+- Audit browser nyata mencakup **66 kombinasi route–viewport**: 7 route publik, 13 route tenant tanpa stay aktif, dan 13 route tenant aktif pada desktop/mobile.
+- Audit statis memeriksa **74 deklarasi route**, role guard, navigasi STAFF, state loading/error/empty, dan titik aksesibilitas utama.
+- Dibuat `docs/M14_AUDIT_UI_UX.md` sebagai sumber kerja kolaboratif AO-00..AO-14; M00, M01, dan M12 disinkronkan.
+- Gate P0: database UAT memiliki dua migration pending. Dampak teramati berupa 500 katalog publik, notifikasi, dan pengumuman serta state publik yang saling bertentangan.
+- Temuan utama lain: urutan hook halaman loyalitas, duplikasi shell tenant mobile, semantik stay lewat periode, asosiasi label auth/profile, overflow profil 7 px, kontras, landmark, dan kepadatan manual/filter mobile.
+- Crawl OWNER/ADMIN/STAFF belum diklaim lulus karena akun fixture UAT belum tersedia. Tidak ada kredensial atau bukti berisi PII yang dimasukkan ke repository.
+
+**Perubahan:** dokumentasi dan dua screenshot publik bebas PII saja; belum ada perubahan kode aplikasi atau schema.
+
 ## 2026-07-30 — Finalisasi hardening pasca verifikasi commit 6223a30
 
 - **S-01 benar-benar atomik:** `renew-requests.service.ts:createRequest()` sekarang menjalankan lock Stay, validasi ownership/status, cross-check checkout/invoice/renew, dan `renewRequest.create()` dalam satu interactive transaction. Lock tidak lagi dilepas sebelum check–create selesai.

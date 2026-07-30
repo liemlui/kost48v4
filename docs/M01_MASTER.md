@@ -8,12 +8,15 @@
 2. `docs/M02_KEPUTUSAN_OWNER.md` — sumber kebenaran keputusan owner sebelum ubah flow.
 3. `docs/M12_CHECKLIST_CHANGELOG.md` — checklist aktif, urutan eksekusi, dan gate verifikasi.
 4. `docs/M00_CODEMAP.md` — peta modul ke file; pakai ini dulu sebelum grep liar ke seluruh repo.
-5. Domain khusus: `M04` keuangan, `M05` siklus huni, `M06` operasional, `M07` publik/marketing, `M08` deploy, `M09` AI Owner/Admin.
-6. `docs/UI_UX_OWNER_ADMIN.md` — standar aktif UI Owner/Admin: ringkas saat dilihat, lengkap saat dibuka.
+5. `docs/M14_AUDIT_UI_UX.md` — audit UI/UX aktif, bukti runtime, dan pembagian kerja AO-00..AO-14.
+6. Domain khusus: `M04` keuangan, `M05` siklus huni, `M06` operasional, `M07` publik/marketing, `M08` deploy, `M09` AI Owner/Admin.
+7. `docs/UI_UX_OWNER_ADMIN.md` — standar aktif UI Owner/Admin: ringkas saat dilihat, lengkap saat dibuka.
 
 Hindari membaca arsip besar kecuali benar-benar perlu forensik: `docs/archieve/*`, file `*_STALE.md`, `reference/*`, dan `backend/src/generated/*`.
 
-## Status Terkini (2026-07-23)
+## Status Terkini (2026-07-30)
+
+- **Fase AO — Audit & Hardening UI/UX:** audit selesai pada 66 kombinasi route–viewport dan 74 route statis. Eksekusi masih terbuka; UAT berstatus RED karena dua migration pending serta crawl OWNER/ADMIN/STAFF belum tersedia. Detail: `docs/M14_AUDIT_UI_UX.md`.
 
 - **Release Pengumuman/Notifikasi P1-P3:** implementasi selesai dan build backend/frontend lulus. Keputusan bisnis, UAT, dan gate rilis ada di `docs/RELEASE_20260723_ANNOUNCEMENT_NOTIFICATIONS.md`.
 - **Perubahan lintas AI pada release ini:** uplift inventaris/fasilitas, quota utilitas berbasis periode sewa, dashboard IoT, P1-P3, hardening strict TypeScript backend, dan konsolidasi frontend/CSS telah direkonsiliasi di `M13_CHANGELOG.md`.
