@@ -63,6 +63,7 @@ import {
   parseJakartaDateOnly,
   startOfJakartaBusinessDay,
 } from "../../common/utils/date.util";
+import { IotService } from "../iot/iot.service";
 
 @Injectable()
 export class StaysService {
@@ -73,6 +74,7 @@ export class StaysService {
     private readonly audit: AuditLogService,
     private readonly accountingPosting: AccountingPostingService,
     private readonly depositLedger: DepositLedgerService,
+    private readonly iot: IotService,
   ) {}
 
   // ═══════════════════════════════════════════════════════════
@@ -247,6 +249,15 @@ export class StaysService {
     let temporaryPassword = portalResult.temporaryPassword;
     let portalUserId = portalResult.userId;
     let passwordHash = portalResult.passwordHash;
+    // IOT on-demand: auto-read meter listrik Tuya untuk baseline tenant baru.
+    // Best-effort — gagal baca (meter offline/belum terdaftar) tidak memblokir check-in.
+    let autoElectricityKwh: number | null = null;
+    try {
+      autoElectricityKwh = await this.iot.readRoomElectricityCumulative(dto.roomId);
+    } catch (error) {
+      this.logger.warn(`Auto-read meter listrik gagal saat check-in kamar ${dto.roomId}: ${error instanceof Error ? error.message : String(error)}`);
+    }
+
     try {
       const created = await this.prisma.$transaction(async (tx) => {
         // Lock + re-validasi: cegah race condition double occupancy
@@ -333,7 +344,14 @@ export class StaysService {
           // (pemindahan dari payment-submissions.service.ts)
           const baselineDateBooking = startOfDay(new Date(dto.checkInDate));
 
-          if (bookingStay.initialElectricityKwhPending != null) {
+          // IOT on-demand: fallback ke auto-read Tuya bila booking tidak membawa
+          // angka meter pending (tenant baru tanpa catat meter saat booking).
+          const baselineElectricity = bookingStay.initialElectricityKwhPending != null
+            ? bookingStay.initialElectricityKwhPending
+            : autoElectricityKwh != null
+              ? new Prisma.Decimal(autoElectricityKwh.toFixed(3))
+              : null;
+          if (baselineElectricity != null) {
             const existingElec = await tx.meterReading.findFirst({
               where: {
                 roomId: dto.roomId,
@@ -348,9 +366,11 @@ export class StaysService {
                   roomId: dto.roomId,
                   utilityType: UtilityType.ELECTRICITY,
                   readingAt: baselineDateBooking,
-                  readingValue: bookingStay.initialElectricityKwhPending,
+                  readingValue: baselineElectricity,
                   recordedById: actor.id,
-                  note: 'Meter awal dipromote dari pending booking saat check-in.',
+                  note: bookingStay.initialElectricityKwhPending != null
+                    ? 'Meter awal dipromote dari pending booking saat check-in.'
+                    : 'Meter awal dibaca otomatis dari Tuya saat check-in.',
                 },
               });
             } else {

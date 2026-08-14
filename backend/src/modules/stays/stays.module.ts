@@ -11,9 +11,10 @@ import { DepositLedgerModule } from '../deposit-ledger/deposit-ledger.module';
 import { NotificationsModule } from '../notifications/notifications.module';
 import { LoyaltyModule } from '../loyalty/loyalty.module';
 import { SettingsModule } from '../settings/settings.module';
+import { IotModule } from '../iot/iot.module';
 
 @Module({
-  imports: [AuditLogModule, AccountingModule, DepositLedgerModule, NotificationsModule, LoyaltyModule, SettingsModule],
+  imports: [AuditLogModule, AccountingModule, DepositLedgerModule, NotificationsModule, LoyaltyModule, SettingsModule, IotModule],
   controllers: [StaysController],
   providers: [StaysService, StaysRenewalService, StaysQueryService, RoomTransferService, PrepayExtensionService],
   exports: [StaysService, StaysRenewalService],
