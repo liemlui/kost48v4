@@ -23,6 +23,7 @@ export default function MeterCycleModal({ show, onHide, stay, onDone }: { show: 
   const [water, setWater] = useState('');
   const [note, setNote] = useState('');
   const [result, setResult] = useState<MeterCycleResult | null>(null);
+  const [pendingMode, setPendingMode] = useState<'manual' | 'auto' | null>(null);
 
   // Estimasi tagihan (live preview)
   const chargeableElec = useMemo(() => {
@@ -38,20 +39,23 @@ export default function MeterCycleModal({ show, onHide, stay, onDone }: { show: 
   const estimatedTotal = chargeableElec + chargeableWater;
 
   const mut = useMutation({
-    mutationFn: () => recordMeterCycle({
+    mutationFn: (auto: boolean) => recordMeterCycle({
       roomId: Number(stay.roomId),
       readingAt,
-      electricityReadingValue: elec.trim(),
+      electricityReadingValue: auto ? undefined : elec.trim(),
+      autoElectricity: auto || undefined,
       waterReadingValue: waterEnabled && water.trim() ? water.trim() : undefined,
       note: note.trim() || undefined,
     }),
     onSuccess: (data) => {
       setResult(data);
+      setPendingMode(null);
       qc.invalidateQueries({ queryKey: ['meter-readings'] });
       qc.invalidateQueries({ queryKey: ['portal-invoices'] });
       qc.invalidateQueries({ queryKey: ['invoices'] });
       onDone?.();
     },
+    onError: () => setPendingMode(null),
   });
 
   const close = () => { setResult(null); setElec(''); setWater(''); setNote(''); mut.reset(); onHide(); };
@@ -92,6 +96,7 @@ export default function MeterCycleModal({ show, onHide, stay, onDone }: { show: 
             <Form.Group className="mb-2">
               <Form.Label>Angka meter listrik (kWh)</Form.Label>
               <Form.Control inputMode="decimal" value={elec} onChange={(e) => setElec(e.currentTarget.value.replace(/[^0-9.]/g, ''))} placeholder="Angka tertera di meter sekarang" />
+              <Form.Text muted>Isi manual, atau klik <strong>🔄 Baca meter otomatis</strong> di bawah agar sistem membaca total kWh kumulatif dari meter Tuya.</Form.Text>
             </Form.Group>
             {waterEnabled ? (
               <Form.Group className="mb-2">
@@ -148,8 +153,11 @@ export default function MeterCycleModal({ show, onHide, stay, onDone }: { show: 
         ) : (
           <>
             <Button variant="light" onClick={close}>Batal</Button>
-            <Button onClick={() => mut.mutate()} disabled={mut.isPending || !elec.trim()}>
-              {mut.isPending ? (<><Spinner size="sm" className="me-2" />Memproses...</>) : 'Catat & Terbitkan'}
+            <Button variant="outline-secondary" onClick={() => { setPendingMode('auto'); mut.mutate(true); }} disabled={mut.isPending}>
+              {mut.isPending && pendingMode === 'auto' ? (<><Spinner size="sm" className="me-2" />Membaca meter...</>) : '🔄 Baca meter otomatis'}
+            </Button>
+            <Button onClick={() => { setPendingMode('manual'); mut.mutate(false); }} disabled={mut.isPending || !elec.trim()}>
+              {mut.isPending && pendingMode === 'manual' ? (<><Spinner size="sm" className="me-2" />Memproses...</>) : 'Catat & Terbitkan'}
             </Button>
           </>
         )}

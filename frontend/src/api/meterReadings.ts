@@ -33,7 +33,9 @@ export type MeterCycleResult = {
 export async function recordMeterCycle(payload: {
   roomId: number;
   readingAt: string;
-  electricityReadingValue: string;
+  electricityReadingValue?: string;
+  /** true = baca counter Tuya kumulatif (add_ele) on-demand, tanpa mengetik manual */
+  autoElectricity?: boolean;
   waterReadingValue?: string;
   note?: string;
 }) {
