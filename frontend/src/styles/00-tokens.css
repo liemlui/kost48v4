@@ -154,9 +154,10 @@
   --pub-brand-gradient: linear-gradient(135deg, #0ea5e9, #0284c7);
   --pub-primary-strong: #0c1a2e;
   --pub-text-strong: #0f172a;
-  --pub-text-soft: #475569;
-  --pub-text-muted: #64748b;
-  --pub-text-dim: #94a3b8;
+  /* AO-08: kontras diperkuat — #64748b→#475569, #94a3b8→#64748b */
+  --pub-text-soft: #334155;
+  --pub-text-muted: #475569;
+  --pub-text-dim: #64748b;
   --pub-surface: #ffffff;
   --pub-surface-soft: #f8fafc;
   --pub-surface-warm: #f7fbff;

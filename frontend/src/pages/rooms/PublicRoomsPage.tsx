@@ -162,6 +162,7 @@ export default function PublicRoomsPage() {
 
   // UX-02: simpan/pulihkan filter katalog & scroll saat navigasi kembali dari detail.
   const CACHE_KEY = 'kost48-catalog-state';
+  const SHORTLIST_KEY = 'kost48-compare-ids';
   useEffect(() => {
     if (!restoresSearch.current) {
       const cached = sessionStorage.getItem(CACHE_KEY);
@@ -174,6 +175,11 @@ export default function PublicRoomsPage() {
           }
         } catch { /* abaikan cache rusak */ }
       }
+      /* AO-16: pulihkan shortlist perbandingan dari sessionStorage */
+      try {
+        const savedIds = sessionStorage.getItem(SHORTLIST_KEY);
+        if (savedIds) setComparedRoomIds(JSON.parse(savedIds));
+      } catch { /* abaikan */ }
       restoresSearch.current = true;
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -186,6 +192,11 @@ export default function PublicRoomsPage() {
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, [searchParams]);
+
+  /* AO-16: persist shortlist perbandingan ke sessionStorage */
+  useEffect(() => {
+    sessionStorage.setItem(SHORTLIST_KEY, JSON.stringify(comparedRoomIds));
+  }, [comparedRoomIds]);
 
   const bathroom = (searchParams.get("bathroom") ?? "") as BathroomFilter;
   const cooling = (searchParams.get("cooling") ?? "") as CoolingFilter;
@@ -367,6 +378,8 @@ export default function PublicRoomsPage() {
             <div className="rm-count-bar">
               {query.isLoading ? (
                 <span className="text-muted"><Spinner animation="border" size="sm" className="me-2" />Memuat kamar...</span>
+              ) : query.isError ? (
+                <span className="text-danger">⚠️ Data kamar tidak tersedia. Kalender di bawah mungkin masih menampilkan data yang valid.</span>
               ) : (
                 <span>
                   {totalPages > 1 ? (
@@ -408,16 +421,36 @@ export default function PublicRoomsPage() {
             )}
 
             {/* ── Room grid ── */}
+            {/* AO-16: bedakan empty state: tanpa filter vs filter aktif vs error */}
             {!query.isLoading && !query.isError && rooms.length === 0 && (
               <div className="rm-empty">
-                <EmptyState
-                  icon="🛏️"
-                  title="Semua kamar sedang penuh"
-                  description="Saat ini belum ada kamar kosong yang bisa dipesan. Hubungi admin via WhatsApp atau cek lagi nanti untuk ketersediaan terbaru."
-                />
-                <a className="btn btn-outline-secondary mt-3" href={officialKost48Location.whatsappUrl} target="_blank" rel="noreferrer">
-                  💬 Tanya ketersediaan via WhatsApp
-                </a>
+                {hasActiveFilter ? (
+                  <EmptyState
+                    icon="🔍"
+                    title="Tidak ada kamar yang cocok"
+                    description="Coba ubah atau reset filter untuk melihat kamar lainnya. Katalog memiliki 22 kamar dengan berbagai tipe dan fasilitas."
+                  />
+                ) : (
+                  <EmptyState
+                    icon="🛏️"
+                    title="Belum ada kamar tersedia"
+                    description="Saat ini belum ada kamar yang dapat ditampilkan. Hubungi admin via WhatsApp atau cek lagi nanti untuk ketersediaan terbaru."
+                  />
+                )}
+                <div className="rm-empty-actions">
+                  {hasActiveFilter && (
+                    <button
+                      type="button"
+                      className="btn btn-outline-secondary"
+                      onClick={() => setSearchParams({}, { replace: true })}
+                    >
+                      ✕ Reset filter
+                    </button>
+                  )}
+                  <a className="btn btn-outline-secondary" href={officialKost48Location.whatsappUrl} target="_blank" rel="noreferrer">
+                    💬 Tanya ketersediaan via WhatsApp
+                  </a>
+                </div>
               </div>
             )}
 

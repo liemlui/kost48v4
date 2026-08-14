@@ -14,7 +14,7 @@
 - [x] Review page-level homepage diverifikasi read-only terhadap produksi: 0/13 kamar memang state data sah; 28 observasi ditriage menjadi AO-17..AO-19, merge AO-08/AO-15, atau ditolak bila menuntut klaim palsu.
 - [x] Review dashboard Owner desktop ditriage terhadap kode: alert/actionability, toolbar, KPI data states, AI setup, dan sistem visual menjadi AO-20/AO-21; sidebar collapse dan label status teks tidak dicatat ulang sebagai defect palsu.
 - [x] Review dashboard Area Admin desktop ditriage terhadap kode: antrean aksi telah ada namun salah urutan; hierarchy exception menjadi AO-22 dan shell/komponen terkoordinasi menjadi AO-23.
-- [ ] Gate awal AO-00: sinkronkan dua migration UAT yang masih pending melalui prosedur migration resmi; jangan gunakan `db push`.
+- [x] Gate awal AO-00: sinkronkan dua migration UAT yang masih pending melalui prosedur migration resmi; jangan gunakan `db push`.
 - [ ] Crawl dinamis OWNER/ADMIN/STAFF diulang setelah akun fixture UAT tersedia. Audit statis bukan pengganti bukti runtime.
 - **Putusan:** status UI/UX pra-go-live **RED** sampai AO-00 selesai dan regresi lintas role dapat dijalankan.
 
@@ -244,22 +244,22 @@ Catatan: perubahan tool/seed deploy 2026-07-19 adalah riwayat UAT. Produksi meng
 **Aturan:** detail bukti, scope file, dependensi, dan DoD mengikuti M14; checklist ini hanya ringkasan antrean.
 
 - [x] **AO-AUDIT** — audit 66 kombinasi route–viewport dan 74 deklarasi route; bukti aman disimpan di `docs/assets/m14-uiux-audit/`.
-- [ ] **AO-00 🔴 P0** — terapkan dua migration UAT pending melalui ledger resmi, backup, dan smoke test. **Owner/DevOps; perubahan DB memerlukan persetujuan.**
-- [ ] **AO-01 🟠 P1** — satukan state katalog publik saat API daftar kamar gagal; jangan tampilkan “0 kamar” bersamaan dengan kalender berisi kamar.
-- [ ] **AO-02 🟠 P1** — perbaiki urutan hooks halaman loyalitas agar feature redirect tidak memicu ErrorBoundary.
+- [x] **AO-00 🔴 P0** — terapkan dua migration UAT pending melalui ledger resmi, backup, dan smoke test. **Owner/DevOps; perubahan DB memerlukan persetujuan.**
+- [x] **AO-01 🟠 P1** — satukan state katalog publik saat API daftar kamar gagal; jangan tampilkan “0 kamar” bersamaan dengan kalender berisi kamar.
+- [x] **AO-02 🟠 P1** — perbaiki urutan hooks halaman loyalitas agar feature redirect tidak memicu ErrorBoundary.
 - [ ] **AO-03 🟠 P1** — sediakan fixture/kredensial UAT non-personal untuk OWNER, ADMIN, STAFF, dan dua state TENANT tanpa menulis secret ke repo.
-- [ ] **AO-04 🟠 P1** — kurangi duplikasi navigasi tenant mobile dan dominance onboarding global.
-- [ ] **AO-05 🟠 P1** — selaraskan istilah masa sewa aktif, lewat jatuh tempo, renewal, dan checkout.
-- [ ] **AO-06 🟠 P1** — asosiasikan label form auth/profile secara programatis.
-- [ ] **AO-07 🟡 P2** — hilangkan overflow horizontal `/profile` dan pecah halaman profil yang terlalu panjang.
-- [ ] **AO-08 🟡 P2** — perbaiki semua pelanggaran kontras serius yang terverifikasi.
-- [ ] **AO-09 🟡 P2** — lengkapi landmark `<main>` dan heading utama yang hilang.
-- [ ] **AO-10 🟡 P2** — ringkas manual tenant mobile dengan progressive disclosure.
-- [ ] **AO-11 🟡 P2** — perjelas scroll/filter horizontal dan target sentuh mobile.
-- [ ] **AO-12 🟡 P2** — buat kontrak koneksi API saat `npm run dev` eksplisit dan reproducible.
+- [x] **AO-04 🟠 P1** — kurangi duplikasi navigasi tenant mobile dan dominance onboarding global.
+- [x] **AO-05 🟠 P1** — selaraskan istilah masa sewa aktif, lewat jatuh tempo, renewal, dan checkout.
+- [x] **AO-06 🟠 P1** — asosiasikan label form auth/profile secara programatis.
+- [x] **AO-07 🟡 P2** — hilangkan overflow horizontal `/profile` dan pecah halaman profil yang terlalu panjang.
+- [x] **AO-08 🟡 P2** — perbaiki semua pelanggaran kontras serius yang terverifikasi.
+- [x] **AO-09 🟡 P2** — lengkapi landmark `<main>` dan heading utama yang hilang.
+- [x] **AO-10 🟡 P2** — ringkas manual tenant mobile dengan progressive disclosure.
+- [x] **AO-11 🟡 P2** — perjelas scroll/filter horizontal dan target sentuh mobile.
+- [x] **AO-12 🟡 P2** — buat kontrak koneksi API saat `npm run dev` eksplisit dan reproducible.
 - [ ] **AO-13** — crawl regresi OWNER/ADMIN/STAFF setelah AO-00 dan AO-03.
-- [ ] **AO-15 🟢 P3** — kelompokkan link footer publik dan pertahankan empat pola publik `Best-in-Class` dari benchmark Baymard.
-- [ ] **AO-16 🟡 P2** — bedakan empty result karena filter/data/error dan pertahankan shortlist perbandingan selama sesi detail/back.
+- [x] **AO-15 🟢 P3** — kelompokkan link footer publik dan pertahankan empat pola publik `Best-in-Class` dari benchmark Baymard.
+- [x] **AO-16 🟡 P2** — bedakan empty result karena filter/data/error dan pertahankan shortlist perbandingan selama sesi detail/back.
 - [ ] **AO-17 🟠 P1** — adaptasikan hero/teaser homepage untuk state 0 kamar tanpa sinyal hijau, CTA palsu, atau grid kosong; tangkap minat via WhatsApp.
 - [ ] **AO-18 🟡 P2** — rapikan hierarchy homepage, trust grid/copy, review empty-state, FAQ, lokasi, dan CTA tanpa klaim palsu.
 - [ ] **AO-19 🟡 P2** — inventarisasi kualitas aset publik dan buat cue galeri selalu terlihat pada touch/keyboard; foto pengganti menunggu aset asli owner bila perlu.

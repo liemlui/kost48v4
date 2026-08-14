@@ -9,6 +9,12 @@
 
 **Perubahan:** dokumentasi dan antrean kolaboratif saja; tidak ada kode aplikasi, schema, dependency, atau data yang diubah.
 
+## 2026-07-30 — AO-08/AO-15/AO-16: Kontras WCAG, Footer Group, Empty State + Shortlist
+
+- **AO-08 🟡 P2:** Perbaiki 13 pelanggaran kontras WCAG AA — token publik diperkuat (`--pub-text-soft` #475569→#334155, `--pub-text-muted` #64748b→#475569, `--pub-text-dim` #94a3b8→#64748b); 8× hardcoded `#94a3b8`→`#64748b`; `#cbd5e1`→`#64748b` (placeholder kamar); `#4ade80`→`#15803d` (harga wizard). File: `00-tokens.css`, `11-public-pages.css`.
+- **AO-15 🟢 P3:** Footer publik dikelompokkan semantik: 3 grup (`Cari Kamar`, `Bantuan`, `Kontak & Akun`) dengan heading `<h3>` dan `<nav aria-label>`. File: `publicGuestShared.tsx`, `11-public-pages.css`.
+- **AO-16 🟡 P2:** Empty state katalog dibedakan: filter aktif → "Tidak ada kamar yang cocok" + tombol reset; tanpa filter → "Belum ada kamar tersedia". Shortlist perbandingan dipersist ke `sessionStorage` (bertahan navigasi detail/back). File: `PublicRoomsPage.tsx`.
+
 ## 2026-07-30 — Triage audit dashboard Owner desktop
 
 - Masukan audit eksternal dashboard Owner disaring ke bukti `CODE`; skor otomatisnya tidak dijadikan metrik release karena audit OWNER dinamis masih menunggu fixture UAT.
@@ -28,6 +34,21 @@
 - Dua screenshot viewport produksi bebas PII ditambahkan ke `docs/assets/m14-uiux-audit/`.
 
 **Perubahan:** dokumentasi + bukti screenshot publik; tidak ada kode aplikasi, dependency, schema, atau data yang diubah.
+
+## 2026-07-30 — Eksekusi Fase AO: perbaikan UI/UX lintas portal
+
+- **AO-00:** 2 migration UAT pending (`announcement_notification_delivery` + `public_room_availability`) diterapkan via `prisma migrate deploy` — DB UAT up-to-date, 500 error di notifikasi/pengumuman/katalog teratasi.
+- **AO-01:** `PublicRoomsPage` — count bar kini menampilkan pesan error alih-alih "0 kamar" saat API gagal, tidak bertentangan dengan kalender ketersediaan.
+- **AO-02:** `MyLoyaltyPage` — guard redirect `loyaltyDisabled` dipindah setelah semua hooks; query loyalty pakai `enabled` agar urutan hooks selalu konsisten, mencegah ErrorBoundary.
+- **AO-04:** `GettingStartedGuide` — dibatasi hanya di `/portal/stay` dan `/portal/bookings` via `useLocation`, tidak lagi mendominasi semua route tenant.
+- **AO-05:** `ActiveStayContent` — timeline "Masa sewa" kini menampilkan "Lewat jadwal" (tone: blocked) saat overdue, bukan "Aktif" yang membingungkan tenant.
+- **AO-06:** `LoginPage`, `ForgotPasswordPage`, `ProfilePage` — `Form.Group` mendapat `controlId`, input mendapat `id`, error punya `id` + `role="alert"` untuk asosiasi label programatik.
+- **AO-07:** `ProfilePage` — overflow-x hidden di `.tenant-profile-onboarding-card` + `max-width: 100%` di `.profile-field-control` untuk mencegah overflow 7px di mobile.
+- **AO-09:** `PublicGuestDashboardPage`, `FaqPublicPage`, `ReviewsPublicPage`, `LoginPage`, `ForgotPasswordPage` — tambah `<main id="main-content">` / ubah `<section>` ke `<main>`.
+- **AO-10:** `MyManualPage` — `TabContent` diubah dari Card bertumpuk menjadi `Accordion` (progressive disclosure) untuk mobile.
+- **AO-11:** Filter invoice mobile — tambah overflow gradient mask, `min-height: 44px`, `flex-shrink: 0`, scrollbar disembunyikan, sentuhan lebih mudah.
+- **AO-12:** `vite.config.ts` — tambah proxy `/api` + `/uploads` ke `http://localhost:3000` agar `npm run dev` langsung terhubung backend.
+- **Build:** backend `tsc --noEmit` ✅ · frontend `tsc -b && vite build` ✅ (162 chunks, PWA verified).
 
 ## 2026-07-30 — Integrasi guideline page-level katalog publik
 

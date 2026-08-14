@@ -128,7 +128,7 @@ export default function LoginPage() {
           </div>
         </section>
 
-        <section className="login-panel" aria-label="Form masuk KOST48">
+        <main className="login-panel" aria-label="Form masuk KOST48">
           <Kost48LogoMark size="login" className="login-mark" />
           <div className="login-heading-block text-center">
             <h2>Masuk ke Portal KOST48</h2>
@@ -172,9 +172,10 @@ export default function LoginPage() {
           {/* noValidate: validasi kustom berbahasa Indonesia di handleSubmit — tanpa ini,
               atribut `required` membuat browser memblokir submit dgn bubble bawaan (Inggris). */}
           <Form onSubmit={handleSubmit} noValidate>
-            <Form.Group className="mb-3">
+            <Form.Group className="mb-3" controlId="login-identifier">
               <Form.Label>{modeCopy.identifierLabel}</Form.Label>
               <Form.Control
+                id="login-identifier"
                 value={identifier}
                 onChange={(e) => {
                   setIdentifier(e.target.value);
@@ -189,12 +190,13 @@ export default function LoginPage() {
                 required
                 isInvalid={Boolean(fieldErrors.identifier)}
               />
-              {fieldErrors.identifier ? <div className="login-inline-error">{fieldErrors.identifier}</div> : null}
+              {fieldErrors.identifier ? <div className="login-inline-error" id="login-identifier-error" role="alert">{fieldErrors.identifier}</div> : null}
             </Form.Group>
 
-            <Form.Group className="mb-2">
+            <Form.Group className="mb-2" controlId="login-password">
               <Form.Label>Password</Form.Label>
               <PasswordInput
+                id="login-password"
                 value={password}
                 onChange={(e) => {
                   setPassword(e.target.value);
@@ -204,7 +206,7 @@ export default function LoginPage() {
                 isInvalid={Boolean(fieldErrors.password)}
                 autoComplete="current-password"
               />
-              {fieldErrors.password ? <div className="login-inline-error">{fieldErrors.password}</div> : null}
+              {fieldErrors.password ? <div className="login-inline-error" id="login-password-error" role="alert">{fieldErrors.password}</div> : null}
             </Form.Group>
 
             <div className="login-forgot-row">
@@ -229,7 +231,7 @@ export default function LoginPage() {
               Area ini untuk owner, admin, dan staff KOST48. Gunakan akun penghuni di tab Penghuni.
             </div>
           )}
-        </section>
+        </main>
       </div>
     </div>
   );

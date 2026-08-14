@@ -351,6 +351,7 @@ export default function PublicGuestDashboardPage() {
   return (
     <div className="gx-page">
       <GuestTopbar scrolled={scrolled} />
+      <main id="main-content">
       {/* UX-06: scroll progress bar — thin line di bawah topbar */}
       <div
         className="gx-scroll-progress"
@@ -832,6 +833,7 @@ export default function PublicGuestDashboardPage() {
         </button>
       )}
 
+      </main>
       <GuestFooter />
     </div>
   );

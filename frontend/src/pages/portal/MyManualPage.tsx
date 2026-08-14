@@ -185,16 +185,16 @@ const GUIDE_TABS = [
 
 function TabContent({ tab }: { tab: typeof GUIDE_TABS[number] }) {
   return (
-    <div>
+    <Accordion flush alwaysOpen={false} defaultActiveKey={tab.sections[0]?.heading ?? undefined}>
       {tab.sections.map((section, i) => (
-        <Card key={i} className="mb-3">
-          <Card.Header><strong>{section.heading}</strong></Card.Header>
-          <Card.Body style={{ whiteSpace: 'pre-line', lineHeight: 1.8 }}>
+        <Accordion.Item eventKey={section.heading} key={i}>
+          <Accordion.Header>{section.heading}</Accordion.Header>
+          <Accordion.Body style={{ whiteSpace: 'pre-line', lineHeight: 1.8 }}>
             {section.body}
-          </Card.Body>
-        </Card>
+          </Accordion.Body>
+        </Accordion.Item>
       ))}
-    </div>
+    </Accordion>
   );
 }
 

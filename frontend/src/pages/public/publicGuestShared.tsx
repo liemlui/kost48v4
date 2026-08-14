@@ -449,15 +449,33 @@ export function GuestFooter() {
               <small>Jl. Hikmah V No. 48 - Surabaya Barat 60216</small>
             </div>
           </div>
-          <nav className="gx-footer-nav" aria-label="Navigasi footer">
-            {NAV_LINKS.map((l) => <a key={l.href} href={l.href}>{l.label}</a>)}
-            <a href="#kamar">Katalog Kamar</a>
-            {PUBLIC_EXTRA_LINKS.map((l) => <Link key={l.to} to={l.to}>{l.label}</Link>)}
-            <Link to="/login">Masuk Portal</Link>
-          </nav>
-          <div className="gx-footer-links">
-            <a href={officialKost48Location.mapsUrl} target="_blank" rel="noreferrer">Google Maps</a>
-            <a href={officialKost48Location.whatsappUrl} target="_blank" rel="noreferrer">WhatsApp</a>
+          {/* AO-15: kelompok footer semantik — Cari Kamar · Bantuan · Kontak & Akun */}
+          <div className="gx-footer-nav-groups">
+            <div className="gx-footer-nav-group">
+              <h3 className="gx-footer-group-heading">Cari Kamar</h3>
+              <nav aria-label="Cari Kamar">
+                <a href="#kamar">Kamar</a>
+                <Link to="/rooms">Katalog Kamar</Link>
+                <a href="#lokasi">Lokasi</a>
+              </nav>
+            </div>
+            <div className="gx-footer-nav-group">
+              <h3 className="gx-footer-group-heading">Bantuan</h3>
+              <nav aria-label="Bantuan">
+                <a href="#fasilitas">Fasilitas</a>
+                <a href="#faq">FAQ</a>
+                <Link to="/panduan">Panduan</Link>
+                <Link to="/reviews">Ulasan</Link>
+              </nav>
+            </div>
+            <div className="gx-footer-nav-group">
+              <h3 className="gx-footer-group-heading">Kontak &amp; Akun</h3>
+              <nav aria-label="Kontak dan Akun">
+                <Link to="/login">Masuk Portal</Link>
+                <a href={officialKost48Location.mapsUrl} target="_blank" rel="noreferrer">Google Maps</a>
+                <a href={officialKost48Location.whatsappUrl} target="_blank" rel="noreferrer">WhatsApp</a>
+              </nav>
+            </div>
           </div>
         </div>
         <p className="gx-footer-copy">

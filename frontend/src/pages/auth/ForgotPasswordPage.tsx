@@ -123,7 +123,7 @@ export default function ForgotPasswordPage() {
           </div>
         </section>
 
-        <section className="login-panel" aria-label="Form lupa password KOST48">
+        <main className="login-panel" aria-label="Form lupa password KOST48">
           <Kost48LogoMark size="login" className="login-mark" />
           <div className="login-heading-block text-center">
             <h2>Lupa Password?</h2>
@@ -201,9 +201,10 @@ export default function ForgotPasswordPage() {
               <>
                 {formError ? <div className="login-form-error" role="alert">{formError}</div> : null}
                 <Form onSubmit={handleEmailSubmit} noValidate>
-                  <Form.Group className="mb-3">
+                  <Form.Group className="mb-3" controlId="forgot-email">
                     <Form.Label>Alamat Email</Form.Label>
                     <Form.Control
+                      id="forgot-email"
                       value={identifier}
                       onChange={(e) => { setIdentifier(e.target.value); if (fieldError) setFieldError(null); }}
                       type="text"
@@ -250,9 +251,10 @@ export default function ForgotPasswordPage() {
               <div className="login-helper-card">
                 Reset password dengan nomor HP dilakukan oleh admin. Masukkan nomor HP Anda lalu hubungi admin via WhatsApp.
               </div>
-              <Form.Group className="mb-3">
+              <Form.Group className="mb-3" controlId="forgot-phone">
                 <Form.Label>Nomor HP</Form.Label>
                 <Form.Control
+                  id="forgot-phone"
                   value={identifier}
                   onChange={(e) => setIdentifier(e.target.value)}
                   type="text"
@@ -283,7 +285,7 @@ export default function ForgotPasswordPage() {
               </div>
             </>
           )}
-        </section>
+        </main>
       </div>
     </div>
   );

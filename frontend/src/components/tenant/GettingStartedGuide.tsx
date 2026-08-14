@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import type { TenantPortalStage } from '../../hooks/useTenantPortalStage';
 
 type Step = { icon: string; label: string; desc: string; to?: string };
@@ -27,10 +27,17 @@ function getSteps(stage: TenantPortalStage, hasStayHistory: boolean): Step[] {
   return [];
 }
 
+/** Hanya tampil di route utama tenant — jangan dominasi semua halaman. */
+const MAIN_TENANT_ROUTES = ['/portal/stay', '/portal/bookings'];
+
 export default function GettingStartedGuide({ stage, hasStayHistory = false }: { stage: TenantPortalStage; hasStayHistory?: boolean }) {
   const navigate = useNavigate();
+  const location = useLocation();
   const steps = getSteps(stage, hasStayHistory);
   if (!steps.length) return null;
+
+  // AO-04: jangan dominasi setiap route — hanya di halaman panduan utama.
+  if (!MAIN_TENANT_ROUTES.includes(location.pathname)) return null;
 
   const isExTenant = stage === 'browsing' && hasStayHistory;
 

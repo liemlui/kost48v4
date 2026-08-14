@@ -552,27 +552,30 @@ export default function ProfilePage() {
               {pwError ? <Alert variant="danger">{pwError}</Alert> : null}
               {pwSuccess ? <Alert variant="success">{pwSuccess}</Alert> : null}
 
-              <Form.Group className="mb-3">
+              <Form.Group className="mb-3" controlId="profile-current-pw">
                 <Form.Label>Password Saat Ini</Form.Label>
                 <PasswordInput
+                  id="profile-current-pw"
                   value={currentPassword}
                   onChange={(e) => setCurrentPassword(e.target.value)}
                   placeholder="Masukkan password lama jika diminta"
                 />
               </Form.Group>
 
-              <Form.Group className="mb-3">
+              <Form.Group className="mb-3" controlId="profile-new-pw">
                 <Form.Label>Password Baru</Form.Label>
                 <PasswordInput
+                  id="profile-new-pw"
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
                   placeholder="Minimal 8 karakter"
                 />
               </Form.Group>
 
-              <Form.Group className="mb-4">
+              <Form.Group className="mb-4" controlId="profile-confirm-pw">
                 <Form.Label>Konfirmasi Password Baru</Form.Label>
                 <PasswordInput
+                  id="profile-confirm-pw"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   placeholder="Ulangi password baru"

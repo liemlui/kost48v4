@@ -250,6 +250,7 @@ export default function ActiveStayContent({ stay }: { stay: Stay }) {
   const rejectedCheckoutRequest = checkoutRequests.find((cr) => cr.stayId === stay.id && cr.status === 'REJECTED');
 
   const endDays = getDaysUntilTenantDate(stay.plannedCheckOutDate);
+  const overdue = endDays !== null && endDays < 0;
   const nearEnd = endDays !== null && endDays >= 0 && endDays <= 10;
   const meterRecordedThisMonth = Boolean(electricityReadingThisMonth);
   const meterScheduleVariant = meterReadingsQuery.isError
@@ -402,8 +403,8 @@ export default function ActiveStayContent({ stay }: { stay: Stay }) {
     {
       key: 'lease',
       title: 'Masa sewa',
-      status: 'Aktif',
-      tone: nearEnd ? 'waiting' : 'active',
+      status: overdue ? 'Lewat jadwal' : 'Aktif',
+      tone: overdue ? 'blocked' : nearEnd ? 'waiting' : 'active',
       helper: `s/d ${formatDate(stay.plannedCheckOutDate) || 'belum ditentukan'}`,
     },
     {

@@ -27,16 +27,14 @@ export default function MyLoyaltyPage() {
     queryFn: fetchPublicConfig,
     staleTime: 60_000,
   });
-  if (!configQuery.isLoading && configQuery.data && !configQuery.data.tenantLoyaltyEnabled) {
-    return <Navigate to="/portal/stay" replace />;
-  }
+  const loyaltyDisabled = !configQuery.isLoading && configQuery.data && !configQuery.data.tenantLoyaltyEnabled;
 
-  const loyaltyQuery = useQuery({ queryKey: ['me-loyalty'], queryFn: getMyLoyalty });
-  const rewardsQuery = useQuery({ queryKey: ['loyalty-rewards'], queryFn: () => getRewards(false) });
-  const redemptionsQuery = useQuery({ queryKey: ['me-redemptions'], queryFn: getMyRedemptions });
-  const referralQuery = useQuery({ queryKey: ['referral-code'], queryFn: getReferralCode });
-  const aboutMeQuery = useQuery({ queryKey: ['peer-about-me'], queryFn: getMyPeerReportsAboutMe });
-  const leaderboardQuery = useQuery({ queryKey: ['loyalty-leaderboard'], queryFn: getLoyaltyLeaderboard });
+  const loyaltyQuery = useQuery({ queryKey: ['me-loyalty'], queryFn: getMyLoyalty, enabled: !loyaltyDisabled && !configQuery.isLoading });
+  const rewardsQuery = useQuery({ queryKey: ['loyalty-rewards'], queryFn: () => getRewards(false), enabled: !loyaltyDisabled && !configQuery.isLoading });
+  const redemptionsQuery = useQuery({ queryKey: ['me-redemptions'], queryFn: getMyRedemptions, enabled: !loyaltyDisabled && !configQuery.isLoading });
+  const referralQuery = useQuery({ queryKey: ['referral-code'], queryFn: getReferralCode, enabled: !loyaltyDisabled && !configQuery.isLoading });
+  const aboutMeQuery = useQuery({ queryKey: ['peer-about-me'], queryFn: getMyPeerReportsAboutMe, enabled: !loyaltyDisabled && !configQuery.isLoading });
+  const leaderboardQuery = useQuery({ queryKey: ['loyalty-leaderboard'], queryFn: getLoyaltyLeaderboard, enabled: !loyaltyDisabled && !configQuery.isLoading });
 
   const improveMutation = useMutation({
     mutationFn: (id: number) => markPeerReportImproved(id),
@@ -71,6 +69,10 @@ export default function MyLoyaltyPage() {
       setError(err?.response?.data?.message || 'Gagal menukar reward. Coba lagi.');
     },
   });
+
+  if (loyaltyDisabled) {
+    return <Navigate to="/portal/stay" replace />;
+  }
 
   return (
     <div>

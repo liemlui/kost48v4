@@ -90,6 +90,7 @@ export default function ReviewsPublicPage() {
   return (
     <div className="public-page-shell">
       <GuestTopbar scrolled={scrolled} />
+      <main id="main-content">
       <div className="container py-4 py-lg-5" style={{ maxWidth: 820 }}>
         <div className="mb-4">
           <div className="page-eyebrow">✦ Ulasan Penghuni</div>
@@ -214,6 +215,7 @@ export default function ReviewsPublicPage() {
           </>
         )}
       </div>
+      </main>
       <GuestFooter />
     </div>
   );

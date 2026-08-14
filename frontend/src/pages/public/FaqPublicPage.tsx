@@ -45,6 +45,7 @@ export default function FaqPublicPage() {
   return (
     <div className="public-page-shell e3-bg-surface">
       <GuestTopbar scrolled={false} />
+      <main id="main-content">
       <div className="container py-4 py-lg-5 e3-maxw-820">
         <div className="mb-4">
           <div className="page-eyebrow">✦ Panduan</div>
@@ -129,6 +130,7 @@ export default function FaqPublicPage() {
           </div>
         )}
       </div>
+      </main>
       <GuestFooter />
     </div>
   );

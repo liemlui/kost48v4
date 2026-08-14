@@ -2099,6 +2099,7 @@ div.tenant-stay-fact-chip {
    ───────────────────────────────────────────── */
 
 .tenant-profile-onboarding-card {
+  overflow-x: hidden;
   background: #fff;
   border-radius: 20px;
   box-shadow: 0 4px 18px rgba(14, 30, 60, 0.06);
@@ -3249,11 +3250,22 @@ div.tenant-stay-fact-chip {
   .tenant-invoices-header .compact-tabs {
     justify-content: flex-start;
     width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    mask-image: linear-gradient(to right, black calc(100% - 2rem), transparent);
+    -webkit-mask-image: linear-gradient(to right, black calc(100% - 2rem), transparent);
+    padding-bottom: 0.35rem;
   }
+  .tenant-invoices-header .compact-tabs::-webkit-scrollbar { display: none; }
 
   .tenant-invoices-header .status-tab {
-    padding: 0.48rem 0.65rem;
+    padding: 0.6rem 0.85rem;
     font-size: 0.82rem;
+    min-height: 44px;
+    white-space: nowrap;
+    flex-shrink: 0;
   }
 
   .tenant-announcement-list-image .safe-image-placeholder,
