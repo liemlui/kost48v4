@@ -21,3 +21,13 @@ export function buildAvailabilityWaUrl(roomCode: string, isChecking = false): st
     : `Halo Admin KOST48, saya tertarik dengan kamar ${roomCode}. Kapan kira-kira kamar ini bisa tersedia?`;
   return buildAdminWaUrl(msg);
 }
+
+/**
+ * Bangun URL WhatsApp ke TENANT (admin/owner → penyewa) dengan pesan kustom.
+ * Dipakai untuk reminder manual (mis. masa sewa habis 7 hari lagi) via deep-link.
+ */
+export function buildTenantWaUrl(phone: string | null | undefined, message: string): string {
+  const normalized = (phone ?? '').replace(/\D/g, '');
+  if (!normalized) return '';
+  return `https://wa.me/${normalized}?text=${encodeURIComponent(message)}`;
+}

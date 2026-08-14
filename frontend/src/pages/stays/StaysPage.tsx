@@ -26,6 +26,7 @@ import ApproveCheckoutModal from '../../components/checkout-requests/ApproveChec
 import RejectCheckoutModal from '../../components/checkout-requests/RejectCheckoutModal';
 import type { CheckoutRequest, PaginatedResponse, Stay } from '../../types';
 import { resolveAbsoluteFileUrl } from '../../utils/resolveAbsoluteFileUrl';
+import { buildTenantWaUrl } from '../../utils/whatsapp';
 import { formatDateId, getBookingExpiryMeta } from '../../utils/bookingExpiry';
 import {
   formatDateSafe,
@@ -955,6 +956,16 @@ export default function StaysPage() {
                             <StatusBadge status={item.status} />
                             {checkoutBadge ? <StatusBadge status={checkoutBadge.status} customLabel={checkoutBadge.label} /> : null}
                           </div>
+                          {daysLeft !== null && daysLeft <= 7 && item.tenant?.phone ? (
+                            <a
+                              className="small mt-2 d-inline-flex align-items-center gap-1"
+                              href={buildTenantWaUrl(item.tenant.phone, `Halo ${item.tenant.fullName}, pengingat dari KOST48 Surabaya: masa sewa kamar ${item.room?.code ?? ''} kamu berakhir ${formatDateSafe(item.plannedCheckOutDate)}. Mohon konfirmasi perpanjangan atau jadwal keluar. Terima kasih.`)}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
+                              💬 Kirim reminder WA
+                            </a>
+                          ) : null}
                           <div className="small text-muted mt-2">Pantau tagihan, deposit, dan kesiapan lepas kamar sebelum final checkout.</div>
                         </td>
                         <td data-label="Dana titipan">
