@@ -45,9 +45,11 @@ export class InventoryMovementsService {
   async create(dto: CreateInventoryMovementDto, actor: CurrentUserPayload) {
     assertOwnerOrAdmin(actor, 'riwayat stok');
     this.assertMeaningfulNote(dto.note);
-    await this.validateMovement(dto.itemId, dto.movementType, dto.roomId, dto.qty);
     const created = await this.prisma.$transaction(async (tx) => {
+      // I-01: validasi dipindah ke dalam transaksi yang sama agar pembacaan
+      // stok memakai baris yang sudah di-lock FOR UPDATE (tanpa TOCTOU).
       const beforeQty = await this.lockInventoryQtyTx(tx, dto.itemId);
+      await this.validateMovementTx(tx, dto.itemId, dto.movementType, dto.roomId, dto.qty, beforeQty);
       if (dto.movementType === InventoryMovementType.RETURN_FROM_ROOM && dto.roomId) {
         await assertRoomItemQtyAvailableTx(tx, dto.itemId, dto.roomId, dto.qty);
       }
@@ -115,23 +117,28 @@ export class InventoryMovementsService {
     return [InventoryMovementType.OUT, InventoryMovementType.ASSIGN_TO_ROOM].includes(movementType as InventoryMovementType);
   }
 
-  private async validateMovement(itemId: number, movementType: string, roomId: number | undefined, qty: string) {
-    const item = await this.prisma.inventoryItem.findUnique({ where: { id: itemId } });
-    if (!item) throw new NotFoundException('Item tidak ditemukan');
+  private async validateMovementTx(
+    tx: any,
+    itemId: number,
+    movementType: string,
+    roomId: number | undefined,
+    qty: string,
+    lockedQtyOnHand: number,
+  ) {
     const numericQty = Number(qty);
     if (numericQty <= 0) throw new ConflictException('qty tidak lebih dari 0');
     if (movementType === 'ADJUSTMENT') throw new ConflictException('movementType tidak didukung');
-    if (this.isStockDecreasingMovement(movementType) && Number(item.qtyOnHand) < numericQty) {
-      throw new ConflictException(`Stok ${item.name} tidak cukup. Tersedia ${item.qtyOnHand}, diminta ${qty}.`);
+    if (this.isStockDecreasingMovement(movementType) && lockedQtyOnHand < numericQty) {
+      throw new ConflictException(`Stok tidak cukup. Tersedia ${lockedQtyOnHand}, diminta ${qty}.`);
     }
     if (['IN', 'OUT'].includes(movementType) && roomId) throw new ConflictException('Data room tidak konsisten');
     if (['ASSIGN_TO_ROOM', 'RETURN_FROM_ROOM'].includes(movementType) && !roomId) throw new ConflictException('Data room tidak konsisten');
     if (roomId) {
-      const room = await this.prisma.room.findUnique({ where: { id: roomId } });
+      const room = await tx.room.findUnique({ where: { id: roomId } });
       if (!room) throw new NotFoundException('Room tidak ditemukan');
     }
     if (movementType === InventoryMovementType.RETURN_FROM_ROOM && roomId) {
-      const roomItem = await this.prisma.roomItem.findFirst({ where: { itemId, roomId } });
+      const roomItem = await tx.roomItem.findFirst({ where: { itemId, roomId } });
       const roomQty = Number(roomItem?.qty ?? 0);
       if (!roomItem || roomQty < numericQty) {
         throw new ConflictException(`Barang di kamar tidak cukup untuk dikembalikan. Tersedia ${roomQty}, diminta ${qty}.`);
