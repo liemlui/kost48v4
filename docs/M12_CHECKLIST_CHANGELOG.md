@@ -268,12 +268,12 @@ Catatan: perubahan tool/seed deploy 2026-07-19 adalah riwayat UAT. Produksi meng
 - [ ] **AO-13** — crawl regresi OWNER/ADMIN/STAFF setelah AO-00 dan AO-03.
 - [x] **AO-15 🟢 P3** — kelompokkan link footer publik dan pertahankan empat pola publik `Best-in-Class` dari benchmark Baymard.
 - [x] **AO-16 🟡 P2** — bedakan empty result karena filter/data/error dan pertahankan shortlist perbandingan selama sesi detail/back.
-- [ ] **AO-17 🟠 P1** — adaptasikan hero/teaser homepage untuk state 0 kamar tanpa sinyal hijau, CTA palsu, atau grid kosong; tangkap minat via WhatsApp.
-- [ ] **AO-18 🟡 P2** — rapikan hierarchy homepage, trust grid/copy, review empty-state, FAQ, lokasi, dan CTA tanpa klaim palsu.
-- [ ] **AO-19 🟡 P2** — inventarisasi kualitas aset publik dan buat cue galeri selalu terlihat pada touch/keyboard; foto pengganti menunggu aset asli owner bila perlu.
-- [ ] **AO-20 🟠 P1** — buat exception dashboard Owner actionable, pisahkan toolbar lokal, bedakan state KPI, dan beri CTA konfigurasi AI yang sah.
+- [x] **AO-17 🟠 P1** — adaptasikan hero/teaser homepage untuk state 0 kamar tanpa sinyal hijau, CTA palsu, atau grid kosong; tangkap minat via WhatsApp.
+- [x] **AO-18 🟡 P2** — rapikan hierarchy homepage, trust grid/copy, review empty-state, FAQ, lokasi, dan CTA tanpa klaim palsu. *(parsial: trust 3+2 + ikon semantik + FAQ sentence case; polish copy menunggu AO-14)*
+- [x] **AO-19 🟡 P2** — inventarisasi kualitas aset publik dan buat cue galeri selalu terlihat pada touch/keyboard; foto pengganti menunggu aset asli owner bila perlu. *(parsial: cue galeri done; inventaris aset menunggu owner)*
+- [x] **AO-20 🟠 P1** — buat exception dashboard Owner actionable, pisahkan toolbar lokal, bedakan state KPI, dan beri CTA konfigurasi AI yang sah. *(parsial: CTA alert + grouping toolbar + CTA AI done; pembedaan state KPI & label aksi menunggu AO-14)*
 - [ ] **AO-21 🟡 P2** — normalisasi sistem visual/terminologi Owner setelah AO-20 review; perubahan AppLayout harus dikoordinasikan.
-- [ ] **AO-22 🟠 P1** — susun dashboard Area Admin agar exception dan antrean lima aksi tampil sebelum metrik; perkuat CTA tanpa membuat queue kedua.
+- [x] **AO-22 🟠 P1** — susun dashboard Area Admin agar exception dan antrean lima aksi tampil sebelum metrik; perkuat CTA tanpa membuat queue kedua.
 - [ ] **AO-23 🟡 P2** — konsolidasikan komponen/shell Area Admin dengan regresi Owner bila AppLayout atau shared CSS berubah.
 - [ ] **AO-14** — audit ulang desktop/mobile + Axe + gate Baymard relevan, build/test, screenshot bebas PII, dan sign-off Fase AO.
 

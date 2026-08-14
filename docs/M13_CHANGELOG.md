@@ -1,5 +1,16 @@
 # KOST48 V5 — M13 Changelog
 
+## 2026-07-30 — Eksekusi Fase AO lanjutan (AO-17..AO-20, AO-22)
+
+- **AO-17:** homepage publik state jujur — hero/stats bedakan loading/error/penuh/kosong (tanpa "0 kamar" hijau), CTA lead-capture WhatsApp saat penuh, teaser katalog jadi waitlist saat 0 bookable, hapus quote hero berulang.
+- **AO-18:** trust grid 4+1 → 3+2; mark 01–05 → ikon semantik `aria-hidden`; tag FAQ sentence case.
+- **AO-19:** cue galeri `Lihat` selalu terlihat pada focus-visible & perangkat touch (sebelumnya hover-only).
+- **AO-20:** strip kondisi dapat CTA "Buka prioritas"; toolbar Owner dikelompokkan (Scope data/Tampilan/Status sistem, gap 16px); state AI belum dikonfigurasi dapat manfaat faktual + CTA `/settings?tab=ai`.
+- **AO-22:** `ActionQueueTable` 5 prioritas Admin dipindah sebelum `Metrik Cepat` (hierarchy banner → warning → antrean → KPI).
+- **Build:** frontend `tsc -b && vite build` ✅ (162 chunks, PWA verified).
+
+**Catatan:** AO-18/19/20 bersifat parsial — inventaris aset (AO-19), pembedaan state KPI + label aksi prioritas (AO-20), dan polish copy homepage (AO-18) menunggu re-audit AO-14. AO-21/AO-23/AO-03/AO-13/AO-14 tetap terbuka (butuh koordinasi AppLayout + fixture/kredensial UAT + verifikasi visual).
+
 ## 2026-07-30 — Audit menyeluruh + fix I-01
 
 - Audit statis lintas scope (keamanan, atomisitas keuangan, race/transaksi, hooks-order frontend) selesai; hasil dibukukan di `docs/M16_AUDIT_MENYELURUH.md`. Risk 🟢 LOW, tanpa temuan HIGH/kritis.
