@@ -1,5 +1,14 @@
 # KOST48 V5 — M13 Changelog
 
+## 2026-07-30 — Audit menyeluruh + fix I-01
+
+- Audit statis lintas scope (keamanan, atomisitas keuangan, race/transaksi, hooks-order frontend) selesai; hasil dibukukan di `docs/M16_AUDIT_MENYELURUH.md`. Risk 🟢 LOW, tanpa temuan HIGH/kritis.
+- **I-01:** validasi mutasi stok (`inventory-movements`) dipindah ke dalam transaksi yang sama agar pembacaan stok memakai baris yang sudah `FOR UPDATE`; menghilangkan TOCTOU pada pesan error.
+- Baseline: backend `test:unit` 74/74 · frontend `vitest run` 135/135 · build FE PWA verified.
+- File scratch audit Cline diarsipkan ke `docs/archieve/`.
+
+**Perubahan:** `inventory-movements.service.ts` (1 file backend) + dokumentasi M12/M13/M16.
+
 ## 2026-07-30 — Triage audit dashboard Area Admin desktop
 
 - Review eksternal Admin dipetakan ke `DashboardAdmin.tsx`, queue/alert component, dan shell shared; skor otomatis tidak dijadikan metrik release tanpa audit dinamis ADMIN/OWNER.

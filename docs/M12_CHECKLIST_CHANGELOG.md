@@ -18,6 +18,14 @@
 - [ ] Crawl dinamis OWNER/ADMIN/STAFF diulang setelah akun fixture UAT tersedia. Audit statis bukan pengganti bukti runtime.
 - **Putusan:** status UI/UX pra-go-live **RED** sampai AO-00 selesai dan regresi lintas role dapat dijalankan.
 
+## Update 2026-07-30 — Audit Menyeluruh KOST48 V5 (Reasonix)
+
+- [x] Audit statis lintas 46 modul backend + frontend + cross-cutting: keamanan (default-deny, HMAC IoT, SQLi, secrets), atomisitas keuangan, race/transaksi, hooks-order frontend. Hasil dibukukan di `docs/M16_AUDIT_MENYELURUH.md`.
+- [x] Baseline hijau: backend `tsc --noEmit` + `test:unit` 74/74 · frontend `npm run build` (PWA verified) + `vitest run` 135/135.
+- [x] Temuan minor **I-01** (validasi mutasi stok di luar tx) diperbaiki commit `610395c` — validasi dipindah ke dalam transaksi yang sama.
+- [x] File scratch audit Cline (A/AUDIT_L/AUDIT_LAPOR) diarsipkan ke `docs/archieve/`.
+- **Putusan:** risk rating 🟢 LOW — 0 HIGH, 0 MEDIUM terbuka, 1 LOW sudah fix. Sisa pra-go-live = Fase A (infra owner) + eksekusi Fase AO (AO-03/13/14/17..23).
+
 ## Update 2026-07-16 — KTP Portal dan Simplifikasi Owner/Admin
 
 - [x] Tenant dapat upload KTP miliknya sendiri; akses lintas tenant ditolak backend.
