@@ -5,6 +5,8 @@
 > **Status implementasi:** foundation done (2026-07-23), telemetry monitoring-only, no auto-billing  
 > **Terkait:** memory `iot-water-kwh-spec` · `M06_OPERASIONAL.md` · `M10_PETA_SCOPE.md`
 
+> **Update 2026-07-30 — Arah IoT baru (on-demand, tanpa cron):** kWh meter Tuya dibaca **on-demand** lewat `POST /api/iot/tenant/refresh` / `GET /api/iot/tenant/my-room` (angka kumulatif `add_ele`), bukan polling cron. Tidak ada cron `iot/tuya/cron` dan `IOT_TUYA_POLL_ENABLED=false`. Selisih pemakaian = total kumulatif sekarang − titik acuan (`MeterReading`) terakhir. Kedepan, ESP32 water-flow & polling akan dipindah ke Raspberry Pi (terpisah dari app ini); app ini cukup membaca data dari Pi saat sudah siap.
+
 ---
 
 ## Daftar Isi

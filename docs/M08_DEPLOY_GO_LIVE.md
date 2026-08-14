@@ -663,13 +663,9 @@ Tambahkan cron AutoOps setiap lima menit:
 
 Endpoint cron hanya menerima `POST` dan header `X-Cron-Token`; token query string tidak didukung. Cron ini juga menjalankan dispatch pengumuman terjadwal serta push outbox.
 
-Tambahkan tepat satu cron IoT setiap sepuluh menit. Timer internal harus tetap OFF pada Passenger:
+**IoT kWh meter TIDAK memakai cron.** Pembacaan Tuya bersifat **on-demand (kumulatif)** untuk menghemat shared hosting idle-sleep: tenant membuka halaman meter atau memanggil `POST /api/iot/tenant/refresh` → backend membaca total kWh kumulatif (`add_ele`) saat itu dan menghitung selisih terhadap titik acuan (`MeterReading`) terakhir. Timer internal tetap OFF (`IOT_TUYA_POLL_ENABLED=false`). **Jangan pasang cron `iot/tuya/cron`.**
 
-```cron
-*/10 * * * * curl -fsS -X POST -H "X-Iot-Cron-Token: <IOT_TUYA_CRON_TOKEN>" https://<domain>/api/iot/tuya/cron >/dev/null 2>&1
-```
-
-Kill procedure IoT yang benar: hapus/nonaktifkan cron di atas, pastikan `IOT_TUYA_POLL_ENABLED=false`, lalu nonaktifkan device melalui registry bila perlu. Variabel `IOT_ENABLED` tidak ada dan tidak boleh dijadikan prosedur rollback.
+Kill/rollback IoT: pastikan `IOT_TUYA_POLL_ENABLED=false`, tidak ada cron `iot/tuya/cron`, lalu nonaktifkan device melalui registry bila perlu. Variabel `IOT_ENABLED` tidak ada dan tidak boleh dijadikan prosedur rollback.
 
 #### 7. Smoke test dan UAT
 
@@ -677,7 +673,7 @@ Kill procedure IoT yang benar: hapus/nonaktifkan cron di atas, pastikan `IOT_TUY
 - Login OWNER; endpoint terproteksi harus menolak tanpa token.
 - Jalankan `POST /api/auto-ops/run` sekali melalui UI/API OWNER/ADMIN.
 - Login OWNER, buka `/iot`, pastikan 13 mapping yang diverifikasi tampil dan tidak ada data `stale` setelah snapshot awal.
-- Panggil `POST /api/iot/tuya/cron` sekali dengan header token; respons harus selesai tanpa polling device ganda.
+- Panggil `POST /api/iot/tenant/refresh` (atau `POST /api/iot/tuya/sync-all` untuk OWNER/ADMIN) sekali; respons harus mengembalikan total kWh kumulatif tanpa polling ganda dan tanpa membutuhkan cron.
 - Pastikan endpoint kompatibilitas klien lama `/api/iot/stream/tenant/raw` merespons `204` dan tidak membuka `text/event-stream`.
 - Pastikan `/sw.js`, `/version.json`, dan navigasi HTML mengirim `Cache-Control: no-store`; aset hash `/assets/*` harus `immutable`.
 - Uji pengumuman langsung dan terjadwal; pastikan `dispatchedAt` hanya terisi sekali.
