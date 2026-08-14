@@ -397,6 +397,18 @@ export default function AdminDashboard() {
           <Link to="/iot" className="small ms-auto" style={{ whiteSpace: 'nowrap' }}>Buka IoT →</Link>
         </div>
       ) : null}
+      {/* AO-22: antrean 5 prioritas tampil sebelum metrik, bukan setelahnya */}
+      {activeArea === 'overview' ? (
+        <ActionQueueTable
+          title="Ringkasan antrean"
+          subtitle="5 pekerjaan paling penting hari ini."
+          items={filteredQueueItems.slice(0, 5)}
+          emptyTitle="Tidak ada item mendesak hari ini"
+          emptyDescription="Semua area operasional sedang aman."
+          maxItems={5}
+          collapsible={false}
+        />
+      ) : null}
       {/* Visual Dashboard: Gauge, ActivityRing, SnippetCard, ComplicationGrid, RatingDisplay */}
       {activeArea === 'overview' ? (
         <section className="owner-panel mt-3 mb-3">
@@ -513,17 +525,6 @@ export default function AdminDashboard() {
             Cek di Operasional →
           </button>
         </Alert>
-      ) : null}
-      {activeArea === 'overview' ? (
-        <ActionQueueTable
-          title="Ringkasan antrean"
-          subtitle="5 pekerjaan paling penting hari ini."
-          items={filteredQueueItems.slice(0, 5)}
-          emptyTitle="Tidak ada item mendesak hari ini"
-          emptyDescription="Semua area operasional sedang aman."
-          maxItems={5}
-          collapsible={false}
-        />
       ) : null}
       {activeArea === 'overview' ? (
         <section className="owner-panel mt-3 mb-3">
