@@ -1,5 +1,14 @@
 # KOST48 V5 — M13 Changelog
 
+## 2026-07-30 — IoT on-demand kumulatif tanpa cron + auto-read meter
+
+- **Arah baru:** kWh meter Tuya dibaca **on-demand** (kumulatif `add_ele`), bukan polling cron. Cron `iot/tuya/cron` dihapus dari runbook; `IOT_TUYA_POLL_ENABLED=false` wajib.
+- **Auto-read:** `POST /meter-readings/cycle` kini menerima `autoElectricity=true` + `electricityReadingValue` opsional — backend baca counter Tuya kumulatif on-demand (`IotService.readRoomElectricityCumulative`), lalu hitung selisih vs titik acuan (`MeterReading`) terakhir dan terbitkan invoice listrik (`MTR-`) dengan jatah gratis 30 kWh. Tenant tak perlu mengetik angka meter manual.
+- Titik acuan tetap maju secara atomik bersama penerbitan invoice (anti double-billing via `alreadyBilledElectricityKwh`).
+- Arah masa depan: ESP32 water-flow & polling pindah ke Raspberry Pi; app ini cukup membaca dari Pi.
+
+**Perubahan:** `iot.service.ts`, `meter-readings.service.ts`, `record-meter-cycle.dto.ts`, `meter-readings.module.ts` + dokumentasi M08/M15.
+
 ## 2026-07-30 — Eksekusi Fase AO lanjutan (AO-17..AO-20, AO-22)
 
 - **AO-17:** homepage publik state jujur — hero/stats bedakan loading/error/penuh/kosong (tanpa "0 kamar" hijau), CTA lead-capture WhatsApp saat penuh, teaser katalog jadi waitlist saat 0 bookable, hapus quote hero berulang.

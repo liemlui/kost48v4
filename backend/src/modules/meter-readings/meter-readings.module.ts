@@ -3,9 +3,10 @@ import { MeterReadingsController } from './meter-readings.controller';
 import { MeterReadingsService } from './meter-readings.service';
 import { InvoicesModule } from '../invoices/invoices.module';
 import { SettingsModule } from '../settings/settings.module';
+import { IotModule } from '../iot/iot.module';
 
 @Module({
-  imports: [InvoicesModule, SettingsModule],
+  imports: [InvoicesModule, SettingsModule, IotModule],
   controllers: [MeterReadingsController],
   providers: [MeterReadingsService],
   exports: [MeterReadingsService],

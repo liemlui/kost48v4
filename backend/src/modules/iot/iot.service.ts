@@ -723,6 +723,42 @@ export class IotService {
     return result;
   }
 
+  /**
+   * On-demand: baca total kWh kumulatif (add_ele) meter listrik Tuya untuk satu
+   * kamar. Dipakai meter-readings saat tenant mencatat meter tanpa mengetik
+   * manual — sinkronisasi counter saat ini, bukan polling cron.
+   */
+  async readRoomElectricityCumulative(roomId: number): Promise<number> {
+    const device = await this.prisma.iotDevice.findFirst({
+      where: {
+        roomId,
+        enabled: true,
+        deviceType: IotDeviceType.ELECTRICITY_METER,
+        provider: IotProvider.TUYA,
+        externalDeviceId: { not: null },
+      },
+      orderBy: [{ lastSeenAt: 'desc' }, { id: 'desc' }],
+    });
+    if (!device) {
+      throw new NotFoundException('Kamar belum punya meter listrik Tuya terdaftar');
+    }
+    await this.pollAndStoreTuyaCoordinated(device);
+    const latest = await this.prisma.iotTelemetry.findFirst({
+      where: {
+        metric: 'electricity.energy_total_kwh',
+        valueDecimal: { not: null },
+        quality: { not: IotReadingQuality.REJECTED },
+        ingestMessage: { deviceId: device.id },
+      },
+      orderBy: { observedAt: 'desc' },
+      select: { valueDecimal: true },
+    });
+    if (latest?.valueDecimal == null) {
+      throw new ServiceUnavailableException('Belum bisa membaca total kWh meter. Coba lagi beberapa saat.');
+    }
+    return Number(latest.valueDecimal);
+  }
+
   async syncAllTuya(actor?: CurrentUserPayload) {
     const devices = await this.prisma.iotDevice.findMany({
       where: { provider: IotProvider.TUYA, enabled: true, externalDeviceId: { not: null } },

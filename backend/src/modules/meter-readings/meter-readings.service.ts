@@ -11,6 +11,7 @@ import { StayStatus, UserRole, UtilityType } from '../../common/enums/app.enums'
 import { endOfDay, parseJakartaDateOnly } from '../../common/utils/date.util';
 import { InvoicesService } from '../invoices/invoices.service';
 import { SettingsService } from '../settings/settings.service';
+import { IotService } from '../iot/iot.service';
 import { getUtilityAllowanceMonths, getUtilityBillingCycle, toUtilityCycleDateKey } from '../../common/business/utility-billing-cycle.helper';
 
 @Injectable()
@@ -20,6 +21,7 @@ export class MeterReadingsService {
     private readonly audit: AuditLogService,
     private readonly invoices: InvoicesService,
     private readonly settings: SettingsService,
+    private readonly iot: IotService,
   ) {}
 
   private async resolveUtilityCycle(stayId: number, checkInDate: Date, asOf: Date) {
@@ -260,7 +262,11 @@ export class MeterReadingsService {
     );
     const allowanceMonths = getUtilityAllowanceMonths(utilityCycle);
 
-    const elecValue = this.parseReadingValue(dto.electricityReadingValue, 'meter listrik');
+    // IOT on-demand: bila autoElectricity diaktifkan, baca counter Tuya kumulatif
+    // (add_ele) tanpa mengetik manual. Gagal baca → error jelas, tidak diam-diam.
+    const elecValue = dto.autoElectricity
+      ? this.parseReadingValue((await this.iot.readRoomElectricityCumulative(roomId)).toFixed(3), 'meter listrik')
+      : this.parseReadingValue(dto.electricityReadingValue ?? '', 'meter listrik');
     const prevElec = await this.prisma.meterReading.findFirst({ where: { roomId, utilityType: UtilityType.ELECTRICITY, readingAt: { lt: readingAt } }, orderBy: { readingAt: 'desc' } });
     const cycleElecBaseline = await this.prisma.meterReading.findFirst({
       where: { roomId, utilityType: UtilityType.ELECTRICITY, readingAt: { lte: utilityCycle.start } },

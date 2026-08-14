@@ -1,4 +1,4 @@
-import { IsDateString, IsInt, IsNumberString, IsOptional, IsString } from 'class-validator';
+import { IsBoolean, IsDateString, IsInt, IsNumberString, IsOptional, IsString } from 'class-validator';
 
 /**
  * M-2: catat meter satu siklus (listrik + air bareng) untuk kamar berpenghuni,
@@ -15,8 +15,15 @@ export class RecordMeterCycleDto {
   @IsDateString()
   readingAt!: string;
 
+  // Opsional: kosongkan + autoElectricity=true agar backend baca counter Tuya
+  // kumulatif (add_ele) on-demand, tanpa tenant mengetik manual.
+  @IsOptional()
   @IsNumberString({}, { message: 'Angka meter listrik harus berupa angka' })
-  electricityReadingValue!: string;
+  electricityReadingValue?: string;
+
+  @IsOptional()
+  @IsBoolean()
+  autoElectricity?: boolean;
 
   @IsOptional()
   @IsNumberString({}, { message: 'Angka meter air harus berupa angka' })
