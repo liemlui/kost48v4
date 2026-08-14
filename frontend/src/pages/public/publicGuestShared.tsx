@@ -93,27 +93,27 @@ export const FACILITY_GROUPS = [
 
 export const TRUST_ITEMS = [
   {
-    mark: '01',
+    mark: '🔍',
     title: 'Status kamar transparan',
     desc: 'Calon penghuni bisa melihat kamar yang tersedia, terisi, atau sedang dicek tanpa menebak dari chat.',
   },
   {
-    mark: '02',
+    mark: '📋',
     title: 'Booking tidak hilang di chat',
     desc: 'Pengajuan booking dan pembayaran punya alur yang lebih rapi sehingga tindak lanjut lebih mudah dilacak.',
   },
   {
-    mark: '03',
+    mark: '📷',
     title: 'Fasilitas terlihat sejak awal',
     desc: 'Foto, fasilitas, tarif, dan status kamar bisa dibandingkan sebelum menghubungi admin.',
   },
   {
-    mark: '04',
+    mark: '📱',
     title: 'Penghuni punya portal',
     desc: 'Masa sewa, tagihan, bukti bayar, dan laporan masalah bisa dicek lebih jelas setelah tinggal.',
   },
   {
-    mark: '05',
+    mark: '⚡',
     title: 'Listrik transparan, bukan token',
     desc: 'Listrik pascabayar: pakai dulu, bayar sesuai meter. Ada jatah listrik gratis tiap bulan, dan saat keluar tidak ada sisa saldo yang hangus — tagihan meter terakhir dipotong dari deposit.',
   },

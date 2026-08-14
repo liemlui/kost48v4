@@ -240,6 +240,20 @@ export default function PublicGuestDashboardPage() {
     };
   }, [catalogStats, roomSummaryQuery.data]);
   const isStatsLoading = roomSummaryQuery.isLoading && !roomSummaryQuery.data;
+  // AO-17: state ketersediaan yang jujur — bedakan loading, error, ada kamar, penuh, dan belum ada data.
+  const bookableRooms = useMemo(
+    () => rooms.filter((r) => isPublicRoomBookable(r)),
+    [rooms],
+  );
+  const availabilityState = isStatsLoading
+    ? 'loading'
+    : roomsQuery.isError || roomSummaryQuery.isError
+      ? 'error'
+      : stats.bookable > 0
+        ? 'available'
+        : stats.total > 0
+          ? 'full'
+          : 'empty';
 
   // Z-17: Sync displayStats immediately when data loads (not just on scroll)
   useEffect(() => {
@@ -384,14 +398,28 @@ export default function PublicGuestDashboardPage() {
             <div className="gx-hero-price-badge">
               <span aria-hidden="true">🏷️</span>
               <strong>Mulai {formatCompactRupiah(Math.min(...monthlyRates))}/bln</strong>
-              <span className="gx-hero-price-badge-sub">{stats.bookable} kamar tersedia</span>
+              <span className={`gx-hero-price-badge-sub${availabilityState === 'full' || availabilityState === 'empty' ? ' is-neutral' : ''}`}>
+                {availabilityState === 'loading' ? 'Memuat ketersediaan…'
+                  : availabilityState === 'error' ? 'Ketersediaan belum dapat dimuat'
+                  : availabilityState === 'full' ? 'Semua kamar sedang terisi'
+                  : availabilityState === 'empty' ? 'Belum ada data kamar'
+                  : `${stats.bookable} kamar tersedia`}
+              </span>
             </div>
           )}
           <div className="gx-hero-cta">
-            <a className="gx-hero-btn-primary" href="#kamar"><span aria-hidden="true">🛏️</span> Lihat Kamar Tersedia →</a>
-            <a className="gx-hero-btn-ghost" href={buildWhatsAppUrl('Halo Admin KOST48, saya ingin tanya ketersediaan kamar.')} target="_blank" rel="noreferrer"><span aria-hidden="true">💬</span> WhatsApp Admin</a>
+            {availabilityState === 'available' || availabilityState === 'loading' || availabilityState === 'error' ? (
+              <>
+                <a className="gx-hero-btn-primary" href="#kamar"><span aria-hidden="true">🛏️</span> Lihat Kamar Tersedia →</a>
+                <a className="gx-hero-btn-ghost" href={buildWhatsAppUrl('Halo Admin KOST48, saya ingin tanya ketersediaan kamar.')} target="_blank" rel="noreferrer"><span aria-hidden="true">💬</span> WhatsApp Admin</a>
+              </>
+            ) : (
+              <>
+                <a className="gx-hero-btn-primary" href={buildWhatsAppUrl('Halo Admin KOST48, kabari saya saat ada kamar tersedia.')} target="_blank" rel="noreferrer"><span aria-hidden="true">🔔</span> Kabari saya saat tersedia</a>
+                <a className="gx-hero-btn-ghost" href="#kamar"><span aria-hidden="true">📋</span> Lihat seluruh kamar</a>
+              </>
+            )}
           </div>
-          <p className="gx-hero-tagline">"Rumah kos sih, tapi terasa seperti rumah sendiri."</p>
         </div>
         <div className="gx-hero-next" aria-hidden="true">Kamar tersedia, fasilitas, dan lokasi ada di bawah.</div>
       </section>
@@ -406,9 +434,13 @@ export default function PublicGuestDashboardPage() {
                 Lihat status setiap kamar secara real-time — filter AC/kipas, KM dalam/luar, harga,
                 dan bandingkan hingga 3 kamar sekaligus. Tidak perlu login, tidak perlu nunggu balas WA.
               </p>
-              <div className="gx-avail-live-badge" aria-live="polite">
+              <div className={`gx-avail-live-badge${availabilityState === 'full' || availabilityState === 'empty' ? ' is-neutral' : ''}`} aria-live="polite">
                 <span className="gx-avail-live-dot" aria-hidden="true" />
-                {isStatsLoading ? 'Memuat ketersediaan…' : `${stats.bookable} kamar tersedia sekarang`}
+                {availabilityState === 'loading' ? 'Memuat ketersediaan…'
+                  : availabilityState === 'error' ? 'Ketersediaan belum dapat dimuat'
+                  : availabilityState === 'full' ? 'Semua kamar sedang terisi'
+                  : availabilityState === 'empty' ? 'Belum ada data kamar'
+                  : `${stats.bookable} kamar tersedia sekarang`}
               </div>
               <div className="gx-avail-stats">
                 <div className="gx-stat gx-stat-green">
@@ -428,9 +460,9 @@ export default function PublicGuestDashboardPage() {
                 <div className="gx-avail-progress-wrap">
                   <div className="gx-avail-progress-meta">
                     <span>Tingkat hunian saat ini</span>
-                    <strong className={`gx-percent-badge${stats.bookable <= 5 ? ' is-scarce' : ''}`}>
+                    <strong className={`gx-percent-badge${stats.bookable > 0 && stats.bookable <= 5 ? ' is-scarce' : ''}`}>
                       <span className="gx-percent-num">{displayStats.percent}%</span>
-                      {stats.bookable <= 5 && <span className="gx-percent-note">⚡ Sisa {stats.bookable} kamar!</span>}
+                      {stats.bookable > 0 && stats.bookable <= 5 && <span className="gx-percent-note">⚡ Sisa {stats.bookable} kamar!</span>}
                     </strong>
                   </div>
                   <div
@@ -442,7 +474,7 @@ export default function PublicGuestDashboardPage() {
                     aria-label={`${stats.occupied} dari ${stats.total} kamar terisi`}
                   >
                     <div
-                      className={`gx-avail-progress-bar${stats.bookable <= 5 ? ' is-scarce' : ''}`}
+                      className={`gx-avail-progress-bar${stats.bookable > 0 && stats.bookable <= 5 ? ' is-scarce' : ''}`}
                       style={{ width: statsVisible ? `${Math.round((stats.occupied / stats.total) * 100)}%` : '0%' }}
                     />
                   </div>
@@ -496,10 +528,19 @@ export default function PublicGuestDashboardPage() {
             </div>
           ) : roomsQuery.isError ? (
             <div className="gx-home-empty">Katalog kamar belum dapat dimuat. <Link to="/rooms">Coba buka katalog langsung →</Link></div>
+          ) : rooms.length > 0 && bookableRooms.length === 0 ? (
+            <div className="gx-home-empty gx-home-waitlist">
+              <strong>Semua kamar sedang terisi.</strong>
+              <p>Seluruh kamar KOST48 saat ini terisi. Kabari kami agar kamu jadi yang pertama tahu saat ada kamar kosong.</p>
+              <div className="gx-home-waitlist-actions">
+                <a href={buildWhatsAppUrl('Halo Admin KOST48, kabari saya saat ada kamar tersedia.')} className="gx-btn gx-btn-whatsapp" target="_blank" rel="noopener noreferrer">Kabari saya via WhatsApp</a>
+                <Link to="/rooms" className="gx-btn-outline">Lihat seluruh kamar</Link>
+              </div>
+            </div>
           ) : rooms.length > 0 ? (
             <>
               <div className="gx-room-grid">
-                {rooms.filter((r) => isPublicRoomBookable(r)).slice(0, 4).map((room) => <RoomPreviewCard key={room.id} room={room} />)}
+                {bookableRooms.slice(0, 4).map((room) => <RoomPreviewCard key={room.id} room={room} />)}
               </div>
               <div className="gx-room-range">
                 <span>Tarif bulanan mulai</span>
@@ -528,7 +569,7 @@ export default function PublicGuestDashboardPage() {
           <div className="gx-trust-grid gx-stagger">
             {TRUST_ITEMS.map((item) => (
               <article className="gx-trust-card" key={item.title}>
-                <span className="gx-trust-mark">{item.mark}</span>
+                <span className="gx-trust-mark" aria-hidden="true">{item.mark}</span>
                 <h3>{item.title}</h3>
                 <p>{item.desc}</p>
               </article>
