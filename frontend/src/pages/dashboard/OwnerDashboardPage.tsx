@@ -300,31 +300,42 @@ export default function OwnerDashboardPage() {
           <p>Ringkasan kesehatan bisnis untuk {selectedPeriodLabel}.</p>
         </div>
         <div className="owner-toolbar">
-          <div className="owner-period-field">
-            <Form.Label htmlFor="owner-year">Tahun</Form.Label>
-            <Form.Control id="owner-year" type="number" value={ym.year} min={2020} max={2100} onChange={(e) => handleChange('year', e.target.value)} />
+          <div className="owner-toolbar-group">
+            <span className="owner-toolbar-group-label">Scope data</span>
+            <div className="owner-toolbar-group-controls">
+              <div className="owner-period-field">
+                <Form.Label htmlFor="owner-year">Tahun</Form.Label>
+                <Form.Control id="owner-year" type="number" value={ym.year} min={2020} max={2100} onChange={(e) => handleChange('year', e.target.value)} />
+              </div>
+              <div className="owner-period-field">
+                <Form.Label htmlFor="owner-month">Bulan</Form.Label>
+                <Form.Select id="owner-month" value={ym.month} onChange={(e) => handleChange('month', e.target.value)}>
+                  {Array.from({ length: 12 }, (_, i) => i + 1).map((m) => (
+                    <option key={m} value={m}>{new Date(0, m - 1).toLocaleString('id-ID', { month: 'long' })}</option>
+                  ))}
+                </Form.Select>
+              </div>
+            </div>
           </div>
-          <div className="owner-period-field">
-            <Form.Label htmlFor="owner-month">Bulan</Form.Label>
-            <Form.Select id="owner-month" value={ym.month} onChange={(e) => handleChange('month', e.target.value)}>
-              {Array.from({ length: 12 }, (_, i) => i + 1).map((m) => (
-                <option key={m} value={m}>{new Date(0, m - 1).toLocaleString('id-ID', { month: 'long' })}</option>
-              ))}
-            </Form.Select>
+          <div className="owner-toolbar-group">
+            <span className="owner-toolbar-group-label">Tampilan</span>
+            <div className="owner-view-toggle" role="radiogroup" aria-label="Tampilan dashboard">
+              <button type="button" role="radio" aria-checked={viewMode === 'compact'} className={viewMode === 'compact' ? 'active' : ''} onClick={() => toggleViewMode()}>
+                📋 Ringkas
+              </button>
+              <button type="button" role="radio" aria-checked={viewMode === 'full'} className={viewMode === 'full' ? 'active' : ''} onClick={() => toggleViewMode()}>
+                📊 Lengkap
+              </button>
+            </div>
           </div>
-          <div className="owner-view-toggle" role="radiogroup" aria-label="Tampilan dashboard">
-            <button type="button" role="radio" aria-checked={viewMode === 'compact'} className={viewMode === 'compact' ? 'active' : ''} onClick={() => toggleViewMode()}>
-              📋 Ringkas
-            </button>
-            <button type="button" role="radio" aria-checked={viewMode === 'full'} className={viewMode === 'full' ? 'active' : ''} onClick={() => toggleViewMode()}>
-              📊 Lengkap
-            </button>
-          </div>
-          <div className="owner-refresh-control">
-            <Button type="button" variant="outline-secondary" size="sm" onClick={refreshDashboard} disabled={isRefreshing}>
-              {isRefreshing ? <><Spinner animation="border" size="sm" className="me-1" />Memuat</> : '↻ Refresh'}
-            </Button>
-            <small aria-live="polite">{lastUpdatedLabel ? `Terakhir diperbarui ${lastUpdatedLabel}` : 'Belum diperbarui'}</small>
+          <div className="owner-toolbar-group">
+            <span className="owner-toolbar-group-label">Status sistem</span>
+            <div className="owner-refresh-control">
+              <Button type="button" variant="outline-secondary" size="sm" onClick={refreshDashboard} disabled={isRefreshing}>
+                {isRefreshing ? <><Spinner animation="border" size="sm" className="me-1" />Memuat</> : '↻ Refresh'}
+              </Button>
+              <small aria-live="polite">{lastUpdatedLabel ? `Terakhir diperbarui ${lastUpdatedLabel}` : 'Belum diperbarui'}</small>
+            </div>
           </div>
         </div>
       </section>
@@ -367,6 +378,15 @@ export default function OwnerDashboardPage() {
                 <span>Periode</span>
                 <strong>{selectedPeriodLabel}</strong>
               </div>
+              {data.signals.length + extraSignals.length > 0 ? (
+                <button
+                  type="button"
+                  className="owner-status-cta"
+                  onClick={() => document.getElementById('prioritas')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
+                >
+                  Buka prioritas &rsaquo;
+                </button>
+              ) : null}
             </section>
           ) : null}
 
@@ -387,7 +407,7 @@ export default function OwnerDashboardPage() {
 
           <Row className="g-3 mb-3">
             <Col lg={7}>
-              <section className="owner-panel h-100">
+              <section className="owner-panel h-100" id="prioritas">
                 <div className="owner-panel-heading">
                   <div>
                     <span className="owner-section-kicker">Prioritas</span>
@@ -493,7 +513,10 @@ export default function OwnerDashboardPage() {
                       )}
                     />
                   ) : (
-                    <Alert variant="secondary" className="mb-0 small">AI belum dikonfigurasi. Aktifkan di <strong>Pengaturan → Konfigurasi AI</strong>.</Alert>
+                    <div className="owner-ai-not-configured">
+                      <p className="mb-2">AI belum dikonfigurasi. Aktifkan agar DeepSeek merangkum kesehatan bisnis dan menyarankan aksi prioritas dari data transaksimu.</p>
+                      <Button type="button" variant="primary" size="sm" onClick={() => navigate('/settings?tab=ai')}>Buka konfigurasi AI →</Button>
+                    </div>
                   )}
                 </div>
               </section>
