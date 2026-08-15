@@ -65,6 +65,7 @@ const RoomDetailPage = lazy(() => import('./pages/rooms/RoomDetailPage'));
 const CheckInWizard = lazy(() => import('./pages/stays/CheckInWizard'));
 const StayDetailPage = lazy(() => import('./pages/stays/StayDetailPage'));
 const StaysPage = lazy(() => import('./pages/stays/StaysPage'));
+const AssistTenantPage = lazy(() => import('./pages/stays/AssistTenantPage'));
 const TicketsPage = lazy(() => import('./pages/tickets/TicketsPage'));
 const StaffRoutinesAdminPage = lazy(() => import('./pages/staff-routines/StaffRoutinesAdminPage'));
 const StaffMonthlyReportPage = lazy(() => import('./pages/staff/StaffMonthlyReportPage'));
@@ -277,6 +278,7 @@ export default function App() {
           <Route path="/portal/booking/:roomId" element={<RequireRoles allowed={['TENANT']}><TenantBookingRouteGuard><BookingPage /></TenantBookingRouteGuard></RequireRoles>} />
           <Route path="/stays" element={<RequireRoles allowed={['OWNER', 'ADMIN']}><StaysPage /></RequireRoles>} />
           <Route path="/stays/check-in" element={<RequireRoles allowed={['ADMIN', 'OWNER']}><CheckInWizard /></RequireRoles>} />
+          <Route path="/stays/assist" element={<RequireRoles allowed={['OWNER', 'ADMIN']}><AssistTenantPage /></RequireRoles>} />
           <Route path="/stays/:id" element={<RequireRoles allowed={['OWNER', 'ADMIN']}><StayDetailPage /></RequireRoles>} />
           <Route path="/invoices" element={<RequireRoles allowed={['OWNER', 'ADMIN']}><InvoicesPage /></RequireRoles>} />
           <Route path="/invoice-payments" element={<RequireRoles allowed={['OWNER', 'ADMIN']}><ConfiguredResourcePage resource="invoice-payments" /></RequireRoles>} />

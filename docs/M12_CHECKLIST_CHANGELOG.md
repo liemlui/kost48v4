@@ -216,6 +216,7 @@ Catatan: perubahan tool/seed deploy 2026-07-19 adalah riwayat UAT. Produksi meng
 > 23. **MX** — ✅ **SELESAI (29 Jul)** — Audit lintas scope: 1 CRITICAL (journal consistency), 2 HIGH (timezone, DRY), 10 rekomendasi X1-X10. Temuan terintegrasi ke `docs/M01_MASTER.md`.
 > 24. **MX-Verify** — ✅ **SELESAI (29 Jul)** — Verifikasi Codex Sol: 12/18 benar, 6 koreksi diterapkan ke M01/M05/M06. Memory `codex-sol-verify-koreksi` tersimpan.
 > 25. **AO-00..AO-23** — 🔴 **ANTRIAN AKTIF** — audit UI/UX lintas portal, benchmark homepage produksi, dan review statis dashboard Owner/Admin 30 Jul 2026. Mulai dari sinkronisasi migration UAT, lalu perbaikan P1, crawl role, benchmark publik, dan audit ulang. Detail otoritatif: [M14 Audit UI/UX](M14_AUDIT_UI_UX.md).
+> 26. **BYPASS-TENANT (by-pass tenant gagap teknologi)** — ✅ **SELESAI** — halaman baru `/stays/assist` "Bantu Penghuni" (OWNER/ADMIN) menyelesaikan 3 aksi dalam satu layar tanpa lompat menu: pilih masa sewa aktif → catat meter otomatis (Tuya) → catat pembayaran tunai & tutup tagihan. Memanfaatkan endpoint yang sudah ada (`recordMeterCycle` auto, `createPayment`, `issueInvoice`). Build frontend ✅ (PWA verified). Sisa #2 (de-emphasize nav) & #3 (audit tenant awam) tetap terbuka untuk sesi berikutnya.
 >
 > **🆕 TODO untuk /new berikutnya — Perbaikan Prioritas Pasca Audit (urutan):**
 > 1. **X1 🔴** — ✅ SELESAI (29 Jul) — Seragamkan SEMUA journal posting → BLOCKING (20+ call site). = AN-03.

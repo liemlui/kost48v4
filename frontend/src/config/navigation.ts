@@ -41,6 +41,7 @@ export const adminSections: NavigationSection[] = [
     title: 'Huni & Uang',
     links: [
       { to: '/dashboard', label: 'Dashboard', icon: '📊', hint: 'Command Center ringkas berisi prioritas paling penting dari semua menu.' },
+      { to: '/stays/assist', label: 'Bantu Penghuni', icon: '🤝', hint: 'Selesaikan catat meter + bayar tunai + tutup tagihan atas nama tenant dalam satu layar.' },
       { to: '/stays', label: 'Masa Sewa & Penghuni', icon: '🏠', hint: 'Booking, masa sewa aktif, perpanjangan, keluar, dan daftar penghuni.', activePaths: ['/stays', '/tenants', '/renew-requests'] },
       { to: '/invoices', label: 'Keuangan', icon: '🧾', hint: 'Tagihan, review pembayaran, voucher WiFi, pendapatan tambahan, dan pengeluaran.', activePaths: ['/invoices', '/invoice-payments', '/payment-submissions/review', '/wifi-sales', '/ancillary-revenue', '/expenses', '/finance/accounting-setup', '/finance/assets'] },
     ],

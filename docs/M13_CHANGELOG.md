@@ -1,5 +1,13 @@
 # KOST48 V5 — M13 Changelog
 
+## 2026-07-30 — By-pass tenant gagap teknologi: halaman "Bantu Penghuni"
+
+- Halaman baru `/stays/assist` (OWNER/ADMIN) menyelesaikan 3 aksi dalam **satu layar** tanpa lompat 3 menu: (1) pilih masa sewa aktif, (2) catat meter listrik **otomatis** (`recordMeterCycle` + `autoElectricity=true` → baca counter Tuya & terbitkan tagihan `MTR-`), (3) catat pembayaran **tunai** sebesar sisa tagihan sehingga tagihan langsung LUNAS (tutup tagihan). Tagihan `DRAFT` punya tombol "Terbitkan" dulu.
+- Entry point: item nav "🤝 Bantu Penghuni" (Area Admin + OWNER mode admin) + sub-nav di `/stays`.
+- Memanfaatkan endpoint & komponen yang sudah ada (`recordMeterCycle`, `createPayment`, `issueInvoice`, `useInvoices`) — tanpa endpoint/backend baru.
+
+**Perubahan:** `AssistTenantPage.tsx` (baru), `App.tsx`, `config/navigation.ts`, `config/routeTitles.ts`, `pages/stays/StaysPage.tsx`. Build frontend ✅ (PWA verified).
+
 ## 2026-07-30 — IoT on-demand kumulatif tanpa cron + auto-read meter
 
 - **Arah baru:** kWh meter Tuya dibaca **on-demand** (kumulatif `add_ele`), bukan polling cron. Cron `iot/tuya/cron` dihapus dari runbook; `IOT_TUYA_POLL_ENABLED=false` wajib.

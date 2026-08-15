@@ -587,6 +587,7 @@ export default function StaysPage() {
         <NavLink to="/stays?status=CHECKOUT" className={({ isActive }) => `admin-sub-nav-link${isActive || statusFilter === 'CHECKOUT' ? ' active' : ''}`}>Checkout</NavLink>
         <NavLink to="/tenants?ktpStatus=PENDING_REVIEW" className="admin-sub-nav-link">Data Penghuni</NavLink>
         <NavLink to="/renew-requests" className="admin-sub-nav-link">Perpanjangan</NavLink>
+        <NavLink to="/stays/assist" className={({ isActive }) => `admin-sub-nav-link${isActive ? ' active' : ''}`}>🤝 Bantu Penghuni</NavLink>
       </div>
 
       <AssistantInsightLine

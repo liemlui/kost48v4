@@ -28,6 +28,7 @@ const ROUTE_TITLES: Array<{ pattern: string; title: string }> = [
   { pattern: '/tenants', title: 'Penghuni' },
 
   { pattern: '/stays/check-in', title: 'Check-in' },
+  { pattern: '/stays/assist', title: 'Bantu Penghuni' },
   { pattern: '/stays/:id', title: 'Detail Masa Sewa' },
   { pattern: '/stays', title: 'Masa Sewa' },
 
