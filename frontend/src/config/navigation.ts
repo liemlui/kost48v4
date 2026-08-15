@@ -26,12 +26,17 @@ export const ownerSections: NavigationSection[] = [
     links: [
       { to: '/owner-dashboard', label: 'Kokpit Owner', icon: '📈', hint: 'KPI bisnis, status kokpit, sinyal risiko, dan tren.' },
       { to: '/reports', label: 'Laporan Bisnis', icon: '📊', hint: 'Operasional, laba rugi, arus kas, neraca, dan rasio keuangan.' },
-      { to: '/market-analysis', label: 'Analisa Pasar (AI)', icon: '🧭', hint: 'Ditemani AI DeepSeek: SWOT, PESTLE, dan analisa kompetitor.' },
       { to: '/finance/accounting-setup', label: 'Akuntansi & Aset', icon: '📘', hint: 'Bagan Akun, periode, saldo awal, jurnal, aset & depresiasi, dan refund kalah-cepat.', activePaths: ['/finance/accounting-setup', '/finance/assets', '/loss-refunds'] },
-      { to: '/loyalty', label: 'Loyalitas & Reward', icon: '🎁', hint: 'Katalog reward, kelola poin, dan setujui penukaran tenant.' },
       { to: '/users', label: 'Akun & Layanan', icon: '👤', hint: 'Kelola akun owner/admin/staff/penghuni, layanan tambahan, dan minat tenant.', activePaths: ['/users', '/tenants', '/additional-services', '/service-interests'] },
       { to: '/iot', label: 'IoT Listrik & Air', icon: '⚡', hint: 'Koneksi Tuya kWh, telemetri listrik, dan persiapan sensor air ESP32.' },
       { to: '/settings', label: 'Pengaturan', icon: '⚙️', hint: 'FAQ publik, foto kamar, konten halaman tamu, tarif dasar, dan konfigurasi AI.' },
+    ],
+  },
+  {
+    title: 'Lainnya',
+    links: [
+      { to: '/market-analysis', label: 'Analisa Pasar (AI)', icon: '🧭', hint: 'Ditemani AI DeepSeek: SWOT, PESTLE, dan analisa kompetitor.' },
+      { to: '/loyalty', label: 'Loyalitas & Reward', icon: '🎁', hint: 'Katalog reward, kelola poin, dan setujui penukaran tenant.' },
     ],
   },
 ];
@@ -58,9 +63,14 @@ export const adminSections: NavigationSection[] = [
   {
     title: 'Penghuni & Komunikasi',
     links: [
-      { to: '/surveys', label: 'Survei Penghuni', icon: '⭐', hint: 'Lihat semua survei kepuasan, rating, komentar, dan ringkasan.' },
       { to: '/guest-preferences', label: 'Preferensi Tamu', icon: '🎯', hint: 'Data preferensi kamar dari wizard publik.' },
       { to: '/announcements', label: 'Pengumuman', icon: '📣', hint: 'Buat dan kelola pengumuman untuk penghuni dan staff.' },
+    ],
+  },
+  {
+    title: 'Lainnya',
+    links: [
+      { to: '/surveys', label: 'Survei Penghuni', icon: '⭐', hint: 'Lihat semua survei kepuasan, rating, komentar, dan ringkasan.' },
       { to: '/loyalty', label: 'Reward', icon: '🎁', hint: 'Setujui penukaran reward tenant dan lihat katalog.' },
     ],
   },
@@ -119,19 +129,26 @@ function getTenantSections(stage: TenantPortalStage = 'occupied', features?: Ten
     }];
   }
 
-  return [{
-    title: 'Portal Penghuni',
-    links: [
-      { to: '/portal/stay', label: 'Panduan Kos Saya', icon: '🏠', hint: 'Kamar, masa sewa, tagihan, dan aksi berikutnya.' },
-      { to: '/portal/energy', label: 'Energi', icon: '⚡', hint: 'Pantau pembacaan listrik & air terbaru dari meter otomatis.' },
-      { to: '/portal/invoices', label: 'Bayar Tagihan', icon: '💳', hint: 'Tagihan, status, dan tindak lanjut pembayaran.' },
-      { to: '/portal/tickets', label: 'Lapor Masalah', icon: '🛠️', hint: 'Laporkan kerusakan atau kebutuhan bantuan dan pantau progresnya.' },
-      { to: '/portal/announcements', label: 'Pengumuman', icon: '📢', hint: 'Info terbaru dari pengelola KOST48.' },
-      { to: '/portal/manual', label: 'Panduan', icon: '📖', hint: 'Aturan, pembayaran, dan layanan kos.' },
-      { to: '/portal/wifi', label: 'Pesan WiFi', icon: '📶', hint: 'Lihat prosedur pembelian paket WiFi melalui WhatsApp.' },
-      ...(features?.loyaltyEnabled ? [{ to: '/portal/loyalty', label: 'Poin & Reward', icon: '🎁', hint: 'Poin kebaikan, leaderboard, katalog reward, dan referral.' }] : []),
-    ],
-  }];
+  return [
+    {
+      title: 'Portal Penghuni',
+      links: [
+        { to: '/portal/stay', label: 'Panduan Kos Saya', icon: '🏠', hint: 'Kamar, masa sewa, tagihan, dan aksi berikutnya.' },
+        { to: '/portal/energy', label: 'Energi', icon: '⚡', hint: 'Pantau pembacaan listrik & air terbaru dari meter otomatis.' },
+        { to: '/portal/invoices', label: 'Bayar Tagihan', icon: '💳', hint: 'Tagihan, status, dan tindak lanjut pembayaran.' },
+        { to: '/portal/tickets', label: 'Lapor Masalah', icon: '🛠️', hint: 'Laporkan kerusakan atau kebutuhan bantuan dan pantau progresnya.' },
+        { to: '/portal/announcements', label: 'Pengumuman', icon: '📢', hint: 'Info terbaru dari pengelola KOST48.' },
+        { to: '/portal/manual', label: 'Panduan', icon: '📖', hint: 'Aturan, pembayaran, dan layanan kos.' },
+        { to: '/portal/wifi', label: 'Pesan WiFi', icon: '📶', hint: 'Lihat prosedur pembelian paket WiFi melalui WhatsApp.' },
+      ],
+    },
+    ...(features?.loyaltyEnabled ? [{
+      title: 'Lainnya',
+      links: [
+        { to: '/portal/loyalty', label: 'Poin & Reward', icon: '🎁', hint: 'Poin kebaikan, leaderboard, katalog reward, dan referral.' },
+      ],
+    }] : []),
+  ];
 }
 
 export function getNavigationSections(role?: Role, tenantStage: TenantPortalStage = 'occupied', features?: TenantFeatures): NavigationSection[] {

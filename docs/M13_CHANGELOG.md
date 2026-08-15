@@ -1,5 +1,13 @@
 # KOST48 V5 — M13 Changelog
 
+## 2026-07-30 — De-emphasize fitur rumit (section nav "Lainnya")
+
+- Item "rumit" dipindah dari nav utama ke section **"Lainnya"**: admin (`Survei Penghuni`, `Reward`), owner (`Analisa Pasar (AI)`, `Loyalitas & Reward`), tenant (`Poin & Reward` saat loyalty aktif).
+- Nav utama fokus ke alur inti (huni/check-in–checkout, keuangan/bayar, operasional). Route & halaman **tidak dihapus** — tetap reachable dari "Lainnya".
+- `referral`/`kanban` bukan item nav terpisah (berada di dalam halaman loyalty/tiket), jadi tidak ada yang terpotong.
+
+**Perubahan:** `config/navigation.ts` (1 file).
+
 ## 2026-07-30 — By-pass tenant gagap teknologi: halaman "Bantu Penghuni"
 
 - Halaman baru `/stays/assist` (OWNER/ADMIN) menyelesaikan 3 aksi dalam **satu layar** tanpa lompat 3 menu: (1) pilih masa sewa aktif, (2) catat meter listrik **otomatis** (`recordMeterCycle` + `autoElectricity=true` → baca counter Tuya & terbitkan tagihan `MTR-`), (3) catat pembayaran **tunai** sebesar sisa tagihan sehingga tagihan langsung LUNAS (tutup tagihan). Tagihan `DRAFT` punya tombol "Terbitkan" dulu.
