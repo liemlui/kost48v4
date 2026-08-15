@@ -1,5 +1,14 @@
 # KOST48 V5 — M13 Changelog
 
+## 2026-07-30 — Tenant awam: 3 tombol inti besar di hub aksi
+
+- Hub aksi tenant (Panduan Kos Saya) kini punya 3 tombol inti besar & berwarna di baris atas: **Bayar Tagihan**, **Catat Meter**, **Lapor Masalah** (sebelumnya "Bayar" & "Lapor Masalah" tidak ada sebagai tombol — hanya di fact-chip/guide).
+- "Bayar Tagihan" mengarah ke invoice paling mendesak (overdue/utama), atau daftar tagihan bila tak ada.
+- Aksi lanjutan (Perpanjang · Ajukan Keluar · Hubungi Admin) tetap ada di baris kedua yang ringkas.
+- Grid 3 kolom + varian `.primary` (biru, sentuh lebih besar) untuk memudahkan tenant gagap teknologi.
+
+**Perubahan:** `StayQuickActions.tsx`, `ActiveStayContent.tsx`, `styles/10-misc.css`.
+
 ## 2026-07-30 — De-emphasize fitur rumit (section nav "Lainnya")
 
 - Item "rumit" dipindah dari nav utama ke section **"Lainnya"**: admin (`Survei Penghuni`, `Reward`), owner (`Analisa Pasar (AI)`, `Loyalitas & Reward`), tenant (`Poin & Reward` saat loyalty aktif).

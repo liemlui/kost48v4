@@ -374,6 +374,13 @@ export default function ActiveStayContent({ stay }: { stay: Stay }) {
       ? 'Ada tagihan tanpa nominal pembayaran. Hubungi admin agar statusnya dicek sebelum ajukan perpanjangan atau keluar.'
       : null;
 
+  // Aksi "Bayar Tagihan" mengarah ke invoice paling mendesak (overdue/utama), atau daftar bila tak ada.
+  const bayarRoute = overdueInvoice
+    ? `/portal/invoices/${overdueInvoice.id}`
+    : primaryInvoice
+      ? `/portal/invoices/${primaryInvoice.id}`
+      : '/portal/invoices';
+
   // Tombol perpanjangan SELALU tampil di halaman; nonaktif (dengan alasan) bila belum bisa diajukan.
   const renewDisabledReason = canRequestRenew
     ? undefined
@@ -477,6 +484,7 @@ export default function ActiveStayContent({ stay }: { stay: Stay }) {
 
       {/* ── Quick actions hub ── */}
       <StayQuickActions
+        bayarHref={bayarRoute}
         canRecordMeter={meterWindow.windowOpen}
         onCatatMeter={() => setShowMeter(true)}
         canRenew={canRequestRenew}

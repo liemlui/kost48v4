@@ -4324,7 +4324,8 @@ div.tenant-stay-fact-chip {
 .tenant-lease-hero-list li span { color:#64748b; }
 .tenant-lease-hero-list li strong { color:#102033; text-align:right; }
 
-.tenant-quick-actions-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:.6rem; margin-bottom:1rem; }
+.tenant-quick-actions-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:.6rem; margin-bottom:1rem; }
+.tenant-quick-actions-primary { grid-template-columns:repeat(3,1fr); }
 .tenant-quick-action { position:relative; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:.32rem; padding:.85rem .5rem; border-radius:16px; border:1px solid rgba(148,163,184,.22); background:#fff; box-shadow:0 2px 8px rgba(14,30,60,.04); cursor:pointer; text-decoration:none; color:#1e293b; transition:transform .12s ease, box-shadow .12s ease; }
 .tenant-quick-action:hover:not(:disabled) { transform:translateY(-2px); box-shadow:0 6px 16px rgba(14,30,60,.1); }
 .tenant-quick-action:disabled { opacity:.5; cursor:not-allowed; }
@@ -4333,6 +4334,12 @@ div.tenant-stay-fact-chip {
 .tenant-quick-action .qa-badge { position:absolute; top:.4rem; right:.5rem; min-width:18px; height:18px; padding:0 5px; border-radius:9px; background:#ef4444; color:#fff; font-size:.66rem; font-weight:800; display:flex; align-items:center; justify-content:center; }
 .tenant-quick-action.tone-warning { background:#fff9eb; border-color:#fde3a7; }
 .tenant-quick-action.tone-info { background:#eff6ff; border-color:#bfdbfe; }
+/* Tombol inti tenant (Bayar · Catat Meter · Lapor Masalah): lebih besar & tegas agar mudah disentuh tenant awam. */
+.tenant-quick-action.primary { padding:1rem .5rem; border:0; background:#2563eb; color:#fff; box-shadow:0 4px 14px rgba(37,99,235,.24); }
+.tenant-quick-action.primary:hover:not(:disabled) { transform:translateY(-2px); box-shadow:0 8px 20px rgba(37,99,235,.32); }
+.tenant-quick-action.primary .qa-icon { font-size:1.6rem; }
+.tenant-quick-action.primary .qa-label { font-size:.8rem; color:#fff; }
+.tenant-quick-action.primary:disabled { background:#94a3b8; opacity:.6; }
 
 .tenant-stay-announcement-banner { display:flex; align-items:center; gap:.7rem; width:100%; text-align:left; border:1px solid #bfdbfe; background:#eff6ff; border-radius:14px; padding:.7rem .9rem; margin-bottom:1rem; cursor:pointer; }
 .tenant-stay-announcement-banner .asb-icon { font-size:1.2rem; }
@@ -5080,7 +5087,7 @@ div.tenant-stay-fact-chip {
 
 @media (max-width: 820px) {
   .tenant-stay-dashboard-grid { grid-template-columns:1fr; }
-  .tenant-quick-actions-grid { grid-template-columns:repeat(4,1fr); gap:.45rem; }
+  .tenant-quick-actions-grid { grid-template-columns:repeat(3,1fr); gap:.45rem; }
   .tenant-quick-action { padding:.65rem .35rem; }
   .tenant-quick-action .qa-label { font-size:.66rem; }
   .tenant-utility-tiles { grid-template-columns:1fr; }
