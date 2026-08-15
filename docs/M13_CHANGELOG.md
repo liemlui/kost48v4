@@ -1,5 +1,12 @@
 # KOST48 V5 — M13 Changelog
 
+## 2026-07-30 — Tenant awam: CTA "Bayar Sekarang" + lapor lebih jelas
+
+- **MyInvoicesPage:** banner CTA utama "💳 Bayar Tagihan Kamu" dengan tombol besar **"Bayar Sekarang"** yang mengarah ke invoice paling mendesak (overdue → jatuh tempo terdekat). Label tombol baris disederhanakan "Bayar & Kirim Bukti" → "Bayar Sekarang".
+- **MyTicketsPage:** tombol "Buat Laporan Baru" diperbesar (`size="lg"`); label kategori "Air / Plumbing" → "Air / keran bocor" (kurangi jargon Inggris).
+
+**Perubahan:** `MyInvoicesPage.tsx`, `MyTicketsPage.tsx`.
+
 ## 2026-07-30 — Tenant awam: 3 tombol inti besar di hub aksi
 
 - Hub aksi tenant (Panduan Kos Saya) kini punya 3 tombol inti besar & berwarna di baris atas: **Bayar Tagihan**, **Catat Meter**, **Lapor Masalah** (sebelumnya "Bayar" & "Lapor Masalah" tidak ada sebagai tombol — hanya di fact-chip/guide).

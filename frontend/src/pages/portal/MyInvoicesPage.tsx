@@ -159,6 +159,21 @@ export default function MyInvoicesPage() {
   const paidCount = allItems.filter((item) => ['PAID', 'CANCELLED'].includes(item.status)).length;
   const overdueCount = openInvoices.filter((item) => isTenantInvoiceOverdue(item) && !pendingReviewByInvoiceId.has(item.id)).length;
 
+  // Tagihan yang benar-benar bisa dibayar (belum masuk antrean verifikasi) — dipakai
+  // untuk CTA "Bayar Sekarang" yang mengarah ke invoice paling mendesak.
+  const payableOpen = useMemo(
+    () => openInvoices.filter((item) => isPayableInvoiceStatus(item.status) && !pendingReviewByInvoiceId.has(item.id)),
+    [openInvoices, pendingReviewByInvoiceId],
+  );
+  const primaryPayableInvoice = useMemo(() => {
+    const overdue = payableOpen.find((item) => isTenantInvoiceOverdue(item));
+    if (overdue) return overdue;
+    const withDue = payableOpen
+      .filter((item) => item.dueDate)
+      .sort((a, b) => new Date(a.dueDate!).getTime() - new Date(b.dueDate!).getTime());
+    return withDue[0] ?? payableOpen[0] ?? null;
+  }, [payableOpen]);
+
   const visibleItems = sortedItems.filter((item) => {
     if (activeTab === 'ALL') return true;
     if (activeTab === 'REVIEW') return pendingReviewByInvoiceId.has(item.id);
@@ -206,6 +221,23 @@ export default function MyInvoicesPage() {
               ))}
             </div>
           </div>
+
+          {/* CTA utama "Bayar Sekarang" — tenant awam langsung tahu harus bayar apa. */}
+          {primaryPayableInvoice ? (
+            <Alert variant="warning" className="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-3 tenant-pay-cta">
+              <div>
+                <div className="fw-semibold fs-6">💳 Bayar Tagihan Kamu</div>
+                <div className="small mt-1">
+                  {overdueCount > 0 ? `${overdueCount} sudah lewat jatuh tempo. ` : ''}
+                  Segera bayar <strong>{primaryPayableInvoice.invoiceNumber || `TG-${primaryPayableInvoice.id}`}</strong>{' '}
+                  — {formatRupiah(getInvoiceTotalAmount(primaryPayableInvoice))}.
+                </div>
+              </div>
+              <Button size="lg" variant="primary" onClick={() => navigate(`/portal/invoices/${primaryPayableInvoice.id}`)}>
+                Bayar Sekarang
+              </Button>
+            </Alert>
+          ) : null}
 
           {/* Audit U-04: gauge tidak boleh menghitung DRAFT/CANCELLED — angka harus
               konsisten dengan tab (DRAFT belum ditagihkan, CANCELLED bukan kewajiban). */}
@@ -309,7 +341,7 @@ export default function MyInvoicesPage() {
                         {pendingReview ? (
                           <Button size="sm" variant="outline-secondary" disabled>Tidak perlu upload ulang</Button>
                         ) : payable ? (
-                          <Button size="sm" variant={overdue ? 'danger' : 'primary'} onClick={() => navigate(`/portal/invoices/${item.id}`)}>Bayar & Kirim Bukti</Button>
+                          <Button size="sm" variant={overdue ? 'danger' : 'primary'} onClick={() => navigate(`/portal/invoices/${item.id}`)}>Bayar Sekarang</Button>
                         ) : (
                           <Button size="sm" variant="outline-primary" onClick={() => navigate(`/portal/invoices/${item.id}`)}>Lihat</Button>
                         )}

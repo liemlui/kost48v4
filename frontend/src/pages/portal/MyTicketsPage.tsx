@@ -118,7 +118,7 @@ const initialForm = { title: '', description: '', category: 'GENERAL', issueImag
 const ticketCategoryOptions = [
   { value: 'GENERAL', label: 'Bantuan umum' },
   { value: 'ELECTRICITY', label: 'Listrik' },
-  { value: 'PLUMBING', label: 'Air / Plumbing' },
+  { value: 'PLUMBING', label: 'Air / keran bocor' },
   { value: 'AC', label: 'AC' },
   { value: 'WIFI', label: 'WiFi' },
   { value: 'DOOR_KEY', label: 'Kunci / Pintu' },
@@ -209,7 +209,7 @@ export default function MyTicketsPage() {
       <PageHeader
         title="Lapor Masalah"
         description="Lihat laporan bantuan yang pernah kamu ajukan. Sistem otomatis menghubungkan laporan dengan kamar aktif kamu."
-        secondaryAction={<Button onClick={() => setShowCreate(true)}>Buat Laporan Baru</Button>}
+        secondaryAction={<Button size="lg" onClick={() => setShowCreate(true)}>Buat Laporan Baru</Button>}
       />
 
       <FreeRepairPolicyCard />
