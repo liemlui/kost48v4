@@ -50,8 +50,8 @@ function TenantInvoiceSnapshot({ allItems, paidCount, unpaidCount, overdueCount 
       <Col sm={5}>
         <Card className="content-card border-0 h-100">
           <Card.Body>
-            <div className="panel-title mb-1">Tingkat Pelunasan</div>
-            <div className="panel-subtitle mb-2">Dari total tagihan yang diterbitkan</div>
+            <div className="panel-title mb-1">Progres Pembayaran</div>
+            <div className="panel-subtitle mb-2">Dari total tagihan</div>
             <div className="invoice-collection-gauge-wrap">
               <DonutGauge
                 value={paidRate}
@@ -74,8 +74,8 @@ function TenantInvoiceSnapshot({ allItems, paidCount, unpaidCount, overdueCount 
       <Col sm={7}>
         <Card className="content-card border-0 h-100">
           <Card.Body>
-            <div className="panel-title mb-1">Tagihan per Status</div>
-            <div className="panel-subtitle mb-2">Jumlah tagihan berdasarkan kondisi bayar</div>
+            <div className="panel-title mb-1">Status Tagihan</div>
+            <div className="panel-subtitle mb-2">Jumlah tagihan tiap status</div>
             {/* Mini bar chart — works at all widths (no ResponsiveContainer zero-width issue) */}
             <div className="invoice-status-minibars">
               {statusBars.length === 0 ? (
@@ -200,7 +200,7 @@ export default function MyInvoicesPage() {
         <Card.Body>
           <div className="table-meta align-items-start tenant-invoices-header">
             <div>
-              <div className="panel-subtitle">Status dan aksi cukup dilihat dari tabel. Bukti yang sedang diperiksa tidak perlu diupload ulang.</div>
+              <div className="panel-subtitle">Lihat status dan cara bayar di tabel. Bukti yang sedang diperiksa tidak perlu diupload ulang.</div>
             </div>
             <div className="status-tab-bar compact-tabs">
               {[
@@ -306,7 +306,7 @@ export default function MyInvoicesPage() {
 
           {query.isLoading ? <div className="py-5 text-center"><Spinner animation="border" /></div> : null}
           {query.isError ? <Alert variant="danger">Gagal memuat tagihan kamu. Silakan coba lagi.</Alert> : null}
-          {!query.isLoading && !query.isError && !visibleItems.length ? <EmptyState icon="🧾" title="Belum ada tagihan di tab ini" description="Tagihan akan muncul sesuai statusnya saat dibuat atau diperbarui admin." /> : null}
+          {!query.isLoading && !query.isError && !visibleItems.length ? <EmptyState icon="🧾" title="Belum ada tagihan di bagian ini" description="Tagihan akan muncul sesuai statusnya saat dibuat atau diperbarui admin." /> : null}
           {!query.isLoading && !query.isError && sortedItems.length > 0 ? (
             <Table hover responsive className="responsive-data-table tenant-invoices-table">
               <thead><tr><th>Tagihan</th><th>Masa Sewa</th><th>Jatuh Tempo</th><th>Total</th><th>Status</th><th>Aksi</th></tr></thead>

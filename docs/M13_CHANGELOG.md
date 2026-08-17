@@ -1,5 +1,14 @@
 # KOST48 V5 — M13 Changelog
 
+## 2026-07-30 — Tenant awam: modal bayar ringkas + label kategori & jargon disederhanakan
+
+- **TenantInvoiceDetailPage:** modal "Bayar & Kirim Bukti" kini hanya menampilkan form inti (Jumlah Dibayar pre-filled + Metode Pembayaran + Bukti pembayaran). Field opsional (Nama Pengirim, Bank Pengirim, Nomor Referensi, Catatan) dilipat ke toggle "Info tambahan (opsional)".
+- **Label kategori laporan:** disinkronkan antara form buat laporan & badge tampil — "Air / Plumbing" → "Air / keran bocor", "Furniture" → "Perabot kamar", "Bantuan Masuk Kamar / Keluar" → "Masuk / keluar kamar", "Tagihan / Admin" → "Tagihan / Pembayaran".
+- **MyInvoicesPage:** jargon disederhanakan — "Tingkat Pelunasan" → "Progres Pembayaran", "Tagihan per Status" → "Status Tagihan", "Status dan aksi..." → "Lihat status dan cara bayar di tabel".
+- **Test:** `navigation.test.ts` diperbarui (OWNER kini 2 grup nav setelah perubahan "Lainnya"). `tsc` FE ✅ + `vitest run` ✅.
+
+**Perubahan:** `TenantInvoiceDetailPage.tsx`, `MyInvoicesPage.tsx`, `MyTicketsPage.tsx`, `utils/tenantCopy.ts`, `styles/10-misc.css`, `test/unit/navigation.test.ts`.
+
 ## 2026-07-30 — Tenant awam: CTA "Bayar Sekarang" + lapor lebih jelas
 
 - **MyInvoicesPage:** banner CTA utama "💳 Bayar Tagihan Kamu" dengan tombol besar **"Bayar Sekarang"** yang mengarah ke invoice paling mendesak (overdue → jatuh tempo terdekat). Label tombol baris disederhanakan "Bayar & Kirim Bukti" → "Bayar Sekarang".

@@ -101,6 +101,9 @@ export default function TenantInvoiceDetailPage() {
   const [payFileLabel, setPayFileLabel] = useState('');
   const [payProofPreviewUrl, setPayProofPreviewUrl] = useState<string | null>(null);
   const [payFormError, setPayFormError] = useState('');
+  // Tenant awam: field opsional (pengirim/bank/referensi/catatan) disembunyikan
+  // di balik "Info tambahan" agar form inti tetap pendek (jumlah + metode + bukti).
+  const [showPayAdvanced, setShowPayAdvanced] = useState(false);
 
   const needsPayment = !isPaid && !isCancelled;
 
@@ -558,51 +561,65 @@ export default function TenantInvoiceDetailPage() {
                   </Form.Select>
                 </Form.Group>
               </Col>
-              <Col md={6}>
-                <Form.Group>
-                  <Form.Label className="fw-semibold">Nama Pengirim</Form.Label>
-                  <Form.Control
-                    type="text"
-                    value={paySenderName}
-                    onChange={(e) => setPaySenderName(e.target.value)}
-                    placeholder="Nama di rekening pengirim"
-                  />
-                </Form.Group>
-              </Col>
-              <Col md={6}>
-                <Form.Group>
-                  <Form.Label className="fw-semibold">Bank Pengirim</Form.Label>
-                  <Form.Control
-                    type="text"
-                    value={paySenderBank}
-                    onChange={(e) => setPaySenderBank(e.target.value)}
-                    placeholder="Nama bank pengirim"
-                  />
-                </Form.Group>
-              </Col>
-              <Col md={6}>
-                <Form.Group>
-                  <Form.Label className="fw-semibold">Nomor Referensi</Form.Label>
-                  <Form.Control
-                    type="text"
-                    value={payRefNumber}
-                    onChange={(e) => setPayRefNumber(e.target.value)}
-                    placeholder="Nomor transaksi / referensi"
-                  />
-                </Form.Group>
-              </Col>
               <Col md={12}>
-                <Form.Group>
-                  <Form.Label className="fw-semibold">Catatan (opsional)</Form.Label>
-                  <Form.Control
-                    as="textarea"
-                    rows={2}
-                    value={payNotes}
-                    onChange={(e) => setPayNotes(e.target.value)}
-                    placeholder="Catatan tambahan untuk admin"
-                  />
-                </Form.Group>
+                <button
+                  type="button"
+                  className="tenant-optional-toggle"
+                  onClick={() => setShowPayAdvanced((v) => !v)}
+                  aria-expanded={showPayAdvanced}
+                >
+                  {showPayAdvanced ? '▾' : '▸'} Info tambahan (opsional) — nama pengirim, bank, referensi
+                </button>
               </Col>
+              {showPayAdvanced ? (
+                <>
+                  <Col md={6}>
+                    <Form.Group>
+                      <Form.Label className="fw-semibold">Nama Pengirim <span className="text-muted">(opsional)</span></Form.Label>
+                      <Form.Control
+                        type="text"
+                        value={paySenderName}
+                        onChange={(e) => setPaySenderName(e.target.value)}
+                        placeholder="Nama di rekening pengirim"
+                      />
+                    </Form.Group>
+                  </Col>
+                  <Col md={6}>
+                    <Form.Group>
+                      <Form.Label className="fw-semibold">Bank Pengirim <span className="text-muted">(opsional)</span></Form.Label>
+                      <Form.Control
+                        type="text"
+                        value={paySenderBank}
+                        onChange={(e) => setPaySenderBank(e.target.value)}
+                        placeholder="Nama bank pengirim"
+                      />
+                    </Form.Group>
+                  </Col>
+                  <Col md={6}>
+                    <Form.Group>
+                      <Form.Label className="fw-semibold">Nomor Referensi <span className="text-muted">(opsional)</span></Form.Label>
+                      <Form.Control
+                        type="text"
+                        value={payRefNumber}
+                        onChange={(e) => setPayRefNumber(e.target.value)}
+                        placeholder="Nomor transaksi / referensi"
+                      />
+                    </Form.Group>
+                  </Col>
+                  <Col md={12}>
+                    <Form.Group>
+                      <Form.Label className="fw-semibold">Catatan <span className="text-muted">(opsional)</span></Form.Label>
+                      <Form.Control
+                        as="textarea"
+                        rows={2}
+                        value={payNotes}
+                        onChange={(e) => setPayNotes(e.target.value)}
+                        placeholder="Catatan tambahan untuk admin"
+                      />
+                    </Form.Group>
+                  </Col>
+                </>
+              ) : null}
               <Col md={12}>
                 <Form.Group>
                   <Form.Label className="fw-semibold">Bukti pembayaran</Form.Label>

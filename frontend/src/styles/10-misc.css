@@ -5176,3 +5176,20 @@ div.tenant-stay-fact-chip {
   color: #94a3b8;
   font-style: italic;
 }
+
+/* Tenant awam: toggle "Info tambahan" di modal bayar — ringkas, tidak mencolok. */
+.tenant-optional-toggle {
+  border: 0;
+  background: transparent;
+  padding: 0;
+  font-size: 0.8rem;
+  font-weight: 650;
+  color: #2563eb;
+  cursor: pointer;
+  text-align: left;
+}
+
+.tenant-optional-toggle:hover {
+  text-decoration: underline;
+}
+

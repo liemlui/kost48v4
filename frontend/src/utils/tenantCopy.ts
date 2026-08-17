@@ -60,17 +60,17 @@ export function tenantPricingTermLabel(term?: PricingTerm | string | null) {
 export function tenantCategoryLabel(category?: string | null) {
   const normalized = normalizeStatus(category);
   if (normalized === 'ELECTRICITY') return 'Listrik';
-  if (normalized === 'PLUMBING') return 'Air / Plumbing';
+  if (normalized === 'PLUMBING') return 'Air / keran bocor';
   if (normalized === 'AC') return 'AC';
   if (normalized === 'WIFI') return 'WiFi';
   if (normalized === 'DOOR_KEY') return 'Kunci / Pintu';
-  if (normalized === 'FURNITURE') return 'Furniture';
+  if (normalized === 'FURNITURE') return 'Perabot kamar';
   if (normalized === 'CLEANING') return 'Kebersihan';
   if (normalized === 'PEST') return 'Hama';
   if (normalized === 'SECURITY') return 'Keamanan';
   if (normalized === 'NOISE') return 'Keributan';
-  if (normalized === 'CHECKIN_CHECKOUT') return 'Bantuan Masuk Kamar / Keluar';
-  if (normalized === 'PAYMENT_ADMIN') return 'Tagihan / Admin';
+  if (normalized === 'CHECKIN_CHECKOUT') return 'Masuk / keluar kamar';
+  if (normalized === 'PAYMENT_ADMIN') return 'Tagihan / Pembayaran';
   if (normalized === 'EMERGENCY') return 'Darurat';
   if (normalized === 'MAINTENANCE') return 'Kamar sedang dicek';
   if (normalized === 'BILLING') return 'Tagihan';
