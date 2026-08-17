@@ -207,7 +207,7 @@
 .table-card .table thead th,
 .content-card .table thead th {
   background: rgba(148, 163, 184, 0.08);
-  color: #475569;
+  color: var(--gray-600);
   font-size: 0.76rem;
   text-transform: uppercase;
   letter-spacing: 0.08em;
@@ -297,7 +297,7 @@
 .badge.bg-secondary.status-badge,
 .badge.bg-light.status-badge {
   background: rgba(148, 163, 184, 0.16) !important;
-  color: #475569 !important;
+  color: var(--gray-600) !important;
 }
 
 .btn {
@@ -315,14 +315,14 @@
 
 .btn-primary {
   border-color: transparent;
-  background: linear-gradient(135deg, #0ea5e9, #0284c7);
+  background: linear-gradient(135deg, var(--pub-brand-blue), var(--pub-brand-blue-hover));
 }
 
 .btn-primary:hover,
 .btn-primary:focus,
 .btn-primary:active {
   border-color: transparent !important;
-  background: linear-gradient(135deg, #0284c7, #0369a1) !important;
+  background: linear-gradient(135deg, var(--pub-brand-blue-hover), #0369a1) !important;
 }
 
 .btn-outline-primary {
@@ -364,7 +364,7 @@
 
 .form-label {
   font-weight: 700;
-  color: #334155;
+  color: var(--gray-700);
   margin-bottom: 0.45rem;
 }
 
@@ -387,7 +387,7 @@
 .nav-tabs .nav-link {
   border: 1px solid transparent;
   border-radius: 14px;
-  color: #475569;
+  color: var(--gray-600);
   font-weight: 700;
   background: rgba(255, 255, 255, 0.72);
 }
@@ -655,7 +655,7 @@
 }
 
 .app-breadcrumb-separator {
-  color: #94a3b8;
+  color: var(--gray-400);
 }
 
 .app-mobile-menu-button {
@@ -676,8 +676,8 @@
   height: 26px;
   border-radius: 50%;
   border: 1px solid rgba(148, 163, 184, 0.3);
-  background: #fff;
-  color: #475569;
+  background: var(--white);
+  color: var(--gray-600);
   font-size: 0.72rem;
   display: flex;
   align-items: center;
@@ -689,8 +689,8 @@
   line-height: 1;
 }
 .sidebar-collapse-toggle:hover {
-  background: #f1f5f9;
-  color: #1e293b;
+  background: var(--gray-100);
+  color: var(--gray-800);
 }
 .sidebar-collapse-toggle.collapsed {
   transform: rotate(180deg);
@@ -724,7 +724,7 @@
 }
 
 .app-sidebar-offcanvas {
-  background: var(--surface-main, #ffffff);
+  background: var(--surface-main, var(--white));
   padding-top: env(safe-area-inset-top, 0);
   padding-bottom: env(safe-area-inset-bottom, 0);
 }
@@ -743,7 +743,7 @@
 /* Prevent black gap / overscroll flash on iPhone when sidebar is open */
 body.offcanvas-open {
   overscroll-behavior: none;
-  background: var(--surface-main, #ffffff);
+  background: var(--surface-main, var(--white));
 }
 
 .android-safe-top {
@@ -826,7 +826,7 @@ body.offcanvas-open {
 
 .skeleton-block {
   border-radius: var(--radius-md);
-  background: linear-gradient(90deg, #e2e8f0 25%, #f1f5f9 50%, #e2e8f0 75%);
+  background: linear-gradient(90deg, var(--gray-200) 25%, var(--gray-100) 50%, var(--gray-200) 75%);
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
 }
@@ -967,8 +967,8 @@ body.offcanvas-open {
   width: 72px;
   height: 72px;
   border-radius: 24px;
-  background: linear-gradient(135deg, #0ea5e9, #0284c7);
-  color: #fff;
+  background: linear-gradient(135deg, var(--pub-brand-blue), var(--pub-brand-blue-hover));
+  color: var(--white);
   display: grid;
   place-items: center;
   font-family: var(--font-display);
@@ -1012,7 +1012,7 @@ body.offcanvas-open {
   background: var(--primary, #0d6efd);
 }
 .notification-dot.read {
-  background: var(--border-soft, #cbd5e1);
+  background: var(--border-soft, var(--gray-300));
 }
 
 /* Notification dropdown item */
@@ -1050,7 +1050,7 @@ body.offcanvas-open {
   gap: 12px;
 }
 .app-footer-phase {
-  color: #475569;
+  color: var(--gray-600);
 }
 
 .badge.bg-warning:not(.text-dark) {
@@ -1064,7 +1064,7 @@ body.offcanvas-open {
 
 .btn-outline-warning:hover,
 .btn-outline-warning:focus-visible {
-  color: #ffffff;
+  color: var(--white);
   background-color: #8a4b00;
   border-color: #8a4b00;
 }

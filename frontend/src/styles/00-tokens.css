@@ -33,6 +33,10 @@
 
   --orange-400: #fb923c; --orange-500: #f97316; --orange-600: #ea580c;
 
+  /* ── Warna dasar netral ─────────────────────────────────────────── */
+  --white: #ffffff;
+  --black: #000000;
+
   /* ── Alias semantik (O-01 — menunjuk ke skala primitif) ─────────── */
   --color-primary: var(--blue-600);
   --color-primary-hover: var(--blue-700);

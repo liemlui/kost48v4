@@ -58,8 +58,8 @@
   appearance: none;
   border: 1px solid rgba(37, 99, 235, 0.16);
   border-radius: 999px;
-  background: #ffffff;
-  color: #1e3a8a;
+  background: var(--white);
+  color: var(--blue-900);
   padding: 0.35rem 0.65rem;
   font: inherit;
   font-size: 0.82rem;
@@ -71,7 +71,7 @@
 
 .staff-filter-chip:hover:not(:disabled) {
   border-color: rgba(37, 99, 235, 0.38);
-  background: #eff6ff;
+  background: var(--blue-50);
 }
 
 .staff-filter-chip:focus-visible {
@@ -98,14 +98,14 @@
 }
 
 .staff-filter-chip.active {
-  border-color: #2563eb;
-  background: #2563eb;
-  color: #ffffff;
+  border-color: var(--blue-600);
+  background: var(--blue-600);
+  color: var(--white);
 }
 
 .staff-filter-chip.active strong {
-  background: #1d4ed8;
-  color: #ffffff;
+  background: var(--blue-700);
+  color: var(--white);
 }
 
 .topbar-profile-trigger,
@@ -118,7 +118,7 @@
   border: 0;
   border-radius: 999px;
   background: transparent;
-  color: #0f172a;
+  color: var(--gray-900);
   padding: 0.22rem 0.35rem;
   text-align: right;
   cursor: pointer;
@@ -127,7 +127,7 @@
 
 .topbar-profile-trigger:hover,
 .staff-user-profile-trigger:hover {
-  background: #eff6ff;
+  background: var(--blue-50);
 }
 
 .topbar-profile-trigger:focus-visible,
@@ -147,7 +147,7 @@
 .staff-user-profile-trigger strong {
   max-width: 210px;
   overflow: hidden;
-  color: #0f172a;
+  color: var(--gray-900);
   font-size: 0.86rem;
   font-weight: 800;
   text-overflow: ellipsis;
@@ -156,7 +156,7 @@
 
 .topbar-profile-trigger em,
 .staff-user-profile-trigger em {
-  color: #64748b;
+  color: var(--gray-500);
   font-size: 0.74rem;
   font-style: normal;
   font-weight: 650;
@@ -271,7 +271,7 @@
   /* Reset backgrounds and shadows for clean print */
   body {
     background: white !important;
-    color: #000 !important;
+    color: var(--black) !important;
     font-size: 12pt !important;
     font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif !important;
   }
@@ -318,10 +318,10 @@
   /* Table readability */
   .table-card .table thead th,
   .content-card .table thead th {
-    background: #f1f5f9 !important;
-    color: #000 !important;
+    background: var(--gray-100) !important;
+    color: var(--black) !important;
     font-size: 9pt !important;
-    border-bottom: 2px solid #000 !important;
+    border-bottom: 2px solid var(--black) !important;
     padding: 6px 8px !important;
   }
 
@@ -390,8 +390,8 @@
   /* Lunas stamp styles (ensure it renders well in print) */
   .print-lunas-stamp {
     display: inline-block;
-    border: 3px solid #15803d;
-    color: #15803d;
+    border: 3px solid var(--green-700);
+    color: var(--green-700);
     padding: 8px 18px;
     border-radius: 12px;
     font-size: 28pt;
@@ -421,7 +421,7 @@
   }
 
   .public-topbar {
-    border-bottom: 2px solid #000 !important;
+    border-bottom: 2px solid var(--black) !important;
     padding-bottom: 8px !important;
     margin-bottom: 12px !important;
   }
@@ -448,7 +448,7 @@
 }
 
 .sidebar-link {
-  color: #334155;
+  color: var(--gray-700);
   border: 1px solid transparent;
 }
 
@@ -500,15 +500,15 @@
 }
 
 .stat-card--danger {
-  border-left-color: #ef4444;
+  border-left-color: var(--red-500);
 }
 
 .stat-card--warning {
-  border-left-color: #f59e0b;
+  border-left-color: var(--amber-500);
 }
 
 .stat-card--success {
-  border-left-color: #22c55e;
+  border-left-color: var(--green-500);
 }
 
 .stat-card-value,
@@ -576,7 +576,7 @@
 .status-tab {
   border: 1px solid rgba(148, 163, 184, 0.22);
   background: rgba(255, 255, 255, 0.86);
-  color: #475569;
+  color: var(--gray-600);
   border-radius: 999px;
   padding: 0.56rem 0.78rem;
   font-weight: 800;
@@ -603,21 +603,21 @@
 .status-tab.tab-danger:hover {
   background: rgba(239, 68, 68, 0.1);
   border-color: rgba(239, 68, 68, 0.22);
-  color: #b91c1c;
+  color: var(--red-700);
 }
 
 .status-tab.tab-warn.active,
 .status-tab.tab-warn:hover {
   background: rgba(245, 158, 11, 0.12);
   border-color: rgba(245, 158, 11, 0.24);
-  color: #b45309;
+  color: var(--amber-700);
 }
 
 .status-tab.tab-success.active,
 .status-tab.tab-success:hover {
   background: rgba(34, 197, 94, 0.12);
   border-color: rgba(34, 197, 94, 0.24);
-  color: #15803d;
+  color: var(--green-700);
 }
 
 .tab-badge {
@@ -694,7 +694,7 @@
 .occ-label {
   font-size: 0.82rem;
   font-weight: 800;
-  color: #475569;
+  color: var(--gray-600);
 }
 
 .occ-bar-track {
@@ -710,8 +710,8 @@
 }
 
 .occ-occupied { background: linear-gradient(90deg, #14b8a6, #0f766e); }
-.occ-available { background: linear-gradient(90deg, #22c55e, #16a34a); }
-.occ-maint { background: linear-gradient(90deg, #f59e0b, #d97706); }
+.occ-available { background: linear-gradient(90deg, var(--green-500), var(--green-600)); }
+.occ-maint { background: linear-gradient(90deg, var(--amber-500), var(--amber-600)); }
 
 .occ-count {
   text-align: right;
@@ -735,7 +735,7 @@
 
 .reminder-summary-card span {
   font-weight: 800;
-  color: #475569;
+  color: var(--gray-600);
 }
 
 .reminder-summary-card strong {

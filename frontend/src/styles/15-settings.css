@@ -61,7 +61,7 @@
 /* V5.8.4 Owner UI simplification */
 .owner-policy-card {
   margin-bottom: 1rem;
-  background: linear-gradient(135deg, #f8fbff, #eef6ff);
+  background: linear-gradient(135deg, var(--surface-soft), #eef6ff);
 }
 .owner-policy-card.danger {
   background: linear-gradient(135deg, #fff7f7, #fff1f2);
@@ -85,7 +85,7 @@
 .owner-policy-pills span, .owner-policy-alert {
   border-radius: 999px;
   background: rgba(37, 99, 235, .08);
-  color: #1d4ed8;
+  color: var(--blue-700);
   font-size: .78rem;
   font-weight: 650;
   padding: .35rem .65rem;
@@ -93,7 +93,7 @@
 .owner-policy-alert {
   display: inline-flex;
   background: rgba(220, 38, 38, .1);
-  color: #b91c1c;
+  color: var(--red-700);
 }
 .owner-financial-health-cockpit .metric-grid {
   margin-top: .75rem;
@@ -102,7 +102,7 @@
   border-radius: 16px;
 }
 .owner-production-gate-card {
-  background: #f8fafc;
+  background: var(--gray-50);
 }
 @media (max-width: 768px) {
   .owner-policy-row {
