@@ -4,6 +4,13 @@
 
 ## Cara Pakai (AI Eksekutor — baca sebelum coding)
 
+## Update 2026-08-17 — Optimasi shared hosting (Prisma engine + AutoOps)
+
+- [x] `binaryTargets` dihapus dari `schema.prisma` — runtime driver adapter tak butuh engine binary; `dist` 58 MB → 35 MB.
+- [x] File engine yatim (`query_engine-windows.dll.node` 21 MB, `query_engine_bg.wasm`, `query_engine_bg.js`) dihapus; `prisma generate` tidak membuatnya ulang.
+- [x] `.env.production.example` diselaraskan dengan `deploy/.env.example`: shared hosting → `AUTO_OPS_ENABLED=false` + cron.
+- **Gate:** `tsc --noEmit` ✅ · `test:unit` 74/74 ✅.
+
 ## Update 2026-07-30 — Audit Mendalam UI/UX Lintas Portal
 
 - [x] Audit browser nyata mencakup 66 kombinasi route–viewport: publik, tenant aktif, dan tenant tanpa stay aktif pada desktop/mobile.

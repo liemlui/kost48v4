@@ -1,5 +1,13 @@
 # KOST48 V5 — M13 Changelog
 
+## 2026-08-17 — Optimasi deploy shared hosting: Prisma tanpa engine binary + AutoOps interval mati di produksi
+
+- **Prisma:** `binaryTargets` dihapus dari `schema.prisma`. Runtime sudah memakai driver adapter (`@prisma/adapter-pg` → query compiler WASM), sehingga binary engine (`query_engine-windows.dll.node` 21 MB, `query_engine_bg.wasm` 2.3 MB, `query_engine_bg.js`) tidak lagi digenerate/dipakai. Hasil: `dist` 58 MB → 35 MB, `src/generated/prisma` 41 MB → 19 MB (hemat ±23 MB per deploy).
+- **Auto-Ops:** `.env.production.example` diselaraskan dengan `deploy/.env.example` — shared hosting/Passenger wajib `AUTO_OPS_ENABLED=false` + `AUTO_OPS_CRON_TOKEN` (cPanel Cron panggil `POST /api/auto-ops/cron`), karena `setInterval` in-process tak andal saat proses di-idle.
+- **Verifikasi:** backend `tsc --noEmit` ✅ · `test:unit` 74/74 ✅ · build sukses.
+
+**Perubahan:** `backend/prisma/schema.prisma`, `backend/.env.production.example`.
+
 ## 2026-07-30 — Tenant awam: modal bayar ringkas + label kategori & jargon disederhanakan
 
 - **TenantInvoiceDetailPage:** modal "Bayar & Kirim Bukti" kini hanya menampilkan form inti (Jumlah Dibayar pre-filled + Metode Pembayaran + Bukti pembayaran). Field opsional (Nama Pengirim, Bank Pengirim, Nomor Referensi, Catatan) dilipat ke toggle "Info tambahan (opsional)".
