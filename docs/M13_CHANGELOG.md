@@ -1,5 +1,13 @@
 # KOST48 V5 — M13 Changelog
 
+## 2026-08-18 — CSS: definisikan 27 token yang dipakai tapi tak pernah didefinisikan
+
+- **00-tokens.css:** 27 custom property yang dirujuk `var(--token)` di 05-staff/06-tenant/04-operations/10-misc/11-public-pages tapi tidak pernah didefinisikan — style diam-diam fallback/rusak tanpa error (mis. `.staff-badge-danger` background kosong). Nilai diambil dari history `styles.css` (commit 6479352^, theme staf hijau) + infer pola fallback existing.
+- **Yang ditambahkan:** `--k48-info/-soft`, `--k48-radius-card`, `--k48-shadow-card/-hover`, `--k48-staff-danger-strong/-soft`, `--k48-staff-warning/-soft`, `--k48-staff-success/-soft`, `--k48-staff-info/-soft`, `--k48-staff-border`, `--k48-staff-shadow-card/-float`, `--k48-staff-radius-card`, `--ops-blue/-ink/-muted/-glow/-text`, `--pub-radius-card`, `--density-body`, `--text-base`, `--bg-subtle`, `--ff-mono`.
+- **Verifikasi:** build FE ✅ (`built in 42.53s`, PWA passed) · `vitest run` 135/135 ✅.
+
+**Perubahan:** `frontend/src/styles/00-tokens.css`.
+
 ## 2026-08-17 — Optimasi deploy shared hosting: Prisma tanpa engine binary + AutoOps interval mati di produksi
 
 - **Prisma:** `binaryTargets` dihapus dari `schema.prisma`. Runtime sudah memakai driver adapter (`@prisma/adapter-pg` → query compiler WASM), sehingga binary engine (`query_engine-windows.dll.node` 21 MB, `query_engine_bg.wasm` 2.3 MB, `query_engine_bg.js`) tidak lagi digenerate/dipakai. Hasil: `dist` 58 MB → 35 MB, `src/generated/prisma` 41 MB → 19 MB (hemat ±23 MB per deploy).
