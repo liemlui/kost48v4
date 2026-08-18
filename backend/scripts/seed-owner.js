@@ -4,7 +4,7 @@
  * tak bisa jalan karena butuh login OWNER/ADMIN. Jalankan SEKALI setelah schema + bootstrap.sql.
  *
  * Cara pakai (dari backend/, setelah `prisma generate`/`npm run build`):
- *   OWNER_EMAIL=owner@kost48surabaya.com OWNER_PASSWORD='RahasiaKuat#2026' OWNER_FULLNAME='Pemilik KOST48' node scripts/seed-owner.js
+ *   OWNER_EMAIL=liem.lui@gmail.com OWNER_PASSWORD='RahasiaKuat#2026' OWNER_FULLNAME='Pemilik KOST48' node scripts/seed-owner.js
  * Atau set di .env lalu: node scripts/seed-owner.js
  *
  * Idempoten: bila email OWNER sudah ada, tidak menimpa (skip). Aman dijalankan ulang.
@@ -29,7 +29,7 @@ function fail(msg) {
   process.exit(1);
 }
 
-if (!email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) fail('OWNER_EMAIL wajib & valid (mis. owner@kost48surabaya.com).');
+if (!email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) fail('OWNER_EMAIL wajib & valid (mis. liem.lui@gmail.com).');
 if (!password || password.length < 8) fail('OWNER_PASSWORD wajib, minimal 8 karakter (gunakan password kuat).');
 
 const prisma = new PrismaClient({ adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL }) });

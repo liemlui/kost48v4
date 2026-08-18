@@ -532,7 +532,7 @@ Tanpa tsc, tanpa prisma generate, tanpa devDependencies — aman untuk hosting R
    \`\`\`bash
    # Migration ledger produksi (Prisma 7.8.0)
    npm run cpanel:migrate
-   OWNER_EMAIL=owner@domain-anda OWNER_PASSWORD='buat-password-kuat' OWNER_FULLNAME='Pemilik KOST48' node scripts/seed-owner.js
+   OWNER_EMAIL=liem.lui@gmail.com OWNER_PASSWORD='buat-password-kuat' OWNER_FULLNAME='Pemilik KOST48' node scripts/seed-owner.js
    \`\`\`
    > Sebelum start, pasang dan verifikasi bootstrap guard database yang khusus schema. \`sql/seed.sql\` membawa data historis/PII dan DILARANG untuk produksi. Lihat \`docs/DEPLOYMENT_ONLINE_20260723.md\` di source release untuk gate lengkap.
 6. **Start App** (Setup Node.js App → Start) + **AutoSSL** domain → HTTPS.
@@ -577,7 +577,7 @@ writeFileSync(OUT + '/README-DEPLOY.md', [
   '   Bootstrap memasang schema.sql dan migration 20260723 + 20260724. Seed hanya membuat 13 kamar tanpa tenant/transaksi.',
   '   Jangan jalankan pada database UAT/produksi yang sudah berisi data; jangan gunakan prisma db push/reset atau sql/seed.sql.',
   '5. Setelah bootstrap schema berhasil, buat OWNER sekali saja:',
-  "   OWNER_EMAIL=owner@domain-anda OWNER_PASSWORD='password-kuat-unik' OWNER_FULLNAME='Pemilik KOST48' node scripts/seed-owner.js",
+  "   OWNER_EMAIL=liem.lui@gmail.com OWNER_PASSWORD='password-kuat-unik' OWNER_FULLNAME='Pemilik KOST48' node scripts/seed-owner.js",
   '   Jangan menyimpan OWNER_PASSWORD permanen di .env.',
   '6. Klik Restart Application di cPanel, aktifkan AutoSSL/HTTPS, lalu smoke test / dan /api/public/rooms.',
   '7. Setelah UAT lulus, pasang cron hanya bila AUTO_OPS/IOT memang diaktifkan:',

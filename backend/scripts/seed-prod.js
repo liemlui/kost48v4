@@ -1,7 +1,9 @@
 /*
  * SEED PRODUKSI — Input data real tenant KOST48 ke DB fresh.
  * Prasyarat: backend up & running, DB sudah fresh (schema via prisma migrate).
- * Pakai: node scripts/seed-prod.js   (opsional: API_BASE=http://localhost:3000/api)
+ * Pakai: OWNER_EMAIL=liem.lui@gmail.com OWNER_PASSWORD='...' node scripts/seed-prod.js
+ *        (opsional: API_BASE=http://localhost:3000/api)
+ * Kredensial OWNER dibaca dari env — TIDAK ditanam di source.
  *
  * Urutan: login OWNER → buat 13 kamar + fasilitas → buat 13 tenant real (nama, NIK)
  * → catatan: email/HP/deposit/stay diisi via UI Owner → Manajemen Tenant.
@@ -10,7 +12,14 @@
  * TIDAK membuat portal access — tunggu email real dari owner.
  */
 const API = process.env.API_BASE || 'http://localhost:3000/api';
-const OWNER = { identifier: 'owner@kost48.com', password: 'Owner#2026' };
+const OWNER = {
+  identifier: (process.env.OWNER_EMAIL || 'liem.lui@gmail.com').trim(),
+  password: process.env.OWNER_PASSWORD || '',
+};
+if (!OWNER.password || OWNER.password.length < 8) {
+  console.error('❌ OWNER_PASSWORD wajib diisi (min 8 karakter) — jangan pakai password default/contoh.');
+  process.exit(1);
+}
 
 let TOKEN = '';
 async function api(method, path, body, { token = null, optional = false } = {}) {

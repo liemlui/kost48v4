@@ -26,7 +26,14 @@ const fs = require('fs');
 const path = require('path');
 
 const API = process.env.API_BASE || 'http://localhost:3000/api';
-const OWNER = { identifier: 'owner@kost48.com', password: '[redacted]' };
+const OWNER = {
+  identifier: (process.env.OWNER_EMAIL || 'liem.lui@gmail.com').trim(),
+  password: process.env.OWNER_PASSWORD || '',
+};
+if (!OWNER.password || OWNER.password.length < 8) {
+  console.error('❌ OWNER_PASSWORD wajib diisi (min 8 karakter) — jangan pakai password default/contoh.');
+  process.exit(1);
+}
 const PASSWORD_LENGTH = 10;
 
 let TOKEN = '';
@@ -38,11 +45,11 @@ function generatePassword(len = PASSWORD_LENGTH) {
   return Array.from(rand, (r) => chars[r % chars.length]).join('');
 }
 
-async function api(method, path, body, { token = [redacted], optional = false } = {}) {
+async function api(method, path, body, { token = null, optional = false } = {}) {
   const tok = token ?? TOKEN;
   const res = await fetch(API + path, {
     method,
-    headers: { 'Content-Type': 'application/json', ...(tok ? { Authorization: [redacted] ${tok}` } : {}) },
+    headers: { 'Content-Type': 'application/json', ...(tok ? { Authorization: `Bearer ${tok}` } : {}) },
     body: body ? JSON.stringify(body) : undefined,
   });
   let j = null;
@@ -114,7 +121,7 @@ function maskNik(nik) {
   console.log(`=== IMPORT TENANT CSV → DATABASE ===\nFile: ${csvFile}\nBaris: ${rows.length} tenant\n`);
 
   // Login
-  TOKEN = [redacted] loginAs(OWNER.identifier, OWNER.password);
+  TOKEN = await loginAs(OWNER.identifier, OWNER.password);
   if (!TOKEN) throw new Error('Login owner gagal.');
   console.log('✓ Login OWNER\n');
 
