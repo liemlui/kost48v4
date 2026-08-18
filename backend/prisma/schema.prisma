@@ -2273,6 +2273,14 @@ model OperationalSetting {
   brevoApiKey                   String   @default("")        // API key Brevo; kosong = nonaktifkan email (secret, never sent to client)
   mailFromEmail                 String   @default("no-reply@kost48surabaya.com")
   mailFromName                  String   @default("Kost48 Surabaya")
+  // ── Tuya IoT Cloud (owner-settable) ─────────────────────────────────────
+  tuyaAccessKey                 String   @default("")        // Access ID/Client ID Tuya; kosong = fallback env TUYA_ACCESS_KEY
+  tuyaSecretKey                 String   @default("")        // Secret Tuya; kosong = fallback env TUYA_SECRET_KEY (secret, never sent to client)
+  tuyaApiBase                   String   @default("https://openapi.tuyaus.com")
+  // ── Web Push VAPID (owner-settable) ─────────────────────────────────────
+  vapidPublicKey                String   @default("")        // kosong = fallback env VAPID_PUBLIC_KEY
+  vapidPrivateKey               String   @default("")        // secret, never sent to client
+  vapidSubject                  String   @default("mailto:admin@kost48.local")
   // ── AutoOps Master Toggle ───────────────────────────────────────────────
   autoOpsEnabled                Boolean  @default(true)      // Master toggle semua AutoOps sweeps
   // ── Accounting Sweep Toggles ────────────────────────────────────────────

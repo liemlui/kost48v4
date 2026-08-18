@@ -22,6 +22,14 @@ export class UpdateOperationalSettingDto {
   @IsOptional() @IsString() @MaxLength(200) brevoApiKey?: string;
   @IsOptional() @IsString() @MaxLength(100) mailFromEmail?: string;
   @IsOptional() @IsString() @MaxLength(100) mailFromName?: string;
+  // Tuya IoT Cloud (owner-settable)
+  @IsOptional() @IsString() @MaxLength(200) tuyaAccessKey?: string;
+  @IsOptional() @IsString() @MaxLength(200) tuyaSecretKey?: string;
+  @IsOptional() @IsString() @MaxLength(300) tuyaApiBase?: string;
+  // Web Push VAPID (owner-settable)
+  @IsOptional() @IsString() @MaxLength(200) vapidPublicKey?: string;
+  @IsOptional() @IsString() @MaxLength(400) vapidPrivateKey?: string;
+  @IsOptional() @IsString() @MaxLength(200) vapidSubject?: string;
   // AutoOps
   @IsOptional() @IsBoolean() autoOpsEnabled?: boolean;
   // Accounting sweeps

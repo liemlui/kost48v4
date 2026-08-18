@@ -779,6 +779,12 @@ export function TariffSettingsPanel() {
       brevoApiKey: (form as any)?.brevoApiKey,
       mailFromEmail: (form as any)?.mailFromEmail,
       mailFromName: (form as any)?.mailFromName,
+      tuyaAccessKey: (form as any)?.tuyaAccessKey,
+      tuyaSecretKey: (form as any)?.tuyaSecretKey,
+      tuyaApiBase: (form as any)?.tuyaApiBase,
+      vapidPublicKey: (form as any)?.vapidPublicKey,
+      vapidPrivateKey: (form as any)?.vapidPrivateKey,
+      vapidSubject: (form as any)?.vapidSubject,
       autoOpsEnabled: Boolean((form as any)?.autoOpsEnabled),
       recurringExpenseDraftsEnabled: Boolean((form as any)?.recurringExpenseDraftsEnabled),
       assetDepreciationAutoEnabled: Boolean((form as any)?.assetDepreciationAutoEnabled),
@@ -949,6 +955,46 @@ export function TariffSettingsPanel() {
             <Form.Group>
               <Form.Label>Nama Pengirim</Form.Label>
               <Form.Control type="text" value={(form as any).mailFromName ?? ''} onChange={(e) => set('mailFromName' as any, e.target.value)} placeholder="Kost48 Surabaya" />
+            </Form.Group>
+          </Col>
+          <Col xs={12}><hr className="my-1" /><p className="text-muted small mb-0">Tuya IoT Cloud (KWH meter per kamar)</p></Col>
+          <Col md={4}>
+            <Form.Group>
+              <Form.Label>Access ID / Client ID</Form.Label>
+              <Form.Control type="text" value={(form as any).tuyaAccessKey ?? ''} onChange={(e) => set('tuyaAccessKey' as any, e.target.value)} placeholder="Client ID Tuya" />
+            </Form.Group>
+          </Col>
+          <Col md={4}>
+            <Form.Group>
+              <Form.Label>Secret Key</Form.Label>
+              <Form.Control type="password" value={(form as any).tuyaSecretKey ?? ''} onChange={(e) => set('tuyaSecretKey' as any, e.target.value)} placeholder={form.tuyaSecretKeySet ? (form.tuyaSecretKeyPreview ?? '••••') : 'Kosong = fallback env'} />
+              <Form.Text muted>{form.tuyaSecretKeySet ? `Tersimpan (sumber: ${form.tuyaSecretKeySource === 'env' ? '.env' : 'settings'}). Kosongkan untuk hapus.` : 'Isi untuk mengaktifkan pembacaan KWH meter Tuya.'}</Form.Text>
+            </Form.Group>
+          </Col>
+          <Col md={4}>
+            <Form.Group>
+              <Form.Label>API Base URL</Form.Label>
+              <Form.Control type="text" value={(form as any).tuyaApiBase ?? ''} onChange={(e) => set('tuyaApiBase' as any, e.target.value)} placeholder="https://openapi.tuyaus.com" />
+            </Form.Group>
+          </Col>
+          <Col xs={12}><hr className="my-1" /><p className="text-muted small mb-0">Web Push (VAPID)</p></Col>
+          <Col md={4}>
+            <Form.Group>
+              <Form.Label>VAPID Public Key</Form.Label>
+              <Form.Control type="text" value={(form as any).vapidPublicKey ?? ''} onChange={(e) => set('vapidPublicKey' as any, e.target.value)} placeholder="Public key VAPID" />
+            </Form.Group>
+          </Col>
+          <Col md={4}>
+            <Form.Group>
+              <Form.Label>VAPID Private Key</Form.Label>
+              <Form.Control type="password" value={(form as any).vapidPrivateKey ?? ''} onChange={(e) => set('vapidPrivateKey' as any, e.target.value)} placeholder={form.vapidPrivateKeySet ? (form.vapidPrivateKeyPreview ?? '••••') : 'Kosong = fallback env'} />
+              <Form.Text muted>{form.vapidPrivateKeySet ? `Tersimpan (sumber: ${form.vapidPrivateKeySource === 'env' ? '.env' : 'settings'}). Kosongkan untuk hapus.` : 'Isi untuk mengaktifkan notifikasi push.'}</Form.Text>
+            </Form.Group>
+          </Col>
+          <Col md={4}>
+            <Form.Group>
+              <Form.Label>Subject (mailto)</Form.Label>
+              <Form.Control type="text" value={(form as any).vapidSubject ?? ''} onChange={(e) => set('vapidSubject' as any, e.target.value)} placeholder="mailto:admin@kost48.local" />
             </Form.Group>
           </Col>
           <Col xs={12}><hr className="my-1" /><p className="text-muted small mb-0">AutoOps — Penjadwalan Otomatis</p></Col>

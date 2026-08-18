@@ -25,3 +25,4 @@ END $$;
 \ir schema.sql
 \ir ../prisma/migrations/20260723000000_announcement_notification_delivery/migration.sql
 \ir ../prisma/migrations/20260724090000_public_room_availability/migration.sql
+\ir ../prisma/migrations/20260818000000_settings_tuya_vapid/migration.sql

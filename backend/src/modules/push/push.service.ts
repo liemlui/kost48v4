@@ -17,6 +17,29 @@ export function normalizePushStatusCode(error: unknown): number | undefined {
   return Number.isFinite(parsed) ? parsed : undefined;
 }
 
+// ── Runtime config VAPID (dari OperationalSetting/DB) ──
+// SettingsService memanggil setVapidConfig saat boot & setelah owner update.
+// Kosong = fallback ke env (VAPID_PUBLIC_KEY/VAPID_PRIVATE_KEY/VAPID_SUBJECT).
+type VapidRuntime = { publicKey: string; privateKey: string; subject: string };
+let vapidRuntime: VapidRuntime | null = null;
+
+export function setVapidConfig(input: { publicKey?: string; privateKey?: string; subject?: string } | null | undefined): void {
+  const publicKey = (input?.publicKey ?? '').trim();
+  const privateKey = (input?.privateKey ?? '').trim();
+  const subject = (input?.subject ?? '').trim();
+  vapidRuntime = publicKey || privateKey
+    ? { publicKey, privateKey, subject: subject || 'mailto:admin@kost48.local' }
+    : null;
+}
+
+function resolveVapid(): VapidRuntime {
+  return {
+    publicKey: vapidRuntime?.publicKey || (process.env.VAPID_PUBLIC_KEY ?? '').trim(),
+    privateKey: vapidRuntime?.privateKey || (process.env.VAPID_PRIVATE_KEY ?? '').trim(),
+    subject: vapidRuntime?.subject || (process.env.VAPID_SUBJECT ?? 'mailto:admin@kost48.local').trim(),
+  };
+}
+
 @Injectable()
 export class PushService implements OnModuleInit {
   private readonly logger = new Logger(PushService.name);
@@ -26,18 +49,27 @@ export class PushService implements OnModuleInit {
   constructor(private readonly prisma: PrismaService) {}
 
   onModuleInit() {
-    const publicKey = (process.env.VAPID_PUBLIC_KEY ?? '').trim();
-    const privateKey = (process.env.VAPID_PRIVATE_KEY ?? '').trim();
-    const subject = (process.env.VAPID_SUBJECT ?? 'mailto:admin@kost48.local').trim();
+    this.applyVapid();
+  }
+
+  /** (Re)terapkan VAPID dari runtime/DB (fallback env) — dipanggil saat boot & setelah owner update. */
+  refreshVapid(): void {
+    this.applyVapid();
+  }
+
+  private applyVapid() {
+    const { publicKey, privateKey, subject } = resolveVapid();
     if (publicKey && privateKey) {
       try {
         webpush.setVapidDetails(subject, publicKey, privateKey);
         this.configured = true;
         this.logger.log('Web Push VAPID terkonfigurasi.');
       } catch (error) {
+        this.configured = false;
         this.logger.warn(`VAPID gagal dikonfigurasi: ${error instanceof Error ? error.message : String(error)}`);
       }
     } else {
+      this.configured = false;
       this.logger.warn('VAPID belum di-set (VAPID_PUBLIC_KEY/PRIVATE_KEY) → Web Push nonaktif; notifikasi in-app tetap berjalan.');
     }
   }
@@ -47,7 +79,7 @@ export class PushService implements OnModuleInit {
   }
 
   getVapidPublicKey(): string | null {
-    return this.configured ? (process.env.VAPID_PUBLIC_KEY ?? '').trim() : null;
+    return this.configured ? resolveVapid().publicKey : null;
   }
 
   /** Simpan/perbarui langganan device (upsert by endpoint). */

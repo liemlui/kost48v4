@@ -2,19 +2,27 @@ import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { setDeepseekApiKey } from '../market-analysis/deepseek.client';
 import { refreshAutoOpsDeadlines } from '../../common/business/auto-ops.constants';
+import { setTuyaCredentials } from '../iot/tuya/tuya-client.service';
+import { setVapidConfig, PushService } from '../push/push.service';
 import { UpdateOperationalSettingDto } from './dto/operational-setting.dto';
 
 @Injectable()
 export class SettingsService implements OnModuleInit {
   private readonly logger = new Logger(SettingsService.name);
 
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly pushService: PushService,
+  ) {}
 
-  /** Muat API key DeepSeek + SLA deadlines dari DB ke runtime saat boot (env tetap fallback). */
+  /** Muat API key DeepSeek/Tuya/VAPID + SLA deadlines dari DB ke runtime saat boot (env tetap fallback). */
   async onModuleInit() {
     try {
-      const s = await this.prisma.operationalSetting.findUnique({ where: { id: 1 }, select: { deepseekApiKey: true } });
+      const s = await this.getOperational();
       if (s?.deepseekApiKey?.trim()) setDeepseekApiKey(s.deepseekApiKey);
+      setTuyaCredentials({ clientId: s.tuyaAccessKey, secret: s.tuyaSecretKey, baseUrl: s.tuyaApiBase });
+      setVapidConfig({ publicKey: s.vapidPublicKey, privateKey: s.vapidPrivateKey, subject: s.vapidSubject });
+      this.pushService.refreshVapid();
       await refreshAutoOpsDeadlines(this.prisma);
     } catch (err: any) {
       this.logger.warn('Gagal memuat konfigurasi dari DB (pakai env fallback)', err?.message ?? err);
@@ -80,6 +88,14 @@ export class SettingsService implements OnModuleInit {
       brevoApiKey: '',
       mailFromEmail: 'no-reply@kost48surabaya.com',
       mailFromName: 'Kost48 Surabaya',
+      // Tuya IoT Cloud
+      tuyaAccessKey: '',
+      tuyaSecretKey: '',
+      tuyaApiBase: 'https://openapi.tuyaus.com',
+      // Web Push VAPID
+      vapidPublicKey: '',
+      vapidPrivateKey: '',
+      vapidSubject: 'mailto:admin@kost48.local',
       // AutoOps
       autoOpsEnabled: true,
       // Accounting sweeps
@@ -122,15 +138,22 @@ export class SettingsService implements OnModuleInit {
 
   async updateOperational(dto: UpdateOperationalSettingDto, userId?: number) {
     await this.getOperational();
-    const { deepseekApiKey, brevoApiKey, ...rest } = dto;
+    const { deepseekApiKey, brevoApiKey, tuyaAccessKey, tuyaSecretKey, vapidPublicKey, vapidPrivateKey, ...rest } = dto;
     const data: Record<string, unknown> = { ...rest, updatedById: userId ?? null };
     if (deepseekApiKey !== undefined) data.deepseekApiKey = deepseekApiKey.trim();
     if (brevoApiKey !== undefined) data.brevoApiKey = brevoApiKey.trim();
+    if (tuyaAccessKey !== undefined) data.tuyaAccessKey = tuyaAccessKey.trim();
+    if (tuyaSecretKey !== undefined) data.tuyaSecretKey = tuyaSecretKey.trim();
+    if (vapidPublicKey !== undefined) data.vapidPublicKey = vapidPublicKey.trim();
+    if (vapidPrivateKey !== undefined) data.vapidPrivateKey = vapidPrivateKey.trim();
 
     const updated = await this.prisma.operationalSetting.update({ where: { id: 1 }, data });
 
     // Aktifkan key baru tanpa restart backend (kosong = kembali ke env fallback).
     if (deepseekApiKey !== undefined) setDeepseekApiKey(updated.deepseekApiKey);
+    setTuyaCredentials({ clientId: updated.tuyaAccessKey, secret: updated.tuyaSecretKey, baseUrl: updated.tuyaApiBase });
+    setVapidConfig({ publicKey: updated.vapidPublicKey, privateKey: updated.vapidPrivateKey, subject: updated.vapidSubject });
+    this.pushService.refreshVapid();
     // Refresh SLA deadlines ke cache runtime
     await refreshAutoOpsDeadlines(this.prisma);
 
@@ -139,13 +162,19 @@ export class SettingsService implements OnModuleInit {
 
   /** Buang kolom rahasia dari payload; sisipkan status key agar UI tahu kondisi tanpa membocorkan nilai. */
   private toSafeView(setting: Awaited<ReturnType<SettingsService['getOperational']>>, role?: string) {
-    const { deepseekApiKey, brevoApiKey, ...safe } = setting;
+    const { deepseekApiKey, brevoApiKey, tuyaSecretKey, vapidPrivateKey, ...safe } = setting;
     const dbKey = (deepseekApiKey ?? '').trim();
     const fromDb = dbKey.length > 0;
     const fromEnv = Boolean(process.env.DEEPSEEK_API_KEY || process.env.AI_PROVIDER_KEY);
     const brevoKey = (brevoApiKey ?? '').trim();
     const brevoFromDb = brevoKey.length > 0;
     const brevoFromEnv = Boolean(process.env.BREVO_API_KEY);
+    const tuyaKey = (tuyaSecretKey ?? '').trim();
+    const tuyaFromDb = tuyaKey.length > 0;
+    const tuyaFromEnv = Boolean(process.env.TUYA_SECRET_KEY || process.env.TUYA_CLIENT_SECRET);
+    const vapidKey = (vapidPrivateKey ?? '').trim();
+    const vapidFromDb = vapidKey.length > 0;
+    const vapidFromEnv = Boolean(process.env.VAPID_PRIVATE_KEY);
     return {
       ...safe,
       deepseekApiKeySet: fromDb || fromEnv,
@@ -154,6 +183,12 @@ export class SettingsService implements OnModuleInit {
       brevoApiKeySet: brevoFromDb || brevoFromEnv,
       brevoApiKeySource: brevoFromDb ? ('settings' as const) : brevoFromEnv ? ('env' as const) : null,
       brevoApiKeyPreview: role === 'OWNER' && brevoFromDb ? `••••${brevoKey.slice(-4)}` : null,
+      tuyaSecretKeySet: tuyaFromDb || tuyaFromEnv,
+      tuyaSecretKeySource: tuyaFromDb ? ('settings' as const) : tuyaFromEnv ? ('env' as const) : null,
+      tuyaSecretKeyPreview: role === 'OWNER' && tuyaFromDb ? `••••${tuyaKey.slice(-4)}` : null,
+      vapidPrivateKeySet: vapidFromDb || vapidFromEnv,
+      vapidPrivateKeySource: vapidFromDb ? ('settings' as const) : vapidFromEnv ? ('env' as const) : null,
+      vapidPrivateKeyPreview: role === 'OWNER' && vapidFromDb ? `••••${vapidKey.slice(-4)}` : null,
     };
   }
 }

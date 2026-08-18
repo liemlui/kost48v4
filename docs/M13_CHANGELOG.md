@@ -1,5 +1,23 @@
 # KOST48 V5 — M13 Changelog
 
+## 2026-08-18 — Settings: kredensial Tuya & VAPID pindah ke Owner Settings (env minimal)
+
+- **OperationalSetting** + migration `20260818000000_settings_tuya_vapid`: kolom `tuyaAccessKey/SecretKey/ApiBase` + `vapidPublicKey/PrivateKey/Subject` (owner-settable; secret tak pernah dikirim ke client).
+- **tuya-client** & **push.service**: baca kredensial DB dulu, env fallback; refresh runtime saat owner update (tanpa restart).
+- **UI Owner → Pengaturan**: section baru "Tuya IoT Cloud" + "Web Push (VAPID)" (pola sama dengan Brevo).
+- **`.env` minimal**: hanya 9 key esensial. DeepSeek/Brevo/Tuya/VAPID diisi via UI Owner.
+
+**Perubahan:** `backend/prisma/schema.prisma`, migration baru, `tuya-client.service.ts`, `push.service.ts`, `settings.*`, `OwnerSettingsPanels.tsx`, `api/settings.ts`, `make-deploy.mjs`, `.env.production.example`, `bootstrap-production-schema.sql`.
+
+## 2026-08-18 — Go-live: lengkapi data tenant (email + koreksi F1/I)
+
+- **Email 4 tenant** yang tadinya kosong kini terisi di `seed-prod.js` + `tenant-data-template.tsv`: Yofi (G) `jtt1234511@gmail.com`, Lovandra (J) `lovandra.fachri103@gmail.com`, Destarika (L) `desterikahasan@gmail.com`, Gabriel (M) `gabrielexcelly1908@gmail.com`.
+- **Kamar F1:** tenant diganti dari Yufita Hieng (NIK 6405025701970003, F, tgl 26) → **GUNAWAN** (NIK 1505062511740001, M, tgl 27). Email GUNAWAN masih kosong.
+- **Kamar I:** nama tampil diubah `Agus Settiyo Budi` → **Theo Wijaya** (NIK tetap 3571021308860003, atas nama Agus Settiyo Budi).
+- **Status email:** 12/13 tenant sudah ber-email; sisa 1 (GUNAWAN, F1).
+
+**Perubahan:** `backend/scripts/seed-prod.js`, `docs/tenant-data-template.tsv`, `docs/GO_LIVE_DATA_ISI.md`, `docs/FORM_ISI_DATA_GO_LIVE.md`, `docs/M11_DEFAULT_DATA.md`.
+
 ## 2026-08-18 — CSS: definisikan 27 token yang dipakai tapi tak pernah didefinisikan
 
 - **00-tokens.css:** 27 custom property yang dirujuk `var(--token)` di 05-staff/06-tenant/04-operations/10-misc/11-public-pages tapi tidak pernah didefinisikan — style diam-diam fallback/rusak tanpa error (mis. `.staff-badge-danger` background kosong). Nilai diambil dari history `styles.css` (commit 6479352^, theme staf hijau) + infer pola fallback existing.

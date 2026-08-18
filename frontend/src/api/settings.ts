@@ -24,6 +24,18 @@ export type OperationalSetting = {
   brevoApiKeyPreview?: string | null;
   mailFromEmail?: string;
   mailFromName?: string;
+  // Tuya IoT Cloud
+  tuyaAccessKey?: string;
+  tuyaApiBase?: string;
+  tuyaSecretKeySet?: boolean;
+  tuyaSecretKeySource?: 'settings' | 'env' | null;
+  tuyaSecretKeyPreview?: string | null;
+  // Web Push VAPID
+  vapidPublicKey?: string;
+  vapidSubject?: string;
+  vapidPrivateKeySet?: boolean;
+  vapidPrivateKeySource?: 'settings' | 'env' | null;
+  vapidPrivateKeyPreview?: string | null;
   // AutoOps
   autoOpsEnabled: boolean;
   // Accounting sweeps
@@ -85,6 +97,12 @@ export type UpdateOperationalSettingPayload = Partial<
   /** Isi untuk mengganti key; string kosong = hapus key dari settings (kembali ke env fallback). */
   deepseekApiKey?: string;
   brevoApiKey?: string;
+  tuyaAccessKey?: string;
+  tuyaSecretKey?: string;
+  tuyaApiBase?: string;
+  vapidPublicKey?: string;
+  vapidPrivateKey?: string;
+  vapidSubject?: string;
 };
 
 /** Field yang diterima PUT /settings/operational (DTO backend pakai forbidNonWhitelisted —
@@ -94,6 +112,8 @@ const OPERATIONAL_UPDATE_KEYS = [
   'waterTariffPerM3Rupiah', 'freeWaterM3PerMonth', 'wifiRupiah', 'galonRupiah',
   'petDepositRupiah', 'extraOccupantFeePercent', 'acCleanKwhThreshold', 'tenantLoyaltyEnabled', 'ktpVerificationGateEnabled',
   'brevoApiKey', 'mailFromEmail', 'mailFromName',
+  'tuyaAccessKey', 'tuyaSecretKey', 'tuyaApiBase',
+  'vapidPublicKey', 'vapidPrivateKey', 'vapidSubject',
   'autoOpsEnabled',
   'recurringExpenseDraftsEnabled', 'assetDepreciationAutoEnabled', 'rentRecognitionEnabled',
   'notificationPruningEnabled', 'notificationRetentionDays', 'journalReconciliationEnabled', 'journalReconciliationLimit',

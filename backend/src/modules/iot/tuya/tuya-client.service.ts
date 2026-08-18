@@ -22,6 +22,20 @@ const TUYA_HOSTS = new Set([
   'openapi.tuyain.com',
 ]);
 
+// ── Runtime override kredensial Tuya (dari OperationalSetting/DB) ──
+// SettingsService memanggil setTuyaCredentials saat boot & setelah owner update.
+// Kosong = fallback ke env (TUYA_ACCESS_KEY/TUYA_SECRET_KEY/TUYA_API_BASE).
+let runtimeTuya: { clientId: string; secret: string; baseUrl: string } | null = null;
+
+export function setTuyaCredentials(input: { clientId?: string; secret?: string; baseUrl?: string } | null | undefined): void {
+  const clientId = (input?.clientId ?? '').trim();
+  const secret = (input?.secret ?? '').trim();
+  const baseUrl = (input?.baseUrl ?? '').trim();
+  runtimeTuya = clientId || secret || baseUrl
+    ? { clientId, secret, baseUrl: baseUrl || 'https://openapi.tuyaus.com' }
+    : null;
+}
+
 export function sha256Hex(value: string | Buffer): string {
   return createHash('sha256').update(value).digest('hex');
 }
@@ -176,15 +190,17 @@ export class TuyaClientService {
   }
 
   private clientId(): string {
+    if (runtimeTuya?.clientId) return runtimeTuya.clientId;
     return String(this.config.get('TUYA_CLIENT_ID') ?? this.config.get('TUYA_ACCESS_KEY') ?? '').trim();
   }
 
   private secret(): string {
+    if (runtimeTuya?.secret) return runtimeTuya.secret;
     return String(this.config.get('TUYA_CLIENT_SECRET') ?? this.config.get('TUYA_SECRET_KEY') ?? '').trim();
   }
 
   private baseUrl(): URL {
-    const raw = String(this.config.get('TUYA_API_BASE') ?? 'https://openapi.tuyaus.com').trim().replace(/\/$/, '');
+    const raw = (runtimeTuya?.baseUrl || String(this.config.get('TUYA_API_BASE') ?? 'https://openapi.tuyaus.com')).trim().replace(/\/$/, '');
     const parsed = new URL(raw);
     if (parsed.protocol !== 'https:' || !TUYA_HOSTS.has(parsed.hostname) || parsed.pathname !== '/') {
       throw new ServiceUnavailableException('TUYA_API_BASE harus memakai endpoint HTTPS regional resmi Tuya');
