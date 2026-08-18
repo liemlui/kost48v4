@@ -35,11 +35,11 @@ Email & HP placeholder — akan dilengkapi via **UI Owner → Manajemen Tenant**
 | B     | Dini Widiastutik       | 3275085012800021    | 1         | 1.500.000         | —           | DELUXE, AC               |
 | C     | Miko Rakatama A. W.    | 6471051708970006    | 28        | 1.600.000         | —           | DELUXE, AC               |
 | D     | Ade Chandra            | 3173052309720009    | 24        | 1.500.000         | 200.000     | DELUXE, AC               |
-| F1    | Yufita Hieng           | 6405025701970003    | 26        | 1.700.000         | —           | DELUXE Mezzanine, AC     |
+| F1    | GUNAWAN                | 1505062511740001    | 27        | 1.700.000         | —           | DELUXE Mezzanine, AC     |
 | F2    | Patrick Wilfred        | 3275020504910019    | 8         | 1.600.000         | —           | DELUXE Mezzanine, AC     |
 | G     | Yofi Nurkolifah        | 3519122204030003    | 1         | 800.000           | —           | ECONOMY, Kipas            |
 | H     | Welly Tanoto           | 3578070811730004    | 10        | 800.000           | —           | ECONOMY, Kipas            |
-| I     | Agus Settiyo Budi      | 3571021308860003    | 5         | 800.000           | —           | ECONOMY, Kipas            |
+| I     | Theo Wijaya            | 3571021308860003    | 5         | 800.000           | —           | ECONOMY, Kipas            |
 | J     | Lovandra               | 3175070312930003    | 30        | 1.500.000         | —           | DELUXE, AC               |
 | K     | Meliana Tamara         | 3578125102000002    | 10        | 1.600.000         | —           | DELUXE, LARGE, AC        |
 | L     | Destarika Hasan        | 1671065812020008    | 1         | 1.600.000         | —           | DELUXE, LARGE, AC        |
@@ -120,7 +120,7 @@ Sumber: konfirmasi owner 2026-07-08. Data ini adalah ground truth lapangan awal,
 
 **✅ Status NIK per 2026-07: Semua 13 tenant sudah punya NIK lengkap.**
 - Dini Widiastutik (Kamar B) ✅ NIK 3275085012800021 — data lengkap, tinggal upload foto KTP via UI
-- Theo Wijaya → **Agus Settiyo Budi** (Kamar I) ✅ NIK 3571021308860003 — data lengkap
+- Theo Wijaya (Kamar I) — nama tampil di sistem; NIK atas nama **Agus Settiyo Budi** ✅ 3571021308860003 — data lengkap
 
 | Area | Data owner-confirmed | Status DB/aplikasi | Target input |
 |------|----------------------|--------------------|--------------|
@@ -244,11 +244,11 @@ Data real dari owner. Seed via `seed-prod.js`. Tgl Masuk = tanggal hari (bulan m
 | B     | Dini Widiastutik       | 3275085012800021    | 1       | 1.500.000     | —        | F      | DELUXE, AC                     |
 | C     | Miko Rakatama A. W.    | 6471051708970006    | 28      | 1.600.000     | —        | M      | DELUXE, AC                     |
 | D     | Ade Chandra            | 3173052309720009    | 24      | 1.500.000     | 200.000  | M      | DELUXE, AC                     |
-| F1    | Yufita Hieng           | 6405025701970003    | 26      | 1.700.000     | —        | F      | DELUXE Mezzanine, AC           |
+| F1    | GUNAWAN                | 1505062511740001    | 27      | 1.700.000     | —        | M      | DELUXE Mezzanine, AC           |
 | F2    | Patrick Wilfred        | 3275020504910019    | 8       | 1.600.000     | —        | M      | DELUXE Mezzanine, AC           |
 | G     | Yofi Nurkolifah        | 3519122204030003    | 1       | 800.000       | —        | F      | ECONOMY, Kipas                 |
 | H     | Welly Tanoto           | 3578070811730004    | 10      | 800.000       | —        | M      | ECONOMY, Kipas                 |
-| I     | Agus Settiyo Budi      | 3571021308860003    | 5       | 800.000       | —        | M      | ECONOMY, Kipas                 |
+| I     | Theo Wijaya            | 3571021308860003    | 5       | 800.000       | —        | M      | ECONOMY, Kipas                 |
 | J     | Lovandra               | 3175070312930003    | 30      | 1.500.000     | —        | M?     | DELUXE, AC                     |
 | K     | Meliana Tamara         | 3578125102000002    | 10      | 1.600.000     | —        | F      | DELUXE LARGE, AC               |
 | L     | Destarika Hasan        | 1671065812020008    | 1       | 1.600.000     | —        | F      | DELUXE LARGE, AC               |
