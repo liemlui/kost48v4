@@ -1,9 +1,9 @@
 /*
  * SEED PRODUKSI — Input data real tenant KOST48 ke DB fresh.
  * Prasyarat: backend up & running, DB sudah fresh (schema via prisma migrate).
- * Pakai: OWNER_EMAIL=liem.lui@gmail.com OWNER_PASSWORD='...' node scripts/seed-prod.js
+ * Pakai: OWNER_EMAIL=liem.lui@gmail.com OWNER_PASSWORD='...' SEED_TENANT_PASSWORD='...' node scripts/seed-prod.js
  *        (opsional: API_BASE=http://localhost:3000/api)
- * Kredensial OWNER dibaca dari env — TIDAK ditanam di source.
+ * Kredensial OWNER & password portal tenant dibaca dari env — TIDAK ditanam di source.
  *
  * Urutan: login OWNER → buat 13 kamar + fasilitas → buat 13 tenant real (nama, NIK)
  * → catatan: email/HP/deposit/stay diisi via UI Owner → Manajemen Tenant.
@@ -18,6 +18,11 @@ const OWNER = {
 };
 if (!OWNER.password || OWNER.password.length < 8) {
   console.error('❌ OWNER_PASSWORD wajib diisi (min 8 karakter) — jangan pakai password default/contoh.');
+  process.exit(1);
+}
+const TENANT_PASSWORD = process.env.SEED_TENANT_PASSWORD || '';
+if (!TENANT_PASSWORD || TENANT_PASSWORD.length < 8) {
+  console.error('❌ SEED_TENANT_PASSWORD wajib diisi (min 8 karakter) untuk akun portal tenant (jangan tanam di source).');
   process.exit(1);
 }
 
@@ -171,7 +176,7 @@ const summary = { rooms: 0, facilities: 0, tenants: 0 };
     if (t.email) {
       await api('POST', `/tenants/${idOf(tenant)}/portal-access`, {
         email: t.email,
-        password: 'Kost48#2026',
+        password: TENANT_PASSWORD,
         fullName: t.name,
       }, { optional: true });
     }
@@ -181,7 +186,7 @@ const summary = { rooms: 0, facilities: 0, tenants: 0 };
   // ── RINGKASAN ──
   console.log('\n=== SEED PRODUKSI SELESAI ===');
   console.log(`  ${summary.rooms} kamar + ${summary.facilities} fasilitas + ${summary.tenants} tenant`);
-  console.log('\n📧 8 tenant dengan email SUDAH mendapat akun portal (password: Kost48#2026)');
+  console.log('\n📧 8 tenant dengan email SUDAH mendapat akun portal (password: dari SEED_TENANT_PASSWORD)');
   console.log('⚠️  5 tenant BELUM ada email — lengkapi via Admin UI /tenants:');
   console.log('    - Yufita Hieng (F1)');
   console.log('    - Yofi Nurkolifah (G)');

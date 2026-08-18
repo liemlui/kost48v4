@@ -5,8 +5,13 @@
  * itu lewat `seed-prod-real.js`.
  *
  * Pakai (dari backend/, server SEBAIKNYA dimatikan dulu):
- *   node scripts/seed-prod-reset.js
+ *   CONFIRM_RESET=YES node scripts/seed-prod-reset.js
  * Lalu: node scripts/seed-prod-real.js
+ *
+ * GUARD (pengaman anti-hapus data):
+ *   - WAJIB set CONFIRM_RESET=YES — tanpa ini script langsung tolak (tidak menyentuh DB).
+ *   - Bila DB sudah berisi data bisnis (Tenant/Stay/Invoice > 0), script tolak KECUALI
+ *     FORCE_RESET=YES juga diset (konfirmasi sadar menghapus data nyata).
  *
  * ⚠️ HANYA untuk database KOSONG / fresh deploy. Jangan dijalankan ulang di DB berisi data.
  */
@@ -67,11 +72,43 @@ const USERS = [
   console.log('=== SI-PROD RESET + FONDASI ===');
   console.log('DB :', mask(DB_URL));
 
+  // ── GUARD 1: konfirmasi eksplisit — reset produksi bersifat DESTRUKTIF ──
+  const CONFIRM_RESET = String(process.env.CONFIRM_RESET || '').toUpperCase() === 'YES';
+  if (!CONFIRM_RESET) {
+    fail('Tolak: reset produksi akan MENGHAPUS SEMUA data. Set CONFIRM_RESET=YES untuk melanjutkan.');
+  }
+  const FORCE_RESET = String(process.env.FORCE_RESET || '').toUpperCase() === 'YES';
+
   step(1, 'Hapus SEMUA data (TRUNCATE … CASCADE) — schema + trigger/CHECK dipertahankan…');
   {
     const client = new Client({ connectionString: DB_URL });
     await client.connect();
     try {
+      // ── GUARD 2: tolak bila DB sudah berisi data bisnis nyata (kecuali FORCE_RESET=YES) ──
+      let tenantCount = 0;
+      let stayCount = 0;
+      let invoiceCount = 0;
+      try {
+        const { rows: cnt } = await client.query(
+          `SELECT
+             COALESCE((SELECT count(*)::int FROM "Tenant"), 0)  AS tenant,
+             COALESCE((SELECT count(*)::int FROM "Stay"), 0)    AS stay,
+             COALESCE((SELECT count(*)::int FROM "Invoice"), 0) AS invoice`,
+        );
+        tenantCount = cnt[0]?.tenant ?? 0;
+        stayCount = cnt[0]?.stay ?? 0;
+        invoiceCount = cnt[0]?.invoice ?? 0;
+      } catch {
+        // tabel belum ada → DB benar-benar kosong (fresh), lanjut
+      }
+      const totalBusinessRows = tenantCount + stayCount + invoiceCount;
+      if (totalBusinessRows > 0 && !FORCE_RESET) {
+        fail(
+          `Tolak: DB berisi data nyata (tenant=${tenantCount}, stay=${stayCount}, invoice=${invoiceCount}). ` +
+          `Reset akan menghapus SEMUANYA. Set FORCE_RESET=YES hanya jika Anda benar-benar yakin.`,
+        );
+      }
+
       const { rows } = await client.query(
         `SELECT tablename FROM pg_tables WHERE schemaname='public' AND tablename <> '_prisma_migrations'`,
       );
