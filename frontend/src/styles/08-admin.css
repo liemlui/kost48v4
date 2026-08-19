@@ -1582,3 +1582,146 @@ button.status-strip-item:hover {
   letter-spacing: 0.03em;
   font-weight: 600;
 }
+
+/* ── M17 Iterasi 1: daftar tugas harian admin (kartu 0–5) ── */
+.admin-work-lane-list {
+  display: grid;
+  gap: 0.7rem;
+}
+.admin-work-lane-card {
+  overflow: hidden;
+  border: 1px solid rgba(37, 99, 235, 0.12);
+  border-radius: 18px;
+  background: linear-gradient(135deg, var(--white) 0%, var(--surface-soft) 100%);
+  box-shadow: 0 10px 26px rgba(30, 64, 175, 0.06);
+  transition: transform 0.16s ease, border-color 0.16s ease, box-shadow 0.16s ease;
+}
+.admin-work-lane-card:hover {
+  transform: translateY(-1px);
+  border-color: rgba(37, 99, 235, 0.26);
+  box-shadow: 0 14px 34px rgba(30, 64, 175, 0.105);
+}
+.admin-work-lane-card.lane-danger {
+  border-left: 5px solid var(--red-500, #dc3545);
+}
+.admin-work-lane-card.lane-warning {
+  border-left: 5px solid var(--amber-500, #f59e0b);
+}
+.admin-work-lane-card.lane-info {
+  border-left: 5px solid var(--blue-500, #3b82f6);
+}
+.admin-work-lane-card.lane-success {
+  border-left: 5px solid var(--green-500, #22c55e);
+}
+.admin-work-lane-card .card-body {
+  padding: 0;
+}
+.admin-work-lane-body {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 0.95rem 1rem;
+}
+.admin-work-lane-step {
+  flex: 0 0 auto;
+  width: 42px;
+  height: 42px;
+  display: inline-grid;
+  place-items: center;
+  border-radius: 14px;
+  color: var(--blue-700);
+  background: var(--blue-100);
+  font-size: 1rem;
+  font-weight: 900;
+}
+.admin-work-lane-main {
+  min-width: 0;
+  flex: 1 1 auto;
+}
+.admin-work-lane-heading {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+.admin-work-lane-heading h2 {
+  margin: 0;
+  color: var(--gray-900);
+  font-size: 1.02rem;
+  font-weight: 850;
+  letter-spacing: -0.02em;
+}
+.admin-work-lane-heading p,
+.admin-work-lane-main p {
+  margin: 0.22rem 0 0;
+  color: var(--gray-600);
+  font-size: 0.85rem;
+  line-height: 1.4;
+}
+.admin-work-lane-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: 0.55rem;
+}
+.admin-work-lane-tone {
+  display: inline-flex;
+  width: fit-content;
+  border-radius: 999px;
+  padding: 0.24rem 0.5rem;
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+.admin-work-lane-tone.tone-danger { color: #991b1b; background: var(--red-100); }
+.admin-work-lane-tone.tone-warning { color: #92400e; background: var(--amber-100); }
+.admin-work-lane-tone.tone-info { color: #075985; background: #e0f2fe; }
+.admin-work-lane-tone.tone-success { color: #166534; background: var(--green-100); }
+.admin-work-lane-count {
+  flex: 0 0 auto;
+  min-width: 74px;
+  display: grid;
+  justify-items: center;
+  gap: 0.05rem;
+  padding: 0.4rem 0.6rem;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.86);
+  border: 1px solid rgba(37, 99, 235, 0.12);
+}
+.admin-work-lane-count strong {
+  color: var(--gray-900);
+  font-size: 1.45rem;
+  font-weight: 900;
+  line-height: 1;
+}
+.admin-work-lane-count span {
+  color: var(--gray-500);
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+.admin-work-lane-action {
+  flex: 0 0 auto;
+  min-width: 128px;
+  font-weight: 800;
+}
+@media (max-width: 768px) {
+  .admin-work-lane-body {
+    flex-wrap: wrap;
+    align-items: stretch;
+  }
+  .admin-work-lane-step {
+    width: 36px;
+    height: 36px;
+    border-radius: 12px;
+    font-size: 0.9rem;
+  }
+  .admin-work-lane-main {
+    flex-basis: calc(100% - 52px);
+  }
+  .admin-work-lane-count {
+    min-width: 64px;
+  }
+  .admin-work-lane-action {
+    width: 100%;
+    min-width: 0;
+  }
+}

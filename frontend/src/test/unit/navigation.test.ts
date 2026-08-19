@@ -7,13 +7,13 @@ import {
 
 describe('Y-M4 — navigation (menu builder per role)', () => {
   describe('getNavigationSections', () => {
-    it('OWNER → grup "Keputusan Owner" + "Lainnya"', () => {
+    it('OWNER → grup "Utama" + "Lainnya"', () => {
       const s = getNavigationSections('OWNER');
-      expect(s.map((x) => x.title)).toEqual(['Keputusan Owner', 'Lainnya']);
+      expect(s.map((x) => x.title)).toEqual(['Utama', 'Lainnya']);
     });
     it('role tak dikenal / undefined → fallback ke adminSections', () => {
-      expect(getNavigationSections(undefined)[0].title).toBe('Huni & Uang');
-      expect(getNavigationSections('WHATEVER')[0].title).toBe('Huni & Uang');
+      expect(getNavigationSections(undefined)[0].title).toBe('Utama');
+      expect(getNavigationSections('WHATEVER')[0].title).toBe('Utama');
     });
   });
 

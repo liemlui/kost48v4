@@ -5,7 +5,7 @@ import { useNavigate, useLocation, Link } from 'react-router-dom';
 import EmptyState from '../../components/common/EmptyState';
 import PaginationControls from '../../components/common/PaginationControls';
 import StatusBadge from '../../components/common/StatusBadge';
-import { AssistantPanel, ActionQueueTable, AdminHealthBar, ActionKanbanBoard, ActionCalendar, type ActionQueueItem, type AssistantItem } from '../../components/command-center';
+import { AssistantPanel, ActionQueueTable, AdminHealthBar, AdminWorkLaneCards, ActionKanbanBoard, ActionCalendar, type ActionQueueItem, type AssistantItem } from '../../components/command-center';
 import SegmentedTabs from '../../components/common/SegmentedTabs';
 import { AssistantInsightLine, EntityBadgeFilterBar } from '../../components/workspace';
 import AutoOpsControlPanel from '../../components/auto-ops/AutoOpsControlPanel';
@@ -48,12 +48,6 @@ import { getTenantKtpReviewQueue } from '../../api/tenants';
 // FASE-H: area kerja admin dipadatkan dari 6 → 3 (Ringkasan · Penghuni & Uang · Operasional).
 type AdminQueueArea = 'overview' | 'stays-finance' | 'ops';
 const CHECKOUT_STAYS_ROUTE = '/stays?status=CHECKOUT';
-
-const ADMIN_QUEUE_AREAS: Array<{ id: AdminQueueArea; label: string; helper: string }> = [
-  { id: 'overview', label: 'Ringkasan', helper: 'Orientasi cepat: kondisi hari ini dan pekerjaan yang butuh keputusan.' },
-  { id: 'stays-finance', label: 'Penghuni & Uang', helper: 'Booking, penghuni aktif, perpanjangan, keluar, tagihan, dan pembayaran.' },
-  { id: 'ops', label: 'Operasional', helper: 'Tiket, staff, rutinitas, kamar, stok, dan inventaris.' },
-];
 
 function normalizeAdminArea(value: string | null | undefined): AdminQueueArea {
   if (value === 'stays-finance' || value === 'stays' || value === 'finance') return 'stays-finance';
@@ -109,25 +103,23 @@ function makeAdminStaffPoints(tickets: Ticket[]): SmartChartPoint[] {
 }
 
 
-function AdminCommandHeader({ totalQueue, urgentCount, activeAreaLabel, dense, onToggleDense }: {
+function AdminCommandHeader({ totalQueue, urgentCount, dense, onToggleDense }: {
   totalQueue: number;
   urgentCount: number;
-  activeAreaLabel: string;
   topQueueItem?: ActionQueueItem;
   dense?: boolean;
   onToggleDense?: () => void;
 }) {
-  const isOverview = activeAreaLabel === 'Ringkasan';
   const headline = totalQueue
-    ? `${totalQueue} pekerjaan ${isOverview ? 'hari ini' : `di area ${activeAreaLabel}`}`
-    : `${activeAreaLabel} aman`;
+    ? `${totalQueue} pekerjaan menunggu hari ini`
+    : 'Semua aman hari ini';
   const status = urgentCount ? `${urgentCount} urgent/terlambat` : 'Tidak ada deadline merah';
   return (
     <div className="admin-command-head admin-command-head-slim admin-tab-heading">
       <div>
-        <div className="page-eyebrow mb-2"><span className="page-eyebrow-dot" /> Admin Command Center</div>
-        <h1>{activeAreaLabel}</h1>
-        <p>{headline}. Dashboard memuat data sesuai area kerja. Gunakan sidebar kiri untuk membuka halaman detail.</p>
+        <div className="page-eyebrow mb-2"><span className="page-eyebrow-dot" /> Dashboard Admin</div>
+        <h1>Hari Ini</h1>
+        <p>{headline}. Urutan kerja: 0 KTP · 1 Booking · 2 Bayar · 3 Perpanjangan · 4 Keluar · 5 Blocker.</p>
         <div className="admin-command-status-line">
           <span>{status}</span>
           <span>Terakhir update: {makeLastUpdatedLabel()}</span>
@@ -210,10 +202,15 @@ export default function AdminDashboard() {
   const location = useLocation();
   const { user } = useAuth();
   const activeArea: AdminQueueArea = normalizeAdminArea(new URLSearchParams(location.search).get('area'));
-  const [dense, setDense] = useState<boolean>(() => localStorage.getItem('admin-density') === 'compact');
+  const [dense, setDense] = useState<boolean>(() => {
+    const saved = localStorage.getItem('admin-density');
+    if (saved === 'compact' || saved === 'full') return saved === 'compact';
+    // Default ringkas: sembunyikan visual dashboard & chart tambahan.
+    return true;
+  });
   const [staysFinanceSubTab, setStaysFinanceSubTab] = useState<'stays' | 'finance'>('stays');
   const [opsSubTab, setOpsSubTab] = useState<'tickets' | 'rooms'>('tickets');
-  const [queueExpanded, setQueueExpanded] = useState(true);
+  const [queueExpanded, setQueueExpanded] = useState(false);
   const [viewMode, setViewMode] = useState<'list' | 'board' | 'calendar'>(() => {
     const stored = localStorage.getItem('admin-queue-view');
     return (stored === 'board' || stored === 'calendar') ? stored : 'list';
@@ -232,14 +229,13 @@ export default function AdminDashboard() {
   };
   const toggleQueueExpanded = () => setQueueExpanded((value) => !value);
   const toggleAiBrief = () => setAiBriefOpen((value) => !value);
-  const dashboardBase = location.pathname === '/admin-dashboard' ? '/admin-dashboard' : '/dashboard';
   const isOverview = activeArea === 'overview';
 
   const aggregateQuery = useQuery({ queryKey: ['admin-dashboard-aggregate'], queryFn: fetchAdminDashboardAggregate, staleTime: 60_000, retry: 1, retryDelay: 1000 });
   const staffPerformanceQuery = useQuery({ queryKey: ['dashboard-admin', 'staff-performance'], queryFn: () => fetchAdminStaffPerformance(), enabled: activeArea === 'ops', ...ACTION_QUERY_OPTIONS });
   const autoOpsQuery = useQuery({ queryKey: ['dashboard-admin', 'auto-ops-status'], queryFn: fetchAutoOpsStatus, enabled: isOverview || (activeArea === 'ops' && opsSubTab === 'tickets'), ...ACTION_QUERY_OPTIONS });
-  const aiStatusQuery = useQuery({ queryKey: ['owner-ai-status'], queryFn: getOwnerAiStatus, staleTime: 300_000, retry: 1 });
-  const surveySummaryQuery = useQuery({ queryKey: ['survey-summary'], queryFn: getSurveySummary, staleTime: 300_000, retry: 1 });
+  const aiStatusQuery = useQuery({ queryKey: ['owner-ai-status'], queryFn: getOwnerAiStatus, staleTime: 300_000, retry: 1, enabled: !dense });
+  const surveySummaryQuery = useQuery({ queryKey: ['survey-summary'], queryFn: getSurveySummary, staleTime: 300_000, retry: 1, enabled: activeArea === 'overview' && !dense });
   const ktpReviewQuery = useQuery({ queryKey: ['tenants', 'ktp-review'], queryFn: getTenantKtpReviewQueue, staleTime: 60_000, retry: 1 });
   const canUseAdminBriefAi = user?.role === 'OWNER' && aiStatusQuery.data?.configured === true;
 
@@ -293,12 +289,12 @@ export default function AdminDashboard() {
   const expiredCheckoutCount = countExpiredDates([...checkoutReviewDeadlines, ...checkoutFinalDeadlines]);
 
   const adminWorkLanes: AdminWorkLane[] = [
-    { id: 'ktp-review', step: '0', title: 'Verifikasi KTP', value: ktpReviewItems.length, helper: ktpReviewItems.length ? 'Periksa foto, cocokkan data, lihat rekomendasi AI, lalu putuskan.' : 'Tidak ada KTP yang menunggu pemeriksaan.', sla: 'secepatnya', nextDeadline: undefined, action: 'Periksa KTP', to: '/tenants?ktpStatus=PENDING_REVIEW', tone: ktpReviewItems.length ? 'warning' : 'success' },
-    { id: 'booking-review', step: '1', title: 'Review booking', value: pendingApprovalCount, helper: pendingApprovalCount ? 'Putuskan booking sebelum kamar tertahan terlalu lama.' : 'Tidak ada booking baru yang menunggu admin.', sla: `${ADMIN_SLA_HOURS.bookingReview} jam`, nextDeadline: earliestDeadlineLabel(bookingReviewDeadlines), action: 'Review Booking', to: '/stays?status=BOOKINGS', tone: expiredBookingReviewCount ? 'danger' : pendingApprovalCount ? 'warning' : 'success' },
-    { id: 'payment-review', step: '2', title: 'Verifikasi pembayaran', value: pendingPaymentReviewCount, helper: pendingPaymentReviewCount ? 'Bukti pending tidak boleh auto-cancel; admin harus putuskan.' : 'Tidak ada bukti bayar pending review.', sla: `${ADMIN_SLA_HOURS.paymentReviewUrgent}/${ADMIN_SLA_HOURS.paymentReviewMax} jam`, nextDeadline: earliestDeadlineLabel(paymentMaxDeadlines), action: 'Verifikasi Pembayaran', to: '/payment-submissions/review', tone: expiredPaymentReviewCount ? 'danger' : pendingPaymentReviewCount ? 'warning' : 'success' },
-    { id: 'renew-checkpoint', step: '3', title: 'Review Perpanjangan', value: pendingRenewCount, helper: pendingRenewCount ? 'Catat meter sebelum approve dan tagihan perpanjangan.' : 'Tidak ada perpanjangan menunggu approval.', sla: `${ADMIN_SLA_HOURS.renewReview} jam`, nextDeadline: earliestDeadlineLabel(renewReviewDeadlines), action: 'Review Perpanjangan', to: '/renew-requests', tone: expiredRenewCount ? 'danger' : pendingRenewCount ? 'warning' : 'success' },
-    { id: 'checkout-flow', step: '4', title: 'Keluar', value: checkoutWorkCount, helper: checkoutWorkCount ? 'Review pengajuan keluar dan finalkan hanya jika tagihan beres.' : 'Tidak ada pengajuan keluar yang menunggu admin.', sla: `${ADMIN_SLA_HOURS.checkoutReview}/${ADMIN_SLA_HOURS.checkoutFinal} jam`, nextDeadline: earliestDeadlineLabel([...checkoutReviewDeadlines, ...checkoutFinalDeadlines]), action: 'Cek Checkout', to: CHECKOUT_STAYS_ROUTE, tone: expiredCheckoutCount ? 'danger' : checkoutWorkCount ? 'warning' : 'success' },
-    { id: 'finance-ticket-blockers', step: '5', title: 'Blocker operasional', value: overdueInvoiceCount + ticketWaitingAdminCount + unassignedTicketCount + lowStockCount, helper: 'Tagihan overdue, tiket menunggu admin, dan stok menipis masuk blocker harian.', sla: 'harian', nextDeadline: earliestDeadlineLabel(overdueInvoices.map((invoice) => invoice.dueDate)), action: overdueInvoiceCount ? 'Lihat Tagihan' : ticketWaitingAdminCount || unassignedTicketCount ? 'Lihat Tiket' : 'Cek Stok', to: overdueInvoiceCount ? '/invoices' : ticketWaitingAdminCount || unassignedTicketCount ? '/tickets' : '/inventory/gudang', tone: overdueInvoiceCount ? 'danger' : ticketWaitingAdminCount || unassignedTicketCount || lowStockCount ? 'warning' : 'success' },
+    { id: 'ktp-review', step: '0', title: 'Verifikasi KTP', value: ktpReviewItems.length, helper: ktpReviewItems.length ? 'Periksa foto, cocokkan data, lihat rekomendasi AI, lalu putuskan.' : 'Tidak ada KTP yang menunggu pemeriksaan.', sla: 'secepatnya', nextDeadline: undefined, action: 'Periksa', to: '/tenants?ktpStatus=PENDING_REVIEW', tone: ktpReviewItems.length ? 'warning' : 'success' },
+    { id: 'booking-review', step: '1', title: 'Review booking', value: pendingApprovalCount, helper: pendingApprovalCount ? 'Putuskan booking sebelum kamar tertahan terlalu lama.' : 'Tidak ada booking baru yang menunggu admin.', sla: `${ADMIN_SLA_HOURS.bookingReview} jam`, nextDeadline: earliestDeadlineLabel(bookingReviewDeadlines), action: 'Review', to: '/stays?status=BOOKINGS', tone: expiredBookingReviewCount ? 'danger' : pendingApprovalCount ? 'warning' : 'success' },
+    { id: 'payment-review', step: '2', title: 'Verifikasi bayar', value: pendingPaymentReviewCount, helper: pendingPaymentReviewCount ? 'Bukti pending tidak boleh auto-cancel; admin harus putuskan.' : 'Tidak ada bukti bayar pending review.', sla: `${ADMIN_SLA_HOURS.paymentReviewUrgent}/${ADMIN_SLA_HOURS.paymentReviewMax} jam`, nextDeadline: earliestDeadlineLabel(paymentMaxDeadlines), action: 'Verifikasi', to: '/payment-submissions/review', tone: expiredPaymentReviewCount ? 'danger' : pendingPaymentReviewCount ? 'warning' : 'success' },
+    { id: 'renew-checkpoint', step: '3', title: 'Catat meter perpanjangan', value: pendingRenewCount, helper: pendingRenewCount ? 'Catat meter listrik/air sebelum approve dan terbitkan tagihan perpanjangan.' : 'Tidak ada perpanjangan menunggu pencatatan meter.', sla: `${ADMIN_SLA_HOURS.renewReview} jam`, nextDeadline: earliestDeadlineLabel(renewReviewDeadlines), action: 'Catat Meter', to: '/renew-requests', tone: expiredRenewCount ? 'danger' : pendingRenewCount ? 'warning' : 'success' },
+    { id: 'checkout-flow', step: '4', title: 'Review checkout', value: checkoutWorkCount, helper: checkoutWorkCount ? 'Review pengajuan keluar dan finalkan hanya jika tagihan beres.' : 'Tidak ada pengajuan keluar yang menunggu admin.', sla: `${ADMIN_SLA_HOURS.checkoutReview}/${ADMIN_SLA_HOURS.checkoutFinal} jam`, nextDeadline: earliestDeadlineLabel([...checkoutReviewDeadlines, ...checkoutFinalDeadlines]), action: 'Review', to: CHECKOUT_STAYS_ROUTE, tone: expiredCheckoutCount ? 'danger' : checkoutWorkCount ? 'warning' : 'success' },
+    { id: 'finance-ticket-blockers', step: '5', title: 'Blocker operasional', value: overdueInvoiceCount + ticketWaitingAdminCount + unassignedTicketCount + lowStockCount + facilityGapCount, helper: 'Tagihan overdue, tiket menunggu admin, stok menipis, dan kamar gap fasilitas masuk blocker harian.', sla: 'harian', nextDeadline: earliestDeadlineLabel(overdueInvoices.map((invoice) => invoice.dueDate)), action: overdueInvoiceCount ? 'Lihat Tagihan' : ticketWaitingAdminCount ? 'Cek Tiket' : unassignedTicketCount ? 'Assign Tiket' : lowStockCount ? 'Cek Stok' : 'Cek Kamar', to: overdueInvoiceCount ? '/invoices?status=OVERDUE' : ticketWaitingAdminCount ? '/tickets?status=DONE' : unassignedTicketCount ? '/tickets' : lowStockCount ? '/inventory/gudang?status=LOW_STOCK' : '/rooms?status=MAINTENANCE', tone: overdueInvoiceCount ? 'danger' : ticketWaitingAdminCount || unassignedTicketCount || lowStockCount || facilityGapCount ? 'warning' : 'success' },
   ];
 
   const queueItems: ActionQueueItem[] = dedupeCommandItems([
@@ -314,9 +310,10 @@ export default function AdminDashboard() {
   ]);
 
   const filteredQueueItems = queueItems.filter((item) => itemMatchesAdminArea(item, activeArea));
-  const topQueueItem = priorityActionFromQueue(filteredQueueItems.length ? filteredQueueItems : queueItems);
-  const urgentQueueCount = filteredQueueItems.filter((item) => item.priority === 'BLOCKER' || item.priority === 'HIGH' || item.timeStatusTone === 'danger').length;
-  const activeAreaConfig = ADMIN_QUEUE_AREAS.find((area) => area.id === activeArea) ?? ADMIN_QUEUE_AREAS[0];
+  const visibleQueueItems = dense ? queueItems : filteredQueueItems;
+  const topQueueItem = priorityActionFromQueue(visibleQueueItems.length ? visibleQueueItems : queueItems);
+  const urgentQueueCount = visibleQueueItems.filter((item) => item.priority === 'BLOCKER' || item.priority === 'HIGH' || item.timeStatusTone === 'danger').length;
+  const totalLaneWork = adminWorkLanes.reduce((sum, lane) => sum + lane.value, 0);
 
   // IoT device health
   const iotOverviewQuery = useQuery({
@@ -324,7 +321,7 @@ export default function AdminDashboard() {
     queryFn: getIotOverview,
     staleTime: 60_000,
     refetchInterval: 120_000,
-    enabled: activeArea === 'overview',
+    enabled: activeArea === 'overview' && !dense,
   });
   const iotOverview = iotOverviewQuery.data;
   const iotEnabledCount = iotOverview?.summary?.enabled ?? 0;
@@ -347,12 +344,36 @@ export default function AdminDashboard() {
 
   return (
     <div className="admin-dashboard-queue-first admin-dashboard-simplified">
-      <AdminCommandHeader totalQueue={filteredQueueItems.length} urgentCount={urgentQueueCount} activeAreaLabel={activeAreaConfig.label} topQueueItem={topQueueItem} dense={dense} onToggleDense={handleToggleDense} />
+      <AdminCommandHeader totalQueue={totalLaneWork} urgentCount={urgentQueueCount} topQueueItem={topQueueItem} dense={dense} onToggleDense={handleToggleDense} />
       <AssistantInsightLine
         title="Asisten Operasional"
         tone={supportQueriesError ? 'warning' : urgentQueueCount ? 'warning' : topQueueItem ? 'info' : 'success'}
-        message={supportQueriesError ? 'Data utama sudah tampil, tetapi sebagian data pendukung gagal dimuat.' : topQueueItem ? `${topQueueItem.type}: ${topQueueItem.issue}` : activeArea === 'overview' ? 'Tidak ada blocker besar. Gunakan tab area untuk membuka detail.' : `${activeAreaConfig.label} sedang aman.`}
+        message={supportQueriesError ? 'Data utama sudah tampil, tetapi sebagian data pendukung gagal dimuat.' : topQueueItem ? `${topQueueItem.type}: ${topQueueItem.issue}` : 'Tidak ada blocker besar. Kerjakan tugas yang tersisa di bawah atau buka halaman detail lewat sidebar.'}
       />
+      {/* M17 Iterasi 1: dashboard admin = daftar tugas harian berurutan 0–5. */}
+      <AdminWorkLaneCards lanes={adminWorkLanes} />
+      {autoOpsQuery.isError || autoOpsNeedsAction ? (
+        <Alert variant={autoOpsQuery.isError ? 'danger' : 'warning'} className="d-flex flex-wrap align-items-center gap-2 py-2">
+          <div className="flex-fill">
+            <strong>{autoOpsQuery.isError ? 'AutoOps mengalami kendala.' : 'AutoOps perlu tindakan.'}</strong>
+            <span className="d-block small text-muted">
+              {autoOpsQuery.isError
+                ? 'Status AutoOps tidak berhasil dimuat. Buka Operasional untuk cek lagi.'
+                : `${autoOpsExpiredCount + autoOpsHeldCount + autoOpsOrphanCount} kandidat perlu diproses di Operasional.`
+              }
+            </span>
+          </div>
+          <button
+            type="button"
+            className={`btn btn-sm ${autoOpsQuery.isError ? 'btn-outline-danger' : 'btn-outline-warning'}`}
+            onClick={() => navigate('/tickets')}
+          >
+            Cek Tiket →
+          </button>
+        </Alert>
+      ) : null}
+      {!dense ? (
+      <>
       {activeArea === 'overview' && facilityGapCount > 0 ? (
         <Alert variant="warning" className="d-flex flex-wrap align-items-center gap-2 py-2">
           <div className="flex-fill">
@@ -410,7 +431,7 @@ export default function AdminDashboard() {
         />
       ) : null}
       {/* Visual Dashboard: Gauge, ActivityRing, SnippetCard, ComplicationGrid, RatingDisplay */}
-      {activeArea === 'overview' ? (
+      {activeArea === 'overview' && !dense ? (
         <section className="owner-panel mt-3 mb-3">
           <div className="owner-panel-heading p-3">
             <div>
@@ -504,27 +525,6 @@ export default function AdminDashboard() {
             ) : null}
           </div>
         </section>
-      ) : null}
-
-      {activeArea === 'overview' && (autoOpsQuery.isError || autoOpsNeedsAction) ? (
-        <Alert variant={autoOpsQuery.isError ? 'danger' : 'warning'} className="d-flex flex-wrap align-items-center gap-2 py-2">
-          <div className="flex-fill">
-            <strong>{autoOpsQuery.isError ? 'AutoOps mengalami kendala.' : 'AutoOps perlu tindakan.'}</strong>
-            <span className="d-block small text-muted">
-              {autoOpsQuery.isError
-                ? 'Status AutoOps tidak berhasil dimuat. Buka Operasional untuk cek lagi.'
-                : `${autoOpsExpiredCount + autoOpsHeldCount + autoOpsOrphanCount} kandidat perlu diproses di Operasional.`
-              }
-            </span>
-          </div>
-          <button
-            type="button"
-            className={`btn btn-sm ${autoOpsQuery.isError ? 'btn-outline-danger' : 'btn-outline-warning'}`}
-            onClick={() => navigate(`${dashboardBase}?area=ops`)}
-          >
-            Cek di Operasional →
-          </button>
-        </Alert>
       ) : null}
       {activeArea === 'overview' ? (
         <section className="owner-panel mt-3 mb-3">
@@ -705,6 +705,8 @@ export default function AdminDashboard() {
       ) : null}
       {activeArea === 'ops' && opsSubTab === 'rooms' ? <AdminRoomsStockWorkspace rooms={rooms} inventoryItems={inventoryItems} onNavigate={navigate} dense={dense} /> : null}
       <AdminOverviewCharts activeArea={activeArea} rooms={rooms} invoices={invoices} tickets={tickets} pendingPaymentReviewCount={pendingPaymentReviewCount} pendingApprovalCount={pendingApprovalCount} waitingInitialPaymentCount={waitingInitialPaymentCount} pendingRenewCount={pendingRenewCount} checkoutCount={pendingCheckoutRequestCount + approvedCheckoutRequestCount} dense={dense} />
+      </>
+      ) : null}
     </div>
   );
 }

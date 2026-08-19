@@ -22,56 +22,46 @@ export type TenantPortalStage = 'browsing' | 'booking' | 'occupied';
 // - "Akun & Layanan" mencakup /users + /tenants + /additional-services + /service-interests.
 export const ownerSections: NavigationSection[] = [
   {
-    title: 'Keputusan Owner',
+    title: 'Utama',
     links: [
-      { to: '/owner-dashboard', label: 'Kokpit Owner', icon: '📈', hint: 'KPI bisnis, status kokpit, sinyal risiko, dan tren.' },
+      { to: '/owner-dashboard', label: 'Kokpit Owner', icon: '📈', hint: 'KPI bisnis, prioritas, dan tren.' },
       { to: '/reports', label: 'Laporan Bisnis', icon: '📊', hint: 'Operasional, laba rugi, arus kas, neraca, dan rasio keuangan.' },
-      { to: '/finance/accounting-setup', label: 'Akuntansi & Aset', icon: '📘', hint: 'Bagan Akun, periode, saldo awal, jurnal, aset & depresiasi, dan refund kalah-cepat.', activePaths: ['/finance/accounting-setup', '/finance/assets', '/loss-refunds'] },
-      { to: '/users', label: 'Akun & Layanan', icon: '👤', hint: 'Kelola akun owner/admin/staff/penghuni, layanan tambahan, dan minat tenant.', activePaths: ['/users', '/tenants', '/additional-services', '/service-interests'] },
-      { to: '/iot', label: 'IoT Listrik & Air', icon: '⚡', hint: 'Koneksi Tuya kWh, telemetri listrik, dan persiapan sensor air ESP32.' },
-      { to: '/settings', label: 'Pengaturan', icon: '⚙️', hint: 'FAQ publik, foto kamar, konten halaman tamu, tarif dasar, dan konfigurasi AI.' },
+      { to: '/finance/accounting-setup', label: 'Akuntansi & Aset', icon: '📘', hint: 'Bagan Akun, jurnal, aset, depresiasi, dan refund.', activePaths: ['/finance/accounting-setup', '/finance/assets', '/loss-refunds'] },
+      { to: '/settings', label: 'Pengaturan', icon: '⚙️', hint: 'Tarif, foto kamar, konten halaman tamu, FAQ, dan AI.' },
     ],
   },
   {
     title: 'Lainnya',
     links: [
-      { to: '/market-analysis', label: 'Analisa Pasar (AI)', icon: '🧭', hint: 'Ditemani AI DeepSeek: SWOT, PESTLE, dan analisa kompetitor.' },
-      { to: '/loyalty', label: 'Loyalitas & Reward', icon: '🎁', hint: 'Katalog reward, kelola poin, dan setujui penukaran tenant.' },
+      { to: '/users', label: 'Akun & Layanan', icon: '👤', hint: 'Akun pengguna, layanan tambahan, dan minat tenant.', activePaths: ['/users', '/tenants', '/additional-services', '/service-interests'] },
+      { to: '/iot', label: 'IoT Listrik & Air', icon: '⚡', hint: 'Meter kWh Tuya dan sensor air ESP32.' },
+      { to: '/market-analysis', label: 'Analisa Pasar (AI)', icon: '🧭', hint: 'SWOT, PESTLE, dan analisa kompetitor dengan AI.' },
+      { to: '/loyalty', label: 'Loyalitas & Reward', icon: '🎁', hint: 'Katalog reward, poin, dan penukaran tenant.' },
     ],
   },
 ];
 
 export const adminSections: NavigationSection[] = [
   {
-    title: 'Huni & Uang',
+    title: 'Utama',
     links: [
-      { to: '/dashboard', label: 'Dashboard', icon: '📊', hint: 'Command Center ringkas berisi prioritas paling penting dari semua menu.' },
-      { to: '/stays/assist', label: 'Bantu Penghuni', icon: '🤝', hint: 'Selesaikan catat meter + bayar tunai + tutup tagihan atas nama tenant dalam satu layar.' },
-      { to: '/stays', label: 'Masa Sewa & Penghuni', icon: '🏠', hint: 'Booking, masa sewa aktif, perpanjangan, keluar, dan daftar penghuni.', activePaths: ['/stays', '/tenants', '/renew-requests'] },
-      { to: '/invoices', label: 'Keuangan', icon: '🧾', hint: 'Tagihan, review pembayaran, voucher WiFi, pendapatan tambahan, dan pengeluaran.', activePaths: ['/invoices', '/invoice-payments', '/payment-submissions/review', '/wifi-sales', '/ancillary-revenue', '/expenses', '/finance/accounting-setup', '/finance/assets'] },
-    ],
-  },
-  {
-    title: 'Operasional',
-    links: [
-      { to: '/tickets', label: 'Staff & Tiket', icon: '👷', hint: 'Tiket operasional, staff, checklist, laporan lapangan, dan kinerja.', activePaths: ['/tickets', '/staff-routines', '/staff-performance'] },
-      { to: '/rooms', label: 'Kamar & Stok', icon: '🏘️', hint: 'Status kamar, barang kamar, stok gudang, mutasi stok, dan catatan meter.', activePaths: ['/rooms', '/inventory', '/room-items', '/inventory-items', '/inventory-movements', '/meter-readings'] },
-      { to: '/iot', label: 'IoT Listrik & Air', icon: '⚡', hint: 'Sinkronkan meter kWh Tuya dan pantau kesiapan sensor air ESP32.' },
-      { to: '/ac-maintenance', label: 'Perawatan AC', icon: '❄️', hint: 'Pantau pemakaian AC dan jadwalkan cuci AC secara konsisten.' },
-    ],
-  },
-  {
-    title: 'Penghuni & Komunikasi',
-    links: [
-      { to: '/guest-preferences', label: 'Preferensi Tamu', icon: '🎯', hint: 'Data preferensi kamar dari wizard publik.' },
-      { to: '/announcements', label: 'Pengumuman', icon: '📣', hint: 'Buat dan kelola pengumuman untuk penghuni dan staff.' },
+      { to: '/dashboard', label: 'Dashboard', icon: '📊', hint: 'Prioritas hari ini: booking, bayar, perpanjangan, keluar, tiket, dan stok.' },
+      { to: '/stays', label: 'Masa Sewa & Penghuni', icon: '🏠', hint: 'Booking, penghuni aktif, perpanjangan, keluar, dan data penghuni.', activePaths: ['/stays', '/tenants', '/renew-requests'] },
+      { to: '/invoices', label: 'Keuangan', icon: '🧾', hint: 'Tagihan, review pembayaran, WiFi, pendapatan tambahan, dan pengeluaran.', activePaths: ['/invoices', '/invoice-payments', '/payment-submissions/review', '/wifi-sales', '/ancillary-revenue', '/expenses', '/finance/accounting-setup', '/finance/assets'] },
+      { to: '/tickets', label: 'Staff & Tiket', icon: '👷', hint: 'Tiket, checklist staff, laporan lapangan, dan kinerja.', activePaths: ['/tickets', '/staff-routines', '/staff-performance'] },
+      { to: '/rooms', label: 'Kamar & Stok', icon: '🏘️', hint: 'Status kamar, barang kamar, stok gudang, dan catatan meter.', activePaths: ['/rooms', '/inventory', '/room-items', '/inventory-items', '/inventory-movements', '/meter-readings'] },
     ],
   },
   {
     title: 'Lainnya',
     links: [
-      { to: '/surveys', label: 'Survei Penghuni', icon: '⭐', hint: 'Lihat semua survei kepuasan, rating, komentar, dan ringkasan.' },
-      { to: '/loyalty', label: 'Reward', icon: '🎁', hint: 'Setujui penukaran reward tenant dan lihat katalog.' },
+      { to: '/stays/assist', label: 'Bantu Penghuni', icon: '🤝', hint: 'Catat meter, terima tunai, dan tutup tagihan atas nama tenant.' },
+      { to: '/announcements', label: 'Pengumuman', icon: '📣', hint: 'Buat dan kelola pengumuman untuk penghuni dan staff.' },
+      { to: '/iot', label: 'IoT Listrik & Air', icon: '⚡', hint: 'Meter kWh Tuya dan sensor air ESP32.' },
+      { to: '/ac-maintenance', label: 'Perawatan AC', icon: '❄️', hint: 'Pantau pemakaian AC dan jadwalkan cuci AC.' },
+      { to: '/guest-preferences', label: 'Preferensi Tamu', icon: '🎯', hint: 'Preferensi kamar dari wizard publik.' },
+      { to: '/surveys', label: 'Survei Penghuni', icon: '⭐', hint: 'Rating, komentar, dan ringkasan survei.' },
+      { to: '/loyalty', label: 'Reward', icon: '🎁', hint: 'Penukaran reward tenant dan katalog.' },
     ],
   },
 ];
