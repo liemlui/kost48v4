@@ -407,6 +407,7 @@ export default function AppLayout({ children }: { children?: ReactNode }) {
             fullName={user?.fullName}
             initials={getInitials(user?.fullName)}
             onLogout={logout}
+            features={tenantFeatures}
           />
 
           <section className="tenant-workspace-content">

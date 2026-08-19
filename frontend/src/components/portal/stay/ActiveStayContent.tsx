@@ -875,15 +875,6 @@ export default function ActiveStayContent({ stay }: { stay: Stay }) {
                 </Link>
               </div>
             </div>{/* listrik tab */}
-            <div id="stay-panel-kamar" role="tabpanel" aria-label="Kamar dan riwayat" hidden={activeTab !== 'kamar'} className="tenant-stay-col-full">
-              <SatisfactionSurveyCard />
-              <StayHistoryTimeline
-                stay={stay}
-                invoices={invoices}
-                invoiceHrefBase="/portal/invoices"
-                journeySteps={stayJourneySteps}
-              />
-            </div>{/* kamar tab */}
           </>
         )}
       </StayTabs>

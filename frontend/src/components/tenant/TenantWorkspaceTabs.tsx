@@ -6,7 +6,7 @@ import PaymentUrgencyChip from '../payment-urgency/PaymentUrgencyChip';
 import Kost48LogoMark from '../common/Kost48LogoMark';
 import TenantAvatar from '../common/TenantAvatar';
 import { useAuth } from '../../context/AuthContext';
-import { getNavigationLinks, type TenantPortalStage } from '../../config/navigation';
+import { getNavigationSections, type TenantFeatures, type TenantPortalStage } from '../../config/navigation';
 import { getResource } from '../../api/resources';
 import GettingStartedGuide from './GettingStartedGuide';
 import type { Announcement } from '../../types';
@@ -86,6 +86,7 @@ export default function TenantWorkspaceTabs({
   fullName,
   initials,
   onLogout,
+  features,
 }: {
   stage: TenantPortalStage;
   stageLoading?: boolean;
@@ -93,10 +94,11 @@ export default function TenantWorkspaceTabs({
   fullName?: string;
   initials: string;
   onLogout: () => void;
+  features?: TenantFeatures;
 }) {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const links = getNavigationLinks('TENANT', stage);
+  const sections = getNavigationSections('TENANT', stage, features);
 
   return (
     <>
@@ -148,14 +150,21 @@ export default function TenantWorkspaceTabs({
             </div>
           </section>
 
-          <nav className="tenant-workspace-tabs" aria-label="Navigasi tenant">
-            {links.map((link) => (
-              <NavLink key={link.to} to={link.to} className={({ isActive }) => `tenant-workspace-tab ${isActive ? 'active' : ''}`} title={link.hint ?? link.label}>
-                <span aria-hidden="true">{link.icon}</span>
-                <strong>{link.label}</strong>
-              </NavLink>
-            ))}
-          </nav>
+          {sections.map((section) => (
+            <section key={section.title} className="tenant-workspace-nav-section" aria-label={section.title}>
+              {sections.length > 1 ? (
+                <div className="tenant-workspace-nav-section-label">{section.title}</div>
+              ) : null}
+              <nav className="tenant-workspace-tabs" aria-label={`Navigasi ${section.title}`}>
+                {section.links.map((link) => (
+                  <NavLink key={link.to} to={link.to} className={({ isActive }) => `tenant-workspace-tab ${isActive ? 'active' : ''}`} title={link.hint ?? link.label}>
+                    <span aria-hidden="true">{link.icon}</span>
+                    <strong>{link.label}</strong>
+                  </NavLink>
+                ))}
+              </nav>
+            </section>
+          ))}
         </>
       )}
     </>

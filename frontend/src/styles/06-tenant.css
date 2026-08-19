@@ -1162,6 +1162,19 @@ h1, h2, h3, h4, h5, h6,
   background: rgba(255, 255, 255, 0.86);
 }
 
+.tenant-workspace-nav-section + .tenant-workspace-nav-section .tenant-workspace-tabs {
+  margin-top: .25rem;
+}
+
+.tenant-workspace-nav-section-label {
+  margin: 1rem 0 .25rem;
+  font-size: .72rem;
+  font-weight: 800;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--gray-500);
+}
+
 .tenant-workspace-tab {
   min-height: 86px;
   display: flex;

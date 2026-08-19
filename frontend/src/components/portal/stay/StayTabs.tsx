@@ -2,12 +2,11 @@ import { useCallback, type KeyboardEvent, type ReactNode } from 'react';
 import { Nav } from 'react-bootstrap';
 import { useSearchParams } from 'react-router-dom';
 
-type TabId = 'ringkasan' | 'listrik' | 'kamar';
+type TabId = 'ringkasan' | 'listrik';
 
 const TABS: { id: TabId; label: string; icon: string }[] = [
   { id: 'ringkasan', label: 'Ringkasan', icon: '🏠' },
   { id: 'listrik', label: 'Listrik & Air', icon: '⚡' },
-  { id: 'kamar', label: 'Kamar & Riwayat', icon: '🛏️' },
 ];
 
 type StayTabsProps = {

@@ -25,9 +25,9 @@ describe('StayTabs', () => {
     expect(screen.getByTestId('active-tab')).toHaveTextContent('listrik');
     expect(document.getElementById('stay-tab-listrik')).toHaveAttribute('aria-selected', 'true');
 
-    await userEvent.click(document.getElementById('stay-tab-kamar')!);
-    expect(screen.getByTestId('active-tab')).toHaveTextContent('kamar');
-    expect(screen.getByTestId('location')).toHaveTextContent('?tab=kamar');
+    await userEvent.click(document.getElementById('stay-tab-ringkasan')!);
+    expect(screen.getByTestId('active-tab')).toHaveTextContent('ringkasan');
+    expect(screen.getByTestId('location')).toHaveTextContent('');
   });
 
   it('mendukung Arrow, Home, dan End pada pola tab desktop', async () => {
@@ -40,7 +40,7 @@ describe('StayTabs', () => {
     expect(screen.getByTestId('active-tab')).toHaveTextContent('listrik');
 
     await userEvent.keyboard('{End}');
-    await waitFor(() => expect(document.activeElement).toBe(document.getElementById('stay-tab-kamar')));
+    await waitFor(() => expect(document.activeElement).toBe(document.getElementById('stay-tab-listrik')));
 
     await userEvent.keyboard('{Home}');
     await waitFor(() => expect(document.activeElement).toBe(document.getElementById('stay-tab-ringkasan')));

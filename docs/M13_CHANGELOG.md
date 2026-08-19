@@ -1,5 +1,14 @@
 # KOST48 V5 — M13 Changelog
 
+## 2026-08-20 — Portal Tenant Ringkas: nav Utama/Lainnya + hapus redundansi dashboard
+
+- **Navigasi tenant** kini dikelompokkan: **Utama** = Panduan Kos Saya · Bayar Tagihan · Lapor Masalah; **Lainnya** = Energi · Pengumuman · Panduan · WiFi · Poin & Reward (bila aktif). Mobile bottom nav tetap 3 tab utama + popup "Lainnya".
+- **Dashboard tenant (MyStayPage):** tab "Kamar & Riwayat" yang duplikat dihapus — survei kepuasan & riwayat sewa tetap ada di tab Ringkasan, info kamar/fasilitas/inventaris/tarif tetap di accordion.
+- Tidak ada fitur yang dihapus; hanya dirapikan agar tenant awam melihat 3 aksi inti lebih dulu.
+- **Verifikasi:** FE `vitest run` 135/135 ✅ · FE `npm run build` ✅ (PWA passed).
+
+**Perubahan:** `frontend/src/config/navigation.ts`, `frontend/src/components/tenant/TenantWorkspaceTabs.tsx`, `frontend/src/components/layout/AppLayout.tsx`, `frontend/src/components/portal/stay/StayTabs.tsx`, `frontend/src/components/portal/stay/ActiveStayContent.tsx`, `frontend/src/styles/06-tenant.css`, `frontend/src/test/components/stayTabs.test.tsx`.
+
 ## 2026-08-20 — M17 Portal Flow Ringkas: Iterasi 4 (E2E + cleanup widget lama)
 
 - **Booking E2E:** flow publik booking → approve → bayar DP → approve → pelunasan → check-in → perpanjangan (DP, meter, settlement, final) → checkout (request → approve → final) diuji live di UAT. Predikat booking di `dashboardShared.tsx` & `stayPredicates.ts` dikoreksi: booking online tetap tampil saat kamar `AVAILABLE`/`MAINTENANCE` (sebelumnya menuntut `RESERVED`, sehingga booking baru tak muncul di antrean).

@@ -121,23 +121,25 @@ function getTenantSections(stage: TenantPortalStage = 'occupied', features?: Ten
 
   return [
     {
-      title: 'Portal Penghuni',
+      title: 'Utama',
       links: [
         { to: '/portal/stay', label: 'Panduan Kos Saya', icon: '🏠', hint: 'Kamar, masa sewa, tagihan, dan aksi berikutnya.' },
-        { to: '/portal/energy', label: 'Energi', icon: '⚡', hint: 'Pantau pembacaan listrik & air terbaru dari meter otomatis.' },
         { to: '/portal/invoices', label: 'Bayar Tagihan', icon: '💳', hint: 'Tagihan, status, dan tindak lanjut pembayaran.' },
         { to: '/portal/tickets', label: 'Lapor Masalah', icon: '🛠️', hint: 'Laporkan kerusakan atau kebutuhan bantuan dan pantau progresnya.' },
+      ],
+    },
+    {
+      title: 'Lainnya',
+      links: [
+        { to: '/portal/energy', label: 'Energi', icon: '⚡', hint: 'Pantau pembacaan listrik & air terbaru dari meter otomatis.' },
         { to: '/portal/announcements', label: 'Pengumuman', icon: '📢', hint: 'Info terbaru dari pengelola KOST48.' },
         { to: '/portal/manual', label: 'Panduan', icon: '📖', hint: 'Aturan, pembayaran, dan layanan kos.' },
         { to: '/portal/wifi', label: 'Pesan WiFi', icon: '📶', hint: 'Lihat prosedur pembelian paket WiFi melalui WhatsApp.' },
+        ...(features?.loyaltyEnabled ? [
+          { to: '/portal/loyalty', label: 'Poin & Reward', icon: '🎁', hint: 'Poin kebaikan, leaderboard, katalog reward, dan referral.' },
+        ] : []),
       ],
     },
-    ...(features?.loyaltyEnabled ? [{
-      title: 'Lainnya',
-      links: [
-        { to: '/portal/loyalty', label: 'Poin & Reward', icon: '🎁', hint: 'Poin kebaikan, leaderboard, katalog reward, dan referral.' },
-      ],
-    }] : []),
   ];
 }
 
