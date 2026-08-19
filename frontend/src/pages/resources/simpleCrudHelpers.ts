@@ -227,6 +227,7 @@ export function getResourceFilterDefinitions(configPath: string, items: Array<Re
 
   if (configPath === '/tenants') return [
     { id: 'ALL', label: 'Semua Tenant', count: totalItems ?? items.length, tone: 'info' as const },
+    { id: 'KTP_REVIEW', label: 'KTP Perlu Review', count: count((item) => Boolean(item.ktpImageUrl) && !item.ktpVerifiedAt), tone: 'warning' as const },
     { id: 'ACTIVE', label: 'Aktif', count: activeCount(true), tone: 'success' as const },
     { id: 'WITH_STAY', label: 'Ada Masa Sewa', count: count((item) => Boolean(item.activeStayId || item.currentStay)), tone: 'success' as const },
     { id: 'NO_STAY', label: 'Belum Menempati', count: count((item) => !item.activeStayId && !item.currentStay), tone: 'warning' as const },
@@ -290,6 +291,7 @@ export function getResourceFilterDefinitions(configPath: string, items: Array<Re
 export function applyResourceFilter(configPath: string, item: Record<string, unknown>, filter: string) {
   if (filter === 'ALL') return true;
   if (configPath === '/tenants') {
+    if (filter === 'KTP_REVIEW') return Boolean(item.ktpImageUrl) && !item.ktpVerifiedAt;
     if (filter === 'ACTIVE') return item.isActive !== false;
     if (filter === 'WITH_STAY') return Boolean(item.activeStayId || item.currentStay);
     if (filter === 'NO_STAY') return !item.activeStayId && !item.currentStay;

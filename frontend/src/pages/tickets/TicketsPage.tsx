@@ -13,7 +13,7 @@ import {
   Table,
 } from "react-bootstrap";
 import { Bar, BarChart, CartesianGrid, Cell, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
-import { useNavigate, NavLink } from "react-router-dom";
+import { useNavigate, NavLink, useSearchParams } from "react-router-dom";
 import PageHeader from "../../components/common/PageHeader";
 import PaginationControls from "../../components/common/PaginationControls";
 import EmptyState from "../../components/common/EmptyState";
@@ -163,8 +163,19 @@ export default function TicketsPage() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const [searchParams] = useSearchParams();
+  const urlStatus = searchParams.get('status');
+  const initialTab: StatusTab = urlStatus === 'ALL' || urlStatus === 'OPEN' || urlStatus === 'IN_PROGRESS' || urlStatus === 'DONE' || urlStatus === 'CLOSED' ? urlStatus : 'OPEN';
   const [assignMap, setAssignMap] = useState<Record<number, string>>({});
-  const [activeTab, setActiveTab] = useState<StatusTab>("OPEN");
+  const [activeTab, setActiveTab] = useState<StatusTab>(initialTab);
+  // M17 Iterasi 2: terapkan filter status dari URL saat query param berubah (mis. klik kartu blocker lagi).
+  useEffect(() => {
+    const next = searchParams.get('status');
+    if (next === 'ALL' || next === 'OPEN' || next === 'IN_PROGRESS' || next === 'DONE' || next === 'CLOSED') {
+      setActiveTab(next);
+      setPage(1);
+    }
+  }, [searchParams]);
   const [showCreateTicket, setShowCreateTicket] = useState(false);
   const [createForm, setCreateForm] = useState({
     category: 'KEBERSIHAN',

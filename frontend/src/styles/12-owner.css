@@ -546,6 +546,22 @@
   line-height: 1;
 }
 
+.owner-signal-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  white-space: nowrap;
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: var(--blue-600);
+}
+
+.owner-signal-cta span {
+  color: var(--gray-500);
+  font-size: 1.1rem;
+  line-height: 1;
+}
+
 .owner-ai-body {
   display: grid;
   align-content: start;

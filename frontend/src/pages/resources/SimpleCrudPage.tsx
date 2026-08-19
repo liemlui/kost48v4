@@ -59,6 +59,17 @@ type ResourceFilterId = string;
 //  COMPONENT: SimpleCrudPage
 // ═══════════════════════════════════════════════════════════
 
+/** M17 Iterasi 2: petakan query param kartu tugas ke filter resource yang ada. */
+function resourceFilterFromSearchParams(configPath: string, searchParams: URLSearchParams): ResourceFilterId {
+  if (configPath === '/inventory-items' && searchParams.get('status') === 'LOW_STOCK') return 'LOW_AUTO';
+  if (configPath === '/rooms') {
+    const roomStatus = searchParams.get('status');
+    if (roomStatus === 'AVAILABLE' || roomStatus === 'OCCUPIED' || roomStatus === 'RESERVED' || roomStatus === 'MAINTENANCE') return roomStatus;
+  }
+  if (configPath === '/tenants' && searchParams.get('ktpStatus') === 'PENDING_REVIEW') return 'KTP_REVIEW';
+  return 'ALL';
+}
+
 export default function SimpleCrudPage({ config, hideAreaMenu = false }: { config: ResourceConfig; hideAreaMenu?: boolean }) {
   const queryClient = useQueryClient();
   const toast = useToast();
@@ -73,13 +84,22 @@ export default function SimpleCrudPage({ config, hideAreaMenu = false }: { confi
   const [error, setError] = useState('');
   const [showActiveOnly, setShowActiveOnly] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
-  const [resourceFilter, setResourceFilter] = useState<ResourceFilterId>('ALL');
+  const [resourceFilter, setResourceFilter] = useState<ResourceFilterId>(() => resourceFilterFromSearchParams(config.path, searchParams));
   const [stockMovementConfirm, setStockMovementConfirm] = useState<{ payload: Record<string, unknown>; isEdit: boolean } | null>(null);
   const [page, setPage] = useState(1);
   const [isInitialLoading, setIsInitialLoading] = useState(true);
   const PAGE_SIZE = 5;
   const movementContext = searchParams.toString();
 
+  // M17 Iterasi 2: saat URL kartu tugas berubah (mis. klik kartu yang sama lagi),
+  // terapkan kembali filter dari query param tanpa menghapus pilihan manual pengguna.
+  useEffect(() => {
+    const filterFromUrl = resourceFilterFromSearchParams(config.path, searchParams);
+    if (filterFromUrl !== 'ALL') {
+      setResourceFilter(filterFromUrl);
+      setPage(1);
+    }
+  }, [config.path, searchParams]);
 
   useEffect(() => {
     setPage(1);

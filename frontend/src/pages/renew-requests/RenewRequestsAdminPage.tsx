@@ -1,5 +1,6 @@
 // FILE: RenewRequestsAdminPage.tsx — admin: daftar + approve/tolak permintaan perpanjangan
 import { useEffect, useMemo, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Alert, Button, Card, Col, Form, Modal, Row, Spinner, Table } from 'react-bootstrap';
 import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from 'recharts';
@@ -62,6 +63,7 @@ function getCurrentRent(rr?: RenewRequest | null) {
 
 const STATUS_OPTIONS = [
   { value: '', label: 'Semua Status' },
+  { value: 'PENDING', label: 'Perlu Meter' },
   { value: 'PENDING_DECISION', label: 'Keputusan Tenant' },
   { value: 'AWAITING_DP', label: 'Menunggu DP' },
   { value: 'DP_SECURED', label: 'DP Aman / Pelunasan' },
@@ -136,7 +138,12 @@ function RenewFlowStrip() {
 
 export default function RenewRequestsAdminPage() {
   const queryClient = useQueryClient();
-  const [statusFilter, setStatusFilter] = useState('');
+  const [searchParams] = useSearchParams();
+  const initialStatus = (() => {
+    const fromUrl = searchParams.get('status') ?? '';
+    return STATUS_OPTIONS.some((option) => option.value === fromUrl) ? fromUrl : '';
+  })();
+  const [statusFilter, setStatusFilter] = useState(initialStatus);
 
   const [approveTarget, setApproveTarget] = useState<RenewRequest | null>(null);
   const [plannedCheckOutDate, setPlannedCheckOutDate] = useState('');
@@ -154,6 +161,13 @@ export default function RenewRequestsAdminPage() {
 
   const [page, setPage] = useState(1);
   const PAGE_SIZE = 10;
+
+  useEffect(() => {
+    const fromUrl = searchParams.get('status') ?? '';
+    if (fromUrl && STATUS_OPTIONS.some((option) => option.value === fromUrl)) {
+      setStatusFilter(fromUrl);
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     setPage(1);

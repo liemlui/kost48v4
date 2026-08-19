@@ -22,6 +22,7 @@ import {
 } from 'recharts';
 import type { OwnerDashboardTrendMonth } from '../../api/finance';
 import { fetchOwnerDashboardAggregate } from '../../api/ownerDashboard';
+import { listResource } from '../../api/resources';
 import { getIotOverview, iotQueryKeys } from '../../api/iot';
 import { cc } from '../../config/chartPalette';
 import { generateBrief, getOwnerAiStatus, type BriefResult } from '../../api/ai';
@@ -42,7 +43,8 @@ function useOwnerViewMode() {
   const [mode, setModeState] = useState<'compact' | 'full'>(() => {
     const saved = localStorage.getItem(VIEW_MODE_KEY);
     if (saved === 'compact' || saved === 'full') return saved;
-    return window.innerWidth <= 834 ? 'compact' : 'full';
+    // Default ringkas: layar utama hanya KPI + prioritas. Mode Lengkap opsional.
+    return 'compact';
   });
 
   const setMode = (next: 'compact' | 'full') => {
@@ -81,6 +83,40 @@ function gradeBadge(grade: string): { label: string; tone: string } {
     case 'PERHATIAN': return { label: 'Perhatian', tone: 'watch' };
     case 'RISIKO': return { label: 'Risiko', tone: 'risk' };
     default: return { label: 'Kritis', tone: 'critical' };
+  }
+}
+
+// M17 Iterasi 3: label aksi + route terfilter untuk sinyal prioritas owner.
+function ownerSignalRoute(signal: { type: string; route: string }): string {
+  switch (signal.type) {
+    case 'overdue': return '/invoices?status=OVERDUE';
+    case 'outstanding': return '/invoices?status=BILLING';
+    case 'pending_payment': return '/payment-submissions/review';
+    case 'vacant-room': return '/rooms?status=AVAILABLE';
+    default: return signal.route;
+  }
+}
+
+function ownerSignalActionLabel(type: string): string {
+  switch (type) {
+    case 'overdue':
+    case 'outstanding': return 'Lihat Tagihan';
+    case 'pending_payment': return 'Verifikasi';
+    case 'vacant-room': return 'Lihat Kamar';
+    case 'meter-due': return 'Catat Meter';
+    case 'readiness': return 'Lengkapi Setup';
+    case 'iot-stale': return 'Cek IoT';
+    default: return 'Buka';
+  }
+}
+
+function ownerSignalTitle(type: string): string {
+  switch (type) {
+    case 'overdue': return 'Tagihan overdue';
+    case 'pending_payment': return 'Bukti bayar pending';
+    case 'outstanding': return 'Tagihan outstanding';
+    case 'vacant-room': return 'Kamar kosong siap tawarkan';
+    default: return 'Perlu perhatian';
   }
 }
 
@@ -259,8 +295,15 @@ export default function OwnerDashboardPage() {
     staleTime: 120_000,
   });
 
+  // M17 Iterasi 3: kamar kosong sebagai sinyal prioritas owner (route terfilter /rooms?status=AVAILABLE).
+  const roomsQuery = useQuery({
+    queryKey: ['rooms', 'owner-vacancy-signals'],
+    queryFn: () => listResource<Record<string, unknown>>('/rooms', { limit: 500, isActive: 'true' }),
+    staleTime: 120_000,
+  });
+
   const refreshDashboard = () => {
-    void Promise.all([aggregateQuery.refetch(), ownerAiStatusQuery.refetch(), iotQuery.refetch()]);
+    void Promise.all([aggregateQuery.refetch(), ownerAiStatusQuery.refetch(), iotQuery.refetch(), roomsQuery.refetch()]);
   };
 
   const extraSignals = useMemo(() => {
@@ -268,10 +311,10 @@ export default function OwnerDashboardPage() {
     const meter = aggregateQuery.data?.meterDue;
     const readiness = aggregateQuery.data?.readiness;
     if (!aggregateQuery.isLoading && !aggregateQuery.isError && (meter?.due ?? 0) > 0) {
-      items.push({ key: 'meter-due', label: 'Meter belum dicatat', helper: `${meter!.recorded}/${meter!.occupied} kamar tercatat bulan ini`, route: '/meter-readings', type: 'outstanding' });
+      items.push({ key: 'meter-due', label: 'Meter belum dicatat', helper: `${meter!.recorded}/${meter!.occupied} kamar tercatat bulan ini`, route: '/meter-readings', type: 'meter-due' });
     }
     if (!aggregateQuery.isLoading && !aggregateQuery.isError && readiness && !readiness.ready) {
-      items.push({ key: 'readiness', label: 'Akuntansi belum siap', helper: `${readiness.missing.length} gate tersisa — skor ${readiness.score ?? 0}%`, route: '/finance/accounting-setup', type: 'outstanding' });
+      items.push({ key: 'readiness', label: 'Akuntansi belum siap', helper: `${readiness.missing.length} gate tersisa — skor ${readiness.score ?? 0}%`, route: '/finance/accounting-setup', type: 'readiness' });
     }
     // A device that intentionally reports an offline cloud state is not an
     // operational incident. Surface only data that has actually gone stale.
@@ -279,11 +322,16 @@ export default function OwnerDashboardPage() {
     if (!iotQuery.isLoading && !iotQuery.isError && (iotData?.summary?.enabled ?? 0) > 0) {
       const staleCount = iotData?.summary?.stale ?? 0;
       if (staleCount > 0) {
-        items.push({ key: 'iot-stale', label: `${staleCount} perangkat IoT belum mengirim data`, helper: 'Cek waktu pembaruan dan sinkronisasi perangkat.', route: '/iot', type: 'overdue' });
+        items.push({ key: 'iot-stale', label: `${staleCount} perangkat IoT belum mengirim data`, helper: 'Cek waktu pembaruan dan sinkronisasi perangkat.', route: '/iot', type: 'iot-stale' });
       }
     }
+    const rooms = roomsQuery.data?.items ?? [];
+    const availableRooms = rooms.filter((room) => room.status === 'AVAILABLE').length;
+    if (!roomsQuery.isLoading && !roomsQuery.isError && availableRooms > 0) {
+      items.push({ key: 'vacant-room', label: `${availableRooms} kamar kosong siap tawarkan`, helper: 'Cek kamar tersedia dan promosikan ke calon penghuni.', route: '/rooms?status=AVAILABLE', type: 'vacant-room' });
+    }
     return items;
-  }, [aggregateQuery.data, aggregateQuery.isLoading, aggregateQuery.isError, iotQuery.data, iotQuery.isLoading, iotQuery.isError]);
+  }, [aggregateQuery.data, aggregateQuery.isLoading, aggregateQuery.isError, iotQuery.data, iotQuery.isLoading, iotQuery.isError, roomsQuery.data, roomsQuery.isLoading, roomsQuery.isError]);
 
   const handleChange = (field: 'year' | 'month', val: string) => {
     const num = parseInt(val, 10);
@@ -300,23 +348,25 @@ export default function OwnerDashboardPage() {
           <p>Ringkasan kesehatan bisnis untuk {selectedPeriodLabel}.</p>
         </div>
         <div className="owner-toolbar">
-          <div className="owner-toolbar-group">
-            <span className="owner-toolbar-group-label">Scope data</span>
-            <div className="owner-toolbar-group-controls">
-              <div className="owner-period-field">
-                <Form.Label htmlFor="owner-year">Tahun</Form.Label>
-                <Form.Control id="owner-year" type="number" value={ym.year} min={2020} max={2100} onChange={(e) => handleChange('year', e.target.value)} />
-              </div>
-              <div className="owner-period-field">
-                <Form.Label htmlFor="owner-month">Bulan</Form.Label>
-                <Form.Select id="owner-month" value={ym.month} onChange={(e) => handleChange('month', e.target.value)}>
-                  {Array.from({ length: 12 }, (_, i) => i + 1).map((m) => (
-                    <option key={m} value={m}>{new Date(0, m - 1).toLocaleString('id-ID', { month: 'long' })}</option>
-                  ))}
-                </Form.Select>
+          {viewMode === 'full' ? (
+            <div className="owner-toolbar-group">
+              <span className="owner-toolbar-group-label">Scope data</span>
+              <div className="owner-toolbar-group-controls">
+                <div className="owner-period-field">
+                  <Form.Label htmlFor="owner-year">Tahun</Form.Label>
+                  <Form.Control id="owner-year" type="number" value={ym.year} min={2020} max={2100} onChange={(e) => handleChange('year', e.target.value)} />
+                </div>
+                <div className="owner-period-field">
+                  <Form.Label htmlFor="owner-month">Bulan</Form.Label>
+                  <Form.Select id="owner-month" value={ym.month} onChange={(e) => handleChange('month', e.target.value)}>
+                    {Array.from({ length: 12 }, (_, i) => i + 1).map((m) => (
+                      <option key={m} value={m}>{new Date(0, m - 1).toLocaleString('id-ID', { month: 'long' })}</option>
+                    ))}
+                  </Form.Select>
+                </div>
               </div>
             </div>
-          </div>
+          ) : null}
           <div className="owner-toolbar-group">
             <span className="owner-toolbar-group-label">Tampilan</span>
             <div className="owner-view-toggle" role="radiogroup" aria-label="Tampilan dashboard">
@@ -406,7 +456,7 @@ export default function OwnerDashboardPage() {
           </Row>
 
           <Row className="g-3 mb-3">
-            <Col lg={7}>
+            <Col lg={viewMode === 'full' ? 7 : 12}>
               <section className="owner-panel h-100" id="prioritas">
                 <div className="owner-panel-heading">
                   <div>
@@ -421,23 +471,23 @@ export default function OwnerDashboardPage() {
                   ) : (
                     <div className="owner-signal-list">
                       {data.signals.map((signal, index) => (
-                        <button key={`${signal.type}-${index}`} type="button" className="owner-signal-item" onClick={() => navigate(signal.route)}>
+                        <button key={`${signal.type}-${index}`} type="button" className="owner-signal-item" onClick={() => navigate(ownerSignalRoute(signal))}>
                           <span className={`owner-signal-dot owner-signal-${signal.type}`} aria-hidden="true" />
                           <span className="owner-signal-content">
-                            <strong>{signal.type === 'overdue' ? 'Tagihan overdue' : signal.type === 'pending_payment' ? 'Pembayaran pending' : 'Tagihan outstanding'}</strong>
+                            <strong>{ownerSignalTitle(signal.type)}</strong>
                             <small>{signal.count} item{signal.totalRupiah ? ` - Rp ${formatRupiahWithoutSymbol(signal.totalRupiah)}` : ''}</small>
                           </span>
-                          <span className="owner-signal-arrow" aria-hidden="true">&rsaquo;</span>
+                          <span className="owner-signal-cta">{ownerSignalActionLabel(signal.type)} <span aria-hidden="true">&rsaquo;</span></span>
                         </button>
                       ))}
                       {extraSignals.map((signal) => (
-                        <button key={signal.key} type="button" className="owner-signal-item" onClick={() => navigate(signal.route)}>
+                        <button key={signal.key} type="button" className="owner-signal-item" onClick={() => navigate(ownerSignalRoute(signal))}>
                           <span className={`owner-signal-dot owner-signal-${signal.type}`} aria-hidden="true" />
                           <span className="owner-signal-content">
                             <strong>{signal.label}</strong>
                             <small>{signal.helper}</small>
                           </span>
-                          <span className="owner-signal-arrow" aria-hidden="true">&rsaquo;</span>
+                          <span className="owner-signal-cta">{ownerSignalActionLabel(signal.type)} <span aria-hidden="true">&rsaquo;</span></span>
                         </button>
                       ))}
                     </div>
@@ -446,7 +496,7 @@ export default function OwnerDashboardPage() {
               </section>
             </Col>
 
-            <Col lg={5}>
+            <Col lg={5} className={viewMode === 'compact' ? 'd-none' : ''}>
               <section className="owner-panel owner-ai-panel h-100">
                 <div className="owner-panel-heading">
                   <div>

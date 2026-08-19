@@ -3,7 +3,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Alert, Badge, Button, Card, Col, Form, Modal, Row, Spinner } from 'react-bootstrap';
 import type { ColumnDef } from '@tanstack/react-table';
-import { NavLink, useNavigate } from 'react-router-dom';
+import { NavLink, useNavigate, useSearchParams } from 'react-router-dom';
 import { Bar, BarChart, CartesianGrid, Cell, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import DonutGauge from '../../components/charts/DonutGauge';
 import PageHeader from '../../components/common/PageHeader';
@@ -181,17 +181,28 @@ export default function InvoicesPage() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const canManageFinance = user?.role === 'OWNER' || user?.role === 'ADMIN';
+  const [searchParams] = useSearchParams();
+  const urlStatus = searchParams.get('status');
+  const initialTab: StatusTab = urlStatus === 'ALL' || urlStatus === 'DRAFT' || urlStatus === 'BILLING' || urlStatus === 'OVERDUE' || urlStatus === 'PAID' || urlStatus === 'CANCELLED' ? urlStatus : 'BILLING';
   const [showCreate, setShowCreate] = useState(false);
   const [formState, setFormState] = useState(initialForm);
   const [error, setError] = useState('');
   const [accountingNotice, setAccountingNotice] = useState('');
-  const [activeTab, setActiveTab] = useState<StatusTab>('BILLING');
+  const [activeTab, setActiveTab] = useState<StatusTab>(initialTab);
   const [keyword, setKeyword] = useState('');
   const [page, setPage] = useState(1);
   const PAGE_SIZE = 5;
   const defaultDateFrom = new Date(new Date().setMonth(new Date().getMonth() - 2)).toISOString().slice(0, 10);
   const [dateFrom, setDateFrom] = useState(defaultDateFrom);
   const [dateTo, setDateTo] = useState('');
+
+  // M17 Iterasi 2: terapkan filter status dari URL saat query param berubah (mis. klik kartu blocker lagi).
+  useEffect(() => {
+    const next = searchParams.get('status');
+    if (next === 'ALL' || next === 'DRAFT' || next === 'BILLING' || next === 'OVERDUE' || next === 'PAID' || next === 'CANCELLED') {
+      setActiveTab(next);
+    }
+  }, [searchParams]);
 
   // Reset halaman ke 1 saat filter berubah agar paginasi tidak menunjuk halaman yang salah.
   const prevFilterRef = useRef({ activeTab, dateFrom, dateTo });
