@@ -11,8 +11,8 @@
  *     howDidYouHear,notes)
  *
  * PAKAI:
- *   node scripts/import-tenant-sheet.js tenant-data.csv
- *   (opsional) API_BASE=http://localhost:3000/api node scripts/import-tenant-sheet.js tenant-data.csv
+ *   node scripts/archive/import-tenant-sheet.js tenant-data.csv
+ *   (opsional) API_BASE=http://localhost:3000/api node scripts/archive/import-tenant-sheet.js tenant-data.csv
  *
  * YANG DILAKUKAN:
  *   1. Baca CSV → cari tenant by identityNumber (NIK)
@@ -108,7 +108,7 @@ function maskNik(nik) {
 (async () => {
   const csvFile = process.argv[2];
   if (!csvFile) {
-    console.error('PAKAI: node scripts/import-tenant-sheet.js tenant-data.csv');
+    console.error('PAKAI: node scripts/archive/import-tenant-sheet.js tenant-data.csv');
     process.exit(1);
   }
   if (!fs.existsSync(csvFile)) {

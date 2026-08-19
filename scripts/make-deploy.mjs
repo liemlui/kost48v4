@@ -418,7 +418,7 @@ function createVerifiedArchive() {
       || entry === 'scripts/seed-prod-real.js'
       || entry === 'scripts/seed-data.json'
       || entry === 'scripts/real-seed-assets.js'
-      || entry === 'scripts/import-real-historical-assets.js'
+      || entry === 'scripts/archive/import-real-historical-assets.js'
     ) {
       rmSync(ARCHIVE_TMP, { force: true });
       fail('arsip memuat seed/data bisnis sensitif: `' + entry + '`. Data real tidak boleh dibawa ke paket kode.');

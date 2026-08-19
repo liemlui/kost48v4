@@ -49,7 +49,7 @@
 
 ### Data detail tenant (opsional tapi berguna — via CSV `tenant-data-template.tsv`)
 
-Kolom yang bisa diimpor `import-tenant-sheet.js`: `occupation`, `companyOrCampus`, `birthDate`, `gender`, `originProvince`, `emergencyContactName`, `emergencyContactPhone`, `howDidYouHear`, `notes`.
+Kolom yang bisa diimpor `scripts/archive/import-tenant-sheet.js`: `occupation`, `companyOrCampus`, `birthDate`, `gender`, `originProvince`, `emergencyContactName`, `emergencyContactPhone`, `howDidYouHear`, `notes`.
 Gender 2 tenant masih kosong: **J (Lovandra)** dan **M (Gabriel)**.
 
 ---
