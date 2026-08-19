@@ -10,11 +10,6 @@ import SegmentedTabs from '../../components/common/SegmentedTabs';
 import { AssistantInsightLine, EntityBadgeFilterBar } from '../../components/workspace';
 import AutoOpsControlPanel from '../../components/auto-ops/AutoOpsControlPanel';
 import SmartChartPanel, { type SmartChartPoint } from '../../components/charts/SmartChartPanel';
-import GaugeChart from '../../components/charts/GaugeChart';
-import ActivityRing from '../../components/charts/ActivityRing';
-import ComplicationGrid, { type ComplicationItem } from '../../components/common/ComplicationGrid';
-import SnippetCard from '../../components/common/SnippetCard';
-import RatingDisplay from '../../components/common/RatingDisplay';
 import DateRangeFilter, { type DateRangeValue, computeRange } from '../../components/common/DateRangeFilter';
 import { generateBrief, getOwnerAiStatus, type BriefResult } from '../../api/ai';
 import AiAssistButton from '../../components/ai/AiAssistButton';
@@ -22,7 +17,6 @@ import AiResultPanel from '../../components/ai/AiResultPanel';
 import { fetchAdminDashboardAggregate } from '../../api/adminDashboard';
 import { fetchAutoOpsStatus } from '../../api/autoOps';
 import { fetchAdminStaffPerformance } from '../../api/staffPerformance';
-import { getSurveySummary } from '../../api/surveys';
 import { getIotOverview, iotQueryKeys } from '../../api/iot';
 import { useOperationalStressIndex } from '../../hooks/useOperationalStressIndex';
 import { useClientPagination } from '../../hooks/useClientPagination';
@@ -164,7 +158,7 @@ function AdminOverviewCharts({ activeArea, rooms, invoices, tickets, pendingPaym
   const stayPoints: SmartChartPoint[] = [
     { label: 'Review booking', value: pendingApprovalCount, detail: 'Menunggu keputusan admin', to: '/stays?status=BOOKINGS' },
     { label: 'Menunggu bayar', value: waitingInitialPaymentCount, detail: 'Tenant punya deadline bayar', to: '/stays?status=BOOKINGS' },
-    { label: 'Cek meter perpanjangan', value: pendingRenewCount, detail: 'Butuh cek meter', to: '/renew-requests?status=PENDING' },
+    { label: 'Cek meter perpanjangan', value: pendingRenewCount, detail: 'Butuh cek meter', to: '/renew-requests?status=DP_SECURED' },
     { label: 'Keluar', value: checkoutCount, detail: 'Review dan finalkan keluar', to: CHECKOUT_STAYS_ROUTE },
   ];
   if (activeArea === 'overview' || dense) return null;
@@ -235,7 +229,6 @@ export default function AdminDashboard() {
   const staffPerformanceQuery = useQuery({ queryKey: ['dashboard-admin', 'staff-performance'], queryFn: () => fetchAdminStaffPerformance(), enabled: activeArea === 'ops', ...ACTION_QUERY_OPTIONS });
   const autoOpsQuery = useQuery({ queryKey: ['dashboard-admin', 'auto-ops-status'], queryFn: fetchAutoOpsStatus, enabled: isOverview || (activeArea === 'ops' && opsSubTab === 'tickets'), ...ACTION_QUERY_OPTIONS });
   const aiStatusQuery = useQuery({ queryKey: ['owner-ai-status'], queryFn: getOwnerAiStatus, staleTime: 300_000, retry: 1, enabled: !dense });
-  const surveySummaryQuery = useQuery({ queryKey: ['survey-summary'], queryFn: getSurveySummary, staleTime: 300_000, retry: 1, enabled: activeArea === 'overview' && !dense });
   const ktpReviewQuery = useQuery({ queryKey: ['tenants', 'ktp-review'], queryFn: getTenantKtpReviewQueue, staleTime: 60_000, retry: 1 });
   const canUseAdminBriefAi = user?.role === 'OWNER' && aiStatusQuery.data?.configured === true;
 
@@ -288,11 +281,31 @@ export default function AdminDashboard() {
   const expiredRenewCount = countExpiredDates(renewReviewDeadlines);
   const expiredCheckoutCount = countExpiredDates([...checkoutReviewDeadlines, ...checkoutFinalDeadlines]);
 
+  // M17 Iterasi 4: antrean renew punya beberapa tahap. Yang butuh "Catat Meter"
+  // adalah DP_SECURED; AWAITING_DP butuh konfirmasi DP, PENDING_DECISION masih
+  // menunggu tenant. Kartu tugas & CTA mengikuti tahap yang paling mendesak.
+  const renewMeterCount = renewRequests.filter((request) => request.status === 'DP_SECURED').length;
+  const renewAwaitingDpCount = renewRequests.filter((request) => request.status === 'AWAITING_DP').length;
+  const renewDecisionCount = renewRequests.filter((request) => ['PENDING', 'PENDING_DECISION'].includes(request.status)).length;
+  const renewLane: AdminWorkLane = (() => {
+    const tone = expiredRenewCount ? 'danger' : pendingRenewCount ? 'warning' : 'success';
+    if (renewMeterCount > 0) {
+      return { id: 'renew-checkpoint', step: '3', title: 'Catat meter perpanjangan', value: pendingRenewCount, helper: `${renewMeterCount} perpanjangan siap dicatat meter & diterbitkan tagihan pelunasan.`, sla: `${ADMIN_SLA_HOURS.renewReview} jam`, nextDeadline: earliestDeadlineLabel(renewReviewDeadlines), action: 'Catat Meter', to: '/renew-requests?status=DP_SECURED', tone };
+    }
+    if (renewAwaitingDpCount > 0) {
+      return { id: 'renew-checkpoint', step: '3', title: 'Konfirmasi DP perpanjangan', value: pendingRenewCount, helper: `${renewAwaitingDpCount} DP perpanjangan menunggu konfirmasi agar kamar aman.`, sla: `${ADMIN_SLA_HOURS.renewReview} jam`, nextDeadline: earliestDeadlineLabel(renewReviewDeadlines), action: 'Konfirmasi DP', to: '/renew-requests?status=AWAITING_DP', tone };
+    }
+    if (renewDecisionCount > 0) {
+      return { id: 'renew-checkpoint', step: '3', title: 'Perpanjangan menunggu tenant', value: pendingRenewCount, helper: 'Tenant belum memutuskan perpanjangan. Tidak ada aksi admin sampai tenant menjawab.', sla: `${ADMIN_SLA_HOURS.renewReview} jam`, nextDeadline: earliestDeadlineLabel(renewReviewDeadlines), action: 'Lihat', to: '/renew-requests?status=PENDING_DECISION', tone };
+    }
+    return { id: 'renew-checkpoint', step: '3', title: 'Catat meter perpanjangan', value: 0, helper: 'Tidak ada perpanjangan menunggu pencatatan meter.', sla: `${ADMIN_SLA_HOURS.renewReview} jam`, nextDeadline: undefined, action: 'Catat Meter', to: '/renew-requests?status=DP_SECURED', tone: 'success' };
+  })();
+
   const adminWorkLanes: AdminWorkLane[] = [
     { id: 'ktp-review', step: '0', title: 'Verifikasi KTP', value: ktpReviewItems.length, helper: ktpReviewItems.length ? 'Periksa foto, cocokkan data, lihat rekomendasi AI, lalu putuskan.' : 'Tidak ada KTP yang menunggu pemeriksaan.', sla: 'secepatnya', nextDeadline: undefined, action: 'Periksa', to: '/tenants?ktpStatus=PENDING_REVIEW', tone: ktpReviewItems.length ? 'warning' : 'success' },
     { id: 'booking-review', step: '1', title: 'Review booking', value: pendingApprovalCount, helper: pendingApprovalCount ? 'Putuskan booking sebelum kamar tertahan terlalu lama.' : 'Tidak ada booking baru yang menunggu admin.', sla: `${ADMIN_SLA_HOURS.bookingReview} jam`, nextDeadline: earliestDeadlineLabel(bookingReviewDeadlines), action: 'Review', to: '/stays?status=BOOKINGS', tone: expiredBookingReviewCount ? 'danger' : pendingApprovalCount ? 'warning' : 'success' },
     { id: 'payment-review', step: '2', title: 'Verifikasi bayar', value: pendingPaymentReviewCount, helper: pendingPaymentReviewCount ? 'Bukti pending tidak boleh auto-cancel; admin harus putuskan.' : 'Tidak ada bukti bayar pending review.', sla: `${ADMIN_SLA_HOURS.paymentReviewUrgent}/${ADMIN_SLA_HOURS.paymentReviewMax} jam`, nextDeadline: earliestDeadlineLabel(paymentMaxDeadlines), action: 'Verifikasi', to: '/payment-submissions/review', tone: expiredPaymentReviewCount ? 'danger' : pendingPaymentReviewCount ? 'warning' : 'success' },
-    { id: 'renew-checkpoint', step: '3', title: 'Catat meter perpanjangan', value: pendingRenewCount, helper: pendingRenewCount ? 'Catat meter listrik/air sebelum approve dan terbitkan tagihan perpanjangan.' : 'Tidak ada perpanjangan menunggu pencatatan meter.', sla: `${ADMIN_SLA_HOURS.renewReview} jam`, nextDeadline: earliestDeadlineLabel(renewReviewDeadlines), action: 'Catat Meter', to: '/renew-requests?status=PENDING', tone: expiredRenewCount ? 'danger' : pendingRenewCount ? 'warning' : 'success' },
+    renewLane,
     { id: 'checkout-flow', step: '4', title: 'Review checkout', value: checkoutWorkCount, helper: checkoutWorkCount ? 'Review pengajuan keluar dan finalkan hanya jika tagihan beres.' : 'Tidak ada pengajuan keluar yang menunggu admin.', sla: `${ADMIN_SLA_HOURS.checkoutReview}/${ADMIN_SLA_HOURS.checkoutFinal} jam`, nextDeadline: earliestDeadlineLabel([...checkoutReviewDeadlines, ...checkoutFinalDeadlines]), action: 'Review', to: CHECKOUT_STAYS_ROUTE, tone: expiredCheckoutCount ? 'danger' : checkoutWorkCount ? 'warning' : 'success' },
     { id: 'finance-ticket-blockers', step: '5', title: 'Blocker operasional', value: overdueInvoiceCount + ticketWaitingAdminCount + unassignedTicketCount + lowStockCount + facilityGapCount, helper: 'Tagihan overdue, tiket menunggu admin, stok menipis, dan kamar gap fasilitas masuk blocker harian.', sla: 'harian', nextDeadline: earliestDeadlineLabel(overdueInvoices.map((invoice) => invoice.dueDate)), action: overdueInvoiceCount ? 'Lihat Tagihan' : ticketWaitingAdminCount ? 'Cek Tiket' : unassignedTicketCount ? 'Assign Tiket' : lowStockCount ? 'Cek Stok' : 'Cek Kamar', to: overdueInvoiceCount ? '/invoices?status=OVERDUE' : ticketWaitingAdminCount ? '/tickets?status=DONE' : unassignedTicketCount ? '/tickets' : lowStockCount ? '/inventory/gudang?status=LOW_STOCK' : '/rooms?status=MAINTENANCE', tone: overdueInvoiceCount ? 'danger' : ticketWaitingAdminCount || unassignedTicketCount || lowStockCount || facilityGapCount ? 'warning' : 'success' },
   ];
@@ -301,7 +314,7 @@ export default function AdminDashboard() {
     ...ktpReviewItems.slice(0, 5).map((tenant) => ({ id: `ktp-review-${tenant.id}`, ruleId: 'ktp-review', entityType: 'tenant', entityId: tenant.id, priority: 'MEDIUM' as const, type: 'Verifikasi KTP', subject: tenant.fullName, issue: 'Foto sudah diunggah. Periksa hasil OCR dan rekomendasi AI sebelum approve.', recommendedAction: 'Review KTP', actionTo: '/tenants?ktpStatus=PENDING_REVIEW' })),
     ...pendingApprovalBookings.slice(0, 4).map((stay) => { const createdAt = getStayCreatedAt(stay); const deadline = getStayDeadline(stay, ADMIN_SLA_HOURS.bookingReview); const meta = getDeadlineMeta(deadline, 'Batas review booking'); return { id: `booking-approval-${stay.id}`, ruleId: 'booking-review-sla', entityType: 'stay', entityId: stay.id, priority: meta.isExpired ? 'HIGH' as const : 'MEDIUM' as const, type: '1. Review booking', subject: stay.tenant?.fullName || stay.room?.code || `Booking #${stay.id}`, issue: meta.isExpired ? 'Melewati batas review. AutoOps dapat reset pemesanan.' : 'Putuskan booking sebelum deadline.', receivedAtLabel: createdAt ? makeClock(createdAt) : undefined, ...makeQueueTime(deadline), recommendedAction: 'Review Booking', actionTo: '/stays?status=BOOKINGS' }; }),
     ...paymentReviewItems.slice(0, 4).map((submission: PaymentSubmission) => { const receivedAt = submission.createdAt ?? submission.paidAt; const urgentAt = addHoursToDate(receivedAt, ADMIN_SLA_HOURS.paymentReviewUrgent); const escalateAt = addHoursToDate(receivedAt, ADMIN_SLA_HOURS.paymentReviewEscalate); const maxAt = addHoursToDate(receivedAt, ADMIN_SLA_HOURS.paymentReviewMax); const maxMeta = getDeadlineMeta(maxAt, 'Batas maksimal review bukti'); const urgentMeta = getDeadlineMeta(urgentAt, 'Urgent sejak'); return { id: `payment-review-${submission.id}`, ruleId: 'payment-review-sla', entityType: 'payment-submission', entityId: submission.id, priority: urgentMeta.isExpired ? 'HIGH' as const : 'MEDIUM' as const, type: '2. Review pembayaran', subject: submission.invoice?.invoiceNumber || submission.tenant?.fullName || `Bukti #${submission.id}`, issue: `Urgent sejak ${urgentAt ? makeClock(urgentAt) : '-'}; escalate ${escalateAt ? makeClock(escalateAt) : '-'}.`, receivedAtLabel: receivedAt ? makeClock(receivedAt) : undefined, deadlineLabel: maxMeta.hasDate ? maxMeta.absoluteLabel : undefined, timeStatusLabel: urgentMeta.hasDate ? urgentMeta.relativeLabel : undefined, timeStatusTone: urgentMeta.isExpired ? 'warning' as const : 'info' as const, recommendedAction: 'Verifikasi', actionTo: '/payment-submissions/review' }; }),
-    ...renewRequests.slice(0, 3).map((request: RenewRequest) => { const deadline = addHoursToDate(request.createdAt, ADMIN_SLA_HOURS.renewReview); const meta = getDeadlineMeta(deadline, 'Batas review perpanjangan'); return { id: `renew-${request.id}`, ruleId: 'renew-meter-sla', entityType: 'renew', entityId: request.id, priority: meta.isExpired ? 'HIGH' as const : 'MEDIUM' as const, type: '3. Renew meter', subject: request.tenant?.fullName || request.stay?.room?.code || `Renew #${request.id}`, issue: 'Catat meter listrik/air sebelum setujui.', receivedAtLabel: request.createdAt ? makeClock(request.createdAt) : undefined, ...makeQueueTime(deadline), recommendedAction: 'Review Renew', actionTo: '/renew-requests?status=PENDING' }; }),
+    ...renewRequests.slice(0, 3).map((request: RenewRequest) => { const deadline = addHoursToDate(request.createdAt, ADMIN_SLA_HOURS.renewReview); const meta = getDeadlineMeta(deadline, 'Batas review perpanjangan'); const renewRoute = request.status === 'DP_SECURED' ? '/renew-requests?status=DP_SECURED' : request.status === 'AWAITING_DP' ? '/renew-requests?status=AWAITING_DP' : request.status === 'PENDING_DECISION' ? '/renew-requests?status=PENDING_DECISION' : '/renew-requests?status=PENDING'; const renewType = request.status === 'DP_SECURED' ? '3. Renew meter' : request.status === 'AWAITING_DP' ? '3. Konfirmasi DP renewal' : '3. Keputusan renewal'; const renewIssue = request.status === 'DP_SECURED' ? 'Catat meter listrik/air dan terbitkan tagihan pelunasan.' : request.status === 'AWAITING_DP' ? 'DP sudah dibayar tenant; konfirmasi agar kamar aman.' : 'Tenant belum memutuskan perpanjangan.'; return { id: `renew-${request.id}`, ruleId: 'renew-meter-sla', entityType: 'renew', entityId: request.id, priority: meta.isExpired ? 'HIGH' as const : 'MEDIUM' as const, type: renewType, subject: request.tenant?.fullName || request.stay?.room?.code || `Renew #${request.id}`, issue: renewIssue, receivedAtLabel: request.createdAt ? makeClock(request.createdAt) : undefined, ...makeQueueTime(deadline), recommendedAction: request.status === 'DP_SECURED' ? 'Catat Meter' : request.status === 'AWAITING_DP' ? 'Konfirmasi DP' : 'Lihat Renew', actionTo: renewRoute }; }),
     ...checkoutPendingRequests.slice(0, 3).map((request: CheckoutRequest) => { const deadline = addHoursToDate(request.createdAt, ADMIN_SLA_HOURS.checkoutReview); const meta = getDeadlineMeta(deadline, 'Batas review keluar'); return { id: `checkout-request-${request.id}`, ruleId: 'checkout-review-sla', entityType: 'checkout', entityId: request.id, priority: meta.isExpired ? 'HIGH' as const : 'MEDIUM' as const, type: '4. Review checkout', subject: request.stay?.tenant?.fullName || request.stay?.room?.code || `Checkout #${request.id}`, issue: 'Review pengajuan keluar. Final keluar tetap aksi terpisah setelah tagihan clear.', receivedAtLabel: request.createdAt ? makeClock(request.createdAt) : undefined, ...makeQueueTime(deadline), recommendedAction: 'Cek Checkout', actionTo: CHECKOUT_STAYS_ROUTE }; }),
     ...checkoutApprovedRequests.slice(0, 3).map((request: CheckoutRequest) => { const receivedAt = request.reviewedAt ?? request.updatedAt ?? request.createdAt; const deadline = addHoursToDate(receivedAt, ADMIN_SLA_HOURS.checkoutFinal); const meta = getDeadlineMeta(deadline, 'Batas final keluar'); return { id: `checkout-final-${request.id}`, ruleId: 'checkout-final-sla', entityType: 'checkout', entityId: request.id, priority: meta.isExpired ? 'HIGH' as const : 'MEDIUM' as const, type: '4. Final keluar', subject: request.stay?.tenant?.fullName || request.stay?.room?.code || `Checkout #${request.id}`, issue: 'Request sudah approved. Finalkan checkout jika semua tagihan lunas dan deposit jelas.', receivedAtLabel: receivedAt ? makeClock(receivedAt) : undefined, ...makeQueueTime(deadline), recommendedAction: 'Finalkan', actionTo: CHECKOUT_STAYS_ROUTE }; }),
     ...overdueInvoices.slice(0, 3).map((invoice) => { const meta = getDeadlineMeta(invoice.dueDate, 'Jatuh tempo tagihan'); return { id: `invoice-${invoice.id}`, ruleId: 'invoice-overdue', entityType: 'invoice', entityId: invoice.id, priority: 'HIGH' as const, type: 'Blocker tagihan', subject: invoice.stay?.tenant?.fullName || invoice.invoiceNumber || `Invoice #${invoice.id}`, issue: `Tagihan open memblokir renew/checkout. ${meta.actionLabel}`, receivedAtLabel: invoice.issuedAt ? makeClock(invoice.issuedAt) : undefined, deadlineLabel: meta.hasDate ? meta.absoluteLabel : undefined, timeStatusLabel: meta.hasDate ? meta.relativeLabel : undefined, timeStatusTone: 'danger' as const, recommendedAction: 'Lihat Tagihan', actionTo: `/invoices/${invoice.id}` }; }),
@@ -429,102 +442,6 @@ export default function AdminDashboard() {
           maxItems={5}
           collapsible={false}
         />
-      ) : null}
-      {/* Visual Dashboard: Gauge, ActivityRing, SnippetCard, ComplicationGrid, RatingDisplay */}
-      {activeArea === 'overview' && !dense ? (
-        <section className="owner-panel mt-3 mb-3">
-          <div className="owner-panel-heading p-3">
-            <div>
-              <span className="owner-section-kicker">Visual Dashboard</span>
-              <h2 className="mb-0">Metrik Cepat</h2>
-            </div>
-          </div>
-          <div className="owner-panel-body p-3">
-            <Row className="g-3">
-              <Col xs={12} md={6} lg={3}>
-                <div className="d-flex flex-column align-items-center">
-                  <GaugeChart
-                    value={rooms.filter((room) => room.status === 'OCCUPIED').length}
-                    max={rooms.length || 1}
-                    label="Okupansi"
-                    unit="%"
-                    size={140}
-                    helperText={`${rooms.filter((room) => room.status === 'OCCUPIED').length} dari ${rooms.length} kamar terisi`}
-                  />
-                </div>
-              </Col>
-              <Col xs={12} md={6} lg={3}>
-                <div className="d-flex flex-column align-items-center">
-                  <ActivityRing
-                    segments={[
-                      { label: 'Terisi', value: rooms.length > 0 ? rooms.filter((r) => r.status === 'OCCUPIED').length / rooms.length : 0, color: '#16a34a' },
-                      { label: 'Booking', value: rooms.length > 0 ? rooms.filter((r) => r.status === 'RESERVED').length / rooms.length : 0, color: '#3b82f6' },
-                      { label: 'Kosong', value: rooms.length > 0 ? rooms.filter((r) => r.status === 'AVAILABLE').length / rooms.length : 0, color: '#94a3b8' },
-                    ]}
-                    size={120}
-                    centerValue={`${rooms.length > 0 ? Math.round((rooms.filter((r) => r.status === 'OCCUPIED').length / rooms.length) * 100) : 0}%`}
-                    centerLabel="Okupansi"
-                  />
-                </div>
-              </Col>
-              <Col xs={12} md={6} lg={3}>
-                <SnippetCard
-                  icon={<span>🧾</span>}
-                  title="Tagihan Open"
-                  value={openInvoiceCount}
-                  unit="tagihan"
-                  accentColor={overdueInvoiceCount > 0 ? '#dc2626' : '#3b82f6'}
-                  badge={overdueInvoiceCount > 0 ? `${overdueInvoiceCount} overdue` : undefined}
-                  badgeColor={overdueInvoiceCount > 0 ? '#dc2626' : undefined}
-                  to="/invoices"
-                  trend={overdueInvoiceCount > 0 ? 'up' : 'flat'}
-                  trendLabel={overdueInvoiceCount > 0 ? 'perlu perhatian' : 'aman'}
-                />
-              </Col>
-              <Col xs={12} md={6} lg={3}>
-                <SnippetCard
-                  icon={<span>🎫</span>}
-                  title="Tiket Aktif"
-                  value={activeTicketCount}
-                  unit="tiket"
-                  accentColor={unassignedTicketCount > 0 ? '#f59e0b' : '#3b82f6'}
-                  badge={unassignedTicketCount > 0 ? `${unassignedTicketCount} unassigned` : undefined}
-                  badgeColor={unassignedTicketCount > 0 ? '#f59e0b' : undefined}
-                  to="/tickets"
-                  trend={activeTicketCount > 0 ? 'up' : 'flat'}
-                  trendLabel={activeTicketCount > 0 ? 'sedang berjalan' : 'tidak ada'}
-                />
-              </Col>
-            </Row>
-            <Row className="g-3 mt-2">
-              <Col xs={12}>
-                <ComplicationGrid
-                  columns={4}
-                  items={[
-                    { id: 'occupancy', icon: <span>🏠</span>, label: 'Okupansi', value: rooms.length > 0 ? Math.round((rooms.filter((r) => r.status === 'OCCUPIED').length / rooms.length) * 100) : 0, unit: '%', color: '#16a34a', to: '/rooms', badge: `${rooms.filter((r) => r.status === 'OCCUPIED').length}/${rooms.length}` },
-                    { id: 'pending-approval', icon: <span>📋</span>, label: 'Review Booking', value: pendingApprovalCount, color: pendingApprovalCount > 0 ? '#f59e0b' : '#16a34a', to: '/stays?status=BOOKINGS', badge: pendingApprovalCount || undefined },
-                    { id: 'payment-review', icon: <span>💳</span>, label: 'Review Bayar', value: pendingPaymentReviewCount, color: pendingPaymentReviewCount > 0 ? '#f59e0b' : '#16a34a', to: '/payment-submissions/review', badge: pendingPaymentReviewCount || undefined },
-                    { id: 'renew', icon: <span>🔄</span>, label: 'Perpanjangan', value: pendingRenewCount, color: pendingRenewCount > 0 ? '#3b82f6' : '#16a34a', to: '/renew-requests?status=PENDING', badge: pendingRenewCount || undefined },
-                    { id: 'checkout', icon: <span>🚪</span>, label: 'Checkout', value: checkoutWorkCount, color: checkoutWorkCount > 0 ? '#f59e0b' : '#16a34a', to: '/stays?status=CHECKOUT', badge: checkoutWorkCount || undefined },
-                    { id: 'overdue', icon: <span>⚠️</span>, label: 'Overdue', value: overdueInvoiceCount, color: overdueInvoiceCount > 0 ? '#dc2626' : '#16a34a', to: '/invoices', badge: overdueInvoiceCount || undefined },
-                    { id: 'tickets', icon: <span>🎫</span>, label: 'Tiket Aktif', value: activeTicketCount, color: activeTicketCount > 0 ? '#f59e0b' : '#16a34a', to: '/tickets', badge: activeTicketCount || undefined },
-                    { id: 'low-stock', icon: <span>📦</span>, label: 'Stok Menipis', value: lowStockCount, color: lowStockCount > 0 ? '#f59e0b' : '#16a34a', to: '/inventory/gudang', badge: lowStockCount || undefined },
-                  ]}
-                />
-              </Col>
-            </Row>
-            {surveySummaryQuery.data && surveySummaryQuery.data.count > 0 ? (
-              <div className="d-flex align-items-center gap-2 mt-3 p-2 rounded-3" style={{ background: '#f8fafc' }}>
-                <span className="fw-semibold small">⭐ Survei Penghuni</span>
-                <RatingDisplay value={Number(surveySummaryQuery.data.avgOverall ?? 0)} maxRating={5} size={16} showValue label={`dari ${surveySummaryQuery.data.count} respons`} />
-                {surveySummaryQuery.data.recommendRate !== null ? (
-                  <span className="small text-muted">| 👍 {surveySummaryQuery.data.recommendRate}% rekomendasi</span>
-                ) : null}
-                <Link to="/surveys" className="small ms-auto" style={{ whiteSpace: 'nowrap' }}>Lihat semua →</Link>
-              </div>
-            ) : null}
-          </div>
-        </section>
       ) : null}
       {activeArea === 'overview' ? (
         <section className="owner-panel mt-3 mb-3">

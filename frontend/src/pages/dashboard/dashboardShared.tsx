@@ -159,10 +159,15 @@ export function isOpenInvoice(invoice: Invoice) {
   return !['PAID', 'CANCELLED'].includes(invoice.status);
 }
 
+// M17 Iterasi 4: booking yang belum dibayar tidak mengubah status kamar — kamar
+// tetap AVAILABLE/MAINTENANCE sampai DP/LUNAS di-approve (baru RESERVED). Predikat
+// lama menuntut room RESERVED sehingga booking baru tidak pernah muncul di antrean admin.
+const BOOKING_ROOM_STATUSES = ['AVAILABLE', 'MAINTENANCE'];
+
 export function isReservedBookingPendingApproval(stay: Stay): boolean {
   return (
     stay.status === 'ACTIVE' &&
-    stay.room?.status === 'RESERVED' &&
+    Boolean(stay.room?.status && BOOKING_ROOM_STATUSES.includes(stay.room.status)) &&
     stay.bookingSource === 'WEBSITE' &&
     !stay.latestInvoiceId &&
     Number(stay.invoiceCount ?? 0) === 0
@@ -172,7 +177,7 @@ export function isReservedBookingPendingApproval(stay: Stay): boolean {
 export function isReservedBookingWaitingPayment(stay: Stay): boolean {
   return (
     stay.status === 'ACTIVE' &&
-    stay.room?.status === 'RESERVED' &&
+    Boolean(stay.room?.status && BOOKING_ROOM_STATUSES.includes(stay.room.status)) &&
     stay.bookingSource === 'WEBSITE' &&
     (Boolean(stay.latestInvoiceId) || Number(stay.invoiceCount ?? 0) > 0)
   );

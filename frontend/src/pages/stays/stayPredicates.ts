@@ -12,7 +12,14 @@ export function daysFromToday(targetDate: string | Date | null | undefined): num
 }
 
 export function isReservedBooking(stay: Stay): boolean {
-  return stay.status === 'ACTIVE' && stay.room?.status === 'RESERVED' && Boolean(stay.expiresAt);
+  // M17 Iterasi 4: "booking" = stay aktif yang belum jadi hunian (room belum OCCUPIED)
+  // dan berasal dari booking online. Room tetap AVAILABLE/MAINTENANCE sebelum DP/LUNAS
+  // di-approve; setelah approve payment baru RESERVED. expiresAt boleh null (sudah bayar).
+  return (
+    stay.status === 'ACTIVE' &&
+    stay.bookingSource === 'WEBSITE' &&
+    Boolean(stay.room?.status && ['AVAILABLE', 'RESERVED', 'MAINTENANCE'].includes(stay.room.status))
+  );
 }
 
 export function isExpiredReservedBooking(stay: Stay): boolean {

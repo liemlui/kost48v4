@@ -1016,7 +1016,7 @@ export default function StaysPage() {
               <tbody>
                 {visibleItems.map((item) => {
                   const reminderBadge = getCheckoutReminderBadge(item);
-                  const isReservedBookingRow = item.room?.status === 'RESERVED';
+                  const isReservedBookingRow = isReservedBooking(item);
                   const expiryMeta = getBookingExpiryMeta(item.expiresAt);
                   const approvalMeta = getBookingApprovalMeta(item);
                   const onOpen = () => navigate(`/stays/${item.id}`);

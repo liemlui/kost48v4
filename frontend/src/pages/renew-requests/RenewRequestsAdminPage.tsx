@@ -63,10 +63,10 @@ function getCurrentRent(rr?: RenewRequest | null) {
 
 const STATUS_OPTIONS = [
   { value: '', label: 'Semua Status' },
-  { value: 'PENDING', label: 'Perlu Meter' },
+  { value: 'PENDING', label: 'Perlu Meter (PENDING)' },
   { value: 'PENDING_DECISION', label: 'Keputusan Tenant' },
   { value: 'AWAITING_DP', label: 'Menunggu DP' },
-  { value: 'DP_SECURED', label: 'DP Aman / Pelunasan' },
+  { value: 'DP_SECURED', label: 'Perlu Meter / Pelunasan' },
   { value: 'COMPLETED', label: 'Selesai' },
   { value: 'REJECTED', label: 'Ditolak' },
   { value: 'REJECTED_BY_TENANT', label: 'Ditolak Tenant' },

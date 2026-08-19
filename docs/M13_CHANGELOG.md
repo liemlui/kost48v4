@@ -1,5 +1,15 @@
 # KOST48 V5 — M13 Changelog
 
+## 2026-08-20 — M17 Portal Flow Ringkas: Iterasi 4 (E2E + cleanup widget lama)
+
+- **Booking E2E:** flow publik booking → approve → bayar DP → approve → pelunasan → check-in → perpanjangan (DP, meter, settlement, final) → checkout (request → approve → final) diuji live di UAT. Predikat booking di `dashboardShared.tsx` & `stayPredicates.ts` dikoreksi: booking online tetap tampil saat kamar `AVAILABLE`/`MAINTENANCE` (sebelumnya menuntut `RESERVED`, sehingga booking baru tak muncul di antrean).
+- **Perpanjangan:** CTA kartu tugas kini dinamis mengikuti state renew — `DP_SECURED` → Catat Meter (`/renew-requests?status=DP_SECURED`), `AWAITING_DP` → Konfirmasi DP, `PENDING_DECISION` → Lihat. Label filter `DP_SECURED` di halaman renew disesuaikan jadi "Perlu Meter / Pelunasan".
+- **Backend:** `createRenewUtilityCheckpointLineTx` tidak lagi membuat `InvoiceLine` qty=0 saat pemakaian tertutup jatah gratis (melanggar `invoice_line_non_negative_chk`); meter tetap dicatat, line dilewati.
+- **Cleanup:** section "Visual Dashboard" di `DashboardAdmin` dihapus; komponen lama `GaugeChart`, `ActivityRing`, `SnippetCard`, `ComplicationGrid`, `RatingDisplay` dihapus dari repo.
+- **Verifikasi:** FE `vitest run` 135/135 ✅ · BE `test:unit` 74/74 ✅ · build FE ✅ (PWA passed) · build BE ✅ · Playwright: dashboard menampilkan lane "Review booking" dan CTA membuka `/stays?status=BOOKINGS` dengan row "Setujui".
+
+**Perubahan:** `frontend/src/pages/dashboard/DashboardAdmin.tsx`, `frontend/src/pages/dashboard/dashboardShared.tsx`, `frontend/src/pages/stays/stayPredicates.ts`, `frontend/src/pages/stays/StaysPage.tsx`, `frontend/src/pages/renew-requests/RenewRequestsAdminPage.tsx`, `backend/src/modules/stays/stays-service.helpers.ts`, `docs/M17_PORTAL_FLOW_RINGKAS.md`.
+
 ## 2026-08-18 — Settings: kredensial Tuya & VAPID pindah ke Owner Settings (env minimal)
 
 - **OperationalSetting** + migration `20260818000000_settings_tuya_vapid`: kolom `tuyaAccessKey/SecretKey/ApiBase` + `vapidPublicKey/PrivateKey/Subject` (owner-settable; secret tak pernah dikirim ke client).

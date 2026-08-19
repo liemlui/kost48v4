@@ -191,6 +191,23 @@ export async function createRenewUtilityCheckpointLineTx(
     },
   });
 
+  // DB constraint invoice_line_non_negative_chk mensyaratkan qty > 0. Pemakaian
+  // yang sepenuhnya tertutup jatah gratis tidak boleh membuat InvoiceLine qty=0;
+  // cukup catat meter dan kembalikan ringkasan nol tanpa line.
+  if (lineAmount <= 0) {
+    return {
+      reading,
+      line: null,
+      previousReadingValue: previousReading.readingValue,
+      readingValue: params.newReadingValue,
+      usageDelta,
+      freeAllowance,
+      chargeableQty: billingQty,
+      tariffRupiah: tariff,
+      amountRupiah: 0,
+    };
+  }
+
   const line = await tx.invoiceLine.create({
     data: {
       invoiceId: params.invoiceId,
