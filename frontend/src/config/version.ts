@@ -5,6 +5,6 @@
 //   PATCH: perbaikan bug / tweak tampilan minor (+0.0.1)
 // Catatan: versi ini HANYA dinaikkan manual oleh AI saat owner minta bump versi.
 // Dokumentasi lengkap: lihat CLAUDE.md bagian "Konvensi Versi".
-export const APP_VERSION = '1.2.0';
-export const APP_PHASE = 'UI/UX Modern';
-export const APP_BUILD_DATE = '2026-07-18';
+export const APP_VERSION = '1.3.0';
+export const APP_PHASE = 'Portal Ringkas';
+export const APP_BUILD_DATE = '2026-08-20';
