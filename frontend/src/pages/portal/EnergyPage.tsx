@@ -1,10 +1,11 @@
 import { useMemo, useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { Button, Card, Spinner } from 'react-bootstrap';
-import { AlertTriangle, ArrowLeft, CalendarDays, Droplets, Radio, ShieldCheck, Zap } from 'lucide-react';
+import { AlertTriangle, ArrowLeft, CalendarDays, Droplets, Radio, RefreshCw, ShieldCheck, Zap } from 'lucide-react';
 import FeatureErrorBoundary from '../../components/common/FeatureErrorBoundary';
 import { useDocumentTitle } from '../../hooks/useDocumentTitle';
+import { useToast } from '../../components/common/ToastProvider';
 import LineAreaChart from '../../components/charts/LineAreaChart';
 import ChartRangeSelector, { type ChartGranularity } from '../../components/charts/ChartRangeSelector';
 import UsageGauge from '../../components/charts/UsageGauge';
@@ -17,6 +18,7 @@ import {
   getMyRoomElectricityTimeline,
   getMyRoomUtilityTelemetry,
   iotQueryKeys,
+  refreshMyRoomMeter,
   type TenantElectricityTimeline,
   type TenantRoomUtilityTelemetry,
   type TenantUtilityDevice,
@@ -27,6 +29,7 @@ import { getResource } from '../../api/resources';
 import { useAuth } from '../../context/AuthContext';
 import { summarizeUsageSinceCheckIn, estimateUtilityCost, numeric } from '../../utils/meterUsage';
 import { toDateKey } from '../../pages/portal/myStayShared';
+import { getApiErrorMessage } from '../../utils/getApiErrorMessage';
 import type { MeterReading, Stay } from '../../types';
 
 const statusLabel: Record<TenantUtilityDevice['status'], string> = {
@@ -120,6 +123,26 @@ export default function EnergyPage() {
   useDocumentTitle('Energi Kamar');
   const { user } = useAuth();
   const tenantId = (user as any)?.tenantId as number | undefined;
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+
+  const refreshSensorMutation = useMutation({
+    mutationFn: refreshMyRoomMeter,
+    onSuccess: async (result) => {
+      toast(
+        result.synced > 0
+          ? `${result.synced}/${result.total} meter berhasil disinkronkan.`
+          : result.message ?? 'Tidak ada meter yang perlu disinkronkan.',
+        result.synced > 0 ? 'success' : 'info',
+      );
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: iotQueryKeys.tenantUtilityRoot }),
+        queryClient.invalidateQueries({ queryKey: ['portal-meter-readings'] }),
+        queryClient.invalidateQueries({ queryKey: ['tenant-meter-history'] }),
+      ]);
+    },
+    onError: (error) => toast(getApiErrorMessage(error, 'Meter belum berhasil disinkronkan.'), 'danger'),
+  });
 
   const stayQuery = useQuery({
     queryKey: ['energy-stay', tenantId],
@@ -393,7 +416,19 @@ export default function EnergyPage() {
           <section className="energy-live-section" aria-labelledby="energy-monitoring-heading">
             <div className="energy-section-heading">
               <div><span>Pemantauan otomatis</span><h2 id="energy-monitoring-heading">Kondisi sensor terbaru</h2></div>
-              <span className="energy-monitoring-note"><Radio size={14} aria-hidden="true" />Bukan dasar langsung tagihan</span>
+              <div className="d-flex align-items-center gap-2 flex-wrap">
+                <Button
+                  size="sm"
+                  variant="outline-primary"
+                  disabled={refreshSensorMutation.isPending}
+                  onClick={() => refreshSensorMutation.mutate()}
+                  title="Sinkronkan ulang pembacaan meter dari perangkat IoT"
+                >
+                  <RefreshCw size={14} aria-hidden="true" className="me-1" />
+                  {refreshSensorMutation.isPending ? 'Menyinkronkan…' : 'Muat Ulang Sensor'}
+                </Button>
+                <span className="energy-monitoring-note"><Radio size={14} aria-hidden="true" />Bukan dasar langsung tagihan</span>
+              </div>
             </div>
             {utilityTelemetryQuery.isLoading ? <div className="energy-live-loading" role="status"><Spinner animation="border" size="sm" /> Memeriksa sensor…</div>
               : utilityTelemetryQuery.isError ? <div className="energy-inline-state is-warning"><strong>Status sensor belum tersedia</strong><span>Catatan dan tagihan resmi tidak terpengaruh.</span><Button size="sm" variant="outline-secondary" onClick={() => utilityTelemetryQuery.refetch()}>Coba lagi</Button></div>

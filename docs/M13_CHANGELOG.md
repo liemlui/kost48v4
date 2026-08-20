@@ -1,5 +1,14 @@
 # KOST48 V5 — M13 Changelog
 
+## 2026-08-20 — Portal Tenant Ringkas (lanjutan): hapus tab Listrik duplikat + refresh sensor pindah ke Energi
+
+- **MyStayPage kini satu layar tanpa tab.** Tab "Listrik & Air" yang menampilkan ulang `UtilityInsightCard` (sudah ada di halaman `/portal/energy`) dihapus; dashboard tenant menyisakan ringkasan listrik singkat dengan tombol "Buka detail energi".
+- **Fitur refresh sensor dipertahankan** — tombol "Muat Ulang Sensor" ditambahkan di halaman Energi (sebelumnya ada di UtilityInsightCard), memanggil `refreshMyRoomMeter` + invalidasi query yang sama.
+- **Komponen tidak terpakai dihapus:** `StayTabs.tsx`, `UtilityInsightCard.tsx`, dan test `stayTabs.test.tsx`.
+- **Verifikasi:** FE `tsc` ✅ · `vitest run` 133/133 ✅ (135 − 2 test StayTabs yang dihapus) · `npm run build` ✅ (PWA passed, chunks 164→161).
+
+**Perubahan:** `frontend/src/components/portal/stay/ActiveStayContent.tsx`, `frontend/src/pages/portal/MyStayPage.tsx`, `frontend/src/pages/portal/EnergyPage.tsx`, `frontend/src/components/portal/stay/StayTabs.tsx` (dihapus), `frontend/src/components/portal/stay/UtilityInsightCard.tsx` (dihapus), `frontend/src/test/components/stayTabs.test.tsx` (dihapus).
+
 ## 2026-08-20 — Portal Tenant Ringkas: nav Utama/Lainnya + hapus redundansi dashboard
 
 - **Navigasi tenant** kini dikelompokkan: **Utama** = Panduan Kos Saya · Bayar Tagihan · Lapor Masalah; **Lainnya** = Energi · Pengumuman · Panduan · WiFi · Poin & Reward (bila aktif). Mobile bottom nav tetap 3 tab utama + popup "Lainnya".

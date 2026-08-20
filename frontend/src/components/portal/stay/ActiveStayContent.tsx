@@ -18,10 +18,8 @@ import MeterCycleModal from '../../stays/MeterCycleModal';
 import StayHistoryTimeline, { type StayJourneyStep } from '../../stays/StayHistoryTimeline';
 import SatisfactionSurveyCard from '../../tenant/SatisfactionSurveyCard';
 import LeaseProgressHero from './LeaseProgressHero';
-import UtilityInsightCard from './UtilityInsightCard';
 import StayQuickActions from './StayQuickActions';
 import StayAnnouncementBanner from './StayAnnouncementBanner';
-import StayTabs from './StayTabs';
 import type { PaginatedResponse } from '../../../types';
 import type { CheckoutRequest, Invoice, MeterReading, RenewRequest, RoomItem, Stay, Ticket } from '../../../types';
 import { getApiErrorMessage } from '../../../utils/getApiErrorMessage';
@@ -29,51 +27,11 @@ import { getDaysUntilTenantDate, getOpenTenantInvoices, getPendingReviewInvoiceI
 import { isPayableInvoiceStatus, TENANT_PAYMENT_REVIEW_MESSAGE, tenantPricingTermLabel } from '../../../utils/tenantCopy';
 import { getInvoiceTotalAmount } from '../../../utils/invoiceTotals';
 import {
-  formatDate, toDateKey, getMeterWindow, getLatestUtilityReading, formatRoomFloorLabel,
+  formatDate, getMeterWindow, getLatestUtilityReading, formatRoomFloorLabel,
   friendlyItemStatus, inventoryStatusClass, getRoomFacilitySummary, getRoomFacilities, getInventoryItems, getRoomCoverImage, getRoomPriceFacts,
 } from '../../../pages/portal/myStayShared';
 import { acCapacityLabel, roomBathroomLabel, roomSizeLabel, roomMaxOccupants } from '../../../utils/roomFacilitySpec';
 import { formatAcHoursEstimate } from '../../../utils/acUsageEstimate';
-
-function StayUtilityDetails({
-  stay,
-  telemetry,
-  isTelemetryLoading,
-  isTelemetryError,
-  canRecord,
-  onCatatMeter,
-}: {
-  stay: Stay;
-  telemetry?: TenantRoomUtilityTelemetry;
-  isTelemetryLoading: boolean;
-  isTelemetryError: boolean;
-  canRecord: boolean;
-  onCatatMeter: () => void;
-}) {
-  const startKey = stay.checkInDate ? toDateKey(new Date(stay.checkInDate)) : '';
-  const endKey = toDateKey(new Date());
-  const readingsQuery = useQuery<MeterReading[]>({
-    queryKey: ['tenant-meter-history', stay.roomId, startKey, endKey],
-    queryFn: () => getMeterReadingsByRoom(stay.roomId, { from: startKey, to: endKey, limit: 100 }),
-    enabled: Boolean(stay.roomId && startKey),
-    staleTime: 60_000,
-    retry: false,
-  });
-
-  return (
-    <UtilityInsightCard
-      stay={stay}
-      readings={readingsQuery.data ?? []}
-      isLoading={readingsQuery.isLoading}
-      isError={readingsQuery.isError}
-      telemetry={telemetry}
-      isTelemetryLoading={isTelemetryLoading}
-      isTelemetryError={isTelemetryError}
-      canRecord={canRecord}
-      onCatatMeter={onCatatMeter}
-    />
-  );
-}
 
 export default function ActiveStayContent({ stay }: { stay: Stay }) {
   const queryClient = useQueryClient();
@@ -497,13 +455,9 @@ export default function ActiveStayContent({ stay }: { stay: Stay }) {
       {/* ── Pengumuman terbaru ── */}
       <StayAnnouncementBanner />
 
-      {/* ── Tab navigasi ── */}
-      <StayTabs>
-        {(activeTab) => (
-          <>
-            <div id="stay-panel-ringkasan" role="tabpanel" aria-label="Ringkasan" hidden={activeTab !== 'ringkasan'}>
-              <div className="tenant-stay-dashboard-grid">
-                <div className="tenant-stay-col-left">
+      {/* ── Konten utama: satu layar ringkas, detail energi ada di halaman Energi ── */}
+      <div className="tenant-stay-dashboard-grid">
+        <div className="tenant-stay-col-left">
           {/* Ringkasan ringan; panel grafik lengkap hanya di tab Listrik & Air. */}
           <Card className="content-card border-0">
             <Card.Body className="d-flex flex-wrap align-items-center justify-content-between gap-3">
@@ -856,28 +810,6 @@ export default function ActiveStayContent({ stay }: { stay: Stay }) {
 
         </div>{/* tenant-stay-col-right */}
       </div>{/* tenant-stay-dashboard-grid */}
-            </div>{/* ringkasan tab */}
-            <div id="stay-panel-listrik" role="tabpanel" aria-label="Listrik dan air" hidden={activeTab !== 'listrik'} className="tenant-stay-col-full">
-              {activeTab === 'listrik' ? (
-                <StayUtilityDetails
-                  stay={stay}
-                  telemetry={utilityTelemetryQuery.data}
-                  isTelemetryLoading={utilityTelemetryQuery.isLoading}
-                  isTelemetryError={utilityTelemetryQuery.isError}
-                  canRecord={meterWindow.windowOpen}
-                  onCatatMeter={() => setShowMeter(true)}
-                />
-              ) : null}
-              <div className="text-end mt-2">
-                <Link to="/portal/energy" className="tenant-energy-link">
-                  Lihat detail energi →{" "}
-                  <span className="tenant-energy-link-hint">tampilan penuh dengan grafik & live watt</span>
-                </Link>
-              </div>
-            </div>{/* listrik tab */}
-          </>
-        )}
-      </StayTabs>
 
       <RenewRequestModal show={showRenewModal} onHide={() => setShowRenewModal(false)} onSuccess={() => {
         queryClient.invalidateQueries({ queryKey: ['portal-renew-requests', stay.id] });
