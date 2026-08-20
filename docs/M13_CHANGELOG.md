@@ -1,5 +1,14 @@
 # KOST48 V5 — M13 Changelog
 
+## 2026-08-20 — Portal Staff: perbaikan 403 /users + hapus kartu kinerja duplikat di dashboard
+
+- **TicketsPage (mode STAFF):** query `/users` kini hanya jalan untuk OWNER/ADMIN (`enabled` sesuai role). Sebelumnya staff mendapat HTTP 403 + console error saat membuka halaman Tugas.
+- **Dashboard staff:** kartu `StaffPerformanceCategoryCard` dihapus dari dashboard karena menduplikasi KPI "Kinerja bulan ini" yang sudah ada di strip atas; detail kategori tetap tersedia di `/staff-report`.
+- **Live check 8 route staff** (`/dashboard`, `/tickets`, `/rooms`, `/rooms/7`, `/staff-warehouse`, `/staff-report`, `/notifications`, `/profile`) memakai akun staff sementara: semua render OK, 0 pageerror/5xx/403/404, 0 blank.
+- **Verifikasi:** FE `tsc` ✅ · `vitest run` 133/133 ✅ · `npm run build` ✅ (PWA passed).
+
+**Perubahan:** `frontend/src/pages/tickets/TicketsPage.tsx`, `frontend/src/components/staff/StaffMotivationDashboard.tsx`.
+
 ## 2026-08-20 — Portal Tenant Ringkas (lanjutan): hapus tab Listrik duplikat + refresh sensor pindah ke Energi
 
 - **MyStayPage kini satu layar tanpa tab.** Tab "Listrik & Air" yang menampilkan ulang `UtilityInsightCard` (sudah ada di halaman `/portal/energy`) dihapus; dashboard tenant menyisakan ringkasan listrik singkat dengan tombol "Buka detail energi".

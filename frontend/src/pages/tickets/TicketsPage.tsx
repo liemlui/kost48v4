@@ -216,6 +216,8 @@ export default function TicketsPage() {
   const usersQuery = useQuery({
     queryKey: ["ticket-assignees"],
     queryFn: () => listResource<UserOption>("/users", { limit: 100 }),
+    // STAFF tidak punya akses /users; daftar assignee hanya dipakai OWNER/ADMIN.
+    enabled: user?.role === "OWNER" || user?.role === "ADMIN",
   });
 
   const simpleAction = useMutation({

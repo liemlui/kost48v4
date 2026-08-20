@@ -3,7 +3,6 @@ import { Card } from 'react-bootstrap';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { AlertTriangle, CheckCircle2, Gauge, ListChecks, TrendingUp } from 'lucide-react';
-import StaffPerformanceCategoryCard from './StaffPerformanceCategoryCard';
 import StaffUnifiedWorkQueue from './StaffUnifiedWorkQueue';
 import StaffRoutineChecklist from './StaffRoutineChecklist';
 import StaffActionLauncher from './StaffActionLauncher';
@@ -190,14 +189,11 @@ export default function StaffMotivationDashboard({ user, tickets, rooms = [], in
         onUpdated={onRoutineUpdated ?? onRefresh}
       />
 
-      <div className="staff-bento-row staff-secondary-panels">
-        <StaffPerformanceCategoryCard performance={performanceQuery.data} compact />
-        <StaffRoutineChecklist
-          today={routineToday ?? null}
-          isLoading={routinesLoading}
-          onJumpToWorkQueue={scrollToQueue}
-        />
-      </div>
+      <StaffRoutineChecklist
+        today={routineToday ?? null}
+        isLoading={routinesLoading}
+        onJumpToWorkQueue={scrollToQueue}
+      />
     </div>
   );
 }
