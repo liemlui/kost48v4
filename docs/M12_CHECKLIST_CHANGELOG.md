@@ -1,8 +1,17 @@
 # KOST48 V5 — Checklist Eksekusi Aktif
 
-> Versi aktif: **2026-07-30** | Changelog → `docs/M13_CHANGELOG.md` | Riwayat fase lama tetap dipertahankan sebagai arsip konteks.
+> Versi aktif: **2026-09-06** | Changelog → `docs/M13_CHANGELOG.md` | Riwayat fase lama tetap dipertahankan sebagai arsip konteks.
 
 ## Cara Pakai (AI Eksekutor — baca sebelum coding)
+
+## Update 2026-09-06 — Sinkronisasi arah dan bukti EF/MA
+
+- [x] **DOC-SYNC — Dokumentasi diselaraskan atas permintaan owner:** M02 keputusan; M12 checklist tunggal; M19 bukti/tabel hosting; M08 runbook; M01/M00/agent guides dan rujukan domain sinkron. Riwayat dipertahankan terpisah dari arah aktif; tidak ada bump versi atau perubahan kode.
+- [x] **Audit lokal EF-01/03/04/07 selesai:** laporan statis dan typecheck diterima; bukan build/UAT baru atau bukti runtime.
+- [x] **Implementasi lokal EF-01/03/05 tersedia:** detail lingkup dan bukti di bagian Fase EF. Perubahan working tree tetap dipertahankan.
+- [ ] **EF-00/EF-02:** identitas deployment dan baseline hosting belum tersedia. Tabel pengamatan pasif serta rencana uji aktif di M19 §9; server belum diuji.
+- [ ] **Fase MA ditunda:** satu proses API sebagai target, tanpa apps/libs atau worker baru. Fase A dan gate AO yang terbuka tetap berlaku.
+- **Koreksi audit awal:** angka idle 120–180/puncak 250–300 MB ada di M08 sebagai estimasi lama; bukan pengukuran. Telemetri kini tersedia lokal. Pool max:3 adalah konfigurasi, bukan jumlah koneksi runtime. Kelayakan 512 MB belum disahkan.
 
 ## Update 2026-08-17 — Optimasi shared hosting (Prisma engine + AutoOps)
 
@@ -39,7 +48,7 @@
 - [x] Upload baru mereset verifikasi dan masuk antrean pemeriksaan Admin.
 - [x] Dashboard Admin menampilkan KTP pending; detail review berada di modal tenant.
 - [x] Toggle Kokpit Owner/Area Admin diverifikasi pada desktop/mobile dan route terpisah.
-- [x] Standar UI dibukukan di `docs/UI_UX_OWNER_ADMIN.md`.
+- [x] Standar UI dibukukan di `docs/M17_PORTAL_FLOW_RINGKAS.md`.
 - [x] Crawl Playwright admin/owner lulus bersih; mobile 375px dashboard/stays/invoices/tickets tanpa overflow horizontal.
 - **Gate:** TypeScript backend dan frontend lulus.
 
@@ -70,14 +79,14 @@
 | Kualitas frontend | CSS entry disatukan, wrapper/konstanta duplikat dibersihkan | `8a589e6` | UAT visual lintas portal |
 | Paket/source baseline | Bundle rilis memuat build artifact dan runtime `node_modules`; server tidak melakukan install/build | `8627289` + generator rilis terkini | Commit dokumentasi/runbook dan pilih SHA rilis |
 
-Catatan: perubahan tool/seed deploy 2026-07-19 adalah riwayat UAT. Produksi mengikuti `DEPLOYMENT_ONLINE_20260723.md`, bukan seed historis atau `db push`.
+Catatan: perubahan tool/seed deploy 2026-07-19 adalah riwayat UAT. Produksi mengikuti M08 dan gate M19, bukan seed historis atau `db push`.
 
 1. **Orientasi:** buka bagian [ANTRIAN EKSEKUSI AKTIF](#antrian-eksekusi-aktif) di file ini.
-2. **Spesifikasi domain:** buka M-file yang ditunjuk fase/task (`M01`-`M09`).
+2. **Spesifikasi domain:** buka M-file yang ditunjuk fase/task (seri M00–M19; EF memakai M19).
 3. **Anchor kode:** grep **nama simbol/fungsi** di `backend/src` / `frontend/src` — **JANGAN** edit buta.
-4. **1 task = 1 commit** (Bahasa Indonesia). Lalu centang `[x]` + 1 baris di `docs/M13_CHANGELOG.md` (paling atas).
-5. **Gate build:** `cd backend; npx tsc --noEmit` · `cd frontend; npm run build`. Task **uang** WAJIB juga `node --test "test/**/*.test.js"` + gate `docs/M04_KEUANGAN.md`.
-6. **DB dev:** postgres **5433** `kost48_v3_pro` · reseed: `node scripts/seed-dev-reset.js && node scripts/seed-dev-real.js` (data asli dari Excel teraudit).
+4. **Satu task = satu commit terarah bila commit diizinkan owner** (Bahasa Indonesia). Perbarui checkbox sesuai bukti + entri `docs/M13_CHANGELOG.md`; dirty tree bukan alasan commit WIP campuran.
+5. **Gate sesuai lingkup:** docs-only = konsistensi/link/diff, tanpa build aplikasi. Kode = typecheck/build/test pada bagian yang relevan; typecheck berbeda dari build/UAT. Task uang juga mengikuti `npm run test:unit` dari backend dan gate `docs/M04_KEUANGAN.md`. Jangan ulang tes lulus tanpa perubahan relevan.
+6. **DB dev:** postgres **5433** `kost48_v3_pro`. Reset/reseed adalah mutasi data dan tidak dijalankan sebagai orientasi rutin; perlu izin tugas terkait. Identitas DB produksi dikonfirmasi di M19.
 7. **Larangan:** no npm dep baru · no `schema.prisma` tanpa approval owner (🧬) · no `git push` · no sentuh file milik AI lain.
 
 ## Efisiensi Sesi & Bump Versi
@@ -95,13 +104,13 @@ Catatan: perubahan tool/seed deploy 2026-07-19 adalah riwayat UAT. Produksi meng
 
 | Marker | Arti |
 |--------|------|
-| 🧑 / [OWNER] | Langkah manusia — STOP & lapor, jangan tebak env/server |
+| 🧑 / [OWNER] | Butuh data/keputusan owner yang belum ada; laporkan kebutuhan spesifik dan lanjutkan pekerjaan independen yang sudah diizinkan |
 | 🧬 / [SCHEMA] | Perlu migration additive — butuh approval owner dulu |
 | **Gate:** | Verifikasi wajib sebelum centang `[x]` |
 
 ---
 
-## Status Ringkas (2026-07-30)
+## Status Ringkas (diselaraskan 2026-09-06; hasil fase lama bertanggal)
 
 | Blok | Status | Catatan |
 |------|--------|---------|
@@ -141,7 +150,7 @@ Catatan: perubahan tool/seed deploy 2026-07-19 adalah riwayat UAT. Produksi meng
 | **Fase AI — Perbaikan Temuan Audit CHECKLIST_09** | ✅ selesai | AI-01..AI-02: hardening 503 isBookingSchemaReady + FE bookingsQuery tak blokir portal; loyalty/renewal/checkout diverifikasi via kode. 2 file backend + 1 file frontend. |
 | **Fase AJ — Sisa Temuan Audit (C05-01 sistemik + C10/C17 + seed)** | ✅ selesai | AJ-01/02 anti-loop ✅ · AJ-03/04 seed + TB ✅ · AJ-05 okupansi ✅ · AJ-06 docs ✅ · AJ-07 yang aman diuji ✅ (temuan baru C19-01/C19-02 dicatat; sisanya human/destructive follow-up). |
 | **Fase AK — Owner-Request 2026-07-04** | ✅ kode selesai | AK-01 API key DeepSeek via Settings (tanpa restart, env fallback, tak pernah bocor ke respons) 🧬 · AK-02 fix 400 simpan panel AI · AK-03 input angka ribuan + fix nol-depan (CurrencyInput diperkuat, 12 file). `db push` kolom baru saat env hidup. |
-| **Fase AM — Redundansi UI/UX + Audit** | ✅ selesai (16/16) | AM-01 unifikasi WA URL, AM-02 hapus RoleWorkspaceTabs, AM-05 Pengumuman sidebar, AM-07 fix spec detection, AM-13 CSS Modules riset, AM-14 useForm wrapper, AM-15 Storybook, AM-16 E2E smoke. Build FE ✅ 6 Jul 2026. Detail: `docs/M14_REDUNDANSI_UI_UX.md`. |
+| **Fase AM — Redundansi UI/UX + Audit** | ✅ selesai (16/16) | AM-01 unifikasi WA URL, AM-02 hapus RoleWorkspaceTabs, AM-05 Pengumuman sidebar, AM-07 fix spec detection, AM-13 CSS Modules riset, AM-14 useForm wrapper, AM-15 Storybook, AM-16 E2E smoke. Build FE ✅ 6 Jul 2026. Detail: `docs/M12_CHECKLIST_CHANGELOG.md (Fase AM, riwayat)`. |
 | **Fase M16 — Audit 360 Flow Huni** | ✅ selesai | 7 temuan: P2-01/02/04 fixed (+🧬), P2-03/05/06/07 diverifikasi valid. Detail: `docs/archieve/M16_AUDIT_360_FLOW_HUNI.md §7`. |
 | **Fase M16-Deep — Audit Siklus Huni (Reasonix)** | ✅ selesai (29 Jul) | Deep audit terhadap laporan M16: 9 best-effort journal ditemukan (vs 3 di M16), severity S-01 dikoreksi MEDIUM→HIGH, cross-ref Fase AN. Temuan terintegrasi ke `docs/M05_SIKLUS_HUNI.md` §Deep Audit. |
 | **Fase M17-Deep — Audit Operasional & Staf (Reasonix)** | ✅ selesai (29 Jul) | Deep audit 11 modul operasional: 1 best-effort journal (wifi-sales), 2 silent swallow, 2 race condition (tickets assign/start). 7 modul BERSIH. Temuan terintegrasi ke `docs/M06_OPERASIONAL.md` §Deep Audit. |
@@ -154,6 +163,8 @@ Catatan: perubahan tool/seed deploy 2026-07-19 adalah riwayat UAT. Produksi meng
 | **Fase MX-Verify — Verifikasi Codex Sol** | ✅ selesai (29 Jul) | 18 temuan diverifikasi oleh Codex Sol (model tertinggi): 12 BENAR, 1 SALAH (A9 expenses), 5 PARSIAL (B1/B4/C1/D1/A7). 8 koreksi diterapkan ke M01/M05/M06. |
 | **Fase MX-Final — Koreksi sign-off pasca commit 6223a30** | ✅ selesai (30 Jul) | S-01 lock dipindahkan ke satu transaksi penuh; OS-05 lock User disamakan untuk ticket+routine; seluruh boundary bucket AI diperbaiki; fan-out peer-report menjadi bulk; 7 regression test khusus ditambahkan. |
 | **Fase AO — Audit & Hardening UI/UX Lintas Portal** | 🔴 audit selesai, eksekusi terbuka | 66 kombinasi awal + verifikasi produksi homepage + review Owner/Admin static-code; 1 P0 environment, 9 P1, 11 P2, 1 P3. Sumber kerja: `docs/M14_AUDIT_UI_UX.md`. |
+| **Fase EF — Efisiensi Shared Hosting 512 MB** | PRIORITAS; menunggu data hosting | Audit lokal selesai, EF-01/03/05 tersedia lokal; EF-00/02 menunggu identitas deployment dan pengukuran. M19 = spesifikasi. |
+| **Fase MA — Batas Modul & Kesiapan Ekstraksi** | DITUNDA | Satu proses API dipertahankan; tidak ada izin apps/libs, ekstraksi atau worker baru. |
 
 ---
 
@@ -180,9 +191,16 @@ Catatan: perubahan tool/seed deploy 2026-07-19 adalah riwayat UAT. Produksi meng
 
 ## ANTRIAN EKSEKUSI AKTIF
 
-> **Fase A** blocked owner (infrastruktur server/domain/env). **Fase AO** adalah antrean UI/UX aktif; fase lama yang sudah selesai tetap menjadi konteks historis.
->
-> **Sisa aktif:**
+**Urutan otoritatif 6 September 2026:**
+
+1. **Fase EF:** identifikasi artefak host lalu pengamatan pasif EF-00/02 (M19 §9). Pemeriksaan lokal yang sudah selesai tidak diulang tanpa perubahan relevan.
+2. **Fase A:** konfirmasi infrastruktur, konfigurasi efektif dan gate go-live; pelaksanaan server/DB menunggu izin terkait.
+3. **Fase AO dan backlog domain yang belum ditutup:** tetap terbuka; bukan izin memulai implementasi lain saat menunggu host.
+4. **Fase MA:** ditunda. Tidak ada prioritas otomatis V5.8/V5.9 ekstraksi.
+
+Daftar berikut adalah ledger lintas fase bertanggal, berisi hasil selesai dan backlog. Urutan nomor lama bukan urutan eksekusi baru. Konflik status diselesaikan dari hasil penutupan yang lebih baru; jangan menjalankan ulang task berstatus selesai.
+
+> **Ledger lintas fase (riwayat dan backlog):**
 > 0. **STAFF-PORTAL-RINGKAS** — ✅ **SELESAI (20 Agu 2026)** — live check 8 route staff; perbaiki 403 `/users` di TicketsPage mode STAFF, hapus kartu kinerja duplikat di dashboard (detail tetap di `/staff-report`). FE vitest 133/133 ✅, build ✅.
 > 0. **TENANT-PORTAL-RINGKAS** — ✅ **SELESAI (20 Agu 2026)** — portal tenant dirapikan: nav Utama/Lainnya (3 aksi inti duluan, fitur lanjutan tetap ada), tab duplikat "Kamar & Riwayat" dihapus, lalu tab "Listrik & Air" juga dihapus dari MyStayPage (detail cukup di `/portal/energy`; tombol refresh sensor dipindah ke sana). FE vitest 133/133 ✅, build ✅.
 > 0. **M17 Portal Flow Ringkas** — ✅ **SELESAI (20 Agu 2026)** — Iterasi 1–4 tuntas: DashboardAdmin = daftar tugas 0–5, CTA terfilter, OwnerDashboard ringkas, E2E booking→bayar→perpanjangan→checkout di UAT, cleanup widget lama. Detail: `docs/M17_PORTAL_FLOW_RINGKAS.md`.
@@ -190,11 +208,11 @@ Catatan: perubahan tool/seed deploy 2026-07-19 adalah riwayat UAT. Produksi meng
 > 0. **G5+ Fixlist KTP** — ✅ **SELESAI (3/3 + hardening review)** — migration `ktpVerificationMethod/Notes`, rate-limit hemat kuota (deterministik/fallback tak potong kuota), method `AI` di `verifyKtp` butuh bukti sukses AI (`KtpAiApprovalService` baru, TTL 30 mnt, sekali pakai); hardening cache AI (prune+cap, clone anti-mutasi, key model konsisten). Build BE ✅ FE ✅
 > 0. **G5+ gap kritis: UI upload foto KTP + audit orphaned endpoint** — ✅ **SELESAI** — endpoint `ktp/upload` yang sebelumnya tak pernah dipanggil UI kini aktif; audit orphaned endpoint Admin/Owner/Inventory juga sudah ditutup: delete KTP, create/update COA, update cash account, update period notes, edit aset, draft FAQ AI, review laporan staff AI, legacy deposit-ledger dry-run, dan integrasi demographics summary sudah tersambung atau dibersihkan bila redundant. Build FE ✅ BE ✅
 > 0. **Fase M16 — Audit 360 Flow Huni** — ✅ **SELESAI** — 7 temuan: P2-01/02/04 fixed, P2-03/05/06/07 diverifikasi valid. Detail: `docs/archieve/M16_AUDIT_360_FLOW_HUNI.md §7`. Build FE ✅ BE ✅
-> 0. **Fase AM — Redundansi UI/UX + Audit (Admin + Owner + Publik)** — ✅ **SELESAI (16/16)** — AM-01..AM-16. Detail: `docs/M14_REDUNDANSI_UI_UX.md`.
+> 0. **Fase AM — Redundansi UI/UX + Audit (Admin + Owner + Publik)** — ✅ **SELESAI (16/16)** — AM-01..AM-16. Detail: `docs/M12_CHECKLIST_CHANGELOG.md (Fase AM, riwayat)`.
 > 0. **Fase M18 — Celah Peningkatan (Review 9 Jul 2026)** — ✅ **11/11** — 11 task tuntas: refresh token race condition, masking NIK, unique `identityNumber`, saveKtpData tidak overwrite field existing, feedback error KTP save, DTO validasi KTP-data, unit test OCR FE/BE, logging silent catch, dan `FeatureErrorBoundary` untuk halaman kritis.
 > 0. **AU-01..AU-03 — Sisa audit kedalaman UI/UX Admin/Owner** — ✅ **SELESAI (8 Jul, Fable5)** — AU-01 `SimpleCrudPage` confirm dialog + `onError` toast di delete (dampak: expenses/invoice-payments/wifi-sales/additional-services); AU-02 `StaysPage` 4 mutation (expire/reject booking, approve/reject checkout) dapat `onError` toast; AU-03 confirm di "Jalankan Kedaluwarsa" (`StaysPage`) + "Hapus key" DeepSeek (`OwnerSettingsPage`). `tsc` FE ✅
 > 0. **GATE-KTP-ENV 🔴 — Jebakan gate KTP produksi** — ✅ **SELESAI (8 Jul, Fable5)** — pembaca gate memakai nilai DB begitu row `OperationalSetting` ada (kolom non-nullable → `?? env` mati), row terbentuk otomatis default `false` → env `KTP_ACTIVATION_GATE_ENABLED=true` yang diwajibkan runbook diabaikan, gate diam-diam OFF. Fix: `settings.service.ts` semai nilai awal row dari env + catatan verifikasi di docs deploy. `tsc` BE ✅
-> 0. **RUNBOOK onboarding 13 tenant nyata** — 📘 `docs/RUNBOOK_ONBOARDING_TENANT_NYATA.md` — urutan tenant→KTP→verify→stay, `checkInDate` = siklus terakhir bulan berjalan, jebakan due-date invoice 24 jam (lunasi sebelum buka portal), prasyarat: NIK Dini/Theo, kamar Annisa, catat meter 13 kamar.
+> 0. **RUNBOOK onboarding 13 tenant nyata** — 📘 `docs/GO_LIVE_DATA_ISI.md` — urutan tenant→KTP→verify→stay, `checkInDate` = siklus terakhir bulan berjalan, jebakan due-date invoice 24 jam (lunasi sebelum buka portal), prasyarat: NIK Dini/Theo, kamar Annisa, catat meter 13 kamar.
 > 0. **SEED-RESET-SCHEMA 🐛** — `backend/scripts/seed-dev-reset.js` TIDAK menerapkan migration terbaru (kolom `Tenant.ktpVerificationMethod` G5+ hilang → login 500) — sementara WAJIB `npx prisma db push --accept-data-loss` manual setelah reset; fix permanen: tambah langkah db push di akhir skrip reset.
 > 0. **AUDIT-ASET (kuis owner 8 Jul)** — 🧑 LAPANGAN lalu input — keliling audit pakai `docs/filePrint/07_FORM_AUDIT_INTERAKTIF_SUPER_DETAIL.html` (atau cetak `06`), kumpulkan CSV → input `FixedAsset` via SALDO AWAL (kapitalisasi: tahan lama ≥ Rp100rb; tanah NJOP + bangunan nilai kondisi kini; cut-off 31 Jul 2026) → jalankan depresiasi → TB wajib seimbang. Kebijakan: M02 "Kuis Audit Aset & Nilai" + M04 Update 2026-07-08 + RUNBOOK §9A.
 > 0. **M31** — ✅ **SELESAI** — AiDraft queue diverifikasi — DeepSeek test-connection PASS via .env API key. Fase 4 = 35/35 100%.
@@ -205,17 +223,17 @@ Catatan: perubahan tool/seed deploy 2026-07-19 adalah riwayat UAT. Produksi meng
 > 2. **X-16 lanjutan** — ✅ **SELESAI** — `e2e/a11y/axe-auth.spec.ts` (12 test: OWNER 3 + ADMIN 3 + STAFF 2 + TENANT 3 + publik 2 = 14 total axe test)
 > 3. **Z-01..Z-19** — Audit cross-portal: 19 task dari inspeksi browser real-time (2 Juli 2026) mencakup 4 portal + halaman publik. Lihat [Fase Z](#fase-z--audit-uiux-cross-portal-2026-07-02).
 > 4. **A1–A6** 🧑 — pra-go-live produksi (server, domain, env, seed OWNER, smoke test) — MANUSIA.
-> 5. **AA-01..AA-05** — ✅ **SELESAI** — Fase AA (CHECKLIST_01): 5 task tuntas; detail di [Fase AA](#fase-aa--perbaikan-temuan-audit-publik-checklist_01).
-> 6. **AB-01..AB-05** — ✅ **SELESAI** — Fase AB (CHECKLIST_02): 5 task tuntas (AB-01 label Dipesan + AB-02 link error-state sudah dari sebelumnya). Detail di [Fase AB](#fase-ab--perbaikan-temuan-audit-katalog-checkout_02).
-> 7. **AC-01..AC-04** — ✅ **SELESAI** — Fase AC (CHECKLIST_03): 4 task tuntas (AC-04 N/A tercakup AB-05). Detail di [Fase AC](#fase-ac--perbaikan-temuan-audit-booking-checklist_03).
-> 8. **AD-01..AD-04** — ✅ **SELESAI** — Fase AD (CHECKLIST_04): 4 task tuntas. Detail di [Fase AD](#fase-ad--perbaikan-temuan-audit-auth-checklist_04).
-> 9. **AE-01 🔴 HIGH** — ✅ **SELESAI** — Fase AE (CHECKLIST_05): AE-01 infinite refetch loop fixed (sudah dari sebelumnya); AE-02 ✅ dikonfirmasi live 3 Jul (bayu occupied). Detail di [Fase AE](#fase-ae--perbaikan-temuan-audit-mystay-checklist_05).
-> 10. **AF-01..AF-03** — ✅ **SELESAI** — Fase AF (CHECKLIST_06): 3 task (AF-01 countdown invoice lunas, AF-02 banner onboarding mantan penghuni, AF-03 catatan INFO). Detail di [Fase AF](#fase-af--perbaikan-temuan-audit-invoice-checklist_06).
-> 11. **AG-01** — ✅ **SELESAI** — Fase AG (CHECKLIST_07): C07-01 sama dengan C06-02, tercakup AF-02. Detail di [Fase AG](#fase-ag--perbaikan-temuan-audit-tiket-checklist_07).
-> 12. **AH-01..AH-04** — ✅ **SELESAI** — Fase AH (CHECKLIST_08): hardening 503 announcements + verifikasi STALE Hermes I12/I13. Detail di [Fase AH](#fase-ah--perbaikan-temuan-audit-info-checklist_08).
-> 13. **AI-01..AI-02** — ✅ **SELESAI** — Fase AI (CHECKLIST_09): hardening 503 isBookingSchemaReady + FE tak blokir portal; loyalty/renewal/checkout diverifikasi via kode. Detail di [Fase AI](#fase-ai--perbaikan-temuan-audit-loyalty-renewal-checkout-checklist_09).
-> 14. **AJ-01..AJ-07** — ✅ **SELESAI** — Fase AJ: anti-loop live lulus, re-seed dev 5433 lulus + TB balanced, label okupansi jelas, dokumen sinkron, dan AJ-07 safe follow-up dicatat (C19-01/C19-02). Detail di [Fase AJ](#fase-aj--sisa-temuan-audit-2026-07-antri).
-> 15. **AN-01..AN-06** — 🔴 **ANTRIAN** — Fase AN: hardening keuangan pasca audit deep (29 Jul 2026). 6 task dari temuan P1-01/P1-02/N4/F-30/P1-04 + unit test. Detail di [Fase AN](#fase-an--hardening-keuangan-pasca-audit-deep). **🆕 AN-03 diperluas:** 9 titik best-effort journal dari M16-Deep (HS-01..HS-09) harus ikut diseragamkan. Lihat `docs/M05_SIKLUS_HUNI.md` §Deep Audit.
+> 5. **AA-01..AA-05** — ✅ **SELESAI** — Fase AA (CHECKLIST_01): 5 task tuntas; detail di [Fase AA](#fase-aa--perbaikan-temuan-audit-publik-checklist_01--selesai).
+> 6. **AB-01..AB-05** — ✅ **SELESAI** — Fase AB (CHECKLIST_02): 5 task tuntas (AB-01 label Dipesan + AB-02 link error-state sudah dari sebelumnya). Detail di [Fase AB](#fase-ab--perbaikan-temuan-audit-katalog-checklist_02--selesai).
+> 7. **AC-01..AC-04** — ✅ **SELESAI** — Fase AC (CHECKLIST_03): 4 task tuntas (AC-04 N/A tercakup AB-05). Detail di [Fase AC](#fase-ac--perbaikan-temuan-audit-booking-checklist_03--selesai).
+> 8. **AD-01..AD-04** — ✅ **SELESAI** — Fase AD (CHECKLIST_04): 4 task tuntas. Detail di [Fase AD](#fase-ad--perbaikan-temuan-audit-auth-checklist_04--selesai).
+> 9. **AE-01 🔴 HIGH** — ✅ **SELESAI** — Fase AE (CHECKLIST_05): AE-01 infinite refetch loop fixed (sudah dari sebelumnya); AE-02 ✅ dikonfirmasi live 3 Jul (bayu occupied). Detail di [Fase AE](#fase-ae--perbaikan-temuan-audit-mystay-checklist_05--selesai).
+> 10. **AF-01..AF-03** — ✅ **SELESAI** — Fase AF (CHECKLIST_06): 3 task (AF-01 countdown invoice lunas, AF-02 banner onboarding mantan penghuni, AF-03 catatan INFO). Detail di [Fase AF](#fase-af--perbaikan-temuan-audit-invoice-checklist_06--selesai).
+> 11. **AG-01** — ✅ **SELESAI** — Fase AG (CHECKLIST_07): C07-01 sama dengan C06-02, tercakup AF-02. Detail di [Fase AG](#fase-ag--perbaikan-temuan-audit-tiket-checklist_07--selesai).
+> 12. **AH-01..AH-04** — ✅ **SELESAI** — Fase AH (CHECKLIST_08): hardening 503 announcements + verifikasi STALE Hermes I12/I13. Detail di [Fase AH](#fase-ah--perbaikan-temuan-audit-info-checklist_08--selesai).
+> 13. **AI-01..AI-02** — ✅ **SELESAI** — Fase AI (CHECKLIST_09): hardening 503 isBookingSchemaReady + FE tak blokir portal; loyalty/renewal/checkout diverifikasi via kode. Detail di [Fase AI](#fase-ai--perbaikan-temuan-audit-loyaltyrenewalcheckout-checklist_09--selesai).
+> 14. **AJ-01..AJ-07** — ✅ **SELESAI** — Fase AJ: anti-loop live lulus, re-seed dev 5433 lulus + TB balanced, label okupansi jelas, dokumen sinkron, dan AJ-07 safe follow-up dicatat (C19-01/C19-02). Detail di [Fase AJ](#fase-aj--sisa-temuan-audit-2026-07--selesai).
+> 15. **AN-01..AN-06** — ✅ **SELESAI pada penutupan Juli** — keenam task sudah dicentang pada [Fase AN](#fase-an--hardening-keuangan-pasca-audit-deep), termasuk penyeragaman journal handling AN-03. Status ANTRIAN lama dicabut; jangan implementasikan ulang dari temuan audit sebelum perbaikan.
 > 16. **M16-Deep** — ✅ **SELESAI (29 Jul)** — Deep audit siklus huni: 9 best-effort journal (vs 3 M16), S-01 severity upgrade, cross-ref Fase AN. Temuan terintegrasi ke `docs/M05_SIKLUS_HUNI.md`.
 > 17. **M17-Deep** — ✅ **SELESAI (29 Jul)** — Deep audit operasional & staf: 5 temuan (OS-01..OS-05) — 1 best-effort journal wifi, 2 silent swallow, 2 race condition tickets. Temuan terintegrasi ke `docs/M06_OPERASIONAL.md`.
 > 18. **M18-Deep** — ✅ **SELESAI (29 Jul)** — Deep audit publik & marketing: 2 temuan (PM-01, PM-04) — domain paling bersih (0 best-effort journal, 0 race condition). Temuan terintegrasi ke `docs/M07_PUBLIK_GROWTH.md`.
@@ -232,7 +250,9 @@ Catatan: perubahan tool/seed deploy 2026-07-19 adalah riwayat UAT. Produksi meng
 > 29. **TENANT-AWAM-BAYAR-LAPOR** — ✅ **SELESAI** — MyInvoicesPage kini punya CTA utama "💳 Bayar Tagihan Kamu" + tombol besar "Bayar Sekarang" (arah ke invoice paling mendesak), label baris disederhanakan; MyTicketsPage tombol "Buat Laporan Baru" diperbesar + label kategori "Air / keran bocor". `tsc` FE ✅.
 > 30. **TENANT-AWAM-AUDIT-LANJUT** — ✅ **SELESAI** — modal bayar+upload bukti diringkas (form inti: jumlah+metode+bukti; field opsional dilipat ke "Info tambahan (opsional)"), label kategori laporan disederhanakan & disinkronkan (Perabot kamar / Masuk-keluar kamar / Tagihan-Pembayaran / Air-keran bocor), jargon MyInvoicesPage diluruskan. Test stale `navigation.test.ts` (OWNER kini 2 grup nav) diperbaiki. `tsc` FE ✅ + `vitest run` ✅.
 >
-> **🆕 TODO untuk /new berikutnya — Perbaikan Prioritas Pasca Audit (urutan):**
+> 31. **EF-00..EF-09** — prioritas Fase EF; status kanonik pada bagian Fase EF di bawah. EF-01/03/05 tersedia lokal, data host UNKNOWN, worker EF-09 ditunda.
+>
+> **Penutupan historis Juli — task berikut sudah selesai, jangan diulang:**
 > 1. **X1 🔴** — ✅ SELESAI (29 Jul) — Seragamkan SEMUA journal posting → BLOCKING (20+ call site). = AN-03.
 > 2. **X2 🟠** — ✅ SELESAI (29 Jul) — Extract `assertOwnerOrAdmin` ke shared guard (4→1).
 > 3. **X3 🟠** — ✅ SELESAI (29 Jul) — Buat `AppConfigService` — validasi env startup + cache.
@@ -250,7 +270,7 @@ Catatan: perubahan tool/seed deploy 2026-07-19 adalah riwayat UAT. Produksi meng
 ### Fase AN — Hardening Keuangan Pasca Audit Deep
 
 **Sumber:** Audit deep Reasonix 29 Juli 2026 — `docs/M04_KEUANGAN.md` §H.  
-**Gate:** `tsc` BE ✅ FE ✅ · `npm run test:unit` 48/48 ✅ · semua task WAJIB jalankan `npm run build && npm run test:unit` setelah selesai.
+**Hasil penutupan Juli:** `tsc` BE ✅ FE ✅ · `npm run test:unit` 48/48 ✅ pada saat itu. Semua task di bawah selesai; angka ini bukan hasil pengujian sesi sekarang. Perubahan uang berikutnya mengikuti gate M04, bukan mengulang implementasi ini.
 
 - [x] **AN-01 🔴 P1-02 — Deposit ledger blocking** — `payment-submissions.service.ts:898-915`: ubah `try/catch` + `logger.warn` menjadi BLOCKING (throw, rollback tx). Deposit diterima wajib tercatat di ledger. **PALING URGENT — tidak ada recovery path.**
 - [x] **AN-02 🟠 P1-01 — Journal posting blocking** — `payment-submissions.service.ts:817-836`: ubah `try/catch` + `journalPending=true` menjadi BLOCKING seperti module expenses (throw, rollback tx). Recovery path (`retry-journal`) tetap dipertahankan sebagai fallback manual.
@@ -296,6 +316,30 @@ Catatan: perubahan tool/seed deploy 2026-07-19 adalah riwayat UAT. Produksi meng
 
 ---
 
+### Fase EF — Efisiensi Shared Hosting 512 MB
+
+**Prioritas aktif.** Spesifikasi/DoD: [M19](M19_EFISIENSI_HOSTING_512MB.md). Keputusan: M02 §Keputusan arah aplikasi. Checkbox selesai di bawah hanya menyatakan lingkup implementasi lokal yang disebut; deployment dan dampak server masih UNKNOWN. Bukti audit/typecheck berasal dari laporan Cline yang diterima owner; build EF-05 dari riwayat M13, tidak diulang saat sinkronisasi docs.
+
+- [ ] **EF-00 P0 — Baseline deployment:** inventaris lokal selesai; identitas artefak server, waktu deploy, versi Node, startup/dokroot, instance Passenger dan limit/fault LVE UNKNOWN. Isi M19 §9.1–9.3 secara pasif.
+- [x] **EF-01 P1 — Implementasi telemetri lokal opsional:** service + interceptor terpasang di working tree; default OFF, timer unref/cleanup. Audit statis + typecheck dilaporkan lulus. Aktivasi, privasi label request saat runtime, dan hasil log host belum diverifikasi; jangan klaim seluruh log bebas PII tanpa memeriksa fallback path.
+- [ ] **EF-02 P0 — Baseline workload:** tabel/panduan M19 §9 tersedia; pengamatan host belum ada. Uji aktif membutuhkan izin server; tanpa kron IoT baru. Catat skenario, rentang waktu, jenis angka (sesaat/rata-rata/puncak), resource/fault dan artefak yang diuji.
+- [x] **EF-03 P0 — Implementasi Prisma singleton lokal:** reports.module memakai PrismaModule global; provider PrismaService hanya di prisma.module pada audit statis. Typecheck dilaporkan lulus. Jumlah pool/koneksi runtime bergantung pada konteks/proses aktual; host UNKNOWN.
+- [ ] **EF-04 P2 — Profil paket static:** peta aset/routing lokal selesai; implementasi profil belum dilakukan. Kandidat publik: build SPA dan gambar kamar publik. Upload privat tidak masuk dokroot/CDN publik. DoD: paket dan kedua profil diverifikasi setelah implementasi diizinkan.
+- [x] **EF-05 P2 — Implementasi packaging kanonik lokal:** bundle-deploy delegasi ke make-deploy; README ganda dan contoh cron IoT dihapus. Riwayat M13 mencatat make-deploy/bundle fast lulus (9.639 file saat pengujian itu). Artefak server/pemakaian generator ini UNKNOWN.
+- [ ] **EF-06 P2 — Kontrak routing/canary:** matriks dirancang di M19 §3.4; kemampuan host, canary dan rollback belum diuji. Uji aktif hanya dengan izin; tanpa perubahan DB.
+- [ ] **EF-07 P1 — Konfigurasi efektif env/DB:** pemetaan statis selesai. Override AutoOps ada lokal; uji false melawan DB true belum dilakukan. Bedakan flag AI dan key DB/env; jangan hapus key. IoT on-demand, tanpa cron Tuya. Inbox/pengumuman harus tetap bekerja.
+- [ ] **EF-08 P2 — Lifecycle/peak:** stop/start, shutdown pool/timer dan idempotensi belum diuji runtime. Rencanakan pengujian terarah; jangan jalankan server/UAT atau ubah hooks tanpa lingkup terkait.
+- [ ] **EF-09 P3 — Gate worker CLI (DITUNDA):** bukan izin membuat worker. Hanya dibahas jika pengukuran AutoOps yang dibatasi membuktikan kebutuhan, dengan budget overlap API+worker dan persetujuan desain.
+
+**Gate EF:** bukti deployment EF-00 + pengukuran EF-02 untuk artefak yang diketahui, verifikasi lokal EF-01/03/05 yang relevan, konfigurasi/lifecycle aman, serta tanpa regresi `/api`/auth/upload bila profil deploy diubah. Angka disk/heap/RSS/PMEM tidak dicampur; tidak ada klaim 512 MB cukup sebelum bukti host.
+
+### Fase MA — Batas Modul & Kesiapan Ekstraksi
+
+- [x] Audit arsitektur lama diterima sebagai bahan perencanaan; penamaan diselaraskan dari V5.7/V5.8/V5.9 arsitektur.
+- [ ] **Implementasi DITUNDA:** tanpa apps/libs, app Nest baru, ekstraksi shared service, worker atau pemisahan proses. Bukan PASS kesiapan migrasi. Lanjut hanya setelah keputusan owner berikutnya; Fase EF didahulukan.
+
+---
+
 ### Fase A — Pra-Go-Live Produksi
 
 **Tujuan:** aplikasi siap publish bersih, tanpa data UAT/testing.  
@@ -303,14 +347,14 @@ Catatan: perubahan tool/seed deploy 2026-07-19 adalah riwayat UAT. Produksi meng
 
 - [ ] **A1 / F1-12** 🧑 Owner konfirmasi VPS/cPanel, domain, HTTPS, PostgreSQL prod 5432, env rahasia siap.
 - [ ] **A2** Fresh provision: buat DB produksi BARU/kosong (jangan drop UAT) → verifikasi dan putuskan patch schema secara terpisah dari bundle → bootstrap guard teruji → OWNER pertama → seed COA/periode/cash account. Server bundle tidak menjalankan npm/Prisma; `db push` dan seed historis dilarang untuk produksi.
-- [ ] **A3** Set env produksi wajib: `NODE_ENV=production`, JWT secret kuat, CORS domain final, VAPID keys, `KTP_ACTIVATION_GATE_ENABLED=true`.
+- [ ] **A3** Set env produksi wajib: `NODE_ENV=production`, JWT secret kuat, CORS domain final, VAPID hanya bila push diaktifkan, `KTP_ACTIVATION_GATE_ENABLED=true`.
 - [ ] **A4** Ganti password OWNER dummy/dev ke password real sebelum dipakai owner.
 - [ ] **A5** Isi opening balance bila ada modal/saldo awal; kalau mulai nol, dokumentasikan zero-start.
 - [ ] **A6** Smoke test prod: login OWNER, public rooms 200, trial balance balanced, recon mismatch 0, readiness tanpa blocker merah.
 - [x] **A7** `backend/package.json` sudah punya `pretest:unit = npm run build` — test unit pakai `dist` segar.
 - [x] **A8** Hardening hasil audit DEEP-01..05 selesai; HSTS dan `Permissions-Policy: camera=(self)` sudah masuk changelog.
 
-**Gate:** `docs/DEPLOYMENT_ONLINE_20260723.md` smoke PASS. **Jangan** backfill data UAT ke produksi; setelah go-live semua release database patch-only.
+**Gate:** `docs/M08_DEPLOY_GO_LIVE.md` smoke PASS. **Jangan** backfill data UAT ke produksi; setelah go-live semua release database patch-only.
 
 ---
 

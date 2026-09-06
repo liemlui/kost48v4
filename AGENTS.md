@@ -1,60 +1,45 @@
-# KOST48 Surabaya V5 — Reasonix Agent Guide
+# KOST48 Surabaya V5 — Agent Guide
 
-> **Baca `CLAUDE.md` untuk panduan lengkap.** File ini = tambahan spesifik Reasonix (memory, session, skills).
+Baca `CLAUDE.md`, lalu M12 untuk tugas aktif. Bahasa kerja dan dokumentasi: Indonesia.
 
-## Project
-Sistem manajemen kost 48 kamar. Backend NestJS+Prisma+PostgreSQL (`backend/`), frontend React+Vite+TanStack Query (`frontend/`). Bahasa kerja: Indonesia. Role: OWNER/ADMIN/STAFF/TENANT.
+## Arah dan status — 6 September 2026
 
-**Status:** Fase B–AM selesai. Hanya Fase A (Pra-Go-Live) yang menunggu owner — server/domain/env. Aplikasi siap produksi.
+- **Fase EF diprioritaskan:** target satu proses API NestJS, frontend React/Vite tetap, tanpa rewrite domain. Instance Passenger aktual masih UNKNOWN.
+- **Fase MA — Batas Modul & Kesiapan Ekstraksi ditunda.** Nama lama V5.7/V5.8/V5.9 arsitektur bukan nomor versi aplikasi; jangan membuat apps/libs, app Nest baru, atau worker.
+- EF-01/03/05 tersedia lokal; audit statis EF-01/03/04/07 selesai. Identitas deployment dan dampak PMEM belum diketahui. Lanjut EF-00/02 melalui data hosting; jangan ulang audit selesai tanpa perubahan relevan.
+- Fase A masih membutuhkan konfirmasi infrastruktur/deployment; gate terbuka AO tidak dibatalkan. Jangan klaim siap produksi dari status historis fase B–AM.
 
-## Commands (verified)
-```bash
-# Backend
-cd backend && npx tsc --noEmit     # typecheck
-cd backend && npm run start:dev     # dev server (port 3000)
-cd backend && npm run build         # production build
-cd backend && npm run test:unit     # unit tests (26 tests)
+## Sumber kebenaran
 
-# Frontend
-cd frontend && npm run dev          # dev server (port 5174)
-cd frontend && npm run build        # production build (tsc + vite + PWA stamp)
-cd frontend && npx vitest run       # unit tests (121 tests)
+1. M02: keputusan owner; M12: satu checklist dan urutan eksekusi.
+2. M19: spesifikasi EF + tabel pengukuran; M08: runbook deploy.
+3. M01: master; M00: peta kode; M03–M11/M14–M18: domain terkait.
+4. M13: riwayat bertanggal, bukan perintah menjalankan ulang tugas.
 
-# Deploy
-npm run bundle:deploy:fast          # bundle deploy package
-npm run make-deploy:fast            # full deploy artifact
-```
+Dokumen aktif: seri M00–M19 di `docs/`, ditambah formulir go-live. Statistik model/test dan memory dapat usang; cek source atau hasil bertanggal. `docs/archieve/*`, `reference/*`, `backend/src/generated/*` tidak dibaca rutin.
 
-## Architecture
-- **46 NestJS modules** di `backend/src/modules/` — core: `stays`, `invoices`, `tenants`, `rooms`, `finance`, `accounting`, `auto-ops`, `iot`
-- **Prisma** — 62 model / 74 enum, DB UAT port 5433 `kost48_v3_pro`, produksi 5432 `kost48_v3`
-- **Frontend pages** — `frontend/src/pages/` per portal: `auth/`, `portal/` (tenant), `dashboard/` (admin), `owner/`, `public/`, `staff/`
-- **Docs:** 15 file aktif (M00-M13 + M15_IOT) — lihat `project-master-stats` memory
-- **CLAUDE.md §Konsep yang sering salah** — WAJIB baca sebelum coding (tidak ada model Booking, DP ≠ deposit, dll.)
+## Perintah PowerShell
 
-## Docs Navigation (hemat token)
-1. `CLAUDE.md` — panduan sesi + aturan kerja
-2. `docs/M01_MASTER.md` — blueprint + ground state
-3. `docs/M02_KEPUTUSAN_OWNER.md` — 84 keputusan owner (SUMBER KEBENARAN)
-4. `docs/M12_CHECKLIST_CHANGELOG.md` — ANTRIAN EKSEKUSI + status fase
-5. `docs/M00_CODEMAP.md` — peta modul→path (pakai ini sebelum grep)
-6. Domain: **M04** keuangan · **M05** siklus huni · **M06** operasional · **M07** publik · **M08** deploy · **M15** IoT
-7. `docs/M13_CHANGELOG.md` — changelog + release notes
+Jalankan dari direktori yang disebut, jangan jalankan server/build untuk task docs-only.
 
-## Reasonix Memory System
-- 7 memory tersimpan: `project-master-stats`, `project-goals-checklist`, `docmap-135-files`, `common-pitfalls`, `iot-water-kwh-spec`, `staff-no-invoice-access`, `staff-portal-new-session-prompt`, `staff-portal-uiux-audit`
-- Gunakan `memory` tool untuk mencari sebelum bertindak
-- Simpan fakta baru dengan `remember` bila relevan lintas sesi
+| Direktori | Tujuan | Perintah |
+|---|---|---|
+| backend | Typecheck tanpa incremental cache | `npx tsc --noEmit --incremental false` |
+| backend | Build / unit | `npm run build` / `npm run test:unit` |
+| frontend | Build / unit | `npm run build` / `npx vitest run` |
+| backend / frontend | Dev (bila dibutuhkan) | `npm run start:dev` / `npm run dev` |
+| root | Artefak deploy lokal | `npm run bundle:deploy:fast` / `npm run make-deploy:fast` |
 
-## Session Management
-- `/new` bila topik berubah total atau >20 turn
-- Sesi optimal: 5-15 turn, 1-3 task terkait
-- Jangan `/new` untuk tugas sepele (1-3 turn)
-- Prefer `explore` / `research` subagent untuk wide-net codebase investigation
+Pembuatan artefak bukan deployment. DB UAT: 5433 `kost48_v3_pro`; DB produksi aktual dikonfirmasi melalui M19, bukan asumsi nama/port.
 
-## Notes
-- Jangan baca `docs/archieve/*`, `reference/*`, `backend/src/generated/*` (token bomb)
-- Commit & docs berbahasa Indonesia
-- 1 task = 1 commit, centang M12 + 1 baris di M13
-- No npm dep baru tanpa approval owner
-- No `git push` tanpa izin
+## Memory dan sesi
+
+Jika tool memory tersedia, gunakan sebagai petunjuk navigasi; jangan menganggap angka atau checklist memory lebih baru dari M12. Jika tidak tersedia, lanjut dengan dokumen lokal. Simpan fakta lintas sesi hanya bila tool tersedia. Sesi baru bila konteks panjang atau topik berubah total; jangan mengulang pekerjaan selesai.
+
+## Batas kerja
+
+- Laksanakan lingkup yang sudah diizinkan tanpa meminta persetujuan yang sama lagi. Izin edit docs mencakup sinkronisasi panduan/checklist, bukan perubahan kode atau server.
+- Jaga seluruh perubahan lama termasuk untracked. Dirty tree tidak mewajibkan commit WIP; jangan reset, stash, atau memindahkan perubahan tanpa izin.
+- Commit hanya jika diminta; satu task = satu commit terarah bila diizinkan. Jangan push/deploy tanpa izin. Jangan tambah npm dependency tanpa persetujuan owner.
+- Selesai task: perbarui M12 + M13; verifikasi sesuai lingkup. Docs-only cukup konsistensi/link/diff, bukan build aplikasi.
+- Pisahkan implementasi, bukti lokal, deployment, dan dampak runtime; typecheck bukan build atau UAT. Jangan mutasi DB produksi atau menampilkan secret.

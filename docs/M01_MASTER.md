@@ -10,17 +10,28 @@
 4. `docs/M00_CODEMAP.md` — peta modul ke file; pakai ini dulu sebelum grep liar ke seluruh repo.
 5. `docs/M14_AUDIT_UI_UX.md` — audit UI/UX aktif, benchmark eksternal terkurasi, bukti runtime lokal/produksi dan static-code Owner/Admin, serta pembagian kerja AO-00..AO-23.
 6. Domain khusus: `M04` keuangan, `M05` siklus huni, `M06` operasional, `M07` publik/marketing, `M08` deploy, `M09` AI Owner/Admin.
-7. `docs/UI_UX_OWNER_ADMIN.md` — standar aktif UI Owner/Admin: ringkas saat dilihat, lengkap saat dibuka.
+7. `docs/M17_PORTAL_FLOW_RINGKAS.md` — prinsip portal ringkas; `docs/M18_ATURAN_HARGA_KAMAR.md` — harga; `docs/M19_EFISIENSI_HOSTING_512MB.md` — prioritas EF dan data hosting.
 
 Hindari membaca arsip besar kecuali benar-benar perlu forensik: `docs/archieve/*`, file `*_STALE.md`, `reference/*`, dan `backend/src/generated/*`.
 
-## Status Terkini (2026-07-30)
+## Status Terkini (2026-09-06)
+
+- **Prioritas: Fase EF**, spesifikasi M19 dan checklist M12. Pertahankan satu proses API NestJS sebagai target; jumlah instance Passenger aktual UNKNOWN. Tidak ada rewrite atau penghapusan fitur bisnis.
+- **Fase MA — Batas Modul & Kesiapan Ekstraksi: DITUNDA.** Sebutan lama V5.7/V5.8/V5.9 arsitektur bukan versi aplikasi. Tidak ada izin membuat apps/libs, aplikasi Nest baru, worker, atau ekstraksi service.
+- **Implementasi lokal:** EF-01 telemetri, EF-03 Prisma singleton, EF-05 packaging tersedia di working tree; sebagian perubahan belum di-commit. Jangan menyamakan seluruh dirty tree dengan Fase EF.
+- **Verifikasi lokal:** audit statis EF-01/03/04/07 selesai; laporan Cline mencatat typecheck exit 0, bukan production build/UAT baru. Riwayat build EF-05 tetap di M13. Tidak ada pengukuran server pada sesi sinkronisasi ini.
+- **Deployment/dampak terukur: UNKNOWN.** Langkah berikutnya identitas artefak server dan pengamatan pasif EF-00/02 di M19 §9. SHA lokal tidak membuktikan isi artefak server, terutama bila bundle memuat uncommitted.
+- **Fase A:** menunggu konfirmasi infrastruktur dan kondisi deployment sebenarnya. **Fase AO:** backlog/gate pra-go-live yang terbuka tetap berlaku; audit Juli bukan bukti keadaan runtime September.
+- **Kesiapan produksi belum disahkan.** Checklist selesai pada fase historis tidak menutup gate EF/A/AO.
+- **Versi aplikasi lokal:** 1.3.0, Portal Ringkas, tanggal versi 2026-08-20 (`frontend/src/config/version.ts`). Label fase tidak melakukan bump versi.
+
+## Riwayat status 30 Juli 2026 (bukan antrean terbaru)
 
 - **Fase AO — Audit & Hardening UI/UX:** audit selesai pada 66 kombinasi route–viewport dan 74 route statis. Eksekusi masih terbuka; UAT berstatus RED karena dua migration pending serta crawl OWNER/ADMIN/STAFF belum tersedia. Detail: `docs/M14_AUDIT_UI_UX.md`.
 
-- **Release Pengumuman/Notifikasi P1-P3:** implementasi selesai dan build backend/frontend lulus. Keputusan bisnis, UAT, dan gate rilis ada di `docs/RELEASE_20260723_ANNOUNCEMENT_NOTIFICATIONS.md`.
+- **Release Pengumuman/Notifikasi P1-P3:** implementasi selesai dan build backend/frontend lulus. Keputusan bisnis, UAT, dan gate rilis ada di `docs/M13_CHANGELOG.md`.
 - **Perubahan lintas AI pada release ini:** uplift inventaris/fasilitas, quota utilitas berbasis periode sewa, dashboard IoT, P1-P3, hardening strict TypeScript backend, dan konsolidasi frontend/CSS telah direkonsiliasi di `M13_CHANGELOG.md`.
-- **Deploy pertama:** database produksi baru dan kosong, bukan drop database UAT dan bukan migrasi data testing. Sesudah go-live, perubahan database patch-only. Runbook otoritatif: `docs/DEPLOYMENT_ONLINE_20260723.md`.
+- **Deploy pertama:** database produksi baru dan kosong, bukan drop database UAT dan bukan migrasi data testing. Sesudah go-live, perubahan database patch-only. Runbook otoritatif: `docs/M08_DEPLOY_GO_LIVE.md`.
 
 - **Fase A** — Pra-Go-Live: blocked owner (deploy nyata menunggu server/domain/env)
 - **Fase B–U** — SELESAI (publik, owner, staff, AI, UI, audit, hardening, wizard, fasilitas)
@@ -38,8 +49,8 @@ Hindari membaca arsip besar kecuali benar-benar perlu forensik: `docs/archieve/*
 - **Finance:** Audit keuangan ultra LULUS — TB balanced, deposit MATCHED, 8 invarian PASS
 - **AI:** Fase G (G0-G9) + Fase J hardening + Fase K pasca-audit SELESAI — manual-only, OWNER/ADMIN, audit meta.ai
 - **G5+** — Perkuat OCR verifikasi KTP + fallback manual + bank data tenant: SELESAI
-- **Schema terkini:** 61 model / 73 enum; migration rilis terbaru `20260723000000_announcement_notification_delivery` menambah kategori notifikasi dan delivery pengumuman. Gunakan ledger migration, bukan `db push`, di produksi.
-- **Baseline kode terkini:** `8627289` — artefak build/session tracking sesudah perubahan P1-P3 dan refactor. Dokumentasi/runbook release di worktree ini perlu ikut di-commit bersama artefak yang disetujui sebelum deploy.
+- **Schema saat catatan Juli:** 61 model / 73 enum; migration rilis terbaru `20260723000000_announcement_notification_delivery` menambah kategori notifikasi dan delivery pengumuman. Gunakan ledger migration, bukan `db push`, di produksi.
+- **Baseline kode saat catatan Juli:** `8627289` — artefak build/session tracking sesudah perubahan P1-P3 dan refactor. Dokumentasi/runbook release di worktree ini perlu ikut di-commit bersama artefak yang disetujui sebelum deploy.
 
 ---
 
@@ -49,7 +60,7 @@ Hindari membaca arsip besar kecuali benar-benar perlu forensik: `docs/archieve/*
 - **Lokasi:** Jl. Hikmah V No. 48, Surabaya Barat (dekat Pakuwon Mall/PTC — bukan Ngagel, koreksi D-01)
 - **Stack:** NestJS + Prisma + PostgreSQL · React + Vite + React-Bootstrap + TanStack Query + Recharts
 - **Role:** OWNER / ADMIN / STAFF / TENANT (tidak ada SUPER_ADMIN/FINANCE)
-- **Status:** BELUM PUBLISH — data UAT/testing tidak dimigrasikan. Go-live pertama memakai database produksi BARU/kosong; database UAT tidak di-drop otomatis. Sesudah go-live, gunakan patch migration saja. **1 staf.** Bayar tunai+transfer.
+- **Status deployment terbaru:** UNKNOWN sampai identitas artefak/host diperoleh (M19 §9). Kebijakan go-live pertama: data UAT/testing tidak dimigrasikan. Go-live pertama memakai database produksi BARU/kosong; database UAT tidak di-drop otomatis. Sesudah go-live, gunakan patch migration saja. **1 staf.** Bayar tunai+transfer.
 - **Filosofi:** retensi > akuisisi; tenant = pengawas kualitas staf; auto-ops maksimal; laporan keuangan jujur.
 
 ---
@@ -67,7 +78,7 @@ Hindari membaca arsip besar kecuali benar-benar perlu forensik: `docs/archieve/*
 
 ---
 
-## 3. Indeks Dossier Domain
+## 3. Indeks dossier historis (nama pra-konsolidasi)
 
 | Dossier | Domain | Status |
 |---------|--------|--------|
@@ -125,7 +136,7 @@ Semua operasi dijalankan sequential dalam `runAll()` untuk menghindari race cond
 - **Backend:** NestJS + TypeScript + Prisma 7 + PostgreSQL. Auth JWT Bearer 24jam + Refresh Token (httpOnly cookie sejak M17). CORS + rate-limit in-memory. 46 modul.
 - **Frontend:** React 18 + Vite 5 + React-Bootstrap + TanStack Query + Recharts. ±50 route.
 - **DB:** `kost48_v3_pro` (UAT, port 5433). Produksi pertama memakai database baru yang ditetapkan owner (mis. `kost48_prod`), bukan asumsi/reuse database lama `kost48_v3`.
-- **61 Prisma model (73 enum):** `User`, `Tenant`, `Room`, `RoomFacility`, `Stay`, `TenantDepositLedgerEntry`, `MeterReading`, `IotDevice`, `IotIngestMessage`, `IotTelemetry`, `Invoice`, `InvoiceLine`, `InvoicePayment`, `PasswordResetToken`, `PaymentSubmission`, `Ticket`, `StaffRoutineTemplate`, `StaffRoutineAssignment`, `StaffRoutineCompletion`, `StaffWorkAudit`, `StaffPerformanceEvent`, `StaffReview`, `Announcement`, `InventoryItem`, `RoomItem`, `InventoryMovement`, `StaffFieldReport`, `RenewRequest`, `CheckoutRequest`, `WifiSale`, `Expense`, `FixedAsset`, `AssetDepreciationRun`, `AssetDepreciationLine`, `AppNotification`, `PushSubscription`, `AuditLog`, `AiDraft`, `ChartOfAccount`, `CashAccount`, `AccountingPeriod`, `OpeningBalanceBatch`, `OpeningBalanceLine`, `JournalEntry`, `JournalLine`, `RentRecognitionSchedule`, `RoomTransfer`, `LoyaltyPoint`, `LoyaltyReward`, `Redemption`, `PeerBehaviorReport`, `TenantReferral`, `Faq`, `OperationalSetting`, `AdditionalService`, `ServiceInterest`, `SatisfactionSurvey`, `MarketAnalysis`, `GuestPreferenceSurvey`, `ExternalReview`, `RefreshToken`.
+- **62 Prisma model (74 enum; hitungan schema lokal 6 Sep 2026, daftar berikut navigasi):** `User`, `Tenant`, `Room`, `RoomFacility`, `Stay`, `TenantDepositLedgerEntry`, `MeterReading`, `IotDevice`, `IotIngestMessage`, `IotTelemetry`, `Invoice`, `InvoiceLine`, `InvoicePayment`, `PasswordResetToken`, `PaymentSubmission`, `Ticket`, `StaffRoutineTemplate`, `StaffRoutineAssignment`, `StaffRoutineCompletion`, `StaffWorkAudit`, `StaffPerformanceEvent`, `StaffReview`, `Announcement`, `InventoryItem`, `RoomItem`, `InventoryMovement`, `StaffFieldReport`, `RenewRequest`, `CheckoutRequest`, `WifiSale`, `Expense`, `FixedAsset`, `AssetDepreciationRun`, `AssetDepreciationLine`, `AppNotification`, `PushSubscription`, `AuditLog`, `AiDraft`, `ChartOfAccount`, `CashAccount`, `AccountingPeriod`, `OpeningBalanceBatch`, `OpeningBalanceLine`, `JournalEntry`, `JournalLine`, `RentRecognitionSchedule`, `RoomTransfer`, `LoyaltyPoint`, `LoyaltyReward`, `Redemption`, `PeerBehaviorReport`, `TenantReferral`, `Faq`, `OperationalSetting`, `AdditionalService`, `ServiceInterest`, `SatisfactionSurvey`, `MarketAnalysis`, `GuestPreferenceSurvey`, `ExternalReview`, `RefreshToken`.
 
 ---
 

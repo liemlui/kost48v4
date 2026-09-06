@@ -1,5 +1,19 @@
 # KOST48 V5 — Keputusan Owner
 
+## Keputusan arah aplikasi — 6 September 2026
+
+Keputusan owner pada sesi penyelarasan dokumentasi; berlaku atas referensi arsitektur/urutan kerja yang lebih lama.
+
+- **ARAH-EF:** Fase EF diprioritaskan. Audit lokal diterima sebagai audit statis dan typecheck; EF-00/02 menunggu identitas deployment dan pengukuran hosting. Jangan ulang implementasi EF-01/03/05 hanya karena server belum terverifikasi.
+- **ARAH-SATU-API:** pertahankan modular monolith dan target satu proses API NestJS, PostgreSQL, frontend serta flow bisnis yang ada. Jumlah instance Passenger di host belum diketahui; target ini bukan bukti runtime.
+- **ARAH-MA-TUNDA:** rencana lama V5.7/V5.8/V5.9 arsitektur dinamai **Fase MA — Batas Modul & Kesiapan Ekstraksi**, ditunda. Audit diterima sebagai bahan perencanaan, bukan PASS kesiapan migrasi. Belum ada izin apps/libs, aplikasi Nest baru, ekstraksi service, worker, atau perubahan model proses. EF-09 hanya gate keputusan masa depan bila pengukuran membuktikan kebutuhan.
+- **ARAH-TRANSAKSI:** accounting, deposit, dan audit yang perlu atomisitas tetap pada transaksi pemanggil sekarang. Kepemilikan shared service ditunda; pasca-commit bukan otomatis aman dipisahkan dan outbox bukan solusi wajib tunggal.
+- **ARAH-DOKUMEN:** seri M00–M19 dipertahankan. M12 satu checklist eksekusi; M19 spesifikasi/bukti EF; M08 runbook; M13 sejarah. Permintaan sinkronisasi mencakup panduan agent/dokumen, bukan kode, deploy, DB, atau bump versi.
+- **ARAH-BUKTI:** catat implementasi, verifikasi lokal, deployment, dan dampak terukur secara terpisah. Kode uncommitted bisa saja masuk artefak; keberadaan patch di server tetap UNKNOWN sampai artefaknya diverifikasi. Fase A dan gate AO yang terbuka tidak dibatalkan.
+- **ARAH-HOST:** dahulukan identitas artefak dan pengamatan pasif. Uji aktif (restart, burst, upload, cron, canary), konfigurasi server dan mutasi DB memerlukan izin terkait. Jangan minta nilai secret atau menghubungi support atas nama owner tanpa izin.
+
+Checklist aktif: [M12](M12_CHECKLIST_CHANGELOG.md#antrian-eksekusi-aktif). Tabel hosting: [M19](M19_EFISIENSI_HOSTING_512MB.md#9-pencatatan-hosting-ef-00-dan-ef-02).
+
 > File hasil pemampatan dari dokumen root `docs/`. File sumber lama sudah diarsipkan ke `docs/archieve/2026-06-16_root_docs_pre_M/`.
 
 ## Tujuan

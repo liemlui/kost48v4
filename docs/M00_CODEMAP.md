@@ -1,17 +1,20 @@
 # CODEMAP — Peta Navigasi Kode KOST48 V5 (untuk AI)
 
+> **Rujukan arah aktif (6 Sep 2026):** [M02](M02_KEPUTUSAN_OWNER.md) untuk keputusan owner; [M12](M12_CHECKLIST_CHANGELOG.md#antrian-eksekusi-aktif) untuk satu checklist/urutan kerja; [M19](M19_EFISIENSI_HOSTING_512MB.md) untuk Fase EF. **EF diprioritaskan, satu proses API sebagai target, Fase MA ditunda.**
+> Dokumen ini menyimpan spesifikasi domain dan bukti bertanggal. Status PASS/selesai pada audit lama hanya berlaku pada lingkup/waktu yang disebut, bukan bukti deployment atau runtime terbaru. Judul sumber pra-konsolidasi adalah riwayat; jangan membuat ulang file lama atau mengulang checklist selesai.
+
 > **Tujuan:** lompat langsung ke file yang benar tanpa scan buta. **Ini peta NAVIGASI, bukan sumber kebenaran perilaku** — detail aturan/flow ada di M-file domain (kolom "Detail"). Verifikasi simbol via Grep sebelum edit; path bisa bergeser.
-> Stack: backend NestJS+Prisma+PostgreSQL (`backend/`), frontend React+Vite (`frontend/`). 46 modul · 61 model · 24 grup halaman.
+> Stack: backend NestJS+Prisma+PostgreSQL (`backend/`), frontend React+Vite (`frontend/`). 46 modul · 62 model (lokal 6 Sep) · 24 grup halaman.
 
 ## Konvensi (sekali paham, berlaku semua modul)
 - **Backend modul:** `backend/src/modules/<nama>/` berisi `<nama>.controller.ts` (route `/<nama>`), `<nama>.service.ts` (logika), `<nama>.module.ts` (wiring), `dto/`. Modul besar dipecah multi-service (lihat tabel).
 - **Infra backend:** `backend/src/prisma/` (PrismaService), `backend/src/auth/` (JWT+guard role + RefreshToken), `backend/src/audit-log/` (AuditLog writer), `backend/src/common/` (`guards/ decorators/ filters/ interceptors/ enums/ utils/ business/`), `backend/src/main.ts` (bootstrap, CORS, prefix `/api`).
 - **Frontend halaman:** `frontend/src/pages/<grup>/<Halaman>Page.tsx`; komponen reusable `frontend/src/components/`; util `frontend/src/utils/`.
-- **Schema:** `backend/prisma/schema.prisma` (61 model, 73 enum). Generated client `backend/src/generated/prisma/` = **JANGAN baca** (32MB, regen `prisma generate`).
+- **Schema:** `backend/prisma/schema.prisma` (62 model, 74 enum; lokal 6 Sep 2026). Generated client `backend/src/generated/prisma/` = **JANGAN baca** (32MB, regen `prisma generate`).
 
 ## Update implementasi 2026-07-23
 
-Baseline kode `main` adalah `8627289`. Rangkuman lintas perubahan AI pada release ini ada di `M13_CHANGELOG.md` dan `RELEASE_20260723_ANNOUNCEMENT_NOTIFICATIONS.md`.
+Baseline historis 23 Juli 2026 adalah `8627289`; HEAD sesi berikutnya harus diperiksa dari Git. Rangkuman lintas perubahan AI pada release ini ada di `M13_CHANGELOG.md` dan `M13_CHANGELOG.md`.
 
 - Backend sekarang diperiksa dengan `strictNullChecks`, `noImplicitAny`, `strictFunctionTypes`, dan `strictBindCallApply`; gunakan `common/utils/error-handler.ts` untuk pola log/rethrow yang seragam.
 - `TenantBookingsQueryService` sudah dihapus. Jalur booking memakai service aktif dan helper bersama di `tenant-bookings/`; jangan membuat ulang service query lama.
@@ -105,7 +108,7 @@ Baseline kode `main` adalah `8627289`. Rangkuman lintas perubahan AI pada releas
 | ancillary-revenue | `ancillary-revenue/ancillary-revenue.service.ts` | Pendapatan tambahan dinamis (OC-01) |
 
 ## Frontend grup halaman (`frontend/src/pages/`)
-Standar struktur dan progressive disclosure Owner/Admin: `docs/UI_UX_OWNER_ADMIN.md`.
+Standar struktur dan progressive disclosure Owner/Admin: `docs/M17_PORTAL_FLOW_RINGKAS.md`.
 `public` katalog+booking publik · `auth` login · `portal` area tenant (MyStay, invoice, loyalty, manual) · `dashboard` (DashboardAdmin owner/admin) · `stays` · `bookings` · `renew-requests` · `invoices` · `payments` · `finance` (AccountingSetup) · `reports` · `rooms` · `resources`+`admin` (CRUD generik via ConfiguredResourcePage/SimpleCrudPage) · `tickets` · `staff`+`staff-routines` · `services` · `marketing` · `loyalty` · `notifications`+`reminders` · `settings` · `profile` · `components/ai` (Fase G reusable AI button/drawer).
 
 ## Index model (61) — grup → `schema.prisma`

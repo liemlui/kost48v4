@@ -1,5 +1,8 @@
 # M15 — IoT KOST48 (Spesifikasi Lengkap)
 
+> **Rujukan arah aktif (6 Sep 2026):** [M02](M02_KEPUTUSAN_OWNER.md) untuk keputusan owner; [M12](M12_CHECKLIST_CHANGELOG.md#antrian-eksekusi-aktif) untuk satu checklist/urutan kerja; [M19](M19_EFISIENSI_HOSTING_512MB.md) untuk Fase EF. **EF diprioritaskan, satu proses API sebagai target, Fase MA ditunda.**
+> Dokumen ini menyimpan spesifikasi domain dan bukti bertanggal. Status PASS/selesai pada audit lama hanya berlaku pada lingkup/waktu yang disebut, bukan bukti deployment atau runtime terbaru. Judul sumber pra-konsolidasi adalah riwayat; jangan membuat ulang file lama atau mengulang checklist selesai.
+
 > **Sumber:** Tuya IoT Console ekspor 2026-07-10 · ESP32-C3 firmware  
 > **Total perangkat:** 27 Tuya (17 Online, 10 Offline) + 2-3 ESP32-C3  
 > **Status implementasi:** foundation done (2026-07-23), telemetry monitoring-only, no auto-billing  

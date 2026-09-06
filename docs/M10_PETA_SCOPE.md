@@ -1,5 +1,8 @@
 # PETA SCOPE — KOST48 V5
 
+> **Rujukan arah aktif (6 Sep 2026):** [M02](M02_KEPUTUSAN_OWNER.md) untuk keputusan owner; [M12](M12_CHECKLIST_CHANGELOG.md#antrian-eksekusi-aktif) untuk satu checklist/urutan kerja; [M19](M19_EFISIENSI_HOSTING_512MB.md) untuk Fase EF. **EF diprioritaskan, satu proses API sebagai target, Fase MA ditunda.**
+> Dokumen ini menyimpan spesifikasi domain dan bukti bertanggal. Status PASS/selesai pada audit lama hanya berlaku pada lingkup/waktu yang disebut, bukan bukti deployment atau runtime terbaru. Judul sumber pra-konsolidasi adalah riwayat; jangan membuat ulang file lama atau mengulang checklist selesai.
+
 > **Tujuan:** lompat ke file yang tepat berdasarkan ROLE pengguna atau FLOW bisnis. Dipakai bersama `M00_CODEMAP.md` (navigasi modul) dan `M12_CHECKLIST_CHANGELOG.md` (antrian task).
 
 ---
@@ -102,7 +105,7 @@
 | Layer | File | Catatan |
 |-------|------|---------|
 | BE module | `backend/src/modules/iot/` | IoT controller, Tuya client/polling, registry credential ESP32, water ingest, dan pembaruan tenant terikat (sudah dibuat) |
-| BE cron | `backend/src/modules/iot/iot-polling.service.ts` | Poll Tuya interval atau `POST /api/iot/tuya/cron` setiap 10 menit |
+| BE cron | `backend/src/modules/iot/iot-polling.service.ts` | Kemampuan polling/cron ada di kode; profil shared hosting memakai on-demand dan timer OFF, tanpa cron Tuya (M08/M19) |
 | BE model | `backend/prisma/schema.prisma` | `IotDevice`, `IotIngestMessage`, `IotTelemetry`; telemetry dipisahkan dari `MeterReading` billing |
 | FE tenant | `frontend/src/pages/portal/EnergyPage.tsx` | Timeline konsumsi dan quota berdasarkan periode sewa lunas; hanya estimasi/monitoring |
 | Docs | `M14_IOT_TUYA_DEVICES.md` · `M15_IOT_KWH_WATER_IMPLEMENTATION_PLAN.md` | Inventaris perangkat Tuya, rollout, dan spek implementasi |

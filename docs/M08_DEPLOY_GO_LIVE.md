@@ -1,5 +1,15 @@
 # KOST48 V5 — Deploy, PWA, Go-Live, Akun Dev
 
+## Arah deploy aktif — 6 September 2026
+
+**Fase EF diprioritaskan; satu proses API sebagai target; Fase MA ditunda.** Dokumen ini runbook, bukan izin menjalankan server/DB. Kelayakan 512 MB dan status deployment belum disahkan. Checklist otoritatif [M12](M12_CHECKLIST_CHANGELOG.md); keputusan [M02](M02_KEPUTUSAN_OWNER.md); spesifikasi/tabel hosting [M19 §9](M19_EFISIENSI_HOSTING_512MB.md#9-pencatatan-hosting-ef-00-dan-ef-02).
+
+- Langkah sekarang: identitas artefak dan pengamatan pasif; pastikan EF-01/03/05 benar-benar masuk artefak sebelum menilai dampaknya. Kode lokal uncommitted bisa ikut paket; SHA saja tidak cukup.
+- Audit statis/typecheck lokal selesai bukan deployment/build/UAT server PASS. Fase A dan gate AO yang terbuka tetap harus ditutup dengan bukti.
+- Profil combined adalah baseline kode lokal; static split masih rencana EF-04/06 setelah kemampuan host jelas. Build SPA/gambar kamar publik dapat dipertimbangkan; jangan membuka seluruh uploads atau bukti bayar/foto privat sebagai static publik.
+- AutoOps target interval OFF; cron token-protected hanya sesuai izin operasional. IoT Tuya on-demand, **tanpa cron Tuya**. Flag AI berbeda dari key DB/env; push bisa memakai konfigurasi DB. Jangan hapus key untuk mencoba mematikan fitur.
+- Petunjuk deploy/seed/restart di bagian lama adalah prosedur bersyarat, bukan tugas yang otomatis diizinkan. Ukur identitas server/DB terlebih dahulu; jangan reset/drop UAT/produksi.
+
 > File hasil pemampatan dari dokumen root `docs/`. File sumber lama sudah diarsipkan ke `docs/archieve/2026-06-16_root_docs_pre_M/`.
 
 ## Tujuan
@@ -14,21 +24,21 @@ Runbook deploy/PWA, checklist go-live, dan appendix akun dummy untuk DB pengemba
 
 ## Update 2026-07-08 — GATE-KTP-ENV Fix + Deploy Docs
 
-Gate KTP diam-diam OFF di produksi telah diperbaiki (`settings.service.ts` semai nilai awal row dari env). Panduan deploy di §5 ditambah catatan "env = nilai awal, selanjutnya UI Settings → Operasional". Runbook onboarding tenant nyata sudah tersedia di `docs/RUNBOOK_ONBOARDING_TENANT_NYATA.md`.
+Gate KTP diam-diam OFF di produksi telah diperbaiki (`settings.service.ts` semai nilai awal row dari env). Panduan deploy di §5 ditambah catatan "env = nilai awal, selanjutnya UI Settings → Operasional". Runbook onboarding tenant nyata sudah tersedia di `docs/GO_LIVE_DATA_ISI.md`.
 
 ## Update 2026-07-23 — Otoritas Deploy Online dan P1-P3
 
-Bagian deploy lama di bawah adalah riwayat teknis dan tidak boleh dipakai tanpa pembaruan ini. Runbook aktif adalah `docs/DEPLOYMENT_ONLINE_20260723.md`.
+Bagian deploy lama di bawah adalah riwayat teknis dan tidak boleh dipakai tanpa pembaruan ini. Runbook aktif adalah M08 ini bersama keputusan M02, checklist M12, dan gate/tabel M19. Dokumen deployment Juli yang disebut pada riwayat tidak tersedia sebagai file aktif; jangan menunggu atau membuat ulang file itu.
 
 - Go-live pertama: provision database produksi **baru dan kosong**. Jangan drop database UAT; jangan migrasikan data testing atau menjalankan seed historis.
 - Sesudah go-live: patch migration saja. Untuk database berisi data nyata, `prisma db push`, reset, penghapusan `_prisma_migrations`, dan `sql/seed.sql` dilarang.
 - Endpoint cron AutoOps yang benar adalah **`POST /api/auto-ops/cron`** dengan header `X-Cron-Token`.
-- PWA Web Push sudah diimplementasikan. Pengumuman terjadwal diproses oleh `AnnouncementSweepService`; kategori notifikasi tersimpan di database. Detail rilis/UAT: `docs/RELEASE_20260723_ANNOUNCEMENT_NOTIFICATIONS.md` dan `docs/UAT_PUSH_NOTIFICATIONS.md`.
+- PWA Web Push sudah diimplementasikan. Pengumuman terjadwal diproses oleh `AnnouncementSweepService`; kategori notifikasi tersimpan di database. Detail rilis/UAT: `docs/M13_CHANGELOG.md` dan `docs/M06_OPERASIONAL.md`.
 - Backend kini memakai pemeriksaan null/implicit-any yang ketat; frontend memuat CSS dari satu entry `styles.css`. Gate yang masih terbuka: uji bootstrap guard database pada DB kosong, perbaikan pencarian tenant booking, dan UAT visual lintas portal setelah konsolidasi CSS. Budget CSS release saat ini 135 KB gzip; angka 80 KB di riwayat PWA lama bukan gate aktif.
 
 ## Update 2026-06-17 — AUDIT KEUANGAN ULTRA ✅
 
-**READY FOR GO-LIVE.** Audit keuangan ultra teliti LULUS: Trial balance balanced, deposit MATCHED, 8 invarian PASS, 0 unmapped transactions. DO-NOT-TOUCH blocks UTUH. Dead code minor `postPaymentReversalTx`. Runbook `M08 §3` smoke + env checklist siap.
+**Hasil audit keuangan 17 Juni 2026 (historis; bukan sign-off go-live sekarang).** Audit saat itu mencatat: Trial balance balanced, deposit MATCHED, 8 invarian PASS, 0 unmapped transactions. DO-NOT-TOUCH blocks UTUH. Dead code minor `postPaymentReversalTx`. Runbook `M08 §3` smoke + env checklist siap.
 
 ## Update 2026-06-19 - Env Fase G AI Owner/Admin
 
@@ -104,7 +114,7 @@ npx --yes prisma@7.8.0 migrate deploy  # replay seluruh migration dari baseline
 - **Squash baseline (2026-06-14):** rantai migration lama (tak lengkap) di-arsip ke `prisma/_archive_migrations_pre_baseline/`; baseline tetap awal rantai dan harus diikuti semua migration setelahnya, termasuk release 2026-07-23. Jalankan `migrate deploy`, bukan file baseline secara manual.
 - **Pagar database di luar Prisma:** trigger, CHECK constraint, advisory lock generate ticket-number, indeks tambahan, dan carve-out deposit historis tidak boleh diasumsikan sudah ikut migration. Sebelum go-live, artefak bootstrap khusus schema harus diekstrak/direview dan diuji pada database kosong; `sql/seed.sql` tidak boleh dipakai karena menyertakan data.
 - **Rehearsal 2026-06-13:** hasil `db push` terdahulu hanya bukti historis. Ini bukan izin memakai `db push` pada deployment produksi sekarang.
-- **DB yang sudah ada tapi dibangun via `db push` (mis. UAT lama):** jangan menghapus ledger atau menjalankan resolve secara buta. Produksi baru tidak memakai DB tersebut; bila suatu DB nyata perlu dipertahankan, gunakan jalur patch dan review ledger/schema terlebih dahulu sesuai `DEPLOYMENT_ONLINE_20260723.md`.
+- **DB yang sudah ada tapi dibangun via `db push` (mis. UAT lama):** jangan menghapus ledger atau menjalankan resolve secara buta. Produksi baru tidak memakai DB tersebut; bila suatu DB nyata perlu dipertahankan, gunakan jalur patch dan review ledger/schema terlebih dahulu sesuai `M08_DEPLOY_GO_LIVE.md` + gate `M19_EFISIENSI_HOSTING_512MB.md`.
 
 **Tidak ada backfill E-2 atau migrasi data UAT.** Seed hanya data fondasi: COA, periode OPEN, opening balance produksi, dan CashAccount.
 
@@ -300,7 +310,7 @@ New-NetFirewallRule -DisplayName "KOST48 LAN frontend 5173" -Direction Inbound -
 
 **Kesiapan host (owner cek 2026-06-13):** Node.js App ✅ (versi dukung) · PostgreSQL ✅ · SSH ✅ · AutoSSL ✅. **#4 TERJAWAB (IDwebhost 2026-06-14):** shared hosting Passenger **TIDAK always-on** (proses Node di-idle/restart saat sepi; tak ada minimum-instances/keep-alive). **Cron Job DIDUKUNG** via cPanel menu "Cron Jobs". → Auto-ops WAJIB digerakkan cron eksternal (in-process timer tak andal di idle-sleep).
 
-**Resource host (statistik owner 2026-07-04):** RAM LVE **512MB** (139MB terpakai situs lama) · inode **46,7rb/75rb (62%)** · entry process 5/15 · Postgres OK. **Kesimpulan: CUKUP** dengan syarat: (a) **JANGAN build di server** (tsc/npm ci penuh bisa OOM + devDeps boros inode) → paket PREBUILT dari lokal; (b) situs lama di-off-kan (bebaskan RAM+inode); (c) heap Node dibatasi `NODE_OPTIONS=--max-old-space-size=192` via env cPanel (flag di `start:prod` package.json TIDAK dipakai Passenger). Estimasi runtime: idle 120-180MB, puncak ~250-300MB. Prisma client = WASM query compiler + driver adapter pg → platform-independent, TANPA `prisma generate` di server (binary `*.node` dibuang dari paket).
+**Resource host (statistik owner 2026-07-04):** RAM LVE **512MB** (139MB terpakai situs lama) · inode **46,7rb/75rb (62%)** · entry process 5/15 · Postgres OK. **Koreksi 6 Sep 2026: kecukupan BELUM terbukti; EF-00/02 harus diukur.** Rekomendasi teknis historis yang perlu diverifikasi: (a) **JANGAN build di server** (tsc/npm ci penuh bisa OOM + devDeps boros inode) → paket PREBUILT dari lokal; (b) situs lama di-off-kan (bebaskan RAM+inode); (c) heap Node dibatasi `NODE_OPTIONS=--max-old-space-size=192` via env cPanel (flag di `start:prod` package.json TIDAK dipakai Passenger). Estimasi runtime: idle 120-180MB, puncak ~250-300MB. Prisma client = WASM query compiler + driver adapter pg → platform-independent, TANPA `prisma generate` di server (binary `*.node` dibuang dari paket).
 
 **Status kode:** ✅ Combined single-server SUDAH dibangun (entry `dist/main.js` serve `client/` + API). ✅ Paket deploy ramping & script cPanel tersedia. ✅ **Endpoint cron auto-ops SUDAH dibuat.**
 - **Auto-ops via cron (SELESAI):** di shared hosting set **`AUTO_OPS_ENABLED=false`** (matikan setInterval in-process yang tak andal) + **`AUTO_OPS_CRON_TOKEN=<rahasia panjang>`**. Endpoint publik token-protected: **`POST /api/auto-ops/cron`** dengan header `X-Cron-Token: <rahasia>` saja; token query tidak didukung. Panggilan ini sekaligus membangunkan app + menjalankan `runAll`. cPanel **Cron Jobs** tiap 5–10 menit:
@@ -314,7 +324,7 @@ New-NetFirewallRule -DisplayName "KOST48 LAN frontend 5173" -Direction Inbound -
 4. **Setup Node.js App**: Node 22, **Application startup file = `dist/main.js`**, env **`NODE_OPTIONS=--max-old-space-size=192`** (WAJIB via env cPanel, tidak bisa via `.env`).
 5. **SSH (di Node venv): tidak ada `npm install`/`npm ci`/Prisma CLI.** Runtime `node_modules` sudah ada di bundle dan server hanya membaca `.env` lalu menjalankan `dist/main.js`.
 6. **Env**: salin `.env.example` → `.env` di root app (dibaca app via @nestjs/config + script seed): `DATABASE_URL`(postgres cPanel), `JWT_SECRET`(baru, kuat), `NODE_ENV=production`, `CORS_ORIGIN=https://domain` (same-origin → domain saja), **`AUTO_OPS_ENABLED=false`** (shared hosting: digerakkan cron, bukan setInterval), **`AUTO_OPS_CRON_TOKEN=<rahasia panjang>`**, **`KTP_ACTIVATION_GATE_ENABLED=true`** (L-4 — default OFF, wajib ON di produksi), VAPID (opsional, push). (PORT diatur Passenger.)
-7. **Schema+seed (sekali):** bundle tidak mengubah database. Verifikasi/putuskan patch database terpisah, lalu jalankan bootstrap guard yang telah diuji (bukan `sql/seed.sql`). Bila DB telah sah, seed **OWNER** sekali dengan `OWNER_EMAIL=... OWNER_PASSWORD=... node scripts/seed-owner.js`, lalu login OWNER untuk seed COA (`POST /api/accounting/default-coa/seed`) + periode OPEN + CashAccount. Lihat `DEPLOYMENT_ONLINE_20260723.md` untuk gate lengkap.
+7. **Schema+seed (sekali):** bundle tidak mengubah database. Verifikasi/putuskan patch database terpisah, lalu jalankan bootstrap guard yang telah diuji (bukan `sql/seed.sql`). Bila DB telah sah, seed **OWNER** sekali dengan `OWNER_EMAIL=... OWNER_PASSWORD=... node scripts/seed-owner.js`, lalu login OWNER untuk seed COA (`POST /api/accounting/default-coa/seed`) + periode OPEN + CashAccount. Lihat `M08_DEPLOY_GO_LIVE.md` + gate `M19_EFISIENSI_HOSTING_512MB.md` untuk gate lengkap.
 8. **Restart App** (Passenger pakai `dist/main.js`). **AutoSSL** domain → HTTPS (PWA penuh).
 9. **Auto-ops**: pasang cPanel **Cron Job** tiap 5–10 menit memanggil `POST /api/auto-ops/cron` dgn `X-Cron-Token` (perintah lengkap di "Status kode" atas). Verifikasi: jalankan manual sekali → cek notif/sweeper berjalan.
 10. Smoke: `https://domain/` (frontend) · `https://domain/api/public/rooms` 200 · login OWNER · trial-balance balanced · reconciliation-lite mismatch=0 · cPanel **Resource Usage: memory faults = 0** (bila ada fault → turunkan `NODE_OPTIONS` ke 160 atau upgrade paket).
@@ -324,7 +334,7 @@ New-NetFirewallRule -DisplayName "KOST48 LAN frontend 5173" -Direction Inbound -
 
 ## Bagian 2 - `docs/GO_LIVE_CHECKLIST.md`
 
-> **ARSIP LAN — bukan prosedur produksi.** Jangan gunakan `golive:setup`, nama database, seed, atau instruksi env di bagian lama ini untuk online deployment. Untuk production gunakan hanya `DEPLOYMENT_ONLINE_20260723.md` dan `DEPLOY_CPANEL_STEP_BY_STEP.md`.
+> **ARSIP LAN — bukan prosedur produksi.** Jangan gunakan `golive:setup`, nama database, seed, atau instruksi env di bagian lama ini untuk online deployment. Untuk production gunakan hanya `M08_DEPLOY_GO_LIVE.md` + gate `M19_EFISIENSI_HOSTING_512MB.md` dan tabel hosting M19 bagian 9.
 
 ### GO-LIVE CHECKLIST — LAN dulu (2026-06-15)
 **Target terpilih:** Lokal/LAN via `npm run golive` (uji di jaringan rumah/kos sebelum publik internet). Detail lengkap & opsi cPanel/VPS di `04_DEPLOY_AND_PWA.md`. **Kode siap:** Fase 1–5 + audit menyeluruh tuntas, `tsc` 0, unit 47/47, tak ada 🔴 bug.
@@ -540,7 +550,7 @@ Untuk shared hosting/Passenger, gunakan cron setiap 5 menit:
 
 - Endpoint harus `POST`, bukan `GET` dan bukan token query string.
 - Cron ini menjalankan dispatch announcement terjadwal dan push outbox selain operasi AutoOps lainnya.
-- Jalankan `docs/UAT_PUSH_NOTIFICATIONS.md` setelah HTTPS dan VAPID aktif. Push boleh ditunda bila VAPID belum siap, tetapi inbox in-app tetap wajib berfungsi.
+- Jalankan `docs/M06_OPERASIONAL.md` setelah HTTPS dan VAPID aktif. Push boleh ditunda bila VAPID belum siap, tetapi inbox in-app tetap wajib berfungsi.
 
 #### Smoke test dan bukti rilis
 
@@ -563,7 +573,7 @@ Untuk shared hosting/Passenger, gunakan cron setiap 5 menit:
 ## Appendix B — Deploy cPanel Step-by-Step
 
 
-> Runbook ini berlaku untuk release setelah 2026-07-23. Keputusan database dan gate lengkap ada di `docs/DEPLOYMENT_ONLINE_20260723.md`; bila ada konflik, dokumen tersebut menang.
+> Runbook ini berlaku untuk release setelah 2026-07-23. Keputusan database dan gate lengkap ada di `docs/M08_DEPLOY_GO_LIVE.md`; bila ada konflik, dokumen tersebut menang.
 
 #### Keputusan sebelum mulai
 
@@ -677,7 +687,7 @@ Kill/rollback IoT: pastikan `IOT_TUYA_POLL_ENABLED=false`, tidak ada cron `iot/t
 - Pastikan endpoint kompatibilitas klien lama `/api/iot/stream/tenant/raw` merespons `204` dan tidak membuka `text/event-stream`.
 - Pastikan `/sw.js`, `/version.json`, dan navigasi HTML mengirim `Cache-Control: no-store`; aset hash `/assets/*` harus `immutable`.
 - Uji pengumuman langsung dan terjadwal; pastikan `dispatchedAt` hanya terisi sekali.
-- Jalankan `docs/UAT_PUSH_NOTIFICATIONS.md` bila VAPID/push diaktifkan.
+- Jalankan `docs/M06_OPERASIONAL.md` bila VAPID/push diaktifkan.
 - Catat SHA rilis, waktu, hasil migration, hasil smoke, dan lokasi backup tanpa menyimpan secret/PII.
 
 #### Redeploy setelah go-live

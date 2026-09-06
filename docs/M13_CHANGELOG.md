@@ -1,5 +1,50 @@
 # KOST48 V5 — M13 Changelog
 
+## 2026-09-06 — Sinkronisasi dokumentasi dan arah EF/MA
+
+- Atas permintaan owner, panduan agent dan seri M00–M19 diselaraskan: Fase EF prioritas, target satu proses API, Fase MA ditunda; versi aplikasi tetap 1.3.0. M02 mencatat keputusan, M12 menjadi checklist tunggal, M19 menyimpan tabel deployment/resource UNKNOWN, dan M08 menjadi runbook aktif.
+- Audit statis/typecheck lokal dibedakan dari build/UAT, deployment dan dampak terukur; klaim host 512 MB cukup dicabut sampai bukti host tersedia. EF-01/03/05 tetap tercatat tersedia lokal, EF-04/07 baru pemetaan, bukan implementasi/runtime PASS.
+- Checklist EF yang rusak/berulang dirapikan, rujukan aktif yang diketahui tidak tersedia dialihkan ke dokumen M yang sesuai, audit portal Juli dari CLAUDE dipertahankan di lampiran historis M14. Form go-live mengarah ke tabel M19 dan tidak meminta password di dokumen.
+- **Verifikasi sesi docs:** pemeriksaan konsistensi/link/diff dan hash perubahan non-dokumentasi. Build, typecheck, UAT dan pengukuran host tidak dijalankan ulang; tidak ada edit kode, deploy, mutasi DB, commit, atau push.
+
+> Entri di bawah adalah riwayat sesuai tanggal dan lingkupnya. Koreksi 6 Sep: idle 120–180/puncak 250–300 MB tercantum di M08 sebagai estimasi lama, bukan pengukuran; cakupan EF sekarang EF-00..EF-09. Klaim PASS/hitungan test/artefak lama bukan bukti versi server sekarang.
+
+## 2026-09-06 — EF-05: packaging deploy menjadi satu jalur kanonik
+
+- `scripts/bundle-deploy.mjs` disederhanakan menjadi wrapper kompatibilitas yang mendelegasikan seluruh build, install, verifikasi, dan arsip ke `scripts/make-deploy.mjs`; tidak ada lagi `npm ci` dan pembuatan TGZ ganda.
+- Generator tidak lagi menulis README lama yang langsung dioverride. README final hanya memiliki satu sumber dan tidak menawarkan cron IoT yang bertentangan dengan M08; mode shared hosting tetap `IOT_TUYA_POLL_ENABLED=false` dan pembacaan Tuya on-demand.
+- **Verifikasi:** `npm run make-deploy` ✅ (frontend PWA, backend build, 176 runtime packages, arsip 9.639 file); `npm run bundle:deploy:fast` ✅; grep README/scripts tanpa cron IoT ✅.
+
+**Perubahan:** `scripts/bundle-deploy.mjs`, `scripts/make-deploy.mjs`, `deploy/README-DEPLOY.md`, `docs/M12_CHECKLIST_CHANGELOG.md`.
+
+## 2026-09-06 — EF-01: telemetri memori lokal opsional
+
+- Menambahkan `MemoryTelemetryService` untuk snapshot startup dan interval opsional berisi RSS, heap, external, array buffers, heap limit, PID, dan uptime.
+- Menambahkan interceptor request opsional untuk mencatat label operasi, status HTTP, dan durasi; semua output satu baris JSON tanpa secret/PII dan tanpa endpoint baru.
+- Default tetap OFF (`MEMORY_TELEMETRY_ENABLED=false`); interval memakai `unref()` agar tidak menahan proses saat shutdown.
+- **Verifikasi:** backend `npx tsc --noEmit` ✅. EF-00/EF-02 (baseline LVE dan workload host) tetap menunggu pengukuran di server.
+
+**Perubahan:** `backend/src/common/telemetry/memory-telemetry.service.ts`, `backend/src/common/telemetry/memory-telemetry.interceptor.ts`, `backend/src/common/config/app-config.service.ts`, `backend/src/app.module.ts`, `docs/M19_EFISIENSI_HOSTING_512MB.md`, `docs/M12_CHECKLIST_CHANGELOG.md`.
+
+## 2026-09-06 — EF-00: inventaris baseline lokal
+
+- Dicatat SHA `cf268716dd89ee08ff5a6318499eba2c8e8107cf`, branch `main`, working tree `dirty`, entrypoint `dist/main.js`, Node lokal `v22.15.0`, dan Prisma `7.8.0`.
+- Verifikasi source tidak memakai `cluster`/`worker_threads`; jumlah instance Passenger, PMEM/fault LVE, command efektif, dan dokroot tetap UNKNOWN sampai diukur di host.
+- **Status:** EF-00 belum ditandai selesai karena DoD mewajibkan bukti runtime host.
+
+**Perubahan:** `docs/M19_EFISIENSI_HOSTING_512MB.md`, `docs/M13_CHANGELOG.md`.
+
+## 2026-09-06 — Audit efisiensi shared hosting 512 MB: verifikasi klaim vs kode + pembukaan Fase EF (M19)
+
+- **Tujuan:** memutuskan kelayakan aplikasi di shared hosting RAM LVE 512 MB dan membukukan Jalur A (tanpa rewrite).
+- **Verdict audit (read-only vs kode):** bisa hidup di 512 MB via Jalur A; pajak tetap = 1 proses Nest (46 modul) + Prisma 7 WASM (generated 27,2 MB) + SPA disajikan Node (`main.ts:204-228`). Mengeluarkan modul kecil (loyalty/survei/guest-pref/market-analysis) hemat RAM kecil — bukan penyelamat.
+- **4 koreksi final:** (1) idle 120–180 / puncak 250–300 MB = estimasi audit, bukan target M08; (2) `rawBody` global tidak menggandakan upload bukti bayar/KTP (Multer `diskStorage` ke disk); (3) Auto-Ops template deploy sudah `AUTO_OPS_ENABLED=false` + cron URL — risiko env kosong lalu DB default `true`; (4) pool pg `max:3` sudah ada (`prisma.service.ts:18-22`).
+- **Konfirmasi positif:** SPA tersaji dari Nest + compression Node · `runAll` = 19+ sweep berurutan (spike terbesar) · IoT timer default OFF · AI default OFF + manual-only · push nonaktif tanpa VAPID.
+- **Fase baru EF-00..EF-07 dibuka** di M12 (ANTRIAN). Tidak ada kode aplikasi yang diubah dalam audit ini.
+- **Verifikasi:** audit read-only terhadap `main.ts`, `app.module.ts`, `package.json`, `auto-ops.service.ts`, `iot-polling.service.ts`, `app-config.service.ts`, `prisma.service.ts`, `make-deploy.mjs`, M08. Tanpa build/UAT. Pengukuran RAM LVE = EF-00 (belum dilakukan).
+
+**Perubahan:** `docs/M19_EFISIENSI_HOSTING_512MB.md` (baru), `docs/M12_CHECKLIST_CHANGELOG.md`, `docs/M13_CHANGELOG.md`.
+
 ## 2026-08-20 — Portal Staff: perbaikan 403 /users + hapus kartu kinerja duplikat di dashboard
 
 - **TicketsPage (mode STAFF):** query `/users` kini hanya jalan untuk OWNER/ADMIN (`enabled` sesuai role). Sebelumnya staff mendapat HTTP 403 + console error saat membuka halaman Tugas.

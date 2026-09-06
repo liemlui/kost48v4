@@ -1,5 +1,8 @@
 # GO-LIVE KOST48 — Data yang Harus Diisi Owner
 
+> **Arah aktif 6 Sep 2026:** [M12](M12_CHECKLIST_CHANGELOG.md) adalah checklist tunggal; **Fase EF diprioritaskan dan Fase MA ditunda**. Isi identitas deployment dan pengamatan pasif pada [M19 §9](M19_EFISIENSI_HOSTING_512MB.md#9-pencatatan-hosting-ef-00-dan-ef-02) terlebih dahulu. Form ini untuk persiapan data bisnis, bukan izin seed, deploy, restart, atau mutasi DB. Nama/jumlah data pada catatan lama belum membuktikan data produksi saat ini.
+> Jangan isi/commit password, token atau key ke dokumen/chat. Isikan kredensial langsung melalui mekanisme aplikasi/server yang diizinkan; laporan cukup status tersedia/belum.
+
 > Isi file ini **sebelum** deploy produksi. Kolom `[ISI]` = wajib Anda isi.
 > Data kamar + 13 tenant (nama/NIK/tarif) **sudah ada** di `backend/scripts/seed-prod.js` — tidak perlu diisi ulang.
 > Yang perlu Anda isi di bawah = data yang TIDAK ada di script / masih placeholder.
