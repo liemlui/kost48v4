@@ -11,8 +11,8 @@ Peta alur kode krusial, lifecycle utama, kontrak domain, safety belt, dan aturan
 
 ## Sumber Digabung
 
-- `docs/02_FLOW_MAP.md` - konten dipertahankan
-- `docs/06_CONTRACTS.md` - konten dipertahankan
+- `docs/archieve/2026-06-16_root_docs_pre_M/02_FLOW_MAP.md` - konten dipertahankan
+- `docs/archieve/2026-06-16_root_docs_pre_M/06_CONTRACTS.md` - konten dipertahankan
 
 ## Update 2026-07-23 — Sinkronisasi Status dan Batas Refactor
 
@@ -58,7 +58,7 @@ Aturan baru:
 - Heading asli dinaikkan levelnya agar tidak bertabrakan dengan struktur M-file.
 
 
-## Bagian 1 - `docs/02_FLOW_MAP.md`
+## Bagian 1 - `docs/archieve/2026-06-16_root_docs_pre_M/02_FLOW_MAP.md`
 
 ### KOST48 V5 — Flow Map (Peta Alur Kode Krusial)
 **Versi:** 2026-06-13 — sinkronisasi keputusan owner, status kode, dossier `10`-`19`, dan urutan Auto-Ops aktual.
@@ -461,7 +461,7 @@ readiness:75 → preview:80 → post:93 (manual) / autoCloseMonthly:122 → reop
 ##### 14.2 Pengumuman
 - `modules/announcements/` — draft → publish :50 → tampil di portal tenant.
 
-##### 14.3 PWA (lihat `docs/04_DEPLOY_AND_PWA.md`)
+##### 14.3 PWA (lihat `docs/archieve/2026-06-16_root_docs_pre_M/04_DEPLOY_AND_PWA.md`)
 - Saat ini: **PWA MVP installable**, belum operasional yang kuat.
 - 17 temuan audit: 3 CRITICAL (PWA-01 s.d 03: produksi tertinggal, HTTP tidak paksa HTTPS, frontend tanpa security headers), 6 HIGH, 7 MEDIUM, 1 PLANNED (push notification).
 - **4 Phase perbaikan:** Phase 0 (Release Gate), Phase 1 (Cache Safety + Update + Offline UX), Phase 2 (Installability), Phase 3 (Web Push dengan outbox).
@@ -548,10 +548,10 @@ State: TanStack Query + Axios; auth JWT. Audit historis UI/UX ada di `archieve/_
 | I — PWA | Flow 14 + `08_PWA_AUDIT` | Sedang dikerjakan AI lain |
 
 
-## Bagian 2 - `docs/06_CONTRACTS.md`
+## Bagian 2 - `docs/archieve/2026-06-16_root_docs_pre_M/06_CONTRACTS.md`
 
 ### KOST48 V5 — Contracts & Business Rules
-**Versi:** 2026-06-13 — pasca Konsolidasi Docs V3. **Sumber historis:** `archieve/01_CONTRACTS.md` (2,489 baris, V5.9.8-A). File ini adalah distilled contracts yang hanya memuat **aturan bisnis yang masih berlaku**. Detail per domain ada di dossier `10`-`19`.
+**Versi:** 2026-06-13 — pasca Konsolidasi Docs V3. **Sumber historis:** `docs/archieve/2026-06-16_root_docs_pre_M/06_CONTRACTS.md` (kontrak lengkap lama; V5.9.8-A). File ini adalah distilled contracts yang hanya memuat **aturan bisnis yang masih berlaku**. Detail per domain ada di dossier `10`-`19`.
 
 <!-- KOST48_DOCS_SYNC_20260613_CONTRACTS_CONSOLIDATED -->
 
@@ -874,7 +874,7 @@ Matrix ini memuat kontrak target keputusan owner. Area bertanda OWNER-only belum
 - Generated Prisma files adalah build artifacts, harus di-restore sebelum commit.
 - No production DB mutation.
 - No schema change tanpa explicit approval.
-- Runbook: `docs/04_DEPLOY_AND_PWA.md`.
+- Runbook: `docs/archieve/2026-06-16_root_docs_pre_M/04_DEPLOY_AND_PWA.md`.
 
 ---
 
@@ -936,26 +936,26 @@ try { Invoke-RestMethod -Method Post -Uri "http://localhost:3000/api/inventory-m
 ---
 
 **Referensi silang dossier domain:**
-- Booking & Stay: `docs/10_PEMBAYARAN_INVOICE.md` + `docs/11_BOOKING_RENEWAL.md`
-- Checkout & Deposit: `docs/12_CHECKOUT_DEPOSIT_OVERSTAY.md`
-- Akuntansi & Laporan: `docs/13_AKUNTANSI_LAPORAN.md` + `docs/05_VERIFIKASI_KEUANGAN.md`
-- Inventaris: `docs/14_INVENTARIS.md`
-- Staf & Tiket: `docs/15_STAF_TIKET_KPI.md`
-- Notifikasi: `docs/16_NOTIFIKASI_PENGUMUMAN.md`
-- Publik & Marketing: `docs/17_PUBLIK_MARKETING_UIUX.md`
-- Auth & Onboarding: `docs/18_AUTH_FONDASI_ONBOARDING.md`
-- Flow Map: `docs/02_FLOW_MAP.md`
-- Keputusan Owner: `docs/03_KEPUTUSAN_OWNER.md`
-- Deploy & PWA: `docs/04_DEPLOY_AND_PWA.md`
-- Blueprint: `docs/00_BLUEPRINT.md`
+- Booking & Stay: `docs/archieve/2026-06-16_root_docs_pre_M/10_PEMBAYARAN_INVOICE.md` + `docs/archieve/2026-06-16_root_docs_pre_M/11_BOOKING_RENEWAL.md`
+- Checkout & Deposit: `docs/archieve/2026-06-16_root_docs_pre_M/12_CHECKOUT_DEPOSIT_OVERSTAY.md`
+- Akuntansi & Laporan: `docs/archieve/2026-06-16_root_docs_pre_M/13_AKUNTANSI_LAPORAN.md` + `docs/archieve/2026-06-16_root_docs_pre_M/05_VERIFIKASI_KEUANGAN.md`
+- Inventaris: `docs/archieve/2026-06-16_root_docs_pre_M/14_INVENTARIS.md`
+- Staf & Tiket: `docs/archieve/2026-06-16_root_docs_pre_M/15_STAF_TIKET_KPI.md`
+- Notifikasi: `docs/archieve/2026-06-16_root_docs_pre_M/16_NOTIFIKASI_PENGUMUMAN.md`
+- Publik & Marketing: `docs/archieve/2026-06-16_root_docs_pre_M/17_PUBLIK_MARKETING_UIUX.md`
+- Auth & Onboarding: `docs/archieve/2026-06-16_root_docs_pre_M/18_AUTH_FONDASI_ONBOARDING.md`
+- Flow Map: `docs/archieve/2026-06-16_root_docs_pre_M/02_FLOW_MAP.md`
+- Keputusan Owner: `docs/archieve/2026-06-16_root_docs_pre_M/03_KEPUTUSAN_OWNER.md`
+- Deploy & PWA: `docs/archieve/2026-06-16_root_docs_pre_M/04_DEPLOY_AND_PWA.md`
+- Blueprint: `docs/archieve/2026-06-16_root_docs_pre_M/00_BLUEPRINT.md`
 
-**Sumber historis lengkap:** `docs/archieve/01_CONTRACTS.md` (2,489 baris, V5.9.8-A)
+**Sumber historis lengkap:** `docs/archieve/2026-06-16_root_docs_pre_M/06_CONTRACTS.md` (V5.9.8-A; arsip)
 
 ---
 
 ## Audit 360° P3 Auth & Security (Jul 2026)
 
-**Status:** 🟢 Solid (1 🔴 CRITICAL ✅ FIXED). Detail → `docs/archieve/M17_AUDIT_360_P3_P8.md`
+**Status:** 🟢 Solid (1 🔴 CRITICAL ✅ FIXED). Detail → `docs/archieve/_previous_cycles/M17_AUDIT_360_P3_P8.md`
 
 ✅ Enumeration-safe login & forgotPassword · ✅ Suspend memutus sesi via JWT `pwdAt` claim · ✅ PasswordResetToken SHA-256 hash, one-time · ✅ bcrypt · ✅ Global default-deny JWT (APP_GUARD) · ✅ Role guard (`@Roles(OWNER, ADMIN)`) · ✅ OWNER-only: periode, user, kamar, harga, deposit · ✅ Staff restriction inventory official (`@Roles`) · ✅ Rate limit (300/menit global, 10/15menit auth)
 

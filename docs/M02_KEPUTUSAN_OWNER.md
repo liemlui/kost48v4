@@ -22,7 +22,7 @@ Sumber cepat untuk keputusan owner dan aturan bisnis yang harus dihormati sebelu
 
 ## Sumber Digabung
 
-- `docs/03_KEPUTUSAN_OWNER.md` - konten dipertahankan
+- `docs/archieve/2026-06-16_root_docs_pre_M/03_KEPUTUSAN_OWNER.md` - konten dipertahankan
 
 ## Update 2026-06-17 — AUDIT KEUANGAN ULTRA ✅
 
@@ -35,7 +35,7 @@ Semua keputusan owner terkait keuangan (no-partial, DP 30%, deposit=Room.default
 
 ## Update 2026-07-08 — Keputusan Data Lapangan Produksi
 
-Status: OWNER-CONFIRMED untuk aturan/ground truth, tetapi sebagian besar BELUM MASUK DB produksi sampai audit lapangan dan onboarding dilakukan. Detail eksekusi: `docs/RUNBOOK_DATA_AWAL_PRODUKSI_DAN_AUDIT_FASILITAS.md`.
+Status: OWNER-CONFIRMED untuk aturan/ground truth, tetapi sebagian besar BELUM MASUK DB produksi sampai audit lapangan dan onboarding dilakukan. Detail eksekusi: `docs/archieve/_expired_root_cleanup/RUNBOOK_DATA_AWAL_PRODUKSI_DAN_AUDIT_FASILITAS.md`.
 
 - **OP-FIX-NORMAL:** Kerusakan normal karena usia barang, aus, bocor, lampu mati, kran rusak, AC bermasalah, atau fasilitas mulai tidak layak ditangani owner/staff lewat perbaikan atau penggantian.
 - **OP-FIX-INTENTIONAL:** Kerusakan sengaja, salah pakai berat, kehilangan barang/kunci, atau pelanggaran aturan direview sebagai tanggung jawab tenant.
@@ -130,7 +130,7 @@ Status: OWNER-CONFIRMED untuk aturan/ground truth, tetapi sebagian besar BELUM M
 ## Keputusan UI/UX Dashboard — 2026-06-17
 
 ### Toggle Owner/Admin View
-- **OWN-DETAIL-WITHOUT-CLUTTER (2026-07-16):** UI lengkap dan detail tetapi dibuka bertahap. Ringkasan dan aksi utama tampil lebih dulu; detail, riwayat, audit, dan data teknis tersedia saat item dibuka. Fitur tidak dihapus hanya demi tampilan sederhana. Sumber: `docs/UI_UX_OWNER_ADMIN.md`.
+- **OWN-DETAIL-WITHOUT-CLUTTER (2026-07-16):** UI lengkap dan detail tetapi dibuka bertahap. Ringkasan dan aksi utama tampil lebih dulu; detail, riwayat, audit, dan data teknis tersedia saat item dibuka. Fitur tidak dihapus hanya demi tampilan sederhana. Sumber: `docs/archieve/_expired_root_cleanup/UI_UX_OWNER_ADMIN.md`.
 - **OWN-VIEW-AUTHORITY:** Toggle hanya mengganti konteks tampilan. OWNER di Area Admin tetap memiliki role dan kewenangan OWNER.
 - **KTP-LEGACY-PORTAL:** Penghuni lama dapat ditandai `LEGACY` saat migrasi. Tenant dapat upload KTP miliknya dari portal; upload baru mereset verifikasi dan masuk antrean Admin. OCR lokal dan AI hanya rekomendasi; keputusan final tetap OWNER/ADMIN.
 - **OWN-TOGGLE**: Owner bisa switch antara "Kokpit Owner" (bisnis) dan "Area Admin" (operasional) via toggle di navbar. Default = Kokpit Owner. Area Admin menampilkan Command Center operasional harian dengan sidebar 6 link.
@@ -149,7 +149,7 @@ Toggle Owner/Admin phase 1 berfungsi penuh. UI telah diperbaiki melalui Fase C (
 
 ---
 
-## Bagian 1 — `docs/03_KEPUTUSAN_OWNER.md`
+## Bagian 1 — `docs/archieve/2026-06-16_root_docs_pre_M/03_KEPUTUSAN_OWNER.md`
 
 ### KEPUTUSAN OWNER — 2026-06-13 (+ addendum 2026-06-14: D-18/D-19, S-2)
 **Sumber:** wawancara owner 2026-06-13 + catatan owner 2026-06-14. Dokumen ini MENGIKAT; bila konflik dengan dokumen lain, file ini menang. Dossier menjelaskan status kode dan cara implementasi, bukan mengganti keputusan bisnis di sini.

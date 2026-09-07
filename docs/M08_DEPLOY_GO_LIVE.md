@@ -18,13 +18,13 @@ Runbook deploy/PWA, checklist go-live, dan appendix akun dummy untuk DB pengemba
 
 ## Sumber Digabung
 
-- `docs/04_DEPLOY_AND_PWA.md` - konten dipertahankan
-- `docs/GO_LIVE_CHECKLIST.md` - konten dipertahankan
+- `docs/archieve/2026-06-16_root_docs_pre_M/04_DEPLOY_AND_PWA.md` - konten dipertahankan
+- `docs/archieve/2026-06-16_root_docs_pre_M/GO_LIVE_CHECKLIST.md` - konten dipertahankan
 - `docs/archieve/2026-06-16_si_notes/_AKUN_DUMMY_DEV.md` - update SI-1 event-path diserap
 
 ## Update 2026-07-08 — GATE-KTP-ENV Fix + Deploy Docs
 
-Gate KTP diam-diam OFF di produksi telah diperbaiki (`settings.service.ts` semai nilai awal row dari env). Panduan deploy di §5 ditambah catatan "env = nilai awal, selanjutnya UI Settings → Operasional". Runbook onboarding tenant nyata sudah tersedia di `docs/GO_LIVE_DATA_ISI.md`.
+Gate KTP diam-diam OFF di produksi telah diperbaiki (`settings.service.ts` semai nilai awal row dari env). Panduan deploy di §5 ditambah catatan "env = nilai awal, selanjutnya UI Settings → Operasional". Runbook onboarding tenant nyata sudah tersedia di `docs/FORM_ISI_DATA_GO_LIVE.md`.
 
 ## Update 2026-07-23 — Otoritas Deploy Online dan P1-P3
 
@@ -70,7 +70,7 @@ Catatan deploy: jangan pernah expose API key ke frontend; semua panggilan DeepSe
 - Appendix akun dummy hanya untuk DB pengembangan; jangan dipakai untuk produksi.
 
 
-## Bagian 1 - `docs/04_DEPLOY_AND_PWA.md`
+## Bagian 1 - `docs/archieve/2026-06-16_root_docs_pre_M/04_DEPLOY_AND_PWA.md`
 
 ### KOST48 V5 — Deploy Produksi & PWA Hardening
 **Versi:** 2026-06-13 — konsolidasi dari `archieve/_DEPRECATED_06_DEPLOY_RUNBOOK.md` dan `archieve/_DEPRECATED_08_PWA_AUDIT_AND_HARDENING_PLAN_2026-06-12.md`.
@@ -332,7 +332,7 @@ New-NetFirewallRule -DisplayName "KOST48 LAN frontend 5173" -Direction Inbound -
 ⚠️ **Ganti password OWNER** dari `admin123`. ⚠️ Jika host ternyata MySQL-only / no-SSH → cPanel batal, pakai VPS. (README ringkas juga ada di dalam paket: `deploy/README-DEPLOY.md`.)
 
 
-## Bagian 2 - `docs/GO_LIVE_CHECKLIST.md`
+## Bagian 2 - `docs/archieve/2026-06-16_root_docs_pre_M/GO_LIVE_CHECKLIST.md`
 
 > **ARSIP LAN — bukan prosedur produksi.** Jangan gunakan `golive:setup`, nama database, seed, atau instruksi env di bagian lama ini untuk online deployment. Untuk production gunakan hanya `M08_DEPLOY_GO_LIVE.md` + gate `M19_EFISIENSI_HOSTING_512MB.md` dan tabel hosting M19 bagian 9.
 

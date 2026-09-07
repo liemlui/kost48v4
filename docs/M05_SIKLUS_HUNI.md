@@ -11,8 +11,8 @@ Dokumen lifecycle penghuni dari booking/renewal sampai checkout, deposit, overst
 
 ## Sumber Digabung
 
-- `docs/11_BOOKING_RENEWAL.md` - konten dipertahankan
-- `docs/12_CHECKOUT_DEPOSIT_OVERSTAY.md` - konten dipertahankan
+- `docs/archieve/2026-06-16_root_docs_pre_M/11_BOOKING_RENEWAL.md` - konten dipertahankan
+- `docs/archieve/2026-06-16_root_docs_pre_M/12_CHECKOUT_DEPOSIT_OVERSTAY.md` - konten dipertahankan
 
 ## Catatan Pemakaian
 
@@ -68,7 +68,7 @@ Bagian historis `DOSSIER 11` di bawah masih menyebut multi-booking `RESERVED` da
 - Booking pesaing yang belum bayar dibatalkan saat pemenang payment approved; pesaing yang sudah transfer perlu jalur refund kalah-cepat.
 - Checklist detail eksekusi ada di `docs/M12_CHECKLIST_CHANGELOG.md` V-00..V-16.
 
-## Bagian 1 - `docs/11_BOOKING_RENEWAL.md`
+## Bagian 1 - `docs/archieve/2026-06-16_root_docs_pre_M/11_BOOKING_RENEWAL.md`
 
 ### DOSSIER 11 — BOOKING & RENEWAL
 **Domain:** booking publik & portal (DP 30%, first-paid-wins) + perpanjangan kontrak (GAP #2). **Flow 2 & 5.**
@@ -137,7 +137,7 @@ Bagian historis `DOSSIER 11` di bawah masih menyebut multi-booking `RESERVED` da
 Gamifikasi (poin perpanjangan → reward) memperkuat retensi renewal — lihat dossier 19. Auto-ops job booking-expiry & DP-forfeit menopang flow ini — lihat dossier 12 (overstay) & dossier 13 (jurnal DP forfeit). Rent-loyalty D-16 cross-ref ke dossier 03, 17, 19.
 
 
-## Bagian 2 - `docs/12_CHECKOUT_DEPOSIT_OVERSTAY.md`
+## Bagian 2 - `docs/archieve/2026-06-16_root_docs_pre_M/12_CHECKOUT_DEPOSIT_OVERSTAY.md`
 
 ### DOSSIER 12 — CHECKOUT, DEPOSIT & OVERSTAY
 **Domain:** checkout (request + final), settlement deposit jaminan, lifecycle overstay/forced-checkout, tenant kabur, barang ditinggal. **Flow 6 + bagian Auto-Ops overstay.**
@@ -196,7 +196,7 @@ Gamifikasi (poin perpanjangan → reward) memperkuat retensi renewal — lihat d
 
 ## Audit 360° Flow Huni — Jul 2026 (M16)
 
-**Status:** 🟢 93% SEHAT — 2 HIGH (✅ FIXED), 4 MEDIUM, 1 LOW. Detail → `docs/archieve/M16_AUDIT_360_FLOW_HUNI.md`
+**Status:** 🟢 93% SEHAT — 2 HIGH (✅ FIXED), 4 MEDIUM, 1 LOW. Detail → `docs/archieve/_previous_cycles/M16_AUDIT_360_FLOW_HUNI.md`
 
 ### Temuan HIGH — ✅ FIXED
 

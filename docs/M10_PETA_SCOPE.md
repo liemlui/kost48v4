@@ -281,7 +281,7 @@ Quota listrik untuk pembacaan meter bisnis dihitung dari periode sewa lunas; DP 
 | Tambah field di model Prisma | — | `backend/prisma/schema.prisma` ⚠️ BUTUH APPROVAL OWNER |
 | Perbaiki UI/UX | — | `frontend/src/styles/` + `frontend/src/components/` |
 | Cek aturan owner | — | `docs/M02_KEPUTUSAN_OWNER.md` (84 keputusan, **SUMBER KEBENARAN**) |
-| Tambah IoT / KWH meter | SYSTEM | `docs/M14_IOT_TUYA_DEVICES.md` + `backend/src/modules/iot/` |
+| Tambah IoT / KWH meter | SYSTEM | `docs/M15_IOT.md` + `backend/src/modules/iot/` |
 
 ---
 

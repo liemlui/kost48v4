@@ -8,14 +8,14 @@ Keputusan [M02](M02_KEPUTUSAN_OWNER.md): **Fase EF diprioritaskan; satu proses A
 |---|---|---|
 | Implementasi | EF-01 telemetri, EF-03 singleton, EF-05 packaging tersedia di working tree | Sebagian belum di-commit; jangan menganggap seluruh dirty tree berasal dari EF |
 | Verifikasi lokal | Audit statis EF-01/03/04/07 + typecheck exit 0 menurut laporan Cline yang diterima owner; build EF-05 tercatat di M13 | Bukan build/UAT baru pada sesi docs; tidak menjamin konfigurasi server |
-| Deployment | UNKNOWN untuk artefak, waktu deploy, patch yang masuk, konfigurasi efektif | Status uncommitted tidak membuktikan patch belum di-deploy; SHA saja tidak mewakili dirty bundle |
+| Deployment | Parsial: konfigurasi panel teridentifikasi; artefak, waktu deploy, patch yang masuk, dan konfigurasi efektif masih UNKNOWN | Screenshot Setup Node.js App diterima 7 Sep 2026 WIB; status uncommitted tidak membuktikan patch belum di-deploy; SHA saja tidak mewakili dirty bundle |
 | Dampak terukur | UNKNOWN: PMEM/resource/fault, workload dan overlap aktual | Efisiensi dan kelayakan 512 MB belum PASS |
 
 Audit statis diterima; tidak diulang tanpa perubahan relevan. Langkah berikutnya adalah **§9.1 identitas deployment**, lalu **§9.3 pengamatan pasif**. Uji aktif host belum diizinkan. Fase A dan gate AO yang terbuka tetap berlaku.
 
 > Dokumen ini adalah **sumber kebenaran** fase efisiensi hosting: verdict kelayakan, anggaran RAM (fakta vs estimasi), verifikasi klaim audit terhadap kode (koreksi final + temuan P0–P2 audit deploy 6 Sep 2026), jalur arsitektur yang disetujui, dan definisi task EF-00..EF-09 (paket 10 mikrotask audit).
 > Sumber kode: `backend/src/main.ts`, `backend/src/app.module.ts`, `backend/src/modules/auto-ops/auto-ops.service.ts`, `backend/src/modules/iot/iot-polling.service.ts`, `backend/src/common/config/app-config.service.ts`, `backend/src/prisma/prisma.service.ts`, `backend/package.json`, `scripts/make-deploy.mjs`, `docs/M08_DEPLOY_GO_LIVE.md`.
-> Terakhir diperbarui: **2026-09-06** | Status: 🔴 **ANTRIAN** (lihat `docs/M12_CHECKLIST_CHANGELOG.md` — Fase EF).
+> Terakhir diperbarui: **2026-09-07** | Status: 🔴 **ANTRIAN** (lihat `docs/M12_CHECKLIST_CHANGELOG.md` — Fase EF).
 
 ---
 
@@ -44,11 +44,12 @@ Audit statis diterima; tidak diulang tanpa perubahan relevan. Langkah berikutnya
 
 | Fakta | Nilai | Status |
 |---|---|---|
-| SHA saat pencatatan | `cf268716dd89ee08ff5a6318499eba2c8e8107cf` | FAKTA lokal, 6 Sep 2026 |
+| SHA saat pencatatan | `8c35a4f7524f85eb3a07f8407a2c950cbfb6e98a` | FAKTA HEAD lokal, 7 Sep 2026; bukan bukti artefak server |
 | Branch / working tree | `main` / `dirty` | FAKTA lokal; dirty state mencakup perubahan lintas task yang sudah ada |
 | Entrypoint artefak | `dist/main.js` | FAKTA konfigurasi (`backend/package.json`); keberadaan di server belum diverifikasi |
 | Versi Node lokal | `v22.15.0` | FAKTA workstation; versi host belum diketahui |
 | Prisma client | `@prisma/client ^7.8.0` | FAKTA source; versi lock/runtime host belum diverifikasi |
+| Bundle lokal | `kost48-deploy-bundled.tgz`, 42.863.126 byte; modifikasi `2026-09-06T06:26:48.9467864+07:00`; SHA-256 `820EEAA22FB389BF8AA8C660F12F0E4FA158F90970B3C4637C78B551F6E73B6` | FAKTA file lokal; waktu modifikasi bukan otomatis waktu build dan bundle bukan otomatis artefak server |
 | Model proses aplikasi | Tidak ada `cluster`/`worker_threads` di source | FAKTA source; tidak membuktikan jumlah instance Passenger |
 | Command Passenger efektif | Belum diketahui | UNKNOWN — ukur di host |
 | Jumlah instance / overlap restart | Belum diketahui | UNKNOWN — ukur di host |
@@ -170,11 +171,15 @@ Isi hanya data yang tersedia dari panel/log/artefak. Nilai kosong tetap **UNKNOW
 
 | Item | Nilai | Sumber/bukti yang diperlukan |
 |---|---|---|
-| Commit/SHA yang membentuk artefak | UNKNOWN | Riwayat build/deploy; bukan otomatis HEAD workstation |
+| Commit/SHA yang membentuk artefak | UNKNOWN | Riwayat build/deploy; HEAD lokal `8c35a4f7524f85eb3a07f8407a2c950cbfb6e98a` hanya identitas workstation |
 | Artefak server | UNKNOWN | Nama, ukuran, tanggal build; checksum/manifes bila tersedia |
+| Bundle kandidat yang diberikan owner | Folder `kost48-deploy-bundled`: 753 file, 55.310.649 byte; isi bertanggal 18 Agu 2026 WIB; `client/version.json` buildId `1BavS58Sb96-` | Artefak lokal/kandidat yang diberikan; belum terbukti sama dengan paket server yang berjalan |
+| Berkas env di dalam bundle | Tidak ada file `.env*` di dalam bundle (pemeriksaan `-Filter '.env*'` kosong); env dikelola melalui konfigurasi panel cPanel | Pemeriksaan folder bundle read-only 7 Sep 2026 WIB |
+| Deklarasi runtime bundle | `package.json` menyatakan `main: dist/main.js`, Node `>=22.12.0`; Node panel `22.23.2` kompatibel secara semver | Pemeriksaan metadata read-only; panel juga mendeteksi `package.json`; aplikasi tidak dijalankan dan kompatibilitas runtime belum diuji |
 | Perubahan uncommitted yang ikut artefak | UNKNOWN | Manifes/diff build atau pemeriksaan isi paket; SHA saja tidak cukup |
-| Waktu deploy terakhir + zona waktu | UNKNOWN | Log deploy/panel |
-| Node / startup file / application root / document root | UNKNOWN | Setup Node.js App / Application Manager; target startup dist/main.js |
+| Waktu deploy terakhir + zona waktu | UNKNOWN; zona waktu acuan `WIB (Asia/Jakarta)` | Log deploy/panel; zona waktu Surabaya diberi oleh owner, tetapi waktu deploy belum tersedia |
+| Versi aplikasi yang dilaporkan terpasang | `v1.2.0` — KOST48 Surabaya Barat — Kos nyaman dekat Pakuwon Mall / PTC | Informasi owner/deployment; berbeda dari versi source lokal `1.3.0`, bukan bukti commit atau isi paket |
+| Node / startup file / application root / document root | Node `22.23.2`; Production; startup `dist/main.js`; application root `kost48-prod`; document root UNKNOWN; URL `kost48surabaya.com` | Screenshot Setup Node.js App diterima 7 Sep 2026 WIB; panel tidak menampilkan document root, paket, atau waktu deploy |
 | EF-01 telemetri sudah terpasang? | UNKNOWN | Identitas/isi artefak dan wiring; uncommitted bukan bukti belum terpasang |
 | EF-03 singleton sudah terpasang? | UNKNOWN | Identitas/isi artefak dan konfigurasi module |
 | EF-05 generator kanonik dipakai? | UNKNOWN | Riwayat proses build paket server |
@@ -186,8 +191,10 @@ Baseline server sebelum patch terpasang hanya mewakili versi server itu. Efek pa
 
 | Item | Nilai panel | Efektif aplikasi | Sumber/catatan |
 |---|---|---|---|
-| PMEM limit | UNKNOWN | — | Target historis 512 MB; konfirmasi limit sekarang |
-| CPU / IO / EP / NPROC limit | UNKNOWN | — | Resource Usage; angka EP 5/15 adalah catatan Juli, bukan pengamatan sekarang |
+| PMEM limit | `512 MB` | Snapshot pemakaian `403,34 MB / 512 MB (78,78%)` | cPanel General Information/Statistics, diterima 7 Sep 2026 WIB; snapshot sesaat, bukan peak |
+| CPU / IO / EP / NPROC limit | CPU `100%`; IOPS `1.024`; I/O `10 MB/s`; EP `15`; proses `100` | Snapshot: CPU `0%`; IOPS `0`; I/O `0 bytes/s`; EP `2/15`; proses `22/100` | cPanel Statistics, diterima 7 Sep 2026 WIB; pemakaian bukan uji beban dan NPROC/fault counter terpisah belum tersedia |
+| File/inode usage | `75.000` file | `49.651 / 75.000 (66,2%)` | cPanel Statistics, snapshot diterima 7 Sep 2026 WIB |
+| PostgreSQL disk usage | — | `48,57 MB` | cPanel Statistics, snapshot diterima 7 Sep 2026 WIB; bukan PMEM PostgreSQL |
 | Instance Passenger dan overlap restart | UNKNOWN | UNKNOWN | Application Manager atau support; jangan menyamakan EP dengan jumlah worker |
 | NODE_OPTIONS / heap limit | UNKNOWN | UNKNOWN | Catat opsi nonrahasia dan heap limit runtime bila sudah tersedia; RSS berbeda dari heap |
 | AUTO_OPS_ENABLED | UNKNOWN | UNKNOWN | Lokal: boolean eksplisit valid menang; kosong/tidak dikenali → DB → fallback true; host tergantung kode deployment |
@@ -201,10 +208,10 @@ Baseline server sebelum patch terpasang hanya mewakili versi server itu. Efek pa
 
 | Pengamatan | Nilai | Sumber / rentang waktu / jenis angka |
 |---|---|---|
-| Tanggal/jam dan zona waktu | UNKNOWN | WIB atau UTC, konsisten |
-| Aktivitas normal saat diamati | UNKNOWN | Traffic biasa/job yang memang sudah berjalan; jangan memicu job |
-| PMEM akun | UNKNOWN | Tandai sesaat, rata-rata interval, atau puncak interval |
-| CPU / IO / EP / NPROC pemakaian | UNKNOWN | Catat rentang panel yang sama dengan PMEM |
+| Tanggal/jam dan zona waktu | `2026-09-07 WIB (Asia/Jakarta)`; jam persis UNKNOWN | Snapshot panel yang diterima pada sesi ini |
+| Aktivitas normal saat diamati | UNKNOWN | Statistik cPanel; tidak ada job atau beban yang dipicu oleh sesi ini |
+| PMEM akun | `403,34 MB / 512 MB (78,78%)` | Snapshot sesaat; bukan rata-rata atau peak |
+| CPU / IO / EP / NPROC pemakaian | CPU `0/100%`; IOPS `0/1.024`; I/O `0 bytes/s / 10 MB/s`; EP `2/15`; proses `22/100` | Snapshot panel yang sama dengan PMEM |
 | Fault counter tiap resource yang tersedia | UNKNOWN | Catat awal/akhir interval dan perubahan, bukan hanya total tanpa waktu |
 | RSS/heap per PID jika log sudah tersedia | UNKNOWN | Data pelengkap, bukan pengganti PMEM akun |
 | Keterbatasan panel/sampling | UNKNOWN | Metrik yang tidak tersedia, interval agregasi, potensi puncak tidak tertangkap |

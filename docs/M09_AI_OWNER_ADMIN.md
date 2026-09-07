@@ -14,11 +14,11 @@ Fase G menjadikan AI sebagai pembantu keputusan Owner/Admin, bukan autopilot. AI
 - **Update 16 Jul 2026 — KTP portal/admin:** tenant dapat upload KTP miliknya dari Profil Saya dan upload masuk antrean Admin. OCR tetap lokal, AI hanya rekomendasi, OWNER/ADMIN melakukan keputusan final. Detail teknis dibuka bertahap agar antrean tetap ringkas.
 
 - **Fase G (G0-G9) SELESAI** 19-20 Jun 2026 — modul `backend/src/modules/owner-ai/` (15 file) + `frontend/src/components/ai/*`.
-- **Fase J — Hardening SELESAI** 20 Jun 2026 — J0-J4: helper/test PDP+uang, guard no-partial DP, hardening FE AI, audit PDP dibukukan di M09. Detail: `docs/M15_FASE_J_HARDENING_AI.md`.
+- **Fase J — Hardening SELESAI** 20 Jun 2026 — J0-J4: helper/test PDP+uang, guard no-partial DP, hardening FE AI, audit PDP dibukukan di M09. Detail: `docs/archieve/2026-06-20_fase_selesai/M15_FASE_J_HARDENING_AI.md`.
 - **Fase K — Pasca-Audit SELESAI** 20 Jun 2026 — 13 task termasuk:
   - **Circuit breaker DeepSeek** (`deepseek.client.ts`): 5 kegagalan berturut-turut → circuit open 30 detik, auto-recover.
   - **Fallback MarketAnalysis.chat**: API gagal → return `RULE_FALLBACK` dengan pesan, bukan 500 error.
-  - **Konfigurasi AI owner-configurable** (R3): model, base URL, daily limit, toggle enable/manual-only/log — semua bisa diatur dari **Owner Settings → tab "AI & Biaya"**. Disimpan di `OperationalSetting` (DB), fallback ke `.env`. API key TETAP di `.env` (keamanan). Detail: `docs/M16_PASCA_AUDIT_PLAN.md`.
+  - **Konfigurasi AI owner-configurable** (R3): model, base URL, daily limit, toggle enable/manual-only/log — semua bisa diatur dari **Owner Settings → tab "AI & Biaya"**. Disimpan di `OperationalSetting` (DB), fallback ke `.env`. API key TETAP di `.env` (keamanan). Detail: `docs/archieve/2026-06-20_fase_selesai/M16_PASCA_AUDIT_PLAN.md`.
 - Integrasi DeepSeek: client di `backend/src/modules/market-analysis/deepseek.client.ts`.
 - Halaman frontend: `frontend/src/pages/marketing/MarketAnalysisPage.tsx`, settings di `frontend/src/pages/settings/OwnerSettingsPage.tsx`.
 - OCR KTP gratis/offline: `frontend/src/utils/ktpOcr.ts`, `frontend/src/pages/bookings/GuestBookingForm.tsx`.
@@ -782,6 +782,6 @@ Untuk setiap task G:
 
 ## Audit 360° P6 AI Flow (Jul 2026)
 
-**Status:** 🟢 Solid — semua pilar arsitektur AI manual-only terverifikasi. Detail → `docs/archieve/M17_AUDIT_360_P3_P8.md`
+**Status:** 🟢 Solid — semua pilar arsitektur AI manual-only terverifikasi. Detail → `docs/archieve/_previous_cycles/M17_AUDIT_360_P3_P8.md`
 
 ✅ **Manual-only** — tidak ada cron/page-load/auto-ops · ✅ **OWNER/ADMIN only** (`@Roles`) · ✅ **Circuit breaker**: 5 gagal → open 30 detik · ✅ **Fallback offline** (MarketAnalysis.chat → `RULE_FALLBACK`) · ✅ **AI configurable** (model, base URL, daily limit dari Owner Settings) · ✅ **Budget guard** (env AI_DAILY_REQUEST_LIMIT, AI_MAX_INPUT_CHARS, AI_MAX_OUTPUT_TOKENS) · ✅ **Snapshot aggregated** (top 10-20, hemat token + PDP) · ✅ **Audit trail** (`AuditLog.meta.ai`: feature, model, promptHash, confidence, humanDecision) · ✅ **No direct mutation** (tidak approve payment, create expense, close ticket, posting journal) · ✅ **KTP OCR lokal** (Tesseract.js offline, teks saja ke DeepSeek)

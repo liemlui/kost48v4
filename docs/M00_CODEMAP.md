@@ -121,7 +121,7 @@ Standar struktur dan progressive disclosure Owner/Admin: `docs/M17_PORTAL_FLOW_R
 - **Growth/AI:** LoyaltyPoint, LoyaltyReward, Redemption, PeerBehaviorReport, TenantReferral, Faq, AdditionalService, ServiceInterest, SatisfactionSurvey, MarketAnalysis, AiDraft, GuestPreferenceSurvey, ExternalReview
 
 ## Flow & audit anchor
-Tabel flow + method-anchor: `M03_FLOW_KONTRAK.md` (kontrak/uang). Job otomatis → `M06_OPERASIONAL.md` § Auto-Ops. Keputusan owner (84+): `M02_KEPUTUSAN_OWNER.md`. Audit terdahulu → `docs/archieve/M09_AUDIT.md`.
+Tabel flow + method-anchor: `M03_FLOW_KONTRAK.md` (kontrak/uang). Job otomatis → `M06_OPERASIONAL.md` § Auto-Ops. Keputusan owner (84+): `M02_KEPUTUSAN_OWNER.md`. Audit terdahulu → `docs/archieve/_previous_cycles/M09_AUDIT.md`.
 
 ## Shared utilities (ditambahkan 2026-07-07)
 | Utility | Path | Tanggung jawab |
@@ -138,7 +138,7 @@ Tabel flow + method-anchor: `M03_FLOW_KONTRAK.md` (kontrak/uang). Job otomatis �
 
 ## Frontend — Redundansi UI/UX (Fase AM)
 
-✅ **16/16 task selesai** — Detail → `docs/archieve/M14_REDUNDANSI_UI_UX.md`
+✅ **16/16 task selesai** — Detail → `docs/archieve/_previous_cycles/M14_REDUNDANSI_UI_UX.md`
 
 | Task | Dampak |
 |------|--------|
@@ -161,6 +161,6 @@ Tabel flow + method-anchor: `M03_FLOW_KONTRAK.md` (kontrak/uang). Job otomatis �
 - **Audit UI/UX lintas portal aktif (30 Jul 2026):** `docs/M14_AUDIT_UI_UX.md` — 66 kombinasi awal, verifikasi homepage produksi, review statis dashboard Owner/Admin, benchmark terkurasi, antrean kolaboratif AO-00..AO-23
 - **Audit Fable (2-3 Jul 2026):** `docs/archieve/audit_fable/00_INDEX.md` — 19 checklist C01-C19
 - **Audit Reasonix Code (7 Jul 2026):** `docs/archieve/audit_reasonix/RINGKASAN_EKSEKUTIF.md` — 82 temuan baru
-- **Audit 360° P3-P8 (Jul 2026):** `docs/archieve/M17_AUDIT_360_P3_P8.md`
-- **Audit 360° Flow Uang (Jul 2026):** `docs/archieve/M15_AUDIT_360_FLOW_UANG.md`
-- **Audit 360° Flow Huni (Jul 2026):** `docs/archieve/M16_AUDIT_360_FLOW_HUNI.md`
+- **Audit 360° P3-P8 (Jul 2026):** `docs/archieve/_previous_cycles/M17_AUDIT_360_P3_P8.md`
+- **Audit 360° Flow Uang (Jul 2026):** `docs/archieve/_previous_cycles/M15_AUDIT_360_FLOW_UANG.md`
+- **Audit 360° Flow Huni (Jul 2026):** `docs/archieve/_previous_cycles/M16_AUDIT_360_FLOW_HUNI.md`

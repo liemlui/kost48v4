@@ -15,6 +15,7 @@ Baca `CLAUDE.md`, lalu M12 untuk tugas aktif. Bahasa kerja dan dokumentasi: Indo
 2. M19: spesifikasi EF + tabel pengukuran; M08: runbook deploy.
 3. M01: master; M00: peta kode; M03–M11/M14–M18: domain terkait.
 4. M13: riwayat bertanggal, bukan perintah menjalankan ulang tugas.
+5. Formulir go-live kanonik: `docs/FORM_ISI_DATA_GO_LIVE.md` (form lama diarsipkan di `docs/archieve/2026-09-07_docs_cleanup/`).
 
 Dokumen aktif: seri M00–M19 di `docs/`, ditambah formulir go-live. Statistik model/test dan memory dapat usang; cek source atau hasil bertanggal. `docs/archieve/*`, `reference/*`, `backend/src/generated/*` tidak dibaca rutin.
 

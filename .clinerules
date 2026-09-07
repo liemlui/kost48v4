@@ -21,6 +21,7 @@ Instruksi owner terbaru berlaku untuk lingkup sesi. Jangan mengunci semua sesi k
 - docs/M01_MASTER.md: orientasi; docs/M00_CODEMAP.md: navigasi kode sebelum rg.
 - docs/M03_FLOW_KONTRAK.md: flow; M04 keuangan; M05 huni; M06 operasional; M07 publik; M08 deploy; M09 AI; M10 scope; M11 default; M14 UI/UX; M15 IoT; M16 audit; M17 portal; M18 harga.
 - docs/M13_CHANGELOG.md: riwayat dan hasil verifikasi bertanggal.
+- Formulir go-live kanonik: docs/FORM_ISI_DATA_GO_LIVE.md (form lama diarsipkan ke docs/archieve/2026-09-07_docs_cleanup/).
 
 Gunakan seri M00–M19. Nama dokumen pra-konsolidasi di bagian sejarah bukan file aktif yang perlu dibuat ulang. Jangan membuat struktur docs paralel. Keputusan owner terbaru mengungguli referensi lama; perilaku aktual dibuktikan lewat kode/runtime, bukan klaim dokumentasi.
 

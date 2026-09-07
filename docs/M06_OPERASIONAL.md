@@ -11,11 +11,11 @@ Operasional harian: inventaris, staf/tiket/KPI, notifikasi/pengumuman, auth/onbo
 
 ## Sumber Digabung
 
-- `docs/14_INVENTARIS.md` - konten dipertahankan
-- `docs/15_STAF_TIKET_KPI.md` - konten dipertahankan
-- `docs/16_NOTIFIKASI_PENGUMUMAN.md` - konten dipertahankan
-- `docs/18_AUTH_FONDASI_ONBOARDING.md` - konten dipertahankan
-- `docs/_PROPOSAL_METER_LISTRIK_AIR.md` - konten dipertahankan
+- `docs/archieve/2026-06-16_root_docs_pre_M/14_INVENTARIS.md` - konten dipertahankan
+- `docs/archieve/2026-06-16_root_docs_pre_M/15_STAF_TIKET_KPI.md` - konten dipertahankan
+- `docs/archieve/2026-06-16_root_docs_pre_M/16_NOTIFIKASI_PENGUMUMAN.md` - konten dipertahankan
+- `docs/archieve/2026-06-16_root_docs_pre_M/18_AUTH_FONDASI_ONBOARDING.md` - konten dipertahankan
+- `docs/archieve/2026-06-16_root_docs_pre_M/_PROPOSAL_METER_LISTRIK_AIR.md` - konten dipertahankan
 
 ## Update 2026-07-08 — Sinkronisasi Operasional
 
@@ -248,7 +248,7 @@ Staff **TIDAK BOLEH** memulai/menyetujui pemesanan layanan berbayar (WiFi, galon
 - Heading asli dinaikkan levelnya agar tidak bertabrakan dengan struktur M-file.
 
 
-## Bagian 1 - `docs/14_INVENTARIS.md`
+## Bagian 1 - `docs/archieve/2026-06-16_root_docs_pre_M/14_INVENTARIS.md`
 
 ### DOSSIER 14 — INVENTARIS & BARANG KAMAR
 **Domain:** stok gudang, pergerakan (movement), barang per kamar (RoomItem), laporan kondisi staf, sinkronisasi 3 jalur. **Flow 9.**
@@ -297,7 +297,7 @@ Staff **TIDAK BOLEH** memulai/menyetujui pemesanan layanan berbayar (WiFi, galon
 - **Pelajaran arsitektural** (layak masuk CLAUDE.md): setiap penulis qty baru WAJIB lewat util movement resmi — jangan tulis versi longgar.
 
 
-## Bagian 2 - `docs/15_STAF_TIKET_KPI.md`
+## Bagian 2 - `docs/archieve/2026-06-16_root_docs_pre_M/15_STAF_TIKET_KPI.md`
 
 ### DOSSIER 15 — STAF, TIKET & KPI
 **Domain:** manajemen tiket operasional, work queue staf, staff performance KPI, round-robin assignment. **Flow 11.**
@@ -352,7 +352,7 @@ Staff **TIDAK BOLEH** memulai/menyetujui pemesanan layanan berbayar (WiFi, galon
 **Lintas-dossier:** tiket inspeksi → dossier 12 (checkout); staff report inventory → dossier 14; review tenant → dossier 17.
 
 
-## Bagian 3 - `docs/16_NOTIFIKASI_PENGUMUMAN.md`
+## Bagian 3 - `docs/archieve/2026-06-16_root_docs_pre_M/16_NOTIFIKASI_PENGUMUMAN.md`
 
 ### DOSSIER 16 — NOTIFIKASI & PENGUMUMAN
 **Domain:** notifikasi in-app, pengumuman, coverage event, rencana push (PWA Phase 3). **Flow 14.**
@@ -401,7 +401,7 @@ Staff **TIDAK BOLEH** memulai/menyetujui pemesanan layanan berbayar (WiFi, galon
 - **Pola terbaik (template):** `checkout-requests.service.ts:294-345` notifyOwnerAdminOnCreate.
 
 
-## Bagian 4 - `docs/18_AUTH_FONDASI_ONBOARDING.md`
+## Bagian 4 - `docs/archieve/2026-06-16_root_docs_pre_M/18_AUTH_FONDASI_ONBOARDING.md`
 
 ### DOSSIER 18 — AUTH, FONDASI & ONBOARDING (KTP)
 **Domain:** auth/identitas, manajemen user/tenant, guard & rate-limit, role OWNER-only, onboarding + verifikasi KTP, fondasi lintas-modul. **Flow 1 + fondasi.**
@@ -451,7 +451,7 @@ Staff **TIDAK BOLEH** memulai/menyetujui pemesanan layanan berbayar (WiFi, galon
 - **Lintas-dossier:** OWNER-only deposit → dossier 12/13; KTP gate aktivasi → dossier 11 (booking); helper konsolidasi → dossier 14.
 
 
-## Bagian 5 - `docs/_PROPOSAL_METER_LISTRIK_AIR.md`
+## Bagian 5 - `docs/archieve/2026-06-16_root_docs_pre_M/_PROPOSAL_METER_LISTRIK_AIR.md`
 
 ### PROPOSAL — Meter Listrik & Air: Pascabayar Murni (keputusan owner 2026-06-16)
 
@@ -587,14 +587,14 @@ Tenant/owner → overview dan history dengan pembaruan berkala; billing tetap me
 
 | Topik | Dokumen |
 |---|---|
-| Inventaris device + Device ID | `docs/M14_IOT_TUYA_DEVICES.md` |
+| Inventaris device + Device ID | `docs/M15_IOT.md` |
 | Spek implementasi | memory `iot-water-kwh-spec` |
 | Peta scope | `docs/M10_PETA_SCOPE.md` § IoT & Monitoring |
 | Proposal meter pascabayar | `docs/M06_OPERASIONAL.md` § Bagian 5 (M-1..M-5 ✅) |
 
 ---
 
-**Status:** 🟢 Solid. Detail → `docs/archieve/M17_AUDIT_360_P3_P8.md`
+**Status:** 🟢 Solid. Detail → `docs/archieve/_previous_cycles/M17_AUDIT_360_P3_P8.md`
 
 ### P4 Staff Ops & Inventory
 ✅ Ticket lifecycle valid (OPEN→IN_PROGRESS→DONE→CLOSED) · ✅ CHECKOUT_INSPECTION dedupe · ✅ Room readiness gate · ✅ SLA escalation (L0→admin, L1→owner) · ✅ Staff close inspeksi (model tenant-pengawas) · ✅ Assignment round-robin · ✅ One-active-work guard · ✅ KPI calculation akurat · ✅ Review tenant→owner verify · ✅ Single-writer inventory trigger · ✅ Staff 403 official inventory · ✅ Edit movement banned · ✅ Field report→admin review

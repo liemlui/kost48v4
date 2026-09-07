@@ -6,6 +6,8 @@
 > **Cara pakai:** Isi kolom kosong di bawah, lalu kirim balik ke saya (bisa copy-paste tabelnya ke chat).
 > Data yang SUDAH lengkap (13 kamar, 13 nama+NIK+tarif+deposit, 8 email) tidak perlu diisi ulang.
 > Tanda `[ ... ]` = silakan isi. Tanda `—` = memang kosong/opsional.
+>
+> 🗂️ **Formulir kanonik (sejak 2026-09-07):** formulir ini menggantikan `GO_LIVE_DATA_ISI.md` yang telah diarsipkan ke `docs/archieve/2026-09-07_docs_cleanup/`. Jangan membuat formulir go-live baru di `docs/` root — isi file ini.
 
 ---
 

@@ -146,7 +146,7 @@ Kebijakan owner terkait kerusakan:
 - Kerusakan sengaja, salah pakai berat, kehilangan barang/kunci, atau pelanggaran aturan: direview sebagai tanggung jawab tenant.
 - Kondisi kamar saat audit produksi sebaiknya difoto sebagai baseline data yang adil.
 
-Rujukan detail: `docs/RUNBOOK_DATA_AWAL_PRODUKSI_DAN_AUDIT_FASILITAS.md`.
+Rujukan detail: `docs/archieve/_expired_root_cleanup/RUNBOOK_DATA_AWAL_PRODUKSI_DAN_AUDIT_FASILITAS.md`.
 
 ---
 
@@ -461,7 +461,7 @@ Data real dari owner. Seed via `seed-prod.js`. Tgl Masuk = tanggal hari (bulan m
 > - Kepastian guling inventaris (C, F1, I, J, M)
 > - **Gudang** — belum diaudit
 > - **Ruang umum** — belum diaudit
-> - Referensi lengkap: `docs/AUDIT_INVENTARIS_LENGKAP.md`
+> - Referensi lengkap: `docs/archieve/AUDIT_INVENTARIS_LENGKAP.md`
 
 ---
 

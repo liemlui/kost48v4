@@ -16,6 +16,7 @@ Sistem manajemen kost 48 kamar. NestJS + Prisma + PostgreSQL (`backend/`), React
 3. `docs/M19_EFISIENSI_HOSTING_512MB.md`: spesifikasi EF, bukti lokal, tabel hosting UNKNOWN.
 4. `docs/M01_MASTER.md`: orientasi; `docs/M00_CODEMAP.md`: modul ke path sebelum pencarian kode.
 5. Domain: M03 flow, M04 keuangan, M05 huni, M06 operasional, M07 publik, M08 deploy, M09 AI, M10 scope, M11 default, M14 UI/UX, M15 IoT, M16 audit, M17 portal, M18 harga. M13 = riwayat.
+6. Formulir go-live kanonik: `docs/FORM_ISI_DATA_GO_LIVE.md`. Form lama (`GO_LIVE_DATA_ISI.md`, `tenant-data-template.tsv`) diarsipkan di `docs/archieve/2026-09-07_docs_cleanup/`.
 
 Seri M00–M19 aktif. Judul sumber lama dalam dossier adalah riwayat, bukan file yang perlu dibuat ulang. Memory hanya petunjuk; keputusan terbaru dan bukti kode menang atas memory lama. Jangan baca `docs/archieve/*`, `reference/*`, `backend/src/generated/*`, atau seluruh node_modules.
 

@@ -1,5 +1,49 @@
 # KOST48 V5 — M13 Changelog
 
+## 2026-09-07 — Arah app ditegaskan, pemetaan AI eksekutor, arsip dokumen go-live
+
+- Owner menginstruksikan: lanjutkan pekerjaan yang belum selesai, petakan tugas agar AI eksekutor lemah pun bisa melaksanakan, arsipkan dokumentasi yang tidak perlu, dan tegaskan arah aplikasi.
+- **Arah aplikasi ditegaskan statis (docs M12 "Cara Pakai"):** prioritas Fase EF, target satu proses API NestJS, Fase MA ditunda, tanpa penghapusan fitur/domain bisnis. Versi aplikasi tetap 1.3.0 (tidak ada bump).
+- **Pemetaan AI:** section "Cara Pakai (AI Eksekutor — baca sebelum coding)" di `docs/M12_CHECKLIST_CHANGELOG.md` kini berisi protokol 5 langkah + tabel antrean prioritas dengan status BLOCKED/bisa-dikerjakan.
+- **Arsip dokumen go-live:** `docs/GO_LIVE_DATA_ISI.md` + `docs/tenant-data-template.tsv` dipindah (git mv, history terjaga) ke `docs/archieve/2026-09-07_docs_cleanup/`. Formulir kanonik = `docs/FORM_ISI_DATA_GO_LIVE.md`; pointer di M08 & M12 diarahkan ke formulir baru.
+- **Pembersihan sekuritas (SEC-CLEAN):** nilai password OWNER yang pernah tertulis teks-polos di file `GO_LIVE_DATA_ISI.md` dihapus dari working tree. Nilai itu sebelumnya sudah ter-push ke `origin/main` (commit `26dd5b8`/`e14ce8b`) → **dianggap bocor; OWNER wajib mengganti password OWNER di aplikasi**. Purge history GitHub (filter-repo/BFG/force-push) TIDAK dilakukan karena membutuhkan permintaan eksplisit.
+- **Perbaikan referensi:** ~70 tautan `docs/*.md` lama di file aktif (M00–M12, M14–M19) diarahkan otomatis ke lokasi arsip aktual (script link-check berbasis nama file). Sisa referensi yang menunjuk artefak di luar repo (mis. `docs/filePrint/05_...`) dicatat di laporan sesi.
+- **EF-00 lanjutan (bundle):** bundle `kost48-deploy-bundled/` diverifikasi ulang read-only: 753 file, 55.310.649 byte, buildId `1BavS58Sb96-`, metadata 18 Agu 2026, dan **tidak memuat file `.env*`** — env dikelola lewat panel cPanel. Ini bukan bukti artefak server yang berjalan.
+- **Verifikasi:** docs-only — tidak ada build/UAT aplikasi karena tidak relevan. Link-check markdown lulus untuk file aktif; sisa referensi rusak tidak diubah dan dicatat.
+
+## 2026-09-07 — EF-00: bundle kandidat diperiksa secara read-only
+
+- Folder `kost48-deploy-bundled` yang diberikan owner berisi 753 file dengan total 55.310.649 byte; metadata isi bertanggal 18 Agu 2026 WIB. `client/version.json` memuat buildId `1BavS58Sb96-`; `package.json` menetapkan `main: dist/main.js` dan engine Node `>=22.12.0`.
+- Node panel dikoreksi menjadi `22.23.2`, sehingga deklarasi engine bundle kompatibel secara semver. Ini belum membuktikan folder tersebut sama dengan artefak server yang berjalan atau membuktikan runtime sehat.
+- Screenshot lanjutan memperlihatkan panel mendeteksi `package.json`; ini menguatkan keberadaan konfigurasi aplikasi pada root panel, tetapi belum membuktikan isi paket, waktu deploy, atau proses yang sedang berjalan.
+- Tidak ada ekstraksi, build, install, start, restart, deploy, atau uji runtime.
+
+**Sumber/waktu:** folder bundle yang diberikan owner, `package.json`, `client/version.json`, dan metadata file lokal; diperiksa read-only pada 2026-09-07 WIB.
+
+## 2026-09-07 — EF-00: snapshot resource cPanel diterima
+
+- Snapshot cPanel mencatat PMEM `403,34 MB / 512 MB (78,78%)`, proses `22/100`, entry processes `2/15`, file usage `49.651/75.000`, PostgreSQL disk `48,57 MB`, CPU `0%`, IOPS `0/1.024`, dan I/O `0 bytes/s / 10 MB/s`.
+- Dicatat sebagai snapshot sesaat pada `2026-09-07 WIB (Asia/Jakarta)`, bukan peak, rata-rata interval, uji beban, atau bukti jumlah instance Passenger. Fault counter, waktu persis, artefak, dan waktu deploy tetap `UNKNOWN`.
+- Kesimpulan kapasitas belum dibuat; PMEM snapshot 78,78% tidak membuktikan host cukup atau tidak cukup untuk workload produksi.
+
+**Sumber/waktu:** cPanel General Information/Statistics yang diberikan owner pada sesi 2026-09-07 WIB. Tidak ada restart, build, deploy, atau uji beban dilakukan.
+
+## 2026-09-07 — EF-00: konfigurasi Node.js hosting teridentifikasi parsial
+
+- Screenshot Setup Node.js App menunjukkan mode `Production`, Node.js `22.23.2`, application root `kost48-prod`, URL `kost48surabaya.com`, dan startup file `dist/main.js`.
+- Owner melaporkan zona waktu deployment Surabaya sebagai `WIB (Asia/Jakarta)` serta versi aplikasi yang terpasang `v1.2.0`, berlabel **KOST48 Surabaya Barat — Kos nyaman dekat Pakuwon Mall / PTC**. Versi ini berbeda dari source lokal `1.3.0` dan belum dapat dipetakan ke commit/paket server.
+- Document root, nama/ukuran/checksum paket yang berjalan, commit artefak, waktu deploy, instance Passenger, resource LVE, dan keberadaan patch EF-01/03/05 tetap `UNKNOWN`. Screenshot konfigurasi bukan bukti waktu deploy atau isi artefak.
+
+**Sumber/waktu:** screenshot Setup Node.js App yang diterima pada sesi 2026-09-07 WIB. Tidak ada restart, build, deploy, atau pengukuran resource dilakukan.
+
+## 2026-09-07 — EF-00: fingerprint lokal diperbarui, deployment masih UNKNOWN
+
+- HEAD lokal aktual `8c35a4f7524f85eb3a07f8407a2c950cbfb6e98a` pada branch `main`; working tree `dirty` dan perubahan kode/script/bundle sebelumnya dipertahankan.
+- Dicatat Node workstation `v22.15.0`, Prisma `7.8.0`, entrypoint konfigurasi `node --max-old-space-size=192 dist/main.js`, serta bundle lokal `kost48-deploy-bundled.tgz` (42.863.126 byte, modifikasi 6 Sep 2026 WIB, SHA-256 `820EEAA22FB389BF8AA8C660F12F0E4FA158F90970B3C4637C78B551F6E73B6`). Waktu modifikasi dan bundle lokal bukan bukti waktu build atau artefak server.
+- Tidak ada bukti hosting yang tersedia pada sesi ini. Artefak/commit server, waktu deploy dan zona waktu, versi Node host, startup file, application/document root, instance Passenger, resource LVE, serta pemasangan EF-01/03/05 tetap `UNKNOWN`; EF-00 tetap terbuka dan tidak ada klaim 512 MB cukup.
+
+**Sumber/waktu:** `git status`, `git rev-parse HEAD`, `git log -1`, `node --version`, `backend/package.json`, `Get-FileHash` dan metadata file lokal; diperiksa 2026-09-07 WIB. Tidak build, ekstrak, jalankan aplikasi, atau menguji host.
+
 ## 2026-09-06 — Sinkronisasi dokumentasi dan arah EF/MA
 
 - Atas permintaan owner, panduan agent dan seri M00–M19 diselaraskan: Fase EF prioritas, target satu proses API, Fase MA ditunda; versi aplikasi tetap 1.3.0. M02 mencatat keputusan, M12 menjadi checklist tunggal, M19 menyimpan tabel deployment/resource UNKNOWN, dan M08 menjadi runbook aktif.

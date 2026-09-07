@@ -11,9 +11,9 @@ Permukaan publik dan pertumbuhan: marketing, UI/UX, loyalitas, gamifikasi, refer
 
 ## Sumber Digabung
 
-- `docs/17_PUBLIK_MARKETING_UIUX.md` - konten dipertahankan
-- `docs/19_GAMIFIKASI_LOYALITAS.md` - konten dipertahankan
-- `docs/_PROPOSAL_MARKETING_GAMIFIKASI_TIP.md` - konten dipertahankan
+- `docs/archieve/2026-06-16_root_docs_pre_M/17_PUBLIK_MARKETING_UIUX.md` - konten dipertahankan
+- `docs/archieve/2026-06-16_root_docs_pre_M/19_GAMIFIKASI_LOYALITAS.md` - konten dipertahankan
+- `docs/archieve/2026-06-16_root_docs_pre_M/_PROPOSAL_MARKETING_GAMIFIKASI_TIP.md` - konten dipertahankan
 
 ## Update 2026-07-08 — Sinkronisasi Publik & Growth
 
@@ -214,7 +214,7 @@ disetujui.
    kerangka interpretasi, bukan modul aplikasi.
 
 
-## Bagian 1 - `docs/17_PUBLIK_MARKETING_UIUX.md`
+## Bagian 1 - `docs/archieve/2026-06-16_root_docs_pre_M/17_PUBLIK_MARKETING_UIUX.md`
 
 ### DOSSIER 17 — PUBLIK, MARKETING & UI/UX
 **Domain:** katalog publik, SEO, funnel akuisisi, social proof, UI/UX seluruh app, visualisasi/chart. **Flow 2-publik + frontend.**
@@ -265,7 +265,7 @@ Prioritas: **#1 Occupancy Heatmap kalender SELESAI 2026-06-14** (CSS grid, renta
 - **Kanal akuisisi (CAC):** groupBy bookingSource/bulan pasca F3-11. **Retensi (CLV):** renewal + gamifikasi (dossier 11/19).
 
 
-## Bagian 2 - `docs/19_GAMIFIKASI_LOYALITAS.md`
+## Bagian 2 - `docs/archieve/2026-06-16_root_docs_pre_M/19_GAMIFIKASI_LOYALITAS.md`
 
 ### DOSSIER 19 — GAMIFIKASI & LOYALITAS TENANT
 **Domain:** program poin loyalitas tenant + reward (retensi). **Fitur BARU (F4-9) — belum ada di kode.** Ide owner.
@@ -319,7 +319,7 @@ Prioritas: **#1 Occupancy Heatmap kalender SELESAI 2026-06-14** (CSS grid, renta
 - Poin expired setelah tenant keluar (tidak carry-over ke booking baru).
 
 
-## Bagian 3 - `docs/_PROPOSAL_MARKETING_GAMIFIKASI_TIP.md`
+## Bagian 3 - `docs/archieve/2026-06-16_root_docs_pre_M/_PROPOSAL_MARKETING_GAMIFIKASI_TIP.md`
 
 ### PROPOSAL — Marketing, Gamifikasi Tenant, Tip Staf (vision owner 2026-06-16)
 
@@ -567,7 +567,7 @@ LoginPage placeholder "Contoh: nama@email.com atau 0812..." — tapi error messa
 
 ## Audit 360° P7 Marketing & Growth (Jul 2026)
 
-**Status:** 🟢 Solid. Detail → `docs/archieve/M17_AUDIT_360_P3_P8.md`
+**Status:** 🟢 Solid. Detail → `docs/archieve/_previous_cycles/M17_AUDIT_360_P3_P8.md`
 
 ✅ Room filter publik · ✅ Badge status kamar (hijau/merah/kuning/abu) · ✅ SEO 100/100 · ✅ JSON-LD (LodgingBusiness) · ✅ Social proof (rating≥4, inisial anonim) · ✅ Availability calendar · ✅ Code splitting · ✅ **CTA booking** — `BookingCtaButton` shared component (P7-01 ✅ FIXED) · ✅ Loyalty poin idempotent (4 trigger) · ✅ Reward accounting (RENT_DISCOUNT/METER_DISCOUNT/SERVICE_ADDON/BADGE) · ✅ Referral system · ✅ Rent-loyalty (D-16 harga tidak naik) · ✅ Market Analysis (DeepSeek + offline fallback) · ✅ Guest Preference Survey (OC-04)
 

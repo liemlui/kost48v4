@@ -11,9 +11,9 @@ Semua fondasi keuangan: harness verifikasi, pembayaran/invoice, accounting, lapo
 
 ## Sumber Digabung
 
-- `docs/05_VERIFIKASI_KEUANGAN.md` - konten dipertahankan
-- `docs/10_PEMBAYARAN_INVOICE.md` - konten dipertahankan
-- `docs/13_AKUNTANSI_LAPORAN.md` - konten dipertahankan
+- `docs/archieve/2026-06-16_root_docs_pre_M/05_VERIFIKASI_KEUANGAN.md` - konten dipertahankan
+- `docs/archieve/2026-06-16_root_docs_pre_M/10_PEMBAYARAN_INVOICE.md` - konten dipertahankan
+- `docs/archieve/2026-06-16_root_docs_pre_M/13_AKUNTANSI_LAPORAN.md` - konten dipertahankan
 
 ## Catatan Pemakaian
 
@@ -118,7 +118,7 @@ Keputusan booking awal Fase V mengubah arti status kamar, tetapi tidak mengubah 
 - Payment proof wajib punya ownership server-side; batch payment tidak boleh membuat submission tanpa file bukti yang terikat user/tenant.
 - Guard no-partial tetap berlaku: nominal sah booking adalah DP tepat atau pelunasan tepat sesuai sisa kewajiban yang dihitung server.
 
-## Bagian 1 - `docs/05_VERIFIKASI_KEUANGAN.md`
+## Bagian 1 - `docs/archieve/2026-06-16_root_docs_pre_M/05_VERIFIKASI_KEUANGAN.md`
 
 ### 05 — HARNESS VERIFIKASI KEUANGAN (jaring pengaman AI eksekutor)
 **Tujuan:** memastikan **hitungan keuangan tetap handal** saat kode disentuh AI lemah. `tsc 0` TIDAK cukup — kode bisa lolos compile tapi salah angka (bukti: bug F-18 = kembaran F-01 yang lolos audit V1). Jalankan harness ini SETELAH tiap task keuangan (dossier 13) dan tiap task uang (dossier 10/12).
@@ -232,7 +232,7 @@ Di DB bersih + COA seeded + CashAccount Cash(1000)+Bank(1010) + periode OPEN:
 - Kalau ada yang ✗ → JANGAN commit; perbaiki atau STOP & lapor.
 
 
-## Bagian 2 - `docs/10_PEMBAYARAN_INVOICE.md`
+## Bagian 2 - `docs/archieve/2026-06-16_root_docs_pre_M/10_PEMBAYARAN_INVOICE.md`
 
 ### DOSSIER 10 — PEMBAYARAN & INVOICE
 **Domain:** alur uang masuk inti — bukti bayar tenant, review/approve admin, invoice & pembayaran manual, meter reading. **Flow 3 & 4.**
@@ -287,7 +287,7 @@ Di DB bersih + COA seeded + CashAccount Cash(1000)+Bank(1010) + periode OPEN:
 - **Prasyarat:** kerjakan SEBELUM deploy (Fase 1). Terkait deposit → dossier 12; akuntansi → dossier 13.
 
 
-## Bagian 3 - `docs/13_AKUNTANSI_LAPORAN.md`
+## Bagian 3 - `docs/archieve/2026-06-16_root_docs_pre_M/13_AKUNTANSI_LAPORAN.md`
 
 ### DOSSIER 13 — AKUNTANSI & LAPORAN
 **Domain:** jurnal otomatis, COA, general ledger, trial balance, laporan keuangan (P&L, Balance Sheet, Cashflow, AR Aging). **Flow 12.**
@@ -391,7 +391,7 @@ Lokasi: `accounting-reports.service.ts` `financialRatios()` (grep `async financi
 
 ## Audit 360° Flow Uang (Jul 2026)
 
-**Status:** 🟢 90% SEHAT — 3 HIGH, 4 MEDIUM, 2 LOW. Detail → `docs/archieve/M15_AUDIT_360_FLOW_UANG.md`
+**Status:** 🟢 90% SEHAT — 3 HIGH, 4 MEDIUM, 2 LOW. Detail → `docs/archieve/_previous_cycles/M15_AUDIT_360_FLOW_UANG.md`
 
 ### 8 Invarian Keuangan — Status Terkini
 
