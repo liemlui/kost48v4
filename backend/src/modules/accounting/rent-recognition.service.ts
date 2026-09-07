@@ -44,24 +44,52 @@ export class RentRecognitionService {
       take: 50,
     });
 
+    const stayIds = stays.map((stay) => stay.id);
+
+    // Batch lookup: semua invoice sewa kandidat dan semua jurnal POSTED diambil
+    // dalam 2 query, bukan per stay (hindari N+1 saat kandidat banyak).
+    const invoices = stayIds.length
+      ? await this.prisma.invoice.findMany({
+          where: {
+            stayId: { in: stayIds },
+            status: { notIn: ['DRAFT', 'CANCELLED'] as any },
+            lines: { some: { lineType: 'RENT' as any } },
+          },
+          orderBy: { id: 'asc' },
+          select: {
+            id: true,
+            stayId: true,
+            lines: { where: { lineType: 'RENT' as any }, select: { lineAmountRupiah: true } },
+          },
+        })
+      : [];
+
+    const invoiceByStay = new Map<number, (typeof invoices)[number]>();
+    for (const invoice of invoices) {
+      if (!invoiceByStay.has(invoice.stayId)) invoiceByStay.set(invoice.stayId, invoice);
+    }
+
+    const postedInvoiceIds = new Set<number>();
+    if (invoices.length > 0) {
+      const postedJournalEntries = await this.prisma.journalEntry.findMany({
+        where: {
+          sourceType: 'INVOICE' as any,
+          sourceId: { in: invoices.map((invoice) => String(invoice.id)) },
+          status: 'POSTED' as any,
+        },
+        select: { sourceId: true },
+      });
+      for (const entry of postedJournalEntries) {
+        const numericId = Number(entry.sourceId);
+        if (Number.isFinite(numericId)) postedInvoiceIds.add(numericId);
+      }
+    }
+
     let created = 0;
     for (const stay of stays) {
-      const invoice = await this.prisma.invoice.findFirst({
-        where: {
-          stayId: stay.id,
-          status: { notIn: ['DRAFT', 'CANCELLED'] as any },
-          lines: { some: { lineType: 'RENT' as any } },
-        },
-        orderBy: { id: 'asc' },
-        select: { id: true, lines: { where: { lineType: 'RENT' as any }, select: { lineAmountRupiah: true } } },
-      });
+      const invoice = invoiceByStay.get(stay.id);
       if (!invoice) continue;
-
-      const issuancePosted = await this.prisma.journalEntry.findFirst({
-        where: { sourceType: 'INVOICE' as any, sourceId: String(invoice.id), status: 'POSTED' as any },
-        select: { id: true },
-      });
-      if (!issuancePosted) continue;
+      if (!postedInvoiceIds.has(invoice.id)) continue;
 
       const rentTotal = invoice.lines.reduce((sum, l) => sum + Number(l.lineAmountRupiah ?? 0), 0);
       const periods = buildRentRecognitionSchedule(stay.checkInDate, String(stay.pricingTerm), rentTotal);

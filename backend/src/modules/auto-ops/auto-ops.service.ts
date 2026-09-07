@@ -46,15 +46,26 @@ export class AutoOpsService implements OnModuleInit, OnModuleDestroy {
   ) {}
 
   private async loadEnabled(): Promise<boolean> {
+    // Env eksplisit MENANG atas DB. Ini penting untuk shared hosting/Passenger:
+    // README deploy menyuruh `AUTO_OPS_ENABLED=false`, tetapi DB OperationalSetting
+    // default-nya `autoOpsEnabled=true` (dan seed membuat row id=1). Tanpa override
+    // ini, setInterval in-process tetap menyala setiap 5 menit dan membuat CPU penuh.
+    const raw = process.env.AUTO_OPS_ENABLED;
+    if (raw !== undefined && raw.trim() !== '') {
+      const value = raw.trim().toLowerCase();
+      if (['true', '1', 'yes', 'y', 'on'].includes(value)) return true;
+      if (['false', '0', 'no', 'n', 'off'].includes(value)) return false;
+    }
+
     try {
       const db = await this.prisma.operationalSetting.findUnique({
         where: { id: 1 },
         select: { autoOpsEnabled: true },
       });
       if (db && typeof db.autoOpsEnabled === 'boolean') return db.autoOpsEnabled;
-    } catch { /* DB not ready — fallback env */ }
-    const raw = String(process.env.AUTO_OPS_ENABLED ?? 'true').trim().toLowerCase();
-    return ['true', '1', 'yes', 'y', 'on'].includes(raw);
+    } catch { /* DB not ready — fallback default */ }
+
+    return true;
   }
 
   async onModuleInit() {

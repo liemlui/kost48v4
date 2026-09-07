@@ -555,7 +555,7 @@ export class AccountingService {
     await this.assertPeriodOpenForDraft(dto.entryDate, dto.accountingPeriodId);
     await this.ensureLinesAccounts(dto.lines.map((line) => line.chartOfAccountId));
     const cashIds = dto.lines.map((line) => line.cashAccountId).filter((id): id is number => Boolean(id));
-    for (const id of cashIds) await this.ensureCashAccount(id);
+    await this.ensureCashAccounts(cashIds);
     const totalDebit = dto.lines.reduce((sum, line) => sum + rupiah(line.debitRupiah), 0);
     const totalCredit = dto.lines.reduce((sum, line) => sum + rupiah(line.creditRupiah), 0);
     const invalid = dto.lines.find((line) => rupiah(line.debitRupiah) > 0 && rupiah(line.creditRupiah) > 0);
@@ -614,9 +614,23 @@ export class AccountingService {
   }
 
   private async ensureCashAccount(id: number) {
-    const row = await (this.prisma as any).cashAccount.findUnique({ where: { id } });
+    const row = await (this.prisma as any).cashAccount.findUnique({
+      where: { id },
+      select: { id: true },
+    });
     if (!row) throw new NotFoundException('Cash account tidak ditemukan.');
     return row;
+  }
+
+  private async ensureCashAccounts(ids: number[]) {
+    const unique = [...new Set(ids)];
+    if (unique.length === 0) return [];
+    const rows = await (this.prisma as any).cashAccount.findMany({
+      where: { id: { in: unique } },
+      select: { id: true },
+    });
+    if (rows.length !== unique.length) throw new NotFoundException('Cash account tidak ditemukan.');
+    return rows;
   }
 
   private async ensureLinesAccounts(ids: number[]) {

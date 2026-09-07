@@ -254,39 +254,26 @@ export class AnnouncementsService {
       });
     }
 
-    for (const user of recipients) {
-      try {
-        const existingNotification = await this.prisma.appNotification.findFirst({
-          where: {
-            recipientUserId: user.id,
-            entityType: 'ANNOUNCEMENT',
-            entityId: String(announcement.id),
-          },
-          select: { id: true },
-        });
-
-        if (existingNotification) {
-          continue;
-        }
-
-        const linkTo = user.role === UserRole.TENANT ? '/portal/announcements' : '/announcements';
-
-        await this.notificationService.create({
+    // Batch fan-out: satu findMany untuk duplikat + satu createMany untuk penerima baru,
+    // sehingga jumlah query tidak tumbuh seiring jumlah penerima.
+    try {
+      await this.notificationService.createManyOnce(
+        recipients.map((user) => ({
           recipientUserId: user.id,
           title: 'Pengumuman baru',
           body: announcement.title,
-          linkTo,
+          linkTo: user.role === UserRole.TENANT ? '/portal/announcements' : '/announcements',
           entityType: 'ANNOUNCEMENT',
           entityId: String(announcement.id),
-          category: 'OPERATIONS',
-        });
-      } catch (err) {
-        this.logger.error(
-          `Gagal membuat notifikasi untuk user ${user.id} pada pengumuman ${announcement.id}`,
-          err,
-        );
-        // jangan rethrow agar satu penerima gagal tidak memblok penerima lain
-      }
+          category: 'OPERATIONS' as const,
+        })),
+      );
+    } catch (err) {
+      this.logger.error(
+        `Gagal membuat notifikasi batch untuk pengumuman ${announcement.id}`,
+        err,
+      );
+      // jangan rethrow agar notifikasi gagal tidak memblok dispatch announcement
     }
 
     // P2-2: tandai sudah didispatch setelah notifikasi berhasil dikirim

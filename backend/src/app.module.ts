@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { APP_GUARD } from '@nestjs/core';
+import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { ConfigModule } from '@nestjs/config';
 import { join } from 'node:path';
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
@@ -54,6 +54,8 @@ import { OwnerDashboardModule } from './modules/owner/owner-dashboard.module';
 import { StaffDashboardModule } from './modules/staff-dashboard/staff-dashboard.module';
 import { IotModule } from './modules/iot/iot.module';
 import { AppConfigModule } from './common/config/app-config.module';
+import { MemoryTelemetryInterceptor } from './common/telemetry/memory-telemetry.interceptor';
+import { MemoryTelemetryService } from './common/telemetry/memory-telemetry.service';
 
 // Passenger/cPanel dapat menjalankan startup file dengan cwd yang berbeda dari
 // application root. __dirname selalu berada di src/ saat development dan dist/
@@ -127,6 +129,8 @@ const ENV_FILE_PATHS = [
     // RolesGuard global aman: tanpa metadata @Roles ia meloloskan request.
     { provide: APP_GUARD, useClass: JwtAuthGuard },
     { provide: APP_GUARD, useClass: RolesGuard },
+    MemoryTelemetryService,
+    { provide: APP_INTERCEPTOR, useClass: MemoryTelemetryInterceptor },
   ],
 })
 export class AppModule {}

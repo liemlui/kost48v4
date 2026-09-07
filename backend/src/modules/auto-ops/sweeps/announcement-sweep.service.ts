@@ -102,40 +102,26 @@ export class AnnouncementSweepService {
       });
     }
 
-    for (const user of recipients) {
-      try {
-        // Cek duplikasi per recipient
-        const existingNotification = await this.prisma.appNotification.findFirst({
-          where: {
-            recipientUserId: user.id,
-            entityType: 'ANNOUNCEMENT',
-            entityId: String(announcementId),
-          },
-          select: { id: true },
-        });
-
-        if (existingNotification) {
-          continue;
-        }
-
-        const linkTo = user.role === UserRole.TENANT ? '/portal/announcements' : '/announcements';
-
-        await this.notificationService.create({
+    // Batch fan-out: satu findMany untuk duplikat + satu createMany untuk penerima baru,
+    // sehingga jumlah query tidak tumbuh seiring jumlah penerima.
+    try {
+      await this.notificationService.createManyOnce(
+        recipients.map((user) => ({
           recipientUserId: user.id,
           title: 'Pengumuman baru',
           body: title,
-          linkTo,
+          linkTo: user.role === UserRole.TENANT ? '/portal/announcements' : '/announcements',
           entityType: 'ANNOUNCEMENT',
           entityId: String(announcementId),
-          category: 'OPERATIONS',
-        });
-      } catch (err) {
-        this.logger.error(
-          `Gagal membuat notifikasi untuk user ${user.id} pada pengumuman ${announcementId}`,
-          err,
-        );
-        // jangan rethrow agar satu penerima gagal tidak memblok penerima lain
-      }
+          category: 'OPERATIONS' as const,
+        })),
+      );
+    } catch (err) {
+      this.logger.error(
+        `Gagal membuat notifikasi batch untuk pengumuman ${announcementId}`,
+        err,
+      );
+      // jangan rethrow agar notifikasi gagal tidak memblok dispatch announcement
     }
 
     // Tandai sudah didispatch

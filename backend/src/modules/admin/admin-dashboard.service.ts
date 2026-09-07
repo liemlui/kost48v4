@@ -4,9 +4,27 @@ import { computeFacilityGap, type FacilityGapInput } from '../rooms/room-facilit
 
 @Injectable()
 export class AdminDashboardService {
+  private static readonly AGGREGATE_CACHE_MS = Number(
+    process.env.ADMIN_DASHBOARD_CACHE_MS ?? 10_000,
+  );
+  private aggregateCache: { at: number; value: unknown } | null = null;
+
   constructor(private readonly prisma: PrismaService) {}
 
   async aggregate() {
+    const ttl = AdminDashboardService.AGGREGATE_CACHE_MS;
+    if (ttl > 0 && this.aggregateCache && Date.now() - this.aggregateCache.at < ttl) {
+      return this.aggregateCache.value;
+    }
+
+    const value = await this.computeAggregate();
+    if (ttl > 0) {
+      this.aggregateCache = { at: Date.now(), value };
+    }
+    return value;
+  }
+
+  private async computeAggregate() {
     const [
       rooms,
       stays,
@@ -22,14 +40,36 @@ export class AdminDashboardService {
     ] = await Promise.all([
       this.prisma.room.findMany({
         where: { isActive: true },
+        select: {
+          id: true,
+          code: true,
+          name: true,
+          floor: true,
+          status: true,
+          monthlyRateRupiah: true,
+          isActive: true,
+        },
         orderBy: { code: 'asc' },
       }),
       this.prisma.stay.findMany({
         where: { status: 'ACTIVE' },
-        include: {
-          room: true,
+        select: {
+          id: true,
+          tenantId: true,
+          roomId: true,
+          status: true,
+          bookingSource: true,
+          checkInDate: true,
+          plannedCheckOutDate: true,
+          expiresAt: true,
+          createdAt: true,
+          room: { select: { id: true, code: true, name: true, status: true } },
           tenant: { select: { id: true, fullName: true } },
-          invoices: { orderBy: { id: 'desc' }, take: 1, select: { id: true, status: true } },
+          invoices: {
+            orderBy: { id: 'desc' },
+            take: 1,
+            select: { id: true, status: true, invoiceNumber: true },
+          },
           _count: { select: { invoices: true } },
         },
         take: 300,
@@ -39,13 +79,24 @@ export class AdminDashboardService {
           ...stay,
           invoiceCount: cnt?.invoices ?? 0,
           latestInvoiceId: inv[0]?.id ?? null,
+          latestInvoiceNumber: inv[0]?.invoiceNumber ?? null,
           latestInvoiceStatus: inv[0]?.status ?? null,
         })),
       ),
       this.prisma.invoice.findMany({
-        include: {
+        select: {
+          id: true,
+          stayId: true,
+          invoiceNumber: true,
+          status: true,
+          dueDate: true,
+          totalAmountRupiah: true,
+          paidAt: true,
+          issuedAt: true,
+          notes: true,
           stay: {
-            include: {
+            select: {
+              id: true,
               tenant: { select: { id: true, fullName: true } },
               room: { select: { id: true, code: true } },
             },

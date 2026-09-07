@@ -87,6 +87,13 @@ export class AppConfigService {
   readonly iotStaleAfterMinutes: number;
 
   // ══════════════════════════════════════════════
+  //  SECTION 6A: Optional memory telemetry
+  // ══════════════════════════════════════════════
+
+  readonly memoryTelemetryEnabled: boolean;
+  readonly memoryTelemetryIntervalSeconds: number;
+
+  // ══════════════════════════════════════════════
   //  SECTION 7: AI / DeepSeek
   // ══════════════════════════════════════════════
 
@@ -192,6 +199,8 @@ export class AppConfigService {
     this.iotTuyaPollMinutes = Number(process.env.IOT_TUYA_POLL_MINUTES ?? 10);
     this.iotTuyaCronToken = (process.env.IOT_TUYA_CRON_TOKEN ?? '').trim();
     this.iotStaleAfterMinutes = Number(process.env.IOT_STALE_AFTER_MINUTES ?? 15);
+    this.memoryTelemetryEnabled = this.parseBool(process.env.MEMORY_TELEMETRY_ENABLED, false);
+    this.memoryTelemetryIntervalSeconds = Math.max(10, Number(process.env.MEMORY_TELEMETRY_INTERVAL_SECONDS ?? 60));
 
     // ── Section 7: AI / DeepSeek ──
     this.deepseekApiKey = process.env.DEEPSEEK_API_KEY || process.env.AI_PROVIDER_KEY || undefined;

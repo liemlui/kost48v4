@@ -506,52 +506,6 @@ writeFileSync(OUT + '/.env.example', [
   '',
 ].join('\n'));
 
-writeFileSync(OUT + '/README-DEPLOY.md', `# KOST48 v1.3.0 — Deploy cPanel/VPS (PREBUILT, include node_modules)
-
-Kode aplikasi sudah di-build di lokal. Server tetap memasang dependency runtime terkunci dengan \`npm run cpanel:install\`.
-Tanpa tsc, tanpa prisma generate, tanpa devDependencies — aman untuk hosting RAM 512MB & limit inode.
-
-## 🚀 Langkah cPanel (1x run, ≈20 menit)
-
-1. **PostgreSQL Databases**: buat DB produksi BARU (mis. \`kost48_prod\`) + user + all privileges. Jangan drop DB UAT. Catat kredensial.
-2. **Upload** \`kost48-deploy.tgz\` ke folder app (mis. \`~/kost48\`) → File Manager: Extract.
-3. **Setup Node.js App**: Node **22** · Application root = folder app · **Startup file = \`dist/main.js\`**
-   - Environment Variables: **\`NODE_OPTIONS=--max-old-space-size=192\`** (batas heap; tidak bisa via .env)
-4. **SSH** (masuk venv Node dari halaman Setup Node.js App):
-   \`\`\`bash
-   cp .env.example .env && nano .env
-   # isi: DATABASE_URL, JWT_SECRET, CORS_ORIGIN, AUTO_OPS_CRON_TOKEN, IOT_TUYA_CRON_TOKEN, IOT_MASTER_KEY
-   npm run cpanel:install
-   \`\`\`
-5. **Setup database** — hanya untuk database produksi baru/kosong. Jangan drop UAT, jangan impor seed historis, dan jangan gunakan db push:
-   \`\`\`bash
-   # Migration ledger produksi (Prisma 7.8.0)
-   npm run cpanel:migrate
-   OWNER_EMAIL=liem.lui@gmail.com OWNER_PASSWORD='buat-password-kuat' OWNER_FULLNAME='Pemilik KOST48' node scripts/seed-owner.js
-   \`\`\`
-   > Sebelum start, pasang dan verifikasi bootstrap guard database yang khusus schema. \`sql/seed.sql\` membawa data historis/PII dan DILARANG untuk produksi. Lihat \`docs/DEPLOYMENT_ONLINE_20260723.md\` di source release untuk gate lengkap.
-6. **Start App** (Setup Node.js App → Start) + **AutoSSL** domain → HTTPS.
-7. **Cron Jobs** (WAJIB — Passenger idle-sleep):
-   \`\`\`
-   */5  * * * * curl -fsS -X POST -H "X-Cron-Token: <TOKEN>" https://domain/api/auto-ops/cron
-   */10 * * * * curl -fsS -X POST -H "X-Iot-Cron-Token: <TOKEN>" https://domain/api/iot/tuya/cron
-   \`\`\`
-8. **Smoke**: \`https://domain/\` tampil · \`/api/public/rooms\` 200 · login OWNER.
-
-## Redeploy (update)
-\`\`\`bash
-# Stop app → backup DB + uploads/ → extract TGZ baru → npm run cpanel:install bila lockfile berubah
-# Untuk produksi yang sudah berisi data: npm run cpanel:migrate (patch-only) → Start app.
-\`\`\`
-
-## Catatan RAM 512MB
-- Semua prebuilt; server tidak build apa pun.
-- Passenger idle-sleep saat sepi; cron membangunkannya.
-- Jika memory faults: turunkan \`NODE_OPTIONS\` ke 160.
-
-⚠️ Jangan commit \`.env\`, data tenant, KTP/NIK, atau password. VPS: \`pm2 start dist/main.js --name kost48\`.
-`);
-
 // Override README lama: bundle sekarang benar-benar membawa runtime node_modules.
 writeFileSync(OUT + '/README-DEPLOY.md', [
   '# KOST48 — Bundle cPanel/VPS siap-jalankan',
@@ -575,9 +529,8 @@ writeFileSync(OUT + '/README-DEPLOY.md', [
   "   OWNER_EMAIL=liem.lui@gmail.com OWNER_PASSWORD='password-kuat-unik' OWNER_FULLNAME='Pemilik KOST48' node scripts/seed-owner.js",
   '   Jangan menyimpan OWNER_PASSWORD permanen di .env.',
   '6. Klik Restart Application di cPanel, aktifkan AutoSSL/HTTPS, lalu smoke test / dan /api/public/rooms.',
-  '7. Setelah UAT lulus, pasang cron hanya bila AUTO_OPS/IOT memang diaktifkan:',
+  '7. Setelah UAT lulus, pasang cron AutoOps bila AUTO_OPS_ENABLED=false:',
   '   */5  * * * * curl -fsS -X POST -H "X-Cron-Token: <TOKEN>" https://domain/api/auto-ops/cron >/dev/null 2>&1',
-  '   */10 * * * * curl -fsS -X POST -H "X-Iot-Cron-Token: <TOKEN>" https://domain/api/iot/tuya/cron >/dev/null 2>&1',
   '',
   '## Redeploy',
   '',
