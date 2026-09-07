@@ -17,13 +17,20 @@ Protokol tetap untuk AI mana pun (termasuk yang "lemah"). Kerjakan urut; jangan 
 | # | Task | Status | Prasyarat untuk mulai |
 |---|------|--------|----------------------|
 | 1 | **EF-00 / EF-02** — identitas deployment + pengamatan pasif (M19 §9) | 🔴 **BLOCKED** | Data hosting: artefak/commit server, waktu deploy, docroot, instance Passenger, fault counter. Screenshot 7 Sep sudah diterima; masih kurang. |
-| 2 | **AO-03 → AO-13 → AO-14** — regresi UI/UX lintas role | ✅ **Bisa dikerjakan lokal** | Fixture/kredensial UAT non-personal (M14). |
+| 2 | **AO-03 → AO-13 → AO-14** — regresi UI/UX lintas role | 🟡 Mekanisme akun audit siap 7 Sep (env `E2E_*` + `seed:audit-users`); provisioning UAT + crawl menunggu izin owner | Fixture/kredensial UAT non-personal (M14). |
 | 3 | **EF-07** uji env lokal; **EF-08** rehearsal lifecycle | ⚠️ Sebagian | Uji aktif host butuh izin; tanpa DB/restart. |
 | 4 | **EF-04** profil paket static | ⚠️ Rencana | Izin lingkup owner. |
 | 5 | **AL backlog H1–H15** (audit Reasonix) | ⚠️ Tunda | Prioritisasi owner. |
 | 6 | **Fase A (A1–A6)** — pra-go-live | 🧑 Owner | Infrastruktur/kredensial/keputusan owner. |
 
 > Aturan prioritas: kerjakan task teratas yang **tidak BLOCKED**. Bila teratas BLOCKED, lanjut ke task berikutnya yang berlabel "Bisa dikerjakan" — jangan menunggu diam. Kembali ke task BLOCKED begitu prasyarat terpenuhi.
+
+## Update 2026-09-07 (lanjutan) — AO-03: mekanisme akun audit lintas role siap
+
+- [ ] **AO-03-MEKANISME (implementasi lokal, bukan provisioning):** `frontend/e2e/audit-users.ts` = satu sumber env `E2E_*` (kredensial TIDAK di-hard-code); `admin-owner-crawl.spec.ts` refactor env-driven; `staff-crawl.spec.ts` baru (AO-13); `backend/scripts/seed-audit-users.js` (alias `npm run seed:audit-users`) = provisioning non-destruktif 5 akun audit event-path via HTTP, password dari env `AUDIT_*`.
+- [ ] **DOCS AO-03:** M11 §1a dirapikan (fondasi seed-dev vs akun audit non-personal); M08 Bagian 3 dicatat DEV-only + pointer skrip audit; M14 status AO-03/AO-13 + §9 perintah crawl diperbarui.
+- **Status:** provisioning akun UAT + crawl lintas role RESTAN menunggu izin owner (mutasi DB dilarang tanpa izin). Empat status dibedakan: mekanisme siap (ini) ≠ akun di-provision ≠ crawl lulus ≠ dampak terukur.
+- **Verifikasi:** `node --check` skrip backend + `npx playwright test --list` frontend; tidak ada mutasi DB / deploy / commit.
 
 ## Update 2026-09-07 — Arah app ditegaskan + pemetaan AI + arsip dokumen
 
@@ -320,7 +327,7 @@ Daftar berikut adalah ledger lintas fase bertanggal, berisi hasil selesai dan ba
 - [x] **AO-00 🔴 P0** — terapkan dua migration UAT pending melalui ledger resmi, backup, dan smoke test. **Owner/DevOps; perubahan DB memerlukan persetujuan.**
 - [x] **AO-01 🟠 P1** — satukan state katalog publik saat API daftar kamar gagal; jangan tampilkan “0 kamar” bersamaan dengan kalender berisi kamar.
 - [x] **AO-02 🟠 P1** — perbaiki urutan hooks halaman loyalitas agar feature redirect tidak memicu ErrorBoundary.
-- [ ] **AO-03 🟠 P1** — sediakan fixture/kredensial UAT non-personal untuk OWNER, ADMIN, STAFF, dan dua state TENANT tanpa menulis secret ke repo.
+- [ ] **AO-03 🟠 P1** — sediakan fixture/kredensial UAT non-personal untuk OWNER, ADMIN, STAFF, dan dua state TENANT tanpa menulis secret ke repo. *(mekanisme siap 7 Sep 2026: `frontend/e2e/audit-users.ts` env-driven + `backend/scripts/seed-audit-users.js` non-destruktif; provisioning akun UAT + crawl menunggu izin owner)*
 - [x] **AO-04 🟠 P1** — kurangi duplikasi navigasi tenant mobile dan dominance onboarding global.
 - [x] **AO-05 🟠 P1** — selaraskan istilah masa sewa aktif, lewat jatuh tempo, renewal, dan checkout.
 - [x] **AO-06 🟠 P1** — asosiasikan label form auth/profile secara programatis.
@@ -330,7 +337,7 @@ Daftar berikut adalah ledger lintas fase bertanggal, berisi hasil selesai dan ba
 - [x] **AO-10 🟡 P2** — ringkas manual tenant mobile dengan progressive disclosure.
 - [x] **AO-11 🟡 P2** — perjelas scroll/filter horizontal dan target sentuh mobile.
 - [x] **AO-12 🟡 P2** — buat kontrak koneksi API saat `npm run dev` eksplisit dan reproducible.
-- [ ] **AO-13** — crawl regresi OWNER/ADMIN/STAFF setelah AO-00 dan AO-03.
+- [ ] **AO-13** — crawl regresi OWNER/ADMIN/STAFF setelah AO-00 dan AO-03. *(crawl STAFF siap 7 Sep 2026: `frontend/e2e/staff-crawl.spec.ts` + `admin-owner-crawl.spec.ts` env-driven; eksekusi menunggu akun UAT/izin)*
 - [x] **AO-15 🟢 P3** — kelompokkan link footer publik dan pertahankan empat pola publik `Best-in-Class` dari benchmark Baymard.
 - [x] **AO-16 🟡 P2** — bedakan empty result karena filter/data/error dan pertahankan shortlist perbandingan selama sesi detail/back.
 - [x] **AO-17 🟠 P1** — adaptasikan hero/teaser homepage untuk state 0 kamar tanpa sinyal hijau, CTA palsu, atau grid kosong; tangkap minat via WhatsApp.

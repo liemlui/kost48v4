@@ -424,6 +424,12 @@ Otomatis & **idempoten** (aman diulang hanya untuk DB baru yang telah disetujui)
 ## Bagian 3 - `docs/archieve/2026-06-16_si_notes/_AKUN_DUMMY_DEV.md`
 
 > DEV ONLY: akun dan data di bagian ini hanya untuk database pengembangan port 5433. Jangan pakai password ini di produksi.
+>
+> **Penting (AO-03, 2026-09-07):** akun dummy di bawah adalah fondasi **DEV**.
+> Untuk akun **AUDIT** crawler lintas role (OWNER/ADMIN/STAFF/dua state TENANT)
+> pakai `backend/scripts/seed-audit-users.js` (`npm run seed:audit-users`) —
+> password dari env `AUDIT_*`, bukan dari dokumen ini; menjalankannya = mutasi DB
+> UAT dan wajib izin owner. Kredensial DEV tidak dianggap sebagai kredensial UAT.
 
 ### Akun Dummy DEV (login cepat) - SI-1 event-path
 

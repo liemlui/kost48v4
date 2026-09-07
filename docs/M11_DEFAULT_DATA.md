@@ -19,13 +19,29 @@
 
 ## 1. Akun & Kredensial
 
-### 1a. Akun Internal (DEV & Produksi)
+### 1a. Akun Fondasi seed-dev (khusus database pengembangan port 5433)
 
 | Role  | Email                  | Password    | Keterangan                        |
 |-------|------------------------|-------------|-----------------------------------|
-| OWNER | `owner@kost48.com`     | `Owner#2026`| Dibuat via `golive-setup.js` / `seed-dev-reset.js` |
-| ADMIN | `admin@kost48.com`     | `admin123`  | DEV only; produksi buat manual    |
-| STAFF | `staff@kost48.com`     | `staff123`  | DEV only; produksi buat manual    |
+| OWNER | `owner@kost48.com`     | `Owner#2026`| Dibuat via `seed-dev-reset.js` (DEV) / `golive-setup.js` (produksi, password beda via env) |
+| ADMIN | `admin@kost48.com`     | `admin123`  | **DEV only** (seed-dev); produksi buat manual |
+| STAFF | `staff@kost48.com`     | `staff123`  | **DEV only** (seed-dev); produksi buat manual |
+
+> Kredensial di atas adalah fondasi **DEV** dan TIDAK boleh dipakai sebagai kredensial audit UAT/produksi.
+
+### 1b. Akun Audit UAT Non-Personal (AO-03) — password TIDAK ditulis di docs
+
+Lima akun audit untuk crawler Playwright lintas role (OWNER, ADMIN, STAFF,
+TENANT dengan stay aktif, TENANT tanpa stay aktif) disediakan di lingkungan
+UAT non-produksi. Semua password dibaca dari **env lokal/secret manager**
+(`frontend/.env.example` hanya memuat nama variable), bukan dari docs/test.
+
+- Penyediaan akun: `cd backend && npm run seed:audit-users` (event-path via HTTP,
+  non-destruktif; **menjalankannya = mutasi DB → wajib izin owner**).
+- Consumsi crawler: `frontend/e2e/audit-users.ts` (env `E2E_OWNER_*`,
+  `E2E_ADMIN_*`, `E2E_STAFF_*`, `E2E_TENANT_ACTIVE_*`, `E2E_TENANT_NO_STAY_*`).
+- Empat status tetap dibedakan: implementasi lokal (mekanisme siap) ≠ akun
+  benar-benar di-provision ≠ crawl lulus ≠ dampak terukur.
 
 ### 1b. Data Tenant Produksi (GO-LIVE)
 

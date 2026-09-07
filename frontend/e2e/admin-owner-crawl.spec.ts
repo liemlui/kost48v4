@@ -1,33 +1,10 @@
 import { test, expect, type Page } from '@playwright/test';
+import { auditCredentials, BASE, ROLE_ROUTES, loginAs, type AuditCredential } from './audit-users';
 
 // Crawl UI/UX Admin & Owner — login nyata via UI, kunjungi semua route menu,
 // tangkap: pageerror (JS crash), console.error, HTTP >=500, request gagal, halaman blank.
-
-const SHARED = [
-  '/renew-requests', '/users', '/tenants', '/stays', '/stays/check-in', '/invoices',
-  '/invoice-payments', '/payment-submissions/review', '/announcements', '/meter-readings',
-  '/iot', '/ac-maintenance', '/additional-services', '/service-interests', '/tickets',
-  '/staff-routines', '/staff-performance', '/surveys', '/guest-preferences',
-  '/inventory/gudang', '/inventory/barang-kamar', '/inventory/mutasi', '/wifi-sales',
-  '/ancillary-revenue', '/finance/accounting-setup', '/finance/assets', '/expenses',
-  '/reminders', '/settings', '/notifications', '/profile',
-];
-
-const ROLES = [
-  {
-    name: 'OWNER', id: 'owner@kost48.com', pw: 'Owner#2026',
-    routes: ['/owner-dashboard', '/admin-dashboard', '/market-analysis', '/loss-refunds', '/reports', ...SHARED],
-  },
-  {
-    name: 'ADMIN', id: 'admin@kost48.com', pw: 'admin123',
-    routes: ['/dashboard', ...SHARED],
-  },
-];
-
-type Finding = { route: string; kind: string; detail: string };
-
-// Default uji terhadap server combined paket deploy (production-like). Override: E2E_BASE.
-const BASE = process.env.E2E_BASE ?? 'http://localhost:3100';
+// AO-03: kredensial TIDAK di-hard-code di sini — dibaca dari env lokal (audit-users.ts).
+// Rute per role dijaga sinkron dengan frontend/src/App.tsx.
 
 const IGNORE_CONSOLE = [
   'Download the React DevTools',
@@ -38,70 +15,70 @@ const IGNORE_CONSOLE = [
   'favicon',
 ];
 
-async function loginAs(page: Page, id: string, pw: string) {
-  await page.goto(BASE + '/login');
-  await page.getByText('Admin / Operasional', { exact: false }).first().click();
-  const inputs = page.locator('form input');
-  await inputs.first().fill(id);
-  await page.locator('form input[type="password"]').fill(pw);
-  await page.locator('form button[type="submit"]').first().click();
-  await page.waitForURL((u) => !u.pathname.includes('/login'), { timeout: 20000 });
+type Finding = { route: string; kind: string; detail: string };
+
+async function crawlRole(page: Page, roleName: 'OWNER' | 'ADMIN', creds: AuditCredential, onFinding: (f: Finding) => void) {
+  let current = '(login)';
+  const on = onFinding;
+
+  page.on('pageerror', (err) => on({ route: current, kind: 'PAGEERROR', detail: String(err.message).slice(0, 300) }));
+  page.on('console', (msg) => {
+    if (msg.type() !== 'error') return;
+    const text = msg.text();
+    if (IGNORE_CONSOLE.some((s) => text.includes(s))) return;
+    on({ route: current, kind: 'CONSOLE', detail: text.slice(0, 300) });
+  });
+  page.on('response', (res) => {
+    const st = res.status();
+    if (st >= 500) on({ route: current, kind: 'HTTP5XX', detail: `${st} ${res.request().method()} ${res.url().slice(0, 180)}` });
+    else if (st === 401 || st === 403 || st === 404) {
+      if (res.url().includes('/api/')) on({ route: current, kind: `HTTP${st}`, detail: `${res.request().method()} ${res.url().slice(0, 180)}` });
+    }
+  });
+  page.on('requestfailed', (req) => {
+    const f = req.failure()?.errorText ?? '';
+    if (f.includes('ERR_ABORTED')) return; // navigasi SPA membatalkan request lama — normal
+    on({ route: current, kind: 'REQFAIL', detail: `${f} ${req.url().slice(0, 160)}` });
+  });
+
+  await loginAs(page, creds);
+
+  const blank: string[] = [];
+  const okPages: string[] = [];
+  for (const route of ROLE_ROUTES[roleName]) {
+    current = route;
+    await page.goto(BASE + route, { waitUntil: 'domcontentloaded' });
+    await page.waitForLoadState('networkidle', { timeout: 12000 }).catch(() => undefined);
+    await page.waitForTimeout(700);
+
+    // masih ke-redirect ke login? = guard salah
+    if (page.url().includes('/login')) {
+      on({ route, kind: 'REDIRECT-LOGIN', detail: 'terlempar kembali ke /login' });
+      await loginAs(page, creds);
+      continue;
+    }
+    const text = (await page.locator('#root').innerText().catch(() => '')).trim();
+    if (text.length < 40) {
+      blank.push(route);
+      on({ route, kind: 'BLANK', detail: `render hanya ${text.length} karakter` });
+    } else {
+      okPages.push(route);
+    }
+    const slug = roleName + route.replace(/[/?:]+/g, '_');
+    await page.screenshot({ path: `e2e-out/${slug}.png` }).catch(() => undefined);
+  }
+
+  console.log(`##RINGKAS## ${roleName}: ${okPages.length}/${ROLE_ROUTES[roleName].length} halaman render OK, ${blank.length} blank`);
 }
 
-for (const role of ROLES) {
-  test(`crawl ${role.name} — semua halaman bersih`, async ({ page }) => {
+for (const roleName of ['OWNER', 'ADMIN'] as const) {
+  const creds = auditCredentials(roleName);
+  test(`crawl ${roleName} — semua halaman bersih`, async ({ page }) => {
+    test.skip(!creds, `Isi E2E_${roleName}_IDENTIFIER dan E2E_${roleName}_PASSWORD di env lokal untuk menjalankan crawl ${roleName}.`);
     test.setTimeout(360000);
     const findings: Finding[] = [];
-    let current = '(login)';
+    await crawlRole(page, roleName, creds!, (f) => findings.push(f));
 
-    page.on('pageerror', (err) => findings.push({ route: current, kind: 'PAGEERROR', detail: String(err.message).slice(0, 300) }));
-    page.on('console', (msg) => {
-      if (msg.type() !== 'error') return;
-      const text = msg.text();
-      if (IGNORE_CONSOLE.some((s) => text.includes(s))) return;
-      findings.push({ route: current, kind: 'CONSOLE', detail: text.slice(0, 300) });
-    });
-    page.on('response', (res) => {
-      const st = res.status();
-      if (st >= 500) findings.push({ route: current, kind: 'HTTP5XX', detail: `${st} ${res.request().method()} ${res.url().slice(0, 180)}` });
-      else if (st === 401 || st === 403 || st === 404) {
-        if (res.url().includes('/api/')) findings.push({ route: current, kind: `HTTP${st}`, detail: `${res.request().method()} ${res.url().slice(0, 180)}` });
-      }
-    });
-    page.on('requestfailed', (req) => {
-      const f = req.failure()?.errorText ?? '';
-      if (f.includes('ERR_ABORTED')) return; // navigasi SPA membatalkan request lama — normal
-      findings.push({ route: current, kind: 'REQFAIL', detail: `${f} ${req.url().slice(0, 160)}` });
-    });
-
-    await loginAs(page, role.id, role.pw);
-
-    const blank: string[] = [];
-    const okPages: string[] = [];
-    for (const route of role.routes) {
-      current = route;
-      await page.goto(BASE + route, { waitUntil: 'domcontentloaded' });
-      await page.waitForLoadState('networkidle', { timeout: 12000 }).catch(() => undefined);
-      await page.waitForTimeout(700);
-
-      // masih ke-redirect ke login? = guard salah
-      if (page.url().includes('/login')) {
-        findings.push({ route, kind: 'REDIRECT-LOGIN', detail: 'terlempar kembali ke /login' });
-        await loginAs(page, role.id, role.pw);
-        continue;
-      }
-      const text = (await page.locator('#root').innerText().catch(() => '')).trim();
-      if (text.length < 40) {
-        blank.push(route);
-        findings.push({ route, kind: 'BLANK', detail: `render hanya ${text.length} karakter` });
-      } else {
-        okPages.push(route);
-      }
-      const slug = role.name + route.replace(/[/?:]+/g, '_');
-      await page.screenshot({ path: `e2e-out/${slug}.png` }).catch(() => undefined);
-    }
-
-    console.log(`##RINGKAS## ${role.name}: ${okPages.length}/${role.routes.length} halaman render OK, ${blank.length} blank`);
     console.log('##TEMUAN##' + JSON.stringify(findings));
 
     const kritis = findings.filter((f) => ['PAGEERROR', 'HTTP5XX', 'BLANK', 'REDIRECT-LOGIN'].includes(f.kind));

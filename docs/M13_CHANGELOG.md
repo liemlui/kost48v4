@@ -1,4 +1,10 @@
 # KOST48 V5 — M13 Changelog
+## 2026-09-07 — AO-03: mekanisme fixture/kredensial audit lintas role (implementasi lokal)
+
+- **Mekanisme akun audit siap (code + docs), bukan provisioning:** `frontend/e2e/audit-users.ts` menjadi sumber kredensial env-driven (E2E_OWNER_*/E2E_ADMIN_*/E2E_STAFF_*/dua state TENANT); `frontend/e2e/admin-owner-crawl.spec.ts` refactor tanpa hard-code password; `frontend/e2e/staff-crawl.spec.ts` baru untuk AO-13; `backend/scripts/seed-audit-users.js` (alias `npm run seed:audit-users`) provisioning non-destruktif 5 akun audit via HTTP (event-path), password dari env `AUDIT_*`, guard `AUDIT_CONFIRM=1`.
+- **Docs sinkron:** M11 §1a dirapikan (fondasi seed-dev vs akun audit non-personal, password audit tidak di docs); M08 Bagian 3 gadi pointer skrip audit; M14 status AO-03/AO-13 + §9 diperbarui; M12 antrean prioritas dicatat.
+- **Status:** implementasi lokal = mekanisme siap. **Provisioning akun UAT + crawl lintas role mancan diizukan owner** (mutasi DB dilarang tanpa izin). Tidak ada klaim akun sudah di-provision atau crawl lulus. Tidak ada mutasi DB, deploy, server start, atau commit.
+- **Verifikasi lokal:** `node --check backend/scripts/seed-audit-users.js` lulus; `npx playwright test --list` (frontend) lulus — semua spec parse OK tanpa server.
 
 ## 2026-09-07 — Arah app ditegaskan, pemetaan AI eksekutor, arsip dokumen go-live
 

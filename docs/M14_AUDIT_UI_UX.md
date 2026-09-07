@@ -838,7 +838,7 @@ Gunakan status berikut di tabel:
 | AO-00 Sinkronkan dua migration UAT | P0 | `BLOCKED:otorisasi owner/devops` | `backend/prisma/migrations/*` hanya deploy, tanpa edit | migrate status + 3 endpoint |
 | AO-01 State terdegradasi katalog publik | P1 | `OPEN` | `PublicRoomsPage.tsx`, komponen availability, `11-public-pages.css` | desktop/mobile + API failure mock |
 | AO-02 Perbaiki hook-order loyalitas | P1 | `OPEN` | `MyLoyaltyPage.tsx`, test loyalty | unit test loading→disabled/enabled |
-| AO-03 Fixture/kredensial audit lintas role | P1 | `BLOCKED:owner pilih mekanisme akun UAT` | docs/env/test only | crawl 3 role login |
+| AO-03 Fixture/kredensial audit lintas role | P1 | `OPEN` — mekanisme siap 7 Sep 2026 (`e2e/audit-users.ts`, `scripts/seed-audit-users.js`); provisioning UAT + crawl menunggu izin owner | `frontend/e2e/*`, `backend/scripts/seed-audit-users.js`, env only | crawl 3 role login |
 | AO-04 Ramping navigasi tenant mobile | P1 | `OPEN` | `TenantWorkspaceTabs.tsx`, `GettingStartedGuide.tsx`, `MobileBottomNav.tsx`, `navigation.ts` | 320–414 px + deep link |
 | AO-05 Semantik kontrak overstay | P1 | `OPEN` | `MyStayPage.tsx`, helper/test stay | H-1/H/H+1/overstay |
 | AO-06 Label auth/profile | P1 | `OPEN` | auth pages, `ProfilePage.tsx`, `PasswordInput.tsx` | Axe + keyboard |
@@ -848,7 +848,7 @@ Gunakan status berikut di tabel:
 | AO-10 Manual tenant scanability | P2 | `OPEN` | `MyManualPage.tsx`, style manual | mobile visual + keyboard |
 | AO-11 Filter/tap target mobile | P2 | `OPEN` | invoice + shared mobile controls | 44 px + active-visible |
 | AO-12 Kontrak API dev | P2 | `OPEN` | `vite.config.ts` atau `.env.development`, docs command | login dev tanpa langkah tersembunyi |
-| AO-13 Crawl OWNER/ADMIN/STAFF | P0 gate | `BLOCKED:AO-00+AO-03` | `frontend/e2e/admin-owner-crawl.spec.ts` + staff crawl | 0 crash/5xx/blank/guard salah |
+| AO-13 Crawl OWNER/ADMIN/STAFF | P0 gate | `BLOCKED:AO-00+AO-03(eksekusi)` | `frontend/e2e/admin-owner-crawl.spec.ts` + `frontend/e2e/staff-crawl.spec.ts` (env `E2E_*`) | 0 crash/5xx/blank/guard salah |
 | AO-15 Struktur footer publik | P3 | `OPEN` | `publicGuestShared.tsx`, `11-public-pages.css` | 6 route publik + 320–414 px |
 | AO-16 Empty result + persistensi shortlist | P2 | `OPEN` | `PublicRoomsPage.tsx`, test katalog | filtered-zero + detail/back |
 | AO-17 Hero/teaser state nol | P1 | `OPEN` | `PublicGuestDashboardPage.tsx`, `11-public-pages.css` | prod-like 0/1/error/loading |
@@ -951,9 +951,15 @@ npx vitest run
 # Dev frontend harus terhubung ke API tanpa langkah tersembunyi setelah AO-12
 npm run dev -- --host 127.0.0.1 --port 5174
 
-# Crawl existing OWNER/ADMIN setelah fixture UAT tersedia
+# Crawl existing OWNER/ADMIN/STAFF setelah fixture UAT tersedia (AO-03)
+# Isi dulu env lokal (password dari env AUDIT_*/secret manager — TIDAK di docs):
+#   E2E_BASE / E2E_OWNER_IDENTIFIER / E2E_OWNER_PASSWORD
+#   E2E_ADMIN_IDENTIFIER / E2E_ADMIN_PASSWORD
+#   E2E_STAFF_IDENTIFIER / E2E_STAFF_PASSWORD
+# Penyediaan akun audit UAT (izin owner; menjalankannya = mutasi DB):
+#   cd backend && npm run seed:audit-users
 $env:E2E_BASE='http://127.0.0.1:5174'
-npx playwright test e2e/admin-owner-crawl.spec.ts --workers=1
+npx playwright test e2e/admin-owner-crawl.spec.ts e2e/staff-crawl.spec.ts --workers=1
 ```
 
 Kredensial audit tidak boleh ditulis ke dokumen ini. Gunakan env lokal atau secret manager.
