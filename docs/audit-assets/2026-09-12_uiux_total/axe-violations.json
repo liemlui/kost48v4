@@ -1,0 +1,92 @@
+{
+  "generatedAt": "2026-09-12",
+  "engine": "axe-core (ruleset wcag2a, wcag2aa, wcag21a, wcag21aa) — dijalankan di dalam iframe berukuran tetap",
+  "validation": "Axe diverifikasi bekerja pada konteks audit dengan uji positif: menyuntikkan <img> tanpa alt + <input> tanpa label menghasilkan image-alt:critical:1, label:critical:1, region:moderate:1. Jadi '0 pelanggaran' pada halaman lain bermakna nyata.",
+  "summary": {
+    "pagesWithViolations": 24,
+    "totalViolationNodes": 118,
+    "criticalNodes": 30,
+    "seriousNodes": 88,
+    "rulesTriggered": ["color-contrast", "label", "select-name", "nested-interactive", "scrollable-region-focusable", "aria-progressbar-name"]
+  },
+  "violations": [
+    {
+      "rule": "label",
+      "impact": "critical",
+      "wcag": "4.1.2 Name, Role, Value / 1.3.1 Info and Relationships",
+      "pages": [
+        { "route": "/reports", "viewport": "1440x1000", "nodes": 1, "target": "input[min=\"2020\"] (input type=number, filter tahun)", "samples": ["input[min=\"2020\"]"] },
+        { "route": "/stays/check-in", "viewport": "1440x1000", "nodes": 1, "target": "input tanpa label pada wizard check-in" },
+        { "route": "/staff-routines", "viewport": "1440x1000", "nodes": 4, "target": "Form.Control tanpa label terasosiasi (mis. placeholder 'Contoh: Sapu ruang umum')" },
+        { "route": "/staff-performance", "viewport": "1440x1000", "nodes": 1, "target": "input type=month" },
+        { "route": "/finance/assets", "viewport": "1440x1000", "nodes": 2, "target": "input type=number" },
+        { "route": "/staff-report", "viewport": "1440x1000 dan 375x812", "nodes": 1, "target": "input type=month" }
+      ],
+      "commonPattern": "React-Bootstrap <Form.Group> TANPA controlId + <Form.Label> tanpa htmlFor. Terukur statis: 333 <Form.Group> vs 16 controlId (≈95% grup tidak memberi asosiasi programatik). <Form.Label> saja tidak menghasilkan atribut apa pun sehingga label tidak terhubung ke kontrol."
+    },
+    {
+      "rule": "select-name",
+      "impact": "critical",
+      "wcag": "4.1.2 Name, Role, Value",
+      "pages": [
+        { "route": "/tickets", "viewport": "1440x1000 dan 375x812", "nodes": 5, "target": "select.form-select.form-select-sm (filter antrean)" },
+        { "route": "/meter-readings", "viewport": "1440x1000", "nodes": 2, "target": ".meter-period-select, .meter-year-select" },
+        { "route": "/payment-submissions/review", "viewport": "1440x1000", "nodes": 2, "target": "select.form-select" },
+        { "route": "/staff-routines", "viewport": "1440x1000", "nodes": 2, "target": "select.form-select" },
+        { "route": "/surveys", "viewport": "1440x1000", "nodes": 2, "target": "select.form-select.form-select-sm" },
+        { "route": "/guest-preferences", "viewport": "1440x1000", "nodes": 1, "target": "select.form-select.form-select-sm" },
+        { "route": "/reports", "viewport": "1440x1000", "nodes": 1, "target": "select (filter)" }
+      ],
+      "commonPattern": "Select filter/kelola tanpa aria-label maupun label terasosiasi. Pembaca layar mengumumkan 'combobox' tanpa nama — pengguna tidak tahu filter apa yang sedang difokuskan."
+    },
+    {
+      "rule": "color-contrast",
+      "impact": "serious",
+      "wcag": "1.4.3 Contrast (Minimum) AA",
+      "totalNodes": 62,
+      "worstCases": [
+        { "route": "/reports", "viewport": "1440x1000", "target": ".report-matrix-row .report-matrix-value .bg-danger.badge", "ratio": 1.05, "fg": "#64748b", "bg": "#dc3545", "required": 4.5, "font": "12.48px bold" },
+        { "route": "/rooms (STAFF)", "viewport": "1440x1000 dan 375x812", "target": ".staff-meter-card-header .bg-warning-subtle.text-warning.border", "ratio": 1.47, "fg": "#ffc107", "bg": "#fff3cd", "required": 4.5, "font": "10.125px bold", "nodes": 14 },
+        { "route": "/finance/accounting-setup", "viewport": "1440x1000", "target": ".accounting-setup-checklist-mark[aria-hidden]", "ratio": 3.29, "fg": "#ffffff", "bg": "#16a34a", "required": 4.5, "font": "12px bold", "nodes": 1 },
+        { "route": "/staff-report", "viewport": "1440x1000 dan 375x812", "target": "article > span", "ratio": 4.28, "fg": "#64748b", "bg": "#e7f5ff", "required": 4.5, "font": "13.76px", "nodes": 2 },
+        { "route": "/settings", "viewport": "1440x1000", "target": ".btn-link.p-0.btn", "ratio": 4.38, "fg": "#0d6efd", "bg": "#fcfcfd", "required": 4.5, "nodes": 1 }
+      ],
+      "otherPagesWithContrast": { "/rooms (publik)": 2, "/update-kamar": 2, "/ (beranda, desktop)": 1, "/invoices": 4, "/notifications": 4, "/expenses": 1, "/meter-readings": 2, "/tickets": 1, "/profile (TENANT)": "1-2" },
+      "rootCause": "Bootstrap 5.3.3 utility class dipakai sebagai sinyal status pada surface terang: --bs-warning #ffc107 (1.47:1 di atas --bs-warning-bg-subtle #fff3cd) dan --bs-danger #dc3545 di atas teks #64748b (1.05:1). Statis: 105 pemakaian bg-warning-subtle/text-warning/bg-danger/text-danger di 12+ file; text-danger 87 kali, text-muted 749 kali. Token KOST48 sendiri (--color-warning #b45309, --color-danger #b91c1c) sudah aman; masalahnya pemakaian utility Bootstrap mentah yang melewati token.",
+      "verifiedRatios": {
+        "text-warning di bg-warning-subtle": 1.47,
+        "text-danger #dc3545 di bg-danger-subtle #f8d7da": 4.02,
+        "text-secondary #6c757d di white": 4.68,
+        "color-muted #64748b di white": 4.76
+      }
+    },
+    {
+      "rule": "nested-interactive",
+      "impact": "serious",
+      "wcag": "4.1.2 / 2.1.1 Keyboard",
+      "pages": [{ "route": "/dashboard (STAFF)", "viewport": "1440x1000 dan 375x812", "nodes": 10, "target": "article:nth-child(1..10)", "detail": "Kartu tugas berupa <article> dengan keturunan yang bisa difokus (tautan/tombol). Fokus keyboard masuk ke dalam kontrol yang bersarang di elemen yang diumumkan sebagai satu kesatuan." }]
+    },
+    {
+      "rule": "scrollable-region-focusable",
+      "impact": "serious",
+      "wcag": "2.1.1 Keyboard",
+      "pages": [{ "route": "/tickets (STAFF)", "viewport": "375x812", "nodes": 1, "target": ".segmented-tabs", "detail": "Area bergulir horizontal tanpa konten yang dapat difokus → pengguna keyboard tidak dapat menggeser daftar filter." }]
+    },
+    {
+      "rule": "aria-progressbar-name",
+      "impact": "serious",
+      "wcag": "4.1.2",
+      "pages": [{ "route": "/finance/accounting-setup", "viewport": "1440x1000", "nodes": 1, "target": ".progress-bar", "detail": "Progress bar tanpa aria-label → pembaca layar tidak menyebut progres apa (mis. 'kesiapan setup akuntansi')." }]
+    }
+  ],
+  "notTriggeredButMeasured": [
+    {
+      "issue": "Label visual tidak terasosiasi secara programatik tanpa memicu aturan axe",
+      "route": "/reset-password",
+      "viewport": "1440x1000",
+      "measured": "3 kontrol (input teks token, 2 input password) tanpa id, tanpa htmlFor; Form.Group tanpa controlId",
+      "code": "frontend/src/pages/auth/ResetPasswordPage.tsx:74-86",
+      "impact": "Pengguna pembaca layar mendengar 'edit teks' tanpa nama field."
+    }
+  ]
+}

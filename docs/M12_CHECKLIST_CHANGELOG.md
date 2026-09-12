@@ -1,153 +1,124 @@
 # KOST48 V5 — Checklist Eksekusi Aktif
 
-> Versi aktif: **2026-09-07** | Changelog → `docs/M13_CHANGELOG.md` | Riwayat fase lama tetap dipertahankan sebagai arsip konteks.
+> Versi aktif: **2026-09-08** | Changelog → `docs/M13_CHANGELOG.md` | Temuan tata dokumen → [M16 §0](M16_AUDIT_MENYELURUH.md#0-audit-dokumentasi-dan-urutan-kerja--8-september-2026) | Ledger fase lama tetap di bawah.
 
 ## Cara Pakai (AI Eksekutor — baca sebelum coding)
 
-Protokol tetap untuk AI mana pun (termasuk yang "lemah"). Kerjakan urut; jangan lompat.
+Protokol tetap untuk AI mana pun. Kerjakan urut; jangan lompat.
 
-1. **Orientasi dulu (5 menit):** baca `CLAUDE.md`, lalu file ini, lalu `docs/M01_MASTER.md`. Untuk task Fase EF, baca juga `docs/M19_EFISIENSI_HOSTING_512MB.md` §9.
-2. **Cek repo:** `git status --short` lalu `git log --oneline -5`. `M`/`??` = perubahan kerja yang BELUM di-commit — JANGAN di-reset, di-stash, atau ditimpa. Kerjakan hanya file dalam lingkup task.
-3. **Pilih SATU task `[ ]`** dari tabel antrean di bawah yang tidak BLOCKED. Selesaikan sampai tuntas, baru mulai task berikutnya. **Jangan mengulang task `[x]`** — itu sudah selesai pada sesi sebelumnya.
-4. **Larangan keras (tanpa izin owner terpisah):** membuat apps/libs/worker/app Nest baru; menambah dependency; bump versi; mutasi DB (UAT/produksi); restart/deploy/cron/canary server; reset/stash; push. Jangan membuat data test untuk eksplorasi.
-5. **Selesai task:** tandai `[x]` + tanggal di file ini, tambah entri bertanggal di `docs/M13_CHANGELOG.md`. Bedakan empat status: **implementasi lokal**, **verifikasi lokal** (tsc/build/test/UAT — sebut jenisnya), **deployment**, **dampak terukur**. Typecheck ≠ build ≠ UAT. Task docs-only tidak butuh build aplikasi.
-
-### 🎯 Antrean Prioritas Aktif (2026-09-07)
-
-| # | Task | Status | Prasyarat untuk mulai |
-|---|------|--------|----------------------|
-| 1 | **EF-00 / EF-02** — identitas deployment + pengamatan pasif (M19 §9) | 🔴 **BLOCKED** | Data hosting: artefak/commit server, waktu deploy, docroot, instance Passenger, fault counter. Screenshot 7 Sep sudah diterima; masih kurang. |
-| 2 | **AO-03 → AO-13 → AO-14** — regresi UI/UX lintas role | 🟡 Mekanisme akun audit siap 7 Sep (env `E2E_*` + `seed:audit-users`); provisioning UAT + crawl menunggu izin owner | Fixture/kredensial UAT non-personal (M14). |
-| 3 | **EF-07** uji env lokal; **EF-08** rehearsal lifecycle | ⚠️ Sebagian | Uji aktif host butuh izin; tanpa DB/restart. |
-| 4 | **EF-04** profil paket static | ⚠️ Rencana | Izin lingkup owner. |
-| 5 | **AL backlog H1–H15** (audit Reasonix) | ⚠️ Tunda | Prioritisasi owner. |
-| 6 | **Fase A (A1–A6)** — pra-go-live | 🧑 Owner | Infrastruktur/kredensial/keputusan owner. |
-
-> Aturan prioritas: kerjakan task teratas yang **tidak BLOCKED**. Bila teratas BLOCKED, lanjut ke task berikutnya yang berlabel "Bisa dikerjakan" — jangan menunggu diam. Kembali ke task BLOCKED begitu prasyarat terpenuhi.
-
-## Update 2026-09-07 (lanjutan) — AO-03: mekanisme akun audit lintas role siap
-
-- [ ] **AO-03-MEKANISME (implementasi lokal, bukan provisioning):** `frontend/e2e/audit-users.ts` = satu sumber env `E2E_*` (kredensial TIDAK di-hard-code); `admin-owner-crawl.spec.ts` refactor env-driven; `staff-crawl.spec.ts` baru (AO-13); `backend/scripts/seed-audit-users.js` (alias `npm run seed:audit-users`) = provisioning non-destruktif 5 akun audit event-path via HTTP, password dari env `AUDIT_*`.
-- [ ] **DOCS AO-03:** M11 §1a dirapikan (fondasi seed-dev vs akun audit non-personal); M08 Bagian 3 dicatat DEV-only + pointer skrip audit; M14 status AO-03/AO-13 + §9 perintah crawl diperbarui.
-- **Status:** provisioning akun UAT + crawl lintas role RESTAN menunggu izin owner (mutasi DB dilarang tanpa izin). Empat status dibedakan: mekanisme siap (ini) ≠ akun di-provision ≠ crawl lulus ≠ dampak terukur.
-- **Verifikasi:** `node --check` skrip backend + `npx playwright test --list` frontend; tidak ada mutasi DB / deploy / commit.
-
-## Update 2026-09-07 — Arah app ditegaskan + pemetaan AI + arsip dokumen
-
-- [x] **ARAH-APP:** arah aplikasi ditegaskan ulang: prioritas Fase EF, target satu proses API NestJS, Fase MA ditunda, tanpa penghapusan fitur/domain bisnis. Versi aplikasi tetap 1.3.0 (tidak ada bump).
-- [x] **PEMETAAN-AI:** bagian "Cara Pakai" di atas kini berisi protokol langkah-demi-langkah agar AI eksekutor mana pun (termasuk yang lemah) bisa bekerja tanpa menebak.
-- [x] **DOC-ARSIP:** `docs/archieve/2026-09-07_docs_cleanup/GO_LIVE_DATA_ISI.md` dan `docs/tenant-data-template.tsv` diarsipkan ke `docs/archieve/2026-09-07_docs_cleanup/`. Formulir go-live kanonik = **`docs/FORM_ISI_DATA_GO_LIVE.md`**.
-- [x] **SEC-CLEAN:** nilai password teks-polos yang pernah tertulis di `GO_LIVE_DATA_ISI.md` dihapus dari working tree. Nilai itu sudah pernah ter-push ke GitHub → **OWNER wajib mengganti password OWNER** (catatan lengkap di M13 2026-09-07). Purge history GitHub hanya atas permintaan eksplisit.
-- [x] **REF-FIX:** tautan dokumen aktif yang menunjuk path lama diarahkan ke `docs/archieve/` (diverifikasi dengan script link-check).
-- [x] **BUNDLE-EF00:** bundle kandidat `kost48-deploy-bundled/` diverifikasi ulang read-only: 753 file, buildId `1BavS58Sb96-`, **tanpa file `.env`** (env dikelola lewat panel cPanel). Ini bukan bukti artefak server yang berjalan.
-
-## Update 2026-09-06 — Sinkronisasi arah dan bukti EF/MA
-
-- [x] **DOC-SYNC — Dokumentasi diselaraskan atas permintaan owner:** M02 keputusan; M12 checklist tunggal; M19 bukti/tabel hosting; M08 runbook; M01/M00/agent guides dan rujukan domain sinkron. Riwayat dipertahankan terpisah dari arah aktif; tidak ada bump versi atau perubahan kode.
-- [x] **Audit lokal EF-01/03/04/07 selesai:** laporan statis dan typecheck diterima; bukan build/UAT baru atau bukti runtime.
-- [x] **Implementasi lokal EF-01/03/05 tersedia:** detail lingkup dan bukti di bagian Fase EF. Perubahan working tree tetap dipertahankan.
-- [ ] **EF-00/EF-02:** inventaris lokal, konfigurasi panel, snapshot resource, dan bundle kandidat diperbarui 7 Sep 2026 (PMEM `403,34/512 MB`, EP `2/15`, proses `22/100`, bundle `buildId 1BavS58Sb96-` di M19 §9.1–9.3). Identitas artefak server, waktu deploy, document root, fault counter, dan baseline workload tetap belum tersedia; server belum diuji dan kelayakan 512 MB belum disahkan.
-- [ ] **Fase MA ditunda:** satu proses API sebagai target, tanpa apps/libs atau worker baru. Fase A dan gate AO yang terbuka tetap berlaku.
-- **Koreksi audit awal:** angka idle 120–180/puncak 250–300 MB ada di M08 sebagai estimasi lama; bukan pengukuran. Telemetri kini tersedia lokal. Pool max:3 adalah konfigurasi, bukan jumlah koneksi runtime. Kelayakan 512 MB belum disahkan.
-
-## Update 2026-08-17 — Optimasi shared hosting (Prisma engine + AutoOps)
-
-- [x] `binaryTargets` dihapus dari `schema.prisma` — runtime driver adapter tak butuh engine binary; `dist` 58 MB → 35 MB.
-- [x] File engine yatim (`query_engine-windows.dll.node` 21 MB, `query_engine_bg.wasm`, `query_engine_bg.js`) dihapus; `prisma generate` tidak membuatnya ulang.
-- [x] `.env.production.example` diselaraskan dengan `deploy/.env.example`: shared hosting → `AUTO_OPS_ENABLED=false` + cron.
-- **Gate:** `tsc --noEmit` ✅ · `test:unit` 74/74 ✅.
-
-## Update 2026-07-30 — Audit Mendalam UI/UX Lintas Portal
-
-- [x] Audit browser nyata mencakup 66 kombinasi route–viewport: publik, tenant aktif, dan tenant tanpa stay aktif pada desktop/mobile.
-- [x] Audit statis mencakup 74 deklarasi route, guard role, navigasi STAFF, state loading/error/empty, serta titik aksesibilitas utama.
-- [x] Temuan, bukti, file ownership, dependensi, dan Definition of Done dibukukan di `docs/M14_AUDIT_UI_UX.md` sebagai sumber eksekusi Fase AO.
-- [x] Masukan Baymard UX-Ray disaring: 4 pola `Best-in-Class` menjadi regression guard, 1 `Small Issue` menjadi AO-15, 2 `Not Applicable`, dan 310 `Not Rated` tidak disalahartikan sebagai defect.
-- [x] Guideline page-level Search Results dipetakan ke katalog `/rooms`: 12 guideline relevan/diadaptasi, 3 dikeluarkan, dan 1 task baru AO-16 untuk filtered-zero state serta persistensi shortlist.
-- [x] Review page-level homepage diverifikasi read-only terhadap produksi: 0/13 kamar memang state data sah; 28 observasi ditriage menjadi AO-17..AO-19, merge AO-08/AO-15, atau ditolak bila menuntut klaim palsu.
-- [x] Review dashboard Owner desktop ditriage terhadap kode: alert/actionability, toolbar, KPI data states, AI setup, dan sistem visual menjadi AO-20/AO-21; sidebar collapse dan label status teks tidak dicatat ulang sebagai defect palsu.
-- [x] Review dashboard Area Admin desktop ditriage terhadap kode: antrean aksi telah ada namun salah urutan; hierarchy exception menjadi AO-22 dan shell/komponen terkoordinasi menjadi AO-23.
-- [x] Gate awal AO-00: sinkronkan dua migration UAT yang masih pending melalui prosedur migration resmi; jangan gunakan `db push`.
-- [ ] Crawl dinamis OWNER/ADMIN/STAFF diulang setelah akun fixture UAT tersedia. Audit statis bukan pengganti bukti runtime.
-- **Putusan:** status UI/UX pra-go-live **RED** sampai AO-00 selesai dan regresi lintas role dapat dijalankan.
-
-## Update 2026-07-30 — Audit Menyeluruh KOST48 V5 (Reasonix)
-
-- [x] Audit statis lintas 46 modul backend + frontend + cross-cutting: keamanan (default-deny, HMAC IoT, SQLi, secrets), atomisitas keuangan, race/transaksi, hooks-order frontend. Hasil dibukukan di `docs/M16_AUDIT_MENYELURUH.md`.
-- [x] Baseline hijau: backend `tsc --noEmit` + `test:unit` 74/74 · frontend `npm run build` (PWA verified) + `vitest run` 135/135.
-- [x] Temuan minor **I-01** (validasi mutasi stok di luar tx) diperbaiki commit `610395c` — validasi dipindah ke dalam transaksi yang sama.
-- [x] File scratch audit Cline (A/AUDIT_L/AUDIT_LAPOR) diarsipkan ke `docs/archieve/`.
-- **Putusan:** risk rating 🟢 LOW — 0 HIGH, 0 MEDIUM terbuka, 1 LOW sudah fix. Sisa pra-go-live = Fase A (infra owner) + eksekusi Fase AO (AO-03/13/14/17..23).
-
-## Update 2026-07-16 — KTP Portal dan Simplifikasi Owner/Admin
-
-- [x] Tenant dapat upload KTP miliknya sendiri; akses lintas tenant ditolak backend.
-- [x] Upload baru mereset verifikasi dan masuk antrean pemeriksaan Admin.
-- [x] Dashboard Admin menampilkan KTP pending; detail review berada di modal tenant.
-- [x] Toggle Kokpit Owner/Area Admin diverifikasi pada desktop/mobile dan route terpisah.
-- [x] Standar UI dibukukan di `docs/M17_PORTAL_FLOW_RINGKAS.md`.
-- [x] Crawl Playwright admin/owner lulus bersih; mobile 375px dashboard/stays/invoices/tickets tanpa overflow horizontal.
-- **Gate:** TypeScript backend dan frontend lulus.
-
-## Update 2026-07-29 — Audit mendalam keuangan & koreksi dokumen
-
-- [x] Audit verifikasi independent terhadap klaim keuangan (Reasonix) — akurasi ~65%, 8 koreksi diterapkan ke M04/M12/M13.
-- [x] Koreksi `docs/M04_KEUANGAN.md`: P1-03 (bukan tx terpisah — SATU tx, try/catch swallow error), update stale line numbers, 10→15 fungsi posting, catatan unit test (script ada di M04, file belum dibuat), tambah temuan N4 (inkonsistensi journal handling expenses vs payment).
-- [x] Koreksi frontend paths + ukuran halaman di dokumentasi.
-- [x] Changelog di `docs/M13_CHANGELOG.md`.
-- **Gate:** Semua verifikasi ulang PASS — tsc 0 errors, 48/48 unit test, frontend build 162 chunks.
-
-## Update 2026-07-29 — Hardening UI/UX IoT dan energi
-
-- [x] Dashboard IoT owner memprioritaskan perangkat bermasalah, membedakan online/offline/stale/nonaktif, dan menyediakan kartu mobile serta detail kualitas telemetri.
-- [x] Portal penghuni memisahkan snapshot periode resmi dari monitoring sensor; nilai kosong, loading, error, dan reset counter tidak lagi berubah menjadi angka nol atau estimasi palsu.
-- [x] Kalender bisnis meter diseragamkan ke WIB; tab, chart, gauge, modal, fokus keyboard, reduced motion, dan kontras diperkuat.
-- [x] Gate frontend lulus: 31 file/135 tes, 4 skenario Playwright + Axe, build TypeScript/Vite/PWA, serta pemeriksaan diff.
-- **Batas rilis:** artefak TGZ lama yang memuat seed historis/PII tidak termasuk commit ini; integrasi perangkat fisik tetap memerlukan UAT lapangan.
-
-## Update 2026-07-23 — Rekonsiliasi perubahan lintas AI
-
-| Area | Status kode | Bukti commit | Gate sisa |
-|---|---|---|---|
-| Inventaris & fasilitas kamar | Summary stok, gap fasilitas, auto-link dengan review operator, dan fix filter/pagination selesai | `1eb11d9`, `0701327` | UAT operator untuk hasil auto-link |
-| IoT & quota energi | Dashboard/telemetri aktif; quota mengikuti sewa lunas dan renewal multi-bulan | `298bcca`–`8af53d6` | Mapping device/hardware, UAT Tuya/ESP32; tanpa auto-billing/auto-alert |
-| Pengumuman/notifikasi/push | P1-P3 selesai, migration delivery tersedia | `f9387d2` | UAT visual + HTTPS/VAPID push |
-| Kualitas backend | Strict null/implicit-any aktif, dead code/helper duplikat dibersihkan | `e327e9b` | Build/typecheck release SHA |
-| Kualitas frontend | CSS entry disatukan, wrapper/konstanta duplikat dibersihkan | `8a589e6` | UAT visual lintas portal |
-| Paket/source baseline | Bundle rilis memuat build artifact dan runtime `node_modules`; server tidak melakukan install/build | `8627289` + generator rilis terkini | Commit dokumentasi/runbook dan pilih SHA rilis |
-
-Catatan: perubahan tool/seed deploy 2026-07-19 adalah riwayat UAT. Produksi mengikuti M08 dan gate M19, bukan seed historis atau `db push`.
-
-1. **Orientasi:** buka bagian [ANTRIAN EKSEKUSI AKTIF](#antrian-eksekusi-aktif) di file ini.
-2. **Spesifikasi domain:** buka M-file yang ditunjuk fase/task (seri M00–M19; EF memakai M19).
-3. **Anchor kode:** grep **nama simbol/fungsi** di `backend/src` / `frontend/src` — **JANGAN** edit buta.
-4. **Satu task = satu commit terarah bila commit diizinkan owner** (Bahasa Indonesia). Perbarui checkbox sesuai bukti + entri `docs/M13_CHANGELOG.md`; dirty tree bukan alasan commit WIP campuran.
-5. **Gate sesuai lingkup:** docs-only = konsistensi/link/diff, tanpa build aplikasi. Kode = typecheck/build/test pada bagian yang relevan; typecheck berbeda dari build/UAT. Task uang juga mengikuti `npm run test:unit` dari backend dan gate `docs/M04_KEUANGAN.md`. Jangan ulang tes lulus tanpa perubahan relevan.
-6. **DB dev:** postgres **5433** `kost48_v3_pro`. Reset/reseed adalah mutasi data dan tidak dijalankan sebagai orientasi rutin; perlu izin tugas terkait. Identitas DB produksi dikonfirmasi di M19.
-7. **Larangan:** no npm dep baru · no `schema.prisma` tanpa approval owner (🧬) · no `git push` · no sentuh file milik AI lain.
-
-## Efisiensi Sesi & Bump Versi
-
-- Satu sesi ideal = 1 episode kerja yang masih berhubungan. Jika topik sudah berubah total atau konteks mulai jenuh, mulai sesi baru lebih hemat daripada menyeret konteks lama.
-- Navigasi token: buka `M00`/`M01`/`M12` dulu, lalu grep simbol spesifik. Jangan baca seluruh arsip saat tidak dibutuhkan.
-- Bump versi aplikasi hanya saat owner minta eksplisit. Sumber kebenaran versi:
-  - `frontend/src/config/version.ts`
-  - `frontend/public/version.json`
-- Format versi:
-  - `PATCH` untuk bugfix / polish kecil
-  - `MINOR` untuk fitur baru yang terasa ke user
-  - `MAJOR` untuk perubahan besar / breaking change
-- Saat bump versi, ikut update `APP_BUILD_DATE` ke tanggal hari ini. Build ID PWA tetap dihasilkan otomatis saat `npm run build`.
+1. **Orientasi (5 menit):** `CLAUDE.md` → file ini (antrean di bawah) → `docs/M01_MASTER.md`. Task EF: `docs/M19_EFISIENSI_HOSTING_512MB.md` §9. Task AO: `docs/M14_AUDIT_UI_UX.md`.
+2. **Cek repo:** `git status --short` lalu `git log --oneline -5`. `M`/`??` = kerja yang BELUM di-commit — jangan di-reset, di-stash, atau ditimpa.
+3. **Pilih SATU task `[ ]`** dari [Antrean Prioritas Aktif](#antrean-prioritas-aktif) yang tidak BLOCKED. Selesaikan tuntas sebelum task berikutnya. **Jangan mengulang `[x]`.**
+4. **Anchor kode:** [M00](M00_CODEMAP.md) → [peta audit per cabang](audit-map/README.md) → satu leaf/simbol, lalu grep source terkait. Hindari memuat seluruh peta ke konteks. Satu task = satu commit terarah **hanya bila owner mengizinkan commit**.
+5. **Larangan tanpa izin terpisah:** apps/libs/worker/app Nest baru; npm dependency; bump versi; mutasi DB; restart/deploy/cron/canary; reset/stash; push. Jangan membuat data test untuk eksplorasi.
+6. **Selesai task:** `[x]` + tanggal di file ini, entri `docs/M13_CHANGELOG.md`. Empat status: **implementasi lokal**, **verifikasi lokal** (sebut tsc/build/test/UAT), **deployment**, **dampak terukur**. Docs-only = konsistensi/link/diff, tanpa build. Task uang: `npm run test:unit` backend + gate M04.
+7. **DB:** UAT postgres **5433** `kost48_v3_pro`. Reset/reseed = mutasi, bukan orientasi. Identitas DB produksi = M19, bukan asumsi.
 
 | Marker | Arti |
 |--------|------|
-| 🧑 / [OWNER] | Butuh data/keputusan owner yang belum ada; laporkan kebutuhan spesifik dan lanjutkan pekerjaan independen yang sudah diizinkan |
-| 🧬 / [SCHEMA] | Perlu migration additive — butuh approval owner dulu |
-| **Gate:** | Verifikasi wajib sebelum centang `[x]` |
+| 🧑 / [OWNER] | Butuh data/keputusan owner; lanjutkan kerja independen yang sudah diizinkan |
+| 🧬 / [SCHEMA] | Migration additive — approval owner dulu |
+| **Gate:** | Verifikasi wajib sebelum `[x]` |
 
----
+## Daftar Isi
 
-## Status Ringkas (diselaraskan 2026-09-06; hasil fase lama bertanggal)
+1. [Antrean prioritas aktif](#antrean-prioritas-aktif) — satu-satunya urutan eksekusi
+2. [Status kerja aktif](#status-kerja-aktif)
+3. [Peta rujukan dokumen](#peta-rujukan-dokumen)
+4. [Efisiensi sesi & versi](#efisiensi-sesi--bump-versi)
+5. [Ledger historis](#ledger-historis-checkbox-fase) — riwayat + checkbox fase
+6. [Riwayat fase](#riwayat-fase-bukan-antrean--jangan-dikerjakan-ulang)
+
+<a id="antrean-prioritas-aktif"></a>
+<a id="antrian-eksekusi-aktif"></a>
+
+### 🎯 Antrean Prioritas Aktif (2026-09-08)
+
+| # | Task | Status | Prasyarat untuk mulai |
+|---|------|--------|----------------------|
+| 1 | **EF-00 / EF-02** — identitas deployment + pengamatan pasif (M19 §9) | 🔴 **BLOCKED: bukti hosting kurang** | Konfigurasi panel/snapshot 7 Sep tersedia; masih perlu artefak/commit server, waktu deploy, docroot, instance Passenger, serta interval resource/fault/workload. Izin saja tidak melengkapi data. |
+| 2 | **AO-03 → AO-13**, lalu **AO-14** setelah dependensi lengkap | 🟢 Audit UI/UX total 12 Sep: 180 pemeriksaan halaman (6 role × 2 viewport) + Axe; 0 error/5xx. **Gate Axe masih gagal** → sign-off AO-14 belum bisa | Bukti: [AUDIT_UIUX_TOTAL_2026-09-12](AUDIT_UIUX_TOTAL_2026-09-12.md). Sisa: AO-08 (kontras), AO-09 (heading), T-01 (label form), AO-18/19/20 parsial, AO-21/23. Viewport 320 px dan rute ber-fixture belum tercakup. |
+| 3 | **EF-07** uji env lokal; **EF-08** rehearsal lifecycle | 🟢 EF-07: unit 8/8 PASS (mock, tanpa DB) 8 Sep | EF-08: lingkup pengujian masih perlu ditetapkan (proses lokal; job yang menulis DB memerlukan fixture/izin UAT). Uji aktif/restart host terpisah. |
+| 4 | **EF-04 / EF-06** — profil static + routing/canary/rollback | ⚠️ Rencana | Baseline dan kemampuan routing host jelas, lalu izin implementasi profil lokal. Canary/restart/deploy host membutuhkan lingkup tersendiri. |
+| 5 | **AL — rekonsiliasi penutupan historis** | ℹ️ H1–H15 dilaporkan selesai 7 Jul; bukan antrean implementasi ulang | H15/Z-19 masih verifikasi manual tanpa bukti penutupan spesifik; tindak lanjuti bersama audit Owner. Backlog lain dipilih per temuan terbuka setelah rekonsiliasi. |
+| 6 | **Fase A (A1–A6)** — pra-go-live | 🧑 Data/keputusan owner | Konfirmasi infrastruktur, identitas DB produksi, rotasi kredensial OWNER yang pernah terekspos, dan rencana go-live. Belum ada izin provisioning/deploy produksi dari audit ini. |
+
+> Aturan prioritas: kerjakan task teratas yang prasyaratnya terpenuhi dan lingkupnya sudah diizinkan. Bila teratas BLOCKED, lanjutkan pekerjaan independen yang sudah diizinkan. Tabel ini tidak memberi izin baru.
+
+## Status Kerja Aktif
+
+- [x] **MODEL-AUDIT — 8 Sep 2026:** [checklist audit total](CHECKLIST_AUDIT_TOTAL.md#pemilihan-model-dan-reasoning) dilengkapi profil model/reasoning pada seluruh 135 subaudit: OpenAI, DeepSeek V4 Pro dan V4 Flash; mencakup audit, pelaksana perbaikan, reviewer, eskalasi Astra/Pro Max serta batas bukti visual/runtime. Rekomendasi disusun menurut risiko proyek dengan sumber kemampuan resmi, bukan benchmark. ID/centang dan prioritas/izin tetap; verifikasi docs-only: kelengkapan profil, konsistensi, tautan dan diff.
+
+- [x] **CHECKLIST-CAKUPAN — 8 Sep 2026:** [satu file checklist audit total](CHECKLIST_AUDIT_TOTAL.md) dibuat atas permintaan owner, berisi 135 kotak centang dengan ID, fokus pemeriksaan, tautan peta dan tabel hasil/checkpoint. Kotak awal kosong berarti cakupan belum direkonsiliasi pada file baru; bukan perintah mengulang audit yang sudah selesai. M12 tetap mengatur urutan task/perbaikan, M02 izin; centang cakupan berarti selesai diperiksa dan hasilnya dapat masih berupa temuan. Verifikasi docs-only: jumlah/keunikan/cakupan, tautan dan diff.
+
+- [x] **PETA-AUDIT — 8 Sep 2026:** [lampiran peta M00](audit-map/README.md) dibuat atas persetujuan owner: indeks aplikasi → kelompok → file → simbol/percabangan, model/enum/field serta alur lintas domain dan format checkpoint. Generator lokal mencatat 1.067 file dalam cakupan (839 AST, 227 metadata, 1 schema), 135 kelompok, 9.367 simbol dan 20.901 titik branch sintaks; 46 modul backend dan 26 grup halaman tercakup. Angka adalah inventaris, bukan test coverage atau audit PASS. Audit perilaku dilanjutkan per task yang sudah ada; peta tidak mengubah izin/prioritas. Verifikasi: parser dan pemeriksaan konsistensi/link/diff; tanpa menjalankan aplikasi/DB.
+
+| Blok | Status 8 Sep | Sumber |
+|------|----------------|--------|
+| Fase EF | Prioritas; EF-01/03/05 lokal; EF-00/02 UNKNOWN host | M19, checkbox Fase EF di bawah |
+| Fase AO | Mekanisme crawl/akun ada; gap alat; sisa AO-03/13/14/18–21/23 | M14, checkbox Fase AO |
+| Fase A | Blocked owner (infra, DB prod, rotasi OWNER) | M08, checkbox Fase A |
+| Fase MA | Ditunda — tanpa apps/libs/worker | M02 |
+| Produksi | Belum disahkan; host versi 1.2.0 ≠ source 1.3.0 | M19 §9 |
+| Audit docs 8 Sep | Temuan D-01..D-11 dibukukan | [M16 §0](M16_AUDIT_MENYELURUH.md#0-audit-dokumentasi-dan-urutan-kerja--8-september-2026) |
+
+## Peta Rujukan Dokumen
+
+Baca sesuai kebutuhan; arsip `docs/archieve/*` hanya untuk forensik.
+
+Lampiran navigasi M00: [peta struktur audit bertahap](audit-map/README.md), [alur lintas domain](audit-map/ALUR_LINTAS_DOMAIN.md), dan [cara audit/checkpoint](audit-map/CARA_AUDIT.md). Pilih satu pertanyaan dan satu leaf source; peta tidak menambah antrean, mengulang task selesai, atau mengubah izin yang sudah tercatat di M02.
+
+Checklist cakupan manual owner: [CHECKLIST_AUDIT_TOTAL.md](CHECKLIST_AUDIT_TOTAL.md) — 135 subkelompok, hasil dan checkpoint dalam satu file; prioritas eksekusi tetap mengikuti antrean M12.
+
+| # | File | Dipakai untuk |
+|---|------|----------------|
+| M00 | `docs/M00_CODEMAP.md` | Modul → path sebelum grep |
+| M01 | `docs/M01_MASTER.md` | Ground state, invarian, identitas bisnis |
+| M02 | `docs/M02_KEPUTUSAN_OWNER.md` | Keputusan owner (menang jika konflik) |
+| M03 | `docs/M03_FLOW_KONTRAK.md` | Booking → invoice → jurnal → stay |
+| M04 | `docs/M04_KEUANGAN.md` | Wajib tiap task uang |
+| M05 | `docs/M05_SIKLUS_HUNI.md` | Stay, renewal, checkout, KTP |
+| M06 | `docs/M06_OPERASIONAL.md` | Staf, tiket, gudang, Auto-Ops |
+| M07 | `docs/M07_PUBLIK_GROWTH.md` | Katalog, SEO, loyalty publik |
+| M08 | `docs/M08_DEPLOY_GO_LIVE.md` | Runbook deploy / go-live |
+| M09 | `docs/M09_AI_OWNER_ADMIN.md` | AI manual OWNER/ADMIN |
+| M10 | `docs/M10_PETA_SCOPE.md` | Scope per role/flow |
+| M11 | `docs/M11_DEFAULT_DATA.md` | Seed/default DEV, bukan password produksi |
+| M12 | file ini | Satu checklist + urutan |
+| M13 | `docs/M13_CHANGELOG.md` | Riwayat bertanggal (tulis di atas) |
+| M14 | `docs/M14_AUDIT_UI_UX.md` | Fase AO + lampiran portal Juli |
+| M15 | `docs/M15_IOT.md` | IoT Tuya/ESP32 |
+| M16 | `docs/M16_AUDIT_MENYELURUH.md` | §0 docs 8 Sep + audit kode 30 Jul |
+| M17 | `docs/M17_PORTAL_FLOW_RINGKAS.md` | Prinsip portal ringkas |
+| M18 | `docs/M18_ATURAN_HARGA_KAMAR.md` | Multiplier harga |
+| M19 | `docs/M19_EFISIENSI_HOSTING_512MB.md` | Fase EF + tabel host |
+| FORM | `docs/FORM_ISI_DATA_GO_LIVE.md` | Formulir go-live kanonik |
+
+Audit historis (bukan antrean): `docs/archieve/audit_fable/00_INDEX.md`, `docs/archieve/audit_reasonix/RINGKASAN_EKSEKUTIF.md`.
+
+## Update 2026-09-11 — Audit K2 FE-065 icons (Checklist Audit Total)
+
+- [x] **FE-065 icons (K2) — 11 Sep 2026:** audit statis `frontend/public/icons` selesai — 16 file/308.998 B, dimensi 13 PNG cocok dengan 10 deklarasi manifest, `favicon.ico` 6 entri valid, 4 referensi `index.html` + 5 CORE_ASSETS `sw.js` + `icon`/`badge` push semua ada, maskable di dalam safe zone (62,1%), paritas bundle 16/16, 0 referensi menggantung. **Terbuka:** 2 file brand divergen tanpa referensi di `/icons/` (keputusan owner), duplikasi `apple-touch-icon`=`icon-180`, komposisi ikon "any" bottom-anchored, serta pemeriksaan visual yang butuh model/manusia berinput gambar. Detail: [M13 2026-09-11](M13_CHANGELOG.md); hasil dicatat di [CHECKLIST_AUDIT_TOTAL](CHECKLIST_AUDIT_TOTAL.md#catatan-hasil-dan-checkpoint). Unit berikutnya: FE-054 api (K4). Cakupan audit total: Frontend 3/67.
+
+## Update 2026-09-08 — Tata ulang docs + audit urutan kerja
+
+- [x] **DOC-TATA:** M12 ditata: satu protokol, dual anchor antrean, status aktif terpisah dari ledger, peta M00–M19. Temuan di [M16 §0](M16_AUDIT_MENYELURUH.md#0-audit-dokumentasi-dan-urutan-kerja--8-september-2026).
+- [x] **AUDIT-ANTREAN** (pagi): dua urutan prioritas disatukan; AL/AO-00 riwayat selesai; AO-18/19/20 parsial tetap terbuka.
+- [x] **AUDIT-AO-ALAT** (pagi): gap alat crawl/provisioning di [M14 §3 AO-03](M14_AUDIT_UI_UX.md#ao-03--p1--kredensial-dan-data-uat-tidak-mendukung-audit-lintas-role).
+- [x] **AO-03 — tindak lanjut alat (sore 8 Sep):** perbaikan alat terimplementasi; provisioning + crawl UAT dieksekusi 8 Sep — OWNER/ADMIN/STAFF dibuat/terverifikasi, TENANT no-stay dummy #55, TENANT aktif didefer; crawl OWNER 36/36, ADMIN 32/32, STAFF 7/7 (0 kritis, hanya warning console `controlId`). Detail di M13.
+- [x] **EF-07-UNIT:** `backend/test/unit/env-ops-flags.test.js` (8 test, mock tanpa DB) — `npm run test:unit` 82/82 PASS · `npx tsc --noEmit --incremental false` ✅. Precedence env>DB AutoOps dan default IoT poll OFF tervalidasi runtime.
+- [ ] **AO-13/14 — bukti eksekusi:** tiga crawl tanpa skip; dua state TENANT; viewport/Axe; screenshot/trace belum otomatis bebas PII.
+- Entri sesi 6–7 Sep dan rincian izin: `docs/M13_CHANGELOG.md` (jangan diduplikasi lagi di puncak file ini).
+
+## Efisiensi Sesi & Bump Versi
+
+- Satu sesi ideal = 1 episode kerja yang masih berhubungan. Topik berganti total → sesi baru.
+- Navigasi token: M00/M01/M12 dulu, lalu grep simbol. Jangan baca seluruh arsip.
+- Bump versi hanya atas permintaan eksplisit owner. Sumber: `frontend/src/config/version.ts`, `frontend/public/version.json`.
+  - `PATCH` bugfix/polish · `MINOR` fitur terasa user · `MAJOR` breaking
+- Saat bump, update `APP_BUILD_DATE`. Build ID PWA dihasilkan saat `npm run build`.
+
+## Riwayat Fase (bukan antrean — jangan dikerjakan ulang)
 
 | Blok | Status | Catatan |
 |------|--------|---------|
@@ -174,8 +145,8 @@ Catatan: perubahan tool/seed deploy 2026-07-19 adalah riwayat UAT. Produksi meng
 | **Fase V — Audit 2026-06-30 + Booking Flow Baru** | ✅ selesai | V-00..V-16: room state `AVAILABLE → RESERVED → OCCUPIED`. 156/156 test PASS. |
 | **Fase W — Audit Maksimal Status Proyek** | ✅ selesai (2026-07-02) | W-00..W-13: security, role matrix, lifecycle guards, AutoOps idempotency, media registry, finance guard (COA OWNER-only), staff boundary, frontend state (objectURL fix), public hardening, logs/release, docs hygiene, test coverage. |
 | **Fase X — Audit UI/UX Visual (Playwright + Inspeksi Visual)** | ✅ selesai | X-01..X-16 semua selesai; X-02d owner konfirmasi OCCUPIED tampil; X-16 axe-auth.spec.ts 12 test. |
-| **Fase Y — Test Coverage Maksimal** | ✅ hampir tuntas | **152/153** area selesai; sisa Y-G7 N/A (source tak ada di repo). 1372 test PASS. |
-| **Fase Z — Audit UI/UX Cross-Portal (2026-07-02)** | 🟡 19 task terverifikasi | 1 CRITICAL (data XSS test), 7 HIGH (404/kosong/nav), 8 MEDIUM (chart/race/loading), 3 LOW (publik). Rujukan di `docs/archieve/_previous_cycles/_AUDIT_CROSS_PORTAL_2026-07-02.md`. |
+| **Fase Y — Test Coverage Maksimal** | ✅ selesai (historis) | 153 area; Y-G7 N/A (source tak ada). Angka tes pada hari penutupan, bukan sesi sekarang. |
+| **Fase Z — Audit UI/UX Cross-Portal (2026-07-02)** | ✅ selesai (historis) | 19 task dieksekusi Juli; sisa bukti verifikasi manual Owner = Z-19/H15 (lihat rekonsiliasi AL). Rujukan arsip: `docs/archieve/_previous_cycles/_AUDIT_CROSS_PORTAL_2026-07-02.md`. |
 | **Fase AA — Perbaikan Temuan Audit CHECKLIST_01** | ✅ selesai | AA-01..AA-05: FaqPublicPage `GuestTopbar`, hapus filter `rating≥4`, 3 fix sudah dari sebelumnya; build lulus. |
 | **Fase AB — Perbaikan Temuan Audit CHECKLIST_02** | ✅ selesai | AB-01..AB-05: 2 sudah done sebelumnya (AB-01 label Dipesan, AB-02 link error-state), 3 dikerjakan (page-size 9, deposit→Deposit jaminan, komentar DP preview) |
 | **Fase AC — Perbaikan Temuan Audit CHECKLIST_03** | ✅ selesai | AC-01..AC-04: UTC date fix WIB, FAQ batas penghuni 2→4, Air Rp 0→Air termasuk, AC-04 N/A (tercakup AB-05) |
@@ -186,6 +157,7 @@ Catatan: perubahan tool/seed deploy 2026-07-19 adalah riwayat UAT. Produksi meng
 | **Fase AH — Perbaikan Temuan Audit CHECKLIST_08** | ✅ selesai | AH-01..AH-04: hardening 503 announcements, verifikasi STALE Hermes I12/I13, banner ex-tenant (tercakup AF-02). 1 file backend. |
 | **Fase AI — Perbaikan Temuan Audit CHECKLIST_09** | ✅ selesai | AI-01..AI-02: hardening 503 isBookingSchemaReady + FE bookingsQuery tak blokir portal; loyalty/renewal/checkout diverifikasi via kode. 2 file backend + 1 file frontend. |
 | **Fase AJ — Sisa Temuan Audit (C05-01 sistemik + C10/C17 + seed)** | ✅ selesai | AJ-01/02 anti-loop ✅ · AJ-03/04 seed + TB ✅ · AJ-05 okupansi ✅ · AJ-06 docs ✅ · AJ-07 yang aman diuji ✅ (temuan baru C19-01/C19-02 dicatat; sisanya human/destructive follow-up). |
+| **Fase AL — Audit Reasonix Code** | ✅ selesai 7 Jul (historis) | C1–C6 + H1–H15 dilaporkan selesai; jangan ulang backlog awal. H15/Z-19 masih butuh bukti verifikasi manual spesifik. |
 | **Fase AK — Owner-Request 2026-07-04** | ✅ kode selesai | AK-01 API key DeepSeek via Settings (tanpa restart, env fallback, tak pernah bocor ke respons) 🧬 · AK-02 fix 400 simpan panel AI · AK-03 input angka ribuan + fix nol-depan (CurrencyInput diperkuat, 12 file). `db push` kolom baru saat env hidup. |
 | **Fase AM — Redundansi UI/UX + Audit** | ✅ selesai (16/16) | AM-01 unifikasi WA URL, AM-02 hapus RoleWorkspaceTabs, AM-05 Pengumuman sidebar, AM-07 fix spec detection, AM-13 CSS Modules riset, AM-14 useForm wrapper, AM-15 Storybook, AM-16 E2E smoke. Build FE ✅ 6 Jul 2026. Detail: `docs/M12_CHECKLIST_CHANGELOG.md (Fase AM, riwayat)`. |
 | **Fase M16 — Audit 360 Flow Huni** | ✅ selesai | 7 temuan: P2-01/02/04 fixed (+🧬), P2-03/05/06/07 diverifikasi valid. Detail: `docs/archieve/_previous_cycles/M16_AUDIT_360_FLOW_HUNI.md §7`. |
@@ -205,35 +177,9 @@ Catatan: perubahan tool/seed deploy 2026-07-19 adalah riwayat UAT. Produksi meng
 
 ---
 
-## Peta Rujukan Dokumen
+## Ledger Historis (checkbox fase)
 
-| Kebutuhan | Baca dulu | Dipakai untuk |
-|-----------|-----------|---------------|
-| Orientasi bisnis & ground state | `docs/M01_MASTER.md` | Gambaran KOST48, 48 kamar, role, invarian sistem |
-| Keputusan owner & UX | `docs/M02_KEPUTUSAN_OWNER.md` | D-01..D-23, role guard, aturan UX owner |
-| Flow kontrak & chain-of-custody | `docs/M03_FLOW_KONTRAK.md` | Booking → invoice → jurnal → stay lifecycle |
-| Keuangan, jurnal, invoice, deposit | `docs/M04_KEUANGAN.md` | WAJIB tiap task uang — unit test + invarian TB |
-| Siklus huni, booking, renewal, KTP | `docs/M05_SIKLUS_HUNI.md` | Booking, stay, checkout, profil tenant |
-| Operasional, staf, gudang, meter | `docs/M06_OPERASIONAL.md` | Staff route, inventory, meter, tiket, gudang |
-| Publik, marketing, SEO, layanan | `docs/M07_PUBLIK_GROWTH.md` | Public UI, katalog, foto marketing, layanan tambahan |
-| Deploy & go-live produksi | `docs/M08_DEPLOY_GO_LIVE.md` | F1-12, env produksi, smoke test, password owner |
-| Audit Fable (2-3 Jul 2026) | `docs/archieve/audit_fable/00_INDEX.md` | 19 checklist C01-C19 |
-| Audit Reasonix (7 Jul 2026) | `docs/archieve/audit_reasonix/RINGKASAN_EKSEKUTIF.md` | 82 temuan baru |
-| Audit historis (Jun 2026) | `docs/archieve/_previous_cycles/M09_AUDIT.md` | Rujukan audit lama, risiko, keputusan pasca-audit |
-| Changelog arsip | `docs/M13_CHANGELOG.md` | Riwayat ringkas; tulis entri baru di paling atas |
-| AI Owner/Admin berbayar | `docs/M09_AI_OWNER_ADMIN.md` | Fase G: tombol manual, DeepSeek, hemat token, OCR, approval copilot |
-| Navigasi kode (PAKAI INI dulu) | `docs/M00_CODEMAP.md` | Modul→path→tanggung jawab + index model + anchor flow |
-
----
-
-## ANTRIAN EKSEKUSI AKTIF
-
-**Urutan otoritatif 6 September 2026:**
-
-1. **Fase EF:** identifikasi artefak host lalu pengamatan pasif EF-00/02 (M19 §9). Pemeriksaan lokal yang sudah selesai tidak diulang tanpa perubahan relevan.
-2. **Fase A:** konfirmasi infrastruktur, konfigurasi efektif dan gate go-live; pelaksanaan server/DB menunggu izin terkait.
-3. **Fase AO dan backlog domain yang belum ditutup:** tetap terbuka; bukan izin memulai implementasi lain saat menunggu host.
-4. **Fase MA:** ditunda. Tidak ada prioritas otomatis V5.8/V5.9 ekstraksi.
+**Bukan urutan eksekusi.** Urutan kerja hanya [Antrean Prioritas Aktif](#antrean-prioritas-aktif) (anchor `#antrian-eksekusi-aktif` menunjuk ke tabel itu). Fase EF tetap diprioritaskan; Fase MA tetap ditunda.
 
 Daftar berikut adalah ledger lintas fase bertanggal, berisi hasil selesai dan backlog. Urutan nomor lama bukan urutan eksekusi baru. Konflik status diselesaikan dari hasil penutupan yang lebih baru; jangan menjalankan ulang task berstatus selesai.
 
@@ -324,30 +270,32 @@ Daftar berikut adalah ledger lintas fase bertanggal, berisi hasil selesai dan ba
 **Aturan:** detail bukti, scope file, dependensi, dan DoD mengikuti M14; checklist ini hanya ringkasan antrean.
 
 - [x] **AO-AUDIT** — audit 66 kombinasi route–viewport dan 74 deklarasi route; bukti aman disimpan di `docs/assets/m14-uiux-audit/`.
-- [x] **AO-00 🔴 P0** — terapkan dua migration UAT pending melalui ledger resmi, backup, dan smoke test. **Owner/DevOps; perubahan DB memerlukan persetujuan.**
+- [x] **AO-00 🔴 P0** — dua migration UAT diterapkan 30 Juli 2026 menurut M13. Jangan menjalankan ulang migration historis. Sebelum crawl baru, verifikasi status ledger target UAT secara read-only; migration baru yang ternyata pending memerlukan lingkup tersendiri. **8 Sep:** `settings_tuya_vapid` terdeteksi pending (kolom sudah ada) → di-`resolve --applied` dengan persetujuan owner; status kini "up to date".
 - [x] **AO-01 🟠 P1** — satukan state katalog publik saat API daftar kamar gagal; jangan tampilkan “0 kamar” bersamaan dengan kalender berisi kamar.
 - [x] **AO-02 🟠 P1** — perbaiki urutan hooks halaman loyalitas agar feature redirect tidak memicu ErrorBoundary.
-- [ ] **AO-03 🟠 P1** — sediakan fixture/kredensial UAT non-personal untuk OWNER, ADMIN, STAFF, dan dua state TENANT tanpa menulis secret ke repo. *(mekanisme siap 7 Sep 2026: `frontend/e2e/audit-users.ts` env-driven + `backend/scripts/seed-audit-users.js` non-destruktif; provisioning akun UAT + crawl menunggu izin owner)*
+- [ ] **AO-03 🟠 P1** — lima persona audit UAT non-personal dengan role/relasi/state yang terverifikasi. Mekanisme tersedia di `74068aa`; gap alat audit 8 Sep di M14 harus ditangani sebelum provisioning. Izin akun/portal dan sesi autentikasi belum diberikan pada sesi audit docs ini.
 - [x] **AO-04 🟠 P1** — kurangi duplikasi navigasi tenant mobile dan dominance onboarding global.
 - [x] **AO-05 🟠 P1** — selaraskan istilah masa sewa aktif, lewat jatuh tempo, renewal, dan checkout.
-- [x] **AO-06 🟠 P1** — asosiasikan label form auth/profile secara programatis.
-- [x] **AO-07 🟡 P2** — hilangkan overflow horizontal `/profile` dan pecah halaman profil yang terlalu panjang.
-- [x] **AO-08 🟡 P2** — perbaiki semua pelanggaran kontras serius yang terverifikasi.
-- [x] **AO-09 🟡 P2** — lengkapi landmark `<main>` dan heading utama yang hilang.
+- [x] **AO-06 🟠 P1 — SELESAI (12 Sep sore):** seluruh kontrol lulus pengukuran. `/reset-password` (3 kontrol) diperbaiki dengan `controlId`; `PasswordInput` kini meneruskan `controlId` ke input di dalam `InputGroup` (context react-bootstrap terputus oleh InputGroup); `<Form.Check>` tanpa `type` di `/staff-routines` diberi `aria-label` karena label tidak dirender. Verifikasi: Axe `label`/`select-name` = **0 node** di 35 rute OWNER, 7 rute STAFF, 6 rute TENANT, dan 8 rute publik.
+- [x] **AO-07 🟡 P2** — hilangkan overflow horizontal `/profile` dan pecah halaman profil yang terlalu panjang. (Terverifikasi ulang 12 Sep: overflow 0 px di 375 px untuk TENANT dan STAFF.)
+- [x] **AO-08 🟡 P2 — SELESAI (12 Sep sore):** 62 node `color-contrast` serious → **0**. Perbaikan: varian `-emphasis` Bootstrap menggantikan `.text-warning/.text-info/.text-danger` (1,47–3,39:1 → 7,2–10,4:1); cacat **judul kartu gelap 1,09:1** diperbaiki (aturan global `h1–h6, strong` ber-`!important` di `06-tenant.css:13–30` dikecualikan untuk permukaan gelap); `--green-700` pada checklist (3,30→5,02); `.report-matrix-row span` tidak lagi menimpa warna badge (1,05→lulus lewat `.text-bg-*`); `#64748b`→`--gray-600` pada kartu biru muda; `--gx-coral` digelapkan (4,04→6,5); `.progress-bar` diberi nama. Rincian: **§0** [AUDIT_UIUX_TOTAL_2026-09-12](AUDIT_UIUX_TOTAL_2026-09-12.md).
+- [x] **AO-09 🟡 P2 — SELESAI untuk temuan terukur (12 Sep sore):** `/reset-password` kini memiliki `<main>` + `<h1>` (0 pelanggaran Axe pada 375 px); `/portal/stay` TENANT memiliki `<h1>`. Sisa P3 non-pelanggaran: 4 halaman dengan `<h1>` ganda (`/inventory/gudang`, `/inventory/barang-kamar`, `/inventory/mutasi`, `/staff-report`) — perlu keputusan struktur judul, tidak memblokir gate a11y.
 - [x] **AO-10 🟡 P2** — ringkas manual tenant mobile dengan progressive disclosure.
 - [x] **AO-11 🟡 P2** — perjelas scroll/filter horizontal dan target sentuh mobile.
 - [x] **AO-12 🟡 P2** — buat kontrak koneksi API saat `npm run dev` eksplisit dan reproducible.
-- [ ] **AO-13** — crawl regresi OWNER/ADMIN/STAFF setelah AO-00 dan AO-03. *(crawl STAFF siap 7 Sep 2026: `frontend/e2e/staff-crawl.spec.ts` + `admin-owner-crawl.spec.ts` env-driven; eksekusi menunggu akun UAT/izin)*
+- [ ] **AO-13** — crawl OWNER/ADMIN/STAFF setelah ledger UAT dan AO-03 terverifikasi. Tiga role harus benar-benar dieksekusi, 0 skip; verifikasi role, route tujuan, konten halaman, dan seluruh temuan. Exit 0 pada skrip saat ini belum cukup membuktikan gate lulus (M14 audit 8 Sep).
 - [x] **AO-15 🟢 P3** — kelompokkan link footer publik dan pertahankan empat pola publik `Best-in-Class` dari benchmark Baymard.
 - [x] **AO-16 🟡 P2** — bedakan empty result karena filter/data/error dan pertahankan shortlist perbandingan selama sesi detail/back.
 - [x] **AO-17 🟠 P1** — adaptasikan hero/teaser homepage untuk state 0 kamar tanpa sinyal hijau, CTA palsu, atau grid kosong; tangkap minat via WhatsApp.
-- [x] **AO-18 🟡 P2** — rapikan hierarchy homepage, trust grid/copy, review empty-state, FAQ, lokasi, dan CTA tanpa klaim palsu. *(parsial: trust 3+2 + ikon semantik + FAQ sentence case; polish copy menunggu AO-14)*
-- [x] **AO-19 🟡 P2** — inventarisasi kualitas aset publik dan buat cue galeri selalu terlihat pada touch/keyboard; foto pengganti menunggu aset asli owner bila perlu. *(parsial: cue galeri done; inventaris aset menunggu owner)*
-- [x] **AO-20 🟠 P1** — buat exception dashboard Owner actionable, pisahkan toolbar lokal, bedakan state KPI, dan beri CTA konfigurasi AI yang sah. *(parsial: CTA alert + grouping toolbar + CTA AI done; pembedaan state KPI & label aksi menunggu AO-14)*
+- [ ] **AO-18 🟡 P2 — PARSIAL:** trust 3+2, ikon semantik dan FAQ sentence case sudah selesai; sisa polish copy/validasi hierarchy homepage diselesaikan sebelum sign-off AO-14. Bagian selesai tidak diulang.
+- [ ] **AO-19 🟡 P2 — PARSIAL:** cue galeri touch/focus sudah selesai; inventaris kualitas aset belum selesai. Inventaris aset tersedia dapat dilakukan dalam lingkup audit terkait; minta aset pengganti hanya jika hasilnya membutuhkan sumber owner.
+- [ ] **AO-20 🟠 P1 — PARSIAL:** CTA alert, grouping toolbar, CTA AI, dan pilihan mode Owner yang idempotent sudah selesai; sisa pembedaan state KPI serta label aksi prioritas diselesaikan sebelum sign-off AO-14. Bagian selesai tidak diulang.
 - [ ] **AO-21 🟡 P2** — normalisasi sistem visual/terminologi Owner setelah AO-20 review; perubahan AppLayout harus dikoordinasikan.
 - [x] **AO-22 🟠 P1** — susun dashboard Area Admin agar exception dan antrean lima aksi tampil sebelum metrik; perkuat CTA tanpa membuat queue kedua.
 - [ ] **AO-23 🟡 P2** — konsolidasikan komponen/shell Area Admin dengan regresi Owner bila AppLayout atau shared CSS berubah.
-- [ ] **AO-14** — audit ulang desktop/mobile + Axe + gate Baymard relevan, build/test, screenshot bebas PII, dan sign-off Fase AO.
+- [ ] **AO-14** — audit final setelah AO-01..13 dan AO-15..23 memenuhi DoD: publik, OWNER/ADMIN/STAFF dan dua state TENANT nyata, viewport 320–1440 px, Axe/gate Baymard, build/test relevan, screenshot/trace aman. Crawl AO-13 saja tidak menutup dependensi maupun sign-off Fase AO. **Progres 12 Sep:** bukti crawl 180 pemeriksaan (6 role × 2 viewport) + Axe tersedia di [AUDIT_UIUX_TOTAL_2026-09-12](AUDIT_UIUX_TOTAL_2026-09-12.md); **gate Axe kini LULUS** setelah perbaikan sore (0 pelanggaran critical/serious pada permukaan yang diaudit ulang), `tsc -b` dan `npm run build` exit 0. Sisa sebelum sign-off: viewport 320 px, rute ber-fixture (`/booking/:roomId`, `/invoices/:id`, `/stays/:id`, detail pengumuman), AO-18/19/20 parsial, AO-21/23 (normalisasi token), serta T-06 performa `/portal/stay`.
+
+**Temuan 12 Sep → status perbaikan:** T-01 label form ✅ selesai · T-02 kontras ✅ selesai · T-03 overflow `/tickets` STAFF ✅ selesai · T-04 nested-interactive ✅ selesai · T-05 heading/landmark ✅ selesai (sisa P3 `<h1>` ganda) · T-07 overflow kecil ✅ selesai · **T-06 performa `/portal/stay` ⏳ belum** · **T-08 normalisasi token ⏳ belum**. Rincian akar masalah dan verifikasi ada di [§0 laporan](AUDIT_UIUX_TOTAL_2026-09-12.md#0-hasil-perbaikan--12-september-2026-sore).
 
 **Gate akhir:** tidak ada 500/blank page, tidak ada overflow global pada 375 px, Axe serious/critical = 0 pada route prioritas, dan matriks role dinamis lengkap.
 
@@ -357,9 +305,9 @@ Daftar berikut adalah ledger lintas fase bertanggal, berisi hasil selesai dan ba
 
 **Prioritas aktif.** Spesifikasi/DoD: [M19](M19_EFISIENSI_HOSTING_512MB.md). Keputusan: M02 §Keputusan arah aplikasi. Checkbox selesai di bawah hanya menyatakan lingkup implementasi lokal yang disebut; deployment dan dampak server masih UNKNOWN. Bukti audit/typecheck berasal dari laporan Cline yang diterima owner; build EF-05 dari riwayat M13, tidak diulang saat sinkronisasi docs.
 
-- [ ] **EF-00 P0 — Baseline deployment:** inventaris lokal diperbarui dan konfigurasi panel parsial diterima 7 Sep 2026; identitas artefak/commit server, waktu deploy, document root, instance Passenger, serta limit/fault LVE tetap UNKNOWN. Isi M19 §9.1–9.3 secara pasif setelah paket informasi hosting tersedia.
+- [ ] **EF-00 P0 — Baseline deployment:** konfigurasi panel parsial dan limit/snapshot resource diterima 7 Sep 2026; identitas artefak/commit server, waktu deploy, document root, instance Passenger serta fault/interval pengukuran tetap UNKNOWN. Isi kekurangan M19 §9.1–9.3 secara pasif setelah data hosting tersedia.
 - [x] **EF-01 P1 — Implementasi telemetri lokal opsional:** service + interceptor terpasang di working tree; default OFF, timer unref/cleanup. Audit statis + typecheck dilaporkan lulus. Aktivasi, privasi label request saat runtime, dan hasil log host belum diverifikasi; jangan klaim seluruh log bebas PII tanpa memeriksa fallback path.
-- [ ] **EF-02 P0 — Baseline workload:** tabel/panduan M19 §9 tersedia; pengamatan host belum ada. Uji aktif membutuhkan izin server; tanpa kron IoT baru. Catat skenario, rentang waktu, jenis angka (sesaat/rata-rata/puncak), resource/fault dan artefak yang diuji.
+- [ ] **EF-02 P0 — Baseline workload:** snapshot host 7 Sep tersedia di M19 §9, tetapi interval/workload/peak/fault belum terukur. Uji aktif membutuhkan izin server; tanpa cron IoT baru. Catat skenario, rentang waktu, jenis angka (sesaat/rata-rata/puncak), resource/fault dan artefak yang diuji.
 - [x] **EF-03 P0 — Implementasi Prisma singleton lokal:** reports.module memakai PrismaModule global; provider PrismaService hanya di prisma.module pada audit statis. Typecheck dilaporkan lulus. Jumlah pool/koneksi runtime bergantung pada konteks/proses aktual; host UNKNOWN.
 - [ ] **EF-04 P2 — Profil paket static:** peta aset/routing lokal selesai; implementasi profil belum dilakukan. Kandidat publik: build SPA dan gambar kamar publik. Upload privat tidak masuk dokroot/CDN publik. DoD: paket dan kedua profil diverifikasi setelah implementasi diizinkan.
 - [x] **EF-05 P2 — Implementasi packaging kanonik lokal:** bundle-deploy delegasi ke make-deploy; README ganda dan contoh cron IoT dihapus. Riwayat M13 mencatat make-deploy/bundle fast lulus (9.639 file saat pengujian itu). Artefak server/pemakaian generator ini UNKNOWN.
@@ -382,10 +330,10 @@ Daftar berikut adalah ledger lintas fase bertanggal, berisi hasil selesai dan ba
 **Tujuan:** aplikasi siap publish bersih, tanpa data UAT/testing.  
 **Rujukan:** `docs/M08_DEPLOY_GO_LIVE.md` · `backend/.env.production.example`.
 
-- [ ] **A1 / F1-12** 🧑 Owner konfirmasi VPS/cPanel, domain, HTTPS, PostgreSQL prod 5432, env rahasia siap.
+- [ ] **A1 / F1-12** 🧑 Owner lengkapi identitas hosting/deployment, domain/HTTPS, host/nama/port PostgreSQL produksi dan kesiapan env rahasia. Ikuti bukti parsial M19; port/nama DB produksi tidak diasumsikan dari UAT atau default.
 - [ ] **A2** Fresh provision: buat DB produksi BARU/kosong (jangan drop UAT) → verifikasi dan putuskan patch schema secara terpisah dari bundle → bootstrap guard teruji → OWNER pertama → seed COA/periode/cash account. Server bundle tidak menjalankan npm/Prisma; `db push` dan seed historis dilarang untuk produksi.
 - [ ] **A3** Set env produksi wajib: `NODE_ENV=production`, JWT secret kuat, CORS domain final, VAPID hanya bila push diaktifkan, `KTP_ACTIVATION_GATE_ENABLED=true`.
-- [ ] **A4** Ganti password OWNER dummy/dev ke password real sebelum dipakai owner.
+- [ ] **A4** Konfirmasi rotasi password OWNER yang pernah terekspos (M13 7 Sep), serta penggantian kredensial dummy/dev sebelum penggunaan produksi. Pembersihan teks repo SEC-CLEAN selesai; bukti rotasi belum tersedia. Jangan catat nilai password di dokumen.
 - [ ] **A5** Isi opening balance bila ada modal/saldo awal; kalau mulai nol, dokumentasikan zero-start.
 - [ ] **A6** Smoke test prod: login OWNER, public rooms 200, trial balance balanced, recon mismatch 0, readiness tanpa blocker merah.
 - [x] **A7** `backend/package.json` sudah punya `pretest:unit = npm run build` — test unit pakai `dist` segar.
@@ -955,7 +903,7 @@ Daftar berikut adalah ledger lintas fase bertanggal, berisi hasil selesai dan ba
 | [x] AL-DOC-4 | ✅ | **10 file audit-reasonix** — 82 temuan lengkap dengan file:line | `docs/archieve/audit_reasonix/` |
 | [x] AL-OC-05 | ✅ | **M29 ExternalReview CRUD audit** — audit selesai, laporan di `docs/archieve/audit_reasonix/M29_AUDIT_EXTERNAL_REVIEW.md` | `docs/archieve/audit_reasonix/` |
 
-#### 🔴 ANTRIAN PERBAIKAN BUG (6 kritis — belum dieksekusi)
+#### Perbaikan bug kritis — selesai menurut riwayat 7 Juli 2026
 
 | Task | Bug | File | Estimasi |
 |------|-----|------|----------|
@@ -966,9 +914,11 @@ Daftar berikut adalah ledger lintas fase bertanggal, berisi hasil selesai dan ba
 | [x] AL-FIX-5 | Journal pending tanpa retry | `payment-submissions.service.ts:794` | 2 jam |
 | [x] AL-FIX-6 | `@IsNumberString` vs JSON number di CreateStayDto | `stay.dto.ts:58-63` | 30 menit |
 
-#### 🟠 BACKLOG (15 tinggi + 35 menengah + 26 rendah)
+#### Rekonsiliasi backlog AL (8 September 2026)
 
-Detail lengkap: `docs/archieve/audit_reasonix/RINGKASAN_EKSEKUTIF.md`. Prioritas: H1-H15 dulu, lalu M1-M35, terakhir L1-L26.
+M13 pada 7 Juli mencatat C1–C6 dan H1–H15 selesai; jumlah temuan audit awal bukan jumlah backlog terbuka sekarang. H1–H14 tidak dijalankan ulang tanpa regresi baru. H15 merujuk verifikasi manual dashboard Owner Z-19 (catatan 4 Juli) yang masih `[ ]` pada ledger Fase Z; bukti penutupan spesifik belum tersedia, sehingga verifikasi tersebut tetap terbuka dan dapat dikoordinasikan dengan AO-13/14.
+
+Sisa temuan menengah/rendah atau refactor hanya dipilih setelah dicocokkan dengan penutupan terbaru di M12/M13 dan diprioritaskan owner. Dossier `docs/archieve/audit_reasonix/RINGKASAN_EKSEKUTIF.md` adalah sumber audit historis, bukan izin implementasi seluruh daftar.
 
 #### 🆕 MINI PROJECT — WiFi Voucher System (AL-04)
 

@@ -4,7 +4,7 @@
 > Dokumen ini menyimpan spesifikasi domain dan bukti bertanggal. Status PASS/selesai pada audit lama hanya berlaku pada lingkup/waktu yang disebut, bukan bukti deployment atau runtime terbaru. Judul sumber pra-konsolidasi adalah riwayat; jangan membuat ulang file lama atau mengulang checklist selesai.
 
 > **Status audit 30 Juli:** SELESAI · **Eksekusi:** backlog AO tetap terbuka; urutan terbaru mengikuti M12 (EF diprioritaskan)
-> **Tanggal:** 30 Juli 2026 · **Target:** pra-go-live KOST48 V5
+> **Audit awal:** 30 Juli 2026 · **Sinkronisasi status/audit alat:** 8 September 2026 · **Audit ulang dinamis:** 12 September 2026 (§0) · **Target:** pra-go-live KOST48 V5
 > **Sumber keputusan:** `M02_KEPUTUSAN_OWNER.md` tetap lebih tinggi daripada dokumen ini.
 > **Antrean ringkas:** `M12_CHECKLIST_CHANGELOG.md` Fase AO.
 
@@ -12,9 +12,35 @@ Dokumen ini adalah sumber kerja bersama untuk audit dan perbaikan UI/UX berikutn
 
 ---
 
-## 1. Ringkasan Eksekutif
+## 0. Audit ulang 12 September 2026 — bukti dinamis baru (180 pemeriksaan halaman)
 
-UI KOST48 sudah matang secara visual dan sebagian besar responsif, tetapi **UAT saat ini belum layak menjadi bukti kesiapan go-live**. Hambatan utama bukan kosmetik: database UAT tertinggal dua migration sehingga beberapa permukaan utama mengembalikan HTTP 500.
+Audit menyeluruh diminta owner dan dijalankan pada instance lokal (frontend `dist` versi 1.3.0 + backend NestJS :3000 + DB UAT 5433). **Laporan lengkap: [AUDIT_UIUX_TOTAL_2026-09-12.md](AUDIT_UIUX_TOTAL_2026-09-12.md)**; artefak: [`audit-assets/2026-09-12_uiux_total/`](audit-assets/2026-09-12_uiux_total/).
+
+**Status gate:** stabilitas ✅, **gerbang aksesibilitas (AO-08) kini LULUS** setelah perbaikan sore hari yang sama: **0 pelanggaran Axe critical/serious** pada permukaan yang diaudit ulang. Sign-off penuh AO-14 masih menunggu item di bawah tabel.
+
+| Dimensi | Sebelum perbaikan | Setelah perbaikan | Keterangan |
+|---|---|---|---|
+| Halaman dirender | 🟢 180/180 | 🟢 | 6 role × 2 viewport; 0 blank, 0 crash React, 0 redirect tak sah |
+| API | 🟢 89 endpoint, 0× 5xx | 🟢 | 1× 204 sah (foto profil kosong) |
+| AO-00 / AO-01 (DB tertinggal, katalog 500) | 🟢 tidak reproduksi | 🟢 | katalog & notifikasi normal |
+| Axe critical | 🔴 30 node | 🟢 **0** | label form & select filter tanpa nama (T-01) |
+| Axe serious | 🔴 88 node | 🟢 **0** | kontras T-02 dsb. |
+| Overflow mobile 375 px | 🟡 3 halaman (+176 px terburuk) | 🟢 **0 px** | `/tickets` STAFF, `/finance/accounting-setup`, `/portal/stay` |
+| Landmark/heading | 🟡 6+ halaman | 🟡 sisa P3 | `/reset-password` & `/portal/stay` sudah `<main>`+`<h1>`; sisa: `<h1>` ganda di 4 halaman (tanpa pelanggaran Axe) |
+| AO-14 (dua state TENANT, publik, viewport, Axe) | 🟢 bukti tersedia | 🟢 | sisa: viewport 320 px, rute ber-fixture, AO-18/19/20/21/23, T-06, T-08 |
+
+Dua koreksi terhadap catatan lama yang harus dipakai mulai sekarang:
+
+1. **AO-06 tidak lagi boleh dianggap selesai sepenuhnya:** `/login`, `/forgot-password`, dan `/profile` lulus (0 kontrol tanpa label), tetapi `/reset-password` masih memiliki 3 kontrol tanpa label terasosiasi (`ResetPasswordPage.tsx:74-86`).
+2. **AO-08 dan AO-09 dibuka kembali** dengan bukti terukur (kontras dan heading), bukan berdasarkan penilaian visual.
+
+Batas metode yang harus disertakan bila hasil ini dikutip: harness iframe berukuran tetap dipakai karena Playwright `spawn EPERM` di sandbox; user agent tetap desktop dan DPR 1,25, sehingga perilaku sentuh nyata serta identitas perangkat mobile **belum terbukti**. Rute ber-fixture (`/booking/:roomId`, `/invoices/:id`, `/stays/:id`, detail pengumuman) dan viewport 320 px belum tercakup.
+
+---
+
+## 1. Ringkasan Eksekutif — snapshot audit awal 30 Juli 2026
+
+Pada audit awal 30 Juli, UI KOST48 sebagian besar responsif, tetapi **UAT saat itu belum layak menjadi bukti kesiapan go-live**: dua migration tertinggal sehingga beberapa permukaan mengembalikan HTTP 500. Tabel berikut menyimpan temuan sebelum perbaikan, bukan kondisi runtime September.
 
 | Area | Hasil | Keputusan |
 |---|---|---|
@@ -30,7 +56,7 @@ UI KOST48 sudah matang secara visual dan sebagian besar responsif, tetapi **UAT 
 
 ### Putusan release
 
-**RED sampai AO-00 selesai.** Jangan menyimpulkan UI siap produksi dari screenshot atau build saja selama migration UAT belum sinkron dan crawl OWNER/ADMIN/STAFF belum dapat dijalankan.
+**Status 8 September: sign-off AO belum diberikan.** AO-00 selesai menurut catatan eksekusi M13 tanggal 30 Juli; jangan menjalankan ulang dua migration historis. Sebelum crawl baru, verifikasi kesegaran ledger pada target UAT secara read-only. AO-03/13/14, sisa AO-18/19/20 serta AO-21/23 tetap terbuka. Skrip audit tersedia, dengan gap alat yang dicatat pada AO-03 di bawah; belum ada provisioning/crawl baru pada sesi dokumentasi ini.
 
 ---
 
@@ -353,6 +379,24 @@ Ini bukan alasan untuk mengubah password database secara diam-diam. Yang dibutuh
 - Password disimpan di env lokal/secret manager, bukan hard-code docs atau test.
 - Crawl OWNER, ADMIN, dan STAFF dapat berjalan tanpa reset data produksi/UAT utama.
 - M11 dan M08 membedakan `seed-dev` dari kredensial UAT aktual.
+
+#### Audit statis alat AO-03/AO-13 — 8 September 2026
+
+Lingkup: skrip provisioning, kontrak API yang dipanggil, helper/config/spec crawl. Ini audit alat dan dokumentasi, bukan reproduksi runtime atau audit ulang EF. Implementasi awal tersedia pada commit lokal `74068aa`; ketersediaan skrip tidak membuktikan lima akun/fixture maupun gate siap.
+
+| Temuan | Bukti source | Tindak lanjut sebelum klaim siap/lulus |
+|---|---|---|
+| **Target UAT belum divalidasi otomatis.** `AUDIT_CONFIRM=1` hanya pemeriksaan string; `API_BASE` bebas menunjuk server mana pun. | `backend/scripts/seed-audit-users.js` — `API`, `AUDIT_CONFIRM`, `api` | Verifikasi identitas API dan DB UAT yang sebenarnya; persetujuan flag bukan deteksi lingkungan. Batasi target provisioning secara eksplisit. |
+| **Fixture tenant dipilih otomatis dari data existing.** Label user non-personal tidak menjamin tenant terkait non-personal. OWNER existing hanya diloginkan; ADMIN/STAFF dibuat jika belum ada; hingga dua portal TENANT dan satu tenant dummy dapat dibuat. | `seed-audit-users.js` — `tenantItems.find`, fallback bagian 4; `backend/src/modules/tenants/tenants.service.ts` — `createPortalAccess` | Tetapkan identitas audit unik dan tenant fixture yang dipilih secara eksplisit. Jangan menautkan akun audit ke penghuni personal. Skrip tidak membuat stay/invoice/payment; jika fixture stay aktif tidak tersedia, lingkup pembuatannya harus ditentukan tersendiri. |
+| **Inventaris hanya halaman pertama.** Skrip meminta `limit=300` tanpa iterasi halaman; backend membatasi maksimum 100. | `seed-audit-users.js` — GET users/tenants/stays; `backend/src/common/utils/pagination.ts` — `buildPagination` | Ambil pagination lengkap atau pencarian identitas spesifik sebelum memutuskan akun/fixture belum ada. Belum ada bukti jumlah data UAT saat ini atau kegagalan runtime akibat batas ini. |
+| **Keberhasilan parsial dapat berakhir exit 0.** Role ADMIN/STAFF berbeda, gagal create tertentu, atau fixture aktif tidak ada hanya menghasilkan warning/skip; ringkasan tetap mencetak selesai. Login OWNER/TENANT tidak memeriksa role/relasi/state secara eksplisit. | `seed-audit-users.js` — `summary`, `loginAs`, cabang warning dan ringkasan | Verifikasi kelima persona, role, user–tenant dan dua state stay setelah provisioning; laporkan gagal bila gate belum lengkap. Password/role akun lama tidak direset oleh skrip. |
+| **Environment proses belum terjamin; seluruh crawl bisa di-skip.** Helper hanya membaca `process.env`; config tidak memuat `.env.local`, bertentangan dengan komentar helper. Kredensial kosong memicu `test.skip`. | `frontend/e2e/audit-users.ts` — `auditCredentials`; `frontend/playwright.config.ts`; kedua spec crawl | Isi environment proses dari shell/secret manager; jangan mengandalkan file env dimuat otomatis. Bukti AO-13 wajib tiga role benar-benar dieksekusi, 0 skip; `--list`/exit 0 bukan crawl lulus. |
+| **Role, route dan isi halaman belum menjadi gate lengkap.** Login hanya menunggu keluar dari `/login`; role salah dapat dialihkan ke default dashboard. Panjang teks `#root` dapat dipenuhi shell walau konten route gagal. | `audit-users.ts` — `loginAs`; `admin-owner-crawl.spec.ts`, `staff-crawl.spec.ts`; `frontend/src/App.tsx` — `RequireRoles` | Cocokkan role aktual (`/auth/me`), URL tujuan yang sah dan elemen konten route. Ini gap alat verifikasi, bukan bukti celah otorisasi aplikasi. |
+| **Tidak semua temuan menggagalkan test.** HTTP 401/403/404 API, console error dan request failure dicatat tetapi tidak masuk filter assertion kritis. | Kedua spec crawl — listener dan `findings.filter` | Tinjau seluruh temuan dan tetapkan penanganan error yang diharapkan/tidak diharapkan. Klaim “semua halaman bersih” tidak cukup dari assertion crash/5xx/blank/redirect-login saja. |
+| **Target suite dan cakupan tenant belum lengkap.** Crawl memakai `E2E_BASE`, config suite memakai `localhost:5173`; dua kredensial TENANT belum dipakai crawl UAT nyata di `frontend/e2e`. Test tenant IoT/a11y memakai session/API mock. | `audit-users.ts`, `playwright.config.ts`, `frontend/e2e/smoke.spec.ts`, `frontend/e2e/a11y/iot-surfaces.spec.ts` | Selaraskan target efektif tiap suite dan lengkapi dua state TENANT nyata, publik, viewport 320–1440 px serta Axe lintas route. Mock a11y bukan integrasi UAT lima persona. |
+| **Login/capture memiliki dampak yang harus dicakup.** Login memperbarui `lastLoginAt` dan membuat `RefreshToken`; screenshot langsung dan trace retry tidak menyamarkan data otomatis. | `backend/src/auth/auth.service.ts` — `login`, `createRefreshToken`; kedua spec crawl — `page.screenshot`; config — `trace` | Izin crawl UAT mencakup mutasi sesi autentikasi; jangan menyebutnya DB read-only. Gunakan fixture non-personal dan tinjau screenshot/trace sebelum dibagikan. Spec belum membatasi seluruh request mutasi otomatis dari halaman. |
+
+**Status tindak lanjut (perbarui 8 Sep, sore):** audit di atas adalah pemeriksaan pagi 8 Sep. Pada sore, koreksi alat berikut terimplementasi di working tree (verifikasi: `node --check` ✓, sinkron `ROLE_ROUTES`↔`App.tsx` tanpa drift): fixture TENANT aktif WAJIB `AUDIT_TENANT_ACTIVE_ID` (tanpa pemilihan tenant existing otomatis), `AUDIT_TENANT_NO_STAY_ID` opsional dengan default tenant dummy NIK `9000000000000001`; pagination lengkap (`listAll` dengan pengulang halaman, limit ≤100 dari `buildPagination`); verifikasi login pasca-buat; gate error → `exit 1` untuk provisioning parsial; guard target `API_BASE` non-lokal (`AUDIT_ALLOW_REMOTE=1` dibutuhkan); screenshot crawl tetap lokal (gitignore `e2e-out/`). **Provisioning/crawl TIDAK dieksekusi:** env `AUDIT_*`/`E2E_*` tidak terisi owner dan backend lokal (porta 3000) tidak di-start. Persetujuan owner dicatat di [M02 §Keputusan izin bertahap](M02_KEPUTUSAN_OWNER.md#keputusan-izin-bertahap--8-september-2026).
 
 ---
 
@@ -824,6 +868,8 @@ Admin menggunakan banyak surface rounded, pill status, action outlined, dan util
 
 ### 7.1 Status task
 
+Status diselaraskan 8 September dari checklist M12 dan riwayat M13. `DONE:riwayat`/`DONE:ledger` mempertahankan hasil terdahulu, bukan bukti runtime September; tidak menjalankan ulang implementasi selesai. `REVIEW` pada pekerjaan parsial hanya mencakup bagian sisanya. Checklist eksekusi tetap satu di M12.
+
 Gunakan status berikut di tabel:
 
 - `OPEN`
@@ -835,38 +881,40 @@ Gunakan status berikut di tabel:
 
 | Task | Prioritas | Status | Ownership file utama | Gate |
 |---|---|---|---|---|
-| AO-00 Sinkronkan dua migration UAT | P0 | `BLOCKED:otorisasi owner/devops` | `backend/prisma/migrations/*` hanya deploy, tanpa edit | migrate status + 3 endpoint |
-| AO-01 State terdegradasi katalog publik | P1 | `OPEN` | `PublicRoomsPage.tsx`, komponen availability, `11-public-pages.css` | desktop/mobile + API failure mock |
-| AO-02 Perbaiki hook-order loyalitas | P1 | `OPEN` | `MyLoyaltyPage.tsx`, test loyalty | unit test loading→disabled/enabled |
-| AO-03 Fixture/kredensial audit lintas role | P1 | `OPEN` — mekanisme siap 7 Sep 2026 (`e2e/audit-users.ts`, `scripts/seed-audit-users.js`); provisioning UAT + crawl menunggu izin owner | `frontend/e2e/*`, `backend/scripts/seed-audit-users.js`, env only | crawl 3 role login |
-| AO-04 Ramping navigasi tenant mobile | P1 | `OPEN` | `TenantWorkspaceTabs.tsx`, `GettingStartedGuide.tsx`, `MobileBottomNav.tsx`, `navigation.ts` | 320–414 px + deep link |
-| AO-05 Semantik kontrak overstay | P1 | `OPEN` | `MyStayPage.tsx`, helper/test stay | H-1/H/H+1/overstay |
-| AO-06 Label auth/profile | P1 | `OPEN` | auth pages, `ProfilePage.tsx`, `PasswordInput.tsx` | Axe + keyboard |
-| AO-07 Profile overflow + disclosure | P2 | `OPEN` | `ProfilePage.tsx`, style profile | 5 viewport mobile |
-| AO-08 Kontras lintas surface | P2 | `OPEN` | CSS sesuai route; klaim per file | Axe 0 serious/critical |
-| AO-09 Landmark/H1 | P2 | `OPEN` | public shell, auth shell, tenant stay | semantic smoke test |
-| AO-10 Manual tenant scanability | P2 | `OPEN` | `MyManualPage.tsx`, style manual | mobile visual + keyboard |
-| AO-11 Filter/tap target mobile | P2 | `OPEN` | invoice + shared mobile controls | 44 px + active-visible |
-| AO-12 Kontrak API dev | P2 | `OPEN` | `vite.config.ts` atau `.env.development`, docs command | login dev tanpa langkah tersembunyi |
-| AO-13 Crawl OWNER/ADMIN/STAFF | P0 gate | `BLOCKED:AO-00+AO-03(eksekusi)` | `frontend/e2e/admin-owner-crawl.spec.ts` + `frontend/e2e/staff-crawl.spec.ts` (env `E2E_*`) | 0 crash/5xx/blank/guard salah |
-| AO-15 Struktur footer publik | P3 | `OPEN` | `publicGuestShared.tsx`, `11-public-pages.css` | 6 route publik + 320–414 px |
-| AO-16 Empty result + persistensi shortlist | P2 | `OPEN` | `PublicRoomsPage.tsx`, test katalog | filtered-zero + detail/back |
-| AO-17 Hero/teaser state nol | P1 | `OPEN` | `PublicGuestDashboardPage.tsx`, `11-public-pages.css` | prod-like 0/1/error/loading |
-| AO-18 Hierarki homepage/trust | P2 | `OPEN` | `PublicGuestDashboardPage.tsx`, `publicGuestShared.tsx`, CSS publik | desktop/mobile + truthfulness |
-| AO-19 Audit aset/galeri publik | P2 | `OPEN` | data aset, `room-images`, gallery renderer | inventory + touch/keyboard |
-| AO-20 Dashboard Owner: exception/actionability | P1 | `OPEN` | `OwnerDashboardPage.tsx`, `12-owner.css` | data state + desktop/touch/keyboard |
+| AO-00 Sinkronkan dua migration UAT | P0 | `DONE:riwayat M13 30 Jul` | `backend/prisma/migrations/*` hanya deploy, tanpa edit | Kesegaran ledger target sebelum crawl baru; bukan ulang migration lama |
+| AO-01 State terdegradasi katalog publik | P1 | `DONE:riwayat M13 30 Jul` | `PublicRoomsPage.tsx`, komponen availability, `11-public-pages.css` | desktop/mobile + API failure mock |
+| AO-02 Perbaiki hook-order loyalitas | P1 | `DONE:riwayat M13 30 Jul` | `MyLoyaltyPage.tsx`, test loyalty | unit test loading→disabled/enabled |
+| AO-03 Fixture/kredensial audit lintas role | P1 | `DONE:provisioning 3 role + TENANT no-stay` — TENANT aktif didefer AO-14; kredensial via env non-repo | `frontend/e2e/*`, `backend/scripts/seed-audit-users.js`, env only | 4/5 persona kini (OWNER/ADMIN/STAFF/TENANT-no-stay); TENANT-aktif menunggu fixture non-personal |
+| AO-04 Ramping navigasi tenant mobile | P1 | `DONE:riwayat M13 30 Jul` | `TenantWorkspaceTabs.tsx`, `GettingStartedGuide.tsx`, `MobileBottomNav.tsx`, `navigation.ts` | 320–414 px + deep link |
+| AO-05 Semantik kontrak overstay | P1 | `DONE:riwayat M13 30 Jul` | `MyStayPage.tsx`, helper/test stay | H-1/H/H+1/overstay |
+| AO-06 Label auth/profile | P1 | `DONE:riwayat M13 30 Jul` | auth pages, `ProfilePage.tsx`, `PasswordInput.tsx` | Axe + keyboard |
+| AO-07 Profile overflow + disclosure | P2 | `DONE:riwayat M13 30 Jul` | `ProfilePage.tsx`, style profile | 5 viewport mobile |
+| AO-08 Kontras lintas surface | P2 | `DONE:riwayat M13 30 Jul` | CSS sesuai route; klaim per file | Axe 0 serious/critical |
+| AO-09 Landmark/H1 | P2 | `DONE:riwayat M13 30 Jul` | public shell, auth shell, tenant stay | semantic smoke test |
+| AO-10 Manual tenant scanability | P2 | `DONE:riwayat M13 30 Jul` | `MyManualPage.tsx`, style manual | mobile visual + keyboard |
+| AO-11 Filter/tap target mobile | P2 | `DONE:riwayat M13 30 Jul` | invoice + shared mobile controls | 44 px + active-visible |
+| AO-12 Kontrak API dev | P2 | `DONE:riwayat M13 30 Jul` | `vite.config.ts` atau `.env.development`, docs command | login dev tanpa langkah tersembunyi |
+| AO-13 Crawl OWNER/ADMIN/STAFF | P0 gate | `DONE:crawl 8 Sep` — OWNER 36/36, ADMIN 32/32, STAFF 7/7; 0 kritis (hanya warning console `controlId`) | `frontend/e2e/admin-owner-crawl.spec.ts` + `frontend/e2e/staff-crawl.spec.ts` (env `E2E_*`) | 3 role dieksekusi, 0 skip; role/route/konten dan seluruh error diperiksa |
+| AO-15 Struktur footer publik | P3 | `DONE:riwayat M13 30 Jul` | `publicGuestShared.tsx`, `11-public-pages.css` | 6 route publik + 320–414 px |
+| AO-16 Empty result + persistensi shortlist | P2 | `DONE:riwayat M13 30 Jul` | `PublicRoomsPage.tsx`, test katalog | filtered-zero + detail/back |
+| AO-17 Hero/teaser state nol | P1 | `DONE:riwayat M13 30 Jul` | `PublicGuestDashboardPage.tsx`, `11-public-pages.css` | prod-like 0/1/error/loading |
+| AO-18 Hierarki homepage/trust | P2 | `REVIEW` — parsial; sisa polish copy/hierarchy | `PublicGuestDashboardPage.tsx`, `publicGuestShared.tsx`, CSS publik | desktop/mobile + truthfulness |
+| AO-19 Audit aset/galeri publik | P2 | `REVIEW` — cue selesai; inventaris aset tersisa | data aset, `room-images`, gallery renderer | inventory + touch/keyboard |
+| AO-20 Dashboard Owner: exception/actionability | P1 | `REVIEW` — sisa state KPI/label aksi | `OwnerDashboardPage.tsx`, `12-owner.css` | data state + desktop/touch/keyboard |
 | AO-21 Sistem visual/terminologi Owner | P2 | `OPEN` | Owner dashboard + AppLayout/nav/title/CSS shell | 1024/1280/1440 + regression role |
-| AO-22 Admin dashboard: queue-first action hierarchy | P1 | `OPEN` | `DashboardAdmin.tsx`, queue/alert components, `08-admin.css` | ADMIN desktop + keyboard/data states |
+| AO-22 Admin dashboard: queue-first action hierarchy | P1 | `DONE:riwayat M13 30 Jul` | `DashboardAdmin.tsx`, queue/alert components, `08-admin.css` | ADMIN desktop + keyboard/data states |
 | AO-23 Sistem komponen/shell Area Admin | P2 | `OPEN` | AppLayout/shared CSS + Admin dashboard | ADMIN + OWNER shell regression |
-| AO-14 Re-audit final 5 role | P0 gate | `BLOCKED:AO-01..AO-13+AO-15..AO-23` | QA only | seluruh Definition of Done + gate Baymard relevan |
+| AO-14 Re-audit final lintas role dan dua state TENANT | P0 gate | `BLOCKED:sisa AO-03/13/18/19/20/21/23+DoD` | QA only | seluruh Definition of Done + gate Baymard relevan; hasil AO-13 saja tidak cukup |
 
 ### 7.2 Gelombang kerja
 
+Peta dependensi berikut dipertahankan untuk lingkup yang belum selesai; bukan antrean baru. Status §7.1 dan M12 menang atas rencana gelombang awal. Tidak ada izin implementasi/server/DB otomatis dari peta ini.
+
 **Wave 0 — wajib lebih dulu**
 
-- AO-00 migration UAT, hanya setelah otorisasi owner/devops.
-- AO-03 mekanisme akun audit.
-- AO-12 kontrak API dev dapat dikerjakan paralel karena file terpisah.
+- AO-00 selesai historis; verifikasi read-only kesegaran ledger UAT sebelum crawl baru. Jika ditemukan migration pending baru, tetapkan lingkup/izin tersendiri.
+- AO-03 tindak lanjut gap alat dan fixture/kredensial terkontrol.
+- AO-12 selesai historis; konsistensi target suite crawl masih perlu ditangani sebagai gap alat 8 Sep.
 
 **Wave 1 — dapat paralel setelah AO-00**
 
@@ -893,13 +941,13 @@ Gunakan status berikut di tabel:
 ### 7.3 Aturan anti-konflik antar-AI
 
 1. Klaim task di tabel sebelum edit.
-2. Satu task = satu commit berbahasa Indonesia.
+2. Satu task = satu commit berbahasa Indonesia bila commit diminta owner; docs-only tidak otomatis mengizinkan commit.
 3. Jangan menyentuh file milik task lain yang `CLAIMED`/`IN_PROGRESS`.
 4. Jika membutuhkan file shared yang sudah diklaim, kirim catatan dependency; jangan edit paralel.
 5. Jangan menyalin klaim audit lama tanpa reproduksi.
 6. Jangan menambah dependency npm tanpa approval owner.
 7. Jangan menjalankan migration, reseed, reset password, atau `db push` tanpa otorisasi.
-8. Setelah commit: update status di M14, centang M12, dan prepend satu baris M13.
+8. Setelah task: sinkronkan status M14/M12 dan tambah entri M13 sesuai bukti, terlepas dari apakah commit diminta.
 9. Simpan screenshot hanya jika tidak memuat PII tenant.
 10. Jangan menyentuh file untracked milik agent lain (`A`, `AUDIT_L`, `AUDIT_LAPOR`, `.claude/`).
 
@@ -912,6 +960,7 @@ Gunakan status berikut di tabel:
 - [ ] Katalog tidak lagi menampilkan `0 kamar` bersamaan dengan kalender 14 kamar.
 - [ ] Loyalitas enabled/disabled tidak memicu React ErrorBoundary.
 - [ ] Crawl OWNER, ADMIN, STAFF, TENANT, dan PUBLIC selesai.
+- [ ] Kredensial/target proses benar; tiga crawl operasional benar-benar dieksekusi (0 skip), role/route/konten benar, dan dua state TENANT dibuktikan pada UAT nyata. Seluruh temuan error ditriage, bukan hanya filter assertion kritis.
 - [ ] 0 blank page, 0 page crash, 0 unexpected redirect-login.
 - [ ] 0 Axe serious/critical pada route audit.
 - [ ] 0 overflow halaman pada 320–1440 px; scroller lokal harus punya affordance.
@@ -938,6 +987,8 @@ Gunakan status berikut di tabel:
 
 ## 9. Perintah Verifikasi
 
+Perintah berikut adalah rencana untuk lingkup pengujian yang telah diizinkan; tidak dijalankan dalam audit dokumentasi 8 Sep. Sebelum provisioning/crawl, selesaikan prasyarat audit alat pada AO-03, verifikasi target API/DB UAT, dan cakup mutasi akun/portal/sesi login dalam izin. `AUDIT_CONFIRM=1` bukan pemeriksaan lingkungan.
+
 ```powershell
 # Status migration — read-only
 cd backend
@@ -952,17 +1003,20 @@ npx vitest run
 npm run dev -- --host 127.0.0.1 --port 5174
 
 # Crawl existing OWNER/ADMIN/STAFF setelah fixture UAT tersedia (AO-03)
-# Isi dulu env lokal (password dari env AUDIT_*/secret manager — TIDAK di docs):
+# Isi dulu environment PROSES dari shell/secret manager (nilai TIDAK di docs):
+# Playwright saat ini tidak otomatis memuat frontend/.env.local.
 #   E2E_BASE / E2E_OWNER_IDENTIFIER / E2E_OWNER_PASSWORD
 #   E2E_ADMIN_IDENTIFIER / E2E_ADMIN_PASSWORD
 #   E2E_STAFF_IDENTIFIER / E2E_STAFF_PASSWORD
-# Penyediaan akun audit UAT (izin owner; menjalankannya = mutasi DB):
-#   cd backend && npm run seed:audit-users
+# Penyediaan akun audit UAT: dari backend, npm run seed:audit-users
+# Hanya setelah gap alat/fixture ditangani dan izin mutasi terkait tersedia.
 $env:E2E_BASE='http://127.0.0.1:5174'
+# Dua spec berikut memakai E2E_BASE; smoke/a11y dengan URL relatif masih
+# memakai baseURL config :5173. Selaraskan target sebelum audit gabungan.
 npx playwright test e2e/admin-owner-crawl.spec.ts e2e/staff-crawl.spec.ts --workers=1
 ```
 
-Kredensial audit tidak boleh ditulis ke dokumen ini. Gunakan env lokal atau secret manager.
+Kredensial audit tidak boleh ditulis ke dokumen ini. Gunakan environment proses atau secret manager. Catat target efektif, role/state, viewport, jumlah executed/skipped, seluruh temuan, serta batas bukti. Exit 0, `--list`, atau screenshot halaman berisi teks belum membuktikan gate AO lulus.
 
 ---
 
