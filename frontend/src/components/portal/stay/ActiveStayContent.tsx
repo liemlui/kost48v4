@@ -9,6 +9,7 @@ import { listResource } from '../../../api/resources';
 import { decideRenewRequest, listMyRenewRequests } from '../../../api/renewRequests';
 import { listMyCheckoutRequests } from '../../../api/checkoutRequests';
 import { listMyPaymentSubmissions } from '../../../api/paymentSubmissions';
+import { PORTAL_QUERY_KEYS } from '../../../api/portalQueryKeys';
 import { getMeterReadingsByRoom } from '../../../api/meterReadings';
 import { getMyRoomUtilityTelemetry, iotQueryKeys, type TenantRoomUtilityTelemetry } from '../../../api/iot';
 import { fetchPublicConfig } from '../../../api/settings';
@@ -56,21 +57,21 @@ export default function ActiveStayContent({ stay }: { stay: Stay }) {
   }, []);
 
   const renewRequestsQuery = useQuery<PaginatedResponse<RenewRequest>>({
-    queryKey: ['portal-renew-requests', stay.id],
+    queryKey: PORTAL_QUERY_KEYS.myRenewRequests,
     queryFn: () => listMyRenewRequests(),
     refetchOnWindowFocus: true,
   });
 
   // Kuota listrik gratis (untuk estimasi jam AC/hari). Settable owner.
   const publicConfigQuery = useQuery({
-    queryKey: ['public-config'],
+    queryKey: PORTAL_QUERY_KEYS.publicConfig,
     queryFn: fetchPublicConfig,
     staleTime: 300_000,
   });
   const freeKwh = publicConfigQuery.data?.freeElectricityKwhPerMonth ?? 30;
 
   const invoicesQuery = useQuery<PaginatedResponse<Invoice>>({
-    queryKey: ['portal-invoices', stay.id],
+    queryKey: PORTAL_QUERY_KEYS.myInvoices,
     queryFn: () => listResource<Invoice>('/invoices/my'),
     staleTime: 60_000,
     refetchOnWindowFocus: true,
@@ -78,14 +79,14 @@ export default function ActiveStayContent({ stay }: { stay: Stay }) {
   });
 
   const submissionsQuery = useQuery({
-    queryKey: ['portal-payment-submissions'],
+    queryKey: PORTAL_QUERY_KEYS.mySubmissions,
     queryFn: () => listMyPaymentSubmissions(),
     staleTime: 30_000,
     refetchOnWindowFocus: true,
   });
 
   const checkoutRequestsQuery = useQuery<PaginatedResponse<CheckoutRequest>>({
-    queryKey: ['portal-checkout-requests', stay.id],
+    queryKey: PORTAL_QUERY_KEYS.myCheckoutRequests,
     queryFn: () => listMyCheckoutRequests(),
     refetchOnWindowFocus: true,
   });
@@ -101,7 +102,7 @@ export default function ActiveStayContent({ stay }: { stay: Stay }) {
   });
 
   const ticketsQuery = useQuery<PaginatedResponse<Ticket>>({
-    queryKey: ['portal-tickets', stay.id],
+    queryKey: PORTAL_QUERY_KEYS.myTickets,
     queryFn: () => listResource<Ticket>('/tickets/my'),
     staleTime: 45_000,
     refetchOnWindowFocus: true,
@@ -109,7 +110,7 @@ export default function ActiveStayContent({ stay }: { stay: Stay }) {
   });
 
   const roomItemsQuery = useQuery<PaginatedResponse<RoomItem>>({
-    queryKey: ['portal-room-items', stay.roomId],
+    queryKey: PORTAL_QUERY_KEYS.myRoomItems,
     queryFn: () => listResource<RoomItem>('/room-items/my-room'),
     enabled: Boolean(stay.roomId),
     staleTime: 120_000,
@@ -118,7 +119,7 @@ export default function ActiveStayContent({ stay }: { stay: Stay }) {
 
   const meterWindow = useMemo(() => getMeterWindow(stay.plannedCheckOutDate), [stay.plannedCheckOutDate]);
   const meterReadingsQuery = useQuery<MeterReading[]>({
-    queryKey: ['portal-meter-readings', stay.roomId, meterWindow.startKey, meterWindow.endKey],
+    queryKey: PORTAL_QUERY_KEYS.meterReadings(stay.roomId, meterWindow.startKey, meterWindow.endKey),
     queryFn: () => getMeterReadingsByRoom(stay.roomId, {
       from: meterWindow.startKey,
       to: meterWindow.endKey,
@@ -392,6 +393,10 @@ export default function ActiveStayContent({ stay }: { stay: Stay }) {
 
   return (
     <>
+      {/* T-06 (audit 12 Sep): cabang stay aktif tidak memuat judul halaman sama sekali
+          (PageHeader hanya dirender pada cabang non-aktif), sehingga route portal terpenting
+          tidak memiliki <h1>. Judul disediakan untuk pembaca layar tanpa mengubah tampilan. */}
+      <h1 className="visually-hidden">Panduan Kos Saya</h1>
       {/* Topbar PaymentUrgencyChip is the main assistant. Body stays compact. */}
       {nearEnd && !hasOpenInvoice ? (
         <Alert variant="warning" className="tenant-short-alert mb-3">

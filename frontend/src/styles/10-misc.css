@@ -627,6 +627,7 @@ body {
    `min-width:0` pada anak flex + pemutus kata mencegah overflow tanpa mengubah layout desktop. */
 .alert.d-flex > * {
   min-width: 0;
+  overflow-wrap: anywhere;
 }
 .alert strong,
 .alert .small {
@@ -1941,11 +1942,16 @@ div.tenant-stay-fact-chip {
   gap: 0;
 }
 
+/* T-06 (audit 12 Sep): baris tarif dossier adalah flex dengan nilai panjang di kanan.
+   Tanpa `min-width: 0`, item flex tidak menyusut di bawah lebar min-content teksnya,
+   sehingga nilai seperti "Data historis dari laporan teraudit (4 kwitansi)" melebar ke
+   282px dan halaman melampaui viewport 375px (terukur +3px). */
 .tenant-dossier-tarif-row {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
   gap: 0.5rem;
+  min-width: 0;
   padding: 0.38rem 0;
   border-bottom: 1px solid rgba(148, 163, 184, 0.12);
   font-size: 0.83rem;
@@ -1958,13 +1964,18 @@ div.tenant-stay-fact-chip {
 .tenant-dossier-tarif-row > span {
   color: var(--gray-500);
   flex: 1;
+  min-width: 0;
 }
 
 .tenant-dossier-tarif-row > strong {
   color: var(--gray-800);
   font-weight: 700;
   text-align: right;
-  flex: 0 0 auto;
+  /* T-06: sebelumnya `flex: 0 0 auto` membuat nilai panjang tidak menyusut sama sekali.
+     `min-width: 0` + pemutus kata membiarkan teks membungkus, bukan meluber keluar layar. */
+  flex: 0 1 auto;
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 /* Facilities chip list */

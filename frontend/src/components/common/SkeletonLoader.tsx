@@ -61,11 +61,21 @@ export function HeroSkeleton() {
 // AUDIT-OWNER (A3): kerangka halaman netral untuk ganti full-page spinner
 // (Suspense fallback, auth-loading, dll). Menjaga tinggi/layout agar tak ada
 // lonjakan layout shift saat konten masuk. role=status untuk pembaca layar.
+//
+// T-06 (audit 12 Sep 2026): versi sebelumnya (HeroSkeleton + TableSkeleton 6x4 = 47 blok)
+// menghasilkan 42-84 elemen skeleton pada satu layar portal tenant, sehingga satu fase load
+// nyaris seluruh layar berisi placeholder. Versi ringkas ini memakai 20 blok dengan tinggi
+// minimum yang sama agar layout tetap stabil.
 export function PageLoadingSkeleton({ label = 'Memuat halaman…' }: { label?: string }) {
   return (
     <div className="page-loading-skeleton p-3" role="status" aria-label={label} aria-busy="true">
-      <HeroSkeleton />
-      <TableSkeleton rows={6} cols={4} />
+      <SkeletonBlock width={200} height={24} className="mb-3" />
+      <div className="page-skeleton-tiles mb-3">
+        {Array.from({ length: 3 }).map((_, index) => (
+          <SkeletonBlock key={`tile-${index}`} width="100%" height={72} />
+        ))}
+      </div>
+      <TableSkeleton rows={4} cols={3} />
       <span className="visually-hidden">{label}</span>
     </div>
   );

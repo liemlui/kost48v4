@@ -91,12 +91,23 @@ export function getMeterWindow(plannedCheckOutDate?: string | null) {
     h10.setDate(h10.getDate() - 10);
     const cutoff = new Date(today);
     cutoff.setDate(cutoff.getDate() - 30);
-    const start = h10 < cutoff ? cutoff : h10;
-    // jendela aktif = hari ini ≥ h10 (sudah masuk window); belum masuk = start = endDate (empty range)
+    // jendela aktif = hari ini ≥ h10 (sudah masuk window)
     const windowOpen = today >= h10;
+
+    // T-06 (audit 12 Sep): `from` tidak boleh melewati `to`. Dua jepitan wajib:
+    //   1) batas atas = min(plannedCheckOutDate, hari ini) — akhir kontrak bisa di masa depan,
+    //      dan rentang tanggal ke masa depan tidak masuk akal untuk catatan meter;
+    //   2) bila H-10 masih di masa depan (belum masuk jendela), rentang kueri memakai jendela
+    //      kalender H-10..akhir kontrak, bukan from > to.
+    // Bug sebelumnya: stay berjalan (plannedCheckOutDate = H+16) menghasilkan
+    // `from=2026-08-13&to=2026-07-28` — rentang terbalik, sehingga catatan meter tidak terkirim.
+    const end = endDate < today ? endDate : today;
+    const start = h10 < cutoff ? cutoff : h10;
+    const queryStart = start <= end ? start : h10;
+
     return {
-      startKey: toDateKey(start),
-      endKey: toDateKey(endDate),
+      startKey: toDateKey(queryStart),
+      endKey: toDateKey(end),
       windowOpen,
       windowStartKey: toDateKey(h10),
       windowEndKey: toDateKey(endDate),

@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { listResource, getResource } from '../api/resources';
 import { listMyTenantBookings } from '../api/bookings';
 import { listMyPaymentSubmissions } from '../api/paymentSubmissions';
+import { PORTAL_QUERY_KEYS } from '../api/portalQueryKeys';
 import { getBookingExpiryMeta, parseDateSafe } from '../utils/bookingExpiry';
 import { getDeadlineMeta } from '../utils/dateTime';
 import type { Invoice, Stay } from '../types';
@@ -82,7 +83,8 @@ export function usePaymentUrgency(): {
 
   // --- Invoices ---
   const invoicesQuery = useQuery({
-    queryKey: ['payment-urgency', 'invoices', { userId }],
+    // T-06: key kanonik bersama ActiveStayContent agar `/invoices/my` tidak diambil dua kali.
+    queryKey: PORTAL_QUERY_KEYS.myInvoices,
     queryFn: () => listResource<Invoice>('/invoices/my'),
     enabled: isTenant && Boolean(userId),
     staleTime: 60_000,
@@ -92,7 +94,8 @@ export function usePaymentUrgency(): {
 
   // --- Bookings ---
   const bookingsQuery = useQuery({
-    queryKey: ['payment-urgency', 'bookings', { userId }],
+    // T-06: key & limit disamakan dengan useTenantPortalStage agar satu request saja.
+    queryKey: PORTAL_QUERY_KEYS.myBookings,
     queryFn: () => listMyTenantBookings({ limit: 50 }),
     enabled: isTenant && Boolean(userId),
     staleTime: 60_000,
@@ -101,18 +104,29 @@ export function usePaymentUrgency(): {
   });
 
   // --- Current Stay ---
+  // T-06: memakai key kanonik yang sama dengan stage portal & MyStayPage. 404 ditangkap
+  // sebagai `null` (hasil valid "tidak punya stay"), sama seperti hook lain, supaya tidak
+  // ada dua perlakuan berbeda terhadap respons yang sama.
   const stayQuery = useQuery({
-    queryKey: ['payment-urgency', 'stay', { userId }],
-    queryFn: () => getResource<Stay>('/stays/me/current'),
+    queryKey: PORTAL_QUERY_KEYS.currentStay,
+    queryFn: async () => {
+      try {
+        return await getResource<Stay>('/stays/me/current');
+      } catch (err: unknown) {
+        const status = (err as { response?: { status?: number } })?.response?.status;
+        if (status === 404) return null;
+        throw err;
+      }
+    },
     enabled: isTenant && Boolean(userId),
-    staleTime: 60_000,
+    staleTime: 30_000,
     refetchOnWindowFocus: true,
     retry: false,
   });
 
   // --- Payment submissions ---
   const submissionsQuery = useQuery({
-    queryKey: ['payment-urgency', 'payment-submissions', { userId }],
+    queryKey: PORTAL_QUERY_KEYS.mySubmissions,
     queryFn: () => listMyPaymentSubmissions(),
     enabled: isTenant && Boolean(userId),
     staleTime: 30_000,

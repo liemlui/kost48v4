@@ -6,6 +6,7 @@ import DonutGauge from '../../components/charts/DonutGauge';
 import PageHeader from '../../components/common/PageHeader';
 import { listResource } from '../../api/resources';
 import { listMyPaymentSubmissions } from '../../api/paymentSubmissions';
+import { PORTAL_QUERY_KEYS } from '../../api/portalQueryKeys';
 import SubmitBatchPaymentModal from '../../components/portal/SubmitBatchPaymentModal';
 import CurrencyDisplay from '../../components/common/CurrencyDisplay';
 import EmptyState from '../../components/common/EmptyState';
@@ -122,18 +123,18 @@ export default function MyInvoicesPage() {
   const PAGE_SIZE = 5;
 
   const query = useQuery({
-    queryKey: ['portal-invoices', { userId, tenantId }],
+    // T-06: key kanonik bersama ActiveStayContent & usePaymentUrgency.
+    queryKey: PORTAL_QUERY_KEYS.myInvoices,
     queryFn: () => listResource<Invoice>('/invoices/my'),
     enabled: Boolean(userId),
     retry: false,
     refetchOnWindowFocus: true,
-    refetchOnMount: true,
     refetchOnReconnect: true,
     staleTime: 30_000,
   });
 
   const submissionsQuery = useQuery({
-    queryKey: ['portal-payment-submissions'],
+    queryKey: PORTAL_QUERY_KEYS.mySubmissions,
     queryFn: () => listMyPaymentSubmissions(),
     enabled: Boolean(userId),
     staleTime: 30_000,

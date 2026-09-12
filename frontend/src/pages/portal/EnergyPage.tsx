@@ -24,6 +24,7 @@ import {
   type TenantUtilityDevice,
 } from '../../api/iot';
 import { getMeterReadingsByRoom } from '../../api/meterReadings';
+import { PORTAL_QUERY_KEYS } from '../../api/portalQueryKeys';
 import { fetchPublicConfig } from '../../api/settings';
 import { getResource } from '../../api/resources';
 import { useAuth } from '../../context/AuthContext';
@@ -145,10 +146,18 @@ export default function EnergyPage() {
   });
 
   const stayQuery = useQuery({
-    queryKey: ['energy-stay', tenantId],
-    queryFn: () => getResource<Stay>('/stays/me/current'),
+    // T-06: key kanonik bersama dengan shell/portal stay; 404 = null (tidak punya stay).
+    queryKey: PORTAL_QUERY_KEYS.currentStay,
+    queryFn: async () => {
+      try {
+        return await getResource<Stay>('/stays/me/current');
+      } catch (err: unknown) {
+        if ((err as { response?: { status?: number } })?.response?.status === 404) return null;
+        throw err;
+      }
+    },
     enabled: Boolean(tenantId),
-    staleTime: 60_000,
+    staleTime: 30_000,
     retry: (failureCount, error) => {
       const status = (error as any)?.response?.status;
       if (status === 404) return false;
@@ -157,7 +166,7 @@ export default function EnergyPage() {
   });
   const stay = stayQuery.data;
 
-  const publicConfig = useQuery({ queryKey: ['public-config'], queryFn: fetchPublicConfig });
+  const publicConfig = useQuery({ queryKey: PORTAL_QUERY_KEYS.publicConfig, queryFn: fetchPublicConfig });
   const waterEnabled = Boolean(publicConfig.data?.waterMeteringEnabled);
   const elecTariff = numeric(stay?.room?.electricityTariffPerKwhRupiah ?? stay?.electricityTariffPerKwhRupiah);
   const waterTariff = numeric(stay?.room?.waterTariffPerM3Rupiah ?? stay?.waterTariffPerM3Rupiah);
@@ -171,7 +180,9 @@ export default function EnergyPage() {
   }, [stay?.checkInDate]);
 
   const meterReadingsQuery = useQuery({
-    queryKey: ['tenant-meter-history', stay?.roomId, meterWindow.startKey, meterWindow.endKey],
+    // T-06: memakai key kanonik portal agar riwayat meter yang sama tidak diambil dua kali
+    // pada satu sesi (portal stay lalu halaman energi).
+    queryKey: PORTAL_QUERY_KEYS.meterReadings(stay?.roomId ?? 'none', meterWindow.startKey, meterWindow.endKey),
     queryFn: () => getMeterReadingsByRoom(stay!.roomId, {
       from: meterWindow.startKey,
       to: meterWindow.endKey,

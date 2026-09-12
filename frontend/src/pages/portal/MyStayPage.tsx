@@ -11,6 +11,7 @@ import CurrencyDisplay from '../../components/common/CurrencyDisplay';
 import EmptyState from '../../components/common/EmptyState';
 import SafeImage from '../../components/common/SafeImage';
 import { getResource, listResource } from '../../api/resources';
+import { PORTAL_QUERY_KEYS } from '../../api/portalQueryKeys';
 import { decideRenewRequest, listMyRenewRequests } from '../../api/renewRequests';
 import { listMyCheckoutRequests } from '../../api/checkoutRequests';
 import { listMyPaymentSubmissions } from '../../api/paymentSubmissions';
@@ -74,7 +75,9 @@ export default function MyStayPage() {
   const tenantId = user?.tenantId;
 
   const query = useQuery({
-    queryKey: ['portal-stay', { userId, tenantId }],
+    // T-06: key kanonik bersama dengan stage portal (useTenantPortalStage) dan
+    // usePaymentUrgency, sehingga `/stays/me/current` diambil sekali per kunjungan.
+    queryKey: PORTAL_QUERY_KEYS.currentStay,
     queryFn: async () => {
       // AJ-01: 404 = hasil valid null agar staleTime berlaku & refetchOnMount tidak loop (C05-01).
       try {
@@ -87,9 +90,8 @@ export default function MyStayPage() {
     enabled: Boolean(userId) && stage === 'occupied',
     retry: false,
     refetchOnWindowFocus: true,
-    refetchOnMount: true,
-    refetchOnReconnect: true,
     staleTime: 30_000,
+    refetchOnReconnect: true,
   });
 
   // TEN-PROFILE-NOTIF: nudge "Lengkapi Profil" bila data onboarding belum lengkap.

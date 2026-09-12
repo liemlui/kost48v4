@@ -1,5 +1,15 @@
 # KOST48 V5 — M13 Changelog
 
+## 2026-09-12 (malam) — T-06: performa render awal `/portal/stay` (23 → 17 request, 0 duplikat)
+
+- **Lingkup:** menutup temuan T-06 dari audit UI/UX hari yang sama. Laporan: [AUDIT_UIUX_TOTAL_2026-09-12 §0b](AUDIT_UIUX_TOTAL_2026-09-12.md#0b-hasil-perbaikan-t-06--performa-render-awal-portalstay).
+- **Akar masalah:** bukan kecepatan server (API 100–750 ms), melainkan **lima tempat menarik data yang sama dengan query key berbeda** sehingga TanStack Query tidak dapat melakukan deduplikasi. Dibuat sumber tunggal key baru `frontend/src/api/portalQueryKeys.ts`; `/stays/me/current` (3×), `/invoices/my` (2×), `/payment-submissions/my` (2×), `/tenant/bookings/my` (2× dengan limit 20 vs 50), dan `/announcements/active` (2×) kini berbagi cache.
+- **Hasil terukur (build produksi, 3 pengukuran berurutan, stabil):** request API 23 → **17**, endpoint unik 16 → **17 (0 duplikat)**, konten bermakna 1500 → **900 ms**, halaman lengkap 1800 → **1200–1500 ms**, elemen skeleton maksimum 84 → **46**, request terlama 928 → **≤ 745 ms**.
+- **Bug laten ditemukan sekaligus diperbaiki:** `getMeterWindow` (`myStayShared.tsx`) menghasilkan rentang tanggal **terbalik** (`from=2026-08-13&to=2026-07-28`) untuk stay yang akhir kontraknya di masa depan, karena batas atas tidak dijepit ke hari ini sementara batas bawah dijepit ke hari ini−30. Kini batas atas = `min(plannedCheckOutDate, hari ini)` dan rentang tidak mungkin terbalik. **Dampak di UAT belum terbukti** (belum ada catatan meter: `/api/meter-readings` = 0 item) sehingga dicatat sebagai bug laten.
+- **Perbaikan pendukung:** `PageLoadingSkeleton` dirampingkan dari 47 blok menjadi 20 blok dengan `min-height: 60vh` (tidak ada layout shift) dan shimmer dimatikan saat `prefers-reduced-motion`; `/portal/stay` kini memiliki `<h1>` pada cabang stay aktif (sebelumnya judul hanya ada di cabang non-aktif); overflow 3 px pada 375 px diperbaiki di `.tenant-dossier-tarif-row > strong` (`flex: 0 0 auto` → `flex: 0 1 auto` + `min-width: 0` + pemutus kata).
+- **Verifikasi:** `npx tsc -b` **exit 0** · `npx vitest run` **133/133 PASS (30 file)** · `npm run build` **exit 0** (verifikasi PWA lulus) · crawl Axe ulang 8 rute TENANT @375 px: **0 pelanggaran, 0 overflow, `<h1>` ada di semua rute**. Catatan alat: Vitest dan Vite memerlukan proses anak yang diblokir sandbox (`spawn EPERM`), sehingga dijalankan dengan eskalasi izin yang disetujui owner.
+- **Empat status:** implementasi aplikasi diubah (hook, komponen, CSS, key query bersama); verifikasi = typecheck + unit test + build + pengukuran performa & crawl Axe lokal (bukan UAT resmi/host); deployment N/A; dampak runtime terukur hanya pada instance UAT lokal.
+
 ## 2026-09-12 (sore) — Perbaikan UI/UX: gate Axe critical/serious 118 node → 0
 
 - **Lingkup:** perbaikan temuan P1/P2 dari audit pagi hari yang sama (T-01…T-05, T-07). Laporan + rincian akar masalah: [AUDIT_UIUX_TOTAL_2026-09-12 §0](AUDIT_UIUX_TOTAL_2026-09-12.md#0-hasil-perbaikan--12-september-2026-sore).

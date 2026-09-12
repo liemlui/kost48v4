@@ -32,9 +32,35 @@ Seluruh temuan P1 dari audit dikerjakan dan diverifikasi ulang dengan crawl Axe 
 
 **Sisa yang belum dikerjakan (dengan alasan):**
 
-- **T-06** performa render awal `/portal/stay` (≈6,3 s, 42–84 elemen skeleton) — butuh perubahan alur query/komponen dan pengukuran sebelum-sesudah; tidak dikerjakan agar tidak mencampur perbaikan aksesibilitas dengan perubahan performa.
+- **T-06** performa render awal `/portal/stay` — **SELESAI pada sesi lanjutan, lihat §0b.**
 - **T-08** normalisasi token (27 nilai `border-radius`, 27 breakpoint) — pekerjaan bertahap lintas semua stylesheet, berisiko regresi visual bila dilakukan sekaligus.
 - **`<h1>` ganda** pada `/inventory/gudang`, `/inventory/barang-kamar`, `/inventory/mutasi`, dan `/staff-report` (P3, axe tidak melaporkan pelanggaran) — perlu keputusan struktur judul per halaman.
+
+**Diperbarui setelah §0b:** kriteria T-06 (konten < 3 detik, skeleton ≤ ~20 per blok, tidak ada fase layar hampir kosong) **terpenuhi**; `/portal/stay` juga sudah memiliki `<h1>` dan overflow 0 px.
+
+---
+
+## 0b. Hasil perbaikan T-06 — performa render awal `/portal/stay`
+
+Dikerjakan pada sesi lanjutan setelah §0. Akar masalahnya **bukan** kecepatan server (API tercepat 100–750 ms), melainkan **lima tempat menarik data yang sama dengan query key berbeda**, sehingga TanStack Query tidak dapat melakukan deduplikasi.
+
+| Metrik (build produksi, 3 pengukuran berurutan) | Sebelum | Sesudah |
+|---|---:|---:|
+| Total request API per kunjungan | 23 | **17** |
+| Endpoint unik | 16 (7 request duplikat) | **17 (0 duplikat)** |
+| Konten bermakna muncul | 1500 ms | **900 ms** |
+| Halaman lengkap (`innerText` > 2700) | 1800 ms | **1200–1500 ms** |
+| Elemen skeleton maksimum | 84 | **46** |
+| Request API terlama | 928 ms | **≤ 745 ms** |
+
+**Akar masalah dan perbaikan:**
+
+1. **`/stays/me/current` diambil 3×.** `useTenantPortalStage` (dipakai shell `AppLayout`), `MyStayPage`, dan `usePaymentUrgency` masing-masing punya key sendiri (`portal-stage/stay`, `portal-stay`, `payment-urgency/stay`) untuk endpoint yang sama. Key kini disatukan lewat sumber tunggal baru **`frontend/src/api/portalQueryKeys.ts`**. Hal yang sama dilakukan untuk `/invoices/my` (2×), `/payment-submissions/my` (2×), `/tenant/bookings/my` (2× dengan limit berbeda 20 vs 50), dan `/announcements/active` (2× karena `TenantWorkspaceTabs` memakai key `portal-announcements/top-strip` sementara `StayAnnouncementBanner` memakai `portal-announcements` dengan `staleTime` berbeda).
+2. **Bug laten: rentang tanggal meter TERBALIK.** `getMeterWindow` (`myStayShared.tsx`) memakai `endKey = plannedCheckOutDate` tanpa menjepit ke hari ini, sedangkan `startKey` dijepit ke *hari ini − 30 hari*. Untuk stay yang sedang berjalan dengan akhir kontrak di masa depan, hasilnya `from=2026-08-13&to=2026-07-28` — `from > to`. Sudah diperbaiki: batas atas = `min(plannedCheckOutDate, hari ini)`, dan bila H-10 masih di masa depan kueri memakai jendela H-10..akhir kontrak sehingga tidak mungkin terbalik. **Dampak di UAT belum terbukti** karena belum ada catatan meter sama sekali (`/api/meter-readings` mengembalikan 0 item), jadi ini dicatat sebagai **bug laten**, bukan temuan dengan dampak terukur.
+3. **Skeleton loading mendominasi layar.** `PageLoadingSkeleton` merender `HeroSkeleton` + `TableSkeleton rows=6 cols=4` = 47 blok; pada fase tertentu satu layar berisi 84 elemen placeholder. Versi ringkas memakai 20 blok dengan `min-height: 60vh` agar tidak ada layout shift, dan animasi shimmer kini dimatikan saat `prefers-reduced-motion: reduce`.
+4. **Kriteria T-06 lainnya yang ikut tertutup:** `/portal/stay` sebelumnya **tanpa `<h1>`** pada cabang stay aktif (judul hanya dirender pada cabang non-aktif) → kini punya `<h1>` untuk pembaca layar; overflow 3 px pada 375 px berasal dari `.tenant-dossier-tarif-row > strong` yang memakai `flex: 0 0 auto` sehingga nilai panjang tidak menyusut → diperbaiki dengan `flex: 0 1 auto` + `min-width: 0` + pemutus kata.
+
+**Verifikasi:** `npx tsc -b` exit 0 · `npx vitest run` **133/133 PASS (30 file)** · `npm run build` exit 0 (verifikasi PWA lulus) · crawl Axe ulang pada 8 rute TENANT @375 px: **0 pelanggaran**, overflow 0 px, `<h1>` ada di semua rute. `/portal/stay` kini bersih sepenuhnya; satu-satunya sisa di portal tenant adalah 1 node kontras di `/profile` (sudah tercatat di §0).
 
 ---
 

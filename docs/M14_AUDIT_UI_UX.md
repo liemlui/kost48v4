@@ -16,7 +16,7 @@ Dokumen ini adalah sumber kerja bersama untuk audit dan perbaikan UI/UX berikutn
 
 Audit menyeluruh diminta owner dan dijalankan pada instance lokal (frontend `dist` versi 1.3.0 + backend NestJS :3000 + DB UAT 5433). **Laporan lengkap: [AUDIT_UIUX_TOTAL_2026-09-12.md](AUDIT_UIUX_TOTAL_2026-09-12.md)**; artefak: [`audit-assets/2026-09-12_uiux_total/`](audit-assets/2026-09-12_uiux_total/).
 
-**Status gate:** stabilitas ✅, **gerbang aksesibilitas (AO-08) kini LULUS** setelah perbaikan sore hari yang sama: **0 pelanggaran Axe critical/serious** pada permukaan yang diaudit ulang. Sign-off penuh AO-14 masih menunggu item di bawah tabel.
+**Status gate:** stabilitas ✅, **gerbang aksesibilitas (AO-08) kini LULUS** setelah perbaikan sore hari yang sama: **0 pelanggaran Axe critical/serious** pada permukaan yang diaudit ulang. **T-06 (performa `/portal/stay`) juga selesai** pada sesi lanjutan. Sign-off penuh AO-14 masih menunggu item di bawah tabel.
 
 | Dimensi | Sebelum perbaikan | Setelah perbaikan | Keterangan |
 |---|---|---|---|
@@ -27,7 +27,8 @@ Audit menyeluruh diminta owner dan dijalankan pada instance lokal (frontend `dis
 | Axe serious | 🔴 88 node | 🟢 **0** | kontras T-02 dsb. |
 | Overflow mobile 375 px | 🟡 3 halaman (+176 px terburuk) | 🟢 **0 px** | `/tickets` STAFF, `/finance/accounting-setup`, `/portal/stay` |
 | Landmark/heading | 🟡 6+ halaman | 🟡 sisa P3 | `/reset-password` & `/portal/stay` sudah `<main>`+`<h1>`; sisa: `<h1>` ganda di 4 halaman (tanpa pelanggaran Axe) |
-| AO-14 (dua state TENANT, publik, viewport, Axe) | 🟢 bukti tersedia | 🟢 | sisa: viewport 320 px, rute ber-fixture, AO-18/19/20/21/23, T-06, T-08 |
+| Performa awal `/portal/stay` | 🔴 23 request (7 duplikat), konten 1500 ms, 84 skeleton | 🟢 **17 request (0 duplikat), konten 900 ms, 46 skeleton** | T-06, lihat [§0b](AUDIT_UIUX_TOTAL_2026-09-12.md#0b-hasil-perbaikan-t-06--performa-render-awal-portalstay) |
+| AO-14 (dua state TENANT, publik, viewport, Axe) | 🟢 bukti tersedia | 🟢 | sisa: viewport 320 px, rute ber-fixture, AO-18/19/20/21/23, T-08 |
 
 Dua koreksi terhadap catatan lama yang harus dipakai mulai sekarang:
 

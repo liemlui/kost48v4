@@ -1,14 +1,17 @@
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { getResource } from '../../../api/resources';
+import { PORTAL_QUERY_KEYS } from '../../../api/portalQueryKeys';
 import type { Announcement } from '../../../types';
 
 export default function StayAnnouncementBanner() {
   const navigate = useNavigate();
   const query = useQuery({
-    queryKey: ['portal-announcements'],
+    // T-06: key & staleTime disamakan dengan TenantWorkspaceTabs (shell). Sebelumnya
+    // staleTime berbeda (60s vs default) sehingga banner memicu permintaan kedua untuk
+    // `/announcements/active` pada halaman yang sama.
+    queryKey: PORTAL_QUERY_KEYS.activeAnnouncements,
     queryFn: () => getResource<{ items: Announcement[] }>('/announcements/active'),
-    staleTime: 60_000,
   });
 
   const items = Array.isArray(query.data?.items) ? query.data!.items : [];

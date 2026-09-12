@@ -8,6 +8,7 @@ import TenantAvatar from '../common/TenantAvatar';
 import { useAuth } from '../../context/AuthContext';
 import { getNavigationSections, type TenantFeatures, type TenantPortalStage } from '../../config/navigation';
 import { getResource } from '../../api/resources';
+import { PORTAL_QUERY_KEYS } from '../../api/portalQueryKeys';
 import GettingStartedGuide from './GettingStartedGuide';
 import type { Announcement } from '../../types';
 
@@ -39,9 +40,11 @@ function normalizeAnnouncement(item: Announcement | undefined) {
 function TenantAnnouncementStrip({ stage }: { stage: TenantPortalStage }) {
   const navigate = useNavigate();
   const query = useQuery({
-    queryKey: ['portal-announcements', 'top-strip'],
+    // T-06: key kanonik bersama dengan StayAnnouncementBanner — sebelumnya keduanya memakai
+    // key berbeda (portal-announcements/top-strip vs portal-announcements) sehingga
+    // `/announcements/active` diambil dua kali pada satu halaman.
+    queryKey: PORTAL_QUERY_KEYS.activeAnnouncements,
     queryFn: () => getResource<{ items: Announcement[] }>('/announcements/active'),
-    enabled: stage === 'occupied',
     staleTime: 5 * 60_000,
     retry: false,
   });

@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '../context/AuthContext';
 import { getResource } from '../api/resources';
 import { listMyTenantBookings } from '../api/bookings';
+import { PORTAL_QUERY_KEYS } from '../api/portalQueryKeys';
 import type { Stay } from '../types';
 import { getActionableTenantBookings } from '../utils/tenantBookingRules';
 
@@ -33,7 +34,9 @@ export function useTenantPortalStage() {
   const tenantId = user?.tenantId;
 
   const stayQuery = useQuery({
-    queryKey: ['portal-stage', 'stay', { userId, tenantId }],
+    // T-06: key bersama dengan MyStayPage/ActiveStayContent/usePaymentUrgency agar
+    // `/stays/me/current` hanya diambil sekali per kunjungan (lihat api/portalQueryKeys.ts).
+    queryKey: PORTAL_QUERY_KEYS.currentStay,
     queryFn: async () => {
       // AE-01: tangkap 404 sebagai hasil valid (null) agar staleTime bekerja
       // dan refetchOnMount tidak memicu loop tak terbatas.
@@ -46,20 +49,20 @@ export function useTenantPortalStage() {
     },
     enabled: isTenant && Boolean(userId),
     retry: false,
-    staleTime: 60_000,
+    staleTime: 30_000,
     refetchOnWindowFocus: true,
-    refetchOnMount: true,
     refetchOnReconnect: true,
   });
 
   const bookingsQuery = useQuery({
-    queryKey: ['portal-stage', 'bookings', { userId, tenantId }],
-    queryFn: () => listMyTenantBookings({ limit: 20 }),
+    // T-06: key disamakan dengan usePaymentUrgency (limit 50) supaya tidak ada dua
+    // permintaan berbeda untuk `/tenant/bookings/my`.
+    queryKey: PORTAL_QUERY_KEYS.myBookings,
+    queryFn: () => listMyTenantBookings({ limit: 50 }),
     enabled: isTenant && Boolean(userId),
     retry: false,
     staleTime: 60_000,
     refetchOnWindowFocus: true,
-    refetchOnMount: true,
     refetchOnReconnect: true,
   });
 

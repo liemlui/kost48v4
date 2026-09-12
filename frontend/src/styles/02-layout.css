@@ -847,6 +847,26 @@ body.offcanvas-open {
   100% { background-position: -200% 0; }
 }
 
+/* T-06 (audit 12 Sep 2026): kerangka halaman mempertahankan tinggi agar tidak ada layout
+   shift saat konten masuk, sementara jumlah blok dijaga sedikit (20) supaya state loading
+   tidak mendominasi layar portal tenant. */
+.page-loading-skeleton {
+  min-height: 60vh;
+}
+
+.page-skeleton-tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 0.85rem;
+}
+
+/* Hormati preferensi pengguna: matikan animasi shimmer. */
+@media (prefers-reduced-motion: reduce) {
+  .skeleton-block {
+    animation: none;
+  }
+}
+
 /* Skeleton → content fade transition */
 @keyframes contentFadeIn {
   from { opacity: 0; transform: translateY(4px); }
