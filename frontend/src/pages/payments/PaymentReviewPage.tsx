@@ -315,7 +315,7 @@ export default function PaymentReviewPage() {
           </div>
           <Row className="g-3 align-items-end">
             <Col md={3}>
-              <Form.Group>
+              <Form.Group controlId="payment-review-page-1">
                 <Form.Label>Status</Form.Label>
                 <Form.Select value={status} onChange={(e) => { setStatus(e.currentTarget.value as any); setActionError(null); }}>
                   <option value="PENDING_REVIEW">Menunggu Review</option>
@@ -325,7 +325,7 @@ export default function PaymentReviewPage() {
               </Form.Group>
             </Col>
             <Col md={3}>
-              <Form.Group>
+              <Form.Group controlId="payment-review-page-2">
                 <Form.Label>Metode</Form.Label>
                 <Form.Select value={paymentMethod} onChange={(e) => setPaymentMethod(e.currentTarget.value)}>
                   <option value="">Semua Metode</option>
@@ -338,13 +338,13 @@ export default function PaymentReviewPage() {
               </Form.Group>
             </Col>
             <Col md={2}>
-              <Form.Group>
+              <Form.Group controlId="payment-review-page-3">
                 <Form.Label>Kamar ID</Form.Label>
                 <Form.Control value={roomId} onChange={(e) => setRoomId(e.currentTarget.value.replace(/\D/g, ''))} inputMode="numeric" placeholder="Opsional" />
               </Form.Group>
             </Col>
             <Col md={2}>
-              <Form.Group>
+              <Form.Group controlId="payment-review-page-4">
                 <Form.Label>Tenant ID</Form.Label>
                 <Form.Control value={tenantId} onChange={(e) => setTenantId(e.currentTarget.value.replace(/\D/g, ''))} inputMode="numeric" placeholder="Opsional" />
               </Form.Group>
@@ -353,7 +353,7 @@ export default function PaymentReviewPage() {
               <Button variant="outline-secondary" className="w-100" onClick={() => query.refetch()}>Refresh</Button>
             </Col>
             <Col md={12}>
-              <Form.Group>
+              <Form.Group controlId="payment-review-page-5">
                 <Form.Label>Pencarian</Form.Label>
                 <Form.Control value={search} onChange={(e) => setSearch(e.currentTarget.value)} placeholder="Cari tenant, kamar, invoice, atau nomor referensi" />
               </Form.Group>

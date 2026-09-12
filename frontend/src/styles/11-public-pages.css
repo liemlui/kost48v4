@@ -2635,7 +2635,9 @@
   --gx-blue: #096c86;
   --gx-blue-2: #0d8aad;
   --gx-green: #23835b;
-  --gx-coral: #bd6049;
+  /* AO-08/T-02: #bd6049 di atas permukaan hangat #fff8f1 hanya 4,04:1 (`.gx-room-range strong`).
+     Digelapkan ke #9a3412 — warna yang sudah dipakai proyek — menjadi 6,5:1 pada latar sama. */
+  --gx-coral: #9a3412;
   --gx-amber: #b97718;
   /* Override global dark-mode vars agar halaman publik selalu light theme */
   --k48-text: #162033;

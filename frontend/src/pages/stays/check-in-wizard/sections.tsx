@@ -63,7 +63,7 @@ export function TenantStepSection({
           <h5 className="mb-0">Pilih Tenant</h5>
           <Button size="sm" variant="outline-primary" onClick={onToggleInlineTenant}>Tambah Tenant Baru</Button>
         </div>
-        <Form.Group className="mb-3">
+        <Form.Group controlId="sections-1" className="mb-3">
           <Form.Label>Tenant</Form.Label>
           {activeStaysLoading ? (
             <div className="d-flex align-items-center gap-2">
@@ -78,6 +78,7 @@ export function TenantStepSection({
               render={({ field }) => (
                 <>
                   <SearchableSelect<number>
+                    ariaLabel="Pilih tenant untuk check-in"
                     value={selectedTenant}
                     onChange={(option) => {
                       setSelectedTenant(option);
@@ -99,7 +100,7 @@ export function TenantStepSection({
           <Card body className="bg-light border">
             <Row className="g-3">
               <Col md={6}>
-                <Form.Group>
+                <Form.Group controlId="sections-2">
                   <Form.Label>
                     Nama<span className="text-danger ms-1">*</span>
                   </Form.Label>
@@ -111,7 +112,7 @@ export function TenantStepSection({
                 </Form.Group>
               </Col>
               <Col md={6}>
-                <Form.Group>
+                <Form.Group controlId="sections-3">
                   <Form.Label>
                     No. HP<span className="text-danger ms-1">*</span>
                   </Form.Label>
@@ -124,7 +125,7 @@ export function TenantStepSection({
                 </Form.Group>
               </Col>
               <Col md={6}>
-                <Form.Group>
+                <Form.Group controlId="sections-4">
                   <Form.Label>Email</Form.Label>
                   <Form.Control
                     value={inlineTenant.email}
@@ -134,7 +135,7 @@ export function TenantStepSection({
                 </Form.Group>
               </Col>
               <Col md={6}>
-                <Form.Group>
+                <Form.Group controlId="sections-5">
                   <Form.Label>Gender</Form.Label>
                   <Form.Select value={inlineTenant.gender} onChange={(e) => setInlineTenant({ ...inlineTenant, gender: e.target.value })}>
                     <option value="MALE">Laki-laki</option>
@@ -193,7 +194,7 @@ export function RoomStepSection({
           <Alert variant="danger">Gagal memuat data masa sewa aktif. Tidak dapat menentukan kamar yang tersedia.</Alert>
         ) : null}
         {!roomsLoading && !activeStaysLoading && !activeStaysError ? (
-          <Form.Group className="mb-3">
+          <Form.Group controlId="sections-6" className="mb-3">
             <Form.Label>Kamar Tersedia</Form.Label>
             <Form.Select value={form.watch('roomId') ?? ''} onChange={(e) => form.setValue('roomId', e.target.value ? Number(e.target.value) : null)}>
               <option value="">Pilih kamar...</option>
@@ -240,7 +241,7 @@ export function ConfirmationStepSection({ form, setDepositWasManuallyCleared }: 
         <h5 className="mb-3">Detail Masa Sewa</h5>
         <Row className="g-3">
           <Col md={6}>
-            <Form.Group>
+            <Form.Group controlId="sections-7">
               <Form.Label>
                 Tanggal Masuk<span className="text-danger ms-1">*</span>
               </Form.Label>
@@ -248,7 +249,7 @@ export function ConfirmationStepSection({ form, setDepositWasManuallyCleared }: 
             </Form.Group>
           </Col>
           <Col md={6}>
-            <Form.Group>
+            <Form.Group controlId="sections-8">
               <Form.Label>Jenis Masa Sewa</Form.Label>
               <Form.Select {...form.register('pricingTerm')}>
                 {pricingTermOptions.map((option) => (
@@ -259,7 +260,7 @@ export function ConfirmationStepSection({ form, setDepositWasManuallyCleared }: 
             </Form.Group>
           </Col>
           <Col md={6}>
-            <Form.Group>
+            <Form.Group controlId="sections-9">
               <Form.Label>
                 Harga Sewa Disepakati<span className="text-danger ms-1">*</span>
               </Form.Label>
@@ -280,7 +281,7 @@ export function ConfirmationStepSection({ form, setDepositWasManuallyCleared }: 
             </Form.Group>
           </Col>
           <Col md={6}>
-            <Form.Group>
+            <Form.Group controlId="sections-10">
               <Form.Label>Deposit</Form.Label>
               <Controller
                 control={form.control}
@@ -304,7 +305,7 @@ export function ConfirmationStepSection({ form, setDepositWasManuallyCleared }: 
             </Form.Group>
           </Col>
           <Col md={6}>
-            <Form.Group>
+            <Form.Group controlId="sections-11">
               <Form.Label>Tujuan Tinggal</Form.Label>
               <Form.Select {...form.register('stayPurpose')}>
                 {stayPurposeOptions.map((option) => (
@@ -315,7 +316,7 @@ export function ConfirmationStepSection({ form, setDepositWasManuallyCleared }: 
             </Form.Group>
           </Col>
           <Col md={6}>
-            <Form.Group>
+            <Form.Group controlId="sections-12">
               <Form.Label>Sumber Booking</Form.Label>
               <Form.Select {...form.register('bookingSource')}>
                 {bookingSourceOptions.map((option) => (
@@ -326,7 +327,7 @@ export function ConfirmationStepSection({ form, setDepositWasManuallyCleared }: 
             </Form.Group>
           </Col>
           <Col md={6}>
-            <Form.Group>
+            <Form.Group controlId="sections-13">
               <Form.Label>
                 Meter Awal Listrik (kWh)<span className="text-danger ms-1">*</span>
               </Form.Label>
@@ -350,7 +351,7 @@ export function ConfirmationStepSection({ form, setDepositWasManuallyCleared }: 
             </Form.Group>
           </Col>
           <Col md={6}>
-            <Form.Group>
+            <Form.Group controlId="sections-14">
               <Form.Label>
                 Meter Awal Air (m³)<span className="text-danger ms-1">*</span>
               </Form.Label>
@@ -374,7 +375,7 @@ export function ConfirmationStepSection({ form, setDepositWasManuallyCleared }: 
             </Form.Group>
           </Col>
           <Col md={12}>
-            <Form.Group>
+            <Form.Group controlId="sections-15">
               <Form.Label>Catatan</Form.Label>
               <Form.Control as="textarea" rows={3} {...form.register('notes')} />
             </Form.Group>

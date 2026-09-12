@@ -325,11 +325,11 @@ export default function MyTicketsPage() {
           <Alert variant="light" className="small">
             Sistem otomatis menghubungkan laporan dengan kamar aktif kamu. Kamu cukup isi masalah yang terjadi, tanpa ID teknis.
           </Alert>
-          <Form.Group className="mb-3">
+          <Form.Group controlId="my-tickets-page-1" className="mb-3">
             <Form.Label>Judul</Form.Label>
             <Form.Control value={formState.title} onChange={(event) => setFormState((prev) => ({ ...prev, title: event.target.value }))} />
           </Form.Group>
-          <Form.Group className="mb-3">
+          <Form.Group controlId="my-tickets-page-2" className="mb-3">
             <Form.Label>Kategori</Form.Label>
             <div className="flow-choice-grid" role="group" aria-label="Kategori laporan">
               {ticketCategoryOptions.map((option) => (
@@ -344,11 +344,11 @@ export default function MyTicketsPage() {
               ))}
             </div>
           </Form.Group>
-          <Form.Group className="mb-3">
+          <Form.Group controlId="my-tickets-page-3" className="mb-3">
             <Form.Label>Deskripsi</Form.Label>
             <Form.Control as="textarea" rows={4} value={formState.description} onChange={(event) => setFormState((prev) => ({ ...prev, description: event.target.value }))} />
           </Form.Group>
-          <Form.Group>
+          <Form.Group controlId="my-tickets-page-4">
             <Form.Label>Foto Masalah (opsional)</Form.Label>
             <CameraOrGalleryInput onChange={handleTicketImage} disabled={uploadingImage} />
             <Form.Text muted>Preview akan dibuat kecil. Klik setelah laporan dibuat untuk melihat hasil di daftar tiket.</Form.Text>

@@ -529,7 +529,7 @@ export default function TenantInvoiceDetailPage() {
           <Form>
             <Row className="g-3">
               <Col md={6}>
-                <Form.Group>
+                <Form.Group controlId="tenant-invoice-detail-page-1">
                   <Form.Label className="fw-semibold">Jumlah Dibayar (Rp)</Form.Label>
                   <Form.Control
                     type="text"
@@ -547,7 +547,7 @@ export default function TenantInvoiceDetailPage() {
                 </Form.Group>
               </Col>
               <Col md={6}>
-                <Form.Group>
+                <Form.Group controlId="tenant-invoice-detail-page-2">
                   <Form.Label className="fw-semibold">Metode Pembayaran</Form.Label>
                   <Form.Select
                     value={payMethod}
@@ -574,7 +574,7 @@ export default function TenantInvoiceDetailPage() {
               {showPayAdvanced ? (
                 <>
                   <Col md={6}>
-                    <Form.Group>
+                    <Form.Group controlId="tenant-invoice-detail-page-3">
                       <Form.Label className="fw-semibold">Nama Pengirim <span className="text-muted">(opsional)</span></Form.Label>
                       <Form.Control
                         type="text"
@@ -585,7 +585,7 @@ export default function TenantInvoiceDetailPage() {
                     </Form.Group>
                   </Col>
                   <Col md={6}>
-                    <Form.Group>
+                    <Form.Group controlId="tenant-invoice-detail-page-4">
                       <Form.Label className="fw-semibold">Bank Pengirim <span className="text-muted">(opsional)</span></Form.Label>
                       <Form.Control
                         type="text"
@@ -596,7 +596,7 @@ export default function TenantInvoiceDetailPage() {
                     </Form.Group>
                   </Col>
                   <Col md={6}>
-                    <Form.Group>
+                    <Form.Group controlId="tenant-invoice-detail-page-5">
                       <Form.Label className="fw-semibold">Nomor Referensi <span className="text-muted">(opsional)</span></Form.Label>
                       <Form.Control
                         type="text"
@@ -607,7 +607,7 @@ export default function TenantInvoiceDetailPage() {
                     </Form.Group>
                   </Col>
                   <Col md={12}>
-                    <Form.Group>
+                    <Form.Group controlId="tenant-invoice-detail-page-6">
                       <Form.Label className="fw-semibold">Catatan <span className="text-muted">(opsional)</span></Form.Label>
                       <Form.Control
                         as="textarea"
@@ -621,7 +621,7 @@ export default function TenantInvoiceDetailPage() {
                 </>
               ) : null}
               <Col md={12}>
-                <Form.Group>
+                <Form.Group controlId="tenant-invoice-detail-page-7">
                   <Form.Label className="fw-semibold">Bukti pembayaran</Form.Label>
                   <CameraOrGalleryInput
                     accept={TENANT_PAYMENT_PROOF_ACCEPT}

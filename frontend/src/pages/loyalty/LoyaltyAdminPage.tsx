@@ -252,11 +252,11 @@ export default function LoyaltyAdminPage() {
       <Modal show={showForm} onHide={() => setShowForm(false)}>
         <Modal.Header closeButton><Modal.Title>{editId ? 'Ubah Reward' : 'Reward Baru'}</Modal.Title></Modal.Header>
         <Modal.Body>
-          <Form.Group className="mb-3"><Form.Label>Nama</Form.Label><Form.Control value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} /></Form.Group>
-          <Form.Group className="mb-3"><Form.Label>Deskripsi</Form.Label><Form.Control as="textarea" rows={2} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} /></Form.Group>
-          <Form.Group className="mb-3"><Form.Label>Tipe</Form.Label><Form.Select value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value })}>{REWARD_TYPES.map((t) => <option key={t} value={t}>{REWARD_TYPE_LABEL[t] ?? t}</option>)}</Form.Select></Form.Group>
-          <Form.Group className="mb-3"><Form.Label>Biaya Poin</Form.Label><CurrencyInput value={form.pointCost} onChange={(v) => setForm({ ...form, pointCost: v ?? 0 })} /></Form.Group>
-          <Form.Group className="mb-3">
+          <Form.Group controlId="loyalty-admin-page-1" className="mb-3"><Form.Label>Nama</Form.Label><Form.Control value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} /></Form.Group>
+          <Form.Group controlId="loyalty-admin-page-2" className="mb-3"><Form.Label>Deskripsi</Form.Label><Form.Control as="textarea" rows={2} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} /></Form.Group>
+          <Form.Group controlId="loyalty-admin-page-3" className="mb-3"><Form.Label>Tipe</Form.Label><Form.Select value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value })}>{REWARD_TYPES.map((t) => <option key={t} value={t}>{REWARD_TYPE_LABEL[t] ?? t}</option>)}</Form.Select></Form.Group>
+          <Form.Group controlId="loyalty-admin-page-4" className="mb-3"><Form.Label>Biaya Poin</Form.Label><CurrencyInput value={form.pointCost} onChange={(v) => setForm({ ...form, pointCost: v ?? 0 })} /></Form.Group>
+          <Form.Group controlId="loyalty-admin-page-5" className="mb-3">
             <Form.Label>Nilai (Rp, untuk jurnal reward)</Form.Label>
             <CurrencyInput value={form.valueRupiah ?? 0} onChange={(v) => setForm({ ...form, valueRupiah: v ?? 0 })} />
             {suggestedCost != null && suggestedCost !== form.pointCost && (
@@ -266,11 +266,11 @@ export default function LoyaltyAdminPage() {
               </Form.Text>
             )}
           </Form.Group>
-          <Form.Group className="mb-3"><Form.Label>Stok (kosongkan = tak terbatas)</Form.Label><Form.Control type="number" min={0} value={form.stockQty ?? ''} onChange={(e) => setForm({ ...form, stockQty: e.target.value === '' ? undefined : Number(e.target.value) })} /></Form.Group>
+          <Form.Group controlId="loyalty-admin-page-6" className="mb-3"><Form.Label>Stok (kosongkan = tak terbatas)</Form.Label><Form.Control type="number" min={0} value={form.stockQty ?? ''} onChange={(e) => setForm({ ...form, stockQty: e.target.value === '' ? undefined : Number(e.target.value) })} /></Form.Group>
           <hr />
           <p className="text-muted small mb-2">Opsional — jika reward ini berupa <strong>tugas staf</strong> (mis. bersihkan area umum), isi kategori tiket. Saat disetujui, tiket staf dibuat otomatis.</p>
-          <Form.Group className="mb-3"><Form.Label>Kategori tugas staf</Form.Label><Form.Control placeholder="mis. CLEANING_COMMON" value={form.fulfillmentTaskCategory ?? ''} onChange={(e) => setForm({ ...form, fulfillmentTaskCategory: e.target.value || undefined })} /></Form.Group>
-          <Form.Group className="mb-3"><Form.Label>Judul tugas staf</Form.Label><Form.Control placeholder="mis. Bersihkan dapur umum" value={form.fulfillmentTaskTitle ?? ''} onChange={(e) => setForm({ ...form, fulfillmentTaskTitle: e.target.value || undefined })} /></Form.Group>
+          <Form.Group controlId="loyalty-admin-page-7" className="mb-3"><Form.Label>Kategori tugas staf</Form.Label><Form.Control placeholder="mis. CLEANING_COMMON" value={form.fulfillmentTaskCategory ?? ''} onChange={(e) => setForm({ ...form, fulfillmentTaskCategory: e.target.value || undefined })} /></Form.Group>
+          <Form.Group controlId="loyalty-admin-page-8" className="mb-3"><Form.Label>Judul tugas staf</Form.Label><Form.Control placeholder="mis. Bersihkan dapur umum" value={form.fulfillmentTaskTitle ?? ''} onChange={(e) => setForm({ ...form, fulfillmentTaskTitle: e.target.value || undefined })} /></Form.Group>
           <Form.Check type="switch" label="Aktif" checked={form.isActive ?? true} onChange={(e) => setForm({ ...form, isActive: e.target.checked })} />
         </Modal.Body>
         <Modal.Footer>

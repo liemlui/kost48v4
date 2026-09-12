@@ -1,4 +1,4 @@
-import { KeyboardEvent, useRef, type ReactNode } from 'react';
+import { KeyboardEvent, useRef, useState, type ReactNode } from 'react';
 
 // Komponen Tab segmen SEMANTIK reusable (keputusan owner: "menu yang tombolnya pilihan itu
 // kan tab, kasih component yang sesuai"). Memakai kelas visual yang sudah ada
@@ -35,6 +35,15 @@ export default function SegmentedTabs<K extends string>({
   className = '',
 }: Props<K>) {
   const refs = useRef<Array<HTMLButtonElement | null>>([]);
+  /** AO-08/T-03: pada layar sempit baris tab dapat menggulir horizontal. Area gulir wajib
+   *  dapat difokus keyboard (WCAG 2.1.1 / axe `scrollable-region-focusable`). Status ini
+   *  diukur dari DOM agar tab stop tambahan hanya muncul ketika benar-benar menggulir. */
+  const [scrollable, setScrollable] = useState(false);
+  const measure = (el: HTMLDivElement | null) => {
+    if (!el) return;
+    const next = el.scrollWidth > el.clientWidth + 1;
+    if (next !== scrollable) setScrollable(next);
+  };
   const enabledIdx = items.map((it, i) => (it.disabled && it.key !== value ? -1 : i)).filter((i) => i >= 0);
 
   function onKeyDown(e: KeyboardEvent<HTMLDivElement>) {
@@ -57,10 +66,13 @@ export default function SegmentedTabs<K extends string>({
 
   return (
     <div
+      ref={measure}
       className={`segmented-tabs ${rowClassName}${size === 'sm' ? ' compact' : ''}${className ? ` ${className}` : ''}`}
       role="tablist"
       aria-label={ariaLabel}
       onKeyDown={onKeyDown}
+      tabIndex={scrollable ? 0 : undefined}
+      title={scrollable ? 'Gulir daftar filter dengan tombol panah' : undefined}
     >
       {items.map((it, i) => {
         const active = it.key === value;

@@ -96,31 +96,31 @@ export default function CashAccountSetupPanel({
         <h3 className="panel-title mb-1">Akun kas dan bank</h3>
         <p className="text-muted">Buat minimal satu akun kas/bank agar readiness naik dan saldo awal bisa dikaitkan ke akun aset di Bagan Akun (COA).</p>
         <Form onSubmit={submit} className="accounting-mini-form">
-          <Form.Group>
+          <Form.Group controlId="cash-account-setup-panel-1">
             <Form.Label>Nama akun</Form.Label>
             <Form.Control value={name} onChange={(event) => setName(event.target.value)} placeholder="Bank Utama KOST48" />
           </Form.Group>
-          <Form.Group>
+          <Form.Group controlId="cash-account-setup-panel-2">
             <Form.Label>Tipe</Form.Label>
             <Form.Select value={accountType} onChange={(event) => setAccountType(event.target.value as CashAccountType)}>
               {cashTypes.map((type) => <option key={type} value={type}>{type}</option>)}
             </Form.Select>
           </Form.Group>
-          <Form.Group>
+          <Form.Group controlId="cash-account-setup-panel-3">
             <Form.Label>Akun Aset (di Bagan Akun)</Form.Label>
             <Form.Select value={selectedAccountId} onChange={(event) => setChartOfAccountId(Number(event.target.value))}>
               {assetAccounts.map((account) => <option key={account.id} value={account.id}>{account.code} · {account.name}</option>)}
             </Form.Select>
           </Form.Group>
-          <Form.Group>
+          <Form.Group controlId="cash-account-setup-panel-4">
             <Form.Label>Saldo awal</Form.Label>
             <CurrencyInput value={openingBalance === '' ? undefined : Number(openingBalance)} onChange={(v) => setOpeningBalance(v == null ? '' : String(v))} />
           </Form.Group>
-          <Form.Group>
+          <Form.Group controlId="cash-account-setup-panel-5">
             <Form.Label>Nama bank</Form.Label>
             <Form.Control value={bankName} onChange={(event) => setBankName(event.target.value)} placeholder="BCA / Mandiri / Tunai" />
           </Form.Group>
-          <Form.Group>
+          <Form.Group controlId="cash-account-setup-panel-6">
             <Form.Label>Atas nama</Form.Label>
             <Form.Control value={holderName} onChange={(event) => setHolderName(event.target.value)} placeholder="Nama pemilik rekening" />
           </Form.Group>
@@ -149,31 +149,31 @@ export default function CashAccountSetupPanel({
             <Modal.Title>Edit Cash Account</Modal.Title>
           </Modal.Header>
           <Modal.Body className="d-grid gap-3">
-            <Form.Group>
+            <Form.Group controlId="cash-account-setup-panel-7">
               <Form.Label>Nama akun</Form.Label>
               <Form.Control value={editForm.name} onChange={(event) => setEditForm((prev) => ({ ...prev, name: event.target.value }))} />
             </Form.Group>
-            <Form.Group>
+            <Form.Group controlId="cash-account-setup-panel-8">
               <Form.Label>Tipe</Form.Label>
               <Form.Select value={editForm.accountType} onChange={(event) => setEditForm((prev) => ({ ...prev, accountType: event.target.value as CashAccountType }))}>
                 {cashTypes.map((type) => <option key={type} value={type}>{type}</option>)}
               </Form.Select>
             </Form.Group>
-            <Form.Group>
+            <Form.Group controlId="cash-account-setup-panel-9">
               <Form.Label>Akun Aset (COA)</Form.Label>
               <Form.Select value={editForm.chartOfAccountId} onChange={(event) => setEditForm((prev) => ({ ...prev, chartOfAccountId: Number(event.target.value) }))}>
                 {assetAccounts.map((account) => <option key={account.id} value={account.id}>{account.code} · {account.name}</option>)}
               </Form.Select>
             </Form.Group>
-            <Form.Group>
+            <Form.Group controlId="cash-account-setup-panel-10">
               <Form.Label>Saldo sekarang</Form.Label>
               <CurrencyInput value={Number(editForm.currentBalanceRupiah || 0)} onChange={(value) => setEditForm((prev) => ({ ...prev, currentBalanceRupiah: String(value ?? 0) }))} />
             </Form.Group>
-            <Form.Group>
+            <Form.Group controlId="cash-account-setup-panel-11">
               <Form.Label>Nama bank</Form.Label>
               <Form.Control value={editForm.bankName} onChange={(event) => setEditForm((prev) => ({ ...prev, bankName: event.target.value }))} />
             </Form.Group>
-            <Form.Group>
+            <Form.Group controlId="cash-account-setup-panel-12">
               <Form.Label>Atas nama</Form.Label>
               <Form.Control value={editForm.holderName} onChange={(event) => setEditForm((prev) => ({ ...prev, holderName: event.target.value }))} />
             </Form.Group>

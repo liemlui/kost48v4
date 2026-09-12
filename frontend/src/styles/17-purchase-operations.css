@@ -45,7 +45,11 @@
 .expense-kind-chip.is-operations { background: var(--gray-100); color: var(--gray-600); }
 .purchase-guide-card { background: var(--gray-900); color: var(--gray-200); }
 .purchase-guide-card .section-kicker { color: var(--blue-300); }
-.purchase-guide-card h2 { color: var(--white); }
+/* AO-08/T-02: `06-tenant.css` memaksa SEMUA h1–h6 berwarna gelap dengan `!important`
+   (baris 13–30), sehingga aturan warna heading di atas kalah dan judul di dalam kartu gelap
+   menjadi #172033 di atas #0f172a — rasio terukur 1,09:1 (tidak terbaca). Deklarasi ini
+   mengembalikan warna heading untuk permukaan gelap; hanya berlaku pada konteks tersebut. */
+.purchase-guide-card h2 { color: var(--white) !important; }
 .purchase-guide-list { display: grid; gap: .8rem; margin: 1.1rem 0; }
 .purchase-guide-list > div { display: grid; grid-template-columns: 26px minmax(0, 1fr); gap: .65rem; }
 .purchase-guide-list span { display: inline-flex; width: 26px; height: 26px; align-items: center; justify-content: center; border-radius: 50%; background: var(--blue-700); color: var(--white); font-size: .76rem; font-weight: 800; }

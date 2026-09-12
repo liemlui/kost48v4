@@ -912,34 +912,34 @@ export default function AccountingSetupPage() {
                       saveCoaMutation.mutate(coaForm);
                     }}
                   >
-                    <Form.Group>
+                    <Form.Group controlId="accounting-setup-page-1">
                       <Form.Label>Kode akun</Form.Label>
                       <Form.Control value={coaForm.code} onChange={(event) => setCoaForm((prev) => ({ ...prev, code: event.target.value }))} placeholder="1015" />
                     </Form.Group>
-                    <Form.Group>
+                    <Form.Group controlId="accounting-setup-page-2">
                       <Form.Label>Nama akun</Form.Label>
                       <Form.Control value={coaForm.name} onChange={(event) => setCoaForm((prev) => ({ ...prev, name: event.target.value }))} placeholder="Bank Operasional Cadangan" />
                     </Form.Group>
-                    <Form.Group>
+                    <Form.Group controlId="accounting-setup-page-3">
                       <Form.Label>Tipe</Form.Label>
                       <Form.Select value={coaForm.type} onChange={(event) => setCoaForm((prev) => ({ ...prev, type: event.target.value as AccountingAccountType }))}>
                         {coaTypes.map((type) => <option key={type} value={type}>{type}</option>)}
                       </Form.Select>
                     </Form.Group>
-                    <Form.Group>
+                    <Form.Group controlId="accounting-setup-page-4">
                       <Form.Label>Normal balance</Form.Label>
                       <Form.Select value={coaForm.normalBalance} onChange={(event) => setCoaForm((prev) => ({ ...prev, normalBalance: event.target.value as NormalBalance }))}>
                         {normalBalances.map((balance) => <option key={balance} value={balance}>{balance}</option>)}
                       </Form.Select>
                     </Form.Group>
-                    <Form.Group>
+                    <Form.Group controlId="accounting-setup-page-5">
                       <Form.Label>Parent account</Form.Label>
                       <Form.Select value={coaForm.parentId ?? ''} onChange={(event) => setCoaForm((prev) => ({ ...prev, parentId: event.target.value ? Number(event.target.value) : undefined }))}>
                         <option value="">Tidak ada parent</option>
                         {parentAccountOptions.map((account) => <option key={account.id} value={account.id}>{account.code} - {account.name}</option>)}
                       </Form.Select>
                     </Form.Group>
-                    <Form.Group>
+                    <Form.Group controlId="accounting-setup-page-6">
                       <Form.Label>Deskripsi</Form.Label>
                       <Form.Control value={coaForm.description ?? ''} onChange={(event) => setCoaForm((prev) => ({ ...prev, description: event.target.value }))} />
                     </Form.Group>

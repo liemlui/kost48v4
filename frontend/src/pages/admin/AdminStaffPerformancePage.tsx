@@ -191,7 +191,7 @@ export default function AdminStaffPerformancePage() {
         eyebrow="Akuntabilitas Staff"
         title="Kinerja Staff"
         description="Monitoring kinerja staff dari checklist, tugas, meter listrik/air, laporan stok, audit random, dan ulasan penghuni."
-        secondaryAction={<Form.Control type="month" value={month} onChange={(event) => setMonth(event.currentTarget.value)} style={{ maxWidth: 190 }} />}
+        secondaryAction={<Form.Control type="month" aria-label="Pilih bulan kinerja staff" value={month} onChange={(event) => setMonth(event.currentTarget.value)} style={{ maxWidth: 190 }} />}
       />
 
       {query.isLoading ? <TableSkeleton rows={5} cols={9} /> : null}

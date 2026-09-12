@@ -203,7 +203,7 @@ export default function CompleteStayModal({
 
         {error ? <Alert variant="danger">{error}</Alert> : null}
 
-        <Form.Group className="mb-3">
+        <Form.Group controlId="complete-stay-modal-1" className="mb-3">
           <Form.Label>
             Tanggal Checkout Final<span className="text-danger ms-1">*</span>
           </Form.Label>
@@ -218,7 +218,7 @@ export default function CompleteStayModal({
           </div>
         </Form.Group>
 
-        <Form.Group>
+        <Form.Group controlId="complete-stay-modal-2">
           <Form.Label>
             Alasan Checkout Final<span className="text-danger ms-1">*</span>
           </Form.Label>
@@ -242,7 +242,7 @@ export default function CompleteStayModal({
           jaminan saat proses deposit.
         </div>
 
-        <Form.Group className="mb-2">
+        <Form.Group controlId="complete-stay-modal-3" className="mb-2">
           <Form.Label className="small">Nominal Denda (Rp)</Form.Label>
           <CurrencyInput
             placeholder="Contoh: 50.000"
@@ -251,7 +251,7 @@ export default function CompleteStayModal({
           />
         </Form.Group>
 
-        <Form.Group className="mb-3">
+        <Form.Group controlId="complete-stay-modal-4" className="mb-3">
           <Form.Label className="small">
             Catatan Kerusakan
             {damageChargeRupiah.trim() && Number(damageChargeRupiah) > 0 && (

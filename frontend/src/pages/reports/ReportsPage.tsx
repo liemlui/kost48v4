@@ -117,12 +117,13 @@ export default function ReportsPage() {
       </div>
       <div className="report-hero-controls mb-3">
           <div className="report-period-card">
-            <Form.Label>Tahun</Form.Label>
-            <Form.Control type="number" value={ym.year} min={2020} max={2100} onChange={(e) => handleChange('year', e.target.value)} />
+            <Form.Label htmlFor="report-period-year">Tahun</Form.Label>
+            {/* AO-08/T-01: label sebelumnya tidak terasosiasi (Form.Label di luar Form.Group). */}
+            <Form.Control id="report-period-year" type="number" value={ym.year} min={2020} max={2100} onChange={(e) => handleChange('year', e.target.value)} />
           </div>
           <div className="report-period-card">
-            <Form.Label>Bulan</Form.Label>
-            <Form.Select value={ym.month} onChange={(e) => handleChange('month', e.target.value)}>
+            <Form.Label htmlFor="report-period-month">Bulan</Form.Label>
+            <Form.Select id="report-period-month" value={ym.month} onChange={(e) => handleChange('month', e.target.value)}>
               {Array.from({ length: 12 }, (_, i) => i + 1).map((m) => (
                 <option key={m} value={m}>{new Date(0, m - 1).toLocaleString('id-ID', { month: 'long' })}</option>
               ))}

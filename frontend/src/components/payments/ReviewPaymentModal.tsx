@@ -343,7 +343,7 @@ export default function ReviewPaymentModal({
 
                   {mode === 'reject' ? (
                     <div className="decision-section-card mt-3">
-                      <Form.Group>
+                      <Form.Group controlId="review-payment-modal-1">
                         <Form.Label>Alasan penolakan untuk tenant</Form.Label>
                         <Form.Control
                           as="textarea"

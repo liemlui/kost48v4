@@ -79,7 +79,7 @@ export default function RenewRequestModal({ show, onHide, onSuccess, stay }: Ren
           Ajukan rencana perpanjangan dari sini. Admin akan mencatat meter terbaru terlebih dahulu, lalu tagihan perpanjangan akan dibuat jika disetujui.
         </Alert>
 
-        <Form.Group className="mb-3">
+        <Form.Group controlId="renew-request-modal-1" className="mb-3">
           <Form.Label>Jenis Perpanjangan</Form.Label>
           <Form.Select value={requestedTerm} onChange={(event) => setRequestedTerm(event.target.value as PricingTerm)}>
             {pricingOptions.map((option) => (
@@ -91,7 +91,7 @@ export default function RenewRequestModal({ show, onHide, onSuccess, stay }: Ren
           </Form.Text>
         </Form.Group>
 
-        <Form.Group className="mb-3">
+        <Form.Group controlId="renew-request-modal-2" className="mb-3">
           <Form.Label>Tanggal akhir masa sewa yang diajukan (opsional)</Form.Label>
           <Form.Control
             type="date"
@@ -104,7 +104,7 @@ export default function RenewRequestModal({ show, onHide, onSuccess, stay }: Ren
           </Form.Text>
         </Form.Group>
 
-        <Form.Group className="mb-3">
+        <Form.Group controlId="renew-request-modal-3" className="mb-3">
           <Form.Label>Catatan untuk admin (opsional)</Form.Label>
           <Form.Control
             as="textarea"

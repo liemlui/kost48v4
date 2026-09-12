@@ -63,7 +63,7 @@ export default function RejectBookingModal({
           Booking akan dibatalkan dan kamar dibuka lagi. Gunakan alasan singkat yang bisa dipahami tenant.
         </Alert>
 
-        <Form.Group>
+        <Form.Group controlId="reject-booking-modal-1">
           <Form.Label>
             Alasan penolakan <span className="text-danger">*</span>
           </Form.Label>

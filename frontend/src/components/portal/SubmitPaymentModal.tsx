@@ -292,7 +292,7 @@ export default function SubmitPaymentModal({
               Pembayaran harus <strong>tepat sebesar total di atas</strong> dan bukti wajib dikirim di modal ini. Nominal lain akan ditolak otomatis.
             </Alert>
 
-            <Form.Group className="mb-3">
+            <Form.Group controlId="submit-payment-modal-1" className="mb-3">
               <Form.Label>Tanggal Bayar</Form.Label>
               <Form.Control
                 type="date"
@@ -302,7 +302,7 @@ export default function SubmitPaymentModal({
               />
             </Form.Group>
 
-            <Form.Group className="mb-3">
+            <Form.Group controlId="submit-payment-modal-2" className="mb-3">
               <Form.Label>Metode Pembayaran</Form.Label>
               <Form.Select
                 value={paymentMethod}
@@ -317,7 +317,7 @@ export default function SubmitPaymentModal({
               </Form.Select>
             </Form.Group>
 
-            <Form.Group className="mb-3">
+            <Form.Group controlId="submit-payment-modal-3" className="mb-3">
               <Form.Label>File Bukti Pembayaran</Form.Label>
               <CameraOrGalleryInput
                 accept={TENANT_PAYMENT_PROOF_ACCEPT}
@@ -349,7 +349,7 @@ export default function SubmitPaymentModal({
             <hr className="my-3" />
             <div className="fw-semibold mb-2 small text-muted">Detail Tambahan (Opsional)</div>
 
-            <Form.Group className="mb-3">
+            <Form.Group controlId="submit-payment-modal-4" className="mb-3">
               <Form.Label>Nama Pengirim</Form.Label>
               <Form.Control
                 type="text"
@@ -361,7 +361,7 @@ export default function SubmitPaymentModal({
               <Form.Text muted>Nama pemilik rekening yang melakukan transfer.</Form.Text>
             </Form.Group>
 
-            <Form.Group className="mb-3">
+            <Form.Group controlId="submit-payment-modal-5" className="mb-3">
               <Form.Label>Bank Pengirim</Form.Label>
               <Form.Control
                 type="text"
@@ -373,7 +373,7 @@ export default function SubmitPaymentModal({
               <Form.Text muted>Bank asal dana dikirim.</Form.Text>
             </Form.Group>
 
-            <Form.Group className="mb-3">
+            <Form.Group controlId="submit-payment-modal-6" className="mb-3">
               <Form.Label>Nomor Referensi</Form.Label>
               <Form.Control
                 type="text"
@@ -385,7 +385,7 @@ export default function SubmitPaymentModal({
               <Form.Text muted>Nomor referensi atau kode transaksi dari bukti transfer.</Form.Text>
             </Form.Group>
 
-            <Form.Group>
+            <Form.Group controlId="submit-payment-modal-7">
               <Form.Label>Catatan</Form.Label>
               <Form.Control
                 as="textarea"

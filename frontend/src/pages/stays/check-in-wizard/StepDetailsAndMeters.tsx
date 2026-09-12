@@ -27,7 +27,7 @@ export default function StepDetailsAndMeters({
         <h5 className="mb-3">Detail Sewa & Meter Awal</h5>
         <Row className="g-3">
           <Col md={6}>
-            <Form.Group>
+            <Form.Group controlId="step-details-and-meters-1">
               <Form.Label>
                 Tanggal Masuk<span className="text-danger ms-1">*</span>
               </Form.Label>
@@ -36,7 +36,7 @@ export default function StepDetailsAndMeters({
             </Form.Group>
           </Col>
           <Col md={6}>
-            <Form.Group>
+            <Form.Group controlId="step-details-and-meters-2">
               <Form.Label>Jenis Masa Sewa</Form.Label>
               <Form.Select {...form.register('pricingTerm')}>
                 {pricingTermOptions.map((option) => (
@@ -47,7 +47,7 @@ export default function StepDetailsAndMeters({
             </Form.Group>
           </Col>
           <Col md={6}>
-            <Form.Group>
+            <Form.Group controlId="step-details-and-meters-3">
               <Form.Label>
                 Harga Sewa Disepakati<span className="text-danger ms-1">*</span>
               </Form.Label>
@@ -77,7 +77,7 @@ export default function StepDetailsAndMeters({
             </Form.Group>
           </Col>
           <Col md={6}>
-            <Form.Group>
+            <Form.Group controlId="step-details-and-meters-4">
               <Form.Label>Deposit</Form.Label>
               <Controller
                 control={form.control}
@@ -119,7 +119,7 @@ export default function StepDetailsAndMeters({
             </Form.Group>
           </Col>
           <Col md={6}>
-            <Form.Group>
+            <Form.Group controlId="step-details-and-meters-5">
               <Form.Label>Tujuan Tinggal</Form.Label>
               <Form.Select {...form.register('stayPurpose')}>
                 {stayPurposeOptions.map((option) => (
@@ -130,7 +130,7 @@ export default function StepDetailsAndMeters({
             </Form.Group>
           </Col>
           <Col md={6}>
-            <Form.Group>
+            <Form.Group controlId="step-details-and-meters-6">
               <Form.Label>Sumber Booking</Form.Label>
               <Form.Select {...form.register('bookingSource')}>
                 {bookingSourceOptions.map((option) => (
@@ -141,7 +141,7 @@ export default function StepDetailsAndMeters({
             </Form.Group>
           </Col>
           <Col md={6}>
-            <Form.Group>
+            <Form.Group controlId="step-details-and-meters-7">
               <Form.Label>
                 Meter Awal Listrik (kWh)<span className="text-danger ms-1">*</span>
               </Form.Label>
@@ -165,7 +165,7 @@ export default function StepDetailsAndMeters({
             </Form.Group>
           </Col>
           <Col md={6}>
-            <Form.Group>
+            <Form.Group controlId="step-details-and-meters-8">
               <Form.Label>
                 Meter Awal Air (m³)<span className="text-danger ms-1">*</span>
               </Form.Label>
@@ -189,7 +189,7 @@ export default function StepDetailsAndMeters({
             </Form.Group>
           </Col>
           <Col md={12}>
-            <Form.Group>
+            <Form.Group controlId="step-details-and-meters-9">
               <Form.Label>Catatan</Form.Label>
               <Form.Control as="textarea" rows={3} {...form.register('notes')} />
             </Form.Group>

@@ -91,7 +91,7 @@ export default function StepTenantSelect({
             ✅ {tenantSuccess}
           </Alert>
         ) : null}
-        <Form.Group className="mb-3">
+        <Form.Group controlId="step-tenant-select-1" className="mb-3">
           <Form.Label>Penghuni</Form.Label>
           {isError ? (
             <Alert variant="warning" className="py-2 mb-0">
@@ -110,6 +110,7 @@ export default function StepTenantSelect({
               render={({ field }) => (
                 <>
                   <SearchableSelect<number>
+                    ariaLabel="Cari dan pilih penghuni"
                     value={selectedTenant}
                     onChange={(option) => {
                       onTenantChange(option);
@@ -131,7 +132,7 @@ export default function StepTenantSelect({
           <Card body className="bg-light border">
             <Row className="g-3">
               <Col md={6}>
-                <Form.Group>
+                <Form.Group controlId="step-tenant-select-2">
                   <Form.Label>
                     Nama<span className="text-danger ms-1">*</span>
                   </Form.Label>
@@ -143,7 +144,7 @@ export default function StepTenantSelect({
                 </Form.Group>
               </Col>
               <Col md={6}>
-                <Form.Group>
+                <Form.Group controlId="step-tenant-select-3">
                   <Form.Label>
                     No. HP<span className="text-danger ms-1">*</span>
                   </Form.Label>
@@ -156,7 +157,7 @@ export default function StepTenantSelect({
                 </Form.Group>
               </Col>
               <Col md={6}>
-                <Form.Group>
+                <Form.Group controlId="step-tenant-select-4">
                   <Form.Label>
                     No. KTP<span className="text-danger ms-1">*</span>
                   </Form.Label>
@@ -171,7 +172,7 @@ export default function StepTenantSelect({
                 </Form.Group>
               </Col>
               <Col md={6}>
-                <Form.Group>
+                <Form.Group controlId="step-tenant-select-5">
                   <Form.Label>Email</Form.Label>
                   <Form.Control 
                     value={inlineTenant.email} 
@@ -181,7 +182,7 @@ export default function StepTenantSelect({
                 </Form.Group>
               </Col>
               <Col md={6}>
-                <Form.Group>
+                <Form.Group controlId="step-tenant-select-6">
                   <Form.Label>Gender</Form.Label>
                   <Form.Select value={inlineTenant.gender} onChange={(e) => setInlineTenant((prev) => ({ ...prev, gender: e.target.value }))}>
                     <option value="MALE">Laki-laki</option>

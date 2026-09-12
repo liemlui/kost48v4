@@ -15,6 +15,11 @@ type Props<T = number | string> = {
   isDisabled?: boolean;
   noOptionsMessage?: string;
   defaultOptions?: boolean | SelectOption<T>[];
+  /**
+   * AO-08/T-01: input pencarian react-select tidak memiliki nama yang dapat diakses bila
+   * tidak ada <label> terasosiasi. Kirim `ariaLabel` agar pembaca layar menyebut tujuan field.
+   */
+  ariaLabel?: string;
 };
 
 export default function SearchableSelect<T = number | string>({
@@ -25,6 +30,7 @@ export default function SearchableSelect<T = number | string>({
   isDisabled,
   noOptionsMessage,
   defaultOptions,
+  ariaLabel,
 }: Props<T>) {
   const timeoutRef = useRef<number | null>(null);
 
@@ -45,6 +51,7 @@ export default function SearchableSelect<T = number | string>({
     <AsyncSelect
       cacheOptions={false}
       defaultOptions={defaultOptions !== undefined ? defaultOptions : true}
+      aria-label={ariaLabel}
       value={value as any}
       loadOptions={debouncedLoadOptions as any}
       onChange={(option) => onChange((option as SelectOption<T>) ?? null)}

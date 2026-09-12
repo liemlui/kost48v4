@@ -2,7 +2,14 @@ import { useState } from 'react';
 import { Button, Form, InputGroup } from 'react-bootstrap';
 import type { FormControlProps } from 'react-bootstrap';
 
-type PasswordInputProps = Omit<FormControlProps, 'type'>;
+type PasswordInputProps = Omit<FormControlProps, 'type'> & {
+  /**
+   * AO-08/T-01: `Form.Control` di dalam `InputGroup` tidak lagi mewarisi `controlId` dari
+   * `<Form.Group>` (context terputus oleh InputGroup), sehingga pasangan `<Form.Label>` ↔ input
+   * kehilangan asosiasi programatiknya. Kirim `controlId` yang sama dengan milik `<Form.Group>`.
+   */
+  controlId?: string;
+};
 
 /** SVG icon mata terbuka — digunakan saat password terlihat */
 function EyeOpenIcon() {
@@ -26,13 +33,17 @@ function EyeClosedIcon() {
   );
 }
 
-export default function PasswordInput(props: PasswordInputProps) {
+export default function PasswordInput({ controlId, ...props }: PasswordInputProps) {
   const [show, setShow] = useState(false);
 
   return (
     <InputGroup>
+      {/* AO-08/T-01: Form.Control di dalam InputGroup tidak lagi mewarisi controlId dari
+          <Form.Group>, sehingga <Form.Label> kehilangan asosiasi programatik. Kirim
+          `controlId` yang sama dengan milik grup agar label menulis `for` dan input `id`. */}
       <Form.Control
         {...props}
+        id={props.id ?? controlId}
         type={show ? 'text' : 'password'}
       />
       <Button

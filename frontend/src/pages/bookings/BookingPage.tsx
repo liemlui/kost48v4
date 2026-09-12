@@ -303,7 +303,7 @@ export default function BookingPage() {
                 <Form onSubmit={handleSubmit}>
                   <Row className="g-3">
                     <Col md={6}>
-                      <Form.Group>
+                      <Form.Group controlId="booking-page-1">
                         <Form.Label>Tanggal mulai tinggal</Form.Label>
                         <Form.Control
                           type="date"
@@ -323,7 +323,7 @@ export default function BookingPage() {
                       </Form.Group>
                     </Col>
                     <Col md={6}>
-                      <Form.Group>
+                      <Form.Group controlId="booking-page-2">
                         <Form.Label>Masa sewa</Form.Label>
                         <Form.Select
                           value={formState.pricingTerm}
@@ -358,7 +358,7 @@ export default function BookingPage() {
                       </Form.Group>
                     </Col>
                     <Col xs={12}>
-                      <Form.Group>
+                      <Form.Group controlId="booking-page-3">
                         <Form.Label>
                           Catatan untuk admin{" "}
                           <span className="text-muted fw-normal">

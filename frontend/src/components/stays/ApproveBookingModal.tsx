@@ -212,7 +212,7 @@ export default function ApproveBookingModal({
           </div>
         </Alert>
 
-        <Form.Group className="mb-3">
+        <Form.Group controlId="approve-booking-modal-1" className="mb-3">
           <Form.Label>
             Tarif Sewa Disepakati <span className="text-danger">*</span>
           </Form.Label>
@@ -235,7 +235,7 @@ export default function ApproveBookingModal({
           </Form.Text>
         </Form.Group>
 
-        <Form.Group className="mb-3">
+        <Form.Group controlId="approve-booking-modal-2" className="mb-3">
           <Form.Label>
             Deposit Jaminan <span className="text-danger">*</span>
           </Form.Label>
@@ -258,7 +258,7 @@ export default function ApproveBookingModal({
           </Form.Text>
         </Form.Group>
 
-        <Form.Group className="mb-3">
+        <Form.Group controlId="approve-booking-modal-3" className="mb-3">
           <Form.Label>
             Meter Awal Listrik (kWh) <span className="text-danger">*</span>
           </Form.Label>
@@ -271,7 +271,7 @@ export default function ApproveBookingModal({
           />
         </Form.Group>
 
-        <Form.Group>
+        <Form.Group controlId="approve-booking-modal-4">
           <Form.Label>
             Meter Awal Air (m³) <span className="text-danger">*</span>
           </Form.Label>

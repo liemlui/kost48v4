@@ -269,7 +269,7 @@ export default function KtpOcrValidateCard({ tenantId, tenantName, ktpVerifiedAt
 
         {!isVerified ? (
           <>
-            <Form.Group className="mb-2">
+            <Form.Group controlId="ktp-ocr-validate-card-1" className="mb-2">
               <Form.Label className="small mb-1">Pindai foto KTP (opsional)</Form.Label>
               <Form.Control
                 type="file"
@@ -335,7 +335,7 @@ export default function KtpOcrValidateCard({ tenantId, tenantName, ktpVerifiedAt
               </Alert>
             ) : null}
 
-            <Form.Group className="mb-2">
+            <Form.Group controlId="ktp-ocr-validate-card-2" className="mb-2">
               <Form.Label className="small mb-1">Teks OCR KTP</Form.Label>
               <Form.Control
                 as="textarea"
@@ -473,7 +473,7 @@ export default function KtpOcrValidateCard({ tenantId, tenantName, ktpVerifiedAt
               Anda akan menyetujui bahwa KTP tenant <strong>{tenantName || `#${tenantId}`}</strong> telah diverifikasi.
               {aiFailed ? ' AI gagal/tidak tersedia — verifikasi sepenuhnya manual.' : ''}
             </p>
-            <Form.Group className="mb-2">
+            <Form.Group controlId="ktp-ocr-validate-card-3" className="mb-2">
               <Form.Label className="small">Metode Verifikasi</Form.Label>
               <Form.Select
                 size="sm"
@@ -487,7 +487,7 @@ export default function KtpOcrValidateCard({ tenantId, tenantName, ktpVerifiedAt
                 <option value="MANUAL">Manual Penuh — tanpa bantuan AI</option>
               </Form.Select>
             </Form.Group>
-            <Form.Group className="mb-2">
+            <Form.Group controlId="ktp-ocr-validate-card-4" className="mb-2">
               <Form.Label className="small">Catatan (opsional)</Form.Label>
               <Form.Control
                 as="textarea"

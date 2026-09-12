@@ -191,7 +191,7 @@ export default function GuestBookingForm({
             <h2 className="h6 fw-semibold mb-3">Data Diri</h2>
             <Row className="g-3">
               <Col xs={12}>
-                <Form.Group>
+                <Form.Group controlId="guest-booking-form-1">
                   <Form.Label>Nama Lengkap <span className="text-danger">*</span></Form.Label>
                   <Form.Control
                     ref={(element) => { step1FieldRefs.current.fullName = element; }}
@@ -206,7 +206,7 @@ export default function GuestBookingForm({
                 </Form.Group>
               </Col>
               <Col md={6}>
-                <Form.Group>
+                <Form.Group controlId="guest-booking-form-2">
                   <Form.Label>Telepon <span className="text-muted small">(minimal salah satu)</span></Form.Label>
                   <Form.Control
                     ref={(element) => { step1FieldRefs.current.phone = element; }}
@@ -221,7 +221,7 @@ export default function GuestBookingForm({
                 </Form.Group>
               </Col>
               <Col md={6}>
-                <Form.Group>
+                <Form.Group controlId="guest-booking-form-3">
                   <Form.Label>Email <span className="text-muted small">(minimal salah satu)</span></Form.Label>
                   <Form.Control
                     ref={(element) => { step1FieldRefs.current.email = element; }}
@@ -237,7 +237,7 @@ export default function GuestBookingForm({
                 </Form.Group>
               </Col>
               <Col xs={12}>
-                <Form.Group>
+                <Form.Group controlId="guest-booking-form-4">
                   <Form.Label>No. KTP/NIK <span className="text-danger">*</span></Form.Label>
                   <Form.Control
                     ref={(element) => { step1FieldRefs.current.identityNumber = element; }}
@@ -276,7 +276,7 @@ export default function GuestBookingForm({
                 {showEmergency && (
                   <Row className="g-3 mt-1">
                     <Col md={6}>
-                      <Form.Group>
+                      <Form.Group controlId="guest-booking-form-5">
                         <Form.Label>Nama Kontak Darurat</Form.Label>
                         <Form.Control
                           value={form.emergencyContactName}
@@ -287,7 +287,7 @@ export default function GuestBookingForm({
                       </Form.Group>
                     </Col>
                     <Col md={6}>
-                      <Form.Group>
+                      <Form.Group controlId="guest-booking-form-6">
                         <Form.Label>Telepon Kontak Darurat</Form.Label>
                         <Form.Control
                           value={form.emergencyContactPhone}
@@ -316,7 +316,7 @@ export default function GuestBookingForm({
             <h2 className="h6 fw-semibold mb-3">Detail Booking</h2>
             <Row className="g-3">
               <Col md={6}>
-                <Form.Group>
+                <Form.Group controlId="guest-booking-form-7">
                   <Form.Label>Tanggal masuk <span className="text-danger">*</span></Form.Label>
                   <Form.Control
                     type="date"
@@ -329,7 +329,7 @@ export default function GuestBookingForm({
                 </Form.Group>
               </Col>
               <Col md={6}>
-                <Form.Group>
+                <Form.Group controlId="guest-booking-form-8">
                   <Form.Label>Pilihan masa sewa <span className="text-danger">*</span></Form.Label>
                   <Form.Select
                     value={form.pricingTerm}
@@ -379,7 +379,7 @@ export default function GuestBookingForm({
                 )}
               </Col>
               <Col md={6}>
-                <Form.Group>
+                <Form.Group controlId="guest-booking-form-9">
                   <Form.Label>Jumlah penghuni</Form.Label>
                   <Form.Select
                     value={form.occupantCount}
@@ -421,7 +421,7 @@ export default function GuestBookingForm({
             <p className="small text-muted mb-3">Semua opsional — klik <strong>Lewati</strong> jika tidak relevan.</p>
             <Row className="g-3">
               <Col md={6}>
-                <Form.Group>
+                <Form.Group controlId="guest-booking-form-10">
                   <Form.Label>Tujuan Tinggal</Form.Label>
                   <Form.Select
                     value={form.stayPurpose ?? ''}
@@ -435,7 +435,7 @@ export default function GuestBookingForm({
                 </Form.Group>
               </Col>
               <Col xs={12}>
-                <Form.Group>
+                <Form.Group controlId="guest-booking-form-11">
                   <Form.Label>Hewan Peliharaan</Form.Label>
                   <div>
                     <Form.Check
@@ -455,7 +455,7 @@ export default function GuestBookingForm({
                 </Form.Group>
               </Col>
               <Col xs={12}>
-                <Form.Group>
+                <Form.Group controlId="guest-booking-form-12">
                   <Form.Label>Catatan Tambahan</Form.Label>
                   <Form.Control
                     as="textarea"

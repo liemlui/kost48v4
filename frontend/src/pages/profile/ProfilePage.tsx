@@ -613,7 +613,7 @@ export default function ProfilePage() {
                 { key: 'tipBank', label: 'Bank (nama bank + no. rekening + a.n.)', placeholder: 'mis. BCA 1234567890 a.n. Budi' },
               ] as const).map((f) => (
                 <Col md={6} key={f.key}>
-                  <Form.Group>
+                  <Form.Group controlId="profile-page-4">
                     <Form.Label>{f.label}</Form.Label>
                     <Form.Control
                       value={tipForm[f.key]}

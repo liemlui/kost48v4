@@ -659,7 +659,7 @@ export default function StaffInventoryStatusModal({
         )}
 
         <div className="staff-evidence-panel mt-3">
-          <Form.Group className="mb-3">
+          <Form.Group controlId="staff-inventory-status-mod-1" className="mb-3">
             <Form.Label>Foto bukti</Form.Label>
             <CameraOrGalleryInput onChange={handleImage} />
             {preview ? (
@@ -674,7 +674,7 @@ export default function StaffInventoryStatusModal({
               jika catatan sudah jelas.
             </Form.Text>
           </Form.Group>
-          <Form.Group>
+          <Form.Group controlId="staff-inventory-status-mod-2">
             <Form.Label>Info kondisi barang</Form.Label>
             <Form.Control
               as="textarea"

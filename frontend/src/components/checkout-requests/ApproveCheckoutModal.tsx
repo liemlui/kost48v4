@@ -110,7 +110,7 @@ export default function ApproveCheckoutModal({
           />
         </div>
 
-        <Form.Group>
+        <Form.Group controlId="approve-checkout-modal-1">
           <Form.Label>Catatan review</Form.Label>
           <Form.Control
             as="textarea"

@@ -690,7 +690,7 @@ export default function InvoicesPage() {
                 <div className="fw-semibold">{cancelTarget.invoiceNumber || `INV-${cancelTarget.id}`}</div>
                 <div className="small text-muted">Status: {getStatusLabel(cancelTarget.status, undefined, { domain: 'invoice' })} · Total <CurrencyDisplay amount={getInvoiceTotalAmount(cancelTarget)} /></div>
               </div>
-              <Form.Group>
+              <Form.Group controlId="invoices-page-1">
                 <Form.Label>Alasan pembatalan</Form.Label>
                 <Form.Control
                   as="textarea"
@@ -726,9 +726,10 @@ export default function InvoicesPage() {
           {error ? <Alert variant="danger">{error}</Alert> : null}
           <Row className="g-3">
             <Col md={12}>
-              <Form.Group>
+              <Form.Group controlId="invoices-page-2">
                 <Form.Label>Masa Sewa</Form.Label>
                 <SearchableSelect<number>
+                  ariaLabel="Cari dan pilih masa sewa"
                   value={selectedStay ? { value: selectedStay.value, label: selectedStay.label } : null}
                   onChange={(option) => setFormState((p) => ({ ...p, stayId: String(option?.value ?? '') }))}
                   loadOptions={async (inputValue) => {
@@ -745,31 +746,31 @@ export default function InvoicesPage() {
               </Form.Group>
             </Col>
             <Col md={6}>
-              <Form.Group>
+              <Form.Group controlId="invoices-page-3">
                 <Form.Label>Nomor Tagihan</Form.Label>
                 <Form.Control value={formState.invoiceNumber} onChange={(e) => setFormState((p) => ({ ...p, invoiceNumber: e.target.value }))} />
               </Form.Group>
             </Col>
             <Col md={6}>
-              <Form.Group>
+              <Form.Group controlId="invoices-page-4">
                 <Form.Label>Jatuh Tempo</Form.Label>
                 <Form.Control type="date" value={formState.dueDate} onChange={(e) => setFormState((p) => ({ ...p, dueDate: e.target.value }))} />
               </Form.Group>
             </Col>
             <Col md={6}>
-              <Form.Group>
+              <Form.Group controlId="invoices-page-5">
                 <Form.Label>Awal Periode</Form.Label>
                 <Form.Control type="date" value={formState.periodStart} onChange={(e) => setFormState((p) => ({ ...p, periodStart: e.target.value }))} />
               </Form.Group>
             </Col>
             <Col md={6}>
-              <Form.Group>
+              <Form.Group controlId="invoices-page-6">
                 <Form.Label>Akhir Periode</Form.Label>
                 <Form.Control type="date" value={formState.periodEnd} onChange={(e) => setFormState((p) => ({ ...p, periodEnd: e.target.value }))} />
               </Form.Group>
             </Col>
             <Col md={12}>
-              <Form.Group>
+              <Form.Group controlId="invoices-page-7">
                 <Form.Label>Catatan</Form.Label>
                 <Form.Control as="textarea" rows={3} value={formState.notes} onChange={(e) => setFormState((p) => ({ ...p, notes: e.target.value }))} />
               </Form.Group>

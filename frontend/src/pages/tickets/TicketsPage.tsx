@@ -527,7 +527,7 @@ export default function TicketsPage() {
               Staff mengirim bukti kerja. Admin tetap cek dan menutup tiket
               final.
             </Alert>
-            <Form.Group className="mb-3">
+            <Form.Group controlId="tickets-page-1" className="mb-3">
               <Form.Label>Catatan hasil kerja</Form.Label>
               <Form.Control
                 as="textarea"
@@ -536,7 +536,7 @@ export default function TicketsPage() {
                 onChange={(e) => setResolutionNote(e.currentTarget.value)}
               />
             </Form.Group>
-            <Form.Group>
+            <Form.Group controlId="tickets-page-2">
               <Form.Label>Foto bukti selesai</Form.Label>
               <CameraOrGalleryInput onChange={handleResolutionImage} />
               {resolutionPreview ? (
@@ -779,6 +779,7 @@ export default function TicketsPage() {
                         <>
                           <Form.Select
                             size="sm"
+                            aria-label={`Assign staff untuk tiket ${item.ticketNumber ?? item.id}`}
                             value={
                               assignMap[item.id] ??
                               String(item.assignedToId ?? "")
@@ -1042,7 +1043,7 @@ export default function TicketsPage() {
           <Modal.Title>Catat Pekerjaan Selesai</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <Form.Group className="mb-3">
+          <Form.Group controlId="tickets-page-3" className="mb-3">
             <Form.Label>Catatan hasil kerja</Form.Label>
             <Form.Control
               as="textarea"
@@ -1051,7 +1052,7 @@ export default function TicketsPage() {
               onChange={(e) => setResolutionNote(e.currentTarget.value)}
             />
           </Form.Group>
-          <Form.Group>
+          <Form.Group controlId="tickets-page-4">
             <Form.Label>Foto bukti selesai</Form.Label>
             <CameraOrGalleryInput onChange={handleResolutionImage} />
             {resolutionPreview ? (
@@ -1127,7 +1128,7 @@ export default function TicketsPage() {
             />
           </div>
           {ticketHasRoomItemDecision(closeTicket) ? (
-            <Form.Group className="mb-3">
+            <Form.Group controlId="tickets-page-5" className="mb-3">
               <Form.Label>Status akhir barang kamar</Form.Label>
               <Form.Select
                 value={finalRoomItemStatus}
@@ -1144,7 +1145,7 @@ export default function TicketsPage() {
             </Form.Group>
           ) : null}
           {ticketHasInventoryDecision(closeTicket) ? (
-            <Form.Group className="mb-3">
+            <Form.Group controlId="tickets-page-6" className="mb-3">
               <Form.Label>Status akhir barang gudang</Form.Label>
               <Form.Select
                 value={finalInventoryItemStatus}
@@ -1160,7 +1161,7 @@ export default function TicketsPage() {
               </Form.Select>
             </Form.Group>
           ) : null}
-          <Form.Group>
+          <Form.Group controlId="tickets-page-7">
             <Form.Label>Catatan final admin</Form.Label>
             <Form.Control
               as="textarea"
@@ -1199,7 +1200,7 @@ export default function TicketsPage() {
         </Modal.Header>
         <Modal.Body>
           {createTicketMutation.isError && <Alert variant="danger">Gagal membuat tiket. Coba lagi.</Alert>}
-          <Form.Group className="mb-3">
+          <Form.Group controlId="tickets-page-8" className="mb-3">
             <Form.Label className="fw-semibold">Jenis Pekerjaan</Form.Label>
             <div className="create-ticket-category-grid">
               {[
@@ -1233,7 +1234,7 @@ export default function TicketsPage() {
 
           <Row className="g-3 mb-3">
             <Col md={12}>
-              <Form.Group>
+              <Form.Group controlId="tickets-page-9">
                 <Form.Label className="fw-semibold">Judul Pekerjaan</Form.Label>
                 <Form.Control
                   value={createForm.title}
@@ -1251,25 +1252,25 @@ export default function TicketsPage() {
             {createForm.category === 'BARANG_PINDAH' && (
               <>
                 <Col md={4}>
-                  <Form.Group>
+                  <Form.Group controlId="tickets-page-10">
                     <Form.Label className="fw-semibold">Nama Barang</Form.Label>
                     <Form.Control value={createForm.itemName} onChange={(e) => setCreateForm((prev) => ({ ...prev, itemName: e.target.value }))} placeholder="Contoh: Sprei, Lemari, Galon" />
                   </Form.Group>
                 </Col>
                 <Col md={2}>
-                  <Form.Group>
+                  <Form.Group controlId="tickets-page-11">
                     <Form.Label className="fw-semibold">Jumlah</Form.Label>
                     <Form.Control type="number" value={createForm.itemQty} onChange={(e) => setCreateForm((prev) => ({ ...prev, itemQty: e.target.value }))} placeholder="1" min="1" />
                   </Form.Group>
                 </Col>
                 <Col md={3}>
-                  <Form.Group>
+                  <Form.Group controlId="tickets-page-12">
                     <Form.Label className="fw-semibold">Dari (Lokasi)</Form.Label>
                     <Form.Control value={createForm.fromLocation} onChange={(e) => setCreateForm((prev) => ({ ...prev, fromLocation: e.target.value }))} placeholder="Gudang / Kamar A1" />
                   </Form.Group>
                 </Col>
                 <Col md={3}>
-                  <Form.Group>
+                  <Form.Group controlId="tickets-page-13">
                     <Form.Label className="fw-semibold">Ke (Tujuan)</Form.Label>
                     <Form.Control value={createForm.toLocation} onChange={(e) => setCreateForm((prev) => ({ ...prev, toLocation: e.target.value }))} placeholder="Kamar B2 / Gudang" />
                   </Form.Group>
@@ -1277,7 +1278,7 @@ export default function TicketsPage() {
               </>
             )}
             <Col md={12}>
-              <Form.Group>
+              <Form.Group controlId="tickets-page-14">
                 <Form.Label className="fw-semibold">Detail & Instruksi</Form.Label>
                 <Form.Control
                   as="textarea"
@@ -1289,7 +1290,7 @@ export default function TicketsPage() {
               </Form.Group>
             </Col>
             <Col md={12}>
-              <Form.Group>
+              <Form.Group controlId="tickets-page-15">
                 <Form.Label className="fw-semibold">Assign ke Staff (opsional)</Form.Label>
                 <Form.Select value={createForm.assignedToId} onChange={(e) => setCreateForm((prev) => ({ ...prev, assignedToId: e.target.value }))}>
                   <option value="">— Pilih staff (bisa diassign nanti) —</option>

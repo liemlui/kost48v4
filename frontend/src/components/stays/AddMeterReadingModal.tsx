@@ -150,7 +150,7 @@ export default function AddMeterReadingModal({
           </div>
         </div>
 
-        <Form.Group className="mb-3">
+        <Form.Group controlId="add-meter-reading-modal-1" className="mb-3">
           <Form.Label>Tanggal Pencatatan</Form.Label>
           <Form.Control 
             type="date" 
@@ -163,7 +163,7 @@ export default function AddMeterReadingModal({
 
         <div className="row g-3 mb-4">
           <div className="col-md-6">
-            <Form.Group>
+            <Form.Group controlId="add-meter-reading-modal-2">
               <Form.Label>Listrik Saat Ini (kWh)</Form.Label>
               <Form.Control 
                 type="number" 
@@ -183,7 +183,7 @@ export default function AddMeterReadingModal({
             </Form.Group>
           </div>
           <div className="col-md-6">
-            <Form.Group>
+            <Form.Group controlId="add-meter-reading-modal-3">
               <Form.Label>Air Saat Ini (m³)</Form.Label>
               <Form.Control 
                 type="number" 
@@ -204,7 +204,7 @@ export default function AddMeterReadingModal({
           </div>
         </div>
 
-        <Form.Group>
+        <Form.Group controlId="add-meter-reading-modal-4">
           <Form.Label>Catatan (Opsional)</Form.Label>
           <Form.Control 
             as="textarea" 

@@ -1,4 +1,4 @@
-import { Alert, Badge, Card, ProgressBar } from 'react-bootstrap';
+import { Alert, Badge, Card } from 'react-bootstrap';
 import type { AccountingReadiness } from '../../api/accounting';
 
 export default function AccountingReadinessCard({ readiness }: { readiness?: AccountingReadiness }) {
@@ -16,7 +16,19 @@ export default function AccountingReadinessCard({ readiness }: { readiness?: Acc
           </div>
           <div className="accounting-score-pill">{score}%</div>
         </div>
-        <ProgressBar now={score} className="mb-3" />
+        {/* AO-08/T-02: progress bar wajib punya nama. react-bootstrap meneruskan `aria-label`
+            ke pembungkus `.progress` dan menyisakan elemen `progressbar` di dalamnya tanpa nama,
+            jadi markup role=progressbar dibuat eksplisit di sini (props lain tetap sama). */}
+        <div
+          className="progress mb-3"
+          role="progressbar"
+          aria-label={`Kesiapan setup akuntansi ${Math.round(score)} persen`}
+          aria-valuenow={Math.round(score)}
+          aria-valuemin={0}
+          aria-valuemax={100}
+        >
+          <div className="progress-bar" style={{ width: `${score}%` }} />
+        </div>
         {postingPeriod ? (
           <div className={`p-3 rounded-3 border mb-3 ${postingPeriod.ready ? 'bg-light' : 'border-warning bg-warning-subtle'}`}>
             <div className="d-flex justify-content-between align-items-start gap-2">

@@ -622,6 +622,17 @@ body {
   font-size: 0.88rem;
 }
 
+/* AO-08/T-07: Alert `d-flex` dengan anak berisi teks panjang dapat melampaui viewport
+   (terukur +3px di /portal/stay pada 375px karena <strong> selebar 282px pada offset 96px).
+   `min-width:0` pada anak flex + pemutus kata mencegah overflow tanpa mengubah layout desktop. */
+.alert.d-flex > * {
+  min-width: 0;
+}
+.alert strong,
+.alert .small {
+  overflow-wrap: anywhere;
+}
+
 /* .app-shell / .app-shell-grid (padding, gap, grid-template-columns) dipindah ke
    02-layout.css (B1: sumber tunggal layout shell). */
 
@@ -3107,10 +3118,47 @@ div.tenant-stay-fact-chip {
 @media (max-width: 640px) {
   .staff-workspace-main {
     width: min(100% - 14px, 1180px) !important;
+    max-width: calc(100vw - 14px);
   }
 
+  /* AO-08/T-03: grid satu kolom berukuran `auto` memakai min-content anaknya sebagai
+     lebar minimum; teks panjang yang tidak dapat diputus (mis. daftar tugas pada
+     `.staff-empty-box`) memaksa kolom 483px sehingga halaman melebar ke 544px pada
+     viewport 375px (terukur +176px). `min-width:0` + pemutus kata menghentikan rantai itu. */
+  .staff-workspace-content,
+  .staff-simple-mode,
+  .staff-work-panel,
+  .staff-work-panel .card-body,
+  .staff-empty-box,
+  .staff-empty-box > * {
+    min-width: 0;
+  }
+
+  .staff-empty-box,
+  .staff-empty-box strong,
+  .staff-empty-box span,
+  .staff-simple-mode p,
+  .staff-simple-mode h1,
+  .page-header-copy,
+  .page-header-copy h1,
+  .page-header-copy p {
+    overflow-wrap: anywhere;
+  }
+
+  /* Wadah gulir horizontal tanpa `min-width:0` tidak dapat menyusut di bawah lebar
+     min-content anaknya, sehingga `overflow-x:auto` tidak pernah menggulir. */
   .staff-workspace-nav-wrap {
     overflow-x: auto;
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .staff-workspace-tabs {
+    min-width: 0;
+  }
+
+  .staff-workspace-tab {
+    flex: 0 0 auto;
   }
 
   .staff-board-lanes,
@@ -5191,5 +5239,20 @@ div.tenant-stay-fact-chip {
 
 .tenant-optional-toggle:hover {
   text-decoration: underline;
+}
+
+/* AO-08/T-07: grid Bootstrap di dalam halaman setup akuntansi meluber 10px pada 375px
+   (terukur: .row right=385, .col-12 right=385, left=-2). Gutter negatif + kolom tanpa
+   `min-width:0` tidak dapat menyusut di bawah lebar kontennya. */
+@media (max-width: 640px) {
+  .accounting-setup-page .row {
+    margin-left: 0;
+    margin-right: 0;
+  }
+  .accounting-setup-page .row > [class*='col'] {
+    min-width: 0;
+    padding-left: 0;
+    padding-right: 0;
+  }
 }
 

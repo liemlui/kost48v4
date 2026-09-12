@@ -465,7 +465,7 @@ export default function AdminStaffFieldReportQueue() {
                   }}
                 />
               ) : null}
-              <Form.Group className="mt-3">
+              <Form.Group controlId="admin-staff-field-report-q-1" className="mt-3">
                 <Form.Label>Keputusan admin</Form.Label>
                 <div
                   className="staff-choice-grid admin-decision-grid"
@@ -508,7 +508,7 @@ export default function AdminStaffFieldReportQueue() {
                     }
                   />
                   {createMovement && decision === "APPROVE" ? (
-                    <Form.Group className="mt-2">
+                    <Form.Group controlId="admin-staff-field-report-q-2" className="mt-2">
                       <Form.Label>Jenis mutasi stok</Form.Label>
                       <Form.Select
                         value={movementType}
@@ -553,7 +553,7 @@ export default function AdminStaffFieldReportQueue() {
                   ) : null}
                 </div>
               ) : null}
-              <Form.Group className="mt-3">
+              <Form.Group controlId="admin-staff-field-report-q-3" className="mt-3">
                 <Form.Label>Catatan admin</Form.Label>
                 <Form.Control
                   as="textarea"

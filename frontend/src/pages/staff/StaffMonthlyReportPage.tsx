@@ -57,7 +57,7 @@ export default function StaffMonthlyReportPage() {
         description="Bukti kerja bulanan. Halaman ini bukan untuk mulai tugas, hanya untuk melihat pekerjaan yang sudah tercatat."
         secondaryAction={
           <div className="staff-report-header-actions no-print">
-            <Form.Control type="month" value={month} onChange={(event) => setMonth(event.currentTarget.value)} style={{ maxWidth: 190 }} />
+            <Form.Control type="month" aria-label="Pilih bulan laporan" value={month} onChange={(event) => setMonth(event.currentTarget.value)} style={{ maxWidth: 190 }} />
             <StaffReportPrintButton disabled={!performance} />
           </div>
         }

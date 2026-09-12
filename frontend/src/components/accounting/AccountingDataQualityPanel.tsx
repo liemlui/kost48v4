@@ -116,7 +116,8 @@ export default function AccountingDataQualityPanel({ readiness, trial, balanceSh
     <div className="accounting-quality-list">
       {list.map((item) => (
         <div key={item.key} className={`accounting-quality-item tone-${item.tone}`}>
-          <Badge bg={item.tone === 'success' ? 'success' : item.tone === 'danger' ? 'danger' : item.tone === 'info' ? 'info' : 'warning'}>{statusBadge(item.tone)}</Badge>
+          {/* AO-08/T-02: `bg="info"` (#0dcaf0) dengan teks putih hanya 1,95:1. `primary` = 4,50:1. */}
+          <Badge bg={item.tone === 'success' ? 'success' : item.tone === 'danger' ? 'danger' : item.tone === 'info' ? 'primary' : 'warning'}>{statusBadge(item.tone)}</Badge>
           <div>
             <strong>{item.label}</strong>
             <small>{item.detail}</small>

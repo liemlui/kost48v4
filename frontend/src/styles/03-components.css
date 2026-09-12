@@ -827,3 +827,23 @@
   gap: 0.75rem;
   margin-bottom: 1rem;
 }
+
+/* ============================================================================
+   AO-08 / T-02 — kontras utility Bootstrap (audit UI/UX total 12 Sep 2026)
+   Bootstrap 5.3.3 mendefinisikan warna sinyal yang GAGAL WCAG AA saat dipakai
+   sebagai teks di atas permukaan terang. Rasio terukur:
+     .text-warning #ffc107 = 1,63:1 (di putih) / 1,47:1 (di bg-warning-subtle)
+     .text-info    #0dcaf0 = 1,96:1
+     .text-danger  #dc3545 = 4,09:1   .text-success #198754 = 4,09:1
+     .text-muted   #6c757d = 4,68:1 di putih, tetapi 4,28:1 di atas kartu biru muda
+   Override memakai varian `-emphasis` Bootstrap dan token KOT48 yang sudah diukur
+   lulus AA (7,2–10,4:1). Bootstrap dimuat sebelum styles.css (main.tsx), jadi aturan
+   ini menang; `-emphasis` tidak pernah dipakai bersama `.text-*` biasa pada elemen
+   yang sama sehingga tidak ada penimpaan ganda.
+   ============================================================================ */
+.text-warning { color: var(--bs-warning-text-emphasis) !important; }
+.text-danger { color: var(--bs-danger-text-emphasis) !important; }
+.text-success { color: var(--bs-success-text-emphasis) !important; }
+.text-info { color: var(--bs-info-text-emphasis) !important; }
+.text-muted { color: var(--gray-600) !important; }
+.btn-link { --bs-btn-color: var(--color-primary); --bs-btn-hover-color: var(--color-primary-hover); }

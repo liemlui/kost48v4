@@ -89,22 +89,22 @@ export default function MeterCycleModal({ show, onHide, stay, onDone }: { show: 
           </Alert>
         ) : (
           <Form>
-            <Form.Group className="mb-2">
+            <Form.Group controlId="meter-cycle-modal-1" className="mb-2">
               <Form.Label>Tanggal catat</Form.Label>
               <Form.Control type="date" value={readingAt} onChange={(e) => setReadingAt(e.currentTarget.value)} />
             </Form.Group>
-            <Form.Group className="mb-2">
+            <Form.Group controlId="meter-cycle-modal-2" className="mb-2">
               <Form.Label>Angka meter listrik (kWh)</Form.Label>
               <Form.Control inputMode="decimal" value={elec} onChange={(e) => setElec(e.currentTarget.value.replace(/[^0-9.]/g, ''))} placeholder="Angka tertera di meter sekarang" />
               <Form.Text muted>Isi manual, atau klik <strong>🔄 Baca meter otomatis</strong> di bawah agar sistem membaca total kWh kumulatif dari meter Tuya.</Form.Text>
             </Form.Group>
             {waterEnabled ? (
-              <Form.Group className="mb-2">
+              <Form.Group controlId="meter-cycle-modal-3" className="mb-2">
                 <Form.Label>Angka meter air (m³)</Form.Label>
                 <Form.Control inputMode="decimal" value={water} onChange={(e) => setWater(e.currentTarget.value.replace(/[^0-9.]/g, ''))} />
               </Form.Group>
             ) : null}
-            <Form.Group className="mb-2">
+            <Form.Group controlId="meter-cycle-modal-4" className="mb-2">
               <Form.Label>Catatan (opsional)</Form.Label>
               <Form.Control as="textarea" rows={2} value={note} onChange={(e) => setNote(e.currentTarget.value)} />
             </Form.Group>

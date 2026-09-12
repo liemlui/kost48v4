@@ -212,7 +212,7 @@ export default function RenewStayModal({
 
         {error ? <Alert variant="danger">{error}</Alert> : null}
 
-        <Form.Group className="mb-3">
+        <Form.Group controlId="renew-stay-modal-1" className="mb-3">
           <Form.Label>Tanggal akhir masa sewa baru (opsional)</Form.Label>
           <Form.Control
             type="date"
@@ -227,7 +227,7 @@ export default function RenewStayModal({
           </div>
         </Form.Group>
 
-        <Form.Group className="mb-3">
+        <Form.Group controlId="renew-stay-modal-2" className="mb-3">
           <Form.Label>Tarif Sewa Periode Baru (Opsional)</Form.Label>
           <CurrencyInput
             value={agreedRentAmountRupiah === '' ? undefined : Number(agreedRentAmountRupiah)}
@@ -241,7 +241,7 @@ export default function RenewStayModal({
           <div className="fw-semibold mb-2">Checkpoint Meter</div>
           <div className="row g-3">
             <div className="col-md-6">
-              <Form.Group>
+              <Form.Group controlId="renew-stay-modal-3">
                 <Form.Label>Meter Listrik Terbaru (kWh)</Form.Label>
                 <Form.Control
                   type="number"
@@ -255,7 +255,7 @@ export default function RenewStayModal({
               </Form.Group>
             </div>
             <div className="col-md-6">
-              <Form.Group>
+              <Form.Group controlId="renew-stay-modal-4">
                 <Form.Label>Meter Air Terbaru (m³)</Form.Label>
                 <Form.Control
                   type="number"
@@ -269,7 +269,7 @@ export default function RenewStayModal({
               </Form.Group>
             </div>
             <div className="col-md-6">
-              <Form.Group>
+              <Form.Group controlId="renew-stay-modal-5">
                 <Form.Label>Tanggal Catat Meter</Form.Label>
                 <Form.Control
                   type="date"

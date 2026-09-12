@@ -351,7 +351,7 @@ export default function InvoiceDetailPage() {
                         <h6 className="mb-3">Tambah Rincian Baru</h6>
                         <Row className="g-3">
                           <Col md={6}>
-                            <Form.Group>
+                            <Form.Group controlId="invoice-detail-page-1">
                               <Form.Label>Tipe</Form.Label>
                               <Form.Select value={lineForm.lineType} onChange={(e) => setLineForm((prev) => ({ ...prev, lineType: e.target.value }))}>
                                 {Object.entries(lineTypeLabels).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
@@ -359,25 +359,25 @@ export default function InvoiceDetailPage() {
                             </Form.Group>
                           </Col>
                           <Col md={6}>
-                            <Form.Group>
+                            <Form.Group controlId="invoice-detail-page-2">
                               <Form.Label>Satuan</Form.Label>
                               <Form.Control value={lineForm.unit} onChange={(e) => setLineForm((prev) => ({ ...prev, unit: e.target.value }))} placeholder="bulan, kWh, m3, dll" />
                             </Form.Group>
                           </Col>
                           <Col md={12}>
-                            <Form.Group>
+                            <Form.Group controlId="invoice-detail-page-3">
                               <Form.Label>Deskripsi</Form.Label>
                               <Form.Control value={lineForm.description} onChange={(e) => setLineForm((prev) => ({ ...prev, description: e.target.value }))} />
                             </Form.Group>
                           </Col>
                           <Col md={6}>
-                            <Form.Group>
+                            <Form.Group controlId="invoice-detail-page-4">
                               <Form.Label>Kuantitas</Form.Label>
                               <Form.Control value={lineForm.qty} onChange={(e) => setLineForm((prev) => ({ ...prev, qty: e.target.value }))} />
                             </Form.Group>
                           </Col>
                           <Col md={6}>
-                            <Form.Group>
+                            <Form.Group controlId="invoice-detail-page-5">
                               <Form.Label>Harga Satuan</Form.Label>
                               <CurrencyInput value={lineForm.unitPriceRupiah === '' ? undefined : Number(lineForm.unitPriceRupiah)} onChange={(v) => setLineForm((prev) => ({ ...prev, unitPriceRupiah: v == null ? '' : String(v) }))} />
                             </Form.Group>
@@ -489,11 +489,11 @@ export default function InvoiceDetailPage() {
           {manualPaymentSafety.blockers.length ? <Alert variant="danger" className="small">{manualPaymentSafety.blockers.join(' ')}</Alert> : null}
           {!manualPaymentSafety.blockers.length && manualPaymentSafety.warnings.length ? <Alert variant="warning" className="small">{manualPaymentSafety.warnings.join(' ')}</Alert> : null}
           <Form>
-            <Form.Group className="mb-3">
+            <Form.Group controlId="invoice-detail-page-6" className="mb-3">
               <Form.Label>Tanggal</Form.Label>
               <Form.Control type="date" value={paymentForm.paymentDate} onChange={(e) => setPaymentForm((prev) => ({ ...prev, paymentDate: e.target.value }))} />
             </Form.Group>
-            <Form.Group className="mb-3">
+            <Form.Group controlId="invoice-detail-page-7" className="mb-3">
               <Form.Label>Nominal</Form.Label>
               <InputGroup>
                 <InputGroup.Text>Rp</InputGroup.Text>
@@ -525,17 +525,17 @@ export default function InvoiceDetailPage() {
               )}
               {!isOverpay ? <div className="small mt-1"><CurrencyDisplay amount={outstanding} /></div> : null}
             </Form.Group>
-            <Form.Group className="mb-3">
+            <Form.Group controlId="invoice-detail-page-8" className="mb-3">
               <Form.Label>Metode</Form.Label>
               <Form.Select value={paymentForm.method} onChange={(e) => setPaymentForm((prev) => ({ ...prev, method: e.target.value }))}>
                 {Object.entries(paymentMethodLabels).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
               </Form.Select>
             </Form.Group>
-            <Form.Group className="mb-3">
+            <Form.Group controlId="invoice-detail-page-9" className="mb-3">
               <Form.Label>Referensi</Form.Label>
               <Form.Control value={paymentForm.referenceNo} onChange={(e) => setPaymentForm((prev) => ({ ...prev, referenceNo: e.target.value }))} placeholder="No. transfer / kas / QRIS" />
             </Form.Group>
-            <Form.Group>
+            <Form.Group controlId="invoice-detail-page-10">
               <Form.Label>Catatan</Form.Label>
               <Form.Control as="textarea" rows={3} value={paymentForm.note} onChange={(e) => setPaymentForm((prev) => ({ ...prev, note: e.target.value }))} placeholder="Wajib jika pembayaran parsial." />
             </Form.Group>

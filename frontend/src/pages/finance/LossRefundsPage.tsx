@@ -119,11 +119,11 @@ export default function LossRefundsPage() {
                 {target.tenant?.phone ? ` (${target.tenant.phone})` : ''}, lalu catat di bawah.
               </p>
               {error && <Alert variant="danger">{error}</Alert>}
-              <Form.Group className="mb-3">
+              <Form.Group controlId="loss-refunds-page-1" className="mb-3">
                 <Form.Label>Catatan (mis. bukti transfer balik / ref)</Form.Label>
                 <Form.Control as="textarea" rows={2} value={note} onChange={(e) => setNote(e.target.value)} placeholder="Transfer balik BCA ref ..." />
               </Form.Group>
-              <Form.Group>
+              <Form.Group controlId="loss-refunds-page-2">
                 <Form.Label>URL bukti transfer balik</Form.Label>
                 <Form.Control value={proofUrl} onChange={(e) => setProofUrl(e.target.value)} placeholder="/uploads/refunds/..." />
               </Form.Group>

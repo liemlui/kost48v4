@@ -277,7 +277,7 @@ export default function FinanceTab({ stay, enabled = true }: { stay: Stay; enabl
             Anda akan membatalkan invoice <strong>{cancelTarget?.invoiceNumber || (cancelTarget ? `INV-${cancelTarget.id}` : '-')}</strong>.
             Invoice yang dibatalkan tidak lagi menjadi tagihan aktif tenant.
           </p>
-          <Form.Group>
+          <Form.Group controlId="finance-tab-1">
             <Form.Label>Alasan Pembatalan</Form.Label>
             <Form.Control
               as="textarea"

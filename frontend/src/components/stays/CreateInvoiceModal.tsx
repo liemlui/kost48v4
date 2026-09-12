@@ -282,19 +282,19 @@ export default function CreateInvoiceModal({
 
         <div className="row g-3 mb-4">
           <div className="col-md-4">
-            <Form.Group>
+            <Form.Group controlId="create-invoice-modal-1">
               <Form.Label>Awal Periode</Form.Label>
               <Form.Control type="date" value={periodStart} onChange={(event) => handlePeriodStartChange(event.target.value)} />
             </Form.Group>
           </div>
           <div className="col-md-4">
-            <Form.Group>
+            <Form.Group controlId="create-invoice-modal-2">
               <Form.Label>Akhir Periode</Form.Label>
               <Form.Control type="date" value={periodEnd} min={addDaysIso(periodStart, 1)} onChange={(event) => setPeriodEnd(event.target.value)} />
             </Form.Group>
           </div>
           <div className="col-md-4">
-            <Form.Group>
+            <Form.Group controlId="create-invoice-modal-3">
               <Form.Label>Jatuh Tempo</Form.Label>
               <Form.Control type="date" value={dueDate} onChange={(event) => setDueDate(event.target.value)} />
             </Form.Group>
@@ -309,7 +309,7 @@ export default function CreateInvoiceModal({
           <div className="fw-semibold mb-2">Ambil dari Penjualan WiFi</div>
           {(wifiSalesQuery.data ?? []).length ? (
             <div className="d-flex flex-wrap gap-2 align-items-end">
-              <Form.Group className="flex-grow-1">
+              <Form.Group controlId="create-invoice-modal-4" className="flex-grow-1">
                 <Form.Label className="small text-muted mb-1">Pilih penjualan WiFi terkait penghuni atau masa sewa ini</Form.Label>
                 <Form.Select value={selectedWifiSaleId} onChange={(event) => setSelectedWifiSaleId(event.target.value)}>
                   <option value="">Pilih penjualan WiFi</option>
@@ -345,7 +345,7 @@ export default function CreateInvoiceModal({
               </div>
               <div className="row g-3 align-items-end">
                 <div className="col-lg-2 col-md-4">
-                  <Form.Group>
+                  <Form.Group controlId="create-invoice-modal-5">
                     <Form.Label className="small text-muted">Tipe</Form.Label>
                     <Form.Select value={item.lineType} onChange={(event) => handleItemChange(index, 'lineType', event.target.value)}>
                       {invoiceLineTypeOptions.map((option) => (
@@ -355,25 +355,25 @@ export default function CreateInvoiceModal({
                   </Form.Group>
                 </div>
                 <div className="col-lg-4 col-md-8">
-                  <Form.Group>
+                  <Form.Group controlId="create-invoice-modal-6">
                     <Form.Label className="small text-muted">Deskripsi</Form.Label>
                     <Form.Control value={item.description} onChange={(event) => handleItemChange(index, 'description', event.target.value)} placeholder="Contoh: Sewa kamar bulan Juni" isInvalid={!String(item.description || '').trim()} />
                   </Form.Group>
                 </div>
                 <div className="col-lg-2 col-md-4 col-6">
-                  <Form.Group>
+                  <Form.Group controlId="create-invoice-modal-7">
                     <Form.Label className="small text-muted">Qty</Form.Label>
                     <Form.Control type="number" min="0" value={item.qty} onChange={(event) => handleItemChange(index, 'qty', Number(event.target.value))} isInvalid={Number(item.qty || 0) <= 0} />
                   </Form.Group>
                 </div>
                 <div className="col-lg-2 col-md-4 col-6">
-                  <Form.Group>
+                  <Form.Group controlId="create-invoice-modal-8">
                     <Form.Label className="small text-muted">Unit</Form.Label>
                     <Form.Control value={item.unit || ''} onChange={(event) => handleItemChange(index, 'unit', event.target.value)} placeholder="bulan" />
                   </Form.Group>
                 </div>
                 <div className="col-lg-2 col-md-4">
-                  <Form.Group>
+                  <Form.Group controlId="create-invoice-modal-9">
                     <Form.Label className="small text-muted">Harga Satuan</Form.Label>
                     <CurrencyInput
                       value={item.unitPriceRupiah}
@@ -392,7 +392,7 @@ export default function CreateInvoiceModal({
           <div className="fw-semibold">Total sementara: <CurrencyDisplay amount={totalAmount} /></div>
         </div>
 
-        <Form.Group>
+        <Form.Group controlId="create-invoice-modal-10">
           <Form.Label>Catatan</Form.Label>
           <Form.Control as="textarea" rows={3} value={notes} onChange={(event) => setNotes(event.target.value)} />
         </Form.Group>

@@ -360,7 +360,7 @@ export default function AssetRegisterPage() {
         <Card.Body>
           <div className="d-flex flex-column flex-lg-row gap-3 justify-content-between align-items-lg-start mb-3">
             <div><div className="small text-uppercase text-muted fw-semibold mb-1">Depresiasi Bulanan</div><h3 className="h5 mb-1">Preview &amp; posting depresiasi</h3><p className="text-muted mb-0">Posting beban penyusutan bulanan ke jurnal akuntansi berdasarkan aset yang aktif dan eligible.</p></div>
-            <div className="d-flex gap-2 align-items-end"><Form.Group><Form.Label className="small mb-1">Tahun</Form.Label><Form.Control type="number" value={runPeriod.year} onChange={(e) => setRunPeriod((prev) => ({ ...prev, year: Number(e.target.value) }))} style={{ width: 110 }} /></Form.Group><Form.Group><Form.Label className="small mb-1">Bulan</Form.Label><Form.Control type="number" min={1} max={12} value={runPeriod.month} onChange={(e) => setRunPeriod((prev) => ({ ...prev, month: Number(e.target.value) }))} style={{ width: 90 }} /></Form.Group><Button variant="outline-primary" disabled={!canRunDepreciation || runMutation.isPending} onClick={() => runMutation.mutate({ ...runPeriod, notes: 'Monthly depreciation run' })}>{runMutation.isPending ? 'Memposting...' : 'Posting Depresiasi'}</Button></div>
+            <div className="d-flex gap-2 align-items-end"><Form.Group controlId="asset-register-page-1"><Form.Label className="small mb-1">Tahun</Form.Label><Form.Control type="number" value={runPeriod.year} onChange={(e) => setRunPeriod((prev) => ({ ...prev, year: Number(e.target.value) }))} style={{ width: 110 }} /></Form.Group><Form.Group controlId="asset-register-page-2"><Form.Label className="small mb-1">Bulan</Form.Label><Form.Control type="number" min={1} max={12} value={runPeriod.month} onChange={(e) => setRunPeriod((prev) => ({ ...prev, month: Number(e.target.value) }))} style={{ width: 90 }} /></Form.Group><Button variant="outline-primary" disabled={!canRunDepreciation || runMutation.isPending} onClick={() => runMutation.mutate({ ...runPeriod, notes: 'Monthly depreciation run' })}>{runMutation.isPending ? 'Memposting...' : 'Posting Depresiasi'}</Button></div>
           </div>
           {previewQuery.isLoading ? <div className="p-3"><TableSkeleton rows={3} cols={4} /></div> : <>
             <div className="d-flex flex-wrap gap-2 mb-3"><StatusBadge status={preview?.alreadyPosted ? 'SECONDARY' : 'INFO'} customLabel={preview?.alreadyPosted ? 'Sudah diposting' : 'Belum diposting'} /><StatusBadge status="SECONDARY" customLabel={`Eligible: ${preview?.eligibleAssetCount ?? 0}`} /><StatusBadge status="SECONDARY" customLabel={`Total: ${formatRupiah(preview?.totalDepreciationRupiah)}`} /></div>
@@ -382,7 +382,7 @@ export default function AssetRegisterPage() {
               Isi data aset tetap. Validasi field wajib tetap aktif sebelum simpan.
             </p>
             <div className="d-grid gap-3">
-              <Form.Group>
+              <Form.Group controlId="asset-register-page-3">
                 <Form.Label>Nama aset</Form.Label>
                 <Form.Control
                   value={form.name}
@@ -393,7 +393,7 @@ export default function AssetRegisterPage() {
               </Form.Group>
               <Row className="g-2">
                 <Col sm={6}>
-                  <Form.Group>
+                  <Form.Group controlId="asset-register-page-4">
                     <Form.Label>Kategori</Form.Label>
                     <Form.Select value={form.category} onChange={(e) => setForm((prev) => ({ ...prev, category: e.target.value as FixedAssetCategory }))}>
                       {categoryOptions.map((option) => <option key={option} value={option}>{categoryLabels[option]}</option>)}
@@ -401,7 +401,7 @@ export default function AssetRegisterPage() {
                   </Form.Group>
                 </Col>
                 <Col sm={6}>
-                  <Form.Group>
+                  <Form.Group controlId="asset-register-page-5">
                     <Form.Label>Basis kapitalisasi</Form.Label>
                     <Form.Select value={form.capitalizationSource} onChange={(e) => setForm((prev) => ({ ...prev, capitalizationSource: e.target.value as FixedAssetCapitalizationSource }))}>
                       {capitalizationOptions.map((option) => <option key={option} value={option}>{capitalizationLabels[option]}</option>)}
@@ -411,13 +411,13 @@ export default function AssetRegisterPage() {
               </Row>
               <Row className="g-2">
                 <Col sm={6}>
-                  <Form.Group>
+                  <Form.Group controlId="asset-register-page-6">
                     <Form.Label>Tanggal perolehan</Form.Label>
                     <Form.Control type="date" value={form.acquisitionDate} onChange={(e) => setForm((prev) => ({ ...prev, acquisitionDate: e.target.value }))} required />
                   </Form.Group>
                 </Col>
                 <Col sm={6}>
-                  <Form.Group>
+                  <Form.Group controlId="asset-register-page-7">
                     <Form.Label>Mulai depresiasi</Form.Label>
                     <Form.Control type="date" value={form.depreciationStartDate} onChange={(e) => setForm((prev) => ({ ...prev, depreciationStartDate: e.target.value }))} />
                   </Form.Group>
@@ -425,13 +425,13 @@ export default function AssetRegisterPage() {
               </Row>
               <Row className="g-2">
                 <Col sm={6}>
-                  <Form.Group>
+                  <Form.Group controlId="asset-register-page-8">
                     <Form.Label>Cost</Form.Label>
                     <CurrencyInput required value={form.acquisitionCostRupiah === '' ? undefined : Number(form.acquisitionCostRupiah)} onChange={(v) => setForm((prev) => ({ ...prev, acquisitionCostRupiah: v == null ? '' : String(v) }))} />
                   </Form.Group>
                 </Col>
                 <Col sm={6}>
-                  <Form.Group>
+                  <Form.Group controlId="asset-register-page-9">
                     <Form.Label>Residu</Form.Label>
                     <CurrencyInput value={form.salvageValueRupiah === '' ? undefined : Number(form.salvageValueRupiah)} onChange={(v) => setForm((prev) => ({ ...prev, salvageValueRupiah: v == null ? '' : String(v) }))} />
                   </Form.Group>
@@ -439,13 +439,13 @@ export default function AssetRegisterPage() {
               </Row>
               <Row className="g-2">
                 <Col sm={6}>
-                  <Form.Group>
+                  <Form.Group controlId="asset-register-page-10">
                     <Form.Label>Umur manfaat bulan</Form.Label>
                     <Form.Control type="number" min={1} value={form.usefulLifeMonths} onChange={(e) => setForm((prev) => ({ ...prev, usefulLifeMonths: e.target.value }))} required />
                   </Form.Group>
                 </Col>
                 <Col sm={6}>
-                  <Form.Group>
+                  <Form.Group controlId="asset-register-page-11">
                     <Form.Label>Akumulasi awal</Form.Label>
                     <CurrencyInput value={form.accumulatedDepreciationRupiah === '' ? undefined : Number(form.accumulatedDepreciationRupiah)} onChange={(v) => setForm((prev) => ({ ...prev, accumulatedDepreciationRupiah: v == null ? '' : String(v) }))} />
                   </Form.Group>
@@ -457,7 +457,7 @@ export default function AssetRegisterPage() {
                 checked={form.depreciationEnabled}
                 onChange={(e) => setForm((prev) => ({ ...prev, depreciationEnabled: e.target.checked }))}
               />
-              <Form.Group>
+              <Form.Group controlId="asset-register-page-12">
                 <Form.Label>Tautkan ke barang inventaris <span className="text-muted">(opsional)</span></Form.Label>
                 <Form.Select value={form.inventoryItemId} onChange={(e) => setForm((prev) => ({ ...prev, inventoryItemId: e.target.value }))}>
                   <option value="">Tidak ditautkan</option>
@@ -467,7 +467,7 @@ export default function AssetRegisterPage() {
                 </Form.Select>
                 <Form.Text muted>Aset ini akan terhubung ke barang inventaris yang sama, bukan dua data terpisah.</Form.Text>
               </Form.Group>
-              <Form.Group>
+              <Form.Group controlId="asset-register-page-13">
                 <Form.Label>Catatan</Form.Label>
                 <Form.Control
                   as="textarea"
@@ -496,8 +496,8 @@ export default function AssetRegisterPage() {
           {alignmentAsset ? <>
             <Alert variant="warning"><strong>Owner approval required.</strong> Jangan post alignment jika nilai aset sudah masuk Fixed Assets di opening balance. Adjustment ini memengaruhi Balance Sheet.</Alert>
             <div className="mb-3"><div className="fw-semibold">{alignmentAsset.assetCode} · {alignmentAsset.name}</div><small className="text-muted">Nilai perolehan {formatRupiah(alignmentAsset.acquisitionCostRupiah)} · nilai buku {formatRupiah(alignmentAsset.bookValueRupiah)}</small></div>
-            <Row className="g-2 mb-3"><Col md={6}><Form.Group><Form.Label>Metode</Form.Label><Form.Select value={alignmentForm.method} onChange={(e) => setAlignmentForm((prev) => ({ ...prev, method: e.target.value as FixedAssetLedgerAlignmentMethod }))}>{alignmentMethods.map((method) => <option key={method} value={method}>{alignmentLabels[method]}</option>)}</Form.Select></Form.Group></Col><Col md={3}><Form.Group><Form.Label>Akun kredit</Form.Label><Form.Control value={alignmentForm.method === 'OWNER_CAPITAL_CONTRIBUTION' ? '3000' : alignmentForm.creditAccountCode} disabled={alignmentForm.method !== 'RECLASSIFY_FROM_CASH'} onChange={(e) => setAlignmentForm((prev) => ({ ...prev, creditAccountCode: e.target.value }))} /></Form.Group></Col><Col md={3}><Form.Group><Form.Label>Jumlah</Form.Label><CurrencyInput disabled={alignmentForm.method === 'DISCLOSURE_ONLY'} value={alignmentForm.amountRupiah === '' ? undefined : Number(alignmentForm.amountRupiah)} onChange={(v) => setAlignmentForm((prev) => ({ ...prev, amountRupiah: v == null ? '' : String(v) }))} /></Form.Group></Col></Row>
-            <Form.Group className="mb-3"><Form.Label>Catatan</Form.Label><Form.Control as="textarea" rows={2} value={alignmentForm.notes} onChange={(e) => setAlignmentForm((prev) => ({ ...prev, notes: e.target.value }))} /></Form.Group>
+            <Row className="g-2 mb-3"><Col md={6}><Form.Group controlId="asset-register-page-14"><Form.Label>Metode</Form.Label><Form.Select value={alignmentForm.method} onChange={(e) => setAlignmentForm((prev) => ({ ...prev, method: e.target.value as FixedAssetLedgerAlignmentMethod }))}>{alignmentMethods.map((method) => <option key={method} value={method}>{alignmentLabels[method]}</option>)}</Form.Select></Form.Group></Col><Col md={3}><Form.Group controlId="asset-register-page-15"><Form.Label>Akun kredit</Form.Label><Form.Control value={alignmentForm.method === 'OWNER_CAPITAL_CONTRIBUTION' ? '3000' : alignmentForm.creditAccountCode} disabled={alignmentForm.method !== 'RECLASSIFY_FROM_CASH'} onChange={(e) => setAlignmentForm((prev) => ({ ...prev, creditAccountCode: e.target.value }))} /></Form.Group></Col><Col md={3}><Form.Group controlId="asset-register-page-16"><Form.Label>Jumlah</Form.Label><CurrencyInput disabled={alignmentForm.method === 'DISCLOSURE_ONLY'} value={alignmentForm.amountRupiah === '' ? undefined : Number(alignmentForm.amountRupiah)} onChange={(v) => setAlignmentForm((prev) => ({ ...prev, amountRupiah: v == null ? '' : String(v) }))} /></Form.Group></Col></Row>
+            <Form.Group controlId="asset-register-page-17" className="mb-3"><Form.Label>Catatan</Form.Label><Form.Control as="textarea" rows={2} value={alignmentForm.notes} onChange={(e) => setAlignmentForm((prev) => ({ ...prev, notes: e.target.value }))} /></Form.Group>
             {alignmentPreviewMutation.isError ? <Alert variant="danger">{getApiErrorMessage(alignmentPreviewMutation.error, 'Preview gagal')}</Alert> : null}
             {alignmentPostMutation.isError ? <Alert variant="danger">{getApiErrorMessage(alignmentPostMutation.error, 'Post alignment gagal')}</Alert> : null}
             {alignmentPreviewMutation.data ? <Card className="border-0 bg-light"><Card.Body><div className="small text-uppercase text-muted fw-semibold mb-2">Preview Journal</div>{alignmentPreviewMutation.data?.journalPreview ? <><div>Debit {alignmentPreviewMutation.data.journalPreview.debit.accountCode} {alignmentPreviewMutation.data.journalPreview.debit.accountName}: <strong>{formatRupiah(alignmentPreviewMutation.data.journalPreview.debit.amountRupiah)}</strong></div><div>Credit {alignmentPreviewMutation.data.journalPreview.credit.accountCode} {alignmentPreviewMutation.data.journalPreview.credit.accountName}: <strong>{formatRupiah(alignmentPreviewMutation.data.journalPreview.credit.amountRupiah)}</strong></div><StatusBadge status="SUCCESS" customLabel="Seimbang" /></> : <div className="text-muted">Metode ini tidak membuat journal.</div>}</Card.Body></Card> : null}

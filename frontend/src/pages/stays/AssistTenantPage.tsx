@@ -200,7 +200,7 @@ export default function AssistTenantPage() {
                 </Alert>
               ) : (
                 <>
-                  <Form.Group className="mb-3">
+                  <Form.Group controlId="assist-tenant-page-1" className="mb-3">
                     <Form.Label>Catatan (opsional)</Form.Label>
                     <Form.Control as="textarea" rows={2} value={meterNote} onChange={(e) => setMeterNote(e.currentTarget.value)} placeholder="Contoh: dicatat bersama tenant" />
                   </Form.Group>

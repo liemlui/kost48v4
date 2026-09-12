@@ -85,7 +85,13 @@ export default function StaffTopWorkspaceNav() {
 
   return (
     <div className="staff-workspace-nav-wrap simple-only">
-      <nav className="staff-workspace-tabs" aria-label="Menu kerja staf">
+      {/* AO-08/T-03: area gulir horizontal wajib dapat difokus keyboard (WCAG 2.1.1). */}
+      <nav
+        className="staff-workspace-tabs"
+        aria-label="Menu kerja staf"
+        tabIndex={0}
+        role="group"
+      >
         {links.map((link) => {
           const badge = countBadge(link.count);
           return (

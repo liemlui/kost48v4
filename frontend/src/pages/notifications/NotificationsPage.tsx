@@ -1,4 +1,4 @@
-﻿import PageHeader from '../../components/common/PageHeader';
+import PageHeader from '../../components/common/PageHeader';
 import { useCallback, useMemo, useState } from 'react';
 import { Alert, Badge, Button, Spinner } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
@@ -281,7 +281,9 @@ export default function NotificationsPage() {
                           {item.isRead ? 'Sudah dibaca' : 'Belum dibaca'}
                         </Badge>
                         {item.linkTo && (
-                          <span className="text-primary small" style={{ cursor: 'pointer' }}>
+                          /* AO-08/T-02: #0d6efd di atas kartu terang hanya 4,38:1. Nilai hex
+                             dipakai langsung karena `!important` stylesheet tema menang. */
+                          <span className="text-primary small" style={{ cursor: 'pointer', color: '#2563eb' }}>
                             Klik untuk buka →
                           </span>
                         )}

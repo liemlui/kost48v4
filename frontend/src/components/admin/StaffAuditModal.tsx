@@ -48,13 +48,13 @@ export default function StaffAuditModal({ show, staff, onHide }: Props) {
       <Modal.Body>
         {mutation.isError ? <Alert variant="danger">Audit belum tersimpan. Coba lagi.</Alert> : null}
         <Alert variant="light" className="border small">Audit harus berdasarkan pengecekan nyata. Jika pekerjaan belum sesuai, tulis catatan agar staff bisa memperbaiki.</Alert>
-        <Form.Group className="mb-3">
+        <Form.Group controlId="staff-audit-modal-1" className="mb-3">
           <Form.Label>Staff</Form.Label>
           <Form.Control value={staff?.staff.fullName ?? ''} disabled />
         </Form.Group>
         <div className="row g-2">
           <div className="col-6">
-            <Form.Group className="mb-3">
+            <Form.Group controlId="staff-audit-modal-2" className="mb-3">
               <Form.Label>Jenis pekerjaan</Form.Label>
               <Form.Select value={sourceType} onChange={(event) => setSourceType(event.currentTarget.value as StaffAuditPayload['sourceType'])}>
                 <option value="MANUAL_AUDIT">Audit manual</option>
@@ -67,13 +67,13 @@ export default function StaffAuditModal({ show, staff, onHide }: Props) {
             </Form.Group>
           </div>
           <div className="col-6">
-            <Form.Group className="mb-3">
+            <Form.Group controlId="staff-audit-modal-3" className="mb-3">
               <Form.Label>ID pekerjaan</Form.Label>
               <Form.Control inputMode="numeric" value={sourceId} onChange={(event) => setSourceId(event.currentTarget.value)} placeholder="Opsional" />
             </Form.Group>
           </div>
         </div>
-        <Form.Group className="mb-3">
+        <Form.Group controlId="staff-audit-modal-4" className="mb-3">
           <Form.Label>Hasil audit</Form.Label>
           <Form.Select value={result} onChange={(event) => setResult(event.currentTarget.value as StaffAuditPayload['result'])}>
             <option value="PASS">Sesuai</option>
@@ -82,7 +82,7 @@ export default function StaffAuditModal({ show, staff, onHide }: Props) {
             <option value="NOT_DONE">Diklaim selesai tapi belum dikerjakan</option>
           </Form.Select>
         </Form.Group>
-        <Form.Group>
+        <Form.Group controlId="staff-audit-modal-5">
           <Form.Label>Catatan</Form.Label>
           <Form.Control as="textarea" rows={3} value={notes} onChange={(event) => setNotes(event.currentTarget.value)} placeholder="Contoh: lantai masih licin, minta pel ulang area kamar mandi." />
         </Form.Group>

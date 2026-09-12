@@ -875,6 +875,9 @@
 .staff-circle-metric-ring strong, .staff-report-circle strong, .staff-routine-circle strong { color:var(--gray-900); font-size:.95rem; font-weight:900; }
 .staff-circle-metric span, .staff-report-circle-card span, .staff-routine-circle-tab > span:not(.staff-routine-circle) { color:var(--gray-900); font-weight:900; font-size:.88rem; }
 .staff-circle-metric small, .staff-report-circle-card small, .staff-routine-circle-tab small { color:var(--gray-500); font-size:.76rem; }
+/* AO-08/T-02: helper kecil pada kartu KPI laporan bulanan memakai --gray-500 (#64748b); di atas
+   permukaan biru muda kartu (#e7f5ff) rasio hanya 4,28:1. --gray-600 memberi 6,82:1. */
+.staff-report-circle-card small { color: var(--gray-600); }
 .staff-circle-metric.tone-green, .staff-report-circle-card.tone-green, .staff-routine-circle-tab.complete { --ring-color:var(--green-500); }
 .staff-circle-metric.tone-amber, .staff-report-circle-card.tone-amber { --ring-color:var(--amber-500); }
 .staff-circle-metric.tone-red, .staff-report-circle-card.tone-red { --ring-color:var(--red-500); }
@@ -1118,6 +1121,9 @@
   color: var(--gray-500);
   font-size: 0.86rem;
 }
+/* AO-08/T-02: #64748b di atas kartu biru muda (--blue-50 #eff6ff) hanya 4,28:1.
+   --gray-600 memberi 6,7:1 pada ukuran yang sama. */
+.staff-coach-focus.tone-info span { color: var(--gray-600); }
 
 .staff-coach-focus.tone-good { border-color: var(--green-200); background: var(--green-50); }
 .staff-coach-focus.tone-warn { border-color: var(--amber-200); background: var(--amber-50); }

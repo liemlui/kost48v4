@@ -25,7 +25,7 @@ export default function StepRoomSelect({
     <Card className="content-card border-0 shadow-sm mb-4">
       <Card.Body>
         <h5 className="mb-3">Pilih Kamar</h5>
-        <Form.Group className="mb-3">
+        <Form.Group controlId="step-room-select-1" className="mb-3">
           <Form.Label>Kamar<span className="text-danger ms-1">*</span></Form.Label>
           {isLoadingRooms ? (
             <div className="d-flex align-items-center gap-2">

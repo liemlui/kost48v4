@@ -99,7 +99,7 @@ export default function StaffWorkActionModal({
           <>
             {/* Foto bukti — di atas form untuk dorong upload */}
             {action === 'COMPLETE' ? (
-              <Form.Group className="mb-3 staff-photo-proof-group">
+              <Form.Group controlId="staff-work-action-modal-1" className="mb-3 staff-photo-proof-group">
                 <Form.Label className="staff-photo-proof-label fw-semibold">
                   📷 Foto bukti kerja{requirePhoto ? ' (wajib)' : ''}
                 </Form.Label>
@@ -114,7 +114,7 @@ export default function StaffWorkActionModal({
               </Form.Group>
             ) : null}
 
-            <Form.Group className="mb-3">
+            <Form.Group controlId="staff-work-action-modal-2" className="mb-3">
               <Form.Label>
                 {action === 'NEED_HELP' ? 'Apa kendalanya?' : `Catatan hasil kerja${requireNote ? ' (wajib)' : ''}`}
               </Form.Label>
@@ -132,7 +132,7 @@ export default function StaffWorkActionModal({
             </Form.Group>
 
             {action === 'NEED_HELP' ? (
-              <Form.Group>
+              <Form.Group controlId="staff-work-action-modal-3">
                 <Form.Label>Foto bukti (opsional)</Form.Label>
                 <CameraOrGalleryInput onChange={onPhotoChange} />
                 {photoPreview ? <SafeImage className="staff-proof-preview" src={photoPreview} alt="Foto bukti" /> : null}

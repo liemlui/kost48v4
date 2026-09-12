@@ -83,7 +83,7 @@ export default function CheckoutRequestModal({ show, onHide, onSuccess, stay }: 
           </Alert>
         ) : null}
 
-        <Form.Group className="mb-3">
+        <Form.Group controlId="checkout-request-modal-1" className="mb-3">
           <Form.Label>Tanggal Keluar yang Diajukan</Form.Label>
           <Form.Control
             type="date"
@@ -96,7 +96,7 @@ export default function CheckoutRequestModal({ show, onHide, onSuccess, stay }: 
           </Form.Text>
         </Form.Group>
 
-        <Form.Group className="mb-3">
+        <Form.Group controlId="checkout-request-modal-2" className="mb-3">
           <Form.Label>Alasan keluar</Form.Label>
           <Form.Control
             as="textarea"
@@ -107,7 +107,7 @@ export default function CheckoutRequestModal({ show, onHide, onSuccess, stay }: 
           />
         </Form.Group>
 
-        <Form.Group className="mb-3">
+        <Form.Group controlId="checkout-request-modal-3" className="mb-3">
           <Form.Label>Catatan Tambahan (opsional)</Form.Label>
           <Form.Control
             as="textarea"

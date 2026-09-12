@@ -375,7 +375,7 @@ export default function RoomDetailPage() {
                   {roomConditionMutation.isError ? <Alert variant="danger" className="py-2">Catatan kamar belum terkirim. Coba sekali lagi.</Alert> : null}
 
                   <div className="staff-room-condition-form">
-                    <Form.Group>
+                    <Form.Group controlId="room-detail-page-1">
                       <Form.Label>Kondisi kamar</Form.Label>
                       <div className="staff-room-condition-choice-grid">
                         {STAFF_ROOM_CONDITION_OPTIONS.map((option) => (
@@ -391,11 +391,11 @@ export default function RoomDetailPage() {
                         ))}
                       </div>
                     </Form.Group>
-                    <Form.Group>
+                    <Form.Group controlId="room-detail-page-2">
                       <Form.Label>Catatan <span className="text-muted">(opsional)</span></Form.Label>
                       <Form.Control as="textarea" rows={2} value={roomConditionNote} onChange={(event) => setRoomConditionNote(event.currentTarget.value)} placeholder="Contoh: cat dinding dekat jendela mengelupas" />
                     </Form.Group>
-                    <Form.Group>
+                    <Form.Group controlId="room-detail-page-3">
                       <Form.Label>Foto pendukung</Form.Label>
                       <CameraOrGalleryInput onChange={handleRoomConditionPhoto} />
                       {roomConditionPreview ? <SafeImage className="staff-proof-preview" src={roomConditionPreview} alt="Foto kondisi kamar" /> : null}

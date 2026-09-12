@@ -713,7 +713,7 @@ body {
   color: var(--gray-50);
 }
 
-.report-insight span {
+.report-insight span:not(.badge) {
   color: rgba(203, 213, 225, 0.78);
   font-size: 0.88rem;
 }
@@ -946,12 +946,14 @@ body {
   color: var(--gray-900);
 }
 
-.report-radar-row span,
-.report-split-row span,
-.report-matrix-row span,
-.report-insight span {
+.report-radar-row span:not(.badge),
+.report-split-row span:not(.badge),
+.report-matrix-row span:not(.badge) {
   color: var(--gray-500);
 }
+/* AO-08/T-02: badge di dalam baris matriks membawa warna teksnya sendiri lewat `text-bg-*`
+   (lihat reportShared.tsx). Tanpa pengecualian `:not(.badge)` di atas — dan tanpa menghapus
+   paksaan warna putih di sini — badge `text-bg-warning` menjadi putih di atas kuning (1,63:1). */
 
 .report-radar-track,
 .report-split-track,

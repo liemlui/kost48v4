@@ -167,13 +167,13 @@ export default function StaffRoutinesAdminPage() {
           <Form onSubmit={submit}>
             <Row className="g-3">
               <Col md={6}>
-                <Form.Group>
+                <Form.Group controlId="staff-routines-admin-page-1">
                   <Form.Label>Nama pekerjaan</Form.Label>
                   <Form.Control value={form.title} onChange={(event) => setForm((prev) => ({ ...prev, title: event.currentTarget.value }))} placeholder="Contoh: Sapu ruang umum" />
                 </Form.Group>
               </Col>
               <Col md={3}>
-                <Form.Group>
+                <Form.Group controlId="staff-routines-admin-page-2">
                   <Form.Label>Jadwal</Form.Label>
                   <Form.Select value={form.frequency} onChange={(event) => setForm((prev) => ({ ...prev, frequency: event.currentTarget.value as StaffRoutineFrequency }))}>
                     <option value="DAILY">Harian</option>
@@ -183,7 +183,7 @@ export default function StaffRoutinesAdminPage() {
                 </Form.Group>
               </Col>
               <Col md={3}>
-                <Form.Group>
+                <Form.Group controlId="staff-routines-admin-page-3">
                   <Form.Label>Area</Form.Label>
                   <Form.Select value={form.areaType} onChange={(event) => setForm((prev) => ({ ...prev, areaType: event.currentTarget.value as StaffRoutineAreaType }))}>
                     <option value="GENERAL">Area umum</option>
@@ -198,7 +198,7 @@ export default function StaffRoutinesAdminPage() {
               </Col>
               {form.frequency === 'WEEKLY' ? (
                 <Col md={3}>
-                  <Form.Group>
+                  <Form.Group controlId="staff-routines-admin-page-4">
                     <Form.Label>Hari</Form.Label>
                     <Form.Select value={form.dayOfWeek} onChange={(event) => setForm((prev) => ({ ...prev, dayOfWeek: event.currentTarget.value }))}>
                       <option value="">Setiap minggu</option>
@@ -215,28 +215,31 @@ export default function StaffRoutinesAdminPage() {
               ) : null}
               {form.frequency === 'MONTHLY' ? (
                 <Col md={3}>
-                  <Form.Group>
+                  <Form.Group controlId="staff-routines-admin-page-5">
                     <Form.Label>Tanggal</Form.Label>
                     <Form.Control type="number" min={1} max={31} value={form.dayOfMonth} onChange={(event) => setForm((prev) => ({ ...prev, dayOfMonth: event.currentTarget.value }))} placeholder="1-31" />
                   </Form.Group>
                 </Col>
               ) : null}
               <Col md={6}>
-                <Form.Group>
+                <Form.Group controlId="staff-routines-admin-page-6">
                   <Form.Label>Catatan untuk staf</Form.Label>
                   <Form.Control value={form.description} onChange={(event) => setForm((prev) => ({ ...prev, description: event.currentTarget.value }))} placeholder="Contoh: bersihkan debu dan sampah kecil" />
                 </Form.Group>
               </Col>
               <Col md={3}>
-                <Form.Group>
+                <Form.Group controlId="staff-routines-admin-page-7">
                   <Form.Label>Urutan</Form.Label>
                   <Form.Control type="number" value={form.sortOrder} onChange={(event) => setForm((prev) => ({ ...prev, sortOrder: event.currentTarget.value }))} />
                 </Form.Group>
               </Col>
               <Col xs={12} md={6} lg={3} className="d-flex align-items-end gap-3 flex-wrap">
-                <Form.Check checked={form.requiresPhoto} onChange={(event) => setForm((prev) => ({ ...prev, requiresPhoto: event.currentTarget.checked }))} label="Butuh foto" />
-                <Form.Check checked={form.requiresNote} onChange={(event) => setForm((prev) => ({ ...prev, requiresNote: event.currentTarget.checked }))} label="Butuh catatan" />
-                <Form.Check checked={form.isActive} onChange={(event) => setForm((prev) => ({ ...prev, isActive: event.currentTarget.checked }))} label="Aktif" />
+                {/* AO-08/T-01: `<Form.Check>` tanpa prop `type` tidak merender elemen <label>,
+                    sehingga `label=` diabaikan dan kontrol kehilangan nama yang dapat diakses.
+                    `aria-label` memastikan nama tersebut ada. */}
+                <Form.Check aria-label="Butuh foto" checked={form.requiresPhoto} onChange={(event) => setForm((prev) => ({ ...prev, requiresPhoto: event.currentTarget.checked }))} label="Butuh foto" />
+                <Form.Check aria-label="Butuh catatan" checked={form.requiresNote} onChange={(event) => setForm((prev) => ({ ...prev, requiresNote: event.currentTarget.checked }))} label="Butuh catatan" />
+                <Form.Check aria-label="Aktif" checked={form.isActive} onChange={(event) => setForm((prev) => ({ ...prev, isActive: event.currentTarget.checked }))} label="Aktif" />
               </Col>
             </Row>
             <div className="d-flex gap-2 mt-3">

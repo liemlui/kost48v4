@@ -239,7 +239,7 @@ export default function FacilityManager({ roomId, allowedToManage = true }: Faci
           <Form onSubmit={handleSubmit} className="border rounded p-3 mb-3 bg-light">
             <Row className="g-2">
               <Col md={4}>
-                <Form.Group>
+                <Form.Group controlId="facility-manager-1">
                   <Form.Label className="small mb-1">Nama Fasilitas *</Form.Label>
                   <Form.Control
                     size="sm"
@@ -251,7 +251,7 @@ export default function FacilityManager({ roomId, allowedToManage = true }: Faci
               </Col>
 
               <Col md={2}>
-                <Form.Group>
+                <Form.Group controlId="facility-manager-2">
                   <Form.Label className="small mb-1">Jumlah</Form.Label>
                   <Form.Control
                     size="sm"
@@ -264,7 +264,7 @@ export default function FacilityManager({ roomId, allowedToManage = true }: Faci
               </Col>
 
               <Col md={3}>
-                <Form.Group>
+                <Form.Group controlId="facility-manager-3">
                   <Form.Label className="small mb-1">Kategori</Form.Label>
                   <Form.Select
                     size="sm"
@@ -282,7 +282,7 @@ export default function FacilityManager({ roomId, allowedToManage = true }: Faci
               </Col>
 
               <Col md={3}>
-                <Form.Group>
+                <Form.Group controlId="facility-manager-4">
                   <Form.Label className="small mb-1">Kondisi</Form.Label>
                   <Form.Select
                     size="sm"
@@ -300,7 +300,7 @@ export default function FacilityManager({ roomId, allowedToManage = true }: Faci
 
             <Row className="g-2 mt-2">
               <Col md={4}>
-                <Form.Group>
+                <Form.Group controlId="facility-manager-5">
                   <Form.Label className="small mb-1">Tautkan ke barang gudang</Form.Label>
                   <Form.Select
                     size="sm"
@@ -319,7 +319,7 @@ export default function FacilityManager({ roomId, allowedToManage = true }: Faci
               </Col>
 
               <Col md={4}>
-                <Form.Group>
+                <Form.Group controlId="facility-manager-6">
                   <Form.Label className="small mb-1">Catatan Internal</Form.Label>
                   <Form.Control
                     size="sm"

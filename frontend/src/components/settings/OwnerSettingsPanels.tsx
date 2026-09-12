@@ -517,7 +517,7 @@ export function FaqManagementPanel() {
         </Modal.Header>
         <Modal.Body>
           {error && <Alert variant="danger" className="py-2 small">{error}</Alert>}
-          <Form.Group className="mb-3">
+          <Form.Group controlId="owner-settings-panels-1" className="mb-3">
             <Form.Label>Pertanyaan</Form.Label>
             <Form.Control
               autoFocus
@@ -526,7 +526,7 @@ export function FaqManagementPanel() {
               placeholder="Contoh: Berapa kisaran tarif kamar?"
             />
           </Form.Group>
-          <Form.Group className="mb-3">
+          <Form.Group controlId="owner-settings-panels-2" className="mb-3">
             <Form.Label>Jawaban</Form.Label>
             <Form.Control
               as="textarea"
@@ -538,7 +538,7 @@ export function FaqManagementPanel() {
           </Form.Group>
           <Row className="g-3">
             <Col md={4}>
-              <Form.Group>
+              <Form.Group controlId="owner-settings-panels-3">
                 <Form.Label>Kategori</Form.Label>
                 <Form.Select value={form.category} onChange={(e) => setForm((p) => ({ ...p, category: e.target.value }))}>
                   {FAQ_CATEGORIES.map((c) => <option key={c}>{c}</option>)}
@@ -546,7 +546,7 @@ export function FaqManagementPanel() {
               </Form.Group>
             </Col>
             <Col md={4}>
-              <Form.Group>
+              <Form.Group controlId="owner-settings-panels-4">
                 <Form.Label>Urutan tampil</Form.Label>
                 <CurrencyInput
                   value={form.sortOrder}
@@ -841,14 +841,14 @@ export function TariffSettingsPanel() {
         {savedMsg ? <Alert variant="success" className="py-2" dismissible onClose={() => setSavedMsg('')}>{savedMsg}</Alert> : null}
         <Row className="g-3">
           <Col md={6}>
-            <Form.Group>
+            <Form.Group controlId="owner-settings-panels-5">
               <Form.Label>Jatah listrik gratis / bulan (kWh)</Form.Label>
               <CurrencyInput value={form.freeElectricityKwhPerMonth} onChange={(v) => set('freeElectricityKwhPerMonth', v ?? 0)} />
               <Form.Text muted>Pemakaian di bawah jatah ini tidak ditagih.</Form.Text>
             </Form.Group>
           </Col>
           <Col md={6}>
-            <Form.Group>
+            <Form.Group controlId="owner-settings-panels-6">
               <Form.Label>Tarif listrik / kWh (Rp)</Form.Label>
               <CurrencyInput value={form.electricityTariffPerKwhRupiah} onChange={(v) => set('electricityTariffPerKwhRupiah', v ?? 0)} />
               <Form.Text muted>Untuk pemakaian melebihi jatah gratis.</Form.Text>
@@ -866,13 +866,13 @@ export function TariffSettingsPanel() {
           {form.waterMeteringEnabled ? (
             <>
               <Col md={6}>
-                <Form.Group>
+                <Form.Group controlId="owner-settings-panels-7">
                   <Form.Label>Tarif air / m³ (Rp)</Form.Label>
                   <CurrencyInput value={form.waterTariffPerM3Rupiah} onChange={(v) => set('waterTariffPerM3Rupiah', v ?? 0)} />
                 </Form.Group>
               </Col>
               <Col md={6}>
-                <Form.Group>
+                <Form.Group controlId="owner-settings-panels-8">
                   <Form.Label>Jatah air gratis / bulan (m³)</Form.Label>
                   <CurrencyInput value={form.freeWaterM3PerMonth} onChange={(v) => set('freeWaterM3PerMonth', v ?? 0)} />
                 </Form.Group>
@@ -881,28 +881,28 @@ export function TariffSettingsPanel() {
           ) : null}
           <Col xs={12}><hr className="my-1" /><p className="text-muted small mb-0">Biaya layanan tambahan & aturan penghuni</p></Col>
           <Col md={6}>
-            <Form.Group>
+            <Form.Group controlId="owner-settings-panels-9">
               <Form.Label>WiFi per gadget / bulan (Rp)</Form.Label>
               <CurrencyInput value={form.wifiRupiah ?? WIFI_DEFAULT_PRICE_RUPIAH} onChange={(v) => set('wifiRupiah', v ?? 0)} />
               <Form.Text muted>Biaya berlangganan WiFi per perangkat per bulan.</Form.Text>
             </Form.Group>
           </Col>
           <Col md={6}>
-            <Form.Group>
+            <Form.Group controlId="owner-settings-panels-10">
               <Form.Label>Galon air (Voila) / galon (Rp)</Form.Label>
               <CurrencyInput value={form.galonRupiah ?? 20000} onChange={(v) => set('galonRupiah', v ?? 0)} />
               <Form.Text muted>Harga jual galon air Voila dari pengelola.</Form.Text>
             </Form.Group>
           </Col>
           <Col md={6}>
-            <Form.Group>
+            <Form.Group controlId="owner-settings-panels-11">
               <Form.Label>Deposit hewan peliharaan (Rp)</Form.Label>
               <CurrencyInput value={form.petDepositRupiah ?? 100000} onChange={(v) => set('petDepositRupiah', v ?? 0)} />
               <Form.Text muted>Deposit refundable untuk tenant yang membawa hewan peliharaan.</Form.Text>
             </Form.Group>
           </Col>
           <Col md={6}>
-            <Form.Group>
+            <Form.Group controlId="owner-settings-panels-12">
               <Form.Label>Biaya penghuni ekstra (%)</Form.Label>
               <CurrencyInput value={form.extraOccupantFeePercent ?? 20} onChange={(v) => set('extraOccupantFeePercent', Math.min(100, v ?? 0))} />
               <Form.Text muted>% dari sewa per penghuni ekstra (di atas batas gratis per roomSize).</Form.Text>
@@ -910,7 +910,7 @@ export function TariffSettingsPanel() {
           </Col>
           <Col xs={12}><hr className="my-1" /><p className="text-muted small mb-0">Perawatan AC (jadwal cuci otomatis)</p></Col>
           <Col md={6}>
-            <Form.Group>
+            <Form.Group controlId="owner-settings-panels-13">
               <Form.Label>Ambang pemakaian AC → cuci (kWh)</Form.Label>
               <CurrencyInput value={form.acCleanKwhThreshold ?? 200} onChange={(v) => set('acCleanKwhThreshold', v ?? 0)} />
               <Form.Text muted>Sistem membuat tiket cuci AC bila estimasi pemakaian (watt × jam × hari sejak cuci terakhir) mencapai angka ini — pemicu dini selain interval hari/bulan per-kamar. Isi 0 untuk pakai interval saja.</Form.Text>
@@ -939,60 +939,60 @@ export function TariffSettingsPanel() {
           </Col>
           <Col xs={12}><hr className="my-1" /><p className="text-muted small mb-0">Email (Brevo)</p></Col>
           <Col md={6}>
-            <Form.Group>
+            <Form.Group controlId="owner-settings-panels-14">
               <Form.Label>Brevo API Key</Form.Label>
               <Form.Control type="password" value={(form as any).brevoApiKey ?? ''} onChange={(e) => set('brevoApiKey' as any, e.target.value)} placeholder={form.brevoApiKeySet ? (form.brevoApiKeyPreview ?? '••••') : 'Kosong = nonaktifkan email'} />
               <Form.Text muted>{form.brevoApiKeySet ? `Tersimpan (sumber: ${form.brevoApiKeySource === 'env' ? '.env' : 'settings'}). Kosongkan untuk hapus.` : 'Isi untuk mengaktifkan email reset password via Brevo.'}</Form.Text>
             </Form.Group>
           </Col>
           <Col md={3}>
-            <Form.Group>
+            <Form.Group controlId="owner-settings-panels-15">
               <Form.Label>Email Pengirim</Form.Label>
               <Form.Control type="email" value={(form as any).mailFromEmail ?? ''} onChange={(e) => set('mailFromEmail' as any, e.target.value)} placeholder="no-reply@kost48surabaya.com" />
             </Form.Group>
           </Col>
           <Col md={3}>
-            <Form.Group>
+            <Form.Group controlId="owner-settings-panels-16">
               <Form.Label>Nama Pengirim</Form.Label>
               <Form.Control type="text" value={(form as any).mailFromName ?? ''} onChange={(e) => set('mailFromName' as any, e.target.value)} placeholder="Kost48 Surabaya" />
             </Form.Group>
           </Col>
           <Col xs={12}><hr className="my-1" /><p className="text-muted small mb-0">Tuya IoT Cloud (KWH meter per kamar)</p></Col>
           <Col md={4}>
-            <Form.Group>
+            <Form.Group controlId="owner-settings-panels-17">
               <Form.Label>Access ID / Client ID</Form.Label>
               <Form.Control type="text" value={(form as any).tuyaAccessKey ?? ''} onChange={(e) => set('tuyaAccessKey' as any, e.target.value)} placeholder="Client ID Tuya" />
             </Form.Group>
           </Col>
           <Col md={4}>
-            <Form.Group>
+            <Form.Group controlId="owner-settings-panels-18">
               <Form.Label>Secret Key</Form.Label>
               <Form.Control type="password" value={(form as any).tuyaSecretKey ?? ''} onChange={(e) => set('tuyaSecretKey' as any, e.target.value)} placeholder={form.tuyaSecretKeySet ? (form.tuyaSecretKeyPreview ?? '••••') : 'Kosong = fallback env'} />
               <Form.Text muted>{form.tuyaSecretKeySet ? `Tersimpan (sumber: ${form.tuyaSecretKeySource === 'env' ? '.env' : 'settings'}). Kosongkan untuk hapus.` : 'Isi untuk mengaktifkan pembacaan KWH meter Tuya.'}</Form.Text>
             </Form.Group>
           </Col>
           <Col md={4}>
-            <Form.Group>
+            <Form.Group controlId="owner-settings-panels-19">
               <Form.Label>API Base URL</Form.Label>
               <Form.Control type="text" value={(form as any).tuyaApiBase ?? ''} onChange={(e) => set('tuyaApiBase' as any, e.target.value)} placeholder="https://openapi.tuyaus.com" />
             </Form.Group>
           </Col>
           <Col xs={12}><hr className="my-1" /><p className="text-muted small mb-0">Web Push (VAPID)</p></Col>
           <Col md={4}>
-            <Form.Group>
+            <Form.Group controlId="owner-settings-panels-20">
               <Form.Label>VAPID Public Key</Form.Label>
               <Form.Control type="text" value={(form as any).vapidPublicKey ?? ''} onChange={(e) => set('vapidPublicKey' as any, e.target.value)} placeholder="Public key VAPID" />
             </Form.Group>
           </Col>
           <Col md={4}>
-            <Form.Group>
+            <Form.Group controlId="owner-settings-panels-21">
               <Form.Label>VAPID Private Key</Form.Label>
               <Form.Control type="password" value={(form as any).vapidPrivateKey ?? ''} onChange={(e) => set('vapidPrivateKey' as any, e.target.value)} placeholder={form.vapidPrivateKeySet ? (form.vapidPrivateKeyPreview ?? '••••') : 'Kosong = fallback env'} />
               <Form.Text muted>{form.vapidPrivateKeySet ? `Tersimpan (sumber: ${form.vapidPrivateKeySource === 'env' ? '.env' : 'settings'}). Kosongkan untuk hapus.` : 'Isi untuk mengaktifkan notifikasi push.'}</Form.Text>
             </Form.Group>
           </Col>
           <Col md={4}>
-            <Form.Group>
+            <Form.Group controlId="owner-settings-panels-22">
               <Form.Label>Subject (mailto)</Form.Label>
               <Form.Control type="text" value={(form as any).vapidSubject ?? ''} onChange={(e) => set('vapidSubject' as any, e.target.value)} placeholder="mailto:admin@kost48.local" />
             </Form.Group>
@@ -1002,7 +1002,7 @@ export function TariffSettingsPanel() {
             <Form.Check type="switch" id="autoops-enabled" label="Aktifkan AutoOps (penjadwalan otomatis)" checked={(form as any).autoOpsEnabled ?? true} onChange={(e) => set('autoOpsEnabled' as any, e.target.checked)} />
           </Col>
           <Col md={4}>
-            <Form.Group><Form.Label>Interval (menit)</Form.Label><Form.Control type="number" min={1} max={60} value={(form as any).autoOpsIntervalMinutes ?? 5} onChange={(e) => set('autoOpsIntervalMinutes' as any, Number(e.target.value))} /></Form.Group>
+            <Form.Group controlId="owner-settings-panels-23"><Form.Label>Interval (menit)</Form.Label><Form.Control type="number" min={1} max={60} value={(form as any).autoOpsIntervalMinutes ?? 5} onChange={(e) => set('autoOpsIntervalMinutes' as any, Number(e.target.value))} /></Form.Group>
           </Col>
           <Col md={4}>
             <Form.Check type="switch" id="ac-cleaning" label="Jadwal cuci AC otomatis" checked={(form as any).acCleaningEnabled ?? true} onChange={(e) => set('acCleaningEnabled' as any, e.target.checked)} />
@@ -1012,26 +1012,26 @@ export function TariffSettingsPanel() {
           <Col md={4}><Form.Check type="switch" id="asset-depreciation" label="Penyusutan aset otomatis" checked={(form as any).assetDepreciationAutoEnabled ?? false} onChange={(e) => set('assetDepreciationAutoEnabled' as any, e.target.checked)} /></Col>
           <Col md={4}><Form.Check type="switch" id="rent-recognition" label="PSAK 72 — pengakuan sewa" checked={(form as any).rentRecognitionEnabled ?? false} onChange={(e) => set('rentRecognitionEnabled' as any, e.target.checked)} /></Col>
           <Col md={4}><Form.Check type="switch" id="notif-pruning" label="Bersihkan notifikasi lama" checked={(form as any).notificationPruningEnabled ?? true} onChange={(e) => set('notificationPruningEnabled' as any, e.target.checked)} /></Col>
-          <Col md={4}><Form.Group><Form.Label>Retensi notifikasi (hari)</Form.Label><Form.Control type="number" min={1} max={365} value={(form as any).notificationRetentionDays ?? 90} onChange={(e) => set('notificationRetentionDays' as any, Number(e.target.value))} /></Form.Group></Col>
+          <Col md={4}><Form.Group controlId="owner-settings-panels-24"><Form.Label>Retensi notifikasi (hari)</Form.Label><Form.Control type="number" min={1} max={365} value={(form as any).notificationRetentionDays ?? 90} onChange={(e) => set('notificationRetentionDays' as any, Number(e.target.value))} /></Form.Group></Col>
           <Col md={4}><Form.Check type="switch" id="journal-recon" label="Backfill jurnal otomatis" checked={(form as any).journalReconciliationEnabled ?? false} onChange={(e) => set('journalReconciliationEnabled' as any, e.target.checked)} /></Col>
-          <Col md={4}><Form.Group><Form.Label>Limit jurnal per run</Form.Label><Form.Control type="number" min={1} max={1000} value={(form as any).journalReconciliationLimit ?? 100} onChange={(e) => set('journalReconciliationLimit' as any, Number(e.target.value))} /></Form.Group></Col>
+          <Col md={4}><Form.Group controlId="owner-settings-panels-25"><Form.Label>Limit jurnal per run</Form.Label><Form.Control type="number" min={1} max={1000} value={(form as any).journalReconciliationLimit ?? 100} onChange={(e) => set('journalReconciliationLimit' as any, Number(e.target.value))} /></Form.Group></Col>
           <Col xs={12}><hr className="my-1" /><p className="text-muted small mb-0">SLA Deadline AutoOps (jam)</p><Form.Text muted>Batas waktu untuk notifikasi urgensi. Default sesuai rekomendasi operasional.</Form.Text></Col>
-          <Col md={3}><Form.Group><Form.Label>Review booking</Form.Label><Form.Control type="number" min={1} max={168} value={(form as any).bookingReviewDeadlineHours ?? 3} onChange={(e) => set('bookingReviewDeadlineHours' as any, Number(e.target.value))} /></Form.Group></Col>
-          <Col md={3}><Form.Group><Form.Label>Bayar setelah approve</Form.Label><Form.Control type="number" min={1} max={168} value={(form as any).approvedBookingPaymentDeadlineHours ?? 3} onChange={(e) => set('approvedBookingPaymentDeadlineHours' as any, Number(e.target.value))} /></Form.Group></Col>
-          <Col md={3}><Form.Group><Form.Label>Review bayar (urgent)</Form.Label><Form.Control type="number" min={1} max={168} value={(form as any).paymentReviewUrgentHours ?? 1} onChange={(e) => set('paymentReviewUrgentHours' as any, Number(e.target.value))} /></Form.Group></Col>
-          <Col md={3}><Form.Group><Form.Label>Review bayar (eskalasi)</Form.Label><Form.Control type="number" min={1} max={168} value={(form as any).paymentReviewEscalateHours ?? 3} onChange={(e) => set('paymentReviewEscalateHours' as any, Number(e.target.value))} /></Form.Group></Col>
-          <Col md={3}><Form.Group><Form.Label>Review bayar (max)</Form.Label><Form.Control type="number" min={1} max={168} value={(form as any).paymentReviewMaxHours ?? 6} onChange={(e) => set('paymentReviewMaxHours' as any, Number(e.target.value))} /></Form.Group></Col>
-          <Col md={3}><Form.Group><Form.Label>Invoice urgent</Form.Label><Form.Control type="number" min={1} max={168} value={(form as any).invoiceUrgentAfterHours ?? 6} onChange={(e) => set('invoiceUrgentAfterHours' as any, Number(e.target.value))} /></Form.Group></Col>
-          <Col md={3}><Form.Group><Form.Label>Invoice jatuh tempo</Form.Label><Form.Control type="number" min={1} max={720} value={(form as any).invoiceDueAfterHours ?? 24} onChange={(e) => set('invoiceDueAfterHours' as any, Number(e.target.value))} /></Form.Group></Col>
-          <Col md={3}><Form.Group><Form.Label>Renew reminder (hari)</Form.Label><Form.Control type="number" min={1} max={30} value={(form as any).renewReminderDays ?? 3} onChange={(e) => set('renewReminderDays' as any, Number(e.target.value))} /></Form.Group></Col>
-          <Col md={3}><Form.Group><Form.Label>Renew last call</Form.Label><Form.Control type="number" min={1} max={168} value={(form as any).renewLastCallHours ?? 24} onChange={(e) => set('renewLastCallHours' as any, Number(e.target.value))} /></Form.Group></Col>
-          <Col md={3}><Form.Group><Form.Label>Bayar renew</Form.Label><Form.Control type="number" min={1} max={168} value={(form as any).renewPaymentDeadlineHours ?? 3} onChange={(e) => set('renewPaymentDeadlineHours' as any, Number(e.target.value))} /></Form.Group></Col>
-          <Col md={3}><Form.Group><Form.Label>Review renew (urgent)</Form.Label><Form.Control type="number" min={1} max={168} value={(form as any).renewReviewUrgentHours ?? 3} onChange={(e) => set('renewReviewUrgentHours' as any, Number(e.target.value))} /></Form.Group></Col>
-          <Col md={3}><Form.Group><Form.Label>Review renew (eskalasi)</Form.Label><Form.Control type="number" min={1} max={168} value={(form as any).renewReviewEscalateHours ?? 6} onChange={(e) => set('renewReviewEscalateHours' as any, Number(e.target.value))} /></Form.Group></Col>
-          <Col md={3}><Form.Group><Form.Label>Review checkout (urgent)</Form.Label><Form.Control type="number" min={1} max={168} value={(form as any).checkoutReviewUrgentHours ?? 3} onChange={(e) => set('checkoutReviewUrgentHours' as any, Number(e.target.value))} /></Form.Group></Col>
-          <Col md={3}><Form.Group><Form.Label>Review checkout (eskalasi)</Form.Label><Form.Control type="number" min={1} max={168} value={(form as any).checkoutReviewEscalateHours ?? 6} onChange={(e) => set('checkoutReviewEscalateHours' as any, Number(e.target.value))} /></Form.Group></Col>
-          <Col md={3}><Form.Group><Form.Label>Final checkout (urgent)</Form.Label><Form.Control type="number" min={1} max={168} value={(form as any).checkoutFinalUrgentHours ?? 6} onChange={(e) => set('checkoutFinalUrgentHours' as any, Number(e.target.value))} /></Form.Group></Col>
-          <Col md={3}><Form.Group><Form.Label>Grace telat keluar</Form.Label><Form.Control type="number" min={1} max={168} value={(form as any).lateTenantVacateHours ?? 3} onChange={(e) => set('lateTenantVacateHours' as any, Number(e.target.value))} /></Form.Group></Col>
+          <Col md={3}><Form.Group controlId="owner-settings-panels-26"><Form.Label>Review booking</Form.Label><Form.Control type="number" min={1} max={168} value={(form as any).bookingReviewDeadlineHours ?? 3} onChange={(e) => set('bookingReviewDeadlineHours' as any, Number(e.target.value))} /></Form.Group></Col>
+          <Col md={3}><Form.Group controlId="owner-settings-panels-27"><Form.Label>Bayar setelah approve</Form.Label><Form.Control type="number" min={1} max={168} value={(form as any).approvedBookingPaymentDeadlineHours ?? 3} onChange={(e) => set('approvedBookingPaymentDeadlineHours' as any, Number(e.target.value))} /></Form.Group></Col>
+          <Col md={3}><Form.Group controlId="owner-settings-panels-28"><Form.Label>Review bayar (urgent)</Form.Label><Form.Control type="number" min={1} max={168} value={(form as any).paymentReviewUrgentHours ?? 1} onChange={(e) => set('paymentReviewUrgentHours' as any, Number(e.target.value))} /></Form.Group></Col>
+          <Col md={3}><Form.Group controlId="owner-settings-panels-29"><Form.Label>Review bayar (eskalasi)</Form.Label><Form.Control type="number" min={1} max={168} value={(form as any).paymentReviewEscalateHours ?? 3} onChange={(e) => set('paymentReviewEscalateHours' as any, Number(e.target.value))} /></Form.Group></Col>
+          <Col md={3}><Form.Group controlId="owner-settings-panels-30"><Form.Label>Review bayar (max)</Form.Label><Form.Control type="number" min={1} max={168} value={(form as any).paymentReviewMaxHours ?? 6} onChange={(e) => set('paymentReviewMaxHours' as any, Number(e.target.value))} /></Form.Group></Col>
+          <Col md={3}><Form.Group controlId="owner-settings-panels-31"><Form.Label>Invoice urgent</Form.Label><Form.Control type="number" min={1} max={168} value={(form as any).invoiceUrgentAfterHours ?? 6} onChange={(e) => set('invoiceUrgentAfterHours' as any, Number(e.target.value))} /></Form.Group></Col>
+          <Col md={3}><Form.Group controlId="owner-settings-panels-32"><Form.Label>Invoice jatuh tempo</Form.Label><Form.Control type="number" min={1} max={720} value={(form as any).invoiceDueAfterHours ?? 24} onChange={(e) => set('invoiceDueAfterHours' as any, Number(e.target.value))} /></Form.Group></Col>
+          <Col md={3}><Form.Group controlId="owner-settings-panels-33"><Form.Label>Renew reminder (hari)</Form.Label><Form.Control type="number" min={1} max={30} value={(form as any).renewReminderDays ?? 3} onChange={(e) => set('renewReminderDays' as any, Number(e.target.value))} /></Form.Group></Col>
+          <Col md={3}><Form.Group controlId="owner-settings-panels-34"><Form.Label>Renew last call</Form.Label><Form.Control type="number" min={1} max={168} value={(form as any).renewLastCallHours ?? 24} onChange={(e) => set('renewLastCallHours' as any, Number(e.target.value))} /></Form.Group></Col>
+          <Col md={3}><Form.Group controlId="owner-settings-panels-35"><Form.Label>Bayar renew</Form.Label><Form.Control type="number" min={1} max={168} value={(form as any).renewPaymentDeadlineHours ?? 3} onChange={(e) => set('renewPaymentDeadlineHours' as any, Number(e.target.value))} /></Form.Group></Col>
+          <Col md={3}><Form.Group controlId="owner-settings-panels-36"><Form.Label>Review renew (urgent)</Form.Label><Form.Control type="number" min={1} max={168} value={(form as any).renewReviewUrgentHours ?? 3} onChange={(e) => set('renewReviewUrgentHours' as any, Number(e.target.value))} /></Form.Group></Col>
+          <Col md={3}><Form.Group controlId="owner-settings-panels-37"><Form.Label>Review renew (eskalasi)</Form.Label><Form.Control type="number" min={1} max={168} value={(form as any).renewReviewEscalateHours ?? 6} onChange={(e) => set('renewReviewEscalateHours' as any, Number(e.target.value))} /></Form.Group></Col>
+          <Col md={3}><Form.Group controlId="owner-settings-panels-38"><Form.Label>Review checkout (urgent)</Form.Label><Form.Control type="number" min={1} max={168} value={(form as any).checkoutReviewUrgentHours ?? 3} onChange={(e) => set('checkoutReviewUrgentHours' as any, Number(e.target.value))} /></Form.Group></Col>
+          <Col md={3}><Form.Group controlId="owner-settings-panels-39"><Form.Label>Review checkout (eskalasi)</Form.Label><Form.Control type="number" min={1} max={168} value={(form as any).checkoutReviewEscalateHours ?? 6} onChange={(e) => set('checkoutReviewEscalateHours' as any, Number(e.target.value))} /></Form.Group></Col>
+          <Col md={3}><Form.Group controlId="owner-settings-panels-40"><Form.Label>Final checkout (urgent)</Form.Label><Form.Control type="number" min={1} max={168} value={(form as any).checkoutFinalUrgentHours ?? 6} onChange={(e) => set('checkoutFinalUrgentHours' as any, Number(e.target.value))} /></Form.Group></Col>
+          <Col md={3}><Form.Group controlId="owner-settings-panels-41"><Form.Label>Grace telat keluar</Form.Label><Form.Control type="number" min={1} max={168} value={(form as any).lateTenantVacateHours ?? 3} onChange={(e) => set('lateTenantVacateHours' as any, Number(e.target.value))} /></Form.Group></Col>
         </Row>
         <Button className="mt-3" onClick={() => void handleSave()} disabled={save.isPending}>
           {save.isPending ? 'Menyimpan...' : 'Simpan Konstanta'}

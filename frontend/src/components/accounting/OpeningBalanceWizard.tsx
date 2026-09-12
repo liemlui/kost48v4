@@ -173,7 +173,7 @@ export default function OpeningBalanceWizard({
         <Form onSubmit={submit} className="mt-3">
           <Row className="g-3">
             <Col md={4}>
-              <Form.Group>
+              <Form.Group controlId="opening-balance-wizard-1">
                 <Form.Label>Accounting period</Form.Label>
                 <Form.Select value={selectedPeriodId} disabled={!canManageOpeningBalance} onChange={(event) => setPeriodId(Number(event.target.value))}>
                   <option value={0}>Pilih periode</option>
@@ -182,13 +182,13 @@ export default function OpeningBalanceWizard({
               </Form.Group>
             </Col>
             <Col md={4}>
-              <Form.Group>
+              <Form.Group controlId="opening-balance-wizard-2">
                 <Form.Label>Cutover date</Form.Label>
                 <Form.Control type="date" value={cutoverDate} disabled={!canManageOpeningBalance} onChange={(event) => setCutoverDate(event.target.value)} />
               </Form.Group>
             </Col>
             <Col md={4}>
-              <Form.Group>
+              <Form.Group controlId="opening-balance-wizard-3">
                 <Form.Label>Catatan</Form.Label>
                 <Form.Control value={notes} disabled={!canManageOpeningBalance} onChange={(event) => setNotes(event.target.value)} />
               </Form.Group>

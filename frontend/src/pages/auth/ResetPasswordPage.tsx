@@ -55,7 +55,7 @@ export default function ResetPasswordPage() {
           </div>
         </section>
 
-        <section className="login-panel">
+        <main className="login-panel" aria-label="Reset password KOST48">
           <div className="brand-block">
             <Kost48LogoMark />
             <div>
@@ -64,26 +64,26 @@ export default function ResetPasswordPage() {
             </div>
           </div>
 
-          <h2>Masukkan token reset</h2>
+          <h1 className="h4">Masukkan token reset</h1>
           <p className="text-muted mb-4">Token bersifat sekali pakai dan memiliki masa berlaku terbatas.</p>
 
           {error ? <Alert variant="danger">{error}</Alert> : null}
           {success ? <Alert variant="success">{success}</Alert> : null}
 
           <Form onSubmit={handleSubmit}>
-            <Form.Group className="mb-3">
+            <Form.Group controlId="reset-password-page-1" className="mb-3">
               <Form.Label>Token Reset</Form.Label>
               <Form.Control value={token} onChange={(e) => setToken(e.target.value)} placeholder="Tempel token reset di sini" />
             </Form.Group>
 
-            <Form.Group className="mb-3">
+            <Form.Group controlId="reset-password-page-2" className="mb-3">
               <Form.Label>Password Baru</Form.Label>
-              <PasswordInput value={newPassword} onChange={(e) => setNewPassword(e.target.value)} placeholder="Minimal 8 karakter" />
+              <PasswordInput controlId="reset-password-page-2" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} placeholder="Minimal 8 karakter" />
             </Form.Group>
 
-            <Form.Group className="mb-4">
+            <Form.Group controlId="reset-password-page-3" className="mb-4">
               <Form.Label>Konfirmasi Password Baru</Form.Label>
-              <PasswordInput value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="Ulangi password baru" />
+              <PasswordInput controlId="reset-password-page-3" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="Ulangi password baru" />
             </Form.Group>
 
             <Button type="submit" disabled={submitting} className="w-100">
@@ -94,7 +94,7 @@ export default function ResetPasswordPage() {
           <div className="login-footer-note mt-3">
             Kembali ke <Link to="/login">halaman login</Link>
           </div>
-        </section>
+        </main>
       </div>
     </div>
   );

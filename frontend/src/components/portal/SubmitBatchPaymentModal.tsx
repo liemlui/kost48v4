@@ -186,7 +186,7 @@ export default function SubmitBatchPaymentModal({
         {validationError ? <Alert variant="danger">{validationError}</Alert> : null}
         {errorMessage ? <Alert variant="danger">{errorMessage}</Alert> : null}
 
-        <Form.Group className="mb-3">
+        <Form.Group controlId="submit-batch-payment-modal-1" className="mb-3">
           <Form.Label>Tanggal Bayar</Form.Label>
           <Form.Control
             type="date"
@@ -196,7 +196,7 @@ export default function SubmitBatchPaymentModal({
           />
         </Form.Group>
 
-        <Form.Group className="mb-3">
+        <Form.Group controlId="submit-batch-payment-modal-2" className="mb-3">
           <Form.Label>Metode Pembayaran</Form.Label>
           <Form.Select
             value={paymentMethod}
@@ -211,7 +211,7 @@ export default function SubmitBatchPaymentModal({
           </Form.Select>
         </Form.Group>
 
-        <Form.Group className="mb-3">
+        <Form.Group controlId="submit-batch-payment-modal-3" className="mb-3">
           <Form.Label>File Bukti Pembayaran</Form.Label>
           <CameraOrGalleryInput
             accept={TENANT_PAYMENT_PROOF_ACCEPT}
@@ -243,7 +243,7 @@ export default function SubmitBatchPaymentModal({
         <hr className="my-3" />
         <div className="fw-semibold mb-2 small text-muted">Detail Tambahan (Opsional)</div>
 
-        <Form.Group className="mb-3">
+        <Form.Group controlId="submit-batch-payment-modal-4" className="mb-3">
           <Form.Label>Nama Pengirim</Form.Label>
           <Form.Control
             type="text"
@@ -254,7 +254,7 @@ export default function SubmitBatchPaymentModal({
           />
         </Form.Group>
 
-        <Form.Group className="mb-3">
+        <Form.Group controlId="submit-batch-payment-modal-5" className="mb-3">
           <Form.Label>Bank Pengirim</Form.Label>
           <Form.Control
             type="text"
@@ -265,7 +265,7 @@ export default function SubmitBatchPaymentModal({
           />
         </Form.Group>
 
-        <Form.Group className="mb-3">
+        <Form.Group controlId="submit-batch-payment-modal-6" className="mb-3">
           <Form.Label>Nomor Referensi</Form.Label>
           <Form.Control
             type="text"
@@ -276,7 +276,7 @@ export default function SubmitBatchPaymentModal({
           />
         </Form.Group>
 
-        <Form.Group>
+        <Form.Group controlId="submit-batch-payment-modal-7">
           <Form.Label>Catatan</Form.Label>
           <Form.Control
             as="textarea"

@@ -420,7 +420,7 @@ export default function ResourceFormModal({
 
   return (
               <Col md={field.type === 'textarea' ? 12 : 6} key={field.name}>
-                <Form.Group>
+                <Form.Group controlId="resource-form-modal-1">
                   <Form.Label>
                     {field.label}
                     {field.required ? <span className="text-danger ms-1">*</span> : null}
@@ -429,6 +429,7 @@ export default function ResourceFormModal({
                   {relationSpec && relationFieldNames.has(field.name) ? (
                     <>
                       <SearchableSelect<number>
+                        ariaLabel={`Pilih ${field.label ?? field.name}`}
                         key={`${config.path}-${field.name}-${relationSourceOptions.map((option) => option.value).join('-')}`}
                         value={relationValue ? { value: relationValue.value, label: relationValue.label } : null}
                         onChange={(option) => updateField(field.name, option?.value ?? '')}
@@ -627,9 +628,10 @@ export default function ResourceFormModal({
                         </Button>
                       ) : (
                         <div>
-                          <Form.Group className="mb-3">
+                          <Form.Group controlId="resource-form-modal-2" className="mb-3">
                             <Form.Label>Password Baru</Form.Label>
                             <PasswordInput
+                              controlId="resource-form-modal-2"
                               value={newPassword}
                               onChange={(event) => setNewPassword(event.target.value)}
                               placeholder="Minimal 8 karakter"
@@ -664,7 +666,7 @@ export default function ResourceFormModal({
                         </Button>
                       ) : (
                         <div>
-                          <Form.Group className="mb-3">
+                          <Form.Group controlId="resource-form-modal-3" className="mb-3">
                             <Form.Label>Email</Form.Label>
                             <Form.Control
                               type="email"
@@ -672,15 +674,16 @@ export default function ResourceFormModal({
                               onChange={(event) => setCreateFormData((prev) => ({ ...prev, email: event.target.value }))}
                             />
                           </Form.Group>
-                          <Form.Group className="mb-3">
+                          <Form.Group controlId="resource-form-modal-4" className="mb-3">
                             <Form.Label>Password</Form.Label>
                             <PasswordInput
+                              controlId="resource-form-modal-4"
                               value={createFormData.password}
                               onChange={(event) => setCreateFormData((prev) => ({ ...prev, password: event.target.value }))}
                               placeholder="Minimal 8 karakter"
                             />
                           </Form.Group>
-                          <Form.Group className="mb-3">
+                          <Form.Group controlId="resource-form-modal-5" className="mb-3">
                             <Form.Label>Nama Lengkap (opsional)</Form.Label>
                             <Form.Control
                               type="text"

@@ -369,13 +369,13 @@ export function OwnerHealthMatrix({ financialRatios, profitLoss, occupancy, cash
         <div className="report-matrix-row" key={row.label}>
           <div><strong>{row.label}</strong><span>{row.note}</span></div>
           <InlinePercentBar value={row.value} color={row.meta.tone === 'good' ? '#22c55e' : row.meta.tone === 'watch' ? '#f59e0b' : '#ef4444'} ariaLabel={`${row.label}: ${row.value}${row.suffix}`} />
-          <div className="report-matrix-value"><strong>{row.value}{row.suffix}</strong><Badge bg={row.meta.color}>{row.meta.label}</Badge></div>
+          <div className="report-matrix-value"><strong>{row.value}{row.suffix}</strong><span className={`badge text-bg-${row.meta.color}`}>{row.meta.label}</span></div>
         </div>
       ))}
       <div className="report-matrix-row">
         <div><strong>Arus Kas Bersih</strong><span>Kas masuk - kas keluar</span></div>
         <InlinePercentBar value={cashFlow.netCashFlowRupiah > 0 ? 100 : 35} color={cf.tone === 'good' ? '#22c55e' : cf.tone === 'watch' ? '#f59e0b' : '#ef4444'} ariaLabel={`Arus kas bersih: ${formatCompactRupiah(cashFlow.netCashFlowRupiah)}`} />
-        <div className="report-matrix-value"><strong>{formatCompactRupiah(cashFlow.netCashFlowRupiah)}</strong><Badge bg={cf.color}>{cf.label}</Badge></div>
+        <div className="report-matrix-value"><strong>{formatCompactRupiah(cashFlow.netCashFlowRupiah)}</strong><span className={`badge text-bg-${cf.color}`}>{cf.label}</span></div>
       </div>
     </div>
   );

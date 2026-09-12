@@ -108,25 +108,25 @@ function CreateMeterReadingModal({
       </Modal.Header>
       <Modal.Body>
         <div className="d-grid gap-3">
-          <Form.Group>
+          <Form.Group controlId="meter-readings-page-1">
             <Form.Label>Kamar</Form.Label>
             <Form.Select value={form.roomId} onChange={(e) => setForm((p) => ({ ...p, roomId: e.target.value }))} required>
               <option value="">Pilih kamar</option>
               {rooms.map((r) => <option key={r.id} value={r.id}>{r.code}{r.name ? ` - ${r.name}` : ''}</option>)}
             </Form.Select>
           </Form.Group>
-          <Form.Group>
+          <Form.Group controlId="meter-readings-page-2">
             <Form.Label>Utilitas</Form.Label>
             <Form.Select value={form.utilityType} onChange={(e) => setForm((p) => ({ ...p, utilityType: e.target.value }))}>
               <option value="ELECTRICITY">Listrik</option>
               <option value="WATER">Air</option>
             </Form.Select>
           </Form.Group>
-          <Form.Group>
+          <Form.Group controlId="meter-readings-page-3">
             <Form.Label>Tanggal</Form.Label>
             <Form.Control type="date" value={form.readingAt} onChange={(e) => setForm((p) => ({ ...p, readingAt: e.target.value }))} required />
           </Form.Group>
-          <Form.Group>
+          <Form.Group controlId="meter-readings-page-4">
             <Form.Label>Nilai Meter</Form.Label>
             <Form.Control
               type="number"
@@ -136,7 +136,7 @@ function CreateMeterReadingModal({
               required
             />
           </Form.Group>
-          <Form.Group>
+          <Form.Group controlId="meter-readings-page-5">
             <Form.Label>Catatan <span className="text-muted">(opsional)</span></Form.Label>
             <Form.Control as="textarea" rows={2} value={form.note} onChange={(e) => setForm((p) => ({ ...p, note: e.target.value }))} />
           </Form.Group>
@@ -215,11 +215,12 @@ export default function MeterReadingsPage() {
       <Card className="content-card border-0 mb-3">
         <Card.Body>
           <div className="d-flex align-items-center gap-3 flex-wrap">
-            <span className="fw-semibold text-muted small text-uppercase">Periode</span>
+            <span className="fw-semibold text-muted small text-uppercase" id="meter-period-label">Periode</span>
             <Form.Select
               size="sm"
               value={selectedMonth}
               onChange={(e) => setSelectedMonth(Number(e.target.value))}
+              aria-labelledby="meter-period-label"
               className="meter-period-select"
             >
               {BULAN.map((nama, idx) => (
@@ -230,11 +231,12 @@ export default function MeterReadingsPage() {
               size="sm"
               value={selectedYear}
               onChange={(e) => setSelectedYear(Number(e.target.value))}
+              aria-label="Tahun periode"
               className="meter-year-select"
             >
               {yearOptions.map((y) => <option key={y} value={y}>{y}</option>)}
             </Form.Select>
-            <Badge bg="info" className="ms-1">
+            <Badge bg="primary" className="ms-1">
               {BULAN[selectedMonth - 1]} {selectedYear}
             </Badge>
           </div>

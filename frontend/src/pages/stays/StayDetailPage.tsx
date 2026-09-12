@@ -448,7 +448,7 @@ export default function StayDetailPage() {
             <Card className="content-card border-0">
               <Card.Body>
                 {notesError ? <Alert variant="danger">{notesError}</Alert> : null}
-                <Form.Group className="mb-3">
+                <Form.Group controlId="stay-detail-page-1" className="mb-3">
                   <Form.Label>Catatan Masa Sewa</Form.Label>
                   <Form.Control as="textarea" rows={6} value={notes} onChange={(e) => setNotes(e.target.value)} />
                 </Form.Group>

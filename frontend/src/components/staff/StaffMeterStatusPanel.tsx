@@ -158,9 +158,9 @@ export default function StaffMeterStatusPanel({ rooms }: Props) {
                       <td className="text-muted small k48-nowrap">{row.tenantName || '—'}</td>
                       <td className="text-center">
                         {row.recorded ? (
-                          <span className="badge bg-success-subtle text-success border border-success-subtle">SUDAH</span>
+                          <span className="badge bg-success-subtle text-success-emphasis border border-success-subtle">SUDAH</span>
                         ) : (
-                          <span className="badge bg-warning-subtle text-warning border border-warning-subtle">BELUM</span>
+                          <span className="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle">BELUM</span>
                         )}
                       </td>
                       <td className="small k48-nowrap">{row.lastElectricity || '—'}</td>
@@ -182,9 +182,9 @@ export default function StaffMeterStatusPanel({ rooms }: Props) {
                   <div className="staff-meter-card-header">
                     <span className="staff-meter-card-room fw-semibold">{row.roomCode}</span>
                     {row.recorded ? (
-                      <span className="badge bg-success-subtle text-success border border-success-subtle">SUDAH</span>
+                      <span className="badge bg-success-subtle text-success-emphasis border border-success-subtle">SUDAH</span>
                     ) : (
-                      <span className="badge bg-warning-subtle text-warning border border-warning-subtle">BELUM</span>
+                      <span className="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle">BELUM</span>
                     )}
                   </div>
                   {row.tenantName ? (

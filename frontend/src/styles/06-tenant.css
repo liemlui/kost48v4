@@ -2460,3 +2460,67 @@ h1, h2, h3, h4, h5, h6,
 .k48-nowrap {
   white-space: nowrap;
 }
+
+/* ============================================================================
+   AO-08 / T-02 — teks di atas permukaan GELAP
+   Aturan global di bagian atas file ini memaksa SEMUA h1–h6, `.brand-title`, dan
+   beberapa `strong` berwarna `--k48-text` (#172033) dengan `!important`. Pada
+   permukaan gelap (gray-800/900, black) hasilnya tidak terbaca — terukur pada
+   `.purchase-guide-card h2`: #172033 di atas #0f172a = 1,09:1.
+   Deklarasi berikut mengembalikan warna terang hanya untuk konteks gelap tersebut,
+   sehingga tidak mengubah heading di permukaan terang.
+   ============================================================================ */
+.purchase-guide-card h1, .purchase-guide-card h2, .purchase-guide-card h3,
+.purchase-guide-card h4, .purchase-guide-card h5, .purchase-guide-card h6,
+.purchase-guide-card strong,
+.rm-compare-bar h1, .rm-compare-bar h2, .rm-compare-bar h3,
+.rm-compare-bar h4, .rm-compare-bar h5, .rm-compare-bar h6,
+.rm-compare-bar strong,
+.gx-lightbox-content h1, .gx-lightbox-content h2, .gx-lightbox-content h3,
+.gx-lightbox-content h4, .gx-lightbox-content h5, .gx-lightbox-content h6,
+.gx-lightbox-content strong,
+.gx-lightbox-body h1, .gx-lightbox-body h2, .gx-lightbox-body h3,
+.gx-lightbox-body h4, .gx-lightbox-body h5, .gx-lightbox-body h6,
+.gx-lightbox-body strong,
+.rcal-filter-active span,
+.rm-guide-chip-sel span {
+  color: var(--white) !important;
+}
+
+/* ── Sisa kontras Bootstrap diukur pada crawl 12 Sep (rasio lama → baru) ─────── */
+/* Aturan global `h1–h6, .brand-title, strong` di atas memakai `!important`, sehingga
+   override biasa kalah. Pola `<strong>` di dalam banner terang (mis. `.alert-light`)
+   dilaporkan axe 1,02:1 (putih di atas #fcfcfd); di sini dikembalikan ke warna teks
+   normal sehingga mengikuti permukaan terangnya. */
+.alert strong,
+.alert-light strong,
+.alert .small {
+  color: inherit !important;
+}
+/* #6c757d → #495057 untuk tombol outline sekunder (4,47:1 → 7,0:1) */
+.btn-outline-secondary {
+  --bs-btn-color: var(--gray-700);
+  --bs-btn-hover-color: var(--white);
+  --bs-btn-border-color: var(--gray-500);
+  --bs-btn-hover-bg: var(--gray-700);
+  --bs-btn-hover-border-color: var(--gray-700);
+}
+/* #94a3b8 (--gray-400) pada putih = 2,56:1 → --gray-600 = 7,0:1.
+   `!important` diperlukan karena aturan global heading/strong di file ini juga `!important`. */
+.stat-mini-label { color: var(--gray-600) !important; }
+/* #1f6feb pada #edf6ff = 4,24:1 → #173b5f = 10,2:1 */
+.ticket-status-badge strong { color: #173b5f !important; }
+/* #2563eb pada --bs-secondary-bg-subtle #e2e3e5 = 4,02:1 → --gray-600 */
+.badge.bg-secondary { background-color: var(--gray-600) !important; }
+/* #dc3545 pada #f8d7da (tombol outline-danger di dalam alert) = 3,39:1 → #b91c1c (5,3:1) */
+.alert .btn-outline-danger,
+.alert-danger .btn-outline-danger {
+  --bs-btn-color: var(--red-700);
+  --bs-btn-border-color: var(--red-700);
+  --bs-btn-hover-color: var(--white);
+  --bs-btn-hover-bg: var(--red-700);
+  --bs-btn-hover-border-color: var(--red-700);
+}
+/* #6c757d (--bs-secondary) pada #f8f9fa hanya 4,44:1 — di bawah ambang 4,5:1.
+   Token --gray-600 (#475569) memberi 7,0:1 pada latar yang sama. */
+.text-secondary { color: var(--gray-600) !important; }

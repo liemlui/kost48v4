@@ -191,7 +191,7 @@ export default function TenantStaffReviewPrompt() {
           )}
 
           {/* Comment */}
-          <Form.Group>
+          <Form.Group controlId="tenant-staff-review-prompt-1">
             <Form.Label className="fw-semibold">
               {isComplaint ? 'Detail masalah (opsional tapi membantu)' : 'Komentar tambahan (opsional)'}
             </Form.Label>

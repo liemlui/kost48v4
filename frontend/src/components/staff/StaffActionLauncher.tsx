@@ -389,7 +389,7 @@ export default function StaffActionLauncher({
             </>
           ) : null}
           {!fixedRoom ? (
-            <Form.Group className="mb-3">
+            <Form.Group controlId="staff-action-launcher-1" className="mb-3">
               <Form.Label>
                 {mode === "STOK_HABIS"
                   ? "Kamar / area terdekat (opsional)"
@@ -422,7 +422,7 @@ export default function StaffActionLauncher({
 
           {mode === "CATAT_METER" ? (
             <>
-              <Form.Group className="mb-3">
+              <Form.Group controlId="staff-action-launcher-2" className="mb-3">
                 <Form.Label>Tanggal cek</Form.Label>
                 <Form.Control
                   type="date"
@@ -433,7 +433,7 @@ export default function StaffActionLauncher({
               </Form.Group>
               <div className="row g-2">
                 <div className="col-6">
-                  <Form.Group className="mb-3">
+                  <Form.Group controlId="staff-action-launcher-3" className="mb-3">
                     <Form.Label>Angka meter listrik</Form.Label>
                     <Form.Control
                       inputMode="decimal"
@@ -446,7 +446,7 @@ export default function StaffActionLauncher({
                   </Form.Group>
                 </div>
                 <div className="col-6">
-                  <Form.Group className="mb-3">
+                  <Form.Group controlId="staff-action-launcher-4" className="mb-3">
                     <Form.Label>Angka meter air</Form.Label>
                     <Form.Control
                       inputMode="decimal"
@@ -457,7 +457,7 @@ export default function StaffActionLauncher({
                   </Form.Group>
                 </div>
               </div>
-              <Form.Group>
+              <Form.Group controlId="staff-action-launcher-5">
                 <Form.Label>Catatan singkat</Form.Label>
                 <Form.Control
                   as="textarea"
@@ -470,7 +470,7 @@ export default function StaffActionLauncher({
             </>
           ) : (
             <>
-              <Form.Group className="mb-3">
+              <Form.Group controlId="staff-action-launcher-6" className="mb-3">
                 <Form.Label>{copy?.problemLabel}</Form.Label>
                 <Form.Control
                   value={problem}
@@ -478,7 +478,7 @@ export default function StaffActionLauncher({
                   placeholder={copy?.placeholder}
                 />
               </Form.Group>
-              <Form.Group className="mb-3">
+              <Form.Group controlId="staff-action-launcher-7" className="mb-3">
                 <Form.Label>Foto bukti</Form.Label>
                 <CameraOrGalleryInput onChange={handleImage} />
                 {reportPreview ? (
@@ -489,7 +489,7 @@ export default function StaffActionLauncher({
                   />
                 ) : null}
               </Form.Group>
-              <Form.Group>
+              <Form.Group controlId="staff-action-launcher-8">
                 <Form.Label>Catatan singkat</Form.Label>
                 <Form.Control
                   as="textarea"

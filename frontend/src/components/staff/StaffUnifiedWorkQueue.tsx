@@ -237,10 +237,13 @@ function DraggableWorkCard({
       ref={setNodeRef}
       style={style}
       className={`staff-work-card staff-status-${item.status.toLowerCase()} ${item.source.toLowerCase()}${isDragging ? ' staff-dragging' : ''}`}
-      {...attributes}
     >
       <div className="staff-work-rank">
-        <span {...listeners} className="staff-drag-handle" title="Seret untuk pindah">
+        {/* AO-08/T-04: atribut dnd-kit (role="button" + tabindex) sebelumnya dipasang pada
+            <article>, sehingga kartu berperan sebagai kontrol interaktif yang MEMUAT tombol aksi
+            di dalamnya (axe `nested-interactive`, 10 node). Atribut dipindah ke handle seret —
+            fungsi seret tetap sama, tetapi hanya satu target interaktif per kartu. */}
+        <span {...listeners} {...attributes} className="staff-drag-handle" title="Seret untuk pindah">
           <GripVertical size={16} aria-hidden />
         </span>
         <span>{index + 1}</span>

@@ -539,12 +539,12 @@ export default function RenewRequestsAdminPage() {
                     { id: 'approved', label: 'Akan disetujui', value: plannedCheckOutDate ? formatDate(plannedCheckOutDate) : formatDate(approveTarget?.requestedCheckOutDate), status: 'SUCCESS', statusLabel: 'Disetujui' },
                   ]}
                 />
-                <Form.Group className="mb-3 mt-3">
+                <Form.Group controlId="renew-requests-admin-page-1" className="mb-3 mt-3">
                   <Form.Label>Tanggal akhir masa sewa baru</Form.Label>
                   <Form.Control type="date" value={plannedCheckOutDate} onChange={(e) => setPlannedCheckOutDate(e.target.value)} />
                   <Form.Text className="text-muted">Kosongkan = ikut request tenant.</Form.Text>
                 </Form.Group>
-                <Form.Group>
+                <Form.Group controlId="renew-requests-admin-page-2">
                   <Form.Label>Tarif sewa renew</Form.Label>
                   <Form.Control type="text" inputMode="numeric" placeholder="Kosongkan jika tetap" value={approvedRentAmount} onChange={(e) => setApprovedRentAmount(e.target.value.replace(/\D/g, ''))} />
                   <Form.Text className="text-muted">Tarif saat ini: {formatRupiah(approveTarget?.stay?.agreedRentAmountRupiah ?? null)}.</Form.Text>
@@ -557,19 +557,19 @@ export default function RenewRequestsAdminPage() {
                 <p className="small text-muted mb-3">Catat meter terbaru. Angka tidak boleh lebih kecil dari catatan lama.</p>
                 <Row className="g-3">
                   <Col md={4}>
-                    <Form.Group>
+                    <Form.Group controlId="renew-requests-admin-page-3">
                       <Form.Label>Meter listrik terbaru (kWh)</Form.Label>
                       <Form.Control type="text" inputMode="decimal" placeholder="Contoh: 1234.000" value={electricityReadingValue} onChange={(e) => setElectricityReadingValue(e.target.value.replace(/[^0-9.]/g, ''))} />
                     </Form.Group>
                   </Col>
                   <Col md={4}>
-                    <Form.Group>
+                    <Form.Group controlId="renew-requests-admin-page-4">
                       <Form.Label>Meter air terbaru (m³)</Form.Label>
                       <Form.Control type="text" inputMode="decimal" placeholder="Contoh: 88.000" value={waterReadingValue} onChange={(e) => setWaterReadingValue(e.target.value.replace(/[^0-9.]/g, ''))} />
                     </Form.Group>
                   </Col>
                   <Col md={4}>
-                    <Form.Group>
+                    <Form.Group controlId="renew-requests-admin-page-5">
                       <Form.Label>Tanggal catat meter</Form.Label>
                       <Form.Control type="date" value={meterReadingAt} onChange={(e) => setMeterReadingAt(e.target.value)} />
                     </Form.Group>
@@ -591,7 +591,7 @@ export default function RenewRequestsAdminPage() {
                 </div>
               ) : null}
               <div className="decision-section-card mt-3">
-                <Form.Group>
+                <Form.Group controlId="renew-requests-admin-page-6">
                   <Form.Label>Catatan persetujuan</Form.Label>
                   <Form.Control as="textarea" rows={3} value={approveReviewNotes} onChange={(e) => setApproveReviewNotes(e.target.value)} placeholder="Contoh: Meter sudah dicatat." />
                 </Form.Group>
@@ -611,7 +611,7 @@ export default function RenewRequestsAdminPage() {
           {rejectFormError ? <Alert variant="warning" className="small">{rejectFormError}</Alert> : null}
           {rejectMutation.isError ? <Alert variant="danger" className="small">{(rejectMutation.error as any)?.response?.data?.message ?? 'Gagal menolak permintaan.'}</Alert> : null}
           <p className="text-muted small">Tolak renew <strong>#{rejectTarget?.id}</strong> dari <strong>{getTenantName(rejectTarget)}</strong>. Alasan wajib jelas.</p>
-          <Form.Group className="mb-3">
+          <Form.Group controlId="renew-requests-admin-page-7" className="mb-3">
             <Form.Label>Alasan Penolakan</Form.Label>
             <Form.Control as="textarea" rows={3} value={reviewNotes} onChange={(e) => setReviewNotes(e.target.value)} placeholder="Contoh: Tagihan lama belum selesai." />
           </Form.Group>

@@ -46,7 +46,7 @@ export default function RejectCheckoutModal({ show, onHide, onSubmit, isSubmitti
             {error}
           </Alert>
         ) : null}
-        <Form.Group>
+        <Form.Group controlId="reject-checkout-modal-1">
           <Form.Label>Catatan Penolakan</Form.Label>
           <Form.Control
             as="textarea"

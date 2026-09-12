@@ -161,13 +161,14 @@ export default function AdminSurveysPage() {
         <Card.Header className="bg-white d-flex justify-content-between align-items-center flex-wrap gap-2">
           <strong>📋 Daftar Survei</strong>
           <div className="d-flex gap-2">
-            <Form.Select size="sm" value={filterRating} onChange={(e) => setFilterRating(e.target.value === 'all' ? 'all' : Number(e.target.value))} style={{ width: 'auto' }}>
+            {/* AO-08/T-01: filter tanpa label visual — beri nama yang dapat diakses. */}
+            <Form.Select aria-label="Filter rating survei" size="sm" value={filterRating} onChange={(e) => setFilterRating(e.target.value === 'all' ? 'all' : Number(e.target.value))} style={{ width: 'auto' }}>
               <option value="all">Semua Rating</option>
               {[5, 4, 3, 2, 1].map((n) => (
                 <option key={n} value={n}>{'★'.repeat(n)} ({items.filter((s) => s.overallRating === n).length})</option>
               ))}
             </Form.Select>
-            <Form.Select size="sm" value={sortBy} onChange={(e) => setSortBy(e.target.value as typeof sortBy)} style={{ width: 'auto' }}>
+            <Form.Select aria-label="Urutkan daftar survei" size="sm" value={sortBy} onChange={(e) => setSortBy(e.target.value as typeof sortBy)} style={{ width: 'auto' }}>
               <option value="newest">Terbaru</option>
               <option value="highest">Rating Tertinggi</option>
               <option value="lowest">Rating Terendah</option>

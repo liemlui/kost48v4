@@ -159,7 +159,7 @@ export default function AccountingPeriodsPanel({ periods, readiness, isLoading, 
           <div className="small text-muted mb-2">
             Catatan internal untuk periode {editingPeriod ? periodKey(editingPeriod) : '-'}.
           </div>
-          <Form.Group>
+          <Form.Group controlId="accounting-periods-panel-2">
             <Form.Label>Catatan owner</Form.Label>
             <Form.Control as="textarea" rows={4} value={periodNotes} onChange={(event) => setPeriodNotes(event.target.value)} placeholder="Contoh: bulan ini ada koreksi utility terlambat, review sebelum close." />
           </Form.Group>

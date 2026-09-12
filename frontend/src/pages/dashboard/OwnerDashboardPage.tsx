@@ -254,7 +254,7 @@ const CARD_ERROR_VALUE = 'Gagal';
 
 export default function OwnerDashboardPage() {
   const navigate = useNavigate();
-  const { mode: viewMode, toggle: toggleViewMode } = useOwnerViewMode();
+  const { mode: viewMode, setMode: setViewMode } = useOwnerViewMode();
   useDocumentTitle('Dashboard Owner');
   const [ym, setYm] = useState<{ year: number; month: number }>(currentYearMonth());
   const [trendMonths, setTrendMonths] = useState<number>(6);
@@ -370,10 +370,10 @@ export default function OwnerDashboardPage() {
           <div className="owner-toolbar-group">
             <span className="owner-toolbar-group-label">Tampilan</span>
             <div className="owner-view-toggle" role="radiogroup" aria-label="Tampilan dashboard">
-              <button type="button" role="radio" aria-checked={viewMode === 'compact'} className={viewMode === 'compact' ? 'active' : ''} onClick={() => toggleViewMode()}>
+              <button type="button" role="radio" aria-checked={viewMode === 'compact'} className={viewMode === 'compact' ? 'active' : ''} onClick={() => setViewMode('compact')}>
                 📋 Ringkas
               </button>
-              <button type="button" role="radio" aria-checked={viewMode === 'full'} className={viewMode === 'full' ? 'active' : ''} onClick={() => toggleViewMode()}>
+              <button type="button" role="radio" aria-checked={viewMode === 'full'} className={viewMode === 'full' ? 'active' : ''} onClick={() => setViewMode('full')}>
                 📊 Lengkap
               </button>
             </div>

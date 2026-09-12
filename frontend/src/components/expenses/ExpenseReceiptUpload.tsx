@@ -112,7 +112,7 @@ export default function ExpenseReceiptUpload({ onApplyDraft, disabled }: Props) 
 
       <Row className="g-3 align-items-end">
         <Col md={5}>
-          <Form.Group>
+          <Form.Group controlId="expense-receipt-upload-1">
             <Form.Label>Foto nota</Form.Label>
             <Form.Control
               type="file"
@@ -129,7 +129,7 @@ export default function ExpenseReceiptUpload({ onApplyDraft, disabled }: Props) 
           </Form.Group>
         </Col>
         <Col md={7}>
-          <Form.Group>
+          <Form.Group controlId="expense-receipt-upload-2">
             <Form.Label>Teks OCR</Form.Label>
             <Form.Control
               as="textarea"

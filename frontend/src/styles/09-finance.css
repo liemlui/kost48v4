@@ -1983,7 +1983,9 @@
 }
 
 .accounting-setup-checklist-item.is-done .accounting-setup-checklist-mark {
-  background: var(--green-600);
+  /* AO-08/T-02: --green-600 (#16a34a) dengan teks putih hanya 3,30:1 — gagal AA untuk teks 12px.
+     --green-700 (#15803d) memberi 5,02:1 pada ukuran yang sama. */
+  background: var(--green-700);
   color: var(--white);
 }
 

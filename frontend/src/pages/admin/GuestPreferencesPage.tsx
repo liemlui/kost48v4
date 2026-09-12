@@ -182,6 +182,7 @@ export default function GuestPreferencesPage() {
           <strong>📋 Riwayat Survei</strong>
           <div className="d-flex gap-2">
             <Form.Select
+              aria-label="Filter status pengisian preferensi"
               size="sm"
               value={showSkipped}
               onChange={(e) => { setShowSkipped(e.target.value); setPage(1); }}
