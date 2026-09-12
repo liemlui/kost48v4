@@ -70,7 +70,7 @@
   gap: 0.65rem;
   align-items: center;
   padding: 0.62rem 0.68rem;
-  border-radius: 15px;
+  border-radius: 14px;
   background: var(--white);
   border: 1px solid rgba(148, 163, 184, 0.18);
   box-shadow: 0 6px 16px rgba(15, 23, 42, 0.035);
@@ -265,7 +265,7 @@
   gap: 0.85rem;
 }
 .staff-motivation-hero {
-  border-radius: 22px;
+  border-radius: 20px;
   background:
     radial-gradient(circle at top right, rgba(14, 165, 233, 0.14), transparent 38%),
     linear-gradient(135deg, var(--white) 0%, var(--pub-surface-warm) 100%);
@@ -687,7 +687,7 @@
 .staff-routine-summary-grid > div {
   background: var(--white);
   border: 1px solid rgba(147, 197, 253, 0.26);
-  border-radius: 17px;
+  border-radius: 16px;
   padding: 0.75rem 0.85rem;
   box-shadow: 0 8px 20px rgba(15, 23, 42, 0.04);
   display: grid;
@@ -791,7 +791,7 @@
 .staff-performance-category-card {
   background: linear-gradient(135deg, var(--blue-50) 0%, var(--white) 58%, #e0f2fe 100%);
   border: 1px solid var(--blue-200) !important;
-  border-radius: 22px;
+  border-radius: 20px;
   box-shadow: 0 14px 34px rgba(37, 99, 235, 0.08);
   margin-bottom: 1rem;
 }
@@ -888,7 +888,7 @@
 .staff-routine-circle-tab:hover, .staff-routine-circle-tab.active { transform:translateY(-1px); border-color:var(--blue-300); box-shadow:0 14px 28px rgba(37,99,235,.10); }
 .staff-routine-group.active-panel { margin-top:.65rem; }
 .staff-routine-percent.complete { background:var(--green-100); color:var(--green-700); }
-.staff-report-summary-card { border-radius:22px; border:1px solid var(--blue-100) !important; background:linear-gradient(135deg,var(--white),var(--blue-50)); box-shadow:0 14px 32px rgba(37,99,235,.07); margin-bottom:1rem; }
+.staff-report-summary-card { border-radius:20px; border:1px solid var(--blue-100) !important; background:linear-gradient(135deg,var(--white),var(--blue-50)); box-shadow:0 14px 32px rgba(37,99,235,.07); margin-bottom:1rem; }
 .staff-report-circle-grid { margin-top:.6rem; }
 .staff-report-circle-card { --ring-color:var(--blue-600); display:flex; align-items:center; gap:.85rem; border:1px solid var(--blue-100); border-radius:18px; background:rgba(255,255,255,.86); padding:.8rem; height:100%; }
 .staff-report-circle { width:76px; height:76px; flex:0 0 auto; }
@@ -955,7 +955,7 @@
 
 .smart-audit-scorebox {
   min-width: 92px;
-  border-radius: 22px;
+  border-radius: 20px;
   padding: 0.8rem 1rem;
   text-align: center;
   background: radial-gradient(circle at top, var(--blue-100), var(--blue-50));
@@ -1797,7 +1797,7 @@
   padding: 0.55rem;
   margin-bottom: 0.95rem;
   border: 1px solid rgba(191, 219, 254, 0.78);
-  border-radius: 22px;
+  border-radius: 20px;
   background: rgba(248, 251, 255, 0.94);
   box-shadow: 0 14px 28px rgba(37, 99, 235, 0.07);
   backdrop-filter: blur(12px);
@@ -1958,7 +1958,7 @@
 
 .staff-room-card {
   border: 1px solid rgba(191, 219, 254, 0.72) !important;
-  border-radius: 22px;
+  border-radius: 20px;
   background: rgba(255,255,255,0.95);
   box-shadow: 0 12px 26px rgba(15, 23, 42, 0.045);
 }
@@ -2023,7 +2023,7 @@
 
 .staff-general-inventory-card.embedded {
   border: 1px solid rgba(191, 219, 254, 0.72) !important;
-  border-radius: 22px;
+  border-radius: 20px;
   background: rgba(255,255,255,0.96);
   box-shadow: 0 12px 26px rgba(15, 23, 42, 0.045);
 }
@@ -3084,7 +3084,7 @@
 
 /* Kartu prioritas terdekat (sisi kanan bento papan kerja) */
 .staff-priority-card {
-  border-radius: 22px;
+  border-radius: 20px;
   background: linear-gradient(135deg, var(--white), var(--pub-surface-warm));
   border: 1px solid rgba(147, 197, 253, 0.34) !important;
   box-shadow: 0 14px 30px rgba(15, 23, 42, 0.05);

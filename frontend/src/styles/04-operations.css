@@ -1052,7 +1052,7 @@ body {
   background:
     linear-gradient(180deg, rgba(255,255,255,0.55), rgba(239,246,255,0.38)),
     radial-gradient(circle at top right, rgba(59,130,246,0.055), transparent 35%);
-  border-radius: 30px;
+  border-radius: 28px;
 }
 
 .app-sidebar,
@@ -1168,7 +1168,7 @@ body {
 .stat-card {
   position: relative;
   overflow: hidden;
-  border-radius: 22px !important;
+  border-radius: 20px !important;
 }
 .stat-card::before {
   content: '';
@@ -1413,7 +1413,7 @@ table.table th { vertical-align: middle; padding: .82rem .8rem; }
     linear-gradient(180deg, var(--surface-soft), var(--white)) !important;
 }
 .public-room-image,
-.public-room-placeholder { border-radius: 22px; }
+.public-room-placeholder { border-radius: 20px; }
 .public-hero-card { overflow: hidden; }
 .public-hero-card::after {
   content: '';
@@ -1436,7 +1436,7 @@ table.table th { vertical-align: middle; padding: .82rem .8rem; }
 }
 
 @media (max-width: 768px) {
-  .page-header--command { padding: 1rem; border-radius: 22px; }
+  .page-header--command { padding: 1rem; border-radius: 20px; }
   .status-tab-bar { overflow-x: auto; flex-wrap: nowrap; padding-bottom: .2rem; }
   .status-tab { white-space: nowrap; }
   .ops-mini-bar { grid-template-columns: 1fr; gap: .25rem; }

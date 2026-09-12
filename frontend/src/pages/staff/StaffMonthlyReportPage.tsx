@@ -68,7 +68,11 @@ export default function StaffMonthlyReportPage() {
 
       {performance ? (
         <>
-          <div className="print-only">
+          {/* T-08: `print-only` disembunyikan secara VISUAL di layar, tetapi tetap ada di
+              accessibility tree — termasuk `<h1>Laporan Kinerja Staff</h1>` di dalamnya,
+              sehingga halaman ini punya dua <h1>. Ditandai aria-hidden karena versi cetak
+              memang duplikat dari versi interaktif di bawahnya. */}
+          <div className="print-only" aria-hidden="true">
             <StaffReportPrintView performance={performance} />
           </div>
 

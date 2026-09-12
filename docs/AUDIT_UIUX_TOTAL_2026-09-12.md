@@ -33,10 +33,10 @@ Seluruh temuan P1 dari audit dikerjakan dan diverifikasi ulang dengan crawl Axe 
 **Sisa yang belum dikerjakan (dengan alasan):**
 
 - **T-06** performa render awal `/portal/stay` — **SELESAI pada sesi lanjutan, lihat §0b.**
-- **T-08** normalisasi token (27 nilai `border-radius`, 27 breakpoint) — pekerjaan bertahap lintas semua stylesheet, berisiko regresi visual bila dilakukan sekaligus.
-- **`<h1>` ganda** pada `/inventory/gudang`, `/inventory/barang-kamar`, `/inventory/mutasi`, dan `/staff-report` (P3, axe tidak melaporkan pelanggaran) — perlu keputusan struktur judul per halaman.
+- **T-08** normalisasi token — **SELESAI untuk radius dan struktur judul; breakpoint sengaja tidak diubah, lihat §0c.**
+- **`<h1>` ganda** pada 4 halaman — **SELESAI, lihat §0c.**
 
-**Diperbarui setelah §0b:** kriteria T-06 (konten < 3 detik, skeleton ≤ ~20 per blok, tidak ada fase layar hampir kosong) **terpenuhi**; `/portal/stay` juga sudah memiliki `<h1>` dan overflow 0 px.
+**Diperbarui setelah §0b dan §0c:** kriteria T-06 (konten < 3 detik, skeleton dikurangi, tidak ada fase layar hampir kosong) **terpenuhi**; `/portal/stay` memiliki `<h1>` dan overflow 0 px; radius 27 → 12 nilai unik dengan skala terdokumentasi; tidak ada lagi `<h1>` ganda pada 4 halaman yang tercatat.
 
 ---
 
@@ -61,6 +61,42 @@ Dikerjakan pada sesi lanjutan setelah §0. Akar masalahnya **bukan** kecepatan s
 4. **Kriteria T-06 lainnya yang ikut tertutup:** `/portal/stay` sebelumnya **tanpa `<h1>`** pada cabang stay aktif (judul hanya dirender pada cabang non-aktif) → kini punya `<h1>` untuk pembaca layar; overflow 3 px pada 375 px berasal dari `.tenant-dossier-tarif-row > strong` yang memakai `flex: 0 0 auto` sehingga nilai panjang tidak menyusut → diperbaiki dengan `flex: 0 1 auto` + `min-width: 0` + pemutus kata.
 
 **Verifikasi:** `npx tsc -b` exit 0 · `npx vitest run` **133/133 PASS (30 file)** · `npm run build` exit 0 (verifikasi PWA lulus) · crawl Axe ulang pada 8 rute TENANT @375 px: **0 pelanggaran**, overflow 0 px, `<h1>` ada di semua rute. `/portal/stay` kini bersih sepenuhnya; satu-satunya sisa di portal tenant adalah 1 node kontras di `/profile` (sudah tercatat di §0).
+
+---
+
+## 0c. Hasil perbaikan T-08 — normalisasi token & struktur judul
+
+**Radius `border-radius`: 27 → 12 nilai unik** (107 deklarasi di 14 file disesuaikan, tanpa mengubah satu pun deklarasi lain).
+
+Skala resmi ditetapkan **dari frekuensi pemakaian nyata**, bukan dikarang: level yang sudah dominan dipertahankan sehingga normalisasi tidak mengubah tampilan secara luas.
+
+| Level | Peran |
+|---|---|
+| 4px | kontrol kecil, chip, badge inline |
+| 6px | input, tombol default |
+| 8px | kartu kecil, panel ringkas |
+| 10px | kartu kecil (varian staff) |
+| 12px | kartu/panel standar |
+| 14px | kartu (`--radius-md` — paling banyak: 81 deklarasi) |
+| 16px | kartu/panel besar (95) |
+| 18px | kartu utama (`--radius-lg`, token K48 — 115) |
+| 20px | kartu publik (`--pub-radius-card`) |
+| 24px | kartu besar / hero (`--radius-xl`) |
+| 28px | permukaan ekstra besar |
+| 999px | pill (267 deklarasi — bukan bagian skala bertingkat) |
+
+Pergeseran yang diterapkan (semuanya ke level terdekat, jarak kecil): 22→20 (37×), 13→12 (20×), 3→4 (11×), 15→14 (10×), 11→10 (7×), 26→24 (5×), 17→16 (3×), 9→8 (3×), 5→4 (3×), 30→28 (2×), 2→4 (2×), lalu 32→28, 34→28, 99→28, 1→4 masing-masing 1×. Skala ini kini didokumentasikan di `00-tokens.css`.
+
+**Breakpoint: TIDAK diubah (dengan alasan).** Inventaris menemukan 31 nilai `max-width` unik. Yang tampak "berdekatan" sebenarnya keluarga batas Bootstrap yang disengaja: `575.98 / 576`, `767.98 / 768`, `991.98 / 992`, `1199.98 / 1200` (proyek juga memakai `min-width: 769px / 992px / 1200px`). Sisanya (350, 430, 440, 480, 520, 560, 600, 620, 640, 680, 720, 760, 820, 860, 900, 920, 980, 1050, 1080, 1100, 1180) adalah titik putus per-fitur. Menggeser nilai-nilai itu berisiko regresi tata letak nyata **tanpa manfaat terukur**, jadi dicatat sebagai hutang teknis yang disengaja, bukan "diperbaiki" secara semu.
+
+**Struktur judul (`<h1>` ganda) — selesai:**
+
+1. `/inventory/gudang`, `/inventory/barang-kamar`, `/inventory/mutasi`: sebelumnya dua `<h1>` karena `InventoryShellPage` **dan** `SimpleCrudPage` masing-masing merender `PageHeader`. `PageHeader` kini menerima prop `as?: 'h1' | 'h2'`, dan `SimpleCrudPage` memakai `as="h2"` ketika dibungkus shell (`hideAreaMenu`). Tidak ada perubahan visual karena CSS proyek sudah menggayai `.page-header h1` **dan** `.page-header h2` secara identik (`01-base.css:338`, `03-components.css:352`). Hasil: `h1Count = 1` di ketiga halaman.
+2. `/staff-report`: `<h1>Laporan Kinerja Staff</h1>` berada di dalam blok `.print-only` yang **disembunyikan secara visual tetapi tetap ada di accessibility tree**, sehingga halaman terbaca memiliki dua judul utama. Blok print ditandai `aria-hidden="true"` karena memang duplikat dari versi interaktif. Terverifikasi: hanya **satu** `<h1>` yang terlihat (`display` bukan `none`), yang kedua berada di dalam `.print-only` dengan `aria-hidden="true"`.
+
+**Verifikasi:** `npx tsc -b` exit 0 · `npx vitest run` **133/133 PASS** · `npm run build` exit 0 (PWA lulus) · crawl Axe ulang: OWNER 10 rute @1440 (termasuk 3 rute inventaris) dan STAFF/publik 9 rute @375 → **0 pelanggaran, 0 overflow, `h1Count = 1`** di semua rute yang diperiksa.
+
+**Batas verifikasi yang dinyatakan jujur:** perubahan radius bersifat visual dan **tidak dapat dibuktikan oleh crawl Axe/DOM** (tidak ada pelanggaran yang diukur). Yang tersedia sebagai jaminan adalah: pergeseran maksimum 2px pada 106 dari 107 deklarasi (satu kasus 34→28), jumlah deklarasi dan `var()` tidak berubah (dijaga oleh pengaman codemod), typecheck + 133 unit test lulus, dan build lulus. Pemeriksaan visual pada layar nyata oleh manusia **belum** dilakukan.
 
 ---
 

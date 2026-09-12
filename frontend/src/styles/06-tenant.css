@@ -201,7 +201,7 @@ h1, h2, h3, h4, h5, h6,
 .staff-badge {
   min-height: 28px;
   padding: 0.3rem 0.58rem;
-  border-radius: 9px;
+  border-radius: 8px;
   border: 1px solid transparent;
 }
 
@@ -555,7 +555,7 @@ h1, h2, h3, h4, h5, h6,
   gap: 0.9rem;
   padding: 1rem;
   border: 1px solid var(--k48-border, var(--k48-border));
-  border-radius: 22px;
+  border-radius: 20px;
   background: linear-gradient(180deg, var(--white) 0%, var(--k48-surface-soft) 100%);
   box-shadow: 0 14px 32px rgba(15, 23, 42, 0.06);
 }
@@ -1398,7 +1398,7 @@ h1, h2, h3, h4, h5, h6,
   display: grid;
   gap: .55rem;
   padding: 1rem;
-  border-radius: 22px;
+  border-radius: 20px;
   border: 1px solid rgba(14, 165, 233, 0.16);
   background: rgba(255, 255, 255, 0.82);
 }
@@ -1483,7 +1483,7 @@ h1, h2, h3, h4, h5, h6,
 .room-discovery-media {
   position: relative;
   min-height: 78px;
-  border-radius: 22px;
+  border-radius: 20px;
   overflow: hidden;
 }
 
@@ -1491,7 +1491,7 @@ h1, h2, h3, h4, h5, h6,
   width: 100%;
   height: 92px;
   object-fit: cover;
-  border-radius: 22px;
+  border-radius: 20px;
 }
 
 .room-discovery-placeholder {
@@ -1501,7 +1501,7 @@ h1, h2, h3, h4, h5, h6,
   gap: .75rem;
   padding: .8rem;
   border: 1px dashed rgba(14, 165, 233, 0.26);
-  border-radius: 22px;
+  border-radius: 20px;
   background: linear-gradient(135deg, rgba(14, 165, 233, 0.10), rgba(255, 255, 255, 0.82));
   color: var(--gray-500);
   font-size: .86rem;
@@ -1561,7 +1561,7 @@ h1, h2, h3, h4, h5, h6,
 
 .room-discovery-price {
   padding: .85rem;
-  border-radius: 22px;
+  border-radius: 20px;
   border: 1px solid rgba(37, 99, 235, 0.12);
   background: var(--white);
 }
@@ -1831,7 +1831,7 @@ h1, h2, h3, h4, h5, h6,
   display: grid;
   grid-template-columns: 1fr 1fr;
   padding: .28rem;
-  border-radius: 15px;
+  border-radius: 14px;
   background: #e9e9ee;
   border: 1px solid #e5e7eb;
   margin-bottom: 1.1rem;
@@ -1848,7 +1848,7 @@ h1, h2, h3, h4, h5, h6,
 
 .login-experience-v518d .login-segment button {
   border: 0;
-  border-radius: 13px;
+  border-radius: 12px;
   background: transparent;
   padding: .72rem .7rem;
   color: #111827;

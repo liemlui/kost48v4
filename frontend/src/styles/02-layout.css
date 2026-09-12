@@ -161,7 +161,7 @@
 }
 
 .toolbar-card {
-  border-radius: 22px;
+  border-radius: 20px;
   padding: 1rem 1.1rem;
 }
 
@@ -452,7 +452,7 @@
 
 .login-aside,
 .login-panel {
-  border-radius: 32px;
+  border-radius: 28px;
 }
 
 .login-aside {

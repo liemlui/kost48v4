@@ -1,5 +1,15 @@
 # KOST48 V5 — M13 Changelog
 
+## 2026-09-12 (malam, lanjutan) — T-08: normalisasi radius (27 → 12 nilai) + struktur judul
+
+- **Lingkup:** menutup sisa temuan T-08 (drift sistem visual) dan temuan `<h1>` ganda. Laporan: [AUDIT_UIUX_TOTAL_2026-09-12 §0c](AUDIT_UIUX_TOTAL_2026-09-12.md#0c-hasil-perbaikan-t-08--normalisasi-token--struktur-judul).
+- **Radius:** 27 → **12 nilai unik**; 107 deklarasi di 14 file disesuaikan ke level terdekat. Skala resmi ditetapkan **dari frekuensi pemakaian nyata** (4/6/8/10/12/14/16/18/20/24/28/999), bukan dikarang, sehingga level dominan (14px 81×, 16px 95×, 18px 115×) tidak berubah. Pergeseran terbesar hanya 22→20 (37×); sisanya 1–2px, dengan satu kasus 34→28. Skala didokumentasikan di `00-tokens.css`.
+- **Breakpoint sengaja TIDAK diubah:** 31 nilai `max-width` unik, tetapi yang tampak berdekatan adalah keluarga batas Bootstrap yang disengaja (`575.98/576`, `767.98/768`, `991.98/992`, `1199.98/1200`, dipadukan `min-width: 769/992/1200`). Menggeser titik putus per-fitur berisiko regresi tata letak nyata tanpa manfaat terukur → dicatat sebagai hutang teknis yang disengaja.
+- **`<h1>` ganda diselesaikan:** (a) `/inventory/gudang|barang-kamar|mutasi` punya dua `<h1>` karena `InventoryShellPage` dan `SimpleCrudPage` masing-masing merender `PageHeader` → `PageHeader` kini menerima `as?: 'h1'|'h2'` dan `SimpleCrudPage` memakai `as="h2"` di dalam shell (`hideAreaMenu`); tidak ada perubahan visual karena CSS sudah menggayai `.page-header h1` dan `.page-header h2` identik. (b) `/staff-report` memiliki `<h1>` di dalam blok `.print-only` yang tersembunyi secara visual tetapi tetap ada di accessibility tree → blok print ditandai `aria-hidden="true"`.
+- **Verifikasi:** `npx tsc -b` **exit 0** · `npx vitest run` **133/133 PASS (30 file)** · `npm run build` **exit 0** (verifikasi PWA lulus) · crawl Axe ulang OWNER 10 rute @1440 + STAFF/publik 9 rute @375: **0 pelanggaran, 0 overflow, `h1Count = 1`**. Catatan alat: Vitest/Vite memerlukan proses anak yang diblokir sandbox (`spawn EPERM`) → dijalankan dengan eskalasi izin yang disetujui owner.
+- **Batas bukti yang dinyatakan:** perubahan radius bersifat visual dan tidak dapat dibuktikan oleh crawl Axe/DOM. Jaminan yang tersedia: pergeseran ≤2px pada 106 dari 107 deklarasi, jumlah deklarasi & `var()` tidak berubah (dijaga pengaman codemod), typecheck + 133 unit test + build lulus. **Pemeriksaan visual manusia belum dilakukan.**
+- **Empat status:** implementasi aplikasi diubah (14 stylesheet, `PageHeader`, `SimpleCrudPage`, halaman laporan staff); verifikasi = statis + typecheck + unit test + build + crawl Axe lokal; deployment N/A; dampak runtime terukur hanya pada instance UAT lokal.
+
 ## 2026-09-12 (malam) — T-06: performa render awal `/portal/stay` (23 → 17 request, 0 duplikat)
 
 - **Lingkup:** menutup temuan T-06 dari audit UI/UX hari yang sama. Laporan: [AUDIT_UIUX_TOTAL_2026-09-12 §0b](AUDIT_UIUX_TOTAL_2026-09-12.md#0b-hasil-perbaikan-t-06--performa-render-awal-portalstay).

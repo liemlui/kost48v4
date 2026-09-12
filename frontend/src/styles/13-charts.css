@@ -60,7 +60,7 @@
 .stay-analytics-legend i {
   width: 8px;
   height: 8px;
-  border-radius: 2px;
+  border-radius: 4px;
   flex-shrink: 0;
 }
 
@@ -159,7 +159,7 @@
   min-height: 86px;
   padding: .48rem;
   border: 1px solid #dbe5f1;
-  border-radius: 13px;
+  border-radius: 12px;
   background: var(--white);
   color: inherit;
   text-align: left;
@@ -388,7 +388,7 @@
 .renew-stat-item i {
   width: 10px;
   height: 10px;
-  border-radius: 3px;
+  border-radius: 4px;
   flex-shrink: 0;
 }
 
@@ -412,13 +412,13 @@
 .renew-stat-bar {
   height: 6px;
   background: rgba(148, 163, 184, 0.18);
-  border-radius: 3px;
+  border-radius: 4px;
   overflow: hidden;
 }
 
 .renew-stat-bar > div {
   height: 100%;
-  border-radius: 3px;
+  border-radius: 4px;
   transition: width 0.4s ease;
 }
 
@@ -912,7 +912,7 @@
 .invoice-breakdown-dot {
   width: 10px;
   height: 10px;
-  border-radius: 3px;
+  border-radius: 4px;
   flex-shrink: 0;
 }
 
@@ -967,13 +967,13 @@
 .invoice-status-minibar-track {
   height: 10px;
   background: rgba(148, 163, 184, 0.12);
-  border-radius: 5px;
+  border-radius: 4px;
   overflow: hidden;
 }
 
 .invoice-status-minibar-fill {
   height: 100%;
-  border-radius: 5px;
+  border-radius: 4px;
   min-width: 4px;
   transition: width 0.5s ease;
 }
@@ -1069,7 +1069,7 @@
 
 .water-flow-bar {
   width: 5px;
-  border-radius: 3px;
+  border-radius: 4px;
   background: var(--pub-brand-blue);
   transition: height 0.3s ease;
   animation: water-bar-pulse 1.2s ease-in-out infinite;
@@ -1186,7 +1186,7 @@
 .utility-projection-bar-track {
   height: 6px;
   background: rgba(148, 163, 184, 0.15);
-  border-radius: 3px;
+  border-radius: 4px;
   display: flex;
   overflow: hidden;
 }
@@ -1194,7 +1194,7 @@
 .utility-projection-bar-fill {
   height: 100%;
   background: var(--pub-brand-blue);
-  border-radius: 3px;
+  border-radius: 4px;
   transition: width 0.5s ease;
 }
 
@@ -1205,7 +1205,7 @@
 .utility-projection-bar-over {
   height: 100%;
   background: var(--red-500);
-  border-radius: 0 3px 3px 0;
+  border-radius: 0 4px 4px 0;
   transition: width 0.5s ease;
 }
 

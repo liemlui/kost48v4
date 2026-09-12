@@ -660,6 +660,9 @@ export default function SimpleCrudPage({ config, hideAreaMenu = false }: { confi
         eyebrow={isStaffView ? 'Daftar Cek' : 'Master data'}
         title={headerTitle}
         description={headerDescription}
+        /* T-08: di dalam shell /inventory/* judul ini adalah bagian dari halaman yang sudah
+           memiliki <h1> "Inventaris", jadi dirender sebagai <h2> agar tidak ada dua <h1>. */
+        as={hideAreaMenu ? 'h2' : 'h1'}
         actionLabel={createGuard.allowed ? (config.createLabel || 'Tambah Data') : undefined}
         onAction={createGuard.allowed ? openCreate : undefined}
       />

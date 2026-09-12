@@ -8,6 +8,12 @@ type PageHeaderProps = {
   onAction?: () => void;
   eyebrow?: string;
   secondaryAction?: ReactNode;
+  /**
+   * T-08 (audit 12 Sep 2026): `as="h2"` dipakai bila halaman sudah memiliki `<h1>` dari shell
+   * induk (mis. `/inventory/*` yang membungkus `SimpleCrudPage`). Wajib agar tidak ada dua
+   * `<h1>` pada satu halaman; gaya visual tetap sama karena hanya level semantiknya berubah.
+   */
+  as?: 'h1' | 'h2';
 };
 
 export default function PageHeader({
@@ -17,12 +23,13 @@ export default function PageHeader({
   onAction,
   eyebrow = 'Workspace',
   secondaryAction,
+  as: Heading = 'h1',
 }: PageHeaderProps) {
   return (
     <div className="page-header page-header--command">
       <div className="page-header-copy">
         <div className="page-eyebrow"><span className="page-eyebrow-dot" /> {eyebrow}</div>
-        <h1>{title}</h1>
+        <Heading>{title}</Heading>
         {description ? <p>{description}</p> : null}
         <div className="page-signal-strip" aria-hidden="true">
           <span />

@@ -694,7 +694,7 @@
   display: inline-block;
   width: 14px;
   height: 3px;
-  border-radius: 2px;
+  border-radius: 4px;
 }
 
 .owner-swatch-revenue { background: var(--blue-600); }
@@ -1082,7 +1082,7 @@
   border: none;
   background: transparent;
   padding: 0.36rem 0.66rem;
-  border-radius: 9px;
+  border-radius: 8px;
   color: var(--gray-600);
   cursor: pointer;
   transition: background 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;

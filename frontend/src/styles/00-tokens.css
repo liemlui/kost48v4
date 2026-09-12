@@ -63,6 +63,26 @@
   --radius-base: 0.375rem; /* 6px — input, button default */
   --radius-full: 9999px;  /* pill */
 
+  /* ── Skala radius resmi (T-08 — audit UI/UX 12 Sep 2026) ─────────────────────
+     Ditetapkan dari frekuensi pemakaian nyata, bukan dikarang: level yang sudah
+     dominan dipertahankan agar normalisasi tidak mengubah tampilan secara luas.
+     Nilai di luar skala ini sudah dinormalisasi (27 → 12 nilai unik, 107 deklarasi
+     di 14 file). Pakai salah satu level berikut untuk kode baru.
+
+        4px   kontrol kecil, chip, badge inline
+        6px   input, tombol default
+        8px   kartu kecil, panel ringkas
+       10px   kartu kecil (varian staff)
+       12px   kartu/panel standar
+       14px   kartu (--radius-md — paling banyak dipakai)
+       16px   kartu/panel besar
+       18px   kartu utama (--radius-lg, token K48)
+       20px   kartu publik (--pub-radius-card)
+       24px   kartu besar / hero (--radius-xl)
+       28px   permukaan ekstra besar (hero & modal besar)
+       999px  pill (chip status, tombol bulat) — bukan bagian skala bertingkat
+     ──────────────────────────────────────────────────────────────────────────── */
+
   /* Touch target (O-08) */
   --tap-min: 44px;
 

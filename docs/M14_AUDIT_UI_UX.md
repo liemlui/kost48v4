@@ -26,9 +26,10 @@ Audit menyeluruh diminta owner dan dijalankan pada instance lokal (frontend `dis
 | Axe critical | 🔴 30 node | 🟢 **0** | label form & select filter tanpa nama (T-01) |
 | Axe serious | 🔴 88 node | 🟢 **0** | kontras T-02 dsb. |
 | Overflow mobile 375 px | 🟡 3 halaman (+176 px terburuk) | 🟢 **0 px** | `/tickets` STAFF, `/finance/accounting-setup`, `/portal/stay` |
-| Landmark/heading | 🟡 6+ halaman | 🟡 sisa P3 | `/reset-password` & `/portal/stay` sudah `<main>`+`<h1>`; sisa: `<h1>` ganda di 4 halaman (tanpa pelanggaran Axe) |
+| Landmark/heading | 🟡 6+ halaman | 🟢 **`h1Count = 1`** | `/reset-password`, `/portal/stay`, dan 4 halaman ber-`<h1>` ganda sudah diperbaiki (§0c) |
+| Drift token radius | 🟡 27 nilai unik | 🟢 **12 nilai unik** | skala resmi terdokumentasi di `00-tokens.css`; breakpoint sengaja tidak diubah — [§0c](AUDIT_UIUX_TOTAL_2026-09-12.md#0c-hasil-perbaikan-t-08--normalisasi-token--struktur-judul) |
 | Performa awal `/portal/stay` | 🔴 23 request (7 duplikat), konten 1500 ms, 84 skeleton | 🟢 **17 request (0 duplikat), konten 900 ms, 46 skeleton** | T-06, lihat [§0b](AUDIT_UIUX_TOTAL_2026-09-12.md#0b-hasil-perbaikan-t-06--performa-render-awal-portalstay) |
-| AO-14 (dua state TENANT, publik, viewport, Axe) | 🟢 bukti tersedia | 🟢 | sisa: viewport 320 px, rute ber-fixture, AO-18/19/20/21/23, T-08 |
+| AO-14 (dua state TENANT, publik, viewport, Axe) | 🟢 bukti tersedia | 🟢 | sisa: viewport 320 px, rute ber-fixture, AO-18/19/20/21/23 |
 
 Dua koreksi terhadap catatan lama yang harus dipakai mulai sekarang:
 

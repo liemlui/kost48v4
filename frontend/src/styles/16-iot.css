@@ -24,7 +24,7 @@
 .iot-health-strip.is-healthy { border-color: rgba(22, 163, 74, 0.24); background: linear-gradient(120deg, var(--green-50), var(--white) 62%); }
 .iot-health-strip.is-warning { border-color: rgba(217, 119, 6, 0.28); background: linear-gradient(120deg, var(--amber-50), var(--white) 62%); }
 .iot-health-strip.is-neutral { background: linear-gradient(120deg, var(--gray-50), var(--white) 62%); }
-.iot-health-icon { display: grid; width: 42px; height: 42px; place-items: center; border-radius: 13px; color: var(--gray-600); background: var(--gray-200); }
+.iot-health-icon { display: grid; width: 42px; height: 42px; place-items: center; border-radius: 12px; color: var(--gray-600); background: var(--gray-200); }
 .iot-health-icon svg { width: 21px; height: 21px; }
 .iot-health-strip.is-healthy .iot-health-icon { color: var(--green-700); background: var(--green-100); }
 .iot-health-strip.is-warning .iot-health-icon { color: var(--amber-700); background: var(--amber-100); }
