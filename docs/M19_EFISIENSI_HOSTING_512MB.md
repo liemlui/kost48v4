@@ -1,21 +1,21 @@
 # KOST48 — Audit & Rencana Efisiensi Shared Hosting 512 MB (Fase EF)
 
-## Arah dan status aktif — 6 September 2026
+## Arah dan status aktif — diselaraskan 8 September 2026
 
 Keputusan [M02](M02_KEPUTUSAN_OWNER.md): **Fase EF diprioritaskan; satu proses API NestJS dipertahankan sebagai target; Fase MA ditunda.** Jumlah instance Passenger aktual belum diketahui. Profil static masih rencana; bukan izin apps/libs, ekstraksi service atau worker baru. Checklist kanonik: [M12](M12_CHECKLIST_CHANGELOG.md#fase-ef--efisiensi-shared-hosting-512-mb).
 
 | Lapisan bukti | Status saat sinkronisasi | Batas kesimpulan |
 |---|---|---|
-| Implementasi | EF-01 telemetri, EF-03 singleton, EF-05 packaging tersedia di working tree | Sebagian belum di-commit; jangan menganggap seluruh dirty tree berasal dari EF |
+| Implementasi | EF-01 telemetri, EF-03 singleton, EF-05 packaging tersedia lokal dan tercakup pada commit `b29ba32`; HEAD audit docs 8 Sep `74068aa` | Commit tersebut juga memuat perubahan lain; commit lokal bukan bukti isi artefak server |
 | Verifikasi lokal | Audit statis EF-01/03/04/07 + typecheck exit 0 menurut laporan Cline yang diterima owner; build EF-05 tercatat di M13 | Bukan build/UAT baru pada sesi docs; tidak menjamin konfigurasi server |
 | Deployment | Parsial: konfigurasi panel teridentifikasi; artefak, waktu deploy, patch yang masuk, dan konfigurasi efektif masih UNKNOWN | Screenshot Setup Node.js App diterima 7 Sep 2026 WIB; status uncommitted tidak membuktikan patch belum di-deploy; SHA saja tidak mewakili dirty bundle |
-| Dampak terukur | UNKNOWN: PMEM/resource/fault, workload dan overlap aktual | Efisiensi dan kelayakan 512 MB belum PASS |
+| Dampak terukur | Snapshot PMEM `403,34/512 MB` dan resource panel 7 Sep tersedia (§9); interval/peak/fault/workload/overlap masih UNKNOWN | Snapshot bukan baseline workload atau bukti dampak optimasi; kelayakan 512 MB belum PASS |
 
 Audit statis diterima; tidak diulang tanpa perubahan relevan. Langkah berikutnya adalah **§9.1 identitas deployment**, lalu **§9.3 pengamatan pasif**. Uji aktif host belum diizinkan. Fase A dan gate AO yang terbuka tetap berlaku.
 
 > Dokumen ini adalah **sumber kebenaran** fase efisiensi hosting: verdict kelayakan, anggaran RAM (fakta vs estimasi), verifikasi klaim audit terhadap kode (koreksi final + temuan P0–P2 audit deploy 6 Sep 2026), jalur arsitektur yang disetujui, dan definisi task EF-00..EF-09 (paket 10 mikrotask audit).
 > Sumber kode: `backend/src/main.ts`, `backend/src/app.module.ts`, `backend/src/modules/auto-ops/auto-ops.service.ts`, `backend/src/modules/iot/iot-polling.service.ts`, `backend/src/common/config/app-config.service.ts`, `backend/src/prisma/prisma.service.ts`, `backend/package.json`, `scripts/make-deploy.mjs`, `docs/M08_DEPLOY_GO_LIVE.md`.
-> Terakhir diperbarui: **2026-09-07** | Status: 🔴 **ANTRIAN** (lihat `docs/M12_CHECKLIST_CHANGELOG.md` — Fase EF).
+> Terakhir diperbarui: **2026-09-08** | Status: 🔴 **ANTRIAN** (lihat `docs/M12_CHECKLIST_CHANGELOG.md` — Fase EF).
 
 ---
 
@@ -42,18 +42,20 @@ Audit statis diterima; tidak diulang tanpa perubahan relevan. Langkah berikutnya
 
 ### 2.1 EF-00 — baseline yang dapat diverifikasi dari workspace
 
+Tabel berikut mempertahankan snapshot inventaris 7 Sep, bukan fingerprint workstation terbaru. Pada audit docs 8 Sep, `git log` menunjukkan HEAD `74068aa` (mekanisme AO) dan implementasi EF tercakup di `b29ba32`; tracked tree bersih sebelum edit docs, `.claude/` dan `kost48-deploy-bundled/` tetap untracked. Bundle historis di bawah tidak diperiksa ulang. Tidak ada bukti baru artefak/deploy/PMEM host dari audit ini.
+
 | Fakta | Nilai | Status |
 |---|---|---|
 | SHA saat pencatatan | `8c35a4f7524f85eb3a07f8407a2c950cbfb6e98a` | FAKTA HEAD lokal, 7 Sep 2026; bukan bukti artefak server |
 | Branch / working tree | `main` / `dirty` | FAKTA lokal; dirty state mencakup perubahan lintas task yang sudah ada |
 | Entrypoint artefak | `dist/main.js` | FAKTA konfigurasi (`backend/package.json`); keberadaan di server belum diverifikasi |
-| Versi Node lokal | `v22.15.0` | FAKTA workstation; versi host belum diketahui |
+| Versi Node lokal | `v22.15.0` | FAKTA workstation saat snapshot; Node panel `22.23.2` dari bukti 7 Sep di §9, versi proses host belum diverifikasi |
 | Prisma client | `@prisma/client ^7.8.0` | FAKTA source; versi lock/runtime host belum diverifikasi |
 | Bundle lokal | `kost48-deploy-bundled.tgz`, 42.863.126 byte; modifikasi `2026-09-06T06:26:48.9467864+07:00`; SHA-256 `820EEAA22FB389BF8AA8C660F12F0E4FA158F90970B3C4637C78B551F6E73B6` | FAKTA file lokal; waktu modifikasi bukan otomatis waktu build dan bundle bukan otomatis artefak server |
 | Model proses aplikasi | Tidak ada `cluster`/`worker_threads` di source | FAKTA source; tidak membuktikan jumlah instance Passenger |
 | Command Passenger efektif | Belum diketahui | UNKNOWN — ukur di host |
 | Jumlah instance / overlap restart | Belum diketahui | UNKNOWN — ukur di host |
-| LVE PMEM, fault, EP/NPROC/CPU/IO | Belum diketahui | UNKNOWN — ukur di host |
+| LVE PMEM, fault, EP/NPROC/CPU/IO | Limit/snapshot panel parsial 7 Sep tersedia di §9 | Interval/peak/fault dan workload masih UNKNOWN; jangan menyamakan snapshot dengan baseline |
 | Dokroot/static split aktif | Belum diketahui; baseline saat ini SPA disajikan Nest | FAKTA kode + UNKNOWN konfigurasi host |
 
 **Kesimpulan EF-00:** inventaris lokal selesai, tetapi task tetap terbuka sampai bukti runtime host melengkapi baris UNKNOWN. Tidak ada klaim bahwa limit 512 MB cukup.
@@ -171,7 +173,7 @@ Isi hanya data yang tersedia dari panel/log/artefak. Nilai kosong tetap **UNKNOW
 
 | Item | Nilai | Sumber/bukti yang diperlukan |
 |---|---|---|
-| Commit/SHA yang membentuk artefak | UNKNOWN | Riwayat build/deploy; HEAD lokal `8c35a4f7524f85eb3a07f8407a2c950cbfb6e98a` hanya identitas workstation |
+| Commit/SHA yang membentuk artefak | UNKNOWN | Riwayat build/deploy diperlukan; HEAD lokal `74068aa` pada 8 Sep (sebelumnya snapshot `8c35a4f` pada 7 Sep) hanya identitas workstation |
 | Artefak server | UNKNOWN | Nama, ukuran, tanggal build; checksum/manifes bila tersedia |
 | Bundle kandidat yang diberikan owner | Folder `kost48-deploy-bundled`: 753 file, 55.310.649 byte; isi bertanggal 18 Agu 2026 WIB; `client/version.json` buildId `1BavS58Sb96-` | Artefak lokal/kandidat yang diberikan; belum terbukti sama dengan paket server yang berjalan |
 | Berkas env di dalam bundle | Tidak ada file `.env*` di dalam bundle (pemeriksaan `-Filter '.env*'` kosong); env dikelola melalui konfigurasi panel cPanel | Pemeriksaan folder bundle read-only 7 Sep 2026 WIB |

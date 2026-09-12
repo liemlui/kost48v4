@@ -247,7 +247,7 @@ export default function ProcessDepositModal({
 
         {!isMeterSettlement ? (
           <>
-            <Form.Group className="mb-3">
+            <Form.Group controlId="process-deposit-modal-1" className="mb-3">
               <Form.Label>Keputusan Deposit</Form.Label>
               <Form.Select
                 value={action}
@@ -268,7 +268,7 @@ export default function ProcessDepositModal({
               </Alert>
             </Form.Group>
 
-            <Form.Group className="mb-3">
+            <Form.Group controlId="process-deposit-modal-2" className="mb-3">
               <Form.Label>Nominal Potongan</Form.Label>
               <Form.Control
                 type="text"
@@ -287,7 +287,7 @@ export default function ProcessDepositModal({
           </>
         ) : null}
 
-        <Form.Group>
+        <Form.Group controlId="process-deposit-modal-3">
           <Form.Label>
             Catatan Keputusan
             {requiresNote ? <span className="text-danger ms-1">*</span> : null}

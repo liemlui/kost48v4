@@ -31,19 +31,33 @@
 
 ### 1b. Akun Audit UAT Non-Personal (AO-03) — password TIDAK ditulis di docs
 
-Lima akun audit untuk crawler Playwright lintas role (OWNER, ADMIN, STAFF,
-TENANT dengan stay aktif, TENANT tanpa stay aktif) disediakan di lingkungan
-UAT non-produksi. Semua password dibaca dari **env lokal/secret manager**
-(`frontend/.env.example` hanya memuat nama variable), bukan dari docs/test.
+Target AO-03 adalah lima persona audit (OWNER, ADMIN, STAFF, TENANT dengan stay
+aktif, TENANT tanpa stay aktif) pada UAT non-produksi yang telah diverifikasi.
+**Status 8 Sep 2026: skrip tersedia, akun/fixture belum dibuktikan siap.**
+Password berasal dari **environment proses/secret manager**, bukan docs/test.
+`frontend/.env.example` adalah contoh nama variabel; config Playwright saat ini
+tidak otomatis memuat `.env.local`.
 
-- Penyediaan akun: `cd backend && npm run seed:audit-users` (event-path via HTTP,
-  non-destruktif; **menjalankannya = mutasi DB → wajib izin owner**).
-- Consumsi crawler: `frontend/e2e/audit-users.ts` (env `E2E_OWNER_*`,
+- Skrip `backend/scripts/seed-audit-users.js` (alias `npm run seed:audit-users`
+  dari backend) memakai OWNER existing untuk login; membuat ADMIN/STAFF bila
+  belum ada, hingga dua portal TENANT, dan fallback satu tenant dummy tanpa stay.
+  Tidak membuat stay/invoice/payment atau mengganti password/role akun lama.
+- Pemilihan tenant existing masih otomatis dan inventaris pagination belum
+  lengkap; ringkasan selesai dapat memuat kegagalan parsial. `AUDIT_CONFIRM=1`
+  hanya flag, bukan verifikasi server/DB. Tetapkan identitas audit unik dan
+  tenant fixture non-personal secara eksplisit sebelum provisioning.
+- **Provisioning memutasi DB; login crawl juga memperbarui `lastLoginAt` dan
+  membuat `RefreshToken`.** Lingkup izin UAT harus mencakup akun/portal serta sesi
+  autentikasi. Rincian gap/prasyarat: [M14 AO-03](M14_AUDIT_UI_UX.md#ao-03--p1--kredensial-dan-data-uat-tidak-mendukung-audit-lintas-role).
+- Konsumsi crawler: `frontend/e2e/audit-users.ts` (env `E2E_OWNER_*`,
   `E2E_ADMIN_*`, `E2E_STAFF_*`, `E2E_TENANT_ACTIVE_*`, `E2E_TENANT_NO_STAY_*`).
-- Empat status tetap dibedakan: implementasi lokal (mekanisme siap) ≠ akun
-  benar-benar di-provision ≠ crawl lulus ≠ dampak terukur.
+  Dua state TENANT baru dideklarasikan sebagai env, belum menjadi crawl UAT nyata
+  di suite aktif. Kredensial kosong membuat crawl operasional di-skip.
+- Empat status tetap dibedakan: implementasi lokal (mekanisme tersedia) ≠ akun
+  benar-benar di-provision ≠ crawl lulus ≠ dampak terukur. Bukti tiga crawl
+  operasional wajib mencatat eksekusi tanpa skip dan role/route yang benar.
 
-### 1b. Data Tenant Produksi (GO-LIVE)
+### 1c. Data Tenant Produksi (GO-LIVE)
 
 **Sumber data:** Owner KOST48, 2026-07. NIK (KTP) sudah diverifikasi.
 Email & HP placeholder — akan dilengkapi via **UI Owner → Manajemen Tenant** sebelum aktivasi portal.

@@ -75,6 +75,13 @@ frontend/screenshots-ui/
 test-output.txt
 backend/test/debug-*.js
 
+# Artefak deploy lokal & perkakas editor (jangan di-commit)
+# kost48-deploy-bundled/ ~53 MB dan .dsh-editor/ ~96 MB: keduanya dibangun ulang lokal,
+# bukan sumber. Sejalan dengan 66801e2 yang mengeluarkan artefak bundle TGZ dari tracking.
+kost48-deploy-bundled/
+.dsh-editor/
+.audit-runtime/
+
 # Temporary/setup scripts (root level)
 setup.sql
 fix-password.js

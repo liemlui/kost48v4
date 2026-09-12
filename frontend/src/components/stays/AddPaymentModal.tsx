@@ -66,25 +66,25 @@ export default function AddPaymentModal({ show, onHide, invoice }: { show: boole
           <div>Sisa tagihan: {remainingAmount}</div>
           <div className="mt-2"><strong>Preview status setelah bayar: {previewStatus}</strong></div>
         </Alert>
-        <Form.Group className="mb-3">
+        <Form.Group controlId="add-payment-modal-1" className="mb-3">
           <Form.Label>Nominal</Form.Label>
           <CurrencyInput value={amountRupiah === '' ? undefined : Number(amountRupiah)} onChange={(v) => setAmountRupiah(v == null ? '' : String(v))} />
         </Form.Group>
-        <Form.Group className="mb-3">
+        <Form.Group controlId="add-payment-modal-2" className="mb-3">
           <Form.Label>Tanggal Bayar</Form.Label>
           <Form.Control type="date" value={paymentDate} onChange={(e) => setPaymentDate(e.target.value)} />
         </Form.Group>
-        <Form.Group className="mb-3">
+        <Form.Group controlId="add-payment-modal-3" className="mb-3">
           <Form.Label>Metode</Form.Label>
           <Form.Select value={method} onChange={(e) => setMethod(e.target.value as PaymentMethod)}>
             {['CASH', 'TRANSFER', 'QRIS'].map((item) => <option key={item} value={item}>{item}</option>)}
           </Form.Select>
         </Form.Group>
-        <Form.Group className="mb-3">
+        <Form.Group controlId="add-payment-modal-4" className="mb-3">
           <Form.Label>Reference No</Form.Label>
           <Form.Control value={referenceNo} onChange={(e) => setReferenceNo(e.target.value)} />
         </Form.Group>
-        <Form.Group>
+        <Form.Group controlId="add-payment-modal-5">
           <Form.Label>Catatan</Form.Label>
           <Form.Control as="textarea" rows={3} value={note} onChange={(e) => setNote(e.target.value)} />
         </Form.Group>

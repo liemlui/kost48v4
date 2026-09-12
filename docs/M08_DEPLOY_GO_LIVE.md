@@ -425,11 +425,15 @@ Otomatis & **idempoten** (aman diulang hanya untuk DB baru yang telah disetujui)
 
 > DEV ONLY: akun dan data di bagian ini hanya untuk database pengembangan port 5433. Jangan pakai password ini di produksi.
 >
-> **Penting (AO-03, 2026-09-07):** akun dummy di bawah adalah fondasi **DEV**.
-> Untuk akun **AUDIT** crawler lintas role (OWNER/ADMIN/STAFF/dua state TENANT)
-> pakai `backend/scripts/seed-audit-users.js` (`npm run seed:audit-users`) —
-> password dari env `AUDIT_*`, bukan dari dokumen ini; menjalankannya = mutasi DB
-> UAT dan wajib izin owner. Kredensial DEV tidak dianggap sebagai kredensial UAT.
+> **Penting (AO-03, diperbarui 2026-09-08):** akun dummy di bawah adalah fondasi **DEV**.
+> `backend/scripts/seed-audit-users.js` (`npm run seed:audit-users`) tersedia,
+> tetapi gap target/fixture/pagination/gate sukses belum ditutup. OWNER existing
+> dipakai login; skrip dapat membuat ADMIN/STAFF, dua portal TENANT dan satu tenant
+> dummy. Baca [M11 §1b](M11_DEFAULT_DATA.md#1b-akun-audit-uat-non-personal-ao-03--password-tidak-ditulis-di-docs)
+> dan [M14 AO-03](M14_AUDIT_UI_UX.md#ao-03--p1--kredensial-dan-data-uat-tidak-mendukung-audit-lintas-role)
+> sebelum eksekusi. Provisioning serta sesi login crawl memutasi DB UAT dan
+> memerlukan lingkup izin terkait. `AUDIT_CONFIRM=1` tidak memvalidasi lingkungan.
+> Password dari environment proses/secret manager; kredensial DEV bukan kredensial UAT.
 
 ### Akun Dummy DEV (login cepat) - SI-1 event-path
 

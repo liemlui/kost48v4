@@ -14,6 +14,27 @@ Keputusan owner pada sesi penyelarasan dokumentasi; berlaku atas referensi arsit
 
 Checklist aktif: [M12](M12_CHECKLIST_CHANGELOG.md#antrian-eksekusi-aktif). Tabel hosting: [M19](M19_EFISIENSI_HOSTING_512MB.md#9-pencatatan-hosting-ef-00-dan-ef-02).
 
+## Keputusan izin bertahap — 8 September 2026
+
+Rekomendasi izin pada tabel di bawah **disetujui owner** pada sesi 8 September 2026 (rencana eksekusi diterima). Tabel ini adalah riwayat keputusan; status aktual dan bukti eksekusi tetap bertanggal di M12/M13. Izin tidak menggantikan bukti hosting/pengukuran.
+
+| Pekerjaan | Izin | Batas |
+|---|---|---|
+| EF-00/EF-02 | Lanjutkan pengumpulan bukti hosting + observasi pasif | Tetap **BLOCKED** sampai data tersedia; izin bukan pengganti bukti. |
+| AO-03 → AO-13 (→ AO-14 setelah dependensi) | **Provisioning akun/fixture audit non-personal + crawl khusus UAT disetujui** | Prasyarat: target API/DB UAT diverifikasi (lokal `localhost:5433` `kost48_v3_pro`); tanpa reset/hapus data lama; AO-14 tetap terbuka. |
+| EF-07 | Uji env lokal terhadap nilai DB simulasi (mock, tanpa sentuhan DB) | Audit statis selesai tidak diulang. |
+| EF-08 | Rehearsal pada proses lokal khusus pengujian | Pengujian job yang menulis DB memerlukan fixture UAT terlokalis; restart host ditunda. |
+| EF-04 | Implementasi ditunda | Baseline + kemampuan routing host jelas, lalu izin implementasi lokal. |
+| AL H1–H15 | Cocokkan status temuan dengan perbaikan terbaru; pilih yang masih terbuka | Ditunda izin implementasi menyeluruh. |
+| Fase A | Lanjutkan pengumpulan data + keputusan owner | Provisioning produksi/deploy menunggu target serta rencana konkret. |
+
+### Koreksi lingkup AO (8 September 2026)
+
+- Fixture tenant untuk crawler wajib **eksplisit non-personal**; skrip `seed-audit-users.js` tidak lagi memilih tenant existing otomatis. Akun TENANT stay-aktif menggunakan `AUDIT_TENANT_ACTIVE_ID` yang ditunjuk owner; tenant tanpa stay default = tenant dummy audit NIK `9000000000000001`. Skrip tidak membuat stay/invoice/payment.
+- Skrip memakai OWNER existing hanya untuk login (tidak buat/ubah password/role OWNER); efek maksimal: membuat ADMIN/STAFF bila belum ada, maksimal dua portal-access tenant, maksimal satu tenant dummy.
+- Login nyata memperbarui `User.lastLoginAt` dan membuat `RefreshToken` — crawl bukan operasi DB read-only; lingkup UAT mencakup sesi autentikasi di lingkungan non-produksi.
+- Target provisioning dibatasi ke lingkungan UAT (guard non-lokal tolak tanpa `AUDIT_ALLOW_REMOTE=1`); kredensial audit non-personal tidak pernah dicetak atau disimpan di repo.
+
 > File hasil pemampatan dari dokumen root `docs/`. File sumber lama sudah diarsipkan ke `docs/archieve/2026-06-16_root_docs_pre_M/`.
 
 ## Tujuan

@@ -99,11 +99,11 @@ export default function DateRangeFilter({
   const customPopover = (
     <Popover id="date-range-custom-popover" style={{ maxWidth: 280 }}>
       <Popover.Body>
-        <Form.Group className="mb-2">
+        <Form.Group controlId="date-range-filter-1" className="mb-2">
           <Form.Label style={{ fontSize: 11 }}>Dari</Form.Label>
           <Form.Control type="date" size="sm" value={customStart} onChange={(e) => setCustomStart(e.target.value)} />
         </Form.Group>
-        <Form.Group className="mb-2">
+        <Form.Group controlId="date-range-filter-2" className="mb-2">
           <Form.Label style={{ fontSize: 11 }}>Sampai</Form.Label>
           <Form.Control type="date" size="sm" value={customEnd} onChange={(e) => setCustomEnd(e.target.value)} />
         </Form.Group>

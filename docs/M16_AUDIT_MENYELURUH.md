@@ -1,32 +1,93 @@
 # M16 — Audit Menyeluruh KOST48 V5
 
-> **Rujukan arah aktif (6 Sep 2026):** [M02](M02_KEPUTUSAN_OWNER.md) untuk keputusan owner; [M12](M12_CHECKLIST_CHANGELOG.md#antrian-eksekusi-aktif) untuk satu checklist/urutan kerja; [M19](M19_EFISIENSI_HOSTING_512MB.md) untuk Fase EF. **EF diprioritaskan, satu proses API sebagai target, Fase MA ditunda.**
+> **Rujukan arah aktif (8 Sep 2026):** [M02](M02_KEPUTUSAN_OWNER.md) untuk keputusan owner; [M12](M12_CHECKLIST_CHANGELOG.md#antrean-prioritas-aktif) untuk satu checklist/urutan kerja; [M19](M19_EFISIENSI_HOSTING_512MB.md) untuk Fase EF. **EF diprioritaskan, satu proses API sebagai target, Fase MA ditunda.**
 > Dokumen ini menyimpan spesifikasi domain dan bukti bertanggal. Status PASS/selesai pada audit lama hanya berlaku pada lingkup/waktu yang disebut, bukan bukti deployment atau runtime terbaru. Judul sumber pra-konsolidasi adalah riwayat; jangan membuat ulang file lama atau mengulang checklist selesai.
 
-> **Status:** ✅ SELESAI · **Auditor:** Reasonix
-> **Tanggal:** 30 Juli 2026 · **Cakupan:** lintas 46 modul backend + frontend + cross-cutting concern.
-> **Sumber keputusan:** `M02_KEPUTUSAN_OWNER.md` tetap lebih tinggi daripada dokumen ini.
-> **Hasil ringkas:** tidak ada temuan HIGH/kritis; 1 temuan minor (I-01) sudah diperbaiki pada commit `610395c`.
+Dokumen ini berisi dua lapisan audit yang tidak boleh dicampur:
 
-Dokumen ini merangkum audit statis menyeluruh terhadap kode KOST48 V5 (backend NestJS+Prisma 46 modul, frontend React+Vite). Audit sebelumnya yang sudah terliput di dokumen lain tidak diulang di sini — dokumen ini fokus pada hasil pengecekan ulang lintas scope dan temuan baru.
+1. **§0 — Audit dokumentasi & urutan kerja (8 September 2026).** Tata letak seri M, tautan, angka schema, dan antrean aktif. Verifikasi = pembacaan file aktif + schema/kode path, tanpa build/UAT.
+2. **§1–§5 — Audit kode statis (30 Juli 2026, Reasonix).** 46 modul backend + frontend + cross-cutting. Tidak diulang pada sesi 8 Sep.
+
+**Sumber keputusan:** `M02_KEPUTUSAN_OWNER.md` tetap lebih tinggi daripada dokumen ini.
 
 ---
 
-## 1. Ringkasan Eksekutif
+<a id="0-audit-dokumentasi-dan-urutan-kerja--8-september-2026"></a>
+
+## 0. Audit dokumentasi dan urutan kerja — 8 September 2026
+
+**Lingkup:** seri aktif `docs/M00`–`M19` + `FORM_ISI_DATA_GO_LIVE.md` + `CLAUDE.md`/`AGENTS.md`. Arsip `docs/archieve/*` tidak dibaca ulang. **Bukan** audit runtime host, crawl UAT, atau regresi 46 modul.
+
+**Fingerprint:** HEAD lokal `74068aa`; versi aplikasi lokal `1.3.0` / Portal Ringkas / `APP_BUILD_DATE` 2026-08-20. Host dilaporkan `v1.2.0` (M19) — SHA artefak server UNKNOWN.
+
+**Empat status sesi ini:** implementasi aplikasi tidak diubah; verifikasi = audit docs + hitungan schema; deployment UNKNOWN; dampak runtime tidak diukur.
+
+### 0.1 Fakta kode yang dicek ulang
+
+| Item | Nilai 8 Sep | Catatan docs sebelumnya |
+|---|---|---|
+| Modul Nest `*.module.ts` di `backend/src/modules` | **46** | Sesuai klaim M00/M01/M16 Juli |
+| Model Prisma `^model ` di `schema.prisma` | **62** termasuk `PublicRoomAvailability` | M00 indeks menyebut 61 dan tidak mencantumkan `PublicRoomAvailability`; M01 bilang 62 tetapi daftar tanpa model itu |
+| Enum Prisma | **74** | Sesuai M00 |
+| Versi FE kanonik | `frontend/src/config/version.ts` = 1.3.0 | Host 1.2.0 ≠ source lokal |
+
+### 0.2 Urutan baca yang sah (setelah dirapikan)
+
+Kerjakan dari atas ke bawah; jangan mulai dari ledger fase B–AL.
+
+1. `CLAUDE.md` / `AGENTS.md` — batas izin dan larangan.
+2. [M02](M02_KEPUTUSAN_OWNER.md) — keputusan owner.
+3. [M12 § Antrean prioritas](M12_CHECKLIST_CHANGELOG.md#antrean-prioritas-aktif) — satu urutan kerja.
+4. Domain: [M19](M19_EFISIENSI_HOSTING_512MB.md) untuk EF; [M14](M14_AUDIT_UI_UX.md) untuk AO; [M08](M08_DEPLOY_GO_LIVE.md) untuk Fase A.
+5. [M00](M00_CODEMAP.md) sebelum grep; [M01](M01_MASTER.md) untuk ground state.
+6. [M13](M13_CHANGELOG.md) hanya untuk riwayat bertanggal, bukan antrean.
+
+### 0.3 Temuan (dokumentasi / urutan kerja)
+
+| ID | Severity | Temuan | Tindak lanjut sesi ini |
+|---|---|---|---|
+| D-01 | P1 | M12 punya dua “pintu” kerja: tabel antrean 8 Sep di atas, lalu protokol kedua + `## ANTRIAN EKSEKUSI AKTIF` tanpa `id="antrian-eksekusi-aktif"`. Banner M00–M18 menunjuk `#antrian-eksekusi-aktif` yang **tidak ada**. | Dual anchor dipasang; protokol digabung; ledger tetap di bawah dengan label riwayat |
+| D-02 | P1 | Blok “Update 2026-09-08 … 07-23” di puncak M12 menduplikasi M13 dan menunda antrean. | Isi sesi dipindah ke pointer M13; M12 depan = protokol → antrean → status aktif → peta |
+| D-03 | P2 | Peta rujukan M12 berhenti di M00/M09/M13; M14–M19 dan formulir go-live tidak masuk indeks kerja | Peta dilengkapi M00–M19 + FORM |
+| D-04 | P2 | Status ringkas M12: Fase Y “152/153 hampir tuntas” vs M01 “153/153 selesai”; Fase Z masih “19 task terverifikasi”; Fase AL tidak ada di tabel status | Tabel status aktif dipisah dari ledger historis; Y/Z/AL dikoreksi sebagai riwayat |
+| D-05 | P2 | M00: 61 vs 62 model; `PublicRoomAvailability` absen; baris “rangkuman … M13 dan M13”; tanggal banner 6 Sep | Indeks model + banner dikoreksi |
+| D-06 | P2 | M01 §1 (Juli) masih menempatkan temuan X1 journal best-effort sebagai CRITICAL terbuka, padahal AN/AL/M16 Juli sudah menutup journal blocking | Banner historis ditambahkan di § tersebut; bukan menghapus bukti Juli |
+| D-07 | P2 | M16 §1/§4/§5: “siap produksi” + sisa AO-17..23 sebagai terbuka. AO-17 dan AO-22 sudah `[x]` di M12; AO-18/19/20 parsial | Putusan Juli dikualifikasi; §4 diselaraskan ke M12 8 Sep |
+| D-08 | P2 | M14 adalah dua dokumen menempel: audit AO 30 Jul (~1000 baris) lalu lampiran portal 2 Jul tanpa daftar isi | Daftar isi + penanda lampiran ditambahkan |
+| D-09 | P3 | M01 §7 menampilkan password seed DEV di dokumen master | Diganti pointer ke M11 (nilai tetap di M11 sebagai default DEV) |
+| D-10 | INFO | `IotRetiredStreamController` masih ada (rekomendasi X10 Juli). Fase MA ditunda → bukan izin hapus/ekstraksi | Dicatat; tidak dikerjakan |
+| D-11 | INFO | Working tree: docs M01/M08/M11–M14/M19 sudah dirty sebelum sesi ini; `kost48-deploy-bundled/` untracked. Tidak di-reset | Dipertahankan |
+
+### 0.4 Yang sudah rapi dan tidak diulang
+
+- Arah EF / satu API / MA ditunda konsisten di M02, M12 antrean, M19, CLAUDE/AGENTS.
+- Gate AO-03 alat (8 Sep) dan EF-00/02 UNKNOWN sudah tercatat M12/M13/M14/M19.
+- Audit kode Juli (§1–§5 di bawah) dan I-01/`610395c` tidak dibuka ulang.
+- Password yang pernah di `GO_LIVE_DATA_ISI.md` sudah diarsipkan; rotasi OWNER produksi tetap kewajiban owner (M13 7 Sep).
+
+### 0.5 Antrean kerja setelah rapikan (bukan izin baru)
+
+Sama dengan [M12 antrean prioritas](M12_CHECKLIST_CHANGELOG.md#antrean-prioritas-aktif): EF-00/02 BLOCKED data host → AO alat/crawl setelah izin → EF-07/08 uji terarah → EF-04/06 rencana → AL hanya rekonsiliasi bukti Z-19/H15 → Fase A owner.
+
+---
+
+## 1. Ringkasan Eksekutif (audit kode 30 Juli 2026)
+
+> Snapshot bertanggal. Angka test/build di tabel adalah hasil Juli, bukan sesi 8 September. Klaim “siap produksi” di bawah = **kesiapan kode inti pada hari audit**, bukan sign-off host/UAT/Fase A.
 
 | Area | Hasil | Keputusan |
 |---|---|---|
-| Build & typecheck | 🟢 backend `tsc --noEmit` clean · frontend `npm run build` 162 chunks + PWA verified | Lulus |
-| Unit test backend | 🟢 74/74 pass (6 suite) | Lulus |
-| Unit test frontend | 🟢 135/135 pass (31 file) | Lulus |
+| Build & typecheck | 🟢 backend `tsc --noEmit` clean · frontend `npm run build` 162 chunks + PWA verified | Lulus (30 Jul) |
+| Unit test backend | 🟢 74/74 pass (6 suite) | Lulus (30 Jul) |
+| Unit test frontend | 🟢 135/135 pass (31 file) | Lulus (30 Jul) |
 | Keamanan (authz/secrets/SQLi) | 🟢 solid — default-deny global, no secret hardcode, raw query terparameterisasi | Sehat |
 | Atomisitas keuangan | 🟢 best-effort journal sudah BLOCKING (AN-03), WiFi sale + deposit ledger atomik | Sehat |
 | Race condition | 🟡 1 minor (I-01) — sudah diperbaiki | Sehat |
 | Frontend | 🟢 tidak ada anti-pattern hooks-order tersisa (AO-02 fixed) | Sehat |
 
-### Putusan
+### Putusan (30 Juli, dikualifikasi 8 Sep)
 
-Codebase **matang dan siap produksi** dari sisi kode inti. Sisa pekerjaan pra-go-live adalah infrastruktur owner (Fase A) dan eksekusi UI/UX Fase AO yang belum tuntas (AO-03/AO-13/AO-14/AO-17..AO-23) — keduanya bukan defect kode.
+Codebase **matang dari sisi kode inti pada audit Juli**. Pra-go-live tetap: infrastruktur (Fase A), identitas host (EF-00/02), crawl/sign-off AO (AO-03/13/14 dan sisa parsial AO-18/19/20 + AO-21/23). AO-17 dan AO-22 sudah ditutup di checklist M12; jangan mengulang.
 
 ---
 
@@ -85,12 +146,14 @@ Catatan: invariant `stok tidak boleh negatif` selalu dijaga `ensureInventoryQtyS
 
 ## 4. Bukan Defect (terdokumentasi terpisah)
 
-- **Fase A (Pra-Go-Live):** blocked owner — server/domain/env.
-- **Fase AO sisa:** `AO-03` (fixture/kredensial UAT non-personal), `AO-13` (crawl regresi OWNER/ADMIN/STAFF), `AO-14` (re-audit final), `AO-17..AO-23` (eksekusi UI/UX dashboard publik/Owner/Admin). Detail: `docs/M14_AUDIT_UI_UX.md`. `AO-03`/`AO-13` memerlukan kredensial/data UAT dari owner.
+- **Fase A (Pra-Go-Live):** blocked owner — server/domain/env; identitas DB produksi tidak diasumsikan dari UAT.
+- **Fase EF:** EF-00/02 menunggu data host; EF-01/03/05 implementasi lokal; kelayakan 512 MB belum PASS. Detail: `docs/M19_EFISIENSI_HOSTING_512MB.md`.
+- **Fase AO sisa (selaras M12 8 Sep):** AO-03 (alat/fixture lalu provisioning), AO-13 (crawl tiga role), AO-14 (sign-off), AO-18/19/20 **parsial**, AO-21, AO-23. AO-17 dan AO-22 sudah selesai. Detail: `docs/M14_AUDIT_UI_UX.md`.
+- **AL / Z-19:** H1–H15 dilaporkan selesai 7 Jul; verifikasi manual Owner untuk Z-19 belum punya bukti spesifik.
 
 ---
 
 ## 5. Kesimpulan
 
-- **Risk rating: 🟢 LOW** — 0 HIGH, 0 MEDIUM terbuka, 1 LOW (sudah fix).
-- Kode inti siap produksi; bukti release menunggu gate infrastruktur (Fase A) dan crawl UAT (AO-03/AO-13/AO-14).
+- **Risk rating kode (30 Jul): 🟢 LOW** — 0 HIGH, 0 MEDIUM terbuka, 1 LOW (sudah fix).
+- **Kesiapan rilis (8 Sep):** kode inti Juli ≠ bukti host, ≠ crawl UAT, ≠ rotasi kredensial OWNER. Jangan mengutip §1 sebagai sign-off produksi.

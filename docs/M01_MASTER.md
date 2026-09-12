@@ -14,14 +14,14 @@
 
 Hindari membaca arsip besar kecuali benar-benar perlu forensik: `docs/archieve/*`, file `*_STALE.md`, `reference/*`, dan `backend/src/generated/*`.
 
-## Status Terkini (2026-09-06)
+## Status Terkini (diselaraskan 2026-09-08)
 
 - **Prioritas: Fase EF**, spesifikasi M19 dan checklist M12. Pertahankan satu proses API NestJS sebagai target; jumlah instance Passenger aktual UNKNOWN. Tidak ada rewrite atau penghapusan fitur bisnis.
 - **Fase MA — Batas Modul & Kesiapan Ekstraksi: DITUNDA.** Sebutan lama V5.7/V5.8/V5.9 arsitektur bukan versi aplikasi. Tidak ada izin membuat apps/libs, aplikasi Nest baru, worker, atau ekstraksi service.
-- **Implementasi lokal:** EF-01 telemetri, EF-03 Prisma singleton, EF-05 packaging tersedia di working tree; sebagian perubahan belum di-commit. Jangan menyamakan seluruh dirty tree dengan Fase EF.
+- **Implementasi lokal:** EF-01 telemetri, EF-03 Prisma singleton, EF-05 packaging tercakup dalam commit `b29ba32` bersama perubahan lain; mekanisme akun/crawl AO tersedia di `74068aa` (HEAD audit docs 8 Sep). Ketersediaan skrip AO masih memiliki gap alat/fixture di M14, belum menjadi provisioning atau crawl lulus.
 - **Verifikasi lokal:** audit statis EF-01/03/04/07 selesai; laporan Cline mencatat typecheck exit 0, bukan production build/UAT baru. Riwayat build EF-05 tetap di M13. Tidak ada pengukuran server pada sesi sinkronisasi ini.
 - **Deployment/dampak terukur: UNKNOWN.** Langkah berikutnya identitas artefak server dan pengamatan pasif EF-00/02 di M19 §9. SHA lokal tidak membuktikan isi artefak server, terutama bila bundle memuat uncommitted.
-- **Fase A:** menunggu konfirmasi infrastruktur dan kondisi deployment sebenarnya. **Fase AO:** backlog/gate pra-go-live yang terbuka tetap berlaku; audit Juli bukan bukti keadaan runtime September.
+- **Fase A:** menunggu konfirmasi infrastruktur, identitas DB/deployment dan bukti rotasi kredensial OWNER. **Fase AO:** AO-00 selesai historis 30 Juli; AO-03/13/14, sisa parsial AO-18/19/20 dan AO-21/23 tetap terbuka. **AL:** penutupan H1–H15 dilaporkan 7 Juli; H15/Z-19 tetap memerlukan bukti verifikasi manual spesifik, bukan mengulang semua temuan. Urutan tunggal mengikuti M12; audit Juli bukan bukti runtime September.
 - **Kesiapan produksi belum disahkan.** Checklist selesai pada fase historis tidak menutup gate EF/A/AO.
 - **Versi aplikasi lokal:** 1.3.0, Portal Ringkas, tanggal versi 2026-08-20 (`frontend/src/config/version.ts`). Label fase tidak melakukan bump versi.
 

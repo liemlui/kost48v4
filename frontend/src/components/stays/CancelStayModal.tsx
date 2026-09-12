@@ -66,7 +66,7 @@ export default function CancelStayModal({
           </div>
         </Alert>
         {error ? <Alert variant="danger">{error}</Alert> : null}
-        <Form.Group>
+        <Form.Group controlId="cancel-stay-modal-1">
           <Form.Label>Alasan Pembatalan <span className="text-danger">*</span></Form.Label>
           <Form.Control
             as="textarea"
