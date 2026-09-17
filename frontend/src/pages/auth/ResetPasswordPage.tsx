@@ -1,4 +1,4 @@
-import { FormEvent, useState } from 'react';
+import { FormEvent, useEffect, useRef, useState } from 'react';
 import { Alert, Button, Form } from 'react-bootstrap';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import PasswordInput from '../../components/common/PasswordInput';
@@ -15,11 +15,21 @@ export default function ResetPasswordPage() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const redirectTimerRef = useRef<number | null>(null);
+
+  useEffect(() => () => {
+    if (redirectTimerRef.current !== null) window.clearTimeout(redirectTimerRef.current);
+  }, []);
 
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
     setError(null);
     setSuccess(null);
+
+    if (!token.trim()) {
+      setError('Token reset wajib diisi. Gunakan tautan reset terbaru atau tempel token yang Anda terima.');
+      return;
+    }
 
     if (newPassword.length < 8) {
       setError('Password baru minimal 8 karakter.');
@@ -33,9 +43,9 @@ export default function ResetPasswordPage() {
 
     setSubmitting(true);
     try {
-      await resetPassword({ token, newPassword });
+      await resetPassword({ token: token.trim(), newPassword });
       setSuccess('Password berhasil diperbarui. Anda akan diarahkan ke login dalam beberapa detik.');
-      window.setTimeout(() => navigate('/login', { replace: true }), 2000);
+      redirectTimerRef.current = window.setTimeout(() => navigate('/login', { replace: true }), 2000);
     } catch (err: any) {
       const message = err?.response?.data?.message;
       setError(Array.isArray(message) ? message.join(', ') : (message || 'Gagal mereset password.'));
@@ -70,23 +80,29 @@ export default function ResetPasswordPage() {
           {error ? <Alert variant="danger">{error}</Alert> : null}
           {success ? <Alert variant="success">{success}</Alert> : null}
 
-          <Form onSubmit={handleSubmit}>
+          <Form onSubmit={handleSubmit} noValidate>
             <Form.Group controlId="reset-password-page-1" className="mb-3">
               <Form.Label>Token Reset</Form.Label>
-              <Form.Control value={token} onChange={(e) => setToken(e.target.value)} placeholder="Tempel token reset di sini" />
+              <Form.Control
+                type="password"
+                autoComplete="off"
+                value={token}
+                onChange={(e) => setToken(e.target.value)}
+                placeholder="Tempel token reset di sini"
+              />
             </Form.Group>
 
             <Form.Group controlId="reset-password-page-2" className="mb-3">
               <Form.Label>Password Baru</Form.Label>
-              <PasswordInput controlId="reset-password-page-2" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} placeholder="Minimal 8 karakter" />
+              <PasswordInput controlId="reset-password-page-2" autoComplete="new-password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} placeholder="Minimal 8 karakter" />
             </Form.Group>
 
             <Form.Group controlId="reset-password-page-3" className="mb-4">
               <Form.Label>Konfirmasi Password Baru</Form.Label>
-              <PasswordInput controlId="reset-password-page-3" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="Ulangi password baru" />
+              <PasswordInput controlId="reset-password-page-3" autoComplete="new-password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="Ulangi password baru" />
             </Form.Group>
 
-            <Button type="submit" disabled={submitting} className="w-100">
+            <Button type="submit" disabled={submitting || Boolean(success)} className="w-100">
               {submitting ? 'Memproses...' : 'Simpan Password Baru'}
             </Button>
           </Form>

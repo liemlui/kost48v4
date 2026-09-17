@@ -14,6 +14,11 @@ const client = axios.create({
 // P3-01: flag global — cegah request flood setelah auth gagal
 let authPermanentlyFailed = false;
 
+/** Membuka kembali client untuk percobaan login baru. */
+export function resetAuthFailureState() {
+  authPermanentlyFailed = false;
+}
+
 function clearAuthAndRedirect() {
   localStorage.removeItem('kost48_access_token');
   sessionStorage.removeItem('kost48_last_authenticated_user');
@@ -86,12 +91,13 @@ client.interceptors.response.use(
       requestUrl.includes('/auth/logout');
 
     // P3-01: Jika 401 dan ada token dan bukan dari auth endpoint → coba refresh
-    if (status === 401 && hasToken && !isAuthRequest) {
+    if (status === 401 && hasToken && !isAuthRequest && !originalRequest?._retry) {
       if (isRefreshing) {
         // Request lain sedang refresh — antri
         return new Promise<string>((resolve, reject) => {
           failedQueue.push({ resolve, reject });
         }).then((newToken) => {
+          originalRequest._retry = true;
           originalRequest.headers.Authorization = `Bearer ${newToken}`;
           return client(originalRequest);
         });
@@ -133,6 +139,11 @@ client.interceptors.response.use(
       error.response.data = {
         message: 'Server tidak merespons. Pastikan backend sudah berjalan dan coba lagi.',
       };
+    }
+
+    if (status === 401 && originalRequest?._retry) {
+      clearAuthAndRedirect();
+      return Promise.reject(new axios.AxiosError('Sesi berakhir. Silakan login kembali.', 'AUTH_EXPIRED', originalRequest));
     }
 
     return Promise.reject(error);

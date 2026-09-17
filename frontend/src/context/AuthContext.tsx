@@ -2,8 +2,9 @@ import { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import { AuthUser } from '../types';
 import { login as loginRequest, me as meRequest } from '../api/auth';
 import { queryClient } from '../lib/queryClient';
+import { resetAuthFailureState } from '../api/client';
 
-const TENANT_SESSION_KEYS = ['portal-bookings-success-message'];
+const TENANT_SESSION_KEYS = ['kost48:portal-bookings:success-message'];
 const AUTH_TOKEN_KEY = 'kost48_access_token';
 const AUTH_USER_CACHE_KEY = 'kost48_last_authenticated_user';
 
@@ -17,6 +18,18 @@ function readCachedUser(): AuthUser | null {
       || typeof parsed.fullName !== 'string'
       || typeof parsed.email !== 'string'
       || !['OWNER', 'ADMIN', 'STAFF', 'TENANT'].includes(String(parsed.role))
+    ) {
+      return null;
+    }
+    if (
+      (typeof parsed.tenantId !== 'number' && parsed.tenantId !== null)
+      || typeof parsed.isActive !== 'boolean'
+      || (parsed.lastLoginAt !== undefined && typeof parsed.lastLoginAt !== 'string' && parsed.lastLoginAt !== null)
+      || (parsed.tipGopay !== undefined && typeof parsed.tipGopay !== 'string' && parsed.tipGopay !== null)
+      || (parsed.tipOvo !== undefined && typeof parsed.tipOvo !== 'string' && parsed.tipOvo !== null)
+      || (parsed.tipDana !== undefined && typeof parsed.tipDana !== 'string' && parsed.tipDana !== null)
+      || (parsed.tipShopeepay !== undefined && typeof parsed.tipShopeepay !== 'string' && parsed.tipShopeepay !== null)
+      || (parsed.tipBank !== undefined && typeof parsed.tipBank !== 'string' && parsed.tipBank !== null)
     ) {
       return null;
     }
@@ -64,20 +77,35 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const me = await meRequest();
         setUser(me);
         cacheUser(me);
-      } catch (error: any) {
-        const status = error?.response?.status;
-        if (status === 401 || status === 403) {
-          localStorage.removeItem(AUTH_TOKEN_KEY);
-          cacheUser(null);
-          setToken(null);
-          setUser(null);
-        }
+      } catch {
+        // Jangan lanjutkan route terlindungi dengan token tanpa user terverifikasi.
+        localStorage.removeItem(AUTH_TOKEN_KEY);
+        cacheUser(null);
+        setToken(null);
+        setUser(null);
       } finally {
         setLoading(false);
       }
     };
     void init();
   }, [token]);
+
+  useEffect(() => {
+    const handleStorage = (event: StorageEvent) => {
+      if (event.storageArea !== localStorage || event.key !== AUTH_TOKEN_KEY) return;
+
+      cacheUser(null);
+      clearTenantSessionStorage();
+      queryClient.clear();
+      resetAuthFailureState();
+      setUser(null);
+      setToken(event.newValue);
+      setLoading(Boolean(event.newValue));
+    };
+
+    window.addEventListener('storage', handleStorage);
+    return () => window.removeEventListener('storage', handleStorage);
+  }, []);
 
   const value = useMemo<AuthContextValue>(() => ({
     user,
@@ -86,6 +114,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     async login(identifier: string, password: string) {
       clearTenantSessionStorage();
       queryClient.clear();
+      // Login baru tetap diizinkan setelah refresh sesi lama gagal.
+      resetAuthFailureState();
       const result = await loginRequest(identifier, password);
       localStorage.setItem(AUTH_TOKEN_KEY, result.accessToken);
       cacheUser(result.user);
@@ -103,6 +133,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         // tetap logout lokal walau server error
       });
       localStorage.removeItem(AUTH_TOKEN_KEY);
+      resetAuthFailureState();
       cacheUser(null);
       clearTenantSessionStorage();
       queryClient.clear();
