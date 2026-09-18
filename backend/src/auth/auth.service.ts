@@ -175,24 +175,34 @@ export class AuthService {
   }
 
   /**
-   * P3-01: Revoke refresh token (logout). Mencabut semua refresh token user.
-   * Juga mencabut token spesifik jika rawToken diberikan (single-session logout).
+   * P3-01: Mencabut refresh token.
+   * - `rawToken` diberikan → cabut HANYA sesi itu (single-session logout).
+   * - `rawToken` kosong    → cabut SEMUA refresh token user (global logout); dipakai
+   *   saat password diganti/di-reset (T1 audit FE-002).
+   *
+   * @param client — opsional: klien transaksi Prisma agar pencabutan bisa atomik
+   *                 dengan perubahan password (T1 audit FE-002). Default: klien biasa.
    */
-  async revokeRefreshTokens(userId: number, rawToken?: string) {
+  async revokeRefreshTokens(
+    userId: number,
+    rawToken?: string,
+    client?: Pick<Prisma.TransactionClient, 'refreshToken'>,
+  ) {
+    const db = client ?? this.prisma;
     if (rawToken) {
       const tokenHash = createHash('sha256').update(rawToken).digest('hex');
-      const stored = await this.prisma.refreshToken.findUnique({
+      const stored = await db.refreshToken.findUnique({
         where: { token: tokenHash, userId },
       });
       if (stored && !stored.revokedAt) {
-        await this.prisma.refreshToken.update({
+        await db.refreshToken.update({
           where: { id: stored.id },
           data: { revokedAt: new Date() },
         });
       }
     } else {
       // Revoke ALL refresh tokens for this user (global logout)
-      await this.prisma.refreshToken.updateMany({
+      await db.refreshToken.updateMany({
         where: { userId, revokedAt: null },
         data: { revokedAt: new Date() },
       });
@@ -378,6 +388,10 @@ export class AuthService {
 
     const passwordHash = await bcrypt.hash(dto.newPassword, 10);
 
+    // T1 (audit FE-002/BE-002): ganti password WAJIB mematikan sesi lama.
+    // Sebelumnya hanya access token lama yang mati (lewat pwdAt di jwt.strategy), sedangkan
+    // refresh token tetap bisa menukar access token baru sampai 7 hari.
+    // Pencabutan ditaruh di dalam transaksi yang sama dengan penggantian hash.
     await this.prisma.$transaction(async (tx) => {
       await tx.$executeRaw(Prisma.sql`
         UPDATE "User"
@@ -392,6 +406,9 @@ export class AuthService {
         SET "usedAt" = NOW()
         WHERE token = ${tokenHash}
       `);
+
+      // Global logout: cabut semua refresh token user.
+      await this.revokeRefreshTokens(user.id, undefined, tx);
     });
 
     return { success: true };
@@ -420,13 +437,18 @@ export class AuthService {
 
     const passwordHash = await bcrypt.hash(dto.newPassword, 10);
 
-    await this.prisma.$executeRaw(Prisma.sql`
-      UPDATE "User"
-      SET "passwordHash" = ${passwordHash},
-          "passwordChangedAt" = NOW(),
-          "updatedAt" = NOW()
-      WHERE id = ${user.id}
-    `);
+    // T1 (audit FE-002/BE-002): idem resetPassword — ganti password mencabut seluruh sesi.
+    await this.prisma.$transaction(async (tx) => {
+      await tx.$executeRaw(Prisma.sql`
+        UPDATE "User"
+        SET "passwordHash" = ${passwordHash},
+            "passwordChangedAt" = NOW(),
+            "updatedAt" = NOW()
+        WHERE id = ${user.id}
+      `);
+
+      await this.revokeRefreshTokens(user.id, undefined, tx);
+    });
 
     return { success: true };
   }

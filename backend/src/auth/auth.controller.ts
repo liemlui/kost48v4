@@ -1,4 +1,4 @@
-﻿import { Body, Controller, Get, Patch, Post, Req, Res, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Patch, Post, Req, Res, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Request, Response } from 'express';
 import { createHash } from 'crypto';
@@ -51,16 +51,20 @@ export class AuthController {
     return { message: 'Token berhasil diperbarui', data: { accessToken: data.accessToken } };
   }
 
+  // Route tetap @Public() dengan sengaja: logout harus tetap berhasil saat access token
+  // sudah kedaluwarsa/hilang, jadi keberhasilan tidak boleh bergantung pada JwtAuthGuard.
+  // Konsekuensinya `req.user` tidak pernah terisi di sini, sehingga pencabutan dilakukan
+  // per-sesi memakai refresh token dari cookie (bukan "cabut semua sesi user").
+  // T2 audit FE-002: cabang "revoke ALL" berbasis `@CurrentUser()` dihapus karena tidak
+  // pernah tereksekusi dan membuat perilaku logout tampak berbeda dari kenyataan.
+  // Bila kelak dibutuhkan "keluar dari semua perangkat", tambahkan endpoint terpisah
+  // yang bergerbang JwtAuthGuard alih-alih mengandalkan route ini.
   @Post('logout')
-  @ApiOperation({ summary: 'Logout — revoke refresh token' })
+  @ApiOperation({ summary: 'Logout — revoke refresh token pada cookie ini' })
   @Public()
-  async logout(@Req() req: Request, @Res({ passthrough: true }) res: Response, @CurrentUser() user?: CurrentUserPayload) {
+  async logout(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
     const rawToken = this.extractRefreshToken(req);
-    if (user) {
-      // Jika ada user (akses token valid), revoke spesifik
-      await this.authService.revokeRefreshTokens(user.id, rawToken ?? undefined);
-    } else if (rawToken) {
-      // Tanpa user, coba revoke via token saja
+    if (rawToken) {
       const tokenHash = createHash('sha256').update(rawToken).digest('hex');
       const stored = await this.prisma.refreshToken.findUnique({ where: { token: tokenHash } });
       if (stored && !stored.revokedAt) {
