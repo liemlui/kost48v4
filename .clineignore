@@ -81,11 +81,11 @@ Thumbs.db
 # - backend/tsconfig.build.json
 # - backend/prisma.config.ts
 # - frontend/package.json
-# - docs/00_GROUND_STATE.md
-# - docs/01_CONTRACTS.md
-# - docs/02_PLAN.md
-# - docs/CHECKLIST.md
-# - docs/03_DECISIONS_LOG.md
-# - docs/04_JOURNAL.md
-# - docs/CHANGELOG.md
+# - AGENTS.md
+# - docs/M00_CODEMAP.md
+# - docs/M12_CHECKLIST_CHANGELOG.md
+# - docs/M13_CHANGELOG.md
+# - docs/M20_PRODUKSI_KOST48.md
+# - docs/FORM_ISI_DATA_GO_LIVE.md
+# Seri dokumen aktif: M00–M20.
 # - .env.example
