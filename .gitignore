@@ -81,6 +81,7 @@ backend/test/debug-*.js
 kost48-deploy-bundled/
 .dsh-editor/
 .audit-runtime/
+/.audit-home/
 
 # Temporary/setup scripts (root level)
 setup.sql
