@@ -5097,7 +5097,7 @@
 
 @media (max-width: 767.98px) {
   .gx-scroll-top {
-    bottom: 4.5rem; /* hindari overlap dengan gx-mobile-booking */
+    bottom: 6.5rem; /* M21: bar CTA mobile (80px) + jarak 1.5rem — jangan bertumpuk */
   }
 }
 
@@ -6166,3 +6166,212 @@
 }
 .gpw-skeleton-line:nth-child(2) { width: 65%; }
 .gpw-skeleton-line:nth-child(3) { width: 45%; }
+
+/* ══════════════════════════════════════════════════════════════════════════
+   M21 — Mobile-first homepage (audit produksi 15 Sep 2026)
+   Semua aturan di bawah hanya aktif ≤767.98px, sehingga tata letak desktop
+   (≥1280px) tidak berubah sama sekali.
+   ══════════════════════════════════════════════════════════════════════════ */
+@media (max-width: 767.98px) {
+  /* 1. Target sentuh ≥44px */
+  .gx-shortcut-link {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding: .5rem .8rem;
+    font-size: .875rem;
+  }
+
+  .gx-footer-nav-group nav { gap: 0; }
+
+  .gx-footer-nav-group nav a {
+    display: flex;
+    align-items: center;
+    min-height: 44px;
+    padding: .35rem 0;
+    font-size: .875rem;
+  }
+
+  .gx-footer-version {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    min-width: 44px;
+    font-size: .75rem;
+  }
+
+  /* 2. Keterbacaan: teks terkecil dinaikkan */
+  .gx-label { font-size: .75rem !important; }
+  .gx-acc-cat { font-size: .78rem; }
+  .gx-footer-copy { font-size: .8rem; }
+  .gx-footer-brand small { font-size: .8rem; }
+  .gx-footer-group-heading { font-size: .75rem; }
+  .gx-hero-eyebrow,
+  .gx-hero-next,
+  .gx-gallery-label,
+  .gx-page small,
+  .gx-page .small {
+    font-size: .8125rem;
+  }
+  .gx-mobile-booking strong { font-size: .92rem; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .gx-mobile-booking span { min-height: 44px; min-width: 64px; font-size: .85rem; flex-shrink: 0; white-space: nowrap; }
+
+  /* 3. Topbar: cegah tombol CTA terpotong di layar sempit */
+  .gx-topbar { padding-left: .75rem; padding-right: .75rem; }
+  .gx-brand { min-width: 0; gap: .5rem; }
+  /* 3a. Nama brand ter-ellipsis karena batas bawaan max-width 128px (teks butuh 129px) — dilepas di mobile */
+  .gx-brand-name { max-width: none; }
+
+  /* 3b. Sisa target sentuh <44px pada audit mobile */
+  .gx-brand,
+  .gx-topbar .gx-btn-solid,
+  .gx-topbar .gx-btn-ghost,
+  .gx-btn.gx-btn-whatsapp {
+    min-height: 44px;
+  }
+
+  .gx-page [role="tab"] {
+    min-height: 44px;
+  }
+
+  /* 4. Bar CTA & kontrol mengambang tidak menutupi konten */
+  body:has(.gx-mobile-booking) .gx-footer { padding-bottom: 6.5rem; }
+  body:has(.gx-mobile-booking) .toast-container.position-fixed.bottom-0 { bottom: 6.5rem !important; }
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   M21b — Target sentuh tablet (768–1023.98px)
+   Audit produksi 15 Sep menemukan 18 target <44px pada 768px karena ambang
+   blok mobile di atas berhenti di 767.98px (M14). Blok ini HANYA memperluas
+   target sentuh — tipografi, padding topbar, dan ukuran layout lain tidak
+   diubah, sehingga ≥1024px (desktop) sama sekali tidak terpengaruh.
+   ══════════════════════════════════════════════════════════════════════════ */
+@media (min-width: 768px) and (max-width: 1023.98px) {
+  .gx-shortcut-link {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding: .5rem .8rem;
+  }
+
+  .gx-footer-nav-group nav { gap: 0; }
+
+  .gx-footer-nav-group nav a {
+    display: flex;
+    align-items: center;
+    min-height: 44px;
+    padding: .35rem 0;
+  }
+
+  .gx-footer-version {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  .gx-brand,
+  .gx-topbar .gx-btn-solid,
+  .gx-topbar .gx-btn-ghost,
+  .gx-btn.gx-btn-whatsapp {
+    min-height: 44px;
+  }
+
+  .gx-page [role="tab"] {
+    min-height: 44px;
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   M21c — Target sentuh pada perangkat sentuh ≥1024px (mis. iPad landscape)
+   Ambang lebar M21b berhenti di 1023.98px, jadi tablet 1024–1279px masih <44px.
+   Aturan ini hanya aktif pada pointer kasar (sentuh) sehingga laptop/desktop
+   bertetikus — termasuk baseline audit 1280/1440 px — sama sekali tidak berubah.
+   Catatan bukti: perilaku `pointer: coarse` belum dapat diverifikasi di sesi lokal
+   (harness berjalan sebagai desktop/pointer fine); yang diverifikasi = tidak ada
+   perubahan pada pointer halus + CSS termuat.
+   ══════════════════════════════════════════════════════════════════════════ */
+@media (min-width: 1024px) and (pointer: coarse) {
+  .gx-shortcut-link {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding: .5rem .8rem;
+  }
+
+  .gx-nav-link {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+  }
+
+  .gx-footer-nav-group nav { gap: 0; }
+
+  .gx-footer-nav-group nav a {
+    display: flex;
+    align-items: center;
+    min-height: 44px;
+    padding: .35rem 0;
+  }
+
+  .gx-footer-version {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  .gx-brand,
+  .gx-topbar .gx-btn-solid,
+  .gx-topbar .gx-btn-ghost,
+  .gx-btn.gx-btn-whatsapp {
+    min-height: 44px;
+  }
+
+  .gx-page [role="tab"] {
+    min-height: 44px;
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   M22 — Ruang-terpesan hero & badge (perbaikan CLS; audit 15 Sep → 17 Sep 2026)
+   Sumber pergeseran terukur (observer layout-shift, 375 px): DIV.gx-hero-body
+   bertambah tinggi 518 → 543 → 568 px saat teks hero mengetik (±25 px/baris),
+   dan badge harga muncul setelah tarif tiba. Pola di bawah mengunci tinggi
+   dengan menumpuk salinan "ruang-terpesan" di sel grid yang sama, sehingga
+   perilakunya sama di semua lebar (tanpa angka piksel yang di-hardcode).
+   ══════════════════════════════════════════════════════════════════════════ */
+.gx-hero-sub,
+.gx-hero-price-badge-sub {
+  display: grid;
+}
+
+.gx-hero-sub > *,
+.gx-hero-price-badge-sub > * {
+  grid-area: 1 / 1;
+}
+
+/* Salinan teks penuh/terpanjang: menentukan tinggi akhir sejak render pertama */
+.gx-hero-sub-reserve,
+.gx-hero-price-badge-sub-reserve {
+  visibility: hidden;
+}
+
+/* Badge harga selalu menempati ruang; sebelum tarif tiba dipakai placeholder senyap */
+.gx-hero-price-slot {
+  display: flex;
+  justify-content: center;
+}
+
+.gx-hero-price-badge.is-placeholder {
+  visibility: hidden;
+}
+
+/* Layar sempit (≤420px): "Masuk Portal" cukup lewat footer, agar brand + CTA tidak terpotong. */
+@media (max-width: 420px) {
+  .gx-nav-cta .gx-btn-ghost { display: none; }
+  .gx-topbar { padding-left: .6rem; padding-right: .6rem; }
+}

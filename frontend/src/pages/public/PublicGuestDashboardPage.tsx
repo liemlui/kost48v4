@@ -51,6 +51,8 @@ export default function PublicGuestDashboardPage() {
 
   const initialCatalogParams = useMemo(() => new URLSearchParams(location.search), [location.search]);
   const [scrolled, setScrolled] = useState(false);
+  // M21 (15 Sep 2026): bar CTA bawah baru tampil setelah hero lewat, agar tidak menutupi CTA hero di layar pendek.
+  const [heroPassed, setHeroPassed] = useState(false);
   const [scrollProgress, setScrollProgress] = useState(0);
   const [lightboxSrc, setLightboxSrc] = useState<string | null>(null);
   const [activeFacilityTab, setActiveFacilityTab] = useState(FACILITY_GROUPS[0].id);
@@ -115,10 +117,20 @@ export default function PublicGuestDashboardPage() {
   const countUpStarted = useRef(false);
   const heroImageUrl = resolvePublicMarketingAssetUrl(marketingAssetMap.get('hero-front')) ?? getKost48FrontPhotoUrl();
   const galleryItems = useMemo(
-    () => GALLERY_ITEMS.map((item) => ({
-      ...item,
-      src: resolvePublicMarketingAssetUrl(marketingAssetMap.get(item.id)) ?? item.src,
-    })),
+    () => GALLERY_ITEMS.map((item) => {
+      const resolved = resolvePublicMarketingAssetUrl(marketingAssetMap.get(item.id));
+      // M21 (13 Sep 2026): grid memakai thumb WebP ringan; lightbox tetap memakai file penuh
+      // (aset brosur memang untuk dibagikan dalam ukuran asli). Thumb dipakai selama sumber
+      // efektif masih aset bawaan — bukan berkas unggahan owner yang berbeda.
+      const useThumb = Boolean(item.thumb) && (!resolved || resolved === item.src);
+      return {
+        ...item,
+        src: resolved ?? item.src,
+        displaySrc: useThumb ? item.thumb! : (resolved ?? item.src),
+        displayW: useThumb ? item.thumbW : undefined,
+        displayH: useThumb ? item.thumbH : undefined,
+      };
+    }),
     [marketingAssetMap],
   );
   const visibleGalleryItems = galleryItems.filter((item) => !galleryBroken[item.id]);
@@ -129,10 +141,20 @@ export default function PublicGuestDashboardPage() {
   }, [marketingAssetsQuery.data]);
 
   useEffect(() => {
-    const h = () => setScrolled(window.scrollY > 60);
+    const hero = document.querySelector('.gx-hero');
+    const h = () => {
+      setScrolled(window.scrollY > 60);
+      // M21: anggap hero sudah lewat bila dasar hero berada di 55% atas viewport.
+      const heroBottom = hero ? hero.getBoundingClientRect().bottom : Number.POSITIVE_INFINITY;
+      setHeroPassed(heroBottom < window.innerHeight * 0.55);
+    };
     h();
     window.addEventListener('scroll', h, { passive: true });
-    return () => window.removeEventListener('scroll', h);
+    window.addEventListener('resize', h);
+    return () => {
+      window.removeEventListener('scroll', h);
+      window.removeEventListener('resize', h);
+    };
   }, []);
 
   useEffect(() => {
@@ -319,11 +341,11 @@ export default function PublicGuestDashboardPage() {
       let answer = item.answer;
       if (item.question === 'Bagaimana sistem listrik?') {
         answer = answer.replace('Jatah gratis 30 kWh/bulan', `Jatah gratis ${freeKwh} kWh/bulan`);
-        answer = answer.replace('Rp 2.500/kWh', `{formatRupiah(electricityTariff)}/kWh`);
+        answer = answer.replace('Rp 2.500/kWh', `${formatRupiah(electricityTariff)}/kWh`);
       } else if (item.question === 'Apakah tersedia WiFi?') {
-        answer = answer.replace('Rp 50.000', `{formatRupiah(wifiPrice)}`);
+        answer = answer.replace('Rp 50.000', `${formatRupiah(wifiPrice)}`);
       } else if (item.question === 'Apakah boleh membawa hewan peliharaan?') {
-        answer = answer.replace('Rp 100.000', `{formatRupiah(petDeposit)}`);
+        answer = answer.replace('Rp 100.000', `${formatRupiah(petDeposit)}`);
       }
       return { ...item, answer };
     });
@@ -380,33 +402,52 @@ export default function PublicGuestDashboardPage() {
       <MobileShortcutNav visible={scrolled} />
       {lightboxSrc && <Lightbox src={lightboxSrc} onClose={closeLightbox} />}
 
-      <section className="gx-hero" id="top">
+      <section className="gx-hero" id="top" aria-label="Beranda KOST48 Surabaya">
         <div className="gx-hero-bg" style={{ backgroundImage: `url(${heroImageUrl})` }} aria-hidden="true" />
         <div className="gx-hero-overlay" aria-hidden="true" />
         <div className="gx-hero-body">
           <p className="gx-hero-eyebrow">Jalan Hikmah V No. 48 - Surabaya Barat</p>
           <h1 className="gx-hero-title">KOST48 Surabaya</h1>
           <p className="gx-hero-headline">Kost bersih &amp; aman dekat Pakuwon Mall</p>
-          <p
-            className="gx-hero-sub"
-            aria-label={HERO_SUB_TEXT}
-          >
-            {heroTyped || ' '}
-            <span className={`gx-typewriter-cursor${heroTypingDone ? ' done' : ''}`} aria-hidden="true" />
+          {/* CLS (audit 15 Sep): teks penuh dirender tak terlihat sebagai ruang-terpesan, sedangkan
+              teks yang mengetik diposisikan absolut di atasnya — tinggi hero tidak berubah tiap karakter.
+              Salinan `visually-hidden` menjadi sumber teks bagi pembaca layar; `aria-label` pada <p>
+              tidak dipakai karena terlarang untuk role paragraph (pelanggaran axe serious). */}
+          <p className="gx-hero-sub">
+            <span className="visually-hidden">{HERO_SUB_TEXT}</span>
+            <span className="gx-hero-sub-reserve" aria-hidden="true">{HERO_SUB_TEXT}</span>
+            <span className="gx-hero-sub-live" aria-hidden="true">
+              {heroTyped || '\u00A0'}
+              <span className={`gx-typewriter-cursor${heroTypingDone ? ' done' : ''}`} />
+            </span>
           </p>
-          {monthlyRates.length > 0 && (
-            <div className="gx-hero-price-badge">
-              <span aria-hidden="true">🏷️</span>
-              <strong>Mulai {formatCompactRupiah(Math.min(...monthlyRates))}/bln</strong>
-              <span className={`gx-hero-price-badge-sub${availabilityState === 'full' || availabilityState === 'empty' ? ' is-neutral' : ''}`}>
-                {availabilityState === 'loading' ? 'Memuat ketersediaan…'
-                  : availabilityState === 'error' ? 'Ketersediaan belum dapat dimuat'
-                  : availabilityState === 'full' ? 'Semua kamar sedang terisi'
-                  : availabilityState === 'empty' ? 'Belum ada data kamar'
-                  : `${stats.bookable} kamar tersedia`}
-              </span>
-            </div>
-          )}
+          {/* CLS: badge harga selalu menempati ruang sejak render pertama; sebelum tarif tiba
+              dipakai placeholder tak terlihat dengan bentuk sama agar CTA tidak bergeser. */}
+          <div className="gx-hero-price-slot">
+            {monthlyRates.length > 0 ? (
+              <div className="gx-hero-price-badge">
+                <span aria-hidden="true">🏷️</span>
+                <strong>Mulai {formatCompactRupiah(Math.min(...monthlyRates))}/bln</strong>
+                <span className={`gx-hero-price-badge-sub${availabilityState === 'full' || availabilityState === 'empty' ? ' is-neutral' : ''}`}>
+                  {/* CLS: tinggi dikunci oleh varian terpanjang, teks state sebenarnya ditumpuk di atasnya */}
+                  <span className="gx-hero-price-badge-sub-reserve" aria-hidden="true">Ketersediaan belum dapat dimuat</span>
+                  <span className="gx-hero-price-badge-sub-live">
+                    {availabilityState === 'loading' ? 'Memuat ketersediaan…'
+                      : availabilityState === 'error' ? 'Ketersediaan belum dapat dimuat'
+                      : availabilityState === 'full' ? 'Semua kamar sedang terisi'
+                      : availabilityState === 'empty' ? 'Belum ada data kamar'
+                      : `${stats.bookable} kamar tersedia`}
+                  </span>
+                </span>
+              </div>
+            ) : (
+              <div className="gx-hero-price-badge is-placeholder" aria-hidden="true">
+                <span>🏷️</span>
+                <strong>Mulai Rp000.000/bln</strong>
+                <span className="gx-hero-price-badge-sub">Ketersediaan belum dapat dimuat</span>
+              </div>
+            )}
+          </div>
           <div className="gx-hero-cta">
             {availabilityState === 'available' || availabilityState === 'loading' || availabilityState === 'error' ? (
               <>
@@ -424,7 +465,7 @@ export default function PublicGuestDashboardPage() {
         <div className="gx-hero-next" aria-hidden="true">Kamar tersedia, fasilitas, dan lokasi ada di bawah.</div>
       </section>
 
-      <section className="gx-avail-section" id="cek-kamar" ref={availSectionRef}>
+      <section className="gx-avail-section" id="cek-kamar" ref={availSectionRef} aria-label="Ketersediaan kamar">
         <Container fluid="xl">
           <div className="gx-avail-wrap">
             <div className="gx-avail-text">
@@ -510,7 +551,7 @@ export default function PublicGuestDashboardPage() {
         </Container>
       </section>
 
-      <section className="gx-market-section" id="kamar">
+      <section className="gx-market-section" id="kamar" aria-label="Katalog kamar">
         <Container fluid="xl">
           <div className="gx-market-head">
             <div className="gx-section-head gx-reveal">
@@ -559,7 +600,7 @@ export default function PublicGuestDashboardPage() {
         </Container>
       </section>
 
-      <section className="gx-trust-section">
+      <section className="gx-trust-section" aria-label="Alasan memilih KOST48">
         <Container fluid="xl">
           <div className="gx-section-head gx-section-head-center">
             <div className="gx-label">Beda dari kost lain</div>
@@ -578,7 +619,7 @@ export default function PublicGuestDashboardPage() {
         </Container>
       </section>
 
-      <section className="gx-content-section" id="fasilitas">
+      <section className="gx-content-section" id="fasilitas" aria-label="Fasilitas">
         <Container fluid="xl">
           <div className="gx-section-head">
             <div className="gx-label">Fasilitas</div>
@@ -628,7 +669,7 @@ export default function PublicGuestDashboardPage() {
         </Container>
       </section>
 
-      <section className="gx-location-section" id="lokasi">
+      <section className="gx-location-section" id="lokasi" aria-label="Lokasi">
         <Container fluid="xl">
           <div className="gx-location-grid">
             <div className="gx-location-copy gx-reveal-l">
@@ -664,7 +705,7 @@ export default function PublicGuestDashboardPage() {
 
       {/* R-02: section ulasan hanya tampil jika ada data ulasan nyata; jika kosong tampilkan blok Keunggulan */}
       {!socialProofQuery.isLoading && !socialProofQuery.isError && displayedReviews.length > 0 ? (
-        <section className="gx-social-proof-section" id="ulasan">
+        <section className="gx-social-proof-section" id="ulasan" aria-label="Ulasan penghuni">
           <Container fluid="xl">
             <div className="gx-social-proof-head">
               <div className="gx-section-head">
@@ -742,7 +783,7 @@ export default function PublicGuestDashboardPage() {
           </Container>
         </section>
       ) : !socialProofQuery.isLoading ? (
-        <section className="gx-keunggulan-section" id="ulasan">
+        <section className="gx-keunggulan-section" id="ulasan" aria-label="Ulasan penghuni">
           <Container fluid="xl">
             <div className="gx-section-head gx-section-head-center">
               <div className="gx-label">Belum Ada Ulasan</div>
@@ -776,7 +817,7 @@ export default function PublicGuestDashboardPage() {
       ) : null}
 
       {visibleGalleryItems.length > 0 ? (
-        <section className="gx-gallery-section">
+        <section className="gx-gallery-section" aria-label="Brosur dan materi informasi">
           <Container fluid="xl">
             <div className="gx-gallery-compact">
               <div className="gx-section-head">
@@ -793,10 +834,13 @@ export default function PublicGuestDashboardPage() {
                     aria-label={`Buka ${item.label} ukuran penuh`}
                   >
                     <img
-                      src={item.src}
+                      src={item.displaySrc}
                       alt={item.label}
                       className="gx-gallery-img"
                       loading="lazy"
+                      decoding="async"
+                      width={item.displayW}
+                      height={item.displayH}
                       onError={() => setGalleryBroken((prev) => ({ ...prev, [item.id]: true }))}
                     />
                     <div className="gx-gallery-overlay"><span>Lihat</span></div>
@@ -809,7 +853,7 @@ export default function PublicGuestDashboardPage() {
         </section>
       ) : null}
 
-      <section className="gx-faq-section" id="faq">
+      <section className="gx-faq-section" id="faq" aria-label="Pertanyaan umum">
         <Container fluid="xl">
           <div className="gx-section-head">
             <div className="gx-label">FAQ</div>
@@ -819,7 +863,7 @@ export default function PublicGuestDashboardPage() {
           <Accordion className="gx-accordion" flush alwaysOpen>
             {faqItems.map((item, i) => (
               <Accordion.Item key={item.question} eventKey={String(i)} className="gx-acc-item">
-                <Accordion.Header className="gx-acc-header">
+                <Accordion.Header as="h3" className="gx-acc-header">
                   <span className="gx-acc-cat">{item.category}</span>
                   {item.question}
                 </Accordion.Header>
@@ -836,7 +880,7 @@ export default function PublicGuestDashboardPage() {
         </Container>
       </section>
 
-      <section className="gx-contact-section" id="hubungi-kami">
+      <section className="gx-contact-section" id="hubungi-kami" aria-label="Hubungi kami">
         <Container fluid="xl">
           <div className="gx-final-cta gx-reveal">
             <div>
@@ -858,10 +902,28 @@ export default function PublicGuestDashboardPage() {
         </Container>
       </section>
 
-      <Link to="/rooms" className="gx-mobile-booking" aria-label="Cek kamar tersedia">
-        <strong>{isStatsLoading ? 'Cek kamar' : `${stats.bookable} kamar tersedia`}</strong>
-        <span><span aria-hidden="true">🔍</span> Cek</span>
-      </Link>
+      {heroPassed && (stats.bookable > 0 || isStatsLoading ? (
+        <Link
+          to="/rooms"
+          className="gx-mobile-booking"
+          aria-label={isStatsLoading ? 'Cek kamar tersedia' : `Cek ${stats.bookable} kamar tersedia`}
+        >
+          <strong>{isStatsLoading ? 'Cek kamar' : `${stats.bookable} kamar tersedia`}</strong>
+          <span><span aria-hidden="true">🔍</span> Cek</span>
+        </Link>
+      ) : (
+        // M21: saat tidak ada kamar kosong, aksi yang berguna adalah minta dikabari — bukan membuka katalog kosong.
+        <a
+          className="gx-mobile-booking gx-mobile-booking-wa"
+          href={buildWhatsAppUrl('Halo Admin KOST48, kabari saya saat ada kamar tersedia.')}
+          target="_blank"
+          rel="noreferrer"
+          aria-label="Semua kamar terisi — minta dikabari saat ada kamar tersedia"
+        >
+          <strong>Semua kamar terisi</strong>
+          <span><span aria-hidden="true">💬</span> Kabari</span>
+        </a>
+      ))}
 
       {scrolled && (
         <button

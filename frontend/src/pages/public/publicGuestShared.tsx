@@ -50,11 +50,21 @@ export const PUBLIC_EXTRA_LINKS = [
   { to: '/reviews', icon: '⭐', label: 'Ulasan Lengkap' },
 ];
 
-export const GALLERY_ITEMS = [
+export type GalleryItem = {
+  id: string;
+  src: string;
+  label: string;
+  /** M21 (15 Sep 2026): varian ringan untuk grid; `src` tetap file penuh untuk lightbox/berbagi. */
+  thumb?: string;
+  thumbW?: number;
+  thumbH?: number;
+};
+
+export const GALLERY_ITEMS: GalleryItem[] = [
   { id: 'profile', src: '/room-images/kost48-profile.webp', label: 'Profil KOST48' },
-  { id: 'spanduk', src: '/room-images/spanduk-kost48-surabaya.webp', label: 'Spanduk KOST48' },
-  { id: 'brosur-depan', src: '/room-images/brosur-depan.webp', label: 'Brosur - Halaman Depan' },
-  { id: 'brosur-belakang', src: '/room-images/brosur-belakang.webp', label: 'Brosur - Halaman Belakang' },
+  { id: 'spanduk', src: '/room-images/spanduk-kost48-surabaya.webp', label: 'Spanduk KOST48', thumb: '/room-images/spanduk-kost48-surabaya-thumb.webp', thumbW: 720, thumbH: 509 },
+  { id: 'brosur-depan', src: '/room-images/brosur-depan.webp', label: 'Brosur - Halaman Depan', thumb: '/room-images/brosur-depan-thumb.webp', thumbW: 800, thumbH: 566 },
+  { id: 'brosur-belakang', src: '/room-images/brosur-belakang.webp', label: 'Brosur - Halaman Belakang', thumb: '/room-images/brosur-belakang-thumb.webp', thumbW: 800, thumbH: 566 },
 ];
 
 export const FACILITY_GROUPS = [
