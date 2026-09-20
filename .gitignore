@@ -84,6 +84,7 @@ kost48-deploy-bundled/
 .dsh-editor/
 .audit-runtime/
 /.audit-home/
+/docs/audit-map/
 
 # Temporary/setup scripts (root level)
 setup.sql
