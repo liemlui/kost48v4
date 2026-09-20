@@ -461,6 +461,17 @@
   font-size: 0.7rem;
 }
 
+.owner-kpi-state {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--owner-muted);
+}
+
+.owner-kpi-state-stale { color: var(--amber-700); }
+
 .owner-panel {
   overflow: hidden;
 }
@@ -602,6 +613,11 @@
 
 .owner-chart-controls,
 .owner-segmented,
+.owner-refresh-stale {
+  color: var(--amber-700);
+  font-weight: 700;
+}
+
 .owner-chart-legend {
   display: flex;
   align-items: center;

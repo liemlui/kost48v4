@@ -22,6 +22,11 @@ import {
 } from 'recharts';
 import type { OwnerDashboardTrendMonth } from '../../api/finance';
 import { fetchOwnerDashboardAggregate } from '../../api/ownerDashboard';
+import {
+  ownerDashboardIsStale,
+  ownerPeriodHasNoActivity,
+  ownerRevenueIsSilentZero,
+} from './ownerDashboardState';
 import { listResource } from '../../api/resources';
 import { getIotOverview, iotQueryKeys } from '../../api/iot';
 import { cc } from '../../config/chartPalette';
@@ -222,18 +227,27 @@ function TrendChart({
   );
 }
 
+type OwnerKpiState = "ok" | "stale";
+
+// AO-20 sisa (13 Sep): KPI selalu menampilkan angka nyata — Rp 0 bisnis nol valid dengan
+// fakta usia/aktivitas, bukan placeholder yang menyembunyikan kondisi. State stale
+// ditambahan sebagai note (ikon + teks), value tidak pernah dihapus.
 function OwnerKpiCard({
   label,
   value,
   change,
   detail,
   tone,
+  state = "ok",
+  stateNote,
 }: {
   label: string;
   value: string;
   change: ChangeMeta | null;
   detail?: ReactNode;
   tone: string;
+  state?: OwnerKpiState;
+  stateNote?: string;
 }) {
   return (
     <Card className={`owner-kpi-card owner-kpi-${tone} h-100`}>
@@ -243,6 +257,9 @@ function OwnerKpiCard({
         <div className="owner-kpi-footer">
           {change ? <span style={{ color: change.color }}>{change.label} dari bulan lalu</span> : <span>Belum ada pembanding</span>}
           {detail ? <small>{detail}</small> : null}
+          {state === "stale" ? (
+            <span className="owner-kpi-state owner-kpi-state-stale" role="status">⚠ {stateNote}</span>
+          ) : null}
         </div>
       </Card.Body>
     </Card>
@@ -287,6 +304,20 @@ export default function OwnerDashboardPage() {
     ? new Date(aggregateQuery.dataUpdatedAt).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })
     : null;
   const isRefreshing = aggregateQuery.isFetching || ownerAiStatusQuery.isFetching;
+  // AO-20 sisa — bedakan usia data (stale) dan periode kosong (no-data).
+  const dataUpdatedAt = aggregateQuery.dataUpdatedAt;
+  const meterDue = aggregateQuery.data?.meterDue;
+  const dashboardStale =
+    !!data &&
+    !aggregateQuery.isLoading &&
+    !aggregateQuery.isError &&
+    !isRefreshing &&
+    ownerDashboardIsStale(dataUpdatedAt);
+  const periodNoActivity = !dashboardStale && ownerPeriodHasNoActivity(data, meterDue);
+  const kpiState: OwnerKpiState = dashboardStale ? "stale" : "ok";
+  const kpiStateNote = dashboardStale
+    ? (lastUpdatedLabel ? `Data tertunda — terakhir ${lastUpdatedLabel}` : "Data tertunda")
+    : undefined;
 
   // IoT device health
   const iotQuery = useQuery({
@@ -384,7 +415,7 @@ export default function OwnerDashboardPage() {
               <Button type="button" variant="outline-secondary" size="sm" onClick={refreshDashboard} disabled={isRefreshing}>
                 {isRefreshing ? <><Spinner animation="border" size="sm" className="me-1" />Memuat</> : '↻ Refresh'}
               </Button>
-              <small aria-live="polite">{lastUpdatedLabel ? `Terakhir diperbarui ${lastUpdatedLabel}` : 'Belum diperbarui'}</small>
+              <small aria-live="polite" className={dashboardStale ? "owner-refresh-stale" : undefined}>{lastUpdatedLabel ? `Terakhir diperbarui ${lastUpdatedLabel}` : 'Belum diperbarui'}{dashboardStale ? " · Data tertunda" : ''}</small>
             </div>
           </div>
         </div>
@@ -410,6 +441,12 @@ export default function OwnerDashboardPage() {
         </Alert>
       ) : null}
 
+      {periodNoActivity ? (
+        <Alert variant="info" className="mb-3" role="status">
+          <div className="fw-semibold">Belum ada aktivitas dicatat untuk {selectedPeriodLabel}.</div>
+          <div className="small">Nilai nol di KPI adalah kondisi nyata periode ini (belum ada pembayar/WiFi/biaya/invois dicatat), bukan error. Tren menampilkan bulan yang sudah ada data untuk pembanding.</div>
+        </Alert>
+      ) : null}
       {data ? (
         <>
           {grade ? (
@@ -442,16 +479,47 @@ export default function OwnerDashboardPage() {
 
           <Row className="g-3 mb-3">
             <Col xs={12} sm={6} xl={3}>
-              <OwnerKpiCard label="Pendapatan" value={formatCompactRupiah(data.kpi.totalRevenueRupiah)} change={changeLabel(data.kpi.totalRevenueChangePercent)} tone="revenue" />
+              <OwnerKpiCard
+                label="Pendapatan"
+                value={formatCompactRupiah(data.kpi.totalRevenueRupiah)}
+                change={changeLabel(data.kpi.totalRevenueChangePercent)}
+                detail={ownerRevenueIsSilentZero(data.kpi.totalRevenueRupiah, dataUpdatedAt) ? "Rp 0 — belum ada pembayar/WiFi dicatat bulan ini (valid, bukan error)" : undefined}
+                tone="revenue"
+                state={kpiState}
+                stateNote={kpiStateNote}
+              />
             </Col>
             <Col xs={12} sm={6} xl={3}>
-              <OwnerKpiCard label="Laba Bersih" value={formatCompactRupiah(data.kpi.netProfitRupiah)} change={changeLabel(data.kpi.netProfitChangePercent)} detail={`Margin ${data.kpi.netProfitMarginPercent}%`} tone="profit" />
+              <OwnerKpiCard
+                label="Laba Bersih"
+                value={formatCompactRupiah(data.kpi.netProfitRupiah)}
+                change={changeLabel(data.kpi.netProfitChangePercent)}
+                detail={`Margin ${data.kpi.netProfitMarginPercent}%`}
+                tone="profit"
+                state={kpiState}
+                stateNote={kpiStateNote}
+              />
             </Col>
             <Col xs={12} sm={6} xl={3}>
-              <OwnerKpiCard label="Okupansi kamar siap-sewa" value={`${data.kpi.occupancyRatePercent}%`} change={changeLabel(data.kpi.occupancyRateChangePercent)} detail="Kamar maintenance tidak dihitung" tone="occupancy" />
+              <OwnerKpiCard
+                label="Okupansi kamar siap-sewa"
+                value={`${data.kpi.occupancyRatePercent}%`}
+                change={changeLabel(data.kpi.occupancyRateChangePercent)}
+                detail="Kamar maintenance tidak dihitung"
+                tone="occupancy"
+                state={kpiState}
+                stateNote={kpiStateNote}
+              />
             </Col>
             <Col xs={12} sm={6} xl={3}>
-              <OwnerKpiCard label="Kas Bersih" value={formatCompactRupiah(data.kpi.netCashFlowRupiah)} change={changeLabel(data.kpi.netCashFlowChangePercent)} tone="cash" />
+              <OwnerKpiCard
+                label="Kas Bersih"
+                value={formatCompactRupiah(data.kpi.netCashFlowRupiah)}
+                change={changeLabel(data.kpi.netCashFlowChangePercent)}
+                tone="cash"
+                state={kpiState}
+                stateNote={kpiStateNote}
+              />
             </Col>
           </Row>
 
@@ -471,7 +539,7 @@ export default function OwnerDashboardPage() {
                   ) : (
                     <div className="owner-signal-list">
                       {data.signals.map((signal, index) => (
-                        <button key={`${signal.type}-${index}`} type="button" className="owner-signal-item" onClick={() => navigate(ownerSignalRoute(signal))}>
+                        <button key={`${signal.type}-${index}`} type="button" className="owner-signal-item" aria-label={`${ownerSignalTitle(signal.type)} — ${ownerSignalActionLabel(signal.type)}`} onClick={() => navigate(ownerSignalRoute(signal))}>
                           <span className={`owner-signal-dot owner-signal-${signal.type}`} aria-hidden="true" />
                           <span className="owner-signal-content">
                             <strong>{ownerSignalTitle(signal.type)}</strong>
@@ -481,7 +549,7 @@ export default function OwnerDashboardPage() {
                         </button>
                       ))}
                       {extraSignals.map((signal) => (
-                        <button key={signal.key} type="button" className="owner-signal-item" onClick={() => navigate(ownerSignalRoute(signal))}>
+                        <button key={signal.key} type="button" className="owner-signal-item" aria-label={`${signal.label} — ${ownerSignalActionLabel(signal.type)}`} onClick={() => navigate(ownerSignalRoute(signal))}>
                           <span className={`owner-signal-dot owner-signal-${signal.type}`} aria-hidden="true" />
                           <span className="owner-signal-content">
                             <strong>{signal.label}</strong>
