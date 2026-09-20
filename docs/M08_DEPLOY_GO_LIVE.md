@@ -9,6 +9,7 @@
 - Profil combined adalah baseline kode lokal; static split masih rencana EF-04/06 setelah kemampuan host jelas. Build SPA/gambar kamar publik dapat dipertimbangkan; jangan membuka seluruh uploads atau bukti bayar/foto privat sebagai static publik.
 - AutoOps target interval OFF; cron token-protected hanya sesuai izin operasional. IoT Tuya on-demand, **tanpa cron Tuya**. Flag AI berbeda dari key DB/env; push bisa memakai konfigurasi DB. Jangan hapus key untuk mencoba mematikan fitur.
 - Petunjuk deploy/seed/restart di bagian lama adalah prosedur bersyarat, bukan tugas yang otomatis diizinkan. Ukur identitas server/DB terlebih dahulu; jangan reset/drop UAT/produksi.
+- **Lembar kerja go-live cPanel:** [GO_LIVE_CPANEL_CHECKLIST.md](GO_LIVE_CPANEL_CHECKLIST.md) (12 Sep 2026) — status artefak, keputusan owner yang belum diambil, urutan langkah server, smoke test, rollback, dan jebakan. Paket terbaru: `kost48-deploy-bundled.tgz` 42.749.795 byte, SHA-256 `BC9176F2897B6FB444FD9A0156C90944D0D289EF8E66932217B2944DB69EEDFD`, build PWA `B70lrG6Auual`.
 
 > File hasil pemampatan dari dokumen root `docs/`. File sumber lama sudah diarsipkan ke `docs/archieve/2026-06-16_root_docs_pre_M/`.
 

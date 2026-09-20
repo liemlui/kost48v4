@@ -165,6 +165,8 @@ Batas yang **tetap ada** dan tidak boleh diklaim berlebih:
 
 ## 3. Rekonsiliasi dengan Audit 30 Juli / 8 September (M14 AO-01…AO-23)
 
+> **Catatan sinkronisasi 13 Sep 2026:** tabel ini adalah rekonsiliasi **sesi pertama 12 Sep, sebelum §0b/§0c**. Status AO-06, AO-08, AO-09, T-06, dan T-08 di bawah sudah usang — lihat §0/§0b/§0c di atas, commit `4e67c13` (performa `/portal/stay`), dan commit `9c211a0` (radius + `<h1>` ganda). Status kanonik tetap di [M12](M12_CHECKLIST_CHANGELOG.md#fase-ao--audit--hardening-uiux-lintas-portal).
+
 | ID lama | Status sekarang | Bukti sesi ini |
 |---|---|---|
 | **AO-00** DB UAT tertinggal 2 migration | ✅ **TIDAK REPRODUKSI** | seluruh endpoint 200; katalog & notifikasi normal |
