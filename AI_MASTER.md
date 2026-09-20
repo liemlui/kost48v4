@@ -58,7 +58,7 @@ Tidak ada hitungan coverage atau klaim PASS baru; `docs/audit/` belum dibuat pad
 
 | Modul / cakupan | File audit / rujukan | Status | Tanggal audit | Freshness |
 |---|---|---|---|---|
-| Auth frontend | [M12](docs/M12_CHECKLIST_CHANGELOG.md) — catatan FE-002; file audit khusus: UNKNOWN — belum diperiksa | UNKNOWN — belum diperiksa | UNKNOWN — belum diperiksa | UNKNOWN — belum diperiksa |
+| Auth frontend | [docs/audit/frontend-auth.md](docs/audit/frontend-auth.md) | Diperiksa sebagian — 2026-09-20 | 2026-09-20 | Segar (baseline d5d04cb) |
 | Context/sesi frontend | [M12](docs/M12_CHECKLIST_CHANGELOG.md) — catatan FE-057; file audit khusus: UNKNOWN — belum diperiksa | UNKNOWN — belum diperiksa | UNKNOWN — belum diperiksa | UNKNOWN — belum diperiksa |
 | Auth backend | [M12](docs/M12_CHECKLIST_CHANGELOG.md) — catatan perbaikan terkait FE-002; file audit khusus: UNKNOWN — belum diperiksa | UNKNOWN — belum diperiksa | UNKNOWN — belum diperiksa | UNKNOWN — belum diperiksa |
 | Modul lainnya | [audit-map](docs/audit-map/) — navigasi, bukan hasil audit | UNKNOWN — belum diperiksa | UNKNOWN — belum diperiksa | UNKNOWN — belum diperiksa |
@@ -109,3 +109,4 @@ Tanggal berikut adalah tanggal pencatatan keputusan sesi ini, bukan hasil inspek
 | 2026-09-20 | Stage 4 selesai — GUIDE diringkas, QUICKREF dirujukkan ke AGENTS, indeks audit dibuat | Pertahankan roadmap/template dan navigasi audit tanpa duplikasi aturan | Hanya empat file scope Stage 4 diubah/dibuat; ringkasan modul belum dibuat; Stage 5 pending, M12/M13 ditunda; menunggu review owner |
 | 2026-09-20 | Stage 5 selesai — konsolidasi governance Stage 1–5 selesai | Hapus tepat 7 allow berbahaya tanpa deny baru; tambahkan rujukan M12 dan entri M13 | Empat file scope Stage 5 diperbarui; konten lama tetap; allow generik belum memblokir semua jalur mutasi; tanpa eksekusi aplikasi atau deployment |
 | 2026-09-20 | Tooling: verify-module.mjs + 3 script root (test:module/build:module/audit:module) | Utang tooling Stage 1-5 ditutup; AI_MASTER §5 | verify-module.mjs 128 baris, 6 skenario verifikasi lulus; manifest 1 modul (frontend-auth); audit doc & module 2+ pending |
+| 2026-09-20 | Audit modul pertama: frontend-auth (docs/audit/frontend-auth.md) | Gap audit doc pertama ditutup; wrapper audit:module terverifikasi melihat doc | Status "diperiksa sebagian"; 86 baris; 5 test coverage; gap login e2e/error/role lain/refresh belum diperiksa |

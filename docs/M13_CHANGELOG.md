@@ -1,5 +1,23 @@
 # KOST48 V5 — M13 Changelog
 
+## 2026-09-20 (audit) — Audit modul pertama: frontend-auth
+
+- **Baru:** `docs/audit/frontend-auth.md` (86 baris) sesuai template
+  AI_WORKFLOW_GUIDE §12.1. Modul pertama yang didaftarkan di
+  `scripts/verify-module.mjs`.
+- **Status:** diperiksa sebagian. Bukti: 5 test di
+  `frontend/src/test/pages/loginPage.test.tsx`, exit 0.
+  Bukti dari sesi tooling sebelumnya, bukan eksekusi baru.
+- **Cakupan:** kontrak file, dependensi masuk/keluar, 5 acceptance
+  dengan bukti, dan gap eksplisit (login e2e, error server, loading,
+  role selain OWNER, refresh sesi, redirect state.from).
+- **Verifikasi wrapper:** `npm run audit:module -- frontend-auth`
+  exit 0 dan melaporkan doc ada; di Windows dijalankan melalui `npm.cmd`
+  karena `npm.ps1` terhalang kebijakan PowerShell. Command langsung
+  `node scripts/verify-module.mjs audit frontend-auth` juga exit 0, doc ada.
+- **AI_MASTER:** §4 status auth frontend → "diperiksa sebagian,
+  2026-09-20"; §8 entri keputusan audit modul pertama.
+
 ## 2026-09-20 (tooling) — verify-module.mjs + 3 script root
 
 - **Baru:** `scripts/verify-module.mjs` (128 baris) — wrapper manifest
