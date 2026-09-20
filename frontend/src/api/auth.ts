@@ -34,7 +34,7 @@ export async function updateMyTipInfo(payload: TipInfoPayload) {
 }
 
 export async function forgotPassword(payload: { identifier: string }) {
-  const response = await client.post<ApiEnvelope<{ success: boolean; resetTokenPreview?: string; expiresAt?: string; channel?: string; destination?: string | null }>>('/auth/forgot-password', payload);
+  const response = await client.post<ApiEnvelope<{ success: boolean }>>('/auth/forgot-password', payload);
   return response.data.data;
 }
 

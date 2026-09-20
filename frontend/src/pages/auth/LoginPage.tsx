@@ -1,6 +1,6 @@
 import { FormEvent, useMemo, useState } from 'react';
 import { Button, Form } from 'react-bootstrap';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom';
 // Style .login-* hidup di 06-tenant.css; halaman auth bukan bagian chunk portal tenant,
 // jadi WAJIB import langsung — tanpa ini tab/kartu login polos di build produksi.
 import PasswordInput from '../../components/common/PasswordInput';
@@ -22,7 +22,7 @@ function normalizeLoginError(message: unknown) {
 }
 
 export default function LoginPage() {
-  const { login, logout } = useAuth();
+  const { login, logout, user, loading } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [mode, setMode] = useState<LoginMode>('TENANT');
@@ -53,6 +53,12 @@ export default function LoginPage() {
       expectedRoleError: 'Akun ini adalah akun penghuni. Gunakan tab Penghuni untuk masuk ke portal kamu.',
     };
   }, [mode]);
+
+  // FE-002: sesi yang sudah tervalidasi tidak perlu melihat form login lagi.
+  // Diletakkan setelah seluruh Hook agar perubahan state sesi tidak melanggar urutan Hook.
+  if (!loading && user) {
+    return <Navigate to={from || getDefaultRoute(user.role)} replace />;
+  }
 
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();

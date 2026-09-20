@@ -40,7 +40,6 @@ export default function ForgotPasswordPage() {
   const [identifier, setIdentifier] = useState('');
   const [fieldError, setFieldError] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState(false);
-  const [previewToken, setPreviewToken] = useState<string | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [cooldown, setCooldown] = useState(0);
@@ -73,8 +72,7 @@ export default function ForgotPasswordPage() {
     setFormError(null);
     setSubmitting(true);
     try {
-      const result = await forgotPassword({ identifier: id });
-      if (result?.resetTokenPreview) setPreviewToken(result.resetTokenPreview);
+      await forgotPassword({ identifier: id });
       setSubmitted(true);
       startCooldown();
     } catch (err: any) {
@@ -168,19 +166,10 @@ export default function ForgotPasswordPage() {
                     <polyline points="20 6 9 17 4 12" />
                   </svg>
                 </div>
-                <div className="login-success-title">Email terkirim!</div>
+                <div className="login-success-title">Permintaan diproses</div>
                 <p className="login-success-body">
-                  Jika akun dengan email <strong>{identifier}</strong> ditemukan, tautan reset password telah dikirim. Cek inbox atau folder spam Anda.
+                  Jika akun dengan email <strong>{identifier}</strong> ditemukan dan alamat emailnya aktif, instruksi reset akan dikirim. Cek inbox atau folder spam Anda.
                 </p>
-
-                {/* Dev-only: backend belum mengembalikan resetTokenPreview — blok ini aman di production */}
-                {previewToken ? (
-                  <div className="login-helper-card text-start mb-3">
-                    <div className="fw-semibold small mb-1">Token Reset (Dev Preview)</div>
-                    <code className="small d-block">{previewToken}</code>
-                    <div className="text-muted small mt-1">Gunakan token ini bila gateway email belum dikonfigurasi.</div>
-                  </div>
-                ) : null}
 
                 {formError ? <div className="login-form-error" role="alert">{formError}</div> : null}
 
