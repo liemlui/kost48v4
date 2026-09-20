@@ -21,6 +21,7 @@ import { serializePrismaResult } from '../../common/utils/serialization';
 import { PrismaService } from '../../prisma/prisma.service';
 import { startOfDay, endOfDay, parseDateOnly } from '../../common/utils/date.util';
 import { isBookingSchemaReady, isBookingSchemaDriftError } from './booking-schema.helper';
+import { isReviewableBookingSource } from './booking-source.helper';
 import { CancelTenantBookingDto } from './dto/cancel-tenant-booking.dto';
 import { CreateTenantBookingDto } from './dto/create-tenant-booking.dto';
 import { ApproveBookingDto } from './dto/approve-booking.dto';
@@ -244,7 +245,9 @@ export class TenantBookingsService {
         if (!booking.tenantIsActive) {
           throw new ConflictException('Tenant tidak aktif untuk approval booking');
         }
-        if (booking.bookingSource !== LeadSource.WEBSITE) {
+        // FE-003 T2: booking mandiri tenant = WEBSITE (form publik) atau PORTAL
+        // (dibuat tenant dari portal). Keduanya lewat flow review yang sama.
+        if (!isReviewableBookingSource(booking.bookingSource)) {
           throw new ConflictException(
             'Booking ini bukan booking mandiri tenant yang dapat disetujui lewat flow ini',
           );
@@ -522,8 +525,9 @@ if (error instanceof Prisma.PrismaClientKnownRequestError) {
           throw new ConflictException('Booking sudah menjadi hunian aktif. Gunakan flow checkout yang sesuai.');
         }
 
-        if (row.bookingSource !== LeadSource.WEBSITE) {
-          throw new ConflictException('Hanya booking website yang dapat ditolak lewat review booking');
+        // FE-003 T2: predikat sama dengan approveBooking — WEBSITE dan PORTAL.
+        if (!isReviewableBookingSource(row.bookingSource)) {
+          throw new ConflictException('Hanya booking mandiri tenant yang dapat ditolak lewat review booking');
         }
 
         const existingInvoice = await tx.invoice.findFirst({
@@ -850,6 +854,17 @@ if (error instanceof Prisma.PrismaClientKnownRequestError) {
         `
       : Prisma.empty;
 
+    // FE-003 T2: riwayat booking tenant menampilkan stay aktif ditambah stay batal
+    // yang berasal dari booking mandiri (WEBSITE = form publik, PORTAL = portal tenant),
+    // sejalan dengan `isReviewableBookingSource` di booking-source.helper.ts.
+    const cancelledSelfServiceFilter = Prisma.sql`(
+            s.status = CAST(${StayStatus.CANCELLED} AS "StayStatus")
+            AND s."bookingSource" IN (
+              CAST(${LeadSource.WEBSITE} AS "LeadSource"),
+              CAST(${LeadSource.PORTAL} AS "LeadSource")
+            )
+          )`;
+
     try {
       const items = await this.prisma.$queryRaw<BookingRowFull[]>(Prisma.sql`
         SELECT
@@ -896,7 +911,7 @@ if (error instanceof Prisma.PrismaClientKnownRequestError) {
         WHERE s."tenantId" = ${tenantId}
           AND (
             s.status = CAST(${StayStatus.ACTIVE} AS "StayStatus")
-            OR (s.status = CAST(${StayStatus.CANCELLED} AS "StayStatus") AND s."bookingSource" = CAST(${LeadSource.WEBSITE} AS "LeadSource"))
+            OR ${cancelledSelfServiceFilter}
           )
         ${searchFilter}
         ORDER BY s."updatedAt" DESC, s."createdAt" DESC, s.id DESC
@@ -909,7 +924,7 @@ if (error instanceof Prisma.PrismaClientKnownRequestError) {
         WHERE s."tenantId" = ${tenantId}
           AND (
             s.status = CAST(${StayStatus.ACTIVE} AS "StayStatus")
-            OR (s.status = CAST(${StayStatus.CANCELLED} AS "StayStatus") AND s."bookingSource" = CAST(${LeadSource.WEBSITE} AS "LeadSource"))
+            OR ${cancelledSelfServiceFilter}
           )
         ${searchFilter}
       `);

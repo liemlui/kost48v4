@@ -5,10 +5,10 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { createPublicBooking, getPublicRoomDetail } from '../../api/bookings';
 import { fetchPublicConfig } from '../../api/settings';
 import EmptyState from '../../components/common/EmptyState';
-import type { CreatePublicBookingPayload, PricingTerm, PublicBookingResult } from '../../types';
+import type { CreatePublicBookingPayload, PublicBookingResult } from '../../types';
 import { calculateRentByPricingTerm, calculateOccupantSurcharge } from '../../utils/pricing';
 import type { GuestBookingFormState } from './guestBookingUtils';
-import { INITIAL_FORM, validate, computeCheckOutDate } from './guestBookingUtils';
+import { INITIAL_FORM, buildBookingPayload, validate, computeCheckOutDate } from './guestBookingUtils';
 import GuestBookingForm from './GuestBookingForm';
 import GuestBookingRoomSummary from './GuestBookingRoomSummary';
 import GuestBookingSuccess from './GuestBookingSuccess';
@@ -81,24 +81,9 @@ export default function GuestBookingPage() {
 
     const checkOutDate = computeCheckOutDate(form.checkInDate, form.pricingTerm, form.leaseDurationCount);
 
-    const payload: CreatePublicBookingPayload = {
-      roomId: room.id,
-      checkInDate: form.checkInDate,
-      pricingTerm: form.pricingTerm as PricingTerm,
-      fullName: form.fullName.trim(),
-      phone: form.phone.trim(),
-      email: form.email.trim(),
-      website: '',
-    };
-    if (form.identityNumber.trim()) payload.identityNumber = form.identityNumber.trim();
-    if (form.emergencyContactName.trim()) payload.emergencyContactName = form.emergencyContactName.trim();
-    if (form.emergencyContactPhone.trim()) payload.emergencyContactPhone = form.emergencyContactPhone.trim();
-    if (checkOutDate) payload.plannedCheckOutDate = checkOutDate;
-    if (form.stayPurpose) payload.stayPurpose = form.stayPurpose as CreatePublicBookingPayload['stayPurpose'];
-    if (form.notes.trim()) payload.notes = form.notes.trim();
-    if (form.occupantCount > 1) payload.occupantCount = form.occupantCount;
-    if (form.hasPet) payload.hasPet = true;
-    if (form.paymentChoice) payload.paymentChoice = form.paymentChoice;
+    // FE-003 T1: payload dibangun `buildBookingPayload` (guestBookingUtils) agar field
+    // opsional tidak dikirim sebagai "" dan kontraknya dapat diuji unit.
+    const payload = buildBookingPayload(form, room.id, checkOutDate);
 
     mutation.mutate(payload);
   };

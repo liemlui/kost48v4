@@ -207,7 +207,7 @@ export default function GuestBookingForm({
               </Col>
               <Col md={6}>
                 <Form.Group controlId="guest-booking-form-2">
-                  <Form.Label>Telepon <span className="text-muted small">(minimal salah satu)</span></Form.Label>
+                  <Form.Label>Telepon <span className="text-danger">*</span></Form.Label>
                   <Form.Control
                     ref={(element) => { step1FieldRefs.current.phone = element; }}
                     value={form.phone}
@@ -222,7 +222,7 @@ export default function GuestBookingForm({
               </Col>
               <Col md={6}>
                 <Form.Group controlId="guest-booking-form-3">
-                  <Form.Label>Email <span className="text-muted small">(minimal salah satu)</span></Form.Label>
+                  <Form.Label>Email <span className="text-muted small">(opsional)</span></Form.Label>
                   <Form.Control
                     ref={(element) => { step1FieldRefs.current.email = element; }}
                     value={form.email}

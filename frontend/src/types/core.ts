@@ -576,7 +576,9 @@ export type CreatePublicBookingPayload = {
   pricingTerm: PricingTerm;
   fullName: string;
   phone: string;
-  email: string;
+  // FE-003 T1: email opsional — jangan kirim "" karena `@IsOptional()` backend
+  // hanya melewati null/undefined, bukan string kosong.
+  email?: string;
   identityNumber?: string;
   emergencyContactName?: string;
   emergencyContactPhone?: string;

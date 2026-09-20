@@ -1,4 +1,4 @@
-import type { PricingTerm } from '../../types';
+import type { CreatePublicBookingPayload, PricingTerm, StayPurposeOption } from '../../types';
 
 export type GuestBookingFormState = {
   fullName: string;
@@ -104,13 +104,55 @@ export function computeCheckOutDate(checkInDate: string, term: string, count: nu
 
 export type FormErrors = Partial<Record<keyof GuestBookingFormState | 'server', string>>;
 
+/**
+ * FE-003 T1 (18 Sep 2026): payload booking publik dibangun di satu fungsi murni
+ * agar kontraknya bisa diuji langsung terhadap `class-validator` backend.
+ *
+ * - Field opsional TIDAK dikirim sebagai string kosong: DTO backend memakai
+ *   `@IsOptional()` yang hanya melewati `null`/`undefined`, sehingga `""`
+ *   tetap divalidasi (`@IsEmail` gagal, `@IsEnum` gagal) dan booking ditolak 400.
+ * - `phone` selalu dikirim karena memang wajib di backend
+ *   (`CreatePublicBookingDto.phone` + `Tenant.phone` NOT NULL).
+ * - `website` adalah honeypot anti-bot: selalu `""` (isi non-kosong ditolak service).
+ */
+export function buildBookingPayload(
+  form: GuestBookingFormState,
+  roomId: number,
+  computedCheckOutDate: string,
+): CreatePublicBookingPayload {
+  const payload: CreatePublicBookingPayload = {
+    roomId,
+    checkInDate: form.checkInDate,
+    pricingTerm: form.pricingTerm,
+    fullName: form.fullName.trim(),
+    phone: form.phone.trim(),
+    website: '',
+  };
+
+  const email = form.email.trim();
+  if (email) payload.email = email;
+  if (form.identityNumber.trim()) payload.identityNumber = form.identityNumber.trim();
+  if (form.emergencyContactName.trim()) payload.emergencyContactName = form.emergencyContactName.trim();
+  if (form.emergencyContactPhone.trim()) payload.emergencyContactPhone = form.emergencyContactPhone.trim();
+  if (computedCheckOutDate) payload.plannedCheckOutDate = computedCheckOutDate;
+  if (form.stayPurpose) payload.stayPurpose = form.stayPurpose as StayPurposeOption;
+  if (form.notes.trim()) payload.notes = form.notes.trim();
+  if (form.occupantCount > 1) payload.occupantCount = form.occupantCount;
+  if (form.hasPet) payload.hasPet = true;
+  if (form.paymentChoice) payload.paymentChoice = form.paymentChoice;
+
+  return payload;
+}
+
 export function validateStep1(form: GuestBookingFormState): FormErrors {
   const errors: FormErrors = {};
   if (!form.fullName.trim()) errors.fullName = 'Nama lengkap wajib diisi.';
   const hasPhone = form.phone.trim().length > 0;
   const hasEmail = form.email.trim().length > 0;
-  if (!hasPhone && !hasEmail) {
-    errors.phone = 'Masukkan nomor telepon atau email agar admin dapat menghubungi Anda.';
+  // FE-003 T1: backend mewajibkan nomor telepon (DTO `phone` + normalisasi nomor di
+  // `public-bookings.service.ts`), sedangkan email benar-benar opsional bila diisi valid.
+  if (!hasPhone) {
+    errors.phone = 'Nomor telepon wajib diisi agar admin dapat menghubungi Anda.';
   }
   if (hasEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
     errors.email = 'Format email tidak valid.';

@@ -29,6 +29,16 @@ describe('Y-M2 — guest booking validation (KTP/email/phone)', () => {
       const e = validateStep1(form({ fullName: 'Budi', phone: '08123456789', email: 'budi@mail.com', identityNumber: '1234567890123456' }));
       expect(Object.keys(e)).toHaveLength(0);
     });
+    // FE-003 T1: backend mewajibkan telepon (DTO `phone` + normalisasi nomor), email opsional.
+    it('email saja tanpa telepon → error phone (kontrak backend wajib telepon)', () => {
+      const e = validateStep1(form({ fullName: 'Budi', phone: '', email: 'budi@mail.com', identityNumber: '1234567890123456' }));
+      expect(e.phone).toBeTruthy();
+      expect(e.email).toBeUndefined();
+    });
+    it('telepon saja tanpa email → tanpa error', () => {
+      const e = validateStep1(form({ fullName: 'Budi', phone: '08123456789', email: '', identityNumber: '1234567890123456' }));
+      expect(Object.keys(e)).toHaveLength(0);
+    });
   });
 
   describe('validateStep2', () => {
