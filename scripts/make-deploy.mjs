@@ -413,6 +413,10 @@ function createVerifiedArchive() {
       rmSync(ARCHIVE_TMP, { force: true });
       fail('arsip memuat implementasi SSE IoT yang sudah dipensiunkan: `' + entry + '`.');
     }
+    if (entry === 'sql/seed.sql' || entry === 'sql/seed_ORIGINAL.sql') {
+      rmSync(ARCHIVE_TMP, { force: true });
+      fail('arsip memuat seed SQL berisi data historis/PII yang dilarang di produksi: `' + entry + '`.');
+    }
     if (
       entry === 'scripts/seed-prod-reset.js'
       || entry === 'scripts/seed-prod-real.js'
@@ -453,6 +457,11 @@ cpSync('backend/dist', OUT + '/dist', {
 });
 cpSync('backend/prisma', OUT + '/prisma', { recursive: true });
 if (existsSync('backend/sql')) cpSync('backend/sql', OUT + '/sql', { recursive: true });
+// seed.sql / seed_ORIGINAL.sql membawa data historis + PII dan DILARANG di produksi.
+// Membiarkannya di paket hanya menambah risiko salah pakai dan ukuran unggahan.
+for (const forbiddenSeed of ['sql/seed.sql', 'sql/seed_ORIGINAL.sql']) {
+  rmSync(OUT + '/' + forbiddenSeed, { force: true });
+}
 writeDeployPackageFiles();
 cpSync('backend/scripts/seed-owner.js', OUT + '/scripts/seed-owner.js'); // seed OWNER pertama (F1-12) di server
 if (existsSync('backend/scripts/bootstrap-tuya-kwh.js')) cpSync('backend/scripts/bootstrap-tuya-kwh.js', OUT + '/scripts/bootstrap-tuya-kwh.js'); // register 13 KWH Tuya device
@@ -523,8 +532,9 @@ writeFileSync(OUT + '/README-DEPLOY.md', [
   '4. Database BARU/kosong: jalankan bootstrap schema sekali dari Terminal. Perintah ini berhenti bila database sudah berisi tabel:',
   '   psql "$DATABASE_URL" --single-transaction -v ON_ERROR_STOP=1 -f sql/bootstrap-production-schema.sql',
   '   psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f sql/seed-production-rooms.sql',
-  '   Bootstrap memasang schema.sql dan migration 20260723 + 20260724. Seed hanya membuat 13 kamar tanpa tenant/transaksi.',
-  '   Jangan jalankan pada database UAT/produksi yang sudah berisi data; jangan gunakan prisma db push/reset atau sql/seed.sql.',
+  '   Bootstrap memasang schema.sql dan migration 20260723 + 20260724 + 20260818. Seed hanya membuat 13 kamar tanpa tenant/transaksi.',
+  '   Paket ini TIDAK memuat sql/seed.sql maupun sql/seed_ORIGINAL.sql (berisi data historis/PII, dilarang di produksi).',
+  '   Jangan jalankan pada database UAT/produksi yang sudah berisi data; jangan gunakan prisma db push/reset.',
   '5. Setelah bootstrap schema berhasil, buat OWNER sekali saja:',
   "   OWNER_EMAIL=liem.lui@gmail.com OWNER_PASSWORD='password-kuat-unik' OWNER_FULLNAME='Pemilik KOST48' node scripts/seed-owner.js",
   '   Jangan menyimpan OWNER_PASSWORD permanen di .env.',
