@@ -31,6 +31,7 @@ temp/
 .cache/
 .parcel-cache/
 .reasonix/
+.claude/
 # Skrip migrasi pembantu sementara (jangan di-commit)
 /_*.js
 
@@ -69,6 +70,7 @@ frontend/test-results/
 frontend/playwright-report/
 frontend/e2e/uat-shots/
 e2e-out/
+/frontend/e2e-out/
 frontend/screenshots-ui/
 
 # Temp/debug artifacts (jangan di-commit)
