@@ -34,17 +34,17 @@ Protokol tetap untuk AI mana pun. Kerjakan urut; jangan lompat.
 <a id="antrean-prioritas-aktif"></a>
 <a id="antrian-eksekusi-aktif"></a>
 
-### 🎯 Antrean Prioritas Aktif (2026-09-13)
+### 🎯 Antrean Prioritas Aktif (2026-09-20)
 
 | # | Task | Status | Prasyarat untuk mulai |
 |---|------|--------|----------------------|
-| 1 | **Sisa go-live (Fase A → operasional)** — onboarding produksi: hunian 13 kamar + verifikasi KTP, opening balance, cron AutoOps, rotasi PIN/secret, pembersihan aplikasi lama | 🧑 **Produksi LIVE 13 Sep 2026**; lanjutan menunggu data/keputusan owner | Data owner yang sudah disiapkan ada di [M20 §11–§12](M20_PRODUKSI_KOST48.md); formulir [FORM_ISI_DATA_GO_LIVE](FORM_ISI_DATA_GO_LIVE.md). Belum ada izin mengubah data produksi di luar lingkup yang disetujui owner. |
-| 2 | **EF-00 sisa** — identitas artefak yang berjalan (SHA, jam deploy) dan perilaku runtime EF-01/03/05 | 🟠 **sebagian terisi 13 Sep** ([M20 §2](M20_PRODUKSI_KOST48.md)) | Identitas deployment (app root, docroot, Node, startup, urutan env, jumlah proses) sudah diketahui; sisanya butuh pembacaan server read-only dengan izin. M19 §9.1–9.3 sudah disinkronkan lebih dulu. |
-| 3 | **Sisa Fase AO** — AO-13 → AO-14 setelah dependensi lengkap | 🟢 Audit UI/UX total 12 Sep: 180 pemeriksaan halaman (6 role × 2 viewport) + Axe; 0 error/5xx; **gate Axe LULUS** (0 critical/serious); `tsc -b` dan `npm run build` exit 0 | Bukti: [AUDIT_UIUX_TOTAL_2026-09-12](AUDIT_UIUX_TOTAL_2026-09-12.md). **Sisa:** viewport 320 px, rute ber-fixture (`/booking/:roomId`, `/invoices/:id`, `/stays/:id`, detail pengumuman), AO-18/19/20 parsial, AO-21/23, serta AO-13 crawl tiga role 0 skip + verifikasi persona. AO-06/08/09 dan T-01..T-08 **sudah selesai** — jangan diulang. |
-| 4 | **EF-02** — baseline workload (interval/peak/fault) | 🟠 bukti awal 13 Sep; pengukuran penuh menunggu izin | Terukur di host: 1 instance Passenger, RSS ≈200 MB/proses, `/api/public/rooms` ≈0,3 s, dan **overlap 2 proses** sesaat setelah restart ([M20 §10](M20_PRODUKSI_KOST48.md)). Sisa: interval pengamatan, rata-rata/peak, serta fault counter tiap resource. |
-| 5 | **EF-07**, lalu **EF-04 / EF-06 / EF-08** | ⚠️ Rencana; sebagian berbekal bukti 13 Sep | EF-07: kasus env `false` vs DB `true` kini nyata di produksi, uji formal belum. EF-06/EF-08: restart, rollback kode, rollback DB via env, dan deploy `client/` tanpa restart **sudah dijalankan** 13 Sep; canary dan shutdown pool/timer belum diuji. EF-04 profil static belum diimplementasi. |
-| 6 | **AL — rekonsiliasi penutupan historis** | ℹ️ H1–H15 dilaporkan selesai 7 Jul; bukan antrean implementasi ulang | H15/Z-19 masih verifikasi manual tanpa bukti penutupan spesifik; tindak lanjuti bersama audit Owner. Backlog lain dipilih per temuan terbuka setelah rekonsiliasi. |
-| 7 | **EF-09** gate worker CLI · **Fase MA** batas modul | ⏸️ Ditunda | EF-09 hanya dibahas bila pengukuran AutoOps membuktikan kebutuhan; MA tanpa apps/libs/app Nest/worker baru. |
+| 1 | **Onboarding hunian + verifikasi KTP** — 13 kamar check-in dengan KTP terverifikasi | 🧑 [OWNER] | Data owner di [M20 §11–§12](M20_PRODUKSI_KOST48.md); formulir [FORM_ISI_DATA_GO_LIVE](FORM_ISI_DATA_GO_LIVE.md). Gate KTP aktif — kamar tidak bisa diaktifkan tanpa KTP terverifikasi. |
+| 2 | **Opening balance** — isi saldo awal di menu Akuntansi (atau catat zero-start) | 🧑 [OWNER] | Periode `OPEN` + 2 CashAccount sudah dibuat 13 Sep 2026; kesiapan akuntansi 75/100 dengan `formalStatementReady=false` ([M20 §3](M20_PRODUKSI_KOST48.md)). |
+| 3 | **Cron AutoOps** — Environment Variables cPanel + Cron Jobs tiap 5 menit | 🧑 [OWNER] | Setelah UAT. **Jangan** pasang cron IoT Tuya. Rujukan teknis: [M20 §8](M20_PRODUKSI_KOST48.md). |
+| 4 | **Ganti password OWNER + PIN owner** — keduanya belum dikonfirmasi diganti | 🧑 [OWNER] | Dilakukan manual via UI/cPanel. Status revisi sementara dicatat terbuka di [M20 §11](M20_PRODUKSI_KOST48.md) dan [GO_LIVE §F](GO_LIVE_CPANEL_CHECKLIST.md). |
+| 5 | **Audit modul 2+** — lanjutkan pendaftaran modul di `scripts/verify-module.mjs` | 🤖 [ASTRA] | Modul pertama `frontend-auth` sudah terdaftar (audit 20 Sep 2026). Maks. satu listing terarah per task; tanpa build/test untuk task docs. |
+| 6 | **Deploy commit lokal** — unggah commit lokal yang belum ter-deploy ke produksi | 🤖 [ASTRA] — **BLOCKED** | Butuh izin deploy eksplisit dari owner. Produksi client saat ini build `BZ-Vpsd9eLX1` (17 Sep 2026); Server access belum diizinkan. |
+| 7 | **2 jalur wrapper** — tutup 2 skenario `scripts/verify-module.mjs` yang belum diuji | 🤖 [ASTRA] | Jalur belum diuji: dependency lokal hilang (exit 4) dan test nol; lihat [AI_MASTER §5](../AI_MASTER.md) dan entri M13 `chore(tooling): wrapper verify-module`. |
 
 > Aturan prioritas: kerjakan task teratas yang prasyaratnya terpenuhi dan lingkupnya sudah diizinkan. Bila teratas BLOCKED, lanjutkan pekerjaan independen yang sudah diizinkan. Tabel ini tidak memberi izin baru.
 
