@@ -47,16 +47,14 @@ Protokol tetap untuk AI mana pun. Kerjakan urut; jangan lompat.
 | 7 | Uji 2 jalur wrapper (`verify-module.mjs`) | 🤖 **AI** | File test kosong / rename node_modules |
 | 8 | Tata ulang penomoran (Opsi C — pindah 4 file `docs/` ke subfolder: GO_LIVE, CHECKLIST_AUDIT, AUDIT_UIUX, FORM_GO_LIVE) | 🤖 **AI** | Sesi fresh, ~30 menit |
 
-> **Sisa lama (referensi)** — baris dari commit `e96d032`; baris lama #1 sudah tercakup item 1–4 di atas. Pertahankan sampai EF/AO diverifikasi selesai.
+**Sisa lama (referensi — belum selesai):** direkonstruksi dari git (`e96d032`); baris lama #1 sudah tercakup item 1–4 di atas.
 
-| # lama | Task | Status | Catatan |
-|---|------|--------|---------|
-| 2 | **EF-00 sisa** — identitas artefak yang berjalan (SHA, jam deploy) dan perilaku runtime EF-01/03/05 | 🟠 **sebagian terisi 13 Sep** ([M20 §2](M20_PRODUKSI_KOST48.md)) | Identitas deployment (app root, docroot, Node, startup, urutan env, jumlah proses) sudah diketahui; sisanya butuh pembacaan server read-only dengan izin. M19 §9.1–9.3 sudah disinkronkan lebih dulu. |
-| 3 | **Sisa Fase AO** — AO-13 → AO-14 setelah dependensi lengkap | 🟢 Audit UI/UX total 12 Sep: 180 pemeriksaan halaman (6 role × 2 viewport) + Axe; 0 error/5xx; **gate Axe LULUS** (0 critical/serious); `tsc -b` dan `npm run build` exit 0 | Bukti: [AUDIT_UIUX_TOTAL_2026-09-12](AUDIT_UIUX_TOTAL_2026-09-12.md). **Sisa:** viewport 320 px, rute ber-fixture (`/booking/:roomId`, `/invoices/:id`, `/stays/:id`, detail pengumuman), AO-18/19/20 parsial, AO-21/23, serta AO-13 crawl tiga role 0 skip + verifikasi persona. AO-06/08/09 dan T-01..T-08 **sudah selesai** — jangan diulang. |
-| 4 | **EF-02** — baseline workload (interval/peak/fault) | 🟠 bukti awal 13 Sep; pengukuran penuh menunggu izin | Terukur di host: 1 instance Passenger, RSS ≈200 MB/proses, `/api/public/rooms` ≈0,3 s, dan **overlap 2 proses** sesaat setelah restart ([M20 §10](M20_PRODUKSI_KOST48.md)). Sisa: interval pengamatan, rata-rata/peak, serta fault counter tiap resource. |
-| 5 | **EF-07**, lalu **EF-04 / EF-06 / EF-08** | ⚠️ Rencana; sebagian berbekal bukti 13 Sep | EF-07: kasus env `false` vs DB `true` kini nyata di produksi, uji formal belum. EF-06/EF-08: restart, rollback kode, rollback DB via env, dan deploy `client/` tanpa restart **sudah dijalankan** 13 Sep; canary dan shutdown pool/timer belum diuji. EF-04 profil static belum diimplementasi. |
-| 6 | **AL — rekonsiliasi penutupan historis** | ℹ️ H1–H15 dilaporkan selesai 7 Jul; bukan antrean implementasi ulang | H15/Z-19 masih verifikasi manual tanpa bukti penutupan spesifik; tindak lanjuti bersama audit Owner. Backlog lain dipilih per temuan terbuka setelah rekonsiliasi. |
-| 7 | **EF-09** gate worker CLI · **Fase MA** batas modul | ⏸️ Ditunda | EF-09 hanya dibahas bila pengukuran AutoOps membuktikan kebutuhan; MA tanpa apps/libs/app Nest/worker baru. |
+1. EF-00 sisa — identitas artefak + pengukuran runtime
+2. Sisa Fase AO — AO-13 crawl + AO-14 sign-off
+3. EF-02 — baseline workload host
+4. EF-07 → EF-04/06/08 — env/kontrak/lifecycle
+5. AL — rekonsiliasi H1-H15, Z-19 verifikasi manual
+6. EF-09 + Fase MA — worker CLI + batas modul (ditunda)
 
 > Aturan prioritas: kerjakan task teratas yang prasyaratnya terpenuhi dan lingkupnya sudah diizinkan. Bila teratas BLOCKED, lanjutkan pekerjaan independen yang sudah diizinkan. Tabel ini tidak memberi izin baru.
 
