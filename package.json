@@ -12,7 +12,10 @@
     "make-deploy:fast": "node scripts/make-deploy.mjs --no-build",
     "bundle:deploy": "node scripts/bundle-deploy.mjs",
     "bundle:deploy:fast": "node scripts/bundle-deploy.mjs --no-build",
-    "token-efficiency-report": "node scripts/token-efficiency-report.mjs"
+    "token-efficiency-report": "node scripts/token-efficiency-report.mjs",
+    "test:module": "node scripts/verify-module.mjs test",
+    "build:module": "node scripts/verify-module.mjs build",
+    "audit:module": "node scripts/verify-module.mjs audit"
   },
   "devDependencies": {
     "xlsx": "^0.18.5"

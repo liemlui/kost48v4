@@ -1,5 +1,22 @@
 # KOST48 V5 — M13 Changelog
 
+## 2026-09-20 (tooling) — verify-module.mjs + 3 script root
+
+- **Baru:** `scripts/verify-module.mjs` (128 baris) — wrapper manifest
+  internal, mode `test`/`build`/`audit`, executable + array argumen tanpa
+  shell. Manifest awal: 1 modul (`frontend-auth`) → `loginPage.test.tsx`.
+- **`package.json` root:** tambah `test:module`, `build:module`,
+  `audit:module` masing-masing memanggil mode wrapper terkait.
+- **Kontrak error:** exit 2 argumen/mode/ID salah, exit 3 build target
+  belum tersedia (`buildTarget: null`), exit 4 dependency lokal hilang.
+  Jumlah test diambil dari reporter JSON Vitest (bukan stdout).
+- **Verifikasi:** 6 skenario lulus — `test frontend-auth` exit 0 dengan
+  5 test; 3 skenario argumen salah exit 2; `build frontend-auth` exit 3
+  dengan pesan; `audit frontend-auth` exit 0 lapor audit doc belum ada.
+- **Batasan:** jalur dependency hilang dan jumlah test nol belum diuji;
+  audit doc `docs/audit/frontend-auth.md` belum dibuat. Tooling lanjutan
+  (module 2+) menunggu modul terdaftar.
+
 ## 2026-09-20 (governance) — Konsolidasi AI Stage 1–5 selesai
 
 - **Hasil:** AGENTS.md menjadi aturan kanonik agent; CLAUDE/Cline/Copilot menjadi pointer; AI_MASTER menjadi dashboard; QUICKREF menjadi cheatsheet; GUIDE menjadi pointer + lampiran roadmap/template; indeks docs/audit dibuat.

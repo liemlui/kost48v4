@@ -67,9 +67,9 @@ Tidak ada hitungan coverage atau klaim PASS baru; `docs/audit/` belum dibuat pad
 
 | Usulan | Status / batas | Owner implementasi | Target |
 |---|---|---|---|
-| `scripts/verify-module.mjs` | Belum dibuat pada recon; rencana terdahulu belum dieksekusi; di luar Stage 1–5 governance | UNKNOWN — belum diperiksa | UNKNOWN — belum diperiksa |
-| `test:module`, `build:module`, `audit:module` | Masih usulan; package.json tidak diubah dalam stage ini | UNKNOWN — belum diperiksa | UNKNOWN — belum diperiksa |
-| Manifest `frontend-auth` | Rencana satu test existing; hasil eksekusi wrapper belum tersedia | UNKNOWN — belum diperiksa | UNKNOWN — belum diperiksa |
+| ~~`scripts/verify-module.mjs`~~ | Selesai Stage tooling 1 — 2026-09-20; manifest 1 modul (frontend-auth); mode test/build/audit | — | Selesai |
+| `test:module`, `build:module`, `audit:module` | Aktif (`npm run test:module -- frontend-auth`, `npm run build:module -- frontend-auth`, `npm run audit:module -- frontend-auth`); buildTarget belum tersedia, mode build exit 3 | — | Selesai |
+| Manifest `frontend-auth` | Aktif; `loginPage.test.tsx` — 5 test, exit 0; audit doc belum dibuat, module 2+ pending | — | Selesai Stage tooling 1 — 2026-09-20 |
 | ~~`docs/audit/README.md`~~ | Selesai Stage 4 — indeks dibuat; lima placeholder belum dibuat, tidak menggandakan audit-map | UNKNOWN — belum diperiksa | Selesai Stage 4 — 2026-09-20 |
 | ~~Permission Reasonix~~ | Selesai Stage 5 — 7 allow dihapus; build/test/install tetap; allow generik masih terbuka | UNKNOWN — belum diperiksa | Selesai Stage 5 — 2026-09-20 |
 
@@ -108,3 +108,4 @@ Tanggal berikut adalah tanggal pencatatan keputusan sesi ini, bukan hasil inspek
 | 2026-09-20 | Stage 3 selesai — pointer diselaraskan dan komentar ignore diperbarui | Kurangi duplikasi panduan agent dan ganti referensi dokumen lama | CLAUDE/Cline/Copilot menjadi pointer; pola ignore tetap; Stage 4–5 pending, M12/M13 ditunda; menunggu review owner |
 | 2026-09-20 | Stage 4 selesai — GUIDE diringkas, QUICKREF dirujukkan ke AGENTS, indeks audit dibuat | Pertahankan roadmap/template dan navigasi audit tanpa duplikasi aturan | Hanya empat file scope Stage 4 diubah/dibuat; ringkasan modul belum dibuat; Stage 5 pending, M12/M13 ditunda; menunggu review owner |
 | 2026-09-20 | Stage 5 selesai — konsolidasi governance Stage 1–5 selesai | Hapus tepat 7 allow berbahaya tanpa deny baru; tambahkan rujukan M12 dan entri M13 | Empat file scope Stage 5 diperbarui; konten lama tetap; allow generik belum memblokir semua jalur mutasi; tanpa eksekusi aplikasi atau deployment |
+| 2026-09-20 | Tooling: verify-module.mjs + 3 script root (test:module/build:module/audit:module) | Utang tooling Stage 1-5 ditutup; AI_MASTER §5 | verify-module.mjs 128 baris, 6 skenario verifikasi lulus; manifest 1 modul (frontend-auth); audit doc & module 2+ pending |
