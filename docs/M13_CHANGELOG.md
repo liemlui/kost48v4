@@ -1,5 +1,32 @@
 # KOST48 V5 — M13 Changelog
 
+## 2026-09-20 (ops) — Rotasi secret produksi + cleanup disk
+
+> Sumber bukti operasional: laporan owner, 20 Sep 2026 malam; tidak diperiksa ulang ke server pada pembaruan dokumentasi ini.
+
+- **Rotasi:** password DB user `kost48s1_lurin` (via cPanel)
+  dan `JWT_SECRET` produksi. `.env` produksi diupdate; nilai
+  disimpan di password manager, tidak dicatat di repo.
+- **Higiene `.htaccess`:** baris `SetEnv DATABASE_URL` +
+  `SetEnv JWT_SECRET` dihapus dari `public_html/.htaccess`;
+  verifikasi `grep -c` = 0. Env app kini bersumber dari
+  `.env` + (opsional) cPanel env, tanpa kedua SetEnv tersebut.
+- **Cleanup PII:** `sql/seed.sql` (854 KB) dan
+  `sql/seed_ORIGINAL.sql` (618 KB) dihapus; file password tenant
+  awal (`~/TENANT-PASSWORD-AWAL-BACA-LALU-HAPUS.txt`) dihapus.
+- **Cleanup disk:** `~/kost48v3` (191 MB), `~/kost48surabaya`
+  (24 MB), 5 tgz staging lama (~98 MB), 3 folder `client-old-*`
+  di app root. App root 257 → 129 MB; home dir ~1.1 GB → ~660 MB.
+  `~/backups` dan `~/lui` dipertahankan.
+- **Bukti:** API produksi HTTPS 200 dengan 13 kamar;
+  `/version.json` = build `BZ-Vpsd9eLX1`; `.env` produksi lolos
+  verifikasi via `psql` (`rooms = 13`).
+- **Deployment:** rotasi dan cleanup dijalankan langsung di
+  server (SSH; rotasi password DB via cPanel) dengan izin owner;
+  tanpa perubahan source.
+- **Dampak runtime:** sesi user aktif terputus setelah
+  JWT_SECRET dirotasi; user perlu login ulang.
+
 ## 2026-09-20 (audit) — Audit modul pertama: frontend-auth
 
 - **Baru:** `docs/audit/frontend-auth.md` (86 baris) sesuai template

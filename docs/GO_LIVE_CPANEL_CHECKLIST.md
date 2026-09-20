@@ -127,16 +127,20 @@ Identitas deployment (menutup sebagian EF-00 §9.1 M19):
 | Proses Passenger | 1 instance (sebelumnya 2), RSS ≈ 200 MB |
 | Environment proses (bukti langsung) | `DATABASE_URL=...@/kost48s1_prod26` |
 
-## F. Sisa pekerjaan owner (belum selesai)
+## F. Sisa pekerjaan owner
 
-1. **Rotasi secret (mendesak).** Nilai `JWT_SECRET` dan password DB saat ini tersimpan terbaca di `public_html/.htaccess` dan sudah tampil di sesi kerja ini tanpa disengaja. Ganti `JWT_SECRET` (Environment Variables cPanel), ganti password user `kost48s1_lurin` (cPanel → PostgreSQL Databases), lalu **hapus baris `SetEnv DATABASE_URL`/`SetEnv JWT_SECRET` dari `.htaccess`** dan andalkan `.env` + env cPanel. Perbarui nilai di env cPanel setelah rotasi.
-2. **Ganti PIN owner** `AVAILABILITY_OWNER_PIN` (saat ini `123456`) menjadi acak ≥6 karakter.
-3. **Ganti password OWNER pertama.** Password sementara ada di `~/OWNER-PASSWORD-BACA-LALU-HAPUS.txt` (mode 600) — login, ganti lewat menu Profil, lalu hapus file itu.
-4. **Lengkapi fondasi akuntansi lewat UI:** periode `OPEN` (1, bulan berjalan) dan 2 CashAccount (Kas Tunai + Bank Utama, saldo awal 0) **sudah dibuat 13 Sep 2026** — catatan lama "masih 0" tidak berlaku lagi. Yang belum: **opening balance diisi** (atau zero-start dicatat), karena kesiapan akuntansi masih 75/100 dengan `formalStatementReady=false` ([M20 §3](M20_PRODUKSI_KOST48.md)).
-5. **Cron AutoOps** (setelah UAT): Environment Variables cPanel → `AUTO_OPS_ENABLED=false` + `AUTO_OPS_CRON_TOKEN=<acak>`; cPanel Cron Jobs tiap 5 menit → `POST /api/auto-ops/cron` dengan header `X-Cron-Token`. **Jangan** pasang cron IoT Tuya.
-6. **Onboarding penghuni nyata** melalui `docs/FORM_ISI_DATA_GO_LIVE.md`.
-7. **Pembersihan disk/inode:** hapus `~/kost48v3`, `~/kost48surabaya`, arsip `kost48-deploy-bundled.tgz` lama, dan `sql/seed.sql` + `sql/seed_ORIGINAL.sql` di app root (setelah yakin tidak dibutuhkan).
-8. **PostgreSQL 9.6.22 sudah EOL** (Nov 2021) — tanyakan ke IDwebhost apakah tersedia versi lebih baru.
+**Status 20 Sep 2026:** berdasarkan laporan owner; password OWNER dan PIN belum dikonfirmasi, tetap terbuka. Bukti server tidak diulang pada pembaruan dokumentasi ini.
+
+- [x] **Rotasi secret (JWT + password DB)** — selesai 20 Sep 2026: password user `kost48s1_lurin` dirotasi via cPanel, `JWT_SECRET` dirotasi, `.env` produksi diperbarui. Nilai disimpan di password manager owner, tidak dicatat di repo.
+- [x] **Hapus `SetEnv DATABASE_URL`/`JWT_SECRET` dari `.htaccess`** — `public_html/.htaccess` bersih dari kedua entri tersebut (`grep -c` = 0), 20 Sep 2026. Env bersumber dari `.env` + (opsional) env cPanel; cPanel tetap diprioritaskan bila diisi.
+- [ ] **Ganti PIN owner** `AVAILABILITY_OWNER_PIN` — belum dikonfirmasi; nilai tidak dicatat di dokumen ini.
+- [ ] **Ganti password OWNER pertama.** Belum dikonfirmasi; login dan ganti lewat menu Profil, lalu hapus file sementara `~/OWNER-PASSWORD-BACA-LALU-HAPUS.txt` (status penghapusan file OWNER belum dikonfirmasi).
+- [x] **Hapus file password tenant** `~/TENANT-PASSWORD-AWAL-BACA-LALU-HAPUS.txt` — selesai 20 Sep 2026; penghapusan file tidak membuktikan penggantian password akun tenant.
+- [ ] **Lengkapi fondasi akuntansi lewat UI:** periode `OPEN` (1, bulan berjalan) dan 2 CashAccount (Kas Tunai + Bank Utama, saldo awal 0) **sudah dibuat 13 Sep 2026** — catatan lama "masih 0" tidak berlaku lagi. Yang belum: **opening balance diisi** (atau zero-start dicatat), karena kesiapan akuntansi masih 75/100 dengan `formalStatementReady=false` ([M20 §3](M20_PRODUKSI_KOST48.md)).
+- [ ] **Cron AutoOps** (setelah UAT): Environment Variables cPanel → `AUTO_OPS_ENABLED=false` + `AUTO_OPS_CRON_TOKEN=<acak>`; cPanel Cron Jobs tiap 5 menit → `POST /api/auto-ops/cron` dengan header `X-Cron-Token`. **Jangan** pasang cron IoT Tuya.
+- [ ] **Onboarding penghuni nyata** melalui `docs/FORM_ISI_DATA_GO_LIVE.md`.
+- [x] **Pembersihan disk/inode** — selesai 20 Sep 2026: `~/kost48v3` (191 MB), `~/kost48surabaya` (24 MB), 5 tgz staging lama (~98 MB), 3 folder `client-old-*`, `sql/seed.sql` (854 KB) + `sql/seed_ORIGINAL.sql` (618 KB) dihapus. App root 257 → 129 MB; home dir ~1.1 GB → ~660 MB; `~/backups` dan `~/lui` dipertahankan. Inode sesudah cleanup belum diukur.
+- [ ] **PostgreSQL 9.6.22 sudah EOL** (Nov 2021) — tanyakan ke IDwebhost apakah tersedia versi lebih baru.
 
 ## G. Catatan teknis untuk release berikutnya
 

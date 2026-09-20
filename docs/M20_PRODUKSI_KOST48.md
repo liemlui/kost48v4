@@ -19,6 +19,10 @@
 
 ## 2. Identitas deployment (menutup sebagian EF-00 §9.1 M19)
 
+**Pembaruan 20 Sep 2026 (laporan owner):** secret dirotasi (password DB + JWT); nilai disimpan di password manager owner, tidak dicatat di repo. `.env` produksi diperbarui; `SetEnv DATABASE_URL`/`JWT_SECRET` di `public_html/.htaccess` sudah dihapus (`grep -c` = 0). Sumber env kini `.env` + (opsional) cPanel env; prioritas cPanel di bawah tetap berlaku bila diisi.
+
+**Cleanup 20 Sep 2026:** app root 257 → 129 MB; home dir ~1.1 GB → ~660 MB. API HTTPS 200, 13 kamar, build `BZ-Vpsd9eLX1`; koneksi `.env` melalui `psql` menghasilkan `rooms = 13`. Bukti dari laporan owner, bukan pemeriksaan server baru pada pembaruan dokumentasi ini.
+
 | Item | Nilai |
 |---|---|
 | Host SSH | `api.kost48surabaya.com` port **4422** (bukan 22), user `kost48s1` |
@@ -171,26 +175,38 @@ Backup yang sudah ada (13 Sep 2026): `db-*.sql.gz`, `app-kost48-prod-*.tar.gz`, 
 4. **`node` bukan bagian dari PATH sesi SSH** → pakai path venv lengkap (`~/nodevenv/kost48-prod/22/bin/node`).
 5. **`psql` tidak otomatis punya akses** → kredensial ada di `.env` app.
 6. **`psql` menolak query `?schema=public`** pada URI (Prisma yang memahaminya).
-7. **Secret tersimpan terbaca di `public_html/.htaccess`** (`JWT_SECRET`, `DATABASE_URL` termasuk password, PIN). Ini harus dirotasi dan baris `SetEnv` rahasia dihapus.
+7. **Secret pernah tersimpan terbaca di `public_html/.htaccess`** (`JWT_SECRET`, `DATABASE_URL` termasuk password, PIN). **20 Sep 2026:** password DB + JWT dirotasi; kedua `SetEnv DATABASE_URL`/`JWT_SECRET` dihapus (`grep -c` = 0), sesuai laporan owner. Status penggantian PIN masih menunggu konfirmasi (§11).
 8. **`_prisma_migrations` tidak ada** → dilarang memakai Prisma CLI untuk patch.
 9. **Proses Passenger bisa menumpuk (overlap).** Saat observasi 13 Sep: sesaat setelah restart terlihat 1 proses, lalu **2 proses hidup bersamaan** (`lsnode` lama tidak langsung mati; RSS ±170–200 MB masing-masing). Ini menjawab sebagian pertanyaan M19 §9.2 soal overlap restart: **overlap nyata terjadi**, sehingga anggaran RAM harus mengasumsikan kemungkinan dua proses. Bila LVE ketat, periksa jumlah proses di cPanel dan pertimbangkan restart aplikasi penuh, bukan hanya `kill -TERM` satu PID.
 10. **HTTPS di depan domain memakai challenge anti-bot (15 Sep).** `curl`/`fetch` polos dari luar (PowerShell `Invoke-WebRequest`, `node fetch`) menerima halaman "One moment, please… / Please wait while your request is being verified…" alih-alih `version.json` atau `index.html` — bukan outage, dan browser sungguhan lolos otomatis. Konsekuensi: **smoke test aset dari luar harus memakai browser** (atau dijalankan dari dalam server seperti `smoke-production.sh`), dan jangan menyimpulkan "situs rusak" dari fetch polos.
 11. **SSH bisa tidak terjangkau dari IP workstation (15 Sep; pulih setelah owner membuka akses).** Percobaan deploy menemukan port 4422 (dan 22, 222, 2222, 2022, 2200, 8022, 65002, 21) **timeout**, sementara 443 terbuka dan SSH ke host lain normal → indikasi firewall/IP allowlist host. Setelah owner mengaktifkan akses, port 4422 kembali normal dan deploy `client/` berjalan (16 Sep WIB). Bila terulang: minta IP publik workstation ditambahkan di cPanel/support, atau konfirmasi port SSH terbaru sebelum sesi deploy berikutnya.
 
+12. **JWT_SECRET placeholder di `.env` = app tidak boot.** Pesan `JWT_SECRET production must be a strong random key (≥32 chars)`. Pastikan nilai asli di `.env`, bukan template `ganti-dengan-secret-acak-kuat-min-32-char`.
+13. **Edit `.env` dengan `sed` bisa gagal senyap** bila password mengandung karakter khusus (mis. `%`, `#`). Pakai `awk` untuk rewrite seluruh baris `KEY="..."` atau `nano` untuk nilai dengan simbol; bandingkan `md5sum` sebelum dan sesudah hanya di server, tanpa mencatat nilainya di dokumen.
+14. **Setelah kill Passenger (`kill -TERM`), app TIDAK selalu auto-revive.** Bila `curl` balas 503, restart via cPanel → Setup Node.js App → tombol Restart, atau trigger beberapa kali dengan `curl`. Cek `stderr.log` untuk error boot.
+
+Catatan 12–14 berasal dari laporan operasional owner pada 20 Sep 2026; tidak diuji ulang pada pembaruan dokumentasi ini.
+
 ## 11. Sisa pekerjaan owner (urutan disarankan)
 
-1. **Ganti PIN owner** (murah, cepat, mengurangi risiko paling langsung).
-2. **Siapkan 4 data onboarding:**
+**Status 20 Sep 2026:** penyelesaian di bawah mengikuti laporan owner; item tanpa konfirmasi tetap terbuka.
+
+- [ ] **Ganti PIN owner** — belum dikonfirmasi.
+- [ ] **Siapkan 4 data onboarding:**
    - bulan + hari masuk 13 penghuni (formulir sudah memuatnya, konsisten dengan spreadsheet owner),
    - 13 angka meter listrik awal (kWh) hasil cek fisik,
    - total kas + saldo bank riil per tanggal cutover (untuk opening balance),
    - deposit per penghuni (data owner hanya menyebut Ade Chandra/kamar D Rp200.000; sisanya "Tidak Deposit").
-3. **Isi saldo awal** di menu Akuntansi (model yang dipilih: rekap sederhana + penagihan mulai siklus berjalan).
-4. **Buat hunian (check-in) 13 kamar** + verifikasi KTP — ingat gate KTP aktif, kamar tidak bisa diaktifkan tanpa KTP terverifikasi.
-5. **Pasang cron AutoOps** di cPanel (§8).
-6. **Rotasi `JWT_SECRET` + password database**, hapus secret dari `.htaccess`, ganti password OWNER & 13 akun tenant, lalu hapus file password sementara di home.
-7. **Bersihkan sisa aplikasi lama** (`~/kost48v3`, `~/kost48surabaya`, arsip `*.tgz` lama, `sql/seed.sql` + `sql/seed_ORIGINAL.sql` di app root) setelah yakin tidak diperlukan.
-8. **Tanyakan versi PostgreSQL** ke IDwebhost.
+- [ ] **Isi saldo awal** di menu Akuntansi (model yang dipilih: rekap sederhana + penagihan mulai siklus berjalan).
+- [ ] **Buat hunian (check-in) 13 kamar** + verifikasi KTP — ingat gate KTP aktif, kamar tidak bisa diaktifkan tanpa KTP terverifikasi.
+- [ ] **Pasang cron AutoOps** di cPanel (§8).
+- [x] **Rotasi `JWT_SECRET` + password database** — selesai 20 Sep 2026; `.env` diperbarui.
+- [x] **Hapus secret dari `.htaccess`** — `SetEnv DATABASE_URL`/`JWT_SECRET` dihapus; `grep -c` = 0, 20 Sep 2026.
+- [ ] **Ganti password OWNER** — belum dikonfirmasi.
+- [ ] **Ganti password 13 akun tenant** — belum dikonfirmasi; penghapusan file password tidak membuktikan penggantian password akun.
+- [x] **Hapus file password tenant sementara** `~/TENANT-PASSWORD-AWAL-BACA-LALU-HAPUS.txt` — selesai 20 Sep 2026; status file password OWNER terpisah belum dikonfirmasi.
+- [x] **Bersihkan sisa aplikasi lama** — `~/kost48v3`, `~/kost48surabaya`, 5 tgz staging lama, 3 folder `client-old-*`, `sql/seed.sql` + `sql/seed_ORIGINAL.sql` dihapus 20 Sep 2026. `~/backups` dan `~/lui` dipertahankan.
+- [ ] **Tanyakan versi PostgreSQL** ke IDwebhost.
 
 ## 12. Data yang sudah disiapkan owner tetapi **belum** dimasukkan
 
