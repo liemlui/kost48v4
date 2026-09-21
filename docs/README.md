@@ -55,6 +55,7 @@ Dibuat 22 September 2026 pada **Tahap 1** [rancangan DOC-GOV-20260922](plans/DOC
 | Laporan audit UI/UX 12 Sep 2026 | [AUDIT_UIUX_TOTAL_2026-09-12.md](AUDIT_UIUX_TOTAL_2026-09-12.md) |
 | Audit menyeluruh dan temuan tata dokumen | [M16](M16_AUDIT_MENYELURUH.md) |
 | Peta hasil audit per cabang (generated) | [audit-map/](audit-map/README.md) |
+| Catatan migrasi dokumen Tahap 2 (bukan audit aplikasi) | [M16 §0 pembaruan Tahap 2](M16_AUDIT_MENYELURUH.md#pembaruan-tahap-2-doc-gov-20260922) |
 
 Hasil audit lama berlaku pada lingkup/waktu yang disebut; bukan PASS untuk perubahan baru dan bukan bukti deployment atau runtime.
 
@@ -64,11 +65,19 @@ Hasil audit lama berlaku pada lingkup/waktu yang disebut; bukan PASS untuk perub
 |---|---|
 | Riwayat bertanggal (entri terbaru) | [M13](M13_CHANGELOG.md) |
 | Snapshot governance 20 Sep 2026 | [history/governance-2026-09-20.md](history/governance-2026-09-20.md) |
+| Riwayat fase lama, ledger historis, Fase AN/MA/A/B-AL | [history/fase-lama.md](history/fase-lama.md) |
+| Fase AO - audit & hardening UI/UX lintas portal | [history/fase-ao.md](history/fase-ao.md) |
+| Fase EF - efisiensi shared hosting 512 MB | [history/fase-ef.md](history/fase-ef.md) |
+| Changelog September 2026 (lanjutan M13) | [history/changelog/2026-09.md](history/changelog/2026-09.md) |
+| Changelog Agustus 2026 | [history/changelog/2026-08.md](history/changelog/2026-08.md) |
+| Changelog Juli 2026 (+ Release 23 Jul) | [history/changelog/2026-07.md](history/changelog/2026-07.md) |
+| Roadmap 30 hari & log keputusan historis | [history/governance-log.md](history/governance-log.md) |
+| Bukti migrasi Tahap 2 per sub-langkah | [history/DOC-GOV-20260922-mapping.md](history/DOC-GOV-20260922-mapping.md) |
 | Rancangan penataan dokumentasi (status mengikuti M12) | [plans/DOC-GOV-20260922.md](plans/DOC-GOV-20260922.md) |
 | Forensik dokumen lama | `docs/archieve/` — hanya bila benar-benar perlu |
 
 ## 6. Batas indeks ini
 
 - Indeks tidak menggantikan M12 (antrean/gate), M02 (keputusan bisnis), atau AGENTS (aturan); urutan kerja tetap dari M12.
-- Folder `docs/product/`, `docs/history/`, dan `docs/plans/` berisi artefak baru 22 Sep 2026; status commit dan kepindahan isi mengikuti keputusan owner pada rancangan DOC-GOV-20260922.
-- Anchor dan path lama dipertahankan sampai migrasi Tahap 2–4 selesai; bila ada tautan tidak cocok, laporkan ke M12, jangan perbaiki di luar scope.
+- Folder `docs/product/`, `docs/history/`, dan `docs/plans/` berisi artefak baru 22 Sep 2026; **Tahap 2 (S0-S6) selesai** dan memindahkan riwayat M12/M13 serta log AI_MASTER ke `docs/history/` tanpa mengubah isi. Tahap 3-4 belum dijalankan.
+- Anchor lama M12/M13 dipertahankan sebagai pointer setelah migrasi Tahap 2; bila ada tautan tidak cocok, laporkan ke M12, jangan perbaiki di luar scope.

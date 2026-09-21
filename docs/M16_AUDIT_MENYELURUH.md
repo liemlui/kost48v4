@@ -25,10 +25,27 @@ Pembaruan ini terpisah dari bukti audit 8 Sep di bawah. Scope: governance, antre
 | DOC-22-01 | Ringkasan AI_MASTER masih Stage 1, log mencatat Stage 5 selesai | Ringkasan/checkpoint diperbaiki; log lama diberi konteks historis |
 | DOC-22-02 | QUICKREF menyebut wrapper belum dibuat; indeks audit menyebut frontend-auth belum ada | Disinkronkan dengan file/script dan audit yang tersedia; batas mode build/audit dinyatakan |
 | DOC-22-03 | Antrean mencampur penanggung jawab/kesiapan; audit modul kedua belum terdefinisi | Prasyarat dan bukti penutupan diperjelas; penetapan modul/scope masih terbuka, bukan audit selesai |
-| DOC-22-04 | M12 1.013 baris/166.098 byte sebelum edit; status aktif bercampur laporan historis | TERBUKA: migrasi bertahap dalam rancangan XL, belum memindah riwayat |
+| DOC-22-04 | M12 1.013 baris/166.098 byte sebelum edit; status aktif bercampur laporan historis | TERLAKSANA (Tahap 2): riwayat M12/M13 dan log AI_MASTER dipindah ke `docs/history/`; M12 aktif 137 baris, M13 147 baris. Lihat pembaruan Tahap 2 di bawah |
 | DOC-22-05 | Prosedur awal M12 menduplikasi AGENTS dan mewajibkan orientasi umum | Rujukan AGENTS dan pembacaan sesuai task diterapkan; gate uang tetap |
 
 Bukti perubahan: [M13 22 Sep](M13_CHANGELOG.md#2026-09-22-docs--koreksi-arahan-ai-dan-rancangan-penataan-menyeluruh). [Rancangan XL](plans/DOC-GOV-20260922.md) belum menjadi aturan aktif. Verifikasi dibatasi pada isi/diff/tautan; kontrol teknis keselamatan lintas-tool belum diuji.
+
+<a id="pembaruan-tahap-2-doc-gov-20260922"></a>
+
+### Pembaruan Tahap 2 - migrasi riwayat & penataan dokumen (DOC-GOV-20260922)
+
+Status penerapan Tahap 2, **bukan** audit ulang aplikasi: tidak ada test/build/UAT/runtime yang dijalankan dan tidak ada file source aplikasi yang disentuh.
+
+| Sub | Hasil | Bukti |
+|---|---|---|
+| S0 | 1 blank line EOF pada mapping dihapus | `git diff HEAD~1 HEAD --check` exit 0 |
+| S2 | M12 1.017 -> 137 baris aktif; riwayat ke `docs/history/fase-ao.md`, `fase-ef.md`, `fase-lama.md`, `changelog/2026-09.md`; 6 anchor hidup | union M12+riwayat `[ ]`=23 `[x]`=101 gate=6; 163 tautan -> 0 rusak |
+| S3 | M13 1.504 -> 147 baris (10 entri terbaru + indeks bulan); 53 entri September, 8 Agustus, 40 Juli + Release 23 Jul dipindah | jumlah heading sebelum/sesudah cocok; anchor `#2026-09-22-docs--koreksi-...` resolve |
+| S4 | AI_MASTER 113 -> 77 baris (<=80); 9 checkbox §3 pindah ke AI_QUICKREF; roadmap + log historis ke `docs/history/governance-log.md` | 9 checkbox terbukti identik; total `[ ]` proyek tetap 40; 231 tautan -> 0 rusak |
+| S5 | `docs/README.md` dan `docs/audit/README.md` menunjuk seluruh file riwayat baru | 0 tautan rusak |
+| S6 | review akhir read-only (tanpa edit kecuali mapping §7) | [mapping §7](history/DOC-GOV-20260922-mapping.md) |
+
+Bukti per sub-langkah, angka, dan penyimpangan yang dicatat ada di [mapping Tahap 2](history/DOC-GOV-20260922-mapping.md). Migrasi memindahkan isi tanpa mengubahnya; M12/M13 tetap pintu masuk antrean dan riwayat terbaru, sedangkan fase lama dan log governance ada di `docs/history/`.
 
 **Lingkup:** seri aktif `docs/M00`–`M19` + `FORM_ISI_DATA_GO_LIVE.md` + `CLAUDE.md`/`AGENTS.md`. Arsip `docs/archieve/*` tidak dibaca ulang. **Bukan** audit runtime host, crawl UAT, atau regresi 46 modul.
 
