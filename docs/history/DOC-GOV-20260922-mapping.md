@@ -168,3 +168,18 @@ Semua path di atas ditulis sebagai `code` sampai file-nya benar-benar dibuat; pe
 5. Ukuran: M12 isi aktif ≤150 baris; AI_MASTER ≤80 baris.
 6. Tidak ada perubahan pada M14, M19, AUDIT_UIUX_TOTAL_2026-09-12, AGENTS, GUIDE, QUICKREF, M02, M00, M01 kecuali diputuskan owner.
 7. Bukti per sub-langkah dicatat di [M13](../M13_CHANGELOG.md) dan laporan sesi; mapping ini diperbarui bila ada penyimpangan (bukan ditulis ulang).
+
+### 7.1 Bukti per sub-langkah
+
+| Sub | Commit | File (blob, baris) | Bukti hitung | Acceptance |
+|---|---|---|---|---|
+| S0 | `73d8d860` | mapping `2bf9ec98` (170) | 1 blank line EOF dihapus (14.152 -> 14.148 byte) | PASS - `git diff HEAD~1 HEAD --check` exit 0 |
+| S2 | `10b63d75` | M12 `f2f99766` (137) - `fase-ao.md` `b3e8550c` (41) - `fase-ef.md` `7cbd6ac6` (21) - `fase-lama.md` `60a4398c` (758) - `changelog/2026-09.md` `9f059775` (108) | M12 `[ ]`=23 (isi aktif 137 baris, `[x]`=0); union M12+4 riwayat `[ ]`=23 `[x]`=101 gate=6; 6 anchor resolve; 163 tautan diperiksa -> 0 rusak | PASS |
+
+### 7.2 Penyimpangan & rekonsiliasi (dicatat, bukan disembunyikan)
+
+1. **Acceptance S2(a) dan S2(b) saling eksklusif.** S2(a) menuntut M12 `[x]` = 101, sedangkan S2(b) menuntut union M12+riwayat `[x]` = 101. Karena seluruh 101 `[x]` pindah ke file riwayat (per §2.1), M12 `[x]` = 0 dan union = 101. Yang dipakai adalah aturan §7 butir 1 (union) - satu-satunya bacaan yang konsisten; bila (a) dipaksakan literal, (b) pasti gagal.
+2. **Task `[ ]` tidak diduplikasi sebagai checkbox.** §3 menuntut 23 baris `- [ ]` di seksi aktif baru M12 **dan** salinan riwayatnya tetap ada di file tujuan, sementara §7 butir 1 serta acceptance S2(b)/S6(b) menuntut union `[ ]` = 23. Agar keduanya terpenuhi, 23 task `[ ]` menjadi checkbox aktif **tunggal** di M12, dan di file riwayat disimpan sebagai kutipan riwayat `> - [ ]` (teks, ID, dan status tidak diubah; hanya penanda kutipan ditambahkan).
+3. **61 tautan relatif pada blok pindahan di-rebase.** Blok berasal dari `docs/`, kini di `docs/history/` (`../`) atau `docs/history/changelog/` (`../../`). Label dan teks tidak diubah; hanya tujuan relatif diperbaiki lalu diverifikasi. Satu tautan fragment `#antrean-prioritas-aktif` (asal M12 L272, kini di `fase-lama.md`) diarahkan ke `../M12_CHECKLIST_CHANGELOG.md#antrean-prioritas-aktif`.
+4. **25 baris trailing whitespace di `fase-lama.md` dinormalkan.** Baris tersebut memakai dua spasi akhir (hard break Markdown) di M12 lama; sebagai baris **baru** terhadap git, `git diff --check` melaporkannya. Normalisasi diperlukan agar acceptance S2(e) exit 0; teks tidak berubah.
+5. **1 tautan rusak pra-eksisting di luar scope:** `docs/M11_DEFAULT_DATA.md:547` -> `../backend/sql/seed-master-data.sql`. Tidak dibuat/diubah pada Tahap 2; dilaporkan sebagai temuan, bukan diperbaiki (di luar scope sub-langkah).
