@@ -16,6 +16,20 @@ Dokumen ini berisi dua lapisan audit yang tidak boleh dicampur:
 
 ## 0. Audit dokumentasi dan urutan kerja — 8 September 2026
 
+### Pembaruan 22 September 2026 — audit arahan AI
+
+Pembaruan ini terpisah dari bukti audit 8 Sep di bawah. Scope: governance, antrean, indeks audit dan petunjuk wrapper; tanpa audit ulang aplikasi/runtime.
+
+| ID | Temuan | Status tindak lanjut |
+|---|---|---|
+| DOC-22-01 | Ringkasan AI_MASTER masih Stage 1, log mencatat Stage 5 selesai | Ringkasan/checkpoint diperbaiki; log lama diberi konteks historis |
+| DOC-22-02 | QUICKREF menyebut wrapper belum dibuat; indeks audit menyebut frontend-auth belum ada | Disinkronkan dengan file/script dan audit yang tersedia; batas mode build/audit dinyatakan |
+| DOC-22-03 | Antrean mencampur penanggung jawab/kesiapan; audit modul kedua belum terdefinisi | Prasyarat dan bukti penutupan diperjelas; penetapan modul/scope masih terbuka, bukan audit selesai |
+| DOC-22-04 | M12 1.013 baris/166.098 byte sebelum edit; status aktif bercampur laporan historis | TERBUKA: migrasi bertahap dalam rancangan XL, belum memindah riwayat |
+| DOC-22-05 | Prosedur awal M12 menduplikasi AGENTS dan mewajibkan orientasi umum | Rujukan AGENTS dan pembacaan sesuai task diterapkan; gate uang tetap |
+
+Bukti perubahan: [M13 22 Sep](M13_CHANGELOG.md#2026-09-22-docs--koreksi-arahan-ai-dan-rancangan-penataan-menyeluruh). [Rancangan XL](plans/DOC-GOV-20260922.md) belum menjadi aturan aktif. Verifikasi dibatasi pada isi/diff/tautan; kontrol teknis keselamatan lintas-tool belum diuji.
+
 **Lingkup:** seri aktif `docs/M00`–`M19` + `FORM_ISI_DATA_GO_LIVE.md` + `CLAUDE.md`/`AGENTS.md`. Arsip `docs/archieve/*` tidak dibaca ulang. **Bukan** audit runtime host, crawl UAT, atau regresi 46 modul.
 
 **Fingerprint:** HEAD lokal `74068aa`; versi aplikasi lokal `1.3.0` / Portal Ringkas / `APP_BUILD_DATE` 2026-08-20. Host dilaporkan `v1.2.0` (M19) — SHA artefak server UNKNOWN.
