@@ -191,7 +191,16 @@ Angka 61 hanya mencakup S2; S3 menambah 42, tidak tercermin di versi awal.
 6. **Gate/perintah pada union: `gate=12` (M12 + 7 file history).** Angka `gate=6` adalah nilai saat baseline Tahap 2 ditetapkan (HEAD 2c5e9cc1). 4 baris gate pindah ke history pada S2; 2 baris tambahan dari `governance-log.md` S4. Domain resmi Tahap 3 = M12 + seluruh history = **12**. Blok riwayat M13 yang dipindah dan log governance ikut memuat penyebutan `test:unit`/`gate M04` pada entri historisnya. Aturan §7 butir 1 menetapkan batas **>= 6**, sehingga statusnya terpenuhi.
 7. **`governance-log.md` memakai basis relatif root, bukan `docs/`.** Blok dari `AI_MASTER.md` memakai tautan relatif terhadap root repo, sehingga 1 tautan (`AI_WORKFLOW_GUIDE.md#11-...`) di-rebase ke `../../`; 0 rusak. Basis per file: M12 `../` atau `../../`, M13 `../../`, AI_MASTER `../../`.
 8. **Diff S5 sengaja minimal.** `docs/README.md` tetap CRLF (83 baris) dan `docs/M16_AUDIT_MENYELURUH.md` serta `docs/audit/README.md` tetap LF; tidak ada churn line-ending. Satu tautan awal di `docs/audit/README.md` sempat salah basis (`M16_...` dari `docs/audit/`) dan diperbaiki menjadi `../M16_...`.
+9. **Tautan menggantung di file arsip M11 sengaja dipertahankan (known exception).** `docs/history/m11-seed-master-data-appendix-2026-07-08.md` memuat rujukan `../backend/sql/seed-master-data.sql` (L547) dan `psql ... -f sql/seed-master-data.sql` (L567) apa adanya sebagai bukti arsip; karena file itu memang sudah dihapus 2026-07-18, pemeriksa tautan melaporkan 1 temuan pada file arsip ini. Itu **known exception, bukan defect**, dan tidak diperbaiki di S1.a.
 
 ### 7.3 Status Tahap 2
 
 **S0-S6 DONE** pada 22 September 2026. Seluruh acceptance sub-langkah terpenuhi, kecuali dua butir yang secara matematis saling eksklusif dan direkonsiliasi pada §7.2 butir 1-2. Satu tautan rusak pra-eksisting di luar scope (`docs/M11_DEFAULT_DATA.md:547`) dilaporkan, tidak diperbaiki. Tidak ada push; tidak ada file di luar scope tersentuh.
+
+### 7.4 Tahap 3 — status sub-langkah
+
+| Sub | Status | Bukti |
+|---|---|---|
+| S1.a | **DONE** — M11 §Appendix "Patch Tenant Aman" (2026-07-08) diarsipkan; M11 diganti stub 3 baris + tautan arsip | arsip `docs/history/m11-seed-master-data-appendix-2026-07-08.md` (29 baris, L544-572 apa adanya; `seed-master-data.sql` tetap 2 kemunculan); M11 572 -> 546 baris; `seed-master-data` di M11 = 0; union `[ ]`=23 `[x]`=101 gate=12 |
+
+S1.b dan S1.c belum dijalankan.
