@@ -49,3 +49,17 @@ XL: persetujuan rencana wajib; tahap kecil; Fase MA tetap ditunda.
 - Penolakan ID kosong/asing telah dicatat di M13 20 Sep; jalur dependency hilang dan test nol masih perlu bukti. Jangan fallback ke full suite.
 - Nest Module/halaman Vite bukan otomatis entry build mandiri; typecheck bukan build.
 - Jangan menimpa `dist` produksi dengan output parsial; jangan install dependency otomatis.
+
+## Checklist Harian (monitoring)
+
+Checklist monitoring turunan AGENTS, dipindah dari AI_MASTER §3 pada Tahap 2. Pelaksanaan kontrol teknis lintas-tool tidak dibuktikan oleh isi Markdown.
+
+- [ ] Instruksi aktif AGENTS/M12 dipahami; QUICKREF hanya bila membantu task, tanpa pembacaan ulang konteks tersedia.
+- [ ] Task punya level XS/S/M/L/XL berdasarkan risiko.
+- [ ] Batas file dibaca 5/8/12/18/20 per tahap dipatuhi atau kebutuhan tambahan dijelaskan.
+- [ ] Command dan efek samping sesuai scope; exception uang di §2 diperhatikan, bukan larangan full test/build universal.
+- [ ] Verifikasi hanya command terdaftar yang diizinkan; docs-only cukup inspeksi.
+- [ ] Diff + 3 baris ringkasan diterima, kecuali format khusus owner menggantikannya.
+- [ ] Audit modul diperbarui jika modul disentuh dan scope mengizinkan.
+- [ ] M12/M13 disinkronkan atau alasan pembatasan scope task saat ini dicatat.
+- [ ] Implementasi, verifikasi lokal, deployment, dan dampak runtime dilaporkan terpisah.
