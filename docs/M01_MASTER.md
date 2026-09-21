@@ -2,6 +2,8 @@
 
 > Dokumen orientasi utama. Detail eksekusi → `docs/M12_CHECKLIST_CHANGELOG.md`. Navigasi kode → `docs/M00_CODEMAP.md`.
 
+> **Arah produk 22 Sep 2026:** sederhanakan pengalaman OWNER/ADMIN pada operasional penghuni dan keuangan; dashboard mudah dibaca dan dampak keputusan jelas. Pengembangan IoT ditunda. Keputusan kanonik: [M02](M02_KEPUTUSAN_OWNER.md#keputusan-penyederhanaan-aplikasi--22-september-2026). Snapshot bertanggal di bawah tidak mengganti arah terbaru atau membuktikan runtime saat ini.
+
 ## Pintu Masuk Docs Cepat
 
 1. `docs/M01_MASTER.md` — blueprint, ground state, dan konteks bisnis global.
@@ -10,7 +12,7 @@
 4. `docs/M00_CODEMAP.md` — peta modul ke file; pakai ini dulu sebelum grep liar ke seluruh repo.
 5. `docs/M14_AUDIT_UI_UX.md` — audit UI/UX aktif, benchmark eksternal terkurasi, bukti runtime lokal/produksi dan static-code Owner/Admin, serta pembagian kerja AO-00..AO-23.
 6. Domain khusus: `M04` keuangan, `M05` siklus huni, `M06` operasional, `M07` publik/marketing, `M08` deploy, `M09` AI Owner/Admin.
-7. `docs/M17_PORTAL_FLOW_RINGKAS.md` — prinsip portal ringkas; `docs/M18_ATURAN_HARGA_KAMAR.md` — harga; `docs/M19_EFISIENSI_HOSTING_512MB.md` — prioritas EF dan data hosting.
+7. `docs/M17_PORTAL_FLOW_RINGKAS.md` — prinsip portal ringkas; `docs/M18_ATURAN_HARGA_KAMAR.md` — harga; `docs/M19_EFISIENSI_HOSTING_512MB.md` — batas teknis EF dan data hosting.
 8. `docs/M20_PRODUKSI_KOST48.md` — **produksi & operasional harian** (identitas deployment, env, redeploy, backup/rollback, jebakan, sisa pekerjaan owner). Baca ini dulu sebelum menyentuh server.
 
 Hindari membaca arsip besar kecuali benar-benar perlu forensik: `docs/archieve/*`, file `*_STALE.md`, `reference/*`, dan `backend/src/generated/*`.

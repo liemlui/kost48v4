@@ -1,8 +1,22 @@
 # KOST48 V5 — Keputusan Owner
 
+## Keputusan penyederhanaan aplikasi — 22 September 2026
+
+Sumber: jawaban langsung owner atas empat pertanyaan arah produk. Keputusan ini memperbarui prioritas produk; aturan nominal, jurnal, permission, dan gate yang sudah berlaku tidak berubah.
+
+- **PROD-SIMPLE:** hasil utama yang didahulukan adalah penyederhanaan aplikasi.
+- **FLOW-CORE:** fokus pada operasional penghuni dan keuangan; mantapkan flow utama bisnis nyata sebelum memperluas fitur.
+- **UX-OWNER-ADMIN:** pengguna prioritas OWNER/ADMIN. Masalah yang dilaporkan owner: UI/UX rumit, dashboard sulit dibaca, dan dampak satu keputusan terhadap nilai keuangan atau proses bisnis lain tidak jelas. Ini kebutuhan owner, bukan hasil audit runtime baru.
+- **IOT-LATER:** pengembangan IoT ditunda sampai flow utama lebih matang. Penundaan pengembangan bukan izin menghapus fitur, memutus integrasi yang berjalan, atau menghilangkan pencatatan meter yang diperlukan tagihan.
+- **ARAH-TEKNIS-TETAP:** target satu API NestJS, React/Vite, penundaan MA, serta gate keselamatan/keuangan tetap. EF tetap batas teknis dan gate yang relevan; prioritas produk kini mengikuti PROD-SIMPLE, bukan otomatis seluruh backlog EF lebih dahulu.
+- **IB-FOUNDATION:** owner mengklarifikasi bahwa landasannya adalah **IB Diploma Business Management Theory**, untuk membangun dasar bisnis kost yang kuat. Penerapan teori harus terhubung ke keputusan bisnis nyata, data, flow aplikasi, dan evaluasi hasil; teori bukan izin otomatis mengubah nominal, jurnal, atau kebijakan bisnis existing.
+
+Turunan pelaksanaan dan acceptance disusun dalam [rancangan DOC-GOV-20260922](plans/DOC-GOV-20260922.md#11-arah-produk-dan-flow-utama). Usulan desain UI belum menjadi keputusan aturan bisnis. Migrasi dokumentasi XL tetap menunggu persetujuan rancangan; jawaban arah produk tidak dianggap sebagai approval migrasi atau implementasi keuangan.
+
 ## Keputusan arah aplikasi — 6 September 2026
 
 Keputusan owner pada sesi penyelarasan dokumentasi; berlaku atas referensi arsitektur/urutan kerja yang lebih lama.
+Prioritas produk pada bagian ini diperbarui oleh keputusan 22 Sep di atas; keputusan arsitektur, transaksi, dan batas izin tetap berlaku.
 
 - **ARAH-EF:** Fase EF diprioritaskan. Audit lokal diterima sebagai audit statis dan typecheck; EF-00/02 menunggu identitas deployment dan pengukuran hosting. Jangan ulang implementasi EF-01/03/05 hanya karena server belum terverifikasi.
 - **ARAH-SATU-API:** pertahankan modular monolith dan target satu proses API NestJS, PostgreSQL, frontend serta flow bisnis yang ada. Jumlah instance Passenger di host belum diketahui; target ini bukan bukti runtime.
