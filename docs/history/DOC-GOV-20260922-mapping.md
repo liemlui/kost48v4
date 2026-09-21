@@ -178,6 +178,7 @@ Semua path di atas ditulis sebagai `code` sampai file-nya benar-benar dibuat; pe
 | S3 | `87a8faa2` | M13 `c31d6fdb` (147) - `changelog/2026-09.md` `e8f40b83` (660) - `changelog/2026-08.md` `ed4d92aa` (75) - `changelog/2026-07.md` `fdc80a10` (757) | 63 entri September: 10 tetap di M13 + 53 pindah; pindah 8 entri Agustus + 40 entri Juli + 1 Release (49 heading `##`) + 41 sub-entri `###`; 3 anchor M13 (termasuk `#2026-09-22-docs--koreksi-...`) resolve; 196 tautan diperiksa -> 0 rusak | PASS |
 | S4 | `3e2f5dd9` | `AI_MASTER.md` `2a0176c6` (77) - `AI_QUICKREF.md` `f8b5c14d` (65) - `governance-log.md` `704cc462` (34) | AI_MASTER 113 -> 77 baris (<=80); 9 checkbox §3 pindah ke QUICKREF dan terbukti identik; 2 baris log 22 Sep tetap di §8; M12+history tetap `[ ]`=23 `[x]`=101; total `[ ]` proyek 40 -> 40; 231 tautan diperiksa -> 0 rusak | PASS |
 | S5 | `7a37551a` | `docs/README.md` `4256382a` (83) - `docs/audit/README.md` `4382ae38` (13) - `docs/M16_AUDIT_MENYELURUH.md` `1f1dba85` (190) | 7 file riwayat baru + mapping tertaut dari docs/README.md; M16 mencatat status S0-S6 dan menutup DOC-22-04 tanpa audit ulang aplikasi; diff terjaga minimal (M16 +19/-1, README +13/-2, audit/README +1); 4.779 tautan repo-wide -> 0 rusak di scope Tahap 2 | PASS |
+| S6 | `7b09b4b1` (HEAD saat review; commit penutup = commit mapping ini) | READ-ONLY - hanya mapping §7 diubah | M12 137 baris - AI_MASTER 77 baris - union `[ ]`=23 `[x]`=101 gate=11 - 6 anchor resolve - 47 rujukan masuk M12 dan 19 ke M13 resolve - 4.779 tautan repo-wide (1 rusak pra-eksisting di luar scope: `docs/M11_DEFAULT_DATA.md:547`) - 15 file tersentuh, semuanya dalam scope | PASS |
 
 ### 7.2 Penyimpangan & rekonsiliasi (dicatat, bukan disembunyikan)
 
@@ -189,3 +190,7 @@ Semua path di atas ditulis sebagai `code` sampai file-nya benar-benar dibuat; pe
 6. **Gate/perintah pada union naik dari 6 menjadi 11.** Angka baseline `gate=6` adalah hitungan M12 saja; blok riwayat M13 yang baru dipindah ikut memuat penyebutan `test:unit`/`gate M04` pada entri historisnya. Aturan §7 butir 1 menetapkan batas **>= 6**, sehingga statusnya terpenuhi.
 7. **`governance-log.md` memakai basis relatif root, bukan `docs/`.** Blok dari `AI_MASTER.md` memakai tautan relatif terhadap root repo, sehingga 1 tautan (`AI_WORKFLOW_GUIDE.md#11-...`) di-rebase ke `../../`; 0 rusak. Basis per file: M12 `../` atau `../../`, M13 `../../`, AI_MASTER `../../`.
 8. **Diff S5 sengaja minimal.** `docs/README.md` tetap CRLF (83 baris) dan `docs/M16_AUDIT_MENYELURUH.md` serta `docs/audit/README.md` tetap LF; tidak ada churn line-ending. Satu tautan awal di `docs/audit/README.md` sempat salah basis (`M16_...` dari `docs/audit/`) dan diperbaiki menjadi `../M16_...`.
+
+### 7.3 Status Tahap 2
+
+**S0-S6 DONE** pada 22 September 2026. Seluruh acceptance sub-langkah terpenuhi, kecuali dua butir yang secara matematis saling eksklusif dan direkonsiliasi pada §7.2 butir 1-2. Satu tautan rusak pra-eksisting di luar scope (`docs/M11_DEFAULT_DATA.md:547`) dilaporkan, tidak diperbaiki. Tidak ada push; tidak ada file di luar scope tersentuh.
