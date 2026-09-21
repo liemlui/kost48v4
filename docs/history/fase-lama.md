@@ -137,7 +137,7 @@ Daftar berikut adalah ledger lintas fase bertanggal, berisi hasil selesai dan ba
 
 ### Fase AN — Hardening Keuangan Pasca Audit Deep
 
-**Sumber:** Audit deep Reasonix 29 Juli 2026 — `docs/M04_KEUANGAN.md` §H.
+**Sumber:** Audit deep Reasonix 29 Juli 2026 — `docs/M04_KEUANGAN.md` §H.  
 **Hasil penutupan Juli:** `tsc` BE ✅ FE ✅ · `npm run test:unit` 48/48 ✅ pada saat itu. Semua task di bawah selesai; angka ini bukan hasil pengujian sesi sekarang. Perubahan uang berikutnya mengikuti gate M04, bukan mengulang implementasi ini.
 
 - [x] **AN-01 🔴 P1-02 — Deposit ledger blocking** — `payment-submissions.service.ts:898-915`: ubah `try/catch` + `logger.warn` menjadi BLOCKING (throw, rollback tx). Deposit diterima wajib tercatat di ledger. **PALING URGENT — tidak ada recovery path.**
@@ -158,7 +158,7 @@ Daftar berikut adalah ledger lintas fase bertanggal, berisi hasil selesai dan ba
 
 ### Fase A — Pra-Go-Live Produksi
 
-**Tujuan:** aplikasi siap publish bersih, tanpa data UAT/testing.
+**Tujuan:** aplikasi siap publish bersih, tanpa data UAT/testing.  
 **Rujukan:** `docs/M08_DEPLOY_GO_LIVE.md` · `backend/.env.production.example`.
 
 > - [ ] **A1 / F1-12** 🧑 Owner lengkapi identitas hosting/deployment, domain/HTTPS, host/nama/port PostgreSQL produksi dan kesiapan env rahasia. Ikuti bukti parsial M19; port/nama DB produksi tidak diasumsikan dari UAT atau default. **Status 16 Sep 2026 (sinkronisasi docs, tanpa pengukuran baru):** sebagian besar terpenuhi dari deployment nyata — identitas deployment, domain/HTTPS, nama DB produksi, dan urutan env ada di [M20 §2](../M20_PRODUKSI_KOST48.md). **Sisa yang membuat checkbox ini tetap terbuka:** versi/port PostgreSQL (socket lokal) masih pertanyaan untuk IDwebhost ([M20 §11](../M20_PRODUKSI_KOST48.md) butir 8) dan kesiapan rotasi secret (A4).
@@ -176,115 +176,115 @@ Daftar berikut adalah ledger lintas fase bertanggal, berisi hasil selesai dan ba
 
 ### Fase B — Publik & Portal Tenant ✅ SELESAI
 
-**Key files:** `PublicGuestDashboardPage`, `GuestBookingForm`, `MyStayPage`, `marketing-public-rooms.service.ts`, `additional-services`, `marketing-assets`.
+**Key files:** `PublicGuestDashboardPage`, `GuestBookingForm`, `MyStayPage`, `marketing-public-rooms.service.ts`, `additional-services`, `marketing-assets`.  
 **Cakupan selesai:** public UI, smart booking (filter range), kalender ketersediaan, foto kamar/fasilitas owner-managed, aset brosur slot-based, WiFi portal tenant, meter jadwal + catat mandiri, profil + foto KTP sebagai avatar.
 
 ---
 
 ### Fase C — Workspace Owner/Admin ✅ SELESAI
 
-**Key files:** `AppLayout.tsx`, `navigation.ts`, `RoleWorkspaceTabs.tsx`, `OwnerDashboardPage`, `DashboardAdmin`, `02-layout.css`, `12-owner.css`.
+**Key files:** `AppLayout.tsx`, `navigation.ts`, `RoleWorkspaceTabs.tsx`, `OwnerDashboardPage`, `DashboardAdmin`, `02-layout.css`, `12-owner.css`.  
 **Cakupan selesai:** toggle Owner↔Admin segmented control, sidebar context-aware, breadcrumb root per mode, route `/owner-dashboard`+`/admin-dashboard` split, status kokpit 4 kartu (ocupansi/tunggakan/meter/readiness), inventaris shell 3 tab.
 
 ---
 
 ### Fase D — Operasional Staff & Gudang ✅ SELESAI
 
-**Key files:** `DashboardStaff.tsx`, `StaffMotivationDashboard.tsx`, `inventory-items`, `WifiOrderPage`, `tickets`.
+**Key files:** `DashboardStaff.tsx`, `StaffMotivationDashboard.tsx`, `inventory-items`, `WifiOrderPage`, `tickets`.  
 **Cakupan selesai:** role scope ketat staf (no tarif/KTP leak), gudang FK `inventoryItemId`, StaffMeterStatusPanel, WiFi order flow (ServiceInterest→WifiSale), tip flow P2P, staff theme mobile.
 
 ---
 
 ### Fase E — Polish & Teknis ✅ SELESAI
 
-**Key files:** `auto-ops/sweeps/` (5 sub-service), `stays-renewal.service.ts`, `test/integration/`, `frontend/e2e/`, `docs/archieve/2026-06-20_fase_selesai/FASE_E_EVALUASI_ARSITEKTUR.md`.
+**Key files:** `auto-ops/sweeps/` (5 sub-service), `stays-renewal.service.ts`, `test/integration/`, `frontend/e2e/`, `docs/archieve/2026-06-20_fase_selesai/FASE_E_EVALUASI_ARSITEKTUR.md`.  
 **Cakupan selesai:** split auto-ops.service.ts (1819→235 baris + 5 sweep service), split stays renewal, integration test TC1-TC4, E2E Playwright (public/booking/portal), leaderboard kebersihan anonim, eval arsitektur (refresh token MEDIUM, CSP LOW, WA LOW, event-bus VERY LOW).
 
 ---
 
 ### Fase F — UI/UX Sweep ✅ SELESAI
 
-**Key files:** `NotFoundPage.tsx`, `ToastProvider.tsx`, `PasswordInput.tsx`, `AppLayout.tsx`, `01-base.css`.
+**Key files:** `NotFoundPage.tsx`, `ToastProvider.tsx`, `PasswordInput.tsx`, `AppLayout.tsx`, `01-base.css`.  
 **Cakupan selesai (10 task):** UX-404, UX-TOAST, UX-A11Y (SVG password + skip-link), UX-COLOR (kontras AA `#475569`), UX-LOGOUT (confirm), UX-SEARCH-TENANT, UX-SKELETON, UX-OVERSCROLL, UX-LOGIN-FORMAT.
 
 ---
 
 ### Fase G — AI Owner/Admin Approval Copilot ✅ SELESAI
 
-**Key files:** `backend/src/modules/owner-ai/` (15 file), `backend/src/modules/market-analysis/deepseek.client.ts`, `frontend/src/components/ai/`.
+**Key files:** `backend/src/modules/owner-ai/` (15 file), `backend/src/modules/market-analysis/deepseek.client.ts`, `frontend/src/components/ai/`.  
 **Cakupan selesai (G0-G9):** G0 safety foundation, G1 owner brief, G2 finance analyst, G3 payment review, G4 expense OCR, G5 KTP OCR validator, G6 ops/inventory AI, G7 settings & budget, G8 FAQ/manual generator, G9 AiDraft queue (schema S-6). Kontrak global: manual-button only, OWNER/ADMIN only, draft saja.
 
 ---
 
 ### Fase H — UI/UX Compact Owner↔Admin ✅ SELESAI
 
-**Key files:** `navigation.ts`, `DashboardAdmin.tsx`, `RoleWorkspaceTabs.tsx`, `OwnerDashboardPage.tsx`, `12-owner.css`, `08-admin.css`.
-**Rujukan:** `docs/archieve/2026-06-20_fase_selesai/M13_FASE_H_UIUX_COMPACT.md`.
+**Key files:** `navigation.ts`, `DashboardAdmin.tsx`, `RoleWorkspaceTabs.tsx`, `OwnerDashboardPage.tsx`, `12-owner.css`, `08-admin.css`.  
+**Rujukan:** `docs/archieve/2026-06-20_fase_selesai/M13_FASE_H_UIUX_COMPACT.md`.  
 **Cakupan selesai:** H1 sidebar owner 18→7, H2 dashboard admin 6→3 tab, H3 merge Minat→Layanan, H4 AiAssistButton, H5 tren chart toggle, H6 hapus CSS dead.
 
 ---
 
 ### Fase I — Navigasi & Onboarding ✅ SELESAI
 
-**Key files:** `DashboardAdmin.tsx`, `StaffTopWorkspaceNav.tsx`, `navigation.ts`, `AppLayout.tsx`, `GettingStartedGuide.tsx`.
-**Rujukan:** `docs/archieve/2026-06-20_fase_selesai/M14_FASE_I_NAVIGASI_ONBOARDING.md`.
+**Key files:** `DashboardAdmin.tsx`, `StaffTopWorkspaceNav.tsx`, `navigation.ts`, `AppLayout.tsx`, `GettingStartedGuide.tsx`.  
+**Rujukan:** `docs/archieve/2026-06-20_fase_selesai/M14_FASE_I_NAVIGASI_ONBOARDING.md`.  
 **Cakupan selesai:** I1 hapus AdminAreaInternalMenu, I2 unifikasi StaffTopWorkspaceNav, I3 ekspos `/meter-readings`, I4 GettingStartedGuide tenant, I5 breadcrumb klik, I6 guide strip adaptif.
 
 ---
 
 ### Fase J — Hardening AI Pra-Go-Live ✅ SELESAI
 
-**Key files:** `owner-ai.helpers.ts`, `backend/test/unit/owner-ai-safety.test.js`, `AiAssistButton.tsx`, `AiResultPanel.tsx`, `docs/archieve/_previous_cycles/M09_AUDIT.md`.
-**Rujukan:** `docs/archieve/2026-06-20_fase_selesai/M15_FASE_J_HARDENING_AI.md`.
+**Key files:** `owner-ai.helpers.ts`, `backend/test/unit/owner-ai-safety.test.js`, `AiAssistButton.tsx`, `AiResultPanel.tsx`, `docs/archieve/_previous_cycles/M09_AUDIT.md`.  
+**Rujukan:** `docs/archieve/2026-06-20_fase_selesai/M15_FASE_J_HARDENING_AI.md`.  
 **Cakupan selesai:** J0 ekstrak guard → `owner-ai.helpers.ts`, J1 unit test ≥18 assert PDP+uang, J2 guard no-partial AI, J3 FE error non-blocking, J4 audit 12 endpoint owner-ai dibukukan di M09.
 
 ---
 
 ### Fase K — Pasca-Audit Total ✅ SELESAI
 
-**Key files:** berbagai — lihat `docs/archieve/2026-06-20_fase_selesai/M16_PASCA_AUDIT_PLAN.md`.
+**Key files:** berbagai — lihat `docs/archieve/2026-06-20_fase_selesai/M16_PASCA_AUDIT_PLAN.md`.  
 **Cakupan selesai (13 task, commit `ac4cc2f`):** P1-P3 keamanan (RolesGuard, DTO multipart, hapus STAFF dari 11 endpoint), P5-P6 circuit breaker DeepSeek + advisory lock, Q1-Q5 data integrity (resolveRent unifikasi, merge helpers, @unique NIK, @index, deposit handling), R1-R5 CSS tokens, unifikasi arus kas, DeepSeek UI Settings, error handling + dead code.
 
 ---
 
 ### Fase L — UI/UX Audit Menyeluruh ✅ SELESAI
 
-**Rujukan utama:** `docs/archieve/2026-06-20_fase_selesai/M17_FASE_L_UIUX_AUDIT.md` · `docs/archieve/fase-l-specs/`
+**Rujukan utama:** `docs/archieve/2026-06-20_fase_selesai/M17_FASE_L_UIUX_AUDIT.md` · `docs/archieve/fase-l-specs/`  
 **Cakupan selesai:** L-01..L-20 semua selesai — loading state, error graceful, mobile responsif, wizard balance, guest auth, public rooms, tenant reports, enum labels, staff/stays/tenant pages, accounting checklist, a11y, empty state, asset pages.
 
 ---
 
 ### Fase M — Quick Wins A11y & Polish ✅ SELESAI
 
-**Key files:** `AppLayout.tsx`, `ConfirmProvider.tsx`, `ToastProvider.tsx`, `ClickableRow.tsx`, `01-base.css`.
+**Key files:** `AppLayout.tsx`, `ConfirmProvider.tsx`, `ToastProvider.tsx`, `ClickableRow.tsx`, `01-base.css`.  
 **Cakupan selesai (6 task):** M-01 `useNavigate` ganti `window.location.assign`, M-02 `ConfirmProvider`+`useConfirm` (9 `window.confirm` diganti), M-03 global `prefers-reduced-motion`, M-04 perbaiki font Cormorant Garamond, M-05 `ClickableRow` aksesibel (6 file), M-06 toast aksesibel (ARIA per-varian, pause hover).
 
 ---
 
 ### Fase N — Ramping Dashboard & Navigasi ✅ SELESAI
 
-**Key files:** `OwnerDashboardPage.tsx`, `DashboardAdmin.tsx`, `AdminHealthBar.tsx`, `navigation.ts`, `admin-dashboard.service.ts`.
+**Key files:** `OwnerDashboardPage.tsx`, `DashboardAdmin.tsx`, `AdminHealthBar.tsx`, `navigation.ts`, `admin-dashboard.service.ts`.  
 **Cakupan selesai (6 task):** N-01 Owner dashboard hapus sinyal ganda, N-02 Admin dashboard hero = ActionQueueTable, N-03 toggle density Admin, N-04 hapus duplikasi nav, N-05 pindah agregasi dashboard ke backend (2 endpoint baru), N-06 axe e2e `@axe-core/playwright`.
 
 ---
 
 ### Fase O — Design System & Konsistensi Visual ✅ SELESAI
 
-**Key files:** `00-tokens.css`, `chartPalette.ts`, `10-misc.css`, `frontend/package.json`.
+**Key files:** `00-tokens.css`, `chartPalette.ts`, `10-misc.css`, `frontend/package.json`.  
 **Cakupan selesai (8 task):** O-01 palet 50–900 + alias semantik, O-02 `chartColors` dari token, O-03 spacing + radius scale, O-04 CSS Modules pilot, O-05 pisah `10-misc.css` (→ 13-reports.css + 14-settings.css), O-06 `lucide-react`, O-07 `date-fns`, O-08 touch target ≥44px.
 
 ---
 
 ### Fase P — Pola UI Modern ✅ SELESAI
 
-**Key files:** `DashboardAdmin.tsx`, `ActionKanbanBoard.tsx`, `ActionCalendar.tsx`, `TanStackTable.tsx`, `MobileBottomNav.tsx`, `CommandPalette.tsx`.
+**Key files:** `DashboardAdmin.tsx`, `ActionKanbanBoard.tsx`, `ActionCalendar.tsx`, `TanStackTable.tsx`, `MobileBottomNav.tsx`, `CommandPalette.tsx`.  
 **Cakupan selesai (6 task):** P-01 3-tampilan toggle (list/board/calendar), P-02 FullCalendar operasional, P-03 @dnd-kit kanban drag-drop aksesibel, P-04 TanStack Table pilot (InvoicesPage), P-05 bottom tab bar Tenant mobile, P-06 command palette ⌘K cmdk.
 
 ---
 
 ### Fase Q — Performa & Stabilitas ✅ SELESAI
 
-**Key files:** `DashboardAdmin.tsx`, `stayPredicates.ts`, `InvoicesPage.tsx`, `StaysPage.tsx`, `PushToggle.tsx`, resource config.
+**Key files:** `DashboardAdmin.tsx`, `stayPredicates.ts`, `InvoicesPage.tsx`, `StaysPage.tsx`, `PushToggle.tsx`, resource config.  
 **Cakupan selesai (7 task):** Q-01 rebuild dist `dist/modules/admin/`, Q-02 retry:1 retryDelay:1000, Q-03 `listAllActiveStaysForBookings` single-call, Q-04 staysQuery `enabled: showCreate`, Q-05 `staleTime` checkout queries, Q-06 empty state informatif inventory, Q-07 PushToggle graceful fallback.
 
 ---
@@ -302,14 +302,14 @@ Daftar berikut adalah ledger lintas fase bertanggal, berisi hasil selesai dan ba
 
 ### Fase T — Wizard Redesign + Animasi Marketing ✅ SELESAI
 
-**Key files:** `GuestPreferenceWizard.tsx`, `RoomCard.tsx`, `11-public-pages.css`.
+**Key files:** `GuestPreferenceWizard.tsx`, `RoomCard.tsx`, `11-public-pages.css`.  
 **Cakupan selesai:** T-01 redesign wizard result screen — extract RoomCard ke komponen bersama, grid RoomCard (bukan chip), animasi fadeInUp/stagger/count-up/pulse, marketing copy personal, urgency line, social proof, dark-theme variant, skeleton shimmer.
 
 ---
 
 ### Fase U — Konsistensi Fasilitas↔Inventaris + Monitoring AC ✅ SELESAI
 
-**Key files:** `room-facility-spec.ts`, `FacilityManager.tsx`, `marketing-public-rooms.service.ts`, `AcMaintenancePage.tsx`, seed.
+**Key files:** `room-facility-spec.ts`, `FacilityManager.tsx`, `marketing-public-rooms.service.ts`, `AcMaintenancePage.tsx`, seed.  
 **Cakupan selesai (8 task):** U-01 spec kanonik fasilitas, U-02 gap report (AC disorot), U-03 panel admin + wiring `inventoryItemId`, U-04 sembunyikan kamar gap dari katalog publik, U-05 enrich tenant (KM/ukuran/AC), U-06 area `/ac-maintenance`, U-07 backfill `seed:facilities`, U-08 build lulus.
 
 ---
@@ -427,8 +427,8 @@ Daftar berikut adalah ledger lintas fase bertanggal, berisi hasil selesai dan ba
 
 ### Fase Z — Audit UI/UX Cross-Portal (2026-07-02)
 
-**Metode:** Inspeksi browser real-time via `browser_navigate` + `browser_snapshot` + `browser_console` — bukan spekulasi. Login sebagai tenant (Maya/Kamar A), staff (staff@kost48.com), dan admin (admin@kost48.com). Halaman publik `/` tanpa login. Owner dashboard tidak bisa diakses (redirect→login via browser tool) — dishare dengan admin dashboard via toggle segmented control.
-**Rujukan detail:** `docs/archieve/_previous_cycles/_AUDIT_CROSS_PORTAL_2026-07-02.md` (laporan lengkap dengan screenshot & kode fix).
+**Metode:** Inspeksi browser real-time via `browser_navigate` + `browser_snapshot` + `browser_console` — bukan spekulasi. Login sebagai tenant (Maya/Kamar A), staff (staff@kost48.com), dan admin (admin@kost48.com). Halaman publik `/` tanpa login. Owner dashboard tidak bisa diakses (redirect→login via browser tool) — dishare dengan admin dashboard via toggle segmented control.  
+**Rujukan detail:** `docs/archieve/_previous_cycles/_AUDIT_CROSS_PORTAL_2026-07-02.md` (laporan lengkap dengan screenshot & kode fix).  
 **Verifikasi awal:** Autocomplete login + novalidate + type=email sudah fixed dari changelog 2026-07-16 ✅. Tidak diulang di sini.
 
 **Urutan prioritas:** Z-01 (critical data) > Z-02..Z-07 (halaman rusak/kosong) > Z-08..Z-16 (medium) > Z-17..Z-18 (publik).
