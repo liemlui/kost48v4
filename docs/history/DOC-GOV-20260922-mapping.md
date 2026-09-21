@@ -175,6 +175,7 @@ Semua path di atas ditulis sebagai `code` sampai file-nya benar-benar dibuat; pe
 |---|---|---|---|---|
 | S0 | `73d8d860` | mapping `2bf9ec98` (170) | 1 blank line EOF dihapus (14.152 -> 14.148 byte) | PASS - `git diff HEAD~1 HEAD --check` exit 0 |
 | S2 | `10b63d75` | M12 `f2f99766` (137) - `fase-ao.md` `b3e8550c` (41) - `fase-ef.md` `7cbd6ac6` (21) - `fase-lama.md` `60a4398c` (758) - `changelog/2026-09.md` `9f059775` (108) | M12 `[ ]`=23 (isi aktif 137 baris, `[x]`=0); union M12+4 riwayat `[ ]`=23 `[x]`=101 gate=6; 6 anchor resolve; 163 tautan diperiksa -> 0 rusak | PASS |
+| S3 | `87a8faa2` | M13 `c31d6fdb` (147) - `changelog/2026-09.md` `e8f40b83` (660) - `changelog/2026-08.md` `ed4d92aa` (75) - `changelog/2026-07.md` `fdc80a10` (757) | 63 entri September: 10 tetap di M13 + 53 pindah; pindah 8 entri Agustus + 40 entri Juli + 1 Release (49 heading `##`) + 41 sub-entri `###`; 3 anchor M13 (termasuk `#2026-09-22-docs--koreksi-...`) resolve; 196 tautan diperiksa -> 0 rusak | PASS |
 
 ### 7.2 Penyimpangan & rekonsiliasi (dicatat, bukan disembunyikan)
 
@@ -183,3 +184,4 @@ Semua path di atas ditulis sebagai `code` sampai file-nya benar-benar dibuat; pe
 3. **61 tautan relatif pada blok pindahan di-rebase.** Blok berasal dari `docs/`, kini di `docs/history/` (`../`) atau `docs/history/changelog/` (`../../`). Label dan teks tidak diubah; hanya tujuan relatif diperbaiki lalu diverifikasi. Satu tautan fragment `#antrean-prioritas-aktif` (asal M12 L272, kini di `fase-lama.md`) diarahkan ke `../M12_CHECKLIST_CHANGELOG.md#antrean-prioritas-aktif`.
 4. **25 baris trailing whitespace di `fase-lama.md` dinormalkan.** Baris tersebut memakai dua spasi akhir (hard break Markdown) di M12 lama; sebagai baris **baru** terhadap git, `git diff --check` melaporkannya. Normalisasi diperlukan agar acceptance S2(e) exit 0; teks tidak berubah.
 5. **1 tautan rusak pra-eksisting di luar scope:** `docs/M11_DEFAULT_DATA.md:547` -> `../backend/sql/seed-master-data.sql`. Tidak dibuat/diubah pada Tahap 2; dilaporkan sebagai temuan, bukan diperbaiki (di luar scope sub-langkah).
+6. **Gate/perintah pada union naik dari 6 menjadi 11.** Angka baseline `gate=6` adalah hitungan M12 saja; blok riwayat M13 yang baru dipindah ikut memuat penyebutan `test:unit`/`gate M04` pada entri historisnya. Aturan §7 butir 1 menetapkan batas **>= 6**, sehingga statusnya terpenuhi.
