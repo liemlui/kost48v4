@@ -23,7 +23,7 @@ Tanggal file lama tidak disimpulkan dari tanggal yang tertulis di dalam dokumenn
 | [AI_MASTER.md](AI_MASTER.md) | Monitoring lintas-agent | Dashboard aktif; status disinkronkan | Dashboard, bukan canonical atau pengganti M12/M13 | 2026-09-22 |
 | [.github/copilot-instructions.md](.github/copilot-instructions.md) | Entry panduan Copilot | Pointer aktif — Stage 3 selesai | Pointer ke AGENTS/M12 dan dashboard AI_MASTER | 2026-09-20 |
 | [M00](docs/M00_CODEMAP.md) / [audit-map](docs/audit-map/) | Navigasi kode dan audit | Ada; dipertahankan, tidak diubah | Peta rujukan; bukan bukti audit otomatis PASS | UNKNOWN — belum diperiksa |
-| [M12](docs/M12_CHECKLIST_CHANGELOG.md) | Antrean dan gate tugas | Kesiapan task diperjelas; migrasi struktur menunggu approval XL | Otoritas antrean/gate di atas AGENTS | 2026-09-22 |
+| [M12](docs/M12_CHECKLIST_CHANGELOG.md) | Antrean dan gate tugas | Kesiapan task diperjelas; Tahap 1 DOC-GOV selesai; tahap 2–4 menunggu urutan rancangan | Otoritas antrean/gate di atas AGENTS | 2026-09-22 |
 | [M13](docs/M13_CHANGELOG.md) | Riwayat bertanggal | Entri koreksi docs dan rancangan ditambahkan; entri lama tetap | Riwayat bukti, bukan antrean baru | 2026-09-22 |
 
 ## 2. Hierarki Aturan (+ KNOWN EXCEPTION gate keuangan)
