@@ -168,5 +168,3 @@ Semua path di atas ditulis sebagai `code` sampai file-nya benar-benar dibuat; pe
 5. Ukuran: M12 isi aktif ≤150 baris; AI_MASTER ≤80 baris.
 6. Tidak ada perubahan pada M14, M19, AUDIT_UIUX_TOTAL_2026-09-12, AGENTS, GUIDE, QUICKREF, M02, M00, M01 kecuali diputuskan owner.
 7. Bukti per sub-langkah dicatat di [M13](../M13_CHANGELOG.md) dan laporan sesi; mapping ini diperbarui bila ada penyimpangan (bukan ditulis ulang).
-
-
