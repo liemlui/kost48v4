@@ -2,7 +2,8 @@
 
 Sumber aturan: [AGENTS.md](AGENTS.md); exception uang di [AGENTS §8](AGENTS.md#8-verifikasiexception).
 Lampiran: [GUIDE §11 — Roadmap](AI_WORKFLOW_GUIDE.md#11-roadmap-migrasi-workflow-30-hari) dan [§12 — Template](AI_WORKFLOW_GUIDE.md#12-lampiran-template-siap-pakai).
-Cheatsheet usulan; tidak mengganti gate proyek atau izin user.
+Cheatsheet turunan; status tooling disinkronkan 22 September 2026. Tidak mengganti gate proyek atau izin user.
+Navigasi dokumen per kebutuhan (mulai task, domain, operasional, audit, riwayat): [docs/README.md](docs/README.md).
 
 ## Pilih level berdasarkan risiko
 
@@ -41,8 +42,10 @@ XL: persetujuan rencana wajib; tahap kecil; Fase MA tetap ditunda.
 - BE: `npm run test:unit` memicu build melalui `pretest:unit`; jangan hapus hook sembarangan.
 - Runner BE langsung melewati hook, tetapi import/prasyarat dan kesegaran `dist` tetap wajib.
 - Artefak basi atau prasyarat tidak tersedia: laporkan verifikasi belum lengkap; jangan klaim PASS.
-- `test:module`, `build:module`, `audit:module` masih usulan; wrapper belum dibuat.
-- Wrapper usulan wajib menolak ID kosong/asing, test kosong, dan target build tidak tersedia.
-- Jangan fallback ke full suite; audit tooling hanya memeriksa manifest/path/kesegaran docs.
+- Wrapper [verify-module.mjs](scripts/verify-module.mjs) tersedia; manifest saat ini hanya `frontend-auth` → `loginPage.test.tsx`.
+- Dari root: `npm run test:module -- frontend-auth` atau `npm run audit:module -- frontend-auth`, hanya bila task mengizinkan. Di PowerShell gunakan `npm.cmd` jika shim `npm.ps1` terhalang kebijakan; jangan mengubah kebijakan sistem.
+- `build:module` tersedia sebagai alias, tetapi mode build belum diimplementasikan: exit 3, tidak membangun apa pun. Jangan menganggap perubahan manifest saja mengaktifkan build.
+- `audit:module` hanya melaporkan keberadaan manifest/path; exit 0 bukan bukti kesegaran dokumen atau PASS perilaku.
+- Penolakan ID kosong/asing telah dicatat di M13 20 Sep; jalur dependency hilang dan test nol masih perlu bukti. Jangan fallback ke full suite.
 - Nest Module/halaman Vite bukan otomatis entry build mandiri; typecheck bukan build.
 - Jangan menimpa `dist` produksi dengan output parsial; jangan install dependency otomatis.

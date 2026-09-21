@@ -1,18 +1,14 @@
 # KOST48 V5 — Checklist Eksekusi Aktif
 
-> Versi aktif: **2026-09-20** | Changelog → `docs/M13_CHANGELOG.md` | Temuan tata dokumen → [M16 §0](M16_AUDIT_MENYELURUH.md#0-audit-dokumentasi-dan-urutan-kerja--8-september-2026) | Ledger fase lama tetap di bawah.
+> Versi aktif: **2026-09-22** | Changelog → `docs/M13_CHANGELOG.md` | Temuan tata dokumen → [M16 §0](M16_AUDIT_MENYELURUH.md#0-audit-dokumentasi-dan-urutan-kerja--8-september-2026) | Ledger fase lama tetap di bawah.
 
 ## Cara Pakai (AI Eksekutor — baca sebelum coding)
 
-Protokol tetap untuk AI mana pun. Kerjakan urut; jangan lompat.
+Aturan kerja, izin, batas baca, dan pemeriksaan repo mengikuti [AGENTS](../AGENTS.md); instruksi yang sudah ada dalam konteks tidak dibaca ulang.
 
-1. **Orientasi (5 menit):** `CLAUDE.md` → file ini (antrean di bawah) → `docs/M01_MASTER.md`. Task EF: `docs/M19_EFISIENSI_HOSTING_512MB.md` §9. Task AO: `docs/M14_AUDIT_UI_UX.md`.
-2. **Cek repo:** `git status --short` lalu `git log --oneline -5`. `M`/`??` = kerja yang BELUM di-commit — jangan di-reset, di-stash, atau ditimpa.
-3. **Pilih SATU task `[ ]`** dari [Antrean Prioritas Aktif](#antrean-prioritas-aktif) yang tidak BLOCKED. Selesaikan tuntas sebelum task berikutnya. **Jangan mengulang `[x]`.**
-4. **Anchor kode:** [M00](M00_CODEMAP.md) → [peta audit per cabang](audit-map/README.md) → satu leaf/simbol, lalu grep source terkait. Hindari memuat seluruh peta ke konteks. Satu task = satu commit terarah **hanya bila owner mengizinkan commit**.
-5. **Larangan tanpa izin terpisah:** apps/libs/worker/app Nest baru; npm dependency; bump versi; mutasi DB; restart/deploy/cron/canary; reset/stash; push. Jangan membuat data test untuk eksplorasi.
-6. **Selesai task:** `[x]` + tanggal di file ini, entri `docs/M13_CHANGELOG.md`. Empat status: **implementasi lokal**, **verifikasi lokal** (sebut tsc/build/test/UAT), **deployment**, **dampak terukur**. Docs-only = konsistensi/link/diff, tanpa build. Task uang: `npm run test:unit` backend + gate M04.
-7. **DB:** UAT postgres **5433** `kost48_v3_pro`. Reset/reseed = mutasi, bukan orientasi. Identitas DB produksi = M19, bukan asumsi.
+1. **Pilih pekerjaan:** prompt owner yang aktif, lalu satu task terbuka dari [antrean](#antrean-prioritas-aktif) yang prasyarat dan izinnya terpenuhi. Jangan mengulang pekerjaan selesai tanpa perubahan relevan.
+2. **Baca sesuai task:** satu peta/domain relevan → target dan dependensi langsung. M01 hanya bila orientasi bisnis diperlukan; EF → M19 §9, AO → M14. Riwayat dibuka hanya untuk menjawab pertanyaan bukti tertentu.
+3. **Tutup dengan bukti:** perbarui status + tanggal dan tautan M13/audit; pisahkan implementasi lokal, verifikasi lokal, deployment, dan dampak terukur. Gate uang tetap `npm run test:unit` backend + gate M04; docs-only cukup inspeksi isi/tautan/diff.
 
 | Marker | Arti |
 |--------|------|
@@ -34,18 +30,24 @@ Protokol tetap untuk AI mana pun. Kerjakan urut; jangan lompat.
 <a id="antrean-prioritas-aktif"></a>
 <a id="antrian-eksekusi-aktif"></a>
 
-### 🎯 Antrean Prioritas Aktif (2026-09-20)
+### 🎯 Antrean Prioritas Aktif (2026-09-22)
 
-| # | Task | Status | Prasyarat untuk mulai |
-|---|------|--------|----------------------|
-| 1 | Onboarding 13 hunian + verifikasi KTP | 🧑 **Owner manual** | Data owner: bulan masuk, meter kWh, deposit |
-| 2 | Opening balance produksi | 🧑 **Owner manual** | Angka kas + bank per cutover |
-| 3 | Cron AutoOps di cPanel | 🧑 **Owner manual** | Login cPanel, `AUTO_OPS_CRON_TOKEN` ada |
-| 4 | Ganti password OWNER + PIN owner | 🧑 **Owner manual** | Login OWNER, cPanel env |
-| 5 | Audit modul 2 (register di manifest dulu) | 🤖 **AI** | Wrapper `verify-module.mjs` siap |
-| 6 | Deploy commit lokal ke produksi | 🤖🧑 **AI + Owner** | Akses server, `npm run make-deploy` |
-| 7 | Uji 2 jalur wrapper (`verify-module.mjs`) | 🤖 **AI** | File test kosong / rename node_modules |
-| 8 | Tata ulang penomoran (Opsi C — pindah 4 file `docs/` ke subfolder: GO_LIVE, CHECKLIST_AUDIT, AUDIT_UIUX, FORM_GO_LIVE) | 🤖 **AI** | Sesi fresh, ~30 menit |
+**Task prompt aktif — DOC-GOV-20260922:** perbaikan inkonsistensi dokumentasi dan persiapan [rancangan penataan total](plans/DOC-GOV-20260922.md). Perbaikan terbatas dibukukan di M13; **Tahap 1 (indeks dokumentasi + penyelarasan workflow) disetujui owner 22 Sep dan sudah diterapkan** — [indeks dokumentasi](README.md) dibuat sehingga rujukan AGENTS §3/§4 tidak lagi menembus file yang belum ada, dan AGENTS/GUIDE/QUICKREF/AI_MASTER/M13 diselaraskan. Tahap 2–4 (antrean/riwayat, domain, review akhir) belum dijalankan dan tetap menunggu urutan rancangan sesuai AGENTS §5. Ini tidak menutup gate aplikasi atau mengizinkan pekerjaan server.
+
+**Arah produk terbaru:** [keputusan owner 22 Sep](M02_KEPUTUSAN_OWNER.md#keputusan-penyederhanaan-aplikasi--22-september-2026) mendahulukan penyederhanaan OWNER/ADMIN pada operasional penghuni dan keuangan. Pengembangan IoT ditunda; gate EF/A/AO dan keuangan tetap. Daftar sisa pekerjaan berikut dipertahankan, tetapi audit tooling tidak otomatis mendahului flow bisnis utama.
+
+**FLOW-CORE-01 — DRAFT:** petakan perjalanan penghuni → tagihan → verifikasi pembayaran → perpanjangan/checkout, beserta pengeluaran dan ringkasan bisnis. Acceptance rancangan: tiap keputusan memiliki aktor, prasyarat, efek pada uang/status/proses lain, bukti hasil, dan jalur koreksi; usulan dashboard menjawab apa yang harus dikerjakan serta asal angka. [Rancangan flow](plans/DOC-GOV-20260922.md#11-arah-produk-dan-flow-utama) belum merupakan bukti perilaku source atau izin perubahan keuangan. Landasan teori telah diklarifikasi: IB Diploma Business Management; [pemetaan awal](plans/DOC-GOV-20260922.md#12-landasan-ib-diploma-business-management) tetap memerlukan bukti data dan kontrak sebelum implementasi.
+
+| # | Task | Penanggung jawab / kesiapan | Prasyarat dan bukti penutupan |
+|---|------|-----------------------------|------------------------------|
+| 1 | Onboarding 13 hunian + verifikasi KTP | Owner / menunggu data | Bulan masuk, meter kWh, deposit; penutupan mengikuti gate Fase A, bukan hanya data terkumpul |
+| 2 | Opening balance produksi | Owner / menunggu angka cutover | Kas/bank per cutover; bukti rekonsiliasi sesuai M04 sebelum ditutup |
+| 3 | Cron AutoOps di cPanel | Owner / menunggu pelaksanaan dan bukti | Target, izin, konfigurasi cron, dan bukti eksekusi sesuai M20; keberadaan token saja belum cukup |
+| 4 | Ganti password OWNER + PIN owner | Owner / belum ada bukti penutupan di antrean | Bukti perubahan tanpa nilai secret; rotasi DB/JWT pada M13 20 Sep tidak membuktikan password OWNER/PIN selesai |
+| 5 | Audit modul kedua | AI / ditunda di belakang pemetaan flow utama | Pemilihan modul mengikuti gap FLOW-CORE-01; gunakan bukti audit yang masih sah. Pendaftaran manifest adalah perubahan tooling terpisah, bukan syarat audit dokumen |
+| 6 | Deploy commit lokal ke produksi | AI + Owner / perlu rencana rilis | Artefak/SHA dan diff rilis, bukti verifikasi, target, rollback, izin deploy; penutupan memakai bukti smoke dan identitas versi tersaji |
+| 7 | Uji dependency hilang dan jumlah test nol pada wrapper | AI / perlu rancangan uji terisolasi | Bukti hasil kedua jalur sesuai kontrak wrapper; usulan fixture terisolasi dalam rancangan, belum izin rename node_modules workspace |
+| 8 | Penataan struktur dokumentasi (termasuk empat file non-M) | AI / Tahap 1 selesai; tahap 2–4 menunggu urutan rancangan | Cakupan diperluas oleh prompt 22 Sep; mapping, kompatibilitas tautan, pelestarian isi, dan acceptance ada di rancangan DOC-GOV-20260922; [indeks dokumentasi](README.md) sudah dibuat pada Tahap 1 |
 
 **Sisa lama (referensi — belum selesai):** direkonstruksi dari git (`e96d032`); baris lama #1 sudah tercakup item 1–4 di atas.
 
@@ -59,6 +61,8 @@ Protokol tetap untuk AI mana pun. Kerjakan urut; jangan lompat.
 > Aturan prioritas: kerjakan task teratas yang prasyaratnya terpenuhi dan lingkupnya sudah diizinkan. Bila teratas BLOCKED, lanjutkan pekerjaan independen yang sudah diizinkan. Tabel ini tidak memberi izin baru.
 
 ## Status Kerja Aktif
+
+- [x] **DOC-GOV-20260922 TAHAP 1 (indeks dokumentasi + penyelarasan workflow) — 22 Sep 2026:** [docs/README.md](README.md) dibuat sebagai indeks berbasis kebutuhan (mulai task, domain, operasional, audit, riwayat) sehingga rujukan `AGENTS.md` §3/§4 tidak lagi menembus file yang belum ada; baris indeks di AGENTS §3 diperjelas; GUIDE mencatat Tahap 1 disetujui dan menautkan status task AGENTS §7 serta indeks; QUICKREF menautkan indeks; AI_MASTER memperbarui status task, baris peta file, catatan §7, dan log keputusan; M12 memperbarui task prompt aktif, kesiapan antrean #8, dan entri ini. **Implementasi lokal:** selesai (1 file baru + 6 file diselaraskan: AGENTS, GUIDE, QUICKREF, AI_MASTER, M12, M13). **Verifikasi lokal:** inspeksi isi/diff, `git diff --check`, pemeriksa tautan relatif (termasuk `docs/README.md`), cek anchor keluar/masuk, dan hitungan `[ ]`/`[x]` M12; rincian angka ada di entri M13 22 Sep dan laporan sesi. **Deployment:** tidak dilakukan. **Dampak runtime:** tidak diukur — docs-only, tanpa perubahan source, DB, atau server. Tahap 2–4 dan keputusan commit masih menunggu owner.
 
 - [x] **FIX-AUDIT-FE-003 (T1 — form booking tamu hanya lolos bila telepon DAN email diisi) — 18 Sep 2026:** payload booking publik tidak lagi dikirim dengan field opsional bernilai `""`. Penyusunan payload dipindah ke fungsi murni `buildBookingPayload()` di `frontend/src/pages/bookings/guestBookingUtils.ts` (email hanya disertakan bila berisi; honeypot `website` tetap `""`), aturan klien disamakan dengan kontrak backend — **telepon wajib, email opsional** — dan label `GuestBookingForm.tsx` diperbaiki ("Telepon *" / "Email (opsional)"). Dasar bukti: `CreatePublicBookingDto.phone` wajib + `public-bookings.service.ts:73–80` menolak nomor kosong, sedangkan `@IsOptional() @IsEmail()` **tidak** melewati `""`. **Implementasi lokal:** selesai. **Verifikasi lokal:** `npx tsc -b` exit 0 · `vitest` target `guestBookingValidation` + `guestBookingPayload` **15/15 lulus** · suite FE penuh **34 file/161 test lulus** (exit 0) · `npm run build` exit 0 (build `FBxovSZhHngz`, PWA verify passed) · skrip `.audit-runtime/audit-fe003-dto-check.mjs` (payload nyata vs `class-validator` backend) 8 kasus + 2 kontrol → **SEMUA EKSPEKTASI TERPENUHI** (exit 0). **Deployment:** belum (produksi client `BZ-Vpsd9eLX1` 17 Sep). **Dampak terukur:** belum; kanal booking publik produksi masih OFF (`PUBLIC_ONLINE_BOOKING_ENABLED=false`).
 - [x] **FIX-AUDIT-FE-003 (T2 — booking portal TENANT tak dapat di-approve/ditolak) — 18 Sep 2026:** predikat review disatukan lewat helper baru `backend/src/modules/tenant-bookings/booking-source.helper.ts` (`isReviewableBookingSource` = `WEBSITE` ∪ `PORTAL`) dan dipakai di `approveBooking` (`tenant-bookings.service.ts:250`), `rejectBooking` (`:529`), serta riwayat booking tenant `findMine` (`:863`, fragmen dipakai ulang di `:914` dan `:927`). Booking yang dibuat tenant dari portal (`LeadSource.PORTAL`) tidak lagi buntu 409, dan stay batal ber-sumber portal kembali tampil di daftar "booking saya". Tanpa perubahan schema, uang/DP/deposit, jurnal, atau status Room. **Implementasi lokal:** selesai. **Verifikasi lokal:** `npx tsc --noEmit --incremental false` exit 0 · `npm run build` exit 0 · `npm run test:unit` **96/96 lulus** termasuk unit baru `backend/test/unit/booking-source.test.js`. **Deployment/dampak runtime:** belum; UAT approve booking portal nyata di DB 5433 memerlukan izin tersendiri. Sisa temuan FE-003 (6 SEDANG + 3 advisory, sebagian milik BE-047/BE-017) tetap terbuka.
@@ -199,7 +203,7 @@ Audit historis (bukan antrean): `docs/archieve/audit_fable/00_INDEX.md`, `docs/a
 ## Efisiensi Sesi & Bump Versi
 
 - Satu sesi ideal = 1 episode kerja yang masih berhubungan. Topik berganti total → sesi baru.
-- Navigasi token: M00/M01/M12 dulu, lalu grep simbol. Jangan baca seluruh arsip.
+- Navigasi konteks mengikuti AGENTS §6: antrean relevan, satu peta, lalu target/dependensi langsung. M01 dan riwayat hanya bila diperlukan.
 - Bump versi hanya atas permintaan eksplisit owner. Sumber: `frontend/src/config/version.ts`, `frontend/public/version.json`.
   - `PATCH` bugfix/polish · `MINOR` fitur terasa user · `MAJOR` breaking
 - Saat bump, update `APP_BUILD_DATE`. Build ID PWA dihasilkan saat `npm run build`.
@@ -265,7 +269,7 @@ Audit historis (bukan antrean): `docs/archieve/audit_fable/00_INDEX.md`, `docs/a
 
 ## Ledger Historis (checkbox fase)
 
-**Bukan urutan eksekusi.** Urutan kerja hanya [Antrean Prioritas Aktif](#antrean-prioritas-aktif) (anchor `#antrian-eksekusi-aktif` menunjuk ke tabel itu). Fase EF tetap diprioritaskan; Fase MA tetap ditunda.
+**Bukan urutan eksekusi.** Urutan kerja hanya [Antrean Prioritas Aktif](#antrean-prioritas-aktif) (anchor `#antrian-eksekusi-aktif` menunjuk ke tabel itu). Prioritas produk mengikuti keputusan owner 22 Sep di M02; gate EF tetap berlaku dan Fase MA tetap ditunda.
 
 Daftar berikut adalah ledger lintas fase bertanggal, berisi hasil selesai dan backlog. Urutan nomor lama bukan urutan eksekusi baru. Konflik status diselesaikan dari hasil penutupan yang lebih baru; jangan menjalankan ulang task berstatus selesai.
 

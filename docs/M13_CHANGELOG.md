@@ -1,5 +1,29 @@
 # KOST48 V5 — M13 Changelog
 
+## 2026-09-22 (docs) — DOC-GOV-20260922 Tahap 1: indeks dokumentasi + penyelarasan workflow
+
+- **Keputusan owner:** rancangan [DOC-GOV-20260922](plans/DOC-GOV-20260922.md) Tahap 1 disetujui; scope dokumentasi lokal, tanpa commit dan tanpa menyentuh source, DB, atau server.
+- **Implementasi lokal:** `docs/README.md` dibuat sebagai indeks berbasis kebutuhan (mulai task, domain, operasional, audit, riwayat) — menutup rujukan `docs/README.md` yang sebelumnya menembus file belum ada di `AGENTS.md` §3/§4. Diselaraskan: AGENTS §3 (fungsi indeks), GUIDE (status Tahap 1, tautan status task AGENTS §7 dan indeks), QUICKREF (tautan indeks), AI_MASTER (status task, baris peta file, catatan §7, log keputusan), M12 (task prompt aktif, kesiapan antrean #8, entri status kerja), dan entri M13 ini.
+- **Verifikasi lokal:** `git diff --check` exit 0 · pemeriksa tautan relatif atas 16 dokumen: **289 tautan, 0 rusak** (sebelum Tahap 1: 236 tautan, 2 rusak) · fragment dalam set: 44 diperiksa, 0 gagal resolve · rujukan masuk ber-fragment ke dokumen yang berubah diperiksa ulang dan tetap utuh · hitungan M12: `[ ]` 23→23, `[x]` 100→101, gate/perintah 6→6. Tanpa build/test/lint/typecheck/server (docs-only).
+- **Deployment:** tidak dilakukan. **Dampak runtime:** tidak diukur; source aplikasi, config permission, DB, dan secret tidak disentuh. Tahap 2–4 serta keputusan commit dan nasib artefak untracked masih menunggu owner.
+
+## 2026-09-22 (arah produk) — Penyederhanaan OWNER/ADMIN dan landasan IB
+
+- **Keputusan owner:** prioritas penyederhanaan aplikasi, fokus operasional penghuni/keuangan, pengguna utama OWNER/ADMIN, dashboard mudah dipahami, dan dampak keputusan bisnis/uang jelas. Pengembangan IoT ditunda. Owner mengklarifikasi IB sebagai IB Diploma Business Management Theory untuk landasan bisnis kost.
+- **Implementasi lokal:** keputusan dicatat di M02; arah produk diselaraskan pada AGENTS, pintu masuk M00/M01 dan antrean M12. Rancangan DOC-GOV-20260922 dilengkapi enam flow utama, usulan matriks dampak keputusan, dan pemetaan awal teori IB → keputusan/data/aplikasi/evaluasi. FLOW-CORE-01 tetap DRAFT; migrasi XL belum disetujui.
+- **Pemeriksaan domain:** pembacaan terarah M03/M04/M05/M14 menemukan narasi historis pelunasan/check-in yang perlu dibedakan dari override aktif, serta pentingnya membedakan DP/deposit, kas/piutang dan checkout/kesiapan kamar. Ini temuan dokumentasi, bukan bug runtime atau audit kode baru.
+- **Verifikasi:** inspeksi isi/diff; pemeriksaan seluruh tautan baru/berubah dan rancangan saat ini: 33 referensi lokal, termasuk 12 fragment, 0 kegagalan (exit 0); `git diff --check` exit 0. Gate uang, keputusan nominal, source, DB, dan server tidak diubah. Test/build tidak dijalankan karena docs-only. Sumber IB resmi dan batas akses PDF dicatat pada rancangan.
+- **Deployment/dampak runtime:** tidak dilakukan/tidak diukur. Perubahan UX, penyederhanaan seluruh docs, serta validasi implementasi teori bisnis masih pekerjaan berikutnya.
+
+## 2026-09-22 (docs) — Koreksi arahan AI dan rancangan penataan menyeluruh
+
+- **Permintaan owner:** alur manajemen pengembangan AI yang aman, penataan total dokumentasi, dan penyelesaian temuan audit docs sebelumnya.
+- **Implementasi lokal:** AI_MASTER diselaraskan dengan konsolidasi Stage 1–5 selesai; status wrapper/audit diperbaiki di QUICKREF dan indeks audit; GUIDE menandai roadmap lama sebagai usulan historis. M12 merujuk prosedur AGENTS, membaca sesuai kebutuhan, dan memisahkan kesiapan task dari penanggung jawab tanpa mengubah gate bisnis.
+- **Batas tooling terdokumentasi:** mode build wrapper belum membangun apa pun (exit 3); mode audit hanya memeriksa keberadaan path, bukan kesegaran/PASS perilaku. Tidak menjalankan wrapper atau test ulang.
+- **Rancangan:** [DOC-GOV-20260922](plans/DOC-GOV-20260922.md), status DRAFT. Workflow, batas keselamatan, mapping seri M00–M20/empat file non-M, migrasi anchor/riwayat, serta acceptance sudah ditulis. Migrasi XL dan perubahan aturan kanonik menunggu persetujuan rencana sesuai AGENTS §5.
+- **Verifikasi lokal:** inspeksi diff/isi; pemeriksaan tautan baru/berubah dan rancangan: 19 referensi lokal, termasuk 4 fragment anchor, 0 kegagalan (exit 0); `git diff --check` exit 0. Tanpa build/test/lint/typecheck/server. Source aplikasi, config permission, DB, secret, commit/push tidak disentuh.
+- **Deployment:** tidak dilakukan. **Dampak runtime:** tidak diukur. Temuan M12 terlalu besar belum ditutup; pengurangan ukuran masuk tahap migrasi setelah approval.
+
 ## 2026-09-20 (ops) — Rotasi secret produksi + cleanup disk
 
 > Sumber bukti operasional: laporan owner, 20 Sep 2026 malam; tidak diperiksa ulang ke server pada pembaruan dokumentasi ini.

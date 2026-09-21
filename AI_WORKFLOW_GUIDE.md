@@ -1,6 +1,10 @@
 Baca [AGENTS.md](AGENTS.md) sebagai sumber aturan kanonik agent.
 Untuk antrean dan gate tugas, ikuti [M12](docs/M12_CHECKLIST_CHANGELOG.md).
 
+Penataan menyeluruh yang diminta 22 Sep 2026 mengikuti [rancangan DOC-GOV-20260922](docs/plans/DOC-GOV-20260922.md); **Tahap 1 disetujui owner 22 Sep dan sudah diterapkan** (indeks dokumentasi dibuat, workflow diselaraskan), tahap 2–4 belum dijalankan. Roadmap di bawah adalah usulan historis 20 Sep; status pelaksanaannya dibaca dari M12/AI_MASTER, bukan dari nomor minggu.
+
+Alur task, syarat masuk/keluar (DoR/DoD), dan pemulihan mengikuti status [AGENTS §7](AGENTS.md#7-tahapan-kerja) dan izin [AGENTS §4](AGENTS.md#4-scopeizin); navigasi dokumen per kebutuhan ada di [docs/README.md](docs/README.md).
+
 ## 11. Roadmap Migrasi Workflow (30 hari)
 
 Roadmap adalah usulan urutan, **bukan izin implementasi**; prioritas EF/onboarding tetap mengikuti M12.
