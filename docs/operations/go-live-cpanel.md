@@ -138,6 +138,18 @@ Identitas deployment (menutup sebagian EF-00 §9.1 M19):
 - [x] **Pembersihan disk/inode** — selesai 20 Sep 2026: `~/kost48v3` (191 MB), `~/kost48surabaya` (24 MB), 5 tgz staging lama (~98 MB), 3 folder `client-old-*`, `sql/seed.sql` (854 KB) + `sql/seed_ORIGINAL.sql` (618 KB) dihapus. App root 257 → 129 MB; home dir ~1.1 GB → ~660 MB; `~/backups` dan `~/lui` dipertahankan. Inode sesudah cleanup belum diukur.
 - [ ] **PostgreSQL 9.6.22 sudah EOL** (Nov 2021) — tanyakan ke IDwebhost apakah tersedia versi lebih baru.
 
+### F.1 Verifikasi gerbang KTP produksi (tanpa menampilkan secret)
+
+**Latar:** `KTP_ACTIVATION_GATE_ENABLED` **default OFF**; runbook deploy menandainya WAJIB di produksi. Bila OFF, aktivasi kamar dapat lolos **tanpa KTP terverifikasi** (bertentangan dengan maksud UU PDP dan temuan D-17). Keputusan owner 23 Sep 2026: **ditunda dengan risiko diterima sementara**, wajib ditinjau sebelum onboarding penghuni nyata ([M02](../M02_KEPUTUSAN_OWNER.md)).
+
+**Prasyarat:** izin akses cPanel/lingkungan aplikasi. Jangan menampilkan nilai secret lain; nilai `true`/`false` pada flag ini bukan secret.
+
+1. **Periksa keberadaan & nilai** — cPanel → Environment Variables aplikasi Node.js (atau `.env` produksi, hanya baca). Catat: ada/tidak, `true`/`false`.
+2. **Bila belum ada atau `false`** — set `KTP_ACTIVATION_GATE_ENABLED=true`, lalu restart aplikasi mengikuti prosedur redeploy (§G/§J). Jangan mengubah env lain pada langkah ini.
+3. **Bukti** — tanggal, nama pemeriksa, status sebelum/sesudah, tanpa screenshot yang memuat secret.
+4. **Uji perilaku** — jalankan di UAT/DEV: aktivasi kamar atau approve booking untuk tenant tanpa KTP terverifikasi **harus DITOLAK**. **Jangan** membuat tenant/booking uji di produksi; bila uji hanya bisa di produksi, jangan lakukan dan tulis **BELUM TERBUKTI**.
+5. **Tindak lanjut** — catat hasil di [M12](../M12_CHECKLIST_CHANGELOG.md) antrean #1. Bila tetap ditunda, tegaskan risiko dan syarat peninjauan sebelum onboarding penghuni nyata.
+
 ## G. Catatan teknis untuk release berikutnya
 
 - **Tidak ada ledger migrasi** di DB produksi (`_prisma_migrations` tidak ada), jadi `prisma migrate deploy` tidak bisa dipakai. Patch skema harus eksplisit dan teruji.
