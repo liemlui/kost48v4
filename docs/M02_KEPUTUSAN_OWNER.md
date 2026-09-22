@@ -1,5 +1,21 @@
 # KOST48 V5 — Keputusan Owner
 
+## 2026-09-23 — Retro-approve kondisional migrasi dokumentasi DOC-GOV-20260922
+
+Owner menyetujui secara retroaktif pelaksanaan:
+
+- Tahap 2 (antrean + riwayat, S0–S6)
+- Tahap 3 S1 (operations batch)
+- Tahap 3 S2.a (M03), S2.a-fix, S2.a-fix-2
+- Tahap 3 S2.b1 (M04 Dossier 10/13 → domain/keuangan)
+
+Dasar: hasil konservatif (docs-only, tidak menyentuh kode/DB/server/deploy), invariant terjaga, tidak ada revert yang diperlukan.
+
+Syarat ke depan:
+- Setiap batch berikutnya (S2.b3, S2.b4, S2.c, S2.d, S3–S7, Tahap 4) WAJIB mendapat approval eksplisit owner SEBELUM eksekusi.
+- Approval dicatat di M02 + AI_MASTER sebelum eksekutor mulai.
+- Tanpa approval, eksekutor STOP; tidak mengasumsikan "lanjut otomatis per batch".
+
 ## Keputusan penyederhanaan aplikasi — 22 September 2026
 
 Sumber: jawaban langsung owner atas empat pertanyaan arah produk. Keputusan ini memperbarui prioritas produk; aturan nominal, jurnal, permission, dan gate yang sudah berlaku tidak berubah.

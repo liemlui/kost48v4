@@ -75,3 +75,4 @@ Log historis append-only ada di [docs/history/governance-log.md](docs/history/go
 |---|---|---|---|
 | 2026-09-22 | Owner meminta alur pengembangan AI yang aman, penataan total docs, dan perbaikan temuan audit dokumentasi | Kurangi status bertentangan, konteks berlebih, dan risiko perubahan | Koreksi status/indeks/petunjuk dan kesiapan task diterapkan; rancangan XL disiapkan, migrasi belum dijalankan |
 | 2026-09-22 | Owner menyetujui [rancangan DOC-GOV-20260922](docs/plans/DOC-GOV-20260922.md) Tahap 1 | Menutup rujukan `docs/README.md` yang belum ada dan memperjelas alur task/DoR/DoD | Tahap 1 diterapkan: `docs/README.md` dibuat; AGENTS/GUIDE/QUICKREF/AI_MASTER dan entri M12/M13 diselaraskan; tahap 2–4 pending; tanpa commit/push |
+| 2026-09-23 | Retro-approve kondisional DOC-GOV-20260922 Tahap 2 + S2.a/b. Wajib approval eksplisit per batch berikutnya. | — | — |
