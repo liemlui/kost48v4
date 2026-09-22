@@ -202,5 +202,6 @@ Angka 61 hanya mencakup S2; S3 menambah 42, tidak tercermin di versi awal.
 | Sub | Status | Bukti |
 |---|---|---|
 | S1.a | **DONE** — M11 §Appendix "Patch Tenant Aman" (2026-07-08) diarsipkan; M11 diganti stub 3 baris + tautan arsip | arsip `docs/history/m11-seed-master-data-appendix-2026-07-08.md` (29 baris, L544-572 apa adanya; `seed-master-data.sql` tetap 2 kemunculan); M11 572 -> 546 baris; `seed-master-data` di M11 = 0; union `[ ]`=23 `[x]`=101 gate=12 |
+| S1.b | **DONE** (`de2d0459`) — batch operations: 5 file baru di `docs/operations/` + 5 sumber jadi pointer; 4 catatan Update M08 → `history/changelog/2026-09.md` | **Disposisi revisi (final):** M08 Bagian 1+2+Appendix A → `deploy-go-live.md`; M11 §1a + M08 Bagian 3 + M11 §9 → `default-dev.md`; M20 §1-§14 → `produksi.md`; GO_LIVE A-J + M08 Appendix B → `go-live-cpanel.md`; FORM A-F → `form-go-live.md`. Konservasi 5 sumber + 5 operations: `[ ]`=78 `[x]`=22 gate=0. Invariant M12+9 history = 23/101/12. 117 tautan → 0 rusak. Stub: M08 37, M20 10, M11 512 baris |
 
-S1.b dan S1.c belum dijalankan.
+S1.c belum dijalankan.
