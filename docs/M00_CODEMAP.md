@@ -77,7 +77,7 @@ Baseline historis 23 Juli 2026 adalah `8627289`; HEAD sesi berikutnya harus dipe
 | wifi-sales | `wifi-sales/wifi-sales.service.ts` | Order/penjualan WiFi tenant |
 | additional-services | `additional-services/additional-services.service.ts` | Layanan tambahan + minat (ServiceInterest) |
 
-### Publik, Marketing & Growth — detail: `M07_PUBLIK_GROWTH.md`
+### Publik, Marketing & Growth — detail: `domain/publik.md`
 | Modul/Service | Path | Tanggung jawab |
 |---|---|---|
 | marketing | `marketing/{marketing-public-rooms,facility-images}.service.ts` | Katalog kamar publik + foto fasilitas |
@@ -89,7 +89,7 @@ Baseline historis 23 Juli 2026 adalah `8627289`; HEAD sesi berikutnya harus dipe
 | faqs | `faqs/faqs.service.ts` | FAQ (rule flow) |
 | announcements | `announcements/{announcements.service,announcements.controller}.ts` | Pengumuman, akses detail, gambar terproteksi, hard delete + cleanup notifikasi |
 
-### AI Owner/Admin — detail: `M09_AI_OWNER_ADMIN.md`
+### AI Owner/Admin — detail: `domain/ai.md`
 | Modul/Service | Path | Tanggung jawab |
 |---|---|---|
 | market-analysis (existing) | `market-analysis/{deepseek.client,market-analysis}.service.ts` | Integrasi DeepSeek awal: SWOT/PESTLE/CAC-CLV, fallback offline |

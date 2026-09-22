@@ -29,7 +29,7 @@
 | BE helper | `backend/src/modules/tenant-bookings/pricing.helper.ts` | Hitung DP 30% + biaya lain |
 | BE katalog | `backend/src/modules/marketing/marketing-public-rooms.service.ts` | Query kamar publik + foto |
 | BE FAQ | `backend/src/modules/faqs/faqs.service.ts` | FAQ publik |
-| Docs | `M05_SIKLUS_HUNI.md` · `M07_PUBLIK_GROWTH.md` | |
+| Docs | `M05_SIKLUS_HUNI.md` · `domain/publik.md` | |
 
 ### A2. TENANT (Penghuni — login role TENANT)
 **Apa yang dilihat/dilakukan:** MyStay (status kamar), invoice & bayar, meter reading, loyalty points, referral, permintaan renew/checkout, review staf, survei.
@@ -97,7 +97,7 @@
 | BE module | `backend/src/modules/settings/settings.service.ts` | OperationalSetting |
 | BE module | `backend/src/modules/accounting/` | Laporan + tutup buku |
 | BE module | `backend/src/modules/market-analysis/` | Analisa pasar AI |
-| Docs | `M04_KEUANGAN.md` · `M09_AI_OWNER_ADMIN.md` · `M02_KEPUTUSAN_OWNER.md` | Sumber kebenaran |
+| Docs | `M04_KEUANGAN.md` · `domain/ai.md` · `M02_KEPUTUSAN_OWNER.md` | Sumber kebenaran |
 
 ### A6. SYSTEM / IoT (Device — tanpa login, cron)
 **Apa yang dilihat/dilakukan:** ESP32-C3 kirim water flow reading dan backend polling Tuya KWH meter via cron untuk observability owner/admin/tenant. Deteksi kebocoran/anomali dan aksi otomatis belum diaktifkan; telemetri tidak boleh membuat invoice otomatis.
@@ -274,7 +274,7 @@ Quota listrik untuk pembacaan meter bisnis dihitung dari periode sewa lunas; DP 
 | Ubah logika pembayaran | ADMIN | `backend/src/modules/payment-submissions/` + `M04_KEUANGAN.md` |
 | Tambah laporan keuangan | OWNER | `backend/src/modules/accounting/` + `M04_KEUANGAN.md` |
 | Ubah logika tiket staf | STAFF | `backend/src/modules/tickets/` + `domain/operasional.md` |
-| Tambah tombol AI baru | OWNER | `backend/src/modules/owner-ai/` + `M09_AI_OWNER_ADMIN.md` |
+| Tambah tombol AI baru | OWNER | `backend/src/modules/owner-ai/` + `domain/ai.md` |
 | Ubah deposit/refund | ADMIN | `backend/src/modules/deposit-ledger/` + `M04_KEUANGAN.md` |
 | Tambah inventory | STAFF | `backend/src/modules/inventory-items/` + `domain/operasional.md` |
 | Ubah auto-ops/sweeper | SYSTEM | `backend/src/modules/auto-ops/` + `domain/operasional.md` § Auto-Ops |

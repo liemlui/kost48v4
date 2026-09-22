@@ -98,7 +98,7 @@ Sesuai analisa PDF, siklus tenant harus terbaca sebagai alur end-to-end: masuk k
 
 ### Update 2026-06-19 - Fase G AI untuk Siklus Huni
 
-AI dalam siklus huni hanya membantu Owner/Admin membaca data dan membuat draft. Detail: `docs/M09_AI_OWNER_ADMIN.md`.
+AI dalam siklus huni hanya membantu Owner/Admin membaca data dan membuat draft. Detail: `docs/domain/ai.md`.
 
 - **Payment review assistant:** AI boleh memberi rekomendasi APPROVE/REJECT/ASK_MORE_INFO untuk `PaymentSubmission`, tetapi approval final tetap tombol Owner/Admin dan guard no-partial backend tetap menang.
 - **KTP OCR validator:** foto KTP tidak dikirim ke DeepSeek. OCR gambar tetap lokal; AI hanya boleh menerima teks OCR untuk menormalkan nama/NIK dan memberi warning. `verifyKtp` tetap Owner-only manual.

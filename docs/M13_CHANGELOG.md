@@ -16,6 +16,16 @@
 ---
 
 
+## 2026-09-23 (docs) — B2 Tahap 3: pemisahan M07 (publik) dan M09 (AI) ke domain/publik.md + domain/ai.md
+
+- **Pemindahan mekanis (isi tidak diubah):** **seluruh isi** `M07_PUBLIK_GROWTH.md` (694 baris) → [`domain/publik.md`](domain/publik.md) (682 baris) dan **seluruh isi** `M09_AI_OWNER_ADMIN.md` (787 baris) → [`domain/ai.md`](domain/ai.md) (786 baris) — satu tujuan per batch sesuai handoff owner, sehingga **tidak ada pemisahan riwayat/audit pada batch ini**. `M07_PUBLIK_GROWTH.md` 694 → 30 baris dan `M09_AI_OWNER_ADMIN.md` 787 → 19 baris (pointer dengan tabel lokasi kanonik).
+- **Konservasi (bukti, bukan klaim):** 1.117 baris non-kosong sumber; multiset per tujuan → 0 hilang (PUB 494, AI 604, pointer M07 12, pointer M09 5) dan tiap blok utuh berurutan (pemeriksa blok 2/2, 4/4, 1/1, 2/2). Dua baris header sumber (kalimat "Dokumen ini menyimpan spesifikasi domain dan bukti bertanggal") **diganti** pada kedua pointer karena tidak lagi akurat — diumumkan, sisa kalimatnya dipertahankan.
+- **Batas yang disengaja:** bagian bertanggal tetap berada di file domain dan **belum dipisah** — `## Update 2026-06/07`, `## Audit UI/UX Full — 2026-06-19`, `## Audit 360° P7 Marketing & Growth (Jul 2026)`, dua deep audit 29 Jul 2026 (publik), serta status Fase G/J/K dan `## Audit 360° P6 AI Flow (Jul 2026)` (AI). Pemisahan ke `docs/AUDIT.md`/`docs/arsip/` menunggu tahap konsolidasi audit/arsip; hal ini dicatat di header masing-masing file domain.
+- **Rujukan masuk diperbaiki (9 penggantian, 7 file):** `M00_CODEMAP.md` (2), `M10_PETA_SCOPE.md` (3), dan 1 di masing-masing `domain/hunian.md`, `domain/keuangan.md`, `domain/kontrak.md`, `domain/operasional.md`. **Sengaja tidak disentuh:** `M02_KEPUTUSAN_OWNER.md` (register keputusan owner — menunggu B7) dan `M01_MASTER.md` + indeks `docs/README.md` (menunggu B5/B10); tujuannya masih resolve ke pointer.
+- **Known exception (fidelity, bukan defect):** 3 baris `**Auditor:**`/`**Metode:**` di `domain/publik.md` mempertahankan hard break Markdown apa adanya dari M07 (L578/L579/L643), sehingga `git diff --cached --check` melaporkan 3 trailing whitespace — pola yang sama dengan mapping §7.2 butir 10 (total lintas B1+B2 = 10 baris). Tidak dihapus agar render tidak berubah; temuan lain 0.
+- **Verifikasi lokal:** invariant `[ ]` = 23, `[x]` = 101, gate domain = 12 (delta 0 vs HEAD); tautan diperiksa → 0 rusak baru; `git diff --cached --check`: hanya 3 known exception hard break di atas (selain itu bersih); UTF-8 tanpa BOM; tanpa blank line di EOF. Tanpa npm/build/test/lint/server.
+- **Deployment:** tidak dilakukan. **Dampak runtime:** tidak diukur. **Gap lama tidak berubah:** P1-04..P1-09 UNKNOWN.
+
 ## 2026-09-23 (docs) — keputusan owner pasca-B1: label batch B1–B11 + dedup kuota D-01
 
 - **Lima keputusan owner 23 Sep 2026 (review B1), dicatat di [STATUS §6](STATUS.md):** (1) lanjut batch B2 (M07 + M09); (2) penomoran resmi penataan = **B1–B11**, label S2.d/S3–S7 superseded; (3) quota utilitas **kanonik di `domain/keuangan.md`**, dua salinan lain jadi rujukan; (4) 4 tautan rusak pra-eksisting ditangani di B11; (5) isi IoT Bagian 6 tetap di `domain/operasional.md` sampai B8.

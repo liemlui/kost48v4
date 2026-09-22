@@ -55,7 +55,7 @@ Sesuai analisa PDF dan temuan owner 2026-06-16, invoice tidak boleh hanya terbac
 
 ## Fase G AI Finance Analyst
 
-AI finance hanya boleh menjadi analis dan pembuat draft keputusan Owner/Admin. Detail implementasi ada di `docs/M09_AI_OWNER_ADMIN.md`.
+AI finance hanya boleh menjadi analis dan pembuat draft keputusan Owner/Admin. Detail implementasi ada di `docs/domain/ai.md`.
 
 - **Manual only:** tombol seperti "Analisa Finance dengan AI" tidak boleh terpanggil otomatis saat halaman finance dibuka.
 - **Owner-only untuk analisa mendalam:** AI membaca snapshot trial balance, P&L, cashflow, ratios, readiness, period close, dan deposit reconciliation; output berupa temuan, risiko, dan rekomendasi.
