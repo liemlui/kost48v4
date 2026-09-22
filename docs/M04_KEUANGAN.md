@@ -176,5 +176,7 @@ Aturan aktif: [Kebijakan Akuntansi & Pelaporan](domain/keuangan.md#kebijakan-aku
 | **P1-02** | Deposit ledger **best-effort** (logger.warn) — deposit diterima tp tak tercatat | Jadikan **blocking** |
 | **P1-03** | Accounting posting di tx **terpisah** dari business tx — window inconsistency | Unify tx / minimal advisory lock |
 
+> **Status verifikasi 23 Sep 2026 (statis, bukan runtime):** `P1-01`, `P1-02`, dan `P1-03` tidak lagi cocok dengan kode saat ini — posting jurnal dan ledger deposit di-`await` di dalam transaksi bisnis (bukan best-effort) dan error diteruskan ke pemanggil. Bukti: [verifikasi P1 uang](audit/p1-uang-status-2026-09-23.md). Angka "3 HIGH" pada header di atas tetap sebagai catatan historis Jul 2026. `P1-04..P1-09` masih UNKNOWN.
+
 ### Temuan MEDIUM
 P1-04 deposit ledger sourceId dedupe · P1-05 EXPIRED→REJECTED · P1-06 reversal partial gagal · P1-07 pre-check di luar tx. LOW: P1-08 `paidAt` fallback · P1-09 note not verified.

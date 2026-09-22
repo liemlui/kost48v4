@@ -16,6 +16,16 @@
 ---
 
 
+## 2026-09-23 (audit) — verifikasi statis status temuan P1-01..P1-03 (Audit 360° uang)
+
+- **Tujuan:** memastikan apakah tiga temuan berlabel "P0 sebelum go-live" pada `M04 §Audit 360° Flow Uang (Jul 2026)` masih berlaku, karena produksi sudah LIVE sejak 13 Sep.
+- **Hasil (statis):** `P1-01` (jurnal best-effort di `approveSubmission`), `P1-02` (deposit ledger best-effort), dan `P1-03` (posting di transaksi terpisah) **tidak lagi cocok dengan kode saat ini** — posting dan ledger di-`await` di dalam transaksi bisnis, `postBalancedJournalTx` melempar error pada jurnal tak balance, dan `catch` terluar rethrow. Bukti: [p1-uang-status-2026-09-23.md](audit/p1-uang-status-2026-09-23.md).
+- **Temuan residual:** `journalPending` tinggal komentar warisan + metode retry (`payment-submissions.service.ts:1100-1194`), belum diverifikasi apakah endpoint-nya masih terekspos; `recordDepositReceivedTx` mengembalikan `null` diam-diam saat `amount <= 0` atau stay tidak ditemukan (`deposit-ledger.service.ts:161`, `:176`).
+- **Tidak diperiksa:** `P1-04..P1-09` (UNKNOWN), reversal, sweeper lain, dan posting expense.
+- **Batas bukti:** verifikasi statis source saja; **tidak ada** test/build/server/runtime yang dijalankan, sehingga ini bukan bukti dampak runtime dan tidak menggantikan gate uang.
+- **File tersentuh:** `docs/audit/p1-uang-status-2026-09-23.md` (baru), `docs/audit/README.md`, `docs/M04_KEUANGAN.md` (catatan status bertanggal pada blok audit; angka historis tidak diubah). Antrean M12 tidak berubah karena tidak ada task antrean yang ditutup.
+- **Deployment:** tidak dilakukan. **Dampak runtime:** tidak diukur.
+
 ## 2026-09-23 (docs) — DOC-GOV-FIX-02: catat keputusan owner (cakupan izin, prioritas, KTP, cakupan flow)
 
 - **Keputusan owner (4):** (1) **PRIORITAS-DOC** — hasil yang didahulukan 30 hari adalah menyelesaikan migrasi DOC-GOV-20260922 (sisa Tahap 3 + Tahap 4); (2) **IZIN-CAKUPAN** — retro-approve kondisional 23 Sep mencakup Tahap 2 (S0–S6), S1, S2.a (+fix), S2.b1, S2.b2.a, S2.b2.b; batch S2.b3/S2.b4/S2.c/S2.d/S3–S7/Tahap 4 tetap wajib approval per batch; (3) **KTP-GATE-TUNDA** — `KTP_ACTIVATION_GATE_ENABLED` produksi ditunda dengan risiko aktivasi tanpa KTP terverifikasi diterima sementara, wajib ditinjau sebelum onboarding penghuni nyata; (4) **FLOW-CORE-CAKUPAN** — keenam flow utama tetap dalam cakupan, tanpa urutan pengerjaan yang disetujui.

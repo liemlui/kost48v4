@@ -11,3 +11,4 @@ Hasil Tahap 2 DOC-GOV-20260922 (migrasi riwayat dokumen; **bukan** audit modul b
 | [frontend-auth](frontend-auth.md) | Diperiksa sebagian, 20 Sep 2026; baseline `d5d04cb`, test login dengan mock; kesegaran terhadap perubahan berikutnya perlu diperiksa |
 | frontend-context | Belum ada dokumen modul; cakupan `frontend/src/context` sudah diaudit sebagai **FE-057** (M12, 17 Sep) dan `frontend/src/hooks` sebagai **FE-059**; pemilihan modul berikutnya mengikuti M12 #5 |
 | auth-backend | Belum ada dokumen modul; catatan terkait ada pada temuan FE-002 (sesi/pertukaran token) di M12 |
+| Uang — temuan P1 Audit 360° (Jul 2026) | [p1-uang-status-2026-09-23](p1-uang-status-2026-09-23.md) — verifikasi **statis** 23 Sep 2026: P1-01/P1-02/P1-03 indikasi diperbaiki; P1-04..P1-09 UNKNOWN |
