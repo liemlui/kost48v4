@@ -16,6 +16,24 @@
 ---
 
 
+## 2026-09-23 (docs) — DOC-GOV-FIX-02: catat keputusan owner (cakupan izin, prioritas, KTP, cakupan flow)
+
+- **Keputusan owner (4):** (1) **PRIORITAS-DOC** — hasil yang didahulukan 30 hari adalah menyelesaikan migrasi DOC-GOV-20260922 (sisa Tahap 3 + Tahap 4); (2) **IZIN-CAKUPAN** — retro-approve kondisional 23 Sep mencakup Tahap 2 (S0–S6), S1, S2.a (+fix), S2.b1, S2.b2.a, S2.b2.b; batch S2.b3/S2.b4/S2.c/S2.d/S3–S7/Tahap 4 tetap wajib approval per batch; (3) **KTP-GATE-TUNDA** — `KTP_ACTIVATION_GATE_ENABLED` produksi ditunda dengan risiko aktivasi tanpa KTP terverifikasi diterima sementara, wajib ditinjau sebelum onboarding penghuni nyata; (4) **FLOW-CORE-CAKUPAN** — keenam flow utama tetap dalam cakupan, tanpa urutan pengerjaan yang disetujui.
+- **Implementasi lokal (docs-only):** `docs/M02_KEPUTUSAN_OWNER.md` (koreksi label cakupan retro-approve + seksi keputusan lanjutan + pointer status seksi 22 Sep), `docs/M12_CHECKLIST_CHANGELOG.md` (sumbu B, baris antrean #1 dan #8), `AI_MASTER.md` (izin/status, baris tabel M12, log keputusan), `docs/plans/DOC-GOV-20260922.md` (header status izin, izin Tahap 3 pada §0), `docs/README.md` (status Tahap 3 pada §6), `docs/history/DOC-GOV-20260922-mapping.md` (§7.4 penutup).
+- **Temuan:** label batch S2.b3, S2.b4, S2.c, S2.d belum punya definisi/scope tertulis di rancangan maupun mapping — scope usulan wajib disusun sebelum permintaan approval batch berikutnya. Definisi invariant `gate = 12` juga belum tertulis; hitungan yang dapat direproduksi untuk pola `**Gate:**`: M12 = 24, `docs/history/**` = 28.
+- **Verifikasi lokal (cwd root repo):** inspeksi diff terarah dan `git diff --check`; invariant M12 `[ ]` = 23 serta M12 + seluruh riwayat `[x]` = 101 dihitung ulang. Tanpa npm/npx, build, test, lint, typecheck, wrapper, atau server.
+- **Deployment:** tidak dilakukan. **Dampak runtime:** tidak diukur; source aplikasi, schema, DB, server, dan secret tidak disentuh.
+
+## 2026-09-23 (docs) — DOC-GOV-FIX-01: sinkronisasi status pelaksanaan vs izin migrasi
+
+- **Masalah:** empat pernyataan status masih menyebut Tahap 2–4 "belum dijalankan/menunggu urutan rancangan" (M12 paragraf task aktif + tabel antrean #8; AI_MASTER ringkasan task + baris tabel M12; mapping §7.4 penutup; rancangan header + §7), padahal Tahap 2 (S0–S6) dan sebagian Tahap 3 (S1, S2.a, S2.b1, S2.b2.a, S2.b2.b) sudah di-commit (HEAD awal `1d66fd34`; selama task ini masuk `5207061b` retro-approve + `055e646b` koreksi status mapping, HEAD verifikasi `055e646b`).
+- **Dua sumbu dipisah:** pelaksanaan (bukti commit + mapping + M13) dan izin/approval (otoritas owner, [M02](M02_KEPUTUSAN_OWNER.md) 2026-09-23). Persetujuan penuh rancangan XL, cakupan S2.b2.a/S2.b2.b, dan batch lanjutan ditulis "belum tercatat — menunggu keputusan owner (UNKNOWN)"; tidak ada approval yang diklaim, ditambahkan, atau dicabut.
+- **Implementasi lokal (docs-only):** `docs/M12_CHECKLIST_CHANGELOG.md` (paragraf task aktif + baris antrean #8), `AI_MASTER.md` (tanggal sinkronisasi, ringkasan task, baris tabel M12, timestamp baris dashboard), `docs/history/DOC-GOV-20260922-mapping.md` (ringkasan penutup §7.4: sumbu izin + status UNKNOWN Audit 360°, melengkapi koreksi `055e646b` yang sudah ada), `docs/plans/DOC-GOV-20260922.md` (§0 status per tahap + catatan checkpoint §7), dan entri M13 ini. `docs/M02_KEPUTUSAN_OWNER.md` tidak diubah.
+- **Audit 360° M04:** tidak dicentang — section `## Audit 360° Flow Uang (Jul 2026)` masih ada di `docs/M04_KEUANGAN.md` dan tidak ditemukan di `history/changelog/2026-06.md`/`2026-07.md`; status **UNKNOWN**, bukan DONE.
+- **Verifikasi lokal (cwd root repo):** `git status --porcelain=v1` kosong sebelum edit; `git diff --check` exit 0; invariant dihitung ulang = M12 `[ ]` 23, M12 + riwayat `[x]` 101, gate domain (M12 + 7 file riwayat) 12; 0 tautan relatif rusak pada baris yang diubah (inspeksi manual; tidak ada anchor lama yang diubah). Tanpa npm/npx, build, test, lint, typecheck, wrapper, atau server.
+- **Batasan:** pemeriksa tautan otomatis tidak tersedia di repo ini (hanya `scripts/verify-module.mjs` yang wajib tidak dijalankan pada task docs), sehingga pemeriksaan tautan bersifat manual dan terbatas pada baris yang diubah. Kontradiksi status lain di luar scope dilaporkan, tidak diperbaiki: `docs/README.md` baris 87 dan `AI_MASTER.md` baris 29.
+- **Deployment:** tidak dilakukan. **Dampak runtime:** tidak diukur; source aplikasi, schema, DB, server, dan secret tidak disentuh.
+
 ## 2026-09-22 (docs) — DOC-GOV-20260922 Tahap 3 S1: batch operations
 
 - **S1.a (`f8f9a589`):** M11 Appendix "Patch Tenant Aman" (seed-master-data, 2026-07-08) diarsipkan ke [docs/history/m11-seed-master-data-appendix-2026-07-08.md](history/m11-seed-master-data-appendix-2026-07-08.md); M11 diganti stub + tautan arsip.

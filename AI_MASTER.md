@@ -1,8 +1,8 @@
 # AI Master — KOST48
 
 Dashboard monitoring governance; bukan sumber aturan baru dan tidak menggantikan M12/M13.
-Status disinkronkan 22 September 2026. **Konsolidasi lama Stage 1–5 selesai** menurut M13 20 Sep; wrapper tersedia dan audit frontend-auth sudah dibuat sebagian.
-Task saat ini: DOC-GOV-20260922 — **Tahap 1 disetujui owner 22 Sep dan sudah diterapkan** (indeks [docs/README.md](docs/README.md) dibuat; AGENTS/GUIDE/QUICKREF/M12/M13 diselaraskan). Tahap 2–4 mengikuti [rancangan penataan total](docs/plans/DOC-GOV-20260922.md). Izin Stage 1 lama adalah riwayat, bukan pembatasan task baru.
+Status disinkronkan 23 September 2026 (DOC-GOV-FIX-01, DOC-GOV-FIX-02). **Konsolidasi lama Stage 1–5 selesai** menurut M13 20 Sep; wrapper tersedia dan audit frontend-auth sudah dibuat sebagian.
+Task saat ini: DOC-GOV-20260922 ([rancangan penataan total](docs/plans/DOC-GOV-20260922.md)). **Pelaksanaan (sumbu A):** Tahap 1 DONE — indeks [docs/README.md](docs/README.md) dibuat, AGENTS/GUIDE/QUICKREF/M12/M13 diselaraskan; Tahap 2 (S0–S6) DONE; Tahap 3 berjalan — S1, S2.a, S2.b1, S2.b2.a, S2.b2.b DONE, sisa S2.b3, S2.b4, S2.c, S2.d, S3–S7; Tahap 4 belum dijalankan. **Izin/approval (sumbu B, otoritas owner):** Tahap 1 disetujui owner 22 Sep; Tahap 2 (S0–S6) + S1 + S2.a (+fix) + S2.b1 + S2.b2.a + S2.b2.b retro-approve kondisional 23 Sep ([M02](docs/M02_KEPUTUSAN_OWNER.md)); prioritas owner 23 Sep = menyelesaikan migrasi dokumentasi; persetujuan penuh rancangan XL dan batch S2.b3, S2.b4, S2.c, S2.d, S3–S7, Tahap 4 belum tercatat — wajib approval per batch. Izin Stage 1 lama adalah riwayat, bukan pembatasan task baru.
 
 ## 1. Peta File Governance
 
@@ -20,10 +20,10 @@ Tanggal file lama tidak disimpulkan dari tanggal yang tertulis di dalam dokumenn
 | [AI_WORKFLOW_GUIDE.md](AI_WORKFLOW_GUIDE.md) | Pointer + lampiran roadmap/template | Roadmap lama diberi konteks; rancangan baru ditautkan | Pointer ke AGENTS/M12; §11–12 lampiran, bukan aturan kanonik | 2026-09-22 |
 | [docs/audit/README.md](docs/audit/README.md) | Indeks audit modul | Satu audit parsial frontend-auth tersedia; empat placeholder | Indeks turunan; audit-map sebagai peta, M12 sebagai antrean | 2026-09-22 |
 | [docs/README.md](docs/README.md) | Indeks dokumentasi berbasis kebutuhan | Dibuat 22 Sep (Tahap 1 DOC-GOV-20260922) | Titik masuk navigasi docs; turunan, bukan sumber aturan | 2026-09-22 |
-| [AI_MASTER.md](AI_MASTER.md) | Monitoring lintas-agent | Dashboard aktif; status disinkronkan | Dashboard, bukan canonical atau pengganti M12/M13 | 2026-09-22 |
+| [AI_MASTER.md](AI_MASTER.md) | Monitoring lintas-agent | Dashboard aktif; status disinkronkan | Dashboard, bukan canonical atau pengganti M12/M13 | 2026-09-23 |
 | [.github/copilot-instructions.md](.github/copilot-instructions.md) | Entry panduan Copilot | Pointer aktif — Stage 3 selesai | Pointer ke AGENTS/M12 dan dashboard AI_MASTER | 2026-09-20 |
 | [M00](docs/M00_CODEMAP.md) / [audit-map](docs/audit-map/) | Navigasi kode dan audit | Ada; dipertahankan, tidak diubah | Peta rujukan; bukan bukti audit otomatis PASS | UNKNOWN — belum diperiksa |
-| [M12](docs/M12_CHECKLIST_CHANGELOG.md) | Antrean dan gate tugas | Kesiapan task diperjelas; Tahap 1 DOC-GOV selesai; tahap 2–4 menunggu urutan rancangan | Otoritas antrean/gate di atas AGENTS | 2026-09-22 |
+| [M12](docs/M12_CHECKLIST_CHANGELOG.md) | Antrean dan gate tugas | Pelaksanaan: Tahap 1–2 DOC-GOV DONE, Tahap 3 berjalan, Tahap 4 belum dijalankan; izin: Tahap 2 (S0–S6) + S1 + S2.a (+fix) + S2.b1 + S2.b2.a + S2.b2.b retro-approve kondisional 23 Sep, batch lanjutan wajib approval per batch | Otoritas antrean/gate di atas AGENTS | 2026-09-23 |
 | [M13](docs/M13_CHANGELOG.md) | Riwayat bertanggal | Entri koreksi docs dan rancangan ditambahkan; entri lama tetap | Riwayat bukti, bukan antrean baru | 2026-09-22 |
 | [docs/history/](docs/history/) | Riwayat fase, changelog bulanan, log governance | Dibuat 22 Sep (Tahap 2 DOC-GOV) | Riwayat; bukan antrean atau sumber aturan | 2026-09-22 |
 | [mapping Tahap 2](docs/history/DOC-GOV-20260922-mapping.md) | Bukti perpindahan blok Tahap 2 | Dicatat per sub-langkah S0-S6 | Bukti migrasi; bukan spesifikasi baru | 2026-09-22 |
@@ -69,10 +69,11 @@ Aturan perubahan mengikuti [AGENTS §10](AGENTS.md#10-perubahan-governance). Sco
 
 ## 8. Log Keputusan
 
-Log historis append-only ada di [docs/history/governance-log.md](docs/history/governance-log.md); dashboard menyimpan dua keputusan terbaru. Log tidak memberi izin baru.
+Log historis append-only ada di [docs/history/governance-log.md](docs/history/governance-log.md); dashboard menyimpan keputusan terbaru (riwayat penuh di log historis). Log tidak memberi izin baru.
 
 | Tanggal | Keputusan owner | Alasan | Dampak / status penerapan |
 |---|---|---|---|
 | 2026-09-22 | Owner meminta alur pengembangan AI yang aman, penataan total docs, dan perbaikan temuan audit dokumentasi | Kurangi status bertentangan, konteks berlebih, dan risiko perubahan | Koreksi status/indeks/petunjuk dan kesiapan task diterapkan; rancangan XL disiapkan, migrasi belum dijalankan |
 | 2026-09-22 | Owner menyetujui [rancangan DOC-GOV-20260922](docs/plans/DOC-GOV-20260922.md) Tahap 1 | Menutup rujukan `docs/README.md` yang belum ada dan memperjelas alur task/DoR/DoD | Tahap 1 diterapkan: `docs/README.md` dibuat; AGENTS/GUIDE/QUICKREF/AI_MASTER dan entri M12/M13 diselaraskan; tahap 2–4 pending; tanpa commit/push |
 | 2026-09-23 | Retro-approve kondisional DOC-GOV-20260922 Tahap 2 + S2.a/b. Wajib approval eksplisit per batch berikutnya. | — | — |
+| 2026-09-23 | Prioritas 30 hari: menyelesaikan migrasi DOC-GOV; cakupan retro-approve diklarifikasi (Tahap 2 S0–S6, S1, S2.a + fix, S2.b1, S2.b2.a, S2.b2.b); gerbang KTP produksi ditunda dengan risiko diterima; keenam flow utama tetap dalam cakupan FLOW-CORE-01 | Menutup ambiguitas cakupan izin dan menetapkan urutan kerja | Dicatat di [M02](docs/M02_KEPUTUSAN_OWNER.md); status disinkronkan di M12/plans/AI_MASTER; approval per batch tetap wajib |

@@ -84,5 +84,5 @@ Hasil audit lama berlaku pada lingkup/waktu yang disebut; bukan PASS untuk perub
 ## 6. Batas indeks ini
 
 - Indeks tidak menggantikan M12 (antrean/gate), M02 (keputusan bisnis), atau AGENTS (aturan); urutan kerja tetap dari M12.
-- Folder `docs/product/`, `docs/history/`, dan `docs/plans/` berisi artefak baru 22 Sep 2026; **Tahap 2 (S0-S6) selesai** dan memindahkan riwayat M12/M13 serta log AI_MASTER ke `docs/history/` tanpa mengubah isi. Tahap 3-4 belum dijalankan.
+- Folder `docs/product/`, `docs/history/`, dan `docs/plans/` berisi artefak baru 22 Sep 2026; **Tahap 2 (S0-S6) selesai** dan memindahkan riwayat M12/M13 serta log AI_MASTER ke `docs/history/` tanpa mengubah isi. **Tahap 3 berjalan** — S1, S2.a (+fix), S2.b1, S2.b2.a, S2.b2.b DONE; sisa S2.b3, S2.b4, S2.c, S2.d, S3–S7; Tahap 4 belum dijalankan. Status lengkap: [M12](M12_CHECKLIST_CHANGELOG.md) dan [§0 rancangan](plans/DOC-GOV-20260922.md#0-status-pelaksanaan-per-tahap).
 - Anchor lama M12/M13 dipertahankan sebagai pointer setelah migrasi Tahap 2; bila ada tautan tidak cocok, laporkan ke M12, jangan perbaiki di luar scope.

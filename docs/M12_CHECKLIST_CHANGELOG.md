@@ -32,7 +32,12 @@ Aturan kerja, izin, batas baca, dan pemeriksaan repo mengikuti [AGENTS](../AGENT
 
 ### 🎯 Antrean Prioritas Aktif (2026-09-22)
 
-**Task prompt aktif — DOC-GOV-20260922:** perbaikan inkonsistensi dokumentasi dan persiapan [rancangan penataan total](plans/DOC-GOV-20260922.md). Perbaikan terbatas dibukukan di M13; **Tahap 1 (indeks dokumentasi + penyelarasan workflow) disetujui owner 22 Sep dan sudah diterapkan** — [indeks dokumentasi](README.md) dibuat sehingga rujukan AGENTS §3/§4 tidak lagi menembus file yang belum ada, dan AGENTS/GUIDE/QUICKREF/AI_MASTER/M13 diselaraskan. Tahap 2–4 (antrean/riwayat, domain, review akhir) belum dijalankan dan tetap menunggu urutan rancangan sesuai AGENTS §5. Ini tidak menutup gate aplikasi atau mengizinkan pekerjaan server.
+**Task prompt aktif — DOC-GOV-20260922:** perbaikan inkonsistensi dokumentasi dan persiapan [rancangan penataan total](plans/DOC-GOV-20260922.md). Perbaikan terbatas dibukukan di M13; **Tahap 1 (indeks dokumentasi + penyelarasan workflow) disetujui owner 22 Sep dan sudah diterapkan** — [indeks dokumentasi](README.md) dibuat sehingga rujukan AGENTS §3/§4 tidak lagi menembus file yang belum ada, dan AGENTS/GUIDE/QUICKREF/AI_MASTER/M13 diselaraskan. Rincian status terbaru (disinkronkan pada DOC-GOV-FIX-01, 23 Sep 2026; dua sumbu dipisah):
+
+- **Sumbu A — pelaksanaan (bukti commit + mapping + M13):** Tahap 1 DONE; Tahap 2 (antrean + riwayat, S0–S6) DONE; Tahap 3 berjalan — S1 `f8f9a589`/`de2d0459`, S2.a `3cca562f` (+ S2.a-fix `c3556bf3`, S2.a-fix-2 `c38fa833`), S2.b1 `f965a6dd`, S2.b2.a `cb1616d7`, S2.b2.b `1d66fd34`; sisa batch S2.b3, S2.b4, S2.c, S2.d, S3–S7; Tahap 4 (review akhir) belum dijalankan. Rincian per sub-langkah: [mapping Tahap 3](history/DOC-GOV-20260922-mapping.md) dan [M13](M13_CHANGELOG.md). Audit 360° M04 = UNKNOWN (belum terbukti selesai).
+- **Sumbu B — izin/approval (otoritas owner; tidak disimpulkan eksekutor):** Tahap 1 disetujui owner 22 Sep; Tahap 2 (S0–S6) + S1 + S2.a (+fix) + S2.b1 + S2.b2.a + S2.b2.b retro-approve kondisional owner 23 Sep ([M02](M02_KEPUTUSAN_OWNER.md)); persetujuan penuh rancangan XL dan batch S2.b3, S2.b4, S2.c, S2.d, S3–S7, Tahap 4 belum tercatat — wajib approval per batch sebelum eksekusi. Prioritas owner 23 Sep: menyelesaikan migrasi dokumentasi (PRIORITAS-DOC).
+
+Ini tidak menutup gate aplikasi atau mengizinkan pekerjaan server.
 
 **Arah produk terbaru:** [keputusan owner 22 Sep](M02_KEPUTUSAN_OWNER.md#keputusan-penyederhanaan-aplikasi--22-september-2026) mendahulukan penyederhanaan OWNER/ADMIN pada operasional penghuni dan keuangan. Pengembangan IoT ditunda; gate EF/A/AO dan keuangan tetap. Daftar sisa pekerjaan berikut dipertahankan, tetapi audit tooling tidak otomatis mendahului flow bisnis utama.
 
@@ -40,14 +45,14 @@ Aturan kerja, izin, batas baca, dan pemeriksaan repo mengikuti [AGENTS](../AGENT
 
 | # | Task | Penanggung jawab / kesiapan | Prasyarat dan bukti penutupan |
 |---|------|-----------------------------|------------------------------|
-| 1 | Onboarding 13 hunian + verifikasi KTP | Owner / menunggu data | Bulan masuk, meter kWh, deposit; penutupan mengikuti gate Fase A, bukan hanya data terkumpul |
+| 1 | Onboarding 13 hunian + verifikasi KTP | Owner / menunggu data | Bulan masuk, meter kWh, deposit; penutupan mengikuti gate Fase A, bukan hanya data terkumpul. Keputusan owner 23 Sep: gerbang KTP produksi **ditunda**; risiko aktivasi tanpa KTP terverifikasi diterima sementara dan wajib ditinjau sebelum onboarding penghuni nyata ([M02](M02_KEPUTUSAN_OWNER.md)) |
 | 2 | Opening balance produksi | Owner / menunggu angka cutover | Kas/bank per cutover; bukti rekonsiliasi sesuai M04 sebelum ditutup |
 | 3 | Cron AutoOps di cPanel | Owner / menunggu pelaksanaan dan bukti | Target, izin, konfigurasi cron, dan bukti eksekusi sesuai M20; keberadaan token saja belum cukup |
 | 4 | Ganti password OWNER + PIN owner | Owner / belum ada bukti penutupan di antrean | Bukti perubahan tanpa nilai secret; rotasi DB/JWT pada M13 20 Sep tidak membuktikan password OWNER/PIN selesai |
 | 5 | Audit modul kedua | AI / ditunda di belakang pemetaan flow utama | Pemilihan modul mengikuti gap FLOW-CORE-01; gunakan bukti audit yang masih sah. Pendaftaran manifest adalah perubahan tooling terpisah, bukan syarat audit dokumen |
 | 6 | Deploy commit lokal ke produksi | AI + Owner / perlu rencana rilis | Artefak/SHA dan diff rilis, bukti verifikasi, target, rollback, izin deploy; penutupan memakai bukti smoke dan identitas versi tersaji |
 | 7 | Uji dependency hilang dan jumlah test nol pada wrapper | AI / perlu rancangan uji terisolasi | Bukti hasil kedua jalur sesuai kontrak wrapper; usulan fixture terisolasi dalam rancangan, belum izin rename node_modules workspace |
-| 8 | Penataan struktur dokumentasi (termasuk empat file non-M) | AI / Tahap 1 selesai; tahap 2–4 menunggu urutan rancangan | Cakupan diperluas oleh prompt 22 Sep; mapping, kompatibilitas tautan, pelestarian isi, dan acceptance ada di rancangan DOC-GOV-20260922; [indeks dokumentasi](README.md) sudah dibuat pada Tahap 1 |
+| 8 | Penataan struktur dokumentasi (termasuk empat file non-M) | AI / **pelaksanaan:** Tahap 1 DONE, Tahap 2 (S0–S6) DONE, Tahap 3 berjalan (S1, S2.a, S2.b1, S2.b2.a, S2.b2.b DONE; sisa S2.b3, S2.b4, S2.c, S2.d, S3–S7), Tahap 4 belum dijalankan; **izin:** Tahap 1 disetujui 22 Sep; Tahap 2 (S0–S6) + S1 + S2.a (+fix) + S2.b1 + S2.b2.a + S2.b2.b retro-approve kondisional 23 Sep; batch S2.b3, S2.b4, S2.c, S2.d, S3–S7, Tahap 4 wajib approval per batch; prioritas owner 23 Sep = menyelesaikan migrasi dokumentasi | Cakupan diperluas oleh prompt 22 Sep; mapping, kompatibilitas tautan, pelestarian isi, dan acceptance ada di rancangan DOC-GOV-20260922; [indeks dokumentasi](README.md) sudah dibuat pada Tahap 1; bukti Tahap 3 di [mapping](history/DOC-GOV-20260922-mapping.md) |
 
 **Sisa lama (referensi — belum selesai):** direkonstruksi dari git (`e96d032`); baris lama #1 sudah tercakup item 1–4 di atas.
 

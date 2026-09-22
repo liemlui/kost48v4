@@ -7,7 +7,10 @@ Owner menyetujui secara retroaktif pelaksanaan:
 - Tahap 2 (antrean + riwayat, S0–S6)
 - Tahap 3 S1 (operations batch)
 - Tahap 3 S2.a (M03), S2.a-fix, S2.a-fix-2
-- Tahap 3 S2.b1 (M04 Dossier 10/13 → domain/keuangan)
+- Tahap 3 S2.b1 (9 blok `## Update` M04 → `domain/keuangan.md` + changelog)
+- Tahap 3 S2.b2.a (M04 Bagian 2 / Dossier 10) dan S2.b2.b (M04 Bagian 3 / Dossier 13)
+
+Klarifikasi 23 Sep 2026: label awal "S2.b1 (M04 Dossier 10/13)" mencampur dua batch berbeda. Cakupan yang dimaksud owner adalah **S2.b1 dan S2.b2.a/S2.b2.b (Dossier 10 dan 13)** — lihat seksi keputusan lanjutan di bawah.
 
 Dasar: hasil konservatif (docs-only, tidak menyentuh kode/DB/server/deploy), invariant terjaga, tidak ada revert yang diperlukan.
 
@@ -15,6 +18,15 @@ Syarat ke depan:
 - Setiap batch berikutnya (S2.b3, S2.b4, S2.c, S2.d, S3–S7, Tahap 4) WAJIB mendapat approval eksplisit owner SEBELUM eksekusi.
 - Approval dicatat di M02 + AI_MASTER sebelum eksekutor mulai.
 - Tanpa approval, eksekutor STOP; tidak mengasumsikan "lanjut otomatis per batch".
+
+## 2026-09-23 — Keputusan lanjutan: prioritas, cakupan izin, KTP, cakupan flow
+
+Empat keputusan owner pada sesi tindak lanjut dokumentasi (23 Sep 2026):
+
+- **PRIORITAS-DOC:** hasil yang didahulukan 30 hari ke depan adalah **menyelesaikan migrasi dokumentasi DOC-GOV-20260922** (sisa Tahap 3 dan Tahap 4). Ini menetapkan urutan kerja, **bukan** izin menyeluruh: setiap batch tetap wajib approval eksplisit sebelum eksekusi sesuai syarat pada seksi retro-approve di atas.
+- **IZIN-CAKUPAN:** retro-approve kondisional 23 Sep mencakup **Tahap 2 (S0–S6), S1, S2.a (+S2.a-fix, S2.a-fix-2), S2.b1, S2.b2.a, dan S2.b2.b** — seluruh pekerjaan Tahap 3 yang sudah di-commit sampai `1d66fd34`. Batch S2.b3, S2.b4, S2.c, S2.d, S3–S7, dan Tahap 4 **belum tercatat** dan tetap menunggu approval per batch.
+- **KTP-GATE-TUNDA:** `KTP_ACTIVATION_GATE_ENABLED` di produksi **ditunda** (belum diset true). Risiko yang diterima owner: selama ditunda, aktivasi kamar dapat lolos **tanpa KTP terverifikasi**, berlawanan dengan maksud UU PDP dan temuan D-17. Wajib ditinjau ulang sebelum onboarding penghuni nyata berikutnya; status env diverifikasi tanpa mencatat nilai secret.
+- **FLOW-CORE-CAKUPAN:** keenam flow utama (penghuni masuk, tagihan & verifikasi pembayaran, perpanjangan, penghuni keluar/checkout, pengeluaran, dashboard harian) **tetap berada dalam cakupan** FLOW-CORE-01; tidak ada flow yang dikeluarkan. Urutan pengerjaan belum disetujui dan disusun sebagai usulan terpisah.
 
 ## Keputusan penyederhanaan aplikasi — 22 September 2026
 
