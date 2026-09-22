@@ -435,3 +435,14 @@ Aturan baru:
 - Lunas dibaca dari invoice/payment asli, bukan dari status kamar dan bukan dari `downPaymentPaidRupiah`.
 - Payment approval tidak boleh set `OCCUPIED` dan tidak boleh promote meter.
 - Check-in/serah kunci wajib invoice sewa awal lunas; saat itulah `initialMetersPromotedAt` dan meter awal dipromosikan.
+
+## Fase G AI sebagai Sidecar Approval (2026-06-19, aktif)
+> Aturan AI tidak boleh memanggil promote stay, approve payment, dan batasan serupa masih berlaku.
+> Dimigrasi dari M03 (via changelog) pada 821495c8 — Tahap 3 S2.
+
+AI/DeepSeek tidak menambah state machine baru untuk booking, invoice, stay, renewal, checkout, ticket, inventory, atau KTP. AI hanya menjadi sidecar manual Owner/Admin: membaca snapshot ringkas, membuat draft/rekomendasi, lalu manusia menekan tombol approve/simpan existing. Detail penuh: `docs/M09_AI_OWNER_ADMIN.md`.
+
+- **Tidak ada transisi otomatis:** AI tidak boleh memanggil promote stay, approve payment, reject payment, verify KTP, close ticket, create inventory movement, post journal, atau open room tanpa aksi manusia.
+- **Endpoint domain tetap sumber kebenaran:** semua mutasi tetap lewat controller/service existing yang sudah punya guard status, role, transaksi, dan audit.
+- **Audit flow:** jika manusia memakai rekomendasi AI, audit domain tetap dibuat dan `AuditLog.meta.ai` mencatat feature/model/hash/confidence/humanDecision.
+- **Fallback:** jika AI mati/limit/error, seluruh flow kontrak tetap berjalan manual seperti sebelum Fase G.

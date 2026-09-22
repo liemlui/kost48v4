@@ -26,3 +26,4 @@ Isi lengkap: [domain/flow.md](domain/flow.md)
 ## Bagian 2 — Contracts (dipindah)
 Isi lengkap: [domain/kontrak.md](domain/kontrak.md)
 Kontrak aktif termasuk override 2026-06-30: [domain/kontrak.md](domain/kontrak.md)
+Kontrak aktif termasuk AI Sidecar Approval 2026-06-19: [domain/kontrak.md](domain/kontrak.md).
