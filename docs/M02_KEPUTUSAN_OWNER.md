@@ -19,6 +19,14 @@ Syarat ke depan:
 - Approval dicatat di M02 + AI_MASTER sebelum eksekutor mulai.
 - Tanpa approval, eksekutor STOP; tidak mengasumsikan "lanjut otomatis per batch".
 
+## 2026-09-23 — Percepatan penataan dokumentasi dan fokus implementasi
+
+Owner menilai perbaikan aturan dan sinkronisasi dokumentasi sudah terlalu lama sehingga menghambat perkembangan aplikasi.
+
+- **DOC-CEPAT:** tumpang tindih dokumentasi diselesaikan dengan eksekusi tegas, bukan tanya-jawab panjang. Batch **S2.b3** (M04 Bagian 1 → `docs/operations/verifikasi-keuangan.md`) dan **S2.b4** (blok Audit 360° → `docs/audit/audit-360-uang-2026-07.md`; M04 menjadi pointer) dijalankan atas instruksi ini.
+- **FOKUS-IMPLEMENTASI:** setelah tumpang tindih selesai, pekerjaan diarahkan ke implementasi aplikasi; sisa pekerjaan dokumentasi tidak lagi mendahului kebutuhan produk.
+- **Batas yang tetap:** approval per batch untuk batch **S3–S7** dan Tahap 4 belum tercatat; gate uang (AGENTS §8 + M04) dan izin server/deploy tetap berlaku.
+
 ## 2026-09-23 — Keputusan lanjutan: prioritas, cakupan izin, KTP, cakupan flow
 
 Empat keputusan owner pada sesi tindak lanjut dokumentasi (23 Sep 2026):

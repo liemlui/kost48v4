@@ -26,7 +26,7 @@ Tanggal file lama tidak disimpulkan dari tanggal yang tertulis di dalam dokumenn
 | [M12](docs/M12_CHECKLIST_CHANGELOG.md) | Antrean dan gate tugas | Pelaksanaan: Tahap 1–2 DOC-GOV DONE, Tahap 3 berjalan, Tahap 4 belum dijalankan; izin: Tahap 2 (S0–S6) + S1 + S2.a (+fix) + S2.b1 + S2.b2.a + S2.b2.b retro-approve kondisional 23 Sep, batch lanjutan wajib approval per batch | Otoritas antrean/gate di atas AGENTS | 2026-09-23 |
 | [M13](docs/M13_CHANGELOG.md) | Riwayat bertanggal | Entri koreksi docs dan rancangan ditambahkan; entri lama tetap | Riwayat bukti, bukan antrean baru | 2026-09-22 |
 | [docs/history/](docs/history/) | Riwayat fase, changelog bulanan, log governance | Dibuat 22 Sep (Tahap 2 DOC-GOV) | Riwayat; bukan antrean atau sumber aturan | 2026-09-22 |
-| [mapping Tahap 2](docs/history/DOC-GOV-20260922-mapping.md) | Bukti perpindahan blok Tahap 2 | Dicatat per sub-langkah S0-S6 | Bukti migrasi; bukan spesifikasi baru | 2026-09-22 |
+| [mapping migrasi DOC-GOV](docs/history/DOC-GOV-20260922-mapping.md) | Bukti perpindahan blok Tahap 2 + status Tahap 3 | Dicatat per sub-langkah S0-S6 (Tahap 2) dan S1–S2.b2 (Tahap 3) | Bukti migrasi; bukan spesifikasi baru | 2026-09-23 |
 
 ## 2. Hierarki Aturan (+ KNOWN EXCEPTION gate keuangan)
 

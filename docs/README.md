@@ -4,7 +4,7 @@
 > Aturan operasional: [AGENTS](../AGENTS.md) · Antrean dan gate: [M12](M12_CHECKLIST_CHANGELOG.md) · Keputusan bisnis: [M02](M02_KEPUTUSAN_OWNER.md) · Dashboard governance: [AI_MASTER](../AI_MASTER.md).
 > Indeks ini turunan: ia menunjuk, bukan menambah aturan, dan bukan bukti audit atau PASS perilaku.
 
-Dibuat 22 September 2026 pada **Tahap 1** [rancangan DOC-GOV-20260922](plans/DOC-GOV-20260922.md). Status folder `docs/domain/` dan `docs/operations/` masih **rencana Tahap 3** dan belum memiliki isi.
+Dibuat 22 September 2026 pada **Tahap 1** [rancangan DOC-GOV-20260922](plans/DOC-GOV-20260922.md). Folder `docs/domain/`, `docs/operations/`, `docs/product/`, dan `docs/history/` **sudah berisi** — Tahap 3 berjalan per 23 Sep 2026.
 
 ## 1. Mulai task
 
@@ -49,6 +49,7 @@ Dibuat 22 September 2026 pada **Tahap 1** [rancangan DOC-GOV-20260922](plans/DOC
 | Produksi & operasional harian shared hosting | [operations/produksi.md](operations/produksi.md) |
 | Checklist go-live cPanel (operasi) | [operations/go-live-cpanel.md](operations/go-live-cpanel.md) |
 | Formulir isi data go-live (operasi) | [operations/form-go-live.md](operations/form-go-live.md) |
+| Harness verifikasi keuangan — invarian, DO-NOT-TOUCH, unit test, gate per-task | [operations/verifikasi-keuangan.md](operations/verifikasi-keuangan.md) |
 
 ## 4. Audit
 

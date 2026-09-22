@@ -1,7 +1,7 @@
 # KOST48 V5 — M13 Changelog
 
 
-> **Entri baru ditulis di paling atas**, tepat di bawah blok indeks ini. Riwayat lanjutan dipindah ke `docs/history/changelog/` pada Tahap 2 (S3) tanpa mengubah isi; file ini menyimpan 10 entri terbaru.
+> **Entri baru ditulis di paling atas**, tepat di bawah blok indeks ini. Riwayat lanjutan dipindah ke `docs/history/changelog/` pada Tahap 2 (S3) tanpa mengubah isi. Rotasi berkala belum dijalankan, jadi jumlah entri di file ini **belum dipatok 10** — entri tertua dipindah saat rotasi dilakukan.
 
 ## Indeks riwayat
 
@@ -15,6 +15,15 @@
 
 ---
 
+
+## 2026-09-23 (docs) — S2.b3 + S2.b4: pemadaman tumpang tindih dokumen keuangan
+
+- **Instruksi owner:** perbaikan aturan/sinkronisasi docs dinilai terlalu lama dan menghambat perkembangan app; tumpang tindih diselesaikan dengan eksekusi tegas, lalu fokus pindah ke implementasi. Batch S2.b3/S2.b4 dijalankan atas instruksi ini ([M02](M02_KEPUTUSAN_OWNER.md)).
+- **Pemindahan mekanis (isi tidak diubah):** `M04_KEUANGAN.md` Bagian 1 (L29–140, harness verifikasi keuangan) → [`operations/verifikasi-keuangan.md`](operations/verifikasi-keuangan.md) (123 baris; **5 `[ ]` gate dipertahankan**); blok `## Audit 360° Flow Uang (Jul 2026)` → [`audit/audit-360-uang-2026-07.md`](audit/audit-360-uang-2026-07.md) (35 baris). `M04_KEUANGAN.md` 182 → 32 baris menjadi pointer tipis.
+- **Duplikasi dihapus:** dua tabel status invarian (M04 vs `domain/keuangan.md`) disatukan; kontradiksi "8 Invarian ✅ SEMUA PASS" versus 3 baris ⚠️ di M04 diselesaikan dengan status per-invarian yang jujur (5 lulus, 3 bercatatan) di [domain/keuangan.md](domain/keuangan.md).
+- **Verifikasi lokal:** tautan relatif file terdampak diperiksa; invariant M12 `[ ]` = 23 dan `[x]` = 101; gate domain tetap 12; konservasi 5 `[ ]` harness; `git diff --check` exit 0.
+- **Batasan:** pemindahan dokumen ini **bukan** bukti status temuan; P1-01..P1-03 tetap "indikasi diperbaiki (statis)" dan P1-04..P1-09 UNKNOWN.
+- **Deployment:** tidak dilakukan. **Dampak runtime:** tidak diukur; source aplikasi, DB, server tidak disentuh.
 
 ## 2026-09-23 (audit) — verifikasi statis status temuan P1-01..P1-03 (Audit 360° uang)
 
