@@ -16,6 +16,14 @@
 ---
 
 
+## 2026-09-22 (docs) — DOC-GOV-20260922 Tahap 3 S1: batch operations
+
+- **S1.a (`f8f9a589`):** M11 Appendix "Patch Tenant Aman" (seed-master-data, 2026-07-08) diarsipkan ke [docs/history/m11-seed-master-data-appendix-2026-07-08.md](history/m11-seed-master-data-appendix-2026-07-08.md); M11 diganti stub + tautan arsip.
+- **S1.b (`de2d0459`):** 5 file `docs/operations/` baru dibuat dari M08/M11/M20/GO_LIVE_CPANEL_CHECKLIST/FORM_ISI_DATA_GO_LIVE; 5 sumber menjadi pointer.
+- **Konservasi:** 78 `[ ]` + 22 `[x]` utuh lintas 5 sumber + 5 operations.
+- **Invariant:** M12+history: 23 `[ ]` / 101 `[x]` / gate 12 tidak berubah.
+- **Verifikasi:** 0 tautan rusak; `git diff --check` exit 0.
+
 ## 2026-09-22 (docs) — DOC-GOV-20260922 Tahap 1: indeks dokumentasi + penyelarasan workflow
 
 - **Keputusan owner:** rancangan [DOC-GOV-20260922](plans/DOC-GOV-20260922.md) Tahap 1 disetujui; scope dokumentasi lokal, tanpa commit dan tanpa menyentuh source, DB, atau server.

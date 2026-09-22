@@ -44,6 +44,11 @@ Dibuat 22 September 2026 pada **Tahap 1** [rancangan DOC-GOV-20260922](plans/DOC
 | Efisiensi hosting 512 MB, gate EF, tabel pengukuran | [M19](M19_EFISIENSI_HOSTING_512MB.md) |
 | Checklist go-live cPanel | [GO_LIVE_CPANEL_CHECKLIST.md](GO_LIVE_CPANEL_CHECKLIST.md) |
 | Formulir data go-live (satu formulir kanonik) | [FORM_ISI_DATA_GO_LIVE.md](FORM_ISI_DATA_GO_LIVE.md) |
+| Runbook deploy, PWA & go-live (operasi) | [operations/deploy-go-live.md](operations/deploy-go-live.md) |
+| Default & seed DEV (akun dev, perintah seed) | [operations/default-dev.md](operations/default-dev.md) |
+| Produksi & operasional harian shared hosting | [operations/produksi.md](operations/produksi.md) |
+| Checklist go-live cPanel (operasi) | [operations/go-live-cpanel.md](operations/go-live-cpanel.md) |
+| Formulir isi data go-live (operasi) | [operations/form-go-live.md](operations/form-go-live.md) |
 
 ## 4. Audit
 
