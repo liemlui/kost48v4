@@ -13,3 +13,4 @@ Hasil Tahap 2 DOC-GOV-20260922 (migrasi riwayat dokumen; **bukan** audit modul b
 | auth-backend | Belum ada dokumen modul; catatan terkait ada pada temuan FE-002 (sesi/pertukaran token) di M12 |
 | Uang — temuan P1 Audit 360° (Jul 2026) | [p1-uang-status-2026-09-23](p1-uang-status-2026-09-23.md) — verifikasi **statis** 23 Sep 2026: P1-01/P1-02/P1-03 indikasi diperbaiki; P1-04..P1-09 UNKNOWN |
 | Uang — bukti Audit 360° (Jul 2026) | [audit-360-uang-2026-07](audit-360-uang-2026-07.md) — dipindah dari M04 (S2.b4); bukti bertanggal, angka historis tidak diubah |
+| Huni — bukti Audit 360° (Jul 2026) + deep audit 29 Jul 2026 | [audit-360-huni-2026-07](audit-360-huni-2026-07.md) — dipindah dari M05 (S2.c); bukti bertanggal |

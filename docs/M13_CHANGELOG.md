@@ -16,6 +16,14 @@
 ---
 
 
+## 2026-09-23 (docs) — S2.c: pemisahan M05 (siklus huni) ke domain/hunian.md
+
+- **Pemindahan mekanis (isi tidak diubah):** aturan bisnis dossier 11/12, desain renewal, invarian & UAT, peta kode → [`domain/hunian.md`](domain/hunian.md) (106 baris); dossier/task/temuan/update → [`changelog/2026-06.md`](history/changelog/2026-06.md) (+92 baris) dan [`2026-07.md`](history/changelog/2026-07.md) (+11 baris); blok Audit 360° Flow Huni + deep audit 29 Jul 2026 → [`audit/audit-360-huni-2026-07.md`](audit/audit-360-huni-2026-07.md) (73 baris). `M05_SIKLUS_HUNI.md` 264 → 29 baris (pointer).
+- **Deduplikasi:** aturan kuota utilitas diarahkan ke [`domain/keuangan.md`](domain/keuangan.md) yang sudah kanonik, dan status kamar Fase V ke [`domain/kontrak.md`](domain/kontrak.md) — tidak dibuat salinan ketiga.
+- **Koreksi selama eksekusi:** satu blok (`## Update 2026-06-30 - Override Booking Awal Fase V`) sempat tertinggal pada pemisahan pertama; sudah dikejar dan dipindah ke changelog. Konservasi isi diverifikasi per blok (bukan hanya jumlah baris).
+- **Verifikasi lokal:** 18 tautan pada file terdampak diperiksa, 0 rusak; `git diff --check`; invariant M12 `[ ]` = 23 dan `[x]` = 101; gate domain tetap 12. Tanpa npm/build/test/server.
+- **Deployment:** tidak dilakukan. **Dampak runtime:** tidak diukur; source aplikasi, DB, server tidak disentuh.
+
 ## 2026-09-23 (docs) — S2.b3 + S2.b4: pemadaman tumpang tindih dokumen keuangan
 
 - **Instruksi owner:** perbaikan aturan/sinkronisasi docs dinilai terlalu lama dan menghambat perkembangan app; tumpang tindih diselesaikan dengan eksekusi tegas, lalu fokus pindah ke implementasi. Batch S2.b3/S2.b4 dijalankan atas instruksi ini ([M02](M02_KEPUTUSAN_OWNER.md)).
