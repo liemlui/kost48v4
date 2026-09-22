@@ -213,4 +213,4 @@ Angka 61 hanya mencakup S2; S3 menambah 42, tidak tercermin di versi awal.
 
 **Prinsip pemisahan (ditetapkan S2.a-fix):** section `## Update …` yang memuat **aturan normatif** (kata kunci "tidak boleh", "wajib", "override", "invarian") → ke `docs/domain/`; `## Update …` yang hanya catatan status atau bukti bertanggal → ke `docs/history/changelog/`. Berlaku untuk semua batch Tahap 3 berikutnya.
 
-**S1 Tahap 3 selesai** (S1.a + S1.b + S1.c); **S2.a selesai** + koreksi **S2.a-fix**/**S2.a-fix-2**; **S2.b1 selesai** (9 Update M04) pada 22 September 2026. S2.b2 (M04 Bagian 2/3 + Audit 360°) belum dijalankan.
+**S1 Tahap 3 selesai** (S1.a + S1.b + S1.c); **S2.a selesai** + koreksi **S2.a-fix**/**S2.a-fix-2**; **S2.b1 selesai** (9 Update M04) pada 22 September 2026; **S2.b2.a dan S2.b2.b selesai** (M04 Bagian 2/3) pada 23 September 2026; Audit 360° belum dijalankan.
