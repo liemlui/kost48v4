@@ -2,7 +2,7 @@
 
 ## Arah deploy aktif — 6 September 2026
 
-**Fase EF diprioritaskan; satu proses API sebagai target; Fase MA ditunda.** Dokumen ini runbook, bukan izin menjalankan server/DB. Kelayakan 512 MB dan status deployment belum disahkan. Checklist otoritatif [M12](M12_CHECKLIST_CHANGELOG.md); keputusan [M02](M02_KEPUTUSAN_OWNER.md); spesifikasi/tabel hosting [M19 §9](M19_EFISIENSI_HOSTING_512MB.md#9-pencatatan-hosting-ef-00-dan-ef-02).
+**Fase EF diprioritaskan; satu proses API sebagai target; Fase MA ditunda.** Dokumen ini runbook, bukan izin menjalankan server/DB. Kelayakan 512 MB dan status deployment belum disahkan. Checklist otoritatif [M12](M12_CHECKLIST_CHANGELOG.md); keputusan [M02](M02_KEPUTUSAN_OWNER.md); spesifikasi/tabel hosting [efisiensi-hosting.md §9](operations/efisiensi-hosting.md#9-pencatatan-hosting-ef-00-dan-ef-02).
 
 - Langkah sekarang: identitas artefak dan pengamatan pasif; pastikan EF-01/03/05 benar-benar masuk artefak sebelum menilai dampaknya. Kode lokal uncommitted bisa ikut paket; SHA saja tidak cukup.
 - Audit statis/typecheck lokal selesai bukan deployment/build/UAT server PASS. Fase A dan gate AO yang terbuka tetap harus ditutup dengan bukti.

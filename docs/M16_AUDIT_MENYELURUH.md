@@ -1,6 +1,6 @@
 # M16 — Audit Menyeluruh KOST48 V5
 
-> **Rujukan arah aktif (8 Sep 2026):** [M02](M02_KEPUTUSAN_OWNER.md) untuk keputusan owner; [M12](M12_CHECKLIST_CHANGELOG.md#antrean-prioritas-aktif) untuk satu checklist/urutan kerja; [M19](M19_EFISIENSI_HOSTING_512MB.md) untuk Fase EF. **EF diprioritaskan, satu proses API sebagai target, Fase MA ditunda.**
+> **Rujukan arah aktif (8 Sep 2026):** [M02](M02_KEPUTUSAN_OWNER.md) untuk keputusan owner; [M12](M12_CHECKLIST_CHANGELOG.md#antrean-prioritas-aktif) untuk satu checklist/urutan kerja; [efisiensi-hosting.md](operations/efisiensi-hosting.md) untuk Fase EF. **EF diprioritaskan, satu proses API sebagai target, Fase MA ditunda.**
 > Dokumen ini menyimpan spesifikasi domain dan bukti bertanggal. Status PASS/selesai pada audit lama hanya berlaku pada lingkup/waktu yang disebut, bukan bukti deployment atau runtime terbaru. Judul sumber pra-konsolidasi adalah riwayat; jangan membuat ulang file lama atau mengulang checklist selesai.
 
 Dokumen ini berisi dua lapisan audit yang tidak boleh dicampur:
@@ -69,7 +69,7 @@ Kerjakan dari atas ke bawah; jangan mulai dari ledger fase B–AL.
 1. `CLAUDE.md` / `AGENTS.md` — batas izin dan larangan.
 2. [M02](M02_KEPUTUSAN_OWNER.md) — keputusan owner.
 3. [M12 § Antrean prioritas](M12_CHECKLIST_CHANGELOG.md#antrean-prioritas-aktif) — satu urutan kerja.
-4. Domain: [M19](M19_EFISIENSI_HOSTING_512MB.md) untuk EF; [M14](M14_AUDIT_UI_UX.md) untuk AO; [M08](M08_DEPLOY_GO_LIVE.md) untuk Fase A.
+4. Domain: [efisiensi-hosting.md](operations/efisiensi-hosting.md) untuk EF; [M14](M14_AUDIT_UI_UX.md) untuk AO; [M08](M08_DEPLOY_GO_LIVE.md) untuk Fase A.
 5. [M00](M00_CODEMAP.md) sebelum grep; [M01](M01_MASTER.md) untuk ground state.
 6. [M13](M13_CHANGELOG.md) hanya untuk riwayat bertanggal, bukan antrean.
 
@@ -178,7 +178,7 @@ Catatan: invariant `stok tidak boleh negatif` selalu dijaga `ensureInventoryQtyS
 ## 4. Bukan Defect (terdokumentasi terpisah)
 
 - **Fase A (Pra-Go-Live):** blocked owner — server/domain/env; identitas DB produksi tidak diasumsikan dari UAT.
-- **Fase EF:** EF-00/02 menunggu data host; EF-01/03/05 implementasi lokal; kelayakan 512 MB belum PASS. Detail: `docs/M19_EFISIENSI_HOSTING_512MB.md`.
+- **Fase EF:** EF-00/02 menunggu data host; EF-01/03/05 implementasi lokal; kelayakan 512 MB belum PASS. Detail: `docs/operations/efisiensi-hosting.md`.
 - **Fase AO sisa (selaras M12 8 Sep):** AO-03 (alat/fixture lalu provisioning), AO-13 (crawl tiga role), AO-14 (sign-off), AO-18/19/20 **parsial**, AO-21, AO-23. AO-17 dan AO-22 sudah selesai. Detail: `docs/M14_AUDIT_UI_UX.md`.
 - **AL / Z-19:** H1–H15 dilaporkan selesai 7 Jul; verifikasi manual Owner untuk Z-19 belum punya bukti spesifik.
 

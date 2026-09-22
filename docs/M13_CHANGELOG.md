@@ -16,6 +16,17 @@
 ---
 
 
+## 2026-09-23 (docs) — B3 Tahap 3: pemisahan M18 (harga kamar) dan M19 (efisiensi hosting) ke domain/ + operations/
+
+- **Pemindahan mekanis (isi tidak diubah):** **seluruh isi** `M18_ATURAN_HARGA_KAMAR.md` (225 baris) → [`domain/harga.md`](domain/harga.md) (168 baris) dan **seluruh isi** `M19_EFISIENSI_HOSTING_512MB.md` (246 baris) → [`operations/efisiensi-hosting.md`](operations/efisiensi-hosting.md) (197 baris) — satu tujuan per batch sesuai handoff owner. Pointer: `M18_ATURAN_HARGA_KAMAR.md` 225 → 10 baris, `M19_EFISIENSI_HOSTING_512MB.md` 246 → 12 baris.
+- **Anchor kompatibilitas dipertahankan:** pointer M19 memuat `<a id="9-pencatatan-hosting-ef-00-dan-ef-02">` dan `<a id="arah-dan-status-aktif--...">` sehingga rujukan berfragment dari M02 L65 dan M08 L5 tetap resolve (pola sama dengan pointer M12).
+- **Konservasi (bukti):** 355 baris non-kosong sumber; multiset per tujuan → 0 hilang (HARGA 161, EF 190, pointer M18 2, pointer M19 1) dan tiap blok utuh berurutan (1/1 di keempat tujuan, dengan pengecualian rebase di butir berikut). Satu baris header sumber pada M18 (kalimat "Dokumen ini menyimpan spesifikasi domain dan bukti bertanggal") **diganti** pada pointer dan diumumkan; baris provenance M18 (`Sumber kode: …`, `Terakhir diperbarui: 2026-08-22.`) **ikut ke file kanonik**, bukan ditinggal di pointer.
+- **Rebase tautan isi pindahan (diumumkan):** 2 baris isi M19 (sumber L5 → file baru L13; sumber L170 → L178) hanya diubah **tujuan relatifnya** dari basis `docs/` ke `docs/operations/` (`../M02_...`, `../M20_...`, `../M12_...#fase-ef--efisiensi-shared-hosting-512-mb`). Teks kedua baris **identik** setelah `../` dilepas — diverifikasi baris-per-baris. Tanpa rebase ini, 4 tautan itu rusak dari lokasi baru; gate G5 menangkapnya sebelum commit.
+- **Rujukan masuk diperbaiki (6 penggantian, 4 file):** `GO_LIVE_CPANEL_CHECKLIST.md` (1), `M08_DEPLOY_GO_LIVE.md` (1, fragment `§9` diarahkan ke file kanonik), `M16_AUDIT_MENYELURUH.md` (3), `M20_PRODUKSI_KOST48.md` (1). **Sengaja tidak disentuh:** `M02_KEPUTUSAN_OWNER.md` L65 (register keputusan owner — anchor di pointer menjaganya tetap resolve), `M01_MASTER.md` L15 dan indeks `docs/README.md` L44 (menunggu B5/B10), serta baris boilerplate "> Rujukan arah aktif … [M19] …" yang identik di semua file M (masih resolve ke pointer).
+- **Duplikasi dicatat, tidak diputuskan:** dugaan tumpang tindih aturan harga §5 (utilitas) & §7 (DP & deposit) dengan `domain/keuangan.md` + `domain/hunian.md` dicatat sebagai **D-02** di [laporan duplikat](history/laporan-duplikat.md); isi tidak diubah/dihapus.
+- **Verifikasi lokal:** invariant `[ ]` = 23, `[x]` = 101, gate domain = 12 (delta 0 vs HEAD); tautan diperiksa → 0 rusak baru; `git diff --cached --check` bersih (tanpa known exception baru); UTF-8 tanpa BOM; tanpa blank line di EOF. Tanpa npm/build/test/lint/server.
+- **Deployment:** tidak dilakukan. **Dampak runtime:** tidak diukur.
+
 ## 2026-09-23 (docs) — B2 Tahap 3: pemisahan M07 (publik) dan M09 (AI) ke domain/publik.md + domain/ai.md
 
 - **Pemindahan mekanis (isi tidak diubah):** **seluruh isi** `M07_PUBLIK_GROWTH.md` (694 baris) → [`domain/publik.md`](domain/publik.md) (682 baris) dan **seluruh isi** `M09_AI_OWNER_ADMIN.md` (787 baris) → [`domain/ai.md`](domain/ai.md) (786 baris) — satu tujuan per batch sesuai handoff owner, sehingga **tidak ada pemisahan riwayat/audit pada batch ini**. `M07_PUBLIK_GROWTH.md` 694 → 30 baris dan `M09_AI_OWNER_ADMIN.md` 787 → 19 baris (pointer dengan tabel lokasi kanonik).
