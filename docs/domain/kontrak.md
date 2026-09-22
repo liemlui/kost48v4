@@ -412,3 +412,26 @@ try { Invoke-RestMethod -Method Post -Uri "http://localhost:3000/api/inventory-m
 **Sumber historis lengkap:** `docs/archieve/2026-06-16_root_docs_pre_M/06_CONTRACTS.md` (V5.9.8-A; arsip)
 
 ---
+
+## Override Booking Flow Fase V (2026-06-30, aktif)
+> Aturan di section ini masih berlaku dan mengesampingkan narasi historis.
+> Dimigrasi dari M03 (via changelog) pada 7186693e — Tahap 3 S2.a.
+
+**Kontrak terbaru mengalahkan narasi historis di bagian lama dokumen ini.** Bagian `0.2 Representasi "Booking"` di bawah masih menyimpan model lama untuk konteks arsip, tetapi eksekusi baru wajib mengikuti Fase V di `docs/M12_CHECKLIST_CHANGELOG.md`.
+
+State final status kamar:
+
+```txt
+Booking dibuat, belum bayar        -> Room AVAILABLE
+DP 30% approved                    -> Room RESERVED
+Full payment approved              -> Room RESERVED
+Check-in/serah kunci setelah lunas  -> Room OCCUPIED
+```
+
+Aturan baru:
+
+- `RoomStatus.BOOKING` tidak boleh ditulis lagi oleh runtime; jika masih ada di DB, perlakukan sebagai legacy-only.
+- `RESERVED` berarti kamar terkunci oleh pembayaran approved, tetapi belum tentu lunas.
+- Lunas dibaca dari invoice/payment asli, bukan dari status kamar dan bukan dari `downPaymentPaidRupiah`.
+- Payment approval tidak boleh set `OCCUPIED` dan tidak boleh promote meter.
+- Check-in/serah kunci wajib invoice sewa awal lunas; saat itulah `initialMetersPromotedAt` dan meter awal dipromosikan.

@@ -25,3 +25,4 @@ Riwayat: [changelog/2026-07.md](history/changelog/2026-07.md) · [changelog/2026
 Isi lengkap: [domain/flow.md](domain/flow.md)
 ## Bagian 2 — Contracts (dipindah)
 Isi lengkap: [domain/kontrak.md](domain/kontrak.md)
+Kontrak aktif termasuk override 2026-06-30: [domain/kontrak.md](domain/kontrak.md)
