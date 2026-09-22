@@ -410,7 +410,7 @@ Untuk shared hosting/Passenger, gunakan cron setiap 5 menit:
 
 - Endpoint harus `POST`, bukan `GET` dan bukan token query string.
 - Cron ini menjalankan dispatch announcement terjadwal dan push outbox selain operasi AutoOps lainnya.
-- Jalankan `docs/M06_OPERASIONAL.md` setelah HTTPS dan VAPID aktif. Push boleh ditunda bila VAPID belum siap, tetapi inbox in-app tetap wajib berfungsi.
+- Jalankan `docs/domain/operasional.md` setelah HTTPS dan VAPID aktif. Push boleh ditunda bila VAPID belum siap, tetapi inbox in-app tetap wajib berfungsi.
 
 #### Smoke test dan bukti rilis
 

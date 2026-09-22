@@ -61,7 +61,7 @@ Baseline historis 23 Juli 2026 adalah `8627289`; HEAD sesi berikutnya harus dipe
 | rooms | `rooms/rooms.service.ts` | Kamar + RoomFacility (defaultDepositRupiah) |
 | meter-readings | `meter-readings/meter-readings.service.ts` | Meter listrik/air pascabayar; quota listrik mengikuti periode sewa lunas (bukan selalu bulan kalender) |
 
-### Operasional & Staff — detail: `M06_OPERASIONAL.md`
+### Operasional & Staff — detail: `domain/operasional.md`
 | Modul/Service | Path | Tanggung jawab |
 |---|---|---|
 | tickets | `tickets/tickets.service.ts` | Tiket keluhan/perbaikan + tiket inspeksi (guard AVAILABLE) |
@@ -127,7 +127,7 @@ Standar struktur dan progressive disclosure Owner/Admin: `docs/M17_PORTAL_FLOW_R
 - **Growth/AI:** LoyaltyPoint, LoyaltyReward, Redemption, PeerBehaviorReport, TenantReferral, Faq, AdditionalService, ServiceInterest, SatisfactionSurvey, MarketAnalysis, AiDraft, GuestPreferenceSurvey, ExternalReview
 
 ## Flow & audit anchor
-Tabel flow + method-anchor: `M03_FLOW_KONTRAK.md` (kontrak/uang). Job otomatis → `M06_OPERASIONAL.md` § Auto-Ops. Keputusan owner (84+): `M02_KEPUTUSAN_OWNER.md`. Audit terdahulu → `docs/archieve/_previous_cycles/M09_AUDIT.md`.
+Tabel flow + method-anchor: `M03_FLOW_KONTRAK.md` (kontrak/uang). Job otomatis → `domain/operasional.md` di audit/audit-operasional-2026-07.md § P5 Auto-Ops. Keputusan owner (84+): `M02_KEPUTUSAN_OWNER.md`. Audit terdahulu → `docs/archieve/_previous_cycles/M09_AUDIT.md`.
 
 ## Shared utilities (ditambahkan 2026-07-07)
 | Utility | Path | Tanggung jawab |

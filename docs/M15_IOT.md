@@ -6,7 +6,7 @@
 > **Sumber:** Tuya IoT Console ekspor 2026-07-10 · ESP32-C3 firmware  
 > **Total perangkat:** 27 Tuya (17 Online, 10 Offline) + 2-3 ESP32-C3  
 > **Status implementasi:** foundation done (2026-07-23), telemetry monitoring-only, no auto-billing  
-> **Terkait:** memory `iot-water-kwh-spec` · `M06_OPERASIONAL.md` · `M10_PETA_SCOPE.md`
+> **Terkait:** memory `iot-water-kwh-spec` · `domain/operasional.md` · `M10_PETA_SCOPE.md`
 
 > **Update 2026-07-30 — Arah IoT baru (on-demand, tanpa cron):** kWh meter Tuya dibaca **on-demand** lewat `POST /api/iot/tenant/refresh` / `GET /api/iot/tenant/my-room` (angka kumulatif `add_ele`), bukan polling cron. Tidak ada cron `iot/tuya/cron` dan `IOT_TUYA_POLL_ENABLED=false`. Selisih pemakaian = total kumulatif sekarang − titik acuan (`MeterReading`) terakhir. Kedepan, ESP32 water-flow & polling akan dipindah ke Raspberry Pi (terpisah dari app ini); app ini cukup membaca data dari Pi saat sudah siap.
 
@@ -29,7 +29,7 @@
 
 > **Sumber:** Tuya IoT Console — ekspor 2026-07-10  
 > **Total perangkat:** 27 (17 Online, 10 Offline)  
-> **Terkait:** memory `iot-water-kwh-spec` (ESP32 water flow) · `M06_OPERASIONAL.md` · `M10_PETA_SCOPE.md`
+> **Terkait:** memory `iot-water-kwh-spec` (ESP32 water flow) · `domain/operasional.md` · `M10_PETA_SCOPE.md`
 
 > **Update implementasi 2026-07-23:** fondasi IoT sudah dibuat dan masuk paket deploy. Telemetry tetap monitoring-only; tidak pernah otomatis menerbitkan tagihan. Status perangkat fisik pada tabel di bawah tetap snapshot Tuya 2026-07-10 dan wajib diverifikasi lagi saat go-live.
 
@@ -189,8 +189,8 @@
 |---|---|
 | Spek implementasi IoT | memory `iot-water-kwh-spec` |
 | Peta scope role | `M10_PETA_SCOPE.md` § IoT & Monitoring |
-| Operasional | `M06_OPERASIONAL.md` § IoT Monitoring |
-| Auto-ops / cron | `M06_OPERASIONAL.md` § Auto-Ops |
+| Operasional | `domain/operasional.md` § IoT Monitoring |
+| Auto-ops / cron | `domain/operasional.md` § P5 Auto-Ops (audit/audit-operasional-2026-07.md) |
 | Default data seed | `M11_DEFAULT_DATA.md` |
 | Keamanan JWT device | memory `iot-water-kwh-spec` (beda dari user JWT) |
 
@@ -205,7 +205,7 @@
 
 > Status: **Fondasi backend/firmware sudah diimplementasikan; rollout perangkat, mapping, dan UAT produksi masih diperlukan.**
 > Tanggal: 2026-07-16
-> Dokumen terkait: `M14_IOT_TUYA_DEVICES.md`, `M04_KEUANGAN.md`, `M05_SIKLUS_HUNI.md`, `M06_OPERASIONAL.md`
+> Dokumen terkait: `M14_IOT_TUYA_DEVICES.md`, `M04_KEUANGAN.md`, `M05_SIKLUS_HUNI.md`, `domain/operasional.md`
 > Runbook Tuya: `M15A_TUYA_KWH_SETUP_RUNBOOK.md`
 > Spesifikasi meter air: `M15B_ESP32_C3_WATER_METER_SPEC.md`
 

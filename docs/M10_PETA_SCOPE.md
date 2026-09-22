@@ -69,7 +69,7 @@
 | BE module | `backend/src/modules/inventory-items/` · `inventory-movements/` | Stok + mutasi |
 | BE module | `backend/src/modules/room-items/` | Barang per kamar |
 | BE module | `backend/src/modules/wifi-sales/` | Order WiFi |
-| Docs | `M06_OPERASIONAL.md` | |
+| Docs | `domain/operasional.md` | |
 
 ### A4. ADMIN (Pengelola — login role ADMIN)
 **Apa yang dilihat/dilakukan:** dashboard admin, approve booking/payment/renewal, kelola kamar & tenant, invoice & expense, laporan, staf, inventaris, pengumuman, FAQ, settings.
@@ -82,7 +82,7 @@
 | FE pages | `frontend/src/pages/finance/` | Accounting setup |
 | FE pages | `frontend/src/pages/reports/` | Laporan |
 | BE module | **Semua modul kecuali owner-ai** | Admin = full access |
-| Docs | `M04_KEUANGAN.md` · `M05_SIKLUS_HUNI.md` · `M06_OPERASIONAL.md` | |
+| Docs | `M04_KEUANGAN.md` · `M05_SIKLUS_HUNI.md` · `domain/operasional.md` | |
 
 ### A5. OWNER (Pemilik — login role OWNER)
 **Apa yang dilihat/dilakukan:** dashboard owner (KPI), laporan keuangan, AI assistant (brief/finance/payment review/ops/inventory), settings sistem, semua akses admin.
@@ -217,7 +217,7 @@ Tenant → StaffReview (kualitas staf)
 | BE | `staff-field-reports/` | Laporan lapangan |
 | BE | `tenant-staff-reviews/` | Review tenant→staf |
 | FE | `pages/tickets/` · `pages/staff/` · `pages/staff-routines/` | UI operasional |
-| Docs | `M06_OPERASIONAL.md` | |
+| Docs | `domain/operasional.md` | |
 
 ### B7. INVENTORY FLOW (Stok → Mutasi → Room Item)
 ```
@@ -230,7 +230,7 @@ InventoryItem (gudang) → InventoryMovement (ASSIGN/OUT/RETURN) → RoomItem (p
 | BE | `inventory-movements/` | Mutasi ASSIGN/OUT/RETURN |
 | BE | `room-items/` | Barang per kamar (FK InventoryItem) |
 | FE | `pages/resources/` (CRUD generik) | UI inventaris |
-| Docs | `M06_OPERASIONAL.md` | |
+| Docs | `domain/operasional.md` | |
 
 ### B8. AI FLOW (Tombol Manual Owner/Admin → Draft → Approve → Audit)
 ```
@@ -273,11 +273,11 @@ Quota listrik untuk pembacaan meter bisnis dihitung dari periode sewa lunas; DP 
 | Ubah logika booking | PUBLIC | `backend/src/modules/tenant-bookings/` + `M05_SIKLUS_HUNI.md` |
 | Ubah logika pembayaran | ADMIN | `backend/src/modules/payment-submissions/` + `M04_KEUANGAN.md` |
 | Tambah laporan keuangan | OWNER | `backend/src/modules/accounting/` + `M04_KEUANGAN.md` |
-| Ubah logika tiket staf | STAFF | `backend/src/modules/tickets/` + `M06_OPERASIONAL.md` |
+| Ubah logika tiket staf | STAFF | `backend/src/modules/tickets/` + `domain/operasional.md` |
 | Tambah tombol AI baru | OWNER | `backend/src/modules/owner-ai/` + `M09_AI_OWNER_ADMIN.md` |
 | Ubah deposit/refund | ADMIN | `backend/src/modules/deposit-ledger/` + `M04_KEUANGAN.md` |
-| Tambah inventory | STAFF | `backend/src/modules/inventory-items/` + `M06_OPERASIONAL.md` |
-| Ubah auto-ops/sweeper | SYSTEM | `backend/src/modules/auto-ops/` + `M06_OPERASIONAL.md` § Auto-Ops |
+| Tambah inventory | STAFF | `backend/src/modules/inventory-items/` + `domain/operasional.md` |
+| Ubah auto-ops/sweeper | SYSTEM | `backend/src/modules/auto-ops/` + `domain/operasional.md` § Auto-Ops |
 | Tambah field di model Prisma | — | `backend/prisma/schema.prisma` ⚠️ BUTUH APPROVAL OWNER |
 | Perbaiki UI/UX | — | `frontend/src/styles/` + `frontend/src/components/` |
 | Cek aturan owner | — | `docs/M02_KEPUTUSAN_OWNER.md` (84 keputusan, **SUMBER KEBENARAN**) |

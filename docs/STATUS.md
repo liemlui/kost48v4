@@ -61,13 +61,14 @@ Format: **ID** — judul | **Gate** (verifikasi wajib sebelum `[x]`). 🧑 = but
 
 ## 4. Task selesai terbaru (bukti bertanggal)
 
+- **23 Sep 2026 — batch B1 (Tahap 3): M06 (operasional) dipisah**: aturan normatif → `docs/domain/operasional.md` (446 baris); riwayat identity dossier, temuan audit, dan task → `docs/history/changelog/2026-06.md` (+156 baris) dan update Juli → `2026-07.md` (+9 baris); empat deep audit 29 Jul 2026 → `docs/audit/audit-operasional-2026-07.md` (257 baris); `docs/M06_OPERASIONAL.md` 846 → 33 baris (pointer, tautan lama tetap resolve). Konservasi 653 baris non-kosong → **0 hilang** (satu baris header sumber diganti pada pointer dan diumumkan); 18 rujukan masuk diperbaiki di 5 file; invariant 23/101/12; 0 tautan rusak baru (4 pra-eksisting/known exception). Bukti: [mapping §7.4](history/DOC-GOV-20260922-mapping.md) dan [M13](M13_CHANGELOG.md).
 - **23 Sep 2026 — konsolidasi dokumen**: M04 (keuangan) dan M05 (huni) dipecah ke `domain/`, `operations/`, `audit/`, `history/`; duplikasi tabel status invarian dihapus; definisi invariant gate ditulis; bukti verifikasi P1 uang dicatat. Commit: `1c156b78`, `8557cf9a`, `6701fc3e`, `9512ad73`, `801cc192`.
 - **23 Sep 2026 — verifikasi statis temuan uang**: P1-01/P1-02/P1-03 indikasi sudah diperbaiki (jurnal & deposit ledger blocking); P1-04..P1-09 UNKNOWN. Bukti: `docs/audit/p1-uang-status-2026-09-23.md`.
 
 ## 5. Pelaksanaan vs izin (dua sumbu — jangan digabung)
 
-- **Sumbu A (pelaksanaan, bukti commit):** migrasi dokumen Tahap 1–2 DONE; Tahap 3 berjalan — S1, S2.a (+fix), S2.b1, S2.b2.a/b, S2.b3, S2.b4, S2.c DONE; sisa S2.d, S3–S7; Tahap 4 belum.
-- **Sumbu B (izin, otoritas owner):** Tahap 1 disetujui 22 Sep; Tahap 2 + S1 + S2.a (+fix) + S2.b1 + S2.b2.a/b retro-approve kondisional 23 Sep; S2.b3/S2.b4/S2.c dijalankan atas instruksi percepatan owner 23 Sep; **konsolidasi ke file utama (§8) juga atas instruksi owner 23 Sep.** Batch S2.d, S3–S7, Tahap 4 belum tercatat — wajib approval per batch.
+- **Sumbu A (pelaksanaan, bukti commit):** migrasi dokumen Tahap 1–2 DONE; Tahap 3 berjalan — S1, S2.a (+fix), S2.b1, S2.b2.a/b, S2.b3, S2.b4, S2.c DONE, ditambah **B1 (M06) DONE 23 Sep** menurut urutan batch handoff owner; sisa batch B2–B11 (padanan label S2.d/S3–S7 belum dipetakan); Tahap 4 belum.
+- **Sumbu B (izin, otoritas owner):** Tahap 1 disetujui 22 Sep; Tahap 2 + S1 + S2.a (+fix) + S2.b1 + S2.b2.a/b retro-approve kondisional 23 Sep; S2.b3/S2.b4/S2.c dijalankan atas instruksi percepatan owner 23 Sep; **konsolidasi ke file utama (§8) dan urutan batch B1–B11 juga atas instruksi owner 23 Sep.** Batch B2–B11, S2.d, S3–S7, Tahap 4 belum tercatat — wajib approval per batch.
 
 ## 6. Keputusan owner yang mengikat (ringkas)
 
@@ -112,4 +113,4 @@ Catatan: nilai 24/28 pada pola `**Gate:**` adalah metrik berbeda, bukan kontradi
 
 **Aturan kompatibilitas:** path lama (`docs/M12_CHECKLIST_CHANGELOG.md` dst.) tetap ada sebagai pointer 3–5 baris supaya tautan lama resolve, dan dihapus hanya setelah tidak ada rujukan.
 
-**Progres konsolidasi:** file ini dibuat (Fase 1) · M12 + AI_MASTER menjadi pointer (Fase 1) · ATURAN/OPERASI/PETA-KODE/AUDIT/KEPUTUSAN-OWNER (Fase 2, berikutnya) · arsip + pembersihan pointer lama (Fase 3).
+**Progres konsolidasi:** file ini dibuat (Fase 1) · M12 + AI_MASTER menjadi pointer (Fase 1) · M04 + M05 dipisah (Tahap 3) · **M06 → `domain/operasional.md` + riwayat + `audit/audit-operasional-2026-07.md` (batch B1, 23 Sep 2026)** · sisa batch B2–B11 (M03/M07/M09/M15/M18/M19, M00/M01/M10/M17, M02, M14/M16/M13, empat dokumen non-M) · ATURAN/OPERASI/PETA-KODE/AUDIT/KEPUTUSAN-OWNER (Fase 2) · arsip + pembersihan pointer lama (Fase 3).

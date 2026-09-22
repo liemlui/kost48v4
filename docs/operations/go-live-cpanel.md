@@ -304,7 +304,7 @@ Kill/rollback IoT: pastikan `IOT_TUYA_POLL_ENABLED=false`, tidak ada cron `iot/t
 - Pastikan endpoint kompatibilitas klien lama `/api/iot/stream/tenant/raw` merespons `204` dan tidak membuka `text/event-stream`.
 - Pastikan `/sw.js`, `/version.json`, dan navigasi HTML mengirim `Cache-Control: no-store`; aset hash `/assets/*` harus `immutable`.
 - Uji pengumuman langsung dan terjadwal; pastikan `dispatchedAt` hanya terisi sekali.
-- Jalankan `docs/M06_OPERASIONAL.md` bila VAPID/push diaktifkan.
+- Jalankan `docs/domain/operasional.md` bila VAPID/push diaktifkan.
 - Catat SHA rilis, waktu, hasil migration, hasil smoke, dan lokasi backup tanpa menyimpan secret/PII.
 
 #### Redeploy setelah go-live
