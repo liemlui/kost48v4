@@ -87,6 +87,29 @@ Kontrak no-partial, status PARTIAL, dan pelunasan manual ada di [Payment & Invoi
 
 - Total pembayaran ≤ invoice + sisa deposit; promosi meter & OCCUPIED hanya saat invoice PAID; satu pemenang per kamar; uang masuk = otomatisasi berhenti.
 
+## Kebijakan Akuntansi & Pelaporan
+
+Dossier 13 mencakup jurnal otomatis, COA, general ledger, trial balance, serta laporan keuangan. Kontrak COA 38 akun, idempotensi jurnal, readiness auto-close, reversal blocking, deposit liability, dan laporan ada di [Accounting & Finance Contracts](kontrak.md#10-accounting--finance-contracts); tidak disalin sebagai kontrak ketiga di sini.
+
+- Pembulatan Rupiah memakai helper terpusat common/business/money.helper.ts: roundRupiah(v) dan rupiahAmount(v).
+
+## Invarian Akuntansi & Pelaporan
+
+- Trial balance seimbang; jurnal idempotent per sourceType+sourceId; DRAFT tidak masuk laporan; deposit excluded dari operating cashflow.
+
+## Pengakuan Pendapatan, Arus Kas & Rasio
+
+- Sewa lebih dari satu bulan ditangguhkan ke COA 2200 lalu diakui straight-line per bulan; Invoice dan AR tetap penuh di muka, hanya pengakuan pendapatan dibagi.
+- Kas memakai cashAccountId atau prefix 10; AR 1100 bukan kas. Deposit dipisah ke depositLiability dan keluar dari operating cashflow.
+- Invarian cashflow: beginning+net=ending. Rasio memakai CASH_PREFIXES 10, INVENTORY_PREFIXES 12, dan CURRENT_LIABILITY_PREFIXES 20/21/22/23.
+- Occupancy memakai kamar operable dan stay ACTIVE dengan initialMetersPromotedAt.
+
+## Otomasi Biaya dan Penutupan Bulanan
+
+- Expense.status membedakan DRAFT, CONFIRMED, dan CANCELLED; recurringKey unik mencegah draft kategori-bulan ganda.
+- Laporan, readiness, analytics, finance, dan posting jurnal hanya memakai expense CONFIRMED. Konfirmasi draft dan posting jurnal berjalan dalam satu transaksi.
+- AutoOps membuat maksimal enam draft biaya rutin, menjalankan depresiasi bulan sebelumnya sebelum auto-close, dapat dipicu OWNER/ADMIN, dan aman dijalankan ulang.
+
 ## Kebijakan Kapitalisasi Aset & Saldo Awal
 
 Detail keputusan owner: [M02 §Kuis Audit Aset & Nilai](../M02_KEPUTUSAN_OWNER.md).
