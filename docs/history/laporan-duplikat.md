@@ -1,20 +1,20 @@
 # Laporan Duplikasi Isi (konsolidasi dokumentasi)
 
-Tanggal: 23 September 2026. Status: catatan temuan — **bukan keputusan aturan**.
-Tujuan: mencatat dugaan duplikasi isi yang ditemukan saat batch konsolidasi. Isi kembar **tidak dihapus dan tidak diringkas** (aturan handoff owner 23 Sep); penentuan aturan mana yang kanonik adalah wewenang owner.
+Tanggal: 23 September 2026. Status: catatan temuan; keputusan owner yang menyertainya dicatat per item (lihat D-01).
+Tujuan: mencatat dugaan duplikasi isi yang ditemukan saat batch konsolidasi. Isi kembar **tidak dihapus dan tidak diringkas tanpa keputusan owner** (aturan handoff owner 23 Sep); penentuan aturan mana yang kanonik adalah wewenang owner.
 
 ## Ditemukan pada batch B1 (M06 → `domain/operasional.md`, 23 Sep 2026)
 
-### D-01 — Aturan quota energi listrik (tiga salinan yang bersinggungan)
+### D-01 — Aturan quota energi listrik (tiga salinan) — **SELESAI DEDUP 23 Sep 2026**
 
 | Lokasi | Kutipan ringkas | Status |
 |---|---|---|
-| `docs/domain/operasional.md` § Bagian 6 IoT Monitoring (dari M06 L548) | "quota gratis listrik mengikuti periode sewa awal/perpanjangan yang sudah lunas. Perpanjangan tiga bulan memperoleh tiga kali quota bulanan; pembayaran DP renewal sendiri tidak mereset quota." | Dipindah apa adanya dari M06 — tidak diubah |
-| `docs/domain/keuangan.md` § Quota Utilitas Berbasis Periode Sewa Lunas (L37–41) | "Dasar quota listrik gratis bukan lagi selalu satu bulan kalender… perpanjangan tiga bulan menerima tiga kali `freeElectricityKwhPerMonth`… Invoice DP renewal sengaja dikecualikan." | Kanonik sejak S2.b1 |
-| `docs/history/changelog/2026-07.md` entri `Update 2026-07-23 — kontrak quota utilitas` | Salinan ringkas aturan yang sama sebagai entri riwayat | Riwayat bertanggal |
+| `docs/domain/operasional.md` § Bagian 6 IoT Monitoring (dari M06 L548) | "Aturan kanonik quota listrik ada di keuangan.md § Quota Utilitas … tidak diulang di sini" | Dipindah dari M06, lalu kalimat berulangnya diganti **rujukan** ke kanonik (23 Sep 2026) |
+| `docs/domain/keuangan.md` § Quota Utilitas Berbasis Periode Sewa Lunas (L37–43) | "Dasar quota listrik gratis bukan lagi selalu satu bulan kalender… perpanjangan tiga bulan menerima tiga kali `freeElectricityKwhPerMonth`… Invoice DP renewal sengaja dikecualikan… `IotTelemetry` tidak menjadi jurnal atau invoice." | **KANONIK** (ditandai eksplisit 23 Sep 2026) |
+| `docs/history/changelog/2026-07.md` entri `Update 2026-07-23 — kontrak quota utilitas` | "entri ini menandai tanggal kontrak; teks aturan tidak diulang" | Riwayat bertanggal; teks berulang diganti **rujukan** ke kanonik (23 Sep 2026) |
 
-Kesamaan isi: ketiganya menyatakan quota listrik gratis mengikuti periode sewa yang sudah lunas, berkelipatan jumlah bulan, dan DP renewal tidak mereset quota.
-Rekomendasi (belum dieksekusi): bila owner memutuskan `domain/keuangan.md` sebagai kanonik, dua salinan lain dapat diubah menjadi rujukan. **Jangan dihapus tanpa keputusan owner**, karena kalimat di `domain/operasional.md` berada di dalam blok spesifikasi IoT yang belum ditinjau ulang (IoT ditunda).
+**KEPUTUSAN OWNER 23 Sep 2026:** `domain/keuangan.md` § Quota Utilitas = kanonik; dua salinan lain menjadi rujukan.
+**Eksekusi:** kalimat aturan yang berulang pada dua salinan diganti penunjuk ke kanonik. Kalimat yang **tidak** berulang tetap dipertahankan apa adanya (contoh: "Catat meter/renewal tetap jalur bisnis yang menerbitkan invoice, bukan polling Tuya" di `domain/operasional.md`, dan klausa `MeterReading` di `changelog/2026-07.md`). **Tidak ada aturan yang berubah** — hanya pengulangan yang dihapus, dan seluruh isi yang dihapus terbukti ada di kanonik (`keuangan.md` L39–42).
 
 ## Aturan pakai laporan ini
 

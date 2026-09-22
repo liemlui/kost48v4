@@ -36,6 +36,8 @@ Untuk eksekusi coding, AI eksekutor WAJIB membaca `docs/M12_CHECKLIST_CHANGELOG.
 
 ## Quota Utilitas Berbasis Periode Sewa Lunas
 
+> **Kanonik (dedup D-01, keputusan owner 23 Sep 2026).** Hanya bagian ini yang mengikat; salinan yang beredar di `domain/operasional.md` § Bagian 6 dan `history/changelog/2026-07.md` adalah rujukan ke sini.
+
 - Dasar quota listrik gratis bukan lagi selalu satu bulan kalender. `MeterReadingsService` dan settlement renewal memakai periode sewa awal/perpanjangan dengan invoice `RENT` berstatus `PAID` sebagai sumber utama.
 - Perpanjangan tiga bulan menerima tiga kali `freeElectricityKwhPerMonth`; pembacaan meter di tengah periode hanya boleh menagihkan sisa quota yang belum dipakai/ditagihkan dalam periode yang sama.
 - Invoice DP renewal sengaja dikecualikan: DP belum memperpanjang masa tinggal sehingga tidak boleh mereset quota.

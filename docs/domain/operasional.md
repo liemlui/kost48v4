@@ -363,7 +363,7 @@ Sumber TUNGGAL (hindari duplikasi). Per-kamar tetap bisa override tarif bila per
 
 > **Fondasi implementasi selesai (2026-07-23); rollout hardware dan UAT masih gate.** Spek lengkap: `M15_IOT_KWH_WATER_IMPLEMENTATION_PLAN.md` + `M14_IOT_TUYA_DEVICES.md`. Telemetry tidak pernah otomatis membuat tagihan.
 
-**Update quota energi:** quota gratis listrik mengikuti periode sewa awal/perpanjangan yang sudah lunas. Perpanjangan tiga bulan memperoleh tiga kali quota bulanan; pembayaran DP renewal sendiri tidak mereset quota. Catat meter/renewal tetap jalur bisnis yang menerbitkan invoice, bukan polling Tuya.
+**Update quota energi:** aturan kanonik quota listrik ada di [keuangan.md](keuangan.md) § Quota Utilitas Berbasis Periode Sewa Lunas — **tidak diulang di sini** (dedup D-01, keputusan owner 23 Sep 2026). Catat meter/renewal tetap jalur bisnis yang menerbitkan invoice, bukan polling Tuya.
 
 ### Hardware Terpasang
 

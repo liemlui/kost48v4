@@ -61,6 +61,7 @@ Format: **ID** — judul | **Gate** (verifikasi wajib sebelum `[x]`). 🧑 = but
 
 ## 4. Task selesai terbaru (bukti bertanggal)
 
+- **23 Sep 2026 — tindak lanjut review B1 (keputusan owner + dedup)**: lima keputusan owner dicatat di §6; **dedup D-01 dieksekusi** — quota utilitas kanonik di `domain/keuangan.md` (ditandai eksplisit), dua salinan berulang di `domain/operasional.md` dan `history/changelog/2026-07.md` menjadi rujukan (kalimat yang tidak berulang dipertahankan; tidak ada aturan yang berubah). Bukti: [laporan duplikat](history/laporan-duplikat.md), [M13](M13_CHANGELOG.md).
 - **23 Sep 2026 — batch B1 (Tahap 3): M06 (operasional) dipisah**: aturan normatif → `docs/domain/operasional.md` (446 baris); riwayat identity dossier, temuan audit, dan task → `docs/history/changelog/2026-06.md` (+156 baris) dan update Juli → `2026-07.md` (+9 baris); empat deep audit 29 Jul 2026 → `docs/audit/audit-operasional-2026-07.md` (257 baris); `docs/M06_OPERASIONAL.md` 846 → 33 baris (pointer, tautan lama tetap resolve). Konservasi 653 baris non-kosong → **0 hilang** (satu baris header sumber diganti pada pointer dan diumumkan); 18 rujukan masuk diperbaiki di 5 file; invariant 23/101/12; 0 tautan rusak baru (4 pra-eksisting/known exception). Bukti: [mapping §7.4](history/DOC-GOV-20260922-mapping.md) dan [M13](M13_CHANGELOG.md).
 - **23 Sep 2026 — konsolidasi dokumen**: M04 (keuangan) dan M05 (huni) dipecah ke `domain/`, `operations/`, `audit/`, `history/`; duplikasi tabel status invarian dihapus; definisi invariant gate ditulis; bukti verifikasi P1 uang dicatat. Commit: `1c156b78`, `8557cf9a`, `6701fc3e`, `9512ad73`, `801cc192`.
 - **23 Sep 2026 — verifikasi statis temuan uang**: P1-01/P1-02/P1-03 indikasi sudah diperbaiki (jurnal & deposit ledger blocking); P1-04..P1-09 UNKNOWN. Bukti: `docs/audit/p1-uang-status-2026-09-23.md`.
@@ -82,6 +83,10 @@ Daftar lengkap dan riwayat keputusan: [M02_KEPUTUSAN_OWNER.md](M02_KEPUTUSAN_OWN
 - **FLOW-CORE-CAKUPAN** (23 Sep): keenam flow utama tetap dalam cakupan (penghuni masuk, tagihan & pembayaran, perpanjangan, checkout/deposit, pengeluaran, dashboard harian).
 - **DOC-CEPAT + FOKUS-IMPLEMENTASI** (23 Sep): tumpang tindih dokumen diselesaikan dengan eksekusi tegas; setelah itu fokus implementasi aplikasi (task pertama: IMPACT-01, §2 #9).
 - **KONSOLIDASI-FILE** (23 Sep): dokumen dirapikan menjadi sedikit file utama tanpa penomoran berserak; docs harus membantu AI bekerja, bukan memperumit.
+- **BATCH-B1-B11** (23 Sep): urutan batch handoff (B1–B11, 1 batch = 1 commit) adalah **penomoran resmi** penataan; label lama S2.d/S3–S7 ditandai superseded dan tidak dipakai lagi.
+- **DEDUP-QUOTA** (23 Sep): `domain/keuangan.md` § Quota Utilitas = **kanonik**; salinan di `domain/operasional.md` § Bagian 6 dan `history/changelog/2026-07.md` menjadi rujukan. Isi aturan tidak berubah — hanya pengulangan yang dihapus ([bukti](history/laporan-duplikat.md)).
+- **TAUTAN-ARSIP-B11** (23 Sep): 4 tautan rusak pra-eksisting (3 di `docs/archieve/**` legacy + 1 di `docs/history/m11-seed-master-data-appendix-2026-07-08.md`) **tidak** diperbaiki sekarang; ditangani di B11.
+- **IOT-BAGIAN6-TETAP** (23 Sep): isi IoT Bagian 6 tetap di `domain/operasional.md` sampai B8 (M15); rumah akhir materi IoT diputuskan di B8 bersama IOT-LATER.
 
 ## 7. Invariant & verifikasi
 

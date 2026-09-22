@@ -16,6 +16,14 @@
 ---
 
 
+## 2026-09-23 (docs) — keputusan owner pasca-B1: label batch B1–B11 + dedup kuota D-01
+
+- **Lima keputusan owner 23 Sep 2026 (review B1), dicatat di [STATUS §6](STATUS.md):** (1) lanjut batch B2 (M07 + M09); (2) penomoran resmi penataan = **B1–B11**, label S2.d/S3–S7 superseded; (3) quota utilitas **kanonik di `domain/keuangan.md`**, dua salinan lain jadi rujukan; (4) 4 tautan rusak pra-eksisting ditangani di B11; (5) isi IoT Bagian 6 tetap di `domain/operasional.md` sampai B8.
+- **Dedup D-01 dieksekusi (aturan tidak berubah):** `domain/keuangan.md` § Quota Utilitas ditandai **kanonik** secara eksplisit; paragraf berulang di `domain/operasional.md` § Bagian 6 dan `history/changelog/2026-07.md` diganti penunjuk ke kanonik. Kalimat yang tidak berulang dipertahankan apa adanya (mis. "Catat meter/renewal tetap jalur bisnis yang menerbitkan invoice, bukan polling Tuya" dan klausa `MeterReading`).
+- **Konservasi delta (diumumkan):** teks aturan yang dihapus = 2 kalimat di `domain/operasional.md` + 2 kalimat di `history/changelog/2026-07.md`; keduanya terbukti ada utuh di `domain/keuangan.md` L39–43 (periode sewa `PAID`, kelipatan bulan, pengecualian DP renewal, `IotTelemetry` bukan jurnal). Tidak ada aturan, nominal, atau gate yang berubah.
+- **Verifikasi:** invariant `[ ]` = 23, `[x]` = 101, gate domain = 12 (delta 0); tautan diperiksa → 0 rusak baru; `git diff --cached --check` bersih (tanpa known exception baru); UTF-8 tanpa BOM; tanpa blank line di EOF. Tanpa npm/build/test/server; tanpa push.
+- **Deployment:** tidak dilakukan. **Dampak runtime:** tidak diukur.
+
 ## 2026-09-23 (docs) — B1 Tahap 3: pemisahan M06 (operasional) ke domain/operasional.md + riwayat + audit
 
 - **Pemindahan mekanis (isi tidak diubah):** M06_OPERASIONAL.md (846 baris) dipartisi penuh tanpa celah; aturan normatif (aturan tenant A–E, scope staf A–F, invarian & peta kode dossier 14/15/16/18, proposal meter listrik/air, spesifikasi IoT) → [`domain/operasional.md`](domain/operasional.md) (446 baris); identity dossier + temuan audit + task + update 2026-06 → [`changelog/2026-06.md`](history/changelog/2026-06.md) (+156 baris); update 2026-07-08 → [`2026-07.md`](history/changelog/2026-07.md) (+9 baris); status audit 360° P3–P8 (P4/P5) + empat deep audit 29 Jul 2026 → [`audit/audit-operasional-2026-07.md`](audit/audit-operasional-2026-07.md) (257 baris). `M06_OPERASIONAL.md` 846 → 33 baris (pointer; tabel lokasi kanonik).
