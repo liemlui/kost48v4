@@ -22,7 +22,7 @@
 > tetapi gap target/fixture/pagination/gate sukses belum ditutup. OWNER existing
 > dipakai login; skrip dapat membuat ADMIN/STAFF, dua portal TENANT dan satu tenant
 > dummy. Baca [M11 §1b](../M11_DEFAULT_DATA.md#1b-akun-audit-uat-non-personal-ao-03--password-tidak-ditulis-di-docs)
-> dan [M14 AO-03](../M14_AUDIT_UI_UX.md#ao-03--p1--kredensial-dan-data-uat-tidak-mendukung-audit-lintas-role)
+> dan [M14 AO-03](../audit/audit-uiux-lintas-portal-2026-07.md#ao-03--p1--kredensial-dan-data-uat-tidak-mendukung-audit-lintas-role)
 > sebelum eksekusi. Provisioning serta sesi login crawl memutasi DB UAT dan
 > memerlukan lingkup izin terkait. `AUDIT_CONFIRM=1` tidak memvalidasi lingkungan.
 > Password dari environment proses/secret manager; kredensial DEV bukan kredensial UAT.
