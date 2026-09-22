@@ -413,7 +413,12 @@ try { Invoke-RestMethod -Method Post -Uri "http://localhost:3000/api/inventory-m
 
 ---
 
-## Override Booking Flow Fase V (2026-06-30, aktif)
+<a id="override-fase-v--status-kamar"></a>
+<a id="override-fase-v---status-kamar"></a>
+<a id="override-booking-flow-fase-v-2026-06-30-aktif"></a>
+## Override Fase V — Status Kamar
+Dampak keuangan: [keuangan.md](keuangan.md#override-fase-v--dampak-keuangan).
+
 > Aturan di section ini masih berlaku dan mengesampingkan narasi historis.
 > Dimigrasi dari M03 (via changelog) pada 7186693e — Tahap 3 S2.a.
 

@@ -10,8 +10,10 @@ Rujukan: [M02](../M02_KEPUTUSAN_OWNER.md) · [M12](../M12_CHECKLIST_CHANGELOG.md
 e0f8984f
 , S2.b Tahap 3). Bagian 2/3 ditambahkan pada S2.b2.
 
-## Override Booking Flow Fase V — Dampak Keuangan
-Kontrak status kamar: [kontrak.md](kontrak.md#override-booking-flow-fase-v-2026-06-30-aktif).
+<a id="override-fase-v--dampak-keuangan"></a>
+<a id="override-fase-v---dampak-keuangan"></a>
+## Override Fase V — Dampak Keuangan
+Kontrak status kamar: [kontrak.md](kontrak.md#override-fase-v--status-kamar).
 
 **Kontrak room status final mengikuti Fase V di `docs/M12_CHECKLIST_CHANGELOG.md`:**
 
@@ -75,7 +77,8 @@ Keputusan booking awal Fase V mengubah arti status kamar, tetapi tidak mengubah 
 
 Detail keputusan owner: [M02 §Kuis Audit Aset & Nilai](../M02_KEPUTUSAN_OWNER.md).
 
-## Status Invarian Keuangan (per Jul 2026)
+## Status Audit Invarian Keuangan (per Jul 2026)
+Daftar invarian kanonik dan aturan normatif tetap di docs/M04_KEUANGAN.md §1.
 
 | Invariant | Status |
 |-----------|--------|
