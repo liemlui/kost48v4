@@ -18,17 +18,8 @@
 ---
 
 ## 1. Akun & Kredensial
-
 ### 1a. Akun Fondasi seed-dev (khusus database pengembangan port 5433)
-
-| Role  | Email                  | Password    | Keterangan                        |
-|-------|------------------------|-------------|-----------------------------------|
-| OWNER | `owner@kost48.com`     | `Owner#2026`| Dibuat via `seed-dev-reset.js` (DEV) / `golive-setup.js` (produksi, password beda via env) |
-| ADMIN | `admin@kost48.com`     | `admin123`  | **DEV only** (seed-dev); produksi buat manual |
-| STAFF | `staff@kost48.com`     | `staff123`  | **DEV only** (seed-dev); produksi buat manual |
-
-> Kredensial di atas adalah fondasi **DEV** dan TIDAK boleh dipakai sebagai kredensial audit UAT/produksi.
-
+Isi lengkap: [operations/default-dev.md](operations/default-dev.md)
 ### 1b. Akun Audit UAT Non-Personal (AO-03) — password TIDAK ditulis di docs
 
 Target AO-03 adalah lima persona audit (OWNER, ADMIN, STAFF, TENANT dengan stay
@@ -514,33 +505,8 @@ Data real dari owner. Seed via `seed-prod.js`. Tgl Masuk = tanggal hari (bulan m
 > Env `DEEPSEEK_API_KEY` tetap jadi fallback bila Settings kosong.
 
 ---
-
 ## 9. Ringkasan Perintah Seed
-
-```bash
-# DEV — Reset + seed ulang dari nol:
-cd backend
-npm run seed:dev:reset     # Bersihkan DB + buat kamar + akun internal
-# (pastikan backend dev sudah jalan: npm run start:dev)
-npm run seed:dev:api       # Buat tenant + stay + invoice + bayar + tiket + survei
-
-# FAQ (idempoten — aman diulang):
-# POST http://localhost:3000/api/faqs/seed  (perlu login OWNER)
-
-# PRODUKSI — input data tenant real (nama, NIK, kamar, tarif):
-# 1. Pastikan DB fresh & kamar sudah terbuat (via golive-setup atau seed:dev:reset)
-# 2. Jalankan seed-prod:
-node scripts/seed-prod.js
-# 3. Email/HP/occupation tenant → input via UI Owner → Manajemen Tenant
-# 4. Deposit → atur via UI Owner
-```
-
----
-
-*Diperbarui: 2026-07-08 · Sumber: owner KOST48 (data tenant real) + kost48surabaya.com + faqs.service.ts*
-
----
-
+Isi lengkap: [operations/default-dev.md](operations/default-dev.md)
 ## Appendix — Seed Master Data (diarsipkan)
 Prosedur "Patch Tenant Aman" (2026-07-08) sudah tidak tersedia.
 Arsip: [m11-seed-master-data-appendix-2026-07-08.md](history/m11-seed-master-data-appendix-2026-07-08.md).
