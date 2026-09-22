@@ -73,6 +73,20 @@ Keputusan booking awal Fase V mengubah arti status kamar, tetapi tidak mengubah 
 - Payment proof wajib punya ownership server-side; batch payment tidak boleh membuat submission tanpa file bukti yang terikat user/tenant.
 - Guard no-partial tetap berlaku: nominal sah booking adalah DP tepat atau pelunasan tepat sesuai sisa kewajiban yang dihitung server.
 
+## Kebijakan Pembayaran & Invoice
+
+Dossier 10 membahas alur uang masuk inti: bukti bayar tenant, review/approve admin, invoice, pembayaran manual, dan meter reading.
+
+Kontrak no-partial, status PARTIAL, dan pelunasan manual ada di [Payment & Invoice Contracts](kontrak.md#3-payment--invoice-contracts); aturan tersebut tidak disalin sebagai kontrak ketiga di sini.
+
+- Pembayaran booking WAJIB lewat approve bukti (bukan pembayaran manual) — guard A1 di invoice-payments.create:142-150.
+- Reversal jurnal saat cancel = BLOCKING (pola A8) di semua jalur.
+- Tarif TERKUNCI setelah DP dibayar (tak bisa diubah saat approve) — cegah manipulasi.
+
+## Invarian Pembayaran & Invoice
+
+- Total pembayaran ≤ invoice + sisa deposit; promosi meter & OCCUPIED hanya saat invoice PAID; satu pemenang per kamar; uang masuk = otomatisasi berhenti.
+
 ## Kebijakan Kapitalisasi Aset & Saldo Awal
 
 Detail keputusan owner: [M02 §Kuis Audit Aset & Nilai](../M02_KEPUTUSAN_OWNER.md).
