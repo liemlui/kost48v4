@@ -20,103 +20,11 @@ Semua fondasi keuangan: harness verifikasi, pembayaran/invoice, accounting, lapo
 - Jadikan file ini pintu masuk tematik; bila butuh detail mentah, cek file sumber di arsip yang disebut di atas.
 - Heading asli dinaikkan levelnya agar tidak bertabrakan dengan struktur M-file.
 
-## Update 2026-07-08 — Sinkronisasi Status Keuangan
+## Updates — dipindah
+- Riwayat historis: [history/changelog/](history/changelog/)
+- Aturan aktif & status invarian: [domain/keuangan.md](domain/keuangan.md)
 
-Semua invarian keuangan tetap terjaga pasca audit Reasonix (82 temuan, 6 critical bug ✅ fixed). DISCOUNT line kini punya journal entry (contra-revenue 4010). Collection rate menggunakan basis akrual yang konsisten. Renewal cross-term sudah diperbaiki. Tidak ada perubahan fundamental pada flow keuangan.
-
-## Update 2026-07-08 — Kebijakan Kapitalisasi Aset & Saldo Awal Audit Inventaris
-
-Keputusan owner (kuis 2026-07-08 — detail di M02 "Kuis Audit Aset & Nilai"):
-
-- **Aset tetap = barang TAHAN LAMA (umur pakai > 1 tahun) harga ≥ Rp 100.000/unit** — kipas Rp150-250rb & lemari plastik Rp200rb MASUK; bohlam/sprei/gayung = beban berapa pun harganya. (Revisi dari Rp500rb di hari yang sama.)
-- Umur ekonomis default: elektronik/AC/CCTV/kipas 48 bln · furniture 48-96 bln · pompa/tandon/instalasi 96 bln · bangunan 240 bln · tanah tidak disusutkan.
-- Cut-off audit inventaris & neraca awal: **31 Juli 2026**. Nota hampir tidak ada → harga default E (estimasi).
-- Tanah + bangunan MASUK pembukuan via **saldo awal** (`FixedAsset.capitalizationSource=OPENING_BALANCE`): tanah = NJOP SPPT PBB; bangunan dinilai SEKALI kondisi kini per cut-off, susut fresh 240 bln (renovasi 2011-kini tidak dirunut per proyek).
-- Rekening bank campur pribadi → saldo porsi kos dipilah per cut-off. Tidak ada hutang bisnis → kewajiban = deposit tenant + sewa diterima di muka.
-
-**Penyesuaian kode (ambang warning/insight saja — TANPA dampak jurnal/TB):** `owner-ai.helpers.ts`, `owner-ai.service.ts`, `prompts/expense-ocr.prompt.ts` (warning kapitalisasi expense-OCR: >Rp500rb → >Rp100rb barang tahan lama) dan `accounting-reports.service.ts` (kandidat expense besar `gte 500000` → `100000`; filter kategori MAINTENANCE/SUPPLIES/OTHER tetap). Form lapangan: `docs/filePrint/05-07` + RUNBOOK §9A.
-
-## Update 2026-06-30 — Override Booking Flow Fase V
-
-**Kontrak room status final mengikuti Fase V di `docs/M12_CHECKLIST_CHANGELOG.md`:**
-
-```txt
-Booking dibuat, belum bayar        -> Room AVAILABLE
-DP 30% approved                    -> Room RESERVED
-Full payment approved              -> Room RESERVED
-Check-in/serah kunci setelah lunas  -> Room OCCUPIED
-```
-
-Aturan baru yang memengaruhi keuangan:
-
-- **`RESERVED` bukan sinonim lunas.** DP dan lunas sama-sama reserved; status pembayaran dibaca dari invoice/payment, bukan dari status kamar dan bukan dari `downPaymentPaidRupiah`.
-- **Payment approval tidak boleh promote meter/occupancy.** `initialMetersPromotedAt` hanya di-set saat check-in.
-- **Check-in/serah kunci wajib invoice sewa awal lunas.** Saat itulah meter awal dipromosikan dan room menjadi `OCCUPIED`.
-- **Booking pesaing unpaid dibatalkan** saat pemenang payment approved; pesaing yang sudah transfer perlu jalur refund kalah-cepat.
-- Label `Reserved-DP` vs `Reserved-Lunas` dibedakan dari payment data, bukan room status.
-
-Untuk eksekusi coding, AI eksekutor WAJIB membaca `docs/M12_CHECKLIST_CHANGELOG.md` Fase V (V-00..V-16) sebagai sumber kebenaran, bukan narasi historis di bagian lama dokumen ini.
-
-## Update 2026-06-20 — Fase K: Unifikasi Arus Kas ✅
-
-**Dua "Arus Kas" yang berbeda (operasional approximation vs ledger-backed direct method) sudah diunifikasi (R2).** `GET /reports/cash-flow` dihapus — semua laporan arus kas kini pakai `GET /accounting/cashflow` (direct method, termasuk deposit + investasi + pendanaan). Frontend `ReportsPage` tab Operasional kini mengambil dari `fetchCashflowStatement()`. Deposit handling normal checkout juga diselaraskan dengan forced checkout (auto-cover semua invoice, tidak hanya meter).
-
-## Update 2026-07-23 — Quota utilitas berbasis periode sewa lunas
-
-- Dasar quota listrik gratis bukan lagi selalu satu bulan kalender. `MeterReadingsService` dan settlement renewal memakai periode sewa awal/perpanjangan dengan invoice `RENT` berstatus `PAID` sebagai sumber utama.
-- Perpanjangan tiga bulan menerima tiga kali `freeElectricityKwhPerMonth`; pembacaan meter di tengah periode hanya boleh menagihkan sisa quota yang belum dipakai/ditagihkan dalam periode yang sama.
-- Invoice DP renewal sengaja dikecualikan: DP belum memperpanjang masa tinggal sehingga tidak boleh mereset quota.
-- `IotTelemetry` tidak menjadi jurnal atau invoice. Hanya `MeterReading` melalui service bisnis ber-audit yang dapat menerbitkan tagihan utilitas.
-
-## Update 2026-06-17 — AUDIT KEUANGAN ULTRA ✅
-
-**Hasil audit menyeluruh (17 Juni 2026):**
-
-| Invariant | Status |
-|-----------|--------|
-| Trial Balance `isBalanced: True` | ✅ LULUS |
-| Deposit Reconciliation MATCHED (16 stay, Rp8jt) | ✅ LULUS |
-| Cashflow `beginning+net=ending` (unit test 13/13) | ✅ LULUS |
-| Financial Ratios expenseRatio benar (unit test 12/12) | ✅ LULUS |
-| 8 Invarian M04 §1 | ✅ SEMUA PASS |
-| 7 DO-NOT-TOUCH blocks | ✅ SEMUA UTUH |
-| Dead code: `postPaymentReversalTx` (0 pemanggil) | 🟡 Minor |
-| Unmapped transactions | ✅ 0 |
-| PSAK 72 RentRecognitionSchedule | ✅ 0 stranded |
-
-**Detail:** Audit ultra teliti 5 jalur: Chain of Custody (Invoice→Jurnal→TB), Invarian Akuntansi, High-Risk Flows (Booking/Checkout/Renewal/Meter/Forced), Dead Code, PSAK 72.
-
-## Update 2026-06-16 - SI-4 Invoice Purpose
-
-Sesuai analisa PDF dan temuan owner 2026-06-16, invoice tidak boleh hanya terbaca sebagai nomor. UI harus menjawab "tagihan ini buat apa" sebelum tenant/admin membuka detail.
-
-- **SI-4 selesai:** `invoicePurposeLabel` dan `invoicePurposeMeta` menurunkan peruntukan dari `InvoiceLineType`.
-- Label utama: `Sewa`, `Listrik`, `Air`, `Listrik & Air`, `Sewa + Listrik`, `Uang Muka (DP)`, `WiFi`, dan `Denda`.
-- Badge "Tagihan <peruntukan>" tampil di daftar tenant, daftar backoffice, detail invoice backoffice, dan detail invoice tenant; nomor invoice turun menjadi subteks.
-- Tidak ada migrasi schema: peruntukan diturunkan dari baris invoice, bukan kolom baru.
-- Prinsip bisnis: kejelasan invoice mengurangi dispute, memperkuat trust, dan menyambungkan pembayaran ke riwayat sewa.
-
-## Update 2026-06-19 - Fase G AI Finance Analyst
-
-AI finance hanya boleh menjadi analis dan pembuat draft keputusan Owner/Admin. Detail implementasi ada di `docs/M09_AI_OWNER_ADMIN.md`.
-
-- **Manual only:** tombol seperti "Analisa Finance dengan AI" tidak boleh terpanggil otomatis saat halaman finance dibuka.
-- **Owner-only untuk analisa mendalam:** AI membaca snapshot trial balance, P&L, cashflow, ratios, readiness, period close, dan deposit reconciliation; output berupa temuan, risiko, dan rekomendasi.
-- **Tidak boleh mutasi ledger:** AI tidak boleh membuat/mengubah `JournalEntry`, `Invoice`, `InvoicePayment`, `Expense`, `AccountingPeriod`, `CashAccount`, atau `OpeningBalance`.
-- **Guard tetap deterministik:** trial balance, no-partial, deposit liability, period OPEN/CLOSED, dan readiness tetap milik service accounting. Jika AI berbeda pendapat dengan guard backend, backend menang.
-- **Expense OCR draft:** nota biaya boleh di-OCR lokal lalu AI menormalkan teks menjadi draft expense. Admin/Owner tetap mengoreksi dan klik simpan; posting expense/jurnal mengikuti service existing.
-- **Audit trail:** jika rekomendasi AI dipakai untuk approve/reject pembayaran atau membuat expense, catat `AuditLog.meta.ai` berisi feature, model, promptHash, snapshotHash, confidence, dan humanDecision.
-
-## Update 2026-06-30 - Payment Booking Fase V
-
-Keputusan booking awal Fase V mengubah arti status kamar, tetapi tidak mengubah prinsip keuangan:
-
-- DP 30% approved dan pelunasan approved sama-sama mengunci room menjadi `RESERVED`.
-- `RESERVED` bukan bukti lunas; bukti lunas tetap invoice `PAID` atau total pembayaran invoice >= total tagihan.
-- Payment approval tidak boleh mengubah room ke `OCCUPIED`, tidak boleh promote meter, dan tidak boleh mengisi `initialMetersPromotedAt`.
-- Check-in/serah kunci wajib lunas penuh; baru setelah itu room `OCCUPIED` dan revenue/lifecycle hunian mengikuti flow promoted.
-- Payment proof wajib punya ownership server-side; batch payment tidak boleh membuat submission tanpa file bukti yang terikat user/tenant.
-- Guard no-partial tetap berlaku: nominal sah booking adalah DP tepat atau pelunasan tepat sesuai sisa kewajiban yang dihitung server.
+Status invarian: lihat §1 (definisi) & status Jul 2026 di [domain/keuangan.md](domain/keuangan.md).
 
 ## Bagian 1 - `docs/archieve/2026-06-16_root_docs_pre_M/05_VERIFIKASI_KEUANGAN.md`
 
@@ -227,7 +135,7 @@ Di DB bersih + COA seeded + CashAccount Cash(1000)+Bank(1010) + periode OPEN:
 - [ ] `tsc --noEmit` 0 error.
 - [ ] `npm run test:unit` (`node --test "test/**/*.test.js"`) semua PASS (kalau task menyentuh fungsi ber-test).
 - [ ] 5 invarian §1 yang relevan tetap true (cek via §4 endpoint).
-- [ ] Angka harapan task terpenuhi (lihat "selesai bila" di `08_CHECKLIST` / dossier 13).
+- [ ] Angka harapan task terpenuhi (lihat "selesai bila" di `08_CHECKLIST` / dossier 13 di domain/keuangan.md).
 - [ ] Tidak menyentuh kode di DO-NOT-TOUCH §2.
 - Kalau ada yang ✗ → JANGAN commit; perbaiki atau STOP & lapor.
 
