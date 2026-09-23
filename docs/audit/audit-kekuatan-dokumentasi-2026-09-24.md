@@ -29,7 +29,7 @@ Tiga kesalahan pengukuran yang secara eksplisit dihindari di sini:
 
 - **83% dari "1.295 berkas" adalah `audit-map` (generated, untracked) + `archieve` (legacy)** → mengutip angka total sebagai ukuran dokumentasi akan menyesatkan. Dokumentasi kanonik yang dipelihara = **43 berkas aktif + 12 arsip**.
 - **Beban baca sesi baru:** `README` 117 + `STATUS` 154 + `ATURAN` 45 + `OPERASI` 52 = **368 baris** (ambang 1.500) — hasil langsung DOCS-CLEANUP-1.
-- Top-level `docs/` = **8 berkas** (`README`, `STATUS`, `ATURAN`, `OPERASI`, `PETA-KODE`, `AUDIT`, `KEPUTUSAN-OWNER`, `M13_CHANGELOG`). Root: 6 md tracked + 1 prompt untracked (`PROMPT-IMPACT-01.md`).
+- Top-level `docs/` = **8 berkas** (`README`, `STATUS`, `ATURAN`, `OPERASI`, `PETA-KODE`, `AUDIT`, `KEPUTUSAN-OWNER`, `M13_CHANGELOG`). Root: **6 md tracked, 0 untracked** — prompt `PROMPT-IMPACT-01.md` dihapus 24 Sep 2026 setelah task penutupnya tercatat (working tree bersih).
 
 ## 3. Verdict per dimensi
 
