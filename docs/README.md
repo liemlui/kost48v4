@@ -14,10 +14,10 @@ Dokumen dirapikan menjadi sedikit file utama tanpa penomoran M. Tabel ini menyeb
 |---|---|---|
 | [AGENTS](../AGENTS.md) | Aturan kerja agent: izin, batas baca, level, verifikasi | tetap di root |
 | [STATUS](STATUS.md) | Antrean, gate, invariant, keputusan owner ringkas | tetap — menggantikan M12, AI_MASTER, ringkasan M13 |
-| `docs/ATURAN.md` *(target)* | Aturan domain: uang, huni, operasional, harga, publik, AI/IoT | [domain/](domain/) |
-| `docs/OPERASI.md` *(target)* | Runbook: deploy, produksi, go-live, env, default dev, data master | [operations/](operations/) |
+| [ATURAN](ATURAN.md) | Aturan domain: uang, huni, operasional, harga, publik, AI/IoT | kanonik sejak Fase 2 (23 Sep 2026) — rincian per topik di [domain/](domain/) |
+| [OPERASI](OPERASI.md) | Runbook: deploy, produksi, go-live, env, default dev, data master | kanonik sejak Fase 2 — rincian di [operations/](operations/) |
 | [PETA-KODE](PETA-KODE.md) | Peta modul dan file kode | tetap — menggantikan M00 |
-| `docs/AUDIT.md` *(target)* | Status audit, temuan, dan bukti bertanggal | [audit/](audit/) |
+| [AUDIT](AUDIT.md) | Status audit, temuan, dan bukti bertanggal | kanonik sejak Fase 2 — rincian di [audit/](audit/) |
 | [KEPUTUSAN-OWNER](KEPUTUSAN-OWNER.md) | Register keputusan bisnis owner | tetap — menggantikan M02 |
 | `docs/arsip/` *(target)* | Riwayat, fase, changelog bulanan, dokumen lama | [history/](history/) + `docs/archieve/` |
 
@@ -30,6 +30,9 @@ Dokumen dirapikan menjadi sedikit file utama tanpa penomoran M. Tabel ini menyeb
 | Template task/audit/handoff + roadmap | [GUIDE](../AI_WORKFLOW_GUIDE.md) §11–§12 |
 | Antrean aktif, gate, prasyarat, blocker, invariant | [STATUS](STATUS.md) — §2 antrean, §3 task terbuka, §7 invariant |
 | Keputusan owner ringkas | [STATUS §6](STATUS.md#6-keputusan-owner-yang-mengikat-ringkas) · register lengkap: [KEPUTUSAN-OWNER](KEPUTUSAN-OWNER.md) |
+| Aturan domain sebelum menyentuh uang/huni/harga | [ATURAN](ATURAN.md) — titik masuk; rincian per topik di `docs/domain/` |
+| Runbook deploy, produksi, dan go-live | [OPERASI](OPERASI.md) — titik masuk; rincian di `docs/operations/` |
+| Status audit, temuan, dan gate verifikasi | [AUDIT](AUDIT.md) — titik masuk; rincian di `docs/audit/` |
 | Peta kode sebelum mencari source | [PETA-KODE](PETA-KODE.md) · [audit-map](audit-map/README.md) · [alur lintas domain](audit-map/ALUR_LINTAS_DOMAIN.md) · [cara audit](audit-map/CARA_AUDIT.md) |
 
 ## 2. Domain (aturan bisnis)
@@ -112,6 +115,6 @@ Path lama dipertahankan sebagai pointer sehingga tautan dan bookmark lama tetap 
 
 - Indeks tidak menggantikan [STATUS](STATUS.md) (antrean/gate), [KEPUTUSAN-OWNER](KEPUTUSAN-OWNER.md) (keputusan bisnis), atau [AGENTS](../AGENTS.md) (aturan); urutan kerja tetap dari STATUS §2.
 - Status penataan dokumen — batch, sisa pekerjaan, arsip — hanya ada di [STATUS §8](STATUS.md#8-struktur-dokumen-tujuan-konsolidasi) dan [mapping Tahap 3](history/DOC-GOV-20260922-mapping.md); indeks ini tidak menyimpan status sendiri agar tidak ada dua sumber.
-- `docs/ATURAN.md`, `docs/OPERASI.md`, dan `docs/AUDIT.md` adalah **target** konsolidasi (Fase 2, menunggu approval owner); selama belum dibuat, rumahnya adalah `docs/domain/`, `docs/operations/`, dan `docs/audit/`.
+- [ATURAN](ATURAN.md), [OPERASI](OPERASI.md), dan [AUDIT](AUDIT.md) adalah rumah kanonik sejak **Fase 2 (23 Sep 2026)**; rinciannya tetap di `docs/domain/`, `docs/operations/`, dan `docs/audit/` dan tidak digandakan ke sana. Sisa target: `docs/arsip/` (Fase 3).
 - Path lama (seri M dan empat berkas non-M) tetap ada sebagai pointer agar tautan lama resolve; penghapusannya menunggu tidak ada rujukan lagi (Fase 3).
 - Bila ada tautan di indeks ini yang tidak cocok, laporkan ke [STATUS](STATUS.md); jangan perbaiki di luar scope batch yang berjalan.
