@@ -14,7 +14,7 @@ Permukaan publik dan pertumbuhan: marketing, UI/UX, loyalitas, gamifikasi, refer
 | Topik | Lokasi kanonik | Catatan |
 |---|---|---|
 | Seluruh isi M07: konsep marketing, arahan UI/UX publik, dossier 17 & 19, proposal marketing/gamifikasi/tip, audit dan update bertanggal | [domain/publik.md](domain/publik.md) | Dipindah utuh apa adanya (B2, 23 Sep 2026); pemisahan audit/riwayat menyusul |
-| Keputusan owner yang dirujuk (UI/UX publik 2026-06-17, D-19, D-23) | [M02](M02_KEPUTUSAN_OWNER.md) | Tetap di M02 â€” tidak diubah |
+| Keputusan owner yang dirujuk (UI/UX publik 2026-06-17, D-19, D-23) | [M02](M02_KEPUTUSAN_OWNER.md) | Tetap di M02 — tidak diubah |
 
 - Lokasi kanonik isi rinci ada di tabel atas; file ini hanya pintu masuk agar tautan lama tetap resolve.
 

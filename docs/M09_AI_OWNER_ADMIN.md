@@ -13,7 +13,7 @@ Fase G menjadikan AI sebagai pembantu keputusan Owner/Admin, bukan autopilot. AI
 
 | Topik | Lokasi kanonik | Catatan |
 |---|---|---|
-| Seluruh isi Fase G: pola aman/terlarang, struktur backend & frontend, budget/context, audit trail, fitur G0â€“G9, UAT, checklist eksekutor, Audit 360Â° P6 | [domain/ai.md](domain/ai.md) | Dipindah utuh apa adanya (B2, 23 Sep 2026); pemisahan audit/riwayat menyusul |
-| Keputusan owner Fase G (D-23 dan turunannya) | [M02](M02_KEPUTUSAN_OWNER.md) | Tetap di M02 â€” tidak diubah |
+| Seluruh isi Fase G: pola aman/terlarang, struktur backend & frontend, budget/context, audit trail, fitur G0–G9, UAT, checklist eksekutor, Audit 360° P6 | [domain/ai.md](domain/ai.md) | Dipindah utuh apa adanya (B2, 23 Sep 2026); pemisahan audit/riwayat menyusul |
+| Keputusan owner Fase G (D-23 dan turunannya) | [M02](M02_KEPUTUSAN_OWNER.md) | Tetap di M02 — tidak diubah |
 
 - Lokasi kanonik isi rinci ada di tabel atas; file ini hanya pintu masuk agar tautan lama tetap resolve.

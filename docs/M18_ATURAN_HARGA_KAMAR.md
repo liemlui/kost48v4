@@ -8,7 +8,7 @@
 | Topik | Lokasi kanonik | Catatan |
 |---|---|---|
 | Seluruh isi M18: prinsip tarif bulanan, formula multiplier, pembulatan, ketersediaan term, utilitas, periode sewa, DP & deposit, surcharge penghuni ekstra, rent-lock, prabayar, kewenangan role, ringkasan alur | [domain/harga.md](domain/harga.md) | Dipindah utuh apa adanya (B3, 23 Sep 2026) |
-| Keputusan owner yang dirujuk (G-4/B, D-02, D-05, D-16, D-18) | [M02](M02_KEPUTUSAN_OWNER.md) | Tetap di M02 â€” tidak diubah |
+| Keputusan owner yang dirujuk (G-4/B, D-02, D-05, D-16, D-18) | [M02](M02_KEPUTUSAN_OWNER.md) | Tetap di M02 — tidak diubah |
 | Antrean/gate yang menyentuh harga | [STATUS.md](STATUS.md) | Kanonik |
 
 - Lokasi kanonik isi rinci ada di tabel atas; file ini hanya pintu masuk agar tautan lama tetap resolve.

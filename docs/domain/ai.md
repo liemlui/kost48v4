@@ -1,12 +1,12 @@
-# AI Owner/Admin â€” Fase G Approval Copilot
+# AI Owner/Admin — Fase G Approval Copilot
 
 Tanggal: 2026-09-23
 Status: aktif
-Tujuan: aturan & spesifikasi AI berbayar (DeepSeek) untuk OWNER/ADMIN â€” pola aman/terlarang, struktur backend/frontend, hemat token, audit trail, fitur G0â€“G9, UAT (dari M09)
-Rujukan: [M02](../M02_KEPUTUSAN_OWNER.md) Â· [M12](../M12_CHECKLIST_CHANGELOG.md) Â· [M09](../M09_AI_OWNER_ADMIN.md) Â· [keuangan.md](keuangan.md) Â· [operasional.md](operasional.md) Â· [publik.md](publik.md)
+Tujuan: aturan & spesifikasi AI berbayar (DeepSeek) untuk OWNER/ADMIN — pola aman/terlarang, struktur backend/frontend, hemat token, audit trail, fitur G0–G9, UAT (dari M09)
+Rujukan: [M02](../M02_KEPUTUSAN_OWNER.md) · [M12](../M12_CHECKLIST_CHANGELOG.md) · [M09](../M09_AI_OWNER_ADMIN.md) · [keuangan.md](keuangan.md) · [operasional.md](operasional.md) · [publik.md](publik.md)
 
 > Migrasi dari docs/M09_AI_OWNER_ADMIN.md (B2 Tahap 3, 23 Sep 2026) pada DOC-GOV-20260922; teks tidak diubah.
-> Batch B2 memindahkan **seluruh isi M09 apa adanya** ke file ini (satu tujuan per handoff owner). Bagian bertanggal â€” Update 16 Jul 2026, status Fase G/J/K, dan `## Audit 360Â° P6 AI Flow (Jul 2026)` â€” **ikut utuh di sini dan belum dipisah**; pemisahan ke `docs/AUDIT.md`/`docs/arsip/` dilakukan pada tahap konsolidasi audit/arsip atau batch lanjutan sesuai keputusan owner.
+> Batch B2 memindahkan **seluruh isi M09 apa adanya** ke file ini (satu tujuan per handoff owner). Bagian bertanggal — Update 16 Jul 2026, status Fase G/J/K, dan `## Audit 360° P6 AI Flow (Jul 2026)` — **ikut utuh di sini dan belum dipisah**; pemisahan ke `docs/AUDIT.md`/`docs/arsip/` dilakukan pada tahap konsolidasi audit/arsip atau batch lanjutan sesuai keputusan owner.
 
 ## Status Saat Ini
 

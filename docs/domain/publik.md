@@ -1,12 +1,12 @@
-# Publik â€” Marketing, UI/UX, Gamifikasi, Growth
+# Publik — Marketing, UI/UX, Gamifikasi, Growth
 
 Tanggal: 2026-09-23
 Status: aktif
-Tujuan: arahan & aturan permukaan publik dan pertumbuhan â€” marketing, UI/UX publik, loyalitas/gamifikasi, referral, tip staf, proposal growth (dari M07)
-Rujukan: [M02](../M02_KEPUTUSAN_OWNER.md) Â· [M12](../M12_CHECKLIST_CHANGELOG.md) Â· [M07](../M07_PUBLIK_GROWTH.md) Â· [keuangan.md](keuangan.md) Â· [operasional.md](operasional.md) Â· [ai.md](ai.md)
+Tujuan: arahan & aturan permukaan publik dan pertumbuhan — marketing, UI/UX publik, loyalitas/gamifikasi, referral, tip staf, proposal growth (dari M07)
+Rujukan: [M02](../M02_KEPUTUSAN_OWNER.md) · [M12](../M12_CHECKLIST_CHANGELOG.md) · [M07](../M07_PUBLIK_GROWTH.md) · [keuangan.md](keuangan.md) · [operasional.md](operasional.md) · [ai.md](ai.md)
 
 > Migrasi dari docs/M07_PUBLIK_GROWTH.md (B2 Tahap 3, 23 Sep 2026) pada DOC-GOV-20260922; teks tidak diubah.
-> Batch B2 memindahkan **seluruh isi M07 apa adanya** ke file ini (satu tujuan per handoff owner). Bagian bertanggal â€” `## Update 2026-06/07`, `## Audit UI/UX Full â€” 2026-06-19`, `## Audit 360Â° P7 Marketing & Growth (Jul 2026)`, dan dua deep audit 29 Jul 2026 â€” **ikut utuh di sini dan belum dipisah**; pemisahan ke `docs/AUDIT.md`/`docs/arsip/` dilakukan pada tahap konsolidasi audit/arsip atau batch lanjutan sesuai keputusan owner.
+> Batch B2 memindahkan **seluruh isi M07 apa adanya** ke file ini (satu tujuan per handoff owner). Bagian bertanggal — `## Update 2026-06/07`, `## Audit UI/UX Full — 2026-06-19`, `## Audit 360° P7 Marketing & Growth (Jul 2026)`, dan dua deep audit 29 Jul 2026 — **ikut utuh di sini dan belum dipisah**; pemisahan ke `docs/AUDIT.md`/`docs/arsip/` dilakukan pada tahap konsolidasi audit/arsip atau batch lanjutan sesuai keputusan owner.
 
 ## Update 2026-07-08 — Sinkronisasi Publik & Growth
 

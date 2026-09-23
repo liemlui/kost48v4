@@ -3,7 +3,7 @@
 <a id="arah-dan-status-aktif--diselaraskan-8-september-2026-identitas-hosting-diperbarui-13-september-2026"></a>
 <a id="9-pencatatan-hosting-ef-00-dan-ef-02"></a>
 
-> **File ini pintu masuk tematik.** Sejak 23 September 2026 seluruh isi aktifnya ada di [operations/efisiensi-hosting.md](operations/efisiensi-hosting.md) â€” dipindah apa adanya pada B3 Tahap 3.
+> **File ini pintu masuk tematik.** Sejak 23 September 2026 seluruh isi aktifnya ada di [operations/efisiensi-hosting.md](operations/efisiensi-hosting.md) — dipindah apa adanya pada B3 Tahap 3.
 > Anchor di atas dipertahankan agar rujukan lama (mis. `M19_EFISIENSI_HOSTING_512MB.md#9-pencatatan-hosting-ef-00-dan-ef-02` dari M02 dan M08) tetap resolve.
 
 ## Isi & lokasi kanonik
