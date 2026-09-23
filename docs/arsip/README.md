@@ -23,10 +23,11 @@ Changelog bulanan yang **masih berjalan** tetap di `docs/history/changelog/2026-
 
 ## 2. Yang bukan arsip ini
 
-- `docs/archieve/**` - arsip legacy dengan ejaan apa adanya (107 berkas di disk; 31 tracked). **Tidak disentuh** di batch DOCS-CLEANUP-1; statusnya keputusan owner.
-- `docs/audit-map/**` - **generated dan untracked** (1.126 berkas); dipakai 135+ tautan peta per ID audit. Jangan dihapus dan jangan dianggap bagian repo.
+- `docs/archieve/**` - arsip legacy dengan ejaan apa adanya (107 berkas di disk; **31 tracked**, 76 lainnya di-exclude **lokal** lewat `.git/info/exclude` L9 sehingga di clone bersih tampak untracked). **Tidak disentuh** dan ejaan tidak diseragamkan - keputusan owner 24 Sep 2026 (`ARSIP-BATAS`).
+- `docs/audit-map/**` - **generated dan untracked** (1.126 berkas, 0 tracked), di-ignore `.gitignore` L87 (`/docs/audit-map/`); dipakai 135+ tautan peta per ID audit. **Jangan dihapus**, jangan dipindah ke repo, dan jangan dianggap bagian repo; regenerasi `node docs/audit-map/generate.cjs` - keputusan owner 24 Sep 2026 (`ARSIP-BATAS`).
 
 ## 3. Aturan
 
 - Berkas di sini boleh besar; biaya bacanya dipindahkan keluar dari jalur kerja rutin.
 - Setiap pemindahan wajib punya bukti konservasi (0 baris non-kosong hilang) di entri riwayat terkait.
+- Batas arsip dan berkas besar sudah **diputuskan owner 24 Sep 2026** (`ARSIP-BATAS`): lihat [KEPUTUSAN-OWNER](../KEPUTUSAN-OWNER.md) dan [STATUS](../STATUS.md).

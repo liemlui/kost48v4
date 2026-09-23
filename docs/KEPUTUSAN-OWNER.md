@@ -8,6 +8,7 @@ Rujukan: [STATUS](STATUS.md) · [AGENTS](../AGENTS.md) · [STATUS](STATUS.md) ·
 > Migrasi dari docs/M02_KEPUTUSAN_OWNER.md (B7 Tahap 3, 23 Sep 2026) pada DOC-GOV-20260922; teks keputusan, tanggal, dan bukti dipindah apa adanya.
 > Kelas isi non-keputusan dan izin/approval yang sudah digantikan dipisah ke [history/izin-dan-catatan-keputusan-owner.md](history/izin-dan-catatan-keputusan-owner.md) tanpa mengubah teks.
 > Status "berlaku/digantikan" di bawah ditetapkan dari bukti bertanggal; keputusan lama tidak otomatis dianggap tidak berlaku.
+> **Diperbarui 24 Sep 2026 (DOCS-CLEANUP-1b):** keputusan owner atas butir A1-A4, C1-C3 ditambahkan sebagai entri baru di bawah; tidak ada keputusan lama yang diubah.
 
 ## Status keputusan (berlaku / digantikan) — dari bukti
 
@@ -18,6 +19,21 @@ Rujukan: [STATUS](STATUS.md) · [AGENTS](../AGENTS.md) · [STATUS](STATUS.md) ·
 | ARAH-DOKUMEN 6 Sep — "seri M00–M19 dipertahankan" | **digantikan** | [KONSOLIDASI-FILE](STATUS.md#6-keputusan-owner-yang-mengikat-ringkas) 23 Sep + [STATUS §8](STATUS.md#8-struktur-dokumen-tujuan-konsolidasi) (7 file utama; path lama menjadi pointer) |
 | Keputusan izin bertahap 8 Sep + koreksi lingkup AO | **riwayat** (izin sebagian masih operatif; status eksekusi bertanggal) | Dipisah ke [history/izin-dan-catatan-keputusan-owner.md](history/izin-dan-catatan-keputusan-owner.md); status aktual di [STATUS](STATUS.md) dan [STATUS](STATUS.md) |
 | Butir lain: D-01..D-31, R1–R5, B1–B5, E/F/K/L/S, OP-*, FIN-*, PUB-*, STF-*, AI-*, OWN-*, W-00-D1..D3, AL-01..AL-04, OC-01..OC-07 | **berlaku** | Tidak ada bukti penggantian yang tercatat per 23 Sep 2026 |
+| Batas penataan arsip & berkas besar (DOCS-CLEANUP, 24 Sep 2026 — A1–A4, C1–C3) | **berlaku** | Entri "2026-09-24 — DOCS-CLEANUP" di bawah; bukti batch [M13](M13_CHANGELOG.md) |
+
+## 2026-09-24 — DOCS-CLEANUP: batas arsip, berkas >600 baris, dan preseden kerja
+
+Konteks: batch DOCS-CLEANUP-1 (commit `06079a97`) memindahkan 11 berkas ke `docs/arsip/` dan menggabungkan 8 grup. Laporan menandai **satu sub-gate belum terpenuhi** (tidak ada berkas aktif >600 baris) dan empat butir yang menyentuh aturan bisnis/data. Owner menyetujui **seluruh rekomendasi** pada 24 Sep 2026, sehingga:
+
+- **A1 — berkas aturan bisnis tetap utuh.** `domain/ai.md` (786), `domain/iot.md` (822), dan `domain/publik.md` (682) **tidak dipecah dan tidak dipindah**. Isi aturan bisnis tetap milik owner; sub-gate ">600 baris" untuk berkas-berkas ini **ditutup sebagai accepted exception**, bukan pelanggaran yang harus dikejar.
+- **A2 — changelog berjalan tetap di tempat.** `history/changelog/2026-09.md` (987 → 1.000 baris) tetap di `docs/history/changelog/` sebagai penerima rotasi entri M13. Rotasi lebih agresif **tidak** dilakukan, karena akan mengeluarkan checkbox dari domain invariant riwayat (`[x]` = 101).
+- **A3 — `docs/archieve/**` dibiarkan.** 107 berkas di disk, **31 tracked**, 76 lainnya di-exclude **lokal** lewat `.git/info/exclude` L9 (`docs/archieve/`) — di clone bersih berkas itu tampak sebagai untracked. Ejaan folder dipertahankan apa adanya; tidak ada pemindahan, penghapusan, atau penyeragaman ejaan.
+- **A4 — `docs/audit-map/**` tetap artefak generated lokal.** 1.126 berkas, **0 tracked**, di-ignore `.gitignore` L87 (`/docs/audit-map/`); dipakai 135+ tautan peta per ID audit. **Dilarang dihapus** dan tidak dipindah ke repo; regenerasi dengan `node docs/audit-map/generate.cjs`.
+- **C1 — tidak ada batch lanjutan.** DOCS-CLEANUP-2/3 **tidak dibuat**; penataan dokumen ditutup pada DOCS-CLEANUP-1. Sisa hanya Tahap 4 (review akhir) bila owner memintanya.
+- **C2 — alat checker tidak diubah.** Angka rujukan tetap **26 temuan docs-scope**, dihitung pada disk yang memuat `docs/audit-map/**`; target `audit-map/**` **tidak** ditandai "generated - dilewati". Keterbatasan yang dinyatakan: di clone bersih angka itu berbeda karena direktori tersebut memang tidak ikut repo.
+- **C3 — preseden kerja disetujui untuk batch penataan berikutnya:** (a) berkas `docs/**` yang sudah kotor karena **task lain yang sedang berjalan** di-commit sebagai *(working tree - hunk task lain)* lewat `git hash-object` + `git update-index --cacheinfo`, sehingga perubahan task lain tetap **unstaged** dan tidak rusak (tanpa `git add -A/-u/.`, tanpa stash/reset); (b) `git commit --amend` **boleh** dipakai untuk menjaga aturan "1 batch = 1 commit" bila ada berkas sah tertinggal dari staging — commit tetap satu dan tidak ada tautan rusak yang tertinggal.
+
+Keputusan ini **tidak mengubah** aturan bisnis, nominal uang, gate uang/huni, schema, permission, kontrak API, atau UI/UX; yang ditetapkan hanya **batas penataan dokumentasi** dan cara kerja batch.
 
 ## 2026-09-23 — DEDUP-UANG: pengulangan isi aturan uang/harga boleh diringkas
 
