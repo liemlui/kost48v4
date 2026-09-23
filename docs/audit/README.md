@@ -21,3 +21,4 @@ Hasil Tahap 2 DOC-GOV-20260922 (migrasi riwayat dokumen; **bukan** audit modul b
 | UI/UX homepage produksi — 15 Sep 2026 (mobile-first) | [audit-homepage-produksi-2026-09-15](audit-homepage-produksi-2026-09-15.md) — dipindah dari M14 (B4); bukti bertanggal + hasil sesudah deploy |
 | Tata dokumen — audit dokumentasi & urutan kerja 8 Sep 2026 | [audit-dokumentasi-2026-09](audit-dokumentasi-2026-09.md) — dipindah dari M16 §0 (B4); temuan D-01..D-11 + status Tahap 2 |
 | Kode — audit menyeluruh 30 Jul 2026 | [audit-menyeluruh-2026-07](audit-menyeluruh-2026-07.md) — dipindah dari M16 §1–§5 (B4); angka test/build hasil Juli |
+| Lintas scope — Audit Lintas Scope Reasonix 29 Jul 2026 | [audit-lintas-scope-2026-07-29](audit-lintas-scope-2026-07-29.md) — dipindah dari M01 § Audit Lintas Scope (B5, 23 Sep 2026); bukti bertanggal, temuan 1 CRITICAL + 2 HIGH + 10 rekomendasi |

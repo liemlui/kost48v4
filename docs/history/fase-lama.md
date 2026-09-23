@@ -53,7 +53,7 @@
 | **Fase M20-Deep — Audit Notifikasi & Sistem (Reasonix)** | ✅ selesai (29 Jul) | Deep scan 6 modul notifikasi/sistem (1138 baris): 0 best-effort journal, 0 race condition. Semua .catch() acceptable. Domain paling bersih. Temuan terintegrasi ke `docs/M06_OPERASIONAL.md` §Deep Audit Notifikasi. |
 | **Fase M21-Deep — Audit AI & Growth (Reasonix)** | ✅ selesai (29 Jul) | Deep scan 7 modul AI/growth (2599 baris): 0 best-effort journal, 0 race condition. FOR UPDATE di loyalty redemption. OWNER-only segregation. Domain terbersih. Temuan terintegrasi ke `docs/M07_PUBLIK_GROWTH.md` §Deep Audit AI. |
 | **Fase M22-Deep — Audit IoT & Telemetri (Reasonix)** | ✅ selesai (29 Jul) | Deep scan modul iot/ (1911 baris): 0 isu. timingSafeEqual di cron token + ESP32 HMAC, polling mutex, RateLimitGuard. Temuan terintegrasi ke `docs/M06_OPERASIONAL.md` §Deep Audit IoT. |
-| **Fase MX — Audit Lintas Scope (Reasonix)** | ✅ selesai (29 Jul) | Cross-scope audit terhadap 8 domain: 1 CRITICAL (journal consistency), 2 HIGH (timezone, DRY), 10 rekomendasi X1-X10. Scope Keuangan = sink terlemah. Temuan terintegrasi ke `docs/M01_MASTER.md` §Audit Lintas Scope. |
+| **Fase MX — Audit Lintas Scope (Reasonix)** | ✅ selesai (29 Jul) | Cross-scope audit terhadap 8 domain: 1 CRITICAL (journal consistency), 2 HIGH (timezone, DRY), 10 rekomendasi X1-X10. Scope Keuangan = sink terlemah. Temuan terintegrasi ke `docs/audit/audit-lintas-scope-2026-07-29.md`. |
 | **Fase MX-Verify — Verifikasi Codex Sol** | ✅ selesai (29 Jul) | 18 temuan diverifikasi oleh Codex Sol (model tertinggi): 12 BENAR, 1 SALAH (A9 expenses), 5 PARSIAL (B1/B4/C1/D1/A7). 8 koreksi diterapkan ke M01/M05/M06. |
 | **Fase MX-Final — Koreksi sign-off pasca commit 6223a30** | ✅ selesai (30 Jul) | S-01 lock dipindahkan ke satu transaksi penuh; OS-05 lock User disamakan untuk ticket+routine; seluruh boundary bucket AI diperbaiki; fan-out peer-report menjadi bulk; 7 regression test khusus ditambahkan. |
 | **Fase AO — Audit & Hardening UI/UX Lintas Portal** | 🔴 audit selesai, eksekusi terbuka | 66 kombinasi awal + verifikasi produksi homepage + review Owner/Admin static-code; 1 P0 environment, 9 P1, 11 P2, 1 P3. Sumber kerja: `docs/M14_AUDIT_UI_UX.md`. |
@@ -71,7 +71,7 @@ Daftar berikut adalah ledger lintas fase bertanggal, berisi hasil selesai dan ba
 > **Ledger lintas fase (riwayat dan backlog):**
 > 0. **STAFF-PORTAL-RINGKAS** — ✅ **SELESAI (20 Agu 2026)** — live check 8 route staff; perbaiki 403 `/users` di TicketsPage mode STAFF, hapus kartu kinerja duplikat di dashboard (detail tetap di `/staff-report`). FE vitest 133/133 ✅, build ✅.
 > 0. **TENANT-PORTAL-RINGKAS** — ✅ **SELESAI (20 Agu 2026)** — portal tenant dirapikan: nav Utama/Lainnya (3 aksi inti duluan, fitur lanjutan tetap ada), tab duplikat "Kamar & Riwayat" dihapus, lalu tab "Listrik & Air" juga dihapus dari MyStayPage (detail cukup di `/portal/energy`; tombol refresh sensor dipindah ke sana). FE vitest 133/133 ✅, build ✅.
-> 0. **M17 Portal Flow Ringkas** — ✅ **SELESAI (20 Agu 2026)** — Iterasi 1–4 tuntas: DashboardAdmin = daftar tugas 0–5, CTA terfilter, OwnerDashboard ringkas, E2E booking→bayar→perpanjangan→checkout di UAT, cleanup widget lama. Detail: `docs/M17_PORTAL_FLOW_RINGKAS.md`.
+> 0. **M17 Portal Flow Ringkas** — ✅ **SELESAI (20 Agu 2026)** — Iterasi 1–4 tuntas: DashboardAdmin = daftar tugas 0–5, CTA terfilter, OwnerDashboard ringkas, E2E booking→bayar→perpanjangan→checkout di UAT, cleanup widget lama. Detail: `docs/product/portal-owner-admin.md`.
 > 0. **SEED-DATA-ASLI ✅** — Seed data asli dari KOST48_Laporan_Bulanan_FINAL_Teraudit.xlsx menggantikan dummy `seed-dev-via-api.js`. 14 kamar, 48 tenant (dengan portal access), 52 stay (12 ACTIVE), 186 invoice PAID, 186 payment, total Rp 219.710.000. Script: `backend/scripts/seed-dev-real.js` + `backend/scripts/seed-data.json`. (19 Jul 2026)
 > 0. **G5+ Fixlist KTP** — ✅ **SELESAI (3/3 + hardening review)** — migration `ktpVerificationMethod/Notes`, rate-limit hemat kuota (deterministik/fallback tak potong kuota), method `AI` di `verifyKtp` butuh bukti sukses AI (`KtpAiApprovalService` baru, TTL 30 mnt, sekali pakai); hardening cache AI (prune+cap, clone anti-mutasi, key model konsisten). Build BE ✅ FE ✅
 > 0. **G5+ gap kritis: UI upload foto KTP + audit orphaned endpoint** — ✅ **SELESAI** — endpoint `ktp/upload` yang sebelumnya tak pernah dipanggil UI kini aktif; audit orphaned endpoint Admin/Owner/Inventory juga sudah ditutup: delete KTP, create/update COA, update cash account, update period notes, edit aset, draft FAQ AI, review laporan staff AI, legacy deposit-ledger dry-run, dan integrasi demographics summary sudah tersambung atau dibersihkan bila redundant. Build FE ✅ BE ✅
@@ -109,7 +109,7 @@ Daftar berikut adalah ledger lintas fase bertanggal, berisi hasil selesai dan ba
 > 20. **M20-Deep** — ✅ **SELESAI (29 Jul)** — Deep audit notifikasi & sistem: 0 isu. Domain paling bersih (0 best-effort journal, 0 race). Temuan terintegrasi ke `docs/M06_OPERASIONAL.md`.
 > 21. **M21-Deep** — ✅ **SELESAI (29 Jul)** — Deep audit AI & growth: 0 isu baru. FOR UPDATE di loyalty, OWNER-only segregation, AI cache prune/cap. Domain terbersih. Temuan terintegrasi ke `docs/M07_PUBLIK_GROWTH.md`.
 > 22. **M22-Deep** — ✅ **SELESAI (29 Jul)** — Deep audit IoT & telemetri: 0 isu. timingSafeEqual HMAC + cron token, polling mutex, RateLimitGuard. Temuan terintegrasi ke `docs/M06_OPERASIONAL.md`.
-> 23. **MX** — ✅ **SELESAI (29 Jul)** — Audit lintas scope: 1 CRITICAL (journal consistency), 2 HIGH (timezone, DRY), 10 rekomendasi X1-X10. Temuan terintegrasi ke `docs/M01_MASTER.md`.
+> 23. **MX** — ✅ **SELESAI (29 Jul)** — Audit lintas scope: 1 CRITICAL (journal consistency), 2 HIGH (timezone, DRY), 10 rekomendasi X1-X10. Temuan terintegrasi ke `docs/audit/audit-lintas-scope-2026-07-29.md`.
 > 24. **MX-Verify** — ✅ **SELESAI (29 Jul)** — Verifikasi Codex Sol: 12/18 benar, 6 koreksi diterapkan ke M01/M05/M06. Memory `codex-sol-verify-koreksi` tersimpan.
 > 25. **AO-00..AO-23** — 🔴 **ANTRIAN AKTIF** — audit UI/UX lintas portal, benchmark homepage produksi, dan review statis dashboard Owner/Admin 30 Jul 2026. Mulai dari sinkronisasi migration UAT, lalu perbaikan P1, crawl role, benchmark publik, dan audit ulang. Detail otoritatif: [M14 Audit UI/UX](../M14_AUDIT_UI_UX.md).
 > 26. **BYPASS-TENANT (by-pass tenant gagap teknologi)** — ✅ **SELESAI** — halaman baru `/stays/assist` "Bantu Penghuni" (OWNER/ADMIN) menyelesaikan 3 aksi dalam satu layar tanpa lompat menu: pilih masa sewa aktif → catat meter otomatis (Tuya) → catat pembayaran tunai & tutup tagihan. Memanfaatkan endpoint yang sudah ada (`recordMeterCycle` auto, `createPayment`, `issueInvoice`). Build frontend ✅ (PWA verified). Sisa #2 (de-emphasize nav) & #3 (audit tenant awam) tetap terbuka untuk sesi berikutnya.
@@ -756,3 +756,29 @@ Sisa temuan menengah/rendah atau refactor hanya dipilih setelah dicocokkan denga
 Owner konfirmasi: voucher system, non-tenant bisa beli. Paket: sebulan 50k, 2 minggu 40k, seminggu 20k, sehari 5k. Spec terpisah.
 
 **Gate akhir Fase AL (audit):** Build backend ✅ · Build frontend (tdk perlu — hanya DTO) · 10 file audit-reasonix lengkap (di `docs/archieve/audit_reasonix/`).
+
+---
+
+## Indeks dossier historis (nama pra-konsolidasi; dari M01, dipindah 23 Sep 2026, B5 Tahap 3)
+
+> Tabel nama dossier lama → domain. Teks tidak diubah.
+
+## 3. Indeks dossier historis (nama pra-konsolidasi)
+
+| Dossier | Domain | Status |
+|---------|--------|--------|
+| `10_PEMBAYARAN_INVOICE` | bayar/approve/invoice/meter | 🟢 selesai |
+| `11_BOOKING_RENEWAL` | booking + renewal | 🟢 selesai (F2-1 renewal dua-fase) |
+| `12_CHECKOUT_DEPOSIT_OVERSTAY` | checkout/deposit/overstay/kabur/abandoned | 🟢 selesai |
+| `13_AKUNTANSI_LAPORAN` | jurnal/laporan/expense/aset/unearned | 🟢 selesai |
+| `14_INVENTARIS` | stok/movement/room-item | 🟢 selesai |
+| `15_STAF_TIKET_KPI` | tiket/rutinitas/KPI/SLA/review | 🟢 selesai |
+| `16_NOTIFIKASI_PENGUMUMAN` | notif/pengumuman/PWA push | 🟢 selesai |
+| `17_PUBLIK_MARKETING_UIUX` | katalog/SEO/UI/chart | 🟢 selesai (SEO 100/100) |
+| `18_AUTH_FONDASI_ONBOARDING` | auth/role/KTP gate | 🟢 selesai |
+| `19_GAMIFIKASI_LOYALITAS` | poin/reward/referral/peer report | 🟢 selesai (F4-9+F4-13) |
+| `M09_AI_OWNER_ADMIN` | AI berbayar DeepSeek (G0-G9) | 🟢 selesai |
+| `archieve/2026-06-20_fase_selesai/M15_FASE_J_HARDENING_AI` | Hardening AI pra-go-live | 🗄️ arsip (J0-J4 selesai) |
+| `archieve/2026-06-20_fase_selesai/M16_PASCA_AUDIT_PLAN` | Pasca-Audit Total | 🗄️ arsip (13 task, commit ac4cc2f) |
+
+**Hierarki sumber kebenaran:** `M02_KEPUTUSAN_OWNER` → kode terverifikasi → dossier domain → `M12_CHECKLIST_CHANGELOG` (urutan eksekusi).

@@ -13,7 +13,7 @@ Rujukan: [M02](../M02_KEPUTUSAN_OWNER.md) · [M12](../M12_CHECKLIST_CHANGELOG.md
 ### KOST48 V5 — Flow Map (Peta Alur Kode Krusial)
 **Versi:** 2026-06-13 — sinkronisasi keputusan owner, status kode, dossier `10`-`19`, dan urutan Auto-Ops aktual.
 **Tujuan:** Peta NARASI alur lintas-domain (apa memanggil apa, transisi status, side-effect, invarian).
-> ⚠️ **ANCHOR BARIS:** angka `file:baris` di dokumen ini = posisi METODE pada snapshot audit **2026-06-13** — **INDIKATIF** (pasti bergeser sejak commit tersebut). **Sumber historis:** `docs/archieve/2026-06-16_root_docs_pre_M/_PETA_AI.md §2` + dossier `10`-`19`. Bila ragu, **grep nama metode di `backend/src/`**, jangan andalkan baris; pakai `docs/M00_CODEMAP.md` untuk navigasi modul terkini.
+> ⚠️ **ANCHOR BARIS:** angka `file:baris` di dokumen ini = posisi METODE pada snapshot audit **2026-06-13** — **INDIKATIF** (pasti bergeser sejak commit tersebut). **Sumber historis:** `docs/archieve/2026-06-16_root_docs_pre_M/_PETA_AI.md §2` + dossier `10`-`19`. Bila ragu, **grep nama metode di `backend/src/`**, jangan andalkan baris; pakai `docs/PETA-KODE.md` untuk navigasi modul terkini.
 
 <!-- KOST48_DOCS_SYNC_20260630_FLOW_MAP_REVIEWED -->
 

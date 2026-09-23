@@ -407,7 +407,7 @@ Tenant/owner → overview dan history dengan pembaruan berkala; billing tetap me
 |---|---|
 | Inventaris device + Device ID | `docs/M15_IOT.md` |
 | Spek implementasi | memory `iot-water-kwh-spec` |
-| Peta scope | `docs/M10_PETA_SCOPE.md` § IoT & Monitoring |
+| Peta scope | `docs/product/scope.md` § A6. SYSTEM / IoT |
 | Proposal meter pascabayar | `docs/M06_OPERASIONAL.md` § Bagian 5 (M-1..M-5 ✅) |
 
 ---
