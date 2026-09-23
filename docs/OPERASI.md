@@ -16,6 +16,8 @@
 
 **Aturan keselamatan dokumen:** jangan pernah menampilkan nilai secret (password, token, API key) atau data pribadi di laporan/keluaran shell. Pindahkan apa adanya bila memang harus dipindah, dan laporkan **lokasinya**, bukan nilainya.
 
+**Nama kunci env (tanpa nilai):** [`backend/.env.example`](../backend/.env.example) adalah template nama kunci yang dipanen dari kode pada 24 Sep 2026, termasuk kunci operasional yang belum disebut di runbook. Ia **bukan** runbook dan **bukan** kontrak lengkap; cara pakai dan nilai produksi tetap di runbook §1 dan §4.
+
 ## 2. Batas kewenangan
 
 - Deploy/rilis adalah **task tersendiri**: artefak/SHA, target, izin owner, backup/rollback, dan smoke check mengikuti [operations/deploy-go-live.md](operations/deploy-go-live.md) serta antrean [STATUS §2](STATUS.md).
