@@ -98,7 +98,7 @@ Indeks dan status ringkasan audit: [audit/README.md](audit/README.md). Hasil aud
 | Roadmap 30 hari & log keputusan historis | [history/governance-log.md](history/governance-log.md) |
 | Bukti migrasi dokumen per sub-langkah | [history/DOC-GOV-20260922-mapping.md](history/DOC-GOV-20260922-mapping.md) |
 | Rancangan penataan dokumentasi (status mengikuti [STATUS](STATUS.md)) | [plans/DOC-GOV-20260922.md](plans/DOC-GOV-20260922.md) |
-| Forensik dokumen lama | `docs/archieve/` — hanya bila benar-benar perlu |
+| Forensik dokumen lama (ejaan folder dipertahankan; status arsip di [STATUS §8](STATUS.md#8-struktur-dokumen-tujuan-konsolidasi)) | `docs/archieve/` — hanya bila benar-benar perlu |
 
 ## 6. Pintu masuk lama (kompatibilitas)
 

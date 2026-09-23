@@ -1,19 +1,30 @@
 # KOST48 V5 — M13 Changelog
 
 
-> **Entri baru ditulis di paling atas**, tepat di bawah blok indeks ini. Riwayat lanjutan dipindah ke `docs/history/changelog/` pada Tahap 2 (S3) tanpa mengubah isi. Rotasi entri ke-11 dst. dijalankan pada B8, B9, dan B10 (23 Sep 2026), sehingga jendela entri di file ini = **10 entri terbaru**; entri yang lebih lama ada di changelog bulanan.
+> **Entri baru ditulis di paling atas**, tepat di bawah blok indeks ini. Riwayat lanjutan dipindah ke `docs/history/changelog/` pada Tahap 2 (S3) tanpa mengubah isi. Rotasi entri ke-11 dst. dijalankan pada B8, B9, B10, dan B11 (23 Sep 2026), sehingga jendela entri di file ini = **10 entri terbaru**; entri yang lebih lama ada di changelog bulanan.
 
 ## Indeks riwayat
 
 | Periode | File | Cakupan |
 |---|---|---|
-| 2026-09 (lanjutan) | [history/changelog/2026-09.md](history/changelog/2026-09.md) | Entri September 2026-09-06 … 2026-09-18 dari Tahap 2/S3 + entri M13 ke-11..26 (2026-09-18 … 2026-09-23) hasil rotasi B8, dilanjutkan rotasi B9 (keputusan owner pasca-B1, B1) dan B10 (B2) + Status Kerja Aktif & Update M12 |
+| 2026-09 (lanjutan) | [history/changelog/2026-09.md](history/changelog/2026-09.md) | Entri September 2026-09-06 … 2026-09-18 dari Tahap 2/S3 + entri M13 ke-11..26 (2026-09-18 … 2026-09-23) hasil rotasi B8, dilanjutkan rotasi B9 (keputusan owner pasca-B1, B1), B10 (B2), dan B11 (B3) + Status Kerja Aktif & Update M12 |
 | 2026-08 | [history/changelog/2026-08.md](history/changelog/2026-08.md) | 8 entri (2026-08-17 ... 2026-08-20) |
 | 2026-07 | [history/changelog/2026-07.md](history/changelog/2026-07.md) | 40 entri + 41 sub-entri Juli + Release 2026-07-23 |
 | <= 2026-07-16 | `docs/archieve/M13_CHANGELOG_ARSIP_S1_2026.md` | arsip lama (tidak dipindahkan) |
 
 
 ---
+
+
+## 2026-09-23 (docs) — B11 Tahap 3 (batch terakhir): penutupan arsip + tautan rusak pra-eksisting — Tahap 3 selesai
+
+- **Tautan rusak pra-eksisting ditutup (keputusan owner TAUTAN-ARSIP-B11):** 3 tautan yang dapat masuk commit diperbaiki tanpa mengubah teks lain — (a) [`docs/archieve/2026-09-07_docs_cleanup/GO_LIVE_DATA_ISI.md`](archieve/2026-09-07_docs_cleanup/GO_LIVE_DATA_ISI.md) L3: dua tujuan relatif diberi kedalaman yang benar (`M12_CHECKLIST_CHANGELOG.md` → `../../M12_CHECKLIST_CHANGELOG.md`; `M19_EFISIENSI_HOSTING_512MB.md#9-pencatatan-hosting-ef-00-dan-ef-02` → `../../M19_…`, fragment `<a id>` di pointer M19 tetap resolve); (b) [`docs/history/m11-seed-master-data-appendix-2026-07-08.md`](history/m11-seed-master-data-appendix-2026-07-08.md) L10: link ke `../backend/sql/seed-master-data.sql` (dihapus 2026-07-18, `ab21d3b9`) diganti teks + penunjuk kanonik ke [`operations/default-dev.md`](operations/default-dev.md) (DEV) dan [`operations/data-master.md`](operations/data-master.md) (referensi master); sisa baris arsip verbatim.
+- **2 temuan sisa di `docs/archieve/**` sengaja TIDAK diubah karena di luar repo:** `_expired_root_cleanup/PANDUAN_DEPLOY_CPANEL.md` L5 (`#troubleshooting` → `#16-troubleshooting`) dan `2026-06-20_fase_selesai/M13_FASE_H_UIUX_COMPACT.md` L30 (`../frontend/...` → `../../../frontend/...`) berada pada berkas yang **di-exclude** `.git/info/exclude` L9, sehingga perbaikannya tidak dapat masuk commit. Dilaporkan sebagai handover Fase 3 (satu baris per berkas) — bukan diperbaiki diam-diam dan bukan diklaim selesai.
+- **Batas arsip (keputusan penataan):** `docs/archieve/**` = **107 berkas di disk, 31 tracked** (30 `.md` + 1 `.tsv`); pemindahan massal **tidak** dilakukan dan ejaan folder tidak dibetulkan (rancangan §4). Rumah target `docs/arsip/` **belum dibuat**; konsolidasi arsip + penghapusan pointer lama tetap **Fase 3** — jadi B11 menutup Tahap 3 tanpa memindahkan arsip.
+- **Verifikasi tautan (bukti, bukan klaim):** checker yang sama dijalankan pada worktree HEAD `9311aad8` dan pada disk → **3 temuan dibuang (tepat yang diperbaiki), 0 temuan baru**; dengan aturan slug gaya GitHub (em dash dihapus) seluruh `docs/**` di luar `audit-map`/`archieve` memberi **0 tautan rusak**, sehingga 16 temuan sisa (12 di `history/fase-lama.md`, 2 di `domain/harga.md`, 1 di `KEPUTUSAN-OWNER.md`, 1 di `M01_MASTER.md`) terbukti **artefak aturan slug ketat, bukan tautan mati** — dan `history/fase-lama.md` tetap tidak disentuh.
+- **Invariant & checkbox:** `[ ]` = 23, `[x]` (domain history) = 101, gate domain = **12** — delta **0**; total checkbox proyek 346 `[ ]` / 146 `[x]` delta 0; known exception trailing whitespace tetap 26 baris; UTF-8 tanpa BOM; akhir-berkas dan line-ending dipertahankan sesuai berkas asal (arsip LF, docs inti CRLF); `git diff --cached --check` exit 0.
+- **Rotasi M13:** entri **B11** ditulis di paling atas dan entri ke-11 (**B3**) diputar ke [`history/changelog/2026-09.md`](history/changelog/2026-09.md) dengan **3 tautan di-rebase**; jendela M13 tetap 10 entri.
+- **Verifikasi lokal:** tanpa npm/build/test/lint/server. **Deployment:** tidak dilakukan. **Dampak runtime:** tidak diukur (docs-only). **Penutupan:** **Tahap 3 (B1–B11) selesai**; sisa Fase 2 (`ATURAN.md`/`OPERASI.md`/`AUDIT.md`, wajib approval owner) dan Fase 3 (arsip + pembersihan pointer lama); GAP lama tidak berubah (P1-04..P1-09 UNKNOWN).
 
 
 ## 2026-09-23 (docs) — B10 Tahap 3: `docs/README.md` ditulis ulang menjadi indeks berbasis kebutuhan menuju rumah kanonik (batch terakhir sebelum B11)
@@ -100,15 +111,4 @@
 - **Rujukan masuk diperbaiki (11 penggantian, 6 file):** `M00_CODEMAP.md` 1, `M11_DEFAULT_DATA.md` 1, `operations/default-dev.md` 1, `audit/README.md` 1, `history/fase-ao.md` 1, `history/changelog/2026-09.md` 6; `audit/README.md` juga menerima 6 baris indeks untuk file audit baru. **Sengaja tidak disentuh:** `docs/README.md` (menunggu B10) dan rujukan path-saja di riwayat yang tetap resolve ke pointer.
 - **Status aktif vs riwayat per bagian:** §7 antrean eksekusi AO (termasuk **27 gate `[ ]` Definition of Done**) bersama §8–§10 → `audit/status-ao-lintas-portal.md`; lampiran portal tenant 2 Juli 2026 → `docs/history/`. Ke-27 gate itu tetap di luar invariant proyek (invariant = `STATUS.md` + `docs/history/**`), jadi 23/101/12 tidak berubah.
 - **Verifikasi lokal:** invariant `[ ]` = 23, `[x]` = 101, gate domain = 12 (delta 0 vs HEAD); total checkbox proyek `[ ]` = 386 dan `[x]` = 146 (delta 0); pemeriksa tautan 1.210 file / 4.905 tautan → 1 rusak pra-eksisting (known exception §7.2 butir 9), **0 baru**; `git diff --cached --check` bersih; UTF-8 tanpa BOM; tanpa blank line di EOF. Tanpa npm/build/test/lint/typecheck/server.
-- **Deployment:** tidak dilakukan. **Dampak runtime:** tidak diukur.
-
-## 2026-09-23 (docs) — B3 Tahap 3: pemisahan M18 (harga kamar) dan M19 (efisiensi hosting) ke domain/ + operations/
-
-- **Pemindahan mekanis (isi tidak diubah):** **seluruh isi** `M18_ATURAN_HARGA_KAMAR.md` (225 baris) → [`domain/harga.md`](domain/harga.md) (168 baris) dan **seluruh isi** `M19_EFISIENSI_HOSTING_512MB.md` (246 baris) → [`operations/efisiensi-hosting.md`](operations/efisiensi-hosting.md) (197 baris) — satu tujuan per batch sesuai handoff owner. Pointer: `M18_ATURAN_HARGA_KAMAR.md` 225 → 10 baris, `M19_EFISIENSI_HOSTING_512MB.md` 246 → 12 baris.
-- **Anchor kompatibilitas dipertahankan:** pointer M19 memuat `<a id="9-pencatatan-hosting-ef-00-dan-ef-02">` dan `<a id="arah-dan-status-aktif--...">` sehingga rujukan berfragment dari M02 L65 dan M08 L5 tetap resolve (pola sama dengan pointer M12).
-- **Konservasi (bukti):** 355 baris non-kosong sumber; multiset per tujuan → 0 hilang (HARGA 161, EF 190, pointer M18 2, pointer M19 1) dan tiap blok utuh berurutan (1/1 di keempat tujuan, dengan pengecualian rebase di butir berikut). Satu baris header sumber pada M18 (kalimat "Dokumen ini menyimpan spesifikasi domain dan bukti bertanggal") **diganti** pada pointer dan diumumkan; baris provenance M18 (`Sumber kode: …`, `Terakhir diperbarui: 2026-08-22.`) **ikut ke file kanonik**, bukan ditinggal di pointer.
-- **Rebase tautan isi pindahan (diumumkan):** 2 baris isi M19 (sumber L5 → file baru L13; sumber L170 → L178) hanya diubah **tujuan relatifnya** dari basis `docs/` ke `docs/operations/` (`../M02_...`, `../M20_...`, `../M12_...#fase-ef--efisiensi-shared-hosting-512-mb`). Teks kedua baris **identik** setelah `../` dilepas — diverifikasi baris-per-baris. Tanpa rebase ini, 4 tautan itu rusak dari lokasi baru; gate G5 menangkapnya sebelum commit.
-- **Rujukan masuk diperbaiki (6 penggantian, 4 file):** `GO_LIVE_CPANEL_CHECKLIST.md` (1), `M08_DEPLOY_GO_LIVE.md` (1, fragment `§9` diarahkan ke file kanonik), `M16_AUDIT_MENYELURUH.md` (3), `M20_PRODUKSI_KOST48.md` (1). **Sengaja tidak disentuh:** `M02_KEPUTUSAN_OWNER.md` L65 (register keputusan owner — anchor di pointer menjaganya tetap resolve), `M01_MASTER.md` L15 dan indeks `docs/README.md` L44 (menunggu B5/B10), serta baris boilerplate "> Rujukan arah aktif … [M19] …" yang identik di semua file M (masih resolve ke pointer).
-- **Duplikasi dicatat, tidak diputuskan:** dugaan tumpang tindih aturan harga §5 (utilitas) & §7 (DP & deposit) dengan `domain/keuangan.md` + `domain/hunian.md` dicatat sebagai **D-02** di [laporan duplikat](history/laporan-duplikat.md); isi tidak diubah/dihapus.
-- **Verifikasi lokal:** invariant `[ ]` = 23, `[x]` = 101, gate domain = 12 (delta 0 vs HEAD); tautan diperiksa → 0 rusak baru; `git diff --cached --check` bersih (tanpa known exception baru); UTF-8 tanpa BOM; tanpa blank line di EOF. Tanpa npm/build/test/lint/server.
 - **Deployment:** tidak dilakukan. **Dampak runtime:** tidak diukur.

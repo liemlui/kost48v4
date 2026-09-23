@@ -7,7 +7,7 @@
 ## Appendix — Seed Master Data (Patch Tenant Aman)
 
 
-Gunakan **[seed-master-data.sql](../backend/sql/seed-master-data.sql)** — satu file yang menggabungkan semua patch data awal. Jalankan sekali, semua data masuk.
+Gunakan **`seed-master-data.sql`** — satu file yang menggabungkan semua patch data awal. Jalankan sekali, semua data masuk. Berkas itu sudah dihapus 2026-07-18 (lihat catatan arsip di atas); langkah seed yang berlaku ada di [operations/default-dev.md](../operations/default-dev.md) (DEV) dan [operations/data-master.md](../operations/data-master.md) (referensi master).
 
 #### Isi
 
