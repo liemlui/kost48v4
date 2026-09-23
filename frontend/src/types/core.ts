@@ -699,6 +699,66 @@ export type PaymentSubmission = {
   reviewedBy?: { id: number; fullName?: string | null } | null;
 };
 
+// IMPACT-01: ringkasan dampak approve — semua angka datang dari backend.
+export type PaymentImpactAllocation = {
+  rentPortionRupiah: number;
+  depositPortionRupiah: number;
+  excessRupiah: number;
+};
+
+export type PaymentImpactState = {
+  invoiceStatus: string;
+  invoicePaidAmountRupiah: number;
+  invoiceRemainingAmountRupiah: number;
+  roomStatus: string;
+  stayStatus: string;
+  depositPaidAmountRupiah: number;
+  depositPaymentStatus: string;
+  downPaymentPaidRupiah: number;
+  expiresAt: string | null;
+};
+
+export type PaymentImpactAccounting = {
+  uangDiterimaRupiah: number;
+  jurnalKasMasukRupiah: number;
+  piutangTurunRupiah: number;
+  depositLiabilityNaikRupiah: number;
+  depositJournalDeferred: boolean;
+};
+
+export type PaymentImpactPreview = {
+  submissionId: number;
+  invoiceNumber: string;
+  isBookingPath: boolean;
+  policy: PaymentPolicy;
+  allocation: PaymentImpactAllocation;
+  before: PaymentImpactState;
+  after: PaymentImpactState;
+  accounting: PaymentImpactAccounting;
+  notes: string[];
+};
+
+export type PaymentImpactRealized = {
+  submissionId: number;
+  invoiceNumber: string;
+  isBookingPath: boolean;
+  allocation: PaymentImpactAllocation;
+  before: PaymentImpactState;
+  after: PaymentImpactState;
+  accounting: PaymentImpactAccounting;
+  references: {
+    invoicePaymentId: number | null;
+    journalInvoicePayment: { id: number; entryNumber: string } | null;
+    journalDeposit: { id: number; entryNumber: string } | null;
+    depositLedgerEntryId: number | null;
+  };
+  notes: string[];
+};
+
+export type PaymentApprovalResult = PaymentSubmission & {
+  impactRealized?: PaymentImpactRealized | null;
+};
+
 export type CreatePaymentSubmissionPayload = {
   stayId: number;
   invoiceId: number;

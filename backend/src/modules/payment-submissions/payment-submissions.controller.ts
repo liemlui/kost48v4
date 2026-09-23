@@ -389,6 +389,16 @@ export class PaymentSubmissionsController {
     };
   }
 
+  @Get(':id/impact')
+  @ApiOperation({ summary: 'Ringkasan dampak sebelum approve pembayaran — OWNER/ADMIN' })
+  @Roles(UserRole.OWNER, UserRole.ADMIN)
+  async impact(@Param('id', ParseIntPipe) id: number) {
+    return {
+      message: 'Ringkasan dampak pembayaran berhasil diambil',
+      data: await this.paymentSubmissionsService.getImpactPreview(id),
+    };
+  }
+
 
   @Post('internal/expire-booking/:stayId')
   @ApiOperation({ summary: 'Tutup booking reserved manual — OWNER/ADMIN' })

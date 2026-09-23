@@ -46,6 +46,18 @@ import {
   endOfDay,
 } from './payment-submissions.helpers';
 import { evaluatePaymentPolicy } from './payment-policy.helper';
+import {
+  buildPaymentImpactPreview,
+  buildPaymentImpactRealized,
+  computePaymentAllocation,
+  computeNextDepositState,
+  computeNextInvoiceState,
+  deriveDepositPaymentStatus,
+  PaymentAllocation,
+  PaymentImpactPreview,
+  PaymentImpactRealized,
+  ImpactStateSnapshot,
+} from './payment-impact.helper';
 
 @Injectable()
 export class PaymentSubmissionsService {
@@ -583,6 +595,124 @@ export class PaymentSubmissionsService {
     }
   }
 
+  /**
+   * IMPACT-01: ringkasan dampak SEBELUM approve (read-only, tanpa mengubah data).
+   * Semua angka memakai helper yang sama dengan jalur approve
+   * (evaluatePaymentPolicy + compute* di payment-impact.helper).
+   */
+  async getImpactPreview(submissionId: number): Promise<PaymentImpactPreview> {
+    try {
+      const submission = await this.prisma.paymentSubmission.findUnique({
+        where: { id: submissionId },
+        include: {
+          stay: { include: { room: true } },
+          invoice: {
+            include: {
+              lines: { select: { lineAmountRupiah: true } },
+              payments: { select: { amountRupiah: true } },
+            },
+          },
+          tenant: { select: { id: true, fullName: true, phone: true } },
+          submittedBy: { select: { id: true, fullName: true } },
+          reviewedBy: { select: { id: true, fullName: true } },
+        },
+      });
+
+      if (!submission) {
+        throw new NotFoundException('Bukti pembayaran tidak ditemukan');
+      }
+
+      return buildPaymentImpactPreview(mapSubmissionFromPrisma(submission));
+    } catch (error) {
+      this.handleSchemaError(error);
+      throw error;
+    }
+  }
+
+  /**
+   * IMPACT-01: rakit dampak nyata + rujukan transaksi setelah approve.
+   * Best-effort: lookup gagal → rujukan null, bukan error (approve sudah commit).
+   */
+  private async buildApprovedImpactRealized(
+    base: {
+      isBookingPath: boolean;
+      stayId: number;
+      allocation: PaymentAllocation;
+      before: ImpactStateSnapshot;
+      invoiceNumber: string;
+      totalInvoiceAmountRupiah: number;
+      depositAmountRupiah: number;
+      downPaymentAmountRupiah: number;
+      invoicePaymentId: number | null;
+    },
+    submissionId: number,
+  ): Promise<PaymentImpactRealized> {
+    const references: PaymentImpactRealized['references'] = {
+      invoicePaymentId: base.invoicePaymentId,
+      journalInvoicePayment: null,
+      journalDeposit: null,
+      depositLedgerEntryId: null,
+    };
+
+    try {
+      if (base.invoicePaymentId) {
+        const journal = await this.prisma.journalEntry.findFirst({
+          where: {
+            sourceType: 'INVOICE_PAYMENT' as any,
+            sourceId: String(base.invoicePaymentId),
+            status: { not: 'VOID' as any },
+          },
+          orderBy: { id: 'desc' },
+          select: { id: true, entryNumber: true },
+        });
+        if (journal) {
+          references.journalInvoicePayment = { id: journal.id, entryNumber: journal.entryNumber };
+        }
+      }
+
+      if (base.isBookingPath) {
+        const depositJournal = await this.prisma.journalEntry.findFirst({
+          where: {
+            sourceType: 'DEPOSIT' as any,
+            sourceId: String(base.stayId),
+            status: { not: 'VOID' as any },
+          },
+          orderBy: { id: 'desc' },
+          select: { id: true, entryNumber: true },
+        });
+        if (depositJournal) {
+          references.journalDeposit = { id: depositJournal.id, entryNumber: depositJournal.entryNumber };
+        }
+
+        const ledgerEntry = await this.prisma.tenantDepositLedgerEntry.findFirst({
+          where: { paymentSubmissionId: submissionId },
+          orderBy: { id: 'desc' },
+          select: { id: true },
+        });
+        if (ledgerEntry) {
+          references.depositLedgerEntryId = ledgerEntry.id;
+        }
+      }
+    } catch (error: any) {
+      this.logger.warn('Rujukan transaksi dampak approve gagal dibaca', {
+        submissionId,
+        error: error?.message ?? error,
+      });
+    }
+
+    return buildPaymentImpactRealized({
+      submissionId,
+      invoiceNumber: base.invoiceNumber,
+      isBookingPath: base.isBookingPath,
+      allocation: base.allocation,
+      before: base.before,
+      totalInvoiceAmountRupiah: base.totalInvoiceAmountRupiah,
+      depositAmountRupiah: base.depositAmountRupiah,
+      downPaymentAmountRupiah: base.downPaymentAmountRupiah,
+      references,
+    });
+  }
+
   // ═══════════════════════════════════════════════════════════
   //  SECTION: Approval Flow — approve, cancelCompeting, notify
   // ═══════════════════════════════════════════════════════════
@@ -590,6 +720,18 @@ export class PaymentSubmissionsService {
   async approveSubmission(user: CurrentUserPayload, submissionId: number) {
     let losingTenants: Array<{ stayId: number; tenantId: number }> = [];
     let paidInvoiceId: number | null = null; // F4-9: dipakai untuk poin ON_TIME_PAYMENT pasca-commit
+    // IMPACT-01: konteks dampak nyata — diisi di dalam transaksi, dibaca setelah commit.
+    let impactRealizedBase: {
+      isBookingPath: boolean;
+      stayId: number;
+      allocation: PaymentAllocation;
+      before: ImpactStateSnapshot;
+      invoiceNumber: string;
+      totalInvoiceAmountRupiah: number;
+      depositAmountRupiah: number;
+      downPaymentAmountRupiah: number;
+      invoicePaymentId: number | null;
+    } | null = null;
     try {
       const approved = await this.prisma.$transaction(async (tx) => {
         const submission = await this.lockSubmissionTx(tx, submissionId);
@@ -687,6 +829,24 @@ export class PaymentSubmissionsService {
           0,
         );
 
+        // IMPACT-01: snapshot keadaan sebelum approve (dipakai ringkasan dampak).
+        const impactBefore: ImpactStateSnapshot = {
+          invoiceStatus: submission.invoiceStatus,
+          invoicePaidAmountRupiah: freshPaidAmount,
+          invoiceRemainingAmountRupiah: invoiceRemaining,
+          roomStatus: submission.roomStatus,
+          stayStatus: submission.stayStatus,
+          depositPaidAmountRupiah: submission.stayDepositPaidAmountRupiah ?? 0,
+          depositPaymentStatus: deriveDepositPaymentStatus(
+            submission.stayDepositAmountRupiah ?? 0,
+            submission.stayDepositPaidAmountRupiah ?? 0,
+          ),
+          downPaymentPaidRupiah: submission.stayDownPaymentPaidRupiah ?? 0,
+          expiresAt: submission.stayExpiresAt
+            ? new Date(submission.stayExpiresAt).toISOString()
+            : null,
+        };
+
         const approvalPolicy = evaluatePaymentPolicy({
           amountRupiah: submission.amountRupiah,
           invoiceStatus: submission.invoiceStatus,
@@ -738,31 +898,28 @@ export class PaymentSubmissionsService {
           }
         }
 
-        let rentPortion = 0;
-        let depositPortion = 0;
-
-        if (isBookingPath) {
-          rentPortion = Math.min(submission.amountRupiah, invoiceRemaining);
-          const rawDeposit = Math.max(0, submission.amountRupiah - rentPortion);
-          const stayDepositAmount = submission.stayDepositAmountRupiah ?? 0;
-          const stayDepositPaidBefore = submission.stayDepositPaidAmountRupiah ?? 0;
-          const depositRemaining = Math.max(stayDepositAmount - stayDepositPaidBefore, 0);
-          depositPortion = Math.min(rawDeposit, depositRemaining);
-          if (rawDeposit > depositPortion) {
-            throw new ConflictException(
-              `Nominal melebihi sisa tagihan + deposit. Kelebihan: Rp ${(rawDeposit - depositPortion).toLocaleString('id-ID')}. Silakan koreksi bukti bayar.`,
-            );
-          }
-        } else {
-          // Invoice-only: must not exceed remaining
-          if (submission.amountRupiah > invoiceRemaining) {
-            throw new ConflictException(
-              `Jumlah pembayaran melebihi sisa tagihan sebesar Rp ${invoiceRemaining.toLocaleString('id-ID')}`,
-            );
-          }
-          rentPortion = submission.amountRupiah;
-          depositPortion = 0;
+        // IMPACT-01: porsi sewa/deposit memakai helper bersama (payment-impact.helper)
+        // supaya angka ringkasan dampak dan angka approve tidak pernah berbeda.
+        const depositRemainingBefore = Math.max(
+          (submission.stayDepositAmountRupiah ?? 0) - (submission.stayDepositPaidAmountRupiah ?? 0),
+          0,
+        );
+        const allocation = computePaymentAllocation({
+          amountRupiah: submission.amountRupiah,
+          invoiceRemainingAmountRupiah: invoiceRemaining,
+          depositRemainingAmountRupiah: isBookingPath ? depositRemainingBefore : 0,
+          isBookingPath,
+        });
+        if (allocation.excessRupiah > 0) {
+          throw new ConflictException(
+            isBookingPath
+              ? `Nominal melebihi sisa tagihan + deposit. Kelebihan: Rp ${allocation.excessRupiah.toLocaleString('id-ID')}. Silakan koreksi bukti bayar.`
+              : `Jumlah pembayaran melebihi sisa tagihan sebesar Rp ${invoiceRemaining.toLocaleString('id-ID')}`,
+          );
         }
+
+        const rentPortion = allocation.rentPortionRupiah;
+        const depositPortion = allocation.depositPortionRupiah;
 
         let invoicePaymentId: number | null = null;
 
@@ -781,14 +938,13 @@ export class PaymentSubmissionsService {
           invoicePaymentId = invoicePayment.id;
         }
 
-        const nextPaidAmount = freshPaidAmount + rentPortion;
-
-        const nextInvoiceStatus =
-          nextPaidAmount >= submission.invoiceTotalAmountRupiah
-            ? InvoiceStatus.PAID
-            : nextPaidAmount > 0
-              ? InvoiceStatus.PARTIAL
-              : InvoiceStatus.ISSUED;
+        // IMPACT-01: status/nominal invoice berikutnya memakai helper bersama.
+        const nextInvoiceState = computeNextInvoiceState({
+          invoiceTotalAmountRupiah: submission.invoiceTotalAmountRupiah,
+          invoicePaidAmountBeforeRupiah: freshPaidAmount,
+          rentPortionRupiah: rentPortion,
+        });
+        const nextInvoiceStatus = nextInvoiceState.statusAfter;
 
         const nextIssuedAt = submission.invoiceIssuedAt
           ? new Date(submission.invoiceIssuedAt)
@@ -829,22 +985,26 @@ export class PaymentSubmissionsService {
 
         // ── Booking path only: deposit settlement, room activation, meter promotion ──
         if (isBookingPath) {
-          const stayDepositAmount = submission.stayDepositAmountRupiah ?? 0;
           const stayDepositPaidBefore = submission.stayDepositPaidAmountRupiah ?? 0;
-          const stayDepositPaidAfter = stayDepositPaidBefore + depositPortion;
 
+          // IMPACT-01: nominal deposit/DP sesudah approve memakai helper bersama
+          // (aturan identik dengan approve sebelumnya: deposit PAID saat lunas).
+          const nextDepositState = computeNextDepositState({
+            depositAmountRupiah: submission.stayDepositAmountRupiah ?? 0,
+            depositPaidBeforeRupiah: stayDepositPaidBefore,
+            downPaymentAmountRupiah: submission.stayDownPaymentAmountRupiah ?? 0,
+            downPaymentPaidBeforeRupiah: submission.stayDownPaymentPaidRupiah ?? 0,
+            rentPortionRupiah: rentPortion,
+            depositPortionRupiah: depositPortion,
+          });
+          const stayDepositPaidAfter = nextDepositState.depositPaidAfterRupiah;
           const stayDepositPaymentStatus: BookingDepositPaymentStatus =
-            stayDepositPaidAfter >= stayDepositAmount && stayDepositAmount > 0
-              ? BookingDepositPaymentStatus.PAID
-              : stayDepositPaidAfter > 0
-                ? BookingDepositPaymentStatus.PARTIAL
-                : BookingDepositPaymentStatus.UNPAID;
+            nextDepositState.depositPaymentStatusAfter;
 
           // A18: DP (uang muka) = bagian dari pembayaran sewa (rentPortion),
           // dicatat terpisah dari deposit jaminan.
-          const stayDpAmount = submission.stayDownPaymentAmountRupiah ?? 0;
           const stayDpPaidBefore = submission.stayDownPaymentPaidRupiah ?? 0;
-          const stayDpPaidAfter = Math.min(stayDpAmount, stayDpPaidBefore + rentPortion);
+          const stayDpPaidAfter = nextDepositState.downPaymentPaidAfterRupiah;
 
           await tx.stay.update({
             where: { id: submission.stayId },
@@ -986,6 +1146,19 @@ export class PaymentSubmissionsService {
           },
         });
 
+        // IMPACT-01: simpan konteks dampak nyata (dibaca setelah commit, di luar transaksi).
+        impactRealizedBase = {
+          isBookingPath,
+          stayId: submission.stayId,
+          allocation,
+          before: impactBefore,
+          invoiceNumber: submission.invoiceNumber,
+          totalInvoiceAmountRupiah: submission.invoiceTotalAmountRupiah,
+          depositAmountRupiah: submission.stayDepositAmountRupiah ?? 0,
+          downPaymentAmountRupiah: submission.stayDownPaymentAmountRupiah ?? 0,
+          invoicePaymentId,
+        };
+
         return this.findSubmissionByIdTx(tx, submissionId);
       });
 
@@ -1014,7 +1187,13 @@ export class PaymentSubmissionsService {
           })
           .catch((e) => { this.logger.warn('Bonus points gagal', { error: e?.message ?? e }); return undefined; });
       }
-      return result;
+      // IMPACT-01: hasil nyata + rujukan transaksi (read-only, best-effort; kegagalan
+      // lookup TIDAK boleh menggagalkan approval yang sudah commit).
+      const impactRealized = impactRealizedBase
+        ? await this.buildApprovedImpactRealized(impactRealizedBase, submissionId)
+        : null;
+
+      return impactRealized ? { ...result, impactRealized } : result;
     } catch (error) {
       // H3: Auto-refund — jika sweeper batalkan stay duluan, submission harus
       // di-reject otomatis agar tidak stuck PENDING_REVIEW selamanya.

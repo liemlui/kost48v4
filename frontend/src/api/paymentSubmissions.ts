@@ -1,9 +1,11 @@
 import apiClient from './client';
-import { createResource, listResource, postAction } from './resources';
+import { createResource, getResource, listResource, postAction } from './resources';
 import type {
   BatchPaymentSubmissionPayload,
   CreatePaymentSubmissionPayload,
   PaginatedResponse,
+  PaymentApprovalResult,
+  PaymentImpactPreview,
   PaymentSubmission,
   ReviewQueueQuery,
 } from '../types';
@@ -21,7 +23,12 @@ export async function listPaymentReviewQueue(params?: ReviewQueueQuery) {
 }
 
 export async function approvePaymentSubmission(id: number | string) {
-  return postAction<PaymentSubmission>(`/payment-submissions/${id}/approve`);
+  return postAction<PaymentApprovalResult>(`/payment-submissions/${id}/approve`);
+}
+
+/** IMPACT-01: ringkasan dampak sebelum approve — angka dihitung backend. */
+export async function getPaymentSubmissionImpact(id: number | string) {
+  return getResource<PaymentImpactPreview>(`/payment-submissions/${id}/impact`);
 }
 
 export async function rejectPaymentSubmission(id: number | string, reviewNotes: string) {

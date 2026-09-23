@@ -13,7 +13,8 @@ import {
   listPaymentReviewQueue,
   rejectPaymentSubmission,
 } from '../../api/paymentSubmissions';
-import type { PaymentSubmission } from '../../types';
+import type { PaymentImpactRealized, PaymentSubmission } from '../../types';
+import PaymentImpactSummary from '../../components/payments/PaymentImpactSummary';
 import { resolveAbsoluteFileUrl } from '../../utils/resolveAbsoluteFileUrl';
 import { CompactMetrics, type MetricChip } from '../../components/command-center';
 import { addHoursToDate, formatDateTimeWib, getDeadlineMeta } from '../../utils/dateTime';
@@ -193,6 +194,8 @@ export default function PaymentReviewPage() {
   const [selected, setSelected] = useState<PaymentSubmission | null>(null);
   const [modalMode, setModalMode] = useState<'approve' | 'reject'>('approve');
   const [actionError, setActionError] = useState<string | null>(null);
+  // IMPACT-01: hasil nyata approve terakhir (angka + rujukan transaksi dari backend).
+  const [lastApprovedImpact, setLastApprovedImpact] = useState<PaymentImpactRealized | null>(null);
 
   const query = useQuery({
     queryKey: ['payment-review-queue', status, search, paymentMethod, roomId, tenantId],
@@ -253,9 +256,11 @@ export default function PaymentReviewPage() {
 
   const approveMutation = useMutation({
     mutationFn: async (submissionId: number) => approvePaymentSubmission(submissionId),
-    onSuccess: async () => {
+    onSuccess: async (result) => {
       setSelected(null);
       setActionError(null);
+      // IMPACT-01: simpan dampak nyata + rujukan transaksi dari response backend.
+      setLastApprovedImpact(result?.impactRealized ?? null);
       await refreshRelated();
     },
     onError: (error: any) => {
@@ -286,6 +291,25 @@ export default function PaymentReviewPage() {
 
       <CommandFlowStrip />
       <CompactMetrics metrics={metrics} />
+
+      {lastApprovedImpact ? (
+        <Card className="content-card border-0 mb-4" data-testid="payment-impact-realized">
+          <Card.Body>
+            <div className="d-flex align-items-start justify-content-between gap-2 flex-wrap">
+              <div>
+                <div className="section-kicker">Hasil approve terakhir</div>
+                <div className="fw-semibold">
+                  {lastApprovedImpact.invoiceNumber} · submission #{lastApprovedImpact.submissionId}
+                </div>
+              </div>
+              <Button size="sm" variant="outline-secondary" onClick={() => setLastApprovedImpact(null)}>
+                Tutup
+              </Button>
+            </div>
+            <PaymentImpactSummary impact={lastApprovedImpact} showReferences />
+          </Card.Body>
+        </Card>
+      ) : null}
 
       {items.length > 0 && (
         <PaymentAnalyticsPanel

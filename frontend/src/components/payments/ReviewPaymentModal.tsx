@@ -1,10 +1,13 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { Alert, Badge, Button, Col, Form, Modal, Row } from 'react-bootstrap';
 import CurrencyDisplay from '../common/CurrencyDisplay';
 import StatusBadge from '../common/StatusBadge';
 import AuthenticatedFileLink from '../common/AuthenticatedFileLink';
 import SafeImage from '../common/SafeImage';
+import PaymentImpactSummary from './PaymentImpactSummary';
 import type { PaymentSubmission } from '../../types';
+import { getPaymentSubmissionImpact } from '../../api/paymentSubmissions';
 import { resolveAbsoluteFileUrl } from '../../utils/resolveAbsoluteFileUrl';
 import AiAssistButton from '../ai/AiAssistButton';
 import { analyzePaymentProof, type PaymentProofAiResult, reviewPaymentSubmission, type PaymentReviewResult } from '../../api/ai';
@@ -74,6 +77,14 @@ export default function ReviewPaymentModal({
 
   const targetLabel = submission?.targetType === 'DEPOSIT' ? 'Deposit booking' : 'Tagihan';
   const safety = useMemo(() => getPaymentReviewSafety(submission), [submission]);
+  // IMPACT-01: ringkasan dampak sebelum approve — angka dihitung backend.
+  const impactQuery = useQuery({
+    queryKey: ['payment-submission-impact', submission?.id ?? null],
+    queryFn: () => getPaymentSubmissionImpact(submission?.id ?? 0),
+    enabled: Boolean(show && submission?.id && mode === 'approve'),
+    staleTime: 15_000,
+    refetchOnWindowFocus: false,
+  });
   const normalizedError = normalizeBackendError(errorMessage);
   const absoluteFileUrl = resolveAbsoluteFileUrl(submission?.fileUrl);
   const reviewDeadline = getDeadlineMeta(addHoursToDate(submission?.createdAt ?? submission?.paidAt, 6), 'Batas review');
@@ -273,6 +284,19 @@ export default function ReviewPaymentModal({
 
                   {mode === 'approve' ? (
                     <>
+                      <div className="decision-section-card mt-3" data-testid="payment-impact-preview">
+                        <div className="section-kicker">Ringkasan dampak (dari backend)</div>
+                        {impactQuery.isPending ? (
+                          <div className="small text-muted">Menghitung dampak...</div>
+                        ) : null}
+                        {impactQuery.isError ? (
+                          <Alert variant="warning" className="small mb-0">
+                            Ringkasan dampak belum tersedia. Keputusan tetap memakai pengaman di atas.
+                          </Alert>
+                        ) : null}
+                        {impactQuery.data ? <PaymentImpactSummary impact={impactQuery.data} /> : null}
+                      </div>
+
                       {safety.requiresChecklist ? (
                         <div className="decision-section-card mt-3">
                           <div className="section-kicker">Checklist sebelum approve</div>
