@@ -56,9 +56,9 @@ Dibuat 22 September 2026 pada **Tahap 1** [rancangan DOC-GOV-20260922](plans/DOC
 | Kebutuhan | Baca |
 |---|---|
 | Indeks dan status ringkasan audit modul | [audit/README.md](audit/README.md) · contoh hasil: [audit/frontend-auth.md](audit/frontend-auth.md) |
-| Cakupan audit total 135 ID | [CHECKLIST_AUDIT_TOTAL.md](CHECKLIST_AUDIT_TOTAL.md) |
+| Cakupan audit total 135 ID | [audit/audit-checklist-total.md](audit/audit-checklist-total.md) · pintu masuk lama: [CHECKLIST_AUDIT_TOTAL.md](CHECKLIST_AUDIT_TOTAL.md) |
 | Audit UI/UX dan tindak lanjut AO | [M14](M14_AUDIT_UI_UX.md) |
-| Laporan audit UI/UX 12 Sep 2026 | [AUDIT_UIUX_TOTAL_2026-09-12.md](AUDIT_UIUX_TOTAL_2026-09-12.md) |
+| Laporan audit UI/UX 12 Sep 2026 | [audit/audit-uiux-total-2026-09-12.md](audit/audit-uiux-total-2026-09-12.md) · pintu masuk lama: [AUDIT_UIUX_TOTAL_2026-09-12.md](AUDIT_UIUX_TOTAL_2026-09-12.md) |
 | Audit menyeluruh dan temuan tata dokumen | [M16](M16_AUDIT_MENYELURUH.md) |
 | Peta hasil audit per cabang (generated) | [audit-map/](audit-map/README.md) |
 | Catatan migrasi dokumen Tahap 2 (bukan audit aplikasi) | [M16 §0 pembaruan Tahap 2](M16_AUDIT_MENYELURUH.md#pembaruan-tahap-2-doc-gov-20260922) |

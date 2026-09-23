@@ -16,6 +16,15 @@
 ---
 
 
+## 2026-09-23 (docs) - B6 Tahap 3: CHECKLIST_AUDIT_TOTAL + AUDIT_UIUX_TOTAL_2026-09-12 ke docs/audit/ (rumah kanonik FLAT)
+
+- **CHECKLIST_AUDIT_TOTAL (281 baris) -> [`docs/audit/audit-checklist-total.md`](audit/audit-checklist-total.md) (290 baris):** seluruh isi dipindah apa adanya; `docs/CHECKLIST_AUDIT_TOTAL.md` menjadi pointer 15 baris. **135 ID (118 `[ ]` + 17 `[x]`) dan arti centang tidak diubah** (delta 0); fragment `#catatan-hasil-dan-checkpoint`, `#pemilihan-model-dan-reasoning`, `#aset-statis-3` ikut pindah utuh dan rujukannya diarahkan ke file kanonik.
+- **AUDIT_UIUX_TOTAL_2026-09-12 (406 baris) -> [`docs/audit/audit-uiux-total-2026-09-12.md`](audit/audit-uiux-total-2026-09-12.md) (415 baris):** laporan lengkap dipindah apa adanya; `docs/AUDIT_UIUX_TOTAL_2026-09-12.md` menjadi pointer 23 baris. Satu baris pemisah `---` menggantung dibuang; 0 baris non-kosong lain hilang.
+- **Rumah kanonik `docs/audit/` FLAT (keputusan penataan AI):** konvensi B4 dipakai, bukan folder `audit/reports/` pada rancangan lama; pilihan ini dicatat di mapping §7.2. Nama file kanonik memakai awalan `audit-` + tanggal agar konsisten dengan file audit B4.
+- **Rebase tautan isi pindahan (diumumkan):** CHECKLIST 142 tautan dan AUDIT_UIUX 2 tautan hanya diubah **tujuan relatifnya** ke basis `docs/audit/`; teks, label, angka, dan ID identik setelah `../` dilepas. Tanpa rebase, 135 tautan peta per ID dan artefak akan rusak dari lokasi baru.
+- **Rujukan masuk diperbaiki:** `docs/README.md` (2 baris) dan `docs/audit/README.md` (1 baris + 2 baris indeks baru); 2 baris header sumber diganti pada pointer (pola B1-B5). Rujukan tingkat-dokumen di `docs/status-ao-lintas-portal.md` tidak diubah (isi, bukan path).
+- **Verifikasi lokal:** konservasi blok identik baris-per-baris di offset tujuan - CHECKLIST identical=141 + rebaseOnly=139 + 0 mismatch; AUDIT_UIUX identical=403 + rebaseOnly=2 + 1 penggantian H1 yang diumumkan. Multiset baris non-kosong 228/228 dan 275/275. Invariant 23/101/12 (delta 0); 0 tautan rusak baru; `git diff --cached --check` bersih. **Deployment:** tidak dilakukan. **Dampak runtime:** tidak diukur (docs-only).
+
 ## 2026-09-23 (docs) — tindak lanjut B5: kebijakan delegasi teknis docs + koreksi penempatan (D-03/D-04/D-05)
 
 - **Keputusan owner (DELEGASI-DOC-TEKNIS)** dicatat di [STATUS §6](STATUS.md): penataan dokumen = keputusan AI (struktur, rumah kanonik, pemisahan riwayat/audit, format, anchor, tautan, dedup pengulangan non-aturan, urutan batch); owner hanya dimintai keputusan yang menyentuh **aturan/flow bisnis** atau **UI/UX**. Delegasi ini **tidak** menambah izin menyentuh source, DB, server, deploy, atau secret.

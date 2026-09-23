@@ -1,7 +1,7 @@
 # Indeks Audit Modul
 
 Peta existing: [audit-map](../audit-map/). Antrean audit: [M12](../M12_CHECKLIST_CHANGELOG.md).
-Status dokumen disinkronkan 22 September 2026. "Belum dibuat" berarti dokumen ringkasan modul belum ada — bukan berarti modul belum pernah diaudit; cakupan per unit ada di [M12](../M12_CHECKLIST_CHANGELOG.md) dan CHECKLIST_AUDIT_TOTAL. Keberadaan dokumen tidak berarti audit lengkap atau bukti masih segar; periksa baseline dan cakupannya sebelum dipakai.
+Status dokumen disinkronkan 22 September 2026. "Belum dibuat" berarti dokumen ringkasan modul belum ada — bukan berarti modul belum pernah diaudit; cakupan per unit ada di [M12](../M12_CHECKLIST_CHANGELOG.md) dan [CHECKLIST_AUDIT_TOTAL](audit-checklist-total.md). Keberadaan dokumen tidak berarti audit lengkap atau bukti masih segar; periksa baseline dan cakupannya sebelum dipakai.
 Hasil Tahap 2 DOC-GOV-20260922 (migrasi riwayat dokumen; **bukan** audit modul baru): [mapping Tahap 2](../history/DOC-GOV-20260922-mapping.md) dan [M16 pembaruan Tahap 2](audit-dokumentasi-2026-09.md#pembaruan-tahap-2-doc-gov-20260922).
 
 | Modul | Status |
@@ -22,3 +22,5 @@ Hasil Tahap 2 DOC-GOV-20260922 (migrasi riwayat dokumen; **bukan** audit modul b
 | Tata dokumen — audit dokumentasi & urutan kerja 8 Sep 2026 | [audit-dokumentasi-2026-09](audit-dokumentasi-2026-09.md) — dipindah dari M16 §0 (B4); temuan D-01..D-11 + status Tahap 2 |
 | Kode — audit menyeluruh 30 Jul 2026 | [audit-menyeluruh-2026-07](audit-menyeluruh-2026-07.md) — dipindah dari M16 §1–§5 (B4); angka test/build hasil Juli |
 | Lintas scope — Audit Lintas Scope Reasonix 29 Jul 2026 | [audit-lintas-scope-2026-07-29](audit-lintas-scope-2026-07-29.md) — dipindah dari M01 § Audit Lintas Scope (B5, 23 Sep 2026); bukti bertanggal, temuan 1 CRITICAL + 2 HIGH + 10 rekomendasi |
+| Cakupan audit total - checklist 135 ID (52 BE + 67 FE + 1 DB + 8 QA + 7 TL) | [audit-checklist-total](audit-checklist-total.md) - dipindah dari `docs/CHECKLIST_AUDIT_TOTAL.md` (B6, 23 Sep 2026); indeks cakupan + tabel hasil/checkpoint, arti centang tidak diubah |
+| UI/UX total - laporan lengkap audit 12 Sep 2026 | [audit-uiux-total-2026-09-12](audit-uiux-total-2026-09-12.md) - dipindah dari `docs/AUDIT_UIUX_TOTAL_2026-09-12.md` (B6, 23 Sep 2026); bukti bertanggal, temuan T-01..T-09 |
