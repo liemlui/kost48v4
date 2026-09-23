@@ -89,7 +89,7 @@ Yang **tetap sah** dari audit itu: 3 Storybook stories, `backend/.env.example` h
 |---|---|---|
 | P1 | Tambahkan **`@ApiResponse`/DTO respons** pada endpoint uang & pembayaran lebih dulu (G1) | Task kode tersendiri (bukan docs-only) |
 | P2 | **JSDoc minimal** pada 19 modul, urutan: modul uang (G2) | Task kode; bisa dipecah per modul |
-| P3 | Buat `backend/.env.example` (tanpa nilai secret) + rujuk dari `OPERASI.md` (G3) | Perubahan config → izin tersendiri |
+| P3 | **SELESAI 24 Sep 2026 (`5cd9c193`)** — `backend/.env.example` dibuat: **85 nama kunci, 0 nilai**, dikelompokkan 12 bagian, kunci library/OS dipisah; dirujuk dari `docs/OPERASI.md` §1 (G3) | selesai |
 | P4 | Ukur **coverage nyata** backend + frontend sekali, lalu catat angkanya di `AUDIT.md` (G4) | Butuh izin; menjalankan uji unit backend memicu full build |
 | P5 | Storybook: putuskan apakah katalog komponen dijadikan target, atau dinyatakan tidak dipakai (G5) | **Keputusan produk** |
 | P6 | Root `README.md`: buat **pointer tipis** ke `AGENTS.md` + `docs/README.md`, atau nyatakan tidak perlu | **Keputusan owner** — perubahan governance (AGENTS §10) |
