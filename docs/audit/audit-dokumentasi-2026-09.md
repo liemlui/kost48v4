@@ -30,7 +30,7 @@ Pembaruan ini terpisah dari bukti audit 8 Sep di bawah. Scope: governance, antre
 | DOC-22-04 | M12 1.013 baris/166.098 byte sebelum edit; status aktif bercampur laporan historis | TERLAKSANA (Tahap 2): riwayat M12/M13 dan log AI_MASTER dipindah ke `docs/history/`; M12 aktif 137 baris, M13 147 baris. Lihat pembaruan Tahap 2 di bawah |
 | DOC-22-05 | Prosedur awal M12 menduplikasi AGENTS dan mewajibkan orientasi umum | Rujukan AGENTS dan pembacaan sesuai task diterapkan; gate uang tetap |
 
-Bukti perubahan: [M13 22 Sep](../M13_CHANGELOG.md#2026-09-22-docs--koreksi-arahan-ai-dan-rancangan-penataan-menyeluruh). [Rancangan XL](../plans/DOC-GOV-20260922.md) belum menjadi aturan aktif. Verifikasi dibatasi pada isi/diff/tautan; kontrol teknis keselamatan lintas-tool belum diuji.
+Bukti perubahan: [changelog 22 Sep](../history/changelog/2026-09.md#2026-09-22-docs--koreksi-arahan-ai-dan-rancangan-penataan-menyeluruh). [Rancangan XL](../plans/DOC-GOV-20260922.md) belum menjadi aturan aktif. Verifikasi dibatasi pada isi/diff/tautan; kontrol teknis keselamatan lintas-tool belum diuji.
 
 <a id="pembaruan-tahap-2-doc-gov-20260922"></a>
 

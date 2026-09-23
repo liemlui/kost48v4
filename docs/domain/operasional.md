@@ -2,7 +2,7 @@
 
 Tanggal: 2026-09-23
 Status: aktif
-Tujuan: aturan operasional harian — aturan tenant, inventaris, staf/tiket/KPI, notifikasi/pengumuman, auth/onboarding — beserta proposal meter listrik/air dan spesifikasi IoT (dari M06)
+Tujuan: aturan operasional harian — aturan tenant, inventaris, staf/tiket/KPI, notifikasi/pengumuman, auth/onboarding — beserta proposal meter listrik/air (spesifikasi IoT dipindah ke [iot.md](iot.md), B8 23 Sep 2026)
 Rujukan: [M02](../M02_KEPUTUSAN_OWNER.md) · [M12](../M12_CHECKLIST_CHANGELOG.md) · [M06](../M06_OPERASIONAL.md) · [hunian.md](hunian.md) · [keuangan.md](keuangan.md) · [kontrak.md](kontrak.md)
 
 > Migrasi dari docs/M06_OPERASIONAL.md (B1 Tahap 3, 23 Sep 2026) pada DOC-GOV-20260922; teks aturan tidak diubah.
@@ -359,58 +359,10 @@ Sumber TUNGGAL (hindari duplikasi). Per-kamar tetap bisa override tarif bila per
 - **"Bayar sekaligus":** kelompokkan invoice sewa + meter yang sama-sama OPEN.
 
 ---
-## Bagian 6 — IoT Monitoring (KWH Tuya + Water Flow ESP32)
 
-> **Fondasi implementasi selesai (2026-07-23); rollout hardware dan UAT masih gate.** Spek lengkap: `M15_IOT_KWH_WATER_IMPLEMENTATION_PLAN.md` + `M14_IOT_TUYA_DEVICES.md`. Telemetry tidak pernah otomatis membuat tagihan.
+## Bagian 6 — IoT Monitoring (dipindah 23 Sep 2026; B8 Tahap 3)
 
-**Update quota energi:** aturan kanonik quota listrik ada di [keuangan.md](keuangan.md) § Quota Utilitas Berbasis Periode Sewa Lunas — **tidak diulang di sini** (dedup D-01, keputusan owner 23 Sep 2026). Catat meter/renewal tetap jalur bisnis yang menerbitkan invoice, bukan polling Tuya.
-
-### Hardware Terpasang
-
-| Jenis | Jumlah | Status | Integrasi |
-|---|---|---|---|
-| **KWH Meter Tuya per kamar** | 13 (snapshot: 11 online) | Tuya Cloud API | Polling cron 10 menit → `IotTelemetry` (bukan `MeterReading` billing) |
-| **CCTV BARDI IP Camera** | 5 (4 online) | Tuya Cloud | Fase lanjutan (snapshot dashboard) |
-| **Smart Lock** | 1 (online) | Tuya Cloud | Fase lanjutan (remote unlock) |
-| **Water Flow D20 + ESP32-C3** | 2-3 unit (rollout hardware) | Signed HTTP POST | `/api/iot/v1/readings` (HMAC per device) |
-
-### Arsitektur Backend (aktif)
-
-```
-ESP32-C3+D20 → signed POST /api/iot/v1/readings → IotIngestMessage + IotTelemetry
-Tuya KWH Meter → Tuya Cloud API → IotPollingService (interval/cron 10 menit) → IotTelemetry
-Tenant/owner → overview dan history dengan pembaruan berkala; billing tetap memakai MeterReading terpisah
-```
-
-- **1 backend** (tidak bikin backend baru — hemat RAM shared hosting)
-- **Tanpa MQTT**; Tuya dipoll melalui REST dan portal tenant memakai polling terikat agar worker shared hosting tidak tertahan koneksi panjang.
-- **Kredensial ESP32** disimpan terenkripsi per device dan request ditandatangani HMAC; bukan JWT pengguna.
-- Endpoint cron Tuya: `POST /api/iot/tuya/cron` dengan header `X-Iot-Cron-Token`.
-
-### Model Prisma (aktif)
-
-- `IotDevice` — registry ESP32/Tuya, mapping kamar, credential terenkripsi
-- `IotIngestMessage` — envelope idempoten/replay-safe per event atau poll
-- `IotTelemetry` — metrik dinormalisasi dari water flow maupun Tuya, lengkap kualitas data
-- `MeterReading` — tetap satu-satunya snapshot yang dipakai billing
-
-### Polling dan tindak lanjut
-
-| Sweeper | Trigger | Aksi |
-|---|---|---|
-| **IotPollingService** | Interval always-on atau cron tiap 10 menit | Polling perangkat Tuya aktif → simpan telemetry |
-| **Anomali/kebocoran** | Belum diaktifkan sebagai auto-action | Tetap kandidat observability; perlu threshold, UAT sensor, dan keputusan operasional sebelum alert otomatis |
-
-### Referensi
-
-| Topik | Dokumen |
-|---|---|
-| Inventaris device + Device ID | `docs/M15_IOT.md` |
-| Spek implementasi | memory `iot-water-kwh-spec` |
-| Peta scope | `docs/product/scope.md` § A6. SYSTEM / IoT |
-| Proposal meter pascabayar | `docs/M06_OPERASIONAL.md` § Bagian 5 (M-1..M-5 ✅) |
-
----
+> Isi bagian ini dipindah **apa adanya** ke rumah kanonik IoT: [iot.md](iot.md) § Bagian 6 — IoT Monitoring (KWH Tuya + Water Flow ESP32). Telemetry tetap monitoring/estimasi dan tidak pernah otomatis menerbitkan tagihan; dasar periode quota ada di [keuangan.md § Quota Utilitas](keuangan.md#quota-utilitas-berbasis-periode-sewa-lunas).
 
 ## Lampiran — Peta kode & coverage modul operasional (dari M06)
 
