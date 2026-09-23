@@ -445,3 +445,21 @@ Tenant/owner → overview dan history dengan pembaruan berkala; billing tetap me
 | Rate limit | `common/middleware/rate-limit.middleware.ts` |
 | User/tenant CRUD + portal access | `users.service.ts`, `tenants.service.ts:47/60/73` |
 | File proof terproteksi (pola utk KTP) | `payment-submissions` proof endpoint + `common/utils/file-signature.util.ts` |
+
+---
+
+> **Auto-Ops Engine (dari M01 §4; dipindah ke rumah kanonik aturan operasional pada koreksi B5, 23 Sep 2026):** teks tidak diubah; nomor bagian mengikuti asalnya.
+## 4. Auto-Ops Engine (6 Sweep Service, 18+ Operasi)
+
+Mutex (DB advisory lock `pg_try_advisory_lock(1)`). **Prinsip:** uang masuk (submission PENDING/APPROVED, invoice PAID/PARTIAL) = STOP otomatisasi. Lock `FOR UPDATE` + re-cek. Timezone WIB (UTC+7). Struktur awal Fase E dipecah menjadi 5 sweep service; release P2 menambah `AnnouncementSweepService` sebagai service ke-6:
+
+| Sweep Service | Operasi |
+|---|---|
+| **BookingSweep** | booking expiry, DP forfeit |
+| **StaySweep** | overstay forced checkout, post-checkout auto-cancel, noon release, room healer, overstay enforcement |
+| **RenewalSweep** | renewal priority expiry, renewal settlement forfeit |
+| **AccountingSweep** | rent recognition (PSAK 72), auto-journal reconciliation, recurring expense draft, automatic depreciation, accounting auto-close, notification pruning |
+| **MaintenanceSweep** | contract end reminders, SLA escalation, belongings abandonment, AC cleaning, referral rewards, PWA push dispatch |
+| **AnnouncementSweep** | dispatch pengumuman aktif yang belum `dispatchedAt`, dedupe per penerima |
+
+Semua operasi dijalankan sequential dalam `runAll()` untuk menghindari race condition double-cancel.

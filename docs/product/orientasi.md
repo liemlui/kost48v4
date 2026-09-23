@@ -2,11 +2,12 @@
 
 Tanggal: 2026-09-23
 Status: aktif
-Tujuan: orientasi produk — identitas & model bisnis, konsep kunci uang, Auto-Ops Engine, invarian sistem, stack & model aktif, dan perintah kerja (dari M01)
+Tujuan: orientasi produk — identitas & model bisnis, konsep kunci uang, invarian sistem, stack & model aktif, dan perintah kerja (dari M01)
 Rujukan: [M02](../M02_KEPUTUSAN_OWNER.md) · [STATUS](../STATUS.md) · [PETA-KODE](../PETA-KODE.md) · [scope.md](scope.md) · [flow-utama.md](flow-utama.md)
 
 > Migrasi dari docs/M01_MASTER.md (B5 Tahap 3, 23 Sep 2026) pada DOC-GOV-20260922; teks orientasi tidak diubah.
 > Batch B5 memisahkan materi bertanggal M01: status terkini 2026-09-08 → [changelog 2026-09](../history/changelog/2026-09.md); riwayat status 30 Juli 2026 → [changelog 2026-07](../history/changelog/2026-07.md); indeks dossier historis → [fase-lama](../history/fase-lama.md); Audit Lintas Scope 29 Jul 2026 → [audit-lintas-scope-2026-07-29.md](../audit/audit-lintas-scope-2026-07-29.md).
+> **Auto-Ops Engine (asal §4) dipindah ke rumah kanonik aturan operasional:** [domain/operasional.md](../domain/operasional.md) (koreksi B5, 23 Sep 2026) — teks tidak diubah; nomor bagian mengikuti asalnya.
 
 ## Pintu Masuk Docs Cepat
 
@@ -35,6 +36,7 @@ Hindari membaca arsip besar kecuali benar-benar perlu forensik: `docs/archieve/*
 ## 2. Konsep Kunci Uang (WAJIB PAHAM)
 
 > **Sumber kebenaran:** `docs/M02_KEPUTUSAN_OWNER.md` — bila konflik, M02 menang.
+> **Ringkasan orientasi, bukan aturan kanonik.** Aturan rinci: harga & surcharge → [domain/harga.md](../domain/harga.md); uang/DP/deposit/invarian pembayaran → [domain/keuangan.md](../domain/keuangan.md); siklus huni → [domain/hunian.md](../domain/hunian.md); operasional & Auto-Ops → [domain/operasional.md](../domain/operasional.md).
 
 - **Tidak ada model Booking.** Satu `Stay` = booking→huni→selesai. Promoted = `initialMetersPromotedAt` terisi.
 - **DP** (`downPayment*`, 30% sewa, **hangus**) ≠ **Deposit jaminan** (`deposit*`, dari `Room.defaultDepositRupiah`, **SELALU tetap, refundable**).
@@ -44,24 +46,6 @@ Hindari membaca arsip besar kecuali benar-benar perlu forensik: `docs/archieve/*
 - **Occupant surcharge (D-24):** Standar 2 org gratis, maks 4 (+20%/orang ekstra). Besar 4 org gratis, maks 6.
 
 ---
-
-## 4. Auto-Ops Engine (6 Sweep Service, 18+ Operasi)
-
-Mutex (DB advisory lock `pg_try_advisory_lock(1)`). **Prinsip:** uang masuk (submission PENDING/APPROVED, invoice PAID/PARTIAL) = STOP otomatisasi. Lock `FOR UPDATE` + re-cek. Timezone WIB (UTC+7). Struktur awal Fase E dipecah menjadi 5 sweep service; release P2 menambah `AnnouncementSweepService` sebagai service ke-6:
-
-| Sweep Service | Operasi |
-|---|---|
-| **BookingSweep** | booking expiry, DP forfeit |
-| **StaySweep** | overstay forced checkout, post-checkout auto-cancel, noon release, room healer, overstay enforcement |
-| **RenewalSweep** | renewal priority expiry, renewal settlement forfeit |
-| **AccountingSweep** | rent recognition (PSAK 72), auto-journal reconciliation, recurring expense draft, automatic depreciation, accounting auto-close, notification pruning |
-| **MaintenanceSweep** | contract end reminders, SLA escalation, belongings abandonment, AC cleaning, referral rewards, PWA push dispatch |
-| **AnnouncementSweep** | dispatch pengumuman aktif yang belum `dispatchedAt`, dedupe per penerima |
-
-Semua operasi dijalankan sequential dalam `runAll()` untuk menghindari race condition double-cancel.
-
----
-
 ## 5. Invarian Sistem (Tak Boleh Dilanggar)
 
 1. Uang masuk = otomatisasi BERHENTI.
@@ -103,4 +87,4 @@ npm run dev               # dev server
 node scripts/seed-dev-reset.js && node scripts/seed-dev-via-api.js
 ```
 
-**Akun dev:** `owner@kost48.com / Owner#2026` (OWNER) · `admin@kost48.com / admin123` (ADMIN) · `staff@kost48.com / staff123` · 16 tenant `@kost48.test / Tenant#2026`.
+**Akun dev & perintah seed:** kanonik di [operations/default-dev.md](../operations/default-dev.md) — daftar akun tidak diulang di sini (dedup D-04, koreksi B5, 23 Sep 2026).

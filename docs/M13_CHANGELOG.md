@@ -16,6 +16,14 @@
 ---
 
 
+## 2026-09-23 (docs) — tindak lanjut B5: kebijakan delegasi teknis docs + koreksi penempatan (D-03/D-04/D-05)
+
+- **Keputusan owner (DELEGASI-DOC-TEKNIS)** dicatat di [STATUS §6](STATUS.md): penataan dokumen = keputusan AI (struktur, rumah kanonik, pemisahan riwayat/audit, format, anchor, tautan, dedup pengulangan non-aturan, urutan batch); owner hanya dimintai keputusan yang menyentuh **aturan/flow bisnis** atau **UI/UX**. Delegasi ini **tidak** menambah izin menyentuh source, DB, server, deploy, atau secret.
+- **Koreksi penempatan (isi tidak diubah):** Auto-Ops Engine (asal M01 §4) dipindah dari [product/orientasi.md](product/orientasi.md) ke rumah kanonik [domain/operasional.md](domain/operasional.md) — 14 baris blok dipindah identik, 1 pemisah `---` dibuang; orientasi 106 → 90 baris; pointer M01 menerima satu baris tabel tujuan baru.
+- **Dedup pengulangan non-aturan:** **D-04** daftar akun dev di orientasi §7 → rujukan kanonik `operations/default-dev.md`; **D-03** diperiksa dan dinyatakan **bukan duplikat** (peta artefak kode vs riwayat bertanggal); **D-05** §1/§2 orientasi ditandai *ringkasan, bukan aturan kanonik* + rujukan ke `domain/harga.md`/`keuangan.md`/`hunian.md` — dedup **isi aturan** uang/harga/huni tetap menunggu keputusan owner (bersama D-02). Bukti: [laporan duplikat](history/laporan-duplikat.md).
+- **Format:** baris B2–B5 pada [mapping §7.4](history/DOC-GOV-20260922-mapping.md) yang sebelumnya tampil sebagai paragraf (tabel tanpa baris) kini menjadi baris tabel yang sah; 4 baris kosong dihapus, 0 baris non-kosong hilang.
+- **Verifikasi lokal:** blok Auto-Ops 14/14 baris identik di tujuan; invariant 23/101/12 (delta 0); 0 tautan rusak baru; `git diff --cached --check` bersih (tanpa trailing whitespace baru). **Deployment:** tidak dilakukan. **Dampak runtime:** tidak diukur (docs-only).
+
 ## 2026-09-23 (docs) — B5 Tahap 3: M00/M01/M10/M17 dipisah ke docs/PETA-KODE.md + docs/product/ + riwayat
 
 - **M00 (172 baris) → [`docs/PETA-KODE.md`](PETA-KODE.md) (177 baris):** seluruh isi peta (L6–L172) dipindah apa adanya — peta audit bertahap, konvensi modul, update implementasi 2026-07-23, tabel modul backend → path → tanggung jawab, grup halaman frontend, index 62 model, flow & audit anchor, shared utilities, redundansi UI/UX Fase AM, Cross-Dimension P8, dan daftar dokumen audit. `docs/M00_CODEMAP.md` 172 → 15 baris (pointer; blok `>` provenance dipertahankan, termasuk tautan `[M12](M12_CHECKLIST_CHANGELOG.md#antrean-prioritas-aktif)` yang dirujuk mapping §6 butir 3).

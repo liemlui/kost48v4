@@ -1,7 +1,7 @@
 # Laporan Duplikasi Isi (konsolidasi dokumentasi)
 
 Tanggal: 23 September 2026. Status: catatan temuan; keputusan owner yang menyertainya dicatat per item (lihat D-01).
-Tujuan: mencatat dugaan duplikasi isi yang ditemukan saat batch konsolidasi. Isi kembar **tidak dihapus dan tidak diringkas tanpa keputusan owner** (aturan handoff owner 23 Sep); penentuan aturan mana yang kanonik adalah wewenang owner.
+Tujuan: mencatat dugaan duplikasi isi yang ditemukan saat batch konsolidasi. Isi kembar **tidak dihapus dan tidak diringkas tanpa keputusan yang sah**: **pengulangan non-aturan** (daftar teknis, indeks, navigasi, header) diputuskan AI sesuai **DELEGASI-DOC-TEKNIS** (owner 23 Sep, STATUS §6), sedangkan **pengulangan isi aturan bisnis** (uang, DP/deposit, harga, huni, flow bisnis) tetap wewenang owner.
 
 ## Ditemukan pada batch B1 (M06 → `domain/operasional.md`, 23 Sep 2026)
 
@@ -28,6 +28,36 @@ Tujuan: mencatat dugaan duplikasi isi yang ditemukan saat batch konsolidasi. Isi
 
 **Status:** hanya **dugaan** yang perlu diperiksa berdampingan; belum dilakukan perbandingan kalimat-per-kalimat, jadi belum ada klaim duplikat pasti. Isi **tidak** diubah/dihapus.
 **Mengapa belum dieksekusi:** ini menyentuh aturan uang/DP/deposit yang dilindungi aturan proyek ("DILARANG mengubah aturan uang/huni/harga, nominal, gate uang") — keputusan rumah kanonik harus dari owner, seperti pola D-01.
+
+## Ditemukan pada batch B5 (M00/M01/M10/M17 → `PETA-KODE.md` + `product/` + riwayat, 23 Sep 2026)
+
+### D-03 — Tabel Fase AM di `PETA-KODE.md` vs riwayat `changelog/2026-07.md` + `fase-lama.md` — **DIPERIKSA: BUKAN DUPLIKAT**
+
+| Lokasi | Isi | Status |
+|---|---|---|
+| `docs/PETA-KODE.md` § Frontend — Redundansi UI/UX (Fase AM) | Status 16/16 + tabel AM-01..AM-16 dengan kolom **Dampak artefak kode** | Dipertahankan: fungsi **pemetaan artefak kode** (mis. `utils/whatsapp.ts`, `useGenericForm`), bukan catatan tanggal |
+| `docs/history/changelog/2026-07.md` (entri M14 SELESAI + AM-01..) dan `docs/history/fase-lama.md` (baris Fase AM) | Narasi kronologis penyelesaian fase | Riwayat bertanggal — tetap di riwayat |
+
+**Keputusan (penataan, AI):** kedua salinan **tidak** identik baris-per-baris dan melayani fungsi berbeda; tidak ada penghapusan. Yang dijaga hanya agar angka "16/16" tidak dijadikan klaim status aktif — status aktif tetap di [STATUS](../STATUS.md).
+
+### D-04 — Daftar akun dev & perintah seed (`product/orientasi.md` §7) vs `operations/default-dev.md` — **SELESAI DEDUP 23 Sep 2026**
+
+| Lokasi | Isi | Status |
+|---|---|---|
+| `docs/operations/default-dev.md` | Akun fondasi seed-dev, akun dummy, perintah seed | **KANONIK** (hasil S1.b) |
+| `docs/product/orientasi.md` §7 (asal M01 L164) | Daftar akun dev yang sama (`owner@kost48.com`, `admin@kost48.com`, `staff@kost48.com`, 16 tenant) | Diganti **rujukan** ke kanonik; perintah kerja tetap di orientasi |
+
+**Keputusan (penataan non-aturan, AI):** hanya daftar akun yang berulang yang diganti rujukan (kredensial DEV, bukan aturan bisnis); **tidak ada aturan bisnis yang berubah** dan perintah kerja (`tsc`, `npm run build`, seed UAT) tetap utuh di `orientasi.md`.
+
+### D-05 — Ringkasan §1/§2 orientasi (identitas, DP/deposit, multiplier harga, surcharge) vs `domain/harga.md`, `domain/keuangan.md`, `domain/hunian.md` — **PENANGANAN DOKUMEN SELESAI; DEDUP ISI MENUNGGU OWNER**
+
+| Lokasi | Bagian yang bersinggungan | Status |
+|---|---|---|
+| `docs/product/orientasi.md` §1 Identitas & Model Bisnis | Jumlah kamar, tipe, role, status deployment | Ringkasan orientasi → ditandai **"ringkasan, bukan aturan kanonik"** + rujukan kanonik ditambahkan (23 Sep 2026) |
+| `docs/product/orientasi.md` §2 Konsep Kunci Uang | DP 30% hangus vs deposit refundable, NO-PARTIAL, tariff multiplier, surcharge penghuni ekstra | Ringkasan orientasi → ditandai + rujukan ke `domain/harga.md`, `domain/keuangan.md`, `domain/hunian.md` |
+| `docs/domain/harga.md`, `domain/keuangan.md`, `domain/hunian.md` | Aturan rinci + invarian | **KANONIK** untuk aturan (tidak diubah) |
+
+**Status:** **isi aturan tidak diubah dan tidak dihapus.** Pengulangan angka (30% DP, multiplier term, surcharge) sengaja dibiarkan sebagai ringkasan sambil menunjuk kanonik; dedup isi aturan menyentuh **aturan bisnis uang/harga/huni** → **menunggu keputusan owner** (bersama D-02). Bila owner memutuskan, catat di [M02](../M02_KEPUTUSAN_OWNER.md) lalu eksekusi pada batch konsolidasi berikutnya.
 
 ## Aturan pakai laporan ini
 

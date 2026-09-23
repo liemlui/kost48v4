@@ -13,7 +13,8 @@
 
 | Topik | Lokasi kanonik | Catatan |
 |---|---|---|
-| Pintu masuk docs cepat, identitas & model bisnis, konsep kunci uang, Auto-Ops Engine, invarian sistem, stack & model aktif, perintah kerja | [product/orientasi.md](product/orientasi.md) | Dipindah utuh apa adanya (B5, 23 Sep 2026) |
+| Pintu masuk docs cepat, identitas & model bisnis, konsep kunci uang, invarian sistem, stack & model aktif, perintah kerja | [product/orientasi.md](product/orientasi.md) | Dipindah utuh apa adanya (B5, 23 Sep 2026) |
+| Auto-Ops Engine (6 sweep service, 18+ operasi) | [domain/operasional.md](domain/operasional.md) | Dipindah apa adanya dari orientasi (koreksi B5, 23 Sep 2026) — rumah kanonik aturan operasional |
 | Status terkini (diselaraskan 2026-09-08) | [history/changelog/2026-09.md](history/changelog/2026-09.md) | Snapshot bertanggal → riwayat (B5) |
 | Riwayat status 30 Juli 2026 (bukan antrean terbaru) | [history/changelog/2026-07.md](history/changelog/2026-07.md) | Snapshot bertanggal → riwayat (B5) |
 | Indeks dossier historis (nama pra-konsolidasi) | [history/fase-lama.md](history/fase-lama.md) | Ledger historis (B5) |
