@@ -15,6 +15,7 @@ const test = require('node:test');
 const { createHash } = require('node:crypto');
 
 const { AuthController } = require('../../dist/auth/auth.controller.js');
+const { AuthService } = require('../../dist/auth/auth.service.js');
 
 const RAW_TOKEN = 'b'.repeat(64);
 const TOKEN_HASH = createHash('sha256').update(RAW_TOKEN).digest('hex');
@@ -26,17 +27,9 @@ function makePrisma({ stored }) {
   return {
     events,
     refreshToken: {
-      findUnique: async (args) => {
-        events.push({ op: 'findUnique', args });
-        return stored;
-      },
-      update: async (args) => {
-        events.push({ op: 'update', args });
-        return {};
-      },
       updateMany: async (args) => {
         events.push({ op: 'updateMany', args });
-        return { count: 0 };
+        return { count: stored && !stored.revokedAt ? 1 : 0 };
       },
     },
   };
@@ -66,16 +59,11 @@ test('T2a — logout mencabut HANYA sesi pada cookie, bukan seluruh sesi user', 
 
   assert.deepEqual(result, { message: 'Logout berhasil' });
 
-  const update = prisma.events.find((e) => e.op === 'update');
+  const update = prisma.events.find((e) => e.op === 'updateMany');
   assert.ok(update, 'token pada cookie harus dicabut');
-  assert.equal(update.args.where.id, stored.id, 'hanya baris token ini yang boleh dicabut');
+  assert.equal(update.args.where.token, TOKEN_HASH, 'hanya token pada cookie yang boleh dicabut');
+  assert.equal(update.args.where.revokedAt, null, 'update harus atomik hanya untuk token aktif');
   assert.ok(update.args.data.revokedAt instanceof Date, 'revokedAt harus diisi');
-
-  assert.equal(
-    prisma.events.filter((e) => e.op === 'updateMany').length,
-    0,
-    'logout TIDAK boleh mencabut semua sesi user (keputusan owner: per-sesi)',
-  );
   assert.deepEqual(res.cleared, [{ name: COOKIE_NAME, options: { httpOnly: true, path: '/api/auth' } }]);
 });
 
@@ -97,7 +85,7 @@ test('T2c — token yang sudah dicabut tidak ditulis ulang (idempoten)', async (
 
   await makeController(prisma).logout(reqWithCookie(RAW_TOKEN), res);
 
-  assert.equal(prisma.events.filter((e) => e.op === 'update').length, 0, 'tidak perlu update ulang');
+  assert.equal(prisma.events.filter((e) => e.op === 'updateMany').length, 1, 'conditional update tetap idempoten');
   assert.equal(res.cleared.length, 1, 'cookie tetap dibersihkan');
 });
 
@@ -108,7 +96,7 @@ test('T2d — token tidak dikenal di DB: tidak ada error, cookie tetap dibersihk
   const result = await makeController(prisma).logout(reqWithCookie('c'.repeat(64)), res);
 
   assert.deepEqual(result, { message: 'Logout berhasil' });
-  assert.equal(prisma.events.filter((e) => e.op === 'update').length, 0);
+  assert.equal(prisma.events.filter((e) => e.op === 'updateMany').length, 1);
   assert.equal(res.cleared.length, 1);
 });
 
@@ -119,8 +107,49 @@ test('T2e — token dicari sebagai SHA-256 dari cookie, bukan nilai mentah', asy
 
   await makeController(prisma).logout(reqWithCookie(RAW_TOKEN), res);
 
-  const lookup = prisma.events.find((e) => e.op === 'findUnique');
-  assert.ok(lookup, 'harus mencari baris token');
-  assert.equal(lookup.args.where.token, TOKEN_HASH, 'pencarian memakai hash SHA-256');
-  assert.notEqual(lookup.args.where.token, RAW_TOKEN, 'token mentah tidak boleh dicari langsung');
+  const update = prisma.events.find((e) => e.op === 'updateMany');
+  assert.ok(update, 'harus mencabut baris token secara kondisional');
+  assert.equal(update.args.where.token, TOKEN_HASH, 'pencabutan memakai hash SHA-256');
+  assert.notEqual(update.args.where.token, RAW_TOKEN, 'token mentah tidak boleh dikirim ke query');
+});
+
+test('T7 - refresh yang kalah dari logout tidak menerbitkan token baru', async () => {
+  const stored = {
+    id: 17,
+    userId: 42,
+    token: TOKEN_HASH,
+    revokedAt: null,
+    expiresAt: new Date(Date.now() + 60_000),
+  };
+  const events = [];
+  const prisma = {
+    refreshToken: { findUnique: async () => stored },
+    $transaction: async (callback) => callback({
+      refreshToken: {
+        deleteMany: async (args) => {
+          events.push({ op: 'claim', args });
+          return { count: 0 };
+        },
+        create: async () => {
+          events.push({ op: 'create' });
+          return {};
+        },
+      },
+      user: {
+        findUnique: async () => {
+          events.push({ op: 'user' });
+          return { id: 42, isActive: true };
+        },
+      },
+    }),
+  };
+  const service = new AuthService(prisma, { signAsync: async () => 'access' }, {});
+
+  await assert.rejects(() => service.refresh(RAW_TOKEN), /digunakan atau dicabut/);
+
+  const claim = events.find((event) => event.op === 'claim');
+  assert.equal(claim.args.where.id, stored.id);
+  assert.equal(claim.args.where.revokedAt, null);
+  assert.equal(events.some((event) => event.op === 'user'), false, 'loser tidak boleh membaca user');
+  assert.equal(events.some((event) => event.op === 'create'), false, 'loser tidak boleh membuat refresh token baru');
 });

@@ -66,13 +66,12 @@ export class AuthController {
     const rawToken = this.extractRefreshToken(req);
     if (rawToken) {
       const tokenHash = createHash('sha256').update(rawToken).digest('hex');
-      const stored = await this.prisma.refreshToken.findUnique({ where: { token: tokenHash } });
-      if (stored && !stored.revokedAt) {
-        await this.prisma.refreshToken.update({
-          where: { id: stored.id },
-          data: { revokedAt: new Date() },
-        });
-      }
+      // Conditional update membuat logout idempoten dan aman bila berlomba
+      // dengan refresh yang menghapus token pada saat yang sama.
+      await this.prisma.refreshToken.updateMany({
+        where: { token: tokenHash, revokedAt: null },
+        data: { revokedAt: new Date() },
+      });
     }
     this.clearRefreshCookie(res);
     return { message: 'Logout berhasil' };

@@ -123,17 +123,19 @@ export class AuthService {
     // 🔴 P0-01: Bungkus rotasi dalam transaksi — cegah race condition
     // Dua request concurrent dengan token yang sama tidak bisa lolos berdua
     return this.prisma.$transaction(async (tx) => {
-      // Single-use enforcement: verifikasi token masih ada di dalam transaksi
-      const stillExists = await tx.refreshToken.findUnique({
-        where: { id: stored.id },
+      // Claim token secara atomik. Kondisi revokedAt wajib berada pada operasi
+      // delete agar refresh yang berlomba dengan logout hanya punya satu pemenang.
+      const claimed = await tx.refreshToken.deleteMany({
+        where: {
+          id: stored.id,
+          revokedAt: null,
+          expiresAt: { gte: new Date() },
+        },
       });
 
-      if (!stillExists) {
-        throw new UnauthorizedException('Refresh token sudah digunakan');
+      if (claimed.count !== 1) {
+        throw new UnauthorizedException('Refresh token sudah digunakan atau dicabut');
       }
-
-      // Hapus token lama
-      await tx.refreshToken.delete({ where: { id: stored.id } });
 
       // Cari user
       const user = await tx.user.findUnique({
@@ -393,18 +395,25 @@ export class AuthService {
     // refresh token tetap bisa menukar access token baru sampai 7 hari.
     // Pencabutan ditaruh di dalam transaksi yang sama dengan penggantian hash.
     await this.prisma.$transaction(async (tx) => {
+      // Claim reset token secara atomik. Dua request yang sebelumnya sama-sama
+      // membaca usedAt=null tidak boleh keduanya mengganti password.
+      const claimed = await tx.$executeRaw(Prisma.sql`
+        UPDATE "PasswordResetToken"
+        SET "usedAt" = NOW()
+        WHERE token = ${tokenHash}
+          AND "usedAt" IS NULL
+          AND "expiresAt" >= NOW()
+      `);
+      if (claimed !== 1) {
+        throw new UnauthorizedException('Token reset tidak valid, sudah digunakan, atau kedaluwarsa');
+      }
+
       await tx.$executeRaw(Prisma.sql`
         UPDATE "User"
         SET "passwordHash" = ${passwordHash},
             "passwordChangedAt" = NOW(),
             "updatedAt" = NOW()
         WHERE id = ${user.id}
-      `);
-
-      await tx.$executeRaw(Prisma.sql`
-        UPDATE "PasswordResetToken"
-        SET "usedAt" = NOW()
-        WHERE token = ${tokenHash}
       `);
 
       // Global logout: cabut semua refresh token user.

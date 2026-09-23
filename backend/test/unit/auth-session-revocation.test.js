@@ -26,7 +26,7 @@ const RESET_TOKEN_HASH = createHash('sha256').update(RAW_RESET_TOKEN).digest('he
 const OLD_PASSWORD_HASH = bcrypt.hashSync(OLD_PASSWORD, 10);
 
 /** Prisma tiruan: mencatat urutan operasi agar bisa diperiksa. */
-function makePrisma({ user, resetRow }) {
+function makePrisma({ user, resetRow, resetClaimCount = 1 }) {
   const events = [];
   const record = (entry) => {
     events.push(entry);
@@ -34,7 +34,9 @@ function makePrisma({ user, resetRow }) {
   };
   const tx = {
     $executeRaw: async (query) => {
-      record({ op: 'executeRaw', sql: String(query?.sql ?? query) });
+      const sql = String(query?.sql ?? query);
+      record({ op: 'executeRaw', sql });
+      if (/UPDATE "PasswordResetToken"/.test(sql)) return resetClaimCount;
       return 1;
     },
     refreshToken: {
@@ -87,6 +89,12 @@ test('T1a — resetPassword mencabut seluruh refresh token di dalam transaksi ya
 
   const tokenUpdate = prisma.events.find((e) => e.op === 'executeRaw' && /UPDATE "PasswordResetToken"/.test(e.sql));
   assert.ok(tokenUpdate, 'harus menandai reset token terpakai');
+  assert.match(tokenUpdate.sql, /"usedAt" IS NULL/);
+  assert.match(tokenUpdate.sql, /"expiresAt" >= NOW\(\)/);
+  assert.ok(
+    prisma.events.indexOf(tokenUpdate) < prisma.events.indexOf(userUpdate),
+    'reset token harus diklaim sebelum password diubah',
+  );
 
   // INVARIAN YANG DULU HILANG: seluruh refresh token user dicabut.
   const revocation = prisma.events.find((e) => e.op === 'revokeAll');
@@ -164,4 +172,20 @@ test('T1e — reset token dicari sebagai SHA-256, bukan token mentah', async () 
   const serialized = JSON.stringify(captured);
   assert.ok(serialized.includes(RESET_TOKEN_HASH), 'harus mencari hash SHA-256 token');
   assert.ok(!serialized.includes(RAW_RESET_TOKEN), 'token mentah tidak boleh dikirim ke query');
+});
+
+test('T6 - request yang kalah claim reset token tidak boleh mengubah password', async () => {
+  const user = { id: USER_ID, isActive: true, passwordHash: OLD_PASSWORD_HASH };
+  const resetRow = { userId: USER_ID, usedAt: null, expiresAt: new Date(Date.now() + 60_000) };
+  const prisma = makePrisma({ user, resetRow, resetClaimCount: 0 });
+
+  await assert.rejects(
+    () => makeService(prisma).resetPassword({ token: RAW_RESET_TOKEN, newPassword: NEW_PASSWORD }),
+    /sudah digunakan/,
+  );
+
+  const userUpdates = prisma.events.filter((e) => e.op === 'executeRaw' && /UPDATE "User"/.test(e.sql));
+  assert.equal(userUpdates.length, 0, 'loser claim tidak boleh mengubah password');
+  assert.equal(prisma.events.filter((e) => e.op === 'revokeAll').length, 0, 'loser claim tidak boleh mencabut sesi');
+  assert.equal(prisma.events.some((e) => e.op === 'tx-commit'), false, 'transaksi loser harus rollback');
 });
