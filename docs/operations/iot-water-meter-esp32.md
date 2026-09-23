@@ -3,7 +3,7 @@
 Tanggal: 2026-09-23
 Status: spesifikasi prototype (belum dirakit/dipasang); bukan izin pengadaan
 Tujuan: spesifikasi perangkat dan prosedur water meter — asumsi pra-beli, BOM, arsitektur hardware/firmware, pulse counting, kalibrasi, persistence, provisioning, upload policy, lifecycle, test plan, OTA, dan gate instalasi satu kamar
-Rujukan: [iot.md](../domain/iot.md) · [IoT (pointer)](../domain/iot.md) · [iot-handoff.md](iot-handoff.md) · [operasional.md](../domain/operasional.md)
+Rujukan: [iot.md](../domain/iot.md) · [IoT (pointer)](../domain/iot.md) · [iot-handoff.md](iot-tuya-setup.md) · [operasional.md](../domain/operasional.md)
 
 > Migrasi dari docs/M15_IOT.md Part D (B8 Tahap 3, 23 Sep 2026) pada DOC-GOV-20260922; teks tidak diubah.
 > Pengadaan/instalasi perangkat tidak termasuk batch dokumentasi ini dan tetap menunggu keputusan owner (IOT-LATER).

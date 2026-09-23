@@ -460,4 +460,4 @@ Isi lengkap perintah seed ada di [Default & Seed DEV](default-dev.md); bagian in
 ## Appendix — Seed Master Data (diarsipkan)
 
 Prosedur "Patch Tenant Aman" (2026-07-08) sudah tidak tersedia.
-Arsip: [m11-seed-master-data-appendix-2026-07-08.md](../history/m11-seed-master-data-appendix-2026-07-08.md).
+Arsip: [m11-seed-master-data-appendix-2026-07-08.md](../arsip/m11-seed-master-data-appendix-2026-07-08.md).

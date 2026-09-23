@@ -2,7 +2,7 @@
 
 > Dipindah apa adanya dari `docs/M14_AUDIT_UI_UX.md` §1–§6 (Tahap 3 batch B4, 23 Sep 2026) pada DOC-GOV-20260922.
 > Sifat: **bukti bertanggal** (audit awal 30 Juli 2026; status per 12–13 September 2026 pada blok asal §1), bukan status aktif. Teks tidak diubah; hanya tujuan tautan relatif di-rebase ke basis `docs/audit/`.
-> Status/antrean aktif Fase AO: [status-ao-lintas-portal.md](status-ao-lintas-portal.md). Audit ulang 12 Sep 2026: [audit-uiux-ulang-2026-09-12.md](audit-uiux-ulang-2026-09-12.md). Antrean kanonik tetap [STATUS.md](../STATUS.md).
+> Status/antrean aktif Fase AO: [status-ao-lintas-portal.md](../audit/status-ao-lintas-portal.md). Audit ulang 12 Sep 2026: [audit-uiux-ulang-2026-09-12.md](../audit/audit-2026-09.md). Antrean kanonik tetap [STATUS.md](../STATUS.md).
 
 
 > **Status audit 30 Juli:** SELESAI · **Eksekusi:** backlog AO tetap terbuka; urutan terbaru mengikuti M12 (EF diprioritaskan)
@@ -34,7 +34,7 @@ Pada audit awal 30 Juli, UI KOST48 sebagian besar responsif, tetapi **UAT saat i
 
 **Status 8 September: sign-off AO belum diberikan.** AO-00 selesai menurut catatan eksekusi M13 tanggal 30 Juli; jangan menjalankan ulang dua migration historis. Sebelum crawl baru, verifikasi kesegaran ledger pada target UAT secara read-only. AO-03/13/14, sisa AO-18/19/20 serta AO-21/23 tetap terbuka. Skrip audit tersedia, dengan gap alat yang dicatat pada AO-03 di bawah; belum ada provisioning/crawl baru pada sesi dokumentasi ini.
 
-**Status 12–13 September 2026:** audit UI/UX total dijalankan — 180 pemeriksaan halaman (6 role × 2 viewport) + Axe, 0 error/5xx; **gate Axe LULUS** (0 critical/serious) setelah perbaikan sore 12 Sep, `tsc -b` dan `npm run build` exit 0. AO-06/AO-08/AO-09 serta T-01..T-08 selesai; empat `<h1>` ganda ditutup di commit `9c211a0`. **Masih terbuka:** AO-13 (bukti eksekusi/verifikasi persona 0 skip) dan sign-off AO-14, viewport 320 px, rute ber-fixture, sisa AO-18/19/20 parsial, serta AO-21/23. Bukti: [audit UI/UX total 12 Sep 2026](audit-uiux-total-2026-09-12.md); status kanonik tetap [STATUS](status-ao-lintas-portal.md).
+**Status 12–13 September 2026:** audit UI/UX total dijalankan — 180 pemeriksaan halaman (6 role × 2 viewport) + Axe, 0 error/5xx; **gate Axe LULUS** (0 critical/serious) setelah perbaikan sore 12 Sep, `tsc -b` dan `npm run build` exit 0. AO-06/AO-08/AO-09 serta T-01..T-08 selesai; empat `<h1>` ganda ditutup di commit `9c211a0`. **Masih terbuka:** AO-13 (bukti eksekusi/verifikasi persona 0 skip) dan sign-off AO-14, viewport 320 px, rute ber-fixture, sisa AO-18/19/20 parsial, serta AO-21/23. Bukti: [audit UI/UX total 12 Sep 2026](audit-uiux-total-2026-09-12.md); status kanonik tetap [STATUS](../audit/status-ao-lintas-portal.md).
 
 ---
 

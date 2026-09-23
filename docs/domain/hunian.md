@@ -6,7 +6,7 @@ Tujuan: aturan & invarian siklus huni (dari M05)
 Rujukan: [KEPUTUSAN-OWNER](../KEPUTUSAN-OWNER.md) · [STATUS](../STATUS.md) · [hunian](hunian.md) · [kontrak.md](kontrak.md) · [keuangan.md](keuangan.md)
 
 > Migrasi dari docs/M05_SIKLUS_HUNI.md (S2.c Tahap 3, 23 Sep 2026) pada DOC-GOV-20260922; teks aturan tidak diubah.
-> Kuota utilitas: [keuangan.md](keuangan.md#quota-utilitas-berbasis-periode-sewa-lunas) · Status kamar Fase V: [kontrak.md](kontrak.md#override-fase-v--status-kamar) · Bukti audit: [audit-360-huni-2026-07.md](../audit/audit-360-huni-2026-07.md)
+> Kuota utilitas: [keuangan.md](keuangan.md#quota-utilitas-berbasis-periode-sewa-lunas) · Status kamar Fase V: [kontrak.md](kontrak.md#override-fase-v--status-kamar) · Bukti audit: [audit-360-huni-2026-07.md](../audit/audit-uang-huni-2026-07.md)
 
 ## Dossier 11 — Booking & Renewal (normatif)
 

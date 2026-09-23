@@ -56,7 +56,7 @@ Sumber: jawaban langsung owner atas empat pertanyaan arah produk. Keputusan ini 
 - **ARAH-TEKNIS-TETAP:** target satu API NestJS, React/Vite, penundaan MA, serta gate keselamatan/keuangan tetap. EF tetap batas teknis dan gate yang relevan; prioritas produk kini mengikuti PROD-SIMPLE, bukan otomatis seluruh backlog EF lebih dahulu.
 - **IB-FOUNDATION:** owner mengklarifikasi bahwa landasannya adalah **IB Diploma Business Management Theory**, untuk membangun dasar bisnis kost yang kuat. Penerapan teori harus terhubung ke keputusan bisnis nyata, data, flow aplikasi, dan evaluasi hasil; teori bukan izin otomatis mengubah nominal, jurnal, atau kebijakan bisnis existing.
 
-Turunan pelaksanaan dan acceptance disusun dalam [rancangan DOC-GOV-20260922](plans/DOC-GOV-20260922.md#11-arah-produk-dan-flow-utama). Usulan desain UI belum menjadi keputusan aturan bisnis. Migrasi dokumentasi XL tetap menunggu persetujuan rancangan; jawaban arah produk tidak dianggap sebagai approval migrasi atau implementasi keuangan.
+Turunan pelaksanaan dan acceptance disusun dalam [rancangan DOC-GOV-20260922](arsip/DOC-GOV-20260922.md#11-arah-produk-dan-flow-utama). Usulan desain UI belum menjadi keputusan aturan bisnis. Migrasi dokumentasi XL tetap menunggu persetujuan rancangan; jawaban arah produk tidak dianggap sebagai approval migrasi atau implementasi keuangan.
 
 ## Keputusan arah aplikasi — 6 September 2026
 

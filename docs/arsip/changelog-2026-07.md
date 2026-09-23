@@ -795,13 +795,13 @@ Keputusan owner (kuis 2026-07-08 — detail di M02 "Kuis Audit Aset & Nilai"):
 
 Semua flow siklus huni telah terverifikasi dalam audit 360° (M15/M16). Perbaikan P2-01 (LeadSource PORTAL) dan P2-02 (guard checkout) sudah diimplementasikan di M16. Tidak ada perubahan fundamental pada lifecycle stay/checkout/deposit.
 
-**Update 2026-07-23 — kontrak quota utilitas:** entri ini menandai tanggal kontrak; **teks aturan tidak diulang** — kanonik di [domain/keuangan.md](../../domain/keuangan.md) § Quota Utilitas Berbasis Periode Sewa Lunas (dedup D-01, keputusan owner 23 Sep 2026). Telemetry IoT hanya memberi observability dan tidak dapat mengubah meter billing tanpa jalur `MeterReading`.
+**Update 2026-07-23 — kontrak quota utilitas:** entri ini menandai tanggal kontrak; **teks aturan tidak diulang** — kanonik di [domain/keuangan.md](../domain/keuangan.md) § Quota Utilitas Berbasis Periode Sewa Lunas (dedup D-01, keputusan owner 23 Sep 2026). Telemetry IoT hanya memberi observability dan tidak dapat mengubah meter billing tanpa jalur `MeterReading`.
 
 ---
 
 ## M06 — Operasional: update bertanggal Juli 2026 (dipindah 23 Sep 2026; B1 Tahap 3)
 
-> Aturan normatif hasil pemisahan ada di [domain/operasional.md](../../domain/operasional.md). Paragraf `**Update UI/UX inventaris 2026-07-23**` sengaja tetap di [changelog 2026-06](2026-06.md) bersama blok identity dossier 14 agar blok itu tidak terpecah; tanggalnya tertulis di paragraf. Teks tidak diubah.
+> Aturan normatif hasil pemisahan ada di [domain/operasional.md](../domain/operasional.md). Paragraf `**Update UI/UX inventaris 2026-07-23**` sengaja tetap di [changelog 2026-06](changelog-2026-06.md) bersama blok identity dossier 14 agar blok itu tidak terpecah; tanggalnya tertulis di paragraf. Teks tidak diubah.
 
 ## Update 2026-07-08 — Sinkronisasi Operasional
 
@@ -842,7 +842,7 @@ Semua modul operasional (inventaris, staf, notifikasi, auth) telah terverifikasi
 
 ## M15 — IoT: update implementasi & verifikasi bertanggal (dipindah 23 Sep 2026; B8 Tahap 3)
 
-> Riwayat bertanggal dari `docs/M15_IOT.md`; teks tidak diubah. Materi aturan/spec ada di [domain/iot.md](../../domain/iot.md); prosedur di [operations/iot-tuya-setup.md](../../operations/iot-tuya-setup.md) dan [operations/iot-water-meter-esp32.md](../../operations/iot-water-meter-esp32.md); handoff di [operations/iot-handoff.md](../../operations/iot-handoff.md).
+> Riwayat bertanggal dari `docs/M15_IOT.md`; teks tidak diubah. Materi aturan/spec ada di [domain/iot.md](../domain/iot.md); prosedur di [operations/iot-tuya-setup.md](../operations/iot-tuya-setup.md) dan [operations/iot-water-meter-esp32.md](../operations/iot-water-meter-esp32.md); handoff di [operations/iot-handoff.md](../operations/iot-tuya-setup.md).
 
 #### Update implementasi 2026-07-23
 

@@ -34,7 +34,7 @@
 |---|---|
 | Deploy, PWA, dan go-live (runbook utama) | [operations/deploy-go-live.md](operations/deploy-go-live.md) |
 | Checklist go-live cPanel (langkah per langkah) | [operations/go-live-cpanel.md](operations/go-live-cpanel.md) |
-| Formulir isi data go-live (satu formulir kanonik) | [operations/form-go-live.md](operations/form-go-live.md) |
+| Formulir isi data go-live (satu formulir kanonik) | [operations/form-go-live.md](operations/go-live-cpanel.md) |
 | Produksi & operasional harian shared hosting | [operations/produksi.md](operations/produksi.md) |
 | Default & seed DEV (akun dev, perintah seed) | [operations/default-dev.md](operations/default-dev.md) |
 | Data master & nilai default (kamar, fasilitas, konstanta, FAQ) | [operations/data-master.md](operations/data-master.md) |
@@ -42,10 +42,10 @@
 | Harness verifikasi keuangan | [operations/verifikasi-keuangan.md](operations/verifikasi-keuangan.md) |
 | IoT — runbook setup Tuya KWH | [operations/iot-tuya-setup.md](operations/iot-tuya-setup.md) |
 | IoT — spesifikasi & prosedur water meter ESP32-C3 | [operations/iot-water-meter-esp32.md](operations/iot-water-meter-esp32.md) |
-| IoT — handoff backend & frontend | [operations/iot-handoff.md](operations/iot-handoff.md) |
+| IoT — handoff backend & frontend | [operations/iot-handoff.md](operations/iot-tuya-setup.md) |
 
 ## 5. Provenance
 
-- Isi `docs/operations/` berasal dari M08/M11/M19/M20 serta `GO_LIVE_CPANEL_CHECKLIST.md` dan `FORM_ISI_DATA_GO_LIVE.md` (batch S1.b, B3, B9), dipindah **tanpa mengubah langkah**; bukti ada di [mapping §7](history/DOC-GOV-20260922-mapping.md).
+- Isi `docs/operations/` berasal dari M08/M11/M19/M20 serta `GO_LIVE_CPANEL_CHECKLIST.md` dan `FORM_ISI_DATA_GO_LIVE.md` (batch S1.b, B3, B9), dipindah **tanpa mengubah langkah**; bukti ada di [mapping §7](arsip/DOC-GOV-20260922-mapping.md).
 - Path lama (termasuk dua berkas non-M di atas) **sudah dihapus di Fase 3**; rincian tetap kanonik di `docs/operations/`.
 - Berkas ini menjadi rumah kanonik sejak **Fase 2 (23 Sep 2026)**; rincian di `docs/operations/` tetap dipakai apa adanya dan tidak digandakan ke berkas ini.

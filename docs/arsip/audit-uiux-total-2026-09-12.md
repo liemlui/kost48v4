@@ -2,8 +2,8 @@
 
 > **Tanggal:** audit 12 September 2026; perbaikan sore 12 Sep dan sesi lanjutan 13 Sep 2026.
 > **Status:** bukti bertanggal - laporan lengkap audit UI/UX total (dinamis + statis) beserta hasil perbaikan T-01..T-09.
-> **Tujuan:** laporan rinci audit UI/UX total sebagai bukti bertanggal; status/antrean aktif tetap di [status-ao-lintas-portal.md](status-ao-lintas-portal.md).
-> **Rujukan:** [audit-uiux-ulang-2026-09-12.md](audit-uiux-ulang-2026-09-12.md) (ringkasan §0), [audit-uiux-lintas-portal-2026-07.md](audit-uiux-lintas-portal-2026-07.md) (AO-00..AO-23), [STATUS.md](../STATUS.md). Path lama `docs/AUDIT_UIUX_TOTAL_2026-09-12.md` sudah dihapus di Fase 3.
+> **Tujuan:** laporan rinci audit UI/UX total sebagai bukti bertanggal; status/antrean aktif tetap di [status-ao-lintas-portal.md](../audit/status-ao-lintas-portal.md).
+> **Rujukan:** [audit-uiux-ulang-2026-09-12.md](../audit/audit-2026-09.md) (ringkasan §0), [audit-uiux-lintas-portal-2026-07.md](audit-uiux-lintas-portal-2026-07.md) (AO-00..AO-23), [STATUS.md](../STATUS.md). Path lama `docs/AUDIT_UIUX_TOTAL_2026-09-12.md` sudah dihapus di Fase 3.
 
 > Dipindah apa adanya dari `docs/AUDIT_UIUX_TOTAL_2026-09-12.md` (Tahap 3 batch B6, 23 Sep 2026) pada DOC-GOV-20260922.
 > Sifat: **bukti bertanggal** laporan lengkap; teks tidak diubah dan angka historis tidak diubah. Hanya 2 tujuan tautan relatif di-rebase ke basis `docs/audit/`.
@@ -13,7 +13,7 @@
 > **Aplikasi yang diaudit:** build produksi `frontend/dist` (versi 1.3.0) disajikan lewat server statis audit, dengan `VITE_API_BASE_URL=/api` dan proxy same-origin ke backend NestJS :3000 — meniru topologi produksi.
 > **Database:** UAT lokal `kost48_v3_pro` (port 5433). **Bukan produksi.**
 > **Artefak bukti:** [`docs/audit-assets/2026-09-12_uiux_total/`](../audit-assets/2026-09-12_uiux_total/) (`crawl-summary.json`, `axe-violations.json`).
-> **Perbaikan:** dikerjakan pada sesi yang sama — lihat [§0 Hasil perbaikan](#0-hasil-perbaikan--12-september-2026-sore).
+> **Perbaikan:** dikerjakan pada sesi yang sama — lihat [§0 Hasil perbaikan](audit-uiux-total-2026-09-12.md#0-hasil-perbaikan--12-september-2026-sore).
 
 ---
 
@@ -177,7 +177,7 @@ Batas yang **tetap ada** dan tidak boleh diklaim berlebih:
 
 ## 3. Rekonsiliasi dengan Audit 30 Juli / 8 September (M14 AO-01…AO-23)
 
-> **Catatan sinkronisasi 13 Sep 2026:** tabel ini adalah rekonsiliasi **sesi pertama 12 Sep, sebelum §0b/§0c**. Status AO-06, AO-08, AO-09, T-06, dan T-08 di bawah sudah usang — lihat §0/§0b/§0c di atas, commit `4e67c13` (performa `/portal/stay`), dan commit `9c211a0` (radius + `<h1>` ganda). Status kanonik tetap di [STATUS](status-ao-lintas-portal.md).
+> **Catatan sinkronisasi 13 Sep 2026:** tabel ini adalah rekonsiliasi **sesi pertama 12 Sep, sebelum §0b/§0c**. Status AO-06, AO-08, AO-09, T-06, dan T-08 di bawah sudah usang — lihat §0/§0b/§0c di atas, commit `4e67c13` (performa `/portal/stay`), dan commit `9c211a0` (radius + `<h1>` ganda). Status kanonik tetap di [STATUS](../audit/status-ao-lintas-portal.md).
 
 | ID lama | Status sekarang | Bukti sesi ini |
 |---|---|---|

@@ -117,7 +117,7 @@ Dossier 13 mencakup jurnal otomatis, COA, general ledger, trial balance, serta l
 Detail keputusan owner: [KEPUTUSAN-OWNER §Kuis Audit Aset & Nilai](../KEPUTUSAN-OWNER.md).
 
 ## Status Audit Invarian Keuangan (per Jul 2026)
-Daftar invarian kanonik (8 invarian) beserta harness verifikasinya ada di [operations/verifikasi-keuangan.md](../operations/verifikasi-keuangan.md) — dipindah dari M04 Bagian 1 pada 23 Sep 2026. Tabel di bawah adalah **status resmi**; bukti auditnya di [audit/audit-360-uang-2026-07.md](../audit/audit-360-uang-2026-07.md).
+Daftar invarian kanonik (8 invarian) beserta harness verifikasinya ada di [operations/verifikasi-keuangan.md](../operations/verifikasi-keuangan.md) — dipindah dari M04 Bagian 1 pada 23 Sep 2026. Tabel di bawah adalah **status resmi**; bukti auditnya di [audit/audit-360-uang-2026-07.md](../audit/audit-uang-huni-2026-07.md).
 
 | Invariant | Status |
 |-----------|--------|
@@ -126,7 +126,7 @@ Daftar invarian kanonik (8 invarian) beserta harness verifikasinya ada di [opera
 | Cashflow `beginning+net=ending` (unit test 13/13) | ✅ LULUS |
 | Financial Ratios expenseRatio benar (unit test 12/12) | ✅ LULUS |
 | 8 invarian keuangan (daftar kanonik di [operations/verifikasi-keuangan.md](../operations/verifikasi-keuangan.md)) | ✅ 5 lulus · ⚠️ 3 bercatatan: #3 receipt best-effort, #6 TB dapat tidak seimbang bila P1-01 terjadi, #7 mismatch bila P1-02 terjadi |
-| Temuan P1-01..P1-03 (jurnal & deposit *best-effort*) | ✅ Indikasi diperbaiki — verifikasi **statis** 23 Sep 2026; P1-04..P1-09 UNKNOWN ([bukti](../audit/p1-uang-status-2026-09-23.md)) |
+| Temuan P1-01..P1-03 (jurnal & deposit *best-effort*) | ✅ Indikasi diperbaiki — verifikasi **statis** 23 Sep 2026; P1-04..P1-09 UNKNOWN ([bukti](../audit/audit-uang-huni-2026-07.md)) |
 | 7 DO-NOT-TOUCH blocks | ✅ SEMUA UTUH |
 | Dead code: `postPaymentReversalTx` (0 pemanggil) | 🟡 Minor |
 | Unmapped transactions | ✅ 0 |

@@ -1,7 +1,7 @@
 # Audit Operasional, Inventaris, Notifikasi & IoT (Jul 2026) — Bukti Bertanggal
 
 > Dipindah apa adanya dari `docs/M06_OPERASIONAL.md` (B1 Tahap 3, 23 Sep 2026) pada DOC-GOV-20260922.
-> Status temuan tetap seperti tertulis di bawah (Jul 2026); bukan status aktif. Aturan operasional ada di [domain/operasional.md](../domain/operasional.md); identity dossier, temuan, dan task ada di [history/changelog/2026-06.md](../history/changelog/2026-06.md).
+> Status temuan tetap seperti tertulis di bawah (Jul 2026); bukan status aktif. Aturan operasional ada di [domain/operasional.md](../domain/operasional.md); identity dossier, temuan, dan task ada di [history/changelog/2026-06.md](../arsip/changelog-2026-06.md).
 
 ## Audit 360° P3–P8 — status modul P4/P5 (Jul 2026)
 

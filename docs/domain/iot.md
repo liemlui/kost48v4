@@ -7,7 +7,7 @@ Rujukan: [operasional.md](operasional.md) · [keuangan.md](keuangan.md) · [harg
 
 > Migrasi dari docs/M15_IOT.md (B8 Tahap 3, 23 Sep 2026) pada DOC-GOV-20260922; Part A dan Part B dipindah apa adanya, ditambah § Bagian 6 IoT dari `domain/operasional.md` — teks tidak diubah.
 > Rencana implementasi (Part B) berstatus **ditunda** sesuai IOT-LATER (keputusan owner 22 Sep, [KEPUTUSAN-OWNER](../KEPUTUSAN-OWNER.md)); pemindahan dokumen ini bukan izin implementasi.
-> Riwayat bertanggal dipisah ke [history/changelog/2026-07.md](../history/changelog/2026-07.md); prosedur ke [operations/iot-tuya-setup.md](../operations/iot-tuya-setup.md) dan [operations/iot-water-meter-esp32.md](../operations/iot-water-meter-esp32.md); handoff ke [operations/iot-handoff.md](../operations/iot-handoff.md).
+> Riwayat bertanggal dipisah ke [history/changelog/2026-07.md](../arsip/changelog-2026-07.md); prosedur ke [operations/iot-tuya-setup.md](../operations/iot-tuya-setup.md) dan [operations/iot-water-meter-esp32.md](../operations/iot-water-meter-esp32.md); handoff ke [operations/iot-handoff.md](../operations/iot-tuya-setup.md).
 
 ## Part A — Inventaris Perangkat Tuya
 

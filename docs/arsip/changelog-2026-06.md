@@ -1,7 +1,7 @@
 # Riwayat Changelog — Juni 2026
 
-> Berisi entri Juni 2026. Satu entri M03 (2026-06-17) tetap di sini sebagai bukti bertanggal; entri normatif M03 — 2026-06-19 (AI Sidecar Approval) dan 2026-06-30 (Override Booking Flow) — dikembalikan ke [domain/kontrak.md](../../domain/kontrak.md) pada S2.a-fix / S2.a-fix-2.
-> Indeks bulan dan entri M13 ada di [M13](../../M13_CHANGELOG.md).
+> Berisi entri Juni 2026. Satu entri M03 (2026-06-17) tetap di sini sebagai bukti bertanggal; entri normatif M03 — 2026-06-19 (AI Sidecar Approval) dan 2026-06-30 (Override Booking Flow) — dikembalikan ke [domain/kontrak.md](../domain/kontrak.md) pada S2.a-fix / S2.a-fix-2.
+> Indeks bulan dan entri M13 ada di [M13](../M13_CHANGELOG.md).
 
 ## 2026-06-17 — M03 AUDIT KEUANGAN ULTRA ✅
 
@@ -25,7 +25,7 @@
 
 ## 2026-06-15 — M04 Dossier 10: Pembayaran & Invoice (snapshot historis)
 
-> Aturan aktif dipindahkan ke [domain/keuangan.md](../../domain/keuangan.md#kebijakan-pembayaran--invoice). Pernyataan peta kode tentang approve yang mengaktivasi kamar/meter adalah narasi historis dan telah digantikan Override Fase V.
+> Aturan aktif dipindahkan ke [domain/keuangan.md](../domain/keuangan.md#kebijakan-pembayaran--invoice). Pernyataan peta kode tentang approve yang mengaktivasi kamar/meter adalah narasi historis dan telah digantikan Override Fase V.
 
 ### DOSSIER 10 — PEMBAYARAN & INVOICE
 **Domain:** alur uang masuk inti — bukti bayar tenant, review/approve admin, invoice & pembayaran manual, meter reading. **Flow 3 & 4.**
@@ -275,7 +275,7 @@ Bagian historis `DOSSIER 11` di bawah masih menyebut multi-booking `RESERVED` da
 
 ## M06 — Operasional: dossier, temuan, task, update (dipindah 23 Sep 2026; B1 Tahap 3)
 
-> Wrapper riwayat M06. Aturan normatif hasil pemisahan ada di [domain/operasional.md](../../domain/operasional.md); audit 29 Juli 2026 ada di [audit/audit-operasional-2026-07.md](../../audit/audit-operasional-2026-07.md). Teks di bawah tidak diubah; blok dossier (identity, temuan audit, task) tidak dipecah.
+> Wrapper riwayat M06. Aturan normatif hasil pemisahan ada di [domain/operasional.md](../domain/operasional.md); audit 29 Juli 2026 ada di [audit/audit-operasional-2026-07.md](../audit/audit-operasional-2026-07.md). Teks di bawah tidak diubah; blok dossier (identity, temuan audit, task) tidak dipecah.
 
 ## Update 2026-06-17 — AUDIT KEUANGAN ULTRA ✅
 

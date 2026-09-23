@@ -15,7 +15,7 @@ Rujukan: [KEPUTUSAN-OWNER](KEPUTUSAN-OWNER.md) · [STATUS](STATUS.md) · [STATUS
 
 [Buka peta audit](audit-map/README.md) → indeks kelompok → leaf satu file → simbol/percabangan yang dipilih. Lampiran ini menginventarisasi source secara otomatis agar audit cukup membaca satu cabang dan kontraknya. [Cara audit/checkpoint](audit-map/CARA_AUDIT.md) dan [alur lintas domain](audit-map/ALUR_LINTAS_DOMAIN.md) membantu memecah pertanyaan kecil.
 
-`TERPETAKAN` bukan PASS audit. Hasil generate menyimpan snapshot lokal dan batas ekstraksi sintaks; status/izin tetap M12/M02. Jangan memuat seluruh folder peta atau JSON inventaris ke konteks. Regenerasi dari root: `node docs/audit-map/generate.cjs` (parser source, tanpa menjalankan aplikasi).
+`TERPETAKAN` bukan PASS audit. **`docs/audit-map/**` adalah artefak *generated* dan *untracked*** (1.126 berkas; dipakai 135+ tautan peta per ID audit) — tidak masuk repo, **jangan dihapus**, dan jangan dianggap bagian repo. Hasil generate menyimpan snapshot lokal dan batas ekstraksi sintaks; status/izin tetap [STATUS](STATUS.md)/[KEPUTUSAN-OWNER](KEPUTUSAN-OWNER.md) (dulu M12/M02). Jangan memuat seluruh folder peta atau JSON inventaris ke konteks. Regenerasi dari root: `node docs/audit-map/generate.cjs` (parser source, tanpa menjalankan aplikasi).
 
 ## Konvensi (sekali paham, berlaku semua modul)
 - **Backend modul:** `backend/src/modules/<nama>/` berisi `<nama>.controller.ts` (route `/<nama>`), `<nama>.service.ts` (logika), `<nama>.module.ts` (wiring), `dto/`. Modul besar dipecah multi-service (lihat tabel).

@@ -24,7 +24,7 @@
 > tetapi gap target/fixture/pagination/gate sukses belum ditutup. OWNER existing
 > dipakai login; skrip dapat membuat ADMIN/STAFF, dua portal TENANT dan satu tenant
 > dummy. Baca §1b di file ini (kanonik).
-> dan [M14 AO-03](../audit/audit-uiux-lintas-portal-2026-07.md#ao-03--p1--kredensial-dan-data-uat-tidak-mendukung-audit-lintas-role)
+> dan [M14 AO-03](../arsip/audit-uiux-lintas-portal-2026-07.md#ao-03--p1--kredensial-dan-data-uat-tidak-mendukung-audit-lintas-role)
 > sebelum eksekusi. Provisioning serta sesi login crawl memutasi DB UAT dan
 > memerlukan lingkup izin terkait. `AUDIT_CONFIRM=1` tidak memvalidasi lingkungan.
 > Password dari environment proses/secret manager; kredensial DEV bukan kredensial UAT.
@@ -48,7 +48,7 @@ tidak otomatis memuat `.env.local`.
   tenant fixture non-personal secara eksplisit sebelum provisioning.
 - **Provisioning memutasi DB; login crawl juga memperbarui `lastLoginAt` dan
   membuat `RefreshToken`.** Lingkup izin UAT harus mencakup akun/portal serta sesi
-  autentikasi. Rincian gap/prasyarat: [M14 AO-03](../audit/audit-uiux-lintas-portal-2026-07.md#ao-03--p1--kredensial-dan-data-uat-tidak-mendukung-audit-lintas-role).
+  autentikasi. Rincian gap/prasyarat: [M14 AO-03](../arsip/audit-uiux-lintas-portal-2026-07.md#ao-03--p1--kredensial-dan-data-uat-tidak-mendukung-audit-lintas-role).
 - Konsumsi crawler: `frontend/e2e/audit-users.ts` (env `E2E_OWNER_*`,
   `E2E_ADMIN_*`, `E2E_STAFF_*`, `E2E_TENANT_ACTIVE_*`, `E2E_TENANT_NO_STAY_*`).
   Dua state TENANT baru dideklarasikan sebagai env, belum menjadi crawl UAT nyata

@@ -1,7 +1,7 @@
 # Audit Lintas Scope — 29 Juli 2026 (Reasonix) — Bukti Bertanggal
 
 > Dipindah apa adanya dari `docs/M01_MASTER.md` § Audit Lintas Scope (B5 Tahap 3, 23 Sep 2026) pada DOC-GOV-20260922.
-> Status temuan tetap seperti tertulis (29 Jul 2026); bukan status aktif. Antrean dan gate aktif: [STATUS](../STATUS.md). Ringkasan fase: [fase-lama](../history/fase-lama.md).
+> Status temuan tetap seperti tertulis (29 Jul 2026); bukan status aktif. Antrean dan gate aktif: [STATUS](../STATUS.md). Ringkasan fase: [fase-lama](../arsip/fase-lama.md).
 
 ## 🆕 Audit Lintas Scope — 29 Jul 2026 (Reasonix)
 

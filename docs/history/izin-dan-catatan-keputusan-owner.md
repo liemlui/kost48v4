@@ -3,10 +3,10 @@
 Tanggal: 2026-09-23
 Status: riwayat — bukan sumber aturan aktif
 Tujuan: rumah riwayat kelas isi register keputusan owner yang bukan keputusan bisnis aktif — izin/approval migrasi dokumentasi yang sudah digantikan, izin bertahap 8 Sep, dan catatan status/teknis bertanggal
-Rujukan: [KEPUTUSAN-OWNER](../KEPUTUSAN-OWNER.md) · [M02 (pointer)](../KEPUTUSAN-OWNER.md) · [STATUS](../STATUS.md) · [governance-log](governance-log.md) · [changelog/2026-06](changelog/2026-06.md) · [changelog/2026-07](changelog/2026-07.md)
+Rujukan: [KEPUTUSAN-OWNER](../KEPUTUSAN-OWNER.md) · [M02 (pointer)](../KEPUTUSAN-OWNER.md) · [STATUS](../STATUS.md) · [governance-log](governance.md) · [changelog/2026-06](../arsip/changelog-2026-06.md) · [changelog/2026-07](../arsip/changelog-2026-07.md)
 
 > Migrasi dari docs/M02_KEPUTUSAN_OWNER.md (B7 Tahap 3, 23 Sep 2026) pada DOC-GOV-20260922; blok dipindah apa adanya — teks, tanggal, dan bukti tidak diubah.
-> Status berlaku/digantikan tiap blok dibaca dari §Status keputusan di [register kanonik](../KEPUTUSAN-OWNER.md); ringkasan log governance ada di [governance-log](governance-log.md).
+> Status berlaku/digantikan tiap blok dibaca dari §Status keputusan di [register kanonik](../KEPUTUSAN-OWNER.md); ringkasan log governance ada di [governance-log](governance.md).
 > Sub-bagian dipindah dengan heading aslinya: "Status: Sudah Terkunci di Kode" (induk `## W-00 — Decision Register`) dan "Refactor 7 Juli 2026" (induk `## Update 2026-07-07`); heading induknya tetap di register kanonik.
 > Catatan 2026-06-17 dan 2026-07-08 di bawah juga punya salinan bulanan di changelog; tidak dihapus atau didedup pada batch ini.
 

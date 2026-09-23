@@ -10,7 +10,7 @@ Isi sumber dipertahankan; hanya tautan relatif disesuaikan untuk lokasi riwayat 
 
 Dashboard monitoring governance; bukan sumber aturan baru dan tidak menggantikan M12/M13.
 Status disinkronkan 22 September 2026. **Konsolidasi lama Stage 1–5 selesai** menurut M13 20 Sep; wrapper tersedia dan audit frontend-auth sudah dibuat sebagian.
-Task saat ini: DOC-GOV-20260922, perbaikan dokumentasi terbatas dan [rancangan penataan total](../../docs/plans/DOC-GOV-20260922.md). Migrasi XL menunggu persetujuan rancangan. Izin Stage 1 lama adalah riwayat, bukan pembatasan task baru.
+Task saat ini: DOC-GOV-20260922, perbaikan dokumentasi terbatas dan [rancangan penataan total](../arsip/DOC-GOV-20260922.md). Migrasi XL menunggu persetujuan rancangan. Izin Stage 1 lama adalah riwayat, bukan pembatasan task baru.
 
 ## 1. Peta File Governance
 
@@ -26,12 +26,12 @@ Tanggal file lama tidak disimpulkan dari tanggal yang tertulis di dalam dokumenn
 | [reasonix.toml](../../reasonix.toml) | Permission tools Reasonix | Selesai Stage 5 — 7 allow dihapus; tanpa deny baru | Config tool; allow generik tetap, bukan blokir menyeluruh | 2026-09-20 |
 | [AI_QUICKREF.md](../../AI_QUICKREF.md) | Cheatsheet harian | Status tooling dan batas bukti diperbarui | Ringkasan turunan AGENTS; exception uang di AGENTS §8 | 2026-09-22 |
 | [AI_WORKFLOW_GUIDE.md](../../AI_WORKFLOW_GUIDE.md) | Pointer + lampiran roadmap/template | Roadmap lama diberi konteks; rancangan baru ditautkan | Pointer ke AGENTS/M12; §11–12 lampiran, bukan aturan kanonik | 2026-09-22 |
-| [docs/audit/README.md](../../docs/audit/README.md) | Indeks audit modul | Satu audit parsial frontend-auth tersedia; empat placeholder | Indeks turunan; audit-map sebagai peta, M12 sebagai antrean | 2026-09-22 |
+| [docs/audit/README.md](../audit/README.md) | Indeks audit modul | Satu audit parsial frontend-auth tersedia; empat placeholder | Indeks turunan; audit-map sebagai peta, M12 sebagai antrean | 2026-09-22 |
 | [AI_MASTER.md](../../AI_MASTER.md) | Monitoring lintas-agent | Dashboard aktif; status disinkronkan | Dashboard, bukan canonical atau pengganti M12/M13 | 2026-09-22 |
 | [.github/copilot-instructions.md](../../.github/copilot-instructions.md) | Entry panduan Copilot | Pointer aktif — Stage 3 selesai | Pointer ke AGENTS/M12 dan dashboard AI_MASTER | 2026-09-20 |
-| [M00](../PETA-KODE.md) / [audit-map](../../docs/audit-map/) | Navigasi kode dan audit | Ada; dipertahankan, tidak diubah | Peta rujukan; bukan bukti audit otomatis PASS | UNKNOWN — belum diperiksa |
+| [M00](../PETA-KODE.md) / [audit-map](../audit-map/) | Navigasi kode dan audit | Ada; dipertahankan, tidak diubah | Peta rujukan; bukan bukti audit otomatis PASS | UNKNOWN — belum diperiksa |
 | [M12](../STATUS.md) | Antrean dan gate tugas | Kesiapan task diperjelas; migrasi struktur menunggu approval XL | Otoritas antrean/gate di atas AGENTS | 2026-09-22 |
-| [M13](../../docs/M13_CHANGELOG.md) | Riwayat bertanggal | Entri koreksi docs dan rancangan ditambahkan; entri lama tetap | Riwayat bukti, bukan antrean baru | 2026-09-22 |
+| [M13](../M13_CHANGELOG.md) | Riwayat bertanggal | Entri koreksi docs dan rancangan ditambahkan; entri lama tetap | Riwayat bukti, bukan antrean baru | 2026-09-22 |
 
 ## 2. Hierarki Aturan (+ KNOWN EXCEPTION gate keuangan)
 
@@ -66,10 +66,10 @@ Tidak ada hitungan coverage atau klaim PASS runtime baru. Kesegaran bukti dinila
 
 | Modul / cakupan | File audit / rujukan | Status | Tanggal audit | Freshness |
 |---|---|---|---|---|
-| Auth frontend | [docs/audit/frontend-auth.md](../../docs/audit/frontend-auth.md) | Diperiksa sebagian — login dengan mock | 2026-09-20 | Baseline d5d04cb; validitas terhadap diff berikutnya belum diperiksa |
+| Auth frontend | [docs/audit/frontend-auth.md](../audit/audit-modul-2026.md) | Diperiksa sebagian — login dengan mock | 2026-09-20 | Baseline d5d04cb; validitas terhadap diff berikutnya belum diperiksa |
 | Context/sesi frontend | [M12](../STATUS.md) — catatan FE-057; file audit khusus: UNKNOWN — belum diperiksa | UNKNOWN — belum diperiksa | UNKNOWN — belum diperiksa | UNKNOWN — belum diperiksa |
 | Auth backend | [M12](../STATUS.md) — catatan perbaikan terkait FE-002; file audit khusus: UNKNOWN — belum diperiksa | UNKNOWN — belum diperiksa | UNKNOWN — belum diperiksa | UNKNOWN — belum diperiksa |
-| Modul lainnya | [audit-map](../../docs/audit-map/) — navigasi, bukan hasil audit | UNKNOWN — belum diperiksa | UNKNOWN — belum diperiksa | UNKNOWN — belum diperiksa |
+| Modul lainnya | [audit-map](../audit-map/) — navigasi, bukan hasil audit | UNKNOWN — belum diperiksa | UNKNOWN — belum diperiksa | UNKNOWN — belum diperiksa |
 
 ## 5. Utang Tooling
 
@@ -94,7 +94,7 @@ Tidak ada hitungan coverage atau klaim PASS runtime baru. Kesegaran bukti dinila
 ## 7. Aturan Perubahan
 
 Aturan perubahan mengikuti [AGENTS §10](../../AGENTS.md#10-perubahan-governance). Konsolidasi Stage 1–5 tanggal 20 Sep selesai; checkpoint per-stage pada log di bawah hanya merekam keadaan saat keputusan dibuat.
-Permintaan owner 22 Sep mengizinkan perbaikan temuan dokumentasi dan penyusunan alur kerja aman. [Rancangan DOC-GOV-20260922](../../docs/plans/DOC-GOV-20260922.md) memisahkan perbaikan langsung dari migrasi XL yang memerlukan persetujuan rencana menurut AGENTS §5.
+Permintaan owner 22 Sep mengizinkan perbaikan temuan dokumentasi dan penyusunan alur kerja aman. [Rancangan DOC-GOV-20260922](../arsip/DOC-GOV-20260922.md) memisahkan perbaikan langsung dari migrasi XL yang memerlukan persetujuan rencana menurut AGENTS §5.
 Scope sesi ini dokumentasi lokal; source aplikasi, konfigurasi permission, DB, dan deployment tidak diubah.
 
 ## 8. Log Keputusan
@@ -123,7 +123,7 @@ Log historis append-only. Status pending pada baris lama dibaca sesuai tanggal/u
 Baca [AGENTS.md](../../AGENTS.md) sebagai sumber aturan kanonik agent.
 Untuk antrean dan gate tugas, ikuti [M12](../STATUS.md).
 
-Penataan menyeluruh yang diminta 22 Sep 2026 memiliki [rancangan DOC-GOV-20260922](../../docs/plans/DOC-GOV-20260922.md), menunggu persetujuan XL. Roadmap di bawah adalah usulan historis 20 Sep; status pelaksanaannya dibaca dari M12/AI_MASTER, bukan dari nomor minggu.
+Penataan menyeluruh yang diminta 22 Sep 2026 memiliki [rancangan DOC-GOV-20260922](../arsip/DOC-GOV-20260922.md), menunggu persetujuan XL. Roadmap di bawah adalah usulan historis 20 Sep; status pelaksanaannya dibaca dari M12/AI_MASTER, bukan dari nomor minggu.
 
 ## 11. Roadmap Migrasi Workflow (30 hari)
 
@@ -194,3 +194,47 @@ Command belum selesai/gagal dan gap verifikasi: [...].
 Temuan di luar scope serta langkah berikutnya: [...].
 Jangan ulang: [audit/test yang masih sah].
 ```
+
+---
+
+**Digabung dari docs/history/governance-log.md** (DOCS-CLEANUP-1, 2026-09-24) - isi blok disalin utuh.
+
+# Log Governance & Roadmap (historis) - KOST48
+
+> Dimigrasi dari AI_MASTER.md pada
+af230928
+ (Tahap 2). Isi blok dipindahkan tanpa diubah.
+> Dashboard aktif: [AI_MASTER.md](../../AI_MASTER.md). Log append-only dan tidak memberi izin baru; status pending pada baris lama dibaca sesuai tanggal/urutannya.
+
+## 6. Roadmap 30 Hari
+
+1. Ringkasan [GUIDE §11](../../AI_WORKFLOW_GUIDE.md#11-roadmap-migrasi-workflow-30-hari); **bukan izin implementasi**, tidak mengganti prioritas EF/onboarding M12.
+2. Hari 1–7: kontrak prompt, klasifikasi 5 task, baseline biaya/command, dan pemetaan prasyarat test satu modul; exception uang tetap berlaku.
+3. Hari 8–14: ringkas 3 modul sering disentuh dari bukti lama; petakan test, owner, freshness, serta prasyarat; eksekusi hanya setelah izin.
+4. Hari 15–21: setelah approval tooling, wrapper tanpa dependency baru; test/audit dahulu, build hanya target tersedia; tanpa fallback full suite.
+5. Hari 22–30: terapkan pada 5–10 task tambahan, bandingkan task selevel, perbaiki batas baca/handoff, laporkan hasil hari 30.
+6. Ukur token aktual bila tersedia atau proksi konteks/durasi/retry/regresi; target awal konteks XS/S turun 30%, bukan klaim hasil; gate tidak dilewati.
+
+## 8. Log Keputusan
+
+Log historis append-only. Status pending pada baris lama dibaca sesuai tanggal/urutannya; ringkasan kondisi saat ini ada di atas. Log tidak memberi izin baru.
+
+| Tanggal | Keputusan owner | Alasan | Dampak / status penerapan |
+|---|---|---|---|
+| 2026-09-20 | Hierarki User > M12 > AGENTS > pointer > dashboard; AGENTS satu sumber aturan agent | Konsistensi lintas-agent, kurangi duplikasi | Disetujui; konsolidasi pending Stage 2–4 |
+| 2026-09-20 | Gate uang opsi C — TUNDA perubahan | Pertahankan gate lama | KNOWN EXCEPTION dicatat §2; full test+build via pretest:unit tetap, tanpa eksekusi pada stage ini |
+| 2026-09-20 | Drift Cline opsi A — sinkronkan melalui pointer | Hindari status M00–M19/deployment lama | Pending Stage 3; referensi mengikuti AGENTS/M12 dan seri M00–M20 |
+| 2026-09-20 | Reasonix opsi C — tighten command berbahaya saja | Batasi delete/migrate/deploy/drop tanpa memperluas scope | Pending Stage 5; build/test/install dibiarkan; efektivitas permission belum diperiksa |
+| 2026-09-20 | .clinerules opsi A — tetap file tunggal | Entry Cline sederhana tanpa duplikasi aturan | Pending Stage 3; isi akan menjadi pointer 2–3 baris |
+| 2026-09-20 | Eksekusi Stage 1 saja: buat AI_MASTER.md | Dashboard dapat direview sebelum konsolidasi | **Stage 1 selesai; Stage 2–5 pending**; M12/M13 belum disinkronkan; menunggu review owner |
+| 2026-09-20 | Stage 2 selesai — konsolidasi AGENTS.md | Satu sumber aturan agent, 10 heading, sesuai outline owner | AGENTS canonical; hanya baris AGENTS §1 dan entri ini diperbarui; Stage 3–5 pending, M12/M13 ditunda; menunggu review owner |
+| 2026-09-20 | Stage 3 selesai — pointer diselaraskan dan komentar ignore diperbarui | Kurangi duplikasi panduan agent dan ganti referensi dokumen lama | CLAUDE/Cline/Copilot menjadi pointer; pola ignore tetap; Stage 4–5 pending, M12/M13 ditunda; menunggu review owner |
+| 2026-09-20 | Stage 4 selesai — GUIDE diringkas, QUICKREF dirujukkan ke AGENTS, indeks audit dibuat | Pertahankan roadmap/template dan navigasi audit tanpa duplikasi aturan | Hanya empat file scope Stage 4 diubah/dibuat; ringkasan modul belum dibuat; Stage 5 pending, M12/M13 ditunda; menunggu review owner |
+| 2026-09-20 | Stage 5 selesai — konsolidasi governance Stage 1–5 selesai | Hapus tepat 7 allow berbahaya tanpa deny baru; tambahkan rujukan M12 dan entri M13 | Empat file scope Stage 5 diperbarui; konten lama tetap; allow generik belum memblokir semua jalur mutasi; tanpa eksekusi aplikasi atau deployment |
+| 2026-09-20 | Tooling: verify-module.mjs + 3 script root (test:module/build:module/audit:module) | Utang tooling Stage 1-5 ditutup; AI_MASTER §5 | verify-module.mjs 128 baris, 6 skenario verifikasi lulus; manifest 1 modul (frontend-auth); audit doc & module 2+ pending |
+| 2026-09-20 | Audit modul pertama: frontend-auth (docs/audit/frontend-auth.md) | Gap audit doc pertama ditutup; wrapper audit:module terverifikasi melihat doc | Status "diperiksa sebagian"; 86 baris; 5 test coverage; gap login e2e/error/role lain/refresh belum diperiksa |
+| 2026-09-22 | Owner meminta alur pengembangan AI yang aman, penataan total docs, dan perbaikan temuan audit dokumentasi | Kurangi status bertentangan, konteks berlebih, dan risiko perubahan | Koreksi status/indeks/petunjuk diterapkan; rancangan XL disiapkan, migrasi belum dijalankan |
+| 2026-09-22 | Owner menyetujui rancangan DOC-GOV-20260922 Tahap 1 | Menutup rujukan `docs/README.md` yang belum ada dan memperjelas alur task/DoR/DoD | Tahap 1 diterapkan (`docs/README.md`, penyelarasan AGENTS/GUIDE/QUICKREF/AI_MASTER/M12/M13); tahap 2–4 pending saat itu; tanpa commit/push |
+| 2026-09-23 | Retro-approve kondisional DOC-GOV-20260922 Tahap 2 + S2.a/S2.b1 | Hasil konservatif (docs-only), invariant terjaga, tidak ada revert yang diperlukan | Disetujui secara retroaktif; batch berikutnya wajib approval eksplisit sebelum eksekusi |
+| 2026-09-23 | Prioritas 30 hari: menyelesaikan migrasi dokumentasi; cakupan retro-approve diklarifikasi (Tahap 2 S0–S6, S1, S2.a + S2.a-fix/-fix-2, S2.b1, S2.b2.a, S2.b2.b); gerbang KTP produksi ditunda dengan risiko diterima; keenam flow utama tetap dalam cakupan FLOW-CORE-01 | Menutup ambiguitas cakupan izin dan menetapkan urutan kerja | Tercatat di M02/M12/plans/README/mapping; approval per batch tetap wajib; risiko KTP wajib ditinjau sebelum onboarding penghuni nyata |
+| 2026-09-23 | Percepatan: perbaikan aturan/sinkronisasi docs terlalu lama dan menghambat app — tumpang tindih diselesaikan dengan eksekusi tegas, lalu fokus ke implementasi aplikasi | Menghindari penataan dokumen menjadi tujuan tanpa batas | S2.b3 (harness → `operations/verifikasi-keuangan.md`) dan S2.b4 (Audit 360° → `audit/audit-360-uang-2026-07.md`) dieksekusi; M04 menjadi pointer; duplikasi tabel status invarian dihapus; batch S3–S7/Tahap 4 tetap wajib approval |

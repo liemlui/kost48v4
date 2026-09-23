@@ -23,7 +23,7 @@
 
 | Temuan | Status | Bukti |
 |---|---|---|
-| P1-01, P1-02, P1-03 (jurnal & deposit ledger) | indikasi sudah diperbaiki — **verifikasi statis**, belum UAT | [audit/p1-uang-status-2026-09-23.md](audit/p1-uang-status-2026-09-23.md) · [audit/audit-360-uang-2026-07.md](audit/audit-360-uang-2026-07.md) |
+| P1-01, P1-02, P1-03 (jurnal & deposit ledger) | indikasi sudah diperbaiki — **verifikasi statis**, belum UAT | [audit/p1-uang-status-2026-09-23.md](audit/audit-uang-huni-2026-07.md) · [audit/audit-360-uang-2026-07.md](audit/audit-uang-huni-2026-07.md) |
 | P1-04 … P1-09 | **UNKNOWN** — belum diperiksa | sama |
 
 **Jadwal (keputusan owner 23 Sep 2026):** audit uang lanjutan P1-04..P1-09 dikerjakan **setelah IMPACT-01**, bukan sebelum. Sampai itu terjadi, jangan mengklaim temuan uang tuntas; setiap task yang menyentuh uang tetap mengikuti gate uang di [STATUS §7](STATUS.md).
@@ -33,31 +33,31 @@
 | Tanggal / lingkup | Berkas |
 |---|---|
 | Indeks cakupan audit total (135 ID) | [audit/audit-checklist-total.md](audit/audit-checklist-total.md) |
-| Audit modul pertama: `frontend/src/pages/auth` (20 Sep 2026) | [audit/frontend-auth.md](audit/frontend-auth.md) |
-| Audit 360° flow uang (Jul 2026) | [audit/audit-360-uang-2026-07.md](audit/audit-360-uang-2026-07.md) |
-| Audit 360° flow huni (Jul 2026) | [audit/audit-360-huni-2026-07.md](audit/audit-360-huni-2026-07.md) |
+| Audit modul pertama: `frontend/src/pages/auth` (20 Sep 2026) | [audit/frontend-auth.md](audit/audit-modul-2026.md) |
+| Audit 360° flow uang (Jul 2026) | [audit/audit-360-uang-2026-07.md](audit/audit-uang-huni-2026-07.md) |
+| Audit 360° flow huni (Jul 2026) | [audit/audit-360-huni-2026-07.md](audit/audit-uang-huni-2026-07.md) |
 | Audit operasional, inventaris, notifikasi & IoT (Jul 2026) | [audit/audit-operasional-2026-07.md](audit/audit-operasional-2026-07.md) |
-| Audit UI/UX lintas portal (30 Jul 2026) | [audit/audit-uiux-lintas-portal-2026-07.md](audit/audit-uiux-lintas-portal-2026-07.md) |
+| Audit UI/UX lintas portal (30 Jul 2026) | [audit/audit-uiux-lintas-portal-2026-07.md](arsip/audit-uiux-lintas-portal-2026-07.md) |
 | Audit lintas scope (29 Jul 2026, Reasonix) | [audit/audit-lintas-scope-2026-07-29.md](audit/audit-lintas-scope-2026-07-29.md) |
-| Audit menyeluruh kode (30 Jul 2026) | [audit/audit-menyeluruh-2026-07.md](audit/audit-menyeluruh-2026-07.md) |
-| Audit dokumentasi & urutan kerja (8 Sep 2026; diperbarui 22–23 Sep) | [audit/audit-dokumentasi-2026-09.md](audit/audit-dokumentasi-2026-09.md) |
-| Audit UI/UX total (12 Sep 2026) | [audit/audit-uiux-total-2026-09-12.md](audit/audit-uiux-total-2026-09-12.md) |
-| Audit ulang UI/UX dinamis — 180 pemeriksaan (12 Sep 2026) | [audit/audit-uiux-ulang-2026-09-12.md](audit/audit-uiux-ulang-2026-09-12.md) |
-| Audit halaman utama produksi, mobile-first (15 Sep 2026) | [audit/audit-homepage-produksi-2026-09-15.md](audit/audit-homepage-produksi-2026-09-15.md) |
+| Audit menyeluruh kode (30 Jul 2026) | [audit/audit-menyeluruh-2026-07.md](audit/audit-modul-2026.md) |
+| Audit dokumentasi & urutan kerja (8 Sep 2026; diperbarui 22–23 Sep) | [audit/audit-dokumentasi-2026-09.md](audit/audit-2026-09.md) |
+| Audit UI/UX total (12 Sep 2026) | [audit/audit-uiux-total-2026-09-12.md](arsip/audit-uiux-total-2026-09-12.md) |
+| Audit ulang UI/UX dinamis — 180 pemeriksaan (12 Sep 2026) | [audit/audit-uiux-ulang-2026-09-12.md](audit/audit-2026-09.md) |
+| Audit halaman utama produksi, mobile-first (15 Sep 2026) | [audit/audit-homepage-produksi-2026-09-15.md](audit/audit-2026-09.md) |
 | Status & antrean eksekusi Fase AO (+ gate DoD) | [audit/status-ao-lintas-portal.md](audit/status-ao-lintas-portal.md) |
-| Status temuan P1-01..P1-09 (verifikasi 23 Sep 2026) | [audit/p1-uang-status-2026-09-23.md](audit/p1-uang-status-2026-09-23.md) |
-| Lampiran audit portal tenant (2 Jul 2026) | [history/lampiran-audit-portal-tenant-2026-07-02.md](history/lampiran-audit-portal-tenant-2026-07-02.md) |
+| Status temuan P1-01..P1-09 (verifikasi 23 Sep 2026) | [audit/p1-uang-status-2026-09-23.md](audit/audit-uang-huni-2026-07.md) |
+| Lampiran audit portal tenant (2 Jul 2026) | [history/lampiran-audit-portal-tenant-2026-07-02.md](arsip/lampiran-audit-portal-tenant-2026-07-02.md) |
 
 ## 5. Batas berkas ini
 
 - Antrean, gate, invariant, dan blocker: [STATUS](STATUS.md); jangan diduplikasi di sini.
 - Aturan domain (termasuk invarian uang/huni): [ATURAN.md](ATURAN.md) + `docs/domain/`.
 - Runbook operasi dan verifikasi keuangan: [OPERASI.md](OPERASI.md).
-- **Known exception & rekonsiliasi migrasi dokumen** (fragment em dash yang dibiarkan, arsip lokal yang di-exclude git, tautan pra-eksisting): [mapping §7.2](history/DOC-GOV-20260922-mapping.md) — bukan defect baru, dan tidak diperbaiki tanpa batch tersendiri.
+- **Known exception & rekonsiliasi migrasi dokumen** (fragment em dash yang dibiarkan, arsip lokal yang di-exclude git, tautan pra-eksisting): [mapping §7.2](arsip/DOC-GOV-20260922-mapping.md) — bukan defect baru, dan tidak diperbaiki tanpa batch tersendiri.
 - Audit statis bukan UAT; inspeksi visual tanpa sesi yang diizinkan tetap ditulis sebagai belum diverifikasi.
 
 ## 6. Provenance
 
-- Isi `docs/audit/` berasal dari M14/M16, `CHECKLIST_AUDIT_TOTAL.md`, `AUDIT_UIUX_TOTAL_2026-09-12.md`, dan S2.b3/S2.b4 (batch B1, B4, B6), dipindah **tanpa mengubah temuan, ID, atau arti centang**; bukti ada di [mapping §7](history/DOC-GOV-20260922-mapping.md).
+- Isi `docs/audit/` berasal dari M14/M16, `CHECKLIST_AUDIT_TOTAL.md`, `AUDIT_UIUX_TOTAL_2026-09-12.md`, dan S2.b3/S2.b4 (batch B1, B4, B6), dipindah **tanpa mengubah temuan, ID, atau arti centang**; bukti ada di [mapping §7](arsip/DOC-GOV-20260922-mapping.md).
 - Path lama (M14/M16 dan dua berkas non-M) **sudah dihapus di Fase 3**; rincian tetap kanonik di `docs/audit/`.
 - Berkas ini menjadi rumah kanonik sejak **Fase 2 (23 Sep 2026)**; rincian di `docs/audit/` tetap dipakai apa adanya dan tidak digandakan ke berkas ini.

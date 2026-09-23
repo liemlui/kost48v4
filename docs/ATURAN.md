@@ -3,7 +3,7 @@
 > **Rumah kanonik aturan domain** (uang, huni, operasional, harga, publik, AI/IoT). Berkas ini adalah **titik masuk**: ia menetapkan batas dan menunjuk berkas rinci — **bukan** tempat menulis aturan baru dan bukan antrean.
 > Otoritas: prompt owner > [STATUS](STATUS.md) (antrean/gate) > [AGENTS](../AGENTS.md) (aturan kerja) > berkas ini. Keputusan bisnis: [KEPUTUSAN-OWNER](KEPUTUSAN-OWNER.md).
 > Rincian aturan ada di `docs/domain/` (§2). Berkas-berkas itu adalah **bagian dari ATURAN ini**, bukan dokumen terpisah yang boleh kedaluwarsa sendiri.
-> Dibuat 23 September 2026 (Fase 2 konsolidasi). Status tahap: [STATUS §8](STATUS.md#8-struktur-dokumen-tujuan-konsolidasi) + [mapping migrasi](history/DOC-GOV-20260922-mapping.md).
+> Dibuat 23 September 2026 (Fase 2 konsolidasi). Status tahap: [STATUS §8](STATUS.md#8-struktur-dokumen-tujuan-konsolidasi) + [mapping migrasi](arsip/DOC-GOV-20260922-mapping.md).
 
 ## 1. Cara pakai
 
@@ -39,6 +39,6 @@ Berkas rinci juga memuat **bukti audit bertanggal** dari era M (mis. `## Audit 3
 
 ## 4. Provenance
 
-- Isi `docs/domain/` berasal dari M03–M07/M09/M15/M18 melalui batch B1–B3, B5, dan B8, dipindah **tanpa mengubah aturan**; bukti perpindahan ada di [mapping §7](history/DOC-GOV-20260922-mapping.md).
+- Isi `docs/domain/` berasal dari M03–M07/M09/M15/M18 melalui batch B1–B3, B5, dan B8, dipindah **tanpa mengubah aturan**; bukti perpindahan ada di [mapping §7](arsip/DOC-GOV-20260922-mapping.md).
 - Path M lama **sudah dihapus di Fase 3** (23 Sep 2026); rincian tetap kanonik di berkas §2 dan tidak digandakan ke berkas ini.
 - Berkas ini menjadi rumah kanonik sejak **Fase 2 (23 Sep 2026)**; rincian di `docs/domain/` tetap dipakai apa adanya dan tidak digandakan ke berkas ini.

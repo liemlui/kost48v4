@@ -3,7 +3,7 @@
 Tanggal: 2026-09-23
 Status: aktif (rancangan + status implementasi)
 Tujuan: rancangan portal ringkas Owner/Admin — prinsip desain, peran, flow OWNER, flow ADMIN, halaman pendukung, kriteria selesai, rencana, dan status implementasi (dari M17)
-Rujukan: [KEPUTUSAN-OWNER](../KEPUTUSAN-OWNER.md) · [STATUS](../STATUS.md) · [scope.md](scope.md) · [flow-utama.md](flow-utama.md)
+Rujukan: [KEPUTUSAN-OWNER](../KEPUTUSAN-OWNER.md) · [STATUS](../STATUS.md) · [scope.md](scope.md) · [flow-utama.md](arah-produk.md)
 
 > Migrasi dari docs/M17_PORTAL_FLOW_RINGKAS.md (B5 Tahap 3, 23 Sep 2026) pada DOC-GOV-20260922; teks rancangan tidak diubah.
 > Batch B5 memindahkan **seluruh isi M17 apa adanya** (L6–L213) ke file ini; empat `[x]` status implementasi ikut apa adanya dan berada di luar domain invariant (STATUS.md + docs/history).
