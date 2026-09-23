@@ -14,7 +14,7 @@
 
 ## 2. Cakupan dan gate verifikasi
 
-- **Indeks cakupan audit total** (135 ID: 118 terbuka + 17 selesai): [audit/audit-checklist-total.md](audit/audit-checklist-total.md). Arti centang tidak boleh diubah saat berkas dipindah/dirapikan.
+- **Indeks cakupan audit total** (135 ID: 117 terbuka + 18 selesai): [audit/audit-checklist-total.md](audit/audit-checklist-total.md). Arti centang hanya berubah ketika audit unit terkait benar-benar selesai dan buktinya dicatat.
 - **Indeks per modul**: [audit/README.md](audit/README.md); peta hasil audit per cabang (generated): [audit-map/](audit-map/README.md).
 - **Gate DoD Fase AO** (audit UI/UX lintas portal) + perintah verifikasinya: [audit/status-ao-lintas-portal.md](audit/status-ao-lintas-portal.md).
 - Gate audit AO-13/AO-14 (tiga crawl tanpa skip, dua state TENANT, viewport 320–1440 px, Axe/gate Baymard, screenshot bebas PII) tercatat sebagai task terbuka di [STATUS §3](STATUS.md); memenuhi DoD bukan otomatis sign-off.
@@ -34,6 +34,7 @@
 |---|---|
 | Indeks cakupan audit total (135 ID) | [audit/audit-checklist-total.md](audit/audit-checklist-total.md) |
 | Audit modul pertama: `frontend/src/pages/auth` (20 Sep 2026) | [audit/frontend-auth.md](audit/audit-modul-2026.md) |
+| Audit ulang modul kedua: backend auth / BE-002 (24 Sep 2026) | [audit/backend-auth-2026-09-24.md](audit/backend-auth-2026-09-24.md) |
 | Audit 360° flow uang (Jul 2026) | [audit/audit-360-uang-2026-07.md](audit/audit-uang-huni-2026-07.md) |
 | Audit 360° flow huni (Jul 2026) | [audit/audit-360-huni-2026-07.md](audit/audit-uang-huni-2026-07.md) |
 | Audit operasional, inventaris, notifikasi & IoT (Jul 2026) | [audit/audit-operasional-2026-07.md](audit/audit-operasional-2026-07.md) |

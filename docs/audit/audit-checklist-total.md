@@ -1,7 +1,7 @@
 # Checklist Audit Total KOST48 (Indeks Cakupan Audit)
 
 > **Tanggal:** 8 September 2026 (dibuat); hasil audit 11-18 September 2026.
-> **Status:** indeks cakupan aktif - 135 ID subkelompok (118 belum, 17 selesai diperiksa). Arti centang tidak diubah.
+> **Status:** indeks cakupan aktif - 135 ID subkelompok (117 belum, 18 selesai diperiksa). Centang BE-002 diperbarui 24 Sep 2026 berdasarkan [audit ulang backend auth](backend-auth-2026-09-24.md).
 > **Tujuan:** satu indeks cakupan audit total beserta tabel hasil/checkpoint, dengan tautan peta per unit.
 > **Rujukan:** [STATUS.md](../STATUS.md) (antrean/gate), [KEPUTUSAN-OWNER](../KEPUTUSAN-OWNER.md) (izin), [audit-map/README.md](../audit-map/README.md) (peta). Path lama `docs/CHECKLIST_AUDIT_TOTAL.md` sudah dihapus di Fase 3.
 
@@ -89,7 +89,7 @@ Untuk database, gunakan [indeks schema](../audit-map/database/schema.md): catat 
 ### Infrastruktur (6)
 
 - [ ] **BE-001 - audit-log** - Pelaku, jejak perubahan, keterkaitan transaksi dan kerahasiaan log. [Peta](../audit-map/backend/infra/audit-log.md) Model: [**K4**](#model-k4).
-- [ ] **BE-002 - auth** - Login, refresh/logout, token, kredensial dan perubahan sesi. [Peta](../audit-map/backend/infra/auth.md) Model: [**K4**](#model-k4).
+- [x] **BE-002 - auth** - Login, refresh/logout, token, kredensial dan perubahan sesi. Selesai audit ulang statis 2026-09-24; T6/T7 tetap terbuka dan runtime belum dibuktikan. [Laporan](backend-auth-2026-09-24.md) · [Peta](../audit-map/backend/infra/auth.md) Model: [**K4**](#model-k4).
 - [ ] **BE-003 - common** - Guard, validasi, error, config, util bisnis dan telemetri lintas modul. [Peta](../audit-map/backend/infra/common.md) Model: [**K4**](#model-k4).
 - [ ] **BE-004 - prisma** - Lifecycle koneksi/pool, transaksi dan shutdown. [Peta](../audit-map/backend/infra/prisma.md) Model: [**K4**](#model-k4).
 - [ ] **BE-005 - root** - Bootstrap, wiring modul, middleware, CORS, routing API/static dan upload. [Peta](../audit-map/backend/infra/root.md) Model: [**K4**](#model-k4).

@@ -10,7 +10,7 @@ Hasil Tahap 2 DOC-GOV-20260922 (migrasi riwayat dokumen; **bukan** audit modul b
 | stays | belum dibuat |
 | [auth-frontend (modul pertama)](audit-modul-2026.md) | Diperiksa sebagian, 20 Sep 2026; baseline `d5d04cb`, uji login dengan mock; kesegaran terhadap perubahan berikutnya perlu diperiksa |
 | frontend-context | Belum ada dokumen modul; cakupan `frontend/src/context` sudah diaudit sebagai **FE-057** (M12, 17 Sep) dan `frontend/src/hooks` sebagai **FE-059**; pemilihan modul berikutnya mengikuti M12 #5 |
-| auth-backend | Belum ada dokumen modul; catatan terkait ada pada temuan FE-002 (sesi/pertukaran token) di M12 |
+| [auth-backend / BE-002](backend-auth-2026-09-24.md) | Audit ulang statis selesai 24 Sep 2026: T1/T2 tetap tertutup; race reset-token T6 dan logout–refresh T7 masih terbuka; runtime/UAT belum dibuktikan |
 | Uang + huni — bukti Audit 360° (Jul 2026), deep audit 29 Jul 2026, dan status temuan P1 (verifikasi statis 23 Sep 2026) | [audit-uang-huni-2026-07](audit-uang-huni-2026-07.md) — gabungan 3 berkas (DOCS-CLEANUP-1, 24 Sep 2026); P1-01/P1-02/P1-03 indikasi diperbaiki, P1-04..P1-09 UNKNOWN; angka historis tidak diubah |
 | Operasional/Inventaris/Notifikasi/IoT — status Audit 360° P3–P8 (P4/P5) + 4 deep audit 29 Jul 2026 | [audit-operasional-2026-07](audit-operasional-2026-07.md) — dipindah dari M06 (B1, 23 Sep 2026); bukti bertanggal |
 | UI/UX lintas portal — temuan AO-00..AO-23 (30 Jul 2026) | [audit-uiux-lintas-portal-2026-07](../arsip/audit-uiux-lintas-portal-2026-07.md) — dipindah dari M14 §1–§6 (B4, 23 Sep 2026); bukti bertanggal |
