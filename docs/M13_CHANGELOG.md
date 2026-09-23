@@ -1,13 +1,13 @@
 # KOST48 V5 — M13 Changelog
 
 
-> **Entri baru ditulis di paling atas**, tepat di bawah blok indeks ini. Riwayat lanjutan dipindah ke `docs/history/changelog/` pada Tahap 2 (S3) tanpa mengubah isi. Rotasi entri ke-11 dst. dijalankan pada B8 dan B9 (23 Sep 2026), sehingga jendela entri di file ini = **10 entri terbaru**; entri yang lebih lama ada di changelog bulanan.
+> **Entri baru ditulis di paling atas**, tepat di bawah blok indeks ini. Riwayat lanjutan dipindah ke `docs/history/changelog/` pada Tahap 2 (S3) tanpa mengubah isi. Rotasi entri ke-11 dst. dijalankan pada B8, B9, dan B10 (23 Sep 2026), sehingga jendela entri di file ini = **10 entri terbaru**; entri yang lebih lama ada di changelog bulanan.
 
 ## Indeks riwayat
 
 | Periode | File | Cakupan |
 |---|---|---|
-| 2026-09 (lanjutan) | [history/changelog/2026-09.md](history/changelog/2026-09.md) | Entri September 2026-09-06 … 2026-09-18 dari Tahap 2/S3 + entri M13 ke-11..26 (2026-09-18 … 2026-09-23) hasil rotasi B8 + Status Kerja Aktif & Update M12 |
+| 2026-09 (lanjutan) | [history/changelog/2026-09.md](history/changelog/2026-09.md) | Entri September 2026-09-06 … 2026-09-18 dari Tahap 2/S3 + entri M13 ke-11..26 (2026-09-18 … 2026-09-23) hasil rotasi B8, dilanjutkan rotasi B9 (keputusan owner pasca-B1, B1) dan B10 (B2) + Status Kerja Aktif & Update M12 |
 | 2026-08 | [history/changelog/2026-08.md](history/changelog/2026-08.md) | 8 entri (2026-08-17 ... 2026-08-20) |
 | 2026-07 | [history/changelog/2026-07.md](history/changelog/2026-07.md) | 40 entri + 41 sub-entri Juli + Release 2026-07-23 |
 | <= 2026-07-16 | `docs/archieve/M13_CHANGELOG_ARSIP_S1_2026.md` | arsip lama (tidak dipindahkan) |
@@ -15,6 +15,16 @@
 
 ---
 
+
+## 2026-09-23 (docs) — B10 Tahap 3: `docs/README.md` ditulis ulang menjadi indeks berbasis kebutuhan menuju rumah kanonik (batch terakhir sebelum B11)
+
+- **Penulisan ulang indeks (aturan tidak berubah):** `docs/README.md` 89 → 117 baris (95 baris non-kosong; 62 → 115 tautan, 93 unik) — dari daftar 21 nomor M menjadi **indeks berbasis kebutuhan menuju 7 file utama + 1 arsip**: §0 "Rumah kanonik" (mengikuti [STATUS §8](STATUS.md#8-struktur-dokumen-tujuan-konsolidasi)), §1 "Mulai task", §2 "Domain (aturan bisnis)", §3 "Operasional dan rilis", §4 "Audit", §5 "Riwayat", **§6 "Pintu masuk lama (kompatibilitas)"**, dan §7 "Batas indeks ini". Indeks tetap **penunjuk**: setiap aturan/status tetap di rumah kanoniknya — STATUS untuk antrean/gate, KEPUTUSAN-OWNER untuk keputusan bisnis, AGENTS untuk aturan kerja; tidak ada aturan baru di README.
+- **Rumah kanonik & alasan:** README **bukan pointer M** seperti batch B1–B9 (ia indeks navigasi), sehingga sifatnya "boleh ditulis ulang" dan pola pointer H1 + provenance + tabel "Isi & lokasi kanonik" **tidak dipaksakan** ke sini. Setiap baris lama diarahkan ke rumah kanonik hasil B1–B9 (daftar lengkap di [mapping §7.2 butir 19](history/DOC-GOV-20260922-mapping.md)); 21 pointer `docs/M*.md` + 4 berkas non-M + `AI_MASTER.md` tetap ditautkan di §6 supaya tautan dan bookmark lama tetap resolve.
+- **Konservasi (bukti, bukan klaim):** 74 baris non-kosong lama **74/74 terpetakan** ke baris baru atau rumah kanonik pengganti; **0 topik hilang**. Delta yang diumumkan: (1) 2 baris blok header lama diganti (M12 → [STATUS](STATUS.md), M02 → [KEPUTUSAN-OWNER](KEPUTUSAN-OWNER.md), AI_MASTER → STATUS); (2) 1 baris status "Tahap 1 / Tahap 3 berjalan" diganti baris provenance "dibuat 22 Sep 2026 + ditulis ulang 23 Sep 2026 (B10)"; (3) 1 baris §6 lama yang memuat status era-S2 (S2.b3/S2.b4/S2.c/S3–S7) diganti rujukan STATUS §8 + mapping Tahap 3 — label itu **superseded** oleh BATCH-B1-B11; (4) baris kanonik (domain/, operations/, product/, audit/, history/, plans/, `docs/archieve/`) dipertahankan teksnya, sebagian berpindah seksi.
+- **Invariant & checkbox:** `[ ]` = 23, `[x]` (domain history) = 101, gate domain = **12** — delta **0** vs worktree HEAD c17b14b8; total checkbox proyek 346 `[ ]` / 146 `[x]` delta 0 (README lama dan baru sama-sama 0 checkbox); 0 tautan rusak baru; known exception trailing whitespace tetap 26 baris; CRLF selaras (blob LF); UTF-8 tanpa BOM; tanpa blank line di EOF.
+- **Rujukan masuk diperiksa:** `docs/README.md` dirujuk path-saja oleh [AI_QUICKREF.md](../AI_QUICKREF.md) L6 dan [AI_WORKFLOW_GUIDE.md](../AI_WORKFLOW_GUIDE.md) L6 — keduanya tetap resolve **tanpa perubahan**; `CLAUDE.md` tidak merujuk README. Tidak ada aturan paralel yang ditambahkan.
+- **Verifikasi lokal:** checker tautan+fragment yang sama dijalankan pada worktree HEAD (`git worktree add --detach`) dan pada disk → himpunan temuan **identik** (17 temuan pra-eksisting: 13 fragment em dash `fase-lama.md`, 2 fragment di `domain/harga.md`, 2 fragment STATUS/KEPUTUSAN-OWNER, 1 path arsip M11) → **0 temuan baru**. Tanpa npm/build/test/lint/server.
+- **Deployment:** tidak dilakukan. **Dampak runtime:** tidak diukur (docs-only). **Gap lama tidak berubah:** P1-04..P1-09 UNKNOWN; sisa batch B11 = arsip + 4 tautan rusak pra-eksisting.
 
 ## 2026-09-23 (docs) — B9 Tahap 3: M11 (default data) dipisah menurut batas DEV/UAT/produksi + rumah referensi baru
 
@@ -102,13 +112,3 @@
 - **Duplikasi dicatat, tidak diputuskan:** dugaan tumpang tindih aturan harga §5 (utilitas) & §7 (DP & deposit) dengan `domain/keuangan.md` + `domain/hunian.md` dicatat sebagai **D-02** di [laporan duplikat](history/laporan-duplikat.md); isi tidak diubah/dihapus.
 - **Verifikasi lokal:** invariant `[ ]` = 23, `[x]` = 101, gate domain = 12 (delta 0 vs HEAD); tautan diperiksa → 0 rusak baru; `git diff --cached --check` bersih (tanpa known exception baru); UTF-8 tanpa BOM; tanpa blank line di EOF. Tanpa npm/build/test/lint/server.
 - **Deployment:** tidak dilakukan. **Dampak runtime:** tidak diukur.
-
-## 2026-09-23 (docs) — B2 Tahap 3: pemisahan M07 (publik) dan M09 (AI) ke domain/publik.md + domain/ai.md
-
-- **Pemindahan mekanis (isi tidak diubah):** **seluruh isi** `M07_PUBLIK_GROWTH.md` (694 baris) → [`domain/publik.md`](domain/publik.md) (682 baris) dan **seluruh isi** `M09_AI_OWNER_ADMIN.md` (787 baris) → [`domain/ai.md`](domain/ai.md) (786 baris) — satu tujuan per batch sesuai handoff owner, sehingga **tidak ada pemisahan riwayat/audit pada batch ini**. `M07_PUBLIK_GROWTH.md` 694 → 30 baris dan `M09_AI_OWNER_ADMIN.md` 787 → 19 baris (pointer dengan tabel lokasi kanonik).
-- **Konservasi (bukti, bukan klaim):** 1.117 baris non-kosong sumber; multiset per tujuan → 0 hilang (PUB 494, AI 604, pointer M07 12, pointer M09 5) dan tiap blok utuh berurutan (pemeriksa blok 2/2, 4/4, 1/1, 2/2). Dua baris header sumber (kalimat "Dokumen ini menyimpan spesifikasi domain dan bukti bertanggal") **diganti** pada kedua pointer karena tidak lagi akurat — diumumkan, sisa kalimatnya dipertahankan.
-- **Batas yang disengaja:** bagian bertanggal tetap berada di file domain dan **belum dipisah** — `## Update 2026-06/07`, `## Audit UI/UX Full — 2026-06-19`, `## Audit 360° P7 Marketing & Growth (Jul 2026)`, dua deep audit 29 Jul 2026 (publik), serta status Fase G/J/K dan `## Audit 360° P6 AI Flow (Jul 2026)` (AI). Pemisahan ke `docs/AUDIT.md`/`docs/arsip/` menunggu tahap konsolidasi audit/arsip; hal ini dicatat di header masing-masing file domain.
-- **Rujukan masuk diperbaiki (9 penggantian, 7 file):** `M00_CODEMAP.md` (2), `M10_PETA_SCOPE.md` (3), dan 1 di masing-masing `domain/hunian.md`, `domain/keuangan.md`, `domain/kontrak.md`, `domain/operasional.md`. **Sengaja tidak disentuh:** `M02_KEPUTUSAN_OWNER.md` (register keputusan owner — menunggu B7) dan `M01_MASTER.md` + indeks `docs/README.md` (menunggu B5/B10); tujuannya masih resolve ke pointer.
-- **Known exception (fidelity, bukan defect):** 3 baris `**Auditor:**`/`**Metode:**` di `domain/publik.md` mempertahankan hard break Markdown apa adanya dari M07 (L578/L579/L643), sehingga `git diff --cached --check` melaporkan 3 trailing whitespace — pola yang sama dengan mapping §7.2 butir 10 (total lintas B1+B2 = 10 baris). Tidak dihapus agar render tidak berubah; temuan lain 0.
-- **Verifikasi lokal:** invariant `[ ]` = 23, `[x]` = 101, gate domain = 12 (delta 0 vs HEAD); tautan diperiksa → 0 rusak baru; `git diff --cached --check`: hanya 3 known exception hard break di atas (selain itu bersih); UTF-8 tanpa BOM; tanpa blank line di EOF. Tanpa npm/build/test/lint/server.
-- **Deployment:** tidak dilakukan. **Dampak runtime:** tidak diukur. **Gap lama tidak berubah:** P1-04..P1-09 UNKNOWN.
