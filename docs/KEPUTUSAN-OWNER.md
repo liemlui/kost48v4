@@ -19,6 +19,15 @@ Rujukan: [STATUS](STATUS.md) · [AGENTS](../AGENTS.md) · [M12](M12_CHECKLIST_CH
 | Keputusan izin bertahap 8 Sep + koreksi lingkup AO | **riwayat** (izin sebagian masih operatif; status eksekusi bertanggal) | Dipisah ke [history/izin-dan-catatan-keputusan-owner.md](history/izin-dan-catatan-keputusan-owner.md); status aktual di [STATUS](STATUS.md) dan [M12](M12_CHECKLIST_CHANGELOG.md) |
 | Butir lain: D-01..D-31, R1–R5, B1–B5, E/F/K/L/S, OP-*, FIN-*, PUB-*, STF-*, AI-*, OWN-*, W-00-D1..D3, AL-01..AL-04, OC-01..OC-07 | **berlaku** | Tidak ada bukti penggantian yang tercatat per 23 Sep 2026 |
 
+## 2026-09-23 — DEDUP-UANG: pengulangan isi aturan uang/harga boleh diringkas
+
+Owner menjawab pertanyaan lanjutan batch B7: pengulangan isi aturan uang/harga **boleh didedup** dengan **satu pernyataan kanonik di `docs/domain/*`**; salinan lain menjadi kalimat rujukan. Batas yang mengikat:
+
+- **Angka dan aturan tidak berubah** — hanya pengulangan yang dihapus; setiap nilai yang dihapus wajib terbukti ada di lokasi kanonik.
+- **Rumah kanonik yang ditetapkan:** multiplikator term & utilitas per term + nominal DP/deposit → `domain/harga.md`; periode quota utilitas → `domain/keuangan.md`; konstanta utilitas (kuota gratis, tarif) → `domain/operasional.md`.
+- **Tidak dihapus:** penyebutan kontekstual di dalam alur domain (`hunian.md`, `kontrak.md`, `flow.md`, `keuangan.md`) selama merupakan bagian alur; copy publik (`domain/publik.md`) tetap urusan keputusan produk.
+- **D-02 dan D-05** pada [laporan duplikat](history/laporan-duplikat.md) ditutup dengan pola ini.
+
 ## 2026-09-23 — Percepatan penataan dokumentasi dan fokus implementasi
 
 Owner menilai perbaikan aturan dan sinkronisasi dokumentasi sudah terlalu lama sehingga menghambat perkembangan aplikasi.

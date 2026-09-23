@@ -39,11 +39,11 @@ Hindari membaca arsip besar kecuali benar-benar perlu forensik: `docs/archieve/*
 > **Ringkasan orientasi, bukan aturan kanonik.** Aturan rinci: harga & surcharge → [domain/harga.md](../domain/harga.md); uang/DP/deposit/invarian pembayaran → [domain/keuangan.md](../domain/keuangan.md); siklus huni → [domain/hunian.md](../domain/hunian.md); operasional & Auto-Ops → [domain/operasional.md](../domain/operasional.md).
 
 - **Tidak ada model Booking.** Satu `Stay` = booking→huni→selesai. Promoted = `initialMetersPromotedAt` terisi.
-- **DP** (`downPayment*`, 30% sewa, **hangus**) ≠ **Deposit jaminan** (`deposit*`, dari `Room.defaultDepositRupiah`, **SELALU tetap, refundable**).
-- **NO-PARTIAL menyeluruh.** Nominal bayar harus tepat (DP atau pelunasan penuh). **First-paid-wins.** Booking expiry 3 jam flat.
+- **DP** (`downPayment*`, hangus) ≠ **Deposit jaminan** (`deposit*`, refundable). Besaran DP, nominal deposit, dan larangan ubah oleh ADMIN **tidak diulang di sini** — lihat [harga.md §7](../domain/harga.md#7-uang-muka-dp--deposit); perlakuan akuntansinya di [keuangan.md](../domain/keuangan.md).
+- **NO-PARTIAL menyeluruh.** Nominal bayar harus tepat (DP atau pelunasan penuh). **First-paid-wins**; batas waktu booking (flat) mengikuti [hunian.md § Dossier 11](../domain/hunian.md#dossier-11--booking--renewal-normatif).
 - **Tanpa denda keterlambatan.** Notifikasi in-app → PWA push. **AI = tombol manual Owner/Admin saja** (D-23).
-- **Sewa per term:** Harian 13% · Mingguan 50% · 2Mingguan 75% · Bulanan 100% · Semester 5.7× · Tahunan 11×. (✅ owner-confirmed 2026-06-24: `pricing.helper.ts`)
-- **Occupant surcharge (D-24):** Standar 2 org gratis, maks 4 (+20%/orang ekstra). Besar 4 org gratis, maks 6.
+- **Sewa per term:** semua term diturunkan dari tarif bulanan memakai tabel multiplikator — angka **tidak diulang di sini**, lihat [harga.md §2](../domain/harga.md#2-formula-multiplikator-pricing_multipliers) (provenance owner-confirmed 2026-06-24 + `pricing.helper.ts` ikut ke kanonik).
+- **Occupant surcharge (D-24):** batas penghuni per ukuran kamar dan tarif per kepala ekstra **tidak diulang di sini** — lihat [harga.md §8](../domain/harga.md#8-penghuni-ekstra--surcharge-20).
 
 ---
 ## 5. Invarian Sistem (Tak Boleh Dilanggar)

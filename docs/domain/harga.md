@@ -36,6 +36,7 @@ Rujukan: [M02](../M02_KEPUTUSAN_OWNER.md) Â· [M12](../M12_CHECKLIST_CHANGELOG.
 | **Tahunan (12 bulan)** | `YEARLY` | **11,00 ×** tarif bulanan | Listrik & air **DIHITUNG TERPISAH** via meter |
 
 ### Catatan penting
+- **Provenance angka:** owner-confirmed 2026-06-24; implementasi `pricing.helper.ts`. Dicatat sebagai kanonik di sini pada dedup D-02/D-05 (keputusan owner 23 Sep 2026) — sebelumnya angka yang sama diulang di `product/orientasi.md` §2 dan `domain/hunian.md` § Dossier 11.
 - `SMESTERLY` = 5,7× → efektif **Rp 0,95/bulan** (diskon ~5% dari 6×).
 - `YEARLY` = 11× → efektif **Rp 0,917/bulan** (diskon ~8,3% dari 12×).
 - Diskon jangka panjang ini khusus pada **prabayar di muka penuh** (lihat §10).
@@ -116,7 +117,7 @@ Aturan `isUtilitiesIncludedForPricingTerm`:
 | `MONTHLY`, `SEMESTERLY`, `YEARLY` | **Pisah via meter** (pascabayar dihitung dari pemakaian) |
 
 ### Aturan tambahan (keputusan owner & FAQ):
-- Sewa bulanan: tiap kamar mendapat **jatah gratis listrik 30 kWh/bulan**; kelebihannya ditagih dengan **tarif Rp 2.500/kWh** (disetel di OperationalSetting; tarif kamar bisa di-override OWNER).
+- Sewa bulanan: tiap kamar mendapat **jatah gratis listrik bulanan**; kelebihannya ditagih dengan **tarif per kWh** (keduanya disetel di `OperationalSetting`; tarif kamar bisa di-override OWNER). **Nilai default tidak diulang di sini** — konstanta kanonik di [operasional.md § Konstanta owner-settable](operasional.md#konstanta-owner-settable-settings-owner--nyambung-permintaan-konstanta-di-settings), dasar periode quota di [keuangan.md § Quota Utilitas](keuangan.md#quota-utilitas-berbasis-periode-sewa-lunas).
 - Air: hanya ditagih bila sesuai setting aktif, dengan tarif per m³ (dari `OperationalSetting.waterTariffPerM3Rupiah`).
 - Untuk tarif jangka pendek (harian/mingguan/2-mingguan), listrik & air **SUDAH TERMASUK** — tidak ditagih meter.
 - Estimasi tambahan listrik (FAQ): kipas umumnya tidak ada tambahan; AC hemat Rp 0–100rb; AC rata-rata Rp 100rb–200rb; pasutri sering di kos Rp 200rb–300rb.
@@ -141,6 +142,8 @@ Contoh: check-in 1 September + 3 bulan → berakhir 1 Desember (exclusive). 31 J
 ---
 
 ## 7. Uang Muka (DP) & Deposit
+
+> **Kanonik nominal DP & deposit (dedup D-02, keputusan owner 23 Sep 2026).** Angka 30% dan `Room.defaultDepositRupiah` di seksi ini adalah rujukan kanonik. Penyebutan kontekstual di [hunian.md](hunian.md#dossier-11--booking--renewal-normatif), [kontrak.md](kontrak.md), [flow.md](flow.md), dan [keuangan.md](keuangan.md) dipertahankan sebagai bagian alur domainnya — bukan salinan yang dihapus.
 
 ### DP (uang muka pemesanan) — G-4/B
 - **DP = 30% × tarif periode** (sesuai `pricingTerm`): `roundRupiah(agreedRentAmountRupiah × 30 / 100)`.

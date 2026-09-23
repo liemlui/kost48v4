@@ -18,7 +18,7 @@ Tujuan: mencatat dugaan duplikasi isi yang ditemukan saat batch konsolidasi. Isi
 
 ## Ditemukan pada batch B3 (M18 → `domain/harga.md`, M19 → `operations/efisiensi-hosting.md`, 23 Sep 2026)
 
-### D-02 — Aturan harga/DP/deposit & utilitas bersinggungan dengan domain uang dan huni — **BELUM DIPUTUSKAN**
+### D-02 — Aturan harga/DP/deposit & utilitas bersinggungan dengan domain uang dan huni — **SELESAI 23 Sep 2026 (keputusan owner DEDUP-UANG)**
 
 | Lokasi | Bagian yang bersinggungan | Status |
 |---|---|---|
@@ -26,8 +26,8 @@ Tujuan: mencatat dugaan duplikasi isi yang ditemukan saat batch konsolidasi. Isi
 | `docs/domain/harga.md` §7 "Uang Muka (DP) & Deposit" (`### DP (uang muka pemesanan) — G-4/B`, `### Prinsip NO-PARTIAL (D-02)`, `### Deposit jaminan`) | Besaran/persentase DP, aturan no-partial, deposit jaminan | Bersinggungan dengan `domain/hunian.md` (dossier 11/12) dan `domain/keuangan.md` (kebijakan & invarian pembayaran) |
 | `docs/domain/harga.md` §8 "Penghuni Ekstra — Surcharge +20%" | Surcharge penghuni ekstra | Belum ada pembanding lain yang ditemukan — kemungkinan bukan duplikat |
 
-**Status:** hanya **dugaan** yang perlu diperiksa berdampingan; belum dilakukan perbandingan kalimat-per-kalimat, jadi belum ada klaim duplikat pasti. Isi **tidak** diubah/dihapus.
-**Mengapa belum dieksekusi:** ini menyentuh aturan uang/DP/deposit yang dilindungi aturan proyek ("DILARANG mengubah aturan uang/huni/harga, nominal, gate uang") — keputusan rumah kanonik harus dari owner, seperti pola D-01.
+**Status (diperiksa berdampingan 23 Sep 2026):** (1) **Utilitas §5 = salinan** — nilai default (kuota gratis & tarif per kWh) menyalin tabel konstanta `domain/operasional.md` § Konstanta owner-settable yang menyatakan dirinya "Sumber TUNGGAL"; salinan di `harga.md` diganti rujukan (+ rujukan dasar periode ke `keuangan.md` § Quota). (2) **DP/deposit §7 = bukan salinan yang aman dihapus** — `harga.md` §7 menetapkan nominal/rumus, sedangkan `hunian.md`/`kontrak.md`/`flow.md`/`keuangan.md` memakainya di dalam alur domain masing-masing; diselesaikan dengan **penanda kanonik + rujukan silang**, tanpa penghapusan. (3) **Surcharge §8 = bukan duplikat** (satu-satunya pernyataan rinci; hanya ringkasan di orientasi yang menjadi rujukan).
+**Eksekusi (23 Sep 2026, keputusan owner DEDUP-UANG):** kanonik yang ditetapkan — multiplikator term & nominal DP/deposit → `domain/harga.md`; periode quota utilitas → `domain/keuangan.md`; konstanta utilitas → `domain/operasional.md`. **Tidak ada angka atau aturan yang berubah**; setiap nilai yang dihapus dari salinan diverifikasi otomatis masih ada di kanonik. Keputusan: [KEPUTUSAN-OWNER](../KEPUTUSAN-OWNER.md) § DEDUP-UANG.
 
 ## Ditemukan pada batch B5 (M00/M01/M10/M17 → `PETA-KODE.md` + `product/` + riwayat, 23 Sep 2026)
 
@@ -49,7 +49,7 @@ Tujuan: mencatat dugaan duplikasi isi yang ditemukan saat batch konsolidasi. Isi
 
 **Keputusan (penataan non-aturan, AI):** hanya daftar akun yang berulang yang diganti rujukan (kredensial DEV, bukan aturan bisnis); **tidak ada aturan bisnis yang berubah** dan perintah kerja (`tsc`, `npm run build`, seed UAT) tetap utuh di `orientasi.md`.
 
-### D-05 — Ringkasan §1/§2 orientasi (identitas, DP/deposit, multiplier harga, surcharge) vs `domain/harga.md`, `domain/keuangan.md`, `domain/hunian.md` — **PENANGANAN DOKUMEN SELESAI; DEDUP ISI MENUNGGU OWNER**
+### D-05 — Ringkasan §1/§2 orientasi (identitas, DP/deposit, multiplier harga, surcharge) vs `domain/harga.md`, `domain/keuangan.md`, `domain/hunian.md` — **SELESAI DEDUP 23 Sep 2026 (keputusan owner DEDUP-UANG)**
 
 | Lokasi | Bagian yang bersinggungan | Status |
 |---|---|---|
@@ -57,9 +57,9 @@ Tujuan: mencatat dugaan duplikasi isi yang ditemukan saat batch konsolidasi. Isi
 | `docs/product/orientasi.md` §2 Konsep Kunci Uang | DP 30% hangus vs deposit refundable, NO-PARTIAL, tariff multiplier, surcharge penghuni ekstra | Ringkasan orientasi → ditandai + rujukan ke `domain/harga.md`, `domain/keuangan.md`, `domain/hunian.md` |
 | `docs/domain/harga.md`, `domain/keuangan.md`, `domain/hunian.md` | Aturan rinci + invarian | **KANONIK** untuk aturan (tidak diubah) |
 
-**Status:** **isi aturan tidak diubah dan tidak dihapus.** Pengulangan angka (30% DP, multiplier term, surcharge) sengaja dibiarkan sebagai ringkasan sambil menunjuk kanonik; dedup isi aturan menyentuh **aturan bisnis uang/harga/huni** → **menunggu keputusan owner** (bersama D-02). Bila owner memutuskan, catat di [M02](../M02_KEPUTUSAN_OWNER.md) lalu eksekusi pada batch konsolidasi berikutnya.
+**Status: SELESAI DEDUP 23 Sep 2026.** Angka yang diulang di §2 orientasi (persentase DP, `Room.defaultDepositRupiah`, multiplikator term, surcharge, batas 3 jam) **diganti kalimat rujukan** ke kanonik; §1 (identitas, jumlah kamar, role, status deployment) **tetap** karena merupakan subjek orientasi itu sendiri. Tidak ada aturan/angka yang berubah — semua nilai yang dihapus terbukti ada di kanonik. Keputusan: [KEPUTUSAN-OWNER](../KEPUTUSAN-OWNER.md) § DEDUP-UANG.
 
 ## Aturan pakai laporan ini
 
 - Temuan di sini **tidak** mengubah isi aturan, tidak menetapkan mana yang benar, dan tidak menutup gate apa pun.
-- Bila owner memutuskan, catat keputusan di [M02](../M02_KEPUTUSAN_OWNER.md), lalu eksekusi dedup pada batch konsolidasi berikutnya dan perbarui baris di atas sebagai bukti.
+- Bila owner memutuskan, catat keputusan di [KEPUTUSAN-OWNER](../KEPUTUSAN-OWNER.md), lalu eksekusi dedup pada batch konsolidasi berikutnya dan perbarui baris di atas sebagai bukti.

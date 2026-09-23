@@ -12,10 +12,10 @@ Rujukan: [M02](../M02_KEPUTUSAN_OWNER.md) · [M12](../M12_CHECKLIST_CHANGELOG.md
 
 #### 1. Aturan bisnis
 ##### Booking
-- **DP 30%** × sewa periode (sesuai pricingTerm), non-refundable, hangus bila gagal lunas H+1. Deposit jaminan = `Room.defaultDepositRupiah`, **SELALU tetap** (D-05; admin tak boleh override).
+- **DP 30%** × sewa periode (sesuai pricingTerm), non-refundable, hangus bila gagal lunas H+1. Deposit jaminan = `Room.defaultDepositRupiah`, **SELALU tetap** (D-05; admin tak boleh override). Nominal kanonik DP & deposit: [harga.md §7](harga.md#7-uang-muka-dp--deposit).
 - **Booking expiry 3 JAM FLAT** semua jalur (D-04) — sudah diterapkan melalui `AUTO_OPS_DEADLINES.BOOKING_REVIEW_DEADLINE_HOURS`.
 - **First-paid-wins**: multi-booking RESERVED tak dibatasi (D4); pembayaran pertama disetujui (DP pun) mengunci kamar + batalkan pesaing.
-- Harga per term (owner-confirmed 2026-06-24): Harian 13% · Mingguan 50% · 2-Mingguan 75% · Bulanan 100% · Semester 5,7× · Tahunan 11× dari tarif bulanan. Utilitas term pendek all-in; bulanan+ meter (C2).
+- Harga per term memakai **tabel multiplikator kanonik** — angka tidak diulang di sini; lihat [harga.md §2](harga.md#2-formula-multiplikator-pricing_multipliers). Utilitas term pendek all-in; bulanan+ meter (C2).
 - **KTP wajib** sebelum aktivasi (E1 — detail di dossier 18).
 ##### Renewal (GAP #2 — TARGET, lihat desain lengkap di §5)
 - Tenant lama yang menyatakan perpanjang punya **prioritas eksklusif sampai hari-H TANPA wajib DP dulu** (L2). Di hari-H belum bayar DP → kamar dibuka publik untuk orang lain (first-paid, mulai tanggal checkout L1). Tenant pilih TIDAK → kamar langsung dibuka.
