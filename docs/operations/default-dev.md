@@ -1,6 +1,8 @@
 # Default & Seed DEV
 
-> Migrasi dari docs/M08_DEPLOY_GO_LIVE.md + docs/M11_DEFAULT_DATA.md (M11 §1a, M08 Bagian 3, M11 §9) pada f8f9a589 (DOC-GOV-20260922 Tahap 3).
+> Migrasi dari docs/M08_DEPLOY_GO_LIVE.md + docs/M11_DEFAULT_DATA.md (M11 §1a, M11 §1b, M08 Bagian 3, M11 §9) pada f8f9a589 (DOC-GOV-20260922 Tahap 3); §1b dan catatan batch B9 ditambahkan 23 September 2026.
+> Sumber asli (`docs/M11_DEFAULT_DATA.md`) tetap ada sebagai pointer dengan anchor kompatibilitas; perintah seed untuk lingkungan PRODUKSI ada di [Produksi & Operasional Harian](produksi.md).
+> **Batas lingkungan:** seluruh isi DEV di file ini memakai basis data pengembangan **port 5433**; kredensial DEV tidak pernah berlaku untuk UAT/produksi.
 > Sumber asli dipertahankan sebagai pointer.
 
 ### 1a. Akun Fondasi seed-dev (khusus database pengembangan port 5433)
@@ -21,11 +23,39 @@
 > `backend/scripts/seed-audit-users.js` (`npm run seed:audit-users`) tersedia,
 > tetapi gap target/fixture/pagination/gate sukses belum ditutup. OWNER existing
 > dipakai login; skrip dapat membuat ADMIN/STAFF, dua portal TENANT dan satu tenant
-> dummy. Baca [M11 §1b](../M11_DEFAULT_DATA.md#1b-akun-audit-uat-non-personal-ao-03--password-tidak-ditulis-di-docs)
+> dummy. Baca §1b di file ini (kanonik).
 > dan [M14 AO-03](../audit/audit-uiux-lintas-portal-2026-07.md#ao-03--p1--kredensial-dan-data-uat-tidak-mendukung-audit-lintas-role)
 > sebelum eksekusi. Provisioning serta sesi login crawl memutasi DB UAT dan
 > memerlukan lingkup izin terkait. `AUDIT_CONFIRM=1` tidak memvalidasi lingkungan.
 > Password dari environment proses/secret manager; kredensial DEV bukan kredensial UAT.
+
+### 1b. Akun Audit UAT Non-Personal (AO-03) — password TIDAK ditulis di docs
+
+Target AO-03 adalah lima persona audit (OWNER, ADMIN, STAFF, TENANT dengan stay
+aktif, TENANT tanpa stay aktif) pada UAT non-produksi yang telah diverifikasi.
+**Status 8 Sep 2026: skrip tersedia, akun/fixture belum dibuktikan siap.**
+Password berasal dari **environment proses/secret manager**, bukan docs/test.
+`frontend/.env.example` adalah contoh nama variabel; config Playwright saat ini
+tidak otomatis memuat `.env.local`.
+
+- Skrip `backend/scripts/seed-audit-users.js` (alias `npm run seed:audit-users`
+  dari backend) memakai OWNER existing untuk login; membuat ADMIN/STAFF bila
+  belum ada, hingga dua portal TENANT, dan fallback satu tenant dummy tanpa stay.
+  Tidak membuat stay/invoice/payment atau mengganti password/role akun lama.
+- Pemilihan tenant existing masih otomatis dan inventaris pagination belum
+  lengkap; ringkasan selesai dapat memuat kegagalan parsial. `AUDIT_CONFIRM=1`
+  hanya flag, bukan verifikasi server/DB. Tetapkan identitas audit unik dan
+  tenant fixture non-personal secara eksplisit sebelum provisioning.
+- **Provisioning memutasi DB; login crawl juga memperbarui `lastLoginAt` dan
+  membuat `RefreshToken`.** Lingkup izin UAT harus mencakup akun/portal serta sesi
+  autentikasi. Rincian gap/prasyarat: [M14 AO-03](../audit/audit-uiux-lintas-portal-2026-07.md#ao-03--p1--kredensial-dan-data-uat-tidak-mendukung-audit-lintas-role).
+- Konsumsi crawler: `frontend/e2e/audit-users.ts` (env `E2E_OWNER_*`,
+  `E2E_ADMIN_*`, `E2E_STAFF_*`, `E2E_TENANT_ACTIVE_*`, `E2E_TENANT_NO_STAY_*`).
+  Dua state TENANT baru dideklarasikan sebagai env, belum menjadi crawl UAT nyata
+  di suite aktif. Kredensial kosong membuat crawl operasional di-skip.
+- Empat status tetap dibedakan: implementasi lokal (mekanisme tersedia) ≠ akun
+  benar-benar di-provision ≠ crawl lulus ≠ dampak terukur. Bukti tiga crawl
+  operasional wajib mencatat eksekusi tanpa skip dan role/route yang benar.
 
 ### Akun Dummy DEV (login cepat) - SI-1 event-path
 

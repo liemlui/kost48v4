@@ -242,3 +242,326 @@ Kunci SSH privat **tidak** disimpan di repo (`%TEMP%\kost48ssh` di workstation).
 ## 14. Riwayat singkat deployment ini
 
 Lihat [M13](../M13_CHANGELOG.md) entri **2026-09-13** untuk kronologi lengkap (backup → bootstrap DB baru → extract paket → perbaikan env cPanel → seed OWNER/tenant/akuntansi → penerbitan halaman operasional).
+
+---
+
+> **Migrasi batch B9 (23 September 2026):** bagian data produksi `docs/M11_DEFAULT_DATA.md` di-append ke file ini tanpa menulis ulang isinya; hanya tautan relatif yang disesuaikan dengan basis folder tujuan. Bagian yang ditambahkan: § Status penggunaan data untuk go-live, §1c Data Tenant Produksi (GO-LIVE), §1b Akun Audit UAT (aktor/fixture), §7 Data Tenant Produksi per kamar, §3a Data Lapangan Produksi Owner, §7b Data Audit Fasilitas Lapangan, dan §8 DeepSeek AI — API Key & Konfigurasi.
+>
+> **Batas lingkungan (eksplisit):** bagian-bagian di bawah adalah **PRODUKSI / GO-LIVE** — data penghuni nyata, ground truth lapangan, audit fasilitas, dan konfigurasi AI produksi. Materi DEV ada di [Default & Seed DEV](default-dev.md); audit UAT non-personal mengikuti [audit AO-03](../audit/audit-uiux-lintas-portal-2026-07.md#ao-03--p1--kredensial-dan-data-uat-tidak-mendukung-audit-lintas-role). Nilai secret/PII **tidak digandakan** dari file lain: API key tetap ditulis sebagai lokasi, bukan nilainya.
+
+<a id="status-penggunaan-data-untuk-go-live"></a>
+<a id="1c-data-tenant-produksi-go-live"></a>
+<a id="7-data-tenant-produksi--skenario-per-kamar"></a>
+<a id="3a-data-lapangan-produksi-owner--belum-otomatis-masuk-db"></a>
+<a id="7b-data-audit-fasilitas-lapangan"></a>
+<a id="8-deepseek-ai--api-key--konfigurasi"></a>
+
+## 15. Status penggunaan data untuk go-live (produksi)
+- Go-live pertama menggunakan database produksi baru/kosong. **Jangan menjalankan seed tenant/transaksi historis atau menyalin data UAT** hanya karena data tersebut tercantum di dokumen ini.
+- Tabel penghuni dan data lapangan adalah referensi onboarding yang wajib dikonfirmasi ulang owner pada hari input. Input penghuni nyata dilakukan melalui UI/runbook terlindungi, setelah KTP dan dasar akuntansi siap.
+- NIK, foto KTP, password, token, dan kredensial lain adalah data sensitif. Jangan salin ke paket deploy, log, screenshot, atau artefak publik. Lihat `DEPLOYMENT_ONLINE_20260723.md` dan runbook onboarding untuk jalur produksi.
+
+### 1c. Data Tenant Produksi (GO-LIVE)
+
+> **Batas:** §1b menyiapkan aktor/fixture **UAT non-produksi**; password berasal dari environment proses/secret manager dan tidak ditulis di docs. Data penghuni nyata di §1c dan §7 hanya masuk lewat UI/runbook produksi.
+
+
+**Sumber data:** Owner KOST48, 2026-07. NIK (KTP) sudah diverifikasi.
+Email & HP placeholder — akan dilengkapi via **UI Owner → Manajemen Tenant** sebelum aktivasi portal.
+
+| Kamar | Nama                   | NIK                 | Tgl Masuk | Tarif Kontrak/bln | Deposit     | Keterangan               |
+|-------|------------------------|---------------------|-----------|-------------------|-------------|--------------------------|
+| A     | Shinta Larista         | 3574036206990003    | 26        | 1.700.000         | —           | DELUXE Mezzanine, AC     |
+| B     | Dini Widiastutik       | 3275085012800021    | 1         | 1.500.000         | —           | DELUXE, AC               |
+| C     | Miko Rakatama A. W.    | 6471051708970006    | 28        | 1.600.000         | —           | DELUXE, AC               |
+| D     | Ade Chandra            | 3173052309720009    | 24        | 1.500.000         | 200.000     | DELUXE, AC               |
+| F1    | GUNAWAN                | 1505062511740001    | 27        | 1.700.000         | —           | DELUXE Mezzanine, AC     |
+| F2    | Patrick Wilfred        | 3275020504910019    | 8         | 1.600.000         | —           | DELUXE Mezzanine, AC     |
+| G     | Yofi Nurkolifah        | 3519122204030003    | 1         | 800.000           | —           | ECONOMY, Kipas            |
+| H     | Welly Tanoto           | 3578070811730004    | 10        | 800.000           | —           | ECONOMY, Kipas            |
+| I     | Theo Wijaya            | 3571021308860003    | 5         | 800.000           | —           | ECONOMY, Kipas            |
+| J     | Lovandra               | 3175070312930003    | 30        | 1.500.000         | —           | DELUXE, AC               |
+| K     | Meliana Tamara         | 3578125102000002    | 10        | 1.600.000         | —           | DELUXE, LARGE, AC        |
+| L     | Destarika Hasan        | 1671065812020008    | 1         | 1.600.000         | —           | DELUXE, LARGE, AC        |
+| M     | Gabriel Excelly P.     | 3511115908030001    | 3         | 1.200.000         | —           | STANDARD, LARGE, Kipas   |
+
+> **Catatan:** `Tgl Masuk` = tanggal hari (bulan bervariasi per tenant — akan dilengkapi via UI).
+> **Deposit:** Hanya Ade Chandra (Kamar D) Rp200.000. Sisanya tidak ada deposit.
+> **Email & HP tenant** belum tersedia — input via UI Owner sebelum aktivasi portal penghuni.
+
+---
+## 7. Data Tenant Produksi — Skenario per Kamar
+
+Data real dari owner. Seed via `seed-prod.js`. Tgl Masuk = tanggal hari (bulan menyusul — akan dilengkapi via UI Owner).
+
+| Kamar | Nama                   | NIK                 | Tgl Msk | Tarif Kontrak | Deposit  | Gender | Keterangan                     |
+|-------|------------------------|---------------------|---------|---------------|----------|--------|--------------------------------|
+| A     | Shinta Larista         | 3574036206990003    | 26      | 1.700.000     | —        | F      | DELUXE Mezzanine, AC           |
+| B     | Dini Widiastutik       | 3275085012800021    | 1       | 1.500.000     | —        | F      | DELUXE, AC                     |
+| C     | Miko Rakatama A. W.    | 6471051708970006    | 28      | 1.600.000     | —        | M      | DELUXE, AC                     |
+| D     | Ade Chandra            | 3173052309720009    | 24      | 1.500.000     | 200.000  | M      | DELUXE, AC                     |
+| F1    | GUNAWAN                | 1505062511740001    | 27      | 1.700.000     | —        | M      | DELUXE Mezzanine, AC           |
+| F2    | Patrick Wilfred        | 3275020504910019    | 8       | 1.600.000     | —        | M      | DELUXE Mezzanine, AC           |
+| G     | Yofi Nurkolifah        | 3519122204030003    | 1       | 800.000       | —        | F      | ECONOMY, Kipas                 |
+| H     | Welly Tanoto           | 3578070811730004    | 10      | 800.000       | —        | M      | ECONOMY, Kipas                 |
+| I     | Theo Wijaya            | 3571021308860003    | 5       | 800.000       | —        | M      | ECONOMY, Kipas                 |
+| J     | Lovandra               | 3175070312930003    | 30      | 1.500.000     | —        | M?     | DELUXE, AC                     |
+| K     | Meliana Tamara         | 3578125102000002    | 10      | 1.600.000     | —        | F      | DELUXE LARGE, AC               |
+| L     | Destarika Hasan        | 1671065812020008    | 1       | 1.600.000     | —        | F      | DELUXE LARGE, AC               |
+| M     | Gabriel Excelly P.     | 3511115908030001    | 3       | 1.200.000     | —        | F?     | STANDARD LARGE, Kipas          |
+
+> **Catatan:**
+> - Gender `?` = perlu konfirmasi owner.
+> - Email/HP/occupation → input via UI Owner.
+> - **Deposit:** Hanya Ade Chandra (Kamar D) Rp200.000. Sisanya tidak ada deposit.
+> - Data tanggal check-in (Tgl Msk) hanya hari; bulan menyesuaikan realitas masing-masing tenant.
+
+---
+
+### 3a. Data Lapangan Produksi Owner — Belum Otomatis Masuk DB
+
+
+### 3a. Data Lapangan Produksi Owner — Belum Otomatis Masuk DB
+
+Sumber: konfirmasi owner 2026-07-08. Data ini adalah ground truth lapangan awal, tetapi **belum boleh dianggap sudah ada di database produksi** sampai diinput lewat UI/seed/runbook. Jangan masukkan full NIK, foto KTP, password jaringan, token, atau API key ke repo.
+
+**✅ Status NIK per 2026-07: Semua 13 tenant sudah punya NIK lengkap.**
+- Dini Widiastutik (Kamar B) ✅ NIK 3275085012800021 — data lengkap, tinggal upload foto KTP via UI
+- Theo Wijaya (Kamar I) — nama tampil di sistem; NIK atas nama **Agus Settiyo Budi** ✅ 3571021308860003 — data lengkap
+
+| Area | Data owner-confirmed | Status DB/aplikasi | Target input |
+|------|----------------------|--------------------|--------------|
+| Kamar F3/F4 | FINAL (owner 2026-07-08): TIDAK ADA — blok F dirombak menjadi F1+F2 | Tidak dibuat di master `Room`; total kamar tetap 13 | — |
+| Lampu area bersama | 7 titik: depan poster, teras depan, dapur, lorong, pojok lorong, depan KM belakang, lorong belakang | BELUM jadi inventory/aset | `InventoryItem`/`FixedAsset` bila ingin dilacak, atau checklist operasional |
+| CCTV area bersama | 5 titik: depan 2, depan dapur 1, area depan KM belakang 1, lorong belakang 1 | BELUM jadi inventory/aset; wajib review privasi angle kamera | `InventoryItem`/`FixedAsset`; dokumen notice CCTV |
+| Bola pemadam api/APAR | Rencana 3-5 titik | BELUM dibeli/dipasang/final | `InventoryItem`/`FixedAsset` + checklist emergency |
+| Kamar mandi dalam | F1 closet jongkok; kamar mandi dalam lain closet duduk | BELUM detail per room item | `RoomFacility` + `RoomItem` per kamar |
+| Kamar mandi luar | 2 unit: satu closet duduk, satu khusus mandi; bak air plastik besar; tidak ada shower | BELUM ada model khusus area bersama | Checklist operasional; dapat dicatat sebagai facility umum/manual |
+| Dapur outdoor | Kran ada, tempat sampah ada, rak piring tidak ada, ventilasi tidak perlu, kompor/selang/regulator/tabung LPG ada | BELUM jadi inventory/aset lengkap | `InventoryItem`/`FixedAsset` untuk kompor/LPG; checklist gas |
+| Jemuran bersama | 1 jemuran besar area kamar belakang | BELUM jadi inventory/aset | `InventoryItem` bila perlu dilacak |
+| Anak kunci | Perlu daftar master/cadangan per kamar | BELUM diinput | Checklist audit kelengkapan data kamar; catatan room/stay |
+| Garansi barang | Jika ada: AC, router, pompa, CCTV, kasur | BELUM terstruktur | `FixedAsset.notes` atau dokumen operasional |
+| Foto audit kondisi kamar saat ini | Perlu foto audit setiap kamar sebelum input data produksi | BELUM dibuat | Upload/file operasional; jangan simpan foto mentah di repo |
+| Materi cetak | Nomor darurat, emergency flow, denah evakuasi, notice CCTV, aturan penghuni, checklist kamar/fasilitas | BELUM dibuat | Dokumen cetak + portal/manual tenant bila relevan |
+
+Kebijakan owner terkait kerusakan:
+
+- Kerusakan normal/aus/bocor/lampu mati/AC bermasalah/fasilitas mulai tidak layak: owner/staff memperbaiki atau mengganti.
+- Kerusakan sengaja, salah pakai berat, kehilangan barang/kunci, atau pelanggaran aturan: direview sebagai tanggung jawab tenant.
+- Kondisi kamar saat audit produksi sebaiknya difoto sebagai baseline data yang adil.
+## 7b. Data Audit Fasilitas Lapangan
+
+> **Status:** Template siap diisi. Data dikumpulkan owner saat audit keliling.
+> Kolom `Kondisi` & `Catatan` diisi manual — hasil audit lapangan.
+>
+> **Audit 2026-07 — Kondisi umum SEMUA KAMAR:**
+> - KM dalam: closet standar duduk + jet shower + shower ✅ kondisi prima
+> - Ember & gayung: ✅ ada
+> - **Gantungan baju**: ✅ ada di setiap kamar & kamar mandi
+> - **Tempat sabun**: ✅ ada di setiap kamar mandi
+> - Kunci pintu & jendela: ✅ aman, semua ok
+> - Plafond & tembok: ✅ baik, beberapa sudah cat ulang
+> - Semua yg ada kasur: ✅ ada sprei
+> - **Kamar B: kasur kosong** (tenant tidak mau)
+
+### Per Kamar (13 kamar: A–D, F1–F2, G–M)
+
+| Kamar | Item | Ada? | Kondisi | Catatan |
+|-------|------|------|---------|---------|
+| **A** | Lampu kamar | ✅ | baik | |
+| | AC Midea | ✅ | baik, remote ada | |
+| | Kasur | ukuran 160 | | |
+| | Lemari plastik kecil | ✅ | | |
+| | Meja | — | tdk ada | |
+| | Sprei | ✅ ada | | |
+| | Bantal | ✅ ada | | |
+| | Tempat sampah | ✅ ada | | |
+| | Kloset Toto duduk + jet shower + shower | ✅ | ✅ prima | |
+| | Meter listrik awal | | | |
+| **B** | Lampu kamar | ✅ | baik | |
+| | AC Midea | ✅ | baik, remote ada | |
+| | Kasur | **kosong** | | tenant tidak mau |
+| | Lemari | — | tdk ada | |
+| | Meja | — | tdk ada | |
+| | Sprei | — | | tdk ada kasur |
+| | Bantal | — | | |
+| | Tempat sampah | ✅ ada | | |
+| | Kloset Toto duduk + jet shower + shower | ✅ | ✅ prima | |
+| | Meter listrik awal | | | |
+| **C** | Lampu kamar | ✅ | baik | |
+| | AC Akari | ✅ | baik, remote ada | |
+| | Kasur | ukuran 120 | | |
+| | Lemari plastik | ✅ | | |
+| | Meja | — | tdk ada | |
+| | Sprei | ✅ ada | | |
+| | Bantal | ✅ ada | | |
+| | Guling | ✅ ada | | inventaris? |
+| | Tempat sampah | ✅ ada | | |
+| | Kloset Toto duduk + jet shower + shower | ✅ | ✅ prima | |
+| | Meter listrik awal | | | |
+| **D** | Lampu kamar | ✅ | baik | |
+| | AC Sharp | ✅ | baik, remote ada | |
+| | Kasur | ukuran 140 | | |
+| | Lemari | ✅ | tipe? | |
+| | Meja | — | tdk ada | |
+| | Sprei | ✅ ada | | |
+| | Bantal | ✅ ada | | |
+| | Tempat sampah | ✅ ada | | |
+| | Kloset American Standard duduk + jet shower + shower | ✅ | ✅ prima | |
+| | Meter listrik awal | | | |
+| **F1** | Lampu kamar | ✅ | baik | |
+| | AC Daikin | ✅ | baik, remote ada | |
+| | Kasur | **2 unit ukuran 90** | | |
+| | Lemari triplek besar | ✅ | | |
+| | Meja | — | tdk ada | |
+| | Sprei | ✅ ada | | |
+| | Bantal | ✅ ada | | |
+| | Guling | ✅ ada | | inventaris? |
+| | Tempat sampah | ✅ ada | | |
+| | Kloset American Standard **jongkok** + jet shower + shower | ✅ | ✅ prima | |
+| | Meter listrik awal | | | |
+| **F2** | Lampu kamar | ✅ | baik | |
+| | AC Samsung | ✅ | baik, remote ada | |
+| | Kasur | ukuran 90 | | |
+| | Lemari plastik | ✅ | | |
+| | Meja | — | tdk ada | |
+| | Sprei | ✅ ada | | |
+| | Bantal | ✅ ada | | |
+| | Tempat sampah | ✅ ada | | |
+| | Kloset DBS duduk + jet shower + shower | ✅ | ✅ prima | |
+| | Meter listrik awal | | | |
+| **G** | Lampu kamar | ✅ | baik | |
+| | Kipas | **1 unit** | | |
+| | KM Luar bersama | — | | |
+| | Kasur | **belum diaudit** | | |
+| | Lemari | **belum diaudit** | | |
+| | Meja | — | tdk ada | |
+| | Tempat sampah | ✅ ada | | |
+| | Meter listrik awal | | | |
+| **H** | Lampu kamar | ✅ | baik | |
+| | Kipas | **1 unit** | | |
+| | KM Luar bersama | — | | |
+| | Kasur | **belum diaudit** | | |
+| | Lemari | **belum diaudit** | | |
+| | Meja | — | tdk ada | |
+| | Tempat sampah | ✅ ada | | |
+| | Meter listrik awal | | | |
+| **I** | Lampu kamar | ✅ | baik | |
+| | Kipas | **1 unit** | | |
+| | KM Luar bersama | — | | |
+| | Kasur | ukuran 140 | | |
+| | Lemari plastik | ✅ | | |
+| | Meja belajar | ✅ | | |
+| | Sprei | ✅ ada | | |
+| | Bantal | ✅ ada | | |
+| | Guling | ✅ ada | | inventaris? |
+| | Tempat sampah | ✅ ada | | |
+| | Meter listrik awal | | | |
+| **J** | Lampu kamar | ✅ | baik | |
+| | AC LG AV-A5UCY | ✅ | baik, remote ada | |
+| | Kasur | **Springbed ukuran 160** | | |
+| | Lemari plastik | ✅ | | |
+| | Meja | — | tdk ada | |
+| | Sprei | ✅ ada | | |
+| | Bantal | ✅ ada | | |
+| | Guling | ✅ ada | | inventaris? |
+| | Tempat sampah | ✅ ada | | |
+| | Kloset Toto duduk + jet shower + shower | ✅ | ✅ prima | |
+| | Meter listrik awal | | | |
+| **K** | Lampu kamar | ✅ | baik | |
+| | AC LG AV-A5UCY | ✅ | baik, remote ada | |
+| | Kasur | **Springbed ukuran 180** | | |
+| | Lemari | **belum diaudit** | | |
+| | Meja | — | tdk ada | |
+| | Sprei | ✅ ada | | |
+| | Bantal | ✅ ada | | |
+| | Tempat sampah | ✅ ada | | |
+| | Kloset Toto duduk + jet shower + shower | ✅ | ✅ prima | |
+| | Meter listrik awal | | | |
+| **L** | Lampu kamar | ✅ | baik | |
+| | AC Aqua | ✅ | baik, remote ada | |
+| | Kasur | **Springbed ukuran 180** | | |
+| | Lemari | ✅ | | |
+| | Meja belajar | ✅ | | |
+| | Sprei | ✅ ada | | |
+| | Bantal | ✅ ada | | |
+| | Tempat sampah | ✅ ada | | |
+| | Kloset Toto duduk + jet shower + shower | ✅ | ✅ prima | |
+| | Meter listrik awal | | | |
+| **M** | Lampu kamar | ✅ | baik | |
+| | Kipas | **2 unit** | | |
+| | KM dalam | — | | |
+| | Kasur | **Springbed ukuran 160** | | |
+| | Lemari plastik | ✅ | | |
+| | Meja | — | tdk ada | |
+| | Sprei | ✅ ada | | |
+| | Bantal | ✅ ada | | |
+| | Guling | ✅ ada | | inventaris? |
+| | Tempat sampah | ✅ ada | | |
+| | Kloset Toto duduk + jet shower + shower | ✅ | ✅ prima | |
+| | Meter listrik awal | | | |
+
+### Area Bersama
+
+| Area | Item | Ada? | Kondisi | Catatan |
+|------|------|------|---------|---------|
+| **Lampu** | Depan poster | 1 | | |
+| | Teras depan | 1 | | |
+| | Dapur | 1 | | |
+| | Lorong | 1 | | |
+| | Pojok lorong | 1 | | |
+| | Depan KM belakang | 1 | | |
+| | Lorong belakang | 1 | | |
+| **CCTV** | Depan (2) | 2 | | |
+| | Depan dapur | 1 | | |
+| | Area depan KM belakang | 1 | | |
+| | Lorong belakang | 1 | | |
+| **KM Luar** | Closet duduk | 1 | | |
+| | Khusus mandi | 1 | | |
+| | Bak plastik besar | 2 | | |
+| | Ember & gayung | ✅ ada | ✅ prima | |
+| | Gantungan baju | ✅ ada | | |
+| | Tempat sabun | ✅ ada | | |
+| **Dapur** | Kompor + LPG | | | |
+| | Kran | | | |
+| | Tempat sampah | | | |
+| **Lain** | Tandon air | | | |
+| | Pompa air | | | |
+| | Jemuran besar | | | |
+| | APAR/ pemadam | rencana 3-5 | | |
+| | Anak kunci cadangan | | | |
+| | Kunci pintu & jendela (semua kamar) | ✅ | ✅ aman | |
+| | Plafond & tembok | ✅ | ✅ baik, cat ulang | |
+
+> **Data yang masih perlu dilengkapi audit lanjutan:**
+> - Ukuran kamar & KM P×L×T — belum diukur
+> - Model/PK/watt/serial/tahun AC — via foto label
+> - Merek, model, watt kipas — belum dicatat
+> - Kasur & lemari G, H — belum diaudit
+> - Lemari K — belum diaudit
+> - Tipe/bahan lemari D — belum spesifik
+> - Jumlah bantal per kamar — inventaris KOST48
+> - Jumlah sikat per KM (sikat lantai & kloset) — inventaris KOST48
+> - Kepastian guling inventaris (C, F1, I, J, M)
+> - **Gudang** — belum diaudit
+> - **Ruang umum** — belum diaudit
+> - Referensi lengkap: `docs/archieve/AUDIT_INVENTARIS_LENGKAP.md`
+
+## 8. DeepSeek AI — API Key & Konfigurasi
+
+
+| Item | Nilai | Lokasi |
+|------|-------|--------|
+| API Key | `sk-...` (dari platform.deepseek.com) | `backend/.env` `DEEPSEEK_API_KEY=` atau Settings → AI & Biaya (OWNER) |
+| Model default | `deepseek-chat` | `backend/.env` `DEEPSEEK_MODEL=` |
+| Base URL | `https://api.deepseek.com` | `backend/.env` `DEEPSEEK_BASE_URL=` (fallback) |
+| Status | ✅ Terverifikasi | `POST /owner-ai/test-connection` — latency ~1.2s, 18 token |
+
+**Cara pakai:**
+1. Daftar di https://platform.deepseek.com → buat API key
+2. Tempel di `backend/.env`: `DEEPSEEK_API_KEY=sk-xxx`
+3. Atau login OWNER → **Pengaturan → AI & Biaya** → isi key → Simpan (langsung aktif, tanpa restart)
+4. Klik **"Tes Koneksi DeepSeek"** untuk verifikasi
+
+> API key dari Settings (DB) lebih aman karena tidak tersimpan di file .env yang bisa ke-commit.
+> Env `DEEPSEEK_API_KEY` tetap jadi fallback bila Settings kosong.
