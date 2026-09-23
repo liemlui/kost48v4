@@ -1,7 +1,7 @@
 # KOST48 V5 — Master Overview & Ground State
 
 > Dokumen orientasi utama. Detail eksekusi → `docs/M12_CHECKLIST_CHANGELOG.md`. Navigasi kode → `docs/PETA-KODE.md`.
-> **Arah produk 22 Sep 2026:** sederhanakan pengalaman OWNER/ADMIN pada operasional penghuni dan keuangan; dashboard mudah dibaca dan dampak keputusan jelas. Pengembangan IoT ditunda. Keputusan kanonik: [M02](M02_KEPUTUSAN_OWNER.md#keputusan-penyederhanaan-aplikasi--22-september-2026). Snapshot bertanggal di bawah tidak mengganti arah terbaru atau membuktikan runtime saat ini.
+> **Arah produk 22 Sep 2026:** sederhanakan pengalaman OWNER/ADMIN pada operasional penghuni dan keuangan; dashboard mudah dibaca dan dampak keputusan jelas. Pengembangan IoT ditunda. Keputusan kanonik: [KEPUTUSAN-OWNER](KEPUTUSAN-OWNER.md#keputusan-penyederhanaan-aplikasi--22-september-2026). Snapshot bertanggal di bawah tidak mengganti arah terbaru atau membuktikan runtime saat ini.
 > Dokumen ini adalah **pintu masuk tematik**; isi rinci sudah dipindah ke lokasi kanonik di bawah (B5, 23 Sep 2026).
 
 <a id="status-terkini-diselaraskan-2026-09-08"></a>
