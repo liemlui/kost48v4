@@ -3,7 +3,7 @@
 Tanggal: 2026-09-22
 Status: aktif
 Tujuan: kontrak & aturan keuangan (dari M04)
-Rujukan: [M02](../M02_KEPUTUSAN_OWNER.md) · [M12](../M12_CHECKLIST_CHANGELOG.md) · [M04](../M04_KEUANGAN.md) · [domain/kontrak.md](kontrak.md)
+Rujukan: [KEPUTUSAN-OWNER](../KEPUTUSAN-OWNER.md) · [STATUS](../STATUS.md) · [keuangan](keuangan.md) · [domain/kontrak.md](kontrak.md)
 
 > Migrasi dari docs/M04_KEUANGAN.md L23–120 (Update normatif) + Bagian 2/3
 > (
@@ -15,7 +15,7 @@ e0f8984f
 ## Override Fase V — Dampak Keuangan
 Kontrak status kamar: [kontrak.md](kontrak.md#override-fase-v--status-kamar).
 
-**Kontrak room status final mengikuti Fase V di `docs/M12_CHECKLIST_CHANGELOG.md`:**
+**Kontrak room status final mengikuti Fase V di [domain/kontrak.md](kontrak.md) (status kamar) dan berkas ini (dampak keuangan):**
 
 ```txt
 Booking dibuat, belum bayar        -> Room AVAILABLE
@@ -32,7 +32,7 @@ Aturan baru yang memengaruhi keuangan:
 - **Booking pesaing unpaid dibatalkan** saat pemenang payment approved; pesaing yang sudah transfer perlu jalur refund kalah-cepat.
 - Label `Reserved-DP` vs `Reserved-Lunas` dibedakan dari payment data, bukan room status.
 
-Untuk eksekusi coding, AI eksekutor WAJIB membaca `docs/M12_CHECKLIST_CHANGELOG.md` Fase V (V-00..V-16) sebagai sumber kebenaran, bukan narasi historis di bagian lama dokumen ini.
+Untuk eksekusi coding, AI eksekutor WAJIB membaca aturan Fase V (V-00..V-16) di [domain/kontrak.md](kontrak.md) dan [domain/keuangan.md](keuangan.md) sebagai sumber kebenaran, bukan narasi historis di bagian lama dokumen ini.
 
 ## Quota Utilitas Berbasis Periode Sewa Lunas
 
@@ -114,7 +114,7 @@ Dossier 13 mencakup jurnal otomatis, COA, general ledger, trial balance, serta l
 
 ## Kebijakan Kapitalisasi Aset & Saldo Awal
 
-Detail keputusan owner: [M02 §Kuis Audit Aset & Nilai](../M02_KEPUTUSAN_OWNER.md).
+Detail keputusan owner: [KEPUTUSAN-OWNER §Kuis Audit Aset & Nilai](../KEPUTUSAN-OWNER.md).
 
 ## Status Audit Invarian Keuangan (per Jul 2026)
 Daftar invarian kanonik (8 invarian) beserta harness verifikasinya ada di [operations/verifikasi-keuangan.md](../operations/verifikasi-keuangan.md) — dipindah dari M04 Bagian 1 pada 23 Sep 2026. Tabel di bawah adalah **status resmi**; bukti auditnya di [audit/audit-360-uang-2026-07.md](../audit/audit-360-uang-2026-07.md).

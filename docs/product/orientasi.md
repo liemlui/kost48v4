@@ -3,7 +3,7 @@
 Tanggal: 2026-09-23
 Status: aktif
 Tujuan: orientasi produk — identitas & model bisnis, konsep kunci uang, invarian sistem, stack & model aktif, dan perintah kerja (dari M01)
-Rujukan: [M02](../M02_KEPUTUSAN_OWNER.md) · [STATUS](../STATUS.md) · [PETA-KODE](../PETA-KODE.md) · [scope.md](scope.md) · [flow-utama.md](flow-utama.md)
+Rujukan: [KEPUTUSAN-OWNER](../KEPUTUSAN-OWNER.md) · [STATUS](../STATUS.md) · [PETA-KODE](../PETA-KODE.md) · [scope.md](scope.md) · [flow-utama.md](flow-utama.md)
 
 > Migrasi dari docs/M01_MASTER.md (B5 Tahap 3, 23 Sep 2026) pada DOC-GOV-20260922; teks orientasi tidak diubah.
 > Batch B5 memisahkan materi bertanggal M01: status terkini 2026-09-08 → [changelog 2026-09](../history/changelog/2026-09.md); riwayat status 30 Juli 2026 → [changelog 2026-07](../history/changelog/2026-07.md); indeks dossier historis → [fase-lama](../history/fase-lama.md); Audit Lintas Scope 29 Jul 2026 → [audit-lintas-scope-2026-07-29.md](../audit/audit-lintas-scope-2026-07-29.md).
@@ -11,14 +11,14 @@ Rujukan: [M02](../M02_KEPUTUSAN_OWNER.md) · [STATUS](../STATUS.md) · [PETA-KOD
 
 ## Pintu Masuk Docs Cepat
 
-1. `docs/M01_MASTER.md` — blueprint, ground state, dan konteks bisnis global.
-2. `docs/M02_KEPUTUSAN_OWNER.md` — sumber kebenaran keputusan owner sebelum ubah flow.
-3. `docs/M12_CHECKLIST_CHANGELOG.md` — checklist aktif, urutan eksekusi, dan gate verifikasi.
-4. `docs/M00_CODEMAP.md` — peta modul ke file; pakai ini dulu sebelum grep liar ke seluruh repo.
-5. `docs/M14_AUDIT_UI_UX.md` — audit UI/UX aktif, benchmark eksternal terkurasi, bukti runtime lokal/produksi dan static-code Owner/Admin, serta pembagian kerja AO-00..AO-23.
-6. Domain khusus: `M04` keuangan, `M05` siklus huni, `M06` operasional, `M07` publik/marketing, `M08` deploy, `M09` AI Owner/Admin.
-7. `docs/M17_PORTAL_FLOW_RINGKAS.md` — prinsip portal ringkas; `docs/M18_ATURAN_HARGA_KAMAR.md` — harga; `docs/M19_EFISIENSI_HOSTING_512MB.md` — batas teknis EF dan data hosting.
-8. `docs/M20_PRODUKSI_KOST48.md` — **produksi & operasional harian** (identitas deployment, env, redeploy, backup/rollback, jebakan, sisa pekerjaan owner). Baca ini dulu sebelum menyentuh server.
+1. [STATUS.md](../STATUS.md) — blueprint kerja: antrean aktif, urutan eksekusi, gate verifikasi, invariant, keputusan owner ringkas.
+2. [KEPUTUSAN-OWNER.md](../KEPUTUSAN-OWNER.md) — sumber kebenaran keputusan owner sebelum mengubah flow.
+3. [PETA-KODE.md](../PETA-KODE.md) — peta modul ke file; pakai ini dulu sebelum grep liar ke seluruh repo.
+4. [AUDIT.md](../AUDIT.md) — status audit, temuan bertanggal, dan gate Fase AO (AO-00..AO-23).
+5. [ATURAN.md](../ATURAN.md) — aturan domain: keuangan, hunian, operasional, harga, publik, AI/IoT; rincian per topik di `docs/domain/`.
+6. [OPERASI.md](../OPERASI.md) — runbook deploy, produksi harian, go-live, env, data master; rincian di `docs/operations/`. Baca ini dulu sebelum menyentuh server.
+7. [product/scope.md](scope.md) dan [product/portal-owner-admin.md](portal-owner-admin.md) — scope per role/flow dan prinsip portal ringkas.
+8. [docs/README.md](../README.md) — indeks navigasi lengkap; peta path lama (M00–M20) ke rumah kanonik ada di §6.
 
 Hindari membaca arsip besar kecuali benar-benar perlu forensik: `docs/archieve/*`, file `*_STALE.md`, `reference/*`, dan `backend/src/generated/*`.
 

@@ -3,7 +3,7 @@
 Tanggal: 2026-09-23
 Status: aktif
 Tujuan: arahan & aturan permukaan publik dan pertumbuhan — marketing, UI/UX publik, loyalitas/gamifikasi, referral, tip staf, proposal growth (dari M07)
-Rujukan: [M02](../M02_KEPUTUSAN_OWNER.md) · [M12](../M12_CHECKLIST_CHANGELOG.md) · [M07](../M07_PUBLIK_GROWTH.md) · [keuangan.md](keuangan.md) · [operasional.md](operasional.md) · [ai.md](ai.md)
+Rujukan: [KEPUTUSAN-OWNER](../KEPUTUSAN-OWNER.md) · [STATUS](../STATUS.md) · [publik](publik.md) · [keuangan.md](keuangan.md) · [operasional.md](operasional.md) · [ai.md](ai.md)
 
 > Migrasi dari docs/M07_PUBLIK_GROWTH.md (B2 Tahap 3, 23 Sep 2026) pada DOC-GOV-20260922; teks tidak diubah.
 > Batch B2 memindahkan **seluruh isi M07 apa adanya** ke file ini (satu tujuan per handoff owner). Bagian bertanggal — `## Update 2026-06/07`, `## Audit UI/UX Full — 2026-06-19`, `## Audit 360° P7 Marketing & Growth (Jul 2026)`, dan dua deep audit 29 Jul 2026 — **ikut utuh di sini dan belum dipisah**; pemisahan ke `docs/AUDIT.md`/`docs/arsip/` dilakukan pada tahap konsolidasi audit/arsip atau batch lanjutan sesuai keputusan owner.
@@ -547,7 +547,7 @@ LoginPage placeholder "Contoh: nama@email.com atau 0812..." — tapi error messa
 | 5 | Gelapkan `--text-muted` ke `#475569` | WCAG AA compliance | 5 menit |
 | 6 | Tambah konfirmasi logout | Mencegah accidental logout | 15 menit |
 
-> **Instruksi eksekusi detail (SEARCH/REPLACE siap pakai) ada di `docs/M12_CHECKLIST_CHANGELOG.md` → Fase F.**
+> **Instruksi eksekusi detail (SEARCH/REPLACE siap pakai) Fase F bersifat historis; aturan aktif ada di berkas ini dan [domain/operasional.md](operasional.md).**
 > Setiap task di M10 sudah dilengkapi: path file, nomor baris, blok SEARCH/REPLACE eksak, dan perintah verifikasi.
 > AI model kecil (V4 Flash) bisa langsung menjalankan tanpa membaca kode sumber.
 

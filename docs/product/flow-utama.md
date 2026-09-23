@@ -2,8 +2,8 @@
 
 Tanggal: 22 September 2026. Status: **peta dokumentasi dan kebutuhan produk; belum verifikasi source/runtime**.
 Tujuan: menyederhanakan pekerjaan penghuni dan keuangan agar pengguna memahami akibat tindakan sebelum menjalankannya.
-Keputusan owner: [M02](../M02_KEPUTUSAN_OWNER.md). Antrean dan gate pelaksanaan: [M12](../M12_CHECKLIST_CHANGELOG.md).
-Dokumen ini tidak mengubah nominal, hak akses, aturan akuntansi, atau status bisnis. Rujukan teknis: [M03](../M03_FLOW_KONTRAK.md), [M04](../M04_KEUANGAN.md), [M05](../M05_SIKLUS_HUNI.md).
+Keputusan owner: [KEPUTUSAN-OWNER](../KEPUTUSAN-OWNER.md). Antrean dan gate pelaksanaan: [STATUS](../STATUS.md).
+Dokumen ini tidak mengubah nominal, hak akses, aturan akuntansi, atau status bisnis. Rujukan teknis: [flow & kontrak](../domain/flow.md), [keuangan](../domain/keuangan.md), [hunian](../domain/hunian.md).
 
 ## 1. Cara membaca bukti
 
@@ -60,7 +60,7 @@ Dashboard utama menjawab tiga pertanyaan: **apa yang perlu saya kerjakan, bagaim
 
 **Batas preview:** frontend mengonsumsi hasil/kontrak backend; tidak membuat rumus atau state machine bisnis kedua. Bila endpoint preview belum ada, tandai kebutuhan kontrak dan implementasikan melalui task terpisah. Perubahan data/permission setelah preview harus ditangani backend saat konfirmasi. Jangan menebak saldo atau menjanjikan hasil dari snapshot usang.
 
-Deskripsi masalah lama [M14](../M14_AUDIT_UI_UX.md) bukan otomatis pekerjaan terbuka: AO-22 tercatat selesai historis, sementara status sisa lain perlu mengikuti M12 dan bukti yang relevan.
+Deskripsi masalah lama [status Fase AO](../audit/status-ao-lintas-portal.md) bukan otomatis pekerjaan terbuka: AO-22 tercatat selesai historis, sementara status sisa lain perlu mengikuti M12 dan bukti yang relevan.
 
 ## 6. Acceptance dan pekerjaan berikutnya
 

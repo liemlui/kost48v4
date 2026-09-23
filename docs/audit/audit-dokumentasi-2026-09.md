@@ -69,10 +69,10 @@ Bukti per sub-langkah, angka, dan penyimpangan yang dicatat ada di [mapping Taha
 Kerjakan dari atas ke bawah; jangan mulai dari ledger fase B–AL.
 
 1. `CLAUDE.md` / `AGENTS.md` — batas izin dan larangan.
-2. [M02](../M02_KEPUTUSAN_OWNER.md) — keputusan owner.
-3. [M12 § Antrean prioritas](../M12_CHECKLIST_CHANGELOG.md#antrean-prioritas-aktif) — satu urutan kerja.
-4. Domain: [efisiensi-hosting.md](../operations/efisiensi-hosting.md) untuk EF; [M14](../M14_AUDIT_UI_UX.md) untuk AO; [M08](../M08_DEPLOY_GO_LIVE.md) untuk Fase A.
-5. [M00](../M00_CODEMAP.md) sebelum grep; [M01](../M01_MASTER.md) untuk ground state.
+2. [KEPUTUSAN-OWNER](../KEPUTUSAN-OWNER.md) — keputusan owner.
+3. [STATUS § Antrean prioritas](../STATUS.md#2-antrean-prioritas-aktif) — satu urutan kerja.
+4. Domain: [efisiensi-hosting.md](../operations/efisiensi-hosting.md) untuk EF; [status Fase AO](status-ao-lintas-portal.md) untuk AO; [deploy & go-live](../operations/deploy-go-live.md) untuk Fase A.
+5. [PETA-KODE](../PETA-KODE.md) sebelum grep; [orientasi produk](../product/orientasi.md) untuk ground state.
 6. [M13](../M13_CHANGELOG.md) hanya untuk riwayat bertanggal, bukan antrean.
 
 ### 0.3 Temuan (dokumentasi / urutan kerja)
@@ -100,6 +100,6 @@ Kerjakan dari atas ke bawah; jangan mulai dari ledger fase B–AL.
 
 ### 0.5 Antrean kerja setelah rapikan (bukan izin baru)
 
-Sama dengan [M12 antrean prioritas](../M12_CHECKLIST_CHANGELOG.md#antrean-prioritas-aktif): EF-00/02 BLOCKED data host → AO alat/crawl setelah izin → EF-07/08 uji terarah → EF-04/06 rencana → AL hanya rekonsiliasi bukti Z-19/H15 → Fase A owner.
+Sama dengan [STATUS antrean prioritas](../STATUS.md#2-antrean-prioritas-aktif): EF-00/02 BLOCKED data host → AO alat/crawl setelah izin → EF-07/08 uji terarah → EF-04/06 rencana → AL hanya rekonsiliasi bukti Z-19/H15 → Fase A owner.
 
 ---

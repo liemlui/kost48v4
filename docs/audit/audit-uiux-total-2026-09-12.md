@@ -3,7 +3,7 @@
 > **Tanggal:** audit 12 September 2026; perbaikan sore 12 Sep dan sesi lanjutan 13 Sep 2026.
 > **Status:** bukti bertanggal - laporan lengkap audit UI/UX total (dinamis + statis) beserta hasil perbaikan T-01..T-09.
 > **Tujuan:** laporan rinci audit UI/UX total sebagai bukti bertanggal; status/antrean aktif tetap di [status-ao-lintas-portal.md](status-ao-lintas-portal.md).
-> **Rujukan:** [audit-uiux-ulang-2026-09-12.md](audit-uiux-ulang-2026-09-12.md) (ringkasan §0), [audit-uiux-lintas-portal-2026-07.md](audit-uiux-lintas-portal-2026-07.md) (AO-00..AO-23), [STATUS.md](../STATUS.md). Pintu masuk lama: `docs/AUDIT_UIUX_TOTAL_2026-09-12.md`.
+> **Rujukan:** [audit-uiux-ulang-2026-09-12.md](audit-uiux-ulang-2026-09-12.md) (ringkasan §0), [audit-uiux-lintas-portal-2026-07.md](audit-uiux-lintas-portal-2026-07.md) (AO-00..AO-23), [STATUS.md](../STATUS.md). Path lama `docs/AUDIT_UIUX_TOTAL_2026-09-12.md` sudah dihapus di Fase 3.
 
 > Dipindah apa adanya dari `docs/AUDIT_UIUX_TOTAL_2026-09-12.md` (Tahap 3 batch B6, 23 Sep 2026) pada DOC-GOV-20260922.
 > Sifat: **bukti bertanggal** laporan lengkap; teks tidak diubah dan angka historis tidak diubah. Hanya 2 tujuan tautan relatif di-rebase ke basis `docs/audit/`.
@@ -50,6 +50,7 @@ Seluruh temuan P1 dari audit dikerjakan dan diverifikasi ulang dengan crawl Axe 
 
 ---
 
+<a id="0b-hasil-perbaikan-t-06--performa-render-awal-portalstay"></a>
 ## 0b. Hasil perbaikan T-06 — performa render awal `/portal/stay`
 
 Dikerjakan pada sesi lanjutan setelah §0. Akar masalahnya **bukan** kecepatan server (API tercepat 100–750 ms), melainkan **lima tempat menarik data yang sama dengan query key berbeda**, sehingga TanStack Query tidak dapat melakukan deduplikasi.
@@ -74,6 +75,7 @@ Dikerjakan pada sesi lanjutan setelah §0. Akar masalahnya **bukan** kecepatan s
 
 ---
 
+<a id="0c-hasil-perbaikan-t-08--normalisasi-token--struktur-judul"></a>
 ## 0c. Hasil perbaikan T-08 — normalisasi token & struktur judul
 
 **Radius `border-radius`: 27 → 12 nilai unik** (107 deklarasi di 14 file disesuaikan, tanpa mengubah satu pun deklarasi lain).
@@ -175,7 +177,7 @@ Batas yang **tetap ada** dan tidak boleh diklaim berlebih:
 
 ## 3. Rekonsiliasi dengan Audit 30 Juli / 8 September (M14 AO-01…AO-23)
 
-> **Catatan sinkronisasi 13 Sep 2026:** tabel ini adalah rekonsiliasi **sesi pertama 12 Sep, sebelum §0b/§0c**. Status AO-06, AO-08, AO-09, T-06, dan T-08 di bawah sudah usang — lihat §0/§0b/§0c di atas, commit `4e67c13` (performa `/portal/stay`), dan commit `9c211a0` (radius + `<h1>` ganda). Status kanonik tetap di [M12](../M12_CHECKLIST_CHANGELOG.md#fase-ao--audit--hardening-uiux-lintas-portal).
+> **Catatan sinkronisasi 13 Sep 2026:** tabel ini adalah rekonsiliasi **sesi pertama 12 Sep, sebelum §0b/§0c**. Status AO-06, AO-08, AO-09, T-06, dan T-08 di bawah sudah usang — lihat §0/§0b/§0c di atas, commit `4e67c13` (performa `/portal/stay`), dan commit `9c211a0` (radius + `<h1>` ganda). Status kanonik tetap di [STATUS](status-ao-lintas-portal.md).
 
 | ID lama | Status sekarang | Bukti sesi ini |
 |---|---|---|

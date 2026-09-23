@@ -1,7 +1,7 @@
 # Default & Seed DEV
 
 > Migrasi dari docs/M08_DEPLOY_GO_LIVE.md + docs/M11_DEFAULT_DATA.md (M11 §1a, M11 §1b, M08 Bagian 3, M11 §9) pada f8f9a589 (DOC-GOV-20260922 Tahap 3); §1b dan catatan batch B9 ditambahkan 23 September 2026.
-> Sumber asli (`docs/M11_DEFAULT_DATA.md`) tetap ada sebagai pointer dengan anchor kompatibilitas; perintah seed untuk lingkungan PRODUKSI ada di [Produksi & Operasional Harian](produksi.md).
+> Sumber asli (`docs/M11_DEFAULT_DATA.md`) sudah dihapus di Fase 3 (23 Sep 2026); perintah seed untuk lingkungan PRODUKSI ada di [Produksi & Operasional Harian](produksi.md).
 > **Batas lingkungan:** seluruh isi DEV di file ini memakai basis data pengembangan **port 5433**; kredensial DEV tidak pernah berlaku untuk UAT/produksi.
 > Sumber asli dipertahankan sebagai pointer.
 

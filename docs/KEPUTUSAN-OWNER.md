@@ -3,7 +3,7 @@
 Tanggal: 2026-09-23
 Status: aktif
 Tujuan: register kanonik keputusan bisnis/arah owner — tanggal, status berlaku/digantikan, dan sumber bukti; keputusan tidak diubah oleh pemindahan
-Rujukan: [STATUS](STATUS.md) · [AGENTS](../AGENTS.md) · [M12](M12_CHECKLIST_CHANGELOG.md) · [M02 (pointer)](M02_KEPUTUSAN_OWNER.md) · [izin & catatan](history/izin-dan-catatan-keputusan-owner.md)
+Rujukan: [STATUS](STATUS.md) · [AGENTS](../AGENTS.md) · [STATUS](STATUS.md) · [KEPUTUSAN-OWNER (pointer)](KEPUTUSAN-OWNER.md) · [izin & catatan](history/izin-dan-catatan-keputusan-owner.md)
 
 > Migrasi dari docs/M02_KEPUTUSAN_OWNER.md (B7 Tahap 3, 23 Sep 2026) pada DOC-GOV-20260922; teks keputusan, tanggal, dan bukti dipindah apa adanya.
 > Kelas isi non-keputusan dan izin/approval yang sudah digantikan dipisah ke [history/izin-dan-catatan-keputusan-owner.md](history/izin-dan-catatan-keputusan-owner.md) tanpa mengubah teks.
@@ -16,7 +16,7 @@ Rujukan: [STATUS](STATUS.md) · [AGENTS](../AGENTS.md) · [M12](M12_CHECKLIST_CH
 | Retro-approve kondisional 23 Sep — syarat "setiap batch wajib approval eksplisit" | **digantikan** | [DELEGASI-DOC-TEKNIS](STATUS.md#6-keputusan-owner-yang-mengikat-ringkas) + [BATCH-B1-B11](STATUS.md#6-keputusan-owner-yang-mengikat-ringkas) (23 Sep, pasca-B5, `fe2955a3`); teks asli di [history/izin-dan-catatan-keputusan-owner.md](history/izin-dan-catatan-keputusan-owner.md) |
 | IZIN-CAKUPAN 23 Sep — "S2.b3/S2.b4/S2.c dan batch berikutnya menunggu approval per batch" | **digantikan** | S2.b3/S2.b4/S2.c dieksekusi atas instruksi percepatan owner 23 Sep; B1–B7 mengikuti urutan batch + DELEGASI-DOC-TEKNIS ([STATUS §5](STATUS.md#5-pelaksanaan-vs-izin-dua-sumbu--jangan-digabung)) |
 | ARAH-DOKUMEN 6 Sep — "seri M00–M19 dipertahankan" | **digantikan** | [KONSOLIDASI-FILE](STATUS.md#6-keputusan-owner-yang-mengikat-ringkas) 23 Sep + [STATUS §8](STATUS.md#8-struktur-dokumen-tujuan-konsolidasi) (7 file utama; path lama menjadi pointer) |
-| Keputusan izin bertahap 8 Sep + koreksi lingkup AO | **riwayat** (izin sebagian masih operatif; status eksekusi bertanggal) | Dipisah ke [history/izin-dan-catatan-keputusan-owner.md](history/izin-dan-catatan-keputusan-owner.md); status aktual di [STATUS](STATUS.md) dan [M12](M12_CHECKLIST_CHANGELOG.md) |
+| Keputusan izin bertahap 8 Sep + koreksi lingkup AO | **riwayat** (izin sebagian masih operatif; status eksekusi bertanggal) | Dipisah ke [history/izin-dan-catatan-keputusan-owner.md](history/izin-dan-catatan-keputusan-owner.md); status aktual di [STATUS](STATUS.md) dan [STATUS](STATUS.md) |
 | Butir lain: D-01..D-31, R1–R5, B1–B5, E/F/K/L/S, OP-*, FIN-*, PUB-*, STF-*, AI-*, OWN-*, W-00-D1..D3, AL-01..AL-04, OC-01..OC-07 | **berlaku** | Tidak ada bukti penggantian yang tercatat per 23 Sep 2026 |
 
 ## 2026-09-23 — DEDUP-UANG: pengulangan isi aturan uang/harga boleh diringkas
@@ -71,7 +71,7 @@ Prioritas produk pada bagian ini diperbarui oleh keputusan 22 Sep di atas; keput
 - **ARAH-BUKTI:** catat implementasi, verifikasi lokal, deployment, dan dampak terukur secara terpisah. Kode uncommitted bisa saja masuk artefak; keberadaan patch di server tetap UNKNOWN sampai artefaknya diverifikasi. Fase A dan gate AO yang terbuka tidak dibatalkan.
 - **ARAH-HOST:** dahulukan identitas artefak dan pengamatan pasif. Uji aktif (restart, burst, upload, cron, canary), konfigurasi server dan mutasi DB memerlukan izin terkait. Jangan minta nilai secret atau menghubungi support atas nama owner tanpa izin.
 
-Checklist aktif: [M12](M12_CHECKLIST_CHANGELOG.md#antrian-eksekusi-aktif). Tabel hosting: [M19](M19_EFISIENSI_HOSTING_512MB.md#9-pencatatan-hosting-ef-00-dan-ef-02).
+Checklist aktif: [STATUS](STATUS.md#2-antrean-prioritas-aktif). Tabel hosting: [efisiensi hosting](operations/efisiensi-hosting.md#9-pencatatan-hosting-ef-00-dan-ef-02).
 
 ## Update 2026-07-08 — Keputusan Data Lapangan Produksi
 
@@ -180,7 +180,7 @@ Status: OWNER-CONFIRMED untuk aturan/ground truth, tetapi sebagian besar BELUM M
 
 ### OWN-STRUKTUR-PHASE2 ✅ SELESAI (Fase C + H + I)
 
-Toggle Owner/Admin phase 1 berfungsi penuh. UI telah diperbaiki melalui Fase C (toggle segmented control, route split, sidebar context-aware, breadcrumb), Fase H (sidebar compact 18→7, dashboard 6→3 tab), dan Fase I (de-duplikasi navigasi, breadcrumb interaktif). Detail: `docs/M12_CHECKLIST_CHANGELOG.md` Fase C, H, I.
+Toggle Owner/Admin phase 1 berfungsi penuh. UI telah diperbaiki melalui Fase C (toggle segmented control, route split, sidebar context-aware, breadcrumb), Fase H (sidebar compact 18→7, dashboard 6→3 tab), dan Fase I (de-duplikasi navigasi, breadcrumb interaktif). Detail: [STATUS.md](STATUS.md) §8 dan [history/changelog/](history/changelog/).
 
 ---
 
@@ -376,7 +376,7 @@ Toggle Owner/Admin phase 1 berfungsi penuh. UI telah diperbaiki melalui Fase C (
 
 ### Rujukan
 - Detail 82 temuan: `docs/archieve/audit_reasonix/` (10 file)
-- Antrian eksekusi: `docs/M12_CHECKLIST_CHANGELOG.md` § Fase AL
+- Antrian eksekusi: [STATUS.md](STATUS.md) (kanonik)
 - Changelog: `docs/M13_CHANGELOG.md`
 
 ---

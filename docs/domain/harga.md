@@ -3,7 +3,7 @@
 Tanggal: 2026-09-23
 Status: aktif
 Tujuan: aturan resmi & terimplementasi penentuan harga kamar (harian, mingguan, 2-mingguan, bulanan, semester, tahunan), pembulatan, utilitas, DP & deposit, rent-lock, prabayar, dan kewenangan role (dari M18)
-Rujukan: [M02](../M02_KEPUTUSAN_OWNER.md) · [M12](../M12_CHECKLIST_CHANGELOG.md) · [M18](../M18_ATURAN_HARGA_KAMAR.md) · [keuangan.md](keuangan.md) · [hunian.md](hunian.md) · [kontrak.md](kontrak.md) · [operasional.md](operasional.md)
+Rujukan: [KEPUTUSAN-OWNER](../KEPUTUSAN-OWNER.md) · [STATUS](../STATUS.md) · [harga](harga.md) · [keuangan.md](keuangan.md) · [hunian.md](hunian.md) · [kontrak.md](kontrak.md) · [operasional.md](operasional.md)
 
 > Migrasi dari docs/M18_ATURAN_HARGA_KAMAR.md (B3 Tahap 3, 23 Sep 2026) pada DOC-GOV-20260922; teks aturan tidak diubah.
 > Batch B3 memindahkan **seluruh isi M18 apa adanya** ke file ini (satu tujuan per handoff owner); nomor & urutan bagian sama seperti aslinya.

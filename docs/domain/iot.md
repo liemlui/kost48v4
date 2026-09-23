@@ -3,7 +3,7 @@
 Tanggal: 2026-09-23
 Status: aktif (pengembangan ditunda — IOT-LATER)
 Tujuan: spesifikasi IoT KOST48 — inventaris perangkat Tuya, arsitektur integrasi, kontrak ingest device, aturan alert, batas telemetry/billing, dan rencana implementasi yang ditunda
-Rujukan: [operasional.md](operasional.md) · [keuangan.md](keuangan.md) · [harga.md](harga.md) · [M15 (pointer)](../M15_IOT.md) · [KEPUTUSAN-OWNER](../KEPUTUSAN-OWNER.md)
+Rujukan: [operasional.md](operasional.md) · [keuangan.md](keuangan.md) · [harga.md](harga.md) · [IoT](iot.md) · [KEPUTUSAN-OWNER](../KEPUTUSAN-OWNER.md)
 
 > Migrasi dari docs/M15_IOT.md (B8 Tahap 3, 23 Sep 2026) pada DOC-GOV-20260922; Part A dan Part B dipindah apa adanya, ditambah § Bagian 6 IoT dari `domain/operasional.md` — teks tidak diubah.
 > Rencana implementasi (Part B) berstatus **ditunda** sesuai IOT-LATER (keputusan owner 22 Sep, [KEPUTUSAN-OWNER](../KEPUTUSAN-OWNER.md)); pemindahan dokumen ini bukan izin implementasi.

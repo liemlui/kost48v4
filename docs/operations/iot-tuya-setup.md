@@ -3,7 +3,7 @@
 Tanggal: 2026-09-23
 Status: runbook (pre-implementation); bukan izin eksekusi
 Tujuan: prosedur setup dan verifikasi Tuya KWH — credential, data center, environment, request signing, connectivity spike, mapping device, algoritma polling, quality rules, observability, test matrix, dan gate go/no-go
-Rujukan: [iot.md](../domain/iot.md) · [M15 (pointer)](../M15_IOT.md) · [operasional.md](../domain/operasional.md) · [KEPUTUSAN-OWNER](../KEPUTUSAN-OWNER.md)
+Rujukan: [iot.md](../domain/iot.md) · [IoT (pointer)](../domain/iot.md) · [operasional.md](../domain/operasional.md) · [KEPUTUSAN-OWNER](../KEPUTUSAN-OWNER.md)
 
 > Migrasi dari docs/M15_IOT.md Part C (B8 Tahap 3, 23 Sep 2026) pada DOC-GOV-20260922; teks tidak diubah.
 > Prosedur ini tidak memberi izin eksekusi: kredensial, cron, dan pilot Tuya tetap memerlukan keputusan/izin owner.

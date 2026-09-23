@@ -3,7 +3,7 @@
 Tanggal: 2026-09-23
 Status: handoff operasional (fondasi terimplementasi; rollout perangkat dan UAT masih gate)
 Tujuan: petunjuk deploy/handoff fondasi Tuya KWH + water flow ESP32 — yang sudah siap, environment, build & aktivasi, API backoffice, kontrak ingest, metric canonical, isolasi billing, dan langkah fase berikutnya
-Rujukan: [iot.md](../domain/iot.md) · [iot-tuya-setup.md](iot-tuya-setup.md) · [iot-water-meter-esp32.md](iot-water-meter-esp32.md) · [M15 (pointer)](../M15_IOT.md)
+Rujukan: [iot.md](../domain/iot.md) · [iot-tuya-setup.md](iot-tuya-setup.md) · [iot-water-meter-esp32.md](iot-water-meter-esp32.md) · [IoT (pointer)](../domain/iot.md)
 
 > Migrasi dari docs/M15_IOT.md Part E (B8 Tahap 3, 23 Sep 2026) pada DOC-GOV-20260922; teks tidak diubah, kecuali § 8 (hasil verifikasi 2026-07-16) yang dipisah sebagai riwayat bertanggal ke [history/changelog/2026-07.md](../history/changelog/2026-07.md).
 

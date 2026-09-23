@@ -1,8 +1,8 @@
 # Landasan IB Diploma Business Management untuk KOST48
 
 Tanggal: 22 September 2026. Status: **landasan produk dan kerangka penerapan; bukan audit kurikulum atau klaim fitur selesai**.
-Owner menetapkan IB Diploma Business Management Theory sebagai dasar bisnis kost yang kuat dalam [M02](../M02_KEPUTUSAN_OWNER.md).
-Penerapan didahulukan pada operasi penghuni dan keuangan OWNER/ADMIN; [flow utama](flow-utama.md) menjadi penghubung teori dengan pekerjaan sehari-hari. Antrean implementasi tetap [M12](../M12_CHECKLIST_CHANGELOG.md).
+Owner menetapkan IB Diploma Business Management Theory sebagai dasar bisnis kost yang kuat dalam [KEPUTUSAN-OWNER](../KEPUTUSAN-OWNER.md).
+Penerapan didahulukan pada operasi penghuni dan keuangan OWNER/ADMIN; [flow utama](flow-utama.md) menjadi penghubung teori dengan pekerjaan sehari-hari. Antrean implementasi tetap [STATUS](../STATUS.md).
 
 ## 1. Dasar dan batas sumber
 
@@ -53,7 +53,7 @@ Contoh adaptasi: owner ingin mengurangi tagihan lewat jatuh tempo. Gunakan opera
 1. **Pencatatan dan alur utama:** bedakan kas/piutang/deposit/pendapatan/laba; jelaskan dampak booking, pembayaran, renewal, checkout dan biaya. Validasi definisi serta sumber sebelum merancang indikator.
 2. **Ringkasan manajemen:** tampilkan pekerjaan mendesak, kondisi bisnis, serta asal angka/periode yang dapat dibuka; gunakan bahasa operasional pada tampilan utama.
 3. **Evaluasi keputusan:** gunakan catatan keputusan dan bukti sebelum/sesudah untuk memilih perbaikan berikutnya.
-4. **Analisis lanjutan bila dibutuhkan:** alat seperti SWOT, PESTLE, BCG, Porter atau bauran pemasaran hanya dipilih bila pertanyaan serta data relevan. Narasi lama [M03](../M03_FLOW_KONTRAK.md) bukan bukti semua alat tersedia, tervalidasi, atau cocok untuk kost.
+4. **Analisis lanjutan bila dibutuhkan:** alat seperti SWOT, PESTLE, BCG, Porter atau bauran pemasaran hanya dipilih bila pertanyaan serta data relevan. Narasi lama [flow & kontrak](../domain/flow.md) bukan bukti semua alat tersedia, tervalidasi, atau cocok untuk kost.
 
 Pengembangan IoT tetap ditunda. Pencatatan meter/utilitas yang diperlukan operasi dan tagihan tetap dijaga. Dashboard tidak perlu menampilkan seluruh teori; penjelasan dan asumsi tersedia saat pengguna membuka detail.
 
@@ -62,7 +62,7 @@ Pengembangan IoT tetap ditunda. Pencatatan meter/utilitas yang diperlukan operas
 - Perhitungan serta mutasi bisnis tetap pada kontrak/service existing; rekomendasi AI tidak langsung memposting jurnal atau mengubah transaksi/status.
 - Rasio, proyeksi dan simulasi menyebut periode, input, rumus dan asumsi; tidak disamakan dengan uang tersedia atau transaksi aktual.
 - Tidak ada data pasar, ambang rasio, hubungan sebab-akibat atau manfaat finansial yang dianggap fakta tanpa bukti. Nol berbeda dari data belum tersedia.
-- Keputusan tarif, DP, deposit, pengakuan pendapatan dan kewenangan tetap mengikuti [M02](../M02_KEPUTUSAN_OWNER.md) serta [M04](../M04_KEUANGAN.md). Usulan teori tidak otomatis menjadi kebijakan baru.
+- Keputusan tarif, DP, deposit, pengakuan pendapatan dan kewenangan tetap mengikuti [KEPUTUSAN-OWNER](../KEPUTUSAN-OWNER.md) serta [keuangan](../domain/keuangan.md). Usulan teori tidak otomatis menjadi kebijakan baru.
 - Source, UI dan runtime belum diaudit pada penataan dokumentasi ini. Integrasi IB yang sudah benar-benar tersedia, mutu indikator, serta efektivitas bagi owner tetap **UNKNOWN** sampai dibuktikan pada task terkait.
 
 Penerapan dianggap berguna ketika owner dapat menjawab suatu pertanyaan bisnis dengan data yang dapat ditelusuri, memahami alternatif dan batasnya, mengambil keputusan sesuai kewenangan, lalu mengevaluasi hasilnya. Jumlah framework, grafik atau halaman bukan ukuran keberhasilan.

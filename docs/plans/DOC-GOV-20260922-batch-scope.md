@@ -1,12 +1,12 @@
 # DOC-GOV-20260922 — Memo Scope Batch Lanjutan (S2.b3 / S2.b4)
 
 Tanggal: 23 September 2026. Status: **DRAFT — usulan, BELUM approval.**
-Otoritas: [M12](../M12_CHECKLIST_CHANGELOG.md) (antrean/gate) dan [M02](../M02_KEPUTUSAN_OWNER.md) (keputusan owner).
+Otoritas: [STATUS](../STATUS.md) (antrean/gate) dan [KEPUTUSAN-OWNER](../KEPUTUSAN-OWNER.md) (keputusan owner).
 Sifat dokumen: **recon read-only.** Tidak ada isi yang dipindahkan, tidak ada approval yang diklaim, tidak ada test/build/server.
 
 ## 1. Mengapa memo ini ada
 
-- Label batch `S2.b3`, `S2.b4`, `S2.c`, `S2.d` dirujuk di [M02:15](../M02_KEPUTUSAN_OWNER.md), [M12:37 dan :55](../M12_CHECKLIST_CHANGELOG.md), serta [§0 rancangan](DOC-GOV-20260922.md#0-status-pelaksanaan-per-tahap) — tetapi **belum pernah punya definisi/scope tertulis**.
+- Label batch `S2.b3`, `S2.b4`, `S2.c`, `S2.d` dirujuk di [KEPUTUSAN-OWNER:15](../KEPUTUSAN-OWNER.md), [STATUS:37 dan :55](../STATUS.md), serta [§0 rancangan](DOC-GOV-20260922.md#0-status-pelaksanaan-per-tahap) — tetapi **belum pernah punya definisi/scope tertulis**.
 - Syarat owner 23 Sep: setiap batch wajib approval eksplisit **sebelum** eksekusi. Approval tidak sah bila scope-nya sendiri belum jelas.
 - Sisa isi `docs/M04_KEUANGAN.md` (180 baris) tinggal dua blok; keduanya belum dimigrasikan.
 

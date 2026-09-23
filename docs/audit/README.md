@@ -1,7 +1,7 @@
 # Indeks Audit Modul
 
-Peta existing: [audit-map](../audit-map/). Antrean audit: [M12](../M12_CHECKLIST_CHANGELOG.md).
-Status dokumen disinkronkan 22 September 2026. "Belum dibuat" berarti dokumen ringkasan modul belum ada — bukan berarti modul belum pernah diaudit; cakupan per unit ada di [M12](../M12_CHECKLIST_CHANGELOG.md) dan [CHECKLIST_AUDIT_TOTAL](audit-checklist-total.md). Keberadaan dokumen tidak berarti audit lengkap atau bukti masih segar; periksa baseline dan cakupannya sebelum dipakai.
+Peta existing: [audit-map](../audit-map/). Antrean audit: [STATUS](../STATUS.md).
+Status dokumen disinkronkan 22 September 2026. "Belum dibuat" berarti dokumen ringkasan modul belum ada — bukan berarti modul belum pernah diaudit; cakupan per unit ada di [STATUS](../STATUS.md) dan [CHECKLIST_AUDIT_TOTAL](audit-checklist-total.md). Keberadaan dokumen tidak berarti audit lengkap atau bukti masih segar; periksa baseline dan cakupannya sebelum dipakai.
 Hasil Tahap 2 DOC-GOV-20260922 (migrasi riwayat dokumen; **bukan** audit modul baru): [mapping Tahap 2](../history/DOC-GOV-20260922-mapping.md) dan [M16 pembaruan Tahap 2](audit-dokumentasi-2026-09.md#pembaruan-tahap-2-doc-gov-20260922).
 
 | Modul | Status |

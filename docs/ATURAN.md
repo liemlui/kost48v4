@@ -40,5 +40,5 @@ Berkas rinci juga memuat **bukti audit bertanggal** dari era M (mis. `## Audit 3
 ## 4. Provenance
 
 - Isi `docs/domain/` berasal dari M03–M07/M09/M15/M18 melalui batch B1–B3, B5, dan B8, dipindah **tanpa mengubah aturan**; bukti perpindahan ada di [mapping §7](history/DOC-GOV-20260922-mapping.md).
-- Path M lama tetap ada sebagai pointer agar tautan lama resolve; pointer **tidak** memuat aturan baru.
+- Path M lama **sudah dihapus di Fase 3** (23 Sep 2026); rincian tetap kanonik di berkas §2 dan tidak digandakan ke berkas ini.
 - Berkas ini menjadi rumah kanonik sejak **Fase 2 (23 Sep 2026)**; rincian di `docs/domain/` tetap dipakai apa adanya dan tidak digandakan ke berkas ini.

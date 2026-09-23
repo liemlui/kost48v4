@@ -3,7 +3,7 @@
 Tanggal: 2026-09-23
 Status: aktif
 Tujuan: aturan operasional harian — aturan tenant, inventaris, staf/tiket/KPI, notifikasi/pengumuman, auth/onboarding — beserta proposal meter listrik/air (spesifikasi IoT dipindah ke [iot.md](iot.md), B8 23 Sep 2026)
-Rujukan: [M02](../M02_KEPUTUSAN_OWNER.md) · [M12](../M12_CHECKLIST_CHANGELOG.md) · [M06](../M06_OPERASIONAL.md) · [hunian.md](hunian.md) · [keuangan.md](keuangan.md) · [kontrak.md](kontrak.md)
+Rujukan: [KEPUTUSAN-OWNER](../KEPUTUSAN-OWNER.md) · [STATUS](../STATUS.md) · [operasional](operasional.md) · [hunian.md](hunian.md) · [keuangan.md](keuangan.md) · [kontrak.md](kontrak.md)
 
 > Migrasi dari docs/M06_OPERASIONAL.md (B1 Tahap 3, 23 Sep 2026) pada DOC-GOV-20260922; teks aturan tidak diubah.
 > Indeks dossier — rujukan "dossier 14/15/16/18" dari [hunian.md](hunian.md) menunjuk ke file ini: **14** inventaris & barang kamar · **15** staf/tiket/KPI · **16** notifikasi & pengumuman · **18** auth/KTP/onboarding.

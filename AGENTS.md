@@ -7,8 +7,8 @@ Baca aturan yang relevan sebelum bertindak; jangan memuat ulang dokumen yang sud
 
 - Hierarki dokumen proyek: **User prompt > docs/STATUS.md (antrean/gate) > AGENTS.md > file rujukan lain**.
 - AGENTS.md adalah satu-satunya sumber aturan operasional kanonik untuk agent.
-- [STATUS.md](docs/STATUS.md) adalah otoritas antrean, urutan, dan gate tugas di atas AGENTS; path `docs/M12_CHECKLIST_CHANGELOG.md` kini hanya pointer ke file itu.
-- [M02](docs/M02_KEPUTUSAN_OWNER.md) menyimpan keputusan bisnis/arah owner; jangan menggantinya dengan asumsi agent.
+- [STATUS.md](docs/STATUS.md) adalah otoritas antrean, urutan, dan gate tugas di atas AGENTS; path `docs/M12_CHECKLIST_CHANGELOG.md` **sudah dihapus di Fase 3** (23 Sep 2026).
+- [KEPUTUSAN-OWNER](docs/KEPUTUSAN-OWNER.md) menyimpan keputusan bisnis/arah owner; jangan menggantinya dengan asumsi agent.
 - CLAUDE.md, .clinerules, dan panduan agent-specific adalah pointer; jangan menambahkan aturan paralel.
 - [AI_QUICKREF.md](AI_QUICKREF.md) adalah cheatsheet turunan; [GUIDE](AI_WORKFLOW_GUIDE.md) menyediakan template task, dampak, verifikasi, dan handoff.
 - Status governance, exception, dan keputusan ringkas ada di [STATUS.md](docs/STATUS.md); `AI_MASTER.md` dan dashboard lama kini pointer, bukan sumber aturan.
@@ -31,14 +31,14 @@ Baca aturan yang relevan sebelum bertindak; jangan memuat ulang dokumen yang sud
 |---|---|
 | [STATUS.md](docs/STATUS.md) | **Satu file kerja**: antrean prioritas, 23 task terbuka + gate, status pelaksanaan vs izin, keputusan owner ringkas, invariant |
 | [AGENTS.md](AGENTS.md) | Aturan kerja, izin, batas, dan verifikasi (file ini) |
-| [KEPUTUSAN-OWNER](docs/KEPUTUSAN-OWNER.md) | Register keputusan bisnis owner (kanonik sejak B7, 23 Sep 2026; `docs/M02_KEPUTUSAN_OWNER.md` kini pointer) |
+| [KEPUTUSAN-OWNER](docs/KEPUTUSAN-OWNER.md) | Register keputusan bisnis owner (kanonik sejak B7, 23 Sep 2026; `docs/M02_KEPUTUSAN_OWNER.md` sudah dihapus di Fase 3) |
 | [ATURAN](docs/ATURAN.md) | Aturan domain: uang, huni, operasional, harga, publik, AI/IoT — rincian per topik di [docs/domain/](docs/domain/) |
 | [OPERASI](docs/OPERASI.md) | Runbook deploy, produksi, go-live, env, default dev — rincian di [docs/operations/](docs/operations/) |
 | [PETA-KODE](docs/PETA-KODE.md) | Peta modul/file/simbol (kanonik sejak B5, 23 Sep 2026); peta generated: [audit-map](docs/audit-map/) |
 | [AUDIT](docs/AUDIT.md) | Status audit dan temuan bertanggal — rincian di [docs/audit/](docs/audit/) |
 | [docs/history/](docs/history/) | Riwayat, fase, changelog bulanan → menyusul `docs/arsip/`; bukan antrean atau perintah mengulang pekerjaan |
 
-- **Konsolidasi (23 Sep 2026, instruksi owner):** dokumen dirapikan menjadi **7 file utama tanpa penomoran M** — Tahap 3 (B1–B11) + Fase 2 selesai; sisa Fase 3 (arsip + pembersihan pointer lama). docs harus membantu AI bekerja, bukan memperumit. Path M lama dipertahankan sebagai pointer agar tautan lama tetap resolve. Progres: [STATUS.md §8](docs/STATUS.md).
+- **Konsolidasi (23 Sep 2026, instruksi owner):** dokumen dirapikan menjadi **7 file utama tanpa penomoran M** — Tahap 3 (B1–B11), Fase 2, dan Fase 3 (pembersihan pointer lama) selesai; sisa Tahap 4 (review akhir) dan konsolidasi arsip. docs harus membantu AI bekerja, bukan memperumit. Path M lama **sudah dihapus** (Fase 3, 23 Sep 2026) setelah seluruh tautan dialihkan ke rumah kanonik. Progres: [STATUS.md §8](docs/STATUS.md).
 - Nomor M lama dipetakan otomatis: M12 + AI_MASTER → STATUS; M02 → KEPUTUSAN-OWNER; M03–M07/M09/M15/M18 → ATURAN; M08/M11/M19/M20 → OPERASI; M00/M10 → PETA-KODE; M14/M16 → AUDIT; M13 + history → arsip.
 - Baca sesuai kebutuhan task; jangan memuat seluruh dokumen sebagai orientasi.
 - Gunakan peta/audit yang sudah ada; jangan menganggap inventaris atau audit lama sebagai bukti PASS untuk diff baru.

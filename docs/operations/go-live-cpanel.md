@@ -1,7 +1,7 @@
 # Checklist Go-Live cPanel
 
 > Migrasi dari docs/GO_LIVE_CPANEL_CHECKLIST.md + docs/M08_DEPLOY_GO_LIVE.md (A-J, Appendix B) pada f8f9a589 (DOC-GOV-20260922 Tahap 3).
-> Sumber asli dipertahankan sebagai pointer.
+> Sumber asli sudah dihapus di Fase 3 (23 Sep 2026); berkas ini kanonik.
 
 ## A. Status artefak saat dokumen ini dibuat (12 Sep 2026)
 
@@ -52,7 +52,7 @@ Database uji **sementara dan terpisah** (`kost48_pkg_verify`) dibuat di PostgreS
 
 1. **Jalur database — ✅ DIPUTUSKAN & DIJALANKAN: jalur A.** DB produksi **baru** `kost48s1_prod26` dibuat lewat cPanel, skema di-bootstrap bersih, OWNER pertama + COA/periode/cash account di-seed 13 Sep. DB uji lama `kost48s1_kost48_prod` **dipertahankan utuh** sebagai cadangan (penghapusan tetap perlu izin terpisah). Catatan: DB yang dibuat lewat phpPgAdmin tidak terdaftar cPanel → gagal `pg_hba` (§E temuan 3).
 2. **Domain final — ✅ DIPUTUSKAN:** `https://kost48surabaya.com` (dipakai `CORS_ORIGIN`/`FRONTEND_URL`, AutoSSL aktif). Canonical `app.kost48surabaya.com` di M08 tidak dipakai.
-3. **Identitas deployment (EF-00) — 🟠 SEBAGIAN:** application root, document root, Node, startup, jumlah proses, urutan env, dan nama DB sudah terisi ([M20 §2](../M20_PRODUKSI_KOST48.md)). Sisa UNKNOWN: SHA tunggal artefak yang berjalan, jam deploy presisi, dan fault/interval pengukuran.
+3. **Identitas deployment (EF-00) — 🟠 SEBAGIAN:** application root, document root, Node, startup, jumlah proses, urutan env, dan nama DB sudah terisi ([produksi §2](produksi.md)). Sisa UNKNOWN: SHA tunggal artefak yang berjalan, jam deploy presisi, dan fault/interval pengukuran.
 4. **Kredensial & secret baru — 🟠 SEBAGIAN:** `JWT_SECRET`, `AUTO_OPS_CRON_TOKEN`, `AVAILABILITY_OWNER_PIN`, dan kredensial DB sudah ada di produksi, **tetapi rotasi belum**: `JWT_SECRET` + password DB masih terbaca di `public_html/.htaccess` dan PIN masih `123456` → §F.1–§F.2. VAPID belum diaktifkan (push opsional).
 5. **Izin menjalankan langkah server — ✅ DIBERIKAN & DIJALANKAN:** deploy paket 13 Sep, deploy `client/` 16 Sep (tanpa restart, tanpa menyentuh backend/DB/`.env`/`uploads`). Izin berikutnya tetap diminta per sesi.
 
@@ -60,7 +60,7 @@ Database uji **sementara dan terpisah** (`kost48_pkg_verify`) dibuat di PostgreS
 
 - [x] Konfirmasi nama & kredensial database produksi — DB `kost48s1_prod26`, user `kost48s1_lurin` (dibuat lewat cPanel → PostgreSQL Databases; §E temuan 3). Nilai kredensial tidak ditulis di dokumen ini.
 - [x] Domain final + akses cPanel (Node.js App, PostgreSQL, Cron Jobs, Terminal/SSH, AutoSSL) — tersedia; `uapi NodeJS` **tidak** ada di server ini sehingga env diubah lewat berkas konfigurasi cPanel + backup (§E temuan 2).
-- [x] Nomor versi Node di panel (target: Node 22) dan kemampuan `NODE_OPTIONS` — Node **22.23.2** (venv khusus app); `NODE_OPTIONS=--max-old-space-size=192` terpasang lewat env cPanel ([M20 §4](../M20_PRODUKSI_KOST48.md)).
+- [x] Nomor versi Node di panel (target: Node 22) dan kemampuan `NODE_OPTIONS` — Node **22.23.2** (venv khusus app); `NODE_OPTIONS=--max-old-space-size=192` terpasang lewat env cPanel ([produksi §4](produksi.md)).
 - [x] Password baru yang kuat untuk OWNER produksi (bukan `admin123`) — dibuat 13 Sep; password sementara masih ada di `~/OWNER-PASSWORD-BACA-LALU-HAPUS.txt` → rotasi + hapus file masuk §F.3.
 - [x] Keputusan jalur database (§B.1) dan jendela waktu eksekusi — jalur A (DB baru + bootstrap bersih), dieksekusi 13 Sep 2026.
 - [ ] Konfirmasi apakah `uploads/` (foto kamar/bukti bayar) perlu dipindahkan dari server lama — **belum terjawab.** Deploy 13–16 Sep tidak menyentuh `uploads/`; aset privat tetap tidak boleh masuk dokroot publik.
@@ -72,7 +72,7 @@ Semua perintah dijalankan **tanpa** `npm install`, `npm ci`, `prisma generate`, 
 1. Unggah `kost48-deploy-bundled.tgz` ke application root, lalu extract.
 2. **Setup Node.js App:** Node 22, mode Production, startup file `dist/main.js`, `NODE_OPTIONS=--max-old-space-size=192` di Environment Variables cPanel (bukan `.env`).
 3. Salin `.env.example` → `.env`, isi minimal: `NODE_ENV=production`, `DATABASE_URL`, `JWT_SECRET`, `CORS_ORIGIN`, `FRONTEND_URL`, `KTP_ACTIVATION_GATE_ENABLED=true`, `PUBLIC_ONLINE_BOOKING_ENABLED=false`, `AUTO_OPS_ENABLED=false`, `AUTO_OPS_CRON_TOKEN`, `AVAILABILITY_OWNER_PIN`.
-4. **Jalur A:** jalankan bootstrap + seed kamar dari Terminal (lihat [M08 Bagian D](../M08_DEPLOY_GO_LIVE.md)). **Jalur B:** jangan jalankan bootstrap; siapkan patch terpisah dengan backup teruji.
+4. **Jalur A:** jalankan bootstrap + seed kamar dari Terminal (lihat [deploy & go-live Bagian D](deploy-go-live.md)). **Jalur B:** jangan jalankan bootstrap; siapkan patch terpisah dengan backup teruji.
 5. Buat OWNER pertama sekali saja: `node scripts/seed-owner.js` dengan `OWNER_EMAIL`/`OWNER_PASSWORD`/`OWNER_FULLNAME` sementara.
 6. Login OWNER → seed COA, periode OPEN, CashAccount, opening balance melalui UI.
 7. Restart Application, aktifkan AutoSSL/HTTPS.
@@ -132,7 +132,7 @@ Identitas deployment (menutup sebagian EF-00 §9.1 M19):
 - [ ] **Ganti PIN owner** `AVAILABILITY_OWNER_PIN` — belum dikonfirmasi; nilai tidak dicatat di dokumen ini.
 - [ ] **Ganti password OWNER pertama.** Belum dikonfirmasi; login dan ganti lewat menu Profil, lalu hapus file sementara `~/OWNER-PASSWORD-BACA-LALU-HAPUS.txt` (status penghapusan file OWNER belum dikonfirmasi).
 - [x] **Hapus file password tenant** `~/TENANT-PASSWORD-AWAL-BACA-LALU-HAPUS.txt` — selesai 20 Sep 2026; penghapusan file tidak membuktikan penggantian password akun tenant.
-- [ ] **Lengkapi fondasi akuntansi lewat UI:** periode `OPEN` (1, bulan berjalan) dan 2 CashAccount (Kas Tunai + Bank Utama, saldo awal 0) **sudah dibuat 13 Sep 2026** — catatan lama "masih 0" tidak berlaku lagi. Yang belum: **opening balance diisi** (atau zero-start dicatat), karena kesiapan akuntansi masih 75/100 dengan `formalStatementReady=false` ([M20 §3](../M20_PRODUKSI_KOST48.md)).
+- [ ] **Lengkapi fondasi akuntansi lewat UI:** periode `OPEN` (1, bulan berjalan) dan 2 CashAccount (Kas Tunai + Bank Utama, saldo awal 0) **sudah dibuat 13 Sep 2026** — catatan lama "masih 0" tidak berlaku lagi. Yang belum: **opening balance diisi** (atau zero-start dicatat), karena kesiapan akuntansi masih 75/100 dengan `formalStatementReady=false` ([produksi §3](produksi.md)).
 - [ ] **Cron AutoOps** (setelah UAT): Environment Variables cPanel → `AUTO_OPS_ENABLED=false` + `AUTO_OPS_CRON_TOKEN=<acak>`; cPanel Cron Jobs tiap 5 menit → `POST /api/auto-ops/cron` dengan header `X-Cron-Token`. **Jangan** pasang cron IoT Tuya.
 - [ ] **Onboarding penghuni nyata** melalui `docs/FORM_ISI_DATA_GO_LIVE.md`.
 - [x] **Pembersihan disk/inode** — selesai 20 Sep 2026: `~/kost48v3` (191 MB), `~/kost48surabaya` (24 MB), 5 tgz staging lama (~98 MB), 3 folder `client-old-*`, `sql/seed.sql` (854 KB) + `sql/seed_ORIGINAL.sql` (618 KB) dihapus. App root 257 → 129 MB; home dir ~1.1 GB → ~660 MB; `~/backups` dan `~/lui` dipertahankan. Inode sesudah cleanup belum diukur.
@@ -140,7 +140,7 @@ Identitas deployment (menutup sebagian EF-00 §9.1 M19):
 
 ### F.1 Verifikasi gerbang KTP produksi (tanpa menampilkan secret)
 
-**Latar:** `KTP_ACTIVATION_GATE_ENABLED` **default OFF**; runbook deploy menandainya WAJIB di produksi. Bila OFF, aktivasi kamar dapat lolos **tanpa KTP terverifikasi** (bertentangan dengan maksud UU PDP dan temuan D-17). Keputusan owner 23 Sep 2026: **ditunda dengan risiko diterima sementara**, wajib ditinjau sebelum onboarding penghuni nyata ([M02](../M02_KEPUTUSAN_OWNER.md)).
+**Latar:** `KTP_ACTIVATION_GATE_ENABLED` **default OFF**; runbook deploy menandainya WAJIB di produksi. Bila OFF, aktivasi kamar dapat lolos **tanpa KTP terverifikasi** (bertentangan dengan maksud UU PDP dan temuan D-17). Keputusan owner 23 Sep 2026: **ditunda dengan risiko diterima sementara**, wajib ditinjau sebelum onboarding penghuni nyata ([KEPUTUSAN-OWNER](../KEPUTUSAN-OWNER.md)).
 
 **Prasyarat:** izin akses cPanel/lingkungan aplikasi. Jangan menampilkan nilai secret lain; nilai `true`/`false` pada flag ini bukan secret.
 
@@ -148,7 +148,7 @@ Identitas deployment (menutup sebagian EF-00 §9.1 M19):
 2. **Bila belum ada atau `false`** — set `KTP_ACTIVATION_GATE_ENABLED=true`, lalu restart aplikasi mengikuti prosedur redeploy (§G/§J). Jangan mengubah env lain pada langkah ini.
 3. **Bukti** — tanggal, nama pemeriksa, status sebelum/sesudah, tanpa screenshot yang memuat secret.
 4. **Uji perilaku** — jalankan di UAT/DEV: aktivasi kamar atau approve booking untuk tenant tanpa KTP terverifikasi **harus DITOLAK**. **Jangan** membuat tenant/booking uji di produksi; bila uji hanya bisa di produksi, jangan lakukan dan tulis **BELUM TERBUKTI**.
-5. **Tindak lanjut** — catat hasil di [M12](../M12_CHECKLIST_CHANGELOG.md) antrean #1. Bila tetap ditunda, tegaskan risiko dan syarat peninjauan sebelum onboarding penghuni nyata.
+5. **Tindak lanjut** — catat hasil di [STATUS](../STATUS.md) antrean #1. Bila tetap ditunda, tegaskan risiko dan syarat peninjauan sebelum onboarding penghuni nyata.
 
 ## G. Catatan teknis untuk release berikutnya
 

@@ -3,14 +3,14 @@
 Tanggal: 2026-09-23
 Status: aktif
 Tujuan: batas teknis & rencana efisiensi shared hosting 512 MB — verdict, anggaran memori, verifikasi klaim audit, jalur arsitektur, peta dependensi mikrotask, definisi EF-00..EF-09, batasan/open questions, dan tabel pencatatan hosting EF-00/EF-02 (dari M19)
-Rujukan: [M02](../M02_KEPUTUSAN_OWNER.md) · [M12](../M12_CHECKLIST_CHANGELOG.md) · [M19](../M19_EFISIENSI_HOSTING_512MB.md) · [produksi.md](produksi.md) · [deploy-go-live.md](deploy-go-live.md) · [go-live-cpanel.md](go-live-cpanel.md)
+Rujukan: [KEPUTUSAN-OWNER](../KEPUTUSAN-OWNER.md) · [STATUS](../STATUS.md) · [efisiensi hosting](efisiensi-hosting.md) · [produksi.md](produksi.md) · [deploy-go-live.md](deploy-go-live.md) · [go-live-cpanel.md](go-live-cpanel.md)
 
 > Migrasi dari docs/M19_EFISIENSI_HOSTING_512MB.md (B3 Tahap 3, 23 Sep 2026) pada DOC-GOV-20260922; teks tidak diubah.
 > Batch B3 memindahkan **seluruh isi M19 apa adanya** ke file ini (satu tujuan per handoff owner). Anchor lama (`#arah-dan-status-aktif...`, `#9-pencatatan-hosting-ef-00-dan-ef-02`) dipertahankan di pointer M19 agar rujukan dari M02/M08 tetap resolve.
 
 ## Arah dan status aktif — diselaraskan 8 September 2026; identitas hosting diperbarui 13 September 2026
 
-Keputusan [M02](../M02_KEPUTUSAN_OWNER.md): **Fase EF diprioritaskan; satu proses API NestJS dipertahankan sebagai target; Fase MA ditunda.** Instance Passenger teramati 13 Sep 2026: **1 proses saat idle, dan 2 proses sempat hidup bersamaan** sesaat setelah restart ([M20 §10](../M20_PRODUKSI_KOST48.md)). Profil static masih rencana; bukan izin apps/libs, ekstraksi service atau worker baru. Checklist kanonik: [M12](../M12_CHECKLIST_CHANGELOG.md#fase-ef--efisiensi-shared-hosting-512-mb).
+Keputusan [KEPUTUSAN-OWNER](../KEPUTUSAN-OWNER.md): **Fase EF diprioritaskan; satu proses API NestJS dipertahankan sebagai target; Fase MA ditunda.** Instance Passenger teramati 13 Sep 2026: **1 proses saat idle, dan 2 proses sempat hidup bersamaan** sesaat setelah restart ([produksi §10](produksi.md)). Profil static masih rencana; bukan izin apps/libs, ekstraksi service atau worker baru. Checklist kanonik: [STATUS](efisiensi-hosting.md).
 
 | Lapisan bukti | Status saat sinkronisasi | Batas kesimpulan |
 |---|---|---|
@@ -23,7 +23,7 @@ Audit statis diterima; tidak diulang tanpa perubahan relevan. **§9.1–§9.3 ki
 
 > Dokumen ini adalah **sumber kebenaran** fase efisiensi hosting: verdict kelayakan, anggaran RAM (fakta vs estimasi), verifikasi klaim audit terhadap kode (koreksi final + temuan P0–P2 audit deploy 6 Sep 2026), jalur arsitektur yang disetujui, dan definisi task EF-00..EF-09 (paket 10 mikrotask audit).
 > Sumber kode: `backend/src/main.ts`, `backend/src/app.module.ts`, `backend/src/modules/auto-ops/auto-ops.service.ts`, `backend/src/modules/iot/iot-polling.service.ts`, `backend/src/common/config/app-config.service.ts`, `backend/src/prisma/prisma.service.ts`, `backend/package.json`, `scripts/make-deploy.mjs`, `docs/M08_DEPLOY_GO_LIVE.md`.
-> Terakhir diperbarui: **2026-09-13** | Status: 🟠 **SEBAGIAN TERISI** (identitas deployment 13 Sep; sisa pengukuran EF-02) — lihat `docs/M12_CHECKLIST_CHANGELOG.md` — Fase EF; rincian server di `docs/M20_PRODUKSI_KOST48.md`.
+> Terakhir diperbarui: **2026-09-13** | Status: 🟠 **SEBAGIAN TERISI** (identitas deployment 13 Sep; sisa pengukuran EF-02) — lihat [STATUS.md](../STATUS.md) (status EF); rincian server di [produksi.md](produksi.md).
 
 ---
 
@@ -175,7 +175,7 @@ Dokumen ini harus dijaga sinkron dengan: `backend/src/main.ts`, `backend/src/app
 
 ## 9. Pencatatan hosting EF-00 dan EF-02
 
-Isi hanya data yang tersedia dari panel/log/artefak. Nilai kosong tetap **UNKNOWN**, sertakan sumber dan waktu/zona waktu; jangan kirim password, token, connection string, atau key. Tabel §9.1–§9.3 diisi dari snapshot panel 7 Sep 2026 dan **sesi deployment 13 Sep 2026** (izin owner; rincian di [M20](../M20_PRODUKSI_KOST48.md)); tidak ada pengukuran host baru yang dijalankan dalam sesi sinkronisasi dokumentasi ini.
+Isi hanya data yang tersedia dari panel/log/artefak. Nilai kosong tetap **UNKNOWN**, sertakan sumber dan waktu/zona waktu; jangan kirim password, token, connection string, atau key. Tabel §9.1–§9.3 diisi dari snapshot panel 7 Sep 2026 dan **sesi deployment 13 Sep 2026** (izin owner; rincian di [produksi](produksi.md)); tidak ada pengukuran host baru yang dijalankan dalam sesi sinkronisasi dokumentasi ini.
 
 ### 9.1 Identitas deployment — isi terlebih dahulu
 

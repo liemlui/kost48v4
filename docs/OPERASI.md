@@ -47,5 +47,5 @@
 ## 5. Provenance
 
 - Isi `docs/operations/` berasal dari M08/M11/M19/M20 serta `GO_LIVE_CPANEL_CHECKLIST.md` dan `FORM_ISI_DATA_GO_LIVE.md` (batch S1.b, B3, B9), dipindah **tanpa mengubah langkah**; bukti ada di [mapping §7](history/DOC-GOV-20260922-mapping.md).
-- Path lama (termasuk dua berkas non-M di atas) tetap ada sebagai pointer agar tautan lama resolve.
+- Path lama (termasuk dua berkas non-M di atas) **sudah dihapus di Fase 3**; rincian tetap kanonik di `docs/operations/`.
 - Berkas ini menjadi rumah kanonik sejak **Fase 2 (23 Sep 2026)**; rincian di `docs/operations/` tetap dipakai apa adanya dan tidak digandakan ke berkas ini.

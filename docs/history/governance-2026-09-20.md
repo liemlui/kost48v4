@@ -1,6 +1,6 @@
 # Riwayat konsolidasi governance 20 September 2026
 
-Snapshot dashboard dan GUIDE sebelum penataan 22 September 2026; termasuk koreksi 22 Sep yang sudah ada. Status pending/roadmap di bawah bersifat historis, bukan antrean atau izin aktif. Aturan kini: [AGENTS](../../AGENTS.md); antrean: [M12](../M12_CHECKLIST_CHANGELOG.md); dashboard: [AI_MASTER](../../AI_MASTER.md).
+Snapshot dashboard dan GUIDE sebelum penataan 22 September 2026; termasuk koreksi 22 Sep yang sudah ada. Status pending/roadmap di bawah bersifat historis, bukan antrean atau izin aktif. Aturan kini: [AGENTS](../../AGENTS.md); antrean: [M12](../STATUS.md); dashboard: [AI_MASTER](../../AI_MASTER.md).
 
 Isi sumber dipertahankan; hanya tautan relatif disesuaikan untuk lokasi riwayat ini.
 
@@ -29,8 +29,8 @@ Tanggal file lama tidak disimpulkan dari tanggal yang tertulis di dalam dokumenn
 | [docs/audit/README.md](../../docs/audit/README.md) | Indeks audit modul | Satu audit parsial frontend-auth tersedia; empat placeholder | Indeks turunan; audit-map sebagai peta, M12 sebagai antrean | 2026-09-22 |
 | [AI_MASTER.md](../../AI_MASTER.md) | Monitoring lintas-agent | Dashboard aktif; status disinkronkan | Dashboard, bukan canonical atau pengganti M12/M13 | 2026-09-22 |
 | [.github/copilot-instructions.md](../../.github/copilot-instructions.md) | Entry panduan Copilot | Pointer aktif — Stage 3 selesai | Pointer ke AGENTS/M12 dan dashboard AI_MASTER | 2026-09-20 |
-| [M00](../../docs/M00_CODEMAP.md) / [audit-map](../../docs/audit-map/) | Navigasi kode dan audit | Ada; dipertahankan, tidak diubah | Peta rujukan; bukan bukti audit otomatis PASS | UNKNOWN — belum diperiksa |
-| [M12](../../docs/M12_CHECKLIST_CHANGELOG.md) | Antrean dan gate tugas | Kesiapan task diperjelas; migrasi struktur menunggu approval XL | Otoritas antrean/gate di atas AGENTS | 2026-09-22 |
+| [M00](../PETA-KODE.md) / [audit-map](../../docs/audit-map/) | Navigasi kode dan audit | Ada; dipertahankan, tidak diubah | Peta rujukan; bukan bukti audit otomatis PASS | UNKNOWN — belum diperiksa |
+| [M12](../STATUS.md) | Antrean dan gate tugas | Kesiapan task diperjelas; migrasi struktur menunggu approval XL | Otoritas antrean/gate di atas AGENTS | 2026-09-22 |
 | [M13](../../docs/M13_CHANGELOG.md) | Riwayat bertanggal | Entri koreksi docs dan rancangan ditambahkan; entri lama tetap | Riwayat bukti, bukan antrean baru | 2026-09-22 |
 
 ## 2. Hierarki Aturan (+ KNOWN EXCEPTION gate keuangan)
@@ -67,8 +67,8 @@ Tidak ada hitungan coverage atau klaim PASS runtime baru. Kesegaran bukti dinila
 | Modul / cakupan | File audit / rujukan | Status | Tanggal audit | Freshness |
 |---|---|---|---|---|
 | Auth frontend | [docs/audit/frontend-auth.md](../../docs/audit/frontend-auth.md) | Diperiksa sebagian — login dengan mock | 2026-09-20 | Baseline d5d04cb; validitas terhadap diff berikutnya belum diperiksa |
-| Context/sesi frontend | [M12](../../docs/M12_CHECKLIST_CHANGELOG.md) — catatan FE-057; file audit khusus: UNKNOWN — belum diperiksa | UNKNOWN — belum diperiksa | UNKNOWN — belum diperiksa | UNKNOWN — belum diperiksa |
-| Auth backend | [M12](../../docs/M12_CHECKLIST_CHANGELOG.md) — catatan perbaikan terkait FE-002; file audit khusus: UNKNOWN — belum diperiksa | UNKNOWN — belum diperiksa | UNKNOWN — belum diperiksa | UNKNOWN — belum diperiksa |
+| Context/sesi frontend | [M12](../STATUS.md) — catatan FE-057; file audit khusus: UNKNOWN — belum diperiksa | UNKNOWN — belum diperiksa | UNKNOWN — belum diperiksa | UNKNOWN — belum diperiksa |
+| Auth backend | [M12](../STATUS.md) — catatan perbaikan terkait FE-002; file audit khusus: UNKNOWN — belum diperiksa | UNKNOWN — belum diperiksa | UNKNOWN — belum diperiksa | UNKNOWN — belum diperiksa |
 | Modul lainnya | [audit-map](../../docs/audit-map/) — navigasi, bukan hasil audit | UNKNOWN — belum diperiksa | UNKNOWN — belum diperiksa | UNKNOWN — belum diperiksa |
 
 ## 5. Utang Tooling
@@ -121,7 +121,7 @@ Log historis append-only. Status pending pada baris lama dibaca sesuai tanggal/u
 ## Snapshot AI_WORKFLOW_GUIDE.md
 
 Baca [AGENTS.md](../../AGENTS.md) sebagai sumber aturan kanonik agent.
-Untuk antrean dan gate tugas, ikuti [M12](../../docs/M12_CHECKLIST_CHANGELOG.md).
+Untuk antrean dan gate tugas, ikuti [M12](../STATUS.md).
 
 Penataan menyeluruh yang diminta 22 Sep 2026 memiliki [rancangan DOC-GOV-20260922](../../docs/plans/DOC-GOV-20260922.md), menunggu persetujuan XL. Roadmap di bawah adalah usulan historis 20 Sep; status pelaksanaannya dibaca dari M12/AI_MASTER, bukan dari nomor minggu.
 

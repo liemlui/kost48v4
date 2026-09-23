@@ -1,7 +1,7 @@
 # Formulir Isi Data Go-Live
 
 > Migrasi dari docs/FORM_ISI_DATA_GO_LIVE.md (A-F) pada f8f9a589 (DOC-GOV-20260922 Tahap 3).
-> Sumber asli dipertahankan sebagai pointer.
+> Sumber asli sudah dihapus di Fase 3 (23 Sep 2026); berkas ini kanonik.
 
 ## A. Akun Admin & Staf
 

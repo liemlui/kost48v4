@@ -3,7 +3,7 @@
 Tanggal: 2026-09-22
 Status: aktif
 Tujuan: kontrak & business rules (dari M03 Bagian 2)
-Rujukan: [M02](../M02_KEPUTUSAN_OWNER.md) · [M12](../M12_CHECKLIST_CHANGELOG.md) · [M03](../M03_FLOW_KONTRAK.md) · [domain/flow.md](flow.md)
+Rujukan: [KEPUTUSAN-OWNER](../KEPUTUSAN-OWNER.md) · [STATUS](../STATUS.md) · [flow & kontrak](flow.md) · [domain/flow.md](flow.md)
 
 > Migrasi dari docs/M03_FLOW_KONTRAK.md L551–955 pada aeedaf99
 > (DOC-GOV-20260922 Tahap 3 S2.a).
@@ -422,7 +422,7 @@ Dampak keuangan: [keuangan.md](keuangan.md#override-fase-v--dampak-keuangan).
 > Aturan di section ini masih berlaku dan mengesampingkan narasi historis.
 > Dimigrasi dari M03 (via changelog) pada 7186693e — Tahap 3 S2.a.
 
-**Kontrak terbaru mengalahkan narasi historis di bagian lama dokumen ini.** Bagian `0.2 Representasi "Booking"` di bawah masih menyimpan model lama untuk konteks arsip, tetapi eksekusi baru wajib mengikuti Fase V di `docs/M12_CHECKLIST_CHANGELOG.md`.
+**Kontrak terbaru mengalahkan narasi historis di bagian lama dokumen ini.** Bagian `0.2 Representasi "Booking"` di bawah masih menyimpan model lama untuk konteks arsip, tetapi eksekusi baru wajib mengikuti Fase V di [domain/kontrak.md](kontrak.md) dan [domain/keuangan.md](keuangan.md).
 
 State final status kamar:
 

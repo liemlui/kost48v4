@@ -3,7 +3,7 @@
 Tanggal: 2026-09-23
 Status: aktif
 Tujuan: aturan & spesifikasi AI berbayar (DeepSeek) untuk OWNER/ADMIN — pola aman/terlarang, struktur backend/frontend, hemat token, audit trail, fitur G0–G9, UAT (dari M09)
-Rujukan: [M02](../M02_KEPUTUSAN_OWNER.md) · [M12](../M12_CHECKLIST_CHANGELOG.md) · [M09](../M09_AI_OWNER_ADMIN.md) · [keuangan.md](keuangan.md) · [operasional.md](operasional.md) · [publik.md](publik.md)
+Rujukan: [KEPUTUSAN-OWNER](../KEPUTUSAN-OWNER.md) · [STATUS](../STATUS.md) · [AI owner/admin](ai.md) · [keuangan.md](keuangan.md) · [operasional.md](operasional.md) · [publik.md](publik.md)
 
 > Migrasi dari docs/M09_AI_OWNER_ADMIN.md (B2 Tahap 3, 23 Sep 2026) pada DOC-GOV-20260922; teks tidak diubah.
 > Batch B2 memindahkan **seluruh isi M09 apa adanya** ke file ini (satu tujuan per handoff owner). Bagian bertanggal — Update 16 Jul 2026, status Fase G/J/K, dan `## Audit 360° P6 AI Flow (Jul 2026)` — **ikut utuh di sini dan belum dipisah**; pemisahan ke `docs/AUDIT.md`/`docs/arsip/` dilakukan pada tahap konsolidasi audit/arsip atau batch lanjutan sesuai keputusan owner.
@@ -767,7 +767,7 @@ Semua task G wajib membuktikan:
 Untuk setiap task G:
 
 1. Baca `CLAUDE.md`.
-2. Baca `docs/M12_CHECKLIST_CHANGELOG.md` bagian Fase G saja.
+2. Baca bagian Fase G di berkas ini ([domain/ai.md](ai.md)) saja.
 3. Baca file ini bagian global + task yang dikerjakan.
 4. Baca domain terkait: M04 untuk uang, M05 untuk booking/KTP/payment, M06 untuk ops/inventory, M07 untuk marketing/FAQ, M08 untuk env, M09 untuk audit.
 5. `git status --short`; jangan sentuh file yang sedang dimodifikasi orang lain.

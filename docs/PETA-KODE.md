@@ -3,7 +3,7 @@
 Tanggal: 2026-09-23
 Status: aktif
 Tujuan: peta navigasi kode kanonik — peta audit bertahap, konvensi modul, modul backend → path → tanggung jawab, grup halaman frontend, index model Prisma, flow & audit anchor, dan shared utility (dari M00)
-Rujukan: [M02](M02_KEPUTUSAN_OWNER.md) · [STATUS](STATUS.md) · [M12](M12_CHECKLIST_CHANGELOG.md) · [audit-map](audit-map/README.md) · [product/scope.md](product/scope.md)
+Rujukan: [KEPUTUSAN-OWNER](KEPUTUSAN-OWNER.md) · [STATUS](STATUS.md) · [STATUS](STATUS.md) · [audit-map](audit-map/README.md) · [product/scope.md](product/scope.md)
 
 > Migrasi dari docs/M00_CODEMAP.md (B5 Tahap 3, 23 Sep 2026) pada DOC-GOV-20260922; teks peta tidak diubah.
 > Batch B5 memindahkan **seluruh isi peta M00 apa adanya** (L6–L172) ke file ini; urutan bagian sama seperti aslinya. Peta scope per role/flow ada di [product/scope.md](product/scope.md).
@@ -34,7 +34,7 @@ Baseline historis 23 Juli 2026 adalah `8627289`; HEAD sesi berikutnya harus dipe
 
 ## Backend modul → path → tanggung jawab
 
-### Keuangan & Akuntansi — detail: `M04_KEUANGAN.md`
+### Keuangan & Akuntansi — detail: `docs/domain/keuangan.md`
 | Modul/Service | Path (`backend/src/modules/`) | Tanggung jawab |
 |---|---|---|
 | accounting (core) | `accounting/accounting.service.ts` | Setup CoA, cash account, periode akuntansi |
@@ -52,7 +52,7 @@ Baseline historis 23 Juli 2026 adalah `8627289`; HEAD sesi berikutnya harus dipe
 | assets | `assets/assets.service.ts` | FixedAsset + depresiasi (run/line) |
 | reports | `reports/reports.service.ts` | Laporan gabungan operasional+keuangan |
 
-### Siklus Huni — detail: `M05_SIKLUS_HUNI.md` + flow `M03_FLOW_KONTRAK.md`
+### Siklus Huni — detail: `docs/domain/hunian.md` + flow `docs/domain/flow.md`
 | Modul/Service | Path | Tanggung jawab |
 |---|---|---|
 | stays (core) | `stays/stays.service.ts` | Lifecycle Stay: booking→huni→selesai (promoted=`initialMetersPromotedAt`) |
@@ -119,7 +119,7 @@ Baseline historis 23 Juli 2026 adalah `8627289`; HEAD sesi berikutnya harus dipe
 | ancillary-revenue | `ancillary-revenue/ancillary-revenue.service.ts` | Pendapatan tambahan dinamis (OC-01) |
 
 ## Frontend grup halaman (`frontend/src/pages/`)
-Standar struktur dan progressive disclosure Owner/Admin: `docs/M17_PORTAL_FLOW_RINGKAS.md`.
+Standar struktur dan progressive disclosure Owner/Admin: `docs/product/portal-owner-admin.md`.
 `public` katalog+booking publik · `auth` login · `portal` area tenant (MyStay, invoice, loyalty, manual) · `dashboard` (DashboardAdmin owner/admin) · `stays` · `bookings` · `renew-requests` · `invoices` · `payments` · `finance` (AccountingSetup) · `reports` · `rooms` · `resources`+`admin` (CRUD generik via ConfiguredResourcePage/SimpleCrudPage) · `tickets` · `staff`+`staff-routines` · `services` · `marketing` · `loyalty` · `notifications`+`reminders` · `settings` · `profile` · `components/ai` (Fase G reusable AI button/drawer).
 
 ## Index model (62) — grup → `schema.prisma`
@@ -132,7 +132,7 @@ Standar struktur dan progressive disclosure Owner/Admin: `docs/M17_PORTAL_FLOW_R
 - **Growth/AI:** LoyaltyPoint, LoyaltyReward, Redemption, PeerBehaviorReport, TenantReferral, Faq, AdditionalService, ServiceInterest, SatisfactionSurvey, MarketAnalysis, AiDraft, GuestPreferenceSurvey, ExternalReview
 
 ## Flow & audit anchor
-Tabel flow + method-anchor: `M03_FLOW_KONTRAK.md` (kontrak/uang). Job otomatis → `domain/operasional.md` di audit/audit-operasional-2026-07.md § P5 Auto-Ops. Keputusan owner (84+): `M02_KEPUTUSAN_OWNER.md`. Audit terdahulu → `docs/archieve/_previous_cycles/M09_AUDIT.md`.
+Tabel flow + method-anchor: `docs/domain/kontrak.md` (kontrak/uang). Job otomatis → `domain/operasional.md` di audit/audit-operasional-2026-07.md § P5 Auto-Ops. Keputusan owner (84+): `docs/KEPUTUSAN-OWNER.md`. Audit terdahulu → `docs/archieve/_previous_cycles/M09_AUDIT.md`.
 
 ## Shared utilities (ditambahkan 2026-07-07)
 | Utility | Path | Tanggung jawab |
@@ -169,7 +169,7 @@ Tabel flow + method-anchor: `M03_FLOW_KONTRAK.md` (kontrak/uang). Job otomatis �
 ✅ 215 `@@index` di 61 model — semua FK utama terindeks · ✅ Global JWT default-deny + DTO validation + pagination + error handling + PWA · ✅ Code splitting + skeleton + empty state chart (✅ P8-03) + 404 (✅ Fase L) + toast (✅ Fase F+M) · ✅ Refresh Token httpOnly cookie (M17 P3-01)
 
 ## Dokumen audit terbaru
-- **Audit UI/UX lintas portal aktif (30 Jul 2026):** `docs/M14_AUDIT_UI_UX.md` — 66 kombinasi awal, verifikasi homepage produksi, review statis dashboard Owner/Admin, benchmark terkurasi, antrean kolaboratif AO-00..AO-23
+- **Audit UI/UX lintas portal aktif (30 Jul 2026):** `docs/audit/status-ao-lintas-portal.md` — 66 kombinasi awal, verifikasi homepage produksi, review statis dashboard Owner/Admin, benchmark terkurasi, antrean kolaboratif AO-00..AO-23
 - **Audit Fable (2-3 Jul 2026):** `docs/archieve/audit_fable/00_INDEX.md` — 19 checklist C01-C19
 - **Audit Reasonix Code (7 Jul 2026):** `docs/archieve/audit_reasonix/RINGKASAN_EKSEKUTIF.md` — 82 temuan baru
 - **Audit 360° P3-P8 (Jul 2026):** `docs/archieve/_previous_cycles/M17_AUDIT_360_P3_P8.md`

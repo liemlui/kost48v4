@@ -59,5 +59,5 @@
 ## 6. Provenance
 
 - Isi `docs/audit/` berasal dari M14/M16, `CHECKLIST_AUDIT_TOTAL.md`, `AUDIT_UIUX_TOTAL_2026-09-12.md`, dan S2.b3/S2.b4 (batch B1, B4, B6), dipindah **tanpa mengubah temuan, ID, atau arti centang**; bukti ada di [mapping §7](history/DOC-GOV-20260922-mapping.md).
-- Path lama (M14/M16 dan dua berkas non-M) tetap ada sebagai pointer agar tautan lama resolve.
+- Path lama (M14/M16 dan dua berkas non-M) **sudah dihapus di Fase 3**; rincian tetap kanonik di `docs/audit/`.
 - Berkas ini menjadi rumah kanonik sejak **Fase 2 (23 Sep 2026)**; rincian di `docs/audit/` tetap dipakai apa adanya dan tidak digandakan ke berkas ini.

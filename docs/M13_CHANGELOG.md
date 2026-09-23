@@ -1,19 +1,30 @@
 # KOST48 V5 — M13 Changelog
 
 
-> **Entri baru ditulis di paling atas**, tepat di bawah blok indeks ini. Riwayat lanjutan dipindah ke `docs/history/changelog/` pada Tahap 2 (S3) tanpa mengubah isi. Rotasi entri ke-11 dst. dijalankan pada B8, B9, B10, B11, Fase 2, dan B12 (23 Sep 2026), sehingga jendela entri di file ini = **10 entri terbaru**; entri yang lebih lama ada di changelog bulanan.
+> **Entri baru ditulis di paling atas**, tepat di bawah blok indeks ini. Riwayat lanjutan dipindah ke `docs/history/changelog/` pada Tahap 2 (S3) tanpa mengubah isi. Rotasi entri ke-11 dst. dijalankan pada B8, B9, B10, B11, Fase 2, B12, dan Fase 3 (23 Sep 2026), sehingga jendela entri di file ini = **10 entri terbaru**; entri yang lebih lama ada di changelog bulanan.
 
 ## Indeks riwayat
 
 | Periode | File | Cakupan |
 |---|---|---|
-| 2026-09 (lanjutan) | [history/changelog/2026-09.md](history/changelog/2026-09.md) | Entri September 2026-09-06 … 2026-09-18 dari Tahap 2/S3 + entri M13 ke-11..26 (2026-09-18 … 2026-09-23) hasil rotasi B8, dilanjutkan rotasi B9 (keputusan owner pasca-B1, B1), B10 (B2), B11 (B3), Fase 2 (B4), dan B12 (B5) + Status Kerja Aktif & Update M12 |
+| 2026-09 (lanjutan) | [history/changelog/2026-09.md](history/changelog/2026-09.md) | Entri September 2026-09-06 … 2026-09-18 dari Tahap 2/S3 + entri M13 ke-11..26 (2026-09-18 … 2026-09-23) hasil rotasi B8, dilanjutkan rotasi B9 (keputusan owner pasca-B1, B1), B10 (B2), B11 (B3), Fase 2 (B4), B12 (B5), dan Fase 3 (tindak lanjut B5) + Status Kerja Aktif & Update M12 |
 | 2026-08 | [history/changelog/2026-08.md](history/changelog/2026-08.md) | 8 entri (2026-08-17 ... 2026-08-20) |
 | 2026-07 | [history/changelog/2026-07.md](history/changelog/2026-07.md) | 40 entri + 41 sub-entri Juli + Release 2026-07-23 |
 | <= 2026-07-16 | `docs/archieve/M13_CHANGELOG_ARSIP_S1_2026.md` | arsip lama (tidak dipindahkan) |
 
 
 ---
+
+
+## 2026-09-23 (docs) — Fase 3 (opsi B): 24 pointer lama dihapus + 201 tautan dialihkan ke rumah kanonik
+
+- **Yang dihapus (pilihan owner "opsi B"):** 20 berkas pointer `docs/M*.md` (M00–M12, M14–M20) + 4 berkas non-M (`CHECKLIST_AUDIT_TOTAL.md`, `AUDIT_UIUX_TOTAL_2026-09-12.md`, `GO_LIVE_CPANEL_CHECKLIST.md`, `FORM_ISI_DATA_GO_LIVE.md`). **`M13_CHANGELOG.md` tetap** (changelog aktif, jendela 10 entri). `docs/` tingkat atas: **32 → 8 berkas** (6 dari 7 file utama + `README` + `M13`; `AGENTS.md` di root); rincian tetap di `domain/` (9), `operations/` (11), `audit/` (15), `product/` (5), `history/` (14), `plans/` (2).
+- **Pengalihan tautan (201):** 162 di berkas luar riwayat, 31 di `docs/history/**`, 6 di berkas arsip tracked (`docs/archieve/2026-09-07_docs_cleanup/GO_LIVE_DATA_ISI.md`), dan 2 di berkas root — memakai pemetaan rumah kanonik B10/Fase 2 (M00→[PETA-KODE](PETA-KODE.md), M01→[orientasi](product/orientasi.md), M02→[KEPUTUSAN-OWNER](KEPUTUSAN-OWNER.md), M03→[flow](domain/flow.md), M04→[keuangan](domain/keuangan.md), M05→[hunian](domain/hunian.md), M06→[operasional](domain/operasional.md), M07→[publik](domain/publik.md), M08→[deploy & go-live](operations/deploy-go-live.md), M09→[AI](domain/ai.md), M10→[scope](product/scope.md), M11→[data DEV](operations/default-dev.md), M12→[STATUS](STATUS.md), M14→[status AO](audit/status-ao-lintas-portal.md), M15→[IoT](domain/iot.md), M16→[audit menyeluruh](audit/audit-menyeluruh-2026-07.md), M17→[portal owner/admin](product/portal-owner-admin.md), M18→[harga](domain/harga.md), M19→[efisiensi hosting](operations/efisiensi-hosting.md), M20→[produksi](operations/produksi.md), serta 4 berkas non-M ke berkas kanoniknya). Label gaya `[M12]` diperbarui ke nama kanonik **hanya di berkas non-riwayat**; label di `docs/history/**` dan arsip dibiarkan apa adanya sebagai bukti historis.
+- **Anchor kompatibilitas dipindahkan:** `#0b-hasil-perbaikan-t-06-…` dan `#0c-hasil-perbaikan-t-08-…` (dulu hidup di berkas pointer `AUDIT_UIUX_TOTAL_2026-09-12.md`) kini ditulis sebagai `<a id>` di [`audit/audit-uiux-total-2026-09-12.md`](audit/audit-uiux-total-2026-09-12.md) sehingga 7 tautan fragmen lama tetap resolve.
+- **Koreksi teks yang masih menyatakan kebijakan lama (38 penggantian, 0 gagal):** `AGENTS.md` §1/§3, `CLAUDE.md`, [README](README.md) §6 (ditulis ulang menjadi peta pengalihan) + §7, [STATUS](STATUS.md) §2/§6/§8, [ATURAN](ATURAN.md)/[OPERASI](OPERASI.md)/[AUDIT](AUDIT.md) bagian Provenance, 5 berkas `operations/` ("sumber asli … pointer"), 3 berkas `audit/` ("pintu masuk lama"), `domain/keuangan.md` + `domain/kontrak.md` (rujukan "WAJIB membaca M12 Fase V" → berkas kanonik), `domain/publik.md`, `domain/ai.md`, `domain/iot.md`, [KEPUTUSAN-OWNER](KEPUTUSAN-OWNER.md), [PETA-KODE](PETA-KODE.md) (5 rujukan detail), `product/scope.md`, dan daftar "Pintu Masuk Docs Cepat" di `product/orientasi.md`.
+- **Konsekuensi yang diumumkan:** 43 `<a id>` hilang bersama berkas yang dihapus, sehingga **bookmark/URL lama ke path `docs/M*.md` tidak lagi resolve** — inilah bedanya opsi B dari opsi A. Riwayat dan arsip **tidak** diubah isinya; hanya tujuan tautannya dialihkan.
+- **Konservasi & invariant:** 24 berkas yang dihapus memuat **0 checkbox** → total checkbox proyek tetap 346 `[ ]` / 146 `[x]` (delta 0); invariant `[ ]` = 23, `[x]` = 101, gate domain = **12** (delta 0); known exception trailing whitespace 53 → **50 baris** (3 baris `M15_IOT.md` ikut terhapus); UTF-8 tanpa BOM; line-ending per berkas dipertahankan.
+- **Verifikasi tautan (bukti):** checker yang sama — kini dengan **path ternormalisasi** (sebelumnya fragmen lewat `../` tidak diperiksa sehingga baseline lama 16–17 temuan *undercount*) — dijalankan pada worktree HEAD `3676f3d4` dan pada disk: **36 → 26 temuan, 0 temuan baru, 10 temuan lama selesai**. **Deployment:** tidak dilakukan. **Dampak runtime:** tidak diukur (docs-only).
 
 
 ## 2026-09-23 (docs) — B12: pemulihan mojibake pada header/provenance pindahan B2/B3 + arsip legacy; label usang AGENTS §3 diselaraskan
@@ -107,11 +118,3 @@
 - **Rebase tautan isi pindahan (diumumkan):** CHECKLIST 142 tautan dan AUDIT_UIUX 2 tautan hanya diubah **tujuan relatifnya** ke basis `docs/audit/`; teks, label, angka, dan ID identik setelah `../` dilepas. Tanpa rebase, 135 tautan peta per ID dan artefak akan rusak dari lokasi baru.
 - **Rujukan masuk diperbaiki:** `docs/README.md` (2 baris) dan `docs/audit/README.md` (1 baris + 2 baris indeks baru); 2 baris header sumber diganti pada pointer (pola B1-B5). Rujukan tingkat-dokumen di `docs/status-ao-lintas-portal.md` tidak diubah (isi, bukan path).
 - **Verifikasi lokal:** konservasi blok identik baris-per-baris di offset tujuan - CHECKLIST identical=141 + rebaseOnly=139 + 0 mismatch; AUDIT_UIUX identical=403 + rebaseOnly=2 + 1 penggantian H1 yang diumumkan. Multiset baris non-kosong 228/228 dan 275/275. Invariant 23/101/12 (delta 0); 0 tautan rusak baru; `git diff --cached --check` bersih. **Deployment:** tidak dilakukan. **Dampak runtime:** tidak diukur (docs-only).
-
-## 2026-09-23 (docs) — tindak lanjut B5: kebijakan delegasi teknis docs + koreksi penempatan (D-03/D-04/D-05)
-
-- **Keputusan owner (DELEGASI-DOC-TEKNIS)** dicatat di [STATUS §6](STATUS.md): penataan dokumen = keputusan AI (struktur, rumah kanonik, pemisahan riwayat/audit, format, anchor, tautan, dedup pengulangan non-aturan, urutan batch); owner hanya dimintai keputusan yang menyentuh **aturan/flow bisnis** atau **UI/UX**. Delegasi ini **tidak** menambah izin menyentuh source, DB, server, deploy, atau secret.
-- **Koreksi penempatan (isi tidak diubah):** Auto-Ops Engine (asal M01 §4) dipindah dari [product/orientasi.md](product/orientasi.md) ke rumah kanonik [domain/operasional.md](domain/operasional.md) — 14 baris blok dipindah identik, 1 pemisah `---` dibuang; orientasi 106 → 90 baris; pointer M01 menerima satu baris tabel tujuan baru.
-- **Dedup pengulangan non-aturan:** **D-04** daftar akun dev di orientasi §7 → rujukan kanonik `operations/default-dev.md`; **D-03** diperiksa dan dinyatakan **bukan duplikat** (peta artefak kode vs riwayat bertanggal); **D-05** §1/§2 orientasi ditandai *ringkasan, bukan aturan kanonik* + rujukan ke `domain/harga.md`/`keuangan.md`/`hunian.md` — dedup **isi aturan** uang/harga/huni tetap menunggu keputusan owner (bersama D-02). Bukti: [laporan duplikat](history/laporan-duplikat.md).
-- **Format:** baris B2–B5 pada [mapping §7.4](history/DOC-GOV-20260922-mapping.md) yang sebelumnya tampil sebagai paragraf (tabel tanpa baris) kini menjadi baris tabel yang sah; 4 baris kosong dihapus, 0 baris non-kosong hilang.
-- **Verifikasi lokal:** blok Auto-Ops 14/14 baris identik di tujuan; invariant 23/101/12 (delta 0); 0 tautan rusak baru; `git diff --cached --check` bersih (tanpa trailing whitespace baru). **Deployment:** tidak dilakukan. **Dampak runtime:** tidak diukur (docs-only).
