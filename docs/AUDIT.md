@@ -48,6 +48,7 @@
 | Status & antrean eksekusi Fase AO (+ gate DoD) | [audit/status-ao-lintas-portal.md](audit/status-ao-lintas-portal.md) |
 | Status temuan P1-01..P1-09 (verifikasi 23 Sep 2026) | [audit/p1-uang-status-2026-09-23.md](audit/audit-uang-huni-2026-07.md) |
 | Audit kekuatan dokumentasi & dokumentasi kode (24 Sep 2026, read-only) | [audit/audit-kekuatan-dokumentasi-2026-09-24.md](audit/audit-kekuatan-dokumentasi-2026-09-24.md) |
+| Z-19 Dashboard Owner (25 Sep 2026, audit statis; gate manual terbuka) | [audit/owner-dashboard-z19-2026-09-25.md](audit/owner-dashboard-z19-2026-09-25.md) |
 | Lampiran audit portal tenant (2 Jul 2026) | [history/lampiran-audit-portal-tenant-2026-07-02.md](arsip/lampiran-audit-portal-tenant-2026-07-02.md) |
 
 ## 5. Batas berkas ini
