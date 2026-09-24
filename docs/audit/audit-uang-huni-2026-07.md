@@ -2,7 +2,7 @@
 
 > Dipindah apa adanya dari `docs/M04_KEUANGAN.md` (Tahap 3 S2.b4, 23 Sep 2026) pada DOC-GOV-20260922.
 > Sifat: **bukti bertanggal**, bukan status aktif. Detail asal: `docs/archieve/_previous_cycles/M15_AUDIT_360_FLOW_UANG.md`.
-> **Status per temuan** (verifikasi statis 23 Sep 2026): [p1-uang-status-2026-09-23.md](audit-uang-huni-2026-07.md) — P1-01..P1-03 indikasi diperbaiki; P1-04..P1-09 UNKNOWN.
+> **Status per temuan** (verifikasi statis 23 Sep 2026): [p1-uang-status-2026-09-23.md](audit-uang-huni-2026-07.md) — P1-01..P1-03 indikasi diperbaiki; P1-04..P1-09 UNKNOWN (snapshot 23 Sep). **Pembaruan 25 Sep 2026:** [verifikasi statis P1-04..P1-09](p1-uang-verifikasi-2026-09-25.md) — P1-04 & P1-05 masih ada, P1-06 & P1-07 indikasi diperbaiki, P1-08 sempit, P1-09 terverifikasi.
 
 ## Audit 360° Flow Uang (Jul 2026)
 
@@ -29,10 +29,10 @@
 | **P1-02** | Deposit ledger **best-effort** (logger.warn) — deposit diterima tp tak tercatat | Jadikan **blocking** |
 | **P1-03** | Accounting posting di tx **terpisah** dari business tx — window inconsistency | Unify tx / minimal advisory lock |
 
-> **Status verifikasi 23 Sep 2026 (statis, bukan runtime):** `P1-01`, `P1-02`, dan `P1-03` tidak lagi cocok dengan kode saat ini — posting jurnal dan ledger deposit di-`await` di dalam transaksi bisnis (bukan best-effort) dan error diteruskan ke pemanggil. Bukti: [verifikasi P1 uang](audit-uang-huni-2026-07.md). Angka "3 HIGH" pada header di atas tetap sebagai catatan historis Jul 2026. `P1-04..P1-09` masih UNKNOWN.
+> **Status verifikasi 23 Sep 2026 (statis, bukan runtime):** `P1-01`, `P1-02`, dan `P1-03` tidak lagi cocok dengan kode saat ini — posting jurnal dan ledger deposit di-`await` di dalam transaksi bisnis (bukan best-effort) dan error diteruskan ke pemanggil. Bukti: [verifikasi P1 uang](audit-uang-huni-2026-07.md). Angka "3 HIGH" pada header di atas tetap sebagai catatan historis Jul 2026. `P1-04..P1-09` masih UNKNOWN pada snapshot 23 Sep; status terbarunya ada di [verifikasi 25 Sep 2026](p1-uang-verifikasi-2026-09-25.md).
 
 ### Temuan MEDIUM
-P1-04 deposit ledger sourceId dedupe · P1-05 EXPIRED→REJECTED · P1-06 reversal partial gagal · P1-07 pre-check di luar tx. LOW: P1-08 `paidAt` fallback · P1-09 note not verified.
+P1-04 deposit ledger sourceId dedupe (masih ada per 25 Sep) · P1-05 EXPIRED→REJECTED · P1-06 reversal partial gagal · P1-07 pre-check di luar tx. LOW: P1-08 `paidAt` fallback · P1-09 note not verified.
 
 ---
 
@@ -147,3 +147,18 @@ Diperiksa pola pada jalur pemanggilan posting jurnal dan deposit ledger: apakah 
 - Hanya jalur yang disebut di tabel yang diperiksa. Jalur lain (mis. reversal, sweeper lain, posting expense) **tidak** diperiksa.
 - Status "indikasi diperbaiki" berlaku untuk pola yang diperiksa, **bukan** jaminan tidak ada celah lain.
 - Temuan `P1-04..P1-09` tetap UNKNOWN sampai diperiksa.
+
+---
+
+**Verifikasi lanjutan 25 Sep 2026** (blok snapshot di atas tetap historis): [Verifikasi Statis P1-04..P1-09](p1-uang-verifikasi-2026-09-25.md) memeriksa jalur temuan pada source saat itu (baseline `7e4bbbdd`).
+
+| ID | Status 25 Sep 2026 | Ringkas bukti |
+|---|---|---|
+| P1-04 (MEDIUM) | **Masih ada** | fallback `sourceId` ke `stayId` + dedupe `findFirst` yang skip senyap; tanpa `@@unique` di schema |
+| P1-05 (MEDIUM) | **Masih ada** | submission `PENDING_REVIEW` di-expire menjadi `EXPIRED`, bukan `REJECTED` |
+| P1-06 (MEDIUM) | **Indikasi diperbaiki** | semua 7 pemanggil reversal memeriksa `skipped` dan melempar error; reversal idempotent `ADJUSTMENT` + `INVOICE_REVERSAL:<id>` |
+| P1-07 (MEDIUM) | **Indikasi diperbaiki** | pre-check luar tx diulang di dalam tx setelah `FOR UPDATE` |
+| P1-08 (LOW) | **Masih ada (sempit)** | `paidAt ?? new Date()` masih ada; `paymentDate` NOT NULL membuat jalur praktis tak tercapai |
+| P1-09 (LOW) | **Terverifikasi** | isi note dipetakan; ditemukan duplikasi fungsi tanpa pemanggil di `payment-submissions.mapper.ts` |
+
+Test/build tidak dijalankan (task dokumentasi; exception §8 AGENTS).
