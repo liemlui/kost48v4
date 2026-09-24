@@ -145,7 +145,7 @@ Daftar lengkap dan status berlaku/digantikan: [KEPUTUSAN-OWNER.md](KEPUTUSAN-OWN
 | Invariant | Nilai | Cara cek |
 |---|---|---|
 | Task terbuka aktif | **23** `[ ]` | hitung `- [ ]` di file ini (§3) |
-| Task selesai historis | **107** `[x]` | `docs/history/**` + `docs/arsip/**` (101 baseline DOCS-CLEANUP-1 + audit BE-002 + verifikasi negatif wrapper = 103; +1 entri audit Z-19 milik task lain yang belum di-commit; +1 entri VERIFY-BE-002-T6T7 25 Sep 2026; +1 entri verifikasi P1-04..P1-09 25 Sep 2026; +1 entri REGRESI-BE002-T3 25 Sep 2026) |
+| Task selesai historis | **108** `[x]` | `docs/history/**` + `docs/arsip/**` (101 baseline DOCS-CLEANUP-1 + audit BE-002 + verifikasi negatif wrapper = 103; +1 entri audit Z-19 milik task lain yang belum di-commit; +1 entri VERIFY-BE-002-T6T7 25 Sep 2026; +1 entri verifikasi P1-04..P1-09 25 Sep 2026; +1 entri REGRESI-BE002-T3 25 Sep 2026; +1 entri Z19-FIX-A (commit `1653c020`, sesi lain) 25 Sep 2026) |
 | Gate domain | **12** | baris cocok pola `pretest:unit\|test:unit\|gate M04` di file ini + 7 berkas riwayat — setelah DOCS-CLEANUP-1: 3 di antaranya berada di `docs/arsip/` dan 2 digabung, dihitung di rumah barunya |
 | Kebersihan diff | `git diff --check` exit 0 | sebelum commit dokumentasi |
 
