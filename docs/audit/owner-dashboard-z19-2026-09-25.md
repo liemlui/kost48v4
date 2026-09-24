@@ -2,7 +2,7 @@
 
 Tanggal: 25 September 2026
 Jenis: audit statis read-only
-Status: **SELESAI SECARA STATIS DENGAN TEMUAN; gate Z-19 belum ditutup**
+Status: **Z19-T1 dan Z19-T4 diperbaiki lokal; Z19-T2, Z19-T3, dan gate visual/runtime belum ditutup**
 
 ## Lingkup
 
@@ -20,13 +20,15 @@ Kontrak dasar sudah baik: route frontend dan endpoint backend sama-sama OWNER-on
 
 ## Temuan
 
-### Z19-T1 — TINGGI — status “Aman” dapat tampil ketika sumber sinyal tambahan gagal
+### Z19-T1 — TINGGI — status “Aman” dapat tampil ketika sumber sinyal tambahan gagal — DIPERBAIKI LOKAL 25 SEP
 
 `iotQuery` dan `roomsQuery` berada di luar endpoint agregat. `extraSignals` hanya menambahkan sinyal saat masing-masing query tidak error; kegagalan keduanya tidak ditampilkan. Badge prioritas kemudian memakai hanya jumlah `data.signals + extraSignals`, sehingga bila sinyal inti kosong tetapi query kamar/IoT gagal, layar dapat menyatakan **Aman** walaupun dua sumber belum diketahui.
 
 Dampak: owner dapat menganggap tidak ada kamar kosong atau perangkat stale saat sumber datanya justru gagal dimuat.
 
 Acceptance perbaikan: kegagalan parsial harus menghasilkan state “data belum lengkap/perlu cek”, tidak boleh dihitung sebagai “Aman”; refresh dan error harus menyebut sumber yang gagal.
+
+Implementasi Z19-FIX-A: kegagalan `roomsQuery`/`iotQuery` sekarang menghasilkan badge dan empty-state **Data belum lengkap**, alert menyebut sumber yang gagal, dan copy melarang kesimpulan aman sebelum refresh. Helper murni `ownerPrioritySourceFailures()` memiliki regresi untuk tidak ada kegagalan, masing-masing sumber, dan kedua sumber.
 
 ### Z19-T2 — TINGGI — “Laba Bersih” tidak memakai basis yang sama antara KPI dan grafik
 
@@ -44,11 +46,13 @@ Dampak: headline “kondisi bulan ini” dan daftar prioritas dapat dibaca sebag
 
 Acceptance perbaikan: label sinyal sebagai “kondisi saat ini” dan pisahkan dari ringkasan periode, atau filter semua sinyal sesuai periode dengan keputusan produk yang eksplisit.
 
-### Z19-T4 — RENDAH — indikator stale menghilang selama background refresh
+### Z19-T4 — RENDAH — indikator stale menghilang selama background refresh — DIPERBAIKI LOKAL 25 SEP
 
 `dashboardStale` mensyaratkan `!isRefreshing`. Saat data lama sedang di-refetch, nilai lama tetap dirender tetapi penanda “Data tertunda” sementara hilang. Tombol refresh juga tidak memasukkan status fetch kamar/IoT ke `isRefreshing`.
 
 Acceptance perbaikan: usia data lama tetap terlihat sampai data baru sukses; status refresh mencakup seluruh sumber yang dipicu tombol.
+
+Implementasi Z19-FIX-A: kalkulasi stale tidak lagi dinetralkan oleh `isRefreshing`; status refresh kini mencakup aggregate, AI status, kamar, dan IoT.
 
 ## Hal yang sudah terpenuhi secara statis
 
@@ -60,10 +64,12 @@ Acceptance perbaikan: usia data lama tetap terlihat sampai data baru sukses; sta
 
 ## Gate yang masih terbuka
 
-- Reproduksi Z19-T1 dengan kegagalan parsial API.
+- Verifikasi runtime kegagalan parsial API untuk implementasi Z19-T1.
 - Rekonsiliasi angka KPI vs tren memakai fixture bulan yang sama.
 - Verifikasi OWNER pada 1024/1280/1440 px, touch, dan keyboard.
 - Axe serious/critical = 0 dan screenshot bebas PII.
 - Uji CTA menuju daftar terfilter dan state loading/error/empty/stale pada runtime.
 
-Z-19 tetap `[ ]`. Temuan implementasi dapat digabung dengan sisa AO-20, tetapi perubahan uang Z19-T2 harus menjadi scope terpisah dengan gate uang.
+Verifikasi lokal Z19-FIX-A: `npm.cmd run test -- src/test/unit/ownerDashboardState.test.ts` **16/16 lulus**; `npm.cmd run build` exit 0, build `TNr9-nhj80tk`, PWA verification passed. Pemanggilan awal keduanya di sandbox gagal membaca `vite.config.ts`; hasil yang diklaim berasal dari pengulangan di luar sandbox. Browser/server/DB tidak dijalankan, sehingga verifikasi visual/runtime tetap UNKNOWN.
+
+Z-19 tetap `[ ]`. Z19-T2 dan Z19-T3 belum diimplementasikan; perubahan uang Z19-T2 harus menjadi scope terpisah dengan gate uang.

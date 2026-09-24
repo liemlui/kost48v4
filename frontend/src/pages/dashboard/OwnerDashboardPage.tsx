@@ -25,6 +25,7 @@ import { fetchOwnerDashboardAggregate } from '../../api/ownerDashboard';
 import {
   ownerDashboardIsStale,
   ownerPeriodHasNoActivity,
+  ownerPrioritySourceFailures,
   ownerRevenueIsSilentZero,
 } from './ownerDashboardState';
 import { listResource } from '../../api/resources';
@@ -303,7 +304,6 @@ export default function OwnerDashboardPage() {
   const lastUpdatedLabel = aggregateQuery.dataUpdatedAt
     ? new Date(aggregateQuery.dataUpdatedAt).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })
     : null;
-  const isRefreshing = aggregateQuery.isFetching || ownerAiStatusQuery.isFetching;
   // AO-20 sisa — bedakan usia data (stale) dan periode kosong (no-data).
   const dataUpdatedAt = aggregateQuery.dataUpdatedAt;
   const meterDue = aggregateQuery.data?.meterDue;
@@ -311,7 +311,6 @@ export default function OwnerDashboardPage() {
     !!data &&
     !aggregateQuery.isLoading &&
     !aggregateQuery.isError &&
-    !isRefreshing &&
     ownerDashboardIsStale(dataUpdatedAt);
   const periodNoActivity = !dashboardStale && ownerPeriodHasNoActivity(data, meterDue);
   const kpiState: OwnerKpiState = dashboardStale ? "stale" : "ok";
@@ -332,6 +331,17 @@ export default function OwnerDashboardPage() {
     queryFn: () => listResource<Record<string, unknown>>('/rooms', { limit: 500, isActive: 'true' }),
     staleTime: 120_000,
   });
+
+  const prioritySourceFailures = ownerPrioritySourceFailures(
+    roomsQuery.isError,
+    iotQuery.isError,
+  );
+  const priorityDataIncomplete = prioritySourceFailures.length > 0;
+  const isRefreshing =
+    aggregateQuery.isFetching ||
+    ownerAiStatusQuery.isFetching ||
+    iotQuery.isFetching ||
+    roomsQuery.isFetching;
 
   const refreshDashboard = () => {
     void Promise.all([aggregateQuery.refetch(), ownerAiStatusQuery.refetch(), iotQuery.refetch(), roomsQuery.refetch()]);
@@ -531,11 +541,28 @@ export default function OwnerDashboardPage() {
                     <span className="owner-section-kicker">Prioritas</span>
                     <h2>Butuh perhatian</h2>
                   </div>
-                  <StatusBadge status={data.signals.length === 0 && extraSignals.length === 0 ? 'SUCCESS' : 'WARNING'} customLabel={data.signals.length === 0 && extraSignals.length === 0 ? 'Aman' : `${data.signals.length + extraSignals.length} sinyal`} />
+                  <StatusBadge
+                    status={data.signals.length === 0 && extraSignals.length === 0 && !priorityDataIncomplete ? 'SUCCESS' : 'WARNING'}
+                    customLabel={priorityDataIncomplete
+                      ? 'Data belum lengkap'
+                      : data.signals.length === 0 && extraSignals.length === 0
+                        ? 'Aman'
+                        : `${data.signals.length + extraSignals.length} sinyal`}
+                  />
                 </div>
                 <div className="owner-panel-body">
-                  {data.signals.length === 0 && extraSignals.length === 0 ? (
+                  {priorityDataIncomplete ? (
+                    <Alert variant="warning" className="mb-3">
+                      <div className="fw-semibold">Status prioritas belum dapat dipastikan.</div>
+                      <div className="small">
+                        Data {prioritySourceFailures.join(' dan ')} gagal dimuat. Coba refresh sebelum menyimpulkan kondisi aman.
+                      </div>
+                    </Alert>
+                  ) : null}
+                  {data.signals.length === 0 && extraSignals.length === 0 && !priorityDataIncomplete ? (
                     <div className="p-4"><EmptyState icon="✅" title="Semua aman" description="Tidak ada tindak lanjut mendesak pada periode ini." /></div>
+                  ) : data.signals.length === 0 && extraSignals.length === 0 ? (
+                    <div className="p-4"><EmptyState icon="⚠️" title="Data prioritas belum lengkap" description="Belum ada sinyal yang dapat ditampilkan dari sumber yang berhasil dimuat." /></div>
                   ) : (
                     <div className="owner-signal-list">
                       {data.signals.map((signal, index) => (

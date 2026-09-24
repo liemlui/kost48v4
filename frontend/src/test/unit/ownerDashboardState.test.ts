@@ -4,6 +4,7 @@ import {
   OWNER_KPI_STALE_MS,
   ownerDashboardIsStale,
   ownerPeriodHasNoActivity,
+  ownerPrioritySourceFailures,
   ownerRevenueIsSilentZero,
 } from '../../pages/dashboard/ownerDashboardState';
 import type { OwnerDashboard } from '../../api/finance';
@@ -37,6 +38,18 @@ describe('ownerDashboardIsStale', () => {
   });
 });
 
+describe('ownerPrioritySourceFailures', () => {
+  it('returns no failures when all supplementary sources succeed', () => {
+    expect(ownerPrioritySourceFailures(false, false)).toEqual([]);
+  });
+
+  it('identifies each failed supplementary source', () => {
+    expect(ownerPrioritySourceFailures(true, false)).toEqual(['kamar']);
+    expect(ownerPrioritySourceFailures(false, true)).toEqual(['IoT']);
+    expect(ownerPrioritySourceFailures(true, true)).toEqual(['kamar', 'IoT']);
+  });
+});
+
 describe('ownerRevenueIsSilentZero', () => {
   it('Rp 0 fresh -> silent zero valid', () => expect(ownerRevenueIsSilentZero(0, NOW, NOW)).toBe(true));
   it('Rp 0 stale -> not silent (stale note wins)', () => expect(ownerRevenueIsSilentZero(0, NOW - OWNER_KPI_STALE_MS - 1, NOW)).toBe(false));
@@ -52,4 +65,3 @@ describe('ownerPeriodHasNoActivity', () => {
   it('meter recorded -> false', () => expect(ownerPeriodHasNoActivity(dashboard(), { occupied: 1, recorded: 1, due: 0 })).toBe(false));
   it('trend with value -> false', () => expect(ownerPeriodHasNoActivity(dashboard({ trendMonths: [{ year: 2026, month: 9, revenue: 100, expense: 0, netProfit: 100 }] }), undefined)).toBe(false));
 });
-

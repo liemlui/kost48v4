@@ -9,6 +9,18 @@ import type { MeterDueSummary } from '../../api/ownerDashboard';
 // dataUpdatedAt dari TanStack Query = epoch ms (number).
 export const OWNER_KPI_STALE_MS = 150_000;
 
+export type OwnerPrioritySourceFailure = 'kamar' | 'IoT';
+
+export function ownerPrioritySourceFailures(
+  roomsError: boolean,
+  iotError: boolean,
+): OwnerPrioritySourceFailure[] {
+  const failures: OwnerPrioritySourceFailure[] = [];
+  if (roomsError) failures.push('kamar');
+  if (iotError) failures.push('IoT');
+  return failures;
+}
+
 export function ownerDashboardIsStale(dataUpdatedAt: number | undefined, nowMs: number = Date.now()): boolean {
   if (!dataUpdatedAt) return false;
   return nowMs - dataUpdatedAt > OWNER_KPI_STALE_MS;
@@ -36,4 +48,3 @@ export function ownerPeriodHasNoActivity(dashboard: OwnerDashboard | undefined, 
     !months || months.every((m) => m.revenue === 0 && m.expense === 0 && m.netProfit === 0);
   return flat(dashboard.trendMonths) && flat(dashboard.trend6Months);
 }
-
