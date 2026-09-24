@@ -397,4 +397,21 @@ Toggle Owner/Admin phase 1 berfungsi penuh. UI telah diperbaiki melalui Fase C (
 
 ---
 
+## 2026-09-25 — Keputusan atas temuan uang lanjutan, izin akses, dan batas kerja
+
+Owner menjawab daftar keputusan yang ditimbulkan verifikasi statis P1-04..P1-09 dan audit Z-19. Keputusan berlaku sebagai berikut.
+
+- **P1-05-KEEP — submission kedaluwarsa tetap `EXPIRED` (status quo).** Dua jalur expiry (`payment-submissions.service.ts:1750–1756`, `:1877–1883`) **tidak diubah**; perilaku ini dicatat sebagai **accepted behaviour**, bukan diubah menjadi `REJECTED`. Tidak ada perubahan source akibat keputusan ini.
+- **P1-04-FIX — risiko ledger deposit diperbaiki (izin diberikan).** Owner memilih memperbaiki, dengan bentuk teknis **`@@unique` dan/atau membuang fallback `stayId` + log keras saat skip**. Batas: (a) perubahan **schema/kunci unik yang menyentuh DB** adalah task operasional tersendiri dengan izin, backup, dan runbook sesuai [OPERASI](OPERASI.md); (b) perbaikan source wajib melewati **gate uang** ([AGENTS §8](../AGENTS.md) + §7 di [STATUS](STATUS.md)).
+- **P1-09-CLEANUP — penghapusan salinan mati `buildApprovalPaymentNote`** (`payment-submissions.mapper.ts`) **digabung** ke task uang berikutnya, bukan task terpisah.
+- **Z19-T2-BASIS — "Laba Bersih" disatukan pada basis akrual.** Definisi KPI dan grafik harus memakai basis yang sama (akrual), menggantikan pencampuran akrual (KPI) vs kas (grafik). Karena menyentuh interpretasi uang, implementasinya mengikuti gate uang dan **berkoordinasi dengan sesi yang memegang berkas dashboard**.
+- **Z19-SESI-LAIN — berkas frontend Z-19 tetap milik sesi yang sedang mengerjakannya.** Sesi lain menyelesaikan perbaikan 3 berkas `frontend/src/**`; sesi verifikasi dokumentasi **tidak** men-stage atau meng-commit berkas itu.
+- **PUSH-25SEP — izin push diberikan dan dieksekusi.** `main` di-push ke `origin/main` (`1b0858c2..5928462f`); commit lokal 24–25 Sep kini sinkron dengan remote.
+- **AKSES-UAT-25SEP — izin akses DB UAT diberikan.** UAT tercatat pada port `5433`, `kost48_v3_pro`; izin dipakai untuk uji konkurensi nyata (T6/T7) pada task tersendiri, bukan untuk mutasi data produksi.
+- **URUTAN-25SEP — urutan task AI berikutnya.** Setelah keputusan ini: (1) regresi auth temuan #3 (login/refresh/JWT strategy/forgot-password/rate limiting), (2) task uang P1-04 + P1-09, (3) uji konkurensi DB untuk T6/T7, (4) Z19-T2 bersama sesi dashboard.
+
+Keputusan ini **tidak mengubah** nominal uang, tarif, aturan DP/deposit, atau kontrak API; yang ditetapkan adalah **izin kerja, bentuk perbaikan yang dipilih, dan urutan eksekusi**.
+
+---
+
 **Akhir dokumen.** Semua keputusan di atas mengikat. Detail implementasi & kode spesifik → dossier domain `10`-`19`. Peta fase → `M01_MASTER.md`.

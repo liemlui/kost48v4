@@ -104,9 +104,25 @@ Tidak ada test/build yang dijalankan: pekerjaan ini audit docs/read-only dan buk
 ### Batas bukti dan tindak lanjut tersisa
 
 - Unit test memakai Prisma tiruan (klaim dijawab `0`/`1`), jadi yang terbukti adalah **guard kondisional + jalur loser**, **bukan** isolasi/locking dua transaksi Postgres nyata. Interleaving nyata tetap **UNKNOWN** sampai ada test konkurensi dengan DB (mis. UAT port 5433) — butuh izin terpisah.
-- Temuan #3 (tidak ada regresi langsung login, refresh, JWT strategy, forgot-password, rate limiting) tetap terbuka; temuan #4 (`secure` cookie bergantung `NODE_ENV`, nilai efektif host tidak diperiksa) tetap RENDAH/operasional.
+- Temuan #3 (tidak ada regresi langsung login, refresh, JWT strategy, forgot-password, rate limiting) **ditutup 25 Sep 2026** — lihat § Regresi temuan #3 di bawah; temuan #4 (`secure` cookie bergantung `NODE_ENV`, nilai efektif host tidak diperiksa) tetap RENDAH/operasional.
 - Runtime/UAT login, pengiriman Brevo nyata, dan deployment: tidak dijalankan dan tidak diukur.
 - Angka 105/105 pada commit `6c2b4029` tetap indikator snapshot agregat, **bukan** bukti per-temuan; addendum ini memakai hasil test **bernama** per temuan.
+
+## Regresi temuan #3 — 25 September 2026
+
+Temuan #3 ("tidak ada regresi langsung untuk login, refresh, JWT strategy, forgot-password, dan rate limiting") ditutup dengan tiga berkas test baru di `backend/test/unit/`:
+
+| Berkas | Cakupan | Jumlah test |
+|---|---|---|
+| `auth-login-refresh.test.js` | login (kredensial seragam, user nonaktif, claim `sub`/`role`/`pwdAt` + TTL 900 detik, hash refresh token, `lastLoginAt`, jalur nomor HP) dan refresh (kosong/tak dikenal/dicabut/kedaluwarsa, rotasi dengan klaim `revokedAt: null`, `pwdAt` dari DB, hash token baru) | 11 |
+| `auth-jwt-forgot.test.js` | `JwtStrategy.validate` (user hilang/nonaktif, token terbit sebelum `passwordChangedAt`, role & tenant dari DB, tanpa kebocoran `passwordHash`) dan `forgotPassword` (respons generik, tanpa token untuk akun tak dikenal/nonaktif, hash SHA-256 + TTL 30 menit, kegagalan email tidak membocorkan status) | 12 |
+| `rate-limit-guard.test.js` | `RateLimitGuard` (bucket `login` 10/5 menit, `forgotPassword` 3/10 menit, bucket eksplisit menang atas nama handler, identitas per user vs per IP, store statis bersama) dan `createRateLimiter` (429 + `Retry-After`, pemisahan bucket per IP/nama, pesan khusus) | 8 |
+
+**Bukti eksekusi (izin owner, cwd `backend`):** `npm run build` exit 0, lalu `node --test` atas kelima berkas auth/rate-limit → **tests 43, pass 43, fail 0** (31 test baru + 12 test lama T1–T7), exit 0.
+
+**Catatan proses:** percobaan pertama menjalankan build dan test secara **paralel** menyebabkan 1 berkas lama gagal *load* (`MODULE_NOT_FOUND` dari `dist` yang sedang di-`clean`); dijalankan berurutan hasilnya 43/43. Kegagalan itu **artefak urutan eksekusi**, bukan cacat kode.
+
+**Tetap UNKNOWN:** perilaku runtime di host produksi, nilai efektif `NODE_ENV` (cookie `secure`), pengiriman Brevo nyata, dan konkurensi nyata pada PostgreSQL.
 
 ## Delta
 
