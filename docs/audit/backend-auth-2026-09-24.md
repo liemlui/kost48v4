@@ -1,6 +1,6 @@
 # Audit Ulang BE-002 — Backend Auth
 
-- Status: audit statis selesai dengan temuan terbuka
+- Status: audit statis selesai dengan temuan terbuka; **addendum verifikasi 25 Sep 2026** mencatat T6/T7 tertutup secara statis + unit pada source `3f097ef0` (lihat § Addendum verifikasi di bawah)
 - Tanggal: 24 September 2026
 - Modul/ID: `BE-002` — `backend/src/auth`
 - Level audit: K4; level pekerjaan dokumentasi: L
@@ -45,6 +45,8 @@ Schema mengunci `RefreshToken.token` dan `PasswordResetToken.token` sebagai uniq
 
 ### Temuan terbuka
 
+> **Status 25 Sep 2026 (addendum):** T6 dan T7 di bawah ini **tertutup secara statis + unit** pada source `3f097ef0`; rincian dan bukti ada di § Addendum verifikasi. Temuan #3 dan #4 tetap terbuka. Teks temuan asli tidak diubah.
+
 1. **TINGGI — BE-002-T6, single-use reset token belum atomik.** `resetPassword()` membaca `usedAt` sebelum transaksi. Di dalam transaksi, `UPDATE "PasswordResetToken" SET "usedAt" = NOW() WHERE token = ...` tidak mensyaratkan `"usedAt" IS NULL`, tidak mengunci baris, dan hasil update tidak diperiksa. Dua request paralel dapat sama-sama melewati pembacaan awal lalu mengganti password secara berurutan dengan token yang sama. Constraint unique pada `token` tidak mencegah race pemakaian. Test `auth-session-revocation.test.js` hanya membuktikan penolakan sekuensial ketika mock sejak awal mengembalikan `usedAt`, bukan dua transaksi konkuren.
 2. **SEDANG — BE-002-T7, refresh dapat berlomba dengan logout.** Status `revokedAt` diperiksa sebelum transaksi refresh. Pemeriksaan ulang di dalam transaksi hanya memastikan baris masih ada, bukan memastikan `revokedAt` tetap `null`. Karena logout menandai baris sebagai revoked tanpa menghapusnya, refresh yang sudah membaca token sebelum logout masih berpotensi menghapus baris tersebut dan menerbitkan pasangan token baru. Belum ada test konkurensi atau bukti isolasi/locking DB yang menutup urutan ini.
 3. **SEDANG — tidak ada regresi langsung untuk login, refresh, JWT strategy, forgot-password, dan rate limiting.** Dua file test yang ditemukan hanya berisi 10 test untuk pencabutan sesi saat perubahan password dan logout per-sesi. Karena keduanya mengimpor `backend/dist`, hasilnya juga bergantung pada build yang segar; audit ini tidak menjalankan build/test.
@@ -64,15 +66,51 @@ Temuan lama T3–T5 dan T8–T16 dari FE-002 tidak dinilai ulang penuh di sini k
 
 Tidak ada test/build yang dijalankan: pekerjaan ini audit docs/read-only dan bukan task implementasi; unit yang ada menggunakan `dist`, sehingga menjalankannya tanpa build segar tidak memenuhi gate kesegaran. Bukti 92/92 dari 18 September tetap bukti historis untuk source saat itu, bukan PASS baru untuk commit sekarang.
 
+> Catatan 25 Sep 2026: baris "belum terpenuhi" pada tabel di atas menggambarkan kondisi commit `f63ea93e`. Status source saat ini ada di § Addendum verifikasi di bawah.
+
 ## Tindak lanjut
 
 - Perbaikan T6 perlu claim token atomik di dalam transaksi, misalnya conditional update `usedAt IS NULL` dengan jumlah baris tepat satu atau row lock, lalu test dua request konkuren.
 - Perbaikan T7 perlu re-check/claim token yang menyertakan `revokedAt IS NULL` dalam transaksi rotasi dan test interleaving logout–refresh.
 - Perubahan source auth adalah task terpisah; laporan ini tidak memberi izin implementasi atau deployment.
 
+## Addendum verifikasi — 25 September 2026
+
+- Baseline laporan ini: commit `f63ea93e`. Source saat verifikasi: `3f097ef0` (kemudian HEAD bergeser ke `cb98a33e` karena commit docs Z-19 oleh sesi lain — docs-only, berkas source yang diuji tidak berubah).
+- Izin: owner (Act mode). Pekerjaan ini docs + verifikasi lokal: **0 perubahan source, schema, dependency, DB, atau server**.
+- Working tree saat verifikasi **tidak bersih** karena pekerjaan dokumen task lain (audit Z-19, 25 Sep) yang tidak disentuh; set Z-19 itu lalu di-commit sesi lain sebagai `cb98a33e` (docs-only).
+
+### Delta source sejak laporan
+
+| Berkas | Hash 12 karakter awal saat laporan (`f63ea93e`) | Hash sekarang (`3f097ef0`) | Status |
+|---|---|---|---|
+| `backend/src/auth/auth.controller.ts` | `46d4eb8ab669` | `702dc50c701e` | **berubah** (commit `6c2b4029`) |
+| `backend/src/auth/auth.service.ts` | `fde7f9ee86aa` | `bbb45fd76946` | **berubah** (commit `6c2b4029`) |
+| `backend/src/auth/jwt.strategy.ts` | `94fa3ed1f639` | `94fa3ed1f639` | tidak berubah |
+| `backend/prisma/schema.prisma` | `469fed9c680b` | `469fed9c680b` | tidak berubah |
+
+### Perbaikan yang dinilai ulang
+
+- **T6 — tertutup secara statis + unit.** `resetPassword()` meng-claim reset token di dalam transaksi memakai `UPDATE "PasswordResetToken" SET "usedAt" = NOW() WHERE token = ... AND "usedAt" IS NULL AND "expiresAt" >= NOW()`, lalu `if (claimed !== 1) throw ...`. Request yang kalah klaim tidak mengganti password dan tidak mencabut sesi.
+- **T7 — tertutup secara statis + unit.** Rotasi refresh memakai `tx.refreshToken.deleteMany({ where: { id, revokedAt: null, expiresAt: { gte: new Date() } } })` lalu `if (claimed.count !== 1) throw ...`; logout mencabut lewat `updateMany({ where: { token, revokedAt: null } })`. Refresh yang kalah dari logout tidak menerbitkan pasangan token baru.
+
+### Bukti eksekusi (izin owner, cwd `backend`)
+
+| Command | Keluaran |
+|---|---|
+| `npm run build` | exit 0 — `clean` → `prisma generate` (v7.8.0) → `tsc -p tsconfig.build.json` → copy `src/generated` ke `dist/generated`; `dist` segar sebelum unit test |
+| `node --test test/unit/auth-session-revocation.test.js test/unit/auth-logout-session.test.js` | exit 0 — **tests 12, pass 12, fail 0** (6 + 6 test, termasuk test bernama `T6` dan `T7`), durasi ±30,4 s |
+
+### Batas bukti dan tindak lanjut tersisa
+
+- Unit test memakai Prisma tiruan (klaim dijawab `0`/`1`), jadi yang terbukti adalah **guard kondisional + jalur loser**, **bukan** isolasi/locking dua transaksi Postgres nyata. Interleaving nyata tetap **UNKNOWN** sampai ada test konkurensi dengan DB (mis. UAT port 5433) — butuh izin terpisah.
+- Temuan #3 (tidak ada regresi langsung login, refresh, JWT strategy, forgot-password, rate limiting) tetap terbuka; temuan #4 (`secure` cookie bergantung `NODE_ENV`, nilai efektif host tidak diperiksa) tetap RENDAH/operasional.
+- Runtime/UAT login, pengiriman Brevo nyata, dan deployment: tidak dijalankan dan tidak diukur.
+- Angka 105/105 pada commit `6c2b4029` tetap indikator snapshot agregat, **bukan** bukti per-temuan; addendum ini memakai hasil test **bernama** per temuan.
+
 ## Delta
 
-- Implementasi lokal: tidak ada perubahan source, DB, schema, dependency, atau konfigurasi.
-- Dokumentasi: laporan BE-002 dibuat dan indeks/status audit diselaraskan.
-- Verifikasi lokal: inspeksi statis dan review diff docs; test/build tidak dijalankan.
-- Deployment/dampak runtime: tidak dilakukan dan belum diukur.
+- Implementasi lokal: tidak ada perubahan source, DB, schema, dependency, atau konfigurasi (berlaku untuk 24 Sep maupun addendum 25 Sep).
+- Dokumentasi: laporan BE-002 dibuat dan indeks/status audit diselaraskan (24 Sep); addendum verifikasi 25 Sep ditambahkan tanpa menghapus temuan awal.
+- Verifikasi lokal: **24 Sep** — inspeksi statis dan review diff docs, test/build tidak dijalankan. **25 Sep (addendum)** — `npm run build` exit 0 + 12/12 unit test lulus (lihat § Addendum verifikasi).
+- Deployment/dampak runtime: tidak dilakukan dan belum diukur pada kedua tanggal.
