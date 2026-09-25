@@ -17,6 +17,8 @@
     "build:local": "npm run build",
     "pretest:unit": "npm run build",
     "test:unit": "node --test \"test/unit/**/*.test.js\"",
+    "pretest:coverage": "npm run build",
+    "test:coverage": "node --experimental-test-coverage --test --test-coverage-include=\"dist/**/*.js\" --test-coverage-exclude=\"dist/generated/**\" \"test/unit/**/*.test.js\"",
     "test:integration": "node --test \"test/integration/**/*.test.js\"",
     "golive": "node scripts/golive.mjs",
     "golive:setup": "npm run build && node scripts/golive-setup.js",

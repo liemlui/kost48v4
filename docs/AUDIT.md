@@ -54,6 +54,7 @@ Audit lanjutan P1-04..P1-09 sudah dilakukan 25 Sep 2026. Status di atas tetap st
 | Audit kekuatan dokumentasi & dokumentasi kode (24 Sep 2026, read-only) | [audit/audit-kekuatan-dokumentasi-2026-09-24.md](audit/audit-kekuatan-dokumentasi-2026-09-24.md) |
 | Z-19 Dashboard Owner (25 Sep 2026, audit statis; gate manual terbuka) | [audit/owner-dashboard-z19-2026-09-25.md](audit/owner-dashboard-z19-2026-09-25.md) |
 | IMPACT-01 (25 Sep 2026, review independen + FIX-A) | [audit/payment-impact-review-2026-09-25.md](audit/payment-impact-review-2026-09-25.md) |
+| Baseline coverage P4 (25 Sep 2026, parsial) | Backend loaded compiled JS: line 29,82%, branch 62,20%, function 41,39%; frontend UNKNOWN — rincian dan batas di [audit kekuatan dokumentasi §7](audit/audit-kekuatan-dokumentasi-2026-09-24.md) |
 | Lampiran audit portal tenant (2 Jul 2026) | [history/lampiran-audit-portal-tenant-2026-07-02.md](arsip/lampiran-audit-portal-tenant-2026-07-02.md) |
 
 ## 5. Batas berkas ini

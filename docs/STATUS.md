@@ -61,6 +61,8 @@ Format: **ID** — judul | **Gate** (verifikasi wajib sebelum `[x]`). 🧑 = but
 
 ## 4. Task selesai terbaru (bukti bertanggal)
 
+- **25 Sep 2026 — P4 coverage baseline PARSIAL:** coverage bawaan Node 22 dijalankan pada build backend segar dan 147/147 unit test lulus. Denominator hanya compiled JS `dist/**/*.js` yang dimuat suite (generated Prisma dikecualikan): line **29,82%**, branch **62,20%**, function **41,39%**; angka ini bukan coverage seluruh file source. Script repeatable `backend npm run test:coverage` ditambahkan dengan prehook build. Frontend tetap **UNKNOWN/BLOCKED** karena provider coverage Vitest tidak terpasang dan dependency baru dilarang; tidak ada dependency ditambah.
+
 - **25 Sep 2026 — EF-04 profil paket static selesai lokal:** `make-deploy.mjs` kini menerima `--profile=combined|static`; default `combined` mempertahankan output lama, sedangkan `static` membuat document-root Vite tanpa backend, Prisma, dependency runtime, `.env`, atau `uploads`. Kedua paket memuat `.kost48-package-profile.json`; daftar file wajib arsip menyesuaikan profil. Script npm static dan ignore artefak ditambahkan. **Verifikasi:** syntax check lulus; profil static build/PWA `6Cew0mAeh7xs` + arsip 308 file lulus; profil combined build penuh + arsip 9.645 file lulus; profil invalid ditolak exit 2; pemindaian arsip static menemukan 0 path private. Deployment/runtime host tidak dilakukan.
 
 - **25 Sep 2026 — IMPACT-01 review independen + FIX-A:** permission endpoint OWNER/ADMIN, sumber angka bersama, alur preview→approve, dan referensi transaksi diperiksa statis. Ditemukan satu gap SEDANG: kegagalan preview tidak memblokir approve. UI kini menonaktifkan approve sampai preview backend tersedia dan menampilkan blocker eksplisit ketika gagal; kontrak API, schema, nominal, jurnal, serta permission tidak berubah. **Verifikasi:** frontend target 3/3 lulus; gate uang backend `npm run test:unit` exit 0 dengan build penuh + 147/147 lulus. Runtime/browser/DB tetap UNKNOWN. Bukti: [review IMPACT-01](audit/payment-impact-review-2026-09-25.md).
@@ -160,7 +162,7 @@ Daftar lengkap dan status berlaku/digantikan: [KEPUTUSAN-OWNER.md](KEPUTUSAN-OWN
 | Invariant | Nilai | Cara cek |
 |---|---|---|
 | Task terbuka aktif | **22** `[ ]` | hitung `- [ ]` di file ini (§3) |
-| Task selesai historis | **116** `[x]` | hitung `- [x]` pada `docs/history/**` + `docs/arsip/**`; EF-04 mengubah satu task historis terbuka menjadi selesai dan menambah entri changelog pada 25 Sep 2026 |
+| Task selesai historis | **117** `[x]` | hitung `- [x]` pada `docs/history/**` + `docs/arsip/**`; termasuk EF-04 dan baseline coverage P4 parsial pada 25 Sep 2026 |
 | Gate domain | **12** | baris cocok pola `pretest:unit\|test:unit\|gate M04` di file ini + 7 berkas riwayat — setelah DOCS-CLEANUP-1: 3 di antaranya berada di `docs/arsip/` dan 2 digabung, dihitung di rumah barunya |
 | Kebersihan diff | `git diff --check` exit 0 | sebelum commit dokumentasi |
 

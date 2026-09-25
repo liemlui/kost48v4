@@ -90,13 +90,13 @@ Yang **tetap sah** dari audit itu: 3 Storybook stories, `backend/.env.example` h
 | P1 | Tambahkan **`@ApiResponse`/DTO respons** pada endpoint uang & pembayaran lebih dulu (G1) | Task kode tersendiri (bukan docs-only) |
 | P2 | **JSDoc minimal** pada 19 modul, urutan: modul uang (G2) | Task kode; bisa dipecah per modul |
 | P3 | **SELESAI 24 Sep 2026 (`5cd9c193`)** — `backend/.env.example` dibuat: **85 nama kunci, 0 nilai**, dikelompokkan 12 bagian, kunci library/OS dipisah; dirujuk dari `docs/OPERASI.md` §1 (G3) | selesai |
-| P4 | Ukur **coverage nyata** backend + frontend sekali, lalu catat angkanya di `AUDIT.md` (G4) | Butuh izin; menjalankan uji unit backend memicu full build |
+| P4 | **PARSIAL 25 Sep 2026:** baseline backend atas compiled JS yang dimuat suite = line 29,82%, branch 62,20%, function 41,39% (147/147 test); frontend tetap UNKNOWN karena provider coverage Vitest tidak terpasang dan dependency baru dilarang | Script repeatable `backend npm run test:coverage`; bukan coverage seluruh file source karena modul yang tidak dimuat tidak masuk denominator Node |
 | P5 | Storybook: putuskan apakah katalog komponen dijadikan target, atau dinyatakan tidak dipakai (G5) | **Keputusan produk** |
 | P6 | Root `README.md`: buat **pointer tipis** ke `AGENTS.md` + `docs/README.md`, atau nyatakan tidak perlu | **Keputusan owner** — perubahan governance (AGENTS §10) |
 
 ## 8. UNKNOWN (tidak diklaim)
 
-- Persentase coverage uji backend/frontend (belum dijalankan).
+- Coverage seluruh source backend dan coverage frontend. Baseline Node backend 25 Sep hanya mencakup compiled JS yang dimuat suite; frontend belum dapat diukur tanpa provider coverage Vitest.
 - Kualitas runtime, performa, dan aksesibilitas (tidak diukur di sini).
 - Isi lengkap artefak audit eksternal (tidak ada di repo).
 - Apakah `@ApiProperty` 108 menutupi seluruh DTO (hanya jumlah dekorator yang diukur, bukan cakupan per-DTO).
