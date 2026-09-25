@@ -29,7 +29,7 @@
 
 **Aturan prioritas:** kerjakan task teratas yang prasyaratnya terpenuhi dan lingkupnya diizinkan. Bila teratas BLOCKED, lanjutkan pekerjaan independen yang diizinkan. Tabel ini tidak memberi izin baru.
 
-## 3. Task terbuka & gate (23 `[ ]`)
+## 3. Task terbuka & gate (22 `[ ]`)
 
 Format: **ID** — judul | **Gate** (verifikasi wajib sebelum `[x]`). 🧑 = butuh data/keputusan owner.
 
@@ -37,10 +37,10 @@ Format: **ID** — judul | **Gate** (verifikasi wajib sebelum `[x]`). 🧑 = but
 - [ ] **AO-13/14-BUKTI** - bukti eksekusi: tiga crawl tanpa skip, dua state TENANT, viewport/Axe, sign-off | **Gate:** crawl tuntas, screenshot/trace bebas PII, sign-off AO-14
 - [ ] **AO-03 P1** - lima persona UAT non-personal dengan role/relasi/state terverifikasi | **Gate:** persona TENANT aktif + verifikasi ledger/DoD
 - [ ] **AO-13** - crawl OWNER/ADMIN/STAFF setelah ledger UAT dan AO-03 terverifikasi | **Gate:** tiga role dieksekusi, 0 skip; exit 0 skrip saja belum cukup
-- [ ] **AO-18 P2** - PARSIAL: trust 3+2, ikon semantik, FAQ sentence case selesai | **Gate:** polish copy/validasi hierarchy homepage sebelum sign-off AO-14
+- [ ] **AO-18 P2** - PARSIAL: trust 3+2, ikon semantik, FAQ sentence case selesai; kalibrasi copy homepage + sentence case label di-commit `8aa0e975` **apa adanya tanpa build/test dan tanpa verifikasi visual** | **Gate:** polish copy/validasi hierarchy homepage sebelum sign-off AO-14
 - [ ] **AO-19 P2** - PARSIAL: inventaris aset publik selesai; sisa butuh keputusan owner | **Gate:** keputusan owner (hak pakai foto, keseragaman aspek, izin optimasi)
 - [ ] **AO-20 P1** - sisa lokal selesai; UAT desktop OWNER 1440 px + visual regression masih BLOCKED | **Gate:** UAT + visual regression + sign-off AO-14
-- [ ] **AO-21 P2** - normalisasi sistem visual/terminologi Owner setelah review AO-20 | **Gate:** perubahan AppLayout dikoordinasikan
+- [ ] **AO-21 P2** - normalisasi sistem visual/terminologi Owner setelah review AO-20; **termasuk keputusan label filter** yang kini bercabang: "Rating tertinggi" (homepage, `8aa0e975`) vs kanonik "Rating Tertinggi" (`domain/publik.md`, `PUB-REVIEWS-FILTER` di KEPUTUSAN-OWNER, `ReviewsPublicPage.tsx`, `AdminSurveysPage.tsx`) | **Gate:** perubahan AppLayout dikoordinasikan
 - [ ] **AO-23 P2** - konsolidasi komponen/shell Area Admin | **Gate:** regresi Owner bila AppLayout atau shared CSS berubah
 - [ ] **AO-14** - audit final setelah AO-01..13 dan AO-15..23 memenuhi DoD | **Gate:** publik + OWNER/ADMIN/STAFF + dua state TENANT, viewport 320-1440 px, Axe/gate Baymard, build/test relevan, screenshot aman
 - [ ] **EF-00 P0** - baseline deployment: konfigurasi panel dan limit/snapshot resource | **Gate:** SHA artefak yang berjalan, jam deploy, perilaku runtime EF-01/03/05, fault/interval pengukuran
@@ -60,6 +60,8 @@ Format: **ID** — judul | **Gate** (verifikasi wajib sebelum `[x]`). 🧑 = but
 **Rekap:** 22 `[ ]` = fase changelog 2 · fase AO 8 · fase EF 6 · fase lama 6 (ID unik 20; AO-13 dan AO-14 muncul dua kali).
 
 ## 4. Task selesai terbaru (bukti bertanggal)
+
+- **25 Sep 2026 — PUB-COPY-CALIBRATION di-commit apa adanya (`8aa0e975`):** pekerjaan yang sudah ada di working tree (`frontend/src/pages/public/PublicGuestDashboardPage.tsx`, 6 insertions / 6 deletions) di-commit **apa adanya** atas instruksi owner; **isi tidak dinilai ulang** dan tidak ada baris yang ditambah atau diubah saat commit. Isi: klaim absolut pada hero dan section "beda dari kost lain" menjadi kalimat terukur, paragraf lokasi mengarahkan buka peta, h2 ulasan kosong dibuat netral, sentence case pada tab "Rating tertinggi" dan tombol FAQ. **Verifikasi:** inspeksi diff + `git diff --cached --name-only`/`--numstat` tepat sebelum commit (tepat 1 berkas, 6/6) serta `git diff --check` exit 0; **build/test/browser tidak dijalankan** (perubahan copy reversibel, level XS) sehingga **tampilan sesudah perubahan belum terverifikasi**. **Catatan terbuka (ranah owner):** label "Rating tertinggi" menyimpang dari kanonik `domain/publik.md` + `PUB-REVIEWS-FILTER` serta dari `ReviewsPublicPage.tsx`/`AdminSurveysPage.tsx`; label "Beda dari kost lain" masih superlatif di atas judul terkalibrasi → dicatat di **AO-21/AO-18**, gate tidak diubah. **Housekeeping:** header §3 yang tertinggal "23 `[ ]`" dikoreksi menjadi 22 agar sama dengan hitungan aktual dan invariant §7. **Deployment/dampak runtime:** tidak dilakukan dan tidak diukur.
 
 - **25 Sep 2026 — P4 coverage baseline PARSIAL:** coverage bawaan Node 22 dijalankan pada build backend segar dan 147/147 unit test lulus. Denominator hanya compiled JS `dist/**/*.js` yang dimuat suite (generated Prisma dikecualikan): line **29,82%**, branch **62,20%**, function **41,39%**; angka ini bukan coverage seluruh file source. Script repeatable `backend npm run test:coverage` ditambahkan dengan prehook build. Frontend tetap **UNKNOWN/BLOCKED** karena provider coverage Vitest tidak terpasang dan dependency baru dilarang; tidak ada dependency ditambah.
 
@@ -162,7 +164,7 @@ Daftar lengkap dan status berlaku/digantikan: [KEPUTUSAN-OWNER.md](KEPUTUSAN-OWN
 | Invariant | Nilai | Cara cek |
 |---|---|---|
 | Task terbuka aktif | **22** `[ ]` | hitung `- [ ]` di file ini (§3) |
-| Task selesai historis | **117** `[x]` | hitung `- [x]` pada `docs/history/**` + `docs/arsip/**`; termasuk EF-04 dan baseline coverage P4 parsial pada 25 Sep 2026 |
+| Task selesai historis | **118** `[x]` | hitung `- [x]` pada `docs/history/**` + `docs/arsip/**`; termasuk EF-04, baseline coverage P4 parsial, dan PUB-COPY-CALIBRATION pada 25 Sep 2026 |
 | Gate domain | **12** | baris cocok pola `pretest:unit\|test:unit\|gate M04` di file ini + 7 berkas riwayat — setelah DOCS-CLEANUP-1: 3 di antaranya berada di `docs/arsip/` dan 2 digabung, dihitung di rumah barunya |
 | Kebersihan diff | `git diff --check` exit 0 | sebelum commit dokumentasi |
 
