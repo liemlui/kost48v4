@@ -75,3 +75,12 @@ Implementasi Z19-FIX-A: kalkulasi stale tidak lagi dinetralkan oleh `isRefreshin
 Verifikasi lokal terbaru setelah Z19-FIX-B: `npm.cmd run test -- src/test/unit/ownerDashboardState.test.ts` **18/18 lulus**; `npm.cmd run build` exit 0, build `G4tda1dB7c3a`, PWA verification passed. Browser/server/DB tidak dijalankan, sehingga verifikasi visual/runtime tetap UNKNOWN.
 
 Z-19 tetap `[ ]`. Z19-T2 belum diimplementasikan; perubahan uang tersebut harus menjadi scope terpisah dengan gate uang.
+
+## Status implementasi Z19-T2 — 25 September 2026 (scope uang terpisah)
+
+Keputusan owner `Z19-T2-BASIS` (25 Sep 2026, [KEPUTUSAN-OWNER](../KEPUTUSAN-OWNER.md)): **"Laba Bersih" disatukan pada basis akrual**. Implementasi dijalankan sebagai scope uang terpisah sesuai syarat di atas.
+
+- **Perubahan:** seri `trendMonths` pada `FinanceService.ownerDashboard()` berhenti memakai **kas** (`InvoicePayment.paymentDate`) dan kini memakai **akrual tagihan** (`Invoice.periodStart`, status bukan `DRAFT`/`CANCELLED`) + WiFi − beban — rumus yang sama dengan KPI `netProfitRupiah`. Kontrak respons tidak berubah: `trendMonths`/`trend6Months` tetap `{ year, month, revenue, expense, netProfit }`.
+- **Bukti (gate uang):** cwd `backend`, `npm run test:unit` **exit 0** — build penuh via `pretest:unit`, **147/147 test lulus**; 3 test baru di `backend/test/unit/owner-dashboard-trend-basis.test.js` mengunci (a) `trendMonths[x].netProfit === kpi.netProfitRupiah` untuk bulan yang sama, (b) SQL trend memakai `periodStart` dan **tidak** lagi `InvoicePayment`, (c) bulan tanpa data tetap nol dan titik bulan berjalan tidak bergeser.
+- **Residual (bukan bug baru):** kartu "Pendapatan" **tetap kas** (keputusan M15) sehingga boleh berbeda dari seri `revenue` trend yang kini akrual; **penjelasan basis di UI (label/caption) tetap milik sesi Z-19** karena menyentuh copy dashboard.
+- **Belum diukur:** runtime/browser/DB tidak dijalankan; bukti ini level kode + unit test.

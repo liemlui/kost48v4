@@ -69,13 +69,17 @@ export class FinanceService {
   }
 
   private async getMonthlyTrendRows(rangeStart: Date, rangeEnd: Date) {
-    const [paymentRows, expenseRows, wifiRows] = await Promise.all([
+    const [invoiceRows, expenseRows, wifiRows] = await Promise.all([
+      // Z19-T2 (25 Sep 2026): seri trend memakai basis AKRUAL yang sama dengan KPI
+      // "Laba Bersih" — tagihan (Invoice.periodStart, status bukan DRAFT/CANCELLED),
+      // bukan penerimaan kas (InvoicePayment.paymentDate).
       this.prisma.$queryRaw<Array<MonthlyTrendRow>>`
-        SELECT EXTRACT(YEAR FROM "paymentDate")::int AS year,
-               EXTRACT(MONTH FROM "paymentDate")::int AS month,
-               COALESCE(SUM("amountRupiah"), 0)::bigint AS total
-        FROM "InvoicePayment"
-        WHERE "paymentDate" >= ${rangeStart} AND "paymentDate" < ${rangeEnd}
+        SELECT EXTRACT(YEAR FROM "periodStart")::int AS year,
+               EXTRACT(MONTH FROM "periodStart")::int AS month,
+               COALESCE(SUM("totalAmountRupiah"), 0)::bigint AS total
+        FROM "Invoice"
+        WHERE status NOT IN ('DRAFT', 'CANCELLED')
+          AND "periodStart" >= ${rangeStart} AND "periodStart" < ${rangeEnd}
         GROUP BY 1, 2
       `,
       this.prisma.$queryRaw<Array<MonthlyTrendRow>>`
@@ -97,7 +101,7 @@ export class FinanceService {
       `,
     ]);
 
-    return { paymentRows, expenseRows, wifiRows };
+    return { invoiceRows, expenseRows, wifiRows };
   }
 
   // ═══════════════════════════════════════════════════════════
@@ -477,6 +481,8 @@ export class FinanceService {
     // untuk dashboard KPI ini tidak signifikan (owner bisa lihat di laporan formal).
     // netProfit = akrual sewa (invoice) + kas WiFi − beban. Berbeda dari totalRevenue (kas murni)
     // sehingga KPI "Laba Bersih" tetap mencerminkan pendapatan yang "diperoleh" bulan ini.
+    // Z19-T2: seri trend (trendMonths) memakai basis akrual yang sama — lihat getMonthlyTrendRows.
+    // Catatan residual: kartu "Pendapatan" tetap KAS (M15); penjelasan basis di UI milik sesi Z-19.
     const netProfit = invoiceRevenue + wifiRevenue - totalExpense;
     const cashIn = paymentRevenue + wifiRevenue;
     const cashOut = totalExpense;
@@ -532,8 +538,8 @@ export class FinanceService {
     const trendCount = query.trendMonths ?? 6;
     const trendRangeStart = new Date(Date.UTC(year, month - trendCount, 1));
     const trendRangeEnd = new Date(Date.UTC(year, month, 1));
-    const { paymentRows, expenseRows, wifiRows } = await this.getMonthlyTrendRows(trendRangeStart, trendRangeEnd);
-    const paymentMap = new Map(paymentRows.map((row) => [`${row.year}-${row.month}`, Number(row.total ?? 0)]));
+    const { invoiceRows, expenseRows, wifiRows } = await this.getMonthlyTrendRows(trendRangeStart, trendRangeEnd);
+    const invoiceMap = new Map(invoiceRows.map((row) => [`${row.year}-${row.month}`, Number(row.total ?? 0)]));
     const expenseMap = new Map(expenseRows.map((row) => [`${row.year}-${row.month}`, Number(row.total ?? 0)]));
     const wifiMap = new Map(wifiRows.map((row) => [`${row.year}-${row.month}`, Number(row.total ?? 0)]));
     const trendMonths: Array<{ year: number; month: number; revenue: number; expense: number; netProfit: number }> = [];
@@ -543,7 +549,10 @@ export class FinanceService {
       let tm = m;
       while (tm <= 0) { tm += 12; ty -= 1; }
       const trendKey = `${ty}-${tm}`;
-      const rev = (paymentMap.get(trendKey) ?? 0) + (wifiMap.get(trendKey) ?? 0);
+      // Z19-T2: basis akrual — rumus identik dengan KPI "Laba Bersih"
+      // (tagihan periodStart + WiFi − beban), supaya kartu dan grafik tidak
+      // lagi memakai label sama dengan angka berbeda.
+      const rev = (invoiceMap.get(trendKey) ?? 0) + (wifiMap.get(trendKey) ?? 0);
       const exp = expenseMap.get(trendKey) ?? 0;
       trendMonths.push({ year: ty, month: tm, revenue: rev, expense: exp, netProfit: rev - exp });
     }

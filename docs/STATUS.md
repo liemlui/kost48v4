@@ -61,6 +61,9 @@ Format: **ID** — judul | **Gate** (verifikasi wajib sebelum `[x]`). 🧑 = but
 
 ## 4. Task selesai terbaru (bukti bertanggal)
 
+- **25 Sep 2026 — Z19-T2: "Laba Bersih" disatukan pada basis akrual (`Z19-T2-BASIS`)**: seri `trendMonths` di `FinanceService.ownerDashboard()` berhenti memakai kas (`InvoicePayment.paymentDate`) dan kini memakai akrual tagihan (`Invoice.periodStart`, status bukan `DRAFT`/`CANCELLED`) + WiFi − beban — rumus identik dengan KPI `netProfitRupiah`; kontrak respons tidak berubah. **Verifikasi (gate uang):** cwd `backend`, `npm run test:unit` **exit 0** dengan **147/147 test lulus**; 3 test baru `backend/test/unit/owner-dashboard-trend-basis.test.js` (kartu vs grafik sama, SQL memakai `periodStart` dan bukan `InvoicePayment`, bulan tanpa data tetap nol). **Residual:** kartu "Pendapatan" tetap **kas** (M15) dan penjelasan basis di UI tetap milik sesi Z-19; **runtime/browser/DB tidak diukur**. Bukti: [laporan Z-19](audit/owner-dashboard-z19-2026-09-25.md).
+
+
 - **25 Sep 2026 — task uang: perbaikan P1-04 + P1-09 (`P1-04-FIX`, `P1-09-CLEANUP`)**: `recordDepositReceivedTx` memakai helper baru `buildDepositReceivedSourceId()` — dua cabang ber-dokumen **mempertahankan format kunci lama verbatim** (idempotensi entri historis tidak berubah), sedangkan cabang **tanpa dokumen sumber** (mis. check-in manual `stays.service.ts:457`) memakai kunci unik `MANUAL_<stayId>_<epochMs>_<nominal>` + `logger.warn` sehingga **fallback ke `stayId` dihentikan**; jalur skip (nominal ≤ 0, stay hilang, entri duplikat) kini menulis `logger.warn`, tidak lagi senyap. Salinan mati `buildApprovalPaymentNote` di `payment-submissions.mapper.ts` dihapus (produksi tetap memakai `payment-submissions.helpers.ts`). **Verifikasi (gate uang):** cwd `backend`, `npm run test:unit` **exit 0** — build penuh via `pretest:unit`, **144/144 test lulus**; test baru `backend/test/unit/deposit-ledger-source-id.test.js` (8 test). **Tetap terbuka:** `@@unique(stayId,type,sourceType,sourceId)` belum ditambahkan (dedupe masih level aplikasi) → task operasional terpisah dengan izin + backup; **runtime/UAT tidak diukur**. Bukti: [laporan P1](audit/p1-uang-verifikasi-2026-09-25.md).
 
 
@@ -150,7 +153,7 @@ Daftar lengkap dan status berlaku/digantikan: [KEPUTUSAN-OWNER.md](KEPUTUSAN-OWN
 | Invariant | Nilai | Cara cek |
 |---|---|---|
 | Task terbuka aktif | **23** `[ ]` | hitung `- [ ]` di file ini (§3) |
-| Task selesai historis | **109** `[x]` | `docs/history/**` + `docs/arsip/**` (101 baseline DOCS-CLEANUP-1 + audit BE-002 + verifikasi negatif wrapper = 103; +1 entri audit Z-19 milik task lain yang belum di-commit; +1 entri VERIFY-BE-002-T6T7 25 Sep 2026; +1 entri verifikasi P1-04..P1-09 25 Sep 2026; +1 entri REGRESI-BE002-T3 25 Sep 2026; +1 entri Z19-FIX-A (commit `1653c020`, sesi lain) 25 Sep 2026; +1 entri perbaikan P1-04/P1-09 25 Sep 2026) |
+| Task selesai historis | **111** `[x]` | `docs/history/**` + `docs/arsip/**` (101 baseline DOCS-CLEANUP-1 + audit BE-002 + verifikasi negatif wrapper = 103; +1 entri audit Z-19 milik task lain yang belum di-commit; +1 entri VERIFY-BE-002-T6T7 25 Sep 2026; +1 entri verifikasi P1-04..P1-09 25 Sep 2026; +1 entri REGRESI-BE002-T3 25 Sep 2026; +1 entri Z19-FIX-A (commit `1653c020`, sesi lain) 25 Sep 2026; +1 entri perbaikan P1-04/P1-09 25 Sep 2026; +1 entri Z19-FIX-B (sesi Z-19, `7cf0fe62`) 25 Sep 2026; +1 entri Z19-T2 25 Sep 2026) |
 | Gate domain | **12** | baris cocok pola `pretest:unit\|test:unit\|gate M04` di file ini + 7 berkas riwayat — setelah DOCS-CLEANUP-1: 3 di antaranya berada di `docs/arsip/` dan 2 digabung, dihitung di rumah barunya |
 | Kebersihan diff | `git diff --check` exit 0 | sebelum commit dokumentasi |
 
