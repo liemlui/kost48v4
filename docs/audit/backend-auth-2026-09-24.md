@@ -124,6 +124,36 @@ Temuan #3 ("tidak ada regresi langsung untuk login, refresh, JWT strategy, forgo
 
 **Tetap UNKNOWN:** perilaku runtime di host produksi, nilai efektif `NODE_ENV` (cookie `secure`), pengiriman Brevo nyata, dan konkurensi nyata pada PostgreSQL.
 
+## Verifikasi DB nyata T6/T7 — 25 Sep 2026 (izin owner `AKSES-UAT-25SEP`)
+
+Berkas baru: `backend/test/integration/auth-concurrency.test.js` — dijalankan hanya dengan `KOST48_UAT_CONCURRENCY_TEST=1`, menolak `NODE_ENV=production`, menolak `DATABASE_URL` yang bukan bertanda UAT (`:5433`), memakai fixture unik, dan menyapu sisa fixture di hook `after`. Bukti eksekusi: cwd `backend`, DB UAT `:5433` (host dan kredensial tidak dicetak).
+
+| Uji | Hasil | Detail |
+|---|---|---|
+| **T7-DB** (refresh vs logout, 3 putaran, dua pool koneksi terpisah) | **LULUS** | logout tetap idempoten; setelah balapan token lama selalu mati; pemenang refresh menghapus baris lama dan menyisakan tepat satu token baru; pihak yang kalah tidak menerbitkan token |
+| **T6-DB** (dua `resetPassword` paralel) | **GAGAL** | **kedua** request ditolak 401 pada langkah klaim (`claimed !== 1`) — bukan race yang bocor |
+
+### Defect baru: BE-002-T6B — klaim/cek kedaluwarsa reset token bergantung zona waktu DB (TINGGI)
+
+`resetPassword()` menjalankan `UPDATE "PasswordResetToken" SET "usedAt" = NOW() WHERE ... AND "expiresAt" >= NOW()`. Kolom `expiresAt` adalah `timestamp` tanpa zona yang diisi Prisma dalam **UTC**, sedangkan `NOW()` mengembalikan **timestamptz** yang dibaca dalam zona waktu sesi. Pada UAT (`TimeZone = Asia/Bangkok`, +7):
+
+- `expiresAt` (UTC, +60 detik) vs `NOW()` → `ge_now = false` → klaim **0 baris** → 401.
+- `expiresAt` vs `(NOW() AT TIME ZONE 'UTC')` → `ge_now_utc = true` → klaim **1 baris**.
+- Probe langsung: `CLAIM_WITH_NOW=0`, `CLAIM_WITH_NOW_UTC=1`.
+
+Konsekuensi: pada DB dengan zona waktu sesi ≠ UTC, **alur reset password tidak dapat diselesaikan** (selalu 401 "Token reset tidak valid, sudah digunakan, atau kedaluwarsa"), sementara langkah forgot-password tetap mengirim email — pengguna terjebak tanpa bisa mengubah password. Status T6 pada addendum di atas (**"tertutup secara statis + unit"**) **tidak berlaku pada runtime**: unit test memakai Prisma tiruan sehingga perbedaan tipe/zona waktu tidak tertangkap. Produksi belum diperiksa (UNKNOWN) — mekanisme ini lingkungan-dependent, jadi hasilnya bergantung zona waktu sesi DB produksi; UAT menunjukkan UTC+7.
+
+### Temuan sekunder dari pola `NOW()` (belum diperbaiki)
+
+1. `forgotPassword()` — `DELETE FROM "PasswordResetToken" WHERE "userId" = X OR "expiresAt" < NOW()`: dengan offset +7, token yang **belum** kedaluwarsa pun dianggap kedaluwarsa, sehingga satu permintaan forgot-password **menghapus token reset milik user lain**.
+2. `reminder-preview.service.ts:98-99` — `s."expiresAt" > NOW()` dan `<= NOW() + INTERVAL`: jendela pengingat bergeser sebesar offset zona waktu DB.
+3. Penulisan `NOW()` ke kolom `timestamp` (`passwordChangedAt`/`updatedAt` di `auth.service.ts:414-415`, `:454-455`; `createdAt`/`updatedAt` pada `INSERT` raw di `tenant-bookings.service.ts:152`, `public-bookings.service.ts:324-325`) menyimpan **waktu lokal**, bukan UTC — bercampur dengan baris yang ditulis Prisma.
+
+### Batas bukti verifikasi ini
+
+- Bukti runtime hanya pada **UAT**; produksi tidak diperiksa dan tidak disentuh. Fixture test dihapus (sapuan `after` melaporkan 1 sisa dibersihkan dari run yang gagal).
+- Perbaikan defect adalah **task terpisah** dengan uji regresi; laporan ini tidak memberi izin implementasi. Test integrasi dipertahankan **merah** sebagai regresi sampai defect diperbaiki.
+
 ## Delta
 
 - Implementasi lokal: tidak ada perubahan source, DB, schema, dependency, atau konfigurasi (berlaku untuk 24 Sep maupun addendum 25 Sep).
