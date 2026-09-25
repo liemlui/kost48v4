@@ -93,9 +93,14 @@ export default function ReviewPaymentModal({
   const canPreviewImage = Boolean(absoluteFileUrl && (submission?.mimeType?.startsWith('image/') || /\.(png|jpe?g|webp)$/i.test(absoluteFileUrl || '')));
   const requiredChecklist = safety.checklist.filter((item) => item.required);
   const requiredChecked = requiredChecklist.every((item) => checkedItems[item.id]);
-  const approveDisabledBySafety = Boolean(safety.approveDisabledReason) || (safety.requiresChecklist && !requiredChecked);
+  const impactUnavailable = mode === 'approve' && (impactQuery.isPending || impactQuery.isError || !impactQuery.data);
+  const approveDisabledBySafety = Boolean(safety.approveDisabledReason)
+    || (safety.requiresChecklist && !requiredChecked)
+    || impactUnavailable;
   const approveDisabledReason = safety.approveDisabledReason
-    ?? (safety.requiresChecklist && !requiredChecked ? 'Centang checklist dulu.' : null);
+    ?? (safety.requiresChecklist && !requiredChecked ? 'Centang checklist dulu.' : null)
+    ?? (impactQuery.isPending ? 'Tunggu ringkasan dampak selesai dihitung.' : null)
+    ?? (impactUnavailable ? 'Ringkasan dampak wajib tersedia sebelum pembayaran disetujui.' : null);
   const acceptedAmountsText = submission?.paymentPolicy?.acceptedAmounts?.length
     ? submission.paymentPolicy.acceptedAmounts
       .map((amount) => `${amount.label} Rp ${Number(amount.amountRupiah ?? 0).toLocaleString('id-ID')}`)
@@ -290,8 +295,8 @@ export default function ReviewPaymentModal({
                           <div className="small text-muted">Menghitung dampak...</div>
                         ) : null}
                         {impactQuery.isError ? (
-                          <Alert variant="warning" className="small mb-0">
-                            Ringkasan dampak belum tersedia. Keputusan tetap memakai pengaman di atas.
+                          <Alert variant="danger" className="small mb-0">
+                            Ringkasan dampak belum tersedia. Approve dinonaktifkan; muat ulang atau coba lagi setelah layanan pulih.
                           </Alert>
                         ) : null}
                         {impactQuery.data ? <PaymentImpactSummary impact={impactQuery.data} /> : null}

@@ -115,7 +115,7 @@ const preview: PaymentImpactPreview = {
   notes: ['Kamar menjadi RESERVED saat approve; OCCUPIED terjadi saat check-in.'],
 };
 
-function renderModal() {
+function renderModal(onApprove = vi.fn()) {
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false, gcTime: 0 } },
   });
@@ -126,7 +126,7 @@ function renderModal() {
         mode="approve"
         submission={submission}
         onHide={vi.fn()}
-        onApprove={vi.fn()}
+        onApprove={onApprove}
         onReject={vi.fn()}
       />
     </QueryClientProvider>,
@@ -158,7 +158,7 @@ describe('ReviewPaymentModal — ringkasan dampak (IMPACT-01)', () => {
     expect(view.getAllByText('RESERVED').length).toBeGreaterThan(0);
   });
 
-  it('menampilkan pesan netral bila ringkasan dampak gagal diambil', async () => {
+  it('memblokir approve bila ringkasan dampak gagal diambil', async () => {
     mocks.getPaymentSubmissionImpact.mockRejectedValue(new Error('gagal'));
 
     renderModal();
@@ -166,5 +166,18 @@ describe('ReviewPaymentModal — ringkasan dampak (IMPACT-01)', () => {
     expect(
       await screen.findByText(/Ringkasan dampak belum tersedia/),
     ).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /approve|setujui/i })).toBeDisabled();
+  });
+
+  it('melepas blocker preview setelah ringkasan dampak tersedia', async () => {
+    mocks.getPaymentSubmissionImpact.mockResolvedValue(preview);
+
+    renderModal();
+
+    await screen.findByText(/Masuk tagihan sewa/);
+    expect(screen.getByRole('button', { name: /approve|setujui/i })).toHaveAttribute(
+      'title',
+      'Centang checklist dulu.',
+    );
   });
 });
