@@ -24,9 +24,13 @@
 | Temuan | Status | Bukti |
 |---|---|---|
 | P1-01, P1-02, P1-03 (jurnal & deposit ledger) | indikasi sudah diperbaiki — **verifikasi statis**, belum UAT | [audit/p1-uang-status-2026-09-23.md](audit/audit-uang-huni-2026-07.md) · [audit/audit-360-uang-2026-07.md](audit/audit-uang-huni-2026-07.md) |
-| P1-04 … P1-09 | **UNKNOWN** — belum diperiksa | sama |
+| P1-04 | **diperbaiki lokal 25 Sep**; dedupe DB-level tetap terbuka | [audit/p1-uang-verifikasi-2026-09-25.md](audit/p1-uang-verifikasi-2026-09-25.md) |
+| P1-05 | accepted behaviour owner: submission kedaluwarsa tetap `EXPIRED` | sama |
+| P1-06, P1-07 | indikasi diperbaiki — **verifikasi statis**, belum UAT | sama |
+| P1-08 | masih ada tetapi jalurnya sempit; belum diperbaiki | sama |
+| P1-09 | terverifikasi; cleanup kode mati selesai 25 Sep | sama |
 
-**Jadwal (keputusan owner 23 Sep 2026):** audit uang lanjutan P1-04..P1-09 dikerjakan **setelah IMPACT-01**, bukan sebelum. Sampai itu terjadi, jangan mengklaim temuan uang tuntas; setiap task yang menyentuh uang tetap mengikuti gate uang di [STATUS §7](STATUS.md).
+Audit lanjutan P1-04..P1-09 sudah dilakukan 25 Sep 2026. Status di atas tetap statis/lokal kecuali dinyatakan lain; jangan menyamakannya dengan UAT atau produksi. Setiap task yang menyentuh uang tetap mengikuti gate uang di [STATUS §7](STATUS.md).
 
 ## 4. Bukti audit bertanggal (kanonik)
 

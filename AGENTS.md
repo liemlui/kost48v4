@@ -11,7 +11,7 @@ Baca aturan yang relevan sebelum bertindak; jangan memuat ulang dokumen yang sud
 - [KEPUTUSAN-OWNER](docs/KEPUTUSAN-OWNER.md) menyimpan keputusan bisnis/arah owner; jangan menggantinya dengan asumsi agent.
 - CLAUDE.md, .clinerules, dan panduan agent-specific adalah pointer; jangan menambahkan aturan paralel.
 - [AI_QUICKREF.md](AI_QUICKREF.md) adalah cheatsheet turunan; [GUIDE](AI_WORKFLOW_GUIDE.md) menyediakan template task, dampak, verifikasi, dan handoff.
-- Status governance, exception, dan keputusan ringkas ada di [STATUS.md](docs/STATUS.md); `AI_MASTER.md` dan dashboard lama kini pointer, bukan sumber aturan.
+- Status governance, exception, dan keputusan ringkas ada di [STATUS.md](docs/STATUS.md); `AI_MASTER.md` dan dashboard lama sudah dihapus pada Fase 3, bukan sumber aturan.
 - Jika ada konflik, sebutkan aturan yang berbenturan dan dampaknya; jangan mengubah gate atau memperluas izin sepihak.
 - Gunakan persetujuan yang sudah mencakup tindakan; tidak ada jawaban bukan persetujuan.
 
@@ -38,7 +38,7 @@ Baca aturan yang relevan sebelum bertindak; jangan memuat ulang dokumen yang sud
 | [AUDIT](docs/AUDIT.md) | Status audit dan temuan bertanggal — rincian di [docs/audit/](docs/audit/) |
 | [docs/history/](docs/history/) | Riwayat, fase, changelog bulanan berjalan; bukti/riwayat bulk ada di [docs/arsip/](docs/arsip/README.md) (**jangan dibaca rutin**); bukan antrean atau perintah mengulang pekerjaan |
 
-- **Konsolidasi (23 Sep 2026, instruksi owner):** dokumen dirapikan menjadi **7 file utama tanpa penomoran M** — Tahap 3 (B1–B11), Fase 2, dan Fase 3 (pembersihan pointer lama) selesai; sisa Tahap 4 (review akhir). `docs/arsip/` **sudah dibuat** 24 Sep 2026 (DOCS-CLEANUP-1). docs harus membantu AI bekerja, bukan memperumit. Path M lama **sudah dihapus** (Fase 3, 23 Sep 2026) setelah seluruh tautan dialihkan ke rumah kanonik. Progres: [STATUS.md §8](docs/STATUS.md).
+- **Konsolidasi (23–25 Sep 2026, instruksi owner):** dokumen dirapikan menjadi **7 file utama tanpa penomoran M** — Tahap 3 (B1–B11), Fase 2, Fase 3, dan Tahap 4 (review akhir) selesai. `docs/arsip/` **sudah dibuat** 24 Sep 2026 (DOCS-CLEANUP-1). Path M lama selain `M13_CHANGELOG.md` **sudah dihapus** setelah seluruh tautan dialihkan ke rumah kanonik. Progres: [STATUS.md §8](docs/STATUS.md).
 - Nomor M lama dipetakan otomatis: M12 + AI_MASTER → STATUS; M02 → KEPUTUSAN-OWNER; M03–M07/M09/M15/M18 → ATURAN; M08/M11/M19/M20 → OPERASI; M00/M10 → PETA-KODE; M14/M16 → AUDIT; M13 + history → arsip.
 - Baca sesuai kebutuhan task; jangan memuat seluruh dokumen sebagai orientasi.
 - Gunakan peta/audit yang sudah ada; jangan menganggap inventaris atau audit lama sebagai bukti PASS untuk diff baru.
