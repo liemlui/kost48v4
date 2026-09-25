@@ -1,5 +1,5 @@
 // FILE: deposit-ledger.service.ts — kelola deposit jaminan penghuni + refund (JALUR UANG)
-import { ConflictException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import { ConflictException, ForbiddenException, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { Prisma } from '../../generated/prisma';
 import {
   BookingDepositPaymentStatus,
@@ -35,6 +35,8 @@ type RecordDepositSettlementParams = {
 
 @Injectable()
 export class DepositLedgerService {
+  private readonly logger = new Logger(DepositLedgerService.name);
+
   constructor(private readonly prisma: PrismaService) {}
 
   private normalizeLimit(limit?: number, fallback = 50, max = 200) {
@@ -119,7 +121,13 @@ export class DepositLedgerService {
       metadata?: Record<string, any> | null;
     },
   ) {
-    if (!params.amountRupiah && params.direction !== TenantDepositLedgerDirection.INFO) return null;
+    if (!params.amountRupiah && params.direction !== TenantDepositLedgerDirection.INFO) {
+      // P1-04: jalur ini sebelumnya senyap. Deposit yang tidak dicatat wajib terlihat di log.
+      this.logger.warn(
+        `Ledger deposit dilewati: amountRupiah=${params.amountRupiah} untuk stay ${params.stay.id} (${params.sourceType}/${params.sourceId}).`,
+      );
+      return null;
+    }
 
     const existing = await tx.tenantDepositLedgerEntry.findFirst({
       where: {
@@ -130,7 +138,14 @@ export class DepositLedgerService {
       },
       select: { id: true },
     });
-    if (existing) return null;
+    if (existing) {
+      // Idempotensi dokumen sumber: entri untuk kunci ini sudah ada. Dicatat agar
+      // "deposit diterima tetapi tidak ada entri baru" tidak lagi senyap (P1-04).
+      this.logger.warn(
+        `Ledger deposit duplikat dilewati: entri #${existing.id} sudah ada untuk ${params.sourceType}/${params.sourceId} (stay ${params.stay.id}).`,
+      );
+      return null;
+    }
 
     return tx.tenantDepositLedgerEntry.create({
       data: {
@@ -158,7 +173,10 @@ export class DepositLedgerService {
 
   async recordDepositReceivedTx(tx: DepositLedgerTx, params: RecordDepositReceivedParams) {
     const amount = Number(params.amountRupiah ?? 0);
-    if (amount <= 0) return null;
+    if (amount <= 0) {
+      this.logger.warn(`Deposit diterima dilewati: nominal tidak valid (${amount}) untuk stay ${params.stayId}.`);
+      return null;
+    }
 
     const stay = await tx.stay.findUnique({
       where: { id: params.stayId },
@@ -173,7 +191,12 @@ export class DepositLedgerService {
         depositPaymentStatus: true,
       },
     });
-    if (!stay) return null;
+    if (!stay) {
+      this.logger.warn(`Deposit diterima dilewati: stay ${params.stayId} tidak ditemukan.`);
+      return null;
+    }
+
+    const occurredAt = params.occurredAt ? new Date(params.occurredAt) : new Date();
 
     return this.createEntryIfMissingTx(tx, {
       stay,
@@ -182,19 +205,45 @@ export class DepositLedgerService {
       amountRupiah: amount,
       balanceAfterRupiah: this.heldBalanceFromSnapshot(stay),
       sourceType: 'PAYMENT_SUBMISSION',
-      sourceId: params.invoicePaymentId
-        ? `PS_${params.paymentSubmissionId ?? params.stayId}_IP_${params.invoicePaymentId}`
-        : String(params.paymentSubmissionId ?? params.stayId),
+      sourceId: this.buildDepositReceivedSourceId(params, amount, occurredAt),
       paymentSubmissionId: params.paymentSubmissionId ?? null,
       invoicePaymentId: params.invoicePaymentId ?? null,
       actorUserId: params.actorUserId ?? null,
-      occurredAt: params.occurredAt ?? new Date(),
+      occurredAt,
       note: params.note ?? 'Deposit diterima dari pembayaran booking.',
       metadata: {
         basis: 'M4_DEPOSIT_LEDGER_PAYMENT_RECEIVED',
         ...(params.metadata ?? {}),
       },
     });
+  }
+
+  /**
+   * P1-04 (audit uang 25 Sep 2026) — kunci idempotensi deposit masuk.
+   *
+   * Dua cabang pertama **mempertahankan format lama apa adanya** supaya idempotensi
+   * data historis tidak berubah. Hanya cabang tanpa dokumen sumber yang diperbaiki:
+   * dulu `String(stayId)`, sehingga dua deposit berbeda pada stay yang sama memakai
+   * kunci identik dan deposit kedua dilewati senyap. Kini kuncinya unik per kejadian
+   * dan pemberian log keras membuat jalur itu terlihat.
+   */
+  private buildDepositReceivedSourceId(
+    params: RecordDepositReceivedParams,
+    amountRupiah: number,
+    occurredAt: Date,
+  ): string {
+    if (params.invoicePaymentId) {
+      return `PS_${params.paymentSubmissionId ?? params.stayId}_IP_${params.invoicePaymentId}`;
+    }
+    if (params.paymentSubmissionId != null) {
+      return String(params.paymentSubmissionId);
+    }
+
+    const sourceId = `MANUAL_${params.stayId}_${new Date(occurredAt).getTime()}_${amountRupiah}`;
+    this.logger.warn(
+      `Deposit diterima tanpa dokumen sumber (stay ${params.stayId}); memakai kunci unik ${sourceId} — fallback ke stayId dihentikan.`,
+    );
+    return sourceId;
   }
 
   async recordDepositSettlementTx(tx: DepositLedgerTx, params: RecordDepositSettlementParams) {

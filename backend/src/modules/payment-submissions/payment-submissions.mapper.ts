@@ -1,4 +1,4 @@
-import { SubmissionListRow, SubmissionLockRow } from './payment-submissions.types';
+import { SubmissionListRow } from './payment-submissions.types';
 
 export function mapSubmissionRow(row: SubmissionListRow) {
   return {
@@ -58,11 +58,4 @@ export function mapSubmissionRow(row: SubmissionListRow) {
         }
       : null,
   };
-}
-
-export function buildApprovalPaymentNote(submission: SubmissionLockRow) {
-  const fragments = ['Pembayaran hasil approval bukti bayar tenant'];
-  if (submission.referenceNumber) fragments.push(`Ref: ${submission.referenceNumber}`);
-  if (submission.senderName) fragments.push(`Pengirim: ${submission.senderName}`);
-  return fragments.join(' | ');
 }

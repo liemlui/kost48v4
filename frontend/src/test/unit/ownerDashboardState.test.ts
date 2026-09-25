@@ -3,7 +3,9 @@ import { describe, expect, it } from 'vitest';
 import {
   OWNER_KPI_STALE_MS,
   ownerDashboardIsStale,
+  ownerPeriodHeadline,
   ownerPeriodHasNoActivity,
+  ownerPriorityScopeLabel,
   ownerPrioritySourceFailures,
   ownerRevenueIsSilentZero,
 } from '../../pages/dashboard/ownerDashboardState';
@@ -47,6 +49,19 @@ describe('ownerPrioritySourceFailures', () => {
     expect(ownerPrioritySourceFailures(true, false)).toEqual(['kamar']);
     expect(ownerPrioritySourceFailures(false, true)).toEqual(['IoT']);
     expect(ownerPrioritySourceFailures(true, true)).toEqual(['kamar', 'IoT']);
+  });
+});
+
+describe('owner dashboard scope copy', () => {
+  it('labels current and selected-period priority sources', () => {
+    expect(ownerPriorityScopeLabel('overdue')).toBe('Saat ini');
+    expect(ownerPriorityScopeLabel('vacant-room')).toBe('Saat ini');
+    expect(ownerPriorityScopeLabel('meter-due')).toBe('Periode terpilih');
+  });
+
+  it('keeps the period headline separate from the current action queue', () => {
+    expect(ownerPeriodHeadline('Bulan ini sehat. Ada 3 hal yang perlu ditindaklanjuti.')).toBe('Bulan ini sehat.');
+    expect(ownerPeriodHeadline('Bulan ini sehat.')).toBe('Bulan ini sehat.');
   });
 });
 

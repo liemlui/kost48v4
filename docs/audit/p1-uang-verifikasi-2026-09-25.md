@@ -24,11 +24,26 @@ Inspeksi source pada jalur yang disebut temuan: dedupe ledger deposit, transisi 
 
 Ringkas: P1-04 dan P1-05 **tidak lagi boleh disebut UNKNOWN** — keduanya masih ada pada source saat ini. P1-06 dan P1-07 **tidak lagi cocok** dengan pola yang dilaporkan Jul 2026. P1-08 tetap ada dalam bentuk sempit. P1-09 terverifikasi dan memunculkan duplikasi kode.
 
+**Status lanjutan 25 Sep 2026:** P1-04 dan P1-09 sudah ditindaklanjuti pada source setelah keputusan owner (`P1-04-FIX`, `P1-09-CLEANUP`, `P1-05-KEEP`) — lihat § Perbaikan di bawah.
+
 ## Temuan residual (baru dari verifikasi ini)
 
 1. **Duplikasi `buildApprovalPaymentNote`** di `payment-submissions.helpers.ts` dan `payment-submissions.mapper.ts` — salinan mapper tanpa pemanggil; risiko divergensi bila salah satu diubah kelak.
 2. **Skip senyap pada ledger deposit** — `createEntryIfMissingTx` mengembalikan `null` tanpa error/log ketika entri dianggap sudah ada (`deposit-ledger.service.ts:133`), saat `amount <= 0` (`:161`), maupun saat stay tidak ditemukan (`:176`). Sejalan catatan residual verifikasi 23 Sep 2026.
 3. **Dedupe ledger tanpa jaminan DB** — tidak ada `@@unique(stayId, type, sourceType, sourceId)`; dua transaksi paralel tetap dapat membuat dua entri.
+
+## Perbaikan P1-04 & P1-09 — 25 September 2026 (setelah keputusan owner)
+
+Keputusan yang mengikat: `P1-05-KEEP` (status quo), `P1-04-FIX`, `P1-09-CLEANUP` ([KEPUTUSAN-OWNER](../KEPUTUSAN-OWNER.md)).
+
+- **P1-04 — fallback `stayId` dihentikan, jalur skip tidak lagi senyap.** `recordDepositReceivedTx` kini memakai helper `buildDepositReceivedSourceId()`:
+  - dua cabang ber-dokumen **mempertahankan format lama verbatim** (`PS_<submission|stayId>_IP_<invoicePayment>` dan `String(submissionId)`) supaya idempotensi entri historis tidak berubah saat kode diperbaiki;
+  - cabang **tanpa dokumen sumber** (mis. check-in manual di `stays.service.ts:457`) memakai kunci unik per kejadian `MANUAL_<stayId>_<epochMs>_<nominal>` **dan** menulis `logger.warn` — bukan lagi `String(stayId)` yang membuat deposit kedua pada stay yang sama tertelan dedupe;
+  - jalur skip (nominal ≤ 0, stay tidak ditemukan, entri duplikat) sekarang menulis `logger.warn`, sehingga "deposit diterima tanpa entri baru" dapat dilacak.
+- **P1-09 — salinan mati dihapus.** `buildApprovalPaymentNote` kini hanya ada di `payment-submissions.helpers.ts` (dipakai `payment-submissions.service.ts:44`, `:934`); salinan tanpa pemanggil di `payment-submissions.mapper.ts` dihapus, termasuk impor `SubmissionLockRow` yang menjadi tak terpakai.
+- **Bukti (gate uang):** cwd `backend`, `npm run test:unit` **exit 0** — hook `pretest:unit` menjalankan build penuh, lalu **tests 144, pass 144, fail 0**. Test baru `backend/test/unit/deposit-ledger-source-id.test.js` (8 test): format kunci ber-dokumen dipertahankan, kunci manual unik per kejadian, dua deposit manual tidak saling menelan, dedupe menulis log duplikat, nominal tidak valid, stay hilang.
+- **Masih terbuka (task operasional terpisah):** `@@unique(stayId, type, sourceType, sourceId)` **belum** ditambahkan, jadi dedupe masih level aplikasi (`findFirst` di dalam transaksi) dan dua transaksi paralel secara teori masih dapat membuat dua entri. Perubahan schema/migrasi menunggu izin operasional + backup.
+- **Runtime tidak diukur:** hasil ini bukti kode + unit test, bukan UAT/produksi.
 
 ## Batas bukti
 

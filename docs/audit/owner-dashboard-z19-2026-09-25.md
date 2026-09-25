@@ -2,7 +2,7 @@
 
 Tanggal: 25 September 2026
 Jenis: audit statis read-only
-Status: **Z19-T1 dan Z19-T4 diperbaiki lokal; Z19-T2, Z19-T3, dan gate visual/runtime belum ditutup**
+Status: **Z19-T1, Z19-T3, dan Z19-T4 diperbaiki lokal; Z19-T2 dan gate visual/runtime belum ditutup**
 
 ## Lingkup
 
@@ -38,13 +38,15 @@ Dampak: kartu dan grafik untuk bulan yang sama dapat berbeda walaupun labelnya i
 
 Acceptance perbaikan: gunakan definisi yang sama, atau ganti label/copy sehingga basis akrual dan kas dinyatakan eksplisit. Karena menyentuh interpretasi uang, implementasi wajib mengikuti gate uang di `STATUS.md` §7.
 
-### Z19-T3 — SEDANG — scope periode KPI berbeda dari scope sinyal tindakan
+### Z19-T3 — SEDANG — scope periode KPI berbeda dari scope sinyal tindakan — DIPERBAIKI LOKAL 25 SEP
 
 KPI invoice/payment/expense/WiFi memakai bulan yang dipilih. Sebaliknya overdue memakai tanggal hari ini, sedangkan pending payment dan outstanding merupakan snapshot global. Pada mode Lengkap, owner dapat memilih bulan historis tetapi strip kondisi tetap menggabungkan angka periode historis dengan antrean tindakan saat ini tanpa label scope.
 
 Dampak: headline “kondisi bulan ini” dan daftar prioritas dapat dibaca sebagai satu periode yang sama padahal bukan.
 
 Acceptance perbaikan: label sinyal sebagai “kondisi saat ini” dan pisahkan dari ringkasan periode, atau filter semua sinyal sesuai periode dengan keputusan produk yang eksplisit.
+
+Implementasi Z19-FIX-B: headline “Kondisi periode terpilih” tidak lagi memuat kalimat jumlah antrean global; panel terpisah bernama “Prioritas operasional”. Setiap sinyal diberi scope eksplisit: overdue, outstanding, pending payment, kamar, readiness, dan IoT = **Saat ini**; meter = **Periode terpilih**. Copy panel menjelaskan bahwa KPI mengikuti periode yang dipilih.
 
 ### Z19-T4 — RENDAH — indikator stale menghilang selama background refresh — DIPERBAIKI LOKAL 25 SEP
 
@@ -70,6 +72,6 @@ Implementasi Z19-FIX-A: kalkulasi stale tidak lagi dinetralkan oleh `isRefreshin
 - Axe serious/critical = 0 dan screenshot bebas PII.
 - Uji CTA menuju daftar terfilter dan state loading/error/empty/stale pada runtime.
 
-Verifikasi lokal Z19-FIX-A: `npm.cmd run test -- src/test/unit/ownerDashboardState.test.ts` **16/16 lulus**; `npm.cmd run build` exit 0, build `TNr9-nhj80tk`, PWA verification passed. Pemanggilan awal keduanya di sandbox gagal membaca `vite.config.ts`; hasil yang diklaim berasal dari pengulangan di luar sandbox. Browser/server/DB tidak dijalankan, sehingga verifikasi visual/runtime tetap UNKNOWN.
+Verifikasi lokal terbaru setelah Z19-FIX-B: `npm.cmd run test -- src/test/unit/ownerDashboardState.test.ts` **18/18 lulus**; `npm.cmd run build` exit 0, build `G4tda1dB7c3a`, PWA verification passed. Browser/server/DB tidak dijalankan, sehingga verifikasi visual/runtime tetap UNKNOWN.
 
-Z-19 tetap `[ ]`. Z19-T2 dan Z19-T3 belum diimplementasikan; perubahan uang Z19-T2 harus menjadi scope terpisah dengan gate uang.
+Z-19 tetap `[ ]`. Z19-T2 belum diimplementasikan; perubahan uang tersebut harus menjadi scope terpisah dengan gate uang.

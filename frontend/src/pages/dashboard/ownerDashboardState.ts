@@ -21,6 +21,14 @@ export function ownerPrioritySourceFailures(
   return failures;
 }
 
+export function ownerPriorityScopeLabel(type: string): 'Saat ini' | 'Periode terpilih' {
+  return type === 'meter-due' ? 'Periode terpilih' : 'Saat ini';
+}
+
+export function ownerPeriodHeadline(headline: string): string {
+  return headline.replace(/\s*Ada \d+ hal yang perlu ditindaklanjuti\.\s*$/, '').trim();
+}
+
 export function ownerDashboardIsStale(dataUpdatedAt: number | undefined, nowMs: number = Date.now()): boolean {
   if (!dataUpdatedAt) return false;
   return nowMs - dataUpdatedAt > OWNER_KPI_STALE_MS;

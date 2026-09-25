@@ -154,11 +154,11 @@ Diperiksa pola pada jalur pemanggilan posting jurnal dan deposit ledger: apakah 
 
 | ID | Status 25 Sep 2026 | Ringkas bukti |
 |---|---|---|
-| P1-04 (MEDIUM) | **Masih ada** | fallback `sourceId` ke `stayId` + dedupe `findFirst` yang skip senyap; tanpa `@@unique` di schema |
-| P1-05 (MEDIUM) | **Masih ada** | submission `PENDING_REVIEW` di-expire menjadi `EXPIRED`, bukan `REJECTED` |
+| P1-04 (MEDIUM) | **Diperbaiki 25 Sep (source)** | fallback `sourceId` ke `stayId` dihentikan + kunci manual unik & log keras; dedupe masih level aplikasi (`@@unique` belum ditambahkan) - [laporan](p1-uang-verifikasi-2026-09-25.md) |
+| P1-05 (MEDIUM) | **Masih ada (accepted, `P1-05-KEEP`)** | submission `PENDING_REVIEW` di-expire menjadi `EXPIRED`, bukan `REJECTED`; dipertahankan atas keputusan owner |
 | P1-06 (MEDIUM) | **Indikasi diperbaiki** | semua 7 pemanggil reversal memeriksa `skipped` dan melempar error; reversal idempotent `ADJUSTMENT` + `INVOICE_REVERSAL:<id>` |
 | P1-07 (MEDIUM) | **Indikasi diperbaiki** | pre-check luar tx diulang di dalam tx setelah `FOR UPDATE` |
 | P1-08 (LOW) | **Masih ada (sempit)** | `paidAt ?? new Date()` masih ada; `paymentDate` NOT NULL membuat jalur praktis tak tercapai |
-| P1-09 (LOW) | **Terverifikasi** | isi note dipetakan; ditemukan duplikasi fungsi tanpa pemanggil di `payment-submissions.mapper.ts` |
+| P1-09 (LOW) | **Diperbaiki 25 Sep (source)** | salinan mati `buildApprovalPaymentNote` di `payment-submissions.mapper.ts` dihapus; catatan produksi tetap dari `payment-submissions.helpers.ts` |
 
 Test/build tidak dijalankan (task dokumentasi; exception §8 AGENTS).

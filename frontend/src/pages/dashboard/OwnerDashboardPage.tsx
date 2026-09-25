@@ -24,7 +24,9 @@ import type { OwnerDashboardTrendMonth } from '../../api/finance';
 import { fetchOwnerDashboardAggregate } from '../../api/ownerDashboard';
 import {
   ownerDashboardIsStale,
+  ownerPeriodHeadline,
   ownerPeriodHasNoActivity,
+  ownerPriorityScopeLabel,
   ownerPrioritySourceFailures,
   ownerRevenueIsSilentZero,
 } from './ownerDashboardState';
@@ -468,8 +470,8 @@ export default function OwnerDashboardPage() {
                 {grade.label}
               </span>
               <div className="owner-status-copy">
-                <span>Kondisi bulan ini</span>
-                <strong>{data.headline}</strong>
+                <span>Kondisi periode terpilih</span>
+                <strong>{ownerPeriodHeadline(data.headline)}</strong>
               </div>
               <div className="owner-status-meta">
                 <span>Periode</span>
@@ -481,7 +483,7 @@ export default function OwnerDashboardPage() {
                   className="owner-status-cta"
                   onClick={() => document.getElementById('prioritas')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
                 >
-                  Buka prioritas &rsaquo;
+                  Buka prioritas operasional &rsaquo;
                 </button>
               ) : null}
             </section>
@@ -538,8 +540,11 @@ export default function OwnerDashboardPage() {
               <section className="owner-panel h-100" id="prioritas">
                 <div className="owner-panel-heading">
                   <div>
-                    <span className="owner-section-kicker">Prioritas</span>
-                    <h2>Butuh perhatian</h2>
+                    <span className="owner-section-kicker">Prioritas operasional</span>
+                    <h2>Perlu ditindaklanjuti</h2>
+                    <p className="small text-muted mb-0 mt-1">
+                      KPI di atas mengikuti {selectedPeriodLabel}. Setiap prioritas di bawah menampilkan scope waktunya.
+                    </p>
                   </div>
                   <StatusBadge
                     status={data.signals.length === 0 && extraSignals.length === 0 && !priorityDataIncomplete ? 'SUCCESS' : 'WARNING'}
@@ -570,7 +575,7 @@ export default function OwnerDashboardPage() {
                           <span className={`owner-signal-dot owner-signal-${signal.type}`} aria-hidden="true" />
                           <span className="owner-signal-content">
                             <strong>{ownerSignalTitle(signal.type)}</strong>
-                            <small>{signal.count} item{signal.totalRupiah ? ` - Rp ${formatRupiahWithoutSymbol(signal.totalRupiah)}` : ''}</small>
+                            <small>{signal.count} item{signal.totalRupiah ? ` - Rp ${formatRupiahWithoutSymbol(signal.totalRupiah)}` : ''} · {ownerPriorityScopeLabel(signal.type)}</small>
                           </span>
                           <span className="owner-signal-cta">{ownerSignalActionLabel(signal.type)} <span aria-hidden="true">&rsaquo;</span></span>
                         </button>
@@ -580,7 +585,7 @@ export default function OwnerDashboardPage() {
                           <span className={`owner-signal-dot owner-signal-${signal.type}`} aria-hidden="true" />
                           <span className="owner-signal-content">
                             <strong>{signal.label}</strong>
-                            <small>{signal.helper}</small>
+                            <small>{signal.helper} · {ownerPriorityScopeLabel(signal.type)}</small>
                           </span>
                           <span className="owner-signal-cta">{ownerSignalActionLabel(signal.type)} <span aria-hidden="true">&rsaquo;</span></span>
                         </button>
