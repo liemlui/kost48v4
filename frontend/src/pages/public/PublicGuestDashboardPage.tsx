@@ -470,7 +470,7 @@ export default function PublicGuestDashboardPage() {
           <div className="gx-avail-wrap">
             <div className="gx-avail-text">
               <div className="gx-label">Ketersediaan kamar — diperbarui langsung</div>
-              <h2>Kamar tersedia, transparan tanpa chat dulu.</h2>
+              <h2>Cek ketersediaan dan harga sebelum menghubungi admin.</h2>
               <p>
                 Lihat status setiap kamar secara real-time — filter AC/kipas, KM dalam/luar, harga,
                 dan bandingkan hingga 3 kamar sekaligus. Tidak perlu login, tidak perlu nunggu balas WA.
@@ -604,7 +604,7 @@ export default function PublicGuestDashboardPage() {
         <Container fluid="xl">
           <div className="gx-section-head gx-section-head-center">
             <div className="gx-label">Beda dari kost lain</div>
-            <h2>Semua info kamar bisa langsung dicek — tidak perlu chat tanya-tanya dulu.</h2>
+            <h2>Informasi utama tersedia untuk membantu Anda membandingkan kamar.</h2>
             <p>Status kamar, jadwal booking, pembayaran, dan komunikasi — semua di satu portal. Kamu tahu posisinya di mana sejak hari pertama.</p>
           </div>
           <div className="gx-trust-grid gx-stagger">
@@ -675,7 +675,7 @@ export default function PublicGuestDashboardPage() {
             <div className="gx-location-copy gx-reveal-l">
               <div className="gx-label">Lokasi</div>
               <h2>Dekat Pakuwon Mall / PTC di Surabaya Barat.</h2>
-              <p>KOST48 berada di Jalan Hikmah V No. 48, Lontar, Sambikerep. Lokasinya mudah dikenali dan cocok untuk calon penghuni yang ingin akses harian lebih praktis.</p>
+              <p>KOST48 berada di Jalan Hikmah V No. 48, Lontar, Sambikerep. Buka peta untuk memeriksa rute dan jarak dari tujuan harian Anda.</p>
               <div className="gx-location-facts">
                 <span>7 menit berjalan kaki</span>
                 <span>Surabaya Barat 60216</span>
@@ -738,7 +738,7 @@ export default function PublicGuestDashboardPage() {
             <div className="gx-catalog-filter gx-review-filter" role="tablist" aria-label="Urutkan ulasan">
               <span>Urutkan</span>
               <button type="button" role="tab" aria-selected={reviewSort === 'recent'} className={reviewSort === 'recent' ? 'active' : ''} onClick={() => { setReviewSort('recent'); setReviewPage(1); }}>Terbaru</button>
-              <button type="button" role="tab" aria-selected={reviewSort === 'rating'} className={reviewSort === 'rating' ? 'active' : ''} onClick={() => { setReviewSort('rating'); setReviewPage(1); }}>Rating Tertinggi</button>
+              <button type="button" role="tab" aria-selected={reviewSort === 'rating'} className={reviewSort === 'rating' ? 'active' : ''} onClick={() => { setReviewSort('rating'); setReviewPage(1); }}>Rating tertinggi</button>
             </div>
             <div className="gx-review-grid">
               {displayedReviews.map((review, index) => {
@@ -787,7 +787,7 @@ export default function PublicGuestDashboardPage() {
           <Container fluid="xl">
             <div className="gx-section-head gx-section-head-center">
               <div className="gx-label">Belum Ada Ulasan</div>
-              <h2>Jadilah penghuni pertama yang memberikan ulasan.</h2>
+              <h2>Belum ada ulasan yang ditampilkan.</h2>
               <p>Belum ada ulasan dari penghuni terverifikasi. Saat kamu sudah tinggal, kamu bisa memberikan penilaian lewat portal penghuni — membantu calon penghuni lain lebih percaya.</p>
             </div>
             <div className="gx-keunggulan-grid">
@@ -874,7 +874,7 @@ export default function PublicGuestDashboardPage() {
 
           <div className="gx-faq-more">
             <button type="button" className="gx-btn-outline" onClick={() => setShowAllFaq((value) => !value)}>
-              {showAllFaq ? 'Tampilkan FAQ Utama' : 'Lihat Semua FAQ'}
+              {showAllFaq ? 'Tampilkan FAQ utama' : 'Lihat semua FAQ'}
             </button>
           </div>
         </Container>
