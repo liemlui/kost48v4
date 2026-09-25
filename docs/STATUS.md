@@ -55,7 +55,7 @@ Format: **ID** — judul | **Gate** (verifikasi wajib sebelum `[x]`). 🧑 = but
 - [ ] **A4** - konfirmasi rotasi password OWNER + PIN | **Gate:** bukti rotasi tanpa mencatat nilai secret
 - [ ] **A5** - opening balance atau dokumentasi zero-start | **Gate:** angka cutover atau dokumentasi nol
 - [ ] **A6** - smoke test produksi: login OWNER, public rooms 200, trial balance, recon | **Gate:** trial balance isBalanced, recon mismatch 0, readiness tanpa blocker merah
-- [ ] **Z-19** - Z19-FIX-A selesai lokal 25 Sep: T1 dan T4 diperbaiki, unit 16/16 + build/PWA lulus; T2/T3 dan verifikasi manual tetap terbuka | **Gate:** tutup Z19-T2/T3, verifikasi kegagalan parsial + stale pada runtime, OWNER 1024/1280/1440 px + touch/keyboard/Axe dan CTA; bukti: [audit Z-19](audit/owner-dashboard-z19-2026-09-25.md)
+- [ ] **Z-19** - FIX-A/B selesai lokal 25 Sep: T1/T3/T4 diperbaiki, unit 18/18 + build/PWA lulus; T2 dan verifikasi manual tetap terbuka | **Gate:** putuskan/tutup Z19-T2 dengan gate uang; verifikasi kegagalan parsial, stale, dan scope periode pada runtime; OWNER 1024/1280/1440 px + touch/keyboard/Axe dan CTA; bukti: [audit Z-19](audit/owner-dashboard-z19-2026-09-25.md)
 
 **Rekap:** 23 `[ ]` = fase changelog 2 · fase AO 8 · fase EF 7 · fase lama 6 (ID unik 21; AO-13 dan AO-14 muncul dua kali).
 
