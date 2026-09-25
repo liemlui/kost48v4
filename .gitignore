@@ -8,8 +8,10 @@ coverage/
 *.tsbuildinfo
 backend/client/
 deploy/
+deploy-static/
 kost48-deploy.tgz
 kost48-deploy-bundled.tgz
+kost48-static-bundled.tgz
 
 # Generated sources
 src/generated/

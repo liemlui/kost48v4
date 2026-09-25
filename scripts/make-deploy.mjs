@@ -21,11 +21,18 @@ import { createHash } from 'node:crypto';
 
 const isWin = process.platform === 'win32';
 const npm = isWin ? 'npm.cmd' : 'npm';
-const OUT = 'deploy';
-const ARCHIVE = 'kost48-deploy-bundled.tgz';
+const profileArg = process.argv.find((arg) => arg.startsWith('--profile='));
+const PROFILE = profileArg ? profileArg.slice('--profile='.length) : 'combined';
+if (!['combined', 'static'].includes(PROFILE)) {
+  console.error('[deploy] GAGAL: profil harus `combined` atau `static`.');
+  process.exit(2);
+}
+const OUT = PROFILE === 'static' ? 'deploy-static' : 'deploy';
+const ARCHIVE = PROFILE === 'static' ? 'kost48-static-bundled.tgz' : 'kost48-deploy-bundled.tgz';
 const STALE_ARCHIVE = 'kost48-deploy.tgz';
 const ARCHIVE_TMP = ARCHIVE + '.tmp';
 const BUILD_MARKER = '.kost48-build-manifest.json';
+const PROFILE_MARKER = '.kost48-package-profile.json';
 const NO_BUILD = process.argv.includes('--no-build');
 
 const BUILD_TARGETS = {
@@ -139,9 +146,10 @@ function fingerprintInputs(paths) {
   return { sha256: hash.digest('hex'), fileCount: files.length };
 }
 
-function writeBuildMarkers() {
+function writeBuildMarkers(targets = Object.keys(BUILD_TARGETS)) {
   const createdAt = new Date().toISOString();
-  for (const [target, config] of Object.entries(BUILD_TARGETS)) {
+  for (const target of targets) {
+    const config = BUILD_TARGETS[target];
     const fingerprint = fingerprintInputs(config.inputs);
     writeJson(config.marker, {
       version: 1,
@@ -153,8 +161,9 @@ function writeBuildMarkers() {
   }
 }
 
-function verifyFreshBuilds() {
-  for (const [target, config] of Object.entries(BUILD_TARGETS)) {
+function verifyFreshBuilds(targets = Object.keys(BUILD_TARGETS)) {
+  for (const target of targets) {
+    const config = BUILD_TARGETS[target];
     for (const output of config.outputs) {
       requirePath(output, 'Jalankan `npm run make-deploy` agar build dibuat ulang.');
     }
@@ -185,6 +194,17 @@ function invalidateOldPackagingOutputs() {
   rmSync(ARCHIVE_TMP, { force: true });
   rmSync(STALE_ARCHIVE, { force: true });
   rmSync(OUT, { recursive: true, force: true });
+}
+
+function writePackageProfile() {
+  writeJson(OUT + '/' + PROFILE_MARKER, {
+    version: 1,
+    profile: PROFILE,
+    createdAt: new Date().toISOString(),
+    contents: PROFILE === 'static'
+      ? 'Vite public document root only'
+      : 'NestJS application root with embedded client and runtime dependencies',
+  });
 }
 
 function writeDeployPackageFiles() {
@@ -353,8 +373,10 @@ function verifyNoLongLivedIotStream() {
     }
   }
 
-  scan(OUT + '/dist');
-  scan(OUT + '/client');
+  const scanRoots = PROFILE === 'static' ? [OUT] : [OUT + '/dist', OUT + '/client'];
+  for (const dir of scanRoots) {
+    if (existsSync(dir)) scan(dir);
+  }
   if (matches.length > 0) {
     fail('runtime deploy masih memuat stream IoT jangka panjang: ' + matches.slice(0, 8).join(', '));
   }
@@ -384,15 +406,19 @@ function createVerifiedArchive() {
       .map((entry) => entry.replaceAll('\\', '/').replace(/^\.\//, '').replace(/\/$/, ''))
       .filter(Boolean),
   );
-  for (const required of [
-    'dist/main.js',
-    'client/index.html',
-    'package.json',
-    'package-lock.json',
-    'node_modules/.package-lock.json',
-    'node_modules/@nestjs/common/package.json',
-    'node_modules/@prisma/adapter-pg/package.json',
-  ]) {
+  const requiredEntries = PROFILE === 'static'
+    ? ['index.html', PROFILE_MARKER]
+    : [
+      'dist/main.js',
+      'client/index.html',
+      'package.json',
+      'package-lock.json',
+      'node_modules/.package-lock.json',
+      'node_modules/@nestjs/common/package.json',
+      'node_modules/@prisma/adapter-pg/package.json',
+      PROFILE_MARKER,
+    ];
+  for (const required of requiredEntries) {
     if (!entries.has(required)) {
       rmSync(ARCHIVE_TMP, { force: true });
       fail('arsip tidak lengkap: `' + required + '` tidak ditemukan.');
@@ -434,6 +460,29 @@ function createVerifiedArchive() {
 
 invalidateOldPackagingOutputs();
 
+if (PROFILE === 'static') {
+  if (NO_BUILD) {
+    console.log('[deploy:static] 1/4 verifikasi build frontend existing (--no-build)...');
+    verifyFreshBuilds(['frontend']);
+  } else {
+    writeFileSync('frontend/.env.production.local', '# auto (deploy static) — jangan commit\nVITE_API_BASE_URL=/api\n');
+    run('1/4 build frontend static (VITE_API_BASE_URL=/api)...', npm, ['run', 'build'], 'frontend');
+    writeBuildMarkers(['frontend']);
+  }
+  console.log('[deploy:static] 2/4 salin frontend/dist sebagai document root publik...');
+  mkdirSync(OUT, { recursive: true });
+  cpSync('frontend/dist', OUT, {
+    recursive: true,
+    filter: (src) => !src.endsWith(BUILD_MARKER),
+  });
+  writePackageProfile();
+  verifyNoLongLivedIotStream();
+  console.log('[deploy:static] 3/4 verifikasi batas publik dan buat arsip...');
+  createVerifiedArchive();
+  console.log('[deploy:static] 4/4 SELESAI: ' + ARCHIVE + ' (' + countFiles(OUT) + ' file)');
+  process.exit(0);
+}
+
 if (NO_BUILD) {
   console.log('[deploy] 1/6 verifikasi build existing (--no-build)...');
   verifyFreshBuilds();
@@ -470,6 +519,7 @@ cpSync('frontend/dist', OUT + '/client', {
   filter: (src) => !src.endsWith(BUILD_MARKER),
 });
 verifyNoLongLivedIotStream();
+writePackageProfile();
 
 run('5/6 buat package-lock runtime produksi...', npm, ['install', '--package-lock-only', '--omit=dev', '--omit=optional', '--ignore-scripts', '--no-audit', '--no-fund', '--progress=false'], OUT);
 validateDeployLock();

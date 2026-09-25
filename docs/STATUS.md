@@ -45,7 +45,7 @@ Format: **ID** — judul | **Gate** (verifikasi wajib sebelum `[x]`). 🧑 = but
 - [ ] **AO-14** - audit final setelah AO-01..13 dan AO-15..23 memenuhi DoD | **Gate:** publik + OWNER/ADMIN/STAFF + dua state TENANT, viewport 320-1440 px, Axe/gate Baymard, build/test relevan, screenshot aman
 - [ ] **EF-00 P0** - baseline deployment: konfigurasi panel dan limit/snapshot resource | **Gate:** SHA artefak yang berjalan, jam deploy, perilaku runtime EF-01/03/05, fault/interval pengukuran
 - [ ] **EF-02 P0** - baseline workload host | **Gate:** butuh izin server; skenario, rentang waktu, jenis angka, resource/fault, artefak tercatat
-- [ ] **EF-04 P2** - profil paket static | **Gate:** paket dan kedua profil diverifikasi setelah implementasi diizinkan
+- [x] **EF-04 P2** - profil paket static selesai lokal 25 Sep | **Bukti:** profil `combined` + `static`, manifest eksplisit, batas private/public, dan kedua arsip terverifikasi; deployment/runtime host tetap UNKNOWN
 - [ ] **EF-06 P2** - kontrak routing/canary | **Gate:** canary/bucket routing diuji dengan izin; tanpa perubahan DB
 - [ ] **EF-07 P1** - konfigurasi efektif env/DB | **Gate:** uji formal flag false vs DB true; jangan hapus key; inbox/pengumuman tetap bekerja
 - [ ] **EF-08 P2** - lifecycle/peak | **Gate:** shutdown pool/timer + idempotensi diuji runtime; jangan jalankan server/UAT
@@ -57,9 +57,11 @@ Format: **ID** — judul | **Gate** (verifikasi wajib sebelum `[x]`). 🧑 = but
 - [ ] **A6** - smoke test produksi: login OWNER, public rooms 200, trial balance, recon | **Gate:** trial balance isBalanced, recon mismatch 0, readiness tanpa blocker merah
 - [ ] **Z-19** - T1..T4 selesai lokal 25 Sep; gate uang 147/147, frontend 18/18, build/PWA lulus; hanya verifikasi manual/runtime terbuka | **Gate:** verifikasi kegagalan parsial, stale, scope periode, dan rekonsiliasi KPI-tren pada runtime; OWNER 1024/1280/1440 px + touch/keyboard/Axe dan CTA; bukti: [audit Z-19](audit/owner-dashboard-z19-2026-09-25.md)
 
-**Rekap:** 23 `[ ]` = fase changelog 2 · fase AO 8 · fase EF 7 · fase lama 6 (ID unik 21; AO-13 dan AO-14 muncul dua kali).
+**Rekap:** 22 `[ ]` = fase changelog 2 · fase AO 8 · fase EF 6 · fase lama 6 (ID unik 20; AO-13 dan AO-14 muncul dua kali).
 
 ## 4. Task selesai terbaru (bukti bertanggal)
+
+- **25 Sep 2026 — EF-04 profil paket static selesai lokal:** `make-deploy.mjs` kini menerima `--profile=combined|static`; default `combined` mempertahankan output lama, sedangkan `static` membuat document-root Vite tanpa backend, Prisma, dependency runtime, `.env`, atau `uploads`. Kedua paket memuat `.kost48-package-profile.json`; daftar file wajib arsip menyesuaikan profil. Script npm static dan ignore artefak ditambahkan. **Verifikasi:** syntax check lulus; profil static build/PWA `6Cew0mAeh7xs` + arsip 308 file lulus; profil combined build penuh + arsip 9.645 file lulus; profil invalid ditolak exit 2; pemindaian arsip static menemukan 0 path private. Deployment/runtime host tidak dilakukan.
 
 - **25 Sep 2026 — IMPACT-01 review independen + FIX-A:** permission endpoint OWNER/ADMIN, sumber angka bersama, alur preview→approve, dan referensi transaksi diperiksa statis. Ditemukan satu gap SEDANG: kegagalan preview tidak memblokir approve. UI kini menonaktifkan approve sampai preview backend tersedia dan menampilkan blocker eksplisit ketika gagal; kontrak API, schema, nominal, jurnal, serta permission tidak berubah. **Verifikasi:** frontend target 3/3 lulus; gate uang backend `npm run test:unit` exit 0 dengan build penuh + 147/147 lulus. Runtime/browser/DB tetap UNKNOWN. Bukti: [review IMPACT-01](audit/payment-impact-review-2026-09-25.md).
 
@@ -157,8 +159,8 @@ Daftar lengkap dan status berlaku/digantikan: [KEPUTUSAN-OWNER.md](KEPUTUSAN-OWN
 
 | Invariant | Nilai | Cara cek |
 |---|---|---|
-| Task terbuka aktif | **23** `[ ]` | hitung `- [ ]` di file ini (§3) |
-| Task selesai historis | **112** `[x]` | `docs/history/**` + `docs/arsip/**` (101 baseline DOCS-CLEANUP-1 + audit BE-002 + verifikasi negatif wrapper = 103; +1 entri audit Z-19 milik task lain yang belum di-commit; +1 entri VERIFY-BE-002-T6T7 25 Sep 2026; +1 entri verifikasi P1-04..P1-09 25 Sep 2026; +1 entri REGRESI-BE002-T3 25 Sep 2026; +1 entri Z19-FIX-A (commit `1653c020`, sesi lain) 25 Sep 2026; +1 entri perbaikan P1-04/P1-09 25 Sep 2026; +1 entri Z19-FIX-B (sesi Z-19, `7cf0fe62`) 25 Sep 2026; +1 entri Z19-T2 25 Sep 2026; +1 entri VERIFY-T6T7-DB 25 Sep 2026) |
+| Task terbuka aktif | **22** `[ ]` | hitung `- [ ]` di file ini (§3) |
+| Task selesai historis | **116** `[x]` | hitung `- [x]` pada `docs/history/**` + `docs/arsip/**`; EF-04 mengubah satu task historis terbuka menjadi selesai dan menambah entri changelog pada 25 Sep 2026 |
 | Gate domain | **12** | baris cocok pola `pretest:unit\|test:unit\|gate M04` di file ini + 7 berkas riwayat — setelah DOCS-CLEANUP-1: 3 di antaranya berada di `docs/arsip/` dan 2 digabung, dihitung di rumah barunya |
 | Kebersihan diff | `git diff --check` exit 0 | sebelum commit dokumentasi |
 
