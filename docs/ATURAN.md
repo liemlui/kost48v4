@@ -34,7 +34,7 @@ Berkas rinci juga memuat **bukti audit bertanggal** dari era M (mis. `## Audit 3
 - Runbook deploy, produksi, go-live, env, data master: [OPERASI.md](OPERASI.md).
 - Status audit dan temuan bertanggal: [AUDIT.md](AUDIT.md).
 - Keputusan bisnis owner (nominal, DP/deposit, harga, utang-piutang, gate uang/huni): [KEPUTUSAN-OWNER](KEPUTUSAN-OWNER.md).
-- Riwayat dan changelog berjalan: [history/](history/); bukti bulk kanonik: [arsip/](arsip/README.md); `docs/archieve/` hanya legacy yang dipertahankan atas keputusan owner.
+- Riwayat dan changelog berjalan: [history/](history/); bukti bulk kanonik: [arsip/](arsip/README.md); arsip legacy kini di `docs/arsip/legacy/` (dulu `docs/archieve/`, dipindah batch B2 2026-10-05).
 - Verifikasi uang (harness, DO-NOT-TOUCH, gate per-task): [operations/verifikasi-keuangan.md](operations/verifikasi-keuangan.md) + gate uang di [STATUS §7](STATUS.md).
 
 ## 4. Provenance

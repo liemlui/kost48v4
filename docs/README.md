@@ -99,7 +99,7 @@ Indeks dan status ringkasan audit: [audit/README.md](audit/README.md). Hasil aud
 | Bukti migrasi dokumen per sub-langkah (arsip) | [arsip/DOC-GOV-20260922-mapping.md](arsip/DOC-GOV-20260922-mapping.md) |
 | Rancangan penataan dokumentasi (selesai; di arsip) | [arsip/DOC-GOV-20260922.md](arsip/DOC-GOV-20260922.md) |
 | Indeks rumah arsip — **jangan dibaca rutin** | [arsip/README.md](arsip/README.md) |
-| Forensik dokumen lama (ejaan folder dipertahankan; status arsip di [STATUS §8](STATUS.md#8-struktur-dokumen-tujuan-konsolidasi)) | `docs/archieve/` — hanya bila benar-benar perlu |
+| Forensik dokumen lama (arsip legacy dipindah ke `docs/arsip/legacy/` pada batch B2 2026-10-05; status arsip di [STATUS §8](STATUS.md#8-struktur-dokumen-tujuan-konsolidasi)) | [arsip/README.md](arsip/README.md) — hanya bila benar-benar perlu |
 
 ## 6. Pintu masuk lama (sudah dihapus)
 

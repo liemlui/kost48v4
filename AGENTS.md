@@ -91,7 +91,7 @@ Batas baca mencakup file unik per tahap; anggaran token indikatif bukan jaminan 
 - Dahulukan rg untuk simbol/import/error, lalu baca potongan yang menjawab pertanyaan.
 - Hitung setiap file yang isinya masuk konteks, termasuk docs/config dan hasil rg; nama hasil listing tidak dihitung.
 - Jangan memuat seluruh seri M lama, riwayat panjang, lockfile, atau semua source sebagai orientasi.
-- docs/archieve/*, reference/*, backend/src/generated/*, dan seluruh node_modules tidak dibaca rutin.
+- Arsip legacy (`docs/arsip/legacy/*`, dulu `docs/archieve/`), sisa `docs/archieve/*` yang menunggu dipindah owner, `reference/*`, `backend/src/generated/*`, dan seluruh node_modules tidak dibaca rutin.
 - Jika batas tercapai sebelum dampak dipahami, pecah tahap atau nilai ulang level; jangan menebak agar masuk anggaran.
 - Instruksi wajib tetap dibaca; jelaskan bila kebutuhan tersebut melampaui batas konteks.
 - Gunakan ringkasan modul sebagai navigasi; pastikan bukti masih sesuai source/config/dependensi yang relevan.

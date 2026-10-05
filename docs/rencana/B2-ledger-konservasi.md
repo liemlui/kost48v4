@@ -92,3 +92,30 @@ Select-String -Path docs/arsip/legacy/**/*.md -Pattern 'Owner#2026|admin123|staf
 | Tanggal | Perubahan |
 |---|---|
 | 2026-10-05 | Dibuat saat B2.1: 39 berkas dipindah (37 identik, 2 transformasi sanitasi), semuanya tracked. |
+## 6. Eksekusi B2.2 dan B2.3 (ringkas)
+
+| Langkah | Commit | Hasil | Verifikasi |
+|---|---|---|---|
+| B2.2 alih rujukan | `59e04736` | 60 kemunculan `archieve/<berkas>.md` → `arsip/legacy/<berkas>.md` di 23 dokumen aktif (20 berkas ikut ter-commit). Klaster: kontrak 18 · PETA-KODE 7 · flow/publik/ai/KEPUTUSAN-OWNER 15 · sisanya 20 | gate tiap klaster; R2 (tautan mati) **0 → 0**; total pelanggaran 23 + 1 dilewati |
+| B2.3 bersih-bersih | (commit ini) | Pernyataan struktur diperbarui: `AGENTS.md` §6 · `docs/ATURAN.md` · `docs/README.md` · `docs/product/orientasi.md` · `docs/arsip/README.md` (inventaris `legacy/`) | gate: R5 kembali ke 5 setelah plan dirampingkan; total 23 + 1 dilewati |
+
+**Penyimpangan yang dicatat (bukan disembunyikan):**
+
+1. **Commit B2.2 memuat 7 berkas dokumentasi tertunda milik owner** (perintah `git add -u -- docs` terlalu luas). Isi tidak hilang; cabang `docs-rombak` belum di-push; 2 berkas source owner tetap belum di-commit. Pemisahan riwayat tersedia atas permintaan owner.
+2. **Baris `docs/archieve/` di `.git/info/exclude` sengaja belum dihapus** (P5 dieksekusi setelah kelas C dipindah owner) supaya ~62 berkas untracked tidak membanjiri `git status`.
+3. **4 sitasi ke berkas yang memang tidak ada** dibiarkan (rusak sebelum B2): `_DEPRECATED_05_UIUX_AUDIT_2026-06-12.md`, `_DEPRECATED_06_DEPLOY_RUNBOOK.md`, `_DEPRECATED_08_PWA_AUDIT_AND_HARDENING_PLAN_2026-06-12.md` (pernah ada di riwayat git), dan `M13_CHANGELOG_ARSIP_S1_2026.md` (tidak pernah ada; nama benarnya `_previous_cycles/M11_CHANGELOG_ARSIP_S1_2026.md`).
+4. **Dua dokumen operasional menyebut `08_CHECKLIST` berdasarkan nama** (`operations/deploy-go-live.md` baris 20; `operations/verifikasi-keuangan.md` baris 117) — setelah berkas itu keluar repo, keduanya menunjuk berkas yang tidak ada. Dibiarkan sebagai rujukan historis.
+
+## 7. Angka checkpoint
+
+| Ukuran | Sebelum B2 | Sesudah B2 |
+|---|---:|---:|
+| `archieve/` di dokumen aktif (tanpa `docs/rencana`) | 93 | **34** |
+| — di antaranya catatan historis/keputusan (dibiarkan) | — | 26 |
+| — pernyataan struktur yang menyebut sisa folder (sengaja, akurat) | — | 5 |
+| — sitasi rusak pra-eksisting | — | 3 |
+| `archieve/` di `docs/rencana` (peta sumber, tidak ditulis ulang) | 120 | 127 |
+| `archieve/` di arsip beku (dibiarkan, P15) | 76 | 116 |
+| Tautan mati (gate R2) | 0 | **0** |
+| Pelanggaran gate | 23 + 1 dilewati | **23 + 1 dilewati** (setelah plan dirampingkan) |
+| Berkas dipindah & tracked di `docs/arsip/legacy/` | 0 | **39** |

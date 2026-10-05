@@ -20,7 +20,7 @@ Rujukan: [KEPUTUSAN-OWNER](../KEPUTUSAN-OWNER.md) · [STATUS](../STATUS.md) · [
 7. [product/scope.md](scope.md) dan [product/portal-owner-admin.md](portal-owner-admin.md) — scope per role/flow dan prinsip portal ringkas.
 8. [docs/README.md](../README.md) — indeks navigasi lengkap; peta path lama (M00–M20) ke rumah kanonik ada di §6.
 
-Hindari membaca arsip besar kecuali benar-benar perlu forensik: `docs/archieve/*`, file `*_STALE.md`, `reference/*`, dan `backend/src/generated/*`.
+Hindari membaca arsip besar kecuali benar-benar perlu forensik: `docs/arsip/legacy/*` (arsip legacy, dulu `docs/archieve/`), sisa `docs/archieve/*` yang menunggu dipindah owner, file `*_STALE.md`, `reference/*`, dan `backend/src/generated/*`.
 
 ## 1. Identitas & Model Bisnis
 

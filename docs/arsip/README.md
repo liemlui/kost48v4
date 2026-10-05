@@ -18,13 +18,14 @@
 | [DOC-GOV-20260922-batch-scope.md](DOC-GOV-20260922-batch-scope.md) | `docs/plans/` | Memo scope batch S2.b3/S2.b4 (DRAFT; batch sudah selesai) |
 | [audit-uiux-lintas-portal-2026-07.md](audit-uiux-lintas-portal-2026-07.md) | `docs/audit/` | Bukti bulk audit UI/UX lintas portal (AO-00..AO-23) |
 | [audit-uiux-total-2026-09-12.md](audit-uiux-total-2026-09-12.md) | `docs/audit/` | Bukti bulk audit UI/UX total 12 Sep 2026 |
+| [legacy/](legacy/) | `docs/archieve/` | **Arsip legacy yang dikutip dokumen aktif** — 39 berkas, subfolder asli dipertahankan (batch B2, 2026-10-05). Ledger konservasi 39 baris (SHA-256 sebelum/sesudah): [B2-ledger-konservasi.md](../rencana/B2-ledger-konservasi.md). 2 berkas di antaranya **transformasi** (kata sandi DEV diredaksi, P33/Q31-9) — SHA-nya memang berbeda |
 
 Changelog bulanan yang **masih berjalan** tetap di `docs/history/changelog/2026-09.md` (menerima rotasi entri M13).
 
 ## 2. Yang bukan arsip ini
 
-- `docs/archieve/**` - arsip legacy dengan ejaan apa adanya (107 berkas di disk; **31 tracked**, 76 lainnya di-exclude **lokal** lewat `.git/info/exclude` L9 sehingga di clone bersih tampak untracked). **Tidak disentuh** dan ejaan tidak diseragamkan - keputusan owner 24 Sep 2026 (`ARSIP-BATAS`).
-- `docs/audit-map/**` - **generated dan untracked** (1.126 berkas, 0 tracked), di-ignore `.gitignore` L87 (`/docs/audit-map/`); dipakai 135+ tautan peta per ID audit. **Jangan dihapus**, jangan dipindah ke repo, dan jangan dianggap bagian repo; regenerasi `node docs/audit-map/generate.cjs` - keputusan owner 24 Sep 2026 (`ARSIP-BATAS`).
+- `docs/archieve/**` - **sisa yang menunggu dipindah keluar repo**: 68 berkas di disk (**7 tracked**, 61 untracked lokal). Sejak batch B2 (2026-10-05) arsip legacy yang **dikutip dokumen aktif** sudah pindah ke [`legacy/`](legacy/) (39 berkas). Sisa 66 berkas kelas C + `08_CHECKLIST.md` **keluar repo** (eksekusi owner; daftar + perintah: [B2-daftar-pindah-arsip-legacy.md](../rencana/B2-daftar-pindah-arsip-legacy.md) §6.2). Baris `docs/archieve/` di `.git/info/exclude` **sengaja belum dihapus** sampai pemindahan itu selesai - kalau dihapus lebih dulu, ~62 berkas untracked membanjiri `git status`. Keputusan lama `ARSIP-BATAS` (24 Sep 2026) digantikan rencana rombak dokumentasi 2026-10-05.
+- `docs/audit-map/**` - **generated dan untracked** (1.126 berkas, 0 tracked), di-ignore `.gitignore` L89 (`/docs/audit-map/`); dipakai 135+ tautan peta per ID audit. **Jangan dihapus** dan jangan dianggap bagian repo; regenerasi `node docs/audit-map/generate.cjs`. Rencana batch **B3** memindahkannya keluar dari `docs/` (target `.audit-map/` di akar repo) dan men-track generatornya.
 
 ## 3. Aturan
 

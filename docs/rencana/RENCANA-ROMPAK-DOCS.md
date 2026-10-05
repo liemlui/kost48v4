@@ -12,15 +12,12 @@ kebijakan `ARSIP-BATAS` (24 Sep 2026) serta target "7 berkas utama + 1 arsip" pa
 
 | Ukuran | Angka |
 |---|---:|
-| `docs/**` (semua) | 1.291 berkas `.md` · 7,3 MB · ≈1,87 juta token (proksi `byte/4`) |
-| `docs/audit-map/` | 1.123 berkas · 4,0 MB — generated, **untracked**, `.gitignore` L89 |
-| `docs/archieve/` (ejaan legacy) | 106 berkas · 1,46 MB — **31 tracked**, 76 untracked (`.git/info/exclude`) |
-| `docs/arsip/` | 12 berkas · 490 KB |
-| `docs/history/` | 5 berkas · 355 KB — `changelog/2026-09.md` sendiri **303 KB / 785 baris** |
-| **Jalur baca "panas"** (root + 8 berkas `docs/` + domain + operations + product + audit) | **50 berkas · 1.037 KB · ≈265 rb token** |
-| Berkas `.md` tracked | 97 |
-| Kotak terbuka | **1.447 `[ ]` di `docs/**`** vs invariant `STATUS.md` §7 yang menyatakan **29** |
-| Tautan markdown di `docs/**` | 5.405 · referensi `audit-map` 219 · referensi `archieve` 181 di 28 berkas aktif |
+| `docs/**` seluruhnya (sebelum B2) | 1.291 berkas `.md` · 7,3 MB · ≈1,87 juta token (proksi `byte/4`) |
+| **Jalur baca "panas"** (yang benar-benar mungkin dibaca sesi baru) | **50 berkas · 1.037 KB · ≈265 rb token** |
+| Kotak terbuka di `docs/**` | 1.447 `[ ]` — vs **29** yang otoritatif |
+| `docs/archieve/` (legacy) · `docs/audit-map/` (generated) | 106 berkas/1,46 MB · 1.123 berkas/4,0 MB |
+
+Rincian per berkas ada di [kartu keputusan](PERTANYAAN-ROMPAK.md) §1 dan kartu baseline gate.
 
 **Temuan yang mengubah dua keputusan (Q9, Q26):** baris **bukan** proksi biaya yang sah.
 `docs/STATUS.md` hanya **147 baris** tetapi **78,4 KB** (533 byte/baris); `docs/audit/audit-checklist-total.md`
@@ -100,7 +97,14 @@ Daftar pindah + perintah siap-jalan: `docs/rencana/B2-daftar-pindah-arsip-legacy
 Temuan yang perlu dibaca sebelum memindahkan: berkas kelas A dikutip **oleh `docs/domain/flow.md`, `docs/domain/kontrak.md`, dan `docs/PETA-KODE.md`** sebagai rujukan eksplisit,
 jadi pemindahan menuntut alih ~181 kemunculan `archieve` di 28 berkas aktif — dan beberapa di antaranya mungkin lebih tepat **diserap** ke dokumen aktif daripada sekadar diarsipkan.
 
-B2 eksekusi–B8 **belum**; menunggu perintah.
+**B2 eksekusi ✅** (2026-10-05, 3 commit — rincian per commit di [ledger](B2-ledger-konservasi.md) §6):
+
+- **B2.1 `2971efa7`** — 39 berkas pindah ke `docs/arsip/legacy/`; **37 identik SHA-256**, **2 transformasi** (redaksi kredensial, sisa 0); 15 berkas untracked kini tracked (P4=a).
+- **B2.2 `59e04736`** — **60 rujukan dialihkan** di 23 dokumen aktif, bertahap 4 klaster + gate tiap klaster (P7). Rujukan hanya dialihkan bila targetnya ada; 4 dibiarkan (lihat §4.1).
+- **B2.3** (putaran ini) — pernyataan struktur diperbarui di `AGENTS.md` §6, `docs/ATURAN.md`, `docs/README.md`, `docs/product/orientasi.md`, `docs/arsip/README.md`.
+- **Menunggu owner:** 66 berkas kelas C + `08_CHECKLIST.md` keluar repo (§6.2 daftar B2) → lalu hapus baris `docs/archieve/` di `.git/info/exclude` (penyimpangan P5 yang disetujui) dan folder `docs/archieve/` di B8 (P11).
+
+B3–B8 **belum**; menunggu perintah.
 
 ### 4.1 Ledger perbaikan di luar batch
 
@@ -112,6 +116,9 @@ B2 eksekusi–B8 **belum**; menunggu perintah.
 | **R1** `docs/domain/keuangan.md:126–127` (2 baris angka test basi) | temuan gate yang nyata | **dibuka** — ditutup di **B5** |
 | **R5** `docs/domain/publik.md` 48,7 KB tanpa TOC | temuan gate | **dibuka** — ditutup di **B8** dengan TOC berjangkar (bukan dipecah) |
 | **Exception tertulis** `docs/rencana/B2-daftar-pindah-arsip-legacy.md` 31,2 KB > plafon berkas kerja batch 16 KB | daftar kerja sementara (keputusan **P8**: biarkan sampai B8) | **diterima sadar** — gate **tetap** melaporkannya sebagai pelanggaran (plafon tidak dilemahkan, sesuai D3); ditutup di **B8** ketika berkasnya jadi kartu arsip ber-banner tanpa blok perintah. Sejak gate v1.3, R5 mencakup `docs/rencana/**`. |
+| **B2 — commit `59e04736` memuat 7 berkas dokumentasi tertunda milik owner** (`STATUS.md`, `KEPUTUSAN-OWNER.md`, `domain/ai.md`, `history/changelog/2026-09.md`, `product/portal-owner-admin.md`, `AUDIT.md`, `audit/README.md`) | **kesalahan agen:** perintah `git add -u -- docs` men-stage **semua** berkas docs yang termodifikasi, bukan hanya hasil alih rujukan | **dilaporkan** (tidak disembunyikan). Isi **tidak hilang** — ada di riwayat cabang `docs-rombak` yang belum di-push; 2 berkas source owner (`MyManualPage.tsx`, `CekPage.tsx`) tetap **belum** di-commit. Pemisahan riwayat (dua commit: konten owner vs alih rujukan) **tersedia atas permintaan owner** — tidak dijalankan sepihak karena menuntut bedah ulang isi berkas milik owner |
+| **4 sitasi ke berkas yang memang tidak ada** (`_DEPRECATED_05_UIUX_AUDIT_2026-06-12.md`, `_DEPRECATED_06_DEPLOY_RUNBOOK.md`, `_DEPRECATED_08_PWA_AUDIT_AND_HARDENING_PLAN_2026-06-12.md` — pernah ada di riwayat git, tidak di disk; `M13_CHANGELOG_ARSIP_S1_2026.md` — tidak pernah ada; nama benarnya `_previous_cycles/M11_CHANGELOG_ARSIP_S1_2026.md`) | ditemukan saat B2.2; **bukan** akibat B2 (rusak sebelum rombak) | dibiarkan + dicatat; penutupnya **tugas tersendiri** (perlu keputusan: perbaiki rujukan atau tandai usang) |
+| **Baris `docs/archieve/` di `.git/info/exclude`** | P5: dihapus **setelah** kelas C dipindah (penyimpangan yang disetujui owner 2026-10-05) | **belum dihapus** oleh desain: kalau dihapus sekarang, ~62 berkas untracked membanjiri `git status`. Verifikasi penutup nanti: `git check-ignore -v docs/archieve/<berkas>` harus kosong |
 
 **Kesiapan rumah arsip (diverifikasi 2026-10-05):** `docs/arsip/` **siap** menjadi rumah final — punya `README.md` dengan
 aturan + inventaris, dan **11 dari 11** berkas isinya terdaftar di README (syarat Q19-v). B2 karena itu tidak perlu
@@ -151,29 +158,11 @@ menyiapkan rumahnya, hanya memverifikasi **sitasi** dan menyiapkan daftar pindah
 
 ## 7. Nilai yang wajib selamat (Q31)
 
-1. Invariant uang & jurnal + gate `backend npm run test:unit` (hook `pretest:unit`) dan gate M04.
-2. Permission/role & status hunian.
-3. Keputusan bisnis owner yang masih berlaku.
-4. Bukti audit bertanggal + batas keberlakuannya.
-5. Larangan menyentuh berkas/simbol berisiko tanpa izin.
-6. Pemisahan implementasi lokal vs verifikasi lokal vs deployment vs dampak runtime.
-7. Landasan bisnis IB Diploma (`docs/product/arah-produk.md`).
-8. Aturan arsip "jangan dibaca rutin".
-9. Larangan menaruh kredensial/rahasia di dokumen.
-10. Daftar berkas/simbol berisiko yang tidak boleh disentuh tanpa izin.
-11. Alur deploy/rollback operasional.
-12. Audit trail: setiap keputusan punya tanggal + bukti yang bisa dijalankan.
+Daftar 12 nilai (uang · hunian/permission · keputusan owner · bukti audit · berkas berisiko · pemisahan status verifikasi · landasan IB · aturan arsip · larangan kredensial · berkas beku · deploy/rollback · audit trail) ada di [kartu keputusan](PERTANYAAN-ROMPAK.md) §4 — dirujuk di sini agar tidak ada dua daftar yang bisa menyimpang.
 
 ## 8. Ukuran keberhasilan (Q32)
 
-| # | Ukuran | Target |
-|---|---|---|
-| a | Jalur baca wajib | dari **50 berkas/1.037 KB** → **≤12 berkas/≤150 KB** |
-| b | Kotak `[ ]` otoritatif | hanya di `docs/ANTREAN.md` |
-| c | Dokumen usang di folder aktif | **0** (punya banner atau sudah pindah) |
-| d | Gate dokumen | bisa gagal, **dan pernah dibuktikan gagal** (baseline B1 tersimpan) |
-| e | Baseline B1 | tersimpan sebagai `docs/arsip/audit/gate-baseline-2026-10-05.md` |
-| f | Uji nyata Q30 | dijalankan di B8 (sesi baru + 1 tugas, ukur berkas+byte dibaca), bukan dijanjikan |
+**(a)** jalur wajib 50 berkas/1.037 KB → **≤12 berkas/≤150 KB** · **(b)** kotak otoritatif hanya di `docs/ANTREAN.md` · **(c)** 0 dokumen usang di folder aktif · **(d)** gate bisa gagal **dan pernah terbukti gagal** (baseline B1) · **(e)** baseline tersimpan sebagai berkas · **(f)** uji nyata Q30 dijalankan di B8. Rincian di [kartu keputusan](PERTANYAAN-ROMPAK.md) §4.
 
 ---
 
