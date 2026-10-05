@@ -3,7 +3,7 @@
 Tanggal: 2026-09-23
 Status: aktif
 Tujuan: arahan & aturan permukaan publik dan pertumbuhan — marketing, UI/UX publik, loyalitas/gamifikasi, referral, tip staf, proposal growth (dari M07)
-Rujukan: [KEPUTUSAN-OWNER](../KEPUTUSAN-OWNER.md) · [STATUS](../STATUS.md) · [publik](publik.md) · [keuangan.md](keuangan.md) · [operasional.md](operasional.md) · [ai.md](ai.md)
+Rujukan: [KEPUTUSAN-OWNER](../KEPUTUSAN-OWNER.md) · [STATUS](../ANTREAN.md) · [publik](publik.md) · [keuangan.md](keuangan.md) · [operasional.md](operasional.md) · [ai.md](ai.md)
 
 **Daftar isi**
 
@@ -40,11 +40,11 @@ Semua fitur publik/marketing/gamifikasi telah terverifikasi dalam audit 360° P7
 
 ## Update 2026-06-17 — AUDIT KEUANGAN ULTRA ✅
 
-MKT-4 CAC/CLV Dashboard selesai (DeepSeek V4 Pro + offline fallback). Audit keuangan LULUS — akuntansi akurat mendukung insight marketing. Detail: `docs/M04_KEUANGAN.md`.
+MKT-4 CAC/CLV Dashboard selesai (DeepSeek V4 Pro + offline fallback). Audit keuangan LULUS — akuntansi akurat mendukung insight marketing. Detail: `docs/domain/keuangan.md`.
 
 ## Update 2026-06-19 - Fase G AI Marketing & FAQ
 
-Analisa pasar AI yang sudah ada menjadi bagian Fase G `docs/M09_AI_OWNER_ADMIN.md`. Semua AI marketing tetap manual lewat tombol, OWNER/ADMIN only, hemat token, dan memiliki fallback offline. Default model baru disarankan `deepseek-v4-flash`; model berat hanya untuk analisa strategis/finance Owner-only.
+Analisa pasar AI yang sudah ada menjadi bagian Fase G `docs/domain/ai.md`. Semua AI marketing tetap manual lewat tombol, OWNER/ADMIN only, hemat token, dan memiliki fallback offline. Default model baru disarankan `deepseek-v4-flash`; model berat hanya untuk analisa strategis/finance Owner-only.
 
 - **Market analysis:** SWOT/PESTLE/Competitor tetap owner-triggered; jangan auto-run saat halaman dibuka.
 - **CAC/CLV:** AI hanya memberi insight naratif dari snapshot agregat; jangan mengarang paid CAC jika biaya iklan belum diinput.

@@ -2,10 +2,10 @@
 
 Tanggal: 23 September 2026
 Status: Kanonik untuk nilai default DEV, konstanta operasional, data master lapangan, dan referensi seed.
-Tujuan: Rumah kanonik materi referensi master asal `docs/M11_DEFAULT_DATA.md` (data mentah lapangan, nilai default, FAQ, data tenant produksi, audit fasilitas).
+Tujuan: Rumah kanonik materi referensi master asal `docs/operations/data-master.md` (data mentah lapangan, nilai default, FAQ, data tenant produksi, audit fasilitas).
 Rujukan: [data default & seed DEV pintu masuk](default-dev.md) · [Default & Seed DEV](default-dev.md) · [Produksi & Operasional Harian](produksi.md) · [operasi produksi](deploy-go-live.md)
 
-> **Migrasi batch B9 (23 September 2026):** isi `docs/M11_DEFAULT_DATA.md` dipindah ke file ini; teks tidak diubah, hanya tautan relatif yang disesuaikan dengan basis folder tujuan. Batch B9 memindahkan: §2, §2 (Catatan Fisik Kamar), §2 (Fasilitas Per Kamar), §3, §4, §5, §6, §7, §7b, dan §8. Sisa isi M11 ada di [Default & Seed DEV](default-dev.md) (§1a, §1b, §9) dan [Produksi & Operasional Harian](produksi.md) (§ Status penggunaan data untuk go-live, §1c, §7 Data Tenant Produksi, §7b Data Audit Fasilitas Lapangan).
+> **Migrasi batch B9 (23 September 2026):** isi `docs/operations/data-master.md` dipindah ke file ini; teks tidak diubah, hanya tautan relatif yang disesuaikan dengan basis folder tujuan. Batch B9 memindahkan: §2, §2 (Catatan Fisik Kamar), §2 (Fasilitas Per Kamar), §3, §4, §5, §6, §7, §7b, dan §8. Sisa isi M11 ada di [Default & Seed DEV](default-dev.md) (§1a, §1b, §9) dan [Produksi & Operasional Harian](produksi.md) (§ Status penggunaan data untuk go-live, §1c, §7 Data Tenant Produksi, §7b Data Audit Fasilitas Lapangan).
 >
 > **Batas lingkungan (eksplisit):** DEV (basis data pengembangan port 5433) · UAT (audit non-personal, akun/kredensial tidak ditulis di docs) · **Produksi (data penghuni nyata dan audit lapangan)**. File ini memuat **referensi nilai/nilai default dan data master lapangan**, bukan instruksi seed produksi; status go-live dan data tenant produksi ada di [Produksi & Operasional Harian](produksi.md).
 

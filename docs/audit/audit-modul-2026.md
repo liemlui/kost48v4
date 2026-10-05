@@ -91,7 +91,7 @@ hubungan fungsi API dengan AuthContext dan kontrak backend UNKNOWN — belum dip
 
 # Audit Menyeluruh Kode KOST48 V5 (30 Juli 2026) — Bukti Bertanggal
 
-> Dipindah apa adanya dari `docs/M16_AUDIT_MENYELURUH.md` §1–§5 (Tahap 3 batch B4, 23 Sep 2026) pada DOC-GOV-20260922.
+> Dipindah apa adanya dari `docs/AUDIT.md` §1–§5 (Tahap 3 batch B4, 23 Sep 2026) pada DOC-GOV-20260922.
 > Sifat: **bukti bertanggal** — audit kode statis 46 modul backend + frontend (Reasonix, 30 Juli 2026). Angka test/build adalah hasil Juli, bukan sesi September, dan bukan sign-off host/UAT/Fase A.
 > Temuan tata dokumen 8 September 2026: [audit-dokumentasi-2026-09.md](audit-2026-09.md).
 
@@ -172,7 +172,7 @@ Catatan: invariant `stok tidak boleh negatif` selalu dijaga `ensureInventoryQtyS
 
 - **Fase A (Pra-Go-Live):** blocked owner — server/domain/env; identitas DB produksi tidak diasumsikan dari UAT.
 - **Fase EF:** EF-00/02 menunggu data host; EF-01/03/05 implementasi lokal; kelayakan 512 MB belum PASS. Detail: `docs/operations/efisiensi-hosting.md`.
-- **Fase AO sisa (selaras M12 8 Sep):** AO-03 (alat/fixture lalu provisioning), AO-13 (crawl tiga role), AO-14 (sign-off), AO-18/19/20 **parsial**, AO-21, AO-23. AO-17 dan AO-22 sudah selesai. Detail: `docs/M14_AUDIT_UI_UX.md`.
+- **Fase AO sisa (selaras M12 8 Sep):** AO-03 (alat/fixture lalu provisioning), AO-13 (crawl tiga role), AO-14 (sign-off), AO-18/19/20 **parsial**, AO-21, AO-23. AO-17 dan AO-22 sudah selesai. Detail: `docs/AUDIT.md`.
 - **AL / Z-19:** H1–H15 dilaporkan selesai 7 Jul; verifikasi manual Owner untuk Z-19 belum punya bukti spesifik.
 
 ---

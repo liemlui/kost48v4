@@ -2,7 +2,7 @@
 
 <!-- kotak-non-otoritatif -->
 > **Catatan (2026-10-05, batch B4):** kotak `[ ]` di berkas ini adalah **langkah operasional**, bukan antrean tugas.
-> Antrean resmi ada di `docs/STATUS.md` (menjadi `docs/ANTREAN.md` pada B5). Penanda ini dikenali gate dokumen (aturan R3).
+> Antrean resmi ada di `docs/ANTREAN.md` (menjadi `docs/ANTREAN.md` pada B5). Penanda ini dikenali gate dokumen (aturan R3).
 
 
 > Migrasi dari docs/GO_LIVE_CPANEL_CHECKLIST.md + docs/M08_DEPLOY_GO_LIVE.md (A-J, Appendix B) pada f8f9a589 (DOC-GOV-20260922 Tahap 3).
@@ -139,7 +139,7 @@ Identitas deployment (menutup sebagian EF-00 §9.1 M19):
 - [x] **Hapus file password tenant** `~/TENANT-PASSWORD-AWAL-BACA-LALU-HAPUS.txt` — selesai 20 Sep 2026; penghapusan file tidak membuktikan penggantian password akun tenant.
 - [ ] **Lengkapi fondasi akuntansi lewat UI:** periode `OPEN` (1, bulan berjalan) dan 2 CashAccount (Kas Tunai + Bank Utama, saldo awal 0) **sudah dibuat 13 Sep 2026** — catatan lama "masih 0" tidak berlaku lagi. Yang belum: **opening balance diisi** (atau zero-start dicatat), karena kesiapan akuntansi masih 75/100 dengan `formalStatementReady=false` ([produksi §3](produksi.md)).
 - [ ] **Cron AutoOps** (setelah UAT): Environment Variables cPanel → `AUTO_OPS_ENABLED=false` + `AUTO_OPS_CRON_TOKEN=<acak>`; cPanel Cron Jobs tiap 5 menit → `POST /api/auto-ops/cron` dengan header `X-Cron-Token`. **Jangan** pasang cron IoT Tuya.
-- [ ] **Onboarding penghuni nyata** melalui `docs/FORM_ISI_DATA_GO_LIVE.md`.
+- [ ] **Onboarding penghuni nyata** melalui `docs/operations/data-master.md` (form lama FORM_ISI_DATA_GO_LIVE.md tidak ada lagi di repo).
 - [x] **Pembersihan disk/inode** — selesai 20 Sep 2026: `~/kost48v3` (191 MB), `~/kost48surabaya` (24 MB), 5 tgz staging lama (~98 MB), 3 folder `client-old-*`, `sql/seed.sql` (854 KB) + `sql/seed_ORIGINAL.sql` (618 KB) dihapus. App root 257 → 129 MB; home dir ~1.1 GB → ~660 MB; `~/backups` dan `~/lui` dipertahankan. Inode sesudah cleanup belum diukur.
 - [ ] **PostgreSQL 9.6.22 sudah EOL** (Nov 2021) — tanyakan ke IDwebhost apakah tersedia versi lebih baru.
 
@@ -153,7 +153,7 @@ Identitas deployment (menutup sebagian EF-00 §9.1 M19):
 2. **Bila belum ada atau `false`** — set `KTP_ACTIVATION_GATE_ENABLED=true`, lalu restart aplikasi mengikuti prosedur redeploy (§G/§J). Jangan mengubah env lain pada langkah ini.
 3. **Bukti** — tanggal, nama pemeriksa, status sebelum/sesudah, tanpa screenshot yang memuat secret.
 4. **Uji perilaku** — jalankan di UAT/DEV: aktivasi kamar atau approve booking untuk tenant tanpa KTP terverifikasi **harus DITOLAK**. **Jangan** membuat tenant/booking uji di produksi; bila uji hanya bisa di produksi, jangan lakukan dan tulis **BELUM TERBUKTI**.
-5. **Tindak lanjut** — catat hasil di [STATUS](../STATUS.md) antrean #1. Bila tetap ditunda, tegaskan risiko dan syarat peninjauan sebelum onboarding penghuni nyata.
+5. **Tindak lanjut** — catat hasil di [STATUS](../ANTREAN.md) antrean #1. Bila tetap ditunda, tegaskan risiko dan syarat peninjauan sebelum onboarding penghuni nyata.
 
 ## G. Catatan teknis untuk release berikutnya
 
@@ -195,7 +195,7 @@ Identitas deployment (menutup sebagian EF-00 §9.1 M19):
 ## Appendix B — Deploy cPanel Step-by-Step
 
 
-> Runbook ini berlaku untuk release setelah 2026-07-23. Keputusan database dan gate lengkap ada di `docs/M08_DEPLOY_GO_LIVE.md`; bila ada konflik, dokumen tersebut menang.
+> Runbook ini berlaku untuk release setelah 2026-07-23. Keputusan database dan gate lengkap ada di `docs/operations/deploy-go-live.md`; bila ada konflik, dokumen tersebut menang.
 
 #### Keputusan sebelum mulai
 

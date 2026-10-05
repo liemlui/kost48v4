@@ -2,7 +2,7 @@
 
 <!-- kotak-non-otoritatif -->
 > **Catatan (2026-10-05, batch B4):** kotak `[ ]` di berkas ini adalah **langkah operasional**, bukan antrean tugas.
-> Antrean resmi ada di `docs/STATUS.md` (menjadi `docs/ANTREAN.md` pada B5). Penanda ini dikenali gate dokumen (aturan R3).
+> Antrean resmi ada di `docs/ANTREAN.md` (menjadi `docs/ANTREAN.md` pada B5). Penanda ini dikenali gate dokumen (aturan R3).
 
 
 > Migrasi dari docs/M20_PRODUKSI_KOST48.md (seluruh section §1-§14) pada f8f9a589 (DOC-GOV-20260922 Tahap 3).
@@ -246,11 +246,11 @@ Kunci SSH privat **tidak** disimpan di repo (`%TEMP%\kost48ssh` di workstation).
 
 ## 14. Riwayat singkat deployment ini
 
-Lihat [M13](../M13_CHANGELOG.md) entri **2026-09-13** untuk kronologi lengkap (backup → bootstrap DB baru → extract paket → perbaikan env cPanel → seed OWNER/tenant/akuntansi → penerbitan halaman operasional).
+Lihat [M13](../arsip/changelog-2026-09.md) entri **2026-09-13** untuk kronologi lengkap (backup → bootstrap DB baru → extract paket → perbaikan env cPanel → seed OWNER/tenant/akuntansi → penerbitan halaman operasional).
 
 ---
 
-> **Migrasi batch B9 (23 September 2026):** bagian data produksi `docs/M11_DEFAULT_DATA.md` di-append ke file ini tanpa menulis ulang isinya; hanya tautan relatif yang disesuaikan dengan basis folder tujuan. Bagian yang ditambahkan: § Status penggunaan data untuk go-live, §1c Data Tenant Produksi (GO-LIVE), §1b Akun Audit UAT (aktor/fixture), §7 Data Tenant Produksi per kamar, §3a Data Lapangan Produksi Owner, §7b Data Audit Fasilitas Lapangan, dan §8 DeepSeek AI — API Key & Konfigurasi.
+> **Migrasi batch B9 (23 September 2026):** bagian data produksi `docs/operations/data-master.md` di-append ke file ini tanpa menulis ulang isinya; hanya tautan relatif yang disesuaikan dengan basis folder tujuan. Bagian yang ditambahkan: § Status penggunaan data untuk go-live, §1c Data Tenant Produksi (GO-LIVE), §1b Akun Audit UAT (aktor/fixture), §7 Data Tenant Produksi per kamar, §3a Data Lapangan Produksi Owner, §7b Data Audit Fasilitas Lapangan, dan §8 DeepSeek AI — API Key & Konfigurasi.
 >
 > **Batas lingkungan (eksplisit):** bagian-bagian di bawah adalah **PRODUKSI / GO-LIVE** — data penghuni nyata, ground truth lapangan, audit fasilitas, dan konfigurasi AI produksi. Materi DEV ada di [Default & Seed DEV](default-dev.md); audit UAT non-personal mengikuti [audit AO-03](../arsip/audit-uiux-lintas-portal-2026-07.md#ao-03--p1--kredensial-dan-data-uat-tidak-mendukung-audit-lintas-role). Nilai secret/PII **tidak digandakan** dari file lain: API key tetap ditulis sebagai lokasi, bukan nilainya.
 

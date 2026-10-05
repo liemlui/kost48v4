@@ -1,6 +1,6 @@
 # Audit 360° Flow Uang (Jul 2026) — Bukti Bertanggal
 
-> Dipindah apa adanya dari `docs/M04_KEUANGAN.md` (Tahap 3 S2.b4, 23 Sep 2026) pada DOC-GOV-20260922.
+> Dipindah apa adanya dari `docs/domain/keuangan.md` (Tahap 3 S2.b4, 23 Sep 2026) pada DOC-GOV-20260922.
 > Sifat: **bukti bertanggal**, bukan status aktif. Detail asal: `docs/arsip/legacy/_previous_cycles/M15_AUDIT_360_FLOW_UANG.md`.
 > **Status per temuan** (verifikasi statis 23 Sep 2026): [p1-uang-status-2026-09-23.md](audit-uang-huni-2026-07.md) — P1-01..P1-03 indikasi diperbaiki; P1-04..P1-09 UNKNOWN (snapshot 23 Sep). **Pembaruan 25 Sep 2026:** [verifikasi statis P1-04..P1-09](p1-uang-verifikasi-2026-09-25.md) — P1-04 & P1-05 masih ada, P1-06 & P1-07 indikasi diperbaiki, P1-08 sempit, P1-09 terverifikasi.
 
@@ -40,7 +40,7 @@ P1-04 deposit ledger sourceId dedupe (masih ada per 25 Sep) · P1-05 EXPIRED→R
 
 # Audit 360° Flow Huni (Jul 2026) — Bukti Bertanggal
 
-> Dipindah apa adanya dari `docs/M05_SIKLUS_HUNI.md` (S2.c Tahap 3, 23 Sep 2026) pada DOC-GOV-20260922.
+> Dipindah apa adanya dari `docs/domain/hunian.md` (S2.c Tahap 3, 23 Sep 2026) pada DOC-GOV-20260922.
 > Status temuan tetap seperti tertulis di bawah (Jul 2026); bukan status aktif. Untuk temuan best-effort jurnal lintas modul, verifikasi terbaru ada di [p1-uang-status-2026-09-23.md](audit-uang-huni-2026-07.md).
 
 ## Audit 360° Flow Huni — Jul 2026 (M16)
@@ -120,7 +120,7 @@ HS-01 s/d HS-06 dan HS-09 adalah tambahan murni dari sisi siklus huni — belum 
 
 Jenis bukti: **verifikasi statis source** (membaca kode), **bukan** verifikasi runtime.
 Baseline: HEAD `9512ad73` (setelah commit dokumentasi 23 Sep 2026). Tidak ada test/build/server/hook yang dijalankan.
-Rujukan asal temuan: `docs/M04_KEUANGAN.md` §`## Audit 360° Flow Uang (Jul 2026)` dan arsip `docs/arsip/legacy/_previous_cycles/M15_AUDIT_360_FLOW_UANG.md`.
+Rujukan asal temuan: `docs/domain/keuangan.md` §`## Audit 360° Flow Uang (Jul 2026)` dan arsip `docs/arsip/legacy/_previous_cycles/M15_AUDIT_360_FLOW_UANG.md`.
 
 ## Metode
 

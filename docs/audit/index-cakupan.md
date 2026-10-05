@@ -25,7 +25,7 @@ Angka di bawah adalah **potret** dari checklist yang diarsipkan; ia **tidak dipe
 1. Pilih bagian dari tabel di atas; buka [checklist arsip](../arsip/audit-checklist-total.md) dan baca baris ID yang dituju (tiap baris menautkan peta di `.audit-map/`).
 2. Kerjakan auditnya sebagai task tersendiri; catat hasil + tanggal + bukti di [docs/audit/](README.md) sebagai kartu bertanggal.
 3. Kalau sebuah ID selesai diperiksa, **jangan** menambah kotak di berkas ini — perbarui potretnya di checklist arsip bila memang perlu, atau tulis statusnya di kartu audit bertanggal.
-4. Antrean tugas tetap satu tempat: [docs/STATUS.md](../STATUS.md) (akan menjadi `docs/ANTREAN.md` pada batch B5). Indeks ini **bukan** antrean.
+4. Antrean tugas tetap satu tempat: [docs/ANTREAN.md](../ANTREAN.md) (akan menjadi `docs/ANTREAN.md` pada batch B5). Indeks ini **bukan** antrean.
 
 ## 3. Konteks yang berguna
 

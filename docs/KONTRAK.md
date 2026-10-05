@@ -39,7 +39,7 @@ Ringkasan + peta dokumen ada di [AGENTS.md](../AGENTS.md) (disuntik tiap request
 - Pilih level dari **risiko dan jangkauan perilaku**, bukan jumlah baris. Uang, auth, tombol kritis, style global, atau kontrak bersama menaikkan level.
 - XL: rencana konkret **wajib disetujui** sebelum implementasi; pecah per tahap dengan acceptance + bukti sendiri.
 - Label ini tidak menggantikan ID audit (FE/BE) atau klasifikasi K1–K4; exception uang di §5 tetap berlaku.
-- Proksi biaya yang dipakai proyek ini: **byte** (token ≈ byte/4) + jumlah berkas. Baris **bukan** proksi yang sah (contoh historis: `STATUS.md` 147 baris tetapi 78 KB).
+- Proksi biaya yang dipakai proyek ini: **byte** (token ≈ byte/4) + jumlah berkas. Baris **bukan** proksi yang sah (contoh historis: `ANTREAN.md` 147 baris tetapi 78 KB).
 
 ## 4. Batas baca
 
@@ -111,7 +111,7 @@ Rincian khusus uang (DO-NOT-TOUCH, invariant, gate per-task): [operations/verifi
 
 ## 8. Konflik yang sudah diselesaikan (jangan diangkat lagi)
 
-- `docs/STATUS.md` → [ANTREAN.md](ANTREAN.md) (batch B5, 2026-10-05); pointer lama dihapus di B8.
+- `docs/ANTREAN.md` → [ANTREAN.md](ANTREAN.md) (batch B5, 2026-10-05); pointer lama dihapus di B8.
 - `AGENTS.md` §3 (router) → dilebur ke [AGENTS.md](../AGENTS.md) §3 (Q4=b, batch B5).
 - `docs/archieve/**` → `docs/arsip/legacy/**` (39 berkas dikutip) + `.docs-legacy/**` (68 berkas, diabaikan git) — batch B2.
 - `docs/audit-map/**` → `.audit-map/**` (tetap gitignored; generator `scripts/audit-map-generate.cjs` **tracked**) — batch B3.
@@ -138,7 +138,7 @@ BLOKIR: tidak ada | <sebab + penanggung jawab>
 
 | Tanggal | Perubahan |
 |---|---|
-| 2026-10-05 | Dibuat pada batch B5: memuat rincian aturan yang dikeluarkan dari `AGENTS.md`, invariant + pelaksanaan-vs-izin (dipindah utuh dari `docs/STATUS.md` §7 dan §5), daftar area berisiko, dan bentuk laporan. |
+| 2026-10-05 | Dibuat pada batch B5: memuat rincian aturan yang dikeluarkan dari `AGENTS.md`, invariant + pelaksanaan-vs-izin (dipindah utuh dari `docs/ANTREAN.md` §7 dan §5), daftar area berisiko, dan bentuk laporan. |
 
 
 ## 10. Pelaksanaan vs izin (dua sumbu — jangan digabung)
@@ -164,4 +164,4 @@ Angka **tidak ditulis** di sini — pakai perintahnya (Q11). Bila sebuah angka w
 
 | Tanggal | Perubahan |
 |---|---|
-| 2026-10-05 | Dibuat pada batch B5: rincian aturan yang dikeluarkan dari `AGENTS.md`, daftar area berisiko, bentuk laporan, dan invariant (dipadatkan dari `docs/STATUS.md` §5 + §7 — isi aslinya tetap ada di riwayat git). |
+| 2026-10-05 | Dibuat pada batch B5: rincian aturan yang dikeluarkan dari `AGENTS.md`, daftar area berisiko, bentuk laporan, dan invariant (dipadatkan dari `docs/ANTREAN.md` §5 + §7 — isi aslinya tetap ada di riwayat git). |

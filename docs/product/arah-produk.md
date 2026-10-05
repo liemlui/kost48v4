@@ -2,7 +2,7 @@
 
 Tanggal: 22 September 2026. Status: **peta dokumentasi dan kebutuhan produk; belum verifikasi source/runtime**.
 Tujuan: menyederhanakan pekerjaan penghuni dan keuangan agar pengguna memahami akibat tindakan sebelum menjalankannya.
-Keputusan owner: [KEPUTUSAN-OWNER](../KEPUTUSAN-OWNER.md). Antrean dan gate pelaksanaan: [STATUS](../STATUS.md).
+Keputusan owner: [KEPUTUSAN-OWNER](../KEPUTUSAN-OWNER.md). Antrean dan gate pelaksanaan: [STATUS](../ANTREAN.md).
 Dokumen ini tidak mengubah nominal, hak akses, aturan akuntansi, atau status bisnis. Rujukan teknis: [flow & kontrak](../domain/flow.md), [keuangan](../domain/keuangan.md), [hunian](../domain/hunian.md).
 
 ## 1. Cara membaca bukti
@@ -77,7 +77,7 @@ Validasi memakai skenario nonpersonal yang disetujui, mencakup jalur normal, pra
 
 Tanggal: 22 September 2026. Status: **landasan produk dan kerangka penerapan; bukan audit kurikulum atau klaim fitur selesai**.
 Owner menetapkan IB Diploma Business Management Theory sebagai dasar bisnis kost yang kuat dalam [KEPUTUSAN-OWNER](../KEPUTUSAN-OWNER.md).
-Penerapan didahulukan pada operasi penghuni dan keuangan OWNER/ADMIN; [flow utama](arah-produk.md) menjadi penghubung teori dengan pekerjaan sehari-hari. Antrean implementasi tetap [STATUS](../STATUS.md).
+Penerapan didahulukan pada operasi penghuni dan keuangan OWNER/ADMIN; [flow utama](arah-produk.md) menjadi penghubung teori dengan pekerjaan sehari-hari. Antrean implementasi tetap [STATUS](../ANTREAN.md).
 
 ## 1. Dasar dan batas sumber
 

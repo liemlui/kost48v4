@@ -6,7 +6,7 @@
 Tanggal: 2026-09-23
 Status: aktif
 Tujuan: peta navigasi kode kanonik — peta audit bertahap, konvensi modul, modul backend → path → tanggung jawab, grup halaman frontend, index model Prisma, flow & audit anchor, dan shared utility (dari M00)
-Rujukan: [KEPUTUSAN-OWNER](KEPUTUSAN-OWNER.md) · [STATUS](STATUS.md) · [STATUS](STATUS.md) · [audit-map](../.audit-map/README.md) · [product/scope.md](product/scope.md)
+Rujukan: [KEPUTUSAN-OWNER](KEPUTUSAN-OWNER.md) · [STATUS](./ANTREAN.md) · [STATUS](./ANTREAN.md) · [audit-map](../.audit-map/README.md) · [product/scope.md](product/scope.md)
 
 > Migrasi dari docs/M00_CODEMAP.md (B5 Tahap 3, 23 Sep 2026) pada DOC-GOV-20260922; teks peta tidak diubah.
 > Batch B5 memindahkan **seluruh isi peta M00 apa adanya** (L6–L172) ke file ini; urutan bagian sama seperti aslinya. Peta scope per role/flow ada di [product/scope.md](product/scope.md).

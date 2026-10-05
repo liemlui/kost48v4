@@ -1,16 +1,20 @@
 # ATURAN — Aturan Domain KOST48
 
+> **Blok baca** · Jenis: **aturan domain** · Status: **aktif** · Untuk siapa: agen/owner yang menyentuh aturan bisnis
+> · Baca kalau: butuh aturan uang, huni, operasional, harga, publik, AI/IoT. · **Jangan** dibaca kalau: mencari aturan kerja agen (itu [KONTRAK](KONTRAK.md)) atau antrean (itu [ANTREAN](ANTREAN.md)).
+
+
 > **Rumah kanonik aturan domain** (uang, huni, operasional, harga, publik, AI/IoT). Berkas ini adalah **titik masuk**: ia menetapkan batas dan menunjuk berkas rinci — **bukan** tempat menulis aturan baru dan bukan antrean.
-> Otoritas: prompt owner > [STATUS](STATUS.md) (antrean/gate) > [AGENTS](../AGENTS.md) (aturan kerja) > berkas ini. Keputusan bisnis: [KEPUTUSAN-OWNER](KEPUTUSAN-OWNER.md).
+> Otoritas: prompt owner > [STATUS](./ANTREAN.md) (antrean/gate) > [AGENTS](../AGENTS.md) (aturan kerja) > berkas ini. Keputusan bisnis: [KEPUTUSAN-OWNER](KEPUTUSAN-OWNER.md).
 > Rincian aturan ada di `docs/domain/` (§2). Berkas-berkas itu adalah **bagian dari ATURAN ini**, bukan dokumen terpisah yang boleh kedaluwarsa sendiri.
-> Dibuat 23 September 2026 (Fase 2 konsolidasi). Status tahap: [STATUS §8](STATUS.md#8-struktur-dokumen-tujuan-konsolidasi) + [mapping migrasi](arsip/DOC-GOV-20260922-mapping.md).
+> Dibuat 23 September 2026 (Fase 2 konsolidasi). Status tahap: [STATUS §8](./ANTREAN.md#8-struktur-dokumen-tujuan-konsolidasi) + [mapping migrasi](arsip/DOC-GOV-20260922-mapping.md).
 
 ## 1. Cara pakai
 
 1. Baca **hanya** topik yang relevan dengan task (§2); jangan memuat seluruh `domain/` sebagai orientasi.
 2. Aturan uang, DP/deposit, harga, dan status hunian **tidak boleh diubah** tanpa keputusan owner di [KEPUTUSAN-OWNER](KEPUTUSAN-OWNER.md) — memindahkan atau merapikan teks tidak mengubah aturan.
 3. Bila aturan yang sama muncul di dua tempat: laporkan ke [laporan duplikat](history/laporan-duplikat.md). Dedup **pengulangan non-aturan** boleh; isi aturan uang/harga/huni tetap milik owner.
-4. Perubahan aturan hanya sah bila ada keputusan owner; sesudahnya perbarui berkas rinci dan catat bukti di [M13](M13_CHANGELOG.md) atau changelog bulanan di `docs/history/changelog/`.
+4. Perubahan aturan hanya sah bila ada keputusan owner; sesudahnya perbarui berkas rinci dan catat bukti di [M13](./arsip/changelog-2026-09.md) atau changelog bulanan di `docs/history/changelog/`.
 
 ## 2. Topik dan berkas rinci (kanonik)
 
@@ -30,12 +34,12 @@ Berkas rinci juga memuat **bukti audit bertanggal** dari era M (mis. `## Audit 3
 
 ## 3. Batas berkas ini
 
-- Antrean, gate, invariant, dan blocker: [STATUS](STATUS.md) — jangan diduplikasi di sini.
+- Antrean, gate, invariant, dan blocker: [STATUS](./ANTREAN.md) — jangan diduplikasi di sini.
 - Runbook deploy, produksi, go-live, env, data master: [OPERASI.md](OPERASI.md).
 - Status audit dan temuan bertanggal: [AUDIT.md](AUDIT.md).
 - Keputusan bisnis owner (nominal, DP/deposit, harga, utang-piutang, gate uang/huni): [KEPUTUSAN-OWNER](KEPUTUSAN-OWNER.md).
-- Riwayat dan changelog berjalan: [history/](history/); bukti bulk kanonik: [arsip/](arsip/README.md); arsip legacy kini di `docs/arsip/legacy/` (dulu `docs/archieve/`, dipindah batch B2 2026-10-05).
-- Verifikasi uang (harness, DO-NOT-TOUCH, gate per-task): [operations/verifikasi-keuangan.md](operations/verifikasi-keuangan.md) + gate uang di [STATUS §7](STATUS.md).
+- Riwayat dan changelog berjalan: [history/](history/); bukti bulk kanonik: [arsip/](arsip/README.md); arsip legacy kini di `docs/arsip/legacy/` (dulu `docs/arsip/legacy/`, dipindah batch B2 2026-10-05).
+- Verifikasi uang (harness, DO-NOT-TOUCH, gate per-task): [operations/verifikasi-keuangan.md](operations/verifikasi-keuangan.md) + gate uang di [STATUS §7](./ANTREAN.md).
 
 ## 4. Provenance
 

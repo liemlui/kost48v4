@@ -36,7 +36,7 @@ KPI `netProfit` dihitung secara akrual sebagai invoice + WiFi − expense. Data 
 
 Dampak: kartu dan grafik untuk bulan yang sama dapat berbeda walaupun labelnya identik; ini berisiko menyesatkan keputusan keuangan.
 
-Acceptance perbaikan: gunakan definisi yang sama, atau ganti label/copy sehingga basis akrual dan kas dinyatakan eksplisit. Karena menyentuh interpretasi uang, implementasi wajib mengikuti gate uang di `STATUS.md` §7.
+Acceptance perbaikan: gunakan definisi yang sama, atau ganti label/copy sehingga basis akrual dan kas dinyatakan eksplisit. Karena menyentuh interpretasi uang, implementasi wajib mengikuti gate uang di `ANTREAN.md` §7.
 
 ### Z19-T3 — SEDANG — scope periode KPI berbeda dari scope sinyal tindakan — DIPERBAIKI LOKAL 25 SEP
 

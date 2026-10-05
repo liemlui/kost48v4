@@ -3,7 +3,7 @@
 > **Blok baca** · Jenis: **antrean kerja (satu-satunya)** · Status: **aktif** · Untuk siapa: owner + agen pelaksana
 > · Baca kalau: memilih tugas berikutnya, mengecek gate, atau menutup tugas. · **Jangan** dibaca kalau: butuh aturan kerja (itu [KONTRAK.md](KONTRAK.md)) atau riwayat/bukti (itu [history/](history/)).
 
-> Berkas ini menggantikan `docs/STATUS.md` sejak batch B5 (2026-10-05). Ia memuat **antrean + gate saja**: tanpa aturan, tanpa bukti bertanggal. Aturan kerja ada di [AGENTS.md](../AGENTS.md) + [KONTRAK.md](KONTRAK.md); bukti bertanggal ada di [history/bukti-2026-10.md](history/bukti-2026-10.md); keputusan bisnis owner di [KEPUTUSAN-OWNER.md](KEPUTUSAN-OWNER.md).
+> Berkas ini menggantikan `docs/ANTREAN.md` sejak batch B5 (2026-10-05). Ia memuat **antrean + gate saja**: tanpa aturan, tanpa bukti bertanggal. Aturan kerja ada di [AGENTS.md](../AGENTS.md) + [KONTRAK.md](KONTRAK.md); bukti bertanggal ada di [history/bukti-2026-10.md](history/bukti-2026-10.md); keputusan bisnis owner di [KEPUTUSAN-OWNER.md](KEPUTUSAN-OWNER.md).
 
 ## 1. Cara pakai (untuk AI, baca ini dulu)
 

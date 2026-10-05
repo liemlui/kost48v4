@@ -176,7 +176,7 @@ Rujukan: [operasional.md](operasional.md) · [keuangan.md](keuangan.md) · [harg
 | Peta scope role | `M10_PETA_SCOPE.md` § IoT & Monitoring |
 | Operasional | `domain/operasional.md` § IoT Monitoring |
 | Auto-ops / cron | `domain/operasional.md` § P5 Auto-Ops (audit/audit-operasional-2026-07.md) |
-| Default data seed | `M11_DEFAULT_DATA.md` |
+| Default data seed | `operations/data-master.md` |
 | Keamanan JWT device | memory `iot-water-kwh-spec` (beda dari user JWT) |
 
 ---
@@ -190,7 +190,7 @@ Rujukan: [operasional.md](operasional.md) · [keuangan.md](keuangan.md) · [harg
 
 > Status: **Fondasi backend/firmware sudah diimplementasikan; rollout perangkat, mapping, dan UAT produksi masih diperlukan.**
 > Tanggal: 2026-07-16
-> Dokumen terkait: `M14_IOT_TUYA_DEVICES.md`, `M04_KEUANGAN.md`, `M05_SIKLUS_HUNI.md`, `domain/operasional.md`
+> Dokumen terkait: `M14_IOT_TUYA_DEVICES.md`, `domain/keuangan.md`, `domain/hunian.md`, `domain/operasional.md`
 > Runbook Tuya: `M15A_TUYA_KWH_SETUP_RUNBOOK.md`
 > Spesifikasi meter air: `M15B_ESP32_C3_WATER_METER_SPEC.md`
 
@@ -816,7 +816,7 @@ Tenant/owner → overview dan history dengan pembaruan berkala; billing tetap me
 
 | Topik | Dokumen |
 |---|---|
-| Inventaris device + Device ID | `docs/M15_IOT.md` |
+| Inventaris device + Device ID | `docs/domain/iot.md` |
 | Spek implementasi | memory `iot-water-kwh-spec` |
 | Peta scope | `docs/product/scope.md` § A6. SYSTEM / IoT |
-| Proposal meter pascabayar | `docs/M06_OPERASIONAL.md` § Bagian 5 (M-1..M-5 ✅) |
+| Proposal meter pascabayar | `docs/domain/operasional.md` § Bagian 5 (M-1..M-5 ✅) |

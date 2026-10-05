@@ -1,5 +1,5 @@
 Baca [AGENTS.md](AGENTS.md) sebagai sumber aturan kanonik agent.
-Untuk antrean dan gate tugas, ikuti [STATUS](docs/STATUS.md).
+Untuk antrean dan gate tugas, ikuti [STATUS](./docs/ANTREAN.md).
 
 Penataan menyeluruh yang diminta 22 Sep 2026 mengikuti [rancangan DOC-GOV-20260922](docs/arsip/DOC-GOV-20260922.md); **Tahap 1 disetujui owner 22 Sep dan sudah diterapkan** (indeks dokumentasi dibuat, workflow diselaraskan), tahap 2–4 belum dijalankan. Roadmap di bawah adalah usulan historis 20 Sep; status pelaksanaannya dibaca dari M12/AI_MASTER, bukan dari nomor minggu.
 

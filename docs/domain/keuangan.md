@@ -3,7 +3,7 @@
 Tanggal: 2026-09-22
 Status: aktif
 Tujuan: kontrak & aturan keuangan (dari M04)
-Rujukan: [KEPUTUSAN-OWNER](../KEPUTUSAN-OWNER.md) · [STATUS](../STATUS.md) · [keuangan](keuangan.md) · [domain/kontrak.md](kontrak.md)
+Rujukan: [KEPUTUSAN-OWNER](../KEPUTUSAN-OWNER.md) · [STATUS](../ANTREAN.md) · [keuangan](keuangan.md) · [domain/kontrak.md](kontrak.md)
 
 > Migrasi dari docs/M04_KEUANGAN.md L23–120 (Update normatif) + Bagian 2/3
 > (

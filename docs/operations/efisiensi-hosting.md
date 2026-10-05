@@ -3,7 +3,7 @@
 Tanggal: 2026-09-23
 Status: aktif
 Tujuan: batas teknis & rencana efisiensi shared hosting 512 MB — verdict, anggaran memori, verifikasi klaim audit, jalur arsitektur, peta dependensi mikrotask, definisi EF-00..EF-09, batasan/open questions, dan tabel pencatatan hosting EF-00/EF-02 (dari M19)
-Rujukan: [KEPUTUSAN-OWNER](../KEPUTUSAN-OWNER.md) · [STATUS](../STATUS.md) · [efisiensi hosting](efisiensi-hosting.md) · [produksi.md](produksi.md) · [deploy-go-live.md](deploy-go-live.md) · [go-live-cpanel.md](go-live-cpanel.md)
+Rujukan: [KEPUTUSAN-OWNER](../KEPUTUSAN-OWNER.md) · [STATUS](../ANTREAN.md) · [efisiensi hosting](efisiensi-hosting.md) · [produksi.md](produksi.md) · [deploy-go-live.md](deploy-go-live.md) · [go-live-cpanel.md](go-live-cpanel.md)
 
 > Migrasi dari docs/M19_EFISIENSI_HOSTING_512MB.md (B3 Tahap 3, 23 Sep 2026) pada DOC-GOV-20260922; teks tidak diubah.
 > Batch B3 memindahkan **seluruh isi M19 apa adanya** ke file ini (satu tujuan per handoff owner). Anchor lama (`#arah-dan-status-aktif...`, `#9-pencatatan-hosting-ef-00-dan-ef-02`) dipertahankan di pointer M19 agar rujukan dari M02/M08 tetap resolve.
@@ -22,8 +22,8 @@ Keputusan [KEPUTUSAN-OWNER](../KEPUTUSAN-OWNER.md): **Fase EF diprioritaskan; sa
 Audit statis diterima; tidak diulang tanpa perubahan relevan. **§9.1–§9.3 kini terisi** dari sesi deployment 13 Sep 2026 dan snapshot panel 7 Sep. Sisa pengukuran EF-02 (interval/peak/fault) serta verifikasi runtime EF-01/03/05 menunggu izin uji aktif. Fase A sudah dipublikasikan 13 Sep; gate AO yang terbuka tetap berlaku.
 
 > Dokumen ini adalah **sumber kebenaran** fase efisiensi hosting: verdict kelayakan, anggaran RAM (fakta vs estimasi), verifikasi klaim audit terhadap kode (koreksi final + temuan P0–P2 audit deploy 6 Sep 2026), jalur arsitektur yang disetujui, dan definisi task EF-00..EF-09 (paket 10 mikrotask audit).
-> Sumber kode: `backend/src/main.ts`, `backend/src/app.module.ts`, `backend/src/modules/auto-ops/auto-ops.service.ts`, `backend/src/modules/iot/iot-polling.service.ts`, `backend/src/common/config/app-config.service.ts`, `backend/src/prisma/prisma.service.ts`, `backend/package.json`, `scripts/make-deploy.mjs`, `docs/M08_DEPLOY_GO_LIVE.md`.
-> Terakhir diperbarui: **2026-09-13** | Status: 🟠 **SEBAGIAN TERISI** (identitas deployment 13 Sep; sisa pengukuran EF-02) — lihat [STATUS.md](../STATUS.md) (status EF); rincian server di [produksi.md](produksi.md).
+> Sumber kode: `backend/src/main.ts`, `backend/src/app.module.ts`, `backend/src/modules/auto-ops/auto-ops.service.ts`, `backend/src/modules/iot/iot-polling.service.ts`, `backend/src/common/config/app-config.service.ts`, `backend/src/prisma/prisma.service.ts`, `backend/package.json`, `scripts/make-deploy.mjs`, `docs/operations/deploy-go-live.md`.
+> Terakhir diperbarui: **2026-09-13** | Status: 🟠 **SEBAGIAN TERISI** (identitas deployment 13 Sep; sisa pengukuran EF-02) — lihat [ANTREAN.md](../ANTREAN.md) (status EF); rincian server di [produksi.md](produksi.md).
 
 ---
 
@@ -171,7 +171,7 @@ Multi-proses belum terbukti layak pada hosting ini; tidak bisa dinyatakan pasti 
 
 ## 8. Sinkronisasi
 
-Dokumen ini harus dijaga sinkron dengan: `backend/src/main.ts`, `backend/src/app.module.ts`, `backend/src/modules/auto-ops/auto-ops.service.ts`, `backend/src/modules/iot/iot-polling.service.ts`, `backend/src/common/config/app-config.service.ts`, `backend/src/prisma/prisma.service.ts`, `backend/src/modules/reports/reports.module.ts`, `backend/src/modules/settings/settings.service.ts`, `backend/src/modules/push/push.service.ts`, `backend/package.json`, `scripts/make-deploy.mjs`, `scripts/bundle-deploy.mjs`, `scripts/golive-combined.mjs`, `docs/M08_DEPLOY_GO_LIVE.md`. Setiap perubahan perilaku deploy wajib mengupdate **M19** (sumber kebenaran) + **M12** (checklist) + **M13** (changelog).
+Dokumen ini harus dijaga sinkron dengan: `backend/src/main.ts`, `backend/src/app.module.ts`, `backend/src/modules/auto-ops/auto-ops.service.ts`, `backend/src/modules/iot/iot-polling.service.ts`, `backend/src/common/config/app-config.service.ts`, `backend/src/prisma/prisma.service.ts`, `backend/src/modules/reports/reports.module.ts`, `backend/src/modules/settings/settings.service.ts`, `backend/src/modules/push/push.service.ts`, `backend/package.json`, `scripts/make-deploy.mjs`, `scripts/bundle-deploy.mjs`, `scripts/golive-combined.mjs`, `docs/operations/deploy-go-live.md`. Setiap perubahan perilaku deploy wajib mengupdate **M19** (sumber kebenaran) + **M12** (checklist) + **M13** (changelog).
 
 ## 9. Pencatatan hosting EF-00 dan EF-02
 

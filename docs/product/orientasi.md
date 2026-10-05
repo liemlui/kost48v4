@@ -3,15 +3,15 @@
 Tanggal: 2026-09-23
 Status: aktif
 Tujuan: orientasi produk — identitas & model bisnis, konsep kunci uang, invarian sistem, stack & model aktif, dan perintah kerja (dari M01)
-Rujukan: [KEPUTUSAN-OWNER](../KEPUTUSAN-OWNER.md) · [STATUS](../STATUS.md) · [PETA-KODE](../PETA-KODE.md) · [scope.md](scope.md) · [flow-utama.md](arah-produk.md)
+Rujukan: [KEPUTUSAN-OWNER](../KEPUTUSAN-OWNER.md) · [STATUS](../ANTREAN.md) · [PETA-KODE](../PETA-KODE.md) · [scope.md](scope.md) · [flow-utama.md](arah-produk.md)
 
 > Migrasi dari docs/M01_MASTER.md (B5 Tahap 3, 23 Sep 2026) pada DOC-GOV-20260922; teks orientasi tidak diubah.
-> Batch B5 memisahkan materi bertanggal M01: status terkini 2026-09-08 → [changelog 2026-09](../history/changelog/2026-09.md); riwayat status 30 Juli 2026 → [changelog 2026-07](../arsip/changelog-2026-07.md); indeks dossier historis → [fase-lama](../arsip/fase-lama.md); Audit Lintas Scope 29 Jul 2026 → [audit-lintas-scope-2026-07-29.md](../audit/audit-lintas-scope-2026-07-29.md).
+> Batch B5 memisahkan materi bertanggal M01: status terkini 2026-09-08 → [changelog 2026-09](../arsip/changelog-2026-09.md); riwayat status 30 Juli 2026 → [changelog 2026-07](../arsip/changelog-2026-07.md); indeks dossier historis → [fase-lama](../arsip/fase-lama.md); Audit Lintas Scope 29 Jul 2026 → [audit-lintas-scope-2026-07-29.md](../audit/audit-lintas-scope-2026-07-29.md).
 > **Auto-Ops Engine (asal §4) dipindah ke rumah kanonik aturan operasional:** [domain/operasional.md](../domain/operasional.md) (koreksi B5, 23 Sep 2026) — teks tidak diubah; nomor bagian mengikuti asalnya.
 
 ## Pintu Masuk Docs Cepat
 
-1. [STATUS.md](../STATUS.md) — blueprint kerja: antrean aktif, urutan eksekusi, gate verifikasi, invariant, keputusan owner ringkas.
+1. [ANTREAN.md](../ANTREAN.md) — blueprint kerja: antrean aktif, urutan eksekusi, gate verifikasi, invariant, keputusan owner ringkas.
 2. [KEPUTUSAN-OWNER.md](../KEPUTUSAN-OWNER.md) — sumber kebenaran keputusan owner sebelum mengubah flow.
 3. [PETA-KODE.md](../PETA-KODE.md) — peta modul ke file; pakai ini dulu sebelum grep liar ke seluruh repo.
 4. [AUDIT.md](../AUDIT.md) — status audit, temuan bertanggal, dan gate Fase AO (AO-00..AO-23).
@@ -20,7 +20,7 @@ Rujukan: [KEPUTUSAN-OWNER](../KEPUTUSAN-OWNER.md) · [STATUS](../STATUS.md) · [
 7. [product/scope.md](scope.md) dan [product/portal-owner-admin.md](portal-owner-admin.md) — scope per role/flow dan prinsip portal ringkas.
 8. [docs/README.md](../../AGENTS.md) — indeks navigasi lengkap; peta path lama (M00–M20) ke rumah kanonik ada di §6.
 
-Hindari membaca arsip besar kecuali benar-benar perlu forensik: `docs/arsip/legacy/*` (arsip legacy, dulu `docs/archieve/`), sisa `docs/archieve/*` yang menunggu dipindah owner, file `*_STALE.md`, `reference/*`, dan `backend/src/generated/*`.
+Hindari membaca arsip besar kecuali benar-benar perlu forensik: `docs/arsip/legacy/*` (arsip legacy, dulu `docs/arsip/legacy/`), sisa `docs/archieve/*` yang menunggu dipindah owner, file `*_STALE.md`, `reference/*`, dan `backend/src/generated/*`.
 
 ## 1. Identitas & Model Bisnis
 
@@ -35,7 +35,7 @@ Hindari membaca arsip besar kecuali benar-benar perlu forensik: `docs/arsip/lega
 
 ## 2. Konsep Kunci Uang (WAJIB PAHAM)
 
-> **Sumber kebenaran:** `docs/M02_KEPUTUSAN_OWNER.md` — bila konflik, M02 menang.
+> **Sumber kebenaran:** `docs/KEPUTUSAN-OWNER.md` — bila konflik, M02 menang.
 > **Ringkasan orientasi, bukan aturan kanonik.** Aturan rinci: harga & surcharge → [domain/harga.md](../domain/harga.md); uang/DP/deposit/invarian pembayaran → [domain/keuangan.md](../domain/keuangan.md); siklus huni → [domain/hunian.md](../domain/hunian.md); operasional & Auto-Ops → [domain/operasional.md](../domain/operasional.md).
 
 - **Tidak ada model Booking.** Satu `Stay` = booking→huni→selesai. Promoted = `initialMetersPromotedAt` terisi.

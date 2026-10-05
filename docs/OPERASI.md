@@ -1,9 +1,13 @@
 # OPERASI — Runbook Operasional KOST48
 
+> **Blok baca** · Jenis: **runbook operasi** · Status: **aktif** · Untuk siapa: agen/owner yang menjalankan deploy atau memeriksa produksi
+> · Baca kalau: deploy, go-live, env, produksi, rollback. · **Jangan** dibaca kalau: mengerjakan perubahan dokumentasi atau kode biasa (itu [KONTRAK](KONTRAK.md)).
+
+
 > **Rumah kanonik runbook operasi** (deploy, produksi, go-live, env, default dev, data master). Berkas ini adalah **titik masuk**: ia menetapkan batas dan menunjuk runbook rinci — **bukan** antrean, dan bukan izin menjalankan deploy.
-> Otoritas: prompt owner > [STATUS](STATUS.md) (antrean/gate) > [AGENTS](../AGENTS.md) (izin & verifikasi) > berkas ini. Aturan bisnis: [ATURAN.md](ATURAN.md).
+> Otoritas: prompt owner > [STATUS](./ANTREAN.md) (antrean/gate) > [AGENTS](../AGENTS.md) (izin & verifikasi) > berkas ini. Aturan bisnis: [ATURAN.md](ATURAN.md).
 > Rincian runbook ada di `docs/operations/` (§4). Berkas-berkas itu adalah **bagian dari OPERASI ini**.
-> Dibuat 23 September 2026 (Fase 2 konsolidasi). Status tahap: [STATUS §8](STATUS.md#8-struktur-dokumen-tujuan-konsolidasi).
+> Dibuat 23 September 2026 (Fase 2 konsolidasi). Status tahap: [STATUS §8](./ANTREAN.md#8-struktur-dokumen-tujuan-konsolidasi).
 
 ## 1. Batas lingkungan (jangan dicampur)
 
@@ -20,14 +24,14 @@
 
 ## 2. Batas kewenangan
 
-- Deploy/rilis adalah **task tersendiri**: artefak/SHA, target, izin owner, backup/rollback, dan smoke check mengikuti [operations/deploy-go-live.md](operations/deploy-go-live.md) serta antrean [STATUS §2](STATUS.md).
+- Deploy/rilis adalah **task tersendiri**: artefak/SHA, target, izin owner, backup/rollback, dan smoke check mengikuti [operations/deploy-go-live.md](operations/deploy-go-live.md) serta antrean [STATUS §2](./ANTREAN.md).
 - DONE lokal, typecheck, atau build **bukan** izin dan bukan bukti deployment; dampak runtime harus diukur terpisah.
 - Mesin/DB UAT dan produksi: identitas melalui runbook, bukan asumsi nama/port. Restore DB dan rollback produksi mengikuti runbook operasi.
 - Jangan menambah dependency, mengubah hook, atau mematikan guard untuk melewati kegagalan.
 
 ## 3. Gate uang & verifikasi terkait
 
-- Task yang menyentuh uang wajib mengikuti gate uang di [STATUS §7](STATUS.md) dan harness [operations/verifikasi-keuangan.md](operations/verifikasi-keuangan.md) (invarian, DO-NOT-TOUCH, gate per-task).
+- Task yang menyentuh uang wajib mengikuti gate uang di [STATUS §7](./ANTREAN.md) dan harness [operations/verifikasi-keuangan.md](operations/verifikasi-keuangan.md) (invarian, DO-NOT-TOUCH, gate per-task).
 - Verifikasi keuangan bukan bukti runtime; status temuan uang ada di [AUDIT.md](AUDIT.md).
 
 ## 4. Runbook rinci (kanonik)

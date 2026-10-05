@@ -1,5 +1,9 @@
 # KEPUTUSAN-OWNER — Register Keputusan Bisnis Owner
 
+> **Blok baca** · Jenis: **register keputusan owner** · Status: **aktif** · Untuk siapa: owner + agen yang menyentuh arah bisnis
+> · Baca kalau: memeriksa keputusan bisnis yang mengikat atau status berlaku/digantikan. · **Jangan** dibaca kalau: mencari aturan teknis (itu [KONTRAK](KONTRAK.md)).
+
+
 Tanggal: 2026-09-23
 Status: aktif
 Tujuan: register kanonik keputusan bisnis/arah owner — tanggal, status berlaku/digantikan, dan sumber bukti; keputusan tidak diubah oleh pemindahan
@@ -15,11 +19,11 @@ Rujukan: [ANTREAN](ANTREAN.md) · [AGENTS](../AGENTS.md) · [ANTREAN](ANTREAN.md
 | Butir | Status | Bukti / pengganti |
 |---|---|---|
 | Retro-approve kondisional 23 Sep — syarat "setiap batch wajib approval eksplisit" | **digantikan** | [DELEGASI-DOC-TEKNIS](#keputusan-yang-mengikat-ringkas) + [BATCH-B1-B11](#keputusan-yang-mengikat-ringkas) (23 Sep, pasca-B5, `fe2955a3`); teks asli di [history/izin-dan-catatan-keputusan-owner.md](history/izin-dan-catatan-keputusan-owner.md) |
-| IZIN-CAKUPAN 23 Sep — "S2.b3/S2.b4/S2.c dan batch berikutnya menunggu approval per batch" | **digantikan** | S2.b3/S2.b4/S2.c dieksekusi atas instruksi percepatan owner 23 Sep; B1–B7 mengikuti urutan batch + DELEGASI-DOC-TEKNIS ([STATUS §5](STATUS.md#5-pelaksanaan-vs-izin-dua-sumbu--jangan-digabung)) |
-| ARAH-DOKUMEN 6 Sep — "seri M00–M19 dipertahankan" | **digantikan** | [KONSOLIDASI-FILE](#keputusan-yang-mengikat-ringkas) 23 Sep + [STATUS §8](STATUS.md#8-struktur-dokumen-tujuan-konsolidasi) (7 file utama; path lama menjadi pointer) |
+| IZIN-CAKUPAN 23 Sep — "S2.b3/S2.b4/S2.c dan batch berikutnya menunggu approval per batch" | **digantikan** | S2.b3/S2.b4/S2.c dieksekusi atas instruksi percepatan owner 23 Sep; B1–B7 mengikuti urutan batch + DELEGASI-DOC-TEKNIS ([STATUS §5](./ANTREAN.md#5-pelaksanaan-vs-izin-dua-sumbu--jangan-digabung)) |
+| ARAH-DOKUMEN 6 Sep — "seri M00–M19 dipertahankan" | **digantikan** | [KONSOLIDASI-FILE](#keputusan-yang-mengikat-ringkas) 23 Sep + [STATUS §8](./ANTREAN.md#8-struktur-dokumen-tujuan-konsolidasi) (7 file utama; path lama menjadi pointer) |
 | Keputusan izin bertahap 8 Sep + koreksi lingkup AO | **riwayat** (izin sebagian masih operatif; status eksekusi bertanggal) | Dipisah ke [history/izin-dan-catatan-keputusan-owner.md](history/izin-dan-catatan-keputusan-owner.md); status aktual di [ANTREAN](ANTREAN.md) dan [ANTREAN](ANTREAN.md) |
 | Butir lain: D-01..D-31, R1–R5, B1–B5, E/F/K/L/S, OP-*, FIN-*, PUB-*, STF-*, AI-*, OWN-*, W-00-D1..D3, AL-01..AL-04, OC-01..OC-07 | **berlaku** | Tidak ada bukti penggantian yang tercatat per 23 Sep 2026 |
-| Batas penataan arsip & berkas besar (DOCS-CLEANUP, 24 Sep 2026 — A1–A4, C1–C3) | **berlaku** | Entri "2026-09-24 — DOCS-CLEANUP" di bawah; bukti batch [M13](M13_CHANGELOG.md) |
+| Batas penataan arsip & berkas besar (DOCS-CLEANUP, 24 Sep 2026 — A1–A4, C1–C3) | **berlaku** | Entri "2026-09-24 — DOCS-CLEANUP" di bawah; bukti batch [M13](./arsip/changelog-2026-09.md) |
 | Arah lapisan keputusan AI (25 Sep 2026 — AI-DECISION-*) | **berlaku**; benturan aturan **diselesaikan** oleh `CEPAT-AI-JADWAL` (agenda terjadwal, halaman hanya membaca); rumah simpanan memakai `AiDraft` (tanpa schema baru) | Entri "2026-09-25 — Arah lapisan keputusan AI" + "2026-09-25 — Dua mode" di bawah; rancangan [product/mode-cepat.md](product/mode-cepat.md) |
 | Dua mode: Mode Cepat `/cepat` + halaman Normal (25 Sep 2026 — DUA-MODE/CEPAT-*) | **berlaku**; implementasi **belum** | Entri "2026-09-25 — Dua mode" di bawah; rancangan [product/mode-cepat.md](product/mode-cepat.md) |
 
@@ -45,7 +49,7 @@ Seluruh entri bertanggal **13 Juni – 25 September 2026** dipindah utuh ke [ars
 
 ## 6. Keputusan owner yang mengikat (ringkas)
 
-Daftar lengkap dan status berlaku/digantikan: [KEPUTUSAN-OWNER.md](KEPUTUSAN-OWNER.md) (register kanonik sejak B7, 23 Sep 2026; `docs/M02_KEPUTUSAN_OWNER.md` sudah dihapus di Fase 3). Kelas riwayat (izin/approval yang sudah digantikan + catatan teknis non-keputusan) ada di [history/izin-dan-catatan-keputusan-owner.md](history/izin-dan-catatan-keputusan-owner.md).
+Daftar lengkap dan status berlaku/digantikan: [KEPUTUSAN-OWNER.md](KEPUTUSAN-OWNER.md) (register kanonik sejak B7, 23 Sep 2026; `docs/KEPUTUSAN-OWNER.md` sudah dihapus di Fase 3). Kelas riwayat (izin/approval yang sudah digantikan + catatan teknis non-keputusan) ada di [history/izin-dan-catatan-keputusan-owner.md](history/izin-dan-catatan-keputusan-owner.md).
 
 - **DEDUP-UANG** (23 Sep): pengulangan isi aturan uang/harga **boleh didedup** dengan satu pernyataan kanonik di `docs/domain/*` (multiplikator term & DP/deposit → `domain/harga.md`; periode quota → `domain/keuangan.md`; konstanta utilitas → `domain/operasional.md`); angka dan aturan tidak berubah, salinan lain menjadi rujukan. Bukti: [laporan duplikat](history/laporan-duplikat.md) D-02/D-05.
 - **PROD-SIMPLE / FLOW-CORE / UX-OWNER-ADMIN** (22 Sep): dahulukan penyederhanaan OWNER/ADMIN pada flow penghuni & keuangan; dashboard harus menjawab "apa yang harus dikerjakan" beserta asal angka.
@@ -58,7 +62,7 @@ Daftar lengkap dan status berlaku/digantikan: [KEPUTUSAN-OWNER.md](KEPUTUSAN-OWN
 - **KONSOLIDASI-FILE** (23 Sep): dokumen dirapikan menjadi sedikit file utama tanpa penomoran berserak; docs harus membantu AI bekerja, bukan memperumit.
 - **BATCH-B1-B11** (23 Sep): urutan batch handoff (B1–B11, 1 batch = 1 commit) adalah **penomoran resmi** penataan; label lama S2.d/S3–S7 ditandai superseded dan tidak dipakai lagi.
 - **DEDUP-QUOTA** (23 Sep): `domain/keuangan.md` § Quota Utilitas = **kanonik**; salinan di `domain/operasional.md` § Bagian 6 dan `history/changelog/2026-07.md` menjadi rujukan. Isi aturan tidak berubah — hanya pengulangan yang dihapus ([bukti](history/laporan-duplikat.md)).
-- **TAUTAN-ARSIP-B11** (23 Sep): 4 tautan rusak pra-eksisting (3 di `docs/archieve/**` legacy + 1 di `docs/history/m11-seed-master-data-appendix-2026-07-08.md`) **tidak** diperbaiki sekarang; ditangani di B11.
+- **TAUTAN-ARSIP-B11** (23 Sep): 4 tautan rusak pra-eksisting (3 di `docs/archieve/**` legacy + 1 di `docs/arsip/m11-seed-master-data-appendix-2026-07-08.md`) **tidak** diperbaiki sekarang; ditangani di B11.
 - **IOT-BAGIAN6-TETAP** (23 Sep): isi IoT Bagian 6 tetap di `domain/operasional.md` sampai B8 (M15); rumah akhir materi IoT diputuskan di B8 bersama IOT-LATER. — **Ditutup di B8 (23 Sep 2026):** Bagian 6 dikonsolidasikan ke `domain/iot.md`; keputusan IOT-LATER (IoT ditunda, pencatatan meter tetap) tidak berubah.
 - **DELEGASI-DOC-TEKNIS** (23 Sep, pasca-B5): **penataan dokumen adalah keputusan AI** — struktur file, rumah kanonik, pemisahan riwayat/audit, format tabel/heading, anchor, tautan, dedup pengulangan **non-aturan**, dan urutan batch B5–B11 diputuskan AI tanpa menunggu approval per batch, dengan bukti konservasi + invariant dilaporkan per commit. **Owner hanya dimintai keputusan yang menyentuh aturan bisnis/flow bisnis atau UI/UX** — termasuk perubahan nominal/DP/deposit/harga/utang-piutang, gate uang/huni, cakupan flow, dan keputusan pengalaman pengguna. Konsekuensi: (a) item "butuh konfirmasi owner" yang bersifat penataan ditutup sendiri (mis. penempatan M10 di `product/scope.md`, Auto-Ops ke `domain/operasional.md`); (b) dedup yang menyentuh isi aturan uang/harga/huni (mis. D-02, D-05) **tetap** milik owner; (c) delegasi ini tidak menambah izin menyentuh source, DB, server, deploy, atau secret.
 

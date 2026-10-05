@@ -3,12 +3,12 @@
 Tanggal: 2026-09-23
 Status: aktif
 Tujuan: navigasi berbasis ROLE pengguna dan FLOW bisnis — scope PUBLIC/TENANT/STAFF/ADMIN/OWNER/SYSTEM, sembilan flow bisnis, quick reference "Mau X? Buka Y", dan alur kerja ideal (dari M10)
-Rujukan: [KEPUTUSAN-OWNER](../KEPUTUSAN-OWNER.md) · [STATUS](../STATUS.md) · [PETA-KODE](../PETA-KODE.md) · [orientasi.md](orientasi.md)
+Rujukan: [KEPUTUSAN-OWNER](../KEPUTUSAN-OWNER.md) · [STATUS](../ANTREAN.md) · [PETA-KODE](../PETA-KODE.md) · [orientasi.md](orientasi.md)
 
 > Migrasi dari docs/M10_PETA_SCOPE.md (B5 Tahap 3, 23 Sep 2026) pada DOC-GOV-20260922; teks peta scope tidak diubah.
 > Batch B5 memindahkan **seluruh isi M10 apa adanya** (L6–L295) ke file ini; nomor & urutan bagian sama seperti aslinya. Peta modul/file kode ada di [PETA-KODE.md](../PETA-KODE.md).
 
-> **Tujuan:** lompat ke file yang tepat berdasarkan ROLE pengguna atau FLOW bisnis. Dipakai bersama `docs/PETA-KODE.md` (navigasi modul) dan `docs/STATUS.md` (antrian task).
+> **Tujuan:** lompat ke file yang tepat berdasarkan ROLE pengguna atau FLOW bisnis. Dipakai bersama `docs/PETA-KODE.md` (navigasi modul) dan `docs/ANTREAN.md` (antrian task).
 
 ---
 
@@ -34,7 +34,7 @@ Rujukan: [KEPUTUSAN-OWNER](../KEPUTUSAN-OWNER.md) · [STATUS](../STATUS.md) · [
 | BE helper | `backend/src/modules/tenant-bookings/pricing.helper.ts` | Hitung DP 30% + biaya lain |
 | BE katalog | `backend/src/modules/marketing/marketing-public-rooms.service.ts` | Query kamar publik + foto |
 | BE FAQ | `backend/src/modules/faqs/faqs.service.ts` | FAQ publik |
-| Docs | `M05_SIKLUS_HUNI.md` · `domain/publik.md` | |
+| Docs | `domain/hunian.md` · `domain/publik.md` | |
 
 ### A2. TENANT (Penghuni — login role TENANT)
 **Apa yang dilihat/dilakukan:** MyStay (status kamar), invoice & bayar, meter reading, loyalty points, referral, permintaan renew/checkout, review staf, survei.
@@ -55,7 +55,7 @@ Rujukan: [KEPUTUSAN-OWNER](../KEPUTUSAN-OWNER.md) · [STATUS](../STATUS.md) · [
 | BE module | `backend/src/modules/loyalty/` | Poin + reward + referral |
 | BE module | `backend/src/modules/surveys/` | Survei kepuasan |
 | BE module | `backend/src/modules/tenant-staff-reviews/` | Review staf |
-| Docs | `M05_SIKLUS_HUNI.md` · `M04_KEUANGAN.md` | |
+| Docs | `domain/hunian.md` · `domain/keuangan.md` | |
 
 ### A3. STAFF (Karyawan — login role STAFF)
 **Apa yang dilihat/dilakukan:** tiket (keluhan/perbaikan/inspeksi), rutinitas harian, laporan lapangan, meter reading, inventory movement, WiFi order.
@@ -87,7 +87,7 @@ Rujukan: [KEPUTUSAN-OWNER](../KEPUTUSAN-OWNER.md) · [STATUS](../STATUS.md) · [
 | FE pages | `frontend/src/pages/finance/` | Accounting setup |
 | FE pages | `frontend/src/pages/reports/` | Laporan |
 | BE module | **Semua modul kecuali owner-ai** | Admin = full access |
-| Docs | `M04_KEUANGAN.md` · `M05_SIKLUS_HUNI.md` · `domain/operasional.md` | |
+| Docs | `domain/keuangan.md` · `domain/hunian.md` · `domain/operasional.md` | |
 
 ### A5. OWNER (Pemilik — login role OWNER)
 **Apa yang dilihat/dilakukan:** dashboard owner (KPI), laporan keuangan, AI assistant (brief/finance/payment review/ops/inventory), settings sistem, semua akses admin.
@@ -102,7 +102,7 @@ Rujukan: [KEPUTUSAN-OWNER](../KEPUTUSAN-OWNER.md) · [STATUS](../STATUS.md) · [
 | BE module | `backend/src/modules/settings/settings.service.ts` | OperationalSetting |
 | BE module | `backend/src/modules/accounting/` | Laporan + tutup buku |
 | BE module | `backend/src/modules/market-analysis/` | Analisa pasar AI |
-| Docs | `M04_KEUANGAN.md` · `domain/ai.md` · `M02_KEPUTUSAN_OWNER.md` | Sumber kebenaran |
+| Docs | `domain/keuangan.md` · `domain/ai.md` · `KEPUTUSAN-OWNER.md` | Sumber kebenaran |
 
 ### A6. SYSTEM / IoT (Device — tanpa login, cron)
 **Apa yang dilihat/dilakukan:** ESP32-C3 kirim water flow reading dan backend polling Tuya KWH meter via cron untuk observability owner/admin/tenant. Deteksi kebocoran/anomali dan aksi otomatis belum diaktifkan; telemetri tidak boleh membuat invoice otomatis.
@@ -134,7 +134,7 @@ PublicBookingForm → PaymentSubmission (DP 30%) → Admin approve → Stay (pro
 | BE | `stays/stays.service.ts` | Promosi booking→stay |
 | BE | `auto-ops/auto-ops.service.ts` (BookingSweep) | Expiry 3 jam |
 | FE | `pages/public/` · `pages/bookings/` | Form + list booking |
-| Docs | `M05_SIKLUS_HUNI.md` · `M03_FLOW_KONTRAK.md` | |
+| Docs | `domain/hunian.md` · `M03_FLOW_KONTRAK.md` | |
 
 ### B2. PAYMENT FLOW (Invoice → Bayar → Approve → Jurnal)
 ```
@@ -150,7 +150,7 @@ Stay aktif → Invoice (sewa + meter) → Tenant bayar (PaymentSubmission)
 | BE | `payment-submissions/payment-submissions.service.ts` | Verifikasi bukti bayar |
 | BE | `accounting/accounting-posting.service.ts` | Posting jurnal |
 | FE | `pages/invoices/` · `pages/payments/` | UI invoice + bayar |
-| Docs | `M04_KEUANGAN.md` | **GATE WAJIB** |
+| Docs | `domain/keuangan.md` | **GATE WAJIB** |
 
 ### B3. STAY FLOW (Huni → Meter → Renewal/Checkout)
 ```
@@ -169,7 +169,7 @@ Stay aktif → MeterReading (bulanan) → RenewRequest (sebelum habis)
 | BE | `stays/room-transfer.service.ts` | Pindah kamar |
 | BE | `auto-ops/auto-ops.service.ts` (StaySweep) | Overstay, room healer |
 | FE | `pages/stays/` · `pages/renew-requests/` | UI stay + renew |
-| Docs | `M05_SIKLUS_HUNI.md` | |
+| Docs | `domain/hunian.md` | |
 
 ### B4. DEPOSIT FLOW (Jaminan → Refund/Settlement)
 ```
@@ -183,7 +183,7 @@ Kabur/abandoned → Forced deposit→AR (DR 2000 / CR 1100)
 | BE | `deposit-ledger/deposit-ledger.service.ts` | Ledger deposit |
 | BE | `checkout-requests/checkout-requests.service.ts` | Settlement saat checkout |
 | BE | `accounting/accounting-posting.service.ts` | Jurnal deposit (liability) |
-| Docs | `M04_KEUANGAN.md` · `M05_SIKLUS_HUNI.md` | |
+| Docs | `domain/keuangan.md` · `domain/hunian.md` | |
 
 ### B5. ACCOUNTING FLOW (Jurnal → Period Close → Laporan)
 ```
@@ -204,7 +204,7 @@ RentRecognitionSchedule → Unearned→Earned (bulanan)
 | BE | `assets/assets.service.ts` | Aset tetap + depresiasi |
 | BE | `auto-ops/auto-ops.service.ts` (AccountingSweep) | Auto-journal, rent recognition |
 | FE | `pages/finance/` · `pages/reports/` | UI akuntansi |
-| Docs | `M04_KEUANGAN.md` | **GATE WAJIB + unit test** |
+| Docs | `domain/keuangan.md` | **GATE WAJIB + unit test** |
 
 ### B6. STAFF OPERATIONS FLOW (Tiket → Rutinitas → KPI)
 ```
@@ -274,19 +274,19 @@ Quota listrik untuk pembacaan meter bisnis dihitung dari periode sewa lunas; DP 
 
 | Saya mau... | Role | Buka file ini dulu |
 |-------------|------|--------------------|
-| Tambah fitur di halaman tenant | TENANT | `frontend/src/pages/portal/` + `M05_SIKLUS_HUNI.md` |
-| Ubah logika booking | PUBLIC | `backend/src/modules/tenant-bookings/` + `M05_SIKLUS_HUNI.md` |
-| Ubah logika pembayaran | ADMIN | `backend/src/modules/payment-submissions/` + `M04_KEUANGAN.md` |
-| Tambah laporan keuangan | OWNER | `backend/src/modules/accounting/` + `M04_KEUANGAN.md` |
+| Tambah fitur di halaman tenant | TENANT | `frontend/src/pages/portal/` + `domain/hunian.md` |
+| Ubah logika booking | PUBLIC | `backend/src/modules/tenant-bookings/` + `domain/hunian.md` |
+| Ubah logika pembayaran | ADMIN | `backend/src/modules/payment-submissions/` + `domain/keuangan.md` |
+| Tambah laporan keuangan | OWNER | `backend/src/modules/accounting/` + `domain/keuangan.md` |
 | Ubah logika tiket staf | STAFF | `backend/src/modules/tickets/` + `domain/operasional.md` |
 | Tambah tombol AI baru | OWNER | `backend/src/modules/owner-ai/` + `domain/ai.md` |
-| Ubah deposit/refund | ADMIN | `backend/src/modules/deposit-ledger/` + `M04_KEUANGAN.md` |
+| Ubah deposit/refund | ADMIN | `backend/src/modules/deposit-ledger/` + `domain/keuangan.md` |
 | Tambah inventory | STAFF | `backend/src/modules/inventory-items/` + `domain/operasional.md` |
 | Ubah auto-ops/sweeper | SYSTEM | `backend/src/modules/auto-ops/` + `domain/operasional.md` § Auto-Ops |
 | Tambah field di model Prisma | — | `backend/prisma/schema.prisma` ⚠️ BUTUH APPROVAL OWNER |
 | Perbaiki UI/UX | — | `frontend/src/styles/` + `frontend/src/components/` |
-| Cek aturan owner | — | `docs/M02_KEPUTUSAN_OWNER.md` (84 keputusan, **SUMBER KEBENARAN**) |
-| Tambah IoT / KWH meter | SYSTEM | `docs/M15_IOT.md` + `backend/src/modules/iot/` |
+| Cek aturan owner | — | `docs/KEPUTUSAN-OWNER.md` (84 keputusan, **SUMBER KEBENARAN**) |
+| Tambah IoT / KWH meter | SYSTEM | `docs/domain/iot.md` + `backend/src/modules/iot/` |
 
 ---
 
@@ -296,5 +296,5 @@ Quota listrik untuk pembacaan meter bisnis dihitung dari periode sewa lunas; DP 
 2. **Buka M-file domain** (kolom "Docs" di tabel) — pahami aturan bisnis
 3. **Buka M00_CODEMAP.md** — verifikasi path modul backend + frontend
 4. **Grep simbol** di `backend/src` / `frontend/src` sebelum edit
-5. **Gate build:** `npx tsc --noEmit` (backend) + `npm run build` (frontend). Kalau task uang: **WAJIB** `M04_KEUANGAN.md` gate.
+5. **Gate build:** `npx tsc --noEmit` (backend) + `npm run build` (frontend). Kalau task uang: **WAJIB** `domain/keuangan.md` gate.
 6. **Tutup:** perbarui checklist terkait di `M12` + entri changelog di `M13`.

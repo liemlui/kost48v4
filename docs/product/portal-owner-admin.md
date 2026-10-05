@@ -3,7 +3,7 @@
 Tanggal: 2026-09-23
 Status: aktif (rancangan + status implementasi)
 Tujuan: rancangan portal ringkas Owner/Admin — prinsip desain, peran, flow OWNER, flow ADMIN, halaman pendukung, kriteria selesai, rencana, dan status implementasi (dari M17)
-Rujukan: [KEPUTUSAN-OWNER](../KEPUTUSAN-OWNER.md) · [STATUS](../STATUS.md) · [scope.md](scope.md) · [flow-utama.md](arah-produk.md)
+Rujukan: [KEPUTUSAN-OWNER](../KEPUTUSAN-OWNER.md) · [STATUS](../ANTREAN.md) · [scope.md](scope.md) · [flow-utama.md](arah-produk.md)
 
 > Migrasi dari docs/M17_PORTAL_FLOW_RINGKAS.md (B5 Tahap 3, 23 Sep 2026) pada DOC-GOV-20260922; teks rancangan tidak diubah.
 > Batch B5 memindahkan **seluruh isi M17 apa adanya** (L6–L213) ke file ini; empat `[x]` status implementasi ikut apa adanya dan berada di luar domain invariant (STATUS.md + docs/history).
@@ -305,7 +305,7 @@ Keputusan lanjutan yang menyertainya: AI **hanya untuk OWNER**; biaya ditampilka
 Konsekuensi yang sudah diputuskan:
 
 - Agenda dihitung **terjadwal**, halaman **membaca**. Rumah simpanan: `AiDraft` (G9; `backend/src/modules/owner-ai/ai-draft.service.ts` + `ai-draft.controller.ts`) dengan status `DRAFT → APPLIED/REJECTED/EXPIRED` dan retensi 60 hari — **tanpa schema baru**.
-- **Ketergantungan yang belum terbukti:** pemicu terjadwal di produksi (cron AutoOps masih terbuka di [STATUS](../STATUS.md) §3). Sampai terbukti, jalur tombol manual yang dipakai — dan itu tidak menghambat, karena kartu aturan tidak bergantung pada AI.
+- **Ketergantungan yang belum terbukti:** pemicu terjadwal di produksi (cron AutoOps masih terbuka di [STATUS](../ANTREAN.md) §3). Sampai terbukti, jalur tombol manual yang dipakai — dan itu tidak menghambat, karena kartu aturan tidak bergantung pada AI.
 
 ### 10.7 Kriteria selesai
 
@@ -318,7 +318,7 @@ Konsekuensi yang sudah diputuskan:
 
 ## 11. Arahan kerja lanjutan (checklist ada di STATUS)
 
-Rancangan di §10 dipotong menjadi task bernomor agar dapat dieksekusi satu per satu. **Antrean resmi tetap [STATUS](../STATUS.md)** — daftar berikut hanya ringkasan arah:
+Rancangan di §10 dipotong menjadi task bernomor agar dapat dieksekusi satu per satu. **Antrean resmi tetap [STATUS](../ANTREAN.md)** — daftar berikut hanya ringkasan arah:
 
 | ID | Pekerjaan | Prasyarat |
 |---|---|---|

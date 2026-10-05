@@ -3,7 +3,7 @@
 Tanggal: 2026-09-23
 Status: aktif
 Tujuan: aturan & spesifikasi AI berbayar (DeepSeek) untuk OWNER/ADMIN — pola aman/terlarang, struktur backend/frontend, hemat token, audit trail, fitur G0–G9, UAT (dari M09)
-Rujukan: [KEPUTUSAN-OWNER](../KEPUTUSAN-OWNER.md) · [STATUS](../STATUS.md) · [AI owner/admin](ai.md) · [keuangan.md](keuangan.md) · [operasional.md](operasional.md) · [publik.md](publik.md)
+Rujukan: [KEPUTUSAN-OWNER](../KEPUTUSAN-OWNER.md) · [STATUS](../ANTREAN.md) · [AI owner/admin](ai.md) · [keuangan.md](keuangan.md) · [operasional.md](operasional.md) · [publik.md](publik.md)
 
 > Migrasi dari docs/M09_AI_OWNER_ADMIN.md (B2 Tahap 3, 23 Sep 2026) pada DOC-GOV-20260922; teks tidak diubah.
 > Batch B2 memindahkan **seluruh isi M09 apa adanya** ke file ini (satu tujuan per handoff owner). Bagian bertanggal — Update 16 Jul 2026, status Fase G/J/K, dan `## Audit 360° P6 AI Flow (Jul 2026)` — **ikut utuh di sini dan belum dipisah**; pemisahan ke `docs/AUDIT.md`/`docs/arsip/` dilakukan pada tahap konsolidasi audit/arsip atau batch lanjutan sesuai keputusan owner.
@@ -781,7 +781,7 @@ Ditambahkan 25 Sep 2026 mengikuti arah owner (lihat [KEPUTUSAN-OWNER](../KEPUTUS
 - §Pola Terlarang di file ini dan item 1 UAT Fase G ("Tombol AI tidak otomatis terpanggil saat halaman dibuka") **tetap berlaku apa adanya**: tidak ada pemanggilan AI pada peristiwa membuka halaman.
 - Keputusan owner: agenda dihitung **terjadwal 1× sehari** lalu **disimpan** ke antrean draft; halaman hanya membaca. Tombol "Perbarui agenda" tetap tersedia di luar jadwal. Karena tidak ada pemanggilan AI saat halaman dibuka, kedua aturan di atas tetap terpenuhi.
 - Batas yang ikut diputuskan: AI **hanya untuk OWNER** (ADMIN/STAFF/TENANT deterministik); biaya hanya ditampilkan ke OWNER dengan target **≤ Rp 50.000/bulan**; AI mati atau kuota habis → halaman tetap tampil penuh dengan kartu aturan. Rincian: [product/mode-cepat.md](../product/mode-cepat.md) §5–§6.
-- **Ketergantungan yang belum terbukti:** pemicu terjadwal yang benar-benar berjalan di produksi. Cron AutoOps masih terbuka di [STATUS](../STATUS.md) §3 dan keberadaan penjadwal internal **UNKNOWN**; verifikasi sebelum `AIDL-04`.
+- **Ketergantungan yang belum terbukti:** pemicu terjadwal yang benar-benar berjalan di produksi. Cron AutoOps masih terbuka di [STATUS](../ANTREAN.md) §3 dan keberadaan penjadwal internal **UNKNOWN**; verifikasi sebelum `AIDL-04`.
 
 **Gate:**
 

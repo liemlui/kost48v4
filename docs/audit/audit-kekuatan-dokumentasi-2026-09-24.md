@@ -3,7 +3,7 @@
 > **Tanggal:** 24 September 2026. **Lingkup:** struktur `docs/`, kualitas dokumentasi kode (backend/frontend), integritas tautan. **Pelaksana:** AI (peninjau dokumen) — **read-only**.
 > **Status:** bukti bertanggal. Ini **bukan** PASS audit modul, bukan bukti deployment, dan bukan bukti dampak runtime.
 > **Tujuan:** satu pengukuran yang dapat direproduksi untuk menjawab "seberapa kuat dokumentasi proyek ini", menggantikan skor tunggal yang tidak dapat diverifikasi.
-> **Rujukan:** [STATUS](../STATUS.md) (antrean/gate) · [AUDIT](../AUDIT.md) (titik masuk) · [AGENTS](../../AGENTS.md) §6/§8 (batas baca, verifikasi).
+> **Rujukan:** [STATUS](../ANTREAN.md) (antrean/gate) · [AUDIT](../AUDIT.md) (titik masuk) · [AGENTS](../../AGENTS.md) §6/§8 (batas baca, verifikasi).
 
 ## 1. Metode, dan tiga kesalahan yang dihindari
 

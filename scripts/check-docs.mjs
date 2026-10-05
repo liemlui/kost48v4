@@ -44,7 +44,7 @@ import { readFileSync, readdirSync, existsSync, statSync } from "node:fs";
 import { join, relative, dirname, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 
-const VERSI_GATE = "v1.5";
+const VERSI_GATE = "v1.6";
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const DOCS = join(ROOT, "docs");
 
@@ -71,6 +71,7 @@ const PENANDA_NON_OTORITATIF = /<!--\s*kotak-non-otoritatif\s*-->/i;
 const RUMAH_KOTAK = [ANTREAN, "docs/STATUS.md"];                        // STATUS sampai B5 melebur ke ANTREAN
 const KARTU_BUKTI_KOTAK = /[\\/]docs[\\/](history|audit|arsip)[\\/]/;   // catatan bertanggal, bukan antrean
 const INDEKS_CAKUPAN = "docs/audit/index-cakupan.md";                   // pengganti checklist audit (Q13)
+const CATATAN_R6 = /[\\/]docs[\\/](rencana|history|arsip)[\\/]/;         // R6: catatan bertanggal dikecualikan
 const PLAFON_AGENTS = 12 * 1024;
 const PLAFON_WAJIB = 16 * 1024;
 const PLAFON_RUJUKAN = 48 * 1024;
@@ -261,6 +262,28 @@ for (const file of berkasAktif) {
   }
 }
 
+// ── R6 — rujukan backtick `docs/...` yang tidak ada di disk (dipasang setelah B8, P32) ──
+{
+  const EXT_R6 = /\.(md|mjs|cjs|js|ts|tsx|json|ps1|sql|prisma|yml|yaml|toml|env|txt|sh)$/i;
+  let nRujukan = 0;
+  for (const file of diperiksa) {
+    if (CATATAN_R6.test(file)) continue;                       // catatan bertanggal boleh menyebut path yang sudah dihapus
+    readFileSync(file, "utf8").split(/\r?\n/).forEach((line, i) => {
+      for (const m of line.matchAll(/`(docs\/[A-Za-z0-9_./\-]+)`/g)) {
+        const p = m[1].replace(/[.,;:]+$/, "");
+        if (/[*{<…]/.test(p)) continue;                        // glob/placeholder
+        const folder = p.endsWith("/");
+        if (!EXT_R6.test(p) && !folder) continue;              // bukan rujukan berkas/folder
+        nRujukan++;
+        const abs = join(ROOT, ...p.replace(/\/$/, "").split("/"));
+        const ada = existsSync(abs) && (folder ? statSync(abs).isDirectory() : statSync(abs).isFile());
+        if (!ada) catat("R6", file, i + 1, `rujukan backtick tidak ada di disk: ${p}`);
+      }
+    });
+  }
+  if (nRujukan === 0) catat("R6", ROOT, 0, "tidak ada rujukan backtick yang diperiksa — periksa apakah pola R6 masih cocok dengan isi dokumen");
+}
+
 // ── laporan ────────────────────────────────────────────────────────────────
 const grup = (rule, arr = pelanggaran) => arr.filter((p) => p.rule === rule);
 const judul = {
@@ -270,6 +293,7 @@ const judul = {
   R4: "R4 blok baca (berkas terpilih) + baris peran AGENTS",
   R5: "R5 plafon byte",
   R7: "R7 indeks cakupan audit",
+  R6: "R6 rujukan backtick",
 };
 
 console.log(`=== CHECK-DOCS ${VERSI_GATE} (gate dokumen KOST48) ===`);
@@ -277,7 +301,7 @@ console.log(`berkas diperiksa : ${diperiksa.length} aktif (${semuaMd.length} .md
 console.log(`versi kanonik    : ${[...versiDiterima].join(", ")} (dari frontend/src/config/version.ts + package.json)`);
 console.log("");
 
-for (const rule of ["R1", "R2", "R3", "R4", "R5", "R7"]) {
+for (const rule of ["R1", "R2", "R3", "R4", "R5", "R6", "R7"]) {
   const g = grup(rule);
   console.log(`— ${judul[rule]}: ${g.length}`);
   if (rule === "R3") {

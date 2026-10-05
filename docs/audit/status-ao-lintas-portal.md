@@ -1,8 +1,8 @@
 # Status & Antrean Eksekusi Fase AO (UI/UX Lintas Portal)
 
-> Dipindah apa adanya dari `docs/M14_AUDIT_UI_UX.md` §7–§10 (Tahap 3 batch B4, 23 Sep 2026) pada DOC-GOV-20260922.
+> Dipindah apa adanya dari `docs/AUDIT.md` §7–§10 (Tahap 3 batch B4, 23 Sep 2026) pada DOC-GOV-20260922.
 > Isi: status task AO, gelombang kerja, aturan anti-konflik, Definition of Done (27 gate `[ ]`), perintah verifikasi, dan handoff. Ini **status kerja aktif**, bukan bukti bertanggal.
-> Antrean/gate kanonik tetap [STATUS.md](../STATUS.md); ringkasan fase di [history/fase-ao.md](../history/fase-ao-ef.md); temuan dan bukti di [audit-uiux-lintas-portal-2026-07.md](../arsip/audit-uiux-lintas-portal-2026-07.md).
+> Antrean/gate kanonik tetap [ANTREAN.md](../ANTREAN.md); ringkasan fase di [history/fase-ao.md](../history/fase-ao-ef.md); temuan dan bukti di [audit-uiux-lintas-portal-2026-07.md](../arsip/audit-uiux-lintas-portal-2026-07.md).
 
 ## 7. Antrean Eksekusi Kolaboratif
 

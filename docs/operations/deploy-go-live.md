@@ -2,7 +2,7 @@
 
 <!-- kotak-non-otoritatif -->
 > **Catatan (2026-10-05, batch B4):** kotak `[ ]` di berkas ini adalah **langkah operasional**, bukan antrean tugas.
-> Antrean resmi ada di `docs/STATUS.md` (menjadi `docs/ANTREAN.md` pada B5). Penanda ini dikenali gate dokumen (aturan R3).
+> Antrean resmi ada di `docs/ANTREAN.md` (menjadi `docs/ANTREAN.md` pada B5). Penanda ini dikenali gate dokumen (aturan R3).
 
 
 > Migrasi dari docs/M08_DEPLOY_GO_LIVE.md (Bagian 1, Bagian 2, Appendix A) pada f8f9a589 (DOC-GOV-20260922 Tahap 3).
@@ -52,7 +52,7 @@ npx --yes prisma@7.8.0 migrate deploy  # replay seluruh migration dari baseline
 - **Squash baseline (2026-06-14):** rantai migration lama (tak lengkap) di-arsip ke `prisma/_archive_migrations_pre_baseline/`; baseline tetap awal rantai dan harus diikuti semua migration setelahnya, termasuk release 2026-07-23. Jalankan `migrate deploy`, bukan file baseline secara manual.
 - **Pagar database di luar Prisma:** trigger, CHECK constraint, advisory lock generate ticket-number, indeks tambahan, dan carve-out deposit historis tidak boleh diasumsikan sudah ikut migration. Sebelum go-live, artefak bootstrap khusus schema harus diekstrak/direview dan diuji pada database kosong; `sql/seed.sql` tidak boleh dipakai karena menyertakan data.
 - **Rehearsal 2026-06-13:** hasil `db push` terdahulu hanya bukti historis. Ini bukan izin memakai `db push` pada deployment produksi sekarang.
-- **DB yang sudah ada tapi dibangun via `db push` (mis. UAT lama):** jangan menghapus ledger atau menjalankan resolve secara buta. Produksi baru tidak memakai DB tersebut; bila suatu DB nyata perlu dipertahankan, gunakan jalur patch dan review ledger/schema terlebih dahulu sesuai `M08_DEPLOY_GO_LIVE.md` + gate `M19_EFISIENSI_HOSTING_512MB.md`.
+- **DB yang sudah ada tapi dibangun via `db push` (mis. UAT lama):** jangan menghapus ledger atau menjalankan resolve secara buta. Produksi baru tidak memakai DB tersebut; bila suatu DB nyata perlu dipertahankan, gunakan jalur patch dan review ledger/schema terlebih dahulu sesuai `operations/deploy-go-live.md` + gate `M19_EFISIENSI_HOSTING_512MB.md`.
 
 **Tidak ada backfill E-2 atau migrasi data UAT.** Seed hanya data fondasi: COA, periode OPEN, opening balance produksi, dan CashAccount.
 
@@ -262,7 +262,7 @@ New-NetFirewallRule -DisplayName "KOST48 LAN frontend 5173" -Direction Inbound -
 4. **Setup Node.js App**: Node 22, **Application startup file = `dist/main.js`**, env **`NODE_OPTIONS=--max-old-space-size=192`** (WAJIB via env cPanel, tidak bisa via `.env`).
 5. **SSH (di Node venv): tidak ada `npm install`/`npm ci`/Prisma CLI.** Runtime `node_modules` sudah ada di bundle dan server hanya membaca `.env` lalu menjalankan `dist/main.js`.
 6. **Env**: salin `.env.example` → `.env` di root app (dibaca app via @nestjs/config + script seed): `DATABASE_URL`(postgres cPanel), `JWT_SECRET`(baru, kuat), `NODE_ENV=production`, `CORS_ORIGIN=https://domain` (same-origin → domain saja), **`AUTO_OPS_ENABLED=false`** (shared hosting: digerakkan cron, bukan setInterval), **`AUTO_OPS_CRON_TOKEN=<rahasia panjang>`**, **`KTP_ACTIVATION_GATE_ENABLED=true`** (L-4 — default OFF, wajib ON di produksi), VAPID (opsional, push). (PORT diatur Passenger.)
-7. **Schema+seed (sekali):** bundle tidak mengubah database. Verifikasi/putuskan patch database terpisah, lalu jalankan bootstrap guard yang telah diuji (bukan `sql/seed.sql`). Bila DB telah sah, seed **OWNER** sekali dengan `OWNER_EMAIL=... OWNER_PASSWORD=... node scripts/seed-owner.js`, lalu login OWNER untuk seed COA (`POST /api/accounting/default-coa/seed`) + periode OPEN + CashAccount. Lihat `M08_DEPLOY_GO_LIVE.md` + gate `M19_EFISIENSI_HOSTING_512MB.md` untuk gate lengkap.
+7. **Schema+seed (sekali):** bundle tidak mengubah database. Verifikasi/putuskan patch database terpisah, lalu jalankan bootstrap guard yang telah diuji (bukan `sql/seed.sql`). Bila DB telah sah, seed **OWNER** sekali dengan `OWNER_EMAIL=... OWNER_PASSWORD=... node scripts/seed-owner.js`, lalu login OWNER untuk seed COA (`POST /api/accounting/default-coa/seed`) + periode OPEN + CashAccount. Lihat `operations/deploy-go-live.md` + gate `M19_EFISIENSI_HOSTING_512MB.md` untuk gate lengkap.
 8. **Restart App** (Passenger pakai `dist/main.js`). **AutoSSL** domain → HTTPS (PWA penuh).
 9. **Auto-ops**: pasang cPanel **Cron Job** tiap 5–10 menit memanggil `POST /api/auto-ops/cron` dgn `X-Cron-Token` (perintah lengkap di "Status kode" atas). Verifikasi: jalankan manual sekali → cek notif/sweeper berjalan.
 10. Smoke: `https://domain/` (frontend) · `https://domain/api/public/rooms` 200 · login OWNER · trial-balance balanced · reconciliation-lite mismatch=0 · cPanel **Resource Usage: memory faults = 0** (bila ada fault → turunkan `NODE_OPTIONS` ke 160 atau upgrade paket).
@@ -271,7 +271,7 @@ New-NetFirewallRule -DisplayName "KOST48 LAN frontend 5173" -Direction Inbound -
 
 ## Bagian 2 - `docs/arsip/legacy/2026-06-16_root_docs_pre_M/GO_LIVE_CHECKLIST.md`
 
-> **ARSIP LAN — bukan prosedur produksi.** Jangan gunakan `golive:setup`, nama database, seed, atau instruksi env di bagian lama ini untuk online deployment. Untuk production gunakan hanya `M08_DEPLOY_GO_LIVE.md` + gate `M19_EFISIENSI_HOSTING_512MB.md` dan tabel hosting M19 bagian 9.
+> **ARSIP LAN — bukan prosedur produksi.** Jangan gunakan `golive:setup`, nama database, seed, atau instruksi env di bagian lama ini untuk online deployment. Untuk production gunakan hanya `operations/deploy-go-live.md` + gate `M19_EFISIENSI_HOSTING_512MB.md` dan tabel hosting M19 bagian 9.
 
 ### GO-LIVE CHECKLIST — LAN dulu (2026-06-15)
 **Target terpilih:** Lokal/LAN via `npm run golive` (uji di jaringan rumah/kos sebelum publik internet). Detail lengkap & opsi cPanel/VPS di `04_DEPLOY_AND_PWA.md`. **Kode siap:** Fase 1–5 + audit menyeluruh tuntas, `tsc` 0, unit 47/47, tak ada 🔴 bug.

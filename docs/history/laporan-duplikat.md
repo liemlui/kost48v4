@@ -38,7 +38,7 @@ Tujuan: mencatat dugaan duplikasi isi yang ditemukan saat batch konsolidasi. Isi
 | `docs/PETA-KODE.md` § Frontend — Redundansi UI/UX (Fase AM) | Status 16/16 + tabel AM-01..AM-16 dengan kolom **Dampak artefak kode** | Dipertahankan: fungsi **pemetaan artefak kode** (mis. `utils/whatsapp.ts`, `useGenericForm`), bukan catatan tanggal |
 | `docs/history/changelog/2026-07.md` (entri M14 SELESAI + AM-01..) dan `docs/history/fase-lama.md` (baris Fase AM) | Narasi kronologis penyelesaian fase | Riwayat bertanggal — tetap di riwayat |
 
-**Keputusan (penataan, AI):** kedua salinan **tidak** identik baris-per-baris dan melayani fungsi berbeda; tidak ada penghapusan. Yang dijaga hanya agar angka "16/16" tidak dijadikan klaim status aktif — status aktif tetap di [STATUS](../STATUS.md).
+**Keputusan (penataan, AI):** kedua salinan **tidak** identik baris-per-baris dan melayani fungsi berbeda; tidak ada penghapusan. Yang dijaga hanya agar angka "16/16" tidak dijadikan klaim status aktif — status aktif tetap di [STATUS](../ANTREAN.md).
 
 ### D-04 — Daftar akun dev & perintah seed (`product/orientasi.md` §7) vs `operations/default-dev.md` — **SELESAI DEDUP 23 Sep 2026**
 

@@ -3,7 +3,7 @@
 Tanggal: 2026-09-22
 Status: aktif
 Tujuan: kontrak & business rules (dari M03 Bagian 2)
-Rujukan: [KEPUTUSAN-OWNER](../KEPUTUSAN-OWNER.md) · [STATUS](../STATUS.md) · [flow & kontrak](flow.md) · [domain/flow.md](flow.md)
+Rujukan: [KEPUTUSAN-OWNER](../KEPUTUSAN-OWNER.md) · [STATUS](../ANTREAN.md) · [flow & kontrak](flow.md) · [domain/flow.md](flow.md)
 
 > Migrasi dari docs/M03_FLOW_KONTRAK.md L551–955 pada aeedaf99
 > (DOC-GOV-20260922 Tahap 3 S2.a).

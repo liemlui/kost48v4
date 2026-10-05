@@ -3,7 +3,7 @@
 Tanggal: 2026-09-22
 Status: aktif
 Tujuan: peta alur kode krusial (dari M03 Bagian 1)
-Rujukan: [KEPUTUSAN-OWNER](../KEPUTUSAN-OWNER.md) · [STATUS](../STATUS.md) · [flow & kontrak](flow.md) · [domain/kontrak.md](kontrak.md)
+Rujukan: [KEPUTUSAN-OWNER](../KEPUTUSAN-OWNER.md) · [STATUS](../ANTREAN.md) · [flow & kontrak](flow.md) · [domain/kontrak.md](kontrak.md)
 
 > Migrasi dari docs/M03_FLOW_KONTRAK.md L61–550 pada aeedaf99
 > (DOC-GOV-20260922 Tahap 3 S2.a).
