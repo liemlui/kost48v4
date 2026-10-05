@@ -18,6 +18,7 @@ Aturan yang berlaku: rujukan **hanya boleh** diarahkan ulang bila targetnya ada.
 | 4 | `docs/M13_CHANGELOG.md` baris 13 | `docs/archieve/M13_CHANGELOG_ARSIP_S1_2026.md` | **tidak pernah ada**. Nama benarnya `_previous_cycles/M11_CHANGELOG_ARSIP_S1_2026.md` (144 KB, kelas C → keluar repo oleh owner) |
 | 5 | `docs/operations/deploy-go-live.md` baris 20 | `` `08_CHECKLIST.md` `` (nama saja, tanpa path) | berkas ada, tetapi **keluar repo** pada batch B2 (eksekusi owner) |
 | 6 | `docs/operations/verifikasi-keuangan.md` baris 117 | `` `08_CHECKLIST` `` (nama saja) | idem #5 |
+| 7 | `docs/arsip/changelog-2026-08.md` · `docs/arsip/legacy/2026-09-07_docs_cleanup/GO_LIVE_DATA_ISI.md` · `docs/history/changelog/2026-09.md` | `docs/archieve/2026-09-07_docs_cleanup/tenant-data-template.tsv` | berkas dipindah ke `.docs-legacy/` saat penutupan B2 (`c1134387`); ketiga rujukan adalah catatan historis |
 
 Catatan sifat: #1–#4 adalah **sitasi prosa** (path dalam backtick) — gate **tidak** memeriksanya, karena R2 hanya memeriksa tautan markdown. #5–#6 berada **di dalam baris `[ ]`** yang juga menjadi sasaran batch B4 (kebijakan kotak).
 

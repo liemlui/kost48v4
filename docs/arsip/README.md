@@ -24,7 +24,7 @@ Changelog bulanan yang **masih berjalan** tetap di `docs/history/changelog/2026-
 
 ## 2. Yang bukan arsip ini
 
-- `docs/archieve/**` - **sisa yang menunggu dipindah keluar repo**: 68 berkas di disk (**7 tracked**, 61 untracked lokal). Sejak batch B2 (2026-10-05) arsip legacy yang **dikutip dokumen aktif** sudah pindah ke [`legacy/`](legacy/) (39 berkas). Sisa 66 berkas kelas C + `08_CHECKLIST.md` **keluar repo** (eksekusi owner; daftar + perintah: [B2-daftar-pindah-arsip-legacy.md](../rencana/B2-daftar-pindah-arsip-legacy.md) §6.2). Baris `docs/archieve/` di `.git/info/exclude` **sengaja belum dihapus** sampai pemindahan itu selesai - kalau dihapus lebih dulu, ~62 berkas untracked membanjiri `git status`. Keputusan lama `ARSIP-BATAS` (24 Sep 2026) digantikan rencana rombak dokumentasi 2026-10-05.
+- `docs/archieve/**` - **SUDAH TIDAK ADA** (batch B2 ditutup 2026-10-05, commit `c1134387`). Arsip legacy terbelah dua: yang **dikutip dokumen aktif** ada di [`legacy/`](legacy/) (39 berkas, tracked), dan sisanya (68 berkas, 913 KB) dipindah **keluar dari dokumentasi** ke `.docs-legacy/` di akar repo — folder itu **diabaikan git** (`.gitignore` L135) dan bebas dipindah keluar repo kapan saja. Alasan penempatan: keputusan owner 2026-10-05 (sandbox agen tidak boleh menulis di luar repo). 7 berkas yang tadinya tracked tetap ada di riwayat git.
 - `docs/audit-map/**` - **generated dan untracked** (1.126 berkas, 0 tracked), di-ignore `.gitignore` L89 (`/docs/audit-map/`); dipakai 135+ tautan peta per ID audit. **Jangan dihapus** dan jangan dianggap bagian repo; regenerasi `node docs/audit-map/generate.cjs`. Rencana batch **B3** memindahkannya keluar dari `docs/` (target `.audit-map/` di akar repo) dan men-track generatornya.
 
 ## 3. Aturan

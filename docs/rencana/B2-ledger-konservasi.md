@@ -99,6 +99,7 @@ Select-String -Path docs/arsip/legacy/**/*.md -Pattern 'Owner#2026|admin123|staf
 | B2.2 alih rujukan | `56e99f15` | 60 kemunculan `archieve/<berkas>.md` → `arsip/legacy/<berkas>.md` di 23 dokumen aktif (16 berkas ikut ter-commit). Klaster: kontrak 18 · PETA-KODE 7 · flow/publik/ai/KEPUTUSAN-OWNER 15 · sisanya 20 | gate tiap klaster; R2 (tautan mati) **0 → 0**; total pelanggaran 23 + 1 dilewati |
 | B2.3 bersih-bersih | `a4b46132` | Pernyataan struktur diperbarui: `AGENTS.md` §6 · `docs/ATURAN.md` · `docs/README.md` · `docs/product/orientasi.md` · `docs/arsip/README.md` (inventaris `legacy/`) | gate: R5 kembali ke 5; total 23 + 1 dilewati |
 | Pemisahan commit campuran | `0f28e8d9` (konten owner) + `56e99f15` (alih rujukan) | Atas instruksi owner 2026-10-05: commit campuran lama dipisah. **Isi berkas owner tidak disentuh** — 20 berkas dipantau SHA-256, **0 berubah** | `git show --stat` kedua commit; commit lama (`59e04736`, `895aff79`, `4282ccf1`) masih dapat diperiksa sampai garbage collection |
+| B2 penutup | `c1134387` | 68 berkas (67 `.md` + 1 `.tsv`, 913 KB) dari `docs/archieve/` → `.docs-legacy/` (di dalam repo, **diabaikan git** atas keputusan owner); 7 penghapusan tracked di-commit satu per satu; P5 & P11 ditutup | konservasi **SHA-256 68/68 identik, 0 berbeda**; `git check-ignore docs/archieve/uji.md` kosong; pohon `docs/archieve/` dihapus |
 
 **Penyimpangan yang dicatat (bukan disembunyikan):**
 
@@ -120,3 +121,5 @@ Select-String -Path docs/arsip/legacy/**/*.md -Pattern 'Owner#2026|admin123|staf
 | Tautan mati (gate R2) | 0 | **0** |
 | Pelanggaran gate | 23 + 1 dilewati | **23 + 1 dilewati** (setelah plan dirampingkan) |
 | Berkas dipindah & tracked di `docs/arsip/legacy/` | 0 | **39** |
+| Berkas fisik di `docs/archieve/` (ditutup 2026-10-05) | 106 | **0** — 39 ke `docs/arsip/legacy/`, 68 ke `.docs-legacy/` (gitignored) |
+| Berkas tracked di `docs/archieve/` | 31 | **0** (7 dihapus dari repo; isi tetap di riwayat git) |
