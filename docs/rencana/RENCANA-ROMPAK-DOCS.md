@@ -75,7 +75,7 @@ Berkas yang **hilang** setelah rombak: `AGENTS.md` §3 (router → `AGENTS.md` �
 | **B5** ✅ | Otoritas dipisah: `AGENTS.md` **17,7 → 7,7 KB** + [KONTRAK](../KONTRAK.md) 13,7 KB + [ANTREAN](../ANTREAN.md) 11,9 KB; `STATUS.md` → pointer; `README.md` dihapus | **jalur wajib 50/1.037 KB → 4 berkas/49,7 KB** · gate 2 pelanggaran | revert |
 | **B6** ✅ | Rotasi changelog: September (302,9 KB) + entri M13 → [arsip/changelog-2026-09.md](../arsip/changelog-2026-09.md) 340,7 KB (beku); berkas hidup [history/changelog/2026-10.md](../history/changelog/2026-10.md) 2,2 KB; basis rotasi = tanggal entri | Gate 2 pelanggaran, R2 0 | revert |
 | **B7** ✅ | Register keputusan dipecah: hidup [KEPUTUSAN-OWNER](../KEPUTUSAN-OWNER.md) **63,9 → 10,6 KB** (tabel status + ringkasan mengikat + indeks arsip); entri bertanggal 13 Jun–25 Sep (54,8 KB) → [arsip](../arsip/keputusan-owner-2026-06-sd-2026-09.md) beku | Gate 2 pelanggaran, R2 0 | revert |
-| **B8** | Sapu akhir: berkas di atas plafon byte, blok baca, **uji nyata Q30** (sesi baru + 1 tugas, ukur berkas+byte yang dibaca) | Laporan akhir + angka sebelum/sesudah | revert commit batch |
+| **B8** 🔄 | Sapu akhir: ✅ TOC `domain/publik.md` (22 entri) · ✅ daftar recon 31,2 KB → [kartu arsip](../arsip/B2-daftar-pindah-arsip-legacy.md) 12,9 KB tanpa blok perintah · ⬜ hapus 3 pointer + rebase rujukan · ⬜ uji nyata Q30 · ⬜ R6 (setelah B8) | **gate BERSIH: 0 pelanggaran, 0 dilewati** | revert |
 
 **Status batch (2026-10-05):** **B0 ✅ B1 ✅ B2 ✅ B3 ✅** · gate terkini **v1.4 = 23 pelanggaran + 1 dilewati** (R1 2 · R2 **0** · R3 12 · R4 4 · R5 5) · bukti per batch: kartu baseline + ledger.
 
@@ -147,11 +147,11 @@ Dibuat: `scripts/check-docs.mjs` · `docs/arsip/audit/gate-baseline-2026-10-05.m
 
 ## 7. Nilai yang wajib selamat (Q31)
 
-Daftar 12 nilai (uang · hunian/permission · keputusan owner · bukti audit · berkas berisiko · pemisahan status verifikasi · landasan IB · aturan arsip · larangan kredensial · berkas beku · deploy/rollback · audit trail) ada di [kartu keputusan](PERTANYAAN-ROMPAK.md) §4 — dirujuk di sini agar tidak ada dua daftar yang bisa menyimpang.
+Daftar 12 nilai (uang · hunian · keputusan owner · bukti audit · berkas berisiko · pemisahan status · IB · arsip · kredensial · berkas beku · deploy/rollback · audit trail) ada di [kartu keputusan](PERTANYAAN-ROMPAK.md) §4.
 
 ## 8. Ukuran keberhasilan (Q32)
 
-**(a)** jalur wajib 50 berkas/1.037 KB → **≤12 berkas/≤150 KB** · **(b)** kotak otoritatif hanya di `docs/ANTREAN.md` · **(c)** 0 dokumen usang di folder aktif · **(d)** gate bisa gagal **dan pernah terbukti gagal** (baseline B1) · **(e)** baseline tersimpan sebagai berkas · **(f)** uji nyata Q30 dijalankan di B8. Rincian di [kartu keputusan](PERTANYAAN-ROMPAK.md) §4.
+**(a)** jalur wajib **tercapai: 4 berkas/49,7 KB** (dari 50/1.037 KB) · **(b)** kotak otoritatif hanya ANTREAN ✓ · **(c)** 0 dokumen usang di folder aktif ✓ · **(d)** gate terbukti bisa gagal ✓ · **(e)** baseline tersimpan ✓ · **(f)** uji nyata Q30 → putaran berikutnya, bersama R6 (setelah B8).
 
 ---
 

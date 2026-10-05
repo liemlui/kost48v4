@@ -5,6 +5,32 @@ Status: aktif
 Tujuan: arahan & aturan permukaan publik dan pertumbuhan — marketing, UI/UX publik, loyalitas/gamifikasi, referral, tip staf, proposal growth (dari M07)
 Rujukan: [KEPUTUSAN-OWNER](../KEPUTUSAN-OWNER.md) · [STATUS](../STATUS.md) · [publik](publik.md) · [keuangan.md](keuangan.md) · [operasional.md](operasional.md) · [ai.md](ai.md)
 
+**Daftar isi**
+
+- [Update 2026-07-08 — Sinkronisasi Publik & Growth](#update-2026-07-08-sinkronisasi-publik-growth)
+- [Update 2026-06-17 — AUDIT KEUANGAN ULTRA ✅](#update-2026-06-17-audit-keuangan-ultra-)
+- [Update 2026-06-19 - Fase G AI Marketing & FAQ](#update-2026-06-19---fase-g-ai-marketing-faq)
+- [Konsep Baru - Public Marketing Modern (2026-06-16)](#konsep-baru---public-marketing-modern-2026-06-16)
+  - [Prinsip arah visual](#prinsip-arah-visual)
+  - [Data marketing yang wajib diangkat](#data-marketing-yang-wajib-diangkat)
+  - [Struktur landing page yang disarankan](#struktur-landing-page-yang-disarankan)
+  - [Fitur frontend yang boleh dimaksimalkan](#fitur-frontend-yang-boleh-dimaksimalkan)
+  - [Batasan kualitas](#batasan-kualitas)
+  - [🆕 UI/UX Publik — Arahan Owner 2026-06-17 (untuk implementasi)](#-uiux-publik-arahan-owner-2026-06-17-untuk-implementasi)
+  - [Backlog desain (diperbarui 2026-06-17)](#backlog-desain-diperbarui-2026-06-17)
+  - [Prioritas productisasi analisa bisnis (owner setuju 2026-06-16)](#prioritas-productisasi-analisa-bisnis-owner-setuju-2026-06-16)
+- [Bagian 1 - `docs/arsip/legacy/2026-06-16_root_docs_pre_M/17_PUBLIK_MARKETING_UIUX.md`](#bagian-1---docsarsiplegacy2026-06-16_root_docs_pre_m17_publik_marketing_uiuxmd)
+  - [DOSSIER 17 — PUBLIK, MARKETING & UI/UX](#dossier-17-publik-marketing-uiux)
+- [Bagian 2 - `docs/arsip/legacy/2026-06-16_root_docs_pre_M/19_GAMIFIKASI_LOYALITAS.md`](#bagian-2---docsarsiplegacy2026-06-16_root_docs_pre_m19_gamifikasi_loyalitasmd)
+  - [DOSSIER 19 — GAMIFIKASI & LOYALITAS TENANT](#dossier-19-gamifikasi-loyalitas-tenant)
+- [Bagian 3 - `docs/arsip/legacy/2026-06-16_root_docs_pre_M/_PROPOSAL_MARKETING_GAMIFIKASI_TIP.md`](#bagian-3---docsarsiplegacy2026-06-16_root_docs_pre_m_proposal_marketing_gamifikasi_tipmd)
+  - [PROPOSAL — Marketing, Gamifikasi Tenant, Tip Staf (vision owner 2026-06-16)](#proposal-marketing-gamifikasi-tenant-tip-staf-vision-owner-2026-06-16)
+- [Audit UI/UX Full — 2026-06-19](#audit-uiux-full-2026-06-19)
+  - [Ringkasan Temuan](#ringkasan-temuan)
+  - [🔴 CRITICAL](#-critical)
+  - [🟠 HIGH](#-high)
+
+
 > Migrasi dari docs/M07_PUBLIK_GROWTH.md (B2 Tahap 3, 23 Sep 2026) pada DOC-GOV-20260922; teks tidak diubah.
 > Batch B2 memindahkan **seluruh isi M07 apa adanya** ke file ini (satu tujuan per handoff owner). Bagian bertanggal — `## Update 2026-06/07`, `## Audit UI/UX Full — 2026-06-19`, `## Audit 360° P7 Marketing & Growth (Jul 2026)`, dan dua deep audit 29 Jul 2026 — **ikut utuh di sini dan belum dipisah**; pemisahan ke `docs/AUDIT.md`/`docs/arsip/` dilakukan pada tahap konsolidasi audit/arsip atau batch lanjutan sesuai keputusan owner.
 

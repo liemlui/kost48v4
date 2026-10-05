@@ -21,17 +21,18 @@
 | [audit-uiux-total-2026-09-12.md](audit-uiux-total-2026-09-12.md) | `docs/audit/` | Bukti bulk audit UI/UX total 12 Sep 2026 |
 | [audit-checklist-total.md](audit-checklist-total.md) | `docs/audit/` | Indeks cakupan audit 135 ID (117 belum / 18 selesai) - dipindah saat batch B4 (2026-10-05); penggantinya [audit/index-cakupan.md](../audit/index-cakupan.md) |
 | [keputusan-owner-2026-06-sd-2026-09.md](keputusan-owner-2026-06-sd-2026-09.md) | `docs/` | Register keputusan owner bertanggal 13 Jun - 25 Sep 2026 (dipecah batch B7; indeks status di [KEPUTUSAN-OWNER.md](../KEPUTUSAN-OWNER.md)) |
+| [B2-daftar-pindah-arsip-legacy.md](B2-daftar-pindah-arsip-legacy.md) | `docs/rencana/` | Daftar kerja recon B2 (kelas A/B/C: 35/5/66) - **sudah dieksekusi**; blok perintahnya dihapus, hasilnya di [B2-ledger-konservasi.md](../rencana/B2-ledger-konservasi.md) |
 | [legacy/](legacy/) | `docs/archieve/` | **Arsip legacy yang dikutip dokumen aktif** — 39 berkas, subfolder asli dipertahankan (batch B2, 2026-10-05). Ledger konservasi 39 baris (SHA-256 sebelum/sesudah): [B2-ledger-konservasi.md](../rencana/B2-ledger-konservasi.md). 2 berkas di antaranya **transformasi** (kata sandi DEV diredaksi, P33/Q31-9) — SHA-nya memang berbeda |
 
-Changelog bulanan yang **masih berjalan** tetap di `docs/history/changelog/2026-09.md` (menerima rotasi entri M13).
+Changelog bulanan yang **masih berjalan** ada di [history/changelog/2026-10.md](../history/changelog/2026-10.md); bulan yang sudah selesai dipindah ke sini (rotasi batch B6).
 
 ## 2. Yang bukan arsip ini
 
 - `docs/archieve/**` - **SUDAH TIDAK ADA** (batch B2 ditutup 2026-10-05, commit `c1134387`). Arsip legacy terbelah dua: yang **dikutip dokumen aktif** ada di [`legacy/`](legacy/) (39 berkas, tracked), dan sisanya (68 berkas, 913 KB) dipindah **keluar dari dokumentasi** ke `.docs-legacy/` di akar repo — folder itu **diabaikan git** (`.gitignore` L135) dan bebas dipindah keluar repo kapan saja. Alasan penempatan: keputusan owner 2026-10-05 (sandbox agen tidak boleh menulis di luar repo). 7 berkas yang tadinya tracked tetap ada di riwayat git.
-- `docs/audit-map/**` - **generated dan untracked** (1.126 berkas, 0 tracked), di-ignore `.gitignore` L89 (`/docs/audit-map/`); dipakai 135+ tautan peta per ID audit. **Jangan dihapus** dan jangan dianggap bagian repo; regenerasi `node docs/audit-map/generate.cjs`. Rencana batch **B3** memindahkannya keluar dari `docs/` (target `.audit-map/` di akar repo) dan men-track generatornya.
+- `.audit-map/**` - **generated dan untracked**, di akar repo, di-ignore `.gitignore` (`/.audit-map/`); dipakai tautan peta per ID audit. **Jangan dihapus.** Generator dikeluarkan dari folder peta ke `scripts/audit-map-generate.cjs` dan **di-track** (batch B3, 2026-10-05); regenerasi dari akar repo: `node scripts/audit-map-generate.cjs`. Peta hasil generate sudah diverifikasi tautannya (4.013 tautan, 0 rusak) — ledger: [B3-ledger-peta-audit.md](../rencana/B3-ledger-peta-audit.md).
 
 ## 3. Aturan
 
 - Berkas di sini boleh besar; biaya bacanya dipindahkan keluar dari jalur kerja rutin.
 - Setiap pemindahan wajib punya bukti konservasi (0 baris non-kosong hilang) di entri riwayat terkait.
-- Batas arsip dan berkas besar sudah **diputuskan owner 24 Sep 2026** (`ARSIP-BATAS`): lihat [KEPUTUSAN-OWNER](../KEPUTUSAN-OWNER.md) dan [STATUS](../STATUS.md).
+- Batas arsip dan berkas besar sudah **diputuskan owner 24 Sep 2026** (`ARSIP-BATAS`): lihat [KEPUTUSAN-OWNER](../KEPUTUSAN-OWNER.md) dan [ANTREAN](../ANTREAN.md).
