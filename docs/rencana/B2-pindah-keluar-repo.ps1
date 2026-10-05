@@ -6,29 +6,42 @@
   (08_CHECKLIST.md). Kelas A/B yang dikutip sudah dipindah ke docs/arsip/legacy/ pada commit 2971efa7.
   TIDAK ADA berkas yang dihapus - semuanya dipindah, dan 6 berkas tracked tetap ada di riwayat git.
 
-  CARA PAKAI
-    1) Uji dulu (tidak mengubah apa pun):      .\docs\rencana\B2-pindah-keluar-repo.ps1
-    2) Kalau daftarnya sudah benar, eksekusi:  .\docs\rencana\B2-pindah-keluar-repo.ps1 -Execute
-    3) Setelah selesai, kabari agen "SELESAI PINDAH": agen memverifikasi 67 berkas sampai di tujuan,
-       meng-commit penghapusan 08_CHECKLIST.md dari repo, lalu menghapus baris docs/archieve/
-       di .git/info/exclude (penutupan P5).
+  TIGA MODE (aman secara default)
+    1) .\docs\rencana\B2-pindah-keluar-repo.ps1
+       UJI murni: tidak memindahkan apa pun, TIDAK membuat folder tujuan, hanya mencetak rencana.
+    2) .\docs\rencana\B2-pindah-keluar-repo.ps1 -Execute
+       Menjalankan pemindahan, tetapi MENOLAK MENIMPA: bila ada satu saja berkas tujuan yang sudah ada,
+       seluruh proses dibatalkan sebelum satu berkas pun berpindah.
+    3) .\docs\rencana\B2-pindah-keluar-repo.ps1 -Execute -Force
+       Menjalankan pemindahan DAN mengizinkan menimpa berkas tujuan yang sudah ada - hanya bila Anda
+       memang menghendakinya.
+
+  PENGAMAN
+    - Pra-terbang 1: daftar $files di bawah DIBANDINGKAN dengan daftar di
+      docs/rencana/B2-daftar-pindah-arsip-legacy.md (bagian "## 5. Kelas C" + baris 08_CHECKLIST.md).
+      Bila tidak sama => BERHENTI, selisihnya dicetak. Tidak ada drift diam-diam.
+    - Pra-terbang 2 (mode -Execute tanpa -Force): mendeteksi bentrok berkas tujuan => BERHENTI,
+      nol pemindahan, daftar bentrok dicetak, saran -Execute -Force.
+    - Gagal membuat folder atau gagal memindah => BERHENTI (bukan lanjut), dan berkas yang sudah
+      terlanjur pindah dilaporkan beserta perintah untuk mengembalikannya.
+    - 6 berkas tracked: penghapusannya dari repo dicatat agen setelah Anda lapor "SELESAI PINDAH".
 
   CATATAN
-    - Folder tujuan di bawah ini bisa Anda ubah; jangan ubah nilai variabel $repo.
-    - Skrip berhenti dengan aman: berkas yang tidak ada hanya diperingatkan, tidak menggagalkan sisanya.
-    - Jangan jalankan dari dalam folder docs; jalankan dari akar repo.
-    - Folder tujuan BELUM ada: skrip membuatnya (-Force). Mode UJI pernah dijalankan agen 2026-10-05:
-      67 target terbaca, 0 dilewati, tidak ada berkas berpindah, dan folder tujuan tidak terbentuk di
-      uji itu karena sandbox agen hanya boleh menulis di dalam repo (Access denied) - di terminal Anda normal.
+    - Jangan ubah nilai variabel $repo. $dest boleh diubah bila Anda ingin lokasi lain.
+    - Jalankan dari akar repo (bukan dari dalam folder docs).
+    - Berkas yang tidak ada di sumber hanya DIPERINGATKAN dan dilewati (bukan kegagalan), karena daftar
+      ini snapshot recon 2026-10-05.
 #>
 [CmdletBinding()]
 param(
-  [switch]$Execute   # tanpa switch ini = mode UJI (WhatIf)
+  [switch]$Execute,  # tanpa switch ini = mode UJI murni (WhatIf, tanpa menulis)
+  [switch]$Force     # hanya berlaku bersama -Execute: izinkan menimpa berkas tujuan
 )
 
 $repo = "C:\Users\lieml\Desktop\Big Personal Web App\kost48surabaya-v3\kost48_full_frontend_backend_upgrade_bundle\final_bundle"
 $dest = "C:\Users\lieml\Desktop\Big Personal Web App\kost48surabaya-v3\_arsip-docs-legacy-2026-10-05"
 
+# Snapshot daftar per 2026-10-05. Sengaja hardcoded; kesamaannya dengan dokumen diperiksa di pra-terbang.
 $files = @(
   "2026-06-16_root_docs_pre_M/08_CHECKLIST.md",
   "2026-06-16_root_docs_pre_M/07_PLAN.md",
@@ -99,7 +112,9 @@ $files = @(
   "audit_reasonix/SPEC_PERBAIKAN_KRITIS.md"
 )
 
-$mode = if ($Execute) { 'EKSEKUSI' } else { 'UJI (WhatIf - tidak ada yang dipindah)' }
+$mode = if ($Execute -and $Force) { 'EKSEKUSI + IZIN MENIMPA (-Force)' }
+        elseif ($Execute) { 'EKSEKUSI (menolak menimpa)' }
+        else { 'UJI murni (WhatIf - tidak menulis apa pun)' }
 Write-Host "=== B2 pindah keluar repo ===" -ForegroundColor Cyan
 Write-Host "mode   : $mode"
 Write-Host "repo   : $repo"
@@ -107,38 +122,119 @@ Write-Host "tujuan : $dest"
 Write-Host "berkas : $($files.Count)"
 Write-Host ""
 
-# 1) folder tujuan utama
-New-Item -ItemType Directory -Force -Path $dest | Out-Null
+# ── PRA-TERBANG 1: daftar skrip harus sama dengan dokumen (anti-drift) ──────
+$dokDaftar = Join-Path $repo 'docs\rencana\B2-daftar-pindah-arsip-legacy.md'
+if (-not (Test-Path $dokDaftar)) {
+  Write-Error "BERHENTI: daftar rujukan tidak ditemukan: $dokDaftar. Pemeriksaan anti-drift tidak boleh dilewati."
+  return
+}
+$barisDok = Get-Content -LiteralPath $dokDaftar
+$dalamBagian5 = $false
+$dariDokumen = New-Object System.Collections.Generic.List[string]
+foreach ($baris in $barisDok) {
+  if ($baris -match '^## 5\. Kelas C') { $dalamBagian5 = $true; continue }
+  if ($dalamBagian5 -and $baris -match '^## ') { break }
+  if ($dalamBagian5 -and $baris -match '^\| `archieve/([^`]+)` \|') { $dariDokumen.Add($matches[1]) }
+}
+if ($dariDokumen.Count -eq 0) {
+  Write-Error "BERHENTI: bagian '## 5. Kelas C' tidak menghasilkan satu baris pun (format dokumen berubah?). Tidak ada yang dipindah."
+  return
+}
+$tambahan = @('2026-06-16_root_docs_pre_M/08_CHECKLIST.md')
+if (-not (($barisDok -join "`n") -match [regex]::Escape($tambahan[0]))) {
+  Write-Error "BERHENTI: dokumen tidak lagi menyebut $($tambahan[0]); dasar pemindahannya hilang. Tidak ada yang dipindah."
+  return
+}
+foreach ($t in $tambahan) { $dariDokumen.Add($t) }
+$hanyaSkrip = @($files | Where-Object { $dariDokumen -notcontains $_ })
+$hanyaDokumen = @($dariDokumen | Where-Object { $files -notcontains $_ })
+if ($hanyaSkrip.Count -gt 0 -or $hanyaDokumen.Count -gt 0) {
+  Write-Error "BERHENTI: daftar skrip TIDAK sama dengan dokumen (drift). Tidak ada yang dipindah."
+  $hanyaSkrip | ForEach-Object { Write-Warning "  hanya di skrip   : $_" }
+  $hanyaDokumen | ForEach-Object { Write-Warning "  hanya di dokumen : $_" }
+  return
+}
+Write-Host "pra-terbang: daftar skrip = dokumen ($($files.Count) berkas)." -ForegroundColor DarkGray
 
-# 2) pindahkan
-$ok = 0; $lewat = 0
+# ── PRA-TERBANG 2: bentrok berkas tujuan ───────────────────────────────────
+$bentrok = @($files | Where-Object { Test-Path (Join-Path $dest ($_ -replace '/', '\')) })
+if ($Execute -and -not $Force -and $bentrok.Count -gt 0) {
+  Write-Host ""
+  Write-Error "BERHENTI: $($bentrok.Count) berkas sudah ada di tujuan. TIDAK ADA yang dipindah."
+  $bentrok | ForEach-Object { Write-Host "   - $_" -ForegroundColor DarkGray }
+  Write-Host "Kalau memang ingin menimpa: .\docs\rencana\B2-pindah-keluar-repo.ps1 -Execute -Force" -ForegroundColor Yellow
+  return
+}
+
+# ── folder tujuan ──────────────────────────────────────────────────────────
+if ($Execute) {
+  try { New-Item -ItemType Directory -Force -Path $dest -ErrorAction Stop | Out-Null }
+  catch { Write-Error "BERHENTI: gagal membuat folder tujuan $dest - $($_.Exception.Message). Tidak ada yang dipindah."; return }
+} else {
+  if (Test-Path $dest) { Write-Host "[uji] folder tujuan sudah ada: $dest" -ForegroundColor DarkGray }
+  else { Write-Host "[uji] folder tujuan akan dibuat bila belum ada: $dest" -ForegroundColor DarkGray }
+  Write-Host "[uji] berkas tujuan yang sudah ada saat ini: $($bentrok.Count) dari $($files.Count) (mode -Execute tanpa -Force akan menolak bila > 0)" -ForegroundColor DarkGray
+}
+
+# ── pemindahan ─────────────────────────────────────────────────────────────
+$ok = 0; $lewat = 0; $gagalSebab = $null
+$sudahPindah = New-Object System.Collections.Generic.List[string]
 foreach ($rel in $files) {
   $src = Join-Path $repo ("docs\archieve\" + ($rel -replace '/', '\'))
   $dst = Join-Path $dest ($rel -replace '/', '\')
   $dstDir = Split-Path -Parent $dst
 
   if (-not (Test-Path $src)) { Write-Warning "TIDAK ADA (dilewati): $src"; $lewat++; continue }
+
   if (-not (Test-Path $dstDir)) {
-    if ($Execute) { New-Item -ItemType Directory -Force -Path $dstDir | Out-Null }
-    else { Write-Host "  [uji] akan dibuat: $dstDir" -ForegroundColor DarkGray }
+    if ($Execute) {
+      try { New-Item -ItemType Directory -Force -Path $dstDir -ErrorAction Stop | Out-Null }
+      catch { $gagalSebab = "gagal membuat folder $dstDir - $($_.Exception.Message)"; break }
+    } else {
+      Write-Host "  [uji] akan dibuat: $dstDir" -ForegroundColor DarkGray
+    }
   }
+
   if ($Execute) {
-    Move-Item -LiteralPath $src -Destination $dst -Force
+    try {
+      if ($Force) { Move-Item -LiteralPath $src -Destination $dst -Force -ErrorAction Stop }
+      else        { Move-Item -LiteralPath $src -Destination $dst -ErrorAction Stop }
+      $ok++; $sudahPindah.Add($rel)
+    } catch {
+      $gagalSebab = "gagal memindah $rel - $($_.Exception.Message)"; break
+    }
   } else {
-    Move-Item -LiteralPath $src -Destination $dst -Force -WhatIf
+    Move-Item -LiteralPath $src -Destination $dst -WhatIf
+    $ok++
   }
-  $ok++
 }
 
+# ── berhenti di tengah: laporkan yang sudah pindah ─────────────────────────
+if ($gagalSebab) {
+  Write-Host ""
+  Write-Error "BERHENTI: $gagalSebab"
+  if ($sudahPindah.Count -gt 0) {
+    Write-Host "Berkas yang SUDAH terlanjur pindah ($($sudahPindah.Count)) - kembalikan manual bila perlu:" -ForegroundColor Yellow
+    foreach ($rel in $sudahPindah) {
+      Write-Host "   $rel" -ForegroundColor DarkGray
+      Write-Host "     Move-Item -LiteralPath `"$dest\$($rel -replace '/', '\')`" -Destination `"$repo\docs\archieve\$($rel -replace '/', '\')`"" -ForegroundColor DarkGray
+    }
+  } else {
+    Write-Host "Tidak ada berkas yang dipindah." -ForegroundColor Green
+  }
+  return
+}
+
+# ── ringkasan mode UJI ─────────────────────────────────────────────────────
 Write-Host ""
 if (-not $Execute) {
-  Write-Host "MODE UJI selesai: $ok berkas akan dipindah, $lewat dilewati." -ForegroundColor Yellow
-  Write-Host "Kalau daftar di atas sudah benar, jalankan lagi dengan -Execute:" -ForegroundColor Yellow
+  Write-Host "MODE UJI selesai: $ok berkas akan dipindah, $lewat dilewati. Tidak ada berkas yang berpindah." -ForegroundColor Yellow
+  Write-Host "Kalau daftar di atas sudah benar:" -ForegroundColor Yellow
   Write-Host "  .\docs\rencana\B2-pindah-keluar-repo.ps1 -Execute" -ForegroundColor Yellow
   return
 }
 
-# 3) verifikasi sesudah eksekusi
+# ── verifikasi sesudah eksekusi ────────────────────────────────────────────
 Write-Host "=== VERIFIKASI ===" -ForegroundColor Cyan
 $ada = 0; $hilang = @()
 foreach ($rel in $files) {
@@ -146,10 +242,11 @@ foreach ($rel in $files) {
   if (Test-Path $dst) { $ada++ } else { $hilang += $rel }
 }
 $sisa = @(Get-ChildItem -LiteralPath (Join-Path $repo 'docs\archieve') -Recurse -File -ErrorAction SilentlyContinue)
-Write-Host "sampai di tujuan : $ada / $($files.Count)"
-Write-Host "tidak sampai     : $($hilang.Count)"
+Write-Host "dipindah (dilaporkan loop) : $ok"
+Write-Host "sampai di tujuan           : $ada / $($files.Count)"
+Write-Host "tidak sampai               : $($hilang.Count)"
 if ($hilang.Count -gt 0) { $hilang | ForEach-Object { Write-Warning "  HILANG: $_" } }
-Write-Host "sisa docs\archieve: $($sisa.Count) berkas (harus 1 = berkas .tsv)"
+Write-Host "sisa docs\archieve         : $($sisa.Count) berkas (harus 1 = berkas .tsv)"
 $sisa | ForEach-Object { Write-Host "   - $($_.Name)" -ForegroundColor DarkGray }
 Write-Host ""
 Write-Host "Sudah selesai? Kabari agen: SELESAI PINDAH" -ForegroundColor Green
