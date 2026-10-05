@@ -19,12 +19,8 @@ kebijakan `ARSIP-BATAS` (24 Sep 2026) serta target "7 berkas utama + 1 arsip" pa
 
 Rincian per berkas: kartu keputusan + kartu baseline gate.
 
-**Temuan yang mengubah dua keputusan (Q9, Q26):** baris **bukan** proksi biaya yang sah.
-`docs/STATUS.md` hanya **147 baris** tetapi **78,4 KB** (533 byte/baris); `docs/arsip/audit-checklist-total.md`
-**236 baris / 110,1 KB**. Ambang berbasis baris akan meloloskan justru dokumen termahal. Karena itu ukuran yang mengikat = **byte**.
-
-**Temuan kedua:** `AGENTS.md` disuntikkan harness sebagai workspace instructions **setiap request**. Menambah isinya
-bukan ongkos sekali baca, melainkan pajak per-putaran. Karena itu plafonnya lebih ketat daripada berkas lain.
+**Temuan yang mengubah Q9/Q26:** baris **bukan** proksi biaya yang sah — `docs/STATUS.md` hanya 147 baris tetapi **78,4 KB**; ambang berbasis baris meloloskan justru dokumen termahal, jadi ukuran mengikat = **byte**.
+**Temuan kedua:** `AGENTS.md` disuntik harness **tiap request** → menambah isinya adalah pajak per-putaran, bukan ongkos sekali baca.
 
 ---
 
