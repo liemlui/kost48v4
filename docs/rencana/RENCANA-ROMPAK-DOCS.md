@@ -73,7 +73,7 @@ Berkas yang **hilang** setelah rombak: `AGENTS.md` §3 (router → `AGENTS.md` �
 | **B3** ✅ | `docs/audit-map/**` → **`.audit-map/`** (tetap gitignored); generator → `scripts/audit-map-generate.cjs` (**tracked**); 157 tautan + 24 path dokumen dialihkan | **1.203 tautan sumber** diperbaiki · **4.013 tautan diverifikasi, 0 rusak** · gate R2 0 · regenerasi peta menunggu owner — ledger: [B3-ledger-peta-audit.md](B3-ledger-peta-audit.md) | revert commit |
 | **B4** ✅ | Checklist audit 135 ID → arsip + indeks tipis; kebijakan 368 kotak: **117 ke arsip · 108 dikonversi · 78 bertanda non-otoritatif · 65 direklasifikasi** | Bukti konversi **normalisasi 5/5 identik** · R3 **0** dengan **143 kotak dikecualikan tetap terlihat** · R7 hijau · R2 0 — ledger: [B4-ledger-kotak.md](B4-ledger-kotak.md) | revert commit |
 | **B5** ✅ | Otoritas dipisah: `AGENTS.md` **17,7 → 7,7 KB** + [KONTRAK](../KONTRAK.md) 13,7 KB + [ANTREAN](../ANTREAN.md) 11,9 KB; `STATUS.md` → pointer; `README.md` dihapus | **jalur wajib 50/1.037 KB → 4 berkas/49,7 KB** · gate 2 pelanggaran | revert |
-| **B6** | Rotasi changelog: bulan berjalan = 30 hari terakhir; `M13_CHANGELOG.md` digabung | Gate hijau | revert commit batch |
+| **B6** ✅ | Rotasi changelog: September (302,9 KB) + entri M13 → [arsip/changelog-2026-09.md](../arsip/changelog-2026-09.md) 340,7 KB (beku); berkas hidup [history/changelog/2026-10.md](../history/changelog/2026-10.md) 2,2 KB; basis rotasi = tanggal entri | Gate 2 pelanggaran, R2 0 | revert |
 | **B7** | `KEPUTUSAN-OWNER` dipecah: berlaku sekarang vs digantikan (arsip) | Gate hijau; berkas hidup ≤16 KB | revert commit batch |
 | **B8** | Sapu akhir: berkas di atas plafon byte, blok baca, **uji nyata Q30** (sesi baru + 1 tugas, ukur berkas+byte yang dibaca) | Laporan akhir + angka sebelum/sesudah | revert commit batch |
 
@@ -112,7 +112,7 @@ B3–B8 **belum**; menunggu perintah.
 | **4 sitasi ke berkas yang tidak ada** (`_DEPRECATED_05/06/08…`, `M13_CHANGELOG_ARSIP_S1_2026.md`) | ditemukan saat B2.2, **bukan** akibat B2 | dicatat di [draft penutup sitasi rusak](PENUTUP-SITASI-RUSAK.md) butir 1–4; dijadwalkan **B8** |
 | **B5 — invariant ditulis padat** (bukan verbatim) + `STATUS.md` disisakan sebagai pointer | plafon KONTRAK 16 KB · Q11 · P19=c | **keputusan teknis agen**: fakta tetap, bentuknya tabel + perintah pengukur; verbatim tetap di riwayat git + bukti-2026-10. Pointer dihapus di **B8** |
 | **Baris `docs/archieve/` di `.git/info/exclude`** | P5, urutan pelaksanaan disetujui owner | **ditutup 2026-10-05** (`c1134387`): baris dihapus setelah arsip keluar; `git check-ignore docs/archieve/uji.md` **kosong** |
-| **B4 — dua runbook diberi penanda, bukan dikonversi** (`go-live-cpanel.md`, `produksi.md`) | P16 menyebut konversi untuk "10 berkas lain"; dua itu dipakai manusia langkah demi langkah | **keputusan teknis agen**: penanda `<!-- kotak-non-otoritatif -->` menyelesaikan ambiguitas yang sama tanpa menghapus kotak yang dipakai; bisa dikonversi atas permintaan owner |
+| **B4 — dua runbook diberi penanda**, bukan dikonversi | runbook dipakai manusia langkah demi langkah | **keputusan teknis agen**; bisa dikonversi atas permintaan owner |
 | **B4 — 5 rujukan historis** (`08_CHECKLIST`, `tenant-data-template.tsv`) | butir 5–7 [draft penutup sitasi rusak](PENUTUP-SITASI-RUSAK.md) | dibiarkan (catatan historis); butir 5–6 dijadwalkan bersamaan saat B5 menulis ulang berkasnya |
 
 **Rumah arsip:** `docs/arsip/` siap (README + aturan + **11/11** inventaris — syarat Q19-v) dan kini juga memuat `legacy/`.
@@ -124,7 +124,7 @@ B3–B8 **belum**; menunggu perintah.
 
 ## 5. Batas dan risiko
 
-- **Sandbox:** menulis **di luar repo** tidak mungkin bagi agen (dibuktikan 2026-10-05) → aset besar ditaruh di `.docs-legacy/` dan `.audit-map/`, keduanya diabaikan git (keputusan owner).
+- **Sandbox:** agen tidak bisa menulis di luar repo (terbukti 2026-10-05) → aset besar di `.docs-legacy/` + `.audit-map/` (diabaikan git).
 - **Berkas untracked selalu dipindah**, tidak pernah dihapus (tidak ada jaring git).
 - **2 berkas source owner** (`MyManualPage.tsx`, `CekPage.tsx`) di luar lingkup rombak; menunggu commit terpisah.
 - **Tanpa commit ke `main`, tanpa push** sampai owner memerintahkan.

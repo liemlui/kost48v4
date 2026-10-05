@@ -13,6 +13,7 @@
 | [changelog-2026-06.md](changelog-2026-06.md) | `docs/history/changelog/` | Changelog bulanan Juni 2026 (rotasi bulan selesai) |
 | [changelog-2026-07.md](changelog-2026-07.md) | `docs/history/changelog/` | Changelog bulanan Juli 2026 |
 | [changelog-2026-08.md](changelog-2026-08.md) | `docs/history/changelog/` | Changelog bulanan Agustus 2026 |
+| [changelog-2026-09.md](changelog-2026-09.md) | `docs/history/changelog/` | Changelog bulanan September 2026 (302,9 KB) + **entri & indeks M13 digabung** - dipindah batch B6 (2026-10-05) |
 | [m11-seed-master-data-appendix-2026-07-08.md](m11-seed-master-data-appendix-2026-07-08.md) | `docs/history/` | Lampiran seed master data (M11) |
 | [DOC-GOV-20260922.md](DOC-GOV-20260922.md) | `docs/plans/` | Rancangan penataan dokumentasi (selesai; Tahap 1-3 + Fase 2/3) |
 | [DOC-GOV-20260922-batch-scope.md](DOC-GOV-20260922-batch-scope.md) | `docs/plans/` | Memo scope batch S2.b3/S2.b4 (DRAFT; batch sudah selesai) |
