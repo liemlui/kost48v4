@@ -91,7 +91,7 @@ Sumber: tanya-jawab 2026-10-05 (Q1–Q32 · O1–O7 · D1–D3 · P1–P32). Rin
 | P13 | Pertahankan subfolder: `docs/arsip/legacy/<subfolder-asli>/…` (flatten akan tabrakan nama) |
 | P14 | **a** + generator di-track: `.audit-map/` di akar, keluaran gitignored, `generate.cjs` tracked |
 | P15 | Rujukan `audit-map` di berkas arsip beku **dibiarkan** + catatan known-broken di kartu arsip |
-| P16 | Hibrida: `operations/deploy-go-live.md` (52) → **b** penanda non-otoritatif · `domain/iot.md` (42) → **a** konversi daftar **menunggu "ya" eksplisit owner** · 10 berkas lain → **a** · butir yang benar-benar pekerjaan terbuka → **c** migrasi ke ANTREAN (pekerjaan tersendiri, bukan satu putaran B4) |
+| P16 | Hibrida: `operations/deploy-go-live.md` (52) → **b** penanda non-otoritatif · `domain/iot.md` (42) → **a** konversi ke daftar biasa (**"ya" owner diberikan 2026-10-05**) · 10 berkas lain → **a** · butir yang benar-benar pekerjaan terbuka → **c** migrasi ke ANTREAN (pekerjaan tersendiri, bukan satu putaran B4) |
 | P17 | `docs/audit/index-cakupan.md` ±60 baris: ID tanpa kotak + tautan peta; dipelihara owner; gate memastikan berkas ada dan tidak memuat `[ ]` otoritatif |
 | P18 | Router **dipadatkan jadi tabel ≤10 baris**; detail tetap di `docs/KONTRAK.md` |
 | P19 | **c** hybrid: alihkan rujukan in-repo, sisakan pointer 3 baris untuk bookmark luar, hapus di B8. **Hasil pemeriksaan:** 0 rujukan di luar repo (folder induk bersih); in-repo non-docs: `.audit-runtime/c3-mine-only.ps1:35` dan komentar `frontend/src/pages/public/CekPage.tsx:10` (berkas dirty owner — disentuh hanya setelah P29) |
@@ -121,12 +121,14 @@ Sumber: tanya-jawab 2026-10-05 (Q1–Q32 · O1–O7 · D1–D3 · P1–P32). Rin
 ## 7. Catatan penyimpangan & item terbuka
 
 1. **Urutan P5 (belum dijalankan):** menghapus baris `docs/archieve/` dari `.git/info/exclude` **sebelum** owner memindahkan kelas C akan memunculkan ~68 berkas untracked di `git status`, karena 66 berkas kelas C + berkas yang ditahan masih tinggal di sana. Karena itu penghapusan ditempatkan **setelah** pemindahan kelas C oleh owner (atau di B8). Kelas A/B tidak terpengaruh: setelah pindah ke `docs/arsip/legacy/`, pola exclude itu tidak lagi menjangkaunya sehingga `git add` normal.
-2. **Item terbuka P16:** konversi 42 kotak `docs/domain/iot.md` menunggu "ya" eksplisit owner (menyentuh aturan bisnis).
-3. **Item terbuka baru — kredensial (Q31-9):** `_AKUN_DUMMY_DEV.md` (untracked) memuat kata sandi DEV terbuka (`Owner#2026`, `admin123`, `staff123`, `Tenant#2026`). P4=a akan menjadikannya berkas tracked. Fakta pembanding: kata sandi yang sama **sudah ada di berkas tracked** — `Owner#2026` 5 berkas, `admin123` 12, `staff123` 5, `Tenant#2026` 4 (terukur 2026-10-05). Jadi ini kondisi repo yang sudah ada, bukan kebocoran baru; tetapi tracking dokumen kredensial memperluasnya. Perlu keputusan: sanitasi dokumen (tunjuk ke `backend/scripts/seed-dev-reset.js`), track apa adanya, atau biarkan lokal.
+2. **P16 — selesai:** konversi 42 kotak `docs/domain/iot.md` ke daftar biasa **disetujui owner 2026-10-05** (sintaks berubah, isi aturan bisnis tidak). Dikerjakan di B4.
+3. **P33 — selesai (kredensial, Q31-9):** `_AKUN_DUMMY_DEV.md` (untracked) memuat kata sandi DEV terbuka (`Owner#2026`, `admin123`, `staff123`, `Tenant#2026`). Keputusan owner 2026-10-05: **sanitasi sebelum di-track** — kata sandi literal dihapus, diganti rujukan ke `backend/scripts/seed-dev-reset.js`; email/nama/kamar tetap. Fakta pembanding: kata sandi yang sama **sudah ada di berkas tracked** — `Owner#2026` 5 berkas, `admin123` 12, `staff123` 5, `Tenant#2026` 4 (terukur 2026-10-05); itu kondisi repo yang sudah ada, bukan kebocoran baru, dan **tidak** dibereskan oleh rombak ini (butuh keputusan + tugas tersendiri).
 4. **Pemeriksaan rujukan luar (P19):** 0 berkas di folder induk menyebut `docs/STATUS.md`. Batas: bookmark peramban, mesin lain, dan catatan di luar disk ini **tidak** bisa saya periksa — asumsi "tidak ada" berasal dari cakupan itu.
+5. **Temuan untuk direkonsiliasi di B5/B7 (bukan pekerjaan B2):** `docs/domain/iot.md:822` menyebut proposal meter pascabayar dengan rujukan **`docs/M06_OPERASIONAL.md` § Bagian 5 (M-1..M-5 ✅)** — path M itu sudah dihapus di Fase 3 (rumah barunya `docs/domain/operasional.md`), dan tanda ✅ di sana **bertentangan** dengan isi proposal yang menyatakan "DISETUJUI (model & tampilan), implementasi BERTAHAP (**belum mulai**)". Dua tempat menyatakan status implementasi yang berbeda; perlu diputuskan mana yang benar sebelum proposal itu diperlakukan sebagai arsip mati.
 
 ## 8. Riwayat
 
 | Tanggal | Perubahan |
 |---|---|
 | 2026-10-05 | Dibuat atas permintaan owner: mengabadikan Q1–Q32 · O1–O7 · D1–D3 · P1–P32 supaya sesi berikutnya tidak menebak (khususnya karena rombak berhenti di B5 menunggu commit owner). |
+| 2026-10-05 | Dua item terbuka ditutup: **P16** (konversi kotak `domain/iot.md`) = **ya**; **P33** (kredensial `_AKUN_DUMMY_DEV.md`) = **sanitasi sebelum di-track**. Ditambah temuan rekonsiliasi status proposal meter (iot.md:822 vs isi proposal). |
