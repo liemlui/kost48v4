@@ -96,12 +96,13 @@ Select-String -Path docs/arsip/legacy/**/*.md -Pattern 'Owner#2026|admin123|staf
 
 | Langkah | Commit | Hasil | Verifikasi |
 |---|---|---|---|
-| B2.2 alih rujukan | `59e04736` | 60 kemunculan `archieve/<berkas>.md` → `arsip/legacy/<berkas>.md` di 23 dokumen aktif (20 berkas ikut ter-commit). Klaster: kontrak 18 · PETA-KODE 7 · flow/publik/ai/KEPUTUSAN-OWNER 15 · sisanya 20 | gate tiap klaster; R2 (tautan mati) **0 → 0**; total pelanggaran 23 + 1 dilewati |
-| B2.3 bersih-bersih | (commit ini) | Pernyataan struktur diperbarui: `AGENTS.md` §6 · `docs/ATURAN.md` · `docs/README.md` · `docs/product/orientasi.md` · `docs/arsip/README.md` (inventaris `legacy/`) | gate: R5 kembali ke 5 setelah plan dirampingkan; total 23 + 1 dilewati |
+| B2.2 alih rujukan | `56e99f15` | 60 kemunculan `archieve/<berkas>.md` → `arsip/legacy/<berkas>.md` di 23 dokumen aktif (16 berkas ikut ter-commit). Klaster: kontrak 18 · PETA-KODE 7 · flow/publik/ai/KEPUTUSAN-OWNER 15 · sisanya 20 | gate tiap klaster; R2 (tautan mati) **0 → 0**; total pelanggaran 23 + 1 dilewati |
+| B2.3 bersih-bersih | `a4b46132` | Pernyataan struktur diperbarui: `AGENTS.md` §6 · `docs/ATURAN.md` · `docs/README.md` · `docs/product/orientasi.md` · `docs/arsip/README.md` (inventaris `legacy/`) | gate: R5 kembali ke 5; total 23 + 1 dilewati |
+| Pemisahan commit campuran | `0f28e8d9` (konten owner) + `56e99f15` (alih rujukan) | Atas instruksi owner 2026-10-05: commit campuran lama dipisah. **Isi berkas owner tidak disentuh** — 20 berkas dipantau SHA-256, **0 berubah** | `git show --stat` kedua commit; commit lama (`59e04736`, `895aff79`, `4282ccf1`) masih dapat diperiksa sampai garbage collection |
 
 **Penyimpangan yang dicatat (bukan disembunyikan):**
 
-1. **Commit B2.2 memuat 7 berkas dokumentasi tertunda milik owner** (perintah `git add -u -- docs` terlalu luas). Isi tidak hilang; cabang `docs-rombak` belum di-push; 2 berkas source owner tetap belum di-commit. Pemisahan riwayat tersedia atas permintaan owner.
+1. **Commit campuran sudah dipisah** (instruksi owner 2026-10-05): `0f28e8d9` = konten dokumentasi owner, `56e99f15` = alih rujukan B2.2. Isi berkas owner **tidak disentuh** (20 berkas dipantau SHA-256, 0 berubah). 2 berkas source owner (`MyManualPage.tsx`, `CekPage.tsx`) tetap belum di-commit sampai B2 ditutup.
 2. **Baris `docs/archieve/` di `.git/info/exclude` sengaja belum dihapus** (P5 dieksekusi setelah kelas C dipindah owner) supaya ~62 berkas untracked tidak membanjiri `git status`.
 3. **4 sitasi ke berkas yang memang tidak ada** dibiarkan (rusak sebelum B2): `_DEPRECATED_05_UIUX_AUDIT_2026-06-12.md`, `_DEPRECATED_06_DEPLOY_RUNBOOK.md`, `_DEPRECATED_08_PWA_AUDIT_AND_HARDENING_PLAN_2026-06-12.md` (pernah ada di riwayat git), dan `M13_CHANGELOG_ARSIP_S1_2026.md` (tidak pernah ada; nama benarnya `_previous_cycles/M11_CHANGELOG_ARSIP_S1_2026.md`).
 4. **Dua dokumen operasional menyebut `08_CHECKLIST` berdasarkan nama** (`operations/deploy-go-live.md` baris 20; `operations/verifikasi-keuangan.md` baris 117) — setelah berkas itu keluar repo, keduanya menunjuk berkas yang tidak ada. Dibiarkan sebagai rujukan historis.
