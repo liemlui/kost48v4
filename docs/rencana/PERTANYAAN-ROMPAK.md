@@ -16,7 +16,7 @@ Sumber: tanya-jawab 2026-10-05 (Q1–Q32 · O1–O7 · D1–D3 · P1–P32). Rin
 | Q1 | b — struktur **tangga baca** | Ada berkas wajib, rujukan, dan arsip; bukan 7 berkas pipih |
 | Q2 | c — aturan **dikeluarkan dari STATUS** | Satu sumber aturan: berkas kontrak |
 | Q3 | b→c — status penataan dokumen di berkas tersendiri, lalu hanya entri riwayat | Perlu penanda kapan "c" berlaku |
-| Q4 | b — router digabung ke `AGENTS.md`; `docs/README.md` dihapus | Tautan ke README dialihkan |
+| Q4 | b — router digabung ke `AGENTS.md`; `AGENTS.md` §3 dihapus | Tautan ke README dialihkan |
 | Q5 | b — `KEPUTUSAN-OWNER` dipecah: berlaku vs digantikan | Berkas hidup kecil |
 | Q6 | a — plafon baca **≤1 berkas wajib + task aktif** | Menentukan isi berkas kontrak |
 | Q7 | c — proksi, bukan token absolut | Lihat O3 |

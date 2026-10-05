@@ -14,7 +14,7 @@ kebijakan `ARSIP-BATAS` (24 Sep 2026) serta target "7 berkas utama + 1 arsip" pa
 |---|---:|
 | `docs/**` seluruhnya (sebelum B2) | 1.291 berkas `.md` · 7,3 MB · ≈1,87 juta token (proksi `byte/4`) |
 | **Jalur baca "panas"** (yang benar-benar mungkin dibaca sesi baru) | **50 berkas · 1.037 KB · ≈265 rb token** |
-Rincian per berkas: kartu keputusan, baseline gate, dan ledger per batch.
+Rincian: kartu keputusan + ledger per batch.
 
 **Temuan yang mengubah Q9/Q26:** baris **bukan** proksi biaya yang sah — `docs/STATUS.md` hanya 147 baris tetapi **78,4 KB**; ambang berbasis baris meloloskan justru dokumen termahal, jadi ukuran mengikat = **byte**.
 **Temuan kedua:** `AGENTS.md` disuntik harness **tiap request** → menambah isinya adalah pajak per-putaran, bukan ongkos sekali baca.
@@ -33,7 +33,7 @@ Rincian per berkas: kartu keputusan, baseline gate, dan ledger per batch.
 | — | `.audit-map/` (akar repo, gitignored) | artefak generated, **bukan** dokumen | — |
 | — | `docs/rencana/` | rencana/kontrak batch yang masih berjalan (dokumen ini) | ≤16 KB |
 
-Berkas yang **hilang** setelah rombak: `docs/README.md` (router → `AGENTS.md` §3), `docs/STATUS.md` (→ `docs/ANTREAN.md`),
+Berkas yang **hilang** setelah rombak: `AGENTS.md` §3 (router → `AGENTS.md` §3), `docs/STATUS.md` (→ `docs/ANTREAN.md`),
 `docs/M13_CHANGELOG.md` (→ riwayat bulanan), `docs/archieve/**` (→ `docs/arsip/legacy/**` atau keluar repo),
 `docs/arsip/audit-checklist-total.md` (→ arsip + indeks kecil).
 
@@ -72,7 +72,7 @@ Berkas yang **hilang** setelah rombak: `docs/README.md` (router → `AGENTS.md` 
 | **B2** ✅ | 39 berkas dikutip → `docs/arsip/legacy/`; 68 sisanya → `.docs-legacy/`; **60 rujukan** dialihkan; 7 penghapusan tracked | konservasi SHA 68/68 · 0 tautan patah baru · P5 & P11 ditutup | revert commit |
 | **B3** ✅ | `docs/audit-map/**` → **`.audit-map/`** (tetap gitignored); generator → `scripts/audit-map-generate.cjs` (**tracked**); 157 tautan + 24 path dokumen dialihkan | **1.203 tautan sumber** diperbaiki · **4.013 tautan diverifikasi, 0 rusak** · gate R2 0 · regenerasi peta menunggu owner — ledger: [B3-ledger-peta-audit.md](B3-ledger-peta-audit.md) | revert commit |
 | **B4** ✅ | Checklist audit 135 ID → arsip + indeks tipis; kebijakan 368 kotak: **117 ke arsip · 108 dikonversi · 78 bertanda non-otoritatif · 65 direklasifikasi** | Bukti konversi **normalisasi 5/5 identik** · R3 **0** dengan **143 kotak dikecualikan tetap terlihat** · R7 hijau · R2 0 — ledger: [B4-ledger-kotak.md](B4-ledger-kotak.md) | revert commit |
-| **B5** | Pisah otoritas: `AGENTS.md` ramping + `docs/KONTRAK.md` + `docs/ANTREAN.md`; bukti → riwayat; `docs/README.md` dihapus | Gate hijau; jalur wajib ≤12 berkas / ≤150 KB | revert commit batch |
+| **B5** ✅ | Otoritas dipisah: `AGENTS.md` **17,7 → 7,7 KB** + [KONTRAK](../KONTRAK.md) 13,7 KB + [ANTREAN](../ANTREAN.md) 11,9 KB; `STATUS.md` → pointer; `README.md` dihapus | **jalur wajib 50/1.037 KB → 4 berkas/49,7 KB** · gate 2 pelanggaran | revert |
 | **B6** | Rotasi changelog: bulan berjalan = 30 hari terakhir; `M13_CHANGELOG.md` digabung | Gate hijau | revert commit batch |
 | **B7** | `KEPUTUSAN-OWNER` dipecah: berlaku sekarang vs digantikan (arsip) | Gate hijau; berkas hidup ≤16 KB | revert commit batch |
 | **B8** | Sapu akhir: berkas di atas plafon byte, blok baca, **uji nyata Q30** (sesi baru + 1 tugas, ukur berkas+byte yang dibaca) | Laporan akhir + angka sebelum/sesudah | revert commit batch |
@@ -90,7 +90,7 @@ Daftar pindah: `docs/rencana/B2-daftar-pindah-arsip-legacy.md`. Temuan: berkas k
 
 - **B2.1 `2971efa7`** — 39 berkas pindah ke `docs/arsip/legacy/`; **37 identik SHA-256**, **2 transformasi** (redaksi kredensial, sisa 0); 15 berkas untracked kini tracked (P4=a).
 - **B2.2 `56e99f15`** — **60 rujukan dialihkan** di 23 dokumen aktif, bertahap 4 klaster + gate tiap klaster (P7). Rujukan hanya dialihkan bila targetnya ada; 4 dibiarkan (lihat §4.1).
-- **B2.3 `a4b46132`** — pernyataan struktur diperbarui di `AGENTS.md` §6, `docs/ATURAN.md`, `docs/README.md`, `docs/product/orientasi.md`, `docs/arsip/README.md`.
+- **B2.3 `a4b46132`** — pernyataan struktur diperbarui di `AGENTS.md` §6, `docs/ATURAN.md`, `AGENTS.md` §3, `docs/product/orientasi.md`, `docs/arsip/README.md`.
 - **`0f28e8d9`** (terpisah, bukan bagian B2) — dokumentasi tertunda owner; dipisah dari commit campuran atas instruksi owner 2026-10-05. **`20a043e7`** — skrip pindah keluar repo + draft penutup sitasi rusak + gate v1.4.
 - **B2 penutup `c1134387`:** 68 berkas arsip (913 KB) pindah ke `.docs-legacy/` — **di dalam repo, diabaikan git** (keputusan owner 2026-10-05, sebab sandbox agen tidak boleh menulis di luar repo); konservasi SHA-256 **68/68**, 7 penghapusan tracked. **P5 ditutup** (baris `docs/archieve/` di `.git/info/exclude` dihapus; `git check-ignore` kosong) · **P11 ditutup** (pohon folder kosong dihapus). Skrip `B2-pindah-keluar-repo.ps1` tetap disimpan sebagai cara mengeluarkan folder itu dari repo bila diinginkan.
 
@@ -110,6 +110,7 @@ B3–B8 **belum**; menunggu perintah.
 | **B3 — regenerasi peta** belum dijalankan agen | generator memanggil `git rev-parse HEAD` via `child_process` pipa stdio → EPERM di sandbox | **diserahkan ke owner**: `node scripts/audit-map-generate.cjs`; isi peta sudah benar tautannya (4.013/4.013) |
 | **B2 — commit campuran (kini dipisah)** | kesalahan agen: `git add -u -- docs` men-stage 7 berkas dokumentasi tertunda owner bersama alih rujukan | **selesai ditangani** 2026-10-05 atas instruksi owner: dipisah menjadi **`0f28e8d9`** (konten owner) + **`56e99f15`** (alih rujukan). Isi berkas owner **tidak disentuh** — 20 berkas dipantau SHA-256, 0 berubah. Commit lama (`59e04736`, `895aff79`, `4282ccf1`) tidak lagi di cabang; objeknya masih dapat diperiksa dengan `git show <sha>` sampai garbage collection |
 | **4 sitasi ke berkas yang tidak ada** (`_DEPRECATED_05/06/08…`, `M13_CHANGELOG_ARSIP_S1_2026.md`) | ditemukan saat B2.2, **bukan** akibat B2 | dicatat di [draft penutup sitasi rusak](PENUTUP-SITASI-RUSAK.md) butir 1–4; dijadwalkan **B8** |
+| **B5 — invariant ditulis padat** (bukan verbatim) + `STATUS.md` disisakan sebagai pointer | plafon KONTRAK 16 KB · Q11 · P19=c | **keputusan teknis agen**: fakta tetap, bentuknya tabel + perintah pengukur; verbatim tetap di riwayat git + bukti-2026-10. Pointer dihapus di **B8** |
 | **Baris `docs/archieve/` di `.git/info/exclude`** | P5, urutan pelaksanaan disetujui owner | **ditutup 2026-10-05** (`c1134387`): baris dihapus setelah arsip keluar; `git check-ignore docs/archieve/uji.md` **kosong** |
 | **B4 — dua runbook diberi penanda, bukan dikonversi** (`go-live-cpanel.md`, `produksi.md`) | P16 menyebut konversi untuk "10 berkas lain"; dua itu dipakai manusia langkah demi langkah | **keputusan teknis agen**: penanda `<!-- kotak-non-otoritatif -->` menyelesaikan ambiguitas yang sama tanpa menghapus kotak yang dipakai; bisa dikonversi atas permintaan owner |
 | **B4 — 5 rujukan historis** (`08_CHECKLIST`, `tenant-data-template.tsv`) | butir 5–7 [draft penutup sitasi rusak](PENUTUP-SITASI-RUSAK.md) | dibiarkan (catatan historis); butir 5–6 dijadwalkan bersamaan saat B5 menulis ulang berkasnya |
@@ -124,22 +125,19 @@ B3–B8 **belum**; menunggu perintah.
 ## 5. Batas dan risiko
 
 - **Sandbox:** menulis **di luar repo** tidak mungkin bagi agen (dibuktikan 2026-10-05) → aset besar ditaruh di `.docs-legacy/` dan `.audit-map/`, keduanya diabaikan git (keputusan owner).
-- **76 berkas `docs/archieve/**` untracked** → tidak ada jaring git. Selalu dipindah, tidak pernah dihapus.
-- **13 entri dirty** pada saat B0 (`main`): 9 dokumen (AUDIT, KEPUTUSAN-OWNER, STATUS, audit/README, domain/ai,
-  history/changelog/2026-09, product/portal-owner-admin + 2 source) + 4 untracked. 9 berkas dokumen itu **tidak disentuh** oleh B0/B1;
-  2 berkas source (`MyManualPage.tsx`, `CekPage.tsx`) di luar lingkup rombak sepenuhnya.
+- **Berkas untracked selalu dipindah**, tidak pernah dihapus (tidak ada jaring git).
+- **2 berkas source owner** (`MyManualPage.tsx`, `CekPage.tsx`) di luar lingkup rombak; menunggu commit terpisah.
 - **Tanpa commit ke `main`, tanpa push** sampai owner memerintahkan.
 
 ---
 
-## 6. Daftar berkas yang diniatkan (record B0)
+## 6. Daftar berkas inti rombak (record B0)
 
-**Dibuat pada B0/B1:** `docs/rencana/RENCANA-ROMPAK-DOCS.md` · `docs/rencana/PERTANYAAN-ROMPAK.md` · `scripts/check-docs.mjs` · `docs/arsip/audit/gate-baseline-2026-10-05.md` ·
-`.design-audit/docs-snapshot-2026-10-05/**` (snapshot, untracked).
+Dibuat: `scripts/check-docs.mjs` · `docs/arsip/audit/gate-baseline-2026-10-05.md` · `docs/rencana/**` (plan, kartu keputusan, ledger per batch) · snapshot `.design-audit/docs-snapshot-2026-10-05/**` (untracked).
 
 **Dibuat pada batch berikutnya:** `docs/KONTRAK.md` · `docs/ANTREAN.md` · `docs/arsip/{audit,changelog,legacy,plans}/**` · `.audit-map/**`.
 
-**Dipindah/dihapus pada batch berikutnya:** `docs/README.md` · `docs/STATUS.md` · `docs/M13_CHANGELOG.md` ·
+**Dipindah/dihapus pada batch berikutnya:** `AGENTS.md` §3 · `docs/STATUS.md` · `docs/M13_CHANGELOG.md` ·
 `docs/arsip/audit-checklist-total.md` · `docs/archieve/**` · `.audit-map/**`.
 
 **Tidak pernah disentuh rombak ini:** `frontend/src/pages/portal/MyManualPage.tsx` · `frontend/src/pages/public/CekPage.tsx` ·

@@ -3,7 +3,7 @@
 Sumber aturan: [AGENTS.md](AGENTS.md); exception uang di [AGENTS §8](AGENTS.md#8-verifikasiexception).
 Lampiran: [GUIDE §11 — Roadmap](AI_WORKFLOW_GUIDE.md#11-roadmap-migrasi-workflow-30-hari) dan [§12 — Template](AI_WORKFLOW_GUIDE.md#12-lampiran-template-siap-pakai).
 Cheatsheet turunan; status tooling disinkronkan 22 September 2026. Tidak mengganti gate proyek atau izin user.
-Navigasi dokumen per kebutuhan (mulai task, domain, operasional, audit, riwayat): [docs/README.md](docs/README.md).
+Navigasi dokumen per kebutuhan (mulai task, domain, operasional, audit, riwayat): [docs/README.md](./AGENTS.md).
 
 ## Pilih level berdasarkan risiko
 

@@ -1,5 +1,8 @@
 # PETA-KODE — Peta Modul, File, dan Simbol KOST48 V5
 
+> **Blok baca** · Jenis: **peta kode** · Status: **aktif** · Untuk siapa: agen yang mencari berkas/simbol atau alur lintas modul · Baca kalau: mencari lokasi kode, kontrak, atau alur — **jangan** dibaca kalau: mencari aturan kerja (itu [KONTRAK.md](KONTRAK.md)) atau antrean (itu [ANTREAN.md](ANTREAN.md)).
+
+
 Tanggal: 2026-09-23
 Status: aktif
 Tujuan: peta navigasi kode kanonik — peta audit bertahap, konvensi modul, modul backend → path → tanggung jawab, grup halaman frontend, index model Prisma, flow & audit anchor, dan shared utility (dari M00)
@@ -13,9 +16,9 @@ Rujukan: [KEPUTUSAN-OWNER](KEPUTUSAN-OWNER.md) · [STATUS](STATUS.md) · [STATUS
 
 ## Peta audit bertahap sampai simbol dan percabangan
 
-[Buka peta audit](../.audit-map/README.md) → indeks kelompok → leaf satu file → simbol/percabangan yang dipilih. Lampiran ini menginventarisasi source secara otomatis agar audit cukup membaca satu cabang dan kontraknya. [Cara audit/checkpoint](../.audit-map/CARA_AUDIT.md) dan [alur lintas domain](../.audit-map/ALUR_LINTAS_DOMAIN.md) membantu memecah pertanyaan kecil.
+[Buka peta audit](../.audit-map/README.md) → indeks kelompok → leaf satu berkas → simbol/percabangan. Lampiran ini menginventarisasi source otomatis agar audit cukup membaca satu cabang + kontraknya. Bantuan: [cara audit](../.audit-map/CARA_AUDIT.md) · [alur lintas domain](../.audit-map/ALUR_LINTAS_DOMAIN.md).
 
-`TERPETAKAN` bukan PASS audit. **`.audit-map/**` adalah artefak *generated* dan *untracked*** (1.126 berkas; dipakai 135+ tautan peta per ID audit) — tidak masuk repo, **jangan dihapus**, dan jangan dianggap bagian repo. Hasil generate menyimpan snapshot lokal dan batas ekstraksi sintaks; status/izin tetap [STATUS](STATUS.md)/[KEPUTUSAN-OWNER](KEPUTUSAN-OWNER.md) (dulu M12/M02). Jangan memuat seluruh folder peta atau JSON inventaris ke konteks. Regenerasi dari root: `node .audit-map/generate.cjs` (parser source, tanpa menjalankan aplikasi).
+`TERPETAKAN` bukan PASS audit. **`.audit-map/**` adalah artefak *generated* dan *untracked*** (jumlah berkas: `Get-ChildItem .audit-map -Recurse -File | Measure-Object`) — diabaikan git, **jangan dihapus**. Status/izin: [ANTREAN](ANTREAN.md)/[KEPUTUSAN-OWNER](KEPUTUSAN-OWNER.md). Jangan memuat seluruh folder peta atau `inventory.json` ke konteks. Regenerasi dari root: `node scripts/audit-map-generate.cjs`.
 
 ## Konvensi (sekali paham, berlaku semua modul)
 - **Backend modul:** `backend/src/modules/<nama>/` berisi `<nama>.controller.ts` (route `/<nama>`), `<nama>.service.ts` (logika), `<nama>.module.ts` (wiring), `dto/`. Modul besar dipecah multi-service (lihat tabel).
@@ -23,15 +26,9 @@ Rujukan: [KEPUTUSAN-OWNER](KEPUTUSAN-OWNER.md) · [STATUS](STATUS.md) · [STATUS
 - **Frontend halaman:** `frontend/src/pages/<grup>/<Halaman>Page.tsx`; komponen reusable `frontend/src/components/`; util `frontend/src/utils/`.
 - **Schema:** `backend/prisma/schema.prisma` (62 model, 74 enum; lokal 8 Sep 2026). Generated client `backend/src/generated/prisma/` = **JANGAN baca** (32MB, regen `prisma generate`).
 
-## Update implementasi 2026-07-23
+## Update implementasi (riwayat)
 
-Baseline historis 23 Juli 2026 adalah `8627289`; HEAD sesi berikutnya harus diperiksa dari Git. Rangkuman lintas perubahan AI pada release ini ada di `M13_CHANGELOG.md`.
-
-- Backend sekarang diperiksa dengan `strictNullChecks`, `noImplicitAny`, `strictFunctionTypes`, dan `strictBindCallApply`; gunakan `common/utils/error-handler.ts` untuk pola log/rethrow yang seragam.
-- `TenantBookingsQueryService` sudah dihapus. Jalur booking memakai service aktif dan helper bersama di `tenant-bookings/`; jangan membuat ulang service query lama.
-- `StaysController` memanggil `StaysRenewalService` langsung untuk renewal; `StaysService` tetap fokus lifecycle inti.
-- CSS frontend dimuat terpusat dari `frontend/src/styles.css`; file wrapper `public-area.ts`, `staff-area.ts`, dan `tenant-area.ts` sudah tidak ada. Konstanta lintas halaman ada di `frontend/src/config/constants.ts`.
-
+Catatan update implementasi peta kode (per 2026-07-23) dipindah ke [history/bukti-2026-10.md](history/bukti-2026-10.md) — di sini hanya peta yang berlaku sekarang.
 ## Backend modul → path → tanggung jawab
 
 ### Keuangan & Akuntansi — detail: `docs/domain/keuangan.md`

@@ -45,7 +45,7 @@ Tiga kesalahan pengukuran yang secara eksplisit dihindari di sini:
 | Dokumentasi komponen frontend | **Lemah** | 3 Storybook stories untuk 182 berkas di `frontend/src/components` (≈1,6%); 289 `.tsx` total |
 | Onboarding lingkungan | **Lemah** | `backend/.env.example` **tidak ada** (frontend ada) |
 | Bukti cakupan uji | **UNKNOWN** | 52 berkas uji backend (+1 spec) + 35 frontend; **coverage tidak diukur** — tidak boleh diklaim dari rasio berkas |
-| Titik masuk untuk pendatang baru | **Cukup** | Tidak ada `README.md` di root — **tetapi** `AGENTS.md` (aturan kanonik) + `docs/README.md` (indeks) adalah titik masuk yang memang dirancang; menambah root README = perubahan **governance** (§7 P6) |
+| Titik masuk untuk pendatang baru | **Cukup** | Tidak ada `README.md` di root — **tetapi** `AGENTS.md` (aturan kanonik) + `AGENTS.md` §3 (indeks) adalah titik masuk yang memang dirancang; menambah root README = perubahan **governance** (§7 P6) |
 
 ## 4. Lima kekuatan (terverifikasi)
 
@@ -78,7 +78,7 @@ Audit ringkas dari sesi lain (artefak `docs_strength_audit.md` — **tidak ada d
 | "Backend test coverage ~7% — 15 test file untuk 46 modul" | **Salah angka:** 52 berkas uji backend (+1 spec). **Inferensi tidak sah:** rasio berkas → coverage. Coverage = **UNKNOWN** (G4) |
 | "Konsolidasi … **0 tautan rusak**" | **Salah:** 26 temuan docs-scope (27 dengan `.github/`) — semua pra-eksisting. Yang benar: **0 temuan baru** |
 | "1.295 berkas / 9,3 MB di `docs/`" sebagai skala dokumentasi | **Benar angkanya, menyesatkan maknanya:** 83% adalah generated (`audit-map`) + legacy (`archieve`); dokumentasi aktif 43 berkas |
-| "Tidak ada README root" sebagai kelemahan | **Benar literal, salah kesimpulan:** `AGENTS.md` + `docs/README.md` adalah titik masuk yang dirancang (§3 baris terakhir) |
+| "Tidak ada README root" sebagai kelemahan | **Benar literal, salah kesimpulan:** `AGENTS.md` + `AGENTS.md` §3 adalah titik masuk yang dirancang (§3 baris terakhir) |
 | Penyebab kesalahan | Perintah dengan glob `**` (kosong diam-diam → dibaca sebagai "nol"), dua subagent dihentikan lalu disimpulkan "semua data ada", dan skor tunggal tanpa rubrik |
 
 Yang **tetap sah** dari audit itu: 3 Storybook stories, `backend/.env.example` hilang, `289 .tsx`, "tidak ada README root" — semuanya cocok dengan pengukuran di §3/§5.
@@ -92,7 +92,7 @@ Yang **tetap sah** dari audit itu: 3 Storybook stories, `backend/.env.example` h
 | P3 | **SELESAI 24 Sep 2026 (`5cd9c193`)** — `backend/.env.example` dibuat: **85 nama kunci, 0 nilai**, dikelompokkan 12 bagian, kunci library/OS dipisah; dirujuk dari `docs/OPERASI.md` §1 (G3) | selesai |
 | P4 | **PARSIAL 25 Sep 2026:** baseline backend atas compiled JS yang dimuat suite = line 29,82%, branch 62,20%, function 41,39% (147/147 test); frontend tetap UNKNOWN karena provider coverage Vitest tidak terpasang dan dependency baru dilarang | Script repeatable `backend npm run test:coverage`; bukan coverage seluruh file source karena modul yang tidak dimuat tidak masuk denominator Node |
 | P5 | Storybook: putuskan apakah katalog komponen dijadikan target, atau dinyatakan tidak dipakai (G5) | **Keputusan produk** |
-| P6 | Root `README.md`: buat **pointer tipis** ke `AGENTS.md` + `docs/README.md`, atau nyatakan tidak perlu | **Keputusan owner** — perubahan governance (AGENTS §10) |
+| P6 | Root `README.md`: buat **pointer tipis** ke `AGENTS.md` + `AGENTS.md` §3, atau nyatakan tidak perlu | **Keputusan owner** — perubahan governance (AGENTS §10) |
 
 ## 8. UNKNOWN (tidak diklaim)
 

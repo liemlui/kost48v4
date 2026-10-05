@@ -123,8 +123,8 @@ Daftar invarian kanonik (8 invarian) beserta harness verifikasinya ada di [opera
 |-----------|--------|
 | Trial Balance `isBalanced: True` | ✅ LULUS |
 | Deposit Reconciliation MATCHED (16 stay, Rp8jt) | ✅ LULUS |
-| Cashflow `beginning+net=ending` (unit test 13/13) | ✅ LULUS |
-| Financial Ratios expenseRatio benar (unit test 12/12) | ✅ LULUS |
+| Cashflow `beginning+net=ending` | ✅ LULUS — cek: `npm run test:unit` (cwd `backend`), berkas `cashflow-classifier.test.js` |
+| Financial Ratios expenseRatio benar | ✅ LULUS — cek: `npm run test:unit` (cwd `backend`), berkas `financial-ratios.helper.test.js` |
 | 8 invarian keuangan (daftar kanonik di [operations/verifikasi-keuangan.md](../operations/verifikasi-keuangan.md)) | ✅ 5 lulus · ⚠️ 3 bercatatan: #3 receipt best-effort, #6 TB dapat tidak seimbang bila P1-01 terjadi, #7 mismatch bila P1-02 terjadi |
 | Temuan P1-01..P1-03 (jurnal & deposit *best-effort*) | ✅ Indikasi diperbaiki — verifikasi **statis** 23 Sep 2026; P1-04..P1-09 UNKNOWN ([bukti](../audit/audit-uang-huni-2026-07.md)) |
 | 7 DO-NOT-TOUCH blocks | ✅ SEMUA UTUH |
