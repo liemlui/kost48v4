@@ -1,5 +1,7 @@
 # Akun Dummy DEV (login cepat)
 
+> **Kata sandi DIHAPUS 2026-10-05** (keputusan P33 / Q31-9: dokumen tidak memuat kredensial). Kata sandi DEV ada di `backend/scripts/seed-dev-reset.js`; jangan disalin ke dokumen.
+
 > ⚠️ **HANYA untuk DB pengembangan** (port **5433** `kost48_v3_pro`). Dibuat oleh
 > `backend/scripts/seed-dev-dummy.js` (wipe + isi atomik). **JANGAN dipakai di produksi** —
 > di produksi, ganti password OWNER dengan yang kuat.
@@ -9,11 +11,11 @@ Login di `http://localhost:5173/login`. Field "identifier" = email.
 ## Back-office
 | Role | Email | Password |
 |------|-------|----------|
-| **OWNER** | `owner@kost48.com` | `Owner#2026` |
-| **ADMIN** | `admin@kost48.com` | `admin123` |
-| **STAFF** | `staff@kost48.com` | `staff123` |
+| **OWNER** | `owner@kost48.com` | `*(dihapus 2026-10-05 — lihat backend/scripts/seed-dev-reset.js)*` |
+| **ADMIN** | `admin@kost48.com` | `*(dihapus 2026-10-05 — lihat backend/scripts/seed-dev-reset.js)*` |
+| **STAFF** | `staff@kost48.com` | `*(dihapus 2026-10-05 — lihat backend/scripts/seed-dev-reset.js)*` |
 
-## Penghuni (TENANT) — semua password sama: `Tenant#2026`
+## Penghuni (TENANT) — semua password sama: `*(dihapus 2026-10-05 — lihat backend/scripts/seed-dev-reset.js)*`
 Pola email: `<nama-depan>.tenant@kost48.test`. 16 tenant pertama menempati kamar A–P:
 
 | Kamar | Nama | Email |
