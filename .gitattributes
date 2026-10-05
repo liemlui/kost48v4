@@ -1,0 +1,46 @@
+# Kebijakan line ending KOST48 — ditambahkan 2026-10-05 (keputusan owner, langkah tersendiri sebelum batch B2).
+#
+# Alasan: repo ini sebelumnya tanpa kebijakan line ending; git memperingatkan
+# "LF will be replaced by CRLF" pada setiap berkas yang ditulis agen. Sebelum rombak
+# dokumentasi memindahkan berkas antar folder, endapan itu harus dikunci supaya
+# pemindahan tidak memicu diff seluruh berkas.
+#
+# Aturan: setiap berkas TEKS disimpan LF (isi index dinormalkan, checkout tetap LF di OS apa pun).
+# Pengecualian yang disengaja: skrip Windows (batch/PowerShell) memakai CRLF.
+# Berkas BINER tidak pernah disentuh line ending-nya.
+
+* text=auto eol=lf
+
+# Skrip Windows — sengaja CRLF
+*.bat text eol=crlf
+*.cmd text eol=crlf
+*.ps1 text eol=crlf
+
+# Biner — line ending tidak pernah disentuh
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.webp binary
+*.bmp binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.otf binary
+*.eot binary
+*.pdf binary
+*.zip binary
+*.tgz binary
+*.gz binary
+*.7z binary
+*.sqlite binary
+*.sqlite3 binary
+*.db binary
+*.exe binary
+*.dll binary
+*.node binary
+*.xlsx binary
+*.xls binary
+*.docx binary
+*.pptx binary

@@ -118,7 +118,8 @@ sebagai `DILEWATI` + exit `2`, bukan senyap.
 
 Isi di §3 **dibekukan** dan tidak diubah. Perubahan berikut dicatat di sini supaya angka baseline dan angka gate terkini tidak saling bertentangan.
 
-- **Setelah perbaikan D1 (2026-10-05):** tautan `docs/product/mode-cepat.md` → `../../design/alur-semua-halaman.html` dibetulkan (1 baris, di luar batch). Gate **v1.2** melaporkan **22 pelanggaran + 1 dilewati** (R1 2 · R2 **0** · R3 12 · R4 4 · R5 4), exit `2`. Perubahan aturan yang menyertainya: D2 (`AGENTS.md` dikecualikan dari R4, wajib baris peran) dan D3 (R5 menghormati daftar isi berjangkar). **Commit: belum dibuat** — `docs/product/mode-cepat.md` masih untracked, sehingga "commit satu baris" akan sekaligus memasukkan seluruh berkas baru itu ke riwayat; menunggu keputusan lingkup commit. SHA akan ditulis di baris ini setelah commit dibuat.
+- **Setelah perbaikan D1 (2026-10-05):** tautan `docs/product/mode-cepat.md` → `../../design/alur-semua-halaman.html` dibetulkan (1 baris, di luar batch). Gate **v1.2** melaporkan **22 pelanggaran + 1 dilewati** (R1 2 · R2 **0** · R3 12 · R4 4 · R5 4), exit `2`. Perubahan aturan yang menyertainya: D2 (`AGENTS.md` dikecualikan dari R4, wajib baris peran) dan D3 (R5 menghormati daftar isi berjangkar).
+- **Commit artefak B0–B1: `22f8d408`** (branch `docs-rombak`, 3 berkas, tanpa push). Fix D1 **tidak** ikut di-commit: `docs/product/mode-cepat.md` masih untracked (20,9 KB, berkas owner), sehingga "commit satu baris" akan sekaligus memperkenalkan seluruh berkas itu ke riwayat — fix dibiarkan di working tree dan ikut saat berkas itu di-commit sendiri.
 
 ## 8. Riwayat berkas ini
 
