@@ -20,6 +20,8 @@ Rujukan: [STATUS](STATUS.md) · [AGENTS](../AGENTS.md) · [STATUS](STATUS.md) ·
 | Keputusan izin bertahap 8 Sep + koreksi lingkup AO | **riwayat** (izin sebagian masih operatif; status eksekusi bertanggal) | Dipisah ke [history/izin-dan-catatan-keputusan-owner.md](history/izin-dan-catatan-keputusan-owner.md); status aktual di [STATUS](STATUS.md) dan [STATUS](STATUS.md) |
 | Butir lain: D-01..D-31, R1–R5, B1–B5, E/F/K/L/S, OP-*, FIN-*, PUB-*, STF-*, AI-*, OWN-*, W-00-D1..D3, AL-01..AL-04, OC-01..OC-07 | **berlaku** | Tidak ada bukti penggantian yang tercatat per 23 Sep 2026 |
 | Batas penataan arsip & berkas besar (DOCS-CLEANUP, 24 Sep 2026 — A1–A4, C1–C3) | **berlaku** | Entri "2026-09-24 — DOCS-CLEANUP" di bawah; bukti batch [M13](M13_CHANGELOG.md) |
+| Arah lapisan keputusan AI (25 Sep 2026 — AI-DECISION-*) | **berlaku**; benturan aturan **diselesaikan** oleh `CEPAT-AI-JADWAL` (agenda terjadwal, halaman hanya membaca); rumah simpanan memakai `AiDraft` (tanpa schema baru) | Entri "2026-09-25 — Arah lapisan keputusan AI" + "2026-09-25 — Dua mode" di bawah; rancangan [product/mode-cepat.md](product/mode-cepat.md) |
+| Dua mode: Mode Cepat `/cepat` + halaman Normal (25 Sep 2026 — DUA-MODE/CEPAT-*) | **berlaku**; implementasi **belum** | Entri "2026-09-25 — Dua mode" di bawah; rancangan [product/mode-cepat.md](product/mode-cepat.md) |
 
 ## 2026-09-24 — DOCS-CLEANUP: batas arsip, berkas >600 baris, dan preseden kerja
 
@@ -411,6 +413,68 @@ Owner menjawab daftar keputusan yang ditimbulkan verifikasi statis P1-04..P1-09 
 - **URUTAN-25SEP — urutan task AI berikutnya.** Setelah keputusan ini: (1) regresi auth temuan #3 (login/refresh/JWT strategy/forgot-password/rate limiting), (2) task uang P1-04 + P1-09, (3) uji konkurensi DB untuk T6/T7, (4) Z19-T2 bersama sesi dashboard.
 
 Keputusan ini **tidak mengubah** nominal uang, tarif, aturan DP/deposit, atau kontrak API; yang ditetapkan adalah **izin kerja, bentuk perbaikan yang dipilih, dan urutan eksekusi**.
+
+---
+
+## 2026-09-25 — Arah lapisan keputusan AI (penyederhanaan OWNER/ADMIN lanjutan)
+
+Owner menetapkan arah baru atas pertanyaan "dashboard interaktif, wizard, atau cara lain": **manfaatkan API AI untuk menyederhanakan data** — kondisi, sebab, rekomendasi, dan lokasi tindakan disusun AI, lalu OWNER/ADMIN **cukup mengklik atau membuka tautan yang direkomendasikan**; tidak semua data perlu ditampilkan sebagai halaman.
+
+- **AI-DECISION-ARAH — AI menyusun alur, manusia memutuskan.** Halaman utama OWNER/ADMIN berubah dari "kumpulan widget/tabel" menjadi **3–5 kartu keputusan** yang masing-masing memuat: kondisi, sebab, rekomendasi, dampak, dan **satu tautan terfilter** ke lokasi tindakan. Data lengkap tidak dihapus, tetapi diturunkan menjadi lapis `Data` yang diakses lewat tautan/pencarian, bukan dipromosikan di navigasi utama.
+- **AI-DECISION-BATAS — AI tetap tidak menulis data.** Arahan ini **tidak mengubah** pola aman/terlarang di [domain/ai.md](domain/ai.md) maupun [scope.md](product/scope.md) §B8: AI hanya menyusun draft/kartu; mutasi data tetap melalui endpoint domain dengan approve manusia. Nominal uang, tarif, aturan DP/deposit, jurnal, permission, dan kontrak API **tidak berubah**.
+- **AI-DECISION-URUTAN — kartu rule-based lebih dulu.** Kesederhanaan tidak menunggu AI: collector + rule engine + fallback deterministik dikerjakan lebih dahulu (`AIDL-02`, `AIDL-04`), AI hanya menambah kualitas sebab/prioritas di atasnya (`AIDL-03`). Dengan AI mati atau kuota habis, kartu tetap tampil.
+- **AI-DECISION-HEMAT — AI tidak dibakar untuk pekerjaan yang sudah jelas.** Kartu STAFF (tugas hari ini) dan TENANT (langkah berikutnya) tetap deterministik; AI dipakai di OWNER dan ADMIN.
+- **AI-DECISION-KONFLIK — butuh keputusan owner sebelum implementasi backend.** Agenda yang sudah siap saat halaman dibuka berbenturan dengan huruf dua aturan kanonik: [domain/ai.md](domain/ai.md) §Pola Terlarang ("AI berjalan otomatis saat dashboard dibuka") dan [scope.md](product/scope.md) §B8 ("Tombol Manual Owner/Admin"). Usulan resolusi (agenda dihitung **terjadwal/setelah event lalu disimpan**, halaman hanya membaca cache) **belum diputuskan** dan tidak boleh dijalankan atas inisiatif agent; dampaknya termasuk kebutuhan rumah penyimpanan/schema yang juga butuh approval tersendiri.
+- **CEK-PUBLIK — halaman `/cek` tetap statis dan disinkronkan manual.** Halaman publik `frontend/src/pages/public/CekPage.tsx` **tidak** diubah menjadi API-driven pada keputusan ini (tetap "tanpa API, tanpa data pribadi" sesuai [OPERASI](OPERASI.md)); isinya diperbarui agar tidak drift dari [STATUS](STATUS.md). Opsi generator/endpoint publik dicatat sebagai usulan terpisah yang belum disetujui.
+
+Rancangan lengkap (prinsip, kontrak kartu, pipeline, bentuk per role, kriteria selesai): [product/portal-owner-admin.md](product/portal-owner-admin.md) §10–§11. **Sebagian rancangan itu disempurnakan oleh entri berikutnya ("Dua mode")** — termasuk urutan `AIDL`, nasib §10.6, dan bentuk permukaan kerjanya. Antrean eksekusi: [STATUS](STATUS.md) (`AIDL-01`..`AIDL-06`, `AI-USAGE-01`).
+
+---
+
+## 2026-09-25 — Dua mode: Mode Cepat (`/cepat`) dan halaman Normal
+
+Lanjutan arah yang sama hari itu. Owner memutuskan bentuk permukaan kerja: setelah login tersedia **dua halaman berdampingan** — halaman **Normal** yang berlaku sekarang, dan halaman **Mode Cepat** yang menyusun arahan kerja. Keputusan ini **menyelesaikan** benturan aturan yang dicatat pada entri sebelumnya dan **menggantikan** item `AIDL-05` (penyederhanaan navigasi halaman Normal). Rancangan lengkap: [product/mode-cepat.md](product/mode-cepat.md).
+
+- **DUA-MODE — dua halaman berdampingan, bukan migrasi paksa.** Halaman Normal tidak ditinggalkan; pengguna memilih. Kegagalan satu halaman tidak mematikan yang lain.
+- **CEPAT-SHELL-PARALEL — shell paralel di route baru.** Mode Cepat dibangun sebagai komponen layout baru di `/cepat`; `AppLayout`, sidebar, `navigation.ts`, seluruh halaman modul, dan CSS halaman lama **tidak disentuh**. Rombak total UI/UX berlaku **hanya** untuk halaman Mode Cepat. Alasan: halaman Normal adalah pembanding dan jalur mundur, sehingga tidak boleh ikut berubah.
+- **CEPAT-NAMA —** label **"Mode Cepat"**, route **`/cepat`**.
+- **CEPAT-AI-OWNER — hanya OWNER memanggil AI.** ADMIN, STAFF, dan TENANT memakai kartu deterministik: tanpa AI, tanpa biaya token, tanpa tampilan biaya. Alasan yang diterima: pekerjaan staff (checklist) dan tenant (tagihan) sudah jelas urutannya, sehingga token tidak memberi manfaat baru; dan karyawan tidak perlu melihat tagihan biaya atas pekerjaannya sendiri.
+- **CEPAT-AI-JADWAL — agenda dihitung terjadwal 1× sehari lalu disimpan; halaman hanya membaca.** Ini **menyelesaikan** benturan dengan [domain/ai.md](domain/ai.md) §Pola Terlarang ("AI berjalan otomatis saat dashboard dibuka") dan UAT Fase G item 1: tidak ada pemanggilan AI pada peristiwa membuka halaman, sehingga biaya per tampilan nol. Tombol "Perbarui agenda" tetap tersedia di luar jadwal. Rumah simpanan memakai antrean draft `AiDraft` (G9) yang sudah ada — **tanpa schema baru**.
+- **CEPAT-AI-MATI — AI mati atau kuota habis: Mode Cepat tetap tampil penuh** dengan kartu aturan; OWNER melihat strip kecil "AI tidak aktif" + tombol coba lagi. Tidak ada halaman kosong dan tidak ada galat.
+- **CEPAT-BIAYA — transparansi biaya hanya untuk OWNER, target ≤ Rp 50.000/bulan.** Angka rupiah **belum ditampilkan** sampai pencatatan usage nyata tersedia (`AI-USAGE-01`); sebelum itu yang ditampilkan adalah kuota. Menampilkan rupiah tanpa dasar pencatatan dinilai mengarang angka dan tidak diizinkan.
+- **CEPAT-PILIH — layar pilih-mode hanya untuk OWNER dan ADMIN.** STAFF dan TENANT langsung masuk Mode Cepat, dengan saklar tetap tersedia di header; memaksa mereka memilih dinilai menambah langkah tanpa makna.
+- **CEPAT-SAKLAR dan CEPAT-DEFAULT —** saklar permanen `Cepat ←→ Normal` di header (satu klik, tanpa login ulang, diingat per pengguna); owner menetapkan **default per role** dan pengguna **selalu boleh mengganti sendiri**.
+- **CEPAT-KOSAKATA — kosakata final "Cepat · Normal".** "Lengkap" menjadi bagian dari Normal, bukan mode ketiga. Saklar lama (`admin-density`, mode owner compact/full) **dipetakan** ke dua mode ini lalu dinonaktifkan per role agar pengguna tidak menghadapi dua saklar bermakna serupa.
+- **CEPAT-GANTI-AIDL05 — Mode Cepat menggantikan `AIDL-05`.** Penyederhanaan navigasi terjadi di dalam Mode Cepat; sidebar halaman Normal tidak diubah.
+- **CEPAT-KIRIM — kirim ringkasan ke WhatsApp dan cetak, khusus OWNER/ADMIN.** Batas: tanpa NIK, tanpa foto identitas, tanpa alamat lengkap, panjang teks dibatasi.
+- **CEPAT-ADMIN-AI-OPSI — tombol AI on-demand untuk ADMIN dicatat sebagai opsi resmi yang BELUM dikerjakan.** Syarat bila kelak diaktifkan: maksimal 1–2 permintaan/hari, hanya atas penekanan tombol, tidak pernah otomatis.
+- **CEPAT-ADOPSI — adopsi diukur, ditinjau setelah 30 hari pemakaian.** Jika Mode Cepat tidak dipakai, yang diperbaiki adalah isi dan urutan kartunya, bukan dengan menambah fitur.
+
+**Batas yang ditegaskan:** keputusan ini tidak mengubah nominal uang, tarif, aturan DP/deposit, jurnal, permission, status hunian, kontrak API, maupun pola aman AI (AI tetap tidak menulis data). Tidak ada schema baru dan tidak ada endpoint publik baru. Gate yang sedang terbuka (AO-14, AO-23, EF, dan lainnya) tidak dibatalkan.
+
+**Prasyarat teknis yang dicatat sebagai risiko, bukan asumsi:** pemicu terjadwal harian belum terbukti tersedia di produksi (cron AutoOps masih terbuka di [STATUS](STATUS.md) §3). Sampai terbukti, agenda berjalan lewat tombol manual; Mode Cepat tetap berfungsi penuh karena kartu aturan tidak bergantung pada AI.
+
+---
+
+## 2026-09-25 — Dua desain (Lama/Baru) dan aturan sewa penghuni
+
+Lanjutan hari yang sama, setelah owner meninjau rancangan role TENANT. Keputusan ini **mengembangkan** entri "Dua mode" di atas: yang semula "halaman Normal tidak disentuh, Mode Cepat berdampingan" menjadi **dua desain yang dipilih owner**, dan aturan sewa penghuni ditetapkan lengkap. Rancangan visual: [design/tenant-cepat.html](../design/tenant-cepat.html) (21 layar × 2 desain) dan peta alur seluruh halaman: [design/alur-semua-halaman.html](../design/alur-semua-halaman.html).
+
+- **KOSAKATA-DESAIN — istilah yang dipakai owner: "Desain Lama" dan "Desain Baru".** Desain Lama = UI yang berlaku sekarang; Desain Baru = Mode Cepat. Ini **menggantikan** pasangan kata "Cepat · Normal" pada `CEPAT-KOSAKATA`; keputusan lamanya tidak dihapus, hanya kosakatanya yang berubah.
+- **DESAIN-TOGGLE-OWNER — owner memilih tampilan untuk semua role; pengguna tetap boleh mengganti sendiri.** Owner menetapkan default per role (`CEPAT-DEFAULT` tetap berlaku). Desain hanya mengubah tampilan: **aturan di backend berlaku sama apa pun desain yang dipilih**, sehingga hak dan kewajiban penghuni tidak bergantung pada pilihan tampilan.
+- **HARGA-LAMA-DIPEGANG — tarif lama penghuni bertahan selama ia kos dan bayar tepat waktu.** Selama tarif untuk penghuni baru tidak berubah, penghuni lama menikmati harga yang lebih murah. Pemetaan teknis: `Stay.agreedRentAmountRupiah` (harga yang dipegang) versus `Room.monthlyRateRupiah` (harga kamar yang berlaku) — `prisma/schema.prisma`.
+- **LEWAT-JATUH-TEMPO = PENGHUNI-BARU — bila tagihan lewat jatuh tempo, hanya DP 30% yang boleh dibayar dan sewanya memakai harga sekarang.** Setelah DP masuk, penghuni boleh tinggal **5 hari** untuk melunasi sisanya (bukan 30 hari). Kamar dapat ditawarkan di iklan.
+- **DP-HANGUS-SELALU-DIINFO — bila 5 hari itu juga lewat, kamar ditawarkan kembali dan DP 30% hangus; pemberitahuan wajib dikirim ke penghuni, tidak boleh didiamkan.** Deposit titipan **tetap dikembalikan** (dipotong hanya bila ada kerusakan), dan staff membersihkan kamar dalam 3 jam. Uang muka (DP) dan deposit titipan adalah dua hal berbeda dan tidak boleh disatukan dalam satu kalimat.
+- **TIDAK-ADA-ATURAN-30-HARI — owner menyatakan aturan "menunggak >30 hari baru boleh diputus" tidak pernah ada.** Konsekuensinya: tidak dibayar berarti penghuni dapat dikeluarkan. **Manual penghuni masih memuat kalimat aturan lama itu dan harus diperbaiki** (`frontend/src/pages/portal/MyManualPage.tsx`).
+- **GANTI-KONTRAK-SEWA — penghuni boleh mengganti kontrak (bulanan ⇄ 2 mingguan ⇄ mingguan ⇄ harian) memakai rumus yang sama dari harga dasarnya.** Berlaku bila diambil **sebelum** jatuh tempo; sesudahnya berlaku aturan penghuni baru di atas. Nama fitur ini adalah **"ganti kontrak sewa"**, bukan "ganti irama bayar".
+- **LISTRIK-KONTRAK-PENDEK — untuk 2 mingguan, mingguan, dan harian, listrik & air SUDAH TERMASUK** (sesuai aturan yang sudah berlaku di kode: `PRICING_MULTIPLIERS` + `isUtilitiesIncludedForPricingTerm`). **Konsekuensinya diwajibkan:** begitu penghuni kembali ke kontrak bulanan, ia **memotret angka meter kWh sebagai acuan baru** pada saat bulanan aktif kembali, dan hal ini diinformasikan saat ia memilih kontrak pendek.
+- **PRABAYAR / TAMBAH-MASA-PAKAI — pembayaran di muka 1–24 bulan dipermudah lewat halaman penghuni.** Kemampuan ini **sudah ada** di backend (`POST /stays/:id/prepay-extension`, harga bulanan terkunci, jurnal + pengakuan bertahap, poin loyalitas) dan sudah dijanjikan di FAQ penghuni; yang ditambahkan adalah pintunya. Batas yang berlaku: **diblokir bila masih ada tagihan belum lunas**.
+- **KONSTANTA-TARIF — konstanta yang berlaku adalah tarif semester 5,7× dan tahunan 11× dari harga bulanan** (`pricing.helper.ts`); komentar di `prepay-extension.service.ts` yang menyebut 5,5× dan 10× **keliru dan harus diperbaiki**, bukan konstantanya yang diubah.
+- **PEMBULATAN-TOTAL — total tagihan prabayar dibulatkan** agar tidak menampilkan angka ganjil (contoh: 12 bulan dari Rp 12.099.996 menjadi Rp 12.100.000).
+- **KEBERSAMAAN-ENGAGEMENT — sejarah/timeline penghuni dan lama kebersamaan boleh ditampilkan**, termasuk manfaat harga lama beserta angkanya. Batas yang dilarang: kelangkaan palsu, hitung mundur di luar tenggat nyata, papan peringkat yang mempermalukan, notifikasi menakut-nakuti, dan menahan informasi untuk memaksa keputusan.
+- **SUARA-PEMBERITAHUAN — nada bahasa penghuni dinilai owner "sudah cukup baik"**: menyatakan keadaan tanpa menuduh, memisahkan uang muka dari deposit, dan menampilkan riwayat pemberitahuan.
+
+**Batas yang ditegaskan:** keputusan ini tidak mengubah nominal uang yang sudah berjalan, jurnal, permission, kontrak API, maupun schema. Implementasinya memerlukan task tersendiri karena menyentuh tarif dan uang (gate uang AGENTS §8). **Dokumen yang perlu ikut diperbarui:** [product/mode-cepat.md](product/mode-cepat.md) §14 (pembaruan), manual penghuni, dan komentar konstanta di `prepay-extension.service.ts`.
 
 ---
 

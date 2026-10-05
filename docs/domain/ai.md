@@ -747,6 +747,49 @@ model AiDraft {
 
 **Gate:** butuh approval owner eksplisit untuk schema S-6. Jangan implement G9 diam-diam.
 
+### G10 - Agenda Keputusan (Decision Agenda) — **keputusan arah sudah turun; implementasi belum**
+
+Ditambahkan 25 Sep 2026 mengikuti arah owner (lihat [KEPUTUSAN-OWNER](../KEPUTUSAN-OWNER.md) entri "2026-09-25 — Arah lapisan keputusan AI" dan rancangan di [product/portal-owner-admin.md](../product/portal-owner-admin.md) §10). **Belum diimplementasikan.**
+
+**Tujuan:** OWNER/ADMIN membuka aplikasi dan langsung melihat **3–5 kartu keputusan** yang sudah siap (kondisi, sebab, rekomendasi, dampak, satu tautan tindakan). Data lengkap tetap ada sebagai lapis `Data`, tidak lagi dipromosikan. AI menyusun; manusia memutuskan.
+
+**Kabar baik dari recon 25 Sep 2026:** sebagian besar bahannya sudah ada dan tidak perlu endpoint baru.
+
+| Kebutuhan | Sudah tersedia di |
+|---|---|
+| Endpoint brief dengan `priorityActions[]` berisi `title`, `reason`, `route`, `severity` | `POST /owner-ai/brief` + `prompts/brief.prompt.ts:17` |
+| Bentuk kartu + renderer + eksekutor tautan | `ActionQueueItem` + `ActionQueueTable.tsx:9-31,56-60` |
+| Dedupe kartu AI vs kartu rule | `utils/commandCenterDedup.ts:7-20` (`ruleId`/`dedupKey`) |
+| Papan alur ADMIN bernomor 0–5 | `AdminWorkLane` (`dashboardShared.tsx:42-53`) |
+| Skor kesehatan + sinyal keputusan OWNER | `useBusinessHealthScore`, `useOperationalStressIndex`, `extraSignals`/`ownerSignalRoute` |
+| Rumah simpanan hasil (G9) | `AiDraft` (`owner-ai/ai-draft.service.ts`, `ai-draft.controller.ts`) |
+| Fallback rule-based tiap fitur | `briefFallback`, `financeFallback`, `paymentFallback`, dll. |
+| Anti-halusinasi angka | snapshot builder → `stableHash` → prompt JSON → normalisasi allowlist → fallback |
+
+**Bentuk kartu:** `ActionQueueItem` + 5 field (`sebab`, `dampak`, `sourceRefs[]`, `expiresAt`, `fallback`). Kontrak rinci: [product/portal-owner-admin.md](../product/portal-owner-admin.md) §10.2.
+
+**Aturan yang wajib dijaga (tidak boleh dilanggar implementasi):**
+
+1. **Rute dari AI tidak boleh langsung dieksekusi.** `route` adalah string bebas dari LLM; wajib dipetakan lewat allowlist deterministik (pola `ownerSignalRoute`) sebelum `navigate`. Lihat temuan A-1 di [audit recon AI 25 Sep](../audit/ai-agenda-recon-2026-09-25.md).
+2. **AI tidak menulis data.** Pola aman §Pola Aman tetap berlaku; kartu berakhir di tautan, wizard, atau approve manusia.
+3. **Angka hanya dari snapshot.** AI tidak boleh membuat angka yang tidak ada di snapshot (`missingData` bila kurang).
+4. **Fallback wajib terlihat.** Kartu hasil rule-based ditandai `fallback: true`; halaman tidak boleh menampilkan galat saat AI mati/kuota habis.
+5. **Hemat token.** Agenda dihitung per (role, periode) dan disimpan; bukan per pembukaan halaman.
+
+**Benturan aturan — SELESAI, diputuskan owner 25 Sep 2026 (`CEPAT-AI-JADWAL`):**
+
+- §Pola Terlarang di file ini dan item 1 UAT Fase G ("Tombol AI tidak otomatis terpanggil saat halaman dibuka") **tetap berlaku apa adanya**: tidak ada pemanggilan AI pada peristiwa membuka halaman.
+- Keputusan owner: agenda dihitung **terjadwal 1× sehari** lalu **disimpan** ke antrean draft; halaman hanya membaca. Tombol "Perbarui agenda" tetap tersedia di luar jadwal. Karena tidak ada pemanggilan AI saat halaman dibuka, kedua aturan di atas tetap terpenuhi.
+- Batas yang ikut diputuskan: AI **hanya untuk OWNER** (ADMIN/STAFF/TENANT deterministik); biaya hanya ditampilkan ke OWNER dengan target **≤ Rp 50.000/bulan**; AI mati atau kuota habis → halaman tetap tampil penuh dengan kartu aturan. Rincian: [product/mode-cepat.md](../product/mode-cepat.md) §5–§6.
+- **Ketergantungan yang belum terbukti:** pemicu terjadwal yang benar-benar berjalan di produksi. Cron AutoOps masih terbuka di [STATUS](../STATUS.md) §3 dan keberadaan penjadwal internal **UNKNOWN**; verifikasi sebelum `AIDL-04`.
+
+**Gate:**
+
+- Tidak ada `navigate` ke rute yang tidak lolos allowlist.
+- Dengan `DEEPSEEK_API_KEY` kosong, provider gagal, atau kuota habis: kartu tetap tampil (fallback) tanpa galat.
+- Dua klik berturut tidak memanggil API dua kali (dedup in-flight sudah ada).
+- Tidak ada mutasi data dari jalur AI; semua aksi tetap lewat endpoint domain.
+
 ## UAT Global Fase G
 
 Semua task G wajib membuktikan:
