@@ -33,7 +33,7 @@ Dokumen dirapikan menjadi sedikit file utama tanpa penomoran M. Tabel ini menyeb
 | Aturan domain sebelum menyentuh uang/huni/harga | [ATURAN](ATURAN.md) — titik masuk; rincian per topik di `docs/domain/` |
 | Runbook deploy, produksi, dan go-live | [OPERASI](OPERASI.md) — titik masuk; rincian di `docs/operations/` |
 | Status audit, temuan, dan gate verifikasi | [AUDIT](AUDIT.md) — titik masuk; rincian di `docs/audit/` |
-| Peta kode sebelum mencari source | [PETA-KODE](PETA-KODE.md) · [audit-map](audit-map/README.md) · [alur lintas domain](audit-map/ALUR_LINTAS_DOMAIN.md) · [cara audit](audit-map/CARA_AUDIT.md) |
+| Peta kode sebelum mencari source | [PETA-KODE](PETA-KODE.md) · [audit-map](../.audit-map/README.md) · [alur lintas domain](../.audit-map/ALUR_LINTAS_DOMAIN.md) · [cara audit](../.audit-map/CARA_AUDIT.md) |
 
 ## 2. Domain (aturan bisnis)
 
@@ -81,7 +81,7 @@ Indeks dan status ringkasan audit: [audit/README.md](audit/README.md). Hasil aud
 | Audit 360° uang + huni + status temuan P1 | [audit/audit-uang-huni-2026-07.md](audit/audit-uang-huni-2026-07.md) — gabungan 3 berkas (DOCS-CLEANUP-1) |
 | Audit dokumentasi dan urutan kerja (termasuk catatan migrasi Tahap 2) | [audit/audit-2026-09.md](audit/audit-2026-09.md) |
 | Audit menyeluruh kode 30 Jul 2026 + audit modul pertama (frontend-auth) | [audit/audit-modul-2026.md](audit/audit-modul-2026.md) |
-| Peta hasil audit per cabang (generated) | [audit-map/](audit-map/README.md) |
+| Peta hasil audit per cabang (generated) | [audit-map/](../.audit-map/README.md) |
 | Lampiran audit portal tenant 2 Jul 2026 (bukti bulk) | [arsip/lampiran-audit-portal-tenant-2026-07-02.md](arsip/lampiran-audit-portal-tenant-2026-07-02.md) |
 
 ## 5. Riwayat

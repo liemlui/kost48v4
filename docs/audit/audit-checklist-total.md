@@ -3,13 +3,13 @@
 > **Tanggal:** 8 September 2026 (dibuat); hasil audit 11-18 September 2026.
 > **Status:** indeks cakupan aktif - 135 ID subkelompok (117 belum, 18 selesai diperiksa). Centang BE-002 diperbarui 24 Sep 2026 berdasarkan [audit ulang backend auth](backend-auth-2026-09-24.md). Addendum 25 Sep 2026: T6/T7 tertutup secara statis + unit (build + 12/12 test); agregat 117/18 **tidak** berubah karena itu indeks cakupan ID, bukan status temuan.
 > **Tujuan:** satu indeks cakupan audit total beserta tabel hasil/checkpoint, dengan tautan peta per unit.
-> **Rujukan:** [STATUS.md](../STATUS.md) (antrean/gate), [KEPUTUSAN-OWNER](../KEPUTUSAN-OWNER.md) (izin), [audit-map/README.md](../audit-map/README.md) (peta). Path lama `docs/CHECKLIST_AUDIT_TOTAL.md` sudah dihapus di Fase 3.
+> **Rujukan:** [STATUS.md](../STATUS.md) (antrean/gate), [KEPUTUSAN-OWNER](../KEPUTUSAN-OWNER.md) (izin), [audit-map/README.md](../../.audit-map/README.md) (peta). Path lama `docs/CHECKLIST_AUDIT_TOTAL.md` sudah dihapus di Fase 3.
 
 > Dipindah apa adanya dari `docs/CHECKLIST_AUDIT_TOTAL.md` (Tahap 3 batch B6, 23 Sep 2026) pada DOC-GOV-20260922.
 > Sifat: **indeks cakupan + bukti bertanggal**, bukan audit ulang. Teks tidak diubah; hanya tujuan tautan relatif di-rebase ke basis `docs/audit/` (142 tautan, termasuk 135 tautan peta per ID).
 > ID, arti centang, dan fragment `#catatan-hasil-dan-checkpoint`, `#pemilihan-model-dan-reasoning`, `#aset-statis-3` dipertahankan apa adanya.
 
-Checklist cakupan yang diminta owner, dibuat **8 September 2026**. Basis: peta lokal **135 subkelompok**; buka hanya bagian yang sedang dikerjakan. [Peta utama](../audit-map/README.md) | [Cara audit](../audit-map/CARA_AUDIT.md) | [Alur lintas domain](../audit-map/ALUR_LINTAS_DOMAIN.md).
+Checklist cakupan yang diminta owner, dibuat **8 September 2026**. Basis: peta lokal **135 subkelompok**; buka hanya bagian yang sedang dikerjakan. [Peta utama](../../.audit-map/README.md) | [Cara audit](../../.audit-map/CARA_AUDIT.md) | [Alur lintas domain](../../.audit-map/ALUR_LINTAS_DOMAIN.md).
 
 ## Cara memakai dan arti centang
 
@@ -82,179 +82,179 @@ Gunakan aspek yang relevan; tulis alasan jika tidak berlaku.
 | Pengujian | Setup/fixture, isolasi/mock, skenario negatif, assertion nyata, skip/false pass, target dan batas bukti |
 | Tooling/config | Input/target, urutan, exit/error, idempotensi, isi artefak, kompatibilitas konfigurasi serta pengecualian secret/data |
 
-Untuk database, gunakan [indeks schema](../audit-map/database/schema.md): catat unit seperti DB-001/Stay atau DB-001/Invoice pada tabel hasil. Kotak DB-001 baru selesai setelah cakupan model/enum dan migration direkonsiliasi. Metadata-only memerlukan inspeksi terarah; status tersebut bukan tanda selesai.
+Untuk database, gunakan [indeks schema](../../.audit-map/database/schema.md): catat unit seperti DB-001/Stay atau DB-001/Invoice pada tabel hasil. Kotak DB-001 baru selesai setelah cakupan model/enum dan migration direkonsiliasi. Metadata-only memerlukan inspeksi terarah; status tersebut bukan tanda selesai.
 
 ## Backend
 
 ### Infrastruktur (6)
 
-- [ ] **BE-001 - audit-log** - Pelaku, jejak perubahan, keterkaitan transaksi dan kerahasiaan log. [Peta](../audit-map/backend/infra/audit-log.md) Model: [**K4**](#model-k4).
-- [x] **BE-002 - auth** - Login, refresh/logout, token, kredensial dan perubahan sesi. Selesai audit ulang statis 2026-09-24; T6/T7 diverifikasi tertutup secara statis + unit lewat addendum 2026-09-25 (build + 12/12 test), interleaving DB dan runtime belum dibuktikan. [Laporan](backend-auth-2026-09-24.md) · [Peta](../audit-map/backend/infra/auth.md) Model: [**K4**](#model-k4).
-- [ ] **BE-003 - common** - Guard, validasi, error, config, util bisnis dan telemetri lintas modul. [Peta](../audit-map/backend/infra/common.md) Model: [**K4**](#model-k4).
-- [ ] **BE-004 - prisma** - Lifecycle koneksi/pool, transaksi dan shutdown. [Peta](../audit-map/backend/infra/prisma.md) Model: [**K4**](#model-k4).
-- [ ] **BE-005 - root** - Bootstrap, wiring modul, middleware, CORS, routing API/static dan upload. [Peta](../audit-map/backend/infra/root.md) Model: [**K4**](#model-k4).
-- [ ] **BE-006 - types** - Kontrak tipe bersama dan kesesuaian dengan data runtime. [Peta](../audit-map/backend/infra/types.md) Model: [**K2**](#model-k2).
+- [ ] **BE-001 - audit-log** - Pelaku, jejak perubahan, keterkaitan transaksi dan kerahasiaan log. [Peta](../../.audit-map/backend/infra/audit-log.md) Model: [**K4**](#model-k4).
+- [x] **BE-002 - auth** - Login, refresh/logout, token, kredensial dan perubahan sesi. Selesai audit ulang statis 2026-09-24; T6/T7 diverifikasi tertutup secara statis + unit lewat addendum 2026-09-25 (build + 12/12 test), interleaving DB dan runtime belum dibuktikan. [Laporan](backend-auth-2026-09-24.md) · [Peta](../../.audit-map/backend/infra/auth.md) Model: [**K4**](#model-k4).
+- [ ] **BE-003 - common** - Guard, validasi, error, config, util bisnis dan telemetri lintas modul. [Peta](../../.audit-map/backend/infra/common.md) Model: [**K4**](#model-k4).
+- [ ] **BE-004 - prisma** - Lifecycle koneksi/pool, transaksi dan shutdown. [Peta](../../.audit-map/backend/infra/prisma.md) Model: [**K4**](#model-k4).
+- [ ] **BE-005 - root** - Bootstrap, wiring modul, middleware, CORS, routing API/static dan upload. [Peta](../../.audit-map/backend/infra/root.md) Model: [**K4**](#model-k4).
+- [ ] **BE-006 - types** - Kontrak tipe bersama dan kesesuaian dengan data runtime. [Peta](../../.audit-map/backend/infra/types.md) Model: [**K2**](#model-k2).
 
 ### Modul bisnis (46)
 
-- [ ] **BE-007 - accounting** - Posting/reversal, jurnal seimbang, periode, saldo awal dan pengakuan pendapatan. [Peta](../audit-map/backend/modules/accounting.md) Model: [**K4**](#model-k4).
-- [ ] **BE-008 - additional-services** - Layanan tambahan, minat, harga, status dan hak akses. [Peta](../audit-map/backend/modules/additional-services.md) Model: [**K3**](#model-k3).
-- [ ] **BE-009 - admin** - Agregasi antrean Admin, prioritas tindakan dan scope data. [Peta](../audit-map/backend/modules/admin.md) Model: [**K3**](#model-k3).
-- [ ] **BE-010 - ai** - Aturan AI/cache, fallback dan hubungan dengan fitur AI aktif. [Peta](../audit-map/backend/modules/ai.md) Model: [**K3**](#model-k3).
-- [ ] **BE-011 - analytics** - Definisi metrik, filter, agregasi dan data kosong. [Peta](../audit-map/backend/modules/analytics.md) Model: [**K3**](#model-k3).
-- [ ] **BE-012 - ancillary-revenue** - Klasifikasi pendapatan tambahan dan rekonsiliasi. [Peta](../audit-map/backend/modules/ancillary-revenue.md) Model: [**K4**](#model-k4).
-- [ ] **BE-013 - announcements** - Penerima, jadwal, konten/gambar, dispatch dan penghapusan. [Peta](../audit-map/backend/modules/announcements.md) Model: [**K3**](#model-k3).
-- [ ] **BE-014 - assets** - Kapitalisasi, depresiasi, disposal dan jurnal aset. [Peta](../audit-map/backend/modules/assets.md) Model: [**K4**](#model-k4).
-- [ ] **BE-015 - auto-ops** - Flag efektif, pemicu, lock, setiap sweep, idempotensi dan cleanup. [Peta](../audit-map/backend/modules/auto-ops.md) Model: [**K4**](#model-k4).
-- [ ] **BE-016 - checkout-requests** - Pengajuan/persetujuan checkout, actor, kondisi status dan race. [Peta](../audit-map/backend/modules/checkout-requests.md) Model: [**K4**](#model-k4).
-- [ ] **BE-017 - deposit-ledger** - Saldo jaminan, settlement/refund, otorisasi dan atomisitas. [Peta](../audit-map/backend/modules/deposit-ledger.md) Model: [**K4**](#model-k4).
-- [ ] **BE-018 - expenses** - Validasi biaya, bukti, posting dan pembatalan. [Peta](../audit-map/backend/modules/expenses.md) Model: [**K4**](#model-k4).
-- [ ] **BE-019 - faqs** - Akses FAQ, isi panduan, seed yang sah dan empty state. [Peta](../audit-map/backend/modules/faqs.md) Model: [**K2**](#model-k2).
-- [ ] **BE-020 - finance** - Rumus KPI keuangan, periode, klasifikasi dan saldo awal/akhir. [Peta](../audit-map/backend/modules/finance.md) Model: [**K4**](#model-k4).
-- [ ] **BE-021 - guest-preferences** - Input preferensi, validasi, penyimpanan dan scope akses. [Peta](../audit-map/backend/modules/guest-preferences.md) Model: [**K3**](#model-k3).
-- [ ] **BE-022 - inventory-items** - Identitas barang, stok, filter dan perubahan data. [Peta](../audit-map/backend/modules/inventory-items.md) Model: [**K3**](#model-k3).
-- [ ] **BE-023 - inventory-movements** - ASSIGN/OUT/RETURN, stok dalam transaksi dan mutasi ganda. [Peta](../audit-map/backend/modules/inventory-movements.md) Model: [**K4**](#model-k4).
-- [ ] **BE-024 - invoice-payments** - Pencatatan pembayaran, nominal, jurnal dan pembatalan. [Peta](../audit-map/backend/modules/invoice-payments.md) Model: [**K4**](#model-k4).
-- [ ] **BE-025 - invoices** - Baris tagihan, total/diskon, jatuh tempo, status dan duplikasi. [Peta](../audit-map/backend/modules/invoices.md) Model: [**K4**](#model-k4).
-- [ ] **BE-026 - iot** - Ingest/provider, device ownership, counter/reset, refresh dan kondisi gagal. [Peta](../audit-map/backend/modules/iot.md) Model: [**K4**](#model-k4).
-- [ ] **BE-027 - loyalty** - Poin, reward, redemption, referral, privasi dan fitur disabled. [Peta](../audit-map/backend/modules/loyalty.md) Model: [**K3**](#model-k3).
-- [ ] **BE-028 - market-analysis** - Provider analisis, konteks data, biaya/kuota dan fallback. [Peta](../audit-map/backend/modules/market-analysis.md) Model: [**K3**](#model-k3).
-- [ ] **BE-029 - marketing** - Katalog publik, availability, foto/fasilitas dan filter. [Peta](../audit-map/backend/modules/marketing.md) Model: [**K3**](#model-k3).
-- [ ] **BE-030 - meter-readings** - Pembacaan awal/akhir, kalender WIB, quota dan batas periode. [Peta](../audit-map/backend/modules/meter-readings.md) Model: [**K4**](#model-k4).
-- [ ] **BE-031 - notifications** - Scope inbox, status baca, preview dan kondisi pengiriman. [Peta](../audit-map/backend/modules/notifications.md) Model: [**K3**](#model-k3).
-- [ ] **BE-032 - owner** - Agregasi Owner, konsistensi KPI dan scope data. [Peta](../audit-map/backend/modules/owner.md) Model: [**K3**](#model-k3).
-- [ ] **BE-033 - owner-ai** - Manual-only, kuota, konteks privat, draft dan approval manusia. [Peta](../audit-map/backend/modules/owner-ai.md) Model: [**K4**](#model-k4).
-- [ ] **BE-034 - payment-submissions** - Upload bukti, validasi nominal, review, duplikasi dan transaksi posting. [Peta](../audit-map/backend/modules/payment-submissions.md) Model: [**K4**](#model-k4).
-- [ ] **BE-035 - push** - Subscription/VAPID, penerima, retry dan kegagalan provider. [Peta](../audit-map/backend/modules/push.md) Model: [**K3**](#model-k3).
-- [ ] **BE-036 - renew-requests** - Term/tarif, batas waktu, DP/pelunasan, overlap dan approval. [Peta](../audit-map/backend/modules/renew-requests.md) Model: [**K4**](#model-k4).
-- [ ] **BE-037 - reports** - Definisi/filter laporan, angka lintas modul, pagination dan export. [Peta](../audit-map/backend/modules/reports.md) Model: [**K3**](#model-k3).
-- [ ] **BE-038 - room-items** - Relasi barang-kamar, fasilitas, stok terkait dan perubahan assignment. [Peta](../audit-map/backend/modules/room-items.md) Model: [**K4**](#model-k4).
-- [ ] **BE-039 - rooms** - Harga/deposit, fasilitas, status, availability dan scope perubahan. [Peta](../audit-map/backend/modules/rooms.md) Model: [**K3**](#model-k3).
-- [ ] **BE-040 - settings** - Hak ubah, nilai efektif DB/env, secret masking dan default. [Peta](../audit-map/backend/modules/settings.md) Model: [**K4**](#model-k4).
-- [ ] **BE-041 - staff-dashboard** - Agregasi tugas staf, scope actor dan data kosong. [Peta](../audit-map/backend/modules/staff-dashboard.md) Model: [**K3**](#model-k3).
-- [ ] **BE-042 - staff-field-reports** - Input laporan, bukti, kepemilikan dan perubahan status. [Peta](../audit-map/backend/modules/staff-field-reports.md) Model: [**K3**](#model-k3).
-- [ ] **BE-043 - staff-performance** - Definisi KPI, event, periode dan akses hasil. [Peta](../audit-map/backend/modules/staff-performance.md) Model: [**K3**](#model-k3).
-- [ ] **BE-044 - staff-routines** - Template, assignment, completion, jadwal dan duplikasi. [Peta](../audit-map/backend/modules/staff-routines.md) Model: [**K3**](#model-k3).
-- [ ] **BE-045 - stays** - Booking/check-in, promoted, renewal/prepay, transfer, checkout dan guard uang. [Peta](../audit-map/backend/modules/stays.md) Model: [**K4**](#model-k4).
-- [ ] **BE-046 - surveys** - Eligibility, input, duplikasi, hasil dan privasi. [Peta](../audit-map/backend/modules/surveys.md) Model: [**K3**](#model-k3).
-- [ ] **BE-047 - tenant-bookings** - Booking publik/tenant, validasi, availability dan race pembayaran. [Peta](../audit-map/backend/modules/tenant-bookings.md) Model: [**K4**](#model-k4).
-- [ ] **BE-048 - tenant-staff-reviews** - Eligibility, anonimitas/scope, duplikasi dan agregasi review. [Peta](../audit-map/backend/modules/tenant-staff-reviews.md) Model: [**K3**](#model-k3).
-- [ ] **BE-049 - tenants** - Data penghuni, KTP, portal access, ownership dan penghapusan. [Peta](../audit-map/backend/modules/tenants.md) Model: [**K4**](#model-k4).
-- [ ] **BE-050 - tickets** - Kategori, actor, assignment, status/SLA dan inspeksi checkout. [Peta](../audit-map/backend/modules/tickets.md) Model: [**K3**](#model-k3).
-- [ ] **BE-051 - users** - Role, aktivasi, perubahan akun, profil dan batas OWNER-only. [Peta](../audit-map/backend/modules/users.md) Model: [**K4**](#model-k4).
-- [ ] **BE-052 - wifi-sales** - Harga voucher, penjualan tenant/non-tenant dan pendapatan. [Peta](../audit-map/backend/modules/wifi-sales.md) Model: [**K4**](#model-k4).
+- [ ] **BE-007 - accounting** - Posting/reversal, jurnal seimbang, periode, saldo awal dan pengakuan pendapatan. [Peta](../../.audit-map/backend/modules/accounting.md) Model: [**K4**](#model-k4).
+- [ ] **BE-008 - additional-services** - Layanan tambahan, minat, harga, status dan hak akses. [Peta](../../.audit-map/backend/modules/additional-services.md) Model: [**K3**](#model-k3).
+- [ ] **BE-009 - admin** - Agregasi antrean Admin, prioritas tindakan dan scope data. [Peta](../../.audit-map/backend/modules/admin.md) Model: [**K3**](#model-k3).
+- [ ] **BE-010 - ai** - Aturan AI/cache, fallback dan hubungan dengan fitur AI aktif. [Peta](../../.audit-map/backend/modules/ai.md) Model: [**K3**](#model-k3).
+- [ ] **BE-011 - analytics** - Definisi metrik, filter, agregasi dan data kosong. [Peta](../../.audit-map/backend/modules/analytics.md) Model: [**K3**](#model-k3).
+- [ ] **BE-012 - ancillary-revenue** - Klasifikasi pendapatan tambahan dan rekonsiliasi. [Peta](../../.audit-map/backend/modules/ancillary-revenue.md) Model: [**K4**](#model-k4).
+- [ ] **BE-013 - announcements** - Penerima, jadwal, konten/gambar, dispatch dan penghapusan. [Peta](../../.audit-map/backend/modules/announcements.md) Model: [**K3**](#model-k3).
+- [ ] **BE-014 - assets** - Kapitalisasi, depresiasi, disposal dan jurnal aset. [Peta](../../.audit-map/backend/modules/assets.md) Model: [**K4**](#model-k4).
+- [ ] **BE-015 - auto-ops** - Flag efektif, pemicu, lock, setiap sweep, idempotensi dan cleanup. [Peta](../../.audit-map/backend/modules/auto-ops.md) Model: [**K4**](#model-k4).
+- [ ] **BE-016 - checkout-requests** - Pengajuan/persetujuan checkout, actor, kondisi status dan race. [Peta](../../.audit-map/backend/modules/checkout-requests.md) Model: [**K4**](#model-k4).
+- [ ] **BE-017 - deposit-ledger** - Saldo jaminan, settlement/refund, otorisasi dan atomisitas. [Peta](../../.audit-map/backend/modules/deposit-ledger.md) Model: [**K4**](#model-k4).
+- [ ] **BE-018 - expenses** - Validasi biaya, bukti, posting dan pembatalan. [Peta](../../.audit-map/backend/modules/expenses.md) Model: [**K4**](#model-k4).
+- [ ] **BE-019 - faqs** - Akses FAQ, isi panduan, seed yang sah dan empty state. [Peta](../../.audit-map/backend/modules/faqs.md) Model: [**K2**](#model-k2).
+- [ ] **BE-020 - finance** - Rumus KPI keuangan, periode, klasifikasi dan saldo awal/akhir. [Peta](../../.audit-map/backend/modules/finance.md) Model: [**K4**](#model-k4).
+- [ ] **BE-021 - guest-preferences** - Input preferensi, validasi, penyimpanan dan scope akses. [Peta](../../.audit-map/backend/modules/guest-preferences.md) Model: [**K3**](#model-k3).
+- [ ] **BE-022 - inventory-items** - Identitas barang, stok, filter dan perubahan data. [Peta](../../.audit-map/backend/modules/inventory-items.md) Model: [**K3**](#model-k3).
+- [ ] **BE-023 - inventory-movements** - ASSIGN/OUT/RETURN, stok dalam transaksi dan mutasi ganda. [Peta](../../.audit-map/backend/modules/inventory-movements.md) Model: [**K4**](#model-k4).
+- [ ] **BE-024 - invoice-payments** - Pencatatan pembayaran, nominal, jurnal dan pembatalan. [Peta](../../.audit-map/backend/modules/invoice-payments.md) Model: [**K4**](#model-k4).
+- [ ] **BE-025 - invoices** - Baris tagihan, total/diskon, jatuh tempo, status dan duplikasi. [Peta](../../.audit-map/backend/modules/invoices.md) Model: [**K4**](#model-k4).
+- [ ] **BE-026 - iot** - Ingest/provider, device ownership, counter/reset, refresh dan kondisi gagal. [Peta](../../.audit-map/backend/modules/iot.md) Model: [**K4**](#model-k4).
+- [ ] **BE-027 - loyalty** - Poin, reward, redemption, referral, privasi dan fitur disabled. [Peta](../../.audit-map/backend/modules/loyalty.md) Model: [**K3**](#model-k3).
+- [ ] **BE-028 - market-analysis** - Provider analisis, konteks data, biaya/kuota dan fallback. [Peta](../../.audit-map/backend/modules/market-analysis.md) Model: [**K3**](#model-k3).
+- [ ] **BE-029 - marketing** - Katalog publik, availability, foto/fasilitas dan filter. [Peta](../../.audit-map/backend/modules/marketing.md) Model: [**K3**](#model-k3).
+- [ ] **BE-030 - meter-readings** - Pembacaan awal/akhir, kalender WIB, quota dan batas periode. [Peta](../../.audit-map/backend/modules/meter-readings.md) Model: [**K4**](#model-k4).
+- [ ] **BE-031 - notifications** - Scope inbox, status baca, preview dan kondisi pengiriman. [Peta](../../.audit-map/backend/modules/notifications.md) Model: [**K3**](#model-k3).
+- [ ] **BE-032 - owner** - Agregasi Owner, konsistensi KPI dan scope data. [Peta](../../.audit-map/backend/modules/owner.md) Model: [**K3**](#model-k3).
+- [ ] **BE-033 - owner-ai** - Manual-only, kuota, konteks privat, draft dan approval manusia. [Peta](../../.audit-map/backend/modules/owner-ai.md) Model: [**K4**](#model-k4).
+- [ ] **BE-034 - payment-submissions** - Upload bukti, validasi nominal, review, duplikasi dan transaksi posting. [Peta](../../.audit-map/backend/modules/payment-submissions.md) Model: [**K4**](#model-k4).
+- [ ] **BE-035 - push** - Subscription/VAPID, penerima, retry dan kegagalan provider. [Peta](../../.audit-map/backend/modules/push.md) Model: [**K3**](#model-k3).
+- [ ] **BE-036 - renew-requests** - Term/tarif, batas waktu, DP/pelunasan, overlap dan approval. [Peta](../../.audit-map/backend/modules/renew-requests.md) Model: [**K4**](#model-k4).
+- [ ] **BE-037 - reports** - Definisi/filter laporan, angka lintas modul, pagination dan export. [Peta](../../.audit-map/backend/modules/reports.md) Model: [**K3**](#model-k3).
+- [ ] **BE-038 - room-items** - Relasi barang-kamar, fasilitas, stok terkait dan perubahan assignment. [Peta](../../.audit-map/backend/modules/room-items.md) Model: [**K4**](#model-k4).
+- [ ] **BE-039 - rooms** - Harga/deposit, fasilitas, status, availability dan scope perubahan. [Peta](../../.audit-map/backend/modules/rooms.md) Model: [**K3**](#model-k3).
+- [ ] **BE-040 - settings** - Hak ubah, nilai efektif DB/env, secret masking dan default. [Peta](../../.audit-map/backend/modules/settings.md) Model: [**K4**](#model-k4).
+- [ ] **BE-041 - staff-dashboard** - Agregasi tugas staf, scope actor dan data kosong. [Peta](../../.audit-map/backend/modules/staff-dashboard.md) Model: [**K3**](#model-k3).
+- [ ] **BE-042 - staff-field-reports** - Input laporan, bukti, kepemilikan dan perubahan status. [Peta](../../.audit-map/backend/modules/staff-field-reports.md) Model: [**K3**](#model-k3).
+- [ ] **BE-043 - staff-performance** - Definisi KPI, event, periode dan akses hasil. [Peta](../../.audit-map/backend/modules/staff-performance.md) Model: [**K3**](#model-k3).
+- [ ] **BE-044 - staff-routines** - Template, assignment, completion, jadwal dan duplikasi. [Peta](../../.audit-map/backend/modules/staff-routines.md) Model: [**K3**](#model-k3).
+- [ ] **BE-045 - stays** - Booking/check-in, promoted, renewal/prepay, transfer, checkout dan guard uang. [Peta](../../.audit-map/backend/modules/stays.md) Model: [**K4**](#model-k4).
+- [ ] **BE-046 - surveys** - Eligibility, input, duplikasi, hasil dan privasi. [Peta](../../.audit-map/backend/modules/surveys.md) Model: [**K3**](#model-k3).
+- [ ] **BE-047 - tenant-bookings** - Booking publik/tenant, validasi, availability dan race pembayaran. [Peta](../../.audit-map/backend/modules/tenant-bookings.md) Model: [**K4**](#model-k4).
+- [ ] **BE-048 - tenant-staff-reviews** - Eligibility, anonimitas/scope, duplikasi dan agregasi review. [Peta](../../.audit-map/backend/modules/tenant-staff-reviews.md) Model: [**K3**](#model-k3).
+- [ ] **BE-049 - tenants** - Data penghuni, KTP, portal access, ownership dan penghapusan. [Peta](../../.audit-map/backend/modules/tenants.md) Model: [**K4**](#model-k4).
+- [ ] **BE-050 - tickets** - Kategori, actor, assignment, status/SLA dan inspeksi checkout. [Peta](../../.audit-map/backend/modules/tickets.md) Model: [**K3**](#model-k3).
+- [ ] **BE-051 - users** - Role, aktivasi, perubahan akun, profil dan batas OWNER-only. [Peta](../../.audit-map/backend/modules/users.md) Model: [**K4**](#model-k4).
+- [ ] **BE-052 - wifi-sales** - Harga voucher, penjualan tenant/non-tenant dan pendapatan. [Peta](../../.audit-map/backend/modules/wifi-sales.md) Model: [**K4**](#model-k4).
 
 ## Frontend
 
 ### Halaman (27: 26 folder fitur + file pages tingkat root)
 
-- [x] **FE-001 - admin** - Halaman admin: alur pengguna, state, akses dan interaksi. Selesai 2026-09-17 (K3) + verifikasi lanjutan (bukti visual & test) — lihat tabel hasil. [Peta](../audit-map/frontend/pages/admin.md) Model: [**K3**](#model-k3).
-- [x] **FE-002 - auth** - Halaman auth: alur pengguna, state, akses dan interaksi. Selesai 2026-09-18 (K4) — lihat tabel hasil. [Peta](../audit-map/frontend/pages/auth.md) Model: [**K4**](#model-k4).
-- [x] **FE-003 - bookings** - Halaman bookings: alur pengguna, state, akses dan interaksi. Selesai 2026-09-18 (K4) — lihat tabel hasil. **Tindak lanjut 2026-09-18:** dua temuan TINGGI diperbaiki (T1 payload form tamu & validasi kontak; T2 predikat review booking portal) — verifikasi: backend `tsc`/build/unit 96/96, frontend `tsc -b`/build, vitest 34 file 161 test, audit kontrak `class-validator` semua ekspektasi terpenuhi; deployment & UAT belum. [Peta](../audit-map/frontend/pages/bookings.md) Model: [**K4**](#model-k4).
-- [ ] **FE-004 - dashboard** - Halaman dashboard: alur pengguna, state, akses dan interaksi. [Peta](../audit-map/frontend/pages/dashboard.md) Model: [**K3**](#model-k3).
-- [ ] **FE-005 - finance** - Halaman finance: alur pengguna, state, akses dan interaksi. [Peta](../audit-map/frontend/pages/finance.md) Model: [**K4**](#model-k4).
-- [ ] **FE-006 - invoices** - Halaman invoices: alur pengguna, state, akses dan interaksi. [Peta](../audit-map/frontend/pages/invoices.md) Model: [**K4**](#model-k4).
-- [ ] **FE-007 - iot** - Halaman iot: alur pengguna, state, akses dan interaksi. [Peta](../audit-map/frontend/pages/iot.md) Model: [**K3**](#model-k3).
-- [ ] **FE-008 - loyalty** - Halaman loyalty: alur pengguna, state, akses dan interaksi. [Peta](../audit-map/frontend/pages/loyalty.md) Model: [**K3**](#model-k3).
-- [ ] **FE-009 - marketing** - Halaman marketing: alur pengguna, state, akses dan interaksi. [Peta](../audit-map/frontend/pages/marketing.md) Model: [**K3**](#model-k3).
-- [ ] **FE-010 - notifications** - Halaman notifications: alur pengguna, state, akses dan interaksi. [Peta](../audit-map/frontend/pages/notifications.md) Model: [**K2**](#model-k2).
-- [ ] **FE-011 - operations** - Halaman operations: alur pengguna, state, akses dan interaksi. [Peta](../audit-map/frontend/pages/operations.md) Model: [**K3**](#model-k3).
-- [ ] **FE-012 - payments** - Halaman payments: alur pengguna, state, akses dan interaksi. [Peta](../audit-map/frontend/pages/payments.md) Model: [**K4**](#model-k4).
-- [ ] **FE-013 - portal** - Halaman portal: alur pengguna, state, akses dan interaksi. [Peta](../audit-map/frontend/pages/portal.md) Model: [**K4**](#model-k4).
-- [ ] **FE-014 - profile** - Halaman profile: alur pengguna, state, akses dan interaksi. [Peta](../audit-map/frontend/pages/profile.md) Model: [**K2**](#model-k2).
-- [ ] **FE-015 - public** - Halaman public: alur pengguna, state, akses dan interaksi. [Peta](../audit-map/frontend/pages/public.md) Model: [**K3**](#model-k3).
-- [ ] **FE-016 - reminders** - Halaman reminders: alur pengguna, state, akses dan interaksi. [Peta](../audit-map/frontend/pages/reminders.md) Model: [**K3**](#model-k3).
-- [ ] **FE-017 - renew-requests** - Halaman renew-requests: alur pengguna, state, akses dan interaksi. [Peta](../audit-map/frontend/pages/renew-requests.md) Model: [**K4**](#model-k4).
-- [ ] **FE-018 - reports** - Halaman reports: alur pengguna, state, akses dan interaksi. [Peta](../audit-map/frontend/pages/reports.md) Model: [**K3**](#model-k3).
-- [ ] **FE-019 - resources** - Halaman resources: alur pengguna, state, akses dan interaksi. [Peta](../audit-map/frontend/pages/resources.md) Model: [**K3**](#model-k3).
-- [ ] **FE-020 - rooms** - Halaman rooms: alur pengguna, state, akses dan interaksi. [Peta](../audit-map/frontend/pages/rooms.md) Model: [**K3**](#model-k3).
-- [ ] **FE-021 - root** - Halaman root: alur pengguna, state, akses dan interaksi. [Peta](../audit-map/frontend/pages/root.md) Model: [**K2**](#model-k2).
-- [ ] **FE-022 - services** - Halaman services: alur pengguna, state, akses dan interaksi. [Peta](../audit-map/frontend/pages/services.md) Model: [**K3**](#model-k3).
-- [ ] **FE-023 - settings** - Halaman settings: alur pengguna, state, akses dan interaksi. [Peta](../audit-map/frontend/pages/settings.md) Model: [**K4**](#model-k4).
-- [ ] **FE-024 - staff** - Halaman staff: alur pengguna, state, akses dan interaksi. [Peta](../audit-map/frontend/pages/staff.md) Model: [**K3**](#model-k3).
-- [ ] **FE-025 - staff-routines** - Halaman staff-routines: alur pengguna, state, akses dan interaksi. [Peta](../audit-map/frontend/pages/staff-routines.md) Model: [**K3**](#model-k3).
-- [ ] **FE-026 - stays** - Halaman stays: alur pengguna, state, akses dan interaksi. [Peta](../audit-map/frontend/pages/stays.md) Model: [**K4**](#model-k4).
-- [ ] **FE-027 - tickets** - Halaman tickets: alur pengguna, state, akses dan interaksi. [Peta](../audit-map/frontend/pages/tickets.md) Model: [**K3**](#model-k3).
+- [x] **FE-001 - admin** - Halaman admin: alur pengguna, state, akses dan interaksi. Selesai 2026-09-17 (K3) + verifikasi lanjutan (bukti visual & test) — lihat tabel hasil. [Peta](../../.audit-map/frontend/pages/admin.md) Model: [**K3**](#model-k3).
+- [x] **FE-002 - auth** - Halaman auth: alur pengguna, state, akses dan interaksi. Selesai 2026-09-18 (K4) — lihat tabel hasil. [Peta](../../.audit-map/frontend/pages/auth.md) Model: [**K4**](#model-k4).
+- [x] **FE-003 - bookings** - Halaman bookings: alur pengguna, state, akses dan interaksi. Selesai 2026-09-18 (K4) — lihat tabel hasil. **Tindak lanjut 2026-09-18:** dua temuan TINGGI diperbaiki (T1 payload form tamu & validasi kontak; T2 predikat review booking portal) — verifikasi: backend `tsc`/build/unit 96/96, frontend `tsc -b`/build, vitest 34 file 161 test, audit kontrak `class-validator` semua ekspektasi terpenuhi; deployment & UAT belum. [Peta](../../.audit-map/frontend/pages/bookings.md) Model: [**K4**](#model-k4).
+- [ ] **FE-004 - dashboard** - Halaman dashboard: alur pengguna, state, akses dan interaksi. [Peta](../../.audit-map/frontend/pages/dashboard.md) Model: [**K3**](#model-k3).
+- [ ] **FE-005 - finance** - Halaman finance: alur pengguna, state, akses dan interaksi. [Peta](../../.audit-map/frontend/pages/finance.md) Model: [**K4**](#model-k4).
+- [ ] **FE-006 - invoices** - Halaman invoices: alur pengguna, state, akses dan interaksi. [Peta](../../.audit-map/frontend/pages/invoices.md) Model: [**K4**](#model-k4).
+- [ ] **FE-007 - iot** - Halaman iot: alur pengguna, state, akses dan interaksi. [Peta](../../.audit-map/frontend/pages/iot.md) Model: [**K3**](#model-k3).
+- [ ] **FE-008 - loyalty** - Halaman loyalty: alur pengguna, state, akses dan interaksi. [Peta](../../.audit-map/frontend/pages/loyalty.md) Model: [**K3**](#model-k3).
+- [ ] **FE-009 - marketing** - Halaman marketing: alur pengguna, state, akses dan interaksi. [Peta](../../.audit-map/frontend/pages/marketing.md) Model: [**K3**](#model-k3).
+- [ ] **FE-010 - notifications** - Halaman notifications: alur pengguna, state, akses dan interaksi. [Peta](../../.audit-map/frontend/pages/notifications.md) Model: [**K2**](#model-k2).
+- [ ] **FE-011 - operations** - Halaman operations: alur pengguna, state, akses dan interaksi. [Peta](../../.audit-map/frontend/pages/operations.md) Model: [**K3**](#model-k3).
+- [ ] **FE-012 - payments** - Halaman payments: alur pengguna, state, akses dan interaksi. [Peta](../../.audit-map/frontend/pages/payments.md) Model: [**K4**](#model-k4).
+- [ ] **FE-013 - portal** - Halaman portal: alur pengguna, state, akses dan interaksi. [Peta](../../.audit-map/frontend/pages/portal.md) Model: [**K4**](#model-k4).
+- [ ] **FE-014 - profile** - Halaman profile: alur pengguna, state, akses dan interaksi. [Peta](../../.audit-map/frontend/pages/profile.md) Model: [**K2**](#model-k2).
+- [ ] **FE-015 - public** - Halaman public: alur pengguna, state, akses dan interaksi. [Peta](../../.audit-map/frontend/pages/public.md) Model: [**K3**](#model-k3).
+- [ ] **FE-016 - reminders** - Halaman reminders: alur pengguna, state, akses dan interaksi. [Peta](../../.audit-map/frontend/pages/reminders.md) Model: [**K3**](#model-k3).
+- [ ] **FE-017 - renew-requests** - Halaman renew-requests: alur pengguna, state, akses dan interaksi. [Peta](../../.audit-map/frontend/pages/renew-requests.md) Model: [**K4**](#model-k4).
+- [ ] **FE-018 - reports** - Halaman reports: alur pengguna, state, akses dan interaksi. [Peta](../../.audit-map/frontend/pages/reports.md) Model: [**K3**](#model-k3).
+- [ ] **FE-019 - resources** - Halaman resources: alur pengguna, state, akses dan interaksi. [Peta](../../.audit-map/frontend/pages/resources.md) Model: [**K3**](#model-k3).
+- [ ] **FE-020 - rooms** - Halaman rooms: alur pengguna, state, akses dan interaksi. [Peta](../../.audit-map/frontend/pages/rooms.md) Model: [**K3**](#model-k3).
+- [ ] **FE-021 - root** - Halaman root: alur pengguna, state, akses dan interaksi. [Peta](../../.audit-map/frontend/pages/root.md) Model: [**K2**](#model-k2).
+- [ ] **FE-022 - services** - Halaman services: alur pengguna, state, akses dan interaksi. [Peta](../../.audit-map/frontend/pages/services.md) Model: [**K3**](#model-k3).
+- [ ] **FE-023 - settings** - Halaman settings: alur pengguna, state, akses dan interaksi. [Peta](../../.audit-map/frontend/pages/settings.md) Model: [**K4**](#model-k4).
+- [ ] **FE-024 - staff** - Halaman staff: alur pengguna, state, akses dan interaksi. [Peta](../../.audit-map/frontend/pages/staff.md) Model: [**K3**](#model-k3).
+- [ ] **FE-025 - staff-routines** - Halaman staff-routines: alur pengguna, state, akses dan interaksi. [Peta](../../.audit-map/frontend/pages/staff-routines.md) Model: [**K3**](#model-k3).
+- [ ] **FE-026 - stays** - Halaman stays: alur pengguna, state, akses dan interaksi. [Peta](../../.audit-map/frontend/pages/stays.md) Model: [**K4**](#model-k4).
+- [ ] **FE-027 - tickets** - Halaman tickets: alur pengguna, state, akses dan interaksi. [Peta](../../.audit-map/frontend/pages/tickets.md) Model: [**K3**](#model-k3).
 
 ### Komponen (26)
 
-- [ ] **FE-028 - accounting** - Komponen accounting: kontrak props/data, interaksi, state dan pemakai lintas halaman. [Peta](../audit-map/frontend/components/accounting.md) Model: [**K4**](#model-k4).
-- [ ] **FE-029 - admin** - Komponen admin: kontrak props/data, interaksi, state dan pemakai lintas halaman. [Peta](../audit-map/frontend/components/admin.md) Model: [**K3**](#model-k3).
-- [ ] **FE-030 - ai** - Komponen ai: kontrak props/data, interaksi, state dan pemakai lintas halaman. [Peta](../audit-map/frontend/components/ai.md) Model: [**K3**](#model-k3).
-- [ ] **FE-031 - auto-ops** - Komponen auto-ops: kontrak props/data, interaksi, state dan pemakai lintas halaman. [Peta](../audit-map/frontend/components/auto-ops.md) Model: [**K4**](#model-k4).
-- [ ] **FE-032 - charts** - Komponen charts: kontrak props/data, interaksi, state dan pemakai lintas halaman. [Peta](../audit-map/frontend/components/charts.md) Model: [**K3**](#model-k3).
-- [ ] **FE-033 - checkout-requests** - Komponen checkout-requests: kontrak props/data, interaksi, state dan pemakai lintas halaman. [Peta](../audit-map/frontend/components/checkout-requests.md) Model: [**K4**](#model-k4).
-- [ ] **FE-034 - command-center** - Komponen command-center: kontrak props/data, interaksi, state dan pemakai lintas halaman. [Peta](../audit-map/frontend/components/command-center.md) Model: [**K3**](#model-k3).
-- [ ] **FE-035 - common** - Komponen common: kontrak props/data, interaksi, state dan pemakai lintas halaman. [Peta](../audit-map/frontend/components/common.md) Model: [**K2**](#model-k2).
-- [ ] **FE-036 - deposit** - Komponen deposit: kontrak props/data, interaksi, state dan pemakai lintas halaman. [Peta](../audit-map/frontend/components/deposit.md) Model: [**K4**](#model-k4).
-- [ ] **FE-037 - expenses** - Komponen expenses: kontrak props/data, interaksi, state dan pemakai lintas halaman. [Peta](../audit-map/frontend/components/expenses.md) Model: [**K4**](#model-k4).
-- [ ] **FE-038 - inventory** - Komponen inventory: kontrak props/data, interaksi, state dan pemakai lintas halaman. [Peta](../audit-map/frontend/components/inventory.md) Model: [**K3**](#model-k3).
-- [ ] **FE-039 - layout** - Komponen layout: kontrak props/data, interaksi, state dan pemakai lintas halaman. [Peta](../audit-map/frontend/components/layout.md) Model: [**K3**](#model-k3).
-- [ ] **FE-040 - notifications** - Komponen notifications: kontrak props/data, interaksi, state dan pemakai lintas halaman. [Peta](../audit-map/frontend/components/notifications.md) Model: [**K2**](#model-k2).
-- [ ] **FE-041 - payment-urgency** - Komponen payment-urgency: kontrak props/data, interaksi, state dan pemakai lintas halaman. [Peta](../audit-map/frontend/components/payment-urgency.md) Model: [**K3**](#model-k3).
-- [ ] **FE-042 - payments** - Komponen payments: kontrak props/data, interaksi, state dan pemakai lintas halaman. [Peta](../audit-map/frontend/components/payments.md) Model: [**K4**](#model-k4).
-- [ ] **FE-043 - portal** - Komponen portal: kontrak props/data, interaksi, state dan pemakai lintas halaman. [Peta](../audit-map/frontend/components/portal.md) Model: [**K4**](#model-k4).
-- [ ] **FE-044 - public** - Komponen public: kontrak props/data, interaksi, state dan pemakai lintas halaman. [Peta](../audit-map/frontend/components/public.md) Model: [**K2**](#model-k2).
-- [ ] **FE-045 - pwa** - Komponen pwa: kontrak props/data, interaksi, state dan pemakai lintas halaman. [Peta](../audit-map/frontend/components/pwa.md) Model: [**K3**](#model-k3).
-- [ ] **FE-046 - reports** - Komponen reports: kontrak props/data, interaksi, state dan pemakai lintas halaman. [Peta](../audit-map/frontend/components/reports.md) Model: [**K3**](#model-k3).
-- [ ] **FE-047 - resources** - Komponen resources: kontrak props/data, interaksi, state dan pemakai lintas halaman. [Peta](../audit-map/frontend/components/resources.md) Model: [**K3**](#model-k3).
-- [ ] **FE-048 - rooms** - Komponen rooms: kontrak props/data, interaksi, state dan pemakai lintas halaman. [Peta](../audit-map/frontend/components/rooms.md) Model: [**K3**](#model-k3).
-- [ ] **FE-049 - settings** - Komponen settings: kontrak props/data, interaksi, state dan pemakai lintas halaman. [Peta](../audit-map/frontend/components/settings.md) Model: [**K4**](#model-k4).
-- [ ] **FE-050 - staff** - Komponen staff: kontrak props/data, interaksi, state dan pemakai lintas halaman. [Peta](../audit-map/frontend/components/staff.md) Model: [**K3**](#model-k3).
-- [ ] **FE-051 - stays** - Komponen stays: kontrak props/data, interaksi, state dan pemakai lintas halaman. [Peta](../audit-map/frontend/components/stays.md) Model: [**K4**](#model-k4).
-- [ ] **FE-052 - tenant** - Komponen tenant: kontrak props/data, interaksi, state dan pemakai lintas halaman. [Peta](../audit-map/frontend/components/tenant.md) Model: [**K4**](#model-k4).
-- [ ] **FE-053 - workspace** - Komponen workspace: kontrak props/data, interaksi, state dan pemakai lintas halaman. [Peta](../audit-map/frontend/components/workspace.md) Model: [**K3**](#model-k3).
+- [ ] **FE-028 - accounting** - Komponen accounting: kontrak props/data, interaksi, state dan pemakai lintas halaman. [Peta](../../.audit-map/frontend/components/accounting.md) Model: [**K4**](#model-k4).
+- [ ] **FE-029 - admin** - Komponen admin: kontrak props/data, interaksi, state dan pemakai lintas halaman. [Peta](../../.audit-map/frontend/components/admin.md) Model: [**K3**](#model-k3).
+- [ ] **FE-030 - ai** - Komponen ai: kontrak props/data, interaksi, state dan pemakai lintas halaman. [Peta](../../.audit-map/frontend/components/ai.md) Model: [**K3**](#model-k3).
+- [ ] **FE-031 - auto-ops** - Komponen auto-ops: kontrak props/data, interaksi, state dan pemakai lintas halaman. [Peta](../../.audit-map/frontend/components/auto-ops.md) Model: [**K4**](#model-k4).
+- [ ] **FE-032 - charts** - Komponen charts: kontrak props/data, interaksi, state dan pemakai lintas halaman. [Peta](../../.audit-map/frontend/components/charts.md) Model: [**K3**](#model-k3).
+- [ ] **FE-033 - checkout-requests** - Komponen checkout-requests: kontrak props/data, interaksi, state dan pemakai lintas halaman. [Peta](../../.audit-map/frontend/components/checkout-requests.md) Model: [**K4**](#model-k4).
+- [ ] **FE-034 - command-center** - Komponen command-center: kontrak props/data, interaksi, state dan pemakai lintas halaman. [Peta](../../.audit-map/frontend/components/command-center.md) Model: [**K3**](#model-k3).
+- [ ] **FE-035 - common** - Komponen common: kontrak props/data, interaksi, state dan pemakai lintas halaman. [Peta](../../.audit-map/frontend/components/common.md) Model: [**K2**](#model-k2).
+- [ ] **FE-036 - deposit** - Komponen deposit: kontrak props/data, interaksi, state dan pemakai lintas halaman. [Peta](../../.audit-map/frontend/components/deposit.md) Model: [**K4**](#model-k4).
+- [ ] **FE-037 - expenses** - Komponen expenses: kontrak props/data, interaksi, state dan pemakai lintas halaman. [Peta](../../.audit-map/frontend/components/expenses.md) Model: [**K4**](#model-k4).
+- [ ] **FE-038 - inventory** - Komponen inventory: kontrak props/data, interaksi, state dan pemakai lintas halaman. [Peta](../../.audit-map/frontend/components/inventory.md) Model: [**K3**](#model-k3).
+- [ ] **FE-039 - layout** - Komponen layout: kontrak props/data, interaksi, state dan pemakai lintas halaman. [Peta](../../.audit-map/frontend/components/layout.md) Model: [**K3**](#model-k3).
+- [ ] **FE-040 - notifications** - Komponen notifications: kontrak props/data, interaksi, state dan pemakai lintas halaman. [Peta](../../.audit-map/frontend/components/notifications.md) Model: [**K2**](#model-k2).
+- [ ] **FE-041 - payment-urgency** - Komponen payment-urgency: kontrak props/data, interaksi, state dan pemakai lintas halaman. [Peta](../../.audit-map/frontend/components/payment-urgency.md) Model: [**K3**](#model-k3).
+- [ ] **FE-042 - payments** - Komponen payments: kontrak props/data, interaksi, state dan pemakai lintas halaman. [Peta](../../.audit-map/frontend/components/payments.md) Model: [**K4**](#model-k4).
+- [ ] **FE-043 - portal** - Komponen portal: kontrak props/data, interaksi, state dan pemakai lintas halaman. [Peta](../../.audit-map/frontend/components/portal.md) Model: [**K4**](#model-k4).
+- [ ] **FE-044 - public** - Komponen public: kontrak props/data, interaksi, state dan pemakai lintas halaman. [Peta](../../.audit-map/frontend/components/public.md) Model: [**K2**](#model-k2).
+- [ ] **FE-045 - pwa** - Komponen pwa: kontrak props/data, interaksi, state dan pemakai lintas halaman. [Peta](../../.audit-map/frontend/components/pwa.md) Model: [**K3**](#model-k3).
+- [ ] **FE-046 - reports** - Komponen reports: kontrak props/data, interaksi, state dan pemakai lintas halaman. [Peta](../../.audit-map/frontend/components/reports.md) Model: [**K3**](#model-k3).
+- [ ] **FE-047 - resources** - Komponen resources: kontrak props/data, interaksi, state dan pemakai lintas halaman. [Peta](../../.audit-map/frontend/components/resources.md) Model: [**K3**](#model-k3).
+- [ ] **FE-048 - rooms** - Komponen rooms: kontrak props/data, interaksi, state dan pemakai lintas halaman. [Peta](../../.audit-map/frontend/components/rooms.md) Model: [**K3**](#model-k3).
+- [ ] **FE-049 - settings** - Komponen settings: kontrak props/data, interaksi, state dan pemakai lintas halaman. [Peta](../../.audit-map/frontend/components/settings.md) Model: [**K4**](#model-k4).
+- [ ] **FE-050 - staff** - Komponen staff: kontrak props/data, interaksi, state dan pemakai lintas halaman. [Peta](../../.audit-map/frontend/components/staff.md) Model: [**K3**](#model-k3).
+- [ ] **FE-051 - stays** - Komponen stays: kontrak props/data, interaksi, state dan pemakai lintas halaman. [Peta](../../.audit-map/frontend/components/stays.md) Model: [**K4**](#model-k4).
+- [ ] **FE-052 - tenant** - Komponen tenant: kontrak props/data, interaksi, state dan pemakai lintas halaman. [Peta](../../.audit-map/frontend/components/tenant.md) Model: [**K4**](#model-k4).
+- [ ] **FE-053 - workspace** - Komponen workspace: kontrak props/data, interaksi, state dan pemakai lintas halaman. [Peta](../../.audit-map/frontend/components/workspace.md) Model: [**K3**](#model-k3).
 
 ### Pendukung bersama (11)
 
-- [x] **FE-054 - api** - Kontrak endpoint, payload/response, auth, error dan invalidasi. Selesai 2026-09-17 (K4) — lihat tabel hasil. [Peta](../audit-map/frontend/shared/api.md) Model: [**K4**](#model-k4).
-- [x] **FE-055 - config** - Route/navigation, label, resource config dan version contract. Selesai 2026-09-17 (K3) — lihat tabel hasil. [Peta](../audit-map/frontend/shared/config.md) Model: [**K3**](#model-k3).
-- [x] **FE-056 - constants** - Nilai bersama dan konsistensi aturan tampilan. Selesai 2026-09-17 (K2) — lihat tabel hasil. [Peta](../audit-map/frontend/shared/constants.md) Model: [**K2**](#model-k2).
-- [x] **FE-057 - context** - Session/state global, lifecycle provider dan stale state. Selesai 2026-09-17 (K4) — lihat tabel hasil. [Peta](../audit-map/frontend/shared/context.md) Model: [**K4**](#model-k4).
-- [x] **FE-058 - data** - Sumber data statis/fixture, relevansi dan privasi. Selesai 2026-09-17 (K3). [Peta](../audit-map/frontend/shared/data.md) Model: [**K3**](#model-k3).
-- [x] **FE-059 - hooks** - Query/mutation, lifecycle, hook-order, loading/error dan cleanup. Selesai 2026-09-17 (K3) — lihat tabel hasil. [Peta](../audit-map/frontend/shared/hooks.md) Model: [**K3**](#model-k3).
-- [x] **FE-060 - lib** - Adapter/library wrapper, konfigurasi dan penanganan error. Selesai 2026-09-17 (K3) — lihat tabel hasil. [Peta](../audit-map/frontend/shared/lib.md) Model: [**K3**](#model-k3).
-- [x] **FE-061 - root** - Entry React, App/route guard, stylesheet entry dan PWA boundary. Selesai 2026-09-17 (K4) — lihat tabel hasil. [Peta](../audit-map/frontend/shared/root.md) Model: [**K4**](#model-k4).
-- [x] **FE-062 - styles** - Token, kontras, responsivitas, fokus dan konsistensi lintas portal. Selesai 2026-09-17 (K2) — lihat tabel hasil. [Peta](../audit-map/frontend/shared/styles.md) Model: [**K2**](#model-k2).
-- [x] **FE-063 - types** - Kontrak tipe FE terhadap payload API dan nullability. Selesai 2026-09-17 (K2) — lihat tabel hasil. [Peta](../audit-map/frontend/shared/types.md) Model: [**K2**](#model-k2).
-- [x] **FE-064 - utils** - Format uang/tanggal, normalisasi, edge case dan helper tampilan. Selesai 2026-09-17 (K3) — lihat tabel hasil. [Peta](../audit-map/frontend/shared/utils.md) Model: [**K3**](#model-k3).
+- [x] **FE-054 - api** - Kontrak endpoint, payload/response, auth, error dan invalidasi. Selesai 2026-09-17 (K4) — lihat tabel hasil. [Peta](../../.audit-map/frontend/shared/api.md) Model: [**K4**](#model-k4).
+- [x] **FE-055 - config** - Route/navigation, label, resource config dan version contract. Selesai 2026-09-17 (K3) — lihat tabel hasil. [Peta](../../.audit-map/frontend/shared/config.md) Model: [**K3**](#model-k3).
+- [x] **FE-056 - constants** - Nilai bersama dan konsistensi aturan tampilan. Selesai 2026-09-17 (K2) — lihat tabel hasil. [Peta](../../.audit-map/frontend/shared/constants.md) Model: [**K2**](#model-k2).
+- [x] **FE-057 - context** - Session/state global, lifecycle provider dan stale state. Selesai 2026-09-17 (K4) — lihat tabel hasil. [Peta](../../.audit-map/frontend/shared/context.md) Model: [**K4**](#model-k4).
+- [x] **FE-058 - data** - Sumber data statis/fixture, relevansi dan privasi. Selesai 2026-09-17 (K3). [Peta](../../.audit-map/frontend/shared/data.md) Model: [**K3**](#model-k3).
+- [x] **FE-059 - hooks** - Query/mutation, lifecycle, hook-order, loading/error dan cleanup. Selesai 2026-09-17 (K3) — lihat tabel hasil. [Peta](../../.audit-map/frontend/shared/hooks.md) Model: [**K3**](#model-k3).
+- [x] **FE-060 - lib** - Adapter/library wrapper, konfigurasi dan penanganan error. Selesai 2026-09-17 (K3) — lihat tabel hasil. [Peta](../../.audit-map/frontend/shared/lib.md) Model: [**K3**](#model-k3).
+- [x] **FE-061 - root** - Entry React, App/route guard, stylesheet entry dan PWA boundary. Selesai 2026-09-17 (K4) — lihat tabel hasil. [Peta](../../.audit-map/frontend/shared/root.md) Model: [**K4**](#model-k4).
+- [x] **FE-062 - styles** - Token, kontras, responsivitas, fokus dan konsistensi lintas portal. Selesai 2026-09-17 (K2) — lihat tabel hasil. [Peta](../../.audit-map/frontend/shared/styles.md) Model: [**K2**](#model-k2).
+- [x] **FE-063 - types** - Kontrak tipe FE terhadap payload API dan nullability. Selesai 2026-09-17 (K2) — lihat tabel hasil. [Peta](../../.audit-map/frontend/shared/types.md) Model: [**K2**](#model-k2).
+- [x] **FE-064 - utils** - Format uang/tanggal, normalisasi, edge case dan helper tampilan. Selesai 2026-09-17 (K3) — lihat tabel hasil. [Peta](../../.audit-map/frontend/shared/utils.md) Model: [**K3**](#model-k3).
 
 ### Aset statis (3)
 
-- [x] **FE-065 - icons** - Ikon, manifest/PWA, ukuran, referensi dan fallback. Selesai 2026-09-11 (K2). [Peta](../audit-map/frontend/static/icons.md) Model: [**K2**](#model-k2).
-- [x] **FE-066 - room-images** - Referensi/kualitas foto publik, fallback dan sumber aset. Selesai 2026-09-08 (K1). [Peta](../audit-map/frontend/static/room-images.md) Model: [**K1**](#model-k1).
-- [x] **FE-067 - root** - Manifest, versi, file publik dan konsistensi referensi aset. Selesai 2026-09-08 (K2). [Peta](../audit-map/frontend/static/root.md) Model: [**K2**](#model-k2).
+- [x] **FE-065 - icons** - Ikon, manifest/PWA, ukuran, referensi dan fallback. Selesai 2026-09-11 (K2). [Peta](../../.audit-map/frontend/static/icons.md) Model: [**K2**](#model-k2).
+- [x] **FE-066 - room-images** - Referensi/kualitas foto publik, fallback dan sumber aset. Selesai 2026-09-08 (K1). [Peta](../../.audit-map/frontend/static/room-images.md) Model: [**K1**](#model-k1).
+- [x] **FE-067 - root** - Manifest, versi, file publik dan konsistensi referensi aset. Selesai 2026-09-08 (K2). [Peta](../../.audit-map/frontend/static/root.md) Model: [**K2**](#model-k2).
 
 ## Database
 
 ### Schema dan migration (1)
 
-- [ ] **DB-001 - schema-migrations** - Setiap model/enum/field/relasi, constraint/index dan ledger migration. [Peta](../audit-map/database/schema-migrations.md) Model: [**K4**](#model-k4).
+- [ ] **DB-001 - schema-migrations** - Setiap model/enum/field/relasi, constraint/index dan ledger migration. [Peta](../../.audit-map/database/schema-migrations.md) Model: [**K4**](#model-k4).
 
 ## Pengujian
 
 ### Kelompok pengujian (8)
 
-- [ ] **QA-001 - backend-unit** - Cakupan invarian backend, isolasi mock dan assertion bermakna. [Peta](../audit-map/tests/backend-unit.md) Model: [**K4**](#model-k4).
-- [ ] **QA-002 - frontend-components** - Interaksi, state dan aksesibilitas komponen. [Peta](../audit-map/tests/frontend-components.md) Model: [**K2**](#model-k2).
-- [ ] **QA-003 - frontend-e2e** - Target/fixture, role, skip, assertion, viewport/Axe dan bukti aman. [Peta](../audit-map/tests/frontend-e2e.md) Model: [**K4**](#model-k4).
-- [ ] **QA-004 - frontend-hooks** - State/transisi query, mutasi, cache dan cleanup. [Peta](../audit-map/tests/frontend-hooks.md) Model: [**K3**](#model-k3).
-- [ ] **QA-005 - frontend-pages** - State halaman, navigasi dan kontrak interaksi. [Peta](../audit-map/tests/frontend-pages.md) Model: [**K2**](#model-k2).
-- [ ] **QA-006 - frontend-root** - Setup test, isolasi, mock global dan file test tingkat root. [Peta](../audit-map/tests/frontend-root.md) Model: [**K3**](#model-k3).
-- [ ] **QA-007 - frontend-unit** - Aturan/helper FE, kasus batas dan assertion. [Peta](../audit-map/tests/frontend-unit.md) Model: [**K3**](#model-k3).
-- [ ] **QA-008 - frontend-utils** - Rumus/format/tanggal dan kasus batas utility. [Peta](../audit-map/tests/frontend-utils.md) Model: [**K3**](#model-k3).
+- [ ] **QA-001 - backend-unit** - Cakupan invarian backend, isolasi mock dan assertion bermakna. [Peta](../../.audit-map/tests/backend-unit.md) Model: [**K4**](#model-k4).
+- [ ] **QA-002 - frontend-components** - Interaksi, state dan aksesibilitas komponen. [Peta](../../.audit-map/tests/frontend-components.md) Model: [**K2**](#model-k2).
+- [ ] **QA-003 - frontend-e2e** - Target/fixture, role, skip, assertion, viewport/Axe dan bukti aman. [Peta](../../.audit-map/tests/frontend-e2e.md) Model: [**K4**](#model-k4).
+- [ ] **QA-004 - frontend-hooks** - State/transisi query, mutasi, cache dan cleanup. [Peta](../../.audit-map/tests/frontend-hooks.md) Model: [**K3**](#model-k3).
+- [ ] **QA-005 - frontend-pages** - State halaman, navigasi dan kontrak interaksi. [Peta](../../.audit-map/tests/frontend-pages.md) Model: [**K2**](#model-k2).
+- [ ] **QA-006 - frontend-root** - Setup test, isolasi, mock global dan file test tingkat root. [Peta](../../.audit-map/tests/frontend-root.md) Model: [**K3**](#model-k3).
+- [ ] **QA-007 - frontend-unit** - Aturan/helper FE, kasus batas dan assertion. [Peta](../../.audit-map/tests/frontend-unit.md) Model: [**K3**](#model-k3).
+- [ ] **QA-008 - frontend-utils** - Rumus/format/tanggal dan kasus batas utility. [Peta](../../.audit-map/tests/frontend-utils.md) Model: [**K3**](#model-k3).
 
 ## Tooling dan konfigurasi
 
 ### Kelompok tooling (7)
 
-- [ ] **TL-001 - backend-config** - Script/package/config compiler/Prisma backend dan kontrak lingkungan. [Peta](../audit-map/tooling/backend-config.md) Model: [**K3**](#model-k3).
-- [ ] **TL-002 - backend-scripts** - Provisioning/migration/helper; target, idempotensi, error dan secret. [Peta](../audit-map/tooling/backend-scripts.md) Model: [**K4**](#model-k4).
-- [ ] **TL-003 - deploy-config** - Konfigurasi paket, routing dan kesesuaian target host; metadata dahulu. [Peta](../audit-map/tooling/deploy-config.md) Model: [**K4**](#model-k4).
-- [ ] **TL-004 - frontend-config** - Vite/TypeScript/Playwright, proxy, baseURL dan build/PWA. [Peta](../audit-map/tooling/frontend-config.md) Model: [**K3**](#model-k3).
-- [ ] **TL-005 - frontend-scripts** - Validasi/build helper frontend dan kegagalan proses. [Peta](../audit-map/tooling/frontend-scripts.md) Model: [**K3**](#model-k3).
-- [ ] **TL-006 - root** - Script/config root, workspace dan jalur perintah kanonik. [Peta](../audit-map/tooling/root.md) Model: [**K3**](#model-k3).
-- [ ] **TL-007 - scripts** - Packaging/deploy helper, file yang dikemas, fingerprint dan eksklusi secret. [Peta](../audit-map/tooling/scripts.md) Model: [**K4**](#model-k4).
+- [ ] **TL-001 - backend-config** - Script/package/config compiler/Prisma backend dan kontrak lingkungan. [Peta](../../.audit-map/tooling/backend-config.md) Model: [**K3**](#model-k3).
+- [ ] **TL-002 - backend-scripts** - Provisioning/migration/helper; target, idempotensi, error dan secret. [Peta](../../.audit-map/tooling/backend-scripts.md) Model: [**K4**](#model-k4).
+- [ ] **TL-003 - deploy-config** - Konfigurasi paket, routing dan kesesuaian target host; metadata dahulu. [Peta](../../.audit-map/tooling/deploy-config.md) Model: [**K4**](#model-k4).
+- [ ] **TL-004 - frontend-config** - Vite/TypeScript/Playwright, proxy, baseURL dan build/PWA. [Peta](../../.audit-map/tooling/frontend-config.md) Model: [**K3**](#model-k3).
+- [ ] **TL-005 - frontend-scripts** - Validasi/build helper frontend dan kegagalan proses. [Peta](../../.audit-map/tooling/frontend-scripts.md) Model: [**K3**](#model-k3).
+- [ ] **TL-006 - root** - Script/config root, workspace dan jalur perintah kanonik. [Peta](../../.audit-map/tooling/root.md) Model: [**K3**](#model-k3).
+- [ ] **TL-007 - scripts** - Packaging/deploy helper, file yang dikemas, fingerprint dan eksklusi secret. [Peta](../../.audit-map/tooling/scripts.md) Model: [**K4**](#model-k4).
 
 ## Catatan hasil dan checkpoint
 

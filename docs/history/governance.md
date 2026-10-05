@@ -29,7 +29,7 @@ Tanggal file lama tidak disimpulkan dari tanggal yang tertulis di dalam dokumenn
 | [docs/audit/README.md](../audit/README.md) | Indeks audit modul | Satu audit parsial frontend-auth tersedia; empat placeholder | Indeks turunan; audit-map sebagai peta, M12 sebagai antrean | 2026-09-22 |
 | [AI_MASTER.md](../../AI_MASTER.md) | Monitoring lintas-agent | Dashboard aktif; status disinkronkan | Dashboard, bukan canonical atau pengganti M12/M13 | 2026-09-22 |
 | [.github/copilot-instructions.md](../../.github/copilot-instructions.md) | Entry panduan Copilot | Pointer aktif — Stage 3 selesai | Pointer ke AGENTS/M12 dan dashboard AI_MASTER | 2026-09-20 |
-| [M00](../PETA-KODE.md) / [audit-map](../audit-map/) | Navigasi kode dan audit | Ada; dipertahankan, tidak diubah | Peta rujukan; bukan bukti audit otomatis PASS | UNKNOWN — belum diperiksa |
+| [M00](../PETA-KODE.md) / [audit-map](../../.audit-map/) | Navigasi kode dan audit | Ada; dipertahankan, tidak diubah | Peta rujukan; bukan bukti audit otomatis PASS | UNKNOWN — belum diperiksa |
 | [M12](../STATUS.md) | Antrean dan gate tugas | Kesiapan task diperjelas; migrasi struktur menunggu approval XL | Otoritas antrean/gate di atas AGENTS | 2026-09-22 |
 | [M13](../M13_CHANGELOG.md) | Riwayat bertanggal | Entri koreksi docs dan rancangan ditambahkan; entri lama tetap | Riwayat bukti, bukan antrean baru | 2026-09-22 |
 
@@ -69,7 +69,7 @@ Tidak ada hitungan coverage atau klaim PASS runtime baru. Kesegaran bukti dinila
 | Auth frontend | [docs/audit/frontend-auth.md](../audit/audit-modul-2026.md) | Diperiksa sebagian — login dengan mock | 2026-09-20 | Baseline d5d04cb; validitas terhadap diff berikutnya belum diperiksa |
 | Context/sesi frontend | [M12](../STATUS.md) — catatan FE-057; file audit khusus: UNKNOWN — belum diperiksa | UNKNOWN — belum diperiksa | UNKNOWN — belum diperiksa | UNKNOWN — belum diperiksa |
 | Auth backend | [M12](../STATUS.md) — catatan perbaikan terkait FE-002; file audit khusus: UNKNOWN — belum diperiksa | UNKNOWN — belum diperiksa | UNKNOWN — belum diperiksa | UNKNOWN — belum diperiksa |
-| Modul lainnya | [audit-map](../audit-map/) — navigasi, bukan hasil audit | UNKNOWN — belum diperiksa | UNKNOWN — belum diperiksa | UNKNOWN — belum diperiksa |
+| Modul lainnya | [audit-map](../../.audit-map/) — navigasi, bukan hasil audit | UNKNOWN — belum diperiksa | UNKNOWN — belum diperiksa | UNKNOWN — belum diperiksa |
 
 ## 5. Utang Tooling
 

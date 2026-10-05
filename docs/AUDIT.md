@@ -15,7 +15,7 @@
 ## 2. Cakupan dan gate verifikasi
 
 - **Indeks cakupan audit total** (135 ID: 117 terbuka + 18 selesai): [audit/audit-checklist-total.md](audit/audit-checklist-total.md). Arti centang hanya berubah ketika audit unit terkait benar-benar selesai dan buktinya dicatat.
-- **Indeks per modul**: [audit/README.md](audit/README.md); peta hasil audit per cabang (generated): [audit-map/](audit-map/README.md).
+- **Indeks per modul**: [audit/README.md](audit/README.md); peta hasil audit per cabang (generated): [audit-map/](../.audit-map/README.md).
 - **Gate DoD Fase AO** (audit UI/UX lintas portal) + perintah verifikasinya: [audit/status-ao-lintas-portal.md](audit/status-ao-lintas-portal.md).
 - Gate audit AO-13/AO-14 (tiga crawl tanpa skip, dua state TENANT, viewport 320–1440 px, Axe/gate Baymard, screenshot bebas PII) tercatat sebagai task terbuka di [STATUS §3](STATUS.md); memenuhi DoD bukan otomatis sign-off.
 

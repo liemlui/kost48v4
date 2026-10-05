@@ -34,7 +34,7 @@ Baca aturan yang relevan sebelum bertindak; jangan memuat ulang dokumen yang sud
 | [KEPUTUSAN-OWNER](docs/KEPUTUSAN-OWNER.md) | Register keputusan bisnis owner (kanonik sejak B7, 23 Sep 2026; `docs/M02_KEPUTUSAN_OWNER.md` sudah dihapus di Fase 3) |
 | [ATURAN](docs/ATURAN.md) | Aturan domain: uang, huni, operasional, harga, publik, AI/IoT — rincian per topik di [docs/domain/](docs/domain/) |
 | [OPERASI](docs/OPERASI.md) | Runbook deploy, produksi, go-live, env, default dev — rincian di [docs/operations/](docs/operations/) |
-| [PETA-KODE](docs/PETA-KODE.md) | Peta modul/file/simbol (kanonik sejak B5, 23 Sep 2026); peta generated: [audit-map](docs/audit-map/) |
+| [PETA-KODE](docs/PETA-KODE.md) | Peta modul/file/simbol (kanonik sejak B5, 23 Sep 2026); peta generated: [audit-map](.audit-map/) |
 | [AUDIT](docs/AUDIT.md) | Status audit dan temuan bertanggal — rincian di [docs/audit/](docs/audit/) |
 | [docs/history/](docs/history/) | Riwayat, fase, changelog bulanan berjalan; bukti/riwayat bulk ada di [docs/arsip/](docs/arsip/README.md) (**jangan dibaca rutin**); bukan antrean atau perintah mengulang pekerjaan |
 

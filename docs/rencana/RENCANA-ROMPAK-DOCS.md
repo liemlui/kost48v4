@@ -15,7 +15,7 @@ kebijakan `ARSIP-BATAS` (24 Sep 2026) serta target "7 berkas utama + 1 arsip" pa
 | `docs/**` seluruhnya (sebelum B2) | 1.291 berkas `.md` · 7,3 MB · ≈1,87 juta token (proksi `byte/4`) |
 | **Jalur baca "panas"** (yang benar-benar mungkin dibaca sesi baru) | **50 berkas · 1.037 KB · ≈265 rb token** |
 | Kotak terbuka di `docs/**` | 1.447 `[ ]` — vs **29** yang otoritatif |
-| `docs/archieve/` (legacy) · `docs/audit-map/` (generated) | 106 berkas/1,46 MB · 1.123 berkas/4,0 MB |
+| `docs/archieve/` (legacy) · `.audit-map/` (generated) | 106 berkas/1,46 MB · 1.123 berkas/4,0 MB |
 
 Rincian per berkas: kartu keputusan + kartu baseline gate.
 
@@ -76,17 +76,15 @@ Berkas yang **hilang** setelah rombak: `docs/README.md` (router → `AGENTS.md` 
 |---|---|---|---|
 | **B0** | Branch `docs-rombak`; snapshot `docs/` ke `.design-audit/docs-snapshot-2026-10-05/`; daftar berkas yang diniatkan | `git status` sebelum = sesudah untuk berkas yang tidak diniatkan | hapus branch bila gagal |
 | **B1** | `scripts/check-docs.mjs` (R1–R5) + jalankan pada kondisi sekarang; baseline disimpan sebagai berkas | Baseline **wajib merah** dan tersimpan sebagai berkas, bukan hanya keluaran terminal | hapus skrip + berkas baseline |
-| **B2** | Recon sitasi `docs/archieve/**`; yang dikutip → `docs/arsip/legacy/`; `archieve` dihapus/dikeluarkan; 181 tautan dialihkan | 0 baris hilang; 0 tautan patah baru; `archieve` tidak lagi disebut berkas aktif | revert commit batch |
-| **B3** | `audit-map` → `.audit-map/`; generator + `.gitignore` L89 + 219 referensi | `node .audit-map/generate.cjs` jalan; gate tautan hijau | revert commit batch |
+| **B2** ✅ | 39 berkas dikutip → `docs/arsip/legacy/`; 68 sisanya → `.docs-legacy/`; **60 rujukan** dialihkan; 7 penghapusan tracked | konservasi SHA 68/68 · 0 tautan patah baru · P5 & P11 ditutup | revert commit |
+| **B3** ✅ | `docs/audit-map/**` → **`.audit-map/`** (tetap gitignored); generator → `scripts/audit-map-generate.cjs` (**tracked**); 157 tautan + 24 path dokumen dialihkan | **1.203 tautan sumber** diperbaiki · **4.013 tautan diverifikasi, 0 rusak** · gate R2 0 · regenerasi peta menunggu owner — ledger: [B3-ledger-peta-audit.md](B3-ledger-peta-audit.md) | revert commit |
 | **B4** | Checklist audit → arsip + indeks kecil; derajat 1.447 kotak diturunkan; backlog 10 teratas ke ANTREAN | R3 hijau (kotak otoritatif hanya di ANTREAN) | revert commit batch |
 | **B5** | Pisah otoritas: `AGENTS.md` ramping + `docs/KONTRAK.md` + `docs/ANTREAN.md`; bukti → riwayat; `docs/README.md` dihapus | Gate hijau; jalur wajib ≤12 berkas / ≤150 KB | revert commit batch |
 | **B6** | Rotasi changelog: bulan berjalan = 30 hari terakhir; `M13_CHANGELOG.md` digabung | Gate hijau | revert commit batch |
 | **B7** | `KEPUTUSAN-OWNER` dipecah: berlaku sekarang vs digantikan (arsip) | Gate hijau; berkas hidup ≤16 KB | revert commit batch |
 | **B8** | Sapu akhir: berkas di atas plafon byte, blok baca, **uji nyata Q30** (sesi baru + 1 tugas, ukur berkas+byte yang dibaca) | Laporan akhir + angka sebelum/sesudah | revert commit batch |
 
-**Status batch (2026-10-05):** **B0 ✅** · **B1 ✅** — baseline gate **v1.1**: **23 pelanggaran + 1 dilewati, exit 2**
-(R1 2 · R2 1 · R3 12 berkas/368 kotak · R4 4 · R5 4). Bukti: `docs/arsip/audit/gate-baseline-2026-10-05.md`.
-Setelah D1–D3 (lihat §4.1): gate **v1.2** = **22 pelanggaran + 1 dilewati** (R1 2 · R2 **0** · R3 12 · R4 4 · R5 4).
+**Status batch (2026-10-05):** **B0 ✅ B1 ✅ B2 ✅ B3 ✅** · gate terkini **v1.4 = 23 pelanggaran + 1 dilewati** (R1 2 · R2 **0** · R3 12 · R4 4 · R5 5) · bukti per batch: kartu baseline + ledger.
 
 **Kebijakan line ending ✅** (2026-10-05, sebelum B2): `.gitattributes` ditambahkan (`* text=auto eol=lf`; skrip Windows CRLF; biner tidak disentuh).
 Fakta yang menghemat satu langkah: isi index sudah LF seluruhnya — **1.109 `i/lf`, 0 `i/crlf`, 0 `i/mixed`** — sehingga **tidak perlu** commit normalisasi;
@@ -115,14 +113,13 @@ B3–B8 **belum**; menunggu perintah.
 | **R1** `docs/domain/keuangan.md:126–127` (2 baris angka test basi) | temuan gate yang nyata | **dibuka** — ditutup di **B5** |
 | **R5** `docs/domain/publik.md` 48,7 KB tanpa TOC | temuan gate | **dibuka** — ditutup di **B8** dengan TOC berjangkar (bukan dipecah) |
 | **Exception tertulis** `B2-daftar-pindah-arsip-legacy.md` 31,2 KB > plafon 16 KB | daftar kerja sementara (P8: biarkan sampai B8) | diterima sadar (plafon tidak dilemahkan); ditutup di **B8** saat jadi kartu arsip |
-| **B2 — arsip ditaruh di dalam repo** (`.docs-legacy/`, diabaikan git), bukan di luar repo | sandbox agen tidak boleh menulis di luar workspace; owner memilih opsi ini | **diterima owner 2026-10-05**; folder bebas dipindah keluar kapan saja tanpa mengubah dokumentasi |
+| **B2/B3 — aset besar di dalam repo** (`.docs-legacy/`, `.audit-map/`, keduanya diabaikan git) | sandbox agen tidak boleh menulis di luar workspace | **diterima owner 2026-10-05**; bebas dipindah keluar kapan saja |
+| **B3 — regenerasi peta** belum dijalankan agen | generator memanggil `git rev-parse HEAD` via `child_process` pipa stdio → EPERM di sandbox | **diserahkan ke owner**: `node scripts/audit-map-generate.cjs`; isi peta sudah benar tautannya (4.013/4.013) |
 | **B2 — commit campuran (kini dipisah)** | kesalahan agen: `git add -u -- docs` men-stage 7 berkas dokumentasi tertunda owner bersama alih rujukan | **selesai ditangani** 2026-10-05 atas instruksi owner: dipisah menjadi **`0f28e8d9`** (konten owner) + **`56e99f15`** (alih rujukan). Isi berkas owner **tidak disentuh** — 20 berkas dipantau SHA-256, 0 berubah. Commit lama (`59e04736`, `895aff79`, `4282ccf1`) tidak lagi di cabang; objeknya masih dapat diperiksa dengan `git show <sha>` sampai garbage collection |
 | **4 sitasi ke berkas yang memang tidak ada** (`_DEPRECATED_05_UIUX_AUDIT_2026-06-12.md`, `_DEPRECATED_06_DEPLOY_RUNBOOK.md`, `_DEPRECATED_08_PWA_AUDIT_AND_HARDENING_PLAN_2026-06-12.md` — pernah ada di riwayat git, tidak di disk; `M13_CHANGELOG_ARSIP_S1_2026.md` — tidak pernah ada; nama benarnya `_previous_cycles/M11_CHANGELOG_ARSIP_S1_2026.md`) | ditemukan saat B2.2; **bukan** akibat B2 (rusak sebelum rombak) | dibiarkan + dicatat; penutupnya **tugas tersendiri** (perlu keputusan: perbaiki rujukan atau tandai usang) |
 | **Baris `docs/archieve/` di `.git/info/exclude`** | P5, urutan pelaksanaan disetujui owner | **ditutup 2026-10-05** (`c1134387`): baris dihapus setelah arsip keluar; `git check-ignore docs/archieve/uji.md` **kosong** |
 
-**Kesiapan rumah arsip (diverifikasi 2026-10-05):** `docs/arsip/` **siap** menjadi rumah final — punya `README.md` dengan
-aturan + inventaris, dan **11 dari 11** berkas isinya terdaftar di README (syarat Q19-v). B2 karena itu tidak perlu
-menyiapkan rumahnya, hanya memverifikasi **sitasi** dan menyiapkan daftar pindah.
+**Rumah arsip:** `docs/arsip/` siap (README + aturan + **11/11** inventaris — syarat Q19-v) dan kini juga memuat `legacy/`.
 
 **Aturan antar-batch:** ragu → naikkan kehati-hatian, jangan turunkan. Setelah **B5**, buka **sesi baru** dan verifikasi sebelum B6
 (B5 mengubah `AGENTS.md` yang disuntik tiap request; kesalahan di situ mencemari semua batch setelahnya).
@@ -149,7 +146,7 @@ menyiapkan rumahnya, hanya memverifikasi **sitasi** dan menyiapkan daftar pindah
 **Dibuat pada batch berikutnya:** `docs/KONTRAK.md` · `docs/ANTREAN.md` · `docs/arsip/{audit,changelog,legacy,plans}/**` · `.audit-map/**`.
 
 **Dipindah/dihapus pada batch berikutnya:** `docs/README.md` · `docs/STATUS.md` · `docs/M13_CHANGELOG.md` ·
-`docs/audit/audit-checklist-total.md` · `docs/archieve/**` · `docs/audit-map/**`.
+`docs/audit/audit-checklist-total.md` · `docs/archieve/**` · `.audit-map/**`.
 
 **Tidak pernah disentuh rombak ini:** `frontend/src/pages/portal/MyManualPage.tsx` · `frontend/src/pages/public/CekPage.tsx` ·
 `design/**` · `.design-audit/**` selain folder snapshot · seluruh `node_modules/**` · artefak build.

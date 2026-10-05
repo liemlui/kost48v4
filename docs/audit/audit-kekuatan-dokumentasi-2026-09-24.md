@@ -21,7 +21,7 @@ Tiga kesalahan pengukuran yang secara eksplisit dihindari di sini:
 
 | Kelompok | Berkas | Tracked | Catatan |
 |---|---:|---|---|
-| `docs/audit-map/**` | 1.126 | **0** | **generated**, di-ignore `.gitignore` L87 `docs/audit-map/`; jangan dihapus; regenerasi `node docs/audit-map/generate.cjs` |
+| `.audit-map/**` | 1.126 | **0** | **generated**, di-ignore `.gitignore` L87 `.audit-map/`; jangan dihapus; regenerasi `node .audit-map/generate.cjs` |
 | `docs/archieve/**` | 107 | 31 | arsip legacy; 76 lainnya di-exclude **lokal** `.git/info/exclude` L9 (di clone bersih tampak untracked) |
 | `docs/arsip/**` | 12 | 12 | rumah bukti/riwayat bulk (dibuat DOCS-CLEANUP-1, 24 Sep 2026); **jangan dibaca rutin** |
 | **Dokumentasi aktif** | **43** | 43 | 8 top-level + `domain/` 9, `operations/` 9, `audit/` 8, `history/` 5, `product/` 4 |
