@@ -84,7 +84,8 @@ git ls-files docs/arsip/legacy | Measure-Object
 # 3) sisa folder sumber (68 berkas: 66 kelas C + 08_CHECKLIST + 1 .tsv)
 Get-ChildItem docs/archieve -Recurse -File | Measure-Object
 # 4) kredensial DEV tidak ada lagi di arsip legacy
-Select-String -Path docs/arsip/legacy/**/*.md -Pattern 'Owner#2026|admin123|staff123|Tenant#2026'
+#    (4 pola yang didaftarkan di docs/operations/default-dev.md; nilainya sengaja tidak ditulis di sini)
+Select-String -Path docs/arsip/legacy/**/*.md -Pattern '<pola-kredensial-DEV>'
 ```
 
 ## 5. Riwayat
@@ -105,8 +106,8 @@ Select-String -Path docs/arsip/legacy/**/*.md -Pattern 'Owner#2026|admin123|staf
 
 1. **Commit campuran sudah dipisah** (instruksi owner 2026-10-05): `0f28e8d9` = konten dokumentasi owner, `56e99f15` = alih rujukan B2.2. Isi berkas owner **tidak disentuh** (20 berkas dipantau SHA-256, 0 berubah). 2 berkas source owner (`MyManualPage.tsx`, `CekPage.tsx`) tetap belum di-commit sampai B2 ditutup.
 2. **Baris `docs/archieve/` di `.git/info/exclude` sengaja belum dihapus** (P5 dieksekusi setelah kelas C dipindah owner) supaya ~62 berkas untracked tidak membanjiri `git status`.
-3. **4 sitasi ke berkas yang memang tidak ada** dibiarkan (rusak sebelum B2): `_DEPRECATED_05_UIUX_AUDIT_2026-06-12.md`, `_DEPRECATED_06_DEPLOY_RUNBOOK.md`, `_DEPRECATED_08_PWA_AUDIT_AND_HARDENING_PLAN_2026-06-12.md` (pernah ada di riwayat git), dan `M13_CHANGELOG_ARSIP_S1_2026.md` (tidak pernah ada; nama benarnya `_previous_cycles/M11_CHANGELOG_ARSIP_S1_2026.md`).
-4. **Dua dokumen operasional menyebut `08_CHECKLIST` berdasarkan nama** (`operations/deploy-go-live.md` baris 20; `operations/verifikasi-keuangan.md` baris 117) — setelah berkas itu keluar repo, keduanya menunjuk berkas yang tidak ada. Dibiarkan sebagai rujukan historis.
+3. **4 sitasi ke berkas yang memang tidak ada** dibiarkan (rusak sebelum B2): `_DEPRECATED_05_UIUX_AUDIT_2026-06-12.md`, `_DEPRECATED_06_DEPLOY_RUNBOOK.md`, `_DEPRECATED_08_PWA_AUDIT_AND_HARDENING_PLAN_2026-06-12.md` (pernah ada di riwayat git), dan `M13_CHANGELOG_ARSIP_S1_2026.md` (tidak pernah ada; nama benarnya `_previous_cycles/M11_CHANGELOG_ARSIP_S1_2026.md`). **Ditutup 2026-10-05:** #1–#3 diganti catatan bertanggal, #4 ikut hilang saat `M13_CHANGELOG.md` dihapus (B8) — [kartu penutup](PENUTUP-SITASI-RUSAK.md).
+4. **Dua dokumen operasional menyebut `08_CHECKLIST` berdasarkan nama** (`operations/deploy-go-live.md` baris 20; `operations/verifikasi-keuangan.md` baris 117) — setelah berkas itu keluar repo, keduanya menunjuk berkas yang tidak ada. Dibiarkan sebagai rujukan historis. **Ditutup 2026-10-05:** keduanya kini menyebut jalur nyatanya di `.docs-legacy/2026-06-16_root_docs_pre_M/08_CHECKLIST.md`.
 
 ## 7. Angka checkpoint
 

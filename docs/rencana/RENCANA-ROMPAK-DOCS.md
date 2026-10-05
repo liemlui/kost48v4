@@ -106,14 +106,15 @@ B3–B8 **belum**; menunggu perintah.
 | **R1** `docs/domain/keuangan.md:126–127` (2 baris angka test basi) | temuan gate yang nyata | **dibuka** — ditutup di **B5** |
 | **R5** `docs/domain/publik.md` 48,7 KB tanpa TOC | temuan gate | **dibuka** — ditutup di **B8** dengan TOC berjangkar (bukan dipecah) |
 | **Exception tertulis** `B2-daftar-pindah-arsip-legacy.md` 31,2 KB > plafon 16 KB | daftar kerja sementara (P8: biarkan sampai B8) | diterima sadar (plafon tidak dilemahkan); ditutup di **B8** saat jadi kartu arsip |
-| **B2/B3 — aset besar di dalam repo** (`.docs-legacy/`, `.audit-map/`, keduanya diabaikan git) | sandbox agen tidak boleh menulis di luar workspace | **diterima owner 2026-10-05**; bebas dipindah keluar kapan saja |
-| **B3 — regenerasi peta** belum dijalankan agen | generator memanggil `git rev-parse HEAD` via `child_process` pipa stdio → EPERM di sandbox | **diserahkan ke owner**: `node scripts/audit-map-generate.cjs`; isi peta sudah benar tautannya (4.013/4.013) |
+| **B2/B3 — aset besar di dalam repo** (`.docs-legacy/`, `.audit-map/`, diabaikan git) | sandbox agen | **diterima owner** |
+| **B3 — regenerasi peta** | sandbox menolak `child_process` | **SELESAI 2026-10-05**: generator dipatch membaca `.git/HEAD` langsung (tanpa spawn) → stempel HEAD nyata; **4.141 tautan diperiksa, 0 rusak**; berkas tulis-tangan tidak berubah |
 | **B2 — commit campuran (dipisah)** | kesalahan agen: `git add -u -- docs` men-stage 7 berkas owner | **selesai**: `0f28e8d9` (konten owner) + `56e99f15` (alih rujukan); 20 berkas dipantau SHA-256, **0 berubah**; commit lama masih `git show`-able |
-| **4 sitasi ke berkas yang tidak ada** (`_DEPRECATED_05/06/08…`, `M13_CHANGELOG_ARSIP_S1_2026.md`) | ditemukan saat B2.2, **bukan** akibat B2 | dicatat di [draft penutup sitasi rusak](PENUTUP-SITASI-RUSAK.md) butir 1–4; dijadwalkan **B8** |
-| **B5 — invariant ditulis padat** (bukan verbatim) + `STATUS.md` disisakan sebagai pointer | plafon KONTRAK 16 KB · Q11 · P19=c | **keputusan teknis agen**: fakta tetap, bentuknya tabel + perintah pengukur; verbatim tetap di riwayat git + bukti-2026-10. Pointer dihapus di **B8** |
+| **Rujukan rusak (7 butir)** | ditemukan B2.2, bukan akibat B2 | **ditutup 2026-10-05**: 4 sitasi + 2 nama `08_CHECKLIST` dibereskan, 1 dibiarkan (catatan historis) — [kartu penutup](PENUTUP-SITASI-RUSAK.md) |
+| **B5 — invariant ditulis padat** + `STATUS.md` jadi pointer | plafon KONTRAK 16 KB · Q11 | **keputusan teknis agen**; verbatim tetap di riwayat git |
 | **Baris `docs/archieve/` di `.git/info/exclude`** | P5, urutan pelaksanaan disetujui owner | **ditutup 2026-10-05** (`c1134387`): baris dihapus setelah arsip keluar; `git check-ignore docs/archieve/uji.md` **kosong** |
-| **B4 — dua runbook diberi penanda**, bukan dikonversi | runbook dipakai manusia langkah demi langkah | **keputusan teknis agen**; bisa dikonversi atas permintaan owner |
-| **B4 — 5 rujukan historis** (`08_CHECKLIST`, `tenant-data-template.tsv`) | butir 5–7 [draft penutup sitasi rusak](PENUTUP-SITASI-RUSAK.md) | dibiarkan (catatan historis); butir 5–6 dijadwalkan bersamaan saat B5 menulis ulang berkasnya |
+| **B4 — dua runbook diberi penanda** | runbook dipakai manusia langkah demi langkah | **keputusan teknis agen** |
+| **R6 · P24a/P24b · kredensial DEV** | keputusan owner | **R6 dipasang** (gate v1.6, diuji negatif) · **`npm run check:docs` ditambahkan** · **hook tidak dipasang** (alasan di [ANTREAN](../ANTREAN.md)) · nilai kredensial dihapus dari 4 dokumen hidup |
+| **Sisa di luar rombak** | perlu keputusan/task sendiri | **tercatat sebagai backlog**: 4 kandidat serap arsip · kredensial DEV di kode · `AI_MASTER.md` — [ANTREAN](../ANTREAN.md) |
 
 **Rumah arsip:** `docs/arsip/` siap (README + aturan + **11/11** inventaris — syarat Q19-v) dan kini juga memuat `legacy/`.
 

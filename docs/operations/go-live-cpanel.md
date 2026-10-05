@@ -66,7 +66,7 @@ Database uji **sementara dan terpisah** (`kost48_pkg_verify`) dibuat di PostgreS
 - [x] Konfirmasi nama & kredensial database produksi — DB `kost48s1_prod26`, user `kost48s1_lurin` (dibuat lewat cPanel → PostgreSQL Databases; §E temuan 3). Nilai kredensial tidak ditulis di dokumen ini.
 - [x] Domain final + akses cPanel (Node.js App, PostgreSQL, Cron Jobs, Terminal/SSH, AutoSSL) — tersedia; `uapi NodeJS` **tidak** ada di server ini sehingga env diubah lewat berkas konfigurasi cPanel + backup (§E temuan 2).
 - [x] Nomor versi Node di panel (target: Node 22) dan kemampuan `NODE_OPTIONS` — Node **22.23.2** (venv khusus app); `NODE_OPTIONS=--max-old-space-size=192` terpasang lewat env cPanel ([produksi §4](produksi.md)).
-- [x] Password baru yang kuat untuk OWNER produksi (bukan `admin123`) — dibuat 13 Sep; password sementara masih ada di `~/OWNER-PASSWORD-BACA-LALU-HAPUS.txt` → rotasi + hapus file masuk §F.3.
+- [x] Password baru yang kuat untuk OWNER produksi (bukan kata sandi DEV default — lihat [default-dev.md](default-dev.md)) — dibuat 13 Sep; password sementara masih ada di `~/OWNER-PASSWORD-BACA-LALU-HAPUS.txt` → rotasi + hapus file masuk §F.3.
 - [x] Keputusan jalur database (§B.1) dan jendela waktu eksekusi — jalur A (DB baru + bootstrap bersih), dieksekusi 13 Sep 2026.
 - [ ] Konfirmasi apakah `uploads/` (foto kamar/bukti bayar) perlu dipindahkan dari server lama — **belum terjawab.** Deploy 13–16 Sep tidak menyentuh `uploads/`; aset privat tetap tidak boleh masuk dokroot publik.
 

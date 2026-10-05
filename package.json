@@ -14,6 +14,7 @@
     "make-deploy:static:fast": "node scripts/make-deploy.mjs --profile=static --no-build",
     "bundle:deploy": "node scripts/bundle-deploy.mjs",
     "bundle:deploy:fast": "node scripts/bundle-deploy.mjs --no-build",
+    "check:docs": "node scripts/check-docs.mjs",
     "token-efficiency-report": "node scripts/token-efficiency-report.mjs",
     "test:module": "node scripts/verify-module.mjs test",
     "build:module": "node scripts/verify-module.mjs build",

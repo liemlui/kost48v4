@@ -479,7 +479,7 @@ readiness:75 → preview:80 → post:93 (manual) / autoCloseMonthly:122 → reop
 
 `frontend/src/App.tsx` — ±50 route. Folder: `pages/{public,auth,portal,staff,admin,owner→(dashboard,finance,reports),bookings,stays,invoices,payments,tickets,rooms,resources,staff-routines,renew-requests,notifications,reminders,settings,profile}`.
 Surface utama: publik (`/`, `/rooms`, `/register`), portal tenant (`pages/portal/*`), staf (`pages/staff/*` + staff-routines), admin/owner (stays, invoices, payments review, renew, tickets, performance, finance, reports).
-State: TanStack Query + Axios; auth JWT. Audit historis UI/UX ada di `archieve/_DEPRECATED_05_UIUX_AUDIT_2026-06-12.md`.
+State: TanStack Query + Axios; auth JWT. Audit historis UI/UX (berkas lama `_DEPRECATED_05_UIUX_AUDIT_2026-06-12.md`) sudah dihapus dari repo; jejaknya ada di riwayat git sebelum 2026-10-05.
 
 ---
 

@@ -377,8 +377,8 @@ Matrix ini memuat kontrak target keputusan owner. Area bertanda OWNER-only belum
 # Public rooms smoke
 Invoke-RestMethod -Method Get -Uri "http://localhost:3000/api/public/rooms"
 
-# Admin login
-$login = Invoke-RestMethod -Method Post -Uri "http://localhost:3000/api/auth/login" -ContentType "application/json" -Body '{"identifier":"admin@kost48.com","password":"admin123"}'; $token=$login.data.accessToken
+# Admin login (kata sandi DEV default: lihat docs/operations/default-dev.md — sengaja tidak ditulis di contoh ini)
+$login = Invoke-RestMethod -Method Post -Uri "http://localhost:3000/api/auth/login" -ContentType "application/json" -Body '{"identifier":"admin@kost48.com","password":"<kata-sandi-DEV>"}'; $token=$login.data.accessToken
 
 # Payment review queue
 Invoke-RestMethod -Method Get -Uri "http://localhost:3000/api/payment-submissions/review-queue" -Headers @{Authorization="Bearer $token"}

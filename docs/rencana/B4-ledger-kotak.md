@@ -58,7 +58,7 @@ Pemindahan checklist memutus **46 tautan**. Semuanya diperbaiki dengan **rebase 
 ## 7. Yang belum dikerjakan dari B4
 
 - **Pindah butir yang benar-benar pekerjaan terbuka ke antrean** (P16 opsi c): butuh pemilahan baris-per-baris; dilakukan saat **B5** menyusun `docs/ANTREAN.md` — bukan pemilahan otomatis.
-- 5 rujukan historis ke `08_CHECKLIST`/`tenant-data-template.tsv` (butir 5–7 [draft penutup](PENUTUP-SITASI-RUSAK.md)) menunggu batch berikutnya.
+- **DITUTUP 2026-10-05:** 5 rujukan ke `08_CHECKLIST`/`tenant-data-template.tsv` — dua di dokumen operasional kini menunjuk jalur nyatanya di `.docs-legacy/`, sisanya di catatan historis dibiarkan — [kartu penutup](PENUTUP-SITASI-RUSAK.md) §5.
 
 ## 8. Riwayat
 

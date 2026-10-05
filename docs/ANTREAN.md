@@ -75,3 +75,18 @@ Format: **ID** — judul | **Gate** (verifikasi wajib sebelum `[x]`). 🧑 = but
 ---
 
 **Backlog 10 teratas** (rincian panjang ada di berkas topiknya; ini hanya pengingat, bukan antrean penuh): lihat daftar `[ ]` di atas — berkas ini satu-satunya sumber. Butir lama yang bukan pekerjaan (indeks cakupan audit, catatan fase) sudah dipindah ke tempatnya masing-masing.
+
+---
+
+## Backlog di luar antrean (belum dijadwalkan)
+
+Butir di bawah **bukan** antrean aktif — sengaja **tanpa kotak `[ ]` dan tanpa gate**, karena belum diputuskan atau butuh task tersendiri. Menaruhnya sebagai kotak akan berpura-pura bahwa ia sudah dijadwalkan.
+
+- **4 kandidat serap arsip legacy** — keputusan owner P3: **tidak diserap** ke dokumen aktif, masuk backlog tersendiri (isi belum ditinjau):
+  - [arsip/legacy/2026-06-16_root_docs_pre_M/04_DEPLOY_AND_PWA.md](arsip/legacy/2026-06-16_root_docs_pre_M/04_DEPLOY_AND_PWA.md) (18 KB)
+  - [arsip/legacy/_previous_cycles/M17_AUDIT_360_P3_P8.md](arsip/legacy/_previous_cycles/M17_AUDIT_360_P3_P8.md) (2,2 KB)
+  - [arsip/legacy/2026-06-16_root_docs_pre_M/17_PUBLIK_MARKETING_UIUX.md](arsip/legacy/2026-06-16_root_docs_pre_M/17_PUBLIK_MARKETING_UIUX.md) (7,8 KB)
+  - [arsip/legacy/AUDIT_INVENTARIS_LENGKAP.md](arsip/legacy/AUDIT_INVENTARIS_LENGKAP.md) (11 KB)
+- **Kredensial DEV di kode** (temuan 2026-10-05, di luar lingkup rombak dokumentasi) — kata sandi DEV ter-hardcode di `backend/scripts/seed-dev-reset.js` (**tracked**, 3 titik), `backend/scripts/seed-dev-real.js` (untracked, 3), `backend/scripts/seed-facilities-inventory.js` (1), `.audit-runtime/check-login.js` (5), `.audit-runtime/check-login-2.js` (2), `.audit-runtime/create-local-accounts.js` (1). Keputusan yang dibutuhkan: pindahkan ke env var (mengubah alur seed + skrip lokal) **atau** sahkan sebagai tooling DEV. Nilai tidak ditulis di sini; daftar kanonik DEV ada di [operations/default-dev.md](operations/default-dev.md).
+- **`AI_MASTER.md`** (0,5 KB, pointer lama) — masih dirujuk 10 berkas (3 di antaranya hidup). Keputusan 2026-10-05: **dibiarkan**; menghapusnya memutus rantai rujukan tanpa manfaat nyata. Hapus hanya bila rujukan itu dialihkan lebih dulu.
+- **Pre-commit hook `check:docs`** (keputusan owner P24b: ditinjau setelah B8) — **tidak dipasang**. Alasan: hook yang bisa dibagikan butuh dependency baru (dilarang aturan §4), sedangkan hook lokal `.git/hooks/` tidak ikut repo sehingga tidak menjaga siapa pun selain mesin ini. Penggantinya: `npm run check:docs` (tersedia di root `package.json` sejak 2026-10-05) dijalankan sebelum menutup batch dokumentasi — sudah menjadi aturan di [KONTRAK §7](KONTRAK.md).

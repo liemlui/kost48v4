@@ -11,7 +11,7 @@
 ## Bagian 1 - `docs/arsip/legacy/2026-06-16_root_docs_pre_M/04_DEPLOY_AND_PWA.md`
 
 ### KOST48 V5 — Deploy Produksi & PWA Hardening
-**Versi:** 2026-06-13 — konsolidasi dari `archieve/_DEPRECATED_06_DEPLOY_RUNBOOK.md` dan `archieve/_DEPRECATED_08_PWA_AUDIT_AND_HARDENING_PLAN_2026-06-12.md`.
+**Versi:** 2026-06-13 — konsolidasi dari runbook deploy dan audit PWA lama (keduanya sudah dihapus dari repo; jejaknya di riwayat git).
 **Target:** VPS produksi, DB `kost48_v3` port 5432. JANGAN jalankan langkah DB di luar jendela deploy.
 
 <!-- KOST48_DOCS_SYNC_20260612_DEPLOY_PWA -->
@@ -22,7 +22,7 @@
 
 ##### 0. Pra-syarat
 - [ ] Semua commit di `origin/main`; `npx tsc --noEmit` backend & frontend = 0 error.
-- [ ] Fase 1 di `08_CHECKLIST.md` selesai, termasuk harness finance dan rekonsiliasi.
+- Fase 1 di `08_CHECKLIST` selesai, termasuk harness finance dan rekonsiliasi (checklist 2026-06-13; berkasnya kini di arsip luar dokumentasi: `.docs-legacy/2026-06-16_root_docs_pre_M/08_CHECKLIST.md`).
 - [ ] Owner mengonfirmasi database target masih kosong/testing dan menyetujui pembuatan ulang. Snapshot `pg_dump` boleh dibuat sebagai pengaman, tetapi **tidak untuk dimigrasikan** ke produksi baru.
 - [ ] Env produksi WAJIB: `DATABASE_URL`, `JWT_SECRET`, `CORS_ORIGIN` (domain frontend — backend tolak start tanpa ini), `NODE_ENV=production`, `FRONTEND_URL`, `BREVO_API_KEY` + `MAIL_FROM_*`. Auto-ops: **VPS/always-on** → `AUTO_OPS_ENABLED=true` (+`AUTO_OPS_INTERVAL_MINUTES`); **shared hosting/Passenger (mis. IDwebhost)** → `AUTO_OPS_ENABLED=false` + `AUTO_OPS_CRON_TOKEN` + cPanel Cron ke `POST /api/auto-ops/cron` (Bagian D).
 - [ ] **F4-2 PWA Web Push (opsional tapi disarankan):** set `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT` (`mailto:owner@...`). Generate sekali: `node -e "console.log(require('web-push').generateVAPIDKeys())"` (dependency `web-push` sudah terpasang). **Tanpa env ini push otomatis NONAKTIF** (notif in-app tetap jalan, tak error). Dispatch push ikut sweeper auto-ops (`runPushDispatch`) → di shared hosting pastikan cPanel Cron `POST /api/auto-ops/cron` aktif. Frontend butuh HTTPS (service worker) agar tenant bisa opt-in.
@@ -267,7 +267,7 @@ New-NetFirewallRule -DisplayName "KOST48 LAN frontend 5173" -Direction Inbound -
 9. **Auto-ops**: pasang cPanel **Cron Job** tiap 5–10 menit memanggil `POST /api/auto-ops/cron` dgn `X-Cron-Token` (perintah lengkap di "Status kode" atas). Verifikasi: jalankan manual sekali → cek notif/sweeper berjalan.
 10. Smoke: `https://domain/` (frontend) · `https://domain/api/public/rooms` 200 · login OWNER · trial-balance balanced · reconciliation-lite mismatch=0 · cPanel **Resource Usage: memory faults = 0** (bila ada fault → turunkan `NODE_OPTIONS` ke 160 atau upgrade paket).
 
-⚠️ **Ganti password OWNER** dari `admin123`. ⚠️ Jika host ternyata MySQL-only / no-SSH → cPanel batal, pakai VPS. (README ringkas juga ada di dalam paket: `deploy/README-DEPLOY.md`.)
+⚠️ **Ganti password OWNER** dari kata sandi DEV default (lihat [default-dev.md](default-dev.md)). ⚠️ Jika host ternyata MySQL-only / no-SSH → cPanel batal, pakai VPS. (README ringkas juga ada di dalam paket: `deploy/README-DEPLOY.md`.)
 
 ## Bagian 2 - `docs/arsip/legacy/2026-06-16_root_docs_pre_M/GO_LIVE_CHECKLIST.md`
 

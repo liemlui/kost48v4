@@ -234,8 +234,38 @@ for (const prefix of ['backend/modules', 'frontend/pages', 'frontend/components'
   const dest = prefix + '/INDEX.md';
   write(dest, ['# ' + prefix, '', link(dest,'README.md','Peta utama'), '', ...[...groups.keys()].filter(g=>g.startsWith(prefix+'/')).sort().map(g=>'- '+link(dest,g+'.md',g.slice(prefix.length+1))+' — '+groups.get(g).length+' file')].join('\n'));
 }
-let head = 'UNKNOWN';
-try { head = cp.execFileSync('git',['rev-parse','HEAD'],{cwd:ROOT,encoding:'utf8',stdio:['ignore','pipe','pipe']}).trim(); } catch {}
+// Stempel HEAD dibaca dari berkas git (tanpa spawn proses): aman di sandbox, tidak butuh `git` di PATH.
+// Urutan: berkas .git/HEAD -> fallback perintah git (bila tersedia) -> 'UNKNOWN'.
+function bacaHeadDariGit(akar) {
+  try {
+    const dotGit = path.join(akar, '.git');
+    if (!fs.existsSync(dotGit)) return null;
+    const stat = fs.statSync(dotGit);
+    let gitDir = dotGit;
+    if (stat.isFile()) {                                  // worktree/submodule: .git berisi "gitdir: <path>"
+      const isi = fs.readFileSync(dotGit, 'utf8').trim();
+      const m = isi.match(/^gitdir:\s*(.+)$/i);
+      if (!m) return null;
+      gitDir = path.resolve(akar, m[1].trim());
+    }
+    const headRaw = fs.readFileSync(path.join(gitDir, 'HEAD'), 'utf8').trim();
+    const ref = headRaw.match(/^ref:\s*(.+)$/i);
+    if (!ref) return /^[0-9a-f]{7,40}$/i.test(headRaw) ? headRaw : null;
+    const refPath = path.join(gitDir, ...ref[1].trim().split('/'));
+    if (fs.existsSync(refPath)) return fs.readFileSync(refPath, 'utf8').trim();
+    const packed = path.join(gitDir, 'packed-refs');       // ref yang sudah dipak
+    if (fs.existsSync(packed)) {
+      for (const line of fs.readFileSync(packed, 'utf8').split(/\r?\n/)) {
+        const m = line.match(/^([0-9a-f]{40})\s+(.+)$/);
+        if (m && m[2] === ref[1].trim()) return m[1];
+      }
+    }
+    return null;
+  } catch { return null; }
+}
+let head = bacaHeadDariGit(ROOT) || null;
+try { head = head || cp.execFileSync('git',['rev-parse','HEAD'],{cwd:ROOT,encoding:'utf8',stdio:['ignore','pipe','pipe']}).trim(); } catch {}
+if (!head) head = 'UNKNOWN';
 const totals = { files: inventory.length, astFiles: inventory.filter(x=>x.mode==='AST').length, metadataFiles: inventory.filter(x=>x.mode==='metadata').length, schemaFiles: inventory.filter(x=>x.mode==='schema').length, groups: groups.size, symbols: inventory.reduce((a,x)=>a+x.symbols,0), branches: inventory.reduce((a,x)=>a+x.branches,0) };
 const diagnostics = inventory.filter(x=>x.diagnostics && x.diagnostics.length).map(x=>({file:x.file,diagnostics:x.diagnostics}));
 const summary = { date: new Date().toISOString(), head, sourceFingerprint: sourceHash.digest('hex'), parser: ts.version, totals, categories, groups:[...groups.keys()].sort(), roots, exclusions:[...skipped,'.env*','secret/key/archive/log files','deploy generated subdirectories','root historical data/documents outside allowlisted roots'], validation:{uniqueFiles:files.size===inventory.length,missingSources:inventory.filter(x=>!fs.existsSync(path.join(ROOT,x.file))).map(x=>x.file),parseDiagnostics:diagnostics}, schema:inventory.find(x=>x.schemaCounts)?.schemaCounts };

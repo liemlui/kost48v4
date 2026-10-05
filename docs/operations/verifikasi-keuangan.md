@@ -114,7 +114,7 @@ Di DB bersih + COA seeded + CashAccount Cash(1000)+Bank(1010) + periode OPEN:
 - `tsc --noEmit` 0 error.
 - `npm run test:unit` (`node --test "test/**/*.test.js"`) semua PASS (kalau task menyentuh fungsi ber-test).
 - 5 invarian §1 yang relevan tetap true (cek via §4 endpoint).
-- Angka harapan task terpenuhi (lihat "selesai bila" di `08_CHECKLIST` / dossier 13 di domain/keuangan.md).
+- Angka harapan task terpenuhi (lihat "selesai bila" di `08_CHECKLIST` — checklist 2026-06-13, kini di `.docs-legacy/2026-06-16_root_docs_pre_M/08_CHECKLIST.md` — atau dossier 13 di domain/keuangan.md).
 - Tidak menyentuh kode di DO-NOT-TOUCH §2.
 - Kalau ada yang ✗ → JANGAN commit; perbaiki atau STOP & lapor.
 
