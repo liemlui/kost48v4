@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // FILE: scripts/check-docs.mjs — gate dokumen KOST48
-// Kontrak aturannya: docs/RENCANA-ROMPAK-DOCS.md §3. Jalankan dari akar repo:
+// Kontrak aturannya: docs/rencana/RENCANA-ROMPAK-DOCS.md §3 · keputusan owner: docs/rencana/PERTANYAAN-ROMPAK.md. Jalankan dari akar repo:
 //   node scripts/check-docs.mjs
 //
 // Kode keluar: 0 = bersih · 1 = ada pelanggaran · 2 = ada pemeriksaan yang DILEWATI
@@ -11,7 +11,7 @@
 //   R2  tautan relatif mati di dokumen aktif
 //   R3  kotak `[ ]` otoritatif hanya di docs/ANTREAN.md
 //   R4  blok baca wajib (jenis/status/untuk siapa/baca kalau) pada berkas tangga wajib
-//   R5  plafon byte: AGENTS.md <=12 KB · berkas wajib <=16 KB · rujukan <=48 KB
+//   R5  plafon byte: AGENTS.md <=12 KB · berkas wajib <=16 KB · rujukan <=48 KB · berkas kerja batch (docs/rencana) <=16 KB
 //
 // Kalibrasi v1.1 (2026-10-05), dua koreksi dari hasil jalan pertama — keduanya agar gate
 // tidak menuduh yang benar:
@@ -28,6 +28,10 @@
 //   4. R5 menghormati pengecualian daftar isi (D3): berkas rujukan di atas 48 KB TIDAK melanggar bila punya
 //      daftar isi berjangkar (>=3 tautan `](#`) di 80 baris pertama. Plafon tidak dinaikkan.
 //
+// Kalibrasi v1.3 (2026-10-05, keputusan P28/P26):
+//   5. Plan rombak pindah ke docs/rencana/. Berkas di docs/rencana/** BUKAN tangga wajib (P26: jalur wajib =
+//      AGENTS + KONTRAK + ANTREAN + PETA-KODE + maks 2 topik), jadi ia hanya dikenai plafon ukuran 16 KB.
+//
 // Yang TIDAK diperiksa v1 (jangan dianggap sudah dijaga): arsip beku (docs/arsip/**, docs/archieve/**),
 // artefak generated (docs/audit-map/**), rotasi changelog, dan isi berkas di luar glob.
 
@@ -35,7 +39,7 @@ import { readFileSync, readdirSync, existsSync, statSync } from "node:fs";
 import { join, relative, dirname, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 
-const VERSI_GATE = "v1.2";
+const VERSI_GATE = "v1.3";
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const DOCS = join(ROOT, "docs");
 
@@ -49,8 +53,9 @@ const BERKAS_WAJIB = [
   "docs/KONTRAK.md",
   "docs/ANTREAN.md",
   "docs/PETA-KODE.md",
-  "docs/RENCANA-ROMPAK-DOCS.md",
 ];
+// Berkas kerja batch (rencana + kartu keputusan) — bukan tangga wajib, tetap dibatasi ukurannya.
+const RENCANA_RE = /[\\/]docs[\\/]rencana[\\/]/;
 // Blok baca hanya untuk berkas yang DIPILIH pembaca (D2) — AGENTS.md dikecualikan, ia disuntik.
 const BLOK_BACA_WAJIB = ["docs/KONTRAK.md", "docs/ANTREAN.md", "docs/PETA-KODE.md"];
 const POLA_PERAN_AGENTS = /kontrak kerja[^\n]{0,120}disuntik|disuntik otomatis/i;
@@ -208,6 +213,14 @@ const punyaTocBerjangkar = (file) => {
   const kepala = readFileSync(file, "utf8").split(/\r?\n/).slice(0, 80).join("\n");
   return (kepala.match(/\]\(#/g) || []).length >= 3;
 };
+for (const file of berkasAktif) {
+  if (BERKAS_WAJIB.includes(rel(file))) continue;
+  if (!RENCANA_RE.test(file)) continue;
+  const size = statSync(file).size;
+  if (size > PLAFON_WAJIB) {
+    catat("R5", file, 0, `${kb(size)} (${size} B) > plafon berkas kerja batch ${kb(PLAFON_WAJIB)} — jadikan kartu arsip atau pecah`);
+  }
+}
 for (const file of berkasAktif) {
   if (BERKAS_WAJIB.includes(rel(file))) continue;
   if (!RUJUKAN_RE.test(file)) continue;

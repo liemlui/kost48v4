@@ -90,7 +90,17 @@ Berkas yang **hilang** setelah rombak: `docs/README.md` (router → `AGENTS.md` 
 **Status batch (2026-10-05):** **B0 ✅** · **B1 ✅** — baseline gate **v1.1**: **23 pelanggaran + 1 dilewati, exit 2**
 (R1 2 · R2 1 · R3 12 berkas/368 kotak · R4 4 · R5 4). Bukti: `docs/arsip/audit/gate-baseline-2026-10-05.md`.
 Setelah D1–D3 (lihat §4.1): gate **v1.2** = **22 pelanggaran + 1 dilewati** (R1 2 · R2 **0** · R3 12 · R4 4 · R5 4).
-B2–B8 **belum**; menunggu perintah.
+
+**Kebijakan line ending ✅** (2026-10-05, sebelum B2): `.gitattributes` ditambahkan (`* text=auto eol=lf`; skrip Windows CRLF; biner tidak disentuh).
+Fakta yang menghemat satu langkah: isi index sudah LF seluruhnya — **1.109 `i/lf`, 0 `i/crlf`, 0 `i/mixed`** — sehingga **tidak perlu** commit normalisasi;
+146 `w/crlf` + 48 `w/mixed` hanyalah artefak checkout Windows.
+
+**B2 recon ✅** (2026-10-05): 106 berkas `docs/archieve/**` dipetakan — **kelas A 35** (dikutip lewat path) · **kelas B 5** (hanya namanya muncul) · **kelas C 66** (tidak dikutip).
+Daftar pindah + perintah siap-jalan: `docs/rencana/B2-daftar-pindah-arsip-legacy.md`. **Eksekusi B2 belum dijalankan** — menunggu persetujuan owner.
+Temuan yang perlu dibaca sebelum memindahkan: berkas kelas A dikutip **oleh `docs/domain/flow.md`, `docs/domain/kontrak.md`, dan `docs/PETA-KODE.md`** sebagai rujukan eksplisit,
+jadi pemindahan menuntut alih ~181 kemunculan `archieve` di 28 berkas aktif — dan beberapa di antaranya mungkin lebih tepat **diserap** ke dokumen aktif daripada sekadar diarsipkan.
+
+B2 eksekusi–B8 **belum**; menunggu perintah.
 
 ### 4.1 Ledger perbaikan di luar batch
 
@@ -101,6 +111,7 @@ B2–B8 **belum**; menunggu perintah.
 | **D3** R5 menghormati **daftar isi berjangkar**; plafon **tidak** dinaikkan | aturan gate v1.2 | **selesai** (gate menerapkan). Fakta: `docs/domain/publik.md` **tidak** punya TOC berjangkar (0 tautan `](#` di 682 baris) → tetap pelanggaran sampai **B8** menambahkan TOC |
 | **R1** `docs/domain/keuangan.md:126–127` (2 baris angka test basi) | temuan gate yang nyata | **dibuka** — ditutup di **B5** |
 | **R5** `docs/domain/publik.md` 48,7 KB tanpa TOC | temuan gate | **dibuka** — ditutup di **B8** dengan TOC berjangkar (bukan dipecah) |
+| **Exception tertulis** `docs/rencana/B2-daftar-pindah-arsip-legacy.md` 31,2 KB > plafon berkas kerja batch 16 KB | daftar kerja sementara (keputusan **P8**: biarkan sampai B8) | **diterima sadar** — gate **tetap** melaporkannya sebagai pelanggaran (plafon tidak dilemahkan, sesuai D3); ditutup di **B8** ketika berkasnya jadi kartu arsip ber-banner tanpa blok perintah. Sejak gate v1.3, R5 mencakup `docs/rencana/**`. |
 
 **Kesiapan rumah arsip (diverifikasi 2026-10-05):** `docs/arsip/` **siap** menjadi rumah final — punya `README.md` dengan
 aturan + inventaris, dan **11 dari 11** berkas isinya terdaftar di README (syarat Q19-v). B2 karena itu tidak perlu
@@ -125,7 +136,7 @@ menyiapkan rumahnya, hanya memverifikasi **sitasi** dan menyiapkan daftar pindah
 
 ## 6. Daftar berkas yang diniatkan (record B0)
 
-**Dibuat pada B0/B1:** `docs/RENCANA-ROMPAK-DOCS.md` · `scripts/check-docs.mjs` · `docs/arsip/audit/gate-baseline-2026-10-05.md` ·
+**Dibuat pada B0/B1:** `docs/rencana/RENCANA-ROMPAK-DOCS.md` · `docs/rencana/PERTANYAAN-ROMPAK.md` · `scripts/check-docs.mjs` · `docs/arsip/audit/gate-baseline-2026-10-05.md` ·
 `.design-audit/docs-snapshot-2026-10-05/**` (snapshot, untracked).
 
 **Dibuat pada batch berikutnya:** `docs/KONTRAK.md` · `docs/ANTREAN.md` · `docs/arsip/{audit,changelog,legacy,plans}/**` · `.audit-map/**`.
@@ -173,3 +184,4 @@ menyiapkan rumahnya, hanya memverifikasi **sitasi** dan menyiapkan daftar pindah
 | 2026-10-05 | Dibuat dari keputusan owner Q1–Q32 + O1–O7. Menggantikan kebijakan `ARSIP-BATAS` dan target 7-berkas. B0–B1 dikerjakan; berhenti di checkpoint untuk persetujuan lanjut. |
 | 2026-10-05 | **B0 selesai:** branch `docs-rombak` + snapshot `.design-audit/docs-snapshot-2026-10-05/` (1.302 berkas, 9,0 MB); 9 berkas kawalan terbukti 0 berubah (SHA-256). **B1 selesai:** `scripts/check-docs.mjs` v1.1; baseline **23 pelanggaran + 1 dilewati (exit 2)** tersimpan di `docs/arsip/audit/gate-baseline-2026-10-05.md`. Dua koreksi v1.0→v1.1 (sumber versi kanonik; kartu bukti audit/history) dan satu cacat R3 dibetulkan agar gate tidak lulus sambil tidak memeriksa. |
 | 2026-10-05 | **D1–D3 (keputusan owner) diterapkan:** D1 tautan `mode-cepat.md` diperbaiki (R2 1 → 0); D2 `AGENTS.md` dikecualikan dari R4 dan diganti kewajiban **baris peran**; D3 R5 menghormati daftar isi berjangkar, plafon tidak dinaikkan. Gate → **v1.2**, **22 pelanggaran + 1 dilewati**. Ledger di §4.1. |
+| 2026-10-05 | **Commit artefak B0–B1 `22f8d408`** (plan + gate + baseline; fix D1 sengaja tidak ikut) dan **commit kebijakan line ending `f8fbff7d`** (`.gitattributes` + appendix baseline). Tanpa push. **B2 recon** menghasilkan `docs/rencana/B2-daftar-pindah-arsip-legacy.md` (A 35 · B 5 · C 66); belum ada berkas dipindahkan. |

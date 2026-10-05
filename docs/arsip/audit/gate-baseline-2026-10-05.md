@@ -2,7 +2,7 @@
 
 > **BANNER ARSIP** · Diarsipkan: **2026-10-05** · Alasan: **kartu bukti bertanggal**, bukan dokumen hidup.
 > Isinya **dibekukan**: angka di sini adalah potret kondisi pada tanggal tersebut dan **tidak diperbarui**.
-> Rumah aturannya: [RENCANA-ROMPAK-DOCS.md](../../RENCANA-ROMPAK-DOCS.md) §3–§4 (batch B1).
+> Rumah aturannya: [RENCANA-ROMPAK-DOCS.md](../rencana/RENCANA-ROMPAK-DOCS.md) §3–§4 (batch B1) · keputusan owner: [PERTANYAAN-ROMPAK.md](../rencana/PERTANYAAN-ROMPAK.md).
 > Pengganti untuk keadaan sekarang: **jalankan** `node scripts/check-docs.mjs` dari akar repo.
 
 > **Blok baca** · Jenis: **kartu bukti gate** · Status: **beku (potret 2026-10-05)** · Untuk siapa: owner + agen pelaksana rombak dokumentasi
