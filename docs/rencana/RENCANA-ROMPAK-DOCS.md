@@ -17,7 +17,7 @@ kebijakan `ARSIP-BATAS` (24 Sep 2026) serta target "7 berkas utama + 1 arsip" pa
 | Kotak terbuka di `docs/**` | 1.447 `[ ]` — vs **29** yang otoritatif |
 | `docs/archieve/` (legacy) · `docs/audit-map/` (generated) | 106 berkas/1,46 MB · 1.123 berkas/4,0 MB |
 
-Rincian per berkas ada di [kartu keputusan](PERTANYAAN-ROMPAK.md) §1 dan kartu baseline gate.
+Rincian per berkas: kartu keputusan + kartu baseline gate.
 
 **Temuan yang mengubah dua keputusan (Q9, Q26):** baris **bukan** proksi biaya yang sah.
 `docs/STATUS.md` hanya **147 baris** tetapi **78,4 KB** (533 byte/baris); `docs/audit/audit-checklist-total.md`
@@ -102,7 +102,7 @@ jadi pemindahan menuntut alih ~181 kemunculan `archieve` di 28 berkas aktif — 
 - **B2.1 `2971efa7`** — 39 berkas pindah ke `docs/arsip/legacy/`; **37 identik SHA-256**, **2 transformasi** (redaksi kredensial, sisa 0); 15 berkas untracked kini tracked (P4=a).
 - **B2.2 `59e04736`** — **60 rujukan dialihkan** di 23 dokumen aktif, bertahap 4 klaster + gate tiap klaster (P7). Rujukan hanya dialihkan bila targetnya ada; 4 dibiarkan (lihat §4.1).
 - **B2.3** (putaran ini) — pernyataan struktur diperbarui di `AGENTS.md` §6, `docs/ATURAN.md`, `docs/README.md`, `docs/product/orientasi.md`, `docs/arsip/README.md`.
-- **Menunggu owner:** 66 berkas kelas C + `08_CHECKLIST.md` keluar repo (§6.2 daftar B2) → lalu hapus baris `docs/archieve/` di `.git/info/exclude` (penyimpangan P5 yang disetujui) dan folder `docs/archieve/` di B8 (P11).
+- **Menunggu owner:** 66 berkas kelas C + `08_CHECKLIST.md` keluar repo — skrip siap-jalan `docs/rencana/B2-pindah-keluar-repo.ps1` (**UJI** default, `-Execute` untuk jalan; sudah diuji: 67 target). Sesudahnya: hapus baris `docs/archieve/` di `.git/info/exclude` (P5) dan folder di B8 (P11). Rujukan rusak: draft di `docs/rencana/PENUTUP-SITASI-RUSAK.md`.
 
 B3–B8 **belum**; menunggu perintah.
 

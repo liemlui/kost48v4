@@ -32,6 +32,11 @@
 //   5. Plan rombak pindah ke docs/rencana/. Berkas di docs/rencana/** BUKAN tangga wajib (P26: jalur wajib =
 //      AGENTS + KONTRAK + ANTREAN + PETA-KODE + maks 2 topik), jadi ia hanya dikenai plafon ukuran 16 KB.
 //
+// Kalibrasi v1.4 (2026-10-05): rentang kode inline (`...`) dinetralkan sebelum R2 mencocokkan tautan.
+// Sebab nyata: dokumen yang MENJELASKAN aturan R2 menulis contoh `[teks](target)` di dalam backtick,
+// dan gate menuduhnya sebagai tautan mati. Kurung milik tautan asli ada DI LUAR rentang kode, jadi
+// tautan sungguhan tetap terperiksa.
+//
 // Yang TIDAK diperiksa v1 (jangan dianggap sudah dijaga): arsip beku (docs/arsip/**, docs/archieve/**),
 // artefak generated (docs/audit-map/**), rotasi changelog, dan isi berkas di luar glob.
 
@@ -39,7 +44,7 @@ import { readFileSync, readdirSync, existsSync, statSync } from "node:fs";
 import { join, relative, dirname, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 
-const VERSI_GATE = "v1.3";
+const VERSI_GATE = "v1.4";
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const DOCS = join(ROOT, "docs");
 
@@ -147,6 +152,8 @@ for (const file of diperiksa) {
 
 // ── R2 — tautan relatif mati ───────────────────────────────────────────────
 const POLA_LINK = /\[[^\]]*\]\(([^)\s]+)(?:\s+"[^"]*")?\)/g;
+// Netralkan rentang kode inline agar contoh di dalam backtick tidak dianggap tautan hidup (v1.4).
+const tanpaKodeInline = (s) => s.replace(/`[^`]*`/g, (m) => " ".repeat(m.length));
 for (const file of diperiksa) {
   const teks = readFileSync(file, "utf8");
   const dir = dirname(file);
@@ -154,7 +161,7 @@ for (const file of diperiksa) {
   teks.split(/\r?\n/).forEach((baris, i) => {
     if (/^\s*```/.test(baris)) { dalamFence = !dalamFence; return; }
     if (dalamFence) return;
-    for (const m of baris.matchAll(POLA_LINK)) {
+    for (const m of tanpaKodeInline(baris).matchAll(POLA_LINK)) {
       const target = m[1];
       if (/^(https?:|mailto:|tel:|#|data:)/i.test(target)) continue;
       const bersih = decodeURIComponent(target.split("#")[0].split("?")[0]);
