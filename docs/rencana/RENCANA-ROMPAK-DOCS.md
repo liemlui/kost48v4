@@ -67,8 +67,8 @@ Berkas yang **hilang** setelah rombak: `AGENTS.md` §3 (router → `AGENTS.md` �
 
 | Batch | Isi | Gate / bukti | Rollback |
 |---|---|---|---|
-| **B0** | Branch `docs-rombak`; snapshot `docs/` ke `.design-audit/docs-snapshot-2026-10-05/`; daftar berkas yang diniatkan | `git status` sebelum = sesudah untuk berkas yang tidak diniatkan | hapus branch bila gagal |
-| **B1** | `scripts/check-docs.mjs` (R1–R5) + jalankan pada kondisi sekarang; baseline disimpan sebagai berkas | Baseline **wajib merah** dan tersimpan sebagai berkas, bukan hanya keluaran terminal | hapus skrip + berkas baseline |
+| **B0** ✅ | Branch `docs-rombak`; snapshot `docs/` ke `.design-audit/docs-snapshot-2026-10-05/`; daftar berkas yang diniatkan | `git status` sebelum = sesudah untuk berkas yang tidak diniatkan | hapus branch bila gagal |
+| **B1** ✅ | `scripts/check-docs.mjs` (R1–R5) + jalankan pada kondisi sekarang; baseline disimpan sebagai berkas | Baseline **wajib merah** dan tersimpan sebagai berkas, bukan hanya keluaran terminal | hapus skrip + berkas baseline |
 | **B2** ✅ | 39 berkas dikutip → `docs/arsip/legacy/`; 68 sisanya → `.docs-legacy/`; **60 rujukan** dialihkan; 7 penghapusan tracked | konservasi SHA 68/68 · 0 tautan patah baru · P5 & P11 ditutup | revert commit |
 | **B3** ✅ | `docs/audit-map/**` → **`.audit-map/`** (tetap gitignored); generator → `scripts/audit-map-generate.cjs` (**tracked**); 157 tautan + 24 path dokumen dialihkan | **1.203 tautan sumber** diperbaiki · **4.013 tautan diverifikasi, 0 rusak** · gate R2 0 · regenerasi peta menunggu owner — ledger: [B3-ledger-peta-audit.md](B3-ledger-peta-audit.md) | revert commit |
 | **B4** ✅ | Checklist audit 135 ID → arsip + indeks tipis; kebijakan 368 kotak: **117 ke arsip · 108 dikonversi · 78 bertanda non-otoritatif · 65 direklasifikasi** | Bukti konversi **normalisasi 5/5 identik** · R3 **0** dengan **143 kotak dikecualikan tetap terlihat** · R7 hijau · R2 0 — ledger: [B4-ledger-kotak.md](B4-ledger-kotak.md) | revert commit |
