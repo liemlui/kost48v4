@@ -14,10 +14,7 @@ kebijakan `ARSIP-BATAS` (24 Sep 2026) serta target "7 berkas utama + 1 arsip" pa
 |---|---:|
 | `docs/**` seluruhnya (sebelum B2) | 1.291 berkas `.md` · 7,3 MB · ≈1,87 juta token (proksi `byte/4`) |
 | **Jalur baca "panas"** (yang benar-benar mungkin dibaca sesi baru) | **50 berkas · 1.037 KB · ≈265 rb token** |
-| Kotak terbuka di `docs/**` | 1.447 `[ ]` — vs **29** yang otoritatif |
-| `docs/archieve/` (legacy) · `.audit-map/` (generated) | 106 berkas/1,46 MB · 1.123 berkas/4,0 MB |
-
-Rincian per berkas: kartu keputusan + kartu baseline gate.
+Rincian per berkas: kartu keputusan, baseline gate, dan ledger per batch.
 
 **Temuan yang mengubah Q9/Q26:** baris **bukan** proksi biaya yang sah — `docs/STATUS.md` hanya 147 baris tetapi **78,4 KB**; ambang berbasis baris meloloskan justru dokumen termahal, jadi ukuran mengikat = **byte**.
 **Temuan kedua:** `AGENTS.md` disuntik harness **tiap request** → menambah isinya adalah pajak per-putaran, bukan ongkos sekali baca.
@@ -126,8 +123,7 @@ B3–B8 **belum**; menunggu perintah.
 
 ## 5. Batas dan risiko
 
-- **Sandbox sesi `workspace-write`:** memindahkan berkas **ke luar repo** (bagian dari B2) tidak bisa dilakukan agen. Owner mengeksekusi
-  daftar perintah yang disiapkan; agen tidak meminta eskalasi untuk hal yang bisa dijalankan owner.
+- **Sandbox:** menulis **di luar repo** tidak mungkin bagi agen (dibuktikan 2026-10-05) → aset besar ditaruh di `.docs-legacy/` dan `.audit-map/`, keduanya diabaikan git (keputusan owner).
 - **76 berkas `docs/archieve/**` untracked** → tidak ada jaring git. Selalu dipindah, tidak pernah dihapus.
 - **13 entri dirty** pada saat B0 (`main`): 9 dokumen (AUDIT, KEPUTUSAN-OWNER, STATUS, audit/README, domain/ai,
   history/changelog/2026-09, product/portal-owner-admin + 2 source) + 4 untracked. 9 berkas dokumen itu **tidak disentuh** oleh B0/B1;
