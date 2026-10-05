@@ -1,12 +1,12 @@
 # Audit 360° Flow Uang (Jul 2026) — Bukti Bertanggal
 
 > Dipindah apa adanya dari `docs/M04_KEUANGAN.md` (Tahap 3 S2.b4, 23 Sep 2026) pada DOC-GOV-20260922.
-> Sifat: **bukti bertanggal**, bukan status aktif. Detail asal: `docs/archieve/_previous_cycles/M15_AUDIT_360_FLOW_UANG.md`.
+> Sifat: **bukti bertanggal**, bukan status aktif. Detail asal: `docs/arsip/legacy/_previous_cycles/M15_AUDIT_360_FLOW_UANG.md`.
 > **Status per temuan** (verifikasi statis 23 Sep 2026): [p1-uang-status-2026-09-23.md](audit-uang-huni-2026-07.md) — P1-01..P1-03 indikasi diperbaiki; P1-04..P1-09 UNKNOWN (snapshot 23 Sep). **Pembaruan 25 Sep 2026:** [verifikasi statis P1-04..P1-09](p1-uang-verifikasi-2026-09-25.md) — P1-04 & P1-05 masih ada, P1-06 & P1-07 indikasi diperbaiki, P1-08 sempit, P1-09 terverifikasi.
 
 ## Audit 360° Flow Uang (Jul 2026)
 
-**Status:** 🟢 90% SEHAT — 3 HIGH, 4 MEDIUM, 2 LOW. Detail → `docs/archieve/_previous_cycles/M15_AUDIT_360_FLOW_UANG.md`
+**Status:** 🟢 90% SEHAT — 3 HIGH, 4 MEDIUM, 2 LOW. Detail → `docs/arsip/legacy/_previous_cycles/M15_AUDIT_360_FLOW_UANG.md`
 
 ### 8 Invarian Keuangan — Status Terkini
 
@@ -45,7 +45,7 @@ P1-04 deposit ledger sourceId dedupe (masih ada per 25 Sep) · P1-05 EXPIRED→R
 
 ## Audit 360° Flow Huni — Jul 2026 (M16)
 
-**Status:** 🟢 93% SEHAT — 2 HIGH (✅ FIXED), 4 MEDIUM, 1 LOW. Detail → `docs/archieve/_previous_cycles/M16_AUDIT_360_FLOW_HUNI.md`
+**Status:** 🟢 93% SEHAT — 2 HIGH (✅ FIXED), 4 MEDIUM, 1 LOW. Detail → `docs/arsip/legacy/_previous_cycles/M16_AUDIT_360_FLOW_HUNI.md`
 
 ### Temuan HIGH — ✅ FIXED
 
@@ -120,7 +120,7 @@ HS-01 s/d HS-06 dan HS-09 adalah tambahan murni dari sisi siklus huni — belum 
 
 Jenis bukti: **verifikasi statis source** (membaca kode), **bukan** verifikasi runtime.
 Baseline: HEAD `9512ad73` (setelah commit dokumentasi 23 Sep 2026). Tidak ada test/build/server/hook yang dijalankan.
-Rujukan asal temuan: `docs/M04_KEUANGAN.md` §`## Audit 360° Flow Uang (Jul 2026)` dan arsip `docs/archieve/_previous_cycles/M15_AUDIT_360_FLOW_UANG.md`.
+Rujukan asal temuan: `docs/M04_KEUANGAN.md` §`## Audit 360° Flow Uang (Jul 2026)` dan arsip `docs/arsip/legacy/_previous_cycles/M15_AUDIT_360_FLOW_UANG.md`.
 
 ## Metode
 

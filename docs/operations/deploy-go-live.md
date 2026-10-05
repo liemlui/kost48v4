@@ -3,7 +3,7 @@
 > Migrasi dari docs/M08_DEPLOY_GO_LIVE.md (Bagian 1, Bagian 2, Appendix A) pada f8f9a589 (DOC-GOV-20260922 Tahap 3).
 > Sumber asli sudah dihapus di Fase 3 (23 Sep 2026); berkas ini kanonik.
 
-## Bagian 1 - `docs/archieve/2026-06-16_root_docs_pre_M/04_DEPLOY_AND_PWA.md`
+## Bagian 1 - `docs/arsip/legacy/2026-06-16_root_docs_pre_M/04_DEPLOY_AND_PWA.md`
 
 ### KOST48 V5 — Deploy Produksi & PWA Hardening
 **Versi:** 2026-06-13 — konsolidasi dari `archieve/_DEPRECATED_06_DEPLOY_RUNBOOK.md` dan `archieve/_DEPRECATED_08_PWA_AUDIT_AND_HARDENING_PLAN_2026-06-12.md`.
@@ -264,7 +264,7 @@ New-NetFirewallRule -DisplayName "KOST48 LAN frontend 5173" -Direction Inbound -
 
 ⚠️ **Ganti password OWNER** dari `admin123`. ⚠️ Jika host ternyata MySQL-only / no-SSH → cPanel batal, pakai VPS. (README ringkas juga ada di dalam paket: `deploy/README-DEPLOY.md`.)
 
-## Bagian 2 - `docs/archieve/2026-06-16_root_docs_pre_M/GO_LIVE_CHECKLIST.md`
+## Bagian 2 - `docs/arsip/legacy/2026-06-16_root_docs_pre_M/GO_LIVE_CHECKLIST.md`
 
 > **ARSIP LAN — bukan prosedur produksi.** Jangan gunakan `golive:setup`, nama database, seed, atau instruksi env di bagian lama ini untuk online deployment. Untuk production gunakan hanya `M08_DEPLOY_GO_LIVE.md` + gate `M19_EFISIENSI_HOSTING_512MB.md` dan tabel hosting M19 bagian 9.
 

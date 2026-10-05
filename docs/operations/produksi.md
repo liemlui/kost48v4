@@ -545,7 +545,7 @@ Kebijakan owner terkait kerusakan:
 > - Kepastian guling inventaris (C, F1, I, J, M)
 > - **Gudang** — belum diaudit
 > - **Ruang umum** — belum diaudit
-> - Referensi lengkap: `docs/archieve/AUDIT_INVENTARIS_LENGKAP.md`
+> - Referensi lengkap: `docs/arsip/legacy/AUDIT_INVENTARIS_LENGKAP.md`
 
 ## 8. DeepSeek AI — API Key & Konfigurasi
 

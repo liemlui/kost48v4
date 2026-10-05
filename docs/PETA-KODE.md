@@ -132,7 +132,7 @@ Standar struktur dan progressive disclosure Owner/Admin: `docs/product/portal-ow
 - **Growth/AI:** LoyaltyPoint, LoyaltyReward, Redemption, PeerBehaviorReport, TenantReferral, Faq, AdditionalService, ServiceInterest, SatisfactionSurvey, MarketAnalysis, AiDraft, GuestPreferenceSurvey, ExternalReview
 
 ## Flow & audit anchor
-Tabel flow + method-anchor: `docs/domain/kontrak.md` (kontrak/uang). Job otomatis → `domain/operasional.md` di audit/audit-operasional-2026-07.md § P5 Auto-Ops. Keputusan owner (84+): `docs/KEPUTUSAN-OWNER.md`. Audit terdahulu → `docs/archieve/_previous_cycles/M09_AUDIT.md`.
+Tabel flow + method-anchor: `docs/domain/kontrak.md` (kontrak/uang). Job otomatis → `domain/operasional.md` di audit/audit-operasional-2026-07.md § P5 Auto-Ops. Keputusan owner (84+): `docs/KEPUTUSAN-OWNER.md`. Audit terdahulu → `docs/arsip/legacy/_previous_cycles/M09_AUDIT.md`.
 
 ## Shared utilities (ditambahkan 2026-07-07)
 | Utility | Path | Tanggung jawab |
@@ -149,7 +149,7 @@ Tabel flow + method-anchor: `docs/domain/kontrak.md` (kontrak/uang). Job otomati
 
 ## Frontend — Redundansi UI/UX (Fase AM)
 
-✅ **16/16 task selesai** — Detail → `docs/archieve/_previous_cycles/M14_REDUNDANSI_UI_UX.md`
+✅ **16/16 task selesai** — Detail → `docs/arsip/legacy/_previous_cycles/M14_REDUNDANSI_UI_UX.md`
 
 | Task | Dampak |
 |------|--------|
@@ -170,8 +170,8 @@ Tabel flow + method-anchor: `docs/domain/kontrak.md` (kontrak/uang). Job otomati
 
 ## Dokumen audit terbaru
 - **Audit UI/UX lintas portal aktif (30 Jul 2026):** `docs/audit/status-ao-lintas-portal.md` — 66 kombinasi awal, verifikasi homepage produksi, review statis dashboard Owner/Admin, benchmark terkurasi, antrean kolaboratif AO-00..AO-23
-- **Audit Fable (2-3 Jul 2026):** `docs/archieve/audit_fable/00_INDEX.md` — 19 checklist C01-C19
-- **Audit Reasonix Code (7 Jul 2026):** `docs/archieve/audit_reasonix/RINGKASAN_EKSEKUTIF.md` — 82 temuan baru
-- **Audit 360° P3-P8 (Jul 2026):** `docs/archieve/_previous_cycles/M17_AUDIT_360_P3_P8.md`
-- **Audit 360° Flow Uang (Jul 2026):** `docs/archieve/_previous_cycles/M15_AUDIT_360_FLOW_UANG.md`
-- **Audit 360° Flow Huni (Jul 2026):** `docs/archieve/_previous_cycles/M16_AUDIT_360_FLOW_HUNI.md`
+- **Audit Fable (2-3 Jul 2026):** `docs/arsip/legacy/audit_fable/00_INDEX.md` — 19 checklist C01-C19
+- **Audit Reasonix Code (7 Jul 2026):** `docs/arsip/legacy/audit_reasonix/RINGKASAN_EKSEKUTIF.md` — 82 temuan baru
+- **Audit 360° P3-P8 (Jul 2026):** `docs/arsip/legacy/_previous_cycles/M17_AUDIT_360_P3_P8.md`
+- **Audit 360° Flow Uang (Jul 2026):** `docs/arsip/legacy/_previous_cycles/M15_AUDIT_360_FLOW_UANG.md`
+- **Audit 360° Flow Huni (Jul 2026):** `docs/arsip/legacy/_previous_cycles/M16_AUDIT_360_FLOW_HUNI.md`

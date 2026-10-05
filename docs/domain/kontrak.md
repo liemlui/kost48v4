@@ -8,10 +8,10 @@ Rujukan: [KEPUTUSAN-OWNER](../KEPUTUSAN-OWNER.md) · [STATUS](../STATUS.md) · [
 > Migrasi dari docs/M03_FLOW_KONTRAK.md L551–955 pada aeedaf99
 > (DOC-GOV-20260922 Tahap 3 S2.a).
 
-## Bagian 2 - `docs/archieve/2026-06-16_root_docs_pre_M/06_CONTRACTS.md`
+## Bagian 2 - `docs/arsip/legacy/2026-06-16_root_docs_pre_M/06_CONTRACTS.md`
 
 ### KOST48 V5 — Contracts & Business Rules
-**Versi:** 2026-06-13 — pasca Konsolidasi Docs V3. **Sumber historis:** `docs/archieve/2026-06-16_root_docs_pre_M/06_CONTRACTS.md` (kontrak lengkap lama; V5.9.8-A). File ini adalah distilled contracts yang hanya memuat **aturan bisnis yang masih berlaku**. Detail per domain ada di dossier `10`-`19`.
+**Versi:** 2026-06-13 — pasca Konsolidasi Docs V3. **Sumber historis:** `docs/arsip/legacy/2026-06-16_root_docs_pre_M/06_CONTRACTS.md` (kontrak lengkap lama; V5.9.8-A). File ini adalah distilled contracts yang hanya memuat **aturan bisnis yang masih berlaku**. Detail per domain ada di dossier `10`-`19`.
 
 <!-- KOST48_DOCS_SYNC_20260613_CONTRACTS_CONSOLIDATED -->
 
@@ -334,7 +334,7 @@ Matrix ini memuat kontrak target keputusan owner. Area bertanda OWNER-only belum
 - Generated Prisma files adalah build artifacts, harus di-restore sebelum commit.
 - No production DB mutation.
 - No schema change tanpa explicit approval.
-- Runbook: `docs/archieve/2026-06-16_root_docs_pre_M/04_DEPLOY_AND_PWA.md`.
+- Runbook: `docs/arsip/legacy/2026-06-16_root_docs_pre_M/04_DEPLOY_AND_PWA.md`.
 
 ---
 
@@ -396,20 +396,20 @@ try { Invoke-RestMethod -Method Post -Uri "http://localhost:3000/api/inventory-m
 ---
 
 **Referensi silang dossier domain:**
-- Booking & Stay: `docs/archieve/2026-06-16_root_docs_pre_M/10_PEMBAYARAN_INVOICE.md` + `docs/archieve/2026-06-16_root_docs_pre_M/11_BOOKING_RENEWAL.md`
-- Checkout & Deposit: `docs/archieve/2026-06-16_root_docs_pre_M/12_CHECKOUT_DEPOSIT_OVERSTAY.md`
-- Akuntansi & Laporan: `docs/archieve/2026-06-16_root_docs_pre_M/13_AKUNTANSI_LAPORAN.md` + `docs/archieve/2026-06-16_root_docs_pre_M/05_VERIFIKASI_KEUANGAN.md`
-- Inventaris: `docs/archieve/2026-06-16_root_docs_pre_M/14_INVENTARIS.md`
-- Staf & Tiket: `docs/archieve/2026-06-16_root_docs_pre_M/15_STAF_TIKET_KPI.md`
-- Notifikasi: `docs/archieve/2026-06-16_root_docs_pre_M/16_NOTIFIKASI_PENGUMUMAN.md`
-- Publik & Marketing: `docs/archieve/2026-06-16_root_docs_pre_M/17_PUBLIK_MARKETING_UIUX.md`
-- Auth & Onboarding: `docs/archieve/2026-06-16_root_docs_pre_M/18_AUTH_FONDASI_ONBOARDING.md`
-- Flow Map: `docs/archieve/2026-06-16_root_docs_pre_M/02_FLOW_MAP.md`
-- Keputusan Owner: `docs/archieve/2026-06-16_root_docs_pre_M/03_KEPUTUSAN_OWNER.md`
-- Deploy & PWA: `docs/archieve/2026-06-16_root_docs_pre_M/04_DEPLOY_AND_PWA.md`
-- Blueprint: `docs/archieve/2026-06-16_root_docs_pre_M/00_BLUEPRINT.md`
+- Booking & Stay: `docs/arsip/legacy/2026-06-16_root_docs_pre_M/10_PEMBAYARAN_INVOICE.md` + `docs/arsip/legacy/2026-06-16_root_docs_pre_M/11_BOOKING_RENEWAL.md`
+- Checkout & Deposit: `docs/arsip/legacy/2026-06-16_root_docs_pre_M/12_CHECKOUT_DEPOSIT_OVERSTAY.md`
+- Akuntansi & Laporan: `docs/arsip/legacy/2026-06-16_root_docs_pre_M/13_AKUNTANSI_LAPORAN.md` + `docs/arsip/legacy/2026-06-16_root_docs_pre_M/05_VERIFIKASI_KEUANGAN.md`
+- Inventaris: `docs/arsip/legacy/2026-06-16_root_docs_pre_M/14_INVENTARIS.md`
+- Staf & Tiket: `docs/arsip/legacy/2026-06-16_root_docs_pre_M/15_STAF_TIKET_KPI.md`
+- Notifikasi: `docs/arsip/legacy/2026-06-16_root_docs_pre_M/16_NOTIFIKASI_PENGUMUMAN.md`
+- Publik & Marketing: `docs/arsip/legacy/2026-06-16_root_docs_pre_M/17_PUBLIK_MARKETING_UIUX.md`
+- Auth & Onboarding: `docs/arsip/legacy/2026-06-16_root_docs_pre_M/18_AUTH_FONDASI_ONBOARDING.md`
+- Flow Map: `docs/arsip/legacy/2026-06-16_root_docs_pre_M/02_FLOW_MAP.md`
+- Keputusan Owner: `docs/arsip/legacy/2026-06-16_root_docs_pre_M/03_KEPUTUSAN_OWNER.md`
+- Deploy & PWA: `docs/arsip/legacy/2026-06-16_root_docs_pre_M/04_DEPLOY_AND_PWA.md`
+- Blueprint: `docs/arsip/legacy/2026-06-16_root_docs_pre_M/00_BLUEPRINT.md`
 
-**Sumber historis lengkap:** `docs/archieve/2026-06-16_root_docs_pre_M/06_CONTRACTS.md` (V5.9.8-A; arsip)
+**Sumber historis lengkap:** `docs/arsip/legacy/2026-06-16_root_docs_pre_M/06_CONTRACTS.md` (V5.9.8-A; arsip)
 
 ---
 

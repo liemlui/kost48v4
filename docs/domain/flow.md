@@ -8,12 +8,12 @@ Rujukan: [KEPUTUSAN-OWNER](../KEPUTUSAN-OWNER.md) · [STATUS](../STATUS.md) · [
 > Migrasi dari docs/M03_FLOW_KONTRAK.md L61–550 pada aeedaf99
 > (DOC-GOV-20260922 Tahap 3 S2.a).
 
-## Bagian 1 - `docs/archieve/2026-06-16_root_docs_pre_M/02_FLOW_MAP.md`
+## Bagian 1 - `docs/arsip/legacy/2026-06-16_root_docs_pre_M/02_FLOW_MAP.md`
 
 ### KOST48 V5 — Flow Map (Peta Alur Kode Krusial)
 **Versi:** 2026-06-13 — sinkronisasi keputusan owner, status kode, dossier `10`-`19`, dan urutan Auto-Ops aktual.
 **Tujuan:** Peta NARASI alur lintas-domain (apa memanggil apa, transisi status, side-effect, invarian).
-> ⚠️ **ANCHOR BARIS:** angka `file:baris` di dokumen ini = posisi METODE pada snapshot audit **2026-06-13** — **INDIKATIF** (pasti bergeser sejak commit tersebut). **Sumber historis:** `docs/archieve/2026-06-16_root_docs_pre_M/_PETA_AI.md §2` + dossier `10`-`19`. Bila ragu, **grep nama metode di `backend/src/`**, jangan andalkan baris; pakai `docs/PETA-KODE.md` untuk navigasi modul terkini.
+> ⚠️ **ANCHOR BARIS:** angka `file:baris` di dokumen ini = posisi METODE pada snapshot audit **2026-06-13** — **INDIKATIF** (pasti bergeser sejak commit tersebut). **Sumber historis:** `docs/arsip/legacy/2026-06-16_root_docs_pre_M/_PETA_AI.md §2` + dossier `10`-`19`. Bila ragu, **grep nama metode di `backend/src/`**, jangan andalkan baris; pakai `docs/PETA-KODE.md` untuk navigasi modul terkini.
 
 <!-- KOST48_DOCS_SYNC_20260630_FLOW_MAP_REVIEWED -->
 
@@ -411,7 +411,7 @@ readiness:75 → preview:80 → post:93 (manual) / autoCloseMonthly:122 → reop
 ##### 14.2 Pengumuman
 - `modules/announcements/` — draft → publish :50 → tampil di portal tenant.
 
-##### 14.3 PWA (lihat `docs/archieve/2026-06-16_root_docs_pre_M/04_DEPLOY_AND_PWA.md`)
+##### 14.3 PWA (lihat `docs/arsip/legacy/2026-06-16_root_docs_pre_M/04_DEPLOY_AND_PWA.md`)
 - Saat ini: **PWA MVP installable**, belum operasional yang kuat.
 - 17 temuan audit: 3 CRITICAL (PWA-01 s.d 03: produksi tertinggal, HTTP tidak paksa HTTPS, frontend tanpa security headers), 6 HIGH, 7 MEDIUM, 1 PLANNED (push notification).
 - **4 Phase perbaikan:** Phase 0 (Release Gate), Phase 1 (Cache Safety + Update + Offline UX), Phase 2 (Installability), Phase 3 (Web Push dengan outbox).
@@ -500,7 +500,7 @@ State: TanStack Query + Axios; auth JWT. Audit historis UI/UX ada di `archieve/_
 ## Riwayat audit
 
 
-**Status:** 🟢 Solid (1 🔴 CRITICAL ✅ FIXED). Detail → `docs/archieve/_previous_cycles/M17_AUDIT_360_P3_P8.md`
+**Status:** 🟢 Solid (1 🔴 CRITICAL ✅ FIXED). Detail → `docs/arsip/legacy/_previous_cycles/M17_AUDIT_360_P3_P8.md`
 
 ✅ Enumeration-safe login & forgotPassword · ✅ Suspend memutus sesi via JWT `pwdAt` claim · ✅ PasswordResetToken SHA-256 hash, one-time · ✅ bcrypt · ✅ Global default-deny JWT (APP_GUARD) · ✅ Role guard (`@Roles(OWNER, ADMIN)`) · ✅ OWNER-only: periode, user, kamar, harga, deposit · ✅ Staff restriction inventory official (`@Roles`) · ✅ Rate limit (300/menit global, 10/15menit auth)
 

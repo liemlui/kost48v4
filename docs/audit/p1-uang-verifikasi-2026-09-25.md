@@ -4,7 +4,7 @@
 - Tanggal: 25 September 2026
 - Baseline: HEAD `7e4bbbdd`; working tree **juga** memuat pekerjaan sesi lain (3 berkas `frontend/src/**` untuk perbaikan temuan Z-19) yang **tidak disentuh** task ini
 - Jenis: **verifikasi statis source** (membaca kode), bukan verifikasi runtime
-- Klaim asli temuan: `docs/archieve/_previous_cycles/M15_AUDIT_360_FLOW_UANG.md` (dibaca tersasar hanya untuk klaim P1-04..P1-09)
+- Klaim asli temuan: `docs/arsip/legacy/_previous_cycles/M15_AUDIT_360_FLOW_UANG.md` (dibaca tersasar hanya untuk klaim P1-04..P1-09)
 - Indeks status sebelumnya: [Status Temuan P1-01..P1-09 (verifikasi 23 Sep 2026)](audit-uang-huni-2026-07.md)
 
 ## Metode

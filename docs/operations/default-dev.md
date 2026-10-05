@@ -15,7 +15,7 @@
 
 > Kredensial di atas adalah fondasi **DEV** dan TIDAK boleh dipakai sebagai kredensial audit UAT/produksi.
 
-## Bagian 3 - `docs/archieve/2026-06-16_si_notes/_AKUN_DUMMY_DEV.md`
+## Bagian 3 - `docs/arsip/legacy/2026-06-16_si_notes/_AKUN_DUMMY_DEV.md`
 
 > DEV ONLY: akun dan data di bagian ini hanya untuk database pengembangan port 5433. Jangan pakai password ini di produksi.
 >

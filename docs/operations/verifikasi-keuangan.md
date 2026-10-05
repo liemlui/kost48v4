@@ -1,11 +1,11 @@
 # Verifikasi Keuangan — Harness Eksekutor
 
 > Dipindah apa adanya dari `docs/M04_KEUANGAN.md` Bagian 1 (Tahap 3 S2.b3, 23 Sep 2026) pada DOC-GOV-20260922.
-> Sumber asli: `docs/archieve/2026-06-16_root_docs_pre_M/05_VERIFIKASI_KEUANGAN.md` (tetap di arsip).
+> Sumber asli: `docs/arsip/legacy/2026-06-16_root_docs_pre_M/05_VERIFIKASI_KEUANGAN.md` (tetap di arsip).
 > **Isi tidak diubah.** Blok gate per-task di akhir tetap memuat 5 `[ ]` dan tetap wajib untuk task uang (AGENTS §8 + gate M04).
 > Rujukan aturan aktif: [domain/keuangan.md](../domain/keuangan.md).
 
-## Bagian 1 - `docs/archieve/2026-06-16_root_docs_pre_M/05_VERIFIKASI_KEUANGAN.md`
+## Bagian 1 - `docs/arsip/legacy/2026-06-16_root_docs_pre_M/05_VERIFIKASI_KEUANGAN.md`
 
 ### 05 — HARNESS VERIFIKASI KEUANGAN (jaring pengaman AI eksekutor)
 **Tujuan:** memastikan **hitungan keuangan tetap handal** saat kode disentuh AI lemah. `tsc 0` TIDAK cukup — kode bisa lolos compile tapi salah angka (bukti: bug F-18 = kembaran F-01 yang lolos audit V1). Jalankan harness ini SETELAH tiap task keuangan (dossier 13) dan tiap task uang (dossier 10/12).

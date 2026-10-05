@@ -5,7 +5,7 @@
 
 ## Audit 360° P3–P8 — status modul P4/P5 (Jul 2026)
 
-**Status:** 🟢 Solid. Detail → `docs/archieve/_previous_cycles/M17_AUDIT_360_P3_P8.md`
+**Status:** 🟢 Solid. Detail → `docs/arsip/legacy/_previous_cycles/M17_AUDIT_360_P3_P8.md`
 
 ### P4 Staff Ops & Inventory
 ✅ Ticket lifecycle valid (OPEN→IN_PROGRESS→DONE→CLOSED) · ✅ CHECKOUT_INSPECTION dedupe · ✅ Room readiness gate · ✅ SLA escalation (L0→admin, L1→owner) · ✅ Staff close inspeksi (model tenant-pengawas) · ✅ Assignment round-robin · ✅ One-active-work guard · ✅ KPI calculation akurat · ✅ Review tenant→owner verify · ✅ Single-writer inventory trigger · ✅ Staff 403 official inventory · ✅ Edit movement banned · ✅ Field report→admin review
