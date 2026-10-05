@@ -7,6 +7,7 @@
 
 > Migrasi dari docs/M08_DEPLOY_GO_LIVE.md (Bagian 1, Bagian 2, Appendix A) pada f8f9a589 (DOC-GOV-20260922 Tahap 3).
 > Sumber asli sudah dihapus di Fase 3 (23 Sep 2026); berkas ini kanonik.
+> **Status:** aktif — runbook deploy & go-live; langkah di dalamnya operasional (bukan antrean tugas).
 
 ## Bagian 1 - `docs/arsip/legacy/2026-06-16_root_docs_pre_M/04_DEPLOY_AND_PWA.md`
 

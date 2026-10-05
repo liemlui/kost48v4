@@ -4,6 +4,7 @@
 > Sumber asli: `docs/arsip/legacy/2026-06-16_root_docs_pre_M/05_VERIFIKASI_KEUANGAN.md` (tetap di arsip).
 > **Isi tidak diubah.** Blok gate per-task di akhir tetap memuat 5 `[ ]` dan tetap wajib untuk task uang (AGENTS §8 + gate M04).
 > Rujukan aturan aktif: [domain/keuangan.md](../domain/keuangan.md).
+> **Status:** aktif — harness verifikasi uang; wajib dibaca sebelum task yang menyentuh uang.
 
 ## Bagian 1 - `docs/arsip/legacy/2026-06-16_root_docs_pre_M/05_VERIFIKASI_KEUANGAN.md`
 

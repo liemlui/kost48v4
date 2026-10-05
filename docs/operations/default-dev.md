@@ -4,6 +4,7 @@
 > Sumber asli (`docs/operations/data-master.md`) sudah dihapus di Fase 3 (23 Sep 2026); perintah seed untuk lingkungan PRODUKSI ada di [Produksi & Operasional Harian](produksi.md).
 > **Batas lingkungan:** seluruh isi DEV di file ini memakai basis data pengembangan **port 5433**; kredensial DEV tidak pernah berlaku untuk UAT/produksi.
 > Sumber asli dipertahankan sebagai pointer.
+> **Status:** aktif — dokumentasi DEV; nilai kredensial DEV terdaftar **di sini** (satu rumah). **DEV only**, jangan dipakai di produksi.
 
 ### 1a. Akun Fondasi seed-dev (khusus database pengembangan port 5433)
 

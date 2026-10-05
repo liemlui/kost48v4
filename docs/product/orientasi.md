@@ -18,9 +18,9 @@ Rujukan: [KEPUTUSAN-OWNER](../KEPUTUSAN-OWNER.md) · [STATUS](../ANTREAN.md) · 
 5. [ATURAN.md](../ATURAN.md) — aturan domain: keuangan, hunian, operasional, harga, publik, AI/IoT; rincian per topik di `docs/domain/`.
 6. [OPERASI.md](../OPERASI.md) — runbook deploy, produksi harian, go-live, env, data master; rincian di `docs/operations/`. Baca ini dulu sebelum menyentuh server.
 7. [product/scope.md](scope.md) dan [product/portal-owner-admin.md](portal-owner-admin.md) — scope per role/flow dan prinsip portal ringkas.
-8. [docs/README.md](../../AGENTS.md) — indeks navigasi lengkap; peta path lama (M00–M20) ke rumah kanonik ada di §6.
+8. [AGENTS.md §3 — Peta dokumen](../../AGENTS.md) — indeks navigasi lengkap; peta path lama (M00–M20) ke rumah kanonik ada di [KONTRAK.md §8](../KONTRAK.md).
 
-Hindari membaca arsip besar kecuali benar-benar perlu forensik: `docs/arsip/legacy/*` (arsip legacy, dulu `docs/arsip/legacy/`), sisa `docs/archieve/*` yang menunggu dipindah owner, file `*_STALE.md`, `reference/*`, dan `backend/src/generated/*`.
+Hindari membaca arsip besar kecuali benar-benar perlu forensik: `docs/arsip/legacy/*` (arsip legacy; dulu docs/archieve/), `.docs-legacy/**` (sisanya, di luar dokumentasi), berkas `*_STALE.md`, `reference/*`, dan `backend/src/generated/*`.
 
 ## 1. Identitas & Model Bisnis
 

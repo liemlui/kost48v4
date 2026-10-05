@@ -13,7 +13,7 @@
 
 ## 2. Arah proyek (ringkas)
 
-- Prioritas: **penyederhanaan OWNER/ADMIN** — operasional penghuni, keuangan, dashboard, kejelasan dampak keputusan. Landasan bisnis: **IB Diploma Business Management** ([product/arah-produk.md](docs/product/arah-produk.md), [product/orientasi.md](docs/product/orientasi.md)).
+- Prioritas: **penyederhanaan OWNER/ADMIN** — operasional penghuni, keuangan, dashboard, kejelasan dampak keputusan. Landasan bisnis: **IB Diploma Business Management** ([arah produk](docs/product/README.md)).
 - Teknis: **satu proses API NestJS dengan modul internal**; frontend React/Vite; tanpa rewrite domain. Modul terpisah/apps/worker (Fase MA) **ditunda** — jangan dibuat.
 - Produksi tercatat LIVE; status historis **bukan** sign-off produksi. Sisa Fase A: onboarding hunian/KTP, opening balance, cron, rotasi secret/PIN — gate-nya di [ANTREAN.md](docs/ANTREAN.md).
 
@@ -23,13 +23,13 @@
 |---|---|
 | **memilih tugas / mengecek gate** | [ANTREAN.md](docs/ANTREAN.md) — satu-satunya antrean |
 | **aturan rinci, invariant, berkas berisiko** | [KONTRAK.md](docs/KONTRAK.md) |
-| aturan domain bisnis (uang, huni, harga, publik, AI/IoT) | [ATURAN.md](docs/ATURAN.md) → rincian di `docs/domain/` |
-| runbook deploy/produksi/go-live/env | [OPERASI.md](docs/OPERASI.md) → rincian di `docs/operations/` |
+| aturan domain bisnis (uang, huni, harga, publik, AI/IoT) | [ATURAN.md](docs/ATURAN.md) → [indeks domain](docs/domain/README.md) |
+| runbook deploy/produksi/go-live/env | [OPERASI.md](docs/OPERASI.md) → [indeks operations](docs/operations/README.md) |
 | peta modul & berkas kode | [PETA-KODE.md](docs/PETA-KODE.md); peta generated: `.audit-map/` (jangan dibaca rutin) |
 | status audit & temuan bertanggal | [AUDIT.md](docs/AUDIT.md) → rincian di `docs/audit/` |
 | keputusan bisnis owner | [KEPUTUSAN-OWNER.md](docs/KEPUTUSAN-OWNER.md) |
-| bukti bertanggal & riwayat | [history/](docs/history/) (+ [bukti-2026-10.md](docs/history/bukti-2026-10.md)); arsip beku: [arsip/](docs/arsip/README.md) — jangan dibaca rutin |
-| rencana rombak dokumentasi (batch & keputusan) | [rencana/](docs/rencana/RENCANA-ROMPAK-DOCS.md) |
+| bukti bertanggal & riwayat | [indeks history](docs/history/README.md) (+ [bukti-2026-10.md](docs/history/bukti-2026-10.md)); arsip beku: [arsip/](docs/arsip/README.md) — jangan dibaca rutin |
+| rencana rombak dokumentasi (batch & keputusan) | [indeks rencana](docs/rencana/README.md) |
 
 Jangan membaca seluruh `docs/` sebagai orientasi; pilih lewat tabel di atas.
 
@@ -98,6 +98,6 @@ Pisahkan implementasi lokal · verifikasi lokal · deployment · dampak runtime.
 - Owner menetapkan kebijakan; agen menerapkan stage yang **sudah** disetujui.
 - Aturan operasional dipelihara di berkas ini + [KONTRAK.md](docs/KONTRAK.md); antrean di [ANTREAN.md](docs/ANTREAN.md); riwayat di `docs/history/`; arsip beku di `docs/arsip/` + `.docs-legacy/`.
 - Jangan menduplikasi aturan ke setiap berkas; pointer diarahkan ke sini atau KONTRAK.
-- Gate dokumen: `node scripts/check-docs.mjs` (wajib hijau sebelum menutup batch dokumentasi). Aturan **R6** disetujui owner tetapi **dipasang setelah B8** — jangan diterapkan lebih awal.
+- Gate dokumen: `node scripts/check-docs.mjs` (= `npm run check:docs`; wajib hijau sebelum menutup batch dokumentasi) — 7 aturan **R1–R7**, termasuk **R6** (rujukan backtick hantu) yang aktif sejak **v1.6** setelah B8. Kekuatan dokumen diukur terpisah: `node scripts/ukur-kekuatan-docs.mjs`.
 - Stage yang belum diizinkan tidak dijalankan; ikuti checkpoint owner.
 - Aturan tertulis mengurangi risiko, bukan jaminan nol kerusakan: kontrol credential/DB, sandbox, review branch, dan backup perlu bukti teknis pada task tersendiri.

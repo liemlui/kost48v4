@@ -7,6 +7,7 @@
 
 > Migrasi dari docs/M20_PRODUKSI_KOST48.md (seluruh section §1-§14) pada f8f9a589 (DOC-GOV-20260922 Tahap 3).
 > Sumber asli sudah dihapus di Fase 3 (23 Sep 2026); berkas ini kanonik.
+> **Status:** aktif — runbook produksi & operasional harian; langkah di dalamnya operasional (bukan antrean tugas).
 
 ## 1. Ringkasan cepat
 

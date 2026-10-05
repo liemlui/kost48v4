@@ -105,9 +105,10 @@ Rincian khusus uang (DO-NOT-TOUCH, invariant, gate per-task): [operations/verifi
 - **Kotak `[ ]` otoritatif hanya di [ANTREAN.md](ANTREAN.md)**. Di berkas lain kotak adalah catatan: beri penanda `<!-- kotak-non-otoritatif -->` atau turunkan jadi daftar biasa.
 - **Arsip**: banner di baris atas · nama berkas tidak diganti · angka di arsip tidak diperbarui · **pekerjaan terbuka tidak boleh ikut terarsip** · satu baris inventaris di [arsip/README.md](arsip/README.md).
 - **Penghapusan**: berkas tracked boleh dihapus dengan ledger konservasi; berkas **untracked selalu dipindah**, tidak pernah dihapus.
-- **Gate dokumen** (`node scripts/check-docs.mjs`, wajib hijau sebelum menutup batch dokumentasi) memeriksa: **R1** angka volatil · **R2** tautan relatif mati · **R3** kotak otoritatif · **R4** blok baca berkas tangga wajib · **R5** plafon byte · **R7** indeks cakupan audit. Pemeriksaan yang **dilewati** tampil sebagai `DILEWATI` + exit 2 — senyap tidak diizinkan.
+- **Gate dokumen** (`node scripts/check-docs.mjs` = `npm run check:docs`, wajib hijau sebelum menutup batch dokumentasi) memeriksa **7 aturan**: **R1** angka volatil · **R2** tautan relatif mati · **R3** kotak otoritatif · **R4** blok baca berkas tangga wajib · **R5** plafon byte · **R6** rujukan backtick hantu · **R7** indeks cakupan audit. Pemeriksaan yang **dilewati** tampil sebagai `DILEWATI` + exit 2 — senyap tidak diizinkan.
+- **Kekuatan dokumen** diukur terpisah dari gate: `node scripts/ukur-kekuatan-docs.mjs` — 11 pemeriksaan deterministik (tautan mati · rujukan backtick hantu · plafon byte · blok baca berkas wajib · kotak otoritatif · rujukan ke path yang sudah dihapus · dokumen yatim · inventaris arsip · baris status · indeks folder · duplikasi judul H1). Kartu ini **bukan pengganti gate**: gate memblokir perubahan, kartu mengukur kesehatan dan boleh gagal tanpa membatalkan pekerjaan.
 - **Plafon byte**: `AGENTS.md` ≤12 KB (disuntik tiap request) · berkas tangga wajib ([KONTRAK](KONTRAK.md), [ANTREAN](ANTREAN.md), [PETA-KODE](PETA-KODE.md)) ≤16 KB · berkas rujukan ≤48 KB (di atasnya wajib daftar isi berjangkar).
-- **Aturan R6** (menolak path `docs/…` di dalam backtick yang tidak ada) sudah disetujui owner tetapi **dipasang setelah B8** — jangan diterapkan lebih awal.
+- **Aturan R6** (menolak path `docs/…` di dalam backtick yang tidak ada) **aktif sejak gate v1.6** — dipasang setelah B8, sesuai keputusan owner, dan sudah diuji negatif (terbukti bisa gagal).
 
 ## 8. Konflik yang sudah diselesaikan (jangan diangkat lagi)
 
