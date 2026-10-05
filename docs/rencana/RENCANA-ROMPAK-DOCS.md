@@ -128,7 +128,7 @@ B3–B8 **belum**; menunggu perintah.
 - **Sandbox:** agen tidak bisa menulis di luar repo (terbukti 2026-10-05) → aset besar di `.docs-legacy/` + `.audit-map/` (diabaikan git).
 - **Berkas untracked selalu dipindah**, tidak pernah dihapus (tidak ada jaring git).
 - **2 berkas source owner** (`MyManualPage.tsx`, `CekPage.tsx`) di luar lingkup rombak; menunggu commit terpisah.
-- **Tanpa commit ke `main`, tanpa push** sampai owner memerintahkan.
+- **Penyelesaian (2026-10-05):** `docs-rombak` di-merge ke `main` secara **fast-forward** (26 commit, 127 berkas, +8.039/−2.716) dan **dipush owner**: `951f0c95..9fe335f2  main -> main`. Jaring pengaman: branch lokal `backup-main-pra-rombak` di `951f0c95`. Agen **tidak** bisa push dari sesi ini (tanpa kredensial TLS — `SEC_E_NO_CREDENTIALS`, helper `manager` tidak di PATH, tanpa kunci SSH/token); dilaporkan apa adanya, bukan diakali.
 
 ---
 
