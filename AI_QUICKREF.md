@@ -25,14 +25,14 @@ XL: persetujuan rencana wajib; tahap kecil; Fase MA tetap ditunda.
 
 ## Checklist sebelum edit
 
-- [ ] Instruksi aktif dipahami; satu tujuan dan acceptance jelas.
-- [ ] Level, scope baca/edit, batas file, dan anggaran ditetapkan.
-- [ ] Audit lama diperiksa kesegarannya; perubahan lokal/untracked dijaga.
-- [ ] Izin sudah mencakup tindakan; jangan meminta persetujuan yang sama lagi.
-- [ ] Larangan test/build/install/refactor dicatat; gate uang/schema/akses dipertahankan.
-- [ ] Sebelum command: periksa cwd, hook pre/post, fixture, efek samping, dan artefak.
-- [ ] Kriteria selesai, laporan, serta pembaruan dokumentasi ditetapkan.
-- [ ] Commit/push/deploy/DB/dependency/bump versi tidak otomatis diizinkan.
+- Instruksi aktif dipahami; satu tujuan dan acceptance jelas.
+- Level, scope baca/edit, batas file, dan anggaran ditetapkan.
+- Audit lama diperiksa kesegarannya; perubahan lokal/untracked dijaga.
+- Izin sudah mencakup tindakan; jangan meminta persetujuan yang sama lagi.
+- Larangan test/build/install/refactor dicatat; gate uang/schema/akses dipertahankan.
+- Sebelum command: periksa cwd, hook pre/post, fixture, efek samping, dan artefak.
+- Kriteria selesai, laporan, serta pembaruan dokumentasi ditetapkan.
+- Commit/push/deploy/DB/dependency/bump versi tidak otomatis diizinkan.
 
 ## Verifikasi terbatas — hanya jika diizinkan
 
@@ -54,12 +54,12 @@ XL: persetujuan rencana wajib; tahap kecil; Fase MA tetap ditunda.
 
 Checklist monitoring turunan AGENTS, dipindah dari AI_MASTER §3 pada Tahap 2. Pelaksanaan kontrol teknis lintas-tool tidak dibuktikan oleh isi Markdown.
 
-- [ ] Instruksi aktif AGENTS/M12 dipahami; QUICKREF hanya bila membantu task, tanpa pembacaan ulang konteks tersedia.
-- [ ] Task punya level XS/S/M/L/XL berdasarkan risiko.
-- [ ] Batas file dibaca 5/8/12/18/20 per tahap dipatuhi atau kebutuhan tambahan dijelaskan.
-- [ ] Command dan efek samping sesuai scope; exception uang di §2 diperhatikan, bukan larangan full test/build universal.
-- [ ] Verifikasi hanya command terdaftar yang diizinkan; docs-only cukup inspeksi.
-- [ ] Diff + 3 baris ringkasan diterima, kecuali format khusus owner menggantikannya.
-- [ ] Audit modul diperbarui jika modul disentuh dan scope mengizinkan.
-- [ ] M12/M13 disinkronkan atau alasan pembatasan scope task saat ini dicatat.
-- [ ] Implementasi, verifikasi lokal, deployment, dan dampak runtime dilaporkan terpisah.
+- Instruksi aktif AGENTS/M12 dipahami; QUICKREF hanya bila membantu task, tanpa pembacaan ulang konteks tersedia.
+- Task punya level XS/S/M/L/XL berdasarkan risiko.
+- Batas file dibaca 5/8/12/18/20 per tahap dipatuhi atau kebutuhan tambahan dijelaskan.
+- Command dan efek samping sesuai scope; exception uang di §2 diperhatikan, bukan larangan full test/build universal.
+- Verifikasi hanya command terdaftar yang diizinkan; docs-only cukup inspeksi.
+- Diff + 3 baris ringkasan diterima, kecuali format khusus owner menggantikannya.
+- Audit modul diperbarui jika modul disentuh dan scope mengizinkan.
+- M12/M13 disinkronkan atau alasan pembatasan scope task saat ini dicatat.
+- Implementasi, verifikasi lokal, deployment, dan dampak runtime dilaporkan terpisah.

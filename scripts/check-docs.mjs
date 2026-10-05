@@ -44,7 +44,7 @@ import { readFileSync, readdirSync, existsSync, statSync } from "node:fs";
 import { join, relative, dirname, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 
-const VERSI_GATE = "v1.4";
+const VERSI_GATE = "v1.5";
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const DOCS = join(ROOT, "docs");
 
@@ -66,6 +66,11 @@ const BLOK_BACA_WAJIB = ["docs/KONTRAK.md", "docs/ANTREAN.md", "docs/PETA-KODE.m
 const POLA_PERAN_AGENTS = /kontrak kerja[^\n]{0,120}disuntik|disuntik otomatis/i;
 const BARIS_PERAN_CONTOH = "> Kontrak kerja agen — disuntik otomatis setiap request. Aturan lengkap: docs/KONTRAK.md.";
 const ANTREAN = "docs/ANTREAN.md";
+// Kotak: rumah otoritatif + berkas bertanda + reklasifikasi catatan (keputusan Q12/Q13/P16/P17, batch B4).
+const PENANDA_NON_OTORITATIF = /<!--\s*kotak-non-otoritatif\s*-->/i;
+const RUMAH_KOTAK = [ANTREAN, "docs/STATUS.md"];                        // STATUS sampai B5 melebur ke ANTREAN
+const KARTU_BUKTI_KOTAK = /[\\/]docs[\\/](history|audit|arsip)[\\/]/;   // catatan bertanggal, bukan antrean
+const INDEKS_CAKUPAN = "docs/audit/index-cakupan.md";                   // pengganti checklist audit (Q13)
 const PLAFON_AGENTS = 12 * 1024;
 const PLAFON_WAJIB = 16 * 1024;
 const PLAFON_RUJUKAN = 48 * 1024;
@@ -176,15 +181,20 @@ if (!existsSync(join(ROOT, ANTREAN))) {
   skip("R3", `${ANTREAN} belum ada; kotak otoritatif belum punya rumah (kondisi baseline, bukan lulus)`);
 }
 const kotak = [];
+const kotakInfo = [];
 for (const file of diperiksa) {
-  if (rel(file) === ANTREAN) continue;
+  const relFile = rel(file);
   const n = (readFileSync(file, "utf8").match(/^\s*[-*]\s*\[ \]/gm) || []).length;
-  if (n > 0) {
-    kotak.push({ file: rel(file), n });
-    catat("R3", file, 0, `${n} kotak terbuka di luar ${ANTREAN} — turunkan derajatnya jadi daftar biasa`);
-  }
+  if (n === 0) continue;
+  if (RUMAH_KOTAK.includes(relFile)) { kotakInfo.push({ file: relFile, n, sebab: "rumah otoritatif" }); continue; }
+  if (KARTU_BUKTI_KOTAK.test(file)) { kotakInfo.push({ file: relFile, n, sebab: "catatan bertanggal (audit/history/arsip)" }); continue; }
+  const kepala = readFileSync(file, "utf8").split(/\r?\n/).slice(0, 40).join("\n");
+  if (PENANDA_NON_OTORITATIF.test(kepala)) { kotakInfo.push({ file: relFile, n, sebab: "bertanda non-otoritatif" }); continue; }
+  kotak.push({ file: relFile, n });
+  catat("R3", file, 0, `${n} kotak terbuka di luar rumah otoritatif — turunkan derajatnya jadi daftar biasa atau beri penanda <!-- kotak-non-otoritatif -->`);
 }
 kotak.sort((a, b) => b.n - a.n);
+kotakInfo.sort((a, b) => b.n - a.n);
 
 // ── R4 — blok baca (berkas yang dipilih pembaca) + baris peran AGENTS ──────
 for (const wajib of BLOK_BACA_WAJIB) {
@@ -240,6 +250,17 @@ for (const file of berkasAktif) {
   }
 }
 
+// ── R7 — indeks cakupan audit wajib ada & bebas kotak otoritatif (Q13/P17) ─
+{
+  const fIndeks = join(ROOT, INDEKS_CAKUPAN);
+  if (!existsSync(fIndeks)) {
+    catat("R7", fIndeks, 0, `${INDEKS_CAKUPAN} belum ada — berkas ini pengganti checklist audit yang diarsipkan (Q13)`);
+  } else {
+    const n = (readFileSync(fIndeks, "utf8").match(/^\s*[-*]\s*\[ \]/gm) || []).length;
+    if (n > 0) catat("R7", fIndeks, 0, `${n} kotak otoritatif di berkas indeks — turunkan jadi daftar biasa`);
+  }
+}
+
 // ── laporan ────────────────────────────────────────────────────────────────
 const grup = (rule, arr = pelanggaran) => arr.filter((p) => p.rule === rule);
 const judul = {
@@ -248,6 +269,7 @@ const judul = {
   R3: "R3 kotak `[ ]` di luar docs/ANTREAN.md",
   R4: "R4 blok baca (berkas terpilih) + baris peran AGENTS",
   R5: "R5 plafon byte",
+  R7: "R7 indeks cakupan audit",
 };
 
 console.log(`=== CHECK-DOCS ${VERSI_GATE} (gate dokumen KOST48) ===`);
@@ -255,13 +277,17 @@ console.log(`berkas diperiksa : ${diperiksa.length} aktif (${semuaMd.length} .md
 console.log(`versi kanonik    : ${[...versiDiterima].join(", ")} (dari frontend/src/config/version.ts + package.json)`);
 console.log("");
 
-for (const rule of ["R1", "R2", "R3", "R4", "R5"]) {
+for (const rule of ["R1", "R2", "R3", "R4", "R5", "R7"]) {
   const g = grup(rule);
   console.log(`— ${judul[rule]}: ${g.length}`);
   if (rule === "R3") {
-    console.log(`  total kotak terbuka di luar ANTREAN: ${kotak.reduce((a, b) => a + b.n, 0)} di ${kotak.length} berkas`);
+    console.log(`  total kotak terbuka di luar rumah otoritatif: ${kotak.reduce((a, b) => a + b.n, 0)} di ${kotak.length} berkas`);
     kotak.slice(0, 15).forEach((k) => console.log(`    ${String(k.n).padStart(4)}  ${k.file}`));
     if (kotak.length > 15) console.log(`    … ${kotak.length - 15} berkas lain`);
+    if (kotakInfo.length) {
+      console.log(`  DIKELUARKAN dari R3 (bukan antrean, tetapi tetap terlihat): ${kotakInfo.reduce((a, b) => a + b.n, 0)} kotak di ${kotakInfo.length} berkas`);
+      kotakInfo.forEach((k) => console.log(`    ${String(k.n).padStart(4)}  ${k.file} — ${k.sebab}`));
+    }
   } else {
     g.slice(0, 15).forEach((p) => console.log(`    ${p.file}${p.line ? ":" + p.line : ""} — ${p.pesan}`));
     if (g.length > 15) console.log(`    … ${g.length - 15} temuan lain`);

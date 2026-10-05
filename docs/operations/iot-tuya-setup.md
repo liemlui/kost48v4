@@ -33,16 +33,16 @@ Runbook ini dipakai untuk membuktikan bahwa backend KOST48 dapat membaca total k
 
 Di Tuya Developer Platform:
 
-- [ ] Cloud project yang benar sudah dipilih.
-- [ ] Development Method (`Smart Home` atau `Custom`) tercatat.
-- [ ] Data Center project tercatat persis seperti yang tampil di console.
-- [ ] Authorization Key memiliki Access ID/Client ID dan Access Secret/Client Secret aktif.
-- [ ] Service plan/API yang dibutuhkan masih aktif.
-- [ ] Minimal layanan device/basic IoT dan authorization tersedia.
-- [ ] Akun aplikasi Tuya/Smart Life yang memiliki perangkat sudah di-link ke project jika memakai Smart Home.
-- [ ] `Devices > All Devices` menampilkan meter yang sama dengan inventaris `M14`.
-- [ ] Device online dapat dibuka dengan fitur Debug Device.
-- [ ] Tidak ada device lama/duplikat yang akan ikut dipolling.
+- Cloud project yang benar sudah dipilih.
+- Development Method (`Smart Home` atau `Custom`) tercatat.
+- Data Center project tercatat persis seperti yang tampil di console.
+- Authorization Key memiliki Access ID/Client ID dan Access Secret/Client Secret aktif.
+- Service plan/API yang dibutuhkan masih aktif.
+- Minimal layanan device/basic IoT dan authorization tersedia.
+- Akun aplikasi Tuya/Smart Life yang memiliki perangkat sudah di-link ke project jika memakai Smart Home.
+- `Devices > All Devices` menampilkan meter yang sama dengan inventaris `M14`.
+- Device online dapat dibuka dengan fitur Debug Device.
+- Tidak ada device lama/duplikat yang akan ikut dipolling.
 
 Catat metadata tanpa secret:
 
@@ -385,14 +385,14 @@ Alert secret-safe harus menyebut `deviceCode` dan kamar, bukan Access ID/token.
 
 Go bila:
 
-- [ ] endpoint region terbukti;
-- [ ] token cache dan signature lulus test;
-- [ ] minimal tiga meter dari product variants berbeda berhasil dibaca;
-- [ ] DP total kWh dan scale tervalidasi;
-- [ ] mapping kamar direview dua orang;
-- [ ] tidak ada command permission pada service account atau kode integrasi bersifat read-only;
-- [ ] prosedur kill/rollback nyata tersedia: hentikan cron, biarkan timer internal OFF, disable perangkat bila perlu, dan gunakan bundle LKG yang sudah bebas SSE;
-- [ ] data polling tidak masuk langsung ke `MeterReading`.
+- endpoint region terbukti;
+- token cache dan signature lulus test;
+- minimal tiga meter dari product variants berbeda berhasil dibaca;
+- DP total kWh dan scale tervalidasi;
+- mapping kamar direview dua orang;
+- tidak ada command permission pada service account atau kode integrasi bersifat read-only;
+- prosedur kill/rollback nyata tersedia: hentikan cron, biarkan timer internal OFF, disable perangkat bila perlu, dan gunakan bundle LKG yang sudah bebas SSE;
+- data polling tidak masuk langsung ke `MeterReading`.
 
 No-go bila salah satu hal berikut terjadi:
 

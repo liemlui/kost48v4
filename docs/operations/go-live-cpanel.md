@@ -1,5 +1,10 @@
 # Checklist Go-Live cPanel
 
+<!-- kotak-non-otoritatif -->
+> **Catatan (2026-10-05, batch B4):** kotak `[ ]` di berkas ini adalah **langkah operasional**, bukan antrean tugas.
+> Antrean resmi ada di `docs/STATUS.md` (menjadi `docs/ANTREAN.md` pada B5). Penanda ini dikenali gate dokumen (aturan R3).
+
+
 > Migrasi dari docs/GO_LIVE_CPANEL_CHECKLIST.md + docs/M08_DEPLOY_GO_LIVE.md (A-J, Appendix B) pada f8f9a589 (DOC-GOV-20260922 Tahap 3).
 > Sumber asli sudah dihapus di Fase 3 (23 Sep 2026); berkas ini kanonik.
 

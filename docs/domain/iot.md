@@ -575,76 +575,76 @@ Default yang disarankan:
 
 ##### Fase 0 - Survey dan keputusan owner
 
-- [ ] Pastikan topologi pipa: satu jalur air benar-benar hanya melayani satu kamar.
-- [ ] Catat model lengkap, datasheet, tegangan, tipe output, dan pulse constant sensor D20.
-- [ ] Tentukan board ESP32-C3 yang dipakai dan GPIO aman.
-- [ ] Konfirmasi cloud project Tuya, data center, dan masa aktif service plan.
-- [ ] Putuskan mode awal: **monitoring + shadow billing** (rekomendasi).
+- Pastikan topologi pipa: satu jalur air benar-benar hanya melayani satu kamar.
+- Catat model lengkap, datasheet, tegangan, tipe output, dan pulse constant sensor D20.
+- Tentukan board ESP32-C3 yang dipakai dan GPIO aman.
+- Konfirmasi cloud project Tuya, data center, dan masa aktif service plan.
+- Putuskan mode awal: **monitoring + shadow billing** (rekomendasi).
 
 Exit gate: tidak ada perangkat yang ambigu kamar atau spesifikasinya.
 
 ##### Fase 1 - Tuya connectivity spike
 
-- [ ] Implementasi client sign/token cache tanpa database mutation.
-- [ ] Buktikan endpoint region dengan satu device online.
-- [ ] Discovery DP untuk setiap `productId` meter.
-- [ ] Ambil status 11 meter online dan simpan fixture tersanitasi untuk test.
-- [ ] Dokumentasikan F1/F2 offline tanpa menganggap nilai nol.
+- Implementasi client sign/token cache tanpa database mutation.
+- Buktikan endpoint region dengan satu device online.
+- Discovery DP untuk setiap `productId` meter.
+- Ambil status 11 meter online dan simpan fixture tersanitasi untuk test.
+- Dokumentasikan F1/F2 offline tanpa menganggap nilai nol.
 
 Exit gate: total kWh terbaca konsisten dari minimal 3 kamar dan mapping skala tervalidasi.
 
 ##### Fase 2 - Fondasi backend IoT
 
-- [ ] Migration additive `IotDevice` + `IotTelemetry`.
-- [ ] Modul `backend/src/modules/iot/`.
-- [ ] Adapter Tuya, poller, idempotency, quality flags, dan audit log.
-- [ ] Endpoint read-only owner/admin untuk status dan histori.
+- Migration additive `IotDevice` + `IotTelemetry`.
+- Modul `backend/src/modules/iot/`.
+- Adapter Tuya, poller, idempotency, quality flags, dan audit log.
+- Endpoint read-only owner/admin untuk status dan histori.
 - [x] Timer internal default OFF melalui `IOT_TUYA_POLL_ENABLED=false`; modul monitoring tetap tersedia. Tidak ada global `IOT_ENABLED`.
 
 Exit gate: test unit, integration, dan migration lulus; modul dapat dimatikan tanpa mengganggu meter manual.
 
 ##### Fase 3 - Pilot polling KWH
 
-- [ ] Mapping seluruh device aktif ke `Room.code`.
-- [ ] Poll setiap 10 menit selama 7 hari.
-- [ ] Dashboard kesehatan device dan last seen.
-- [ ] Bandingkan dengan aplikasi Tuya dan pembacaan manual.
+- Mapping seluruh device aktif ke `Room.code`.
+- Poll setiap 10 menit selama 7 hari.
+- Dashboard kesehatan device dan last seen.
+- Bandingkan dengan aplikasi Tuya dan pembacaan manual.
 
 Exit gate: tidak ada salah kamar, counter rollback palsu, atau skala unit salah.
 
 ##### Fase 4 - Prototype ESP32 bench
 
-- [ ] Wiring aman 3.3 V dan enclosure belum dipasang ke jalur kamar.
-- [ ] GPIO pulse counting, NVS state, Wi-Fi reconnect, HTTPS verify, dan signed payload.
-- [ ] Kalibrasi volume pada sedikitnya tiga laju aliran.
-- [ ] Uji mati listrik, reboot, Wi-Fi putus, API down, dan retry duplikat.
+- Wiring aman 3.3 V dan enclosure belum dipasang ke jalur kamar.
+- GPIO pulse counting, NVS state, Wi-Fi reconnect, HTTPS verify, dan signed payload.
+- Kalibrasi volume pada sedikitnya tiga laju aliran.
+- Uji mati listrik, reboot, Wi-Fi putus, API down, dan retry duplikat.
 
 Exit gate: cumulative total pulih setelah reboot dan request duplikat tidak menggandakan data.
 
 ##### Fase 5 - Pilot satu kamar
 
-- [ ] Instalasi oleh teknisi/plumber dengan valve isolasi dan akses servis.
-- [ ] Jalankan monitoring 7-14 hari tanpa billing.
-- [ ] Bandingkan volume dengan wadah ukur/meter referensi.
-- [ ] Tuning alert; ukur false positive.
+- Instalasi oleh teknisi/plumber dengan valve isolasi dan akses servis.
+- Jalankan monitoring 7-14 hari tanpa billing.
+- Bandingkan volume dengan wadah ukur/meter referensi.
+- Tuning alert; ukur false positive.
 
 Exit gate: instalasi tidak bocor, koneksi stabil, error terukur, dan SOP servis tersedia.
 
 ##### Fase 6 - Shadow billing satu siklus
 
-- [ ] Buat kandidat meter tetapi owner/admin tetap input/konfirmasi.
-- [ ] Jalankan rekonsiliasi 30 hari.
-- [ ] Dokumentasikan koreksi, downtime, dan reset.
-- [ ] Review metrologi dan komunikasi tenant.
+- Buat kandidat meter tetapi owner/admin tetap input/konfirmasi.
+- Jalankan rekonsiliasi 30 hari.
+- Dokumentasikan koreksi, downtime, dan reset.
+- Review metrologi dan komunikasi tenant.
 
 Exit gate: owner menandatangani keputusan apakah data boleh menjadi basis tagihan.
 
 ##### Fase 7 - Rollout bertahap
 
-- [ ] Maksimal 3-5 kamar per batch.
-- [ ] Pantau 7 hari sebelum batch berikutnya.
-- [ ] Rotate secret per device setelah commissioning.
-- [ ] Update inventaris dan diagram jalur pipa.
+- Maksimal 3-5 kamar per batch.
+- Pantau 7 hari sebelum batch berikutnya.
+- Rotate secret per device setelah commissioning.
+- Update inventaris dan diagram jalur pipa.
 
 #### 10. Struktur kode yang direncanakan
 
@@ -720,14 +720,14 @@ End-to-end:
 
 Integrasi dianggap siap produksi hanya jika:
 
-- [ ] setiap device memiliki kode fisik, room mapping, foto pemasangan, dan tanggal commissioning;
-- [ ] secret tidak ada di git, frontend bundle, URL query, atau log;
-- [ ] health dashboard menunjukkan last seen dan error yang dapat ditindaklanjuti;
-- [ ] raw telemetry dan billing snapshot terpisah;
-- [ ] retry idempoten dan counter kumulatif tahan reboot;
-- [ ] SOP offline, reset, ganti sensor, pindah kamar, dan koreksi tersedia;
-- [ ] shadow billing satu siklus selesai;
-- [ ] owner menyetujui kebijakan billing dan aspek metrologi;
+- setiap device memiliki kode fisik, room mapping, foto pemasangan, dan tanggal commissioning;
+- secret tidak ada di git, frontend bundle, URL query, atau log;
+- health dashboard menunjukkan last seen dan error yang dapat ditindaklanjuti;
+- raw telemetry dan billing snapshot terpisah;
+- retry idempoten dan counter kumulatif tahan reboot;
+- SOP offline, reset, ganti sensor, pindah kamar, dan koreksi tersedia;
+- shadow billing satu siklus selesai;
+- owner menyetujui kebijakan billing dan aspek metrologi;
 - [x] rollback terdokumentasi tanpa flag fiktif: stop cron + timer internal OFF + disable device bila perlu; bundle LKG wajib sudah bebas SSE dan flow manual tetap aktif.
 
 #### 13. Keputusan yang masih diperlukan dari owner

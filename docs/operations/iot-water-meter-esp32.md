@@ -36,21 +36,21 @@ Istilah "water flow D20" dipakai banyak vendor untuk sensor yang karakteristikny
 
 Checklist datasheet:
 
-- [ ] merek dan model lengkap;
-- [ ] ukuran ulir dan arah aliran;
-- [ ] operating voltage;
-- [ ] konsumsi arus;
-- [ ] tipe output: open collector, NPN, push-pull, atau lainnya;
-- [ ] level tegangan HIGH output;
-- [ ] pulse constant/formula vendor;
-- [ ] rentang flow minimum, nominal, dan maksimum;
-- [ ] tekanan kerja dan burst pressure;
-- [ ] suhu air;
-- [ ] akurasi dan repeatability;
-- [ ] orientation requirement;
-- [ ] bahan yang bersentuhan dengan air;
-- [ ] sertifikasi/kelayakan untuk air bersih;
-- [ ] kebutuhan straight pipe sebelum/sesudah sensor.
+- merek dan model lengkap;
+- ukuran ulir dan arah aliran;
+- operating voltage;
+- konsumsi arus;
+- tipe output: open collector, NPN, push-pull, atau lainnya;
+- level tegangan HIGH output;
+- pulse constant/formula vendor;
+- rentang flow minimum, nominal, dan maksimum;
+- tekanan kerja dan burst pressure;
+- suhu air;
+- akurasi dan repeatability;
+- orientation requirement;
+- bahan yang bersentuhan dengan air;
+- sertifikasi/kelayakan untuk air bersih;
+- kebutuhan straight pipe sebelum/sesudah sensor.
 
 Jika datasheet tidak jelas, anggap output **tidak aman untuk GPIO 3.3 V** sampai diukur dan diberi level shifting/protection yang sesuai.
 
@@ -501,17 +501,17 @@ Jika OTA diterapkan:
 
 Go bila:
 
-- [ ] datasheet sensor exact tersedia;
-- [ ] output signal aman untuk GPIO 3.3 V melalui circuit yang diverifikasi;
-- [ ] board dan pin assignment final;
-- [ ] kalibrasi tiga flow band selesai;
-- [ ] total tahan reboot dan power cut;
-- [ ] TLS dan HMAC lulus test;
-- [ ] queue offline dan idempotency terbukti;
-- [ ] jalur pipa eksklusif ke kamar pilot;
-- [ ] valve isolasi dan akses servis tersedia;
-- [ ] owner menerima mode monitoring-only;
-- [ ] plumber/teknisi menyetujui instalasi fisik.
+- datasheet sensor exact tersedia;
+- output signal aman untuk GPIO 3.3 V melalui circuit yang diverifikasi;
+- board dan pin assignment final;
+- kalibrasi tiga flow band selesai;
+- total tahan reboot dan power cut;
+- TLS dan HMAC lulus test;
+- queue offline dan idempotency terbukti;
+- jalur pipa eksklusif ke kamar pilot;
+- valve isolasi dan akses servis tersedia;
+- owner menerima mode monitoring-only;
+- plumber/teknisi menyetujui instalasi fisik.
 
 No-go bila:
 

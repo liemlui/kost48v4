@@ -40,7 +40,7 @@ Folder peta naik satu tingkat (`docs/audit-map` → `.audit-map`), sehingga taut
 | `../M00_CODEMAP.md` | `../docs/PETA-KODE.md` |
 | `../M02_KEPUTUSAN_OWNER.md` | `../docs/KEPUTUSAN-OWNER.md` |
 | `../M12_CHECKLIST_CHANGELOG.md#antrean-prioritas-aktif` | `../docs/STATUS.md#2-antrean-prioritas-aktif` |
-| `../CHECKLIST_AUDIT_TOTAL.md` | `../docs/audit/audit-checklist-total.md` |
+| `../CHECKLIST_AUDIT_TOTAL.md` | `../docs/arsip/audit-checklist-total.md` |
 | `../M13_CHANGELOG.md` (berkasnya ada, pathnya yang salah setelah pindah) | `../docs/M13_CHANGELOG.md` |
 
 ## 4. Rujukan di dokumen aktif
@@ -50,7 +50,7 @@ Folder peta naik satu tingkat (`docs/audit-map` → `.audit-map`), sehingga taut
 | Tautan markdown (path relatif dihitung ulang per lokasi berkas) | **157** |
 | Sebutan path repo-relatif `docs/audit-map` → `.audit-map` | **24** |
 | Gagal dialihkan | **0** |
-| Berkas terdampak terbesar | `docs/audit/audit-checklist-total.md` (140 tautan) |
+| Berkas terdampak terbesar | `docs/arsip/audit-checklist-total.md` (140 tautan) |
 
 2 tautan ke **direktori** (`../audit-map/`, tanpa nama berkas) tidak tertangkap pola pertama dan sempat memunculkan 3 temuan R2; dibetulkan menjadi `../../.audit-map/` (2 berkas: `docs/audit/README.md`, `docs/history/governance.md`). Sesudahnya **R2 kembali 0**.
 

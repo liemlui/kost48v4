@@ -18,6 +18,7 @@
 | [DOC-GOV-20260922-batch-scope.md](DOC-GOV-20260922-batch-scope.md) | `docs/plans/` | Memo scope batch S2.b3/S2.b4 (DRAFT; batch sudah selesai) |
 | [audit-uiux-lintas-portal-2026-07.md](audit-uiux-lintas-portal-2026-07.md) | `docs/audit/` | Bukti bulk audit UI/UX lintas portal (AO-00..AO-23) |
 | [audit-uiux-total-2026-09-12.md](audit-uiux-total-2026-09-12.md) | `docs/audit/` | Bukti bulk audit UI/UX total 12 Sep 2026 |
+| [audit-checklist-total.md](audit-checklist-total.md) | `docs/audit/` | Indeks cakupan audit 135 ID (117 belum / 18 selesai) - dipindah saat batch B4 (2026-10-05); penggantinya [audit/index-cakupan.md](../audit/index-cakupan.md) |
 | [legacy/](legacy/) | `docs/archieve/` | **Arsip legacy yang dikutip dokumen aktif** — 39 berkas, subfolder asli dipertahankan (batch B2, 2026-10-05). Ledger konservasi 39 baris (SHA-256 sebelum/sesudah): [B2-ledger-konservasi.md](../rencana/B2-ledger-konservasi.md). 2 berkas di antaranya **transformasi** (kata sandi DEV diredaksi, P33/Q31-9) — SHA-nya memang berbeda |
 
 Changelog bulanan yang **masih berjalan** tetap di `docs/history/changelog/2026-09.md` (menerima rotasi entri M13).

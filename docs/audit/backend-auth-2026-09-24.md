@@ -6,7 +6,7 @@
 - Level audit: K4; level pekerjaan dokumentasi: L
 - Owner bisnis/teknis: belum ditetapkan
 - Identitas bukti: commit `f63ea93e`; working tree awal hanya memiliki `PROMPT-IMPACT-01.md` untracked dan tidak disentuh
-- Sumber: [PETA-KODE](../PETA-KODE.md), [audit FE-002](audit-checklist-total.md#catatan-hasil-dan-checkpoint), dan [template audit modul](../../AI_WORKFLOW_GUIDE.md#121-template-audit-modul)
+- Sumber: [PETA-KODE](../PETA-KODE.md), [audit FE-002](../arsip/audit-checklist-total.md#catatan-hasil-dan-checkpoint), dan [template audit modul](../../AI_WORKFLOW_GUIDE.md#121-template-audit-modul)
 
 ## Tujuan, invariant, dan batas
 

@@ -111,11 +111,11 @@ Di DB bersih + COA seeded + CashAccount Cash(1000)+Bank(1010) + periode OPEN:
 > Bila angka cashflow menampilkan mutasi PIUTANG (1100) sebagai "kas" → F1-3 belum benar. Bila expenseRatio = jutaan persen → F1-4 belum benar.
 
 #### 6. GATE PER-TASK (centang sebelum commit task finance)
-- [ ] `tsc --noEmit` 0 error.
-- [ ] `npm run test:unit` (`node --test "test/**/*.test.js"`) semua PASS (kalau task menyentuh fungsi ber-test).
-- [ ] 5 invarian §1 yang relevan tetap true (cek via §4 endpoint).
-- [ ] Angka harapan task terpenuhi (lihat "selesai bila" di `08_CHECKLIST` / dossier 13 di domain/keuangan.md).
-- [ ] Tidak menyentuh kode di DO-NOT-TOUCH §2.
+- `tsc --noEmit` 0 error.
+- `npm run test:unit` (`node --test "test/**/*.test.js"`) semua PASS (kalau task menyentuh fungsi ber-test).
+- 5 invarian §1 yang relevan tetap true (cek via §4 endpoint).
+- Angka harapan task terpenuhi (lihat "selesai bila" di `08_CHECKLIST` / dossier 13 di domain/keuangan.md).
+- Tidak menyentuh kode di DO-NOT-TOUCH §2.
 - Kalau ada yang ✗ → JANGAN commit; perbaiki atau STOP & lapor.
 
 ---

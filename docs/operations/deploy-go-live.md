@@ -1,5 +1,10 @@
 # Deploy, PWA & Go-Live — Runbook
 
+<!-- kotak-non-otoritatif -->
+> **Catatan (2026-10-05, batch B4):** kotak `[ ]` di berkas ini adalah **langkah operasional**, bukan antrean tugas.
+> Antrean resmi ada di `docs/STATUS.md` (menjadi `docs/ANTREAN.md` pada B5). Penanda ini dikenali gate dokumen (aturan R3).
+
+
 > Migrasi dari docs/M08_DEPLOY_GO_LIVE.md (Bagian 1, Bagian 2, Appendix A) pada f8f9a589 (DOC-GOV-20260922 Tahap 3).
 > Sumber asli sudah dihapus di Fase 3 (23 Sep 2026); berkas ini kanonik.
 

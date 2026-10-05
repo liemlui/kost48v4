@@ -1,5 +1,10 @@
 # Checklist Audit Total KOST48 (Indeks Cakupan Audit)
 
+> **BANNER ARSIP** · Diarsipkan: **2026-10-05** (batch B4) · Alasan: **indeks cakupan audit 135 ID sudah tidak dipakai sebagai antrean**; digantikan oleh [audit/index-cakupan.md](../audit/index-cakupan.md).
+> Isinya **dibekukan**: angka dan centang di sini adalah potret 8–18 September 2026 dan **tidak diperbarui**.
+> Cara memakai: hanya untuk forensik bukti audit per-ID. Antrean resmi: [docs/STATUS.md](../STATUS.md).
+
+
 > **Tanggal:** 8 September 2026 (dibuat); hasil audit 11-18 September 2026.
 > **Status:** indeks cakupan aktif - 135 ID subkelompok (117 belum, 18 selesai diperiksa). Centang BE-002 diperbarui 24 Sep 2026 berdasarkan [audit ulang backend auth](backend-auth-2026-09-24.md). Addendum 25 Sep 2026: T6/T7 tertutup secara statis + unit (build + 12/12 test); agregat 117/18 **tidak** berubah karena itu indeks cakupan ID, bukan status temuan.
 > **Tujuan:** satu indeks cakupan audit total beserta tabel hasil/checkpoint, dengan tautan peta per unit.
