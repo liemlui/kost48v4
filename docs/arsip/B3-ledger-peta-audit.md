@@ -1,9 +1,11 @@
+> **ARSIP BEKU** · dipindah dari `docs/rencana/` ke `docs/arsip/` pada 2026-10-07 (sensus dokumen, batch SENSUS-DOCS). Isi tidak diubah selain banner ini + penyesuaian tautan relatif; **jangan dibaca rutin**.
+
 # B3 — ledger pemindahan peta audit ke `.audit-map/` (potret 2026-10-05)
 
 > **Blok baca** · Jenis: **kartu bukti pemindahan** · Status: **beku setelah B3** · Untuk siapa: owner + agen verifikator
 > · Baca kalau: memverifikasi pemindahan peta audit atau menjalankan ulang generasinya.
 
-Rumah aturan: [RENCANA-ROMPAK-DOCS.md](RENCANA-ROMPAK-DOCS.md) §4 (B3) · keputusan owner: [PERTANYAAN-ROMPAK.md](PERTANYAAN-ROMPAK.md) (Q21, P14, P15).
+Rumah aturan: [RENCANA-ROMPAK-DOCS.md](../rencana/RENCANA-ROMPAK-DOCS.md) §4 (B3) · keputusan owner: [PERTANYAAN-ROMPAK.md](../rencana/PERTANYAAN-ROMPAK.md) (Q21, P14, P15).
 
 ## 1. Apa yang dipindah dan mengapa
 

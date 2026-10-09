@@ -4,7 +4,7 @@
 // "Kekuatan %" di sini = jumlah pemeriksaan yang LULUS dibagi jumlah pemeriksaan yang dijalankan.
 // Kartu ini deterministik dan bisa dijalankan ulang siapa pun; ia TIDAK mengukur selera/keindahan,
 // dan tidak menggantikan gate (scripts/check-docs.mjs) — keduanya saling melengkapi:
-//   gate   = aturan yang bisa memblokir (R1-R7)
+//   gate   = aturan yang bisa memblokir (R1-R11)
 //   kartu  = kesehatan yang lebih luas (yatim, indeks, inventaris, status, duplikasi)
 //
 // Pakai: node scripts/ukur-kekuatan-docs.mjs [akar-repo]
@@ -92,7 +92,7 @@ const cek = (nama, lulus, detail) => hasil.push({ nama, lulus, detail });
   cek("C. Semua berkas aktif di dalam plafon byte", pelanggar.length === 0, pelanggar.length ? pelanggar.join("; ") : `${aktif.length} berkas diperiksa`);
 }
 
-// ── D. blok baca / baris peran ────────────────────────────────────────────────
+// ── D. blok baca / baris peran / baris Fakta ─────────────────────────────────
 {
   const kurang = [];
   for (const r of ["docs/KONTRAK.md", "docs/ANTREAN.md", "docs/PETA-KODE.md"]) {
@@ -103,7 +103,19 @@ const cek = (nama, lulus, detail) => hasil.push({ nama, lulus, detail });
   }
   const ag = readFileSync(join(ROOT, "AGENTS.md"), "utf8").split(/\r?\n/).slice(0, 12).join("\n");
   if (!/disuntik otomatis|kontrak kerja/i.test(ag)) kurang.push("AGENTS.md tanpa baris peran");
-  cek("D. Berkas tangga wajib punya blok baca + baris peran AGENTS", kurang.length === 0, kurang.join("; ") || "ok");
+  // Baris Fakta (dipasang 2026-10-07, batch SERAH-SESI — diputuskan di KONTRAK §7):
+  // setiap berkas tangga wajib menyatakan POTRET + perintah pengukurnya di bagian atas, supaya
+  // kebasiannya bisa dinilai pembaca tanpa membuka berkas lain. Diperiksa di 14 baris pertama
+  // karena blok baca sendiri memakan 2 baris.
+  for (const r of ["AGENTS.md", "docs/KONTRAK.md", "docs/ANTREAN.md", "docs/PETA-KODE.md"]) {
+    const p = join(ROOT, r);
+    if (!existsSync(p)) continue;
+    const kepala = readFileSync(p, "utf8").split(/\r?\n/).slice(0, 14).join("\n");
+    if (!/Fakta/i.test(kepala)) kurang.push(`${r} tanpa baris Fakta`);
+    if (!/\d{4}-\d{2}-\d{2}/.test(kepala)) kurang.push(`${r} tanpa tanggal potret di baris Fakta`);
+    if (!/node scripts\//.test(kepala)) kurang.push(`${r} tanpa perintah pengukur di baris Fakta`);
+  }
+  cek("D. Berkas tangga wajib punya blok baca + baris peran AGENTS + baris Fakta (potret & perintah ukur)", kurang.length === 0, kurang.join("; ") || "ok");
 }
 
 // ── E. kotak otoritatif ───────────────────────────────────────────────────────
@@ -204,6 +216,57 @@ const cek = (nama, lulus, detail) => hasil.push({ nama, lulus, detail });
   }
   const dobel = [...peta.entries()].filter(([, v]) => v.length > 1);
   cek("K. Tidak ada judul H1 yang sama di dua dokumen aktif", dobel.length === 0, dobel.length ? dobel.map(([k, v]) => `"${k}" (${v.length})`).slice(0, 3).join("; ") : "ok");
+}
+
+// ── L. rujukan nomor baris + keadaan berkas serah-terima (dipasang 2026-10-07, batch SERAH-SESI) ──
+// Dua klaim yang sebelumnya hanya ditulis, tidak diperiksa:
+//   (1) KONTRAK §7: "rujukan lokasi = kutipan, bukan nomor baris". Berkas tangga wajib 0 (mereka
+//       dibaca tiap sesi); dokumen rujukan dilaporkan angkanya sebagai temuan, bukan kegagalan —
+//       konversinya pekerjaan Isi yang butuh verifikasi kode per baris (kalibrasi 16 gate).
+//   (2) Berkas serah-terima paling cepat basi dan paling mahal bila salah, jadi klaim keadaannya
+//       diikat ke fakta yang bisa diperiksa: blok `@kost48-state` harus ada, skrip pemeriksanya
+//       harus ada, dan setiap berkas yang disebut sebagai pengukur harus benar-benar ada di disk.
+{
+  const POLA = /(?<![\w/\\.-])[\w][\w./\\-]*\.(?:tsx?|jsx?|mjs|cjs|prisma|sql|ps1):\d+/g;
+  const rujukan = [];
+  for (const f of aktif) {
+    const r = rel(f);
+    if (/^docs\/(audit|history|arsip)\//.test(r)) continue;   // catatan bertanggal: bukti baris memang alatnya
+    const n = (readFileSync(f, "utf8").match(POLA) || []).length;
+    if (n > 0) rujukan.push(`${r} (${n})`);
+  }
+  const tanggaKena = rujukan.filter((s) => /^(AGENTS|docs\/(KONTRAK|ANTREAN|PETA-KODE))\.md/.test(s));
+  rujukan.sort();
+
+  const kurang = [];
+  const P = join(ROOT, "docs", "kerja", "SERAH-TERIMA.md");
+  if (!existsSync(P)) {
+    kurang.push("docs/kerja/SERAH-TERIMA.md tidak ada");
+  } else {
+    const isi = readFileSync(P, "utf8");
+    if (!/@kost48-state/.test(isi)) kurang.push("tanpa blok @kost48-state");
+    // Perintah pengukur yang disebut harus benar-benar ada. Dua bentuk yang sah: skrip repo
+    // (`scripts/*.mjs`, backtick atau tautan) dan perintah pengukuran langsung (mis. PowerShell
+    // `[IO.File]::ReadAllBytes`). Klaim "ada alat yang memeriksa ini" tidak boleh hidup sebagai teks saja.
+    const skrip = new Set([
+      ...[...isi.matchAll(/`(scripts\/[^`\s]+\.mjs)[^`]*`/g)].map((m) => m[1]),
+      ...[...isi.matchAll(/\]\((?:\.\.\/)*(scripts\/[^)\s]+\.mjs)\)/g)].map((m) => m[1]),
+    ]);
+    for (const s of skrip) if (!existsSync(join(ROOT, s))) kurang.push(`skrip pengukur tidak ada: ${s}`);
+    const perintahLangsung = /\[IO\.File\]::|Get-Content |git status |git rev-parse/.test(isi);
+    if (skrip.size === 0 && !perintahLangsung) kurang.push("tidak menyebut skrip/perintah pengukur mana pun");
+    // Berkas lokal yang ditunjuk sebagai sumber (tautan relatif) harus ada.
+    for (const m of isi.matchAll(/\]\((?!https?:)([^)#\s]+\.md)(?:#[^)]*)?\)/g)) {
+      const t = m[1];
+      if (!existsSync(resolve(dirname(P), t))) kurang.push(`tautan mati: ${t}`);
+    }
+  }
+  const detail = [
+    tanggaKena.length ? `berkas tangga kena: ${tanggaKena.join(", ")}` : "berkas tangga bersih",
+    `${rujukan.reduce((a, s) => a + Number(s.match(/\((\d+)\)/)[1]), 0)} rujukan nomor baris di ${rujukan.length} dokumen rujukan (temuan, bukan kegagalan)`,
+    kurang.join("; ") || "keadaan serah-terima ok",
+  ].join(" · ");
+  cek("L. Rujukan nomor baris (berkas tangga wajib 0) + keadaan berkas serah-terima terikat fakta", tanggaKena.length === 0 && kurang.length === 0, detail);
 }
 
 const lulus = hasil.filter((h) => h.lulus).length;

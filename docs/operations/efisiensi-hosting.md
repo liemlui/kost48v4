@@ -3,7 +3,7 @@
 Tanggal: 2026-09-23
 Status: aktif
 Tujuan: batas teknis & rencana efisiensi shared hosting 512 MB — verdict, anggaran memori, verifikasi klaim audit, jalur arsitektur, peta dependensi mikrotask, definisi EF-00..EF-09, batasan/open questions, dan tabel pencatatan hosting EF-00/EF-02 (dari M19)
-Rujukan: [KEPUTUSAN-OWNER](../KEPUTUSAN-OWNER.md) · [STATUS](../ANTREAN.md) · [efisiensi hosting](efisiensi-hosting.md) · [produksi.md](produksi.md) · [deploy-go-live.md](deploy-go-live.md) · [go-live-cpanel.md](go-live-cpanel.md)
+Rujukan: [KEPUTUSAN-OWNER](../KEPUTUSAN-OWNER.md) · [ANTREAN](../ANTREAN.md) · [efisiensi hosting](efisiensi-hosting.md) · [produksi.md](produksi.md) · [deploy-go-live.md](deploy-go-live.md) · [go-live-cpanel.md](go-live-cpanel.md)
 
 > Migrasi dari docs/M19_EFISIENSI_HOSTING_512MB.md (B3 Tahap 3, 23 Sep 2026) pada DOC-GOV-20260922; teks tidak diubah.
 > Batch B3 memindahkan **seluruh isi M19 apa adanya** ke file ini (satu tujuan per handoff owner). Anchor lama (`#arah-dan-status-aktif...`, `#9-pencatatan-hosting-ef-00-dan-ef-02`) dipertahankan di pointer M19 agar rujukan dari M02/M08 tetap resolve.

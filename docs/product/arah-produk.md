@@ -2,7 +2,7 @@
 
 Tanggal: 22 September 2026. Status: **peta dokumentasi dan kebutuhan produk; belum verifikasi source/runtime**.
 Tujuan: menyederhanakan pekerjaan penghuni dan keuangan agar pengguna memahami akibat tindakan sebelum menjalankannya.
-Keputusan owner: [KEPUTUSAN-OWNER](../KEPUTUSAN-OWNER.md). Antrean dan gate pelaksanaan: [STATUS](../ANTREAN.md).
+Keputusan owner: [KEPUTUSAN-OWNER](../KEPUTUSAN-OWNER.md). Antrean dan gate pelaksanaan: [ANTREAN](../ANTREAN.md).
 Dokumen ini tidak mengubah nominal, hak akses, aturan akuntansi, atau status bisnis. Rujukan teknis: [flow & kontrak](../domain/flow.md), [keuangan](../domain/keuangan.md), [hunian](../domain/hunian.md).
 
 ## 1. Cara membaca bukti
@@ -71,22 +71,22 @@ Validasi memakai skenario nonpersonal yang disetujui, mencakup jalur normal, pra
 
 ---
 
-**Digabung dari docs/product/landasan-ib.md** (DOCS-CLEANUP-1, 2026-09-24) - isi blok disalin utuh.
+**Digabung dari docs/product/landasan-ib.md** (DOCS-CLEANUP-1, 2026-09-24) - isi blok disalin utuh. Penomoran bagiannya **melanjutkan bagian pertama** (§7–§12) supaya tidak ada nomor bagian yang dipakai dua kali dalam satu berkas.
 
-# Landasan IB Diploma Business Management untuk KOST48
+## Landasan IB Diploma Business Management untuk KOST48
 
 Tanggal: 22 September 2026. Status: **landasan produk dan kerangka penerapan; bukan audit kurikulum atau klaim fitur selesai**.
 Owner menetapkan IB Diploma Business Management Theory sebagai dasar bisnis kost yang kuat dalam [KEPUTUSAN-OWNER](../KEPUTUSAN-OWNER.md).
-Penerapan didahulukan pada operasi penghuni dan keuangan OWNER/ADMIN; [flow utama](arah-produk.md) menjadi penghubung teori dengan pekerjaan sehari-hari. Antrean implementasi tetap [STATUS](../ANTREAN.md).
+Penerapan didahulukan pada operasi penghuni dan keuangan OWNER/ADMIN; [flow utama](arah-produk.md) menjadi penghubung teori dengan pekerjaan sehari-hari. Antrean implementasi tetap [ANTREAN](../ANTREAN.md).
 
-## 1. Dasar dan batas sumber
+## 7. Dasar dan batas sumber
 
 [IB DP Business Management subject brief, first assessments 2024](https://www.ibo.org/globalassets/new-structure/programmes/dp/pdfs/business-management-sl-subject-brief-en.pdf) menekankan keputusan bisnis, hubungan fungsi bisnis, dan konsekuensi bagi pemangku kepentingan. Konsep lintas bidangnya mencakup **kreativitas, perubahan, etika, dan keberlanjutan**.
 Pemeriksaan terdahulu pada 22 September memakai teks indeks pencarian resmi; pengambilan PDF penuh ditolak HTTP 403. Dokumen ini tidak mengklaim mencakup seluruh silabus atau memvalidasi rumus/modul pembelajaran IB.
 
 Pemetaan berikut merupakan **adaptasi KOST48**. Urutan dan kebutuhan aplikasinya mengikuti masalah owner, data yang tersedia, serta aturan bisnis existing; bukan urutan resmi kurikulum atau kewajiban menambah seluruh alat analisis IB.
 
-## 2. Lima bidang dalam keputusan kost
+## 8. Lima bidang dalam keputusan kost
 
 | Bidang penerapan | Pertanyaan bisnis KOST48 | Data/bukti yang perlu tersedia | Bentuk bantuan aplikasi yang dituju |
 |---|---|---|---|
@@ -96,7 +96,7 @@ Pemetaan berikut merupakan **adaptasi KOST48**. Urutan dan kebutuhan aplikasinya
 | Pemasaran | Layanan apa dibutuhkan penghuni dan apa yang mendukung retensi? | Masukan penghuni, keluhan, renewal, alasan keluar dan data pasar bersumber/tanggal | Ringkasan kebutuhan/retensi untuk menilai pilihan layanan; dampak harga/operasi tetap ditelusuri |
 | Strategi dan evaluasi | Masalah apa paling bernilai diselesaikan dan apakah keputusan memberi hasil? | Tujuan, baseline, alternatif, biaya/manfaat, asumsi dan hasil setelah tindakan | Catatan keputusan singkat dengan pemilik keputusan, batas kesimpulan dan waktu evaluasi |
 
-## 3. Empat konsep sebagai pemeriksaan keputusan
+## 9. Empat konsep sebagai pemeriksaan keputusan
 
 | Konsep | Pertanyaan penerapan KOST48 |
 |---|---|
@@ -107,7 +107,7 @@ Pemetaan berikut merupakan **adaptasi KOST48**. Urutan dan kebutuhan aplikasinya
 
 Pertanyaan ini membantu menilai pilihan. Jawabannya tidak menggantikan kebijakan deposit, tarif, kontrak sewa, pengakuan pendapatan, hak akses atau gate yang sudah diputuskan owner.
 
-## 4. Bentuk catatan keputusan
+## 10. Bentuk catatan keputusan
 
 Gunakan pola **kerangka → keputusan → input/sumber/tanggal → hasil dan batas → evaluasi**. Catatan dapat ditautkan dari task/keputusan yang relevan; jangan membuat antrean kedua.
 
@@ -123,7 +123,7 @@ Gunakan pola **kerangka → keputusan → input/sumber/tanggal → hasil dan bat
 
 Contoh adaptasi: owner ingin mengurangi tagihan lewat jatuh tempo. Gunakan operasi dan keuangan untuk memetakan invoice valid serta status pembayaran, periksa hambatan komunikasi, pilih tindak lanjut sesuai kewenangan, lalu bandingkan hasil pada periode yang sebanding. Jangan menyimpulkan penyebab dari korelasi atau mengarang target persentase tanpa baseline.
 
-## 5. Urutan penerapan produk
+## 11. Urutan penerapan produk
 
 1. **Pencatatan dan alur utama:** bedakan kas/piutang/deposit/pendapatan/laba; jelaskan dampak booking, pembayaran, renewal, checkout dan biaya. Validasi definisi serta sumber sebelum merancang indikator.
 2. **Ringkasan manajemen:** tampilkan pekerjaan mendesak, kondisi bisnis, serta asal angka/periode yang dapat dibuka; gunakan bahasa operasional pada tampilan utama.
@@ -132,7 +132,7 @@ Contoh adaptasi: owner ingin mengurangi tagihan lewat jatuh tempo. Gunakan opera
 
 Pengembangan IoT tetap ditunda. Pencatatan meter/utilitas yang diperlukan operasi dan tagihan tetap dijaga. Dashboard tidak perlu menampilkan seluruh teori; penjelasan dan asumsi tersedia saat pengguna membuka detail.
 
-## 6. Batas penerapan dan bukti selesai
+## 12. Batas penerapan dan bukti selesai
 
 - Perhitungan serta mutasi bisnis tetap pada kontrak/service existing; rekomendasi AI tidak langsung memposting jurnal atau mengubah transaksi/status.
 - Rasio, proyeksi dan simulasi menyebut periode, input, rumus dan asumsi; tidak disamakan dengan uang tersedia atau transaksi aktual.

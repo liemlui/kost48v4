@@ -5,6 +5,8 @@
 
 > Berkas ini menggantikan `docs/ANTREAN.md` sejak batch B5 (2026-10-05). Ia memuat **antrean + gate saja**: tanpa aturan, tanpa bukti bertanggal. Aturan kerja ada di [AGENTS.md](../AGENTS.md) + [KONTRAK.md](KONTRAK.md); bukti bertanggal ada di [history/bukti-2026-10.md](history/bukti-2026-10.md); keputusan bisnis owner di [KEPUTUSAN-OWNER.md](KEPUTUSAN-OWNER.md).
 
+**Fakta** · Status: **aktif** · potret **2026-10-09** — ukur ulang: `node scripts/ukur-kekuatan-docs.mjs` (kesehatan antrean) + hitung `- [ ]` di §3 (ambang & invariant: [KONTRAK §11](KONTRAK.md)) — jangan percaya tanggal di berkas ini.
+
 ## 1. Cara pakai (untuk AI, baca ini dulu)
 
 1. Baca [AGENTS.md](../AGENTS.md) (aturan, izin, verifikasi) lalu file ini.
@@ -36,6 +38,8 @@
 ## 3. Task terbuka & gate (29 `[ ]`)
 
 Format: **ID** — judul | **Gate** (verifikasi wajib sebelum `[x]`). 🧑 = butuh data/keputusan owner.
+
+**Dokumen kerja (tugas level ≥S).** Tugas yang butuh langkah, jebakan, dan perintah verifikasi boleh punya dokumen kerja `docs/kerja/TASK-<ID>.md` — bentuk **7 bagian**, **tanpa kotak dan tanpa daftar pekerjaan** (bukan antrean kedua: status tetap di baris §3 ini). Syarat pakai + asal-usul: [ADAPTASI-DOKTRIN-DOCS](rencana/ADAPTASI-DOKTRIN-DOCS.md) butir **A-2**; contoh pertama: [TASK-T05-DETEKTOR-ARSIP](kerja/TASK-T05-DETEKTOR-ARSIP.md).
 
 - [ ] **ONBOARDING-HUNIAN** - lanjutan onboarding 13 hunian + verifikasi KTP (menunggu data owner) | **Gate:** bulan masuk, 13 meter kWh, saldo kas/bank, deposit; penutupan lewat gate Fase A
 - [ ] **AO-13/14-BUKTI** - bukti eksekusi: tiga crawl tanpa skip, dua state TENANT, viewport/Axe, sign-off | **Gate:** crawl tuntas, screenshot/trace bebas PII, sign-off AO-14
@@ -88,5 +92,5 @@ Butir di bawah **bukan** antrean aktif — sengaja **tanpa kotak `[ ]` dan tanpa
   - [arsip/legacy/2026-06-16_root_docs_pre_M/17_PUBLIK_MARKETING_UIUX.md](arsip/legacy/2026-06-16_root_docs_pre_M/17_PUBLIK_MARKETING_UIUX.md) (7,8 KB)
   - [arsip/legacy/AUDIT_INVENTARIS_LENGKAP.md](arsip/legacy/AUDIT_INVENTARIS_LENGKAP.md) (11 KB)
 - **Kredensial DEV di kode** (temuan 2026-10-05, di luar lingkup rombak dokumentasi) — kata sandi DEV ter-hardcode di `backend/scripts/seed-dev-reset.js` (**tracked**, 3 titik), `backend/scripts/seed-dev-real.js` (untracked, 3), `backend/scripts/seed-facilities-inventory.js` (1), `.audit-runtime/check-login.js` (5), `.audit-runtime/check-login-2.js` (2), `.audit-runtime/create-local-accounts.js` (1). Keputusan yang dibutuhkan: pindahkan ke env var (mengubah alur seed + skrip lokal) **atau** sahkan sebagai tooling DEV. Nilai tidak ditulis di sini; daftar kanonik DEV ada di [operations/default-dev.md](operations/default-dev.md).
-- **`AI_MASTER.md`** (0,5 KB, pointer lama) — masih dirujuk 10 berkas (3 di antaranya hidup). Keputusan 2026-10-05: **dibiarkan**; menghapusnya memutus rantai rujukan tanpa manfaat nyata. Hapus hanya bila rujukan itu dialihkan lebih dulu.
+- **`AI_MASTER.md`** — **SELESAI 2026-10-07 (sensus dokumen):** dipindah ke [arsip/AI_MASTER.md](arsip/AI_MASTER.md) **setelah** seluruh rujukan hidupnya dialihkan, sehingga syarat keputusan 2026-10-05 ("hapus hanya bila rujukan itu dialihkan lebih dulu") dipenuhi. Dua pointer lama lain — `AI_QUICKREF.md` dan `AI_WORKFLOW_GUIDE.md` — ikut diarsipkan pada batch yang sama. Bukti + ledger konservasi: [sensus dokumen](audit/sensus-dokumen-2026-10-07.md).
 - **Pre-commit hook `check:docs`** (keputusan owner P24b: ditinjau setelah B8) — **tidak dipasang**. Alasan: hook yang bisa dibagikan butuh dependency baru (dilarang aturan §4), sedangkan hook lokal `.git/hooks/` tidak ikut repo sehingga tidak menjaga siapa pun selain mesin ini. Penggantinya: `npm run check:docs` (tersedia di root `package.json` sejak 2026-10-05) dijalankan sebelum menutup batch dokumentasi — sudah menjadi aturan di [KONTRAK §7](KONTRAK.md).

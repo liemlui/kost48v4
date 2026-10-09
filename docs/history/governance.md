@@ -1,6 +1,6 @@
 # Riwayat konsolidasi governance 20 September 2026
 
-Snapshot dashboard dan GUIDE sebelum penataan 22 September 2026; termasuk koreksi 22 Sep yang sudah ada. Status pending/roadmap di bawah bersifat historis, bukan antrean atau izin aktif. Aturan kini: [AGENTS](../../AGENTS.md); antrean: [M12](../ANTREAN.md); dashboard: [AI_MASTER](../../AI_MASTER.md).
+Snapshot dashboard dan GUIDE sebelum penataan 22 September 2026; termasuk koreksi 22 Sep yang sudah ada. Status pending/roadmap di bawah bersifat historis, bukan antrean atau izin aktif. Aturan kini: [AGENTS](../../AGENTS.md); antrean: [M12](../ANTREAN.md); dashboard: [AI_MASTER](../arsip/AI_MASTER.md).
 
 Isi sumber dipertahankan; hanya tautan relatif disesuaikan untuk lokasi riwayat ini.
 
@@ -24,10 +24,10 @@ Tanggal file lama tidak disimpulkan dari tanggal yang tertulis di dalam dokumenn
 | [.clinerules](../../.clinerules) | Panduan Cline | Pointer aktif — Stage 3 selesai; tetap file tunggal | Pointer 2 baris ke AGENTS/M12 | 2026-09-20 |
 | [.clineignore](../../.clineignore) | Ignore context Cline | Komentar tersinkron — Stage 3 selesai; pola tetap | Config tool, bukan sumber aturan kerja | 2026-09-20 |
 | [reasonix.toml](../../reasonix.toml) | Permission tools Reasonix | Selesai Stage 5 — 7 allow dihapus; tanpa deny baru | Config tool; allow generik tetap, bukan blokir menyeluruh | 2026-09-20 |
-| [AI_QUICKREF.md](../../AI_QUICKREF.md) | Cheatsheet harian | Status tooling dan batas bukti diperbarui | Ringkasan turunan AGENTS; exception uang di AGENTS §8 | 2026-09-22 |
-| [AI_WORKFLOW_GUIDE.md](../../AI_WORKFLOW_GUIDE.md) | Pointer + lampiran roadmap/template | Roadmap lama diberi konteks; rancangan baru ditautkan | Pointer ke AGENTS/M12; §11–12 lampiran, bukan aturan kanonik | 2026-09-22 |
+| [AI_QUICKREF.md](../arsip/AI_QUICKREF.md) | Cheatsheet harian | Status tooling dan batas bukti diperbarui | Ringkasan turunan AGENTS; exception uang di AGENTS §8 | 2026-09-22 |
+| [AI_WORKFLOW_GUIDE.md](../arsip/AI_WORKFLOW_GUIDE.md) | Pointer + lampiran roadmap/template | Roadmap lama diberi konteks; rancangan baru ditautkan | Pointer ke AGENTS/M12; §11–12 lampiran, bukan aturan kanonik | 2026-09-22 |
 | [docs/audit/README.md](../audit/README.md) | Indeks audit modul | Satu audit parsial frontend-auth tersedia; empat placeholder | Indeks turunan; audit-map sebagai peta, M12 sebagai antrean | 2026-09-22 |
-| [AI_MASTER.md](../../AI_MASTER.md) | Monitoring lintas-agent | Dashboard aktif; status disinkronkan | Dashboard, bukan canonical atau pengganti M12/M13 | 2026-09-22 |
+| [AI_MASTER.md](../arsip/AI_MASTER.md) | Monitoring lintas-agent | Dashboard aktif; status disinkronkan | Dashboard, bukan canonical atau pengganti M12/M13 | 2026-09-22 |
 | [.github/copilot-instructions.md](../../.github/copilot-instructions.md) | Entry panduan Copilot | Pointer aktif — Stage 3 selesai | Pointer ke AGENTS/M12 dan dashboard AI_MASTER | 2026-09-20 |
 | [M00](../PETA-KODE.md) / [audit-map](../../.audit-map/) | Navigasi kode dan audit | Ada; dipertahankan, tidak diubah | Peta rujukan; bukan bukti audit otomatis PASS | UNKNOWN — belum diperiksa |
 | [M12](../ANTREAN.md) | Antrean dan gate tugas | Kesiapan task diperjelas; migrasi struktur menunggu approval XL | Otoritas antrean/gate di atas AGENTS | 2026-09-22 |
@@ -84,7 +84,7 @@ Tidak ada hitungan coverage atau klaim PASS runtime baru. Kesegaran bukti dinila
 
 ## 6. Roadmap 30 Hari
 
-1. Ringkasan [GUIDE §11](../../AI_WORKFLOW_GUIDE.md#11-roadmap-migrasi-workflow-30-hari); **bukan izin implementasi**, tidak mengganti prioritas EF/onboarding M12.
+1. Ringkasan [GUIDE §11](../arsip/AI_WORKFLOW_GUIDE.md#11-roadmap-migrasi-workflow-30-hari); **bukan izin implementasi**, tidak mengganti prioritas EF/onboarding M12.
 2. Hari 1–7: kontrak prompt, klasifikasi 5 task, baseline biaya/command, dan pemetaan prasyarat test satu modul; exception uang tetap berlaku.
 3. Hari 8–14: ringkas 3 modul sering disentuh dari bukti lama; petakan test, owner, freshness, serta prasyarat; eksekusi hanya setelah izin.
 4. Hari 15–21: setelah approval tooling, wrapper tanpa dependency baru; test/audit dahulu, build hanya target tersedia; tanpa fallback full suite.
@@ -93,7 +93,7 @@ Tidak ada hitungan coverage atau klaim PASS runtime baru. Kesegaran bukti dinila
 
 ## 7. Aturan Perubahan
 
-Aturan perubahan mengikuti [AGENTS §10](../../AGENTS.md#10-perubahan-governance). Konsolidasi Stage 1–5 tanggal 20 Sep selesai; checkpoint per-stage pada log di bawah hanya merekam keadaan saat keputusan dibuat.
+Aturan perubahan mengikuti [AGENTS §9](../../AGENTS.md#9-perubahan-governance). Konsolidasi Stage 1–5 tanggal 20 Sep selesai; checkpoint per-stage pada log di bawah hanya merekam keadaan saat keputusan dibuat.
 Permintaan owner 22 Sep mengizinkan perbaikan temuan dokumentasi dan penyusunan alur kerja aman. [Rancangan DOC-GOV-20260922](../arsip/DOC-GOV-20260922.md) memisahkan perbaikan langsung dari migrasi XL yang memerlukan persetujuan rencana menurut AGENTS §5.
 Scope sesi ini dokumentasi lokal; source aplikasi, konfigurasi permission, DB, dan deployment tidak diubah.
 
@@ -204,11 +204,11 @@ Jangan ulang: [audit/test yang masih sah].
 > Dimigrasi dari AI_MASTER.md pada
 af230928
  (Tahap 2). Isi blok dipindahkan tanpa diubah.
-> Dashboard aktif: [AI_MASTER.md](../../AI_MASTER.md). Log append-only dan tidak memberi izin baru; status pending pada baris lama dibaca sesuai tanggal/urutannya.
+> Dashboard aktif: [AI_MASTER.md](../arsip/AI_MASTER.md). Log append-only dan tidak memberi izin baru; status pending pada baris lama dibaca sesuai tanggal/urutannya.
 
 ## 6. Roadmap 30 Hari
 
-1. Ringkasan [GUIDE §11](../../AI_WORKFLOW_GUIDE.md#11-roadmap-migrasi-workflow-30-hari); **bukan izin implementasi**, tidak mengganti prioritas EF/onboarding M12.
+1. Ringkasan [GUIDE §11](../arsip/AI_WORKFLOW_GUIDE.md#11-roadmap-migrasi-workflow-30-hari); **bukan izin implementasi**, tidak mengganti prioritas EF/onboarding M12.
 2. Hari 1–7: kontrak prompt, klasifikasi 5 task, baseline biaya/command, dan pemetaan prasyarat test satu modul; exception uang tetap berlaku.
 3. Hari 8–14: ringkas 3 modul sering disentuh dari bukti lama; petakan test, owner, freshness, serta prasyarat; eksekusi hanya setelah izin.
 4. Hari 15–21: setelah approval tooling, wrapper tanpa dependency baru; test/audit dahulu, build hanya target tersedia; tanpa fallback full suite.

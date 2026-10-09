@@ -12,6 +12,12 @@
 //   R3  kotak `[ ]` otoritatif hanya di docs/ANTREAN.md
 //   R4  blok baca wajib (jenis/status/untuk siapa/baca kalau) pada berkas tangga wajib
 //   R5  plafon byte: AGENTS.md <=12 KB · berkas wajib <=16 KB · rujukan <=48 KB · berkas kerja batch (docs/rencana) <=16 KB
+//   R6  rujukan `docs/...` di dalam backtick yang tidak ada di disk (catatan bertanggal dikecualikan)
+//   R7  indeks cakupan audit (pengganti checklist audit yang diarsipkan)
+//   R8  anchor `#bagian` mati; anchor "rapuh" (hidup hanya bila spasi digabung) dilaporkan sebagai INFO
+//   R9  nomor bagian `## N.` dipakai lebih dari sekali dalam satu berkas hidup (catatan bertanggal dikecualikan)
+//   R10 lebih dari satu judul H1 dalam satu berkas hidup (gejala dua dokumen digabung jadi satu)
+//   R11 salinan berkas tangga wajib di luar rumah kanoniknya (zona "jangan dibaca" dikecualikan)
 //
 // Kalibrasi v1.1 (2026-10-05), dua koreksi dari hasil jalan pertama — keduanya agar gate
 // tidak menuduh yang benar:
@@ -37,14 +43,75 @@
 // dan gate menuduhnya sebagai tautan mati. Kurung milik tautan asli ada DI LUAR rentang kode, jadi
 // tautan sungguhan tetap terperiksa.
 //
+// Kalibrasi v1.7 (2026-10-07, batch A-1) — R8 dipasang, dengan dua tingkat:
+//   6. R8 sengaja TIDAK memblokir setiap ketidakcocokan anchor. Slug GitHub dan slugifier lama
+//      (`scripts/tambah-toc.mjs`) berbeda pada judul yang memuat simbol berspasi (—, /, &):
+//      GitHub menghasilkan `--`, slugifier lama menghasilkan `-`. Karena itu:
+//        · PELANGGARAN   = anchor mati di KEDUA konvensi (pasti rusak bagi pembaca)
+//        · INFO "rapuh"  = hidup hanya di konvensi lama (mati di GitHub) — terlihat, tidak memblokir
+//      Sebab: pengukuran pertama batch ini memakai tiruan slug yang salah dan melaporkan 29 anchor
+//      mati, padahal yang pasti rusak 15 + 7 rapuh. Gate tidak boleh menuduh yang benar (v1.1/v1.4).
+//   7. Akar kerapuhan: `scripts/tambah-toc.mjs` memakai slugifier lama. Skrip itu diperbaiki pada
+//      batch yang sama supaya R8 tidak terus memanen temuan baru dari daftar isi yang baru dibuat.
+//
+// Kalibrasi v1.8 (2026-10-07, batch SPLIT+R9):
+//   8. R9 memeriksa nomor bagian `## N.` yang dipakai dua kali dalam SATU berkas hidup. Cakupan
+//      sengaja mengecualikan catatan bertanggal (docs/audit, docs/history, docs/arsip, docs/rencana):
+//      berkas di sana hasil penggabungan dan DIBEKUKAN (KONTRAK §7), jadi menomori ulang isinya
+//      justru merusak bukti. Yang diperiksa adalah berkas yang masih dipakai sebagai aturan/rujukan.
+//   9. R8 menerima anchor HTML eksplisit (`<a id="...">`), karena GitHub menghormatinya. Tanpa ini
+//      R8 bisa menuduh mati tautan yang sebenarnya hidup (ditemukan dari `docs/operations/produksi.md`).
+//      R9 tetap hanya `## N.` — nomor pada `###` belum diperiksa (kandidat aturan berikutnya).
+//
+// Kalibrasi v1.9 (2026-10-07, batch RAPI):
+//  10. R10 menandai berkas hidup dengan lebih dari satu judul H1 — gejala dua dokumen digabung jadi
+//      satu. Cakupan mengecualikan catatan bertanggal, sama seperti R9. Menurunkan `# X` menjadi `## X`
+//      TIDAK memutus anchor: slug hanya bergantung pada teks judul, bukan levelnya.
+//  11. Indeks folder kini boleh disegarkan (`buat-indeks-folder.mjs --segarkan`) dan tidak lagi
+//      mendaftarkan dirinya sendiri — sebelumnya 22 baris ukuran basi dan 3 di antaranya mustahil benar.
+//
+// Kalibrasi v2.0 (2026-10-07, batch RAPI) — R11:
+//  12. R11 menjaga prinsip "aturan yang menang tidak boleh jadi yang paling basi": tidak boleh ada
+//      salinan AGENTS/KONTRAK/ANTREAN/PETA-KODE di luar rumah kanoniknya. Zona yang SUDAH dinyatakan
+//      "jangan dibaca" (`.design-audit`, `.docs-legacy`, `.audit-map`) dikecualikan — di sanalah
+//      salinan basi memang wajar ada; yang dicegah adalah salinan baru di tempat yang ikut dibaca.
+//      Pemicu nyatanya: `.design-audit/docs-snapshot-2026-10-05/docs/PETA-KODE.md`.
+//
+// Catatan kalibrasi 2026-10-07 (batch SISA-DOCS) — BUKAN aturan baru, jadi VERSI_GATE tetap v2.0 (11 aturan R1–R11):
+//  13. T-05 ditutup sebagai CATATAN, bukan pelanggaran. Aturan KONTRAK §7 "pekerjaan terbuka tidak boleh ikut
+//      terarsip" sebelumnya tidak punya detektor sama sekali (docs/arsip/** dikecualikan penuh dari gate).
+//      Sekarang jumlah kotak `[ ]` di docs/arsip/** tercetak setiap kali gate dijalankan. Ia SENGAJA tidak
+//      memblokir: 244 kotak tersebar di 9 berkas arsip yang DIBEKUKAN (KONTRAK §7) dan ikut dijaga ledger
+//      konservasi SHA-256, sehingga pelanggaran ini tidak bisa ditutup tanpa menyunting arsip beku —
+//      pelanggaran yang tidak bisa ditutup = gate yang selalu merah. Exit code tidak berubah karenanya.
+//  14. Kalimat kepala "berkas diperiksa" dibuat bisa direkonsiliasi sendiri (T-09): ia kini memisahkan
+//      berkas aktif di docs/ dan berkas di akar repo, karena 66/69 aktif tidak bisa dihitung dari
+//      "117 .md di docs/ − 56 arsip" tanpa menebak dari mana 5 sisanya datang.
+//  15. TEMUAN SAMPINGAN — **diputuskan owner 2026-10-07**: 47 dari 55 berkas arsip tidak memuat kata
+//      "beku/arsip" di 6 baris pertama. Keputusannya **opsi (b)**: aturan banner dibatasi pada berkas yang
+//      diarsipkan SEJAK DOCS-CLEANUP-1, sedangkan arsip legacy hasil pindah massal bersandar pada inventaris
+//      (arsip/README.md) + ledger konservasi. KONSEKUENSINYA: gate TIDAK boleh menuntut banner dari 47 berkas
+//      itu — menambahkannya retroaktif berarti menyunting arsip beku. Kalau kelak ada aturan banner, ia harus
+//      membawa daftar pengecualian legacy, bukan menghitung semua isi docs/arsip/**.
+//
+//  16. Kalibrasi 2026-10-09 (batch SERAH-SESI) — CATATAN NOMOR BARIS, BUKAN aturan ke-12. Kebijakan
+//      "rujukan lokasi = kutipan, bukan nomor baris" (KONTRAK §7, batch A-1) sebelumnya tidak punya
+//      detektor sama sekali; kini jumlah rujukan `berkas:NNN` pada dokumen KONTRAK dicetak setiap gate
+//      jalan (terukur pertama: 85 rujukan di 9 berkas, terbanyak docs/domain/flow.md = 25). Ia tidak
+//      memblokir karena konversinya menyentuh dokumen aturan bisnis 30 KB dan butuh verifikasi kode per
+//      baris — pekerjaan Isi, bukan pekerjaan sistem. VERBATIM: VERSI_GATE tetap v2.0 (11 aturan R1–R11).
+//
 // Yang TIDAK diperiksa v1 (jangan dianggap sudah dijaga): arsip beku (docs/arsip/**, docs/archieve/**),
 // artefak generated (docs/audit-map/**), rotasi changelog, dan isi berkas di luar glob.
+// R8 memakai EMULASI slug GitHub, bukan github-slugger: project ini dilarang menambah dependency
+// (AGENTS §2), jadi judul dengan tanda baca yang sangat tidak lazim bisa masih berbeda dari renderer
+// asli. Karena itu R8 dua tingkat, bukan satu tingkat yang memblokir.
 
 import { readFileSync, readdirSync, existsSync, statSync } from "node:fs";
 import { join, relative, dirname, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 
-const VERSI_GATE = "v1.6";
+const VERSI_GATE = "v2.0";
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const DOCS = join(ROOT, "docs");
 
@@ -284,6 +351,177 @@ for (const file of berkasAktif) {
   if (nRujukan === 0) catat("R6", ROOT, 0, "tidak ada rujukan backtick yang diperiksa — periksa apakah pola R6 masih cocok dengan isi dokumen");
 }
 
+// ── R8 — anchor `#bagian` mati & anchor rapuh (dipasang 2026-10-07, batch A-1) ──
+{
+  // Judul dibaca sebagai TEKS TER-RENDER: backtick, sintaks tautan, dan penanda tebal dilepas.
+  const renderJudul = (t) =>
+    t.replace(/`([^`]*)`/g, "$1").replace(/\[([^\]]*)\]\([^)]*\)/g, "$1").replace(/\*\*|__/g, "");
+  // Konvensi GitHub (github-slugger): buang tanda baca; SETIAP spasi jadi satu tanda hubung
+  // ("a — b" -> "a---b"). '_' dipertahankan, tidak ada penyatuan rentetan spasi.
+  const slugGH = (t) =>
+    renderJudul(t).trim().toLowerCase().replace(/[^\p{L}\p{N}\p{M}\-_ ]/gu, "").replace(/ /g, "-");
+  // Konvensi slugifier lama (scripts/tambah-toc.mjs): buang tanda baca, lalu gabungkan rentetan spasi.
+  const slugLama = (t) => t.toLowerCase().replace(/[^\p{L}\p{N}\s-]/gu, "").trim().replace(/\s+/g, "-");
+
+  const setSlug = new Map();
+  const slugs = (file) => {
+    if (setSlug.has(file)) return setSlug.get(file);
+    if (!existsSync(file)) { setSlug.set(file, null); return null; }
+    const gh = new Set();
+    const lama = new Set();
+    const terlihat = new Map();
+    let dalamFence = false;
+    for (const baris of readFileSync(file, "utf8").split(/\r?\n/)) {
+      if (/^\s*(```|~~~)/.test(baris)) { dalamFence = !dalamFence; continue; }
+      if (dalamFence) continue;
+      // Anchor HTML eksplisit juga sah di GitHub — hitung supaya R8 tidak menuduh yang benar.
+      for (const ma of baris.matchAll(/<a\s+(?:id|name)=["']([^"']+)["']/gi)) gh.add(ma[1].toLowerCase());
+      const m = baris.match(/^#{1,6}\s+(.+?)\s*#*\s*$/);
+      if (!m) continue;
+      let s = slugGH(m[1]);
+      const n = terlihat.get(s) || 0;               // judul kembar: GitHub memberi akhiran -1, -2
+      terlihat.set(s, n + 1);
+      if (n > 0) s = `${s}-${n}`;
+      gh.add(s);
+      lama.add(slugLama(renderJudul(m[1])));
+    }
+    setSlug.set(file, { gh, lama });
+    return setSlug.get(file);
+  };
+
+  let nAnchor = 0;
+  for (const file of diperiksa) {
+    const dir = dirname(file);
+    readFileSync(file, "utf8").split(/\r?\n/).forEach((baris, i) => {
+      for (const m of tanpaKodeInline(baris).matchAll(/\[[^\]]*\]\(([^)\s]+)\)/g)) {
+        const target = m[1];
+        if (/^(?:https?:|mailto:)/i.test(target)) continue;
+        const potong = target.indexOf("#");
+        if (potong < 0) continue;
+        const berkasTujuan = target.slice(0, potong);
+        let anchor = target.slice(potong + 1);
+        if (!anchor) continue;
+        try { anchor = decodeURIComponent(anchor); } catch { /* pakai apa adanya */ }
+        const abs = berkasTujuan ? resolve(dir, berkasTujuan) : file;
+        const s = slugs(abs);
+        if (s === null) continue;                   // berkas tujuan tidak ada -> itu urusan R2
+        nAnchor++;
+        const a = anchor.toLowerCase();
+        if (s.gh.has(a)) continue;
+        if (s.lama.has(a)) {
+          catatInfo("R8", file, i + 1, `anchor rapuh #${anchor} — hidup hanya bila spasi digabung, mati di GitHub (${rel(abs)})`);
+          continue;
+        }
+        catat("R8", file, i + 1, `anchor tidak ada di ${rel(abs)}: #${anchor}`);
+      }
+    });
+  }
+  if (nAnchor === 0) catat("R8", ROOT, 0, "tidak ada anchor yang diperiksa — periksa apakah pola R8 masih cocok dengan isi dokumen");
+}
+
+// ── R9 — nomor bagian `## N.` ganda dalam satu berkas hidup (dipasang 2026-10-07, batch SPLIT) ──
+{
+  let nNomor = 0;
+  for (const file of diperiksa) {
+    if (KARTU_BUKTI_RE.test(file) || CATATAN_R6.test(file)) continue;   // catatan bertanggal dibekukan
+    const terlihatNomor = new Map();
+    let dalamFence = false;
+    readFileSync(file, "utf8").split(/\r?\n/).forEach((baris, i) => {
+      if (/^\s*(```|~~~)/.test(baris)) { dalamFence = !dalamFence; return; }
+      if (dalamFence) return;
+      const m = baris.match(/^##\s+(\d+)\./);
+      if (!m) return;
+      nNomor++;
+      const n = terlihatNomor.get(m[1]) || 0;
+      terlihatNomor.set(m[1], n + 1);
+      if (n > 0) catat("R9", file, i + 1, `nomor bagian §${m[1]}. dipakai lebih dari sekali di berkas ini`);
+    });
+  }
+  if (nNomor === 0) catat("R9", ROOT, 0, "tidak ada nomor bagian yang diperiksa — periksa apakah pola R9 masih cocok dengan isi dokumen");
+}
+
+// ── R10 — lebih dari satu judul H1 dalam satu berkas hidup (dipasang 2026-10-07) ──
+{
+  let nH1 = 0;
+  for (const file of diperiksa) {
+    if (KARTU_BUKTI_RE.test(file) || CATATAN_R6.test(file)) continue;   // catatan bertanggal dibekukan
+    const posisi = [];
+    let dalamFence = false;
+    readFileSync(file, "utf8").split(/\r?\n/).forEach((baris, i) => {
+      if (/^\s*(```|~~~)/.test(baris)) { dalamFence = !dalamFence; return; }
+      if (dalamFence) return;
+      if (/^#\s+\S/.test(baris)) posisi.push(i + 1);
+    });
+    nH1 += posisi.length;
+    posisi.slice(1).forEach((barisKe) =>
+      catat("R10", file, barisKe, 'judul H1 tambahan di berkas hidup — turunkan jadi "## " (slug tidak berubah) atau pisahkan berkasnya'),
+    );
+  }
+  if (nH1 === 0) catat("R10", ROOT, 0, "tidak ada judul H1 yang diperiksa — periksa apakah pola R10 masih cocok");
+}
+
+// ── R11 — salinan berkas tangga di luar rumah kanonik (dipasang 2026-10-07) ──
+{
+  const kanonik = new Map(BERKAS_WAJIB.map((p) => [p.split("/").pop(), p]));   // basename → jalur kanonik
+  // Zona yang sudah dinyatakan "jangan dibaca" (AGENTS §6): salinan basi di sana wajar ada.
+  const ZONA_JANGAN_DIBACA = /^\.(design-audit|docs-legacy|audit-map)\//;
+  const SELALU_LEWAT = new Set([".git", "node_modules"]);
+  const salinan = [];
+  (function telusur(dir) {
+    let entri;
+    try { entri = readdirSync(dir, { withFileTypes: true }); } catch { return; }
+    for (const e of entri) {
+      const full = join(dir, e.name);
+      if (e.isDirectory()) { if (!SELALU_LEWAT.has(e.name)) telusur(full); continue; }
+      const kanon = kanonik.get(e.name);
+      if (!kanon) continue;
+      const r = rel(full);
+      if (r === kanon || ZONA_JANGAN_DIBACA.test(r)) continue;
+      salinan.push({ r, kanon });
+    }
+  })(ROOT);
+  salinan.sort((a, b) => a.r.localeCompare(b.r)).forEach((s) =>
+    catat("R11", join(ROOT, s.r), 0, `salinan berkas tangga di luar rumah kanoniknya (${s.kanon}) — pindahkan/hapus, atau nyatakan zonanya sebagai jangan-dibaca bila memang arsip`),
+  );
+  if (kanonik.size === 0) catat("R11", ROOT, 0, "daftar berkas tangga kosong — periksa apakah pola R11 masih cocok");
+}
+
+// ── CATATAN ARSIP (T-05) — kotak `[ ]` di dalam arsip beku (dipasang 2026-10-07, batch SISA-DOCS) ──
+// Dipindai tiap kali gate jalan, TIDAK dihitung sebagai pelanggaran dan tidak mengubah exit code.
+// Alasan lengkap: kalibrasi 13 di kepala skrip. Bentuknya sama dengan laporan anchor "rapuh" R8:
+// yang tidak pasti/tidak bisa ditutup tetap DILIHAT, tetapi tidak menuduh.
+const arsipKotak = [];
+{
+  for (const f of walk(join(ROOT, "docs", "arsip"))) {
+    const n = (readFileSync(f, "utf8").match(/^\s*[-*]\s*\[ \]/gm) || []).length;
+    if (n > 0) arsipKotak.push({ file: rel(f), n });
+  }
+  arsipKotak.sort((a, b) => b.n - a.n || a.file.localeCompare(b.file));
+}
+
+// ── CATATAN NOMOR BARIS (dipasang 2026-10-07, batch SERAH-SESI) — INFO, bukan pelanggaran ──
+// Kebijakan KONTRAK §7: "rujukan lokasi = kutipan, bukan nomor baris". Sampai batch ini
+// kebijakan itu TIDAK punya detektor sama sekali. Bentuk yang dipilih sama dengan T-05:
+// DILIHAT tiap kali gate jalan, TIDAK memblokir, dan exit code tidak berubah — karena
+// 85 rujukan itu tidak bisa ditutup tanpa menyunting dokumen aturan bisnis 30 KB yang
+// butuh verifikasi kode per baris (pekerjaan Isi, bukan pekerjaan sistem).
+// Ruang lingkup SENGAJA = dokumen kontrak R1 saja (akar + docs/*.md + domain/operations/
+// product), karena di sanalah aturannya berlaku. `docs/kerja/**`, catatan bertanggal
+// (audit/history/arsip), dan rencana batch DILUARKAN: di sana "bukti baris" memang alat kerja.
+const POLA_NOMOR_BARIS = /(?<![\w/\\.-])([\w][\w./\\-]*\.(?:tsx?|jsx?|mjs|cjs|prisma|sql|ps1)):(\d+)/g;
+const KONTRAK_RE = /(^|[\\/])docs[\\/](domain|operations|product)[\\/]|(^|[\\/])docs[\\/][^\\/]+\.md$/;
+const nomorBaris = [];
+{
+  for (const f of [...berkasAktif, ...berkasRoot]) {
+    const r = rel(f);
+    if (!KONTRAK_RE.test(f)) continue;
+    if (/^docs\/(kerja|rencana|audit|history|arsip)\//.test(r)) continue;
+    const m = readFileSync(f, "utf8").match(POLA_NOMOR_BARIS) || [];
+    if (m.length > 0) nomorBaris.push({ file: r, n: m.length });
+  }
+  nomorBaris.sort((a, b) => b.n - a.n || a.file.localeCompare(b.file));
+}
+
 // ── laporan ────────────────────────────────────────────────────────────────
 const grup = (rule, arr = pelanggaran) => arr.filter((p) => p.rule === rule);
 const judul = {
@@ -294,14 +532,18 @@ const judul = {
   R5: "R5 plafon byte",
   R7: "R7 indeks cakupan audit",
   R6: "R6 rujukan backtick",
+  R8: "R8 anchor mati",
+  R9: "R9 nomor bagian ganda",
+  R10: "R10 judul H1 ganda",
+  R11: "R11 salinan berkas tangga",
 };
 
 console.log(`=== CHECK-DOCS ${VERSI_GATE} (gate dokumen KOST48) ===`);
-console.log(`berkas diperiksa : ${diperiksa.length} aktif (${semuaMd.length} .md di docs/ seluruhnya; ${semuaMd.length - berkasAktif.length} arsip/generated dikecualikan)`);
+console.log(`berkas diperiksa : ${diperiksa.length} aktif = ${berkasAktif.length} di docs/ + ${berkasRoot.length} di akar repo (docs/ memuat ${semuaMd.length} .md; ${semuaMd.length - berkasAktif.length} arsip/generated dikecualikan)`);
 console.log(`versi kanonik    : ${[...versiDiterima].join(", ")} (dari frontend/src/config/version.ts + package.json)`);
 console.log("");
 
-for (const rule of ["R1", "R2", "R3", "R4", "R5", "R6", "R7"]) {
+for (const rule of ["R1", "R2", "R3", "R4", "R5", "R6", "R7", "R8", "R9", "R10", "R11"]) {
   const g = grup(rule);
   console.log(`— ${judul[rule]}: ${g.length}`);
   if (rule === "R3") {
@@ -312,6 +554,18 @@ for (const rule of ["R1", "R2", "R3", "R4", "R5", "R6", "R7"]) {
       console.log(`  DIKELUARKAN dari R3 (bukan antrean, tetapi tetap terlihat): ${kotakInfo.reduce((a, b) => a + b.n, 0)} kotak di ${kotakInfo.length} berkas`);
       kotakInfo.forEach((k) => console.log(`    ${String(k.n).padStart(4)}  ${k.file} — ${k.sebab}`));
     }
+    console.log("");
+    console.log(`  CATATAN ARSIP (T-05, bukan pelanggaran — arsip beku): ${arsipKotak.reduce((a, b) => a + b.n, 0)} kotak \`[ ]\` di ${arsipKotak.length} berkas docs/arsip/**`);
+    arsipKotak.slice(0, 8).forEach((k) => console.log(`    ${String(k.n).padStart(4)}  ${k.file}`));
+    if (arsipKotak.length > 8) console.log(`    … ${arsipKotak.length - 8} berkas lain`);
+    console.log("    KONTRAK §7 melarang pekerjaan terbuka ikut terarsip; angka ini membuat pelanggarannya terlihat.");
+    console.log("    Tidak memblokir karena arsip beku + ledger konservasi SHA-256 (kalibrasi 13 di kepala skrip).");
+    console.log("");
+    console.log(`  CATATAN NOMOR BARIS (KONTRAK §7, bukan pelanggaran): ${nomorBaris.reduce((a, b) => a + b.n, 0)} rujukan \`berkas:NNN\` di ${nomorBaris.length} dokumen kontrak aktif`);
+    nomorBaris.slice(0, 8).forEach((k) => console.log(`    ${String(k.n).padStart(4)}  ${k.file}`));
+    if (nomorBaris.length > 8) console.log(`    … ${nomorBaris.length - 8} berkas lain`);
+    console.log("    Kebijakan: tunjuk lokasi dengan KUTIPAN teks/anchor, bukan nomor baris (basi setiap berkas disunting).");
+    console.log("    Tidak memblokir: konversinya pekerjaan Isi yang butuh verifikasi kode (kalibrasi 16 di kepala skrip).");
   } else {
     g.slice(0, 15).forEach((p) => console.log(`    ${p.file}${p.line ? ":" + p.line : ""} — ${p.pesan}`));
     if (g.length > 15) console.log(`    … ${g.length - 15} temuan lain`);
@@ -325,7 +579,7 @@ if (infos.length > 0) {
   const perFile = {};
   infos.forEach((p) => { perFile[p.file] = (perFile[p.file] || 0) + 1; });
   Object.entries(perFile).sort((a, b) => b[1] - a[1]).slice(0, 8).forEach(([f, n]) => console.log(`    ${String(n).padStart(4)}  ${f}`));
-  console.log("    (kartu bukti bertanggal + berkas dengan daftar isi berjangkar: angkanya memang begitu, bukan kotor)");
+  console.log("    (kartu bukti bertanggal · berkas dengan daftar isi berjangkar · anchor rapuh R8: angkanya memang begitu, bukan kotor)");
 }
 console.log("");
 
@@ -352,5 +606,16 @@ Cara membetulkan:
   R2  perbaiki/arahkan ulang tautannya ke rumah kanonik.
   R3  kotak pekerjaan hanya di docs/ANTREAN.md; di tempat lain turunkan derajatnya jadi daftar biasa.
   R4  tambahkan blok baca di 12 baris pertama berkas tangga wajib.
-  R5  rampingkan berkas, atau pecah dengan daftar isi berjangkar.`);
+  R5  rampingkan berkas, atau pecah dengan daftar isi berjangkar.
+  R6  perbaiki rujukan backtick ke berkas yang benar, atau tandai barisnya sebagai catatan bertanggal.
+  R7  buat/pulihkan docs/audit/index-cakupan.md sebagai pengganti checklist audit yang diarsipkan.
+  R8  perbaiki anchor ke judul yang benar; "rapuh" berarti anchor itu hanya hidup bila spasi digabung
+      (gejala slugifier lama di scripts/tambah-toc.mjs) — perbaiki anchor-nya, dan jangan buat TOC baru
+      dengan skrip slug lama.
+  R9  nomori ulang bagian yang bentrok dalam satu berkas (mis. hasil penggabungan dua dokumen:
+      lanjutkan penomorannya). Kalau berkasnya catatan bertanggal, ia memang dikecualikan.
+  R10 berkas hidup hanya boleh punya satu judul H1; turunkan judul kedua jadi "## " (slug tidak berubah),
+      atau pisahkan dokumennya ke berkas sendiri.
+  R11 berkas tangga wajib hanya boleh ada di rumah kanoniknya; salinan di tempat lain dipindahkan
+      atau dihapus (zona ".design-audit/.docs-legacy/.audit-map" memang dikecualikan).`);
 process.exit(dilewati.length > 0 ? 2 : 1);

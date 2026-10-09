@@ -1,10 +1,12 @@
+> **ARSIP BEKU** · dipindah dari `docs/rencana/` ke `docs/arsip/` pada 2026-10-07 (sensus dokumen, batch SENSUS-DOCS). Isi tidak diubah selain banner ini + penyesuaian tautan relatif; **jangan dibaca rutin**.
+
 # Penutup rujukan rusak — SELESAI (7 butir)
 
 > **Blok baca** · Jenis: **kartu penutup rujukan rusak** · Status: **SELESAI — dieksekusi 2026-10-05** (perintah owner: "kerjakan semua yang belum dikerjakan, ambil keputusan paling bijak") · Untuk siapa: owner + agen verifikator
 > · Baca kalau: akan menutup rujukan yang tidak punya target di repo. · **Jangan** dibaca kalau: mengerjakan task produk biasa.
 
 Konteks: ditemukan saat batch **B2** (2026-10-05) ketika alih rujukan arsip legacy. **Tidak satu pun disebabkan B2** — semuanya sudah rusak sebelum rombak.
-Bukti mentah: [B2-ledger-konservasi.md](B2-ledger-konservasi.md) §6 butir 3 dan 4 · keputusan terkait: [PERTANYAAN-ROMPAK.md](PERTANYAAN-ROMPAK.md) (P3, P15, P16).
+Bukti mentah: [B2-ledger-konservasi.md](B2-ledger-konservasi.md) §6 butir 3 dan 4 · keputusan terkait: [PERTANYAAN-ROMPAK.md](../rencana/PERTANYAAN-ROMPAK.md) (P3, P15, P16).
 
 Aturan yang berlaku: rujukan **hanya boleh** diarahkan ulang bila targetnya ada. Karena targetnya tidak ada, keenam butir ini **tidak** bisa ditutup oleh pengalihan path — harus diputuskan isinya.
 
@@ -58,9 +60,9 @@ Konsekuensi bila R6 dipasang **sebelum** butir 1–6 ditutup: pelanggaran naik, 
 |---|---|---|
 | 1 | Kalimat di `docs/domain/flow.md` diganti: "berkas lama `_DEPRECATED_05_UIUX_AUDIT_2026-06-12.md` sudah dihapus dari repo; jejaknya di riwayat git sebelum 2026-10-05" (opsi b) | tidak ada lagi path mati di baris itu |
 | 2–3 | Baris versi `docs/operations/deploy-go-live.md` diganti: "konsolidasi dari runbook deploy dan audit PWA lama (keduanya sudah dihapus dari repo; jejaknya di riwayat git)" (opsi b) | dua path mati hilang, asal-usul tetap tercatat |
-| 4 | **Tertutup dengan sendirinya:** berkas yang memuatnya (`docs/M13_CHANGELOG.md`) dihapus pada B8; sitasi itu kini hanya ada di salinan arsip beku | [arsip/changelog-2026-09.md](../arsip/changelog-2026-09.md) menyimpan isi M13 utuh |
+| 4 | **Tertutup dengan sendirinya:** berkas yang memuatnya (`docs/M13_CHANGELOG.md`) dihapus pada B8; sitasi itu kini hanya ada di salinan arsip beku | [arsip/changelog-2026-09.md](changelog-2026-09.md) menyimpan isi M13 utuh |
 | 5–6 | Keterangan ditambahkan **dan** jalur baru ditunjuk: `.docs-legacy/2026-06-16_root_docs_pre_M/08_CHECKLIST.md` (berkasnya memang ada di sana, di subfolder aslinya) | [deploy-go-live.md](../operations/deploy-go-live.md) · [verifikasi-keuangan.md](../operations/verifikasi-keuangan.md) |
-| 7 | **Dibiarkan** — ketiga rujukan `tenant-data-template.tsv` semuanya di catatan historis (arsip + changelog beku), dan berkasnya terdaftar di inventaris arsip | [arsip/README.md](../arsip/README.md) |
+| 7 | **Dibiarkan** — ketiga rujukan `tenant-data-template.tsv` semuanya di catatan historis (arsip + changelog beku), dan berkasnya terdaftar di inventaris arsip | [arsip/README.md](README.md) |
 | R6 | **Dipasang setelah B8** (gate v1.6). Cakupan: rujukan `docs/…` dalam backtick yang tidak ada; catatan bertanggal (`docs/rencana`, `docs/history`, `docs/arsip`) dikecualikan; glob/placeholder dilewati. **Terbukti bisa gagal**: uji negatif dengan satu rujukan palsu → 1 pelanggaran, exit 1 | [check-docs.mjs](../../scripts/check-docs.mjs) |
 
 **Efek samping yang ikut tertangani:** R6 menemukan **36 rujukan rusak lain** yang tidak ada di inventaris awal (path era-M yang dihapus Fase 3), tersebar di 22 berkas hidup — semuanya sudah diarahkan ke rumah kanonik (40 penggantian). Selain itu, satu rujukan ke berkas yang memang tidak pernah ada (`FORM_ISI_DATA_GO_LIVE.md`) ditandai apa adanya di 2 dokumen, bukan dialihkan diam-diam.

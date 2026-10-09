@@ -1,9 +1,11 @@
+> **ARSIP BEKU** · dipindah dari `docs/rencana/` ke `docs/arsip/` pada 2026-10-07 (sensus dokumen, batch SENSUS-DOCS). Isi tidak diubah selain banner ini + penyesuaian tautan relatif; **jangan dibaca rutin**.
+
 # B2 — ledger konservasi pemindahan arsip legacy (potret 2026-10-05)
 
 > **Blok baca** · Jenis: **kartu bukti pemindahan** · Status: **beku setelah B2** · Untuk siapa: owner + agen verifikator
 > · Baca kalau: memverifikasi bahwa pemindahan B2 tidak menghilangkan atau mengubah isi berkas.
 
-Rumah aturan: [RENCANA-ROMPAK-DOCS.md](RENCANA-ROMPAK-DOCS.md) §4 (B2) · keputusan owner: [PERTANYAAN-ROMPAK.md](PERTANYAAN-ROMPAK.md) (P4, P9, P12, P13, P33).
+Rumah aturan: [RENCANA-ROMPAK-DOCS.md](../rencana/RENCANA-ROMPAK-DOCS.md) §4 (B2) · keputusan owner: [PERTANYAAN-ROMPAK.md](../rencana/PERTANYAAN-ROMPAK.md) (P4, P9, P12, P13, P33).
 
 ## 1. Ringkasan
 

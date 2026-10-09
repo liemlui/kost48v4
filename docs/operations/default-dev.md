@@ -147,6 +147,66 @@ node scripts/seed-prod.js
 
 ---
 
-*Diperbarui: 2026-07-08 · Sumber: owner KOST48 (data tenant real) + kost48surabaya.com + faqs.service.ts*
+## 10. Referensi command kerja (dipindah dari KONTRAK §5)
+
+Semua perintah di bawah **sudah terbukti jalan di mesin ini**. Daftar ini **bukan izin otomatis** — izinnya datang dari task (lihat [KONTRAK](../KONTRAK.md) §5 dan gate G0). Pakai cwd yang tertulis; jangan menjalankan dari akar bila cwd disebut.
+
+| Cwd | Tujuan bila diperlukan & diizinkan | Command |
+|---|---|---|
+| backend | Typecheck tanpa cache | `npx tsc --noEmit --incremental false` |
+| backend | Build / unit lengkap sesuai gate | `npm run build` / `npm run test:unit` |
+| frontend | Build / test terpilih | `npm run build` / `npm run test -- <path>` |
+| frontend | Suite unit lengkap bila diizinkan | `npx vitest run` |
+| backend/frontend | Dev bila task membutuhkan | `npm run start:dev` / `npm run dev` |
+| root | Gate dokumen (wajib untuk batch dokumentasi) | `node scripts/check-docs.mjs` |
+| root | Kartu kekuatan dokumentasi (bukan gate, boleh gagal) | `node scripts/ukur-kekuatan-docs.mjs` |
+| root | Kartu kesegaran isi docs (bukan gate; exit 3 = menolak mengukur saat `git` tak ada / repo shallow) | `node scripts/ukur-kesegaran-docs.mjs` |
+| root | Artefak deploy lokal bila diminta | `npm run bundle:deploy:fast` / `npm run make-deploy:fast` |
+
+Catatan yang mengikat: `pretest:unit` backend menjalankan `npm run build` (lihat [KONTRAK](../KONTRAK.md) §5 — exception uang).
+
+### 10a. Jebakan mesin-dev yang sudah terbukti (jangan diulang)
+
+Jebakan **produksi** punya rumah sendiri di [produksi §10](produksi.md) — **jangan diduplikasi di sini**, cukup ditunjuk. Daftar ini tumbuh dari kejadian nyata dan setiap baris menyebut buktinya; mengisinya dengan karangan akan merusak gunanya.
+
+| Gejala | Sebab | Tindakan |
+|---|---|---|
+| Dokumen tampak berubah (`git status` → ` M`) padahal isinya tidak | berkas ditulis dengan CRLF padahal [.gitattributes](../../.gitattributes) mewajibkan `* text=auto eol=lf`; `scripts/tambah-toc.mjs` menulis CRLF sampai diperbaiki 2026-10-07 | **114 berkas sudah dinormalkan 2026-10-07** (keputusan owner). Diagnosis `git ls-files --eol <berkas>` — `w/crlf` berarti ini penyebabnya; jangan commit "perubahan" itu. Pengecualian yang **benar**: `*.ps1/*.bat/*.cmd` memang CRLF |
+| Setelah menormalkan line ending, `git status` melaporkan banyak ` M` **hantu** (isinya identik dengan index) | stat-cache index basi: ukuran/mtime berubah, tetapi kontennya sama | buktikan dulu kontennya sama: `git hash-object --no-filters -- <berkas>` == `git rev-parse :<berkas>` dan `git diff-files -p -- <berkas>` kosong. Obatnya **satu berkas per perintah**: `git update-index --refresh -- <berkas>` (tanpa pathspec ia keluar 1 dan **tidak menulis** index; `git add --refresh -- .` pun tidak cukup). Tidak ada konten yang di-stage (`git diff --cached` tetap 0) |
+| Huruf hilang setelah teks disusun lewat PowerShell (mis. `branch backup…` menjadi `ackup…`) | backtick adalah karakter escape PowerShell: `` `b `` menjadi **backspace (0x08)** | jangan menyusun teks repo di dalam string PowerShell; sisir dengan `[System.IO.File]::ReadAllBytes`. Kejadian nyata: `docs/history/changelog/2026-10.md` (1 byte 0x08), ditemukan & diperbaiki 2026-10-07 |
+| Teks non-ASCII tampak rusak (`â€”`) di terminal | jalur keluaran konsol bisa mendekode UTF-8 dengan cara lain — berkasnya **belum tentu** cacat | verifikasi byte lebih dulu (`[System.IO.File]::ReadAllText` / daftar byte). Perhatian: beberapa dokumen **sengaja mengutip** pola mojibake (tabel inversi B12 di [bukti-2026-10](../history/bukti-2026-10.md) dan [mapping arsip](../arsip/DOC-GOV-20260922-mapping.md)) — **jangan "perbaiki"** |
+| Skrip Node gagal `EPERM` saat memanggil `git` atau program lain | sandbox menolak **pipa stdio** `child_process` (pipeline PowerShell sendiri tidak terpengaruh) | alihkan keluaran anak ke berkas sementara tanpa pipa — contoh yang sudah jalan: `scripts/ukur-kesegaran-docs.mjs` |
+| Baris ukuran KB di indeks folder jadi basi setelah dokumen disunting | indeks dihasilkan dari berkas; tanpa `--segarkan` skrip **tidak menimpa** indeks yang sudah ada | `node scripts/buat-indeks-folder.mjs --segarkan` |
+| `git diff --check` melaporkan pelanggaran yang bukan bagian diff Anda | pohon kerja memuat perubahan belum-commit dari sesi lain | scope dulu: `git diff --check -- <berkas Anda>` |
+| Angka "% segar" tinggi padahal belum ada manusia yang memeriksa isinya | batch dokumentasi menyentuh banyak dokumen sekaligus, sehingga `t_doc` nyaris seragam dan angka itu mengukur **urutan commit** | baca blok batas pada keluaran `node scripts/ukur-kesegaran-docs.mjs`; kartu ini bukan bukti isi benar |
+
+---
+
+## 11. Verifikasi dan Confidence Gate (dipindah utuh dari `docs/KONTRAK.md` §5, 2026-10-07)
+
+> **Isi tidak diubah.** Aturan ini dulu ada di KONTRAK §5; ia dipindahkan ke rumah teknisnya karena KONTRAK menyentuh plafon 16 KB (preseden sama: tabel perintah §10 di atas). Ringkasannya tetap di [AGENTS §7](../../AGENTS.md); tempat ini yang **rinci**.
+
+| Gate | Pemeriksaan sebelum melanjutkan |
+|---|---|
+| G0 — Otorisasi | Task mengizinkan command; larangan eksplisit berlaku |
+| G1 — Dampak | Acceptance, kontrak, dan konsumen yang berubah diketahui |
+| G2 — Relevansi | Test membuktikan perilaku itu; fixture/layanan dipahami |
+| G3 — Biaya | Hook pre/post, build, generate, install, efek samping diketahui |
+| G4 — Kesegaran | Source/artefak yang diuji sesuai perubahan saat ini |
+| G5 — Stop | Hasil lengkap; bila test dijalankan, jumlah test terpilih > 0; acceptance terpenuhi |
+
+- **Docs-only (XS)**: inspeksi isi, ejaan, tautan, scope, diff — jangan test/build/lint/typecheck atau menyalakan server.
+- S/M: test berkas/modul terkait; tambah regresi hanya bila membuktikan bug perilaku.
+- L: test kedua sisi kontrak; build hanya entry/package terkait yang tersedia dan diizinkan.
+- Test kosong, artefak basi, atau hasil tidak lengkap **bukan** PASS. Typecheck ≠ build; build ≠ UAT; artefak ≠ deployment; test lokal ≠ dampak runtime.
+- Baca lifecycle script sebelum memanggilnya: `pretest:unit` backend menjalankan `npm run build`.
+- **KNOWN EXCEPTION — gate uang (opsi C, TUNDA)**: task yang menyentuh uang tetap wajib `npm run test:unit` backend (memicu full build lewat `pretest:unit`). Jangan menghapus/mengubah hook atau menggantinya dengan subset sepihak. Bila task uang melarang full test/build, catat konflik dan minta keputusan owner.
+- Exception uang **tidak** memerintahkan test/build untuk task dokumentasi.
+
+Referensi command ada di §10 berkas ini (cwd, tujuan, dan perintah yang sudah terbukti jalan di mesin ini). Daftar itu **bukan izin otomatis**, dan cwd yang tertulis di sana wajib dipakai.
+
+---
+
+*Diperbarui: 2026-10-07 (§10 daftar perintah + §10a jebakan mesin-dev + §11 gate verifikasi) · Sumber: owner KOST48 (data tenant real) + kost48surabaya.com + faqs.service.ts*
 
 ---

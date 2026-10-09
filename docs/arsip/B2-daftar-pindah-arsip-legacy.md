@@ -1,7 +1,7 @@
 # B2 - daftar pindah arsip legacy (kartu arsip)
 
 > **BANNER ARSIP** · Diarsipkan: **2026-10-05** (batch B8) · Alasan: **daftar kerja selesai** - pemindahannya sudah dieksekusi; blok perintahnya dihapus karena tidak lagi berlaku.
-> Isinya **dibekukan** sebagai bukti: kelas A/B/C, metode, dan angka saat recon. Hasil eksekusi: [B2-ledger-konservasi.md](../rencana/B2-ledger-konservasi.md).
+> Isinya **dibekukan** sebagai bukti: kelas A/B/C, metode, dan angka saat recon. Hasil eksekusi: [B2-ledger-konservasi.md](B2-ledger-konservasi.md).
 
 
 > **Blok baca** · Jenis: **daftar kerja batch** · Status: **menunggu persetujuan owner** · Untuk siapa: owner + agen pelaksana B2

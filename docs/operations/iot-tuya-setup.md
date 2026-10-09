@@ -416,7 +416,7 @@ No-go bila salah satu hal berikut terjadi:
 
 **Digabung dari docs/operations/iot-handoff.md** (DOCS-CLEANUP-1, 2026-09-24) - isi blok disalin utuh.
 
-# IoT — Handoff Backend & Frontend
+## IoT — Handoff Backend & Frontend
 
 Tanggal: 2026-09-23
 Status: handoff operasional (fondasi terimplementasi; rollout perangkat dan UAT masih gate)

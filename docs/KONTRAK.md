@@ -3,6 +3,8 @@
 > **Blok baca** · Jenis: **kontrak kerja (rinci)** · Status: **aktif** · Untuk siapa: agen pelaksana + owner
 > · Baca kalau: butuh aturan rinci, invariant yang harus dijaga, daftar berkas beku, atau bentuk verifikasi. · **Jangan** dibaca kalau: sedang memilih tugas (itu [ANTREAN.md](ANTREAN.md)) atau butuh riwayat (itu [history/](history/)).
 
+**Fakta** · Status: **aktif** · potret **2026-10-09** — ukur ulang: `node scripts/check-docs.mjs` + `node scripts/ukur-kekuatan-docs.mjs` (jangan percaya tanggal di berkas ini).
+
 Ringkasan + peta dokumen ada di [AGENTS.md](../AGENTS.md) (disuntik tiap request, jadi sengaja pendek). Berkas ini **rinciannya** — dibaca saat benar-benar dipakai, bukan setiap putaran.
 
 ## 1. Otoritas dan konflik
@@ -19,6 +21,7 @@ Ringkasan + peta dokumen ada di [AGENTS.md](../AGENTS.md) (disuntik tiap request
 - Pertahankan kontrak publik: petakan producer → kontrak → consumer; sebut invariant uang/jurnal, permission, status hunian, API, privasi.
 - Izin edit dokumen **tidak** otomatis berarti izin mengubah kode, server, atau DB.
 - Instruksi owner yang mempersempit scope mengungguli kewajiban dokumentasi umum; catat penundaan yang terjadi.
+- **Protokol bertanya sempit**: bertanya hanya bila menyentuh **uang**, **perilaku pengguna**, **penghapusan data**, atau **deploy/secret**. Di luar keempatnya agen memutuskan sendiri dan mencatat satu baris alasannya di laporan; menahan pekerjaan menunggu jawaban yang tidak wajib adalah pemborosan waktu owner. Ini batas **atas** kapan agen tidak perlu bertanya, bukan pengganti kewajiban lapor.
 - Jangan: menambah dependency, memutasi DB produksi, menampilkan secret, `reset`/`stash` perubahan tanpa izin, push/deploy tanpa izin.
 - Jaga **seluruh** perubahan lama termasuk untracked; dirty tree tidak mewajibkan commit WIP. Commit hanya bila diminta; satu task = satu commit terarah.
 - Gunakan akses paling sempit yang mencukupi. **Jangan** menonaktifkan sandbox, guard, test, atau memperluas permission untuk melewati kegagalan; laporkan batas kontrol teknis yang menghambat.
@@ -28,18 +31,12 @@ Ringkasan + peta dokumen ada di [AGENTS.md](../AGENTS.md) (disuntik tiap request
 
 ## 3. Level task dan anggaran baca
 
-| Level | Cakupan | Maks. berkas | Test | Build | Token indikatif |
-|---|---|---:|---|---|---|
-| XS | Typo/copy/style lokal tanpa logika | 5 | Tidak | Tidak | 1–3 ribu |
-| S | Satu fungsi, satu berkas implementasi | 8 | Berkas terkait | Tidak full build | 3–7 ribu |
-| M | Beberapa berkas, satu modul | 12 | Modul terkait | Bila perlu & diizinkan | 7–15 ribu |
-| L | Lintas modul / kontrak bersama | 18 | Modul terdampak + kontrak | Entry/package terkait | 15–30 ribu |
-| XL | Arsitektur/schema/runtime besar | 20/tahap | Bertahap | Sesuai tahap disetujui | 10–25 ribu/tahap |
+Tabel level lengkap (cakupan · maks. berkas · test · token indikatif) ada di [AGENTS.md](../AGENTS.md) §5 — **jangan disalin ke sini**. Yang khusus berkas ini hanya kolom **Build**: XS tidak build · S tanpa full build · M bila perlu & diizinkan · L entry/package terkait · XL sesuai tahap yang disetujui.
 
 - Pilih level dari **risiko dan jangkauan perilaku**, bukan jumlah baris. Uang, auth, tombol kritis, style global, atau kontrak bersama menaikkan level.
 - XL: rencana konkret **wajib disetujui** sebelum implementasi; pecah per tahap dengan acceptance + bukti sendiri.
 - Label ini tidak menggantikan ID audit (FE/BE) atau klasifikasi K1–K4; exception uang di §5 tetap berlaku.
-- Proksi biaya yang dipakai proyek ini: **byte** (token ≈ byte/4) + jumlah berkas. Baris **bukan** proksi yang sah (contoh historis: `ANTREAN.md` 147 baris tetapi 78 KB).
+- Proksi biaya: **byte** (token ≈ byte/4) + jumlah berkas; baris **bukan** proksi yang sah (contoh historis: `ANTREAN.md` 147 baris tetapi 78 KB).
 
 ## 4. Batas baca
 
@@ -47,7 +44,7 @@ Ringkasan + peta dokumen ada di [AGENTS.md](../AGENTS.md) (disuntik tiap request
 - Nyatakan pertanyaan yang ingin dijawab sebelum membaca tambahan; tanpa kebutuhan baru, jangan membaca ulang.
 - Maksimal satu listing terarah per task; setelah path diketahui, pakai pencarian isi pada scope itu (`rg`).
 - Hitung setiap berkas yang isinya masuk konteks (termasuk docs/config dan hasil `rg`); nama hasil listing tidak dihitung.
-- Tidak dibaca rutin: `docs/arsip/**`, `docs/arsip/legacy/**`, `.docs-legacy/**`, `.audit-map/**` (kecuali forensik), `reference/*`, `backend/src/generated/*`, `node_modules`, lockfile.
+- Tidak dibaca rutin: `docs/arsip/**`, `docs/arsip/legacy/**`, `.docs-legacy/**`, `.audit-map/**` (kecuali forensik), `.design-audit/**` (snapshot sesi lama; memuat salinan basi dokumen aturan — bila bertentangan dengan berkas di `docs/`, yang di `docs/` menang), `reference/*`, `backend/src/generated/*`, `node_modules`, lockfile.
 - Arsip beku **tidak** dianggap bukti PASS untuk perubahan baru; hasil lama hanya sah bila input relevannya masih sama.
 - Memory (bila ada) hanya petunjuk — bukan lebih baru dari [ANTREAN.md](ANTREAN.md).
 - Handoff membawa tujuan, izin, perubahan, bukti, dan langkah berikutnya; jangan mengulang pekerjaan yang sudah selesai.
@@ -55,34 +52,7 @@ Ringkasan + peta dokumen ada di [AGENTS.md](../AGENTS.md) (disuntik tiap request
 
 ## 5. Verifikasi dan Confidence Gate
 
-| Gate | Pemeriksaan sebelum melanjutkan |
-|---|---|
-| G0 — Otorisasi | Task mengizinkan command; larangan eksplisit berlaku |
-| G1 — Dampak | Acceptance, kontrak, dan konsumen yang berubah diketahui |
-| G2 — Relevansi | Test membuktikan perilaku itu; fixture/layanan dipahami |
-| G3 — Biaya | Hook pre/post, build, generate, install, efek samping diketahui |
-| G4 — Kesegaran | Source/artefak yang diuji sesuai perubahan saat ini |
-| G5 — Stop | Hasil lengkap; bila test dijalankan, jumlah test terpilih > 0; acceptance terpenuhi |
-
-- **Docs-only (XS)**: inspeksi isi, ejaan, tautan, scope, diff — jangan test/build/lint/typecheck atau menyalakan server.
-- S/M: test berkas/modul terkait; tambah regresi hanya bila membuktikan bug perilaku.
-- L: test kedua sisi kontrak; build hanya entry/package terkait yang tersedia dan diizinkan.
-- Test kosong, artefak basi, atau hasil tidak lengkap **bukan** PASS. Typecheck ≠ build; build ≠ UAT; artefak ≠ deployment; test lokal ≠ dampak runtime.
-- Baca lifecycle script sebelum memanggilnya: `pretest:unit` backend menjalankan `npm run build`.
-- **KNOWN EXCEPTION — gate uang (opsi C, TUNDA)**: task yang menyentuh uang tetap wajib `npm run test:unit` backend (memicu full build lewat `pretest:unit`). Jangan menghapus/mengubah hook atau menggantinya dengan subset sepihak. Bila task uang melarang full test/build, catat konflik dan minta keputusan owner.
-- Exception uang **tidak** memerintahkan test/build untuk task dokumentasi.
-
-Referensi command (bukan izin otomatis; pakai PowerShell dari cwd yang disebut):
-
-| Cwd | Tujuan bila diperlukan & diizinkan | Command |
-|---|---|---|
-| backend | Typecheck tanpa cache | `npx tsc --noEmit --incremental false` |
-| backend | Build / unit lengkap sesuai gate | `npm run build` / `npm run test:unit` |
-| frontend | Build / test terpilih | `npm run build` / `npm run test -- <path>` |
-| frontend | Suite unit lengkap bila diizinkan | `npx vitest run` |
-| backend/frontend | Dev bila task membutuhkan | `npm run start:dev` / `npm run dev` |
-| root | Gate dokumen (wajib untuk batch dokumentasi) | `node scripts/check-docs.mjs` |
-| root | Artefak deploy lokal bila diminta | `npm run bundle:deploy:fast` / `npm run make-deploy:fast` |
+**Dipindahkan 2026-10-07 (batch SERAH-SESI)** ke rumah teknisnya: `docs/operations/default-dev.md` §11 — tabel gate G0–G5, aturan per level (docs-only, S/M, L), definisi "bukan PASS", dan exception uang. Aturannya **tidak berubah**; yang berubah hanya tempatnya, karena berkas ini menyentuh plafon 16 KB (preseden sama: tabel perintah §5 → `default-dev` §10 pada batch SPLIT). Ringkasannya tetap di [AGENTS.md](../AGENTS.md) §7, dan command per-cwd ada di `default-dev` §10.
 
 ## 6. Berkas dan area berisiko (jangan diubah tanpa izin eksplisit + rencana)
 
@@ -103,11 +73,14 @@ Rincian khusus uang (DO-NOT-TOUCH, invariant, gate per-task): [operations/verifi
 
 - **Angka volatil tidak ditulis di dokumen kontrak.** Tulis perintah pengukurnya; bila sebuah angka wajib muncul, tulis sebagai **potret bertanggal** ("potret 2026-10-05") dan sebutkan sumbernya.
 - **Kotak `[ ]` otoritatif hanya di [ANTREAN.md](ANTREAN.md)**. Di berkas lain kotak adalah catatan: beri penanda `<!-- kotak-non-otoritatif -->` atau turunkan jadi daftar biasa.
-- **Arsip**: banner di baris atas · nama berkas tidak diganti · angka di arsip tidak diperbarui · **pekerjaan terbuka tidak boleh ikut terarsip** · satu baris inventaris di [arsip/README.md](arsip/README.md).
+- **Arsip**: banner di baris atas · nama berkas tidak diganti · angka di arsip tidak diperbarui · **pekerjaan terbuka tidak boleh ikut terarsip** · satu baris inventaris di [arsip/README.md](arsip/README.md). Banner wajib sejak DOCS-CLEANUP-1; arsip legacy (pindah massal) bersandar pada inventaris + ledger konservasi (keputusan owner 2026-10-07), jadi gate **tidak menuntutnya**.
 - **Penghapusan**: berkas tracked boleh dihapus dengan ledger konservasi; berkas **untracked selalu dipindah**, tidak pernah dihapus.
-- **Gate dokumen** (`node scripts/check-docs.mjs` = `npm run check:docs`, wajib hijau sebelum menutup batch dokumentasi) memeriksa **7 aturan**: **R1** angka volatil · **R2** tautan relatif mati · **R3** kotak otoritatif · **R4** blok baca berkas tangga wajib · **R5** plafon byte · **R6** rujukan backtick hantu · **R7** indeks cakupan audit. Pemeriksaan yang **dilewati** tampil sebagai `DILEWATI` + exit 2 — senyap tidak diizinkan.
-- **Kekuatan dokumen** diukur terpisah dari gate: `node scripts/ukur-kekuatan-docs.mjs` — 11 pemeriksaan deterministik (tautan mati · rujukan backtick hantu · plafon byte · blok baca berkas wajib · kotak otoritatif · rujukan ke path yang sudah dihapus · dokumen yatim · inventaris arsip · baris status · indeks folder · duplikasi judul H1). Kartu ini **bukan pengganti gate**: gate memblokir perubahan, kartu mengukur kesehatan dan boleh gagal tanpa membatalkan pekerjaan.
+- **Rujukan lokasi: kutipan, bukan nomor baris.** Tunjuk lokasi dengan **kutipan teks/komentar kode** atau anchor bagian — **bukan** nomor baris, yang basi setiap kali berkas disunting; nomor baris hanya sah di bukti audit bertanggal dan kartu potret. Detektornya (INFO, bukan pelanggaran) ada di gate; anchor diperiksa **R8**, dan pembuatnya (`scripts/tambah-toc.mjs`) sudah diselaraskan dengan slug GitHub pada 2026-10-07.
+- **Gate dokumen** (`node scripts/check-docs.mjs` = `npm run check:docs`; wajib hijau sebelum menutup batch dokumentasi) memeriksa **11 aturan R1–R11**: angka volatil · tautan mati · kotak otoritatif · blok baca · plafon byte · rujukan backtick · indeks cakupan · anchor mati · nomor bagian ganda · judul H1 ganda · salinan berkas tangga. Cakupan, pengecualian (catatan bertanggal & zona jangan-dibaca), dan riwayat kalibrasinya ada di **kepala `scripts/check-docs.mjs`** — tidak diulang di sini. Pemeriksaan yang **dilewati** tampil `DILEWATI` + exit 2.
+- **Kartu ukur** (bukan gate — boleh gagal tanpa membatalkan pekerjaan): kekuatan `node scripts/ukur-kekuatan-docs.mjs` (12 pemeriksaan deterministik) · kesegaran `node scripts/ukur-kesegaran-docs.mjs` (`% segar` + `% cakupan` sebagai potret bertanggal; menolak mencetak angka bila repo shallow atau `git` tak ada) · kesesuaian serah-terima `node scripts/ukur-serah-terima-docs.mjs`.
+- **Alat ukur diperiksa, bukan hanya ditulis.** `ukur-serah-terima-docs.mjs` memeriksa **blok `@kost48-state`** di [kerja/SERAH-TERIMA.md](kerja/SERAH-TERIMA.md) terhadap repo (HEAD, berkas yang ditunjuk, label gate) — berkas serah-terima yang basi lebih berbahaya daripada tidak ada; **detektor nomor baris** mencetak INFO di gate tanpa mengubah exit code (pelajaran T-05: angka yang tidak bisa ditutup tidak dijadikan pelanggaran).
 - **Plafon byte**: `AGENTS.md` ≤12 KB (disuntik tiap request) · berkas tangga wajib ([KONTRAK](KONTRAK.md), [ANTREAN](ANTREAN.md), [PETA-KODE](PETA-KODE.md)) ≤16 KB · berkas rujukan ≤48 KB (di atasnya wajib daftar isi berjangkar).
+- **Baris Fakta pada berkas tangga wajib**: satu baris (bukan blok baru) berisi **tanggal potret** + perintah pengukurnya, diperiksa mesin oleh kartu kekuatan (pemeriksaan **D**).
 - **Aturan R6** (menolak path `docs/…` di dalam backtick yang tidak ada) **aktif sejak gate v1.6** — dipasang setelah B8, sesuai keputusan owner, dan sudah diuji negatif (terbukti bisa gagal).
 
 ## 8. Konflik yang sudah diselesaikan (jangan diangkat lagi)
@@ -117,7 +90,9 @@ Rincian khusus uang (DO-NOT-TOUCH, invariant, gate per-task): [operations/verifi
 - `docs/archieve/**` → `docs/arsip/legacy/**` (39 berkas dikutip) + `.docs-legacy/**` (68 berkas, diabaikan git) — batch B2.
 - `docs/audit-map/**` → `.audit-map/**` (tetap gitignored; generator `scripts/audit-map-generate.cjs` **tracked**) — batch B3.
 - Checklist audit 135 ID → [arsip/audit-checklist-total.md](arsip/audit-checklist-total.md) + indeks tipis [audit/index-cakupan.md](audit/index-cakupan.md) — batch B4.
-- Pengaturan yang **ditolak** dan jangan ditawarkan lagi tanpa keputusan baru: pre-commit hook (ditinjau setelah B8), pasang R6 sebelum B8, naikkan plafon byte untuk satu berkas.
+- Pengaturan yang **ditolak** dan jangan ditawarkan lagi tanpa keputusan baru: pre-commit hook (ditinjau setelah B8), pasang R6 sebelum B8, naikkan plafon byte untuk satu berkas, **struktur 5 berkas doktrin dokumentasi proyek lain** — kontrak kedua (ATURAN-AI.md), antrean kedua (PEKERJAAN.md), router kedua (berkas README di akar docs/), atau paketnya sebagai satu kesatuan (R-1…R-4), dan **R-5/R-6** (definisinya di bawah). Alasan per butir: [ADAPTASI-DOKTRIN-DOCS](rencana/ADAPTASI-DOKTRIN-DOCS.md) §4.
+- **R-5** — berkas [kerja/SERAH-TERIMA.md](kerja/SERAH-TERIMA.md) adalah **potret, bukan antrean**: status pekerjaan tetap hanya di [ANTREAN.md](ANTREAN.md), tiap baris "belum selesai" menunjuk antrean atau berkas batas, dan R3 tetap berlaku.
+- **R-6** — **sensus dokumen tidak menjadi aturan tetap**: butuh mata manusia per berkas, jadi ia hidup sebagai langkah terjadwal dalam batch rombak + kartu audit bertanggal ([sensus 2026-10-07](audit/sensus-dokumen-2026-10-07.md) adalah bentuknya).
 
 ## 9. Bentuk laporan
 
@@ -134,17 +109,11 @@ BLOKIR: tidak ada | <sebab + penanggung jawab>
 - Pisahkan **implementasi lokal · verifikasi lokal · deployment · dampak runtime** — jangan saling menggantikan.
 - Jangan menampilkan log panjang; ambil hasil, error relevan, dan bukti yang diperlukan untuk menilai acceptance.
 - Review oleh pelaksana disebut **self-review**; klaim review independen hanya bila benar-benar dilakukan pihak lain.
-
-## 10. Riwayat
-
-| Tanggal | Perubahan |
-|---|---|
-| 2026-10-05 | Dibuat pada batch B5: memuat rincian aturan yang dikeluarkan dari `AGENTS.md`, invariant + pelaksanaan-vs-izin (dipindah utuh dari `docs/ANTREAN.md` §7 dan §5), daftar area berisiko, dan bentuk laporan. |
-
+- **Batas kejujuran**: arti bukti tiap klaim — dan apa yang belum pernah dijalankan — dicatat di [history/batas-kejujuran.md](history/batas-kejujuran.md); aturan wajibnya di [AGENTS §8](../AGENTS.md).
 
 ## 10. Pelaksanaan vs izin (dua sumbu — jangan digabung)
 
-Status pelaksanaan (sudah dikerjakan/belum) dan status izin (boleh/tidak) **dua hal berbeda**: jangan menandai tugas selesai hanya karena izinnya ada, dan jangan menganggap pekerjaan terlarang berarti belum dikerjakan. Setiap laporan menyebut keduanya bila relevan. Tugas yang menunggu keputusan owner ditulis `BLOCKED` + syarat pembukanya, bukan `DONE`.
+Status pelaksanaan (sudah/belum) dan status izin (boleh/tidak) **dua hal berbeda**: izin ada ≠ tugas selesai, dan pekerjaan terlarang ≠ belum dikerjakan. Laporan menyebut keduanya bila relevan; tugas yang menunggu keputusan owner ditulis `BLOCKED` + syarat pembukanya, bukan `DONE`.
 
 ## 11. Invariant & cara memeriksanya
 
@@ -158,6 +127,8 @@ Angka **tidak ditulis** di sini — pakai perintahnya (Q11). Bila sebuah angka w
 | Kebersihan diff | `git diff --check` | exit 0 sebelum commit dokumentasi |
 | Gate dokumen | `node scripts/check-docs.mjs` | exit 0 (atau `DILEWATI` yang dijelaskan) sebelum menutup batch dokumentasi |
 | Konservasi pemindahan | bandingkan SHA-256 berkas sebelum/sesudah | 100% identik, kecuali transformasi yang dicatat |
+| Kesesuaian berkas serah-terima | `node scripts/ukur-serah-terima-docs.mjs` | blok `@kost48-state` cocok dengan repo (HEAD, berkas yang ditunjuk ada, label gate benar); tanggal potret tidak lebih tua dari commit terakhir berkas tangga |
+| Register keputusan final | `node scripts/ukur-serah-terima-docs.mjs --keputusan` | setiap baris di [KEPUTUSAN-OWNER.md](KEPUTUSAN-OWNER.md) punya tanggal + sumber; **tidak ada** baris baru yang menghidupkan R-1…R-6 tanpa keputusan baru |
 
 **Exception ukuran berkas yang sudah disetujui:** aturan bisnis owner (mis. `docs/domain/ai.md`, `docs/domain/iot.md`, `docs/domain/publik.md`) boleh melewati plafon rujukan bila punya daftar isi berjangkar; keputusan lama ARSIP-BATAS (24 Sep 2026) digantikan rencana rombak 2026-10-05.
 
@@ -165,4 +136,6 @@ Angka **tidak ditulis** di sini — pakai perintahnya (Q11). Bila sebuah angka w
 
 | Tanggal | Perubahan |
 |---|---|
-| 2026-10-05 | Dibuat pada batch B5: rincian aturan yang dikeluarkan dari `AGENTS.md`, daftar area berisiko, bentuk laporan, dan invariant (dipadatkan dari `docs/ANTREAN.md` §5 + §7 — isi aslinya tetap ada di riwayat git). |
+| 2026-10-05 | Dibuat pada batch B5: rincian aturan yang dikeluarkan dari `AGENTS.md`, daftar area berisiko, bentuk laporan, invariant & cara memeriksanya. |
+| 2026-10-07 | Batch **A-1/A-5 · SPLIT · RAPI**: protokol bertanya sempit (§2), konvensi kutipan (§7), gate → R1–R11, penolakan struktur 5 berkas (§8), §5/§3 dipindahkan ke [default-dev](operations/default-dev.md) §10 dan AGENTS §5. |
+| 2026-10-07 | **Batch SERAH-SESI** ([kontrak batch](rencana/SERAH-SESI-DOCS.md)): §8 + register keputusan final + R-5/R-6, §7 mendaftarkan dua alat ukur baru (`ukur-serah-terima-docs.mjs`, detektor nomor baris **INFO**), §5 **dipindahkan utuh** ke `default-dev` §11 (plafon), berkas tangga wajib dapat baris **Fakta**, §11–§12 dipadatkan (rincian tetap di [bukti-2026-10](history/bukti-2026-10.md) + commit). |

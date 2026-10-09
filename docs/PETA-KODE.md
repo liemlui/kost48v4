@@ -3,10 +3,8 @@
 > **Blok baca** · Jenis: **peta kode** · Status: **aktif** · Untuk siapa: agen yang mencari berkas/simbol atau alur lintas modul · Baca kalau: mencari lokasi kode, kontrak, atau alur — **jangan** dibaca kalau: mencari aturan kerja (itu [KONTRAK.md](KONTRAK.md)) atau antrean (itu [ANTREAN.md](ANTREAN.md)).
 
 
-Tanggal: 2026-09-23
-Status: aktif
-Tujuan: peta navigasi kode kanonik — peta audit bertahap, konvensi modul, modul backend → path → tanggung jawab, grup halaman frontend, index model Prisma, flow & audit anchor, dan shared utility (dari M00)
-Rujukan: [KEPUTUSAN-OWNER](KEPUTUSAN-OWNER.md) · [STATUS](./ANTREAN.md) · [STATUS](./ANTREAN.md) · [audit-map](../.audit-map/README.md) · [product/scope.md](product/scope.md)
+**Fakta** · Status: **aktif** · potret **2026-10-09** — ukur ulang: `node scripts/ukur-kesegaran-docs.mjs` (24 rujukan kode tak terselesaikan pada potret terakhir; [batas-kejujuran](history/batas-kejujuran.md) §2). Tujuan: peta navigasi kode kanonik — peta audit bertahap, konvensi modul, modul backend → path → tanggung jawab, grup halaman frontend, index model Prisma, flow & audit anchor, dan shared utility (dari M00). (jangan percaya tanggal di berkas ini)
+Rujukan: [KEPUTUSAN-OWNER](KEPUTUSAN-OWNER.md) · [ANTREAN](./ANTREAN.md) · [ANTREAN](./ANTREAN.md) · [audit-map](../.audit-map/README.md) · [product/scope.md](product/scope.md)
 
 > Migrasi dari docs/M00_CODEMAP.md (B5 Tahap 3, 23 Sep 2026) pada DOC-GOV-20260922; teks peta tidak diubah.
 > Batch B5 memindahkan **seluruh isi peta M00 apa adanya** (L6–L172) ke file ini; urutan bagian sama seperti aslinya. Peta scope per role/flow ada di [product/scope.md](product/scope.md).
@@ -136,8 +134,8 @@ Tabel flow + method-anchor: `docs/domain/kontrak.md` (kontrak/uang). Job otomati
 |---------|------|----------------|
 | `dateOnlyWib` / `todayWib` / `isoDate` | `backend/src/common/utils/date-only.ts` | Normalisasi tanggal WIB (UTC+7) — pakai di semua modul akuntansi (unifikasi dari 5 implementasi) |
 | `roundRupiah` / `rupiahAmount` | `backend/src/common/business/money.helper.ts` | Standarisasi pembulatan Rupiah (F4-10) |
-| `cashflow-classifier` | `backend/src/common/utils/cashflow-classifier.ts` | Klasifikasi kas vs AR (F1-3) |
-| `financial-ratios.helper` | `backend/src/common/utils/financial-ratios.helper.ts` | Helper rasio keuangan (F1-4) |
+| `cashflow-classifier` | `backend/src/modules/accounting/cashflow-classifier.ts` | Klasifikasi kas vs AR (F1-3) |
+| `financial-ratios.helper` | `backend/src/modules/accounting/financial-ratios.helper.ts` | Helper rasio keuangan (F1-4) |
 | `room-booking.util` | `backend/src/common/utils/room-booking.util.ts` | Konsolidasi helper booking (F2-5) |
 | `staff-assignment.util` | `backend/src/common/utils/staff-assignment.util.ts` | Round-robin assignment staf |
 | `ticket-number.util` | `backend/src/common/utils/ticket-number.util.ts` | Generate nomor tiket |

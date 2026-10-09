@@ -4,7 +4,7 @@
 - Tanggal: 2026-09-20
 - Owner bisnis: belum ditetapkan
 - Owner teknis: belum ditetapkan
-- Sumber: [AI_WORKFLOW_GUIDE §12.1](../../AI_WORKFLOW_GUIDE.md#121-template-audit-modul)
+- Sumber: [AI_WORKFLOW_GUIDE §12.1](../arsip/AI_WORKFLOW_GUIDE.md#121-template-audit-modul)
 - Identitas bukti: commit d5d04cb + working tree bersih
 - Cakupan identitas: baseline saat recon; penulisan dokumen ini menambah working tree sesudahnya.
 - Batas baca: test login lengkap, LoginPage 60 baris pertama, api/auth.ts 40 baris pertama, core.ts melalui rg.

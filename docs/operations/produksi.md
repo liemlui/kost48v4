@@ -266,6 +266,7 @@ Lihat [M13](../arsip/changelog-2026-09.md) entri **2026-09-13** untuk kronologi 
 - Go-live pertama menggunakan database produksi baru/kosong. **Jangan menjalankan seed tenant/transaksi historis atau menyalin data UAT** hanya karena data tersebut tercantum di dokumen ini.
 - Tabel penghuni dan data lapangan adalah referensi onboarding yang wajib dikonfirmasi ulang owner pada hari input. Input penghuni nyata dilakukan melalui UI/runbook terlindungi, setelah KTP dan dasar akuntansi siap.
 - NIK, foto KTP, password, token, dan kredensial lain adalah data sensitif. Jangan salin ke paket deploy, log, screenshot, atau artefak publik. Lihat `DEPLOYMENT_ONLINE_20260723.md` dan runbook onboarding untuk jalur produksi.
+- **Keputusan owner 2026-10-07 (`PII-DOC-TENANT`) — exception bertanggal:** blok data tenant (§16) dan data lapangan, termasuk NIK, **sengaja dipertahankan di dokumen ini** sebagai referensi onboarding. Ini **bukan** kelalaian dan **jangan dihapus atau diredaksi** oleh agen tanpa keputusan baru; aturan pada butir di atas tetap berlaku penuh. Yang perlu diketahui apa adanya: nilai ini **sudah berada di riwayat git**, sehingga meredaksi berkas tidak menghapus jejaknya — pembersihan riwayat adalah keputusan terpisah. Register: [KEPUTUSAN-OWNER](../KEPUTUSAN-OWNER.md) §6.
 
 ### 1c. Data Tenant Produksi (GO-LIVE)
 
@@ -296,7 +297,7 @@ Email & HP placeholder — akan dilengkapi via **UI Owner → Manajemen Tenant**
 > **Email & HP tenant** belum tersedia — input via UI Owner sebelum aktivasi portal penghuni.
 
 ---
-## 7. Data Tenant Produksi — Skenario per Kamar
+## 16. Data Tenant Produksi — Skenario per Kamar
 
 Data real dari owner. Seed via `seed-prod.js`. Tgl Masuk = tanggal hari (bulan menyusul — akan dilengkapi via UI Owner).
 
@@ -326,9 +327,6 @@ Data real dari owner. Seed via `seed-prod.js`. Tgl Masuk = tanggal hari (bulan m
 
 ### 3a. Data Lapangan Produksi Owner — Belum Otomatis Masuk DB
 
-
-### 3a. Data Lapangan Produksi Owner — Belum Otomatis Masuk DB
-
 Sumber: konfirmasi owner 2026-07-08. Data ini adalah ground truth lapangan awal, tetapi **belum boleh dianggap sudah ada di database produksi** sampai diinput lewat UI/seed/runbook. Jangan masukkan full NIK, foto KTP, password jaringan, token, atau API key ke repo.
 
 **✅ Status NIK per 2026-07: Semua 13 tenant sudah punya NIK lengkap.**
@@ -355,7 +353,7 @@ Kebijakan owner terkait kerusakan:
 - Kerusakan normal/aus/bocor/lampu mati/AC bermasalah/fasilitas mulai tidak layak: owner/staff memperbaiki atau mengganti.
 - Kerusakan sengaja, salah pakai berat, kehilangan barang/kunci, atau pelanggaran aturan: direview sebagai tanggung jawab tenant.
 - Kondisi kamar saat audit produksi sebaiknya difoto sebagai baseline data yang adil.
-## 7b. Data Audit Fasilitas Lapangan
+## 17. Data Audit Fasilitas Lapangan
 
 > **Status:** Template siap diisi. Data dikumpulkan owner saat audit keliling.
 > Kolom `Kondisi` & `Catatan` diisi manual — hasil audit lapangan.
@@ -553,7 +551,7 @@ Kebijakan owner terkait kerusakan:
 > - **Ruang umum** — belum diaudit
 > - Referensi lengkap: `docs/arsip/legacy/AUDIT_INVENTARIS_LENGKAP.md`
 
-## 8. DeepSeek AI — API Key & Konfigurasi
+## 18. DeepSeek AI — API Key & Konfigurasi
 
 
 | Item | Nilai | Lokasi |

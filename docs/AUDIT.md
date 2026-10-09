@@ -5,15 +5,15 @@
 
 
 > **Rumah kanonik status audit**: indeks audit, gate verifikasi, status temuan, dan bukti bertanggal. Berkas ini adalah **titik masuk** — laporan rinci ada di `docs/audit/` (§4).
-> Otoritas: prompt owner > [STATUS](./ANTREAN.md) (antrean/gate) > [AGENTS](../AGENTS.md) (aturan verifikasi) > berkas ini.
+> Otoritas: prompt owner > [ANTREAN](./ANTREAN.md) (antrean/gate) > [AGENTS](../AGENTS.md) (aturan verifikasi) > berkas ini.
 > **Arti status di sini:** audit lama berlaku pada lingkup dan waktu yang disebut. Audit bukan **PASS** untuk perubahan baru, bukan bukti deployment, dan bukan bukti dampak runtime.
-> Dibuat 23 September 2026 (Fase 2 konsolidasi). Status tahap: [STATUS §8](./ANTREAN.md#8-struktur-dokumen-tujuan-konsolidasi).
+> Dibuat 23 September 2026 (Fase 2 konsolidasi). Status tahap: [ANTREAN](./ANTREAN.md).
 
 ## 1. Cara pakai
 
 1. Sebelum audit baru, periksa apakah ada audit dengan lingkup yang sama (§4) — jangan mengulang audit tanpa perubahan relevan.
 2. Kutip **file + tanggal + lingkup** saat memakai temuan; jangan menggeneralisasi temuan satu modul ke modul lain.
-3. Temuan sampingan yang tidak dikerjakan masuk backlog [STATUS §2](./ANTREAN.md); jangan menambah antrean baru di berkas ini.
+3. Temuan sampingan yang tidak dikerjakan masuk backlog [ANTREAN](./ANTREAN.md); jangan menambah antrean baru di berkas ini.
 4. Setelah audit selesai: tulis bukti bertanggal di `docs/audit/`, perbarui tabel §4 dan [audit/README.md](audit/README.md), lalu catat entri riwayat.
 
 ## 2. Cakupan dan gate verifikasi
@@ -21,7 +21,7 @@
 - **Indeks cakupan audit total** (135 ID: 117 terbuka + 18 selesai): [audit/audit-checklist-total.md](./arsip/audit-checklist-total.md). Arti centang hanya berubah ketika audit unit terkait benar-benar selesai dan buktinya dicatat.
 - **Indeks per modul**: [audit/README.md](audit/README.md); peta hasil audit per cabang (generated): [audit-map/](../.audit-map/README.md).
 - **Gate DoD Fase AO** (audit UI/UX lintas portal) + perintah verifikasinya: [audit/status-ao-lintas-portal.md](audit/status-ao-lintas-portal.md).
-- Gate audit AO-13/AO-14 (tiga crawl tanpa skip, dua state TENANT, viewport 320–1440 px, Axe/gate Baymard, screenshot bebas PII) tercatat sebagai task terbuka di [STATUS §3](./ANTREAN.md); memenuhi DoD bukan otomatis sign-off.
+- Gate audit AO-13/AO-14 (tiga crawl tanpa skip, dua state TENANT, viewport 320–1440 px, Axe/gate Baymard, screenshot bebas PII) tercatat sebagai task terbuka di [ANTREAN](./ANTREAN.md); memenuhi DoD bukan otomatis sign-off.
 
 ## 3. Status temuan uang (P1) — belum tuntas
 
@@ -34,7 +34,7 @@
 | P1-08 | masih ada tetapi jalurnya sempit; belum diperbaiki | sama |
 | P1-09 | terverifikasi; cleanup kode mati selesai 25 Sep | sama |
 
-Audit lanjutan P1-04..P1-09 sudah dilakukan 25 Sep 2026. Status di atas tetap statis/lokal kecuali dinyatakan lain; jangan menyamakannya dengan UAT atau produksi. Setiap task yang menyentuh uang tetap mengikuti gate uang di [STATUS §7](./ANTREAN.md).
+Audit lanjutan P1-04..P1-09 sudah dilakukan 25 Sep 2026. Status di atas tetap statis/lokal kecuali dinyatakan lain; jangan menyamakannya dengan UAT atau produksi. Setiap task yang menyentuh uang tetap mengikuti gate uang di [ANTREAN](./ANTREAN.md).
 
 ## 4. Bukti audit bertanggal (kanonik)
 
@@ -59,12 +59,14 @@ Audit lanjutan P1-04..P1-09 sudah dilakukan 25 Sep 2026. Status di atas tetap st
 | Z-19 Dashboard Owner (25 Sep 2026, audit statis; gate manual terbuka) | [audit/owner-dashboard-z19-2026-09-25.md](audit/owner-dashboard-z19-2026-09-25.md) |
 | IMPACT-01 (25 Sep 2026, review independen + FIX-A) | [audit/payment-impact-review-2026-09-25.md](audit/payment-impact-review-2026-09-25.md) |
 | Recon infrastruktur AI untuk lapisan agenda keputusan (25 Sep 2026, statis) | [audit/ai-agenda-recon-2026-09-25.md](audit/ai-agenda-recon-2026-09-25.md) |
+| Kesiapan docs sebagai aturan vs doktrin eksternal (7 Okt 2026, read-only; gate hijau, **16 temuan** — TINGGI sudah ditutup, 1 exception owner `PII-DOC-TENANT`; T-14 (banner arsip) dan T-15 (line ending, 114 berkas dinormalkan) **diputuskan + dieksekusi** 7 Okt; T-16 peringatan: 25 "mojibake" adalah kutipan sengaja; kalibrasi + koreksi di §6–§7) | [audit/audit-aturan-docs-vs-doktrin-2026-10-07.md](audit/audit-aturan-docs-vs-doktrin-2026-10-07.md) |
+| Sensus dokumen — mana yang masih dipakai, mana yang diarsipkan (7 Okt 2026, sensus pertama) | [audit/sensus-dokumen-2026-10-07.md](audit/sensus-dokumen-2026-10-07.md): 72 → 66 dokumen aktif, **7 dipindah ke arsip** (4 ledger/penutup batch + 3 pointer lama) dengan ledger konservasi SHA-256; 3 kandidat gelombang berikutnya |
 | Baseline coverage P4 (25 Sep 2026, parsial) | Backend loaded compiled JS: line 29,82%, branch 62,20%, function 41,39%; frontend UNKNOWN — rincian dan batas di [audit kekuatan dokumentasi §7](audit/audit-kekuatan-dokumentasi-2026-09-24.md) |
 | Lampiran audit portal tenant (2 Jul 2026) | [history/lampiran-audit-portal-tenant-2026-07-02.md](arsip/lampiran-audit-portal-tenant-2026-07-02.md) |
 
 ## 5. Batas berkas ini
 
-- Antrean, gate, invariant, dan blocker: [STATUS](./ANTREAN.md); jangan diduplikasi di sini.
+- Antrean, gate, invariant, dan blocker: [ANTREAN](./ANTREAN.md); jangan diduplikasi di sini.
 - Aturan domain (termasuk invarian uang/huni): [ATURAN.md](ATURAN.md) + `docs/domain/`.
 - Runbook operasi dan verifikasi keuangan: [OPERASI.md](OPERASI.md).
 - **Known exception & rekonsiliasi migrasi dokumen** (fragment em dash yang dibiarkan, arsip lokal yang di-exclude git, tautan pra-eksisting): [mapping §7.2](arsip/DOC-GOV-20260922-mapping.md) — bukan defect baru, dan tidak diperbaiki tanpa batch tersendiri.

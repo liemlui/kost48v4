@@ -70,8 +70,8 @@ Berkas yang **hilang** setelah rombak: `AGENTS.md` §3 (router → `AGENTS.md` �
 | **B0** ✅ | Branch `docs-rombak`; snapshot `docs/` ke `.design-audit/docs-snapshot-2026-10-05/`; daftar berkas yang diniatkan | `git status` sebelum = sesudah untuk berkas yang tidak diniatkan | hapus branch bila gagal |
 | **B1** ✅ | `scripts/check-docs.mjs` (R1–R5) + jalankan pada kondisi sekarang; baseline disimpan sebagai berkas | Baseline **wajib merah** dan tersimpan sebagai berkas, bukan hanya keluaran terminal | hapus skrip + berkas baseline |
 | **B2** ✅ | 39 berkas dikutip → `docs/arsip/legacy/`; 68 sisanya → `.docs-legacy/`; **60 rujukan** dialihkan; 7 penghapusan tracked | konservasi SHA 68/68 · 0 tautan patah baru · P5 & P11 ditutup | revert commit |
-| **B3** ✅ | Peta 4 MB keluar `docs/` → `.audit-map/` (gitignored); generator **tracked** di `scripts/`; 157 tautan + 24 path dialihkan | **4.141 tautan diverifikasi, 0 rusak** — [ledger](B3-ledger-peta-audit.md) | revert |
-| **B4** ✅ | Kebijakan 368 kotak: **117 ke arsip · 108 dikonversi · 78 bertanda · 65 direklasifikasi**; indeks cakupan lahir | **konversi terbukti identik 5/5** · R3 0 — [ledger](B4-ledger-kotak.md) | revert |
+| **B3** ✅ | Peta 4 MB keluar `docs/` → `.audit-map/` (gitignored); generator **tracked** di `scripts/`; 157 tautan + 24 path dialihkan | **4.141 tautan diverifikasi, 0 rusak** — [ledger](../arsip/B3-ledger-peta-audit.md) | revert |
+| **B4** ✅ | Kebijakan 368 kotak: **117 ke arsip · 108 dikonversi · 78 bertanda · 65 direklasifikasi**; indeks cakupan lahir | **konversi terbukti identik 5/5** · R3 0 — [ledger](../arsip/B4-ledger-kotak.md) | revert |
 | **B5** ✅ | Otoritas dipisah: `AGENTS.md` **17,7 → 7,7 KB** + [KONTRAK](../KONTRAK.md) 13,7 KB + [ANTREAN](../ANTREAN.md) 11,9 KB; `STATUS.md` → pointer; `README.md` dihapus | **jalur wajib 50/1.037 KB → 4 berkas/49,7 KB** · gate 2 pelanggaran | revert |
 | **B6** ✅ | Rotasi changelog: September (302,9 KB) + entri M13 → [arsip/changelog-2026-09.md](../arsip/changelog-2026-09.md) 340,7 KB (beku); berkas hidup [history/changelog/2026-10.md](../history/changelog/2026-10.md) 2,2 KB; basis rotasi = tanggal entri | Gate 2 pelanggaran, R2 0 | revert |
 | **B7** ✅ | Register keputusan dipecah: hidup [KEPUTUSAN-OWNER](../KEPUTUSAN-OWNER.md) **63,9 → 10,6 KB** (tabel status + ringkasan mengikat + indeks arsip); entri bertanggal 13 Jun–25 Sep (54,8 KB) → [arsip](../arsip/keputusan-owner-2026-06-sd-2026-09.md) beku | Gate 2 pelanggaran, R2 0 | revert |
@@ -86,7 +86,7 @@ Fakta yang menghemat satu langkah: isi index sudah LF seluruhnya — **1.109 `i/
 **B2 recon ✅** (2026-10-05): 106 berkas `docs/archieve/**` dipetakan — **kelas A 35** (dikutip lewat path) · **kelas B 5** (hanya namanya muncul) · **kelas C 66** (tidak dikutip).
 Daftar pindah: `docs/rencana/B2-daftar-pindah-arsip-legacy.md`. Temuan: berkas kelas A dikutip eksplisit oleh `flow.md`, `kontrak.md`, dan `PETA-KODE.md`, sehingga pemindahan menuntut alih rujukan besar — dan sebagian kandidat lebih tepat **diserap** ke dokumen aktif (masuk backlog P3).
 
-**B2 eksekusi ✅** (2026-10-05, 3 commit — rincian per commit di [ledger](B2-ledger-konservasi.md) §6):
+**B2 eksekusi ✅** (2026-10-05, 3 commit — rincian per commit di [ledger](../arsip/B2-ledger-konservasi.md) §6):
 
 - **B2.1 `2971efa7`** — 39 berkas pindah ke `docs/arsip/legacy/`; **37 identik SHA-256**, **2 transformasi** (redaksi kredensial, sisa 0); 15 berkas untracked kini tracked (P4=a).
 - **B2.2 `56e99f15`** — **60 rujukan dialihkan** di 23 dokumen aktif, bertahap 4 klaster + gate tiap klaster (P7). Rujukan hanya dialihkan bila targetnya ada; 4 dibiarkan (lihat §4.1).
@@ -109,7 +109,7 @@ B3–B8 **belum**; menunggu perintah.
 | **B2/B3 — aset besar di dalam repo** (`.docs-legacy/`, `.audit-map/`, diabaikan git) | sandbox agen | **diterima owner** |
 | **B3 — regenerasi peta** | sandbox menolak `child_process` | **SELESAI**: generator membaca `.git/HEAD` langsung → stempel nyata; **4.141 tautan, 0 rusak** |
 | **B2 — commit campuran (dipisah)** | kesalahan agen: `git add -u -- docs` men-stage 7 berkas owner | **selesai**: `0f28e8d9` (konten owner) + `56e99f15` (alih rujukan); 20 berkas dipantau SHA-256, **0 berubah**; commit lama masih `git show`-able |
-| **Rujukan rusak (7 butir)** | ditemukan B2.2, bukan akibat B2 | **ditutup 2026-10-05**: 4 sitasi + 2 nama `08_CHECKLIST` dibereskan, 1 dibiarkan (catatan historis) — [kartu penutup](PENUTUP-SITASI-RUSAK.md) |
+| **Rujukan rusak (7 butir)** | ditemukan B2.2, bukan akibat B2 | **ditutup 2026-10-05**: 4 sitasi + 2 nama `08_CHECKLIST` dibereskan, 1 dibiarkan (catatan historis) — [kartu penutup](../arsip/PENUTUP-SITASI-RUSAK.md) |
 | **B5 — invariant ditulis padat** + `STATUS.md` jadi pointer | plafon KONTRAK 16 KB · Q11 | **keputusan teknis agen**; verbatim tetap di riwayat git |
 | **Baris `docs/archieve/` di `.git/info/exclude`** | P5, urutan pelaksanaan disetujui owner | **ditutup 2026-10-05** (`c1134387`): baris dihapus setelah arsip keluar; `git check-ignore docs/archieve/uji.md` **kosong** |
 | **B4 — dua runbook diberi penanda** | runbook dipakai manusia langkah demi langkah | **keputusan teknis agen** |

@@ -3,7 +3,7 @@
 Tanggal: 2026-09-23
 Status: aktif
 Tujuan: navigasi berbasis ROLE pengguna dan FLOW bisnis — scope PUBLIC/TENANT/STAFF/ADMIN/OWNER/SYSTEM, sembilan flow bisnis, quick reference "Mau X? Buka Y", dan alur kerja ideal (dari M10)
-Rujukan: [KEPUTUSAN-OWNER](../KEPUTUSAN-OWNER.md) · [STATUS](../ANTREAN.md) · [PETA-KODE](../PETA-KODE.md) · [orientasi.md](orientasi.md)
+Rujukan: [KEPUTUSAN-OWNER](../KEPUTUSAN-OWNER.md) · [ANTREAN](../ANTREAN.md) · [PETA-KODE](../PETA-KODE.md) · [orientasi.md](orientasi.md)
 
 > Migrasi dari docs/M10_PETA_SCOPE.md (B5 Tahap 3, 23 Sep 2026) pada DOC-GOV-20260922; teks peta scope tidak diubah.
 > Batch B5 memindahkan **seluruh isi M10 apa adanya** (L6–L295) ke file ini; nomor & urutan bagian sama seperti aslinya. Peta modul/file kode ada di [PETA-KODE.md](../PETA-KODE.md).

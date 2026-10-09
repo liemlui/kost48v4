@@ -1,9 +1,11 @@
+> **ARSIP BEKU** · dipindah dari `docs/rencana/` ke `docs/arsip/` pada 2026-10-07 (sensus dokumen, batch SENSUS-DOCS). Isi tidak diubah selain banner ini + penyesuaian tautan relatif; **jangan dibaca rutin**.
+
 # B4 — ledger kebijakan kotak & indeks cakupan (potret 2026-10-05)
 
 > **Blok baca** · Jenis: **kartu bukti batch** · Status: **beku setelah B4** · Untuk siapa: owner + agen verifikator
 > · Baca kalau: mempertanyakan mengapa sebuah kotak `[ ]` tidak lagi dihitung sebagai antrean, atau mencari indeks cakupan audit.
 
-Rumah aturan: [RENCANA-ROMPAK-DOCS.md](RENCANA-ROMPAK-DOCS.md) §4 (B4) · keputusan owner: [PERTANYAAN-ROMPAK.md](PERTANYAAN-ROMPAK.md) (Q12, Q13, P16, P17).
+Rumah aturan: [RENCANA-ROMPAK-DOCS.md](../rencana/RENCANA-ROMPAK-DOCS.md) §4 (B4) · keputusan owner: [PERTANYAAN-ROMPAK.md](../rencana/PERTANYAAN-ROMPAK.md) (Q12, Q13, P16, P17).
 
 ## 1. Masalah yang ditutup
 

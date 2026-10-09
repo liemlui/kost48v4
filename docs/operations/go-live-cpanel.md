@@ -153,7 +153,7 @@ Identitas deployment (menutup sebagian EF-00 §9.1 M19):
 2. **Bila belum ada atau `false`** — set `KTP_ACTIVATION_GATE_ENABLED=true`, lalu restart aplikasi mengikuti prosedur redeploy (§G/§J). Jangan mengubah env lain pada langkah ini.
 3. **Bukti** — tanggal, nama pemeriksa, status sebelum/sesudah, tanpa screenshot yang memuat secret.
 4. **Uji perilaku** — jalankan di UAT/DEV: aktivasi kamar atau approve booking untuk tenant tanpa KTP terverifikasi **harus DITOLAK**. **Jangan** membuat tenant/booking uji di produksi; bila uji hanya bisa di produksi, jangan lakukan dan tulis **BELUM TERBUKTI**.
-5. **Tindak lanjut** — catat hasil di [STATUS](../ANTREAN.md) antrean #1. Bila tetap ditunda, tegaskan risiko dan syarat peninjauan sebelum onboarding penghuni nyata.
+5. **Tindak lanjut** — catat hasil di [ANTREAN](../ANTREAN.md) antrean #1. Bila tetap ditunda, tegaskan risiko dan syarat peninjauan sebelum onboarding penghuni nyata.
 
 ## G. Catatan teknis untuk release berikutnya
 
@@ -325,7 +325,7 @@ Jangan reset database, menjalankan seed, atau memakai `db push` pada produksi ya
 
 **Digabung dari docs/operations/form-go-live.md** (DOCS-CLEANUP-1, 2026-09-24) - isi blok disalin utuh.
 
-# Formulir Isi Data Go-Live
+## Formulir Isi Data Go-Live
 
 > Migrasi dari docs/FORM_ISI_DATA_GO_LIVE.md (A-F) pada f8f9a589 (DOC-GOV-20260922 Tahap 3).
 > Sumber asli sudah dihapus di Fase 3 (23 Sep 2026); berkas ini kanonik.
