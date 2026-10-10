@@ -19,8 +19,13 @@ Mulai dari sini, berurutan:
 
 Gate — jalankan SEKALI di akhir tugas, bukan per langkah:
   docs-only            -> node scripts/check-docs.mjs
-  + kartu kesehatan    -> node scripts/ukur-kekuatan-docs.mjs
+  + kartu kesehatan    -> node scripts/ukur-kekuatan-docs.mjs   (13 pemeriksaan, termasuk ratchet baris)
   + keadaan sesi       -> node scripts/ukur-serah-terima-docs.mjs
+  + bukti pagar        -> node scripts/check-docs.selftest.mjs  (wajib 13/13)
+
+Ratchet baris: total baris dokumen aktif TIDAK boleh naik. Kalau pemeriksaan M GAGAL karena Anda
+menambah baris, itu bukan kegagalan palsu — putuskan sadar: pindahkan isi ke arsip, atau naikkan
+`total_baris` di scripts/docs-lines.baseline.json BESERTA `alasan` pada commit yang sama.
 
 Aturan yang paling sering dilanggar:
 - Jangan menambah aturan paralel: kontrak hanya AGENTS + KONTRAK, antrean hanya ANTREAN (KONTRAK §1, R3).

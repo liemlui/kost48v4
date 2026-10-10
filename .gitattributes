@@ -44,3 +44,6 @@
 *.xls binary
 *.docx binary
 *.pptx binary
+
+# Data skrip (mis. baseline ratchet dokumen) — LF eksplisit, ditulis skrip Node maupun PowerShell.
+*.json text eol=lf

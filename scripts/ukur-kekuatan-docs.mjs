@@ -8,7 +8,7 @@
 //   kartu  = kesehatan yang lebih luas (yatim, indeks, inventaris, status, duplikasi)
 //
 // Pakai: node scripts/ukur-kekuatan-docs.mjs [akar-repo]
-import { readdirSync, readFileSync, existsSync, statSync } from "node:fs";
+import { readdirSync, readFileSync, writeFileSync, existsSync, statSync } from "node:fs";
 import { join, relative, resolve, dirname, sep } from "node:path";
 
 const ROOT = resolve(process.argv[2] ?? ".");
@@ -267,6 +267,39 @@ const cek = (nama, lulus, detail) => hasil.push({ nama, lulus, detail });
     kurang.join("; ") || "keadaan serah-terima ok",
   ].join(" · ");
   cek("L. Rujukan nomor baris (berkas tangga wajib 0) + keadaan berkas serah-terima terikat fakta", tanggaKena.length === 0 && kurang.length === 0, detail);
+}
+
+// ── M. RATCHET total baris dokumen aktif (dipasang 2026-10-09, mengikuti sistem kontrak dokumentasi) ──
+// Menutup kerusakan "pertumbuhan senyap": setiap batch menambah beberapa baris, dan setelah beberapa
+// bulan bacaan sesi baru membengkak tanpa ada satu keputusan pun yang menyetujuinya.
+// Angka baseline disimpan di `scripts/docs-lines.baseline.json` (data, bukan dokumen — jadi tidak
+// melanggar aturan "angka volatil tidak ditulis di dokumen"). NAIK hanya boleh dengan keputusan
+// pemilik: naikkan angka di berkas itu dan tulis alasannya di `alasan` pada commit yang sama.
+// Ini LAPORAN, bukan gate: ia tidak pernah mengubah exit code.
+{
+  const BASELINE = join(ROOT, "scripts", "docs-lines.baseline.json");
+  const total = aktif.reduce((a, f) => a + readFileSync(f, "utf8").split(/\r?\n/).length, 0);
+  let lulus = true;
+  let detail = `${total} baris di ${aktif.length} berkas aktif`;
+  if (!existsSync(BASELINE)) {
+    try {
+      writeFileSync(BASELINE, JSON.stringify({ total_baris: total, berkas: aktif.length, tanggal: new Date().toISOString().slice(0, 10), alasan: "baseline awal" }, null, 2) + "\n", "utf8");
+      detail += " · baseline dibuat";
+    } catch (e) {
+      lulus = false;
+      detail += ` · baseline TIDAK bisa dibuat: ${e.code ?? e.message}`;
+    }
+  } else {
+    const b = JSON.parse(readFileSync(BASELINE, "utf8"));
+    const delta = total - b.total_baris;
+    if (delta > 0) {
+      lulus = false;
+      detail += ` · NAIK ${delta} baris dari baseline ${b.total_baris} (${b.tanggal}) — kenaikan butuh keputusan pemilik: perbarui scripts/docs-lines.baseline.json beserta alasannya, atau pindahkan isi ke arsip`;
+    } else {
+      detail += ` · ${delta === 0 ? "sama dengan" : `turun ${-delta} baris dari`} baseline ${b.total_baris} (${b.tanggal})`;
+    }
+  }
+  cek("M. Total baris dokumen aktif tidak naik dari baseline (ratchet)", lulus, detail);
 }
 
 const lulus = hasil.filter((h) => h.lulus).length;

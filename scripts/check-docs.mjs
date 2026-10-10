@@ -112,7 +112,12 @@ import { join, relative, dirname, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const VERSI_GATE = "v2.0";
-const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
+// Akar repo bisa diarahkan lewat argumen pertama: `node scripts/check-docs.mjs <akar>`.
+// Dipakai oleh SELF-TEST (scripts/check-docs.selftest.mjs), yang membangun pohon sintetis lalu
+// membuktikan gate INI benar-benar GAGAL saat seharusnya gagal — pagar yang tidak pernah terbukti
+// bisa gagal tidak layak dipercaya (di repo rujukan, tiga kali sebuah pemeriksaan tampak hijau
+// padahal tidak memeriksa apa pun). Tanpa argumen, akar = folder induk skrip ini.
+const ROOT = resolve(process.argv[2] ?? join(dirname(fileURLToPath(import.meta.url)), ".."));
 const DOCS = join(ROOT, "docs");
 
 const ARSIP_RE = /[\\/]docs[\\/](arsip|archieve|audit-map)[\\/]/;

@@ -58,16 +58,17 @@
 | Pemeriksaan | Hasil |
 |---|---|
 | `node scripts/check-docs.mjs` | **BERSIH** — 0 pelanggaran, 0 dilewati, exit 0; INFO 3 (kartu bertanggal + anchor rapuh) |
-| `node scripts/ukur-kekuatan-docs.mjs` | **13/13 = 100%** (11 pemeriksaan lama + **D** diperluas + **L** baru) |
+| `node scripts/ukur-kekuatan-docs.mjs` | **12/12 = 100%** (11 pemeriksaan lama + **D** diperluas + **L** baru) |
 | `node scripts/ukur-serah-terima-docs.mjs` | blok `@kost48-state` **cocok** dengan repo |
 | Plafon byte | `AGENTS.md` 9,4 KB (12) · `KONTRAK` 15,7 KB (16) · `ANTREAN` 14,8 KB (16) · `PETA-KODE` 15,8 KB (16) — **semua di bawah plafon** |
 | Yang **TIDAK** dijalankan | test/build/lint/typecheck, server, DB, UAT, deployment (docs-only — [default-dev §11](../operations/default-dev.md)). **Dampak runtime tidak diukur**: yang dibuktikan gate adalah tautan & bentuk dokumen, bukan aplikasi masih bekerja |
 
 ## 6. Pekerjaan lanjutan yang dibuka batch ini
 
-1. **Konversi 85 rujukan nomor baris** (`docs/domain/**`, `docs/operations/**`, `docs/product/**`) — level L, butuh verifikasi kode; **belum** masuk [ANTREAN](../ANTREAN.md) §3.
-2. **Pemeriksa `--keputusan`** (invariant "Register keputusan final" di [KONTRAK §11](../KONTRAK.md)) — bentuknya sudah ditetapkan, implementasinya kecil; boleh dikerjakan bersamaan dengan tugas dokumentasi berikutnya.
-3. **Tiga tautan mati** yang tercatat pada potret kartu kekuatan (A: 10/11) — dua di antaranya adalah berkas batch ini yang **belum ada saat potret diambil**; verifikasi ulang sesudah batch ditutup.
+1. **Konversi 102 rujukan nomor baris** (`docs/domain/**`, `docs/operations/**`, `docs/product/**`) — **jangan** dikerjakan sebagai transformasi otomatis: sudah dicoba dan **merusak** (empat kerusakan terukur, §3). Level L, dikerjakan per rujukan dengan verifikasi kode; **belum** masuk [ANTREAN](../ANTREAN.md) §3.
+2. **Pemeriksa `--keputusan`** (invariant "Register keputusan final" di [KONTRAK §11](../KONTRAK.md)) — **selesai** pada batch PENUTUP: LULUS (9 baris keputusan diperiksa, 9 baris indeks arsip dikecualikan, 0 temuan).
+3. **Ukuran dokumentasi dibanding sistem rujukan** — repo ini ±13,6 ribu baris dokumen aktif di 69 berkas, sedangkan sistem rujukan menargetkan ≤6 berkas / ≤1.500 baris. Menurunkannya berarti memutuskan **apa yang keluar dari lingkup** (mis. panduan domain/operasi ke repo terpisah) — **keputusan pemilik**, bukan tindakan agen. Ratchet (pemeriksaan **M**) menjaga agar angkanya tidak naik diam-diam. **Terbuka.**
+4. **Batch PENUTUP (2026-10-09, hari yang sama)** menambahkan dua mekanisme yang belum ada — **self-test pagar** (`node scripts/check-docs.selftest.mjs`) dan **ratchet baris** (pemeriksaan **M**) — didokumentasikan di [ALAT-UKUR-KESEGARAN-DOCS §9](ALAT-UKUR-KESEGARAN-DOCS.md), didaftarkan di [KONTRAK §7](../KONTRAK.md).
 
 ## 7. Riwayat
 

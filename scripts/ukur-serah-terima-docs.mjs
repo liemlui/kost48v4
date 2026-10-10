@@ -228,7 +228,11 @@ if (arg === "--segarkan") {
     console.error("GAGAL  git tidak tersedia — tidak bisa menyegarkan head");
     process.exit(3);
   }
-  const tanggal = new Date().toISOString().slice(0, 10);
+  // Tanggal = tanggal LOKAL, bukan UTC. `toISOString()` memakai UTC dan di zona WIB (UTC+7)
+  // menghasilkan tanggal besok selama 7 jam pertama hari itu — pernah terjadi: commit 2026-10-09
+  // pagi tercatat "2026-10-10" di blok keadaan. Dokumen repo ini memakai tanggal lokal.
+  const d = new Date();
+  const tanggal = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
   const teks = readFileSync(BERKAS, "utf8");
   const baru = teks
     .replace(/^(head:\s*)\S+/m, `$1${head}`)

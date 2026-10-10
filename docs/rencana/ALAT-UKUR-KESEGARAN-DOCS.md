@@ -113,7 +113,32 @@ Sisa yang **bukan** milik §7 dan masih menggantung: keputusan owner untuk **T-1
 - Angka yang ditulis di laporan wajib berasal dari keluaran perintah; tulis **potret + tanggal**. Jangan mengarang.
 - Bila menemukan cacat pada alat ukur sendiri: **perbaiki alatnya lebih dulu**, laporkan, jangan menambal gejalanya. Hari ini ini terjadi tiga kali (slug tiruan, `--paksa`/akar repo, self-entry indeks) dan dua di antaranya hampir menjadi temuan palsu.
 
-## 9. Riwayat
+## 9. Self-test pagar + ratchet baris (dipasang 2026-10-09, batch PENUTUP)
+
+Dua mekanisme yang belum ada sampai batch ini; keduanya menutup kerusakan yang **sudah** terbukti.
+
+**Self-test pagar — `node scripts/check-docs.selftest.mjs`.** Menutup: pagar yang tidak pernah terbukti
+bisa gagal tidak layak dipercaya (di repo rujukan, tiga kali sebuah pemeriksaan tampak hijau padahal
+tidak memeriksa apa pun). Cara kerja: pohon sintetis di `.design-audit/selftest/` → dibuktikan **BERSIH**
+lebih dulu (syarat mutlak) → satu pelanggaran disuntik per aturan R1–R11, gate wajib menangkapnya →
+ditutup uji bahwa pemeriksaan yang **DILEWATI** berbuntut exit 2, bukan 0. Prasyarat: `check-docs.mjs`
+menerima akar repo sebagai argumen, dan keluaran anak dialihkan ke berkas lewat fd (**bukan pipa** —
+sandbox menolak pipa stdio). Pemasangan pertama: **13/13 lulus**, dan ia langsung menemukan **dua
+kesalahan saya sendiri** — ekspektasi exit code (gate: `1` pelanggaran, `2` ada yang dilewati) dan teks
+mutasi uji R4 yang memuat frasa yang dicari R4 sehingga ujinya palsu. **Pelajaran: teks mutasi tidak
+boleh memuat apa yang sedang dicari aturan yang diuji.**
+
+**Ratchet baris — pemeriksaan M di `scripts/ukur-kekuatan-docs.mjs`.** Menutup: pertumbuhan senyap.
+Aturan: total baris dokumen aktif tidak boleh naik dari `scripts/docs-lines.baseline.json` (**data, bukan
+dokumen**, jadi aturan angka volatil tidak dilanggar); kenaikan butuh keputusan pemilik — perbarui angka
+baseline **beserta `alasan`** pada commit yang sama, atau pindahkan isi ke arsip. Sifatnya bagian dari
+kartu kekuatan, jadi **laporan**, bukan gate (tidak mengubah exit code). Uji negatif sudah dijalankan
+(+2 baris → GAGAL, lalu dikembalikan). **Batas jujurnya:** ratchet mengukur **pertumbuhan**, bukan
+**kecukupan** — sistem rujukan menargetkan ≤6 berkas/≤1.500 baris dan repo ini jauh di atasnya, tetapi
+memangkas isi yang masih berlaku adalah **keputusan pemilik**, bukan tindakan agen; memangkasnya justru
+kerusakan termahal (butir pekerjaan hilang saat dokumen diringkas).
+
+## 10. Riwayat
 
 | Tanggal | Perubahan |
 |---|---|

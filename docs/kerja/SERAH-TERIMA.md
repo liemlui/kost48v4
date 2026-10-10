@@ -7,8 +7,8 @@
 
 ```yaml
 # @kost48-state — blok yang diperiksa mesin, jangan diedit manual tanpa mengukur ulang.
-head: 9be0ea4798f4ec2091026dbd15199a6435e1e456   # git rev-parse HEAD saat potret
-tanggal: 2026-10-09
+head: 0bd4a7ca2ed292b4e39c8b212104266a9e86d0c5   # git rev-parse HEAD saat potret
+tanggal: 2026-10-10
 gate: BERSIH                                      # node scripts/check-docs.mjs
 kartu_kekuatan: 12/12                             # node scripts/ukur-kekuatan-docs.mjs
 periksa: node scripts/ukur-serah-terima-docs.mjs  # pemeriksa blok ini
@@ -73,3 +73,4 @@ Rumah lengkapnya: [default-dev §10a](../operations/default-dev.md) (jebakan mes
 | Tanggal | Perubahan |
 |---|---|
 | 2026-10-07 | Dibuat pada batch SERAH-SESI bersama [PROMPT-SESI-BERIKUTNYA](PROMPT-SESI-BERIKUTNYA.md) dan [kontrak batchnya](../rencana/SERAH-SESI-DOCS.md). Bentuknya diadaptasi dari dokumen serah-terima proyek lain (isi tidak disalin, hanya perannya), lalu disesuaikan dengan aturan lokal: **tanpa kotak** (R3/R-5), dengan blok `@kost48-state` yang **diperiksa mesin** karena berkas serah-terima paling cepat basi dan paling mahal bila salah. |
+| 2026-10-09 | Pemeriksaan **M** (ratchet baris) dan self-test gate dipasang pada batch PENUTUP; uji negatif ratchet (+2 baris) terbukti GAGAL lalu dikembalikan. |
