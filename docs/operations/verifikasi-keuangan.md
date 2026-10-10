@@ -35,8 +35,8 @@
 
 #### 3. UNIT TEST (zero-dependency — pakai test runner BAWAAN Node, TANPA npm install)
 > Proyek belum punya jest. JANGAN install. Pakai `node --test` (Node ≥18) terhadap hasil build `dist/`. Test = file CommonJS di `backend/test/unit/`.
-**Cara jalankan:** `cd backend && npm run build && node --test "test/**/*.test.js"` → harus semua PASS (hijau). (Catatan: `node --test test/` GAGAL di Node 22/Windows — pakai pola glob ini.)
-**Script siap-pakai (sudah ditambahkan):** di `package.json` → `"test:unit": "node --test \"test/**/*.test.js\""` → jalankan `npm run test:unit`.
+**Cara jalankan:** `cd backend && npm run build && node --test "test/unit/**/*.test.js"` → harus semua PASS (hijau). (Catatan: `node --test test/` GAGAL di Node 22/Windows — pakai pola glob ini. `test/integration/**` bergerbang env dan **bukan** bagian perintah ini; glob lama `test/**/*.test.js` ikut menariknya.)
+**Script siap-pakai (sudah ditambahkan):** di `backend/package.json` → `"test:unit": "node --test \"test/unit/**/*.test.js\""` → jalankan `npm run test:unit`. (Kutipan glob dikoreksi 2026-10-10 agar sama dengan skrip hari ini.)
 
 ##### File 1 — `backend/test/unit/pricing.test.js` (SIAP PAKAI — angka sudah diverifikasi dari kode)
 ```js

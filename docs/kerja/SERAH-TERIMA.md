@@ -7,10 +7,10 @@
 
 ```yaml
 # @kost48-state — blok yang diperiksa mesin, jangan diedit manual tanpa mengukur ulang.
-head: 0bd4a7ca2ed292b4e39c8b212104266a9e86d0c5   # git rev-parse HEAD saat potret
+head: 0b84034d92c00975a11fbd133b483667b5f37afb   # git rev-parse HEAD saat potret
 tanggal: 2026-10-10
 gate: BERSIH                                      # node scripts/check-docs.mjs
-kartu_kekuatan: 12/12                             # node scripts/ukur-kekuatan-docs.mjs
+kartu_kekuatan: 13/13                             # node scripts/ukur-kekuatan-docs.mjs
 periksa: node scripts/ukur-serah-terima-docs.mjs  # pemeriksa blok ini
 ```
 
@@ -26,23 +26,24 @@ Diperiksa oleh `node scripts/ukur-serah-terima-docs.mjs` ([KONTRAK §11](../KONT
 
 ## 2. Keadaan repository pada potret
 
-**Potret terakhir: 2026-10-09, branch `main`, HEAD `faff7c36`** — pohon kerja **bersih** kecuali dua berkas source owner yang sengaja tidak ikut commit batch dokumentasi (`frontend/src/pages/portal/MyManualPage.tsx`, `frontend/src/pages/public/CekPage.tsx`) dan dua folder untracked (`.design-audit/`, `design/`). Batch SERAH-SESI **sudah di-commit** pada `faff7c36` (72 berkas, +2714/−231).
+**Potret terakhir: 2026-10-10, branch `main`, HEAD `0b84034d`** — pohon kerja **tidak bersih**: dua berkas source milik owner (`frontend/src/pages/portal/MyManualPage.tsx`, `frontend/src/pages/public/CekPage.tsx`) dan dua folder untracked (`.design-audit/`, `design/`) — semuanya **di luar** batch dokumentasi dan tidak disentuh — **ditambah delapan berkas dokumen sesi 2026-10-10 yang belum di-commit** (§6). Tiga commit sesudah potret sebelumnya: PENUTUP (`9e8be972`), RUJUKAN (`3a7ba7e0`), kenaikan baseline ratchet (`0b84034d`).
 
-**⚠ Koreksi tanggal yang mudah menyesatkan.** Sebelum commit itu, keadaan diukur pada **pohon kerja kotor**: HEAD `65d1dab4`, **69 berkas berubah** (51 diubah · 7 dipindah/di-rename · 11 untracked) — akumulasi batch B0–B8 dan SPLIT/RAPI/SISA-DOCS. Batch-batch itu **menyebut dirinya "2026-10-07"**, padahal **commit terakhir sebelum batch ini bertanggal 2026-10-06** dan gate di commit itu masih **v1.6** (bukan v2.0). Artinya label "2026-10-07" adalah **tanggal sesi yang belum di-commit**, dan **pengukuran pada berkas ini (2026-10-09) lebih baru dari label itu**. Yang dipakai sebagai tanggal di baris Fakta berkas tangga = **tanggal pengukuran nyata (2026-10-09)**; label "2026-10-07" di catatan batch **dibiarkan apa adanya** supaya arsip tidak disunting retroaktif, tetapi jangan dipakai sebagai tanggal pengukuran.
+**⚠ Koreksi yang mudah menyesatkan — keduanya diukur ulang 2026-10-10.** (a) Potret sebelumnya menyebut HEAD **`faff7c36`** ("72 berkas, +2714/−231"); commit itu **bukan nenek moyang HEAD dan tidak ada cabang yang memuatnya** — ia versi lama dari commit batch SERAH-SESI yang sama-sama berinduk `65d1dab4`, lalu digantikan **`9be0ea47`** (72 berkas, +2732/−232). Nomor dari catatan lama karena itu **tidak boleh disalin**. (b) Label tanggal di catatan batch adalah tanggal **penulisan sesi**, bukan tanggal commit maupun tanggal pengukuran: batch B0–B8 menyebut "2026-10-07" padahal commit terakhir saat itu 2026-10-06 dan gate-nya masih v1.6. Label lama **dibiarkan apa adanya** (menyuntingnya = menyunting catatan bertanggal); yang sah dipakai sebagai tanggal = **tanggal pengukuran nyata**.
 
 **Fakta ini bagian dari potret:** angka apa pun yang dibaca dari commit terakhir tidak sama dengan isi disk bila pohon kerja kotor ([kartu kesegaran](../rencana/ALAT-UKUR-KESEGARAN-DOCS.md)).
 
 | Ukuran | Nilai potret | Perintah pengukur |
 |---|---:|---|
-| `AGENTS.md` (disuntik tiap request, plafon 12 KB) | 9.592 B | `[IO.File]::ReadAllBytes("AGENTS.md").Length` |
-| `docs/KONTRAK.md` (plafon 16 KB) | 16.121 B | idem |
-| `docs/ANTREAN.md` (plafon 16 KB) | 15.193 B | idem |
-| `docs/PETA-KODE.md` (plafon 16 KB) | 16.214 B | idem |
-| Gate dokumen | **BERSIH** — 0 pelanggaran, 0 pemeriksaan dilewati, 11 aturan (v2.0) + 3 INFO | `node scripts/check-docs.mjs` |
-| Kartu kekuatan | **12/12 = 100%** (11 pemeriksaan lama + **D** diperluas baris Fakta + **L** baru) | `node scripts/ukur-kekuatan-docs.mjs` |
-| Rujukan nomor baris di dokumen kontrak aktif | **102** rujukan di 10 berkas (gate) · **103** di 11 berkas (kartu) — terbanyak `docs/operations/efisiensi-hosting.md` (29), `docs/domain/flow.md` (25) | INFO detektor di gate; kartu kekuatan pemeriksaan **L** |
+| `AGENTS.md` (disuntik tiap request, plafon 12 KB) | 9.803 B | `[IO.File]::ReadAllBytes("AGENTS.md").Length` |
+| `docs/KONTRAK.md` (plafon 16 KB) | 16.304 B (**sisa 80 B**) | idem |
+| `docs/ANTREAN.md` (plafon 16 KB) | 15.256 B | idem |
+| `docs/PETA-KODE.md` (plafon 16 KB) | 16.214 B (**sisa 170 B**) | idem |
+| Gate dokumen + pagar | **BERSIH** — 0 pelanggaran, 0 pemeriksaan dilewati, 11 aturan (v2.0) + 3 INFO · self-test pagar **13/13 lulus** | `node scripts/check-docs.mjs` + `node scripts/check-docs.selftest.mjs` |
+| Kartu kekuatan | **13/13 = 100%** (11 pemeriksaan lama + **D** diperluas baris Fakta + **L** + **M** ratchet: 13.684 baris = baseline 2026-10-10) | `node scripts/ukur-kekuatan-docs.mjs` |
+| Rujukan nomor baris di dokumen kontrak aktif | **0** rujukan di 0 berkas kontrak (gate) · **1** di 1 berkas (kartu) — turun dari **70** pada 2026-10-10; sisa itu kutipan bertanggal `docs/rencana/PERTANYAAN-ROMPAK.md`, bukan dokumen hidup | INFO detektor di gate; kartu kekuatan pemeriksaan **L** |
+| Kesegaran isi docs | `% cakupan` **71%** (49/69) · `% segar` **80%** (39/49) — potret 2026-10-10, HEAD `0b84034d` | `node scripts/ukur-kesegaran-docs.mjs` |
 
-**Kenapa dua angka (102 vs 103):** ruang lingkupnya memang berbeda, bukan selisih yang tak dijelaskan — detektor gate memakai **cakupan kontrak yang sama dengan R1** (10 berkas), sedangkan pemeriksaan **L** kartu juga menghitung `docs/rencana/**` (berkas kontrak batch) sehingga 11 berkas. Yang **sama** pada keduanya: berkas tangga wajib = **0**.
+**Kenapa dua angka (0 vs 1):** ruang lingkupnya memang berbeda, bukan selisih yang tak dijelaskan — detektor gate memakai **cakupan kontrak yang sama dengan R1**, sedangkan pemeriksaan **L** kartu juga menghitung `docs/rencana/**` (berkas kontrak batch) sehingga satu kutipan bertanggal di sana ikut terhitung. Yang **sama** pada keduanya: berkas tangga wajib = **0**.
 
 **Batas angka di atas:** semuanya potret, dan **pohon kerja belum bersih** — angka byte berubah begitu ada berkas disunting. Yang sah dijadikan bukti hanya keluaran perintah, bukan tabel ini.
 
@@ -65,7 +66,9 @@ Rumah lengkapnya: [default-dev §10a](../operations/default-dev.md) (jebakan mes
 ## 5. Langkah berikutnya (menunjuk, bukan memerintah)
 
 - **Antrean:** [ANTREAN §3](../ANTREAN.md) — pilih satu tugas yang prasyaratnya terpenuhi. Butir dokumentasi yang masih terbuka: kontrak batch [SERAH-SESI-DOCS](../rencana/SERAH-SESI-DOCS.md) §6.
-- **Belum dikerjakan, sudah terukur:** **101** rujukan nomor baris di 9 dokumen kontrak aktif. Kebijakannya ([KONTRAK §7](../KONTRAK.md)) dan detektornya (INFO di gate) sudah ada; **konversi otomatis dicoba 2026-10-09 lalu DIHENTIKAN** karena merusak. Empat kerusakan ditemukan lewat pengukuran — semuanya akibat **skrip konversi**, bukan dokumen lama: (1) `\s{2,}` memuat newline → `flow.md` **508→305 baris** (tabel tergabung); (2) rentang **en dash** (`:18–22`) tidak tertangkap → sisa menggantung `prisma.service.ts–22`; (3) aturan `| |`→`|` menghapus **kolom kosong tabel** (16 baris `| |`); (4) pola longgar `:[ \t]*\d+` + aturan pagar kode → **nama simbol di dalam backtick ikut terhapus** (`` `nama `:60` `` menjadi `` `nama `` ``), dan 3 pagar kode JSON rusak. Semua perubahan **dipulihkan** (`git checkout`), 9 berkas **kembali bersih**, tidak ada yang di-commit. Pelajaran + prosedur aman: [default-dev §10a](../operations/default-dev.md). **Sisanya pekerjaan Isi** (per rujukan, dengan verifikasi kode per baris), bukan pekerjaan mesin.
+- **Menunggu keputusan owner:** [TANYA-OWNER](TANYA-OWNER.md) — pertanyaan berbahasa manusia (arah percepatan, **flow app baru**, gate uang, izin rilis/UI, perampingan docs) yang masing-masing sudah membawa konteks · pilihan · risiko · rekomendasi agen · **default yang dijalankan bila tidak dijawab**. Otoritas keputusan: [AGENTS §4](../../AGENTS.md) + [default-dev §12](../operations/default-dev.md).
+- **Selesai 2026-10-10 — konversi rujukan nomor baris tuntas:** **70 → 0** di dokumen kontrak aktif (1 kutipan bertanggal tersisa di `docs/rencana/`). Dikerjakan **per rujukan dengan mata pada kode**, bukan transformasi teks — 6 berkas tuntas pada batch RUJUKAN, 4 berkas sisanya (`efisiensi-hosting` 29 · `flow` 32 · `publik` 18 · `default-dev` 1) pada sesi ini. Bahwa nomor baris itu **memang menyesatkan** dibuktikan, bukan diduga: rujukan lama ke metode `complete` di `stays.service.ts` mendarat **165 baris** dari posisi sebenarnya, `processDeposit` meleset **626 baris**, dan 31 dari 32 rujukan di `flow.md` sudah basi. Pelajaran yang tetap berlaku ([default-dev §10a](../operations/default-dev.md)): **konversi otomatis selalu merusak** (dicoba 6×: tabel tergabung, backtick rusak, kolom tabel hilang, nama simbol terhapus) — sisa pekerjaan seperti ini adalah **pekerjaan Isi**, bukan pekerjaan mesin.
+- **Sasaran kerapatan docs (arah owner 10 Okt 2026 — bukan lagi ≤1.500 baris, tapi angka yang diukur).** Yang dijaga adalah **biaya baca sesi baru**, bukan total halaman. Potret 2026-10-10: **bootstrap 712 baris** (7 berkas: AGENTS 109 · KONTRAK 142 · ANTREAN 96 · PETA-KODE 172 · SERAH-TERIMA 79 · PROMPT-SESI 85 · TANYA-OWNER 29) → sasaran **≤800** · **referensi domain+operasi 7.887 baris di 20 berkas** (dibaca sesuai tugas, bukan saat masuk) → sasaran **−20% (±6.300)** lewat penggabungan duplikasi, dijalankan dalam batch kecil · **total dokumen aktif 13.794 baris / 70 berkas** → sasaran **≤12.000** · aturan tambahan: **tidak ada dokumen baru tanpa menggabungkan/menutup satu yang lama**. Ukur: `(Get-Content <berkas>).Count` per kelompok, atau `node scripts/ukur-kekuatan-docs.mjs` (pemeriksaan M/ratchet). Larangan tetap: **jangan memangkas isi yang masih berlaku** — pindahkan, bukan hapus.
 - **Batas sesi ini (jujur):** batch SERAH-SESI **hanya mengubah dokumentasi dan skrip ukur**. Tidak ada test/build/lint/typecheck, tidak ada server/DB, tidak ada deployment, dan **dampak runtime tidak diukur** — yang dibuktikan gate adalah *tautan dan bentuk dokumen benar*, bukan *aplikasi masih bekerja*.
 
 ## 6. Riwayat berkas ini
@@ -74,3 +77,4 @@ Rumah lengkapnya: [default-dev §10a](../operations/default-dev.md) (jebakan mes
 |---|---|
 | 2026-10-07 | Dibuat pada batch SERAH-SESI bersama [PROMPT-SESI-BERIKUTNYA](PROMPT-SESI-BERIKUTNYA.md) dan [kontrak batchnya](../rencana/SERAH-SESI-DOCS.md). Bentuknya diadaptasi dari dokumen serah-terima proyek lain (isi tidak disalin, hanya perannya), lalu disesuaikan dengan aturan lokal: **tanpa kotak** (R3/R-5), dengan blok `@kost48-state` yang **diperiksa mesin** karena berkas serah-terima paling cepat basi dan paling mahal bila salah. |
 | 2026-10-09 | Pemeriksaan **M** (ratchet baris) dan self-test gate dipasang pada batch PENUTUP; uji negatif ratchet (+2 baris) terbukti GAGAL lalu dikembalikan. |
+| 2026-10-10 | **Sinkronisasi potret + penutupan konversi rujukan.** Potret: `head` 3 commit basi · `kartu_kekuatan` 12/12 padahal 13/13 · nomor commit `faff7c36` yang **yatim** (digantikan `9be0ea47`, +2732/−232 bukan +2714/−231) · baris "101 rujukan di 9 dokumen" yang sudah 70 di 4. Konversi: **70 → 0** rujukan nomor baris di dokumen kontrak (§5). Koreksi isi yang ikut terbukti: bagian audit UI/UX 2026-06-19 di `publik.md` (8 temuan sudah ditutup), register GAP #1/#3 di `flow.md`, `golive-setup.js` → `seed-owner.js`, klaim `data-master.md` "sudah dihapus", `bootstrap.sql` → `sql/bootstrap-production-schema.sql`, kutipan glob `test:unit`. Semua angka diukur ulang, bukan disalin. |

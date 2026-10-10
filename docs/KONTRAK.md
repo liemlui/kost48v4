@@ -21,7 +21,7 @@ Ringkasan + peta dokumen ada di [AGENTS.md](../AGENTS.md) (disuntik tiap request
 - Pertahankan kontrak publik: petakan producer → kontrak → consumer; sebut invariant uang/jurnal, permission, status hunian, API, privasi.
 - Izin edit dokumen **tidak** otomatis berarti izin mengubah kode, server, atau DB.
 - Instruksi owner yang mempersempit scope mengungguli kewajiban dokumentasi umum; catat penundaan yang terjadi.
-- **Protokol bertanya sempit**: bertanya hanya bila menyentuh **uang**, **perilaku pengguna**, **penghapusan data**, atau **deploy/secret**. Di luar keempatnya agen memutuskan sendiri dan mencatat satu baris alasannya di laporan (kewajiban lapor tetap berlaku).
+- **Protokol bertanya sempit**: **keputusan teknis milik agen** — putuskan sendiri + catat satu baris. Tanya owner hanya untuk **uang**, **flow/perilaku pengguna baru**, **hapus data**, **deploy/secret**, atau **keputusan penting**: [AGENTS §4](../AGENTS.md) · [default-dev §12](operations/default-dev.md).
 - Jangan: menambah dependency, memutasi DB produksi, menampilkan secret, `reset`/`stash` perubahan tanpa izin, push/deploy tanpa izin.
 - Jaga **seluruh** perubahan lama termasuk untracked; dirty tree tidak mewajibkan commit WIP. Commit hanya bila diminta; satu task = satu commit terarah.
 - Gunakan akses paling sempit yang mencukupi. **Jangan** menonaktifkan sandbox, guard, test, atau memperluas permission untuk melewati kegagalan; laporkan batas kontrol teknis yang menghambat.

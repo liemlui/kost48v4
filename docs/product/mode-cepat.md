@@ -29,6 +29,20 @@ Rujukan: [KEPUTUSAN-OWNER](../KEPUTUSAN-OWNER.md) (entri 25 Sep 2026 "Dua mode")
 | `CEPAT-ADMIN-AI-OPSI` | Tombol AI on-demand untuk ADMIN dicatat sebagai **opsi resmi yang belum dikerjakan** (syarat: maksimal 1–2 permintaan/hari, hanya atas penekanan tombol). |
 | `CEPAT-ADOPSI` | Keberhasilan diukur: **tinjau adopsi setelah 30 hari pemakaian**. Jika Mode Cepat tidak dipakai, yang diperbaiki adalah isi kartunya — bukan menambah fitur. |
 
+### 1b. Arah lanjutan (owner, 10 Okt 2026) — mobile-first, ringan, navigasi berjenjang
+
+Ini **melanjutkan**, bukan menggantikan, keputusan 25 Sep di atas. Semua keputusan lama tetap berlaku; yang bertambah adalah sasaran bentuk aplikasinya.
+
+| ID | Keputusan |
+|---|---|
+| `CEPAT-UTAMA` | **Mode Cepat adalah arah utama produk.** Fitur baru dirancang untuk Mode Cepat; fitur lama **beralih bertahap** — halaman Normal tidak dirusak dan tidak dihapus sebelum owner memutuskan. |
+| `MOBILE-FIRST` | Sasaran utama **layar ponsel** (±360–430 px): satu kolom, aksi utama dalam jangkauan jempol, tanpa tabel lebar. Desktop = penyempurnaan, bukan acuan desain. |
+| `APP-RINGAN` | Aplikasi **ringan**: bundle kecil, sedikit permintaan jaringan, hemat baterai. Menambah dependency wajib punya alasan yang dibuktikan, bukan rasa nyaman. |
+| `NAV-BERJENJANG` | Navigasi **berjenjang** (ringkas → detail), bukan semua menu terbuka sekaligus. Pengguna tidak boleh dibingungkan oleh pilihan yang belum relevan baginya. |
+| `SEMBUNYI-SEMENTARA` | Akses yang tidak dibutuhkan peran/keadaan **disembunyikan sementara** (progressive disclosure), bukan dihapus; kemunculannya dijelaskan konteks (kartu/langkah yang sedang dikerjakan). |
+| `UI-BOLEH-ROMBAK` | Agen **boleh merombak UI/UX** selama alurnya membaik dan tidak menjadi lebih jelek. Perubahan **langkah/alur** yang dilihat pengguna tetap dilaporkan sebelum→sesudah; perubahan konsistensi teknis tidak perlu ditanyakan. |
+| `KERJA-KECIL-COMMIT` | Pengerjaan dipecah **increment kecil**, **setiap increment di-commit** supaya bisa dilacak dan dibatalkan (`git revert`) bila salah. Push/deploy tetap menunggu perintah owner. |
+
 **Yang tidak berubah oleh keputusan ini:** nominal uang, tarif, aturan DP/deposit, jurnal, permission, status hunian, kontrak API, dan pola aman AI ([domain/ai.md](../domain/ai.md) §Pola Aman). Tidak ada schema baru.
 
 ---

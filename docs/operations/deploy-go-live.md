@@ -57,7 +57,7 @@ npx --yes prisma@7.8.0 migrate deploy  # replay seluruh migration dari baseline
 
 **Tidak ada backfill E-2 atau migrasi data UAT.** Seed hanya data fondasi: COA, periode OPEN, opening balance produksi, dan CashAccount.
 
-> ⚠️ **PRASYARAT seed (temuan rehearsal F1-12): DB fresh TIDAK punya user.** `bootstrap.sql` tidak membuat User dan belum ada seed script. Endpoint seed (COA/period/opening/cashaccount) butuh auth ADMIN/OWNER. Maka langkah #0 sebelum seed: **buat user OWNER pertama** — INSERT manual ke tabel `"User"` (password bcrypt) ATAU sediakan seed script. Tanpa ini, runbook seed via API tidak bisa jalan. (Rekomendasi: tambahkan `prisma/seed.ts` minimal OWNER untuk produksi.)
+> ⚠️ **PRASYARAT seed (temuan rehearsal F1-12): DB fresh TIDAK punya user.** `sql/bootstrap-production-schema.sql` tidak membuat User dan belum ada seed script. Endpoint seed (COA/period/opening/cashaccount) butuh auth ADMIN/OWNER. Maka langkah #0 sebelum seed: **buat user OWNER pertama** — INSERT manual ke tabel `"User"` (password bcrypt) ATAU sediakan seed script. Tanpa ini, runbook seed via API tidak bisa jalan. (Rekomendasi: tambahkan `prisma/seed.ts` minimal OWNER untuk produksi.)
 
 - [ ] Seed COA.
 - [ ] Buat periode OPEN dan opening balance produksi.

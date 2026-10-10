@@ -29,12 +29,12 @@ Rujukan: [KEPUTUSAN-OWNER](../KEPUTUSAN-OWNER.md) · [ANTREAN](../ANTREAN.md) ·
 
 ##### 0.1 Request pipeline (backend)
 - Entry: `backend/src/main.ts`
-  - `ValidationPipe({ whitelist, transform, forbidNonWhitelisted, disableErrorMessages di production })` — main.ts:34
-  - CORS dari `CORS_ORIGIN` env (production wajib diisi) — main.ts:40-47
-  - `trust proxy = 1` + security headers manual (X-Content-Type-Options, X-Frame-Options, Referrer-Policy, Permissions-Policy, CSP) — main.ts:50-59
+  - `ValidationPipe({ whitelist, transform, forbidNonWhitelisted, disableErrorMessages di production })` — `main.ts` `bootstrap()`
+  - CORS dari `CORS_ORIGIN` env (production wajib diisi) — `main.ts` `bootstrap()` (blok `enableCors`)
+  - `trust proxy = 1` + security headers manual (X-Content-Type-Options, X-Frame-Options, Referrer-Policy, Permissions-Policy, CSP) — `main.ts` `bootstrap()` (middleware security headers + `set('trust proxy', 1)`)
   - ⚠️ **TANPA Helmet** (keputusan sadar), **RATE-LIMIT SUDAH ADA** sejak V5.12.2: `common/middleware/rate-limit.middleware.ts` — global 300/menit/IP (env `RATE_LIMIT_GLOBAL_PER_MINUTE`), auth 10/15 menit/IP (env `RATE_LIMIT_AUTH_PER_15MIN`). In-memory, per-proses; multi-instance perlu store bersama.
   - Static `/uploads` dihapus; bukti bayar hanya via endpoint terproteksi `GET /api/payment-submissions/proofs/:filename`
-  - Swagger hanya non-production — main.ts:65+
+  - Swagger hanya non-production — `main.ts` `bootstrap()` (`if (!isProduction)` + `SwaggerModule.setup`)
 - Module root: `backend/src/app.module.ts` — 33 modul di `modules/` (lihat `01_GROUND_STATE §1.2`).
 - Auth: JWT Bearer, guard + decorator `@Roles(...)`. Role enum aktual: **OWNER, ADMIN, STAFF, TENANT** (schema.prisma `UserRole`). **APP_GUARD global default-deny** (E-1) sejak V5.12.2 — controller baru otomatis 401, bukan bocor publik.
 - Semua mutasi penting menulis `AuditLog` (langsung via `tx.auditLog.create` atau `audit.log`).
@@ -50,12 +50,12 @@ SELESAI   = Stay(status=COMPLETED)  |  BATAL/EXPIRED = Stay(status=CANCELLED)
 >
 > **Alur booking:** bayar DP 30% (atau lunas langsung) → DP approved = kamar terkunci (pesaing dibatalkan, `expiresAt` mati) → pelunasan + jaminan saat check-in → gagal lunas H+1 pk 12:00 → DP hangus (jurnal `DP_FORFEIT`). Overstay: tenant promoted lewat `plannedCheckOutDate` → tiket EVICT_OVERSTAY → H+1 forced checkout otomatis.
 
-Constraint DB penunjang (secara historis berada dalam `sql/bootstrap.sql`; sumber saat ini `sql/seed.sql` juga membawa data historis/PII):
+Constraint DB penunjang (secara historis berada dalam `backend/sql/bootstrap-production-schema.sql`; sumber saat ini `backend/sql/seed.sql` juga membawa data historis/PII):
 - `stay_one_active_per_tenant_uidx` — 1 stay ACTIVE per tenant (termasuk fase booking).
 - `stay_one_active_per_room_uidx` — 1 stay ACTIVE per room **hanya jika sudah promoted** → multi-booking RESERVED pada 1 kamar DIIZINKAN (first paid wins).
 - `stay_deposit_payment_amount_chk` — depositPaid ≤ depositAmount.
 
-> Untuk produksi, constraint/trigger ini harus diekstrak menjadi bootstrap guard khusus dan diuji pada DB kosong. Jangan menjalankan `sql/seed.sql` untuk memperoleh constraint tersebut. Rujukan otoritatif: `DEPLOYMENT_ONLINE_20260723.md`.
+> Untuk produksi, constraint/trigger ini harus diekstrak menjadi bootstrap guard khusus dan diuji pada DB kosong. Jangan menjalankan `backend/sql/seed.sql` untuk memperoleh constraint tersebut. Rujukan otoritatif: `DEPLOYMENT_ONLINE_20260723.md`.
 
 ##### 0.3 Enum status inti (schema.prisma)
 | Entitas | Status |
@@ -76,16 +76,16 @@ Constraint DB penunjang (secara historis berada dalam `sql/bootstrap.sql`; sumbe
 
 | Langkah | Rantai kode |
 |---|---|
-| Login (email/phone + password) | auth.service.ts:28 `login` → `findUserForLogin`:254 → bcrypt compare → JWT |
-| Profil sendiri | auth.service.ts:75 `me` |
-| Lupa password | auth.service.ts:96 `forgotPassword` → token CSPRNG → `PasswordResetToken` → `sendResetEmail`:366 |
-| Reset password | auth.service.ts:152 `resetPassword` (transaksi :199) |
-| Ganti password | auth.service.ts:218 `changePassword` |
+| Login (email/phone + password) | `auth.service.ts` `login` → `findUserForLogin` → bcrypt compare → JWT |
+| Profil sendiri | `auth.service.ts` `me` |
+| Lupa password | `auth.service.ts` `forgotPassword` → token CSPRNG → `PasswordResetToken` → `sendResetEmail` |
+| Reset password | `auth.service.ts` `resetPassword` (transaksi di dalamnya) |
+| Ganti password | `auth.service.ts` `changePassword` |
 
 Manajemen identitas:
-- Users CRUD (OWNER/ADMIN only): `modules/users/users.controller.ts:20-39`
-- Tenants CRUD + akses portal: `modules/tenants/tenants.controller.ts` — buat akun portal `:60`, suspend `:47`, reset password `:73`
-- Profil tenant self-service: `modules/tenants/tenant-profile.controller.ts:19,28` (GET profile, PATCH onboarding)
+- Users CRUD (OWNER/ADMIN only): `modules/users/users.controller.ts` — `findAll` / `findOne` / `create` / `update`
+- Tenants CRUD + akses portal: `modules/tenants/tenants.controller.ts` — buat akun portal `createPortalAccess`, suspend `togglePortalAccess`, reset password `resetPortalPassword`
+- Profil tenant self-service: `modules/tenants/tenant-profile.controller.ts` — `getMyProfile` (GET profile), `onboardingFill` (PATCH onboarding)
 
 **Invarian:** token reset sekali pakai & berbatas waktu; tenant hanya bisa baca data dirinya; tidak ada refresh token (expiry 24 jam). Suspend user MEMUTUS sesi seketika (jwt.strategy validasi DB per request + klaim pwdAt).
 **Fokus audit:** enumerasi akun via respons forgot-password; kekuatan JWT secret & klaim; sesi setelah suspend portal-access. (Rate-limit auth sudah ada — lihat §0.1)
@@ -95,29 +95,29 @@ Manajemen identitas:
 #### 2. Flow Publik → Booking
 
 ##### 2.1 Katalog publik
-- `modules/marketing/marketing-public-rooms.controller.ts:11,19` → `marketing-public-rooms.service.ts` — daftar/detail kamar publik. MAINTENANCE normal tidak dapat dipesan; MAINTENANCE dengan `allowBookingWhileCleaning=true` dapat dipesan tetapi belum dapat dihuni.
+- `modules/marketing/marketing-public-rooms.controller.ts` — `findAll` (daftar) / `findOne` (detail) → `marketing-public-rooms.service.ts` `getPublicRooms` / `getPublicRoomDetail`. MAINTENANCE normal tidak dapat dipesan; MAINTENANCE dengan `allowBookingWhileCleaning=true` dapat dipesan tetapi belum dapat dihuni.
 - FAQ publik: `modules/faqs/faqs.controller.ts` (6 endpoint).
 
 ##### 2.2 Booking publik (tanpa login)
-- `modules/tenant-bookings/public-bookings.controller.ts:13` POST → `public-bookings.service.ts:113` `createPublicBooking` (481 baris; buat Tenant+User+Stay sekaligus).
+- `modules/tenant-bookings/public-bookings.controller.ts` `create` POST → `public-bookings.service.ts` `createPublicBooking` (buat Tenant+User+Stay sekaligus).
 
 ##### 2.3 Booking via portal tenant
-`modules/tenant-bookings/tenant-bookings.service.ts:56` `createBooking`:
-1. Guard schema-ready :57; tenant aktif :91.
-2. Transaksi: `SELECT … FOR UPDATE` Tenant :98 → tolak jika sudah punya stay ACTIVE :100-109.
-3. Lock Room `FOR UPDATE` :111; kamar harus `isActive` dan status AVAILABLE/RESERVED :125 (multi-booking RESERVED diizinkan).
-4. Tolak jika ada stay promoted/occupied di kamar itu :129-142.
-5. Harga = snapshot tarif room per `pricingTerm` :144; **DP = 30% × sewa** :157.
-6. `expiresAt = calculateBookingExpiry(checkInDate)` : helper memakai deadline flat 3 jam dari waktu pembuatan.
-7. Room → RESERVED :157; INSERT Stay (raw SQL) :163; AuditLog `CREATE_BOOKING` :188.
+`modules/tenant-bookings/tenant-bookings.service.ts` `createBooking`:
+1. Guard schema-ready `validateBookingPreconditions` (`isBookingSchemaReady`); tenant aktif di helper yang sama.
+2. Transaksi: `SELECT … FOR UPDATE` Tenant → tolak jika sudah punya stay ACTIVE.
+3. Lock Room `FOR UPDATE`; kamar harus `isActive` dan status bookable (`AVAILABLE`, atau `MAINTENANCE` dengan `allowBookingWhileCleaning`).
+4. Tolak jika ada stay promoted/occupied di kamar itu (kueri `existingPaidOrOccupiedStay`).
+5. Harga = snapshot tarif room per `pricingTerm` via `resolveRent`; **DP = 30% × sewa** (`downPaymentAmountRupiah`).
+6. `expiresAt = calculateBookingExpiry(checkInDate)` — helper memakai deadline flat 3 jam dari waktu pembuatan (`AUTO_OPS_DEADLINES.BOOKING_REVIEW_DEADLINE_HOURS`).
+7. Room status dibiarkan apa adanya (baru RESERVED saat DP/pelunasan disetujui); INSERT Stay (raw SQL); AuditLog `CREATE_BOOKING`.
 
 ##### 2.4 Keputusan admin
-- Approve: tenant-bookings.service.ts:247 `approveBooking` → terbit invoice booking.
-- Reject: :506 `rejectBooking` (tulis `Stay.cancelReason`); Cancel oleh tenant: :677 `cancelPendingBooking`.
+- Approve: `tenant-bookings.service.ts` `approveBooking` → terbit invoice booking.
+- Reject: `rejectBooking` (tulis `Stay.cancelReason`); Cancel oleh tenant: `cancelPendingBooking`.
 - Daftar booking tenant: `findMine`; notifikasi approved/rejected (best-effort).
 
 **Invarian:** booking belum bayar tidak mengunci kamar; DP pertama yang disetujui mengunci kamar; DP 30% mengikuti pricingTerm; booking expired tidak boleh di-approve.
-**Fokus audit:** race multi-booking saat 2 pembayaran disetujui hampir bersamaan; konsistensi `isBookingSchemaDriftError` yang menelan error :222; jalur publik vs portal — apakah validasi & DP identik? (Lihat GAP #1 dan #4 di §15)
+**Fokus audit:** race multi-booking saat 2 pembayaran disetujui hampir bersamaan; konsistensi `isBookingSchemaDriftError` yang menelan error: jalur publik vs portal — apakah validasi & DP identik? (Lihat GAP #1 dan #4 di §15)
 
 ---
 
@@ -126,25 +126,25 @@ Manajemen identitas:
 **File inti:** `modules/payment-submissions/payment-submissions.service.ts` (1.564 baris — terbesar).
 
 ##### 3.1 Tenant upload bukti
-`createSubmission`:52 → `findEligibleSubmissionTarget`:1306 → PaymentSubmission PENDING_REVIEW. File bukti via endpoint terproteksi (`doesTenantOwnProof`:1554).
+`createSubmission` → `findEligibleSubmissionTarget` → PaymentSubmission PENDING_REVIEW. File bukti via endpoint terproteksi (`doesTenantOwnProof`).
 
-##### 3.2 Approve oleh admin — `approveSubmission`:353
-1. Lock submission `FOR UPDATE` (`lockSubmissionTx`:1370); harus PENDING_REVIEW; stay ACTIVE. (Sub-baris langkah indikatif; anchor split/OCCUPIED/meter lihat dossier 10.)
-2. `isBookingPath = room.status == RESERVED` :339; expired tidak bisa di-approve :345.
-3. Hitung ulang paid amount :358; split nominal → `rentPortion` + `depositPortion` :369-393.
-4. Buat `InvoicePayment` :397; status invoice → PAID/PARTIAL/ISSUED :414.
-5. Auto Journal Lite (best-effort) :439-449.
-6. Submission → APPROVED :451.
-7. **Jalur booking** :461:
-   - Update DP terbayar :473. Deposit ledger (best-effort) :483.
-   - **Jika invoice PAID:** Room → OCCUPIED :519; auto `plannedCheckOutDate` :530; promosi meter :542+ → stay "promoted".
-   - `cancelCompetingUnpaidBookingsTx`:736.
-8. Notifikasi tenant :1270/:1298.
+##### 3.2 Approve oleh admin — `payment-submissions.service.ts` `approveSubmission`
+1. Lock submission `FOR UPDATE` (`lockSubmissionTx`); harus PENDING_REVIEW; stay ACTIVE. (Sub-baris langkah indikatif; anchor split/OCCUPIED/meter lihat dossier 10.)
+2. `isBookingPath = room.status == RESERVED` lewat `submission.stayPromotedAt == null`; expired tidak bisa di-approve.
+3. Hitung ulang paid amount (`freshPaidAmount`); split nominal → `rentPortion` + `depositPortion` (via `computePaymentAllocation`).
+4. Buat `InvoicePayment` (hanya porsi sewa); status invoice → PAID/PARTIAL/ISSUED via `computeNextInvoiceState`.
+5. Auto Journal Lite (best-effort) — `postInvoiceIssuedTx` + `postInvoicePaymentTx`.
+6. Submission → APPROVED (`status: APPROVED`).
+7. **Jalur booking** (`if (isBookingPath)`):
+   - Update DP terbayar (`nextDepositState` → `stay.update`). Deposit ledger (best-effort) `recordDepositReceivedTx`.
+   - **Jika invoice PAID:** Room di-set `RESERVED` (OCCUPIED baru saat check-in); auto `plannedCheckOutDate` via `calculatePeriodEnd`; promosi meter TIDAK di sini — dipindah ke check-in (`stays.service.ts` `create`).
+   - `cancelCompetingUnpaidBookingsTx` (`payment-submissions.service.ts`).
+8. Notifikasi tenant `notifyPaymentApproved` / `notifyLosingTenants`.
 
-> ⚠️ **Catatan GAP #1 (owner):** Status teknis `PARTIAL` tetap diperlukan untuk DP 30% yang sah. Gap-nya adalah approval belum memvalidasi ulang dua nominal yang diizinkan: DP tepat atau pelunasan penuh tepat. Invoice-only wajib lunas penuh.
+> ⚠️ **Catatan GAP #1 (owner):** Status teknis `PARTIAL` tetap diperlukan untuk DP 30% yang sah. Gap-nya adalah approval belum memvalidasi ulang dua nominal yang diizinkan: DP tepat atau pelunasan penuh tepat. Invoice-only wajib lunas penuh. **Status 2026-10-10:** validasi ulang itu **sudah ada** di `approveSubmission` (`F1-1R (D-02): NO-PARTIAL`) — lihat §15.
 
 ##### 3.3 Jalur lain
-- Reject: `rejectSubmission`:909. Expire manual: `expireBooking`:959. Sweep expiry: `runExpiryCheck`:1096 → `autoCancelRejectedExpiredBookingTx`:1233.
+- Reject: `rejectSubmission`. Expire manual: `expireBooking`. Sweep expiry: `runExpiryCheck` → `autoCancelRejectedExpiredBookingTx`.
 - **Refund DP kalah first-paid-wins:** `cancelCompetingUnpaidBookingsTx` hanya batalkan yang belum bayar. Untuk PENDING_REVIEW: admin refund manual + kirim bukti ke tenant. Lihat GAP #4 di §15.
 
 **Invarian:** total pembayaran ≤ invoice + sisa DP; promosi meter & OCCUPIED hanya saat invoice PAID; hanya satu pemenang per kamar.
@@ -156,13 +156,13 @@ Manajemen identitas:
 
 **File:** `modules/invoices/invoices.service.ts`, `modules/invoice-payments/invoice-payments.service.ts`, `modules/meter-readings/meter-readings.service.ts`
 
-- Invoice CRUD: create:269, `createWithLinesAndIssue`:281, line add/update/remove (guard line setelah ISSUED), `recalculateInvoiceTotal`:423.
-- Issue: invoices.service.ts:444 → jurnal `postInvoiceIssued`.
-- Cancel: :480 → pre-check jurnal POSTED, lalu reversal.
-- Pembayaran manual (admin): invoice-payments.service.ts:113 `create` (FOR UPDATE, anti-overpayment) → `syncInvoiceStatus`; update:189 / remove:237 (remove berjurnal kini diblokir A8).
-- Meter reading: meter-readings.service.ts:121 create / :153 update, guard kronologis `assertReadingIsChronological`:29.
+- Invoice CRUD: `create`, `createWithLinesAndIssue`, line `addLine`/`updateLine`/`removeLine` (guard: invoice wajib masih DRAFT), `recalculateInvoiceTotal`.
+- Issue: `invoices.service.ts` `issue` → jurnal `postInvoiceIssued`.
+- Cancel: `cancel` → pre-check jurnal POSTED, lalu reversal.
+- Pembayaran manual (admin): `invoice-payments.service.ts` `create` (FOR UPDATE, anti-overpayment) → `syncInvoiceStatus`; `update` / `remove` (remove berjurnal kini diblokir A8, dan guard `assertStayNotOccupiedForPaymentMutationTx`).
+- Meter reading: `meter-readings.service.ts` `create` / `update`, guard kronologis `assertReadingIsChronological`.
 
-> ⚠️ **Catatan GAP #3 (owner):** Admin tidak boleh remove invoice payment jika kamar sudah OCCUPIED. Kode belum punya guard ini. Detail di §15 GAP #3.
+> ⚠️ **Catatan GAP #3 (owner):** Admin tidak boleh remove invoice payment jika kamar sudah OCCUPIED. Dulu (2026-06-12) kode belum punya guard ini; **status 2026-10-10 guard sudah ada** (`assertStayNotOccupiedForPaymentMutationTx`). Detail di §15 GAP #3.
 
 **Invarian:** Σ InvoicePayment ≤ total invoice; status invoice = f(Σpayment); line tidak berubah setelah ISSUE; meter reading monoton naik per room+utilityType.
 **Fokus audit:** konsistensi `syncInvoiceStatus` vs perhitungan inline di approveSubmission; reversal saat remove payment yang membuat invoice turun dari PAID → PARTIAL (kamar sudah OCCUPIED — GAP #3).
@@ -198,22 +198,22 @@ Manajemen identitas:
 #### 6. Flow Checkout & Deposit
 
 ##### 6.1 Pengajuan checkout
-`modules/checkout-requests/checkout-requests.service.ts` — create:47 (guard `assertNoOpenInvoices`:32) → approve:128 / reject:201 → notifikasi :294/:354/:392.
+`modules/checkout-requests/checkout-requests.service.ts` — `createRequest` (guard `assertNoOpenInvoices`) → `approveRequest` / `rejectRequest` → notifikasi `notifyOwnerAdminOnCreate` / `notifyTenantOnApprove` / `notifyTenantOnReject`.
 
-##### 6.2 Final checkout — `stays.service.ts:526` `complete`
+##### 6.2 Final checkout — `stays.service.ts` `complete`
 1. Hanya aktor lifecycle (`assertCoreLifecycleActor`).
-2. **Blokir jika masih ada invoice belum PAID/CANCELLED** :500-523.
-3. Stay → COMPLETED :525. Jika tidak ada stay aktif lain → **Room → MAINTENANCE** :546 + auto-create ticket `CHECKOUT_INSPECTION` (dedupe per stay/room/kategori) :559-606.
+2. **Blokir jika masih ada invoice belum PAID/CANCELLED** (`blockingInvoices`, tagihan meter dikecualikan).
+3. Stay → COMPLETED (`stay.updateMany`). Jika tidak ada stay aktif lain → **Room → MAINTENANCE** (`if (otherActive === 0)`) + auto-create ticket `CHECKOUT_INSPECTION` (dedupe lewat `existingInspectionTicket`).
 
-##### 6.3 Settlement deposit — `stays.service.ts:812` `processDeposit`
+##### 6.3 Settlement deposit — `stays.service.ts` `processDeposit`
 - Hanya saat COMPLETED/CANCELLED & depositStatus HELD.
 - Aksi: FULL_REFUND / PARTIAL / FORFEIT → depositStatus final; jurnal + ledger (**blocking**).
 
-##### 6.4 Room readiness gate — `tickets.service.ts:530` `close`
-Tiket CHECKOUT_INSPECTION di-close → cek tidak ada stay ACTIVE lain :622 → semua barang GOOD :630 → **Room MAINTENANCE → AVAILABLE** :637-647.
+##### 6.4 Room readiness gate — `tickets.service.ts` `close`
+Tiket CHECKOUT_INSPECTION di-close → cek tidak ada stay promoted lain (`otherPromotedStays`) → status item akhir harus GOOD (`hasProblemFinalStatus`) → **Room MAINTENANCE → AVAILABLE** (`room.updateMany` di blok room-ready).
 
 ##### 6.5 Deposit ledger
-`modules/deposit-ledger/deposit-ledger.service.ts` — recordDepositReceivedTx:158 (idempotent), recordDepositSettlementTx:197, summary:319, **reconciliationLite:351** (alat audit bawaan), backfillDryRun:420.
+`modules/deposit-ledger/deposit-ledger.service.ts` — `recordDepositReceivedTx` (idempotent), `recordDepositSettlementTx`, `summary`, **`reconciliationLite`** (alat audit bawaan), `backfillDryRun`.
 
 **Invarian:** kamar tidak pernah AVAILABLE tanpa inspeksi; deposit diproses tepat 1×; Σ ledger per stay = depositPaid − refund − deduction.
 **Fokus audit:** deposit received best-effort tapi settlement blocking — ledger bisa pincang. Jalankan `reconciliationLite`.
@@ -256,20 +256,20 @@ Tiket CHECKOUT_INSPECTION di-close → cek tidak ada stay ACTIVE lain :622 → s
 #### 8. Flow Tiket & Operasional Staf
 
 ##### 8.1 Tiket — `modules/tickets/tickets.service.ts`
-- Buat: backoffice :265 (6+ kategori), portal :321 (komplain), otomatis (CHECKOUT_INSPECTION, EVICT_OVERSTAY, laporan barang).
-- Siklus: assign:405 → start:437 (IN_PROGRESS) → markDone:493 (DONE) → close:530 (admin; gate kamar). Cancel dari kondisi diizinkan.
+- Buat: backoffice `createBackoffice` (6+ kategori), portal `createPortal` (komplain), otomatis (CHECKOUT_INSPECTION, EVICT_OVERSTAY, laporan barang).
+- Siklus: `assign` → `start` (IN_PROGRESS) → `markDone` (DONE) → `close` (admin; gate kamar). Cancel dari kondisi diizinkan.
 
 ##### 8.2 Rutinitas staf — `modules/staff-routines/staff-routines.service.ts`
-Template (admin CRUD :314-:385) → staf `getToday`:74 → start:147/complete:207 (guard satu-kerja-aktif `assertNoActiveWork`:48) → KPI :276, progress admin :385.
+Template (admin `createTemplate`/`updateTemplate`) → staf `getToday` → `start`/`complete` (guard satu-kerja-aktif `assertNoActiveWork`) → KPI `getMyKpi`, progress admin `getAdminProgress`.
 
 ##### 8.3 Laporan lapangan — `modules/staff-field-reports/staff-field-reports.service.ts`
-Staf lapor kondisi barang (create:73, foto) → admin reviewQueue:349 → adminReview:436 → validasi movement :563 + sinkron RoomItem :599 + auto-ticket :638.
+Staf lapor kondisi barang (`create`, foto) → admin `reviewQueue` → `adminReview` → validasi movement `validateMovement` + sinkron RoomItem `syncRoomItemTx` + update deskripsi tiket yang tertaut.
 
 ##### 8.4 Kinerja & review
-- `modules/staff-performance/staff-performance.service.ts` — agregat bulanan per staf :161 (KPI dari routine/ticket/field report events), audit kerja `createAudit`:117, saran audit :80, bukti :112.
-- Review tenant→staf: `modules/tenant-staff-reviews/tenant-staff-reviews.service.ts` — eligible:15, create:54 (rating; ≤2⭐ wajib komplain, ≥4⭐ pujian; anti-duplikat).
+- `modules/staff-performance/staff-performance.service.ts` — agregat bulanan per staf `getStaffMonthly` (KPI dari routine/ticket/field report events), audit kerja `createAudit`, saran audit `getAuditSuggestions`, bukti `getStaffEvidence`.
+- Review tenant→staf: `modules/tenant-staff-reviews/tenant-staff-reviews.service.ts` — `eligible`, `create` (rating; ≤2⭐ wajib komplain, ≥4⭐ pujian; anti-duplikat).
 
-**Fokus audit:** parsing regex BARANG_PINDAH :603-619 (rapuh); penugasan otomatis ke staf id terkecil (beban tidak merata); guard role `markDone` vs `close`.
+**Fokus audit:** penanganan kategori `BARANG_PINDAH` (`tickets.service.ts` `close`, `notifyBarangPindahClosed`) dan `TicketCategory.BARANG_PINDAH` (rapuh: bergantung deskripsi tiket); penugasan otomatis ke staf id terkecil (beban tidak merata); guard role `markDone` vs `close`.
 
 ---
 
@@ -278,19 +278,19 @@ Staf lapor kondisi barang (create:73, foto) → admin reviewQueue:349 → adminR
 **File:** `modules/inventory-items/`, `modules/inventory-movements/`, `modules/room-items/`
 
 ##### 9.1 Master barang gudang — `inventory-items.service.ts`
-- CRUD :146/:198 — create, read, update, delete barang.
-- `ensureOpeningStockSyncedTx`:99 — sinkron stok awal.
-- Update status dari lapangan :216 — auto-ticket bila rusak/hilang.
+- CRUD (`create`/`update`/`findOne`/remove) — create, read, update, delete barang.
+- `ensureOpeningStockSyncedTx` — sinkron stok awal.
+- Update status dari lapangan `updateStatusFromField` — auto-ticket bila rusak/hilang.
 
 ##### 9.2 Pergerakan stok — `inventory-movements.service.ts`
-- `create`:43 — lock qty `lockInventoryQtyTx`:88, validasi kecukupan stok :132, sinkron RoomItem :156.
-- `update`:72 — reverse lalu re-apply.
+- `create` — lock qty `lockInventoryQtyTx`, validasi kecukupan stok `validateMovementTx`, sinkron RoomItem `syncRoomItemTx`.
+- `update` — mutasi resmi tidak boleh diedit langsung; `update` menolak dengan arahan buat mutasi koreksi.
 - Satu movement IN/OUT mempengaruhi qty gudang + RoomItem.
 
 ##### 9.3 Barang per kamar — `room-items.service.ts`
-- Daftar per kamar :69, milik tenant :73.
-- Update status :115 — auto-ticket bila rusak/hilang.
-- `create` disabled :98 — hanya via movement, tidak langsung.
+- Daftar per kamar `findAll`, milik tenant `findMyRoomItems`.
+- Update status `updateStatusFromField` — auto-ticket bila rusak/hilang.
+- `create` disabled (melempar `ForbiddenException`) — hanya via movement, tidak langsung.
 
 ##### 9.4 Sinkronisasi & verifikasi
 - `Verifikasi batch 5` (Audit Mega): double-apply qty TIDAK terjadi (trigger DB + sync self-healing). Tapi risiko kombinasi field-report → ticket-close tetap ada.
@@ -304,19 +304,19 @@ Staf lapor kondisi barang (create:73, foto) → admin reviewQueue:349 → adminR
 #### 10. Flow Keuangan Operasional (Expense, WiFi, Aset)
 
 ##### 10.1 Expense
-- `modules/expenses/expenses.service.ts` CRUD :49-:72 → jurnal `postExpenseTx`.
+- `modules/expenses/expenses.service.ts` CRUD (`create`/`update`/`remove`) → jurnal `postExpenseTx`.
 - **Fokus audit:** delete expense — apakah jurnal ikut direversal? (M-33, FIX-14/15)
 
 ##### 10.2 WiFi Sales
-- `modules/wifi-sales/wifi-sales.service.ts` CRUD :40-:59 → jurnal `postWifiSaleTx`.
+- `modules/wifi-sales/wifi-sales.service.ts` CRUD (`create`/`update`/`remove`) → jurnal `postWifiSaleTx`.
 - Tenant bisa order WiFi via portal.
 - **Fokus audit:** delete wifi-sale — apakah jurnal ikut direversal?
 
 ##### 10.3 Aset Tetap
-- `modules/assets/assets.service.ts` — CRUD :296/:337, readiness :48.
-- **Ledger alignment:** preview:154 / post:159 → `postFixedAssetLedgerAlignmentTx`.
-- **Depresiasi:** preview:377 / `runDepreciation`:384 → `AssetDepreciationRun` + `postDepreciationRunTx`.
-- **Fokus audit:** depresiasi dobel-run pada bulan sama; aset terhubung roomItem/inventoryItem/expense (`validateRelations`:635) saat induk dihapus.
+- `modules/assets/assets.service.ts` — CRUD `create`/`update`/`findOne`, readiness `readiness`.
+- **Ledger alignment:** `previewLedgerAlignment` / `postLedgerAlignment` → `postFixedAssetLedgerAlignmentTx`.
+- **Depresiasi:** `depreciationPreview` / `runDepreciation` → `AssetDepreciationRun` + `postDepreciationRunTx`.
+- **Fokus audit:** depresiasi dobel-run pada bulan sama; aset terhubung roomItem/inventoryItem/expense (`validateRelations`) saat induk dihapus.
 
 ---
 
@@ -325,17 +325,17 @@ Staf lapor kondisi barang (create:73, foto) → admin reviewQueue:349 → adminR
 **File:** `modules/accounting/`
 
 ##### 11.1 Master & jurnal manual — `accounting.service.ts`
-seedDefaultCoa:52 → COA CRUD :88-:139 → CashAccount :140-:213 → Periode :214-:312 → Opening balance draft/post/void :325-:526 → Jurnal manual draft :544 (guard periode OPEN :585).
+`seedDefaultCoa` → COA CRUD (`listAccounts`/`createAccount`/`updateAccount`) → CashAccount (`listCashAccounts`/`createCashAccount`/`updateCashAccount`) → Periode (`listPeriods`/`createPeriod`/`updatePeriod`) → Opening balance (`listOpeningBalances`/`createOpeningBalanceDraft`/`postOpeningBalance`/`voidOpeningBalance`) → Jurnal manual draft `createJournalDraft` (guard periode OPEN).
 
 ##### 11.2 Auto Journal Lite — `accounting-posting.service.ts`
-- Wrapper non-tx :69-:127 dan versi `*Tx` :263-:771 untuk: INVOICE_ISSUED, INVOICE_PAYMENT, EXPENSE, WIFI_SALE, DEPOSIT_RECEIVED/SETTLEMENT, FIXED_ASSET_ALIGNMENT :128, DEPRECIATION_RUN :204, reversal cancel invoice :689 / payment :741.
-- Inti: `postBalancedJournalTx`:1110 — jurnal seimbang, idempotent per (sourceType, sourceId), skip VOID.
-- Perbaikan data: `backfillAutoJournal`:905, `dryRunDepositBackfill`:773, `findUnmappedSourceIds`:988.
+- Wrapper non-tx (`postInvoiceIssued`/`postInvoicePayment`/`postExpense`/`postWifiSale`/`postDepositReceivedForStay`/`postDepositSettlement`) dan versi `*Tx` untuk: INVOICE_ISSUED, INVOICE_PAYMENT, EXPENSE, WIFI_SALE, DEPOSIT_RECEIVED/SETTLEMENT, FIXED_ASSET_ALIGNMENT `postFixedAssetLedgerAlignmentTx`, DEPRECIATION_RUN `postDepreciationRunTx`, reversal cancel invoice `postInvoiceCancellationReversalTx` / payment `postPaymentReversalTx`.
+- Inti: `postBalancedJournalTx` — jurnal seimbang, idempotent per (sourceType, sourceId), skip VOID.
+- Perbaikan data: `backfillAutoJournal`, `dryRunDepositBackfill`, `findUnmappedSourceIds`.
 
 ##### 11.3 Tutup buku — `accounting-period-close.service.ts`
-readiness:75 → preview:80 → post:93 (manual) / autoCloseMonthly:122 → reopen:248. Readiness check: jurnal unmapped :580, depresiasi :604, alignment aset :615, trial balance :620.
+`readiness` → `preview` → `post` (manual) / `autoCloseMonthly` → `reopen`. Readiness check per `key`: `unmapped-operational`, `depreciation`, `asset-alignment`, `trial-balance`.
 
-##### 11.4 Kesiapan global — `accounting-readiness.service.ts:134` `getReadiness`.
+##### 11.4 Kesiapan global — `accounting-readiness.service.ts` `getReadiness`.
 
 **Invarian:** setiap jurnal seimbang; 1 sumber operasional = max 1 jurnal POSTED aktif; tidak ada posting ke CLOSED; reversal hanya untuk POSTED.
 **Fokus audit:** kebijakan campuran blocking vs best-effort per sumber × pemanggil; auto-close menutup periode sementara jurnal best-effort gagal belum di-backfill.
@@ -345,13 +345,13 @@ readiness:75 → preview:80 → post:93 (manual) / autoCloseMonthly:122 → reop
 #### 12. Flow Pelaporan & Dashboard Finance
 
 ##### 12.1 Laporan operasional — `modules/reports/reports.service.ts`
-- monthly-income, overdue-aging, deposit-liability, expense-summary, cash-flow, profit-loss, financial-ratios, occupancy (controller :24-:80).
+- monthly-income, overdue-aging, deposit-liability, expense-summary, profit-loss, financial-ratios, occupancy-daily, occupancy (rute di controller; `cash-flow` dihapus, digantikan `GET /accounting/cashflow`).
 
 ##### 12.2 Dashboard finansial — `modules/finance/finance.service.ts`
-- `businessHealth`:40 — kesehatan bisnis multi-indikator.
-- `occupancySummary`:179 — okupansi exclude RESERVED.
-- `balanceSheetDraft`:234 — neraca saldo draft.
-- `ownerDashboard`:280 — dashboard owner ringkas.
+- `businessHealth` — kesehatan bisnis multi-indikator.
+- `occupancySummary` — okupansi exclude RESERVED.
+- `balanceSheetDraft` — neraca saldo draft.
+- `ownerDashboard` — dashboard owner ringkas.
 - Sejak V5.12.2 (E-4): saldo kas dari JURNAL (opening + Σ debit−kredit POSTED), bukan field manual.
 - Sejak V5.12.2 (E-5): deposit liability = HELD di businessHealth & balanceSheetDraft.
 
@@ -404,12 +404,12 @@ readiness:75 → preview:80 → post:93 (manual) / autoCloseMonthly:122 → reop
 
 ##### 14.1 Notifikasi in-app
 - `modules/notifications/app-notification.controller.ts` — list, read, read-all.
-- `preview reminder` :17-:49; `mock send` :20.
+- `preview reminder` (`reminder-preview.controller.ts` `getAll` dan varian per jenis); `mock send` (`reminder-mock.controller.ts` `mockSend`).
 - **Belum ada pengiriman email/WA nyata.**
 - Notifikasi terkirim untuk payment, booking, checkout, overstay H-7/H-3/H-1/H-day, announcement, dan kompetitor menang. **Renew request/approve/reject belum memiliki notifikasi.**
 
 ##### 14.2 Pengumuman
-- `modules/announcements/` — draft → publish :50 → tampil di portal tenant.
+- `modules/announcements/` — draft → publish (`announcements.service.ts` `update` dengan `isPublishing`) → tampil di portal tenant.
 
 ##### 14.3 PWA (lihat `docs/arsip/legacy/2026-06-16_root_docs_pre_M/04_DEPLOY_AND_PWA.md`)
 - Saat ini: **PWA MVP installable**, belum operasional yang kuat.
@@ -424,11 +424,13 @@ readiness:75 → preview:80 → post:93 (manual) / autoCloseMonthly:122 → reop
 
 > **Sumber:** Wawancara owner 2026-06-12. Setelah dikonfirmasi, ditemukan 4 gap antara aturan bisnis asli vs implementasi kode.
 
+> **Status 2026-10-10 — register ini potret wawancara, bukan status hari ini.** Diverifikasi ulang ke kode: **GAP #1 dan GAP #3 tampak sudah ditutup**, sehingga kalimat “Kode belum punya guard ini” dan “approval belum memvalidasi ulang dua nominal” di §3/§4 tidak lagi berlaku. Bukti: `payment-submissions.service.ts` `approveSubmission` menegakkan **dua nominal sah** (DP tepat atau pelunasan penuh) dan menolak sisanya — komentarnya sendiri `F1-1R (D-02): NO-PARTIAL`, sedangkan jalur invoice-only wajib lunas penuh · `invoice-payments.service.ts` `remove` memanggil `assertStayNotOccupiedForPaymentMutationTx`. **Batas:** ini pembacaan kode, **bukan** verifikasi runtime (tidak ada test/alur yang dijalankan); keputusan mencabut GAP adalah keputusan owner.
+
 ##### 🔴 GAP #1 — Tidak Ada Pembayaran Partial
 
 **Aturan owner:** *"Pembayaran harus sesuai dengan kontrak sehingga kita tidak menerima pembayaran Partial."*
 
-**Fakta kode (`payment-submissions.service.ts:406-430`):** `approveSubmission` split nominal → `rentPortion` + `depositPortion`, invoice bisa PARTIAL, kamar tetap RESERVED.
+**Fakta kode (`payment-submissions.service.ts` `approveSubmission`):** `approveSubmission` split nominal → `rentPortion` + `depositPortion`, invoice bisa PARTIAL, kamar tetap RESERVED.
 
 **Dampak:** Kode izinkan skenario yang tidak dikehendaki — tenant bayar sebagian, admin approve, invoice PARTIAL.
 
@@ -448,7 +450,7 @@ readiness:75 → preview:80 → post:93 (manual) / autoCloseMonthly:122 → reop
 
 **Aturan owner:** *"Room yang masih di masa kontrak, tidak dapat dibatalkan sepihak oleh admin."*
 
-**Fakta kode (`invoice-payments.service.ts:237` `remove`):** Tidak ada guard apakah room sudah OCCUPIED.
+**Fakta kode (`invoice-payments.service.ts` `remove`):** saat wawancara (2026-06-12) tidak ada guard apakah room sudah OCCUPIED. **Status 2026-10-10 — guard itu sudah ada:** `remove` memanggil `assertStayNotOccupiedForPaymentMutationTx`, yang menolak bila stay promoted atau `room.status == OCCUPIED`.
 
 **Perbaikan:** Tambah guard: tolak `remove` jika stay sudah promoted (`initialMetersPromotedAt != NULL`) atau room.status == OCCUPIED.
 

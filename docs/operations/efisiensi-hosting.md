@@ -40,13 +40,13 @@ Audit statis diterima; tidak diulang tanpa perubahan relevan. **§9.1–§9.3 ki
 |---|---|---|
 | Overhead cPanel/LVE | ~50 MB | ESTIMASI (belum terukur) |
 | PostgreSQL satu akun | ~80–150 MB | ESTIMASI (belum terukur) |
-| Nest + Express + 46 modul | ~80–130 MB RSS boot (heap cap 192 = target M08, **bukan fakta runtime**) | ESTIMASI (belum terukur). `start:prod` memuat `--max-old-space-size=192`, tetapi Passenger menjalankan `dist/main.js` langsung (M08:303, M08:593, make-deploy:565) — cap hanya berlaku bila `NODE_OPTIONS` diset di env cPanel |
+| Nest + Express + 46 modul | ~80–130 MB RSS boot (heap cap 192 = target M08, **bukan fakta runtime**) | ESTIMASI (belum terukur). `start:prod` memuat `--max-old-space-size=192`, tetapi Passenger menjalankan `dist/main.js` langsung (deploy-go-live "Resource host"/"Estimasi runtime", make-deploy `start:prod`) — cap hanya berlaku bila `NODE_OPTIONS` diset di env cPanel |
 | Prisma generated WASM | **27,2 MB disk / 31 file** (`backend/src/generated`) | FAKTA terverifikasi |
 | Spike cron / dashboard | +30–80 MB sebentar | ESTIMASI (belum terukur) |
 
 **Fakta M08 (statistik owner 2026-07-04):** RAM LVE **512 MB** (139 MB terpakai situs lama) · inode 46,7rb/75rb (62%) · entry process 5/15 · Postgres OK.
 
-> **Catatan penting (audit deploy 6 Sep 2026):** `--max-old-space-size=192` membatasi *old-space* V8 — **RSS total proses bisa melebihi 192 MB**, dan angka ini **bukan fakta runtime host** (Passenger mengabaikan `start:prod`; M08:303). Angka idle 120–180 / puncak 250–300 MB **MEMANG ada di M08:303** sebagai **estimasi lama** ("Estimasi runtime: idle 120-180MB, puncak ~250-300MB") — bukan pengukuran. Jangan menjumlahkan estimasi "cPanel 50 MB" + "Postgres 80–150 MB" menjadi anggaran pasti; PMEM LVE akun adalah sumber keputusan (P2). Semua harus diukur (EF-00/EF-01).
+> **Catatan penting (audit deploy 6 Sep 2026):** `--max-old-space-size=192` membatasi *old-space* V8 — **RSS total proses bisa melebihi 192 MB**, dan angka ini **bukan fakta runtime host** (Passenger mengabaikan `start:prod`; `deploy-go-live.md` "Resource host"). Angka idle 120–180 / puncak 250–300 MB **MEMANG ada di `deploy-go-live.md`** sebagai **estimasi lama** ("Estimasi runtime: idle 120-180MB, puncak ~250-300MB") — bukan pengukuran. Jangan menjumlahkan estimasi "cPanel 50 MB" + "Postgres 80–150 MB" menjadi anggaran pasti; PMEM LVE akun adalah sumber keputusan (P2). Semua harus diukur (EF-00/EF-01).
 
 ### 2.1 EF-00 — baseline yang dapat diverifikasi dari workspace
 
@@ -76,22 +76,22 @@ Tabel berikut mempertahankan snapshot inventaris 7 Sep, bukan fingerprint workst
 |-------|-------|
 | 46 modul NestJS dalam 1 proses | Tepat 46 folder `backend/src/modules/`; semua di-import `app.module.ts` (imports baris 68–124) |
 | Prisma 7 + WASM (27 MB disk) | `@prisma/client`, `prisma`, `@prisma/adapter-pg` `^7.8.0` (`backend/package.json`); `binaryTargets` sudah dihapus (M13); `backend/src/generated` = 27,2 MB |
-| Nest menyajikan SPA (`client/` = copy `frontend/dist`) | `main.ts:204–228` (`useStaticAssets` + SPA fallback); `scripts/golive-combined.mjs:45–48`; `scripts/make-deploy.mjs:459` |
-| Node yang meng-gzip | `main.ts:91` `app.use(compression())` |
-| `rawBody: true` global | `main.ts:25` |
-| Auto-Ops = kandidat beban puncak; belum diukur | `auto-ops.service.ts:172–218` `runAllUnlocked()`: 19+ sweep berurutan — booking expiry, renewal priority/settlement, DP forfeit, overstay, recurring expense, depresiasi, rent recognition, rekonsiliasi jurnal, auto-close, prune notifikasi, dispatch pengumuman, push dispatch |
-| IoT timer default OFF | `IOT_TUYA_POLL_ENABLED` default `false` (`app-config.service.ts:191`, `iot-polling.service.ts:31`); kWh Tuya dibaca **on-demand tanpa cron** di mode shared hosting (M08 §IoT) |
-| AI DeepSeek manual-only, default OFF | `aiFeaturesEnabled = (process.env.AI_FEATURES_ENABLED === 'true')` — default OFF (`app-config.service.ts:201`); `aiManualOnly` default on; tombol AI OWNER/ADMIN saja |
-| Web-push nonaktif tanpa VAPID | M08 F4-2: tanpa VAPID → push otomatis NONAKTIF; notif in-app tetap jalan |
+| Nest menyajikan SPA (`client/` = copy `frontend/dist`) | `main.ts` (`useStaticAssets` + SPA fallback `sendFile`); `scripts/golive-combined.mjs` (`cpSync('frontend/dist', 'backend/client')`); `scripts/make-deploy.mjs` (`cpSync('frontend/dist', OUT + '/client')`) |
+| Node yang meng-gzip | `main.ts` (`app.use(compression())`) |
+| `rawBody: true` global | `main.ts` (`NestFactory.create(..., { rawBody: true })`) |
+| Auto-Ops = kandidat beban puncak; belum diukur | `auto-ops.service.ts` (`runAllUnlocked()` — 19+ sweep berurutan lewat `bookingSweep`/`staySweep`/`renewalSweep`/`accountingSweep`/`maintenanceSweep`/`announcementSweep`): booking expiry, renewal priority/settlement, DP forfeit, overstay, recurring expense, depresiasi, rent recognition, rekonsiliasi jurnal, auto-close, prune notifikasi, dispatch pengumuman, push dispatch |
+| IoT timer default OFF | `IOT_TUYA_POLL_ENABLED` default `false` (`app-config.service.ts` `iotTuyaPollEnabled`, `iot-polling.service.ts` `intervalPollingEnabled()`); kWh Tuya dibaca **on-demand tanpa cron** di mode shared hosting (`go-live-cpanel.md` "IoT kWh meter TIDAK memakai cron"; `produksi.md` "Jangan memasang cron IoT Tuya") |
+| AI DeepSeek manual-only, default OFF | `aiFeaturesEnabled = (process.env.AI_FEATURES_ENABLED === 'true')` — default OFF (`app-config.service.ts` `aiFeaturesEnabled`); `aiManualOnly` default on; tombol AI OWNER/ADMIN saja |
+| Web-push nonaktif tanpa VAPID | `deploy-go-live.md` F4-2: tanpa VAPID → push otomatis NONAKTIF; notif in-app tetap jalan |
 | Tesseract/Recharts/FullCalendar = beban browser | `frontend/package.json`: `tesseract.js` ^7, `recharts` ^3.8, `@fullcalendar/*` ^6 — beban JS bundle & browser, bukan heap server (kecuali di-gzip oleh Node saat serve SPA) |
-| Heap cap 192 MB | `backend/package.json` `start:prod`; M08:314 |
-| Pool pg `max:3` | `prisma.service.ts:18–22` (`new Pool({ max: 3, Client: SerializedPgClient })`) |
+| Heap cap 192 MB | `backend/package.json` `start:prod`; `deploy-go-live.md` "Resource host" (flag tidak dipakai Passenger) |
+| Pool pg `max:3` | `prisma.service.ts` (konstruktor: `new Pool({ max: 3, Client: SerializedPgClient })`) |
 ### 3.2 Koreksi final — 4 klaim audit awal salah/terlalu keras
 
-1. **Idle 120–180 / puncak 250–300 MB** — **ADA di M08:303** sebagai *"Estimasi runtime: idle 120-180MB, puncak ~250-300MB"*, tetapi itu **estimasi lama runbook, bukan pengukuran**. Koreksi M19 sebelumnya yang menyebut "tidak ada di M08" adalah **salah** — audit deploy 6 Sep 2026 membantahnya. Sisa fakta M08 benar: LVE 512 MB, situs lama 139 MB, inode 62%, entry 5/15, heap cap 192 MB (hanya bila `NODE_OPTIONS` diset di cPanel).
+1. **Idle 120–180 / puncak 250–300 MB** — **ADA di `deploy-go-live.md`** sebagai *"Estimasi runtime: idle 120-180MB, puncak ~250-300MB"*, tetapi itu **estimasi lama runbook, bukan pengukuran**. Koreksi M19 sebelumnya yang menyebut "tidak ada di M08" adalah **salah** — audit deploy 6 Sep 2026 membantahnya. Sisa fakta M08 benar: LVE 512 MB, situs lama 139 MB, inode 62%, entry 5/15, heap cap 192 MB (hanya bila `NODE_OPTIONS` diset di cPanel).
 2. **`rawBody` bukan pengganda file KTP/bukti bayar.** Upload bukti bayar & KTP memakai Multer `FileInterceptor` + `diskStorage` (stream ke disk, multipart) — tidak lewat body-parser JSON, jadi `rawBody` tidak menggandakannya. `rawBody` hanya menahan body JSON/urlencoded di memori. Membatasi ke rute IoT tetap rapi, tetapi **bukan penghemat utama**.
-3. **Auto-Ops template deploy sudah `AUTO_OPS_ENABLED=false` + cron URL** (`make-deploy.mjs:490–493`). Risiko nyata = env kosong lalu **DB default `autoOpsEnabled=true`** (seed row id=1; komentar `auto-ops.service.ts:49–52`). Advisory lock `pg_try_advisory_lock` sudah ada.
-4. **Pool pg `max:3` sudah terimplementasi** (`prisma.service.ts:18–22`) — bukan pekerjaan baru.
+3. **Auto-Ops template deploy sudah `AUTO_OPS_ENABLED=false` + cron URL** (`scripts/make-deploy.mjs`, `.env.example` generator). Risiko nyata = env kosong lalu **DB default `autoOpsEnabled=true`** (seed row id=1; `auto-ops.service.ts` `loadEnabled()`). Advisory lock `pg_try_advisory_lock` sudah ada (`auto-ops.service.ts` `withAdvisoryLock`).
+4. **Pool pg `max:3` sudah terimplementasi** (`prisma.service.ts` konstruktor `new Pool({ max: 3 })`) — bukan pekerjaan baru.
 
 ### 3.3 Belum terukur (wajib diukur di LVE = EF-00)
 
@@ -101,17 +101,17 @@ RSS boot 80–130 MB · RSS Prisma 20–40 MB · spike cron +30–80 MB · overh
 
 | Prioritas | Temuan | Bukti terverifikasi | Status |
 |---|---|---|---|
-| P0 | **Dua instance PrismaService/pool** — `reports.module.ts:8` mendaftarkan provider lokal, padahal `prisma.module.ts:4–7` sudah `@Global` | `reports.module.ts:8`, `prisma.module.ts:4–7`; `max:3` per pool → kapasitas bisa 6 koneksi/proses | ✅ **FIX** (ACT 6 Sep 2026): provider lokal dihapus, pakai `PrismaModule` global |
-| P0 | **Heap 192 bukan fakta runtime** — Passenger menjalankan `dist/main.js` langsung; `start:prod` tidak dipakai | M08:303, M08:593, make-deploy:565–566, golive-combined:64 | 📌 dikoreksi di §2; verifikasi `NODE_OPTIONS` cPanel + `v8.getHeapStatistics()` |
+| P0 | **Dua instance PrismaService/pool** — `reports.module.ts` dulu mendaftarkan provider lokal, padahal `prisma.module.ts` sudah `@Global` | `reports.module.ts` (`imports: [PrismaModule]`), `prisma.module.ts` (`@Global`); `max:3` per pool → kapasitas bisa 6 koneksi/proses | ✅ **FIX** (ACT 6 Sep 2026): provider lokal dihapus, pakai `PrismaModule` global |
+| P0 | **Heap 192 bukan fakta runtime** — Passenger menjalankan `dist/main.js` langsung; `start:prod` tidak dipakai | `deploy-go-live.md` "Resource host", `scripts/make-deploy.mjs` `.env.example`, `scripts/golive-combined.mjs` `env` (`AUTO_OPS_ENABLED: 'true'`) | 📌 dikoreksi di §2; verifikasi `NODE_OPTIONS` cPanel + `v8.getHeapStatistics()` |
 | P0 | **Tidak ada .htaccess/Passenger/nginx aktif** (grep 0 file) | grep repo | 📌 EF-06 — perlu profil paket + routing webserver + acceptance host |
-| P1 | **Key AI/Push dapat dibaca dari DB lalu env; flag izin AI terpisah** — `settings.service.ts:19–25` muat DeepSeek/Tuya/VAPID dari DB saat boot; `push.service.ts:35–40` DB dulu, env fallback | `settings.service.ts:18–26`, `push.service.ts:20–41` | 📌 EF-07 — "kosongkan env" TIDAK memadai; ukur konfigurasi efektif |
-| P1 | **make-deploy README menawarkan cron IoT** yang M08:666 larang | make-deploy:578–580 vs M08:666 | ✅ EF-05 lokal: contoh cron IoT di generator dihapus; artefak host UNKNOWN |
-| P1 | **bundle-deploy duplikasi packaging** (make-deploy + npm ci lagi + arsip lagi) | bundle-deploy:65–67, 85–97, 128 | ✅ EF-05 lokal: wrapper delegasi tunggal; deployment UNKNOWN |
-| P1 | **Shutdown hooks belum terbukti** — `main.ts` hanya pasang `beforeExit`, bukan SIGTERM | `prisma.service.ts:74–78` (`process.on('beforeExit')`), `main.ts:88` | 📌 EF-08 — rehearsal stop/restart |
-| P2 | **Static streaming, bukan seluruh SPA di heap** — `main.ts:209–224` `useStaticAssets`+`sendFile` | `main.ts:209–224` | 📌 koreksi klaim "penghemat idle RAM terbesar" — potensi di request/gzip CPU/wakeups, bukan idle RSS |
-| P2 | **Estimasi cPanel 50 MB + Postgres 80–150 MB tidak boleh dijumlah** tanpa tahu proses mana masuk LVE akun | M08:303 | 📌 PMEM LVE = sumber keputusan |
+| P1 | **Key AI/Push dapat dibaca dari DB lalu env; flag izin AI terpisah** — `settings.service.ts` `onModuleInit()` muat DeepSeek/Tuya/VAPID dari DB saat boot; `push.service.ts` `resolveVapid()`/`setVapidConfig()` DB dulu, env fallback | `settings.service.ts` `onModuleInit()`, `push.service.ts` `resolveVapid()` | 📌 EF-07 — "kosongkan env" TIDAK memadai; ukur konfigurasi efektif |
+| P1 | **make-deploy README dulu menawarkan cron IoT** yang `go-live-cpanel.md` "Jangan pasang cron `iot/tuya/cron`" larang | riwayat EF-05 (contoh cron IoT di generator dihapus) vs `go-live-cpanel.md` §"IoT kWh meter TIDAK memakai cron" | ✅ EF-05 lokal: contoh cron IoT di generator dihapus; artefak host UNKNOWN |
+| P1 | **bundle-deploy dulu duplikasi packaging** (make-deploy + npm ci lagi + arsip lagi) | `scripts/bundle-deploy.mjs` (delegasi `spawnSync(npm, ['run', 'make-deploy'])`) | ✅ EF-05 lokal: wrapper delegasi tunggal; deployment UNKNOWN |
+| P1 | **Shutdown hooks belum terbukti** — `main.ts` hanya pasang `beforeExit`, bukan SIGTERM | `prisma.service.ts` `enableShutdownHooks()` (`process.on('beforeExit')`), `main.ts` `await prismaService.enableShutdownHooks(app)` | 📌 EF-08 — rehearsal stop/restart |
+| P2 | **Static streaming, bukan seluruh SPA di heap** — `main.ts` `app.useStaticAssets(frontendDir, ...)` + `res.sendFile(index.html)` | `main.ts` (blok "Combined single-server") | 📌 koreksi klaim "penghemat idle RAM terbesar" — potensi di request/gzip CPU/wakeups, bukan idle RSS |
+| P2 | **Estimasi cPanel 50 MB + Postgres 80–150 MB tidak boleh dijumlah** tanpa tahu proses mana masuk LVE akun | `deploy-go-live.md` "Resource host" | 📌 PMEM LVE = sumber keputusan |
 
-> **Catatan kontrak routing (dari audit):** kandidat static split = satu origin, Passenger root `/`, dokroot = artefak Vite publik, `/api/*` diteruskan path utuh ke Nest (`setGlobalPrefix('api')` main.ts:90). Kontrak: `/api/public/rooms` → JSON 200 · `/api/stays` tanpa auth → 401 · `/api/tidak-ada` → JSON 404 · `/login`, `/portal/stay` → HTML SPA · `/assets/hilang.js` → 404 · publik hanya `/uploads/room-images/*` + `/api/uploads/room-images/*` (main.ts:61–86) · bukti bayar tetap bearer `/api/payment-submissions/proofs/:filename` · cookie `Path=/api/auth` HttpOnly Secure (auth.controller) + `withCredentials:true` (client.ts:11) · SW tolak cache `/api/*` kecuali gambar kamar (sw.js:52–79).
+> **Catatan kontrak routing (dari audit):** kandidat static split = satu origin, Passenger root `/`, dokroot = artefak Vite publik, `/api/*` diteruskan path utuh ke Nest (`setGlobalPrefix('api')` `main.ts`). Kontrak: `/api/public/rooms` → JSON 200 · `/api/stays` tanpa auth → 401 · `/api/tidak-ada` → JSON 404 · `/login`, `/portal/stay` → HTML SPA · `/assets/hilang.js` → 404 · publik hanya `/uploads/room-images/*` + `/api/uploads/room-images/*` (blok `uploads/room-images` di `main.ts`) · bukti bayar tetap bearer `/api/payment-submissions/proofs/:filename` · cookie `Path=/api/auth` HttpOnly Secure (auth.controller) + `withCredentials:true` (`client.ts` `withCredentials: true`) · SW tolak cache `/api/*` kecuali gambar kamar (`sw.js` `publicRoomImage`).
 
 ## 4. Jalur Arsitektur
 
@@ -133,7 +133,7 @@ Multi-proses belum terbukti layak pada hosting ini; tidak bisa dinyatakan pasti 
 | 3 | **Baseline workload terkontrol (EF-02)** | Cold start, idle hangat, aset/static burst, dashboard/report, upload legal maks, AutoOps bersamaan aktivitas normal (tanpa menambah cron IoT), stop/restart. Load generator dari klien luar host. Ambil peak proses + peak PMEM akun. |
 | 4 | **Hilangkan Prisma provider ganda (EF-03)** | ✅ **Implementasi lokal selesai** — `reports.module.ts` memakai `PrismaModule` global. Registrasi ganda dihapus; jumlah pool/koneksi host belum diukur. |
 | 5 | **Profil paket static (EF-04)** | ✅ **Selesai lokal 25 Sep:** `combined` + `static`, manifest profil, required archive per profil, dan eksklusi `.env`/`uploads`; routing host tetap EF-06. |
-| 6 | **Sederhanakan packaging wrapper + README (EF-05)** | Satu jalur install/arsip/verifikasi; buang README lama yang dioverride (make-deploy:509–553 → 556–589); hapus contoh cron IoT dari generator (bertentangan M08:666). |
+| 6 | **Sederhanakan packaging wrapper + README (EF-05)** | Satu jalur install/arsip/verifikasi; buang README lama yang dioverride (generator `.env.example`/README-DEPLOY di `make-deploy.mjs`); hapus contoh cron IoT dari generator (bertentangan `go-live-cpanel.md`). |
 | 7 | **Kontrak routing + canary host (EF-06)** | Satu origin, Passenger root `/`, dokroot = artefak Vite publik, `/api/*` path utuh; uji matriks §3.4; rollback profil combined; tanpa perubahan DB. |
 | 8 | **Verifikasi effective env/DB scheduler (EF-07)** | `AUTO_OPS_ENABLED=false` + `IOT_TUYA_POLL_ENABLED=false`; JANGAN hapus kunci DB (DeepSeek/Tuya/VAPID dibaca dari DB — `settings.service.ts`, `push.service.ts`); uji false menang atas DB true; cron URL tetap; inbox/pengumuman tidak mati. |
 | 9 | **Rehearsal lifecycle & peak (EF-08)** | Stop/start tidak meninggalkan pool/timer; SIGTERM (sekarang hanya `beforeExit`); job idempoten di UAT; sesuaikan hooks hanya bila bukti menunjukkan perlu; jangan ubah jalur uang bersamaan. |
@@ -150,7 +150,7 @@ Multi-proses belum terbukti layak pada hosting ini; tidak bisa dinyatakan pasti 
 | **EF-02** | 🔴 P0 | Baseline workload terkontrol: cold start, idle hangat, aset/static burst, dashboard/report, upload legal maks, AutoOps bersamaan aktivitas normal (tanpa menambah cron IoT), stop/restart; load generator dari klien luar host; catat peak proses + peak PMEM akun | Data terekam; estimator vs bukti nyata diberi label; panjang periode sesuai |
 | **EF-03** | 🔴 P0 | **Implementasi lokal selesai:** provider duplikat di `reports.module.ts` dihapus, pakai `PrismaModule` global | Audit statis dan typecheck dilaporkan lulus; jumlah instance/pool host UNKNOWN |
 | **EF-04** | 🟢 P2 | **DONE lokal 25 Sep:** profil `combined` untuk application root dan `static` untuk document root Vite; manifest profil + verifikasi batas private/public | Kedua arsip lulus verifikasi; deployment/runtime host UNKNOWN |
-| **EF-05** | 🟢 P2 | **Implementasi lokal selesai; deployment UNKNOWN.** Sederhanakan packaging wrapper + README: satu jalur install/arsip/verifikasi; buang README lama yang dioverride (make-deploy:509–553 → 556–589); hapus contoh cron IoT (M08:666) | `bundle-deploy` delegasi tunggal; README hasil generate konsisten M08 |
+| **EF-05** | 🟢 P2 | **Implementasi lokal selesai; deployment UNKNOWN.** Sederhanakan packaging wrapper + README: satu jalur install/arsip/verifikasi; buang README lama yang dioverride (generator `.env.example`/README-DEPLOY di `make-deploy.mjs`); hapus contoh cron IoT (`go-live-cpanel.md` "Jangan pasang cron `iot/tuya/cron`") | `bundle-deploy` delegasi tunggal; README hasil generate konsisten M08 |
 | **EF-06** | 🟢 P2 | Kontrak routing + canary host: template webserver sesuai kemampuan host terkonfirmasi; uji matriks §3.4 (JSON 200/401/404, HTML SPA, 404 asset, image publik, bukti bayar bearer, cookie auth, SW) | Matriks lulus di canary; rollback profil combined; tanpa perubahan DB |
 | **EF-07** | 🟡 P1 | Verifikasi effective env/DB: `AUTO_OPS_ENABLED=false` + `IOT_TUYA_POLL_ENABLED=false`; JANGAN hapus kunci opsional DB (DeepSeek/Tuya/VAPID dari DB — settings.service.ts, push.service.ts); uji false menang atas DB true; cron URL tetap jalan; inbox/pengumuman tidak mati | Hasil uji tercatat; tidak ada fitur hilang tanpa alasan terukur |
 | **EF-08** | 🟡 P2 | Rehearsal lifecycle & peak: stop/start tidak meninggalkan pool/timer; SIGTERM (sekarang hanya `beforeExit`); job idempoten di UAT; sesuaikan hooks hanya bila bukti menunjukkan perlu | Rehearsal tercatat; shutdown/restart terbukti aman |

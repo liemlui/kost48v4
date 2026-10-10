@@ -431,6 +431,8 @@ Saat tenant **perpanjang**, tawarkan add-on (opsional, tidak memaksa):
 
 **Cakupan:** 14 file CSS (~6000 baris), 100+ komponen React, 26 halaman, routing, auth, form UX, PWA, aksesibilitas.
 
+> **Status 2026-10-10 — bagian ini potret historis, bukan daftar cacat hari ini.** Diverifikasi ulang ke kode: **C-1, H-1, M-1, M-2, M-3, M-4, L-1, L-2 sudah DITUTUP** (bukti: `App.tsx` `Route path="*"` + `NotFoundPage.tsx` · `ToastProvider.tsx` dipasang di `main.tsx` dan dipakai `SimpleCrudPage.tsx` · `PasswordInput.tsx` memakai SVG `EyeOpenIcon` tanpa `tabIndex={-1}` · `AppLayout.tsx` `.skip-to-content` + `useConfirm` “Keluar” · `00-tokens.css` `--text-muted: #475569` · `GlobalSearch.tsx` `canSearchInvoices` · `SkeletonLoader.tsx` `StatCardSkeleton`) · **L-3** aturannya sudah tidak ada di kode (`overscroll-behavior-y` tidak ditemukan di `frontend/src`) · **M-5** masih berlaku (`SearchableSelect.tsx` `menuPortalTarget`). Teks temuan di bawah **dibiarkan apa adanya** sebagai catatan tanggal.
+
 ### Ringkasan Temuan
 
 | Severity | Jumlah | Area |
@@ -459,7 +461,7 @@ Saat tenant **perpanjang**, tawarkan add-on (opsional, tidak memaksa):
 
 Setelah create/update/delete, feedback sukses hanya berupa Alert inline di dalam modal atau hilang saat modal ditutup. `SimpleCrudPage` menutup modal setelah submit tanpa indikasi sukses apapun. Tidak ada pemanggilan `Toast` dari react-bootstrap di semua file TSX.
 
-**Evidence:** `search_content "toast|Toast|useToast"` di `frontend/src` — hanya style CSS toast (`.toast-container` di `02-layout.css:716`) tapi tidak ada komponen React yang menggunakannya.
+**Evidence:** `search_content "toast|Toast|useToast"` di `frontend/src` — hanya style CSS toast (aturan `.toast-container` di `frontend/src/styles/02-layout.css`) tapi tidak ada komponen React yang menggunakannya.
 
 **Rekomendasi:** Buat `ToastProvider` + `useToast()` hook, tampilkan toast sukses/error di pojok kanan bawah setelah setiap mutasi. Bisa pakai react-bootstrap `Toast` atau buat custom ringan.
 
@@ -471,7 +473,7 @@ Setelah create/update/delete, feedback sukses hanya berupa Alert inline di dalam
 
 `PasswordInput.tsx` menggunakan `🙈` / `👁` sebagai toggle show/hide password. Emoji dirender berbeda di tiap OS. Tombol toggle memiliki `tabIndex={-1}` (line 23) sehingga tidak bisa dijangkau keyboard.
 
-**File:** `frontend/src/components/common/PasswordInput.tsx:23-28`
+**File:** `frontend/src/components/common/PasswordInput.tsx` — tombol toggle show/hide
 
 **Rekomendasi:** Ganti emoji dengan SVG icon (mata terbuka/tertutup), hapus `tabIndex={-1}`, tambahkan `aria-label` dinamis ("Tampilkan password" / "Sembunyikan password").
 
@@ -485,7 +487,7 @@ Tidak ada `<a href="#main-content" class="skip-link">` di awal halaman. User key
 
 `--text-muted: #64748b` pada background putih memiliki contrast ratio ~4.55:1 — borderline pass untuk normal text (≥18px) tapi **gagal WCAG AA untuk small text** (<18px). Banyak `.small.text-muted` di aplikasi (label form, caption tabel, hint).
 
-**File:** `frontend/src/styles/01-base.css:23` (custom property), digunakan di 200+ tempat.
+**File:** `frontend/src/styles/00-tokens.css` — token `--text-muted` di blok `:root`, digunakan di 200+ tempat.
 
 **Rekomendasi:** Ubah `--text-muted` ke `#475569` (ratio 5.5:1, aman small text) atau `#334155` (ratio 7:1, AAA).
 
@@ -501,7 +503,7 @@ Tombol "Logout" di `AppLayout` untuk Admin/Owner dan Staff langsung memanggil `l
 
 `SearchableSelect` menggunakan `menuPortalTarget={document.body}` yang me-render dropdown di luar DOM tree modal. Focus tidak ter-trap di dalam modal saat dropdown react-select terbuka — user bisa Tab ke elemen di belakang modal.
 
-**File:** `frontend/src/components/common/SearchableSelect.tsx:58`
+**File:** `frontend/src/components/common/SearchableSelect.tsx` — prop `menuPortalTarget` pada `AsyncSelect`
 
 **Rekomendasi:** Gunakan `menuPortalTarget` yang mengarah ke container modal, atau tambah event handler untuk membatasi Tab.
 
@@ -513,7 +515,7 @@ Tombol "Logout" di `AppLayout` untuk Admin/Owner dan Staff langsung memanggil `l
 
 `GlobalSearch` mengembalikan `null` saat `role === 'TENANT'`. Di portal tenant dengan banyak invoice dan tiket, tenant harus scroll panjang untuk mencari invoice lama.
 
-**File:** `frontend/src/components/layout/GlobalSearch.tsx:88`
+**File:** `frontend/src/components/layout/GlobalSearch.tsx` — gerbang peran `canSearchTenants` / `canSearchRooms` / `canSearchInvoices`
 
 **Rekomendasi:** Buka search terbatas untuk tenant (hanya invoice dan tiket miliknya, bukan data global).
 
@@ -521,7 +523,7 @@ Tombol "Logout" di `AppLayout` untuk Admin/Owner dan Staff langsung memanggil `l
 
 `StatCardSkeleton` menggunakan width fixed (96px, 120px, 72%) yang menghasilkan layout shift saat konten riil muncul karena dimensi tidak cocok.
 
-**File:** `frontend/src/components/common/SkeletonLoader.tsx:29-40`
+**File:** `frontend/src/components/common/SkeletonLoader.tsx` — `StatCardSkeleton`
 
 **Rekomendasi:** Gunakan CSS grid yang sama dengan stat card asli agar skeleton dan konten riil memiliki dimensi identik.
 
@@ -529,7 +531,7 @@ Tombol "Logout" di `AppLayout` untuk Admin/Owner dan Staff langsung memanggil `l
 
 `01-base.css` line 68 menetapkan `overscroll-behavior-y: none` pada body. Mencegah pull-to-refresh di mobile browser — gesture alami pengguna mobile.
 
-**File:** `frontend/src/styles/01-base.css:68`
+**File:** UNKNOWN — `overscroll-behavior-y` tidak ada lagi di kode hari ini; yang tersisa hanya `overscroll-behavior: none` pada `body.offcanvas-open` (`frontend/src/styles/02-layout.css`)
 
 **Rekomendasi:** Hapus atau batasi hanya pada elemen yang memang tidak boleh overscroll (mis. chart/map containers).
 
@@ -537,7 +539,7 @@ Tombol "Logout" di `AppLayout` untuk Admin/Owner dan Staff langsung memanggil `l
 
 LoginPage placeholder "Contoh: nama@email.com atau 0812..." — tapi error message generik. User tidak tahu apakah format input yang salah atau password yang salah.
 
-**File:** `frontend/src/pages/auth/LoginPage.tsx:57`
+**File:** `frontend/src/pages/auth/LoginPage.tsx` — `identifierPlaceholder` ("Contoh: nama@email.com atau 0812...")
 
 **Rekomendasi:** Tambah validasi format ringan: jika input mengandung `@`, perlakukan sebagai email; jika diawali `0` dan numerik, perlakukan sebagai HP. Beri pesan error spesifik per format.
 
@@ -597,7 +599,7 @@ LoginPage placeholder "Contoh: nama@email.com atau 0812..." — tapi error messa
 
 | ID | Lokasi | Deskripsi | Severity |
 |----|--------|-----------|----------|
-| **PM-01** | `peer-report.service.ts:48,73` | 2 `.catch(() => undefined)` — notifikasi admin & reportee gagal tanpa log. Dampak rendah (notifikasi non-kritis). | 🟢 LOW |
+| **PM-01** | `peer-report.service.ts` — `create` / `moderate` | 2 `.catch(() => undefined)` — notifikasi admin & reportee gagal tanpa log. Dampak rendah (notifikasi non-kritis). | 🟢 LOW |
 | **PM-04** | `public-availability.controller.ts` | Endpoint `PUT /public/availability/setup` di-protect dengan `X-Availability-Pin` header + `timingSafeEqual`, bukan JWT. Aman secara kriptografi, tapi tidak terintegrasi dengan sistem auth/role. PIN bocor = attacker bisa ubah ketersediaan publik. | 🟡 MEDIUM |
 
 ### Verifikasi auth guards — ✅ SEMUA BENAR
@@ -615,8 +617,8 @@ LoginPage placeholder "Contoh: nama@email.com atau 0812..." — tapi error messa
 
 ### Data leak prevention — ✅ AKTIF
 
-- `marketing-public-rooms.service.ts:31` — `notes: false` di `PUBLIC_ROOM_SELECT` — mencegah ekspos catatan internal kamar ✅
-- `marketing-public-rooms.service.ts:40` — `publicAvailability` hanya expose `status`, bukan metadata internal ✅
+- `marketing-public-rooms.service.ts` — `notes: false` di `PUBLIC_ROOM_SELECT` — mencegah ekspos catatan internal kamar ✅
+- `marketing-public-rooms.service.ts` — `publicAvailability` hanya expose `status`, bukan metadata internal ✅
 - FAQ publik hanya mengembalikan `isPublished: true` + `sortOrder` — tidak ada field internal ✅
 - Surveys: semua endpoint butuh auth, tidak bisa di-spam publik ✅
 
@@ -636,8 +638,8 @@ LoginPage placeholder "Contoh: nama@email.com atau 0812..." — tapi error messa
 
 | Lokasi | Pola | Verifikasi |
 |---|---|---|
-| `deepseek.client.ts:124` | `res.text().catch(() => '')` | Fallback empty string untuk AI client — acceptable ✅ |
-| `market-analysis.service.ts:449` | `.catch(() => { throw new NotFoundException(...) })` | BUKAN swallow — re-throw sebagai HTTP exception — ✅ |
+| `deepseek.client.ts` | `res.text().catch(() => '')` | Fallback empty string untuk AI client — acceptable ✅ |
+| `market-analysis.service.ts` — `remove()` | `.catch(() => { throw new NotFoundException(...) })` | BUKAN swallow — re-throw sebagai HTTP exception — ✅ |
 
 ### Risk rating
 
@@ -663,18 +665,18 @@ LoginPage placeholder "Contoh: nama@email.com atau 0812..." — tapi error messa
 
 | Lokasi | Pola | Status |
 |---|---|---|
-| `peer-report.service.ts:48,73` | `.catch(() => undefined)` notifikasi | PM-01 (LOW) — sudah tercakup M18 |
-| `deepseek.client.ts:124` | `.catch(() => '')` fallback AI | Acceptable ✅ |
-| `market-analysis.service.ts:449` | `.catch(() => throw)` re-throw | Acceptable ✅ |
+| `peer-report.service.ts` — `create` / `moderate` | `.catch(() => undefined)` notifikasi | PM-01 (LOW) — sudah tercakup M18 |
+| `deepseek.client.ts` | `.catch(() => '')` fallback AI | Acceptable ✅ |
+| `market-analysis.service.ts` — `remove()` | `.catch(() => throw)` re-throw | Acceptable ✅ |
 
 ### Positive patterns — 4 guard kuat
 
 | # | Pattern | Lokasi | Dampak |
 |---|---------|--------|--------|
-| 1 | **FOR UPDATE lock reward** | `redemption.service.ts:69,111` | `SELECT ... FOR UPDATE` pada `LoyaltyReward` dengan `stockQty` — mencegah overselling reward (dua tenant redeem bersamaan) ✅ |
+| 1 | **FOR UPDATE lock reward** | `redemption.service.ts` — `requestRedemption` / `decideRedemption` | `SELECT ... FOR UPDATE` pada `LoyaltyReward` dengan `stockQty` — mencegah overselling reward (dua tenant redeem bersamaan) ✅ |
 | 2 | **OWNER-only segregation** | `owner-ai.controller.ts` | Delete/config/dangerous = OWNER only. Read/generate = OWNER/ADMIN. Sesuai M09 spec ✅ |
 | 3 | **AI cache prune+cap** | `ai-cache.service.ts` | Cache AI punya TTL, max entries, dan prune — mencegah memory leak ✅ |
-| 4 | **Redemption $transaction** | `redemption.service.ts:66,104` | Dua `$transaction` terpisah — redeem + fulfill, masing-masing dengan lock ✅ |
+| 4 | **Redemption $transaction** | `redemption.service.ts` — `requestRedemption` / `decideRedemption` | Dua `$transaction` terpisah — redeem + fulfill, masing-masing dengan lock ✅ |
 
 ### Auth guard matrix — OWNER/ADMIN only
 

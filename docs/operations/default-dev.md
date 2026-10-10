@@ -1,7 +1,7 @@
 # Default & Seed DEV
 
 > Migrasi dari docs/M08_DEPLOY_GO_LIVE.md + docs/M11_DEFAULT_DATA.md (M11 §1a, M11 §1b, M08 Bagian 3, M11 §9) pada f8f9a589 (DOC-GOV-20260922 Tahap 3); §1b dan catatan batch B9 ditambahkan 23 September 2026.
-> Sumber asli (`docs/operations/data-master.md`) sudah dihapus di Fase 3 (23 Sep 2026); perintah seed untuk lingkungan PRODUKSI ada di [Produksi & Operasional Harian](produksi.md).
+> Sumber asli (`docs/operations/data-master.md`) masih ada dan tetap ter-tracked — **koreksi 2026-10-10**: klaim lama “sudah dihapus di Fase 3 (23 Sep 2026)” tidak cocok dengan riwayat git (`git log --diff-filter=D` kosong); perintah seed untuk lingkungan PRODUKSI ada di [Produksi & Operasional Harian](produksi.md).
 > **Batas lingkungan:** seluruh isi DEV di file ini memakai basis data pengembangan **port 5433**; kredensial DEV tidak pernah berlaku untuk UAT/produksi.
 > Sumber asli dipertahankan sebagai pointer.
 > **Status:** aktif — dokumentasi DEV; nilai kredensial DEV terdaftar **di sini** (satu rumah). **DEV only**, jangan dipakai di produksi.
@@ -10,7 +10,7 @@
 
 | Role  | Email                  | Password    | Keterangan                        |
 |-------|------------------------|-------------|-----------------------------------|
-| OWNER | `owner@kost48.com`     | `Owner#2026`| Dibuat via `seed-dev-reset.js` (DEV) / `golive-setup.js` (produksi, password beda via env) |
+| OWNER | `owner@kost48.com`     | `Owner#2026`| Dibuat via `seed-dev-reset.js` (DEV) / `seed-owner.js` (produksi, kredensial lewat env `OWNER_EMAIL`/`OWNER_PASSWORD`/`OWNER_FULLNAME` — `npm run seed:owner`) |
 | ADMIN | `admin@kost48.com`     | `admin123`  | **DEV only** (seed-dev); produksi buat manual |
 | STAFF | `staff@kost48.com`     | `staff123`  | **DEV only** (seed-dev); produksi buat manual |
 
@@ -181,7 +181,7 @@ Jebakan **produksi** punya rumah sendiri di [produksi §10](produksi.md) — **j
 | Angka "% segar" tinggi padahal belum ada manusia yang memeriksa isinya | batch dokumentasi menyentuh banyak dokumen sekaligus, sehingga `t_doc` nyaris seragam dan angka itu mengukur **urutan commit** | baca blok batas pada keluaran `node scripts/ukur-kesegaran-docs.mjs`; kartu ini bukan bukti isi benar |
 | **Kartu kekuatan tiba-tiba GAGAL di pemeriksaan M** padahal batch Anda hanya menambah beberapa baris | ratchet baris dokumen aktif: total baris tidak boleh naik dari `scripts/docs-lines.baseline.json` | itu **bukan** kegagalan palsu — putuskan sadar: pindahkan isi ke arsip, atau naikkan `total_baris` di berkas baseline **beserta `alasan`** pada commit yang sama (angka baseline = data, bukan dokumen, jadi aturan "angka volatil" tidak dilanggar) |
 | Self-test gate melaporkan "terdeteksi=false" pada aturan yang jelas-jelas Anda langgar | teks mutasi uji sendiri memuat frasa yang sedang dicari aturan itu (mis. menulis "tanpa blok baca" di dalam uji R4) | tulis mutasi **tanpa** frasa yang dicari; jalankan `node scripts/check-docs.selftest.mjs` — self-test wajib LULUS sebelum gate dianggap dipercaya |
-| Transformasi teks massal atas dokumen bernilai tinggi **merusak tanpa terlihat** | **Empat kerusakan nyata** pada 2026-10-09 (konversi rujukan nomor baris), semuanya ketahuan **hanya karena ada pengukuran sebelum/sesudah**: (1) `\s{2,}` di JS memuat **newline** → `docs/domain/flow.md` 508→305 baris (baris tabel tergabung); (2) rentang memakai **en dash** (U+2013) → `prisma.service.ts:18–22` menyisakan `prisma.service.ts–22`; (3) aturan `\| \|`→`\|` menghapus **kolom kosong tabel**; (4) pola longgar `:[ \t]*\d+` + aturan pagar kode menghapus **nama simbol di dalam backtick** dan 3 pagar kode JSON | **Prosedur wajib bila transformasi menyentuh ≥10 berkas:** (a) `git archive HEAD` sebagai byte pembanding; (b) penjaga struktur di skrip — jumlah **baris** dan **baris tabel** harus identik, skrip **menolak menulis** bila berbeda; (c) uji **dua arah** — setiap baris baru harus = baris lama dikurangi pola yang dinyatakan, dan setiap teks yang dibuang harus cocok pola itu (**0 pengecualian**); (d) uji terpisah untuk yang **tidak boleh** hilang: jam (`12:00`), pagar kode, backtick kosong, kolom tabel kosong; (e) **jangan** pakai `\s` untuk merapikan teks — pakai `[ \t]` saja; (f) batasi ke bentuk yang benar-benar terbukti, sisanya **dilaporkan**, bukan ditebak. Kalau satu pun tidak bisa dipenuhi: **jangan jalankan** — sisa rujukan nomor baris jauh lebih murah daripada dokumen aturan yang rusak senyap |
+| Transformasi teks massal atas dokumen bernilai tinggi **merusak tanpa terlihat** | **Empat kerusakan nyata** pada 2026-10-09 (konversi rujukan nomor baris), semuanya ketahuan **hanya karena ada pengukuran sebelum/sesudah**: (1) `\s{2,}` di JS memuat **newline** → `docs/domain/flow.md` 508→305 baris (baris tabel tergabung); (2) rentang memakai **en dash** (U+2013) → rujukan baris 18–22 pada `prisma.service.ts` (`PrismaService`, pool `max: 3`) menyisakan sisa menggantung `prisma.service.ts–22`; (3) aturan `\| \|`→`\|` menghapus **kolom kosong tabel**; (4) pola longgar `:[ \t]*\d+` + aturan pagar kode menghapus **nama simbol di dalam backtick** dan 3 pagar kode JSON | **Prosedur wajib bila transformasi menyentuh ≥10 berkas:** (a) `git archive HEAD` sebagai byte pembanding; (b) penjaga struktur di skrip — jumlah **baris** dan **baris tabel** harus identik, skrip **menolak menulis** bila berbeda; (c) uji **dua arah** — setiap baris baru harus = baris lama dikurangi pola yang dinyatakan, dan setiap teks yang dibuang harus cocok pola itu (**0 pengecualian**); (d) uji terpisah untuk yang **tidak boleh** hilang: jam (`12:00`), pagar kode, backtick kosong, kolom tabel kosong; (e) **jangan** pakai `\s` untuk merapikan teks — pakai `[ \t]` saja; (f) batasi ke bentuk yang benar-benar terbukti, sisanya **dilaporkan**, bukan ditebak. Kalau satu pun tidak bisa dipenuhi: **jangan jalankan** — sisa rujukan nomor baris jauh lebih murah daripada dokumen aturan yang rusak senyap |
 
 ---
 
@@ -203,13 +203,33 @@ Jebakan **produksi** punya rumah sendiri di [produksi §10](produksi.md) — **j
 - L: test kedua sisi kontrak; build hanya entry/package terkait yang tersedia dan diizinkan.
 - Test kosong, artefak basi, atau hasil tidak lengkap **bukan** PASS. Typecheck ≠ build; build ≠ UAT; artefak ≠ deployment; test lokal ≠ dampak runtime.
 - Baca lifecycle script sebelum memanggilnya: `pretest:unit` backend menjalankan `npm run build`.
-- **KNOWN EXCEPTION — gate uang (opsi C, TUNDA)**: task yang menyentuh uang tetap wajib `npm run test:unit` backend (memicu full build lewat `pretest:unit`). Jangan menghapus/mengubah hook atau menggantinya dengan subset sepihak. Bila task uang melarang full test/build, catat konflik dan minta keputusan owner.
+- **Gate uang — dilonggarkan sebagian (keputusan owner 10 Okt 2026):** `npm run test:unit` backend **wajib** (memicu full build lewat `pretest:unit`) bila perubahan menyentuh **rumus, jurnal/posting, skema DB, atau aturan uang**; perubahan **tampilan/label/copy** di halaman yang menyentuh uang cukup **verifikasi terkecil** (render/diff/inspeksi), tanpa full build. Jangan menghapus atau mengubah hook. Bila ragu masuk kategori mana, **perlakukan sebagai rumus**.
 - Exception uang **tidak** memerintahkan test/build untuk task dokumentasi.
 
 Referensi command ada di §10 berkas ini (cwd, tujuan, dan perintah yang sudah terbukti jalan di mesin ini). Daftar itu **bukan izin otomatis**, dan cwd yang tertulis di sana wajib dipakai.
 
 ---
 
-*Diperbarui: 2026-10-07 (§10 daftar perintah + §10a jebakan mesin-dev + §11 gate verifikasi) · Sumber: owner KOST48 (data tenant real) + kost48surabaya.com + faqs.service.ts*
+## 12. Otoritas keputusan & ekonomi verifikasi (arah owner 2026-10-10)
+
+**Satu baris:** keputusan **teknis milik agen**; owner hanya dimintai **uang · flow/perilaku pengguna baru · hapus data · deploy/secret · keputusan penting yang sulit dibalik**. Ringkasan kanonik: [AGENTS §4](../../AGENTS.md); register keputusan bisnis: [KEPUTUSAN-OWNER](../KEPUTUSAN-OWNER.md).
+
+| Kelas | Siapa memutuskan | Contoh |
+|---|---|---|
+| **Teknis** | **Agen (dsh)** — putuskan, kerjakan, catat satu baris alasan | arsitektur modul, nama berkas/fungsi/anchor, pola Prisma & DTO, urutan kerja, pemakaian library **yang sudah ada**, refactor internal, penataan & format dokumen, alat ukur |
+| **Produk / flow** | **Owner** | flow app **baru**, perubahan langkah yang dilihat pengguna, aturan bisnis, label/halaman publik |
+| **Uang** | **Owner** (+ gate uang §11) | nominal, DP/deposit, harga, jurnal, periode, rekonsiliasi |
+| **Data & produksi** | **Owner** | hapus/migrasi data, deploy, secret, akses server/DB produksi |
+| **Penting & sulit dibalik** | **Owner** | keputusan yang mengikat lintas modul atau menutup opsi lain (rewrite domain, ganti arsitektur hosting) |
+
+**Cara bertanya — supaya owner tidak menebak.** Satu pertanyaan = satu keputusan, bahasa manusia, memuat: (a) konteks 2–3 baris, (b) 2–4 pilihan, (c) akibat tiap pilihan **termasuk risiko**, (d) **rekomendasi agen + alasan**, (e) **default yang diambil bila tidak dijawab**, supaya pekerjaan lain tetap jalan. Pertanyaan terkumpul di satu tempat: [kerja/TANYA-OWNER.md](../kerja/TANYA-OWNER.md) — jangan berpencar di banyak berkas.
+
+**Ekonomi verifikasi (fokus percepatan app).** Jalankan **verifikasi terkecil yang membuktikan acceptance**, sekali, lalu lanjut. Jangan mengulang audit statis yang sudah ada; jangan build penuh untuk pekerjaan dokumen; test baru hanya bila menutup risiko **uang/auth/schema/kontrak bersama**. Verifikasi yang tidak membuktikan apa pun tentang acceptance = biaya, bukan mutu. **Docs-only tetap tanpa test/build/lint/typecheck**, dan gate dokumen dijalankan **sekali per batch**. **Gate uang §11 tetap berlaku** sampai owner memutuskan lain.
+
+**Dilarang:** menahan task hanya karena menunggu jawaban yang tidak wajib (tulis default + lanjut), dan menanyakan ulang hal yang sudah diputuskan ([KONTRAK §8](../KONTRAK.md)).
+
+---
+
+*Diperbarui: 2026-10-10 (§12 otoritas keputusan + ekonomi verifikasi) · 2026-10-07 (§10 daftar perintah + §10a jebakan mesin-dev + §11 gate verifikasi) · Sumber: owner KOST48 (data tenant real) + kost48surabaya.com + faqs.service.ts*
 
 ---
