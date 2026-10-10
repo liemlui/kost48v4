@@ -26,12 +26,12 @@
 #### 2. ⛔ DO-NOT-TOUCH (kode SUDAH BENAR — jangan "diperbaiki")
 | Kode | Lokasi | Kenapa jangan disentuh |
 |---|---|---|
-| `postBalancedJournalTx` (inti jurnal) | `accounting-posting.service.ts:1342-1448` | Guard balance+idempotent+periode OPEN. Mesin jurnal SEHAT. ⚠️ Line numbers diperbarui 2026-07-29 (sebelumnya 1110-1216 — stale). |
-| Blok saldo kas E-4 | `accounting-reports.service.ts:837-862` | Saldo per CashAccount = opening + Σ(D−K) line ber-cashAccountId. SUDAH BENAR — F1-3 meniru pola INI, jangan ubah blok ini. |
-| 10 fungsi posting (D/K) | `accounting-posting.service.ts:128-849` | Semua balance+idempotent. Hanya F1-8 (settlement guard) yang menambah CEK, bukan ubah jurnal. |
-| Trial Balance + opening fallback | `accounting-reports.service.ts:27-95` | Anti-double-count. |
+| `postBalancedJournalTx` (inti jurnal) | `accounting-posting.service.ts` — metode `postBalancedJournalTx` | Guard balance+idempotent+periode OPEN. Mesin jurnal SEHAT. ⚠️ Rujukan lokasi memakai **nama metode**, bukan nomor baris (KONTRAK §7): nomor baris basi setiap berkas disunting. |
+| Blok saldo kas E-4 | `accounting-reports.service.ts` — metode `cashflow`, blok saldo per CashAccount | Saldo per CashAccount = opening + Σ(D−K) line ber-cashAccountId. SUDAH BENAR — F1-3 meniru pola INI, jangan ubah blok ini. |
+| 10 fungsi posting (D/K) | `accounting-posting.service.ts` — metode `post*Tx` (10 fungsi posting) | Semua balance+idempotent. Hanya F1-8 (settlement guard) yang menambah CEK, bukan ubah jurnal. |
+| Trial Balance + opening fallback | `accounting-reports.service.ts` — metode `trialBalance` | Anti-double-count. |
 | Tutup buku (closing/reopen versioned) | `accounting-period-close.service.ts` | Paling matang; jangan utak-atik. |
-| `recalculateInvoiceTotal` (DISCOUNT−) | `invoices.service.ts:461-480` | Konsisten dgn trigger DB. ⚠️ Line numbers diperbarui 2026-07-29 (sebelumnya 423-442 — stale). |
+| `recalculateInvoiceTotal` (DISCOUNT−) | `invoices.service.ts` — metode `recalculateInvoiceTotal` | Konsisten dgn trigger DB. ⚠️ Rujukan lokasi memakai **nama metode**, bukan nomor baris (KONTRAK §7). |
 
 #### 3. UNIT TEST (zero-dependency — pakai test runner BAWAAN Node, TANPA npm install)
 > Proyek belum punya jest. JANGAN install. Pakai `node --test` (Node ≥18) terhadap hasil build `dist/`. Test = file CommonJS di `backend/test/unit/`.

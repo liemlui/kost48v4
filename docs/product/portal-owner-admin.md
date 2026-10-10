@@ -233,7 +233,7 @@ Latar: arahan owner 25 Sep 2026 — *"manfaatkan API AI untuk membuat simpel sem
 
 ### 10.2 Kontrak kartu keputusan — **pakai ulang, bukan bikin baru**
 
-Recon 25 Sep 2026 menemukan bentuk kartu yang dibutuhkan **sudah ada** di aplikasi: `ActionQueueItem` (`frontend/src/components/command-center/ActionQueueTable.tsx:9-31`), dipakai antrean kerja ADMIN dan sudah punya renderer + eksekutor deep-link (`openActionTarget()`, baris 56–60) serta peringkat prioritas (`:43-51`). Karena itu kontrak baru **tidak** dibuat; kartu keputusan = `ActionQueueItem` + 5 field tambahan.
+Recon 25 Sep 2026 menemukan bentuk kartu yang dibutuhkan **sudah ada** di aplikasi: `ActionQueueItem` (`frontend/src/components/command-center/ActionQueueTable.tsx`), dipakai antrean kerja ADMIN dan sudah punya renderer + eksekutor deep-link (`openActionTarget()`) serta peringkat prioritas. Karena itu kontrak baru **tidak** dibuat; kartu keputusan = `ActionQueueItem` + 5 field tambahan.
 
 Sudah tersedia di `ActionQueueItem`:
 
@@ -243,7 +243,7 @@ Sudah tersedia di `ActionQueueItem`:
 | `type`, `subject`, `issue` | judul, objek, masalah | judul + 2–3 fakta kartu |
 | `recommendedAction` | satu tindakan konkret | label tombol utama |
 | `actionTo` | tujuan deep-link (`navigate` bila internal) | **"tinggal klik"** |
-| `ruleId`, `entityType`, `entityId`, `dedupKey` | identitas & dedupe (`utils/commandCenterDedup.ts:7-20`) | mencegah kartu AI ganda dengan kartu rule |
+| `ruleId`, `entityType`, `entityId`, `dedupKey` | identitas & dedupe (`frontend/src/utils/commandCenterDedup.ts` — `getCommandDedupKey`/`dedupeCommandItems`) | mencegah kartu AI ganda dengan kartu rule |
 | `deadlineLabel`, `timeStatusLabel`, `timeStatusTone` | tenggat & status waktu | kesegaran kartu |
 
 Field yang masih perlu ditambahkan (belum ada di tipe mana pun):
@@ -256,7 +256,7 @@ Field yang masih perlu ditambahkan (belum ada di tipe mana pun):
 | `expiresAt` | masa berlaku kartu | mencegah kartu basi tampil sebagai fakta |
 | `fallback` | true bila hasil rule-based, bukan AI | transparansi & pengukuran pasca-AI |
 
-**Batas keamanan yang wajib menyertai kontrak ini:** keluaran AI saat ini memuat `route` berupa **string bebas** dan UI belum memvalidasinya sebelum `navigate` (temuan A-1 di [audit AI 25 Sep](../audit/ai-agenda-recon-2026-09-25.md)). Kartu AI **tidak boleh** menavigasi ke string dari LLM. Rute harus dipetakan lewat allowlist deterministik (pola `ownerSignalRoute`, `frontend/src/pages/dashboard/OwnerDashboardPage.tsx:98-106`) sebelum dipakai.
+**Batas keamanan yang wajib menyertai kontrak ini:** keluaran AI saat ini memuat `route` berupa **string bebas** dan UI belum memvalidasinya sebelum `navigate` (temuan A-1 di [audit AI 25 Sep](../audit/ai-agenda-recon-2026-09-25.md)). Kartu AI **tidak boleh** menavigasi ke string dari LLM. Rute harus dipetakan lewat allowlist deterministik (pola fungsi `ownerSignalRoute` di `frontend/src/pages/dashboard/OwnerDashboardPage.tsx`) sebelum dipakai.
 
 ### 10.3 Alur produksi kartu (pipeline)
 

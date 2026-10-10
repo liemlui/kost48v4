@@ -280,7 +280,7 @@ Staff **TIDAK BOLEH** memulai/menyetujui pemesanan layanan berbayar (WiFi, galon
 - **Konvensi event baru:** penerima eksplisit; linkTo terdalam relevan; dedupe key (recipient, entityType, entityId, title); best-effort never-throw; di LUAR tx bila pasca-commit.
 - **Util target:** `notifySafe({recipient,dedupeKey,...})` terpusat (Langkah 1 murah) sebelum outbox push (Phase 3).
 - **Prioritas penutupan:** renew (vacancy) > A17 copy (kepercayaan) > payment-submitted (kecepatan kas) > ticket-assign (SLA) > room-ready > wifi.
-- **Pola terbaik (template):** `checkout-requests.service.ts:294-345` notifyOwnerAdminOnCreate.
+- **Pola terbaik (template):** `checkout-requests.service.ts` — metode `notifyOwnerAdminOnCreate`.
 
 
 ---
@@ -369,15 +369,15 @@ Sumber TUNGGAL (hindari duplikasi). Per-kamar tetap bisa override tarif bila per
 #### 2. Peta kode (3 jalur sinkron qty)
 | Jalur | Lokasi | Lock | Validasi RETURN | Status |
 |---|---|---|---|---|
-| 1. Movement resmi | `inventory-movements.service.ts:43-70` | ✅ `:88` | ✅ `:94-103` | 🟢 RUJUKAN EMAS |
-| 2. Laporan staf (status only) | `room-items.service.ts:115-274` | n/a | n/a | 🟢 |
-| 3. Admin-review field report (boleh buat movement) | `staff-field-reports.service.ts:478-505` | ❌ | ❌ | 🔴 I-02 |
+| 1. Movement resmi | `inventory-movements.service.ts` — `create` (dalam transaksi) | ✅ `update` (`lockInventoryQtyTx`) | ✅ `ensureInventoryQtySyncedTx` | 🟢 RUJUKAN EMAS |
+| 2. Laporan staf (status only) | `room-items.service.ts` — `updateStatusFromField` | n/a | n/a | 🟢 |
+| 3. Admin-review field report (boleh buat movement) | `staff-field-reports.service.ts` — `adminReview` (+ `validateMovement`) | ❌ | ❌ | 🔴 I-02 |
 
 #### 2. Peta kode
 | Aksi | Lokasi |
 |---|---|
 | Ticket CRUD + assign/close | `tickets.service.ts` |
-| Auto-create CHECKOUT_INSPECTION | `stays.service.ts:605-654` (dedupe) |
+| Auto-create CHECKOUT_INSPECTION | `stays.service.ts` — `complete` (pembuatan tiket di dalamnya, dengan dedupe) |
 | Staff work queue | `tickets.controller.ts` GET endpoint |
 | KPI calculation (resolved rate, avg time) | `tickets.service.ts` / frontend dashboard |
 | Staff review (tenant rating) | `reviews` module |
@@ -392,10 +392,10 @@ Sumber TUNGGAL (hindari duplikasi). Per-kamar tetap bisa override tarif bila per
 #### 2. Peta kode
 | Aksi | Lokasi |
 |---|---|
-| Login/me/forgot/reset/change | `auth.service.ts:28/75/96/152/218` |
+| Login/me/forgot/reset/change | `auth.service.ts` — `login` / `me` / `forgotPassword` / `resetPassword` / `changePassword` |
 | Guard global + @Public | `common/guards/*`, `app.module.ts` (E-1) |
 | Rate limit | `common/middleware/rate-limit.middleware.ts` |
-| User/tenant CRUD + portal access | `users.service.ts`, `tenants.service.ts:47/60/73` |
+| User/tenant CRUD + portal access | `users.service.ts`, `tenants.service.ts` — `findAll` / `findOne` / `setKtpImage` |
 | File proof terproteksi (pola utk KTP) | `payment-submissions` proof endpoint + `common/utils/file-signature.util.ts` |
 
 ---

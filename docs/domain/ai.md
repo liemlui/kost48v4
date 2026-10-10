@@ -757,10 +757,10 @@ Ditambahkan 25 Sep 2026 mengikuti arah owner (lihat [KEPUTUSAN-OWNER](../KEPUTUS
 
 | Kebutuhan | Sudah tersedia di |
 |---|---|
-| Endpoint brief dengan `priorityActions[]` berisi `title`, `reason`, `route`, `severity` | `POST /owner-ai/brief` + `prompts/brief.prompt.ts:17` |
-| Bentuk kartu + renderer + eksekutor tautan | `ActionQueueItem` + `ActionQueueTable.tsx:9-31,56-60` |
-| Dedupe kartu AI vs kartu rule | `utils/commandCenterDedup.ts:7-20` (`ruleId`/`dedupKey`) |
-| Papan alur ADMIN bernomor 0–5 | `AdminWorkLane` (`dashboardShared.tsx:42-53`) |
+| Endpoint brief dengan `priorityActions[]` berisi `title`, `reason`, `route`, `severity` | `POST /owner-ai/brief` + prompt di `backend/src/modules/owner-ai/prompts/brief.prompt.ts` |
+| Bentuk kartu + renderer + eksekutor tautan | `ActionQueueItem` + `frontend/src/components/command-center/ActionQueueTable.tsx` (`openActionTarget`) |
+| Dedupe kartu AI vs kartu rule | `frontend/src/utils/commandCenterDedup.ts` (`ruleId`/`dedupKey`) |
+| Papan alur ADMIN bernomor 0–5 | tipe `AdminWorkLane` di `frontend/src/pages/dashboard/dashboardShared.tsx` |
 | Skor kesehatan + sinyal keputusan OWNER | `useBusinessHealthScore`, `useOperationalStressIndex`, `extraSignals`/`ownerSignalRoute` |
 | Rumah simpanan hasil (G9) | `AiDraft` (`owner-ai/ai-draft.service.ts`, `ai-draft.controller.ts`) |
 | Fallback rule-based tiap fitur | `briefFallback`, `financeFallback`, `paymentFallback`, dll. |

@@ -61,7 +61,7 @@ login sukses
 - **Saklar header** selalu tampil di kedua shell: `[ Cepat | Normal ]`. Perpindahan tidak memuat ulang sesi.
 - Pilihan terakhir pengguna **diingat** (per pengguna, per perangkat).
 - STAFF/TENANT tidak melihat layar pilih-mode karena Mode Cepat mereka gratis dan deterministik — memilih di antara keduanya hanya menambah langkah tanpa makna (`CEPAT-PILIH`).
-- Titik sambung kode yang sudah ada: `getDefaultRoute(role, tenantStage)` di `frontend/src/config/navigation.ts:165-174` — percabangan role sudah punya rumahnya.
+- Titik sambung kode yang sudah ada: `getDefaultRoute(role, tenantStage)` di `frontend/src/config/navigation.ts` — percabangan role sudah punya rumahnya.
 
 **Kosakata & pensiun saklar (`CEPAT-KOSAKATA`).** Saat ini sudah ada `admin-density` (Ringkas/Lengkap) dan mode owner compact/full. Setelah Mode Cepat ada, pemetaannya:
 
@@ -110,7 +110,7 @@ Aturan: **jangan sampai pengguna menghadapi dua saklar yang artinya mirip.** Saa
 └─────────────────────────────────────────────────┘
 ```
 
-Sumber angka sudah ada: `useOperationalStressIndex`, `priorityActionFromQueue`, `adminWorkLanes` (`pages/dashboard/dashboardShared.tsx:42-53,279-285`). **Tidak ada permintaan AI** di role ini.
+Sumber angka sudah ada: `useOperationalStressIndex` (`frontend/src/hooks/useOperationalStressIndex.ts`), `priorityActionFromQueue` (`frontend/src/pages/dashboard/dashboardShared.tsx`), dan `adminWorkLanes` (`frontend/src/pages/dashboard/DashboardAdmin.tsx`). **Tidak ada permintaan AI** di role ini.
 
 ### 4.3 STAFF — satu tugas per layar
 
@@ -144,7 +144,7 @@ Batas ini **tidak boleh dilonggarkan tanpa keputusan owner baru**:
 2. **AI tidak berjalan saat halaman dibuka.** Agenda dihitung penjadwal 1× sehari dan disimpan (rumah simpanan: antrean draft `AiDraft`, G9, sudah ada). Membuka halaman = membaca. Biaya per tampilan **nol**.
 3. **AI tidak menulis data.** Kartu berakhir di tautan terfilter, wizard, atau approve manusia; mutasi tetap lewat endpoint domain.
 4. **Angka hanya dari snapshot.** AI tidak boleh membuat angka yang tidak ada di snapshot; jika kurang → `missingData`.
-5. **Rute dari AI tidak boleh langsung dieksekusi.** Wajib lolos allowlist deterministik sebelum `navigate` (temuan A-1; pola `ownerSignalRoute`, `OwnerDashboardPage.tsx:98-106`).
+5. **Rute dari AI tidak boleh langsung dieksekusi.** Wajib lolos allowlist deterministik sebelum `navigate` (temuan A-1; pola fungsi `ownerSignalRoute` di `frontend/src/pages/dashboard/OwnerDashboardPage.tsx`).
 6. **Kartu = aturan ∪ AI, jangan pernah AI saja.** Ini penjamin anti-bolong: kalau AI lupa menyebut sesuatu, kartu dari aturan tetap tampil.
 7. **AI mati ≠ halaman mati** (`CEPAT-AI-MATI`).
 

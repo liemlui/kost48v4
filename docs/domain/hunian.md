@@ -67,9 +67,9 @@ Rujukan: [KEPUTUSAN-OWNER](../KEPUTUSAN-OWNER.md) · [ANTREAN](../ANTREAN.md) ·
 #### 2. Peta kode
 | Aksi | Lokasi |
 |---|---|
-| Buat booking portal (DP 30%, lock Tenant+Room) | `tenant-bookings.service.ts:56`; DP :157; INSERT :173 |
-| Booking publik (paritas DP/deposit) | `public-bookings.service.ts:334`; expiry :292 |
-| Approve/reject booking + notif | `tenant-bookings.service.ts:247 / :506`; notif :979/:1016 |
+| Buat booking portal (DP 30%, lock Tenant+Room) | `tenant-bookings.service.ts` — `createBooking` (DP + INSERT stay di dalamnya) |
+| Booking publik (paritas DP/deposit) | `public-bookings.service.ts` — `createPublicBooking`; expiry oleh `auto-ops.service.ts` `runBookingExpiry` |
+| Approve/reject booking + notif | `tenant-bookings.service.ts` — `approveBooking` / `rejectBooking`; notif `notifyBookingApproved` / `notifyBookingRejected` |
 | Renew request dua fase | `renew-requests.service.ts`: DP PAID → terbitkan invoice pelunasan; pelunasan PAID → finalisasi stay melalui `stays.service.ts` |
 
 
@@ -77,13 +77,13 @@ Rujukan: [KEPUTUSAN-OWNER](../KEPUTUSAN-OWNER.md) · [ANTREAN](../ANTREAN.md) ·
 #### 2. Peta kode
 | Aksi | Lokasi |
 |---|---|
-| Checkout request create/approve/reject + notif | `checkout-requests.service.ts:47/128/201`; notif :294/:354/:392 |
-| Final checkout (blokir tagihan + tiket inspeksi) | `stays.service.ts:526`; tiket :605-654 |
-| Cancel stay | `stays.service.ts:675`; **lubang B-08: promoted tak buat tiket :768-790** |
-| Process deposit (jurnal+ledger blocking) | `stays.service.ts:812`; settlement :861-892; posting :928-941 |
-| Deposit ledger (idempotent + reconciliationLite) | `deposit-ledger.service.ts:158/197/351` |
-| Forced checkout overstay H+1 | `auto-ops.service.ts:508-685`; blokir tagihan :548; tiket+notif :605-679 |
-| Sweeper noon/H+1/DP-forfeit (satu pintu) | `auto-ops.service.ts:214` cancelEndedUnpaidStay |
+| Checkout request create/approve/reject + notif | `checkout-requests.service.ts` — `createRequest` / `approveRequest` / `rejectRequest`; notif `notifyOwnerAdminOnCreate` / `notifyTenantOnApprove` / `notifyTenantOnReject` |
+| Final checkout (blokir tagihan + tiket inspeksi) | `stays.service.ts` — `complete` (tiket inspeksi dibuat di dalamnya) |
+| Cancel stay | `stays.service.ts` — `cancel`; **lubang B-08: promoted tak buat tiket** |
+| Process deposit (jurnal+ledger blocking) | `stays.service.ts` — `processDeposit`; settlement `settleDepositAgainstOpenInvoicesTx` |
+| Deposit ledger (idempotent + reconciliationLite) | `deposit-ledger.service.ts` — `recordDepositReceivedTx` / `recordDepositSettlementTx` (+ reconciliationLite) |
+| Forced checkout overstay H+1 | `auto-ops.service.ts` — `runOverstayForcedCheckout` (blokir tagihan + tiket + notif di dalamnya) |
+| Sweeper noon/H+1/DP-forfeit (satu pintu) | `auto-ops.service.ts` — `runAllUnlocked` (termasuk `cancelEndedUnpaidStay`) |
 
 ## Catatan AI & riwayat sewa (normatif)
 
