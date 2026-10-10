@@ -1,15 +1,41 @@
 # TANYA-OWNER — pertanyaan yang menunggu keputusan owner
 
-> **Blok baca** · Jenis: **daftar pertanyaan untuk owner (bukan antrean, bukan kontrak)** · Status: **aktif — kosong per 10 Okt 2026 (semua pertanyaan sudah dijawab)** · Untuk siapa: owner + agen yang butuh jawaban sebelum melanjutkan
+> **Blok baca** · Jenis: **daftar pertanyaan untuk owner (bukan antrean, bukan kontrak)** · Status: **aktif — 1 pertanyaan terbuka (P8, 10 Okt 2026)** · Untuk siapa: owner + agen yang butuh jawaban sebelum melanjutkan
 > · Baca kalau: owner ingin melihat **apa yang sedang menunggu keputusannya**, atau agen mau memastikan tidak ada pertanyaan terbuka. · **Jangan** dibaca kalau: mencari keputusan yang sudah final (itu [KEPUTUSAN-OWNER](../KEPUTUSAN-OWNER.md)) atau memilih tugas (itu [ANTREAN](../ANTREAN.md)).
 
-**Pertanyaan terbuka: TIDAK ADA.** Tujuh pertanyaan pertama (P1–P7: arah percepatan, increment pertama, flow app baru, gate uang, izin rilis, UI/UX, kerapatan docs) **sudah dijawab owner 10 Okt 2026** dan dipindah ke register keputusan sebagai **`MODE-CEPAT-UTAMA + KERJA-KECIL-COMMIT`** di [KEPUTUSAN-OWNER §6](../KEPUTUSAN-OWNER.md) — di sana juga ada `OTORITAS-TEKNIS-AI + EKONOMI-VERIFIKASI`. Ringkasan arahnya: Mode Cepat sebagai arah utama, mobile-first, ringan, navigasi berjenjang.
+## 1. Cara pakai berkas ini (format wajib — arah owner 10 Okt 2026)
 
-## Cara pakai berkas ini kalau nanti ada pertanyaan baru
+Setiap pertanyaan **wajib** memakai lima unsur ini, dalam bahasa manusia — bukan pilihan singkat yang membuat owner menebak:
 
-Aturan (arah owner 10 Okt 2026 — [default-dev §12](../operations/default-dev.md)): **satu pertanyaan = satu keputusan**, ditulis bahasa manusia, wajib memuat **konteks · pilihan · risiko tiap pilihan · rekomendasi agen · default yang dijalankan bila tidak dijawab**. Pertanyaan yang sudah dijawab **dipindah** ke [KEPUTUSAN-OWNER](../KEPUTUSAN-OWNER.md) dan **dihapus** dari sini. Tidak ada kotak `[ ]` di sini — ini bukan antrean kerja.
+1. **Konteks** — apa yang terjadi, dan kenapa ini butuh keputusan owner (bukan agen).
+2. **Pilihan berhuruf (a) · (b) · (c)** — minimal dua; kalau pilihan belum terbayang, agen **menyusun dulu** pilihan yang masuk akal.
+3. **Konsekuensi tiap pilihan** — apa yang terjadi, apa yang **tidak** terjadi, perkiraan biaya waktu/langkah, dan **risikonya** ditulis terbuka.
+4. **Rekomendasi agen + alasan** — agen ikut berpikir, bukan cuma bertanya.
+5. **Default bila tidak dijawab** — supaya pekerjaan lain tidak berhenti menunggu.
 
-## Keputusan yang TIDAK perlu ditanyakan ke owner (agen memutuskan sendiri)
+**Dilarang:** pertanyaan telanjang di chat ("mau saya commit?"), pertanyaan ya/tidak tanpa konsekuensi, dan pertanyaan yang memaksa owner membaca kode untuk bisa menjawab. Pertanyaan yang sudah dijawab **dipindah** ke [KEPUTUSAN-OWNER](../KEPUTUSAN-OWNER.md) dan **dihapus** dari sini. Tidak ada kotak `[ ]` di sini — ini bukan antrean kerja.
+
+## 2. Pertanyaan terbuka
+
+### P8. Dua berkas source Anda — di-commit sekarang atau tidak?
+
+**Konteks.** Ada dua berkas kode yang **sudah Anda ubah sendiri** sebelum sesi ini dan masih **belum di-commit**: [MyManualPage.tsx](../../frontend/src/pages/portal/MyManualPage.tsx) (kalimat "jika menunggak >30 hari, pengelola berhak memutus sewa" dihapus dari panduan penghuni) dan [CekPage.tsx](../../frontend/src/pages/public/CekPage.tsx) (ditambah bagian 7 tentang dua mode Cepat & Normal, catatan tanggal diperbarui ke 25 Sep, ditambah baris "deploy menunggu rencana rilis"). Karena belum di-commit, kedua perubahan itu **tidak terlacak git dan tidak ikut ter-push ke `main`**. Saya belum menyentuhnya, karena ini kode — bukan dokumen.
+
+**Pilihan dan konsekuensinya:**
+
+| Pilihan | Apa yang saya lakukan | Yang terjadi | Biaya | Risiko |
+|---|---|---|---|---|
+| **(a)** Build dulu, lalu commit + push | jalankan build frontend, kalau hijau → commit terpisah + push | perubahan Anda terlacak **dan** ada bukti frontend masih terkompilasi | ±5–15 menit mesin | **rendah** — kalau build gagal saya berhenti dan lapor, tidak memaksa commit |
+| **(b)** Commit tanpa build | langsung commit + push | tercepat; perubahan terlacak | ±1 menit | **sedang** — kalau ada galat TypeScript/import, `main` jadi merah untuk sesi berikutnya, merusak kebiasaan "setiap commit hijau" |
+| **(c)** Biarkan seperti sekarang | tidak ada tindakan | `main` tetap bersih (hanya dokumen hari ini) | 0 | **sedang** — perubahan Anda tetap tak terlacak; kalau disk bermasalah atau Anda pindah mesin, isinya hilang; halaman `/cek` di produksi tetap versi lama |
+
+Yang **tidak** terjadi pada ketiga pilihan: **produksi tidak berubah** — deploy terpisah dan menunggu perintah Anda (`P5`: produksi saat Anda putuskan).
+
+**Rekomendasi saya: (a).** Alasannya: `CekPage.tsx` adalah halaman **publik** yang dibaca calon penghuni, dan build adalah bukti minimum yang murah sebelum isinya masuk `main` lewat push. Gate uang tidak berlaku di sini, dan aturan Anda sendiri (`MOBILE-FIRST`, `UI-BOLEH-ROMBAK`) membuat perubahan tampilan tidak perlu ditahan. Catatan jujur: **build ≠ tampilannya benar** — build hanya membuktikan tidak ada galat tipe/import; verifikasi visual halaman perlu langkah terpisah.
+
+**Default bila tidak dijawab: (c)** — saya tidak menyentuh kode Anda, dan pekerjaan lain tetap jalan (AIDL-01a mulai dari kode baru, bukan dari berkas itu).
+
+## 3. Keputusan yang TIDAK perlu ditanyakan ke owner (agen memutuskan sendiri)
 
 Dicatat supaya owner tahu apa yang berjalan tanpa menunggu dia — rincian di [default-dev §12](../operations/default-dev.md):
 
@@ -21,9 +47,10 @@ Dicatat supaya owner tahu apa yang berjalan tanpa menunggu dia — rincian di [d
 | `design/` tidak ikut git | biarkan untracked + tandai buktinya sebagai bukti lokal | bukti harus jujur menyebut dirinya lokal |
 | GAP #1/#3 di `flow.md` tampak sudah ditutup kode | biarkan sebagai status bertanggal | mencabut gap = keputusan bisnis owner |
 
-## Riwayat berkas ini
+## 4. Riwayat berkas ini
 
 | Tanggal | Perubahan |
 |---|---|
 | 2026-10-10 | Dibuat: tujuh pertanyaan (P1–P7) dengan format konteks · pilihan · risiko · rekomendasi · default. |
-| 2026-10-10 | **Dijawab owner** → dipindah ke [KEPUTUSAN-OWNER](../KEPUTUSAN-OWNER.md) (`MODE-CEPAT-UTAMA + KERJA-KECIL-COMMIT`); berkas dikosongkan dari pertanyaan terbuka dan disisakan cara pakai + daftar keputusan yang tidak perlu ditanyakan. |
+| 2026-10-10 | **Dijawab owner** → dipindah ke [KEPUTUSAN-OWNER](../KEPUTUSAN-OWNER.md) (`MODE-CEPAT-UTAMA + KERJA-KECIL-COMMIT`); berkas dikosongkan dari pertanyaan terbuka. |
+| 2026-10-10 | **Format pertanyaan diperketat** (arahan owner: "jelaskan detail, bahasa manusia, generate pilihan, sebutkan segala konsekuensinya"): format lima unsur jadi wajib, ditambah contoh benar vs salah, dan pertanyaan telanjang di chat dinyatakan pelanggaran. Aturan ikut masuk [AGENTS §4](../../AGENTS.md) + [default-dev §10a/§12](../operations/default-dev.md). Pertanyaan baru **P8** ditambahkan lengkap dengan pilihan (a)/(b)/(c) + konsekuensinya. |
