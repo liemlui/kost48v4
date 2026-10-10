@@ -1,6 +1,6 @@
 {
-    "total_baris":  13653,
+    "total_baris":  13678,
     "berkas":  69,
     "tanggal":  "2026-10-09",
-    "alasan":  "batch PENUTUP (akhir): +5 baris dari 13648 — titik masuk sesi docs/kerja/PROMPT-SESI-BERIKUTNYA.md kini memuat perintah self-test dan catatan ratchet, supaya sesi baru tahu kedua alat itu ada. Tidak ada dokumen baru."
+    "alasan":  "batch RUJUKAN: +25 baris dari 13653 = satu entri bukti bertanggal di docs/history/bukti-2026-10.md yang mencatat (a) hasil konversi 6 berkas (102-\u003e70 rujukan), (b) TEMUAN bahwa nomor baris di dokumen sudah basi jauh (stays.complete: 526 vs 691; processDeposit: 812 vs 1438), dan (c) dua artefak transformasi otomatis yang membuatnya ditolak. Nomor baris di kartu bukti bertanggal SAH menurut KONTRAK §7. Tidak ada dokumen baru."
 }
