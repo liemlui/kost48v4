@@ -7,7 +7,7 @@
 
 ```yaml
 # @kost48-state — blok yang diperiksa mesin, jangan diedit manual tanpa mengukur ulang.
-head: faff7c365d30070e8a398e0833cc8e45878a394a   # git rev-parse HEAD saat potret
+head: 9be0ea4798f4ec2091026dbd15199a6435e1e456   # git rev-parse HEAD saat potret
 tanggal: 2026-10-09
 gate: BERSIH                                      # node scripts/check-docs.mjs
 kartu_kekuatan: 12/12                             # node scripts/ukur-kekuatan-docs.mjs
@@ -40,9 +40,9 @@ Diperiksa oleh `node scripts/ukur-serah-terima-docs.mjs` ([KONTRAK §11](../KONT
 | `docs/PETA-KODE.md` (plafon 16 KB) | 16.214 B | idem |
 | Gate dokumen | **BERSIH** — 0 pelanggaran, 0 pemeriksaan dilewati, 11 aturan (v2.0) + 3 INFO | `node scripts/check-docs.mjs` |
 | Kartu kekuatan | **12/12 = 100%** (11 pemeriksaan lama + **D** diperluas baris Fakta + **L** baru) | `node scripts/ukur-kekuatan-docs.mjs` |
-| Rujukan nomor baris di dokumen kontrak aktif | **101** rujukan di 9 berkas (gate) · **102** di 10 berkas (kartu) — terbanyak `docs/operations/efisiensi-hosting.md` (29), `docs/domain/flow.md` (25) | INFO detektor di gate; kartu kekuatan pemeriksaan **L** |
+| Rujukan nomor baris di dokumen kontrak aktif | **102** rujukan di 10 berkas (gate) · **103** di 11 berkas (kartu) — terbanyak `docs/operations/efisiensi-hosting.md` (29), `docs/domain/flow.md` (25) | INFO detektor di gate; kartu kekuatan pemeriksaan **L** |
 
-**Kenapa dua angka (101 vs 102):** ruang lingkupnya memang berbeda, bukan selisih yang tak dijelaskan — detektor gate memakai **cakupan kontrak yang sama dengan R1** (9 berkas), sedangkan pemeriksaan **L** kartu juga menghitung `docs/rencana/**` (berkas kontrak batch) sehingga 10 berkas. Yang **sama** pada keduanya: berkas tangga wajib = **0**.
+**Kenapa dua angka (102 vs 103):** ruang lingkupnya memang berbeda, bukan selisih yang tak dijelaskan — detektor gate memakai **cakupan kontrak yang sama dengan R1** (10 berkas), sedangkan pemeriksaan **L** kartu juga menghitung `docs/rencana/**` (berkas kontrak batch) sehingga 11 berkas. Yang **sama** pada keduanya: berkas tangga wajib = **0**.
 
 **Batas angka di atas:** semuanya potret, dan **pohon kerja belum bersih** — angka byte berubah begitu ada berkas disunting. Yang sah dijadikan bukti hanya keluaran perintah, bukan tabel ini.
 
@@ -65,7 +65,7 @@ Rumah lengkapnya: [default-dev §10a](../operations/default-dev.md) (jebakan mes
 ## 5. Langkah berikutnya (menunjuk, bukan memerintah)
 
 - **Antrean:** [ANTREAN §3](../ANTREAN.md) — pilih satu tugas yang prasyaratnya terpenuhi. Butir dokumentasi yang masih terbuka: kontrak batch [SERAH-SESI-DOCS](../rencana/SERAH-SESI-DOCS.md) §6.
-- **Belum dikerjakan, sudah terukur:** **102** rujukan nomor baris di 10 dokumen kontrak aktif — kebijakannya sudah ada ([KONTRAK §7](../KONTRAK.md)), detektornya sudah ada (INFO di gate), konversinya **belum** dijalankan. Pekerjaan Isi, butuh verifikasi kode per baris.
+- **Belum dikerjakan, sudah terukur:** **101** rujukan nomor baris di 9 dokumen kontrak aktif. Kebijakannya ([KONTRAK §7](../KONTRAK.md)) dan detektornya (INFO di gate) sudah ada; **konversi otomatis dicoba 2026-10-09 lalu DIHENTIKAN** karena merusak. Empat kerusakan ditemukan lewat pengukuran — semuanya akibat **skrip konversi**, bukan dokumen lama: (1) `\s{2,}` memuat newline → `flow.md` **508→305 baris** (tabel tergabung); (2) rentang **en dash** (`:18–22`) tidak tertangkap → sisa menggantung `prisma.service.ts–22`; (3) aturan `| |`→`|` menghapus **kolom kosong tabel** (16 baris `| |`); (4) pola longgar `:[ \t]*\d+` + aturan pagar kode → **nama simbol di dalam backtick ikut terhapus** (`` `nama `:60` `` menjadi `` `nama `` ``), dan 3 pagar kode JSON rusak. Semua perubahan **dipulihkan** (`git checkout`), 9 berkas **kembali bersih**, tidak ada yang di-commit. Pelajaran + prosedur aman: [default-dev §10a](../operations/default-dev.md). **Sisanya pekerjaan Isi** (per rujukan, dengan verifikasi kode per baris), bukan pekerjaan mesin.
 - **Batas sesi ini (jujur):** batch SERAH-SESI **hanya mengubah dokumentasi dan skrip ukur**. Tidak ada test/build/lint/typecheck, tidak ada server/DB, tidak ada deployment, dan **dampak runtime tidak diukur** — yang dibuktikan gate adalah *tautan dan bentuk dokumen benar*, bukan *aplikasi masih bekerja*.
 
 ## 6. Riwayat berkas ini

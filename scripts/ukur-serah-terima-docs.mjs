@@ -164,20 +164,31 @@ function periksaKeputusan() {
   }
   const baris = readFileSync(KEPUTUSAN, "utf8").split(/\r?\n/);
   const TANGGAL = /(20\d{2}-\d{2}-\d{2}|\d{1,2}\s+(Jan|Feb|Mar|Apr|Mei|Jun|Jul|Agu|Sep|Okt|Nov|Des)\w*|20\d{2})/i;
-  // Sumber = atribusi eksplisit ke pemilik/prompt/register lain. SENGAJA ketat: "audit"/"§" saja
-  // akan meloloskan hampir semua baris, dan pemeriksa yang selalu lulus tidak menjaga apa pun.
-  const SUMBER = /(\[KEPUTUSAN|KEPUTUSAN-OWNER|owner|prompt|permintaan)/i;
-  // Tabel INVENTARIS (daftar topik → berkas arsip) bukan register keputusan: barisnya memuat
-  // BANYAK tanggal (rentang) dan tidak mencatat keputusan. Dikecualikan dengan alasan, bukan diam-diam.
-  const INVENTARIS = /Bagian di arsip|Topik/i;
+  // Sumber = atribusi eksplisit. Dua bentuk sah, keduanya dipakai di register ini:
+  //   (a) menunjuk pemilik/prompt/register lain ("KEPUTUSAN-OWNER", "owner", "prompt");
+  //   (b) menunjuk ID keputusan (huruf besar + tanda hubung + angka: `D-01..D-31`, `AI-DECISION-25SEP`,
+  //       `DOCS-CLEANUP`) — ID adalah bentuk atribusi paling kuat karena menunjuk entri lain.
+  // Kata umum seperti "audit" atau "§" saja SENGAJA tidak diterima: pemeriksa yang selalu lulus tidak menjaga apa pun.
+  const SUMBER = /(\[KEPUTUSAN|KEPUTUSAN-OWNER|owner|prompt|permintaan|\b[A-Z][A-Z0-9]*(?:-[A-Z0-9]+)+\b)/;
+  // Tabel INVENTARIS/STATUS (daftar arsip atau daftar status keputusan) bukan register keputusan baru:
+  // barisnya memuat tanggal + topik tanpa atribusi, dan memang bukan keputusan. Dikecualikan dengan
+  // alasan tertulis — kalibrasi yang sama dengan R1/R8 di gate: pemeriksa tidak boleh menuduh yang benar.
+  const KEPALA_ARSIP = /Bagian di arsip|Topik|Status keputusan/i;
   const tanpa = [];
   let kandidat = 0;
   let dilewati = 0;
+  // Konteks tabel: baris tabel tidak berdiri sendiri. Tabel yang kepalanya menyatakan dirinya
+  // INVENTARIS/STATUS (mis. "Bagian di arsip | Topik", "Status keputusan (berlaku / digantikan)")
+  // memang hanya memuat tanggal + topik tanpa atribusi — menuntut "sumber" di situ salah alamat.
+  // Pemeriksa WAJIB sadar konteks, kalau tidak ia menuduh yang benar (kalibrasi yang sama dengan R1/R8
+  // di gate). Kepala tabel ditemukan dengan menelusuri ke atas sampai baris non-tabel.
+  let kepalaTabel = null;
   for (let i = 0; i < baris.length; i++) {
     const b = baris[i];
-    if (!/^\s*\|/.test(b)) continue;                       // hanya baris tabel
-    if (/^\s*\|[\s:|-]+\|\s*$/.test(b)) continue;          // garis pemisah
-    if (INVENTARIS.test(b)) { dilewati++; continue; }      // inventaris arsip, bukan keputusan
+    if (!/^\s*\|/.test(b)) { if (b.trim() !== "") kepalaTabel = null; continue; }  // di luar tabel
+    if (kepalaTabel === null) { kepalaTabel = b; continue; }                        // baris pertama tabel = kepala
+    if (/^\s*\|[\s:|-]+\|\s*$/.test(b)) continue;                                    // garis pemisah
+    if (KEPALA_ARSIP.test(kepalaTabel)) { dilewati++; continue; }                    // indeks arsip, bukan keputusan
     const sel = b.split("|").map((s) => s.trim()).filter(Boolean);
     if (sel.length < 2) continue;
     if (/^(tanggal|no|nomor|id|kode|hal|aspek|butir|#)$/i.test(sel[0])) continue;  // kepala tabel
@@ -187,7 +198,7 @@ function periksaKeputusan() {
   }
   console.log("=== UKUR REGISTER KEPUTUSAN FINAL (docs/KEPUTUSAN-OWNER.md) ===");
   console.log(`baris keputusan diperiksa: ${kandidat}`);
-  console.log(`tabel inventaris dilewati : ${dilewati} baris (bukan register keputusan)`);
+  console.log(`baris indeks arsip dilewati: ${dilewati} (tanggal+topik saja, bukan keputusan)`);
   console.log(`tanpa tanggal/sumber      : ${tanpa.length}`);
   console.log("");
   if (tanpa.length === 0) {

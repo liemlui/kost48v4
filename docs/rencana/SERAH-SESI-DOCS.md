@@ -36,9 +36,14 @@
 
 **Yang sengaja TIDAK dikerjakan** (supaya tidak diangkat lagi):
 
-- **Konversi 85 rujukan nomor baris** di `docs/domain/**` dan `docs/operations/**` menjadi kutipan teks. Itu pekerjaan **Isi**, bukan sistem, dan menyentuh dokumen aturan bisnis 30 KB yang butuh verifikasi kode per baris. Kebijakannya sudah ada ([KONTRAK §7](../KONTRAK.md)); konversinya menunggu tugas tersendiri di [ANTREAN](../ANTREAN.md).
+- **Konversi 101 rujukan nomor baris** di `docs/domain/**` dan `docs/operations/**` menjadi kutipan teks. **Dicoba dan dihentikan 2026-10-09.** Empat kerusakan terukur muncul dari **skrip konversi** (bukan dari dokumen lama): `\s{2,}` memuat newline → `flow.md` 508→305 baris · rentang **en dash** tidak tertangkap → sisa `prisma.service.ts–22` · aturan `| |`→`|` menghapus **kolom kosong tabel** · pola longgar `:[ \t]*\d+` + aturan pagar kode menghapus **nama simbol di dalam backtick** dan 3 pagar kode JSON. **Semua perubahan dipulihkan** (`git checkout`), 9 berkas bersih, **0 perubahan di-commit**. Kesimpulan: ini pekerjaan **Isi** (per rujukan + verifikasi kode), bukan pekerjaan mesin. Prosedur aman untuk transformasi massal dicatat di [default-dev §10a](../operations/default-dev.md); sisanya tetap terlihat sebagai INFO di gate.
 - **Berkas `CHEATSHEET` gaya proyek lain**: padanannya sudah hidup sebagai bagian tetap [default-dev §10](../operations/default-dev.md) (tabel perintah) dan §10a (jebakan) — dibuat pada butir **A-4**. Menambah berkas baru = duplikasi.
 - **`docs/README.md` sebagai router**: tetap ditolak (R-3); router ada di [AGENTS §3](../../AGENTS.md).
+
+**Kekurangan yang ditemukan sendiri pada penutupan batch, lalu diperbaiki:**
+
+1. **Label tanggal yang menyesatkan.** Batch-batch sebelumnya menyebut dirinya "2026-10-07" padahal **tidak ada commit bertanggal itu** (commit terakhir sebelum batch ini: **2026-10-06**; gate di commit itu masih **v1.6**). Waktu modifikasi berkas membuktikan tulisan itu memang dibuat 2026-10-07, jadi labelnya **sah sebagai tanggal penulisan**, tetapi **bukan** tanggal commit — dan tidak boleh dipakai sebagai tanggal pengukuran. Baris **Fakta** di 4 berkas tangga sekarang memakai **tanggal pengukuran nyata (2026-10-09)**; label lama di catatan batch **dibiarkan** (menyuntingnya = menyunting catatan bertanggal).
+2. **Pemeriksa register keputusan menuduh yang benar** (12 → 1 → 0 temuan palsu). Ketiga sebabnya ada di **alat**, bukan di register owner: (a) tabel **indeks arsip/status** diperlakukan sebagai keputusan; (b) atribusi berupa **ID keputusan** (`D-01..D-31`, `AI-DECISION-*`, `DOCS-CLEANUP`) tidak dikenali polanya; (c) pola ID menuntut ≥3 huruf sehingga `D-01` tidak cocok. Hasil akhir: **LULUS — 9 baris keputusan + 9 baris indeks dikecualikan**; isi [KEPUTUSAN-OWNER](../KEPUTUSAN-OWNER.md) **tidak** disentuh.
 
 ## 4. Kenapa bentuknya berbeda dari proyek sumber (bukan salinan)
 
