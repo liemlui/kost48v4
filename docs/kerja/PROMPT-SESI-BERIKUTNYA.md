@@ -15,7 +15,7 @@ Mulai dari sini, berurutan:
 2. docs/KONTRAK.md — aturan rinci, berkas berisiko, bentuk laporan, invariant.
 3. docs/ANTREAN.md — SATU-SATUNYA antrean; pilih satu tugas dari §3.
 4. docs/kerja/SERAH-TERIMA.md — keadaan terakhir, pelajaran, batas, langkah berikutnya.
-5. docs/kerja/PROMPT-SESI-BERIKUTNYA.md (berkas ini) — jalankan §3 untuk mengukur keadaan.
+5. docs/kerja/PROMPT-SESI-BERIKUTNYA.md (berkas ini) — jalankan perintah ukur di §3, lalu bandingkan dengan potret SERAH-TERIMA.
 
 Sebelum menyentuh berkas apa pun: buat GOAL + TODOS untuk pekerjaan ini (AGENTS §7 · default-dev §12).
 Owner memakai keduanya untuk tracking; pekerjaan tanpa keduanya dianggap tidak terlacak.
@@ -44,19 +44,11 @@ Lapor dengan bentuk 5 baris KONTRAK §9, dan sebutkan apa yang TIDAK dijalankan.
 
 Repo: **`final_bundle`** (KOST48 Surabaya V5 — backend NestJS, frontend React/Vite; produksi LIVE). Dokumentasi: `docs/`. Bahasa: **Indonesia**.
 
-## 3. Keadaan yang diukur (ukur sendiri, jangan percaya tulisan ini)
+## 3. Keadaan yang diukur — rumahnya di berkas serah-terima (jangan disalin ke sini)
 
-Potret **2026-10-07**, `main`, HEAD **`65d1dab4`**:
+Dulu bagian ini memuat tabel potret sendiri. Tabel itu **dihapus 2026-10-11**: ia duplikat fakta yang sudah punya rumah ber-mesin, dan duplikatnya terbukti **bertentangan** dengan potret yang lebih baru (masih menulis kartu kekuatan "10/11", "85 rujukan nomor baris di 9 berkas", "pohon kerja kotor 69 berkas"). Dua tempat menyimpan angka yang sama = dua tempat yang bisa saling menyalahkan.
 
-| Ukuran | Nilai potret | Perintah |
-|---|---:|---|
-| Gate dokumen | **BERSIH** (0 pelanggaran, 0 dilewati, 11 aturan v2.0 + INFO) | `node scripts/check-docs.mjs` |
-| Kartu kekuatan | **10/11** pada potret; target **13/13** sesudah batch SERAH-SESI | `node scripts/ukur-kekuatan-docs.mjs` |
-| Blok keadaan serah-terima | **cocok** dengan repo | `node scripts/ukur-serah-terima-docs.mjs` |
-| Rujukan nomor baris (kontrak aktif) | **85** di 9 berkas | INFO di gate |
-| Pohon kerja | **kotor** — 69 berkas berubah belum di-commit | `git status --porcelain` |
-
-**Blok `@kost48-state` di [SERAH-TERIMA](SERAH-TERIMA.md)** adalah potret yang sama dalam bentuk yang diperiksa mesin. Kalau salah satu dari keduanya berbeda dengan kenyataan, **kenyataan yang menang** dan potretnya wajib diperbarui.
+**Rumah potretnya satu:** [SERAH-TERIMA](SERAH-TERIMA.md) §2, dijaga blok `@kost48-state` yang **diperiksa mesin**. Perintah pengukurnya ada di §1 di atas, dan keadaan sesi yang menyimpang dari kenyataan **selalu dimenangkan kenyataan**.
 
 ## 4. Urutan pekerjaan yang mengikat
 
