@@ -5,11 +5,11 @@
 
 `AIDL-01b` adalah increment kedua dari `AIDL-01` ([ANTREAN §3](../ANTREAN.md)); `AIDL-01a` (5 field kontrak) **selesai 11 Okt 2026** — [TASK-AIDL-01a](TASK-AIDL-01a.md). Gate `AIDL-01` di ANTREAN menuntut **dua** hal, dan keduanya harus dibaca terpisah:
 
-> "dengan AI dimatikan atau key kosong, **OWNER/ADMIN/STAFF** tetap melihat kartu tanpa galat; tidak ada angka di luar snapshot; **tidak ada kontrak kartu paralel**" — TENANT **tidak** diberi kartu (keputusan owner 11 Okt 2026 `KARTU-3-ROLE`), jadi langkah "kartu TENANT" di bawah **selesai sebagai keputusan, bukan implementasi**.
+> "dengan AI dimatikan atau key kosong, **OWNER/ADMIN/STAFF/TENANT** tetap melihat kartu tanpa galat; tidak ada angka di luar snapshot; **tidak ada kontrak kartu paralel**" — keempat role termasuk TENANT (ditegaskan owner 11 Okt 2026 setelah sempat salah saya tulis "tiga role"). Aturan mana yang jadi kartu TENANT masih menunggu keputusan owner (**P11**); sampai itu dijawab, langkah kartu TENANT **belum bisa dibangun**.
 
 ## Goal & todos
 
-**Goal.** Memastikan tiap role yang **sudah ditetapkan** (OWNER/ADMIN/STAFF — TENANT tidak diberi kartu, keputusan owner 11 Okt 2026) melihat **kartu keputusan** dari jalur rule-based saat AI mati, memakai kontrak yang **sudah ada** — tanpa mesin kedua dan tanpa kontrak kedua.
+**Goal.** Memastikan tiap role **keempatnya** (OWNER/ADMIN/STAFF/TENANT) melihat **kartu keputusan** dari jalur rule-based saat AI mati, memakai kontrak yang **sudah ada** — tanpa mesin kedua dan tanpa kontrak kedua. Untuk TENANT, aturan mana yang dipakai **menunggu keputusan owner (P11)**.
 
 **Temuan recon yang mengubah lingkup (11 Okt 2026, diperiksa di kode — bukan ingatan):** jalur **rule-based sudah menjadi jalur normal hari ini**, dan sudah lintas role:
 
@@ -31,7 +31,7 @@
 | # | Langkah | Status |
 |---:|---|---|
 | 1 | Recon: rumah aturan tiap role + apa yang benar-benar kurang | **selesai** |
-| 2 | Keputusan owner: apakah TENANT dapat kartu aturan, dan aturan mana | **selesai** — owner 11 Okt 2026 memilih **tidak** (`KARTU-3-ROLE`) |
+| 2 | Keputusan owner: apakah TENANT dapat kartu aturan, dan aturan mana | **dapat kartu** (ditegaskan owner 11 Okt 2026) · **aturan mana** menunggu **P11** |
 | 3 | Fungsi allowlist rute bersama untuk kartu (khusus jalur AI) | **selesai** |
 | 4 | Penandaan `fallback` sungguhan saat AI masuk (`AIDL-03/04`) | belum — sengaja ditunda |
 | 5 | Build frontend + test | **selesai** |
@@ -65,7 +65,8 @@ Diverifikasi 11 Okt 2026 di kode:
 
 1. **Allowlist rute sebagai fungsi murni** + test: rute dikenal diteruskan, rute asing → `undefined` (bukan string mentah).
 2. **Jangan** menyentuh kartu yang sudah tampil: menambah `sourceRefs`/`sebab` ke produsen lama adalah perubahan perilaku tampilan dan **tidak** diminta gate ini.
-3. **TENANT** — **selesai sebagai keputusan: tidak diberi kartu** (owner 11 Okt 2026, `KARTU-3-ROLE`; gate ANTREAN sudah disesuaikan). Kalau nanti owner berubah pikiran, ia menjadi increment baru, bukan bagian `AIDL-01b`.
+3. **TENANT** — **dapat kartu (ditegaskan owner 11 Okt 2026)**, tetapi **aturan mana** yang layak jadi kartu penghuni belum diputuskan: pertanyaan **P11** di [TANYA-OWNER](TANYA-OWNER.md). Sampai dijawab, langkah ini **belum bisa dibangun** dan TENANT tetap tanpa kartu — batas yang dicatat, bukan disembunyikan.
+   Catatan teknis yang sudah terverifikasi (`git grep` di `frontend/src`): `queueItems`/`ActionQueueTable` hari ini hanya dipakai di [StaysPage](../../frontend/src/pages/stays/StaysPage.tsx), [DashboardStaff](../../frontend/src/pages/dashboard/DashboardStaff.tsx), [DashboardAdmin](../../frontend/src/pages/dashboard/DashboardAdmin.tsx), dan [AdminWorkspaces](../../frontend/src/pages/dashboard/AdminWorkspaces.tsx) — **tidak satu pun di portal penghuni** (mis. `MyStayPage.tsx`). Jadi kartu TENANT menjadi **konsumen pertama di area penghuni**, bukan perubahan pada layar yang sudah memakai kartu.
 4. **`fallback`** — tunggu `AIDL-03/04`; menandainya sekarang = metadata bohong.
 5. Tutup increment dengan build + test + commit, lalu perbarui baris ANTREAN bila perlu.
 
