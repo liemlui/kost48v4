@@ -22,7 +22,7 @@ Increment ini adalah bagian pertama dari `AIDL-01` ([ANTREAN §3](../ANTREAN.md)
 
 ## 1. Tujuan & definisi selesai
 
-**Tujuan.** Menyiapkan kontrak kartu keputusan yang dipakai **semua role** (OWNER/ADMIN/STAFF/TENANT) tanpa membuat tipe kedua, sehingga `AIDL-01b` bisa membangun mesin kartu **aturan** di atasnya dan `AIDL-03/04` hanya menambah kualitas (sebab/prioritas) dari AI.
+**Tujuan.** Menyiapkan kontrak kartu keputusan yang dipakai **ketiga role** (OWNER/ADMIN/STAFF — keputusan owner 11 Okt 2026: TENANT **tidak** diberi kartu, lihat [KEPUTUSAN-OWNER](../KEPUTUSAN-OWNER.md) `KARTU-3-ROLE`) tanpa membuat tipe kedua, sehingga `AIDL-01b` bisa membangun mesin kartu **aturan** di atasnya dan `AIDL-03/04` hanya menambah kualitas (sebab/prioritas) dari AI.
 
 **Definisi selesai (dapat diperiksa).**
 

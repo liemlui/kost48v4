@@ -5,11 +5,11 @@
 
 `AIDL-01b` adalah increment kedua dari `AIDL-01` ([ANTREAN §3](../ANTREAN.md)); `AIDL-01a` (5 field kontrak) **selesai 11 Okt 2026** — [TASK-AIDL-01a](TASK-AIDL-01a.md). Gate `AIDL-01` di ANTREAN menuntut **dua** hal, dan keduanya harus dibaca terpisah:
 
-> "dengan AI dimatikan atau key kosong, OWNER/ADMIN/STAFF/TENANT tetap melihat kartu tanpa galat; tidak ada angka di luar snapshot; **tidak ada kontrak kartu paralel**"
+> "dengan AI dimatikan atau key kosong, **OWNER/ADMIN/STAFF** tetap melihat kartu tanpa galat; tidak ada angka di luar snapshot; **tidak ada kontrak kartu paralel**" — TENANT **tidak** diberi kartu (keputusan owner 11 Okt 2026 `KARTU-3-ROLE`), jadi langkah "kartu TENANT" di bawah **selesai sebagai keputusan, bukan implementasi**.
 
 ## Goal & todos
 
-**Goal.** Memastikan tiap role (OWNER/ADMIN/STAFF/TENANT) melihat **kartu keputusan** dari jalur rule-based saat AI mati, memakai kontrak yang **sudah ada** — tanpa mesin kedua dan tanpa kontrak kedua.
+**Goal.** Memastikan tiap role yang **sudah ditetapkan** (OWNER/ADMIN/STAFF — TENANT tidak diberi kartu, keputusan owner 11 Okt 2026) melihat **kartu keputusan** dari jalur rule-based saat AI mati, memakai kontrak yang **sudah ada** — tanpa mesin kedua dan tanpa kontrak kedua.
 
 **Temuan recon yang mengubah lingkup (11 Okt 2026, diperiksa di kode — bukan ingatan):** jalur **rule-based sudah menjadi jalur normal hari ini**, dan sudah lintas role:
 
@@ -31,7 +31,7 @@
 | # | Langkah | Status |
 |---:|---|---|
 | 1 | Recon: rumah aturan tiap role + apa yang benar-benar kurang | **selesai** |
-| 2 | Keputusan owner: apakah TENANT dapat kartu aturan, dan aturan mana | **menunggu owner** — pertanyaan P10 di [TANYA-OWNER](TANYA-OWNER.md) |
+| 2 | Keputusan owner: apakah TENANT dapat kartu aturan, dan aturan mana | **selesai** — owner 11 Okt 2026 memilih **tidak** (`KARTU-3-ROLE`) |
 | 3 | Fungsi allowlist rute bersama untuk kartu (khusus jalur AI) | **selesai** |
 | 4 | Penandaan `fallback` sungguhan saat AI masuk (`AIDL-03/04`) | belum — sengaja ditunda |
 | 5 | Build frontend + test | **selesai** |
@@ -65,7 +65,7 @@ Diverifikasi 11 Okt 2026 di kode:
 
 1. **Allowlist rute sebagai fungsi murni** + test: rute dikenal diteruskan, rute asing → `undefined` (bukan string mentah).
 2. **Jangan** menyentuh kartu yang sudah tampil: menambah `sourceRefs`/`sebab` ke produsen lama adalah perubahan perilaku tampilan dan **tidak** diminta gate ini.
-3. **TENANT** — berhenti dan tanyakan owner lebih dulu (aturan mana yang layak jadi kartu penghuni). Sampai itu dijawab, role TENANT tetap tanpa kartu aturan, dan itu **dicatat sebagai batas**, bukan disembunyikan.
+3. **TENANT** — **selesai sebagai keputusan: tidak diberi kartu** (owner 11 Okt 2026, `KARTU-3-ROLE`; gate ANTREAN sudah disesuaikan). Kalau nanti owner berubah pikiran, ia menjadi increment baru, bukan bagian `AIDL-01b`.
 4. **`fallback`** — tunggu `AIDL-03/04`; menandainya sekarang = metadata bohong.
 5. Tutup increment dengan build + test + commit, lalu perbarui baris ANTREAN bila perlu.
 
