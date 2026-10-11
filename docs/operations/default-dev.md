@@ -189,6 +189,7 @@ Jebakan **produksi** punya rumah sendiri di [produksi §10](produksi.md) — **j
 | `git commit -F <berkas>` gagal `fatal: could not read log file` | `$env:TEMP` **berbeda tiap pemanggilan perintah** di harness ini (`…\Temp\dsh-xxxx\`), sedangkan berkas pesan commit ditulis ke `…\Temp\` | pakai **path absolut yang sama persis** saat menulis dan saat memakai, atau tulis berkas pesan di dalam repo lalu hapus setelah commit. Kejadian 2026-10-10 — staging tidak hilang, commit tinggal diulang dengan path literal |
 | Pertanyaan ke owner dikirim **telanjang** — "mau saya commit?", "lanjut?", atau pilihan singkat tanpa konsekuensi | agen mengejar kecepatan dan menganggap owner sudah tahu konteks yang ada di kepalanya sendiri; akibatnya owner harus menebak, dan satu pertanyaan jadi lebih mahal daripada pekerjaannya | **Format wajib lima unsur**: konteks · pilihan **(a)/(b)/(c)** · konsekuensi + risiko tiap pilihan · rekomendasi agen + alasan · default bila tidak dijawab. Kalau pilihan belum terbayang: **susun dulu** pilihan yang masuk akal — jangan melempar pertanyaan kosong. Kejadian 2026-10-10 **dua kali** (pilihan singkat di alat tanya-jawab, lalu "mau saya commit?" di chat); keduanya ditegur owner. Rumah aturan: [§12](#12-otoritas-keputusan--ekonomi-verifikasi-arah-owner-2026-10-10) + [AGENTS §4](../../AGENTS.md); pertanyaan ditulis di [kerja/TANYA-OWNER.md](../kerja/TANYA-OWNER.md) |
 | Gate menuduh rujukan **hantu** (`R6`) pada kalimat yang justru **menyatakan** berkasnya tidak ada | aturan R6 memeriksa **bentuk** `docs/...` di dalam backtick, bukan makna kalimatnya — jadi menyebut berkas lama sebagai contoh tetap terhitung | kalau berkasnya memang sudah tidak ada, jangan tulis path-nya di dalam backtick: pakai *miring* (mis. *docs/STATUS.md*) atau sebut namanya tanpa awalan `docs/`. Kejadian 2026-10-10 (2× dalam satu commit, `KEPUTUSAN-OWNER` + `TANYA-OWNER`); **jangan** melonggarkan gate-nya — ganti gayanya |
+| Skrip ukur berhenti dengan `SyntaxError: Expected ',' or '}' after property value in JSON` | berkas **data** yang dibaca skrip memuat kutip ganda **tanpa escape** di dalam nilai string — pada 2026-10-10 ini terjadi di `scripts/docs-lines.baseline.json` karena kata berkutip ditulis apa adanya di `alasan` | pakai kutip tunggal (`'…'`) di dalam nilai JSON, atau escape (`\"`). Diagnosis cepat: `Get-Content <berkas> -Raw | ConvertFrom-Json` — kalau gagal, jangan menyalahkan skripnya. Kejadian 2026-10-10 (1×, ketahuan sebelum commit) |
 | PowerShell gagal dengan `Missing closing ')'` atau `if : The term 'if' is not recognized` | `if` adalah **statement**, bukan ekspresi: memakainya di dalam argumen/format (`(if (...) {...} else {...})`) ditolak parser | hitung dulu ke variabel, baru pakai: `$x = if (...) { 'a' } else { 'b' }` di baris terpisah **sah**, lalu pakai `$x` di dalam string. Kejadian 2026-10-10 **dua kali** pada perintah ukur byte yang sama |
 
 ---
@@ -251,6 +252,25 @@ Referensi command ada di §10 berkas ini (cwd, tujuan, dan perintah yang sudah t
 4. **Batas keras** — todos adalah instrumen **sesi**, **bukan** antrean kedua: status pekerjaan proyek tetap di [ANTREAN](../ANTREAN.md) §3; **jangan** menulis daftar kotak `[ ]` ke dokumen mana pun di luar ANTREAN (gate R3) dan jangan membuat berkas antrean paralel.
 5. **Satu goal = satu pekerjaan** yang punya definisi selesai; pekerjaan besar dipecah per increment (`KERJA-KECIL-COMMIT` di [mode-cepat §1b](../product/mode-cepat.md)) sehingga tiap increment bisa ditutup sendiri dan di-commit sendiri.
 6. **Laporan penutup** menyebut goal + jumlah langkah yang selesai — itu yang dibaca owner untuk menilai laju, bukan kesan agen.
+
+**Catatan permanen goal + todos (arah owner 10 Okt 2026 — pilihan c).** Goal dan todos hidup di sesi, tetapi owner memutuskan jejaknya **ikut disimpan di repo** supaya bisa dibuka kembali berbulan-bulan kemudian.
+
+- **Tugas yang punya dokumen kerja** (`docs/kerja/TASK-<ID>.md`): tulis satu boks **Goal & todos** di bagian atas, bentuk baku:
+
+  ```text
+  ## Goal & todos
+  **Goal:** <satu kalimat — apa yang selesai + definisi selesai yang bisa diperiksa>
+  **Bukti penutup:** <perintah/keluaran/commit>
+
+  | # | Langkah | Status |
+  |---:|---|---|
+  | 1 | … | belum |
+  ```
+
+  Status yang dipakai: **`belum` · `jalan` · `selesai` · `blokir`** — **jangan** kotak `[ ]`, karena gate R3 menolak kotak di luar [ANTREAN](../ANTREAN.md).
+- **Tugas kecil (XS/S) tanpa dokumen kerja:** catat **satu baris** di entri changelog: `goal · langkah selesai/total · commit`.
+- **Boks diperbarui selama bekerja**, bukan sekali di awal; saat pekerjaan ditutup, status terakhir + commit pengakhirnya diisi pada baris "Bukti penutup".
+- **Yang dilarang:** menjadikan boks itu daftar pekerjaan berikutnya (itu tugas antipran) atau menyalin status proyek ke sini — ia **catatan**, bukan antrean.
 
 **Ekonomi verifikasi (fokus percepatan app).** Jalankan **verifikasi terkecil yang membuktikan acceptance**, sekali, lalu lanjut. Jangan mengulang audit statis yang sudah ada; jangan build penuh untuk pekerjaan dokumen; test baru hanya bila menutup risiko **uang/auth/schema/kontrak bersama**. Verifikasi yang tidak membuktikan apa pun tentang acceptance = biaya, bukan mutu. **Docs-only tetap tanpa test/build/lint/typecheck**, dan gate dokumen dijalankan **sekali per batch**. **Gate uang §11 tetap berlaku** sampai owner memutuskan lain.
 
