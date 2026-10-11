@@ -2,7 +2,7 @@
 
 Tanggal: 23 September 2026
 Status: Kanonik untuk nilai default DEV, konstanta operasional, data master lapangan, dan referensi seed.
-Tujuan: Rumah kanonik materi referensi master asal `docs/operations/data-master.md` (data mentah lapangan, nilai default, FAQ, data tenant produksi, audit fasilitas).
+Tujuan: Rumah kanonik materi referensi master asal `docs/operations/data-master.md` (data mentah lapangan, nilai default, FAQ).
 Rujukan: [data default & seed DEV pintu masuk](default-dev.md) · [Default & Seed DEV](default-dev.md) · [Produksi & Operasional Harian](produksi.md) · [operasi produksi](deploy-go-live.md)
 
 > **Migrasi batch B9 (23 September 2026):** isi `docs/operations/data-master.md` dipindah ke file ini; teks tidak diubah, hanya tautan relatif yang disesuaikan dengan basis folder tujuan. Batch B9 memindahkan: §2, §2 (Catatan Fisik Kamar), §2 (Fasilitas Per Kamar), §3, §4, §5, §6, §7, §7b, dan §8. Sisa isi M11 ada di [Default & Seed DEV](default-dev.md) (§1a, §1b, §9) dan [Produksi & Operasional Harian](produksi.md) (§ Status penggunaan data untuk go-live, §1c, §7 Data Tenant Produksi, §7b Data Audit Fasilitas Lapangan).
@@ -19,7 +19,7 @@ Rujukan: [data default & seed DEV pintu masuk](default-dev.md) · [Default & See
 |---|---|---|
 | § Status penggunaan data untuk go-live | [operations/produksi.md](produksi.md) | Batas produksi sebelum go-live |
 | §1a Akun Fondasi seed-dev, §1b Akun Audit UAT Non-Personal, §9 Ringkasan Perintah Seed | [operations/default-dev.md](default-dev.md) | DEV + fixture UAT; kredensial tidak ditulis di docs |
-| §1c Data Tenant Produksi (GO-LIVE), §7 Data Tenant Produksi per kamar | [operations/produksi.md](produksi.md) | Data penghuni nyata; input lewat UI Owner |
+| §1c Data Tenant Produksi (GO-LIVE), §16 Data Tenant Produksi per kamar (dulu §7 di sini) | [operations/produksi.md](produksi.md) | Data penghuni nyata; input lewat UI Owner |
 | §2 Kamar (13 kamar nyata), Catatan Fisik Kamar, Fasilitas Per Kamar | File ini | Nilai master lapangan |
 | §3 Fasilitas Umum | File ini | Referensi fasilitas |
 | §3a Data Lapangan Produksi Owner | [operations/produksi.md](produksi.md) | Ground truth lapangan; belum otomatis masuk DB |
@@ -31,7 +31,7 @@ Rujukan: [data default & seed DEV pintu masuk](default-dev.md) · [Default & See
 ## Catatan Pemakaian
 
 - Jadikan file ini rumah kanonik nilai master/default; runbook DEV (akun & perintah seed) ada di [Default & Seed DEV](default-dev.md), data produksi/audit lapangan ada di [Produksi & Operasional Harian](produksi.md).
-- Heading asli (`## 2. Kamar (13 Kamar Nyata)` … `## 8. DeepSeek AI`) dipertahankan apa adanya; penomoran bagian tidak diubah demi keterlacakan.
+- Heading asli (`## 2. Kamar (13 Kamar Nyata)` … `## 6. FAQ Lengkap`) dipertahankan apa adanya; penomoran bagian tidak diubah demi keterlacakan. **Sejak 11 Okt 2026 ada lompatan nomor 6 → 9**: §7, §7b, dan §8 dipindah ke [produksi.md](produksi.md) (lihat tabel "Isi & lokasi kanonik" di atas) dan nomornya **sengaja tidak dipakai ulang** supaya rujukan lama tetap menunjuk hal yang sama.
 - **Batas DEV/UAT/produksi tetap eksplisit:** DEV di `operations/default-dev.md`, UAT non-personal mengikuti berkas audit AO-03, produksi/audit lapangan di `operations/produksi.md`.
 - **Keselamatan data:** materi ini memuat data lapangan yang dapat memuat PII; jangan salin ke paket deploy, log, atau artefak publik.
 ---
