@@ -17,6 +17,9 @@ Mulai dari sini, berurutan:
 4. docs/kerja/SERAH-TERIMA.md — keadaan terakhir, pelajaran, batas, langkah berikutnya.
 5. docs/kerja/PROMPT-SESI-BERIKUTNYA.md (berkas ini) — jalankan §3 untuk mengukur keadaan.
 
+Sebelum menyentuh berkas apa pun: buat GOAL + TODOS untuk pekerjaan ini (AGENTS §7 · default-dev §12).
+Owner memakai keduanya untuk tracking; pekerjaan tanpa keduanya dianggap tidak terlacak.
+
 Gate — jalankan SEKALI di akhir tugas, bukan per langkah:
   docs-only            -> node scripts/check-docs.mjs
   + kartu kesehatan    -> node scripts/ukur-kekuatan-docs.mjs   (13 pemeriksaan, termasuk ratchet baris)
@@ -62,6 +65,7 @@ Potret **2026-10-07**, `main`, HEAD **`65d1dab4`**:
 3. **Berkas risiko** (uang, auth, schema DB, kontrak API) tidak disentuh tanpa izin eksplisit + rencana ([KONTRAK §6](../KONTRAK.md)).
 4. **Bertanya hanya untuk empat hal**: uang · perilaku pengguna · hapus data · deploy/secret. Di luar itu putuskan sendiri + catat satu baris ([KONTRAK §2](../KONTRAK.md)).
 5. **Tugas level ≥S boleh punya dokumen kerja** `docs/kerja/TASK-<ID>.md` — 7 bagian, tanpa kotak, bukan antrean kedua ([ANTREAN §3](../ANTREAN.md)).
+6. **Goal + todos wajib dibuat sebelum bekerja** dan diperbarui selama bekerja ([AGENTS §7](../../AGENTS.md) · [default-dev §12](../operations/default-dev.md)); goal ditutup hanya bila definisi selesainya terpenuhi.
 
 ## 5. Jebakan yang sudah terverifikasi (jangan terperangkap lagi)
 

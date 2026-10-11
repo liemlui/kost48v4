@@ -243,6 +243,15 @@ Referensi command ada di §10 berkas ini (cwd, tujuan, dan perintah yang sudah t
 **Contoh benar** (bentuk yang diharapkan): *"Kontekns: dua berkas source Anda belum di-commit. (a) Saya build frontend lalu commit+push — bukti kompilasi, ±10 menit, tidak menyentuh produksi. (b) Commit tanpa build — 1 menit, risiko: kalau ada galat TypeScript, `main` jadi merah untuk sesi berikutnya. (c) Biarkan — main tetap bersih, tetapi perubahan Anda tidak terlacak. Rekomendasi: (a). Default bila tidak dijawab: (c)."*
 **Contoh salah:** *"Mau saya commit juga berkas source-nya?"* — tidak ada pilihan, tidak ada konsekuensi, tidak ada default.
 
+**Goal & todos pada setiap pekerjaan (arah owner 10 Okt 2026 — wajib, untuk tracking owner).** Pekerjaan yang tidak punya keduanya dianggap **tidak terlacak**, sekalipun hasilnya benar.
+
+1. **Goal** — satu kalimat tujuan + **definisi selesai yang bisa diperiksa**, menyebut berkas/keluaran yang menjadi bukti. Goal ditutup **hanya** bila definisi selesai benar-benar terpenuhi; kalau belum, tulis apa yang kurang — jangan ditutup diam-diam.
+2. **Todos** — langkah konkret, satu baris per langkah, status `pending`/`in_progress`/`completed` diperbarui **selama** bekerja (bukan sekali di awal). Item selesai ditandai begitu selesai; langkah baru yang muncul ditambahkan, tidak disembunyikan.
+3. **Blokir** — pekerjaan yang macet **≥3 putaran** ditandai `blocked` dengan **sebab konkret** (bukan "sulit" atau "belum yakin"), supaya owner bisa memutuskan.
+4. **Batas keras** — todos adalah instrumen **sesi**, **bukan** antrean kedua: status pekerjaan proyek tetap di [ANTREAN](../ANTREAN.md) §3; **jangan** menulis daftar kotak `[ ]` ke dokumen mana pun di luar ANTREAN (gate R3) dan jangan membuat berkas antrean paralel.
+5. **Satu goal = satu pekerjaan** yang punya definisi selesai; pekerjaan besar dipecah per increment (`KERJA-KECIL-COMMIT` di [mode-cepat §1b](../product/mode-cepat.md)) sehingga tiap increment bisa ditutup sendiri dan di-commit sendiri.
+6. **Laporan penutup** menyebut goal + jumlah langkah yang selesai — itu yang dibaca owner untuk menilai laju, bukan kesan agen.
+
 **Ekonomi verifikasi (fokus percepatan app).** Jalankan **verifikasi terkecil yang membuktikan acceptance**, sekali, lalu lanjut. Jangan mengulang audit statis yang sudah ada; jangan build penuh untuk pekerjaan dokumen; test baru hanya bila menutup risiko **uang/auth/schema/kontrak bersama**. Verifikasi yang tidak membuktikan apa pun tentang acceptance = biaya, bukan mutu. **Docs-only tetap tanpa test/build/lint/typecheck**, dan gate dokumen dijalankan **sekali per batch**. **Gate uang §11 tetap berlaku** sampai owner memutuskan lain.
 
 **Dilarang:** menahan task hanya karena menunggu jawaban yang tidak wajib (tulis default + lanjut), dan menanyakan ulang hal yang sudah diputuskan ([KONTRAK §8](../KONTRAK.md)).
