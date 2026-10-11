@@ -28,6 +28,20 @@ export type ActionQueueItem = {
   ruleId?: string;
   entityType?: string;
   entityId?: string | number | null;
+  // ── 5 field keputusan kartu (AIDL-01a) — semuanya opsional supaya kartu lama
+  //    yang belum mengisinya tetap sah dan 4 consumer lama tidak perlu diubah.
+  //    Normalisasi (sourceRefs kosong, expiresAt lewat) ada di SATU tempat:
+  //    `frontend/src/utils/decisionCard.ts`. Kontrak: portal-owner-admin §10.
+  /** Mengapa hal ini terjadi (boleh disusun AI). */
+  sebab?: string;
+  /** Apa yang berubah bila dilakukan/diabaikan (kaitan uang/okupansi). */
+  dampak?: string;
+  /** Snapshot/endpoint asal angka — kartu tidak boleh mengarang angka. */
+  sourceRefs?: { label: string; ref: string }[];
+  /** Masa berlaku kartu; mencegah kartu basi tampil sebagai fakta. */
+  expiresAt?: string | null;
+  /** `true` bila kartu berasal dari jalur rule-based, bukan AI. */
+  fallback?: boolean;
 };
 
 const priorityLabel: Record<AssistantSeverity, { label: string; status: string }> = {

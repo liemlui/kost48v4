@@ -9,16 +9,16 @@ Increment ini adalah bagian pertama dari `AIDL-01` ([ANTREAN §3](../ANTREAN.md)
 
 **Goal.** Tipe `ActionQueueItem` punya **5 field tambahan** — `sebab`, `dampak`, `sourceRefs[]`, `expiresAt`, `fallback` — **di tipe yang sudah ada** (bukan kontrak paralel), dan **seluruh consumer lama tetap terkompilasi**. **Bukan** bagian increment ini: mesin kartu aturan (itu `AIDL-01b`) dan halaman `/cepat` (itu `AIDL-02a`).
 
-**Bukti penutup:** _belum diisi — diisi saat increment ditutup (perintah build + jumlah test + commit)._
+**Bukti penutup — terisi 11 Okt 2026.** Build frontend `exit 0` (`tsc -b` lulus, `vite build` 44,98 s, PWA `qEDSp80ZMc1w`, `chunks=162`) · **test baru 12/12 lulus** (`npx vitest run src/test/unit/decisionCardNormalize.test.ts`) · **seluruh test frontend 180/180 lulus di 36 berkas** (bukti tidak ada test lain yang rusak) · berkas diubah: `ActionQueueTable.tsx` (+5 field opsional), `utils/decisionCard.ts` (baru), `src/test/unit/decisionCardNormalize.test.ts` (baru). **Batas:** test baru menguji fungsi normalisasi murni, **bukan** render komponen; dan **belum ada layar yang memakai** kelima field itu (`AIDL-01b` yang memakainya).
 
 | # | Langkah | Status |
 |---:|---|---|
-| 1 | Catat baseline: tipe di `ActionQueueTable.tsx` + 4 consumer + util dedupe | belum |
-| 2 | Tambah 5 field **opsional** ke tipe (field lama tidak diubah) | belum |
-| 3 | Satukan normalisasi/validasi di satu helper bersama (jangan tersebar di halaman) | belum |
-| 4 | Test kecil: field lama tetap valid · `fallback` benar saat AI mati · `expiresAt` lewat ditandai | belum |
-| 5 | Build frontend + pastikan 4 consumer tetap kompilasi | belum |
-| 6 | Isi baris "Bukti penutup" + commit (satu increment = satu commit) | belum |
+| 1 | Catat baseline: tipe di `ActionQueueTable.tsx` + 4 consumer + util dedupe | **selesai** |
+| 2 | Tambah 5 field **opsional** ke tipe (field lama tidak diubah) | **selesai** |
+| 3 | Satukan normalisasi/validasi di satu helper bersama (jangan tersebar di halaman) | **selesai** |
+| 4 | Test kecil: field lama tetap valid · `fallback` benar saat AI mati · `expiresAt` lewat ditandai | **selesai** |
+| 5 | Build frontend + pastikan 4 consumer tetap kompilasi | **selesai** |
+| 6 | Isi baris "Bukti penutup" + commit (satu increment = satu commit) | **selesai** |
 
 ## 1. Tujuan & definisi selesai
 
