@@ -1,6 +1,6 @@
 # TANYA-OWNER — pertanyaan yang menunggu keputusan owner
 
-> **Blok baca** · Jenis: **daftar pertanyaan untuk owner (bukan antrean, bukan kontrak)** · Status: **aktif — 1 pertanyaan terbuka (P9, 11 Okt 2026)** · Untuk siapa: owner + agen yang butuh jawaban sebelum melanjutkan
+> **Blok baca** · Jenis: **daftar pertanyaan untuk owner (bukan antrean, bukan kontrak)** · Status: **aktif — 2 pertanyaan terbuka (P9 dokumentasi, P10 kartu TENANT), 11 Okt 2026** · Untuk siapa: owner + agen yang butuh jawaban sebelum melanjutkan
 > · Baca kalau: owner ingin melihat **apa yang sedang menunggu keputusannya**, atau agen mau memastikan tidak ada pertanyaan terbuka. · **Jangan** dibaca kalau: mencari keputusan yang sudah final (itu [KEPUTUSAN-OWNER](../KEPUTUSAN-OWNER.md)) atau memilih tugas (itu [ANTREAN](../ANTREAN.md)).
 
 ## 1. Cara pakai berkas ini (format wajib — arah owner 10 Okt 2026)
@@ -16,6 +16,20 @@ Setiap pertanyaan **wajib** memakai lima unsur ini, dalam bahasa manusia — buk
 **Dilarang:** pertanyaan telanjang di chat ("mau saya commit?"), pertanyaan ya/tidak tanpa konsekuensi, dan pertanyaan yang memaksa owner membaca kode untuk bisa menjawab. Pertanyaan yang sudah dijawab **dipindah** ke [KEPUTUSAN-OWNER](../KEPUTUSAN-OWNER.md) dan **dihapus** dari sini. Tidak ada kotak `[ ]` di sini — ini bukan antrean kerja.
 
 ## 2. Pertanyaan terbuka
+
+### P10. Penghuni (TENANT) dapat kartu keputusan juga, atau cukup layar biasa?
+
+**Konteks.** Gate `AIDL-01` di [ANTREAN §3](../ANTREAN.md) menyebut **empat** role: OWNER, ADMIN, STAFF, TENANT. Recon 11 Okt 2026 di kode menemukan kartu aturan (rule-based) **sudah hidup untuk tiga role** — OWNER ([useBusinessHealthScore.ts](../../frontend/src/hooks/useBusinessHealthScore.ts), 6 aturan) + ([useOperationalStressIndex.ts](../../frontend/src/hooks/useOperationalStressIndex.ts)) · ADMIN ([DashboardAdmin.tsx](../../frontend/src/pages/dashboard/DashboardAdmin.tsx), 8 aturan + opsStress) · STAFF (`opsStress.queueItems`) — total **16 aturan**, dan semuanya **tanpa AI**. **TENANT belum punya produsen aturan sama sekali.** Menambahkan kartu untuk penghuni = **perilaku pengguna baru** (penghuni melihat "keputusan" di layarnya), jadi ini wajib keputusan Anda — bukan keputusan teknis agen ([AGENTS §4](../../AGENTS.md)).
+
+**Pilihan dan konsekuensinya:**
+
+- **(a) TENANT dapat kartu aturan, daftar minimal (3 aturan).** Mis. tagihan jatuh tempo, perpanjangan menunggu keputusan, pengajuan keluar berjalan. Yang terjadi: gate `AIDL-01` terpenuhi untuk keempat role. Biaya ±1 sesi (kode + test + build). **Risiko sedang:** penghuni melihat istilah internal bila aturannya tidak ditulis dari sudut pandangnya; perlu tinjauan kalimat.
+- **(b) TENANT tetap tanpa kartu; gate `AIDL-01` dianggap terpenuhi untuk 3 role saja.** Paling murah dan tidak menyentuh layar penghuni. **Risiko rendah**, tetapi gate di ANTREAN berbunyi "OWNER/ADMIN/STAFF/TENANT" sehingga **butuh Anda mengubah bunyi gate** itu agar tidak menjadi utang palsu.
+- **(c) Tunda keputusan; lanjut ke `AIDL-02` (shell `/cepat`).** Yang terjadi: `AIDL-01` tetap terbuka pada bagian TENANT, tetapi pekerjaan lain maju. Biaya 0 sekarang. **Risiko:** gate `AIDL-01` tidak bisa ditutup.
+
+**Rekomendasi saya: (b) lalu (c).** Alasan: value kartu keputusan untuk penghuni belum terbukti (mereka punya sedikit keputusan yang perlu diputuskan di aplikasi), sedangkan biaya + risiko kalimat internal lebih besar dari manfaatnya saat ini. Menutup gate dengan kalimat yang jujur (3 role) lebih baik daripada memaksakan role keempat demi kecocokan teks.
+
+**Default bila tidak dijawab:** saya **tidak** menambah kartu TENANT (tidak menyentuh layar penghuni) dan melanjutkan ke `AIDL-02`; baris gate `AIDL-01` saya biarkan terbuka hanya pada bagian TENANT sampai Anda memutuskan.
 
 ### P9. Pemadatan dokumentasi domain+operasi: mulai dari klaster IoT, atau tunggu target Anda?
 
@@ -81,3 +95,4 @@ Dicatat supaya owner tahu apa yang berjalan tanpa menunggu dia — rincian di [d
 | 2026-10-10 | **P8 dijawab owner: (d)** → dipindah ke [KEPUTUSAN-OWNER](../KEPUTUSAN-OWNER.md) `P8-BUILD-SEBELUM-COMMIT`; dieksekusi (build lulus, commit `64107e55` dipush). Berkas ini kembali kosong dari pertanyaan terbuka. |
 | 2026-10-10 | **Pertanyaan lanjutan dijawab owner: (c)** (goal+todos dicatat permanen) → dipindah ke [KEPUTUSAN-OWNER](../KEPUTUSAN-OWNER.md) `LOG-GOAL-TODOS-PERMANEN`. **Penyimpangan yang dicatat apa adanya:** pertanyaan itu diajukan di chat dengan format lima unsur lengkap, tetapi **tidak lebih dulu ditulis ke berkas ini** — bagian "juga ditulis ke TANYA-OWNER" pada §1 tidak dipenuhi. Mulai sekarang pertanyaan ditulis di sini **lebih dulu**, lalu dipaparkan di chat. |
 | 2026-10-11 | **P9 ditambahkan (pemadatan dokumentasi: mulai dari klaster IoT atau tunggu target owner).** Dijawab lebih dulu di berkas ini **sebelum** dipaparkan di chat, sesuai perbaikan aturan pada baris di atas. Dua koreksi yang ikut tercatat di konteks P9: angka potret §5 "7.887 baris di 20 berkas" tidak cocok dengan ukuran nyata (**7.900 baris di 18 berkas**), dan kandidat "klaster AI" di potret menunjuk berkas domain AI pemantauan yang **tidak ada di disk** (temuan ini sempat ditulis dalam backtick dan **ditegur gate R6** — sudah diperbaiki dengan menyebutnya sebagai deskripsi, bukan path). Blok P8 lama masih ada di §2 sebagai catatan pertanyaan lampau (jawabannya sudah di [KEPUTUSAN-OWNER](../KEPUTUSAN-OWNER.md)); ia boleh dihapus pada pembersihan berkas berikutnya. |
+| 2026-10-11 | **P10 ditambahkan (kartu keputusan untuk penghuni/TENANT).** Muncul dari recon `AIDL-01b`: 16 aturan rule-based sudah hidup untuk OWNER/ADMIN/STAFF, TENANT belum punya. Karena menambah kartu penghuni = perilaku pengguna baru, keputusannya diangkat ke owner dengan 5 unsur lengkap. Default: kartu TENANT **tidak** ditambah, lanjut ke `AIDL-02`. |
