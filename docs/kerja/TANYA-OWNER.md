@@ -37,6 +37,8 @@ Setiap pertanyaan **wajib** memakai lima unsur ini, dalam bahasa manusia — buk
 - **(b) Bereskan potret dulu + inventaris duplikasi, tanpa menyentuh isi domain.** Biaya ±1 jam, 3–4 berkas dokumen. **Risiko rendah** — isi aturan domain tidak tersentuh. Target pemadatan belum jalan.
 - **(c) Tunda pemadatan, pindah ke Mode Cepat (`AIDL-01a`).** Sejalan dengan fokus Anda. Biaya ±1 sesi, 2–3 berkas kode + test. **Risiko sedang:** menyentuh kode; `AIDL-02` (login/saklar mode) **wajib** keputusan Anda karena itu flow pengguna baru.
 
+**Sudah dieksekusi 11 Okt 2026 (kasus terbesar, tanpa menyentuh aturan bisnis):** blok salinan produksi di data-master.md dipindah utuh ke arsip, **−234 baris** dokumen aktif, gate + kartu hijau, ledger SHA-256 terdaftar. Yang **masih menunggu keputusan Anda** tinggal: (1) sisa penggabungan yang menuntut penilaian **makna** aturan (bukan duplikat verbatim), dan (2) kandidat klaster IoT (±1.950 baris) yang perlu Anda putuskan cara gabungnya. Rekomendasi & default seperti di bawah.
+
 **Rekomendasi saya: (b) dulu, lalu (a) sebagai batch pertama, dan jangan berharap (a) menyelesaikan sasaran.** Angka di atas menunjukkan sasaran −20% hanya tercapai bila Anda ikut memutuskan aturan mana yang boleh digabung; (b) memberi Anda daftar itu tanpa mengubah isi aturan. **Default bila tidak dijawab:** saya jalankan **(b)** — lengkapi inventaris tumpang-tindih **makna** (bukan hanya verbatim) untuk kandidat terbesar, tanpa menyentuh isi domain — lalu berhenti sebelum penggabungan pertama. Baseline tetap di angka terukur (hijau) dan **bisa Anda kembalikan ke 14.055** kapan pun — lihat butir 3 di atas.
 
 ### P8. (SUDAH DIJAWAB 10 Okt 2026 — pemilik aturannya: lihat register) Dua berkas source Anda — di-commit sekarang atau tidak?

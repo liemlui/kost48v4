@@ -139,7 +139,7 @@ Identitas deployment (menutup sebagian EF-00 §9.1 M19):
 - [x] **Hapus file password tenant** `~/TENANT-PASSWORD-AWAL-BACA-LALU-HAPUS.txt` — selesai 20 Sep 2026; penghapusan file tidak membuktikan penggantian password akun tenant.
 - [ ] **Lengkapi fondasi akuntansi lewat UI:** periode `OPEN` (1, bulan berjalan) dan 2 CashAccount (Kas Tunai + Bank Utama, saldo awal 0) **sudah dibuat 13 Sep 2026** — catatan lama "masih 0" tidak berlaku lagi. Yang belum: **opening balance diisi** (atau zero-start dicatat), karena kesiapan akuntansi masih 75/100 dengan `formalStatementReady=false` ([produksi §3](produksi.md)).
 - [ ] **Cron AutoOps** (setelah UAT): Environment Variables cPanel → `AUTO_OPS_ENABLED=false` + `AUTO_OPS_CRON_TOKEN=<acak>`; cPanel Cron Jobs tiap 5 menit → `POST /api/auto-ops/cron` dengan header `X-Cron-Token`. **Jangan** pasang cron IoT Tuya.
-- [ ] **Onboarding penghuni nyata** melalui `docs/operations/data-master.md` (form lama FORM_ISI_DATA_GO_LIVE.md tidak ada lagi di repo).
+- [ ] **Onboarding penghuni nyata** melalui [produksi.md](produksi.md) §15–§16 (data tenant produksi; form lama FORM_ISI_DATA_GO_LIVE.md tidak ada lagi di repo).
 - [x] **Pembersihan disk/inode** — selesai 20 Sep 2026: `~/kost48v3` (191 MB), `~/kost48surabaya` (24 MB), 5 tgz staging lama (~98 MB), 3 folder `client-old-*`, `sql/seed.sql` (854 KB) + `sql/seed_ORIGINAL.sql` (618 KB) dihapus. App root 257 → 129 MB; home dir ~1.1 GB → ~660 MB; `~/backups` dan `~/lui` dipertahankan. Inode sesudah cleanup belum diukur.
 - [ ] **PostgreSQL 9.6.22 sudah EOL** (Nov 2021) — tanyakan ke IDwebhost apakah tersedia versi lebih baru.
 
