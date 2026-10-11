@@ -295,7 +295,7 @@ Yang **tetap berlaku**: AI hanya OWNER (§5), kartu = aturan ∪ AI (§7), agend
 1. **Harga lama dipegang** selama kos dan bayar tepat waktu (`Stay.agreedRentAmountRupiah` vs `Room.monthlyRateRupiah`).
 2. **Lewat jatuh tempo → dihitung penghuni baru:** hanya DP 30%, harga sekarang, boleh tinggal **5 hari**; kamar dapat ditawarkan di iklan.
 3. **Bila 5 hari itu juga lewat:** kamar ditawarkan kembali, **DP hangus**, dan itu **selalu diinformasikan**; **deposit titipan dikembalikan**; staff membersihkan kamar dalam 3 jam.
-4. **Tidak ada aturan "menunggak >30 hari"** — manual penghuni masih memuatnya dan harus diperbaiki.
+4. **Tidak ada aturan "menunggak >30 hari"** — manual penghuni **sudah diperbaiki 10 Okt 2026** (`MyManualPage.tsx` memuat kalimat itu sampai commit `b2354c78`; dihapus, sesuai keputusan owner `TIDAK-ADA-ATURAN-30-HARI`).
 5. **Ganti kontrak sewa** (bulanan ⇄ 2 mingguan ⇄ mingguan ⇄ harian) memakai rumus yang sama dari harga dasar, bila diambil **sebelum** jatuh tempo.
 6. **Listrik & air sudah termasuk** untuk 2 mingguan, mingguan, dan harian; **kembali ke bulanan → memotret angka meter kWh sebagai acuan baru**.
 7. **Prabayar/tambah masa pakai 1–24 bulan** lewat halaman penghuni (endpoint sudah ada), diblokir bila masih ada tagihan belum lunas.

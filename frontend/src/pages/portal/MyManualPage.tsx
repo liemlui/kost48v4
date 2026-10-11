@@ -139,7 +139,7 @@ const GUIDE_TABS = [
       },
       {
         heading: 'Jatuh Tempo & Keterlambatan',
-        body: `• Tagihan sewa: jatuh tempo sesuai tanggal check-in setiap bulan.\n• Tagihan listrik: jatuh tempo 7 hari setelah diterbitkan.\n• TIDAK ada denda keterlambatan.\n• Namun tagihan yang menunggak dapat menghambat proses perpanjangan/checkout.\n• Jika menunggak >30 hari, pengelola berhak memutus sewa.`,
+        body: `• Tagihan sewa: jatuh tempo sesuai tanggal check-in setiap bulan.\n• Tagihan listrik: jatuh tempo 7 hari setelah diterbitkan.\n• TIDAK ada denda keterlambatan.\n• Namun tagihan yang menunggak dapat menghambat proses perpanjangan/checkout.`,
       },
     ],
   },

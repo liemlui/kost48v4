@@ -7,6 +7,8 @@ import { Link } from 'react-router-dom';
  * Halaman statis (tanpa panggilan API, tanpa login) supaya bisa dibuka cepat dari HP.
  * Isinya sengaja TIDAK memuat kredensial/PII: hanya status dan langkah.
  * Perbarui daftar ini secara manual saat item selesai.
+ * Sumber kebenaran antrean: docs/ANTREAN.md. Bila halaman ini berbeda dengan antrean
+ * internal, antrean internal yang berlaku — perbarui halaman ini setiap antrean berubah.
  */
 
 type Status = 'selesai' | 'sebagian' | 'belum' | 'keputusan';
@@ -25,12 +27,13 @@ const SECTIONS: Array<{
 }> = [
   {
     title: '1. Deployment & teknis',
-    note: 'Status 13 September 2026.',
+    note: 'Status 25 September 2026.',
     items: [
       { label: 'Aplikasi live', detail: 'kost48surabaya.com — versi 1.3.0, Passenger menyajikan SPA + API', status: 'selesai' },
       { label: 'Database produksi', detail: 'Database baru, 13 kamar, 38 akun COA', status: 'selesai' },
       { label: 'HTTPS & header cache', detail: 'PWA: /sw.js dan /version.json no-store', status: 'selesai' },
-      { label: 'Gate KTP aktif', detail: 'Kamar tidak bisa diaktifkan tanpa KTP terverifikasi', status: 'selesai' },
+      { label: 'Gate KTP', detail: 'Mekanisme tersedia, tetapi gerbang KTP di produksi ditunda atas keputusan owner 23 Sep — wajib ditinjau sebelum onboarding penghuni nyata', status: 'keputusan' },
+      { label: 'Deploy commit lokal terbaru', detail: 'Menunggu rencana rilis: artefak, target, langkah rollback, dan uji sesudah deploy', status: 'belum' },
       { label: 'Backup pra-deploy', detail: 'Database + aplikasi lama tersimpan di folder backups', status: 'selesai' },
     ],
   },
@@ -82,6 +85,20 @@ const SECTIONS: Array<{
       { label: 'Bersihkan sisa aplikasi lama', detail: 'Dua direktori + arsip besar masih memakai kuota disk', status: 'belum' },
     ],
   },
+  {
+    title: '7. Dua mode: Cepat & Normal (agenda AI)',
+    note: 'Arah 25 September 2026: halaman Normal tetap seperti sekarang; halaman baru "Mode Cepat" menyusun arahan kerja — AI hanya untuk owner dan dihitung terjadwal, biaya ditampilkan hanya ke owner.',
+    items: [
+      { label: 'Keputusan dua mode', detail: 'Sudah ditetapkan owner 25 Sep: halaman Cepat berdampingan dengan Normal, halaman Normal tidak diubah', status: 'sebagian' },
+      { label: 'Kartu keputusan tanpa AI (aturan biasa)', detail: 'Fondasi untuk semua role; tetap tampil walau AI mati atau kuota habis', status: 'belum' },
+      { label: 'Halaman Mode Cepat + pilihan setelah login', detail: 'Owner & admin memilih Cepat atau Normal; staff & tenant langsung masuk Cepat', status: 'belum' },
+      { label: 'Tautan rekomendasi bisa diklik', detail: 'AI sudah mengirim tautan lokasi tindakan, tetapi belum ditampilkan sebagai tombol', status: 'sebagian' },
+      { label: 'Agenda AI otomatis 1x sehari + info biaya', detail: 'Dihitung terjadwal lalu disimpan; membuka halaman tidak memanggil AI', status: 'belum' },
+      { label: 'Catat pemakaian & harga AI', detail: 'Prasyarat sebelum angka biaya boleh ditampilkan; saat ini yang jujur hanya kuota', status: 'belum' },
+      { label: 'Kirim ringkasan ke WhatsApp & cetak', detail: 'Untuk owner & admin; tanpa NIK, foto, atau alamat', status: 'belum' },
+      { label: 'Tinjauan pemakaian setelah 30 hari', detail: 'Menentukan apakah isi kartu perlu diperbaiki; bukan menambah fitur', status: 'belum' },
+    ],
+  },
 ];
 
 export default function CekPage() {
@@ -98,6 +115,7 @@ export default function CekPage() {
       <h1 className="h4 mb-1">Checklist Go-Live KOST48</h1>
       <p className="text-muted small">
         Ringkasan status persiapan produksi. Halaman ini tidak memuat password, NIK, atau data pribadi penghuni.
+        Diperbarui manual; bila berbeda dengan antrean kerja internal, antrean internal yang berlaku.
       </p>
 
       <div className="d-flex flex-wrap gap-2 mb-3">
@@ -143,6 +161,10 @@ export default function CekPage() {
             <li>Pasang kron AutoOps di cPanel.</li>
             <li>Rotasi JWT secret &amp; password database sebelum data penghuni asli dipakai.</li>
           </ol>
+          <p className="text-muted small mb-0 mt-2">
+            Jalur paralel: bagian 7 (dua mode Cepat &amp; Normal) berjalan tanpa menunggu item di atas — mulai dari kartu
+            keputusan tanpa AI, lalu menampilkan tautan rekomendasi AI sebagai tombol pada halaman Mode Cepat.
+          </p>
         </Card.Body>
       </Card>
 
