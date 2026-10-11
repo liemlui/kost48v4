@@ -1,6 +1,6 @@
 # TANYA-OWNER — pertanyaan yang menunggu keputusan owner
 
-> **Blok baca** · Jenis: **daftar pertanyaan untuk owner (bukan antrean, bukan kontrak)** · Status: **aktif — 1 pertanyaan terbuka (P8, 10 Okt 2026)** · Untuk siapa: owner + agen yang butuh jawaban sebelum melanjutkan
+> **Blok baca** · Jenis: **daftar pertanyaan untuk owner (bukan antrean, bukan kontrak)** · Status: **aktif — kosong per 10 Okt 2026 (P8 sudah dijawab)** · Untuk siapa: owner + agen yang butuh jawaban sebelum melanjutkan
 > · Baca kalau: owner ingin melihat **apa yang sedang menunggu keputusannya**, atau agen mau memastikan tidak ada pertanyaan terbuka. · **Jangan** dibaca kalau: mencari keputusan yang sudah final (itu [KEPUTUSAN-OWNER](../KEPUTUSAN-OWNER.md)) atau memilih tugas (itu [ANTREAN](../ANTREAN.md)).
 
 ## 1. Cara pakai berkas ini (format wajib — arah owner 10 Okt 2026)
@@ -17,7 +17,7 @@ Setiap pertanyaan **wajib** memakai lima unsur ini, dalam bahasa manusia — buk
 
 ## 2. Pertanyaan terbuka
 
-### P8. Dua berkas source Anda — di-commit sekarang atau tidak?
+### P8. (SUDAH DIJAWAB 10 Okt 2026 — pemilik aturannya: lihat register) Dua berkas source Anda — di-commit sekarang atau tidak?
 
 **Konteks.** Ada dua berkas kode yang **sudah Anda ubah sendiri** sebelum sesi ini dan masih **belum di-commit**: [MyManualPage.tsx](../../frontend/src/pages/portal/MyManualPage.tsx) (kalimat "jika menunggak >30 hari, pengelola berhak memutus sewa" dihapus dari panduan penghuni) dan [CekPage.tsx](../../frontend/src/pages/public/CekPage.tsx) (ditambah bagian 7 tentang dua mode Cepat & Normal, catatan tanggal diperbarui ke 25 Sep, ditambah baris "deploy menunggu rencana rilis"). Karena belum di-commit, kedua perubahan itu **tidak terlacak git dan tidak ikut ter-push ke `main`**. Saya belum menyentuhnya, karena ini kode — bukan dokumen.
 
@@ -33,7 +33,7 @@ Yang **tidak** terjadi pada ketiga pilihan: **produksi tidak berubah** — deplo
 
 **Rekomendasi saya: (a).** Alasannya: `CekPage.tsx` adalah halaman **publik** yang dibaca calon penghuni, dan build adalah bukti minimum yang murah sebelum isinya masuk `main` lewat push. Gate uang tidak berlaku di sini, dan aturan Anda sendiri (`MOBILE-FIRST`, `UI-BOLEH-ROMBAK`) membuat perubahan tampilan tidak perlu ditahan. Catatan jujur: **build ≠ tampilannya benar** — build hanya membuktikan tidak ada galat tipe/import; verifikasi visual halaman perlu langkah terpisah.
 
-**Default bila tidak dijawab: (c)** — saya tidak menyentuh kode Anda, dan pekerjaan lain tetap jalan (AIDL-01a mulai dari kode baru, bukan dari berkas itu).
+**Jawaban owner: (d)** — periksa isi → build → commit + push. Sudah dieksekusi: build `exit 0` (tsc lulus, vite 1m 23s, PWA `qEDSp80ZMc1w`) dan commit `64107e55` dipush; satu cacat ditemukan saat pemeriksaan isi dan diperbaiki sebelum commit (komentar `CekPage.tsx` menunjuk berkas antrean lama *docs/STATUS.md* yang tidak ada). Keputusan lengkap: [KEPUTUSAN-OWNER](../KEPUTUSAN-OWNER.md) `P8-BUILD-SEBELUM-COMMIT`. Blok pertanyaan ini boleh dihapus pada pembersihan dokumen berikutnya (arah owner P7: padatkan seefisien mungkin).
 
 ## 3. Keputusan yang TIDAK perlu ditanyakan ke owner (agen memutuskan sendiri)
 
@@ -54,3 +54,4 @@ Dicatat supaya owner tahu apa yang berjalan tanpa menunggu dia — rincian di [d
 | 2026-10-10 | Dibuat: tujuh pertanyaan (P1–P7) dengan format konteks · pilihan · risiko · rekomendasi · default. |
 | 2026-10-10 | **Dijawab owner** → dipindah ke [KEPUTUSAN-OWNER](../KEPUTUSAN-OWNER.md) (`MODE-CEPAT-UTAMA + KERJA-KECIL-COMMIT`); berkas dikosongkan dari pertanyaan terbuka. |
 | 2026-10-10 | **Format pertanyaan diperketat** (arahan owner: "jelaskan detail, bahasa manusia, generate pilihan, sebutkan segala konsekuensinya"): format lima unsur jadi wajib, ditambah contoh benar vs salah, dan pertanyaan telanjang di chat dinyatakan pelanggaran. Aturan ikut masuk [AGENTS §4](../../AGENTS.md) + [default-dev §10a/§12](../operations/default-dev.md). Pertanyaan baru **P8** ditambahkan lengkap dengan pilihan (a)/(b)/(c) + konsekuensinya. |
+| 2026-10-10 | **P8 dijawab owner: (d)** → dipindah ke [KEPUTUSAN-OWNER](../KEPUTUSAN-OWNER.md) `P8-BUILD-SEBELUM-COMMIT`; dieksekusi (build lulus, commit `64107e55` dipush). Berkas ini kembali kosong dari pertanyaan terbuka. |
