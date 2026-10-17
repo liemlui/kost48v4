@@ -1,7 +1,7 @@
 # Mode Cepat (`/cepat`) — Rancangan Dua Halaman Berdampingan
 
 Tanggal: 2026-09-25
-Status: **keputusan owner terkunci; AIDL-02/03/05 selesai 17–18 Okt 2026; agenda terjadwal menyusul**
+Status: **keputusan owner terkunci; AIDL-01/02/03/05 selesai 17–18 Okt 2026; agenda terjadwal menyusul**
 Tujuan: merancang halaman "Mode Cepat" sebagai permukaan kerja baru untuk semua role, hidup berdampingan dengan halaman Normal yang sekarang, tanpa menyentuh halaman Normal.
 Rujukan: [KEPUTUSAN-OWNER](../KEPUTUSAN-OWNER.md) (entri 25 Sep 2026 "Dua mode") · [ANTREAN](../ANTREAN.md) (antrean resmi) · [portal-owner-admin.md](portal-owner-admin.md) §10 (kontrak kartu) · [domain/ai.md](../domain/ai.md) §G10 · [audit recon AI](../audit/ai-agenda-recon-2026-09-25.md) · [scope.md](scope.md) §B8
 

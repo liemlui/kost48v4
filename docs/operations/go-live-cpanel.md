@@ -13,7 +13,7 @@
 | Item | Nilai | Catatan |
 |---|---|---|
 | Commit sumber | `cbca06f` (branch `main`, tree kotor seperti sebelumnya) | seluruh perubahan 12 Sep ikut terpaket |
-| Versi aplikasi | 1.3.0 (`Portal Ringkas`) | tanpa bump versi |
+| Versi aplikasi | 1.3.0 (`Portal Ringkas`) — potret 12 Sep 2026 | tanpa bump versi |
 | Build ID PWA | `B70lrG6Auual` | 159 chunk; initial JS 145 KiB gzip, initial CSS 131 KiB gzip |
 | Arsip paket | `kost48-deploy-bundled.tgz` — 42.749.795 byte (40,8 MB), 10.500 entri | siap unggah |
 | SHA-256 arsip | `BC9176F2897B6FB444FD9A0156C90944D0D289EF8E66932217B2944DB69EEDFD` | catat di bukti rilis |

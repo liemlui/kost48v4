@@ -56,8 +56,41 @@ export type OwnerAiStatus = {
   logUsage: boolean;
 };
 
+export type AiPriceTier = { offPeak: number; peak: number };
+
+export type AiModelPricing = {
+  cacheHitInputUsdPer1M: AiPriceTier;
+  cacheMissInputUsdPer1M: AiPriceTier;
+  outputUsdPer1M: AiPriceTier;
+};
+
+export type OwnerAiPricing = {
+  version: number;
+  currency: 'USD';
+  updatedAt: string;
+  source: string;
+  sourceUrl: string;
+  models: Record<string, AiModelPricing>;
+};
+
+export type OwnerAiPricingRefreshResult = {
+  pricing: OwnerAiPricing;
+  sourceMode: 'official-page' | 'ai-knowledge';
+  warnings: string[];
+};
+
 export async function getOwnerAiStatus() {
   const response = await client.get<ApiEnvelope<OwnerAiStatus>>('/owner-ai/status');
+  return response.data.data;
+}
+
+export async function getOwnerAiPricing() {
+  const response = await client.get<ApiEnvelope<OwnerAiPricing>>('/owner-ai/pricing');
+  return response.data.data;
+}
+
+export async function refreshOwnerAiPricing() {
+  const response = await client.post<ApiEnvelope<OwnerAiPricingRefreshResult>>('/owner-ai/pricing/refresh');
   return response.data.data;
 }
 
@@ -324,6 +357,18 @@ export type OwnerAiUsage = {
   todayTotal: number;
   remainingDaily: number;
   byFeature: Record<string, number>;
+  tokens?: {
+    prompt: number;
+    completion: number;
+    total: number;
+    cacheHit: number;
+    cacheMiss: number;
+    byFeature: Record<string, number>;
+  };
+  estimatedCostUsd?: number;
+  pricedCalls?: number;
+  unpricedCalls?: number;
+  pricing?: OwnerAiPricing;
   recentAudit: OwnerAiAuditEntry[];
 };
 

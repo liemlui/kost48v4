@@ -109,6 +109,22 @@ export class OwnerAiController {
     return this.ownerAiService.getUsageOverview();
   }
 
+  /** Harga AI aktif (USD per 1 juta token). OWNER only — biaya hanya untuk owner. */
+  @Get('pricing')
+  @ApiOperation({ summary: 'Harga AI aktif — OWNER-only' })
+  @Roles(UserRole.OWNER)
+  async pricing() {
+    return this.ownerAiService.getPricing();
+  }
+
+  /** Perbarui harga AI lewat AI (membaca halaman resmi). OWNER only. */
+  @Post('pricing/refresh')
+  @ApiOperation({ summary: 'Perbarui harga AI lewat AI — OWNER-only' })
+  @Roles(UserRole.OWNER)
+  async refreshPricing(@CurrentUser() user: CurrentUserPayload) {
+    return this.ownerAiService.refreshPricing(user.id);
+  }
+
   /** G7: tes koneksi DeepSeek. OWNER only. Tidak bocorkan API key. */
   @Post('test-connection')
   @ApiOperation({ summary: 'Tes koneksi DeepSeek — OWNER-only' })

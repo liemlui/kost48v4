@@ -4,6 +4,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Alert, Badge, Button, Card, Col, Form, Modal, Row, Spinner } from 'react-bootstrap';
 import client from '../../api/client';
 import SafeImage from '../common/SafeImage';
+import ImageRatioHint, { UploadRatioNotice, useUploadRatioCheck } from '../common/ImageRatioHint';
 import CurrencyInput from '../common/CurrencyInput';
 import { SkeletonBlock } from '../common/SkeletonLoader';
 import { useConfirm } from '../common/ConfirmProvider';
@@ -15,7 +16,8 @@ import { WIFI_DEFAULT_PRICE_RUPIAH } from '../../config/constants';
 import { listFacilityImages, uploadFacilityImage, deleteFacilityImage } from '../../api/facilityImages';
 import { deleteMarketingAsset, listMarketingAssets, uploadMarketingAsset } from '../../api/marketingAssets';
 import { resolveAbsoluteFileUrl } from '../../utils/resolveAbsoluteFileUrl';
-import { getOwnerAiStatus, getOwnerAiUsage, testOwnerAiConnection } from '../../api/ai';
+import { getOwnerAiStatus, getOwnerAiUsage, getOwnerAiPricing, refreshOwnerAiPricing, testOwnerAiConnection } from '../../api/ai';
+import AiPricingCard from './AiPricingCard';
 import { generateFaqDraft, type FaqDraftResult } from '../../api/ai';
 import { listAiDrafts, reviewAiDraft, expireAiDrafts, type AiDraft, type AiDraftStatus } from '../../api/aiDrafts';
 import AiAssistButton from '../ai/AiAssistButton';
@@ -54,6 +56,8 @@ export function FacilityPhotoPanel() {
   const qc = useQueryClient();
   const [uploading, setUploading] = useState<string | null>(null);
   const [error, setError] = useState('');
+  // RA-12: rasio hanya disarankan — unggahan tetap diterima apa adanya.
+  const ratioCheck = useUploadRatioCheck();
 
   const { data: uploaded = [], isLoading, refetch } = useQuery({
     queryKey: ['facility-images'],
@@ -66,6 +70,7 @@ export function FacilityPhotoPanel() {
     setUploading(slug);
     setError('');
     try {
+      await ratioCheck.checkFile(file, 'facility');
       await uploadFacilityImage(slug, file);
       qc.invalidateQueries({ queryKey: ['facility-images'] });
     } catch (err) {
@@ -95,6 +100,8 @@ export function FacilityPhotoPanel() {
           Upload 1 foto real per fasilitas KOST48. Foto akan tampil di halaman publik (beranda).
           Format: JPG/PNG/WebP, maks. 2MB.
         </small>
+        <ImageRatioHint target="facility" />
+        <UploadRatioNotice verdict={ratioCheck.verdict} />
       </div>
 
       {error && <Alert variant="danger" className="py-2 small mb-3" dismissible onClose={() => setError('')}>{error}</Alert>}
@@ -168,6 +175,7 @@ export function MarketingAssetPanel() {
   const qc = useQueryClient();
   const [uploading, setUploading] = useState<string | null>(null);
   const [error, setError] = useState('');
+  const ratioCheck = useUploadRatioCheck();
 
   const { data: assets = [], isLoading, isError, refetch } = useQuery({
     queryKey: ['marketing-assets'],
@@ -178,6 +186,7 @@ export function MarketingAssetPanel() {
     setUploading(slug);
     setError('');
     try {
+      await ratioCheck.checkFile(file, 'marketing');
       await uploadMarketingAsset(slug, file);
       qc.invalidateQueries({ queryKey: ['marketing-assets'] });
     } catch (err) {
@@ -207,6 +216,8 @@ export function MarketingAssetPanel() {
           Kelola foto hero, galeri, spanduk, dan brosur yang tampil di landing page. Jika upload dihapus,
           halaman publik kembali memakai aset bawaan.
         </small>
+        <ImageRatioHint target="marketing" />
+        <UploadRatioNotice verdict={ratioCheck.verdict} />
       </div>
 
       {error && <Alert variant="danger" className="py-2 small mb-3" dismissible onClose={() => setError('')}>{error}</Alert>}
@@ -588,6 +599,7 @@ export function RoomPhotoPanel() {
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState('');
   const fileRef = useRef<HTMLInputElement>(null);
+  const ratioCheck = useUploadRatioCheck();
 
   const { data: rooms = [], isLoading, isError, refetch } = useQuery<RoomBasic[]>({
     queryKey: ['owner-rooms-photos'],
@@ -610,6 +622,7 @@ export function RoomPhotoPanel() {
     setUploading(true);
     setUploadError('');
     try {
+      await ratioCheck.checkFile(file, 'room-card');
       const res = await client.post<{ data: { fileUrl: string } }>('/rooms/upload-image', fd, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
@@ -645,6 +658,7 @@ export function RoomPhotoPanel() {
       <div className="mb-3">
         <h3 className="h5 mb-0">Foto Kamar</h3>
         <small className="text-muted">Pilih kamar untuk melihat dan mengelola foto yang tampil di halaman publik.</small>
+        <ImageRatioHint target="room-card" />
       </div>
 
       <Row className="g-3">
@@ -711,6 +725,7 @@ export function RoomPhotoPanel() {
               </div>
 
               {uploadError && <Alert variant="danger" className="py-2 small mb-3">{uploadError}</Alert>}
+              <UploadRatioNotice verdict={ratioCheck.verdict} />
 
               {selectedRoom.images?.length === 0 ? (
                 <Alert variant="light" className="border text-center text-muted">
@@ -1053,6 +1068,7 @@ const AI_FEATURE_LABELS: Record<string, string> = {
   'inventory-reorder-draft': 'Saran Stok',
   'field-report-review-draft': 'Review Lapangan',
   'test-connection': 'Tes Koneksi',
+  'pricing-refresh': 'Perbarui Harga AI',
 };
 const aiFeatureLabel = (k: string) => AI_FEATURE_LABELS[k] ?? k;
 
@@ -1064,10 +1080,18 @@ export function AiSettingsPanel() {
   const statusQuery = useQuery({ queryKey: ['owner-ai', 'status'], queryFn: getOwnerAiStatus });
   // /owner-ai/usage = OWNER-only di backend (G7 observability biaya); ADMIN tidak fetch agar tidak 403.
   const usageQuery = useQuery({ queryKey: ['owner-ai', 'usage'], queryFn: getOwnerAiUsage, enabled: isOwner });
+  const pricingQuery = useQuery({ queryKey: ['owner-ai', 'pricing'], queryFn: getOwnerAiPricing, enabled: isOwner });
   const settingsQuery = useQuery({ queryKey: ['settings', 'operational'], queryFn: fetchOperationalSettings });
   const updateMutation = useMutation({
     mutationFn: updateOperationalSettings,
     onSuccess: () => { qc.invalidateQueries({ queryKey: ['owner-ai', 'status'] }); qc.invalidateQueries({ queryKey: ['settings', 'operational'] }); },
+  });
+  const refreshPricingMutation = useMutation({
+    mutationFn: refreshOwnerAiPricing,
+    onSuccess: (data) => {
+      qc.setQueryData(['owner-ai', 'pricing'], data.pricing);
+      qc.invalidateQueries({ queryKey: ['owner-ai', 'usage'] });
+    },
   });
   const testMutation = useMutation({ mutationFn: testOwnerAiConnection });
 
@@ -1191,6 +1215,18 @@ export function AiSettingsPanel() {
       ) : (
         <Alert variant="warning">Gagal memuat status AI.</Alert>
       )}
+
+      <AiPricingCard
+        pricing={u?.pricing ?? pricingQuery.data}
+        usage={u}
+        isOwner={isOwner}
+        refreshing={refreshPricingMutation.isPending}
+        onRefresh={() => refreshPricingMutation.mutate()}
+        refreshError={(refreshPricingMutation.error as any)?.response?.data?.message
+          ?? (refreshPricingMutation.error as any)?.message
+          ?? null}
+        refreshWarnings={refreshPricingMutation.data?.warnings}
+      />
 
       <Row className="g-3">
         <Col md={5}>
