@@ -3,7 +3,7 @@ import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import ActionQueueTable from '../../components/command-center/ActionQueueTable';
 import { buildTenantDecisionQueue } from '../../utils/tenantDecisionQueue';
-import type { Invoice, RenewRequest } from '../../types';
+import type { CheckoutRequest, Invoice, RenewRequest } from '../../types';
 
 const SEKARANG = new Date('2026-10-17T05:00:00.000Z');
 
@@ -23,6 +23,14 @@ const perpanjanganMenunggu = {
   requestedTerm: 'MONTHLY',
   status: 'PENDING_DECISION',
 } as unknown as RenewRequest;
+
+const pengajuanKeluar = {
+  id: 11,
+  stayId: 7,
+  requestedCheckOutDate: '2026-10-31',
+  checkoutReason: 'Pindah kerja',
+  status: 'PENDING',
+} as unknown as CheckoutRequest;
 
 function renderKartu(items: ReturnType<typeof buildTenantDecisionQueue>) {
   return render(
@@ -70,5 +78,26 @@ describe('AIDL-01b — kartu TENANT benar-benar dirender (bukan cuma data)', () 
 
     renderKartu(buildTenantDecisionQueue({}));
     expect(screen.getByText('Tidak ada antrean mendesak')).toBeInTheDocument();
+  });
+
+  it('kartu pengajuan keluar tampil sebagai informasi tanpa tombol navigasi', () => {
+    renderKartu(buildTenantDecisionQueue({ inProgressCheckoutRequest: pengajuanKeluar }));
+
+    expect(screen.getByText('Pengajuan keluar sedang berjalan')).toBeInTheDocument();
+    expect(screen.getByText(/31 Oktober 2026/)).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /Pantau status/i })).toBeNull();
+  });
+
+  it('tiga kartu tampil bersamaan', () => {
+    renderKartu(buildTenantDecisionQueue({
+      overdueInvoice: tagihanTerlambat,
+      pendingDecisionRequest: perpanjanganMenunggu,
+      inProgressCheckoutRequest: pengajuanKeluar,
+    }));
+
+    expect(screen.getByText('Tagihan INV-2026-0042')).toBeInTheDocument();
+    expect(screen.getByText('Perpanjangan menunggu keputusan')).toBeInTheDocument();
+    expect(screen.getByText('Pengajuan keluar sedang berjalan')).toBeInTheDocument();
+    expect(screen.getAllByRole('row')).toHaveLength(4); // 1 header + 3 kartu
   });
 });

@@ -53,6 +53,7 @@ export const DECISION_CARD_RULES: readonly string[] = [
   // di kode, jadi tidak memperlebar allowlist rute untuk kartu dari AI.
   'tenant-invoice-overdue',
   'tenant-renew-pending-decision',
+  'tenant-checkout-in-progress',
 ];
 
 const bersihkan = (nilai?: string | null): string => (typeof nilai === 'string' ? nilai.trim() : '');

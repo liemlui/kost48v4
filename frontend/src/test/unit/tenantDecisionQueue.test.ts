@@ -5,7 +5,7 @@ import {
   TENANT_DECISION_RULE,
   tenantInvoicePath,
 } from '../../utils/tenantDecisionQueue';
-import type { Invoice, RenewRequest } from '../../types';
+import type { CheckoutRequest, Invoice, RenewRequest } from '../../types';
 
 // Waktu dipaku supaya "terlambat N hari" tidak berubah seiring berjalannya hari.
 const SEKARANG = new Date('2026-10-17T05:00:00.000Z');
@@ -26,6 +26,14 @@ const perpanjanganMenunggu = {
   requestedTerm: 'MONTHLY',
   status: 'PENDING_DECISION',
 } as unknown as RenewRequest;
+
+const pengajuanKeluar = {
+  id: 11,
+  stayId: 7,
+  requestedCheckOutDate: '2026-10-31',
+  checkoutReason: 'Pindah kerja',
+  status: 'PENDING',
+} as unknown as CheckoutRequest;
 
 describe('AIDL-01b — kartu keputusan role TENANT', () => {
   beforeEach(() => {
@@ -92,8 +100,44 @@ describe('AIDL-01b — kartu keputusan role TENANT', () => {
     expect(new Set(items.map((item) => item.id)).size).toBe(2);
   });
 
+  it('pengajuan keluar berjalan menjadi kartu informasi tanpa navigasi', () => {
+    const items = buildTenantDecisionQueue({ inProgressCheckoutRequest: pengajuanKeluar });
+
+    expect(items).toHaveLength(1);
+    const [kartu] = items;
+    expect(kartu.ruleId).toBe(TENANT_DECISION_RULE.checkoutInProgress);
+    expect(kartu.priority).toBe('MEDIUM');
+    expect(kartu.subject).toBe('Pengajuan keluar sedang berjalan');
+    expect(kartu.issue).toContain('31 Oktober 2026');
+    expect(kartu.issue).toContain('menunggu review pengelola');
+    expect(kartu.actionTo).toBeUndefined();
+    expect(kartu.entityType).toBe('checkout_request');
+    expect(kartu.entityId).toBe(11);
+  });
+
+  it('pengajuan keluar yang sudah disetujui memakai kalimat finalisasi', () => {
+    const [kartu] = buildTenantDecisionQueue({
+      inProgressCheckoutRequest: { ...pengajuanKeluar, status: 'APPROVED' } as CheckoutRequest,
+    });
+
+    expect(kartu.issue).toContain('disetujui; menunggu finalisasi pengelola');
+  });
+
+  it('tiga masalah sekaligus menghasilkan tiga kartu dengan kunci dedupe berbeda', () => {
+    const items = buildTenantDecisionQueue({
+      overdueInvoice: tagihanTerlambat,
+      pendingDecisionRequest: perpanjanganMenunggu,
+      inProgressCheckoutRequest: pengajuanKeluar,
+    });
+
+    expect(items).toHaveLength(3);
+    expect(new Set(items.map((item) => item.dedupKey)).size).toBe(3);
+    expect(new Set(items.map((item) => item.id)).size).toBe(3);
+  });
+
   it('ruleId-nya terdaftar di registri aturan kartu (tidak ada aturan liar)', () => {
     expect(isDecisionRuleKnown(TENANT_DECISION_RULE.invoiceOverdue)).toBe(true);
     expect(isDecisionRuleKnown(TENANT_DECISION_RULE.renewPendingDecision)).toBe(true);
+    expect(isDecisionRuleKnown(TENANT_DECISION_RULE.checkoutInProgress)).toBe(true);
   });
 });

@@ -209,7 +209,8 @@ export default function ActiveStayContent({ stay }: { stay: Stay }) {
   const pendingCheckoutRequest = checkoutRequests.find((cr) => cr.stayId === stay.id && cr.status === 'PENDING');
   const approvedCheckoutRequest = checkoutRequests.find((cr) => cr.stayId === stay.id && cr.status === 'APPROVED');
   const rejectedCheckoutRequest = checkoutRequests.find((cr) => cr.stayId === stay.id && cr.status === 'REJECTED');
-
+  // AIDL-01b kartu ketiga: pengajuan keluar yang masih berjalan (PENDING/APPROVED).
+  const inProgressCheckoutRequest = pendingCheckoutRequest ?? approvedCheckoutRequest ?? null;
   const endDays = getDaysUntilTenantDate(stay.plannedCheckOutDate);
   const overdue = endDays !== null && endDays < 0;
   const nearEnd = endDays !== null && endDays >= 0 && endDays <= 10;
@@ -230,8 +231,8 @@ export default function ActiveStayContent({ stay }: { stay: Stay }) {
   // ── kartu keputusan TENANT (AIDL-01b) ─────────────────────────────────────────
   // Dibangun dari data yang SUDAH dimuat di halaman ini; tidak ada permintaan API baru.
   const tenantDecisionItems = useMemo(
-    () => buildTenantDecisionQueue({ overdueInvoice, pendingDecisionRequest }),
-    [overdueInvoice, pendingDecisionRequest],
+    () => buildTenantDecisionQueue({ overdueInvoice, pendingDecisionRequest, inProgressCheckoutRequest }),
+    [overdueInvoice, pendingDecisionRequest, inProgressCheckoutRequest],
   );
 
   // ── guide state ──────────────────────────────────────────────────────────────
@@ -455,9 +456,9 @@ export default function ActiveStayContent({ stay }: { stay: Stay }) {
       </Card>
 
       {/* ── Kartu keputusan TENANT (AIDL-01b; keputusan owner 11 Okt 2026 P11-a).
-             Hanya dua aturan: tagihan lewat tenggat + perpanjangan menunggu keputusan.
-             Bila keduanya kosong blok ini tidak dirender, supaya halaman tidak menambah
-             kebisingan. ── */}
+             Tiga aturan: tagihan lewat tenggat, perpanjangan menunggu keputusan,
+             dan pengajuan keluar berjalan. Bila semuanya kosong blok ini tidak
+             dirender, supaya halaman tidak menambah kebisingan. ── */}
       {tenantDecisionItems.length ? (
         <div className="mb-3">
           <ActionQueueTable

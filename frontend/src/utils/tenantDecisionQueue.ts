@@ -4,7 +4,9 @@
  * Aturannya adalah keputusan owner 11 Okt 2026 (P11, pilihan `a`):
  *   1. tagihan jatuh tempo -> kartu dengan aksi ke detail tagihan;
  *   2. perpanjangan menunggu keputusan -> kartu informasi, karena keputusannya
- *      diambil di halaman yang sama (bukan navigasi ke rute lain).
+ *      diambil di halaman yang sama (bukan navigasi ke rute lain);
+ *   3. pengajuan keluar berjalan (PENDING/APPROVED) -> kartu informasi, karena
+ *      keputusan ada di pengelola dan penghuni hanya memantau.
  *
  * Batas yang disengaja:
  * - BUKAN mesin aturan kedua. Fungsi ini murni memetakan data yang sudah dimuat
@@ -17,7 +19,7 @@
  *   angka karangan: `sourceRefs` menunjuk ke asalnya.
  */
 import type { ActionQueueItem } from '../components/command-center/ActionQueueTable';
-import type { Invoice, RenewRequest } from '../types';
+import type { CheckoutRequest, Invoice, RenewRequest } from '../types';
 import { formatDateOnly } from './dateTime';
 import { formatRupiah } from './formatCurrency';
 import { getInvoiceTotalAmount } from './invoiceTotals';
@@ -26,6 +28,7 @@ import { getTenantDateDiffInDays } from './tenantDates';
 export const TENANT_DECISION_RULE = {
   invoiceOverdue: 'tenant-invoice-overdue',
   renewPendingDecision: 'tenant-renew-pending-decision',
+  checkoutInProgress: 'tenant-checkout-in-progress',
 } as const;
 
 export const TENANT_STAY_PATH = '/portal/stay';
@@ -37,6 +40,7 @@ export function tenantInvoicePath(invoiceId: number): string {
 export function buildTenantDecisionQueue(input: {
   overdueInvoice?: Invoice | null;
   pendingDecisionRequest?: RenewRequest | null;
+  inProgressCheckoutRequest?: CheckoutRequest | null;
 }): ActionQueueItem[] {
   const items: ActionQueueItem[] = [];
 
@@ -84,6 +88,29 @@ export function buildTenantDecisionQueue(input: {
       sebab: 'Pengajuan perpanjangan berhenti di titik keputusan penghuni.',
       dampak: 'Masa sewa tidak diperpanjang sampai keputusan diberikan.',
       sourceRefs: [{ label: 'Perpanjangan', ref: TENANT_STAY_PATH }],
+      expiresAt: null,
+    });
+  }
+
+  const checkout = input.inProgressCheckoutRequest ?? null;
+  if (checkout) {
+    const statusCopy = checkout.status === 'APPROVED'
+      ? 'disetujui; menunggu finalisasi pengelola'
+      : 'menunggu review pengelola';
+    items.push({
+      id: `tenant-checkout-${checkout.id}`,
+      priority: 'MEDIUM',
+      type: 'Pengajuan keluar',
+      subject: 'Pengajuan keluar sedang berjalan',
+      issue: `Diajukan untuk ${formatDateOnly(checkout.requestedCheckOutDate)} · ${statusCopy}.`,
+      recommendedAction: 'Pantau status di halaman ini',
+      dedupKey: `checkout-request:${checkout.id}`,
+      ruleId: TENANT_DECISION_RULE.checkoutInProgress,
+      entityType: 'checkout_request',
+      entityId: checkout.id,
+      sebab: 'Pengajuan keluar sudah dikirim dan sedang diproses.',
+      dampak: 'Tanggal keluar dan pengembalian deposit mengikuti keputusan pengelola.',
+      sourceRefs: [{ label: 'Pengajuan keluar', ref: TENANT_STAY_PATH }],
       expiresAt: null,
     });
   }

@@ -2,6 +2,9 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { CEPAT_PATH, persistModeChoice, shouldShowFloatingSwitch } from '../../utils/modeCepat';
 import ModeSwitch from '../cepat/ModeSwitch';
+// CSS ini juga diimpor CepatShell (lazy). Impor di sini membuat gaya saklar
+// mengambang tersedia di halaman Normal tanpa menunggu chunk /cepat.
+import '../../styles/18-cepat.css';
 
 /**
  * Jalan masuk Normal → Cepat tanpa menyentuh `AppLayout`.
