@@ -1,15 +1,15 @@
 # TASK-AIDL-01b — mesin kartu aturan lintas role: apa yang SUDAH ada, apa yang belum
 
-> **Blok baca** · Jenis: **dokumen kerja tugas (kontrak kerja + catatan goal/todos, bukan antrean)** · Status: **aktif — recon terverifikasi 11 Okt 2026; lingkup penyempitan usulan, menunggu keputusan owner** · Untuk siapa: agen yang mengerjakan increment ini + owner yang menilai lingkupnya
+> **Blok baca** · Jenis: **dokumen kerja tugas (kontrak kerja + catatan goal/todos, bukan antrean)** · Status: **aktif — recon + allowlist rute selesai 11 Okt 2026; sisa: kartu TENANT (P11 dijawab owner: tiga kartu inti)** · Untuk siapa: agen yang mengerjakan increment ini + owner yang menilai lingkupnya
 > · Baca kalau: mengerjakan atau menilai `AIDL-01b`. · **Jangan** dibaca kalau: memilih tugas (itu [ANTREAN](../ANTREAN.md) §3) atau mencari rancangan kartu lengkap (itu [product/portal-owner-admin.md](../product/portal-owner-admin.md) §10).
 
 `AIDL-01b` adalah increment kedua dari `AIDL-01` ([ANTREAN §3](../ANTREAN.md)); `AIDL-01a` (5 field kontrak) **selesai 11 Okt 2026** — [TASK-AIDL-01a](TASK-AIDL-01a.md). Gate `AIDL-01` di ANTREAN menuntut **dua** hal, dan keduanya harus dibaca terpisah:
 
-> "dengan AI dimatikan atau key kosong, **OWNER/ADMIN/STAFF/TENANT** tetap melihat kartu tanpa galat; tidak ada angka di luar snapshot; **tidak ada kontrak kartu paralel**" — keempat role termasuk TENANT (ditegaskan owner 11 Okt 2026 setelah sempat salah saya tulis "tiga role"). Aturan mana yang jadi kartu TENANT masih menunggu keputusan owner (**P11**); sampai itu dijawab, langkah kartu TENANT **belum bisa dibangun**.
+> "dengan AI dimatikan atau key kosong, **OWNER/ADMIN/STAFF/TENANT** tetap melihat kartu tanpa galat; tidak ada angka di luar snapshot; **tidak ada kontrak kartu paralel**" — keempat role termasuk TENANT (ditegaskan owner 11 Okt 2026 setelah sempat salah saya tulis "tiga role"). Aturan kartu TENANT **sudah diputuskan owner** (**P11**, 11 Okt 2026: pilihan (a) — tiga kartu inti, dua dibangun lebih dulu; register `KARTU-TENANT-3-INTI`), jadi langkah kartu TENANT kini **boleh dibangun** dan menjadi sisa satu-satunya increment ini.
 
 ## Goal & todos
 
-**Goal.** Memastikan tiap role **keempatnya** (OWNER/ADMIN/STAFF/TENANT) melihat **kartu keputusan** dari jalur rule-based saat AI mati, memakai kontrak yang **sudah ada** — tanpa mesin kedua dan tanpa kontrak kedua. Untuk TENANT, aturan mana yang dipakai **menunggu keputusan owner (P11)**.
+**Goal.** Memastikan tiap role **keempatnya** (OWNER/ADMIN/STAFF/TENANT) melihat **kartu keputusan** dari jalur rule-based saat AI mati, memakai kontrak yang **sudah ada** — tanpa mesin kedua dan tanpa kontrak kedua. Untuk TENANT, aturan yang dipakai: **tiga kartu inti (P11 dijawab owner 11 Okt 2026: pilihan a)**, dibangun mulai dari dua yang datanya sudah ada.
 
 **Temuan recon yang mengubah lingkup (11 Okt 2026, diperiksa di kode — bukan ingatan):** jalur **rule-based sudah menjadi jalur normal hari ini**, dan sudah lintas role:
 
@@ -26,12 +26,12 @@
 2. **`fallback` belum ditandai pada kartu yang ada.** Kartu hari ini memang 100% rule-based, tetapi menuliskan `fallback: true` sekarang akan menjadi **metadata bohong** (tidak ada jalur AI yang sedang dilewati). Penandaan itu masuk bersama `AIDL-03/04`, saat AI benar-benar mengisi sebagian kartu.
 3. **Peta allowlist rute belum ada sebagai fungsi bersama** — dibutuhkan agar kartu **dari AI** tidak pernah `navigate` ke string bebas dari LLM ([portal-owner-admin §10.2](../product/portal-owner-admin.md) "Batas keamanan"; temuan A-1 di [audit AI 25 Sep](../audit/ai-agenda-recon-2026-09-25.md)). Ini murni teknis dan bisa dikerjakan sekarang.
 
-**Bukti penutup — terisi 11 Okt 2026 (langkah 3 selesai; langkah 2 menunggu owner).** Build frontend `exit 0` (`tsc -b` lulus, `vite build` 36,06 s, PWA `qEDSp80ZMc1w`, `chunks=162`) · **test baru 24/24 lulus** (allowlist rute 12 + normalisasi kartu 12) · **seluruh test frontend 192/192 lulus di 37 berkas** · berkas diubah: `utils/decisionRoutes.ts` (baru), `src/test/unit/decisionRoutes.test.ts` (baru). **Yang tidak dibuktikan:** allowlist ini **belum dipakai** jalur mana pun (belum ada kartu dari AI); ia disiapkan untuk `AIDL-03/04`. Dan kartu TENANT **belum ada** — menunggu keputusan owner.
+**Bukti penutup — terisi 11 Okt 2026 (langkah 3 selesai; langkah 2 menunggu owner).** Build frontend `exit 0` (`tsc -b` lulus, `vite build` 36,06 s, PWA `qEDSp80ZMc1w`, `chunks=162`) · **test baru 24/24 lulus** (allowlist rute 12 + normalisasi kartu 12) · **seluruh test frontend 192/192 lulus di 37 berkas** · berkas diubah: `utils/decisionRoutes.ts` (baru), `src/test/unit/decisionRoutes.test.ts` (baru). **Yang tidak dibuktikan:** allowlist ini **belum dipakai** jalur mana pun (belum ada kartu dari AI); ia disiapkan untuk `AIDL-03/04`. Dan kartu TENANT **belum dibangun** — keputusan owner (P11) sudah ada, kodenya belum.
 
 | # | Langkah | Status |
 |---:|---|---|
 | 1 | Recon: rumah aturan tiap role + apa yang benar-benar kurang | **selesai** |
-| 2 | Keputusan owner: apakah TENANT dapat kartu aturan, dan aturan mana | **dapat kartu** (ditegaskan owner 11 Okt 2026) · **aturan mana** menunggu **P11** |
+| 2 | Keputusan owner: apakah TENANT dapat kartu aturan, dan aturan mana | **dapat kartu** (ditegaskan owner 11 Okt 2026) · **aturan**: tiga kartu inti, dua lebih dulu (**P11 dijawab**) |
 | 3 | Fungsi allowlist rute bersama untuk kartu (khusus jalur AI) | **selesai** |
 | 4 | Penandaan `fallback` sungguhan saat AI masuk (`AIDL-03/04`) | belum — sengaja ditunda |
 | 5 | Build frontend + test | **selesai** |
@@ -65,7 +65,7 @@ Diverifikasi 11 Okt 2026 di kode:
 
 1. **Allowlist rute sebagai fungsi murni** + test: rute dikenal diteruskan, rute asing → `undefined` (bukan string mentah).
 2. **Jangan** menyentuh kartu yang sudah tampil: menambah `sourceRefs`/`sebab` ke produsen lama adalah perubahan perilaku tampilan dan **tidak** diminta gate ini.
-3. **TENANT** — **dapat kartu (ditegaskan owner 11 Okt 2026)**, tetapi **aturan mana** yang layak jadi kartu penghuni belum diputuskan: pertanyaan **P11** di [TANYA-OWNER](TANYA-OWNER.md). Sampai dijawab, langkah ini **belum bisa dibangun** dan TENANT tetap tanpa kartu — batas yang dicatat, bukan disembunyikan.
+3. **TENANT** — **dapat kartu (ditegaskan owner 11 Okt 2026)**, dan **aturannya sudah diputuskan owner** (**P11** 11 Okt 2026: pilihan (a) — tiga kartu inti, dua dibangun lebih dulu; `KARTU-TENANT-3-INTI`). Langkah ini **boleh dibangun**; kodenya **belum ada**.
    Catatan teknis yang sudah terverifikasi (`git grep` di `frontend/src`): `queueItems`/`ActionQueueTable` hari ini hanya dipakai di [StaysPage](../../frontend/src/pages/stays/StaysPage.tsx), [DashboardStaff](../../frontend/src/pages/dashboard/DashboardStaff.tsx), [DashboardAdmin](../../frontend/src/pages/dashboard/DashboardAdmin.tsx), dan [AdminWorkspaces](../../frontend/src/pages/dashboard/AdminWorkspaces.tsx) — **tidak satu pun di portal penghuni** (mis. `MyStayPage.tsx`). Jadi kartu TENANT menjadi **konsumen pertama di area penghuni**, bukan perubahan pada layar yang sudah memakai kartu.
 4. **`fallback`** — tunggu `AIDL-03/04`; menandainya sekarang = metadata bohong.
 5. Tutup increment dengan build + test + commit, lalu perbarui baris ANTREAN bila perlu.
@@ -94,3 +94,4 @@ Diverifikasi 11 Okt 2026 di kode:
 | Tanggal | Perubahan |
 |---|---|
 | 2026-10-11 | Dibuat. Recon terverifikasi: 16 aturan rule-based sudah hidup lintas OWNER/ADMIN/STAFF; TENANT belum punya. Lingkup diusulkan menyempit ke allowlist rute (teknis) + keputusan owner untuk TENANT. Belum ada kode ditulis untuk increment ini. |
+| 2026-10-11 | **P11 dijawab owner: (a)** — tiga kartu inti TENANT, dua dibangun lebih dulu. Sisa increment kini **satu**: kartu TENANT (allowlist rute + 24 test sudah selesai). Kode kartu TENANT **belum ditulis**; risiko kalimat tagihan terbaca "menagih" wajib ditinjau sebelum rilis. |
