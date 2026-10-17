@@ -1,7 +1,7 @@
 # Mode Cepat (`/cepat`) — Rancangan Dua Halaman Berdampingan
 
 Tanggal: 2026-09-25
-Status: **keputusan owner terkunci; shell AIDL-02 + tautan AI AIDL-03 selesai 17–18 Okt 2026; agenda terjadwal/kirim-cetak menyusul**
+Status: **keputusan owner terkunci; AIDL-02/03/05 selesai 17–18 Okt 2026; agenda terjadwal menyusul**
 Tujuan: merancang halaman "Mode Cepat" sebagai permukaan kerja baru untuk semua role, hidup berdampingan dengan halaman Normal yang sekarang, tanpa menyentuh halaman Normal.
 Rujukan: [KEPUTUSAN-OWNER](../KEPUTUSAN-OWNER.md) (entri 25 Sep 2026 "Dua mode") · [ANTREAN](../ANTREAN.md) (antrean resmi) · [portal-owner-admin.md](portal-owner-admin.md) §10 (kontrak kartu) · [domain/ai.md](../domain/ai.md) §G10 · [audit recon AI](../audit/ai-agenda-recon-2026-09-25.md) · [scope.md](scope.md) §B8
 
@@ -315,7 +315,7 @@ Yang **tetap berlaku**: AI hanya OWNER (§5), kartu = aturan ∪ AI (§7), agend
 
 ### 14.4 Yang belum ada, dan karena itu tercatat sebagai pekerjaan
 
-- Route `/cepat` **terdaftar** di `App.tsx` (AIDL-02, 17 Okt 2026) dan panel AI manual dengan tautan ber-allowlist ada (AIDL-03, 18 Okt 2026); agenda terjadwal dan kirim/cetak menyusul.
+- Route `/cepat` **terdaftar** di `App.tsx` (AIDL-02, 17 Okt 2026), panel AI manual dengan tautan ber-allowlist ada (AIDL-03, 18 Okt 2026), dan kirim WhatsApp/cetak OWNER/ADMIN ada (AIDL-05, 18 Okt 2026); agenda terjadwal menyusul.
 - Halaman penghuni untuk **prabayar**, **ganti kontrak sewa**, **DP hangus**, dan **acuan meter baru** belum ada.
 - **Mekanisme iklan kamar**, **hitungan 5 hari**, dan **pemberitahuan otomatis** DP hangus belum ada.
 - Pemicu terjadwal harian (cron) masih terbuka seperti dicatat di §6.

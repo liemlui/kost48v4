@@ -250,6 +250,66 @@
   font-size: 0.75rem;
 }
 
+/* ── Ringkasan WhatsApp/cetak (OWNER/ADMIN) ────────────────────── */
+.cepat-summary-actions {
+  margin-top: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border: 1px dashed var(--border-default);
+  border-radius: var(--radius-base);
+  background: var(--gray-50);
+}
+
+.cepat-summary-actions-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.cepat-summary-note {
+  margin: var(--space-2) 0 0;
+  color: var(--text-secondary);
+  font-size: 0.75rem;
+}
+
+.cepat-print-summary pre {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font-family: inherit;
+  font-size: 0.85rem;
+  line-height: 1.45;
+}
+
+@media print {
+  .cepat-header,
+  .cepat-hero,
+  .cepat-footer,
+  .cepat-ai,
+  .cepat-note,
+  .cepat-summary-actions-row,
+  .cepat-summary-note,
+  .cepat-main .compact-metrics-row,
+  .cepat-main .action-queue-card,
+  .mode-cepat-floating {
+    display: none !important;
+  }
+
+  .cepat-shell {
+    background: var(--white);
+  }
+
+  .cepat-main {
+    max-width: none;
+    padding: 0;
+  }
+
+  .cepat-summary-actions {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+  }
+}
+
 .cepat-footer {
   padding: var(--space-4) var(--space-4) calc(var(--space-6) + env(safe-area-inset-bottom, 0px));
   color: var(--text-secondary);
