@@ -169,7 +169,7 @@ Catatan yang mengikat: `pretest:unit` backend menjalankan `npm run build` (lihat
 
 Jebakan **produksi** punya rumah sendiri di [produksi §10](produksi.md) — **jangan diduplikasi di sini**, cukup ditunjuk. Daftar ini tumbuh dari kejadian nyata dan setiap baris menyebut buktinya; mengisinya dengan karangan akan merusak gunanya.
 
-> **Aturan owner (10 Okt 2026):** setiap kesalahan yang **terulang** wajib punya entri di tabel ini **pada sesi yang sama** — gejala · sebab · tindakan pencegah — supaya tidak pernah ada kesalahan ketiga. Aturan ini sendiri muncul karena satu kelas kesalahan terjadi **empat kali dalam satu sesi** (lihat baris "Isi dokumen **terpotong atau menempel**" di tabel di bawah).
+> **Aturan owner (10 Okt 2026):** setiap kesalahan yang **terulang** wajib punya entri di tabel ini **pada sesi yang sama** — gejala · sebab · tindakan pencegah — supaya tidak pernah ada kesalahan ketiga. Aturan ini sendiri muncul karena satu kelas kesalahan terjadi **lima kali dalam satu sesi** (lihat baris "Isi dokumen **terpotong atau menempel**" di tabel di bawah). **Versi portabel (18 Okt 2026):** katalog ini juga hidup sebagai **skill DSH `dsh-jebakan-kerja`** (`~/.dsh/skills/dsh-jebakan-kerja/SKILL.md`) sehingga terbaca di **setiap sesi dan lintas proyek**, bukan hanya di repo ini. Pembagian tugas: **repo ini = detail + bukti bertanggal**; **skill = versi ringkas yang portabel**. Kesalahan baru dicatat di **keduanya** pada sesi yang sama.
 
 | Gejala | Sebab | Tindakan |
 |---|---|---|
