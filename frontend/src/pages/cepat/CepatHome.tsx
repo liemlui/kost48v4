@@ -7,6 +7,7 @@ import { getResource, listResource } from '../../api/resources';
 import { listMyRenewRequests } from '../../api/renewRequests';
 import { PORTAL_QUERY_KEYS } from '../../api/portalQueryKeys';
 import { ActionQueueTable, CompactMetrics } from '../../components/command-center';
+import CepatAiBrief from '../../components/cepat/CepatAiBrief';
 import EmptyState from '../../components/common/EmptyState';
 import { useBusinessHealthScore } from '../../hooks/useBusinessHealthScore';
 import { useOperationalStressIndex } from '../../hooks/useOperationalStressIndex';
@@ -92,6 +93,9 @@ function OwnerCepatHome() {
         maxItems={6}
         collapsible={false}
       />
+
+      <CepatAiBrief />
+
       <p className="cepat-note">Butuh data lengkap? Pindah ke Normal lewat saklar di header.</p>
     </>
   );

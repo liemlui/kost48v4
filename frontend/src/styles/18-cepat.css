@@ -152,6 +152,104 @@
   text-align: center;
 }
 
+/* ── Panel agenda AI (OWNER, manual) ───────────────────────────── */
+.cepat-ai {
+  margin-top: var(--space-4);
+  padding: var(--space-4);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-lg);
+  background: var(--white);
+}
+
+.cepat-ai-off {
+  margin-top: var(--space-4);
+  border: 1px dashed var(--border-default);
+  background: var(--gray-50);
+}
+
+.cepat-ai-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-bottom: var(--space-3);
+}
+
+.cepat-ai-head h2 {
+  margin: 0;
+  font-size: 1.05rem;
+}
+
+.cepat-ai-quota {
+  color: var(--text-secondary);
+  font-size: 0.75rem;
+  white-space: nowrap;
+}
+
+.cepat-ai-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.cepat-ai-item {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  padding: var(--space-2);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-base);
+  background: var(--gray-50);
+}
+
+.cepat-ai-item .badge {
+  flex: 0 0 auto;
+}
+
+.cepat-ai-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+.cepat-ai-title {
+  font-size: 0.88rem;
+  font-weight: 700;
+}
+
+.cepat-ai-reason {
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+}
+
+.cepat-ai-link {
+  align-self: flex-start;
+  color: var(--blue-700);
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.cepat-ai-link:hover {
+  text-decoration: underline;
+}
+
+.cepat-ai-link.is-disabled {
+  color: var(--text-secondary);
+  font-weight: 500;
+  cursor: not-allowed;
+}
+
+.cepat-ai-note {
+  margin: var(--space-2) 0 0;
+  color: var(--text-secondary);
+  font-size: 0.75rem;
+}
+
 .cepat-footer {
   padding: var(--space-4) var(--space-4) calc(var(--space-6) + env(safe-area-inset-bottom, 0px));
   color: var(--text-secondary);

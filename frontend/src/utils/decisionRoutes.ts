@@ -57,6 +57,22 @@ export const DECISION_CARD_RULES: readonly string[] = [
 
 const bersihkan = (nilai?: string | null): string => (typeof nilai === 'string' ? nilai.trim() : '');
 
+/**
+ * Cocokkan path konkret dengan pola allowlist. Segmen `:nama` menerima satu
+ * segmen aman (huruf/angka/underscore/strip), sehingga `/invoices/:id` menerima
+ * `/invoices/12` tetapi tidak menerima `/invoices/12/extra` atau segmen kosong.
+ */
+function cocokPola(path: string, pola: string): boolean {
+  const bagianPath = path.split('/');
+  const bagianPola = pola.split('/');
+  if (bagianPath.length !== bagianPola.length) return false;
+  return bagianPola.every((segmen, index) => (
+    segmen.startsWith(':')
+      ? /^[A-Za-z0-9_-]+$/.test(bagianPath[index] ?? '')
+      : segmen === bagianPath[index]
+  ));
+}
+
 const bagianRute = (kandidat: string): { path: string; query: string } | null => {
   const potong = kandidat.split('#')[0];
   const tanya = potong.indexOf('?');
@@ -65,13 +81,13 @@ const bagianRute = (kandidat: string): { path: string; query: string } | null =>
   return path.startsWith('/') ? { path, query } : null;
 };
 
-/** Apakah rute ini ada di allowlist? (path saja, tanpa query) */
+/** Apakah rute ini cocok dengan salah satu pola allowlist? (path saja, tanpa query) */
 export function isDecisionRouteAllowed(kandidat?: string | null): boolean {
   const teks = bersihkan(kandidat);
   if (!teks) return false;
   const bagian = bagianRute(teks);
   if (!bagian) return false;
-  return DECISION_CARD_ROUTES.includes(bagian.path);
+  return DECISION_CARD_ROUTES.some((pola) => cocokPola(bagian.path, pola));
 }
 
 /**
@@ -86,7 +102,7 @@ export function resolveDecisionRoute(kandidat?: string | null): string | undefin
   if (teks.includes('//') || teks.includes('\\') || teks.includes('..')) return undefined;
   const bagian = bagianRute(teks);
   if (!bagian) return undefined;
-  if (!DECISION_CARD_ROUTES.includes(bagian.path)) return undefined;
+  if (!DECISION_CARD_ROUTES.some((pola) => cocokPola(bagian.path, pola))) return undefined;
   // query dipertahankan hanya sebatas bentuk yang dipakai kartu (mis. ?status=BOOKINGS)
   if (bagian.query && !/^[A-Za-z0-9_=&%-]+$/.test(bagian.query)) return undefined;
   return bagian.query ? `${bagian.path}?${bagian.query}` : bagian.path;

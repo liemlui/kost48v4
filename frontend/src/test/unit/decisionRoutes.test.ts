@@ -9,10 +9,19 @@ import {
 
 describe('AIDL-01b — allowlist rute kartu keputusan', () => {
   describe('rute yang dikenal diteruskan apa adanya', () => {
-    it('rute kartu yang dipakai hari ini lolos', () => {
+    it('rute kartu yang dipakai hari ini lolos (literal)', () => {
       for (const rute of DECISION_CARD_ROUTES) {
+        if (rute.includes(':')) continue; // pola diuji lewat contoh konkret di bawah
         expect(resolveDecisionRoute(rute)).toBe(rute);
       }
+    });
+
+    it('pola :id menerima id konkret, bukan string pola mentah', () => {
+      expect(resolveDecisionRoute('/invoices/:id')).toBeUndefined();
+      expect(resolveDecisionRoute('/invoices/12')).toBe('/invoices/12');
+      expect(resolveDecisionRoute('/rooms/kamar-a-1')).toBe('/rooms/kamar-a-1');
+      expect(resolveDecisionRoute('/invoices/12/extra')).toBeUndefined();
+      expect(resolveDecisionRoute('/invoices/')).toBeUndefined();
     });
 
     it('query yang dipakai kartu dipertahankan', () => {
