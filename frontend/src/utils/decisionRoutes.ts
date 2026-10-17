@@ -49,6 +49,10 @@ export const DECISION_CARD_RULES: readonly string[] = [
   'ticket-open',
   'business-stable',
   'ops-stable',
+  // TENANT (AIDL-01b, keputusan owner 11 Okt 2026 P11-a). Rutenya ditulis tangan
+  // di kode, jadi tidak memperlebar allowlist rute untuk kartu dari AI.
+  'tenant-invoice-overdue',
+  'tenant-renew-pending-decision',
 ];
 
 const bersihkan = (nilai?: string | null): string => (typeof nilai === 'string' ? nilai.trim() : '');

@@ -27,6 +27,8 @@ import { getApiErrorMessage } from '../../../utils/getApiErrorMessage';
 import { getDaysUntilTenantDate, getOpenTenantInvoices, getPendingReviewInvoiceIds, getPrimaryTenantInvoice, isTenantInvoiceOverdue } from '../../../utils/tenantRules';
 import { isPayableInvoiceStatus, TENANT_PAYMENT_REVIEW_MESSAGE, tenantPricingTermLabel } from '../../../utils/tenantCopy';
 import { getInvoiceTotalAmount } from '../../../utils/invoiceTotals';
+import { buildTenantDecisionQueue } from '../../../utils/tenantDecisionQueue';
+import { ActionQueueTable } from '../../../components/command-center';
 import {
   formatDate, getMeterWindow, getLatestUtilityReading, formatRoomFloorLabel,
   friendlyItemStatus, inventoryStatusClass, getRoomFacilitySummary, getRoomFacilities, getInventoryItems, getRoomCoverImage, getRoomPriceFacts,
@@ -224,6 +226,13 @@ export default function ActiveStayContent({ stay }: { stay: Stay }) {
   const hasZeroAmountOpenInvoice = zeroAmountOpenInvoices.length > 0;
   const canRequestRenew = !pendingRenewRequest && !hasOpenInvoice && !approvedCheckoutRequest && !pendingCheckoutRequest;
   const canRequestCheckout = !pendingCheckoutRequest && !approvedCheckoutRequest && !hasOpenInvoice;
+
+  // ── kartu keputusan TENANT (AIDL-01b) ─────────────────────────────────────────
+  // Dibangun dari data yang SUDAH dimuat di halaman ini; tidak ada permintaan API baru.
+  const tenantDecisionItems = useMemo(
+    () => buildTenantDecisionQueue({ overdueInvoice, pendingDecisionRequest }),
+    [overdueInvoice, pendingDecisionRequest],
+  );
 
   // ── guide state ──────────────────────────────────────────────────────────────
 
@@ -444,6 +453,24 @@ export default function ActiveStayContent({ stay }: { stay: Stay }) {
           </div>
         </Card.Body>
       </Card>
+
+      {/* ── Kartu keputusan TENANT (AIDL-01b; keputusan owner 11 Okt 2026 P11-a).
+             Hanya dua aturan: tagihan lewat tenggat + perpanjangan menunggu keputusan.
+             Bila keduanya kosong blok ini tidak dirender, supaya halaman tidak menambah
+             kebisingan. ── */}
+      {tenantDecisionItems.length ? (
+        <div className="mb-3">
+          <ActionQueueTable
+            title="Yang perlu kamu kerjakan"
+            subtitle="Tagihan dan keputusan masa sewa yang menunggu kamu."
+            items={tenantDecisionItems}
+            emptyTitle="Tidak ada yang mendesak"
+            emptyDescription="Tidak ada tagihan lewat tenggat dan tidak ada keputusan perpanjangan yang menunggu."
+            maxItems={3}
+            collapsible={false}
+          />
+        </div>
+      ) : null}
 
       {/* ── Quick actions hub ── */}
       <StayQuickActions

@@ -1,6 +1,6 @@
 # TASK-AIDL-01b — mesin kartu aturan lintas role: apa yang SUDAH ada, apa yang belum
 
-> **Blok baca** · Jenis: **dokumen kerja tugas (kontrak kerja + catatan goal/todos, bukan antrean)** · Status: **aktif — recon + allowlist rute selesai 11 Okt 2026; sisa: kartu TENANT (P11 dijawab owner: tiga kartu inti)** · Untuk siapa: agen yang mengerjakan increment ini + owner yang menilai lingkupnya
+> **Blok baca** · Jenis: **dokumen kerja tugas (kontrak kerja + catatan goal/todos, bukan antrean)** · Status: **aktif — recon, allowlist rute, dan dua kartu TENANT selesai (17 Okt 2026); sisa: kartu ketiga + verifikasi visual** · Untuk siapa: agen yang mengerjakan increment ini + owner yang menilai lingkupnya
 > · Baca kalau: mengerjakan atau menilai `AIDL-01b`. · **Jangan** dibaca kalau: memilih tugas (itu [ANTREAN](../ANTREAN.md) §3) atau mencari rancangan kartu lengkap (itu [product/portal-owner-admin.md](../product/portal-owner-admin.md) §10).
 
 `AIDL-01b` adalah increment kedua dari `AIDL-01` ([ANTREAN §3](../ANTREAN.md)); `AIDL-01a` (5 field kontrak) **selesai 11 Okt 2026** — [TASK-AIDL-01a](TASK-AIDL-01a.md). Gate `AIDL-01` di ANTREAN menuntut **dua** hal, dan keduanya harus dibaca terpisah:
@@ -18,7 +18,7 @@
 | OWNER | [useBusinessHealthScore.ts](../../frontend/src/hooks/useBusinessHealthScore.ts) (6 aturan: `invoice-overdue`, `payment-review`, `checkout-final`, `renew-pending`, `room-available`, `business-stable`) + [useOperationalStressIndex.ts](../../frontend/src/hooks/useOperationalStressIndex.ts) | `queueItems: ActionQueueItem[]` |
 | ADMIN | [DashboardAdmin.tsx](../../frontend/src/pages/dashboard/DashboardAdmin.tsx) (8 aturan: `ktp-review`, `booking-review-sla`, `payment-review-sla`, `renew-meter-sla`, `checkout-review-sla`, `checkout-final-sla`, `invoice-overdue`, `booking-payment-waiting`) + `opsStress.queueItems` | `queueItems` dibangun dari `dedupeCommandItems([...])` |
 | STAFF | `opsStress.queueItems` di [DashboardStaff.tsx](../../frontend/src/pages/dashboard/DashboardStaff.tsx) | `dedupeCommandItems([...opsStress.queueItems])` |
-| TENANT | **belum ada produsen aturan** | belum ditemukan di `frontend/src` |
+| TENANT | [utils/tenantDecisionQueue.ts](../../frontend/src/utils/tenantDecisionQueue.ts) (2 aturan, 17 Okt 2026: `tenant-invoice-overdue`, `tenant-renew-pending-decision`) | dipasang di `ActiveStayContent.tsx` |
 
 **Karena itu `AIDL-01b` BUKAN "membuat mesin kartu"** — mesinnya ada (deterministik, di kode, tanpa AI). Yang benar-benar kurang hanya tiga, dan dua di antaranya tidak boleh dikerjakan pada increment ini:
 
@@ -26,7 +26,7 @@
 2. **`fallback` belum ditandai pada kartu yang ada.** Kartu hari ini memang 100% rule-based, tetapi menuliskan `fallback: true` sekarang akan menjadi **metadata bohong** (tidak ada jalur AI yang sedang dilewati). Penandaan itu masuk bersama `AIDL-03/04`, saat AI benar-benar mengisi sebagian kartu.
 3. **Peta allowlist rute belum ada sebagai fungsi bersama** — dibutuhkan agar kartu **dari AI** tidak pernah `navigate` ke string bebas dari LLM ([portal-owner-admin §10.2](../product/portal-owner-admin.md) "Batas keamanan"; temuan A-1 di [audit AI 25 Sep](../audit/ai-agenda-recon-2026-09-25.md)). Ini murni teknis dan bisa dikerjakan sekarang.
 
-**Bukti penutup — terisi 11 Okt 2026 (langkah 3 selesai; langkah 2 menunggu owner).** Build frontend `exit 0` (`tsc -b` lulus, `vite build` 36,06 s, PWA `qEDSp80ZMc1w`, `chunks=162`) · **test baru 24/24 lulus** (allowlist rute 12 + normalisasi kartu 12) · **seluruh test frontend 192/192 lulus di 37 berkas** · berkas diubah: `utils/decisionRoutes.ts` (baru), `src/test/unit/decisionRoutes.test.ts` (baru). **Yang tidak dibuktikan:** allowlist ini **belum dipakai** jalur mana pun (belum ada kartu dari AI); ia disiapkan untuk `AIDL-03/04`. Dan kartu TENANT **belum dibangun** — keputusan owner (P11) sudah ada, kodenya belum.
+**Bukti penutup — terisi 11 Okt 2026 (langkah 3 selesai; langkah 2 menunggu owner).** Build frontend `exit 0` (`tsc -b` lulus, `vite build` 36,06 s, PWA `qEDSp80ZMc1w`, `chunks=162`) · **test baru 24/24 lulus** (allowlist rute 12 + normalisasi kartu 12) · **seluruh test frontend 192/192 lulus di 37 berkas** · berkas diubah: `utils/decisionRoutes.ts` (baru), `src/test/unit/decisionRoutes.test.ts` (baru). **Yang tidak dibuktikan:** allowlist ini **belum dipakai** jalur mana pun (belum ada kartu dari AI); ia disiapkan untuk `AIDL-03/04`. Dan kartu TENANT **dibangun 17 Okt 2026** (dua aturan pertama): produsen murni di [utils/tenantDecisionQueue.ts](../../frontend/src/utils/tenantDecisionQueue.ts), dipasang di `ActiveStayContent.tsx`; test baru **6/6** lulus, seluruh test frontend **198/198 di 38 berkas**, `npm run build` **exit 0** (PWA `BCKEesTsxQ_x`, 163 chunk). **Belum dibuktikan:** tampilan di browser dan kartu ketiga.
 
 | # | Langkah | Status |
 |---:|---|---|
@@ -34,7 +34,7 @@
 | 2 | Keputusan owner: apakah TENANT dapat kartu aturan, dan aturan mana | **dapat kartu** (ditegaskan owner 11 Okt 2026) · **aturan**: tiga kartu inti, dua lebih dulu (**P11 dijawab**) |
 | 3 | Fungsi allowlist rute bersama untuk kartu (khusus jalur AI) | **selesai** |
 | 4 | Penandaan `fallback` sungguhan saat AI masuk (`AIDL-03/04`) | belum — sengaja ditunda |
-| 5 | Build frontend + test | **selesai** |
+| 5 | Build frontend + test | **selesai** — angka & tanggalnya di baris Bukti penutup (potret 17 Okt 2026) |
 
 ## 1. Tujuan & definisi selesai
 
@@ -95,3 +95,4 @@ Diverifikasi 11 Okt 2026 di kode:
 |---|---|
 | 2026-10-11 | Dibuat. Recon terverifikasi: 16 aturan rule-based sudah hidup lintas OWNER/ADMIN/STAFF; TENANT belum punya. Lingkup diusulkan menyempit ke allowlist rute (teknis) + keputusan owner untuk TENANT. Belum ada kode ditulis untuk increment ini. |
 | 2026-10-11 | **P11 dijawab owner: (a)** — tiga kartu inti TENANT, dua dibangun lebih dulu. Sisa increment kini **satu**: kartu TENANT (allowlist rute + 24 test sudah selesai). Kode kartu TENANT **belum ditulis**; risiko kalimat tagihan terbaca "menagih" wajib ditinjau sebelum rilis. |
+| 2026-10-17 | **Dua kartu TENANT dibangun.** `utils/tenantDecisionQueue.ts` (murni, tanpa API baru) + test 6 + dipasang di `ActiveStayContent.tsx`; `ruleId` terdaftar di `utils/decisionRoutes.ts`. Test frontend **198/198 di 38 berkas**, build **exit 0** (PWA `BCKEesTsxQ_x`). Sisa: kartu ketiga + verifikasi visual. |
