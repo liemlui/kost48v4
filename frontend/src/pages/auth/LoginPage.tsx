@@ -7,7 +7,7 @@ import PasswordInput from '../../components/common/PasswordInput';
 import Kost48LogoMark from '../../components/common/Kost48LogoMark';
 import Kost48DecorGallery from '../../components/common/Kost48DecorGallery';
 import { officialKost48Highlights, officialKost48Location } from '../../data/officialKost48Content';
-import { getDefaultRoute } from '../../config/navigation';
+import { resolvePostLoginRoute } from '../../utils/modeCepat';
 import { useAuth } from '../../context/AuthContext';
 import type { UserRole } from '../../types';
 
@@ -57,7 +57,7 @@ export default function LoginPage() {
   // FE-002: sesi yang sudah tervalidasi tidak perlu melihat form login lagi.
   // Diletakkan setelah seluruh Hook agar perubahan state sesi tidak melanggar urutan Hook.
   if (!loading && user) {
-    return <Navigate to={from || getDefaultRoute(user.role)} replace />;
+    return <Navigate to={resolvePostLoginRoute(user, 'occupied', from)} replace />;
   }
 
   const handleSubmit = async (event: FormEvent) => {
@@ -96,7 +96,7 @@ export default function LoginPage() {
         setFieldErrors({ form: modeCopy.expectedRoleError });
         return;
       }
-      navigate(from || getDefaultRoute(user.role), { replace: true });
+      navigate(resolvePostLoginRoute(user, 'occupied', from), { replace: true });
     } catch (err: any) {
       setFieldErrors({ form: normalizeLoginError(err?.response?.data?.message) });
     } finally {

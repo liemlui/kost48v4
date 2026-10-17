@@ -1,0 +1,336 @@
+/* ================================================================
+   18-cepat.css — Mode Cepat (AIDL-02)
+   Shell paralel `/cepat` + layar pilih-mode + saklar mengambang.
+   Hanya kelas baru ber-prefix `cepat-` / `pilih-mode` / `mode-switch`;
+   tidak menyentuh CSS halaman Normal (gate AIDL-02).
+   ================================================================ */
+
+.cepat-shell {
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at 85% -10%, var(--blue-50) 0, transparent 42%),
+    var(--gray-50);
+  color: var(--text-primary);
+}
+
+.cepat-header {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: calc(var(--space-3) + env(safe-area-inset-top, 0px)) var(--space-4) var(--space-3);
+  background: rgba(255, 255, 255, 0.94);
+  border-bottom: 1px solid var(--border-default);
+  backdrop-filter: blur(10px);
+}
+
+.cepat-brand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.cepat-brand-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: var(--radius-full);
+  background: var(--blue-600);
+  color: var(--white);
+  font-size: 1rem;
+  flex: 0 0 auto;
+}
+
+.cepat-brand-copy {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  line-height: 1.15;
+}
+
+.cepat-brand-copy strong {
+  font-size: 0.95rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cepat-brand-copy small {
+  color: var(--text-secondary);
+  font-size: 0.75rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cepat-header-actions {
+  flex: 0 0 auto;
+}
+
+.cepat-main {
+  width: 100%;
+  max-width: 980px;
+  margin: 0 auto;
+  padding: var(--space-4) var(--space-3) var(--space-8);
+}
+
+.cepat-hero {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding: var(--space-4);
+  margin-bottom: var(--space-4);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-lg);
+  background: var(--white);
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+
+.cepat-hero h1 {
+  margin: 0 0 var(--space-1);
+  font-size: clamp(1.35rem, 4vw, 1.8rem);
+  line-height: 1.15;
+}
+
+.cepat-hero p {
+  margin: 0;
+  max-width: 46rem;
+  color: var(--text-secondary);
+  font-size: 0.92rem;
+}
+
+.cepat-eyebrow {
+  display: inline-block;
+  margin-bottom: var(--space-1);
+  color: var(--blue-700);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.cepat-score {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: baseline;
+  gap: 0.15rem;
+  color: var(--blue-700);
+  font-size: clamp(1.6rem, 5vw, 2.3rem);
+  font-weight: 800;
+  line-height: 1;
+}
+
+.cepat-score small {
+  color: var(--text-secondary);
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+
+.cepat-state {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-6);
+  color: var(--text-secondary);
+}
+
+.cepat-alert {
+  margin-bottom: var(--space-4);
+}
+
+.cepat-note {
+  margin: var(--space-3) 0 0;
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+  text-align: center;
+}
+
+.cepat-footer {
+  padding: var(--space-4) var(--space-4) calc(var(--space-6) + env(safe-area-inset-bottom, 0px));
+  color: var(--text-secondary);
+  font-size: 0.75rem;
+  text-align: center;
+}
+
+/* ── Saklar dua mode ───────────────────────────────────────────── */
+.mode-switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 3px;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-full);
+  background: var(--gray-100);
+}
+
+.mode-switch button {
+  min-height: 2.25rem;
+  padding: 0.35rem 0.85rem;
+  border: 0;
+  border-radius: var(--radius-full);
+  background: transparent;
+  color: var(--gray-700);
+  font-size: 0.8rem;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.mode-switch button:hover {
+  color: var(--gray-900);
+  background: rgba(255, 255, 255, 0.65);
+}
+
+.mode-switch button:focus-visible {
+  outline: 3px solid var(--blue-300);
+  outline-offset: 1px;
+}
+
+.mode-switch button.active {
+  background: var(--white);
+  color: var(--blue-700);
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.16);
+}
+
+/* ── Saklar mengambang di halaman Normal ───────────────────────── */
+.mode-cepat-floating {
+  position: fixed;
+  right: var(--space-3);
+  bottom: calc(4.75rem + env(safe-area-inset-bottom, 0px));
+  z-index: 1045;
+  padding: 3px;
+  border-radius: var(--radius-full);
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.18);
+  backdrop-filter: blur(8px);
+}
+
+.mode-cepat-floating .mode-switch {
+  background: var(--white);
+}
+
+@media (min-width: 992px) {
+  .mode-cepat-floating {
+    right: var(--space-4);
+    bottom: var(--space-4);
+  }
+}
+
+/* ── Layar pilih-mode ──────────────────────────────────────────── */
+.pilih-mode-shell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pilih-mode-main {
+  width: 100%;
+  max-width: 880px;
+  padding: var(--space-8) var(--space-4);
+}
+
+.pilih-mode-head {
+  margin-bottom: var(--space-6);
+  text-align: center;
+}
+
+.pilih-mode-head h1 {
+  margin: 0 0 var(--space-2);
+  font-size: clamp(1.5rem, 4vw, 2.1rem);
+}
+
+.pilih-mode-head p {
+  max-width: 40rem;
+  margin: 0 auto;
+  color: var(--text-secondary);
+}
+
+.pilih-mode-grid {
+  display: grid;
+  gap: var(--space-4);
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 768px) {
+  .pilih-mode-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.pilih-mode-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-2);
+  width: 100%;
+  min-height: 11rem;
+  padding: var(--space-5);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-lg);
+  background: var(--white);
+  color: var(--text-primary);
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 120ms ease, box-shadow 120ms ease, transform 120ms ease;
+}
+
+.pilih-mode-card:hover {
+  border-color: var(--blue-300);
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+}
+
+.pilih-mode-card:focus-visible {
+  outline: 3px solid var(--blue-300);
+  outline-offset: 2px;
+}
+
+.pilih-mode-card.is-current {
+  border-color: var(--blue-500);
+  box-shadow: 0 0 0 1px var(--blue-500) inset;
+}
+
+.pilih-mode-icon {
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+.pilih-mode-title {
+  font-size: 1.1rem;
+  font-weight: 800;
+}
+
+.pilih-mode-desc {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+
+.pilih-mode-badge {
+  margin-top: auto;
+  padding: 0.2rem 0.6rem;
+  border-radius: var(--radius-full);
+  background: var(--blue-50);
+  color: var(--blue-700);
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.pilih-mode-footnote {
+  margin: var(--space-6) auto 0;
+  max-width: 38rem;
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+  text-align: center;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pilih-mode-card {
+    transition: none;
+  }
+}

@@ -3,6 +3,7 @@ import { lazy, Suspense, useEffect, useRef, type ReactNode } from 'react';
 import { Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import { PageLoadingSkeleton } from './components/common/SkeletonLoader';
 import AppLayout from './components/layout/AppLayout';
+import ModeCepatFloatingSwitch from './components/layout/ModeCepatFloatingSwitch';
 import ProtectedRoute from './components/layout/ProtectedRoute';
 import PwaRouteBoundary from './components/pwa/PwaRouteBoundary';
 import { getDefaultRoute } from './config/navigation';
@@ -81,6 +82,9 @@ const ServiceInterestsPage = lazy(() => import('./pages/services/ServiceInterest
 const MeterReadingsPage = lazy(() => import('./pages/rooms/MeterReadingsPage'));
 const AcMaintenancePage = lazy(() => import('./pages/operations/AcMaintenancePage'));
 const IotOverviewPage = lazy(() => import('./pages/iot/IotOverviewPage'));
+// AIDL-02: shell Mode Cepat berdampingan dengan halaman Normal; keduanya route terpisah.
+const CepatShell = lazy(() => import('./pages/cepat/CepatShell'));
+const PilihModePage = lazy(() => import('./pages/cepat/PilihModePage'));
 
 type Role = 'OWNER' | 'ADMIN' | 'STAFF' | 'TENANT';
 
@@ -212,6 +216,7 @@ export default function App() {
   return (
     <PwaRouteBoundary>
       <RouteTitleSync />
+      <ModeCepatFloatingSwitch />
       <Suspense fallback={<PageLoadingSkeleton />}>
         <BreadcrumbProvider>
         <Routes>
@@ -229,6 +234,10 @@ export default function App() {
         <Route path="/reviews" element={<ReviewsPublicPage />} />
         <Route path="/" element={<RootEntry />} />
         <Route element={<ProtectedRoute />}>
+          {/* AIDL-02: dua route ini sengaja di LUAR AppLayout — shell Cepat punya header sendiri
+              dan halaman Normal tidak boleh berubah (diff bersih pada shell/sidebar/CSS lama). */}
+          <Route path="/cepat" element={<CepatShell />} />
+          <Route path="/pilih-mode" element={<PilihModePage />} />
           <Route element={<AppLayout />}>
           <Route
             path="/dashboard"
