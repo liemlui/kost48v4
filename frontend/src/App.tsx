@@ -9,6 +9,7 @@ import PwaRouteBoundary from './components/pwa/PwaRouteBoundary';
 import { getDefaultRoute } from './config/navigation';
 import { resolveRouteTitle } from './config/routeTitles';
 import { useDocumentTitle } from './hooks/useDocumentTitle';
+import { useCanonicalUrl } from './utils/canonical';
 import { useTenantPortalStage } from './hooks/useTenantPortalStage';
 import { useAuth } from './context/AuthContext';
 import { useToast } from './components/common/ToastProvider';
@@ -209,6 +210,7 @@ function RootEntry() {
 function RouteTitleSync() {
   const { pathname } = useLocation();
   useDocumentTitle(resolveRouteTitle(pathname));
+  useCanonicalUrl();
   return null;
 }
 

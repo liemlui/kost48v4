@@ -6,4 +6,4 @@ Disallow: /portal/
 Disallow: /reports
 Disallow: /settings
 
-Sitemap: https://app.kost48surabaya.com/sitemap.xml
+Sitemap: https://kost48surabaya.com/sitemap.xml
