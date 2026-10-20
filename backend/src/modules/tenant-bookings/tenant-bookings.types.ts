@@ -56,6 +56,7 @@ export interface ApprovalBookingSnapshot {
   stayStatus: string;
   pricingTerm: string;
   agreedRentAmountRupiah: number;
+  depositAmountRupiah: number;
   checkInDate: Date;
   plannedCheckOutDate: Date | null;
   expiresAt: Date | null;

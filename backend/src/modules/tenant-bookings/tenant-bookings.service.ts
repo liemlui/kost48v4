@@ -16,6 +16,7 @@ import {
 } from '../../common/enums/app.enums';
 import { CurrentUserPayload } from '../../common/interfaces/current-user.interface';
 import { roundRupiah } from '../../common/business/money.helper';
+import { resolveDepositWithoutOverride } from '../../common/utils/deposit-policy.util';
 import { buildMeta, buildPagination } from '../../common/utils/pagination';
 import { serializePrismaResult } from '../../common/utils/serialization';
 import { PrismaService } from '../../prisma/prisma.service';
@@ -227,6 +228,11 @@ export class TenantBookingsService {
         const booking = await lockApprovalBookingTx(tx, stayId);
         if (!booking) throw new NotFoundException('Booking tidak ditemukan');
 
+        const depositAmountRupiah = resolveDepositWithoutOverride(
+          booking.depositAmountRupiah,
+          dto.depositAmountRupiah,
+        );
+
         if (booking.stayStatus !== StayStatus.ACTIVE) {
           throw new ConflictException('Booking tidak lagi aktif dan tidak dapat disetujui');
         }
@@ -310,7 +316,7 @@ export class TenantBookingsService {
           where: { id: stayId },
           data: {
             agreedRentAmountRupiah: dto.agreedRentAmountRupiah,
-            depositAmountRupiah: dto.depositAmountRupiah,
+            depositAmountRupiah,
             ...(dpPaidSoFar === 0
               ? { downPaymentAmountRupiah: roundRupiah((dto.agreedRentAmountRupiah * 30) / 100) }
               : {}),

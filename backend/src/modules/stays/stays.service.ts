@@ -11,6 +11,7 @@ import { createHash, randomBytes } from "crypto";
 import * as bcrypt from "bcryptjs";
 import { AuditLogService } from "../../audit-log/audit-log.service";
 import { CurrentUserPayload } from "../../common/interfaces/current-user.interface";
+import { resolveDepositWithoutOverride } from "../../common/utils/deposit-policy.util";
 import {
   RoomStatus,
   StayStatus,
@@ -231,7 +232,7 @@ export class StaysService {
 
     const agreed =
       dto.agreedRentAmountRupiah ?? calculateRentByPricingTerm(Number(room.monthlyRateRupiah ?? 0), dto.pricingTerm);
-    const deposit = dto.depositAmountRupiah ?? (room.defaultDepositRupiah ?? 0);
+    const deposit = resolveDepositWithoutOverride(room.defaultDepositRupiah ?? 0, dto.depositAmountRupiah);
     const electricity =
       dto.electricityTariffPerKwhRupiah ?? room.electricityTariffPerKwhRupiah;
     const water = dto.waterTariffPerM3Rupiah ?? room.waterTariffPerM3Rupiah;

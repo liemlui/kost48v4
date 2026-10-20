@@ -6,7 +6,7 @@ export async function lockApprovalBookingTx(tx: Prisma.TransactionClient, stayId
   const rows = await tx.$queryRaw<ApprovalBookingSnapshot[]>(Prisma.sql`
     SELECT
       s.id AS "stayId", s."tenantId", s."roomId", s.status AS "stayStatus", s."pricingTerm",
-      s."agreedRentAmountRupiah", s."checkInDate", s."plannedCheckOutDate", s."expiresAt", s."bookingSource",
+      s."agreedRentAmountRupiah", s."depositAmountRupiah", s."checkInDate", s."plannedCheckOutDate", s."expiresAt", s."bookingSource",
       r.code AS "roomCode", r.status AS "roomStatus", r."isActive" AS "roomIsActive", t."isActive" AS "tenantIsActive"
     FROM "Stay" s
     INNER JOIN "Room" r ON r.id = s."roomId"
