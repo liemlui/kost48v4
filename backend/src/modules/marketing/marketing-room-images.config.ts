@@ -1,9 +1,9 @@
 // F3-11 (M-04): katalog foto marketing kamar dipindah dari `marketing-public-rooms.service.ts`
 // ke konfigurasi terpisah agar daftar ~76 foto bisa dirawat tanpa menyentuh logika service.
-// Foto fisik berada di `/api/uploads/room-images`; daftar ini adalah fallback ketika
-// `Room.images` (DB) kosong, dipetakan dari kode kamar.
+// Foto fisik berada di aset statis `/room-images` (dipetakan UI dari nama berkas);
+// daftar ini adalah fallback ketika `Room.images` (DB) kosong, dipetakan dari kode kamar.
 
-export const ROOM_IMAGE_BASE_PATH = '/api/uploads/room-images';
+export const ROOM_IMAGE_BASE_PATH = '/room-images';
 
 // Whitelist berkas foto kamar yang benar-benar tersedia di folder uploads.
 export const ROOM_MARKETING_IMAGE_FILES = new Set<string>([
