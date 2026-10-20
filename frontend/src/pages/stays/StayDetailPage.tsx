@@ -283,6 +283,12 @@ export default function StayDetailPage() {
           <div className="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-3">
             <div className="d-flex flex-wrap gap-2 align-items-center">
               <StatusBadge status={stay.status} />
+              {stay.status === 'ACTIVE' && stay.lifecycleStatus === 'GRACE' ? (
+                <StatusBadge status="WARNING" customLabel="Masa tenggang" />
+              ) : null}
+              {stay.status === 'ACTIVE' && stay.lifecycleStatus === 'OVERSTAY' ? (
+                <StatusBadge status="DANGER" customLabel="Overstay" />
+              ) : null}
               {overdue ? <StatusBadge status="OVERDUE" /> : null}
             </div>
 
