@@ -1,7 +1,7 @@
 // FILE: stay-sweep.service.ts — auto-sweep transisi status stay: selesai, overdue, notifikasi
 import { ConflictException, Injectable, Logger } from '@nestjs/common';
 import { Prisma } from '../../../generated/prisma';
-import { InvoiceStatus, PaymentSubmissionStatus, RoomStatus, StayStatus } from '../../../common/enums/app.enums';
+import { CheckoutRequestStatus, InvoiceStatus, PaymentSubmissionStatus, RoomStatus, StayStatus } from '../../../common/enums/app.enums';
 import { PrismaService } from '../../../prisma/prisma.service';
 import { AccountingPostingService } from '../../accounting/accounting-posting.service';
 import { AppNotificationService } from '../../notifications/app-notification.service';
@@ -116,6 +116,20 @@ export class StaySweepService {
     options: { actorUserId?: number | null; source?: string },
     cutoffDate: Date,
   ): Promise<boolean> {
+    // S-10: checkout dua langkah — persetujuan mengubah plannedCheckOutDate.
+    // Selama checkout request sudah APPROVED, tenant tidak boleh diperlakukan
+    // sebagai overstay; final checkout menunggu tindakan admin.
+    const approvedCheckout = await this.prisma.checkoutRequest.findFirst({
+      where: { stayId, status: CheckoutRequestStatus.APPROVED },
+      select: { id: true },
+    });
+    if (approvedCheckout) {
+      this.logger.warn(
+        `Forced checkout stay #${stayId} dilewati: checkout request #${approvedCheckout.id} sudah APPROVED (checkout in progress).`,
+      );
+      return false;
+    }
+
     // B-07 (D-03): tagihan DRAFT (belum diterbitkan, tanpa jurnal) TIDAK boleh
     // memblokir forced checkout — DRAFT yang terlupakan dulu bikin overstay tak
     // pernah auto-checkout + alert merah tiap hari. Hanya ISSUED/PARTIAL yang blokir.
