@@ -511,6 +511,7 @@ export default function CheckInWizard({ show: _show = true, onHide }: CheckInWiz
                 estimatedWaterThreshold={estimatedWaterThreshold}
                 depositWasManuallyCleared={depositWasManuallyCleared}
                 setDepositWasManuallyCleared={setDepositWasManuallyCleared}
+                isReserved={String((selectedRoom as any)?.status ?? '').toUpperCase() === 'RESERVED'}
               />
             </>
           ) : null}

@@ -12,6 +12,7 @@ interface StepDetailsAndMetersProps {
   estimatedWaterThreshold: number;
   depositWasManuallyCleared: boolean;
   setDepositWasManuallyCleared: (value: boolean) => void;
+  isReserved?: boolean;
 }
 
 export default function StepDetailsAndMeters({
@@ -20,6 +21,7 @@ export default function StepDetailsAndMeters({
   estimatedWaterThreshold,
   depositWasManuallyCleared,
   setDepositWasManuallyCleared,
+  isReserved = false,
 }: StepDetailsAndMetersProps) {
   return (
     <Card className="content-card border-0 shadow-sm mb-4">
@@ -109,13 +111,24 @@ export default function StepDetailsAndMeters({
                 <div className="text-danger small mt-2">{String(form.formState.errors.depositAmountRupiah.message)}</div>
               ) : null}
               {/* Audit E-3: jaminan tunai yang diterima saat check-in harus tercatat resmi */}
-              <Form.Check
-                type="checkbox"
-                id="check-in-deposit-collected"
-                className="mt-2"
-                label="Jaminan sudah diterima saat check-in (dicatat ke ledger & jurnal)"
-                {...form.register('depositCollected')}
-              />
+              {isReserved ? (
+                <div className="text-muted small mt-2">
+                  Deposit booking sudah dicatat lewat pembayaran; checkbox “Jaminan sudah diterima” tidak diperlukan.
+                </div>
+              ) : (
+                <>
+                  <Form.Check
+                    type="checkbox"
+                    id="check-in-deposit-collected"
+                    className="mt-2"
+                    label="Jaminan sudah diterima saat check-in (dicatat ke ledger & jurnal)"
+                    {...form.register('depositCollected')}
+                  />
+                  <div className="text-muted small mt-1">
+                    Wajib dicentang bila deposit tunai diterima saat check-in; jika tidak, check-in ditolak.
+                  </div>
+                </>
+              )}
             </Form.Group>
           </Col>
           <Col md={6}>
