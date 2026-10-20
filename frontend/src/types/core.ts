@@ -203,6 +203,7 @@ export type Stay = {
   tenant?: Tenant | null;
   room?: Room | null;
   status: StayStatus;
+  lifecycleStatus?: 'ACTIVE' | 'GRACE' | 'OVERSTAY' | 'COMPLETED' | 'CANCELLED' | string;
   pricingTerm?: PricingTerm;
   agreedRentAmountRupiah?: number | null;
   depositAmountRupiah?: number | null;

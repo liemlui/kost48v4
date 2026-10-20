@@ -7,6 +7,7 @@ import { serializePrismaResult } from '../../common/utils/serialization';
 import { PrismaService } from '../../prisma/prisma.service';
 import { StaysQueryDto } from './dto/stays-query.dto';
 import { buildUtilitySuggestion, mapPricingTermToUnit, normalizeStayForResponse } from './stays.helpers';
+import { deriveStayLifecycle } from './stay-lifecycle.helper';
 
 @Injectable()
 export class StaysQueryService {
@@ -171,6 +172,16 @@ export class StaysQueryService {
       where: { stayId: id, status: { notIn: [InvoiceStatus.PAID, InvoiceStatus.CANCELLED] } },
     });
 
+    const renewalGrace = await this.prisma.renewRequest.findFirst({
+      where: {
+        stayId: id,
+        status: 'DP_SECURED' as any,
+        settlementDueDate: { not: null },
+      },
+      orderBy: { settlementDueDate: 'desc' },
+      select: { settlementDueDate: true },
+    });
+
     return serializePrismaResult(
       normalizeStayForResponse({
         ...stay,
@@ -179,6 +190,11 @@ export class StaysQueryService {
         latestInvoiceId: stay.invoices[0]?.id ?? null,
         latestInvoiceNumber: stay.invoices[0]?.invoiceNumber ?? null,
         latestInvoiceStatus: stay.invoices[0]?.status ?? null,
+        lifecycleStatus: deriveStayLifecycle({
+          status: stay.status,
+          plannedCheckOutDate: stay.plannedCheckOutDate,
+          renewalGraceUntil: renewalGrace?.settlementDueDate ?? null,
+        }),
       }),
     );
   }
