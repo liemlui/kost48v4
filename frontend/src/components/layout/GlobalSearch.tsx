@@ -99,7 +99,7 @@ export default function GlobalSearch({ role }: { role?: string }) {
               kind: 'invoice' as const,
               id: item.id,
               title: item.invoiceNumber || `INV-${item.id}`,
-              subtitle: [item.status, getInvoiceTotalAmount(item) ? `{formatRupiah(getInvoiceTotalAmount(item))}` : null]
+              subtitle: [item.status, getInvoiceTotalAmount(item) ? formatRupiah(getInvoiceTotalAmount(item)) : null]
                 .filter(Boolean)
                 .join(' · '),
               target: `/invoices/${item.id}`,

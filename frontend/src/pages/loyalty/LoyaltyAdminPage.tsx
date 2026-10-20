@@ -214,7 +214,7 @@ export default function LoyaltyAdminPage() {
                   <td>{r.name}{r.description && <div className="text-muted small">{r.description}</div>}</td>
                   <td><small>{REWARD_TYPE_LABEL[r.type] ?? r.type}</small></td>
                   <td>{r.pointCost}</td>
-                  <td>{r.valueRupiah ? `{formatRupiah(r.valueRupiah)}` : '-'}</td>
+                  <td>{r.valueRupiah ? formatRupiah(r.valueRupiah) : '-'}</td>
                   <td>{r.stockQty ?? '∞'}</td>
                   <td><StatusBadge status={r.isActive ? 'ACTIVE' : 'INACTIVE'} /></td>
                   {isOwner && <td className="text-end"><Button size="sm" variant="outline-secondary" onClick={() => openEdit(r)}>Ubah</Button></td>}

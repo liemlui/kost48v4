@@ -321,7 +321,7 @@ export default function PublicRoomDetailPage() {
                         <DetailFeatureCard {...getFeature(room, 'bathroom')} />
                         <DetailFeatureCard {...getFeature(room, 'cooling')} />
                         <DetailFeatureCard {...getFeature(room, 'size')} />
-                        <DetailFeatureCard icon="🛡️" label="Deposit jaminan" value={room.defaultDepositRupiah ? `{formatRupiah(room.defaultDepositRupiah)}` : 'Tanya admin'} />
+                        <DetailFeatureCard icon="🛡️" label="Deposit jaminan" value={room.defaultDepositRupiah ? formatRupiah(room.defaultDepositRupiah) : 'Tanya admin'} />
                       </div>
 
                       <div className="room-detail-amenities" aria-label="Fasilitas kamar">

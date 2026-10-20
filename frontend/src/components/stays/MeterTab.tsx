@@ -8,7 +8,7 @@ import { numeric, buildMeterRows, categorizeReadings } from '../../utils/meterUs
 import { formatRupiah, formatRupiahWithoutSymbol } from '../../utils/formatCurrency';
 
 function rupiah(value: number) {
-  return `{formatRupiah(value)}`;
+  return formatRupiah(value);
 }
 
 export default function MeterTab({
