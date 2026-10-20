@@ -81,6 +81,7 @@ export type Tenant = {
   ktpVerifiedAt?: string | null;
   ktpVerificationMethod?: string | null;
   ktpVerificationNotes?: string | null;
+  ktpStatus?: 'PENDING' | 'VERIFIED' | 'REJECTED' | null;
 };
 
 export type TenantProfileCompletionSummary = {
@@ -119,6 +120,7 @@ export type TenantSelfProfile = {
   ktpVerifiedAt?: string | null;
   ktpVerificationMethod?: string | null;
   ktpVerificationNotes?: string | null;
+  ktpStatus?: 'PENDING' | 'VERIFIED' | 'REJECTED' | null;
 };
 
 export type TenantProfileResponse = {

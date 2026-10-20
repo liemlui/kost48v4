@@ -1,7 +1,7 @@
 // FILE: tenants.service.ts — CRUD data penghuni + KTP + profil (master data)
 import { Injectable, NotFoundException, BadRequestException, ForbiddenException, ConflictException } from '@nestjs/common';
 import * as bcrypt from 'bcryptjs';
-import { Prisma, ProfilePhotoSource } from '../../generated/prisma';
+import { Prisma, ProfilePhotoSource, KtpStatus } from '../../generated/prisma';
 import { PrismaService } from '../../prisma/prisma.service';
 import { buildMeta, buildPagination } from '../../common/utils/pagination';
 import { CreatePortalAccessDto } from './dto/create-portal-access.dto';
@@ -226,6 +226,9 @@ export class TenantsService {
         ktpVerificationMethod: null,
         ktpVerificationNotes: null,
         ktpDeletedAt: null,
+        ktpStatus: KtpStatus.PENDING,
+        ktpRejectedAt: null,
+        ktpRejectionReason: null,
       },
     });
     await this.audit.log({ actorUserId: actor.id, action: 'KTP_UPLOAD', entityType: 'Tenant', entityId: String(id) });
@@ -269,6 +272,9 @@ export class TenantsService {
         ktpVerifiedById: actor.id,
         ktpVerificationMethod: method,
         ktpVerificationNotes: opts?.notes?.slice(0, 500) ?? null,
+        ktpStatus: KtpStatus.VERIFIED,
+        ktpRejectedAt: null,
+        ktpRejectionReason: null,
       },
     });
     await this.audit.log({
@@ -277,6 +283,41 @@ export class TenantsService {
       entityType: 'Tenant',
       entityId: String(id),
       meta: { method, notes: opts?.notes?.slice(0, 200) },
+    });
+    return updated;
+  }
+
+  /**
+   * S-09: tolak KTP tenant. OWNER/ADMIN.
+   * Hanya untuk KTP yang belum terverifikasi; alasan wajib.
+   */
+  async rejectKtp(id: number, actor: CurrentUserPayload, reason: string) {
+    const tenant = await this.prisma.tenant.findUnique({
+      where: { id },
+      select: { id: true, ktpImageFileKey: true, ktpVerifiedAt: true },
+    });
+    if (!tenant) throw new NotFoundException('Tenant tidak ditemukan');
+    if (!tenant.ktpImageFileKey) throw new ConflictException('Tenant belum mengunggah foto KTP.');
+    if (tenant.ktpVerifiedAt) throw new ConflictException('KTP sudah terverifikasi; tidak dapat ditolak.');
+
+    const updated = await this.prisma.tenant.update({
+      where: { id },
+      data: {
+        ktpStatus: KtpStatus.REJECTED,
+        ktpRejectedAt: new Date(),
+        ktpRejectionReason: reason.trim().slice(0, 500),
+        ktpVerifiedAt: null,
+        ktpVerifiedById: null,
+        ktpVerificationMethod: null,
+        ktpVerificationNotes: null,
+      },
+    });
+    await this.audit.log({
+      actorUserId: actor.id,
+      action: 'KTP_REJECT',
+      entityType: 'Tenant',
+      entityId: String(id),
+      meta: { reason: reason.trim().slice(0, 200) },
     });
     return updated;
   }
@@ -580,6 +621,9 @@ export class TenantsService {
         ktpVerifiedAt: null,
         ktpVerifiedById: null,
         ktpDeletedAt: new Date(),
+        ktpStatus: null,
+        ktpRejectedAt: null,
+        ktpRejectionReason: null,
         ...(clearAutoPhoto
           ? {
               profilePhotoUrl: null,

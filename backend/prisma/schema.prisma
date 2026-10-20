@@ -197,6 +197,12 @@ enum CheckoutRequestStatus {
   REJECTED
 }
 
+enum KtpStatus {
+  PENDING
+  VERIFIED
+  REJECTED
+}
+
 enum TicketStatus {
   OPEN
   IN_PROGRESS
@@ -658,6 +664,10 @@ model Tenant {
   ktpVerificationMethod    String?   @db.VarChar(50)
   ktpVerificationNotes     String?
   ktpDeletedAt             DateTime?
+  // S-09: status KTP eksplisit (null = belum ada KTP; PENDING = menunggu verifikasi).
+  ktpStatus                KtpStatus?
+  ktpRejectedAt            DateTime?
+  ktpRejectionReason       String?
 
   // PUB-FOTO-PROFIL-KTP: foto profil/avatar tenant. Default diturunkan dari foto KTP
   // pertama (source KTP_AUTO); owner/admin bisa ganti (source MANUAL). KTP_AUTO ikut

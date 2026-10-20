@@ -19,6 +19,7 @@ import { deleteFileSafe, detectImageMime, MIME_TO_EXT } from '../../common/utils
 import { CreatePortalAccessDto } from './dto/create-portal-access.dto';
 import { CreateTenantDto, UpdateTenantDto } from './dto/tenant.dto';
 import { SaveKtpDataDto } from './dto/save-ktp-data.dto';
+import { RejectKtpDto } from './dto/reject-ktp.dto';
 import { TenantsQueryDto } from './dto/tenants-query.dto';
 import { TogglePortalAccessDto } from './dto/toggle-portal-access.dto';
 import { ResetPortalPasswordDto } from './dto/reset-portal-password.dto';
@@ -208,6 +209,21 @@ export class TenantsController {
     return {
       message: 'KTP tenant berhasil diverifikasi',
       data: await this.tenantsService.verifyKtp(id, user, body),
+    };
+  }
+
+  /** S-09: tolak KTP tenant (OWNER/ADMIN) dengan alasan. */
+  @Post(':id/ktp/reject')
+  @ApiOperation({ summary: 'Tolak KTP tenant — OWNER/ADMIN' })
+  @Roles(UserRole.OWNER, UserRole.ADMIN)
+  async rejectKtp(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() body: RejectKtpDto,
+    @CurrentUser() user: CurrentUserPayload,
+  ) {
+    return {
+      message: 'KTP tenant ditolak',
+      data: await this.tenantsService.rejectKtp(id, user, body.reason),
     };
   }
 
