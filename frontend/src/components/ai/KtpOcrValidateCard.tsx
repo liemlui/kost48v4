@@ -3,7 +3,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Alert, Badge, Button, Card, Form, Modal, Spinner } from 'react-bootstrap';
 import { useAuth } from '../../context/AuthContext';
 import { getOwnerAiStatus, validateKtpOcr, type KtpOcrValidateResult } from '../../api/ai';
-import { verifyTenantKtp, saveTenantKtpData, getTenant, uploadTenantKtpImage, deleteTenantKtp, type VerifyKtpPayload } from '../../api/tenants';
+import { verifyTenantKtp, rejectTenantKtp, saveTenantKtpData, getTenant, uploadTenantKtpImage, deleteTenantKtp, type VerifyKtpPayload } from '../../api/tenants';
 import { preprocessImage } from '../../utils/ocrPreprocess';
 import { getApiErrorMessage } from '../../utils/getApiErrorMessage';
 import { useToast } from '../common/ToastProvider';
@@ -78,6 +78,18 @@ export default function KtpOcrValidateCard({ tenantId, tenantName, ktpVerifiedAt
       setShowVerifyModal(false);
       queryClient.invalidateQueries({ queryKey: ['tenants'] });
       queryClient.invalidateQueries({ queryKey: ['tenant', tenantId] });
+    },
+  });
+
+  const rejectMutation = useMutation({
+    mutationFn: (reason: string) => rejectTenantKtp(tenantId, { reason }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['tenants'] });
+      queryClient.invalidateQueries({ queryKey: ['tenant', tenantId] });
+      toast('KTP ditolak. Tenant dapat mengunggah ulang.', 'success');
+    },
+    onError: (err) => {
+      toast(getApiErrorMessage(err, 'Gagal menolak KTP.'), 'danger');
     },
   });
 
@@ -376,6 +388,20 @@ export default function KtpOcrValidateCard({ tenantId, tenantName, ktpVerifiedAt
                 onClick={() => setShowVerifyModal(true)}
               >
                 ✅ Verifikasi Manual
+              </Button>
+
+              <Button
+                type="button"
+                variant="outline-danger"
+                size="sm"
+                disabled={!hasKtpPhoto || rejectMutation.isPending}
+                title={!hasKtpPhoto ? 'Upload & simpan foto KTP dulu sebelum menolak' : undefined}
+                onClick={() => {
+                  const reason = window.prompt('Alasan menolak KTP (wajib, maks 500 karakter):');
+                  if (reason && reason.trim()) rejectMutation.mutate(reason.trim());
+                }}
+              >
+                {rejectMutation.isPending ? 'Menolak…' : 'Tolak KTP'}
               </Button>
             </div>
 

@@ -88,6 +88,16 @@ export interface VerifyKtpResponse {
   ktpVerificationNotes: string | null;
 }
 
+export interface RejectKtpPayload {
+  reason: string;
+}
+
+/** Tolak KTP tenant (OWNER/ADMIN) — S-09. */
+export async function rejectTenantKtp(tenantId: number, payload: RejectKtpPayload): Promise<Tenant> {
+  const response = await client.post<ApiEnvelope<Tenant>>(`/tenants/${tenantId}/ktp/reject`, payload);
+  return response.data.data;
+}
+
 /** Verifikasi KTP tenant secara manual (OWNER/ADMIN). */
 export async function verifyTenantKtp(tenantId: number, payload?: VerifyKtpPayload): Promise<VerifyKtpResponse> {
   const response = await client.post<ApiEnvelope<VerifyKtpResponse>>(
