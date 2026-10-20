@@ -20,3 +20,21 @@ export function resolveDepositWithoutOverride(
   }
   return expected;
 }
+
+/**
+ * F-01 lanjutan: cegah deposit dicatat dua kali saat aktivasi booking.
+ * Booking RESERVED sudah mencatat deposit lewat persetujuan pembayaran;
+ * checkbox "Jaminan sudah diterima" tidak boleh menambah catatan lagi.
+ */
+export function assertDepositNotCollectedTwice(
+  depositCollected: boolean | undefined,
+  depositPaidAmountRupiah: number | null | undefined,
+  depositPaymentStatus: string | null | undefined,
+): void {
+  if (!depositCollected) return;
+  if (Number(depositPaidAmountRupiah ?? 0) > 0 || depositPaymentStatus === 'PAID') {
+    throw new BadRequestException(
+      'Jaminan sudah tercatat dibayar untuk booking ini. Jangan centang "Jaminan sudah diterima" saat aktivasi; deposit tidak boleh dicatat dua kali.',
+    );
+  }
+}

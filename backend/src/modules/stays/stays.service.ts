@@ -11,7 +11,7 @@ import { createHash, randomBytes } from "crypto";
 import * as bcrypt from "bcryptjs";
 import { AuditLogService } from "../../audit-log/audit-log.service";
 import { CurrentUserPayload } from "../../common/interfaces/current-user.interface";
-import { resolveDepositWithoutOverride } from "../../common/utils/deposit-policy.util";
+import { resolveDepositWithoutOverride, assertDepositNotCollectedTwice } from "../../common/utils/deposit-policy.util";
 import {
   RoomStatus,
   StayStatus,
@@ -313,6 +313,7 @@ export class StaysService {
               id: true,
               depositAmountRupiah: true,
               depositPaidAmountRupiah: true,
+              depositPaymentStatus: true,
               initialElectricityKwhPending: true,
               initialWaterM3Pending: true,
               checkInDate: true,
@@ -322,6 +323,12 @@ export class StaysService {
           if (!bookingStay) {
             throw new ConflictException('Tidak ada booking aktif untuk kamar ini.');
           }
+
+          assertDepositNotCollectedTwice(
+            dto.depositCollected,
+            bookingStay.depositPaidAmountRupiah,
+            bookingStay.depositPaymentStatus,
+          );
 
           // Verifikasi invoice sewa awal sudah LUNAS
           const initialInvoice = await tx.invoice.findFirst({
