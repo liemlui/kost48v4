@@ -1,4 +1,4 @@
-import { BadRequestException } from '@nestjs/common';
+import { BadRequestException, ConflictException } from '@nestjs/common';
 
 /**
  * F-01/P27: deposit jaminan tidak boleh di-override.
@@ -35,6 +35,30 @@ export function assertDepositNotCollectedTwice(
   if (Number(depositPaidAmountRupiah ?? 0) > 0 || depositPaymentStatus === 'PAID') {
     throw new BadRequestException(
       'Jaminan sudah tercatat dibayar untuk booking ini. Jangan centang "Jaminan sudah diterima" saat aktivasi; deposit tidak boleh dicatat dua kali.',
+    );
+  }
+}
+
+/** F-11: walk-in harus mencatat deposit tunai saat check-in. */
+export function assertWalkInDepositCollected(
+  depositAmountRupiah: number,
+  depositCollected: boolean | undefined,
+): void {
+  if (depositAmountRupiah > 0 && !depositCollected) {
+    throw new ConflictException(
+      'Deposit jaminan belum diterima. Centang "Jaminan sudah diterima" saat check-in tunai atau lunasi deposit sebelum check-in.',
+    );
+  }
+}
+
+/** F-11: booking RESERVED hanya boleh check-in bila deposit sudah lunas. */
+export function assertReservedDepositPaid(
+  depositAmountRupiah: number,
+  depositPaidAmountRupiah: number,
+): void {
+  if (depositAmountRupiah > 0 && depositPaidAmountRupiah < depositAmountRupiah) {
+    throw new ConflictException(
+      'Deposit jaminan belum lunas. Selesaikan deposit sebelum check-in; deposit tidak boleh tertagih belakangan.',
     );
   }
 }

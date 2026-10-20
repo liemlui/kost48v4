@@ -11,7 +11,7 @@ import { createHash, randomBytes } from "crypto";
 import * as bcrypt from "bcryptjs";
 import { AuditLogService } from "../../audit-log/audit-log.service";
 import { CurrentUserPayload } from "../../common/interfaces/current-user.interface";
-import { resolveDepositWithoutOverride, assertDepositNotCollectedTwice } from "../../common/utils/deposit-policy.util";
+import { resolveDepositWithoutOverride, assertDepositNotCollectedTwice, assertWalkInDepositCollected, assertReservedDepositPaid } from "../../common/utils/deposit-policy.util";
 import { calculateBookingCharges } from "../tenant-bookings/booking-charges.helper";
 import {
   RoomStatus,
@@ -244,6 +244,9 @@ export class StaysService {
     });
     const agreed = charges.agreedRentAmountRupiah;
     const deposit = resolveDepositWithoutOverride(charges.depositAmountRupiah, dto.depositAmountRupiah);
+    if (room.status !== RoomStatus.RESERVED) {
+      assertWalkInDepositCollected(deposit, dto.depositCollected);
+    }
     const electricity =
       dto.electricityTariffPerKwhRupiah ?? room.electricityTariffPerKwhRupiah;
     const water = dto.waterTariffPerM3Rupiah ?? room.waterTariffPerM3Rupiah;
@@ -339,6 +342,11 @@ export class StaysService {
             dto.depositCollected,
             bookingStay.depositPaidAmountRupiah,
             bookingStay.depositPaymentStatus,
+          );
+
+          assertReservedDepositPaid(
+            Number(bookingStay.depositAmountRupiah ?? 0),
+            Number(bookingStay.depositPaidAmountRupiah ?? 0),
           );
 
           // Verifikasi invoice sewa awal sudah LUNAS
