@@ -15,7 +15,7 @@ import type {
   PricingTerm,
   PublicRoom,
 } from "../../types";
-import { calculateRentByPricingTerm, isUtilitiesIncludedForPricingTerm } from "../../utils/pricing";
+import { calculateRentByPricingTerm, isUtilitiesIncludedForPricingTerm, calculateOccupantSurcharge, ROOM_MAX_OCCUPANTS } from "../../utils/pricing";
 import { getKost48RoomGallery, resolveKost48MarketingImageUrl } from "../../data/kost48Assets";
 import { formatRupiah } from "../../utils/formatCurrency";
 import {
@@ -31,6 +31,8 @@ type BookingFormState = {
   checkInDate: string;
   pricingTerm: PricingTerm;
   notes: string;
+  occupantCount: number;
+  hasPet: boolean;
 };
 
 function todayString() {
@@ -115,6 +117,8 @@ export default function BookingPage() {
       initialRoom?.availablePricingTerms?.[0] ??
       "MONTHLY",
     notes: "",
+    occupantCount: 1,
+    hasPet: false,
   });
   const [error, setError] = useState("");
 
@@ -182,11 +186,19 @@ export default function BookingPage() {
     );
   }, [room, formState.pricingTerm]);
 
+  const occupantSurcharge = useMemo(() => {
+    const base = Number(selectedRate ?? 0);
+    return base > 0 ? calculateOccupantSurcharge(base, (room as any)?.roomSize, formState.occupantCount) : 0;
+  }, [room, selectedRate, formState.occupantCount]);
+  const petDepositRupiah = formState.hasPet ? 100000 : 0;
   const initialTotal = useMemo(() => {
     const rent = Number(selectedRate ?? 0);
     const deposit = Number(room?.defaultDepositRupiah ?? 0);
-    return rent + deposit;
-  }, [room, selectedRate]);
+    return rent + occupantSurcharge + deposit + petDepositRupiah;
+  }, [room, selectedRate, occupantSurcharge, petDepositRupiah]);
+
+  const roomSizeKey = String((room as any)?.roomSize ?? '').toUpperCase();
+  const maxOccupants = ROOM_MAX_OCCUPANTS[roomSizeKey] ?? 4;
 
   const handleSubmit = (event: FormEvent) => {
     event.preventDefault();
@@ -199,6 +211,8 @@ export default function BookingPage() {
       roomId: room.id,
       checkInDate: formState.checkInDate,
       pricingTerm: formState.pricingTerm,
+      occupantCount: formState.occupantCount,
+      hasPet: formState.hasPet,
       ...(formState.notes?.trim() ? { notes: formState.notes.trim() } : {}),
     };
     mutation.mutate(payload);
@@ -266,7 +280,13 @@ export default function BookingPage() {
                         <div className="fs-4 fw-bold"><CurrencyDisplay amount={initialTotal} /></div>
                         <div className="booking-room-estimate-lines">
                           <span>Sewa pertama <strong><CurrencyDisplay amount={selectedRate} showZero={false} /></strong></span>
+                          {occupantSurcharge > 0 ? (
+                            <span>Tambahan penghuni <strong><CurrencyDisplay amount={occupantSurcharge} showZero={false} /></strong></span>
+                          ) : null}
                           <span>Deposit awal <strong><CurrencyDisplay amount={room.defaultDepositRupiah} showZero={false} /></strong></span>
+                          {petDepositRupiah > 0 ? (
+                            <span>Deposit hewan <strong><CurrencyDisplay amount={petDepositRupiah} showZero={false} /></strong></span>
+                          ) : null}
                         </div>
                       </div>
 
@@ -355,6 +375,41 @@ export default function BookingPage() {
                             );
                           })}
                         </Form.Select>
+                      </Form.Group>
+                    </Col>
+                    <Col md={6}>
+                      <Form.Group controlId="booking-page-occupants">
+                        <Form.Label>Jumlah penghuni</Form.Label>
+                        <Form.Select
+                          value={formState.occupantCount}
+                          onChange={(event) =>
+                            setFormState((prev) => ({
+                              ...prev,
+                              occupantCount: Number(event.target.value),
+                            }))
+                          }
+                        >
+                          {Array.from({ length: maxOccupants }, (_, index) => index + 1).map((count) => (
+                            <option key={count} value={count}>{count} orang</option>
+                          ))}
+                        </Form.Select>
+                        <Form.Text muted>2+2 STANDARD / 4+2 LARGE; kepala ekstra +20%.</Form.Text>
+                      </Form.Group>
+                    </Col>
+                    <Col md={6}>
+                      <Form.Group controlId="booking-page-pet">
+                        <Form.Check
+                          type="checkbox"
+                          label="Ada hewan peliharaan (+ deposit hewan)"
+                          checked={formState.hasPet}
+                          onChange={(event) =>
+                            setFormState((prev) => ({
+                              ...prev,
+                              hasPet: event.target.checked,
+                            }))
+                          }
+                        />
+                        <Form.Text muted>Deposit hewan ditambahkan ke deposit awal.</Form.Text>
                       </Form.Group>
                     </Col>
                     <Col xs={12}>

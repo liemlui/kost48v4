@@ -279,9 +279,13 @@ export default function CheckInWizard({ show: _show = true, onHide }: CheckInWiz
         checkInDate: values.checkInDate,
         pricingTerm: values.pricingTerm,
         agreedRentAmountRupiah: Number(values.agreedRentAmountRupiah),
-        depositAmountRupiah: values.depositAmountRupiah !== '' && values.depositAmountRupiah !== undefined && values.depositAmountRupiah !== null
-          ? Number(values.depositAmountRupiah)
-          : depositWasManuallyCleared ? 0 : undefined,
+        depositAmountRupiah: values.hasPet
+          ? undefined
+          : values.depositAmountRupiah !== '' && values.depositAmountRupiah !== undefined && values.depositAmountRupiah !== null
+            ? Number(values.depositAmountRupiah)
+            : depositWasManuallyCleared ? 0 : undefined,
+        occupantCount: Math.max(1, Number(values.occupantCount) || 1),
+        hasPet: Boolean(values.hasPet),
         stayPurpose: values.stayPurpose || undefined,
         bookingSource: values.bookingSource || undefined,
         notes: values.notes || undefined,

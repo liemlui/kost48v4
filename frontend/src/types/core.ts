@@ -566,6 +566,8 @@ export type CreateTenantBookingPayload = {
   plannedCheckOutDate?: string;
   stayPurpose?: StayPurposeOption;
   notes?: string;
+  occupantCount?: number;
+  hasPet?: boolean;
 };
 
 export type StayPurposeOption = 'WORK' | 'STUDY' | 'TRANSIT' | 'FAMILY' | 'MEDICAL' | 'PROJECT' | 'OTHER';

@@ -14,6 +14,8 @@ export type WizardFormValues = {
   checkInDate: string;
   agreedRentAmountRupiah: number | string;
   depositAmountRupiah: number | string;
+  occupantCount: number | string;
+  hasPet: boolean;
   stayPurpose: string;
   bookingSource: string;
   notes: string;

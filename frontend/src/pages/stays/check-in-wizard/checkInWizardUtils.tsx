@@ -53,6 +53,8 @@ export const defaultValues: WizardFormValues = {
   checkInDate: today(),
   agreedRentAmountRupiah: '',
   depositAmountRupiah: '',
+  occupantCount: 1,
+  hasPet: false,
   stayPurpose: '',
   bookingSource: '',
   notes: '',

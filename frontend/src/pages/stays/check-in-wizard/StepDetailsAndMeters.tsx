@@ -119,6 +119,28 @@ export default function StepDetailsAndMeters({
             </Form.Group>
           </Col>
           <Col md={6}>
+            <Form.Group controlId="step-details-and-meters-occupants">
+              <Form.Label>Jumlah Penghuni</Form.Label>
+              <Form.Control
+                type="number"
+                min={1}
+                max={6}
+                {...form.register('occupantCount', { valueAsNumber: true })}
+              />
+              <div className="text-muted small mt-1">2+2 STANDARD / 4+2 LARGE; kepala ekstra +20%.</div>
+            </Form.Group>
+          </Col>
+          <Col md={6}>
+            <Form.Group controlId="step-details-and-meters-pet">
+              <Form.Check
+                type="checkbox"
+                label="Ada hewan peliharaan (+ deposit hewan)"
+                {...form.register('hasPet')}
+              />
+              <div className="text-muted small mt-1">Deposit dihitung sistem: default kamar + deposit hewan.</div>
+            </Form.Group>
+          </Col>
+          <Col md={6}>
             <Form.Group controlId="step-details-and-meters-5">
               <Form.Label>Tujuan Tinggal</Form.Label>
               <Form.Select {...form.register('stayPurpose')}>
