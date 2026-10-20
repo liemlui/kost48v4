@@ -13,6 +13,7 @@ import { InvoicesService } from '../invoices/invoices.service';
 import { SettingsService } from '../settings/settings.service';
 import { IotService } from '../iot/iot.service';
 import { getUtilityAllowanceMonths, getUtilityBillingCycle, toUtilityCycleDateKey } from '../../common/business/utility-billing-cycle.helper';
+import { buildMeterNoInvoiceMessage } from './meter-reading-message.helper';
 
 @Injectable()
 export class MeterReadingsService {
@@ -301,7 +302,7 @@ export class MeterReadingsService {
       .reduce((total, line) => total + Number(line.qty), 0);
 
     const lines: Array<{ lineType: string; utilityType: string; description: string; qty: string; unit: string; unitPriceRupiah: number; sortOrder: number }> = [];
-    let elecUsage = 0; let elecChargeable = 0;
+    let elecUsage = 0; let elecChargeable = 0; let electricityTariffRupiah = 0;
     if (prevElec) {
       elecUsage = elecValue.minus(prevElec.readingValue).toNumber();
       const free = Number(setting.freeElectricityKwhPerMonth ?? 0) * allowanceMonths;
@@ -311,6 +312,7 @@ export class MeterReadingsService {
       const totalCycleChargeable = Math.max(0, totalCycleUsage - free);
       elecChargeable = Math.max(0, totalCycleChargeable - alreadyBilledElectricityKwh);
       const tariff = Number(room.electricityTariffPerKwhRupiah || setting.electricityTariffPerKwhRupiah || 0);
+      electricityTariffRupiah = tariff;
       const electricityDescription = `Listrik periode ${toUtilityCycleDateKey(utilityCycle.start)} s.d. ${toUtilityCycleDateKey(utilityCycle.end)}: ${totalCycleUsage.toFixed(2)} kWh; ${free} kWh gratis; ${alreadyBilledElectricityKwh.toFixed(2)} kWh sudah ditagih; ${elecChargeable.toFixed(2)} kWh ditagih sekarang`;
       if (elecChargeable > 0 && tariff > 0) {
         lines.push({ lineType: 'ELECTRICITY', utilityType: 'ELECTRICITY', description: `Listrik: ${elecUsage.toFixed(2)} kWh − ${free} kWh gratis = ${elecChargeable.toFixed(2)} kWh`, qty: elecChargeable.toFixed(3), unit: 'kWh', unitPriceRupiah: tariff, sortOrder: 0 });
@@ -319,12 +321,13 @@ export class MeterReadingsService {
         lines[lines.length - 1].description = electricityDescription;
       }
     }
-    let waterUsage = 0; let waterChargeable = 0;
+    let waterUsage = 0; let waterChargeable = 0; let waterTariffRupiah = 0;
     if (waterEnabled && prevWater && waterValue) {
       waterUsage = waterValue.minus(prevWater.readingValue).toNumber();
       const freeW = Number(setting.freeWaterM3PerMonth ?? 0);
       waterChargeable = Math.max(0, waterUsage - freeW);
       const wtariff = Number(room.waterTariffPerM3Rupiah || setting.waterTariffPerM3Rupiah || 0);
+      waterTariffRupiah = wtariff;
       if (waterChargeable > 0 && wtariff > 0) {
         lines.push({ lineType: 'WATER', utilityType: 'WATER', description: `Air: ${waterUsage.toFixed(2)} m³ − ${freeW} m³ gratis = ${waterChargeable.toFixed(2)} m³`, qty: waterChargeable.toFixed(3), unit: 'm³', unitPriceRupiah: wtariff, sortOrder: 1 });
       }
@@ -379,7 +382,18 @@ export class MeterReadingsService {
     await this.audit.log({ actorUserId: actor.id, action: 'CREATE', entityType: 'MeterReading', entityId: String(txResult.electricity.id), newData: { electricity: txResult.electricity, water: txResult.water } });
 
     if (!lines.length) {
-      return { readings: { electricity: txResult.electricity, water: txResult.water }, invoice: null, summary, message: prevElec ? 'Pemakaian dalam jatah gratis — tidak ada tagihan meter.' : 'Catatan meter pertama tersimpan (belum ada selisih untuk ditagih).' };
+      return {
+        readings: { electricity: txResult.electricity, water: txResult.water },
+        invoice: null,
+        summary,
+        message: buildMeterNoInvoiceMessage({
+          hasPreviousElectricity: Boolean(prevElec),
+          electricityChargeableKwh: elecChargeable,
+          electricityTariffRupiah,
+          waterChargeableM3: waterChargeable,
+          waterTariffRupiah,
+        }),
+      };
     }
 
     return { readings: { electricity: txResult.electricity, water: txResult.water }, invoice: txResult.invoice, summary };
