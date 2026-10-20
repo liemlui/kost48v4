@@ -193,6 +193,7 @@ export interface RoomPricingSnapshot {
   biWeeklyRateRupiah: number | null;
   monthlyRateRupiah: number;
   defaultDepositRupiah: number;
+  roomSize: string;
   electricityTariffPerKwhRupiah: number;
   waterTariffPerM3Rupiah: number;
   notes: string | null;

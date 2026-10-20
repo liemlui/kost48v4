@@ -16,7 +16,8 @@ import { AUTO_OPS_DEADLINES, hoursFromNow } from '../../common/business/auto-ops
 import { serializePrismaResult } from '../../common/utils/serialization';
 import { normalizePhone } from '../../common/utils/phone.util';
 import { PrismaService } from '../../prisma/prisma.service';
-import { calculateRentByPricingTerm, calculateOccupantSurcharge, ROOM_MAX_FREE_OCCUPANTS, ROOM_MAX_OCCUPANTS } from './pricing.helper';
+import { calculateRentByPricingTerm } from './pricing.helper';
+import { calculateBookingCharges } from './booking-charges.helper';
 import { startOfDay, endOfDay, addDays, parseDateOnly } from '../../common/utils/date.util';
 import { isBookingSchemaReady, isBookingSchemaDriftError } from './booking-schema.helper';
 import { findBookingByIdTx } from './tenant-bookings.helpers';
@@ -249,22 +250,20 @@ export class PublicBookingsService {
         if (!baseRent || baseRent <= 0) {
           throw new ConflictException('Tarif kamar untuk term ini belum tersedia');
         }
-        const occupantCount = Math.max(1, Number(dto.occupantCount ?? 1));
-        const roomSizeKey = String(room.roomSize ?? '').toUpperCase();
-        const hardCap = ROOM_MAX_OCCUPANTS[roomSizeKey] ?? (ROOM_MAX_FREE_OCCUPANTS[roomSizeKey] ?? 2) + 2;
-        if (occupantCount > hardCap) {
-          throw new BadRequestException(
-            `Jumlah penghuni melebihi batas maksimal untuk kamar ${roomSizeKey === 'LARGE' ? 'besar' : 'standar'} (maks ${hardCap} orang).`,
-          );
-        }
-        const occupantSurcharge = calculateOccupantSurcharge(baseRent, room.roomSize, occupantCount);
-        const agreedRentAmountRupiah = baseRent + occupantSurcharge;
-
-        // Deposit jaminan dasar dari kamar + tambahan hewan bila ada.
-        const hasPet = Boolean(dto.hasPet);
         const opSetting = await tx.operationalSetting.findUnique({ where: { id: 1 } });
-        const petDepositRupiah = hasPet ? (opSetting?.petDepositRupiah ?? 100000) : 0;
-        const depositAmountRupiah = (room.defaultDepositRupiah ?? 0) + petDepositRupiah;
+        const charges = calculateBookingCharges({
+          baseRentRupiah: baseRent,
+          roomSize: room.roomSize,
+          occupantCount: dto.occupantCount,
+          hasPet: dto.hasPet,
+          petDepositRupiah: opSetting?.petDepositRupiah,
+          defaultDepositRupiah: room.defaultDepositRupiah,
+        });
+        const occupantCount = charges.occupantCount;
+        const agreedRentAmountRupiah = charges.agreedRentAmountRupiah;
+        const hasPet = Boolean(dto.hasPet);
+        const petDepositRupiah = charges.petDepositRupiah;
+        const depositAmountRupiah = charges.depositAmountRupiah;
 
         // DP = 30% sewa (default), atau 100% bila tenant pilih LUNAS.
         const isFullPayment = dto.paymentChoice === 'FULL';

@@ -66,6 +66,17 @@ export class CreateStayDto {
   @Min(0)
   depositAmountRupiah?: number;
 
+  @ApiPropertyOptional({ description: 'Jumlah penghuni (default 1; 2+2 STANDARD / 4+2 LARGE)' })
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  occupantCount?: number;
+
+  @ApiPropertyOptional({ description: 'Ada hewan peliharaan? (menambah deposit hewan)' })
+  @IsOptional()
+  @IsBoolean()
+  hasPet?: boolean;
+
   // Audit E-3: jaminan diterima tunai saat check-in manual — bila true,
   // depositPaid langsung tercatat + masuk ledger & jurnal liability.
   @ApiPropertyOptional({ description: 'Apakah deposit sudah diterima tunai saat check-in?' })

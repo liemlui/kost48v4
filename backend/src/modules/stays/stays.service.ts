@@ -12,6 +12,7 @@ import * as bcrypt from "bcryptjs";
 import { AuditLogService } from "../../audit-log/audit-log.service";
 import { CurrentUserPayload } from "../../common/interfaces/current-user.interface";
 import { resolveDepositWithoutOverride, assertDepositNotCollectedTwice } from "../../common/utils/deposit-policy.util";
+import { calculateBookingCharges } from "../tenant-bookings/booking-charges.helper";
 import {
   RoomStatus,
   StayStatus,
@@ -230,9 +231,19 @@ export class StaysService {
       );
     }
 
-    const agreed =
+    const baseAgreedRent =
       dto.agreedRentAmountRupiah ?? calculateRentByPricingTerm(Number(room.monthlyRateRupiah ?? 0), dto.pricingTerm);
-    const deposit = resolveDepositWithoutOverride(room.defaultDepositRupiah ?? 0, dto.depositAmountRupiah);
+    const opSetting = await this.prisma.operationalSetting.findUnique({ where: { id: 1 } });
+    const charges = calculateBookingCharges({
+      baseRentRupiah: baseAgreedRent,
+      roomSize: (room as any).roomSize,
+      occupantCount: dto.occupantCount,
+      hasPet: dto.hasPet,
+      petDepositRupiah: opSetting?.petDepositRupiah,
+      defaultDepositRupiah: room.defaultDepositRupiah,
+    });
+    const agreed = charges.agreedRentAmountRupiah;
+    const deposit = resolveDepositWithoutOverride(charges.depositAmountRupiah, dto.depositAmountRupiah);
     const electricity =
       dto.electricityTariffPerKwhRupiah ?? room.electricityTariffPerKwhRupiah;
     const water = dto.waterTariffPerM3Rupiah ?? room.waterTariffPerM3Rupiah;
@@ -437,6 +448,8 @@ export class StaysService {
               status: StayStatus.ACTIVE,
               pricingTerm: dto.pricingTerm as PricingTerm,
               agreedRentAmountRupiah: agreed,
+              occupantCount: charges.occupantCount,
+              hasPet: Boolean(dto.hasPet),
               checkInDate: new Date(dto.checkInDate),
               plannedCheckOutDate: dto.plannedCheckOutDate
                 ? new Date(dto.plannedCheckOutDate)

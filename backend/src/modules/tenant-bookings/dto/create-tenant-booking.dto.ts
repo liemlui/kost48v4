@@ -1,4 +1,4 @@
-import { IsDateString, IsEnum, IsInt, IsOptional, IsString } from 'class-validator';
+import { IsBoolean, IsDateString, IsEnum, IsInt, IsOptional, IsString, Min } from 'class-validator';
 import { PricingTerm, StayPurpose } from '../../../common/enums/app.enums';
 
 export class CreateTenantBookingDto {
@@ -22,4 +22,13 @@ export class CreateTenantBookingDto {
   @IsOptional()
   @IsString()
   notes?: string;
+
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  occupantCount?: number;
+
+  @IsOptional()
+  @IsBoolean()
+  hasPet?: boolean;
 }

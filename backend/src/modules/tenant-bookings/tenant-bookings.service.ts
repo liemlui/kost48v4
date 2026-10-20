@@ -44,6 +44,7 @@ import {
   resolveTenantPortalUser,
 } from './tenant-bookings.helpers';
 import { lockApprovalBookingTx } from './tenant-bookings.queries';
+import { calculateBookingCharges } from './booking-charges.helper';
 
 @Injectable()
 export class TenantBookingsService {
@@ -81,7 +82,7 @@ export class TenantBookingsService {
           SELECT
             id, code, name, floor, status, "isActive",
             "dailyRateRupiah", "weeklyRateRupiah", "biWeeklyRateRupiah",
-            "monthlyRateRupiah", "defaultDepositRupiah",
+            "monthlyRateRupiah", "defaultDepositRupiah", "roomSize",
             "allowBookingWhileCleaning",
             "electricityTariffPerKwhRupiah", "waterTariffPerM3Rupiah", notes
           FROM "Room"
@@ -116,16 +117,27 @@ export class TenantBookingsService {
           throw new ConflictException('Kamar sedang ditempati. Pemesanan baru belum dibuka sampai kamar siap huni.');
         }
 
-        const agreedRentAmountRupiah = resolveRent(room as any, dto.pricingTerm);
-        if (!agreedRentAmountRupiah || agreedRentAmountRupiah <= 0) {
+        const baseRentRupiah = resolveRent(room as any, dto.pricingTerm);
+        if (!baseRentRupiah || baseRentRupiah <= 0) {
           throw new ConflictException('Tarif kamar untuk term ini belum tersedia');
         }
+
+        const opSetting = await tx.operationalSetting.findUnique({ where: { id: 1 } });
+        const charges = calculateBookingCharges({
+          baseRentRupiah,
+          roomSize: room.roomSize,
+          occupantCount: dto.occupantCount,
+          hasPet: dto.hasPet,
+          petDepositRupiah: opSetting?.petDepositRupiah,
+          defaultDepositRupiah: room.defaultDepositRupiah,
+        });
+        const agreedRentAmountRupiah = charges.agreedRentAmountRupiah;
 
         // A18: DP (uang muka pesan kamar) = 30% × sewa sesuai pricingTerm (G4=B),
         // non-refundable, bagian dari harga sewa. TERPISAH dari deposit jaminan.
         const downPaymentAmountRupiah = roundRupiah((agreedRentAmountRupiah * 30) / 100);
-        // Deposit jaminan (refundable, dicek saat checkout) dari konfigurasi kamar.
-        const depositAmountRupiah = room.defaultDepositRupiah ?? 0;
+        // Deposit jaminan (refundable, dicek saat checkout) + deposit hewan bila ada.
+        const depositAmountRupiah = charges.depositAmountRupiah;
 
         const expiresAt = calculateBookingExpiry(checkInDate);
         const stayPurposeSql = dto.stayPurpose
@@ -137,6 +149,7 @@ export class TenantBookingsService {
         const insertedRows = await tx.$queryRaw<Array<{ id: number }>>(Prisma.sql`
           INSERT INTO "Stay" (
             "tenantId", "roomId", status, "pricingTerm", "agreedRentAmountRupiah",
+            "occupantCount", "hasPet",
             "checkInDate", "plannedCheckOutDate", "expiresAt", "depositAmountRupiah",
             "downPaymentAmountRupiah",
             "electricityTariffPerKwhRupiah", "waterTariffPerM3Rupiah",
@@ -145,7 +158,8 @@ export class TenantBookingsService {
             ${tenantId}, ${dto.roomId},
             CAST(${StayStatus.ACTIVE} AS "StayStatus"),
             CAST(${dto.pricingTerm} AS "PricingTerm"),
-            ${agreedRentAmountRupiah}, ${checkInDate}, ${plannedCheckOutDate}, ${expiresAt},
+            ${agreedRentAmountRupiah}, ${charges.occupantCount}, ${Boolean(dto.hasPet)},
+            ${checkInDate}, ${plannedCheckOutDate}, ${expiresAt},
             ${depositAmountRupiah},
             ${downPaymentAmountRupiah},
             ${room.electricityTariffPerKwhRupiah ?? 0}, ${room.waterTariffPerM3Rupiah ?? 0},
