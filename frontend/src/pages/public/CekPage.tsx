@@ -1,14 +1,14 @@
-import { Badge, Card, Container, ListGroup } from 'react-bootstrap';
-import { Link } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { Badge, Card, Container, ListGroup, Nav } from 'react-bootstrap';
+import OkupansiPage from './OkupansiPage';
 
 /**
- * /cek — checklist go-live & status singkat untuk owner.
+ * /cek — SATU halaman untuk checklist go-live + data yang perlu owner siapkan
+ * + ubah ketersediaan kamar (dulu terpisah di /okupansi; rute itu kini dialihkan).
  *
- * Halaman statis (tanpa panggilan API, tanpa login) supaya bisa dibuka cepat dari HP.
- * Isinya sengaja TIDAK memuat kredensial/PII: hanya status dan langkah.
- * Perbarui daftar ini secara manual saat item selesai.
- * Sumber kebenaran antrean: docs/ANTREAN.md. Bila halaman ini berbeda dengan antrean
- * internal, antrean internal yang berlaku — perbarui halaman ini setiap antrean berubah.
+ * Isinya sengaja TIDAK memuat kredensial/PII: hanya status, angka agregat, dan langkah.
+ * Potret data: 22 Okt 2026 (dihitung dari DB produksi). Perbarui angka saat berubah.
+ * Sumber kebenaran antrean: docs/ANTREAN.md.
  */
 
 type Status = 'selesai' | 'sebagian' | 'belum' | 'keputusan';
@@ -20,88 +20,70 @@ const STATUS_BADGE: Record<Status, { bg: string; text?: string; label: string }>
   keputusan: { bg: 'info', text: 'dark', label: 'Perlu keputusan owner' },
 };
 
-const SECTIONS: Array<{
-  title: string;
-  note?: string;
-  items: Array<{ label: string; detail: string; status: Status }>;
-}> = [
+type Item = { label: string; detail: string; status: Status };
+
+const SECTIONS: Array<{ title: string; note?: string; items: Item[] }> = [
   {
-    title: '1. Deployment & teknis',
-    note: 'Status 25 September 2026.',
+    title: '1. Data yang perlu Anda siapkan (penentu go-live)',
+    note: 'Potret 22 Okt 2026 dari DB produksi: 13 kamar, 13 data penghuni, 11 hunian aktif.',
     items: [
-      { label: 'Aplikasi live', detail: 'kost48surabaya.com — versi 1.3.0, Passenger menyajikan SPA + API', status: 'selesai' },
-      { label: 'Database produksi', detail: 'Database baru, 13 kamar, 38 akun COA', status: 'selesai' },
-      { label: 'HTTPS & header cache', detail: 'PWA: /sw.js dan /version.json no-store', status: 'selesai' },
-      { label: 'Gate KTP', detail: 'Mekanisme tersedia, tetapi gerbang KTP di produksi ditunda atas keputusan owner 23 Sep — wajib ditinjau sebelum onboarding penghuni nyata', status: 'keputusan' },
-      { label: 'Deploy commit lokal terbaru', detail: 'Menunggu rencana rilis: artefak, target, langkah rollback, dan uji sesudah deploy', status: 'belum' },
-      { label: 'Backup pra-deploy', detail: 'Database + aplikasi lama tersimpan di folder backups', status: 'selesai' },
+      { label: 'Foto kamar F1 & F2 (asli)', detail: 'Belum ada di server. Katalog F1/F2 masih memakai foto kamar lain dari fallback — unggah lewat Admin → Kamar → F1/F2.', status: 'belum' },
+      { label: 'Foto/scan KTP 13 penghuni', detail: '0 dari 13 tersimpan. Unggah lewat profil tenant atau menu KTP admin.', status: 'belum' },
+      { label: 'Verifikasi KTP', detail: '0 dari 13 terverifikasi. Selama gate KTP aktif di produksi, aktivasi hunian menunggu verifikasi.', status: 'belum' },
+      { label: 'Setoran deposit hunian aktif', detail: '1 dari 11 hunian sudah tercatat (kamar D Rp200.000); 10 hunian masih Rp0. Aturan baru: AC Rp200.000, non-AC Rp100.000.', status: 'sebagian' },
+      { label: 'Email penghuni', detail: '12 dari 13 terisi. Satu data tanpa email tidak bisa memakai portal/lupa password.', status: 'sebagian' },
+      { label: 'Tanggal masuk + tarif kontrak + meter listrik awal', detail: 'Untuk 13 kamar. Angka ini yang dipakai membuat hunian & tagihan pertama.', status: 'belum' },
+      { label: 'Saldo awal kas & bank (opening balance)', detail: 'Butuh angka riil per tanggal cutover; diisi di Akuntansi → Saldo Awal.', status: 'keputusan' },
+      { label: 'Rekening transfer untuk bukti bayar', detail: 'Nomor rekening tujuan yang ditampilkan ke penghuni saat membayar.', status: 'belum' },
+      { label: 'Satu baris FAQ produksi (kapasitas kamar)', detail: 'Baris “Satu kamar bisa untuk berapa orang?” masih versi lama; edit lewat Admin → FAQ (seed tidak menimpa).', status: 'belum' },
+      { label: 'PIN owner yang kuat', detail: 'PIN dipakai untuk membuka panel ketersediaan di halaman ini.', status: 'keputusan' },
+      { label: 'Rotasi JWT secret & password database', detail: 'Ditunda atas keputusan owner; sebaiknya dilakukan sebelum data penghuni asli dipakai penuh.', status: 'keputusan' },
     ],
   },
   {
-    title: '2. Akun & akses',
+    title: '2. Yang sudah beres',
     items: [
-      { label: 'Akun OWNER', detail: 'Sudah bisa login; password sementara ada di file di server', status: 'sebagian' },
-      { label: '13 akun portal penghuni', detail: '12 punya akun portal; GUNAWAN (F1) tanpa akun karena akan keluar', status: 'selesai' },
-      { label: 'Akun STAFF', detail: 'Belum dibuat — opsional bila ada staf', status: 'belum' },
+      { label: 'Aplikasi live', detail: 'kost48surabaya.com — SPA + API satu origin; build yang berjalan tertera di atas.', status: 'selesai' },
+      { label: 'Pendaftaran akun penghuni', detail: '/register aktif (rate limit 5/10 menit); 11 akun tenant aktif dengan password awal Tenant#2026.', status: 'selesai' },
+      { label: 'Katalog & tarif', detail: '13 kamar; tarif bulanan + harian/mingguan/2-mingguan terisi; deposit AC 200rb / non-AC 100rb.', status: 'selesai' },
+      { label: 'Aturan tenant di app', detail: '8 kategori aturan + kalkulator “hitungan untukmu” di Portal → Panduan.', status: 'selesai' },
+      { label: 'Backup harian + uji restore', detail: 'Dump DB + arsip app, retensi 14 hari, satu uji restore berhasil (20 Okt 2026).', status: 'selesai' },
+      { label: 'Deploy & rollback', detail: 'Paket prebuilt, backup app+DB sebelum extract, smoke dari server.', status: 'selesai' },
     ],
   },
   {
-    title: '3. Fondasi akuntansi',
+    title: '3. Teknis yang belum selesai',
     items: [
-      { label: 'Bagan akun (COA)', detail: '38 akun standar sudah tersedia', status: 'selesai' },
-      { label: 'Periode OPEN', detail: 'Periode bulan berjalan sudah dibuka', status: 'selesai' },
-      { label: 'Kas & bank', detail: 'Kas Tunai + Bank Utama (saldo awal 0)', status: 'selesai' },
-      { label: 'Saldo awal (opening balance)', detail: 'Butuh angka kas + saldo bank riil per tanggal cutover', status: 'keputusan' },
-      { label: 'Transaksi pertama', detail: 'Terisi otomatis saat invoice/pembayaran pertama', status: 'belum' },
-    ],
-  },
-  {
-    title: '4. Onboarding penghuni',
-    note: 'Urutan wajib: tenant → KTP → verifikasi → hunian. Jangan lompat.',
-    items: [
-      { label: 'Data 13 penghuni', detail: 'Nama, NIK, HP, dan sewa yang disepakati sudah tersimpan', status: 'selesai' },
-      { label: 'Hunian (check-in)', detail: 'Belum dibuat — menunggu bulan masuk & angka meter listrik', status: 'belum' },
-      { label: 'Verifikasi KTP', detail: 'Wajib sebelum kamar bisa diaktifkan (gate aktif)', status: 'belum' },
-      { label: 'Meter listrik awal', detail: 'Butuh 13 angka kWh hasil cek fisik', status: 'belum' },
-      { label: 'Tagihan pertama', detail: 'Dibuat setelah hunian aktif', status: 'belum' },
-    ],
-  },
-  {
-    title: '5. Operasional harian',
-    items: [
-      { label: 'Ubah ketersediaan kamar', detail: 'Halaman /okupansi (PIN owner) — sudah diuji berfungsi', status: 'selesai' },
-      { label: 'Kron AutoOps', detail: 'Belum dipasang; pengingat & pengumuman terjadwal belum jalan', status: 'belum' },
-      { label: 'Status kamar di katalog', detail: 'Terisi 12 kamar, tersedia 1 kamar (lihat /okupansi)', status: 'sebagian' },
-      { label: 'Jumlah proses Passenger', detail: 'Saat ini 2 proses hidup (overlap restart) — perlu diukur/dirapikan bila RAM ketat', status: 'belum' },
-    ],
-  },
-  {
-    title: '6. Keamanan & pemeliharaan',
-    items: [
-      { label: 'Rotasi JWT secret & password database', detail: 'Ditunda atas keputusan owner — WAJIB sebelum data penghuni asli diisi', status: 'keputusan' },
-      { label: 'Ganti PIN owner', detail: 'PIN saat ini masih nilai lama yang lemah', status: 'keputusan' },
-      { label: 'Ganti password OWNER & 13 tenant', detail: 'Password awal bersifat sementara', status: 'belum' },
-      { label: 'Versi PostgreSQL', detail: 'Server memakai 9.6 yang sudah end-of-life — tanyakan ke hosting', status: 'keputusan' },
-      { label: 'Bersihkan sisa aplikasi lama', detail: 'Dua direktori + arsip besar masih memakai kuota disk', status: 'belum' },
-    ],
-  },
-  {
-    title: '7. Dua mode: Cepat & Normal (agenda AI)',
-    note: 'Arah 25 September 2026: halaman Normal tetap seperti sekarang; halaman baru "Mode Cepat" menyusun arahan kerja — AI hanya untuk owner dan dihitung terjadwal, biaya ditampilkan hanya ke owner.',
-    items: [
-      { label: 'Keputusan dua mode', detail: 'Sudah ditetapkan owner 25 Sep: halaman Cepat berdampingan dengan Normal, halaman Normal tidak diubah', status: 'selesai' },
-      { label: 'Kartu keputusan tanpa AI (aturan biasa)', detail: 'Fondasi untuk semua role; tetap tampil walau AI mati atau kuota habis', status: 'selesai' },
-      { label: 'Halaman Mode Cepat + pilihan setelah login', detail: 'Owner & admin memilih Cepat atau Normal; staff & tenant langsung masuk Cepat', status: 'selesai' },
-      { label: 'Tautan rekomendasi bisa diklik', detail: 'Tautan AI tampil di Mode Cepat OWNER setelah lolos allowlist rute', status: 'selesai' },
-      { label: 'Agenda AI otomatis 1x sehari + info biaya', detail: 'Dihitung terjadwal lalu disimpan; membuka halaman tidak memanggil AI', status: 'sebagian' },
-      { label: 'Catat pemakaian & harga AI', detail: 'Token usage dicatat dan biaya diestimasi dari tabel harga resmi; rupiah menunggu kurs', status: 'selesai' },
-      { label: 'Kirim ringkasan ke WhatsApp & cetak', detail: 'Untuk owner & admin; tanpa NIK, foto, atau alamat', status: 'selesai' },
-      { label: 'Tinjauan pemakaian setelah 30 hari', detail: 'Menentukan apakah isi kartu perlu diperbaiki; bukan menambah fitur', status: 'belum' },
+      { label: 'Cron AutoOps di cPanel', detail: 'Pengingat kontrak, sweep booking, dan pengumuman terjadwal belum berjalan otomatis.', status: 'belum' },
+      { label: 'PostgreSQL 9.6 (end-of-life)', detail: 'Tanyakan versi lebih baru ke hosting.', status: 'keputusan' },
+      { label: 'Overlap proses Passenger', detail: 'Setelah restart bisa ada 2 proses hidup; pantau RAM 512 MB.', status: 'belum' },
+      { label: 'Sisa aplikasi lama di server', detail: 'Beberapa direktori/arsip lama masih memakai kuota disk.', status: 'belum' },
     ],
   },
 ];
 
+const URUTAN = [
+  'Unggah foto F1/F2 + lengkapi email penghuni yang kosong.',
+  'Kumpulkan: tanggal masuk, tarif kontrak, meter listrik awal, dan deposit per penghuni.',
+  'Isi saldo awal kas/bank di Akuntansi.',
+  'Buat hunian (check-in) 13 kamar, unggah + verifikasi KTP.',
+  'Terbitkan tagihan pertama, cek portal tenant bisa dibuka.',
+  'Pasang cron AutoOps, lalu rotasi JWT secret & password database.',
+];
+
 export default function CekPage() {
+  const [tab, setTab] = useState<'checklist' | 'ketersediaan'>('checklist');
+  const [build, setBuild] = useState<{ version?: string; buildId?: string } | null>(null);
+
+  useEffect(() => {
+    let alive = true;
+    fetch('/version.json', { cache: 'no-store' })
+      .then((res) => res.json())
+      .then((data) => { if (alive) setBuild(data); })
+      .catch(() => {});
+    return () => { alive = false; };
+  }, []);
+
   const totals = SECTIONS.flatMap((section) => section.items).reduce(
     (acc, item) => {
       acc[item.status] += 1;
@@ -111,66 +93,77 @@ export default function CekPage() {
   );
 
   return (
-    <Container className="py-3" style={{ maxWidth: 760 }}>
-      <h1 className="h4 mb-1">Checklist Go-Live KOST48</h1>
-      <p className="text-muted small">
-        Ringkasan status persiapan produksi. Halaman ini tidak memuat password, NIK, atau data pribadi penghuni.
-        Diperbarui manual; bila berbeda dengan antrean kerja internal, antrean internal yang berlaku.
+    <Container className="py-3" style={{ maxWidth: 820 }}>
+      <h1 className="h4 mb-1">Checklist Go-Live &amp; Ketersediaan</h1>
+      <p className="text-muted small mb-3">
+        Satu halaman untuk menyiapkan go-live: daftar data yang masih kurang, status teknis, dan pengubah ketersediaan kamar.
+        Tidak memuat password, NIK, atau data pribadi penghuni. Potret data 22 Oktober 2026.
       </p>
 
-      <div className="d-flex flex-wrap gap-2 mb-3">
-        <Badge bg="success">Selesai {totals.selesai}</Badge>
-        <Badge bg="warning" text="dark">Sebagian {totals.sebagian}</Badge>
-        <Badge bg="secondary">Belum {totals.belum}</Badge>
-        <Badge bg="info" text="dark">Perlu keputusan {totals.keputusan}</Badge>
+      <div className="mb-3 small text-muted">
+        Build berjalan: <code>{build?.buildId ?? 'memuat…'}</code>
+        {build?.version ? <> · versi <code>{build.version}</code></> : null}
       </div>
 
-      {SECTIONS.map((section) => (
-        <Card key={section.title} className="mb-3">
-          <Card.Header className="fw-semibold">{section.title}</Card.Header>
-          {section.note && <Card.Body className="py-2 text-muted small border-bottom">{section.note}</Card.Body>}
-          <ListGroup variant="flush">
-            {section.items.map((item) => {
-              const badge = STATUS_BADGE[item.status];
-              return (
-                <ListGroup.Item key={item.label}>
-                  <div className="d-flex align-items-start justify-content-between gap-2">
-                    <div>
-                      <div className="fw-semibold">{item.label}</div>
-                      <div className="text-muted small">{item.detail}</div>
-                    </div>
-                    <Badge bg={badge.bg} text={badge.text} className="text-nowrap">
-                      {badge.label}
-                    </Badge>
-                  </div>
-                </ListGroup.Item>
-              );
-            })}
-          </ListGroup>
-        </Card>
-      ))}
+      <Nav variant="tabs" activeKey={tab} onSelect={(key) => setTab((key as typeof tab) || 'checklist')} className="mb-3">
+        <Nav.Item>
+          <Nav.Link eventKey="checklist">Checklist &amp; data kurang</Nav.Link>
+        </Nav.Item>
+        <Nav.Item>
+          <Nav.Link eventKey="ketersediaan">Ketersediaan kamar</Nav.Link>
+        </Nav.Item>
+      </Nav>
 
-      <Card className="mb-3">
-        <Card.Header className="fw-semibold">Urutan yang disarankan berikutnya</Card.Header>
-        <Card.Body>
-          <ol className="mb-0 small">
-            <li>Ganti PIN owner (murah dan cepat).</li>
-            <li>Siapkan 4 data: bulan masuk, meter listrik awal, saldo kas/bank, dan deposit per penghuni.</li>
-            <li>Isi saldo awal di menu Akuntansi.</li>
-            <li>Buat hunian (check-in) 13 kamar + verifikasi KTP.</li>
-            <li>Pasang kron AutoOps di cPanel.</li>
-            <li>Rotasi JWT secret &amp; password database sebelum data penghuni asli dipakai.</li>
-          </ol>
-          <p className="text-muted small mb-0 mt-2">
-            Jalur paralel: bagian 7 (dua mode Cepat &amp; Normal) berjalan tanpa menunggu item di atas — mulai dari kartu
-            keputusan tanpa AI, lalu menampilkan tautan rekomendasi AI sebagai tombol pada halaman Mode Cepat.
+      {tab === 'ketersediaan' ? (
+        <OkupansiPage embedded />
+      ) : (
+        <>
+          <div className="d-flex flex-wrap gap-2 mb-3">
+            <Badge bg="success">Selesai {totals.selesai}</Badge>
+            <Badge bg="warning" text="dark">Sebagian {totals.sebagian}</Badge>
+            <Badge bg="secondary">Belum {totals.belum}</Badge>
+            <Badge bg="info" text="dark">Perlu keputusan {totals.keputusan}</Badge>
+          </div>
+
+          {SECTIONS.map((section) => (
+            <Card key={section.title} className="mb-3">
+              <Card.Header className="fw-semibold">{section.title}</Card.Header>
+              {section.note ? <Card.Body className="py-2 text-muted small border-bottom">{section.note}</Card.Body> : null}
+              <ListGroup variant="flush">
+                {section.items.map((item) => {
+                  const badge = STATUS_BADGE[item.status];
+                  return (
+                    <ListGroup.Item key={item.label}>
+                      <div className="d-flex align-items-start justify-content-between gap-2">
+                        <div>
+                          <div className="fw-semibold">{item.label}</div>
+                          <div className="text-muted small">{item.detail}</div>
+                        </div>
+                        <Badge bg={badge.bg} text={badge.text} className="text-nowrap">
+                          {badge.label}
+                        </Badge>
+                      </div>
+                    </ListGroup.Item>
+                  );
+                })}
+              </ListGroup>
+            </Card>
+          ))}
+
+          <Card className="mb-3">
+            <Card.Header className="fw-semibold">Urutan yang disarankan</Card.Header>
+            <Card.Body>
+              <ol className="mb-0 small ps-3">
+                {URUTAN.map((step) => <li key={step} className="mb-1">{step}</li>)}
+              </ol>
+            </Card.Body>
+          </Card>
+
+          <p className="text-muted small mb-0">
+            Status di atas potret manual; bila berbeda dengan antrean kerja internal, <code>docs/ANTREAN.md</code> yang berlaku.
           </p>
-        </Card.Body>
-      </Card>
-
-      <div className="text-center small">
-        <Link to="/okupansi">Ubah ketersediaan kamar</Link>
-      </div>
+        </>
+      )}
     </Container>
   );
 }

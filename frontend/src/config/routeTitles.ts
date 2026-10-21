@@ -15,8 +15,8 @@ const ROUTE_TITLES: Array<{ pattern: string; title: string }> = [
   { pattern: '/booking/:roomId', title: 'Booking Kamar' },
   { pattern: '/panduan', title: 'Panduan & FAQ' },
   { pattern: '/reviews', title: 'Ulasan Penghuni' },
-  { pattern: '/okupansi', title: 'Ketersediaan Kamar' },
-  { pattern: '/cek', title: 'Checklist Go-Live' },
+  { pattern: '/okupansi', title: 'Checklist Go-Live' },
+  { pattern: '/cek', title: 'Checklist Go-Live & Ketersediaan' },
 
   { pattern: '/dashboard', title: 'Dashboard' },
   { pattern: '/owner-dashboard', title: 'Dashboard Owner' },

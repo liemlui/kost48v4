@@ -24,7 +24,6 @@ import TenantBookingGate from './components/tenant/TenantBookingGate';
 const PublicGuestDashboardPage = lazy(() => import('./pages/public/PublicGuestDashboardPage'));
 const PublicAvailabilityWizardPage = lazy(() => import('./pages/public/PublicAvailabilityWizardPage'));
 // DEPLOY-2026-09-13: halaman operasional ringan untuk owner (ubah ketersediaan kamar + checklist go-live).
-const OkupansiPage = lazy(() => import('./pages/public/OkupansiPage'));
 const CekPage = lazy(() => import('./pages/public/CekPage'));
 const GuestBookingPage = lazy(() => import('./pages/bookings/GuestBookingPage'));
 const RoomsRouteEntry = lazy(() => import('./pages/rooms/RoomsRouteEntry'));
@@ -232,7 +231,7 @@ export default function App() {
         <Route path="/booking/:roomId" element={<GuestBookingPage />} />
         <Route path="/update-kamar" element={<PublicAvailabilityWizardPage />} />
         <Route path="/availability-setup" element={<PublicAvailabilityWizardPage />} />
-        <Route path="/okupansi" element={<OkupansiPage />} />
+        <Route path="/okupansi" element={<Navigate to="/cek" replace />} />
         <Route path="/cek" element={<CekPage />} />
         <Route path="/panduan" element={<FaqPublicPage />} />
         <Route path="/reviews" element={<ReviewsPublicPage />} />

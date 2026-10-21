@@ -40,7 +40,7 @@ function errorMessage(error: unknown) {
   return 'Tidak dapat menghubungi server. Coba lagi.';
 }
 
-export default function OkupansiPage() {
+export default function OkupansiPage({ embedded = false }: { embedded?: boolean } = {}) {
   const [pin, setPin] = useState('');
   const [savedPin, setSavedPin] = useState<string | null>(null);
   const [rooms, setRooms] = useState<PublicAvailabilityRoom[]>([]);
@@ -127,10 +127,10 @@ export default function OkupansiPage() {
 
   if (!savedPin) {
     return (
-      <Container className="py-4" style={{ maxWidth: 520 }}>
+      <Container className={embedded ? 'py-2 px-0' : 'py-4'} style={{ maxWidth: embedded ? 720 : 520 }}>
         <Card>
           <Card.Body>
-            <h1 className="h5 mb-1">Ubah Ketersediaan Kamar</h1>
+            {embedded ? null : <h1 className="h5 mb-1">Ubah Ketersediaan Kamar</h1>}
             <p className="text-muted small mb-3">
               Masukkan PIN owner untuk melihat dan mengubah status kamar di katalog publik.
             </p>
@@ -151,9 +151,11 @@ export default function OkupansiPage() {
                 {isLoading ? <Spinner size="sm" animation="border" /> : 'Buka'}
               </Button>
             </Form>
-            <div className="text-center mt-3 small">
-              <Link to="/cek">Lihat checklist go-live</Link>
-            </div>
+            {embedded ? null : (
+              <div className="text-center mt-3 small">
+                <Link to="/cek">Lihat checklist go-live</Link>
+              </div>
+            )}
           </Card.Body>
         </Card>
       </Container>
@@ -161,10 +163,10 @@ export default function OkupansiPage() {
   }
 
   return (
-    <Container className="py-3" style={{ maxWidth: 720 }}>
+    <Container className={embedded ? 'py-2 px-0' : 'py-3'} style={{ maxWidth: 720 }}>
       <div className="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-2">
         <div>
-          <h1 className="h5 mb-0">Ketersediaan Kamar</h1>
+          {embedded ? null : <h1 className="h5 mb-0">Ketersediaan Kamar</h1>}
           <div className="text-muted small">
             Tersedia <strong>{counts.available}</strong> · Penuh <strong>{counts.full}</strong> · Disembunyikan{' '}
             <strong>{counts.hidden}</strong>
@@ -241,9 +243,11 @@ export default function OkupansiPage() {
         ke WhatsApp; <em>Penuh</em> tetap bisa ditanyakan; <em>Sembunyikan</em> menghilangkan kamar dari beranda dan
         katalog.
       </p>
-      <div className="text-center mt-3 small">
-        <Link to="/cek">Checklist go-live</Link>
-      </div>
+      {embedded ? null : (
+        <div className="text-center mt-3 small">
+          <Link to="/cek">Checklist go-live</Link>
+        </div>
+      )}
     </Container>
   );
 }

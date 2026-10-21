@@ -21,7 +21,7 @@
 
 Daftar prioritas, penanggung jawab, dan kesiapan ada di [TASK-AKTIF](kerja/TASK-AKTIF.md#prioritas) bagian “Prioritas & penanggung jawab”. Antrean satu baris per tugas ada di §3.
 
-## 3. Task terbuka & gate (36 `[ ]`)
+## 3. Task terbuka & gate (35 `[ ]`)
 
 Format: **ID** — judul | **Gate** (verifikasi wajib sebelum `[x]`). (owner) = butuh data/keputusan owner.
 
@@ -70,12 +70,12 @@ Format: **ID** — judul | **Gate** (verifikasi wajib sebelum `[x]`). (owner) = 
 - [ ] **W-FIN-001** - F-01 override deposit & F-02 paritas surcharge/deposit hewan antar kanal | **Gate:** P27 = **tegakkan di semua kanal**; satu helper dipakai booking publik/portal/walk-in; gate uang backend lulus; [TASK](kerja/TASK-AKTIF.md#d4f-sinkron) | checklist: kerja/TASK-AKTIF.md#d4f-sinkron
 - [x] **W-FIN-002** - selaraskan panduan tenant, prompt FAQ AI, dan komentar kode dengan aturan kanonik (F-04..F-10) | **Gate:** 0 angka bertentangan; gate dokumen hijau; [TASK](kerja/TASK-AKTIF.md#d4f-sinkron) | **Bukti 21 Okt 2026:** F-04..F-10 teks selesai di `MyManualPage.tsx`, `faq.prompt.ts`, dan komentar `prepay-extension.service.ts`; `rg` frasa basi 0; `tsc --noEmit` exit 0; test MyManualPage 3/3; `check-docs` BERSIH. Sisa F-15..F-17 dicatat terbuka | checklist: kerja/TASK-AKTIF.md#d4f-sinkron
 - [ ] **W-DATA-001** (owner) - bandingkan tarif & deposit 13 kamar produksi dengan seed, catat selisih (rekomendasi c) | **Gate:** izin baca DB; kueri read-only; selisih dicatat tanpa PII
-- [ ] **W-OPS-015** - halaman `/checklist` memuat daftar data go-live (aset, stok, foto, kamar, KTP, keuangan, akun, konten) | **Gate:** konten ditinjau owner; deploy; render 390/1440 px; tanpa PII di halaman
+- [x] **W-OPS-015** - halaman `/checklist` memuat daftar data go-live (aset, stok, foto, kamar, KTP, keuangan, akun, konten) | **Gate:** konten ditinjau owner; deploy; render 390/1440 px; tanpa PII di halaman. **Bukti 22 Okt 2026:** digabung ke `/cek` (satu halaman: checklist + data yang kurang + editor ketersediaan; `/okupansi` dialihkan), tanpa PII, build `swSyGU0OfDsh`, `/cek` 200. Sisa: tinjauan owner
 - [x] **W-OPS-017** (owner) - dump + cron harian + retensi 14 hari + satu uji restore | **Gate:** berkas dump + `gzip -t` + hitung 5 tabel di DB uji + DB uji dihapus; [runbook](operations/produksi.md#d4b-backup). **Bukti 20 Okt 2026:** dump 40 KB (gzip OK), cron terpasang, restore 62 tabel + 5 hitungan cocok, DB uji dihapus; run terjadwal pertama belum terlihat
 - [ ] **W-OPS-014** (owner) - konfirmasi apakah `uploads/` (foto kamar/bukti bayar) perlu dipindahkan dari server lama | **Gate:** jawaban owner + bukti path/aset; jangan salin data pengguna tanpa izin
 - [ ] **W-DOC-001** - tata ulang dokumen generasi kedua D0–D9 ([kontrak](kerja/TASK-DOCS-GEN2.md)): konstitusi ID + registry, peta peran, registry fitur, konsolidasi ≤30 berkas/≤400 KB, checklist di dokumen tugas, gate v3 | **Gate:** tiap batch D0–D9 punya bukti; gate hijau saat batch ditutup; keputusan [keputusan program](KEPUTUSAN-OWNER.md); baseline [inventaris 2026-10-20](arsip/inventaris-docs-2026-10-20.md) | checklist: kerja/TASK-DOCS-GEN2.md#checklist
 
-**Rekap (potret 2026-10-21):** 36 terbuka + 9 selesai = 45 baris.
+**Rekap (potret 2026-10-22):** 35 terbuka + 10 selesai = 45 baris.
 
 
 ---
