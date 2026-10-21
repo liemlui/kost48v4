@@ -3,7 +3,14 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import TenantRulesWizard from '../../components/tenant/TenantRulesWizard';
 import { DEFAULT_TENANT_RULE_CONTEXT } from '../../data/tenantRules';
 
-const context = { ...DEFAULT_TENANT_RULE_CONTEXT, roomCode: 'A1', roomDepositRupiah: 500000 };
+const context = {
+  ...DEFAULT_TENANT_RULE_CONTEXT,
+  roomCode: 'A1',
+  roomDepositRupiah: 500000,
+  rentRupiah: 1000000,
+  roomSize: 'STANDARD',
+  occupantCount: 2,
+};
 
 describe('TenantRulesWizard — 4 pertanyaan, tanpa penyimpanan', () => {
   it('menampilkan pertanyaan pertama + tombol lewati', () => {
@@ -28,7 +35,7 @@ describe('TenantRulesWizard — 4 pertanyaan, tanpa penyimpanan', () => {
     expect(screen.getByText(/Aturan yang berlaku untukmu/i)).toBeInTheDocument();
     expect(screen.getByText(/sudah penghuni · bawa hewan · 3–4 orang · bayar 6 bulan/i)).toBeInTheDocument();
     expect(screen.getAllByText(/Deposit kamar A1/i).length).toBeGreaterThan(0);
-    expect(screen.getAllByText(/5,7/).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/5\.700\.000/).length).toBeGreaterThan(0);
   });
 
   it('tidak menyimpan jawaban ke storage', () => {

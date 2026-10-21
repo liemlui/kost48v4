@@ -1,18 +1,26 @@
 /**
  * KOST48 — Sumber tunggal aturan penghuni (W-TNT-001).
  * =====================================================
- * Dipakai oleh halaman Panduan tenant (`MyManualPage`) dan wizard aturan.
+ * Dipakai halaman Panduan tenant + wizard aturan.
+ *
+ * Gaya bahasa: kalimat pendek, kata sehari-hari, angka sesedikit mungkin.
+ * Angka yang mahal dihafal diganti CONTOH HITUNG dari data kamar tenant
+ * (`TenantRuleContext`), mis. "tambah 1 orang = Rp200.000 per periode".
  *
  * Prinsip:
- *  - Setiap ANGKA punya `source` yang menunjuk kode/dokumen kanonik. Jangan
- *    menambah angka baru di sini tanpa sumber; FAQ/DB bukan sumber aturan.
- *  - Angka yang bergantung data (deposit kamar/hewan) dibaca dari
- *    `TenantRuleContext`, bukan ditulis sebagai konstanta.
- *  - Teks sengaja tidak memuat klaim yang tidak ditegakkan kode (tamu
- *    Rp50.000/malam, denda merokok Rp200.000, refund 7 hari kerja,
- *    QRIS/e-wallet).
+ *  - Setiap angka punya `source` kanonik (dirujuk di UI sebagai tooltip).
+ *  - Rumus memakai helper yang sama dengan backend (`utils/pricing.ts`),
+ *    bukan hitungan baru.
+ *  - Tidak memuat klaim yang tidak ditegakkan kode (tamu Rp50.000/malam,
+ *    denda merokok Rp200.000, refund 7 hari, QRIS/e-wallet).
  */
 import { formatRupiah } from '../utils/formatCurrency';
+import {
+  ROOM_MAX_FREE_OCCUPANTS,
+  ROOM_MAX_OCCUPANTS,
+  calculateOccupantSurcharge,
+  roundUpToNearest,
+} from '../utils/pricing';
 
 export type TenantRuleCategoryId =
   | 'hewan'
@@ -29,17 +37,18 @@ export type TenantRuleContext = {
   petDepositRupiah: number;
   /** `OperationalSetting.extraOccupantFeePercent` — default backend 20. */
   extraOccupantPercent: number;
-  /** `Room.code` kamar tenant (bila sudah punya masa sewa). */
   roomCode?: string | null;
-  /** `Room.defaultDepositRupiah` / `Stay.depositAmountRupiah` kamar tenant. */
+  /** `Room.defaultDepositRupiah` / `Stay.depositAmountRupiah`. */
   roomDepositRupiah?: number | null;
+  /** `Stay.agreedRentAmountRupiah` — tarif periode yang disepakati. */
+  rentRupiah?: number | null;
+  /** `Room.roomSize` — STANDARD atau LARGE. */
+  roomSize?: string | null;
+  /** `Stay.occupantCount`. */
+  occupantCount?: number | null;
 };
 
-/**
- * Fallback saat `/settings/public-config` belum termuat. Nilainya menyalin
- * default backend (`settings.service.ts` `getOperationalDefaults`), bukan
- * angka baru — UI akan memakai nilai server begitu tersedia.
- */
+/** Fallback = default backend (`settings.service.ts`), bukan angka baru. */
 export const DEFAULT_TENANT_RULE_CONTEXT: TenantRuleContext = {
   petDepositRupiah: 100000,
   extraOccupantPercent: 20,
@@ -48,7 +57,7 @@ export const DEFAULT_TENANT_RULE_CONTEXT: TenantRuleContext = {
 export type TenantRuleNumber = {
   label: string;
   value: (ctx: TenantRuleContext) => string;
-  /** Rujukan kanonik — tampil sebagai tooltip/catatan kecil di UI. */
+  /** Rujukan kanonik — tampil sebagai tooltip di UI. */
   source: string;
 };
 
@@ -64,45 +73,64 @@ export type TenantRuleCategory = {
   summary: string;
   keywords: string[];
   numbers: TenantRuleNumber[];
+  /** Contoh hitung untuk kamar tenant (kosong bila data belum ada). */
+  examples?: (ctx: TenantRuleContext) => string[];
   sections: TenantRuleSection[];
 };
 
-const pct = (ctx: TenantRuleContext) => `${ctx.extraOccupantPercent}% × tarif periode`;
+// ── helper bahasa + hitung (semua memakai rumus kanonik) ───────────────────
+
+const rupiah = (value: number | null | undefined) =>
+  value != null && Number.isFinite(value) ? formatRupiah(value) : null;
+
+const sizeLabel = (size?: string | null) =>
+  String(size ?? '').toUpperCase() === 'LARGE' ? 'LARGE' : 'STANDARD';
+
+const freeOccupants = (ctx: TenantRuleContext) => ROOM_MAX_FREE_OCCUPANTS[sizeLabel(ctx.roomSize)];
+const maxOccupants = (ctx: TenantRuleContext) => ROOM_MAX_OCCUPANTS[sizeLabel(ctx.roomSize)];
+
+const surchargeFor = (ctx: TenantRuleContext, extraHeads: number) =>
+  ctx.rentRupiah != null && extraHeads > 0
+    ? calculateOccupantSurcharge(ctx.rentRupiah, sizeLabel(ctx.roomSize), freeOccupants(ctx) + extraHeads)
+    : null;
+
+const dpFor = (ctx: TenantRuleContext) =>
+  ctx.rentRupiah != null ? Math.round((ctx.rentRupiah * 30) / 100) : null;
+
+const termPrice = (monthly: number | null | undefined, multiplier: number) =>
+  monthly != null && Number.isFinite(monthly) ? roundUpToNearest(monthly * multiplier) : null;
 
 export const TENANT_RULE_CATEGORIES: TenantRuleCategory[] = [
   {
     id: 'hewan',
     icon: '🐾',
     title: 'Hewan peliharaan',
-    summary: 'Diizinkan dengan pemberitahuan; ada deposit terpisah yang refundable.',
+    summary: 'Boleh, asal lapor dan bayar deposit yang kembali saat keluar.',
     keywords: ['hewan', 'peliharaan', 'kucing', 'anjing', 'pet', 'deposit hewan'],
     numbers: [
       {
         label: 'Deposit hewan',
         value: (ctx) => formatRupiah(ctx.petDepositRupiah),
-        source: 'Pengaturan → petDepositRupiah (settings.service.ts)',
+        source: 'Pengaturan → petDepositRupiah',
       },
-      {
-        label: 'Sifat',
-        value: () => 'Refundable',
-        source: 'keuangan.md §7 — deposit adalah dana titip, bukan revenue',
-      },
+    ],
+    examples: (ctx) => [
+      `Bawa 1 kucing: siapkan ${formatRupiah(ctx.petDepositRupiah)} saat masuk. Kembali penuh kalau tidak ada kerusakan.`,
     ],
     sections: [
       {
         title: 'Cara membawa hewan',
         lines: [
-          'Beri tahu pengelola saat booking atau check-in — jangan diam-diam.',
-          'Deposit hewan dibayar sekali bersama deposit kamar, bukan biaya bulanan.',
-          'Hewan tidak boleh mengganggu penghuni lain; keluhan berulang dapat membatasi izin.',
+          'Bilang ke pengelola saat booking atau check-in.',
+          'Deposit dibayar sekali, bukan biaya bulanan.',
+          'Hewan tidak boleh mengganggu penghuni lain.',
         ],
       },
       {
-        title: 'Kapan deposit hewan kembali',
+        title: 'Kapan depositnya kembali',
         lines: [
-          'Dikembalikan saat checkout bila tidak ada kerusakan akibat hewan.',
-          'Bila ada kerusakan, potongan dicatat dan sisanya dikembalikan.',
-          'Deposit hewan bukan biaya sewa.',
+          'Saat keluar, kalau tidak ada kerusakan akibat hewan.',
+          'Kalau ada kerusakan, potongannya dicatat dan sisanya kembali.',
         ],
       },
     ],
@@ -111,62 +139,60 @@ export const TENANT_RULE_CATEGORIES: TenantRuleCategory[] = [
     id: 'penghuni',
     icon: '👥',
     title: 'Jumlah penghuni',
-    summary: 'Batas gratis 2 orang (STANDARD) atau 4 orang (LARGE); kelebihan +20% per kepala.',
-    keywords: ['penghuni', 'orang', 'kapasitas', 'surcharge', 'tambahan', 'extra', 'kepala'],
+    summary: 'Kamar STANDARD untuk 2 orang, LARGE untuk 4 orang. Tambah orang ada biaya.',
+    keywords: ['penghuni', 'orang', 'kapasitas', 'tambahan', 'extra', 'kepala', 'biaya tambahan'],
     numbers: [
       {
-        label: 'Gratis STANDARD',
-        value: () => '2 orang',
+        label: 'Tanpa biaya tambahan',
+        value: (ctx) => `${freeOccupants(ctx)} orang (kamar ${sizeLabel(ctx.roomSize)})`,
         source: 'pricing.helper.ts ROOM_MAX_FREE_OCCUPANTS',
       },
       {
-        label: 'Maks STANDARD',
-        value: () => '4 orang',
-        source: 'pricing.helper.ts ROOM_MAX_OCCUPANTS',
-      },
-      {
-        label: 'Gratis LARGE',
-        value: () => '4 orang',
-        source: 'pricing.helper.ts ROOM_MAX_FREE_OCCUPANTS',
-      },
-      {
-        label: 'Maks LARGE',
-        value: () => '6 orang',
-        source: 'pricing.helper.ts ROOM_MAX_OCCUPANTS',
-      },
-      {
-        label: 'Kepala ekstra',
-        value: pct,
-        source: 'keuangan.md §8 — keputusan owner D-24',
-      },
-      {
-        label: 'Pembulatan',
-        value: () => 'Rp 5.000 ke atas',
-        source: 'pricing.helper.ts PRICING_ROUND_TO',
+        label: 'Tambahan per orang',
+        value: (ctx) => {
+          const amount = surchargeFor(ctx, 1);
+          return amount != null ? `${formatRupiah(amount)} / periode` : '20% tarif periode';
+        },
+        source: 'keuangan.md §8 — D-24',
       },
     ],
+    examples: (ctx) => {
+      const lines: string[] = [];
+      const free = freeOccupants(ctx);
+      const extra = Math.max(0, Number(ctx.occupantCount ?? 0) - free);
+      const oneMore = surchargeFor(ctx, 1);
+      const room = ctx.roomCode ? `Kamar ${ctx.roomCode}` : 'Kamar kamu';
+      if (oneMore != null) {
+        lines.push(`${room} (${sizeLabel(ctx.roomSize)}) nyaman untuk ${free} orang. Tambah 1 orang = ${formatRupiah(oneMore)} per periode.`);
+      }
+      if (extra > 0) {
+        const amount = surchargeFor(ctx, extra);
+        lines.push(`Kamu sekarang ${ctx.occupantCount} orang: ${extra} orang tambahan = ${amount != null ? formatRupiah(amount) : 'biaya tambahan'} per periode.`);
+      }
+      return lines;
+    },
     sections: [
       {
-        title: 'Batas gratis dan batas maksimal',
+        title: 'Batas kamar',
         lines: [
-          'Kamar STANDARD: 2 orang tanpa biaya tambahan, maksimal 4 orang.',
-          'Kamar LARGE: 4 orang tanpa biaya tambahan, maksimal 6 orang.',
-          'Lebih dari 2 kepala ekstra tidak bisa dipesan sistem (kamar tidak layak huni).',
+          'STANDARD: 2 orang tanpa biaya tambahan, maksimal 4.',
+          'LARGE: 4 orang tanpa biaya tambahan, maksimal 6.',
+          'Lebih dari itu kamar tidak layak huni.',
         ],
       },
       {
-        title: 'Cara menghitung surcharge',
+        title: 'Cara menghitung biaya tambahan',
         lines: [
-          'Surcharge = tarif periode × persentase × jumlah kepala ekstra, dibulatkan ke atas ke Rp5.000.',
-          'Contoh: tarif periode Rp1.000.000 dan 1 kepala ekstra → Rp200.000.',
-          'Surcharge masuk ke sewa periode itu, sehingga ikut menentukan DP 30%.',
+          '20% dari tarif periode, untuk setiap orang tambahan.',
+          'Dibulatkan ke atas ke kelipatan Rp5.000.',
+          'Biaya masuk ke sewa periode itu, jadi ikut menentukan DP.',
         ],
       },
       {
-        title: 'Yang wajib dicatat',
+        title: 'Catat di kontrak',
         lines: [
-          'Jumlah penghuni dikonfirmasi ke pengelola dan dicatat di kontrak.',
-          'Perubahan jumlah penghuni setelah check-in diatur lewat pengelola, bukan otomatis.',
+          'Jumlah penghuni dicatat di kontrak.',
+          'Perubahan jumlah orang diatur lewat pengelola.',
         ],
       },
     ],
@@ -174,58 +200,55 @@ export const TENANT_RULE_CATEGORIES: TenantRuleCategory[] = [
   {
     id: 'prabayar',
     icon: '📆',
-    title: 'Prabayar & diskon',
-    summary: 'Bayar di muka 1–24 bulan; harga bulanan dikunci, diskon untuk 6/12 bulan.',
-    keywords: ['prabayar', 'di muka', 'diskon', 'tahunan', 'semester', 'bulanan', 'mingguan', 'rent-lock'],
+    title: 'Bayar di muka',
+    summary: 'Bayar beberapa bulan sekaligus lebih hemat, dan harga bulananmu dikunci.',
+    keywords: ['prabayar', 'di muka', 'diskon', 'tahunan', 'semester', 'bulanan', 'mingguan'],
     numbers: [
       {
-        label: '2 minggu',
-        value: () => '0,75× tarif bulanan',
-        source: 'pricing.helper.ts PRICING_MULTIPLIERS',
+        label: 'Hemat 6 bulan',
+        value: () => 'sekitar 5%',
+        source: 'keuangan.md §2 — SMESTERLY 5,7×',
       },
       {
-        label: '6 bulan',
-        value: () => '5,7× tarif bulanan',
-        source: 'keuangan.md §2 — SMESTERLY',
-      },
-      {
-        label: '1 tahun',
-        value: () => '11× tarif bulanan',
-        source: 'keuangan.md §2 — YEARLY',
-      },
-      {
-        label: 'Rentang prabayar',
-        value: () => '1–24 bulan',
-        source: 'keuangan.md §10 — D-18',
-      },
-      {
-        label: 'Pembulatan',
-        value: () => 'Rp 5.000 ke atas',
-        source: 'pricing.helper.ts PRICING_ROUND_TO',
+        label: 'Hemat 1 tahun',
+        value: () => 'sekitar 8%',
+        source: 'keuangan.md §2 — YEARLY 11×',
       },
     ],
+    examples: (ctx) => {
+      const six = termPrice(ctx.rentRupiah, 5.7);
+      const twelve = termPrice(ctx.rentRupiah, 11);
+      const lines: string[] = [];
+      if (six != null && ctx.rentRupiah != null) {
+        lines.push(`6 bulan: ${formatRupiah(six)} — hemat ${formatRupiah(ctx.rentRupiah * 6 - six)} dibanding bayar bulanan.`);
+      }
+      if (twelve != null && ctx.rentRupiah != null) {
+        lines.push(`1 tahun: ${formatRupiah(twelve)} — hemat ${formatRupiah(ctx.rentRupiah * 12 - twelve)} dibanding bayar bulanan.`);
+      }
+      return lines;
+    },
     sections: [
       {
         title: 'Cara kerja',
         lines: [
-          'Kamu boleh membayar di muka kapan saja, tidak harus menunggu kontrak habis.',
-          'Harga bulanan dikunci selama kontrak tidak putus (rent-lock D-16).',
-          'Prabayar diblokir bila masih ada tagihan terbit/sebagian.',
+          'Boleh bayar di muka kapan saja, 1–24 bulan.',
+          'Harga bulanan dikunci selama kontrak tidak putus.',
+          'Tidak bisa prabayar kalau masih ada tagihan.',
         ],
       },
       {
-        title: 'Diskon jangka panjang',
+        title: 'Hematnya',
         lines: [
-          '6 bulan: tarif bulanan × 5,7 — efektif sekitar 5% lebih murah per bulan.',
-          '1 tahun: tarif bulanan × 11 — efektif sekitar 8,3% lebih murah per bulan.',
-          'Diskon hanya berlaku untuk prabayar penuh, bukan cicilan.',
+          '6 bulan: tarif bulanan × 5,7.',
+          '1 tahun: tarif bulanan × 11 — seperti dapat 1 bulan gratis.',
+          'Hanya untuk bayar penuh, bukan cicilan.',
         ],
       },
       {
         title: 'Listrik & air',
         lines: [
-          'Sewa 2 minggu: listrik & air sudah termasuk (all-in).',
-          'Bulanan, 6 bulan, dan 1 tahun: listrik & air dihitung dari meter sesuai setting kamar.',
+          'Sewa 2 minggu: sudah termasuk.',
+          'Bulanan ke atas: dihitung dari meter.',
         ],
       },
     ],
@@ -233,61 +256,57 @@ export const TENANT_RULE_CATEGORIES: TenantRuleCategory[] = [
   {
     id: 'pembayaran',
     icon: '💳',
-    title: 'Pembayaran & DP',
-    summary: 'DP 30% mengunci kamar; pelunasan sekali bayar; bukti transfer diperiksa admin.',
-    keywords: ['bayar', 'pembayaran', 'dp', 'uang muka', 'pelunasan', 'transfer', 'tunai', 'bukti', 'jatuh tempo'],
+    title: 'Pembayaran & uang muka',
+    summary: 'Uang muka (DP) mengunci kamar; sisanya dilunasi sekali bayar.',
+    keywords: ['bayar', 'pembayaran', 'dp', 'uang muka', 'pelunasan', 'transfer', 'tunai', 'bukti'],
     numbers: [
       {
-        label: 'DP',
-        value: () => '30% × tarif periode',
+        label: 'Uang muka (DP)',
+        value: (ctx) => {
+          const dp = dpFor(ctx);
+          return dp != null ? formatRupiah(dp) : '30% tarif periode';
+        },
         source: 'keuangan.md §7 — G-4/B',
       },
-      {
-        label: 'Pelunasan',
-        value: () => 'sisa sewa + deposit',
-        source: 'keuangan.md §7 — NO-PARTIAL (D-02)',
-      },
-      {
-        label: 'Jatuh tempo tagihan',
-        value: () => '24 jam setelah terbit',
-        source: 'auto-ops.constants.ts INVOICE_DUE_AFTER_HOURS',
-      },
-      {
-        label: 'Batas booking',
-        value: () => '3 jam',
-        source: 'auto-ops.constants.ts BOOKING_REVIEW_DEADLINE_HOURS',
-      },
     ],
+    examples: (ctx) => {
+      const dp = dpFor(ctx);
+      if (dp == null || ctx.rentRupiah == null) return [];
+      const rest = ctx.rentRupiah - dp;
+      const deposit = rupiah(ctx.roomDepositRupiah);
+      return [
+        `DP kamar kamu: ${formatRupiah(dp)} — bagian dari sewa, bukan biaya tambahan.`,
+        `Pelunasan: ${formatRupiah(rest)}${deposit ? ` + deposit ${deposit}` : ' + deposit'}.`,
+      ];
+    },
     sections: [
       {
-        title: 'DP (uang muka)',
+        title: 'Uang muka (DP)',
         lines: [
-          'DP = 30% dari tarif periode.',
-          'DP adalah bagian dari sewa, bukan biaya tambahan.',
-          'DP hangus bila booking dibatalkan atau gagal dilunasi.',
+          '30% dari tarif periode; kamar terkunci setelah bukti transfer diperiksa.',
+          'Hangus kalau booking dibatalkan atau gagal dilunasi.',
         ],
       },
       {
-        title: 'Pelunasan & no-partial',
+        title: 'Pelunasan',
         lines: [
-          'Pembayaran sah hanya DP 30% persis atau pelunasan penuh (sisa sewa + deposit).',
-          'Tidak ada cicilan.',
-          'Tagihan perpanjangan dan utilitas wajib lunas penuh.',
+          'Sekali bayar: sisa sewa + deposit. Tidak ada cicilan.',
+          'Tagihan perpanjangan dan listrik wajib lunas penuh.',
         ],
       },
       {
-        title: 'Cara membayar',
+        title: 'Cara bayar',
         lines: [
           'Transfer bank atau tunai ke pengelola.',
-          'Untuk transfer, unggah bukti di portal; admin memeriksa sebelum pembayaran tercatat.',
-          'Tidak ada QRIS atau e-wallet — pembayaran selalu lewat bukti transfer manual.',
+          'Unggah bukti transfer di portal; admin memeriksa dulu.',
+          'Tidak ada QRIS atau e-wallet.',
         ],
       },
       {
-        title: 'Jatuh tempo',
+        title: 'Tenggat',
         lines: [
-          'Semua tagihan jatuh tempo 24 jam setelah terbit (default; tenggat pastinya tertera di invoice).',
-          'Tidak ada denda keterlambatan otomatis, tetapi tunggakan menghambat perpanjangan dan checkout.',
+          'Semua tagihan jatuh tempo 24 jam setelah terbit.',
+          'Tidak ada denda otomatis, tapi tunggakan menghambat perpanjangan dan keluar.',
         ],
       },
     ],
@@ -296,15 +315,12 @@ export const TENANT_RULE_CATEGORIES: TenantRuleCategory[] = [
     id: 'deposit',
     icon: '🔒',
     title: 'Deposit jaminan',
-    summary: 'Dana titip per kamar (+ hewan), refundable, menutup tagihan terbuka saat checkout.',
-    keywords: ['deposit', 'jaminan', 'dana titipan', 'refund', 'potongan', 'settlement'],
+    summary: 'Uang titip yang kembali saat keluar, setelah semua tagihan beres.',
+    keywords: ['deposit', 'jaminan', 'dana titipan', 'refund', 'potongan'],
     numbers: [
       {
         label: 'Deposit kamar',
-        value: (ctx) =>
-          ctx.roomDepositRupiah != null
-            ? formatRupiah(ctx.roomDepositRupiah)
-            : 'mengikuti kamar yang dipilih',
+        value: (ctx) => rupiah(ctx.roomDepositRupiah) ?? 'mengikuti kamar pilihanmu',
         source: 'Room.defaultDepositRupiah — keuangan.md §7 (D-05)',
       },
       {
@@ -312,41 +328,34 @@ export const TENANT_RULE_CATEGORIES: TenantRuleCategory[] = [
         value: (ctx) => formatRupiah(ctx.petDepositRupiah),
         source: 'Pengaturan → petDepositRupiah',
       },
-      {
-        label: 'Sifat',
-        value: () => 'Refundable',
-        source: 'keuangan.md §7 — dana titip (liability), bukan revenue',
-      },
     ],
+    examples: (ctx) => {
+      const deposit = rupiah(ctx.roomDepositRupiah);
+      if (!deposit) return [];
+      const room = ctx.roomCode ? `Kamar ${ctx.roomCode}` : 'Kamar kamu';
+      return [`${room}: deposit ${deposit} — kembali saat keluar kalau tidak ada kerusakan atau tunggakan.`];
+    },
     sections: [
       {
-        title: 'Apa itu deposit jaminan',
+        title: 'Apa ini',
         lines: [
-          'Dana titip yang dibayar saat masuk, bukan biaya sewa.',
-          'Nominalnya mengikuti kamar yang dipilih; rincian tampil di tagihan awal.',
+          'Bukan biaya sewa; ini uang titip yang dikembalikan.',
+          'Nominalnya mengikuti kamar yang kamu pilih.',
         ],
       },
       {
-        title: 'Apa yang memotong deposit',
+        title: 'Dipakai untuk apa',
         lines: [
-          'Tagihan terbuka saat checkout — termasuk sewa dan utilitas.',
-          'Kerusakan akibat kelalaian penghuni, dengan catatan yang jelas.',
-          'Biaya overstay/pembersihan bila ada.',
+          'Menutup tagihan terbuka saat keluar — termasuk sewa dan listrik.',
+          'Kerusakan akibat kelalaian, selalu dengan catatan.',
         ],
       },
       {
         title: 'Sisa dan kekurangan',
         lines: [
-          'Sisa deposit dikembalikan setelah semua kewajiban selesai.',
-          'Bila deposit tidak cukup, kekurangan menjadi piutangmu.',
-          'Deposit diproses setelah inspeksi kamar dan pelunasan; waktu proses mengikuti antrean pengelola.',
-        ],
-      },
-      {
-        title: 'Deposit hewan',
-        lines: [
-          'Terpisah dari deposit kamar.',
-          'Dikembalikan bila tidak ada kerusakan akibat hewan.',
+          'Sisa kembali setelah semua kewajiban beres.',
+          'Kalau kurang, sisanya jadi utangmu.',
+          'Diproses setelah inspeksi kamar dan pelunasan.',
         ],
       },
     ],
@@ -354,59 +363,43 @@ export const TENANT_RULE_CATEGORIES: TenantRuleCategory[] = [
   {
     id: 'overstay',
     icon: '⏰',
-    title: 'Lewat tanggal keluar (overstay)',
-    summary: 'Kamar dilepas pukul 12.00 WIB di hari-H; checkout paksa pukul 12.00 WIB di H+1.',
-    keywords: ['overstay', 'lewat', 'telat', 'checkout paksa', 'evict', 'barang', 'denda'],
+    title: 'Lewat tanggal keluar',
+    summary: 'Kalau tidak memperpanjang, kamar diambil alih dan kamu harus segera keluar.',
+    keywords: ['overstay', 'lewat', 'telat', 'checkout paksa', 'barang', 'denda'],
     numbers: [
       {
-        label: 'Pengingat',
-        value: () => 'H-10 · H-7 · H-3 · H-1 · hari-H',
-        source: 'maintenance-sweep.service.ts REMINDER_THRESHOLDS',
-      },
-      {
         label: 'Kamar dilepas',
-        value: () => '12.00 WIB hari-H',
+        value: () => 'pukul 12.00, hari terakhir',
         source: 'stay-sweep.service.ts runNoonRelease',
       },
       {
         label: 'Checkout paksa',
-        value: () => '12.00 WIB H+1',
+        value: () => 'pukul 12.00, besoknya',
         source: 'stay-sweep.service.ts runOverstayForcedCheckout',
-      },
-      {
-        label: 'Batas ambil barang',
-        value: () => '30 hari',
-        source: 'hunian.md Dossier 12 — B3',
       },
     ],
     sections: [
       {
-        title: 'Apa yang terjadi',
+        title: 'Yang terjadi',
         lines: [
-          'Pengingat dikirim mulai H-10 sampai hari-H.',
-          'Pada hari-H pukul 12.00 WIB, kamar dilepas ke penghuni baru bila belum ada DP perpanjangan.',
-          'Pada H+1 pukul 12.00 WIB, sistem melakukan checkout paksa bila kamu masih tinggal.',
+          'Kamu diingatkan mulai 10 hari sebelum masa sewa habis.',
+          'Di hari terakhir pukul 12.00, kamar dilepas ke penghuni baru.',
+          'Besoknya pukul 12.00, sistem mengeluarkanmu secara paksa.',
         ],
       },
       {
-        title: 'Tagihan & deposit',
+        title: 'Tagihannya',
         lines: [
-          'Tagihan yang belum lunas tetap menjadi tanggung jawabmu.',
-          'Biaya overstay/pembersihan dapat dipotong dari deposit.',
-          'Bila deposit tidak cukup, sisanya menjadi piutang.',
+          'Tetap berjalan; biaya overstay/pembersihan bisa dipotong dari deposit.',
+          'Kalau deposit kurang, sisanya jadi utangmu.',
+          'Kalau masih menunggak, admin menindaklanjuti manual.',
         ],
       },
       {
         title: 'Barangmu',
         lines: [
-          'Barang yang tertinggal disimpan 30 hari sejak checkout.',
-          'Setelah 30 hari, barang dinyatakan ditinggal (ABANDONED).',
-        ],
-      },
-      {
-        title: 'Kalau masih ada tunggakan',
-        lines: [
-          'Checkout otomatis tidak dijalankan; admin mendapat peringatan dan menindaklanjuti manual.',
+          'Disimpan 30 hari setelah keluar.',
+          'Setelah itu dinyatakan ditinggal.',
         ],
       },
     ],
@@ -414,49 +407,42 @@ export const TENANT_RULE_CATEGORIES: TenantRuleCategory[] = [
   {
     id: 'checkout',
     icon: '🚪',
-    title: 'Checkout',
-    summary: 'Ajukan dari portal minimal H+1; lunasi tagihan non-meter; inspeksi lalu deposit diproses.',
-    keywords: ['checkout', 'keluar', 'pindah', 'inspeksi', 'kunci', 'tagihan final'],
+    title: 'Keluar (checkout)',
+    summary: 'Ajukan dari portal, lunasi tagihan, inspeksi, lalu deposit diproses.',
+    keywords: ['checkout', 'keluar', 'pindah', 'inspeksi', 'kunci', 'tagihan akhir'],
     numbers: [
       {
-        label: 'Pengajuan',
-        value: () => 'minimal H+1 dari hari ini',
+        label: 'Ajukan',
+        value: () => 'minimal besok (H+1)',
         source: 'CheckoutRequestModal.tsx',
       },
       {
-        label: 'Batas pengajuan',
+        label: 'Batas',
         value: () => '≤ tanggal rencana keluar',
         source: 'hunian.md Dossier 12',
-      },
-      {
-        label: 'Blokir checkout',
-        value: () => 'tagihan non-meter',
-        source: 'checkoutReadiness.ts getBlockingOpenInvoices',
       },
     ],
     sections: [
       {
         title: 'Syarat',
         lines: [
-          'Semua tagihan non-meter lunas atau dibatalkan.',
-          'Tagihan meter (listrik/air) tidak memblokir — dipotong dari deposit saat settlement.',
+          'Tagihan non-listrik lunas; tagihan listrik/air dipotong dari deposit.',
           'Kembalikan kunci dan kosongkan barang pribadi.',
         ],
       },
       {
-        title: 'Urutan proses',
+        title: 'Urutan',
         lines: [
-          'Buka Panduan Kos Saya → Ajukan Keluar.',
-          'Pilih tanggal keluar dan tulis alasan.',
-          'Admin meninjau; persetujuan belum berarti kamu sudah keluar.',
-          'Admin menghitung tagihan final, inspeksi kamar, lalu memproses deposit.',
+          'Buka Panduan Kos Saya → Ajukan Keluar → pilih tanggal dan alasan.',
+          'Admin meninjau, menghitung tagihan akhir, lalu inspeksi kamar.',
+          'Persetujuan admin belum berarti kamu sudah keluar.',
         ],
       },
       {
         title: 'Keluar lebih awal',
         lines: [
-          'Sewa yang sudah dibayar hangus untuk sisa periode (tidak ada refund prorata).',
-          'Deposit tetap dikembalikan normal setelah kewajiban selesai.',
+          'Sisa sewa hangus; tidak ada pengembalian prorata.',
+          'Deposit tetap kembali normal setelah kewajiban beres.',
         ],
       },
     ],
@@ -465,7 +451,7 @@ export const TENANT_RULE_CATEGORIES: TenantRuleCategory[] = [
     id: 'ktp',
     icon: '🪪',
     title: 'KTP & data pribadi',
-    summary: 'Satu foto KTP untuk verifikasi identitas; akses terbatas; data dihapus saat checkout.',
+    summary: 'Satu foto KTP untuk verifikasi; datanya dihapus saat kamu keluar.',
     keywords: ['ktp', 'identitas', 'pdp', 'privasi', 'foto', 'verifikasi'],
     numbers: [
       {
@@ -478,39 +464,34 @@ export const TENANT_RULE_CATEGORIES: TenantRuleCategory[] = [
         value: () => 'OWNER/ADMIN',
         source: 'tenants.controller.ts verifyKtp @Roles',
       },
-      {
-        label: 'Data KTP setelah checkout',
-        value: () => 'dihapus otomatis',
-        source: 'stays.service.ts cleanupTenantKtpOnCheckout',
-      },
     ],
     sections: [
       {
         title: 'Kenapa perlu',
         lines: [
-          'Foto KTP dipakai untuk mencocokkan identitas penghuni.',
-          'Verifikasi dilakukan manual oleh pengelola — tidak ada janji waktu proses.',
+          'Untuk mencocokkan identitas penghuni.',
+          'Diverifikasi manual oleh pengelola.',
         ],
       },
       {
-        title: 'Siapa yang bisa melihat',
+        title: 'Siapa yang bisa lihat',
         lines: [
-          'Hanya OWNER dan ADMIN yang bisa membuka dan memverifikasi foto KTP.',
-          'Data tidak dibagikan ke pihak lain.',
+          'Hanya OWNER dan ADMIN.',
+          'Tidak dibagikan ke pihak lain.',
         ],
       },
       {
         title: 'Kapan dihapus',
         lines: [
-          'Foto KTP dihapus otomatis setelah checkout terakhir (tidak ada masa sewa lain).',
-          'OWNER juga bisa menghapus data KTP lebih awal lewat permintaan PDP.',
+          'Otomatis setelah kamu keluar (tidak ada masa sewa lain).',
+          'OWNER juga bisa menghapus lebih awal lewat permintaan PDP.',
         ],
       },
     ],
   },
 ];
 
-/** Cari kategori yang cocok dengan kata kunci (judul, ringkasan, isi, angka). */
+/** Cari kategori yang cocok (judul, ringkasan, isi, contoh, angka). */
 export function filterTenantRuleCategories(
   query: string,
   ctx: TenantRuleContext = DEFAULT_TENANT_RULE_CONTEXT,
@@ -523,7 +504,8 @@ export function filterTenantRuleCategories(
       category.title,
       category.summary,
       ...category.keywords,
-      ...category.numbers.flatMap((n) => [n.label, n.value(ctx), n.source]),
+      ...category.numbers.flatMap((n) => [n.label, n.value(ctx)]),
+      ...(category.examples?.(ctx) ?? []),
       ...category.sections.flatMap((s) => [s.title, ...s.lines]),
     ]
       .join(' ')
@@ -533,7 +515,7 @@ export function filterTenantRuleCategories(
 }
 
 // ══════════════════════════════════════════════════════════════════════════════
-// WIZARD 4 PERTANYAAN — hanya memilih cabang aturan; tidak menyimpan data pribadi
+// WIZARD 4 PERTANYAAN — memilih cabang aturan; tidak menyimpan data pribadi
 // ══════════════════════════════════════════════════════════════════════════════
 
 export type TenantRulesWizardStage = 'penghuni' | 'calon';
@@ -559,16 +541,16 @@ export const TENANT_RULES_WIZARD_QUESTIONS: TenantRulesWizardQuestion[] = [
   {
     key: 'stage',
     question: 'Kamu sudah penghuni atau masih calon?',
-    help: 'Menentukan bagian yang paling relevan untukmu sekarang.',
+    help: 'Kami tampilkan bagian yang paling berguna untukmu.',
     options: [
-      { value: 'penghuni', label: 'Sudah penghuni', hint: 'Perpanjangan, checkout, overstay' },
+      { value: 'penghuni', label: 'Sudah penghuni', hint: 'Perpanjangan, keluar, overstay' },
       { value: 'calon', label: 'Masih calon', hint: 'DP, deposit, cara bayar' },
     ],
   },
   {
     key: 'pet',
-    question: 'Apakah kamu membawa hewan peliharaan?',
-    help: 'Hewan diizinkan dengan pemberitahuan dan deposit terpisah.',
+    question: 'Bawa hewan peliharaan?',
+    help: 'Boleh, asal lapor dan bayar deposit yang kembali.',
     options: [
       { value: 'ya', label: 'Ya, bawa hewan', hint: 'Ada deposit hewan' },
       { value: 'tidak', label: 'Tidak', hint: 'Tanpa deposit hewan' },
@@ -576,23 +558,23 @@ export const TENANT_RULES_WIZARD_QUESTIONS: TenantRulesWizardQuestion[] = [
   },
   {
     key: 'occupants',
-    question: 'Berapa orang akan tinggal di kamar?',
-    help: 'Batas gratis berbeda untuk kamar STANDARD dan LARGE.',
+    question: 'Berapa orang akan tinggal?',
+    help: 'Kamar STANDARD muat 2 orang, LARGE 4 orang — tanpa biaya tambahan.',
     options: [
-      { value: '1-2', label: '1–2 orang', hint: 'Tanpa surcharge' },
-      { value: '3-4', label: '3–4 orang', hint: 'STANDARD kena surcharge' },
+      { value: '1-2', label: '1–2 orang', hint: 'Tanpa biaya tambahan' },
+      { value: '3-4', label: '3–4 orang', hint: 'STANDARD kena biaya tambahan' },
       { value: '5-6', label: '5–6 orang', hint: 'Hanya kamar LARGE' },
     ],
   },
   {
     key: 'term',
     question: 'Rencana bayar berapa lama?',
-    help: 'Term menentukan pengali tarif dan apakah listrik/air termasuk.',
+    help: 'Term menentukan harga dan apakah listrik/air termasuk.',
     options: [
       { value: 'MONTHLY', label: '1 bulan', hint: 'Listrik & air dari meter' },
-      { value: 'BIWEEKLY', label: '2 minggu', hint: '0,75× · all-in' },
-      { value: 'SMESTERLY', label: '6 bulan', hint: '5,7× · hemat ±5%' },
-      { value: 'YEARLY', label: '1 tahun', hint: '11× · hemat 1 bulan' },
+      { value: 'BIWEEKLY', label: '2 minggu', hint: 'Sudah termasuk listrik & air' },
+      { value: 'SMESTERLY', label: '6 bulan', hint: 'Lebih hemat ±5%' },
+      { value: 'YEARLY', label: '1 tahun', hint: 'Hemat 1 bulan' },
     ],
   },
 ];
@@ -628,24 +610,37 @@ const TERM_LABEL: Record<TenantRulesWizardTerm, string> = {
   YEARLY: '1 tahun',
 };
 
-const TERM_NOTE: Record<TenantRulesWizardTerm, string[]> = {
-  MONTHLY: ['Bulanan: tarif ×1; listrik & air dihitung dari meter.'],
-  BIWEEKLY: ['2 minggu: tarif bulanan × 0,75; listrik & air sudah termasuk.'],
-  SMESTERLY: ['6 bulan: tarif bulanan × 5,7; listrik & air dihitung dari meter.'],
-  YEARLY: ['1 tahun: tarif bulanan × 11; listrik & air dihitung dari meter.'],
+const occupantHeadcount: Record<TenantRulesWizardOccupants, number> = {
+  '1-2': 2,
+  '3-4': 4,
+  '5-6': 6,
 };
 
-const OCCUPANT_NOTE: Record<TenantRulesWizardOccupants, (ctx: TenantRuleContext) => string[]> = {
-  '1-2': () => ['1–2 orang: tanpa surcharge di kamar STANDARD maupun LARGE.'],
-  '3-4': (ctx) => [
-    `Kamar STANDARD: 1–2 kepala ekstra × ${ctx.extraOccupantPercent}% tarif periode.`,
-    'Kamar LARGE: masih tanpa surcharge sampai 4 orang.',
-  ],
-  '5-6': () => [
-    'Hanya kamar LARGE (maksimal 6 orang) yang bisa menampung 5–6 orang.',
-    'Kamar STANDARD maksimal 4 orang.',
-  ],
-};
+function termNote(term: TenantRulesWizardTerm, ctx: TenantRuleContext): string {
+  const monthly = ctx.rentRupiah;
+  const six = termPrice(monthly, 5.7);
+  const twelve = termPrice(monthly, 11);
+  if (term === 'SMESTERLY' && six != null) return `6 bulan: ${formatRupiah(six)} — listrik & air dari meter.`;
+  if (term === 'YEARLY' && twelve != null) return `1 tahun: ${formatRupiah(twelve)} — listrik & air dari meter.`;
+  if (term === 'BIWEEKLY') return '2 minggu: listrik & air sudah termasuk.';
+  return 'Bulanan: listrik & air dihitung dari meter.';
+}
+
+function occupantNote(occupants: TenantRulesWizardOccupants, ctx: TenantRuleContext): string[] {
+  const heads = occupantHeadcount[occupants];
+  const free = freeOccupants(ctx);
+  const extra = Math.max(0, heads - free);
+  const amount = extra > 0 ? surchargeFor(ctx, extra) : null;
+
+  if (extra === 0) return [`${heads} orang: tanpa biaya tambahan di kamar ${sizeLabel(ctx.roomSize)}.`];
+  if (amount != null) {
+    return [`${heads} orang di kamar ${sizeLabel(ctx.roomSize)}: ${extra} orang tambahan = ${formatRupiah(amount)} per periode.`];
+  }
+  return [
+    `${heads} orang di kamar STANDARD: ${extra} orang tambahan kena biaya 20% tarif periode per orang.`,
+    'Kamar LARGE masih tanpa biaya tambahan sampai 4 orang.',
+  ];
+}
 
 function byId(id: TenantRuleCategoryId): TenantRuleCategory {
   const found = TENANT_RULE_CATEGORIES.find((category) => category.id === id);
@@ -653,10 +648,7 @@ function byId(id: TenantRuleCategoryId): TenantRuleCategory {
   return found;
 }
 
-/**
- * Hasil wizard = aturan + angka yang berlaku untuk kombinasi jawaban.
- * Fungsi murni: tidak menyentuh storage/API dan tidak menyimpan jawaban.
- */
+/** Fungsi murni: tidak menyentuh storage/API dan tidak menyimpan jawaban. */
 export function buildTenantRulesWizardResult(
   answers: TenantRulesWizardAnswers,
   ctx: TenantRuleContext = DEFAULT_TENANT_RULE_CONTEXT,
@@ -670,59 +662,44 @@ export function buildTenantRulesWizardResult(
 
   const highlights: string[] = [];
   if (stage === 'calon') {
-    highlights.push('Kamu sedang memesan kamar: mulai dari DP 30% dan deposit jaminan.');
+    const dp = dpFor(ctx);
+    highlights.push(dp != null ? `Kamar dikunci setelah DP ${formatRupiah(dp)} dibayar.` : 'Kamar dikunci setelah DP 30% dibayar.');
   } else {
-    highlights.push('Kamu sudah menghuni: pengingat perpanjangan mulai H-10; checkout diajukan dari Panduan Kos Saya.');
+    highlights.push('Pengingat perpanjangan mulai 10 hari sebelum masa sewa habis.');
   }
   if (pet === 'ya') {
-    highlights.push(`Bawa hewan: siapkan deposit hewan ${formatRupiah(ctx.petDepositRupiah)} (refundable).`);
+    highlights.push(`Deposit hewan ${formatRupiah(ctx.petDepositRupiah)} — kembali kalau tidak ada kerusakan.`);
   }
-  if (occupants === '5-6') {
-    highlights.push('5–6 orang hanya bisa di kamar LARGE (maksimal 6).');
-  } else if (occupants === '3-4') {
-    highlights.push('3–4 orang: kamar LARGE tanpa surcharge; kamar STANDARD kena surcharge per kepala ekstra.');
-  } else {
-    highlights.push('1–2 orang: tanpa surcharge di kedua ukuran kamar.');
-  }
-  highlights.push(TERM_NOTE[term][0]);
-  if (ctx.roomDepositRupiah != null) {
-    highlights.push(
-      `Deposit kamar${ctx.roomCode ? ` ${ctx.roomCode}` : ''}: ${formatRupiah(ctx.roomDepositRupiah)} (refundable).`,
-    );
-  }
+  highlights.push(...occupantNote(occupants, ctx));
+  highlights.push(termNote(term, ctx));
 
   const notes: TenantRulesWizardResult['notes'] = {
     hewan:
       pet === 'ya'
-        ? [
-            `Deposit hewan ${formatRupiah(ctx.petDepositRupiah)} dibayar bersama deposit kamar.`,
-            'Refundable bila tidak ada kerusakan akibat hewan.',
-          ]
-        : ['Kamu tidak membawa hewan — tidak ada deposit hewan.'],
-    penghuni: OCCUPANT_NOTE[occupants](ctx),
-    prabayar: TERM_NOTE[term],
+        ? [`Deposit hewan ${formatRupiah(ctx.petDepositRupiah)} dibayar bersama deposit kamar.`, 'Kembali penuh kalau tidak ada kerusakan.']
+        : ['Tanpa hewan: tidak ada deposit hewan.'],
+    penghuni: occupantNote(occupants, ctx),
+    prabayar: [termNote(term, ctx)],
     pembayaran:
-      stage === 'calon'
+      dpFor(ctx) != null
         ? [
-            'DP 30% mengunci kamar setelah bukti transfer diperiksa admin.',
-            'Pelunasan sekali bayar: sisa sewa + deposit.',
+            `DP kamu: ${formatRupiah(dpFor(ctx) as number)} — bagian dari sewa, bukan biaya tambahan.`,
+            'Sisanya dilunasi sekali bayar bersama deposit.',
           ]
-        : ['Perpanjangan juga memakai DP 30% dan pelunasan sekali bayar.'],
+        : ['DP 30% dari tarif periode; sisanya dilunasi sekali bayar bersama deposit.'],
     deposit: [
-      ctx.roomDepositRupiah != null
-        ? `Deposit kamar${ctx.roomCode ? ` ${ctx.roomCode}` : ''}: ${formatRupiah(ctx.roomDepositRupiah)}.`
+      rupiah(ctx.roomDepositRupiah)
+        ? `Deposit kamar${ctx.roomCode ? ` ${ctx.roomCode}` : ''}: ${rupiah(ctx.roomDepositRupiah)}.`
         : 'Deposit mengikuti kamar yang kamu pilih.',
-      'Menutup tagihan terbuka saat checkout; sisa dikembalikan, kekurangan menjadi piutang.',
+      'Dipakai menutup tagihan terbuka saat keluar; sisanya kembali.',
     ],
-    overstay: [
-      'Kamar dilepas pukul 12.00 WIB di hari-H; checkout paksa pukul 12.00 WIB di H+1.',
-    ],
+    overstay: ['Kamar dilepas pukul 12.00 di hari terakhir; checkout paksa besoknya pukul 12.00.'],
     checkout: [
       stage === 'penghuni'
-        ? 'Ajukan keluar dari Panduan Kos Saya minimal H+1 sebelum tanggal yang kamu inginkan.'
-        : 'Saatnya keluar nanti: ajukan minimal H+1 dan lunasi tagihan non-meter.',
+        ? 'Ajukan keluar dari Panduan Kos Saya, minimal besok (H+1).'
+        : 'Nanti saat keluar: ajukan minimal besok (H+1) dan lunasi tagihan non-listrik.',
     ],
-    ktp: ['Satu foto KTP untuk verifikasi; data dihapus otomatis setelah checkout.'],
+    ktp: ['Satu foto KTP untuk verifikasi; dihapus otomatis saat kamu keluar.'],
   };
 
   const order: TenantRuleCategoryId[] =

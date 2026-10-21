@@ -49,17 +49,17 @@ describe('Y-P3 — MyManualPage (tenant portal integration)', () => {
     for (const title of [
       'Hewan peliharaan',
       'Jumlah penghuni',
-      'Prabayar & diskon',
-      'Pembayaran & DP',
-      'Lewat tanggal keluar (overstay)',
-      'Checkout',
+      'Bayar di muka',
+      'Pembayaran & uang muka',
+      'Lewat tanggal keluar',
+      'Keluar (checkout)',
       'KTP & data pribadi',
     ]) {
       expect(screen.getByText(title)).toBeInTheDocument();
     }
     // "Deposit jaminan" muncul di kartu deposit dan di judul kategori.
     expect(screen.getAllByText(/Deposit jaminan/).length).toBeGreaterThanOrEqual(2);
-    expect(screen.getByText(/8 aturan yang mengikatmu/i)).toBeInTheDocument();
+    expect(screen.getByText(/Aturan yang berlaku/i)).toBeInTheDocument();
   });
 
   it('kartu deposit memakai nominal kamar (bukan angka tetap) saat stay tersedia', async () => {
@@ -69,18 +69,21 @@ describe('Y-P3 — MyManualPage (tenant portal integration)', () => {
       roomId: 3,
       status: 'ACTIVE',
       depositAmountRupiah: 650000,
-      room: { id: 3, code: 'A1', monthlyRateRupiah: 1000000, defaultDepositRupiah: 650000 },
+      agreedRentAmountRupiah: 1000000,
+      occupantCount: 2,
+      room: { id: 3, code: 'A1', monthlyRateRupiah: 1000000, defaultDepositRupiah: 650000, roomSize: 'STANDARD' },
     });
 
     renderPage(<MyManualPage />);
 
     expect(await screen.findByText(/Deposit jaminan — kamar A1/i)).toBeInTheDocument();
     expect(screen.getAllByText(/650\.000/).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/Hitungan untukmu/i).length).toBeGreaterThan(0);
   });
 
   it('kartu deposit jujur saat tenant belum punya kamar', () => {
     renderPage(<MyManualPage />);
-    expect(screen.getAllByText(/mengikuti kamar yang dipilih/i).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/mengikuti kamar pilihanmu/i).length).toBeGreaterThan(0);
   });
 
   it('pencarian menyaring kategori', () => {

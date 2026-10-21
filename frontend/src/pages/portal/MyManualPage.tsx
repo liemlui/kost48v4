@@ -193,6 +193,9 @@ export default function MyManualPage() {
         publicConfigQuery.data?.extraOccupantFeePercent ?? DEFAULT_TENANT_RULE_CONTEXT.extraOccupantPercent,
       roomCode: stay?.room?.code ?? null,
       roomDepositRupiah: stay?.depositAmountRupiah ?? stay?.room?.defaultDepositRupiah ?? null,
+      rentRupiah: stay?.agreedRentAmountRupiah ?? stay?.room?.monthlyRateRupiah ?? null,
+      roomSize: stay?.room?.roomSize ?? null,
+      occupantCount: stay?.occupantCount ?? null,
     }),
     [publicConfigQuery.data, stay],
   );
@@ -250,8 +253,8 @@ export default function MyManualPage() {
 
                 <div className="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-2">
                   <div>
-                    <strong>8 aturan yang mengikatmu</strong>
-                    <div className="text-muted small">Setiap angka diambil dari data kamar dan Pengaturan pengelola.</div>
+                    <strong>Aturan yang berlaku</strong>
+                    <div className="text-muted small">Angka di bawah dihitung dari kamar dan tarifmu.</div>
                   </div>
                   <Badge bg="light" text="dark">{filteredCategories.length} dari {TENANT_RULE_CATEGORIES.length} kategori</Badge>
                 </div>
@@ -292,6 +295,14 @@ export default function MyManualPage() {
                               </div>
                             ))}
                           </div>
+                          {(category.examples?.(ruleContext) ?? []).length > 0 ? (
+                            <div className="tenant-rule-example mb-3">
+                              <strong>Hitungan untukmu</strong>
+                              <ul className="mb-0 ps-3">
+                                {(category.examples?.(ruleContext) ?? []).map((line) => <li key={line}>{line}</li>)}
+                              </ul>
+                            </div>
+                          ) : null}
                           {category.sections.map((section) => (
                             <div key={section.title} className="mb-2">
                               <strong className="d-block mb-1">{section.title}</strong>
