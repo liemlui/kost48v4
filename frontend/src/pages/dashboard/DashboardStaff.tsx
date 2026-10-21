@@ -4,6 +4,7 @@ import { useAuth } from '../../context/AuthContext';
 import StaffMotivationDashboard from '../../components/staff/StaffMotivationDashboard';
 import { fetchStaffRoutineToday, fetchMyStaffRoutineKpi } from '../../api/staffRoutines';
 import { fetchStaffDashboardAggregate } from '../../api/staffDashboard';
+import { StaffQuickStart } from '../../components/common/QuickStartWizard';
 import { useOperationalStressIndex } from '../../hooks/useOperationalStressIndex';
 import { dedupeCommandItems } from '../../utils/commandCenterDedup';
 import { HeroSkeleton, StatCardSkeleton, TableSkeleton } from '../../components/common/SkeletonLoader';
@@ -51,6 +52,7 @@ export default function StaffDashboard() {
 
   return (
     <div className="staff-simple-mode">
+      <StaffQuickStart />
       <StaffMotivationDashboard
         user={user}
         tickets={tickets}

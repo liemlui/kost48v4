@@ -10,6 +10,7 @@ import { SkeletonBlock } from "../../components/common/SkeletonLoader";
 import TenantBookingGate from "../../components/tenant/TenantBookingGate";
 import RoomComparePanel from "../../components/rooms/RoomComparePanel";
 import AvailabilityTimeline from "../../components/public/RichAvailabilityCalendar";
+import AvailabilityHeatmap from "../../components/public/AvailabilityHeatmap";
 import Kost48LogoMark from "../../components/common/Kost48LogoMark";
 import RoomCard from "../../components/rooms/RoomCard";
 import type { PricingTerm, PublicRoom } from "../../types";
@@ -35,7 +36,7 @@ import { formatRupiah } from "../../utils/formatCurrency";
 
 type BathroomFilter = "" | "inside" | "outside";
 type CoolingFilter = "" | "ac" | "fan";
-type AvailFilter = "" | "bookable" | "occupied" | "checking";
+type AvailFilter = "" | "all" | "bookable" | "occupied" | "checking";
 type SortFilter = "price-asc" | "price-desc" | "recommended";
 type CategoryFilter = "" | "ECONOMY" | "STANDARD" | "DELUXE";
 
@@ -210,7 +211,9 @@ export default function PublicRoomsPage() {
 
   const bathroom = (searchParams.get("bathroom") ?? "") as BathroomFilter;
   const cooling = (searchParams.get("cooling") ?? "") as CoolingFilter;
-  const avail = (searchParams.get("avail") ?? "") as AvailFilter;
+  // W-OWN-019: katalog dibuka dengan kamar yang tersedia; "Semua Kamar" eksplisit via avail=all.
+  const availParam = searchParams.get("avail");
+  const avail = (availParam === null ? "bookable" : availParam) as AvailFilter;
   const sort = (searchParams.get("sort") ?? "price-asc") as SortFilter;
   // SHOWCASE-CATEGORY: parameter `category` dari beranda (PUB-ROOM-CATEGORY) — nilai asing diabaikan.
   const rawCategory = (searchParams.get("category") ?? "").toUpperCase();
@@ -232,9 +235,10 @@ export default function PublicRoomsPage() {
       if (category && String(room.category ?? "STANDARD").toUpperCase() !== category) return false;
       const bookable = isPublicRoomBookable(room);
       const status = String(room.status ?? "").toUpperCase();
-      if (avail === "bookable" && !bookable) return false;
-      if (avail === "occupied" && (bookable || status !== "OCCUPIED")) return false;
-      if (avail === "checking" && status !== "MAINTENANCE") return false;
+      if (avail === "all" || avail === "") { /* semua kamar */ }
+      else if (avail === "bookable" && !bookable) return false;
+      else if (avail === "occupied" && (bookable || status !== "OCCUPIED")) return false;
+      else if (avail === "checking" && status !== "MAINTENANCE") return false;
       return true;
     });
 
@@ -309,8 +313,9 @@ export default function PublicRoomsPage() {
     setSearchParams(p, { replace: true });
   };
 
-  const hasActiveFilter = !!(bathroom || cooling || avail || category || sort !== "price-asc");
+  const hasActiveFilter = !!(bathroom || cooling || (avail && avail !== "bookable") || category || sort !== "price-asc");
   const [filtersOpen, setFiltersOpen] = useState(false);
+  const [showDetailCalendar, setShowDetailCalendar] = useState(false);
   const paginationItems = useMemo(() => getPaginationItems(totalPages, safePage), [safePage, totalPages]);
 
   return (
@@ -384,11 +389,11 @@ export default function PublicRoomsPage() {
               <div className="rm-filter-group">
                 <span className="rm-filter-label">Ketersediaan</span>
                 {/* UD-07: "Semua Kamar" lebih jujur — termasuk kamar terisi & yang sedang dicek (tidak semua bisa diajukan). */}
-                <FilterChip label="Semua Kamar" active={!avail} onClick={() => update({ avail: "" })} />
+                <FilterChip label="Semua Kamar" active={avail === "all"} onClick={() => update({ avail: "all" })} />
                 <FilterChip label="Tersedia" active={avail === "bookable"} onClick={() => update({ avail: "bookable" })} />
                 <FilterChip label="Sedang disiapkan" active={avail === "checking"} onClick={() => update({ avail: "checking" })} />
                 <FilterChip label="Penuh / Terisi" active={avail === "occupied"} onClick={() => update({ avail: "occupied" })} />
-                {!avail && <span className="rm-filter-hint">Termasuk kamar terisi &amp; yang sedang dicek</span>}
+                {avail === "all" && <span className="rm-filter-hint">Termasuk kamar terisi &amp; yang sedang dicek</span>}
                 {avail === "bookable" && <span className="rm-filter-hint">Kamar tersedia dapat ditanyakan atau direservasi melalui WhatsApp.</span>}
               </div>
               <div className="rm-filter-divider" aria-hidden="true" />
@@ -581,9 +586,18 @@ export default function PublicRoomsPage() {
               </div>
             </div>
 
-            {/* ── KALENDER KETERSEDIAAN ── */}
-            <AvailabilityTimeline />
-            {/* RichAvailabilityCalendar menggantikan AvailabilityTimeline lama */}
+            {/* ── KETERSEDIAAN: heatmap default, tabel 7 hari di balik tombol ── */}
+            <div className="d-flex justify-content-end mb-2">
+              <Button
+                size="sm"
+                variant="link"
+                className="p-0 small"
+                onClick={() => setShowDetailCalendar((value) => !value)}
+              >
+                {showDetailCalendar ? 'Tampilkan heatmap' : 'Tampilan rinci (tabel 7 hari)'}
+              </Button>
+            </div>
+            {showDetailCalendar ? <AvailabilityTimeline /> : <AvailabilityHeatmap />}
 
             {/* ── Compare ── */}
             {comparedRooms.length > 0 && (

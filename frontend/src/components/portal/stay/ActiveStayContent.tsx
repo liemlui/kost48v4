@@ -19,6 +19,7 @@ import MeterCycleModal from '../../stays/MeterCycleModal';
 import StayHistoryTimeline, { type StayJourneyStep } from '../../stays/StayHistoryTimeline';
 import SatisfactionSurveyCard from '../../tenant/SatisfactionSurveyCard';
 import TenantCheckoutCta from '../../tenant/TenantCheckoutCta';
+import QuickStartWizard from '../../common/QuickStartWizard';
 import LeaseProgressHero from './LeaseProgressHero';
 import StayQuickActions from './StayQuickActions';
 import StayAnnouncementBanner from './StayAnnouncementBanner';
@@ -416,6 +417,17 @@ export default function ActiveStayContent({ stay }: { stay: Stay }) {
           (PageHeader hanya dirender pada cabang non-aktif), sehingga route portal terpenting
           tidak memiliki <h1>. Judul disediakan untuk pembaca layar tanpa mengubah tampilan. */}
       <h1 className="visually-hidden">Panduan Kos Saya</h1>
+      <QuickStartWizard
+        scope="tenant"
+        title="Apa yang mau kamu kerjakan?"
+        subtitle="Empat jalan pintas paling sering dipakai penghuni."
+        actions={[
+          { key: 'bayar', icon: '💳', label: 'Bayar tagihan', hint: 'Lihat tagihan aktif', to: bayarRoute },
+          { key: 'meter', icon: '⚡', label: 'Catat meter', hint: meterWindow.windowOpen ? 'Isi angka meter' : 'Dibuka H-10', onClick: () => setShowMeter(true), disabled: !meterWindow.windowOpen },
+          { key: 'lapor', icon: '🛠️', label: 'Lapor masalah', hint: 'Kirim keluhan', to: '/portal/tickets' },
+          { key: 'keluar', icon: '🚪', label: 'Ajukan keluar', hint: canRequestCheckout ? 'Rencanakan tanggal' : 'Selesaikan tagihan dulu', onClick: () => setShowCheckoutModal(true), disabled: !canRequestCheckout },
+        ]}
+      />
       {/* Topbar PaymentUrgencyChip is the main assistant. Body stays compact. */}
       {nearEnd && !hasOpenInvoice ? (
         <Alert variant="warning" className="tenant-short-alert mb-3">

@@ -6529,3 +6529,37 @@
   .gx-fit-section,
   .gx-guarantee-section { padding: 3rem 0; }
 }
+
+/* W-OWN-019 — heatmap ketersediaan (mobile-first) */
+.rm-heatmap { border-radius:16px; background:var(--white); box-shadow:0 2px 10px rgba(14,30,60,.05); }
+.rm-heatmap-legend { display:flex; flex-wrap:wrap; gap:.35rem .85rem; font-size:.74rem; color:var(--gray-600); }
+.rm-heatmap-legend-item { display:inline-flex; align-items:center; gap:.3rem; }
+.rm-heatmap-legend-item i { width:10px; height:10px; border-radius:3px; background:var(--gray-300); }
+.rm-heatmap-legend-item.is-kosong i { background:#22c55e; }
+.rm-heatmap-legend-item.is-huni i { background:#cbd5e1; }
+.rm-heatmap-legend-item.is-booking_dp i { background:#60a5fa; }
+.rm-heatmap-legend-item.is-maintenance i { background:#f59e0b; }
+.rm-heatmap-legend-item.is-perpanjang i { background:#a78bfa; }
+.rm-heatmap-table { display:flex; flex-direction:column; gap:.35rem; }
+.rm-heatmap-row { display:grid; grid-template-columns:104px minmax(0,1fr); gap:.45rem; align-items:center; width:100%; border:1px solid var(--gray-200); background:var(--white); border-radius:12px; padding:.4rem .5rem; text-align:left; cursor:pointer; }
+.rm-heatmap-row:hover { border-color:var(--blue-300); background:var(--blue-50); }
+.rm-heatmap-room { display:flex; flex-direction:column; gap:.12rem; min-width:0; }
+.rm-heatmap-room strong { font-size:.86rem; }
+.rm-heatmap-badge { align-self:flex-start; font-size:.6rem; }
+.rm-heatmap-vacancy { font-size:.64rem; font-weight:700; color:var(--gray-600); }
+.rm-heatmap-vacancy.is-kosong { color:#15803d; }
+.rm-heatmap-vacancy.is-cenderung_kosong { color:#b45309; }
+.rm-heatmap-vacancy.is-mungkin { color:#0369a1; }
+.rm-heatmap-vacancy.is-cenderung_lanjut { color:var(--gray-500); }
+.rm-heatmap-days { display:grid; grid-auto-flow:column; grid-auto-columns:minmax(10px,1fr); gap:2px; overflow-x:auto; }
+.rm-heatmap-day { height:22px; border-radius:4px; background:#cbd5e1; }
+.rm-heatmap-day.is-kosong { background:#22c55e; }
+.rm-heatmap-day.is-huni { background:#cbd5e1; }
+.rm-heatmap-day.is-booking_dp { background:#60a5fa; }
+.rm-heatmap-day.is-maintenance { background:#f59e0b; }
+.rm-heatmap-day.is-perpanjang { background:#a78bfa; }
+@media (min-width:768px) {
+  .rm-heatmap-row { grid-template-columns:190px minmax(0,1fr); }
+  .rm-heatmap-room { flex-direction:row; align-items:center; gap:.45rem; }
+  .rm-heatmap-badge { align-self:center; }
+}

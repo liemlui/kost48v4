@@ -1,5 +1,6 @@
 // FILE: DashboardAdmin.tsx — dashboard admin: operasional, keuangan, okupansi
 import { useState, type ReactNode } from 'react';
+import { AdminQuickStart } from '../../components/common/QuickStartWizard';
 import { Alert, Col, Row, Table } from 'react-bootstrap';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import EmptyState from '../../components/common/EmptyState';
@@ -357,6 +358,7 @@ export default function AdminDashboard() {
 
   return (
     <div className="admin-dashboard-queue-first admin-dashboard-simplified">
+      <AdminQuickStart />
       <AdminCommandHeader totalQueue={totalLaneWork} urgentCount={urgentQueueCount} topQueueItem={topQueueItem} dense={dense} onToggleDense={handleToggleDense} />
       <AssistantInsightLine
         title="Asisten Operasional"

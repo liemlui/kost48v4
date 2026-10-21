@@ -1,5 +1,6 @@
 // FILE: OwnerDashboardPage.tsx — dashboard owner: KPI, tren pendapatan, okupansi (JALUR UANG)
 import { useMemo, useState, type ReactNode } from 'react';
+import { OwnerQuickStart } from '../../components/common/QuickStartWizard';
 import { formatRupiahWithoutSymbol, formatCompactRupiah } from '../../utils/formatCurrency';
 import { Alert, Button, Card, Col, Container, Form, Row, Spinner } from 'react-bootstrap';
 import { useQuery } from '@tanstack/react-query';
@@ -384,6 +385,7 @@ export default function OwnerDashboardPage() {
   return (
     <FeatureErrorBoundary>
       <Container fluid className={`owner-dashboard owner-view-${viewMode} px-2 py-3`}>
+      <OwnerQuickStart />
       <section className="owner-workspace-head mb-3">
         <div>
           <span className="owner-section-kicker">Kokpit bisnis</span>

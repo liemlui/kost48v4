@@ -5302,3 +5302,15 @@ div.tenant-stay-fact-chip {
   }
 }
 
+/* W-OWN-020 — wizard jalan pintas di beranda */
+.quickstart-card { background:linear-gradient(135deg,#eff6ff 0%,#ffffff 70%); border:1px solid var(--blue-200) !important; border-radius:16px; }
+.quickstart-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:.5rem; }
+.quickstart-action { display:flex; flex-direction:column; align-items:flex-start; gap:.1rem; padding:.6rem .7rem; border:1px solid var(--gray-200); border-radius:12px; background:var(--white); color:var(--gray-800); text-decoration:none; text-align:left; cursor:pointer; min-height:64px; }
+.quickstart-action:hover:not(:disabled) { border-color:var(--blue-300); background:var(--blue-50); }
+.quickstart-action:disabled { opacity:.55; cursor:not-allowed; }
+.quickstart-action span { font-size:1.15rem; line-height:1; }
+.quickstart-action strong { font-size:.84rem; }
+.quickstart-action small { font-size:.7rem; color:var(--gray-500); }
+.quickstart-restore { display:block; width:100%; margin-bottom:.75rem; padding:.45rem .6rem; border:1px dashed var(--gray-300); border-radius:10px; background:transparent; color:var(--gray-600); font-size:.75rem; }
+.quickstart-restore:hover { border-color:var(--blue-300); color:var(--blue-700); }
+@media (min-width:768px) { .quickstart-grid { grid-template-columns:repeat(4,minmax(0,1fr)); } }
