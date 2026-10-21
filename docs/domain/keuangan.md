@@ -296,6 +296,7 @@ Jalur invoice-only (renewal/utilitas) wajib lunas penuh.
 
 #### Deposit jaminan
 - **Selalu** = `Room.defaultDepositRupiah` (nilai bawaan kamar) — **ADMIN tidak boleh mengubah deposit** (D-05). Berlaku di **semua kanal** (booking publik, booking portal, walk-in); tidak ada override.
+- **Nilai bawaan per kamar (keputusan owner 21 Okt 2026):** kamar **AC Rp 200.000**, kamar **non-AC Rp 100.000** — disimpan di `Room.defaultDepositRupiah` per kamar. Stay yang sudah berjalan **tidak** di-retro; nilai baru berlaku untuk booking/aktivasi berikutnya.
 - Merupakan **dana titip, liability (kewajiban), BUKAN revenue**.
 
 ---
