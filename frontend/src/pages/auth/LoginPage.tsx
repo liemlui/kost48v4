@@ -217,6 +217,7 @@ export default function LoginPage() {
 
             <div className="login-forgot-row">
               <Link to="/forgot-password">Lupa password?</Link>
+              {mode === 'TENANT' ? <Link to="/register">Belum punya akun? Daftar</Link> : null}
             </div>
 
             <Button type="submit" disabled={submitting} className="w-100 login-submit-btn">

@@ -18,7 +18,9 @@ import { ChangePasswordDto } from './dto/change-password.dto';
 import { UpdateMyTipInfoDto } from './dto/update-my-tip-info.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { LoginDto } from './dto/login.dto';
+import { RegisterDto } from './dto/register.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
+import { UserRole } from '../common/enums/app.enums';
 
 @Injectable()
 export class AuthService {
@@ -34,6 +36,62 @@ export class AuthService {
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
   ) {}
+
+  /**
+   * Pendaftaran akun penghuni (publik, rate-limited).
+   * Bila email cocok dengan data Tenant yang dibuat admin dan belum punya akun,
+   * akun ditempelkan ke tenant itu; kalau belum ada, Tenant baru dibuat.
+   * KTP tetap menyusul saat check-in — pendaftaran hanya membuka akses portal.
+   */
+  async register(dto: RegisterDto) {
+    const email = dto.email.trim().toLowerCase();
+    const fullName = dto.fullName.trim();
+    const phone = normalizePhone(dto.phone);
+
+    if (!phone || phone.length < 8) {
+      throw new ConflictException('Nomor HP tidak valid. Gunakan format 08xx atau 62xx.');
+    }
+
+    const existingUser = await this.prisma.user.findFirst({
+      where: { email: { equals: email, mode: 'insensitive' } },
+      select: { id: true },
+    });
+    if (existingUser) {
+      throw new ConflictException('Email sudah terdaftar. Masuk, atau gunakan menu lupa password.');
+    }
+
+    const existingTenant = await this.prisma.tenant.findFirst({
+      where: { email: { equals: email, mode: 'insensitive' }, user: { is: null } },
+      select: { id: true },
+    });
+
+    const passwordHash = await bcrypt.hash(dto.password, 10);
+
+    const created = await this.prisma.$transaction(async (tx) => {
+      const tenantId =
+        existingTenant?.id ??
+        (
+          await tx.tenant.create({
+            data: { fullName, phone, email },
+            select: { id: true },
+          })
+        ).id;
+
+      return tx.user.create({
+        data: {
+          fullName,
+          email,
+          passwordHash,
+          role: UserRole.TENANT,
+          tenantId,
+          isActive: true,
+        },
+        select: { id: true, fullName: true, email: true, role: true, tenantId: true },
+      });
+    });
+
+    return created;
+  }
 
   async login(dto: LoginDto) {
     const invalidCredentialsMessage = 'Email/nomor HP atau password salah';

@@ -9,6 +9,7 @@ import { UserRole } from '../common/enums/app.enums';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
 import { RateLimitGuard } from '../common/guards/rate-limit.guard';
+import { RateLimit } from '../common/decorators/rate-limit.decorator';
 import { CurrentUserPayload } from '../common/interfaces/current-user.interface';
 import { PrismaService } from '../prisma/prisma.service';
 import { AuthService } from './auth.service';
@@ -16,6 +17,7 @@ import { ChangePasswordDto } from './dto/change-password.dto';
 import { UpdateMyTipInfoDto } from './dto/update-my-tip-info.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { LoginDto } from './dto/login.dto';
+import { RegisterDto } from './dto/register.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 
 @ApiTags('auth')
@@ -28,6 +30,19 @@ export class AuthController {
     private readonly authService: AuthService,
     private readonly prisma: PrismaService,
   ) {}
+
+  @Post('register')
+  @ApiOperation({ summary: 'Daftar akun penghuni — publik, rate-limited' })
+  @Public()
+  @UseGuards(RateLimitGuard)
+  @RateLimit('register')
+  async register(@Body() dto: RegisterDto) {
+    const user = await this.authService.register(dto);
+    return {
+      message: 'Akun berhasil dibuat. Silakan masuk dengan email dan password kamu.',
+      data: user,
+    };
+  }
 
   @Post('login')
   @ApiOperation({ summary: 'Login user — publik, rate-limited' })

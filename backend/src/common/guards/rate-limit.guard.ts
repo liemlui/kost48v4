@@ -38,6 +38,7 @@ export class RateLimitGuard implements CanActivate {
 
   private readonly configs: Record<string, RateLimitConfig> = {
     login: { maxRequests: 10, windowMs: 5 * 60 * 1000 },
+    register: { maxRequests: 5, windowMs: 10 * 60 * 1000 },
     forgotPassword: { maxRequests: 3, windowMs: 10 * 60 * 1000 },
     resetPassword: { maxRequests: 5, windowMs: 10 * 60 * 1000 },
     // Public cron hooks are token-protected, but still need a small outer

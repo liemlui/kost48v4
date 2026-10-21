@@ -16,6 +16,7 @@ import { useToast } from './components/common/ToastProvider';
 import ForgotPasswordPage from './pages/auth/ForgotPasswordPage';
 import LoginPage from './pages/auth/LoginPage';
 import ResetPasswordPage from './pages/auth/ResetPasswordPage';
+import RegisterPage from './pages/auth/RegisterPage';
 import TenantBookingGate from './components/tenant/TenantBookingGate';
 
 // F2-11 (V-1): code-split halaman publik (dashboard tamu, katalog, detail, booking)
@@ -223,6 +224,7 @@ export default function App() {
         <BreadcrumbProvider>
         <Routes>
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/register" element={<RegisterPage />} />
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
         <Route path="/reset-password" element={<ResetPasswordPage />} />
         <Route path="/rooms" element={<RoomsRouteEntry />} />

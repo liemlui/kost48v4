@@ -6,6 +6,22 @@ export async function login(identifier: string, password: string) {
   return response.data.data;
 }
 
+export type RegisterTenantPayload = {
+  fullName: string;
+  email: string;
+  phone: string;
+  password: string;
+};
+
+/** Pendaftaran akun penghuni (publik). Tidak otomatis login — arahkan ke /login. */
+export async function registerTenant(payload: RegisterTenantPayload) {
+  const response = await client.post<ApiEnvelope<{ id: number; fullName: string; email: string; role: string; tenantId: number }>>(
+    '/auth/register',
+    payload,
+  );
+  return response.data.data;
+}
+
 export async function me() {
   const response = await client.get<ApiEnvelope<AuthUser>>('/auth/me');
   return response.data.data;
