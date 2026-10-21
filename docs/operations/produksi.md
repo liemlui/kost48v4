@@ -685,6 +685,10 @@ dan isinya tidak boleh dibaca, disalin, atau ditampilkan. Jalur saja yang boleh 
 (SHA-256 `9a76dc23…fe39b`), extract, restart, smoke 4 URL `200`, buildId `BZ-Vpsd9eLX1` → `0Dc2WPRpp8Me`.
 Rincian: `docs/arsip/bukti-2026-10.md` §15.
 
+2026-10-21 15:45–15:47 WIB: deploy commit `68766d98`, bundle 43.073.633 byte (SHA-256 `1f34e90b…e61b2e`),
+backup `app-pre-wfin002-20261021-154541.tgz` (32 MB), extract tanpa `.env`/`uploads`/`tmp`, restart;
+smoke `/`, `/login`, `/api/public/rooms`, `/version.json` **200** + `/api/stays` **401**, buildId `zuOIOPU762vn`.
+
 
 <a id="d4b-backup"></a>
 ## Bagian B — Backup & restore produksi
