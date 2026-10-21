@@ -21,7 +21,7 @@
 
 Daftar prioritas, penanggung jawab, dan kesiapan ada di [TASK-AKTIF](kerja/TASK-AKTIF.md#prioritas) bagian “Prioritas & penanggung jawab”. Antrean satu baris per tugas ada di §3.
 
-## 3. Task terbuka & gate (34 `[ ]`)
+## 3. Task terbuka & gate (36 `[ ]`)
 
 Format: **ID** — judul | **Gate** (verifikasi wajib sebelum `[x]`). (owner) = butuh data/keputusan owner.
 
@@ -60,6 +60,8 @@ Format: **ID** — judul | **Gate** (verifikasi wajib sebelum `[x]`). (owner) = 
 - [x] **W-OWN-017** - kirim ringkasan ke WhatsApp + cetak (OWNER/ADMIN) | **Gate:** tanpa NIK/foto/alamat; panjang dibatasi; format stabil. **Bukti 18 Okt:** `cepatSummary.ts` (whitelist+masking, 1200) + aksi Cepat; 9/9 test, frontend 246/246; build exit 0 (`yqbdxH46dUlV`). Sisa: browser
 - [ ] **W-OWN-013** - tinjau adopsi Mode Cepat setelah 30 hari pemakaian | **Gate:** angka pemakaian Cepat vs Normal dan jumlah kartu yang diklik tercatat; keputusan lanjutan berbasis data, bukan opini
 - [x] **W-OWN-018** - catat usage token + konstanta harga AI (menutup A-5/A-6) | **Gate:** `AuditLog.meta.ai` tertulis, `GET /owner-ai/usage` berisi angka, tidak ada secret di log. **Bukti 18 Okt 2026:** test backend 157/157 + frontend 255/255, build exit 0; rincian di [changelog 18 Okt](history/changelog/2026-10.md). Batas: DB/AI nyata belum dijalankan
+- [ ] **W-OWN-019** - katalog `/rooms` default **kamar tersedia** + heatmap ketersediaan mobile-first + skor peluang kosong per kamar | **Gate:** tanpa query hanya kamar bookable; heatmap terbaca 390/768/1440 px tanpa scroll horizontal; skor 4 skenario teruji dan berlabel “perkiraan”; tanpa nama penghuni di publik; `check-fitur` hijau; [TASK](kerja/TASK-RUANG-WIZARD.md)
+- [ ] **W-OWN-020** - wizard pembuka lintas role (TENANT/STAFF/ADMIN/OWNER): aksi penting dulu, tombol lewati ke tampilan penuh | **Gate:** halaman pertama = wizard; ≤1 ketuk ke aksi utama; tombol lewati selalu ada; pilihan diingat per user; tanpa regresi AppLayout/shell; render 390 px; [TASK](kerja/TASK-RUANG-WIZARD.md)
 
 - [x] **W-TNT-001** - aturan huni (hewan, isi penghuni, prabayar, pembayaran, deposit, overstay, checkout) tampil jelas di app tenant + wizard terarah + CTA checkout (warna beda, copy humanis) + dokumen 1 halaman (rekomendasi a) | **Gate:** setiap angka menunjuk sumber kanonik; 0 pertentangan dengan kode; ≤2 klik dari beranda; render 390/1440 px | **Bukti 21 Okt 2026:** `tenantRules.ts` 8 kategori berangka + `source`; wizard 4 jalur; kartu deposit dari data kamar (bukan konstanta); CTA amber + copy overstay; F-15..F-17 ditutup/ditandai; test FE 57 berkas/306 lulus, tsc FE+BE exit 0, `check-docs` BERSIH, render 390/1440 tanpa PII. Sisa: tanda tangan owner + edit 1 baris FAQ produksi lewat admin | checklist: kerja/TASK-AKTIF.md#d4f-faq
 - [ ] **W-TNT-002** - checklist hewan + jumlah penghuni saat check-in → deposit hewan & surcharge otomatis, satu helper untuk walk-in/booking/portal | **Gate:** `hasPet`/`occupantCount` terisi; deposit = kamar + pet; tidak dobel dengan yang sudah dibayar; test hitung 3 kanal; [TASK](kerja/TASK-AKTIF.md#d4f-huni) | checklist: kerja/TASK-AKTIF.md#d4f-huni
@@ -73,7 +75,7 @@ Format: **ID** — judul | **Gate** (verifikasi wajib sebelum `[x]`). (owner) = 
 - [ ] **W-OPS-014** (owner) - konfirmasi apakah `uploads/` (foto kamar/bukti bayar) perlu dipindahkan dari server lama | **Gate:** jawaban owner + bukti path/aset; jangan salin data pengguna tanpa izin
 - [ ] **W-DOC-001** - tata ulang dokumen generasi kedua D0–D9 ([kontrak](kerja/TASK-DOCS-GEN2.md)): konstitusi ID + registry, peta peran, registry fitur, konsolidasi ≤30 berkas/≤400 KB, checklist di dokumen tugas, gate v3 | **Gate:** tiap batch D0–D9 punya bukti; gate hijau saat batch ditutup; keputusan [keputusan program](KEPUTUSAN-OWNER.md); baseline [inventaris 2026-10-20](arsip/inventaris-docs-2026-10-20.md) | checklist: kerja/TASK-DOCS-GEN2.md#checklist
 
-**Rekap (potret 2026-10-21):** 34 terbuka + 9 selesai = 43 baris.
+**Rekap (potret 2026-10-21):** 36 terbuka + 9 selesai = 45 baris.
 
 
 ---
