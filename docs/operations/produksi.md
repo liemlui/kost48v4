@@ -9,6 +9,16 @@
 > Sumber asli sudah dihapus di Fase 3 (23 Sep 2026); berkas ini kanonik.
 > **Status:** aktif — runbook produksi & operasional harian; langkah di dalamnya operasional (bukan antrean tugas).
 
+## Daftar isi
+
+- [Bagian A — Akses server (SSH/scp)](#d4b-akses-ssh)
+- [Bagian B — Backup & restore produksi](#d4b-backup)
+- [Bagian C — Setup cPanel pertama kali](#d4b-cpanel)
+- [Bagian D — Verifikasi gate KTP](#d4b-ktp)
+- [Bagian E — Kapasitas RAM 512 MB](#d4b-kapasitas)
+- [Bagian F — Harness verifikasi uang](#d4b-verifikasi)
+
+
 ## 1. Ringkasan cepat
 
 | | |
@@ -251,7 +261,7 @@ Lihat [M13](../arsip/changelog-2026-09.md) entri **2026-09-13** untuk kronologi 
 
 ---
 
-> **Migrasi batch B9 (23 September 2026):** bagian data produksi `docs/operations/data-master.md` di-append ke file ini tanpa menulis ulang isinya; hanya tautan relatif yang disesuaikan dengan basis folder tujuan. Bagian yang ditambahkan: § Status penggunaan data untuk go-live, §1c Data Tenant Produksi (GO-LIVE), §1b Akun Audit UAT (aktor/fixture), §7 Data Tenant Produksi per kamar, §3a Data Lapangan Produksi Owner, §7b Data Audit Fasilitas Lapangan, dan §8 DeepSeek AI — API Key & Konfigurasi.
+> **Migrasi batch B9 (23 September 2026):** bagian data produksi `docs/operations/default-dev.md` di-append ke file ini tanpa menulis ulang isinya; hanya tautan relatif yang disesuaikan dengan basis folder tujuan. Bagian yang ditambahkan: § Status penggunaan data untuk go-live, §1c Data Tenant Produksi (GO-LIVE), §1b Akun Audit UAT (aktor/fixture), §7 Data Tenant Produksi per kamar, §3a Data Lapangan Produksi Owner, §7b Data Audit Fasilitas Lapangan, dan §8 DeepSeek AI — API Key & Konfigurasi.
 >
 > **Batas lingkungan (eksplisit):** bagian-bagian di bawah adalah **PRODUKSI / GO-LIVE** — data penghuni nyata, ground truth lapangan, audit fasilitas, dan konfigurasi AI produksi. Materi DEV ada di [Default & Seed DEV](default-dev.md); audit UAT non-personal mengikuti [audit AO-03](../arsip/audit-uiux-lintas-portal-2026-07.md#ao-03--p1--kredensial-dan-data-uat-tidak-mendukung-audit-lintas-role). Nilai secret/PII **tidak digandakan** dari file lain: API key tetap ditulis sebagai lokasi, bukan nilainya.
 
@@ -279,14 +289,14 @@ Email & HP placeholder — akan dilengkapi via **UI Owner → Manajemen Tenant**
 | Kamar | Nama                   | NIK                 | Tgl Masuk | Tarif Kontrak/bln | Deposit     | Keterangan               |
 |-------|------------------------|---------------------|-----------|-------------------|-------------|--------------------------|
 | A     | Shinta Larista         | 3574036206990003    | 26        | 1.700.000         | —           | DELUXE Mezzanine, AC     |
-| B     | Dini Widiastutik       | 3275085012800021    | 1         | 1.500.000         | —           | DELUXE, AC               |
+| B     | Tenant Kamar B       | 3275085012800021    | 1         | 1.500.000         | —           | DELUXE, AC               |
 | C     | Miko Rakatama A. W.    | 6471051708970006    | 28        | 1.600.000         | —           | DELUXE, AC               |
 | D     | Ade Chandra            | 3173052309720009    | 24        | 1.500.000         | 200.000     | DELUXE, AC               |
 | F1    | GUNAWAN                | 1505062511740001    | 27        | 1.700.000         | —           | DELUXE Mezzanine, AC     |
 | F2    | Patrick Wilfred        | 3275020504910019    | 8         | 1.600.000         | —           | DELUXE Mezzanine, AC     |
 | G     | Yofi Nurkolifah        | 3519122204030003    | 1         | 800.000           | —           | ECONOMY, Kipas            |
 | H     | Welly Tanoto           | 3578070811730004    | 10        | 800.000           | —           | ECONOMY, Kipas            |
-| I     | Theo Wijaya            | 3571021308860003    | 5         | 800.000           | —           | ECONOMY, Kipas            |
+| I     | Tenant Kamar I            | 3571021308860003    | 5         | 800.000           | —           | ECONOMY, Kipas            |
 | J     | Lovandra               | 3175070312930003    | 30        | 1.500.000         | —           | DELUXE, AC               |
 | K     | Meliana Tamara         | 3578125102000002    | 10        | 1.600.000         | —           | DELUXE, LARGE, AC        |
 | L     | Destarika Hasan        | 1671065812020008    | 1         | 1.600.000         | —           | DELUXE, LARGE, AC        |
@@ -304,14 +314,14 @@ Data real dari owner. Seed via `seed-prod.js`. Tgl Masuk = tanggal hari (bulan m
 | Kamar | Nama                   | NIK                 | Tgl Msk | Tarif Kontrak | Deposit  | Gender | Keterangan                     |
 |-------|------------------------|---------------------|---------|---------------|----------|--------|--------------------------------|
 | A     | Shinta Larista         | 3574036206990003    | 26      | 1.700.000     | —        | F      | DELUXE Mezzanine, AC           |
-| B     | Dini Widiastutik       | 3275085012800021    | 1       | 1.500.000     | —        | F      | DELUXE, AC                     |
+| B     | Tenant Kamar B       | 3275085012800021    | 1       | 1.500.000     | —        | F      | DELUXE, AC                     |
 | C     | Miko Rakatama A. W.    | 6471051708970006    | 28      | 1.600.000     | —        | M      | DELUXE, AC                     |
 | D     | Ade Chandra            | 3173052309720009    | 24      | 1.500.000     | 200.000  | M      | DELUXE, AC                     |
 | F1    | GUNAWAN                | 1505062511740001    | 27      | 1.700.000     | —        | M      | DELUXE Mezzanine, AC           |
 | F2    | Patrick Wilfred        | 3275020504910019    | 8       | 1.600.000     | —        | M      | DELUXE Mezzanine, AC           |
 | G     | Yofi Nurkolifah        | 3519122204030003    | 1       | 800.000       | —        | F      | ECONOMY, Kipas                 |
 | H     | Welly Tanoto           | 3578070811730004    | 10      | 800.000       | —        | M      | ECONOMY, Kipas                 |
-| I     | Theo Wijaya            | 3571021308860003    | 5       | 800.000       | —        | M      | ECONOMY, Kipas                 |
+| I     | Tenant Kamar I            | 3571021308860003    | 5       | 800.000       | —        | M      | ECONOMY, Kipas                 |
 | J     | Lovandra               | 3175070312930003    | 30      | 1.500.000     | —        | M?     | DELUXE, AC                     |
 | K     | Meliana Tamara         | 3578125102000002    | 10      | 1.600.000     | —        | F      | DELUXE LARGE, AC               |
 | L     | Destarika Hasan        | 1671065812020008    | 1       | 1.600.000     | —        | F      | DELUXE LARGE, AC               |
@@ -330,8 +340,8 @@ Data real dari owner. Seed via `seed-prod.js`. Tgl Masuk = tanggal hari (bulan m
 Sumber: konfirmasi owner 2026-07-08. Data ini adalah ground truth lapangan awal, tetapi **belum boleh dianggap sudah ada di database produksi** sampai diinput lewat UI/seed/runbook. Jangan masukkan full NIK, foto KTP, password jaringan, token, atau API key ke repo.
 
 **✅ Status NIK per 2026-07: Semua 13 tenant sudah punya NIK lengkap.**
-- Dini Widiastutik (Kamar B) ✅ NIK 3275085012800021 — data lengkap, tinggal upload foto KTP via UI
-- Theo Wijaya (Kamar I) — nama tampil di sistem; NIK atas nama **Agus Settiyo Budi** ✅ 3571021308860003 — data lengkap
+- Tenant Kamar B ✅ NIK ################ — data lengkap, tinggal upload foto KTP via UI
+- Tenant Kamar I — nama tampil di sistem; NIK atas nama **pemilik KTP** ✅ ################ — data lengkap
 
 | Area | Data owner-confirmed | Status DB/aplikasi | Target input |
 |------|----------------------|--------------------|--------------|
@@ -569,3 +579,608 @@ Kebijakan owner terkait kerusakan:
 
 > API key dari Settings (DB) lebih aman karena tidak tersimpan di file .env yang bisa ke-commit.
 > Env `DEEPSEEK_API_KEY` tetap jadi fallback bila Settings kosong.
+
+
+<a id="d4b-akses-ssh"></a>
+## Bagian A — Akses server (SSH/scp)
+
+> **Blok baca** · Jenis: **runbook akses** · Status: **aktif (potret 2026-10-18)** · **Jangan** dibaca kalau: pekerjaan hanya di repo lokal dan tidak menyentuh server · Untuk siapa: sesi/agen yang perlu masuk server produksi · Baca kalau: butuh SSH/scp, restart Passenger, recon, atau rollback rilis.
+
+> **Berkas ini memuat _path_ kunci, bukan isinya.** Jangan pernah menyalin kunci privat, isi `.env`, password, token, NIK, atau data tenant ke dokumen, chat, atau log. Kunci privat tidak pernah ditulis di sini.
+
+### 1. Identitas server (terverifikasi 2026-10-18)
+
+| Butir | Nilai |
+|---|---|
+| Host SSH | `api.kost48surabaya.com` → `203.161.184.69` |
+| Port | `4422` (bukan 22) |
+| User | `kost48s1` |
+| Home | `/home/kost48s1` · hostname `batikan.idweb.host` · shell `/bin/bash` |
+| Host key (expect) | `ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDz1LkMb1mMgLlipEYHW8utncxyVjZk9C5ZMagDxBzxQ` |
+| Panel | cPanel (LiteSpeed + Passenger), akun shared hosting, RAM 512 MB |
+
+Cocokkan host key sebelum mengetik apa pun: `ssh-keygen -F '[api.kost48surabaya.com]:4422' -f kost48-known_hosts`.
+
+### 2. Autentikasi
+
+- Wajib **publickey**. Password ada di server, tetapi **tidak boleh** diminta, ditulis, atau ditempel agen — termasuk di chat dan log.
+- Kunci rilis: `.ssh-kost48/kost48_deploy` (ED25519, tanpa passphrase), fingerprint
+  `SHA256:lFhZEwXqjUMrGQlzUc6rsJGmWJkDvErDNmgG4xLQabg`.
+- Kunci publiknya terpasang di `~/.ssh/authorized_keys` (komentar `dsh-release-2026-10-18`).
+  Panel cPanel → SSH Access **tidak** menampilkan kunci ini; yang tampil di sana (`dsh-deploy-kost48`)
+  adalah kunci lain buatan cPanel yang tidak dipakai agen.
+- **Kunci privat tidak boleh di-commit.** `.ssh-kost48/` dan `kost48-known_hosts` sudah masuk
+  `.gitignore`; tetap jangan pakai `git add -A`.
+- Kunci hilang/dicabut → minta owner memasang ulang kunci publik (cPanel SSH Access → Import Key,
+  atau `printf '%s\n' '<baris publik>' >> ~/.ssh/authorized_keys` dari sesi PuTTY milik owner).
+  Jangan meminta password, jangan membuat kunci baru tanpa izin.
+- Kunci ini memberi shell penuh sebagai `kost48s1`. Cabut barisnya di `~/.ssh/authorized_keys`
+  begitu tidak dipakai.
+
+### 3. Perintah yang bekerja di mesin ini
+
+Windows + sandbox DSH: `%USERPROFILE%\.ssh` tidak bisa ditulis, jadi `known_hosts` disimpan di repo.
+
+```powershell
+$ssh = "C:\WINDOWS\System32\OpenSSH\ssh.exe"
+& $ssh -p 4422 -i .ssh-kost48\kost48_deploy -o IdentitiesOnly=yes -o BatchMode=yes `
+  -o UserKnownHostsFile=kost48-known_hosts kost48s1@api.kost48surabaya.com 'whoami; hostname'
+```
+
+```powershell
+$scp = "C:\WINDOWS\System32\OpenSSH\scp.exe"
+& $scp -P 4422 -i .ssh-kost48\kost48_deploy -o IdentitiesOnly=yes `
+  -o UserKnownHostsFile=kost48-known_hosts .\skrip.sh kost48s1@api.kost48surabaya.com:~/
+```
+
+- Perintah panjang: kirim sebagai berkas (`scp`), jalankan `ssh … 'bash ~/skrip.sh; rm -f ~/skrip.sh'`.
+- **Jangan** menaruh `$()`, `|`, atau kutip ganda di dalam string perintah satu-baris: PowerShell membuang
+  kutipnya lalu bash memecah perintah (pernah menghasilkan `syntax error near unexpected token` dan
+  `command not found`). Berkas skrip menghindari seluruh kelas kesalahan ini.
+- Heredoc di server: pakai `cat > ~/x.sh <<'EOF' … EOF` lalu `bash ~/x.sh`.
+
+### 4. Peta server (potret 2026-10-18)
+
+| Butir | Nilai |
+|---|---|
+| `APP_ROOT` | `/home/kost48s1/kost48-prod` — `dist/`, `client/`, `node_modules/`, `prisma/`, `sql/`, `scripts/`, `.env`, `uploads/`, `stderr.log`, `tmp/` |
+| `PUBLIC_ROOT` | `/home/kost48s1/public_html` — `.htaccess` memuat `PassengerAppRoot` + `PassengerStartupFile dist/main.js`, Node `nodevenv/kost48-prod/22` |
+| Paket | profil `combined`: frontend dilayani proses Nest yang sama (`VITE_API_BASE_URL=/api`, satu origin) |
+| Restart | `mkdir -p /home/kost48s1/kost48-prod/tmp && touch /home/kost48s1/kost48-prod/tmp/restart.txt` |
+| Log | `~/kost48-prod/stderr.log` · `~/access-logs/kost48surabaya.com-ssl_log` (jangan dump penuh) |
+| Backup rilis | `~/backup-YYYYmmdd-HHMM-uiux/` (`dist`, `client`, `env.backup` mode 600, `package.json`) |
+
+Rollback (hanya bila smoke gagal). **Cek path dulu**, baru hapus:
+
+```bash
+APP=/home/kost48s1/kost48-prod; BK=~/backup-20261018-0729-uiux
+echo "APP=$APP"; ls -la "$APP" | head
+rm -rf "$APP/dist" "$APP/client" && cp -a "$BK/dist" "$BK/client" "$APP/" && touch "$APP/tmp/restart.txt"
+```
+
+### 5. Larangan di server
+
+Tanpa `npm install`/`npm ci`, build, `prisma generate`/`db push`, seed (`node scripts/seed-owner.js`),
+atau migrasi. Tanpa menghentikan/menonaktifkan service lain. Tanpa menimpa `.env` dan `uploads/`.
+Tanpa `cat` isi `.env`, `.bash_history`, atau `~/OWNER-PASSWORD-BACA-LALU-HAPUS.txt` — berkas itu **ada**,
+dan isinya tidak boleh dibaca, disalin, atau ditampilkan. Jalur saja yang boleh dilaporkan.
+
+### 6. Jebakan yang sudah terbukti
+
+- RAM akun **512 MB**; satu proses app ≈ 185–207 MB. Build/npm di server berisiko OOM — paket dibuat di lokal.
+- `/` setelah restart bisa **±20 detik** (cold start); panggilan berikutnya ±0,05 s. Satu request pertama
+  tidak boleh dipakai menyimpulkan "down".
+- `app.kost48surabaya.com` dan `api.kost48surabaya.com` **tidak** melayani aplikasi (`app./rooms` = 404,
+  `app./` = halaman "Index of /"). Smoke hanya di `https://kost48surabaya.com`.
+- `curl` HTTPS dari shell DSH gagal (`SEC_E_NO_CREDENTIALS`). Jalankan curl **di server**, bukan di workstation;
+  kegagalan curl lokal bukan bukti situs mati.
+- Monitor kualitas hosting memeriksa `api.kost48surabaya.com` (404 permanen). Alert uptime dari panel itu
+  bukan bukti situs down — buktinya log akses (`200` dominan, `0 × 5xx` pada 18 Okt 2026).
+- Ekstraksi arsip menimpa `dist/` + `client/` + `node_modules/`; `uploads/` dan `.env` tidak ada di dalam arsip,
+  jadi aman. Tetap backup dulu.
+
+### 7. Jejak akses terakhir
+
+2026-10-18 07:29–07:36 WIB: recon, backup (`backup-20261018-0729-uiux`, 57 MB), unggah 43.033.340 byte
+(SHA-256 `9a76dc23…fe39b`), extract, restart, smoke 4 URL `200`, buildId `BZ-Vpsd9eLX1` → `0Dc2WPRpp8Me`.
+Rincian: `docs/arsip/bukti-2026-10.md` §15.
+
+
+<a id="d4b-backup"></a>
+## Bagian B — Backup & restore produksi
+
+> **Blok baca** · Jenis: **runbook operasi** · Status: **aktif — dieksekusi 20 Okt 2026; run terjadwal pertama belum terlihat** · Untuk siapa: owner/operator yang menjalankan backup
+> · Baca kalau: akan membuat dump produksi, memasang jadwal harian, atau menguji restore. · **Jangan** dibaca kalau: mencari aturan bisnis (itu [ATURAN](../ATURAN.md)).
+
+### 1. Keputusan & tujuan
+
+Keputusan owner **P24 (19 Okt 2026)**: *"Ya dump sekarang dan lakukan rekomendasi kamu."* Rekomendasi yang disetujui: **dump sekarang + jadwal harian + retensi 14 hari + satu uji restore** ke database terpisah.
+
+Alasannya terukur: dump terakhir **13 Sep 2026**; data 18 Okt (11 tagihan, 11 pembayaran, 23 jurnal) tidak tercakup backup mana pun yang terlihat, dan belum ada bukti restore.
+
+### 2. Yang sudah ada
+
+- Skrip dump: [backup.sh](../../scripts/remote/backup.sh) — membaca `DATABASE_URL` dari `~/kost48-prod/.env`, menulis `~/backups/db-<nama>-<ts>.sql.gz` + arsip app, lalu menguji `gzip -t`. **Tidak** mencetak sandi.
+- Folder `~/backups` di server. Sejak 20 Okt 2026: cron harian + retensi 14 hari terpasang, uji restore lulus, dan catatan bukti ada di §7. Skrip dipakai dengan URL utuh (tidak lagi mengurai nama DB dari URL).
+
+### 3. Langkah A — dump sekarang
+
+Jalankan dari mesin yang punya akses SSH ke server produksi (bukan dari aplikasi):
+
+```bash
+ssh <user>@<host>
+cd ~/kost48-prod
+bash scripts/remote/backup.sh
+```
+
+Yang harus terlihat di keluaran: `OK -> /home/<user>/backups/db-<nama>-<ts>.sql.gz (<ukuran>)`, `gzip -t OK`, dan jumlah baris `COPY` > 0. Catat nama berkas + ukuran + waktu. **Jangan** menyalin isi dump atau kredensial ke chat.
+
+### 4. Langkah B — jadwal harian + retensi 14 hari
+
+Pasang cron milik user aplikasi (bukan root), jam 02.00 WIB server:
+
+```cron
+0 2 * * * /bin/bash /home/<user>/kost48-prod/scripts/remote/backup.sh >> /home/<user>/backups/backup.log 2>&1
+```
+
+Retensi (hapus dump dan arsip app lebih tua dari 14 hari; hanya dua pola itu):
+
+```cron
+30 2 * * * find /home/<user>/backups -maxdepth 1 \( -name 'db-*.sql.gz' -o -name 'app-kost48-prod-*.tar.gz' \) -mtime +14 -delete
+```
+
+Arsip app ikut masuk retensi karena skrip membuat salinan app setiap run (±50 MB); tanpa ini folder tumbuh tanpa batas.
+
+Bukti yang dicatat: `crontab -l` memuat dua baris di atas; `tail backup.log` menunjukkan run pertama sukses; `ls -lh ~/backups` menunjukkan berkas baru.
+
+### 5. Langkah C — uji restore ke database terpisah
+
+**Jangan** restore ke database produksi. Gunakan DB uji sementara:
+
+```bash
+DB=kost48_restore_test_$(date +%Y%m%d)
+createdb "$DB"
+gunzip -c ~/backups/db-<nama>-<ts>.sql.gz | psql -d "$DB"
+psql -d "$DB" -At -F' | ' -c 'select '\''Stay'\'', count(*) from "Stay" union all select '\''Invoice'\'', count(*) from "Invoice" union all select '\''InvoicePayment'\'', count(*) from "InvoicePayment" union all select '\''JournalEntry'\'', count(*) from "JournalEntry" union all select '\''Tenant'\'', count(*) from "Tenant";'
+dropdb "$DB"
+```
+
+**Lulus bila** jumlah `Stay`, `Invoice`, `InvoicePayment`, `JournalEntry`, dan `Tenant` sama dengan produksi saat dump diambil; `psql` tidak melaporkan error; DB uji dihapus setelahnya.
+
+**Catatan 20 Okt 2026 (terbukti di server):** akun DB bukan pemilik extension `plpgsql`, sehingga restore penuh berhenti di `COMMENT ON EXTENSION plpgsql`. Saring dua baris itu sebelum restore:
+
+```bash
+gunzip -c ~/backups/db-<nama>-<ts>.sql.gz \
+  | grep -vE '^(CREATE EXTENSION IF NOT EXISTS plpgsql|COMMENT ON EXTENSION plpgsql)' \
+  | psql "$DBURL_TEST" -q -v ON_ERROR_STOP=1
+```
+
+Hasil uji: 62 tabel dibuat, lima hitungan cocok dengan produksi, DB uji dihapus.
+
+### 6. Bukti yang wajib dicatat
+
+1. Nama berkas dump + ukuran + waktu + hasil `gzip -t`.
+2. Baris cron (tanpa kredensial) + log run pertama.
+3. Hasil hitung 5 tabel di DB uji + pernyataan DB uji sudah dihapus.
+4. Pernyataan eksplisit: **restore diuji**, bukan hanya "dump dibuat".
+
+Bukti ditulis di [bukti-2026-10](../arsip/bukti-2026-10.md) (bagian baru) — bukan di berkas ini.
+
+### 7. Status eksekusi
+
+- **19 Okt 2026:** belum dijalankan — shell sesi agen gagal start (`0xC0000142`).
+- **20 Okt 2026 06:31 WIB:** dump dibuat (40 KB, `gzip -t` OK, 62 blok `COPY`); cron dua baris terpasang; probe cron terbukti menulis 3× dalam 3 menit; restore ke DB uji berhasil (62 tabel; Stay 11, Invoice 11, InvoicePayment 11, JournalEntry 23, Tenant 13); DB uji dihapus.
+- Retensi 14 hari juga menghapus arsip app (`app-kost48-prod-*.tar.gz`), karena skrip membuatnya setiap run.
+- Run terjadwal pertama (21 Okt 02.00 WIB) belum terlihat saat catatan ini ditulis.
+- Runbook ini **tidak** memberi izin mengubah data produksi; restore hanya ke DB terpisah.
+
+
+<a id="d4b-cpanel"></a>
+## Bagian C — Setup cPanel pertama kali
+
+### Appendix B — Deploy cPanel Step-by-Step
+
+
+> Runbook ini berlaku untuk release setelah 2026-07-23. Keputusan database dan gate lengkap ada di `docs/operations/produksi.md`; bila ada konflik, dokumen tersebut menang.
+
+##### Keputusan sebelum mulai
+
+Untuk go-live pertama, buat **database produksi baru dan kosong**. Jangan drop database UAT dan jangan memasukkan data UAT/seed historis ke produksi. Sesudah go-live, pembaruan database hanya melalui patch migration.
+
+Jangan mulai jika salah satu kondisi berikut belum terpenuhi:
+
+- SHA `main` rilis, backup UAT/uploads, dan build backend/frontend sudah tercatat.
+- Domain HTTPS, kredensial DB baru, dan seluruh secret produksi sudah tersedia.
+- Bootstrap guard database (constraint/trigger di luar Prisma) sudah diuji pada PostgreSQL kosong. `sql/seed.sql` bukan bootstrap karena membawa data historis/PII.
+- Temuan pencarian tenant booking serta UAT visual lintas portal sudah ditutup.
+
+##### 1. Buat database baru
+
+Di **PostgreSQL Databases**, buat database baru, user baru, password kuat, lalu berikan hak hanya pada database itu. Contoh URL:
+
+```env
+DATABASE_URL="postgresql://USER:PASSWORD@127.0.0.1:5432/kost48_prod?schema=public"
+```
+
+Simpan database UAT lama sebagai backup read-only. Penghapusan membutuhkan persetujuan owner terpisah.
+
+##### 2. Unggah paket rilis
+
+Bangun bundle dari SHA rilis di mesin tepercaya, unggah `kost48-deploy-bundled.tgz` ke folder app (misalnya `/home/USER/kost48`), dan extract. Bundle ini sudah memuat backend/frontend prebuilt serta runtime `node_modules`; jangan menimpa `.env` atau `uploads/` bila melakukan redeploy.
+
+Di **Setup Node.js App** gunakan Node 22, mode Production, application root folder app, dan startup file `dist/main.js`. Set `NODE_OPTIONS=--max-old-space-size=192` di environment cPanel, bukan di `.env`.
+
+##### 3. Isi environment
+
+Salin `.env.example` ke `.env`, lalu isi minimal:
+
+```env
+NODE_ENV=production
+DATABASE_URL="...database produksi baru..."
+JWT_SECRET="...acak dan kuat..."
+CORS_ORIGIN="https://domain-anda"
+FRONTEND_URL="https://domain-anda"
+KTP_ACTIVATION_GATE_ENABLED=true
+AUTO_OPS_ENABLED=false
+AUTO_OPS_CRON_TOKEN="...acak dan kuat..."
+TUYA_ACCESS_KEY="...Tuya Access ID..."
+TUYA_SECRET_KEY="...Tuya Access Secret..."
+TUYA_API_BASE=https://openapi.tuyaus.com
+IOT_TUYA_POLL_ENABLED=false
+IOT_TUYA_CRON_TOKEN="...acak dan kuat..."
+IOT_STALE_AFTER_MINUTES=30
+##### Isi hanya jika ESP32 water meter dipakai; simpan permanen di password manager.
+IOT_MASTER_KEY="...32 byte base64 atau 64 hex..."
+```
+
+Tambahkan VAPID (`VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT`) sebelum mengaktifkan push. Jangan menaruh secret di command history, ticket, atau screenshot.
+
+##### 4. Jangan install atau menjalankan Prisma di server
+
+Tidak ada perintah berikut yang boleh dijalankan di server:
+
+```bash
+npm install
+npm ci
+prisma db push
+prisma migrate deploy
+```
+
+Database tidak disentuh otomatis oleh bundle. Verifikasi dulu apakah target benar-benar fresh atau sudah memiliki schema/data nyata. Patch database—bila memang dibutuhkan—harus ditentukan terpisah, dibackup, direview, dan dilakukan melalui metode yang disetujui owner. `prisma db push`, reset, penghapusan ledger, dan `sql/seed.sql` tetap dilarang.
+
+Setelah migration, pasang hanya bootstrap guard yang telah diuji dan disetujui. Bila artefak guard belum tersedia/terverifikasi, berhenti: aplikasi belum siap go-live.
+
+##### 5. Seed fondasi tanpa data historis
+
+```bash
+OWNER_EMAIL=owner@domain-anda \
+OWNER_PASSWORD='password-kuat-sementara' \
+OWNER_FULLNAME='Pemilik KOST48' \
+npm run seed:owner
+```
+
+Kemudian login sebagai OWNER dan buat COA, periode OPEN, cash account, opening balance atau catatan zero-start, kamar/fasilitas, dan onboarding penghuni nyata melalui UI/runbook. Jangan menjalankan seed teraudit yang membawa tenant, transaksi, atau PII.
+
+Setelah 13 kamar produksi tersedia, daftarkan registry Tuya secara idempoten dan tarik snapshot pertama:
+
+```bash
+node scripts/bootstrap-tuya-kwh.js --sync
+```
+
+Periksa mapping device ID ke kode kamar sebelum melanjutkan. Jangan jalankan bootstrap ini bila daftar perangkat produksi belum diverifikasi.
+
+##### 6. Start, HTTPS, dan cron
+
+Start aplikasi dari cPanel, aktifkan AutoSSL, lalu pastikan domain HTTPS sudah aktif sebelum UAT push.
+
+Tambahkan cron AutoOps setiap lima menit:
+
+```cron
+*/5 * * * * curl -fsS -X POST -H "X-Cron-Token: <AUTO_OPS_CRON_TOKEN>" https://<domain>/api/auto-ops/cron >/dev/null 2>&1
+```
+
+Endpoint cron hanya menerima `POST` dan header `X-Cron-Token`; token query string tidak didukung. Cron ini juga menjalankan dispatch pengumuman terjadwal serta push outbox.
+
+**IoT kWh meter TIDAK memakai cron.** Pembacaan Tuya bersifat **on-demand (kumulatif)** untuk menghemat shared hosting idle-sleep: tenant membuka halaman meter atau memanggil `POST /api/iot/tenant/refresh` → backend membaca total kWh kumulatif (`add_ele`) saat itu dan menghitung selisih terhadap titik acuan (`MeterReading`) terakhir. Timer internal tetap OFF (`IOT_TUYA_POLL_ENABLED=false`). **Jangan pasang cron `iot/tuya/cron`.**
+
+Kill/rollback IoT: pastikan `IOT_TUYA_POLL_ENABLED=false`, tidak ada cron `iot/tuya/cron`, lalu nonaktifkan device melalui registry bila perlu. Variabel `IOT_ENABLED` tidak ada dan tidak boleh dijadikan prosedur rollback.
+
+##### 7. Smoke test dan UAT
+
+- Buka `/` dan cek `/api/public/rooms` menghasilkan respons sehat.
+- Login OWNER; endpoint terproteksi harus menolak tanpa token.
+- Jalankan `POST /api/auto-ops/run` sekali melalui UI/API OWNER/ADMIN.
+- Login OWNER, buka `/iot`, pastikan 13 mapping yang diverifikasi tampil dan tidak ada data `stale` setelah snapshot awal.
+- Panggil `POST /api/iot/tenant/refresh` (atau `POST /api/iot/tuya/sync-all` untuk OWNER/ADMIN) sekali; respons harus mengembalikan total kWh kumulatif tanpa polling ganda dan tanpa membutuhkan cron.
+- Pastikan endpoint kompatibilitas klien lama `/api/iot/stream/tenant/raw` merespons `204` dan tidak membuka `text/event-stream`.
+- Pastikan `/sw.js`, `/version.json`, dan navigasi HTML mengirim `Cache-Control: no-store`; aset hash `/assets/*` harus `immutable`.
+- Uji pengumuman langsung dan terjadwal; pastikan `dispatchedAt` hanya terisi sekali.
+- Jalankan `docs/domain/hunian.md` bila VAPID/push diaktifkan.
+- Catat SHA rilis, waktu, hasil migration, hasil smoke, dan lokasi backup tanpa menyimpan secret/PII.
+
+##### Redeploy setelah go-live
+
+1. Jadwalkan maintenance window bila migration ada.
+2. Backup database dan `uploads/`; uji backup pada lingkungan non-produksi.
+3. Extract bundle SHA baru tanpa menimpa `.env`/`uploads`, lalu restart aplikasi. Evaluasi patch database secara terpisah bila release memang mengubah schema.
+4. Restart dan jalankan smoke/UAT yang relevan.
+
+Jangan reset database, menjalankan seed, atau memakai `db push` pada produksi yang telah berisi data nyata.
+
+---
+
+**Digabung dari docs/operations/form-go-live.md** (DOCS-CLEANUP-1, 2026-09-24) - isi blok disalin utuh.
+
+### Formulir Isi Data Go-Live
+
+> Migrasi dari docs/FORM_ISI_DATA_GO_LIVE.md (A-F) pada f8f9a589 (DOC-GOV-20260922 Tahap 3).
+> Sumber asli sudah dihapus di Fase 3 (23 Sep 2026); berkas ini kanonik.
+
+### A. Akun Admin & Staf
+
+| Peran | Email | Password | Nama Lengkap |
+|-------|-------|----------|--------------|
+| ADMIN (opsional) | `[ ... ]` | Atur langsung di aplikasi | `[ ... ]` |
+| STAFF (1 orang) | `[ ... ]` | Atur langsung di aplikasi | `[ ... ]` |
+
+---
+
+### B. Data Tenant yang Belum Lengkap
+
+#### B1. Email + Gender + Pekerjaan (yang masih kosong)
+
+| Kamar | Nama | Email | Gender (L/P) | Pekerjaan |
+|-------|------|-------|--------------|-----------|
+| F1 | GUNAWAN | — *(segera checkout — tidak perlu akun portal)* | `[ ... ]` | `[ ... ]` |
+| J | Lovandra | `lovandra.fachri103@gmail.com` | `[ ... ]` | `[ ... ]` |
+| M | Gabriel Excelly Pranajaya | `gabrielexcelly1908@gmail.com` | `[ ... ]` | `[ ... ]` |
+
+> Email **G** (`jtt1234511@gmail.com`) dan **L** (`desterikahasan@gmail.com`) sudah terisi (keluar dari daftar kosong).
+> **Pekerjaan (`occupation`) masih kosong untuk semua 13 tenant** — opsional, isi di §B2 bila mau lengkap.
+
+#### B2. Pekerjaan (occupation) — semua 13 tenant
+
+| Kamar | Nama | Pekerjaan |
+|-------|------|-----------|
+| A | Shinta Larista | `[ ... ]` |
+| B | Tenant Kamar B | `[ ... ]` |
+| C | Miko Rakatama Adhi Winarto | `[ ... ]` |
+| D | Ade Chandra | `[ ... ]` |
+| F1 | GUNAWAN | `[ ... ]` |
+| F2 | Patrick Wilfred | `[ ... ]` |
+| G | Yofi Nurkolifah | `[ ... ]` |
+| H | Welly Tanoto | `[ ... ]` |
+| I | Tenant Kamar I | `[ ... ]` |
+| J | Lovandra | `[ ... ]` |
+| K | Meliana Tamara | `[ ... ]` |
+| L | Destarika Hasan | `[ ... ]` |
+| M | Gabriel Excelly Pranajaya | `[ ... ]` |
+
+---
+
+### C. Data Check-in per Kamar (WAJIB)
+
+> `Tarif Kontrak` sudah ada di sistem. Yang perlu diisi: **bulan+tahun masuk** (tanggal hari sudah ada) dan **meter listrik awal**.
+
+| Kamar | Nama | Tanggal Masuk (hari sudah ada) | Bulan + Tahun Masuk | Meter Listrik Awal (kWh) |
+|-------|------|-------------------------------|---------------------|---------------------------|
+| A | Shinta Larista | 26 | Jun 2026 | ≈ 11.224 |
+| B | Tenant Kamar B | 1 | Apr 2026 | ≈ 6.074 |
+| C | Miko Rakatama A. W. | 28 | Mar 2026 | ≈ 8.178 |
+| D | Ade Chandra | 24 | Agu 2025 | ≈ 5.629 |
+| F1 | GUNAWAN | 27 | Jul 2026 | `[ ... ]` |
+| F2 | Patrick Wilfred | 8 | Jun 2026 | `[ ... ]` |
+| G | Yofi Nurkolifah | 1 | Agu 2025 | `[ ... ]` |
+| H | Welly Tanoto | 10 | Mei 2025 | `[ ... ]` |
+| I | Tenant Kamar I | 5 | Mei 2025 | `[ ... ]` |
+| J | Lovandra | 30 | Jan 2026 | ≈ 3.893 |
+| K | Meliana Tamara | 10 | Mei 2025 | ≈ 8.641 |
+| L | Destarika Hasan | 1 | Mei 2025 | ≈ 5.697 |
+| M | Gabriel Excelly P. | 3 | Mei 2025 | `[ ... ]` |
+
+> 📅 **Bulan+tahun masuk** diambil dari `Scan/KOST48_Historical_DB_AI_CONTEXT.md` §8. Catatan: **B (Dini)** ngekos sejak sebelum Nov 2024 (arsip mulai Nov 2024), pindah C→B 1 Apr 2026; **I (Theo)** masih aktif tapi belum bayar Jul+Agustus 2026.
+> 📊 **Meter `≈`** = pembacaan absolut terakhir (Jun–Jul 2026), **wajib cek fisik ulang** saat go-live.
+
+---
+
+### D. Keuangan
+
+| Item | Nilai |
+|------|-------|
+| Opening balance (saldo awal kas/bank) | `[ ... ]` (atau tulis "ZERO-START") |
+| Rekening transfer — Nama Bank | diisi owner via UI Owner → Settings Operasional |
+| Rekening transfer — No. Rekening | diisi owner via UI Owner → Settings Operasional |
+| Rekening transfer — Atas Nama | diisi owner via UI Owner → Settings Operasional |
+
+---
+
+### E. Layanan Tambahan (opsional)
+
+| Layanan | Harga / bulan |
+|---------|---------------|
+| WiFi per perangkat | `[ ... ]` (contoh: 50.000) |
+| Lainnya: `[ ... ]` | `[ ... ]` |
+
+---
+
+### F. Pengumuman Awal (opsional)
+
+| Judul | Isi | Kategori (info/urgent/maintenance) |
+|-------|-----|-----------------------------------|
+| `[ ... ]` | `[ ... ]` | `[ ... ]` |
+
+
+<a id="d4b-ktp"></a>
+## Bagian D — Verifikasi gate KTP
+
+#### F.1 Verifikasi gerbang KTP produksi (tanpa menampilkan secret)
+
+**Latar:** `KTP_ACTIVATION_GATE_ENABLED` **default OFF**; runbook deploy menandainya WAJIB di produksi. Bila OFF, aktivasi kamar dapat lolos **tanpa KTP terverifikasi** (bertentangan dengan maksud UU PDP dan temuan D-17). Keputusan owner 23 Sep 2026: **ditunda dengan risiko diterima sementara**, wajib ditinjau sebelum onboarding penghuni nyata ([KEPUTUSAN-OWNER](../KEPUTUSAN-OWNER.md)).
+
+**Prasyarat:** izin akses cPanel/lingkungan aplikasi. Jangan menampilkan nilai secret lain; nilai `true`/`false` pada flag ini bukan secret.
+
+1. **Periksa keberadaan & nilai** — cPanel → Environment Variables aplikasi Node.js (atau `.env` produksi, hanya baca). Catat: ada/tidak, `true`/`false`.
+2. **Bila belum ada atau `false`** — set `KTP_ACTIVATION_GATE_ENABLED=true`, lalu restart aplikasi mengikuti prosedur redeploy (§G/§J). Jangan mengubah env lain pada langkah ini.
+3. **Bukti** — tanggal, nama pemeriksa, status sebelum/sesudah, tanpa screenshot yang memuat secret.
+4. **Uji perilaku** — jalankan di UAT/DEV: aktivasi kamar atau approve booking untuk tenant tanpa KTP terverifikasi **harus DITOLAK**. **Jangan** membuat tenant/booking uji di produksi; bila uji hanya bisa di produksi, jangan lakukan dan tulis **BELUM TERBUKTI**.
+5. **Tindak lanjut** — catat hasil di [ANTREAN](../ANTREAN.md) antrean #1. Bila tetap ditunda, tegaskan risiko dan syarat peninjauan sebelum onboarding penghuni nyata.
+
+
+<a id="d4b-kapasitas"></a>
+## Bagian E — Kapasitas RAM 512 MB
+
+### 11. Aturan kapasitas RAM: 512 MB adalah batas kerja, naik kuota bukan rekomendasi pertama
+
+Berlaku untuk setiap agen yang bekerja di repo ini. Batas akun **LVE 512 MB** adalah batas kerja; menaikkan kuota (1 GB) **bukan** jawaban pertama atas gejala kehabisan memori atau 5xx, dan hanya boleh direkomendasikan sebagai pilihan terakhir dengan bukti terukur.
+
+**Angka dasar (potret 2026-10-19, audit read-only di server produksi):**
+
+| Keadaan | RSS worker | Perkiraan akun LVE | Terhadap 512 MB |
+|---|---|---|---|
+| 1 worker (steady state) | 171–176 MiB | 199–272 MiB | aman, sisa ±240 MiB |
+| 2 worker (overlap restart) | ±353 MiB | 376–449 MiB | muat, mepet |
+| 3 worker | ±530 MiB | 553–626 MiB | **melewati limit → kill/5xx** |
+
+Selisih LVE−RSS (23–96 MiB) adalah overhead akun yang belum terjelaskan penuh; jangan dijumlahkan sebagai anggaran pasti. Bukti ini menjawab sebagian EF-02 (beban 20 request paralel); cold start dan puncak AutoOps belum diukur, jadi verdict kelayakan penuh tetap terbuka.
+
+**Urutan diagnosis wajib sebelum menyebut kuota:**
+1. Hitung worker (`pgrep -c lsnode`, `pgrep -a lsnode`). Worker lama yang tidak mati saat SIGTERM adalah penyebab paling sering — lihat [produksi](produksi.md) bagian overlap restart.
+2. Periksa scheduler ganda: timer in-process (`AUTO_OPS_ENABLED`) dan cron; jangan menyalakan keduanya.
+3. Periksa pool DB (`max`, timeout) dan modul berat yang di-import eager.
+4. Baru setelah 1–3 terbukti bersih, ukur puncak LVE pada skenario yang sah.
+
+**Ambang merekomendasikan naik kuota — semua wajib terpenuhi:**
+- jumlah worker sudah dikunci dan diverifikasi (1, atau 2 saat overlap restart);
+- puncak LVE terukur **≥470 MiB** (headroom <10%) pada **≥3 pengukuran** skenario sah (overlap 2 worker + sweep AutoOps), bukan estimasi;
+- penyebabnya bukan akumulasi worker, timer ganda, atau pool tanpa batas;
+- rekomendasi menyertakan angka sebelum/sesudah, biaya, dan rollback.
+
+**Aturan angka:** klaim "hemat X MB" wajib berasal dari pengukuran sebelum/sesudah di server yang sama; estimasi diberi label **estimasi**. `--max-old-space-size=192` sudah aktif di produksi — jangan diubah tanpa uji beban. Bila 5xx muncul saat 1 worker dan LVE <400 MiB, penyebabnya bukan kapasitas — jangan ajukan kuota.
+
+
+<a id="d4b-verifikasi"></a>
+## Bagian F — Harness verifikasi uang
+
+> Dipindah apa adanya dari `docs/domain/keuangan.md` Bagian 1 (Tahap 3 S2.b3, 23 Sep 2026) pada DOC-GOV-20260922.
+> Sumber asli: `docs/arsip/legacy/2026-06-16_root_docs_pre_M/05_VERIFIKASI_KEUANGAN.md` (tetap di arsip).
+> **Isi tidak diubah.** Blok gate per-task di akhir tetap memuat 5 `[ ]` dan tetap wajib untuk task uang (AGENTS §8 + gate M04).
+> Rujukan aturan aktif: [domain/keuangan.md](../domain/keuangan.md).
+> **Status:** aktif — harness verifikasi uang; wajib dibaca sebelum task yang menyentuh uang.
+
+### Bagian 1 - `docs/arsip/legacy/2026-06-16_root_docs_pre_M/05_VERIFIKASI_KEUANGAN.md`
+
+#### 05 — HARNESS VERIFIKASI KEUANGAN (jaring pengaman AI eksekutor)
+**Tujuan:** memastikan **hitungan keuangan tetap handal** saat kode disentuh AI lemah. `tsc 0` TIDAK cukup — kode bisa lolos compile tapi salah angka (bukti: bug F-18 = kembaran F-01 yang lolos audit V1). Jalankan harness ini SETELAH tiap task keuangan (dossier 13) dan tiap task uang (dossier 10/12).
+**Aturan inti:** kalau salah satu cek di bawah GAGAL → **JANGAN commit**, perbaiki dulu. Kalau tak yakin → STOP & lapor.
+
+---
+##### 1. INVARIAN KEUANGAN (HARAM dilanggar — kalau pernah false, ada bug)
+1. **Setiap JournalEntry balance:** Σ debit = Σ kredit (DB-enforced; jangan matikan guard `postBalancedJournalTx`).
+2. **Idempotent:** 1 (sourceType, sourceId) = maksimal 1 jurnal POSTED non-VOID.
+3. **Deposit = LIABILITY** (akun 2000), bukan revenue. Saldo 2000 TIDAK pernah debit (kalau debit → F-24 belum difix).
+4. **Kas = akun prefix `10` (1000/1010/1020)**, BUKAN `11` (1100 = PIUTANG). Cashflow/rasio yang menyebut "kas" harus pakai `cashAccountId` atau prefix `10`.
+5. **No-partial:** total pembayaran = DP-persis ATAU pelunasan-penuh; invoice tak pernah PARTIAL liar.
+6. **Trial Balance seimbang:** total debit = total kredit (sampai ke rupiah).
+7. **Rekonsiliasi deposit: mismatch = 0** (snapshot stay = ledger = akun 2000).
+8. **Revenue ≠ invoice DRAFT** (DRAFT belum diterbitkan, bukan pendapatan).
+
+##### 2. ⛔ DO-NOT-TOUCH (kode SUDAH BENAR — jangan "diperbaiki")
+| Kode | Lokasi | Kenapa jangan disentuh |
+|---|---|---|
+| `postBalancedJournalTx` (inti jurnal) | `accounting-posting.service.ts` — metode `postBalancedJournalTx` | Guard balance+idempotent+periode OPEN. Mesin jurnal SEHAT. ⚠️ Rujukan lokasi memakai **nama metode**, bukan nomor baris (KONTRAK §7): nomor baris basi setiap berkas disunting. |
+| Blok saldo kas E-4 | `accounting-reports.service.ts` — metode `cashflow`, blok saldo per CashAccount | Saldo per CashAccount = opening + Σ(D−K) line ber-cashAccountId. SUDAH BENAR — F1-3 meniru pola INI, jangan ubah blok ini. |
+| 10 fungsi posting (D/K) | `accounting-posting.service.ts` — metode `post*Tx` (10 fungsi posting) | Semua balance+idempotent. Hanya F1-8 (settlement guard) yang menambah CEK, bukan ubah jurnal. |
+| Trial Balance + opening fallback | `accounting-reports.service.ts` — metode `trialBalance` | Anti-double-count. |
+| Tutup buku (closing/reopen versioned) | `accounting-period-close.service.ts` | Paling matang; jangan utak-atik. |
+| `recalculateInvoiceTotal` (DISCOUNT−) | `invoices.service.ts` — metode `recalculateInvoiceTotal` | Konsisten dgn trigger DB. ⚠️ Rujukan lokasi memakai **nama metode**, bukan nomor baris (KONTRAK §7). |
+
+##### 3. UNIT TEST (zero-dependency — pakai test runner BAWAAN Node, TANPA npm install)
+> Proyek belum punya jest. JANGAN install. Pakai `node --test` (Node ≥18) terhadap hasil build `dist/`. Test = file CommonJS di `backend/test/unit/`.
+**Cara jalankan:** `cd backend && npm run build && node --test "test/unit/**/*.test.js"` → harus semua PASS (hijau). (Catatan: `node --test test/` GAGAL di Node 22/Windows — pakai pola glob ini. `test/integration/**` bergerbang env dan **bukan** bagian perintah ini; glob lama `test/**/*.test.js` ikut menariknya.)
+**Script siap-pakai (sudah ditambahkan):** di `backend/package.json` → `"test:unit": "node --test \"test/unit/**/*.test.js\""` → jalankan `npm run test:unit`. (Kutipan glob dikoreksi 2026-10-10 agar sama dengan skrip hari ini.)
+
+###### File 1 — `backend/test/unit/pricing.test.js` (SIAP PAKAI — angka sudah diverifikasi dari kode)
+```js
+const test = require('node:test');
+const assert = require('node:assert');
+const P = require('../../dist/modules/tenant-bookings/pricing.helper.js');
+
+test('calculateRentByPricingTerm — tarif bulanan 1.700.000 (owner decision: WEEKLY=0.5, SMESTERLY=5.7, YEARLY=11)', () => {
+  assert.strictEqual(P.calculateRentByPricingTerm(1700000, 'DAILY'), 225000);    // 221.000 → bulat naik 5.000
+  assert.strictEqual(P.calculateRentByPricingTerm(1700000, 'WEEKLY'), 850000);   // 0.5 × 1.700.000 = 850.000
+  assert.strictEqual(P.calculateRentByPricingTerm(1700000, 'BIWEEKLY'), 1275000); // 0.75 × 1.700.000 = 1.275.000 → 1.275.000
+  assert.strictEqual(P.calculateRentByPricingTerm(1700000, 'MONTHLY'), 1700000);
+  assert.strictEqual(P.calculateRentByPricingTerm(1700000, 'SMESTERLY'), 9690000); // 5.7 × 1.700.000 = 9.690.000 → 9.690.000
+  assert.strictEqual(P.calculateRentByPricingTerm(1700000, 'YEARLY'), 18700000);   // 11.0 × 1.700.000 = 18.700.000 → 18.700.000
+});
+test('pembulatan naik ke 5.000', () => {
+  assert.strictEqual(P.calculateRentByPricingTerm(1333000, 'DAILY'), 175000);    // 173.290 → 175.000
+  assert.strictEqual(P.roundUpToNearest(1, 5000), 5000);
+  assert.strictEqual(P.roundUpToNearest(5000, 5000), 5000);
+  assert.strictEqual(P.roundUpToNearest(0), 0);
+  assert.strictEqual(P.roundUpToNearest(-5), 0);
+});
+test('term tidak valid / rate 0 → 0', () => {
+  assert.strictEqual(P.calculateRentByPricingTerm(0, 'MONTHLY'), 0);
+  assert.strictEqual(P.calculateRentByPricingTerm(1000000, 'XXX'), 0);
+});
+test('utilitas included hanya term pendek', () => {
+  for (const t of ['DAILY','WEEKLY','BIWEEKLY']) assert.strictEqual(P.isUtilitiesIncludedForPricingTerm(t), true);
+  for (const t of ['MONTHLY','SMESTERLY','YEARLY']) assert.strictEqual(P.isUtilitiesIncludedForPricingTerm(t), false);
+});
+```
+
+###### File 2 — `backend/test/unit/periode.test.js` (SIAP PAKAI — UTC, exclusive end)
+```js
+const test = require('node:test');
+const assert = require('node:assert');
+const S = require('../../dist/modules/stays/stays.helpers.js');
+const iso = (d) => d.toISOString().slice(0, 10);
+
+test('calculatePeriodEnd — end eksklusif', () => {
+  assert.strictEqual(iso(S.calculatePeriodEnd(new Date(Date.UTC(2026,8,1)), 'DAILY')),   '2026-09-02');
+  assert.strictEqual(iso(S.calculatePeriodEnd(new Date(Date.UTC(2026,8,1)), 'WEEKLY')),  '2026-09-08');
+  assert.strictEqual(iso(S.calculatePeriodEnd(new Date(Date.UTC(2026,8,1)), 'MONTHLY')), '2026-10-01');
+});
+test('addCalendarMonthsClamped — clamp akhir bulan', () => {
+  assert.strictEqual(iso(S.calculatePeriodEnd(new Date(Date.UTC(2026,0,31)), 'MONTHLY')), '2026-02-28'); // 31 Jan +1bln → 28 Feb
+});
+```
+
+###### File 3 — `backend/test/unit/cashflow-classifier.test.js` (BUAT SAAT F1-3)
+Saat F1-3 mengekstrak fungsi classifier kas (deteksi line kas via `cashAccountId != null`, klasifikasi sekali per line), tulis test: line ber-cashAccountId debit → operating-in; line AR (1100) → BUKAN kas (operating-in = 0); OPENING_BALANCE → bukan arus operasi. **DP/angka harapan: lihat skenario emas §5.**
+
+> Fungsi lain (DP 30% = `Math.round(rent*30/100)`, splitRent/Deposit) ada di service (bukan helper murni) — diuji via skenario emas §5, bukan unit test.
+
+##### 4. HARNESS REKONSILIASI (alat audit BAWAAN — jalankan tiap selesai task finance)
+| Endpoint | Harapan SEHAT | Kalau GAGAL artinya |
+|---|---|---|
+| `GET /api/accounting/trial-balance` | `isBalanced: true` (debit=kredit) | ada jurnal tak balance → bug posting |
+| `GET /api/deposit-ledger/reconciliation-lite` | `mismatch: 0` | snapshot stay ≠ ledger → bug deposit |
+| `GET /api/accounting/deposit-reconciliation` | `reconciliationStatus: MATCHED` (atau OPENING_BALANCE_ONLY) | akun 2000 ≠ operational held → F-24/F-06 |
+| `GET /api/accounting/cashflow` | beginning + netCashflow = ending | breakdown arus salah → F1-3 belum benar |
+| `GET /api/accounting/financial-ratios` | expenseRatio masuk akal (mis. 25, bukan 1e8); occupancy>0 saat ada penghuni | F-02/F-04/F-18 belum benar |
+
+**Aturan:** jalankan SEBELUM mulai (catat baseline) & SESUDAH task. Angka boleh berubah, tapi invarian §1 harus tetap true.
+
+##### 5. SKENARIO EMAS (end-to-end, angka eksak — verifikasi setelah Fase 1)
+Di DB bersih + COA seeded + CashAccount Cash(1000)+Bank(1010) + periode OPEN:
+1. Kamar tarif bulanan **1.700.000**, deposit **500.000**. Booking MONTHLY → DP 30% = **510.000**.
+2. Tenant bayar DP 510.000 (transfer) → approve → jurnal `INVOICE_PAYMENT` D Bank 510.000 / K AR 510.000. Kamar RESERVED, expiresAt null.
+3. Pelunasan = sisa sewa (1.700.000−510.000=1.190.000) + deposit 500.000 = **1.690.000** → approve → kamar OCCUPIED, meter promoted. Deposit → jurnal D Bank / K 2000 (liability) 500.000.
+4. **Cek:** trial-balance seimbang; cashflow operating-in bulan ini = 510.000+1.190.000 = **1.700.000** (kas dari pelunasan sewa) — BUKAN angka AR; deposit 500.000 masuk kas tapi kredit 2000 (liability, bukan revenue). reconciliation-lite mismatch=0.
+5. Checkout → settlement FULL_REFUND 500.000 → D 2000 / K Bank 500.000 → saldo 2000 kembali 0. reconciliation MATCHED.
+> Bila angka cashflow menampilkan mutasi PIUTANG (1100) sebagai "kas" → F1-3 belum benar. Bila expenseRatio = jutaan persen → F1-4 belum benar.
+
+##### 6. GATE PER-TASK (centang sebelum commit task finance)
+- `tsc --noEmit` 0 error.
+- `npm run test:unit` (`node --test "test/**/*.test.js"`) semua PASS (kalau task menyentuh fungsi ber-test).
+- 5 invarian §1 yang relevan tetap true (cek via §4 endpoint).
+- Angka harapan task terpenuhi (lihat "selesai bila" di `08_CHECKLIST` — checklist 2026-06-13, kini di `.docs-legacy/2026-06-16_root_docs_pre_M/08_CHECKLIST.md` — atau dossier 13 di domain/keuangan.md).
+- Tidak menyentuh kode di DO-NOT-TOUCH §2.
+- Kalau ada yang ✗ → JANGAN commit; perbaiki atau STOP & lapor.
+
+---
+
+**Konservasi:** 5 `[ ]` pada gate per-task di atas dipertahankan; jumlah checkbox proyek tidak berubah oleh pemindahan ini.
+

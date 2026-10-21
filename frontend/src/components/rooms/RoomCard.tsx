@@ -11,6 +11,7 @@ import {
 } from '../../utils/publicRoomDisplay';
 import type { PublicRoom } from '../../types';
 import FacilityList from './FacilityList';
+import FrameImage from '../common/FrameImage';
 import RoomPriceTable from './RoomPriceTable';
 import RoomSpecChips from './RoomSpecChips';
 import BookingCtaButton from './BookingCtaButton';
@@ -74,13 +75,11 @@ export function RoomCardImage({ room }: { room: PublicRoom }) {
       onMouseLeave={() => setHovered(false)}
     >
       {active ? (
-        <img
+        <FrameImage
           key={active}
           src={active}
           alt={`Kamar ${room.code} — ${getPublicRoomCoolingLabel(room)}, kamar mandi ${getPublicRoomBathroomLabel(room)}`}
           className="rm-card-img"
-          loading="lazy"
-          decoding="async"
           onError={() => markFailed(active)}
         />
       ) : (

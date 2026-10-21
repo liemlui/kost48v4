@@ -275,7 +275,7 @@ Bagian historis `DOSSIER 11` di bawah masih menyebut multi-booking `RESERVED` da
 
 ## M06 — Operasional: dossier, temuan, task, update (dipindah 23 Sep 2026; B1 Tahap 3)
 
-> Wrapper riwayat M06. Aturan normatif hasil pemisahan ada di [domain/operasional.md](../domain/operasional.md); audit 29 Juli 2026 ada di [audit/audit-operasional-2026-07.md](../audit/audit-operasional-2026-07.md). Teks di bawah tidak diubah; blok dossier (identity, temuan audit, task) tidak dipecah.
+> Wrapper riwayat M06. Aturan normatif hasil pemisahan ada di [domain/operasional.md](../domain/operasional.md); audit 29 Juli 2026 ada di [audit/audit-operasional-2026-07.md](audit-operasional-2026-07.md). Teks di bawah tidak diubah; blok dossier (identity, temuan audit, task) tidak dipecah.
 
 ## Update 2026-06-17 — AUDIT KEUANGAN ULTRA ✅
 

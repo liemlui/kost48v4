@@ -3712,7 +3712,10 @@
   width: 3rem;
   height: 3rem;
   border-radius: 8px;
-  object-fit: cover;
+  /* Foto fasilitas diunggah dengan rasio bebas (HP/DSLR); `contain` menjaga seluruh objek
+     terlihat di thumbnail 3 rem — crop persegi 48 px terlalu memotong (18 Okt 2026). */
+  object-fit: contain;
+  padding: 2px;
   flex: 0 0 3rem;
   border: 1px solid rgba(35, 131, 91, .18);
   background: #eef4f0;
@@ -6374,4 +6377,155 @@
 @media (max-width: 420px) {
   .gx-nav-cta .gx-btn-ghost { display: none; }
   .gx-topbar { padding-left: .6rem; padding-right: .6rem; }
+}
+
+/* ════════════════════════════════════════════════════════════════════════════
+   SHOWCASE PUBLIK — kebutuhan → bukti → jaminan (18 Okt 2026)
+   Tiga bagian yang menambah kekuatan jual beranda tanpa mengubah katalog lama:
+     • .gx-fit-*       — memilih kamar dari kebutuhan (bukan dari daftar fitur);
+     • .gx-guarantee-* — janji yang sudah tertulis di aturan (risk reversal);
+     • .gx-hero-trust  — satu baris fakta di bawah CTA hero.
+   Tidak ada angka bisnis di CSS: semua angka yang tampil berasal dari data/props.
+   ════════════════════════════════════════════════════════════════════════════ */
+
+.gx-fit-section {
+  padding: 4.5rem 0;
+  background: #f6f8f5;
+}
+
+.gx-fit-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.gx-fit-card {
+  display: grid;
+  align-content: start;
+  gap: .45rem;
+  padding: 1.25rem;
+  border: 1px solid var(--gx-line);
+  border-radius: 18px;
+  background: var(--white);
+  color: var(--gx-ink);
+  text-decoration: none;
+  box-shadow: 0 10px 26px rgba(22, 32, 51, .06);
+  transition: transform .18s cubic-bezier(.22, 1, .36, 1), box-shadow .18s cubic-bezier(.22, 1, .36, 1), border-color .18s;
+}
+
+.gx-fit-card:hover,
+.gx-fit-card:focus-visible {
+  transform: translateY(-4px);
+  border-color: rgba(35, 131, 91, .4);
+  box-shadow: 0 18px 40px rgba(22, 32, 51, .12);
+}
+
+.gx-fit-mark {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border-radius: 14px;
+  background: #e4f3ed;
+  font-size: 1.25rem;
+}
+
+.gx-fit-card strong {
+  font-size: 1rem;
+  line-height: 1.35;
+}
+
+.gx-fit-desc {
+  color: #374151;
+  font-size: .85rem;
+  line-height: 1.55;
+}
+
+.gx-fit-count {
+  color: var(--gx-green, #23835b);
+  font-size: .8rem;
+  font-weight: 800;
+}
+
+.gx-fit-count.is-empty {
+  color: #92400e;
+}
+
+.gx-fit-cta {
+  margin-top: .3rem;
+  color: var(--gx-green, #23835b);
+  font-size: .82rem;
+  font-weight: 800;
+}
+
+.gx-hero-trust {
+  margin: 0;
+  color: rgba(255, 255, 255, .86);
+  font-size: .8rem;
+  font-weight: 700;
+  letter-spacing: .01em;
+}
+
+.gx-guarantee-section {
+  padding: 4.5rem 0;
+  background: var(--white);
+}
+
+.gx-guarantee-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: .85rem;
+  margin-top: 1.5rem;
+}
+
+.gx-guarantee-card {
+  display: grid;
+  align-content: start;
+  gap: .4rem;
+  padding: 1.1rem;
+  border: 1px solid #bae6fd;
+  border-radius: 16px;
+  background: #f0f9ff;
+}
+
+.gx-guarantee-mark {
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+  background: var(--white);
+  font-size: 1.1rem;
+  box-shadow: 0 6px 14px rgba(3, 105, 161, .12);
+}
+
+.gx-guarantee-card strong {
+  color: #0c4a6e;
+  font-size: .92rem;
+  line-height: 1.4;
+}
+
+.gx-guarantee-card span {
+  color: #374151;
+  font-size: .82rem;
+  line-height: 1.55;
+}
+
+.gx-guarantee-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .75rem;
+  margin-top: 1.4rem;
+}
+
+@media (max-width: 900px) {
+  .gx-fit-grid { grid-template-columns: 1fr; }
+  .gx-guarantee-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 560px) {
+  .gx-guarantee-grid { grid-template-columns: 1fr; }
+  .gx-fit-section,
+  .gx-guarantee-section { padding: 3rem 0; }
 }

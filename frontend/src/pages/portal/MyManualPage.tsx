@@ -2,7 +2,7 @@
  * KOST48 — Panduan & Aturan Kos (MyManualPage)
  * ==============================================
  * 7 tab terstruktur: Aturan, Perpanjangan, Checkout, kWh Meter, Cara Bayar, WiFi, Kontak.
- * Konten di bawah adalah DRAFT AI — silakan review & edit oleh owner.
+ * Konten disinkronkan dengan aturan kanonik pada 2026-10-21; angka dan rujukan mengikuti docs/domain/.
  */
 import PageHeader from '../../components/common/PageHeader';
 import { useState, useMemo } from 'react';
@@ -16,7 +16,7 @@ const WHATSAPP_URL = `https://wa.me/${KOST_WHATSAPP_NUMBER}`;
 const KOST_WHATSAPP_DISPLAY = `0${KOST_WHATSAPP_NUMBER.slice(2)}`.replace(/(\d{4})(\d{4})(\d+)/, '$1-$2-$3');
 
 // ══════════════════════════════════════════════════════════════════════════════
-// KONTEN PANDUAN (DRAFT AI — REVIEW OWNER SEBELUM PUBLISH)
+// KONTEN PANDUAN (disinkronkan dengan aturan kanonik 2026-10-21)
 // ══════════════════════════════════════════════════════════════════════════════
 
 const GUIDE_TABS = [
@@ -26,8 +26,12 @@ const GUIDE_TABS = [
     title: 'Aturan Kos',
     sections: [
       {
+        heading: 'Kapasitas & Penghuni Tambahan',
+        body: `• Kamar STANDARD: 2 orang tanpa biaya tambahan; maksimal 4 orang (2 penghuni tambahan).\n• Kamar LARGE: 4 orang tanpa biaya tambahan; maksimal 6 orang (2 penghuni tambahan).\n• Setiap penghuni tambahan di atas batas gratis dikenakan 20% dari tarif sewa periode yang dipilih per kepala.\n• Penghuni tambahan wajib dikonfirmasi ke pengelola dan dicatat di kontrak.`,
+      },
+      {
         heading: 'Jam Tamu & Akses',
-        body: `• Tamu diperbolehkan berkunjung pukul 07.00–22.00 WIB.\n• Tamu wajib lapor ke staf/pengelola saat datang.\n• Tamu tidak diizinkan masuk area kamar di luar jam berkunjung.\n• Tamu yang menginap HARUS izin 1 hari sebelumnya — dikenakan biaya Rp50.000/malam.`,
+        body: `• Tamu diperbolehkan berkunjung pukul 07.00–22.00 WIB.\n• Tamu wajib lapor ke staf/pengelola saat datang.\n• Tamu tidak diizinkan masuk area kamar di luar jam berkunjung.\n• Tamu yang menginap wajib sepengetahuan pengelola. Sistem belum menghitung tarif tamu menginap secara otomatis.`,
       },
       {
         heading: 'Kebersihan & Ketertiban',
@@ -35,7 +39,11 @@ const GUIDE_TABS = [
       },
       {
         heading: 'Larangan',
-        body: `• DILARANG KERAS: narkoba, minuman keras, senjata tajam, senjata api.\n• Dilarang merokok di dalam kamar — area merokok tersedia di teras luar.\n• Dilarang memelihara hewan peliharaan di dalam kamar.\n• Dilarang memodifikasi instalasi listrik/air tanpa izin pengelola.\n• Dilarang mengecat dinding atau membuat lubang permanen tanpa izin.\n• Dilarang meminjamkan kunci kamar kepada non-penghuni.`,
+        body: `• DILARANG KERAS: narkoba, minuman keras, senjata tajam, senjata api.\n• Dilarang merokok di dalam kamar — area merokok tersedia di teras luar.\n• Dilarang memodifikasi instalasi listrik/air tanpa izin pengelola.\n• Dilarang mengecat dinding atau membuat lubang permanen tanpa izin.\n• Dilarang meminjamkan kunci kamar kepada non-penghuni.`,
+      },
+      {
+        heading: 'Hewan Peliharaan',
+        body: `• Hewan peliharaan diizinkan dengan pemberitahuan ke pengelola saat booking/check-in.\n• Pemilik hewan wajib membayar deposit hewan (default Rp100.000, refundable bila tidak ada kerusakan).\n• Hewan tidak boleh mengganggu penghuni lain; keluhan berulang dapat membatasi izin.`,
       },
       {
         heading: 'Parkir',
@@ -58,15 +66,15 @@ const GUIDE_TABS = [
     sections: [
       {
         heading: 'Timeline Perpanjangan',
-        body: `H-30 sebelum akhir sewa:\n  → Kamu mendapat notifikasi di portal.\n  → Buka menu "Panduan Kos Saya" → klik tombol "Perpanjang".\n  → Pilih durasi perpanjangan (1 bulan / 3 bulan / 6 bulan / 1 tahun).\n  → Tagihan DP (Down Payment 30% dari total sewa) diterbitkan.\n\nDP (30%) harus dibayar maksimal H-1 sebelum akhir sewa.\n\nH-7 setelah DP lunas:\n  → Tagihan pelunasan (sisa 70%) diterbitkan.\n  → Bayar pelunasan sebelum masa sewa baru dimulai.\n\nSETELAH LUNAS:\n  → Status sewa otomatis diperpanjang.\n  → Tidak ada biaya tambahan atau denda.`,
+        body: `H-10 sebelum akhir sewa:\n  → Kamu mendapat notifikasi di portal.\n  → Buka menu "Panduan Kos Saya" → klik tombol "Perpanjang".\n  → Pilih durasi perpanjangan (1 bulan / 2 minggu / 6 bulan / 1 tahun).\n  → Tagihan DP (Down Payment 30% dari tarif periode) diterbitkan.\n\nDP (30%) harus dibayar paling lambat hari-H (tanggal akhir sewa).\n\nH+7 setelah DP dibayar:\n  → Tagihan pelunasan (sisa 70%) diterbitkan.\n  → Bayar pelunasan paling lambat H+7 setelah DP.\n\nSETELAH LUNAS:\n  → Status sewa diperpanjang setelah pelunasan diverifikasi.\n  → Tidak ada biaya tambahan di luar DP dan pelunasan.`,
       },
       {
         heading: 'Catatan Penting',
-        body: `• DP 30% bersifat HANGUS jika kamu batal setelah DP dibayar.\n• Perpanjangan TIDAK bisa dicicil — bayar tepat nominal (DP atau pelunasan penuh).\n• Jika belum perpanjang sampai H-1, kamar akan dibuka untuk penghuni baru.\n• Tarif perpanjangan mengikuti tarif kontrak kamu (bukan tarif publik terbaru).`,
+        body: `• DP 30% tidak dikembalikan jika kamu batal setelah DP dibayar.\n• Perpanjangan TIDAK bisa dicicil — bayar tepat nominal (DP atau pelunasan penuh).\n• Jika DP belum dibayar sampai hari-H, kamar akan dibuka untuk penghuni baru.\n• Tarif perpanjangan mengikuti tarif kontrak kamu (bukan tarif publik terbaru).`,
       },
       {
         heading: 'Durasi & Diskon',
-        body: `• Bulanan: tarif normal\n• 3 bulan: tarif normal × 3\n• 6 bulan: tarif normal × 5,7 (diskon 5%)\n• 1 tahun: tarif normal × 11 (diskon 1 bulan gratis! 🎉)`,
+        body: `• 1 bulan: tarif bulanan normal\n• 2 minggu: tarif bulanan × 0,75\n• 6 bulan: tarif bulanan × 5,7 (hemat 5%)\n• 1 tahun: tarif bulanan × 11 (hemat 1 bulan)`,
       },
     ],
   },
@@ -81,11 +89,11 @@ const GUIDE_TABS = [
       },
       {
         heading: 'Proses Checkout',
-        body: `1. Buka menu "Panduan Kos Saya" → klik "Ajukan Keluar".\n2. Pilih tanggal rencana keluar.\n3. Admin akan menghitung tagihan final (listrik + sewa sisa).\n4. Lunasi tagihan final.\n5. Admin inspeksi kamar — pastikan tidak ada kerusakan.\n6. Kunci dikembalikan.\n7. Deposit jaminan dikembalikan (refund) dalam 7 hari kerja.\n\n⏱️ Estimasi total proses: 3–7 hari kerja setelah pengajuan.`,
+        body: `1. Buka menu "Panduan Kos Saya" → klik "Ajukan Keluar".\n2. Pilih tanggal rencana keluar.\n3. Admin akan menghitung tagihan final (listrik + sewa sisa).\n4. Lunasi tagihan final.\n5. Admin inspeksi kamar — pastikan tidak ada kerusakan.\n6. Kunci dikembalikan.\n7. Deposit jaminan diproses setelah inspeksi dan pelunasan; waktu proses mengikuti antrean pengelola.\n\n⏱️ Estimasi total proses: 3–7 hari kerja setelah pengajuan.`,
       },
       {
         heading: 'Deposit Jaminan',
-        body: `• Deposit jaminan adalah uang jaminan yang dibayar saat pertama masuk.\n• Deposit DIKEMBALIKAN PENUH saat checkout jika tidak ada kerusakan.\n• Kerusakan akibat kelalaian penghuni akan dipotong dari deposit.\n• Nominal deposit per kamar: Rp300.000–Rp600.000 (tergantung tipe kamar).\n• BUKAN uang sewa — tidak bisa dipakai untuk bayar sewa bulan terakhir.`,
+        body: `• Deposit jaminan adalah dana titipan yang dibayar saat pertama masuk.\n• Nominal deposit mengikuti kamar yang kamu pilih; nilai pastinya tampil di rincian tagihan/portal.\n• Saat checkout, deposit dipakai lebih dulu untuk menutup tagihan terbuka (termasuk sewa dan utilitas).\n• Setelah semua kewajiban selesai, sisa deposit dikembalikan; bila deposit tidak cukup, kekurangan menjadi piutangmu.\n• Kerusakan akibat kelalaian penghuni dipotong dari deposit dengan catatan yang jelas.`,
       },
       {
         heading: 'Pindah Kamar',
@@ -127,19 +135,19 @@ const GUIDE_TABS = [
     sections: [
       {
         heading: 'Metode Pembayaran',
-        body: `• Transfer bank (BCA / Mandiri — nomor rekening dari pengelola).\n• Tunai ke pengelola (minta nota/kwitansi).\n• QRIS / GoPay / DANA / ShopeePay (konfirmasi ke pengelola).`,
+        body: `• Transfer bank (BCA / Mandiri — nomor rekening dari pengelola).\n• Tunai ke pengelola (minta nota/kwitansi).\n• Bukti transfer diunggah di portal untuk diverifikasi admin.`,
       },
       {
         heading: 'Langkah Bayar + Upload Bukti',
-        body: `1. Buka menu "Bayar Tagihan".\n2. Pilih tagihan yang mau dibayar.\n3. Klik "Bayar & Kirim Bukti".\n4. Transfer sesuai nominal yang tertera (tepat, tidak kurang).\n5. Upload foto/screenshot bukti transfer.\n6. Kirim — admin akan verifikasi maksimal 1×24 jam.\n\n✅ Status "Sedang Diperiksa" → admin sedang cek bukti.\n✅ Status "Selesai" → pembayaran diterima.`,
+        body: `1. Buka menu "Bayar Tagihan".\n2. Pilih tagihan yang mau dibayar.\n3. Klik "Bayar & Kirim Bukti".\n4. Transfer sesuai nominal yang tertera (tepat, tidak kurang).\n5. Upload foto/screenshot bukti transfer.\n6. Kirim — admin akan memverifikasi bukti sebelum pembayaran tercatat.\n\n✅ Status "Sedang Diperiksa" → admin sedang cek bukti.\n✅ Status "Selesai" → pembayaran diterima.`,
       },
       {
         heading: 'Jenis Tagihan',
-        body: `• Tagihan Sewa (bulanan / sesuai kontrak).\n• Tagihan Listrik (pemakaian di atas jatah yang berlaku pada kontrak/kamar).\n• Tagihan WiFi (Rp50.000/bulan/perangkat — opsional).\n• Tagihan Kerusakan (jika ada, atas kelalaian penghuni).`,
+        body: `• Tagihan Sewa (bulanan / sesuai kontrak).\n• Tagihan Listrik (pemakaian di atas jatah yang berlaku pada kontrak/kamar).\n• Tagihan WiFi (sesuai paket yang dipilih — opsional).\n• Tagihan Kerusakan (jika ada, atas kelalaian penghuni).`,
       },
       {
         heading: 'Jatuh Tempo & Keterlambatan',
-        body: `• Tagihan sewa: jatuh tempo sesuai tanggal check-in setiap bulan.\n• Tagihan listrik: jatuh tempo 7 hari setelah diterbitkan.\n• TIDAK ada denda keterlambatan.\n• Namun tagihan yang menunggak dapat menghambat proses perpanjangan/checkout.`,
+        body: `• Semua tagihan (sewa, listrik, WiFi, dan lainnya) jatuh tempo 24 jam setelah diterbitkan.\n• TIDAK ada denda keterlambatan otomatis.\n• Namun tagihan yang menunggak dapat menghambat proses perpanjangan/checkout.`,
       },
     ],
   },
@@ -150,11 +158,11 @@ const GUIDE_TABS = [
     sections: [
       {
         heading: 'Cara Pesan',
-        body: `1. Buka menu "Pesan WiFi".\n2. Klik "Tambah Perangkat".\n3. Masukkan nama perangkat (contoh: "Laptop Andi" atau "HP Samsung").\n4. Lakukan pembayaran Rp50.000.\n5. Admin akan mengaktifkan WiFi untuk perangkat kamu dalam 1×24 jam.`,
+        body: `1. Buka menu "Pesan WiFi".\n2. Pilih paket yang tersedia — tarif dan ketentuan tampil di halaman itu.\n3. Klik "Pesan Sekarang" atau hubungi pengelola via WhatsApp.\n4. Pengelola akan menghubungi untuk konfirmasi dan instruksi pembayaran.\n5. Layanan diaktifkan setelah pembayaran dikonfirmasi pengelola.`,
       },
       {
         heading: 'Biaya & Ketentuan',
-        body: `• Rp50.000/bulan/perangkat.\n• Maksimal 3 perangkat per kamar.\n• Kecepatan stabil untuk browsing, streaming, dan video call.\n• WiFi khusus penghuni KOST48 — tidak bisa dipakai non-penghuni.`,
+        body: `• Tarif dan ketentuan mengikuti paket yang tampil di halaman Pesan WiFi.\n• Jumlah perangkat mengikuti ketentuan paket yang dipilih.\n• Kecepatan stabil untuk browsing, streaming, dan video call.\n• WiFi khusus penghuni KOST48 — tidak bisa dipakai non-penghuni.`,
       },
       {
         heading: 'Cara Koneksi',

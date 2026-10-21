@@ -847,3 +847,49 @@
 .text-info { color: var(--bs-info-text-emphasis) !important; }
 .text-muted { color: var(--gray-600) !important; }
 .btn-link { --bs-btn-color: var(--color-primary); --bs-btn-hover-color: var(--color-primary-hover); }
+
+/* ============================================================================
+   FRAME-IMAGE — foto unggahan berbagai rasio ditampilkan utuh (18 Okt 2026)
+   Dipakai `components/common/FrameImage.tsx`. Frame publik tingginya tetap dan
+   memakai `object-fit: cover`; untuk foto berasio ekstrem (potret HP, panorama,
+   brosur A4) komponen menambahkan `.frame-image-contain` + `.frame-image-backdrop`,
+   sehingga foto tampil UTUH di atas salinan blur tanpa bilah kosong.
+   Batas yang disadari: mode ditentukan SETELAH gambar dimuat (naturalWidth/
+   naturalHeight) — foto berasio normal tidak berubah perilakunya (tetap cover).
+   `!important` perlu karena media query mobile di `11-public-pages.css` memaksa
+   `object-fit: cover` pada `.gx-room-image` dengan spesifisitas yang sama.
+   Urutan cat: backdrop (positioned, z-index auto) lalu <img> utama (relative,
+   z-index auto) — gambar tetap di atas salinan blur, dan badge/overlay yang
+   datang sesudahnya tetap di atas keduanya.
+   ============================================================================ */
+.frame-image {
+  position: relative;
+  object-position: center;
+}
+
+.frame-image.frame-image-contain {
+  object-fit: contain !important;
+}
+
+.frame-image-backdrop {
+  position: absolute;
+  inset: -10%;
+  width: 120%;
+  height: 120%;
+  object-fit: cover;
+  filter: blur(16px) saturate(1.05);
+  opacity: .5;
+  pointer-events: none;
+  user-select: none;
+}
+
+/* Panel upload: rekomendasi rasio — jelas dibaca, tetap satu baris bantu (bukan kartu baru). */
+.image-ratio-hint {
+  display: block;
+  margin-top: .35rem;
+  line-height: 1.5;
+}
+
+.image-ratio-hint strong {
+  color: var(--gray-700);
+}

@@ -62,7 +62,9 @@ export class PrepayExtensionService {
         : (stay.room?.monthlyRateRupiah ?? stay.agreedRentAmountRupiah);
       if (monthlyRent <= 0) throw new ConflictException('Tarif bulanan kamar belum diatur.');
 
-      // F5-8 (A-5 / D-21.4): tarif diskon prabayar jangka panjang (SMESTERLY 5,5×/6 bln; YEARLY 10×/12 bln).
+      // F5-8 (A-5 / D-21.4): tarif diskon prabayar jangka panjang (SMESTERLY 5,7×/6 bln; YEARLY 11×/12 bln).
+      // effectiveMonthly dibulatkan ke rupiah terdekat (roundRupiah); term pricing memakai
+      // roundUpToNearest ke Rp5.000 — selisih receh ini yang dicatat sebagai F-10.
       // effectiveMonthly dipakai konsisten utk invoice + deferral + recognition (Σ tetap = total).
       const rateTerm = (dto.rateTerm as 'MONTHLY' | 'SMESTERLY' | 'YEARLY') || 'MONTHLY';
       let effectiveMonthly = monthlyRent;

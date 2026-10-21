@@ -7,8 +7,5 @@ Isi tabel diturunkan langsung dari setiap berkas (judul + "baca kalau"), jadi ti
 
 | Berkas | Judul | Ukuran | Kapan dibaca |
 |---|---|---:|---|
-| [arah-produk.md](arah-produk.md) | Flow utama OWNER/ADMIN | 17.0 KB | — |
-| [mode-cepat.md](mode-cepat.md) | Mode Cepat (`/cepat`) — Rancangan Dua Halaman Berdampingan | 22.8 KB | — |
-| [orientasi.md](orientasi.md) | Orientasi Proyek & Konteks Bisnis KOST48 V5 | 7.8 KB | — |
-| [portal-owner-admin.md](portal-owner-admin.md) | Portal Owner & Admin — Rancangan Ringkas dan Manusiawi | 21.3 KB | — |
-| [scope.md](scope.md) | Peta Scope & File per Role dan Flow — KOST48 V5 | 17.2 KB | — |
+| [peran.md](peran.md) | Peta peran & rute — OWNER, ADMIN, STAFF, TENANT | 10.9 KB | memeriksa role, layar inti, atau rute mana yang boleh dibuka. · **Jangan** dibaca kalau: mencari status pekerjaan (itu [ |
+| [product.md](product.md) | Produk — arah, orientasi, portal, dan scope | 64.1 KB | mencari peta peran/rute (itu [peran.md](peran.md)). |

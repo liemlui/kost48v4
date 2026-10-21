@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 660" width="100%" role="img" aria-labelledby="judul">
+  <title id="judul">Alur huni KOST48 — status, uang, dan tenggat</title>
+  <rect width="1000" height="660" fill="#ffffff"/>
+  <text x="32" y="38" font-family="Segoe UI, Arial, sans-serif" font-size="23" font-weight="700" fill="#12232b">Alur huni KOST48 — status, uang, dan tenggat</text>
+  <text x="32" y="62" font-family="Segoe UI, Arial, sans-serif" font-size="12.5" fill="#5b6770">Angka mengikuti aturan kanonik: harga.md · hunian.md · keuangan.md · operasional.md</text>
+  <line x1="60" y1="96" x2="60" y2="524" stroke="#d7dee3" stroke-width="2"/>
+
+  <circle cx="60" cy="112" r="15" fill="#0f4c5c"/>
+  <text x="60" y="117" font-family="Segoe UI, Arial, sans-serif" font-size="13" font-weight="700" fill="#ffffff" text-anchor="middle">1</text>
+  <text x="92" y="108" font-family="Segoe UI, Arial, sans-serif" font-size="15" font-weight="700" fill="#12232b">Booking dibuat</text>
+  <text x="92" y="128" font-family="Segoe UI, Arial, sans-serif" font-size="12.3" fill="#495057">DP 30% dari sewa term · kamar BELUM terkunci · kedaluwarsa 3 jam</text>
+  <rect x="760" y="96" width="205" height="30" rx="15" fill="#eef5f6" stroke="#cfe3e6"/>
+  <text x="862" y="116" font-family="Segoe UI, Arial, sans-serif" font-size="11.5" fill="#0f4c5c" text-anchor="middle">Stay ACTIVE · kamar AVAILABLE</text>
+
+  <circle cx="60" cy="176" r="15" fill="#0f4c5c"/>
+  <text x="60" y="181" font-family="Segoe UI, Arial, sans-serif" font-size="13" font-weight="700" fill="#ffffff" text-anchor="middle">2</text>
+  <text x="92" y="172" font-family="Segoe UI, Arial, sans-serif" font-size="15" font-weight="700" fill="#12232b">Bayar DP dengan bukti transfer</text>
+  <text x="92" y="192" font-family="Segoe UI, Arial, sans-serif" font-size="12.3" fill="#495057">Nominal tepat DP · approve ADMIN/OWNER · tanpa QRIS atau gateway</text>
+  <rect x="760" y="160" width="205" height="30" rx="15" fill="#eef5f6" stroke="#cfe3e6"/>
+  <text x="862" y="180" font-family="Segoe UI, Arial, sans-serif" font-size="11.5" fill="#0f4c5c" text-anchor="middle">kamar RESERVED</text>
+
+  <circle cx="60" cy="240" r="15" fill="#0f4c5c"/>
+  <text x="60" y="245" font-family="Segoe UI, Arial, sans-serif" font-size="13" font-weight="700" fill="#ffffff" text-anchor="middle">3</text>
+  <text x="92" y="236" font-family="Segoe UI, Arial, sans-serif" font-size="15" font-weight="700" fill="#12232b">Pelunasan penuh</text>
+  <text x="92" y="256" font-family="Segoe UI, Arial, sans-serif" font-size="12.3" fill="#495057">Sisa sewa + deposit kamar + deposit hewan Rp100.000 · invoice jatuh tempo 24 jam</text>
+  <rect x="760" y="224" width="205" height="30" rx="15" fill="#eef5f6" stroke="#cfe3e6"/>
+  <text x="862" y="244" font-family="Segoe UI, Arial, sans-serif" font-size="11.5" fill="#0f4c5c" text-anchor="middle">invoice PAID · tetap RESERVED</text>
+
+  <circle cx="60" cy="304" r="15" fill="#0f4c5c"/>
+  <text x="60" y="309" font-family="Segoe UI, Arial, sans-serif" font-size="13" font-weight="700" fill="#ffffff" text-anchor="middle">4</text>
+  <text x="92" y="300" font-family="Segoe UI, Arial, sans-serif" font-size="15" font-weight="700" fill="#12232b">Check-in / serah kunci</text>
+  <text x="92" y="320" font-family="Segoe UI, Arial, sans-serif" font-size="12.3" fill="#495057">Syarat: invoice sewa PAID + meter awal · KTP boleh menyusul, wajib dilengkapi</text>
+  <rect x="760" y="288" width="205" height="30" rx="15" fill="#eef5f6" stroke="#cfe3e6"/>
+  <text x="862" y="308" font-family="Segoe UI, Arial, sans-serif" font-size="11.5" fill="#0f4c5c" text-anchor="middle">promoted · kamar OCCUPIED</text>
+
+  <circle cx="60" cy="368" r="15" fill="#0f4c5c"/>
+  <text x="60" y="373" font-family="Segoe UI, Arial, sans-serif" font-size="13" font-weight="700" fill="#ffffff" text-anchor="middle">5</text>
+  <text x="92" y="364" font-family="Segoe UI, Arial, sans-serif" font-size="15" font-weight="700" fill="#12232b">Huni dan tagihan meter</text>
+  <text x="92" y="384" font-family="Segoe UI, Arial, sans-serif" font-size="12.3" fill="#495057">Listrik 30 kWh/bulan gratis, lalu Rp2.500/kWh · tanpa denda keterlambatan</text>
+  <rect x="760" y="352" width="205" height="30" rx="15" fill="#eef5f6" stroke="#cfe3e6"/>
+  <text x="862" y="372" font-family="Segoe UI, Arial, sans-serif" font-size="11.5" fill="#0f4c5c" text-anchor="middle">Stay ACTIVE</text>
+
+  <circle cx="60" cy="432" r="15" fill="#0f4c5c"/>
+  <text x="60" y="437" font-family="Segoe UI, Arial, sans-serif" font-size="13" font-weight="700" fill="#ffffff" text-anchor="middle">6</text>
+  <text x="92" y="428" font-family="Segoe UI, Arial, sans-serif" font-size="15" font-weight="700" fill="#12232b">Perpanjangan</text>
+  <text x="92" y="448" font-family="Segoe UI, Arial, sans-serif" font-size="12.3" fill="#495057">DP 30% ≤ hari-H · pelunasan ≤ H+7 · harga lama dikunci (tidak naik)</text>
+  <rect x="760" y="416" width="205" height="30" rx="15" fill="#eef5f6" stroke="#cfe3e6"/>
+  <text x="862" y="436" font-family="Segoe UI, Arial, sans-serif" font-size="11.5" fill="#0f4c5c" text-anchor="middle">DP_SECURED → COMPLETED</text>
+
+  <circle cx="60" cy="496" r="15" fill="#0f4c5c"/>
+  <text x="60" y="501" font-family="Segoe UI, Arial, sans-serif" font-size="13" font-weight="700" fill="#ffffff" text-anchor="middle">7</text>
+  <text x="92" y="492" font-family="Segoe UI, Arial, sans-serif" font-size="15" font-weight="700" fill="#12232b">Checkout dan deposit</text>
+  <text x="92" y="512" font-family="Segoe UI, Arial, sans-serif" font-size="12.3" fill="#495057">Tagihan non-meter lunas · denda kerusakan opsional · deposit diproses satu kali</text>
+  <rect x="760" y="480" width="205" height="30" rx="15" fill="#eef5f6" stroke="#cfe3e6"/>
+  <text x="862" y="500" font-family="Segoe UI, Arial, sans-serif" font-size="11.5" fill="#0f4c5c" text-anchor="middle">COMPLETED · MAINTENANCE</text>
+
+  <rect x="32" y="536" width="470" height="68" rx="8" fill="#fff6ea" stroke="#e6b980"/>
+  <text x="48" y="557" font-family="Segoe UI, Arial, sans-serif" font-size="12.5" font-weight="700" fill="#7a4a12">Bila tidak keluar tepat waktu</text>
+  <text x="48" y="574" font-family="Segoe UI, Arial, sans-serif" font-size="11.5" fill="#6b4a20">H-day 12.00 kamar dilepas + tiket EVICT · H+1 12.00 forced checkout</text>
+  <text x="48" y="590" font-family="Segoe UI, Arial, sans-serif" font-size="11.5" fill="#6b4a20">barang ditinggal 30 hari → ABANDONED</text>
+
+  <rect x="518" y="536" width="450" height="68" rx="8" fill="#eef5f6" stroke="#bcd6da"/>
+  <text x="534" y="557" font-family="Segoe UI, Arial, sans-serif" font-size="12.5" font-weight="700" fill="#0f4c5c">Deposit jaminan (refundable)</text>
+  <text x="534" y="574" font-family="Segoe UI, Arial, sans-serif" font-size="11.5" fill="#31555c">FULL_REFUND · PARTIAL (potongan + refund = deposit)</text>
+  <text x="534" y="590" font-family="Segoe UI, Arial, sans-serif" font-size="11.5" fill="#31555c">FORFEIT (catatan ≥8 karakter) · diproses 1× oleh OWNER</text>
+
+  <text x="32" y="628" font-family="Segoe UI, Arial, sans-serif" font-size="10.5" fill="#6c757d">Diagram menjelaskan aturan; penegakan ada di kode. Ketidaksesuaian teks yang masih terbuka dicatat di TASK-SINKRON-ATURAN.</text>
+</svg>

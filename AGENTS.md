@@ -17,6 +17,7 @@
 
 - Prioritas: **penyederhanaan OWNER/ADMIN** — operasional penghuni, keuangan, dashboard, kejelasan dampak keputusan. Landasan bisnis: **IB Diploma Business Management** ([arah produk](docs/product/README.md)).
 - Teknis: **satu proses API NestJS dengan modul internal**; frontend React/Vite; tanpa rewrite domain. Modul terpisah/apps/worker (Fase MA) **ditunda** — jangan dibuat.
+- **Batas RAM LVE 512 MB adalah batas kerja.** Naik kuota bukan rekomendasi pertama; urutan diagnosis + ambang wajib ada di [produksi Bagian E](docs/operations/produksi.md#d4b-kapasitas).
 - Produksi tercatat LIVE; status historis **bukan** sign-off produksi. Sisa Fase A: onboarding hunian/KTP, opening balance, cron, rotasi secret/PIN — gate-nya di [ANTREAN.md](docs/ANTREAN.md).
 
 ## 3. Peta dokumen (router)
@@ -28,9 +29,11 @@
 | aturan domain bisnis (uang, huni, harga, publik, AI/IoT) | [ATURAN.md](docs/ATURAN.md) → [indeks domain](docs/domain/README.md) |
 | runbook deploy/produksi/go-live/env | [OPERASI.md](docs/OPERASI.md) → [indeks operations](docs/operations/README.md) |
 | peta modul & berkas kode | [PETA-KODE.md](docs/PETA-KODE.md); peta generated: `.audit-map/` (jangan dibaca rutin) |
+| ID proses & registry nama | [id-registry.md](docs/id-registry.md) — prefix wajib terdaftar; ID proses bukan satu huruf + angka |
+| registry fitur & jangkar kode | [FITUR.md](docs/FITUR.md) — ID FEAT-, rute, status, path komponen |
 | status audit & temuan bertanggal | [AUDIT.md](docs/AUDIT.md) → rincian di `docs/audit/` |
 | keputusan bisnis owner | [KEPUTUSAN-OWNER.md](docs/KEPUTUSAN-OWNER.md) |
-| bukti bertanggal & riwayat | [indeks history](docs/history/README.md) (+ [bukti-2026-10.md](docs/history/bukti-2026-10.md)); arsip beku: [arsip/](docs/arsip/README.md) — jangan dibaca rutin |
+| bukti bertanggal & riwayat | [indeks history](docs/history/README.md) (+ [bukti-2026-10.md](docs/arsip/bukti-2026-10.md)); arsip beku: [arsip/](docs/arsip/README.md) — jangan dibaca rutin |
 | rencana rombak dokumentasi (batch & keputusan) | [indeks rencana](docs/rencana/README.md) · dokumen kerja per tugas: [indeks kerja](docs/kerja/README.md) |
 
 Jangan membaca seluruh `docs/` sebagai orientasi; pilih lewat tabel di atas.
@@ -107,6 +110,6 @@ Pisahkan implementasi lokal · verifikasi lokal · deployment · dampak runtime.
 - Owner menetapkan kebijakan; agen menerapkan stage yang **sudah** disetujui.
 - Aturan operasional dipelihara di berkas ini + [KONTRAK.md](docs/KONTRAK.md); antrean di [ANTREAN.md](docs/ANTREAN.md); riwayat di `docs/history/`; arsip beku di `docs/arsip/` + `.docs-legacy/`.
 - Jangan menduplikasi aturan ke setiap berkas; pointer diarahkan ke sini atau KONTRAK.
-- Gate dokumen: `node scripts/check-docs.mjs` (= `npm run check:docs`; wajib hijau sebelum menutup batch dokumentasi) — **11 aturan R1–R11** (gate **v2.0**). Yang paling mudah terlewat: **R6** rujukan backtick hantu (**v1.6**) · **R8** anchor mati, anchor "rapuh" dilaporkan sebagai INFO (**v1.7**) · **R9** nomor bagian ganda · **R10** judul H1 ganda · **R11** salinan berkas tangga di luar rumah kanonik (**v1.8–v2.0**; catatan bertanggal dan zona `.design-audit`/`.docs-legacy`/`.audit-map` dikecualikan). Kekuatan dokumen diukur terpisah: `node scripts/ukur-kekuatan-docs.mjs` (13 pemeriksaan — termasuk **ratchet baris**, yang naik hanya dengan keputusan owner). Pagar dibuktikan bisa gagal: `node scripts/check-docs.selftest.mjs`.
+- Gate dokumen: `node scripts/check-docs.mjs` (= `npm run check:docs`; wajib hijau sebelum menutup batch dokumentasi) — **12 aturan R1–R12** (gate **v2.1**). Yang paling mudah terlewat: **R6** rujukan backtick hantu (**v1.6**) · **R8** anchor mati, anchor "rapuh" dilaporkan sebagai INFO (**v1.7**) · **R9** nomor bagian ganda · **R10** judul H1 ganda · **R11** salinan berkas tangga di luar rumah kanonik (**v1.8–v2.0**) · **R12** ikatan ANTREAN↔checklist dokumen tugas (**v2.1**; catatan bertanggal dan zona `.design-audit`/`.docs-legacy`/`.audit-map` dikecualikan). Kekuatan dokumen diukur terpisah: `node scripts/ukur-kekuatan-docs.mjs` (13 pemeriksaan — termasuk **ratchet baris**, yang naik hanya dengan keputusan owner). Pagar dibuktikan bisa gagal: `node scripts/check-docs.selftest.mjs`.
 - Stage yang belum diizinkan tidak dijalankan; ikuti checkpoint owner.
 - Aturan tertulis mengurangi risiko, bukan jaminan nol kerusakan: kontrol credential/DB, sandbox, review branch, dan backup perlu bukti teknis pada task tersendiri.

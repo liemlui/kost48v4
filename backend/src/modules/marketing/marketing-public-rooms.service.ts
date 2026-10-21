@@ -12,6 +12,7 @@ import { isBookingSchemaReady } from '../tenant-bookings/booking-schema.helper';
 import { calculateRentByPricingTerm } from '../tenant-bookings/pricing.helper';
 import { PublicRoomsQueryDto } from './dto/public-rooms-query.dto';
 import { computeFacilityGap, type FacilityGapInput } from '../rooms/room-facility-spec';
+import { resolvePublicAvailabilityStatus } from './public-availability.helper';
 import {
   GENERIC_ROOM_MARKETING_IMAGES,
   ROOM_IMAGE_BASE_PATH,
@@ -223,7 +224,7 @@ export class MarketingPublicRoomsService {
       let reserved = 0;
 
       for (const room of rooms) {
-        const publicStatus = this.resolvePublicAvailabilityStatus(room);
+        const publicStatus = resolvePublicAvailabilityStatus(room);
         if (publicStatus === PublicRoomAvailabilityStatus.HIDDEN) continue;
         if (publicStatus === PublicRoomAvailabilityStatus.AVAILABLE) {
           available += 1;
@@ -273,7 +274,7 @@ export class MarketingPublicRoomsService {
         code: room.code,
         name: room.name,
         floor: room.floor,
-        publicStatus: this.resolvePublicAvailabilityStatus(room),
+        publicStatus: resolvePublicAvailabilityStatus(room),
       })),
     };
   }
@@ -819,15 +820,6 @@ export class MarketingPublicRoomsService {
     };
   }
 
-  private resolvePublicAvailabilityStatus(room: {
-    status: RoomStatus | string;
-    publicAvailability?: { status: PublicRoomAvailabilityStatus } | null;
-  }): PublicRoomAvailabilityStatus {
-    if (room.publicAvailability?.status) return room.publicAvailability.status;
-    return room.status === RoomStatus.AVAILABLE
-      ? PublicRoomAvailabilityStatus.AVAILABLE
-      : PublicRoomAvailabilityStatus.FULL;
-  }
 
   private isPublicOnlineBookingEnabled() {
     return ['true', '1', 'yes', 'on'].includes(
@@ -888,7 +880,7 @@ export class MarketingPublicRoomsService {
     projected?: { date: string; reason: 'checkout-approved' | 'short-term' },
   ) {
     const highlightedPricingTerm = pricingTerm ?? PricingTerm.MONTHLY;
-    const publicStatus = this.resolvePublicAvailabilityStatus(room);
+    const publicStatus = resolvePublicAvailabilityStatus(room);
     const isPubliclyAvailable = publicStatus === PublicRoomAvailabilityStatus.AVAILABLE;
     const onlineBookingEnabled = this.isPublicOnlineBookingEnabled();
 

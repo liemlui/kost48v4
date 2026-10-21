@@ -30,7 +30,10 @@ export type CashAccount = {
   accountNumberMasked?: string | null;
   holderName?: string | null;
   openingBalanceRupiah: number;
+  // currentBalanceRupiah = opening + mutasi jurnal POSTED (dihitung server, AL-FIX-6).
   currentBalanceRupiah: number;
+  manualBalanceRupiah?: number;
+  ledgerDeltaRupiah?: number;
   isDefault: boolean;
   isActive: boolean;
   notes?: string | null;

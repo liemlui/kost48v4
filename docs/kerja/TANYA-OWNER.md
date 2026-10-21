@@ -1,6 +1,6 @@
 # TANYA-OWNER — pertanyaan yang menunggu keputusan owner
 
-> **Blok baca** · Jenis: **daftar pertanyaan untuk owner (bukan antrean, bukan kontrak)** · Status: **aktif — 0 pertanyaan terbuka (P11 dijawab owner 11 Okt 2026: pilihan a)** · Untuk siapa: owner + agen yang butuh jawaban sebelum melanjutkan
+> **Blok baca** · Jenis: **daftar pertanyaan untuk owner (bukan antrean, bukan kontrak)** · Status: **aktif — 0 pertanyaan terbuka (potret 19 Okt 2026)** · Untuk siapa: owner + agen yang butuh jawaban sebelum melanjutkan
 > · Baca kalau: owner ingin melihat **apa yang sedang menunggu keputusannya**, atau agen mau memastikan tidak ada pertanyaan terbuka. · **Jangan** dibaca kalau: mencari keputusan yang sudah final (itu [KEPUTUSAN-OWNER](../KEPUTUSAN-OWNER.md)) atau memilih tugas (itu [ANTREAN](../ANTREAN.md)).
 
 ## 1. Cara pakai berkas ini (format wajib — arah owner 10 Okt 2026)
@@ -17,9 +17,169 @@ Setiap pertanyaan **wajib** memakai lima unsur ini, dalam bahasa manusia — buk
 
 ## 2. Pertanyaan terbuka
 
-**Tidak ada pertanyaan terbuka per 11 Okt 2026.** **P11** (aturan kartu penghuni) **dijawab owner: (a)** — tiga kartu inti, dua dibangun lebih dulu; jawabannya dipindah ke register `KARTU-TENANT-3-INTI` di [KEPUTUSAN-OWNER](../KEPUTUSAN-OWNER.md) dan blok pertanyaannya dihapus (pertanyaan terjawab tidak disimpan dua kali, §1).
+**Tidak ada pertanyaan terbuka per 19 Okt 2026.** P19, P21, P24, dan P27 dijawab owner pada 19 Okt (listrik Rp2.500/kWh · air gratis sementara · data go-live disiapkan owner lewat `/checklist` · dump + jadwal + uji restore · paritas semua kanal) — rincian di register `GO-LIVE-DATA + TARIF + BACKUP + PARITAS`. Blok keempatnya di bawah ditandai **DITUTUP** dan dipertahankan sebagai rincian sampai pembersihan berkas berikutnya. Riwayat: **P12–P16** dijawab owner 18–19 Okt 2026 dan **dipindah** ke register [KEPUTUSAN-OWNER](../KEPUTUSAN-OWNER.md) entri "P12–P16"; blok pertanyaannya dihapus dari sini sesuai §1.
 
-**Catatan riwayat (bukan pertanyaan):** empat pertanyaan sebelumnya sudah dijawab dan **dipindah** ke register sebagai `PEMADATAN-STOP-MEKANIS + KARTU-4-ROLE (dikoreksi owner) + BASELINE-RATCHET-DITERIMA` dan `KARTU-TENANT-3-INTI` (P11, 11 Okt 2026: pilihan (a)) ([KEPUTUSAN-OWNER](../KEPUTUSAN-OWNER.md)) — bagian P10 di entri itu **dikoreksi pada hari yang sama**: TENANT **tetap** mendapat kartu. Blok P8 lama juga sudah dihapus: pertanyaan yang sudah dijawab **tidak** disimpan dua kali.
+### P17 — Email/identifier untuk akun ADMIN "Hadi" (T6)
+
+**Konteks:** Owner menetapkan ADMIN bernama **Hadi** tanpa email. Menu Akun Pengguna mewajibkan email valid karena email dipakai sebagai identifier login staf; tanpa email, akun tidak bisa dibuat dan tidak bisa login.
+
+**Pilihan:**
+- **(a)** Owner memberi email nyata Hadi (atau email kerja yang benar-benar bisa dibuka). Konsekuensi: akun dibuat lewat menu, login diuji, reset sandi mandiri mungkin. Risiko: bila email bukan milik Hadi, tautan reset tidak sampai ke dia.
+- **(b)** Pakai email internal permanen `hadi@kost48surabaya.com` sebagai identifier dan owner menyampaikan sandi awal langsung. Konsekuensi: alur ADMIN terbukti; email tidak dipakai menerima pesan. Risiko: bila domain tidak punya kotak surat, reset via email tetap tidak sampai (harus lewat owner).
+- **(c)** Tunda ADMIN sampai email ada. Konsekuensi: tidak ada risiko akun; butir checklist c9 tetap terbuka. Risiko: owner tetap satu-satunya operator.
+
+**Rekomendasi:** **(a)** bila Hadi punya email; kalau belum, **(b)** dengan catatan reset manual oleh owner.
+
+**Default bila tidak dijawab:** tidak membuat akun; T6 tetap terbuka.
+
+### P18 — Brevo: IP server, pengirim terverifikasi, dan rotasi kunci (T5)
+
+**Konteks:** Kunci Brevo sudah diisi lewat Pengaturan Operasional, tetapi uji kirim **gagal 401**: Brevo menolak karena IP server `203.161.184.108` belum masuk daftar IP resmi akun. Kunci juga pernah ditempel di chat sehingga sebaiknya dirotasi.
+
+**Pilihan:**
+- **(a)** Owner menambah IP `203.161.184.108` di dashboard Brevo (Security → Authorised IPs), memastikan pengirim `no-reply@kost48surabaya.com` terverifikasi, lalu memberi tahu agen. Konsekuensi: email reset langsung aktif; agen mengulang uji kirim dan memeriksa log. Risiko: daftar IP harus diperbarui bila hosting pindah IP.
+- **(b)** Owner menonaktifkan pembatasan IP di Brevo. Konsekuensi: tidak perlu menjaga daftar IP; kunci bisa dipakai dari mana saja. Risiko: keamanan kunci menurun — tidak disarankan.
+- **(c)** Tunda email; reset manual oleh owner. Konsekuensi: tidak ada perubahan keamanan; portal belum mandiri. Risiko: beban owner berlanjut.
+
+**Rekomendasi:** **(a)**, lalu **rotasi kunci** setelah uji karena nilainya sudah terekspos di chat (kunci baru dimasukkan lewat Pengaturan Operasional, bukan chat).
+
+**Default bila tidak dijawab:** email tetap nonaktif; T5 dan butir p3 checklist tetap terbuka.
+
+### P19 — Tarif listrik & air Rp 0 di 13 kamar (temuan audit 19 Okt) — **DITUTUP 19 Okt 2026: listrik Rp2.500/kWh; air gratis sementara**
+
+**Konteks:** audit 19 Okt 2026 07:03 WIB menemukan `Room.electricityTariffPerKwhRupiah` dan `Room.waterTariffPerM3Rupiah` bernilai **0 untuk 13 dari 13 kamar**, `waterMeteringEnabled=false`, sedangkan `freeElectricityKwhPerMonth=30`. Setiap tagihan baru yang memuat pemakaian listrik/air akan menghitung **pemakaian × Rp 0** — uang kos kurang tertagih, dan angkanya masuk buku besar apa adanya.
+
+**Pilihan:**
+- **(a)** Owner memberi angka tarif listrik per kWh dan tarif air per m³ (boleh per kamar bila beda), agen mengisi lewat menu Kamar. Konsekuensi: tagihan berikutnya benar; 11 tagihan PAID tidak berubah. Risiko: bila angka belum tersedia, penerbitan tagihan menunggu.
+- **(b)** Satu tarif global di Pengaturan Operasional, semua kamar mengikuti. Konsekuensi: cepat, satu angka. Risiko: kamar dengan tarif berbeda akan salah tagih.
+- **(c)** Tunda: larang penerbitan tagihan yang memuat listrik/air sampai tarif ada. Konsekuensi: tidak ada tagihan salah. Risiko: butuh perubahan perilaku (izin agen) dan menahan penagihan.
+
+**Rekomendasi:** **(a)** — tarif listrik hampir selalu per kamar dan sudah ada kolomnya.
+
+**Default bila tidak dijawab:** tidak menerbitkan tagihan baru yang memuat listrik/air; tidak mengubah kode.
+
+### P20 — Saldo awal kas/bank (A5) masih kosong
+
+**Konteks:** `OpeningBalanceBatch` **0 baris**, `CashAccount.openingBalanceRupiah` = 0 untuk kedua akun, sementara 23 jurnal POSTED sudah berjalan (debit = kredit Rp 29.400.000). Tanpa angka cutover, neraca tidak berangkat dari saldo riil. A5 masih terbuka di [ANTREAN](../ANTREAN.md).
+
+**Pilihan:**
+- **(a)** Owner menetapkan saldo kas tunai + saldo bank per tanggal cutover; agen menyiapkan batch saldo awal dan mempostingnya. Konsekuensi: neraca berangkat dari saldo nyata. Risiko: angka salah akan menggeser seluruh laporan sampai dikoreksi lewat reversal.
+- **(b)** Zero-start resmi: sistem mulai dari 0 dan saldo riil di luar sistem sampai cutover berikutnya. Konsekuensi: tidak ada jurnal baru. Risiko: laporan kas tidak mencerminkan uang yang benar-benar dipegang owner.
+- **(c)** Tunda; laporkan sebagai celah terbuka. Konsekuensi: tidak ada risiko jurnal. Risiko: keputusan A5 tetap menggantung dan laporan tetap ambigu.
+
+**Rekomendasi:** **(a)** bila ada uang tunai/saldo bank nyata saat sistem mulai; **(b)** bila seluruh uang memang masuk setelah 18 Okt.
+
+**Default bila tidak dijawab:** **(b)** zero-start ditulis di laporan sebagai keadaan resmi sampai keputusan ada.
+
+### P21 — Foto kamar & fasilitas katalog publik kosong — **DITUTUP 19 Okt 2026: owner siapkan data; daftar di `/checklist`**
+
+**Konteks:** `Room.images` kosong untuk **13/13 kamar**, folder `uploads/` berisi **0 berkas**, dan tiga URL foto yang dipakai `/api/public/rooms` diuji → **404 semua**. `RoomFacility` juga **0 baris**. Artinya katalog publik siap dibuka tetapi setiap kartu kamar menampilkan gambar rusak tanpa fasilitas.
+
+**Pilihan:**
+- **(a)** Owner menyerahkan foto kamar + daftar fasilitas; agen mengunggah dan memverifikasi satu URL → 200. Konsekuensi: katalog layak dibuka. Risiko: waktu menunggu aset dari owner.
+- **(b)** Pakai foto dari materi promosi lama yang sudah ada. Konsekuensi: cepat. Risiko: foto mungkin tidak sesuai kondisi kamar sekarang.
+- **(c)** Tutup katalog publik sampai foto tersedia (situs hanya WhatsApp). Konsekuensi: tidak ada katalog rusak. Risiko: kehilangan permintaan masuk.
+
+**Rekomendasi:** **(a)**, dengan **(c)** sebagai keadaan sementara selama aset belum ada.
+
+**Default bila tidak dijawab:** katalog publik **ditutup**; status NO-GO tetap.
+
+### P22 — Deposit: 1 ledger tanpa jurnal, hanya 1 dari 11 stay ber-ledger
+
+**Konteks:** `TenantDepositLedgerEntry` berisi **1 baris** (`INCREASE_LIABILITY` Rp 200.000) dan baris itu **tanpa** `journalEntryId`; 10 stay lain tidak punya ledger deposit sama sekali. Akun liabilitas deposit (2000) karena itu belum mencerminkan uang yang dipegang kos.
+
+**Pilihan:**
+- **(a)** Backfill: owner mengonfirmasi deposit yang benar-benar diterima per penghuni, agen memposting jurnal penerimaan deposit. Konsekuensi: liabilitas benar. Risiko: bila angka owner beda dari catatan, perlu koreksi resmi.
+- **(b)** Catat resmi "deposit diterima di luar sistem / belum dijurnal" tanpa jurnal. Konsekuensi: tidak menyentuh buku besar. Risiko: neraca tetap kurang saji selama deposit dipegang.
+- **(c)** Tunda sampai ada penghuni baru dengan deposit yang tercatat rapi.
+
+**Rekomendasi:** **(a)** — ini uang orang lain yang harus tampil sebagai liabilitas.
+
+**Default bila tidak dijawab:** **(b)** dicatat sebagai celah terbuka, tanpa perubahan data.
+
+### P23 — Dua alamat kos yang berbeda (publik vs cetak invoice)
+
+**Konteks:** halaman publik, FAQ, dan peta memakai **"Jalan Hikmah V No. 48, Surabaya Barat"**, sedangkan tata letak **cetak invoice** memakai **"Jl. Kedung Tarukan 4C No. 48, Surabaya"**. Salah satu tidak benar, atau keduanya benar untuk keperluan berbeda. Alamat tidak punya field konfigurasi — keduanya ditulis di kode.
+
+**Pilihan:**
+- **(a)** Hikmah V yang benar → perbaiki template cetak invoice. Konsekuensi: dokumen keuangan konsisten dengan situs. Risiko: bila ternyata salah, invoice yang sudah tercetak keliru.
+- **(b)** Kedung Tarukan yang benar → perbaiki halaman publik, FAQ, peta, dan judul. Konsekuensi: situs yang berubah, bukan invoice. Risiko: materi promosi tercetak lama ikut salah.
+- **(c)** Keduanya benar (mis. alamat lama/baru) → sebut keduanya dengan label di kedua tempat.
+
+**Rekomendasi:** **(a)** — tiga tempat publik sudah konsisten ke Hikmah V; satu tempat cetak yang menyimpang.
+
+**Default bila tidak dijawab:** tidak mengubah apa pun; dicatat sebagai inkonsistensi P2 di laporan audit.
+
+### P24 — Backup database produksi (izin tindakan di server) — **DITUTUP 19 Okt 2026: dump + jadwal + uji restore disetujui**
+
+**Konteks:** dump DB terakhir bertanggal **13 Sep 2026** (36 hari lalu). Data 18 Okt — 11 tagihan, 11 pembayaran, 23 jurnal — **tidak tercakup** oleh backup mana pun yang terlihat. Tidak ada bukti uji restore. Backup hosting (cPanel) tidak terverifikasi.
+
+**Pilihan:**
+- **(a)** Ya: buat dump sekarang, pasang jadwal harian, dan lakukan **satu uji restore** ke database terpisah. Konsekuensi: data bisa dipulihkan dan terbukti. Risiko: butuh ruang disk (±14 MB/berkas) dan satu sesi kerja di server.
+- **(b)** Hanya dump sekali sekarang, tanpa jadwal dan tanpa uji restore. Konsekuensi: ada titik pulih hari ini. Risiko: besok kembali tanpa backup; restore belum terbukti.
+- **(c)** Tidak; andalkan backup hosting. Konsekuensi: tidak ada tindakan. Risiko: keberadaan backup hosting `UNKNOWN` — bila tidak ada, kehilangan data tidak bisa dipulihkan.
+
+**Rekomendasi:** **(a)**.
+
+**Default bila tidak dijawab:** tidak membuat dump; risiko P1 ini diterima owner dan tertulis di laporan audit.
+
+### P25 — Bila KTP belum dilengkapi setelah check-in, apa konsekuensinya?
+
+**Konteks:** owner memutuskan KTP **tidak memblokir check-in**, tetapi **wajib dilengkapi sesudahnya** dan diingatkan terus. Sistem sekarang hanya punya saklar boolean “wajib KTP sebelum aktivasi” dan belum punya status KTP; jadi “wajib sesudah” belum punya akibat yang jelas. Ini menyangkut perilaku penghuni dan kepatuhan data, karena itu diputuskan owner.
+
+**Pilihan:**
+- **(a)** Pengingat saja, tanpa memblokir layanan. Konsekuensi: penghuni tetap bisa huni, perpanjang, dan checkout; kewajiban tercatat dan terlihat admin. Risiko: sebagian KTP tidak pernah masuk; kepatuhan bergantung pada kerelaan penghuni.
+- **(b)** Blokir **perpanjangan** sampai KTP terverifikasi. Konsekuensi: hampir semua penghuni akan melengkapi karena butuh renew; check-in dan checkout tetap jalan. Risiko: bila verifikasi lambat, renewal tertunda dan kamar bisa kosong; butuh jalur pengecualian manual OWNER.
+- **(c)** Blokir **checkout** sampai KTP terverifikasi. Konsekuensi: paling kuat. Risiko: penghuni yang ingin keluar tertahan; berpotensi sengketa deposit/barang — tidak disarankan.
+
+**Rekomendasi:** **(a) + eskalasi**: pengingat berulang ke penghuni, dan daftar “KTP belum lengkap” muncul di dashboard admin/owner; blokir hanya bila owner benar-benar membutuhkannya.
+
+**Default bila tidak dijawab:** **(a)** — pengingat saja, tanpa blokir layanan.
+
+### P26 — Tenggat melengkapi KTP
+
+**Konteks:** agar pengingat punya akhir, perlu tenggat. Verifikasi KTP saat ini bisa dilakukan **OWNER dan ADMIN** (`@Roles(OWNER, ADMIN)` di controller), sedangkan aturan dossier 18 menyebut verifikasi **OWNER** — selisih itu dicatat sebagai **F-13** di [TASK-SINKRON-ATURAN](TASK-AKTIF.md#d4f-sinkron) dan **tidak** diselesaikan lewat pertanyaan ini. Tenggat terlalu pendek membuat penghuni baru tertekan; terlalu panjang membuat data kosong menumpuk.
+
+**Pilihan:**
+- **(a)** **7 hari kalender** sejak check-in; eskalasi ke OWNER pada hari ke-8. Konsekuensi: cukup manusiawi, satu minggu untuk melengkapi. Risiko: 7 hari pertama data belum lengkap.
+- **(b)** **3 hari**. Konsekuensi: data cepat lengkap. Risiko: penghuni yang sibuk/baru pindah bisa terlewat dan langsung dieskalasi.
+- **(c)** **14 hari**. Konsekuensi: paling longgar. Risiko: data kosong lebih lama; pengingat terasa tidak serius.
+
+**Rekomendasi:** **(a)** — sejalan dengan irama H+7 yang sudah dipakai renewal.
+
+**Default bila tidak dijawab:** **(a)** 7 hari; akses verifikasi **tidak diubah** (tetap OWNER+ADMIN sesuai kode), F-13 tetap tercatat.
+
+### P27 — Deposit & surcharge: tegakkan aturan di semua kanal, atau biarkan berbeda? — **DITUTUP 19 Okt 2026: tegakkan di semua kanal**
+
+**Konteks:** kode sekarang menerima **override deposit** saat approve booking/check-in (padahal aturan D-05: deposit selalu `Room.defaultDepositRupiah`), dan **hanya booking publik** yang menghitung **surcharge penghuni + deposit hewan**; booking portal dan walk-in tidak. Artinya kamar yang sama bisa berharga berbeda tergantung jalur, dan deposit bisa menyimpang dari aturan. Ini uang, jadi owner yang memutuskan.
+
+**Pilihan:**
+- **(a)** Tegakkan aturan: deposit **selalu** default kamar (tanpa override), surcharge + deposit hewan dihitung **di semua kanal**. Konsekuensi: satu harga untuk satu kamar; FAQ bisa jujur. Risiko: admin kehilangan jalur negosiasi deposit; nominal booking portal berubah (lebih tinggi bila ada penghuni ekstra/hewan).
+- **(b)** Pertahankan override deposit **khusus ADMIN** dengan alasan wajib + audit, tetapi surcharge/deposit hewan tetap paritas. Konsekuensi: fleksibel untuk kasus khusus. Risiko: selisih deposit tetap mungkin; laporan harus menyebut alasan.
+- **(c)** Tunda; FAQ menulis apa adanya bahwa kanal berbeda. Konsekuensi: tidak ada perubahan uang. Risiko: aturan “deposit selalu default kamar” tetap dilanggar kode; transparansi jadi pengakuan cacat.
+
+**Rekomendasi:** **(a)** — aturan sudah ada (D-05/D-24); yang perlu diperbaiki adalah kode dan satu helper bersama, bukan aturannya.
+
+**Default bila tidak dijawab:** **(c)** sampai ada keputusan: tidak mengubah perhitungan uang, dan FAQ **tidak** boleh menjanjikan paritas.
+
+### P28 — Verifikasi KTP: OWNER saja, atau OWNER+ADMIN?
+
+**Konteks:** aturan dossier 18 menyebut verifikasi KTP oleh **OWNER**, tetapi controller hari ini memasang `@Roles(OWNER, ADMIN)` — ADMIN bisa memverifikasi. Ini menyangkut akses ke data pribadi (foto KTP), jadi bukan keputusan teknis biasa; selisihnya dicatat **F-13**.
+
+**Pilihan:**
+- **(a)** **OWNER saja** (sesuai aturan tertulis). Konsekuensi: sejalan prinsip akses paling sempit; ADMIN tetap bisa mengunggah/menyiapkan, OWNER yang mengklik verifikasi. Risiko: verifikasi menumpuk di satu orang; onboarding 13 KTP bisa lambat.
+- **(b)** **OWNER+ADMIN** (sesuai kode hari ini). Konsekuensi: verifikasi bisa dibagi; aturan dossier 18 diperbarui. Risiko: ADMIN memegang akses PII; perlu jejak audit yang jelas dan kepercayaan eksplisit.
+- **(c)** Tunda: biarkan kode apa adanya, catat sebagai penyimpangan. Konsekuensi: tidak ada perubahan hari ini. Risiko: aturan dan kode terus berbeda.
+
+**Rekomendasi:** **(a)** — aturan sudah menetapkan OWNER; memperluas akses PII sebaiknya keputusan sadar, bukan karena kode terlanjur longgar.
+
+**Default bila tidak dijawab:** **(c)** — tidak mengubah akses; F-13 tetap tercatat.
+
+**Catatan riwayat (bukan pertanyaan):** P8–P16 sudah dijawab owner dan dipindah ke register [KEPUTUSAN-OWNER](../KEPUTUSAN-OWNER.md) (`P8-BUILD-SEBELUM-COMMIT`, `PEMADATAN-STOP-MEKANIS + KARTU-4-ROLE`, `KARTU-TENANT-3-INTI`, `P12–P16`); pertanyaan terjawab tidak disimpan dua kali (§1).
+
+
+
+
 
 ## 3. Keputusan yang TIDAK perlu ditanyakan ke owner (agen memutuskan sendiri)
 
@@ -47,3 +207,9 @@ Dicatat supaya owner tahu apa yang berjalan tanpa menunggu dia — rincian di [d
 | 2026-10-11 | **P9 dan P10 DIJAWAB owner: P9 (b), P10 (b), baseline ratchet diterima.** Jawabannya dipindah ke register sebagai `PEMADATAN-STOP-MEKANIS + KARTU-4-ROLE (dikoreksi owner) + BASELINE-RATCHET-DITERIMA` ([KEPUTUSAN-OWNER](../KEPUTUSAN-OWNER.md)), dan berkas ini **dikosongkan**: blok P10, P9, dan P8 (yang jawabannya sudah ada di register) dihapus sesuai aturan §1 "pertanyaan yang sudah dijawab tidak disimpan dua kali". Berkas 98 → 44 baris. Dampak yang langsung dieksekusi: gate `AIDL-01` di [ANTREAN §3](../ANTREAN.md) ditulis jujur "tiga role"; pemadatan **tidak** dilanjutkan ke penggabungan makna. |
 | 2026-10-11 | **KOREKSI OWNER atas P10, dan saya catat sebagai kesalahan eksekusi saya.** Owner menegaskan: *"loh role tetap tenant, admin, owner dan staff loh ya"* — jadi **TENANT tetap mendapat kartu**. Saat mengeksekusi pilihan (b), saya sempat menulis gate `AIDL-01` menjadi "tiga role"; itu **dibatalkan** dan gate kembali ke **OWNER/ADMIN/STAFF/TENANT**. Empat dokumen yang sudah saya ubah menyesuaikan (ANTREAN, TASK-AIDL-01a, TASK-AIDL-01b, register). Karena **aturan** kartu penghuni belum ada, muncul pertanyaan baru **P11** di berkas ini alih-alih saya mengarang daftar aturannya sendiri. |
 | 2026-10-11 | **P11 DIJAWAB owner: (a)** — tiga kartu inti untuk TENANT, dua dibangun lebih dulu (tagihan, perpanjangan). Jawaban dipindah ke [KEPUTUSAN-OWNER](../KEPUTUSAN-OWNER.md) `KARTU-TENANT-3-INTI`; blok P11 **dihapus** sesuai §1; berkas kembali **0 pertanyaan terbuka**. Kode kartu TENANT **belum ditulis** — sisa `AIDL-01b`. |
+| 2026-10-18 | **Lima pertanyaan baru P12–P16** ditulis di sini **sebelum** dipaparkan di chat: P12 berkas sandi OWNER + kunci SSH rilis, P13 kunci Brevo + pengirim, P14 akun ADMIN/STAFF, P15 saldo awal kas/bank, P16 izin deploy perbaikan laporan + UAT. Semua memakai lima unsur (§1). Konteks angkanya potret 18 Okt 2026 (rotasi DB 11:07 WIB, login OWNER 201, laporan produksi masih ±14,6 jt sampai deploy). |
+| 2026-10-19 | **P12–P16 DIJAWAB owner** (P12 a dengan koreksi "tidak perlu dihapus", P13 kunci Brevo diberikan, P14 nama Hadi tanpa email, P15 b, P16 a) → dipindah ke register [KEPUTUSAN-OWNER](../KEPUTUSAN-OWNER.md) entri `P12–P16`; bloknya **dihapus** dari sini (§1). Dua pertanyaan lanjutan ditulis: **P17** email/identifier Hadi, **P18** IP server + pengirim + rotasi kunci Brevo. |
+| 2026-10-19 | **Enam pertanyaan baru P19–P24** ditulis di sini **sebelum** dipaparkan di chat, lahir dari audit go-live bertanggal ([AUDIT-GOLIVE-2026-10-19](../arsip/AUDIT-GOLIVE-2026-10-19.md)): P19 tarif listrik/air 0 di 13 kamar, P20 saldo awal kas/bank, P21 foto & fasilitas katalog publik, P22 deposit tanpa jurnal, P23 dua alamat kos, P24 izin backup + uji restore. Semua memakai lima unsur (§1). Angka konteksnya potret 19 Okt 2026 07:03 WIB dari kueri baca-saja ke DB produksi. |
+| 2026-10-19 | **Empat pertanyaan baru P25–P28** ditulis di sini **sebelum** dipaparkan di chat, lahir dari instruksi owner tentang transparansi aturan + KTP pasca-check-in: P25 konsekuensi KTP belum lengkap, P26 tenggat, P27 paritas deposit/surcharge antar kanal, P28 akses verifikasi KTP. Semua memakai lima unsur (§1). Default sementara: pengingat saja, 7 hari (akses verifikasi tidak diubah), dan **tidak** mengubah perhitungan uang. |
+| 2026-10-19 | **Arahan owner: default diterima, hanya pertanyaan krusial.** Delapan pertanyaan ditutup dengan default (P17, P18, P20, P22, P23, P25, P26, P28); yang tetap terbuka hanya **P19, P21, P24, P27**. Bloknya dipertahankan sebagai rincian sampai pembersihan berikutnya; keputusan induk di register `DEFAULT-DITERIMA`. |
+| 2026-10-19 | **P19, P21, P24, P27 dijawab owner** → register `GO-LIVE-DATA + TARIF + BACKUP + PARITAS`: listrik Rp2.500/kWh, air gratis sementara (IoT waterflow), data go-live lewat `/checklist`, dump + jadwal + uji restore, paritas semua kanal. Blok ditandai **DITUTUP**; berkas kembali **0 pertanyaan terbuka**. |

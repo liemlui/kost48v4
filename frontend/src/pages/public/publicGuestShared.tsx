@@ -11,6 +11,7 @@ import { fetchPublicSocialProof } from '../../api/marketing';
 import { listFacilityImages } from '../../api/facilityImages';
 import { listMarketingAssets } from '../../api/marketingAssets';
 import Kost48LogoMark from '../../components/common/Kost48LogoMark';
+import FrameImage from '../../components/common/FrameImage';
 import { useAuth } from '../../context/AuthContext';
 import { getDefaultRoute } from '../../config/navigation';
 import { useTenantPortalStage } from '../../hooks/useTenantPortalStage';
@@ -342,7 +343,11 @@ export function RoomPreviewCard({ room }: { room: PublicRoom }) {
   return (
     <article className={`gx-room-card${isOccupied ? ' gx-room-card-occupied' : ''}${isAvailable ? ' gx-room-card-available' : ''}`}>
       <div className="gx-room-image-wrap">
-        <img src={getRoomCover(room)} alt={`${room.name || room.code || 'Kamar KOST48'} — ${getPublicRoomCoolingLabel(room)}, KM ${getPublicRoomBathroomLabel(room)}`} className="gx-room-image" loading="lazy" />
+        <FrameImage
+          src={getRoomCover(room)}
+          alt={`${room.name || room.code || 'Kamar KOST48'} — ${getPublicRoomCoolingLabel(room)}, KM ${getPublicRoomBathroomLabel(room)}`}
+          className="gx-room-image"
+        />
         <span className={`gx-room-status ${availability.tone}`}><span aria-hidden="true">{roomStatusIcon(availability.tone)}</span> {availability.label}</span>
         {/* R-06: chip TERISI besar di atas foto untuk kamar occupied */}
         {isOccupied && (

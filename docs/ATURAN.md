@@ -13,21 +13,21 @@
 
 1. Baca **hanya** topik yang relevan dengan task (§2); jangan memuat seluruh `domain/` sebagai orientasi.
 2. Aturan uang, DP/deposit, harga, dan status hunian **tidak boleh diubah** tanpa keputusan owner di [KEPUTUSAN-OWNER](KEPUTUSAN-OWNER.md) — memindahkan atau merapikan teks tidak mengubah aturan.
-3. Bila aturan yang sama muncul di dua tempat: laporkan ke [laporan duplikat](history/laporan-duplikat.md). Dedup **pengulangan non-aturan** boleh; isi aturan uang/harga/huni tetap milik owner.
+3. Bila aturan yang sama muncul di dua tempat: laporkan ke [laporan duplikat](arsip/laporan-duplikat.md). Dedup **pengulangan non-aturan** boleh; isi aturan uang/harga/huni tetap milik owner.
 4. Perubahan aturan hanya sah bila ada keputusan owner; sesudahnya perbarui berkas rinci dan catat bukti di [M13](./arsip/changelog-2026-09.md) atau changelog bulanan di `docs/history/changelog/`.
 
 ## 2. Topik dan berkas rinci (kanonik)
 
 | Topik | Berkas kanonik | Cakupan |
 |---|---|---|
-| Flow dan kontrak lintas domain | [domain/flow.md](domain/flow.md) · [domain/kontrak.md](domain/kontrak.md) | peta flow, business rules, override Fase V, kontrak producer ke consumer |
+| Flow dan kontrak lintas domain | [domain/publik.md — Flow](domain/publik.md#d4c-flow) · [domain/publik.md — Kontrak](domain/publik.md#d4c-kontrak) | peta flow, business rules, override Fase V, kontrak producer ke consumer |
 | Keuangan, jurnal, tagihan | [domain/keuangan.md](domain/keuangan.md) | kebijakan & invarian pembayaran/invoice/akuntansi, quota utilitas, otomasi bulanan, kapitalisasi aset |
 | Siklus huni, deposit, checkout | [domain/hunian.md](domain/hunian.md) | booking & renewal, checkout, deposit, overstay, catatan AI & riwayat sewa |
-| Harga kamar | [domain/harga.md](domain/harga.md) | tarif bulanan, multiplier, pembulatan, term, DP & deposit, surcharge, rent-lock |
-| Operasional harian | [domain/operasional.md](domain/operasional.md) | aturan tenant & staf, inventaris, tiket/KPI, notifikasi, auth/KTP, Auto-Ops |
+| Harga kamar | [domain/keuangan.md — Harga](domain/keuangan.md#d4c-harga) | tarif bulanan, multiplier, pembulatan, term, DP & deposit, surcharge, rent-lock |
+| Operasional harian | [domain/hunian.md — Operasional](domain/hunian.md#d4c-operasional) | aturan tenant & staf, inventaris, tiket/KPI, notifikasi, auth/KTP, Auto-Ops |
 | Publik dan pertumbuhan | [domain/publik.md](domain/publik.md) | marketing, UI/UX publik, gamifikasi & loyalitas, FAQ |
 | AI owner/admin | [domain/ai.md](domain/ai.md) | Fase G approval copilot, arsitektur, format respons, audit trail, hemat token |
-| IoT (pengembangan ditunda; pencatatan meter tetap) | [domain/iot.md](domain/iot.md) | inventaris perangkat Tuya, arsitektur ingest, aturan alert & billing meter |
+| IoT (pengembangan ditunda; pencatatan meter tetap) | [domain/ai.md — Bagian IoT](domain/ai.md#d4c-iot) | inventaris perangkat Tuya, arsitektur ingest, aturan alert & billing meter |
 | Aturan bisnis & keputusan lintas topik | [KEPUTUSAN-OWNER.md](KEPUTUSAN-OWNER.md) | register keputusan owner + status berlaku/digantikan |
 
 Berkas rinci juga memuat **bukti audit bertanggal** dari era M (mis. `## Audit 360° P6`). Bukti itu riwayat, bukan aturan aktif; status audit ada di [AUDIT.md](AUDIT.md).
@@ -39,7 +39,7 @@ Berkas rinci juga memuat **bukti audit bertanggal** dari era M (mis. `## Audit 3
 - Status audit dan temuan bertanggal: [AUDIT.md](AUDIT.md).
 - Keputusan bisnis owner (nominal, DP/deposit, harga, utang-piutang, gate uang/huni): [KEPUTUSAN-OWNER](KEPUTUSAN-OWNER.md).
 - Riwayat dan changelog berjalan: [history/](history/); bukti bulk kanonik: [arsip/](arsip/README.md); arsip legacy kini di `docs/arsip/legacy/` (dulu `docs/arsip/legacy/`, dipindah batch B2 2026-10-05).
-- Verifikasi uang (harness, DO-NOT-TOUCH, gate per-task): [operations/verifikasi-keuangan.md](operations/verifikasi-keuangan.md) + gate uang di [ANTREAN](./ANTREAN.md).
+- Verifikasi uang (harness, DO-NOT-TOUCH, gate per-task): [produksi Bagian F](operations/produksi.md#d4b-verifikasi) + gate uang di [ANTREAN](./ANTREAN.md).
 
 ## 4. Provenance
 

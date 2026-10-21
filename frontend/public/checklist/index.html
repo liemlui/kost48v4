@@ -1,0 +1,258 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="robots" content="noindex, nofollow" />
+<title>KOST48 — Checklist Go-Live</title>
+<style>
+  :root { --ink:#111827; --muted:#4b5563; --line:#e5e7eb; --bg:#f9fafb; --card:#fff;
+          --ok:#047857; --warn:#b45309; --bad:#b91c1c; --accent:#1d4ed8; }
+  * { box-sizing: border-box; }
+  body { margin:0; font:16px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif; color:var(--ink); background:var(--bg); }
+  header { background:#0f172a; color:#f8fafc; padding:28px 20px; }
+  header .wrap, main, footer .wrap { max-width: 980px; margin: 0 auto; }
+  h1 { margin:0 0 6px; font-size:1.6rem; line-height:1.25; }
+  .sub { margin:0; color:#cbd5e1; font-size:.95rem; }
+  main { padding:24px 20px 48px; }
+  h2 { font-size:1.15rem; margin:34px 0 10px; padding-bottom:6px; border-bottom:2px solid var(--line); }
+  h3 { font-size:1rem; margin:20px 0 8px; }
+  .note { background:#eff6ff; border-left:4px solid var(--accent); padding:10px 12px; margin:12px 0; font-size:.95rem; }
+  .danger { background:#fef2f2; border-left:4px solid var(--bad); }
+  .ok { background:#ecfdf5; border-left:4px solid var(--ok); }
+  table { width:100%; border-collapse:collapse; background:var(--card); font-size:.93rem; margin:8px 0 4px; }
+  th, td { border:1px solid var(--line); padding:8px 10px; text-align:left; vertical-align:top; }
+  th { background:#f3f4f6; font-weight:600; }
+  .tag { display:inline-block; padding:1px 8px; border-radius:999px; font-size:.78rem; font-weight:600; white-space:nowrap; }
+  .t-ok { background:#d1fae5; color:var(--ok); }
+  .t-warn { background:#fef3c7; color:var(--warn); }
+  .t-bad { background:#fee2e2; color:var(--bad); }
+  .t-info { background:#dbeafe; color:var(--accent); }
+  ul.check { list-style:none; padding:0; margin:6px 0; }
+  ul.check li { background:var(--card); border:1px solid var(--line); border-radius:8px; padding:8px 10px; margin:6px 0; display:flex; gap:10px; align-items:flex-start; }
+  ul.check input { margin-top:4px; width:18px; height:18px; flex:none; }
+  label { cursor:pointer; }
+  ul.check label.done { text-decoration:line-through; color:var(--muted); }
+  .meta { color:var(--muted); font-size:.88rem; }
+  code { background:#f3f4f6; padding:1px 5px; border-radius:4px; font-size:.88em; }
+  .toolbar { position:sticky; top:0; background:var(--bg); padding:10px 0; border-bottom:1px solid var(--line); display:flex; gap:10px; flex-wrap:wrap; align-items:center; z-index:5; }
+  button { font:inherit; padding:6px 12px; border-radius:8px; border:1px solid var(--line); background:#fff; cursor:pointer; }
+  button.primary { background:var(--accent); border-color:var(--accent); color:#fff; }
+  footer { background:#0f172a; color:#cbd5e1; padding:22px 20px; font-size:.88rem; }
+  @media print { .toolbar { display:none; } body { background:#fff; } header, footer { background:#fff; color:#000; } }
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <h1>KOST48 — Checklist Go-Live</h1>
+    <p class="sub">Daftar data dan keputusan yang harus Anda siapkan sebelum aplikasi dipakai penuh. Potret: 19 Oktober 2026.</p>
+  </div>
+</header>
+
+<main>
+  <div class="toolbar">
+    <button class="primary" id="btn-print">Cetak / simpan PDF</button>
+    <button id="btn-clear">Hapus centang</button>
+    <span class="meta">Centang disimpan di browser ini saja (localStorage), tidak dikirim ke server.</span>
+  </div>
+
+  <div class="note">
+    Halaman ini sengaja <strong>tidak diindeks mesin pencari</strong>. Jangan menempelkan NIK, foto KTP, sandi, atau token ke halaman ini maupun ke chat.
+  </div>
+
+  <h2>1. Keadaan sistem saat ini (acuan, bukan target)</h2>
+  <table>
+    <thead><tr><th>Butir</th><th>Nilai terverifikasi 19 Okt 2026</th></tr></thead>
+    <tbody>
+      <tr><td>Kamar</td><td>13 kamar (A, B, C, D, F1, F2, G, H, I, J, K, L, M). 11 terisi, 2 kosong (C, F1).</td></tr>
+      <tr><td>Penghuni</td><td>13 data tenant; 12 punya akun portal; <strong>1 penghuni belum punya email/akun</strong>.</td></tr>
+      <tr><td>Hunian</td><td>11 masa sewa aktif (check-in September 2026).</td></tr>
+      <tr><td>Tagihan</td><td>11 invoice terbit, <strong>semua lunas</strong> Rp 14.600.000 (TRANSFER, 18 Okt 2026).</td></tr>
+      <tr><td>Jurnal</td><td>23 jurnal; debit = kredit Rp 29.400.000.</td></tr>
+      <tr><td>Akuntansi</td><td>COA 38 akun; periode Sep &amp; Okt 2026 OPEN; <strong>saldo awal belum diisi</strong>.</td></tr>
+      <tr><td>Akun staf</td><td><strong>Belum ada ADMIN/STAFF</strong>; hanya 1 OWNER + 12 akun tenant.</td></tr>
+      <tr><td>KTP</td><td><strong>0 dari 13 terverifikasi</strong>; gate lama masih aktif. Keputusan 19 Okt: check-in tidak diblokir, KTP wajib dilengkapi setelahnya.</td></tr>
+      <tr><td>Email (Brevo)</td><td>Kunci tersimpan, tetapi IP server <strong>ditolak 401</strong>; pengirim belum terverifikasi.</td></tr>
+      <tr><td>Foto &amp; fasilitas</td><td><strong>0 dari 13 kamar punya foto</strong>; fasilitas kamar 0 baris.</td></tr>
+      <tr><td>Utilitas</td><td>Tarif kamar listrik/air tercatat 0; keputusan 19 Okt: listrik global <strong>Rp2.500/kWh</strong>, air <strong>gratis sementara</strong> — pastikan nilai di Pengaturan Operasional sudah benar.</td></tr>
+      <tr><td>Backup</td><td>Dump terakhir <strong>13 Sep 2026</strong>; belum ada jadwal harian dan belum ada uji restore.</td></tr>
+      <tr><td>Cron AutoOps</td><td><strong>Crontab kosong</strong>; AutoOps hanya berjalan in-process.</td></tr>
+      <tr><td>Resource</td><td>3 proses Node ±449 MB dari RAM 512 MB.</td></tr>
+    </tbody>
+  </table>
+
+  <h2>2. Data yang harus Anda siapkan</h2>
+
+  <h3>2.1 Properti, kamar, dan fasilitas</h3>
+  <table>
+    <thead><tr><th>Item</th><th>Status</th><th>Yang harus disiapkan</th></tr></thead>
+    <tbody>
+      <tr><td>Data 13 kamar</td><td><span class="tag t-ok">Ada</span></td><td>Kode, lantai, ukuran, kategori, tarif bulanan, deposit, AC/kipas, kamar mandi dalam/luar. Konfirmasi bila ada perubahan.</td></tr>
+      <tr><td>Fasilitas per kamar</td><td><span class="tag t-bad">Kosong</span></td><td>Daftar barang tetap per kamar: kasur, lemari, gantungan, meja/kursi, lampu, kunci, remote. Ini juga dipakai saat checkout.</td></tr>
+      <tr><td>Fasilitas umum</td><td><span class="tag t-bad">Kosong</span></td><td>Wi-Fi, dapur bersama, lounge, parkir, air, keamanan/CCTV — beserta statusnya untuk katalog.</td></tr>
+      <tr><td>Aturan per kamar</td><td><span class="tag t-warn">Perlu diputuskan</span></td><td>Boleh hewan? merokok? tamu menginap? — tentukan supaya deposit dan aturan bisa dihitung.</td></tr>
+    </tbody>
+  </table>
+
+  <h3>2.2 Foto dan materi publik</h3>
+  <table>
+    <thead><tr><th>Item</th><th>Status</th><th>Yang harus disiapkan</th></tr></thead>
+    <tbody>
+      <tr><td>Foto kamar</td><td><span class="tag t-bad">0/13</span></td><td>Minimal 3 foto per kamar: kasur, kamar mandi, tampak keseluruhan. JPG/WebP, sisi terpanjang ±1600 px, &lt;300 KB per foto.</td></tr>
+      <tr><td>Foto fasilitas umum</td><td><span class="tag t-bad">Belum ada</span></td><td>Dapur, lounge, parkir, koridor, tampak depan, gerbang.</td></tr>
+      <tr><td>Foto cover / hero</td><td><span class="tag t-bad">Belum ada</span></td><td>Satu foto utama untuk beranda dan katalog.</td></tr>
+      <tr><td>Denah / tata letak</td><td><span class="tag t-warn">Opsional</span></td><td>Gambar denah lantai 1 dan 2 bila ingin ditampilkan.</td></tr>
+      <tr><td>Hak pakai foto</td><td><span class="tag t-warn">Perlu konfirmasi</span></td><td>Foto milik sendiri atau izin fotografer; jangan pakai foto internet.</td></tr>
+    </tbody>
+  </table>
+
+  <h3>2.3 Aset tetap, inventaris, dan stok</h3>
+  <table>
+    <thead><tr><th>Item</th><th>Status</th><th>Yang harus disiapkan</th></tr></thead>
+    <tbody>
+      <tr><td>Aset tetap</td><td><span class="tag t-bad">Belum ada</span></td><td>Daftar: bangunan/renovasi, AC, kasur, lemari, elektronik, kendaraan. Sertakan nilai perolehan, tanggal perolehan, dan umur ekonomis.</td></tr>
+      <tr><td>Barang per kamar</td><td><span class="tag t-warn">Sebagian</span></td><td>Jumlah dan kondisi tiap barang (baik/rusak/hilang). Dipakai untuk audit checkout.</td></tr>
+      <tr><td>Stok gudang</td><td><span class="tag t-bad">Belum ada</span></td><td>Daftar barang habis pakai: sabun, tisu, galon, lampu, sekring, alat kebersihan. Qty awal, satuan, dan batas minimum.</td></tr>
+      <tr><td>Barang rusak/hilang</td><td><span class="tag t-warn">Perlu dicek</span></td><td>Catat yang sudah tidak layak agar tidak dihitung sebagai stok.</td></tr>
+    </tbody>
+  </table>
+
+  <h3>2.4 Penghuni dan dokumen</h3>
+  <table>
+    <thead><tr><th>Item</th><th>Status</th><th>Yang harus disiapkan</th></tr></thead>
+    <tbody>
+      <tr><td>Foto KTP penghuni aktif</td><td><span class="tag t-bad">0/13</span></td><td>Unggah + verifikasi lewat menu tenant. Check-in tidak lagi diblokir, tetapi kewajiban ini harus dikejar.</td></tr>
+      <tr><td>Email &amp; nomor HP</td><td><span class="tag t-warn">12 email</span></td><td>Lengkapi email penghuni tersebut atau nonaktifkan akunnya bila sudah tidak menyewa.</td></tr>
+      <tr><td>Kontak darurat</td><td><span class="tag t-warn">Opsional</span></td><td>Nama + nomor yang bisa dihubungi.</td></tr>
+      <tr><td>Deposit yang dipegang</td><td><span class="tag t-warn">Sebagian</span></td><td>Konfirmasi deposit per penghuni (saat ini hanya kamar D Rp 200.000 tercatat).</td></tr>
+      <tr><td>Persetujuan PDP</td><td><span class="tag t-warn">Perlu diputuskan</span></td><td>Beri tahu penghuni data apa yang disimpan (KTP, kontak) dan untuk apa.</td></tr>
+    </tbody>
+  </table>
+
+  <h3>2.5 Keuangan</h3>
+  <table>
+    <thead><tr><th>Item</th><th>Status</th><th>Yang harus disiapkan</th></tr></thead>
+    <tbody>
+      <tr><td>Saldo awal kas/bank</td><td><span class="tag t-bad">Kosong</span></td><td>Saldo per tanggal cutover, atau konfirmasi resmi "zero-start" bila sistem mulai dari 0.</td></tr>
+      <tr><td>Rekening penerima transfer</td><td><span class="tag t-warn">Perlu dicek</span></td><td>Nama bank, nomor rekening, atas nama — dipakai di invoice dan pesan WA.</td></tr>
+      <tr><td>Tarif listrik</td><td><span class="tag t-ok">Diputuskan</span></td><td>Rp2.500/kWh sebagai default global. Isi bila ingin berbeda per kamar.</td></tr>
+      <tr><td>Tarif air</td><td><span class="tag t-ok">Diputuskan</span></td><td>Gratis sementara sampai sensor waterflow IoT tersedia; metering tetap OFF.</td></tr>
+      <tr><td>Deposit per kamar</td><td><span class="tag t-ok">Ada</span></td><td>Rp300.000–600.000 sesuai kamar. Tidak boleh diubah admin (aturan D-05).</td></tr>
+      <tr><td>Tunggakan/piutang</td><td><span class="tag t-warn">Perlu dicek</span></td><td>Daftar tagihan yang belum lunas di luar sistem, bila ada.</td></tr>
+    </tbody>
+  </table>
+
+  <h3>2.6 Akun, akses, dan notifikasi</h3>
+  <table>
+    <thead><tr><th>Item</th><th>Status</th><th>Yang harus disiapkan</th></tr></thead>
+    <tbody>
+      <tr><td>Akun ADMIN/STAFF</td><td><span class="tag t-bad">Belum ada</span></td><td>Nama, email valid, dan role. Dibuat OWNER lewat menu Akun Pengguna.</td></tr>
+      <tr><td>Brevo (reset password)</td><td><span class="tag t-bad">401</span></td><td>Tambahkan IP server <code>203.161.184.108</code>, verifikasi pengirim, lalu rotasi kunci (kunci lama pernah terekspos).</td></tr>
+      <tr><td>Web push (VAPID)</td><td><span class="tag t-warn">Belum</span></td><td>Isi kunci VAPID di Pengaturan Operasional bila notifikasi push akan dipakai.</td></tr>
+      <tr><td>PIN owner &amp; smart lock</td><td><span class="tag t-warn">Perlu rotasi</span></td><td>PIN halaman okupansi dan kode gerbang; jangan dibagikan ke non-penghuni.</td></tr>
+      <tr><td>Sandi &amp; kunci</td><td><span class="tag t-warn">Perlu rotasi</span></td><td>Rotasi sandi DB, hapus berkas sandi sementara, cabut kunci SSH yang tidak dipakai.</td></tr>
+    </tbody>
+  </table>
+
+  <h3>2.7 Aturan dan konten</h3>
+  <table>
+    <thead><tr><th>Item</th><th>Status</th><th>Yang harus disiapkan</th></tr></thead>
+    <tbody>
+      <tr><td>FAQ aturan huni</td><td><span class="tag t-warn">Draft</span></td><td>Hewan + deposit, jumlah isi penghuni, prabayar, pembayaran, deposit, overstay, checkout, KTP.</td></tr>
+      <tr><td>Aturan rumah final</td><td><span class="tag t-warn">Perlu diputuskan</span></td><td>Tamu, jam tenang, merokok, hewan, parkir, dapur, keamanan.</td></tr>
+      <tr><td>Jam check-in/check-out</td><td><span class="tag t-warn">Konfirmasi</span></td><td>Check-in 14.00–22.00 dan check-out maks 12.00 (aturan rumah saat ini).</td></tr>
+      <tr><td>Alamat &amp; kontak publik</td><td><span class="tag t-warn">Konfirmasi</span></td><td>Alamat resmi (ada dua versi di sistem) dan nomor WhatsApp admin.</td></tr>
+      <tr><td>Kebijakan Wi-Fi</td><td><span class="tag t-warn">Konfirmasi</span></td><td>Gratis atau berbayar; bila berbayar, harga per bulan/minggu/hari.</td></tr>
+    </tbody>
+  </table>
+
+  <h3>2.8 Teknis go-live</h3>
+  <table>
+    <thead><tr><th>Item</th><th>Status</th><th>Yang harus disiapkan</th></tr></thead>
+    <tbody>
+      <tr><td>Backup database</td><td><span class="tag t-bad">Belum</span></td><td>Dump sekarang + jadwal harian + retensi 14 hari + satu uji restore ke DB terpisah. Perintah: lihat runbook backup.</td></tr>
+      <tr><td>Cron AutoOps</td><td><span class="tag t-bad">Kosong</span></td><td>Pasang cron pemanggil AutoOps dengan token; tanpa ini pengingat dan sweep tidak berjalan.</td></tr>
+      <tr><td>Domain &amp; HTTPS</td><td><span class="tag t-ok">Jalan</span></td><td>Pastikan sertifikat diperbarui otomatis dan <code>/version.json</code> mengembalikan build terbaru.</td></tr>
+      <tr><td>Resource server</td><td><span class="tag t-warn">449/512 MB</span></td><td>Kurangi proses Node menjadi satu, atau naikkan RAM, sebelum menambah pengguna.</td></tr>
+      <tr><td>Rollback</td><td><span class="tag t-warn">Perlu uji</span></td><td>Simpan paket build terakhir + langkah kembali ke versi sebelumnya.</td></tr>
+    </tbody>
+  </table>
+
+  <h2>3. Uji minimum sebelum mengumumkan go-live</h2>
+  <p class="meta">Jalankan berurutan. Bila satu langkah gagal, jangan lanjut ke pengumuman.</p>
+  <ul class="check" data-group="golive">
+    <li><input type="checkbox" id="g1"><label for="g1">Login OWNER berhasil; dashboard terbuka tanpa galat konsol.</label></li>
+    <li><input type="checkbox" id="g2"><label for="g2">13 kamar tampil dengan tarif, deposit, dan foto yang benar.</label></li>
+    <li><input type="checkbox" id="g3"><label for="g3">11 invoice lunas tetap lunas setelah reload; laporan tidak minus.</label></li>
+    <li><input type="checkbox" id="g4"><label for="g4">Check-in uji pada kamar uji (bukan kamar nyata) berhasil: stay, invoice, jurnal, meter awal.</label></li>
+    <li><input type="checkbox" id="g5"><label for="g5">Satu penghuni (dengan izin) login, melihat tagihan, dan mengunggah bukti bayar.</label></li>
+    <li><input type="checkbox" id="g6"><label for="g6">Checkout uji: tagihan, inspeksi, dan settlement deposit berjalan.</label></li>
+    <li><input type="checkbox" id="g7"><label for="g7">Uji restore backup ke DB terpisah berhasil dan jumlah baris utama cocok.</label></li>
+    <li><input type="checkbox" id="g8"><label for="g8">PWA terpasang di Android/iPhone; notifikasi push diterima bila diaktifkan.</label></li>
+    <li><input type="checkbox" id="g9"><label for="g9">Cron AutoOps terbukti berjalan (log) dan pengingat kontrak muncul.</label></li>
+    <li><input type="checkbox" id="g10"><label for="g10">Satu akun ADMIN/STAFF dibuat, login, lalu diuji batas aksesnya.</label></li>
+  </ul>
+
+  <h2>4. Bila muncul gejala ini, jangan laporkan sebagai bug baru</h2>
+  <table>
+    <thead><tr><th>Gejala</th><th>Sebab yang sudah diketahui</th><th>Status</th></tr></thead>
+    <tbody>
+      <tr><td>Laporan September "Belum Tertagih" padahal lunas</td><td>Laporan mencampur basis periode invoice dengan tanggal pembayaran</td><td><span class="tag t-bad">Belum diperbaiki</span></td></tr>
+      <tr><td>Halaman akun kas menampilkan saldo 0</td><td>Membaca kolom tersimpan, bukan saldo dari jurnal</td><td><span class="tag t-bad">Belum diperbaiki</span></td></tr>
+      <tr><td>"Lupa password" tidak mengirim email</td><td>Brevo belum aktif (IP ditolak)</td><td><span class="tag t-warn">Perlu konfigurasi</span></td></tr>
+      <tr><td>Pembayaran pada hunian terisi tidak bisa diubah</td><td>Aturan keamanan uang (bukan bug)</td><td><span class="tag t-info">Sesuai desain</span></td></tr>
+      <tr><td>Check-in lama menolak "KTP belum diverifikasi"</td><td>Gate lama masih aktif di produksi; keputusan 19 Okt menghapus blokir ini</td><td><span class="tag t-warn">Menunggu patch</span></td></tr>
+    </tbody>
+  </table>
+
+  <h2>5. Aturan data selama persiapan</h2>
+  <ul>
+    <li>Jangan menempelkan NIK lengkap, foto KTP, sandi, atau token ke chat, dokumen, atau tangkapan layar yang dibagikan.</li>
+    <li>Gunakan kamar dan tenant uji untuk skenario berisiko (check-in, checkout, pembatalan).</li>
+    <li>Catat setiap perubahan data nyata (tanggal, siapa, apa) supaya bisa ditelusuri.</li>
+    <li>Backup sebelum uji besar: minimal salinan basis data dan folder unggahan.</li>
+  </ul>
+
+  <div class="note ok">
+    <strong>Kriteria GO:</strong> semua bagian 2 berstatus siap; 10 uji minimum lulus; backup harian + satu uji restore terbukti; cron AutoOps berjalan; akun staf ada; KTP penghuni aktif terverifikasi; dan keputusan saldo awal sudah diambil.
+  </div>
+</main>
+
+<footer>
+  <div class="wrap">
+    KOST48 — halaman internal persiapan go-live. Angka bagian 1 adalah potret 19 Oktober 2026 dan akan berubah; selalu cek ulang di aplikasi.
+  </div>
+</footer>
+
+<script>
+(function () {
+  var KEY = 'kost48-checklist-golive-v1';
+  var boxes = Array.prototype.slice.call(document.querySelectorAll('ul.check input[type="checkbox"]'));
+  var state = {};
+  try { state = JSON.parse(localStorage.getItem(KEY) || '{}') || {}; } catch (e) { state = {}; }
+
+  function paint(box) {
+    var label = document.querySelector('label[for="' + box.id + '"]');
+    if (label) label.classList.toggle('done', box.checked);
+  }
+  boxes.forEach(function (box) {
+    box.checked = !!state[box.id];
+    paint(box);
+    box.addEventListener('change', function () {
+      state[box.id] = box.checked;
+      try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {}
+      paint(box);
+    });
+  });
+
+  document.getElementById('btn-print').addEventListener('click', function () { window.print(); });
+  document.getElementById('btn-clear').addEventListener('click', function () {
+    state = {};
+    try { localStorage.removeItem(KEY); } catch (e) {}
+    boxes.forEach(function (b) { b.checked = false; paint(b); });
+  });
+})();
+</script>
+</body>
+</html>

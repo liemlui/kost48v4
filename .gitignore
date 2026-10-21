@@ -133,3 +133,9 @@ storybook-static
 # Arsip legacy yang dikeluarkan dari dokumentasi (batch B2, 2026-10-05).
 # Boleh dipindah ke luar repo kapan saja tanpa mengubah apa pun di dokumentasi.
 .docs-legacy/
+
+# Kunci akses server + known_hosts (dibuat 2026-10-18, lihat docs/operations/akses-ssh.md).
+# Kredensial: JANGAN pernah di-commit, di-zip, atau ditempel ke chat/log.
+.ssh-kost48/
+kost48-known_hosts
+.kost48-known_hosts

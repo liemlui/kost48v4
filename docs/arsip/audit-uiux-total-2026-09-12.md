@@ -3,7 +3,7 @@
 > **Tanggal:** audit 12 September 2026; perbaikan sore 12 Sep dan sesi lanjutan 13 Sep 2026.
 > **Status:** bukti bertanggal - laporan lengkap audit UI/UX total (dinamis + statis) beserta hasil perbaikan T-01..T-09.
 > **Tujuan:** laporan rinci audit UI/UX total sebagai bukti bertanggal; status/antrean aktif tetap di [status-ao-lintas-portal.md](../audit/status-ao-lintas-portal.md).
-> **Rujukan:** [audit-uiux-ulang-2026-09-12.md](../audit/audit-2026-09.md) (ringkasan §0), [audit-uiux-lintas-portal-2026-07.md](audit-uiux-lintas-portal-2026-07.md) (AO-00..AO-23), [STATUS.md](../STATUS.md). Path lama `docs/AUDIT_UIUX_TOTAL_2026-09-12.md` sudah dihapus di Fase 3.
+> **Rujukan:** [audit-uiux-ulang-2026-09-12.md](audit-2026-09.md) (ringkasan §0), [audit-uiux-lintas-portal-2026-07.md](audit-uiux-lintas-portal-2026-07.md) (AO-00..AO-23), [STATUS.md](../STATUS.md). Path lama `docs/AUDIT_UIUX_TOTAL_2026-09-12.md` sudah dihapus di Fase 3.
 
 > Dipindah apa adanya dari `docs/AUDIT_UIUX_TOTAL_2026-09-12.md` (Tahap 3 batch B6, 23 Sep 2026) pada DOC-GOV-20260922.
 > Sifat: **bukti bertanggal** laporan lengkap; teks tidak diubah dan angka historis tidak diubah. Hanya 2 tujuan tautan relatif di-rebase ke basis `docs/audit/`.

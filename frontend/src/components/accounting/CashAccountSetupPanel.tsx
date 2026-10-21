@@ -65,7 +65,9 @@ export default function CashAccountSetupPanel({
       name: item.name,
       accountType: item.accountType,
       chartOfAccountId: item.chartOfAccountId,
-      currentBalanceRupiah: String(item.currentBalanceRupiah ?? 0),
+      // Kolom manual, bukan saldo hasil jurnal (AL-FIX-6) — edit tidak boleh menimpa
+      // saldo terhitung dengan angka turunan.
+      currentBalanceRupiah: String(item.manualBalanceRupiah ?? item.currentBalanceRupiah ?? 0),
       bankName: item.bankName ?? '',
       holderName: item.holderName ?? '',
       isDefault: item.isDefault,

@@ -7,12 +7,6 @@ Isi tabel diturunkan langsung dari setiap berkas (judul + "baca kalau"), jadi ti
 
 | Berkas | Judul | Ukuran | Kapan dibaca |
 |---|---|---:|---|
-| [data-master.md](data-master.md) | Data Master & Nilai Default KOST48 | 19.6 KB | — |
-| [default-dev.md](default-dev.md) | Default & Seed DEV | 28.1 KB | — |
-| [deploy-go-live.md](deploy-go-live.md) | Deploy, PWA & Go-Live — Runbook | 34.7 KB | — |
-| [efisiensi-hosting.md](efisiensi-hosting.md) | Efisiensi Hosting 512 MB (Fase EF) — Audit, Rencana, dan Pencatatan | 36.6 KB | — |
-| [go-live-cpanel.md](go-live-cpanel.md) | Checklist Go-Live cPanel | 28.8 KB | — |
-| [iot-tuya-setup.md](iot-tuya-setup.md) | IoT — Runbook Setup Tuya KWH | 21.0 KB | **PRE-IMPLEMENTATION RUNBOOK** |
-| [iot-water-meter-esp32.md](iot-water-meter-esp32.md) | IoT — Spesifikasi & Prosedur Water Meter ESP32-C3 | 20.6 KB | **PROTOTYPE SPECIFICATION** |
-| [produksi.md](produksi.md) | Produksi & Operasional Harian (Shared Hosting) | 37.1 KB | — |
-| [verifikasi-keuangan.md](verifikasi-keuangan.md) | Verifikasi Keuangan — Harness Eksekutor | 10.0 KB | — |
+| [default-dev.md](default-dev.md) | Default, Seed & Data Master | 48.7 KB | — |
+| [iot.md](iot.md) | IoT — Runbook KWH & Water Meter | 42.3 KB | butuh prosedur Tuya KWH atau spesifikasi water meter ESP32-C3. |
+| [produksi.md](produksi.md) | Produksi & Operasional Harian (Shared Hosting) | 72.6 KB | akan membuat dump produksi, memasang jadwal harian, atau menguji restore. · **Jangan** dibaca kalau: mencari aturan bisn |

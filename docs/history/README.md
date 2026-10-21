@@ -7,9 +7,4 @@ Isi tabel diturunkan langsung dari setiap berkas (judul + "baca kalau"), jadi ti
 
 | Berkas | Judul | Ukuran | Kapan dibaca |
 |---|---|---:|---|
-| [batas-kejujuran.md](batas-kejujuran.md) | BATAS KEJUJURAN — apa yang sudah dibuktikan, dan apa yang belum | 7.2 KB | akan menulis "selesai/hijau/terverifikasi", atau menilai apakah sebuah klaim di repo ini sudah dibuktikan. · **Jangan**  |
-| [bukti-2026-10.md](bukti-2026-10.md) | Bukti bertanggal — Oktober 2026 (dipindah dari STATUS §4 dan §8) | 100.0 KB | memeriksa bukti penutupan tugas, atau mencari mengapa sebuah tugas dianggap selesai. · **Jangan** dibaca kalau: mencari  |
-| [fase-ao-ef.md](fase-ao-ef.md) | Fase AO — Audit & Hardening UI/UX Lintas Portal (riwayat) | 15.0 KB | — |
-| [governance.md](governance.md) | Riwayat konsolidasi governance 20 September 2026 | 23.1 KB | — |
-| [izin-dan-catatan-keputusan-owner.md](izin-dan-catatan-keputusan-owner.md) | Izin & Catatan Keputusan Owner — riwayat (kelas non-keputusan register M02) | 6.1 KB | — |
-| [laporan-duplikat.md](laporan-duplikat.md) | Laporan Duplikasi Isi (konsolidasi dokumentasi) | 7.8 KB | — |
+| [batas-kejujuran.md](batas-kejujuran.md) | BATAS KEJUJURAN — apa yang sudah dibuktikan, dan apa yang belum | 7.3 KB | akan menulis "selesai/hijau/terverifikasi", atau menilai apakah sebuah klaim di repo ini sudah dibuktikan. · **Jangan**  |

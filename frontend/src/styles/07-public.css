@@ -879,7 +879,11 @@
   width: 100%;
   height: clamp(280px, 44vw, 460px);
   display: block;
-  object-fit: cover;
+  /* Galeri detail adalah tempat calon penghuni memeriksa kamar: foto TIDAK dipotong.
+     `contain` + latar netral menampilkan seluruh foto apa pun rasio unggahannya
+     (18 Okt 2026). Thumbnail di bawah tetap `cover` karena hanya pemilih foto. */
+  object-fit: contain;
+  background: var(--gray-100);
   border-radius: 1.05rem;
 }
 

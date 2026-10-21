@@ -34,7 +34,9 @@ const BERKAS = {
   "docs/PETA-KODE.md": BLOK + "# PETA-KODE\n\n## 1. Peta\n\nIsi.\n",
   "docs/ANTREAN.md":
     BLOK +
-    "# ANTREAN\n\n## 1. Antrean\n\nRujukan sah: `docs/KONTRAK.md` dan [KONTRAK](KONTRAK.md#1-aturan).\n\n- [ ] TUGAS-1 — contoh | Gate: tidak ada\n",
+    "# ANTREAN\n\n## 1. Antrean\n\nRujukan sah: `docs/KONTRAK.md` dan [KONTRAK](KONTRAK.md#1-aturan).\n\n- [ ] TUGAS-1 — contoh | Gate: tidak ada | checklist: kerja/TASK-AKTIF.md#checklist\n",
+  "docs/kerja/TASK-AKTIF.md":
+    "# TASK-AKTIF (pohon uji)\n\n<!-- checklist-otoritatif -->\n\n## Checklist\n\n<a id=\"checklist\"></a>\n\n- [ ] W-TNT-001 — contoh langkah\n",
   "docs/audit/index-cakupan.md": "# Indeks cakupan audit\n\nRujukan: `docs/KONTRAK.md`.\n",
 };
 
@@ -106,6 +108,8 @@ const KASUS = [
   ["R9", "R9 nomor bagian ganda", () => tulis("docs/KONTRAK.md", BLOK + "# KONTRAK\n\n## 1. Aturan\n\nA\n\n## 1. Lagi\n\nB\n")],
   ["R10", "R10 judul H1 ganda", () => tulis("docs/KONTRAK.md", BLOK + "# KONTRAK\n\n# KONTRAK KEDUA\n\nIsi.\n")],
   ["R11", "R11 salinan berkas tangga", () => tulis("docs/salinan/AGENTS.md", "# Salinan AGENTS\n\nIsi.\n")],
+  ["R12", "R12 checklist tanpa rujukan ANTREAN", () => tulis("docs/ANTREAN.md", baca("docs/ANTREAN.md").replace(" | checklist: kerja/TASK-AKTIF.md#checklist", ""))],
+  ["R12", "R12 anchor checklist salah", () => tulis("docs/ANTREAN.md", baca("docs/ANTREAN.md").replace("kerja/TASK-AKTIF.md#checklist", "kerja/TASK-AKTIF.md#tidak-ada"))],
 ];
 
 for (const [id, judul, suntik] of KASUS) {

@@ -4,10 +4,10 @@
 
 
 **Fakta** · Status: **aktif** · potret **2026-10-09** — ukur ulang: `node scripts/ukur-kesegaran-docs.mjs` (24 rujukan kode tak terselesaikan pada potret terakhir; [batas-kejujuran](history/batas-kejujuran.md) §2). Tujuan: peta navigasi kode kanonik — peta audit bertahap, konvensi modul, modul backend → path → tanggung jawab, grup halaman frontend, index model Prisma, flow & audit anchor, dan shared utility (dari M00). (jangan percaya tanggal di berkas ini)
-Rujukan: [KEPUTUSAN-OWNER](KEPUTUSAN-OWNER.md) · [ANTREAN](./ANTREAN.md) · [ANTREAN](./ANTREAN.md) · [audit-map](../.audit-map/README.md) · [product/scope.md](product/scope.md)
+Rujukan: [KEPUTUSAN-OWNER](KEPUTUSAN-OWNER.md) · [ANTREAN](./ANTREAN.md) · [ANTREAN](./ANTREAN.md) · [audit-map](../.audit-map/README.md) · [product/scope.md](product/product.md#d4d-scope)
 
 > Migrasi dari docs/M00_CODEMAP.md (B5 Tahap 3, 23 Sep 2026) pada DOC-GOV-20260922; teks peta tidak diubah.
-> Batch B5 memindahkan **seluruh isi peta M00 apa adanya** (L6–L172) ke file ini; urutan bagian sama seperti aslinya. Peta scope per role/flow ada di [product/scope.md](product/scope.md).
+> Batch B5 memindahkan **seluruh isi peta M00 apa adanya** (L6–L172) ke file ini; urutan bagian sama seperti aslinya. Peta scope per role/flow ada di [product/scope.md](product/product.md#d4d-scope).
 
 > **Tujuan:** lompat langsung ke file yang benar tanpa scan buta. **Ini peta NAVIGASI, bukan sumber kebenaran perilaku** — detail aturan/flow ada di M-file domain (kolom "Detail"). Verifikasi simbol via Grep sebelum edit; path bisa bergeser.
 > Stack: backend NestJS+Prisma+PostgreSQL (`backend/`), frontend React+Vite (`frontend/`). 46 modul · 62 model (termasuk `PublicRoomAvailability`; hitungan schema 8 Sep 2026) · 26 grup halaman (direktori aktual 8 Sep 2026).
@@ -26,7 +26,7 @@ Rujukan: [KEPUTUSAN-OWNER](KEPUTUSAN-OWNER.md) · [ANTREAN](./ANTREAN.md) · [AN
 
 ## Update implementasi (riwayat)
 
-Catatan update implementasi peta kode (per 2026-07-23) dipindah ke [history/bukti-2026-10.md](history/bukti-2026-10.md) — di sini hanya peta yang berlaku sekarang.
+Catatan update implementasi peta kode (per 2026-07-23) dipindah ke [history/bukti-2026-10.md](arsip/bukti-2026-10.md) — di sini hanya peta yang berlaku sekarang.
 ## Backend modul → path → tanggung jawab
 
 ### Keuangan & Akuntansi — detail: `docs/domain/keuangan.md`
@@ -47,7 +47,7 @@ Catatan update implementasi peta kode (per 2026-07-23) dipindah ke [history/bukt
 | assets | `assets/assets.service.ts` | FixedAsset + depresiasi (run/line) |
 | reports | `reports/reports.service.ts` | Laporan gabungan operasional+keuangan |
 
-### Siklus Huni — detail: `docs/domain/hunian.md` + flow `docs/domain/flow.md`
+### Siklus Huni — detail: `docs/domain/hunian.md` + flow `docs/domain/publik.md`
 | Modul/Service | Path | Tanggung jawab |
 |---|---|---|
 | stays (core) | `stays/stays.service.ts` | Lifecycle Stay: booking→huni→selesai (promoted=`initialMetersPromotedAt`) |
@@ -61,7 +61,7 @@ Catatan update implementasi peta kode (per 2026-07-23) dipindah ke [history/bukt
 | rooms | `rooms/rooms.service.ts` | Kamar + RoomFacility (defaultDepositRupiah) |
 | meter-readings | `meter-readings/meter-readings.service.ts` | Meter listrik/air pascabayar; quota listrik mengikuti periode sewa lunas (bukan selalu bulan kalender) |
 
-### Operasional & Staff — detail: `domain/operasional.md`
+### Operasional & Staff — detail: `domain/hunian.md`
 | Modul/Service | Path | Tanggung jawab |
 |---|---|---|
 | tickets | `tickets/tickets.service.ts` | Tiket keluhan/perbaikan + tiket inspeksi (guard AVAILABLE) |
@@ -114,7 +114,7 @@ Catatan update implementasi peta kode (per 2026-07-23) dipindah ke [history/bukt
 | ancillary-revenue | `ancillary-revenue/ancillary-revenue.service.ts` | Pendapatan tambahan dinamis (OC-01) |
 
 ## Frontend grup halaman (`frontend/src/pages/`)
-Standar struktur dan progressive disclosure Owner/Admin: `docs/product/portal-owner-admin.md`.
+Standar struktur dan progressive disclosure Owner/Admin: `docs/arsip/portal-owner-admin.md`.
 `public` katalog+booking publik · `auth` login · `portal` area tenant (MyStay, invoice, loyalty, manual) · `dashboard` (DashboardAdmin owner/admin) · `stays` · `bookings` · `renew-requests` · `invoices` · `payments` · `finance` (AccountingSetup) · `reports` · `rooms` · `resources`+`admin` (CRUD generik via ConfiguredResourcePage/SimpleCrudPage) · `tickets` · `staff`+`staff-routines` · `services` · `marketing` · `loyalty` · `notifications`+`reminders` · `settings` · `profile` · `components/ai` (Fase G reusable AI button/drawer).
 
 ## Index model (62) — grup → `schema.prisma`
@@ -127,7 +127,7 @@ Standar struktur dan progressive disclosure Owner/Admin: `docs/product/portal-ow
 - **Growth/AI:** LoyaltyPoint, LoyaltyReward, Redemption, PeerBehaviorReport, TenantReferral, Faq, AdditionalService, ServiceInterest, SatisfactionSurvey, MarketAnalysis, AiDraft, GuestPreferenceSurvey, ExternalReview
 
 ## Flow & audit anchor
-Tabel flow + method-anchor: `docs/domain/kontrak.md` (kontrak/uang). Job otomatis → `domain/operasional.md` di audit/audit-operasional-2026-07.md § P5 Auto-Ops. Keputusan owner (84+): `docs/KEPUTUSAN-OWNER.md`. Audit terdahulu → `docs/arsip/legacy/_previous_cycles/M09_AUDIT.md`.
+Tabel flow + method-anchor: `docs/domain/publik.md` (kontrak/uang). Job otomatis → `domain/hunian.md` di audit/audit-operasional-2026-07.md § P5 Auto-Ops. Keputusan owner (84+): `docs/KEPUTUSAN-OWNER.md`. Audit terdahulu → `docs/arsip/legacy/_previous_cycles/M09_AUDIT.md`.
 
 ## Shared utilities (ditambahkan 2026-07-07)
 | Utility | Path | Tanggung jawab |
@@ -144,13 +144,13 @@ Tabel flow + method-anchor: `docs/domain/kontrak.md` (kontrak/uang). Job otomati
 
 ## Frontend — Redundansi UI/UX (Fase AM)
 
-✅ **16/16 task selesai** — Detail → `docs/arsip/legacy/_previous_cycles/M14_REDUNDANSI_UI_UX.md`
+**16/16 task selesai** — Detail → `docs/arsip/legacy/_previous_cycles/M14_REDUNDANSI_UI_UX.md`
 
 | Task | Dampak |
 |------|--------|
 | AM-01 Unifikasi WhatsApp URL | 13 instance → 1 `utils/whatsapp.ts` |
 | AM-02 Hapus RoleWorkspaceTabs | Duplikat dashboard tabs di AppLayout |
-| AM-05 Tambah Pengumuman sidebar | Ikon 📣 di nav admin |
+| AM-05 Tambah Pengumuman sidebar | Ikon pengumuman di nav admin |
 | AM-06/08/09 RoomCard reusable | FacilityList, RoomPriceTable, RoomSpecChips (3 komponen baru) |
 | AM-07 Fix RoomComparePanel | Regex inline → shared utility |
 | AM-11/12 Hapus tombol duplikat | Owner dashboard + FinancialRatiosPage |
@@ -158,10 +158,10 @@ Tabel flow + method-anchor: `docs/domain/kontrak.md` (kontrak/uang). Job otomati
 | AM-15 Storybook pilot | 3 story (StatusBadge, EmptyState, StatCard) |
 | AM-16 E2E smoke test | 3 flow kritis (public, login, dashboard) |
 
-**Audit skor frontend:** 7/8 kategori ⭐⭐⭐⭐⭐, 1/8 ⭐⭐⭐⭐ (styling 99% CSS global)
+**Audit skor frontend:** 7/8 kategori bintang 5, 1/8 bintang 4 (styling 99% CSS global)
 
 ## Cross-Dimension (P8) — Audit 360°
-✅ 215 `@@index` di 61 model — semua FK utama terindeks · ✅ Global JWT default-deny + DTO validation + pagination + error handling + PWA · ✅ Code splitting + skeleton + empty state chart (✅ P8-03) + 404 (✅ Fase L) + toast (✅ Fase F+M) · ✅ Refresh Token httpOnly cookie (M17 P3-01)
+215 `@@index` di 61 model — semua FK utama terindeks · Global JWT default-deny + DTO validation + pagination + error handling + PWA · Code splitting + skeleton + empty state chart (P8-03) + 404 (Fase L) + toast (Fase F+M) · Refresh Token httpOnly cookie (M17 P3-01)
 
 ## Dokumen audit terbaru
 - **Audit UI/UX lintas portal aktif (30 Jul 2026):** `docs/audit/status-ao-lintas-portal.md` — 66 kombinasi awal, verifikasi homepage produksi, review statis dashboard Owner/Admin, benchmark terkurasi, antrean kolaboratif AO-00..AO-23

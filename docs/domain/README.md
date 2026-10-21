@@ -7,12 +7,7 @@ Isi tabel diturunkan langsung dari setiap berkas (judul + "baca kalau"), jadi ti
 
 | Berkas | Judul | Ukuran | Kapan dibaca |
 |---|---|---:|---|
-| [ai.md](ai.md) | AI Owner/Admin — Fase G Approval Copilot | 29.7 KB | — |
-| [flow.md](flow.md) | Flow Map Kost48 | 35.9 KB | — |
-| [harga.md](harga.md) | Harga — Aturan Penentuan Harga Kamar | 13.2 KB | — |
-| [hunian.md](hunian.md) | Hunian — Siklus, Renewal, Checkout, Deposit | 12.2 KB | — |
-| [iot.md](iot.md) | IoT — Spesifikasi, Inventaris Perangkat, dan Arsitektur | 35.2 KB | **Fondasi backend/firmware sudah diimplementasikan; rollout perangkat, mapping, dan UAT produksi masih diperlukan.** |
-| [keuangan.md](keuangan.md) | Keuangan — Domain | 9.6 KB | — |
-| [kontrak.md](kontrak.md) | Kontrak & Business Rules Kost48 | 21.8 KB | — |
-| [operasional.md](operasional.md) | Operasional — Aturan, Inventaris, Staf, Notifikasi, Auth | 25.1 KB | — |
-| [publik.md](publik.md) | Publik — Marketing, UI/UX, Gamifikasi, Growth | 51.4 KB | — |
+| [ai.md](ai.md) | AI Owner/Admin — Fase G Approval Copilot | 65.2 KB | **Fondasi backend/firmware sudah diimplementasikan; rollout perangkat, mapping, dan UAT produksi masih diperlukan.** |
+| [hunian.md](hunian.md) | Hunian — Siklus, Renewal, Checkout, Deposit | 38.1 KB | — |
+| [keuangan.md](keuangan.md) | Keuangan — Domain | 23.2 KB | — |
+| [publik.md](publik.md) | Publik — Marketing, UI/UX, Gamifikasi, Growth | 109.5 KB | — |

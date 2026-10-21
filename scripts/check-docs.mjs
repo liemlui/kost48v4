@@ -9,7 +9,7 @@
 // Aturan:
 //   R1  angka volatil tanpa penanda potret pada DOKUMEN KONTRAK
 //   R2  tautan relatif mati di dokumen aktif
-//   R3  kotak `[ ]` otoritatif hanya di docs/ANTREAN.md
+//   R3  kotak `[ ]` otoritatif di docs/ANTREAN.md + `## Checklist` dokumen tugas bertanda (D5)
 //   R4  blok baca wajib (jenis/status/untuk siapa/baca kalau) pada berkas tangga wajib
 //   R5  plafon byte: AGENTS.md <=12 KB · berkas wajib <=16 KB · rujukan <=48 KB · berkas kerja batch (docs/rencana) <=16 KB
 //   R6  rujukan `docs/...` di dalam backtick yang tidak ada di disk (catatan bertanggal dikecualikan)
@@ -18,6 +18,7 @@
 //   R9  nomor bagian `## N.` dipakai lebih dari sekali dalam satu berkas hidup (catatan bertanggal dikecualikan)
 //   R10 lebih dari satu judul H1 dalam satu berkas hidup (gejala dua dokumen digabung jadi satu)
 //   R11 salinan berkas tangga wajib di luar rumah kanoniknya (zona "jangan dibaca" dikecualikan)
+//   R12 ikatan ANTREAN ↔ checklist dokumen tugas: pointer `checklist:` harus hidup, checklist aktif dirujuk
 //
 // Kalibrasi v1.1 (2026-10-05), dua koreksi dari hasil jalan pertama — keduanya agar gate
 // tidak menuduh yang benar:
@@ -111,7 +112,7 @@ import { readFileSync, readdirSync, existsSync, statSync } from "node:fs";
 import { join, relative, dirname, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 
-const VERSI_GATE = "v2.0";
+const VERSI_GATE = "v2.1";
 // Akar repo bisa diarahkan lewat argumen pertama: `node scripts/check-docs.mjs <akar>`.
 // Dipakai oleh SELF-TEST (scripts/check-docs.selftest.mjs), yang membangun pohon sintetis lalu
 // membuktikan gate INI benar-benar GAGAL saat seharusnya gagal — pagar yang tidak pernah terbukti
@@ -142,6 +143,8 @@ const ANTREAN = "docs/ANTREAN.md";
 const PENANDA_NON_OTORITATIF = /<!--\s*kotak-non-otoritatif\s*-->/i;
 const RUMAH_KOTAK = [ANTREAN, "docs/STATUS.md"];                        // STATUS sampai B5 melebur ke ANTREAN
 const KARTU_BUKTI_KOTAK = /[\\/]docs[\\/](history|audit|arsip)[\\/]/;   // catatan bertanggal, bukan antrean
+const PENANDA_CHECKLIST = /<!--\s*checklist-otoritatif\s*-->/i;         // D5: checklist di dokumen tugas
+const CHECKLIST_TUGAS = /^docs\/kerja\/(TASK-[^/]+|TASK-AKTIF)\.md$/;   // D5: rumah checklist yang sah
 const INDEKS_CAKUPAN = "docs/audit/index-cakupan.md";                   // pengganti checklist audit (Q13)
 const CATATAN_R6 = /[\\/]docs[\\/](rencana|history|arsip)[\\/]/;         // R6: catatan bertanggal dikecualikan
 const PLAFON_AGENTS = 12 * 1024;
@@ -259,6 +262,13 @@ for (const file of diperiksa) {
   const relFile = rel(file);
   const n = (readFileSync(file, "utf8").match(/^\s*[-*]\s*\[ \]/gm) || []).length;
   if (n === 0) continue;
+  if (CHECKLIST_TUGAS.test(relFile)) {
+    const isi = readFileSync(file, "utf8");
+    if (PENANDA_CHECKLIST.test(isi) && /^## Checklist\b/m.test(isi)) {
+      kotakInfo.push({ file: relFile, n, sebab: "checklist tugas bertanda (D5)" });
+      continue;
+    }
+  }
   if (RUMAH_KOTAK.includes(relFile)) { kotakInfo.push({ file: relFile, n, sebab: "rumah otoritatif" }); continue; }
   if (KARTU_BUKTI_KOTAK.test(file)) { kotakInfo.push({ file: relFile, n, sebab: "catatan bertanggal (audit/history/arsip)" }); continue; }
   const kepala = readFileSync(file, "utf8").split(/\r?\n/).slice(0, 40).join("\n");
@@ -491,6 +501,42 @@ for (const file of berkasAktif) {
   if (kanonik.size === 0) catat("R11", ROOT, 0, "daftar berkas tangga kosong — periksa apakah pola R11 masih cocok");
 }
 
+// ── R12 — ikatan antrean ↔ checklist dokumen tugas (D5) ────────────────────
+{
+  const pointers = [];
+  const antPath = join(ROOT, ANTREAN);
+  if (!existsSync(antPath)) {
+    catat("R12", antPath, 0, "ANTREAN belum ada — ikatan checklist tidak bisa diperiksa");
+  } else {
+    readFileSync(antPath, "utf8").split(/\r?\n/).forEach((line, i) => {
+      const hits = line.match(/checklist:\s*[^\s|)]+/g) || [];
+      for (const hit of hits) {
+        const raw = hit.replace(/^checklist:\s*/, "");
+        const [p, anchor] = raw.split("#");
+        const abs = p.startsWith("docs/")
+          ? join(ROOT, ...p.split("/"))
+          : join(ROOT, "docs", ...p.split("/"));
+        if (!existsSync(abs)) {
+          catat("R12", antPath, i + 1, `checklist menunjuk berkas tidak ada: ${p}`);
+          continue;
+        }
+        if (anchor && !new RegExp(`id=["']${anchor}["']`).test(readFileSync(abs, "utf8"))) {
+          catat("R12", antPath, i + 1, `anchor checklist tidak ada: ${raw}`);
+        }
+        pointers.push(abs);
+      }
+    });
+  }
+  const taskDocs = berkasAktif.filter((f) => {
+    if (!CHECKLIST_TUGAS.test(rel(f))) return false;
+    const isi = readFileSync(f, "utf8");
+    return PENANDA_CHECKLIST.test(isi) && /^## Checklist\b/m.test(isi);
+  });
+  for (const f of taskDocs) {
+    if (!pointers.includes(f)) catat("R12", f, 0, "checklist aktif tidak dirujuk satu baris ANTREAN");
+  }
+}
+
 // ── CATATAN ARSIP (T-05) — kotak `[ ]` di dalam arsip beku (dipasang 2026-10-07, batch SISA-DOCS) ──
 // Dipindai tiap kali gate jalan, TIDAK dihitung sebagai pelanggaran dan tidak mengubah exit code.
 // Alasan lengkap: kalibrasi 13 di kepala skrip. Bentuknya sama dengan laporan anchor "rapuh" R8:
@@ -541,6 +587,7 @@ const judul = {
   R9: "R9 nomor bagian ganda",
   R10: "R10 judul H1 ganda",
   R11: "R11 salinan berkas tangga",
+  R12: "R12 ikatan antrean ↔ checklist dokumen tugas",
 };
 
 console.log(`=== CHECK-DOCS ${VERSI_GATE} (gate dokumen KOST48) ===`);
@@ -548,7 +595,7 @@ console.log(`berkas diperiksa : ${diperiksa.length} aktif = ${berkasAktif.length
 console.log(`versi kanonik    : ${[...versiDiterima].join(", ")} (dari frontend/src/config/version.ts + package.json)`);
 console.log("");
 
-for (const rule of ["R1", "R2", "R3", "R4", "R5", "R6", "R7", "R8", "R9", "R10", "R11"]) {
+for (const rule of ["R1", "R2", "R3", "R4", "R5", "R6", "R7", "R8", "R9", "R10", "R11", "R12"]) {
   const g = grup(rule);
   console.log(`— ${judul[rule]}: ${g.length}`);
   if (rule === "R3") {
@@ -609,7 +656,8 @@ Cara membetulkan:
   R1  hapus angkanya, ganti dengan perintah pengukurnya; atau tulis sebagai potret bertanggal
       ("potret 2026-10-05") yang memuat kata penanda riwayat.
   R2  perbaiki/arahkan ulang tautannya ke rumah kanonik.
-  R3  kotak pekerjaan hanya di docs/ANTREAN.md; di tempat lain turunkan derajatnya jadi daftar biasa.
+  R3  kotak pekerjaan hanya di docs/ANTREAN.md dan di "## Checklist" dokumen tugas bertanda
+      <!-- checklist-otoritatif -->; di tempat lain turunkan derajatnya jadi daftar biasa.
   R4  tambahkan blok baca di 12 baris pertama berkas tangga wajib.
   R5  rampingkan berkas, atau pecah dengan daftar isi berjangkar.
   R6  perbaiki rujukan backtick ke berkas yang benar, atau tandai barisnya sebagai catatan bertanggal.
@@ -622,5 +670,7 @@ Cara membetulkan:
   R10 berkas hidup hanya boleh punya satu judul H1; turunkan judul kedua jadi "## " (slug tidak berubah),
       atau pisahkan dokumennya ke berkas sendiri.
   R11 berkas tangga wajib hanya boleh ada di rumah kanoniknya; salinan di tempat lain dipindahkan
-      atau dihapus (zona ".design-audit/.docs-legacy/.audit-map" memang dikecualikan).`);
+      atau dihapus (zona ".design-audit/.docs-legacy/.audit-map" memang dikecualikan).
+  R12 setiap baris ANTREAN yang memuat "checklist:" harus menunjuk berkas+anchor yang ada, dan
+      setiap checklist tugas bertanda harus dirujuk satu baris ANTREAN.`);
 process.exit(dilewati.length > 0 ? 2 : 1);

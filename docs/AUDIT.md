@@ -4,7 +4,7 @@
 > · Baca kalau: butuh status audit terkini atau mencari temuan bertanggal. · **Jangan** dibaca kalau: butuh pekerjaan berikutnya (itu [ANTREAN](ANTREAN.md)).
 
 
-> **Rumah kanonik status audit**: indeks audit, gate verifikasi, status temuan, dan bukti bertanggal. Berkas ini adalah **titik masuk** — laporan rinci ada di `docs/audit/` (§4).
+> **Rumah kanonik status audit**: indeks audit, gate verifikasi, status temuan, dan bukti bertanggal. Berkas ini adalah **titik masuk** — laporan rinci bertanggal ada di `docs/arsip/` (§4) sejak batch D4a; indeks aktif di `docs/audit/`.
 > Otoritas: prompt owner > [ANTREAN](./ANTREAN.md) (antrean/gate) > [AGENTS](../AGENTS.md) (aturan verifikasi) > berkas ini.
 > **Arti status di sini:** audit lama berlaku pada lingkup dan waktu yang disebut. Audit bukan **PASS** untuk perubahan baru, bukan bukti deployment, dan bukan bukti dampak runtime.
 > Dibuat 23 September 2026 (Fase 2 konsolidasi). Status tahap: [ANTREAN](./ANTREAN.md).
@@ -27,8 +27,8 @@
 
 | Temuan | Status | Bukti |
 |---|---|---|
-| P1-01, P1-02, P1-03 (jurnal & deposit ledger) | indikasi sudah diperbaiki — **verifikasi statis**, belum UAT | [audit/p1-uang-status-2026-09-23.md](audit/audit-uang-huni-2026-07.md) · [audit/audit-360-uang-2026-07.md](audit/audit-uang-huni-2026-07.md) |
-| P1-04 | **diperbaiki lokal 25 Sep**; dedupe DB-level tetap terbuka | [audit/p1-uang-verifikasi-2026-09-25.md](audit/p1-uang-verifikasi-2026-09-25.md) |
+| P1-01, P1-02, P1-03 (jurnal & deposit ledger) | indikasi sudah diperbaiki — **verifikasi statis**, belum UAT | [audit/p1-uang-status-2026-09-23.md](arsip/audit-uang-huni-2026-07.md) · [audit/audit-360-uang-2026-07.md](arsip/audit-uang-huni-2026-07.md) |
+| P1-04 | **diperbaiki lokal 25 Sep**; dedupe DB-level tetap terbuka | [audit/p1-uang-verifikasi-2026-09-25.md](arsip/p1-uang-verifikasi-2026-09-25.md) |
 | P1-05 | accepted behaviour owner: submission kedaluwarsa tetap `EXPIRED` | sama |
 | P1-06, P1-07 | indikasi diperbaiki — **verifikasi statis**, belum UAT | sama |
 | P1-08 | masih ada tetapi jalurnya sempit; belum diperbaiki | sama |
@@ -41,27 +41,27 @@ Audit lanjutan P1-04..P1-09 sudah dilakukan 25 Sep 2026. Status di atas tetap st
 | Tanggal / lingkup | Berkas |
 |---|---|
 | Indeks cakupan audit total (135 ID) | [audit/audit-checklist-total.md](./arsip/audit-checklist-total.md) |
-| Audit modul pertama: `frontend/src/pages/auth` (20 Sep 2026) | [audit/frontend-auth.md](audit/audit-modul-2026.md) |
-| Audit ulang modul kedua: backend auth / BE-002 (24 Sep 2026) | [audit/backend-auth-2026-09-24.md](audit/backend-auth-2026-09-24.md) |
-| Audit 360° flow uang (Jul 2026) | [audit/audit-360-uang-2026-07.md](audit/audit-uang-huni-2026-07.md) |
-| Audit 360° flow huni (Jul 2026) | [audit/audit-360-huni-2026-07.md](audit/audit-uang-huni-2026-07.md) |
-| Audit operasional, inventaris, notifikasi & IoT (Jul 2026) | [audit/audit-operasional-2026-07.md](audit/audit-operasional-2026-07.md) |
+| Audit modul pertama: `frontend/src/pages/auth` (20 Sep 2026) | [audit/frontend-auth.md](arsip/audit-modul-2026.md) |
+| Audit ulang modul kedua: backend auth / BE-002 (24 Sep 2026) | [audit/backend-auth-2026-09-24.md](arsip/backend-auth-2026-09-24.md) |
+| Audit 360° flow uang (Jul 2026) | [audit/audit-360-uang-2026-07.md](arsip/audit-uang-huni-2026-07.md) |
+| Audit 360° flow huni (Jul 2026) | [audit/audit-360-huni-2026-07.md](arsip/audit-uang-huni-2026-07.md) |
+| Audit operasional, inventaris, notifikasi & IoT (Jul 2026) | [audit/audit-operasional-2026-07.md](arsip/audit-operasional-2026-07.md) |
 | Audit UI/UX lintas portal (30 Jul 2026) | [audit/audit-uiux-lintas-portal-2026-07.md](arsip/audit-uiux-lintas-portal-2026-07.md) |
-| Audit lintas scope (29 Jul 2026, Reasonix) | [audit/audit-lintas-scope-2026-07-29.md](audit/audit-lintas-scope-2026-07-29.md) |
-| Audit menyeluruh kode (30 Jul 2026) | [audit/audit-menyeluruh-2026-07.md](audit/audit-modul-2026.md) |
-| Audit dokumentasi & urutan kerja (8 Sep 2026; diperbarui 22–23 Sep) | [audit/audit-dokumentasi-2026-09.md](audit/audit-2026-09.md) |
+| Audit lintas scope (29 Jul 2026, Reasonix) | [audit/audit-lintas-scope-2026-07-29.md](arsip/audit-lintas-scope-2026-07-29.md) |
+| Audit menyeluruh kode (30 Jul 2026) | [audit/audit-menyeluruh-2026-07.md](arsip/audit-modul-2026.md) |
+| Audit dokumentasi & urutan kerja (8 Sep 2026; diperbarui 22–23 Sep) | [audit/audit-dokumentasi-2026-09.md](arsip/audit-2026-09.md) |
 | Audit UI/UX total (12 Sep 2026) | [audit/audit-uiux-total-2026-09-12.md](arsip/audit-uiux-total-2026-09-12.md) |
-| Audit ulang UI/UX dinamis — 180 pemeriksaan (12 Sep 2026) | [audit/audit-uiux-ulang-2026-09-12.md](audit/audit-2026-09.md) |
-| Audit halaman utama produksi, mobile-first (15 Sep 2026) | [audit/audit-homepage-produksi-2026-09-15.md](audit/audit-2026-09.md) |
+| Audit ulang UI/UX dinamis — 180 pemeriksaan (12 Sep 2026) | [audit/audit-uiux-ulang-2026-09-12.md](arsip/audit-2026-09.md) |
+| Audit halaman utama produksi, mobile-first (15 Sep 2026) | [audit/audit-homepage-produksi-2026-09-15.md](arsip/audit-2026-09.md) |
 | Status & antrean eksekusi Fase AO (+ gate DoD) | [audit/status-ao-lintas-portal.md](audit/status-ao-lintas-portal.md) |
-| Status temuan P1-01..P1-09 (verifikasi 23 Sep 2026) | [audit/p1-uang-status-2026-09-23.md](audit/audit-uang-huni-2026-07.md) |
-| Audit kekuatan dokumentasi & dokumentasi kode (24 Sep 2026, read-only) | [audit/audit-kekuatan-dokumentasi-2026-09-24.md](audit/audit-kekuatan-dokumentasi-2026-09-24.md) |
-| Z-19 Dashboard Owner (25 Sep 2026, audit statis; gate manual terbuka) | [audit/owner-dashboard-z19-2026-09-25.md](audit/owner-dashboard-z19-2026-09-25.md) |
-| IMPACT-01 (25 Sep 2026, review independen + FIX-A) | [audit/payment-impact-review-2026-09-25.md](audit/payment-impact-review-2026-09-25.md) |
-| Recon infrastruktur AI untuk lapisan agenda keputusan (25 Sep 2026, statis) | [audit/ai-agenda-recon-2026-09-25.md](audit/ai-agenda-recon-2026-09-25.md) |
-| Kesiapan docs sebagai aturan vs doktrin eksternal (7 Okt 2026, read-only; gate hijau, **16 temuan** — TINGGI sudah ditutup, 1 exception owner `PII-DOC-TENANT`; T-14 (banner arsip) dan T-15 (line ending, 114 berkas dinormalkan) **diputuskan + dieksekusi** 7 Okt; T-16 peringatan: 25 "mojibake" adalah kutipan sengaja; kalibrasi + koreksi di §6–§7) | [audit/audit-aturan-docs-vs-doktrin-2026-10-07.md](audit/audit-aturan-docs-vs-doktrin-2026-10-07.md) |
-| Sensus dokumen — mana yang masih dipakai, mana yang diarsipkan (7 Okt 2026, sensus pertama) | [audit/sensus-dokumen-2026-10-07.md](audit/sensus-dokumen-2026-10-07.md): 72 → 66 dokumen aktif, **7 dipindah ke arsip** (4 ledger/penutup batch + 3 pointer lama) dengan ledger konservasi SHA-256; 3 kandidat gelombang berikutnya |
-| Baseline coverage P4 (25 Sep 2026, parsial) | Backend loaded compiled JS: line 29,82%, branch 62,20%, function 41,39%; frontend UNKNOWN — rincian dan batas di [audit kekuatan dokumentasi §7](audit/audit-kekuatan-dokumentasi-2026-09-24.md) |
+| Status temuan P1-01..P1-09 (verifikasi 23 Sep 2026) | [audit/p1-uang-status-2026-09-23.md](arsip/audit-uang-huni-2026-07.md) |
+| Audit kekuatan dokumentasi & dokumentasi kode (24 Sep 2026, read-only) | [audit/audit-kekuatan-dokumentasi-2026-09-24.md](arsip/audit-kekuatan-dokumentasi-2026-09-24.md) |
+| Z-19 Dashboard Owner (25 Sep 2026, audit statis; gate manual terbuka) | [audit/owner-dashboard-z19-2026-09-25.md](arsip/owner-dashboard-z19-2026-09-25.md) |
+| IMPACT-01 (25 Sep 2026, review independen + FIX-A) | [audit/payment-impact-review-2026-09-25.md](arsip/payment-impact-review-2026-09-25.md) |
+| Recon infrastruktur AI untuk lapisan agenda keputusan (25 Sep 2026, statis) | [audit/ai-agenda-recon-2026-09-25.md](arsip/ai-agenda-recon-2026-09-25.md) |
+| Kesiapan docs sebagai aturan vs doktrin eksternal (7 Okt 2026, read-only; gate hijau, **16 temuan** — TINGGI sudah ditutup, 1 exception owner `PII-DOC-TENANT`; T-14 (banner arsip) dan T-15 (line ending, 114 berkas dinormalkan) **diputuskan + dieksekusi** 7 Okt; T-16 peringatan: 25 "mojibake" adalah kutipan sengaja; kalibrasi + koreksi di §6–§7) | [audit/audit-aturan-docs-vs-doktrin-2026-10-07.md](arsip/audit-aturan-docs-vs-doktrin-2026-10-07.md) |
+| Sensus dokumen — mana yang masih dipakai, mana yang diarsipkan (7 Okt 2026, sensus pertama) | [audit/sensus-dokumen-2026-10-07.md](arsip/sensus-dokumen-2026-10-07.md): 72 → 66 dokumen aktif, **7 dipindah ke arsip** (4 ledger/penutup batch + 3 pointer lama) dengan ledger konservasi SHA-256; 3 kandidat gelombang berikutnya |
+| Baseline coverage P4 (25 Sep 2026, parsial) | Backend loaded compiled JS: line 29,82%, branch 62,20%, function 41,39%; frontend UNKNOWN — rincian dan batas di [audit kekuatan dokumentasi §7](arsip/audit-kekuatan-dokumentasi-2026-09-24.md) |
 | Lampiran audit portal tenant (2 Jul 2026) | [history/lampiran-audit-portal-tenant-2026-07-02.md](arsip/lampiran-audit-portal-tenant-2026-07-02.md) |
 
 ## 5. Batas berkas ini

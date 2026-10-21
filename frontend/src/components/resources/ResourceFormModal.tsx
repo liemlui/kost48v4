@@ -10,6 +10,7 @@ import CurrencyInput from '../common/CurrencyInput';
 import PasswordInput from '../common/PasswordInput';
 import SearchableSelect from '../common/SearchableSelect';
 import SafeImage from '../common/SafeImage';
+import ImageRatioHint, { UploadRatioNotice, useUploadRatioCheck } from '../common/ImageRatioHint';
 import { uploadAnnouncementImage, uploadRoomImage } from '../../api/mediaUploads';
 import { compressImageFile } from '../../utils/compressImageFile';
 import { formatDateOnly } from '../../utils/dateTime';
@@ -74,6 +75,8 @@ export default function ResourceFormModal({
   const [roomImageUploading, setRoomImageUploading] = useState(false);
   const [roomImageError, setRoomImageError] = useState<string | null>(null);
   const [zoomImageUrl, setZoomImageUrl] = useState<string | null>(null);
+  // RA-12: cek rasio foto sebelum diunggah — peringatan saja, tidak memblokir.
+  const ratioCheck = useUploadRatioCheck();
 
   useEffect(() => {
     const nextSummary = (editingItem?.portalUserSummary as PortalUserSummary | null | undefined)
@@ -262,6 +265,7 @@ export default function ResourceFormModal({
       if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
         throw new Error('Gambar pengumuman hanya menerima JPG, PNG, atau WebP.');
       }
+      await ratioCheck.checkFile(file, 'gallery');
       const compressed = await compressImageFile(file);
       const uploaded = await uploadAnnouncementImage(compressed);
       setFormState({ ...formState, imageUrl: uploaded.fileUrl, imageFileKey: uploaded.fileKey, imageOriginalFilename: uploaded.originalFilename, imageMimeType: uploaded.mimeType, imageFileSizeBytes: uploaded.fileSizeBytes });
@@ -374,6 +378,7 @@ export default function ResourceFormModal({
     try {
       const existing = Array.isArray(formState.images) ? (formState.images as string[]) : [];
       const uploadedUrls: string[] = [];
+      await ratioCheck.checkFiles(files, 'room-card');
       for (const file of files) {
         if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
           throw new Error('Galeri kamar hanya menerima JPG, PNG, atau WebP.');
@@ -401,6 +406,7 @@ export default function ResourceFormModal({
       if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
         throw new Error('Gambar pengumuman hanya menerima JPG, PNG, atau WebP.');
       }
+      await ratioCheck.checkFile(file, 'gallery');
       const compressed = await compressImageFile(file);
       const uploaded = await uploadAnnouncementImage(compressed);
       setFormState({ ...formState, imageUrl: uploaded.fileUrl, imageFileKey: uploaded.fileKey, imageOriginalFilename: uploaded.originalFilename, imageMimeType: uploaded.mimeType, imageFileSizeBytes: uploaded.fileSizeBytes });
@@ -485,6 +491,8 @@ export default function ResourceFormModal({
                     <div className="room-image-manager">
                       <Form.Control type="file" accept="image/jpeg,image/png,image/webp" multiple onChange={handleRoomImageUpload} disabled={roomImageUploading} />
                       <Form.Text muted>Unggah beberapa foto kamar. Foto pertama otomatis menjadi cover utama di katalog, halaman detail, dan halaman booking.</Form.Text>
+                      <ImageRatioHint target="room-card" />
+                      <UploadRatioNotice verdict={ratioCheck.verdict} className="mt-2" />
                       {roomImageError ? <Alert variant="danger" className="mt-2 mb-0 py-2">{roomImageError}</Alert> : null}
                       {roomImageUploading ? <div className="small mt-2 text-muted">Mengunggah gambar kamar...</div> : null}
                       {Array.isArray(currentValue) && currentValue.length ? (
@@ -514,6 +522,8 @@ export default function ResourceFormModal({
                     <div>
                       <Form.Control type="file" accept="image/jpeg,image/png,image/webp" onChange={handleAnnouncementImageUpload} disabled={roomImageUploading} />
                       <Form.Text muted>Unggah satu gambar cover pengumuman. Preview akan tampil kecil dan bisa di-zoom.</Form.Text>
+                      <ImageRatioHint target="gallery" />
+                      <UploadRatioNotice verdict={ratioCheck.verdict} className="mt-2" />
                       {roomImageError ? <Alert variant="danger" className="mt-2 mb-0 py-2">{roomImageError}</Alert> : null}
                       {roomImageUploading ? <div className="small mt-2 text-muted">Mengunggah gambar pengumuman...</div> : null}
                       {typeof currentValue === 'string' && currentValue ? (() => { const absoluteUrl = resolveAbsoluteFileUrl(currentValue); return (

@@ -5,5 +5,5 @@
 > **Dashboard governance kini menyatu di [docs/ANTREAN.md](../ANTREAN.md)** — antrean prioritas, daftar task terbuka + gate, status pelaksanaan vs izin, keputusan owner ringkas, dan invariant.
 >
 > File ini dipertahankan sebagai pointer agar tautan lama tetap resolve; tidak ada isi aktif di sini.
-> Log keputusan historis (append-only): [docs/history/governance-log.md](../history/governance.md).
+> Log keputusan historis (append-only): [docs/history/governance-log.md](governance.md).
 > Riwayat fase dan changelog bulanan: [docs/history/](../history).

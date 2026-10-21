@@ -31,6 +31,7 @@ import { deleteFileSafe } from "../../common/utils/file-signature.util";
 import { pickRoundRobinStaffTx } from "../../common/utils/staff-assignment.util";
 import { join } from "path";
 import { PrismaService } from "../../prisma/prisma.service";
+import { clearPublicAvailabilityOverrideTx } from "../marketing/public-availability.helper";
 import {
   CancelStayDto,
   CompleteStayDto,
@@ -500,6 +501,10 @@ export class StaysService {
           where: { id: dto.roomId },
           data: { status: RoomStatus.OCCUPIED },
         });
+
+        // AL-FIX-7 (19 Okt 2026): mulai check-in, ketersediaan diturunkan dari Room.status —
+        // overlay /okupansi lama dihapus agar tidak bisa "membuka" kamar yang terisi.
+        await clearPublicAvailabilityOverrideTx(tx, dto.roomId);
 
         // TEMUAN-1: booking activation sudah punya invoice sewa — jangan buat baru
         if (lockedRoom.status !== RoomStatus.RESERVED) {

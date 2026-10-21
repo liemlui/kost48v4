@@ -43,7 +43,11 @@ export class ReportsService {
       this.prisma.invoicePayment.aggregate({
         _sum: { amountRupiah: true },
         where: {
-          paymentDate: { gte: start, lt: end },
+          // AL-FIX-5 (18 Okt 2026): basis SAMA dengan `billed` di atas — pembayaran
+          // diatribusikan ke periode Invoice.periodStart, bukan tanggal kas paymentDate.
+          // Sebelumnya paid=paymentDate membuat bulan tagihan (Sep) tampak menunggak
+          // 14,6 jt sementara bulan kas (Okt) tampak minus 14,6 jt.
+          invoice: { periodStart: { gte: start, lt: end } },
         },
       }),
       this.prisma.invoice.groupBy({

@@ -27,6 +27,7 @@ import {
   getPublicRoomVisibleAmenities,
   isPublicRoomBookable,
 } from "../../utils/publicRoomDisplay";
+import { formatRupiah } from "../../utils/formatCurrency";
 
 // ═══════════════════════════════════════════════════════════
 //  COMPONENT: PublicRoomsPage
@@ -35,7 +36,16 @@ import {
 type BathroomFilter = "" | "inside" | "outside";
 type CoolingFilter = "" | "ac" | "fan";
 type AvailFilter = "" | "bookable" | "occupied" | "checking";
-type SortFilter = "price-asc" | "price-desc";
+type SortFilter = "price-asc" | "price-desc" | "recommended";
+type CategoryFilter = "" | "ECONOMY" | "STANDARD" | "DELUXE";
+
+// SHOWCASE-CATEGORY: chip kategori memakai label manusia + jumlah kamar tersedia
+// (dihitung dari data yang sudah dimuat — tidak ada angka tetap di kode).
+const CATEGORY_CHIPS: Array<{ id: Exclude<CategoryFilter, "">; label: string }> = [
+  { id: "ECONOMY", label: "Ekonomi" },
+  { id: "STANDARD", label: "Standar" },
+  { id: "DELUXE", label: "Deluxe" },
+];
 
 const pricingTerm: PricingTerm = "MONTHLY";
 const ROOMS_PER_PAGE = 9; // F2-11 (W-03): paginasi katalog publik
@@ -202,6 +212,11 @@ export default function PublicRoomsPage() {
   const cooling = (searchParams.get("cooling") ?? "") as CoolingFilter;
   const avail = (searchParams.get("avail") ?? "") as AvailFilter;
   const sort = (searchParams.get("sort") ?? "price-asc") as SortFilter;
+  // SHOWCASE-CATEGORY: parameter `category` dari beranda (PUB-ROOM-CATEGORY) — nilai asing diabaikan.
+  const rawCategory = (searchParams.get("category") ?? "").toUpperCase();
+  const category: CategoryFilter = rawCategory === "ECONOMY" || rawCategory === "STANDARD" || rawCategory === "DELUXE"
+    ? rawCategory
+    : "";
 
   const query = useQuery({
     queryKey: ["public-rooms", { pricingTerm }],
@@ -214,6 +229,7 @@ export default function PublicRoomsPage() {
     let list = roomsFromApi.filter((room) => {
       if (bathroom && getPublicRoomBathroom(room) !== bathroom) return false;
       if (cooling && getPublicRoomCooling(room) !== cooling) return false;
+      if (category && String(room.category ?? "STANDARD").toUpperCase() !== category) return false;
       const bookable = isPublicRoomBookable(room);
       const status = String(room.status ?? "").toUpperCase();
       if (avail === "bookable" && !bookable) return false;
@@ -223,20 +239,50 @@ export default function PublicRoomsPage() {
     });
 
     list = [...list].sort((a, b) => {
+      // SHOWCASE-SORT: "Rekomendasi" = kamar yang bisa langsung diajukan lebih dulu,
+      // lalu tarif terendah. Bukan penilaian subjektif — hanya urutan ketersediaan + harga.
+      if (sort === "recommended") {
+        const aBookable = isPublicRoomBookable(a) ? 1 : 0;
+        const bBookable = isPublicRoomBookable(b) ? 1 : 0;
+        if (aBookable !== bBookable) return bBookable - aBookable;
+      }
       const aRate = getBestPublicRoomRate(a, pricingTerm);
       const bRate = getBestPublicRoomRate(b, pricingTerm);
       return sort === "price-desc" ? bRate - aRate : aRate - bRate;
     });
 
     return list;
-  }, [roomsFromApi, bathroom, cooling, avail, sort]);
+  }, [roomsFromApi, bathroom, cooling, avail, sort, category]);
 
   const bookableCount = rooms.filter((r) => isPublicRoomBookable(r)).length;
+  // SHOWCASE-CATEGORY: hitungan per kategori untuk chip filter (total & yang tersedia).
+  const categoryCounts = useMemo(() => {
+    const counts: Record<string, { total: number; bookable: number }> = {
+      ECONOMY: { total: 0, bookable: 0 },
+      STANDARD: { total: 0, bookable: 0 },
+      DELUXE: { total: 0, bookable: 0 },
+    };
+    for (const room of roomsFromApi) {
+      const entry = counts[String(room.category ?? "STANDARD").toUpperCase()];
+      if (!entry) continue;
+      entry.total += 1;
+      if (isPublicRoomBookable(room)) entry.bookable += 1;
+    }
+    return counts;
+  }, [roomsFromApi]);
+  // SHOWCASE-RATE: rentang tarif bulanan dari kamar yang sedang bisa diajukan.
+  const bookableMonthlyRates = useMemo(
+    () => rooms
+      .filter((room) => isPublicRoomBookable(room))
+      .map((room) => getBestPublicRoomRate(room, pricingTerm))
+      .filter((rate) => rate > 0),
+    [rooms],
+  );
   const lockedForTenant = isTenant && !isTenantStageLoading && stage !== "browsing";
 
   // F2-11 (W-03): paginasi 9 per halaman (ROOMS_PER_PAGE); reset ke hal.1 saat filter/sort berubah.
   const [page, setPage] = useState(1);
-  useEffect(() => { setPage(1); }, [bathroom, cooling, avail, sort]);
+  useEffect(() => { setPage(1); }, [bathroom, cooling, avail, sort, category]);
   const totalPages = Math.max(1, Math.ceil(rooms.length / ROOMS_PER_PAGE));
   const safePage = Math.min(page, totalPages);
   const pageRooms = useMemo(
@@ -263,7 +309,7 @@ export default function PublicRoomsPage() {
     setSearchParams(p, { replace: true });
   };
 
-  const hasActiveFilter = !!(bathroom || cooling || avail || sort !== "price-asc");
+  const hasActiveFilter = !!(bathroom || cooling || avail || category || sort !== "price-asc");
   const [filtersOpen, setFiltersOpen] = useState(false);
   const paginationItems = useMemo(() => getPaginationItems(totalPages, safePage), [safePage, totalPages]);
 
@@ -359,10 +405,28 @@ export default function PublicRoomsPage() {
               </div>
               <div className="rm-filter-divider" aria-hidden="true" />
               <div className="rm-filter-group">
-                <span className="rm-filter-label">Harga</span>
+                <span className="rm-filter-label">Urutkan</span>
+                <FilterChip label="Rekomendasi" active={sort === "recommended"} onClick={() => update({ sort: sort === "recommended" ? "price-asc" : "recommended" })} />
                 <FilterChip label="Termurah" active={sort === "price-asc"} onClick={() => update({ sort: "price-asc" })} />
                 <FilterChip label="Termahal" active={sort === "price-desc"} onClick={() => update({ sort: "price-desc" })} />
               </div>
+              {Object.values(categoryCounts).some((entry) => entry.total > 0) && (
+                <>
+                  <div className="rm-filter-divider" aria-hidden="true" />
+                  <div className="rm-filter-group">
+                    <span className="rm-filter-label">Kategori</span>
+                    {CATEGORY_CHIPS.filter((chip) => categoryCounts[chip.id].total > 0).map((chip) => (
+                      <FilterChip
+                        key={chip.id}
+                        label={`${chip.label} (${categoryCounts[chip.id].bookable})`}
+                        active={category === chip.id}
+                        onClick={() => update({ category: category === chip.id ? "" : chip.id })}
+                      />
+                    ))}
+                    <span className="rm-filter-hint">Angka dalam kurung = kamar yang bisa diajukan sekarang.</span>
+                  </div>
+                </>
+              )}
               {hasActiveFilter && (
                 <button
                   type="button"
@@ -375,7 +439,7 @@ export default function PublicRoomsPage() {
             </div>
 
             {/* ── Count ── */}
-            <div className="rm-count-bar">
+            <div className="rm-count-bar" role="status" aria-live="polite">
               {query.isLoading ? (
                 <span className="text-muted"><Spinner animation="border" size="sm" className="me-2" />Memuat kamar...</span>
               ) : query.isError ? (
@@ -389,6 +453,9 @@ export default function PublicRoomsPage() {
                   )}
                   {bookableCount > 0 && rooms.length !== bookableCount && (
                     <> · <strong className="rm-count-bookable">{bookableCount}</strong> tersedia sekarang</>
+                  )}
+                  {bookableMonthlyRates.length > 0 && (
+                    <> · mulai <strong>{formatRupiah(Math.min(...bookableMonthlyRates))}</strong>/bln</>
                   )}
                 </span>
               )}
@@ -428,7 +495,7 @@ export default function PublicRoomsPage() {
                   <EmptyState
                     icon="🔍"
                     title="Tidak ada kamar yang cocok"
-                    description="Coba ubah atau reset filter untuk melihat kamar lainnya. Katalog memiliki 22 kamar dengan berbagai tipe dan fasilitas."
+                    description="Coba ubah atau reset filter untuk melihat kamar lainnya."
                   />
                 ) : (
                   <EmptyState

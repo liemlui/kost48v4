@@ -139,7 +139,7 @@ export class AccountingService {
 
   async listCashAccounts(query: CashAccountsQueryDto = {}) {
     await this.schemaGuard.assertReady();
-    return (this.prisma as any).cashAccount.findMany({
+    const accounts = await (this.prisma as any).cashAccount.findMany({
       where: {
         ...(query.accountType ? { accountType: query.accountType as any } : {}),
         ...(query.isActive !== undefined ? { isActive: query.isActive } : {}),
@@ -149,6 +149,34 @@ export class AccountingService {
       },
       include: { chartOfAccount: { select: { id: true, code: true, name: true, type: true } } },
       orderBy: [{ isDefault: 'desc' }, { name: 'asc' }],
+    });
+
+    // AL-FIX-6 (18 Okt 2026): saldo kas dibaca dari JURNAL POSTED (opening + Σ debit−kredit
+    // per cashAccountId), bukan kolom manual `currentBalanceRupiah` yang tidak pernah
+    // di-update oleh posting. Rumus ini sama dengan laporan cashflow
+    // (accounting-reports.service.ts, audit E-4) dan trial balance, sehingga daftar akun
+    // kas tidak lagi melaporkan 0 saat jurnal berisi saldo.
+    const ledgerSums = await (this.prisma as any).journalLine.groupBy({
+      by: ['cashAccountId'],
+      where: { cashAccountId: { not: null }, journalEntry: { status: 'POSTED' as any } },
+      _sum: { debitRupiah: true, creditRupiah: true },
+    });
+    const ledgerDeltaByCashAccountId = new Map<number, number>(
+      ledgerSums.map((row: any) => [
+        Number(row.cashAccountId),
+        Number(row._sum?.debitRupiah ?? 0) - Number(row._sum?.creditRupiah ?? 0),
+      ]),
+    );
+
+    return accounts.map((account: any) => {
+      const opening = Number(account.openingBalanceRupiah ?? 0);
+      const ledgerDelta = ledgerDeltaByCashAccountId.get(Number(account.id)) ?? 0;
+      return {
+        ...account,
+        currentBalanceRupiah: opening + ledgerDelta,
+        ledgerDeltaRupiah: ledgerDelta,
+        manualBalanceRupiah: Number(account.currentBalanceRupiah ?? 0),
+      };
     });
   }
 

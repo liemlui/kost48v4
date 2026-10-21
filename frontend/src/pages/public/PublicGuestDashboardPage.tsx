@@ -10,6 +10,7 @@ import type { PublicConfig } from '../../api/settings';
 import { listFacilityImages } from '../../api/facilityImages';
 import { listMarketingAssets } from '../../api/marketingAssets';
 import Kost48LogoMark from '../../components/common/Kost48LogoMark';
+import FrameImage from '../../components/common/FrameImage';
 import { useAuth } from '../../context/AuthContext';
 import { getDefaultRoute } from '../../config/navigation';
 import { useTenantPortalStage } from '../../hooks/useTenantPortalStage';
@@ -32,7 +33,7 @@ import {
 } from '../../utils/publicRoomDisplay';
 import { resolveAbsoluteFileUrl } from '../../utils/resolveAbsoluteFileUrl';
 import { formatRupiah, formatRupiahWithoutSymbol } from '../../utils/formatCurrency';
-import { WIFI_DEFAULT_PRICE_RUPIAH } from '../../config/constants';
+import { WIFI_DEFAULT_PRICE_RUPIAH, DP_RATIO } from '../../config/constants';
 import {
   NAV_LINKS, GALLERY_ITEMS, FACILITY_GROUPS, TRUST_ITEMS, HOME_FAQ_ITEMS, EXTRA_FAQ_ITEMS, MAPS_EMBED_URL, CATALOG_BATCH_SIZE,
   resolvePublicMarketingAssetUrl, getTodayDateInput, formatCompactRupiah, formatMonthlyRange, buildWhatsAppUrl, buildRoomWhatsAppUrl, getRoomCover,
@@ -335,6 +336,65 @@ export default function PublicGuestDashboardPage() {
     [catalogRooms, visibleRoomCount],
   );
 
+  // SHOWCASE-FIT: pilih kamar dari KEBUTUHAN, bukan dari daftar fitur. Angka di tiap
+  // kartu dihitung dari data kamar publik saat ini (bukan angka karangan), dan tautannya
+  // langsung memakai filter yang sudah didukung halaman katalog.
+  const fitOptions = useMemo(() => {
+    const bookable = rooms.filter((room) => isPublicRoomBookable(room));
+    const countBy = (predicate: (room: PublicRoom) => boolean) => bookable.filter(predicate).length;
+    return [
+      {
+        id: 'ac',
+        mark: '❄️',
+        title: 'Butuh kamar sejuk untuk kerja atau istirahat',
+        desc: 'Pendingin AC di kamar. Status tiap kamar terlihat sebelum kamu menghubungi admin.',
+        count: countBy((room) => getPublicRoomCooling(room) === 'ac'),
+        to: '/rooms?avail=bookable&cooling=ac',
+      },
+      {
+        id: 'inside',
+        mark: '🚿',
+        title: 'Ingin kamar mandi dalam, tidak perlu berbagi',
+        desc: 'Filter ini hanya menampilkan kamar dengan kamar mandi pribadi di dalam kamar.',
+        count: countBy((room) => getPublicRoomBathroom(room) === 'inside'),
+        to: '/rooms?avail=bookable&bathroom=inside',
+      },
+      {
+        id: 'hemat',
+        mark: '🏷️',
+        title: 'Mau tarif paling ringan bulan ini',
+        desc: 'Diurutkan dari tarif bulanan terendah, tanpa menyembunyikan kamar yang sedang terisi.',
+        count: bookable.length,
+        to: '/rooms?avail=bookable&sort=price-asc',
+      },
+    ];
+  }, [rooms]);
+
+  // SHOWCASE-GUARANTEE: janji yang SUDAH tertulis di aturan/FAQ — dipakai sebagai
+  // risk reversal di dekat CTA akhir. Tidak ada klaim baru yang tidak ada sumbernya.
+  const guarantees = useMemo(() => [
+    {
+      mark: '🛡️',
+      title: `DP ${Math.round(DP_RATIO * 100)}% untuk mengamankan kamar`,
+      desc: 'Sisa pembayaran dibawa saat check-in; kamar terkunci setelah pembayaran disetujui admin.',
+    },
+    {
+      mark: '⚡',
+      title: 'Listrik pascabayar, bukan token',
+      desc: `Jatah gratis ${freeKwh} kWh/bulan; kelebihan ${formatRupiah(electricityTariff)}/kWh, tanpa saldo token yang hangus.`,
+    },
+    {
+      mark: '🔧',
+      title: 'Kerusakan wajar diperbaiki gratis',
+      desc: 'Lampu, kran, shower, atau kebocoran — lapor lewat portal penghuni, ditangani tanpa biaya.',
+    },
+    {
+      mark: '🧾',
+      title: 'Harga yang tertera = harga yang ditagih',
+      desc: 'Tarif, deposit, dan DP dijelaskan sejak awal; tidak ada biaya tambahan yang muncul belakangan.',
+    },
+  ], [freeKwh, electricityTariff]);
+
   const faqItems = useMemo(() => {
     const base = showAllFaq ? [...HOME_FAQ_ITEMS, ...EXTRA_FAQ_ITEMS] : HOME_FAQ_ITEMS;
     return base.map((item) => {
@@ -461,6 +521,9 @@ export default function PublicGuestDashboardPage() {
               </>
             )}
           </div>
+          <p className="gx-hero-trust">
+            Tanpa login · DP {Math.round(DP_RATIO * 100)}% · Status kamar diperbarui langsung
+          </p>
         </div>
         <div className="gx-hero-next" aria-hidden="true">Kamar tersedia, fasilitas, dan lokasi ada di bawah.</div>
       </section>
@@ -547,6 +610,29 @@ export default function PublicGuestDashboardPage() {
                 </div>
               </div>
             </div>
+          </div>
+        </Container>
+      </section>
+
+      <section className="gx-fit-section" aria-labelledby="gx-fit-title">
+        <Container fluid="xl">
+          <div className="gx-section-head gx-section-head-center">
+            <div className="gx-label">Mulai dari kebutuhan</div>
+            <h2 id="gx-fit-title">Kamar yang cocok ditentukan oleh cara kamu tinggal.</h2>
+            <p>Pilih satu kebutuhan utama — katalog langsung menyaring kamar yang relevan, lengkap dengan status terkininya.</p>
+          </div>
+          <div className="gx-fit-grid">
+            {fitOptions.map((option) => (
+              <Link key={option.id} to={option.to} className="gx-fit-card">
+                <span className="gx-fit-mark" aria-hidden="true">{option.mark}</span>
+                <strong>{option.title}</strong>
+                <span className="gx-fit-desc">{option.desc}</span>
+                <span className={`gx-fit-count${option.count === 0 ? ' is-empty' : ''}`}>
+                  {option.count > 0 ? `${option.count} kamar tersedia sekarang` : 'Sedang tidak ada — tanyakan admin'}
+                </span>
+                <span className="gx-fit-cta">Lihat kamar ini →</span>
+              </Link>
+            ))}
           </div>
         </Container>
       </section>
@@ -833,12 +919,11 @@ export default function PublicGuestDashboardPage() {
                     onClick={() => setLightboxSrc(item.src)}
                     aria-label={`Buka ${item.label} ukuran penuh`}
                   >
-                    <img
+                    <FrameImage
                       src={item.displaySrc}
                       alt={item.label}
                       className="gx-gallery-img"
                       loading="lazy"
-                      decoding="async"
                       width={item.displayW}
                       height={item.displayH}
                       onError={() => setGalleryBroken((prev) => ({ ...prev, [item.id]: true }))}
@@ -876,6 +961,29 @@ export default function PublicGuestDashboardPage() {
             <button type="button" className="gx-btn-outline" onClick={() => setShowAllFaq((value) => !value)}>
               {showAllFaq ? 'Tampilkan FAQ utama' : 'Lihat semua FAQ'}
             </button>
+          </div>
+        </Container>
+      </section>
+
+      <section className="gx-guarantee-section" aria-labelledby="gx-guarantee-title">
+        <Container fluid="xl">
+          <div className="gx-section-head">
+            <div className="gx-label">Sebelum bayar</div>
+            <h2 id="gx-guarantee-title">Empat hal yang sudah tertulis, bukan janji lisan.</h2>
+            <p>Semua poin di bawah berlaku untuk seluruh kamar dan tercantum juga di halaman panduan.</p>
+          </div>
+          <div className="gx-guarantee-grid">
+            {guarantees.map((item) => (
+              <article className="gx-guarantee-card" key={item.title}>
+                <span className="gx-guarantee-mark" aria-hidden="true">{item.mark}</span>
+                <strong>{item.title}</strong>
+                <span>{item.desc}</span>
+              </article>
+            ))}
+          </div>
+          <div className="gx-guarantee-actions">
+            <Link to="/panduan" className="gx-btn-outline">Baca aturan &amp; panduan lengkap</Link>
+            <Link to="/rooms" className="gx-btn-primary"><span aria-hidden="true">🔍</span> Lihat kamar tersedia</Link>
           </div>
         </Container>
       </section>
