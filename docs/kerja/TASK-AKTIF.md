@@ -28,13 +28,14 @@ Bentuk 7 bagian mengikuti konvensi [ANTREAN §3](../ANTREAN.md) butir A-2 — **
 
 | Langkah | Status | Bukti penutup |
 |---|---|---|
-| 1. Model konten tunggal (kategori + sumber angka) | belum | tabel konten + pemetaan ke berkas kanonik |
-| 2. Tulis 8 blok aturan + perbaiki teks yang bertentangan | belum | 0 temuan F-04..F-08 tersisa |
-| 3. Halaman tenant (ganti draft `GUIDE_TABS`) | belum | render 390/1440 px, ≤2 klik dari beranda |
-| 4. Wizard terarah 4 pertanyaan | belum | 4 jalur diuji, hasil = aturan + angka |
-| 5. Kartu deposit ringkas + CTA checkout | belum | copy + warna terbukti di layar |
-| 6. Dokumen 1 halaman untuk owner (rekomendasi a) | belum | ditandatangani owner |
-| 7. Bukti render + jangkar tiap aturan | belum | 390/1440 px, 0 tautan mati |
+| 1. Matriks konten 8 kategori + sumber angka (§2) | selesai 2026-10-21 | tabel matriks di §2 |
+| 2. Model konten tunggal `frontend/src/data/tenantRules.ts` | selesai 2026-10-21 | 8 kategori bertipe + angka dari `TenantRuleContext` |
+| 3. Halaman tenant (ganti `GUIDE_TABS`) | selesai 2026-10-21 | render 390/1440 px, ≤2 klik dari beranda |
+| 4. Wizard terarah 4 pertanyaan | selesai 2026-10-21 | 4 jalur diuji, hasil = aturan + angka |
+| 5. Kartu deposit ringkas + CTA checkout | selesai 2026-10-21 | nominal kamar (bukan konstanta) + warna CTA beda |
+| 6. Dokumen 1 halaman untuk owner (rekomendasi a) | selesai 2026-10-21 — menunggu tanda tangan | [ATURAN-TENANT-1-HALAMAN](ATURAN-TENANT-1-HALAMAN.md) |
+| 7. F-15/F-16/F-17 diselaraskan atau ditandai | selesai 2026-10-21 | FAQ seed + copy publik = D-24; banner hunian.md hidup |
+| 8. Bukti render + jangkar tiap aturan | belum | 390/1440 px, 0 tautan mati |
 
 ### 1. Tujuan & definisi selesai
 
@@ -96,13 +97,16 @@ Setiap langkah = satu increment yang bisa di-commit sendiri.
 
 ### 6. Catatan penyimpangan
 
-Belum ada. Setiap penyimpangan dari kontrak ini dicatat di sini pada sesi yang sama.
+- **2026-10-21 — konten aturan hidup di frontend, FAQ seed tetap di backend.** `tenantRules.ts` dipakai panduan + wizard. Backend tidak mengimpornya (rootDir Nest) dan baris FAQ adalah data DB yang diedit owner — seed hanya menambah pertanyaan baru.
+- **2026-10-21 — F-17 ditutup sebagai “ditandai”.** Banner salinan bertanggal di `docs/domain/hunian.md` dipertahankan; aturan bisnis di dalamnya tidak diubah.
+- Setiap penyimpangan lain dari kontrak ini dicatat di sini pada sesi yang sama.
 
 ### 7. Riwayat
 
 | Tanggal | Perubahan |
 |---|---|
 | 2026-10-19 | Dibuat dari instruksi owner: semua aturan masuk FAQ + terlihat di app tenant, boleh berbentuk wizard, deposit dikomunikasikan di depan, checkout humanis, overstay diinformasikan. Menggabungkan rekomendasi **(a)** dari jawaban sebelumnya (dokumen 1 halaman). Belum ada kode ditulis. |
+| 2026-10-21 | Dikerjakan: model konten `tenantRules.ts`, halaman tenant + pencarian, wizard 4 pertanyaan, kartu deposit + CTA amber, F-15..F-17, dokumen owner. Bukti: test FE 306/306, tsc FE+BE, `check-docs` BERSIH, render 390/1440. Sisa: tanda tangan owner + edit 1 baris FAQ produksi. |
 
 
 <a id="d4f-huni"></a>
@@ -240,24 +244,24 @@ Bentuk 7 bagian mengikuti konvensi [ANTREAN §3](../ANTREAN.md) butir A-2. Statu
 | **F-12** | Walk-in check-in tidak punya `occupantCount`/`hasPet` di DTO meski kolomnya ada | `stay.dto.ts` | Akar keluhan owner: deposit hewan/surcharge tidak bisa otomatis | M | tidak |
 | **F-13** | Akses verifikasi KTP: aturan dossier 18 menyebut **verifikasi OWNER**, controller memasang `@Roles(OWNER, ADMIN)` | `tenants.controller.ts` vs [operasional.md](../domain/hunian.md#d4c-operasional) | Wewenang verifikasi PII tidak konsisten; audit bisa mencatat ADMIN sebagai verifikator | XS | **ya — putuskan OWNER-only atau OWNER+ADMIN** |
 | **F-14** | Runbook go-live/produksi masih **mewajibkan** `KTP_ACTIVATION_GATE_ENABLED=true` dan menguji “aktivasi tanpa KTP → DITOLAK”; keputusan 19 Okt 2026 menghapus blokir itu | [produksi Bagian C](../operations/produksi.md#d4b-cpanel), [produksi Bagian D](../operations/produksi.md#d4b-ktp), [produksi.md](../operations/produksi.md) | Operator berikutnya bisa menyalakan gate dan memblokir check-in sesuai kebijakan lama | S | tidak — ikut task KTP (F-14) |
-| **F-15** | FAQ seed masih menulis “1–2 orang”, dan baris FAQ di DB produksi kemungkinan sudah ter-seed dengan teks lama | `backend/src/modules/faqs/faqs.service.ts` (`DEFAULT_FAQS`) | Panduan tenant yang sudah dikoreksi bisa tetap dibaca bersama FAQ lama; mengubah kode tidak memperbarui baris DB | S | tidak — butuh edit konten FAQ di produksi |
-| **F-16** | Copy publik memakai “1–2 orang” dan “maks 2 orang” | `frontend/src/data/officialKost48Content.ts`, `frontend/src/components/public/GuestPreferenceWizard.tsx` | Bertentangan dengan D-24 (STANDARD 2+2 / LARGE 4+2) di permukaan publik | XS | tidak |
-| **F-17** | `docs/domain/hunian.md` §Aturan & Panduan Tenant (2026-06-17) masih memuat deposit Rp300.000, maksimal 2 orang, denda merokok Rp200.000, dan aturan hewan versi lama | `docs/domain/hunian.md` | Salinan bertanggal yang bisa dipakai ulang sebagai aturan paralel; bukan aturan kanonik | M | tidak — ditandai, bukan diubah |
+| **F-15** | FAQ seed masih menulis “1–2 orang”, dan baris FAQ di DB produksi kemungkinan sudah ter-seed dengan teks lama | `backend/src/modules/faqs/faqs.service.ts` (`DEFAULT_FAQS`) | Panduan tenant yang sudah dikoreksi bisa tetap dibaca bersama FAQ lama; mengubah kode tidak memperbarui baris DB | S | **selesai 2026-10-21** — seed = D-24; baris DB diedit admin lewat menu FAQ (seed idempoten per pertanyaan, tidak menimpa) |
+| **F-16** | Copy publik memakai “1–2 orang” dan “maks 2 orang” | `frontend/src/data/officialKost48Content.ts`, `frontend/src/components/public/GuestPreferenceWizard.tsx` | Bertentangan dengan D-24 (STANDARD 2+2 / LARGE 4+2) di permukaan publik | XS | **selesai 2026-10-21** — kedua berkas memakai STANDARD 2/4 dan LARGE 4/6 |
+| **F-17** | `docs/domain/hunian.md` §Aturan & Panduan Tenant (2026-06-17) masih memuat deposit Rp300.000, maksimal 2 orang, denda merokok Rp200.000, dan aturan hewan versi lama | `docs/domain/hunian.md` | Salinan bertanggal yang bisa dipakai ulang sebagai aturan paralel; bukan aturan kanonik | M | **ditutup sebagai ditandai** — banner “Salinan bertanggal” hidup (commit `68766d98`); aturan bisnis tidak diubah |
 
-**Baseline pemeriksaan 2026-10-21 (sebelum suntingan F-04..F-10).** F-04 tidak lagi dapat dibuktikan dari `MyManualPage.tsx`: baris “1 kamar maksimal 2 orang” sudah tidak ada di berkas itu. Salinan yang masih hidup: `docs/domain/hunian.md` §B/§C (F-17), `faqs.service.ts` (`DEFAULT_FAQS`, F-15), `officialKost48Content.ts` + `GuestPreferenceWizard.tsx` (F-16). Di `MyManualPage.tsx` yang tersisa sebelum batch: renewal H-30/H-1/H-7, listrik 7 hari, “deposit bukan uang sewa”, hewan dilarang, tamu Rp50.000/malam, QRIS/e-wallet, refund 7 hari, alur WiFi “Tambah Perangkat”, dan janji verifikasi 1×24 jam. Lima klaim tak ditegakkan terakhir sudah dihapus/dilunakkan pada langkah 2; sisanya dikerjakan di langkah 10–14. Prompt FAQ AI (`faq.prompt.ts`) dan komentar prabayar (`prepay-extension.service.ts`) belum disentuh.
+**Riwayat ringkas W-FIN-002 (2026-10-21).** F-04..F-10 ditutup di `MyManualPage.tsx`, `faq.prompt.ts`, dan komentar prabayar; rincian di [ANTREAN](../ANTREAN.md) baris W-FIN-002 + [changelog 21 Okt](../history/changelog/2026-10.md).
 
-**Tabel sebelum→sesudah (potret 2026-10-21).** “Sesudah” = target batch ini; angka kanonik sudah diverifikasi di langkah 7.
+**Matriks konten W-TNT-001 (potret 2026-10-21).** Setiap angka menunjuk sumber kanonik; klaim yang tidak ditegakkan kode (tamu Rp50.000/malam, denda merokok Rp200.000, refund 7 hari kerja, QRIS/e-wallet) **tidak** dimasukkan.
 
-| ID | Sebelum | Sesudah (target) |
-|---|---|---|
-| **F-04** | Aturan kapasitas tidak ada di `MyManualPage.tsx`; salinan “maksimal 2 orang” hidup di `docs/domain/hunian.md`, FAQ seed, dan copy publik | `MyManualPage.tsx` memuat STANDARD 2+2 / LARGE 4+2 + surcharge 20%; F-15..F-17 tetap terbuka |
-| **F-05** | H-30, DP maks H-1, pelunasan H-7, durasi 1/3/6/12 bulan | H-10, DP ≤ hari-H, pelunasan ≤ H+7, durasi 1 bulan/2 minggu/6 bulan/1 tahun, kamar dibuka hari-H tanpa DP |
-| **F-06** | Tagihan listrik jatuh tempo 7 hari | Semua tagihan jatuh tempo 24 jam setelah terbit |
-| **F-07** | Deposit “bukan uang sewa, tidak bisa dipakai bayar sewa” | Deposit menutup tagihan terbuka termasuk sewa; sisa dikembalikan; kekurangan menjadi piutang |
-| **F-08** | Hewan dilarang; tamu Rp50.000/malam; QRIS/e-wallet; WiFi “Tambah Perangkat”; refund 7 hari; verifikasi 1×24 jam | Hewan diizinkan + deposit Rp100.000; tarif tamu tidak diklaim; transfer/tunai; alur Pesan WiFi; tanpa janji waktu proses |
-| **F-09** | Prompt: minimal 1 bulan, DP “bulan pertama”, checkout H-7, WiFi gratis, hewan dilarang | Prompt: DP 30% × tarif periode; tanpa minimal 1 bulan/H-7; WiFi berbayar; hewan izin + deposit; listrik/air dari setting kamar |
-| **F-10** | Komentar prabayar 5,5×/6 dan 10×/12 | Komentar 5,7×/6 dan 11×/12 + pembulatan ke Rp5.000 |
-| **F-15..F-17** | FAQ seed/DB, copy publik, dan `docs/domain/hunian.md` §Aturan 2026-06-17 masih memuat aturan lama | **Tetap terbuka** — dicatat sebagai temuan, tidak diperbaiki di batch ini |
+| Kategori | Ringkasan | Angka | Sumber kanonik |
+|---|---|---|---|
+| hewan | Diizinkan dengan pemberitahuan; deposit refundable | deposit hewan dari `petDepositRupiah` (default 100.000) | `booking-charges.helper.ts`; `settings.service.ts` |
+| penghuni | Batas gratis + surcharge per kepala | STANDARD 2 gratis/4 maks; LARGE 4/6; +20% per kepala ekstra; bulat Rp5.000 | `pricing.helper.ts`; [keuangan.md §8](../domain/keuangan.md#d4c-harga) |
+| prabayar | Bayar di muka; diskon term panjang | 2 minggu 0,75×; 6 bulan 5,7×; 1 tahun 11×; bulat Rp5.000; 1–24 bulan | `pricing.helper.ts`; keuangan.md §2/§10 |
+| pembayaran | DP, pelunasan, bukti transfer | DP 30% × tarif periode; pelunasan sisa 70% + deposit; jatuh tempo 24 jam; booking 3 jam | keuangan.md §7; [hunian.md](../domain/hunian.md#dossier-11--booking--renewal-normatif); `auto-ops.constants.ts` |
+| deposit | Jaminan kamar + hewan, settlement | nominal `Room.defaultDepositRupiah` (+ hewan); refundable; menutup tagihan terbuka | keuangan.md §7; `stays.service.ts` `processDeposit` |
+| overstay | Konsekuensi lewat tanggal keluar | pengingat H-10/H-7/H-3/H-1/H-day; kamar dilepas 12.00 WIB hari-H; checkout paksa 12.00 WIB H+1; barang 30 hari | [hunian.md Dossier 12](../domain/hunian.md#dossier-12--checkout-deposit--overstay-normatif); `stay-sweep.service.ts` |
+| checkout | Syarat & urutan keluar | ajukan minimal H+1; batas ≤ tanggal rencana keluar; tagihan non-meter wajib lunas | hunian.md Dossier 12; `checkoutReadiness.ts`; `CheckoutRequestModal.tsx` |
+| ktp | Identitas & PDP | 1 foto KTP; 2 peran verifikator (OWNER/ADMIN); data dihapus saat checkout | `tenants.controller.ts`; `stays.service.ts` `cleanupTenantKtpOnCheckout` |
 
 **Status penutupan teks 2026-10-21.** F-04..F-10 **selesai** di permukaan yang disebut: `MyManualPage.tsx`, `faq.prompt.ts`, dan komentar `prepay-extension.service.ts`; rujukan kanonik sudah diverifikasi. F-15..F-17 **tetap terbuka** (FAQ seed/DB, copy publik, salinan `hunian.md`). F-01/F-02 sudah selesai di kode (commit `b56d4b83`/`56c84a68`); F-03/F-11..F-14 tetap terbuka.
 

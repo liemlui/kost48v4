@@ -18,6 +18,7 @@ import RenewRequestModal from '../../tenant/RenewRequestModal';
 import MeterCycleModal from '../../stays/MeterCycleModal';
 import StayHistoryTimeline, { type StayJourneyStep } from '../../stays/StayHistoryTimeline';
 import SatisfactionSurveyCard from '../../tenant/SatisfactionSurveyCard';
+import TenantCheckoutCta from '../../tenant/TenantCheckoutCta';
 import LeaseProgressHero from './LeaseProgressHero';
 import StayQuickActions from './StayQuickActions';
 import StayAnnouncementBanner from './StayAnnouncementBanner';
@@ -360,6 +361,14 @@ export default function ActiveStayContent({ stay }: { stay: Stay }) {
           ? 'Sedang ada pengajuan keluar aktif.'
           : 'Belum bisa diajukan saat ini.'));
 
+  // W-TNT-001: alasan tombol keluar nonaktif — copy sama dengan CTA checkout.
+  const checkoutDisabledReason = canRequestCheckout
+    ? undefined
+    : (blockedText
+      ?? (pendingCheckoutRequest || approvedCheckoutRequest
+        ? 'Pengajuan keluar sedang berjalan.'
+        : 'Belum bisa diajukan saat ini.'));
+
   // ── helpers for fact-chip tones ─────────────────────────────────────────────
 
   const billTone = payableOpenInvoices.length
@@ -483,6 +492,17 @@ export default function ActiveStayContent({ stay }: { stay: Stay }) {
         onRenew={() => setShowRenewModal(true)}
         canCheckout={canRequestCheckout}
         onCheckout={() => setShowCheckoutModal(true)}
+      />
+
+      {/* W-TNT-001: aturan bisa dicapai 1 klik dari beranda; CTA checkout warna beda. */}
+      <div className="mb-2">
+        <Link to="/portal/manual" className="tenant-rules-link">📖 Semua aturan &amp; biaya (2 menit)</Link>
+      </div>
+      <TenantCheckoutCta
+        canCheckout={canRequestCheckout}
+        disabledReason={checkoutDisabledReason}
+        onCheckout={() => setShowCheckoutModal(true)}
+        hasActiveRequest={Boolean(pendingCheckoutRequest || approvedCheckoutRequest)}
       />
 
       {/* ── Pengumuman terbaru ── */}

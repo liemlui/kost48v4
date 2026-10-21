@@ -1,106 +1,39 @@
 /**
  * KOST48 — Panduan & Aturan Kos (MyManualPage)
  * ==============================================
- * 7 tab terstruktur: Aturan, Perpanjangan, Checkout, kWh Meter, Cara Bayar, WiFi, Kontak.
- * Konten disinkronkan dengan aturan kanonik pada 2026-10-21; angka dan rujukan mengikuti docs/domain/.
+ * Tab: Aturan Kos (8 kategori dari SATU sumber `data/tenantRules.ts`), Panduan Cepat
+ * (wizard 4 pertanyaan), kWh Meter, Cara Bayar, WiFi, Kontak.
+ * Angka aturan dibaca dari `TenantRuleContext` (data kamar + `/settings/public-config`),
+ * bukan konstanta halaman. Konten disinkronkan dengan `docs/domain/` pada 2026-10-21.
  */
 import PageHeader from '../../components/common/PageHeader';
-import { useState, useMemo } from 'react';
-import { Accordion, Alert, Button, Card, Nav, Spinner } from 'react-bootstrap';
+import { useMemo, useState } from 'react';
+import { Accordion, Alert, Badge, Button, Card, Form, Nav, Spinner } from 'react-bootstrap';
 import { useQuery } from '@tanstack/react-query';
 import { fetchPublicFaqs, type FaqItem } from '../../api/faqs';
+import { fetchPublicConfig } from '../../api/settings';
+import { getResource } from '../../api/resources';
+import { PORTAL_QUERY_KEYS } from '../../api/portalQueryKeys';
 import FreeRepairPolicyCard from '../../components/tenant/FreeRepairPolicyCard';
+import DepositRulesCard from '../../components/tenant/DepositRulesCard';
+import TenantRulesWizard from '../../components/tenant/TenantRulesWizard';
+import {
+  DEFAULT_TENANT_RULE_CONTEXT,
+  TENANT_RULE_CATEGORIES,
+  filterTenantRuleCategories,
+  type TenantRuleContext,
+} from '../../data/tenantRules';
+import type { Stay } from '../../types';
 
 const KOST_WHATSAPP_NUMBER = (import.meta.env.VITE_PUBLIC_ADMIN_WHATSAPP ?? '6285648887628').replace(/\D/g, '');
 const WHATSAPP_URL = `https://wa.me/${KOST_WHATSAPP_NUMBER}`;
 const KOST_WHATSAPP_DISPLAY = `0${KOST_WHATSAPP_NUMBER.slice(2)}`.replace(/(\d{4})(\d{4})(\d+)/, '$1-$2-$3');
 
 // ══════════════════════════════════════════════════════════════════════════════
-// KONTEN PANDUAN (disinkronkan dengan aturan kanonik 2026-10-21)
+// TAB PENDUKUNG (bukan aturan yang mengikat; dipertahankan dari panduan lama)
 // ══════════════════════════════════════════════════════════════════════════════
 
-const GUIDE_TABS = [
-  {
-    key: 'aturan',
-    icon: '📋',
-    title: 'Aturan Kos',
-    sections: [
-      {
-        heading: 'Kapasitas & Penghuni Tambahan',
-        body: `• Kamar STANDARD: 2 orang tanpa biaya tambahan; maksimal 4 orang (2 penghuni tambahan).\n• Kamar LARGE: 4 orang tanpa biaya tambahan; maksimal 6 orang (2 penghuni tambahan).\n• Setiap penghuni tambahan di atas batas gratis dikenakan 20% dari tarif sewa periode yang dipilih per kepala.\n• Penghuni tambahan wajib dikonfirmasi ke pengelola dan dicatat di kontrak.`,
-      },
-      {
-        heading: 'Jam Tamu & Akses',
-        body: `• Tamu diperbolehkan berkunjung pukul 07.00–22.00 WIB.\n• Tamu wajib lapor ke staf/pengelola saat datang.\n• Tamu tidak diizinkan masuk area kamar di luar jam berkunjung.\n• Tamu yang menginap wajib sepengetahuan pengelola. Sistem belum menghitung tarif tamu menginap secara otomatis.`,
-      },
-      {
-        heading: 'Kebersihan & Ketertiban',
-        body: `• Setiap penghuni wajib menjaga kebersihan kamar masing-masing.\n• Area bersama (koridor, dapur, kamar mandi luar, teras) — gotong royong bersih setiap Minggu pagi.\n• Sampah harap dibuang ke tempat sampah yang disediakan setiap hari.\n• Dilarang membuat keributan yang mengganggu penghuni lain — jam tenang 22.00–06.00 WIB.\n• Musik/audio harap pakai headphone setelah jam 22.00.`,
-      },
-      {
-        heading: 'Larangan',
-        body: `• DILARANG KERAS: narkoba, minuman keras, senjata tajam, senjata api.\n• Dilarang merokok di dalam kamar — area merokok tersedia di teras luar.\n• Dilarang memodifikasi instalasi listrik/air tanpa izin pengelola.\n• Dilarang mengecat dinding atau membuat lubang permanen tanpa izin.\n• Dilarang meminjamkan kunci kamar kepada non-penghuni.`,
-      },
-      {
-        heading: 'Hewan Peliharaan',
-        body: `• Hewan peliharaan diizinkan dengan pemberitahuan ke pengelola saat booking/check-in.\n• Pemilik hewan wajib membayar deposit hewan (default Rp100.000, refundable bila tidak ada kerusakan).\n• Hewan tidak boleh mengganggu penghuni lain; keluhan berulang dapat membatasi izin.`,
-      },
-      {
-        heading: 'Parkir',
-        body: `• Parkir motor tersedia di area parkir depan (gratis untuk penghuni).\n• Parkir mobil terbatas — koordinasi dengan pengelola.\n• Jangan memarkir kendaraan di depan pintu darurat atau akses koridor.\n• Kunci stang/ganda untuk keamanan kendaraan — pengelola tidak bertanggung jawab atas kehilangan.`,
-      },
-      {
-        heading: 'Keamanan',
-        body: `• Kunci kamar sendiri setiap keluar — jangan titip kunci ke sembarang orang.\n• CCTV beroperasi 24 jam di area koridor dan pintu masuk.\n• Laporkan orang mencurigakan ke staf atau pengelola segera.\n• Smart lock gerbang utama menggunakan kode akses — JANGAN bagikan kode ke non-penghuni.`,
-      },
-      {
-        heading: 'Hak & Kewajiban',
-        body: `HAK PENGHUNI:\n• Mendapatkan fasilitas sesuai yang tercantum di inventaris kamar.\n• Mendapatkan perbaikan gratis untuk kerusakan wajar (lampu, kran, shower, kloset, stop kontak, kebocoran).\n• Mendapatkan jatah listrik sesuai kontrak dan konfigurasi kamar yang tampil di portal.\n• Mendapatkan akses portal penghuni 24 jam untuk bayar, lapor, pantau meter.\n\nKEWAJIBAN PENGHUNI:\n• Membayar sewa tepat waktu sesuai jatuh tempo.\n• Menjaga fasilitas kos — kerusakan akibat kelalaian ditanggung penghuni.\n• Melapor ke pengelola jika ada masalah (kerusakan, gangguan, darurat).\n• Mengikuti aturan yang berlaku — pelanggaran berulang dapat berakibat pemutusan sewa.`,
-      },
-    ],
-  },
-  {
-    key: 'perpanjangan',
-    icon: '🔄',
-    title: 'Perpanjang Sewa',
-    sections: [
-      {
-        heading: 'Timeline Perpanjangan',
-        body: `H-10 sebelum akhir sewa:\n  → Kamu mendapat notifikasi di portal.\n  → Buka menu "Panduan Kos Saya" → klik tombol "Perpanjang".\n  → Pilih durasi perpanjangan (1 bulan / 2 minggu / 6 bulan / 1 tahun).\n  → Tagihan DP (Down Payment 30% dari tarif periode) diterbitkan.\n\nDP (30%) harus dibayar paling lambat hari-H (tanggal akhir sewa).\n\nH+7 setelah DP dibayar:\n  → Tagihan pelunasan (sisa 70%) diterbitkan.\n  → Bayar pelunasan paling lambat H+7 setelah DP.\n\nSETELAH LUNAS:\n  → Status sewa diperpanjang setelah pelunasan diverifikasi.\n  → Tidak ada biaya tambahan di luar DP dan pelunasan.`,
-      },
-      {
-        heading: 'Catatan Penting',
-        body: `• DP 30% tidak dikembalikan jika kamu batal setelah DP dibayar.\n• Perpanjangan TIDAK bisa dicicil — bayar tepat nominal (DP atau pelunasan penuh).\n• Jika DP belum dibayar sampai hari-H, kamar akan dibuka untuk penghuni baru.\n• Tarif perpanjangan mengikuti tarif kontrak kamu (bukan tarif publik terbaru).`,
-      },
-      {
-        heading: 'Durasi & Diskon',
-        body: `• 1 bulan: tarif bulanan normal\n• 2 minggu: tarif bulanan × 0,75\n• 6 bulan: tarif bulanan × 5,7 (hemat 5%)\n• 1 tahun: tarif bulanan × 11 (hemat 1 bulan)`,
-      },
-    ],
-  },
-  {
-    key: 'checkout',
-    icon: '🚪',
-    title: 'Checkout / Pindah',
-    sections: [
-      {
-        heading: 'Syarat Checkout',
-        body: `• Semua tagihan LUNAS (sewa + listrik + WiFi + lainnya).\n• Tidak ada tiket kerusakan yang belum selesai.\n• Kembalikan kunci kamar ke pengelola.\n• Bersihkan kamar dari barang pribadi — kosongkan seluruhnya.`,
-      },
-      {
-        heading: 'Proses Checkout',
-        body: `1. Buka menu "Panduan Kos Saya" → klik "Ajukan Keluar".\n2. Pilih tanggal rencana keluar.\n3. Admin akan menghitung tagihan final (listrik + sewa sisa).\n4. Lunasi tagihan final.\n5. Admin inspeksi kamar — pastikan tidak ada kerusakan.\n6. Kunci dikembalikan.\n7. Deposit jaminan diproses setelah inspeksi dan pelunasan; waktu proses mengikuti antrean pengelola.\n\n⏱️ Estimasi total proses: 3–7 hari kerja setelah pengajuan.`,
-      },
-      {
-        heading: 'Deposit Jaminan',
-        body: `• Deposit jaminan adalah dana titipan yang dibayar saat pertama masuk.\n• Nominal deposit mengikuti kamar yang kamu pilih; nilai pastinya tampil di rincian tagihan/portal.\n• Saat checkout, deposit dipakai lebih dulu untuk menutup tagihan terbuka (termasuk sewa dan utilitas).\n• Setelah semua kewajiban selesai, sisa deposit dikembalikan; bila deposit tidak cukup, kekurangan menjadi piutangmu.\n• Kerusakan akibat kelalaian penghuni dipotong dari deposit dengan catatan yang jelas.`,
-      },
-      {
-        heading: 'Pindah Kamar',
-        body: `• Bisa pindah antar kamar KOST48 (jika tersedia).\n• Ajukan via staf atau pengelola.\n• Selisih tarif disesuaikan.\n• Deposit mengikuti kamar baru.`,
-      },
-    ],
-  },
+const SUPPORT_TABS = [
   {
     key: 'kwh',
     icon: '⚡',
@@ -124,7 +57,7 @@ const GUIDE_TABS = [
       },
       {
         heading: 'Hemat Listrik 💡',
-        body: `• Matikan AC saat tidak di kamar.\n• Cabut charger setelah penuh.\n• Gunakan lampu LED hemat energi.\n• Matikan peralatan elektronik saat tidur.\n\nRata-rata pemakaian normal: 30–60 kWh/bulan (dengan AC).`,
+        body: `• Matikan AC saat tidak di kamar.\n• Cabut charger setelah penuh.\n• Gunakan lampu LED hemat energi.\n• Matikan peralatan elektronik saat tidur.`,
       },
     ],
   },
@@ -144,10 +77,6 @@ const GUIDE_TABS = [
       {
         heading: 'Jenis Tagihan',
         body: `• Tagihan Sewa (bulanan / sesuai kontrak).\n• Tagihan Listrik (pemakaian di atas jatah yang berlaku pada kontrak/kamar).\n• Tagihan WiFi (sesuai paket yang dipilih — opsional).\n• Tagihan Kerusakan (jika ada, atas kelalaian penghuni).`,
-      },
-      {
-        heading: 'Jatuh Tempo & Keterlambatan',
-        body: `• Semua tagihan (sewa, listrik, WiFi, dan lainnya) jatuh tempo 24 jam setelah diterbitkan.\n• TIDAK ada denda keterlambatan otomatis.\n• Namun tagihan yang menunggak dapat menghambat proses perpanjangan/checkout.`,
       },
     ],
   },
@@ -191,7 +120,13 @@ const GUIDE_TABS = [
   },
 ];
 
-function TabContent({ tab }: { tab: typeof GUIDE_TABS[number] }) {
+const TABS = [
+  { key: 'aturan', icon: '📋', title: 'Aturan Kos' },
+  { key: 'panduan', icon: '🧭', title: 'Panduan Cepat' },
+  ...SUPPORT_TABS.map((t) => ({ key: t.key, icon: t.icon, title: t.title })),
+];
+
+function TabContent({ tab }: { tab: typeof SUPPORT_TABS[number] }) {
   return (
     <Accordion flush alwaysOpen={false} defaultActiveKey={tab.sections[0]?.heading ?? undefined}>
       {tab.sections.map((section, i) => (
@@ -206,9 +141,66 @@ function TabContent({ tab }: { tab: typeof GUIDE_TABS[number] }) {
   );
 }
 
+function isNotFoundError(error: unknown): boolean {
+  const maybe = error as { response?: { status?: number; data?: { statusCode?: number } }; status?: number };
+  return (
+    maybe?.response?.status === 404 ||
+    maybe?.response?.data?.statusCode === 404 ||
+    maybe?.status === 404
+  );
+}
+
+function readInitialTab(): { tab: string; category?: string } {
+  const hash = typeof window !== 'undefined' ? window.location.hash.replace('#', '') : '';
+  if (TENANT_RULE_CATEGORIES.some((category) => category.id === hash)) {
+    return { tab: 'aturan', category: hash };
+  }
+  if (TABS.some((tab) => tab.key === hash)) return { tab: hash };
+  return { tab: 'aturan' };
+}
+
 export default function MyManualPage() {
-  const [activeTab, setActiveTab] = useState(GUIDE_TABS[0].key);
+  const initial = useMemo(readInitialTab, []);
+  const [activeTab, setActiveTab] = useState(initial.tab);
+  const [search, setSearch] = useState('');
+
   const faqsQuery = useQuery({ queryKey: ['public-faqs'], queryFn: fetchPublicFaqs });
+
+  // Sumber angka: konstanta pengelola + data kamar tenant (bukan angka tetap).
+  const publicConfigQuery = useQuery({
+    queryKey: PORTAL_QUERY_KEYS.publicConfig,
+    queryFn: fetchPublicConfig,
+  });
+  const stayQuery = useQuery({
+    queryKey: PORTAL_QUERY_KEYS.currentStay,
+    queryFn: async () => {
+      try {
+        return await getResource<Stay>('/stays/me/current');
+      } catch (err: unknown) {
+        if (isNotFoundError(err)) return null;
+        throw err;
+      }
+    },
+    retry: false,
+    staleTime: 30_000,
+  });
+
+  const stay = stayQuery.data ?? null;
+  const ruleContext: TenantRuleContext = useMemo(
+    () => ({
+      petDepositRupiah: publicConfigQuery.data?.petDepositRupiah ?? DEFAULT_TENANT_RULE_CONTEXT.petDepositRupiah,
+      extraOccupantPercent:
+        publicConfigQuery.data?.extraOccupantFeePercent ?? DEFAULT_TENANT_RULE_CONTEXT.extraOccupantPercent,
+      roomCode: stay?.room?.code ?? null,
+      roomDepositRupiah: stay?.depositAmountRupiah ?? stay?.room?.defaultDepositRupiah ?? null,
+    }),
+    [publicConfigQuery.data, stay],
+  );
+
+  const filteredCategories = useMemo(
+    () => filterTenantRuleCategories(search, ruleContext),
+    [search, ruleContext],
+  );
 
   const grouped = useMemo(() => {
     const items = (faqsQuery.data ?? []).slice().sort((a, b) => a.sortOrder - b.sortOrder);
@@ -221,6 +213,8 @@ export default function MyManualPage() {
     return Array.from(map.entries());
   }, [faqsQuery.data]);
 
+  const activeSupportTab = SUPPORT_TABS.find((t) => t.key === activeTab);
+
   return (
     <div>
       <PageHeader
@@ -232,11 +226,10 @@ export default function MyManualPage() {
       <div className="container py-4">
         <FreeRepairPolicyCard />
 
-        {/* ── 7 TAB UTAMA ── */}
         <Card className="mb-3">
           <Card.Header className="p-0">
-            <Nav variant="tabs" activeKey={activeTab} onSelect={(k) => setActiveTab(k || GUIDE_TABS[0].key)} className="flex-nowrap" style={{ overflowX: 'auto', flexWrap: 'nowrap', whiteSpace: 'nowrap', scrollbarWidth: 'thin' }}>
-              {GUIDE_TABS.map((tab) => (
+            <Nav variant="tabs" activeKey={activeTab} onSelect={(k) => setActiveTab(k || 'aturan')} className="flex-nowrap" style={{ overflowX: 'auto', flexWrap: 'nowrap', whiteSpace: 'nowrap', scrollbarWidth: 'thin' }}>
+              {TABS.map((tab) => (
                 <Nav.Item key={tab.key}>
                   <Nav.Link eventKey={tab.key} className="px-3 py-2" style={{ fontSize: '.9rem', fontWeight: activeTab === tab.key ? 600 : 400 }}>
                     {tab.icon} {tab.title}
@@ -246,7 +239,86 @@ export default function MyManualPage() {
             </Nav>
           </Card.Header>
           <Card.Body>
-            <TabContent tab={GUIDE_TABS.find((t) => t.key === activeTab) || GUIDE_TABS[0]} />
+            {activeTab === 'aturan' ? (
+              <>
+                <DepositRulesCard
+                  roomCode={ruleContext.roomCode}
+                  roomDepositRupiah={ruleContext.roomDepositRupiah}
+                  petDepositRupiah={ruleContext.petDepositRupiah}
+                  className="mb-3"
+                />
+
+                <div className="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-2">
+                  <div>
+                    <strong>8 aturan yang mengikatmu</strong>
+                    <div className="text-muted small">Setiap angka diambil dari data kamar dan Pengaturan pengelola.</div>
+                  </div>
+                  <Badge bg="light" text="dark">{filteredCategories.length} dari {TENANT_RULE_CATEGORIES.length} kategori</Badge>
+                </div>
+
+                <Form.Control
+                  type="search"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  placeholder="Cari aturan — mis. hewan, DP, deposit, overstay, checkout"
+                  aria-label="Cari aturan"
+                  className="mb-3"
+                />
+
+                {filteredCategories.length === 0 ? (
+                  <Alert variant="info" className="mb-0">
+                    Tidak ada aturan yang cocok dengan “{search}”.{' '}
+                    <Button variant="link" size="sm" className="p-0 align-baseline" onClick={() => setSearch('')}>
+                      Tampilkan semua
+                    </Button>
+                  </Alert>
+                ) : (
+                  <Accordion flush defaultActiveKey={initial.category} alwaysOpen={false}>
+                    {filteredCategories.map((category) => (
+                      <Accordion.Item eventKey={category.id} key={category.id}>
+                        <Accordion.Header>
+                          <span className="me-2" aria-hidden>{category.icon}</span>
+                          <span>
+                            {category.title}
+                            <span className="d-block text-muted fw-normal" style={{ fontSize: '.78rem' }}>{category.summary}</span>
+                          </span>
+                        </Accordion.Header>
+                        <Accordion.Body>
+                          <div className="d-flex flex-wrap gap-2 mb-3">
+                            {category.numbers.map((number) => (
+                              <div key={number.label} className="tenant-rule-number" title={`Sumber: ${number.source}`}>
+                                <span>{number.label}</span>
+                                <strong>{number.value(ruleContext)}</strong>
+                              </div>
+                            ))}
+                          </div>
+                          {category.sections.map((section) => (
+                            <div key={section.title} className="mb-2">
+                              <strong className="d-block mb-1">{section.title}</strong>
+                              <ul className="mb-0 ps-3">
+                                {section.lines.map((line) => <li key={line}>{line}</li>)}
+                              </ul>
+                            </div>
+                          ))}
+                        </Accordion.Body>
+                      </Accordion.Item>
+                    ))}
+                  </Accordion>
+                )}
+
+                <div className="mt-3">
+                  <Button variant="outline-primary" size="sm" onClick={() => setActiveTab('panduan')}>
+                    🧭 Bantu pilih aturan (4 pertanyaan)
+                  </Button>
+                </div>
+              </>
+            ) : null}
+
+            {activeTab === 'panduan' ? (
+              <TenantRulesWizard context={ruleContext} onSkip={() => setActiveTab('aturan')} />
+            ) : null}
+
+            {activeSupportTab ? <TabContent tab={activeSupportTab} /> : null}
           </Card.Body>
         </Card>
 

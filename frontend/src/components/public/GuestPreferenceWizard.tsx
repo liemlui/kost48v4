@@ -76,10 +76,10 @@ const STEPS = [
   {
     key: 'size',
     question: 'Butuh ruang gerak ekstra?',
-    sub: 'Standar (7,5 m²) — efisien, maks 2 orang. Besar (10,5 m²) — lega, muat untuk kamu yang bawa banyak barang atau suka terima tamu.',
+    sub: 'Standar (7,5 m²) — efisien, 2 orang tanpa biaya tambahan (maks 4). Besar (10,5 m²) — lega, 4 orang tanpa biaya tambahan (maks 6).',
     options: [
-      { value: 'standard', label: 'Standar', icon: '📦', note: '7,5 m² · Efisien · Maks 2 orang' },
-      { value: 'large',    label: 'Besar',   icon: '🏠', note: '10,5 m² · Lega · Maks 4 orang' },
+      { value: 'standard', label: 'Standar', icon: '📦', note: '7,5 m² · Efisien · 2 orang (+2 ekstra)' },
+      { value: 'large',    label: 'Besar',   icon: '🏠', note: '10,5 m² · Lega · 4 orang (+2 ekstra)' },
     ],
   },
   {

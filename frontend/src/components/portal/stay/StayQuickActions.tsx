@@ -21,6 +21,8 @@ type QuickAction = {
   disabled?: boolean;
   title?: string;
   primary?: boolean;
+  /** `checkout` = warna amber berbeda dari aksi utama (W-TNT-001). */
+  tone?: 'checkout';
 };
 
 /**
@@ -37,7 +39,7 @@ export default function StayQuickActions(props: Props) {
 
   const secondaryActions: QuickAction[] = [
     { key: 'renew', icon: '🔄', label: 'Perpanjang', onClick: props.onRenew, disabled: !props.canRenew, title: props.renewDisabledReason },
-    { key: 'checkout', icon: '🚪', label: 'Ajukan Keluar', onClick: props.onCheckout, disabled: !props.canCheckout, title: !props.canCheckout ? 'Selesaikan tagihan aktif dulu sebelum mengajukan keluar.' : undefined },
+    { key: 'checkout', icon: '🚪', label: 'Ajukan Keluar', onClick: props.onCheckout, disabled: !props.canCheckout, tone: 'checkout', title: !props.canCheckout ? 'Selesaikan tagihan aktif dulu sebelum mengajukan keluar.' : undefined },
     { key: 'wa', icon: '💬', label: 'Hubungi Admin', href: officialKost48Location.whatsappUrl },
   ];
 
@@ -48,7 +50,7 @@ export default function StayQuickActions(props: Props) {
         <span className="qa-label">{a.label}</span>
       </>
     );
-    const className = `tenant-quick-action${a.primary ? ' primary' : ''}`;
+    const className = `tenant-quick-action${a.primary ? ' primary' : ''}${a.tone ? ` tone-${a.tone}` : ''}`;
     if (a.href) {
       // Tautan eksternal (https) dibuka tab baru; rute internal memakai Link agar tetap SPA.
       const external = a.href.startsWith('http');

@@ -1,6 +1,10 @@
 import { useState } from 'react';
 import { Alert, Button, Form, Modal, Spinner } from 'react-bootstrap';
+import { useQuery } from '@tanstack/react-query';
 import { createCheckoutRequest } from '../../api/checkoutRequests';
+import { fetchPublicConfig } from '../../api/settings';
+import { PORTAL_QUERY_KEYS } from '../../api/portalQueryKeys';
+import DepositRulesCard from '../tenant/DepositRulesCard';
 import type { Stay } from '../../types';
 import { getDateInputDaysFromToday, toUtcDateOnlyIso } from '../../utils/tenantDates';
 import { toTenantFriendlyError } from '../../utils/tenantErrorCopy';
@@ -14,6 +18,13 @@ interface CheckoutRequestModalProps {
 
 export default function CheckoutRequestModal({ show, onHide, onSuccess, stay }: CheckoutRequestModalProps) {
   const getMinDate = () => getDateInputDaysFromToday(1);
+
+  // W-TNT-001: kartu deposit saat checkout memakai nominal kamar, bukan konstanta.
+  const publicConfigQuery = useQuery({
+    queryKey: PORTAL_QUERY_KEYS.publicConfig,
+    queryFn: fetchPublicConfig,
+    enabled: show,
+  });
 
   const [requestedCheckOutDate, setRequestedCheckOutDate] = useState(getMinDate());
   const [checkoutReason, setCheckoutReason] = useState('');
@@ -82,6 +93,18 @@ export default function CheckoutRequestModal({ show, onHide, onSuccess, stay }: 
             {error}
           </Alert>
         ) : null}
+
+        <DepositRulesCard
+          variant="checkout"
+          roomCode={stay.room?.code ?? null}
+          roomDepositRupiah={stay.depositAmountRupiah ?? stay.room?.defaultDepositRupiah ?? null}
+          petDepositRupiah={publicConfigQuery.data?.petDepositRupiah ?? 100000}
+          className="mb-3"
+        />
+        <Alert variant="warning" className="small">
+          Ajukan jauh hari supaya inspeksi dan pengembalian deposit tidak mepet. Kalau tanggal keluar terlewat tanpa perpanjangan,
+          kamar dilepas pukul 12.00 WIB di hari-H dan checkout paksa berjalan pukul 12.00 WIB keesokan harinya.
+        </Alert>
 
         <Form.Group controlId="checkout-request-modal-1" className="mb-3">
           <Form.Label>Tanggal Keluar yang Diajukan</Form.Label>

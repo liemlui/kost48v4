@@ -91,7 +91,7 @@ export const officialKost48Faq: Kost48OfficialFaq[] = [
   {
     category: 'Aturan',
     question: 'Satu kamar untuk berapa orang?',
-    answer: 'Standar satu kamar untuk 1–2 orang. Penghuni tambahan perlu konfirmasi terlebih dahulu kepada pengelola. Biaya air dan kebersihan untuk penghuni tambahan berlaku sesuai ketentuan.',
+    answer: 'Kamar STANDARD: 2 orang tanpa biaya tambahan (maksimal 4). Kamar LARGE: 4 orang tanpa biaya tambahan (maksimal 6). Penghuni tambahan di atas batas gratis dikenakan 20% dari tarif sewa periode per kepala. Konfirmasi jumlah penghuni ke pengelola saat booking.',
   },
   {
     category: 'Fasilitas',
