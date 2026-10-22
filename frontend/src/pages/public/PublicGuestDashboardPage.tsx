@@ -824,7 +824,7 @@ export default function PublicGuestDashboardPage() {
             <div className="gx-catalog-filter gx-review-filter" role="tablist" aria-label="Urutkan ulasan">
               <span>Urutkan</span>
               <button type="button" role="tab" aria-selected={reviewSort === 'recent'} className={reviewSort === 'recent' ? 'active' : ''} onClick={() => { setReviewSort('recent'); setReviewPage(1); }}>Terbaru</button>
-              <button type="button" role="tab" aria-selected={reviewSort === 'rating'} className={reviewSort === 'rating' ? 'active' : ''} onClick={() => { setReviewSort('rating'); setReviewPage(1); }}>Rating tertinggi</button>
+              <button type="button" role="tab" aria-selected={reviewSort === 'rating'} className={reviewSort === 'rating' ? 'active' : ''} onClick={() => { setReviewSort('rating'); setReviewPage(1); }}>Rating Tertinggi</button>
             </div>
             <div className="gx-review-grid">
               {displayedReviews.map((review, index) => {
