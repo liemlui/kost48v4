@@ -36,12 +36,12 @@ Diperiksa oleh `node scripts/ukur-serah-terima-docs.mjs` ([default-dev §11](../
 |---|---:|---|
 | `AGENTS.md` (disuntik tiap request, plafon 12 KB) | 12.069 B (**sisa 219 B**) | `wc -c AGENTS.md` |
 | `docs/KONTRAK.md` (plafon 16 KB) | 15.869 B (**sisa 515 B**) | `wc -c` |
-| `docs/ANTREAN.md` (plafon 16 KB) | 16.281 B (**sisa 103 B**) | idem |
+| `docs/ANTREAN.md` (plafon 16 KB) | 16.358 B (**sisa 26 B**) | idem |
 | `docs/PETA-KODE.md` (plafon 16 KB) | 16.190 B (**sisa 194 B**) | idem |
 | Gate dokumen + pagar | **BERSIH** — 0 pelanggaran, 0 pemeriksaan dilewati, **16 aturan (v3.0)** + 14 INFO · self-test pagar **21/21 lulus** | `node scripts/check-docs.mjs` + `node scripts/check-docs.selftest.mjs` |
 | Kartu kekuatan | **10/13 = 77%** — C (changelog 66 KB tanpa TOC), E (kotak di dokumen tugas bertanda), H (1 arsip belum terdaftar); **M ratchet LULUS** (11.421 baris, turun 2.604 dari baseline `scripts/docs-lines.baseline.json`, **jangan** disalin ke tabel ini) | `node scripts/ukur-kekuatan-docs.mjs` |
 | Rujukan nomor baris di dokumen kontrak aktif | **0** rujukan di 0 berkas kontrak (gate) | INFO detektor di gate; kartu kekuatan pemeriksaan **L** |
-| Kesegaran isi docs | `% cakupan` **68%** (25/37) · `% segar` **68%** (17/25) — potret 2026-10-22, HEAD `1a5bcd39` | `node scripts/ukur-kesegaran-docs.mjs` |
+| Kesegaran isi docs | `% cakupan` **68%** (25/37) · `% segar` **48%** (12/25) — potret 2026-10-22 sesudah batch D6–D9 + W-TNT-004/W-OWN-006; metrik mengukur urutan commit, bukan kebenaran isi | `node scripts/ukur-kesegaran-docs.mjs` |
 
 **Tiga kegagalan kartu (C/E/H) adalah temuan pra-eksisting, bukan akibat DOCS-GEN2:** **C** = changelog bulan berjalan 66 KB melewati plafon rujukan dan belum punya TOC; **E** = kartu menghitung kotak di dokumen tugas bertanda `<!-- checklist-otoritatif -->` yang justru **sah** menurut R3 (gate BERSIH); **H** = satu berkas arsip (`D4a-addendum-tautan-arsip.md`) belum terdaftar di `docs/arsip/README.md`. Ketiganya dicatat, bukan disembunyikan.
 

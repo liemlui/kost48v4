@@ -45,11 +45,12 @@
 
 ## 3. Matriks rute → role
 
-**79 baris = 79 `<Route path=...>`** di `App.tsx` (potret 2026-10-21). Sebaran: **PUBLIK 13 · Semua 7 · RequireRoles 59 · TIDAK TERPETAKAN 0**.
+**80 baris = 80 `<Route path=...>`** di `App.tsx` (potret 2026-10-22). Sebaran: **PUBLIK 14 · Semua 7 · RequireRoles 59 · TIDAK TERPETAKAN 0**.
 
 | Rute | Role |
 |---|---|
 | `/login` | PUBLIK |
+| `/register` | PUBLIK |
 | `/forgot-password` | PUBLIK |
 | `/reset-password` | PUBLIK |
 | `/rooms` | PUBLIK (katalog; default TENANT stage browsing) |
@@ -135,7 +136,7 @@
 2. **`/portal/guide` tanpa `RequireRoles`**: semua role terautentikasi bisa memicu redirect ke `/portal/manual`; isi manual tetap dijaga TENANT.
 3. **Tiga rute redirect inventaris** (`/inventory-items`, `/room-items`, `/inventory-movements`) juga tanpa `RequireRoles`; yang dijaga adalah targetnya. STAFF yang membukanya akan diredirect lagi oleh `RequireRoles` di `/inventory/*`.
 4. **OWNER punya dua mode nyata**: `/owner-dashboard` dan `/admin-dashboard`, keduanya OWNER-only. ADMIN **tidak** boleh membuka `/admin-dashboard`; jangan menyebutnya "dashboard admin".
-5. **`navigation.ts` bukan daftar akses.** Ia kurasi sidebar: 8 tautan OWNER, 12 ADMIN, 5 STAFF, 7 TENANT (occupied) + 1 loyalty opsional, sedangkan `App.tsx` punya 79 rute. Detail, profil, notifikasi, redirect, dan stub sengaja tidak masuk sidebar; selisih ini temuan, bukan kesalahan.
+5. **`navigation.ts` bukan daftar akses.** Ia kurasi sidebar: 8 OWNER, 12 ADMIN, 5 STAFF, 7 TENANT (+1 loyalty opsional), sedangkan `App.tsx` punya 80 rute. Detail, profil, notifikasi, redirect, dan stub sengaja tidak masuk sidebar; selisih ini temuan.
 6. **`/portal/checkout` dan `/portal/renewal` adalah stub** (komentar kode R-13), bukan layar penuh.
 7. **Tiga halaman operasional publik** (`/okupansi`, `/update-kamar`, `/availability-setup`) tidak punya guard frontend. Otorisasi backend-nya **tidak diperiksa** di D2.
 8. **Dua rute kamar berbeda**: `/rooms/:id` (OWNER/ADMIN/STAFF) dan `/rooms/:roomId/detail` (PUBLIK). Jangan saling menggantikan.

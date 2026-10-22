@@ -3,7 +3,7 @@
 > **Blok baca** · Jenis: **registry fitur (tier-1)** · Status: **aktif sejak 2026-10-21 (batch D3 DOCS-GEN2)** · Untuk siapa: agen + owner yang mencari fitur, rute, atau jangkar kode
 > · Baca kalau: mencari ID fitur, role, rute, status, atau berkas komponennya. · **Jangan** dibaca kalau: mencari status pekerjaan (itu [ANTREAN](ANTREAN.md)) atau aturan kerja (itu [KONTRAK](KONTRAK.md)).
 
-**Fakta** · potret **2026-10-21** — **58 fitur** menutup **79 rute** `App.tsx`; sumber role/rute: [peta peran](product/peran.md), `frontend/src/App.tsx`, `frontend/src/config/navigation.ts`.
+**Fakta** · potret **2026-10-22** — **58 fitur** menutup **80 rute** `App.tsx`; sumber role/rute: [peta peran](product/peran.md), `frontend/src/App.tsx`, `frontend/src/config/navigation.ts`.
 
 ## 1. Cara membaca
 
@@ -86,7 +86,7 @@
 
 ## 4. Cakupan
 
-- **58 fitur** menutup **79/79 rute**; **0 rute tak terpetakan**, **0 rute ganda**.
+- **58 fitur** menutup **80/80 rute**; **0 rute tak terpetakan**, **0 rute ganda**.
 - Per area: OPS 12 · ADM 26 · FIN 6 · STF 2 · TNT 12.
 - Checker mandiri: `node scripts/check-fitur.mjs` — memeriksa format ID, status, path jangkar, dan cakupan rute `App.tsx`.
 
