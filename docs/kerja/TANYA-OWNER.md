@@ -229,6 +229,20 @@ Setiap pertanyaan **wajib** memakai lima unsur ini, dalam bahasa manusia — buk
 
 **Default bila tidak dijawab:** **(c)** — Mode Cepat sudah ditandai `deprecated`; tidak ada pencatat baru, baris tetap terbuka sampai owner memutuskan.
 
+### P33 — Bukti pemicu cron agenda AI di produksi (W-OWN-012)
+
+**Konteks:** kode agenda AI harian sudah selesai dan diuji (`AiAgendaSweepService`: maksimal satu `AiDraft` `daily-agenda` per hari WIB; panggilan kedua di hari yang sama mengembalikan `AGENDA_ALREADY_CREATED_TODAY`; fallback rule-based saat AI mati). Di produksi `AUTO_OPS_ENABLED=false`, jadi pemicu satu-satunya adalah `POST /api/auto-ops/cron` dengan header token dari env server. Yang belum terbukti: draft itu benar-benar lahir di produksi dan panggilan kedua tidak menambahnya. Membuktikannya butuh salah satu dari dua hal yang belum diizinkan: **baca DB produksi** (P31 masih terbuka) atau **satu panggilan cron** yang berisiko memicu permintaan AI berbayar bila kunci AI aktif.
+
+**Pilihan:**
+- **(a)** Owner mengizinkan **satu panggilan cron** pada jendela yang dipastikan AI mati/fallback (kunci AI kosong atau `AI_ENABLED=false`); agen memanggil dua kali dan melaporkan JSON panggilan kedua (`skipped: true` / `AGENDA_ALREADY_CREATED_TODAY`). Konsekuensi: bukti dedupe end-to-end tanpa biaya AI; satu draft agenda nyata masuk ke kotak OWNER. Risiko: kalau AI ternyata aktif, ada biaya satu brief (kecil, tetapi uang = keputusan owner).
+- **(b)** Owner memberi **izin baca-saja DB produksi** (SELECT `id, feature, targetId, createdAt` dari `AiDraft` untuk `feature='daily-agenda'` hari itu) setelah cron terjadwal berjalan sendiri. Konsekuensi: tanpa panggilan manual dan tanpa biaya tambahan. Risiko: butuh akses DB; bukti baru ada setelah cron benar-benar berjalan.
+- **(c)** Owner menjalankan sendiri dua `curl` cron dan menempelkan JSON-nya. Konsekuensi: nol akses/biaya agen. Risiko: satu putaran bolak-balik; cron terjadwal tetap belum terbukti.
+- **(d)** Owner menyatakan bukti cron tidak diperlukan; W-OWN-012 ditutup dengan bukti kode + lima unit test. Konsekuensi: baris ditutup hari ini. Risiko: klaim "berjalan di produksi" tidak pernah dibuktikan.
+
+**Rekomendasi:** **(b)** — bukti tanpa biaya dan tanpa panggilan manual; **(a)** hanya bila owner bisa memastikan AI sedang mati.
+
+**Default bila tidak dijawab:** **(c)/BLOCKED** — tidak ada panggilan produksi dan tidak ada kueri DB dari agen; baris W-OWN-012 tetap `[ ]` dengan tanda BLOCKED (owner).
+
 
 
 
@@ -265,3 +279,4 @@ Dicatat supaya owner tahu apa yang berjalan tanpa menunggu dia — rincian di [d
 | 2026-10-19 | **Empat pertanyaan baru P25–P28** ditulis di sini **sebelum** dipaparkan di chat, lahir dari instruksi owner tentang transparansi aturan + KTP pasca-check-in: P25 konsekuensi KTP belum lengkap, P26 tenggat, P27 paritas deposit/surcharge antar kanal, P28 akses verifikasi KTP. Semua memakai lima unsur (§1). Default sementara: pengingat saja, 7 hari (akses verifikasi tidak diubah), dan **tidak** mengubah perhitungan uang. |
 | 2026-10-19 | **Arahan owner: default diterima, hanya pertanyaan krusial.** Delapan pertanyaan ditutup dengan default (P17, P18, P20, P22, P23, P25, P26, P28); yang tetap terbuka hanya **P19, P21, P24, P27**. Bloknya dipertahankan sebagai rincian sampai pembersihan berikutnya; keputusan induk di register `DEFAULT-DITERIMA`. |
 | 2026-10-19 | **P19, P21, P24, P27 dijawab owner** → register `GO-LIVE-DATA + TARIF + BACKUP + PARITAS`: listrik Rp2.500/kWh, air gratis sementara (IoT waterflow), data go-live lewat `/checklist`, dump + jadwal + uji restore, paritas semua kanal. Blok ditandai **DITUTUP**; berkas kembali **0 pertanyaan terbuka**. |
+| 2026-10-22 | **P33 ditambahkan (W-OWN-012, bukti cron produksi).** Konteks: kode + lima unit test selesai, produksi `AUTO_OPS_ENABLED=false`, bukti dedupe butuh baca DB (P31 terbuka) atau satu panggilan cron yang bisa memicu AI berbayar. Empat pilihan (a–d) + risiko + rekomendasi (b) + default aman (c/BLOCKED). **Tidak ada panggilan produksi/kueri DB dijalankan.** |
