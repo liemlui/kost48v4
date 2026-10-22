@@ -21,7 +21,7 @@
 
 Daftar prioritas, penanggung jawab, dan kesiapan ada di [TASK-AKTIF](kerja/TASK-AKTIF.md#prioritas) bagian “Prioritas & penanggung jawab”. Antrean satu baris per tugas ada di §3.
 
-## 3. Task terbuka & gate (30 `[ ]`)
+## 3. Task terbuka & gate (29 `[ ]`)
 
 Format: **ID** — judul | **Gate** (verifikasi wajib sebelum `[x]`). (owner) = butuh data/keputusan owner.
 
@@ -36,7 +36,7 @@ Format: **ID** — judul | **Gate** (verifikasi wajib sebelum `[x]`). (owner) = 
 - [ ] **W-OWN-008** - sisa lokal selesai; UAT desktop OWNER 1440 px + visual regression masih BLOCKED | **Gate:** UAT + visual regression + sign-off AO-14
 - [ ] **W-OWN-009** - normalisasi sistem visual/terminologi Owner setelah review AO-20; **label filter sudah diseragamkan "Rating Tertinggi"** (22 Okt: `PublicGuestDashboardPage.tsx`; sisa normalisasi visual/terminologi menunggu review AO-20) | **Gate:** perubahan AppLayout dikoordinasikan
 - [ ] **W-OWN-010** - konsolidasi komponen/shell Area Admin | **Gate:** regresi Owner bila AppLayout atau shared CSS berubah
-- [ ] **W-OWN-011** - etalase beranda/katalog + foto rasio apa pun utuh & saran rasio upload | **Gate:** bukti browser 390/768/1440 px (foto utuh, chip kategori, tautan kebutuhan); [TASK](kerja/TASK-AKTIF.md#d4f-uiux) | checklist: kerja/TASK-AKTIF.md#d4f-uiux
+- [x] **W-OWN-011** - etalase beranda/katalog + foto rasio apa pun utuh & saran rasio upload | **Gate:** bukti browser 390/768/1440 px (foto utuh, chip kategori, tautan kebutuhan); [TASK](kerja/TASK-AKTIF.md#d4f-uiux); **Bukti:** [render 390/768/1440](kerja/bukti-own-011-2026-10-22/README.md) — 0.75/2.33 `contain`, 1.33 `cover`, chip kategori, tautan kebutuhan | checklist: kerja/TASK-AKTIF.md#d4f-uiux
 - [ ] **W-OWN-005** - audit final setelah AO-01..13 dan AO-15..23 memenuhi DoD | **Gate:** publik + OWNER/ADMIN/STAFF + dua state TENANT, viewport 320-1440 px, Axe/gate Baymard, build/test relevan, screenshot aman
 - [ ] **W-OPS-002** - baseline deployment: konfigurasi panel dan limit/snapshot resource | **Gate:** SHA artefak yang berjalan, jam deploy, perilaku runtime EF-01/03/05, fault/interval pengukuran
 - [ ] **W-OPS-003** - baseline workload host | **Gate:** butuh izin server; skenario, rentang waktu, jenis angka, resource/fault, artefak tercatat
@@ -65,7 +65,7 @@ Format: **ID** — judul | **Gate** (verifikasi wajib sebelum `[x]`). (owner) = 
 
 - [x] **W-TNT-001** - aturan huni (hewan, isi penghuni, prabayar, pembayaran, deposit, overstay, checkout) tampil jelas di app tenant + wizard terarah + CTA checkout (warna beda, copy humanis) + dokumen 1 halaman (rekomendasi a) | **Gate:** setiap angka menunjuk sumber kanonik; 0 pertentangan dengan kode; ≤2 klik dari beranda; render 390/1440 px | **Bukti 21 Okt 2026:** `tenantRules.ts` 8 kategori berangka + `source`; wizard 4 jalur; kartu deposit dari data kamar (bukan konstanta); CTA amber + copy overstay; F-15..F-17 ditutup/ditandai; test FE 57 berkas/306 lulus, tsc FE+BE exit 0, `check-docs` BERSIH, render 390/1440 tanpa PII. Sisa: tanda tangan owner + edit 1 baris FAQ produksi lewat admin | checklist: kerja/TASK-AKTIF.md#d4f-faq
 - [x] **W-TNT-002** - checklist hewan + jumlah penghuni saat check-in → deposit hewan & surcharge otomatis, satu helper untuk walk-in/booking/portal | **Gate:** `hasPet`/`occupantCount` terisi; deposit = kamar + pet; tidak dobel dengan yang sudah dibayar; test hitung 3 kanal; [TASK](kerja/TASK-AKTIF.md#d4f-huni) **Bukti 22 Okt:** helper biaya 3 kanal, DTO `occupantCount`/`hasPet`, gate uang 191/191. Sisa: uji check-in ganda | checklist: kerja/TASK-AKTIF.md#d4f-huni
-- [x] **W-TNT-003** (owner) - KTP tidak memblokir check-in; wajib dilengkapi pasca check-in + status 4 keadaan + pengingat berulang | **Gate:** default P25/P26 dipakai (pengingat saja · 7 hari); gate lama tidak memblokir; pengingat berhenti saat verified; akses verifikasi **tidak diubah** (P28 default); runbook diperbarui (F-14); [TASK](kerja/TASK-AKTIF.md#d4f-huni) **Bukti 22 Okt:** gate KTP dihapus dari check-in **dan** booking; `KtpReminderSweepService` gelombang 7 hari (dedupe per gelombang, berhenti saat VERIFIED) + eskalasi OWNER/ADMIN hari ke-8 tanpa NIK/foto; pemicu manual `POST /api/auto-ops/run/ktp-reminders`; runbook Bagian D ditulis ulang; BE 198/198, FE 311/311. Sisa: uji runtime di perangkat + data KTP produksi | checklist: kerja/TASK-AKTIF.md#d4f-huni
+- [x] **W-TNT-003** (owner) - KTP tidak memblokir check-in; wajib dilengkapi pasca check-in + status 4 keadaan + pengingat berulang | **Gate:** default P25/P26 dipakai (pengingat saja · 7 hari); gate lama tidak memblokir; pengingat berhenti saat verified; akses verifikasi **tidak diubah** (P28 default); runbook diperbarui (F-14); [TASK](kerja/TASK-AKTIF.md#d4f-huni) **Bukti:** gate dihapus (check-in + booking); `KtpReminderSweepService` 7 hari (dedupe per gelombang, berhenti saat VERIFIED) + eskalasi hari ke-8 tanpa NIK/foto; runbook Bagian D diperbarui; BE 198/198, FE 311/311. Sisa: uji runtime | checklist: kerja/TASK-AKTIF.md#d4f-huni
 - [ ] **W-TNT-004** - PWA push aktif + tombol "Ingatkan via WA" manual (wa.me, tanpa API) pada kartu urgent admin/owner | **Gate:** push diterima 1 perangkat (bukti); tombol membuka wa.me terisi; tanpa kunci API; tanpa NIK di pesan; [TASK](kerja/TASK-AKTIF.md#d4f-huni) | checklist: kerja/TASK-AKTIF.md#d4f-huni
 - [x] **W-FIN-001** - F-01 override deposit & F-02 paritas surcharge/deposit hewan antar kanal | **Gate:** P27 = **tegakkan di semua kanal**; satu helper dipakai booking publik/portal/walk-in; gate uang backend lulus; [TASK](kerja/TASK-AKTIF.md#d4f-sinkron) **Bukti 22 Okt:** override deposit diabaikan, helper 3 kanal, gate uang 191/191 | checklist: kerja/TASK-AKTIF.md#d4f-sinkron
 - [x] **W-FIN-002** - selaraskan panduan tenant, prompt FAQ AI, dan komentar kode dengan aturan kanonik (F-04..F-10) | **Gate:** 0 angka bertentangan; gate dokumen hijau; [TASK](kerja/TASK-AKTIF.md#d4f-sinkron) | **Bukti 21 Okt 2026:** F-04..F-10 teks selesai di `MyManualPage.tsx`, `faq.prompt.ts`, dan komentar `prepay-extension.service.ts`; `rg` frasa basi 0; `tsc --noEmit` exit 0; test MyManualPage 3/3; `check-docs` BERSIH. Sisa F-15..F-17 dicatat terbuka | checklist: kerja/TASK-AKTIF.md#d4f-sinkron
@@ -75,7 +75,7 @@ Format: **ID** — judul | **Gate** (verifikasi wajib sebelum `[x]`). (owner) = 
 - [ ] **W-OPS-014** (owner) - konfirmasi apakah `uploads/` (foto kamar/bukti bayar) perlu dipindahkan dari server lama | **Gate:** jawaban owner + bukti path/aset; jangan salin data pengguna tanpa izin
 - [ ] **W-DOC-001** - tata ulang dokumen generasi kedua D0–D9 ([kontrak](kerja/TASK-DOCS-GEN2.md)): konstitusi ID + registry, peta peran, registry fitur, konsolidasi ≤30 berkas/≤400 KB, checklist di dokumen tugas, gate v3 | **Gate:** tiap batch D0–D9 punya bukti; gate hijau saat batch ditutup; keputusan [keputusan program](KEPUTUSAN-OWNER.md); baseline [inventaris 2026-10-20](arsip/inventaris-docs-2026-10-20.md) | checklist: kerja/TASK-DOCS-GEN2.md#checklist
 
-**Rekap (potret 2026-10-22):** 30 terbuka + 15 selesai = 45 baris.
+**Rekap (potret 2026-10-22):** 29 terbuka + 16 selesai = 45 baris.
 
 
 ---

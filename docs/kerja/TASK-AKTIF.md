@@ -346,7 +346,7 @@ Bentuk 7 bagian mengikuti konvensi [ANTREAN §3](../ANTREAN.md) butir A-2. Statu
 | 7 | Rekomendasi rasio di panel upload | selesai |
 | 8 | Typecheck + test + bundling | selesai |
 | 9 | Dokumen: berkas ini, ANTREAN, changelog, gate dokumen | selesai |
-| 10 | Bukti browser 390/768/1440 px (foto potret, chip, tautan kebutuhan) | belum |
+| 10 | Bukti browser 390/768/1440 px (foto potret, chip, tautan kebutuhan) | **selesai 22 Okt** — [bukti render](bukti-own-011-2026-10-22/README.md) (API tiruan, 8 screenshot, tanpa PII) |
 
 ### 1. Tujuan & definisi selesai
 
@@ -407,6 +407,7 @@ Fakta yang diverifikasi dari kode (bukan ingatan):
 | Tanggal | Perubahan |
 |---|---|
 | 2026-10-18 | Dibuat setelah implementasi selesai lokal. Implementasi: util + komponen + section beranda + katalog + panel upload. Verifikasi: typecheck, 19 test baru, 274/274 seluruh frontend, `vite build` exit 0. Belum: bukti browser, `npm run build` penuh, mutasi bukti pagar. |
+| 2026-10-22 | **Langkah 10 selesai** — bukti render 390/768/1440 px dengan API tiruan (data fiktif, tanpa PII): foto potret 0.75 & panorama 2.33 tampil `object-fit: contain` (utuh, latar blur), foto 1.33/1.00 tetap `cover`; chip kategori `Ekonomi (1)`/`Standar (1)`/`Deluxe (2)`; tautan kebutuhan mendarat di `/rooms?avail=bookable&cooling=ac`, `&bathroom=inside`, `&sort=price-asc`; tanpa scroll horizontal di ketiga lebar. Berkas + metode + batas: [bukti render](bukti-own-011-2026-10-22/README.md). |
 
 <a id="prioritas"></a>
 ## Bagian E — Prioritas & penanggung jawab
