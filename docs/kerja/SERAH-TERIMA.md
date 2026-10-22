@@ -7,10 +7,10 @@
 
 ```yaml
 # @kost48-state — blok yang diperiksa mesin, jangan diedit manual tanpa mengukur ulang.
-head: 0b84034d92c00975a11fbd133b483667b5f37afb   # git rev-parse HEAD saat potret
-tanggal: 2026-10-10
-gate: BERSIH                                      # node scripts/check-docs.mjs
-kartu_kekuatan: 13/13                             # node scripts/ukur-kekuatan-docs.mjs
+head: 1a5bcd39c94938927df7c1555c4f6932ae9d6c0a   # git rev-parse HEAD saat potret
+tanggal: 2026-10-22
+gate: BERSIH                                      # node scripts/check-docs.mjs (v3.0, 16 aturan)
+kartu_kekuatan: 10/13                             # node scripts/ukur-kekuatan-docs.mjs
 periksa: node scripts/ukur-serah-terima-docs.mjs  # pemeriksa blok ini
 ```
 
@@ -26,7 +26,7 @@ Diperiksa oleh `node scripts/ukur-serah-terima-docs.mjs` ([default-dev §11](../
 
 ## 2. Keadaan repository pada potret
 
-**Potret terakhir: 2026-10-10, branch `main`, HEAD `0b84034d`** — pohon kerja **tidak bersih**: dua berkas source milik owner (`frontend/src/pages/portal/MyManualPage.tsx`, `frontend/src/pages/public/CekPage.tsx`) dan dua folder untracked (`.design-audit/`, `design/`) — semuanya **di luar** batch dokumentasi dan tidak disentuh — **ditambah delapan berkas dokumen sesi 2026-10-10 yang belum di-commit** (§6). Tiga commit sesudah potret sebelumnya: PENUTUP (`9e8be972`), RUJUKAN (`3a7ba7e0`), kenaikan baseline ratchet (`0b84034d`).
+**Potret terakhir: 2026-10-22, branch `main`, HEAD `1a5bcd39`** — pohon kerja masih memuat berkas **untracked** dari sesi lama (`.design-audit/`, `design/`, `diag*.sh`, `host*.sh`, `old.sh`, `seo.sh`, `rilis-hash.txt`, `.tmp-docs-audit.mjs`, satu tgz deploy lama) yang **tidak disentuh** batch dokumentasi. Riwayat terakhir: **DOCS-GEN2 D6–D9 ditutup** (commit `1a5bcd39`); deploy produksi terakhir build `0x8rRhAiIe3_` (commit `e4ae5766`). Tiga commit sesudah potret sebelumnya: PENUTUP (`9e8be972`), RUJUKAN (`3a7ba7e0`), kenaikan baseline ratchet (`0b84034d`).
 
 **⚠ Koreksi yang mudah menyesatkan — keduanya diukur ulang 2026-10-10.** (a) Potret sebelumnya menyebut HEAD **`faff7c36`** ("72 berkas, +2714/−231"); commit itu **bukan nenek moyang HEAD dan tidak ada cabang yang memuatnya** — ia versi lama dari commit batch SERAH-SESI yang sama-sama berinduk `65d1dab4`, lalu digantikan **`9be0ea47`** (72 berkas, +2732/−232). Nomor dari catatan lama karena itu **tidak boleh disalin**. (b) Label tanggal di catatan batch adalah tanggal **penulisan sesi**, bukan tanggal commit maupun tanggal pengukuran: batch B0–B8 menyebut "2026-10-07" padahal commit terakhir saat itu 2026-10-06 dan gate-nya masih v1.6. Label lama **dibiarkan apa adanya** (menyuntingnya = menyunting catatan bertanggal); yang sah dipakai sebagai tanggal = **tanggal pengukuran nyata**.
 
@@ -34,18 +34,18 @@ Diperiksa oleh `node scripts/ukur-serah-terima-docs.mjs` ([default-dev §11](../
 
 | Ukuran | Nilai potret | Perintah pengukur |
 |---|---:|---|
-| `AGENTS.md` (disuntik tiap request, plafon 12 KB) | 9.803 B | `[IO.File]::ReadAllBytes("AGENTS.md").Length` |
-| `docs/KONTRAK.md` (plafon 16 KB) | 16.304 B (**sisa 80 B**) | idem |
-| `docs/ANTREAN.md` (plafon 16 KB) | 15.256 B | idem |
-| `docs/PETA-KODE.md` (plafon 16 KB) | 16.214 B (**sisa 170 B**) | idem |
-| Gate dokumen + pagar | **BERSIH** — 0 pelanggaran, 0 pemeriksaan dilewati, 11 aturan (v2.0) + 3 INFO · self-test pagar **13/13 lulus** | `node scripts/check-docs.mjs` + `node scripts/check-docs.selftest.mjs` |
-| Kartu kekuatan | **13/13 = 100%** (11 pemeriksaan lama + **D** diperluas baris Fakta + **L** + **M** ratchet: baseline dirujuk ke `scripts/docs-lines.baseline.json`, **jangan** disalin ke tabel ini) | `node scripts/ukur-kekuatan-docs.mjs` |
-| Rujukan nomor baris di dokumen kontrak aktif | **0** rujukan di 0 berkas kontrak (gate) · **1** di 1 berkas (kartu) — turun dari **70** pada 2026-10-10; sisa itu kutipan bertanggal `docs/arsip/PERTANYAAN-ROMPAK.md`, bukan dokumen hidup | INFO detektor di gate; kartu kekuatan pemeriksaan **L** |
-| Kesegaran isi docs | `% cakupan` **71%** (49/69) · `% segar` **80%** (39/49) — potret 2026-10-10, HEAD `0b84034d` | `node scripts/ukur-kesegaran-docs.mjs` |
+| `AGENTS.md` (disuntik tiap request, plafon 12 KB) | 12.069 B (**sisa 219 B**) | `wc -c AGENTS.md` |
+| `docs/KONTRAK.md` (plafon 16 KB) | 15.869 B (**sisa 515 B**) | `wc -c` |
+| `docs/ANTREAN.md` (plafon 16 KB) | 16.281 B (**sisa 103 B**) | idem |
+| `docs/PETA-KODE.md` (plafon 16 KB) | 16.190 B (**sisa 194 B**) | idem |
+| Gate dokumen + pagar | **BERSIH** — 0 pelanggaran, 0 pemeriksaan dilewati, **16 aturan (v3.0)** + 14 INFO · self-test pagar **21/21 lulus** | `node scripts/check-docs.mjs` + `node scripts/check-docs.selftest.mjs` |
+| Kartu kekuatan | **10/13 = 77%** — C (changelog 66 KB tanpa TOC), E (kotak di dokumen tugas bertanda), H (1 arsip belum terdaftar); **M ratchet LULUS** (11.421 baris, turun 2.604 dari baseline `scripts/docs-lines.baseline.json`, **jangan** disalin ke tabel ini) | `node scripts/ukur-kekuatan-docs.mjs` |
+| Rujukan nomor baris di dokumen kontrak aktif | **0** rujukan di 0 berkas kontrak (gate) | INFO detektor di gate; kartu kekuatan pemeriksaan **L** |
+| Kesegaran isi docs | `% cakupan` **68%** (25/37) · `% segar` **68%** (17/25) — potret 2026-10-22, HEAD `1a5bcd39` | `node scripts/ukur-kesegaran-docs.mjs` |
 
-**Kenapa dua angka (0 vs 1):** ruang lingkupnya memang berbeda, bukan selisih yang tak dijelaskan — detektor gate memakai **cakupan kontrak yang sama dengan R1**, sedangkan pemeriksaan **L** kartu juga menghitung `docs/rencana/**` (berkas kontrak batch) sehingga satu kutipan bertanggal di sana ikut terhitung. Yang **sama** pada keduanya: berkas tangga wajib = **0**.
+**Tiga kegagalan kartu (C/E/H) adalah temuan pra-eksisting, bukan akibat DOCS-GEN2:** **C** = changelog bulan berjalan 66 KB melewati plafon rujukan dan belum punya TOC; **E** = kartu menghitung kotak di dokumen tugas bertanda `<!-- checklist-otoritatif -->` yang justru **sah** menurut R3 (gate BERSIH); **H** = satu berkas arsip (`D4a-addendum-tautan-arsip.md`) belum terdaftar di `docs/arsip/README.md`. Ketiganya dicatat, bukan disembunyikan.
 
-**Batas angka di atas:** semuanya potret, dan **pohon kerja belum bersih** — angka byte berubah begitu ada berkas disunting. Yang sah dijadikan bukti hanya keluaran perintah, bukan tabel ini.
+**Batas angka di atas:** semuanya potret, dan **pohon kerja belum bersih** — angka byte berubah begitu ada berkas disunting. Yang sah dijadikan bukti hanya keluaran perintah, bukan tabel ini. **Batas sesi 2026-10-22:** batch ini hanya menyentuh dokumen + skrip ukur/gate — tidak ada kode aplikasi, test/build aplikasi, server, DB, atau deploy; `check-docs`/`check-fitur` membuktikan **bentuk dan tautan** dokumen, bukan bahwa aplikasi berjalan.
 
 ## 3. Pelajaran yang sudah memakan waktu (jangan diulang)
 
@@ -81,3 +81,4 @@ Rumah lengkapnya: [default-dev §10a](../operations/default-dev.md) (jebakan mes
 | 2026-10-09 | Pemeriksaan **M** (ratchet baris) dan self-test gate dipasang pada batch PENUTUP; uji negatif ratchet (+2 baris) terbukti GAGAL lalu dikembalikan. |
 | 2026-10-11 | **Potret diukur ulang, dua angka di §5 terbukti salah (bukan cuma basi).** Bootstrap 712 → **750**; "domain+operasi 7.887 baris di **20** berkas" → **7.900 di 18 berkas** (daftar 20-nya tidak pernah konsisten); total 13.795 → **14.076**; kandidat pemadatan "klaster AI" menunjuk berkas yang **tidak ada**. Tabel potret basi di [PROMPT-SESI](../arsip/PROMPT-SESI-BERIKUTNYA.md) §3 dihapus (duplikat fakta + bertentangan) → rumah potret tinggal §2 berkas ini. Keputusan pemadatan (P9) + kenaikan ratchet **+21** dicatat di [TANYA-OWNER](TANYA-OWNER.md) dan [changelog](../history/changelog/2026-10.md); baseline 14.055 → 14.076 disetujui agen atas mandat owner dan **terbuka untuk dibatalkan**. **Tambahan hari yang sama (ronde lanjutan):** duplikasi dokumen diukur alat baru (`scripts/petakan-duplikasi-docs.mjs`) — **340 baris berlebih unik (3,7%)**, jauh di bawah kebutuhan −20%; inventaris + batasnya masuk [SERAH-SESI-DOCS](../arsip/SERAH-SESI-DOCS.md) §6·3 dan [bukti 2026-10](../arsip/bukti-2026-10.md). **Batch pemadatan pertama dieksekusi hari yang sama: −234 baris dokumen aktif** (blok salinan produksi di [data-master.md](../operations/default-dev.md#d4b-data-master) dipindah utuh ke [arsip](../arsip/data-master-bagian-produksi-2026-10-11.md) dengan ledger SHA-256; ratchet turun, baseline **tidak** dinaikkan). **`AIDL-01a` selesai di kode hari yang sama** (5 field keputusan masuk ke tipe yang sudah ada + helper normalisasi tunggal; build exit 0, test baru 12/12, seluruh test frontend 180/180) — sisa `AIDL-01b`/`AIDL-02` menunggu increment berikutnya. |
 | 2026-10-10 | **Sinkronisasi potret + penutupan konversi rujukan.** Potret: `head` 3 commit basi · `kartu_kekuatan` 12/12 padahal 13/13 · nomor commit `faff7c36` yang **yatim** (digantikan `9be0ea47`, +2732/−232 bukan +2714/−231) · baris "101 rujukan di 9 dokumen" yang sudah 70 di 4. Konversi: **70 → 0** rujukan nomor baris di dokumen kontrak (§5). Koreksi isi yang ikut terbukti: bagian audit UI/UX 2026-06-19 di `publik.md` (8 temuan sudah ditutup), register GAP #1/#3 di `flow.md`, `golive-setup.js` → `seed-owner.js`, klaim `data-master.md` "sudah dihapus", `bootstrap.sql` → `sql/bootstrap-production-schema.sql`, kutipan glob `test:unit`. Semua angka diukur ulang, bukan disalin. |
+| 2026-10-22 | **Potret diperbarui setelah DOCS-GEN2 D6–D9 ditutup** (commit `1a5bcd39`): `head` 0b84034d → **1a5bcd39**; tanggal 2026-10-10 → **2026-10-22**; gate v2.1 (12 aturan) → **v3.0 (16 aturan)**; self-test 13/13 → **21/21**; kartu 13/13 → **10/13** (C/E/H pra-eksisting, M ratchet lulus). Byte berkas tangga diukur ulang: AGENTS **12.069** · KONTRAK **15.869** · ANTREAN **16.281** · PETA-KODE **16.190**. Kesegaran **68% cakupan** (25/37) · **68% segar** (17/25). Blok state adalah potret commit `1a5bcd39`; berkas ini sendiri di-commit sesudahnya. |
