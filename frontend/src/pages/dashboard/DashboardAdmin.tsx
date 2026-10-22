@@ -323,9 +323,44 @@ export default function AdminDashboard() {
     ...opsStress.queueItems,
   ]);
 
-  const filteredQueueItems = queueItems.filter((item) => itemMatchesAdminArea(item, activeArea));
-  const visibleQueueItems = dense ? queueItems : filteredQueueItems;
-  const topQueueItem = priorityActionFromQueue(visibleQueueItems.length ? visibleQueueItems : queueItems);
+  // W-TNT-004 — lengkapi kartu dengan kontak tenant supaya tombol "Ingatkan via WA" hanya
+  // muncul pada kartu urgent yang memang punya tenant. `phone` kosong tetap diisi ''
+  // (bukan undefined) agar UI bisa membedakan "tidak ada tenant" dari "nomor belum diisi".
+  const tenantContactFor = (item: ActionQueueItem): { name?: string | null; phone: string } | null => {
+    if (item.entityType === 'tenant') {
+      const tenant = ktpReviewItems.find((row) => String(row.id) === String(item.entityId));
+      return tenant ? { name: tenant.fullName, phone: tenant.phone ?? '' } : null;
+    }
+    if (item.entityType === 'payment-submission') {
+      const submission = paymentReviewItems.find((row) => String(row.id) === String(item.entityId));
+      return submission ? { name: submission.tenant?.fullName ?? null, phone: submission.tenant?.phone ?? '' } : null;
+    }
+    if (item.entityType === 'stay') {
+      const stay = [...pendingApprovalBookings, ...waitingInitialPaymentBookings].find((row) => String(row.id) === String(item.entityId));
+      return stay ? { name: stay.tenant?.fullName ?? null, phone: stay.tenant?.phone ?? '' } : null;
+    }
+    if (item.entityType === 'renew') {
+      const request = renewRequests.find((row) => String(row.id) === String(item.entityId));
+      return request ? { name: request.tenant?.fullName ?? null, phone: request.tenant?.phone ?? '' } : null;
+    }
+    if (item.entityType === 'checkout') {
+      const request = [...checkoutPendingRequests, ...checkoutApprovedRequests].find((row) => String(row.id) === String(item.entityId));
+      return request ? { name: request.stay?.tenant?.fullName ?? null, phone: request.stay?.tenant?.phone ?? '' } : null;
+    }
+    if (item.entityType === 'invoice') {
+      const invoice = overdueInvoices.find((row) => String(row.id) === String(item.entityId));
+      return invoice ? { name: invoice.stay?.tenant?.fullName ?? null, phone: invoice.stay?.tenant?.phone ?? '' } : null;
+    }
+    return null;
+  };
+  const queueItemsWithContact: ActionQueueItem[] = queueItems.map((item) => {
+    const contact = tenantContactFor(item);
+    return contact ? { ...item, contactName: contact.name, contactPhone: contact.phone, contactProfilePath: '/tenants' } : item;
+  });
+
+  const filteredQueueItems = queueItemsWithContact.filter((item) => itemMatchesAdminArea(item, activeArea));
+  const visibleQueueItems = dense ? queueItemsWithContact : filteredQueueItems;
+  const topQueueItem = priorityActionFromQueue(visibleQueueItems.length ? visibleQueueItems : queueItemsWithContact);
   const urgentQueueCount = visibleQueueItems.filter((item) => item.priority === 'BLOCKER' || item.priority === 'HIGH' || item.timeStatusTone === 'danger').length;
   const totalLaneWork = adminWorkLanes.reduce((sum, lane) => sum + lane.value, 0);
 

@@ -3,7 +3,7 @@ import { Button, Card, Collapse, Table } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import EmptyState from '../common/EmptyState';
 import StatusBadge from '../common/StatusBadge';
-import { buildAdminWaUrl } from '../../utils/whatsapp';
+import { buildAdminWaUrl, buildTenantReminderMessage, buildTenantWaUrl } from '../../utils/whatsapp';
 import type { AssistantSeverity } from './AssistantPanel';
 
 export type ActionQueueItem = {
@@ -42,6 +42,13 @@ export type ActionQueueItem = {
   expiresAt?: string | null;
   /** `true` bila kartu berasal dari jalur rule-based, bukan AI. */
   fallback?: boolean;
+  // ── W-TNT-004: kontak tenant untuk tombol "Ingatkan via WA" pada kartu urgent.
+  //    `contactPhone` sengaja dibedakan dari `undefined`: string kosong = tenant ada
+  //    tetapi nomornya belum diisi (UI menampilkan "nomor belum ada").
+  contactPhone?: string;
+  contactName?: string | null;
+  /** Rute untuk melengkapi profil saat nomor belum ada (default /tenants). */
+  contactProfilePath?: string;
 };
 
 const priorityLabel: Record<AssistantSeverity, { label: string; status: string }> = {
@@ -78,6 +85,54 @@ function openActionTarget(target: string, navigate: (to: string) => void) {
 function buildStaffUnavailableUrl(item: ActionQueueItem) {
   const message = `Admin KOST48: staff sedang libur/tidak tersedia untuk ${item.subject}. Mohon koordinasi via WhatsApp. Target penanganan mengikuti kesepakatan chat ini.`;
   return buildAdminWaUrl(message);
+}
+
+function isUrgentItem(item: ActionQueueItem): boolean {
+  return item.priority === 'BLOCKER' || item.priority === 'HIGH' || item.timeStatusTone === 'danger';
+}
+
+/**
+ * W-TNT-004 — tombol "Ingatkan via WA" pada kartu urgent.
+ * Memakai deep-link wa.me (tanpa API berbayar). Bila nomor tenant belum ada,
+ * tombolnya menjadi arahan mengisi profil — bukan tautan mati.
+ */
+export function TenantWaAction({ item }: { item: ActionQueueItem }) {
+  const navigate = useNavigate();
+  if (!isUrgentItem(item) || item.contactPhone === undefined) return null;
+  if (!item.contactPhone) {
+    return (
+      <Button
+        variant="outline-secondary"
+        size="sm"
+        onClick={(event) => {
+          event.stopPropagation();
+          navigate(item.contactProfilePath ?? '/tenants');
+        }}
+      >
+        Nomor belum ada — isi profil
+      </Button>
+    );
+  }
+  const href = buildTenantWaUrl(
+    item.contactPhone,
+    buildTenantReminderMessage({
+      tenantName: item.contactName,
+      subject: item.subject,
+      type: item.type,
+      deadlineLabel: item.deadlineLabel,
+    }),
+  );
+  return (
+    <a
+      className="btn btn-outline-success btn-sm"
+      href={href}
+      target="_blank"
+      rel="noreferrer"
+      onClick={(event) => event.stopPropagation()}
+    >
+      Ingatkan via WA
+    </a>
+  );
 }
 
 export default function ActionQueueTable({
@@ -184,6 +239,7 @@ export default function ActionQueueTable({
                                     Staff libur
                                   </Button>
                                 ) : null}
+                                <TenantWaAction item={item} />
                                 {(item.secondaryActionTo || item.onSecondaryAction) ? (
                                   <Button variant="outline-secondary" size="sm" onClick={(event) => {
                                     event.stopPropagation();

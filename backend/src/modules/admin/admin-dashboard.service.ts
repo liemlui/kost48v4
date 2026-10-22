@@ -64,7 +64,7 @@ export class AdminDashboardService {
           expiresAt: true,
           createdAt: true,
           room: { select: { id: true, code: true, name: true, status: true } },
-          tenant: { select: { id: true, fullName: true } },
+          tenant: { select: { id: true, fullName: true, phone: true } },
           invoices: {
             orderBy: { id: 'desc' },
             take: 1,
@@ -97,7 +97,7 @@ export class AdminDashboardService {
           stay: {
             select: {
               id: true,
-              tenant: { select: { id: true, fullName: true } },
+              tenant: { select: { id: true, fullName: true, phone: true } },
               room: { select: { id: true, code: true } },
             },
           },
@@ -112,7 +112,7 @@ export class AdminDashboardService {
       this.prisma.renewRequest.findMany({
         where: { status: { in: ['PENDING', 'PENDING_DECISION', 'AWAITING_DP', 'DP_SECURED'] } },
         include: {
-          tenant: { select: { id: true, fullName: true } },
+          tenant: { select: { id: true, fullName: true, phone: true } },
           stay: { include: { room: { select: { id: true, code: true } } } },
         },
         take: 50,
@@ -123,7 +123,7 @@ export class AdminDashboardService {
         include: {
           stay: {
             include: {
-              tenant: { select: { id: true, fullName: true } },
+              tenant: { select: { id: true, fullName: true, phone: true } },
               room: { select: { id: true, code: true } },
             },
           },
@@ -136,7 +136,7 @@ export class AdminDashboardService {
         include: {
           stay: {
             include: {
-              tenant: { select: { id: true, fullName: true } },
+              tenant: { select: { id: true, fullName: true, phone: true } },
               room: { select: { id: true, code: true } },
             },
           },
@@ -148,7 +148,7 @@ export class AdminDashboardService {
         where: { status: 'PENDING_REVIEW' },
         include: {
           invoice: { select: { id: true, invoiceNumber: true } },
-          tenant: { select: { id: true, fullName: true } },
+          tenant: { select: { id: true, fullName: true, phone: true } },
         },
         orderBy: { createdAt: 'asc' },
         take: 25,

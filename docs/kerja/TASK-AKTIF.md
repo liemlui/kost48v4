@@ -464,7 +464,8 @@ Butir di bawah **bukan** antrean aktif — sengaja **tanpa kotak `[ ]` dan tanpa
 - [x] Gate lama tidak memblokir; akses verifikasi tidak berubah (P28)
 
 ### W-TNT-004 — NOTIF-PWA-WA
-- [ ] PWA push aktif + tombol WA manual; tanpa API dan tanpa NIK
+- [x] Tombol "Ingatkan via WA" manual di kartu urgent (deep-link wa.me, nomor 62…, pesan ≤320 tanpa NIK/foto/alamat)
+- [ ] PWA push diterima di 1 perangkat nyata (bukti perangkat = owner)
 
 ### W-FIN-001 — SINKRON-UANG
 - [ ] Satu helper deposit/surcharge untuk booking publik, portal, walk-in

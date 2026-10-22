@@ -890,7 +890,7 @@ export type RenewRequest = {
     plannedCheckOutDate?: string | null;
     tenant?: { id: number; fullName?: string } | null;
   } | null;
-  tenant?: { id: number; fullName?: string } | null;
+  tenant?: { id: number; fullName?: string; phone?: string | null } | null;
   reviewedBy?: { id: number; fullName?: string } | null;
 };
 

@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { DndContext, DragEndEvent, PointerSensor, KeyboardSensor, useSensor, useSensors, closestCenter } from '@dnd-kit/core';
 import { useDroppable, useDraggable } from '@dnd-kit/core';
 import { sortableKeyboardCoordinates } from '@dnd-kit/sortable';
-import type { ActionQueueItem } from './ActionQueueTable';
+import { TenantWaAction, type ActionQueueItem } from './ActionQueueTable';
 
 type ColId = 'baru' | 'dikerjakan' | 'menunggu-cek' | 'selesai';
 
@@ -62,6 +62,9 @@ function KanbanCard({ item }: { item: ActionQueueItem }) {
       {item.timeStatusLabel ? (
         <div className="text-muted mt-1 e3-fs-xs">{item.timeStatusLabel}</div>
       ) : null}
+      <div className="mt-1" onPointerDown={(event) => event.stopPropagation()}>
+        <TenantWaAction item={item} />
+      </div>
     </div>
   );
 }

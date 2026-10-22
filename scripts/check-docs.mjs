@@ -122,11 +122,12 @@
 //  20. R16 menyimpan cap di `scripts/docs-tier.baseline.json` (data, bukan dokumen). Cap diukur dari
 //      keadaan nyata, bukan angka karangan; `--perbarui-tier` hanya boleh MENURUNKAN cap dan menolak
 //      bila total sekarang sudah melewati cap lama. Baseline yang hilang = pelanggaran, bukan lulus.
-//  21. R16 hanya men-cap tier yang dibaca SETIAP sesi baru: T0 konstitusi, T1 aturan/registry, T2
-//      rujukan topik (+ T9 lain). T3 (kerja/rencana) dan T4 (catatan bertanggal) TIDAK di-cap karena
-//      bertambah oleh pekerjaan nyata (dokumen tugas, changelog, bukti) — men-cap-nya membuat gate
-//      merah setiap kali ada pekerjaan dicatat, yaitu pelanggaran yang tak bisa ditutup (pelajaran T-05).
-//      Keduanya tetap DIUKUR dan dicetak sebagai INFO supaya pertumbuhannya terlihat.
+//  21. R16 hanya men-cap tier RUJUKAN yang bisa dijaga: T1 aturan/registry, T2 rujukan topik, T9 lain.
+//      T0 konstitusi TIDAK di-cap karena tiap berkasnya sudah punya plafon sendiri (R5) dan
+//      KEPUTUSAN-OWNER bertambah oleh keputusan owner; T3 kerja/rencana dan T4 catatan bertanggal
+//      bertambah oleh pekerjaan nyata (dokumen tugas, changelog, bukti). Men-cap tier itu membuat gate
+//      merah setiap kali ada pekerjaan dicatat — pelanggaran yang tak bisa ditutup (pelajaran T-05).
+//      Semua tier tetap DIUKUR dan dicetak sebagai INFO supaya pertumbuhannya terlihat.
 
 // artefak generated (docs/audit-map/**), rotasi changelog, dan isi berkas di luar glob.
 // R8 memakai EMULASI slug GitHub, bukan github-slugger: project ini dilarang menambah dependency
@@ -572,7 +573,7 @@ const TIER0_FILES = [
   "docs/KEPUTUSAN-OWNER.md",
 ];
 const TIERS = [
-  { id: "T0", label: "konstitusi", cocok: (r) => TIER0_FILES.includes(r) },
+  { id: "T0", label: "konstitusi", cocok: (r) => TIER0_FILES.includes(r), tanpaCap: true },
   { id: "T1", label: "aturan & registry", cocok: (r) => /^docs\/[^/]+\.md$/.test(r) },
   { id: "T2", label: "rujukan topik", cocok: (r) => /^docs\/(domain|operations|product)\//.test(r) },
   { id: "T3", label: "kerja & rencana", cocok: (r) => /^docs\/(kerja|rencana)\//.test(r), tanpaCap: true },

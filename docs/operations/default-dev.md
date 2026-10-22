@@ -593,7 +593,7 @@ Arsip: [m11-seed-master-data-appendix-2026-07-08.md](../arsip/m11-seed-master-da
 | KONTRAK §7 gate dokumen R1–R12 + cakupan di kepala skrip | check-docs + selftest | DIPERIKSA | — |
 | KONTRAK §7 kartu ukur (kekuatan, kesegaran, serah-terima) | ukur-kekuatan · ukur-kesegaran · ukur-serah-terima | DIPERIKSA | — |
 | KONTRAK §7 plafon byte (AGENTS 12 KB · tangga 16 KB · rujukan 48 KB) | R5 | DIPERIKSA | — |
-| KONTRAK §7 plafon tier (T0–T2/T9) | R16 | DIPERIKSA | owner — cap hanya turun |
+| KONTRAK §7 plafon tier (T1/T2/T9) | R16 | DIPERIKSA | owner — cap hanya turun |
 | KONTRAK §7 baris Fakta pada berkas tangga | kartu kekuatan D | DIPERIKSA | — |
 | KONTRAK §7 pagar wajib bisa gagal | check-docs.selftest | DIPERIKSA | — |
 | KONTRAK §7 ratchet baris dokumen aktif | kartu kekuatan M | DIPERIKSA | owner — kenaikan butuh keputusan + alasan |

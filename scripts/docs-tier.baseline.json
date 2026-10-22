@@ -1,9 +1,8 @@
 {
   "tanggal": "2026-10-22",
-  "alasan": "R16: T3 (kerja/rencana) dan T4 (catatan bertanggal) tidak di-cap karena bertambah oleh pekerjaan nyata; cap hanya untuk tier yang dibaca setiap sesi (T0-T2+T9).",
+  "alasan": "R16: T0 konstitusi tidak di-cap (tiap berkasnya sudah dibatasi R5; KEPUTUSAN-OWNER tumbuh oleh keputusan owner). Cap berlaku untuk tier rujukan T1/T2/T9.",
   "tier": {
     "T0": {
-      "cap": 98662,
       "berkas": 5
     },
     "T1": {
@@ -11,7 +10,7 @@
       "berkas": 5
     },
     "T2": {
-      "cap": 501334,
+      "cap": 501308,
       "berkas": 12
     },
     "T3": {
