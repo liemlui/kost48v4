@@ -8,9 +8,8 @@ import { APP_VERSION, APP_PHASE } from '../../config/version';
 import NotificationBell from '../notifications/NotificationBell';
 import StaffTopWorkspaceNav from '../staff/StaffTopWorkspaceNav';
 import TenantWorkspaceTabs from '../tenant/TenantWorkspaceTabs';
-import MobileBottomNav from './MobileBottomNav';
-import AdminMobileBottomNav from './AdminMobileBottomNav';
-import StaffMobileBottomNav from './StaffMobileBottomNav';
+import RoleMobileBottomNav from './RoleMobileBottomNav';
+import { ADMIN_MOBILE_TABS, STAFF_MOBILE_TABS, tenantMobileTabs } from '../../config/mobileNav';
 const CommandPalette = lazy(() => import('../common/CommandPalette'));
 import GlobalSearch from './GlobalSearch';
 import PaymentUrgencyChip from '../payment-urgency/PaymentUrgencyChip';
@@ -390,7 +389,11 @@ export default function AppLayout({ children }: { children?: ReactNode }) {
             </section>
           </main>
         </div>
-        <StaffMobileBottomNav />
+        <RoleMobileBottomNav
+          mainTabs={STAFF_MOBILE_TABS.mainTabs}
+          moreTabs={STAFF_MOBILE_TABS.moreTabs}
+          ariaLabel="Navigasi bawah staff"
+        />
       </>
     );
   }
@@ -414,7 +417,7 @@ export default function AppLayout({ children }: { children?: ReactNode }) {
             {children ?? <Outlet />}
           </section>
         </main>
-        <MobileBottomNav stage={tenantStage} />
+        <RoleMobileBottomNav {...tenantMobileTabs(tenantStage)} ariaLabel="Navigasi bawah tenant" />
       </div>
     );
   }
@@ -562,7 +565,11 @@ export default function AppLayout({ children }: { children?: ReactNode }) {
         </footer>
       </div>
     </div>
-    <AdminMobileBottomNav onMoreClick={() => setSidebarOpen(true)} />
+    <RoleMobileBottomNav
+      mainTabs={ADMIN_MOBILE_TABS}
+      onMoreClick={() => setSidebarOpen(true)}
+      ariaLabel="Navigasi cepat admin"
+    />
     <Suspense fallback={null}>
       {isCommandOpen && <CommandPalette onClose={() => setIsCommandOpen(false)} />}
     </Suspense>

@@ -17,7 +17,7 @@
 
 | ID | Fitur | Role | Rute | Status | Jangkar kode |
 |---|---|---|---|---|---|
-| FEAT-OPS-001 | Login, lupa sandi, reset sandi | PUBLIK | `/login`, `/forgot-password`, `/reset-password` | aktif | `frontend/src/pages/auth/LoginPage.tsx`<br>`frontend/src/pages/auth/ForgotPasswordPage.tsx`<br>`frontend/src/pages/auth/ResetPasswordPage.tsx` |
+| FEAT-OPS-001 | Login, daftar akun tenant, lupa sandi, reset sandi | PUBLIK | `/login`, `/register`, `/forgot-password`, `/reset-password` | aktif | `frontend/src/pages/auth/LoginPage.tsx`<br>`frontend/src/pages/auth/RegisterPage.tsx`<br>`frontend/src/pages/auth/ForgotPasswordPage.tsx`<br>`frontend/src/pages/auth/ResetPasswordPage.tsx` |
 | FEAT-OPS-002 | Katalog kamar publik | PUBLIK | `/rooms`, `/rooms/:roomId/detail` | aktif | `frontend/src/pages/rooms/RoomsRouteEntry.tsx`<br>`frontend/src/pages/rooms/PublicRoomDetailPage.tsx` |
 | FEAT-OPS-003 | Booking tamu | PUBLIK | `/booking/:roomId` | aktif | `frontend/src/pages/bookings/GuestBookingPage.tsx` |
 | FEAT-OPS-004 | Wizard ketersediaan kamar | PUBLIK | `/update-kamar`, `/availability-setup` | aktif | `frontend/src/pages/public/PublicAvailabilityWizardPage.tsx` |

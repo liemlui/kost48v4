@@ -21,7 +21,7 @@
 
 Daftar prioritas, penanggung jawab, dan kesiapan ada di [TASK-AKTIF](kerja/TASK-AKTIF.md#prioritas) bagian “Prioritas & penanggung jawab”. Antrean satu baris per tugas ada di §3.
 
-## 3. Task terbuka & gate (29 `[ ]`)
+## 3. Task terbuka & gate (28 `[ ]`)
 
 Format: **ID** — judul | **Gate** (verifikasi wajib sebelum `[x]`). (owner) = butuh data/keputusan owner.
 
@@ -35,7 +35,7 @@ Format: **ID** — judul | **Gate** (verifikasi wajib sebelum `[x]`). (owner) = 
 - [ ] **W-OWN-007** - PARSIAL: inventaris aset publik selesai; sisa butuh keputusan owner | **Gate:** keputusan owner (hak pakai foto, keseragaman aspek, izin optimasi)
 - [ ] **W-OWN-008** - sisa lokal selesai; UAT desktop OWNER 1440 px + visual regression masih BLOCKED | **Gate:** UAT + visual regression + sign-off AO-14
 - [ ] **W-OWN-009** - normalisasi sistem visual/terminologi Owner setelah review AO-20; **label filter sudah diseragamkan "Rating Tertinggi"** (22 Okt: `PublicGuestDashboardPage.tsx`; sisa normalisasi visual/terminologi menunggu review AO-20) | **Gate:** perubahan AppLayout dikoordinasikan
-- [ ] **W-OWN-010** - konsolidasi komponen/shell Area Admin | **Gate:** regresi Owner bila AppLayout atau shared CSS berubah
+- [x] **W-OWN-010** - konsolidasi komponen/shell Area Admin | **Gate:** regresi Owner bila AppLayout atau shared CSS berubah. **Bukti:** 3 pembungkus nav dilebur ke `RoleMobileBottomNav` + `config/mobileNav.ts`; markup 0 diff vs baseline (`mobileNavShell.test.tsx`)
 - [x] **W-OWN-011** - etalase beranda/katalog + foto rasio apa pun utuh & saran rasio upload | **Gate:** bukti browser 390/768/1440 px (foto utuh, chip kategori, tautan kebutuhan); [TASK](kerja/TASK-AKTIF.md#d4f-uiux); **Bukti:** [render 390/768/1440](kerja/bukti-own-011-2026-10-22/README.md) — 0.75/2.33 `contain`, 1.33 `cover`, chip kategori, tautan kebutuhan | checklist: kerja/TASK-AKTIF.md#d4f-uiux
 - [ ] **W-OWN-005** - audit final setelah AO-01..13 dan AO-15..23 memenuhi DoD | **Gate:** publik + OWNER/ADMIN/STAFF + dua state TENANT, viewport 320-1440 px, Axe/gate Baymard, build/test relevan, screenshot aman
 - [ ] **W-OPS-002** - baseline deployment: konfigurasi panel dan limit/snapshot resource | **Gate:** SHA artefak yang berjalan, jam deploy, perilaku runtime EF-01/03/05, fault/interval pengukuran
@@ -54,8 +54,8 @@ Format: **ID** — judul | **Gate** (verifikasi wajib sebelum `[x]`). (owner) = 
 - [ ] **W-OWN-001** - T1..T4 selesai lokal 25 Sep; gate uang 147/147, frontend 18/18, build/PWA lulus; hanya verifikasi manual/runtime terbuka | **Gate:** verifikasi kegagalan parsial, stale, scope periode, dan rekonsiliasi KPI-tren pada runtime; OWNER 1024/1280/1440 px + touch/keyboard/Axe dan CTA; bukti: [audit dashboard owner](arsip/owner-dashboard-z19-2026-09-25.md)
 
 - [x] **W-OWN-014** - kontrak + mesin kartu aturan lintas OWNER/ADMIN/STAFF/TENANT | **Gate:** AI mati/key kosong, keempat role tetap melihat kartu tanpa galat; tidak ada angka di luar snapshot; tidak ada kontrak paralel. **Bukti 18 Okt 2026:** tiga kartu TENANT (tagihan telat, perpanjangan PENDING_DECISION, pengajuan keluar) + screenshot /portal/stay 390/1440 dengan & tanpa pemicu di `kerja/bukti-aidl-01-2026-10-18/` (API mock, tanpa DB); test frontend 255/255, build exit 0. Sisa: data DB nyata + tinjauan owner
-- [x] **W-OWN-015** - shell Mode Cepat `/cepat` + percabangan login (OWNER/ADMIN pilih-mode; STAFF/TENANT langsung) + saklar header + pemetaan saklar lama | **Gate:** halaman Normal **0 perubahan** (diff bersih pada shell/sidebar/CSS lama); pindah mode tanpa login ulang; pilihan diingat per pengguna. **Bukti 17 Okt 2026:** 29/29 test baru, seluruh frontend 225/225; build exit 0 (PWA `J4_5PjGo8N6R`); `AppLayout`/sidebar/CSS lama tidak berubah. Sisa: bukti browser + saklar lama dua arah
-- [x] **W-OWN-016** - allowlist rute + tautan rekomendasi AI yang bisa diklik pada Mode Cepat OWNER | **Gate:** tidak ada `navigate` ke rute di luar allowlist; tautan mendarat pada filter yang benar (butuh bukti browser); temuan A-1/A-2 di [audit AI](arsip/ai-agenda-recon-2026-09-25.md). **Bukti 17–18 Okt 2026:** matcher pola `:id` diperbaiki (sebelumnya `/invoices/12` ditolak) + `toSafeAiPriorityActions` membuang rute mentah; 24/24 test AIDL-03, seluruh frontend 237/237; build exit 0 (PWA `Ot79kDcHyivi`). Sisa: bukti browser
+- [x] **W-OWN-015** - shell Mode Cepat `/cepat` + percabangan login (OWNER/ADMIN pilih-mode; STAFF/TENANT langsung) + saklar header + pemetaan saklar lama | **Gate:** halaman Normal **0 perubahan** (diff bersih pada shell/sidebar/CSS lama); pindah mode tanpa login ulang; pilihan diingat per pengguna. **Bukti 17 Okt 2026:** 29/29 test baru, FE 225/225; build exit 0; `AppLayout`/sidebar/CSS lama tidak berubah. Sisa: bukti browser + saklar lama
+- [x] **W-OWN-016** - allowlist rute + tautan rekomendasi AI yang bisa diklik pada Mode Cepat OWNER | **Gate:** tidak ada `navigate` ke rute di luar allowlist; tautan mendarat pada filter yang benar (butuh bukti browser); temuan A-1/A-2 di [audit AI](arsip/ai-agenda-recon-2026-09-25.md). **Bukti 17–18 Okt 2026:** matcher pola `:id` + `toSafeAiPriorityActions` membuang rute mentah; 24/24 test AIDL-03, FE 237/237. Sisa: bukti browser
 - [ ] **W-OWN-012** - agenda AI terjadwal 1×/hari (memakai antrean `AiDraft`, tanpa schema baru) + strip biaya/kuota OWNER | **Gate:** membuka halaman **tidak** memicu permintaan AI; rupiah hanya tampil setelah `W-OWN-018` selesai; pemicu terjadwal terbukti berjalan
 - [x] **W-OWN-017** - kirim ringkasan ke WhatsApp + cetak (OWNER/ADMIN) | **Gate:** tanpa NIK/foto/alamat; panjang dibatasi; format stabil. **Bukti 18 Okt:** `cepatSummary.ts` (whitelist+masking, 1200) + aksi Cepat; 9/9 test, frontend 246/246; build exit 0 (`yqbdxH46dUlV`). Sisa: browser
 - [ ] **W-OWN-013** - tinjau adopsi Mode Cepat setelah 30 hari pemakaian | **Gate:** angka pemakaian Cepat vs Normal dan jumlah kartu yang diklik tercatat; keputusan lanjutan berbasis data, bukan opini
@@ -75,7 +75,7 @@ Format: **ID** — judul | **Gate** (verifikasi wajib sebelum `[x]`). (owner) = 
 - [ ] **W-OPS-014** (owner) - konfirmasi apakah `uploads/` (foto kamar/bukti bayar) perlu dipindahkan dari server lama | **Gate:** jawaban owner + bukti path/aset; jangan salin data pengguna tanpa izin
 - [ ] **W-DOC-001** - tata ulang dokumen generasi kedua D0–D9 ([kontrak](kerja/TASK-DOCS-GEN2.md)): konstitusi ID + registry, peta peran, registry fitur, konsolidasi ≤30 berkas/≤400 KB, checklist di dokumen tugas, gate v3 | **Gate:** tiap batch D0–D9 punya bukti; gate hijau saat batch ditutup; keputusan [keputusan program](KEPUTUSAN-OWNER.md); baseline [inventaris 2026-10-20](arsip/inventaris-docs-2026-10-20.md) | checklist: kerja/TASK-DOCS-GEN2.md#checklist
 
-**Rekap (potret 2026-10-22):** 29 terbuka + 16 selesai = 45 baris.
+**Rekap (potret 2026-10-22):** 28 terbuka + 17 selesai = 45 baris.
 
 
 ---
