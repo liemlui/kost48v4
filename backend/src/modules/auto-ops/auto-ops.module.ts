@@ -8,15 +8,17 @@ import { AccountingSweepService } from './sweeps/accounting-sweep.service';
 import { MaintenanceSweepService } from './sweeps/maintenance-sweep.service';
 import { AnnouncementSweepService } from './sweeps/announcement-sweep.service';
 import { KtpReminderSweepService } from './sweeps/ktp-reminder-sweep.service';
+import { AiAgendaSweepService } from './sweeps/ai-agenda-sweep.service';
 import { AccountingModule } from '../accounting/accounting.module';
 import { NotificationsModule } from '../notifications/notifications.module';
 import { DepositLedgerModule } from '../deposit-ledger/deposit-ledger.module';
 import { AssetsModule } from '../assets/assets.module';
 import { PushModule } from '../push/push.module';
 import { LoyaltyModule } from '../loyalty/loyalty.module';
+import { OwnerAiModule } from '../owner-ai/owner-ai.module';
 
 @Module({
-  imports: [AccountingModule, NotificationsModule, DepositLedgerModule, AssetsModule, PushModule, LoyaltyModule],
+  imports: [AccountingModule, NotificationsModule, DepositLedgerModule, AssetsModule, PushModule, LoyaltyModule, OwnerAiModule],
   controllers: [AutoOpsController],
   providers: [
     AutoOpsService,
@@ -27,6 +29,7 @@ import { LoyaltyModule } from '../loyalty/loyalty.module';
     MaintenanceSweepService,
     AnnouncementSweepService,
     KtpReminderSweepService,
+    AiAgendaSweepService,
   ],
   exports: [
     AutoOpsService,

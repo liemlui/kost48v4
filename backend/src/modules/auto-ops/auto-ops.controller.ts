@@ -210,4 +210,12 @@ export class AutoOpsController {
   async runKtpReminders(@CurrentUser() user: CurrentUserPayload) {
     return { message: 'AutoOps pengingat KTP berhasil dijalankan', data: await this.autoOpsService.runKtpReminders({ actorUserId: user.id, source: 'MANUAL_KTP_REMINDERS_RUN' }) };
   }
+
+  // W-OWN-012: trigger manual agenda AI harian (maks 1 draft per hari WIB).
+  @Post('run/ai-agenda')
+  @ApiOperation({ summary: 'Trigger agenda AI harian — OWNER/ADMIN' })
+  @Roles(UserRole.OWNER, UserRole.ADMIN)
+  async runDailyAiAgenda(@CurrentUser() user: CurrentUserPayload) {
+    return { message: 'AutoOps agenda AI harian berhasil dijalankan', data: await this.autoOpsService.runDailyAiAgenda({ actorUserId: user.id, source: 'MANUAL_DAILY_AI_AGENDA_RUN' }) };
+  }
 }

@@ -11,6 +11,7 @@ import { AccountingSweepService } from './sweeps/accounting-sweep.service';
 import { MaintenanceSweepService } from './sweeps/maintenance-sweep.service';
 import { AnnouncementSweepService } from './sweeps/announcement-sweep.service';
 import { KtpReminderSweepService } from './sweeps/ktp-reminder-sweep.service';
+import { AiAgendaSweepService } from './sweeps/ai-agenda-sweep.service';
 
 type AutoOpsRunResult = {
   expiredBookings: number;
@@ -28,6 +29,7 @@ type AutoOpsRunResult = {
   acCleaning?: unknown;
   journalReconciliation?: unknown;
   ktpReminders?: unknown;
+  aiAgenda?: unknown;
 };
 
 @Injectable()
@@ -46,6 +48,7 @@ export class AutoOpsService implements OnModuleInit, OnModuleDestroy {
     private readonly maintenanceSweep: MaintenanceSweepService,
     private readonly announcementSweep: AnnouncementSweepService,
     private readonly ktpReminderSweep: KtpReminderSweepService,
+    private readonly aiAgendaSweep: AiAgendaSweepService,
   ) {}
 
   private async loadEnabled(): Promise<boolean> {
@@ -203,6 +206,8 @@ export class AutoOpsService implements OnModuleInit, OnModuleDestroy {
     const announcementDispatch = await this.announcementSweep.sweepAnnouncementDispatch();
     // W-TNT-003: pengingat KTP 7 hari berulang, berhenti saat terverifikasi.
     const ktpReminders = await this.ktpReminderSweep.runKtpReminders(options);
+    // W-OWN-012: agenda AI harian (1×/hari, lewat antrean AiDraft).
+    const aiAgenda = await this.aiAgendaSweep.runDailyAiAgenda(options);
     const pushDispatch = await this.maintenanceSweep.runPushDispatch(options);
     return {
       expiredBookings: bookingResult.expiredStayIds.length,
@@ -220,6 +225,7 @@ export class AutoOpsService implements OnModuleInit, OnModuleDestroy {
       acCleaning,
       journalReconciliation,
       ktpReminders,
+      aiAgenda,
     };
   }
 
@@ -316,5 +322,10 @@ export class AutoOpsService implements OnModuleInit, OnModuleDestroy {
   // W-TNT-003: pengingat KTP pasca-check-in (pengingat saja, tanpa memblokir layanan).
   async runKtpReminders(options: { actorUserId?: number | null; source?: string; now?: Date } = {}) {
     return this.ktpReminderSweep.runKtpReminders(options);
+  }
+
+  // W-OWN-012: agenda AI harian (dedupe per hari WIB, tanpa AI saat halaman dibuka).
+  async runDailyAiAgenda(options: { actorUserId?: number | null; source?: string; now?: Date } = {}) {
+    return this.aiAgendaSweep.runDailyAiAgenda(options);
   }
 }

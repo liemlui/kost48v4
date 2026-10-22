@@ -177,6 +177,58 @@ Setiap pertanyaan **wajib** memakai lima unsur ini, dalam bahasa manusia — buk
 
 **Catatan riwayat (bukan pertanyaan):** P8–P16 sudah dijawab owner dan dipindah ke register [KEPUTUSAN-OWNER](../KEPUTUSAN-OWNER.md) (`P8-BUILD-SEBELUM-COMMIT`, `PEMADATAN-STOP-MEKANIS + KARTU-4-ROLE`, `KARTU-TENANT-3-INTI`, `P12–P16`); pertanyaan terjawab tidak disimpan dua kali (§1).
 
+### P29 — Bukti UAT & sign-off AO-14: siapa yang menjalankan, di data apa?
+
+**Konteks:** tujuh baris antrean (W-OWN-001/002/003/004/005/008, plus W-OWN-006) berhenti di **bukti runtime**, bukan di kode: crawl tiga role, dua state TENANT, viewport 320–1440 px, Axe/gate Baymard, screenshot bebas PII, dan tanda tangan AO-14. Agen tidak boleh membuat persona/UAT di produksi dan tidak punya sesi login. Tanpa keputusan ini, baris-baris itu tetap terbuka walau kode dan test hijau.
+
+**Pilihan:**
+- **(a)** Owner menjalankan sesi UAT singkat (OWNER/ADMIN/STAFF + 2 state TENANT) dan mengirim screenshot + catatan; agen menutup baris dengan bukti itu. Konsekuensi: bukti paling sah karena berasal dari sesi nyata. Risiko: butuh ±1 jam waktu owner; jadwal bergantung owner.
+- **(b)** Agen menyiapkan **skrip crawl** (Playwright) yang dijalankan owner di mesin sendiri dengan akun UAT, lalu artefak (trace/screenshot) diunggah. Konsekuensi: sebagian besar pekerjaan mekanis hilang dari pundak owner. Risiko: menambah skrip + dependensi dev; akun UAT harus ada dan bukan data penghuni nyata.
+- **(c)** Tunda seluruh bukti UAT sampai data go-live lengkap (foto, KTP, meter). Konsekuensi: tidak ada klaim DoD yang salah. Risiko: 7 baris antrean berhenti lama; regresi visual tidak terdeteksi.
+
+**Rekomendasi:** **(b) lalu (a)** — skrip menghemat waktu owner, tetapi tanda tangan AO-14 tetap butuh mata owner.
+
+**Default bila tidak dijawab:** **(c)** — baris tetap `[ ]` dan ditandai menunggu bukti; tidak ada klaim selesai.
+
+### P30 — Normalisasi visual (AO-20) & hak pakai foto/aset (AO-19)
+
+**Konteks:** W-OWN-009 menyisakan normalisasi istilah/warna setelah review AO-20; W-OWN-007 menyisakan keputusan **hak pakai foto**, keseragaman aspek, dan izin optimasi aset. Keduanya menyentuh tampilan publik dan kepemilikan materi, jadi bukan keputusan teknis.
+
+**Pilihan:**
+- **(a)** Owner menandai **satu** istilah/komponen contoh per masalah (mis. "Rating Tertinggi" sebagai pola), agen menyeragamkan sisanya. Konsekuensi: arah visual konsisten tanpa owner mengaudit semua halaman. Risiko: agen salah menafsirkan untuk halaman yang tidak dicontohkan.
+- **(b)** Agen mengusulkan daftar istilah (glosarium) + tangkapan layar sebelum–sesudah per halaman, owner menyetujui borongan. Konsekuensi: satu putaran review, hasil menyeluruh. Risiko: butuh waktu owner membaca satu dokumen.
+- **(c)** Biarkan apa adanya; catat sebagai utang visual. Konsekuensi: tidak ada risiko perubahan. Risiko: istilah bercampur (mis. "Deluxe" vs "Premium") tetap membingungkan calon penghuni.
+
+**Rekomendasi:** **(b)** — satu dokumen glosarium + bukti visual lebih murah daripada review berulang; sekalian menutup AO-20 dan AO-19 dalam satu keputusan.
+
+**Default bila tidak dijawab:** **(c)** — tidak ada perubahan tampilan; baris tetap terbuka.
+
+### P31 — Akses server & data produksi untuk sisa W-OPS/W-DATA
+
+**Konteks:** W-OPS-002/003/004/005/006/009/010/011/012/013/014 dan W-DATA-001 butuh **izin eksplisit**: pengukuran resource host, konfigurasi env/DB, rotasi secret/PIN, saldo awal, pemindahan `uploads/`, dan kueri baca DB produksi untuk membandingkan tarif 13 kamar. Agen hanya diizinkan menyentuh yang sudah disetujui.
+
+**Pilihan:**
+- **(a)** Owner memberi izin **baca-saja** (kueri SELECT + `du`/`ps`) untuk satu jendela waktu; agen mencatat temuan tanpa PII. Konsekuensi: W-DATA-001 dan baseline workload bisa selesai tanpa risiko tulis. Risiko: perlu owner hadir memberi akses; hasilnya potret, bukan pemantauan.
+- **(b)** Tunda semua sampai onboarding 13 hunian selesai. Konsekuensi: tidak ada perubahan server. Risiko: baseline performa & rotasi secret makin jauh dari keadaan nyata.
+- **(c)** Agen menyiapkan **daftar perintah** yang dijalankan owner sendiri (copy-paste), hasilnya ditempel balik. Konsekuensi: nol akses agen ke server. Risiko: salah tempel/kurang teliti; butuh satu putaran bolak-balik.
+
+**Rekomendasi:** **(a)** untuk baca-saja + **(c)** untuk tindakan yang mengubah server (rotasi, migrasi aset).
+
+**Default bila tidak dijawab:** **(c)** — tidak ada akses baru; baris bertanda BLOCKED (owner).
+
+### P32 — Review adopsi Mode Cepat setelah 30 hari
+
+**Konteks:** W-OWN-013 meminta keputusan berbasis data: berapa pemakaian `/cepat` vs Normal dan berapa kartu yang diklik. Data itu belum dikumpulkan; tanpa angka, keputusannya jadi opini.
+
+**Pilihan:**
+- **(a)** Tambahkan pencatat pemakaian ringan (AuditLog `page_view` untuk `/cepat` + klik kartu) dan tinjau setelah 30 hari. Konsekuensi: keputusan punya dasar angka. Risiko: menambah data perilaku; perlu kebijakan retensi.
+- **(b)** Pakai data yang sudah ada (log akses server) tanpa kode baru. Konsekuensi: nol perubahan kode. Risiko: log akses tidak memuat klik kartu, jadi kesimpulan lemah.
+- **(c)** Putuskan tanpa data: hapus Mode Cepat karena sudah `deprecated`. Konsekuensi: kode lebih sederhana. Risiko: membuang fitur tanpa bukti pemakaian.
+
+**Rekomendasi:** **(a)** — murah, dan sejalan dengan gate “berbasis data, bukan opini”.
+
+**Default bila tidak dijawab:** **(c)** — Mode Cepat sudah ditandai `deprecated`; tidak ada pencatat baru, baris tetap terbuka sampai owner memutuskan.
+
 
 
 
