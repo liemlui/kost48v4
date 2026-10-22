@@ -1,3 +1,5 @@
+> **ARSIP — dibekukan 2026-10-22 (batch D9 DOCS-GEN2).** Kontrak program DOCS-GEN2 (D0–D9) **selesai**; berkas dipindah dari `docs/kerja/` ke sini setelah `W-DOC-001` ditutup di [ANTREAN](../ANTREAN.md). Angka di dalamnya adalah potret saat batch berjalan, **bukan** status terkini. Ledger konservasi: SHA-256 `32b2cc3b…b512`, 34.057 byte, 350 baris (sebelum banner); transformasi yang dicatat = banner ini + penutupan status D6–D9/checklist. Aturan yang lahir dari batch ini tetap hidup di [default-dev §13](../operations/default-dev.md#d4b-register) dan gate **v3.0**.
+
 # TASK — DOCS-GEN2: tata ulang dokumen generasi kedua
 
 > **Blok baca** · Jenis: **dokumen kerja program** (bukan antrean) · Status: **aktif sejak 2026-10-21** · Untuk siapa: agen pelaksana batch D0–D9
@@ -38,10 +40,10 @@ Rujukan: [KEPUTUSAN-OWNER](../KEPUTUSAN-OWNER.md) entri `DOCS-GEN2`; baseline: [
 | D3 | registry fitur `FEAT-` | **selesai** | [FITUR](../FITUR.md) — 58 fitur, 79/79 rute; checker `scripts/check-fitur.mjs` |
 | D4 | konsolidasi 89 → 33 berkas (target ≤30 belum tercapai) | **D4a–D4e selesai 21 Okt; gap 6 berkas dilaporkan** | ledger [D4a](../arsip/D4a-ledger-konservasi.md) · [D4b](../arsip/D4b-ledger-konservasi.md) · [D4c](../arsip/D4c-ledger-konservasi.md) · [D4d](../arsip/D4d-ledger-konservasi.md); 33/769,3 KB |
 | D5 | ANTREAN ≤16 KB + checklist di dokumen tugas + migrasi ID | **selesai 21 Okt** | ANTREAN 14.081 B; R12; `id-registry` §5a |
-| D6 | register aturan (tanpa detektor → panduan) | belum | — |
-| D7 | anggaran baca + aturan DeepSeek | belum | — |
-| D8 | gate v3 R12–R16 + self-test | belum | — |
-| D9 | tutup: ukur sebelum/sesudah, arsipkan rencana | belum | — |
+| D6 | register aturan (tanpa detektor → panduan) | **selesai 22 Okt** | [default-dev §13](../operations/default-dev.md#d4b-register) · KONTRAK §11 → §11a |
+| D7 | anggaran baca + aturan DeepSeek | **selesai 22 Okt** | [default-dev §12a](../operations/default-dev.md#d4b-baca) · `ukur-jalur-baca.mjs --baca` |
+| D8 | gate v3 R12–R16 + self-test | **selesai 22 Okt** | gate **v3.0** R13–R16 · selftest 21/21 · `scripts/docs-tier.baseline.json` |
+| D9 | tutup: ukur sebelum/sesudah, arsipkan rencana | **selesai 22 Okt** | berkas ini diarsipkan; `W-DOC-001` ditutup |
 
 ## Rencana D4 per folder (potret 2026-10-21)
 
@@ -332,8 +334,19 @@ D4 adalah **XL**: rencana per folder ditulis lebih dulu, lalu tiap sub-batch die
 
 <!-- checklist-otoritatif -->
 
-- [ ] W-DOC-001 — D5: ANTREAN ≤16 KB, checklist terikat, ID W- aktif
-- [ ] W-DOC-001 — D6: register aturan; aturan tanpa detektor jadi PANDUAN
-- [ ] W-DOC-001 — D7: anggaran baca per level + aturan DeepSeek
-- [ ] W-DOC-001 — D8: gate v3 R13–R16 + self-test dua arah
-- [ ] W-DOC-001 — D9: ukur akhir, arsipkan rencana, tutup DOCS-GEN2
+- [x] W-DOC-001 — D5: ANTREAN ≤16 KB, checklist terikat, ID W- aktif
+- [x] W-DOC-001 — D6: register aturan; aturan tanpa detektor jadi PANDUAN
+- [x] W-DOC-001 — D7: anggaran baca per level + aturan DeepSeek
+- [x] W-DOC-001 — D8: gate v3 R13–R16 + self-test dua arah
+- [x] W-DOC-001 — D9: ukur akhir, arsipkan rencana, tutup DOCS-GEN2
+
+## D6–D9 — hasil (2026-10-22)
+
+| Batch | Hasil terukur |
+|---|---|
+| D6 | Register aturan di [default-dev §13](../operations/default-dev.md#d4b-register) — 60 baris, 100% berdetektor atau `PANDUAN`+pemilik. KONTRAK §11 dipindah **utuh** ke [default-dev §11a](../operations/default-dev.md#d4b-invariant); KONTRAK 16.378 → **15.869 B** (plafon tidak dinaikkan). Konflik "4 vs 5 hal" ditutup di register + [KONTRAK §8](../KONTRAK.md). |
+| D7 | Tabel anggaran baca XS–XL + aturan >20% di [default-dev §12a](../operations/default-dev.md#d4b-baca); mode `--baca <path...> [--level=]` mencetak `BACA: n berkas / KB (B)` dan membandingkan anggaran. Diuji dengan fixture 22 B. |
+| D8 | Gate **v3.0**: R13 emoji/mojibake tier-0/1 · R14 prefix ID vs id-registry §2/§4 · R15 rute/path peran.md↔`App.tsx`/disk · R16 cap byte per tier (ratchet, `scripts/docs-tier.baseline.json`). Self-test **21/21** — tiap mutan R13–R16 tertangkap. |
+| D9 | `check-docs` **BERSIH** (16 aturan) · `check-fitur` 58 fitur/80 rute · `inventaris` 35 berkas/824,5 KB · `kekuatan` 10/13 (C/E/H pra-eksisting) · `selftest` 21/21 · `serah-terima` COCOK sesudah blok state diperbarui. |
+
+**Gap yang tidak ditutup:** target Q3=a **≤30 berkas** belum tercapai (35 berkas aktif di `docs/`, di luar akar repo) — sisa gap = berkas wajib + pekerjaan terbuka; keputusannya milik owner, bukan sesuatu yang ditutup dengan mengarsipkan pekerjaan terbuka.

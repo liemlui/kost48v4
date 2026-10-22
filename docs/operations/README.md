@@ -7,6 +7,6 @@ Isi tabel diturunkan langsung dari setiap berkas (judul + "baca kalau"), jadi ti
 
 | Berkas | Judul | Ukuran | Kapan dibaca |
 |---|---|---:|---|
-| [default-dev.md](default-dev.md) | Default, Seed & Data Master | 48.7 KB | — |
+| [default-dev.md](default-dev.md) | Default, Seed & Data Master | 58.7 KB | — |
 | [iot.md](iot.md) | IoT — Runbook KWH & Water Meter | 42.3 KB | butuh prosedur Tuya KWH atau spesifikasi water meter ESP32-C3. |
-| [produksi.md](produksi.md) | Produksi & Operasional Harian (Shared Hosting) | 72.6 KB | akan membuat dump produksi, memasang jadwal harian, atau menguji restore. · **Jangan** dibaca kalau: mencari aturan bisn |
+| [produksi.md](produksi.md) | Produksi & Operasional Harian (Shared Hosting) | 73.3 KB | akan membuat dump produksi, memasang jadwal harian, atau menguji restore. · **Jangan** dibaca kalau: mencari aturan bisn |

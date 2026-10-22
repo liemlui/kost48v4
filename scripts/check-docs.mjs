@@ -19,6 +19,13 @@
 //   R10 lebih dari satu judul H1 dalam satu berkas hidup (gejala dua dokumen digabung jadi satu)
 //   R11 salinan berkas tangga wajib di luar rumah kanoniknya (zona "jangan dibaca" dikecualikan)
 //   R12 ikatan ANTREAN ↔ checklist dokumen tugas: pointer `checklist:` harus hidup, checklist aktif dirujuk
+//   R13 emoji tier-0/1 (wajib 0) + mojibake tanpa penanda "mojibake"/[kutipan-disengaja]
+//   R14 prefix ID bernomor di tier-0/1 harus terdaftar di id-registry §2 (aktif) atau §4 (alias beku)
+//   R15 rute di docs/product/peran.md harus ada di frontend/src/App.tsx; path `frontend/...` di
+//       peran.md/FITUR harus ada di disk
+//   R16 plafon byte per tier (T0 konstitusi · T1 aturan/registry · T2 rujukan topik · T3 kerja/catatan ·
+//       T9 lain) bersifat RATCHET: cap di `scripts/docs-tier.baseline.json`, hanya boleh turun
+//       (`--perbarui-tier --alasan="..."`). R16 menutup celah "tiap batch menambah sedikit".
 //
 // Kalibrasi v1.1 (2026-10-05), dua koreksi dari hasil jalan pertama — keduanya agar gate
 // tidak menuduh yang benar:
@@ -102,23 +109,36 @@
 //      memblokir karena konversinya menyentuh dokumen aturan bisnis 30 KB dan butuh verifikasi kode per
 //      baris — pekerjaan Isi, bukan pekerjaan sistem. VERBATIM: VERSI_GATE tetap v2.0 (11 aturan R1–R11).
 //
-// Yang TIDAK diperiksa v1 (jangan dianggap sudah dijaga): arsip beku (docs/arsip/**, docs/archieve/**),
+// Kalibrasi v3.0 (2026-10-22, batch D8 DOCS-GEN2) — R13–R16:
+//  17. R13/R14 sengaja dibatasi ke TIER-0/1 (5 berkas konstitusi + `docs/*.md` akar). Dokumen domain
+//      dan catatan bertanggal memuat ID historis dan kutipan apa adanya; menuntutnya di sana akan
+//      membuat gate merah permanen — pelajaran T-05 (pelanggaran yang tak bisa ditutup = gate palsu).
+//  18. R14 hanya memeriksa token ID BERNOMOR (berakhir angka, mis. `AO-03`, `W-OWN-001`). Nama berkas
+//      (`TASK-…`), nama kartu (`KARTU-…`), dan token teknis (`SHA-256`) masuk daftar NOISE — bukan ID.
+//      Prefix sah = yang tertulis di tabel id-registry §2 atau §4; menambah keluarga ID baru berarti
+//      menambah satu baris registry, bukan melonggarkan gate.
+//  19. R15 memakai daftar rute dari `frontend/src/App.tsx` sebagai sumber kebenaran. Pola berwildcard
+//      (`/finance/*`, `/portal/*`) dilewati: itu ringkasan, bukan rute literal.
+//  20. R16 menyimpan cap di `scripts/docs-tier.baseline.json` (data, bukan dokumen). Cap diukur dari
+//      keadaan nyata, bukan angka karangan; `--perbarui-tier` hanya boleh MENURUNKAN cap dan menolak
+//      bila total sekarang sudah melewati cap lama. Baseline yang hilang = pelanggaran, bukan lulus.
+
 // artefak generated (docs/audit-map/**), rotasi changelog, dan isi berkas di luar glob.
 // R8 memakai EMULASI slug GitHub, bukan github-slugger: project ini dilarang menambah dependency
 // (AGENTS §2), jadi judul dengan tanda baca yang sangat tidak lazim bisa masih berbeda dari renderer
 // asli. Karena itu R8 dua tingkat, bukan satu tingkat yang memblokir.
 
-import { readFileSync, readdirSync, existsSync, statSync } from "node:fs";
+import { readFileSync, readdirSync, existsSync, statSync, writeFileSync, mkdirSync } from "node:fs";
 import { join, relative, dirname, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 
-const VERSI_GATE = "v2.1";
+const VERSI_GATE = "v3.0";
 // Akar repo bisa diarahkan lewat argumen pertama: `node scripts/check-docs.mjs <akar>`.
 // Dipakai oleh SELF-TEST (scripts/check-docs.selftest.mjs), yang membangun pohon sintetis lalu
 // membuktikan gate INI benar-benar GAGAL saat seharusnya gagal — pagar yang tidak pernah terbukti
 // bisa gagal tidak layak dipercaya (di repo rujukan, tiga kali sebuah pemeriksaan tampak hijau
 // padahal tidak memeriksa apa pun). Tanpa argumen, akar = folder induk skrip ini.
-const ROOT = resolve(process.argv[2] ?? join(dirname(fileURLToPath(import.meta.url)), ".."));
+const ROOT = resolve(process.argv.slice(2).find((a) => !a.startsWith("--")) ?? join(dirname(fileURLToPath(import.meta.url)), ".."));
 const DOCS = join(ROOT, "docs");
 
 const ARSIP_RE = /[\\/]docs[\\/](arsip|archieve|audit-map)[\\/]/;
@@ -537,6 +557,221 @@ for (const file of berkasAktif) {
   }
 }
 
+// ── TIER & R13–R16 (gate v3, batch D8 DOCS-GEN2) ───────────────────────────
+// Tier dipakai dua aturan: R13/R14 (encoding + registry di tier-0/1) dan R16 (plafon byte ratchet).
+const TIER0_FILES = [
+  "AGENTS.md",
+  "docs/KONTRAK.md",
+  "docs/ANTREAN.md",
+  "docs/PETA-KODE.md",
+  "docs/KEPUTUSAN-OWNER.md",
+];
+const TIERS = [
+  { id: "T0", label: "konstitusi", cocok: (r) => TIER0_FILES.includes(r) },
+  { id: "T1", label: "aturan & registry", cocok: (r) => /^docs\/[^/]+\.md$/.test(r) },
+  { id: "T2", label: "rujukan topik", cocok: (r) => /^docs\/(domain|operations|product)\//.test(r) },
+  { id: "T3", label: "kerja & rencana", cocok: (r) => /^docs\/(kerja|rencana)\//.test(r) },
+  { id: "T4", label: "catatan bertanggal", cocok: (r) => /^docs\/(audit|history)\//.test(r), tanpaCap: true },
+  { id: "T9", label: "lain", cocok: () => true },
+];
+const hitungTier = () => {
+  const t = Object.fromEntries(TIERS.map((x) => [x.id, { berkas: 0, byte: 0 }]));
+  for (const f of diperiksa) {
+    const tier = TIERS.find((x) => x.cocok(rel(f)));
+    t[tier.id].berkas++;
+    t[tier.id].byte += statSync(f).size;
+  }
+  return t;
+};
+const TIER_BASELINE = join(ROOT, "scripts", "docs-tier.baseline.json");
+const argAlasan = (process.argv.find((a) => a.startsWith("--alasan=")) || "").split("=").slice(1).join("=");
+if (process.argv.includes("--perbarui-tier")) {
+  const sekarang = hitungTier();
+  let lama = { tier: {} };
+  if (existsSync(TIER_BASELINE)) {
+    try { lama = JSON.parse(readFileSync(TIER_BASELINE, "utf8")); }
+    catch { console.error(`${rel(TIER_BASELINE)} tidak bisa di-parse; perbaiki dulu`); process.exit(1); }
+  }
+  if (!argAlasan) { console.error('--perbarui-tier butuh --alasan="..." (kenapa cap berubah)'); process.exit(2); }
+  const baru = { tanggal: new Date().toISOString().slice(0, 10), alasan: argAlasan, tier: {} };
+  for (const { id, label, tanpaCap } of TIERS) {
+    if (tanpaCap) { baru.tier[id] = { berkas: sekarang[id].berkas }; continue; }
+    const capLama = lama.tier?.[id]?.cap;
+    const n = sekarang[id].byte;
+    if (capLama !== undefined && n > capLama) {
+      console.error(`${id} (${label}): ${n} B > cap lama ${capLama} B — cap hanya boleh turun; pindahkan isi dulu`);
+      process.exit(1);
+    }
+    baru.tier[id] = { cap: capLama === undefined ? n : Math.min(capLama, n), berkas: sekarang[id].berkas };
+  }
+  mkdirSync(dirname(TIER_BASELINE), { recursive: true });
+  writeFileSync(TIER_BASELINE, JSON.stringify(baru, null, 2) + "\n", "utf8");
+  console.log(`baseline tier ditulis: ${rel(TIER_BASELINE)} — alasan: ${argAlasan}`);
+  for (const { id, label, tanpaCap } of TIERS) console.log(`  ${id} ${label.padEnd(18)} ${baru.tier[id].berkas} berkas · ${tanpaCap ? "tanpa cap (catatan bertanggal)" : `cap ${baru.tier[id].cap} B`}`);
+  process.exit(0);
+}
+
+const EMOJI = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{2B00}-\u{2BFF}\u{FE0F}]/gu;
+const MOJIBAKE = [/â€/g, /Ã[\u0080-\u00BF]/g, /Â[\u0080-\u00BF]/g, /ï¿½/g, /\uFFFD/g, /â”/g];
+const PENANDA_KUTIPAN = /mojibake|\[kutipan-disengaja\]/i;
+const tier01 = [...new Set([
+  ...TIER0_FILES.map((p) => join(ROOT, ...p.split("/"))),
+  ...readdirSync(DOCS).filter((n) => n.endsWith(".md")).map((n) => join(DOCS, n)),
+])].filter(existsSync);
+
+// ── R13 — emoji & mojibake di tier-0/1 (dipasang 2026-10-22, batch D8) ─────
+{
+  let nBaris = 0;
+  for (const f of tier01) {
+    let dalamFence = false;
+    readFileSync(f, "utf8").split(/\r?\n/).forEach((baris, i) => {
+      if (/^\s*(```|~~~)/.test(baris)) { dalamFence = !dalamFence; return; }
+      if (dalamFence) return;
+      nBaris++;
+      const nEmoji = (baris.match(EMOJI) || []).length;
+      if (nEmoji > 0) catat("R13", f, i + 1, `${nEmoji} emoji/karakter hias — tier-0/1 wajib 0 (tulis status dengan kata)`);
+      if (PENANDA_KUTIPAN.test(baris)) return;
+      const nRusak = MOJIBAKE.reduce((s, re) => s + ((baris.match(re) || []).length), 0);
+      if (nRusak > 0) catat("R13", f, i + 1, `${nRusak} mojibake tanpa penanda "mojibake"/[kutipan-disengaja]`);
+    });
+  }
+  if (nBaris === 0) catat("R13", ROOT, 0, "tidak ada baris tier-0/1 yang diperiksa — periksa apakah pola R13 masih cocok");
+}
+
+// ── R14 — prefix ID bernomor wajib terdaftar (dipasang 2026-10-22, batch D8) ──
+{
+  const regPath = join(ROOT, "docs", "id-registry.md");
+  const prefixTerdaftar = new Set();
+  if (existsSync(regPath)) {
+    let bagian = "";
+    for (const baris of readFileSync(regPath, "utf8").split(/\r?\n/)) {
+      const h = baris.match(/^##\s+(\d+[a-z]?)\./);
+      if (h) bagian = h[1];
+      if (bagian !== "2" && bagian !== "4") continue;
+      if (!/^\|/.test(baris)) continue;
+      const sel = (baris.split("|")[1] || "").replace(/`/g, "");
+      for (const tok of sel.split(/[/,·…]/)) {
+        const t = tok.trim();
+        if (!/^[A-Z]/.test(t)) continue;
+        prefixTerdaftar.add(t.includes("-") ? t.split("-")[0] : (t.match(/^[A-Z]+/) || [t])[0]);
+      }
+    }
+  } else {
+    catat("R14", regPath, 0, "docs/id-registry.md belum ada — prefix ID tidak bisa diperiksa");
+  }
+  // NOISE = token teknis & nama (bukan ID). Daftar ini sengaja pendek dan beralasan.
+  const NOISE = new Set([
+    "SHA", "UTF", "AES", "PSAK", "ISO", "GPT", "ESP", "HMAC", "JSON", "HTML", "HTTP", "API",
+    "SQL", "CSS", "TASK", "KARTU",
+  ]);
+  const ID_BERNOMOR = /\b([A-Z][A-Z0-9]{0,5})(?:-[A-Z0-9]{1,6}){0,2}-\d{1,4}[a-z]?(?![-\w])/g;
+  let nToken = 0;
+  for (const f of tier01) {
+    readFileSync(f, "utf8").split(/\r?\n/).forEach((baris, i) => {
+      for (const m of baris.matchAll(ID_BERNOMOR)) {
+        if (NOISE.has(m[1])) continue;
+        nToken++;
+        if (!prefixTerdaftar.has(m[1])) {
+          catat("R14", f, i + 1, `prefix ID "${m[1]}-" tidak terdaftar di id-registry §2/§4 (token ${m[0]})`);
+        }
+      }
+    });
+  }
+  if (nToken === 0) catat("R14", ROOT, 0, "tidak ada token ID bernomor yang diperiksa — periksa apakah pola R14 masih cocok");
+}
+
+// ── R15 — rute/path dokumen harus ada di kode (dipasang 2026-10-22, batch D8) ──
+{
+  const appTsx = join(ROOT, "frontend", "src", "App.tsx");
+  const peran = join(ROOT, "docs", "product", "peran.md");
+  const fitur = join(ROOT, "docs", "FITUR.md");
+  const ruteApp = new Set();
+  if (existsSync(appTsx)) {
+    // Rute bersarang (`/inventory` + `gudang`) disusun dari indentasi JSX: setiap <Route> mewarisi
+    // path absolut terdekat dari induknya. Tanpa ini, rute anak dilaporkan "tidak ada" secara salah.
+    const barisApp = readFileSync(appTsx, "utf8").split(/\r?\n/);
+    const stack = [];
+    barisApp.forEach((b, i) => {
+      const buka = b.match(/^(\s*)<Route\b/);
+      if (buka) {
+        const indent = buka[1].length;
+        let path = null;
+        for (let j = i; j < Math.min(i + 5, barisApp.length); j++) {
+          const mp = barisApp[j].match(/path=["']([^"']+)["']/);
+          if (mp) { path = mp[1]; break; }
+          if (j > i && /<Route\b/.test(barisApp[j])) break;
+        }
+        while (stack.length && stack[stack.length - 1].indent >= indent) stack.pop();
+        const induk = [...stack].reverse().find((s) => s.path)?.path ?? "";
+        const penuh = path === null ? null : path.startsWith("/") ? path : `${induk}/${path}`.replace(/\/+/g, "/");
+        stack.push({ indent, path: penuh });
+        if (penuh) ruteApp.add(penuh);
+      } else if (/<\/Route>/.test(b)) {
+        const indent = b.match(/^(\s*)/)[1].length;
+        while (stack.length && stack[stack.length - 1].indent >= indent) stack.pop();
+      }
+    });
+  } else if (existsSync(peran)) {
+    catat("R15", appTsx, 0, "frontend/src/App.tsx tidak ada — rute peran.md tidak bisa diverifikasi");
+  }
+  let nRute = 0;
+  if (existsSync(peran)) {
+    readFileSync(peran, "utf8").split(/\r?\n/).forEach((baris, i) => {
+      for (const m of baris.matchAll(/`(\/[^`\s]*)`/g)) {
+        const r = m[1];
+        if (r.includes("*")) continue;            // ringkasan wildcard, bukan rute literal
+        nRute++;
+        if (!ruteApp.has(r)) catat("R15", peran, i + 1, `rute ${r} tidak ada di frontend/src/App.tsx`);
+      }
+    });
+    if (nRute === 0) catat("R15", peran, 0, "tidak ada rute yang diperiksa — periksa apakah pola R15 masih cocok");
+  }
+  let nPath = 0;
+  for (const f of [peran, fitur]) {
+    if (!existsSync(f)) continue;
+    readFileSync(f, "utf8").split(/\r?\n/).forEach((baris, i) => {
+      for (const m of baris.matchAll(/`(frontend\/[^`\s]+)`/g)) {
+        const p = m[1].replace(/[.,;:]+$/, "");
+        if (/[*{<…]/.test(p)) continue;
+        nPath++;
+        if (!existsSync(join(ROOT, ...p.split("/")))) catat("R15", f, i + 1, `path ${p} tidak ada di disk`);
+      }
+    });
+  }
+  if (nPath === 0 && existsSync(peran)) catatInfo("R15", peran, 0, "tidak ada path frontend/... yang diperiksa");
+}
+
+// ── R16 — plafon byte per tier, ratchet (dipasang 2026-10-22, batch D8) ──────
+{
+  const sekarang = hitungTier();
+  if (!existsSync(TIER_BASELINE)) {
+    catat("R16", TIER_BASELINE, 0, `baseline tier belum ada — jalankan: node scripts/check-docs.mjs --perbarui-tier --alasan="..."`);
+  } else {
+    let b = null;
+    try { b = JSON.parse(readFileSync(TIER_BASELINE, "utf8")); }
+    catch { catat("R16", TIER_BASELINE, 0, "baseline tier tidak bisa di-parse sebagai JSON"); }
+    if (b) {
+      for (const { id, label, tanpaCap } of TIERS) {
+        const n = sekarang[id].byte;
+        if (tanpaCap) {
+          catatInfo("R16", TIER_BASELINE, 0, `tier ${id} (${label}) ${n} B — catatan bertanggal, tidak di-cap (bertambah karena bukti baru) `);
+          continue;
+        }
+        const cap = b.tier?.[id]?.cap;
+        if (cap === undefined) {
+          catat("R16", TIER_BASELINE, 0, `tier ${id} (${label}) belum punya cap — jalankan --perbarui-tier`);
+          continue;
+        }
+        if (n > cap) {
+          catat("R16", TIER_BASELINE, 0, `tier ${id} (${label}) ${n} B > cap ${cap} B (+${n - cap} B) — pindahkan isi; cap hanya turun dengan keputusan owner`);
+        } else {
+          catatInfo("R16", TIER_BASELINE, 0, `tier ${id} (${label}) ${n} B / cap ${cap} B (${cap - n} B ruang)`);
+        }
+      }
+    }
+  }
+}
+
 // ── CATATAN ARSIP (T-05) — kotak `[ ]` di dalam arsip beku (dipasang 2026-10-07, batch SISA-DOCS) ──
 // Dipindai tiap kali gate jalan, TIDAK dihitung sebagai pelanggaran dan tidak mengubah exit code.
 // Alasan lengkap: kalibrasi 13 di kepala skrip. Bentuknya sama dengan laporan anchor "rapuh" R8:
@@ -588,6 +823,10 @@ const judul = {
   R10: "R10 judul H1 ganda",
   R11: "R11 salinan berkas tangga",
   R12: "R12 ikatan antrean ↔ checklist dokumen tugas",
+  R13: "R13 emoji/mojibake tier-0/1",
+  R14: "R14 prefix ID terdaftar",
+  R15: "R15 rute/path dokumen vs kode",
+  R16: "R16 plafon tier (ratchet)",
 };
 
 console.log(`=== CHECK-DOCS ${VERSI_GATE} (gate dokumen KOST48) ===`);
@@ -595,7 +834,7 @@ console.log(`berkas diperiksa : ${diperiksa.length} aktif = ${berkasAktif.length
 console.log(`versi kanonik    : ${[...versiDiterima].join(", ")} (dari frontend/src/config/version.ts + package.json)`);
 console.log("");
 
-for (const rule of ["R1", "R2", "R3", "R4", "R5", "R6", "R7", "R8", "R9", "R10", "R11", "R12"]) {
+for (const rule of ["R1", "R2", "R3", "R4", "R5", "R6", "R7", "R8", "R9", "R10", "R11", "R12", "R13", "R14", "R15", "R16"]) {
   const g = grup(rule);
   console.log(`— ${judul[rule]}: ${g.length}`);
   if (rule === "R3") {
@@ -672,5 +911,13 @@ Cara membetulkan:
   R11 berkas tangga wajib hanya boleh ada di rumah kanoniknya; salinan di tempat lain dipindahkan
       atau dihapus (zona ".design-audit/.docs-legacy/.audit-map" memang dikecualikan).
   R12 setiap baris ANTREAN yang memuat "checklist:" harus menunjuk berkas+anchor yang ada, dan
-      setiap checklist tugas bertanda harus dirujuk satu baris ANTREAN.`);
+      setiap checklist tugas bertanda harus dirujuk satu baris ANTREAN.
+  R13 tier-0/1 wajib 0 emoji; mojibake hanya sah pada baris yang memuat kata "mojibake" atau
+      penanda [kutipan-disengaja]. Tulis status dengan kata, bukan ikon.
+  R14 tambahkan prefix ke id-registry §2 (aktif) atau §4 (alias beku). Nama berkas (TASK-...),
+      nama kartu (KARTU-...), dan token teknis (SHA-256) bukan ID — jangan didaftarkan.
+  R15 rute di peran.md harus ada di frontend/src/App.tsx, dan path frontend/... harus ada di disk.
+      Perbaiki dokumennya bila kode memang tidak punya rute itu; jangan melemahkan gate.
+  R16 satu tier melewati cap byte-nya. Pindahkan isi ke arsip/rumah yang tepat; cap hanya boleh
+      TURUN: node scripts/check-docs.mjs --perbarui-tier --alasan="..."`);
 process.exit(dilewati.length > 0 ? 2 : 1);

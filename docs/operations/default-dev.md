@@ -11,6 +11,7 @@
 - [§10 Referensi command kerja](#d4b-gate-10)
 - [§11 Verifikasi dan Confidence Gate](#d4b-gate-11)
 - [§12 Otoritas keputusan & ekonomi verifikasi](#d4b-gate-12)
+- [§13 Register aturan normatif](#d4b-register)
 - [Bagian G — Data master & nilai default](#d4b-data-master)
 
 
@@ -227,6 +228,26 @@ Jebakan **produksi** punya rumah sendiri di [produksi §10](produksi.md) — **j
 
 Referensi command ada di §10 berkas ini (cwd, tujuan, dan perintah yang sudah terbukti jalan di mesin ini). Daftar itu **bukan izin otomatis**, dan cwd yang tertulis di sana wajib dipakai.
 
+<a id="d4b-invariant"></a>
+### 11a. Invariant & cara memeriksanya (dipindah utuh dari `docs/KONTRAK.md` §11, 2026-10-22)
+
+> **Isi tidak diubah.** Bagian ini dulu ada di KONTRAK §11; ia dipindahkan ke rumah verifikasi yang sama dengan gate G0–G5 di atas, agar KONTRAK punya ruang untuk register aturan (batch D6 DOCS-GEN2) tanpa menaikkan plafon 16 KB. Pointer-nya tetap di [KONTRAK §11](../KONTRAK.md).
+
+Angka **tidak ditulis** di sini — pakai perintahnya (Q11). Bila sebuah angka wajib muncul di laporan, tulis sebagai potret bertanggal.
+
+| Invariant | Cara memeriksa | Ambang lulus |
+|---|---|---|
+| Antrean tugas terbuka | hitung `- [ ]` di [ANTREAN](../ANTREAN.md) §3 | sama dengan judul bagian itu |
+| Tugas selesai historis | hitung `- [x]` di `docs/history/**` + `docs/arsip/**` | tidak menurun tanpa penjelasan |
+| Gate domain uang/huni | `grep` pola `pretest:unit\|test:unit\|gate M04` di ANTREAN + berkas riwayat | tidak ada gate yang hilang |
+| Kebersihan diff | `git diff --check` | exit 0 sebelum commit dokumentasi |
+| Gate dokumen | `node scripts/check-docs.mjs` | exit 0 (atau `DILEWATI` yang dijelaskan) sebelum menutup batch dokumentasi |
+| Konservasi pemindahan | bandingkan SHA-256 berkas sebelum/sesudah | 100% identik, kecuali transformasi yang dicatat |
+| Kesesuaian berkas serah-terima | `node scripts/ukur-serah-terima-docs.mjs` | blok `@kost48-state` cocok dengan repo (HEAD, berkas yang ditunjuk ada, label gate benar); tanggal potret tidak lebih tua dari commit terakhir berkas tangga |
+| Register keputusan final | `node scripts/ukur-serah-terima-docs.mjs --keputusan` | setiap baris di [KEPUTUSAN-OWNER](../KEPUTUSAN-OWNER.md) punya tanggal + sumber; **tidak ada** baris baru yang menghidupkan R-1…R-6 tanpa keputusan baru |
+
+**Exception ukuran berkas yang sudah disetujui:** aturan bisnis owner (mis. `docs/domain/ai.md`, `docs/domain/publik.md`) boleh melewati plafon rujukan bila punya daftar isi berjangkar; keputusan lama ARSIP-BATAS (24 Sep 2026) digantikan rencana rombak 2026-10-05.
+
 ---
 
 <a id="d4b-gate-12"></a>
@@ -284,6 +305,23 @@ Referensi command ada di §10 berkas ini (cwd, tujuan, dan perintah yang sudah t
 - **Yang dilarang:** menjadikan boks itu daftar pekerjaan berikutnya (itu tugas antipran) atau menyalin status proyek ke sini — ia **catatan**, bukan antrean.
 
 **Ekonomi verifikasi (fokus percepatan app).** Jalankan **verifikasi terkecil yang membuktikan acceptance**, sekali, lalu lanjut. Jangan mengulang audit statis yang sudah ada; jangan build penuh untuk pekerjaan dokumen; test baru hanya bila menutup risiko **uang/auth/schema/kontrak bersama**. Verifikasi yang tidak membuktikan apa pun tentang acceptance = biaya, bukan mutu. **Docs-only tetap tanpa test/build/lint/typecheck**, dan gate dokumen dijalankan **sekali per batch**. **Gate uang §11 tetap berlaku** sampai owner memutuskan lain.
+
+<a id="d4b-baca"></a>
+### 12a. Anggaran baca per level (batch D7 DOCS-GEN2)
+
+Angka **diturunkan**, bukan dikarang: token indikatif [AGENTS §5](../../AGENTS.md) × 4 (KONTRAK §3: token ≈ byte/4), kolom berkas = "maks. berkas" AGENTS §5.
+
+| Level | Berkas (maks) | Anggaran baca | Catatan |
+|---|---:|---|---|
+| XS | 5 | 4–12 KB | typo/copy lokal |
+| S | 8 | 12–28 KB | satu fungsi/berkas |
+| M | 12 | 28–60 KB | satu modul |
+| L | 18 | 60–120 KB | lintas modul |
+| XL | 20/tahap | 40–100 KB/tahap | arsitektur; per tahap |
+
+- **Pencatatan:** satu baris di laporan: `BACA: <n> berkas / <KB>` — **model menilai** berkas mana yang masuk konteks, **skrip menghitung** byte-nya: `node scripts/ukur-jalur-baca.mjs --baca <path...> [--level=S]`.
+- **Cakupan:** anggaran menghitung bacaan **tambahan** selama tugas; AGENTS yang disuntik tidak dihitung. Jalur wajib (KONTRAK + ANTREAN) sudah memakan sebagian besar anggaran XS/S — itu fakta yang harus terlihat, bukan alasan menaikkan angka.
+- **Kelebihan anggaran:** dilaporkan, **tidak** diblokir gate (gate tidak bisa melihat konteks sesi); lebih dari **20%** di atas anggaran wajib satu baris alasan di laporan.
 
 **Dilarang:** menahan task hanya karena menunggu jawaban yang tidak wajib (tulis default + lanjut), dan menanyakan ulang hal yang sudah diputuskan ([KONTRAK §8](../KONTRAK.md)).
 
@@ -523,4 +561,73 @@ Isi lengkap perintah seed ada di [Default & Seed DEV](default-dev.md); bagian in
 
 Prosedur "Patch Tenant Aman" (2026-07-08) sudah tidak tersedia.
 Arsip: [m11-seed-master-data-appendix-2026-07-08.md](../arsip/m11-seed-master-data-appendix-2026-07-08.md).
+
+<a id="d4b-register"></a>
+## 13. Register aturan normatif (batch D6 DOCS-GEN2, 2026-10-22)
+
+**Cara baca.** Setiap aturan normatif di tier-0/1 punya **detektor yang bisa gagal** atau status **PANDUAN** (+ pemilik + alasan). `PANDUAN` **tidak menghapus kewajiban** — ia menyatakan aturan itu dijaga manusia, bukan mesin. Detektor yang tertulis `R…` hidup di [check-docs](../../scripts/check-docs.mjs) dan dibuktikan bisa gagal oleh [self-test](../../scripts/check-docs.selftest.mjs); yang lain adalah skrip ukur. Register ini **tidak** memeriksa dirinya sendiri: aturan baru wajib menambah satu baris di sini pada batch yang sama.
+
+| Aturan (rumah · kutipan) | Detektor | Status | Pemilik & alasan |
+|---|---|---|---|
+| AGENTS §1 hierarki otoritas | — | PANDUAN | owner — menilai niat/konflik tidak bisa digate |
+| AGENTS §1 "tidak ada jawaban bukan persetujuan" | — | PANDUAN | owner |
+| AGENTS §2 satu proses API NestJS; modul terpisah ditunda | — | PANDUAN | owner — keputusan arsitektur, bukan bentuk berkas |
+| AGENTS §2 RAM LVE 512 MB = batas kerja | — | PANDUAN | owner — ambang diagnosis di [produksi Bagian E](produksi.md#d4b-kapasitas) |
+| AGENTS §3 peta dokumen (router) | R2 · R6 · R8 | DIPERIKSA | — |
+| AGENTS §4 izin, scope, larangan (dependency/DB/secret/reset/deploy) | — | PANDUAN | owner — izin hanya bisa dinilai manusia |
+| AGENTS §5 level task, maks. berkas, token indikatif | — | PANDUAN | agen — dihitung saat review, bukan gate |
+| AGENTS §6 batas baca + zona jangan-dibaca | R11 (zona dikecualikan) | PANDUAN | agen — kebiasaan membaca tidak terlihat gate |
+| AGENTS §7 gate G0–G5, docs-only tanpa test | — | PANDUAN | agen — verifikasi diri di laporan |
+| AGENTS §8 bentuk laporan + batas kejujuran | ukur-serah-terima | PANDUAN | owner — klaim "hijau" butuh pembacaan manusia |
+| AGENTS §9 gate dokumen R1–R16 | check-docs + selftest | DIPERIKSA | — |
+| KONTRAK §1 konflik & hierarki | — | PANDUAN | owner |
+| KONTRAK §2 Smallest Safe Change + scope sebelum edit | — | PANDUAN | agen |
+| KONTRAK §2 jangan menonaktifkan sandbox/guard/test | — | PANDUAN | owner |
+| KONTRAK §3 level, proksi byte, XL butuh approval | — | PANDUAN | agen |
+| KONTRAK §4 batas baca & hitung berkas | — | PANDUAN | agen |
+| KONTRAK §6 berkas/area berisiko butuh izin | — | PANDUAN | owner |
+| KONTRAK §7 angka volatil tanpa penanda potret | R1 | DIPERIKSA | — |
+| KONTRAK §7 kotak otoritatif hanya ANTREAN + checklist bertanda | R3 | DIPERIKSA | — |
+| KONTRAK §7 arsip: banner, nama tetap, pekerjaan terbuka tidak ikut | catatan T-05 di gate | PANDUAN | owner — arsip beku tidak boleh disunting |
+| KONTRAK §7 rujukan lokasi = kutipan, bukan nomor baris | INFO nomor baris di gate | PANDUAN | agen — konversi = pekerjaan Isi |
+| KONTRAK §7 gate dokumen R1–R12 + cakupan di kepala skrip | check-docs + selftest | DIPERIKSA | — |
+| KONTRAK §7 kartu ukur (kekuatan, kesegaran, serah-terima) | ukur-kekuatan · ukur-kesegaran · ukur-serah-terima | DIPERIKSA | — |
+| KONTRAK §7 plafon byte (AGENTS 12 KB · tangga 16 KB · rujukan 48 KB) | R5 | DIPERIKSA | — |
+| KONTRAK §7 plafon byte per tier (T0–T3/T9, ratchet) | R16 | DIPERIKSA | owner — cap hanya boleh turun |
+| KONTRAK §7 baris Fakta pada berkas tangga | kartu kekuatan D | DIPERIKSA | — |
+| KONTRAK §7 pagar wajib bisa gagal | check-docs.selftest | DIPERIKSA | — |
+| KONTRAK §7 ratchet baris dokumen aktif | kartu kekuatan M | DIPERIKSA | owner — kenaikan butuh keputusan + alasan |
+| KONTRAK §8 konflik selesai; R-1…R-6 tidak dihidupkan lagi | ukur-serah-terima `--keputusan` | DIPERIKSA | — |
+| KONTRAK §9 bentuk laporan 4 baris + level | — | PANDUAN | owner |
+| KONTRAK §10 pelaksanaan vs izin (dua sumbu) | — | PANDUAN | agen |
+| KONTRAK §12 riwayat berkas | — | PANDUAN | agen |
+| ATURAN §1 aturan uang/harga/huni butuh keputusan owner | — | PANDUAN | owner |
+| ATURAN §2 topik kanonik (tautan ke domain/) | R2 · R6 · R8 | DIPERIKSA | — |
+| ATURAN §3 batas berkas (antrean/runbook/audit di rumahnya) | — | PANDUAN | agen |
+| domain/keuangan — invarian uang & jurnal | gate uang `npm run test:unit` backend | DIPERIKSA | owner — wajib saat rumus/jurnal/skema berubah; menjalankannya tetap PANDUAN |
+| domain/hunian — siklus huni, deposit, KTP pasca check-in | — | PANDUAN | owner |
+| domain/publik — FAQ bukan sumber aturan; tanpa PII | — | PANDUAN | owner |
+| domain/ai — AI berbayar butuh izin + fallback rule-based | — | PANDUAN | owner (biaya) |
+| operations/produksi — deploy/backup/cron/kapasitas | — | PANDUAN | owner |
+| operations/default-dev — seed idempoten, batas DEV/UAT/produksi | — | PANDUAN | agen |
+| OPERASI §1 batas lingkungan; jangan tampilkan secret/data pribadi | — | PANDUAN | owner |
+| OPERASI §2 deploy/rilis = task tersendiri | — | PANDUAN | owner |
+| OPERASI §4 runbook kanonik (tautan) | R2 · R6 · R8 | DIPERIKSA | — |
+| id-registry §2 prefix wajib terdaftar sebelum dipakai | R14 | DIPERIKSA | — |
+| id-registry §3 nomor tidak didaur ulang | — | PANDUAN | agen |
+| id-registry §5 tanpa emoji; mojibake hanya sebagai kutipan | R13 | DIPERIKSA | — |
+| id-registry §5a pemetaan ID lama → `W-` | — | PANDUAN | agen — alias beku, tidak disunting |
+| default-dev §10 command per-cwd | — | PANDUAN | agen — perintah sudah terbukti, bukan gate |
+| default-dev §10a jebakan mesin-dev | — | PANDUAN | agen |
+| default-dev §11 gate G0–G5; "bukan PASS"; exception uang | — | PANDUAN | agen — gate uang bagian uang diperiksa test |
+| default-dev §11a invariant & ambang lulus | ukur-serah-terima · check-docs · git | DIPERIKSA | — |
+| default-dev §12 lima hal yang ditanyakan ke owner | — | PANDUAN | owner — lihat penyelesaian "4 vs 5" di bawah |
+| default-dev §12 goal & todos + jejak di repo | — | PANDUAN | owner |
+| default-dev §12 ekonomi verifikasi | — | PANDUAN | agen |
+| FITUR — registry fitur (`FEAT-`): rute unik, jangkar ada, status sah | check-fitur | DIPERIKSA | — |
+| peran.md — rute/path yang ditulis harus ada di kode | R15 | DIPERIKSA | — |
+| batas-kejujuran — pisahkan implementasi/verifikasi/deployment/runtime | — | PANDUAN | owner |
+| Register ini — aturan baru menambah satu baris di sini | — | PANDUAN | agen — register tidak memeriksa dirinya sendiri |
+
+**Penyelesaian "4 vs 5 hal".** Aturan yang mengikat adalah **lima hal** yang ditanyakan ke owner: uang · flow/perilaku pengguna baru · hapus data · deploy/secret · keputusan penting yang sulit dibalik ([AGENTS §4](../../AGENTS.md) · [KONTRAK §2](../KONTRAK.md) · [§12](#d4b-gate-12)). Versi **"empat hal"** (tanpa "keputusan penting") hanya hidup di **arsip beku** — `ADAPTASI-DOKTRIN-DOCS` butir A-5 dan `PROMPT-SESI-BERIKUTNYA` — dan **tidak berlaku**; arsip tidak disunting. Satu baris konflik dicatat di [KONTRAK §8](../KONTRAK.md).
 

@@ -14,7 +14,7 @@ kartu_kekuatan: 13/13                             # node scripts/ukur-kekuatan-d
 periksa: node scripts/ukur-serah-terima-docs.mjs  # pemeriksa blok ini
 ```
 
-Diperiksa oleh `node scripts/ukur-serah-terima-docs.mjs` ([KONTRAK §11](../KONTRAK.md) invariant "Kesesuaian berkas serah-terima"). **Ukur sendiri: jangan percaya blok di atas** — ia benar hanya pada commit `head` itu.
+Diperiksa oleh `node scripts/ukur-serah-terima-docs.mjs` ([default-dev §11](../operations/default-dev.md#d4b-invariant) invariant "Kesesuaian berkas serah-terima"). **Ukur sendiri: jangan percaya blok di atas** — ia benar hanya pada commit `head` itu.
 
 ## 1. Urutan baca untuk sesi baru
 

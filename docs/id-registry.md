@@ -63,11 +63,17 @@ Tanpa aturan nama, setiap batch baru menambah tabrakan. Berkas ini **tidak mengu
 | `AO-xx` | fase audit UI/UX | label historis | tidak dipakai untuk pekerjaan baru |
 | `EF-xx` | fase efisiensi hosting | label historis | tidak dipakai untuk pekerjaan baru |
 | `AIDL-xx` | agenda keputusan AI | label historis | `W-` untuk lanjutannya |
+| `F-01`…`F-17` | temuan audit (uang/huni/publik) | mirip kode kamar `F1`/`F2` | `AUD-<tanggal>-NN` |
+| `F2-…` / `F3-…` / `F4-…` / `F5-…` | temuan fase audit F2–F5 | mirip kode kamar | `AUD-<tanggal>-NN` |
+| `P2-…` / `P3-…` / `P7-…` / `P8-…` | prioritas/tahap audit | mirip pertanyaan owner `P29` | `W-` atau `AUD-` |
+| `T-01`…`T-16` | temuan audit UI/teknis | mirip ID tugas | `AUD-<tanggal>-NN` |
+| `H-…` / `S-…` / `M-…` / `V-…` / `L-…` / `E-…` / `K-…` / `B-…` / `I-…` / `N-…` / `G-…` / `C-…` / `UD-…` / `OC-…` / `AM-…` / `AL-…` / `SI-…` / `PM-…` / `MKT-…` / `FIX-…` / `PWA-…` / `IMPACT-…` / `AI-…` / `Z-…` / `BE-…` / `BACKUP-…` | label audit/pekerjaan historis | banyak yang mirip kode kamar atau prioritas | `AUD-` / `W-` |
 
 ## 5. Simbol
 
 - **Tier-0 dan tier-1 tanpa emoji.** Status ditulis kata: `BUKA` · `JALAN` · `SELESAI` · `BLOKIR` · `BATAL`.
-- **Mojibake hanya sah sebagai kutipan.** Baris yang memang mengutip teks rusak wajib memuat kata **mojibake** atau penanda `[kutipan-disengaja]`; selain itu dianggap kerusakan. (Detektornya dipasang di gate v3, batch D8.)
+- **Mojibake hanya sah sebagai kutipan.** Baris yang memang mengutip teks rusak wajib memuat kata **mojibake** atau penanda `[kutipan-disengaja]`; selain itu dianggap kerusakan. Detektornya **R13** (gate v3); bentuk dan ambangnya di kepala `scripts/check-docs.mjs`.
+- **Nama bukan ID.** `TASK-…` (nama dokumen tugas), `KARTU-…` (jenis kartu aturan), dan token teknis (`SHA-256`, `UTF-8`) tidak diperiksa R14 — daftar NOISE-nya ada di gate dan sengaja pendek.
 - **Tidak ada karakter hiasan sebagai pengganti status.** Centang, bintang, dan ikon tidak dipakai untuk menyatakan keadaan.
 
 ## 5a. Pemetaan ID D5 (21 Okt 2026)

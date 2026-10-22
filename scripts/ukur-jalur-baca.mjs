@@ -8,9 +8,9 @@
 // Catatan kejujuran: skrip ini TIDAK bisa tahu berkas mana yang benar-benar dibuka oleh sebuah sesi.
 // Untuk uji nyata (Q30), catat manual berkas yang dibuka agen pada satu tugas, lalu bandingkan dengan keluaran ini.
 import { readFileSync, existsSync, readdirSync, statSync } from "node:fs";
-import { join, resolve, relative, sep } from "node:path";
+import { join, resolve, relative, sep, isAbsolute } from "node:path";
 
-const ROOT = resolve(process.argv[2] ?? ".");
+const ROOT = resolve(process.argv[2] && !process.argv[2].startsWith("--") ? process.argv[2] : ".");
 const WAJIB = ["AGENTS.md", "docs/KONTRAK.md", "docs/ANTREAN.md", "docs/PETA-KODE.md"];
 const RUJUKAN_SERING = [
   "docs/ATURAN.md",
@@ -22,11 +22,48 @@ const RUJUKAN_SERING = [
 const BASELINE = { berkas: 50, kb: 1037, catatan: "potret B0 2026-10-05 sebelum rombak" };
 
 const ukur = (f) => {
-  const p = join(ROOT, f.split("/").join(sep));
+  const p = isAbsolute(f) ? f : join(ROOT, f.split("/").join(sep));
   if (!existsSync(p)) return { f, ada: false, b: 0 };
   return { f, ada: true, b: statSync(p).size };
 };
 const baris = (x) => `  ${x.ada ? " " : "!"} ${x.f.padEnd(30)} ${(x.b / 1024).toFixed(1).padStart(8)} KB`;
+
+// ── mode --baca (D7 DOCS-GEN2): hitung biaya baca AKTUAL sebuah tugas ────────
+// Aturan: model menilai berkas mana yang masuk konteks; skrip ini MENGHITUNG byte-nya.
+// Format laporan: `BACA: <n> berkas / <KB>`. Anggaran per level diturunkan dari token
+// indikatif AGENTS §5 × 4 (KONTRAK §3: token ≈ byte/4) — lihat default-dev §12.
+const ANGGARAN_KB = { XS: [4, 12], S: [12, 28], M: [28, 60], L: [60, 120], XL: [40, 100] };
+const iBaca = process.argv.indexOf("--baca");
+if (iBaca >= 0) {
+  const argumen = process.argv.slice(iBaca + 1).filter((a) => !a.startsWith("--"));
+  const level = (process.argv.find((a) => a.startsWith("--level=")) || "").split("=")[1];
+  if (argumen.length === 0) {
+    console.error("pakai: node scripts/ukur-jalur-baca.mjs --baca <path...> [--level=XS|S|M|L|XL]");
+    process.exit(2);
+  }
+  let total = 0;
+  let ada = 0;
+  console.log("=== BACA: berkas yang masuk konteks ===");
+  for (const f of argumen) {
+    const x = ukur(f);
+    total += x.b;
+    if (x.ada) ada++;
+    console.log(baris(x));
+  }
+  const kb = total / 1024;
+  console.log(`  BACA: ${ada} berkas / ${kb.toFixed(1)} KB (${total} B)${ada < argumen.length ? ` (${argumen.length - ada} tidak ada)` : ""}`);
+  const anggaran = level ? ANGGARAN_KB[level.toUpperCase()] : null;
+  if (level && !anggaran) {
+    console.log(`  level "${level}" tidak dikenal; anggaran tidak dinilai`);
+    process.exitCode = 1;
+  } else if (anggaran) {
+    const [bawah, atas] = anggaran;
+    if (kb >= bawah && kb <= atas) console.log(`  anggaran ${level.toUpperCase()} ${bawah}–${atas} KB: DI DALAM`);
+    else if (kb < bawah) console.log(`  anggaran ${level.toUpperCase()} ${bawah}–${atas} KB: di bawah (tidak perlu dijelaskan)`);
+    else console.log(`  anggaran ${level.toUpperCase()} ${bawah}–${atas} KB: DI ATAS${kb > atas * 1.2 ? " >20% — wajib satu baris alasan" : ""}`);
+  }
+  process.exit(process.exitCode ?? 0);
+}
 
 let total = 0, n = 0;
 console.log("=== JALUR WAJIB (aturan: dibaca sebelum bertindak) ===");

@@ -76,7 +76,7 @@ Rincian khusus uang (DO-NOT-TOUCH, invariant, gate per-task): [produksi Bagian F
 - **Arsip**: banner di baris atas · nama berkas tidak diganti · angka di arsip tidak diperbarui · **pekerjaan terbuka tidak boleh ikut terarsip** · satu baris inventaris di [arsip/README.md](arsip/README.md). Banner wajib sejak DOCS-CLEANUP-1; arsip legacy (pindah massal) bersandar pada inventaris + ledger konservasi (keputusan owner 2026-10-07), jadi gate **tidak menuntutnya**.
 - **Penghapusan**: berkas tracked boleh dihapus dengan ledger konservasi; berkas **untracked selalu dipindah**, tidak pernah dihapus.
 - **Rujukan lokasi: kutipan, bukan nomor baris.** Tunjuk lokasi dengan **kutipan teks/komentar kode** atau anchor bagian — **bukan** nomor baris, yang basi setiap kali berkas disunting; nomor baris hanya sah di bukti audit bertanggal dan kartu potret. Detektornya (INFO) ada di gate; anchor diperiksa **R8**, pembuat anchor diselaraskan dengan slug GitHub.
-- **Gate dokumen** (`node scripts/check-docs.mjs` = `npm run check:docs`; wajib hijau sebelum menutup batch dokumentasi) memeriksa **12 aturan R1–R12**: angka volatil · tautan mati · kotak otoritatif · blok baca · plafon byte · rujukan backtick · indeks cakupan · anchor mati · nomor bagian ganda · judul H1 ganda · salinan berkas tangga · ikatan antrean↔checklist. Cakupan, pengecualian (catatan bertanggal & zona jangan-dibaca), dan riwayat kalibrasinya ada di **kepala `scripts/check-docs.mjs`** — tidak diulang di sini. Pemeriksaan yang **dilewati** tampil `DILEWATI` + exit 2.
+- **Gate dokumen** (`node scripts/check-docs.mjs` = `npm run check:docs`; wajib hijau sebelum menutup batch dokumentasi) memeriksa **16 aturan R1–R16** (gate **v3.0**): angka volatil · tautan mati · kotak otoritatif · blok baca · plafon byte · rujukan backtick · indeks cakupan · anchor mati · nomor bagian ganda · judul H1 ganda · salinan berkas tangga · ikatan antrean↔checklist · **R13** emoji/mojibake tier-0/1 · **R14** prefix ID terdaftar · **R15** rute/path dokumen vs kode · **R16** plafon byte per tier (ratchet). Cakupan, pengecualian (catatan bertanggal & zona jangan-dibaca), dan riwayat kalibrasinya ada di **kepala `scripts/check-docs.mjs`** — tidak diulang di sini. Pemeriksaan yang **dilewati** tampil `DILEWATI` + exit 2.
 - **Kartu ukur** (bukan gate — boleh gagal tanpa membatalkan pekerjaan): kekuatan `node scripts/ukur-kekuatan-docs.mjs` (13 pemeriksaan deterministik) · kesegaran `node scripts/ukur-kesegaran-docs.mjs` (`% segar` + `% cakupan` sebagai potret bertanggal; menolak mencetak angka bila repo shallow atau `git` tak ada) · kesesuaian serah-terima `node scripts/ukur-serah-terima-docs.mjs`.
 - **Pagar wajib dibuktikan bisa gagal** (`node scripts/check-docs.selftest.mjs`) dan **total baris dokumen aktif punya ratchet** (pemeriksaan **M** kartu kekuatan; baseline = data di `scripts/docs-lines.baseline.json`, naik **hanya** dengan keputusan pemilik + `alasan` pada commit yang sama). Aturan, cara kerja, dan jebakannya: [ALAT-UKUR-KESEGARAN-DOCS §7](arsip/ALAT-UKUR-KESEGARAN-DOCS.md).
 - **Alat ukur diperiksa, bukan hanya ditulis.** `ukur-serah-terima-docs.mjs` memeriksa **blok `@kost48-state`** di [kerja/SERAH-TERIMA.md](kerja/SERAH-TERIMA.md) terhadap repo (HEAD, berkas yang ditunjuk, label gate) — berkas serah-terima yang basi lebih berbahaya daripada tidak ada; **detektor nomor baris** mencetak INFO di gate tanpa mengubah exit code (pelajaran T-05: angka yang tidak bisa ditutup tidak dijadikan pelanggaran).
@@ -94,6 +94,7 @@ Rincian khusus uang (DO-NOT-TOUCH, invariant, gate per-task): [produksi Bagian F
 - Pengaturan yang **ditolak** dan jangan ditawarkan lagi tanpa keputusan baru: pre-commit hook (ditinjau setelah B8), pasang R6 sebelum B8, naikkan plafon byte untuk satu berkas, **struktur 5 berkas doktrin dokumentasi proyek lain** — kontrak kedua (ATURAN-AI.md), antrean kedua (PEKERJAAN.md), router kedua (berkas README di akar docs/), atau paketnya sebagai satu kesatuan (R-1…R-4), dan **R-5/R-6** (definisinya di bawah). Alasan per butir: [ADAPTASI-DOKTRIN-DOCS](arsip/ADAPTASI-DOKTRIN-DOCS.md) §4.
 - **R-5** — berkas [kerja/SERAH-TERIMA.md](kerja/SERAH-TERIMA.md) adalah **potret, bukan antrean**: status pekerjaan tetap hanya di [ANTREAN.md](ANTREAN.md), tiap baris "belum selesai" menunjuk antrean atau berkas batas, dan R3 tetap berlaku.
 - **R-6** — **sensus dokumen tidak menjadi aturan tetap**: butuh mata manusia per berkas, jadi ia hidup sebagai langkah terjadwal dalam batch rombak + kartu audit bertanggal ([sensus 2026-10-07](arsip/sensus-dokumen-2026-10-07.md) adalah bentuknya).
+- **"Empat hal" vs "lima hal"** — aturan yang mengikat adalah **lima**: uang · flow/perilaku pengguna baru · hapus data · deploy/secret · keputusan penting yang sulit dibalik (AGENTS §4, §2 di atas, [default-dev §12](operations/default-dev.md#d4b-gate-12)). Versi "empat hal" hanya ada di **arsip beku** (ADAPTASI-DOKTRIN-DOCS A-5, PROMPT-SESI-BERIKUTNYA) dan tidak berlaku; arsip tidak disunting. Rinciannya di [register aturan](operations/default-dev.md#d4b-register).
 
 ## 9. Bentuk laporan
 
@@ -118,20 +119,7 @@ Status pelaksanaan (sudah/belum) dan status izin (boleh/tidak) **dua hal berbeda
 
 ## 11. Invariant & cara memeriksanya
 
-Angka **tidak ditulis** di sini — pakai perintahnya (Q11). Bila sebuah angka wajib muncul di laporan, tulis sebagai potret bertanggal.
-
-| Invariant | Cara memeriksa | Ambang lulus |
-|---|---|---|
-| Antrean tugas terbuka | hitung `- [ ]` di [ANTREAN.md](ANTREAN.md) §3 | sama dengan judul bagian itu |
-| Tugas selesai historis | hitung `- [x]` di `docs/history/**` + `docs/arsip/**` | tidak menurun tanpa penjelasan |
-| Gate domain uang/huni | `grep` pola `pretest:unit\|test:unit\|gate M04` di ANTREAN + berkas riwayat | tidak ada gate yang hilang |
-| Kebersihan diff | `git diff --check` | exit 0 sebelum commit dokumentasi |
-| Gate dokumen | `node scripts/check-docs.mjs` | exit 0 (atau `DILEWATI` yang dijelaskan) sebelum menutup batch dokumentasi |
-| Konservasi pemindahan | bandingkan SHA-256 berkas sebelum/sesudah | 100% identik, kecuali transformasi yang dicatat |
-| Kesesuaian berkas serah-terima | `node scripts/ukur-serah-terima-docs.mjs` | blok `@kost48-state` cocok dengan repo (HEAD, berkas yang ditunjuk ada, label gate benar); tanggal potret tidak lebih tua dari commit terakhir berkas tangga |
-| Register keputusan final | `node scripts/ukur-serah-terima-docs.mjs --keputusan` | setiap baris di [KEPUTUSAN-OWNER.md](KEPUTUSAN-OWNER.md) punya tanggal + sumber; **tidak ada** baris baru yang menghidupkan R-1…R-6 tanpa keputusan baru |
-
-**Exception ukuran berkas yang sudah disetujui:** aturan bisnis owner (mis. `docs/domain/ai.md`, `docs/domain/publik.md`) boleh melewati plafon rujukan bila punya daftar isi berjangkar; keputusan lama ARSIP-BATAS (24 Sep 2026) digantikan rencana rombak 2026-10-05.
+**Dipindahkan utuh 2026-10-22 (batch D6 DOCS-GEN2)** ke rumah verifikasinya: [default-dev §11](operations/default-dev.md#d4b-invariant) — tabel invariant + ambang lulus (antrean, gate uang, diff, gate dokumen, konservasi, serah-terima, register keputusan) dan exception ukuran berkas. Aturannya **tidak berubah**; tempatnya berpindah agar register aturan (D6) masuk tanpa menaikkan plafon 16 KB (preseden sama: §5 → `default-dev` §11, batch SERAH-SESI 2026-10-07).
 
 ## 12. Riwayat
 

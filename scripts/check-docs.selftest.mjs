@@ -34,10 +34,16 @@ const BERKAS = {
   "docs/PETA-KODE.md": BLOK + "# PETA-KODE\n\n## 1. Peta\n\nIsi.\n",
   "docs/ANTREAN.md":
     BLOK +
-    "# ANTREAN\n\n## 1. Antrean\n\nRujukan sah: `docs/KONTRAK.md` dan [KONTRAK](KONTRAK.md#1-aturan).\n\n- [ ] TUGAS-1 — contoh | Gate: tidak ada | checklist: kerja/TASK-AKTIF.md#checklist\n",
+    "# ANTREAN\n\n## 1. Antrean\n\nRujukan sah: `docs/KONTRAK.md` dan [KONTRAK](KONTRAK.md#1-aturan).\n\n- [ ] W-OPS-001 — contoh | Gate: tidak ada | checklist: kerja/TASK-AKTIF.md#checklist\n",
   "docs/kerja/TASK-AKTIF.md":
     "# TASK-AKTIF (pohon uji)\n\n<!-- checklist-otoritatif -->\n\n## Checklist\n\n<a id=\"checklist\"></a>\n\n- [ ] W-TNT-001 — contoh langkah\n",
   "docs/audit/index-cakupan.md": "# Indeks cakupan audit\n\nRujukan: `docs/KONTRAK.md`.\n",
+  "docs/id-registry.md":
+    "# ID-REGISTRY (pohon uji)\n\n## 2. Bentuk yang berlaku\n\n| Prefix | Untuk | Bentuk | Contoh |\n|---|---|---|---|\n| `W-` | pekerjaan | `W-<AREA>-NNN` | `W-OPS-001` |\n| `R` | aturan gate | `RNN` | `R12` |\n\n## 4. Alias lama\n\n| ID lama | Arti aslinya | Untuk objek baru pakai |\n|---|---|---|\n| `AO-xx` | label historis | `W-` |\n",
+  "docs/product/peran.md":
+    "# Peta peran (pohon uji)\n\n## 3. Matriks rute\n\n| Rute | Role |\n|---|---|\n| `/login` | PUBLIK |\n| `/dashboard` | ADMIN |\n\nSumber: `frontend/src/App.tsx`.\n",
+  "frontend/src/App.tsx":
+    "export function App() {\n  return (\n    <Routes>\n      <Route path=\"/login\" element={<Login />} />\n      <Route path=\"/dashboard\" element={<Dash />} />\n    </Routes>\n  );\n}\n",
 };
 
 function bangunPohon() {
@@ -47,6 +53,8 @@ function bangunPohon() {
     mkdirSync(dirname(p), { recursive: true });
     writeFileSync(p, isi, "utf8");
   }
+  // R16 butuh baseline tier. Cap diukur dari pohon uji yang bersih — bukan angka karangan.
+  jalankanGate(["--perbarui-tier", "--alasan=selftest: cap diukur dari pohon uji"]);
 }
 
 function tulis(rel, isi) {
@@ -63,12 +71,12 @@ function baca(rel) {
 // Sandbox menolak PIPA stdio pada child_process (EPERM) — pola yang sama dengan
 // scripts/ukur-kesegaran-docs.mjs. Karena itu keluaran dialihkan ke berkas lewat fd, TANPA pipa,
 // dan berkasnya dibaca setelah proses selesai. Tidak ada jalur `require`: skrip ini ESM.
-function jalankanGate() {
+function jalankanGate(tambahan = []) {
   const out = join(TREE, ".keluaran.txt");
   const fd = openSync(out, "w");
   let status = null;
   try {
-    const r = spawnSync(process.execPath, [GATE, TREE], { cwd: ROOT, stdio: ["ignore", fd, fd] });
+    const r = spawnSync(process.execPath, [GATE, TREE, ...tambahan], { cwd: ROOT, stdio: ["ignore", fd, fd] });
     status = r.status;
     if (r.error) return { status: null, keluaran: `galat spawn: ${r.error.code ?? r.error.message}` };
   } finally {
@@ -110,6 +118,12 @@ const KASUS = [
   ["R11", "R11 salinan berkas tangga", () => tulis("docs/salinan/AGENTS.md", "# Salinan AGENTS\n\nIsi.\n")],
   ["R12", "R12 checklist tanpa rujukan ANTREAN", () => tulis("docs/ANTREAN.md", baca("docs/ANTREAN.md").replace(" | checklist: kerja/TASK-AKTIF.md#checklist", ""))],
   ["R12", "R12 anchor checklist salah", () => tulis("docs/ANTREAN.md", baca("docs/ANTREAN.md").replace("kerja/TASK-AKTIF.md#checklist", "kerja/TASK-AKTIF.md#tidak-ada"))],
+  ["R13", "R13 emoji di tier-0", () => tulis("docs/KONTRAK.md", baca("docs/KONTRAK.md") + "\nStatus peluncuran \u{1F680}\n")],
+  ["R13", "R13 mojibake tanpa penanda", () => tulis("docs/KONTRAK.md", baca("docs/KONTRAK.md") + "\nTeks â€” rusak\n")],
+  ["R14", "R14 prefix ID asing", () => tulis("docs/KONTRAK.md", baca("docs/KONTRAK.md") + "\nXYZ-999\n")],
+  ["R15", "R15 rute tidak ada di App.tsx", () => tulis("docs/product/peran.md", baca("docs/product/peran.md") + "\n| `/tidak-ada` | PUBLIK |\n")],
+  ["R15", "R15 path frontend/ tidak ada", () => tulis("docs/product/peran.md", baca("docs/product/peran.md") + "\nSumber: `frontend/src/tidak-ada.tsx`.\n")],
+  ["R16", "R16 tier melewati cap", () => tulis("docs/product/besar.md", "# Berkas besar\n\n" + "x".repeat(2048) + "\n")],
 ];
 
 for (const [id, judul, suntik] of KASUS) {

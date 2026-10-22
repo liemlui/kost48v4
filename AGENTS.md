@@ -17,7 +17,7 @@
 
 - Prioritas: **penyederhanaan OWNER/ADMIN** — operasional penghuni, keuangan, dashboard, kejelasan dampak keputusan. Landasan bisnis: **IB Diploma Business Management** ([arah produk](docs/product/README.md)).
 - Teknis: **satu proses API NestJS dengan modul internal**; frontend React/Vite; tanpa rewrite domain. Modul terpisah/apps/worker (Fase MA) **ditunda** — jangan dibuat.
-- **Batas RAM LVE 512 MB adalah batas kerja.** Naik kuota bukan rekomendasi pertama; urutan diagnosis + ambang wajib ada di [produksi Bagian E](docs/operations/produksi.md#d4b-kapasitas).
+- **RAM LVE 512 MB = batas kerja**; naik kuota bukan rekomendasi pertama; diagnosis + ambang di [produksi Bagian E](docs/operations/produksi.md#d4b-kapasitas).
 - Produksi tercatat LIVE; status historis **bukan** sign-off produksi. Sisa Fase A: onboarding hunian/KTP, opening balance, cron, rotasi secret/PIN — gate-nya di [ANTREAN.md](docs/ANTREAN.md).
 
 ## 3. Peta dokumen (router)
@@ -60,7 +60,7 @@ Jangan membaca seluruh `docs/` sebagai orientasi; pilih lewat tabel di atas.
 | L | lintas modul / kontrak bersama | 18 | + kontrak | 15–30 ribu |
 | XL | arsitektur/schema/runtime besar | 20/tahap | bertahap | 10–25 ribu/tahap |
 
-Uang, auth, tombol kritis, style global, dan kontrak bersama menaikkan level. XL wajib rencana disetujui lebih dulu. Proksi biaya = **byte** (≈token×4) + jumlah berkas; baris bukan proksi yang sah.
+Uang, auth, tombol kritis, style global, kontrak bersama menaikkan level. XL wajib rencana disetujui. Proksi biaya = **byte** (≈token×4) + jumlah berkas; baris bukan proksi.
 
 ## 6. Batas baca (ringkas — rincian [KONTRAK §4](docs/KONTRAK.md))
 
@@ -69,6 +69,7 @@ Uang, auth, tombol kritis, style global, dan kontrak bersama menaikkan level. XL
 - Tidak dibaca rutin: `docs/arsip/**`, `docs/arsip/legacy/**`, `.docs-legacy/**`, `.audit-map/**`, `.design-audit/**` (snapshot & peta sesi lama — memuat salinan basi dokumen aturan, **bukan** sumber aturan), `reference/*`, `backend/src/generated/*`, `node_modules`, lockfile.
 - Hitung setiap berkas yang isinya masuk konteks. Handoff membawa tujuan, izin, perubahan, bukti, langkah berikutnya.
 - Memory hanya petunjuk — bukan lebih baru dari [ANTREAN.md](docs/ANTREAN.md). Token aktual tidak tersedia → pakai proksi berkas/byte; jangan mengarang angka kuota.
+- **Anggaran baca** per level (KB, token×4): XS 4–12 · S 12–28 · M 28–60 · L 60–120 · XL 40–100/tahap; catat `BACA: n/KB`, >20% di atas = satu baris alasan ([default-dev §12](docs/operations/default-dev.md#d4b-baca)).
 
 ## 7. Tahapan kerja & gate (ringkas — rincian gate G0–G5: [default-dev §11](docs/operations/default-dev.md))
 
@@ -110,6 +111,6 @@ Pisahkan implementasi lokal · verifikasi lokal · deployment · dampak runtime.
 - Owner menetapkan kebijakan; agen menerapkan stage yang **sudah** disetujui.
 - Aturan operasional dipelihara di berkas ini + [KONTRAK.md](docs/KONTRAK.md); antrean di [ANTREAN.md](docs/ANTREAN.md); riwayat di `docs/history/`; arsip beku di `docs/arsip/` + `.docs-legacy/`.
 - Jangan menduplikasi aturan ke setiap berkas; pointer diarahkan ke sini atau KONTRAK.
-- Gate dokumen: `node scripts/check-docs.mjs` (= `npm run check:docs`; wajib hijau sebelum menutup batch dokumentasi) — **12 aturan R1–R12** (gate **v2.1**). Yang paling mudah terlewat: **R6** rujukan backtick hantu (**v1.6**) · **R8** anchor mati, anchor "rapuh" dilaporkan sebagai INFO (**v1.7**) · **R9** nomor bagian ganda · **R10** judul H1 ganda · **R11** salinan berkas tangga di luar rumah kanonik (**v1.8–v2.0**) · **R12** ikatan ANTREAN↔checklist dokumen tugas (**v2.1**; catatan bertanggal dan zona `.design-audit`/`.docs-legacy`/`.audit-map` dikecualikan). Kekuatan dokumen diukur terpisah: `node scripts/ukur-kekuatan-docs.mjs` (13 pemeriksaan — termasuk **ratchet baris**, yang naik hanya dengan keputusan owner). Pagar dibuktikan bisa gagal: `node scripts/check-docs.selftest.mjs`.
+- Gate dokumen: `node scripts/check-docs.mjs` (= `npm run check:docs`; wajib hijau sebelum menutup batch dokumentasi) — **16 aturan R1–R16** (gate **v3.0**; daftar, cakupan, pengecualian, dan riwayat kalibrasi ada di kepala skrip). Kekuatan dokumen diukur terpisah: `node scripts/ukur-kekuatan-docs.mjs` (13 pemeriksaan — termasuk **ratchet baris**, naik hanya dengan keputusan owner). Pagar dibuktikan bisa gagal: `node scripts/check-docs.selftest.mjs`.
 - Stage yang belum diizinkan tidak dijalankan; ikuti checkpoint owner.
 - Aturan tertulis mengurangi risiko, bukan jaminan nol kerusakan: kontrol credential/DB, sandbox, review branch, dan backup perlu bukti teknis pada task tersendiri.

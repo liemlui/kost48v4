@@ -5,7 +5,7 @@
 
 > Berkas ini menggantikan `docs/ANTREAN.md` sejak batch B5 (2026-10-05). Ia memuat **antrean + gate saja**: tanpa aturan, tanpa bukti bertanggal. Aturan kerja ada di [AGENTS.md](../AGENTS.md) + [KONTRAK.md](KONTRAK.md); bukti bertanggal ada di [history/bukti-2026-10.md](arsip/bukti-2026-10.md); keputusan bisnis owner di [KEPUTUSAN-OWNER.md](KEPUTUSAN-OWNER.md).
 
-**Fakta** · Status: **aktif** · potret **2026-10-09** — ukur ulang: `node scripts/ukur-kekuatan-docs.mjs` (kesehatan antrean) + hitung `- [ ]` di §3 (ambang & invariant: [KONTRAK §11](KONTRAK.md)) — jangan percaya tanggal di berkas ini.
+**Fakta** · Status: **aktif** · potret **2026-10-22** — ukur ulang: `node scripts/ukur-kekuatan-docs.mjs` (kesehatan antrean) + hitung `- [ ]` di §3 (ambang & invariant: [default-dev §11](operations/default-dev.md#d4b-invariant)) — jangan percaya tanggal di berkas ini.
 
 ## 1. Cara pakai (untuk AI, baca ini dulu)
 
@@ -23,7 +23,7 @@ Daftar prioritas, penanggung jawab, dan kesiapan ada di [TASK-AKTIF](kerja/TASK-
 
 **BLOCKED (owner):** baris bertanda (owner) dan W-OWN-001..009/013 serta W-OPS-*/W-DATA-001 menunggu jawaban **P29–P32** di [TANYA-OWNER](kerja/TANYA-OWNER.md) (bukti UAT/sign-off · normalisasi visual & hak foto · akses server/DB · adopsi Mode Cepat). Default teraman sudah dijalankan; tidak ada baris yang diklaim selesai tanpa bukti.
 
-## 3. Task terbuka & gate (28 `[ ]`)
+## 3. Task terbuka & gate (27 `[ ]`)
 
 Format: **ID** — judul | **Gate** (verifikasi wajib sebelum `[x]`). (owner) = butuh data/keputusan owner.
 
@@ -75,9 +75,9 @@ Format: **ID** — judul | **Gate** (verifikasi wajib sebelum `[x]`). (owner) = 
 - [x] **W-OPS-015** - halaman `/checklist` memuat daftar data go-live (aset, stok, foto, kamar, KTP, keuangan, akun, konten) | **Gate:** konten ditinjau owner; deploy; render 390/1440 px; tanpa PII di halaman. **Bukti 22 Okt:** digabung ke `/cek` (checklist + data kurang + ketersediaan; `/okupansi` dialihkan), tanpa PII, build `swSyGU0OfDsh`. Sisa: tinjauan owner
 - [x] **W-OPS-017** (owner) - dump + cron harian + retensi 14 hari + satu uji restore | **Gate:** berkas dump + `gzip -t` + hitung 5 tabel di DB uji + DB uji dihapus; [runbook](operations/produksi.md#d4b-backup). **Bukti 20 Okt 2026:** dump 40 KB (gzip OK), cron terpasang, restore 62 tabel + 5 hitungan cocok, DB uji dihapus; run terjadwal pertama belum terlihat
 - [ ] **W-OPS-014** (owner) - konfirmasi apakah `uploads/` (foto kamar/bukti bayar) perlu dipindahkan dari server lama | **Gate:** jawaban owner + bukti path/aset; jangan salin data pengguna tanpa izin
-- [ ] **W-DOC-001** - tata ulang dokumen generasi kedua D0–D9 ([kontrak](kerja/TASK-DOCS-GEN2.md)): konstitusi ID + registry, peta peran, registry fitur, konsolidasi ≤30 berkas/≤400 KB, checklist di dokumen tugas, gate v3 | **Gate:** tiap batch D0–D9 punya bukti; gate hijau saat batch ditutup; keputusan [keputusan program](KEPUTUSAN-OWNER.md); baseline [inventaris 2026-10-20](arsip/inventaris-docs-2026-10-20.md) | checklist: kerja/TASK-DOCS-GEN2.md#checklist
+- [x] **W-DOC-001** - tata ulang dokumen generasi kedua D0–D9 ([kontrak arsip](arsip/TASK-DOCS-GEN2.md)): konstitusi ID + registry, peta peran, registry fitur, checklist di dokumen tugas, gate v3 | **Gate:** tiap batch D0–D9 punya bukti; gate hijau saat batch ditutup. **Bukti 22 Okt:** gate v3.0 R1–R16 BERSIH, selftest 21/21, register default-dev §13, anggaran baca §12a; gap ≤30 berkas = keputusan owner
 
-**Rekap (potret 2026-10-22):** 28 terbuka + 17 selesai = 45 baris.
+**Rekap (potret 2026-10-22):** 27 terbuka + 18 selesai = 45 baris.
 
 
 ---

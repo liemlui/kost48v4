@@ -1,0 +1,29 @@
+{
+  "tanggal": "2026-10-22",
+  "alasan": "Penutupan D9 (2026-10-22): baseline R16 diukur pada keadaan akhir batch D6-D9; catatan bertanggal (T4) dikeluarkan dari cap karena bertambah oleh bukti baru. Baseline antara D8 superseded.",
+  "tier": {
+    "T0": {
+      "cap": 98665,
+      "berkas": 5
+    },
+    "T1": {
+      "cap": 37839,
+      "berkas": 5
+    },
+    "T2": {
+      "cap": 501335,
+      "berkas": 12
+    },
+    "T3": {
+      "cap": 117610,
+      "berkas": 8
+    },
+    "T4": {
+      "berkas": 6
+    },
+    "T9": {
+      "cap": 106,
+      "berkas": 1
+    }
+  }
+}
