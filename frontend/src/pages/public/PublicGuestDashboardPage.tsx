@@ -468,7 +468,7 @@ export default function PublicGuestDashboardPage() {
         <div className="gx-hero-body">
           <p className="gx-hero-eyebrow">Jalan Hikmah V No. 48 - Surabaya Barat</p>
           <h1 className="gx-hero-title">KOST48 Surabaya</h1>
-          <p className="gx-hero-headline">Kost bersih &amp; aman dekat Pakuwon Mall</p>
+          <p className="gx-hero-headline">Kost bersih dan aman dekat Pakuwon Mall</p>
           {/* CLS (audit 15 Sep): teks penuh dirender tak terlihat sebagai ruang-terpesan, sedangkan
               teks yang mengetik diposisikan absolut di atasnya — tinggi hero tidak berubah tiap karakter.
               Salinan `visually-hidden` menjadi sumber teks bagi pembaca layar; `aria-label` pada <p>
@@ -511,13 +511,13 @@ export default function PublicGuestDashboardPage() {
           <div className="gx-hero-cta">
             {availabilityState === 'available' || availabilityState === 'loading' || availabilityState === 'error' ? (
               <>
-                <a className="gx-hero-btn-primary" href="#kamar"><span aria-hidden="true">🛏️</span> Lihat Kamar Tersedia →</a>
+                <a className="gx-hero-btn-primary" href="#kamar"><span aria-hidden="true">🛏️</span> Lihat kamar tersedia →</a>
                 <a className="gx-hero-btn-ghost" href={buildWhatsAppUrl('Halo Admin KOST48, saya ingin tanya ketersediaan kamar.')} target="_blank" rel="noreferrer"><span aria-hidden="true">💬</span> WhatsApp Admin</a>
               </>
             ) : (
               <>
                 <a className="gx-hero-btn-primary" href={buildWhatsAppUrl('Halo Admin KOST48, kabari saya saat ada kamar tersedia.')} target="_blank" rel="noreferrer"><span aria-hidden="true">🔔</span> Kabari saya saat tersedia</a>
-                <a className="gx-hero-btn-ghost" href="#kamar"><span aria-hidden="true">📋</span> Lihat seluruh kamar</a>
+                <a className="gx-hero-btn-ghost" href="#kamar"><span aria-hidden="true">📋</span> Lihat katalog kamar</a>
               </>
             )}
           </div>
@@ -584,7 +584,7 @@ export default function PublicGuestDashboardPage() {
                   </div>
                 </div>
               )}
-              <a className="gx-btn-primary" href="/rooms"><span aria-hidden="true">🔍</span> Lihat Katalog Kamar</a>
+              <a className="gx-btn-primary" href="/rooms"><span aria-hidden="true">🔍</span> Lihat katalog kamar</a>
               <span className="text-muted small mt-2 d-block">💡 Cukup DP 30% untuk amankan kamar — sisanya saat check-in.</span>
             </div>
             <div className="gx-avail-steps">
@@ -642,10 +642,10 @@ export default function PublicGuestDashboardPage() {
           <div className="gx-market-head">
             <div className="gx-section-head gx-reveal">
               <div className="gx-label">Pilih kamarmu</div>
-              <h2>Pilih kamar yang benar-benar sesuai, bukan sekadar yang ada.</h2>
+              <h2>Katalog kamar KOST48.</h2>
               <p>Filter AC/kipas, kamar mandi dalam/luar, dan harga. Bandingkan 3 kamar sekaligus — baru booking yang benar-benar cocok.</p>
             </div>
-            <Link to="/rooms" className="gx-btn-outline">Lihat Katalog Lengkap →</Link>
+            <Link to="/rooms" className="gx-btn-outline">Lihat katalog kamar →</Link>
           </div>
 
           {/* Preview card 4 kamar — teaser, bukan full catalog */}
@@ -661,7 +661,7 @@ export default function PublicGuestDashboardPage() {
               <p>Seluruh kamar KOST48 saat ini terisi. Kabari kami agar kamu jadi yang pertama tahu saat ada kamar kosong.</p>
               <div className="gx-home-waitlist-actions">
                 <a href={buildWhatsAppUrl('Halo Admin KOST48, kabari saya saat ada kamar tersedia.')} className="gx-btn gx-btn-whatsapp" target="_blank" rel="noopener noreferrer">Kabari saya via WhatsApp</a>
-                <Link to="/rooms" className="gx-btn-outline">Lihat seluruh kamar</Link>
+                <Link to="/rooms" className="gx-btn-outline">Lihat katalog kamar</Link>
               </div>
             </div>
           ) : rooms.length > 0 ? (
@@ -872,7 +872,7 @@ export default function PublicGuestDashboardPage() {
         <section className="gx-keunggulan-section" id="ulasan" aria-label="Ulasan penghuni">
           <Container fluid="xl">
             <div className="gx-section-head gx-section-head-center">
-              <div className="gx-label">Belum Ada Ulasan</div>
+              <div className="gx-label">Ulasan penghuni</div>
               <h2>Belum ada ulasan yang ditampilkan.</h2>
               <p>Belum ada ulasan dari penghuni terverifikasi. Saat kamu sudah tinggal, kamu bisa memberikan penilaian lewat portal penghuni — membantu calon penghuni lain lebih percaya.</p>
             </div>
@@ -969,7 +969,7 @@ export default function PublicGuestDashboardPage() {
         <Container fluid="xl">
           <div className="gx-section-head">
             <div className="gx-label">Sebelum bayar</div>
-            <h2 id="gx-guarantee-title">Empat hal yang sudah tertulis, bukan janji lisan.</h2>
+            <h2 id="gx-guarantee-title">Hal-hal yang sudah tertulis, bukan janji lisan.</h2>
             <p>Semua poin di bawah berlaku untuk seluruh kamar dan tercantum juga di halaman panduan.</p>
           </div>
           <div className="gx-guarantee-grid">
@@ -983,7 +983,7 @@ export default function PublicGuestDashboardPage() {
           </div>
           <div className="gx-guarantee-actions">
             <Link to="/panduan" className="gx-btn-outline">Baca aturan &amp; panduan lengkap</Link>
-            <Link to="/rooms" className="gx-btn-primary"><span aria-hidden="true">🔍</span> Lihat kamar tersedia</Link>
+            <Link to="/rooms" className="gx-btn-primary"><span aria-hidden="true">🔍</span> Lihat katalog kamar</Link>
           </div>
         </Container>
       </section>
@@ -1003,7 +1003,7 @@ export default function PublicGuestDashboardPage() {
               </address>
             </div>
             <div className="gx-final-actions">
-              <Link to="/rooms" className="gx-btn-primary"><span aria-hidden="true">🔍</span> Lihat Pilihan Kamar</Link>
+              <Link to="/rooms" className="gx-btn-primary"><span aria-hidden="true">🔍</span> Lihat katalog kamar</Link>
               <a className="gx-btn-outline" href={officialKost48Location.whatsappUrl} target="_blank" rel="noreferrer"><span aria-hidden="true">💬</span> Chat WhatsApp</a>
             </div>
           </div>

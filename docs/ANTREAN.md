@@ -33,7 +33,7 @@ Format: **ID** — judul | **Gate** (verifikasi wajib sebelum `[x]`). (owner) = 
 - [ ] **W-OWN-004** - bukti eksekusi: tiga crawl tanpa skip, dua state TENANT, viewport/Axe, sign-off | **Gate:** crawl tuntas, screenshot/trace bebas PII, sign-off AO-14
 - [ ] **W-OWN-002** - lima persona UAT non-personal dengan role/relasi/state terverifikasi | **Gate:** persona TENANT aktif + verifikasi ledger/DoD
 - [ ] **W-OWN-003** - crawl OWNER/ADMIN/STAFF setelah ledger UAT dan AO-03 terverifikasi | **Gate:** tiga role dieksekusi, 0 skip; exit 0 skrip saja belum cukup
-- [ ] **W-OWN-006** - PARSIAL: trust 3+2, ikon semantik, FAQ sentence case selesai; kalibrasi copy homepage + sentence case label di-commit `8aa0e975` **apa adanya tanpa build/test dan tanpa verifikasi visual** | **Gate:** polish copy/validasi hierarchy homepage sebelum sign-off AO-14
+- [ ] **W-OWN-006** (owner: sign-off AO-14) - trust 3+2, ikon semantik, FAQ sentence case selesai; **22 Okt:** copy + hierarki homepage dipoles (CTA katalog seragam, h2 katalog, "hal-hal tertulis"), render 390/1440 0 overflow | **Gate:** sign-off AO-14 setelah tinjauan owner
 - [ ] **W-OWN-007** - PARSIAL: inventaris aset publik selesai; sisa butuh keputusan owner | **Gate:** keputusan owner (hak pakai foto, keseragaman aspek, izin optimasi)
 - [ ] **W-OWN-008** - sisa lokal selesai; UAT desktop OWNER 1440 px + visual regression masih BLOCKED | **Gate:** UAT + visual regression + sign-off AO-14
 - [ ] **W-OWN-009** - normalisasi sistem visual/terminologi Owner setelah review AO-20; **label filter sudah diseragamkan "Rating Tertinggi"** (22 Okt: `PublicGuestDashboardPage.tsx`; sisa normalisasi visual/terminologi menunggu review AO-20) | **Gate:** perubahan AppLayout dikoordinasikan
