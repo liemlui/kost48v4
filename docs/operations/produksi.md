@@ -90,7 +90,7 @@ Diatur di cPanel → Setup Node.js App → Environment Variables:
 | `AUTO_OPS_ENABLED` | `false` (rencana) | Passenger idle → timer in-process tak andal |
 | `AUTO_OPS_CRON_TOKEN` | acak (rencana) | membuka `POST /api/auto-ops/cron` |
 
-Di dalam `.env` app root: `CORS_ORIGIN`, `FRONTEND_URL`, `KTP_ACTIVATION_GATE_ENABLED=true`, `PUBLIC_ONLINE_BOOKING_ENABLED=false`. Ingat: `.env` **kalah** dari env var cPanel.
+Di dalam `.env` app root: `CORS_ORIGIN`, `FRONTEND_URL`, `PUBLIC_ONLINE_BOOKING_ENABLED=false`. Ingat: `.env` **kalah** dari env var cPanel. `KTP_ACTIVATION_GATE_ENABLED` tidak lagi dibaca kode — KTP **tidak** memblokir check-in sejak keputusan owner 19 Okt 2026 (lihat [Bagian D](#d4b-ktp)).
 
 ## 5. Operasional harian
 
@@ -824,7 +824,6 @@ DATABASE_URL="...database produksi baru..."
 JWT_SECRET="...acak dan kuat..."
 CORS_ORIGIN="https://domain-anda"
 FRONTEND_URL="https://domain-anda"
-KTP_ACTIVATION_GATE_ENABLED=true
 AUTO_OPS_ENABLED=false
 AUTO_OPS_CRON_TOKEN="...acak dan kuat..."
 TUYA_ACCESS_KEY="...Tuya Access ID..."
@@ -1015,19 +1014,18 @@ Jangan reset database, menjalankan seed, atau memakai `db push` pada produksi ya
 
 
 <a id="d4b-ktp"></a>
-## Bagian D — Verifikasi gate KTP
+## Bagian D — KTP pasca-check-in (dulu: verifikasi gate KTP)
 
-#### F.1 Verifikasi gerbang KTP produksi (tanpa menampilkan secret)
+#### F.1 Periksa perilaku KTP produksi (tanpa menampilkan secret)
 
-**Latar:** `KTP_ACTIVATION_GATE_ENABLED` **default OFF**; runbook deploy menandainya WAJIB di produksi. Bila OFF, aktivasi kamar dapat lolos **tanpa KTP terverifikasi** (bertentangan dengan maksud UU PDP dan temuan D-17). Keputusan owner 23 Sep 2026: **ditunda dengan risiko diterima sementara**, wajib ditinjau sebelum onboarding penghuni nyata ([KEPUTUSAN-OWNER](../KEPUTUSAN-OWNER.md)).
+**Latar (berubah — keputusan owner 19 Okt 2026, P25=a/P26=a; ditegakkan 22 Okt 2026 oleh W-TNT-003):** KTP **tidak memblokir check-in maupun booking**. Flag env `KTP_ACTIVATION_GATE_ENABLED` dan saklar `OperationalSetting.ktpVerificationGateEnabled` **tidak lagi dibaca untuk memblokir** — keduanya ditinggalkan demi kompatibilitas data, dan label di Pengaturan menyebutnya **informasi saja**. Kewajiban KTP dikejar **sesudah** check-in: pengingat otomatis tiap **7 hari** ke penghuni (berhenti sendiri saat KTP VERIFIED) + eskalasi ke OWNER/ADMIN setelah **hari ke-8** (`KtpReminderSweepService`, dapat dipicu manual `POST /api/auto-ops/run/ktp-reminders`). Verifikasi KTP tetap **OWNER+ADMIN** (default P28; selisih F-13 tetap tercatat). Rujukan aturan: [hunian §KTP](../domain/hunian.md).
 
 **Prasyarat:** izin akses cPanel/lingkungan aplikasi. Jangan menampilkan nilai secret lain; nilai `true`/`false` pada flag ini bukan secret.
 
-1. **Periksa keberadaan & nilai** — cPanel → Environment Variables aplikasi Node.js (atau `.env` produksi, hanya baca). Catat: ada/tidak, `true`/`false`.
-2. **Bila belum ada atau `false`** — set `KTP_ACTIVATION_GATE_ENABLED=true`, lalu restart aplikasi mengikuti prosedur redeploy (§G/§J). Jangan mengubah env lain pada langkah ini.
-3. **Bukti** — tanggal, nama pemeriksa, status sebelum/sesudah, tanpa screenshot yang memuat secret.
-4. **Uji perilaku** — jalankan di UAT/DEV: aktivasi kamar atau approve booking untuk tenant tanpa KTP terverifikasi **harus DITOLAK**. **Jangan** membuat tenant/booking uji di produksi; bila uji hanya bisa di produksi, jangan lakukan dan tulis **BELUM TERBUKTI**.
-5. **Tindak lanjut** — catat hasil di [ANTREAN](../ANTREAN.md) antrean #1. Bila tetap ditunda, tegaskan risiko dan syarat peninjauan sebelum onboarding penghuni nyata.
+1. **Periksa nilai flag (informasi saja)** — cPanel → Environment Variables aplikasi Node.js (atau `.env` produksi, hanya baca). Catat: ada/tidak, `true`/`false`. Nilai apa pun **tidak** mengubah perilaku check-in.
+2. **Uji perilaku di UAT/DEV** — (a) check-in/aktivasi kamar untuk tenant **tanpa** KTP harus **BERHASIL** (tidak lagi ditolak); (b) pengingat KTP muncul untuk penghuni yang punya akun portal dan **berhenti** setelah KTP diverifikasi; (c) pesan pengingat tidak memuat NIK/foto/alamat. **Jangan** membuat tenant/booking uji di produksi; bila uji hanya bisa di produksi, jangan lakukan dan tulis **BELUM TERBUKTI**.
+3. **Bukti** — tanggal, nama pemeriksa, hasil tiga butir di atas, tanpa screenshot yang memuat secret/NIK/foto.
+4. **Tindak lanjut** — catat hasil di baris **W-TNT-003** [ANTREAN](../ANTREAN.md) §3.
 
 
 <a id="d4b-kapasitas"></a>

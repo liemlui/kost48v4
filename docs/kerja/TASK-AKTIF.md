@@ -128,7 +128,7 @@ Bentuk 7 bagian mengikuti konvensi [ANTREAN §3](../ANTREAN.md) butir A-2 — **
 | 1. Satu helper hitung deposit + surcharge | belum | unit test 3 kanal menghasilkan angka sama |
 | 2. DTO + service + UI checklist check-in | belum | `occupantCount`/`hasPet` terisi; deposit tersimpan |
 | 3. Paritas booking portal | belum | booking portal menagih surcharge + deposit hewan |
-| 4. Status KTP + pengingat berulang | belum | 4 keadaan; pengingat berhenti saat verified |
+| 4. Status KTP + pengingat berulang | **selesai 22 Okt** | 4 keadaan + pengingat 7 hari berhenti saat VERIFIED (`ktp-reminder.test.js` 7 test) |
 | 5. Runbook KTP diperbarui (F-14) | belum | tidak ada lagi langkah “wajib gate ON” |
 | 6. PWA aktif + tombol WA manual | belum | push diterima 1 perangkat; tombol membuka wa.me terisi |
 | 7. Bukti hitung + idempotensi | belum | check-in dua kali tidak menambah deposit |
@@ -191,13 +191,15 @@ Bentuk 7 bagian mengikuti konvensi [ANTREAN §3](../ANTREAN.md) butir A-2 — **
 
 ### 6. Catatan penyimpangan
 
-Belum ada. Setiap penyimpangan dari kontrak ini dicatat di sini pada sesi yang sama.
+- **2026-10-22 (W-TNT-003).** Gate KTP dihapus dari **dua** tempat, bukan satu: `stays.service.ts` `create` (check-in/aktivasi) **dan** `tenant-bookings.service.ts` (booking portal). Alasan: keputusan P25=a berbunyi “pengingat saja, **tanpa memblokir layanan**”, dan satu-satunya saklar KTP berlaku untuk keduanya — mempertahankan blokir booking akan membuat keputusan itu tidak ditegakkan kode. Kolom `OperationalSetting.ktpVerificationGateEnabled` **tidak dihapus** (tanpa migrasi); label di Pengaturan diubah menjadi “informasi saja” supaya tidak menjanjikan blokir yang tidak ada.
+- **2026-10-22 (W-TNT-003).** Eskalasi hari ke-8 dipilih sebagai satu notifikasi sekali ke seluruh OWNER/ADMIN aktif (dedupe judul+Stay), bukan daftar berkala: P26 hanya menyebut “eskalasi ke OWNER pada hari ke-8”. Daftar “KTP belum lengkap” di dashboard admin **sudah ada** lewat filter `/tenants?ktpStatus=PENDING_REVIEW` dan kartu `ktp-review` di `DashboardAdmin`.
 
 ### 7. Riwayat
 
 | Tanggal | Perubahan |
 |---|---|
 | 2026-10-19 | Dibuat dari instruksi owner: checklist hewan saat check-in agar deposit otomatis, aturan jumlah isi penghuni, KTP opsional saat check-in lalu wajib dilengkapi dengan notifikasi, PWA aktif, pengingat WA manual satu klik. Konsekuensi KTP menunggu P25/P26. Belum ada kode ditulis. |
+| 2026-10-22 | **W-TNT-003 selesai (lokal):** blokir gate KTP dihapus dari check-in + booking; `KtpReminderSweepService` mengirim pengingat tiap 7 hari (dedupe per gelombang, berhenti saat VERIFIED) + eskalasi OWNER/ADMIN hari ke-8, tanpa NIK/foto; pemicu manual `POST /api/auto-ops/run/ktp-reminders`; runbook F-14 (produksi Bagian D) diperbarui. Bukti: `ktp-reminder.test.js` (7 test) + backend 198/198, frontend 311/311, `tsc` FE exit 0, `check-docs` BERSIH. **Belum**: uji runtime push di perangkat + verifikasi data KTP produksi. |
 
 
 <a id="d4f-sinkron"></a>
@@ -243,7 +245,7 @@ Bentuk 7 bagian mengikuti konvensi [ANTREAN §3](../ANTREAN.md) butir A-2. Statu
 | **F-11** | Check-in tidak memblokir deposit belum lunas; yang dicek hanya invoice sewa PAID | `stays.service.ts` `create` | Deposit bisa tertagih belakangan | S | tidak (perbaiki di follow-up) |
 | **F-12** | Walk-in check-in tidak punya `occupantCount`/`hasPet` di DTO meski kolomnya ada | `stay.dto.ts` | Akar keluhan owner: deposit hewan/surcharge tidak bisa otomatis | M | tidak |
 | **F-13** | Akses verifikasi KTP: aturan dossier 18 menyebut **verifikasi OWNER**, controller memasang `@Roles(OWNER, ADMIN)` | `tenants.controller.ts` vs [operasional.md](../domain/hunian.md#d4c-operasional) | Wewenang verifikasi PII tidak konsisten; audit bisa mencatat ADMIN sebagai verifikator | XS | **ya — putuskan OWNER-only atau OWNER+ADMIN** |
-| **F-14** | Runbook go-live/produksi masih **mewajibkan** `KTP_ACTIVATION_GATE_ENABLED=true` dan menguji “aktivasi tanpa KTP → DITOLAK”; keputusan 19 Okt 2026 menghapus blokir itu | [produksi Bagian C](../operations/produksi.md#d4b-cpanel), [produksi Bagian D](../operations/produksi.md#d4b-ktp), [produksi.md](../operations/produksi.md) | Operator berikutnya bisa menyalakan gate dan memblokir check-in sesuai kebijakan lama | S | tidak — ikut task KTP (F-14) |
+| **F-14** | Runbook go-live/produksi masih **mewajibkan** `KTP_ACTIVATION_GATE_ENABLED=true` dan menguji “aktivasi tanpa KTP → DITOLAK”; keputusan 19 Okt 2026 menghapus blokir itu | [produksi Bagian C](../operations/produksi.md#d4b-cpanel), [produksi Bagian D](../operations/produksi.md#d4b-ktp), [produksi.md](../operations/produksi.md) | Operator berikutnya bisa menyalakan gate dan memblokir check-in sesuai kebijakan lama | S | **selesai 22 Okt 2026** — runbook C/D ditulis ulang: gate tidak lagi dibaca, uji wajib = check-in **berhasil** tanpa KTP + pengingat berhenti saat VERIFIED |
 | **F-15** | FAQ seed masih menulis “1–2 orang”, dan baris FAQ di DB produksi kemungkinan sudah ter-seed dengan teks lama | `backend/src/modules/faqs/faqs.service.ts` (`DEFAULT_FAQS`) | Panduan tenant yang sudah dikoreksi bisa tetap dibaca bersama FAQ lama; mengubah kode tidak memperbarui baris DB | S | **selesai 2026-10-21** — seed = D-24; baris DB diedit admin lewat menu FAQ (seed idempoten per pertanyaan, tidak menimpa) |
 | **F-16** | Copy publik memakai “1–2 orang” dan “maks 2 orang” | `frontend/src/data/officialKost48Content.ts`, `frontend/src/components/public/GuestPreferenceWizard.tsx` | Bertentangan dengan D-24 (STANDARD 2+2 / LARGE 4+2) di permukaan publik | XS | **selesai 2026-10-21** — kedua berkas memakai STANDARD 2/4 dan LARGE 4/6 |
 | **F-17** | `docs/domain/hunian.md` §Aturan & Panduan Tenant (2026-06-17) masih memuat deposit Rp300.000, maksimal 2 orang, denda merokok Rp200.000, dan aturan hewan versi lama | `docs/domain/hunian.md` | Salinan bertanggal yang bisa dipakai ulang sebagai aturan paralel; bukan aturan kanonik | M | **ditutup sebagai ditandai** — banner “Salinan bertanggal” hidup (commit `68766d98`); aturan bisnis tidak diubah |
@@ -457,8 +459,8 @@ Butir di bawah **bukan** antrean aktif — sengaja **tanpa kotak `[ ]` dan tanpa
 - [ ] Deposit hewan & surcharge dihitung otomatis; test 3 kanal
 
 ### W-TNT-003 — KTP-PASCA-CHECKIN
-- [ ] KTP tidak memblokir check-in; status 4 keadaan + pengingat berulang
-- [ ] Gate lama tidak memblokir; akses verifikasi tidak berubah (P28)
+- [x] KTP tidak memblokir check-in; status 4 keadaan + pengingat berulang
+- [x] Gate lama tidak memblokir; akses verifikasi tidak berubah (P28)
 
 ### W-TNT-004 — NOTIF-PWA-WA
 - [ ] PWA push aktif + tombol WA manual; tanpa API dan tanpa NIK

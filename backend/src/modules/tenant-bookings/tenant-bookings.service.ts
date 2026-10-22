@@ -1080,20 +1080,9 @@ if (error instanceof Prisma.PrismaClientKnownRequestError) {
       throw new NotFoundException('Tenant tidak ditemukan atau sudah nonaktif');
     }
 
-    // F3-17: gate aktivasi — owner toggle di Settings → Operational.
-    // DB prioritas, env KTP_ACTIVATION_GATE_ENABLED sebagai fallback.
-    const ktpGateEnabled =
-      (await this.prisma.operationalSetting.findUnique({
-        where: { id: 1 },
-        select: { ktpVerificationGateEnabled: true },
-      }))?.ktpVerificationGateEnabled ??
-      String(process.env.KTP_ACTIVATION_GATE_ENABLED ?? 'false').toLowerCase() === 'true';
-    if (ktpGateEnabled && tenant.ktpVerifiedAt == null) {
-      throw new ConflictException(
-        'KTP tenant belum diverifikasi. Unggah & verifikasi KTP sebelum melakukan booking (gate onboarding).',
-      );
-    }
-
+    // W-TNT-003 (keputusan owner 19 Okt 2026 — P25=a): booking TIDAK lagi diblokir status
+    // KTP. Gate lama `ktpVerificationGateEnabled` berhenti memblokir layanan; kewajiban
+    // KTP dikejar lewat pengingat berulang setelah check-in (KtpReminderSweepService).
     return { tenantId, checkInDate, plannedCheckOutDate, tenant };
   }
 

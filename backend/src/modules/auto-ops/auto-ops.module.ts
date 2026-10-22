@@ -7,6 +7,7 @@ import { RenewalSweepService } from './sweeps/renewal-sweep.service';
 import { AccountingSweepService } from './sweeps/accounting-sweep.service';
 import { MaintenanceSweepService } from './sweeps/maintenance-sweep.service';
 import { AnnouncementSweepService } from './sweeps/announcement-sweep.service';
+import { KtpReminderSweepService } from './sweeps/ktp-reminder-sweep.service';
 import { AccountingModule } from '../accounting/accounting.module';
 import { NotificationsModule } from '../notifications/notifications.module';
 import { DepositLedgerModule } from '../deposit-ledger/deposit-ledger.module';
@@ -25,6 +26,7 @@ import { LoyaltyModule } from '../loyalty/loyalty.module';
     AccountingSweepService,
     MaintenanceSweepService,
     AnnouncementSweepService,
+    KtpReminderSweepService,
   ],
   exports: [
     AutoOpsService,

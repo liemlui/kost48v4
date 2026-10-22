@@ -946,11 +946,11 @@ export function TariffSettingsPanel() {
             <Form.Check
               type="switch"
               id="ktp-gate-toggle"
-              label="Wajibkan verifikasi KTP sebelum check-in & booking (gate UU PDP)"
+              label="Tandai kebijakan KTP wajib (informasi saja — TIDAK memblokir check-in/booking)"
               checked={form.ktpVerificationGateEnabled ?? false}
               onChange={(e) => set('ktpVerificationGateEnabled', e.target.checked)}
             />
-            <Form.Text muted>Aktifkan setelah onboarding KTP siap. Tenant yang KTP-nya belum diverifikasi akan ditolak saat check-in atau booking.</Form.Text>
+            <Form.Text muted>Sejak 19 Okt 2026 KTP tidak lagi menjadi penghalang masuk. Penghuni diingatkan otomatis tiap 7 hari sampai KTP terverifikasi (pengingat berhenti sendiri); admin/owner menerima eskalasi setelah hari ke-8.</Form.Text>
           </Col>
           <Col xs={12}><hr className="my-1" /><p className="text-muted small mb-0">Email (Brevo)</p></Col>
           <Col md={6}>

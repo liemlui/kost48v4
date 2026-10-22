@@ -165,23 +165,11 @@ export class StaysService {
       }
     }
 
-    // F3-17: gate aktivasi kamar — owner bisa toggle di Settings → Operational.
-    // DB prioritas, env KTP_ACTIVATION_GATE_ENABLED sebagai fallback (backward compat).
-    const ktpGateEnabled =
-      (await this.prisma.operationalSetting.findUnique({
-        where: { id: 1 },
-        select: { ktpVerificationGateEnabled: true },
-      }))?.ktpVerificationGateEnabled ??
-      String(process.env.KTP_ACTIVATION_GATE_ENABLED ?? "false").toLowerCase() === "true";
-    if (
-      ktpGateEnabled &&
-      (tenant as { ktpVerifiedAt: Date | null }).ktpVerifiedAt == null
-    ) {
-      throw new ConflictException(
-        "KTP tenant belum diverifikasi. Unggah & verifikasi KTP sebelum aktivasi kamar (gate UU PDP/onboarding).",
-      );
-    }
-
+    // W-TNT-003 (keputusan owner 19 Okt 2026 — P25=a, P26=a): KTP TIDAK memblokir
+    // check-in/aktivasi kamar. Gate lama `ktpVerificationGateEnabled` berhenti menjadi
+    // penghalang masuk; kewajiban KTP dikejar sesudahnya lewat pengingat berulang 7 hari
+    // (KtpReminderSweepService) yang berhenti sendiri saat KTP terverifikasi.
+    // Verifikasi KTP tetap OWNER+ADMIN (default P28; selisih F-13 tetap terbuka).
     const room = await this.prisma.room.findUnique({
       where: { id: dto.roomId },
     });

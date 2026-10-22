@@ -10,6 +10,7 @@ import { RenewalSweepService } from './sweeps/renewal-sweep.service';
 import { AccountingSweepService } from './sweeps/accounting-sweep.service';
 import { MaintenanceSweepService } from './sweeps/maintenance-sweep.service';
 import { AnnouncementSweepService } from './sweeps/announcement-sweep.service';
+import { KtpReminderSweepService } from './sweeps/ktp-reminder-sweep.service';
 
 type AutoOpsRunResult = {
   expiredBookings: number;
@@ -26,6 +27,7 @@ type AutoOpsRunResult = {
   rentRecognition?: unknown;
   acCleaning?: unknown;
   journalReconciliation?: unknown;
+  ktpReminders?: unknown;
 };
 
 @Injectable()
@@ -43,6 +45,7 @@ export class AutoOpsService implements OnModuleInit, OnModuleDestroy {
     private readonly accountingSweep: AccountingSweepService,
     private readonly maintenanceSweep: MaintenanceSweepService,
     private readonly announcementSweep: AnnouncementSweepService,
+    private readonly ktpReminderSweep: KtpReminderSweepService,
   ) {}
 
   private async loadEnabled(): Promise<boolean> {
@@ -198,6 +201,8 @@ export class AutoOpsService implements OnModuleInit, OnModuleDestroy {
     const accountingAutoClose = await this.accountingSweep.runAccountingAutoClose(options);
     const notificationPruning = await this.accountingSweep.runNotificationPruning(options);
     const announcementDispatch = await this.announcementSweep.sweepAnnouncementDispatch();
+    // W-TNT-003: pengingat KTP 7 hari berulang, berhenti saat terverifikasi.
+    const ktpReminders = await this.ktpReminderSweep.runKtpReminders(options);
     const pushDispatch = await this.maintenanceSweep.runPushDispatch(options);
     return {
       expiredBookings: bookingResult.expiredStayIds.length,
@@ -214,6 +219,7 @@ export class AutoOpsService implements OnModuleInit, OnModuleDestroy {
       pushDispatch,
       acCleaning,
       journalReconciliation,
+      ktpReminders,
     };
   }
 
@@ -305,5 +311,10 @@ export class AutoOpsService implements OnModuleInit, OnModuleDestroy {
 
   async runPushDispatch(options: { actorUserId?: number | null; source?: string } = {}) {
     return this.maintenanceSweep.runPushDispatch(options);
+  }
+
+  // W-TNT-003: pengingat KTP pasca-check-in (pengingat saja, tanpa memblokir layanan).
+  async runKtpReminders(options: { actorUserId?: number | null; source?: string; now?: Date } = {}) {
+    return this.ktpReminderSweep.runKtpReminders(options);
   }
 }

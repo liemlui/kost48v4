@@ -202,4 +202,12 @@ export class AutoOpsController {
   async runReferralRewards(@CurrentUser() user: CurrentUserPayload) {
     return { message: 'AutoOps reward referral berhasil dijalankan', data: await this.autoOpsService.runReferralRewards({ actorUserId: user.id, source: 'MANUAL_REFERRAL_REWARDS_RUN' }) };
   }
+
+  // W-TNT-003: trigger manual pengingat KTP pasca-check-in (UAT/ops).
+  @Post('run/ktp-reminders')
+  @ApiOperation({ summary: 'Trigger pengingat KTP pasca-check-in — OWNER/ADMIN' })
+  @Roles(UserRole.OWNER, UserRole.ADMIN)
+  async runKtpReminders(@CurrentUser() user: CurrentUserPayload) {
+    return { message: 'AutoOps pengingat KTP berhasil dijalankan', data: await this.autoOpsService.runKtpReminders({ actorUserId: user.id, source: 'MANUAL_KTP_REMINDERS_RUN' }) };
+  }
 }
