@@ -6541,13 +6541,13 @@
 .rm-heatmap-legend-item.is-maintenance i { background:#f59e0b; }
 .rm-heatmap-legend-item.is-perpanjang i { background:#a78bfa; }
 .rm-heatmap-table { display:flex; flex-direction:column; gap:.35rem; overflow-x:auto; }
-.rm-heatmap-row { min-width:166px; }
+.rm-heatmap-row { min-width:166px; grid-template-columns:128px minmax(0,1fr); }
 .rm-heatmap-row { display:grid; grid-template-columns:104px minmax(0,1fr); gap:.45rem; align-items:center; width:100%; border:1px solid var(--gray-200); background:var(--white); border-radius:12px; padding:.4rem .5rem; text-align:left; cursor:pointer; }
 .rm-heatmap-row:hover { border-color:var(--blue-300); background:var(--blue-50); }
 .rm-heatmap-room { display:flex; flex-direction:column; gap:.12rem; min-width:0; }
 .rm-heatmap-room strong { font-size:.86rem; }
 .rm-heatmap-badge { align-self:flex-start; font-size:.6rem; }
-.rm-heatmap-vacancy { font-size:.64rem; font-weight:700; color:var(--gray-600); }
+.rm-heatmap-vacancy { font-size:.6rem; line-height:1.15; font-weight:700; color:var(--gray-600); text-wrap:balance; }
 .rm-heatmap-vacancy.is-kosong { color:#15803d; }
 .rm-heatmap-vacancy.is-cenderung_kosong { color:#b45309; }
 .rm-heatmap-vacancy.is-mungkin { color:#0369a1; }
