@@ -29,9 +29,22 @@ describe('estimateVacancy — perkiraan peluang kamar kosong', () => {
       },
       TODAY,
     );
-    expect(result.score).toBe(65);
+    expect(result.score).toBe(63);
     expect(result.status).toBe('CENDERUNG_KOSONG');
     expect(result.label).toBe('Kemungkinan kosong: tinggi');
+  });
+
+  it('kontrak sudah LEWAT tidak otomatis "akan keluar" bagi penghuni lama', () => {
+    const baru = estimateVacancy(
+      { status: 'OCCUPIED', checkInDate: daysAgo(45), remainingDays: 0 },
+      TODAY,
+    );
+    const lama = estimateVacancy(
+      { status: 'OCCUPIED', checkInDate: daysAgo(900), remainingDays: 0 },
+      TODAY,
+    );
+    expect(lama.score).toBeLessThan(baru.score);
+    expect(lama.status).toBe('CENDERUNG_LANJUT');
   });
 
   it('penghuni lama (>2 tahun) dengan sisa kontrak ~120 hari → kemungkinan kosong rendah', () => {

@@ -6,8 +6,10 @@
  * peluang ia keluar. Jadi skor harus TURUN secara monoton terhadap lama tinggal.
  *
  * Sumbangan skor:
- *  - sisa kontrak (backend mengirim number, 0 = habis/lewat): lewat/≤7 +40 · ≤30 +22
- *    · ≤60 +10 · ≤120 +4 · >120 0
+ *  - sisa kontrak (backend mengirim number, 0 = habis/lewat): ≤7 +38 · ≤30 +22
+ *    · ≤60 +10 · ≤120 +4 · >120 0 · SUDAH LEWAT (0) +28 — sengaja lebih kecil dari
+ *    ≤7: kontrak lewat tidak otomatis berarti penghuni akan keluar, apalagi bila
+ *    ia sudah tinggal lama (data produksi memakai 0 untuk SEMUA kontrak lewat)
  *  - lama tinggal (monoton turun, tanpa lompatan): <90 +25 · <180 +15 · <365 +8 · <730 +3 · ≥730 0
  *  - perpanjangan: APPROVED/COMPLETED/ACCEPTED −45 · PENDING/AWAITING_DP/DP_SECURED −25
  *  - hasil di-clamp 0..100
@@ -71,9 +73,15 @@ export function tenureRisk(tenureDays: number): number {
   return 0;
 }
 
-/** Sumbangan sisa kontrak — makin dekat akhir kontrak, makin besar. */
+/**
+ * Sumbangan sisa kontrak — makin dekat akhir kontrak, makin besar.
+ * `remainingDays <= 0` = kontrak sudah lewat; backend memakai 0 sebagai nilai
+ * "tidak ada sisa", jadi nilainya dibuat lebih rendah daripada ≤7 hari supaya
+ * penghuni lama yang kontraknya lewat tidak otomatis dicap akan keluar.
+ */
 export function remainingRisk(remainingDays: number): number {
-  if (remainingDays <= 7) return 40;
+  if (remainingDays <= 0) return 28;
+  if (remainingDays <= 7) return 38;
   if (remainingDays <= 30) return 22;
   if (remainingDays <= 60) return 10;
   if (remainingDays <= 120) return 4;
@@ -116,10 +124,10 @@ export function estimateVacancy(input: VacancyInput, today: Date = new Date()): 
 
   score = Math.max(0, Math.min(100, score));
 
-  if (score >= 65) {
+  if (score >= 60) {
     return { score, status: 'CENDERUNG_KOSONG', label: 'Kemungkinan kosong: tinggi', note: NOTE, hasData: true };
   }
-  if (score >= 40) {
+  if (score >= 35) {
     return { score, status: 'MUNGKIN', label: 'Kemungkinan kosong: sedang', note: NOTE, hasData: true };
   }
   return { score, status: 'CENDERUNG_LANJUT', label: 'Kemungkinan kosong: rendah', note: NOTE, hasData: true };
