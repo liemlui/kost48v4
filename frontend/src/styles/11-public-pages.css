@@ -6540,7 +6540,8 @@
 .rm-heatmap-legend-item.is-booking_dp i { background:#60a5fa; }
 .rm-heatmap-legend-item.is-maintenance i { background:#f59e0b; }
 .rm-heatmap-legend-item.is-perpanjang i { background:#a78bfa; }
-.rm-heatmap-table { display:flex; flex-direction:column; gap:.35rem; }
+.rm-heatmap-table { display:flex; flex-direction:column; gap:.35rem; overflow-x:auto; }
+.rm-heatmap-row { min-width:166px; }
 .rm-heatmap-row { display:grid; grid-template-columns:104px minmax(0,1fr); gap:.45rem; align-items:center; width:100%; border:1px solid var(--gray-200); background:var(--white); border-radius:12px; padding:.4rem .5rem; text-align:left; cursor:pointer; }
 .rm-heatmap-row:hover { border-color:var(--blue-300); background:var(--blue-50); }
 .rm-heatmap-room { display:flex; flex-direction:column; gap:.12rem; min-width:0; }
@@ -6551,15 +6552,29 @@
 .rm-heatmap-vacancy.is-cenderung_kosong { color:#b45309; }
 .rm-heatmap-vacancy.is-mungkin { color:#0369a1; }
 .rm-heatmap-vacancy.is-cenderung_lanjut { color:var(--gray-500); }
-.rm-heatmap-days { display:grid; grid-auto-flow:column; grid-auto-columns:minmax(10px,1fr); gap:2px; overflow-x:auto; }
+.rm-heatmap-days { display:grid; grid-auto-flow:column; grid-auto-columns:minmax(10px,1fr); gap:2px; }
 .rm-heatmap-day { height:22px; border-radius:4px; background:#cbd5e1; }
 .rm-heatmap-day.is-kosong { background:#22c55e; }
 .rm-heatmap-day.is-huni { background:#cbd5e1; }
 .rm-heatmap-day.is-booking_dp { background:#60a5fa; }
 .rm-heatmap-day.is-maintenance { background:#f59e0b; }
 .rm-heatmap-day.is-perpanjang { background:#a78bfa; }
+.rm-heatmap-vacancy.is-tidak_diketahui { color:var(--gray-500); font-style:italic; }
+.rm-heatmap-tenure { font-size:.6rem; color:var(--gray-500); }
+.rm-heatmap-open { align-self:flex-start; border:0; background:none; padding:0; font-size:.86rem; font-weight:700; color:var(--blue-700, #1d4ed8); text-decoration:underline; }
+.rm-heatmap-open:hover { color:var(--blue-800, #1e40af); }
+.rm-heatmap-row.is-head { border:0; background:none; padding:0 .5rem; cursor:default; }
+.rm-heatmap-row.is-head:hover { background:none; }
+.rm-heatmap-axis { font-size:.5rem; line-height:1; color:var(--gray-500); text-align:center; align-self:center; overflow:hidden; white-space:nowrap; }
+.rm-heatmap-axis.is-today { color:var(--blue-700, #1d4ed8); font-weight:700; }
+.rm-heatmap-axis-label { font-size:.62rem; color:var(--gray-500); align-self:center; }
+.rm-heatmap-state { min-height:220px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:.5rem; }
+@media (max-width:419px) {
+  .rm-heatmap-axis.is-alt { visibility:hidden; }
+}
 @media (min-width:768px) {
   .rm-heatmap-row { grid-template-columns:190px minmax(0,1fr); }
   .rm-heatmap-room { flex-direction:row; align-items:center; gap:.45rem; }
   .rm-heatmap-badge { align-self:center; }
+  .rm-heatmap-axis { font-size:.6rem; }
 }
