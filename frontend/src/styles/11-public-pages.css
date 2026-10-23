@@ -6551,15 +6551,10 @@
 .rm-heatmap-legend-items { display:flex; flex-wrap:wrap; gap:.25rem .7rem; }
 .rm-heatmap-legend-item { display:inline-flex; align-items:center; gap:.3rem; font-size:.72rem; color:var(--gray-600); }
 .rm-heatmap-legend-item i { width:14px; height:10px; border-radius:3px; background:var(--gray-300); display:inline-block; flex:0 0 auto; }
-.rm-heatmap-legend-item.is-kosong i { background:#22c55e; }
-.rm-heatmap-legend-item.is-huni i { background:#cbd5e1; }
-.rm-heatmap-legend-item.is-booking_dp i { background:#60a5fa; }
-.rm-heatmap-legend-item.is-maintenance i { background:#f59e0b; }
-.rm-heatmap-legend-item.is-perpanjang i { background:#a78bfa; }
 .rm-heatmap-legend-item.is-belum_ada_info i { background:#f8fafc; box-shadow:inset 0 0 0 1px #94a3b8; }
-.rm-heatmap-legend-item.is-rendah i { background:#94a3b8; }
-.rm-heatmap-legend-item.is-sedang i { background:repeating-linear-gradient(135deg,#475569 0 2px,#e2e8f0 2px 4px); }
-.rm-heatmap-legend-item.is-tinggi i { background:repeating-linear-gradient(135deg,#15803d 0 2px,#bbf7d0 2px 4px); }
+.rm-heatmap-legend-item.is-rendah i { background:#e2e8f0; box-shadow:inset 0 0 0 1px #94a3b8; }
+.rm-heatmap-legend-item.is-sedang i { background:repeating-linear-gradient(135deg,#d97706 0 2px,#fef3c7 2px 4px); box-shadow:inset 0 0 0 1px #d97706; }
+.rm-heatmap-legend-item.is-tinggi i { background:#bbf7d0; box-shadow:inset 0 0 0 1px #16a34a; }
 
 /* Kalender */
 .rm-heatmap-calendar { display:grid; gap:2px; }
@@ -6568,7 +6563,8 @@
 .rm-heatmap-week { margin-top:2px; }
 .rm-heatmap-weekday { font-size:.66rem; font-weight:700; color:var(--gray-500); text-align:center; padding:.15rem 0; }
 .rm-heatmap-weekday.is-sun { color:#b91c1c; }
-.rm-heatmap-cell { position:relative; display:flex; flex-direction:column; gap:2px; min-width:0; min-height:58px; padding:3px; border:1px solid var(--gray-200); border-radius:8px; background:var(--white); text-align:left; cursor:pointer; font:inherit; }
+.rm-heatmap-cell { position:relative; display:flex; flex-direction:column; gap:3px; min-width:0; min-height:46px; padding:4px; border:1px solid var(--gray-200); border-radius:8px; background:var(--white); text-align:left; cursor:pointer; font:inherit; }
+.rm-heatmap-cell.is-quiet { background:#fbfcfe; }
 .rm-heatmap-cell:hover { border-color:var(--blue-300,#93c5fd); background:var(--blue-50,#eff6ff); }
 .rm-heatmap-cell:focus-visible { outline:2px solid var(--blue-700,#1d4ed8); outline-offset:2px; }
 .rm-heatmap-cell.is-outside { background:#f8fafc; border-color:transparent; cursor:default; }
@@ -6579,22 +6575,14 @@
 .rm-heatmap-cell.is-today .rm-heatmap-date { background:var(--blue-700,#1d4ed8); color:#fff; }
 .rm-heatmap-cell.is-outside .rm-heatmap-date { color:var(--gray-400,#94a3b8); }
 
-/* Chip kamar: pita atas = status huni, pita bawah = peluang kosong */
-.rm-heatmap-chips { display:flex; flex-direction:column; gap:2px; min-width:0; }
-.rm-heatmap-chip { display:flex; flex-direction:column; height:12px; border-radius:3px; overflow:hidden; flex:0 0 auto; }
-.rm-heatmap-chip-bars { display:flex; flex-direction:column; height:100%; border-radius:3px; overflow:hidden; flex:1 1 auto; }
-.rm-heatmap-chip-code { display:none; }
-.rm-heatmap-chip .band { display:block; flex:1 1 50%; min-height:5px; }
-.rm-heatmap-chip .band-1.is-kosong { background:#22c55e; }
-.rm-heatmap-chip .band-1.is-huni { background:#cbd5e1; }
-.rm-heatmap-chip .band-1.is-booking_dp { background:#60a5fa; }
-.rm-heatmap-chip .band-1.is-maintenance { background:#f59e0b; }
-.rm-heatmap-chip .band-1.is-perpanjang { background:#a78bfa; }
-.rm-heatmap-chip .band-2.is-belum_ada_info { background:#f8fafc; box-shadow:inset 0 0 0 1px #94a3b8; }
-.rm-heatmap-chip .band-2.is-rendah { background:#94a3b8; }
-.rm-heatmap-chip .band-2.is-sedang { background:repeating-linear-gradient(135deg,#475569 0 2px,#e2e8f0 2px 4px); }
-.rm-heatmap-chip .band-2.is-tinggi { background:repeating-linear-gradient(135deg,#15803d 0 2px,#bbf7d0 2px 4px); }
-.rm-heatmap-more { font-size:.58rem; line-height:1.1; color:var(--gray-500); }
+/* Chip kamar: satu kode kamar berwarna peluang kosong (maks 3 per sel, sisanya +N) */
+.rm-heatmap-chips { display:flex; flex-wrap:wrap; align-items:center; gap:2px; min-width:0; }
+.rm-heatmap-chip { display:inline-flex; align-items:center; justify-content:center; min-width:20px; height:16px; padding:0 .28rem; border-radius:5px; font-size:.6rem; font-weight:700; line-height:1; letter-spacing:.02em; color:#166534; background:#dcfce7; box-shadow:inset 0 0 0 1px #16a34a; flex:0 0 auto; }
+.rm-heatmap-chip.is-tinggi { color:#166534; background:#bbf7d0; box-shadow:inset 0 0 0 1px #16a34a; }
+.rm-heatmap-chip.is-sedang { color:#92400e; background:repeating-linear-gradient(135deg,#fde68a 0 3px,#fef3c7 3px 6px); box-shadow:inset 0 0 0 1px #d97706; }
+.rm-heatmap-chip.is-rendah { color:#334155; background:#e2e8f0; box-shadow:inset 0 0 0 1px #94a3b8; }
+.rm-heatmap-chip.is-belum_ada_info { color:#475569; background:#f8fafc; box-shadow:inset 0 0 0 1px #94a3b8; }
+.rm-heatmap-more { font-size:.6rem; font-weight:600; line-height:1.1; color:var(--gray-500); }
 .rm-heatmap-state { min-height:220px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:.5rem; }
 
 /* Panel detail satu tanggal */

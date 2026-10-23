@@ -10,20 +10,23 @@ import {
   type VacancyChance,
   type VacancyOnDateEstimate,
 } from '../../utils/vacancyEstimate';
+import { isVacancyStart } from '../../utils/vacancyCalendar';
 
 /**
- * Kalender heatmap ketersediaan kamar (W-OWN-019).
+ * Kalender ketersediaan kamar (W-OWN-019, dirapikan 23 Okt 2026).
  *
- * Bentuk: KALENDER BULANAN 7 kolom hari (keputusan owner 23 Okt 2026 lewat
- * gambar rujukan) — menggantikan matriks 14 tanggal × 13 kamar. Tiap sel adalah
- * satu tanggal berisi chip per kamar; setiap chip punya DUA PITA:
- *   pita atas  = status huni (fakta: Kosong/Terisi/Booking DP/Perbaikan/Perpanjangan)
- *   pita bawah = peluang kosong (perkiraan: belum ada info/rendah/sedang/tinggi)
- * Peluang kosong TIDAK dibedakan lewat warna saja — pita bawah memakai pola
- * (solid, garis miring, outline). Nama penghuni tidak pernah tampil di sini.
+ * Bentuk: KALENDER BULANAN 7 kolom hari. Tiap sel = satu tanggal dan HANYA
+ * memuat kamar yang MULAI kosong di tanggal itu (keputusan owner: peristiwa,
+ * bukan semua kamar yang kebetulan kosong pada tanggal itu — aturannya di
+ * `utils/vacancyCalendar.ts`). Kamar yang sudah kosong sejak sebelumnya tidak
+ * diulang tiap hari, jadi sel berisi 0–3 kode kamar, bukan 13 pita warna.
  *
- * Rumus peluang kosong per tanggal hidup di `utils/vacancyEstimate.ts`
+ * Klaim (target `status`.chip_health): sel tanggal hanya memuat kamar yang
+ * mulai kosong di tanggal itu — tidak ada pita ganda status huni + peluang.
+ *
+ * Rumus peluang kosong hidup di `utils/vacancyEstimate.ts`
  * (`estimateVacancyOnDate`) — komponen ini tidak menghitung apa pun sendiri.
+ * Nama penghuni tidak pernah tampil di sini.
  */
 
 type DayStatus = 'KOSONG' | 'HUNI' | 'BOOKING_DP' | 'MAINTENANCE' | 'PERPANJANG';
@@ -43,6 +46,9 @@ type CalendarRoom = {
 
 type CalendarData = { from: string; to: string; dates: string[]; rooms: CalendarRoom[] };
 
+/** Satu kamar pada satu tanggal. */
+type DayItem = { room: CalendarRoom; status: DayStatus; vacancy: VacancyOnDateEstimate };
+
 const DAY_LABEL: Record<DayStatus, string> = {
   KOSONG: 'Kosong',
   HUNI: 'Terisi',
@@ -51,14 +57,10 @@ const DAY_LABEL: Record<DayStatus, string> = {
   PERPANJANG: 'Perpanjangan',
 };
 
-const DAY_ORDER: DayStatus[] = ['KOSONG', 'HUNI', 'BOOKING_DP', 'MAINTENANCE', 'PERPANJANG'];
+/** Maksimal kode kamar yang dicetak di satu sel; sisanya "+N". */
+const CHIP_LIMIT = 3;
+
 const CHANCE_ORDER: VacancyChance[] = ['TINGGI', 'SEDANG', 'RENDAH', 'BELUM_ADA_INFO'];
-const CHANCE_WEIGHT: Record<VacancyChance, number> = {
-  TINGGI: 0,
-  SEDANG: 1,
-  RENDAH: 2,
-  BELUM_ADA_INFO: 3,
-};
 
 const WEEKDAYS = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'];
 const WEEKDAY_LONG = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
@@ -125,30 +127,25 @@ function statusTone(status: string): { bg: string; text?: string; label: string 
   return { bg: 'secondary', label: 'Terisi' };
 }
 
-function chipLimitFor(width: number) {
-  if (width >= 1024) return 7;
-  if (width >= 640) return 5;
-  return 3;
+/** Urutkan: peluang terbesar dulu (jawaban langsung pertanyaan owner), lalu kode kamar. */
+function sortByChanceThenCode(items: DayItem[]) {
+  const rank: Record<VacancyChance, number> = { TINGGI: 0, SEDANG: 1, RENDAH: 2, BELUM_ADA_INFO: 3 };
+  return items.sort(
+    (a, b) =>
+      rank[a.vacancy.chance] - rank[b.vacancy.chance] ||
+      String(a.room.code).localeCompare(String(b.room.code), 'id', { numeric: true }),
+  );
 }
 
 export default function AvailabilityHeatmap() {
   const navigate = useNavigate();
   const [monthOffset, setMonthOffset] = useState(0);
   const month = useMemo(() => buildMonth(monthOffset), [monthOffset]);
-  const [chipLimit, setChipLimit] = useState(() =>
-    typeof window === 'undefined' ? 3 : chipLimitFor(window.innerWidth),
-  );
   const [focusIso, setFocusIso] = useState<string | null>(null);
   const [selectedIso, setSelectedIso] = useState<string | null>(null);
   const cellRefs = useRef(new Map<string, HTMLButtonElement>());
   const panelRef = useRef<HTMLDivElement | null>(null);
   const returnFocusTo = useRef<string | null>(null);
-
-  useEffect(() => {
-    const onResize = () => setChipLimit(chipLimitFor(window.innerWidth));
-    window.addEventListener('resize', onResize);
-    return () => window.removeEventListener('resize', onResize);
-  }, []);
 
   const query = useQuery({
     queryKey: ['availability-calendar', month.from, month.to],
@@ -164,50 +161,42 @@ export default function AvailabilityHeatmap() {
     [query.data],
   );
 
-  /** Satu kumpulan data per tanggal: status huni + peluang kosong tiap kamar. */
+  /**
+   * Satu kumpulan PERISTIWA per tanggal: hanya kamar yang MULAI kosong di tanggal
+   * itu (lihat `utils/vacancyCalendar.ts`). Status huni tetap dihitung untuk
+   * ringkasan hari ini dan panel rincian.
+   */
   const byDate = useMemo(() => {
-    const map = new Map<
-      string,
-      Array<{ room: CalendarRoom; status: DayStatus; vacancy: VacancyOnDateEstimate }>
-    >();
+    const map = new Map<string, DayItem[]>();
     for (const iso of month.dates) {
-      const items = rooms.map((room) => ({
+      const all: DayItem[] = rooms.map((room) => ({
         room,
         status: (room.days?.[iso] ?? 'HUNI') as DayStatus,
         vacancy: estimateVacancyOnDate({ ...room }, iso),
       }));
-      // Yang paling mungkin kosong muncul lebih dulu — jawaban langsung pertanyaan owner.
-      items.sort(
-        (a, b) =>
-          CHANCE_WEIGHT[a.vacancy.chance] - CHANCE_WEIGHT[b.vacancy.chance] ||
-          String(a.room.code).localeCompare(String(b.room.code), 'id', { numeric: true }),
-      );
-      map.set(iso, items);
+      map.set(iso, sortByChanceThenCode(all.filter((item) => isVacancyStart(item.vacancy, iso))));
     }
     return map;
   }, [rooms, month.dates]);
 
-  const statusesPresent = useMemo(() => {
-    const seen = new Set<DayStatus>();
-    for (const items of byDate.values()) for (const item of items) seen.add(item.status);
-    return DAY_ORDER.filter((status) => seen.has(status));
-  }, [byDate]);
-
+  /** Urutan legenda = peluang yang benar-benar muncul di sel bulan ini. */
   const chancesPresent = useMemo(() => {
     const seen = new Set<VacancyChance>();
     for (const items of byDate.values()) for (const item of items) seen.add(item.vacancy.chance);
     return CHANCE_ORDER.filter((chance) => seen.has(chance));
   }, [byDate]);
 
-  const todayItems = byDate.get(month.today) ?? [];
-  const todayCounts = todayItems.reduce(
-    (acc, item) => {
-      acc[item.status] = (acc[item.status] ?? 0) + 1;
-      return acc;
-    },
-    {} as Partial<Record<DayStatus, number>>,
-  );
-  const isLikely = (chance: VacancyChance) => chance === 'TINGGI' || chance === 'SEDANG';
+  /** Status huni hari ini dihitung dari SEMUA kamar (bukan hanya yang mulai kosong). */
+  const todayStatusCounts = useMemo(() => {
+    const counts: Partial<Record<DayStatus, number>> = {};
+    for (const room of rooms) {
+      const status = (room.days?.[month.today] ?? 'HUNI') as DayStatus;
+      counts[status] = (counts[status] ?? 0) + 1;
+    }
+    return counts;
+  }, [rooms, month.today]);
+
+  const todayStarts = byDate.get(month.today) ?? [];
 
   const cells = useMemo(() => {
     const leading = Array.from({ length: month.leadingBlanks }, () => null) as Array<string | null>;
@@ -265,16 +254,14 @@ export default function AvailabilityHeatmap() {
 
   const describeCell = (iso: string) => {
     const items = byDate.get(iso) ?? [];
-    if (!items.length) return longDate(iso);
-    const likely = items.filter((item) => isLikely(item.vacancy.chance)).length;
-    const counts = DAY_ORDER.filter((status) => items.some((item) => item.status === status))
-      .map((status) => `${DAY_LABEL[status]} ${items.filter((item) => item.status === status).length} kamar`)
-      .join(', ');
-    return `${longDate(iso)}. ${likely} dari ${items.length} kamar berpeluang kosong. Status huni: ${counts}. Tekan Enter untuk rincian per kamar.`;
+    if (!items.length) {
+      return `${longDate(iso)}. Tidak ada kamar yang diperkirakan mulai kosong di tanggal ini. Tekan Enter untuk rincian.`;
+    }
+    const codes = items.map((item) => item.room.code);
+    return `${longDate(iso)}. ${codes.length} kamar diperkirakan mulai kosong: ${codes.join(', ')}. Tekan Enter untuk rincian.`;
   };
 
   const selectedItems = selectedIso ? byDate.get(selectedIso) ?? [] : [];
-  const selectedLikely = selectedItems.filter((item) => isLikely(item.vacancy.chance)).length;
   const isLoading = query.isLoading;
   const isEmpty = !isLoading && !query.isError && rooms.length === 0;
 
@@ -286,14 +273,14 @@ export default function AvailabilityHeatmap() {
             <h2 className="rm-heatmap-title">Ketersediaan kamar</h2>
             <div className="rm-heatmap-summary">
               <span className="rm-heatmap-month">{month.label}</span>
-              {todayItems.length > 0 ? (
+              {rooms.length > 0 ? (
                 <>
                   {' · hari ini '}
-                  {shortDate(month.today)}: {todayCounts.KOSONG ?? 0} kosong ·{' '}
-                  {todayCounts.HUNI ?? 0} terisi
-                  {todayCounts.BOOKING_DP ? ` · ${todayCounts.BOOKING_DP} booking` : ''}
-                  {todayCounts.MAINTENANCE ? ` · ${todayCounts.MAINTENANCE} perbaikan` : ''}
-                  {` · ${todayItems.filter((item) => isLikely(item.vacancy.chance)).length} kamar berpeluang kosong`}
+                  {shortDate(month.today)}: {todayStatusCounts.KOSONG ?? 0} kosong ·{' '}
+                  {todayStatusCounts.HUNI ?? 0} terisi
+                  {todayStatusCounts.BOOKING_DP ? ` · ${todayStatusCounts.BOOKING_DP} booking` : ''}
+                  {todayStatusCounts.MAINTENANCE ? ` · ${todayStatusCounts.MAINTENANCE} perbaikan` : ''}
+                  {` · ${todayStarts.length} kamar mulai kosong`}
                 </>
               ) : null}
             </div>
@@ -326,28 +313,20 @@ export default function AvailabilityHeatmap() {
           </div>
         </div>
 
-        <div className="rm-heatmap-legend-groups">
-          <fieldset className="rm-heatmap-legend">
-            <legend className="rm-heatmap-legend-title">Status huni</legend>
-            <div className="rm-heatmap-legend-items">
-              {statusesPresent.map((status) => (
-                <span key={status} className={`rm-heatmap-legend-item is-${status.toLowerCase()}`}>
-                  <i aria-hidden="true" /> {DAY_LABEL[status]}
-                </span>
-              ))}
-            </div>
-          </fieldset>
-          <fieldset className="rm-heatmap-legend">
-            <legend className="rm-heatmap-legend-title">Peluang kosong</legend>
-            <div className="rm-heatmap-legend-items">
-              {chancesPresent.map((chance) => (
-                <span key={chance} className={`rm-heatmap-legend-item is-${chance.toLowerCase()}`}>
-                  <i aria-hidden="true" /> {VACANCY_CHANCE_LABEL[chance]}
-                </span>
-              ))}
-            </div>
-          </fieldset>
-        </div>
+        {chancesPresent.length > 0 ? (
+          <div className="rm-heatmap-legend-groups">
+            <fieldset className="rm-heatmap-legend">
+              <legend className="rm-heatmap-legend-title">Peluang kosong</legend>
+              <div className="rm-heatmap-legend-items">
+                {chancesPresent.map((chance) => (
+                  <span key={chance} className={`rm-heatmap-legend-item is-${chance.toLowerCase()}`}>
+                    <i aria-hidden="true" /> {VACANCY_CHANCE_LABEL[chance]}
+                  </span>
+                ))}
+              </div>
+            </fieldset>
+          </div>
+        ) : null}
 
         <p className="rm-heatmap-note">{VACANCY_NOTE}</p>
 
@@ -401,7 +380,7 @@ export default function AvailabilityHeatmap() {
                       );
                     }
                     const items = byDate.get(iso) ?? [];
-                    const visible = items.slice(0, chipLimit);
+                    const visible = items.slice(0, CHIP_LIMIT);
                     const hidden = items.length - visible.length;
                     const isToday = iso === month.today;
                     return (
@@ -416,6 +395,7 @@ export default function AvailabilityHeatmap() {
                           'rm-heatmap-cell',
                           isToday ? 'is-today' : '',
                           selectedIso === iso ? 'is-selected' : '',
+                          items.length === 0 ? 'is-quiet' : '',
                         ]
                           .filter(Boolean)
                           .join(' ')}
@@ -429,22 +409,23 @@ export default function AvailabilityHeatmap() {
                         <span className="rm-heatmap-date" aria-hidden="true">
                           {Number(iso.slice(8, 10))}
                         </span>
-                        <span className="rm-heatmap-chips" aria-hidden="true">
-                          {visible.map((item) => {
-                            const chance = item.vacancy.chance;
-                            const hint = `${item.room.code} · ${DAY_LABEL[item.status]} · peluang kosong ${VACANCY_CHANCE_LABEL[chance]} — ${item.vacancy.reason}`;
-                            return (
-                              <span className="rm-heatmap-chip" key={item.room.id} title={hint}>
-                                <span className="rm-heatmap-chip-code">{item.room.code}</span>
-                                <span className="rm-heatmap-chip-bars">
-                                  <i className={`band band-1 is-${item.status.toLowerCase()}`} />
-                                  <i className={`band band-2 is-${chance.toLowerCase()}`} />
+                        {items.length > 0 ? (
+                          <span className="rm-heatmap-chips" aria-hidden="true">
+                            {visible.map((item) => {
+                              const hint = `${item.room.code} · peluang kosong ${VACANCY_CHANCE_LABEL[item.vacancy.chance]} — ${item.vacancy.reason}`;
+                              return (
+                                <span
+                                  key={item.room.id}
+                                  className={`rm-heatmap-chip is-${item.vacancy.chance.toLowerCase()}`}
+                                  title={hint}
+                                >
+                                  {item.room.code}
                                 </span>
-                              </span>
-                            );
-                          })}
-                          {hidden > 0 ? <span className="rm-heatmap-more">+{hidden}</span> : null}
-                        </span>
+                              );
+                            })}
+                            {hidden > 0 ? <span className="rm-heatmap-more">+{hidden}</span> : null}
+                          </span>
+                        ) : null}
                       </button>
                     );
                   })}
@@ -477,34 +458,43 @@ export default function AvailabilityHeatmap() {
                     Tutup
                   </Button>
                 </div>
-                <p className="rm-heatmap-summary mb-2">
-                  {selectedLikely} dari {selectedItems.length} kamar berpeluang kosong pada{' '}
-                  {shortDate(selectedIso)}.
-                </p>
-                <ul className="rm-heatmap-panel-list">
-                  {selectedItems.map((item) => {
-                    const tone = statusTone(item.room.status);
-                    return (
-                      <li className="rm-heatmap-panel-item" key={item.room.id}>
-                        <button
-                          type="button"
-                          className="rm-heatmap-panel-code"
-                          onClick={() => navigate(`/rooms/${item.room.id}/detail`)}
-                          aria-label={`Buka detail kamar ${item.room.code}`}
-                        >
-                          {item.room.code}
-                        </button>
-                        <Badge bg={tone.bg} text={tone.text}>
-                          {DAY_LABEL[item.status]}
-                        </Badge>
-                        <span className="rm-heatmap-panel-chance">
-                          Peluang kosong: {VACANCY_CHANCE_LABEL[item.vacancy.chance]}
-                        </span>
-                        <span className="rm-heatmap-panel-basis">{item.vacancy.reason}</span>
-                      </li>
-                    );
-                  })}
-                </ul>
+                {selectedItems.length > 0 ? (
+                  <>
+                    <p className="rm-heatmap-summary mb-2">
+                      {selectedItems.length} kamar diperkirakan mulai kosong pada{' '}
+                      {shortDate(selectedIso)}.
+                    </p>
+                    <ul className="rm-heatmap-panel-list">
+                      {selectedItems.map((item) => {
+                        const tone = statusTone(item.room.status);
+                        return (
+                          <li className="rm-heatmap-panel-item" key={item.room.id}>
+                            <button
+                              type="button"
+                              className="rm-heatmap-panel-code"
+                              onClick={() => navigate(`/rooms/${item.room.id}/detail`)}
+                              aria-label={`Buka detail kamar ${item.room.code}`}
+                            >
+                              {item.room.code}
+                            </button>
+                            <Badge bg={tone.bg} text={tone.text}>
+                              {DAY_LABEL[item.status]}
+                            </Badge>
+                            <span className="rm-heatmap-panel-chance">
+                              Peluang kosong: {VACANCY_CHANCE_LABEL[item.vacancy.chance]}
+                            </span>
+                            <span className="rm-heatmap-panel-basis">{item.vacancy.reason}</span>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  </>
+                ) : (
+                  <p className="rm-heatmap-summary mb-0">
+                    Tidak ada kamar yang diperkirakan mulai kosong pada {shortDate(selectedIso)}.
+                    Kamar yang sudah kosong sebelum tanggal ini tidak diulang di sini.
+                  </p>
+                )}
               </div>
             ) : null}
           </>
