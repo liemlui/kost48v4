@@ -11,7 +11,7 @@ import type { PricingTerm, PublicRoom } from '../../types';
 import StatusBadge, { getStatusLabel } from '../../components/common/StatusBadge';
 import { getKost48RoomGallery, resolveKost48MarketingImageUrl } from '../../data/kost48Assets';
 import { calculateRentByPricingTerm, isUtilitiesIncludedForPricingTerm, ALL_PRICING_TERMS } from '../../utils/pricing';
-import { getPublicRoomAvailabilityDisplay, getPublicRoomInitialCostEstimate, publicBookingSafetySteps } from '../../utils/publicRoomDisplay';
+import { getPublicRoomAvailabilityDisplay, getPublicRoomInitialCostEstimate, publicBookingSafetySteps, roomDisplayCode } from '../../utils/publicRoomDisplay';
 import { formatRupiah, formatRupiahWithoutSymbol } from '../../utils/formatCurrency';
 import { DP_RATIO } from '../../config/constants';
 import { buildAdminWaUrl, buildRoomWaUrl } from '../../utils/whatsapp';
@@ -257,7 +257,10 @@ export default function PublicRoomDetailPage() {
         <div className="room-detail-topline mb-4">
           <div>
             <div className="page-eyebrow">Detail Kamar — KOST48 Surabaya</div>
-            <h1 className="mb-1">{room ? (room.name?.trim() || `Kamar ${room.code}`) : 'Detail kamar'}</h1>
+            {/* S4: judul memakai label "Kmr <kode>" (satu helper); nama kamar jadi subjudul.
+                Rincian di halaman ini tetap lengkap — tidak dipangkas seperti kartu katalog. */}
+            <h1 className="mb-1">{room ? roomDisplayCode(room.code, 'Detail kamar') : 'Detail kamar'}</h1>
+            {room?.name?.trim() ? <div className="text-muted small mb-1">{room.name}</div> : null}
             <div className="text-muted">Lihat foto, fasilitas, term sewa, dan deposit sebelum mengajukan pemesanan.</div>
           </div>
           <div className="d-flex gap-2 flex-wrap">
@@ -434,8 +437,8 @@ export default function PublicRoomDetailPage() {
                     <div className="d-flex justify-content-between align-items-start gap-3 mb-3">
                       <div>
                         <div className="room-detail-booking-label">Kamar dipilih</div>
-                        <h2>{room.name || `Kamar ${room.code}`}</h2>
-                        <div className="text-muted small">{room.code}</div>
+                        <h2>{roomDisplayCode(room.code, `Kamar ${room.id}`)}</h2>
+                        {room.name?.trim() ? <div className="text-muted small">{room.name}</div> : null}
                       </div>
                       <StatusBadge status={room.status} customLabel={availability?.label} />
                     </div>

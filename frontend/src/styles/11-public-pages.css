@@ -357,7 +357,7 @@
 }
 
 .rm-card-img-wrap {
-  height: 190px;
+  height: 156px;
   overflow: hidden;
   background: var(--gray-100);
   position: relative;
@@ -385,9 +385,9 @@
   align-items: center;
   justify-content: center;
   gap: .35rem;
-  height: 190px;
+  height: 156px;
   color: var(--gray-600); /* AO-08: kontras 4.40→7.3 */
-  font-size: .82rem;
+  font-size: .75rem;
 }
 
 .rm-card-img-placeholder span {
@@ -426,7 +426,7 @@
   left: .65rem;
   padding: .22rem .6rem;
   border-radius: 999px;
-  font-size: .7rem;
+  font-size: .75rem;
   font-weight: 800;
   letter-spacing: .03em;
   backdrop-filter: blur(8px);
@@ -474,14 +474,14 @@
   position: absolute;
   top: .65rem;
   right: .65rem;
-  width: 2rem;
-  height: 2rem;
+  width: 2.75rem;
+  height: 2.75rem;
   border-radius: 50%;
   border: 1px solid rgba(255, 255, 255, .7);
   background: rgba(255, 255, 255, .88);
   backdrop-filter: blur(6px);
   color: #374151;
-  font-size: .78rem;
+  font-size: .75rem;
   font-weight: 800;
   display: grid;
   place-items: center;
@@ -497,12 +497,13 @@
 
 .rm-card-compare-btn:disabled { opacity: .4; cursor: not-allowed; }
 
-/* Card body */
+/* Card body — S4 (23 Okt 2026): rapat, hierarki 3 ukuran teks.
+   S1 1.35rem (harga = elemen dominan) · S2 1rem (label "Kmr X") · S3 .75rem (sisanya). */
 .rm-card-body {
   display: flex;
   flex-direction: column;
-  gap: .55rem;
-  padding: 1rem;
+  gap: .45rem;
+  padding: .85rem;
   flex: 1;
 }
 
@@ -515,7 +516,7 @@
 
 .rm-card-code {
   color: var(--gray-900);
-  font-size: 1.1rem;
+  font-size: 1rem;
   font-weight: 900;
   letter-spacing: -.03em;
   color: var(--gray-900);
@@ -523,9 +524,9 @@
 }
 
 .rm-card-name {
-  font-size: .8rem;
-  color: var(--gray-900);
-  font-weight: 600;
+  font-size: .75rem;
+  color: var(--gray-600);
+  font-weight: 500;
   margin-top: .12rem;
   line-height: 1.3;
 }
@@ -539,7 +540,7 @@
   align-items: center;
   gap: .35rem;
   margin: 0;
-  font-size: .72rem;
+  font-size: .75rem;
   color: var(--gray-600);
   line-height: 1.3;
 }
@@ -549,7 +550,7 @@
   align-items: center;
   padding: .16rem .45rem;
   border-radius: 999px;
-  font-size: .72rem;
+  font-size: .75rem;
   font-weight: 700;
   color: #334155;
   background: #e2e8f0;
@@ -567,7 +568,7 @@
 }
 
 .rm-card-specs span {
-  font-size: .78rem;
+  font-size: .75rem;
   font-weight: 700;
   color: var(--gray-900);
   background: var(--gray-100);
@@ -595,18 +596,18 @@
   display: flex;
   align-items: baseline;
   gap: .35rem;
-  margin-top: auto;
+  margin: .1rem 0 0;
 }
 
 .rm-card-price-row strong {
-  font-size: 1.25rem;
+  font-size: 1.35rem;
   font-weight: 900;
   letter-spacing: -.03em;
   color: var(--pub-primary-strong);
 }
 
 .rm-card-price-row span {
-  font-size: .78rem;
+  font-size: .75rem;
   color: var(--gray-900);
   font-weight: 600;
 }
@@ -614,7 +615,7 @@
 .rm-card-price-ask {
   font-style: italic;
   color: var(--gray-500) !important;
-  font-size: .8rem !important;
+  font-size: .75rem !important;
 }
 
 .rm-card-actions {
@@ -624,6 +625,19 @@
   padding-top: .25rem;
   border-top: 1px solid rgba(148, 163, 184, .12);
   margin-top: auto;
+}
+
+/* S4 — target sentuh minimum 44 x 44 CSS px (WCAG 2.5.5 AAA; diukur dengan
+   getBoundingClientRect di e2e/a11y/rooms.spec.ts). Bootstrap `btn-sm` hanya
+   ~31 px, jadi tinggi minimumnya dinaikkan di sini — hanya di dalam kartu. */
+.rm-card-actions .btn {
+  min-height: 2.75rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: .75rem;
+  padding-top: .35rem;
+  padding-bottom: .35rem;
 }
 
 /* ── Card pricing table (semua term) ── */
@@ -688,15 +702,22 @@
   background: none;
   border: none;
   color: #0369a1;
-  font-size: .78rem;
+  font-size: .75rem;
   font-weight: 700;
   cursor: pointer;
   text-align: center;
-  padding: .2rem 0;
+  min-height: 2.75rem;
+  width: 100%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: .35rem 0;
   transition: color .14s;
 }
 
-.rm-btn-detail:hover { color: var(--pub-brand-blue-hover); }
+/* S4 (23 Okt 2026): warna hover lama #0284c7 hanya 4,09:1 di atas kartu putih —
+   gagal WCAG AA 4,5:1 (terukur axe: color-contrast). #075985 = 7,93:1. */
+.rm-btn-detail:hover { color: #075985; }
 
 /* ── Compare bar ── */
 .rm-compare-bar {
@@ -887,8 +908,8 @@
 }
 
 @media (max-width: 640px) {
-  .rm-card-img-wrap { height: 175px; }
-  .rm-card-img-placeholder { height: 175px; }
+  .rm-card-img-wrap { height: 144px; }
+  .rm-card-img-placeholder { height: 144px; }
   .rm-compare-bar { min-width: 90vw; flex-direction: column; text-align: center; }
 }
 
@@ -902,8 +923,8 @@
   color: var(--white);
   border: none;
   border-radius: 50%;
-  width: 28px;
-  height: 28px;
+  width: 2.75rem;
+  height: 2.75rem;
   font-size: 1.1rem;
   line-height: 1;
   display: flex;
@@ -924,7 +945,7 @@
   left: .5rem;
   background: rgba(255, 255, 255, .93);
   color: var(--gray-800);
-  font-size: .72rem;
+  font-size: .75rem;
   font-weight: 700;
   padding: .22rem .55rem;
   border-radius: 999px;

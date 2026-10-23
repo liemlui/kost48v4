@@ -33,6 +33,7 @@ import {
   getPublicRoomCoolingLabel,
   getPublicRoomVisibleAmenities,
   isPublicRoomBookable,
+  roomDisplayCode,
 } from '../../utils/publicRoomDisplay';
 import { resolveAbsoluteFileUrl } from '../../utils/resolveAbsoluteFileUrl';
 import { buildAdminWaUrl, buildRoomWaUrl } from '../../utils/whatsapp';
@@ -371,7 +372,11 @@ export function RoomPreviewCard({ room }: { room: PublicRoom }) {
       </div>
       <div className="gx-room-body">
         <div>
-          <h3>{room.name || room.code || `Kamar ${room.id}`}</h3>
+          {/* S4: label "Kmr <kode>" dari satu helper; nama kamar jadi subjudul. */}
+          <h3>
+            {roomDisplayCode(room.code, room.name || `Kamar ${room.id}`)}
+            {room.code && room.name?.trim() ? <small> {room.name}</small> : null}
+          </h3>
           <p>{availability.canBook ? 'Status kosong atau siap diajukan mengikuti tombol booking.' : 'Belum bisa dibooking langsung, tetapi tetap bisa ditanyakan.'}</p>
           {/* PUB-CALENDAR-CHECKOUT: proyeksi kamar akan kosong (kamar terisi). */}
           {!availability.canBook && room.projectedAvailableDate ? (

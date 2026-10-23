@@ -133,7 +133,7 @@ Berkas ini adalah rumah rencana + progres program; jangan membuat dokumen parale
 | S1 | **selesai** (P37 tetap terbuka dengan default berjalan) | sesi 23 Okt 2026 | §8.9 (L1+L2) + register [KEPUTUSAN-OWNER](../KEPUTUSAN-OWNER.md) `ROOMS-AKUN-V2 S1` & `S1b`: P34 (a) bulanan bergulir · P35 (a) NIK bukan alat masuk · P36 (a) akun wajib di titik DP · P38 **DP 30%** (kanonik, sudah berjalan di kode) | S2 rencana rinci |
 | S2 | **selesai** | sesi 23 Okt 2026 (sesi S2) | §8.10 = rencana rinci S3–S9 (7 blok: perubahan berkas · acceptance terkecil · risiko · urutan) · §8.11 = L1 ukur ulang + temuan baru dari kode · `check-docs` BERSIH, tidak ada kode berubah | **S3** eksekusi: kirim `pricingTerm` ke publik, `termRisk` + `VACANCY_WEIGHT_TABLE`, aturan bulanan bergulir |
 | S3 | **selesai** | sesi 23 Okt 2026 (sesi S3) | [§8.12](#812-sesi-23-okt-2026-sesi-s3--peluang-kosong-berjenjang-bukti): `VACANCY_WEIGHT_TABLE` + `termRisk` + aturan bergulir P34 (a) semua di `utils/vacancyEstimate.ts`; `pricingTerm` + fakta kontrak whitelist dikirim backend (katalog **dan** kalender); chip di `RoomCard`, tabel bobot di `AvailabilityHeatmap`; vitest 367 lulus · tsc FE/BE 0 · `check-docs` BERSIH | **S4** label "Kmr X" + kartu compact |
-| S4 | belum mulai | — | rencana: sama | — |
+| S4 | **selesai** | sesi 23 Okt 2026 (sesi S4) | [§8.13](#813-sesi-23-okt-2026-sesi-s4--label-kmr-x--kartu-compact-bukti): `roomDisplayCode()` satu helper ("Kmr A"/"Kmr F1") + unit test; kartu katalog dipangkas ke satu elemen dominan (harga bulanan) dengan chip peluang kosong S3 tetap tampil; `RoomPreviewCard` & judul detail memakai helper yang sama; target sentuh ≥44×44 px di 390/768/1440 px; axe 0 violation · `check-fitur` bersih | **S5** identitas: bukti anti-enumerasi + penguncian percobaan |
 | S5 | belum mulai | — | rencana: sama | — |
 | S6 | belum mulai | — | rencana: sama | — |
 | S7 | belum mulai | — | rencana: sama (gate `npm run test:unit` wajib) | — |
@@ -616,3 +616,122 @@ tabel bobot di heatmap **belum dilihat mata di browser** — yang terbukti hanya
 "kelihatan bagus". (4) Peristiwa kosong 11 kamar adalah hasil aturan bergulir atas data kontrak yang **sudah
 lewat tanggal** — bukan bukti penghuni benar-benar akan keluar; tetap berlabel "perkiraan, bukan janji".
 (5) `pricingTerm` per kamar, Stay ACTIVE, CheckoutRequest, dan jumlah akun TENANT tetap UNKNOWN.
+
+### 8.13 Sesi 23 Okt 2026 (sesi S4) — label "Kmr X" + kartu compact: bukti
+
+**A. L1 ukur ulang** (dijalankan sesi S4, potret 2026-10-23; perintah + hasil apa adanya).
+
+| Hal | Hasil ukur | Selisih vs potret prompt |
+|---|---|---|
+| HEAD / branch | `30ebfdf3` · `main` · `## main...origin/main` (sinkron, tidak ada commit tertunda) | sama |
+| Build produksi | `Z1Qr7_YnZFAK` (`GET /version.json`) | sama |
+| Kamar | 13: A,B,C,D,G,H,I,J,K,L,M,F1,F2 (payload `/api/public/rooms` 11.974 B) | sama |
+| Huni | `occupied 12 · bookable 1 · maintenance 0 · reserved 0 · total 13` (`/api/public/rooms/summary`) | sama |
+| Booking online publik | MATI — `onlineBookingEnabled` true di **0 dari 13** kamar | sama |
+| Tanggal kontrak | **8** berakhir 1–10 Okt 2026 (B,G,H,I,K,L,M,F2) · **3** di depan (A 26/10, D 24/10, J 30/10) · C dan F1 tanpa tanggal | sama dengan §8.11/§8.12 |
+| `pricingTerm` di payload produksi | **TIDAK ADA** (kode S3 belum di-deploy) | sama |
+| Kunci SSH/deploy | **tetap TIDAK ADA** — `~/.ssh` tidak ada, `$TEMP/kost48ssh` tidak ada, tidak ada `*.pem` hasil pencarian di `C:\Users\lieml` | izin akses ukur (keputusan S2) **belum** bisa dipakai di mesin ini |
+| Stay ACTIVE / baris CheckoutRequest / akun TENANT | **UNKNOWN** — tanpa akses DB; tidak dikarang | sama |
+| Cacat Kmr C | katalog `OCCUPIED`, kalender `AVAILABLE` | sama; dicatat, **tidak** diperbaiki (bukan S4) |
+
+**B. Yang berubah (kode, sesi ini).**
+
+- `frontend/src/utils/publicRoomDisplay.ts` — `roomDisplayCode(code, fallback)` + `ROOM_DISPLAY_CODE_PREFIX`
+  ("Kmr"). **Satu tempat**; `Room.code` di data tidak berubah. Spasi dirapikan, kode kosong/`null` memakai
+  `fallback` pemanggil supaya tidak ada label "Kmr " menggantung.
+- `frontend/src/components/rooms/RoomCard.tsx` — label `Kmr A`, `room.name` turun jadi subjudul, tabel harga
+  **6 term** + daftar fasilitas dipangkas dari kartu (keduanya tetap lengkap di halaman detail), harga bulanan
+  menjadi **satu elemen dominan**. Chip peluang kosong S3 **tetap** dirender (`VacancyChip` tidak disentuh).
+- `frontend/src/pages/public/publicGuestShared.tsx` — `RoomPreviewCard` memakai helper yang sama; nama kamar
+  jadi subjudul. Tidak ada selektor `.gx-*` baru (berkas CSS hanya boleh diubah pada `.rm-*`).
+- `frontend/src/pages/rooms/PublicRoomDetailPage.tsx` — `h1` dan `h2` "Kmr X", nama kamar pindah ke baris
+  subjudul; rincian (6 term tarif, fasilitas, deposit, DP) **tidak** dipangkas.
+- `frontend/src/styles/11-public-pages.css` — **hanya selektor `.rm-*`**: gambar kartu 190→156 px (144 px di
+  ≤640 px), padding/gap lebih rapat, skala teks kartu menjadi **3 ukuran** (1.35 / 1 / .75 rem), target sentuh
+  tombol bandingkan 32→44 px, tombol geser foto 28→44 px, tombol aksi + "Lihat detail" `min-height: 44px`.
+  **Cacat kontras yang ditemukan lalu diperbaiki**: `.rm-btn-detail:hover` memakai `--pub-brand-blue-hover`
+  (`#0284c7`) = **4,09:1** di atas kartu putih → gagal WCAG AA (4,5:1) dan itulah satu-satunya violation yang
+  sempat muncul; hover diganti `#075985` = **7,93:1**.
+- Test: `roomDisplayCode.test.ts` (baru, 6 kasus) · `roomPreviewCard.test.tsx` (baru, 2 kasus) ·
+  `roomCard.test.tsx` diperbarui (label "Kmr A-01", fallback kode kosong, harga dominan & tidak ada tabel di
+  kartu) · `e2e/a11y/rooms.spec.ts` (baru, 3 test: 3 lebar + axe + target sentuh, tabel bobot heatmap, judul
+  halaman detail).
+- `docs/FITUR.md` **tidak** disentuh: tidak ada path komponen/rute yang berubah (`check-fitur` bersih).
+
+**C. Angka sebelum → sesudah.**
+
+Kartu pertama di `/rooms` (`?avail=all&sort=price-asc`, 9 kartu halaman 1), diukur `getBoundingClientRect()`.
+"Sebelum" = **kartu yang dilayani produksi** (`buildId Z1Qr7_YnZFAK`, kode sebelum S3 dan S4 → tanpa chip);
+"sesudah" = **build lokal** sesi S4.
+
+| Lebar | Tinggi kartu sebelum (produksi) | Tinggi kartu sesudah (lokal S4) | Δ |
+|---|---:|---:|---:|
+| 390 px | 703 px (lebar 366) | **452 px** (lebar 366) | −251 px (−36%) |
+| 768 px | 721 px (lebar 237) | **485 px** (lebar 237) | −236 px (−33%) |
+| 1440 px | 650 px (lebar 421) | **429 px** (lebar 421) | −221 px (−34%) |
+
+| Hal | Sebelum | Sesudah |
+|---|---|---|
+| Tabel harga di kartu | 6 baris per kartu (54 baris untuk 9 kartu) | **0** — harga bulanan 1 baris (elemen dominan) |
+| Daftar fasilitas di kartu | ada (`FacilityList`, maks 3) | **0** — pindah ke halaman detail |
+| Ukuran teks di kartu | 8 nilai (.65/.7/.72/.74/.78/.8/1.1/1.25 rem) | **3** nilai (1.35 / 1 / .75 rem) + glyph ikon |
+| Target sentuh kontrol kartu | 32 px (bandingkan), 28 px (geser foto), ±31 px (tombol aksi) | **≥ 44 × 44 px**, 0 kontrol di bawah 44 px pada 390/768/1440 px |
+| Kontras tombol "Lihat detail" saat hover | 4,09:1 (`#0284c7`) — gagal AA | **7,93:1** (`#075985`) |
+| axe-core violation `/rooms` | belum pernah diukur | **0** di 390/768/1440 px (termasuk `--repeat-each=2` → 6 test lulus); 1 violation yang sempat muncul = cacat kontras hover `.rm-btn-detail` yang **diperbaiki** — lihat §B dan §E.3 |
+| Scroll horizontal | belum pernah diukur | **tidak ada** di 390/768/1440 px |
+| Label kamar | "A" / "F1" di kartu; judul detail = `room.name` | **"Kmr A" / "Kmr F1"** di kartu, kartu pratinjau, dan judul detail |
+| Chip peluang kosong S3 di kartu | ada di kode, belum pernah dirender | **tampil & benar**: "Perkiraan kosong 30/10 · peluang …", `title` memuat "bukan janji" |
+
+**D. Verifikasi** — hasil apa adanya (potret 2026-10-23/24, build **lokal**, bukan produksi).
+
+- `cd frontend && npx tsc --noEmit` → **exit 0**.
+- `cd frontend && npx vitest run` → potret 2026-10-23/24: **64 berkas / 377 test lulus** (riwayat: potret S3 di
+  §8.12 = 62 berkas / 367 test; S4 menambah 2 berkas dan 10 test).
+- `cd frontend && npx vitest run src/test/unit/roomDisplayCode.test.ts src/test/components/roomCard.test.tsx
+  src/test/components/roomPreviewCard.test.tsx` → potret 2026-10-23/24: **3 berkas / 16 test lulus**.
+- `cd frontend && npx playwright test e2e/a11y/rooms.spec.ts` → **3 test lulus**; potret akhir dengan
+  `--repeat-each=2` → **6 test lulus** (chromium, `baseURL` `http://localhost:5173`, dev server lokal).
+  Angka yang dicetak spec: 390 px → kartu 9, kontrol 29, minW/minH **44/44**, axe **0**; 768 px → idem;
+  1440 px → idem; chip "Perkiraan kosong 30/10"; axe saat tombol detail di-hover → **0**.
+  Screenshot (di **luar repo**, `%TEMP%\kost48-s4-shots`): `rooms-390.png`, `rooms-768.png`,
+  `rooms-1440.png`, `rooms-390-card.png`, `rooms-768-card.png`, `rooms-1440-card.png`,
+  `rooms-detail-390.png` + `s4-rooms-measure.json`.
+- `node scripts/check-fitur.mjs` → `bersih — 58 fitur, 80 rute, 80 rute App.tsx`.
+- `node scripts/check-docs.mjs` → **BERSIH — 0 pelanggaran**; `node scripts/check-docs.selftest.mjs` tidak dijalankan.
+- `git diff --check` → bersih; `git status --short` → hanya 8 berkas terlacak berubah + 3 berkas baru milik S4
+  (tidak ada `git add -A`; berkas untracked lama tetap tidak disentuh).
+- **TIDAK dijalankan**: `cd backend && npx tsc --noEmit -p tsconfig.json` dan `cd backend && npm run test:unit`
+  — S4 tidak menyentuh backend/uang/jurnal/skema. `npm run build` tidak dijalankan (deploy = S9).
+
+**E. Batas kejujuran sesi ini.**
+
+1. **Tidak di-deploy**, `PUBLIC_ONLINE_BOOKING_ENABLED` tidak disentuh. Semua bukti visual berasal dari
+   **build lokal**; produksi masih `Z1Qr7_YnZFAK` (kode pra-S3/S4), jadi tidak ada satu pun klaim "tampilan
+   produksi sudah begini".
+2. **Data uji bukan data produksi**: spec memakai fixture 13 kamar dengan kode yang sama, tetapi tanggal
+   kontrak/tarif dibuat relatif terhadap hari berjalan supaya chip deterministik. Yang terbukti: perilaku
+   tampilan terhadap bentuk payload, bukan terhadap isi DB produksi.
+3. **Axe sempat tidak stabil, penyebabnya ditemukan dan diperbaiki (bukan ditoleransi).** Satu run mencatat
+   1 violation di 390 px, menghilang di run berikutnya. Setelah spec mencetak rincian node, violation itu
+   adalah `color-contrast` pada `.rm-btn-detail` — terjadi hanya ketika tetikus kebetulan berhenti di tombol itu
+   (efek tangkapan layar kartu), karena warna **hover** lamanya `#0284c7` hanya **4,09:1** di atas kartu putih
+   (gagal AA 4,5:1). Probe 4 keadaan (hover/tanpa hover, 2×) menunjukkan `color: rgb(3,105,161)` = 5,93:1 tanpa
+   hover. Diperbaiki dengan hover `#075985` = 7,93:1, **dan** spec sekarang (a) memindahkan tetikus ke posisi
+   netral sebelum axe dan (b) mengukur axe lagi saat tombol detail di-hover, supaya regresi ini tidak kembali
+   diam-diam. Cacat ini **sudah ada sebelum S4** (aturan hover lama), bukan akibat pemangkasan kartu.
+4. **Halaman detail punya 3 pelanggaran axe lama** yang **bukan** dari S4 — `color-contrast`
+   (`.room-detail-above-fold-price`), `landmark-one-main` (shell halaman tanpa `<main>`), `region`. Dicatat
+   sebagai temuan bertanggal; **tidak** diperbaiki karena di luar fase ini dan menyentuh shell halaman publik.
+   Konsekuensinya: klaim "axe 0" hanya berlaku untuk `/rooms`, bukan seluruh halaman publik.
+5. **Target sentuh 44 px** diukur pada kontrol yang **terender**. Tombol geser foto (`‹ ›`) hanya dirender saat
+   gambar di-hover, jadi di layar sentuh ia tidak muncul — diukur setelah hover dipaksa, bukan gaya sentuh nyata.
+6. **Yang belum pernah dilihat mata**: (a) tampilan `/rooms` di perangkat/sentuh sungguhan — yang ada hanya
+   tangkapan Chromium desktop-emulasi 390/768/1440 px; (b) `RoomPreviewCard` di halaman beranda tamu
+   (`PublicGuestDashboardPage`) — bukti hanya unit test render; (c) halaman publik lain yang sama-sama memakai
+   `11-public-pages.css` (mis. beranda/tim kami) — meskipun diff hanya menyentuh `.rm-*`, tidak ada tangkapan
+   layar halaman itu di sesi ini.
+7. **Informasi yang hilang dari kartu adalah keputusan sadar**: harga semua term dan daftar fasilitas hanya ada
+   di halaman detail sekarang. Kalau owner ingin salah satunya kembali ke kartu, itu perubahan S4 lanjutan
+   (bukan regresi diam-diam).
+8. `pricingTerm` per kamar, Stay ACTIVE, baris CheckoutRequest, dan jumlah akun TENANT tetap **UNKNOWN**
+   (tanpa akses DB). Cacat Kmr C tetap dicatat, tidak diperbaiki.

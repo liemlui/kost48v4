@@ -8,6 +8,24 @@ export function normalizePublicRoomText(value: unknown) {
   return String(value ?? "").toLowerCase();
 }
 
+/** Prefix label kamar publik. Huruf besar, satu tempat (S4 23 Okt 2026). */
+export const ROOM_DISPLAY_CODE_PREFIX = "Kmr";
+
+/**
+ * S4 — label tampilan kamar: "Kmr A", "Kmr F1". **Satu tempat** untuk semua
+ * tampilan publik; `Room.code` di data **tidak** diubah (kode tetap "A").
+ *
+ * - Spasi berlebih dirapikan (`" F1 "` → "Kmr F1"), kapitalisasi mengikuti data.
+ * - Kode kosong/`null`/`undefined` tidak menghasilkan "Kmr " menggantung:
+ *   yang dikembalikan adalah `fallback` milik pemanggil (mis. `Kamar ${id}`),
+ *   jadi tidak ada teks judul kosong di kartu.
+ */
+export function roomDisplayCode(code: unknown, fallback = ""): string {
+  const normalized = String(code ?? "").trim().replace(/\s+/g, " ");
+  if (!normalized) return fallback;
+  return `${ROOM_DISPLAY_CODE_PREFIX} ${normalized}`;
+}
+
 export function getPublicRoomSearchText(room: PublicRoom) {
   return [
     room.code,

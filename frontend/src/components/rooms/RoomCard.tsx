@@ -8,6 +8,7 @@ import {
   getPublicRoomAvailabilityDisplay,
   getPublicRoomBathroomLabel,
   getPublicRoomCoolingLabel,
+  roomDisplayCode,
 } from '../../utils/publicRoomDisplay';
 import type { PublicRoom } from '../../types';
 import {
@@ -15,9 +16,8 @@ import {
   VACANCY_NOTE,
   estimateNextVacancy,
 } from '../../utils/vacancyEstimate';
-import FacilityList from './FacilityList';
+import { formatRupiah } from '../../utils/formatCurrency';
 import FrameImage from '../common/FrameImage';
-import RoomPriceTable from './RoomPriceTable';
 import RoomSpecChips from './RoomSpecChips';
 import BookingCtaButton from './BookingCtaButton';
 
@@ -117,7 +117,7 @@ export function RoomCardImage({ room }: { room: PublicRoom }) {
         <FrameImage
           key={active}
           src={active}
-          alt={`Kamar ${room.code} — ${getPublicRoomCoolingLabel(room)}, kamar mandi ${getPublicRoomBathroomLabel(room)}`}
+          alt={`${roomDisplayCode(room.code, 'Kamar')} — ${getPublicRoomCoolingLabel(room)}, kamar mandi ${getPublicRoomBathroomLabel(room)}`}
           className="rm-card-img"
           onError={() => markFailed(active)}
         />
@@ -214,12 +214,15 @@ export default function RoomCard({
         )}
       </div>
 
-      {/* Body */}
+      {/* Body — S4 (23 Okt 2026): kartu compact, satu elemen dominan (harga).
+          Harga semua term + fasilitas lengkap pindah ke halaman detail supaya
+          kartu tidak menampilkan hal yang sama dua kali. Chip peluang kosong
+          (S3) TETAP ada di sini. */}
       <div className="rm-card-body">
         <div className="rm-card-title-row">
           <div>
-            <div className="rm-card-code">{room.code || `Kamar ${room.id}`}</div>
-            <div className="rm-card-name">{room.name || 'Kamar KOST48 Surabaya'}</div>
+            <div className="rm-card-code">{roomDisplayCode(room.code, `Kamar ${room.id}`)}</div>
+            {room.name?.trim() ? <div className="rm-card-name">{room.name}</div> : null}
           </div>
         </div>
 
@@ -229,15 +232,11 @@ export default function RoomCard({
         {/* 4 spec chip: KM, Pendingin, Ukuran, Tipe */}
         <RoomSpecChips room={room} variant="card" />
 
-        <FacilityList
-          facilities={room.facilities ?? []}
-          compact
-          maxItems={3}
-          emptyMessage=""
-        />
-
-        {/* Tabel harga lengkap semua term */}
-        <RoomPriceTable room={room} monthlyRate={monthlyRate} variant="card" />
+        {/* Satu elemen dominan: tarif bulanan. */}
+        <p className="rm-card-price-row">
+          <strong>{monthlyRate > 0 ? formatRupiah(monthlyRate) : 'Tanya admin'}</strong>
+          <span>/ bulan</span>
+        </p>
         {monthlyRate === 0 && <div className="rm-card-price-ask">Hubungi admin untuk tarif</div>}
 
         <BookingCtaButton
