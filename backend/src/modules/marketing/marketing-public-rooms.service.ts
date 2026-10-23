@@ -504,6 +504,39 @@ export class MarketingPublicRoomsService {
       renewByStayId.set(rr.stayId, rr);
     }
 
+    // Ambil pengajuan keluar (`CheckoutRequest`) PENDING / APPROVED untuk stay aktif.
+    // Hanya DIBACA — alur approval tetap milik modul checkout-requests.
+    // `requestedCheckOutDate` non-nullable di schema (`DateTime @db.Date`), jadi
+    // tidak ada jalur "NULL → turunkan ke akhir kontrak".
+    const checkoutRequests = activeStayIds.length > 0
+      ? await this.prisma.checkoutRequest.findMany({
+          where: {
+            stayId: { in: activeStayIds },
+            status: { in: ['PENDING', 'APPROVED'] },
+          },
+          select: {
+            stayId: true,
+            status: true,
+            requestedCheckOutDate: true,
+            createdAt: true,
+          },
+          orderBy: { createdAt: 'desc' },
+        })
+      : [];
+    // APPROVED menang atas PENDING; di antara status yang sama, yang terbaru menang.
+    const checkoutByStayId = new Map<
+      number,
+      { status: 'PENDING' | 'APPROVED'; requestedCheckOutDate: Date }
+    >();
+    for (const cr of checkoutRequests) {
+      const existing = checkoutByStayId.get(cr.stayId);
+      if (existing?.status === 'APPROVED' && cr.status !== 'APPROVED') continue;
+      checkoutByStayId.set(cr.stayId, {
+        status: cr.status as 'PENDING' | 'APPROVED',
+        requestedCheckOutDate: cr.requestedCheckOutDate,
+      });
+    }
+
     // Group stays by roomId.
     const staysByRoomId = new Map<number, typeof stays>();
     for (const stay of stays) {
@@ -534,6 +567,8 @@ export class MarketingPublicRoomsService {
       remainingDays: number;
       hasPendingRenew: boolean;
       renewStatus: string | null;
+      /** Pengajuan keluar yang sedang berjalan — tanpa PII, hanya tanggal + status. */
+      checkoutRequest: { status: 'PENDING' | 'APPROVED'; requestedCheckOutDate: string } | null;
       dpTenantName: string | null;
       dpCheckInDate: string | null;
       days: Record<string, string>;
@@ -559,6 +594,8 @@ export class MarketingPublicRoomsService {
       let hasPendingRenew = false;
       let renewStatus: string | null = null;
       let dpCheckInDate: string | null = null;
+      // Stay yang datanya dipakai baris kamar ini — dipakai untuk mengambil CheckoutRequest.
+      let referencedStayId: number | null = todayStay?.id ?? null;
 
       if (todayStay) {
         const isOccupied =
@@ -595,6 +632,7 @@ export class MarketingPublicRoomsService {
           return bEnd - aEnd;
         });
         const latestStay = sortedStays[0];
+        referencedStayId = latestStay.id ?? null;
         checkInDate = latestStay.checkInDate
           ? this.localYMD(latestStay.checkInDate)
           : null;
@@ -653,6 +691,8 @@ export class MarketingPublicRoomsService {
         }
       }
 
+      const checkoutInfo = referencedStayId != null ? checkoutByStayId.get(referencedStayId) : undefined;
+
       roomDays.push({
         id: room.id,
         code: room.code,
@@ -669,6 +709,12 @@ export class MarketingPublicRoomsService {
         remainingDays,
         hasPendingRenew,
         renewStatus,
+        checkoutRequest: checkoutInfo
+          ? {
+              status: checkoutInfo.status,
+              requestedCheckOutDate: this.localYMD(checkoutInfo.requestedCheckOutDate),
+            }
+          : null,
         dpTenantName: null,  // C01-02: jangan bocorkan PII ke publik
         dpCheckInDate,
         days,

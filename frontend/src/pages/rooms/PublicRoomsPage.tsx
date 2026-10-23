@@ -9,7 +9,6 @@ import EmptyState from "../../components/common/EmptyState";
 import { SkeletonBlock } from "../../components/common/SkeletonLoader";
 import TenantBookingGate from "../../components/tenant/TenantBookingGate";
 import RoomComparePanel from "../../components/rooms/RoomComparePanel";
-import AvailabilityTimeline from "../../components/public/RichAvailabilityCalendar";
 import AvailabilityHeatmap from "../../components/public/AvailabilityHeatmap";
 import Kost48LogoMark from "../../components/common/Kost48LogoMark";
 import RoomCard from "../../components/rooms/RoomCard";
@@ -315,7 +314,6 @@ export default function PublicRoomsPage() {
 
   const hasActiveFilter = !!(bathroom || cooling || (avail && avail !== "bookable") || category || sort !== "price-asc");
   const [filtersOpen, setFiltersOpen] = useState(false);
-  const [showDetailCalendar, setShowDetailCalendar] = useState(false);
   const paginationItems = useMemo(() => getPaginationItems(totalPages, safePage), [safePage, totalPages]);
 
   return (
@@ -586,18 +584,8 @@ export default function PublicRoomsPage() {
               </div>
             </div>
 
-            {/* ── KETERSEDIAAN: heatmap default, tabel 7 hari di balik tombol ── */}
-            <div className="d-flex justify-content-end mb-2">
-              <Button
-                size="sm"
-                variant="link"
-                className="p-0 small"
-                onClick={() => setShowDetailCalendar((value) => !value)}
-              >
-                {showDetailCalendar ? 'Tampilkan heatmap' : 'Tampilan rinci (tabel 7 hari)'}
-              </Button>
-            </div>
-            {showDetailCalendar ? <AvailabilityTimeline /> : <AvailabilityHeatmap />}
+            {/* ── KETERSEDIAAN: satu representasi saja — kalender heatmap ── */}
+            <AvailabilityHeatmap />
 
             {/* ── Compare ── */}
             {comparedRooms.length > 0 && (

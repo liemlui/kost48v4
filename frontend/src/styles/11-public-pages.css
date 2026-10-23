@@ -6530,51 +6530,97 @@
   .gx-guarantee-section { padding: 3rem 0; }
 }
 
-/* W-OWN-019 — heatmap ketersediaan (mobile-first) */
+/* W-OWN-019 — heatmap ketersediaan.
+   Bentuk: KALENDER BULANAN 7 kolom hari (keputusan owner 23 Okt 2026, menggantikan
+   matriks 14×13). Tiap sel = satu tanggal; isinya chip per kamar, tiap chip = DUA
+   PITA (atas status huni, bawah peluang kosong). Peluang kosong tidak boleh
+   dibedakan lewat warna saja → pola garis/outline dipakai di pita bawah. */
 .rm-heatmap { border-radius:16px; background:var(--white); box-shadow:0 2px 10px rgba(14,30,60,.05); }
-.rm-heatmap-legend { display:flex; flex-wrap:wrap; gap:.35rem .85rem; font-size:.74rem; color:var(--gray-600); }
-.rm-heatmap-legend-item { display:inline-flex; align-items:center; gap:.3rem; }
-.rm-heatmap-legend-item i { width:10px; height:10px; border-radius:3px; background:var(--gray-300); }
+.rm-heatmap-head { display:flex; flex-wrap:wrap; align-items:flex-start; justify-content:space-between; gap:.5rem; }
+.rm-heatmap-title { font-size:.95rem; font-weight:700; margin:0; color:var(--gray-800,#1f2937); }
+.rm-heatmap-month { font-size:.82rem; font-weight:700; color:var(--gray-700,#334155); }
+.rm-heatmap-summary { font-size:.76rem; color:var(--gray-600); line-height:1.4; }
+.rm-heatmap-note { font-size:.74rem; color:var(--gray-600); line-height:1.45; margin:.5rem 0 1.25rem; }
+.rm-heatmap-nav { display:flex; align-items:center; gap:.25rem; }
+.rm-heatmap-nav .btn { min-width:44px; min-height:44px; display:inline-flex; align-items:center; justify-content:center; padding:0 .55rem; }
+
+/* Legenda: dua blok berjudul, tidak boleh memuat status yang tak mungkin muncul */
+.rm-heatmap-legend-groups { display:flex; flex-wrap:wrap; gap:.5rem 1.5rem; margin-bottom:.5rem; }
+.rm-heatmap-legend { border:0; margin:0; padding:0; min-width:0; }
+.rm-heatmap-legend-title { font-size:.64rem; font-weight:700; letter-spacing:.05em; text-transform:uppercase; color:var(--gray-500); padding:0; margin:0 0 .25rem; }
+.rm-heatmap-legend-items { display:flex; flex-wrap:wrap; gap:.25rem .7rem; }
+.rm-heatmap-legend-item { display:inline-flex; align-items:center; gap:.3rem; font-size:.72rem; color:var(--gray-600); }
+.rm-heatmap-legend-item i { width:14px; height:10px; border-radius:3px; background:var(--gray-300); display:inline-block; flex:0 0 auto; }
 .rm-heatmap-legend-item.is-kosong i { background:#22c55e; }
 .rm-heatmap-legend-item.is-huni i { background:#cbd5e1; }
 .rm-heatmap-legend-item.is-booking_dp i { background:#60a5fa; }
 .rm-heatmap-legend-item.is-maintenance i { background:#f59e0b; }
 .rm-heatmap-legend-item.is-perpanjang i { background:#a78bfa; }
-.rm-heatmap-table { display:flex; flex-direction:column; gap:.35rem; overflow-x:auto; }
-.rm-heatmap-row { min-width:166px; grid-template-columns:128px minmax(0,1fr); }
-.rm-heatmap-row { display:grid; grid-template-columns:104px minmax(0,1fr); gap:.45rem; align-items:center; width:100%; border:1px solid var(--gray-200); background:var(--white); border-radius:12px; padding:.4rem .5rem; text-align:left; cursor:pointer; }
-.rm-heatmap-row:hover { border-color:var(--blue-300); background:var(--blue-50); }
-.rm-heatmap-room { display:flex; flex-direction:column; gap:.12rem; min-width:0; }
-.rm-heatmap-room strong { font-size:.86rem; }
-.rm-heatmap-badge { align-self:flex-start; font-size:.6rem; }
-.rm-heatmap-vacancy { font-size:.6rem; line-height:1.15; font-weight:700; color:var(--gray-600); text-wrap:balance; }
-.rm-heatmap-vacancy.is-kosong { color:#15803d; }
-.rm-heatmap-vacancy.is-cenderung_kosong { color:#b45309; }
-.rm-heatmap-vacancy.is-mungkin { color:#0369a1; }
-.rm-heatmap-vacancy.is-cenderung_lanjut { color:var(--gray-500); }
-.rm-heatmap-days { display:grid; grid-auto-flow:column; grid-auto-columns:minmax(10px,1fr); gap:2px; }
-.rm-heatmap-day { height:22px; border-radius:4px; background:#cbd5e1; }
-.rm-heatmap-day.is-kosong { background:#22c55e; }
-.rm-heatmap-day.is-huni { background:#cbd5e1; }
-.rm-heatmap-day.is-booking_dp { background:#60a5fa; }
-.rm-heatmap-day.is-maintenance { background:#f59e0b; }
-.rm-heatmap-day.is-perpanjang { background:#a78bfa; }
-.rm-heatmap-vacancy.is-tidak_diketahui { color:var(--gray-500); font-style:italic; }
-.rm-heatmap-tenure { font-size:.6rem; color:var(--gray-500); }
-.rm-heatmap-open { align-self:flex-start; border:0; background:none; padding:0; font-size:.86rem; font-weight:700; color:var(--blue-700, #1d4ed8); text-decoration:underline; }
-.rm-heatmap-open:hover { color:var(--blue-800, #1e40af); }
-.rm-heatmap-row.is-head { border:0; background:none; padding:0 .5rem; cursor:default; }
-.rm-heatmap-row.is-head:hover { background:none; }
-.rm-heatmap-axis { font-size:.5rem; line-height:1; color:var(--gray-500); text-align:center; align-self:center; overflow:hidden; white-space:nowrap; }
-.rm-heatmap-axis.is-today { color:var(--blue-700, #1d4ed8); font-weight:700; }
-.rm-heatmap-axis-label { font-size:.62rem; color:var(--gray-500); align-self:center; }
+.rm-heatmap-legend-item.is-belum_ada_info i { background:#f8fafc; box-shadow:inset 0 0 0 1px #94a3b8; }
+.rm-heatmap-legend-item.is-rendah i { background:#94a3b8; }
+.rm-heatmap-legend-item.is-sedang i { background:repeating-linear-gradient(135deg,#475569 0 2px,#e2e8f0 2px 4px); }
+.rm-heatmap-legend-item.is-tinggi i { background:repeating-linear-gradient(135deg,#15803d 0 2px,#bbf7d0 2px 4px); }
+
+/* Kalender */
+.rm-heatmap-calendar { display:grid; gap:2px; }
+.rm-heatmap-weekdays,
+.rm-heatmap-week { display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); gap:2px; }
+.rm-heatmap-week { margin-top:2px; }
+.rm-heatmap-weekday { font-size:.66rem; font-weight:700; color:var(--gray-500); text-align:center; padding:.15rem 0; }
+.rm-heatmap-weekday.is-sun { color:#b91c1c; }
+.rm-heatmap-cell { position:relative; display:flex; flex-direction:column; gap:2px; min-width:0; min-height:58px; padding:3px; border:1px solid var(--gray-200); border-radius:8px; background:var(--white); text-align:left; cursor:pointer; font:inherit; }
+.rm-heatmap-cell:hover { border-color:var(--blue-300,#93c5fd); background:var(--blue-50,#eff6ff); }
+.rm-heatmap-cell:focus-visible { outline:2px solid var(--blue-700,#1d4ed8); outline-offset:2px; }
+.rm-heatmap-cell.is-outside { background:#f8fafc; border-color:transparent; cursor:default; }
+.rm-heatmap-cell.is-outside:hover { background:#f8fafc; border-color:transparent; }
+.rm-heatmap-cell.is-today { border-color:var(--blue-700,#1d4ed8); }
+.rm-heatmap-cell.is-selected { background:var(--blue-50,#eff6ff); border-color:var(--blue-700,#1d4ed8); box-shadow:inset 0 0 0 1px var(--blue-700,#1d4ed8); }
+.rm-heatmap-date { display:inline-flex; align-items:center; justify-content:center; min-width:18px; height:18px; padding:0 2px; font-size:.68rem; font-weight:700; color:var(--gray-700,#334155); line-height:1; border-radius:999px; flex:0 0 auto; align-self:flex-start; }
+.rm-heatmap-cell.is-today .rm-heatmap-date { background:var(--blue-700,#1d4ed8); color:#fff; }
+.rm-heatmap-cell.is-outside .rm-heatmap-date { color:var(--gray-400,#94a3b8); }
+
+/* Chip kamar: pita atas = status huni, pita bawah = peluang kosong */
+.rm-heatmap-chips { display:flex; flex-direction:column; gap:2px; min-width:0; }
+.rm-heatmap-chip { display:flex; flex-direction:column; height:12px; border-radius:3px; overflow:hidden; flex:0 0 auto; }
+.rm-heatmap-chip-bars { display:flex; flex-direction:column; height:100%; border-radius:3px; overflow:hidden; flex:1 1 auto; }
+.rm-heatmap-chip-code { display:none; }
+.rm-heatmap-chip .band { display:block; flex:1 1 50%; min-height:5px; }
+.rm-heatmap-chip .band-1.is-kosong { background:#22c55e; }
+.rm-heatmap-chip .band-1.is-huni { background:#cbd5e1; }
+.rm-heatmap-chip .band-1.is-booking_dp { background:#60a5fa; }
+.rm-heatmap-chip .band-1.is-maintenance { background:#f59e0b; }
+.rm-heatmap-chip .band-1.is-perpanjang { background:#a78bfa; }
+.rm-heatmap-chip .band-2.is-belum_ada_info { background:#f8fafc; box-shadow:inset 0 0 0 1px #94a3b8; }
+.rm-heatmap-chip .band-2.is-rendah { background:#94a3b8; }
+.rm-heatmap-chip .band-2.is-sedang { background:repeating-linear-gradient(135deg,#475569 0 2px,#e2e8f0 2px 4px); }
+.rm-heatmap-chip .band-2.is-tinggi { background:repeating-linear-gradient(135deg,#15803d 0 2px,#bbf7d0 2px 4px); }
+.rm-heatmap-more { font-size:.58rem; line-height:1.1; color:var(--gray-500); }
 .rm-heatmap-state { min-height:220px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:.5rem; }
-@media (max-width:419px) {
-  .rm-heatmap-axis.is-alt { visibility:hidden; }
+
+/* Panel detail satu tanggal */
+.rm-heatmap-panel { margin-top:.6rem; border:1px solid var(--gray-200); border-radius:12px; background:var(--white); box-shadow:0 6px 18px rgba(14,30,60,.08); padding:.7rem .8rem; }
+.rm-heatmap-panel-head { display:flex; align-items:center; justify-content:space-between; gap:.5rem; margin-bottom:.4rem; }
+.rm-heatmap-panel-head h3 { font-size:.86rem; font-weight:700; margin:0; }
+.rm-heatmap-panel-list { list-style:none; margin:0; padding:0; display:grid; gap:.35rem; max-height:320px; overflow-y:auto; }
+.rm-heatmap-panel-item { display:flex; flex-wrap:wrap; align-items:center; gap:.3rem .5rem; border:1px solid var(--gray-200); border-radius:10px; padding:.4rem .5rem; }
+.rm-heatmap-panel-code { font-size:.8rem; font-weight:700; color:var(--blue-700,#1d4ed8); background:none; border:0; padding:0; text-decoration:underline; min-height:44px; display:inline-flex; align-items:center; }
+.rm-heatmap-panel-status { font-size:.72rem; font-weight:700; color:var(--gray-700,#334155); }
+.rm-heatmap-panel-chance { font-size:.72rem; color:var(--gray-600); }
+.rm-heatmap-panel-basis { flex:1 1 100%; font-size:.7rem; color:var(--gray-600); line-height:1.35; }
+.rm-heatmap-panel-empty { font-size:.78rem; color:var(--gray-600); margin:0; }
+
+/* Mobile: kalender dibuat selebar kartu supaya tap target tanggal tetap ≥44px */
+@media (max-width:767px) {
+  .rm-heatmap-calendar { margin-left:calc(-1 * (1rem + .75rem)); margin-right:calc(-1 * (1rem + .75rem)); }
+  .rm-heatmap-weekdays,
+  .rm-heatmap-week { gap:1px; }
+  .rm-heatmap-cell { padding:2px; border-radius:6px; }
+  .rm-heatmap-weekday { font-size:.6rem; }
 }
 @media (min-width:768px) {
-  .rm-heatmap-row { grid-template-columns:190px minmax(0,1fr); }
-  .rm-heatmap-room { flex-direction:row; align-items:center; gap:.45rem; }
-  .rm-heatmap-badge { align-self:center; }
-  .rm-heatmap-axis { font-size:.6rem; }
+  .rm-heatmap-legend-title { font-size:.7rem; }
+  .rm-heatmap-legend-item { font-size:.78rem; }
+  .rm-heatmap-cell { min-height:72px; padding:4px; }
+  .rm-heatmap-chip { height:14px; }
+  .rm-heatmap-date { font-size:.74rem; }
 }

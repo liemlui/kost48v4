@@ -5,6 +5,6 @@
 //   PATCH: perbaikan bug / tweak tampilan minor (+0.0.1)
 // Catatan: versi ini HANYA dinaikkan manual oleh AI saat owner minta bump versi.
 // Dokumentasi lengkap: lihat CLAUDE.md bagian "Konvensi Versi".
-export const APP_VERSION = '1.5.0';
-export const APP_PHASE = 'Aturan Huni Transparan';
-export const APP_BUILD_DATE = '2026-10-21';
+export const APP_VERSION = '1.6.0';
+export const APP_PHASE = 'Kalender Ketersediaan Kamar';
+export const APP_BUILD_DATE = '2026-10-23';

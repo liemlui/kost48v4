@@ -28,6 +28,19 @@ export async function getAvailabilityCalendar(params?: { from?: string; to?: str
         name: string | null;
         floor: string | null;
         status: string;
+        /** Tanggal check-in stay yang sedang berjalan (ISO). */
+        checkInDate: string | null;
+        /** Akhir kontrak stay yang sedang berjalan (ISO). */
+        plannedCheckOutDate: string | null;
+        /** Sisa hari dari HARI INI sampai akhir kontrak (0 = habis atau lewat). */
+        remainingDays: number;
+        hasPendingRenew: boolean;
+        renewStatus: string | null;
+        /**
+         * Pengajuan keluar yang sedang berjalan. Tanpa PII — hanya status + tanggal.
+         * `null` = tidak ada pengajuan; estimator lalu memakai `plannedCheckOutDate`.
+         */
+        checkoutRequest: { status: 'PENDING' | 'APPROVED'; requestedCheckOutDate: string } | null;
         days: Record<string, string>;
       }>;
     };
