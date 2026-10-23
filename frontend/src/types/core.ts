@@ -479,6 +479,24 @@ export type PublicRoom = {
   // PUB-CALENDAR-CHECKOUT: proyeksi kamar "Akan Kosong" (ISO date) bila relevan.
   projectedAvailableDate?: string | null;
   projectedAvailableReason?: 'checkout-approved' | 'short-term' | null;
+  // S3 (23 Okt 2026): fakta kontrak PUBLIK — whitelist tanggal + masa sewa.
+  // Tanpa nama/telepon/NIK. `pricingTerm` di sini = masa sewa stay aktif,
+  // BUKAN `highlightedPricingTerm` (term yang disorot katalog).
+  /**
+   * Tanggal check-in stay aktif (ISO `YYYY-MM-DD`) — `null` bila kamar kosong
+   * atau kontrak tidak punya tanggal.
+   */
+  checkInDate?: string | null;
+  /** Akhir kontrak stay aktif (ISO `YYYY-MM-DD`). */
+  plannedCheckOutDate?: string | null;
+  /** Sisa hari menuju akhir kontrak (0 = habis atau lewat). */
+  remainingDays?: number | null;
+  /** Masa sewa stay aktif: DAILY…YEARLY. */
+  pricingTerm?: PricingTerm | null;
+  hasPendingRenew?: boolean | null;
+  renewStatus?: string | null;
+  /** Pengajuan keluar yang sedang berjalan — status + tanggal saja, tanpa PII. */
+  checkoutRequest?: { status: 'PENDING' | 'APPROVED'; requestedCheckOutDate: string } | null;
   notes?: string | null;
   images?: string[];
   pricing: {

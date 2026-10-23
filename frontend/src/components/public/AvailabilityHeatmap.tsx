@@ -6,6 +6,7 @@ import { getAvailabilityCalendar } from '../../api/bookings';
 import {
   VACANCY_CHANCE_LABEL,
   VACANCY_NOTE,
+  VACANCY_WEIGHT_TABLE,
   estimateVacancyOnDate,
   type VacancyChance,
   type VacancyOnDateEstimate,
@@ -37,6 +38,8 @@ type CalendarRoom = {
   status: string;
   checkInDate?: string | null;
   plannedCheckOutDate?: string | null;
+  /** Masa sewa stay aktif (DAILY…YEARLY) — dikirim backend sejak S3. */
+  pricingTerm?: string | null;
   remainingDays?: number | null;
   hasPendingRenew?: boolean | null;
   renewStatus?: string | null;
@@ -329,6 +332,37 @@ export default function AvailabilityHeatmap() {
         ) : null}
 
         <p className="rm-heatmap-note">{VACANCY_NOTE}</p>
+
+        {/* Tabel bobot = VACANCY_WEIGHT_TABLE, sumber angka yang sama dengan rumus
+            di `utils/vacancyEstimate.ts`. Dibuka lewat <details> supaya kalender
+            tetap dekat di layar 390 px, tetapi labelnya selalu terlihat. */}
+        <details className="rm-heatmap-weights">
+          <summary>Bobot masa sewa pada perkiraan peluang kosong</summary>
+          <table>
+            <caption>
+              Semakin pendek masa sewa, semakin sering kontraknya berakhir — jadi semakin
+              tinggi peluang kamar kosong. Angka ini perkiraan, bukan janji.
+            </caption>
+            <thead>
+              <tr>
+                <th scope="col">Masa sewa</th>
+                <th scope="col">Kelas</th>
+                <th scope="col">Bobot</th>
+                <th scope="col">Alasan</th>
+              </tr>
+            </thead>
+            <tbody>
+              {VACANCY_WEIGHT_TABLE.map((row) => (
+                <tr key={row.label}>
+                  <th scope="row">{row.label}</th>
+                  <td>{row.kelas}</td>
+                  <td>{row.weight > 0 ? `+${row.weight}` : '0'}</td>
+                  <td>{row.reason}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </details>
 
         {isLoading ? (
           <div className="rm-heatmap-state text-muted small" role="status">

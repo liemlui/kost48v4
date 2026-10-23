@@ -1,5 +1,11 @@
 import { describe, it, expect } from 'vitest';
-import { estimateVacancy, estimateVacancyOnDate } from '../../utils/vacancyEstimate';
+import {
+  VACANCY_WEIGHT_TABLE,
+  estimateVacancy,
+  estimateVacancyOnDate,
+  rollsMonthly,
+  termRisk,
+} from '../../utils/vacancyEstimate';
 
 const TODAY = new Date('2026-10-22T08:00:00+07:00');
 
@@ -288,11 +294,14 @@ describe('estimateVacancyOnDate — peluang kosong per tanggal', () => {
   });
 
   it('perpanjangan disetujui menekan peluang kosong', () => {
+    // Sewa harian (bukan kelas bergulir) supaya tanggal kontrak yang sudah lewat
+    // tidak digeser P34 (a) — yang diuji di sini hanya efek perpanjangan.
     const base = {
       status: 'OCCUPIED' as const,
       checkInDate: daysAgo(60),
       plannedCheckOutDate: ahead(10),
       remainingDays: 10,
+      pricingTerm: 'DAILY',
     };
     const date = ymd(ahead(20));
     const plain = estimateVacancyOnDate(base, date);
@@ -332,6 +341,141 @@ describe('estimateVacancyOnDate — peluang kosong per tanggal', () => {
     expect(pending.reason).toMatch(/menunggu persetujuan/);
     for (const result of [contract, pending]) {
       expect(result.reason).not.toMatch(/[A-Z][a-z]{3,}\s[A-Z][a-z]{3,}/); // dua kata berhuruf besar = nama
+    }
+  });
+});
+
+/* ── S3: peluang kosong berjenjang (masa sewa + bulanan bergulir) ───────────── */
+
+describe('termRisk — bobot masa sewa (tabel yang sama dengan yang tampil di layar)', () => {
+  const BASE = { status: 'OCCUPIED', checkInDate: '2026-09-01', remainingDays: 0 } as const;
+  type Kelas = 'pendek' | 'menengah' | 'panjang';
+
+  const bobot = (kelas: Kelas) =>
+    VACANCY_WEIGHT_TABLE.filter((row) => row.kelas === kelas).map((row) => row.weight);
+
+  it('tabel menutup keenam masa sewa tepat sekali + satu baris "tanpa data", semua beralasan', () => {
+    const terms = VACANCY_WEIGHT_TABLE.flatMap((row) => row.terms);
+    expect(terms.slice().sort()).toEqual([
+      'BIWEEKLY',
+      'DAILY',
+      'MONTHLY',
+      'SMESTERLY',
+      'WEEKLY',
+      'YEARLY',
+    ]);
+    expect(new Set(terms).size).toBe(terms.length);
+    expect(VACANCY_WEIGHT_TABLE.filter((row) => row.kelas === 'tanpa data')).toHaveLength(1);
+    for (const row of VACANCY_WEIGHT_TABLE) {
+      expect(row.reason.length, `baris ${row.label} tanpa alasan`).toBeGreaterThan(10);
+    }
+  });
+
+  it('ARAH: pendek > menengah > panjang (misi owner §8.1 butir 1)', () => {
+    expect(Math.min(...bobot('pendek'))).toBeGreaterThan(Math.max(...bobot('menengah')));
+    expect(Math.min(...bobot('menengah'))).toBeGreaterThan(Math.max(...bobot('panjang')));
+    expect(Math.max(...bobot('panjang'))).toBe(0);
+  });
+
+  it('skor = dasar + bobot baris tabelnya (angka di layar = angka di uji)', () => {
+    const dasar = estimateVacancy(BASE, TODAY).score;
+    for (const row of VACANCY_WEIGHT_TABLE) {
+      for (const term of row.terms) {
+        expect(termRisk(term), term).toBe(row.weight);
+        expect(estimateVacancy({ ...BASE, pricingTerm: term }, TODAY).score, term).toBe(
+          dasar + row.weight,
+        );
+      }
+    }
+  });
+
+  it('tanpa masa sewa / term tak dikenal: bobot 0 — skor sama dengan rumus lama', () => {
+    expect(estimateVacancy(BASE, TODAY).score).toBe(53);
+    expect(termRisk(null)).toBe(0);
+    expect(termRisk(undefined)).toBe(0);
+    expect(termRisk('')).toBe(0);
+    expect(termRisk('TIDAK_DIKENAL')).toBe(0);
+    expect(estimateVacancy({ ...BASE, pricingTerm: null }, TODAY).score).toBe(53);
+  });
+
+  it('hanya bulanan ke atas yang digulirkan; sewa pendek tidak', () => {
+    expect(rollsMonthly('DAILY')).toBe(false);
+    expect(rollsMonthly('WEEKLY')).toBe(false);
+    expect(rollsMonthly('BIWEEKLY')).toBe(false);
+    expect(rollsMonthly('MONTHLY')).toBe(true);
+    expect(rollsMonthly('SMESTERLY')).toBe(true);
+    expect(rollsMonthly('YEARLY')).toBe(true);
+    expect(rollsMonthly(null)).toBe(true); // default P34 (a): kontrak lewat = bulanan
+  });
+});
+
+describe('estimateVacancyOnDate — kontrak lewat = bulanan bergulir (P34 a)', () => {
+  const ROOM = {
+    status: 'OCCUPIED',
+    checkInDate: '2026-09-01',
+    plannedCheckOutDate: '2026-10-01',
+    remainingDays: 0,
+    pricingTerm: 'MONTHLY',
+  };
+
+  it('kontrak lewat dinilai pada siklus bulan berikutnya, bukan tanggal lama', () => {
+    const today = estimateVacancyOnDate(ROOM, '2026-10-23');
+    expect(today.basis).toBe('KONTRAK_BERAKHIR');
+    expect(today.vacantFrom).toBe('2026-11-01');
+    expect(today.chance).toBe('RENDAH'); // masih terikat sampai siklus berikutnya
+    expect(today.reason).toMatch(/bulanan bergulir, siklus bulanan berikutnya 1\/11/);
+  });
+
+  it('pada siklus berikutnya skor = sisa 0 + lama tinggal + bobot bulanan (63)', () => {
+    const atCycle = estimateVacancyOnDate(ROOM, '2026-11-01');
+    expect(atCycle.vacantFrom).toBe('2026-11-01');
+    expect(atCycle.score).toBe(63); // 28 + 25 + 10
+    expect(atCycle.chance).toBe('TINGGI');
+  });
+
+  it('siklus bergulir maju lagi saat tanggal yang dinilai melewatinya', () => {
+    expect(estimateVacancyOnDate(ROOM, '2026-11-02').vacantFrom).toBe('2026-12-01');
+    expect(estimateVacancyOnDate(ROOM, '2026-12-01').vacantFrom).toBe('2026-12-01');
+    expect(estimateVacancyOnDate(ROOM, '2027-01-15').vacantFrom).toBe('2027-02-01');
+  });
+
+  it('tanggal dijepit ke akhir bulan (kontrak 31 Januari → 28 Februari)', () => {
+    const room = { ...ROOM, checkInDate: '2026-01-01', plannedCheckOutDate: '2026-01-31' };
+    expect(estimateVacancyOnDate(room, '2026-02-15').vacantFrom).toBe('2026-02-28');
+  });
+
+  it('sewa pendek TIDAK digulirkan: kontrak lewat tetap tanggal kosongnya', () => {
+    const daily = { ...ROOM, pricingTerm: 'DAILY' };
+    const today = estimateVacancyOnDate(daily, '2026-10-23');
+    expect(today.vacantFrom).toBe('2026-10-01');
+    expect(today.score).toBe(77); // 28 + 25 + 24 (harian)
+    expect(today.chance).toBe('TINGGI');
+    expect(today.reason).not.toMatch(/bergulir/);
+  });
+
+  it('pengajuan keluar menang atas aturan bergulir (tanggal penghuni, bukan siklus)', () => {
+    const withCheckout = estimateVacancyOnDate(
+      { ...ROOM, checkoutRequest: { status: 'APPROVED', requestedCheckOutDate: '2026-10-25' } },
+      '2026-10-23',
+    );
+    expect(withCheckout.basis).toBe('CHECKOUT_DISETUJUI');
+    expect(withCheckout.vacantFrom).toBe('2026-10-25');
+  });
+
+  it('perpanjangan disetujui tetap menekan kamar yang kontraknya sudah lewat', () => {
+    const renewed = estimateVacancyOnDate(
+      { ...ROOM, hasPendingRenew: true, renewStatus: 'APPROVED' },
+      '2026-11-01',
+    );
+    expect(renewed.chance).toBe('RENDAH');
+    expect(renewed.reason).toMatch(/sudah diperpanjang/);
+  });
+
+  it('label tetap perkiraan: teks dasar tidak pernah menjanjikan kepastian', () => {
+    for (const iso of ['2026-10-23', '2026-11-01', '2026-12-01']) {
+      const result = estimateVacancyOnDate(ROOM, iso);
+      expect(result.reason).not.toMatch(/pasti|dijamin/i);
+      expect(result.hasData).toBe(true);
     }
   });
 });

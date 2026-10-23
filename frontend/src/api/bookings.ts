@@ -32,6 +32,8 @@ export async function getAvailabilityCalendar(params?: { from?: string; to?: str
         checkInDate: string | null;
         /** Akhir kontrak stay yang sedang berjalan (ISO). */
         plannedCheckOutDate: string | null;
+        /** Masa sewa stay aktif (DAILY…YEARLY) — S3, tanpa PII. */
+        pricingTerm: string | null;
         /** Sisa hari dari HARI INI sampai akhir kontrak (0 = habis atau lewat). */
         remainingDays: number;
         hasPendingRenew: boolean;

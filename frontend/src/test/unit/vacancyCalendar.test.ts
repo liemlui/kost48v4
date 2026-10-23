@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { isVacancyStart, pickVacancyStarts } from '../../utils/vacancyCalendar';
-import type { VacancyOnDateEstimate } from '../../utils/vacancyEstimate';
+import { estimateVacancyOnDate, type VacancyOnDateEstimate } from '../../utils/vacancyEstimate';
 
 /** Bangun estimate minimal — bentuknya mengikuti keluaran `estimateVacancyOnDate`. */
 function estimate(partial: Partial<VacancyOnDateEstimate> = {}): VacancyOnDateEstimate {
@@ -59,5 +59,34 @@ describe('vacancyCalendar — peristiwa "kamar mulai kosong"', () => {
     expect(pickVacancyStarts(items, '2026-11-04').map((item) => item.code)).toEqual(['C', 'A']);
     expect(pickVacancyStarts(items, '2026-11-07').map((item) => item.code)).toEqual(['F1']);
     expect(pickVacancyStarts(items, '2026-11-08')).toEqual([]);
+  });
+
+  it('kontrak lewat (bulanan bergulir, P34 a) muncul di siklus berikutnya — bukan diulang tiap hari', () => {
+    // Estimator milik `vacancyEstimate.ts`; berkas ini hanya memilih, jadi bukti
+    // "satu sumber" diuji dengan merangkai keduanya pada data kontrak nyata.
+    const room = {
+      status: 'OCCUPIED',
+      checkInDate: '2026-09-01',
+      plannedCheckOutDate: '2026-10-01',
+      remainingDays: 0,
+      pricingTerm: 'MONTHLY',
+    };
+
+    // Tepat di tanggal akhir kontrak: belum digulirkan, jadi masih peristiwa tanggal itu.
+    const atOldDate = estimateVacancyOnDate(room, '2026-10-01');
+    expect(atOldDate.vacantFrom).toBe('2026-10-01');
+    expect(isVacancyStart(atOldDate, '2026-10-01')).toBe(true);
+
+    // Sesudah kontrak lewat: peristiwa pindah ke siklus bulan berikutnya dan TIDAK
+    // diulang di setiap hari setelah tanggal lama.
+    for (const iso of ['2026-10-02', '2026-10-15', '2026-10-31']) {
+      const estimateAfter = estimateVacancyOnDate(room, iso);
+      expect(estimateAfter.vacantFrom, iso).toBe('2026-11-01');
+      expect(isVacancyStart(estimateAfter, iso), iso).toBe(false);
+    }
+
+    const atCycle = estimateVacancyOnDate(room, '2026-11-01');
+    expect(atCycle.vacantFrom).toBe('2026-11-01');
+    expect(isVacancyStart(atCycle, '2026-11-01')).toBe(true);
   });
 });

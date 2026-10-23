@@ -43,6 +43,25 @@ const PUBLIC_ROOM_SELECT = {
 
 type PublicRoomRecord = Prisma.RoomGetPayload<{ select: typeof PUBLIC_ROOM_SELECT }>;
 
+/**
+ * Fakta kontrak yang boleh tampil di publik (whitelist S3, 23 Okt 2026).
+ * HANYA tanggal + masa sewa + status pengajuan. Nama/telepon/NIK penghuni tidak
+ * pernah masuk struktur ini (C01-02) — jangan menambah field PII di sini.
+ */
+export interface PublicStayFacts {
+  checkInDate: string | null;
+  plannedCheckOutDate: string | null;
+  /** Sisa hari menuju akhir kontrak (0 = habis atau sudah lewat), dihitung di server. */
+  remainingDays: number;
+  /** Masa sewa stay aktif: DAILY…YEARLY (enum `PricingTerm`). */
+  pricingTerm: string | null;
+  hasPendingRenew: boolean;
+  renewStatus: string | null;
+  checkoutRequest: { status: 'PENDING' | 'APPROVED'; requestedCheckOutDate: string } | null;
+  projectedAvailableDate: string | null;
+  projectedAvailableReason: 'checkout-approved' | 'short-term' | null;
+}
+
 export interface PublicRoomSummary {
   bookable: number;
   occupied: number;
@@ -348,57 +367,140 @@ export class MarketingPublicRoomsService {
     ]);
 
     const facilitiesByRoomId = await this.getPublicFacilitiesByRoomId(items.map((room) => room.id));
-    const projectedByRoomId = await this.getProjectedAvailabilityByRoomId(items.map((room) => room.id));
+    const stayFactsByRoomId = await this.getPublicStayFactsByRoomId(items.map((room) => room.id));
 
     return {
-      items: serializePrismaResult(items.map((room) => this.toPublicRoomDto(room, query.pricingTerm, facilitiesByRoomId.get(room.id) ?? [], projectedByRoomId.get(room.id)))),
+      items: serializePrismaResult(items.map((room) => this.toPublicRoomDto(room, query.pricingTerm, facilitiesByRoomId.get(room.id) ?? [], stayFactsByRoomId.get(room.id)))),
       meta: buildMeta(page, limit, totalItems),
     };
   }
 
-  // PUB-CALENDAR-CHECKOUT/RENEW: proyeksi tanggal kamar "Akan Kosong" untuk kamar
-  // terisi yang (a) ada checkout-request APPROVED, atau (b) stay-nya jangka pendek
-  // (harian/mingguan/2-mingguan) yang sering tidak diperpanjang. Keputusan owner 2026-06-18.
-  private async getProjectedAvailabilityByRoomId(
-    roomIds: number[],
-  ): Promise<Map<number, { date: string; reason: 'checkout-approved' | 'short-term' }>> {
-    const map = new Map<number, { date: string; reason: 'checkout-approved' | 'short-term' }>();
-    if (!roomIds.length) return map;
-    const todayStr = new Date().toISOString().slice(0, 10);
+  // PUB-CALENDAR-CHECKOUT/RENEW: fakta kontrak publik per kamar — dipakai katalog
+  // (chip peluang kosong) dan sekaligus menyimpan proyeksi tanggal kamar "Akan
+  // Kosong" untuk kamar terisi yang (a) ada checkout-request APPROVED, atau (b)
+  // stay-nya jangka pendek (harian/mingguan/2-mingguan) yang sering tidak
+  // diperpanjang. Keputusan owner 2026-06-18.
+  //
+  // S3 (23 Okt 2026): isi fungsi ini adalah WHITELIST publik — tanggal, masa sewa,
+  // dan status pengajuan. Nama/telepon/NIK penghuni tidak pernah di-select di sini.
+  private async getPublicStayFactsByRoomId(roomIds: number[]): Promise<Map<number, PublicStayFacts>> {
+    const facts = new Map<number, PublicStayFacts>();
+    if (!roomIds.length) return facts;
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const todayStr = this.localYMD(today);
 
     const stays = await this.prisma.stay.findMany({
       where: { roomId: { in: roomIds }, status: 'ACTIVE' as any },
-      select: { id: true, roomId: true, pricingTerm: true, plannedCheckOutDate: true },
+      select: {
+        id: true,
+        roomId: true,
+        pricingTerm: true,
+        checkInDate: true,
+        plannedCheckOutDate: true,
+      },
+      orderBy: { checkInDate: 'desc' },
     });
+    if (!stays.length) return facts;
+
     const stayIds = stays.map((s) => s.id);
-    const approved = stayIds.length
-      ? await this.prisma.checkoutRequest.findMany({
-          where: { stayId: { in: stayIds }, status: 'APPROVED' as any },
-          select: { stayId: true, requestedCheckOutDate: true },
-          orderBy: { requestedCheckOutDate: 'asc' },
-        })
-      : [];
-    const approvedByStayId = new Map<number, Date>();
-    for (const c of approved) if (!approvedByStayId.has(c.stayId)) approvedByStayId.set(c.stayId, c.requestedCheckOutDate);
+    const [checkoutRows, renewRows] = await Promise.all([
+      this.prisma.checkoutRequest.findMany({
+        where: { stayId: { in: stayIds }, status: { in: ['PENDING', 'APPROVED'] as any } },
+        select: { stayId: true, status: true, requestedCheckOutDate: true, createdAt: true },
+        orderBy: { createdAt: 'desc' },
+      }),
+      this.prisma.renewRequest.findMany({
+        where: { stayId: { in: stayIds }, status: { in: ['PENDING', 'APPROVED'] } },
+        select: { stayId: true, status: true },
+      }),
+    ]);
+
+    // APPROVED menang atas PENDING; di antara status yang sama, yang terbaru menang.
+    const checkoutByStayId = new Map<
+      number,
+      { status: 'PENDING' | 'APPROVED'; requestedCheckOutDate: Date }
+    >();
+    for (const row of checkoutRows) {
+      const existing = checkoutByStayId.get(row.stayId);
+      if (existing?.status === 'APPROVED' && row.status !== 'APPROVED') continue;
+      checkoutByStayId.set(row.stayId, {
+        status: row.status as 'PENDING' | 'APPROVED',
+        requestedCheckOutDate: row.requestedCheckOutDate,
+      });
+    }
+    const renewByStayId = new Map<number, string>();
+    for (const row of renewRows) renewByStayId.set(row.stayId, row.status);
+
+    // Satu stay per kamar: yang mencakup hari ini; kalau tidak ada, kontrak terjauh
+    // (stay yang masih ACTIVE walau kontraknya sudah lewat).
+    const byRoomId = new Map<number, typeof stays>();
+    for (const stay of stays) {
+      const list = byRoomId.get(stay.roomId);
+      if (list) list.push(stay);
+      else byRoomId.set(stay.roomId, [stay]);
+    }
 
     const SHORT_TERMS = ['DAILY', 'WEEKLY', 'BIWEEKLY'];
-    for (const stay of stays) {
-      const checkout = approvedByStayId.get(stay.id);
-      let date: Date | null = null;
-      let reason: 'checkout-approved' | 'short-term' | null = null;
-      if (checkout) {
-        date = checkout;
-        reason = 'checkout-approved';
-      } else if (SHORT_TERMS.includes(String(stay.pricingTerm)) && stay.plannedCheckOutDate) {
-        date = stay.plannedCheckOutDate;
-        reason = 'short-term';
+    for (const [roomId, roomStays] of byRoomId) {
+      const covering = roomStays.find((stay) => {
+        const start = new Date(stay.checkInDate);
+        const end = stay.plannedCheckOutDate ? new Date(stay.plannedCheckOutDate) : null;
+        return start <= today && (!end || end > today);
+      });
+      const stay = covering
+        ?? [...roomStays].sort(
+          (a, b) => (b.plannedCheckOutDate?.getTime() ?? 0) - (a.plannedCheckOutDate?.getTime() ?? 0),
+        )[0];
+
+      const checkInDate = this.localYMD(new Date(stay.checkInDate));
+      const plannedCheckOutDate = stay.plannedCheckOutDate
+        ? this.localYMD(new Date(stay.plannedCheckOutDate))
+        : null;
+      const remainingDays = plannedCheckOutDate
+        ? Math.max(
+          0,
+          Math.round((new Date(`${plannedCheckOutDate}T00:00:00`).getTime() - today.getTime()) / 86_400_000),
+        )
+        : 0;
+
+      const checkout = checkoutByStayId.get(stay.id);
+      const renewStatus = renewByStayId.get(stay.id) ?? null;
+
+      // PUB-CALENDAR-CHECKOUT: hanya tanggal yang belum lewat yang diproyeksikan.
+      let projectedAvailableDate: string | null = null;
+      let projectedAvailableReason: 'checkout-approved' | 'short-term' | null = null;
+      if (checkout?.status === 'APPROVED') {
+        projectedAvailableDate = this.localYMD(new Date(checkout.requestedCheckOutDate));
+        projectedAvailableReason = 'checkout-approved';
+      } else if (SHORT_TERMS.includes(String(stay.pricingTerm)) && plannedCheckOutDate) {
+        projectedAvailableDate = plannedCheckOutDate;
+        projectedAvailableReason = 'short-term';
       }
-      if (date && reason) {
-        const dateStr = date.toISOString().slice(0, 10);
-        if (dateStr >= todayStr) map.set(stay.roomId, { date: dateStr, reason });
+      if (projectedAvailableDate && projectedAvailableDate < todayStr) {
+        projectedAvailableDate = null;
+        projectedAvailableReason = null;
       }
+
+      facts.set(roomId, {
+        checkInDate,
+        plannedCheckOutDate,
+        remainingDays,
+        pricingTerm: stay.pricingTerm ? String(stay.pricingTerm) : null,
+        hasPendingRenew: renewStatus !== null,
+        renewStatus,
+        checkoutRequest: checkout
+          ? {
+            status: checkout.status,
+            requestedCheckOutDate: this.localYMD(new Date(checkout.requestedCheckOutDate)),
+          }
+          : null,
+        projectedAvailableDate,
+        projectedAvailableReason,
+      });
     }
-    return map;
+    return facts;
   }
 
   // ═══════════════════════════════════════════════════════════
@@ -471,6 +573,7 @@ export class MarketingPublicRoomsService {
         id: true,
         roomId: true,
         status: true,
+        pricingTerm: true,
         checkInDate: true,
         plannedCheckOutDate: true,
         initialMetersPromotedAt: true,
@@ -564,6 +667,8 @@ export class MarketingPublicRoomsService {
       currentTenantName: string | null;
       checkInDate: string | null;
       plannedCheckOutDate: string | null;
+      /** Masa sewa stay aktif (enum `PricingTerm`); null = tidak ada stay. */
+      pricingTerm: string | null;
       remainingDays: number;
       hasPendingRenew: boolean;
       renewStatus: string | null;
@@ -590,6 +695,8 @@ export class MarketingPublicRoomsService {
 
       let checkInDate: string | null = null;
       let plannedCheckOutDate: string | null = null;
+      /** Masa sewa stay yang dipakai baris ini (enum `PricingTerm`) — S3, tanpa PII. */
+      let pricingTerm: string | null = null;
       let remainingDays = 0;
       let hasPendingRenew = false;
       let renewStatus: string | null = null;
@@ -609,6 +716,7 @@ export class MarketingPublicRoomsService {
           plannedCheckOutDate = todayStay.plannedCheckOutDate
             ? this.localYMD(todayStay.plannedCheckOutDate)
             : null;
+          pricingTerm = todayStay.pricingTerm ? String(todayStay.pricingTerm) : null;
           if (plannedCheckOutDate) {
             remainingDays = diffDays(new Date(plannedCheckOutDate + 'T00:00:00'));
           }
@@ -639,6 +747,7 @@ export class MarketingPublicRoomsService {
         plannedCheckOutDate = latestStay.plannedCheckOutDate
           ? this.localYMD(latestStay.plannedCheckOutDate)
           : null;
+        pricingTerm = latestStay.pricingTerm ? String(latestStay.pricingTerm) : null;
         remainingDays = 0; // kontrak sudah lewat
         const rr = latestStay.id ? renewByStayId.get(latestStay.id) : undefined;
         if (rr) {
@@ -706,6 +815,7 @@ export class MarketingPublicRoomsService {
         currentTenantName: null,  // C01-02: jangan bocorkan PII ke publik
         checkInDate,
         plannedCheckOutDate,
+        pricingTerm,
         remainingDays,
         hasPendingRenew,
         renewStatus,
@@ -774,10 +884,10 @@ export class MarketingPublicRoomsService {
     }
 
     const facilitiesByRoomId = await this.getPublicFacilitiesByRoomId([room.id]);
-    const projectedByRoomId = await this.getProjectedAvailabilityByRoomId([room.id]);
+    const stayFactsByRoomId = await this.getPublicStayFactsByRoomId([room.id]);
     const highlightedPricingTerm = this.getAvailablePricingTerms(room)[0] ?? PricingTerm.MONTHLY;
 
-    return serializePrismaResult(this.toPublicRoomDto(room, highlightedPricingTerm, facilitiesByRoomId.get(room.id) ?? [], projectedByRoomId.get(room.id)));
+    return serializePrismaResult(this.toPublicRoomDto(room, highlightedPricingTerm, facilitiesByRoomId.get(room.id) ?? [], stayFactsByRoomId.get(room.id)));
   }
 
   // ------------------------------------------------------------------
@@ -923,7 +1033,7 @@ export class MarketingPublicRoomsService {
     room: PublicRoomRecord,
     pricingTerm?: PricingTerm,
     facilities: unknown[] = [],
-    projected?: { date: string; reason: 'checkout-approved' | 'short-term' },
+    stayFacts?: PublicStayFacts,
   ) {
     const highlightedPricingTerm = pricingTerm ?? PricingTerm.MONTHLY;
     const publicStatus = resolvePublicAvailabilityStatus(room);
@@ -943,8 +1053,19 @@ export class MarketingPublicRoomsService {
       roomType: room.roomType,
       roomSize: room.roomSize,
       // PUB-CALENDAR-CHECKOUT: tanggal proyeksi kamar kosong (null bila tak relevan).
-      projectedAvailableDate: projected?.date ?? null,
-      projectedAvailableReason: projected?.reason ?? null,
+      projectedAvailableDate: stayFacts?.projectedAvailableDate ?? null,
+      projectedAvailableReason: stayFacts?.projectedAvailableReason ?? null,
+      // S3 (23 Okt 2026): fakta kontrak publik — WHITELIST tanggal + masa sewa saja.
+      // Nama/telepon/NIK penghuni tidak boleh masuk sini; kalau butuh field baru,
+      // pastikan lolos aturan tanpa-PII di §8.10 dan KONTRAK.
+      checkInDate: stayFacts?.checkInDate ?? null,
+      plannedCheckOutDate: stayFacts?.plannedCheckOutDate ?? null,
+      remainingDays: stayFacts?.remainingDays ?? 0,
+      hasPendingRenew: stayFacts?.hasPendingRenew ?? false,
+      renewStatus: stayFacts?.renewStatus ?? null,
+      /** Masa sewa stay aktif (bukan `highlightedPricingTerm` milik katalog). */
+      pricingTerm: stayFacts?.pricingTerm ?? null,
+      checkoutRequest: stayFacts?.checkoutRequest ?? null,
       images: this.resolveRoomMarketingImages(room),
       notes: null,  // C01-03: catatan internal tidak untuk publik
       pricing: {

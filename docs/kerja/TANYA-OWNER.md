@@ -1,6 +1,6 @@
 # TANYA-OWNER — pertanyaan yang menunggu keputusan owner
 
-> **Blok baca** · Jenis: **daftar pertanyaan untuk owner (bukan antrean, bukan kontrak)** · Status: **aktif — P37 satu-satunya pertanyaan terbuka (default berjalan); potret 23 Okt 2026** · Untuk siapa: owner + agen yang butuh jawaban sebelum melanjutkan
+> **Blok baca** · Jenis: **daftar pertanyaan untuk owner (bukan antrean, bukan kontrak)** · Status: **aktif — tidak ada pertanyaan terbuka; P34–P38 dijawab owner 23 Okt 2026 (potret 2026-10-23)** · Untuk siapa: owner + agen yang butuh jawaban sebelum melanjutkan
 > · Baca kalau: owner ingin melihat **apa yang sedang menunggu keputusannya**, atau agen mau memastikan tidak ada pertanyaan terbuka. · **Jangan** dibaca kalau: mencari keputusan yang sudah final (itu [KEPUTUSAN-OWNER](../KEPUTUSAN-OWNER.md)) atau memilih tugas (itu [ANTREAN](../ANTREAN.md)).
 
 ## 1. Cara pakai berkas ini (format wajib — arah owner 10 Okt 2026)
@@ -17,24 +17,13 @@ Setiap pertanyaan **wajib** memakai lima unsur ini, dalam bahasa manusia — buk
 
 ## 2. Pertanyaan terbuka
 
-**Satu pertanyaan terbuka per 23 Okt 2026: P37** (wizard sebagai beranda tiap role — default "tidak ada perubahan beranda" berjalan). **P34–P36 dan P38 dijawab owner 23 Okt 2026** → register [KEPUTUSAN-OWNER](../KEPUTUSAN-OWNER.md) entri `ROOMS-AKUN-V2 S1` (kontrak bergulir · NIK bukan alat masuk · akun wajib di titik DP) dan `S1b` (DP 30% × tarif periode). Rincian ukur + riset: [TASK-RUANG-WIZARD §8.9](TASK-RUANG-WIZARD.md#89-sesi-23-okt-2026--bukti-l1-ukur-ulang-dan-l2-riset). Di bawahnya blok lama dipertahankan sebagai rincian sampai pembersihan berikutnya.
+**Tidak ada pertanyaan terbuka per 23 Okt 2026.** **P34–P38 dijawab owner 23 Okt 2026** → register [KEPUTUSAN-OWNER](../KEPUTUSAN-OWNER.md) entri `ROOMS-AKUN-V2 S1` (kontrak bergulir · NIK bukan alat masuk · akun wajib di titik DP), `S1b` (DP 30% × tarif periode), dan `S2` (wizard jadi beranda tiap role · akses ukur produksi dipulihkan baca-saja · double-book ditegakkan di aplikasi tanpa skema). Rincian ukur + riset: [TASK-RUANG-WIZARD §8.9](TASK-RUANG-WIZARD.md#89-sesi-23-okt-2026--bukti-l1-ukur-ulang-dan-l2-riset). Blok pertanyaan yang sudah dijawab **dihapus** dari sini sesuai §1; di bawahnya blok lama dipertahankan sebagai rincian sampai pembersihan berikutnya.
 
 **Dijawab owner 23 Okt 2026 → [KEPUTUSAN-OWNER](../KEPUTUSAN-OWNER.md) entri `ROOMS-AKUN-V2 S1`:** P34 **(a)** kontrak lewat tanggal = bulanan bergulir · P35 **(a)** NIK bukan alat masuk · P36 **(a)** akun wajib di titik DP. Blok pertanyaannya dihapus dari sini sesuai §1.
 
-### P37 — Wizard sebagai beranda tiap role
-
-**Konteks:** Misi Anda: fitur per role tampil sesederhana mungkin — wizard dulu, bukan menu penuh. Wizard pembuka sudah ada untuk empat role dengan tombol "lewati" yang diingat per pengguna, tetapi menu penuh masih tampil bersamaan. Riset: progressive disclosure mensyaratkan jalan keluar yang jelas ("must be obvious how users progress to the secondary level"), dan Apple menyarankan tab bar lima item atau kurang karena item yang disembunyikan sulit ditemukan. Ini keputusan owner karena mengubah tampilan pertama yang dilihat semua pengguna setiap hari.
-
-**Pilihan:**
-- **(a) Wizard jadi layar pertama tiap role, dengan tombol "Lihat semua menu" yang selalu terlihat.** Konsekuensi: satu jalur utama untuk semua orang, fitur lengkap tetap satu ketukan. Risiko: pengguna yang sudah hafal alur harus melewati wizard sekali (pilihannya diingat, jadi tidak berulang).
-- **(b) Wizard hanya untuk TENANT; OWNER/ADMIN/STAFF langsung dashboard penuh.** Konsekuensi: operator tidak terganggu, penghuni tetap dipandu. Risiko: dua pola berbeda untuk dirawat, dan misi "sederhana untuk semua role" hanya separuh tercapai.
-- **(c) Wizard tetap opsional lewat tombol, bukan layar pertama.** Konsekuensi: tidak ada perubahan kebiasaan siapa pun. Risiko: wizard jarang dipakai sehingga tidak menolong pengguna baru.
-
-**Rekomendasi:** **(a)** — paling dekat dengan misi Anda, dengan syarat tombol "Lihat semua menu" tidak pernah disembunyikan dan pilihan "lewati" tetap diingat per pengguna.
-
-**Default bila tidak dijawab:** **(c)** — tidak ada perubahan beranda; wizard tetap seperti sekarang.
-
 **Dijawab owner 23 Okt 2026 → [KEPUTUSAN-OWNER](../KEPUTUSAN-OWNER.md) entri `ROOMS-AKUN-V2 S1b`:** DP **30% × tarif periode** (kanonik sejak 23 Sep 2026, sudah dihitung di kode booking publik) — tidak ada perubahan rumus. Blok pertanyaannya dihapus dari sini sesuai §1.
+
+**Dijawab owner 23 Okt 2026 → [KEPUTUSAN-OWNER](../KEPUTUSAN-OWNER.md) entri `ROOMS-AKUN-V2 S2`:** P37 **(a)** wizard pembuka jadi layar pertama tiap role dengan tombol "Lihat semua menu" yang selalu terlihat · akses ukur produksi dipulihkan baca-saja di mesin kerja agen · double-book ditegakkan di aplikasi (FOR UPDATE + cek irisan + ulang transaksi) **tanpa** perubahan skema. Blok P37 dihapus dari sini sesuai §1.
 
 **Blok lama yang DITUTUP (19 Okt 2026):** P19, P21, P24, dan P27 dijawab owner pada 19 Okt (listrik Rp2.500/kWh · air gratis sementara · data go-live disiapkan owner lewat `/checklist` · dump + jadwal + uji restore · paritas semua kanal) — rincian di register `GO-LIVE-DATA + TARIF + BACKUP + PARITAS`. Blok keempatnya di bawah ditandai **DITUTUP** dan dipertahankan sebagai rincian sampai pembersihan berkas berikutnya. Riwayat: **P12–P16** dijawab owner 18–19 Okt 2026 dan **dipindah** ke register [KEPUTUSAN-OWNER](../KEPUTUSAN-OWNER.md) entri "P12–P16"; blok pertanyaannya dihapus dari sini sesuai §1.
 
@@ -302,3 +291,4 @@ Dicatat supaya owner tahu apa yang berjalan tanpa menunggu dia — rincian di [d
 | 2026-10-23 | **Lima pertanyaan baru P34–P38** ditulis di sini **sebelum** dipaparkan di chat, lahir dari fase S1 Program ROOMS dan AKUN V2: P34 kontrak lewat tanggal, P35 NIK sebagai identifier, P36 pintu akun booking+DP, P37 wizard sebagai beranda, P38 nominal/tenggat/verifikator DP. Semua memakai lima unsur (§1). Konteks angkanya potret 23 Okt 2026 dari API publik produksi (13 kamar, 12 terisi, booking online mati, 9 kontrak lewat tanggal) + riset bersumber di [TASK-RUANG-WIZARD §8.9](TASK-RUANG-WIZARD.md#89-sesi-23-okt-2026--bukti-l1-ukur-ulang-dan-l2-riset). Tidak ada kode/DB yang disentuh. |
 | 2026-10-23 | **P34, P35, P36 DIJAWAB owner (semuanya pilihan a) dan P38 bentuknya dipilih (b, persentase sewa)** → dipindah ke register [KEPUTUSAN-OWNER](../KEPUTUSAN-OWNER.md) entri `ROOMS-AKUN-V2 S1`; blok P34–P36 **dihapus** dari sini sesuai §1 dan P38 dipersempit menjadi satu pertanyaan angka. Sisa terbuka: P37 (default berjalan) dan P38 (angka persentase). |
 | 2026-10-23 | **P38 DIJAWAB owner: "DP 30%"** → register [KEPUTUSAN-OWNER](../KEPUTUSAN-OWNER.md) entri `ROOMS-AKUN-V2 S1b`; blok P38 **dihapus** sesuai §1. Tercatat **koreksi konteks**: DP 30% (`downPaymentAmountRupiah`) berbeda dari deposit jaminan (`depositAmountRupiah`) — konteks pertanyaan sebelumnya keliru menyebut DP = deposit kamar + deposit hewan. Tidak ada perubahan rumus; **sisa pertanyaan terbuka: P37 saja**. |
+| 2026-10-23 | **P37 DIJAWAB owner: (a) wizard jadi layar pertama tiap role** dengan tombol "Lihat semua menu" selalu terlihat. Dua pertanyaan teknis sesi S2 ikut diputuskan: **akses ukur produksi dipulihkan** (kunci baca-saja di mesin kerja agen, supaya angka UNKNOWN bisa diukur) dan **double-book ditegakkan di aplikasi tanpa perubahan skema** (konsekuensi: constraint DB tidak dibuat, batasnya wajib ditulis di laporan S7). Ketiganya → register [KEPUTUSAN-OWNER](../KEPUTUSAN-OWNER.md) entri `ROOMS-AKUN-V2 S2`; blok P37 **dihapus** dari sini sesuai §1. **Tidak ada pertanyaan terbuka.** |

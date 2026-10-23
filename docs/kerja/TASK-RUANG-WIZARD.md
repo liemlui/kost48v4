@@ -130,7 +130,15 @@ Berkas ini adalah rumah rencana + progres program; jangan membuat dokumen parale
 
 | Fase | Status | Sesi/tanggal | Bukti | Langkah berikutnya |
 |---|---|---|---|---|
-| S1 | **selesai** (P37 tetap terbuka dengan default berjalan) | sesi 23 Okt 2026 | §8.9 (L1+L2) + register [KEPUTUSAN-OWNER](../KEPUTUSAN-OWNER.md) `ROOMS-AKUN-V2 S1` & `S1b`: P34 (a) bulanan bergulir · P35 (a) NIK bukan alat masuk · P36 (a) akun wajib di titik DP · P38 **DP 30%** (kanonik, sudah berjalan di kode) | **S2 rencana rinci** ditulis ke berkas ini (tanpa kode); P37 boleh diputuskan kapan saja |
+| S1 | **selesai** (P37 tetap terbuka dengan default berjalan) | sesi 23 Okt 2026 | §8.9 (L1+L2) + register [KEPUTUSAN-OWNER](../KEPUTUSAN-OWNER.md) `ROOMS-AKUN-V2 S1` & `S1b`: P34 (a) bulanan bergulir · P35 (a) NIK bukan alat masuk · P36 (a) akun wajib di titik DP · P38 **DP 30%** (kanonik, sudah berjalan di kode) | S2 rencana rinci |
+| S2 | **selesai** | sesi 23 Okt 2026 (sesi S2) | §8.10 = rencana rinci S3–S9 (7 blok: perubahan berkas · acceptance terkecil · risiko · urutan) · §8.11 = L1 ukur ulang + temuan baru dari kode · `check-docs` BERSIH, tidak ada kode berubah | **S3** eksekusi: kirim `pricingTerm` ke publik, `termRisk` + `VACANCY_WEIGHT_TABLE`, aturan bulanan bergulir |
+| S3 | **selesai** | sesi 23 Okt 2026 (sesi S3) | [§8.12](#812-sesi-23-okt-2026-sesi-s3--peluang-kosong-berjenjang-bukti): `VACANCY_WEIGHT_TABLE` + `termRisk` + aturan bergulir P34 (a) semua di `utils/vacancyEstimate.ts`; `pricingTerm` + fakta kontrak whitelist dikirim backend (katalog **dan** kalender); chip di `RoomCard`, tabel bobot di `AvailabilityHeatmap`; vitest 367 lulus · tsc FE/BE 0 · `check-docs` BERSIH | **S4** label "Kmr X" + kartu compact |
+| S4 | belum mulai | — | rencana: sama | — |
+| S5 | belum mulai | — | rencana: sama | — |
+| S6 | belum mulai | — | rencana: sama | — |
+| S7 | belum mulai | — | rencana: sama (gate `npm run test:unit` wajib) | — |
+| S8 | belum mulai | — | rencana: sama (P37 a: wizard jadi layar pertama tiap peran, "Lihat semua menu" selalu terlihat) | — |
+| S9 | belum mulai | — | rencana: sama (deploy hanya dengan izin owner) | — |
 
 ### 8.5 Kartu pengingat (cetak di awal dan akhir setiap sesi)
 
@@ -210,3 +218,401 @@ PENGINGAT PROGRAM ROOMS dan AKUN V2
 **C. Keputusan owner (dijawab 23 Okt 2026).** P34 **(a)** kontrak lewat tanggal dianggap bulanan bergulir · P35 **(a)** NIK bukan alat masuk, login tetap email atau nomor HP · P36 **(a)** tamu boleh mengajukan tanpa akun dan akun wajib saat membayar DP · P38 **(b) DP 30% × tarif periode**, sama dengan aturan kanonik 23 Sep 2026 dan **sudah berjalan di kode** (`downPaymentAmountRupiah`); tercatat koreksi bahwa DP 30% berbeda dari deposit jaminan. Rincian di register [KEPUTUSAN-OWNER](../KEPUTUSAN-OWNER.md) entri `ROOMS-AKUN-V2 S1` dan `S1b`. Masih terbuka: **P37** wizard sebagai beranda — default "beranda tidak berubah" berjalan sampai owner menyatakan lain. Belum ada kode yang boleh ditulis untuk S3–S8 sebelum rencana rinci S2 masuk dokumen.
 
 **D. Batas kejujuran sesi ini.** Angka Stay ACTIVE, CheckoutRequest, dan jumlah akun TENANT **tidak terukur** (tanpa akses DB) dan ditulis UNKNOWN. Research di atas adalah teori dari sumber sekunder, bukan uji pada data kost ini: belum ada satu pun label historis "penghuni keluar" yang dipakai menghitung akurasi. Tidak ada kode, skema, atau data yang diubah pada sesi ini.
+
+### 8.10 Rencana rinci S3 sampai S9 (disusun di sesi S2, 23 Okt 2026)
+
+Isi bagian ini menggantikan "rencana ≤10 baris" fase DRAFT untuk S3–S9. Fakta yang dipakai = hasil ukur
+ulang sesi S2 ([§8.11](#811-sesi-23-okt-2026-sesi-s2--bukti-l1-ulang-dan-rencana-s3s9)) + riset [§8.9](#89-sesi-23-okt-2026--bukti-l1-ukur-ulang-dan-l2-riset).
+**Satu sesi satu fase**; tiap fase berhenti di checkpoint tertulis di bloknya. Fase yang butuh keputusan owner
+wajib berhenti **sebelum** menulis kode, bukan sesudah.
+
+#### Aturan yang berlaku di semua fase S3–S9
+
+- **Satu sumber rumus peluang kosong** = `frontend/src/utils/vacancyEstimate.ts`. Berkas lain hanya memanggil;
+  `vacancyCalendar.ts` hanya memilih peristiwa. Dilarang menambah rumus, bobot, atau ambang di komponen,
+  backend, CSS, atau dokumen.
+- **Tanpa PII**: nama/NIK/telepon penghuni tidak boleh masuk payload publik, log, atau screenshot. Tanggal
+  kontrak sudah publik lewat `GET /api/public/rooms/availability-calendar` (potret 23 Okt 2026), jadi field
+  tanggal boleh ditambah ke katalog **dengan whitelist**; nama tidak boleh ikut.
+- **Batas keras**: `prisma migrate` dilarang; skema/migrasi DB, nominal uang, dan kredensial identitas =
+  keputusan owner dulu; deploy hanya di S9 + izin eksplisit owner; tanpa dependency baru.
+- **Gate kode** (dijalankan hanya oleh fase yang menulis kode): `cd frontend && npx tsc --noEmit` ·
+  `cd frontend && npx vitest run` (penuh, latar belakang) · `cd backend && npx tsc --noEmit -p tsconfig.json` ·
+  `cd backend && npm run test:unit` (**wajib** untuk S7 karena menyentuh uang & waktu-jeda) ·
+  `node scripts/check-fitur.mjs` · `node scripts/check-docs.mjs`.
+- **Penutup tiap sesi**: bukti perintah + exit code, baris [§8.4](#84-progres-program-perbarui-setiap-sesi),
+  satu baris "langkah berikutnya", kartu pengingat [§8.5](#85-kartu-pengingat-cetak-di-awal-dan-akhir-setiap-sesi).
+
+#### S3 — Peluang kosong berjenjang
+
+Tujuan: satu skor yang membedakan **tiga kelas masa sewa** (pendek < bulanan · 1–6 bulan · ≥ 1 tahun sesuai
+misi [§8.1](#81-misi-kutipan-owner--jangan-ditafsirkan-lain) butir 1), ditambah aturan **bulanan bergulir**
+(P34 a), dipakai katalog **dan** kalender.
+
+**Perubahan berkas**
+- `backend/src/modules/marketing/marketing-public-rooms.service.ts` — baris kamar di `getAvailabilityCalendar`
+  mengirim `pricingTerm` stay aktif hari itu (enum `PricingTerm`; nilainya sudah dibaca untuk proyeksi
+  `SHORT_TERMS`, tetapi belum pernah dikirim ke publik). Tanpa kolom nama/telepon.
+- `frontend/src/types/core.ts` — tipe `PublicRoom` + tipe baris kalender menerima `pricingTerm?: PricingTerm | null`.
+- `frontend/src/utils/vacancyEstimate.ts` — **satu-satunya tempat rumus**: `pricingTerm` masuk `VacancyInput`,
+  fungsi `termRisk(pricingTerm)`, tabel bobot ekspor `VACANCY_WEIGHT_TABLE` (dipakai UI **dan** test supaya
+  angka di layar = angka yang diuji), dan aturan bulanan bergulir di `estimateVacancyOnDate`: bila tanggal
+  mulai kosong sudah lewat dan term-nya bulanan atau lebih panjang, kamar dinilai pada siklus bulan berikutnya,
+  alasan ditulis "siklus bulanan berikutnya", status tetap "perkiraan".
+- `frontend/src/utils/vacancyCalendar.ts` — hanya meneruskan field; tetap tanpa perhitungan.
+- `frontend/src/components/public/AvailabilityHeatmap.tsx` — tampilkan `VACANCY_WEIGHT_TABLE` sebagai tabel
+  HTML terbaca pembaca layar di panel legenda (bukan teks bebas), dan teruskan `pricingTerm` ke estimator
+  (baris kamar sudah di-spread, jadi tinggal dipakai).
+- `frontend/src/components/rooms/RoomCard.tsx` — chip peluang kosong di katalog memakai fungsi yang sama,
+  berlabel "perkiraan".
+- Test: `frontend/src/test/unit/vacancyEstimate.test.ts`, `frontend/src/test/unit/vacancyCalendar.test.ts`.
+
+**Acceptance terkecil**
+- `cd frontend && npx vitest run src/test/unit/vacancyEstimate.test.ts src/test/unit/vacancyCalendar.test.ts`
+  lulus, termasuk test baru: satu per kelas term, satu kasus **kontrak lewat** (bulanan bergulir, `today`
+  disuntik), satu kasus "sebelum tanggal kosong selalu RENDAH".
+- Bukti satu sumber: `rg -n "termRisk|remainingRisk|tenureRisk" --glob "frontend/src/**"` hanya cocok di
+  `utils/vacancyEstimate.ts` (+ berkas test).
+- Bukti membedakan: estimator dijalankan atas payload produksi yang tersimpan menghasilkan **≥ 3 nilai skor
+  berbeda** untuk 13 kamar (pembanding: potret §8.9 hanya 53/63/100).
+- `cd frontend && npx tsc --noEmit` exit 0 · `cd backend && npx tsc --noEmit -p tsconfig.json` exit 0.
+
+**Risiko**
+- Menambah field ke katalog publik = permukaan data baru. Mitigasi: whitelist eksplisit (tanggal + term saja),
+  test yang gagal bila kunci `currentTenantName`/`fullName`/`phone` muncul di payload katalog.
+- Skor kamar yang kontraknya lewat bisa **naik** karena bergulir, lalu dibaca sebagai janji. Mitigasi: teks
+  alasan wajib menyebut "siklus bulanan berikutnya", label tetap "perkiraan, bukan janji".
+- Menambah `termRisk` mengubah skor lama sehingga sebagian ekspektasi test lama harus diperbarui. Mitigasi:
+  yang diubah hanya angka harapan, **invarian** (monoton turun terhadap lama tinggal, perpanjangan menekan
+  peluang) tetap diuji; setiap perubahan angka dicatat di badan sesi.
+
+**Urutan pengerjaan**: (1) kirim `pricingTerm` dari backend + tipe FE; (2) `termRisk` + `VACANCY_WEIGHT_TABLE`
+di satu berkas; (3) aturan bergulir di `estimateVacancyOnDate`; (4) test per kelas + kasus lewat; (5) chip
+katalog; (6) tabel bobot di heatmap; (7) jalankan gate + bukti "membedakan" di atas payload nyata.
+
+**Hasil sesi S3 (23 Okt 2026)** — urutan (1)–(7) dikerjakan, dengan dua penyesuaian yang dicatat terbuka:
+(a) katalog publik **juga** mengirim fakta kontrak ber-whitelist (tanggal, `remainingDays`, `pricingTerm`,
+status pengajuan) — tanpa itu chip di `RoomCard` tidak punya dasar hitung; helper backend
+`getProjectedAvailabilityByRoomId` diperluas menjadi `getPublicStayFactsByRoomId` (satu query stay + dua query
+status, tanpa PII). (b) Sewa **pendek tidak digulirkan** bulanan: kontraknya memang sudah jatuh tempo dan kelas
+itu justru paling mungkin kosong, jadi menggulirkannya sebulan akan menurunkan peluang pada kelas yang
+seharusnya tertinggi. Angka bobot + sebaran skor + batas kejujuran ada di [§8.12](#812-sesi-23-okt-2026-sesi-s3--peluang-kosong-berjenjang-bukti).
+
+#### S4 — Label "Kmr X" dan kartu compact
+
+Tujuan: label tampilan "Kmr A"/"Kmr F1" ( **`Room.code` tidak diubah**), kartu katalog ringkas, target sentuh
+≥ 44 px, terbaca di 390/768/1440 px.
+
+**Perubahan berkas**
+- `frontend/src/utils/publicRoomDisplay.ts` — helper tampilan `roomDisplayCode(code)` → "Kmr A"; satu tempat,
+  dipakai semua tampilan publik. Data kamar tetap `code = "A"`.
+- `frontend/src/components/rooms/RoomCard.tsx` — label memakai helper; `room.name` turun menjadi subjudul;
+  isi kartu dipangkas ke satu elemen dominan (riset [§8.9](#89-sesi-23-okt-2026--bukti-l1-ukur-ulang-dan-l2-riset) alur B).
+- `frontend/src/pages/public/publicGuestShared.tsx` — `RoomPreviewCard` memakai helper yang sama.
+- `frontend/src/pages/rooms/PublicRoomDetailPage.tsx` — judul "Kmr F1", rincian tetap lengkap.
+- `frontend/src/styles/11-public-pages.css` — tinggi kartu, jarak, target sentuh ≥ 44 CSS px; **tanpa**
+  menurunkan kontras (warna chip dari commit `c808df5a` dipertahankan).
+- `docs/FITUR.md` hanya bila path komponen berubah (kalau tidak, tidak disentuh).
+
+**Acceptance terkecil**
+- `node scripts/check-fitur.mjs` → `bersih — <n> fitur, <n> rute`, exit 0.
+- Bukti 3 lebar: tangkapan layar `/rooms` di 390/768/1440 px tanpa scroll horizontal + axe-core **0 violation**.
+- Target sentuh: `getBoundingClientRect()` semua kontrol di kartu ≥ 44 × 44 CSS px (dicatat sebagai angka).
+- `cd frontend && npx tsc --noEmit` exit 0 · `cd frontend && npx vitest run` penuh lulus.
+
+**Risiko**
+- Kartu terlalu ringkas = informasi hilang. Mitigasi: halaman detail tetap memuat semua; yang dibuang hanya
+  duplikasi di kartu.
+- Label tampilan menyimpang dari data. Mitigasi: unit test helper (A, F1, kode kosong) + tidak ada perubahan DB.
+- CSS `11-public-pages.css` dipakai halaman publik lain. Mitigasi: hanya selektor `.rm-*`, plus bukti visual
+  halaman publik lain yang memakai berkas itu.
+
+**Urutan pengerjaan**: (1) helper label + test; (2) kartu katalog; (3) kartu pratinjau; (4) judul detail;
+(5) CSS target sentuh; (6) ukur 3 lebar + axe; (7) `check-fitur`.
+
+#### S5 — Identitas: bukti anti-enumerasi dan penguncian percobaan
+
+Tujuan: NIK **tidak** jadi kredensial (P35 a); yang ditutup adalah bukti anti-enumerasi dan penguncian
+percobaan. Keadaan terukur: login sudah menerima email **atau** nomor HP, pesan galat seragam, cek `isActive`
+dilakukan **setelah** verifikasi sandi, dan bucket `login` = 10 permintaan / 5 menit
+(`backend/src/common/guards/rate-limit.guard.ts`). Yang belum ada: waktu respons seragam untuk identifier tak
+dikenal dan penguncian percobaan per akun.
+
+**Perubahan berkas**
+- `backend/src/auth/auth.service.ts` — `bcrypt.compare` terhadap hash tiruan saat identifier tidak ditemukan
+  (waktu respons setara), dan penghitung percobaan gagal per `identifier` + IP dengan jeda 15 menit; kegagalan
+  penguncian dicatat ke `AuditLog` **tanpa** identifier lengkap (hanya bentuk tersamar).
+- `backend/src/common/guards/rate-limit.guard.ts` — tidak diubah kecuali penguncian butuh bucket baru; bila
+  perlu, tambah entri di tabel `configs` (bukan jalur baru).
+- Test baru `backend/test/unit/auth-anti-enumeration.test.js` — pesan galat identik untuk identifier tak
+  dikenal vs sandi salah; selisih **median** waktu respons dua jalur di bawah ambang yang ditetapkan di berkas
+  test; penguncian aktif setelah N gagal lalu pulih setelah jeda.
+- `backend/test/unit/auth-login-refresh.test.js` — tambah kasus akun TENANT lama (email dan nomor HP) tetap
+  bisa masuk.
+
+**Acceptance terkecil**
+- `cd backend && npm run test:unit` lulus (jumlah test naik, tidak ada test dihapus/dilemahkan).
+- `cd backend && npx tsc --noEmit -p tsconfig.json` exit 0.
+- Uji manual "12 akun TENANT lama tetap bisa masuk" **butuh data produksi**: akses ukur dipulihkan owner
+  23 Okt 2026 (keputusan register `ROOMS-AKUN-V2 S2`, baca-saja). Bila saat S5 dimulai kunci belum tersedia,
+  hasilnya ditulis **BELUM TERBUKTI** (bukan "lulus") dan dicatat di §8.4 sebagai sisa.
+
+**Risiko**
+- Penguncian = alat DoS terhadap akun sendiri. Mitigasi: kunci per kombinasi identifier + IP, durasi pendek,
+  tanpa kunci permanen, dan pesan yang memberi tahu sisa waktu.
+- Waktu respons seragam menambah latensi login (± satu `bcrypt.compare`). Mitigasi: hash tiruan dibuat sekali
+  saat modul dimuat, biaya tetap, diukur di test.
+- Penghitung di memori proses tidak berlaku lintas replika. Mitigasi: dicatat sebagai batas; tidak menambah
+  dependency/Redis tanpa izin owner.
+
+**Urutan pengerjaan**: (1) `bcrypt` tiruan; (2) penguncian + audit; (3) test anti-enumerasi; (4) test akun lama;
+(5) `test:unit`; (6) catat batas uji manual 12 akun.
+
+#### S6 — Pemisahan calon penghuni dan penghuni
+
+Tujuan: sistem **membedakan tegas** calon (belum sewa) dan penghuni (sudah sewa) di navigasi, label, dan akses.
+Keadaan terukur: `useTenantPortalStage` sudah menghasilkan tiga tahap (`browsing`/`booking`/`occupied`) dan
+`config/navigation.ts` sudah memilih tautan per tahap, **tetapi** `ProtectedRoute.tsx` hanya memeriksa token —
+tidak memeriksa peran maupun tahap, jadi rute tenant tetap terbuka untuk calon.
+
+**Perubahan berkas**
+- `frontend/src/components/layout/ProtectedRoute.tsx` — menerima `allowRoles` dan (untuk TENANT) `allowStages`;
+  menolak dengan pengalihan yang punya pesan jelas, bukan layar kosong.
+- `frontend/src/App.tsx` — rute portal tenant diberi `allowStages`, rute kamar publik dan status pengajuan
+  dibiarkan terbuka untuk calon.
+- `frontend/src/config/navigation.ts` — label per tahap (calon: "Cari kamar", "Pengajuan saya"; penghuni:
+  "Kamar saya", "Tagihan"), tanpa menghilangkan tautan "Lihat semua menu".
+- `frontend/src/hooks/useTenantPortalStage.ts` — nama tahap untuk calon dibuat eksplisit (tanpa mengubah
+  sumber data `/stays/me/current` + `/tenant/bookings/my`).
+- Backend: `backend/src/modules/tenant-bookings/tenant-bookings.controller.ts` + `stays` — pastikan TENANT tanpa
+  booking/stay ditolak (404/403) dan **tidak** membocorkan data stay orang lain; test regresi.
+
+**Acceptance terkecil**
+- Test unit `frontend/src/test/unit/navigation*.test.ts` (baru/besuai nama yang ada): untuk tahap calon,
+  `getNavigationLinks` tidak memuat rute bayar/tagihan; untuk tahap penghuni, memuat.
+- Test backend: TENANT tanpa stay → `GET /stays/me/current` 404, `GET /tenant/bookings/my` daftar kosong.
+- 4 peran dirender 390 px tanpa menu bocor (bukti tangkapan layar per peran).
+
+**Risiko**
+- Guard baru bisa mengunci penghuni lama yang stay-nya belum terbentuk. Mitigasi: tahap `browsing` tetap boleh
+  membuka status pengajuan; ada jalan keluar "Lihat semua menu" (larangan [§8.8](#88-larangan-khusus-program)).
+- Dua pola label bisa membingungkan. Mitigasi: satu tabel label per tahap di `navigation.ts`, diuji.
+
+**Urutan pengerjaan**: (1) definisi tahap calon; (2) guard rute; (3) navigasi + label; (4) test frontend;
+(5) test backend penolakan; (6) bukti 4 peran 390 px.
+
+#### S7 — DP: gerbang akun, idempotensi, tahan double-book
+
+Tujuan: P36 (a) ditegakkan — tamu **boleh** mengajukan tanpa akun, akun **wajib** saat membayar DP, booking
+tanpa akun **tidak mengunci** kamar, dan jalur ADMIN/OWNER tetap ada sebagai cadangan. **Nominal tidak diubah**
+(DP 30 % × tarif periode sudah berjalan, P38).
+
+**Fakta terukur yang jadi dasar (potret 2026-10-23)**: `public-bookings.service.ts` **membuat akun TENANT
+otomatis** saat tamu mengajukan (kata sandi sementara diacak pada baris ±114, akun dibuat ±237–247, kata sandi
+dikembalikan di respons ±381). Jadi gerbang "akun saat DP" hari ini **tidak** berlaku: akun lahir di titik
+ajukan. Kamar dikunci `SELECT ... FOR UPDATE` di dalam transaksi, dan `Stay` **tidak punya** unique index untuk
+irisan rentang tanggal.
+
+**Perubahan berkas**
+- `backend/src/modules/tenant-bookings/public-bookings.service.ts` — pengajuan tamu menyimpan `Tenant` +
+  `Stay` **tanpa** membuat `User` dan tanpa mengembalikan kata sandi; respons memuat kode pengajuan, bukan
+  kredensial.
+- `backend/src/modules/tenant-bookings/tenant-bookings.controller.ts` — endpoint klaim
+  `POST /tenant/bookings/claim`: akun TENANT yang login mengaitkan pengajuan yang kontak email/nomor HP-nya
+  **sama persis** dengan kontak pengajuan; gagal = pesan seragam tanpa membocorkan keberadaan pengajuan.
+- `backend/src/modules/tenant-bookings/admin-bookings.controller.ts` — jalur cadangan OWNER/ADMIN mengaitkan
+  pengajuan ke akun secara manual (untuk kasus kontak berbeda).
+- `backend/src/modules/payment-submissions/payment-submissions.controller.ts` + service — pembayaran DP tetap
+  `@Roles(TENANT)` dan **wajib** memeriksa kepemilikan stay; tanpa akun terklaim, DP tidak bisa dibayar
+  (gerbang P36 a) dan pesan mengarahkan ke klaim/masuk.
+- Idempotensi pembayaran: kunci idempoten pada pengajuan pembayaran + penolakan duplikat (stay + nominal +
+  jendela waktu yang sama). **Tanpa kolom/tabel baru**; bila ternyata mustahil tanpa skema, fase berhenti dan
+  pemilik keputusan = owner (skema).
+- Tahan double-book: cek irisan rentang setelah `FOR UPDATE` + ulang transaksi pada SQLSTATE 40001.
+  **Keputusan owner 23 Okt 2026** (register `ROOMS-AKUN-V2 S2`): jaminan ditegakkan **di aplikasi saja**,
+  constraint exclusion PostgreSQL **tidak** dibuat — karena itu batas "balapan antar-proses masih mungkin"
+  **wajib** ditulis di laporan S7, bukan diklaim tertutup.
+- Test baru: `backend/test/unit/booking-guest-to-account.test.js`, `payment-idempotency.test.js`,
+  `booking-overlap.test.js`.
+
+**Acceptance terkecil**
+- `cd backend && npm run test:unit` **lulus** (gate uang; wajib) dan jumlah test naik.
+- `cd backend && npx tsc --noEmit -p tsconfig.json` exit 0.
+- Bukti perilaku: pengajuan tamu tanpa akun → baris `User` **tidak** bertambah (test dengan mock Prisma
+  mencatat pemanggilan `user.create`), DP tidak bisa dibayar sebelum klaim, dan pengajuan ganda dengan kunci
+  sama menghasilkan satu baris.
+- Baris/data uji yang dipakai untuk verifikasi dihapus setelahnya (laporan menyebut apa yang dihapus).
+
+**Risiko**
+- Tamu tidak bisa membayar DP karena klaim gagal (kontak beda). Mitigasi: jalur cadangan OWNER/ADMIN + pesan
+  yang menyebut langkah berikutnya, bukan jalan buntu.
+- Menghapus akun otomatis menghilangkan jalur "langsung punya sandi". Mitigasi: undangan membuat sandi setelah
+  klaim; socialisasi di halaman status pengajuan.
+- Tanpa constraint DB, dua pengajuan bersamaan masih bisa lolos pada replika berbeda. Mitigasi: dicatat sebagai
+  batas jujur; usulan constraint = keputusan owner berikutnya.
+
+**Urutan pengerjaan**: (1) hentikan pembuatan akun + respons kode pengajuan; (2) endpoint klaim + jalur
+cadangan admin; (3) gerbang DP + cek kepemilikan; (4) idempotensi; (5) cek irisan + retry; (6) `test:unit`;
+(7) hapus baris uji + catat batas.
+
+#### S8 — Booking dan wizard-first per peran
+
+Tujuan: alur final pengajuan (a) tamu mengajukan → akun saat DP tersambung utuh di UI, dan wizard menjadi
+**layar pertama tiap peran**. **P37 sudah diputuskan owner 23 Okt 2026 = (a)** (register `ROOMS-AKUN-V2 S2`):
+wizard pembuka jadi layar pertama TENANT/STAFF/ADMIN/OWNER dengan tombol **"Lihat semua menu" selalu terlihat**
+dan pilihan "lewati" tetap diingat per pengguna.
+
+**Perubahan berkas**
+- `frontend/src/pages/rooms/PublicRoomDetailPage.tsx` — CTA "Ajukan sewa" tanpa login, formulir kontak minimum
+  (nama, telepon, email opsional), hasil = kode pengajuan yang bisa dilacak.
+- `frontend/src/pages/public/PublicGuestDashboardPage.tsx` + `publicGuestShared.tsx` — halaman status
+  pengajuan: kode, tanggal, langkah berikutnya ("buat akun/masuk untuk membayar DP"), tanpa data penghuni lain.
+- `frontend/src/components/common/QuickStartWizard.tsx` — dipakai sebagai layar pertama tiap peran (P37 a),
+  ditambah varian TENANT tahap calon (aksi: cari kamar, ajukan, lacak pengajuan).
+- `frontend/src/components/layout/AppLayout.tsx` + `frontend/src/App.tsx` — titik pasang wizard sebagai layar
+  pertama per peran, dengan tombol "Lihat semua menu" **selalu terlihat** (larangan [§8.8](#88-larangan-khusus-program)
+  melarang menyembunyikan fitur tanpa jalan keluar) dan tanpa regresi 4 peran.
+
+**Acceptance terkecil**
+- 4 peran dirender 390 px: wizard tampil sebagai layar pertama, tombol "Lihat semua menu" terlihat tanpa
+  menggulir (bukti tangkapan layar per peran + angka posisi tombol), axe 0 violation, urutan Tab masuk akal.
+- Menekan "Lihat semua menu" membuka navigasi penuh dan pilihan "lewati" diingat setelah muat ulang (bukti
+  langkah demi langkah, bukan klaim).
+- `cd frontend && npx vitest run` penuh lulus; `cd frontend && npx tsc --noEmit` exit 0.
+- `node scripts/check-fitur.mjs` bersih (rute baru terdaftar di `docs/FITUR.md`).
+
+**Risiko**
+- Pengguna yang sudah hafal alur harus melewati wizard sekali (pilihan diingat, jadi tidak berulang) dan
+  operator bisa merasa dihambat. Mitigasi: "Lihat semua menu" selalu terlihat + "lewati" per pengguna.
+- Alur tamu menambah langkah sebelum DP. Mitigasi: pengajuan tetap satu layar; langkah akun baru muncul di
+  titik uang.
+
+**Urutan pengerjaan**: (1) CTA + formulir pengajuan; (2) halaman status + kode; (3) klaim dari status ke akun;
+(4) wizard calon; (5) daftar rute di `docs/FITUR.md`; (6) bukti 4 peran + axe.
+
+#### S9 — Pengerasan, test penuh, dan publish
+
+Tujuan: semua gate hijau, izin owner diperoleh, deploy client-only, smoke produksi, dan jalur rollback terbukti.
+
+**Perubahan berkas**
+- Tidak ada perubahan fitur baru. Yang berubah: `docs/ANTREAN.md` (status), [§8.4](#84-progres-program-perbarui-setiap-sesi),
+  dan — setelah deploy — `frontend/dist` hasil build (tidak di-commit) + catatan versi di dokumen bukti.
+
+**Acceptance terkecil**
+- Gate: `cd frontend && npx tsc --noEmit` · `cd frontend && npx vitest run` penuh ·
+  `cd backend && npx tsc --noEmit -p tsconfig.json` · `cd backend && npm run test:unit` ·
+  `node scripts/check-fitur.mjs` · `node scripts/check-docs.mjs` · `git diff --check` — semua exit 0.
+- Izin owner tertulis untuk deploy (keputusan owner, bukan asumsi agen).
+- Deploy client-only: `cd frontend && npm run build` → `tar -czf ../../tmp/client-update.tgz -C dist .` →
+  `scp` ke `~/staging/` → `bash ~/staging/deploy-client-safe.sh` → smoke: `GET /version.json` menampilkan
+  buildId baru, `/rooms` memuat 13 kamar, axe + keyboard di produksi.
+- Rollback: `client-old-<ts>` tersedia dan jalurnya disebut di laporan.
+- **Tidak** menyalakan `PUBLIC_ONLINE_BOOKING_ENABLED` di fase ini; flag tetap MATI sampai owner memutuskan.
+
+**Risiko**
+- Fitur baru tidak terlihat karena booking publik masih MATI. Mitigasi: dicatat di laporan; menyalakan flag =
+  keputusan owner terpisah.
+- Deploy mengubah produksi. Mitigasi: hanya client (tanpa migrasi/back end), rollback disiapkan lebih dulu,
+  smoke dijalankan setelah deploy.
+- RAM LVE 512 MB. Mitigasi: tidak ada proses baru; build dijalankan lokal, bukan di server.
+
+**Urutan pengerjaan**: (1) jalankan semua gate; (2) minta izin owner; (3) build + paket; (4) deploy;
+(5) smoke + axe/keyboard; (6) catat bukti + rollback; (7) tutup `W-OWN-021` di ANTREAN **hanya** bila semua
+gate + smoke terbukti.
+
+### 8.11 Sesi 23 Okt 2026 (sesi S2) — bukti L1 ulang dan rencana S3–S9
+
+**A. L1 ukur ulang** (dijalankan sesi S2, potret 2026-10-23; perintah + hasil apa adanya).
+
+| Hal | Hasil ukur | Selisih vs potret prompt | Cara ukur |
+|---|---|---|---|
+| HEAD / branch | `d3f8bdd4` · `main` · 1 commit di depan `origin/main`, belum dipush | sama | `git log --oneline -1`, `git status -sb` |
+| Build produksi | `Z1Qr7_YnZFAK` | sama | `GET https://kost48surabaya.com/version.json` |
+| Kamar | 13: A,B,C,D,G,H,I,J,K,L,M,F1,F2 | sama | `GET /api/public/rooms` (11.974 B) |
+| Huni | `occupied 12 · bookable 1 · maintenance 0 · reserved 0 · total 13` | sama | `GET /api/public/rooms/summary` |
+| Booking online publik | MATI — `onlineBookingEnabled` true di **0 dari 13** kamar | sama | payload kamar |
+| Tanggal kontrak | **8** kamar punya tanggal berakhir 1–10 Okt 2026 dengan `remainingDays 0` (B, G, H, I, K, L, M, F2) · **3** masih di depan (A 26 Okt / 3 hari, D 24 Okt / 1 hari, J 30 Okt / 7 hari) · **C dan F1 tanpa tanggal** | **beda cara hitung**: kalimat "9 dari 12" ikut menghitung C yang tidak punya tanggal kontrak; angka yang bisa dipertanggungjawabkan = 8 tanggal eksplisit + C tanpa data | `GET /api/public/rooms/availability-calendar` |
+| Cacat Kmr C | katalog `OCCUPIED`/`FULL`, kalender `AVAILABLE` + 14/14 hari tanpa status HUNI, `checkInDate`/`plannedCheckOutDate` null | sama (dicatat, **tidak** diperbaiki) | dua endpoint publik |
+| Stay ACTIVE / CheckoutRequest / akun TENANT | **UNKNOWN** — tanpa akses DB (kunci deploy tidak ada di mesin) | sama | percobaan tidak dilakukan sesi ini |
+
+**B. Temuan baru yang mengubah rencana** (dibaca dari kode, bukan dari catatan lama):
+`public-bookings.service.ts` membuat akun TENANT otomatis + mengembalikan kata sandi sementara pada respons
+pengajuan (baris ±114, ±237–247, ±381) — jadi premis "akun baru lahir saat DP" **belum** benar dan menjadi
+pekerjaan inti S7. `Stay` tidak punya unique index untuk irisan rentang tanggal; penguncian kamar sekarang
+bersandar pada `SELECT ... FOR UPDATE` + cek di aplikasi. `ProtectedRoute.tsx` hanya memeriksa token (bukan
+peran/tahap) — inti pekerjaan S6. Bucket `login` = 10 permintaan / 5 menit; waktu respons dan penguncian
+percobaan belum seragam — inti pekerjaan S5. `pricingTerm` sudah dibaca backend untuk proyeksi `SHORT_TERMS`
+tetapi belum pernah dikirim ke publik — inti pekerjaan S3.
+
+**C. Rencana rinci** = [§8.10](#810-rencana-rinci-s3-sampai-s9-disusun-di-sesi-s2-23-okt-2026), tujuh blok fase
+dengan perubahan berkas · acceptance terkecil · risiko · urutan pengerjaan. **Setelah rencana ditulis**, owner
+menjawab **P37 (a)** — wizard jadi layar pertama tiap peran —, **memulihkan akses ukur produksi (baca-saja)**,
+dan memutuskan **double-book ditegakkan di aplikasi tanpa perubahan skema**. Ketiganya masuk register
+[KEPUTUSAN-OWNER](../KEPUTUSAN-OWNER.md) entri `ROOMS-AKUN-V2 S2`; blok §8.10 S5, S7, dan S8 sudah disesuaikan
+dengan keputusan itu. **Tidak ada pertanyaan owner yang terbuka** saat sesi S2 ditutup.
+
+**D. Batas kejujuran sesi ini.** Sesi ini **docs-only**: `git diff` hanya menyentuh `docs/kerja/TASK-RUANG-WIZARD.md`
+dan `docs/ANTREAN.md`; tidak ada kode, skema, DB, build, atau deploy yang dijalankan (sesuai AGENTS §7 untuk
+pekerjaan dokumen — `tsc`/`vitest`/`test:unit`/`build` **sengaja tidak** dijalankan). Rencana di §8.10 belum
+dibuktikan bisa dieksekusi: acceptance tiap fase adalah **target**, bukan hasil. Angka Stay ACTIVE,
+CheckoutRequest, dan jumlah akun TENANT tetap UNKNOWN. Nomor baris kode di §8.11 B adalah potret 23 Okt 2026
+dan bisa bergeser setelah suntingan berikutnya. Cacat Kmr C dicatat, tidak diperbaiki. P37 tetap terbuka
+dengan default "beranda tidak berubah".
+
+### 8.12 Sesi 23 Okt 2026 (sesi S3) — peluang kosong berjenjang: bukti
+
+**A. L1 ukur ulang** (dijalankan sesi S3, potret 2026-10-23; perintah + hasil apa adanya).
+
+| Hal | Hasil ukur | Selisih vs potret prompt |
+|---|---|---|
+| HEAD / branch | `d3f8bdd4` · `main` · 1 commit di depan `origin/main`, belum dipush; 4 berkas dokumen S2 belum di-commit | sama |
+| Build produksi | `Z1Qr7_YnZFAK` | sama |
+| Kamar / huni | 13 kamar · `occupied 12 · bookable 1 · maintenance 0 · reserved 0 · total 13` | sama |
+| Booking online publik | MATI — `onlineBookingEnabled` true di 0 dari 13 kamar | sama |
+| Tanggal kontrak | 8 kamar berakhir 1–10 Okt 2026 dengan `remainingDays 0` (B, G, H, I, K, L, M, F2) · 3 masih di depan (A 26 Okt/3 hari, D 24 Okt/1 hari, J 30 Okt/7 hari) · C dan F1 tanpa tanggal | sama dengan §8.11 |
+| Kunci SSH/deploy | **TIDAK ADA** — `~/.ssh` tidak ada, `$TEMP/kost48ssh` tidak ada, tidak ada `*.pem` di mesin/repo | izin akses ukur (keputusan S2) belum bisa dipakai di mesin ini |
+| Stay ACTIVE / baris CheckoutRequest / akun TENANT | **UNKNOWN** — tanpa akses DB; tidak dikarang | sama |
+| Cacat Kmr C | katalog `OCCUPIED`/`FULL`, kalender `AVAILABLE` | sama; dicatat, **tidak** diperbaiki (bukan S3) |
+
+**B. Yang berubah (kode, sesi ini).** Satu sumber rumus tetap `frontend/src/utils/vacancyEstimate.ts`:
+`VACANCY_WEIGHT_TABLE` (7 baris terbaca manusia: DAILY +24 · WEEKLY +20 · BIWEEKLY +16 · MONTHLY +10 ·
+SMESTERLY +6 · YEARLY 0 · tanpa data 0, tiap baris satu alasan), `termRisk()`, `rollsMonthly()`, aturan
+**bulanan bergulir** P34 (a) di `estimateVacancyOnDate`, dan pemilih tanggal `estimateNextVacancy()` untuk
+kartu katalog. `vacancyCalendar.ts` tidak menambah perhitungan apa pun. Backend
+(`marketing-public-rooms.service.ts`) mengirim `pricingTerm` + fakta kontrak ber-whitelist di **kalender** dan
+**katalog**; tipe `PublicRoom`/baris kalender di FE ikut diperbarui. `RoomCard.tsx` memasang chip
+"Perkiraan kosong &lt;tgl&gt; · peluang …"; `AvailabilityHeatmap.tsx` merender `VACANCY_WEIGHT_TABLE` sebagai
+tabel HTML (caption + `th scope`) di panel legenda.
+
+**C. Angka sebelum → sesudah** (estimator lokal dijalankan atas payload kalender produksi 2026-10-23…11-05;
+skrip sekali pakai di `$TMPDIR`, tidak masuk repo):
+
+| Hal | Sebelum (potret S2) | Sesudah (kode S3) |
+|---|---|---|
+| Sebaran skor 13 kamar, dinilai hari ini | 53 · 63 · 100 | 100×2 · 63×3 · 53×8 → **3 nilai** (tidak berubah; payload produksi belum membawa `pricingTerm`) |
+| Kamar dengan **peristiwa kosong bertanggal** | 3 (A 26/10, D 24/10, J 30/10) | **11** (A 26/10, D 24/10, J 30/10, B/G/L 1/11, M 3/11, I 5/11, F2 8/11, H/K 10/11) |
+| Skor pada tanggal peristiwa | 53 (A/D/J) · 100 (C, F1) | 100×2 · 53×11 → 2 nilai |
+| Bobot masa sewa | tidak ada | DAILY +24 · WEEKLY +20 · BIWEEKLY +16 · MONTHLY +10 · SMESTERLY +6 · YEARLY 0 |
+| Sensitivitas term (skor 13 kamar bila payload membawa term itu) | — | DAILY 87/77 · WEEKLY 83/73 · BIWEEKLY 79/69 · MONTHLY 73/63 · SMESTERLY 69/59 · YEARLY 63/53 |
+| `pricingTerm` per kamar di produksi | tidak dikirim | **UNKNOWN** — belum ada di payload produksi (deploy = S9) dan DB tidak terbaca |
+
+**D. Verifikasi** — hasil apa adanya, **potret 2026-10-23** (angka test di bawah boleh basi; ukur ulang dengan
+perintahnya). `cd frontend` → `npx tsc --noEmit` **exit 0** · `npx vitest run` penuh
+**potret 2026-10-23: 62 berkas, 367 test lulus** · `npx vitest run src/test/unit/vacancyEstimate.test.ts
+src/test/unit/vacancyCalendar.test.ts` **potret 2026-10-23: 41 test lulus** · `npx vitest run
+src/test/components/roomCard.test.tsx` **potret 2026-10-23: 6 test lulus** · `cd backend` →
+`npx tsc --noEmit -p tsconfig.json` **exit 0** · `node scripts/check-docs.mjs` **BERSIH — 0 pelanggaran** ·
+`node scripts/check-fitur.mjs` **bersih** · `git diff --check` **bersih**. Bukti satu sumber:
+`rg -n "termRisk|remainingRisk|tenureRisk|VACANCY_WEIGHT_TABLE" --glob "frontend/src/**"` hanya cocok di
+`utils/vacancyEstimate.ts` + berkas test; UI hanya mengimpor.
+
+**E. Batas kejujuran sesi ini.** (1) **Tidak di-deploy** dan `PUBLIC_ONLINE_BOOKING_ENABLED` tidak disentuh;
+kode baru belum pernah jalan di produksi, jadi `pricingTerm` belum terbukti sampai jumpa di payload nyata.
+(2) **Tidak dijalankan**: `cd backend && npm run test:unit` — S3 tidak menyentuh `pricing.helper.ts`/rumus
+uang/skema; `npm run build`; axe/keyboard di browser 390/768/1440 px (itu S4/S9). Tampilan chip di kartu dan
+tabel bobot di heatmap **belum dilihat mata di browser** — yang terbukti hanya "test render lulus", bukan
+"tampilannya benar". (3) Sebaran skor tetap **sempit (3 nilai)** karena term belum dikirim server: bobot
+`termRisk` hanya membedakan kamar bila kamar-kamarnya punya masa sewa berbeda. Bobot **tidak** digeser supaya
+"kelihatan bagus". (4) Peristiwa kosong 11 kamar adalah hasil aturan bergulir atas data kontrak yang **sudah
+lewat tanggal** — bukan bukti penghuni benar-benar akan keluar; tetap berlabel "perkiraan, bukan janji".
+(5) `pricingTerm` per kamar, Stay ACTIVE, CheckoutRequest, dan jumlah akun TENANT tetap UNKNOWN.

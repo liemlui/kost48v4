@@ -10,6 +10,11 @@ import {
   getPublicRoomCoolingLabel,
 } from '../../utils/publicRoomDisplay';
 import type { PublicRoom } from '../../types';
+import {
+  VACANCY_CHANCE_LABEL,
+  VACANCY_NOTE,
+  estimateNextVacancy,
+} from '../../utils/vacancyEstimate';
 import FacilityList from './FacilityList';
 import FrameImage from '../common/FrameImage';
 import RoomPriceTable from './RoomPriceTable';
@@ -18,6 +23,40 @@ import BookingCtaButton from './BookingCtaButton';
 
 // ── Constants ──────────────────────────────────────────────────────────────
 const PRICING_TERM = 'MONTHLY' as const;
+
+/** Tanggal lokal hari ini — `YYYY-MM-DD` (bukan UTC, supaya tidak geser sehari). */
+function localTodayIso(): string {
+  const now = new Date();
+  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+}
+
+/** "1/11" — tanggal pendek untuk chip (bukan hitungan, hanya format). */
+function shortDay(iso: string): string {
+  const [, month, day] = iso.slice(0, 10).split('-');
+  return `${Number(day)}/${Number(month)}`;
+}
+
+/**
+ * Chip peluang kosong di katalog. Sumbernya `utils/vacancyEstimate.ts`
+ * (`estimateNextVacancy`) — komponen ini TIDAK menghitung skor sendiri.
+ * Disembunyikan bila tidak ada dasar tanggal atau kamar memang sudah kosong
+ * (badge ketersediaan sudah menyebut "Kosong").
+ */
+function VacancyChip({ room }: { room: PublicRoom }) {
+  const vacancy = estimateNextVacancy({ ...room }, localTodayIso());
+  if (!vacancy.hasData || !vacancy.vacantFrom || vacancy.basis === 'SUDAH_KOSONG') return null;
+
+  const date = shortDay(vacancy.vacantFrom);
+  const chance = VACANCY_CHANCE_LABEL[vacancy.chance];
+  return (
+    <p className="rm-card-vacancy" title={VACANCY_NOTE}>
+      <span className={`rm-card-vacancy-chip is-${vacancy.chance.toLowerCase()}`}>
+        Perkiraan kosong {date}
+      </span>
+      <span className="rm-card-vacancy-chance">peluang {chance}</span>
+    </p>
+  );
+}
 
 // ── Category badge helper ──────────────────────────────────────────────────
 export function getCategoryBadgeInfo(room: PublicRoom) {
@@ -183,6 +222,9 @@ export default function RoomCard({
             <div className="rm-card-name">{room.name || 'Kamar KOST48 Surabaya'}</div>
           </div>
         </div>
+
+        {/* Chip peluang kosong: satu sumber rumus dengan heatmap (utils/vacancyEstimate). */}
+        <VacancyChip room={room} />
 
         {/* 4 spec chip: KM, Pendingin, Ukuran, Tipe */}
         <RoomSpecChips room={room} variant="card" />

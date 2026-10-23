@@ -48,4 +48,43 @@ describe('Y-O1 — RoomCard', () => {
       expect(screen.getByText('Kamar A Lantai 1')).toBeInTheDocument();
     });
   });
+
+  describe('chip peluang kosong (satu sumber: utils/vacancyEstimate)', () => {
+    const isoOffset = (days: number) => {
+      const d = new Date();
+      d.setDate(d.getDate() + days);
+      return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    };
+
+    it('kamar terisi dengan kontrak berakhir menampilkan "Perkiraan kosong" + peluang', () => {
+      const occupied = {
+        ...room,
+        status: 'OCCUPIED',
+        checkInDate: isoOffset(-40),
+        plannedCheckOutDate: isoOffset(5),
+        remainingDays: 5,
+        pricingTerm: 'MONTHLY',
+      } as PublicRoom;
+
+      render(
+        <MemoryRouter>
+          <RoomCard room={occupied} />
+        </MemoryRouter>,
+      );
+
+      expect(screen.getByText(/Perkiraan kosong \d+\/\d+/)).toBeInTheDocument();
+      expect(screen.getByText(/^peluang (tinggi|sedang|rendah)$/)).toBeInTheDocument();
+      expect(screen.getByTitle(/bukan janji/)).toBeInTheDocument();
+    });
+
+    it('tanpa tanggal kontrak chip tidak dikarang', () => {
+      const noDates = { ...room, status: 'OCCUPIED' } as PublicRoom;
+      render(
+        <MemoryRouter>
+          <RoomCard room={noDates} />
+        </MemoryRouter>,
+      );
+      expect(screen.queryByText(/Perkiraan kosong/)).toBeNull();
+    });
+  });
 });
