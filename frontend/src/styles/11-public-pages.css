@@ -6553,7 +6553,7 @@
 .rm-heatmap-legend-item i { width:14px; height:10px; border-radius:3px; background:var(--gray-300); display:inline-block; flex:0 0 auto; }
 .rm-heatmap-legend-item.is-belum_ada_info i { background:#f8fafc; box-shadow:inset 0 0 0 1px #94a3b8; }
 .rm-heatmap-legend-item.is-rendah i { background:#e2e8f0; box-shadow:inset 0 0 0 1px #94a3b8; }
-.rm-heatmap-legend-item.is-sedang i { background:repeating-linear-gradient(135deg,#d97706 0 2px,#fef3c7 2px 4px); box-shadow:inset 0 0 0 1px #d97706; }
+.rm-heatmap-legend-item.is-sedang i { background:#fde68a; box-shadow:inset 0 0 0 1px #b45309; }
 .rm-heatmap-legend-item.is-tinggi i { background:#bbf7d0; box-shadow:inset 0 0 0 1px #16a34a; }
 
 /* Kalender */
@@ -6575,11 +6575,14 @@
 .rm-heatmap-cell.is-today .rm-heatmap-date { background:var(--blue-700,#1d4ed8); color:#fff; }
 .rm-heatmap-cell.is-outside .rm-heatmap-date { color:var(--gray-400,#94a3b8); }
 
-/* Chip kamar: satu kode kamar berwarna peluang kosong (maks 3 per sel, sisanya +N) */
+/* Chip kamar: satu kode kamar berwarna peluang kosong (maks 3 per sel, sisanya +N).
+   Warna sengaja SOLID — latar bergradasi membuat axe-core menandai color-contrast
+   "incomplete" sehingga status aksesibilitas kalender tidak bisa dinilai. Pembedaan
+   non-warna tetap ada: SEDANG memakai huruf miring + cincin amber, TINGGI huruf tegak. */
 .rm-heatmap-chips { display:flex; flex-wrap:wrap; align-items:center; gap:2px; min-width:0; }
 .rm-heatmap-chip { display:inline-flex; align-items:center; justify-content:center; min-width:20px; height:16px; padding:0 .28rem; border-radius:5px; font-size:.6rem; font-weight:700; line-height:1; letter-spacing:.02em; color:#166534; background:#dcfce7; box-shadow:inset 0 0 0 1px #16a34a; flex:0 0 auto; }
 .rm-heatmap-chip.is-tinggi { color:#166534; background:#bbf7d0; box-shadow:inset 0 0 0 1px #16a34a; }
-.rm-heatmap-chip.is-sedang { color:#92400e; background:repeating-linear-gradient(135deg,#fde68a 0 3px,#fef3c7 3px 6px); box-shadow:inset 0 0 0 1px #d97706; }
+.rm-heatmap-chip.is-sedang { color:#92400e; background:#fde68a; box-shadow:inset 0 0 0 1px #b45309; font-style:italic; }
 .rm-heatmap-chip.is-rendah { color:#334155; background:#e2e8f0; box-shadow:inset 0 0 0 1px #94a3b8; }
 .rm-heatmap-chip.is-belum_ada_info { color:#475569; background:#f8fafc; box-shadow:inset 0 0 0 1px #94a3b8; }
 .rm-heatmap-more { font-size:.6rem; font-weight:600; line-height:1.1; color:var(--gray-500); }
