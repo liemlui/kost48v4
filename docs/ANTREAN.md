@@ -3,17 +3,17 @@
 > **Blok baca** · Jenis: **antrean kerja (satu-satunya)** · Status: **aktif** · Untuk siapa: owner + agen pelaksana
 > · Baca kalau: memilih tugas berikutnya, mengecek gate, atau menutup tugas. · **Jangan** dibaca kalau: butuh aturan kerja (itu [KONTRAK.md](KONTRAK.md)) atau riwayat/bukti (itu [history/](history/)).
 
-> Berkas ini menggantikan `docs/ANTREAN.md` sejak batch B5 (2026-10-05). Ia memuat **antrean + gate saja**: tanpa aturan, tanpa bukti bertanggal. Aturan kerja ada di [AGENTS.md](../AGENTS.md) + [KONTRAK.md](KONTRAK.md); bukti bertanggal ada di [history/bukti-2026-10.md](arsip/bukti-2026-10.md); keputusan bisnis owner di [KEPUTUSAN-OWNER.md](KEPUTUSAN-OWNER.md).
+> Berkas ini memuat **antrean + gate saja**: tanpa aturan, tanpa bukti bertanggal. Aturan kerja: [AGENTS.md](../AGENTS.md) + [KONTRAK.md](KONTRAK.md); bukti bertanggal: [history/bukti-2026-10.md](arsip/bukti-2026-10.md); keputusan owner: [KEPUTUSAN-OWNER.md](KEPUTUSAN-OWNER.md).
 
-**Fakta** · Status: **aktif** · potret **2026-10-22** — ukur ulang: `node scripts/ukur-kekuatan-docs.mjs` (kesehatan antrean) + hitung `- [ ]` di §3 (ambang & invariant: [default-dev §11](operations/default-dev.md#d4b-invariant)) — jangan percaya tanggal di berkas ini.
+**Fakta** · Status: **aktif** · potret **2026-10-23** — ukur ulang: `node scripts/ukur-kekuatan-docs.mjs` (kesehatan antrean) + hitung `- [ ]` di §3 (ambang & invariant: [default-dev §11](operations/default-dev.md#d4b-invariant)) — jangan percaya tanggal di berkas ini.
 
 ## 1. Cara pakai (untuk AI, baca ini dulu)
 
 1. Baca [AGENTS.md](../AGENTS.md) (aturan, izin, verifikasi) lalu file ini.
 2. Pilih **satu** task dari §2 yang prasyarat dan izinnya sudah terpenuhi. Jangan mengulang pekerjaan selesai tanpa perubahan relevan.
-3. Aturan domain (uang/huni/operasional/harga): [docs/ATURAN.md](ATURAN.md) — **kanonik sejak Fase 2 (23 Sep 2026)**; rincian per topik di `docs/domain/`.
-4. Runbook operasi (deploy/produksi/go-live): [docs/OPERASI.md](OPERASI.md) — kanonik sejak Fase 2; rincian di `docs/operations/`. Status audit dan temuan bertanggal: [docs/AUDIT.md](AUDIT.md) — rincian di `docs/audit/`.
-5. Peta kode: [docs/PETA-KODE.md](PETA-KODE.md) (kanonik sejak B5, 23 Sep 2026) + [.audit-map/](../.audit-map/README.md); scope per role/flow: [docs/product/scope.md](product/product.md#d4d-scope); orientasi produk: [docs/product/orientasi.md](product/product.md#d4d-orientasi).
+3. Aturan domain (uang/huni/operasional/harga): [ATURAN.md](ATURAN.md) (rincian `docs/domain/`).
+4. Runbook operasi (deploy/produksi/go-live): [OPERASI.md](OPERASI.md) (rincian `docs/operations/`). Audit & temuan bertanggal: [AUDIT.md](AUDIT.md) (rincian `docs/audit/`).
+5. Peta kode: [PETA-KODE.md](PETA-KODE.md) + [.audit-map](../.audit-map/README.md); scope per role/flow: [scope](product/product.md#d4d-scope); orientasi: [orientasi](product/product.md#d4d-orientasi).
 6. Tutup dengan bukti: perbarui §5/§7 di file ini, tulis entri di `docs/history/changelog/`, dan pisahkan implementasi lokal vs verifikasi vs deployment vs dampak runtime.
 
 
@@ -23,11 +23,11 @@ Daftar prioritas, penanggung jawab, dan kesiapan ada di [TASK-AKTIF](kerja/TASK-
 
 **BLOCKED (owner):** baris bertanda (owner) dan W-OWN-001..009/013 serta W-OPS-*/W-DATA-001 menunggu jawaban **P29–P32** di [TANYA-OWNER](kerja/TANYA-OWNER.md) (bukti UAT/sign-off · normalisasi visual & hak foto · akses server/DB · adopsi Mode Cepat). Default teraman sudah dijalankan; tidak ada baris yang diklaim selesai tanpa bukti.
 
-## 3. Task terbuka & gate (27 `[ ]`)
+## 3. Task terbuka & gate (28 `[ ]`)
 
 Format: **ID** — judul | **Gate** (verifikasi wajib sebelum `[x]`). (owner) = butuh data/keputusan owner.
 
-**Dokumen kerja (tugas level ≥S).** Tugas yang butuh langkah, jebakan, dan perintah verifikasi boleh punya dokumen kerja `docs/kerja/TASK-<ID>.md` — bentuk **7 bagian**, **tanpa kotak dan tanpa daftar pekerjaan** (bukan antrean kedua: status tetap di baris §3 ini). Syarat pakai + asal-usul: [ADAPTASI-DOKTRIN-DOCS](arsip/ADAPTASI-DOKTRIN-DOCS.md) butir **A-2**; contoh pertama: [TASK-T05-DETEKTOR-ARSIP](arsip/TASK-T05-DETEKTOR-ARSIP.md).
+**Dokumen kerja (tugas ≥S).** Tugas yang butuh langkah/jebakan boleh punya `docs/kerja/TASK-<ID>.md` — 7 bagian, tanpa kotak dan tanpa daftar pekerjaan (status tetap di §3). Asal-usul: [ADAPTASI-DOKTRIN-DOCS](arsip/ADAPTASI-DOKTRIN-DOCS.md) butir **A-2**; contoh: [TASK-T05](arsip/TASK-T05-DETEKTOR-ARSIP.md).
 
 - [ ] **W-OPS-001** - lanjutan onboarding 13 hunian + verifikasi KTP (menunggu data owner) | **Gate:** bulan masuk, 13 meter kWh, saldo kas/bank, deposit; penutupan lewat gate Fase A
 - [ ] **W-OWN-004** - bukti eksekusi: tiga crawl tanpa skip, dua state TENANT, viewport/Axe, sign-off | **Gate:** crawl tuntas, screenshot/trace bebas PII, sign-off AO-14
@@ -64,6 +64,7 @@ Format: **ID** — judul | **Gate** (verifikasi wajib sebelum `[x]`). (owner) = 
 - [x] **W-OWN-018** - catat usage token + konstanta harga AI (menutup A-5/A-6) | **Gate:** `AuditLog.meta.ai` tertulis, `GET /owner-ai/usage` berisi angka, tidak ada secret di log. **Bukti 18 Okt 2026:** test backend 157/157 + frontend 255/255, build exit 0; rincian di [changelog 18 Okt](history/changelog/2026-10.md). Batas: DB/AI nyata belum dijalankan
 - [x] **W-OWN-019** - katalog `/rooms` default **kamar tersedia** + heatmap ketersediaan mobile-first + skor peluang kosong per kamar | **Gate:** tanpa query hanya kamar bookable; heatmap terbaca 390/768/1440 px tanpa scroll horizontal; skor 4 skenario teruji dan berlabel “perkiraan”; tanpa nama penghuni di publik; `check-fitur` hijau; [TASK](kerja/TASK-RUANG-WIZARD.md) **Bukti 22 Okt:** `/rooms` default bookable, heatmap 14 hari + toggle tabel, `estimateVacancy` 4 test, build `3VTDk5uLtg4I`, FE 311/311. Sisa: tinjauan owner
 - [x] **W-OWN-020** - wizard pembuka lintas role (TENANT/STAFF/ADMIN/OWNER): aksi penting dulu, tombol lewati ke tampilan penuh | **Gate:** halaman pertama = wizard; ≤1 ketuk ke aksi utama; tombol lewati selalu ada; pilihan diingat per user; tanpa regresi AppLayout/shell; render 390 px; [TASK](kerja/TASK-RUANG-WIZARD.md) **Bukti 22 Okt:** `QuickStartWizard` 4 role, lewati diingat per user, AppLayout utuh, build `3VTDk5uLtg4I`. Sisa: render perangkat
+- [ ] **W-OWN-021** - Program ROOMS & AKUN V2 (9 fase) | **Gate:** [§8 rencana + protokol + pertanyaan wajib](kerja/TASK-RUANG-WIZARD.md#8-program-rooms-dan-akun-v2-23-okt-2026); deploy hanya di S9 + izin owner
 
 - [x] **W-TNT-001** - aturan huni + wizard terarah + CTA checkout + dokumen 1 halaman | **Gate:** angka menunjuk sumber kanonik; 0 pertentangan; ≤2 klik dari beranda; render 390/1440 | **Bukti 21 Okt 2026:** `tenantRules.ts` 8 kategori + `source`; wizard 4 jalur; kartu deposit dari data kamar; CTA amber; F-15..F-17; FE 306/306, tsc FE+BE exit 0, check-docs BERSIH. Sisa: tanda tangan owner + 1 baris FAQ | checklist: kerja/TASK-AKTIF.md#d4f-faq
 - [x] **W-TNT-002** - checklist hewan + jumlah penghuni saat check-in → deposit hewan & surcharge otomatis, satu helper untuk walk-in/booking/portal | **Gate:** `hasPet`/`occupantCount` terisi; deposit = kamar + pet; tidak dobel dengan yang sudah dibayar; test hitung 3 kanal; [TASK](kerja/TASK-AKTIF.md#d4f-huni) **Bukti 22 Okt:** helper biaya 3 kanal, DTO `occupantCount`/`hasPet`, gate uang 191/191. Sisa: uji check-in ganda | checklist: kerja/TASK-AKTIF.md#d4f-huni
@@ -77,7 +78,7 @@ Format: **ID** — judul | **Gate** (verifikasi wajib sebelum `[x]`). (owner) = 
 - [ ] **W-OPS-014** (owner) - konfirmasi apakah `uploads/` (foto kamar/bukti bayar) perlu dipindahkan dari server lama | **Gate:** jawaban owner + bukti path/aset; jangan salin data pengguna tanpa izin
 - [x] **W-DOC-001** - tata ulang dokumen generasi kedua D0–D9 ([kontrak arsip](arsip/TASK-DOCS-GEN2.md)): konstitusi ID + registry, peta peran, registry fitur, checklist di dokumen tugas, gate v3 | **Gate:** tiap batch D0–D9 punya bukti; gate hijau saat batch ditutup. **Bukti 22 Okt:** gate v3.0 R1–R16 BERSIH, selftest 21/21, register default-dev §13, anggaran baca §12a; gap ≤30 berkas = keputusan owner
 
-**Rekap (potret 2026-10-22):** 27 terbuka + 18 selesai = 45 baris.
+**Rekap (potret 2026-10-23):** 28 terbuka + 18 selesai = 46 baris.
 
 
 ---
