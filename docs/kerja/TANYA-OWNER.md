@@ -1,6 +1,6 @@
 # TANYA-OWNER — pertanyaan yang menunggu keputusan owner
 
-> **Blok baca** · Jenis: **daftar pertanyaan untuk owner (bukan antrean, bukan kontrak)** · Status: **aktif — tidak ada pertanyaan terbuka; P34–P38 dijawab owner 23 Okt 2026 (potret 2026-10-23)** · Untuk siapa: owner + agen yang butuh jawaban sebelum melanjutkan
+> **Blok baca** · Jenis: **daftar pertanyaan untuk owner (bukan antrean, bukan kontrak)** · Status: **aktif — 1 pertanyaan menunggu jawaban (S9-1 izin deploy client-only) + 4 tercatat dengan default berjalan (S9-2…S9-5), potret 2026-10-24** · Untuk siapa: owner + agen yang butuh jawaban sebelum melanjutkan
 > · Baca kalau: owner ingin melihat **apa yang sedang menunggu keputusannya**, atau agen mau memastikan tidak ada pertanyaan terbuka. · **Jangan** dibaca kalau: mencari keputusan yang sudah final (itu [KEPUTUSAN-OWNER](../KEPUTUSAN-OWNER.md)) atau memilih tugas (itu [ANTREAN](../ANTREAN.md)).
 
 ## 1. Cara pakai berkas ini (format wajib — arah owner 10 Okt 2026)
@@ -17,7 +17,7 @@ Setiap pertanyaan **wajib** memakai lima unsur ini, dalam bahasa manusia — buk
 
 ## 2. Pertanyaan terbuka
 
-**Tidak ada pertanyaan terbuka per 23 Okt 2026.** **P34–P38 dijawab owner 23 Okt 2026** → register [KEPUTUSAN-OWNER](../KEPUTUSAN-OWNER.md) entri `ROOMS-AKUN-V2 S1` (kontrak bergulir · NIK bukan alat masuk · akun wajib di titik DP), `S1b` (DP 30% × tarif periode), dan `S2` (wizard jadi beranda tiap role · akses ukur produksi dipulihkan baca-saja · double-book ditegakkan di aplikasi tanpa skema). Rincian ukur + riset: [TASK-RUANG-WIZARD §8.9](TASK-RUANG-WIZARD.md#89-sesi-23-okt-2026--bukti-l1-ukur-ulang-dan-l2-riset). Blok pertanyaan yang sudah dijawab **dihapus** dari sini sesuai §1; di bawahnya blok lama dipertahankan sebagai rincian sampai pembersihan berikutnya.
+**Per 24 Okt 2026: satu pertanyaan menunggu jawaban (S9-1 izin deploy) dan empat tercatat dengan default berjalan (S9-2…S9-5) — blok lengkapnya di akhir §2.** **P34–P38 dijawab owner 23 Okt 2026** → register [KEPUTUSAN-OWNER](../KEPUTUSAN-OWNER.md) entri `ROOMS-AKUN-V2 S1` (kontrak bergulir · NIK bukan alat masuk · akun wajib di titik DP), `S1b` (DP 30% × tarif periode), dan `S2` (wizard jadi beranda tiap role · akses ukur produksi dipulihkan baca-saja · double-book ditegakkan di aplikasi tanpa skema). Rincian ukur + riset: [TASK-RUANG-WIZARD §8.9](TASK-RUANG-WIZARD.md#89-sesi-23-okt-2026--bukti-l1-ukur-ulang-dan-l2-riset). Blok pertanyaan yang sudah dijawab **dihapus** dari sini sesuai §1; di bawahnya blok lama dipertahankan sebagai rincian sampai pembersihan berikutnya.
 
 **Dijawab owner 23 Okt 2026 → [KEPUTUSAN-OWNER](../KEPUTUSAN-OWNER.md) entri `ROOMS-AKUN-V2 S1`:** P34 **(a)** kontrak lewat tanggal = bulanan bergulir · P35 **(a)** NIK bukan alat masuk · P36 **(a)** akun wajib di titik DP. Blok pertanyaannya dihapus dari sini sesuai §1.
 
@@ -255,6 +255,70 @@ Setiap pertanyaan **wajib** memakai lima unsur ini, dalam bahasa manusia — buk
 
 
 
+### S9-1 — Izin deploy client-only ke produksi (kode S3–S8 belum live) — **MENUNGGU JAWABAN**
+
+**Konteks:** Program ROOMS dan AKUN V2 selesai sampai S8 (chip peluang kosong + tabel bobot, label "Kmr X" + kartu compact, anti-enumerasi, pemisahan calon/penghuni, gerbang akun DP, booking tamu + klaim, wizard-first per peran), tetapi **belum ada di produksi**. Ukur ulang 24 Okt 2026: `GET https://kost48surabaya.com/version.json` masih `buildId Z1Qr7_YnZFAK`, dan payload katalog produksi **tidak memuat** `pricingTerm`, jadi chip peluang kosong belum bisa tampil. Yang akan di-deploy **hanya folder `client/`** (hasil `npm run build` di lokal): backend, `.env`, `uploads/`, dan DB **tidak** disentuh, tanpa restart, tanpa migrasi — RAM LVE 512 MB tidak terpakai proses baru. Rollback sudah tersedia di server (`client-old-20261023-221641`, `client-old-20261023-221035`) dan skrip deploy membuat `client-old-<timestamp>` baru **sebelum** menukar folder. Karena ini mengubah produksi, keputusannya milik owner (AGENTS §4 butir 4), bukan agen.
+
+**Pilihan:**
+- **(a) Deploy client-only sekarang**, setelah commit + push `main`, lalu smoke produksi (`/version.json` buildId baru, `/rooms` memuat 13 kamar, axe + urutan Tab di halaman yang berubah). Konsekuensi: UI S3–S8 langsung tampil untuk pengunjung. **Batas yang harus dibaca:** backend masih versi lama, jadi **klaim pengajuan belum bisa dipakai sungguhan** dan `POST /public/bookings` tetap menjawab 503 karena flag booking MATI — yang berubah adalah tampilan + jalan keluar WhatsApp. Risiko: cacat UI yang lolos gate lokal akan terlihat publik; pemulihan = satu perintah (pindahkan `client-old-<ts>` kembali), ±1 menit, tanpa restart.
+- **(b) Commit + push saja, deploy ditunda.** Konsekuensi: `main` menyimpan kode S3–S8 dan bisa di-rollback per commit, tetapi pengunjung tetap melihat UI lama; `W-OWN-021` **tetap terbuka**. Risiko: jarak `main` ↔ produksi makin lebar dan semua bukti perilaku tetap berstatus build lokal.
+- **(c) Deploy sebagian (hanya halaman publik).** Konsekuensi: butuh paket build terpisah yang belum pernah diuji dan menambah jalur deploy kedua. Risiko: dua paket client harus dijaga selaras, dan `client-old-*` tidak lagi cukup untuk memulihkan keadaan campuran.
+
+**Rekomendasi:** **(a)** — semua gate hijau, deploy hanya menyentuh folder `client/`, dan rollback sudah terbukti ada di server. Alasan utama: tanpa deploy, seluruh bukti S3–S8 tetap "build lokal + API ditiru" dan tidak pernah menjadi bukti produksi.
+
+**Default bila tidak dijawab:** **(b)** — tidak ada deploy; commit + push tetap berjalan sesuai izin owner yang sudah diberikan, `W-OWN-021` dibiarkan terbuka, dan laporan S9 menulis apa yang kurang.
+
+### S9-2 — `docs/FITUR.md` tepat di plafon R16 (anotasi registry wizard/klaim)
+
+**Konteks:** `docs/FITUR.md` 11.671 byte dan tier T1 (`scripts/docs-tier.baseline.json`) sudah **tepat di plafon** `check-docs` R16, jadi menambah byte apa pun di `docs/*.md` top-level akan membuat gate merah. S9 **tidak menambah rute** (`check-fitur` bersih: 58 fitur / 80 rute; layar pertama dirender `AppLayout` pada rute yang sudah terdaftar dan panel klaim menempel di `/portal/bookings`), sehingga anotasi registry untuk wizard-first dan klaim sebenarnya **tidak wajib** sekarang.
+
+**Pilihan:**
+- **(a) Tidak menganotasi FITUR.md** di S9; registry tetap 58 fitur / 80 rute. Konsekuensi: gate tetap hijau, tanpa risiko. Risiko: pembaca FITUR.md tidak melihat catatan bahwa wizard-first dan klaim sudah ada — informasinya tetap terbaca di dokumen kerja ini (§8.17).
+- **(b) Pangkas isi `docs/FITUR.md` lebih dulu, lalu tambah anotasi.** Konsekuensi: butuh satu putaran sunting + ukur ulang byte. Risiko: pemangkasan bisa menghapus keterangan yang masih dipakai.
+- **(c) Naikkan plafon tier T1.** Konsekuensi: aturan ratchet dilonggarkan. Risiko: plafon yang naik menghapus fungsi pagar pertumbuhan dokumen — menurut kebijakan yang sekarang, cap hanya **turun** tanpa keputusan owner.
+
+**Rekomendasi:** **(a)** — S9 tidak menambah rute, jadi tidak ada fakta registry yang berubah; menambah byte hanya untuk anotasi akan memaksa pemangkasan tanpa manfaat pembaca yang sebanding.
+
+**Default bila tidak dijawab:** **(a)** — tidak ada perubahan `docs/FITUR.md`.
+
+### S9-3 — TENANT: wizard tumpang tindih dengan tab tahap S6
+
+**Konteks:** Di halaman TENANT, wizard layar pertama (S8) tampil di bawah tab tahap "Calon penghuni / Lihat semua menu" (S6) dan memuat tautan yang sama — jadi sebagian tautan tampil dua kali dalam satu layar 390 px. §8.8 melarang menyembunyikan jalan keluar, dan P37 (a) meminta "Lihat semua menu" selalu terlihat, sehingga penggabungan tampilan adalah keputusan UX owner, bukan keputusan agen.
+
+**Pilihan:**
+- **(a) Pertahankan keduanya di S9** dan catat sebagai backlog perapian tampilan. Konsekuensi: duplikasi visual tetap ada; tidak ada risiko regresi. Risiko: pengguna TENANT melihat tautan ganda.
+- **(b) Sembunyikan tab tahap saat wizard tampil.** Konsekuensi: layar lebih bersih. Risiko: bertabrakan dengan §8.8/P37 — jalan keluar bisa hilang saat wizard aktif, jadi perlu desain ulang tombolnya lebih dulu.
+- **(c) Hapus wizard untuk TENANT saja.** Konsekuensi: TENANT kembali ke menu penuh. Risiko: melanggar P37 (a) yang meminta wizard jadi layar pertama **tiap** peran.
+
+**Rekomendasi:** **(a)** — perbaikan tampilan ini menyentuh perilaku pengguna baru (P37) sehingga butuh keputusan tersendiri; menahannya di S9 tidak menambah risiko.
+
+**Default bila tidak dijawab:** **(a)** — tidak ada perubahan; dicatat sebagai backlog.
+
+### S9-4 — Floating switch "Mode Cepat" menutupi sebagian konten di 390 px
+
+**Konteks:** Elemen switch mengambang itu **sudah ada sebelum S8** (bukan regresi) dan pada layar 390 px menutupi sebagian isi, termasuk kartu klaim. Perbaikan posisi/ukuran menyentuh navigasi global yang dipakai 4 peran.
+
+**Pilihan:**
+- **(a) Biarkan di S9** + catat sebagai temuan. Konsekuensi: tidak ada risiko regresi navigasi. Risiko: sebagian konten tetap tertutup di layar sempit.
+- **(b) Perbaiki posisinya sekarang** (geser/beri jarak aman). Konsekuensi: satu perubahan CSS kecil. Risiko: menyentuh elemen global untuk 4 peran tanpa uji perangkat fisik.
+
+**Rekomendasi:** **(a)** — bukan regresi S8 dan bukan bagian acceptance S9 (pengerasan + publish).
+
+**Default bila tidak dijawab:** **(a)** — tidak diubah; dicatat di laporan sebagai temuan.
+
+### S9-5 — Pelacakan pengajuan tanpa login
+
+**Konteks:** Halaman hasil pengajuan hanya menampilkan kode `K48-xxxx-y`, tanpa cara mengecek status tanpa masuk akun. Endpoint publik "lacak pakai kode" sengaja **tidak** dibuat karena kode pendek mudah ditebak (risiko enumerasi); default teraman = lacak setelah klaim di portal.
+
+**Pilihan:**
+- **(a) Tidak dibuat** (default). Konsekuensi: tamu harus klaim dulu untuk melihat status; tidak ada permukaan enumerasi baru. Risiko: tamu yang belum siap punya akun tidak bisa memantau sendiri.
+- **(b) Endpoint publik baru** `GET /public/bookings/:code` dengan rate limit + kode lebih panjang/entropi cukup. Konsekuensi: tamu bisa memantau tanpa akun. Risiko: menambah satu permukaan publik yang harus diuji anti-enumerasi; perlu keputusan owner sebelum ditulis.
+- **(c) Lacak manual lewat WhatsApp admin.** Konsekuensi: tanpa kode baru. Risiko: beban admin bertambah.
+
+**Rekomendasi:** **(a)** — mengikuti default teraman yang sudah berjalan di S7/S8 dan tidak menambah permukaan serangan.
+
+**Default bila tidak dijawab:** **(a)** — tidak ada endpoint baru.
+
 ## 3. Keputusan yang TIDAK perlu ditanyakan ke owner (agen memutuskan sendiri)
 
 Dicatat supaya owner tahu apa yang berjalan tanpa menunggu dia — rincian di [default-dev §12](../operations/default-dev.md):
@@ -291,4 +355,4 @@ Dicatat supaya owner tahu apa yang berjalan tanpa menunggu dia — rincian di [d
 | 2026-10-23 | **Lima pertanyaan baru P34–P38** ditulis di sini **sebelum** dipaparkan di chat, lahir dari fase S1 Program ROOMS dan AKUN V2: P34 kontrak lewat tanggal, P35 NIK sebagai identifier, P36 pintu akun booking+DP, P37 wizard sebagai beranda, P38 nominal/tenggat/verifikator DP. Semua memakai lima unsur (§1). Konteks angkanya potret 23 Okt 2026 dari API publik produksi (13 kamar, 12 terisi, booking online mati, 9 kontrak lewat tanggal) + riset bersumber di [TASK-RUANG-WIZARD §8.9](TASK-RUANG-WIZARD.md#89-sesi-23-okt-2026--bukti-l1-ukur-ulang-dan-l2-riset). Tidak ada kode/DB yang disentuh. |
 | 2026-10-23 | **P34, P35, P36 DIJAWAB owner (semuanya pilihan a) dan P38 bentuknya dipilih (b, persentase sewa)** → dipindah ke register [KEPUTUSAN-OWNER](../KEPUTUSAN-OWNER.md) entri `ROOMS-AKUN-V2 S1`; blok P34–P36 **dihapus** dari sini sesuai §1 dan P38 dipersempit menjadi satu pertanyaan angka. Sisa terbuka: P37 (default berjalan) dan P38 (angka persentase). |
 | 2026-10-23 | **P38 DIJAWAB owner: "DP 30%"** → register [KEPUTUSAN-OWNER](../KEPUTUSAN-OWNER.md) entri `ROOMS-AKUN-V2 S1b`; blok P38 **dihapus** sesuai §1. Tercatat **koreksi konteks**: DP 30% (`downPaymentAmountRupiah`) berbeda dari deposit jaminan (`depositAmountRupiah`) — konteks pertanyaan sebelumnya keliru menyebut DP = deposit kamar + deposit hewan. Tidak ada perubahan rumus; **sisa pertanyaan terbuka: P37 saja**. |
-| 2026-10-23 | **P37 DIJAWAB owner: (a) wizard jadi layar pertama tiap role** dengan tombol "Lihat semua menu" selalu terlihat. Dua pertanyaan teknis sesi S2 ikut diputuskan: **akses ukur produksi dipulihkan** (kunci baca-saja di mesin kerja agen, supaya angka UNKNOWN bisa diukur) dan **double-book ditegakkan di aplikasi tanpa perubahan skema** (konsekuensi: constraint DB tidak dibuat, batasnya wajib ditulis di laporan S7). Ketiganya → register [KEPUTUSAN-OWNER](../KEPUTUSAN-OWNER.md) entri `ROOMS-AKUN-V2 S2`; blok P37 **dihapus** dari sini sesuai §1. **Tidak ada pertanyaan terbuka.** |
+| 2026-10-24 | **Lima pertanyaan S9 ditulis di sini sebelum dipaparkan di chat** (fase S9 Program ROOMS dan AKUN V2): **S9-1** izin deploy client-only — satu-satunya yang menahan pekerjaan, karena deploy mengubah produksi (AGENTS §4 butir 4); **S9-2** plafon `docs/FITUR.md` di batas R16; **S9-3** wizard TENANT tumpang tindih tab tahap S6; **S9-4** switch "Mode Cepat" menutupi konten 390 px; **S9-5** pelacakan pengajuan tanpa login. Semua memakai lima unsur (§1). Konteks angkanya potret 24 Okt 2026: buildId produksi `Z1Qr7_YnZFAK`, `pricingTerm` tidak ada di payload publik, dan ukur baca-saja DB produksi (Stay ACTIVE 11 · CheckoutRequest 0 · akun TENANT 12 · `pricingTerm` MONTHLY di 11 stay aktif · Kmr C tanpa stay aktif). Izin **commit + push `main`** sudah diberikan owner di sesi ini, jadi tidak diajukan sebagai pertanyaan. Default S9-2…S9-5 berjalan tanpa menunggu jawaban. |

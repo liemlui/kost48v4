@@ -138,7 +138,7 @@ Berkas ini adalah rumah rencana + progres program; jangan membuat dokumen parale
 | S6 | **selesai** | sesi 24 Okt 2026 (sesi S6) | [§8.15](#815-sesi-24-okt-2026-sesi-s6--pemisahan-calon-penghuni-dan-penghuni): `ProtectedRoute` menerima `allowRoles` + `allowStages` (penolakan = toast pesan + pengalihan, bukan spinner abadi); 12 rute portal tenant dipisah per tahap dari satu sumber `TENANT_ROUTE_STAGES`; satu tabel label per tahap (calon "Cari kamar"/"Pengajuan saya", penghuni "Kamar saya"/"Tagihan") + seksi "Lihat semua menu" di setiap tahap; backend: TENANT tanpa stay → 404 + daftar kosong; FE vitest penuh lulus · BE **217 lulus** · tsc FE/BE 0 | **S7** DP: gerbang akun, idempotensi, tahan double-book |
 | S7 | **selesai** | sesi 24 Okt 2026 (sesi S7) | [§8.16](#816-sesi-24-okt-2026-sesi-s7--dp-gerbang-akun-idempotensi-tahan-double-book): pengajuan tamu tidak lagi membuat akun (`user.create` 0, tanpa kata sandi di respons) + kode pengajuan `K48-xxxx-y`; klaim `POST /tenant/bookings/claim` (kontak sama persis, pesan seragam) + jalur cadangan OWNER/ADMIN `POST /admin/bookings/:stayId/link-account`; gerbang DP dua lapis + pesan berisi langkah klaim; tolak duplikat pembayaran (stay+invoice+nominal+tanggal, jendela 24 jam); cek irisan rentang + retry 40001 di 2 jalur booking; BE **241 lulus** (dari 217) · FE 389 lulus · tsc FE/BE 0 · `check-docs` BERSIH · ANTREAN 16.375 byte; **batas: jaminan aplikasi saja, tanpa exclusion constraint DB** | **S8** booking + wizard-first per role (P37 a: wizard jadi layar pertama tiap peran, "Lihat semua menu" selalu terlihat) + alur klaim di UI |
 | S8 | **selesai** | sesi 24 Okt 2026 (sesi S8) | [§8.17](#817-sesi-24-okt-2026-sesi-s8--booking-dan-wizard-first-per-peran-bukti): alur tamu→kode→klaim→DP tersambung di UI (CTA "Ajukan sewa" tanpa akun, kode pengajuan + langkah klaim, panel "Klaim pengajuan" di `/portal/bookings` dengan pesan seragam apa adanya + jalan keluar admin); wizard jadi layar pertama 4 peran lewat `AppLayout` pada rute pendaratan (bukan rute baru), "Lihat semua menu" 44 px dan terlihat tanpa menggulir di 390 px, "lewati" diingat per pengguna; FE **68 berkas / 407 test** lulus · tsc FE 0 · axe **0 violation** di 9 sampel · `check-fitur` bersih (58 fitur/80 rute, tanpa rute baru) · `check-docs` BERSIH | **S9** pengerasan + gate penuh + izin owner + deploy client-only |
-| S9 | belum mulai | — | rencana: sama (deploy hanya dengan izin owner) | — |
+| S9 | **selesai sebagian** — deploy client-only SUDAH live; `W-OWN-021` **tetap terbuka** karena axe produksi belum terbukti | sesi 24 Okt 2026 (sesi S9) | [§8.18](#818-sesi-24-okt-2026-sesi-s9--pengerasan-gate-penuh-deploy-client-only-bukti): gate penuh hijau (vitest 68/407 · BE 241/6 · check-fitur 58/80 · check-docs BERSIH); gate `verify-pwa` sempat **GAGAL** (CSS gzip 138.323 > 138.240) lalu dipangkas tanpa menaikkan ambang; angka UNKNOWN S5/S7/S8 ditutup (Stay ACTIVE 11 · CheckoutRequest 0 · TENANT 12); deploy `Z1Qr7_YnZFAK` → **`DbHa1OoxHfSP`**, rollback `client-old-20261024-093640`; smoke: 13 kamar · DP 30% Rp 510.000 · booking online ditutup · keyboard 9 fokus/0 tabindex positif. **axe produksi BELUM TERBUKTI** | axe + keyboard produksi 4 peran (butuh axe same-origin + akun uji ADMIN/STAFF), lalu tutup `W-OWN-021` |
 
 ### 8.5 Kartu pengingat (cetak di awal dan akhir setiap sesi)
 
@@ -1126,3 +1126,77 @@ bukan perubahan ambang; ambang tetap **20 ms** dan tetap ditulis di berkas test 
 9. **Yang belum pernah dijalankan**: deploy/`npm run build` produksi (deploy = S9); `prisma migrate` (dilarang); akses DB/SSH produksi; login & klaim sungguhan ke API nyata; uji dua peramban/perangkat fisik; `cd backend && npm run test:unit` (backend tidak disentuh sesi ini).
 
 **G. Data uji yang dihapus.** Tidak ada baris/data uji yang dibuat atau dihapus pada sesi ini: tidak ada DB yang disentuh, tidak ada migrasi/skrip SQL, dan seluruh artefak bukti (skrip Playwright, tangkapan layar, `report.json`) berada **di luar repo** (`%TEMP%\kost48-s8-shots`, `%TEMP%\kost48-s8-proof`) sehingga `git status --short` hanya memuat berkas yang memang diubah.
+
+### 8.18 Sesi 24 Okt 2026 (sesi S9) — pengerasan, gate penuh, deploy client-only: bukti
+
+**A. L1 ukur ulang** (potret 2026-10-24, cwd = akar repo; angka DB dari kueri baca-saja ke produksi).
+
+| Hal | Hasil ukur | Selisih vs potret prompt |
+|---|---|---|
+| HEAD / branch | `5968bb65` · `main` · `## main...origin/main` (sinkron) | sama |
+| Working tree saat mulai | 16 berkas berubah + 3 test baru (kerja S8 **belum** di-commit) | sama |
+| Kunci SSH | `.ssh-kost48/` ADA; dipakai **baca-saja** sesi ini, isi tidak dicetak | S9 memakainya (sesuai rencana) |
+| Build produksi | `Z1Qr7_YnZFAK` (`GET /version.json` + `client/version.json` di disk, sama) | sama |
+| Kamar / huni | 13 kamar; `occupied 12 · bookable 1 · maintenance 0 · reserved 0 · total 13` | sama |
+| Booking online publik | MATI — `onlineBookingEnabled` true di **0 dari 13**; `pricingTerm` **tidak ada** di payload | sama (backend belum live) |
+| **Stay ACTIVE** | **11** | **tertutup** (sebelumnya UNKNOWN) |
+| **CheckoutRequest** | **0 baris** | **tertutup** |
+| **Akun TENANT** | **12** `User` ber-role TENANT · **13** baris `Tenant` · **1** `User` OWNER · **0** ADMIN/STAFF | **tertutup** |
+| **`pricingTerm` per kamar** | `MONTHLY` di 11 stay ACTIVE; kamar **C** dan **F1** tanpa stay aktif | **tertutup** |
+| `docs/ANTREAN.md` | 16.371 byte (plafon 16.384) | sama |
+| Test yang lulus | BE 241/6 suite · FE 68 berkas/407 test | sama |
+| Cacat Kmr C | katalog `OCCUPIED` vs kalender `AVAILABLE` — **sebabnya terukur**: `Room.status='OCCUPIED'` tetapi **tidak ada Stay ACTIVE** untuk C. Tidak diperbaiki (bukan S9) | sebab baru ditemukan |
+
+**B. Izin owner.** **commit + push `main`** diberikan owner di sesi ini (S8 dan S9) → dijalankan. **Deploy client-only** dijawab owner **S9-1 (a)**: deploy sekarang lalu smoke produksi. S9-2…S9-5 (plafon `docs/FITUR.md`, wizard TENANT tumpang tindih, switch "Mode Cepat" 390 px, lacak pengajuan tanpa login) tercatat di [TANYA-OWNER](TANYA-OWNER.md) dan berjalan pada default (a) masing-masing; tidak satu pun diubah di sesi ini.
+
+**C. Gate penuh (exit code + angka).**
+
+| Gate | Hasil |
+|---|---|
+| `cd frontend && npx tsc --noEmit` | exit 0 |
+| `cd frontend && npx vitest run` | **68 berkas / 407 test lulus** (potret 24 Okt 2026, sesi S9) — dijalankan **dua kali** (sebelum dan sesudah perbaikan CSS) |
+| `cd backend && npx tsc --noEmit -p tsconfig.json` | exit 0 |
+| `cd backend && npm run test:unit` | `# tests 241 · # suites 6 · # pass 241 · # fail 0` (full build via `pretest:unit`) |
+| `node scripts/check-fitur.mjs` | bersih — **58 fitur / 80 rute** |
+| `node scripts/check-docs.mjs` | **BERSIH — 0 pelanggaran** |
+| `git diff --check` | exit 0 (hanya peringatan CRLF→LF) |
+| `wc -c docs/ANTREAN.md` | 16.371 → **16.368** byte (≤16.384) |
+
+**Temuan gate baru — `npm run build` GAGAL di pemeriksaan pertama:** `verify-pwa` menolak karena *Initial CSS gzip budget exceeded: 138.323 > 138.240* (135 KiB). Ambang **tidak** dinaikkan (dilarang). Yang dikerjakan agar lulus: (1) blok CSS S8 dipadatkan — susunan header/heading/catatan memakai utility yang **sudah ada** (`d-flex/flex-wrap/justify-content-between/gap-3/mb-3/flex-grow-1/mt-3`), dua aturan yang tidak wajib (`.quickstart-first-grid .quickstart-action`, `.quickstart-first-note`) dibuang; (2) **deklarasi duplikat** `color: var(--gray-900)` di blok tarif above-the-fold dihapus (no-op); (3) satu aturan **CSS mati** `.guest-home-page` dibuang setelah terbukti **0 rujukan** di `src/` dan `public/`. Hasil: `PWA verification passed … initial-css-gzip=135 KiB`.
+
+**D. Deploy client-only (sudah dijalankan, dengan izin owner).**
+
+| Butir | Nilai |
+|---|---|
+| Build lokal | `npm run build` → buildId **`DbHa1OoxHfSP`** (entry `assets/index-8U444FH0.js`, 170 chunk) |
+| Paket | `client-update.tgz` **59.424.155** byte · sha256 `202887238aceb9f24a94ae423e783a28f16f029ec032831fa71a42bd119aa33a` — **identik** lokal & server |
+| Skrip | `bash ~/staging/deploy-client-safe.sh` (backup → ekstrak ke `client-new` → verifikasi entry → tukar folder) |
+| Backup otomatis | `~/backups/client-20261024-093640.tar.gz` (versi lama `Z1Qr7_YnZFAK`) |
+| Folder rollback | `~/kost48-prod/client-old-20261024-093640` |
+| Perintah rollback | `mv ~/kost48-prod/client-old-20261024-093640 ~/kost48-prod/client` lalu bersihkan cache peramban |
+| Proses di server | **tidak ada** proses baru, **tanpa restart**; backend/DB/`.env`/`uploads` tidak disentuh |
+
+**E. Smoke produksi setelah deploy** (semua di `https://kost48surabaya.com`, bukan build lokal).
+
+| Butir | Hasil |
+|---|---|
+| `GET /version.json` | **`DbHa1OoxHfSP`** (sebelum `Z1Qr7_YnZFAK`); nilai dari server = nilai di disk |
+| `GET /`, `/rooms`, `/cek` | 200 |
+| `/rooms` (filter "Semua Kamar") | **"1 – 9 dari 13 kamar"** → 13 kamar; label **"Kmr F1"** (S4) muncul; default "Tersedia" = 1 kamar |
+| `/rooms/5/detail` | h1 **"Kmr F1"**; **"DP awal: Rp 510.000"** (=30% × Rp1.700.000, P38); deposit jaminan Rp 200.000; panel **"Booking online kamar ini sedang ditutup"** + tombol WhatsApp (flag MATI) |
+| Keyboard (halaman detail) | **9 fokus berurutan**: `Kembali ke daftar kamar` → `Tanya Ketersediaan via WhatsApp` → `Slide 1…6`; **0** elemen `tabindex` positif; tidak ada focus trap pada 9 langkah pertama |
+| axe produksi | **BELUM TERBUKTI** — `axe-core` tidak bisa dimuat di halaman produksi (import dari CDN gagal di jaringan sesi ini). Butuh salah satu: izin memuat axe dari CDN, atau axe disajikan same-origin. axe 0 violation di §8.17 = **build lokal**, bukan produksi |
+
+**F. Batas kejujuran sesi ini.**
+
+1. **Yang di-deploy hanya `client/`.** Backend produksi **tetap versi lama**, jadi: `pricingTerm` belum ada di payload publik → **chip peluang kosong S3 belum tampil di produksi**; `POST /tenant/bookings/claim` belum ada di produksi → **panel klaim belum bisa dipakai**; `POST /public/bookings` tetap **503** karena flag MATI. Yang benar-benar terbukti di produksi = tampilan + jalan keluar WhatsApp, **bukan** klaim/DP.
+2. **Wizard-first produksi BELUM TERBUKTI untuk peran login.** DB produksi hanya punya 1 `User` OWNER dan 12 TENANT — **tidak ada akun ADMIN/STAFF** — dan sesi ini tidak melakukan login sungguhan. Yang terbukti: kode merender wizard di rute pendaratan (build lokal, sesi disuntik; §8.17).
+3. **axe produksi belum terbukti** (lihat E). Tidak ada klaim WCAG dari produksi pada sesi ini.
+4. **Batas double-book tetap berlaku.** Jaminan S7 hanya di aplikasi (`FOR UPDATE` + cek irisan + ulang transaksi 40001); **tidak ada exclusion constraint DB**, jadi balapan antar-proses masih mungkin dan **tidak** diklaim tertutup.
+5. **Kmr C** dicatat, tidak diperbaiki: `Room.status='OCCUPIED'` tanpa Stay ACTIVE.
+6. **Temuan CSS mati**: keluarga `.guest-home-*` (15 aturan di `10-misc.css`) seluruhnya tanpa rujukan. Hanya **1** aturan (`.guest-home-page`) dibuang — sebatas yang dibutuhkan gate; sisanya **backlog**, bukan diklaim bersih.
+7. **Yang belum pernah dijalankan**: `prisma migrate` (dilarang); deploy backend; login + klaim + bayar DP sungguhan ke API nyata; uji perangkat fisik; axe produksi.
+
+**G. Data uji.** Tidak ada baris/data dibuat atau dihapus: tidak ada DB yang ditulis, tidak ada migrasi, dan artefak bukti (skrip probe, log vitest, `client-update.tgz`) berada **di luar repo** (`%TEMP%\kost48-s9`) sehingga `git status --short` hanya memuat berkas yang memang diubah.
+
+**H. Langkah berikutnya (satu baris).** Jalankan axe + keyboard di produksi untuk 4 peran (butuh axe same-origin dan akun uji ADMIN/STAFF), lalu tutup `W-OWN-021`.
