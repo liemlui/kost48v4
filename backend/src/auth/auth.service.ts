@@ -2,6 +2,8 @@
 import {
   ConflictException,
   ForbiddenException,
+  HttpException,
+  HttpStatus,
   Injectable,
   Logger,
   NotFoundException,
@@ -10,7 +12,7 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs';
-import { createHash, randomBytes } from 'crypto';
+import { createHash, createHmac, randomBytes } from 'crypto';
 import { Prisma } from '../generated/prisma';
 import { PrismaService } from '../prisma/prisma.service';
 import { normalizePhone, denormalizePhone } from '../common/utils/phone.util';
@@ -22,6 +24,36 @@ import { RegisterDto } from './dto/register.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { UserRole } from '../common/enums/app.enums';
 
+/**
+ * S5 — hash tiruan untuk jalur "identifier tidak ditemukan".
+ *
+ * Dibuat **sekali saat modul dimuat** dengan cost yang sama dengan seluruh hash
+ * sandi di repo ini (`bcrypt.hash(..., 10)`), lalu dipakai sebagai sasaran
+ * `bcrypt.compare` ketika identifier tidak ada. Tanpa langkah ini jalur "identifier
+ * tak dikenal" selesai tanpa `bcrypt.compare`, sehingga waktu responsnya lebih
+ * pendek dan keberadaan akun bisa ditebak dari stopwatch (OWASP Authentication
+ * Cheat Sheet: pesan generik **dan** waktu respons seragam). Sandi asal hash ini
+ * acak dan tidak pernah dipakai untuk masuk.
+ */
+const DUMMY_PASSWORD_HASH = bcrypt.hashSync(randomBytes(24).toString('hex'), 10);
+
+/** S5 — penguncian percobaan: jumlah kegagalan yang memicu kunci, dan durasi kunci. */
+const MAX_FAILED_LOGIN_ATTEMPTS = 5;
+const LOGIN_LOCKOUT_MS = 15 * 60 * 1000;
+/** Batas jumlah kunci yang dilacak supaya serangan identifier unik tidak menghabiskan memori. */
+const FAILED_LOGIN_MAX_KEYS = 10_000;
+
+/** Konteks request yang dibutuhkan `login()` — sekarang hanya IP klien. */
+export interface LoginRequestContext {
+  ip?: string;
+}
+
+interface FailedLoginEntry {
+  failedAttempts: number;
+  firstFailedAt: number;
+  lockedUntil: number | null;
+}
+
 @Injectable()
 export class AuthService {
   private readonly logger = new Logger(AuthService.name);
@@ -30,6 +62,21 @@ export class AuthService {
   private readonly REFRESH_TOKEN_DAYS = 7;
   /** Access token expiry: 15 menit (dalam detik) */
   private readonly ACCESS_TOKEN_EXPIRY_SEC = 900;
+
+  /**
+   * S5 — penghitung percobaan gagal per `identifier` + IP.
+   *
+   * **Batas yang wajib ditulis**: peta ini hidup di memori proses. Ia hanya benar
+   * untuk satu proses API (produksi sekarang satu proses Passenger) dan **tidak**
+   * berlaku lintas replika — replika kedua punya hitungan sendiri. Tidak ada
+   * Redis/dependency baru; kalau kelak produksi multi-replika, penguncian harus
+   * dipindah ke penyimpanan bersama. `AuthService` adalah provider singleton Nest,
+   * jadi satu peta per proses.
+   */
+  private readonly failedLoginAttempts = new Map<string, FailedLoginEntry>();
+
+  /** Kunci HMAC untuk bentuk tersamar identifier di AuditLog — dibuat sekali per proses. */
+  private readonly identifierMaskKey = randomBytes(32);
 
   constructor(
     private readonly prisma: PrismaService,
@@ -93,20 +140,29 @@ export class AuthService {
     return created;
   }
 
-  async login(dto: LoginDto) {
+  async login(dto: LoginDto, context?: LoginRequestContext) {
     const invalidCredentialsMessage = 'Email/nomor HP atau password salah';
 
     const identifier = dto.identifier.trim();
     const normalizedPhone = normalizePhone(identifier);
 
+    // S5: kunci percobaan per `identifier` + IP, diperiksa SEBELUM menyentuh DB.
+    const attemptKey = this.buildLoginAttemptKey(identifier, normalizedPhone, context?.ip);
+    this.assertLoginNotLocked(attemptKey);
+
     const user = await this.findUserForLogin(identifier, normalizedPhone);
 
     if (!user) {
+      // S5 anti-enumerasi: tetap bayar satu `bcrypt.compare` terhadap hash tiruan
+      // supaya waktu respons jalur ini setara dengan jalur "password salah".
+      await bcrypt.compare(dto.password, DUMMY_PASSWORD_HASH);
+      await this.registerFailedLogin(attemptKey, identifier, normalizedPhone, context?.ip);
       throw new UnauthorizedException(invalidCredentialsMessage);
     }
 
     const passwordMatch = await bcrypt.compare(dto.password, user.passwordHash);
     if (!passwordMatch) {
+      await this.registerFailedLogin(attemptKey, identifier, normalizedPhone, context?.ip);
       throw new UnauthorizedException(invalidCredentialsMessage);
     }
 
@@ -114,6 +170,9 @@ export class AuthService {
     if (!user.isActive) {
       throw new ForbiddenException(invalidCredentialsMessage);
     }
+
+    // Sandi benar: hitungan gagal untuk kombinasi ini dihapus.
+    this.failedLoginAttempts.delete(attemptKey);
 
     await this.prisma.user.update({
       where: { id: user.id },
@@ -583,6 +642,168 @@ export class AuthService {
 
   private async findUserForForgotPassword(identifier: string, normalizedPhone: string | null) {
     return this.findUserByEmailOrPhone(identifier, normalizedPhone);
+  }
+
+  // ---- S5: penguncian percobaan ----
+
+  /**
+   * Kunci penghitung = identifier yang sudah dinormalkan + IP klien.
+   *
+   * Nomor HP dinormalkan lebih dulu supaya `0812…` dan `62812…` berbagi satu
+   * hitungan; email di-lowercase. IP ikut masuk kunci sesuai rencana §8.10 S5
+   * ("per `identifier` + IP") — tanpa IP, satu penyerang bisa mengunci akun
+   * korban hanya dengan lima sandi salah, dan tanpa identifier, satu IP bisa
+   * menghabiskan jatah akun lain.
+   */
+  private buildLoginAttemptKey(
+    identifier: string,
+    normalizedPhone: string | null,
+    ip?: string,
+  ): string {
+    const subject = this.loginSubject(identifier, normalizedPhone);
+    return `${subject}|${ip ?? 'unknown'}`;
+  }
+
+  private loginSubject(identifier: string, normalizedPhone: string | null): string {
+    const lowered = identifier.trim().toLowerCase();
+    if (lowered.includes('@')) return `email:${lowered}`;
+    return `phone:${normalizedPhone ?? lowered}`;
+  }
+
+  /** Melempar 429 + sisa waktu bila kombinasi ini sedang terkunci. */
+  private assertLoginNotLocked(attemptKey: string): void {
+    const entry = this.failedLoginAttempts.get(attemptKey);
+    if (!entry) return;
+
+    const now = Date.now();
+
+    if (entry.lockedUntil !== null) {
+      if (now < entry.lockedUntil) {
+        const remainingMinutes = Math.max(1, Math.ceil((entry.lockedUntil - now) / 60_000));
+        throw new HttpException(
+          `Terlalu banyak percobaan masuk. Coba lagi dalam ${remainingMinutes} menit.`,
+          HttpStatus.TOO_MANY_REQUESTS,
+        );
+      }
+      // Jeda 15 menit lewat → hitungan dibuang, tidak ada kunci permanen.
+      this.failedLoginAttempts.delete(attemptKey);
+      return;
+    }
+
+    if (now - entry.firstFailedAt > LOGIN_LOCKOUT_MS) {
+      this.failedLoginAttempts.delete(attemptKey);
+    }
+  }
+
+  /**
+   * Menambah hitungan gagal; pada ambang ke-`MAX_FAILED_LOGIN_ATTEMPTS` kombinasi
+   * ini dikunci `LOGIN_LOCKOUT_MS` dan peristiwa itu ditulis ke AuditLog dengan
+   * identifier **tersamar** (§8.8: tanpa email/nomor HP utuh di log/audit).
+   */
+  private async registerFailedLogin(
+    attemptKey: string,
+    identifier: string,
+    normalizedPhone: string | null,
+    ip?: string,
+  ): Promise<void> {
+    const now = Date.now();
+    this.pruneFailedLoginAttempts(now);
+
+    const previous = this.failedLoginAttempts.get(attemptKey);
+    const entry: FailedLoginEntry =
+      !previous || now - previous.firstFailedAt > LOGIN_LOCKOUT_MS
+        ? { failedAttempts: 0, firstFailedAt: now, lockedUntil: null }
+        : previous;
+
+    entry.failedAttempts += 1;
+
+    let justLocked = false;
+    if (entry.failedAttempts >= MAX_FAILED_LOGIN_ATTEMPTS && entry.lockedUntil === null) {
+      entry.lockedUntil = now + LOGIN_LOCKOUT_MS;
+      justLocked = true;
+    }
+
+    this.failedLoginAttempts.set(attemptKey, entry);
+
+    if (justLocked) {
+      await this.recordLoginLockout(identifier, normalizedPhone, ip, entry);
+    }
+  }
+
+  /** Menjaga peta tetap terbatas saat penyerang memakai identifier unik tanpa henti. */
+  private pruneFailedLoginAttempts(now: number): void {
+    if (this.failedLoginAttempts.size < FAILED_LOGIN_MAX_KEYS) return;
+
+    for (const [key, entry] of this.failedLoginAttempts) {
+      const expired =
+        entry.lockedUntil !== null
+          ? entry.lockedUntil <= now
+          : now - entry.firstFailedAt > LOGIN_LOCKOUT_MS;
+      if (expired) this.failedLoginAttempts.delete(key);
+    }
+    if (this.failedLoginAttempts.size < FAILED_LOGIN_MAX_KEYS) return;
+
+    let earliestKey: string | undefined;
+    let earliestAt = Number.POSITIVE_INFINITY;
+    for (const [key, entry] of this.failedLoginAttempts) {
+      const at = entry.lockedUntil ?? entry.firstFailedAt;
+      if (at < earliestAt) {
+        earliestAt = at;
+        earliestKey = key;
+      }
+    }
+    if (earliestKey) this.failedLoginAttempts.delete(earliestKey);
+  }
+
+  /**
+   * Bentuk tersamar untuk log/audit. HMAC-SHA256 dengan kunci **per proses**,
+   * bukan `sha256` polos: ruang nomor HP Indonesia cukup kecil untuk dibalik
+   * dengan brute force, jadi hash tanpa kunci bukan penyamaran. Konsekuensinya
+   * tag ini hanya bisa dikorelasikan di dalam satu proses — dan itu memang batas
+   * penguncian in-memory ini.
+   */
+  private maskIdentifier(identifier: string, normalizedPhone: string | null): string {
+    const subject = this.loginSubject(identifier, normalizedPhone);
+    const kind = subject.startsWith('email:') ? 'email' : 'phone';
+    const digest = createHmac('sha256', this.identifierMaskKey).update(subject).digest('hex');
+    return `${kind}:hmac-${digest.slice(0, 12)}`;
+  }
+
+  private async recordLoginLockout(
+    identifier: string,
+    normalizedPhone: string | null,
+    ip: string | undefined,
+    entry: FailedLoginEntry,
+  ): Promise<void> {
+    const identifierMask = this.maskIdentifier(identifier, normalizedPhone);
+    const lockedForMinutes = Math.round(LOGIN_LOCKOUT_MS / 60_000);
+    const clientIp = ip ?? 'unknown';
+
+    this.logger.warn(
+      `Login dikunci ${lockedForMinutes} menit untuk ${identifierMask} dari ${clientIp} setelah ${entry.failedAttempts} percobaan gagal`,
+    );
+
+    try {
+      await this.prisma.auditLog.create({
+        data: {
+          actorUserId: null,
+          action: 'AUTH_LOGIN_LOCKOUT',
+          entityType: 'Auth',
+          entityId: identifierMask,
+          meta: {
+            identifierMask,
+            clientIp,
+            failedAttempts: entry.failedAttempts,
+            lockedForMinutes,
+          } as Prisma.InputJsonValue,
+        },
+      });
+    } catch (err) {
+      // Penguncian tetap berlaku walau audit gagal ditulis; jangan bocorkan identifier.
+      this.logger.error(
+        `[loginLockout] Gagal menulis AuditLog untuk ${identifierMask}: ${(err as Error)?.message ?? 'unknown'}`,
+      );
+    }
   }
 
   private async sendResetEmail(email: string, rawToken: string): Promise<void> {

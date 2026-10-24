@@ -167,7 +167,57 @@ test('LOGIN-5 — login via nomor HP memakai tenant aktif lalu user TENANT', asy
   assert.equal(result.user.tenantId, TENANT_ID);
 });
 
-/** Prisma tiruan untuk refresh: transaksi + klaim token. */
+test('LOGIN-6 — akun TENANT lama (buatan admin) masuk dengan email terdaftar', async () => {
+  // Bentuk "TENANT lama": akun dibuat admin/owner untuk penghuni yang sudah menghuni,
+  // jadi emailnya ada di User tetapi Tenant.phone sudah terisi lebih dulu. Login tidak
+  // boleh bergantung pada pendaftaran mandiri.
+  const tenantUser = makeUser({ email: 'penghuni.lama@kost48.test', role: 'TENANT' });
+  const prisma = makeLoginPrisma({ emailUser: tenantUser, tenant: { id: TENANT_ID }, phoneUser: null });
+
+  const result = await makeService(prisma).login({
+    identifier: 'Penghuni.Lama@kost48.test',
+    password: PASSWORD,
+  });
+
+  assert.equal(result.user.role, 'TENANT');
+  assert.equal(result.user.tenantId, TENANT_ID);
+  assert.equal(result.user.email, 'penghuni.lama@kost48.test');
+
+  const emailLookup = prisma.events.find((event) => event.op === 'user.findFirst').args;
+  assert.deepEqual(emailLookup.where.email, { equals: 'penghuni.lama@kost48.test', mode: 'insensitive' });
+  assert.equal(
+    prisma.events.some((event) => event.op === 'tenant.findFirst'),
+    false,
+    'email yang cocok tidak perlu mencari tenant lewat nomor HP',
+  );
+});
+
+test('LOGIN-7 — akun TENANT lama tanpa email tetap masuk dengan nomor HP berformat bebas', async () => {
+  // Sisa akun lama yang dibuat admin hanya punya nomor HP di Tenant (User.email = null).
+  const tenantUser = makeUser({ email: null, role: 'TENANT' });
+  const prisma = makeLoginPrisma({ emailUser: null, tenant: { id: TENANT_ID }, phoneUser: tenantUser });
+
+  const result = await makeService(prisma).login({
+    identifier: '+62 812-3456-7890',
+    password: PASSWORD,
+  });
+
+  const tenantLookup = prisma.events.find((event) => event.op === 'tenant.findFirst').args;
+  const phoneConditions = tenantLookup.where.OR.map((condition) => condition.phone);
+  assert.ok(phoneConditions.includes('6281234567890'), 'bentuk 62… harus dicoba');
+  assert.ok(phoneConditions.includes('081234567890'), 'bentuk 08… harus dicoba');
+  assert.equal(tenantLookup.where.isActive, true);
+
+  const userLookup = prisma.events.filter((event) => event.op === 'user.findFirst').pop();
+  assert.equal(userLookup.args.where.tenantId, TENANT_ID);
+  assert.equal(userLookup.args.where.role, 'TENANT');
+  assert.equal(userLookup.args.where.isActive, true);
+
+  assert.equal(result.user.role, 'TENANT');
+  assert.equal(result.user.tenantId, TENANT_ID);
+});
+
+
 function makeRefreshPrisma({ stored = null, user = makeUser(), claimCount = 1 } = {}) {
   const events = [];
   const tx = {

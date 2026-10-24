@@ -48,8 +48,14 @@ export class AuthController {
   @ApiOperation({ summary: 'Login user — publik, rate-limited' })
   @Public()
   @UseGuards(RateLimitGuard)
-  async login(@Body() dto: LoginDto, @Res({ passthrough: true }) res: Response) {
-    const data = await this.authService.login(dto);
+  async login(
+    @Body() dto: LoginDto,
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    // S5: kunci percobaan per identifier + IP. `trust proxy` diset di main.ts,
+    // jadi req.ip memakai IP klien asli di belakang Passenger/LiteSpeed.
+    const data = await this.authService.login(dto, { ip: req.ip });
     // P3-01: set refresh token sebagai httpOnly cookie (XSS-safe)
     this.setRefreshCookie(res, data.refreshToken);
     return { message: 'Login berhasil', data: { accessToken: data.accessToken, user: data.user } };

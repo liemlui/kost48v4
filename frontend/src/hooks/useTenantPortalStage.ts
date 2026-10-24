@@ -6,8 +6,21 @@ import { listMyTenantBookings } from '../api/bookings';
 import { PORTAL_QUERY_KEYS } from '../api/portalQueryKeys';
 import type { Stay } from '../types';
 import { getActionableTenantBookings } from '../utils/tenantBookingRules';
+import {
+  TENANT_STAGE_NAMES,
+  isTenantCandidateStage,
+  isTenantOccupantStage,
+  type TenantPortalStage,
+} from '../config/navigation';
 
-export type TenantPortalStage = 'browsing' | 'booking' | 'occupied';
+// S6: tipe tahap kanonik ada di `config/navigation.ts` (dipakai juga oleh guard rute dan
+// menu). Diekspor ulang dari sini supaya pemanggil lama (GettingStartedGuide) tetap jalan
+// tanpa dua definisi union yang bisa menyimpang.
+export type { TenantPortalStage };
+
+/** Tahap `browsing`/`booking` = CALON penghuni (belum sewa); `occupied` = PENGHUNI. */
+export const isTenantPortalStageCandidate = isTenantCandidateStage;
+export const isTenantPortalStageOccupant = isTenantOccupantStage;
 
 function isNotFoundError(error: unknown): boolean {
   const maybe = error as {
@@ -94,6 +107,10 @@ export function useTenantPortalStage() {
 
   return {
     stage,
+    /** S6: nama tahap untuk manusia (calon belum mengajukan / calon pengajuan berjalan / penghuni). */
+    stageName: TENANT_STAGE_NAMES[stage],
+    /** S6: calon penghuni = `browsing`/`booking`; `false` = penghuni (`occupied`). */
+    isCandidate: isTenantCandidateStage(stage),
     isLoading: isStageLoading,
     hasStayHistory,
 

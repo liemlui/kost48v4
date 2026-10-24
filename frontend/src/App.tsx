@@ -6,7 +6,7 @@ import AppLayout from './components/layout/AppLayout';
 import ModeCepatFloatingSwitch from './components/layout/ModeCepatFloatingSwitch';
 import ProtectedRoute from './components/layout/ProtectedRoute';
 import PwaRouteBoundary from './components/pwa/PwaRouteBoundary';
-import { getDefaultRoute } from './config/navigation';
+import { TENANT_ROUTE_STAGES, getDefaultRoute } from './config/navigation';
 import { resolveRouteTitle } from './config/routeTitles';
 import { useDocumentTitle } from './hooks/useDocumentTitle';
 import { useCanonicalUrl } from './utils/canonical';
@@ -335,23 +335,48 @@ export default function App() {
           <Route path="/settings" element={<RequireRoles allowed={['OWNER', 'ADMIN']}><OwnerSettingsPage /></RequireRoles>} />
           <Route path="/notifications" element={<RequireRoles allowed={['OWNER', 'ADMIN', 'STAFF', 'TENANT']}><NotificationsPage /></RequireRoles>} />
 
-          <Route path="/portal/announcements" element={<RequireRoles allowed={['TENANT']}><MyAnnouncementsPage /></RequireRoles>} />
-          <Route path="/portal/announcements/:id" element={<RequireRoles allowed={['TENANT']}><TenantAnnouncementDetailPage /></RequireRoles>} />
-          <Route path="/portal/stay" element={<RequireRoles allowed={['TENANT']}><MyStayPage /></RequireRoles>} />
-          <Route path="/portal/energy" element={<RequireRoles allowed={['TENANT']}><EnergyPage /></RequireRoles>} />
-          <Route path="/portal/bookings" element={<RequireRoles allowed={['TENANT']}><MyBookingsPage /></RequireRoles>} />
-          <Route path="/portal/invoices" element={<RequireRoles allowed={['TENANT']}><MyInvoicesPage /></RequireRoles>} />
-          <Route path="/portal/invoices/:id" element={<RequireRoles allowed={['TENANT']}><TenantInvoiceDetailPage /></RequireRoles>} />
-          <Route path="/portal/tickets" element={<RequireRoles allowed={['TENANT']}><MyTicketsPage /></RequireRoles>} />
-          <Route path="/portal/loyalty" element={<RequireRoles allowed={['TENANT']}><MyLoyaltyPage /></RequireRoles>} />
-          <Route path="/portal/manual" element={<RequireRoles allowed={['TENANT']}><MyManualPage /></RequireRoles>} />
-          {/* R-13: route /portal/checkout & /portal/renewal — stub informatif, redirect ke /portal/stay */}
-          <Route path="/portal/checkout" element={<RequireRoles allowed={['TENANT']}><CheckoutPortalPage /></RequireRoles>} />
-          <Route path="/portal/renewal" element={<RequireRoles allowed={['TENANT']}><RenewalPortalPage /></RequireRoles>} />
+          {/* S6 — pemisahan calon penghuni vs penghuni.
+              Tahap yang boleh membuka tiap rute portal = satu sumber di `config/navigation.ts`
+              (`TENANT_ROUTE_STAGES`), dipakai juga oleh menu, supaya tidak ada rute terkunci
+              tanpa jalan masuk. Calon (browsing/booking) tetap boleh membuka status pengajuan
+              dan panduan; rute isi sewa aktif hanya untuk penghuni (`occupied`).
+              `/rooms` dan `/portal/booking/:roomId` sengaja TIDAK dikunci di sini: katalog
+              publik untuk calon, dan rute booking punya gerbangnya sendiri (TenantBookingRouteGuard). */}
+          <Route
+            element={(
+              <ProtectedRoute
+                allowRoles={['TENANT']}
+                allowStages={TENANT_ROUTE_STAGES['/portal/bookings']}
+              />
+            )}
+          >
+            <Route path="/portal/bookings" element={<MyBookingsPage />} />
+            <Route path="/portal/manual" element={<MyManualPage />} />
+          </Route>
+          <Route
+            element={(
+              <ProtectedRoute
+                allowRoles={['TENANT']}
+                allowStages={TENANT_ROUTE_STAGES['/portal/stay']}
+              />
+            )}
+          >
+            <Route path="/portal/stay" element={<MyStayPage />} />
+            <Route path="/portal/invoices" element={<MyInvoicesPage />} />
+            <Route path="/portal/invoices/:id" element={<TenantInvoiceDetailPage />} />
+            <Route path="/portal/tickets" element={<MyTicketsPage />} />
+            <Route path="/portal/energy" element={<EnergyPage />} />
+            <Route path="/portal/announcements" element={<MyAnnouncementsPage />} />
+            <Route path="/portal/announcements/:id" element={<TenantAnnouncementDetailPage />} />
+            <Route path="/portal/loyalty" element={<MyLoyaltyPage />} />
+            <Route path="/portal/wifi" element={<WifiOrderPage />} />
+            {/* R-13: route /portal/checkout & /portal/renewal — stub informatif, redirect ke /portal/stay */}
+            <Route path="/portal/checkout" element={<CheckoutPortalPage />} />
+            <Route path="/portal/renewal" element={<RenewalPortalPage />} />
+          </Route>
           <Route path="/loyalty" element={<RequireRoles allowed={['OWNER', 'ADMIN']}><LoyaltyAdminPage /></RequireRoles>} />
           {/* R-17: redirect /portal/guide lama → /portal/manual */}
           <Route path="/portal/guide" element={<Navigate to="/portal/manual" replace />} />
-          <Route path="/portal/wifi" element={<RequireRoles allowed={['TENANT']}><WifiOrderPage /></RequireRoles>} />
           </Route>
           <Route path="*" element={<NotFoundPage />} />
         </Route>

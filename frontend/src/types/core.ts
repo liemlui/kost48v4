@@ -617,6 +617,8 @@ export type CreatePublicBookingPayload = {
 export type PublicBookingResult = {
   booking: {
     stayId: number;
+    /** S7: kode pengajuan (K48-xxxx-y) — pengganti kredensial akun otomatis. */
+    referenceCode?: string;
     roomId: number;
     roomCode: string;
     status: string;
@@ -635,11 +637,19 @@ export type PublicBookingResult = {
     };
     hasPet: boolean;
   };
+  /**
+   * S7 (P36 a): pengajuan tamu tidak lagi melahirkan akun. `portalAccess` tetap
+   * dikirim agar pemanggil lama tidak pecah, tetapi isinya instruksi klaim.
+   * `temporaryPassword`/`isNewUser` hanya mungkin ada di respons server lama.
+   */
   portalAccess: {
     email: string;
-    temporaryPassword?: string | null;
-    isNewUser: boolean;
+    requiresAccount?: boolean;
+    claimRequired?: boolean;
+    referenceCode?: string;
     instructions: string;
+    temporaryPassword?: string | null;
+    isNewUser?: boolean;
   };
   message: string;
 };

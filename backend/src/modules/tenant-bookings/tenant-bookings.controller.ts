@@ -37,6 +37,20 @@ export class TenantBookingsController {
     };
   }
 
+  @Post('claim')
+  @ApiOperation({
+    summary: 'Klaim pengajuan booking tanpa akun yang kontaknya sama dengan akun ini — TENANT',
+  })
+  async claim(@CurrentUser() user: CurrentUserPayload) {
+    const result = await this.tenantBookingsService.claimGuestBookings(user);
+    return {
+      message: result.alreadyClaimed
+        ? 'Pengajuan sudah terkait dengan akun ini'
+        : 'Pengajuan berhasil diklaim. Sekarang kamu bisa membayar DP dari portal.',
+      data: result,
+    };
+  }
+
   @Post(':id/cancel')
   @ApiOperation({ summary: 'Batalkan booking — TENANT' })
   async cancel(

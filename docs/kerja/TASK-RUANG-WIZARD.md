@@ -1,6 +1,6 @@
 # TASK — Katalog `/rooms`, heatmap ketersediaan, dan wizard-first lintas role
 
-> **Blok baca** · Jenis: **dokumen kerja tugas** · Status: **aktif — fase A (katalog tersedia + heatmap + skor peluang + wizard pembuka) sudah live; Program "ROOMS & AKUN V2" masuk §8 (rencana, belum ada kode)** · Untuk siapa: agen pelaksana + owner
+> **Blok baca** · Jenis: **dokumen kerja tugas** · Status: **aktif — fase A (katalog tersedia + heatmap + skor peluang + wizard pembuka) sudah live; Program "ROOMS & AKUN V2" di §8 (kode S3–S6 ada, belum di-deploy)** · Untuk siapa: agen pelaksana + owner
 > · Baca kalau: mengerjakan katalog kamar publik, heatmap ketersediaan, prediksi kamar kosong, atau wizard pembuka di beranda tiap role. · **Jangan** dibaca kalau: memilih tugas (itu [ANTREAN](../ANTREAN.md)) atau mencari aturan bisnis (itu [domain/keuangan.md](../domain/keuangan.md)).
 
 Bentuk 7 bagian, tanpa kotak otoritatif — status pekerjaan tetap di [ANTREAN §3](../ANTREAN.md) baris `W-OWN-019`/`W-OWN-020`.
@@ -134,9 +134,9 @@ Berkas ini adalah rumah rencana + progres program; jangan membuat dokumen parale
 | S2 | **selesai** | sesi 23 Okt 2026 (sesi S2) | §8.10 = rencana rinci S3–S9 (7 blok: perubahan berkas · acceptance terkecil · risiko · urutan) · §8.11 = L1 ukur ulang + temuan baru dari kode · `check-docs` BERSIH, tidak ada kode berubah | **S3** eksekusi: kirim `pricingTerm` ke publik, `termRisk` + `VACANCY_WEIGHT_TABLE`, aturan bulanan bergulir |
 | S3 | **selesai** | sesi 23 Okt 2026 (sesi S3) | [§8.12](#812-sesi-23-okt-2026-sesi-s3--peluang-kosong-berjenjang-bukti): `VACANCY_WEIGHT_TABLE` + `termRisk` + aturan bergulir P34 (a) semua di `utils/vacancyEstimate.ts`; `pricingTerm` + fakta kontrak whitelist dikirim backend (katalog **dan** kalender); chip di `RoomCard`, tabel bobot di `AvailabilityHeatmap`; vitest 367 lulus · tsc FE/BE 0 · `check-docs` BERSIH | **S4** label "Kmr X" + kartu compact |
 | S4 | **selesai** | sesi 23 Okt 2026 (sesi S4) | [§8.13](#813-sesi-23-okt-2026-sesi-s4--label-kmr-x--kartu-compact-bukti): `roomDisplayCode()` satu helper ("Kmr A"/"Kmr F1") + unit test; kartu katalog dipangkas ke satu elemen dominan (harga bulanan) dengan chip peluang kosong S3 tetap tampil; `RoomPreviewCard` & judul detail memakai helper yang sama; target sentuh ≥44×44 px di 390/768/1440 px; axe 0 violation · `check-fitur` bersih | **S5** identitas: bukti anti-enumerasi + penguncian percobaan |
-| S5 | belum mulai | — | rencana: sama | — |
-| S6 | belum mulai | — | rencana: sama | — |
-| S7 | belum mulai | — | rencana: sama (gate `npm run test:unit` wajib) | — |
+| S5 | **selesai** — kecuali uji manual "12 akun TENANT lama" yang **BELUM TERBUKTI** (tanpa kunci akses DB) | sesi 24 Okt 2026 (sesi S5) | [§8.14](#814-sesi-24-okt-2026-sesi-s5--identitas-bukti-anti-enumerasi-dan-penguncian-percobaan): `DUMMY_PASSWORD_HASH` cost 10 dibuat sekali saat modul dimuat → jalur identifier tak dikenal membayar satu `bcrypt.compare` (median selisih **1,7 ms**, ambang berkas test 20 ms); penguncian **5 gagal → 15 menit** per identifier+IP tanpa kunci permanen, pesan 429 menyebut sisa menit, `AuditLog` `AUTH_LOGIN_LOCKOUT` dengan identifier **tersamar** (HMAC 12 hex); NIK **0** rujukan di `src/auth`; BE **211 lulus** · tsc FE/BE 0 · `check-docs` BERSIH | **S6** pemisahan calon vs penghuni |
+| S6 | **selesai** | sesi 24 Okt 2026 (sesi S6) | [§8.15](#815-sesi-24-okt-2026-sesi-s6--pemisahan-calon-penghuni-dan-penghuni): `ProtectedRoute` menerima `allowRoles` + `allowStages` (penolakan = toast pesan + pengalihan, bukan spinner abadi); 12 rute portal tenant dipisah per tahap dari satu sumber `TENANT_ROUTE_STAGES`; satu tabel label per tahap (calon "Cari kamar"/"Pengajuan saya", penghuni "Kamar saya"/"Tagihan") + seksi "Lihat semua menu" di setiap tahap; backend: TENANT tanpa stay → 404 + daftar kosong; FE vitest penuh lulus · BE **217 lulus** · tsc FE/BE 0 | **S7** DP: gerbang akun, idempotensi, tahan double-book |
+| S7 | **selesai** | sesi 24 Okt 2026 (sesi S7) | [§8.16](#816-sesi-24-okt-2026-sesi-s7--dp-gerbang-akun-idempotensi-tahan-double-book): pengajuan tamu tidak lagi membuat akun (`user.create` 0, tanpa kata sandi di respons) + kode pengajuan `K48-xxxx-y`; klaim `POST /tenant/bookings/claim` (kontak sama persis, pesan seragam) + jalur cadangan OWNER/ADMIN `POST /admin/bookings/:stayId/link-account`; gerbang DP dua lapis + pesan berisi langkah klaim; tolak duplikat pembayaran (stay+invoice+nominal+tanggal, jendela 24 jam); cek irisan rentang + retry 40001 di 2 jalur booking; BE **241 lulus** (dari 217) · FE 389 lulus · tsc FE/BE 0 · `check-docs` BERSIH · ANTREAN 16.375 byte; **batas: jaminan aplikasi saja, tanpa exclusion constraint DB** | **S8** booking + wizard-first per role (P37 a: wizard jadi layar pertama tiap peran, "Lihat semua menu" selalu terlihat) + alur klaim di UI |
 | S8 | belum mulai | — | rencana: sama (P37 a: wizard jadi layar pertama tiap peran, "Lihat semua menu" selalu terlihat) | — |
 | S9 | belum mulai | — | rencana: sama (deploy hanya dengan izin owner) | — |
 
@@ -367,6 +367,14 @@ dikenal dan penguncian percobaan per akun.
 
 **Urutan pengerjaan**: (1) `bcrypt` tiruan; (2) penguncian + audit; (3) test anti-enumerasi; (4) test akun lama;
 (5) `test:unit`; (6) catat batas uji manual 12 akun.
+
+**Hasil sesi S5 (24 Okt 2026)** — urutan (1)–(6) dikerjakan, dengan dua penyesuaian yang dicatat terbuka:
+(a) `rate-limit.guard.ts` **tidak** diubah: penguncian 5 kegagalan per identifier+IP sudah lebih ketat daripada
+bucket `login` (10 permintaan/5 menit per IP), jadi tidak perlu bucket baru. IP klien masuk kunci lewat
+`req.ip` (`trust proxy` sudah `1` di `main.ts`), sehingga `login()` menerima `LoginRequestContext` — itu
+satu-satunya perubahan tanda tangan. (b) Test waktu memakai **median** dengan dua putaran pemanasan yang
+dibuang; ambang tetap 20 ms (pengukuran pertama tanpa pemanasan: 14,6 ms). Bukti lengkap, angka, dan batas
+kejujuran di [§8.14](#814-sesi-24-okt-2026-sesi-s5--identitas-bukti-anti-enumerasi-dan-penguncian-percobaan).
 
 #### S6 — Pemisahan calon penghuni dan penghuni
 
@@ -735,3 +743,304 @@ Kartu pertama di `/rooms` (`?avail=all&sort=price-asc`, 9 kartu halaman 1), diuk
    (bukan regresi diam-diam).
 8. `pricingTerm` per kamar, Stay ACTIVE, baris CheckoutRequest, dan jumlah akun TENANT tetap **UNKNOWN**
    (tanpa akses DB). Cacat Kmr C tetap dicatat, tidak diperbaiki.
+
+### 8.14 Sesi 24 Okt 2026 (sesi S5) — identitas: bukti anti-enumerasi dan penguncian percobaan
+
+**A. L1 ukur ulang** (dijalankan sesi S5, potret 2026-10-24; perintah + hasil apa adanya).
+
+| Hal | Hasil ukur | Selisih vs potret prompt |
+|---|---|---|
+| HEAD / branch | `04b26a23` · `main` · `## main...origin/main` (sinkron, tidak ada commit tertunda) | sama |
+| Build produksi | `Z1Qr7_YnZFAK` (`GET /version.json`) | sama — kode S3, S4, dan S5 belum di-deploy |
+| Kamar | 13: A,B,C,D,G,H,I,J,K,L,M,F1,F2 (payload `/api/public/rooms` 11.974 B) | sama |
+| Huni | `occupied 12 · bookable 1 · maintenance 0 · reserved 0 · total 13` | sama |
+| Booking online publik | MATI — `onlineBookingEnabled` true di **0 dari 13** kamar | sama |
+| `pricingTerm` di payload produksi | **TIDAK ADA** (kode S3 belum di-deploy) | sama |
+| Kunci SSH/deploy | **tetap TIDAK ADA** — `~/.ssh` tidak ada, `$TEMP/kost48ssh` tidak ada, tidak ada `*.pem` di `C:\Users\lieml` (kedalaman 2) | izin akses ukur (keputusan S2) **belum** bisa dipakai di mesin ini |
+| Stay ACTIVE / baris CheckoutRequest / akun TENANT | **UNKNOWN** — tanpa akses DB; tidak dikarang | sama |
+| Cacat Kmr C | katalog `OCCUPIED`, kalender `AVAILABLE` | sama; dicatat, **tidak** diperbaiki (bukan S5) |
+
+**B. Yang berubah (kode, sesi ini).**
+
+- `backend/src/auth/auth.service.ts` **(1) anti-enumerasi waktu respons.** `DUMMY_PASSWORD_HASH =
+  bcrypt.hashSync(<sandi acak>, 10)` dibuat **sekali saat modul dimuat**; cost 10 = cost seluruh hash sandi
+  di repo ini. Jalur "identifier tidak ditemukan" sekarang menjalankan
+  `await bcrypt.compare(dto.password, DUMMY_PASSWORD_HASH)` sebelum melempar galat, sehingga ia membayar
+  satu `bcrypt.compare` seperti jalur "sandi salah". Pesan dan status kedua jalur tetap **identik**
+  (`Email/nomor HP atau password salah`, 401) — tidak ada pesan/status baru yang bisa dipakai menebak
+  keberadaan akun.
+- `backend/src/auth/auth.service.ts` **(2) penguncian percobaan.** Peta `failedLoginAttempts` per proses:
+  kunci = identifier ternormalisasi (`08xx` dan `628xx` **berbagi satu hitungan**, email di-lowercase) **+ IP**;
+  `MAX_FAILED_LOGIN_ATTEMPTS = 5`; `LOGIN_LOCKOUT_MS = 15 menit` dihitung dari saat ambang dilampaui;
+  percobaan saat terkunci → `429` dengan pesan yang menyebut sisa menit. Tidak ada kunci permanen: setelah
+  jeda lewat, hitungan dibuang dan login normal kembali. Login dengan sandi benar menghapus hitungan.
+- `backend/src/auth/auth.service.ts` **(2b) audit tersamar.** Saat kunci aktif, satu baris
+  `AuditLog` ditulis dengan `action = AUTH_LOGIN_LOCKOUT`, `entityType = Auth`, `entityId` = bentuk tersamar,
+  dan `meta = { identifierMask, clientIp, failedAttempts, lockedForMinutes }`. Bentuk tersamar =
+  `email|phone:hmac-<12 hex>` dari **HMAC-SHA256 dengan kunci acak per proses**, bukan `sha256` polos: ruang
+  nomor HP Indonesia cukup kecil untuk dibalik brute force, jadi hash tanpa kunci bukan penyamaran. Kegagalan
+  menulis audit **tidak** membatalkan penguncian (dicatat sebagai `logger.error` tanpa identifier).
+- `backend/src/auth/auth.service.ts` **(2c) batas memori.** Peta dibatasi `FAILED_LOGIN_MAX_KEYS = 10.000`
+  dengan prune dua tahap (buang entri kedaluwarsa, lalu buang yang paling awal) supaya serangan identifier
+  unik tidak menghabiskan RAM. Batas ini **wajib dibaca sebagai batas**: peta hidup di memori proses, jadi
+  penguncian **tidak berlaku lintas replika**; tidak ada Redis/dependency baru.
+- `backend/src/auth/auth.controller.ts` — `login()` meneruskan `req.ip` sebagai `LoginRequestContext`.
+  `main.ts` sudah menyetel `trust proxy = 1`, jadi IP adalah IP klien di belakang Passenger/LiteSpeed.
+- `backend/src/common/guards/rate-limit.guard.ts` — **tidak diubah.** Bucket `login` (10 permintaan / 5 menit
+  per IP) tetap; penguncian 5 kegagalan per identifier+IP lebih dulu bekerja, guard tetap pagar luar per IP.
+- Test baru `backend/test/unit/auth-anti-enumeration.test.js` (6 kasus) dan dua kasus baru di
+  `backend/test/unit/auth-login-refresh.test.js` (LOGIN-6, LOGIN-7).
+- **NIK tidak menjadi kredensial (P35 a) — bukti pemeriksaan kode, bukan klaim.** `identityNumber` tidak
+  muncul sama sekali di `backend/src/auth/`; di seluruh `backend/src/` (tanpa `src/generated/**`) ia hanya
+  muncul di `tenants.service.ts` (validasi keunikan NIK saat admin menyimpan data KTP, `identityNumber: true`
+  pada `select`), `public-bookings.service.ts` (menyimpan NIK saat pengajuan tamu),
+  `owner-ai.service.ts` (membaca NIK untuk konteks AI), dan dua DTO. **0** dari `user.findFirst`/`findUnique`
+  di `backend/src/**` memakai `identityNumber`; jalur login hanya mencari lewat `email` lalu `Tenant.phone`
+  (`role: TENANT`, `isActive: true`).
+
+**C. Angka sebelum → sesudah.**
+
+| Hal | Sebelum (potret S4) | Sesudah (kode S5) |
+|---|---|---|
+| `bcrypt.compare` pada jalur identifier tak dikenal | **0** (langsung lempar galat) | **1** terhadap hash tiruan cost 10 |
+| Median waktu respons dua jalur (9 sampel + 2 pemanasan, ambang **20 ms** di berkas test) | belum pernah diukur | identifier tak dikenal **201,7 ms** · sandi salah **203,5 ms** → **selisih 1,7 ms** |
+| Biaya satu `bcrypt.compare` cost 10 di mesin ini | — | **191,2 ms** (pembanding: tanpa hash tiruan selisihnya mendekati satu bcrypt penuh) |
+| Pesan galat & status HTTP dua jalur | sama (`Email/nomor HP atau password salah`, 401) — tapi waktunya berbeda | sama **dan** waktunya setara |
+| Percobaan gagal sebelum dikunci | tidak ada batas per akun (hanya 10 permintaan/5 menit per IP dari guard) | **5** per identifier+IP, lalu **429** "Coba lagi dalam 15 menit" |
+| Jejak audit saat terkunci | tidak ada | 1 baris `AuditLog` `AUTH_LOGIN_LOCKOUT`, identifier **tersamar** (`email:hmac-…` / `phone:hmac-…`, 12 hex) |
+| Test backend (`npm run test:unit`) | **203 lulus / 0 gagal** (6 suite) | **211 lulus / 0 gagal** (6 suite) — +6 kasus anti-enumerasi, +2 kasus TENANT lama |
+| Kasus `auth-login-refresh.test.js` | 11 | **13** (LOGIN-6 email, LOGIN-7 nomor HP berformat bebas) |
+
+Catatan metoda: pengukuran **pertama** (tanpa pemanasan JIT) memberi selisih **14,6 ms** — masih di bawah
+ambang, tetapi terlalu dekat untuk diandalkan. Yang ditambahkan adalah **pemanasan dua putaran yang dibuang**,
+bukan perubahan ambang; ambang tetap **20 ms** dan tetap ditulis di berkas test bersama alasannya.
+
+**D. Verifikasi** — hasil apa adanya (potret 2026-10-24).
+
+- `cd backend && npm run test:unit` (memicu `pretest:unit` = full build) → potret 2026-10-24: **211 test lulus,
+  0 gagal**, 6 suite, 198 subtest TAP, exit 0.
+- `cd backend && node --test test/unit/auth-anti-enumeration.test.js` → **6/6 lulus**.
+  `cd backend && node --test test/unit/auth-login-refresh.test.js` → **13/13 lulus**.
+- `cd backend && npx tsc --noEmit -p tsconfig.json` → **exit 0**.
+- `cd frontend && npx tsc --noEmit` → **exit 0**. **`npx vitest run` sengaja TIDAK dijalankan**: frontend tidak
+  disentuh sama sekali (tidak ada berkas `frontend/**` di diff) dan tidak ada string pesan login yang berubah
+  di FE — pesan `Email/nomor HP atau password salah` datang dari backend, FE hanya menampilkannya.
+- `node scripts/check-fitur.mjs` → `bersih — 58 fitur, 80 rute, 80 rute App.tsx`.
+- `node scripts/check-docs.mjs` → **BERSIH — 0 pelanggaran**; `git diff --check` → bersih.
+- Berkas yang berubah: `backend/src/auth/auth.service.ts`, `backend/src/auth/auth.controller.ts`,
+  `backend/test/unit/auth-login-refresh.test.js`, berkas baru `backend/test/unit/auth-anti-enumeration.test.js`,
+  plus dokumen ini dan `docs/ANTREAN.md`. **`rate-limit.guard.ts` tidak disentuh.**
+
+**E. Batas kejujuran sesi ini.**
+
+1. **Uji manual "12 akun TENANT lama tetap bisa masuk" = BELUM TERBUKTI**, bukan "lulus". Yang terbukti hanya
+   unit test dengan **Prisma tiruan** (LOGIN-6/LOGIN-7) atas bentuk akun yang sama: TENANT dengan email, dan
+   TENANT tanpa email yang masuk lewat nomor HP. Butuh **kunci akses baca-saja produksi** (keputusan register
+   `ROOMS-AKUN-V2 S2`) yang **belum ada di mesin ini**; angka akun TENANT di produksi tetap **UNKNOWN**.
+2. **Tidak di-deploy.** Produksi masih `Z1Qr7_YnZFAK`, jadi tidak ada satu pun klaim "anti-enumerasi bekerja di
+   produksi". Seluruh angka waktu di §C diukur di mesin kerja dengan Prisma tiruan, **bukan** dengan latensi
+   PostgreSQL/Passenger sungguhan.
+3. **Residu waktu yang diketahui dan tidak ditutup**: jalur email dikenal dan email tak dikenal sama-sama
+   melakukan **1** kueri, tetapi jalur **nomor HP** tak dikenal melakukan 2 kueri (`User` lalu `Tenant`) dan
+   nomor HP dikenal 3 kueri. Selisih ±1 kueri (~orde 1 ms) tertutup oleh biaya bcrypt (~190 ms di mesin ini),
+   tetapi tidak nol. Tidak diukur di test karena Prisma tiruan tidak punya latensi.
+4. **`bcrypt.compare` tiruan mengasumsikan semua hash sandi produksi cost 10.** Seluruh pemanggilan
+   `bcrypt.hash(...)` di `backend/src/**` memakai cost 10, tetapi hash warisan yang dibuat di luar kode ini
+   tidak bisa diperiksa tanpa akses DB. Bila ada akun ber-cost lain, jalur itu tetap lebih lambat/lebih cepat
+   dari hash tiruan.
+5. **Penguncian in-memory tidak lintas replika** dan hilang saat proses restart. Ini batas yang ditulis, bukan
+   cacat tersembunyi; memperbaikinya butuh penyimpanan bersama (Redis/DB) = keputusan owner + dependency baru.
+6. **Pesan 429 menyebut sisa waktu** sesuai rencana §8.10 S5. Pesan itu **tidak** membocorkan keberadaan akun
+   karena hitungan gagal juga ditambah di cabang `!user` (`registerFailedLogin` dipanggil sebelum galat 401
+   dilempar), sehingga identifier yang tidak ada bisa terkunci dengan pesan yang sama. Sifat ini terbukti
+   **dari kode**, **bukan** dari test khusus: ENUM-3 mengunci akun yang ada, ENUM-1/ENUM-2 hanya melakukan satu
+   kegagalan pada identifier tak dikenal (tidak sampai ambang).
+7. **Yang belum pernah dijalankan**: uji beban/paralel atas peta penguncian; uji di perangkat/browser; login
+   sungguhan ke API produksi; `npm run build` untuk deploy (deploy = S9).
+
+### 8.15 Sesi 24 Okt 2026 (sesi S6) — pemisahan calon penghuni dan penghuni
+
+**A. L1 ukur ulang** (dijalankan sesi S6, potret 2026-10-24; perintah + hasil apa adanya).
+
+| Hal | Hasil ukur | Selisih vs potret prompt |
+|---|---|---|
+| HEAD / branch | `04b26a23` · `main` · `## main...origin/main` (sinkron) | sama |
+| Working tree saat mulai | 5 modified + 1 untracked = kerja S5 (`auth.service.ts`, `auth.controller.ts`, `auth-login-refresh.test.js`, `docs/ANTREAN.md`, berkas ini, `auth-anti-enumeration.test.js`) — **utuh, tidak disentuh** | sama |
+| Build produksi | `Z1Qr7_YnZFAK` (`GET /version.json`) | sama — kode S3–S6 belum di-deploy |
+| Kamar | 13: A,B,C,D,G,H,I,J,K,L,M,F1,F2 (payload `/api/public/rooms` 11.974 B) | sama |
+| Huni | `occupied 12 · bookable 1 · maintenance 0 · reserved 0 · total 13` | sama |
+| Booking online publik | MATI — `onlineBookingEnabled` true di **0 dari 13** | sama |
+| `pricingTerm` di payload produksi | **TIDAK ADA** (kode S3 belum di-deploy) | sama |
+| Kunci SSH/deploy | **tetap TIDAK ADA** — `~/.ssh` tidak ada, `$TEMP/kost48ssh` tidak ada, tidak ada `*.pem` (kedalaman 2) | izin akses ukur (register `ROOMS-AKUN-V2 S2`) **belum** bisa dipakai di mesin ini |
+| Stay ACTIVE / baris CheckoutRequest / akun TENANT / `pricingTerm` per kamar | **UNKNOWN** — tanpa akses DB; tidak dikarang | sama |
+| Cacat Kmr C | katalog `OCCUPIED`, kalender `AVAILABLE` | sama; dicatat, **tidak** diperbaiki (bukan S6) |
+
+**B. Yang berubah (kode, sesi ini).**
+
+- `frontend/src/config/navigation.ts` — **satu sumber pemisahan tahap.** Definisi eksplisit
+  `TENANT_CANDIDATE_STAGES` (`browsing`+`booking` = calon), `TENANT_OCCUPANT_STAGE` (`occupied`),
+  `isTenantCandidateStage()`, `isTenantOccupantStage()`, `TENANT_STAGE_NAMES`. Izin rute per tahap
+  `TENANT_ROUTE_STAGES` (tujuan → tahap) + `tenantStageAllowsRoute()`. Inventaris menu
+  `TENANT_MENU_ITEMS` (tujuan + ikon + hint, **tanpa** label), **satu** tabel label per tahap
+  `TENANT_STAGE_LABELS`, dan `TENANT_ALL_MENU_TITLE = 'Lihat semua menu'`. `getTenantMenuLinks()` +
+  `getTenantMenuItemStages()` diekspor untuk uji cakupan.
+- `frontend/src/hooks/useTenantPortalStage.ts` — tipe tahap diambil dari `config/navigation.ts`
+  (**satu** union, bukan dua salinan), hasil hook menambah `stageName` + `isCandidate`. Sumber data
+  **tidak diubah**: `/stays/me/current` + `/tenant/bookings/my` dengan query key yang sama.
+- `frontend/src/components/layout/ProtectedRoute.tsx` — menerima `allowRoles` dan (khusus TENANT)
+  `allowStages`. Penolakan → toast pesan jelas **lalu** `<Navigate replace>` ke
+  `getDefaultRoute(role, stage)`; selama tahap masih dimuat ditampilkan `PageLoadingSkeleton`, bukan
+  penolakan prematur. Tidak ada layar kosong / spinner abadi.
+- `frontend/src/App.tsx` — 12 rute portal tenant dipisah dari **sumber yang sama**
+  (`TENANT_ROUTE_STAGES`): grup terbuka calon+penghuni (`/portal/bookings`, `/portal/manual`) dan grup
+  khusus penghuni (`/portal/stay`, `/portal/invoices[/:id]`, `/portal/tickets`, `/portal/energy`,
+  `/portal/announcements[/:id]`, `/portal/loyalty`, `/portal/wifi`, `/portal/checkout`,
+  `/portal/renewal`). `/rooms` dan `/portal/booking/:roomId` **tidak** dikunci (katalog publik untuk
+  calon; rute booking punya `TenantBookingRouteGuard` sendiri). Rute 3 peran lain tidak disentuh.
+- `frontend/src/test/unit/navigation.test.ts` — diperluas 8 → **13 test** (tidak ada yang dihapus).
+- `frontend/src/test/pages/protectedRouteStage.test.tsx` — **baru**, 6 test guard.
+- `frontend/src/test/fixtures/mobileNavBaseline.json` — baseline W-OWN-010 diregenerasi lewat mekanisme
+  bawaan test (hapus → jalankan → jalankan lagi). Diff dibaca: **hanya** tiga label tenant berubah
+  ("Panduan Kos Saya"→"Kamar saya", "Bayar Tagihan"→"Tagihan", "Lapor Masalah"→"Lapor masalah");
+  struktur, href, dan entri staff/admin/owner identik.
+- `backend/src/modules/stays/stays-query.service.ts` — `findCurrentForTenant`: TENANT tanpa baris
+  `Tenant` kini `NotFoundException` **404** (dulu `ConflictException` 409), sejalan dengan FE yang
+  memperlakukan 404 sebagai "belum ada sewa".
+- `backend/src/modules/tenant-bookings/tenant-bookings.service.ts` — `findMine`: TENANT tanpa baris
+  `Tenant` kini mengembalikan `{ items: [], meta }` **tanpa galat dan tanpa kueri stay**.
+- `backend/test/unit/tenant-stage-access.test.js` — **baru**, 6 kasus regresi.
+
+**C. Angka sebelum → sesudah.**
+
+| Hal | Sebelum (potret S5) | Sesudah (kode S6) |
+|---|---|---|
+| `ProtectedRoute` memeriksa | token saja | token + peran (`allowRoles`) + tahap TENANT (`allowStages`) |
+| Rute portal tenant yang dijaga tahap | **0** dari 12 | **12** dari 12 (2 rute untuk semua tahap, 10 rute khusus penghuni) |
+| Menu tahap `browsing` | 1 tautan (`/rooms`) | 3 tautan (Cari kamar, Pengajuan saya, Panduan) dalam 2 seksi |
+| Menu tahap `booking` | 2 tautan, termasuk `/portal/invoices` ("Tagihan Awal") | 3 tautan, **tanpa** rute bayar/tagihan |
+| Menu tahap `occupied` | "Portal Penghuni"/"Lainnya", label "Panduan Kos Saya"/"Bayar Tagihan" | "Menu utama"/"Lihat semua menu", label "Kamar saya"/"Tagihan" |
+| Seksi jalan keluar "Lihat semua menu" | tidak ada (seksi bernama "Lainnya" hanya di tahap occupied) | ada di **3 dari 3** tahap, isinya tepat semua tujuan sah tahap itu |
+| TENANT tanpa baris Tenant → `GET /stays/me/current` | **409** Conflict | **404** Not Found |
+| TENANT tanpa baris Tenant → `GET /tenant/bookings/my` | **409** Conflict | **200** `{ items: [] }`, 0 kueri |
+| Test frontend (berkas / test) | 64 berkas / 378 test | **65 berkas / 389 test** |
+| Test backend (`npm run test:unit`) | 211 lulus / 0 gagal | **217 lulus / 0 gagal** (6 suite) |
+
+**D. Verifikasi** — hasil apa adanya (potret 2026-10-24, cwd = akar repo).
+
+- `cd frontend && npx vitest run` (penuh, latar belakang) → potret 2026-10-24: **65 berkas / 389 test
+  lulus, 0 gagal**.
+- `cd frontend && npx vitest run src/test/unit/navigation.test.ts` → **13/13 lulus** (termasuk 5 kasus
+  baru: larangan rute bayar untuk calon, label "Tagihan"/"Kamar saya" untuk penghuni, seksi "Lihat
+  semua menu" di semua tahap, menu↔guard sepakat, menu penghuni tanpa jalan buntu).
+- `cd frontend && npx vitest run src/test/pages/protectedRouteStage.test.tsx` → **6/6 lulus**.
+- `cd frontend && npx tsc --noEmit` → **exit 0**.
+- `cd backend && npx tsc --noEmit -p tsconfig.json` → **exit 0**.
+- `cd backend && npm run test:unit` (memicu `pretest:unit` = full build) → **217 lulus, 0 gagal**,
+  6 suite, exit 0. `node --test test/unit/tenant-stage-access.test.js` → **6/6 lulus**.
+- `node scripts/check-fitur.mjs` → `bersih — 58 fitur, 80 rute, 80 rute App.tsx`.
+- `node scripts/check-docs.mjs` → **BERSIH — 0 pelanggaran**; `wc -c docs/ANTREAN.md` → lihat laporan
+  sesi (plafon 16.384 byte).
+- Bukti 390 px (dev server lokal `vite --port 5174`, API ditiru, **di luar repo**
+  `%TEMP%\kost48-s6-shots`): tenant calon = `Cari kamar · Pengajuan saya · Panduan` (seksi "Calon
+  penghuni" + "Lihat semua menu"); tenant penghuni = `Kamar saya · Tagihan · Lapor masalah · Energi ·
+  Pengumuman · Panduan · Pesan WiFi` (seksi "Menu utama" + "Lihat semua menu"); staff = 6 tautan;
+  admin = 16 tautan; owner = 12 tautan. **Menu bocor 0**, `pageError` 0. Tangkapan:
+  `s6-390-{tenant-calon,tenant-penghuni,staff,admin,owner}.png` + `s6-390-report.json`.
+
+**E. Batas kejujuran sesi ini.**
+
+1. **Tidak di-deploy.** Produksi tetap `Z1Qr7_YnZFAK`, jadi **tidak ada** klaim bahwa pemisahan akses
+   berlaku di produksi. Semua bukti = build/kode **LOKAL**.
+2. **Bukti 390 px bukan login sungguhan.** Sesi disuntik (token demo + cache user di
+   `localStorage`/`sessionStorage`) dan API ditiru lewat *route interception* Playwright; tidak ada
+   akun produksi yang dipakai dan tidak ada data penghuni sungguhan di layar. Yang terbukti:
+   **pemilihan menu dan guard merender tanpa menu bocor di browser 390 px**, bukan perilaku server.
+3. **Guard diuji sebagai komponen, bukan end-to-end.** Test `protectedRouteStage` memakai
+   `useTenantPortalStage` tiruan; rantai "API → tahap → guard" hanya terbukti lewat unit test backend
+   (`findCurrentForTenant`/`findMine`) dan test menu — **belum** lewat browser dengan token nyata.
+4. **Perubahan 409 → 404 pada `!tenantId` adalah perubahan kontrak API.** Pemakai lain yang
+   mengharapkan 409 harus menyesuaikan; di repo ini tidak ada test/consumer yang mengharapkan 409
+   (`rg` atas `Akun tenant belum terhubung` menyisakan `tenant-bookings.service.ts` untuk
+   `createBooking`/`cancel` yang **tidak** diubah).
+5. **`getTenantMenuItemStages` memisahkan "boleh dibuka" dari "tampil di menu".** `/rooms` dan
+   `/portal/bookings` tetap boleh dibuka penghuni lewat URL (status pengajuan untuk calon), tetapi
+   tidak ditampilkan sebagai menu penghuni karena halaman itu mengalihkan ke `/portal/stay`. Ini
+   keputusan teknis, bukan keputusan owner.
+6. **Yang belum pernah dijalankan**: login sungguhan ke API produksi; axe/WCAG penuh untuk shell
+   390 px (bukti sesi ini hanya label menu + tangkapan layar); `npm run build` untuk deploy (deploy =
+   S9); uji beban atas `/tenant/bookings/my` untuk TENANT tanpa `tenantId`.
+### 8.16 Sesi 24 Okt 2026 (sesi S7) — DP: gerbang akun, idempotensi, tahan double-book
+
+**A. L1 ukur ulang** (dijalankan sesi S7, potret 2026-10-24; perintah + hasil apa adanya).
+
+| Hal | Hasil ukur | Selisih vs potret prompt |
+|---|---|---|
+| HEAD / branch | `04b26a23` · `main` · `## main...origin/main` (sinkron) | sama |
+| Working tree saat mulai | 13 modified + 3 untracked milik S5/S6 (`auth-anti-enumeration.test.js`, `tenant-stage-access.test.js`, `protectedRouteStage.test.tsx`) — **utuh, tidak disentuh** | sama |
+| Kunci SSH/deploy | `~/.ssh` **tidak ada**, `$TEMP/kost48ssh` **tidak ada**, `*.pem` **0** — tetapi **`.ssh-kost48/` ADA** (`kost48_deploy` 419 B + `known_hosts`, 18 Okt 08:00) | **BEDA**: potret S6 menulis "TIDAK ADA". Isi kunci tidak dibaca/dicetak; sesi ini tetap tidak memakai akses produksi |
+| Build produksi | **tidak diukur ulang** — tidak ada permintaan jaringan ke produksi pada sesi ini | UNKNOWN sesi ini (potret terakhir `Z1Qr7_YnZFAK`) |
+| Kamar / huni / booking online publik | **tidak diukur ulang** (tidak ada panggilan API produksi sesi ini) | UNKNOWN sesi ini |
+| Stay ACTIVE / baris CheckoutRequest / akun TENANT / `pricingTerm` per kamar | **UNKNOWN** — tidak ada akses DB; kunci ada tetapi tidak dipakai | sama |
+| `docs/ANTREAN.md` | 16.370 byte (plafon 16.384) | sama |
+| Test yang lulus | BE **217** / 6 suite · FE **389** / 65 berkas | sama |
+
+**B. Fakta yang dibuktikan ulang dari kode sebelum menulis** (bukan ingatan):
+
+1. `public-bookings.service.ts` membuat akun TENANT otomatis: `temporaryPassword = \`Kost48${randomInt(...)}\`` (baris 114), `bcrypt.hash` (115), `tx.user.create` (236), dan `temporaryPassword` dikembalikan di respons (381).
+2. Kamar dikunci `FOR UPDATE` **2 kali** (119, 141), tetapi **tidak ada** perbandingan irisan rentang tanggal: `checkInDate`/`plannedCheckOutDate` hanya divalidasi (89–112) dan dikirim ke INSERT (291–313).
+3. Kepemilikan stay pada pembayaran **sudah** difilter di SQL: `payment-submissions.queries.ts` baris 35 `AND s."tenantId" = ${tenantId}`. Jadi inti gerbang DP = tidak ada akun yang terklaim ke Tenant pemilik stay.
+4. `POST /auth/register` (`auth.service.ts` 93–141) **sudah** menempelkan akun baru ke `Tenant` yang belum punya user bila emailnya cocok — itu jalur "akun lahir di titik DP" yang dipakai, dan **tidak diubah** (warisan S5).
+5. Validasi bukti bayar menuntut `fileKey` untuk metode non-CASH (bukti bayar manual tetap wajib).
+
+**C. Yang berubah (kode, sesi ini).**
+
+- `backend/src/modules/tenant-bookings/public-bookings.service.ts` — pengajuan tamu **berhenti membuat akun**: `temporaryPassword`/`bcrypt.hash`/`tx.user.create` dihapus, `Stay.createdById` = **NULL**, audit `CREATE_PUBLIC_BOOKING` tanpa aktor User. Respons memuat **kode pengajuan** (`booking.referenceCode`) alih-alih kredensial; kunci `portalAccess` dipertahankan dengan penanda `requiresAccount`/`claimRequired` + instruksi (tanpa password). Transaksi dibungkus retry serialisasi dan memanggil cek irisan rentang.
+- `backend/src/modules/tenant-bookings/tenant-bookings.helpers.ts` — tambah tiga helper bersama: `buildBookingReferenceCode(stayId)` (kode `K48-xxxx-y`, deterministik, alfabet tanpa I/O/B/0/1), `findUnclaimedGuestTenantIds()` (Tenant tanpa user + punya stay ACTIVE + kontak **exact match**), `assertNoOverlappingStayTx()` (irisan `[masuk, keluar)` per kamar, mengabaikan pengajuan kedaluwarsa yang belum bayar DP), `withSerializationRetry()` (maks 3 percobaan pada SQLSTATE 40001), dan `GUEST_CLAIM_UNIFORM_MESSAGE`.
+- `backend/src/modules/tenant-bookings/tenant-bookings.service.ts` — `claimGuestBookings()` (idempoten bila sudah punya stay ACTIVE; menolak melepas akun yang punya riwayat; 0 atau >1 kandidat → pesan seragam) dan `linkBookingAccount()` (jalur cadangan OWNER/ADMIN, audit `LINK_BOOKING_ACCOUNT`). Jalur portal `createBooking` ikut memakai cek irisan + retry.
+- `backend/src/modules/tenant-bookings/tenant-bookings.controller.ts` — `POST /tenant/bookings/claim` (`@Roles(TENANT)`).
+- `backend/src/modules/tenant-bookings/admin-bookings.controller.ts` — `POST /admin/bookings/:stayId/link-account` (`@Roles(OWNER, ADMIN)`), DTO baru `dto/link-booking-account.dto.ts` (`userId` atau `email`).
+- `backend/src/modules/payment-submissions/payment-submissions.service.ts` — gerbang DP dua lapis: `findEligibleSubmissionTarget` (SQL) + pemeriksaan `eligibility.tenantId !== tenantId`; saat stay tidak ditemukan/bukan miliknya, `buildStayOwnershipFailure()` memberi pesan berisi langkah klaim **hanya** bila kontak pemanggil cocok dengan pengajuan belum berakun, dan 404 seragam untuk sisanya. Ditambah tolak-duplikat sebelum INSERT.
+- `backend/src/modules/payment-submissions/payment-submissions.utils.ts` — `PAYMENT_IDEMPOTENCY_WINDOW_MS` (24 jam) + `paymentIdempotencyWindowStart()`, mendokumentasikan batas (bukan idempotency key sejati).
+- `frontend/src/types/core.ts` + `frontend/src/pages/bookings/GuestBookingSuccess.tsx` — konsekuensi kontrak respons: tipe `PublicBookingResult` menerima `referenceCode` (dan `isNewUser` jadi opsional), halaman sukses menampilkan **kode pengajuan + langkah klaim**, bukan password sementara yang sudah tidak ada.
+- Test baru: `backend/test/unit/booking-guest-to-account.test.js` (10 test), `payment-idempotency.test.js` (5 test), `booking-overlap.test.js` (9 test).
+
+**D. Angka sebelum dan sesudah** (potret 2026-10-24, semua lokal).
+
+| Hal | Sebelum | Sesudah |
+|---|---|---|
+| Test backend (`npm run test:unit`) | 217 lulus / 6 suite | **241 lulus / 6 suite** (+24, tidak ada test dihapus/dilemahkan) |
+| Test frontend (`npx vitest run`) | 389 lulus / 65 berkas | 389 lulus / 65 berkas (tidak berubah) |
+| `user.create` saat tamu mengajukan | 1 akun per tamu baru | **0** (test mencatat 0 pemanggilan) |
+| Kata sandi di respons pengajuan | ada (`temporaryPassword`) | **tidak ada** (respons hanya memuat kode pengajuan) |
+| Cek irisan rentang tanggal | tidak ada | ada, di 2 jalur pembuatan booking |
+| Retry SQLSTATE 40001 | tidak ada | maks 3 percobaan |
+| Tolak duplikat pengajuan pembayaran | hanya "masih ada yang PENDING untuk invoice ini" | + kunci idempoten (stay+invoice+nominal+tanggal bayar) dalam jendela 24 jam |
+| Endpoint baru | 0 | 2 (klaim TENANT, kait-akun OWNER/ADMIN) |
+| `docs/ANTREAN.md` | 16.370 byte | 16.375 byte (plafon 16.384) |
+
+**E. Verifikasi** — hasil apa adanya (cwd = akar repo kecuali disebut).
+
+- `cd backend && npx tsc --noEmit -p tsconfig.json` → **exit 0**.
+- `cd backend && npm run test:unit` (memicu `pretest:unit` = full build) → potret 2026-10-24: **241 lulus, 0 gagal**, 6 suite, exit 0.
+- `cd frontend && npx tsc --noEmit` → **exit 0**.
+- `cd frontend && npx vitest run` (penuh) → potret 2026-10-24: **65 berkas / 389 test lulus, 0 gagal**.
+- `node scripts/check-fitur.mjs` → `bersih — 58 fitur, 80 rute, 80 rute App.tsx`.
+- `node scripts/check-docs.mjs` → **BERSIH — 0 pelanggaran, 0 pemeriksaan dilewati**.
+- `wc -c docs/ANTREAN.md` → **16.375** (≤ 16.384).
+- `git diff --check` → **exit 0** (hanya peringatan CRLF pada berkas warisan S5/S6).
+- `git log --oneline -1` → `04b26a23`; `git status -sb` → `## main...origin/main`, tanpa commit/push.
+
+**F. Batas kejujuran sesi ini.**
+
+1. **Tanpa constraint DB, double-book belum tertutup rapat.** Jaminan S7 = **aplikasi saja** (`FOR UPDATE` baris Room + cek irisan). Dua pengajuan bersamaan pada koneksi/proses/replika berbeda **masih bisa lolos**; exclusion constraint PostgreSQL tidak dibuat (keputusan owner `ROOMS-AKUN-V2 S2`) dan tidak diklaim tertutup.
+2. **Idempotensi tanpa skema punya batas jendela.** Kunci diturunkan dari kolom yang sudah ada dan hanya berlaku **24 jam**; pengajuan identik setelah jendela itu tidak bisa dibedakan dari pembayaran baru. Ini bukan `Idempotency-Key` seperti Stripe.
+3. **Semua bukti perilaku lewat Prisma tiruan**, bukan DB sungguhan: tidak ada transaksi PostgreSQL nyata, tidak ada `FOR UPDATE` nyata, dan skenario balapan tidak dijalankan. Yang terbukti = urutan panggilan, bentuk kueri, dan pesan galat.
+4. **Retry 40001 tidak terpicu hari ini**: transaksi berjalan pada isolasi default (READ COMMITTED), serialisasi nyata datang dari `FOR UPDATE`. Pengulangan hanya diuji lewat mock.
+5. **Yang belum pernah dijalankan**: deploy/`npm run build` produksi (deploy = S9); `prisma migrate` (dilarang); akses DB/SSH produksi (kunci ada di `.ssh-kost48/` tetapi tidak dipakai sesi ini); login dan klaim sungguhan ke API nyata; alur klaim di UI portal (bagian S8).
+6. **Klaim memindahkan `User.tenantId`, bukan menghapus data.** Baris `Tenant` lama hasil pendaftaran tetap ada tanpa user — **tidak dihapus** (hapus data = keputusan owner). Akun yang sudah punya riwayat hunian/pengajuan ditolak untuk diklaim.
+7. **Pemegang email pengajuan bisa mengklaim lewat pendaftaran.** `POST /auth/register` (warisan S5, tidak diubah) menempelkan akun baru ke `Tenant` pengajuan bila emailnya cocok, tanpa verifikasi email/OTP. S7 tidak menambah verifikasi kontak; jalur cadangan OWNER/ADMIN disediakan untuk kasus kontak berbeda.
+8. **Nominal tidak disentuh.** DP tetap `roundRupiah(sewa × 30%)` (test: 1.500.000 → 450.000); `pricing.helper.ts`/`booking-charges.helper.ts`/jurnal tidak diubah.
+9. **Kode pengajuan bukan autentikasi.** Ia hanya penanda yang bisa disebut ke admin; tidak bisa dipakai mengambil alih pengajuan (klaim tetap butuh akun + kontak sama persis).
+
+**G. Data uji yang dihapus.** Tidak ada baris/data uji yang dibuat pada sesi ini: seluruh verifikasi berjalan di memori dengan Prisma tiruan, tanpa menyentuh DB produksi maupun dev. Tidak ada tabel/kolom/migrasi baru.
+

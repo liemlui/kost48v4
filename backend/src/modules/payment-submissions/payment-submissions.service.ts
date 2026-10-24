@@ -46,6 +46,8 @@ import {
   endOfDay,
 } from './payment-submissions.helpers';
 import { evaluatePaymentPolicy } from './payment-policy.helper';
+import { paymentIdempotencyWindowStart } from './payment-submissions.utils';
+import { findUnclaimedGuestTenantIds } from '../tenant-bookings/tenant-bookings.helpers';
 import {
   buildPaymentImpactPreview,
   buildPaymentImpactRealized,
@@ -207,6 +209,35 @@ export class PaymentSubmissionsService {
     }
   }
 
+  /**
+   * S7 (P36 a) — gerbang DP: tanpa stay yang benar-benar milik akun ini, DP tidak bisa dibayar.
+   * Pesannya harus punya jalan keluar, tetapi TIDAK boleh jadi oracle: petunjuk klaim hanya
+   * muncul bila kontak akun ini memang cocok dengan pengajuan tamu yang belum berakun.
+   * Mengembalikan exception (bukan melempar) supaya pemanggil memakai `throw` dan TS bisa
+   * menyempitkan tipe setelahnya.
+   */
+  private async buildStayOwnershipFailure(user: CurrentUserPayload, tenantId: number) {
+    const myTenant = await this.prisma.tenant.findUnique({
+      where: { id: tenantId },
+      select: { phone: true, email: true },
+    });
+
+    const claimableTenantIds = await findUnclaimedGuestTenantIds(this.prisma, {
+      phones: [myTenant?.phone ?? null],
+      emails: [user.email ?? null, myTenant?.email ?? null],
+      excludeTenantId: tenantId,
+    });
+
+    if (claimableTenantIds.length > 0) {
+      return new ConflictException(
+        'Pengajuan kamar ini belum terhubung ke akun kamu, jadi DP belum bisa dibayar. Buka portal → "Klaim pengajuan" (pakai email/nomor HP yang sama seperti saat mengajukan), atau hubungi admin KOST48 dengan menyebut kode pengajuan.',
+      );
+    }
+
+    // Seragam untuk stay/invoice yang tidak ada maupun yang bukan milik akun ini.
+    return new NotFoundException('Booking atau invoice tidak ditemukan');
+  }
+
   async createSubmission(user: CurrentUserPayload, dto: CreatePaymentSubmissionDto) {
     const tenantId = user.tenantId;
     if (!tenantId) {
@@ -221,7 +252,14 @@ export class PaymentSubmissionsService {
     try {
       const eligibility = await this.findEligibleSubmissionTarget(tenantId, dto.stayId, dto.invoiceId);
       if (!eligibility) {
-        throw new NotFoundException('Booking atau invoice tidak ditemukan');
+        // S7 (P36 a): pengajuan tanpa akun terklaim tidak bisa dibayar DP-nya.
+        throw await this.buildStayOwnershipFailure(user, tenantId);
+      }
+      // S7: kepemilikan stay = syarat mutlak. Kueri `findEligibleSubmissionTarget` sudah
+      // memfilter `s."tenantId" = tenantId`; pemeriksaan ini pertahanan lapis kedua supaya
+      // perubahan kueri di masa depan tidak diam-diam membuka pembayaran stay orang lain.
+      if (Number(eligibility.tenantId) !== tenantId) {
+        throw await this.buildStayOwnershipFailure(user, tenantId);
       }
       await this.assertRenewalPaymentWithinDeadline(this.prisma, dto.invoiceId, paidAt);
 
@@ -264,6 +302,31 @@ export class PaymentSubmissionsService {
         if (existingPending) {
           throw new ConflictException(
             'Masih ada bukti pembayaran lain yang sedang menunggu review untuk invoice ini',
+          );
+        }
+
+        // S7 — idempotensi: pengajuan dengan kunci yang sama (stay + invoice + nominal +
+        // tanggal bayar) dalam jendela waktu yang sama hanya boleh ada SATU baris.
+        // Transaksi ini sudah menahan lock baris Invoice, jadi dua permintaan bersamaan
+        // untuk invoice yang sama diserialkan dan yang kedua melihat baris pertama.
+        const duplicate = await tx.paymentSubmission.findFirst({
+          where: {
+            stayId: dto.stayId,
+            invoiceId: dto.invoiceId,
+            amountRupiah: dto.amountRupiah,
+            paidAt,
+            status: {
+              in: [PaymentSubmissionStatus.PENDING_REVIEW, PaymentSubmissionStatus.APPROVED],
+            },
+            createdAt: { gte: paymentIdempotencyWindowStart() },
+          },
+          select: { id: true, status: true },
+        });
+        if (duplicate) {
+          throw new ConflictException(
+            duplicate.status === PaymentSubmissionStatus.APPROVED
+              ? 'Pembayaran dengan nominal dan tanggal yang sama sudah disetujui untuk tagihan ini. Periksa riwayat pembayaran sebelum mengirim ulang.'
+              : 'Pembayaran dengan nominal dan tanggal yang sama sudah dikirim dan sedang menunggu review untuk tagihan ini.',
           );
         }
 

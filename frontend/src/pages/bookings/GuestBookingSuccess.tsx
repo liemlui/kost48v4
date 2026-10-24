@@ -1,5 +1,4 @@
-import { useState } from 'react';
-import { Alert, Button, Card } from 'react-bootstrap';
+import { Alert, Card } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import CurrencyDisplay from '../../components/common/CurrencyDisplay';
 import StatusBadge, { getStatusLabel } from '../../components/common/StatusBadge';
@@ -12,24 +11,9 @@ interface GuestBookingSuccessProps {
 }
 
 export default function GuestBookingSuccess({ result }: GuestBookingSuccessProps) {
-  const [showPassword, setShowPassword] = useState(false);
-  const [copied, setCopied] = useState(false);
-  const [copyError, setCopyError] = useState(false);
-  const tempPwd = result.portalAccess.temporaryPassword;
-
-  const handleCopyPassword = async () => {
-    if (!tempPwd) return;
-    try {
-      await navigator.clipboard.writeText(tempPwd);
-      setCopyError(false);
-      setCopied(true);
-      window.setTimeout(() => setCopied(false), 3000);
-    } catch {
-      setCopied(false);
-      setCopyError(true);
-    }
-  };
-
+  // S7 (P36 a): pengajuan tamu tidak lagi membuat akun otomatis, jadi tidak ada
+  // password sementara untuk ditampilkan. Yang ditampilkan = kode pengajuan.
+  const referenceCode = result.booking.referenceCode ?? result.portalAccess.referenceCode ?? '';
 
   return (
     <div className="public-page-shell">
@@ -69,39 +53,20 @@ export default function GuestBookingSuccess({ result }: GuestBookingSuccessProps
               </div>
             </div>
 
-            {tempPwd ? (
-              <Alert variant="warning" className="small">
-                <div className="text-danger fw-bold mb-2">⚠️ Password ini HANYA ditampilkan SEKALI. Salin dan simpan sekarang juga.</div>
-                <strong>Password portal sementara Anda:</strong>
-                <div className="d-flex align-items-center gap-2 mt-2 flex-wrap">
-                  <code className="fs-5 bg-white px-2 py-1 rounded">{showPassword ? tempPwd : '\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022'}</code>
-                  <Button
-                    variant="outline-secondary"
-                    size="sm"
-                    onClick={() => setShowPassword((v) => !v)}
-                  >
-                    {showPassword ? 'Sembunyikan' : 'Tampilkan'}
-                  </Button>
-                  <Button
-                    variant={copied ? 'success' : 'outline-primary'}
-                    size="sm"
-                    onClick={handleCopyPassword}
-                  >
-                    {copied ? '\u2705 Disalin' : '\ud83d\udccb Salin'}
-                  </Button>
-                </div>
-                {copyError ? (
-                  <div className="text-danger small mt-2">
-                    Browser tidak mengizinkan salin otomatis. Silakan salin password secara manual dari kolom di atas.
-                  </div>
-                ) : null}
-                <div className="mt-2">
-                  <strong>Simpan password ini.</strong> Password sementara hanya ditampilkan di halaman ini dan tidak akan dikirim melalui email atau SMS.
+            {referenceCode ? (
+              <Alert variant="info" className="small">
+                <div className="fw-semibold mb-1">Kode pengajuan kamu</div>
+                <code className="fs-5 bg-white px-2 py-1 rounded d-inline-block mb-2">{referenceCode}</code>
+                <div>
+                  <strong>Akun wajib saat membayar DP.</strong> Daftar atau masuk memakai email/nomor HP yang
+                  sama dengan pengajuan ini, lalu klaim pengajuan memakai kode di atas. Bila kontaknya berbeda,
+                  hubungi admin KOST48 dan sebutkan kode ini. Tidak ada password yang dikirim lewat email atau
+                  SMS.
                 </div>
               </Alert>
             ) : (
               <Alert variant="info" className="small">
-                Gunakan akun portal yang sudah pernah dibuat untuk login. Email: <strong>{result.portalAccess.email}</strong>
+                {result.portalAccess.instructions}
               </Alert>
             )}
 
@@ -143,7 +108,8 @@ export default function GuestBookingSuccess({ result }: GuestBookingSuccessProps
                   <strong>Admin me-review booking Anda</strong> — biasanya dalam hitungan jam.
                 </li>
                 <li className="mb-2">
-                  <strong>Invoice resmi terbit di portal</strong> — login dengan akun yang baru dibuat untuk melihat tagihan.
+                  <strong>Invoice resmi terbit setelah admin menyetujui</strong> — masuk/daftar dengan kontak
+                  yang sama, lalu klaim pengajuan untuk melihat tagihan di portal.
                 </li>
                 <li className="mb-2">
                   <strong>Bayar DP atau LUNAS sesuai pilihan Anda</strong> — begitu pembayaran disetujui admin,{' '}

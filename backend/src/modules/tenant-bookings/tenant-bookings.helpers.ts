@@ -1,6 +1,6 @@
-import { BadRequestException } from '@nestjs/common';
+import { BadRequestException, ConflictException } from '@nestjs/common';
 import { Prisma } from '../../generated/prisma';
-import { PricingTerm, RoomStatus, UserRole } from '../../common/enums/app.enums';
+import { PricingTerm, RoomStatus, StayStatus, UserRole } from '../../common/enums/app.enums';
 import { PrismaService } from '../../prisma/prisma.service';
 import { BookingRow, RoomPayload } from './tenant-bookings.types';
 import { AUTO_OPS_DEADLINES, hoursFromNow, hoursAfter } from '../../common/business/auto-ops.constants';
@@ -304,6 +304,132 @@ export async function findBookingByIdTx(tx: Prisma.TransactionClient, bookingId:
   `);
   if (rows.length === 0) return null;
   return mapBookingRowFull(rows[0]);
+}
+
+/**
+ * S7 (P36 a) — kode pengajuan yang ditampilkan ke tamu tanpa akun.
+ * Diturunkan dari `Stay.id` (TANPA kolom/tabel baru), deterministik, dan tidak
+ * memuat data pribadi. Alfabet sengaja tanpa I/O/B/0/1 supaya tidak salah baca
+ * saat tamu menyebutkannya lewat telepon/WhatsApp ke admin.
+ */
+const REFERENCE_CODE_ALPHABET = 'ACDEFGHJKLMNPQRSTUVWXYZ23456789';
+
+/**
+ * S7 (P36 a) — pesan SERAGAM untuk semua kegagalan klaim: tidak membedakan
+ * "pengajuan tidak ada" dari "kontak beda", jadi tidak bisa dipakai menebak
+ * keberadaan pengajuan orang lain.
+ */
+export const GUEST_CLAIM_UNIFORM_MESSAGE =
+  'Pengajuan tidak dapat diklaim dengan akun ini. Pastikan email/nomor HP akun sama dengan yang dipakai saat mengajukan, atau hubungi admin KOST48 dengan menyebut kode pengajuan.';
+
+export function buildBookingReferenceCode(stayId: number): string {
+  if (!Number.isInteger(stayId) || stayId <= 0) return '';
+  const body = stayId.toString(36).toUpperCase().padStart(4, '0');
+  let sum = 0;
+  for (const char of body) sum += char.charCodeAt(0);
+  const check = REFERENCE_CODE_ALPHABET[sum % REFERENCE_CODE_ALPHABET.length];
+  return `K48-${body}-${check}`;
+}
+
+/**
+ * S7 (P36 a) — Tenant pemilik pengajuan tamu yang **belum punya akun** dan
+ * kontaknya sama persis dengan akun yang login. Exact match (bukan LIKE) karena
+ * phone sudah dinormalisasi (`normalizePhone`) dan email sudah lowercase di kedua sisi.
+ */
+export async function findUnclaimedGuestTenantIds(
+  prisma: PrismaService,
+  params: { phones?: Array<string | null | undefined>; emails?: Array<string | null | undefined>; excludeTenantId?: number | null },
+): Promise<number[]> {
+  const phones = [...new Set((params.phones ?? []).filter((value): value is string => Boolean(value)))];
+  const emails = [...new Set((params.emails ?? []).filter((value): value is string => Boolean(value)))];
+  if (phones.length === 0 && emails.length === 0) return [];
+
+  const rows = await prisma.tenant.findMany({
+    where: {
+      ...(params.excludeTenantId ? { id: { not: params.excludeTenantId } } : {}),
+      user: { is: null },
+      stays: { some: { status: StayStatus.ACTIVE as any } },
+      OR: [
+        ...phones.map((phone) => ({ phone })),
+        ...emails.map((email) => ({ email })),
+      ],
+    },
+    select: { id: true },
+  });
+  return rows.map((row) => row.id);
+}
+
+/**
+ * S7 — cek irisan rentang tanggal untuk satu kamar. **Wajib** dipanggil di dalam transaksi
+ * yang sama dan setelah baris `Room` dikunci `FOR UPDATE`.
+ *
+ * Semantik rentang: `[checkInDate, plannedCheckOutDate)`; ujung terbuka (null) = tak
+ * berhingga. Dua rentang beririsan bila `lama.masuk < baru.keluar` DAN `lama.keluar > baru.masuk`.
+ *
+ * Pengajuan yang SUDAH KEDALUWARSA dan belum pernah membayar DP tidak dihitung: booking yang
+ * lewat TTL tidak boleh mengunci kamar selamanya (sweep kedaluwarsa berjalan terpisah).
+ *
+ * Batas jujur: ini jaminan **aplikasi**. Tanpa exclusion constraint PostgreSQL (keputusan
+ * owner `ROOMS-AKUN-V2 S2`), dua pengajuan bersamaan pada replika/proses berbeda masih bisa
+ * lolos — jendela balapan itu tidak ditutup oleh kode ini.
+ */
+export async function assertNoOverlappingStayTx(
+  tx: Prisma.TransactionClient,
+  params: { roomId: number; checkInDate: Date; plannedCheckOutDate: Date | null },
+): Promise<void> {
+  const endCondition = params.plannedCheckOutDate
+    ? Prisma.sql`s."checkInDate" < ${params.plannedCheckOutDate}`
+    : Prisma.sql`TRUE`;
+
+  const rows = await tx.$queryRaw<Array<{ id: number }>>(Prisma.sql`
+    /* S7-overlap */
+    SELECT s.id
+    FROM "Stay" s
+    WHERE s."roomId" = ${params.roomId}
+      AND s."status" = CAST(${StayStatus.ACTIVE} AS "StayStatus")
+      AND (s."plannedCheckOutDate" IS NULL OR s."plannedCheckOutDate" > ${params.checkInDate})
+      AND ${endCondition}
+      AND NOT (
+        COALESCE(s."downPaymentPaidRupiah", 0) = 0
+        AND s."expiresAt" IS NOT NULL
+        AND s."expiresAt" < NOW()
+      )
+    LIMIT 1
+  `);
+
+  if (rows.length > 0) {
+    throw new ConflictException(
+      'Kamar ini sudah punya pengajuan/hunian pada rentang tanggal yang beririsan. Pilih tanggal lain atau kamar lain.',
+    );
+  }
+}
+
+const SERIALIZATION_FAILURE_CODE = '40001';
+
+/**
+ * S7 — ulangi transaksi pada kegagalan serialisasi (SQLSTATE 40001), sesuai keputusan owner
+ * `ROOMS-AKUN-V2 S2`.
+ *
+ * Catatan jujur: transaksi booking berjalan pada isolasi default (READ COMMITTED), sehingga
+ * 40001 praktis tidak muncul hari ini; serialisasi nyata datang dari `FOR UPDATE` pada baris
+ * Room/Tenant/Invoice. Pengulangan ini menjaga kode tetap benar bila isolasi dinaikkan kelak.
+ */
+export async function withSerializationRetry<T>(
+  run: () => Promise<T>,
+  options: { attempts?: number; delayMs?: number } = {},
+): Promise<T> {
+  const attempts = Math.max(1, options.attempts ?? 3);
+  const delayMs = options.delayMs ?? 25;
+
+  for (let attempt = 1; ; attempt += 1) {
+    try {
+      return await run();
+    } catch (error) {
+      const code = String((error as any)?.code ?? (error as any)?.meta?.code ?? '');
+      if (code !== SERIALIZATION_FAILURE_CODE || attempt >= attempts) throw error;
+      if (delayMs > 0) await new Promise((resolve) => setTimeout(resolve, delayMs * attempt));
+    }
+  }
 }
 
 export async function resolveTenantPortalUser(prisma: PrismaService, tenantId: number): Promise<number | null> {

@@ -1,4 +1,4 @@
-import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma } from '../../generated/prisma';
 import { CurrentUserPayload } from '../../common/interfaces/current-user.interface';
 import { RoomStatus, StayStatus, InvoiceStatus, UtilityType } from '../../common/enums/app.enums';
@@ -93,7 +93,10 @@ export class StaysQueryService {
 
   async findCurrentForTenant(user: CurrentUserPayload) {
     if (!user.tenantId) {
-      throw new ConflictException('Akun tenant belum terhubung ke data tenant');
+      // S6: TENANT tanpa baris Tenant = belum pernah punya sewa → 404 "tidak ada stay",
+      // bukan 409. FE memperlakukan 404 sebagai hasil valid (tahap `browsing`), sehingga
+      // calon penghuni tidak melihat layar galat di portal.
+      throw new NotFoundException('Stay aktif tidak ditemukan');
     }
 
     const stay = await this.prisma.stay.findFirst({

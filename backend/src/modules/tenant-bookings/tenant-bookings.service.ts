@@ -13,6 +13,7 @@ import {
   LeadSource,
   RoomStatus,
   StayStatus,
+  UserRole,
 } from '../../common/enums/app.enums';
 import { CurrentUserPayload } from '../../common/interfaces/current-user.interface';
 import { roundRupiah } from '../../common/business/money.helper';
@@ -27,6 +28,7 @@ import { CancelTenantBookingDto } from './dto/cancel-tenant-booking.dto';
 import { CreateTenantBookingDto } from './dto/create-tenant-booking.dto';
 import { ApproveBookingDto } from './dto/approve-booking.dto';
 import { RejectBookingDto } from './dto/reject-booking.dto';
+import { LinkBookingAccountDto } from './dto/link-booking-account.dto';
 import { TenantBookingsQueryDto } from './dto/tenant-bookings-query.dto';
 import { AppNotificationService } from '../notifications/app-notification.service';
 import { AccountingPostingService } from '../accounting/accounting-posting.service';
@@ -42,6 +44,11 @@ import {
   calculateDueDate,
   calculateBookingExpiry,
   resolveTenantPortalUser,
+  GUEST_CLAIM_UNIFORM_MESSAGE,
+  buildBookingReferenceCode,
+  findUnclaimedGuestTenantIds,
+  assertNoOverlappingStayTx,
+  withSerializationRetry,
 } from './tenant-bookings.helpers';
 import { lockApprovalBookingTx } from './tenant-bookings.queries';
 import { calculateBookingCharges } from './booking-charges.helper';
@@ -64,7 +71,7 @@ export class TenantBookingsService {
       await this.validateBookingPreconditions(dto, user);
 
     try {
-      const createdBooking = await this.prisma.$transaction(async (tx) => {
+      const createdBooking = await withSerializationRetry(() => this.prisma.$transaction(async (tx) => {
         await tx.$queryRawUnsafe(`SELECT id FROM "Tenant" WHERE id = $1 FOR UPDATE`, tenantId);
 
         const existingActiveStay = await tx.stay.findFirst({
@@ -116,6 +123,13 @@ export class TenantBookingsService {
         if (existingPaidOrOccupiedStay) {
           throw new ConflictException('Kamar sedang ditempati. Pemesanan baru belum dibuka sampai kamar siap huni.');
         }
+
+        // S7: tahan double-book — cek irisan rentang tanggal untuk kamar ini.
+        await assertNoOverlappingStayTx(tx, {
+          roomId: dto.roomId,
+          checkInDate,
+          plannedCheckOutDate,
+        });
 
         const baseRentRupiah = resolveRent(room as any, dto.pricingTerm);
         if (!baseRentRupiah || baseRentRupiah <= 0) {
@@ -192,7 +206,7 @@ export class TenantBookingsService {
         });
 
         return booking;
-      });
+      }));
 
       return serializePrismaResult(createdBooking);
     } catch (error: any) {
@@ -851,11 +865,17 @@ if (error instanceof Prisma.PrismaClientKnownRequestError) {
 
   async findMine(user: CurrentUserPayload, query: TenantBookingsQueryDto) {
     const tenantId = user.tenantId;
-    if (!tenantId) {
-      throw new ConflictException('Akun tenant belum terhubung ke data tenant');
-    }
-
     const { page, limit, skip, take } = buildPagination(query.page, query.limit);
+
+    if (!tenantId) {
+      // S6: TENANT tanpa baris Tenant = belum pernah mengajukan → daftar kosong (200),
+      // bukan galat. Tidak ada kueri stay yang dijalankan, jadi tidak mungkin membocorkan
+      // stay milik tenant lain.
+      return {
+        items: [],
+        meta: buildMeta(page, limit, 0),
+      };
+    }
 
     if (!(await isBookingSchemaReady(this.prisma))) {
       return {
@@ -1035,6 +1055,165 @@ if (error instanceof Prisma.PrismaClientKnownRequestError) {
     }
   }
 
+
+  // ═══════════════════════════════════════════════════════════
+  //  SECTION: Claim Guest Booking (S7 — P36 a)
+  // ═══════════════════════════════════════════════════════════
+
+  /**
+   * S7: akun TENANT yang login mengklaim pengajuan tamu yang **kontaknya sama persis**
+   * (email atau nomor HP hasil normalisasi). Pengajuan tamu tidak punya akun, jadi
+   * satu-satunya cara DP bisa dibayar adalah setelah Stay berada di tenant milik akun ini.
+   *
+   * Semua jalur gagal memakai pesan SERAGAM (`GUEST_CLAIM_UNIFORM_MESSAGE`) supaya tidak
+   * ada oracle "pengajuan ini ada / tidak ada".
+   */
+  async claimGuestBookings(user: CurrentUserPayload) {
+    const currentTenantId = user.tenantId ?? null;
+
+    if (currentTenantId) {
+      const activeStay = await this.prisma.stay.findFirst({
+        where: { tenantId: currentTenantId, status: StayStatus.ACTIVE as any },
+        select: { id: true },
+      });
+      if (activeStay) {
+        // Idempoten: sudah terklaim. Tidak ada perubahan data, tidak ada kebocoran baru.
+        return {
+          alreadyClaimed: true,
+          tenantId: currentTenantId,
+          claimed: await this.mapClaimedBookings(currentTenantId),
+        };
+      }
+
+      // Akun dengan riwayat (hunian/pengajuan lama) tidak dipindahkan diam-diam.
+      const historyCount = await this.prisma.stay.count({ where: { tenantId: currentTenantId } });
+      if (historyCount > 0) throw new ConflictException(GUEST_CLAIM_UNIFORM_MESSAGE);
+    }
+
+    const currentTenant = currentTenantId
+      ? await this.prisma.tenant.findUnique({
+          where: { id: currentTenantId },
+          select: { id: true, phone: true, email: true },
+        })
+      : null;
+
+    const candidateIds = await findUnclaimedGuestTenantIds(this.prisma, {
+      phones: [currentTenant?.phone ?? null],
+      emails: [user.email ?? null, currentTenant?.email ?? null],
+      excludeTenantId: currentTenantId,
+    });
+
+    // 0 kandidat = tidak ada pengajuan yang cocok; >1 = ambigu (kontak dipakai lebih dari
+    // satu pengajuan) → jalur cadangan OWNER/ADMIN. Keduanya dijawab pesan yang sama.
+    if (candidateIds.length !== 1) throw new ConflictException(GUEST_CLAIM_UNIFORM_MESSAGE);
+
+    const targetTenantId = candidateIds[0];
+    const claimed = await this.mapClaimedBookings(targetTenantId);
+    if (claimed.length === 0) throw new ConflictException(GUEST_CLAIM_UNIFORM_MESSAGE);
+
+    await this.prisma.$transaction(async (tx) => {
+      await tx.user.update({ where: { id: user.id }, data: { tenantId: targetTenantId } });
+      await tx.auditLog.create({
+        data: {
+          actorUserId: user.id,
+          action: 'CLAIM_GUEST_BOOKING',
+          entityType: 'Tenant',
+          entityId: String(targetTenantId),
+          meta: {
+            fromTenantId: currentTenantId,
+            stayIds: claimed.map((item) => item.stayId),
+          } as any,
+        },
+      });
+    });
+
+    return { alreadyClaimed: false, tenantId: targetTenantId, claimed };
+  }
+
+  /**
+   * S7: jalur cadangan OWNER/ADMIN — mengaitkan pengajuan tanpa akun ke akun TENANT
+   * yang sudah ada saat klaim mandiri gagal (kontak pengajuan berbeda).
+   */
+  async linkBookingAccount(stayId: number, dto: LinkBookingAccountDto, actor: CurrentUserPayload) {
+    const stay = await this.prisma.stay.findUnique({
+      where: { id: stayId },
+      select: { id: true, tenantId: true, status: true },
+    });
+    if (!stay) throw new NotFoundException('Pengajuan tidak ditemukan');
+
+    const email = dto.email?.trim().toLowerCase();
+    if (!dto.userId && !email) {
+      throw new BadRequestException('Sebutkan userId atau email akun tenant yang akan dikaitkan');
+    }
+
+    const targetUser = dto.userId
+      ? await this.prisma.user.findFirst({
+          where: { id: dto.userId, role: UserRole.TENANT as any, isActive: true },
+          select: { id: true, tenantId: true },
+        })
+      : await this.prisma.user.findFirst({
+          where: { email: { equals: email!, mode: 'insensitive' }, role: UserRole.TENANT as any, isActive: true },
+          select: { id: true, tenantId: true },
+        });
+
+    if (!targetUser) throw new NotFoundException('Akun tenant tujuan tidak ditemukan atau nonaktif');
+
+    if (targetUser.tenantId === stay.tenantId) {
+      // Idempoten: sudah terkait.
+      return { stayId, linked: true, alreadyLinked: true, referenceCode: buildBookingReferenceCode(stayId) };
+    }
+
+    if (targetUser.tenantId) {
+      const detachedHistory = await this.prisma.stay.count({ where: { tenantId: targetUser.tenantId } });
+      if (detachedHistory > 0) {
+        throw new ConflictException(
+          'Akun ini masih memiliki riwayat pengajuan/hunian lain. Selesaikan dulu sebelum mengaitkan ke pengajuan ini.',
+        );
+      }
+    }
+
+    await this.prisma.$transaction(async (tx) => {
+      await tx.user.update({ where: { id: targetUser.id }, data: { tenantId: stay.tenantId } });
+      await tx.auditLog.create({
+        data: {
+          actorUserId: actor.id,
+          action: 'LINK_BOOKING_ACCOUNT',
+          entityType: 'Stay',
+          entityId: String(stayId),
+          meta: { fromTenantId: targetUser.tenantId, toTenantId: stay.tenantId, linkedUserId: targetUser.id } as any,
+        },
+      });
+    });
+
+    return { stayId, linked: true, alreadyLinked: false, referenceCode: buildBookingReferenceCode(stayId) };
+  }
+
+  /** Daftar pengajuan aktif milik satu tenant dalam bentuk aman (tanpa PII). */
+  private async mapClaimedBookings(tenantId: number) {
+    const rows = await this.prisma.stay.findMany({
+      where: { tenantId, status: StayStatus.ACTIVE as any },
+      select: {
+        id: true,
+        status: true,
+        checkInDate: true,
+        plannedCheckOutDate: true,
+        expiresAt: true,
+        room: { select: { code: true } },
+      },
+      orderBy: { id: 'desc' },
+      take: 20,
+    });
+
+    return rows.map((row) => ({
+      stayId: row.id,
+      referenceCode: buildBookingReferenceCode(row.id),
+      roomCode: row.room?.code ?? null,
+      status: row.status,
+      checkInDate: row.checkInDate,
+      plannedCheckOutDate: row.plannedCheckOutDate,
+      expiresAt: row.expiresAt,
+    }));
+  }
 
   // ═══════════════════════════════════════════════════════════
   //  SECTION: Helpers — Booking Preconditions

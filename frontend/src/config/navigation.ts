@@ -15,6 +15,77 @@ export type NavigationSection = {
 
 export type TenantPortalStage = 'browsing' | 'booking' | 'occupied';
 
+// ═══════════════════════════════════════════════════════════
+//  S6 — PEMISAHAN CALON PENGHUNI DAN PENGHUNI (satu sumber)
+//  Tahap (`stage`) berasal dari useTenantPortalStage (`/stays/me/current` +
+//  `/tenant/bookings/my`). Di sini hanya DEFINISI, bukan sumber data:
+//  - calon  = `browsing` (belum mengajukan) dan `booking` (sudah mengajukan, belum sewa)
+//  - penghuni = `occupied` (punya stay aktif)
+//  Guard rute (App.tsx) dan menu memakai definisi yang sama, supaya tidak ada
+//  rute terkunci tanpa jalan masuk atau menu yang menolak saat dibuka.
+// ═══════════════════════════════════════════════════════════
+
+/** Tahap yang berarti "calon penghuni" — belum punya sewa aktif. */
+export const TENANT_CANDIDATE_STAGES = ['browsing', 'booking'] as const;
+
+/** Tahap yang berarti "penghuni" — sudah punya sewa aktif. */
+export const TENANT_OCCUPANT_STAGE = 'occupied' as const;
+
+export function isTenantCandidateStage(stage: TenantPortalStage): boolean {
+  switch (stage) {
+    case 'browsing':
+    case 'booking':
+      return true;
+    default:
+      return false;
+  }
+}
+
+export function isTenantOccupantStage(stage: TenantPortalStage): boolean {
+  return stage === TENANT_OCCUPANT_STAGE;
+}
+
+/** Nama tahap untuk manusia (laporan, judul, pesan penolakan). */
+export const TENANT_STAGE_NAMES: Record<TenantPortalStage, string> = {
+  browsing: 'Calon penghuni — belum mengajukan',
+  booking: 'Calon penghuni — pengajuan berjalan',
+  occupied: 'Penghuni — sewa aktif',
+};
+
+/**
+ * Satu sumber izin rute portal tenant: tujuan → tahap yang mengizinkannya.
+ * Dipakai `allowStages` di App.tsx DAN untuk menyusun menu (`getTenantSections`).
+ * Tujuan yang tidak ada di sini berarti tidak dibatasi tahap (mis. `/portal/booking/:roomId`
+ * yang punya gerbang sendiri, dan `/rooms` yang publik).
+ */
+export const TENANT_ROUTE_STAGES: Record<string, TenantPortalStage[]> = {
+  // Status pengajuan + panduan terbuka untuk calon (§8.8: jangan kunci tanpa jalan keluar).
+  '/portal/bookings': ['browsing', 'booking', 'occupied'],
+  '/portal/manual': ['browsing', 'booking', 'occupied'],
+  // Sisa portal = isi sewa aktif, hanya untuk penghuni.
+  '/portal/stay': ['occupied'],
+  '/portal/invoices': ['occupied'],
+  '/portal/tickets': ['occupied'],
+  '/portal/energy': ['occupied'],
+  '/portal/announcements': ['occupied'],
+  '/portal/wifi': ['occupied'],
+  '/portal/loyalty': ['occupied'],
+  '/portal/checkout': ['occupied'],
+  '/portal/renewal': ['occupied'],
+};
+
+/** Tahap yang boleh membuka tujuan portal; `undefined` = tidak dibatasi tahap. */
+export function getTenantRouteStages(to: string): TenantPortalStage[] | undefined {
+  return TENANT_ROUTE_STAGES[to];
+}
+
+/** Apakah penghuni tahap ini boleh membuka tujuan portal tertentu. */
+export function tenantStageAllowsRoute(stage: TenantPortalStage, to: string): boolean {
+  const allowed = TENANT_ROUTE_STAGES[to];
+  if (!allowed) return true;
+  return allowed.includes(stage);
+}
+
 // OWN-STATUS-CARDS / FASE-H: Kokpit Owner dipadatkan jadi 1 grup strategis "Keputusan Owner".
 // Item operasional harian yang duplikat dengan sidebar Admin DIHAPUS — owner mengaksesnya via toggle
 // 🔧 Area Admin. Beberapa route digabung lewat `activePaths` agar tetap reachable tanpa nambah item:
@@ -99,48 +170,127 @@ const staffSections: NavigationSection[] = [
 
 export type TenantFeatures = { loyaltyEnabled?: boolean };
 
+/**
+ * Judul baku grup jalan keluar menu (P37 a / §8.8). WAJIB muncul di setiap tahap:
+ * calon maupun penghuni tidak boleh kehilangan jalan ke fitur lain.
+ */
+export const TENANT_ALL_MENU_TITLE = 'Lihat semua menu';
+
+type TenantMenuItem = {
+  to: string;
+  icon: string;
+  hint: string;
+  /**
+   * Tahap yang MENAMPILKAN item di menu. Bila kosong, dipakai izin guard
+   * (`TENANT_ROUTE_STAGES`). Menu tidak pernah boleh lebih luas dari izin guard.
+   * Dipakai untuk menyembunyikan menu yang secara teknis boleh dibuka tetapi
+   * menjadi jalan buntu bagi tahap itu — mis. "Cari kamar" untuk penghuni, atau
+   * "Pengajuan saya" untuk penghuni (halaman itu mengalihkan ke /portal/stay).
+   */
+  menuStages?: TenantPortalStage[];
+  /** Tujuan yang hanya muncul bila fitur aktif (dari `/settings/public-config`). */
+  feature?: keyof TenantFeatures;
+};
+
+const TENANT_ALL_STAGES: TenantPortalStage[] = ['browsing', 'booking', 'occupied'];
+
+/**
+ * Inventaris menu portal tenant — tujuan, ikon, hint. SENGAJA tanpa label:
+ * label per tahap ada di satu tabel `TENANT_STAGE_LABELS` supaya calon dan penghuni
+ * tidak pernah memakai dua pola penamaan.
+ */
+const TENANT_MENU_ITEMS: TenantMenuItem[] = [
+  { to: '/rooms', icon: '🛏️', hint: 'Lihat kamar yang tersedia dan mulai pengajuan.', menuStages: ['browsing', 'booking'] },
+  { to: '/portal/bookings', icon: '🗓️', hint: 'Pantau pengajuan, tagihan awal, dan bukti pembayaran.', menuStages: ['browsing', 'booking'] },
+  { to: '/portal/stay', icon: '🏠', hint: 'Kamar, masa sewa, tagihan, dan aksi berikutnya.' },
+  { to: '/portal/invoices', icon: '💳', hint: 'Tagihan sewa, status, dan tindak lanjut pembayaran.' },
+  { to: '/portal/tickets', icon: '🛠️', hint: 'Laporkan kerusakan atau kebutuhan bantuan dan pantau progresnya.' },
+  { to: '/portal/energy', icon: '⚡', hint: 'Pantau pembacaan listrik & air terbaru dari meter otomatis.' },
+  { to: '/portal/announcements', icon: '📢', hint: 'Info terbaru dari pengelola KOST48.' },
+  { to: '/portal/manual', icon: '📖', hint: 'Aturan, pembayaran, dan layanan kos.' },
+  { to: '/portal/wifi', icon: '📶', hint: 'Lihat prosedur pembelian paket WiFi melalui WhatsApp.' },
+  { to: '/portal/loyalty', icon: '🎁', hint: 'Poin kebaikan, leaderboard, katalog reward, dan referral.', feature: 'loyaltyEnabled' },
+];
+
+/** Tahap yang menampilkan item menu; tidak pernah lebih luas dari izin guard. */
+export function getTenantMenuItemStages(to: string): TenantPortalStage[] {
+  const item = TENANT_MENU_ITEMS.find((candidate) => candidate.to === to);
+  const allowedByGuard = TENANT_ROUTE_STAGES[to] ?? TENANT_ALL_STAGES;
+  if (!item || !item.menuStages) return allowedByGuard;
+  return item.menuStages.filter((stage) => allowedByGuard.includes(stage));
+}
+
+/**
+ * SATU tabel label per tahap (S6). Kunci = tujuan kanonik di `TENANT_MENU_ITEMS`.
+ * Calon memakai kata kerja mencari/mengajukan; penghuni memakai kata kepemilikan/tagihan.
+ */
+const TENANT_STAGE_LABELS: Record<TenantPortalStage, Record<string, string>> = {
+  browsing: {
+    '/rooms': 'Cari kamar',
+    '/portal/bookings': 'Pengajuan saya',
+    '/portal/manual': 'Panduan',
+  },
+  booking: {
+    '/portal/bookings': 'Pengajuan saya',
+    '/rooms': 'Lihat kamar',
+    '/portal/manual': 'Panduan',
+  },
+  occupied: {
+    '/portal/stay': 'Kamar saya',
+    '/portal/invoices': 'Tagihan',
+    '/portal/tickets': 'Lapor masalah',
+    '/portal/energy': 'Energi',
+    '/portal/announcements': 'Pengumuman',
+    '/portal/manual': 'Panduan',
+    '/portal/wifi': 'Pesan WiFi',
+    '/portal/loyalty': 'Poin & Reward',
+  },
+};
+
+/** Tautan utama tiap tahap; sisanya masuk grup "Lihat semua menu". */
+const TENANT_STAGE_PRIMARY: Record<TenantPortalStage, string[]> = {
+  browsing: ['/rooms', '/portal/bookings'],
+  booking: ['/portal/bookings', '/rooms'],
+  occupied: ['/portal/stay', '/portal/invoices', '/portal/tickets'],
+};
+
+/** Semua tujuan tenant yang boleh dibuka pada tahap ini (menurut `TENANT_ROUTE_STAGES`). */
+export function getTenantMenuLinks(
+  stage: TenantPortalStage = 'occupied',
+  features?: TenantFeatures,
+): NavigationLink[] {
+  const labels = TENANT_STAGE_LABELS[stage];
+  return TENANT_MENU_ITEMS
+    .filter((item) => getTenantMenuItemStages(item.to).includes(stage))
+    .filter((item) => (item.feature ? Boolean(features?.[item.feature]) : true))
+    .map((item) => ({
+      to: item.to,
+      // Label wajib ada di tabel per tahap; jatuh ke tujuan hanya untuk mencegah menu kosong.
+      label: labels[item.to] ?? item.to,
+      icon: item.icon,
+      hint: item.hint,
+    }));
+}
+
 function getTenantSections(stage: TenantPortalStage = 'occupied', features?: TenantFeatures): NavigationSection[] {
-  if (stage === 'browsing') {
-    return [{
-      title: 'Portal Penghuni',
-      links: [
-        { to: '/rooms', label: 'Pilih Kamar', icon: '🛏️', hint: 'Lihat kamar yang tersedia dan mulai pemesanan.' },
-      ],
-    }];
-  }
+  const allLinks = getTenantMenuLinks(stage, features);
+  const primaryOrder = TENANT_STAGE_PRIMARY[stage] ?? [];
+  const primaryLinks = primaryOrder
+    .map((to) => allLinks.find((link) => link.to === to))
+    .filter((link): link is NavigationLink => Boolean(link));
+  const restLinks = allLinks.filter((link) => !primaryLinks.some((primary) => primary.to === link.to));
 
-  if (stage === 'booking') {
-    return [{
-      title: 'Portal Penghuni',
-      links: [
-        { to: '/portal/bookings', label: 'Status Pemesanan', icon: '🗓️', hint: 'Pantau review admin, tagihan awal, dan bukti pembayaran.' },
-        { to: '/portal/invoices', label: 'Tagihan Awal', icon: '🧾', hint: 'Bayar tagihan awal setelah pemesanan disetujui.' },
-      ],
-    }];
+  const sections: NavigationSection[] = [];
+  if (primaryLinks.length > 0) {
+    sections.push({
+      title: isTenantCandidateStage(stage) ? 'Calon penghuni' : 'Menu utama',
+      links: primaryLinks,
+    });
   }
-
-  return [
-    {
-      title: 'Utama',
-      links: [
-        { to: '/portal/stay', label: 'Panduan Kos Saya', icon: '🏠', hint: 'Kamar, masa sewa, tagihan, dan aksi berikutnya.' },
-        { to: '/portal/invoices', label: 'Bayar Tagihan', icon: '💳', hint: 'Tagihan, status, dan tindak lanjut pembayaran.' },
-        { to: '/portal/tickets', label: 'Lapor Masalah', icon: '🛠️', hint: 'Laporkan kerusakan atau kebutuhan bantuan dan pantau progresnya.' },
-      ],
-    },
-    {
-      title: 'Lainnya',
-      links: [
-        { to: '/portal/energy', label: 'Energi', icon: '⚡', hint: 'Pantau pembacaan listrik & air terbaru dari meter otomatis.' },
-        { to: '/portal/announcements', label: 'Pengumuman', icon: '📢', hint: 'Info terbaru dari pengelola KOST48.' },
-        { to: '/portal/manual', label: 'Panduan', icon: '📖', hint: 'Aturan, pembayaran, dan layanan kos.' },
-        { to: '/portal/wifi', label: 'Pesan WiFi', icon: '📶', hint: 'Lihat prosedur pembelian paket WiFi melalui WhatsApp.' },
-        ...(features?.loyaltyEnabled ? [
-          { to: '/portal/loyalty', label: 'Poin & Reward', icon: '🎁', hint: 'Poin kebaikan, leaderboard, katalog reward, dan referral.' },
-        ] : []),
-      ],
-    },
-  ];
+  // §8.8: grup "Lihat semua menu" selalu ada — inilah jalan keluar yang tidak boleh hilang,
+  // bukan tautan palsu: isinya tepat semua tujuan yang boleh dibuka tahap ini.
+  sections.push({ title: TENANT_ALL_MENU_TITLE, links: restLinks });
+  return sections;
 }
 
 export function getNavigationSections(role?: Role, tenantStage: TenantPortalStage = 'occupied', features?: TenantFeatures): NavigationSection[] {

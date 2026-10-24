@@ -7,9 +7,7 @@ import {
   ServiceUnavailableException,
 } from '@nestjs/common';
 import { Prisma } from '../../generated/prisma';
-import * as bcrypt from 'bcryptjs';
-import { randomInt } from 'crypto';
-import { LeadSource, PricingTerm, RoomStatus, StayStatus, UserRole } from '../../common/enums/app.enums';
+import { LeadSource, PricingTerm, RoomStatus, StayStatus } from '../../common/enums/app.enums';
 import { roundRupiah } from '../../common/business/money.helper';
 import { ReferralService } from '../loyalty/referral.service';
 import { AUTO_OPS_DEADLINES, hoursFromNow } from '../../common/business/auto-ops.constants';
@@ -20,7 +18,7 @@ import { calculateRentByPricingTerm } from './pricing.helper';
 import { calculateBookingCharges } from './booking-charges.helper';
 import { startOfDay, endOfDay, addDays, parseDateOnly } from '../../common/utils/date.util';
 import { isBookingSchemaReady, isBookingSchemaDriftError } from './booking-schema.helper';
-import { findBookingByIdTx } from './tenant-bookings.helpers';
+import { findBookingByIdTx, buildBookingReferenceCode, assertNoOverlappingStayTx, withSerializationRetry } from './tenant-bookings.helpers';
 import { CreatePublicBookingDto } from './dto/create-public-booking.dto';
 import { CreatePublicSurveyDto } from './dto/create-public-survey.dto';
 
@@ -111,11 +109,12 @@ export class PublicBookingsService {
       );
     }
 
-    const temporaryPassword = `Kost48${randomInt(10000, 99999)}`;
-    const passwordHash = await bcrypt.hash(temporaryPassword, 10);
+    // S7 (P36 a): pengajuan tamu TIDAK membuat akun. Akun wajib saat membayar DP,
+    // jadi tidak ada password sementara yang dibuat/dikembalikan di titik ini.
+    // Tamu mengingat kode pengajuan (diturunkan dari Stay.id) untuk klaim/admin.
 
     try {
-      const result = await this.prisma.$transaction(async (tx) => {
+      const result = await withSerializationRetry(() => this.prisma.$transaction(async (tx) => {
         await tx.$queryRawUnsafe(`SELECT id FROM "Room" WHERE id = $1 FOR UPDATE`, dto.roomId);
 
         const lockedRooms = await tx.$queryRaw<RoomPricingSnapshot[]>(Prisma.sql`
@@ -171,6 +170,13 @@ export class PublicBookingsService {
         if (existingPaidOrOccupiedStay) {
           throw new ConflictException('Kamar sedang ditempati. Pemesanan baru belum dibuka sampai kamar siap huni.');
         }
+
+        // S7: tahan double-book — cek irisan rentang tanggal untuk kamar ini.
+        await assertNoOverlappingStayTx(tx, {
+          roomId: dto.roomId,
+          checkInDate,
+          plannedCheckOutDate,
+        });
 
         const existingTenantWithActiveBooking = await tx.tenant.findFirst({
           where: {
@@ -228,23 +234,10 @@ export class PublicBookingsService {
           }
         }
 
-        let portalUser = tenant.user ?? null;
-        let isNewUser = false;
-
-        if (!portalUser) {
-          isNewUser = true;
-          portalUser = await tx.user.create({
-            data: {
-              fullName: trimmedFullName,
-              email: normalizedEmail || `tenant-${tenant.id}@phone.local.kost48`,
-              passwordHash,
-              role: UserRole.TENANT as any,
-              tenantId: tenant.id,
-              isActive: true,
-            },
-            select: { id: true, isActive: true },
-          });
-        }
+        // S7 (P36 a): TIDAK ada `tx.user.create` di sini. Akun hanya lahir lewat
+        // pendaftaran/klaim di titik DP, sehingga "akun wajib saat membayar DP"
+        // berlaku: sebelum akun terklaim, tidak ada pemilik yang bisa membayar.
+        const hasPortalAccount = Boolean(tenant.user);
 
         const baseRent = this.resolveRent(room, dto.pricingTerm);
         if (!baseRent || baseRent <= 0) {
@@ -319,7 +312,7 @@ export class PublicBookingsService {
             CAST(${LeadSource.WEBSITE} AS "LeadSource"),
             ${stayPurposeSql},
             ${null},
-            ${portalUser.id},
+            ${null},
             NOW(),
             NOW()
           )
@@ -331,6 +324,8 @@ export class PublicBookingsService {
           throw new ConflictException('Booking gagal dibuat');
         }
 
+        const referenceCode = buildBookingReferenceCode(bookingId);
+
         const booking = await findBookingByIdTx(tx, bookingId, tenant.id);
         if (!booking) {
           throw new NotFoundException('Booking yang baru dibuat tidak ditemukan');
@@ -338,7 +333,8 @@ export class PublicBookingsService {
 
         await tx.auditLog.create({
           data: {
-            actorUserId: portalUser.id,
+            // S7: pengajuan tamu tanpa akun — tidak ada aktor User yang sah.
+            actorUserId: null,
             action: 'CREATE_PUBLIC_BOOKING',
             entityType: 'Stay',
             entityId: String(booking.id),
@@ -350,7 +346,8 @@ export class PublicBookingsService {
               paymentChoice: dto.paymentChoice ?? 'DP',
               expiresAt,
               isNewTenant,
-              isNewUser,
+              referenceCode,
+              requiresAccountForDownPayment: true,
             } as any,
           },
         });
@@ -358,6 +355,7 @@ export class PublicBookingsService {
         return {
           booking: {
             stayId: booking.id,
+            referenceCode,
             roomId: booking.roomId,
             roomCode: booking.room?.code ?? room.code,
             status: booking.status,
@@ -376,19 +374,22 @@ export class PublicBookingsService {
             },
             hasPet,
           },
+          // S7 (P36 a): TIDAK ada kredensial di respons. Kunci `portalAccess` dipertahankan
+          // supaya pemanggil lama tidak pecah, tetapi isinya kini instruksi klaim.
           portalAccess: {
             email: normalizedEmail,
-            temporaryPassword: isNewUser ? temporaryPassword : undefined,
-            isNewUser,
-            instructions: isNewUser
-              ? 'Akun portal telah dibuat. Silakan login menggunakan email dan password sementara di atas.'
-              : 'Silakan login menggunakan akun portal yang sudah pernah dibuat.',
+            requiresAccount: true,
+            claimRequired: !hasPortalAccount,
+            referenceCode,
+            instructions: hasPortalAccount
+              ? 'Kamu sudah punya akun portal. Masuk dengan akun itu untuk memantau pengajuan dan membayar DP.'
+              : 'Akun wajib saat membayar DP. Daftar/masuk memakai email atau nomor HP yang sama dengan pengajuan ini, lalu klaim pengajuan memakai kode di atas.',
           },
-          message: isNewUser
-            ? 'Booking berhasil dibuat. Silakan login ke portal untuk memantau status booking Anda.'
-            : 'Booking berhasil dibuat. Silakan login menggunakan akun portal yang sudah pernah dibuat.',
+          message: hasPortalAccount
+            ? 'Pengajuan diterima. Masuk ke portal untuk memantau status dan membayar DP.'
+            : 'Pengajuan diterima. Simpan kode pengajuan ini; akun dibuat/diklaim saat kamu membayar DP.',
         };
-      });
+      }));
 
       return serializePrismaResult(result);
     } catch (error: any) {
