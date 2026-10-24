@@ -3657,15 +3657,6 @@ div.tenant-stay-fact-chip {
 }
 
 /* V5.9.8-G — Guest dashboard from official Kost48 website, modernized */
-.guest-home-page {
-  min-height: 100vh;
-  color: var(--gray-900);
-  background:
-    radial-gradient(circle at top left, rgba(14, 165, 233, 0.12), transparent 32rem),
-    linear-gradient(180deg, var(--pub-surface-warm) 0%, #eef7ff 38%, var(--white) 100%);
-  scroll-behavior: smooth;
-}
-
 .guest-home-topbar {
   position: sticky;
   top: 0;
@@ -5318,13 +5309,11 @@ div.tenant-stay-fact-chip {
 /* S8 (P37 a) — wizard sebagai LAYAR PERTAMA tiap peran.
    Mobile-first 390 px: tombol "Lihat semua menu" ada di header (paling atas) dan target
    sentuhnya 44 px, jadi terlihat tanpa menggulir. Aksi ada di bawahnya; di layar sempit
-   satu kolom supaya label tidak terpotong. */
+   satu kolom supaya label tidak terpotong. Susunan header/heading/catatan memakai utility
+   yang SUDAH ada di bundle (d-flex/flex-wrap/justify-content-between/gap-3/mb-3/flex-grow-1/mt-3)
+   supaya gzip CSS awal tetap di bawah plafon gate verify-pwa (135 KiB). */
 .quickstart-first-screen { max-width:920px; margin:0 auto; padding:.25rem 0 5.5rem; }
-.quickstart-first-header { display:flex; flex-wrap:wrap; align-items:flex-start; justify-content:space-between; gap:.75rem; margin-bottom:1rem; }
-.quickstart-first-heading { flex:1 1 220px; min-width:0; }
-.quickstart-first-heading h1 { font-size:1.15rem; line-height:1.35; margin:0 0 .25rem; }
-.quickstart-first-allmenu { min-height:44px; padding:.5rem 1rem; font-weight:600; white-space:nowrap; }
+.quickstart-first-screen h1 { font-size:1.15rem; line-height:1.35; margin:0 0 .25rem; }
+.quickstart-first-allmenu { min-height:44px; white-space:nowrap; }
 .quickstart-first-grid { grid-template-columns:1fr; }
-.quickstart-first-grid .quickstart-action { min-height:68px; }
 @media (min-width:576px) { .quickstart-first-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } }
-.quickstart-first-note { margin-top:.85rem; max-width:60ch; }

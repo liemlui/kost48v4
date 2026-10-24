@@ -252,8 +252,8 @@ export function QuickStartFirstScreen({
 
   return (
     <section className="quickstart-first-screen" aria-labelledby="quickstart-first-title">
-      <div className="quickstart-first-header">
-        <div className="quickstart-first-heading">
+      <div className="d-flex flex-wrap justify-content-between gap-3 mb-3">
+        <div className="flex-grow-1">
           <div className="page-eyebrow">KOST48 Surabaya</div>
           <h1 id="quickstart-first-title">{definition.title}</h1>
           <p className="text-muted small mb-0">{definition.subtitle}</p>
@@ -299,7 +299,7 @@ export function QuickStartFirstScreen({
         })}
       </div>
 
-      <p className="quickstart-first-note small text-muted mb-0">
+      <p className="mt-3 small text-muted mb-0">
         Pilihan “Lihat semua menu” diingat untuk akun ini, jadi lain kali kamu langsung masuk ke
         halaman penuh. Tidak ada fitur yang disembunyikan.
       </p>
