@@ -22,8 +22,14 @@ describe('Y-M2 — guest booking validation (KTP/email/phone)', () => {
     it('NIK bukan 16 digit → error identityNumber', () => {
       expect(validateStep1(form({ fullName: 'Budi', phone: '0811', identityNumber: '123' })).identityNumber).toMatch(/16 digit/i);
     });
-    it('NIK wajib diisi', () => {
-      expect(validateStep1(form({ fullName: 'Budi', phone: '0811', identityNumber: '' })).identityNumber).toBeTruthy();
+    // S8 (P36 a + P35 a): NIK BUKAN syarat mengajukan — tamu boleh mengajukan dengan kontak
+    // minimum (nama + telepon, email opsional). NIK hanya untuk verifikasi KTP kemudian;
+    // backend juga memperlakukan `identityNumber` sebagai opsional.
+    it('NIK boleh kosong (kontak minimum: nama + telepon)', () => {
+      expect(validateStep1(form({ fullName: 'Budi', phone: '0811', identityNumber: '' })).identityNumber).toBeUndefined();
+    });
+    it('pengajuan minimum tanpa email & tanpa NIK → tanpa error', () => {
+      expect(Object.keys(validateStep1(form({ fullName: 'Budi', phone: '08123456789', email: '', identityNumber: '' })))).toHaveLength(0);
     });
     it('data valid → tanpa error', () => {
       const e = validateStep1(form({ fullName: 'Budi', phone: '08123456789', email: 'budi@mail.com', identityNumber: '1234567890123456' }));

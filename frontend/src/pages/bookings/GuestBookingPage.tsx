@@ -8,7 +8,13 @@ import EmptyState from '../../components/common/EmptyState';
 import type { CreatePublicBookingPayload, PublicBookingResult } from '../../types';
 import { calculateRentByPricingTerm, calculateOccupantSurcharge } from '../../utils/pricing';
 import type { GuestBookingFormState } from './guestBookingUtils';
-import { INITIAL_FORM, buildBookingPayload, validate, computeCheckOutDate } from './guestBookingUtils';
+import {
+  INITIAL_FORM,
+  buildBookingPayload,
+  computeCheckOutDate,
+  describePublicBookingError,
+  validate,
+} from './guestBookingUtils';
 import GuestBookingForm from './GuestBookingForm';
 import GuestBookingRoomSummary from './GuestBookingRoomSummary';
 import GuestBookingSuccess from './GuestBookingSuccess';
@@ -23,6 +29,8 @@ export default function GuestBookingPage() {
   const [form, setForm] = useState<GuestBookingFormState>({ ...INITIAL_FORM });
   const [result, setResult] = useState<PublicBookingResult | null>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  // S8: 503 dari backend = booking online ditutup / skema belum siap → tampilkan jalan keluar.
+  const [onlineBookingClosed, setOnlineBookingClosed] = useState(false);
 
   const roomQuery = useQuery({
     queryKey: ['public-room-detail', id],
@@ -44,13 +52,12 @@ export default function GuestBookingPage() {
     onSuccess: (data) => {
       setResult(data);
       setErrors({});
+      setOnlineBookingClosed(false);
     },
     onError: (err: unknown) => {
-      const message =
-        err && typeof err === 'object' && 'response' in err
-          ? ((err as { response?: { data?: { message?: string | string[] } } }).response?.data?.message ?? 'Booking gagal dibuat.')
-          : 'Booking gagal dibuat.';
-      setErrors({ server: Array.isArray(message) ? message.join(', ') : message });
+      const info = describePublicBookingError(err);
+      setOnlineBookingClosed(info.onlineBookingClosed);
+      setErrors({ server: info.message });
     },
   });
 
@@ -179,10 +186,34 @@ export default function GuestBookingPage() {
     <div className="public-page-shell">
       <main className="container py-4 py-lg-5" style={{ maxWidth: 960 }}>
         <div className="mb-4">
-          <div className="page-eyebrow">✦ Booking tamu publik</div>
+          <div className="page-eyebrow">✦ Pengajuan sewa tamu — tanpa akun</div>
           <h1 className="mb-1">Form Booking — {room.code}</h1>
-          <div className="text-muted">Lengkapi data diri dan pilih tanggal check-in. Admin akan memeriksa dan menyetujui booking Anda.</div>
+          <div className="text-muted">
+            Cukup nama dan nomor telepon (email opsional). Setelah dikirim kamu menerima{' '}
+            <strong>kode pengajuan</strong>; akun baru wajib saat membayar DP.
+          </div>
         </div>
+
+        {onlineBookingClosed ? (
+          <Alert variant="warning">
+            <div className="fw-semibold mb-1">Booking online sedang ditutup</div>
+            <div className="small mb-2">
+              Pengajuan lewat formulir ini belum bisa diproses. Ketersediaan kamar tetap diperbarui —
+              hubungi admin KOST48 lewat WhatsApp untuk menanyakan atau mereservasi kamar ini.
+            </div>
+            <div className="d-flex gap-2 flex-wrap">
+              <a
+                className="btn btn-primary btn-sm"
+                href={buildAvailabilityWaUrl(room.code || `Kamar #${room.id}`)}
+                target="_blank"
+                rel="noreferrer"
+              >
+                💬 Hubungi Admin via WhatsApp
+              </a>
+              <a className="btn btn-outline-secondary btn-sm" href="/rooms">Lihat Kamar Lain</a>
+            </div>
+          </Alert>
+        ) : null}
 
         <Row className="g-4">
           <Col lg={5}>

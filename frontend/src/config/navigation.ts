@@ -272,13 +272,29 @@ export function getTenantMenuLinks(
     }));
 }
 
-function getTenantSections(stage: TenantPortalStage = 'occupied', features?: TenantFeatures): NavigationSection[] {
+/**
+ * Tautan tahap ini dengan **tautan utama lebih dulu** (`TENANT_STAGE_PRIMARY`), sisanya
+ * menyusul. Satu sumber untuk menu (S6) dan untuk aksi wizard layar pertama (S8), supaya
+ * urutan prioritas tidak ditulis dua kali.
+ */
+export function getTenantPrimaryMenuLinks(
+  stage: TenantPortalStage = 'occupied',
+  features?: TenantFeatures,
+): NavigationLink[] {
   const allLinks = getTenantMenuLinks(stage, features);
   const primaryOrder = TENANT_STAGE_PRIMARY[stage] ?? [];
   const primaryLinks = primaryOrder
     .map((to) => allLinks.find((link) => link.to === to))
     .filter((link): link is NavigationLink => Boolean(link));
-  const restLinks = allLinks.filter((link) => !primaryLinks.some((primary) => primary.to === link.to));
+  const restLinks = allLinks.filter((link) => !primaryOrder.includes(link.to));
+  return [...primaryLinks, ...restLinks];
+}
+
+function getTenantSections(stage: TenantPortalStage = 'occupied', features?: TenantFeatures): NavigationSection[] {
+  const orderedLinks = getTenantPrimaryMenuLinks(stage, features);
+  const primaryOrder = TENANT_STAGE_PRIMARY[stage] ?? [];
+  const primaryLinks = orderedLinks.filter((link) => primaryOrder.includes(link.to));
+  const restLinks = orderedLinks.filter((link) => !primaryOrder.includes(link.to));
 
   const sections: NavigationSection[] = [];
   if (primaryLinks.length > 0) {

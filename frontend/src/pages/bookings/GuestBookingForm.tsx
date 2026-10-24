@@ -238,7 +238,7 @@ export default function GuestBookingForm({
               </Col>
               <Col xs={12}>
                 <Form.Group controlId="guest-booking-form-4">
-                  <Form.Label>No. KTP/NIK <span className="text-danger">*</span></Form.Label>
+                  <Form.Label>No. KTP/NIK <span className="text-muted small">(opsional)</span></Form.Label>
                   <Form.Control
                     ref={(element) => { step1FieldRefs.current.identityNumber = element; }}
                     value={form.identityNumber}

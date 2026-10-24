@@ -24,6 +24,12 @@ import {
   type NavigationLink,
   type NavigationSection,
 } from '../../config/navigation';
+import {
+  QuickStartFirstScreen,
+  getQuickStartFirstScreen,
+  isQuickStartSkipped,
+  setQuickStartSkipped,
+} from '../common/QuickStartWizard';
 import { useAuth } from '../../context/AuthContext';
 import { useConfirm } from '../common/ConfirmProvider';
 import { fetchPublicConfig } from '../../api/settings';
@@ -344,6 +350,33 @@ export default function AppLayout({ children }: { children?: ReactNode }) {
   }, [location.pathname, links, isOwner, ownerViewMode, breadcrumbLabel]);
   const defaultRoute = getDefaultRoute(user?.role, tenantStage);
 
+  // ── P37 a (S8): wizard sebagai LAYAR PERTAMA tiap peran ──────────────────────────────
+  // Tampil hanya di rute pendaratan peran itu sendiri (bukan di setiap halaman), dan hilang
+  // setelah pengguna menekan "Lihat semua menu" / memilih aksi — pilihan itu diingat per
+  // pengguna (`isQuickStartSkipped`, kunci sama dengan kartu wizard di dalam halaman).
+  const firstScreenDefinition = useMemo(
+    () => getQuickStartFirstScreen(user?.role, tenantStage, tenantFeatures),
+    [user?.role, tenantStage, tenantFeatures],
+  );
+  const [revealedQuickStart, setRevealedQuickStart] = useState<Record<string, boolean>>({});
+  const quickStartScope = firstScreenDefinition?.scope;
+  const showQuickStartFirstScreen = Boolean(user)
+    && Boolean(firstScreenDefinition)
+    && Boolean(quickStartScope)
+    && location.pathname === defaultRoute
+    && !(revealedQuickStart[quickStartScope as string]
+      ?? isQuickStartSkipped(quickStartScope as string, user?.id));
+
+  const revealQuickStart = () => {
+    if (!quickStartScope) return;
+    setQuickStartSkipped(quickStartScope, true, user?.id);
+    setRevealedQuickStart((current) => ({ ...current, [quickStartScope]: true }));
+  };
+
+  const pageContent = showQuickStartFirstScreen && firstScreenDefinition
+    ? <QuickStartFirstScreen definition={firstScreenDefinition} onReveal={revealQuickStart} />
+    : (children ?? <Outlet />);
+
   useEffect(() => {
     if (sidebarOpen) {
       document.body.classList.add('offcanvas-open');
@@ -385,7 +418,7 @@ export default function AppLayout({ children }: { children?: ReactNode }) {
             <StaffTopWorkspaceNav />
 
             <section className="staff-workspace-content">
-              {children ?? <Outlet />}
+              {pageContent}
             </section>
           </main>
         </div>
@@ -414,7 +447,7 @@ export default function AppLayout({ children }: { children?: ReactNode }) {
           />
 
           <section className="tenant-workspace-content">
-            {children ?? <Outlet />}
+            {pageContent}
           </section>
         </main>
         <RoleMobileBottomNav {...tenantMobileTabs(tenantStage)} ariaLabel="Navigasi bawah tenant" />
@@ -556,7 +589,7 @@ export default function AppLayout({ children }: { children?: ReactNode }) {
             ) : null}
           </section>
 
-          {children ?? <Outlet />}
+          {pageContent}
         </main>
 
         <footer className="app-footer">

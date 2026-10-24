@@ -158,7 +158,9 @@ export function validateStep1(form: GuestBookingFormState): FormErrors {
     errors.email = 'Format email tidak valid.';
   }
   if (!form.identityNumber.trim()) {
-    errors.identityNumber = 'Nomor KTP/NIK wajib diisi untuk booking.';
+    // S8 (P36 a + P35 a): pengajuan tamu memakai kontak minimum — nama, telepon, email
+    // opsional. NIK BUKAN syarat mengajukan (backend `identityNumber` juga opsional;
+    // NIK hanya untuk verifikasi KTP saat/sesudah check-in). Bila diisi, tetap divalidasi.
   } else if (!/^\d{16}$/.test(form.identityNumber.trim())) {
     errors.identityNumber = 'NIK harus tepat 16 digit angka.';
   }
@@ -174,5 +176,49 @@ export function validateStep2(form: GuestBookingFormState): FormErrors {
 
 export function validate(form: GuestBookingFormState): FormErrors {
   return { ...validateStep1(form), ...validateStep2(form) };
+}
+
+/**
+ * S8 — arti galat `POST /public/bookings` untuk layar pengajuan.
+ *
+ * Backend menjawab **503** saat `PUBLIC_ONLINE_BOOKING_ENABLED` mati atau skema booking
+ * belum siap (lihat `public-bookings.service.ts`). 503 bukan salah isian pengguna: layar
+ * harus menawarkan jalan keluar (WhatsApp admin), bukan hanya pesan galat di form.
+ */
+export type PublicBookingErrorInfo = {
+  message: string;
+  /** true = booking online sedang ditutup/503 → tampilkan jalan keluar WhatsApp. */
+  onlineBookingClosed: boolean;
+};
+
+const DEFAULT_PUBLIC_BOOKING_ERROR = 'Booking gagal dibuat. Silakan coba lagi.';
+const CLOSED_PUBLIC_BOOKING_MESSAGE =
+  'Booking online sedang ditutup. Kamu tetap bisa menghubungi admin KOST48 lewat WhatsApp untuk cek kamar dan reservasi.';
+
+function readErrorBody(err: unknown) {
+  if (!err || typeof err !== 'object') return { status: undefined as number | undefined, message: undefined as string | undefined };
+  const withResponse = err as {
+    response?: { status?: number; data?: { message?: string | string[]; statusCode?: number } };
+    status?: number;
+  };
+  const rawMessage = withResponse.response?.data?.message;
+  return {
+    status: withResponse.response?.status ?? withResponse.response?.data?.statusCode ?? withResponse.status,
+    message: Array.isArray(rawMessage) ? rawMessage.join(', ') : rawMessage,
+  };
+}
+
+export function describePublicBookingError(err: unknown): PublicBookingErrorInfo {
+  const { status, message } = readErrorBody(err);
+  if (status === 503) {
+    return {
+      message: message?.trim() ? message : CLOSED_PUBLIC_BOOKING_MESSAGE,
+      onlineBookingClosed: true,
+    };
+  }
+  return {
+    message: message?.trim() ? message : DEFAULT_PUBLIC_BOOKING_ERROR,
+    onlineBookingClosed: false,
+  };
 }
 import { formatDateOnly } from '../../utils/dateTime';

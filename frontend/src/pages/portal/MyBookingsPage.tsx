@@ -1,9 +1,10 @@
 // FILE: MyBookingsPage.tsx — portal penghuni: daftar booking saya
 import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Alert, Button, Modal, Spinner } from "react-bootstrap";
+import { Alert, Button, Card, Modal, Spinner } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
-import { cancelTenantBooking, listMyTenantBookings } from "../../api/bookings";
+import { cancelTenantBooking, claimGuestBookings, listMyTenantBookings } from "../../api/bookings";
+import type { GuestClaimResult } from "../../api/bookings";
 import { getResource } from "../../api/resources";
 import {
   listMyPaymentSubmissions,
@@ -21,6 +22,7 @@ import {
   isPendingReviewStatus,
 } from "../../utils/tenantCopy";
 import { getActionableTenantBookings, getLatestTenantBookingUpdate, isTenantBookingOccupied, stayToTenantBooking } from "../../utils/tenantBookingRules";
+import { buildAdminWaUrl } from "../../utils/whatsapp";
 import type {
   CreatePaymentSubmissionPayload,
   PaymentSubmission,
@@ -50,6 +52,23 @@ function isNotFoundError(error: unknown): boolean {
 
 const SESSION_KEY = "kost48:portal-bookings:success-message";
 
+// S8 — pesan galat klaim diambil APA ADANYA dari server (pesan seragam
+// `GUEST_CLAIM_UNIFORM_MESSAGE`), tanpa ditulis ulang/ditambah, supaya layar tidak
+// menjadi alat menebak keberadaan pengajuan orang lain. Fallback hanya untuk galat
+// jaringan yang tidak membawa pesan server.
+const CLAIM_NETWORK_FALLBACK =
+  "Klaim belum bisa diproses karena koneksi gagal. Coba lagi, atau hubungi admin KOST48 dengan menyebut kode pengajuan.";
+
+function readUniformClaimMessage(error: unknown): string {
+  const raw = (error as { response?: { data?: { message?: string | string[] } } })
+    ?.response?.data?.message;
+  const message = Array.isArray(raw) ? raw.join(", ") : raw;
+  return typeof message === "string" && message.trim() ? message : CLAIM_NETWORK_FALLBACK;
+}
+
+const CLAIM_ADMIN_WA_MESSAGE =
+  "Halo Admin KOST48, saya ingin mengklaim pengajuan kamar. Kode pengajuan saya: ";
+
 export default function MyBookingsPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -74,6 +93,8 @@ export default function MyBookingsPage() {
   );
   const [cancelTarget, setCancelTarget] = useState<TenantBooking | null>(null);
   const [cancelError, setCancelError] = useState<string | null>(null);
+  const [claimResult, setClaimResult] = useState<GuestClaimResult | null>(null);
+  const [claimError, setClaimError] = useState<string | null>(null);
 
   const bookingsQuery = useQuery({
     queryKey: ["tenant-bookings", { userId, tenantId }],
@@ -227,6 +248,31 @@ export default function MyBookingsPage() {
     },
   });
 
+  // S8 — klaim pengajuan tamu (endpoint S7). Pesan galat dipakai apa adanya.
+  const claimMutation = useMutation({
+    mutationFn: () => claimGuestBookings(),
+    onSuccess: async (data) => {
+      setClaimError(null);
+      setClaimResult(data);
+      const message = data.alreadyClaimed
+        ? "Pengajuan ini sudah terkait dengan akunmu. Tidak ada data yang berubah."
+        : `Pengajuan berhasil diklaim${data.claimed.length ? ` (${data.claimed.length} pengajuan)` : ""}. Lanjutkan dengan mengirim bukti DP.`;
+      setSuccessMessage(message);
+      sessionStorage.setItem(SESSION_KEY, message);
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["tenant-bookings"] }),
+        queryClient.invalidateQueries({ queryKey: ["payment-submissions"] }),
+        queryClient.invalidateQueries({ queryKey: ["portal-invoices"] }),
+        queryClient.invalidateQueries({ queryKey: ["portal-stay"] }),
+        refetchStage(),
+      ]);
+    },
+    onError: (error) => {
+      setClaimResult(null);
+      setClaimError(readUniformClaimMessage(error));
+    },
+  });
+
   const handleUploadClick = (
     booking: TenantBooking,
     targetType: PaymentTargetType,
@@ -262,6 +308,71 @@ export default function MyBookingsPage() {
         </Alert>
       ) : null}
 
+      {/* S8 — klaim pengajuan tanpa akun. Formulir tamu tidak membuat akun; akun lahir di
+          sini/di pendaftaran, lalu pengajuan dihubungkan lewat kontak yang sama persis.
+          Pesan galat = pesan seragam server + jalur admin (bukan layar kosong). */}
+      <Card className="content-card border-0 mb-3" id="tenant-claim-pengajuan">
+        <Card.Body>
+          <div className="d-flex justify-content-between align-items-start gap-3 flex-wrap">
+            <div>
+              <h2 className="h6 mb-1">Klaim pengajuan tamu</h2>
+              <p className="small text-muted mb-0">
+                Pernah mengajukan kamar tanpa akun? Masuk atau daftar memakai email/nomor HP yang
+                <strong> sama persis</strong> seperti saat mengajukan, lalu tekan tombol ini. Akun
+                wajib ada sebelum DP dibayar.
+              </p>
+            </div>
+            <Button
+              variant="outline-primary"
+              onClick={() => claimMutation.mutate()}
+              disabled={claimMutation.isPending}
+            >
+              {claimMutation.isPending ? "Mengklaim…" : "Klaim pengajuan"}
+            </Button>
+          </div>
+
+          {claimError ? (
+            <Alert variant="warning" className="mt-3 mb-0">
+              <div className="fw-semibold mb-1">Pengajuan belum bisa diklaim</div>
+              <div className="small">{claimError}</div>
+              <div className="mt-2">
+                <a
+                  className="btn btn-sm btn-outline-secondary"
+                  href={buildAdminWaUrl(CLAIM_ADMIN_WA_MESSAGE)}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  💬 Hubungi admin KOST48
+                </a>
+              </div>
+            </Alert>
+          ) : null}
+
+          {claimResult ? (
+            <Alert variant="success" className="mt-3 mb-0">
+              <div className="fw-semibold mb-1">
+                {claimResult.alreadyClaimed
+                  ? "Pengajuan sudah terkait dengan akun ini"
+                  : "Pengajuan berhasil diklaim"}
+              </div>
+              {claimResult.claimed.length ? (
+                <ul className="small mb-2">
+                  {claimResult.claimed.map((item) => (
+                    <li key={item.stayId}>
+                      <code className="text-dark">{item.referenceCode}</code>
+                      {item.roomCode ? ` · Kmr ${item.roomCode}` : ""}
+                    </li>
+                  ))}
+                </ul>
+              ) : null}
+              <a className="btn btn-sm btn-primary" href="#tenant-booking-list">
+                Lanjut kirim bukti DP
+              </a>
+            </Alert>
+          ) : null}
+        </Card.Body>
+      </Card>
+
       {submissionListError ? (
         <Alert variant="warning">{submissionListError}</Alert>
       ) : null}
@@ -291,7 +402,7 @@ export default function MyBookingsPage() {
         />
       ) : null}
 
-      <div className="d-grid gap-3">
+      <div className="d-grid gap-3" id="tenant-booking-list">
         {visibleBookings.map((booking: TenantBooking) => {
           const relatedSubmissions = [
             ...(submissionByBooking.get(booking.id) ?? []),

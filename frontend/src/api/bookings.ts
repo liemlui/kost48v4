@@ -164,3 +164,35 @@ export async function cancelTenantBooking(
     payload as Record<string, unknown> | undefined,
   );
 }
+
+// ═══════════════════════════════════════════════════════════
+//  S8 — KLAIM PENGAJUAN TAMU (endpoint S7 `POST /tenant/bookings/claim`)
+// ═══════════════════════════════════════════════════════════
+
+export type GuestClaimedBooking = {
+  stayId: number;
+  /** Kode pengajuan `K48-xxxx-y` — penanda, BUKAN kredensial. */
+  referenceCode: string;
+  roomCode: string | null;
+  status: string;
+  checkInDate?: string | null;
+  plannedCheckOutDate?: string | null;
+  expiresAt?: string | null;
+};
+
+export type GuestClaimResult = {
+  /** true = akun ini sudah punya huni aktif; tidak ada perubahan data. */
+  alreadyClaimed: boolean;
+  tenantId: number;
+  claimed: GuestClaimedBooking[];
+};
+
+/**
+ * Klaim pengajuan tanpa akun yang kontaknya sama persis dengan akun yang login.
+ * Semua jalur gagal menjawab **409** dengan pesan seragam (`GUEST_CLAIM_UNIFORM_MESSAGE`);
+ * UI wajib menampilkan pesan itu apa adanya dan menyediakan jalur admin — bukan menebak
+ * penyebabnya, supaya endpoint tidak bisa dipakai memeriksa keberadaan pengajuan orang lain.
+ */
+export async function claimGuestBookings() {
+  return postAction<GuestClaimResult>('/tenant/bookings/claim');
+}

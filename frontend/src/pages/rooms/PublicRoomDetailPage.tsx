@@ -281,7 +281,7 @@ export default function PublicRoomDetailPage() {
             <div className="d-flex gap-2 flex-wrap align-items-center">
               {availability.canBook ? (
                 <button type="button" className="btn btn-primary btn-lg room-detail-cta-main" onClick={handleBook}>
-                  Booking Kamar Ini
+                  Ajukan sewa
                 </button>
               ) : (
                 <a className="btn btn-warning btn-lg room-detail-cta-main" href={buildRoomWaUrl(room.code || `Kamar #${room.id}`)} target="_blank" rel="noreferrer">
@@ -292,6 +292,14 @@ export default function PublicRoomDetailPage() {
                 <a className="btn btn-outline-secondary" href={buildRoomWaUrl(room.code || `Kamar #${room.id}`)} target="_blank" rel="noreferrer">💬 Tanya via WhatsApp</a>
               )}
             </div>
+            {/* S8 (P36 a): pengajuan boleh tanpa akun — akun baru wajib di titik uang (DP).
+                Bila booking online kamar ini dimatikan (`onlineBookingEnabled=false`), CTA
+                berubah jadi jalur WhatsApp di atas; tidak ada formulir yang bisa dibuka. */}
+            <p className="room-detail-cta-note small text-muted mb-0">
+              {availability.canBook
+                ? 'Tanpa akun. Akun baru wajib saat membayar DP — kamu akan menerima kode pengajuan untuk dilacak.'
+                : 'Booking online kamar ini sedang ditutup. Admin bisa membantu lewat WhatsApp.'}
+            </p>
           </div>
         )}
 
@@ -479,7 +487,7 @@ export default function PublicRoomDetailPage() {
 
                     <div className="d-grid gap-2 mt-3">
                       {availability?.canBook ? (
-                        <Button size="lg" onClick={handleBook}>Ajukan Booking</Button>
+                        <Button size="lg" onClick={handleBook}>Ajukan sewa</Button>
                       ) : null}
                       <a className="btn btn-outline-secondary" href={buildRoomWaUrl(room.code || `Kamar #${room.id}`)} target="_blank" rel="noreferrer">💬 {availability?.canBook ? 'Tanya via WhatsApp' : 'Tanya Ketersediaan'}</a>
                     </div>
@@ -497,7 +505,7 @@ export default function PublicRoomDetailPage() {
                 <strong><CurrencyDisplay amount={selectedRow?.rent ?? 0} showZero={false} /></strong>
               </div>
               {availability?.canBook ? (
-                <Button onClick={handleBook}>Booking Kamar Ini</Button>
+                <Button onClick={handleBook}>Ajukan sewa</Button>
               ) : (
                 <a className="btn btn-warning" href={buildRoomWaUrl(room.code || `Kamar #${room.id}`)} target="_blank" rel="noreferrer">💬 Tanya via WhatsApp</a>
               )}

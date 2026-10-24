@@ -137,7 +137,7 @@ Berkas ini adalah rumah rencana + progres program; jangan membuat dokumen parale
 | S5 | **selesai** — kecuali uji manual "12 akun TENANT lama" yang **BELUM TERBUKTI** (tanpa kunci akses DB) | sesi 24 Okt 2026 (sesi S5) | [§8.14](#814-sesi-24-okt-2026-sesi-s5--identitas-bukti-anti-enumerasi-dan-penguncian-percobaan): `DUMMY_PASSWORD_HASH` cost 10 dibuat sekali saat modul dimuat → jalur identifier tak dikenal membayar satu `bcrypt.compare` (median selisih **1,7 ms**, ambang berkas test 20 ms); penguncian **5 gagal → 15 menit** per identifier+IP tanpa kunci permanen, pesan 429 menyebut sisa menit, `AuditLog` `AUTH_LOGIN_LOCKOUT` dengan identifier **tersamar** (HMAC 12 hex); NIK **0** rujukan di `src/auth`; BE **211 lulus** · tsc FE/BE 0 · `check-docs` BERSIH | **S6** pemisahan calon vs penghuni |
 | S6 | **selesai** | sesi 24 Okt 2026 (sesi S6) | [§8.15](#815-sesi-24-okt-2026-sesi-s6--pemisahan-calon-penghuni-dan-penghuni): `ProtectedRoute` menerima `allowRoles` + `allowStages` (penolakan = toast pesan + pengalihan, bukan spinner abadi); 12 rute portal tenant dipisah per tahap dari satu sumber `TENANT_ROUTE_STAGES`; satu tabel label per tahap (calon "Cari kamar"/"Pengajuan saya", penghuni "Kamar saya"/"Tagihan") + seksi "Lihat semua menu" di setiap tahap; backend: TENANT tanpa stay → 404 + daftar kosong; FE vitest penuh lulus · BE **217 lulus** · tsc FE/BE 0 | **S7** DP: gerbang akun, idempotensi, tahan double-book |
 | S7 | **selesai** | sesi 24 Okt 2026 (sesi S7) | [§8.16](#816-sesi-24-okt-2026-sesi-s7--dp-gerbang-akun-idempotensi-tahan-double-book): pengajuan tamu tidak lagi membuat akun (`user.create` 0, tanpa kata sandi di respons) + kode pengajuan `K48-xxxx-y`; klaim `POST /tenant/bookings/claim` (kontak sama persis, pesan seragam) + jalur cadangan OWNER/ADMIN `POST /admin/bookings/:stayId/link-account`; gerbang DP dua lapis + pesan berisi langkah klaim; tolak duplikat pembayaran (stay+invoice+nominal+tanggal, jendela 24 jam); cek irisan rentang + retry 40001 di 2 jalur booking; BE **241 lulus** (dari 217) · FE 389 lulus · tsc FE/BE 0 · `check-docs` BERSIH · ANTREAN 16.375 byte; **batas: jaminan aplikasi saja, tanpa exclusion constraint DB** | **S8** booking + wizard-first per role (P37 a: wizard jadi layar pertama tiap peran, "Lihat semua menu" selalu terlihat) + alur klaim di UI |
-| S8 | belum mulai | — | rencana: sama (P37 a: wizard jadi layar pertama tiap peran, "Lihat semua menu" selalu terlihat) | — |
+| S8 | **selesai** | sesi 24 Okt 2026 (sesi S8) | [§8.17](#817-sesi-24-okt-2026-sesi-s8--booking-dan-wizard-first-per-peran-bukti): alur tamu→kode→klaim→DP tersambung di UI (CTA "Ajukan sewa" tanpa akun, kode pengajuan + langkah klaim, panel "Klaim pengajuan" di `/portal/bookings` dengan pesan seragam apa adanya + jalan keluar admin); wizard jadi layar pertama 4 peran lewat `AppLayout` pada rute pendaratan (bukan rute baru), "Lihat semua menu" 44 px dan terlihat tanpa menggulir di 390 px, "lewati" diingat per pengguna; FE **68 berkas / 407 test** lulus · tsc FE 0 · axe **0 violation** di 9 sampel · `check-fitur` bersih (58 fitur/80 rute, tanpa rute baru) · `check-docs` BERSIH | **S9** pengerasan + gate penuh + izin owner + deploy client-only |
 | S9 | belum mulai | — | rencana: sama (deploy hanya dengan izin owner) | — |
 
 ### 8.5 Kartu pengingat (cetak di awal dan akhir setiap sesi)
@@ -1044,3 +1044,85 @@ bukan perubahan ambang; ambang tetap **20 ms** dan tetap ditulis di berkas test 
 
 **G. Data uji yang dihapus.** Tidak ada baris/data uji yang dibuat pada sesi ini: seluruh verifikasi berjalan di memori dengan Prisma tiruan, tanpa menyentuh DB produksi maupun dev. Tidak ada tabel/kolom/migrasi baru.
 
+### 8.17 Sesi 24 Okt 2026 (sesi S8) — booking dan wizard-first per peran: bukti
+
+**A. L1 ukur ulang** (dijalankan sesi S8, potret 2026-10-24; perintah + hasil apa adanya, cwd = akar repo).
+
+| Hal | Hasil ukur | Selisih vs potret prompt |
+|---|---|---|
+| HEAD / branch | `5968bb65` · `main` · `## main...origin/main` (sinkron, tanpa commit lokal) | sama |
+| Working tree saat mulai | bersih dari kerja agen; untracked milik owner (`design/`, `.design-audit/`, `*.sh`, `room-images/*.jpg|png`, `kost48-deploy-bundled*.tgz`, `rilis-hash.txt`) **utuh, tidak disentuh** | sama |
+| Kunci SSH/deploy | `.ssh-kost48/` **ADA** (`kost48_deploy` 419 B + `known_hosts` + `owner-password-baru.txt`), `kost48-known_hosts` ADA. Isi kunci tidak dibaca/dicetak; sesi ini **tidak** memakai akses produksi | sama |
+| Build produksi | **tidak diukur ulang** (tidak ada permintaan jaringan ke produksi pada sesi ini) | UNKNOWN sesi ini (potret terakhir `Z1Qr7_YnZFAK`) |
+| Kamar / huni / booking online publik | **tidak diukur ulang** (tanpa panggilan API produksi) | UNKNOWN sesi ini |
+| Stay ACTIVE / CheckoutRequest / akun TENANT / `pricingTerm` per kamar | **UNKNOWN** — akses DB tidak dipakai | sama |
+| `docs/ANTREAN.md` | 16.375 byte (plafon 16.384) | sama |
+| Test yang lulus | BE 241 / 6 suite · FE 389 / 65 berkas | sama |
+| Cacat Kmr C | masih tercatat (katalog `OCCUPIED` vs kalender `AVAILABLE`) — **tidak** diperbaiki (bukan S8) | sama |
+
+**B. Fakta yang dibuktikan ulang dari kode sebelum menulis** (bukan ingatan):
+
+1. `public-bookings.service.ts` mengembalikan `booking.referenceCode` + `portalAccess.requiresAccount|claimRequired` dan **tidak** memuat `temporaryPassword` (warisan S7 utuh).
+2. `POST /tenant/bookings/claim` ada di `tenant-bookings.controller.ts` (`@Roles(TENANT)`), hasil `{ alreadyClaimed, tenantId, claimed[] }`; semua jalur gagal = `GUEST_CLAIM_UNIFORM_MESSAGE` (`tenant-bookings.helpers.ts`).
+3. `QuickStartWizard` **belum** menjadi layar pertama: ia hanya kartu di dalam dashboard owner/admin/staff dan di panduan kos penghuni (`ActiveStayContent`), sehingga menu penuh tetap tampil lebih dulu.
+4. Form pengajuan tamu **mewajibkan NIK 16 digit** di FE (`validateStep1`), padahal DTO backend `identityNumber` **opsional** — penghalang untuk "kontak minimum" pada §8.10 S8.
+
+**C. Yang berubah (kode, sesi ini).**
+
+- `frontend/src/pages/rooms/PublicRoomDetailPage.tsx` — CTA utama menjadi **"Ajukan sewa"** (above-the-fold, kartu samping, sticky mobile) + catatan "Tanpa akun. Akun baru wajib saat membayar DP…". Saat `onlineBookingEnabled=false`/kamar tidak bisa diajukan, CTA tetap jalur WhatsApp dan catatan menyebut booking online ditutup.
+- `frontend/src/pages/bookings/guestBookingUtils.ts` — **NIK tidak lagi wajib** saat mengajukan (kontak minimum: nama + telepon, email opsional; NIK tetap divalidasi 16 digit **bila diisi**), sejalan dengan DTO backend dan P35/P36. Ditambah `describePublicBookingError()`: status **503** dipetakan ke `onlineBookingClosed` + kalimat jalan keluar.
+- `frontend/src/pages/bookings/GuestBookingPage.tsx` — memakai `describePublicBookingError`; 503 menampilkan panel "Booking online sedang ditutup" + tombol WhatsApp (bukan hanya galat form); judul menjelaskan "tanpa akun, kode pengajuan".
+- `frontend/src/pages/bookings/GuestBookingForm.tsx` — label NIK menjadi "(opsional)".
+- `frontend/src/pages/bookings/GuestBookingSuccess.tsx` — halaman status pengajuan: kode pengajuan, tanggal, langkah berikutnya, CTA **"Masuk & klaim pengajuan"** + "Daftar dulu", dan penegasan bahwa kode **bukan** kata sandi/alat masuk. Tanpa query string, tanpa PII di URL.
+- `frontend/src/pages/public/PublicGuestDashboardPage.tsx` — seksi "Sudah mengajukan kamar? Lanjutkan dari akun." (masuk/daftar → klaim di "Pengajuan saya"); memakai kelas `gx-*` yang sudah ada, tanpa mengubah `11-public-pages.css`.
+- `frontend/src/api/bookings.ts` — `claimGuestBookings()` + tipe `GuestClaimResult`/`GuestClaimedBooking` untuk endpoint S7.
+- `frontend/src/pages/portal/MyBookingsPage.tsx` — panel **"Klaim pengajuan tamu"**: tombol memanggil `POST /tenant/bookings/claim` tanpa parameter, galat ditampilkan **apa adanya dari server** (pesan seragam) + tombol "Hubungi admin KOST48", sukses menampilkan kode `K48-…` + tautan "Lanjut kirim bukti DP" (anchor ke daftar booking). Pesan galat **tidak** lewat `toTenantFriendlyError` supaya tidak ditulis ulang.
+- `frontend/src/components/common/QuickStartWizard.tsx` — satu sumber untuk kartu + layar pertama: `OWNER/ADMIN/STAFF_QUICK_START`, kunci preferensi `kost48-quickstart:<scope>:<userId>` (`isQuickStartSkipped`/`setQuickStartSkipped`), `getQuickStartFirstScreen(role, stage)` (TENANT memakai inventaris menu S6 — calon: cari kamar/pengajuan/panduan; penghuni: kamar saya/tagihan/…), dan komponen `QuickStartFirstScreen` dengan tombol **"Lihat semua menu"** di header.
+- `frontend/src/config/navigation.ts` — tambah `getTenantPrimaryMenuLinks()` (urutan `TENANT_STAGE_PRIMARY` lebih dulu) dan `getTenantSections` memakainya, supaya menu portal dan aksi wizard memakai satu daftar.
+- `frontend/src/components/layout/AppLayout.tsx` — merender `QuickStartFirstScreen` **menggantikan isi halaman** saat pengguna membuka rute pendaratannya sendiri (`getDefaultRoute`) dan belum memilih "Lihat semua menu"; pilihan disimpan per pengguna sehingga bertahan setelah muat ulang.
+- `frontend/src/styles/10-misc.css` — gaya `.quickstart-first-*` (mobile-first 1 kolom, tombol 44 px, padding bawah agar tidak tertutup nav bawah).
+- `frontend/src/styles/07-public.css` — perbaikan kontras blok tarif above-the-fold (`--gray-500`→`--gray-600`, angka `--gray-900`): axe 4,46:1 → lulus 4,5:1.
+- Test baru: `src/test/unit/quickStartFirstScreen.test.tsx` (8), `src/test/pages/tenantClaim.test.tsx` (5), `src/test/unit/guestBookingError.test.ts` (4); `src/test/unit/guestBookingValidation.test.ts` +1 test dan 1 test NIK-wajib diganti menjadi "NIK boleh kosong" (perubahan persyaratan, bukan pelemahan: backend memang opsional).
+- `docs/FITUR.md` **tidak berubah**: tidak ada rute/halaman baru (layar pertama dirender `AppLayout` pada rute yang sudah terdaftar; klaim menempel di `/portal/bookings`), dan tier T1 dokumen sudah tepat di plafon R16 sehingga penambahan apa pun akan melanggar `check-docs`.
+
+**D. Angka sebelum dan sesudah** (potret 2026-10-24, semua lokal).
+
+| Hal | Sebelum | Sesudah |
+|---|---|---|
+| Test frontend (`npx vitest run`) | 65 berkas / 389 test | **68 berkas / 407 test** (+3 berkas, +18 test; tidak ada test dihapus) |
+| Test backend (`npm run test:unit`) | 241 / 6 suite | tidak dijalankan — backend **tidak disentuh** |
+| Wizard sebagai layar pertama | kartu di dalam dashboard (menu penuh tampil lebih dulu) | layar pertama 4 peran di rute pendaratan; "Lihat semua menu" 44 px, `top` 226–361 px pada viewport 844 px |
+| Syarat NIK saat mengajukan | wajib 16 digit (FE) | opsional (FE mengikuti DTO backend); tetap 16 digit bila diisi |
+| Jalan keluar saat `POST /public/bookings` 503 | hanya pesan galat di form | panel "Booking online ditutup" + WhatsApp + tautan katalog |
+| Klaim pengajuan di UI | tidak ada | panel di `/portal/bookings`, pesan seragam apa adanya + jalur admin |
+| axe (9 sampel 390 px) | — | **0 violation** di semua sampel |
+| `check-fitur` | 58 fitur / 80 rute | **58 fitur / 80 rute** (tanpa rute baru) |
+| `docs/ANTREAN.md` | 16.375 byte | **16.371 byte** (menyusut 4 B; plafon 16.384 — suntingan baris W-OWN-021 dibuat lebih pendek, bukan lebih panjang) |
+
+**E. Bukti manual 390 px + axe + urutan Tab** (dev server lokal `vite --port 5174`, **API ditiru** lewat *route interception* Playwright, sesi disuntik token demo + cache user; artefak **di luar repo** `%TEMP%\kost48-s8-shots`).
+
+| Peran | Rute pendaratan | Judul wizard | Aksi | Tombol "Lihat semua menu" (top–bottom / tinggi / viewport) | Terlihat tanpa menggulir | Setelah diklik | Setelah muat ulang |
+|---|---|---|---|---|---|---|---|
+| OWNER | `/owner-dashboard` | Mau kerjakan apa hari ini? | 4 | 303–347 / 44 / 844 | ya | wizard lepas (≤0,5 dtk), Kokpit Owner tampil | wizard tidak muncul, kunci `kost48-quickstart:owner:901` |
+| ADMIN | `/dashboard` | Mulai dari mana? | 4 | 226–270 / 44 / 844 | ya | wizard lepas, dashboard admin tampil | wizard tidak muncul, kunci `…:admin:902` |
+| STAFF | `/dashboard` | Tugas hari ini | 4 | 343–387 / 44 / 844 | ya | wizard lepas, shell staff tampil | wizard tidak muncul, kunci `…:staff:903` |
+| TENANT (calon) | `/rooms` | Mau cari kamar atau lanjutkan pengajuan? | 3 (Cari kamar · Pengajuan saya · Panduan) | 361–405 / 44 / 844 | ya | wizard lepas, katalog tampil | wizard tidak muncul, kunci `…:tenant-calon:904` |
+
+- Tangkapan: `s8-390-{owner,admin,staff,tenant}-{wizard,fullmenu,after-reload}.png` + `s8-390-publik-{beranda,detail-kamar,form-pengajuan}.png` + `s8-390-tenant-klaim{,-sukses}.png` + `s8-390-report.json`.
+- axe (axe-core dari `node_modules`, tag `wcag2a/wcag2aa/wcag21a/wcag21aa`): **0 violation** pada 9 sampel — 4 layar wizard, beranda publik, detail kamar, form pengajuan, panel klaim, dan panel klaim setelah klaim berhasil. Incomplete yang tersisa: `color-contrast` (butuh latar nyata/gradien) dan `aria-prohibited-attr` — bukan pelanggaran, tetapi **bukan** bukti bebas masalah; lihat F.
+- Urutan Tab: pada semua peran, Tab melewati elemen chrome dulu (menu Cepat/Normal, brand, profil, keluar, nav peran) lalu masuk ke aksi wizard dan berakhir di "Lihat semua menu"; tidak ada fokus trap, tidak ada `tabindex` positif. Contoh TENANT: `Portal Penghuni → profil → Keluar → Cari kamar → Pengajuan saya → Panduan → Lihat semua menu`.
+- Klaim di UI (sampel `tenant-klaim`): klik "Klaim pengajuan" → kode `K48-0005-A` tampil, tautan "Lanjut kirim bukti DP" ada.
+
+**F. Batas kejujuran sesi ini.**
+
+1. **Tidak di-deploy.** Produksi tetap pada build terakhir yang terukur (`Z1Qr7_YnZFAK`, tidak diukur ulang sesi ini). Semua bukti = **build lokal**; tidak ada klaim bahwa wizard/klaim berlaku di produksi.
+2. **Bukti 390 px/axe bukan login sungguhan.** Sesi disuntik (token demo + cache user di `localStorage`/`sessionStorage`) dan API ditiru lewat *route interception*. Tidak ada akun atau data penghuni sungguhan di layar. Yang terbukti: **wizard dirender sebagai layar pertama, tombol "Lihat semua menu" terlihat tanpa menggulir, dan pilihan "lewati" bertahan setelah muat ulang** — bukan perilaku server.
+3. **API tiruan tidak lengkap.** Setelah "Lihat semua menu", dashboard ADMIN/STAFF memunculkan galat komponen karena fixture tiruan tidak menyediakan semua bentuk data (`board.final`, `marketingAssets`). Galat itu **artefak harness**, bukan temuan produk; karena itu axe hanya diklaim untuk 9 sampel di atas.
+4. **axe 0 violation artinya**: alat axe-core (tag WCAG 2.1 A/AA) tidak menemukan pelanggaran otomatis pada **state halaman** yang dipindai; butir `color-contrast` yang berstatus *incomplete* tidak diperiksa karena latar gradien, dan axe **tidak** menggantikan uji manusia/pembaca layar.
+5. **`guestBookingValidation` berubah karena persyaratan berubah.** NIK tidak lagi wajib saat mengajukan. Ini konsekuensi P36 (a)/P35 (a) dan kontrak DTO backend (`identityNumber` opsional), bukan pelonggaran gate untuk meluluskan test.
+6. **Batas double-book tetap berlaku.** S7 hanya menjamin di aplikasi (`FOR UPDATE` + cek irisan + retry 40001). S8 tidak menambah constraint DB, jadi **balapan antar-proses masih mungkin** dan tidak diklaim tertutup.
+7. **"Halaman status pengajuan" bukan halaman publik baru.** Rencana §8.10 menyebut `PublicGuestDashboardPage`/`publicGuestShared`; kenyataannya halaman itu beranda publik. S8 memakai jalur yang aman: status tampil di **hasil pengajuan** (`GuestBookingSuccess`) dan di portal **setelah klaim**. Endpoint lacak-pengajuan-publik lewat kode **tidak dibuat** (risiko enumerasi, default teraman) sehingga `publicGuestShared.tsx` tidak disentuh.
+8. **TENANT: wizard tumpang tindih dengan tab tahap S6.** Tab "Calon penghuni/Lihat semua menu" sudah tampil di atas wizard dan memuat tautan yang sama. Tidak dihapus (P37 a + §8.8 melarang menyembunyikan jalan keluar); penggabungan tampilan = keputusan UX owner, dicatat sebagai bahan S9.
+9. **Yang belum pernah dijalankan**: deploy/`npm run build` produksi (deploy = S9); `prisma migrate` (dilarang); akses DB/SSH produksi; login & klaim sungguhan ke API nyata; uji dua peramban/perangkat fisik; `cd backend && npm run test:unit` (backend tidak disentuh sesi ini).
+
+**G. Data uji yang dihapus.** Tidak ada baris/data uji yang dibuat atau dihapus pada sesi ini: tidak ada DB yang disentuh, tidak ada migrasi/skrip SQL, dan seluruh artefak bukti (skrip Playwright, tangkapan layar, `report.json`) berada **di luar repo** (`%TEMP%\kost48-s8-shots`, `%TEMP%\kost48-s8-proof`) sehingga `git status --short` hanya memuat berkas yang memang diubah.

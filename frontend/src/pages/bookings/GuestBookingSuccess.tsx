@@ -61,7 +61,7 @@ export default function GuestBookingSuccess({ result }: GuestBookingSuccessProps
                   <strong>Akun wajib saat membayar DP.</strong> Daftar atau masuk memakai email/nomor HP yang
                   sama dengan pengajuan ini, lalu klaim pengajuan memakai kode di atas. Bila kontaknya berbeda,
                   hubungi admin KOST48 dan sebutkan kode ini. Tidak ada password yang dikirim lewat email atau
-                  SMS.
+                  SMS — kode ini penanda untuk dilacak, bukan kata sandi dan bukan alat masuk.
                 </div>
               </Alert>
             ) : (
@@ -131,8 +131,12 @@ export default function GuestBookingSuccess({ result }: GuestBookingSuccessProps
 
             <div className="d-flex gap-2 justify-content-center mt-4 flex-wrap">
               <Link to="/rooms" className="btn btn-outline-secondary">Lihat Kamar Lain</Link>
-              <Link to="/login" className="btn btn-primary">Pantau Booking di Portal</Link>
+              <Link to="/login" className="btn btn-primary">Masuk &amp; klaim pengajuan</Link>
             </div>
+            <p className="text-center small text-muted mt-3 mb-0">
+              Belum punya akun? <Link to="/register">Daftar dulu</Link> memakai kontak yang sama, lalu klaim
+              pengajuan di halaman &ldquo;Pengajuan saya&rdquo;.
+            </p>
           </Card.Body>
         </Card>
       </div>

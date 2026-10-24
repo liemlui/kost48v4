@@ -1286,15 +1286,18 @@
   flex: 1 1 180px;
 }
 
+/* S8 — kontras: label & nilai tarif di blok above-the-fold harus ≥4.5:1
+   (#64748b di atas #f0f9ff hanya 4.46:1). Pakai gray-600 untuk label, gray-900 untuk angka. */
 .room-detail-above-fold-price span:first-child {
   font-size: .76rem;
-  color: var(--gray-500);
+  color: var(--gray-600);
   font-weight: 700;
 }
 
 .room-detail-above-fold-price strong {
   font-size: 1.35rem;
   font-weight: 800;
+  color: var(--gray-900);
   color: var(--gray-900);
 }
 

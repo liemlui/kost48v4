@@ -965,6 +965,25 @@ export default function PublicGuestDashboardPage() {
         </Container>
       </section>
 
+      <section className="py-4 py-lg-5" aria-labelledby="gx-claim-title">
+        <Container fluid="xl">
+          <div className="gx-section-head">
+            <div className="gx-label">Pengajuan saya</div>
+            <h2 id="gx-claim-title">Sudah mengajukan kamar? Lanjutkan dari akun.</h2>
+            <p>
+              Pengajuan dilacak lewat akun, bukan dengan menebak kode di halaman publik. Masuk atau daftar
+              memakai email/nomor HP yang <strong>sama</strong> seperti saat mengajukan, lalu tekan
+              <strong> Klaim pengajuan</strong> di halaman &ldquo;Pengajuan saya&rdquo;. Kamar belum terkunci
+              sebelum DP dibayar.
+            </p>
+          </div>
+          <div className="gx-guarantee-actions">
+            <Link to="/login" className="gx-btn-primary"><span aria-hidden="true">🔑</span> Masuk &amp; klaim pengajuan</Link>
+            <Link to="/register" className="gx-btn-outline">Daftar akun</Link>
+          </div>
+        </Container>
+      </section>
+
       <section className="gx-guarantee-section" aria-labelledby="gx-guarantee-title">
         <Container fluid="xl">
           <div className="gx-section-head">
